@@ -135,8 +135,6 @@
 ****************************************************************************/
 
 #include "emu.h"
-#include "memconv.h"
-#include "profiler.h"
 #include "machine/atarigen.h"
 #include "cpu/mips/r3000.h"
 #include "cpu/m68000/m68000.h"
@@ -144,13 +142,20 @@
 #include "jagblit.h"
 
 
-#define ENABLE_BORDERS		0
+#define ENABLE_BORDERS      0
 
-#define LOG_BLITS			0
-#define LOG_BAD_BLITS		0
-#define LOG_BLITTER_STATS	0
-#define LOG_BLITTER_WRITE	0
-#define LOG_UNHANDLED_BLITS	0
+#define LOG_BLITS           0
+#define LOG_BAD_BLITS       0
+#define LOG_BLITTER_STATS   0
+#define LOG_BLITTER_WRITE   0
+#define LOG_UNHANDLED_BLITS 0
+
+
+// FIXME: this should be 1, but then MAME performance will be s*** with this
+//    (i.e. it drops the performance from 400% to 6% on an i5 machine).
+// But the PIT irq is definitely needed by some games (for example Pitfall refuses
+//    to enter into gameplay without this enabled).
+const int PIT_MULT_DBG_HACK = 64;
 
 
 // interrupts to main CPU:
@@ -164,17 +169,17 @@
 /* GPU registers */
 enum
 {
-	MEMCON1,	MEMCON2,	HC,			VC,
-	LPH,		LPV,		GPU0,		GPU1,
-	OB_HH,		OB_HL,		OB_LH,		OB_LL,
-	GPU2,		GPU3,		GPU4,		GPU5,
-	OLP_L,		OLP_H,		GPU6,		OBF,
-	VMODE,		BORD1,		BORD2,		HP,
-	HBB,		HBE,		HSYNC,		HVS,
-	HDB1,		HDB2,		HDE,		VP,
-	VBB,		VBE,		VS,			VDB,
-	VDE,		VEB,		VEE,		VI,
-	PIT0,		PIT1,		HEQ,		GPU7,
+	MEMCON1,    MEMCON2,    HC,         VC,
+	LPH,        LPV,        GPU0,       GPU1,
+	OB_HH,      OB_HL,      OB_LH,      OB_LL,
+	GPU2,       GPU3,       GPU4,       GPU5,
+	OLP_L,      OLP_H,      GPU6,       OBF,
+	VMODE,      BORD1,      BORD2,      HP,
+	HBB,        HBE,        HSYNC,      HVS,
+	HDB1,       HDB2,       HDE,        VP,
+	VBB,        VBE,        VS,         VDB,
+	VDE,        VEB,        VEE,        VI,
+	PIT0,       PIT1,       HEQ,        GPU7,
 	BG,
 	INT1 = 0xe0/2,
 	INT2,
@@ -185,47 +190,9 @@ enum
 
 /*************************************
  *
- *  Local variables
- *
- *************************************/
-
-/* blitter variables */
-static UINT32 blitter_regs[BLITTER_REGS];
-static UINT16 gpu_regs[GPU_REGS];
-
-static emu_timer *object_timer;
-static UINT8 cpu_irq_state;
-
-static bitmap_t *screen_bitmap;
-
-static pen_t *pen_table;
-
-UINT8 blitter_status;
-
-
-/*************************************
- *
  *  Prototypes
  *
  *************************************/
-
-/* from jagobj.c */
-static void jagobj_init(running_machine &machine);
-static void process_object_list(running_machine &machine, int vc, UINT16 *_scanline);
-
-/* from jagblit.c */
-static void generic_blitter(running_machine &machine, UINT32 command, UINT32 a1flags, UINT32 a2flags);
-static void blitter_09800001_010020_010020(running_machine &machine, UINT32 command, UINT32 a1flags, UINT32 a2flags);
-static void blitter_09800009_000020_000020(running_machine &machine, UINT32 command, UINT32 a1flags, UINT32 a2flags);
-static void blitter_01800009_000028_000028(running_machine &machine, UINT32 command, UINT32 a1flags, UINT32 a2flags);
-static void blitter_01800001_000018_000018(running_machine &machine, UINT32 command, UINT32 a1flags, UINT32 a2flags);
-static void blitter_01c00001_000018_000018(running_machine &machine, UINT32 command, UINT32 a1flags, UINT32 a2flags);
-
-#ifdef MESS
-static void blitter_00010000_xxxxxx_xxxxxx(running_machine &machine, UINT32 command, UINT32 a1flags, UINT32 a2flags);
-static void blitter_01800001_xxxxxx_xxxxxx(running_machine &machine, UINT32 command, UINT32 a1flags, UINT32 a2flags);
-static void blitter_x1800x01_xxxxxx_xxxxxx(running_machine &machine, UINT32 command, UINT32 a1flags, UINT32 a2flags);
-#endif
 
 
 
@@ -235,15 +202,13 @@ static void blitter_x1800x01_xxxxxx_xxxxxx(running_machine &machine, UINT32 comm
  *
  *************************************/
 
-INLINE void get_crosshair_xy(running_machine &machine, int player, int *x, int *y)
+inline void jaguar_state::get_crosshair_xy(int player, int &x, int &y)
 {
-	const rectangle &visarea = machine.primary_screen->visible_area();
+	const rectangle &visarea = machine().primary_screen->visible_area();
 
-	int width = visarea.max_x + 1 - visarea.min_x;
-	int height = visarea.max_y + 1 - visarea.min_y;
 	/* only 2 lightguns are connected */
-	*x = visarea.min_x + (((input_port_read(machine, player ? "FAKE2_X" : "FAKE1_X") & 0xff) * width) >> 8);
-	*y = visarea.min_y + (((input_port_read(machine, player ? "FAKE2_Y" : "FAKE1_Y") & 0xff) * height) >> 8);
+	x = visarea.min_x + (((ioport(player ? "FAKE2_X" : "FAKE1_X")->read() & 0xff) * visarea.width()) >> 8);
+	y = visarea.min_y + (((ioport(player ? "FAKE2_Y" : "FAKE1_Y")->read() & 0xff) * visarea.height()) >> 8);
 }
 
 
@@ -254,12 +219,12 @@ INLINE void get_crosshair_xy(running_machine &machine, int player, int *x, int *
  *
  *************************************/
 
-INLINE int effective_hvalue(int value)
+inline int jaguar_state::effective_hvalue(int value)
 {
 	if (!(value & 0x400))
 		return value & 0x3ff;
 	else
-		return (value & 0x3ff) + (gpu_regs[HP] & 0x3ff) + 1;
+		return (value & 0x3ff) + (m_gpu_regs[HP] & 0x3ff) + 1;
 }
 
 
@@ -270,14 +235,12 @@ INLINE int effective_hvalue(int value)
  *
  *************************************/
 
-INLINE int adjust_object_timer(running_machine &machine, int vc)
+inline bool jaguar_state::adjust_object_timer(int vc)
 {
-	int hdbpix[2];
-	int hdb = 0;
-
 	/* extract the display begin registers */
-	hdbpix[0] = (gpu_regs[HDB1] & 0x7ff) / 2;
-	hdbpix[1] = (gpu_regs[HDB2] & 0x7ff) / 2;
+	int hdbpix[2];
+	hdbpix[0] = (m_gpu_regs[HDB1] & 0x7ff) / 2;
+	hdbpix[1] = (m_gpu_regs[HDB2] & 0x7ff) / 2;
 
 	/* sort */
 	if (hdbpix[0] > hdbpix[1])
@@ -288,34 +251,15 @@ INLINE int adjust_object_timer(running_machine &machine, int vc)
 	}
 
 	/* select the target one */
-	hdb = hdbpix[vc % 2];
+	int hdb = hdbpix[vc % 2];
 
 	/* if setting the second one in a line, make sure we will ever actually hit it */
-	if (vc % 2 == 1 && (hdbpix[1] == hdbpix[0] || hdbpix[1] >= machine.primary_screen->width()))
-		return FALSE;
+	if (vc % 2 == 1 && (hdbpix[1] == hdbpix[0] || hdbpix[1] >= machine().primary_screen->width()))
+		return false;
 
 	/* adjust the timer */
-	object_timer->adjust(machine.primary_screen->time_until_pos(vc / 2, hdb), vc | (hdb << 16));
-	return TRUE;
-}
-
-
-
-/*************************************
- *
- *  GPU optimization control
- *
- *************************************/
-
-void jaguar_gpu_suspend(running_machine &machine)
-{
-	machine.device<cpu_device>("gpu")->suspend(SUSPEND_REASON_SPIN, 1);
-}
-
-
-void jaguar_gpu_resume(running_machine &machine)
-{
-	machine.device<cpu_device>("gpu")->resume(SUSPEND_REASON_SPIN);
+	m_object_timer->adjust(machine().primary_screen->time_until_pos(vc / 2, hdb), vc | (hdb << 16));
+	return true;
 }
 
 
@@ -326,26 +270,27 @@ void jaguar_gpu_resume(running_machine &machine)
  *
  *************************************/
 
-static void update_cpu_irq(running_machine &machine)
+void jaguar_state::update_cpu_irq()
 {
-	if (cpu_irq_state & gpu_regs[INT1] & 0x1f)
-		cputag_set_input_line(machine, "maincpu", cojag_is_r3000 ? R3000_IRQ4 : M68K_IRQ_6, ASSERT_LINE);
+	if ((m_cpu_irq_state & m_gpu_regs[INT1] & 0x1f) != 0)
+		m_main_cpu->set_input_line(m_is_r3000 ? R3000_IRQ4 : M68K_IRQ_6, ASSERT_LINE);
 	else
-		cputag_set_input_line(machine, "maincpu", cojag_is_r3000 ? R3000_IRQ4 : M68K_IRQ_6, CLEAR_LINE);
+		m_main_cpu->set_input_line(m_is_r3000 ? R3000_IRQ4 : M68K_IRQ_6, CLEAR_LINE);
 }
 
 
-void jaguar_gpu_cpu_int(device_t *device)
+void jaguar_state::gpu_cpu_int(device_t *device)
 {
-	cpu_irq_state |= 2;
-	update_cpu_irq(device->machine());
+	jaguar_state &state = *device->machine().driver_data<jaguar_state>();
+	state.m_cpu_irq_state |= 2;
+	state.update_cpu_irq();
 }
 
-
-void jaguar_dsp_cpu_int(device_t *device)
+void jaguar_state::dsp_cpu_int(device_t *device)
 {
-	cpu_irq_state |= 16;
-	update_cpu_irq(device->machine());
+	jaguar_state &state = *device->machine().driver_data<jaguar_state>();
+	state.m_cpu_irq_state |= 16;
+	state.update_cpu_irq();
 }
 
 
@@ -356,13 +301,13 @@ void jaguar_dsp_cpu_int(device_t *device)
  *
  *************************************/
 
-static void jaguar_set_palette(UINT16 vmode)
+void jaguar_state::set_palette(UINT16 vmode)
 {
 	static const UINT8 red_lookup[256] =
 	{
-		  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-		 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 19,  0,
-		 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 64, 43, 21,  0,
+			0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+			34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 19,  0,
+			68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 64, 43, 21,  0,
 		102,102,102,102,102,102,102,102,102,102,102, 95, 71, 47, 23,  0,
 		135,135,135,135,135,135,135,135,135,135,130,104, 78, 52, 26,  0,
 		169,169,169,169,169,169,169,169,169,170,141,113, 85, 56, 28,  0,
@@ -380,22 +325,22 @@ static void jaguar_set_palette(UINT16 vmode)
 
 	static const UINT8 grn_lookup[256] =
 	{
-		  0, 17, 34, 51, 68, 85,102,119,136,153,170,187,204,221,238,255,
-		  0, 19, 38, 57, 77, 96,115,134,154,173,182,211,231,250,255,255,
-		  0, 21, 43, 64, 86,107,129,150,172,193,215,236,255,255,255,255,
-		  0, 23, 47, 71, 96,119,142,166,190,214,238,255,255,255,255,255,
-		  0, 26, 52, 78,104,130,156,182,208,234,255,255,255,255,255,255,
-		  0, 28, 56, 85,113,141,170,198,226,255,255,255,255,255,255,255,
-		  0, 30, 61, 91,122,153,183,214,244,255,255,255,255,255,255,255,
-		  0, 32, 65, 98,131,164,197,230,255,255,255,255,255,255,255,255,
-		  0, 32, 65, 98,131,164,197,230,255,255,255,255,255,255,255,255,
-		  0, 30, 61, 91,122,153,183,214,244,255,255,255,255,255,255,255,
-		  0, 28, 56, 85,113,141,170,198,226,255,255,255,255,255,255,255,
-		  0, 26, 52, 78,104,130,156,182,208,234,255,255,255,255,255,255,
-		  0, 23, 47, 71, 96,119,142,166,190,214,238,255,255,255,255,255,
-		  0, 21, 43, 64, 86,107,129,150,172,193,215,236,255,255,255,255,
-		  0, 19, 38, 57, 77, 96,115,134,154,173,182,211,231,250,255,255,
-		  0, 17, 34, 51, 68, 85,102,119,136,153,170,187,204,221,238,255
+			0, 17, 34, 51, 68, 85,102,119,136,153,170,187,204,221,238,255,
+			0, 19, 38, 57, 77, 96,115,134,154,173,182,211,231,250,255,255,
+			0, 21, 43, 64, 86,107,129,150,172,193,215,236,255,255,255,255,
+			0, 23, 47, 71, 96,119,142,166,190,214,238,255,255,255,255,255,
+			0, 26, 52, 78,104,130,156,182,208,234,255,255,255,255,255,255,
+			0, 28, 56, 85,113,141,170,198,226,255,255,255,255,255,255,255,
+			0, 30, 61, 91,122,153,183,214,244,255,255,255,255,255,255,255,
+			0, 32, 65, 98,131,164,197,230,255,255,255,255,255,255,255,255,
+			0, 32, 65, 98,131,164,197,230,255,255,255,255,255,255,255,255,
+			0, 30, 61, 91,122,153,183,214,244,255,255,255,255,255,255,255,
+			0, 28, 56, 85,113,141,170,198,226,255,255,255,255,255,255,255,
+			0, 26, 52, 78,104,130,156,182,208,234,255,255,255,255,255,255,
+			0, 23, 47, 71, 96,119,142,166,190,214,238,255,255,255,255,255,
+			0, 21, 43, 64, 86,107,129,150,172,193,215,236,255,255,255,255,
+			0, 19, 38, 57, 77, 96,115,134,154,173,182,211,231,250,255,255,
+			0, 17, 34, 51, 68, 85,102,119,136,153,170,187,204,221,238,255
 	};
 
 	static const UINT8 blu_lookup[256] =
@@ -413,9 +358,9 @@ static void jaguar_set_palette(UINT16 vmode)
 		169,169,169,169,169,169,169,169,169,170,141,113, 85, 56, 28,  0,
 		135,135,135,135,135,135,135,135,135,135,130,104, 78, 52, 26,  0,
 		102,102,102,102,102,102,102,102,102,102,102, 95, 71, 47, 23,  0,
-		 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 64, 43, 21,  0,
-		 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 19,  0,
-		  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
+			68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 64, 43, 21,  0,
+			34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 19,  0,
+			0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
 	};
 
 	int i;
@@ -432,7 +377,7 @@ static void jaguar_set_palette(UINT16 vmode)
 				UINT8 r = (red_lookup[i >> 8] * (i & 0xff)) >> 8;
 				UINT8 g = (grn_lookup[i >> 8] * (i & 0xff)) >> 8;
 				UINT8 b = (blu_lookup[i >> 8] * (i & 0xff)) >> 8;
-				pen_table[i] = MAKE_RGB(r, g, b);
+				m_pen_table[i] = MAKE_RGB(r, g, b);
 			}
 			break;
 
@@ -454,7 +399,7 @@ static void jaguar_set_palette(UINT16 vmode)
 					g = (g << 3) | (g >> 2);
 					b = (b << 3) | (b >> 2);
 				}
-				pen_table[i] = MAKE_RGB(r, g, b);
+				m_pen_table[i] = MAKE_RGB(r, g, b);
 			}
 			break;
 
@@ -463,16 +408,16 @@ static void jaguar_set_palette(UINT16 vmode)
 			for (i = 0; i < 65536; i++)
 			{
 				if (i & 1) // FIXME: controls RGB 5-5-5 / 5-6-5 format or it's just ignored? Used by UBI Soft logo in Rayman
-					pen_table[i] = MAKE_RGB(pal5bit(i >> 11), pal5bit(i >> 1), pal5bit(i >> 6));
+					m_pen_table[i] = MAKE_RGB(pal5bit(i >> 11), pal5bit(i >> 1), pal5bit(i >> 6));
 				else
-					pen_table[i] = MAKE_RGB(pal5bit(i >> 11), pal6bit(i >> 0), pal5bit(i >> 6));
+					m_pen_table[i] = MAKE_RGB(pal5bit(i >> 11), pal6bit(i >> 0), pal5bit(i >> 6));
 			}
 			break;
 
 		/* RGB full */
 		case 0x006:
 			for (i = 0; i < 65536; i++)
-				pen_table[i] = MAKE_RGB(pal5bit(i >> 11), pal6bit(i >> 0), pal5bit(i >> 6));
+				m_pen_table[i] = MAKE_RGB(pal5bit(i >> 11), pal6bit(i >> 0), pal5bit(i >> 6));
 			break;
 
 		/* others */
@@ -487,29 +432,15 @@ static void jaguar_set_palette(UINT16 vmode)
 
 /*************************************
  *
- *  Fast memory accessors
- *
- *************************************/
-
-static UINT8 *get_jaguar_memory(running_machine &machine, UINT32 offset)
-{
-	address_space *space = machine.device("gpu")->memory().space(AS_PROGRAM);
-	return (UINT8 *)space->get_read_ptr(offset);
-}
-
-
-
-/*************************************
- *
  *  32-bit access to the blitter
  *
  *************************************/
 
-static void blitter_run(running_machine &machine)
+void jaguar_state::blitter_run()
 {
-	UINT32 command = blitter_regs[B_CMD] & STATIC_COMMAND_MASK;
-	UINT32 a1flags = blitter_regs[A1_FLAGS] & STATIC_FLAGS_MASK;
-	UINT32 a2flags = blitter_regs[A2_FLAGS] & STATIC_FLAGS_MASK;
+	UINT32 command = m_blitter_regs[B_CMD] & STATIC_COMMAND_MASK;
+	UINT32 a1flags = m_blitter_regs[A1_FLAGS] & STATIC_FLAGS_MASK;
+	UINT32 a2flags = m_blitter_regs[A2_FLAGS] & STATIC_FLAGS_MASK;
 
 	g_profiler.start(PROFILER_USER1);
 
@@ -517,53 +448,50 @@ static void blitter_run(running_machine &machine)
 	{
 		if (command == 0x09800001 && a1flags == 0x010020)
 		{
-			blitter_09800001_010020_010020(machine, blitter_regs[B_CMD], blitter_regs[A1_FLAGS], blitter_regs[A2_FLAGS]);
+			blitter_09800001_010020_010020(m_blitter_regs[B_CMD], m_blitter_regs[A1_FLAGS], m_blitter_regs[A2_FLAGS]);
 			return;
 		}
 		if (command == 0x09800009 && a1flags == 0x000020)
 		{
-			blitter_09800009_000020_000020(machine, blitter_regs[B_CMD], blitter_regs[A1_FLAGS], blitter_regs[A2_FLAGS]);
+			blitter_09800009_000020_000020(m_blitter_regs[B_CMD], m_blitter_regs[A1_FLAGS], m_blitter_regs[A2_FLAGS]);
 			return;
 		}
 		if (command == 0x01800009 && a1flags == 0x000028)
 		{
-			blitter_01800009_000028_000028(machine, blitter_regs[B_CMD], blitter_regs[A1_FLAGS], blitter_regs[A2_FLAGS]);
+			blitter_01800009_000028_000028(m_blitter_regs[B_CMD], m_blitter_regs[A1_FLAGS], m_blitter_regs[A2_FLAGS]);
 			return;
 		}
 
 		if (command == 0x01800001 && a1flags == 0x000018)
 		{
-			blitter_01800001_000018_000018(machine, blitter_regs[B_CMD], blitter_regs[A1_FLAGS], blitter_regs[A2_FLAGS]);
+			blitter_01800001_000018_000018(m_blitter_regs[B_CMD], m_blitter_regs[A1_FLAGS], m_blitter_regs[A2_FLAGS]);
 			return;
 		}
 
 		if (command == 0x01c00001 && a1flags == 0x000018)
 		{
-			blitter_01c00001_000018_000018(machine, blitter_regs[B_CMD], blitter_regs[A1_FLAGS], blitter_regs[A2_FLAGS]);
+			blitter_01c00001_000018_000018(m_blitter_regs[B_CMD], m_blitter_regs[A1_FLAGS], m_blitter_regs[A2_FLAGS]);
 			return;
 		}
 	}
 
-#ifdef MESS
 	if (command == 0x00010000)
 	{
-		blitter_00010000_xxxxxx_xxxxxx(machine, blitter_regs[B_CMD], blitter_regs[A1_FLAGS], blitter_regs[A2_FLAGS]);
+		blitter_00010000_xxxxxx_xxxxxx(m_blitter_regs[B_CMD], m_blitter_regs[A1_FLAGS], m_blitter_regs[A2_FLAGS]);
 		return;
 	}
 
 	if (command == 0x01800001)
 	{
-		blitter_01800001_xxxxxx_xxxxxx(machine, blitter_regs[B_CMD], blitter_regs[A1_FLAGS], blitter_regs[A2_FLAGS]);
+		blitter_01800001_xxxxxx_xxxxxx(m_blitter_regs[B_CMD], m_blitter_regs[A1_FLAGS], m_blitter_regs[A2_FLAGS]);
 		return;
 	}
 
 	if ((command & 0x0ffff0ff) == 0x01800001)
 	{
-		blitter_x1800x01_xxxxxx_xxxxxx(machine, blitter_regs[B_CMD], blitter_regs[A1_FLAGS], blitter_regs[A2_FLAGS]);
+		blitter_x1800x01_xxxxxx_xxxxxx(m_blitter_regs[B_CMD], m_blitter_regs[A1_FLAGS], m_blitter_regs[A2_FLAGS]);
 		return;
 	}
-#endif
-
 
 if (LOG_BLITTER_STATS)
 {
@@ -573,21 +501,21 @@ static int blitter_count = 0;
 static int reps = 0;
 int i;
 for (i = 0; i < blitter_count; i++)
-	if (blitter_stats[i][0] == (blitter_regs[B_CMD] & STATIC_COMMAND_MASK) &&
-		blitter_stats[i][1] == (blitter_regs[A1_FLAGS] & STATIC_FLAGS_MASK) &&
-		blitter_stats[i][2] == (blitter_regs[A2_FLAGS] & STATIC_FLAGS_MASK))
+	if (blitter_stats[i][0] == (m_blitter_regs[B_CMD] & STATIC_COMMAND_MASK) &&
+		blitter_stats[i][1] == (m_blitter_regs[A1_FLAGS] & STATIC_FLAGS_MASK) &&
+		blitter_stats[i][2] == (m_blitter_regs[A2_FLAGS] & STATIC_FLAGS_MASK))
 		break;
 if (i == blitter_count)
 {
-	blitter_stats[i][0] = blitter_regs[B_CMD] & STATIC_COMMAND_MASK;
-	blitter_stats[i][1] = blitter_regs[A1_FLAGS] & STATIC_FLAGS_MASK;
-	blitter_stats[i][2] = blitter_regs[A2_FLAGS] & STATIC_FLAGS_MASK;
+	blitter_stats[i][0] = m_blitter_regs[B_CMD] & STATIC_COMMAND_MASK;
+	blitter_stats[i][1] = m_blitter_regs[A1_FLAGS] & STATIC_FLAGS_MASK;
+	blitter_stats[i][2] = m_blitter_regs[A2_FLAGS] & STATIC_FLAGS_MASK;
 	blitter_stats[i][3] = 0;
 	blitter_pixels[i] = 0;
 	blitter_count++;
 }
 blitter_stats[i][3]++;
-blitter_pixels[i] += (blitter_regs[B_COUNT] & 0xffff) * (blitter_regs[B_COUNT] >> 16);
+blitter_pixels[i] += (m_blitter_regs[B_COUNT] & 0xffff) * (m_blitter_regs[B_COUNT] >> 16);
 if (++reps % 100 == 99)
 {
 	mame_printf_debug("---\nBlitter stats:\n");
@@ -599,41 +527,36 @@ if (++reps % 100 == 99)
 }
 }
 
-	generic_blitter(machine, blitter_regs[B_CMD], blitter_regs[A1_FLAGS], blitter_regs[A2_FLAGS]);
+	generic_blitter(m_blitter_regs[B_CMD], m_blitter_regs[A1_FLAGS], m_blitter_regs[A2_FLAGS]);
 	g_profiler.stop();
 }
 
-static TIMER_CALLBACK( blitter_done )
-{
-	blitter_status = 1;
-}
-
-READ32_HANDLER( jaguar_blitter_r )
+READ32_MEMBER( jaguar_state::blitter_r )
 {
 	switch (offset)
 	{
-		case B_CMD:	/* B_CMD */
-			return blitter_status & 3;
+		case B_CMD: /* B_CMD */
+			return m_blitter_status & 3;
 
 		default:
-			logerror("%08X:Blitter read register @ F022%02X\n", cpu_get_previouspc(&space->device()), offset * 4);
+			logerror("%08X:Blitter read register @ F022%02X\n", space.device().safe_pcbase(), offset * 4);
 			return 0;
 	}
 }
 
 
-WRITE32_HANDLER( jaguar_blitter_w )
+WRITE32_MEMBER( jaguar_state::blitter_w )
 {
-	COMBINE_DATA(&blitter_regs[offset]);
-	if (offset == B_CMD)
+	COMBINE_DATA(&m_blitter_regs[offset]);
+	if ((offset == B_CMD) && (mem_mask & 0x0000ffff))
 	{
-		blitter_status = 0;
-		space->machine().scheduler().timer_set(attotime::from_usec(100), FUNC(blitter_done));
-		blitter_run(space->machine());
+		m_blitter_status = 0;
+		timer_set(attotime::from_usec(100), TID_BLITTER_DONE);
+		blitter_run();
 	}
 
 	if (LOG_BLITTER_WRITE)
-	logerror("%08X:Blitter write register @ F022%02X = %08X\n", cpu_get_previouspc(&space->device()), offset * 4, data);
+	logerror("%08X:Blitter write register @ F022%02X = %08X\n", space.device().safe_pcbase(), offset * 4, data);
 }
 
 
@@ -644,92 +567,72 @@ WRITE32_HANDLER( jaguar_blitter_w )
  *
  *************************************/
 
-READ16_HANDLER( jaguar_tom_regs_r )
+READ16_MEMBER( jaguar_state::tom_regs_r )
 {
 	if (offset != INT1 && offset != INT2 && offset != HC && offset != VC)
-		logerror("%08X:TOM read register @ F00%03X\n", cpu_get_previouspc(&space->device()), offset * 2);
+		logerror("%08X:TOM read register @ F00%03X\n", space.device().safe_pcbase(), offset * 2);
 
 	switch (offset)
 	{
 		case INT1:
-			return cpu_irq_state;
+			return m_cpu_irq_state;
 
 		case HC:
-			return space->machine().primary_screen->hpos() % (space->machine().primary_screen->width() / 2);
+			return machine().primary_screen->hpos() % (machine().primary_screen->width() / 2);
 
 		case VC:
 		{
 			UINT8 half_line;
 
-			if(space->machine().primary_screen->hpos() >= (space->machine().primary_screen->width() / 2))
+			if(machine().primary_screen->hpos() >= (machine().primary_screen->width() / 2))
 				half_line = 1;
 			else
 				half_line = 0;
 
-			return space->machine().primary_screen->vpos() * 2 + half_line;
+			return machine().primary_screen->vpos() * 2 + half_line;
 		}
 	}
 
-	return gpu_regs[offset];
+	return m_gpu_regs[offset];
 }
 
-/*
-FIXME: this should be 1, but then MAME performance will be s*** with this (i.e. it drops the performance from 400% to 6% on an i5 machine).
-But the PIT irq is definitely needed by some games (for example Pitfall refuses to enter into gameplay without this enabled).
-*/
-#define PIT_MULT_DBG_HACK 64
-
-static TIMER_CALLBACK( jaguar_pit )
+WRITE16_MEMBER( jaguar_state::tom_regs_w )
 {
-	attotime sample_period;
-	cpu_irq_state |= 4;
-	update_cpu_irq(machine);
-
-	if (gpu_regs[PIT0])
-	{
-		sample_period = attotime::from_nsec(((machine.device("gpu")->unscaled_clock()*PIT_MULT_DBG_HACK) / (1+gpu_regs[PIT0])) / (1+gpu_regs[PIT1]));
-		machine.scheduler().timer_set(sample_period, FUNC(jaguar_pit));
-	}
-}
-
-
-WRITE16_HANDLER( jaguar_tom_regs_w )
-{
-	UINT32 reg_store = gpu_regs[offset];
+	UINT32 reg_store = m_gpu_regs[offset];
 	attotime sample_period;
 	if (offset < GPU_REGS)
 	{
-		COMBINE_DATA(&gpu_regs[offset]);
+		COMBINE_DATA(&m_gpu_regs[offset]);
 
 		switch (offset)
 		{
 			case MEMCON1:
-				if((gpu_regs[offset] & 1) == 0)
+				if((m_gpu_regs[offset] & 1) == 0)
 					printf("Warning: ROMHI = 0!\n");
 
 				break;
 			case PIT0:
 			case PIT1:
-				if (gpu_regs[PIT0] && gpu_regs[PIT0] != 0xffff) //FIXME: avoid too much small timers for now
+				if (m_gpu_regs[PIT0] && m_gpu_regs[PIT0] != 0xffff) //FIXME: avoid too much small timers for now
 				{
-					sample_period = attotime::from_nsec(((space->machine().device("gpu")->unscaled_clock()*PIT_MULT_DBG_HACK) / (1+gpu_regs[PIT0])) / (1+gpu_regs[PIT1]));
-					space->machine().scheduler().timer_set(sample_period, FUNC(jaguar_pit));
+					sample_period = attotime::from_nsec(((m_gpu->unscaled_clock()*PIT_MULT_DBG_HACK) / (1+m_gpu_regs[PIT0])) / (1+m_gpu_regs[PIT1]));
+					timer_set(sample_period, TID_PIT);
 				}
 				break;
 
 			case INT1:
-				cpu_irq_state &= ~(gpu_regs[INT1] >> 8);
-				update_cpu_irq(space->machine());
+				m_cpu_irq_state &= ~(m_gpu_regs[INT1] >> 8);
+				update_cpu_irq();
 				break;
 
 			case VMODE:
-				if (reg_store != gpu_regs[offset])
-					jaguar_set_palette(gpu_regs[VMODE]);
+				if (reg_store != m_gpu_regs[offset])
+					set_palette(m_gpu_regs[VMODE]);
 				break;
 
-			case OBF:	/* clear GPU interrupt */
-				cpu_irq_state &= 0xfd;
-				update_cpu_irq(space->machine());
+			case OBF:   /* clear GPU interrupt */
+				m_cpu_irq_state &= 0xfd;
+				update_cpu_irq();
 				break;
 
 			case HP:
@@ -744,24 +647,20 @@ WRITE16_HANDLER( jaguar_tom_regs_w )
 			case VDB:
 			case VDE:
 			{
-				if (reg_store != gpu_regs[offset])
+				if (reg_store != m_gpu_regs[offset])
 				{
-					int hperiod = 2 * ((gpu_regs[HP] & 0x3ff) + 1);
-					int hbend = effective_hvalue(ENABLE_BORDERS ? gpu_regs[HBE] : MIN(gpu_regs[HDB1], gpu_regs[HDB2]));
-					int hbstart = effective_hvalue(gpu_regs[ENABLE_BORDERS ? HBB : HDE]);
-					int vperiod = (gpu_regs[VP] & 0x7ff) + 1;
-					int vbend = MAX(gpu_regs[VBE],gpu_regs[VDB]) & 0x7ff;
-					int vbstart = gpu_regs[VBB] & 0x7ff;
+					int hperiod = 2 * ((m_gpu_regs[HP] & 0x3ff) + 1);
+					int hbend = effective_hvalue(ENABLE_BORDERS ? m_gpu_regs[HBE] : MIN(m_gpu_regs[HDB1], m_gpu_regs[HDB2]));
+					int hbstart = effective_hvalue(m_gpu_regs[ENABLE_BORDERS ? HBB : HDE]);
+					int vperiod = (m_gpu_regs[VP] & 0x7ff) + 1;
+					int vbend = MAX(m_gpu_regs[VBE],m_gpu_regs[VDB]) & 0x7ff;
+					int vbstart = m_gpu_regs[VBB] & 0x7ff;
 
 					/* adjust for the half-lines */
 					if (hperiod != 0 && vperiod != 0 && hbend < hbstart && vbend < vbstart && hbstart < hperiod)
 					{
-						rectangle visarea;
-						visarea.min_x = hbend / 2;
-						visarea.max_x = hbstart / 2 - 1;
-						visarea.min_y = vbend / 2;
-						visarea.max_y = vbstart / 2 - 1;
-						space->machine().primary_screen->configure(hperiod / 2, vperiod / 2, visarea, HZ_TO_ATTOSECONDS((double)COJAG_PIXEL_CLOCK * 2 / hperiod / vperiod));
+						rectangle visarea(hbend / 2, hbstart / 2 - 1, vbend / 2, vbstart / 2 - 1);
+						machine().primary_screen->configure(hperiod / 2, vperiod / 2, visarea, HZ_TO_ATTOSECONDS(double(m_pixel_clock) * 2 / hperiod / vperiod));
 					}
 				}
 				break;
@@ -770,26 +669,7 @@ WRITE16_HANDLER( jaguar_tom_regs_w )
 	}
 
 	if (offset != INT2 && offset != VI && offset != INT1)
-		logerror("%08X:TOM write register @ F00%03X = %04X\n", cpu_get_previouspc(&space->device()), offset * 2, data);
-}
-
-
-
-/*************************************
- *
- *  32-bit TOM register access
- *
- *************************************/
-
-READ32_HANDLER( jaguar_tom_regs32_r )
-{
-	return read32be_with_16be_handler(jaguar_tom_regs_r, space, offset, mem_mask);
-}
-
-
-WRITE32_HANDLER( jaguar_tom_regs32_w )
-{
-	write32be_with_16be_handler(jaguar_tom_regs_w, space, offset, data, mem_mask);
+		logerror("%08X:TOM write register @ F00%03X = %04X\n", space.device().safe_pcbase(), offset * 2, data);
 }
 
 
@@ -800,22 +680,22 @@ WRITE32_HANDLER( jaguar_tom_regs32_w )
  *
  *************************************/
 
-READ32_HANDLER( cojag_gun_input_r )
+READ32_MEMBER( jaguar_state::cojag_gun_input_r )
 {
 	int beamx, beamy;
 
 	switch (offset)
 	{
 		case 0:
-			get_crosshair_xy(space->machine(), 1, &beamx, &beamy);
+			get_crosshair_xy(1, beamx, beamy);
 			return (beamy << 16) | (beamx ^ 0x1ff);
 
 		case 1:
-			get_crosshair_xy(space->machine(), 0, &beamx, &beamy);
+			get_crosshair_xy(0, beamx, beamy);
 			return (beamy << 16) | (beamx ^ 0x1ff);
 
 		case 2:
-			return input_port_read(space->machine(), "IN3");
+			return ioport("IN3")->read();
 	}
 	return 0;
 }
@@ -828,41 +708,75 @@ READ32_HANDLER( cojag_gun_input_r )
  *
  *************************************/
 
-static TIMER_CALLBACK( cojag_scanline_update )
+void jaguar_state::device_timer(emu_timer &timer, device_timer_id id, int param, void *ptr)
+{
+	switch (id)
+	{
+		case TID_SCANLINE:
+			scanline_update(param);
+			break;
+
+		case TID_BLITTER_DONE:
+			m_blitter_status = 1;
+			break;
+
+		case TID_PIT:
+			m_cpu_irq_state |= 4;
+			update_cpu_irq();
+			if (m_gpu_regs[PIT0] != 0)
+			{
+				attotime sample_period = attotime::from_nsec(((m_gpu->unscaled_clock()*PIT_MULT_DBG_HACK) / (1+m_gpu_regs[PIT0])) / (1+m_gpu_regs[PIT1]));
+				timer_set(sample_period, TID_PIT);
+			}
+			break;
+
+		case TID_SERIAL:
+			serial_update();
+			break;
+
+		case TID_GPU_SYNC:
+			// if a command is still pending, and we haven't maxed out our timer, set a new one
+			if (m_gpu_command_pending && param < 1000)
+				timer_set(attotime::from_usec(50), TID_GPU_SYNC, ++param);
+			break;
+	}
+}
+
+void jaguar_state::scanline_update(int param)
 {
 	int vc = param & 0xffff;
 	int hdb = param >> 16;
-	const rectangle &visarea = machine.primary_screen->visible_area();
+	const rectangle &visarea = machine().primary_screen->visible_area();
 
 	/* only run if video is enabled and we are past the "display begin" */
-	if ((gpu_regs[VMODE] & 1) && vc >= (gpu_regs[VDB] & 0x7ff))
+	if ((m_gpu_regs[VMODE] & 1) && vc >= (m_gpu_regs[VDB] & 0x7ff))
 	{
-		UINT32 *dest = BITMAP_ADDR32(screen_bitmap, vc >> 1, 0);
+		UINT32 *dest = &m_screen_bitmap.pix32(vc >> 1);
 		int maxx = visarea.max_x;
-		int hde = effective_hvalue(gpu_regs[HDE]) >> 1;
+		int hde = effective_hvalue(m_gpu_regs[HDE]) >> 1;
 		UINT16 x,scanline[760];
-		UINT8 y,pixel_width = ((gpu_regs[VMODE]>>10)&3)+1;
+		UINT8 y,pixel_width = ((m_gpu_regs[VMODE]>>10)&3)+1;
 
 		/* if we are first on this scanline, clear to the border color */
 		if (ENABLE_BORDERS && vc % 2 == 0)
 		{
-			rgb_t border = MAKE_RGB(gpu_regs[BORD1] & 0xff, gpu_regs[BORD1] >> 8, gpu_regs[BORD2] & 0xff);
+			rgb_t border = MAKE_RGB(m_gpu_regs[BORD1] & 0xff, m_gpu_regs[BORD1] >> 8, m_gpu_regs[BORD2] & 0xff);
 			for (x = visarea.min_x; x <= visarea.max_x; x++)
 				dest[x] = border;
 		}
 
 		/* process the object list for this counter value */
-		process_object_list(machine, vc, scanline);
+		process_object_list(vc, scanline);
 
 		/* copy the data to the target, clipping */
-		if ((gpu_regs[VMODE] & 0x106) == 0x002)	/* RGB24 */
+		if ((m_gpu_regs[VMODE] & 0x106) == 0x002)   /* RGB24 */
 		{
 			for (x = 0; x < 760 && hdb <= maxx && hdb < hde; x+=2)
 				for (y = 0; y < pixel_width; y++)
 				{
-					UINT8 r = pen_table[(scanline[x]&0xff)|256];
-					UINT8 g = pen_table[(scanline[x]>>8)|512];
-					UINT8 b = pen_table[scanline[x+1]&0xff];
+					UINT8 r = m_pen_table[(scanline[x]&0xff)|256];
+					UINT8 g = m_pen_table[(scanline[x]>>8)|512];
+					UINT8 b = m_pen_table[scanline[x+1]&0xff];
 					dest[hdb++] = MAKE_RGB(r, g, b);
 				}
 		}
@@ -870,7 +784,7 @@ static TIMER_CALLBACK( cojag_scanline_update )
 		{
 			for (x = 0; x < 760 && hdb <= maxx && hdb < hde; x++)
 				for (y = 0; y < pixel_width; y++)
-					dest[hdb++] = pen_table[scanline[x]];
+					dest[hdb++] = m_pen_table[scanline[x]];
 		}
 	}
 
@@ -878,46 +792,44 @@ static TIMER_CALLBACK( cojag_scanline_update )
 	do
 	{
 		/* handle vertical interrupts */
-		if (vc == gpu_regs[VI])
+		if (vc == m_gpu_regs[VI])
 		{
-			cpu_irq_state |= 1;
-			update_cpu_irq(machine);
+			m_cpu_irq_state |= 1;
+			update_cpu_irq();
 		}
 
 		/* point to the next counter value */
-		if (++vc / 2 >= machine.primary_screen->height())
+		if (++vc / 2 >= machine().primary_screen->height())
 			vc = 0;
 
-	} while (!adjust_object_timer(machine, vc));
+	} while (!adjust_object_timer(vc));
 }
 
-static STATE_POSTLOAD( cojag_postload )
+void jaguar_state::video_start()
 {
-	update_cpu_irq(machine);
+	memset(&m_blitter_regs, 0, sizeof(m_blitter_regs));
+	memset(&m_gpu_regs, 0, sizeof(m_gpu_regs));
+	m_cpu_irq_state = 0;
+
+	m_object_timer = timer_alloc(TID_SCANLINE);
+	adjust_object_timer(0);
+
+	m_screen_bitmap.allocate(760, 512);
+
+	jagobj_init();
+
+	save_item(NAME(m_pen_table));
+	save_item(NAME(m_blitter_regs));
+	save_item(NAME(m_gpu_regs));
+	save_item(NAME(m_cpu_irq_state));
+	m_pixel_clock = m_is_cojag ? COJAG_PIXEL_CLOCK : JAGUAR_CLOCK;
 }
 
-VIDEO_START( cojag )
+
+void jaguar_state::device_postload()
 {
-	memset(&blitter_regs, 0, sizeof(blitter_regs));
-	memset(&gpu_regs, 0, sizeof(gpu_regs));
-	cpu_irq_state = 0;
-
-	object_timer = machine.scheduler().timer_alloc(FUNC(cojag_scanline_update));
-	adjust_object_timer(machine, 0);
-
-	screen_bitmap = auto_bitmap_alloc(machine, 760, 512, BITMAP_FORMAT_RGB32);
-
-	jagobj_init(machine);
-
-	pen_table = auto_alloc_array(machine, pen_t, 65536);
-
-	state_save_register_global_pointer(machine, pen_table, 65536);
-	state_save_register_global_array(machine, blitter_regs);
-	state_save_register_global_array(machine, gpu_regs);
-	state_save_register_global(machine, cpu_irq_state);
-	machine.state().register_postload(cojag_postload, NULL);
+	update_cpu_irq();
 }
-
 
 
 /*************************************
@@ -926,17 +838,17 @@ VIDEO_START( cojag )
  *
  *************************************/
 
-SCREEN_UPDATE( cojag )
+UINT32 jaguar_state::screen_update(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
 	/* if not enabled, just blank */
-	if (!(gpu_regs[VMODE] & 1))
+	if (!(m_gpu_regs[VMODE] & 1))
 	{
-		bitmap_fill(bitmap, cliprect, 0);
+		bitmap.fill(0, cliprect);
 		return 0;
 	}
 
 	/* render the object list */
-	copybitmap(bitmap, screen_bitmap, 0, 0, 0, 0, cliprect);
+	copybitmap(bitmap, m_screen_bitmap, 0, 0, 0, 0, cliprect);
 	return 0;
 }
 
@@ -960,10 +872,10 @@ SCREEN_UPDATE( cojag )
  *************************************/
 
 /* generic blitters */
-#define FUNCNAME	generic_blitter
-#define COMMAND		command
-#define A1FIXED		a1flags
-#define A2FIXED		a2flags
+#define FUNCNAME    generic_blitter
+#define COMMAND     command
+#define A1FIXED     a1flags
+#define A2FIXED     a2flags
 #include "jagblit.c"
 #undef A2FIXED
 #undef A1FIXED
@@ -971,86 +883,83 @@ SCREEN_UPDATE( cojag )
 #undef FUNCNAME
 
 /* optimized common blitters */
-#define FUNCNAME	blitter_09800001_010020_010020
-#define COMMAND		0x09800001
-#define A1FIXED		0x010020
-#define A2FIXED		0x010020
+#define FUNCNAME    blitter_09800001_010020_010020
+#define COMMAND     0x09800001
+#define A1FIXED     0x010020
+#define A2FIXED     0x010020
 #include "jagblit.c"
 #undef A2FIXED
 #undef A1FIXED
 #undef COMMAND
 #undef FUNCNAME
 
-#define FUNCNAME	blitter_09800009_000020_000020
-#define COMMAND		0x09800009
-#define A1FIXED		0x000020
-#define A2FIXED		0x000020
+#define FUNCNAME    blitter_09800009_000020_000020
+#define COMMAND     0x09800009
+#define A1FIXED     0x000020
+#define A2FIXED     0x000020
 #include "jagblit.c"
 #undef A2FIXED
 #undef A1FIXED
 #undef COMMAND
 #undef FUNCNAME
 
-#define FUNCNAME	blitter_01800009_000028_000028
-#define COMMAND		0x01800009
-#define A1FIXED		0x000028
-#define A2FIXED		0x000028
+#define FUNCNAME    blitter_01800009_000028_000028
+#define COMMAND     0x01800009
+#define A1FIXED     0x000028
+#define A2FIXED     0x000028
 #include "jagblit.c"
 #undef A2FIXED
 #undef A1FIXED
 #undef COMMAND
 #undef FUNCNAME
 
-#define FUNCNAME	blitter_01800001_000018_000018
-#define COMMAND		0x01800001
-#define A1FIXED		0x000018
-#define A2FIXED		0x000018
+#define FUNCNAME    blitter_01800001_000018_000018
+#define COMMAND     0x01800001
+#define A1FIXED     0x000018
+#define A2FIXED     0x000018
 #include "jagblit.c"
 #undef A2FIXED
 #undef A1FIXED
 #undef COMMAND
 #undef FUNCNAME
 
-#define FUNCNAME	blitter_01c00001_000018_000018
-#define COMMAND		0x01c00001
-#define A1FIXED		0x000018
-#define A2FIXED		0x000018
+#define FUNCNAME    blitter_01c00001_000018_000018
+#define COMMAND     0x01c00001
+#define A1FIXED     0x000018
+#define A2FIXED     0x000018
 #include "jagblit.c"
 #undef A2FIXED
 #undef A1FIXED
 #undef COMMAND
 #undef FUNCNAME
 
-#ifdef MESS
 
-#define FUNCNAME	blitter_00010000_xxxxxx_xxxxxx
-#define COMMAND		0x00010000
-#define A1FIXED		a1flags
-#define A2FIXED		a2flags
+#define FUNCNAME    blitter_00010000_xxxxxx_xxxxxx
+#define COMMAND     0x00010000
+#define A1FIXED     a1flags
+#define A2FIXED     a2flags
 #include "jagblit.c"
 #undef A2FIXED
 #undef A1FIXED
 #undef COMMAND
 #undef FUNCNAME
 
-#define FUNCNAME	blitter_01800001_xxxxxx_xxxxxx
-#define COMMAND		0x01800001
-#define A1FIXED		a1flags
-#define A2FIXED		a2flags
+#define FUNCNAME    blitter_01800001_xxxxxx_xxxxxx
+#define COMMAND     0x01800001
+#define A1FIXED     a1flags
+#define A2FIXED     a2flags
 #include "jagblit.c"
 #undef A2FIXED
 #undef A1FIXED
 #undef COMMAND
 #undef FUNCNAME
 
-#define FUNCNAME	blitter_x1800x01_xxxxxx_xxxxxx
-#define COMMAND		((command & 0xf0000f00) | 0x01800001)
-#define A1FIXED		a1flags
-#define A2FIXED		a2flags
+#define FUNCNAME    blitter_x1800x01_xxxxxx_xxxxxx
+#define COMMAND     ((command & 0xf0000f00) | 0x01800001)
+#define A1FIXED     a1flags
+#define A2FIXED     a2flags
 #include "jagblit.c"
 #undef A2FIXED
 #undef A1FIXED
 #undef COMMAND
 #undef FUNCNAME
-
-#endif /* MESS */

@@ -12,21 +12,23 @@ Use Player 1 joystick and button, then press START1 to go to next screen.
 
 #include "emu.h"
 #include "cpu/z80/z80.h"
-#include "deprecat.h"
 #include "sound/ay8910.h"
 #include "includes/higemaru.h"
 
 
-static INTERRUPT_GEN( higemaru_interrupt )
+TIMER_DEVICE_CALLBACK_MEMBER(higemaru_state::higemaru_scanline)
 {
-	if (cpu_getiloops(device) == 0)
-		device_set_input_line_and_vector(device, 0, HOLD_LINE, 0xcf);	/* RST 08h */
-	else
-		device_set_input_line_and_vector(device, 0, HOLD_LINE, 0xd7);	/* RST 10h */
+	int scanline = param;
+
+	if(scanline == 240) // vblank-out irq
+		machine().device("maincpu")->execute().set_input_line_and_vector(0, HOLD_LINE, 0xcf);   /* RST 08h - vblank */
+
+	if(scanline == 0) // unknown irq event, does various stuff like copying the spriteram
+		machine().device("maincpu")->execute().set_input_line_and_vector(0, HOLD_LINE, 0xd7);   /* RST 10h */
 }
 
 
-static ADDRESS_MAP_START( higemaru_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( higemaru_map, AS_PROGRAM, 8, higemaru_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0xc000, 0xc000) AM_READ_PORT("P1")
 	AM_RANGE(0xc001, 0xc001) AM_READ_PORT("P2")
@@ -34,11 +36,11 @@ static ADDRESS_MAP_START( higemaru_map, AS_PROGRAM, 8 )
 	AM_RANGE(0xc003, 0xc003) AM_READ_PORT("DSW1")
 	AM_RANGE(0xc004, 0xc004) AM_READ_PORT("DSW2")
 	AM_RANGE(0xc800, 0xc800) AM_WRITE(higemaru_c800_w)
-	AM_RANGE(0xc801, 0xc802) AM_DEVWRITE("ay1", ay8910_address_data_w)
-	AM_RANGE(0xc803, 0xc804) AM_DEVWRITE("ay2", ay8910_address_data_w)
-	AM_RANGE(0xd000, 0xd3ff) AM_RAM_WRITE(higemaru_videoram_w) AM_BASE_MEMBER(higemaru_state, m_videoram)
-	AM_RANGE(0xd400, 0xd7ff) AM_RAM_WRITE(higemaru_colorram_w) AM_BASE_MEMBER(higemaru_state, m_colorram)
-	AM_RANGE(0xd880, 0xd9ff) AM_RAM AM_BASE_SIZE_MEMBER(higemaru_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0xc801, 0xc802) AM_DEVWRITE_LEGACY("ay1", ay8910_address_data_w)
+	AM_RANGE(0xc803, 0xc804) AM_DEVWRITE_LEGACY("ay2", ay8910_address_data_w)
+	AM_RANGE(0xd000, 0xd3ff) AM_RAM_WRITE(higemaru_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0xd400, 0xd7ff) AM_RAM_WRITE(higemaru_colorram_w) AM_SHARE("colorram")
+	AM_RANGE(0xd880, 0xd9ff) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0xe000, 0xefff) AM_RAM
 ADDRESS_MAP_END
 
@@ -158,24 +160,21 @@ GFXDECODE_END
 static MACHINE_CONFIG_START( higemaru, higemaru_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, XTAL_12MHz/4)	/* 3 MHz Sharp LH0080A Z80A-CPU-D */
+	MCFG_CPU_ADD("maincpu", Z80, XTAL_12MHz/4)  /* 3 MHz Sharp LH0080A Z80A-CPU-D */
 	MCFG_CPU_PROGRAM_MAP(higemaru_map)
-	MCFG_CPU_VBLANK_INT_HACK(higemaru_interrupt,2)
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("scantimer", higemaru_state, higemaru_scanline, "screen", 0, 1)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(higemaru)
+	MCFG_SCREEN_UPDATE_DRIVER(higemaru_state, screen_update_higemaru)
 
 	MCFG_GFXDECODE(higemaru)
 	MCFG_PALETTE_LENGTH(32*4+16*16)
 
-	MCFG_PALETTE_INIT(higemaru)
-	MCFG_VIDEO_START(higemaru)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -201,19 +200,19 @@ ROM_START( higemaru )
 	ROM_LOAD( "hg7.m11", 0x6000, 0x2000, CRC(dc5d455d) SHA1(7d253d6680d35943792746da11d91d7be57367cc) )
 
 	ROM_REGION( 0x2000, "gfx1", 0 )
-	ROM_LOAD( "hg3.m1", 0x0000, 0x2000, CRC(b37b88c8) SHA1(7933270969806154f0774d31fda75a5352cf26ad) )	/* characters */
+	ROM_LOAD( "hg3.m1", 0x0000, 0x2000, CRC(b37b88c8) SHA1(7933270969806154f0774d31fda75a5352cf26ad) )  /* characters */
 
 	ROM_REGION( 0x4000, "gfx2", 0 )
-	ROM_LOAD( "hg1.c14", 0x0000, 0x2000, CRC(ef4c2f5d) SHA1(247ce819cdc4ed4ec99c25c9006bac1911354bc8) )	/* tiles */
+	ROM_LOAD( "hg1.c14", 0x0000, 0x2000, CRC(ef4c2f5d) SHA1(247ce819cdc4ed4ec99c25c9006bac1911354bc8) ) /* tiles */
 	ROM_LOAD( "hg2.e14", 0x2000, 0x2000, CRC(9133f804) SHA1(93661c028709a7134537321e52da85e3c0f917ba) )
 
 	ROM_REGION( 0x0420, "proms", 0 )
-	ROM_LOAD( "hgb3.l6", 0x0000, 0x0020, CRC(629cebd8) SHA1(c28cd0f341f4f1c7be97f4d8c289860db8ac0857) )	/* palette */
-	ROM_LOAD( "hgb5.m4", 0x0020, 0x0100, CRC(dbaa4443) SHA1(cca2f9b187abd735f2309b38570edcd745042b3e) )	/* char lookup table */
-	ROM_LOAD( "hgb1.h7", 0x0120, 0x0100, CRC(07c607ce) SHA1(c048602d62f47129152bbc7ccd38627d78a4392f) )	/* sprite lookup table */
-	ROM_LOAD( "hgb4.l9", 0x0220, 0x0100, CRC(712ac508) SHA1(5349d722ab6733afdda65f6e0a98322f0d515e86) )	/* interrupt timing (not used) */
-	ROM_LOAD( "hgb2.k7", 0x0320, 0x0100, CRC(4921635c) SHA1(aee37d6cdc36acf0f11ff5f93e7b16e4b12f6c39) )	/* video timing? (not used) */
+	ROM_LOAD( "hgb3.l6", 0x0000, 0x0020, CRC(629cebd8) SHA1(c28cd0f341f4f1c7be97f4d8c289860db8ac0857) ) /* palette */
+	ROM_LOAD( "hgb5.m4", 0x0020, 0x0100, CRC(dbaa4443) SHA1(cca2f9b187abd735f2309b38570edcd745042b3e) ) /* char lookup table */
+	ROM_LOAD( "hgb1.h7", 0x0120, 0x0100, CRC(07c607ce) SHA1(c048602d62f47129152bbc7ccd38627d78a4392f) ) /* sprite lookup table */
+	ROM_LOAD( "hgb4.l9", 0x0220, 0x0100, CRC(712ac508) SHA1(5349d722ab6733afdda65f6e0a98322f0d515e86) ) /* interrupt timing (not used) */
+	ROM_LOAD( "hgb2.k7", 0x0320, 0x0100, CRC(4921635c) SHA1(aee37d6cdc36acf0f11ff5f93e7b16e4b12f6c39) ) /* video timing? (not used) */
 ROM_END
 
 
-GAME( 1984, higemaru, 0, higemaru, higemaru, 0, ROT0, "Capcom", "Pirate Ship Higemaru", GAME_SUPPORTS_SAVE )
+GAME( 1984, higemaru, 0, higemaru, higemaru, driver_device, 0, ROT0, "Capcom", "Pirate Ship Higemaru", GAME_SUPPORTS_SAVE )

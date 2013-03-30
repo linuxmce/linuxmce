@@ -3,60 +3,39 @@
 
 #include "emu.h"
 
-namespace N64
-{
-
-namespace RDP
-{
-
-class OtherModes;
-class MiscState;
-class Processor;
+struct OtherModesT;
+struct MiscStateT;
+class n64_rdp;
+struct rdp_span_aux;
 class Color;
+struct rdp_poly_state;
 
-class Blender
+class N64BlenderT
 {
 	public:
-		Blender()
+		N64BlenderT()
 		{
-			m_blend_enable = false;
 		}
 
-		bool				Blend2Cycle(UINT32* fr, UINT32* fg, UINT32* fb, int dith, int adseed, int partialreject, int bsel0, int bsel1);
-		bool				Blend1Cycle(UINT32* fr, UINT32* fg, UINT32* fb, int dith, int adseed, int partialreject, int special_bsel);
+		bool                Blend2Cycle(UINT32* fr, UINT32* fg, UINT32* fb, int dith, int adseed, int partialreject, int bsel0, int bsel1, rdp_span_aux *userdata, const rdp_poly_state& object);
+		bool                Blend1Cycle(UINT32* fr, UINT32* fg, UINT32* fb, int dith, int adseed, int partialreject, int special_bsel, rdp_span_aux *userdata, const rdp_poly_state& object);
 
-		void				SetOtherModes(OtherModes* other_modes) { m_other_modes = other_modes; }
-		void				SetMiscState(MiscState* misc_state) { m_misc_state = misc_state; }
-		void				SetMachine(running_machine& machine) { m_machine = &machine; }
-		void				SetProcessor(Processor* rdp) { m_rdp = rdp; }
+		void                SetMachine(running_machine& machine) { m_machine = &machine; }
+		void                SetProcessor(n64_rdp* rdp) { m_rdp = rdp; }
 
-		void				SetBlendEnable(bool enable) { m_blend_enable = enable; }
-		bool				GetBlendEnable() { return m_blend_enable; }
-
-		void				SetShiftA(INT32 shift) { m_shift_a = shift; }
-		void				SetShiftB(INT32 shift) { m_shift_b = shift; }
+		running_machine &machine() const { assert(m_machine != NULL); return *m_machine; }
 
 	private:
-		running_machine*	m_machine;
-		OtherModes*			m_other_modes;
-		MiscState*			m_misc_state;
-		Processor*			m_rdp;
+		running_machine*    m_machine;
+		n64_rdp*            m_rdp;
 
-		bool				m_blend_enable;
-		INT32				m_shift_a;
-		INT32				m_shift_b;
+		void                BlendEquationCycle0(INT32* r, INT32* g, INT32* b, int bsel_special, rdp_span_aux *userdata, const rdp_poly_state& object);
+		void                BlendEquationCycle1(INT32* r, INT32* g, INT32* b, int bsel_special, rdp_span_aux *userdata, const rdp_poly_state& object);
 
-		void				BlendEquationCycle0(INT32* r, INT32* g, INT32* b, int bsel_special);
-		void				BlendEquationCycle1(INT32* r, INT32* g, INT32* b, int bsel_special);
+		bool                AlphaCompare(UINT8 alpha, const rdp_span_aux *userdata, const rdp_poly_state& object);
 
-		bool				AlphaCompare(UINT8 alpha);
-
-		void				DitherRGB(INT32* r, INT32* g, INT32* b, int dith);
-		void				DitherA(UINT8* a, int dith);
+		void                DitherRGB(INT32* r, INT32* g, INT32* b, int dith);
+		void                DitherA(UINT8* a, int dith);
 };
-
-} // namespace RDP
-
-} // namespace N64
 
 #endif // _VIDEO_RDPBLEND_H_

@@ -185,13 +185,14 @@ There is not a rev 03 known or dumped. An Asteroids rev 03 is not mentioned in a
 
 #include "emu.h"
 #include "cpu/m6502/m6502.h"
-#include "rendlay.h"
 #include "video/vector.h"
 #include "video/avgdvg.h"
 #include "machine/atari_vg.h"
 #include "includes/asteroid.h"
 #include "sound/discrete.h"
 #include "sound/pokey.h"
+
+#include "astdelux.lh"
 
 #define MASTER_CLOCK (XTAL_12_096MHz)
 #define CLOCK_3KHZ  (MASTER_CLOCK / 4096)
@@ -202,9 +203,9 @@ There is not a rev 03 known or dumped. An Asteroids rev 03 is not mentioned in a
  *
  *************************************/
 
-static WRITE8_HANDLER( astdelux_coin_counter_w )
+WRITE8_MEMBER(asteroid_state::astdelux_coin_counter_w)
 {
-	coin_counter_w(space->machine(), offset,data);
+	coin_counter_w(machine(), offset,data);
 }
 
 
@@ -215,7 +216,7 @@ static WRITE8_HANDLER( astdelux_coin_counter_w )
  *
  *************************************/
 
-static WRITE8_HANDLER( llander_led_w )
+WRITE8_MEMBER(asteroid_state::llander_led_w)
 {
 	static const char *const lampname[] =
 	{
@@ -234,67 +235,67 @@ static WRITE8_HANDLER( llander_led_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( asteroid_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( asteroid_map, AS_PROGRAM, 8, asteroid_state )
 	ADDRESS_MAP_GLOBAL_MASK(0x7fff)
 	AM_RANGE(0x0000, 0x01ff) AM_RAM
-	AM_RANGE(0x0200, 0x02ff) AM_RAMBANK("bank1") AM_BASE_MEMBER(asteroid_state, m_ram1)
-	AM_RANGE(0x0300, 0x03ff) AM_RAMBANK("bank2") AM_BASE_MEMBER(asteroid_state, m_ram2)
-	AM_RANGE(0x2000, 0x2007) AM_READ(asteroid_IN0_r)	/* IN0 */
-	AM_RANGE(0x2400, 0x2407) AM_READ(asteroid_IN1_r)	/* IN1 */
-	AM_RANGE(0x2800, 0x2803) AM_READ(asteroid_DSW1_r)	/* DSW1 */
-	AM_RANGE(0x3000, 0x3000) AM_WRITE(avgdvg_go_w)
+	AM_RANGE(0x0200, 0x02ff) AM_RAMBANK("bank1") AM_SHARE("ram1")
+	AM_RANGE(0x0300, 0x03ff) AM_RAMBANK("bank2") AM_SHARE("ram2")
+	AM_RANGE(0x2000, 0x2007) AM_READ(asteroid_IN0_r)    /* IN0 */
+	AM_RANGE(0x2400, 0x2407) AM_READ(asteroid_IN1_r)    /* IN1 */
+	AM_RANGE(0x2800, 0x2803) AM_READ(asteroid_DSW1_r)   /* DSW1 */
+	AM_RANGE(0x3000, 0x3000) AM_WRITE_LEGACY(avgdvg_go_w)
 	AM_RANGE(0x3200, 0x3200) AM_WRITE(asteroid_bank_switch_w)
 	AM_RANGE(0x3400, 0x3400) AM_WRITE(watchdog_reset_w)
-	AM_RANGE(0x3600, 0x3600) AM_DEVWRITE("discrete", asteroid_explode_w)
-	AM_RANGE(0x3a00, 0x3a00) AM_DEVWRITE("discrete", asteroid_thump_w)
-	AM_RANGE(0x3c00, 0x3c05) AM_DEVWRITE("discrete", asteroid_sounds_w)
-	AM_RANGE(0x3e00, 0x3e00) AM_DEVWRITE("discrete", asteroid_noise_reset_w)
-	AM_RANGE(0x4000, 0x47ff) AM_RAM AM_BASE(&avgdvg_vectorram) AM_SIZE(&avgdvg_vectorram_size) AM_REGION("maincpu", 0x4000)
-	AM_RANGE(0x5000, 0x57ff) AM_ROM						/* vector rom */
+	AM_RANGE(0x3600, 0x3600) AM_WRITE(asteroid_explode_w)
+	AM_RANGE(0x3a00, 0x3a00) AM_WRITE(asteroid_thump_w)
+	AM_RANGE(0x3c00, 0x3c05) AM_WRITE(asteroid_sounds_w)
+	AM_RANGE(0x3e00, 0x3e00) AM_WRITE(asteroid_noise_reset_w)
+	AM_RANGE(0x4000, 0x47ff) AM_RAM AM_SHARE("vectorram") AM_REGION("maincpu", 0x4000)
+	AM_RANGE(0x5000, 0x57ff) AM_ROM                     /* vector rom */
 	AM_RANGE(0x6800, 0x7fff) AM_ROM
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( astdelux_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( astdelux_map, AS_PROGRAM, 8, asteroid_state )
 	ADDRESS_MAP_GLOBAL_MASK(0x7fff)
 	AM_RANGE(0x0000, 0x01ff) AM_RAM
-	AM_RANGE(0x0200, 0x02ff) AM_RAMBANK("bank1") AM_BASE_MEMBER(asteroid_state, m_ram1)
-	AM_RANGE(0x0300, 0x03ff) AM_RAMBANK("bank2") AM_BASE_MEMBER(asteroid_state, m_ram2)
-	AM_RANGE(0x2000, 0x2007) AM_READ(asteroid_IN0_r)	/* IN0 */
-	AM_RANGE(0x2400, 0x2407) AM_READ(asteroid_IN1_r)	/* IN1 */
-	AM_RANGE(0x2800, 0x2803) AM_READ(asteroid_DSW1_r)	/* DSW1 */
-	AM_RANGE(0x2c00, 0x2c0f) AM_DEVREADWRITE("pokey", pokey_r, pokey_w)
-	AM_RANGE(0x2c40, 0x2c7f) AM_DEVREAD("earom", atari_vg_earom_r)
-	AM_RANGE(0x3000, 0x3000) AM_WRITE(avgdvg_go_w)
-	AM_RANGE(0x3200, 0x323f) AM_DEVWRITE("earom", atari_vg_earom_w)
+	AM_RANGE(0x0200, 0x02ff) AM_RAMBANK("bank1") AM_SHARE("ram1")
+	AM_RANGE(0x0300, 0x03ff) AM_RAMBANK("bank2") AM_SHARE("ram2")
+	AM_RANGE(0x2000, 0x2007) AM_READ(asteroid_IN0_r)    /* IN0 */
+	AM_RANGE(0x2400, 0x2407) AM_READ(asteroid_IN1_r)    /* IN1 */
+	AM_RANGE(0x2800, 0x2803) AM_READ(asteroid_DSW1_r)   /* DSW1 */
+	AM_RANGE(0x2c00, 0x2c0f) AM_DEVREADWRITE("pokey", pokey_device, read, write)
+	AM_RANGE(0x2c40, 0x2c7f) AM_DEVREAD("earom", atari_vg_earom_device, read)
+	AM_RANGE(0x3000, 0x3000) AM_WRITE_LEGACY(avgdvg_go_w)
+	AM_RANGE(0x3200, 0x323f) AM_DEVWRITE("earom", atari_vg_earom_device, write)
 	AM_RANGE(0x3400, 0x3400) AM_WRITE(watchdog_reset_w)
-	AM_RANGE(0x3600, 0x3600) AM_DEVWRITE("discrete", asteroid_explode_w)
-	AM_RANGE(0x3a00, 0x3a00) AM_DEVWRITE("earom", atari_vg_earom_ctrl_w)
+	AM_RANGE(0x3600, 0x3600) AM_WRITE(asteroid_explode_w)
+	AM_RANGE(0x3a00, 0x3a00) AM_DEVWRITE("earom", atari_vg_earom_device, ctrl_w)
 	AM_RANGE(0x3c00, 0x3c01) AM_WRITE(astdelux_led_w)
-	AM_RANGE(0x3c03, 0x3c03) AM_DEVWRITE("discrete", astdelux_sounds_w)
+	AM_RANGE(0x3c03, 0x3c03) AM_WRITE(astdelux_sounds_w)
 	AM_RANGE(0x3c04, 0x3c04) AM_WRITE(astdelux_bank_switch_w)
 	AM_RANGE(0x3c05, 0x3c07) AM_WRITE(astdelux_coin_counter_w)
-	AM_RANGE(0x3e00, 0x3e00) AM_DEVWRITE("discrete", asteroid_noise_reset_w)
-	AM_RANGE(0x4000, 0x47ff) AM_RAM AM_BASE(&avgdvg_vectorram) AM_SIZE(&avgdvg_vectorram_size) AM_REGION("maincpu", 0x4000)
-	AM_RANGE(0x4800, 0x57ff) AM_ROM						/* vector rom */
+	AM_RANGE(0x3e00, 0x3e00) AM_WRITE(asteroid_noise_reset_w)
+	AM_RANGE(0x4000, 0x47ff) AM_RAM AM_SHARE("vectorram") AM_REGION("maincpu", 0x4000)
+	AM_RANGE(0x4800, 0x57ff) AM_ROM                     /* vector rom */
 	AM_RANGE(0x6000, 0x7fff) AM_ROM
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( llander_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( llander_map, AS_PROGRAM, 8, asteroid_state )
 	ADDRESS_MAP_GLOBAL_MASK(0x7fff)
 	AM_RANGE(0x0000, 0x00ff) AM_RAM AM_MIRROR(0x1f00)
 	AM_RANGE(0x2000, 0x2000) AM_READ_PORT("IN0")
-	AM_RANGE(0x2400, 0x2407) AM_READ(asteroid_IN1_r)	/* IN1 */
-	AM_RANGE(0x2800, 0x2803) AM_READ(asteroid_DSW1_r)	/* DSW1 */
+	AM_RANGE(0x2400, 0x2407) AM_READ(asteroid_IN1_r)    /* IN1 */
+	AM_RANGE(0x2800, 0x2803) AM_READ(asteroid_DSW1_r)   /* DSW1 */
 	AM_RANGE(0x2c00, 0x2c00) AM_READ_PORT("THRUST")
-	AM_RANGE(0x3000, 0x3000) AM_WRITE(avgdvg_go_w)
+	AM_RANGE(0x3000, 0x3000) AM_WRITE_LEGACY(avgdvg_go_w)
 	AM_RANGE(0x3200, 0x3200) AM_WRITE(llander_led_w)
 	AM_RANGE(0x3400, 0x3400) AM_WRITE(watchdog_reset_w)
-	AM_RANGE(0x3c00, 0x3c00) AM_DEVWRITE("discrete", llander_sounds_w)
-	AM_RANGE(0x3e00, 0x3e00) AM_DEVWRITE("discrete", llander_snd_reset_w)
-	AM_RANGE(0x4000, 0x47ff) AM_RAM AM_BASE(&avgdvg_vectorram) AM_SIZE(&avgdvg_vectorram_size) AM_REGION("maincpu", 0x4000)
-	AM_RANGE(0x4800, 0x5fff) AM_ROM						/* vector rom */
+	AM_RANGE(0x3c00, 0x3c00) AM_WRITE(llander_sounds_w)
+	AM_RANGE(0x3e00, 0x3e00) AM_WRITE(llander_snd_reset_w)
+	AM_RANGE(0x4000, 0x47ff) AM_RAM AM_SHARE("vectorram") AM_REGION("maincpu", 0x4000)
+	AM_RANGE(0x4800, 0x5fff) AM_ROM                     /* vector rom */
 	AM_RANGE(0x6000, 0x7fff) AM_ROM
 ADDRESS_MAP_END
 
@@ -306,19 +307,19 @@ ADDRESS_MAP_END
  *
  *************************************/
 
-static CUSTOM_INPUT( clock_r )
+CUSTOM_INPUT_MEMBER(asteroid_state::clock_r)
 {
-	return (field->port->machine().device<cpu_device>("maincpu")->total_cycles() & 0x100) ? 1 : 0;
+	return (machine().device<cpu_device>("maincpu")->total_cycles() & 0x100) ? 1 : 0;
 }
 
 static INPUT_PORTS_START( asteroid )
 	PORT_START("IN0")
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	/* Bit 2 is the 3 KHz source and Bit 3 the VG_HALT bit    */
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(clock_r, NULL)
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, asteroid_state,clock_r, NULL)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SPECIAL ) PORT_CUSTOM(avgdvg_done_r, NULL)
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_BUTTON5 ) PORT_CODE(KEYCODE_SPACE) PORT_CODE(JOYCODE_BUTTON3)		/* hyperspace */
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON3 ) PORT_CODE(KEYCODE_LCONTROL) PORT_CODE(JOYCODE_BUTTON1)	/* fire */
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_BUTTON5 ) PORT_CODE(KEYCODE_SPACE) PORT_CODE(JOYCODE_BUTTON3)       /* hyperspace */
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON3 ) PORT_CODE(KEYCODE_LCONTROL) PORT_CODE(JOYCODE_BUTTON1)    /* fire */
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_SERVICE ) PORT_NAME("Diagnostic Step") PORT_CODE(KEYCODE_F1)
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_TILT )
 	PORT_SERVICE( 0x80, IP_ACTIVE_HIGH )
@@ -329,32 +330,32 @@ static INPUT_PORTS_START( asteroid )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_COIN3 )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_START1 )
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_START2 )
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON4 ) PORT_CODE(KEYCODE_LALT) PORT_CODE(JOYCODE_BUTTON2)		/* thrust */
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON4 ) PORT_CODE(KEYCODE_LALT) PORT_CODE(JOYCODE_BUTTON2)        /* thrust */
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_CODE(KEYCODE_RIGHT) PORT_CODE(JOYCODE_X_RIGHT_SWITCH)/* right */
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_CODE(KEYCODE_LEFT) PORT_CODE(JOYCODE_X_LEFT_SWITCH)	/* left */
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_CODE(KEYCODE_LEFT) PORT_CODE(JOYCODE_X_LEFT_SWITCH)  /* left */
 
 	PORT_START("DSW1")
-	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Language ) )	PORT_DIPLOCATION("SW:1,2")
-	PORT_DIPSETTING (	0x00, DEF_STR( English ) )
-	PORT_DIPSETTING (	0x01, DEF_STR( German ) )
-	PORT_DIPSETTING (	0x02, DEF_STR( French ) )
-	PORT_DIPSETTING (	0x03, DEF_STR( Spanish ) )
-	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Lives ) )	PORT_DIPLOCATION("SW:3")
-	PORT_DIPSETTING (	0x04, "3" )
-	PORT_DIPSETTING (	0x00, "4" )
-	PORT_DIPNAME( 0x08, 0x00, "Center Mech" )		PORT_DIPLOCATION("SW:4") /* Left/Center for 3-door mech */
-	PORT_DIPSETTING (	0x00, "X 1" )
-	PORT_DIPSETTING (	0x08, "X 2" )
-	PORT_DIPNAME( 0x30, 0x00, "Right Mech" )		PORT_DIPLOCATION("SW:5,6")
-	PORT_DIPSETTING (	0x00, "X 1" )
-	PORT_DIPSETTING (	0x10, "X 4" )
-	PORT_DIPSETTING (	0x20, "X 5" )
-	PORT_DIPSETTING (	0x30, "X 6" )
-	PORT_DIPNAME( 0xc0, 0x80, DEF_STR( Coinage ) )	PORT_DIPLOCATION("SW:7,8")
-	PORT_DIPSETTING (	0xc0, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING (	0x80, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING (	0x40, DEF_STR( 1C_2C ) )
-	PORT_DIPSETTING (	0x00, DEF_STR( Free_Play ) )
+	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Language ) ) PORT_DIPLOCATION("SW:1,2")
+	PORT_DIPSETTING (   0x00, DEF_STR( English ) )
+	PORT_DIPSETTING (   0x01, DEF_STR( German ) )
+	PORT_DIPSETTING (   0x02, DEF_STR( French ) )
+	PORT_DIPSETTING (   0x03, DEF_STR( Spanish ) )
+	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Lives ) )    PORT_DIPLOCATION("SW:3")
+	PORT_DIPSETTING (   0x04, "3" )
+	PORT_DIPSETTING (   0x00, "4" )
+	PORT_DIPNAME( 0x08, 0x00, "Center Mech" )       PORT_DIPLOCATION("SW:4") /* Left/Center for 3-door mech */
+	PORT_DIPSETTING (   0x00, "X 1" )
+	PORT_DIPSETTING (   0x08, "X 2" )
+	PORT_DIPNAME( 0x30, 0x00, "Right Mech" )        PORT_DIPLOCATION("SW:5,6")
+	PORT_DIPSETTING (   0x00, "X 1" )
+	PORT_DIPSETTING (   0x10, "X 4" )
+	PORT_DIPSETTING (   0x20, "X 5" )
+	PORT_DIPSETTING (   0x30, "X 6" )
+	PORT_DIPNAME( 0xc0, 0x80, DEF_STR( Coinage ) )  PORT_DIPLOCATION("SW:7,8")
+	PORT_DIPSETTING (   0xc0, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING (   0x80, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING (   0x40, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING (   0x00, DEF_STR( Free_Play ) )
 INPUT_PORTS_END
 
 
@@ -362,8 +363,8 @@ static INPUT_PORTS_START( asteroidb )
 	PORT_INCLUDE( asteroid )
 
 	PORT_MODIFY("IN0")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* resets */
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* resets */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )    /* resets */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )    /* resets */
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_TILT )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -375,9 +376,9 @@ static INPUT_PORTS_START( asteroidb )
 	PORT_MODIFY("IN1")
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_START1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_COIN1 )
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_BUTTON4 ) PORT_CODE(KEYCODE_LALT) PORT_CODE(JOYCODE_BUTTON2)			/* thrust */
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_BUTTON4 ) PORT_CODE(KEYCODE_LALT) PORT_CODE(JOYCODE_BUTTON2)            /* thrust */
 	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_COIN2 )
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON3 ) PORT_CODE(KEYCODE_LCONTROL) PORT_CODE(JOYCODE_BUTTON1)		/* fire */
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON3 ) PORT_CODE(KEYCODE_LCONTROL) PORT_CODE(JOYCODE_BUTTON1)        /* fire */
 
 	PORT_MODIFY("DSW1")
 	PORT_DIPUNKNOWN_DIPLOC( 0x08, 0x08, "SW:4" )
@@ -386,7 +387,7 @@ static INPUT_PORTS_START( asteroidb )
 
 	PORT_START("HS") /* hyperspace */
 	PORT_BIT( 0x7f, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_CODE(KEYCODE_SPACE) PORT_CODE(JOYCODE_BUTTON3)			/* hyperspace */
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_CODE(KEYCODE_SPACE) PORT_CODE(JOYCODE_BUTTON3)            /* hyperspace */
 INPUT_PORTS_END
 
 
@@ -397,39 +398,39 @@ static INPUT_PORTS_START( asterock )
 	/* Bit 0 is VG_HALT and Bit 2 is the 3 KHz source */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_SPECIAL ) PORT_CUSTOM(avgdvg_done_r, NULL)
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(clock_r, NULL)
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_CODE(KEYCODE_SPACE) PORT_CODE(JOYCODE_BUTTON3)		/* hyperspace */
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_CODE(KEYCODE_LCONTROL) PORT_CODE(JOYCODE_BUTTON1)		/* fire */
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, asteroid_state,clock_r, NULL)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_CODE(KEYCODE_SPACE) PORT_CODE(JOYCODE_BUTTON3)        /* hyperspace */
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_CODE(KEYCODE_LCONTROL) PORT_CODE(JOYCODE_BUTTON1)     /* fire */
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME("Diagnostic Step") PORT_CODE(KEYCODE_F1)
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_TILT )
 	PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
 
 	PORT_MODIFY("DSW1")
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Language ) )					PORT_DIPLOCATION("SW:1,2")
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Language ) )                 PORT_DIPLOCATION("SW:1,2")
 	PORT_DIPSETTING(    0x00, DEF_STR( English ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( French ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( German ) )
 	PORT_DIPSETTING(    0x03, DEF_STR( Italian ) )
-	PORT_DIPNAME( 0x0c, 0x04, DEF_STR( Lives ) )					PORT_DIPLOCATION("SW:3,4")
+	PORT_DIPNAME( 0x0c, 0x04, DEF_STR( Lives ) )                    PORT_DIPLOCATION("SW:3,4")
 	PORT_DIPSETTING(    0x00, "2" )
 	PORT_DIPSETTING(    0x04, "3" )
 	PORT_DIPSETTING(    0x08, "4" )
 	PORT_DIPSETTING(    0x0c, "5" )
-	PORT_DIPNAME( 0x10, 0x00, "Records Table" )						PORT_DIPLOCATION("SW:5")
+	PORT_DIPNAME( 0x10, 0x00, "Records Table" )                     PORT_DIPLOCATION("SW:5")
 	PORT_DIPSETTING(    0x00, DEF_STR( Normal ) )
 	PORT_DIPSETTING(    0x10, "Special" )
-	PORT_DIPNAME( 0x20, 0x00, "Coin Mode" )							PORT_DIPLOCATION("SW:6")
-	PORT_DIPSETTING (	0x00, DEF_STR( Normal ) )
-	PORT_DIPSETTING (	0x20, "Special" )
-	PORT_DIPNAME( 0xc0, 0x80, DEF_STR( Coinage ) )					PORT_DIPLOCATION("SW:7,8")
-	PORT_DIPSETTING (	0xc0, DEF_STR( 2C_1C ) )					PORT_CONDITION("DSW1",0x20,PORTCOND_EQUALS,0x00)
-	PORT_DIPSETTING (	0x80, DEF_STR( 1C_1C ) )					PORT_CONDITION("DSW1",0x20,PORTCOND_EQUALS,0x00)
-	PORT_DIPSETTING (	0x40, DEF_STR( 1C_2C ) )					PORT_CONDITION("DSW1",0x20,PORTCOND_EQUALS,0x00)
-//  PORT_DIPSETTING (   0x00, DEF_STR( 1C_1C ) )                    PORT_CONDITION("DSW1",0x20,PORTCOND_EQUALS,0x00)
-	PORT_DIPSETTING (	0xc0, "Coin A 2/1 Coin B 2/1 Coin C 1/1" )	PORT_CONDITION("DSW1",0x20,PORTCOND_NOTEQUALS,0x00)
-	PORT_DIPSETTING (	0x80, "Coin A 1/1 Coin B 1/1 Coin C 1/2" )	PORT_CONDITION("DSW1",0x20,PORTCOND_NOTEQUALS,0x00)
-	PORT_DIPSETTING (	0x40, "Coin A 1/2 Coin B 1/2 Coin C 1/4" )	PORT_CONDITION("DSW1",0x20,PORTCOND_NOTEQUALS,0x00)
-//  PORT_DIPSETTING (   0x00, "Coin A 1/1 Coin B 1/1 Coin C 1/2" )  PORT_CONDITION("DSW1",0x20,PORTCOND_NOTEQUALS,0x00)
+	PORT_DIPNAME( 0x20, 0x00, "Coin Mode" )                         PORT_DIPLOCATION("SW:6")
+	PORT_DIPSETTING (   0x00, DEF_STR( Normal ) )
+	PORT_DIPSETTING (   0x20, "Special" )
+	PORT_DIPNAME( 0xc0, 0x80, DEF_STR( Coinage ) )                  PORT_DIPLOCATION("SW:7,8")
+	PORT_DIPSETTING (   0xc0, DEF_STR( 2C_1C ) )                    PORT_CONDITION("DSW1",0x20,EQUALS,0x00)
+	PORT_DIPSETTING (   0x80, DEF_STR( 1C_1C ) )                    PORT_CONDITION("DSW1",0x20,EQUALS,0x00)
+	PORT_DIPSETTING (   0x40, DEF_STR( 1C_2C ) )                    PORT_CONDITION("DSW1",0x20,EQUALS,0x00)
+//  PORT_DIPSETTING (   0x00, DEF_STR( 1C_1C ) )                    PORT_CONDITION("DSW1",0x20,EQUALS,0x00)
+	PORT_DIPSETTING (   0xc0, "Coin A 2/1 Coin B 2/1 Coin C 1/1" )  PORT_CONDITION("DSW1",0x20,NOTEQUALS,0x00)
+	PORT_DIPSETTING (   0x80, "Coin A 1/1 Coin B 1/1 Coin C 1/2" )  PORT_CONDITION("DSW1",0x20,NOTEQUALS,0x00)
+	PORT_DIPSETTING (   0x40, "Coin A 1/2 Coin B 1/2 Coin C 1/4" )  PORT_CONDITION("DSW1",0x20,NOTEQUALS,0x00)
+//  PORT_DIPSETTING (   0x00, "Coin A 1/1 Coin B 1/1 Coin C 1/2" )  PORT_CONDITION("DSW1",0x20,NOTEQUALS,0x00)
 INPUT_PORTS_END
 
 
@@ -437,10 +438,10 @@ static INPUT_PORTS_START( astdelux )
 	PORT_START("IN0")
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNUSED ) /* According to schematics */
 	/* Bit 2 is the 3 KHz source and Bit 3 the VG_HALT bit    */
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(clock_r, NULL)
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, asteroid_state,clock_r, NULL)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SPECIAL ) PORT_CUSTOM(avgdvg_done_r, NULL)
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_BUTTON5 ) PORT_CODE(KEYCODE_SPACE) PORT_CODE(JOYCODE_BUTTON3)		/* hyperspace */
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON3 ) PORT_CODE(KEYCODE_LCONTROL) PORT_CODE(JOYCODE_BUTTON1)	/* fire */
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_BUTTON5 ) PORT_CODE(KEYCODE_SPACE) PORT_CODE(JOYCODE_BUTTON3)       /* hyperspace */
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON3 ) PORT_CODE(KEYCODE_LCONTROL) PORT_CODE(JOYCODE_BUTTON1)    /* fire */
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_SERVICE ) PORT_NAME("Diagnostic Step") PORT_CODE(KEYCODE_F1)
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_TILT )
 	PORT_SERVICE( 0x80, IP_ACTIVE_HIGH )
@@ -451,63 +452,63 @@ static INPUT_PORTS_START( astdelux )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_COIN3 ) /* Coin Right */
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_START1 )
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_START2 )
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON4 ) PORT_CODE(KEYCODE_LALT) PORT_CODE(JOYCODE_BUTTON2)		/* thrust */
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON4 ) PORT_CODE(KEYCODE_LALT) PORT_CODE(JOYCODE_BUTTON2)        /* thrust */
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_CODE(KEYCODE_RIGHT) PORT_CODE(JOYCODE_X_RIGHT_SWITCH)/* right */
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_CODE(KEYCODE_LEFT) PORT_CODE(JOYCODE_X_LEFT_SWITCH)	/* left */
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_CODE(KEYCODE_LEFT) PORT_CODE(JOYCODE_X_LEFT_SWITCH)  /* left */
 
 	PORT_START("DSW1")
-	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Language ) )		PORT_DIPLOCATION("R5:1,2")
-	PORT_DIPSETTING (	0x00, DEF_STR( English ) )
-	PORT_DIPSETTING (	0x01, DEF_STR( German ) )
-	PORT_DIPSETTING (	0x02, DEF_STR( French ) )
-	PORT_DIPSETTING (	0x03, DEF_STR( Spanish ) )
+	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Language ) )     PORT_DIPLOCATION("R5:1,2")
+	PORT_DIPSETTING (   0x00, DEF_STR( English ) )
+	PORT_DIPSETTING (   0x01, DEF_STR( German ) )
+	PORT_DIPSETTING (   0x02, DEF_STR( French ) )
+	PORT_DIPSETTING (   0x03, DEF_STR( Spanish ) )
 	/*  Default lives is 2,3,4,5. Values incremented by 1 if Bonus Life set to None or Coinage set to 2C_1C.
-        Incremented by 2 if both are set at the same time. PORT_CONDITION() can only test for 1 switch at a time. */
-	PORT_DIPNAME( 0x0c, 0x00, DEF_STR( Lives ) )		PORT_DIPLOCATION("R5:3,4") /* Default is 2 or 3 depending on manual version */
-	PORT_DIPSETTING (	0x00, "2-4" )
-	PORT_DIPSETTING (	0x04, "3-5" )
-	PORT_DIPSETTING (	0x08, "4-6" )
-	PORT_DIPSETTING (	0x0c, "5-7" )
-	PORT_DIPNAME( 0x10, 0x00, "Minimum Plays" )			PORT_DIPLOCATION("R5:5")
-	PORT_DIPSETTING (	0x00, "1" )
-	PORT_DIPSETTING (	0x10, "2" )
-	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Difficulty ) )	PORT_DIPLOCATION("R5:6") /* Listed as "Unused" */
-	PORT_DIPSETTING (	0x00, DEF_STR( Hard ) )
-	PORT_DIPSETTING (	0x20, DEF_STR( Easy ) )
-	PORT_DIPNAME( 0xc0, 0x00, DEF_STR( Bonus_Life ) )	PORT_DIPLOCATION("R5:7,8")
-	PORT_DIPSETTING (	0x00, "10000" )
-	PORT_DIPSETTING (	0x40, "12000" )
-	PORT_DIPSETTING (	0x80, "15000" )
-	PORT_DIPSETTING (	0xc0, DEF_STR( None ) )
+	    Incremented by 2 if both are set at the same time. PORT_CONDITION() can only test for 1 switch at a time. */
+	PORT_DIPNAME( 0x0c, 0x00, DEF_STR( Lives ) )        PORT_DIPLOCATION("R5:3,4") /* Default is 2 or 3 depending on manual version */
+	PORT_DIPSETTING (   0x00, "2-4" )
+	PORT_DIPSETTING (   0x04, "3-5" )
+	PORT_DIPSETTING (   0x08, "4-6" )
+	PORT_DIPSETTING (   0x0c, "5-7" )
+	PORT_DIPNAME( 0x10, 0x00, "Minimum Plays" )         PORT_DIPLOCATION("R5:5")
+	PORT_DIPSETTING (   0x00, "1" )
+	PORT_DIPSETTING (   0x10, "2" )
+	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("R5:6") /* Listed as "Unused" */
+	PORT_DIPSETTING (   0x00, DEF_STR( Hard ) )
+	PORT_DIPSETTING (   0x20, DEF_STR( Easy ) )
+	PORT_DIPNAME( 0xc0, 0x00, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION("R5:7,8")
+	PORT_DIPSETTING (   0x00, "10000" )
+	PORT_DIPSETTING (   0x40, "12000" )
+	PORT_DIPSETTING (   0x80, "15000" )
+	PORT_DIPSETTING (   0xc0, DEF_STR( None ) )
 
 	PORT_START("DSW2")
-	PORT_DIPNAME( 0x03, 0x01, DEF_STR( Coinage ) )		PORT_DIPLOCATION("L8:1,2")
-	PORT_DIPSETTING (	0x00, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING (	0x01, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING (	0x02, DEF_STR( 1C_2C ) )
-	PORT_DIPSETTING (	0x03, DEF_STR( Free_Play ) )
-	PORT_DIPNAME( 0x0c, 0x0c, "Right Coin" )			PORT_DIPLOCATION("L8:3,4")
-	PORT_DIPSETTING (	0x00, "X 6" )
-	PORT_DIPSETTING (	0x04, "X 5" )
-	PORT_DIPSETTING (	0x08, "X 4" )
-	PORT_DIPSETTING (	0x0c, "X 1" )
-	PORT_DIPNAME( 0x10, 0x10, "Center Coin" )			PORT_DIPLOCATION("L8:5") /* "Left Coin" in a 2-mech door */
-	PORT_DIPSETTING (	0x00, "X 2" )
-	PORT_DIPSETTING (	0x10, "X 1" )
-	PORT_DIPNAME( 0xe0, 0xe0, "Bonus Coins" )			PORT_DIPLOCATION("L8:6,7,8")
-	PORT_DIPSETTING (	0x60, "1 Coin Each 5 Coins" )
-	PORT_DIPSETTING (	0x80, "2 Coins Each 4 Coins" )
-	PORT_DIPSETTING (	0xa0, "1 Coin Each 4 Coins" )
-	PORT_DIPSETTING (	0xc0, "1 Coin Each 2 Coins" )
-	PORT_DIPSETTING (	0xe0, DEF_STR( None ) )
+	PORT_DIPNAME( 0x03, 0x01, DEF_STR( Coinage ) )      PORT_DIPLOCATION("L8:1,2")
+	PORT_DIPSETTING (   0x00, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING (   0x01, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING (   0x02, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING (   0x03, DEF_STR( Free_Play ) )
+	PORT_DIPNAME( 0x0c, 0x0c, "Right Coin" )            PORT_DIPLOCATION("L8:3,4")
+	PORT_DIPSETTING (   0x00, "X 6" )
+	PORT_DIPSETTING (   0x04, "X 5" )
+	PORT_DIPSETTING (   0x08, "X 4" )
+	PORT_DIPSETTING (   0x0c, "X 1" )
+	PORT_DIPNAME( 0x10, 0x10, "Center Coin" )           PORT_DIPLOCATION("L8:5") /* "Left Coin" in a 2-mech door */
+	PORT_DIPSETTING (   0x00, "X 2" )
+	PORT_DIPSETTING (   0x10, "X 1" )
+	PORT_DIPNAME( 0xe0, 0xe0, "Bonus Coins" )           PORT_DIPLOCATION("L8:6,7,8")
+	PORT_DIPSETTING (   0x60, "1 Coin Each 5 Coins" )
+	PORT_DIPSETTING (   0x80, "2 Coins Each 4 Coins" )
+	PORT_DIPSETTING (   0xa0, "1 Coin Each 4 Coins" )
+	PORT_DIPSETTING (   0xc0, "1 Coin Each 2 Coins" )
+	PORT_DIPSETTING (   0xe0, DEF_STR( None ) )
 
 	/* The manual includes a 3rd DIP controlling the number & configuration of coin counters, defined as: */
 #if 0
 	PORT_START("DSW3")                                  // 4-Toggle switch located on game PCB at M12
 	PORT_DIPNAME( 0x03, 0x00, "Coin Counters" )             PORT_DIPLOCATION("M12:1,2")
 	PORT_DIPSETTING (   0x00, "1=Left, Center & Right" )    // "For games having these coin doors: Thai 1Baht/1Baht, German 1DM/1DM, US 25c/25c,
-                                                            // Belgian or French 5Fr/5Fr, Swiss or French 1Fr/1Fr, US 25c/25c/25c,
-                                                            // Japanese 100Y/100Y, Swedish 1Kr/1Kr, UK 10P/10P, Australian 20c/20c, or Italian 100L/100L."
+															// Belgian or French 5Fr/5Fr, Swiss or French 1Fr/1Fr, US 25c/25c/25c,
+															// Japanese 100Y/100Y, Swedish 1Kr/1Kr, UK 10P/10P, Australian 20c/20c, or Italian 100L/100L."
 	PORT_DIPSETTING (   0x01, "1=Left & Center, 2=Right" )  // "For games having these coin doors: German 2DM/1DM, German 1DM/5DM, US 25c/25c/1$, or US 25c/1$."
 	PORT_DIPSETTING (   0x02, "1=Left, 2=Center & Right" )  // "No coin door is currently designed for this configuration."
 	PORT_DIPSETTING (   0x03, "1=Left, 2=Center, 3=Right" ) // "For games having these coin doors: German 1DM/2DM/5DM."
@@ -525,7 +526,7 @@ static INPUT_PORTS_START( llander )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_TILT )
 	/* Of the rest, Bit 6 is the 3KHz source. 3,4 and 5 are unknown */
 	PORT_BIT( 0x38, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(clock_r, NULL)
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, asteroid_state,clock_r, NULL)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME("Diagnostic Step") PORT_CODE(KEYCODE_F1)
 
 	PORT_START("IN1")
@@ -535,35 +536,35 @@ static INPUT_PORTS_START( llander )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_COIN3 )
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_START2 )  PORT_NAME("Select Game")
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON3 ) PORT_NAME("Abort")
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_CODE(KEYCODE_RIGHT) PORT_CODE(JOYCODE_X_RIGHT_SWITCH)	/* right */
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_CODE(KEYCODE_LEFT) PORT_CODE(JOYCODE_X_LEFT_SWITCH)		/* left */
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_CODE(KEYCODE_RIGHT) PORT_CODE(JOYCODE_X_RIGHT_SWITCH)    /* right */
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_CODE(KEYCODE_LEFT) PORT_CODE(JOYCODE_X_LEFT_SWITCH)      /* left */
 
 	PORT_START("DSW1")
-	PORT_DIPNAME( 0x03, 0x00, "Right Coin" )			PORT_DIPLOCATION("P8:1,2") /* "Left Coin Mech always registers X 1" */
-	PORT_DIPSETTING (	0x00, "X 1" )
-	PORT_DIPSETTING (	0x01, "X 4" )
-	PORT_DIPSETTING (	0x02, "X 5" )
-	PORT_DIPSETTING (	0x03, "X 6" )
-	PORT_DIPNAME( 0x0c, 0x00, DEF_STR( Language ) )		PORT_DIPLOCATION("P8:3,4")
-	PORT_DIPSETTING (	0x00, DEF_STR( English ) )
-	PORT_DIPSETTING (	0x04, DEF_STR( French ) )
-	PORT_DIPSETTING (	0x08, DEF_STR( Spanish ) )
-	PORT_DIPSETTING (	0x0c, DEF_STR( German ) )
-	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Coinage ) )		PORT_DIPLOCATION("P8:6")
-	PORT_DIPSETTING (	0x00, DEF_STR( Normal ) )
-	PORT_DIPSETTING (	0x20, DEF_STR( Free_Play ) )
-	PORT_DIPNAME( 0xd0, 0x80, "Fuel Units Per Coin" )	PORT_DIPLOCATION("P8:5,7,8")
-	PORT_DIPSETTING (	0x00, "450" )
-	PORT_DIPSETTING (	0x40, "600" )
-	PORT_DIPSETTING (	0x80, "750" )
-	PORT_DIPSETTING (	0xc0, "900" )
-	PORT_DIPSETTING (	0x10, "1100" )
-	PORT_DIPSETTING (	0x50, "1300" )
-	PORT_DIPSETTING (	0x90, "1550" )
-	PORT_DIPSETTING (	0xd0, "1800" )
+	PORT_DIPNAME( 0x03, 0x00, "Right Coin" )            PORT_DIPLOCATION("P8:1,2") /* "Left Coin Mech always registers X 1" */
+	PORT_DIPSETTING (   0x00, "X 1" )
+	PORT_DIPSETTING (   0x01, "X 4" )
+	PORT_DIPSETTING (   0x02, "X 5" )
+	PORT_DIPSETTING (   0x03, "X 6" )
+	PORT_DIPNAME( 0x0c, 0x00, DEF_STR( Language ) )     PORT_DIPLOCATION("P8:3,4")
+	PORT_DIPSETTING (   0x00, DEF_STR( English ) )
+	PORT_DIPSETTING (   0x04, DEF_STR( French ) )
+	PORT_DIPSETTING (   0x08, DEF_STR( Spanish ) )
+	PORT_DIPSETTING (   0x0c, DEF_STR( German ) )
+	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Coinage ) )      PORT_DIPLOCATION("P8:6")
+	PORT_DIPSETTING (   0x00, DEF_STR( Normal ) )
+	PORT_DIPSETTING (   0x20, DEF_STR( Free_Play ) )
+	PORT_DIPNAME( 0xd0, 0x80, "Fuel Units Per Coin" )   PORT_DIPLOCATION("P8:5,7,8")
+	PORT_DIPSETTING (   0x00, "450" )
+	PORT_DIPSETTING (   0x40, "600" )
+	PORT_DIPSETTING (   0x80, "750" )
+	PORT_DIPSETTING (   0xc0, "900" )
+	PORT_DIPSETTING (   0x10, "1100" )
+	PORT_DIPSETTING (   0x50, "1300" )
+	PORT_DIPSETTING (   0x90, "1550" )
+	PORT_DIPSETTING (   0xd0, "1800" )
 
 	/* The next one is a potentiometer */
-	/* The way the DAC/counter circuit always trys to self center at the voltage derived from the thrust control, */
+	/* The way the DAC/counter circuit always tries to self center at the voltage derived from the thrust control, */
 	/* I don't think it ever expected to get to 0xff. We can not emulate the external DAC circuit exactly, */
 	/* so changing the range to 0xfe seems to solve the problem. */
 	/* The thrust control is basically a hand operated pedal. */
@@ -577,15 +578,15 @@ static INPUT_PORTS_START( llander1 )
 	PORT_INCLUDE( llander )
 
 	PORT_MODIFY("DSW1")
-	PORT_DIPNAME( 0x10, 0x00, DEF_STR( Coinage ) )		PORT_DIPLOCATION("P8:5") /* "Left Coin Mech always registers X 1" */
-	PORT_DIPSETTING (	0x00, DEF_STR( Normal ) )
-	PORT_DIPSETTING (	0x10, DEF_STR( Free_Play ) )
-	PORT_DIPUNUSED_DIPLOC( 0x20, 0x20, "P8:6" )			/* Listed as "Unused" */
-	PORT_DIPNAME( 0xc0, 0x80, "Fuel units" )			PORT_DIPLOCATION("P8:7,8")
-	PORT_DIPSETTING (	0x00, "450" )
-	PORT_DIPSETTING (	0x40, "600" )
-	PORT_DIPSETTING (	0x80, "750" )
-	PORT_DIPSETTING (	0xc0, "900" )
+	PORT_DIPNAME( 0x10, 0x00, DEF_STR( Coinage ) )      PORT_DIPLOCATION("P8:5") /* "Left Coin Mech always registers X 1" */
+	PORT_DIPSETTING (   0x00, DEF_STR( Normal ) )
+	PORT_DIPSETTING (   0x10, DEF_STR( Free_Play ) )
+	PORT_DIPUNUSED_DIPLOC( 0x20, 0x20, "P8:6" )         /* Listed as "Unused" */
+	PORT_DIPNAME( 0xc0, 0x80, "Fuel units" )            PORT_DIPLOCATION("P8:7,8")
+	PORT_DIPSETTING (   0x00, "450" )
+	PORT_DIPSETTING (   0x40, "600" )
+	PORT_DIPSETTING (   0x80, "750" )
+	PORT_DIPSETTING (   0xc0, "900" )
 INPUT_PORTS_END
 
 
@@ -615,16 +616,15 @@ static MACHINE_CONFIG_START( asteroid, asteroid_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6502, MASTER_CLOCK/8)
 	MCFG_CPU_PROGRAM_MAP(asteroid_map)
-	MCFG_CPU_PERIODIC_INT(asteroid_interrupt, (double)MASTER_CLOCK/4096/12)
+	MCFG_CPU_PERIODIC_INT_DRIVER(asteroid_state, asteroid_interrupt,  (double)MASTER_CLOCK/4096/12)
 
-	MCFG_MACHINE_RESET(asteroid)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", VECTOR)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_SIZE(400,300)
 	MCFG_SCREEN_VISIBLE_AREA(522, 1566, 394, 1182)
-	MCFG_SCREEN_UPDATE(vector)
+	MCFG_SCREEN_UPDATE_STATIC(vector)
 
 	MCFG_VIDEO_START(dvg)
 
@@ -640,7 +640,7 @@ static MACHINE_CONFIG_DERIVED( asterock, asteroid )
 
 	/* basic machine hardware */
 	MCFG_CPU_MODIFY("maincpu")
-	MCFG_CPU_PERIODIC_INT(asterock_interrupt, (double)MASTER_CLOCK/4096/12)
+	MCFG_CPU_PERIODIC_INT_DRIVER(asteroid_state, asterock_interrupt,  (double)MASTER_CLOCK/4096/12)
 MACHINE_CONFIG_END
 
 
@@ -657,8 +657,9 @@ static MACHINE_CONFIG_DERIVED( astdelux, asteroid )
 	MCFG_SOUND_CONFIG_DISCRETE(astdelux)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 
-	MCFG_SOUND_ADD("pokey", POKEY, MASTER_CLOCK/8)
-	MCFG_SOUND_CONFIG(pokey_config)
+	MCFG_POKEY_ADD("pokey", MASTER_CLOCK/8)
+	MCFG_POKEY_CONFIG(pokey_config)
+	MCFG_POKEY_OUTPUT_RC(RES_K(10), CAP_U(0.015), 5.0)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 MACHINE_CONFIG_END
 
@@ -668,14 +669,14 @@ static MACHINE_CONFIG_DERIVED( llander, asteroid )
 	/* basic machine hardware */
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_PROGRAM_MAP(llander_map)
-	MCFG_CPU_PERIODIC_INT(llander_interrupt, (double)MASTER_CLOCK/4096/12)
+	MCFG_CPU_PERIODIC_INT_DRIVER(asteroid_state, llander_interrupt,  (double)MASTER_CLOCK/4096/12)
 
 	MCFG_MACHINE_RESET(avgdvg)
 
 	MCFG_SCREEN_MODIFY("screen")
 	MCFG_SCREEN_REFRESH_RATE(40)
 	MCFG_SCREEN_VISIBLE_AREA(522, 1566, 270, 1070)
-	MCFG_SCREEN_UPDATE(vector)
+	MCFG_SCREEN_UPDATE_STATIC(vector)
 
 	MCFG_VIDEO_START(dvg)
 
@@ -747,19 +748,36 @@ ROM_END
 
 ROM_START( asterock )
 	ROM_REGION( 0x8000, "maincpu", 0 )
-	ROM_LOAD( "sidamas.2",    0x6800, 0x0400, CRC(cdf720c6) SHA1(85fe748096478e28a06bd98ff3aad73ab21b22a4) )
-	ROM_LOAD( "sidamas.3",    0x6c00, 0x0400, CRC(ee58bdf0) SHA1(80094cb5dafd327aff6658ede33106f0493a809d) )
-	ROM_LOAD( "sidamas.4",    0x7000, 0x0400, CRC(8d3e421e) SHA1(5f5719ab84d4755e69bef205d313b455bc59c413) )
-	ROM_LOAD( "sidamas.5",    0x7400, 0x0400, CRC(d2ce7672) SHA1(b6012e09b2439a614a55bcf23be0692c42830e21) )
-	ROM_LOAD( "sidamas.6",    0x7800, 0x0400, CRC(74103c87) SHA1(e568b5ac573a6d0474cf672b3c62abfbd3320799) )
-	ROM_LOAD( "sidamas.7",    0x7c00, 0x0400, CRC(75a39768) SHA1(bf22998fd692fb01964d8894e421435c55d746a0) )
+	ROM_LOAD( "10505.2",       0x6800, 0x0400, CRC(cdf720c6) SHA1(85fe748096478e28a06bd98ff3aad73ab21b22a4) )
+	ROM_LOAD( "10505.3",       0x6c00, 0x0400, CRC(ee58bdf0) SHA1(80094cb5dafd327aff6658ede33106f0493a809d) )
+	ROM_LOAD( "10505.4",       0x7000, 0x0400, CRC(8d3e421e) SHA1(5f5719ab84d4755e69bef205d313b455bc59c413) )
+	ROM_LOAD( "10505.5",       0x7400, 0x0400, CRC(d2ce7672) SHA1(b6012e09b2439a614a55bcf23be0692c42830e21) )
+	ROM_LOAD( "10505.6",       0x7800, 0x0400, CRC(74103c87) SHA1(e568b5ac573a6d0474cf672b3c62abfbd3320799) )
+	ROM_LOAD( "10505.7",       0x7c00, 0x0400, CRC(75a39768) SHA1(bf22998fd692fb01964d8894e421435c55d746a0) )
 	/* Vector ROM */
-	ROM_LOAD( "sidamas.0",    0x5000, 0x0400, CRC(6bd2053f) SHA1(790f2858f44bbb1854e2d9d549e29f4815c4665b) )
-	ROM_LOAD( "sidamas.1",    0x5400, 0x0400, CRC(231ce201) SHA1(710f4c19864d725ba1c9ea447a97e84001a679f7) )
+	ROM_LOAD( "10505.0",       0x5000, 0x0400, CRC(6bd2053f) SHA1(790f2858f44bbb1854e2d9d549e29f4815c4665b) )
+	ROM_LOAD( "10505.1",       0x5400, 0x0400, CRC(231ce201) SHA1(710f4c19864d725ba1c9ea447a97e84001a679f7) )
 
 	/* DVG PROM */
 	ROM_REGION( 0x100, "user1", 0 )
-	ROM_LOAD( "034602-01.c8",    0x0000, 0x0100, CRC(97953db8) SHA1(8cbded64d1dd35b18c4d5cece00f77e7b2cab2ad) )
+	ROM_LOAD( "034602-01.c8",  0x0000, 0x0100, CRC(97953db8) SHA1(8cbded64d1dd35b18c4d5cece00f77e7b2cab2ad) )
+ROM_END
+
+ROM_START( asterockv )
+	ROM_REGION( 0x8000, "maincpu", 0 )
+	ROM_LOAD( "10505.2",       0x6800, 0x0400, CRC(cdf720c6) SHA1(85fe748096478e28a06bd98ff3aad73ab21b22a4) )
+	ROM_LOAD( "10505.3",       0x6c00, 0x0400, CRC(ee58bdf0) SHA1(80094cb5dafd327aff6658ede33106f0493a809d) )
+	ROM_LOAD( "10505.4",       0x7000, 0x0400, CRC(8d3e421e) SHA1(5f5719ab84d4755e69bef205d313b455bc59c413) )
+	ROM_LOAD( "10505.5",       0x7400, 0x0400, CRC(d2ce7672) SHA1(b6012e09b2439a614a55bcf23be0692c42830e21) )
+	ROM_LOAD( "10505.6",       0x7800, 0x0400, CRC(74103c87) SHA1(e568b5ac573a6d0474cf672b3c62abfbd3320799) )
+	ROM_LOAD( "10505.7",       0x7c00, 0x0400, CRC(75a39768) SHA1(bf22998fd692fb01964d8894e421435c55d746a0) )
+	/* Vector ROM */
+	ROM_LOAD( "videotronas.0", 0x5000, 0x0400, CRC(d1ac90b5) SHA1(7209027d2099c75c6336605ae80491ffc5673674) ) // only this rom differs from Sidam's Asterock
+	ROM_LOAD( "10505.1",       0x5400, 0x0400, CRC(231ce201) SHA1(710f4c19864d725ba1c9ea447a97e84001a679f7) )
+
+	/* DVG PROM */
+	ROM_REGION( 0x100, "user1", 0 )
+	ROM_LOAD( "034602-01.c8",  0x0000, 0x0100, CRC(97953db8) SHA1(8cbded64d1dd35b18c4d5cece00f77e7b2cab2ad) )
 ROM_END
 
 ROM_START( meteorts )
@@ -789,7 +807,20 @@ ROM_START( meteorho )
 
 	/* DVG PROM */
 	ROM_REGION( 0x100, "user1", 0 )
-	ROM_LOAD( "prom.bin",	0x0000, 0x0100, CRC(9e237193) SHA1(f663e12d5db0fa50ea49d03591475ae0a7168bc0) )
+	ROM_LOAD( "prom.bin",   0x0000, 0x0100, CRC(9e237193) SHA1(f663e12d5db0fa50ea49d03591475ae0a7168bc0) )
+ROM_END
+
+ROM_START( hyperspc )
+	ROM_REGION( 0x8000, "maincpu", 0 )
+	ROM_LOAD( "035145-01.bin",   0x6800, 0x0800, CRC(e9bfda64) SHA1(291dc567ebb31b35df83d9fb87f4080f251ff9c8) )
+	ROM_LOAD( "035144-01.bin",   0x7000, 0x0800, CRC(e53c28a9) SHA1(d9f081e73511ec43377f0c6457747f15a470d4dc) )
+	ROM_LOAD( "035143-01.bin",   0x7800, 0x0800, CRC(7d4e3d05) SHA1(d88000e904e158efde50e453e2889ecd2cb95f24) )
+	/* Vector ROM */
+	ROM_LOAD( "035127-01.bin",   0x5000, 0x0800, CRC(7dec48bd) SHA1(8bc926a763ff80b101b2e1c24d45615c3daf67d5) )
+
+	/* DVG PROM */
+	ROM_REGION( 0x100, "user1", 0 )
+	ROM_LOAD( "034602-01.c8",   0x0000, 0x0100, CRC(97953db8) SHA1(8cbded64d1dd35b18c4d5cece00f77e7b2cab2ad) )
 ROM_END
 
 
@@ -919,16 +950,16 @@ ROM_END
  *
  *************************************/
 
-static DRIVER_INIT( asteroidb )
+DRIVER_INIT_MEMBER(asteroid_state,asteroidb)
 {
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_read_port(0x2000, 0x2000, "IN0");
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_read_port(0x2003, 0x2003, "HS");
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_port(0x2000, 0x2000, "IN0");
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_port(0x2003, 0x2003, "HS");
 }
 
 
-static DRIVER_INIT( asterock )
+DRIVER_INIT_MEMBER(asteroid_state,asterock)
 {
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x2000, 0x2007, FUNC(asterock_IN0_r));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(0x2000, 0x2007, read8_delegate(FUNC(asteroid_state::asterock_IN0_r),this));
 }
 
 
@@ -939,15 +970,17 @@ static DRIVER_INIT( asterock )
  *
  *************************************/
 
-GAME( 1979, asteroid, 0,        asteroid, asteroid, 0,        ROT0, "Atari",   "Asteroids (rev 4)",        GAME_SUPPORTS_SAVE )
-GAME( 1979, asteroid2,asteroid, asteroid, asteroid, 0,        ROT0, "Atari",   "Asteroids (rev 2)",        GAME_SUPPORTS_SAVE )
-GAME( 1979, asteroid1,asteroid, asteroid, asteroid, 0,        ROT0, "Atari",   "Asteroids (rev 1)",        GAME_SUPPORTS_SAVE )
-GAME( 1979, asteroidb,asteroid, asteroid, asteroidb,asteroidb,ROT0, "bootleg", "Asteroids (bootleg on Lunar Lander hardware)", GAME_SUPPORTS_SAVE )
-GAME( 1979, asterock, asteroid, asterock, asterock, asterock, ROT0, "bootleg (Sidam)", "Asterock",         GAME_SUPPORTS_SAVE )
-GAME( 1979, meteorts, asteroid, asteroid, asteroid, 0,        ROT0, "bootleg (VGG)",   "Meteorites (bootleg of Asteroids)", GAME_SUPPORTS_SAVE )
-GAME( 1980, meteorho, asteroid, asteroid, asteroid, 0,        ROT0, "bootleg (Hoei)",  "Meteor (bootleg of Asteroids)", GAME_SUPPORTS_SAVE )
-GAMEL(1980, astdelux, 0,        astdelux, astdelux, 0,        ROT0, "Atari",   "Asteroids Deluxe (rev 3)", GAME_SUPPORTS_SAVE, layout_ho88ffff )
-GAMEL(1980, astdelux2,astdelux, astdelux, astdelux, 0,        ROT0, "Atari",   "Asteroids Deluxe (rev 2)", GAME_SUPPORTS_SAVE, layout_ho88ffff )
-GAMEL(1980, astdelux1,astdelux, astdelux, astdelux, 0,        ROT0, "Atari",   "Asteroids Deluxe (rev 1)", GAME_SUPPORTS_SAVE, layout_ho88ffff )
-GAME( 1979, llander,  0,        llander,  llander,  0,        ROT0, "Atari",   "Lunar Lander (rev 2)",     GAME_SUPPORTS_SAVE )
-GAME( 1979, llander1, llander,  llander,  llander1, 0,        ROT0, "Atari",   "Lunar Lander (rev 1)",     GAME_SUPPORTS_SAVE )
+GAME( 1979, asteroid,  0,         asteroid,  asteroid,  driver_device,  0,         ROT0, "Atari",   "Asteroids (rev 4)",        GAME_SUPPORTS_SAVE )
+GAME( 1979, asteroid2, asteroid,  asteroid,  asteroid,  driver_device,  0,         ROT0, "Atari",   "Asteroids (rev 2)",        GAME_SUPPORTS_SAVE )
+GAME( 1979, asteroid1, asteroid,  asteroid,  asteroid,  driver_device,  0,         ROT0, "Atari",   "Asteroids (rev 1)",        GAME_SUPPORTS_SAVE )
+GAME( 1979, asteroidb, asteroid,  asteroid,  asteroidb, asteroid_state, asteroidb, ROT0, "bootleg", "Asteroids (bootleg on Lunar Lander hardware)",  GAME_SUPPORTS_SAVE )
+GAME( 1979, asterock,  asteroid,  asterock,  asterock,  asteroid_state, asterock,  ROT0, "bootleg (Sidam)",     "Asterock (Sidam bootleg of Asteroids)",     GAME_SUPPORTS_SAVE )
+GAME( 1979, asterockv, asteroid,  asterock,  asterock,  asteroid_state, asterock,  ROT0, "bootleg (Videotron)", "Asterock (Videotron bootleg of Asteroids)", GAME_SUPPORTS_SAVE )
+GAME( 1979, meteorts,  asteroid,  asteroid,  asteroid,  driver_device,  0,         ROT0, "bootleg (VGG)",       "Meteorites (bootleg of Asteroids)", GAME_SUPPORTS_SAVE )
+GAME( 1979, meteorho,  asteroid,  asteroid,  asteroid,  driver_device,  0,         ROT0, "bootleg (Hoei)",      "Meteor (bootleg of Asteroids)",     GAME_SUPPORTS_SAVE )
+GAME( 1979, hyperspc,  asteroid,  asteroid,  asteroid,  driver_device,  0,         ROT0, "bootleg (Rumiano)",   "Hyperspace (bootleg of Asteroids)", GAME_SUPPORTS_SAVE )
+GAMEL(1980, astdelux,  0,         astdelux,  astdelux,  driver_device,  0,         ROT0, "Atari",   "Asteroids Deluxe (rev 3)", GAME_SUPPORTS_SAVE, layout_astdelux )
+GAMEL(1980, astdelux2, astdelux,  astdelux,  astdelux,  driver_device,  0,         ROT0, "Atari",   "Asteroids Deluxe (rev 2)", GAME_SUPPORTS_SAVE, layout_astdelux )
+GAMEL(1980, astdelux1, astdelux,  astdelux,  astdelux,  driver_device,  0,         ROT0, "Atari",   "Asteroids Deluxe (rev 1)", GAME_SUPPORTS_SAVE, layout_astdelux )
+GAME( 1979, llander,   0,         llander,   llander,   driver_device,  0,         ROT0, "Atari",   "Lunar Lander (rev 2)",     GAME_SUPPORTS_SAVE )
+GAME( 1979, llander1,  llander,   llander,   llander1,  driver_device,  0,         ROT0, "Atari",   "Lunar Lander (rev 1)",     GAME_SUPPORTS_SAVE )

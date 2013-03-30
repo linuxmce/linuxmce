@@ -827,10 +827,10 @@ void console_create_window(running_machine &machine)
 	{
 		NSInteger tag;
 		for (tag = 1; tag <= 8; tag <<= 1) {
-			NSString	*title = [NSString stringWithFormat:@"%d-byte Chunks", tag];
+			NSString	*title = [NSString stringWithFormat:@"%ld-byte Chunks", tag];
 			NSMenuItem	*chunkItem = [menu insertItemWithTitle:title
 														action:@selector(showChunkSize:)
-												 keyEquivalent:[NSString stringWithFormat:@"%d", tag]
+												 keyEquivalent:[NSString stringWithFormat:@"%ld", tag]
 													   atIndex:index++];
 			[chunkItem setTarget:self];
 			[chunkItem setTag:tag];
@@ -887,8 +887,8 @@ void console_create_window(running_machine &machine)
 
 @implementation MAMEDisassemblyView
 
-- (device_debug::breakpoint *)findBreakpointAtAddress:(offs_t)address inAddressSpace:(address_space *)space {
-	device_debug			*cpuinfo = space->device().debug();
+- (device_debug::breakpoint *)findBreakpointAtAddress:(offs_t)address inAddressSpace:(address_space &)space {
+	device_debug			*cpuinfo = space.device().debug();
 	device_debug::breakpoint	*bp;
 	for (bp = cpuinfo->breakpoint_first(); (bp != NULL) && (address != bp->address()); bp = bp->next()) {}
 	return bp;
@@ -900,13 +900,13 @@ void console_create_window(running_machine &machine)
 
 	item = [contextMenu addItemWithTitle:@"Toggle Breakpoint"
 								  action:@selector(debugToggleBreakpoint:)
-						   keyEquivalent:[NSString stringWithFormat:@"%C", NSF9FunctionKey]];
+						   keyEquivalent:[NSString stringWithFormat:@"%C", (short)NSF9FunctionKey]];
 	[item setKeyEquivalentModifierMask:0];
 	[item setTarget:self];
 
 	item = [contextMenu addItemWithTitle:@"Disable Breakpoint"
 								  action:@selector(debugToggleBreakpointEnable:)
-						   keyEquivalent:[NSString stringWithFormat:@"%C", NSF9FunctionKey]];
+						   keyEquivalent:[NSString stringWithFormat:@"%C", (short)NSF9FunctionKey]];
 	[item setKeyEquivalentModifierMask:NSShiftKeyMask];
 	[item setTarget:self];
 
@@ -914,7 +914,7 @@ void console_create_window(running_machine &machine)
 
 	item = [contextMenu addItemWithTitle:@"Run to Cursor"
 								  action:@selector(debugRunToCursor:)
-						   keyEquivalent:[NSString stringWithFormat:@"%C", NSF4FunctionKey]];
+						   keyEquivalent:[NSString stringWithFormat:@"%C", (short)NSF4FunctionKey]];
 	[item setKeyEquivalentModifierMask:0];
 	[item setTarget:self];
 
@@ -1090,8 +1090,8 @@ void console_create_window(running_machine &machine)
 
 - (IBAction)debugToggleBreakpoint:(id)sender {
 	if (view->cursor_visible()) {
-		address_space *space = downcast<const debug_view_disasm_source *>(view->source())->space();
-		if (!useConsole || (debug_cpu_get_visible_cpu(*machine) == &space->device())) {
+		address_space &space = downcast<const debug_view_disasm_source *>(view->source())->space();
+		if (!useConsole || (debug_cpu_get_visible_cpu(*machine) == &space.device())) {
 			offs_t				address = downcast<debug_view_disasm *>(view)->selected_address();
 			device_debug::breakpoint *bp = [self findBreakpointAtAddress:address inAddressSpace:space];
 
@@ -1105,9 +1105,9 @@ void console_create_window(running_machine &machine)
 				debug_console_execute_command(*machine, [command UTF8String], 1);
 			} else {
 				if (bp == NULL)
-					space->device().debug()->breakpoint_set(address, NULL, NULL);
+					space.device().debug()->breakpoint_set(address, NULL, NULL);
 				else
-					space->device().debug()->breakpoint_clear(bp->index());
+					space.device().debug()->breakpoint_clear(bp->index());
 			}
 		}
 	}
@@ -1116,8 +1116,8 @@ void console_create_window(running_machine &machine)
 
 - (IBAction)debugToggleBreakpointEnable:(id)sender {
 	if (view->cursor_visible()) {
-		address_space *space = downcast<const debug_view_disasm_source *>(view->source())->space();
-		if (!useConsole || (debug_cpu_get_visible_cpu(*machine) == &space->device())) {
+		address_space &space = downcast<const debug_view_disasm_source *>(view->source())->space();
+		if (!useConsole || (debug_cpu_get_visible_cpu(*machine) == &space.device())) {
 			offs_t				address = downcast<debug_view_disasm *>(view)->selected_address();
 			device_debug::breakpoint *bp = [self findBreakpointAtAddress:address inAddressSpace:space];
 
@@ -1130,7 +1130,7 @@ void console_create_window(running_machine &machine)
 						command = [NSString stringWithFormat:@"bpenable %X", (unsigned)bp->index()];
 					debug_console_execute_command(*machine, [command UTF8String], 1);
 				} else {
-					space->device().debug()->breakpoint_enable(bp->index(), !bp->enabled());
+					space.device().debug()->breakpoint_enable(bp->index(), !bp->enabled());
 				}
 			}
 		}
@@ -1140,8 +1140,8 @@ void console_create_window(running_machine &machine)
 
 - (IBAction)debugRunToCursor:(id)sender {
 	if (view->cursor_visible()) {
-		address_space *space = downcast<const debug_view_disasm_source *>(view->source())->space();
-		if (debug_cpu_get_visible_cpu(*machine) == &space->device()) {
+		address_space &space = downcast<const debug_view_disasm_source *>(view->source())->space();
+		if (debug_cpu_get_visible_cpu(*machine) == &space.device()) {
 			offs_t address = downcast<debug_view_disasm *>(view)->selected_address();
 			if (useConsole) {
 				NSString *command = [NSString stringWithFormat:@"go 0x%lX", (unsigned long)address];
@@ -1163,7 +1163,7 @@ void console_create_window(running_machine &machine)
 	{
 		NSMenuItem *breakItem = [menu insertItemWithTitle:@"Toggle Breakpoint at Cursor"
 												   action:@selector(debugToggleBreakpoint:)
-											keyEquivalent:[NSString stringWithFormat:@"%C", NSF9FunctionKey]
+											keyEquivalent:[NSString stringWithFormat:@"%C", (short)NSF9FunctionKey]
 												  atIndex:index++];
 		[breakItem setKeyEquivalentModifierMask:0];
 		[breakItem setTarget:self];
@@ -1171,7 +1171,7 @@ void console_create_window(running_machine &machine)
 	{
 		NSMenuItem *disableItem = [menu insertItemWithTitle:@"Disable Breakpoint at Cursor"
 													 action:@selector(debugToggleBreakpointEnable:)
-											  keyEquivalent:[NSString stringWithFormat:@"%C", NSF9FunctionKey]
+											  keyEquivalent:[NSString stringWithFormat:@"%C", (short)NSF9FunctionKey]
 													atIndex:index++];
 		[disableItem setKeyEquivalentModifierMask:NSShiftKeyMask];
 		[disableItem setAlternate:YES];
@@ -1183,11 +1183,11 @@ void console_create_window(running_machine &machine)
 		if (runMenu != nil) {
 			runItem = [runMenu addItemWithTitle:@"to Cursor"
 										 action:@selector(debugRunToCursor:)
-								  keyEquivalent:[NSString stringWithFormat:@"%C", NSF4FunctionKey]];
+								  keyEquivalent:[NSString stringWithFormat:@"%C", (short)NSF4FunctionKey]];
 		} else {
 			runItem = [menu insertItemWithTitle:@"Run to Cursor"
 										 action:@selector(debugRunToCursor:)
-								  keyEquivalent:[NSString stringWithFormat:@"%C", NSF4FunctionKey]
+								  keyEquivalent:[NSString stringWithFormat:@"%C", (short)NSF4FunctionKey]
 										atIndex:index++];
 		}
 		[runItem setKeyEquivalentModifierMask:0];
@@ -1350,26 +1350,26 @@ void console_create_window(running_machine &machine)
 	{
 		NSMenuItem *runParentItem = [menu addItemWithTitle:@"Run"
 													action:@selector(debugRun:)
-											 keyEquivalent:[NSString stringWithFormat:@"%C", NSF5FunctionKey]];
+											 keyEquivalent:[NSString stringWithFormat:@"%C", (short)NSF5FunctionKey]];
 		NSMenu *runMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:@"Run"];
 		[runParentItem setSubmenu:runMenu];
 		[runMenu release];
 		[runParentItem setKeyEquivalentModifierMask:0];
 		[[runMenu addItemWithTitle:@"and Hide Debugger"
 							action:@selector(debugRunAndHide:)
-					 keyEquivalent:[NSString stringWithFormat:@"%C", NSF12FunctionKey]]
+					 keyEquivalent:[NSString stringWithFormat:@"%C", (short)NSF12FunctionKey]]
 		 setKeyEquivalentModifierMask:0];
 		[[runMenu addItemWithTitle:@"to Next CPU"
 							action:@selector(debugRunToNextCPU:)
-					 keyEquivalent:[NSString stringWithFormat:@"%C", NSF6FunctionKey]]
+					 keyEquivalent:[NSString stringWithFormat:@"%C", (short)NSF6FunctionKey]]
 		 setKeyEquivalentModifierMask:0];
 		[[runMenu addItemWithTitle:@"until Next Interrupt on Current CPU"
 							action:@selector(debugRunToNextInterrupt:)
-					 keyEquivalent:[NSString stringWithFormat:@"%C", NSF7FunctionKey]]
+					 keyEquivalent:[NSString stringWithFormat:@"%C", (short)NSF7FunctionKey]]
 		 setKeyEquivalentModifierMask:0];
 		[[runMenu addItemWithTitle:@"until Next VBLANK"
 							action:@selector(debugRunToNextVBLANK:)
-					 keyEquivalent:[NSString stringWithFormat:@"%C", NSF8FunctionKey]]
+					 keyEquivalent:[NSString stringWithFormat:@"%C", (short)NSF8FunctionKey]]
 		 setKeyEquivalentModifierMask:0];
 	}
 	{
@@ -1379,15 +1379,15 @@ void console_create_window(running_machine &machine)
 		[stepMenu release];
 		[[stepMenu addItemWithTitle:@"Into"
 							 action:@selector(debugStepInto:)
-					  keyEquivalent:[NSString stringWithFormat:@"%C", NSF11FunctionKey]]
+					  keyEquivalent:[NSString stringWithFormat:@"%C", (short)NSF11FunctionKey]]
 		 setKeyEquivalentModifierMask:0];
 		[[stepMenu addItemWithTitle:@"Over"
 							 action:@selector(debugStepOver:)
-					  keyEquivalent:[NSString stringWithFormat:@"%C", NSF10FunctionKey]]
+					  keyEquivalent:[NSString stringWithFormat:@"%C", (short)NSF10FunctionKey]]
 		 setKeyEquivalentModifierMask:0];
 		[[stepMenu addItemWithTitle:@"Out"
 							 action:@selector(debugStepOut:)
-					  keyEquivalent:[NSString stringWithFormat:@"%C", NSF10FunctionKey]]
+					  keyEquivalent:[NSString stringWithFormat:@"%C", (short)NSF10FunctionKey]]
 		 setKeyEquivalentModifierMask:NSShiftKeyMask];
 	}
 	{
@@ -1397,11 +1397,11 @@ void console_create_window(running_machine &machine)
 		[resetMenu release];
 		[[resetMenu addItemWithTitle:@"Soft"
 							  action:@selector(debugSoftReset:)
-					   keyEquivalent:[NSString stringWithFormat:@"%C", NSF3FunctionKey]]
+					   keyEquivalent:[NSString stringWithFormat:@"%C", (short)NSF3FunctionKey]]
 		 setKeyEquivalentModifierMask:0];
 		[[resetMenu addItemWithTitle:@"Hard"
 							  action:@selector(debugHardReset:)
-					   keyEquivalent:[NSString stringWithFormat:@"%C", NSF3FunctionKey]]
+					   keyEquivalent:[NSString stringWithFormat:@"%C", (short)NSF3FunctionKey]]
 		 setKeyEquivalentModifierMask:NSShiftKeyMask];
 	}
 	[menu addItem:[NSMenuItem separatorItem]];
@@ -1781,7 +1781,7 @@ void console_create_window(running_machine &machine)
 
 
 - (IBAction)debugNewErrorLogWindow:(id)sender {
-	MAMEDisassemblyViewer *win = [[MAMEErrorLogViewer alloc] initWithMachine:*machine console:self];
+	MAMEErrorLogViewer *win = [[MAMEErrorLogViewer alloc] initWithMachine:*machine console:self];
 	[auxiliaryWindows addObject:win];
 	[win release];
 	[win activate];

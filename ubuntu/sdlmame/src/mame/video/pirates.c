@@ -6,78 +6,71 @@
 
 /* tilemaps */
 
-static TILE_GET_INFO( get_tx_tile_info )
+TILE_GET_INFO_MEMBER(pirates_state::get_tx_tile_info)
 {
-	pirates_state *state = machine.driver_data<pirates_state>();
-	int code = state->m_tx_tileram[tile_index*2];
-	int colr = state->m_tx_tileram[tile_index*2+1];
+	int code = m_tx_tileram[tile_index*2];
+	int colr = m_tx_tileram[tile_index*2+1];
 
-	SET_TILE_INFO(0,code,colr,0);
+	SET_TILE_INFO_MEMBER(0,code,colr,0);
 }
 
-static TILE_GET_INFO( get_fg_tile_info )
+TILE_GET_INFO_MEMBER(pirates_state::get_fg_tile_info)
 {
-	pirates_state *state = machine.driver_data<pirates_state>();
-	int code = state->m_fg_tileram[tile_index*2];
-	int colr = state->m_fg_tileram[tile_index*2+1]+0x80;
+	int code = m_fg_tileram[tile_index*2];
+	int colr = m_fg_tileram[tile_index*2+1]+0x80;
 
-	SET_TILE_INFO(0,code,colr,0);
+	SET_TILE_INFO_MEMBER(0,code,colr,0);
 }
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(pirates_state::get_bg_tile_info)
 {
-	pirates_state *state = machine.driver_data<pirates_state>();
-	int code = state->m_bg_tileram[tile_index*2];
-	int colr = state->m_bg_tileram[tile_index*2+1]+ 0x100;
+	int code = m_bg_tileram[tile_index*2];
+	int colr = m_bg_tileram[tile_index*2+1]+ 0x100;
 
-	SET_TILE_INFO(0,code,colr,0);
+	SET_TILE_INFO_MEMBER(0,code,colr,0);
 }
 
 
 /* video start / update */
 
-VIDEO_START(pirates)
+void pirates_state::video_start()
 {
-	pirates_state *state = machine.driver_data<pirates_state>();
-	state->m_tx_tilemap = tilemap_create(machine, get_tx_tile_info,tilemap_scan_cols,8,8,36,32);
+	m_tx_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(pirates_state::get_tx_tile_info),this),TILEMAP_SCAN_COLS,8,8,36,32);
 
 	/* Not sure how big they can be, Pirates uses only 32 columns, Genix 44 */
-	state->m_fg_tilemap = tilemap_create(machine, get_fg_tile_info,tilemap_scan_cols,8,8,64,32);
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info,tilemap_scan_cols,     8,8,64,32);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(pirates_state::get_fg_tile_info),this),TILEMAP_SCAN_COLS,8,8,64,32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(pirates_state::get_bg_tile_info),this),TILEMAP_SCAN_COLS,     8,8,64,32);
 
-	tilemap_set_transparent_pen(state->m_tx_tilemap,0);
-	tilemap_set_transparent_pen(state->m_fg_tilemap,0);
+	m_tx_tilemap->set_transparent_pen(0);
+	m_fg_tilemap->set_transparent_pen(0);
 }
 
 
 
-WRITE16_HANDLER( pirates_tx_tileram_w )
+WRITE16_MEMBER(pirates_state::pirates_tx_tileram_w)
 {
-	pirates_state *state = space->machine().driver_data<pirates_state>();
-	COMBINE_DATA(state->m_tx_tileram+offset);
-	tilemap_mark_tile_dirty(state->m_tx_tilemap,offset/2);
+	COMBINE_DATA(m_tx_tileram+offset);
+	m_tx_tilemap->mark_tile_dirty(offset/2);
 }
 
-WRITE16_HANDLER( pirates_fg_tileram_w )
+WRITE16_MEMBER(pirates_state::pirates_fg_tileram_w)
 {
-	pirates_state *state = space->machine().driver_data<pirates_state>();
-	COMBINE_DATA(state->m_fg_tileram+offset);
-	tilemap_mark_tile_dirty(state->m_fg_tilemap,offset/2);
+	COMBINE_DATA(m_fg_tileram+offset);
+	m_fg_tilemap->mark_tile_dirty(offset/2);
 }
 
-WRITE16_HANDLER( pirates_bg_tileram_w )
+WRITE16_MEMBER(pirates_state::pirates_bg_tileram_w)
 {
-	pirates_state *state = space->machine().driver_data<pirates_state>();
-	COMBINE_DATA(state->m_bg_tileram+offset);
-	tilemap_mark_tile_dirty(state->m_bg_tilemap,offset/2);
+	COMBINE_DATA(m_bg_tileram+offset);
+	m_bg_tilemap->mark_tile_dirty(offset/2);
 }
 
 
 
-static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect)
+static void draw_sprites(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	pirates_state *state = machine.driver_data<pirates_state>();
-	const gfx_element *gfx = machine.gfx[1];
+	gfx_element *gfx = machine.gfx[1];
 	UINT16 *source = state->m_spriteram + 4;
 	UINT16 *finish = source + 0x800/2-4;
 
@@ -86,9 +79,9 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 		int xpos, ypos, flipx, flipy, code, color;
 
 		xpos = source[1] - 32;
-		ypos = source[-1];	// indeed...
+		ypos = source[-1];  // indeed...
 
-		if (ypos & 0x8000) break;	/* end-of-list marker */
+		if (ypos & 0x8000) break;   /* end-of-list marker */
 
 		code = source[2] >> 2;
 		color = source[0] & 0xff;
@@ -107,14 +100,13 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 	}
 }
 
-SCREEN_UPDATE(pirates)
+UINT32 pirates_state::screen_update_pirates(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	pirates_state *state = screen->machine().driver_data<pirates_state>();
-	tilemap_set_scrollx(state->m_bg_tilemap,0,state->m_scroll[0]);
-	tilemap_set_scrollx(state->m_fg_tilemap,0,state->m_scroll[0]);
-	tilemap_draw(bitmap,cliprect,state->m_bg_tilemap,0,0);
-	tilemap_draw(bitmap,cliprect,state->m_fg_tilemap,0,0);
-	draw_sprites(screen->machine(),bitmap,cliprect);
-	tilemap_draw(bitmap,cliprect,state->m_tx_tilemap,0,0);
+	m_bg_tilemap->set_scrollx(0,m_scroll[0]);
+	m_fg_tilemap->set_scrollx(0,m_scroll[0]);
+	m_bg_tilemap->draw(bitmap, cliprect, 0,0);
+	m_fg_tilemap->draw(bitmap, cliprect, 0,0);
+	draw_sprites(machine(),bitmap,cliprect);
+	m_tx_tilemap->draw(bitmap, cliprect, 0,0);
 	return 0;
 }

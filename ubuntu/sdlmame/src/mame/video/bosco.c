@@ -14,11 +14,12 @@
 #define STARS_COLOR_BASE (64*4+64*4+4)
 #define VIDEO_RAM_SIZE 0x400
 
-PALETTE_INIT( bosco )
+PALETTE_INIT_MEMBER(bosco_state,bosco)
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 
-	machine.colortable = colortable_alloc(machine, 32+64);
+	machine().colortable = colortable_alloc(machine(), 32+64);
 
 	/* core palette */
 	for (i = 0;i < 32;i++)
@@ -39,7 +40,7 @@ PALETTE_INIT( bosco )
 		bit2 = ((*color_prom) >> 7) & 0x01;
 		b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 
-		colortable_palette_set_color(machine.colortable,i,MAKE_RGB(r,g,b));
+		colortable_palette_set_color(machine().colortable,i,MAKE_RGB(r,g,b));
 		color_prom++;
 	}
 
@@ -56,24 +57,24 @@ PALETTE_INIT( bosco )
 		bits = (i >> 4) & 0x03;
 		b = map[bits];
 
-		colortable_palette_set_color(machine.colortable,32 + i,MAKE_RGB(r,g,b));
+		colortable_palette_set_color(machine().colortable,32 + i,MAKE_RGB(r,g,b));
 	}
 
 	/* characters / sprites */
 	for (i = 0;i < 64*4;i++)
 	{
-		colortable_entry_set_value(machine.colortable, i, (color_prom[i] & 0x0f) + 0x10);	/* chars */
-		colortable_entry_set_value(machine.colortable, i+64*4, color_prom[i] & 0x0f);	/* sprites */
+		colortable_entry_set_value(machine().colortable, i, (color_prom[i] & 0x0f) + 0x10); /* chars */
+		colortable_entry_set_value(machine().colortable, i+64*4, color_prom[i] & 0x0f); /* sprites */
 	}
 
 	/* bullets lookup table */
 	/* they use colors 28-31, I think - PAL 5A controls it */
 	for (i = 0;i < 4;i++)
-		colortable_entry_set_value(machine.colortable, 64*4+64*4+i, 31-i);
+		colortable_entry_set_value(machine().colortable, 64*4+64*4+i, 31-i);
 
 	/* now the stars */
 	for (i = 0;i < 64;i++)
-		colortable_entry_set_value(machine.colortable, 64*4+64*4+4+i, 32 + i);
+		colortable_entry_set_value(machine().colortable, 64*4+64*4+4+i, 32 + i);
 }
 
 
@@ -85,19 +86,19 @@ PALETTE_INIT( bosco )
 ***************************************************************************/
 
 /* the video RAM has space for 32x32 tiles and is only partially used for the radar */
-static TILEMAP_MAPPER( fg_tilemap_scan )
+TILEMAP_MAPPER_MEMBER(bosco_state::fg_tilemap_scan )
 {
 	return col + (row << 5);
 }
 
 
-INLINE void get_tile_info(running_machine &machine,tile_data *tileinfo,int tile_index,int ram_offs)
+INLINE void get_tile_info_bosco(running_machine &machine,tile_data &tileinfo,int tile_index,int ram_offs)
 {
 	bosco_state *state =  machine.driver_data<bosco_state>();
 
 	UINT8 attr = state->m_videoram[ram_offs + tile_index + 0x800];
-	tileinfo->category = (attr & 0x20) >> 5;
-	tileinfo->group = attr & 0x3f;
+	tileinfo.category = (attr & 0x20) >> 5;
+	tileinfo.group = attr & 0x3f;
 	SET_TILE_INFO(
 			0,
 			state->m_videoram[ram_offs + tile_index],
@@ -105,14 +106,14 @@ INLINE void get_tile_info(running_machine &machine,tile_data *tileinfo,int tile_
 			TILE_FLIPYX(attr >> 6) ^ TILE_FLIPX);
 }
 
-static TILE_GET_INFO( bg_get_tile_info )
+TILE_GET_INFO_MEMBER(bosco_state::bg_get_tile_info )
 {
-	get_tile_info(machine,tileinfo,tile_index,0x400);
+	get_tile_info_bosco(machine(),tileinfo,tile_index,0x400);
 }
 
-static TILE_GET_INFO( fg_get_tile_info )
+TILE_GET_INFO_MEMBER(bosco_state::fg_get_tile_info )
 {
-	get_tile_info(machine,tileinfo,tile_index,0x000);
+	get_tile_info_bosco(machine(),tileinfo,tile_index,0x000);
 }
 
 
@@ -123,27 +124,25 @@ static TILE_GET_INFO( fg_get_tile_info )
 
 ***************************************************************************/
 
-VIDEO_START( bosco )
+VIDEO_START_MEMBER(bosco_state,bosco)
 {
-	bosco_state *state =  machine.driver_data<bosco_state>();
 
-	state->m_bg_tilemap = tilemap_create(machine, bg_get_tile_info,tilemap_scan_rows,8,8,32,32);
-	state->m_fg_tilemap = tilemap_create(machine, fg_get_tile_info,fg_tilemap_scan,  8,8, 8,32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(bosco_state::bg_get_tile_info),this),TILEMAP_SCAN_ROWS,8,8,32,32);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(bosco_state::fg_get_tile_info),this),tilemap_mapper_delegate(FUNC(bosco_state::fg_tilemap_scan),this),  8,8, 8,32);
 
-	colortable_configure_tilemap_groups(machine.colortable, state->m_bg_tilemap, machine.gfx[0], 0x1f);
-	colortable_configure_tilemap_groups(machine.colortable, state->m_fg_tilemap, machine.gfx[0], 0x1f);
+	colortable_configure_tilemap_groups(machine().colortable, m_bg_tilemap, machine().gfx[0], 0x1f);
+	colortable_configure_tilemap_groups(machine().colortable, m_fg_tilemap, machine().gfx[0], 0x1f);
 
-	tilemap_set_scrolldx(state->m_bg_tilemap,3,3);
+	m_bg_tilemap->set_scrolldx(3,3);
 
-	machine.generic.spriteram_size = 0x0c;
-	machine.generic.spriteram.u8 = state->m_videoram + 0x03d4;
-	machine.generic.spriteram2.u8 = machine.generic.spriteram.u8 + 0x0800;
-	state->m_bosco_radarx = state->m_videoram + 0x03f0;
-	state->m_bosco_radary = state->m_bosco_radarx + 0x0800;
+	m_spriteram = m_videoram + 0x03d4;
+	m_spriteram_size = 0x0c;
+	m_spriteram2 = m_spriteram + 0x0800;
+	m_bosco_radarx = m_videoram + 0x03f0;
+	m_bosco_radary = m_bosco_radarx + 0x0800;
 
-
-	state->save_item(NAME(state->m_stars_scrollx));
-	state->save_item(NAME(state->m_stars_scrolly));
+	save_item(NAME(m_stars_scrollx));
+	save_item(NAME(m_stars_scrolly));
 }
 
 
@@ -156,26 +155,26 @@ VIDEO_START( bosco )
 
 WRITE8_HANDLER( bosco_videoram_w )
 {
-	bosco_state *state =  space->machine().driver_data<bosco_state>();
+	bosco_state *state =  space.machine().driver_data<bosco_state>();
 
 	state->m_videoram[offset] = data;
 	if (offset & 0x400)
-		tilemap_mark_tile_dirty(state->m_bg_tilemap,offset & 0x3ff);
+		state->m_bg_tilemap->mark_tile_dirty(offset & 0x3ff);
 	else
-		tilemap_mark_tile_dirty(state->m_fg_tilemap,offset & 0x3ff);
+		state->m_fg_tilemap->mark_tile_dirty(offset & 0x3ff);
 }
 
 WRITE8_HANDLER( bosco_scrollx_w )
 {
-	bosco_state *state =  space->machine().driver_data<bosco_state>();
+	bosco_state *state =  space.machine().driver_data<bosco_state>();
 
-	tilemap_set_scrollx(state->m_bg_tilemap,0,data);
+	state->m_bg_tilemap->set_scrollx(0,data);
 }
 
 WRITE8_HANDLER( bosco_scrolly_w )
 {
-	bosco_state *state =  space->machine().driver_data<bosco_state>();
-	tilemap_set_scrolly(state->m_bg_tilemap,0,data);
+	bosco_state *state =  space.machine().driver_data<bosco_state>();
+	state->m_bg_tilemap->set_scrolly(0,data);
 }
 
 WRITE8_HANDLER( bosco_starclr_w )
@@ -190,20 +189,26 @@ WRITE8_HANDLER( bosco_starclr_w )
 
 ***************************************************************************/
 
-static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_sprites(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
-	UINT8 *spriteram = machine.generic.spriteram.u8;
-	UINT8 *spriteram_2 = machine.generic.spriteram2.u8;
+	bosco_state *state =  machine.driver_data<bosco_state>();
+	UINT8 *spriteram = state->m_spriteram;
+	UINT8 *spriteram_2 = state->m_spriteram2;
 	int offs;
 
-	for (offs = 0;offs < machine.generic.spriteram_size;offs += 2)
+	for (offs = 0;offs < state->m_spriteram_size;offs += 2)
 	{
 		int sx = spriteram[offs + 1] - 1;
 		int sy = 240 - spriteram_2[offs];
 		int flipx = spriteram[offs] & 1;
 		int flipy = spriteram[offs] & 2;
 		int color = spriteram_2[offs + 1] & 0x3f;
-		if (flip_screen_get(machine)) sx += 32-2;
+
+		if (state->flip_screen())
+		{
+			sx += 128-2;
+			sy += 8;
+		}
 
 		drawgfx_transmask(bitmap,cliprect,machine.gfx[1],
 				(spriteram[offs] & 0xfc) >> 2,
@@ -215,18 +220,21 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 }
 
 
-static void draw_bullets(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_bullets(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	bosco_state *state =  machine.driver_data<bosco_state>();
 	int offs;
 
 	for (offs = 4; offs < 0x10;offs++)
 	{
-		int x,y;
+		int x = state->m_bosco_radarx[offs] + ((~state->m_bosco_radarattr[offs] & 0x01) << 8);
+		int y = 253 - state->m_bosco_radary[offs];
 
-		x = state->m_bosco_radarx[offs] + ((~state->m_bosco_radarattr[offs] & 0x01) << 8);
-		y = 253 - state->m_bosco_radary[offs];
-		if (flip_screen_get(machine)) x -= 3;
+		if (state->flip_screen())
+		{
+			x += 96-2;
+			y += 8;
+		}
 
 		drawgfx_transmask(bitmap,cliprect,machine.gfx[2],
 				((state->m_bosco_radarattr[offs] & 0x0e) >> 1) ^ 0x07,
@@ -237,9 +245,9 @@ static void draw_bullets(running_machine &machine, bitmap_t *bitmap, const recta
 }
 
 
-static void draw_stars(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, int flip)
+static void draw_stars(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, int flip)
 {
-	bosco_state *state =  machine.driver_data<bosco_state>();
+	bosco_state *state = machine.driver_data<bosco_state>();
 
 	if (1)
 	{
@@ -247,25 +255,25 @@ static void draw_stars(running_machine &machine, bitmap_t *bitmap, const rectang
 		int set_a, set_b;
 
 		/* two sets of stars controlled by these bits */
-		set_a = state->m_bosco_starblink[0] & 0x01;
-		set_b = (state->m_bosco_starblink[1] & 0x01) |0x2;
+		set_a = (state->m_bosco_starblink[0] & 1);
+		set_b = (state->m_bosco_starblink[1] & 1) | 2;
 
 		for (star_cntr = 0;star_cntr < MAX_STARS;star_cntr++)
 		{
 			int x,y;
 
-			if   ( (set_a == star_seed_tab[star_cntr].set) ||  ( set_b == star_seed_tab[star_cntr].set) )
+			if ( (set_a == star_seed_tab[star_cntr].set) || ( set_b == star_seed_tab[star_cntr].set) )
 			{
-				x = (  star_seed_tab[star_cntr].x + state->m_stars_scrollx) % 256;
-				y = (  star_seed_tab[star_cntr].y + state->m_stars_scrolly) % 256;
+				x = (star_seed_tab[star_cntr].x + state->m_stars_scrollx) % 256;
+				y = (star_seed_tab[star_cntr].y + state->m_stars_scrolly) % 256;
 
 				/* dont draw the stars that are off the screen */
-				if ( x < 224 && y < 224 )
+				if ( x < 224 )
 				{
-					if (flip) x += 64;
+					if (flip) x += 20*8;
 
-					if (y >= cliprect->min_y && y <= cliprect->max_y)
-						*BITMAP_ADDR16(bitmap, y, x) = STARS_COLOR_BASE + star_seed_tab[star_cntr].col;
+					if (cliprect.contains(x, y))
+						bitmap.pix16(y, x) = STARS_COLOR_BASE + star_seed_tab[star_cntr].col;
 				}
 			}
 		}
@@ -273,18 +281,17 @@ static void draw_stars(running_machine &machine, bitmap_t *bitmap, const rectang
 }
 
 
-SCREEN_UPDATE( bosco )
+UINT32 bosco_state::screen_update_bosco(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	bosco_state *state =  screen->machine().driver_data<bosco_state>();
 
 	/* the radar tilemap is just 8x32. We rely on the tilemap code to repeat it across
-       the screen, and clip it to only the position where it is supposed to be shown */
-	rectangle fg_clip = *cliprect;
-	rectangle bg_clip = *cliprect;
-	if (flip_screen_get(screen->machine()))
+	   the screen, and clip it to only the position where it is supposed to be shown */
+	rectangle fg_clip = cliprect;
+	rectangle bg_clip = cliprect;
+	if (flip_screen())
 	{
-		bg_clip.min_x = 8*8;
-		fg_clip.max_x = 8*8-1;
+		bg_clip.min_x = 20*8;
+		fg_clip.max_x = 20*8-1;
 	}
 	else
 	{
@@ -292,30 +299,33 @@ SCREEN_UPDATE( bosco )
 		fg_clip.min_x = 28*8;
 	}
 
-	bitmap_fill(bitmap,cliprect,get_black_pen(screen->machine()));
-	draw_stars(screen->machine(),bitmap,cliprect,flip_screen_get(screen->machine()));
+	bitmap.fill(get_black_pen(machine()), cliprect);
+	draw_stars(machine(),bitmap,cliprect,flip_screen());
 
-	tilemap_draw(bitmap,&bg_clip,state->m_bg_tilemap,0,0);
-	tilemap_draw(bitmap,&fg_clip,state->m_fg_tilemap,0,0);
+	m_bg_tilemap->draw(bitmap, bg_clip, 0,0);
+	m_fg_tilemap->draw(bitmap, fg_clip, 0,0);
 
-	draw_sprites(screen->machine(), bitmap,cliprect);
+	draw_sprites(machine(), bitmap,cliprect);
 
 	/* draw the high priority characters */
-	tilemap_draw(bitmap,&bg_clip,state->m_bg_tilemap,1,0);
-	tilemap_draw(bitmap,&fg_clip,state->m_fg_tilemap,1,0);
+	m_bg_tilemap->draw(bitmap, bg_clip, 1,0);
+	m_fg_tilemap->draw(bitmap, fg_clip, 1,0);
 
-	draw_bullets(screen->machine(), bitmap,cliprect);
+	draw_bullets(machine(), bitmap,cliprect);
 
 	return 0;
 }
 
 
-SCREEN_EOF( bosco )
+void bosco_state::screen_eof_bosco(screen_device &screen, bool state)
 {
-	bosco_state *state =  machine.driver_data<bosco_state>();
-	static const int speedsx[8] = { -1, -2, -3, 0, 3, 2, 1, 0 };
-	static const int speedsy[8] = { 0, -1, -2, -3, 0, 3, 2, 1 };
+	// falling edge
+	if (!state)
+	{
+		static const int speedsx[8] = { -1, -2, -3, 0, 3, 2, 1, 0 };
+		static const int speedsy[8] = { 0, -1, -2, -3, 0, 3, 2, 1 };
 
-	state->m_stars_scrollx += speedsx[state->m_bosco_starcontrol[0] & 0x07];
-	state->m_stars_scrolly += speedsy[(state->m_bosco_starcontrol[0] & 0x38) >> 3];
+		m_stars_scrollx += speedsx[m_bosco_starcontrol[0] & 0x07];
+		m_stars_scrolly += speedsy[(m_bosco_starcontrol[0] & 0x38) >> 3];
+	}
 }

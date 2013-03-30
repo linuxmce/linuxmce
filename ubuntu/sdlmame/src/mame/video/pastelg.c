@@ -19,12 +19,13 @@ static void pastelg_gfxdraw(running_machine &machine);
 
 
 ******************************************************************************/
-PALETTE_INIT( pastelg )
+void pastelg_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 	int bit0, bit1, bit2, bit3, r, g, b;
 
-	for (i = 0; i < machine.total_colors(); i++)
+	for (i = 0; i < machine().total_colors(); i++)
 	{
 		bit0 = (color_prom[0] >> 0) & 0x01;
 		bit1 = (color_prom[0] >> 1) & 0x01;
@@ -36,94 +37,88 @@ PALETTE_INIT( pastelg )
 		bit2 = (color_prom[0] >> 6) & 0x01;
 		bit3 = (color_prom[0] >> 7) & 0x01;
 		g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-		bit0 = (color_prom[machine.total_colors()] >> 0) & 0x01;
-		bit1 = (color_prom[machine.total_colors()] >> 1) & 0x01;
-		bit2 = (color_prom[machine.total_colors()] >> 2) & 0x01;
-		bit3 = (color_prom[machine.total_colors()] >> 3) & 0x01;
+		bit0 = (color_prom[machine().total_colors()] >> 0) & 0x01;
+		bit1 = (color_prom[machine().total_colors()] >> 1) & 0x01;
+		bit2 = (color_prom[machine().total_colors()] >> 2) & 0x01;
+		bit3 = (color_prom[machine().total_colors()] >> 3) & 0x01;
 		b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 
-		palette_set_color(machine,i,MAKE_RGB(r,g,b));
+		palette_set_color(machine(),i,MAKE_RGB(r,g,b));
 		color_prom++;
 	}
 }
 
-WRITE8_HANDLER( pastelg_clut_w )
+WRITE8_MEMBER(pastelg_state::pastelg_clut_w)
 {
-	pastelg_state *state = space->machine().driver_data<pastelg_state>();
-	state->m_clut[offset] = data;
+	m_clut[offset] = data;
 }
 
 /******************************************************************************
 
 
 ******************************************************************************/
-int pastelg_blitter_src_addr_r(address_space *space)
+int pastelg_blitter_src_addr_r(address_space &space)
 {
-	pastelg_state *state = space->machine().driver_data<pastelg_state>();
+	pastelg_state *state = space.machine().driver_data<pastelg_state>();
 	return state->m_blitter_src_addr;
 }
 
-WRITE8_HANDLER( pastelg_blitter_w )
+WRITE8_MEMBER(pastelg_state::pastelg_blitter_w)
 {
-	pastelg_state *state = space->machine().driver_data<pastelg_state>();
 	switch (offset)
 	{
-		case 0: state->m_blitter_src_addr = (state->m_blitter_src_addr & 0xff00) | data; break;
-		case 1: state->m_blitter_src_addr = (state->m_blitter_src_addr & 0x00ff) | (data << 8); break;
-		case 2: state->m_blitter_destx = data; break;
-		case 3: state->m_blitter_desty = data; break;
-		case 4: state->m_blitter_sizex = data; break;
-		case 5: state->m_blitter_sizey = data;
+		case 0: m_blitter_src_addr = (m_blitter_src_addr & 0xff00) | data; break;
+		case 1: m_blitter_src_addr = (m_blitter_src_addr & 0x00ff) | (data << 8); break;
+		case 2: m_blitter_destx = data; break;
+		case 3: m_blitter_desty = data; break;
+		case 4: m_blitter_sizex = data; break;
+		case 5: m_blitter_sizey = data;
 				/* writing here also starts the blit */
-				pastelg_gfxdraw(space->machine());
+				pastelg_gfxdraw(machine());
 				break;
-		case 6:	state->m_blitter_direction_x = (data & 0x01) ? 1 : 0;
-				state->m_blitter_direction_y = (data & 0x02) ? 1 : 0;
-				state->m_flipscreen = (data & 0x04) ? 0 : 1;
-				state->m_dispflag = (data & 0x08) ? 0 : 1;
-				pastelg_vramflip(space->machine());
+		case 6: m_blitter_direction_x = (data & 0x01) ? 1 : 0;
+				m_blitter_direction_y = (data & 0x02) ? 1 : 0;
+				m_flipscreen = (data & 0x04) ? 0 : 1;
+				m_dispflag = (data & 0x08) ? 0 : 1;
+				pastelg_vramflip(machine());
 				break;
 	}
 }
 
 
-WRITE8_HANDLER( threeds_romsel_w )
+WRITE8_MEMBER(pastelg_state::threeds_romsel_w)
 {
-	pastelg_state *state = space->machine().driver_data<pastelg_state>();
 	if (data&0xfc) printf("%02x\n",data);
-	state->m_gfxrom = (data & 0x3);
+	m_gfxrom = (data & 0x3);
 }
 
-WRITE8_HANDLER( threeds_output_w )
+WRITE8_MEMBER(pastelg_state::threeds_output_w)
 {
-	pastelg_state *state = space->machine().driver_data<pastelg_state>();
-	state->m_palbank = ((data & 0x10) >> 4);
+	m_palbank = ((data & 0x10) >> 4);
 
 }
 
-READ8_HANDLER( threeds_rom_readback_r )
+READ8_MEMBER(pastelg_state::threeds_rom_readback_r)
 {
-	pastelg_state *state = space->machine().driver_data<pastelg_state>();
-	UINT8 *GFX = space->machine().region("gfx1")->base();
+	UINT8 *GFX = memregion("gfx1")->base();
 
-	return GFX[(state->m_blitter_src_addr | (state->m_gfxrom << 16)) & 0x3ffff];
+	return GFX[(m_blitter_src_addr | (m_gfxrom << 16)) & 0x3ffff];
 }
 
 
-WRITE8_HANDLER( pastelg_romsel_w )
+WRITE8_MEMBER(pastelg_state::pastelg_romsel_w)
 {
-	pastelg_state *state = space->machine().driver_data<pastelg_state>();
-	int gfxlen = space->machine().region("gfx1")->bytes();
-	state->m_gfxrom = ((data & 0xc0) >> 6);
-	state->m_palbank = ((data & 0x10) >> 4);
+	int gfxlen = memregion("gfx1")->bytes();
+	m_gfxrom = ((data & 0xc0) >> 6);
+	m_palbank = ((data & 0x10) >> 4);
 	nb1413m3_sndrombank1_w(space, 0, data);
 
-	if ((state->m_gfxrom << 16) > (gfxlen - 1))
+	if ((m_gfxrom << 16) > (gfxlen - 1))
 	{
 #ifdef MAME_DEBUG
 		popmessage("GFXROM BANK OVER!!");
 #endif
-		state->m_gfxrom &= (gfxlen / 0x20000 - 1);
+		m_gfxrom &= (gfxlen / 0x20000 - 1);
 	}
 }
 
@@ -155,7 +150,7 @@ static void pastelg_vramflip(running_machine &machine)
 	state->m_flipscreen_old = state->m_flipscreen;
 }
 
-static TIMER_CALLBACK( blitter_timer_callback )
+TIMER_CALLBACK_MEMBER(pastelg_state::blitter_timer_callback)
 {
 	nb1413m3_busyflag = 1;
 }
@@ -163,7 +158,7 @@ static TIMER_CALLBACK( blitter_timer_callback )
 static void pastelg_gfxdraw(running_machine &machine)
 {
 	pastelg_state *state = machine.driver_data<pastelg_state>();
-	UINT8 *GFX = machine.region("gfx1")->base();
+	UINT8 *GFX = state->memregion("gfx1")->base();
 	int width = machine.primary_screen->width();
 
 	int x, y;
@@ -207,7 +202,7 @@ static void pastelg_gfxdraw(running_machine &machine)
 		incy = -1;
 	}
 
-	gfxlen = machine.region("gfx1")->bytes();
+	gfxlen = machine.root_device().memregion("gfx1")->bytes();
 	gfxaddr = (state->m_gfxrom << 16) + state->m_blitter_src_addr;
 
 	readflag = 0;
@@ -281,42 +276,40 @@ static void pastelg_gfxdraw(running_machine &machine)
 	}
 
 	nb1413m3_busyflag = 0;
-	machine.scheduler().timer_set(attotime::from_hz(400000) * nb1413m3_busyctr, FUNC(blitter_timer_callback));
+	machine.scheduler().timer_set(attotime::from_hz(400000) * nb1413m3_busyctr, timer_expired_delegate(FUNC(pastelg_state::blitter_timer_callback),state));
 }
 
 /******************************************************************************
 
 
 ******************************************************************************/
-VIDEO_START( pastelg )
+void pastelg_state::video_start()
 {
-	pastelg_state *state = machine.driver_data<pastelg_state>();
-	int width = machine.primary_screen->width();
-	int height = machine.primary_screen->height();
+	int width = machine().primary_screen->width();
+	int height = machine().primary_screen->height();
 
-	state->m_videoram = auto_alloc_array_clear(machine, UINT8, width * height);
-	state->m_clut = auto_alloc_array(machine, UINT8, 0x10);
+	m_videoram = auto_alloc_array_clear(machine(), UINT8, width * height);
+	m_clut = auto_alloc_array(machine(), UINT8, 0x10);
 }
 
 /******************************************************************************
 
 
 ******************************************************************************/
-SCREEN_UPDATE( pastelg )
+UINT32 pastelg_state::screen_update_pastelg(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	pastelg_state *state = screen->machine().driver_data<pastelg_state>();
-	if (state->m_dispflag)
+	if (m_dispflag)
 	{
 		int x, y;
-		int width = screen->width();
-		int height = screen->height();
+		int width = screen.width();
+		int height = screen.height();
 
 		for (y = 0; y < height; y++)
 			for (x = 0; x < width; x++)
-				*BITMAP_ADDR16(bitmap, y, x) = state->m_videoram[(y * width) + x];
+				bitmap.pix16(y, x) = m_videoram[(y * width) + x];
 	}
 	else
-		bitmap_fill(bitmap, cliprect, 0);
+		bitmap.fill(0, cliprect);
 
 	return 0;
 }

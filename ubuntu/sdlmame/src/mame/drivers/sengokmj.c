@@ -28,11 +28,11 @@ Sound:  Z80-A
         M6295
 OSC:    14.31818MHz
         16.000MHz
-Chips:  SEI0100
+Chips:  SEI0100 (YM3931, main/sub cpu interface)
         SEI0160
-        SEI0200
+        SEI0200 (tilemap chip)
         SEI0210
-        SEI0220
+        SEI0220 (sprite chip)
 
 
 MAH1-1-1.915  samples
@@ -62,74 +62,78 @@ RSSENGO2.72   chr.
 class sengokmj_state : public driver_device
 {
 public:
-	sengokmj_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	sengokmj_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) { }
 
 	UINT16 m_sengokumj_mux_data;
 	UINT8 m_hopper_io;
+	DECLARE_READ16_MEMBER(mahjong_panel_r);
+	DECLARE_WRITE16_MEMBER(mahjong_panel_w);
+	DECLARE_WRITE16_MEMBER(sengokmj_out_w);
+	DECLARE_READ16_MEMBER(sengokmj_system_r);
+	INTERRUPT_GEN_MEMBER(sengokmj_interrupt);
 };
 
 
 
 /* Multiplexer device for the mahjong panel */
-static READ16_HANDLER( mahjong_panel_r )
+READ16_MEMBER(sengokmj_state::mahjong_panel_r)
 {
-	sengokmj_state *state = space->machine().driver_data<sengokmj_state>();
-	switch(state->m_sengokumj_mux_data)
+	const char *const mpnames[] = { "KEY0", "KEY1", "KEY2", "KEY3", "KEY4", "UNUSED" };
+	int i;
+	UINT16 res = 0xffff;
+
+	for(i=0;i<5;i++)
 	{
-		case 0x0100: return input_port_read(space->machine(), "KEY0");
-		case 0x0200: return input_port_read(space->machine(), "KEY1");
-		case 0x0400: return input_port_read(space->machine(), "KEY2");
-		case 0x0800: return input_port_read(space->machine(), "KEY3");
-		case 0x1000: return input_port_read(space->machine(), "KEY4");
-		case 0x2000: return input_port_read(space->machine(), "UNUSED");
+		if(m_sengokumj_mux_data & 1 << i)
+			res = ioport(mpnames[i])->read();
 	}
 
-	return 0xffff;
+	return res;
 }
 
-static WRITE16_HANDLER( mahjong_panel_w )
+WRITE16_MEMBER(sengokmj_state::mahjong_panel_w)
 {
-	sengokmj_state *state = space->machine().driver_data<sengokmj_state>();
-	state->m_sengokumj_mux_data = data;
+	m_sengokumj_mux_data = (data & 0x3f00) >> 8;
+
+	if(data & 0xc0ff)
+		logerror("Write to mux %04x\n",data);
 }
 
-static WRITE16_HANDLER( sengokmj_out_w )
+WRITE16_MEMBER(sengokmj_state::sengokmj_out_w)
 {
-	sengokmj_state *state = space->machine().driver_data<sengokmj_state>();
 	/* ---- ---- ---x ---- J.P. Signal (?)*/
-	/* ---- ---- ---- -x-- Coin counter (done AFTER that you press start)*/
+	/* ---- ---- ---- -x-- Coin counter (done AFTER you press start)*/
 	/* ---- ---- ---- --x- Cash enable (lockout)*/
 	/* ---- ---- ---- ---x Hopper 10 */
-	coin_lockout_w(space->machine(), 0,~data & 2);
-	coin_lockout_w(space->machine(), 1,~data & 2);
-	coin_counter_w(space->machine(), 0,data & 4);
-	state->m_hopper_io = ((data & 1)<<6);
-//  popmessage("%02x",state->m_hopper_io);
+	coin_lockout_w(machine(), 0,~data & 2);
+	coin_lockout_w(machine(), 1,~data & 2);
+	coin_counter_w(machine(), 0,data & 4);
+	m_hopper_io = ((data & 1)<<6);
+//  popmessage("%02x",m_hopper_io);
 }
 
-static READ16_HANDLER( sengokmj_system_r )
+READ16_MEMBER(sengokmj_state::sengokmj_system_r)
 {
-	sengokmj_state *state = space->machine().driver_data<sengokmj_state>();
-	return (input_port_read(space->machine(), "SYSTEM") & 0xffbf) | state->m_hopper_io;
+	return (ioport("SYSTEM")->read() & 0xffbf) | m_hopper_io;
 }
 
-static ADDRESS_MAP_START( sengokmj_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( sengokmj_map, AS_PROGRAM, 16, sengokmj_state )
 	AM_RANGE(0x00000, 0x07fff) AM_RAM
 	AM_RANGE(0x08000, 0x09fff) AM_RAM AM_SHARE("nvram")
-	AM_RANGE(0x0c000, 0x0c7ff) AM_RAM_WRITE(seibucrtc_sc0vram_w) AM_BASE(&seibucrtc_sc0vram)
-	AM_RANGE(0x0c800, 0x0cfff) AM_RAM_WRITE(seibucrtc_sc1vram_w) AM_BASE(&seibucrtc_sc1vram)
-	AM_RANGE(0x0d000, 0x0d7ff) AM_RAM_WRITE(seibucrtc_sc2vram_w) AM_BASE(&seibucrtc_sc2vram)
-	AM_RANGE(0x0d800, 0x0e7ff) AM_RAM_WRITE(seibucrtc_sc3vram_w) AM_BASE(&seibucrtc_sc3vram)
-	AM_RANGE(0x0e800, 0x0f7ff) AM_RAM_WRITE(paletteram16_xBBBBBGGGGGRRRRR_word_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x0c000, 0x0c7ff) AM_RAM_WRITE_LEGACY(seibucrtc_sc0vram_w) AM_SHARE("crtc_sc0vram")
+	AM_RANGE(0x0c800, 0x0cfff) AM_RAM_WRITE_LEGACY(seibucrtc_sc1vram_w) AM_SHARE("crtc_sc1vram")
+	AM_RANGE(0x0d000, 0x0d7ff) AM_RAM_WRITE_LEGACY(seibucrtc_sc2vram_w) AM_SHARE("crtc_sc2vram")
+	AM_RANGE(0x0d800, 0x0e7ff) AM_RAM_WRITE_LEGACY(seibucrtc_sc3vram_w) AM_SHARE("crtc_sc3vram")
+	AM_RANGE(0x0e800, 0x0f7ff) AM_RAM_WRITE(paletteram_xBBBBBGGGGGRRRRR_word_w) AM_SHARE("paletteram")
 	AM_RANGE(0x0f800, 0x0ffff) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0xc0000, 0xfffff) AM_ROM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sengokmj_io_map, AS_IO, 16 )
-	AM_RANGE(0x4000, 0x400f) AM_READWRITE(seibu_main_word_r, seibu_main_word_w)
+static ADDRESS_MAP_START( sengokmj_io_map, AS_IO, 16, sengokmj_state )
+	AM_RANGE(0x4000, 0x400f) AM_READWRITE_LEGACY(seibu_main_word_r, seibu_main_word_w)
 	/*Areas from 8000-804f are for the custom Seibu CRTC.*/
-	AM_RANGE(0x8000, 0x804f) AM_RAM_WRITE(seibucrtc_vregs_w) AM_BASE(&seibucrtc_vregs)
+	AM_RANGE(0x8000, 0x804f) AM_RAM_WRITE_LEGACY(seibucrtc_vregs_w) AM_SHARE("crtc_vregs")
 
 //  AM_RANGE(0x8080, 0x8081) CRTC extra register?
 //  AM_RANGE(0x80c0, 0x80c1) CRTC extra register?
@@ -143,31 +147,31 @@ ADDRESS_MAP_END
 
 
 static INPUT_PORTS_START( sengokmj )
-	SEIBU_COIN_INPUTS	/* coin inputs read through sound cpu */
+	SEIBU_COIN_INPUTS   /* coin inputs read through sound cpu */
 
 	PORT_START("DSW1")
 	PORT_DIPNAME( 0x0001, 0x0000, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW1:1")
-	PORT_DIPSETTING(	  0x0001, DEF_STR( Off ) )
-	PORT_DIPSETTING(	  0x0000, DEF_STR( On ) )
+	PORT_DIPSETTING(      0x0001, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 	PORT_DIPNAME( 0x0002, 0x0002, "Re-start" )  PORT_DIPLOCATION("SW1:2")
-	PORT_DIPSETTING(	  0x0002, DEF_STR( Off ) )
-	PORT_DIPSETTING(	  0x0000, DEF_STR( On ) )
+	PORT_DIPSETTING(      0x0002, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 	PORT_DIPNAME( 0x0004, 0x0004, "Double G" )  PORT_DIPLOCATION("SW1:3")
-	PORT_DIPSETTING(	  0x0004, DEF_STR( Off ) )
-	PORT_DIPSETTING(	  0x0000, DEF_STR( On ) )
+	PORT_DIPSETTING(      0x0004, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 	PORT_DIPNAME( 0x0008, 0x0008, "Double L" )  PORT_DIPLOCATION("SW1:4")
-	PORT_DIPSETTING(	  0x0008, DEF_STR( Off ) )
-	PORT_DIPSETTING(	  0x0000, DEF_STR( On ) )
+	PORT_DIPSETTING(      0x0008, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 	PORT_DIPNAME( 0x0010, 0x0010, "Kamon" )  PORT_DIPLOCATION("SW1:5")
-	PORT_DIPSETTING(	  0x0010, DEF_STR( Off ) )
-	PORT_DIPSETTING(	  0x0000, DEF_STR( On ) )
+	PORT_DIPSETTING(      0x0010, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 	PORT_DIPUNUSED_DIPLOC( 0x0020, 0x0020, "SW1:6" )
 	PORT_DIPNAME( 0x0040, 0x0040, "Out Sw" ) PORT_DIPLOCATION("SW1:7")
-	PORT_DIPSETTING(	  0x0040, DEF_STR( Off ) )
-	PORT_DIPSETTING(	  0x0000, DEF_STR( On ) )
+	PORT_DIPSETTING(      0x0040, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 	PORT_DIPNAME( 0x0080, 0x0000, "Hopper" ) PORT_DIPLOCATION("SW1:8") //game gives hopper error with this off.
-	PORT_DIPSETTING(	  0x0080, DEF_STR( Off ) )
-	PORT_DIPSETTING(	  0x0000, DEF_STR( On ) )
+	PORT_DIPSETTING(      0x0080, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("KEY0")
@@ -230,51 +234,51 @@ static INPUT_PORTS_START( sengokmj )
 
 	PORT_START("SYSTEM")
 	PORT_DIPNAME( 0x0001, 0x0001, "Door" )
-	PORT_DIPSETTING(	  0x0001, DEF_STR( Off ) )
-	PORT_DIPSETTING(	  0x0000, DEF_STR( On ) )
+	PORT_DIPSETTING(      0x0001, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 	PORT_SERVICE( 0x0002, IP_ACTIVE_LOW )
 	PORT_DIPNAME( 0x0004, 0x0004, "Opt. 1st" )
-	PORT_DIPSETTING(	  0x0004, DEF_STR( Off ) )
-	PORT_DIPSETTING(	  0x0000, DEF_STR( On ) )
+	PORT_DIPSETTING(      0x0004, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 	PORT_DIPNAME( 0x0008, 0x0008, "Reset" )
-	PORT_DIPSETTING(	  0x0008, DEF_STR( Off ) )
-	PORT_DIPSETTING(	  0x0000, DEF_STR( On ) )
+	PORT_DIPSETTING(      0x0008, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 	PORT_DIPNAME( 0x0010, 0x0010, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(	  0x0010, DEF_STR( Off ) )
-	PORT_DIPSETTING(	  0x0000, DEF_STR( On ) )
+	PORT_DIPSETTING(      0x0010, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 	PORT_DIPNAME( 0x0020, 0x0020, "Cash" )
 	PORT_DIPSETTING(      0x0020, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 //  0x40 Hopper
 	PORT_DIPNAME( 0x0080, 0x0080, "Meter" )
-	PORT_DIPSETTING(	  0x0080, DEF_STR( Off ) )
-	PORT_DIPSETTING(	  0x0000, DEF_STR( On ) )
+	PORT_DIPSETTING(      0x0080, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 INPUT_PORTS_END
 
 
 static const gfx_layout tilelayout =
 {
-	16,16,	/* 16*16 sprites  */
+	16,16,  /* 16*16 sprites  */
 	RGN_FRAC(1,1),
-	4,	/* 4 bits per pixel */
+	4,  /* 4 bits per pixel */
 	{ 8, 12, 0, 4 },
 	{ 3, 2, 1, 0, 16+3, 16+2, 16+1, 16+0,
-             3+32*16, 2+32*16, 1+32*16, 0+32*16, 16+3+32*16, 16+2+32*16, 16+1+32*16, 16+0+32*16 },
+				3+32*16, 2+32*16, 1+32*16, 0+32*16, 16+3+32*16, 16+2+32*16, 16+1+32*16, 16+0+32*16 },
 	{ 0*16, 2*16, 4*16, 6*16, 8*16, 10*16, 12*16, 14*16,
 			16*16, 18*16, 20*16, 22*16, 24*16, 26*16, 28*16, 30*16 },
-	128*8	/* every sprite takes 128 consecutive bytes */
+	128*8   /* every sprite takes 128 consecutive bytes */
 };
 
 static const gfx_layout charlayout =
 {
 	8,8,
 	RGN_FRAC(1,1),
-	4,	/* 4 bits per pixel */
+	4,  /* 4 bits per pixel */
 	{ 8, 12, 0, 4 },
 	{ 3, 2, 1, 0, 16+3, 16+2, 16+1, 16+0 },
 	{ 0*16, 2*16, 4*16, 6*16, 8*16, 10*16, 12*16, 14*16 },
-	128*8	/* every sprite takes 128 consecutive bytes */
+	128*8   /* every sprite takes 128 consecutive bytes */
 };
 
 static GFXDECODE_START( sengokmj )
@@ -285,9 +289,9 @@ static GFXDECODE_START( sengokmj )
 	GFXDECODE_ENTRY( "tx_gfx", 0, charlayout, 0x700, 0x10 ) /* Text */
 GFXDECODE_END
 
-static INTERRUPT_GEN( sengokmj_interrupt )
+INTERRUPT_GEN_MEMBER(sengokmj_state::sengokmj_interrupt)
 {
-	device_set_input_line_and_vector(device,0,HOLD_LINE,0xc8/4);
+	device.execute().set_input_line_and_vector(0,HOLD_LINE,0xc8/4);
 }
 
 static MACHINE_CONFIG_START( sengokmj, sengokmj_state )
@@ -296,7 +300,7 @@ static MACHINE_CONFIG_START( sengokmj, sengokmj_state )
 	MCFG_CPU_ADD("maincpu", V30, 16000000/2) /* V30-8 */
 	MCFG_CPU_PROGRAM_MAP(sengokmj_map)
 	MCFG_CPU_IO_MAP(sengokmj_io_map)
-	MCFG_CPU_VBLANK_INT("screen", sengokmj_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", sengokmj_state,  sengokmj_interrupt)
 
 	SEIBU_SOUND_SYSTEM_CPU(14318180/4)
 
@@ -307,10 +311,9 @@ static MACHINE_CONFIG_START( sengokmj, sengokmj_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0, 320-1, 16, 256-1) //TODO: dynamic resolution
-	MCFG_SCREEN_UPDATE(seibu_crtc)
+	MCFG_SCREEN_UPDATE_STATIC(seibu_crtc)
 
 	MCFG_GFXDECODE(sengokmj)
 	MCFG_PALETTE_LENGTH(0x800)
@@ -351,12 +354,12 @@ ROM_START( sengokmj )
 	ROM_REGION( 0x080000, "tx_gfx", 0 )
 	ROM_COPY( "gfx_tiles" , 0x180000, 0x00000, 0x080000)
 
-	ROM_REGION( 0x40000, "oki", 0 )	 /* ADPCM samples */
+	ROM_REGION( 0x40000, "oki", 0 )  /* ADPCM samples */
 	ROM_LOAD( "mah1-1-1.915", 0x00000, 0x20000, CRC(d4612e95) SHA1(937c5dbd25c89d4f4178b0bed510307020c5f40e) )
 
 	ROM_REGION( 0x200, "user1", 0 ) /* not used */
 	ROM_LOAD( "rs006.89", 0x000, 0x200, CRC(96f7646e) SHA1(400a831b83d6ac4d2a46ef95b97b1ee237099e44) ) /* Priority */
 ROM_END
 
-GAME( 1991, sengokmj, 0, sengokmj, sengokmj, 0, ROT0, "Sigma", "Sengoku Mahjong [BET] (Japan)", GAME_IMPERFECT_GRAPHICS )
+GAME( 1991, sengokmj, 0, sengokmj, sengokmj, driver_device, 0, ROT0, "Sigma", "Sengoku Mahjong [BET] (Japan)", GAME_IMPERFECT_GRAPHICS )
 /*Non-Bet Version?*/

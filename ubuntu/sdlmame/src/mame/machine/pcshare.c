@@ -33,7 +33,7 @@
 #define DBG_LOG(N,M,A) \
 	if(VERBOSE_DBG>=N){ if( M )logerror("%11.6f: %-24s",pc_keyb.machine().time().as_double(),(char*)M ); logerror A; }
 
-#define VERBOSE_JOY 0		/* JOY (joystick port) */
+#define VERBOSE_JOY 0       /* JOY (joystick port) */
 #define JOY_LOG(N,M,A) \
 	if(VERBOSE_JOY>=N){ if( M )logerror("%11.6f: %-24s",pc_keyb.machine().time().as_double(),(char*)M ); logerror A; }
 
@@ -154,7 +154,7 @@ static UINT8 at_pages[0x10];
 
 static WRITE_LINE_DEVICE_HANDLER( pc_dma_hrq_changed )
 {
-	cputag_set_input_line(device->machine(), "maincpu", INPUT_LINE_HALT, state ? ASSERT_LINE : CLEAR_LINE);
+	device->machine().device("maincpu")->execute().set_input_line(INPUT_LINE_HALT, state ? ASSERT_LINE : CLEAR_LINE);
 
 	/* Assert HLDA */
 	i8237_hlda_w( device, state );
@@ -166,7 +166,7 @@ static READ8_HANDLER( pc_dma_read_byte )
 	offs_t page_offset = (((offs_t) dma_offset[0][dma_channel]) << 16)
 		& 0xFF0000;
 
-	return space->read_byte(page_offset + offset);
+	return space.read_byte(page_offset + offset);
 }
 
 
@@ -175,7 +175,7 @@ static WRITE8_HANDLER( pc_dma_write_byte )
 	offs_t page_offset = (((offs_t) dma_offset[0][dma_channel]) << 16)
 		& 0xFF0000;
 
-	space->write_byte(page_offset + offset, data);
+	space.write_byte(page_offset + offset, data);
 }
 
 static READ8_HANDLER(dma_page_select_r)
@@ -261,28 +261,34 @@ static I8237_INTERFACE( dma8237_2_config )
 
 static WRITE_LINE_DEVICE_HANDLER( pic8259_1_set_int_line )
 {
-	cputag_set_input_line(device->machine(), "maincpu", 0, state ? HOLD_LINE : CLEAR_LINE);
+	device->machine().device("maincpu")->execute().set_input_line(0, state ? HOLD_LINE : CLEAR_LINE);
+}
+
+static READ8_DEVICE_HANDLER( get_slave_ack )
+{
+	if (offset==2) { // IRQ = 2
+		return pic8259_acknowledge(space.machine().device("pic8259_2"));
+	}
+	return 0x00;
 }
 
 static const struct pic8259_interface pic8259_1_config =
 {
-	DEVCB_LINE(pic8259_1_set_int_line)
+	DEVCB_LINE(pic8259_1_set_int_line),
+	DEVCB_LINE_VCC,
+	DEVCB_HANDLER(get_slave_ack)
 };
 
 static const struct pic8259_interface pic8259_2_config =
 {
-	DEVCB_DEVICE_LINE("pic8259_1", pic8259_ir2_w)
+	DEVCB_DEVICE_LINE("pic8259_1", pic8259_ir2_w),
+	DEVCB_LINE_GND,
+	DEVCB_NULL
 };
 
 IRQ_CALLBACK(pcat_irq_callback)
 {
-	int r = 0;
-	r = pic8259_acknowledge(device->machine().device("pic8259_2"));
-	if (r==0)
-	{
-		r = pic8259_acknowledge(device->machine().device("pic8259_1"));
-	}
-	return r;
+	return pic8259_acknowledge(device->machine().device("pic8259_1"));
 }
 
 static WRITE_LINE_DEVICE_HANDLER( at_pit8254_out0_changed )
@@ -304,30 +310,30 @@ static const struct pit8253_config at_pit8254_config =
 {
 	{
 		{
-			4772720/4,				/* heartbeat IRQ */
+			4772720/4,              /* heartbeat IRQ */
 			DEVCB_NULL,
 			DEVCB_LINE(at_pit8254_out0_changed)
 		}, {
-			4772720/4,				/* dram refresh */
+			4772720/4,              /* dram refresh */
 			DEVCB_NULL,
 			DEVCB_NULL
 		}, {
-			4772720/4,				/* pio port c pin 4, and speaker polling enough */
+			4772720/4,              /* pio port c pin 4, and speaker polling enough */
 			DEVCB_NULL,
 			DEVCB_LINE(at_pit8254_out2_changed)
 		}
 	}
 };
 
-ADDRESS_MAP_START( pcat32_io_common, AS_IO, 32 )
-	AM_RANGE(0x0000, 0x001f) AM_DEVREADWRITE8("dma8237_1", i8237_r, i8237_w, 0xffffffff)
-	AM_RANGE(0x0020, 0x003f) AM_DEVREADWRITE8("pic8259_1", pic8259_r, pic8259_w, 0xffffffff)
-	AM_RANGE(0x0040, 0x005f) AM_DEVREADWRITE8("pit8254", pit8253_r, pit8253_w, 0xffffffff)
-	AM_RANGE(0x0060, 0x006f) AM_READWRITE8(kbdc8042_8_r, kbdc8042_8_w, 0xffffffff)
-	AM_RANGE(0x0070, 0x007f) AM_RAM //AM_DEVREADWRITE8_MODERN("rtc", mc146818_device, read, write, 0xffffffff)
-	AM_RANGE(0x0080, 0x009f) AM_READWRITE8(dma_page_select_r,dma_page_select_w, 0xffffffff)//TODO
-	AM_RANGE(0x00a0, 0x00bf) AM_DEVREADWRITE8("pic8259_2", pic8259_r, pic8259_w, 0xffffffff)
-	AM_RANGE(0x00c0, 0x00df) AM_DEVREADWRITE8("dma8237_2", i8237_r, i8237_w, 0xffff)
+ADDRESS_MAP_START( pcat32_io_common, AS_IO, 32, driver_device )
+	AM_RANGE(0x0000, 0x001f) AM_DEVREADWRITE8_LEGACY("dma8237_1", i8237_r, i8237_w, 0xffffffff)
+	AM_RANGE(0x0020, 0x003f) AM_DEVREADWRITE8_LEGACY("pic8259_1", pic8259_r, pic8259_w, 0xffffffff)
+	AM_RANGE(0x0040, 0x005f) AM_DEVREADWRITE8_LEGACY("pit8254", pit8253_r, pit8253_w, 0xffffffff)
+	AM_RANGE(0x0060, 0x006f) AM_READWRITE8_LEGACY(kbdc8042_8_r, kbdc8042_8_w, 0xffffffff)
+	AM_RANGE(0x0070, 0x007f) AM_RAM //AM_DEVREADWRITE8("rtc", mc146818_device, read, write, 0xffffffff)
+	AM_RANGE(0x0080, 0x009f) AM_READWRITE8_LEGACY(dma_page_select_r,dma_page_select_w, 0xffffffff)//TODO
+	AM_RANGE(0x00a0, 0x00bf) AM_DEVREADWRITE8_LEGACY("pic8259_2", pic8259_r, pic8259_w, 0xffffffff)
+	AM_RANGE(0x00c0, 0x00df) AM_DEVREADWRITE8_LEGACY("dma8237_2", i8237_r, i8237_w, 0xffff)
 ADDRESS_MAP_END
 
 MACHINE_CONFIG_FRAGMENT(pcat_common)

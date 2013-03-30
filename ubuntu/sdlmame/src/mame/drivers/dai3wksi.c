@@ -41,18 +41,18 @@ Driver Notes:
 #include "machine/rescap.h"
 #include "sound/sn76477.h"
 
-#define USE_SAMPLES		(1)
+#define USE_SAMPLES     (1)
 
 
 class dai3wksi_state : public driver_device
 {
 public:
-	dai3wksi_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	dai3wksi_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_dai3wksi_videoram(*this, "videoram"){ }
 
 	/* video */
-	UINT8 *     m_dai3wksi_videoram;
-	size_t      m_dai3wksi_videoram_size;
+	required_shared_ptr<UINT8> m_dai3wksi_videoram;
 	int         m_dai3wksi_flipscreen;
 	int         m_dai3wksi_redscreen;
 	int         m_dai3wksi_redterop;
@@ -62,6 +62,12 @@ public:
 	UINT8       m_port_last2;
 	int         m_enabled_sound;
 	int         m_sound3_counter;
+	DECLARE_WRITE8_MEMBER(dai3wksi_audio_1_w);
+	DECLARE_WRITE8_MEMBER(dai3wksi_audio_2_w);
+	DECLARE_WRITE8_MEMBER(dai3wksi_audio_3_w);
+	virtual void machine_start();
+	virtual void machine_reset();
+	UINT32 screen_update_dai3wksi(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
 };
 
 
@@ -123,31 +129,30 @@ static void dai3wksi_get_pens(pen_t *pens)
 }
 
 
-static SCREEN_UPDATE( dai3wksi )
+UINT32 dai3wksi_state::screen_update_dai3wksi(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	dai3wksi_state *state = screen->machine().driver_data<dai3wksi_state>();
 	offs_t offs;
 	pen_t pens[8];
 
 	dai3wksi_get_pens(pens);
 
-	for (offs = 0; offs < state->m_dai3wksi_videoram_size; offs++)
+	for (offs = 0; offs < m_dai3wksi_videoram.bytes(); offs++)
 	{
 		offs_t i;
 
 		UINT8 x = offs << 2;
 		UINT8 y = offs >> 6;
-		UINT8 data = state->m_dai3wksi_videoram[offs];
+		UINT8 data = m_dai3wksi_videoram[offs];
 		UINT8 color;
-		int value = (x >> 2) + ((y >> 5) << 6) + 64 * 8 * (state->m_dai3wksi_redterop ? 1 : 0);
+		int value = (x >> 2) + ((y >> 5) << 6) + 64 * 8 * (m_dai3wksi_redterop ? 1 : 0);
 
-		if (state->m_dai3wksi_redscreen)
+		if (m_dai3wksi_redscreen)
 		{
 			color = 0x02;
 		}
 		else
 		{
-			if (input_port_read(screen->machine(), "IN2") & 0x03)
+			if (ioport("IN2")->read() & 0x03)
 				color = vr_prom2[value];
 			else
 				color = vr_prom1[value];
@@ -157,10 +162,10 @@ static SCREEN_UPDATE( dai3wksi )
 		{
 			pen_t pen = (data & (1 << i)) ? pens[color] : pens[0];
 
-			if (state->m_dai3wksi_flipscreen)
-				*BITMAP_ADDR32(bitmap, 255-y, 255-x) = pen;
+			if (m_dai3wksi_flipscreen)
+				bitmap.pix32(255-y, 255-x) = pen;
 			else
-				*BITMAP_ADDR32(bitmap, y, x) = pen;
+				bitmap.pix32(y, x) = pen;
 
 			x++;
 		}
@@ -176,85 +181,82 @@ static SCREEN_UPDATE( dai3wksi )
  *
  *************************************/
 
-#define SAMPLE_SOUND1		0
-#define SAMPLE_SOUND2		1
-#define SAMPLE_SOUND3_1		2
-#define SAMPLE_SOUND3_2		3
-#define SAMPLE_SOUND4		4
-#define SAMPLE_SOUND5		5
-#define SAMPLE_SOUND6_1		6
-#define SAMPLE_SOUND6_2		7
+#define SAMPLE_SOUND1       0
+#define SAMPLE_SOUND2       1
+#define SAMPLE_SOUND3_1     2
+#define SAMPLE_SOUND3_2     3
+#define SAMPLE_SOUND4       4
+#define SAMPLE_SOUND5       5
+#define SAMPLE_SOUND6_1     6
+#define SAMPLE_SOUND6_2     7
 
-#define CHANNEL_SOUND1		0
-#define CHANNEL_SOUND2		1
-#define CHANNEL_SOUND3		2
-#define CHANNEL_SOUND4		3
-#define CHANNEL_SOUND5		4
-#define CHANNEL_SOUND6		5
+#define CHANNEL_SOUND1      0
+#define CHANNEL_SOUND2      1
+#define CHANNEL_SOUND3      2
+#define CHANNEL_SOUND4      3
+#define CHANNEL_SOUND5      4
+#define CHANNEL_SOUND6      5
 
 
 #if (USE_SAMPLES)
-static WRITE8_HANDLER( dai3wksi_audio_1_w )
+WRITE8_MEMBER(dai3wksi_state::dai3wksi_audio_1_w)
 {
-	dai3wksi_state *state = space->machine().driver_data<dai3wksi_state>();
-	device_t *samples = space->machine().device("samples");
-	UINT8 rising_bits = data & ~state->m_port_last1;
+	samples_device *samples = machine().device<samples_device>("samples");
+	UINT8 rising_bits = data & ~m_port_last1;
 
-	state->m_enabled_sound = data & 0x80;
+	m_enabled_sound = data & 0x80;
 
-	if ((rising_bits & 0x20) && state->m_enabled_sound)
+	if ((rising_bits & 0x20) && m_enabled_sound)
 	{
 		if (data & 0x04)
-			sample_start(samples, CHANNEL_SOUND5, SAMPLE_SOUND5, 0);
+			samples->start(CHANNEL_SOUND5, SAMPLE_SOUND5);
 		else
-			sample_start(samples, CHANNEL_SOUND5, SAMPLE_SOUND5, 1);
+			samples->start(CHANNEL_SOUND5, SAMPLE_SOUND5, true);
 	}
-	if (!(data & 0x20) && (state->m_port_last1 & 0x20))
-		sample_stop(samples, CHANNEL_SOUND5);
+	if (!(data & 0x20) && (m_port_last1 & 0x20))
+		samples->stop(CHANNEL_SOUND5);
 
-	state->m_port_last1 = data;
+	m_port_last1 = data;
 }
 
-static WRITE8_HANDLER( dai3wksi_audio_2_w )
+WRITE8_MEMBER(dai3wksi_state::dai3wksi_audio_2_w)
 {
-	dai3wksi_state *state = space->machine().driver_data<dai3wksi_state>();
-	device_t *samples = space->machine().device("samples");
-	UINT8 rising_bits = data & ~state->m_port_last2;
+	samples_device *samples = machine().device<samples_device>("samples");
+	UINT8 rising_bits = data & ~m_port_last2;
 
-	state->m_dai3wksi_flipscreen = data & 0x10;
-	state->m_dai3wksi_redscreen  = ~data & 0x20;
-	state->m_dai3wksi_redterop   = data & 0x40;
+	m_dai3wksi_flipscreen = data & 0x10;
+	m_dai3wksi_redscreen  = ~data & 0x20;
+	m_dai3wksi_redterop   = data & 0x40;
 
-	if (state->m_enabled_sound)
+	if (m_enabled_sound)
 	{
-		if (rising_bits & 0x01) sample_start(samples, CHANNEL_SOUND1, SAMPLE_SOUND1, 0);
-		if (rising_bits & 0x02) sample_start(samples, CHANNEL_SOUND2, SAMPLE_SOUND2, 0);
-		if (rising_bits & 0x08) sample_start(samples, CHANNEL_SOUND4, SAMPLE_SOUND4, 0);
+		if (rising_bits & 0x01) samples->start(CHANNEL_SOUND1, SAMPLE_SOUND1);
+		if (rising_bits & 0x02) samples->start(CHANNEL_SOUND2, SAMPLE_SOUND2);
+		if (rising_bits & 0x08) samples->start(CHANNEL_SOUND4, SAMPLE_SOUND4);
 		if (rising_bits & 0x04)
 		{
-			if (!state->m_sound3_counter)
-				sample_start(samples, CHANNEL_SOUND3, SAMPLE_SOUND3_1, 0);
+			if (!m_sound3_counter)
+				samples->start(CHANNEL_SOUND3, SAMPLE_SOUND3_1);
 			else
-				sample_start(samples, CHANNEL_SOUND3, SAMPLE_SOUND3_2, 0);
+				samples->start(CHANNEL_SOUND3, SAMPLE_SOUND3_2);
 
-			state->m_sound3_counter ^= 1;
+			m_sound3_counter ^= 1;
 		}
 	}
 
-	state->m_port_last2 = data;
+	m_port_last2 = data;
 }
 
-static WRITE8_HANDLER( dai3wksi_audio_3_w )
+WRITE8_MEMBER(dai3wksi_state::dai3wksi_audio_3_w)
 {
-	dai3wksi_state *state = space->machine().driver_data<dai3wksi_state>();
-	device_t *samples = space->machine().device("samples");
+	samples_device *samples = machine().device<samples_device>("samples");
 
-	if (state->m_enabled_sound)
+	if (m_enabled_sound)
 	{
 		if (data & 0x40)
-			sample_start(samples, CHANNEL_SOUND6, SAMPLE_SOUND6_1, 0);
+			samples->start(CHANNEL_SOUND6, SAMPLE_SOUND6_1);
 		else if (data & 0x80)
-			sample_start(samples, CHANNEL_SOUND6, SAMPLE_SOUND6_2, 0);
+			samples->start(CHANNEL_SOUND6, SAMPLE_SOUND6_2);
 	}
 }
 
@@ -262,234 +264,233 @@ static WRITE8_HANDLER( dai3wksi_audio_3_w )
 static const char *const dai3wksi_sample_names[] =
 {
 	"*dai3wksi",
-	"1.wav",
-	"2.wav",
-	"3.wav",
-	"3-2.wav",
-	"4.wav",
-	"5.wav",
-	"6.wav",
-	"6-2.wav",
+	"1",
+	"2",
+	"3",
+	"3-2",
+	"4",
+	"5",
+	"6",
+	"6-2",
 	0
 };
 
 
 static const samples_interface dai3wksi_samples_interface =
 {
-	6,	/* 6 channels */
+	6,  /* 6 channels */
 	dai3wksi_sample_names
 };
 
 #else
 
-static WRITE8_HANDLER( dai3wksi_audio_1_w )
+WRITE8_MEMBER(dai3wksi_state::dai3wksi_audio_1_w)
 {
-	device_t *ic79 = space->machine().device("ic79");
+	device_t *ic79 = machine().device("ic79");
 
-	space->machine().sound().system_enable(data & 0x80);
+	machine().sound().system_enable(data & 0x80);
 
-	sn76477_enable_w(ic79, (~data >> 5) & 0x01);		/* invader movement enable */
-	sn76477_envelope_1_w(ic79, (~data >> 2) & 0x01);	/* invader movement envelope control*/
+	sn76477_enable_w(ic79, (~data >> 5) & 0x01);        /* invader movement enable */
+	sn76477_envelope_1_w(ic79, (~data >> 2) & 0x01);    /* invader movement envelope control*/
 }
 
-static WRITE8_HANDLER( dai3wksi_audio_2_w )
+WRITE8_MEMBER(dai3wksi_state::dai3wksi_audio_2_w)
 {
 
-	dai3wksi_state *state = space->machine().driver_data<dai3wksi_state>();
-	device_t *ic77 = space->machine().device("ic77");
-	device_t *ic78 = space->machine().device("ic78");
-	device_t *ic80 = space->machine().device("ic80");
+	device_t *ic77 = machine().device("ic77");
+	device_t *ic78 = machine().device("ic78");
+	device_t *ic80 = machine().device("ic80");
 
-	state->m_dai3wksi_flipscreen =  data & 0x10;
-	state->m_dai3wksi_redscreen  = ~data & 0x20;
-	state->m_dai3wksi_redterop   =  data & 0x40;
+	m_dai3wksi_flipscreen =  data & 0x10;
+	m_dai3wksi_redscreen  = ~data & 0x20;
+	m_dai3wksi_redterop   =  data & 0x40;
 
-	sn76477_enable_w(ic77, (~data >> 0) & 0x01);	/* ship movement */
-	sn76477_enable_w(ic78, (~data >> 1) & 0x01);	/* danger text */
+	sn76477_enable_w(ic77, (~data >> 0) & 0x01);    /* ship movement */
+	sn76477_enable_w(ic78, (~data >> 1) & 0x01);    /* danger text */
 	/* ic76 - invader hit  (~data >> 2) & 0x01 */
-	sn76477_enable_w(ic80, (~data >> 3) & 0x01);	/* planet explosion */
+	sn76477_enable_w(ic80, (~data >> 3) & 0x01);    /* planet explosion */
 }
 
-static WRITE8_HANDLER( dai3wksi_audio_3_w )
+WRITE8_MEMBER(dai3wksi_state::dai3wksi_audio_3_w)
 {
-	device_t *ic81 = space->machine().device("ic81");
+	device_t *ic81 = machine().device("ic81");
 
-	sn76477_enable_w(ic81, (~data >> 2) & 0x01);	/* player shoot enable */
-	sn76477_vco_w(ic81, (~data >> 3) & 0x01);		/* player shoot vco control */
+	sn76477_enable_w(ic81, (~data >> 2) & 0x01);    /* player shoot enable */
+	sn76477_vco_w(ic81, (~data >> 3) & 0x01);       /* player shoot vco control */
 }
 
 
 /* Invader Hit */
 static const sn76477_interface dai3wksi_sn76477_ic76 =
 {
-	0,				/*  4 noise_res (N/C)        */
-	0,				/*  5 filter_res (N/C)       */
-	0,				/*  6 filter_cap (N/C)       */
-	RES_K(4.7),		/*  7 decay_res              */
-	CAP_U(0.1),		/*  8 attack_decay_cap       */
-	RES_K(4.7), 	/* 10 attack_res             */
-	RES_K(150),		/* 11 amplitude_res          */
-	RES_K(47),		/* 12 feedback_res           */
-	0,				/* 16 vco_voltage (variable) */
-	CAP_U(0.022),	/* 17 vco_cap                */
-	RES_K(33),		/* 18 vco_res                */
-	5.0,			/* 19 pitch_voltage          */
-	0,				/* 20 slf_res (N/C)          */
-	0,				/* 21 slf_cap (N/C)          */
-	0,				/* 23 oneshot_cap (N/C)      */
-	0,				/* 24 oneshot_res (N/C)      */
-	0,				/* 22 vco                    */
-	0,				/* 26 mixer A                */
-	0,				/* 25 mixer B                */
-	0,				/* 27 mixer C                */
-	0,				/* 1  envelope 1             */
-	0,				/* 28 envelope 2             */
-	0				/* 9  enable                 */
+	0,              /*  4 noise_res (N/C)        */
+	0,              /*  5 filter_res (N/C)       */
+	0,              /*  6 filter_cap (N/C)       */
+	RES_K(4.7),     /*  7 decay_res              */
+	CAP_U(0.1),     /*  8 attack_decay_cap       */
+	RES_K(4.7),     /* 10 attack_res             */
+	RES_K(150),     /* 11 amplitude_res          */
+	RES_K(47),      /* 12 feedback_res           */
+	0,              /* 16 vco_voltage (variable) */
+	CAP_U(0.022),   /* 17 vco_cap                */
+	RES_K(33),      /* 18 vco_res                */
+	5.0,            /* 19 pitch_voltage          */
+	0,              /* 20 slf_res (N/C)          */
+	0,              /* 21 slf_cap (N/C)          */
+	0,              /* 23 oneshot_cap (N/C)      */
+	0,              /* 24 oneshot_res (N/C)      */
+	0,              /* 22 vco                    */
+	0,              /* 26 mixer A                */
+	0,              /* 25 mixer B                */
+	0,              /* 27 mixer C                */
+	0,              /* 1  envelope 1             */
+	0,              /* 28 envelope 2             */
+	0               /* 9  enable                 */
 };
 
 
 /* Ship Movement */
 static const sn76477_interface dai3wksi_sn76477_ic77 =
 {
-	0,				/*  4 noise_res (N/C)      */
-	0,				/*  5 filter_res (N/C)     */
-	0,				/*  6 filter_cap (N/C)     */
-	RES_K(4.7),		/*  7 decay_res            */
-	CAP_U(0.1),		/*  8 attack_decay_cap     */
-	RES_K(4.7), 	/* 10 attack_res           */
-	RES_K(150),		/* 11 amplitude_res        */
-	RES_K(47),		/* 12 feedback_res         */
-	0,				/* 16 vco_voltage (N/C)    */
-	0,				/* 17 vco_cap (N/C)        */
-	0,				/* 18 vco_res (N/C)        */
-	0,				/* 19 pitch_voltage        */
-	RES_K(200),		/* 20 slf_res              */
-	CAP_U(0.0022),	/* 21 slf_cap              */
-	CAP_U(10),		/* 23 oneshot_cap          */
-	RES_K(4.7),		/* 24 oneshot_res          */
-	5,				/* 22 vco                  */
-	5,				/* 26 mixer A              */
-	0,				/* 25 mixer B              */
-	0,				/* 27 mixer C              */
-	5,				/* 1  envelope 1           */
-	0,				/* 28 envelope 2           */
-	1				/* 9  enable (variable)    */
+	0,              /*  4 noise_res (N/C)      */
+	0,              /*  5 filter_res (N/C)     */
+	0,              /*  6 filter_cap (N/C)     */
+	RES_K(4.7),     /*  7 decay_res            */
+	CAP_U(0.1),     /*  8 attack_decay_cap     */
+	RES_K(4.7),     /* 10 attack_res           */
+	RES_K(150),     /* 11 amplitude_res        */
+	RES_K(47),      /* 12 feedback_res         */
+	0,              /* 16 vco_voltage (N/C)    */
+	0,              /* 17 vco_cap (N/C)        */
+	0,              /* 18 vco_res (N/C)        */
+	0,              /* 19 pitch_voltage        */
+	RES_K(200),     /* 20 slf_res              */
+	CAP_U(0.0022),  /* 21 slf_cap              */
+	CAP_U(10),      /* 23 oneshot_cap          */
+	RES_K(4.7),     /* 24 oneshot_res          */
+	5,              /* 22 vco                  */
+	5,              /* 26 mixer A              */
+	0,              /* 25 mixer B              */
+	0,              /* 27 mixer C              */
+	5,              /* 1  envelope 1           */
+	0,              /* 28 envelope 2           */
+	1               /* 9  enable (variable)    */
 };
 
 
 /* Danger */
 static const sn76477_interface dai3wksi_sn76477_ic78 =
 {
-	RES_K(47),		/*  4 noise_res            */
-	0,				/*  5 filter_res (N/C)     */
-	0,				/*  6 filter_cap (N/C)     */
-	RES_K(200),		/*  7 decay_res            */
-	CAP_U(0.1),		/*  8 attack_decay_cap     */
-	RES_K(4.7), 	/* 10 attack_res           */
-	RES_K(150),		/* 11 amplitude_res        */
-	RES_K(47),		/* 12 feedback_res         */
-	0,				/* 16 vco_voltage (N/C)    */
-	CAP_U(0.47),	/* 17 vco_cap              */
-	RES_K(75),		/* 18 vco_res              */
-	5.0,			/* 19 pitch_voltage        */
-	RES_K(47),		/* 20 slf_res              */
-	CAP_N(1),		/* 21 slf_cap              */
-	CAP_U(10),		/* 23 oneshot_cap          */
-	RES_K(22),		/* 24 oneshot_res          */
-	5,				/* 22 vco                  */
-	0,				/* 26 mixer A              */
-	0,				/* 25 mixer B              */
-	0,				/* 27 mixer C              */
-	5,				/* 1  envelope 1           */
-	0,				/* 28 envelope 2           */
-	1				/* 9  enable (variable)    */
+	RES_K(47),      /*  4 noise_res            */
+	0,              /*  5 filter_res (N/C)     */
+	0,              /*  6 filter_cap (N/C)     */
+	RES_K(200),     /*  7 decay_res            */
+	CAP_U(0.1),     /*  8 attack_decay_cap     */
+	RES_K(4.7),     /* 10 attack_res           */
+	RES_K(150),     /* 11 amplitude_res        */
+	RES_K(47),      /* 12 feedback_res         */
+	0,              /* 16 vco_voltage (N/C)    */
+	CAP_U(0.47),    /* 17 vco_cap              */
+	RES_K(75),      /* 18 vco_res              */
+	5.0,            /* 19 pitch_voltage        */
+	RES_K(47),      /* 20 slf_res              */
+	CAP_N(1),       /* 21 slf_cap              */
+	CAP_U(10),      /* 23 oneshot_cap          */
+	RES_K(22),      /* 24 oneshot_res          */
+	5,              /* 22 vco                  */
+	0,              /* 26 mixer A              */
+	0,              /* 25 mixer B              */
+	0,              /* 27 mixer C              */
+	5,              /* 1  envelope 1           */
+	0,              /* 28 envelope 2           */
+	1               /* 9  enable (variable)    */
 };
 
 
 /* Invader Marching Noise */
 static const sn76477_interface dai3wksi_sn76477_ic79 =
 {
-	0,				/*  4 noise_res (N/C)      */
-	0,				/*  5 filter_res (N/C)     */
-	0,				/*  6 filter_cap (N/C)     */
-	RES_K(56),		/*  7 decay_res            */
-	CAP_U(0.1),		/*  8 attack_decay_cap     */
-	RES_K(4.7), 	/* 10 attack_res           */
-	RES_K(150),		/* 11 amplitude_res        */
-	RES_K(47),		/* 12 feedback_res         */
-	0,				/* 16 vco_voltage (N/C)    */
-	CAP_U(0.01),	/* 17 vco_cap              */
-	RES_K(100),		/* 18 vco_res              */
-	5.0,			/* 19 pitch_voltage        */
-	RES_K(150),		/* 20 slf_res              */
-	CAP_N(1),		/* 21 slf_cap              */
-	CAP_U(10),		/* 23 oneshot_cap          */
-	RES_K(22),		/* 24 oneshot_res          */
-	5,				/* 22 vco                  */
-	0,				/* 26 mixer A              */
-	0,				/* 25 mixer B              */
-	0,				/* 27 mixer C              */
-	5,				/* 1  envelope 1 (variable)*/
-	5,				/* 28 envelope 2           */
-	1				/* 9  enable (variable)    */
+	0,              /*  4 noise_res (N/C)      */
+	0,              /*  5 filter_res (N/C)     */
+	0,              /*  6 filter_cap (N/C)     */
+	RES_K(56),      /*  7 decay_res            */
+	CAP_U(0.1),     /*  8 attack_decay_cap     */
+	RES_K(4.7),     /* 10 attack_res           */
+	RES_K(150),     /* 11 amplitude_res        */
+	RES_K(47),      /* 12 feedback_res         */
+	0,              /* 16 vco_voltage (N/C)    */
+	CAP_U(0.01),    /* 17 vco_cap              */
+	RES_K(100),     /* 18 vco_res              */
+	5.0,            /* 19 pitch_voltage        */
+	RES_K(150),     /* 20 slf_res              */
+	CAP_N(1),       /* 21 slf_cap              */
+	CAP_U(10),      /* 23 oneshot_cap          */
+	RES_K(22),      /* 24 oneshot_res          */
+	5,              /* 22 vco                  */
+	0,              /* 26 mixer A              */
+	0,              /* 25 mixer B              */
+	0,              /* 27 mixer C              */
+	5,              /* 1  envelope 1 (variable)*/
+	5,              /* 28 envelope 2           */
+	1               /* 9  enable (variable)    */
 };
 
 
 /* Big Planet Explosion */
 static const sn76477_interface dai3wksi_sn76477_ic80 =
 {
-	RES_K(47),		/*  4 noise_res            */
-	RES_K(330),		/*  5 filter_res           */
-	CAP_P(470),		/*  6 filter_cap           */
-	RES_M(2),		/*  7 decay_res            */
-	CAP_U(1),		/*  8 attack_decay_cap     */
-	RES_K(4.7), 	/* 10 attack_res           */
-	RES_K(150),		/* 11 amplitude_res        */
-	RES_K(47),		/* 12 feedback_res         */
-	0,				/* 16 vco_voltage (N/C)    */
-	0,				/* 17 vco_cap (N/C)        */
-	0,				/* 18 vco_res (N/C)        */
-	5.0,			/* 19 pitch_voltage        */
-	0,				/* 20 slf_res (N/C)        */
-	0,				/* 21 slf_cap (N/C)        */
-	CAP_U(10),		/* 23 oneshot_cap          */
-	RES_K(55),		/* 24 oneshot_res          */
-	5,				/* 22 vco                  */
-	0,				/* 26 mixer A              */
-	5,				/* 25 mixer B              */
-	0,				/* 27 mixer C              */
-	5,				/* 1  envelope 1           */
-	0,				/* 28 envelope 2           */
-	1				/* 9  enable (variable)    */
+	RES_K(47),      /*  4 noise_res            */
+	RES_K(330),     /*  5 filter_res           */
+	CAP_P(470),     /*  6 filter_cap           */
+	RES_M(2),       /*  7 decay_res            */
+	CAP_U(1),       /*  8 attack_decay_cap     */
+	RES_K(4.7),     /* 10 attack_res           */
+	RES_K(150),     /* 11 amplitude_res        */
+	RES_K(47),      /* 12 feedback_res         */
+	0,              /* 16 vco_voltage (N/C)    */
+	0,              /* 17 vco_cap (N/C)        */
+	0,              /* 18 vco_res (N/C)        */
+	5.0,            /* 19 pitch_voltage        */
+	0,              /* 20 slf_res (N/C)        */
+	0,              /* 21 slf_cap (N/C)        */
+	CAP_U(10),      /* 23 oneshot_cap          */
+	RES_K(55),      /* 24 oneshot_res          */
+	5,              /* 22 vco                  */
+	0,              /* 26 mixer A              */
+	5,              /* 25 mixer B              */
+	0,              /* 27 mixer C              */
+	5,              /* 1  envelope 1           */
+	0,              /* 28 envelope 2           */
+	1               /* 9  enable (variable)    */
 };
 
 
 /* Plane Shoot noise */
 static const sn76477_interface dai3wksi_sn76477_ic81 =
 {
-	0,				/*  4 noise_res (N/C)      */
-	0,				/*  5 filter_res (N/C)     */
-	0,				/*  6 filter_cap (N/C)     */
-	RES_K(200),		/*  7 decay_res            */
-	CAP_U(10),		/*  8 attack_decay_cap     */
-	RES_K(4.7), 	/* 10 attack_res           */
-	RES_K(150),		/* 11 amplitude_res        */
-	RES_K(47),		/* 12 feedback_res         */
-	2.5,			/* 16 vco_voltage    */
-	CAP_U(0.01),	/* 17 vco_cap              */
-	RES_K(100),		/* 18 vco_res              */
-	5.0,			/* 19 pitch_voltage        */
-	RES_K(100),		/* 20 slf_res              */
-	CAP_N(0.47),	/* 21 slf_cap              */
-	CAP_U(10),		/* 23 oneshot_cap          */
-	RES_K(6.8),		/* 24 oneshot_res          */
-	0,				/* 22 vco (variable)       */
-	0,				/* 26 mixer A              */
-	5,				/* 25 mixer B              */
-	5,				/* 27 mixer C              */
-	5,				/* 1  envelope 1           */
-	0,				/* 28 envelope 2           */
-	1				/* 9  enable (variable)    */
+	0,              /*  4 noise_res (N/C)      */
+	0,              /*  5 filter_res (N/C)     */
+	0,              /*  6 filter_cap (N/C)     */
+	RES_K(200),     /*  7 decay_res            */
+	CAP_U(10),      /*  8 attack_decay_cap     */
+	RES_K(4.7),     /* 10 attack_res           */
+	RES_K(150),     /* 11 amplitude_res        */
+	RES_K(47),      /* 12 feedback_res         */
+	2.5,            /* 16 vco_voltage    */
+	CAP_U(0.01),    /* 17 vco_cap              */
+	RES_K(100),     /* 18 vco_res              */
+	5.0,            /* 19 pitch_voltage        */
+	RES_K(100),     /* 20 slf_res              */
+	CAP_N(0.47),    /* 21 slf_cap              */
+	CAP_U(10),      /* 23 oneshot_cap          */
+	RES_K(6.8),     /* 24 oneshot_res          */
+	0,              /* 22 vco (variable)       */
+	0,              /* 26 mixer A              */
+	5,              /* 25 mixer B              */
+	5,              /* 27 mixer C              */
+	5,              /* 1  envelope 1           */
+	0,              /* 28 envelope 2           */
+	1               /* 9  enable (variable)    */
 };
 
 #endif
@@ -502,7 +503,7 @@ static const sn76477_interface dai3wksi_sn76477_ic81 =
  *
  *************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, dai3wksi_state )
 	AM_RANGE(0x0000, 0x1bff) AM_ROM
 	AM_RANGE(0x2000, 0x23ff) AM_RAM
 	AM_RANGE(0x2400, 0x24ff) AM_MIRROR(0x100) AM_READ_PORT("IN0")
@@ -510,7 +511,7 @@ static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
 	AM_RANGE(0x3000, 0x3000) AM_WRITE(dai3wksi_audio_1_w)
 	AM_RANGE(0x3400, 0x3400) AM_WRITE(dai3wksi_audio_2_w)
 	AM_RANGE(0x3800, 0x3800) AM_WRITE(dai3wksi_audio_3_w)
-	AM_RANGE(0x8000, 0xbfff) AM_RAM AM_BASE_SIZE_MEMBER(dai3wksi_state, m_dai3wksi_videoram, m_dai3wksi_videoram_size)
+	AM_RANGE(0x8000, 0xbfff) AM_RAM AM_SHARE("videoram")
 ADDRESS_MAP_END
 
 
@@ -526,10 +527,10 @@ static INPUT_PORTS_START( dai3wksi )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_4WAY PORT_PLAYER(1)
 	PORT_SERVICE( 0x04, IP_ACTIVE_HIGH )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_4WAY PORT_PLAYER(2)
-	PORT_DIPNAME( 0x10, 0x00, "DIPSW #7" )						PORT_DIPLOCATION("SW1:7")
+	PORT_DIPNAME( 0x10, 0x00, "DIPSW #7" )                      PORT_DIPLOCATION("SW1:7")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x10, DEF_STR( On ) )
-	PORT_DIPNAME( 0x20, 0x00, "DIPSW #8" )						PORT_DIPLOCATION("SW1:8")
+	PORT_DIPNAME( 0x20, 0x00, "DIPSW #8" )                      PORT_DIPLOCATION("SW1:8")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( On ) )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_4WAY PORT_PLAYER(2)
@@ -546,10 +547,10 @@ static INPUT_PORTS_START( dai3wksi )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_4WAY PORT_PLAYER(1)
 
 	PORT_START("IN2")
-	PORT_DIPNAME( 0x01, 0x00, "DIPSW #1" )						PORT_DIPLOCATION("SW1:1")
+	PORT_DIPNAME( 0x01, 0x00, "DIPSW #1" )                      PORT_DIPLOCATION("SW1:1")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( On ) )
-	PORT_DIPNAME( 0x02, 0x00, "DIPSW #2" )						PORT_DIPLOCATION("SW1:2")
+	PORT_DIPNAME( 0x02, 0x00, "DIPSW #2" )                      PORT_DIPLOCATION("SW1:2")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( On ) )
 	PORT_BIT( 0xfc, IP_ACTIVE_HIGH, IPT_UNKNOWN )
@@ -562,28 +563,26 @@ INPUT_PORTS_END
  *
  *************************************/
 
-static MACHINE_START( dai3wksi )
+void dai3wksi_state::machine_start()
 {
-	dai3wksi_state *state = machine.driver_data<dai3wksi_state>();
 
 	/* Set up save state */
-	state->save_item(NAME(state->m_dai3wksi_flipscreen));
-	state->save_item(NAME(state->m_dai3wksi_redscreen));
-	state->save_item(NAME(state->m_dai3wksi_redterop));
-	state->save_item(NAME(state->m_port_last1));
-	state->save_item(NAME(state->m_port_last2));
-	state->save_item(NAME(state->m_enabled_sound));
-	state->save_item(NAME(state->m_sound3_counter));
+	save_item(NAME(m_dai3wksi_flipscreen));
+	save_item(NAME(m_dai3wksi_redscreen));
+	save_item(NAME(m_dai3wksi_redterop));
+	save_item(NAME(m_port_last1));
+	save_item(NAME(m_port_last2));
+	save_item(NAME(m_enabled_sound));
+	save_item(NAME(m_sound3_counter));
 }
 
-static MACHINE_RESET( dai3wksi )
+void dai3wksi_state::machine_reset()
 {
-	dai3wksi_state *state = machine.driver_data<dai3wksi_state>();
 
-	state->m_port_last1 = 0;
-	state->m_port_last2 = 0;
-	state->m_enabled_sound = 0;
-	state->m_sound3_counter = 0;
+	m_port_last1 = 0;
+	m_port_last2 = 0;
+	m_enabled_sound = 0;
+	m_sound3_counter = 0;
 }
 
 
@@ -592,24 +591,20 @@ static MACHINE_CONFIG_START( dai3wksi, dai3wksi_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", Z80, XTAL_10MHz/4)
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", dai3wksi_state,  irq0_line_hold)
 
-	MCFG_MACHINE_START(dai3wksi)
-	MCFG_MACHINE_RESET(dai3wksi)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
 	MCFG_SCREEN_SIZE(256, 256)
 	MCFG_SCREEN_VISIBLE_AREA(4, 251, 8, 247)
 	MCFG_SCREEN_REFRESH_RATE(60)
-	MCFG_SCREEN_UPDATE(dai3wksi)
+	MCFG_SCREEN_UPDATE_DRIVER(dai3wksi_state, screen_update_dai3wksi)
 
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
 #if (USE_SAMPLES)
-	MCFG_SOUND_ADD("samples", SAMPLES, 0)
-	MCFG_SOUND_CONFIG(dai3wksi_samples_interface)
+	MCFG_SAMPLES_ADD("samples", dai3wksi_samples_interface)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 #else
 	MCFG_SOUND_ADD("ic76", SN76477, 0)
@@ -660,4 +655,4 @@ ROM_END
  *
  *************************************/
 
-GAME( 1979, dai3wksi, 0, dai3wksi, dai3wksi, 0, ROT270, "Sun Electronics", "Dai San Wakusei Meteor (Japan)", GAME_WRONG_COLORS | GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1979, dai3wksi, 0, dai3wksi, dai3wksi, driver_device, 0, ROT270, "Sun Electronics", "Dai San Wakusei Meteor (Japan)", GAME_WRONG_COLORS | GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )

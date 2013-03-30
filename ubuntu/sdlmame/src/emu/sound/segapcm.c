@@ -5,31 +5,69 @@
 #include "emu.h"
 #include "segapcm.h"
 
-typedef struct _segapcm_state segapcm_state;
-struct _segapcm_state
-{
-	UINT8  *ram;
-	UINT8 low[16];
-	const UINT8 *rom;
-	int bankshift;
-	int bankmask;
-	int rgnmask;
-	sound_stream * stream;
-};
 
-INLINE segapcm_state *get_safe_token(device_t *device)
+// device type definition
+const device_type SEGAPCM = &device_creator<segapcm_device>;
+
+
+//-------------------------------------------------
+//  segapcm_device - constructor
+//-------------------------------------------------
+
+segapcm_device::segapcm_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, SEGAPCM, "Sega PCM", "segapcm", tag, owner, clock),
+		device_sound_interface(mconfig, *this),
+		m_ram(NULL),
+		m_rom(NULL),
+		m_bankshift(0),
+		m_bankmask(0),
+		m_rgnmask(0),
+		m_stream(NULL)
 {
-	assert(device != NULL);
-	assert(device->type() == SEGAPCM);
-	return (segapcm_state *)downcast<legacy_device_base *>(device)->token();
 }
 
-static STREAM_UPDATE( SEGAPCM_update )
-{
-	segapcm_state *spcm = (segapcm_state *)param;
-	int rgnmask = spcm->rgnmask;
-	int ch;
 
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void segapcm_device::device_start()
+{
+	int mask, rom_mask, len;
+	const sega_pcm_interface *intf = (const sega_pcm_interface *)static_config();
+
+	m_rom = *region();
+	m_ram = auto_alloc_array(machine(), UINT8, 0x800);
+
+	memset(m_ram, 0xff, 0x800);
+
+	m_bankshift = (UINT8)(intf->bank);
+	mask = intf->bank >> 16;
+	if(!mask)
+		mask = BANK_MASK7>>16;
+
+	len = region()->bytes();
+	m_rgnmask = len - 1;
+
+	for(rom_mask = 1; rom_mask < len; rom_mask *= 2);
+
+	rom_mask--;
+
+	m_bankmask = mask & (rom_mask >> m_bankshift);
+
+	m_stream = stream_alloc(0, 2, clock() / 128);
+
+	save_item(NAME(m_low));
+	save_pointer(NAME(m_ram), 0x800);
+}
+
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void segapcm_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
 	/* clear the buffers */
 	memset(outputs[0], 0, samples*sizeof(*outputs[0]));
 	memset(outputs[1], 0, samples*sizeof(*outputs[1]));
@@ -56,15 +94,15 @@ static STREAM_UPDATE( SEGAPCM_update )
 	// 0x87     ?
 
 	/* loop over channels */
-	for (ch = 0; ch < 16; ch++)
+	for (int ch = 0; ch < 16; ch++)
 	{
-		UINT8 *regs = spcm->ram+8*ch;
+		UINT8 *regs = m_ram+8*ch;
 
 		/* only process active channels */
 		if (!(regs[0x86]&1))
 		{
-			const UINT8 *rom = spcm->rom + ((regs[0x86] & spcm->bankmask) << spcm->bankshift);
-			UINT32 addr = (regs[0x85] << 16) | (regs[0x84] << 8) | spcm->low[ch];
+			const UINT8 *rom = m_rom + ((regs[0x86] & m_bankmask) << m_bankshift);
+			UINT32 addr = (regs[0x85] << 16) | (regs[0x84] << 8) | m_low[ch];
 			UINT32 loop = (regs[0x05] << 16) | (regs[0x04] << 8);
 			UINT8 end = regs[6] + 1;
 			int i;
@@ -86,7 +124,7 @@ static STREAM_UPDATE( SEGAPCM_update )
 				}
 
 				/* fetch the sample */
-				v = rom[(addr >> 8) & rgnmask] - 0x80;
+				v = rom[(addr >> 8) & m_rgnmask] - 0x80;
 
 				/* apply panning and advance */
 				outputs[0][i] += v * regs[2];
@@ -97,83 +135,21 @@ static STREAM_UPDATE( SEGAPCM_update )
 			/* store back the updated address */
 			regs[0x84] = addr >> 8;
 			regs[0x85] = addr >> 16;
-			spcm->low[ch] = regs[0x86] & 1 ? 0 : addr;
+			m_low[ch] = regs[0x86] & 1 ? 0 : addr;
 		}
 	}
 }
 
-static DEVICE_START( segapcm )
+
+WRITE8_MEMBER( segapcm_device::sega_pcm_w )
 {
-	const sega_pcm_interface *intf = (const sega_pcm_interface *)device->baseconfig().static_config();
-	int mask, rom_mask, len;
-	segapcm_state *spcm = get_safe_token(device);
-
-	spcm->rom = *device->region();
-	spcm->ram = auto_alloc_array(device->machine(), UINT8, 0x800);
-
-	memset(spcm->ram, 0xff, 0x800);
-
-	spcm->bankshift = (UINT8)(intf->bank);
-	mask = intf->bank >> 16;
-	if(!mask)
-		mask = BANK_MASK7>>16;
-
-	len = device->region()->bytes();
-	spcm->rgnmask = len - 1;
-
-	for(rom_mask = 1; rom_mask < len; rom_mask *= 2);
-
-	rom_mask--;
-
-	spcm->bankmask = mask & (rom_mask >> spcm->bankshift);
-
-	spcm->stream = device->machine().sound().stream_alloc(*device, 0, 2, device->clock() / 128, spcm, SEGAPCM_update);
-
-	device->save_item(NAME(spcm->low));
-	device->save_pointer(NAME(spcm->ram), 0x800);
+	m_stream->update();
+	m_ram[offset & 0x07ff] = data;
 }
 
 
-WRITE8_DEVICE_HANDLER( sega_pcm_w )
+READ8_MEMBER( segapcm_device::sega_pcm_r )
 {
-	segapcm_state *spcm = get_safe_token(device);
-	spcm->stream->update();
-	spcm->ram[offset & 0x07ff] = data;
+	m_stream->update();
+	return m_ram[offset & 0x07ff];
 }
-
-READ8_DEVICE_HANDLER( sega_pcm_r )
-{
-	segapcm_state *spcm = get_safe_token(device);
-	spcm->stream->update();
-	return spcm->ram[offset & 0x07ff];
-}
-
-
-
-/**************************************************************************
- * Generic get_info
- **************************************************************************/
-
-DEVICE_GET_INFO( segapcm )
-{
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(segapcm_state);				break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME( segapcm );		break;
-		case DEVINFO_FCT_STOP:							/* Nothing */									break;
-		case DEVINFO_FCT_RESET:							/* Nothing */									break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "Sega PCM");					break;
-		case DEVINFO_STR_FAMILY:					strcpy(info->s, "Sega custom");					break;
-		case DEVINFO_STR_VERSION:					strcpy(info->s, "1.0");							break;
-		case DEVINFO_STR_SOURCE_FILE:						strcpy(info->s, __FILE__);						break;
-		case DEVINFO_STR_CREDITS:					strcpy(info->s, "Copyright Nicola Salmoria and the MAME Team"); break;
-	}
-}
-
-
-DEFINE_LEGACY_SOUND_DEVICE(SEGAPCM, segapcm);

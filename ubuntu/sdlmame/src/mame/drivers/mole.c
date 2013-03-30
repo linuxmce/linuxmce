@@ -56,8 +56,8 @@
 class mole_state : public driver_device
 {
 public:
-	mole_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	mole_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) { }
 
 	/* video-related */
 	tilemap_t    *m_bg_tilemap;
@@ -65,6 +65,16 @@ public:
 
 	/* memory */
 	UINT16       m_tileram[0x400];
+	DECLARE_WRITE8_MEMBER(mole_tileram_w);
+	DECLARE_WRITE8_MEMBER(mole_tilebank_w);
+	DECLARE_WRITE8_MEMBER(mole_flipscreen_w);
+	DECLARE_READ8_MEMBER(mole_protection_r);
+	TILE_GET_INFO_MEMBER(get_bg_tile_info);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_mole(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
@@ -74,57 +84,49 @@ public:
  *
  *************************************/
 
-static PALETTE_INIT( mole )
+void mole_state::palette_init()
 {
 	int i;
 
 	for (i = 0; i < 8; i++)
-		palette_set_color_rgb(machine, i, pal1bit(i >> 0), pal1bit(i >> 2), pal1bit(i >> 1));
+		palette_set_color_rgb(machine(), i, pal1bit(i >> 0), pal1bit(i >> 2), pal1bit(i >> 1));
 }
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(mole_state::get_bg_tile_info)
 {
-	mole_state *state = machine.driver_data<mole_state>();
-	UINT16 code = state->m_tileram[tile_index];
+	UINT16 code = m_tileram[tile_index];
 
-	SET_TILE_INFO((code & 0x200) ? 1 : 0, code & 0x1ff, 0, 0);
+	SET_TILE_INFO_MEMBER((code & 0x200) ? 1 : 0, code & 0x1ff, 0, 0);
 }
 
-static VIDEO_START( mole )
+void mole_state::video_start()
 {
-	mole_state *state = machine.driver_data<mole_state>();
-	memset(state->m_tileram, 0, sizeof(state->m_tileram));
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_rows, 8, 8, 40, 25);
+	memset(m_tileram, 0, sizeof(m_tileram));
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(mole_state::get_bg_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 40, 25);
 
-	state->save_item(NAME(state->m_tileram));
+	save_item(NAME(m_tileram));
 }
 
-static WRITE8_HANDLER( mole_videoram_w )
+WRITE8_MEMBER(mole_state::mole_tileram_w)
 {
-	mole_state *state = space->machine().driver_data<mole_state>();
-
-	state->m_tileram[offset] = data | (state->m_tile_bank << 8);
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_tileram[offset] = data | (m_tile_bank << 8);
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-static WRITE8_HANDLER( mole_tilebank_w )
+WRITE8_MEMBER(mole_state::mole_tilebank_w)
 {
-	mole_state *state = space->machine().driver_data<mole_state>();
-
-	state->m_tile_bank = data;
-	tilemap_mark_all_tiles_dirty(state->m_bg_tilemap);
+	m_tile_bank = data;
 }
 
-static WRITE8_HANDLER( mole_flipscreen_w )
+WRITE8_MEMBER(mole_state::mole_flipscreen_w)
 {
-	flip_screen_set(space->machine(), data & 0x01);
+	flip_screen_set(data & 0x01);
 }
 
-static SCREEN_UPDATE( mole )
+UINT32 mole_state::screen_update_mole(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	mole_state *state = screen->machine().driver_data<mole_state>();
 
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
 	return 0;
 }
 
@@ -136,35 +138,34 @@ static SCREEN_UPDATE( mole )
  *
  *************************************/
 
-static READ8_HANDLER( mole_protection_r )
+READ8_MEMBER(mole_state::mole_protection_r)
 {
-
-    /*  Following are all known examples of Mole Attack
-    **  code reading from the protection circuitry:
-    **
-    **  5b0b:
-    **  ram[0x0361] = (ram[0x885+ram[0x8a5])&ram[0x886]
-    **  ram[0x0363] = ram[0x886]
-    **
-    **  53c9:
-    **  ram[0xe0] = ram[0x800]+ram[0x802]+ram[0x804]
-    **  ram[0xea] = ram[0x828]
-    **
-    **  ram[0xe2] = (ram[0x806]&ram[0x826])|ram[0x820]
-    **  ram[0xe3] = ram[0x826]
-    **
-    **  ram[0x361] = (ram[0x8cd]&ram[0x8ad])|ram[0x8ce]
-    **  ram[0x362] = ram[0x8ae] = 0x32
-    **
-    **  ram[0x363] = ram[0x809]+ram[0x829]+ram[0x828]
-    **  ram[0x364] = ram[0x808]
-    */
+	/*  Following are all known examples of Mole Attack
+	**  code reading from the protection circuitry:
+	**
+	**  5b0b:
+	**  ram[0x0361] = (ram[0x885+ram[0x8a5])&ram[0x886]
+	**  ram[0x0363] = ram[0x886]
+	**
+	**  53c9:
+	**  ram[0xe0] = ram[0x800]+ram[0x802]+ram[0x804]
+	**  ram[0xea] = ram[0x828]
+	**
+	**  ram[0xe2] = (ram[0x806]&ram[0x826])|ram[0x820]
+	**  ram[0xe3] = ram[0x826]
+	**
+	**  ram[0x361] = (ram[0x8cd]&ram[0x8ad])|ram[0x8ce]
+	**  ram[0x362] = ram[0x8ae] = 0x32
+	**
+	**  ram[0x363] = ram[0x809]+ram[0x829]+ram[0x828]
+	**  ram[0x364] = ram[0x808]
+	*/
 
 	switch (offset)
 	{
 	case 0x08: return 0xb0; /* random mole placement */
 	case 0x26:
-		if (cpu_get_pc(&space->device()) == 0x53d7)
+		if (space.device().safe_pc() == 0x53d7)
 		{
 			return 0x06; /* bonus round */
 		}
@@ -176,11 +177,11 @@ static READ8_HANDLER( mole_protection_r )
 	case 0xae: return 0x32; /* coinage */
 	}
 
-    /*  The above are critical protection reads.
-    **  It isn't clear what effect (if any) the
-    **  remaining reads have; for now we simply
-    **  return 0x00
-    */
+	/*  The above are critical protection reads.
+	**  It isn't clear what effect (if any) the
+	**  remaining reads have; for now we simply
+	**  return 0x00
+	*/
 
 	return 0x00;
 }
@@ -192,15 +193,15 @@ static READ8_HANDLER( mole_protection_r )
  *
  *************************************/
 
-static ADDRESS_MAP_START( mole_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( mole_map, AS_PROGRAM, 8, mole_state )
 	AM_RANGE(0x0000, 0x03ff) AM_RAM
 	AM_RANGE(0x0800, 0x08ff) AM_READ(mole_protection_r)
 	AM_RANGE(0x0800, 0x0800) AM_WRITENOP // ???
 	AM_RANGE(0x0820, 0x0820) AM_WRITENOP // ???
 	AM_RANGE(0x5000, 0x7fff) AM_MIRROR(0x8000) AM_ROM
-	AM_RANGE(0x8000, 0x83ff) AM_RAM_WRITE(mole_videoram_w)
+	AM_RANGE(0x8000, 0x83ff) AM_WRITE(mole_tileram_w) AM_READNOP
 	AM_RANGE(0x8400, 0x8400) AM_WRITE(mole_tilebank_w)
-	AM_RANGE(0x8c00, 0x8c01) AM_DEVWRITE("aysnd", ay8910_data_address_w)
+	AM_RANGE(0x8c00, 0x8c01) AM_DEVWRITE_LEGACY("aysnd", ay8910_data_address_w)
 	AM_RANGE(0x8c40, 0x8c40) AM_WRITENOP // ???
 	AM_RANGE(0x8c80, 0x8c80) AM_WRITENOP // ???
 	AM_RANGE(0x8c81, 0x8c81) AM_WRITENOP // ???
@@ -218,26 +219,26 @@ ADDRESS_MAP_END
  *************************************/
 
 static INPUT_PORTS_START( mole )
-	PORT_START("DSW")	/* 0x8d00 */
+	PORT_START("DSW")   /* 0x8d00 */
 	PORT_DIPNAME( 0x01, 0x00, "Round Points" )
-	PORT_DIPSETTING(	0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x01, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x01, DEF_STR( On ) )
 	PORT_DIPNAME( 0x02, 0x00, DEF_STR( Coinage ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0x02, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x02, DEF_STR( 1C_2C ) )
 	PORT_DIPNAME( 0x0c, 0x00, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(	0x00, "A" )
-	PORT_DIPSETTING(	0x04, "B" )
-	PORT_DIPSETTING(	0x08, "C" )
-	PORT_DIPSETTING(	0x0c, "D" )
+	PORT_DIPSETTING(    0x00, "A" )
+	PORT_DIPSETTING(    0x04, "B" )
+	PORT_DIPSETTING(    0x08, "C" )
+	PORT_DIPSETTING(    0x0c, "D" )
 	PORT_DIPNAME( 0x30, 0x00, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(	0x00, "A" )
-	PORT_DIPSETTING(	0x10, "B" )
-	PORT_DIPSETTING(	0x20, "C" )
-	PORT_DIPSETTING(	0x30, "D" )
+	PORT_DIPSETTING(    0x00, "A" )
+	PORT_DIPSETTING(    0x10, "B" )
+	PORT_DIPSETTING(    0x20, "C" )
+	PORT_DIPSETTING(    0x30, "D" )
 	PORT_BIT( 0xc0, IP_ACTIVE_HIGH, IPT_UNUSED )
 
-	PORT_START("IN0")	/* 0x8d40 */
+	PORT_START("IN0")   /* 0x8d40 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_OTHER ) PORT_NAME("P1 Pad 1") PORT_CODE(KEYCODE_1_PAD)
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_OTHER ) PORT_NAME("P1 Pad 2") PORT_CODE(KEYCODE_2_PAD)
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_OTHER ) PORT_NAME("P1 Pad 3") PORT_CODE(KEYCODE_3_PAD)
@@ -247,7 +248,7 @@ static INPUT_PORTS_START( mole )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_OTHER ) PORT_NAME("P1 Pad 7") PORT_CODE(KEYCODE_7_PAD)
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_OTHER ) PORT_NAME("P1 Pad 8") PORT_CODE(KEYCODE_8_PAD)
 
-	PORT_START("IN1")	/* 0x8d80 */
+	PORT_START("IN1")   /* 0x8d80 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_OTHER ) PORT_NAME("P1 Pad 9") PORT_CODE(KEYCODE_9_PAD)
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_OTHER ) PORT_NAME("P2 Pad 1") PORT_CODE(KEYCODE_Q) PORT_COCKTAIL
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_OTHER ) PORT_NAME("P2 Pad 2") PORT_CODE(KEYCODE_W) PORT_COCKTAIL
@@ -259,7 +260,7 @@ static INPUT_PORTS_START( mole )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_START1 )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN1 )
 
-	PORT_START("IN2")	/* 0x8dc0 */
+	PORT_START("IN2")   /* 0x8dc0 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_OTHER ) PORT_NAME("P2 Pad 8") PORT_CODE(KEYCODE_X) PORT_COCKTAIL
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_OTHER ) PORT_NAME("P2 Pad 7") PORT_CODE(KEYCODE_Z) PORT_COCKTAIL
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_OTHER ) PORT_NAME("P2 Pad 4") PORT_CODE(KEYCODE_A) PORT_COCKTAIL
@@ -278,9 +279,9 @@ INPUT_PORTS_END
 
 static const gfx_layout tile_layout =
 {
-	8,8,	/* character size */
-	512,	/* number of characters */
-	3,		/* number of bitplanes */
+	8,8,    /* character size */
+	512,    /* number of characters */
+	3,      /* number of bitplanes */
 	{ 0x0000*8, 0x1000*8, 0x2000*8 },
 	{ 0, 1, 2, 3, 4, 5, 6, 7 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
@@ -300,18 +301,14 @@ GFXDECODE_END
  *
  *************************************/
 
-static MACHINE_START( mole )
+void mole_state::machine_start()
 {
-	mole_state *state = machine.driver_data<mole_state>();
-
-	state->save_item(NAME(state->m_tile_bank));
+	save_item(NAME(m_tile_bank));
 }
 
-static MACHINE_RESET( mole )
+void mole_state::machine_reset()
 {
-	mole_state *state = machine.driver_data<mole_state>();
-
-	state->m_tile_bank = 0;
+	m_tile_bank = 0;
 }
 
 static MACHINE_CONFIG_START( mole, mole_state )
@@ -319,25 +316,20 @@ static MACHINE_CONFIG_START( mole, mole_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6502, 4000000) // ???
 	MCFG_CPU_PROGRAM_MAP(mole_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", mole_state,  irq0_line_hold)
 
-	MCFG_MACHINE_START(mole)
-	MCFG_MACHINE_RESET(mole)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(40*8, 25*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 40*8-1, 0*8, 25*8-1)
-	MCFG_SCREEN_UPDATE(mole)
+	MCFG_SCREEN_UPDATE_DRIVER(mole_state, screen_update_mole)
 
 	MCFG_GFXDECODE(mole)
 	MCFG_PALETTE_LENGTH(8)
 
-	MCFG_PALETTE_INIT(mole)
-	MCFG_VIDEO_START(mole)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -354,18 +346,18 @@ MACHINE_CONFIG_END
  *************************************/
 
 ROM_START( mole ) // ALL ROMS ARE 2732
-	ROM_REGION( 0x10000, "maincpu", 0 )	// 64k for 6502 code
-	ROM_LOAD( "m3a.5h",	0x5000, 0x1000, CRC(5fbbdfef) SHA1(8129e90a05b3ca50f47f7610eec51c16c8609590) )
-	ROM_LOAD( "m2a.7h",	0x6000, 0x1000, CRC(f2a90642) SHA1(da6887725d70924fc4b9cca83172276976f5020c) )
-	ROM_LOAD( "m1a.8h",	0x7000, 0x1000, CRC(cff0119a) SHA1(48fc81b8c68e977680e7b8baf1193f0e7e0cd013) )
+	ROM_REGION( 0x10000, "maincpu", 0 ) // 64k for 6502 code
+	ROM_LOAD( "m3a.5h", 0x5000, 0x1000, CRC(5fbbdfef) SHA1(8129e90a05b3ca50f47f7610eec51c16c8609590) )
+	ROM_LOAD( "m2a.7h", 0x6000, 0x1000, CRC(f2a90642) SHA1(da6887725d70924fc4b9cca83172276976f5020c) )
+	ROM_LOAD( "m1a.8h", 0x7000, 0x1000, CRC(cff0119a) SHA1(48fc81b8c68e977680e7b8baf1193f0e7e0cd013) )
 
 	ROM_REGION( 0x6000, "gfx1", 0 )
-	ROM_LOAD( "mea.4a",	0x0000, 0x1000, CRC(49d89116) SHA1(aa4cde07e10624072e50ba5bd209acf93092cf78) )
-	ROM_LOAD( "mca.6a",	0x1000, 0x1000, CRC(04e90300) SHA1(c908a3a651e50428eedc2974160cdbf2ed946abc) )
-	ROM_LOAD( "maa.9a",	0x2000, 0x1000, CRC(6ce9442b) SHA1(c08bf0911f1dfd4a3f9452efcbb3fd3688c4bf8c) )
-	ROM_LOAD( "mfa.3a",	0x3000, 0x1000, CRC(0d0c7d13) SHA1(8a6d371571391f2b54ffa65b77e4e83fd607d2c9) )
-	ROM_LOAD( "mda.5a",	0x4000, 0x1000, CRC(41ae1842) SHA1(afc169c3245b0946ef81e65d0b755d498ee71667) )
-	ROM_LOAD( "mba.8a",	0x5000, 0x1000, CRC(50c43fc9) SHA1(af478f3d89cd6c87f32dcdda7fabce25738c340b) )
+	ROM_LOAD( "mea.4a", 0x0000, 0x1000, CRC(49d89116) SHA1(aa4cde07e10624072e50ba5bd209acf93092cf78) )
+	ROM_LOAD( "mca.6a", 0x1000, 0x1000, CRC(04e90300) SHA1(c908a3a651e50428eedc2974160cdbf2ed946abc) )
+	ROM_LOAD( "maa.9a", 0x2000, 0x1000, CRC(6ce9442b) SHA1(c08bf0911f1dfd4a3f9452efcbb3fd3688c4bf8c) )
+	ROM_LOAD( "mfa.3a", 0x3000, 0x1000, CRC(0d0c7d13) SHA1(8a6d371571391f2b54ffa65b77e4e83fd607d2c9) )
+	ROM_LOAD( "mda.5a", 0x4000, 0x1000, CRC(41ae1842) SHA1(afc169c3245b0946ef81e65d0b755d498ee71667) )
+	ROM_LOAD( "mba.8a", 0x5000, 0x1000, CRC(50c43fc9) SHA1(af478f3d89cd6c87f32dcdda7fabce25738c340b) )
 ROM_END
 
 
@@ -375,4 +367,4 @@ ROM_END
  *
  *************************************/
 
-GAME( 1982, mole, 0, mole, mole, 0, ROT0, "Yachiyo Electronics, Ltd.", "Mole Attack", GAME_SUPPORTS_SAVE )
+GAME( 1982, mole, 0, mole, mole, driver_device, 0, ROT0, "Yachiyo Electronics, Ltd.", "Mole Attack", GAME_SUPPORTS_SAVE )

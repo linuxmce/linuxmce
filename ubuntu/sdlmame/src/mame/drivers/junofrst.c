@@ -16,7 +16,7 @@ $8100-$8FFF = Work RAM
 
 Write memory
 
-$8030   - interrupt control register D0 = interupts on or off
+$8030   - interrupt control register D0 = interrupts on or off
 $8031   - unknown
 $8032   - unknown
 $8033   - unknown
@@ -92,10 +92,10 @@ Blitter source graphics
 class junofrst_state : public tutankhm_state
 {
 public:
-	junofrst_state(running_machine &machine, const driver_device_config_base &config)
-		: tutankhm_state(machine, config) { }
+	junofrst_state(const machine_config &mconfig, device_type type, const char *tag)
+		: tutankhm_state(mconfig, type, tag) { }
 
-	UINT8     m_blitterdata[4];
+	UINT8    m_blitterdata[4];
 	int      m_i8039_status;
 	int      m_last_irq;
 
@@ -105,6 +105,20 @@ public:
 	device_t *m_filter_0_0;
 	device_t *m_filter_0_1;
 	device_t *m_filter_0_2;
+	DECLARE_WRITE8_MEMBER(junofrst_blitter_w);
+	DECLARE_WRITE8_MEMBER(junofrst_bankselect_w);
+	DECLARE_WRITE8_MEMBER(junofrst_sh_irqtrigger_w);
+	DECLARE_WRITE8_MEMBER(junofrst_i8039_irq_w);
+	DECLARE_WRITE8_MEMBER(i8039_irqen_and_status_w);
+	DECLARE_WRITE8_MEMBER(flip_screen_w);
+	DECLARE_WRITE8_MEMBER(junofrst_coin_counter_w);
+	DECLARE_WRITE8_MEMBER(junofrst_irq_enable_w);
+	DECLARE_READ8_MEMBER(junofrst_portA_r);
+	DECLARE_WRITE8_MEMBER(junofrst_portB_w);
+	DECLARE_DRIVER_INIT(junofrst);
+	DECLARE_MACHINE_START(junofrst);
+	DECLARE_MACHINE_RESET(junofrst);
+	INTERRUPT_GEN_MEMBER(junofrst_30hz_irq);
 };
 
 
@@ -126,21 +140,21 @@ public:
           We have to mask it off otherwise the "Juno First" logo on the title screen is wrong.
 */
 
-static WRITE8_HANDLER( junofrst_blitter_w )
+WRITE8_MEMBER(junofrst_state::junofrst_blitter_w)
 {
-	junofrst_state *state = space->machine().driver_data<junofrst_state>();
-	state->m_blitterdata[offset] = data;
+
+	m_blitterdata[offset] = data;
 
 	/* blitter is triggered by $8073 */
 	if (offset == 3)
 	{
 		int i;
-		UINT8 *gfx_rom = space->machine().region("gfx1")->base();
+		UINT8 *gfx_rom = memregion("gfx1")->base();
 
-		offs_t src = ((state->m_blitterdata[2] << 8) | state->m_blitterdata[3]) & 0xfffc;
-		offs_t dest = (state->m_blitterdata[0] << 8) | state->m_blitterdata[1];
+		offs_t src = ((m_blitterdata[2] << 8) | m_blitterdata[3]) & 0xfffc;
+		offs_t dest = (m_blitterdata[0] << 8) | m_blitterdata[1];
 
-		int copy = state->m_blitterdata[3] & 0x01;
+		int copy = m_blitterdata[3] & 0x01;
 
 		/* 16x16 graphics */
 		for (i = 0; i < 16; i++)
@@ -166,9 +180,9 @@ static WRITE8_HANDLER( junofrst_blitter_w )
 						data = 0;
 
 					if (dest & 1)
-						state->m_videoram[dest >> 1] = (state->m_videoram[dest >> 1] & 0x0f) | (data << 4);
+						m_videoram[dest >> 1] = (m_videoram[dest >> 1] & 0x0f) | (data << 4);
 					else
-						state->m_videoram[dest >> 1] = (state->m_videoram[dest >> 1] & 0xf0) | data;
+						m_videoram[dest >> 1] = (m_videoram[dest >> 1] & 0xf0) | data;
 				}
 
 				dest += 1;
@@ -180,33 +194,31 @@ static WRITE8_HANDLER( junofrst_blitter_w )
 }
 
 
-static WRITE8_HANDLER( junofrst_bankselect_w )
+WRITE8_MEMBER(junofrst_state::junofrst_bankselect_w)
 {
-	memory_set_bank(space->machine(), "bank1", data & 0x0f);
+	membank("bank1")->set_entry(data & 0x0f);
 }
 
 
-static READ8_DEVICE_HANDLER( junofrst_portA_r )
+READ8_MEMBER(junofrst_state::junofrst_portA_r)
 {
-	junofrst_state *state = device->machine().driver_data<junofrst_state>();
 	int timer;
 
 	/* main xtal 14.318MHz, divided by 8 to get the CPU clock, further */
 	/* divided by 1024 to get this timer */
 	/* (divide by (1024/2), and not 1024, because the CPU cycle counter is */
 	/* incremented every other state change of the clock) */
-	timer = (state->m_soundcpu->total_cycles() / (1024 / 2)) & 0x0f;
+	timer = (m_soundcpu->total_cycles() / (1024 / 2)) & 0x0f;
 
 	/* low three bits come from the 8039 */
 
-	return (timer << 4) | state->m_i8039_status;
+	return (timer << 4) | m_i8039_status;
 }
 
 
-static WRITE8_DEVICE_HANDLER( junofrst_portB_w )
+WRITE8_MEMBER(junofrst_state::junofrst_portB_w)
 {
-	junofrst_state *state = device->machine().driver_data<junofrst_state>();
-	device_t *filter[3] = { state->m_filter_0_0, state->m_filter_0_1, state->m_filter_0_2 };
+	device_t *filter[3] = { m_filter_0_0, m_filter_0_1, m_filter_0_2 };
 	int i;
 
 	for (i = 0; i < 3; i++)
@@ -214,9 +226,9 @@ static WRITE8_DEVICE_HANDLER( junofrst_portB_w )
 		int C = 0;
 
 		if (data & 1)
-			C += 47000;	/* 47000pF = 0.047uF */
+			C += 47000; /* 47000pF = 0.047uF */
 		if (data & 2)
-			C += 220000;	/* 220000pF = 0.22uF */
+			C += 220000;    /* 220000pF = 0.22uF */
 
 		data >>= 2;
 		filter_rc_set_RC(filter[i], FLT_RC_LOWPASS, 1000, 2200, 200, CAP_P(C));
@@ -224,66 +236,74 @@ static WRITE8_DEVICE_HANDLER( junofrst_portB_w )
 }
 
 
-static WRITE8_HANDLER( junofrst_sh_irqtrigger_w )
+WRITE8_MEMBER(junofrst_state::junofrst_sh_irqtrigger_w)
 {
-	junofrst_state *state = space->machine().driver_data<junofrst_state>();
 
-	if (state->m_last_irq == 0 && data == 1)
+
+	if (m_last_irq == 0 && data == 1)
 	{
 		/* setting bit 0 low then high triggers IRQ on the sound CPU */
-		device_set_input_line_and_vector(state->m_soundcpu, 0, HOLD_LINE, 0xff);
+		m_soundcpu->set_input_line_and_vector(0, HOLD_LINE, 0xff);
 	}
 
-	state->m_last_irq = data;
+	m_last_irq = data;
 }
 
 
-static WRITE8_HANDLER( junofrst_i8039_irq_w )
+WRITE8_MEMBER(junofrst_state::junofrst_i8039_irq_w)
 {
-	junofrst_state *state = space->machine().driver_data<junofrst_state>();
-	device_set_input_line(state->m_i8039, 0, ASSERT_LINE);
+
+	m_i8039->execute().set_input_line(0, ASSERT_LINE);
 }
 
 
-static WRITE8_HANDLER( i8039_irqen_and_status_w )
+WRITE8_MEMBER(junofrst_state::i8039_irqen_and_status_w)
 {
-	junofrst_state *state = space->machine().driver_data<junofrst_state>();
+
 
 	if ((data & 0x80) == 0)
-		device_set_input_line(state->m_i8039, 0, CLEAR_LINE);
-	state->m_i8039_status = (data & 0x70) >> 4;
+		m_i8039->execute().set_input_line(0, CLEAR_LINE);
+	m_i8039_status = (data & 0x70) >> 4;
 }
 
 
-static WRITE8_HANDLER( flip_screen_w )
+WRITE8_MEMBER(junofrst_state::flip_screen_w)
 {
+
 	tutankhm_flip_screen_x_w(space, 0, data);
 	tutankhm_flip_screen_y_w(space, 0, data);
 }
 
 
-static WRITE8_HANDLER( junofrst_coin_counter_w )
+WRITE8_MEMBER(junofrst_state::junofrst_coin_counter_w)
 {
-	coin_counter_w(space->machine(), offset, data);
+	coin_counter_w(machine(), offset, data);
 }
 
+WRITE8_MEMBER(junofrst_state::junofrst_irq_enable_w)
+{
 
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0x7fff) AM_RAM AM_BASE_MEMBER(junofrst_state, m_videoram)
-	AM_RANGE(0x8000, 0x800f) AM_RAM AM_BASE_MEMBER(junofrst_state, m_paletteram)
+	m_irq_enable = data & 1;
+	if (!m_irq_enable)
+		m_maincpu->set_input_line(0, CLEAR_LINE);
+}
+
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, junofrst_state )
+	AM_RANGE(0x0000, 0x7fff) AM_RAM AM_SHARE("videoram")
+	AM_RANGE(0x8000, 0x800f) AM_RAM AM_SHARE("paletteram")
 	AM_RANGE(0x8010, 0x8010) AM_READ_PORT("DSW2")
 	AM_RANGE(0x801c, 0x801c) AM_READ(watchdog_reset_r)
 	AM_RANGE(0x8020, 0x8020) AM_READ_PORT("SYSTEM")
 	AM_RANGE(0x8024, 0x8024) AM_READ_PORT("P1")
 	AM_RANGE(0x8028, 0x8028) AM_READ_PORT("P2")
 	AM_RANGE(0x802c, 0x802c) AM_READ_PORT("DSW1")
-	AM_RANGE(0x8030, 0x8030) AM_WRITE(interrupt_enable_w)
+	AM_RANGE(0x8030, 0x8030) AM_WRITE(junofrst_irq_enable_w)
 	AM_RANGE(0x8031, 0x8032) AM_WRITE(junofrst_coin_counter_w)
-	AM_RANGE(0x8033, 0x8033) AM_WRITEONLY AM_BASE_MEMBER(junofrst_state, m_scroll)  /* not used in Juno */
+	AM_RANGE(0x8033, 0x8033) AM_WRITEONLY AM_SHARE("scroll")  /* not used in Juno */
 	AM_RANGE(0x8034, 0x8035) AM_WRITE(flip_screen_w)
 	AM_RANGE(0x8040, 0x8040) AM_WRITE(junofrst_sh_irqtrigger_w)
-	AM_RANGE(0x8050, 0x8050) AM_WRITE(soundlatch_w)
+	AM_RANGE(0x8050, 0x8050) AM_WRITE(soundlatch_byte_w)
 	AM_RANGE(0x8060, 0x8060) AM_WRITE(junofrst_bankselect_w)
 	AM_RANGE(0x8070, 0x8073) AM_WRITE(junofrst_blitter_w)
 	AM_RANGE(0x8100, 0x8fff) AM_RAM
@@ -292,26 +312,26 @@ static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( audio_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( audio_map, AS_PROGRAM, 8, junofrst_state )
 	AM_RANGE(0x0000, 0x0fff) AM_ROM
 	AM_RANGE(0x2000, 0x23ff) AM_RAM
-	AM_RANGE(0x3000, 0x3000) AM_READ(soundlatch_r)
-	AM_RANGE(0x4000, 0x4000) AM_DEVWRITE("aysnd", ay8910_address_w)
-	AM_RANGE(0x4001, 0x4001) AM_DEVREAD("aysnd", ay8910_r)
-	AM_RANGE(0x4002, 0x4002) AM_DEVWRITE("aysnd", ay8910_data_w)
-	AM_RANGE(0x5000, 0x5000) AM_WRITE(soundlatch2_w)
+	AM_RANGE(0x3000, 0x3000) AM_READ(soundlatch_byte_r)
+	AM_RANGE(0x4000, 0x4000) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_w)
+	AM_RANGE(0x4001, 0x4001) AM_DEVREAD_LEGACY("aysnd", ay8910_r)
+	AM_RANGE(0x4002, 0x4002) AM_DEVWRITE_LEGACY("aysnd", ay8910_data_w)
+	AM_RANGE(0x5000, 0x5000) AM_WRITE(soundlatch2_byte_w)
 	AM_RANGE(0x6000, 0x6000) AM_WRITE(junofrst_i8039_irq_w)
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( mcu_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( mcu_map, AS_PROGRAM, 8, junofrst_state )
 	AM_RANGE(0x0000, 0x0fff) AM_ROM
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( mcu_io_map, AS_IO, 8 )
-	AM_RANGE(0x00, 0xff) AM_READ(soundlatch2_r)
-	AM_RANGE(MCS48_PORT_P1, MCS48_PORT_P1) AM_DEVWRITE("dac", dac_w)
+static ADDRESS_MAP_START( mcu_io_map, AS_IO, 8, junofrst_state )
+	AM_RANGE(0x00, 0xff) AM_READ(soundlatch2_byte_r)
+	AM_RANGE(MCS48_PORT_P1, MCS48_PORT_P1) AM_DEVWRITE("dac", dac_device, write_unsigned8)
 	AM_RANGE(MCS48_PORT_P2, MCS48_PORT_P2) AM_WRITE(i8039_irqen_and_status_w)
 ADDRESS_MAP_END
 
@@ -327,22 +347,20 @@ static INPUT_PORTS_START( junofrst )
 	KONAMI8_COCKTAIL_B213_UNK
 
 	PORT_START("DSW1")
-	KONAMI_COINAGE(DEF_STR( Free_Play ), "No Coin B")
+	KONAMI_COINAGE_LOC(DEF_STR( Free_Play ), "No Coin B", SW1)
 	/* "No Coin B" = coins produce sound, but no effect on coin counter */
 
 	PORT_START("DSW2")
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Lives ) )
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW2:1,2")
 	PORT_DIPSETTING(    0x03, "3" )
 	PORT_DIPSETTING(    0x02, "4" )
 	PORT_DIPSETTING(    0x01, "5" )
 	PORT_DIPSETTING(    0x00, "256 (Cheat)")
-	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Cabinet ) )
+	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Cabinet ) )      PORT_DIPLOCATION("SW2:3")
 	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( Cocktail ) )
-	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x70, 0x70, DEF_STR( Difficulty ) )
+	PORT_DIPUNUSED_DIPLOC( 0x08, IP_ACTIVE_LOW, "SW2:4" )
+	PORT_DIPNAME( 0x70, 0x70, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("SW2:5,6,7")
 	PORT_DIPSETTING(    0x70, "1 (Easiest)" )
 	PORT_DIPSETTING(    0x60, "2" )
 	PORT_DIPSETTING(    0x50, "3" )
@@ -351,7 +369,7 @@ static INPUT_PORTS_START( junofrst )
 	PORT_DIPSETTING(    0x20, "6" )
 	PORT_DIPSETTING(    0x10, "7" )
 	PORT_DIPSETTING(    0x00, "8 (Hardest)" )
-	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Demo_Sounds ) )
+	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW2:8")
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 INPUT_PORTS_END
@@ -362,70 +380,78 @@ static const ay8910_interface ay8910_config =
 {
 	AY8910_LEGACY_OUTPUT,
 	AY8910_DEFAULT_LOADS,
-	DEVCB_HANDLER(junofrst_portA_r),
+	DEVCB_DRIVER_MEMBER(junofrst_state,junofrst_portA_r),
 	DEVCB_NULL,
 	DEVCB_NULL,
-	DEVCB_HANDLER(junofrst_portB_w)
+	DEVCB_DRIVER_MEMBER(junofrst_state,junofrst_portB_w)
 };
 
 
-static MACHINE_START( junofrst )
+MACHINE_START_MEMBER(junofrst_state,junofrst)
 {
-	junofrst_state *state = machine.driver_data<junofrst_state>();
 
-	state->m_maincpu = machine.device<cpu_device>("maincpu");
-	state->m_i8039 = machine.device("mcu");
-	state->m_soundcpu = machine.device<cpu_device>("audiocpu");
-	state->m_filter_0_0 = machine.device("filter.0.0");
-	state->m_filter_0_1 = machine.device("filter.0.1");
-	state->m_filter_0_2 = machine.device("filter.0.2");
+	m_maincpu = machine().device<cpu_device>("maincpu");
+	m_i8039 = machine().device("mcu");
+	m_soundcpu = machine().device<cpu_device>("audiocpu");
+	m_filter_0_0 = machine().device("filter.0.0");
+	m_filter_0_1 = machine().device("filter.0.1");
+	m_filter_0_2 = machine().device("filter.0.2");
 
-	state->save_item(NAME(state->m_i8039_status));
-	state->save_item(NAME(state->m_last_irq));
-	state->save_item(NAME(state->m_flip_x));
-	state->save_item(NAME(state->m_flip_y));
-	state->save_item(NAME(state->m_blitterdata));
+	save_item(NAME(m_i8039_status));
+	save_item(NAME(m_last_irq));
+	save_item(NAME(m_irq_toggle));
+	save_item(NAME(m_irq_enable));
+	save_item(NAME(m_flip_x));
+	save_item(NAME(m_flip_y));
+	save_item(NAME(m_blitterdata));
 }
 
-static MACHINE_RESET( junofrst )
+MACHINE_RESET_MEMBER(junofrst_state,junofrst)
 {
-	junofrst_state *state = machine.driver_data<junofrst_state>();
 
-	state->m_i8039_status = 0;
-	state->m_last_irq = 0;
-	state->m_flip_x = 0;
-	state->m_flip_y = 0;
-	state->m_blitterdata[0] = 0;
-	state->m_blitterdata[1] = 0;
-	state->m_blitterdata[2] = 0;
-	state->m_blitterdata[3] = 0;
+	m_i8039_status = 0;
+	m_last_irq = 0;
+	m_flip_x = 0;
+	m_flip_y = 0;
+	m_blitterdata[0] = 0;
+	m_blitterdata[1] = 0;
+	m_blitterdata[2] = 0;
+	m_blitterdata[3] = 0;
+}
+
+INTERRUPT_GEN_MEMBER(junofrst_state::junofrst_30hz_irq)
+{
+
+	/* flip flops cause the interrupt to be signalled every other frame */
+	m_irq_toggle ^= 1;
+	if (m_irq_toggle && m_irq_enable)
+		device.execute().set_input_line(0, ASSERT_LINE);
 }
 
 static MACHINE_CONFIG_START( junofrst, junofrst_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M6809, 1500000)			/* 1.5 MHz ??? */
+	MCFG_CPU_ADD("maincpu", M6809, 1500000)         /* 1.5 MHz ??? */
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", junofrst_state,  junofrst_30hz_irq)
 
-	MCFG_CPU_ADD("audiocpu", Z80,14318000/8)	/* 1.78975 MHz */
+	MCFG_CPU_ADD("audiocpu", Z80,14318000/8)    /* 1.78975 MHz */
 	MCFG_CPU_PROGRAM_MAP(audio_map)
 
-	MCFG_CPU_ADD("mcu", I8039,8000000)	/* 8MHz crystal */
+	MCFG_CPU_ADD("mcu", I8039,8000000)  /* 8MHz crystal */
 	MCFG_CPU_PROGRAM_MAP(mcu_map)
 	MCFG_CPU_IO_MAP(mcu_io_map)
 
-	MCFG_MACHINE_START(junofrst)
-	MCFG_MACHINE_RESET(junofrst)
+	MCFG_MACHINE_START_OVERRIDE(junofrst_state,junofrst)
+	MCFG_MACHINE_RESET_OVERRIDE(junofrst_state,junofrst)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_REFRESH_RATE(30)
+	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
-	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)	/* not sure about the visible area */
-	MCFG_SCREEN_UPDATE(tutankhm)
+	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)  /* not sure about the visible area */
+	MCFG_SCREEN_UPDATE_DRIVER(junofrst_state, screen_update_tutankhm)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -436,7 +462,7 @@ static MACHINE_CONFIG_START( junofrst, junofrst_state )
 	MCFG_SOUND_ROUTE(1, "filter.0.1", 0.30)
 	MCFG_SOUND_ROUTE(2, "filter.0.2", 0.30)
 
-	MCFG_SOUND_ADD("dac", DAC, 0)
+	MCFG_DAC_ADD("dac")
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 
 	MCFG_SOUND_ADD("filter.0.0", FILTER_RC, 0)
@@ -449,7 +475,7 @@ MACHINE_CONFIG_END
 
 
 ROM_START( junofrst )
-	ROM_REGION( 0x1c000, "maincpu", 0 )	/* code + space for decrypted opcodes */
+	ROM_REGION( 0x1c000, "maincpu", 0 ) /* code + space for decrypted opcodes */
 	ROM_LOAD( "jfa_b9.bin",   0x0a000, 0x2000, CRC(f5a7ab9d) SHA1(9603e797839290f8e1f93ccff9cc820604cc49ab) ) /* program ROMs */
 	ROM_LOAD( "jfb_b10.bin",  0x0c000, 0x2000, CRC(f20626e0) SHA1(46f58bdc1a613124e2c148b61f774fcc6c232868) )
 	ROM_LOAD( "jfc_a10.bin",  0x0e000, 0x2000, CRC(1e7744a7) SHA1(bee69833af886436016560295cddf0c8b4c5e771) )
@@ -464,17 +490,17 @@ ROM_START( junofrst )
 	ROM_REGION(  0x10000 , "audiocpu", 0 ) /* 64k for Z80 sound CPU code */
 	ROM_LOAD( "jfs1_j3.bin",  0x0000, 0x1000, CRC(235a2893) SHA1(b90251c4971f7ba12e407f86c32723d513d6b4a0) )
 
-	ROM_REGION( 0x1000, "mcu", 0 )	/* 8039 */
+	ROM_REGION( 0x1000, "mcu", 0 )  /* 8039 */
 	ROM_LOAD( "jfs2_p4.bin",  0x0000, 0x1000, CRC(d0fa5d5f) SHA1(9d0730d1d037bf96b0c933a32355602bf2d735dd) )
 
-	ROM_REGION( 0x6000, "gfx1", 0 )	/* BLTROM, used at runtime */
+	ROM_REGION( 0x6000, "gfx1", 0 ) /* BLTROM, used at runtime */
 	ROM_LOAD( "jfs3_c7.bin",  0x00000, 0x2000, CRC(aeacf6db) SHA1(f99ef9f9153d7a83e1881d9181faac99cb8c8a57) )
 	ROM_LOAD( "jfs4_d7.bin",  0x02000, 0x2000, CRC(206d954c) SHA1(65494766676f18d8b5ae9a54cee00790e7b1e67e) )
 	ROM_LOAD( "jfs5_e7.bin",  0x04000, 0x2000, CRC(1eb87a6e) SHA1(f5471b9f6f1fa6d6e5d76300d89f71da3129516a) )
 ROM_END
 
 ROM_START( junofrstg )
-	ROM_REGION( 0x1c000, "maincpu", 0 )	/* code + space for decrypted opcodes */
+	ROM_REGION( 0x1c000, "maincpu", 0 ) /* code + space for decrypted opcodes */
 	ROM_LOAD( "jfg_a.9b",     0x0a000, 0x2000, CRC(8f77d1c5) SHA1(d47fcdbc47673c228661a3528fff0c691c76df9e) ) /* program ROMs */
 	ROM_LOAD( "jfg_b.10b",    0x0c000, 0x2000, CRC(cd645673) SHA1(25994210a8a424bdf2eca3efa19e7eeffc097cec) )
 	ROM_LOAD( "jfg_c.10a",    0x0e000, 0x2000, CRC(47852761) SHA1(eeef814b6ad681d4c2274f0a69d1ed9c5c1b9118) )
@@ -489,10 +515,10 @@ ROM_START( junofrstg )
 	ROM_REGION(  0x10000 , "audiocpu", 0 ) /* 64k for Z80 sound CPU code */
 	ROM_LOAD( "jfs1_j3.bin",  0x0000, 0x1000, CRC(235a2893) SHA1(b90251c4971f7ba12e407f86c32723d513d6b4a0) )
 
-	ROM_REGION( 0x1000, "mcu", 0 )	/* 8039 */
+	ROM_REGION( 0x1000, "mcu", 0 )  /* 8039 */
 	ROM_LOAD( "jfs2_p4.bin",  0x0000, 0x1000, CRC(d0fa5d5f) SHA1(9d0730d1d037bf96b0c933a32355602bf2d735dd) )
 
-	ROM_REGION( 0x6000, "gfx1", 0 )	/* BLTROM, used at runtime */
+	ROM_REGION( 0x6000, "gfx1", 0 ) /* BLTROM, used at runtime */
 	ROM_LOAD( "jfs3_c7.bin",  0x00000, 0x2000, CRC(aeacf6db) SHA1(f99ef9f9153d7a83e1881d9181faac99cb8c8a57) )
 	ROM_LOAD( "jfs4_d7.bin",  0x02000, 0x2000, CRC(206d954c) SHA1(65494766676f18d8b5ae9a54cee00790e7b1e67e) )
 	ROM_LOAD( "jfs5_e7.bin",  0x04000, 0x2000, CRC(1eb87a6e) SHA1(f5471b9f6f1fa6d6e5d76300d89f71da3129516a) )
@@ -500,14 +526,14 @@ ROM_END
 
 
 
-static DRIVER_INIT( junofrst )
+DRIVER_INIT_MEMBER(junofrst_state,junofrst)
 {
-	UINT8 *decrypted = konami1_decode(machine, "maincpu");
+	UINT8 *decrypted = konami1_decode(machine(), "maincpu");
 
-	memory_configure_bank(machine, "bank1", 0, 16, machine.region("maincpu")->base() + 0x10000, 0x1000);
-	memory_configure_bank_decrypted(machine, "bank1", 0, 16, decrypted + 0x10000, 0x1000);
+	machine().root_device().membank("bank1")->configure_entries(0, 16, machine().root_device().memregion("maincpu")->base() + 0x10000, 0x1000);
+	machine().root_device().membank("bank1")->configure_decrypted_entries(0, 16, decrypted + 0x10000, 0x1000);
 }
 
 
-GAME( 1983, junofrst, 0,        junofrst, junofrst, junofrst, ROT90, "Konami", "Juno First", 0 )
-GAME( 1983, junofrstg,junofrst, junofrst, junofrst, junofrst, ROT90, "Konami (Gottlieb license)", "Juno First (Gottlieb)", 0 )
+GAME( 1983, junofrst, 0,        junofrst, junofrst, junofrst_state, junofrst, ROT90, "Konami", "Juno First", 0 )
+GAME( 1983, junofrstg,junofrst, junofrst, junofrst, junofrst_state, junofrst, ROT90, "Konami (Gottlieb license)", "Juno First (Gottlieb)", 0 )

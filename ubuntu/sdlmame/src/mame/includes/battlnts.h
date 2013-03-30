@@ -7,8 +7,8 @@
 class battlnts_state : public driver_device
 {
 public:
-	battlnts_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	battlnts_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) { }
 
 	/* memory pointers */
 //  UINT8 *      paletteram;    // this currently uses generic palette handling
@@ -19,16 +19,19 @@ public:
 
 
 	/* devices */
-	device_t *m_audiocpu;
+	cpu_device *m_audiocpu;
 	device_t *m_k007342;
 	device_t *m_k007420;
+	DECLARE_WRITE8_MEMBER(battlnts_sh_irqtrigger_w);
+	DECLARE_WRITE8_MEMBER(battlnts_bankswitch_w);
+	DECLARE_WRITE8_MEMBER(battlnts_spritebank_w);
+	DECLARE_DRIVER_INIT(rackemup);
+	virtual void machine_start();
+	virtual void machine_reset();
+	UINT32 screen_update_battlnts(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(battlnts_interrupt);
 };
 
 /*----------- defined in video/battlnts.c -----------*/
-
-WRITE8_HANDLER( battlnts_spritebank_w );
-
-SCREEN_UPDATE( battlnts );
-
 void battlnts_tile_callback(running_machine &machine, int layer, int bank, int *code, int *color, int *flags);
 void battlnts_sprite_callback(running_machine &machine, int *code, int *color);

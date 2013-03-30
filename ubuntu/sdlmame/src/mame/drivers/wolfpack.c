@@ -9,38 +9,37 @@ Atari Wolf Pack (prototype) driver
 #include "sound/s14001a.h"
 #include "includes/wolfpack.h"
 
-static TIMER_CALLBACK( periodic_callback )
+TIMER_CALLBACK_MEMBER(wolfpack_state::periodic_callback)
 {
 	int scanline = param;
 
-	cputag_set_input_line(machine, "maincpu", INPUT_LINE_NMI, PULSE_LINE);
+	machine().device("maincpu")->execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 
 	scanline += 64;
 
 	if (scanline >= 262)
 		scanline = 0;
 
-	machine.scheduler().timer_set(machine.primary_screen->time_until_pos(scanline), FUNC(periodic_callback), scanline);
+	machine().scheduler().timer_set(machine().primary_screen->time_until_pos(scanline), timer_expired_delegate(FUNC(wolfpack_state::periodic_callback),this), scanline);
 }
 
 
-static MACHINE_RESET( wolfpack )
+void wolfpack_state::machine_reset()
 {
-	machine.scheduler().timer_set(machine.primary_screen->time_until_pos(0), FUNC(periodic_callback));
+	machine().scheduler().timer_set(machine().primary_screen->time_until_pos(0), timer_expired_delegate(FUNC(wolfpack_state::periodic_callback),this));
 }
 
 
-static CUSTOM_INPUT( wolfpack_dial_r )
+CUSTOM_INPUT_MEMBER(wolfpack_state::wolfpack_dial_r)
 {
 	int bit = (FPTR)param;
-	return ((input_port_read(field->port->machine(), "DIAL") + bit) / 2) & 0x01;
+	return ((ioport("DIAL")->read() + bit) / 2) & 0x01;
 }
 
 
-static READ8_HANDLER( wolfpack_misc_r )
+READ8_MEMBER(wolfpack_state::wolfpack_misc_r)
 {
-	wolfpack_state *state = space->machine().driver_data<wolfpack_state>();
-	device_t *device = space->machine().device("speech");
+	device_t *device = machine().device("speech");
 	UINT8 val = 0;
 
 	/* BIT0 => SPEECH BUSY */
@@ -53,72 +52,73 @@ static READ8_HANDLER( wolfpack_misc_r )
 	/* BIT7 => VBLANK      */
 
 	if (!s14001a_bsy_r(device))
-        val |= 0x01;
+		val |= 0x01;
 
-	if (!state->m_collision)
+	if (!m_collision)
 		val |= 0x10;
 
-	if (space->machine().primary_screen->vpos() >= 240)
+	if (machine().primary_screen->vpos() >= 240)
 		val |= 0x80;
 
 	return val;
 }
 
 
-static WRITE8_HANDLER( wolfpack_high_explo_w ) { }
-static WRITE8_HANDLER( wolfpack_sonar_ping_w ) {}
-static WRITE8_HANDLER( wolfpack_sirlat_w ) {}
-static WRITE8_HANDLER( wolfpack_pt_sound_w ) {}
-static WRITE8_HANDLER( wolfpack_launch_torpedo_w ) {}
-static WRITE8_HANDLER( wolfpack_low_explo_w ) {}
-static WRITE8_HANDLER( wolfpack_screw_cont_w ) {}
-static WRITE8_HANDLER( wolfpack_lamp_flash_w ) {}
-static WRITE8_HANDLER( wolfpack_warning_light_w ) {}
-static WRITE8_HANDLER( wolfpack_audamp_w ) {}
+WRITE8_MEMBER(wolfpack_state::wolfpack_high_explo_w){ }
+WRITE8_MEMBER(wolfpack_state::wolfpack_sonar_ping_w){}
+WRITE8_MEMBER(wolfpack_state::wolfpack_sirlat_w){}
+WRITE8_MEMBER(wolfpack_state::wolfpack_pt_sound_w){}
+WRITE8_MEMBER(wolfpack_state::wolfpack_launch_torpedo_w){}
+WRITE8_MEMBER(wolfpack_state::wolfpack_low_explo_w){}
+WRITE8_MEMBER(wolfpack_state::wolfpack_screw_cont_w){}
+WRITE8_MEMBER(wolfpack_state::wolfpack_lamp_flash_w){}
+WRITE8_MEMBER(wolfpack_state::wolfpack_warning_light_w){}
+WRITE8_MEMBER(wolfpack_state::wolfpack_audamp_w){}
 
-static WRITE8_DEVICE_HANDLER( wolfpack_word_w )
+WRITE8_MEMBER(wolfpack_state::wolfpack_word_w)
 {
-       /* latch word from bus into temp register, and place on s14001a input bus */
-       /* there is no real need for a temp register at all, since the bus 'register' acts as one */
-        s14001a_reg_w(device, data & 0x1f); /* SA0 (IN5) is pulled low according to the schematic, so its 0x1f and not 0x3f as one would expect */
+	device_t *device = machine().device("speech");
+		/* latch word from bus into temp register, and place on s14001a input bus */
+		/* there is no real need for a temp register at all, since the bus 'register' acts as one */
+		s14001a_reg_w(device, data & 0x1f); /* SA0 (IN5) is pulled low according to the schematic, so its 0x1f and not 0x3f as one would expect */
 }
 
-static WRITE8_DEVICE_HANDLER( wolfpack_start_speech_w )
+WRITE8_MEMBER(wolfpack_state::wolfpack_start_speech_w)
 {
-        s14001a_set_volume(device, 15); /* hack, should be executed just once during game init, or defaulted to this in the s14001a core */
-        s14001a_rst_w(device, data&1);
-}
-
-
-static WRITE8_HANDLER( wolfpack_attract_w )
-{
-	coin_lockout_global_w(space->machine(), !(data & 1));
+	device_t *device = machine().device("speech");
+		s14001a_set_volume(device, 15); /* hack, should be executed just once during game init, or defaulted to this in the s14001a core */
+		s14001a_rst_w(device, data&1);
 }
 
 
-static WRITE8_HANDLER( wolfpack_credit_w )
+WRITE8_MEMBER(wolfpack_state::wolfpack_attract_w)
 {
-	set_led_status(space->machine(), 0, !(data & 1));
+	coin_lockout_global_w(machine(), !(data & 1));
 }
 
 
-static WRITE8_HANDLER( wolfpack_coldetres_w )
+WRITE8_MEMBER(wolfpack_state::wolfpack_credit_w)
 {
-	wolfpack_state *state = space->machine().driver_data<wolfpack_state>();
-	state->m_collision = 0;
+	set_led_status(machine(), 0, !(data & 1));
 }
 
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+WRITE8_MEMBER(wolfpack_state::wolfpack_coldetres_w)
+{
+	m_collision = 0;
+}
+
+
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, wolfpack_state )
 	AM_RANGE(0x0000, 0x00ff) AM_RAM AM_MIRROR(0x100)
 	AM_RANGE(0x1000, 0x1000) AM_READ_PORT("INPUTS")
-	AM_RANGE(0x1000, 0x10ff) AM_WRITEONLY AM_BASE_MEMBER(wolfpack_state, m_alpha_num_ram)
+	AM_RANGE(0x1000, 0x10ff) AM_WRITEONLY AM_SHARE("alpha_num_ram")
 	AM_RANGE(0x2000, 0x2000) AM_READ(wolfpack_misc_r)
 	AM_RANGE(0x2000, 0x2000) AM_WRITE(wolfpack_high_explo_w)
 	AM_RANGE(0x2001, 0x2001) AM_WRITE(wolfpack_sonar_ping_w)
 	AM_RANGE(0x2002, 0x2002) AM_WRITE(wolfpack_sirlat_w)
 	AM_RANGE(0x2003, 0x2003) AM_WRITE(wolfpack_pt_sound_w)
-	AM_RANGE(0x2004, 0x2004) AM_DEVWRITE("speech", wolfpack_start_speech_w)
+	AM_RANGE(0x2004, 0x2004) AM_WRITE(wolfpack_start_speech_w)
 	AM_RANGE(0x2005, 0x2005) AM_WRITE(wolfpack_launch_torpedo_w)
 	AM_RANGE(0x2006, 0x2006) AM_WRITE(wolfpack_low_explo_w)
 	AM_RANGE(0x2007, 0x2007) AM_WRITE(wolfpack_screw_cont_w)
@@ -133,7 +133,7 @@ static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
 	AM_RANGE(0x3000, 0x3000) AM_WRITE(wolfpack_audamp_w)
 	AM_RANGE(0x3001, 0x3001) AM_WRITE(wolfpack_pt_horz_w)
 	AM_RANGE(0x3003, 0x3003) AM_WRITE(wolfpack_pt_pic_w)
-	AM_RANGE(0x3004, 0x3004) AM_DEVWRITE("speech", wolfpack_word_w)
+	AM_RANGE(0x3004, 0x3004) AM_WRITE(wolfpack_word_w)
 	AM_RANGE(0x3007, 0x3007) AM_WRITE(wolfpack_coldetres_w)
 	AM_RANGE(0x4000, 0x4000) AM_WRITE(wolfpack_ship_h_w)
 	AM_RANGE(0x4001, 0x4001) AM_WRITE(wolfpack_torpedo_pic_w)
@@ -151,8 +151,8 @@ ADDRESS_MAP_END
 
 static INPUT_PORTS_START( wolfpack )
 	PORT_START("INPUTS")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(wolfpack_dial_r, (void *)0)	/* dial connects here */
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(wolfpack_dial_r, (void *)1)	/* dial connects here */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, wolfpack_state,wolfpack_dial_r, (void *)0)    /* dial connects here */
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, wolfpack_state,wolfpack_dial_r, (void *)1)    /* dial connects here */
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_TILT )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_SERVICE( 0x10, IP_ACTIVE_HIGH )
@@ -294,21 +294,17 @@ static MACHINE_CONFIG_START( wolfpack, wolfpack_state )
 	MCFG_CPU_PROGRAM_MAP(main_map)
 
 	/* video hardware */
-	MCFG_MACHINE_RESET(wolfpack)
 
 
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(512, 262)
 	MCFG_SCREEN_VISIBLE_AREA(0, 511, 16, 239)
-	MCFG_SCREEN_UPDATE(wolfpack)
-	MCFG_SCREEN_EOF(wolfpack)
+	MCFG_SCREEN_UPDATE_DRIVER(wolfpack_state, screen_update_wolfpack)
+	MCFG_SCREEN_VBLANK_DRIVER(wolfpack_state, screen_eof_wolfpack)
 
 	MCFG_GFXDECODE(wolfpack)
 	MCFG_PALETTE_LENGTH(12)
-	MCFG_PALETTE_INIT(wolfpack)
-	MCFG_VIDEO_START(wolfpack)
 
 	/* sound hardware */
 	MCFG_SOUND_ADD("speech", S14001A, 20000) /* RC Clock (C=100pf, R=470K-670K ohms, adjustable) ranging from 14925.37313hz to 21276.59574hz, likely factory set to 20000hz since anything below 19500 is too slow */
@@ -346,4 +342,4 @@ ROM_START( wolfpack )
 ROM_END
 
 
-GAME( 1978, wolfpack, 0, wolfpack, wolfpack, 0, ORIENTATION_FLIP_Y, "Atari", "Wolf Pack (prototype)", GAME_IMPERFECT_SOUND )
+GAME( 1978, wolfpack, 0, wolfpack, wolfpack, driver_device, 0, ORIENTATION_FLIP_Y, "Atari", "Wolf Pack (prototype)", GAME_IMPERFECT_SOUND )

@@ -66,19 +66,29 @@ Dumping Notes:
 #include "emu.h"
 #include "cpu/z80/z80.h"
 #include "render.h"
-#include "machine/laserdsc.h"
+#include "machine/ldv1000.h"
 
 
 class lgp_state : public driver_device
 {
 public:
-	lgp_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	lgp_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+			m_laserdisc(*this, "laserdisc") ,
+		m_tile_ram(*this, "tile_ram"),
+		m_tile_control_ram(*this, "tile_ctrl_ram"){ }
 
-	device_t *m_laserdisc;
-	UINT8 *m_tile_ram;
-	UINT8 *m_tile_control_ram;
+	required_device<pioneer_ldv1000_device> m_laserdisc;
+	required_shared_ptr<UINT8> m_tile_ram;
+	required_shared_ptr<UINT8> m_tile_control_ram;
 	emu_timer *m_irq_timer;
+	DECLARE_READ8_MEMBER(ldp_read);
+	DECLARE_WRITE8_MEMBER(ldp_write);
+	DECLARE_DRIVER_INIT(lgp);
+	virtual void machine_start();
+	UINT32 screen_update_lgp(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(vblank_callback_lgp);
+	TIMER_CALLBACK_MEMBER(irq_stop);
 };
 
 
@@ -88,16 +98,15 @@ public:
 
 
 /* VIDEO GOODS */
-static SCREEN_UPDATE( lgp )
+UINT32 lgp_state::screen_update_lgp(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	lgp_state *state = screen->machine().driver_data<lgp_state>();
 	int charx, chary;
 
 	/* make color 0 transparent */
-	palette_set_color(screen->machine(), 0, MAKE_ARGB(0,0,0,0));
+	palette_set_color(machine(), 0, MAKE_ARGB(0,0,0,0));
 
 	/* clear */
-	bitmap_fill(bitmap, cliprect, 0);
+	bitmap.fill(0, cliprect);
 
 	/* Draw tiles */
 	for (charx = 0; charx < 32; charx++)
@@ -108,8 +117,8 @@ static SCREEN_UPDATE( lgp )
 
 			/* Somewhere there's a flag that offsets the tilemap by 0x100*x */
 			/* Palette is likely set somewhere as well (tile_control_ram?) */
-			drawgfx_transpen(bitmap, cliprect, screen->machine().gfx[0],
-					state->m_tile_ram[current_screen_character],
+			drawgfx_transpen(bitmap, cliprect, machine().gfx[0],
+					m_tile_ram[current_screen_character],
 					0,
 					0, 0, charx*8, chary*8, 0);
 		}
@@ -121,16 +130,14 @@ static SCREEN_UPDATE( lgp )
 
 /* MEMORY HANDLERS */
 /* Main Z80 R/W */
-static READ8_HANDLER(ldp_read)
+READ8_MEMBER(lgp_state::ldp_read)
 {
-	lgp_state *state = space->machine().driver_data<lgp_state>();
-	return laserdisc_data_r(state->m_laserdisc);
+	return m_laserdisc->status_r();
 }
 
-static WRITE8_HANDLER(ldp_write)
+WRITE8_MEMBER(lgp_state::ldp_write)
 {
-	lgp_state *state = space->machine().driver_data<lgp_state>();
-	laserdisc_data_w(state->m_laserdisc,data);
+	m_laserdisc->data_w(data);
 }
 
 
@@ -138,15 +145,15 @@ static WRITE8_HANDLER(ldp_write)
 
 
 /* PROGRAM MAPS */
-static ADDRESS_MAP_START( main_program_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_program_map, AS_PROGRAM, 8, lgp_state )
 	AM_RANGE(0x0000,0x7fff) AM_ROM
-	AM_RANGE(0xe000,0xe3ff) AM_RAM AM_BASE_MEMBER(lgp_state, m_tile_ram)
-	AM_RANGE(0xe400,0xe7ff) AM_RAM AM_BASE_MEMBER(lgp_state, m_tile_control_ram)
+	AM_RANGE(0xe000,0xe3ff) AM_RAM AM_SHARE("tile_ram")
+	AM_RANGE(0xe400,0xe7ff) AM_RAM AM_SHARE("tile_ctrl_ram")
 
 //  AM_RANGE(0xef00,0xef00) AM_READ_PORT("IN_TEST")
 	AM_RANGE(0xef80,0xef80) AM_READWRITE(ldp_read,ldp_write)
-	AM_RANGE(0xefb8,0xefb8) AM_READ(ldp_read)		/* Likely not right, calms it down though */
-	AM_RANGE(0xefc0,0xefc0) AM_READ_PORT("DSWA")	/* Not tested */
+	AM_RANGE(0xefb8,0xefb8) AM_READ(ldp_read)       /* Likely not right, calms it down though */
+	AM_RANGE(0xefc0,0xefc0) AM_READ_PORT("DSWA")    /* Not tested */
 	AM_RANGE(0xefc8,0xefc8) AM_READ_PORT("DSWB")
 	AM_RANGE(0xefd0,0xefd0) AM_READ_PORT("DSWC")
 	AM_RANGE(0xefd8,0xefd8) AM_READ_PORT("IN0")
@@ -154,22 +161,22 @@ static ADDRESS_MAP_START( main_program_map, AS_PROGRAM, 8 )
 	AM_RANGE(0xf000,0xffff) AM_RAM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sound_program_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_program_map, AS_PROGRAM, 8, lgp_state )
 	AM_RANGE(0x0000,0x3fff) AM_ROM
 	AM_RANGE(0x8000,0x83ff) AM_RAM
-	AM_RANGE(0x8400,0x8407) AM_RAM		/* Needs handler!  Communications? */
-	AM_RANGE(0x8800,0x8803) AM_RAM		/* Needs handler!  Communications? */
+	AM_RANGE(0x8400,0x8407) AM_RAM      /* Needs handler!  Communications? */
+	AM_RANGE(0x8800,0x8803) AM_RAM      /* Needs handler!  Communications? */
 ADDRESS_MAP_END
 
 
 /* IO MAPS */
-static ADDRESS_MAP_START( main_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( main_io_map, AS_IO, 8, lgp_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 //  AM_RANGE(0xfd,0xfd) AM_READ_PORT("IN_TEST")
 //  AM_RANGE(0xfe,0xfe) AM_READ_PORT("IN_TEST")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sound_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( sound_io_map, AS_IO, 8, lgp_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 ADDRESS_MAP_END
 
@@ -263,7 +270,7 @@ static INPUT_PORTS_START( lgp )
 
 
 	PORT_START("IN0")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SERVICE )	/* Manual says service switch simply increases credit count. */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SERVICE )   /* Manual says service switch simply increases credit count. */
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_TILT )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN )
@@ -315,9 +322,9 @@ static const gfx_layout lgp_gfx_layout_16x32 =
 	{ 0,1,2,3,4,5,6,7 },
 	{ 0*8,1*8,2*8,3*8,4*8,5*8,6*8,7*8,8*8,9*8,10*8,11*8,12*8,13*8,14*8,15*8 },
 	{ 0*128, 1*128, 2*128, 3*128, 4*128, 5*128, 6*128, 7*128,
-	  8*128, 9*128,10*128,11*128,12*128,13*128,14*128,15*128,
-	 16*128,17*128,18*128,19*128,20*128,21*128,22*128,23*128,
-	 24*128,25*128,26*128,27*128,28*128,29*128,30*128,31*128},
+		8*128, 9*128,10*128,11*128,12*128,13*128,14*128,15*128,
+		16*128,17*128,18*128,19*128,20*128,21*128,22*128,23*128,
+		24*128,25*128,26*128,27*128,28*128,29*128,30*128,31*128},
 	32*128
 };
 
@@ -326,28 +333,25 @@ static GFXDECODE_START( lgp )
 	GFXDECODE_ENTRY("gfx4", 0, lgp_gfx_layout_16x32, 0x0, 0x100)
 GFXDECODE_END
 
-static TIMER_CALLBACK( irq_stop )
+TIMER_CALLBACK_MEMBER(lgp_state::irq_stop)
 {
-	cputag_set_input_line(machine, "maincpu", 0, CLEAR_LINE);
+	machine().device("maincpu")->execute().set_input_line(0, CLEAR_LINE);
 }
 
-static INTERRUPT_GEN( vblank_callback_lgp )
+INTERRUPT_GEN_MEMBER(lgp_state::vblank_callback_lgp)
 {
-	lgp_state *state = device->machine().driver_data<lgp_state>();
 	// NMI
-	//device_set_input_line(device, INPUT_LINE_NMI, PULSE_LINE);
+	//device.execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 
 	// IRQ
-	device_set_input_line(device, 0, ASSERT_LINE);
-	state->m_irq_timer->adjust(attotime::from_usec(50));
+	device.execute().set_input_line(0, ASSERT_LINE);
+	m_irq_timer->adjust(attotime::from_usec(50));
 }
 
 
-static MACHINE_START( lgp )
+void lgp_state::machine_start()
 {
-	lgp_state *state = machine.driver_data<lgp_state>();
-	state->m_laserdisc = machine.device("laserdisc");
-	state->m_irq_timer = machine.scheduler().timer_alloc(FUNC(irq_stop));
+	m_irq_timer = machine().scheduler().timer_alloc(timer_expired_delegate(FUNC(lgp_state::irq_stop),this));
 }
 
 
@@ -357,30 +361,29 @@ static MACHINE_CONFIG_START( lgp, lgp_state )
 	MCFG_CPU_ADD("maincpu", Z80, CPU_PCB_CLOCK)
 	MCFG_CPU_PROGRAM_MAP(main_program_map)
 	MCFG_CPU_IO_MAP(main_io_map)
-	MCFG_CPU_VBLANK_INT("screen", vblank_callback_lgp)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", lgp_state,  vblank_callback_lgp)
 
 	/* sound cpu */
 	MCFG_CPU_ADD("audiocpu", Z80, SOUND_PCB_CLOCK)
 	MCFG_CPU_PROGRAM_MAP(sound_program_map)
 	MCFG_CPU_IO_MAP(sound_io_map)
 
-	MCFG_MACHINE_START(lgp)
 
-	MCFG_LASERDISC_ADD("laserdisc", PIONEER_LDV1000, "screen", "ldsound")
-	MCFG_LASERDISC_OVERLAY(lgp, 256, 256, BITMAP_FORMAT_INDEXED16)
+	MCFG_LASERDISC_LDV1000_ADD("laserdisc")
+	MCFG_LASERDISC_OVERLAY_DRIVER(256, 256, lgp_state, screen_update_lgp)
 
 	/* video hardware */
-	MCFG_LASERDISC_SCREEN_ADD_NTSC("screen", BITMAP_FORMAT_INDEXED16)
+	MCFG_LASERDISC_SCREEN_ADD_NTSC("screen", "laserdisc")
 
 	MCFG_PALETTE_LENGTH(256)
-	/* MCFG_PALETTE_INIT(lgp) */
+	/* MCFG_PALETTE_INIT_OVERRIDE(lgp_state,lgp) */
 
 	MCFG_GFXDECODE(lgp)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
 
-	MCFG_SOUND_ADD("ldsound", LASERDISC_SOUND, 0)
+	MCFG_SOUND_MODIFY("laserdisc")
 	MCFG_SOUND_ROUTE(0, "lspeaker", 1.0)
 	MCFG_SOUND_ROUTE(1, "rspeaker", 1.0)
 MACHINE_CONFIG_END
@@ -436,7 +439,7 @@ ROM_START( lgp )
 	/* Sound CPU - on Sound PCB */
 	ROM_REGION( 0x4000, "audiocpu", 0 )
 	ROM_LOAD( "a02_29.ic11", 0x0000, 0x2000, CRC(c44026db) SHA1(93a6e8f272ca826c05a7be59e14a1a0c848fbaa0) )
-	ROM_LOAD( "a02_30.ic17", 0x2000, 0x2000, CRC(8c324556) SHA1(9e1f6f00d4023d9cfd414d3cc02af55be49dde2c) )	/* Sound data? */
+	ROM_LOAD( "a02_30.ic17", 0x2000, 0x2000, CRC(8c324556) SHA1(9e1f6f00d4023d9cfd414d3cc02af55be49dde2c) ) /* Sound data? */
 
 
 	/* OBJ PCB */
@@ -471,9 +474,9 @@ ROM_START( lgp )
 ROM_END
 
 
-static DRIVER_INIT( lgp )
+DRIVER_INIT_MEMBER(lgp_state,lgp)
 {
 }
 
 /*    YEAR  NAME PARENT   MACHINE INPUT INIT MONITOR  COMPANY   FULLNAME             FLAGS) */
-GAME( 1983, lgp, 0,       lgp,    lgp,  lgp, ROT0,    "Taito",  "Laser Grand Prix",  GAME_NOT_WORKING|GAME_NO_SOUND)
+GAME( 1983, lgp, 0,       lgp,    lgp, lgp_state,  lgp, ROT0,    "Taito",  "Laser Grand Prix",  GAME_NOT_WORKING|GAME_NO_SOUND)

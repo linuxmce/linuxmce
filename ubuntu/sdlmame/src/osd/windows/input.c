@@ -40,7 +40,7 @@
 //============================================================
 
 // For testing purposes: force DirectInput
-#define FORCE_DIRECTINPUT	0
+#define FORCE_DIRECTINPUT   0
 
 // standard windows headers
 #define WIN32_LEAN_AND_MEAN
@@ -59,8 +59,8 @@
 #include <stddef.h>
 
 // MAME headers
-#include "osdepend.h"
 #include "emu.h"
+#include "osdepend.h"
 #include "ui.h"
 
 // MAMEOS headers
@@ -84,12 +84,12 @@ enum
 	POVDIR_DOWN
 };
 
-#define MAX_KEYS			256
+#define MAX_KEYS            256
 
-#define MAME_KEY			0
-#define DI_KEY				1
-#define VIRTUAL_KEY			2
-#define ASCII_KEY			3
+#define MAME_KEY            0
+#define DI_KEY              1
+#define VIRTUAL_KEY         2
+#define ASCII_KEY           3
 
 
 
@@ -97,12 +97,12 @@ enum
 //  MACROS
 //============================================================
 
-#define STRUCTSIZE(x)		((dinput_version == 0x0300) ? sizeof(x##_DX3) : sizeof(x))
+#define STRUCTSIZE(x)       ((dinput_version == 0x0300) ? sizeof(x##_DX3) : sizeof(x))
 
 #ifdef UNICODE
-#define UNICODE_SUFFIX		"W"
+#define UNICODE_SUFFIX      "W"
 #else
-#define UNICODE_SUFFIX		"A"
+#define UNICODE_SUFFIX      "A"
 #endif
 
 
@@ -112,80 +112,80 @@ enum
 //============================================================
 
 // state information for a keyboard; DirectInput state must be first element
-typedef struct _keyboard_state keyboard_state;
-struct _keyboard_state
+struct keyboard_state
 {
-	UINT8					state[MAX_KEYS];
-	INT8					oldkey[MAX_KEYS];
-	INT8					currkey[MAX_KEYS];
+	UINT8                   state[MAX_KEYS];
+	INT8                    oldkey[MAX_KEYS];
+	INT8                    currkey[MAX_KEYS];
 };
 
 
 // state information for a mouse; DirectInput state must be first element
-typedef struct _mouse_state mouse_state;
-struct _mouse_state
+struct mouse_state
 {
-	DIMOUSESTATE2			state;
-	LONG					raw_x, raw_y, raw_z;
+	DIMOUSESTATE2           state;
+	LONG                    raw_x, raw_y, raw_z;
 };
 
 
 // state information for a joystick; DirectInput state must be first element
-typedef struct _joystick_state joystick_state;
-struct _joystick_state
+struct joystick_state
 {
-	DIJOYSTATE				state;
-	LONG					rangemin[8];
-	LONG					rangemax[8];
+	DIJOYSTATE              state;
+	LONG                    rangemin[8];
+	LONG                    rangemax[8];
 };
 
 
 // DirectInput-specific information about a device
-typedef struct _dinput_device_info dinput_device_info;
-struct _dinput_device_info
+struct dinput_device_info
 {
-	LPDIRECTINPUTDEVICE		device;
-	LPDIRECTINPUTDEVICE2	device2;
-	DIDEVCAPS				caps;
-	LPCDIDATAFORMAT			format;
+	LPDIRECTINPUTDEVICE     device;
+	LPDIRECTINPUTDEVICE2    device2;
+	DIDEVCAPS               caps;
+	LPCDIDATAFORMAT         format;
 };
 
 
 // RawInput-specific information about a device
-typedef struct _rawinput_device_info rawinput_device_info;
-struct _rawinput_device_info
+struct rawinput_device_info
 {
-	HANDLE					device;
+	HANDLE                  device;
 };
 
 
 // generic device information
-typedef struct _device_info device_info;
-struct _device_info
+class device_info
 {
-	running_machine &machine() const { assert(m_machine != NULL); return *m_machine; }
+public:
+	device_info(running_machine &machine)
+		: m_machine(machine) { }
+
+	running_machine &machine() const { return m_machine; }
 
 	// device information
-	device_info **			head;
-	device_info *			next;
-	const char *			name;
-	void					(*poll)(device_info *info);
+	device_info **          head;
+	device_info *           next;
+	const char *            name;
+	void                    (*poll)(device_info *info);
 
 	// MAME information
-	running_machine *		m_machine;
-	input_device *			device;
+	input_device *          device;
 
 	// device state
 	union
 	{
-		keyboard_state		keyboard;
-		mouse_state			mouse;
-		joystick_state		joystick;
+		keyboard_state      keyboard;
+		mouse_state         mouse;
+		joystick_state      joystick;
 	};
 
 	// DirectInput/RawInput-specific state
-	dinput_device_info		dinput;
-	rawinput_device_info	rawinput;
+	dinput_device_info      dinput;
+	rawinput_device_info    rawinput;
+
+private:
+	running_machine &       m_machine;
 };
 
 
@@ -202,36 +202,36 @@ typedef /*WINUSERAPI*/ BOOL (WINAPI *register_rawinput_devices_ptr)(IN PCRAWINPU
 //============================================================
 
 // global states
-static UINT8				input_enabled;
-static osd_lock *			input_lock;
-static UINT8				input_paused;
-static DWORD				last_poll;
+static UINT8                input_enabled;
+static osd_lock *           input_lock;
+static UINT8                input_paused;
+static DWORD                last_poll;
 
 // DirectInput variables
-static LPDIRECTINPUT		dinput;
-static int					dinput_version;
+static LPDIRECTINPUT        dinput;
+static int                  dinput_version;
 
 // RawInput variables
-static get_rawinput_device_list_ptr		get_rawinput_device_list;
-static get_rawinput_data_ptr			get_rawinput_data;
-static get_rawinput_device_info_ptr 	get_rawinput_device_info;
-static register_rawinput_devices_ptr	register_rawinput_devices;
+static get_rawinput_device_list_ptr     get_rawinput_device_list;
+static get_rawinput_data_ptr            get_rawinput_data;
+static get_rawinput_device_info_ptr     get_rawinput_device_info;
+static register_rawinput_devices_ptr    register_rawinput_devices;
 
 // keyboard states
-static UINT8				keyboard_win32_reported_key_down;
-static device_info *		keyboard_list;
+static UINT8                keyboard_win32_reported_key_down;
+static device_info *        keyboard_list;
 
 // mouse states
-static UINT8				mouse_enabled;
-static device_info *		mouse_list;
+static UINT8                mouse_enabled;
+static device_info *        mouse_list;
 
 // lightgun states
-static UINT8				lightgun_shared_axis_mode;
-static UINT8				lightgun_enabled;
-static device_info *		lightgun_list;
+static UINT8                lightgun_shared_axis_mode;
+static UINT8                lightgun_enabled;
+static device_info *        lightgun_list;
 
 // joystick states
-static device_info *		joystick_list;
+static device_info *        joystick_list;
 
 // default axis names
 static const TCHAR *const default_axis_name[] =
@@ -311,115 +311,115 @@ static const TCHAR *default_pov_name(int which);
 static const int win_key_trans_table[][4] =
 {
 	// MAME key             dinput key          virtual key     ascii
-	{ ITEM_ID_ESC,			DIK_ESCAPE,			VK_ESCAPE,		27 },
-	{ ITEM_ID_1,			DIK_1,				'1',			'1' },
-	{ ITEM_ID_2,			DIK_2,				'2',			'2' },
-	{ ITEM_ID_3,			DIK_3,				'3',			'3' },
-	{ ITEM_ID_4,			DIK_4,				'4',			'4' },
-	{ ITEM_ID_5,			DIK_5,				'5',			'5' },
-	{ ITEM_ID_6,			DIK_6,				'6',			'6' },
-	{ ITEM_ID_7,			DIK_7,				'7',			'7' },
-	{ ITEM_ID_8,			DIK_8,				'8',			'8' },
-	{ ITEM_ID_9,			DIK_9,				'9',			'9' },
-	{ ITEM_ID_0,			DIK_0,				'0',			'0' },
-	{ ITEM_ID_MINUS,		DIK_MINUS,			VK_OEM_MINUS,	'-' },
-	{ ITEM_ID_EQUALS,		DIK_EQUALS,			VK_OEM_PLUS,	'=' },
-	{ ITEM_ID_BACKSPACE,	DIK_BACK,			VK_BACK,		8 },
-	{ ITEM_ID_TAB,			DIK_TAB,			VK_TAB, 		9 },
-	{ ITEM_ID_Q,			DIK_Q,				'Q',			'Q' },
-	{ ITEM_ID_W,			DIK_W,				'W',			'W' },
-	{ ITEM_ID_E,			DIK_E,				'E',			'E' },
-	{ ITEM_ID_R,			DIK_R,				'R',			'R' },
-	{ ITEM_ID_T,			DIK_T,				'T',			'T' },
-	{ ITEM_ID_Y,			DIK_Y,				'Y',			'Y' },
-	{ ITEM_ID_U,			DIK_U,				'U',			'U' },
-	{ ITEM_ID_I,			DIK_I,				'I',			'I' },
-	{ ITEM_ID_O,			DIK_O,				'O',			'O' },
-	{ ITEM_ID_P,			DIK_P,				'P',			'P' },
-	{ ITEM_ID_OPENBRACE,	DIK_LBRACKET,		VK_OEM_4,		'[' },
-	{ ITEM_ID_CLOSEBRACE,	DIK_RBRACKET,		VK_OEM_6,		']' },
-	{ ITEM_ID_ENTER,		DIK_RETURN, 		VK_RETURN,		13 },
-	{ ITEM_ID_LCONTROL, 	DIK_LCONTROL,		VK_LCONTROL,	0 },
-	{ ITEM_ID_A,			DIK_A,				'A',			'A' },
-	{ ITEM_ID_S,			DIK_S,				'S',			'S' },
-	{ ITEM_ID_D,			DIK_D,				'D',			'D' },
-	{ ITEM_ID_F,			DIK_F,				'F',			'F' },
-	{ ITEM_ID_G,			DIK_G,				'G',			'G' },
-	{ ITEM_ID_H,			DIK_H,				'H',			'H' },
-	{ ITEM_ID_J,			DIK_J,				'J',			'J' },
-	{ ITEM_ID_K,			DIK_K,				'K',			'K' },
-	{ ITEM_ID_L,			DIK_L,				'L',			'L' },
-	{ ITEM_ID_COLON,		DIK_SEMICOLON,		VK_OEM_1,		';' },
-	{ ITEM_ID_QUOTE,		DIK_APOSTROPHE,		VK_OEM_7,		'\'' },
-	{ ITEM_ID_TILDE,		DIK_GRAVE,			VK_OEM_3,		'`' },
-	{ ITEM_ID_LSHIFT,		DIK_LSHIFT, 		VK_LSHIFT,		0 },
-	{ ITEM_ID_BACKSLASH,	DIK_BACKSLASH,		VK_OEM_5,		'\\' },
-	{ ITEM_ID_BACKSLASH2,	DIK_OEM_102,		VK_OEM_102,		'<' },
-	{ ITEM_ID_Z,			DIK_Z,				'Z',			'Z' },
-	{ ITEM_ID_X,			DIK_X,				'X',			'X' },
-	{ ITEM_ID_C,			DIK_C,				'C',			'C' },
-	{ ITEM_ID_V,			DIK_V,				'V',			'V' },
-	{ ITEM_ID_B,			DIK_B,				'B',			'B' },
-	{ ITEM_ID_N,			DIK_N,				'N',			'N' },
-	{ ITEM_ID_M,			DIK_M,				'M',			'M' },
-	{ ITEM_ID_COMMA,		DIK_COMMA,			VK_OEM_COMMA,	',' },
-	{ ITEM_ID_STOP, 		DIK_PERIOD, 		VK_OEM_PERIOD,	'.' },
-	{ ITEM_ID_SLASH,		DIK_SLASH,			VK_OEM_2,		'/' },
-	{ ITEM_ID_RSHIFT,		DIK_RSHIFT, 		VK_RSHIFT,		0 },
-	{ ITEM_ID_ASTERISK, 	DIK_MULTIPLY,		VK_MULTIPLY,	'*' },
-	{ ITEM_ID_LALT, 		DIK_LMENU,			VK_LMENU,		0 },
-	{ ITEM_ID_SPACE,		DIK_SPACE,			VK_SPACE,		' ' },
-	{ ITEM_ID_CAPSLOCK, 	DIK_CAPITAL,		VK_CAPITAL, 	0 },
-	{ ITEM_ID_F1,			DIK_F1,				VK_F1,			0 },
-	{ ITEM_ID_F2,			DIK_F2,				VK_F2,			0 },
-	{ ITEM_ID_F3,			DIK_F3,				VK_F3,			0 },
-	{ ITEM_ID_F4,			DIK_F4,				VK_F4,			0 },
-	{ ITEM_ID_F5,			DIK_F5,				VK_F5,			0 },
-	{ ITEM_ID_F6,			DIK_F6,				VK_F6,			0 },
-	{ ITEM_ID_F7,			DIK_F7,				VK_F7,			0 },
-	{ ITEM_ID_F8,			DIK_F8,				VK_F8,			0 },
-	{ ITEM_ID_F9,			DIK_F9,				VK_F9,			0 },
-	{ ITEM_ID_F10,			DIK_F10,			VK_F10, 		0 },
-	{ ITEM_ID_NUMLOCK,		DIK_NUMLOCK,		VK_NUMLOCK, 	0 },
-	{ ITEM_ID_SCRLOCK,		DIK_SCROLL,			VK_SCROLL,		0 },
-	{ ITEM_ID_7_PAD,		DIK_NUMPAD7,		VK_NUMPAD7, 	0 },
-	{ ITEM_ID_8_PAD,		DIK_NUMPAD8,		VK_NUMPAD8, 	0 },
-	{ ITEM_ID_9_PAD,		DIK_NUMPAD9,		VK_NUMPAD9, 	0 },
-	{ ITEM_ID_MINUS_PAD,	DIK_SUBTRACT,		VK_SUBTRACT,	0 },
-	{ ITEM_ID_4_PAD,		DIK_NUMPAD4,		VK_NUMPAD4, 	0 },
-	{ ITEM_ID_5_PAD,		DIK_NUMPAD5,		VK_NUMPAD5, 	0 },
-	{ ITEM_ID_6_PAD,		DIK_NUMPAD6,		VK_NUMPAD6, 	0 },
-	{ ITEM_ID_PLUS_PAD, 	DIK_ADD,			VK_ADD, 		0 },
-	{ ITEM_ID_1_PAD,		DIK_NUMPAD1,		VK_NUMPAD1, 	0 },
-	{ ITEM_ID_2_PAD,		DIK_NUMPAD2,		VK_NUMPAD2, 	0 },
-	{ ITEM_ID_3_PAD,		DIK_NUMPAD3,		VK_NUMPAD3, 	0 },
-	{ ITEM_ID_0_PAD,		DIK_NUMPAD0,		VK_NUMPAD0, 	0 },
-	{ ITEM_ID_DEL_PAD,		DIK_DECIMAL,		VK_DECIMAL, 	0 },
-	{ ITEM_ID_F11,			DIK_F11,			VK_F11, 		0 },
-	{ ITEM_ID_F12,			DIK_F12,			VK_F12, 		0 },
-	{ ITEM_ID_F13,			DIK_F13,			VK_F13, 		0 },
-	{ ITEM_ID_F14,			DIK_F14,			VK_F14, 		0 },
-	{ ITEM_ID_F15,			DIK_F15,			VK_F15, 		0 },
-	{ ITEM_ID_ENTER_PAD,	DIK_NUMPADENTER,	VK_RETURN,		0 },
-	{ ITEM_ID_RCONTROL, 	DIK_RCONTROL,		VK_RCONTROL,	0 },
-	{ ITEM_ID_SLASH_PAD,	DIK_DIVIDE,			VK_DIVIDE,		0 },
-	{ ITEM_ID_PRTSCR,		DIK_SYSRQ,			0,				0 },
-	{ ITEM_ID_RALT, 		DIK_RMENU,			VK_RMENU,		0 },
-	{ ITEM_ID_HOME, 		DIK_HOME,			VK_HOME,		0 },
-	{ ITEM_ID_UP,			DIK_UP,				VK_UP,			0 },
-	{ ITEM_ID_PGUP, 		DIK_PRIOR,			VK_PRIOR,		0 },
-	{ ITEM_ID_LEFT, 		DIK_LEFT,			VK_LEFT,		0 },
-	{ ITEM_ID_RIGHT,		DIK_RIGHT,			VK_RIGHT,		0 },
-	{ ITEM_ID_END,			DIK_END,			VK_END, 		0 },
-	{ ITEM_ID_DOWN, 		DIK_DOWN,			VK_DOWN,		0 },
-	{ ITEM_ID_PGDN, 		DIK_NEXT,			VK_NEXT,		0 },
-	{ ITEM_ID_INSERT,		DIK_INSERT,			VK_INSERT,		0 },
-	{ ITEM_ID_DEL,			DIK_DELETE,			VK_DELETE,		0 },
-	{ ITEM_ID_LWIN, 		DIK_LWIN,			VK_LWIN,		0 },
-	{ ITEM_ID_RWIN, 		DIK_RWIN,			VK_RWIN,		0 },
-	{ ITEM_ID_MENU, 		DIK_APPS,			VK_APPS,		0 },
-	{ ITEM_ID_PAUSE,		DIK_PAUSE,			VK_PAUSE,		0 },
-	{ ITEM_ID_CANCEL,		0,					VK_CANCEL,		0 },
+	{ ITEM_ID_ESC,          DIK_ESCAPE,         VK_ESCAPE,      27 },
+	{ ITEM_ID_1,            DIK_1,              '1',            '1' },
+	{ ITEM_ID_2,            DIK_2,              '2',            '2' },
+	{ ITEM_ID_3,            DIK_3,              '3',            '3' },
+	{ ITEM_ID_4,            DIK_4,              '4',            '4' },
+	{ ITEM_ID_5,            DIK_5,              '5',            '5' },
+	{ ITEM_ID_6,            DIK_6,              '6',            '6' },
+	{ ITEM_ID_7,            DIK_7,              '7',            '7' },
+	{ ITEM_ID_8,            DIK_8,              '8',            '8' },
+	{ ITEM_ID_9,            DIK_9,              '9',            '9' },
+	{ ITEM_ID_0,            DIK_0,              '0',            '0' },
+	{ ITEM_ID_MINUS,        DIK_MINUS,          VK_OEM_MINUS,   '-' },
+	{ ITEM_ID_EQUALS,       DIK_EQUALS,         VK_OEM_PLUS,    '=' },
+	{ ITEM_ID_BACKSPACE,    DIK_BACK,           VK_BACK,        8 },
+	{ ITEM_ID_TAB,          DIK_TAB,            VK_TAB,         9 },
+	{ ITEM_ID_Q,            DIK_Q,              'Q',            'Q' },
+	{ ITEM_ID_W,            DIK_W,              'W',            'W' },
+	{ ITEM_ID_E,            DIK_E,              'E',            'E' },
+	{ ITEM_ID_R,            DIK_R,              'R',            'R' },
+	{ ITEM_ID_T,            DIK_T,              'T',            'T' },
+	{ ITEM_ID_Y,            DIK_Y,              'Y',            'Y' },
+	{ ITEM_ID_U,            DIK_U,              'U',            'U' },
+	{ ITEM_ID_I,            DIK_I,              'I',            'I' },
+	{ ITEM_ID_O,            DIK_O,              'O',            'O' },
+	{ ITEM_ID_P,            DIK_P,              'P',            'P' },
+	{ ITEM_ID_OPENBRACE,    DIK_LBRACKET,       VK_OEM_4,       '[' },
+	{ ITEM_ID_CLOSEBRACE,   DIK_RBRACKET,       VK_OEM_6,       ']' },
+	{ ITEM_ID_ENTER,        DIK_RETURN,         VK_RETURN,      13 },
+	{ ITEM_ID_LCONTROL,     DIK_LCONTROL,       VK_LCONTROL,    0 },
+	{ ITEM_ID_A,            DIK_A,              'A',            'A' },
+	{ ITEM_ID_S,            DIK_S,              'S',            'S' },
+	{ ITEM_ID_D,            DIK_D,              'D',            'D' },
+	{ ITEM_ID_F,            DIK_F,              'F',            'F' },
+	{ ITEM_ID_G,            DIK_G,              'G',            'G' },
+	{ ITEM_ID_H,            DIK_H,              'H',            'H' },
+	{ ITEM_ID_J,            DIK_J,              'J',            'J' },
+	{ ITEM_ID_K,            DIK_K,              'K',            'K' },
+	{ ITEM_ID_L,            DIK_L,              'L',            'L' },
+	{ ITEM_ID_COLON,        DIK_SEMICOLON,      VK_OEM_1,       ';' },
+	{ ITEM_ID_QUOTE,        DIK_APOSTROPHE,     VK_OEM_7,       '\'' },
+	{ ITEM_ID_TILDE,        DIK_GRAVE,          VK_OEM_3,       '`' },
+	{ ITEM_ID_LSHIFT,       DIK_LSHIFT,         VK_LSHIFT,      0 },
+	{ ITEM_ID_BACKSLASH,    DIK_BACKSLASH,      VK_OEM_5,       '\\' },
+	{ ITEM_ID_BACKSLASH2,   DIK_OEM_102,        VK_OEM_102,     '<' },
+	{ ITEM_ID_Z,            DIK_Z,              'Z',            'Z' },
+	{ ITEM_ID_X,            DIK_X,              'X',            'X' },
+	{ ITEM_ID_C,            DIK_C,              'C',            'C' },
+	{ ITEM_ID_V,            DIK_V,              'V',            'V' },
+	{ ITEM_ID_B,            DIK_B,              'B',            'B' },
+	{ ITEM_ID_N,            DIK_N,              'N',            'N' },
+	{ ITEM_ID_M,            DIK_M,              'M',            'M' },
+	{ ITEM_ID_COMMA,        DIK_COMMA,          VK_OEM_COMMA,   ',' },
+	{ ITEM_ID_STOP,         DIK_PERIOD,         VK_OEM_PERIOD,  '.' },
+	{ ITEM_ID_SLASH,        DIK_SLASH,          VK_OEM_2,       '/' },
+	{ ITEM_ID_RSHIFT,       DIK_RSHIFT,         VK_RSHIFT,      0 },
+	{ ITEM_ID_ASTERISK,     DIK_MULTIPLY,       VK_MULTIPLY,    '*' },
+	{ ITEM_ID_LALT,         DIK_LMENU,          VK_LMENU,       0 },
+	{ ITEM_ID_SPACE,        DIK_SPACE,          VK_SPACE,       ' ' },
+	{ ITEM_ID_CAPSLOCK,     DIK_CAPITAL,        VK_CAPITAL,     0 },
+	{ ITEM_ID_F1,           DIK_F1,             VK_F1,          0 },
+	{ ITEM_ID_F2,           DIK_F2,             VK_F2,          0 },
+	{ ITEM_ID_F3,           DIK_F3,             VK_F3,          0 },
+	{ ITEM_ID_F4,           DIK_F4,             VK_F4,          0 },
+	{ ITEM_ID_F5,           DIK_F5,             VK_F5,          0 },
+	{ ITEM_ID_F6,           DIK_F6,             VK_F6,          0 },
+	{ ITEM_ID_F7,           DIK_F7,             VK_F7,          0 },
+	{ ITEM_ID_F8,           DIK_F8,             VK_F8,          0 },
+	{ ITEM_ID_F9,           DIK_F9,             VK_F9,          0 },
+	{ ITEM_ID_F10,          DIK_F10,            VK_F10,         0 },
+	{ ITEM_ID_NUMLOCK,      DIK_NUMLOCK,        VK_NUMLOCK,     0 },
+	{ ITEM_ID_SCRLOCK,      DIK_SCROLL,         VK_SCROLL,      0 },
+	{ ITEM_ID_7_PAD,        DIK_NUMPAD7,        VK_NUMPAD7,     0 },
+	{ ITEM_ID_8_PAD,        DIK_NUMPAD8,        VK_NUMPAD8,     0 },
+	{ ITEM_ID_9_PAD,        DIK_NUMPAD9,        VK_NUMPAD9,     0 },
+	{ ITEM_ID_MINUS_PAD,    DIK_SUBTRACT,       VK_SUBTRACT,    0 },
+	{ ITEM_ID_4_PAD,        DIK_NUMPAD4,        VK_NUMPAD4,     0 },
+	{ ITEM_ID_5_PAD,        DIK_NUMPAD5,        VK_NUMPAD5,     0 },
+	{ ITEM_ID_6_PAD,        DIK_NUMPAD6,        VK_NUMPAD6,     0 },
+	{ ITEM_ID_PLUS_PAD,     DIK_ADD,            VK_ADD,         0 },
+	{ ITEM_ID_1_PAD,        DIK_NUMPAD1,        VK_NUMPAD1,     0 },
+	{ ITEM_ID_2_PAD,        DIK_NUMPAD2,        VK_NUMPAD2,     0 },
+	{ ITEM_ID_3_PAD,        DIK_NUMPAD3,        VK_NUMPAD3,     0 },
+	{ ITEM_ID_0_PAD,        DIK_NUMPAD0,        VK_NUMPAD0,     0 },
+	{ ITEM_ID_DEL_PAD,      DIK_DECIMAL,        VK_DECIMAL,     0 },
+	{ ITEM_ID_F11,          DIK_F11,            VK_F11,         0 },
+	{ ITEM_ID_F12,          DIK_F12,            VK_F12,         0 },
+	{ ITEM_ID_F13,          DIK_F13,            VK_F13,         0 },
+	{ ITEM_ID_F14,          DIK_F14,            VK_F14,         0 },
+	{ ITEM_ID_F15,          DIK_F15,            VK_F15,         0 },
+	{ ITEM_ID_ENTER_PAD,    DIK_NUMPADENTER,    VK_RETURN,      0 },
+	{ ITEM_ID_RCONTROL,     DIK_RCONTROL,       VK_RCONTROL,    0 },
+	{ ITEM_ID_SLASH_PAD,    DIK_DIVIDE,         VK_DIVIDE,      0 },
+	{ ITEM_ID_PRTSCR,       DIK_SYSRQ,          0,              0 },
+	{ ITEM_ID_RALT,         DIK_RMENU,          VK_RMENU,       0 },
+	{ ITEM_ID_HOME,         DIK_HOME,           VK_HOME,        0 },
+	{ ITEM_ID_UP,           DIK_UP,             VK_UP,          0 },
+	{ ITEM_ID_PGUP,         DIK_PRIOR,          VK_PRIOR,       0 },
+	{ ITEM_ID_LEFT,         DIK_LEFT,           VK_LEFT,        0 },
+	{ ITEM_ID_RIGHT,        DIK_RIGHT,          VK_RIGHT,       0 },
+	{ ITEM_ID_END,          DIK_END,            VK_END,         0 },
+	{ ITEM_ID_DOWN,         DIK_DOWN,           VK_DOWN,        0 },
+	{ ITEM_ID_PGDN,         DIK_NEXT,           VK_NEXT,        0 },
+	{ ITEM_ID_INSERT,       DIK_INSERT,         VK_INSERT,      0 },
+	{ ITEM_ID_DEL,          DIK_DELETE,         VK_DELETE,      0 },
+	{ ITEM_ID_LWIN,         DIK_LWIN,           VK_LWIN,        0 },
+	{ ITEM_ID_RWIN,         DIK_RWIN,           VK_RWIN,        0 },
+	{ ITEM_ID_MENU,         DIK_APPS,           VK_APPS,        0 },
+	{ ITEM_ID_PAUSE,        DIK_PAUSE,          VK_PAUSE,       0 },
+	{ ITEM_ID_CANCEL,       0,                  VK_CANCEL,      0 },
 
 	// New keys introduced in Windows 2000. These have no MAME codes to
 	// preserve compatibility with old config files that may refer to them
@@ -429,18 +429,18 @@ static const int win_key_trans_table[][4] =
 	// paused). Some codes are missing because the mapping to vkey codes
 	// isn't clear, and MapVirtualKey is no help.
 
-	{ ITEM_ID_OTHER_SWITCH,	DIK_MUTE,			VK_VOLUME_MUTE,			0 },
-	{ ITEM_ID_OTHER_SWITCH,	DIK_VOLUMEDOWN,		VK_VOLUME_DOWN,			0 },
-	{ ITEM_ID_OTHER_SWITCH,	DIK_VOLUMEUP,		VK_VOLUME_UP,			0 },
-	{ ITEM_ID_OTHER_SWITCH,	DIK_WEBHOME,		VK_BROWSER_HOME,		0 },
-	{ ITEM_ID_OTHER_SWITCH,	DIK_WEBSEARCH,		VK_BROWSER_SEARCH,		0 },
-	{ ITEM_ID_OTHER_SWITCH,	DIK_WEBFAVORITES,	VK_BROWSER_FAVORITES,	0 },
-	{ ITEM_ID_OTHER_SWITCH,	DIK_WEBREFRESH,		VK_BROWSER_REFRESH,		0 },
-	{ ITEM_ID_OTHER_SWITCH,	DIK_WEBSTOP,		VK_BROWSER_STOP,		0 },
-	{ ITEM_ID_OTHER_SWITCH,	DIK_WEBFORWARD,		VK_BROWSER_FORWARD,		0 },
-	{ ITEM_ID_OTHER_SWITCH,	DIK_WEBBACK,		VK_BROWSER_BACK,		0 },
-	{ ITEM_ID_OTHER_SWITCH,	DIK_MAIL,			VK_LAUNCH_MAIL,			0 },
-	{ ITEM_ID_OTHER_SWITCH,	DIK_MEDIASELECT,	VK_LAUNCH_MEDIA_SELECT,	0 },
+	{ ITEM_ID_OTHER_SWITCH, DIK_MUTE,           VK_VOLUME_MUTE,         0 },
+	{ ITEM_ID_OTHER_SWITCH, DIK_VOLUMEDOWN,     VK_VOLUME_DOWN,         0 },
+	{ ITEM_ID_OTHER_SWITCH, DIK_VOLUMEUP,       VK_VOLUME_UP,           0 },
+	{ ITEM_ID_OTHER_SWITCH, DIK_WEBHOME,        VK_BROWSER_HOME,        0 },
+	{ ITEM_ID_OTHER_SWITCH, DIK_WEBSEARCH,      VK_BROWSER_SEARCH,      0 },
+	{ ITEM_ID_OTHER_SWITCH, DIK_WEBFAVORITES,   VK_BROWSER_FAVORITES,   0 },
+	{ ITEM_ID_OTHER_SWITCH, DIK_WEBREFRESH,     VK_BROWSER_REFRESH,     0 },
+	{ ITEM_ID_OTHER_SWITCH, DIK_WEBSTOP,        VK_BROWSER_STOP,        0 },
+	{ ITEM_ID_OTHER_SWITCH, DIK_WEBFORWARD,     VK_BROWSER_FORWARD,     0 },
+	{ ITEM_ID_OTHER_SWITCH, DIK_WEBBACK,        VK_BROWSER_BACK,        0 },
+	{ ITEM_ID_OTHER_SWITCH, DIK_MAIL,           VK_LAUNCH_MAIL,         0 },
+	{ ITEM_ID_OTHER_SWITCH, DIK_MEDIASELECT,    VK_LAUNCH_MEDIA_SELECT, 0 },
 };
 
 
@@ -502,9 +502,9 @@ INLINE INT32 normalize_absolute_axis(INT32 raw, INT32 rawmin, INT32 rawmax)
 void wininput_init(running_machine &machine)
 {
 	// we need pause and exit callbacks
-	machine.add_notifier(MACHINE_NOTIFY_PAUSE, wininput_pause);
-	machine.add_notifier(MACHINE_NOTIFY_RESUME, wininput_resume);
-	machine.add_notifier(MACHINE_NOTIFY_EXIT, wininput_exit);
+	machine.add_notifier(MACHINE_NOTIFY_PAUSE, machine_notify_delegate(FUNC(wininput_pause), &machine));
+	machine.add_notifier(MACHINE_NOTIFY_RESUME, machine_notify_delegate(FUNC(wininput_resume), &machine));
+	machine.add_notifier(MACHINE_NOTIFY_EXIT, machine_notify_delegate(FUNC(wininput_exit), &machine));
 
 	// allocate a lock for input synchronizations, since messages sometimes come from another thread
 	input_lock = osd_lock_alloc();
@@ -576,8 +576,8 @@ void wininput_poll(running_machine &machine)
 		winwindow_process_events_periodic(machine);
 
 		// track if mouse/lightgun is enabled, for mouse hiding purposes
-		mouse_enabled = input_device_class_enabled(machine, DEVICE_CLASS_MOUSE);
-		lightgun_enabled = input_device_class_enabled(machine, DEVICE_CLASS_LIGHTGUN);
+		mouse_enabled = machine.input().device_class(DEVICE_CLASS_MOUSE).enabled();
+		lightgun_enabled = machine.input().device_class(DEVICE_CLASS_LIGHTGUN).enabled();
 	}
 
 	// poll all of the devices
@@ -738,9 +738,9 @@ BOOL wininput_handle_raw(HANDLE device)
 int wininput_vkey_for_mame_code(input_code code)
 {
 	// only works for keyboard switches
-	if (INPUT_CODE_DEVCLASS(code) == DEVICE_CLASS_KEYBOARD && INPUT_CODE_ITEMCLASS(code) == ITEM_CLASS_SWITCH)
+	if (code.device_class() == DEVICE_CLASS_KEYBOARD && code.item_class() == ITEM_CLASS_SWITCH)
 	{
-		input_item_id id = INPUT_CODE_ITEMID(code);
+		input_item_id id = code.item_id();
 		int tablenum;
 
 		// scan the table for a match
@@ -756,25 +756,40 @@ int wininput_vkey_for_mame_code(input_code code)
 //  customize_input_type_list
 //============================================================
 
-void windows_osd_interface::customize_input_type_list(input_type_desc *typelist)
+void windows_osd_interface::customize_input_type_list(simple_list<input_type_entry> &typelist)
 {
-	input_type_desc *typedesc;
+	input_type_entry *entry;
 
 	// loop over the defaults
-	for (typedesc = typelist; typedesc != NULL; typedesc = typedesc->next)
-		switch (typedesc->type)
+	for (entry = typelist.first(); entry != NULL; entry = entry->next())
+		switch (entry->type())
 		{
 			// disable the config menu if the ALT key is down
 			// (allows ALT-TAB to switch between windows apps)
 			case IPT_UI_CONFIGURE:
-				input_seq_set_5(&typedesc->seq[SEQ_TYPE_STANDARD], KEYCODE_TAB, SEQCODE_NOT, KEYCODE_LALT, SEQCODE_NOT, KEYCODE_RALT);
+				entry->defseq(SEQ_TYPE_STANDARD).set(KEYCODE_TAB, input_seq::not_code, KEYCODE_LALT, input_seq::not_code, KEYCODE_RALT);
 				break;
 
 			// alt-enter for fullscreen
 			case IPT_OSD_1:
-				typedesc->token = "TOGGLE_FULLSCREEN";
-				typedesc->name = "Toggle Fullscreen";
-				input_seq_set_2(&typedesc->seq[SEQ_TYPE_STANDARD], KEYCODE_LALT, KEYCODE_ENTER);
+				entry->configure_osd("TOGGLE_FULLSCREEN", "Toggle Fullscreen");
+				entry->defseq(SEQ_TYPE_STANDARD).set(KEYCODE_LALT, KEYCODE_ENTER);
+				break;
+
+			// alt-F12 for fullscreen snap
+			case IPT_OSD_2:
+				entry->configure_osd("RENDER_SNAP", "Take Rendered Snapshot");
+				entry->defseq(SEQ_TYPE_STANDARD).set(KEYCODE_LALT, KEYCODE_F12);
+				break;
+
+			// alt-F11 for fullscreen video
+			case IPT_OSD_3:
+				entry->configure_osd("RENDER_AVI", "Record Rendered Video");
+				entry->defseq(SEQ_TYPE_STANDARD).set(KEYCODE_LALT, KEYCODE_F11);
+				break;
+
+			// leave everything else alone
+			default:
 				break;
 		}
 }
@@ -817,9 +832,8 @@ static device_info *generic_device_alloc(running_machine &machine, device_info *
 	device_info *devinfo;
 
 	// allocate memory for the device object
-	devinfo = global_alloc_clear(device_info);
+	devinfo = global_alloc_clear(device_info(machine));
 	devinfo->head = devlist_head_ptr;
-	devinfo->m_machine = &machine;
 
 	// allocate a UTF8 copy of the name
 	devinfo->name = utf8_from_tstring(name);
@@ -948,7 +962,7 @@ static void win32_init(running_machine &machine)
 		return;
 
 	// we need an exit callback
-	machine.add_notifier(MACHINE_NOTIFY_EXIT, win32_exit);
+	machine.add_notifier(MACHINE_NOTIFY_EXIT, machine_notify_delegate(FUNC(win32_exit), &machine));
 
 	// allocate two lightgun devices
 	for (gunnum = 0; gunnum < 2; gunnum++)
@@ -963,13 +977,13 @@ static void win32_init(running_machine &machine)
 			break;
 
 		// add the device
-		devinfo->device = input_device_add(machine, DEVICE_CLASS_LIGHTGUN, devinfo->name, devinfo);
+		devinfo->device = machine.input().device_class(DEVICE_CLASS_LIGHTGUN).add_device(devinfo->name, devinfo);
 
 		// populate the axes
 		for (axisnum = 0; axisnum < 2; axisnum++)
 		{
 			char *name = utf8_from_tstring(default_axis_name[axisnum]);
-			input_device_item_add(devinfo->device, name, &devinfo->mouse.state.lX + axisnum, (input_item_id)(ITEM_ID_XAXIS + axisnum), generic_axis_get_state);
+			devinfo->device->add_item(name, (input_item_id)(ITEM_ID_XAXIS + axisnum), generic_axis_get_state, &devinfo->mouse.state.lX + axisnum);
 			osd_free(name);
 		}
 
@@ -977,7 +991,7 @@ static void win32_init(running_machine &machine)
 		for (butnum = 0; butnum < 2; butnum++)
 		{
 			char *name = utf8_from_tstring(default_button_name(butnum));
-			input_device_item_add(devinfo->device, name, &devinfo->mouse.state.rgbButtons[butnum], (input_item_id)(ITEM_ID_BUTTON1 + butnum), generic_button_get_state);
+			devinfo->device->add_item(name, (input_item_id)(ITEM_ID_BUTTON1 + butnum), generic_button_get_state, &devinfo->mouse.state.rgbButtons[butnum]);
 			osd_free(name);
 		}
 	}
@@ -1116,7 +1130,7 @@ static void dinput_init(running_machine &machine)
 	mame_printf_verbose("DirectInput: Using DirectInput %d\n", dinput_version >> 8);
 
 	// we need an exit callback
-	machine.add_notifier(MACHINE_NOTIFY_EXIT, dinput_exit);
+	machine.add_notifier(MACHINE_NOTIFY_EXIT, machine_notify_delegate(FUNC(dinput_exit), &machine));
 
 	// initialize keyboard devices, but only if we don't have any yet
 	if (keyboard_list == NULL)
@@ -1342,7 +1356,7 @@ static BOOL CALLBACK dinput_keyboard_enum(LPCDIDEVICEINSTANCE instance, LPVOID r
 		goto exit;
 
 	// add the device
-	devinfo->device = input_device_add(machine, DEVICE_CLASS_KEYBOARD, devinfo->name, devinfo);
+	devinfo->device = machine.input().device_class(DEVICE_CLASS_KEYBOARD).add_device(devinfo->name, devinfo);
 	devinfo->poll = dinput_keyboard_poll;
 
 	// populate it
@@ -1357,7 +1371,7 @@ static BOOL CALLBACK dinput_keyboard_enum(LPCDIDEVICEINSTANCE instance, LPVOID r
 		name = dinput_device_item_name(devinfo, keynum, defname, NULL);
 
 		// add the item to the device
-		input_device_item_add(devinfo->device, name, &devinfo->keyboard.state[keynum], itemid, generic_button_get_state);
+		devinfo->device->add_item(name, itemid, generic_button_get_state, &devinfo->keyboard.state[keynum]);
 		osd_free(name);
 	}
 
@@ -1408,18 +1422,18 @@ static BOOL CALLBACK dinput_mouse_enum(LPCDIDEVICEINSTANCE instance, LPVOID ref)
 
 	// set relative mode on the mouse device
 	result = dinput_set_dword_property(devinfo->dinput.device, DIPROP_AXISMODE, 0, DIPH_DEVICE, DIPROPAXISMODE_REL);
-	if (result != DI_OK)
+	if (result != DI_OK && result != DI_PROPNOEFFECT)
 	{
 		mame_printf_error("DirectInput: Unable to set relative mode for mouse %d (%s)\n", generic_device_index(mouse_list, devinfo), devinfo->name);
 		goto error;
 	}
 
 	// add the device
-	devinfo->device = input_device_add(machine, DEVICE_CLASS_MOUSE, devinfo->name, devinfo);
+	devinfo->device = machine.input().device_class(DEVICE_CLASS_MOUSE).add_device(devinfo->name, devinfo);
 	devinfo->poll = dinput_mouse_poll;
 	if (guninfo != NULL)
 	{
-		guninfo->device = input_device_add(machine, DEVICE_CLASS_LIGHTGUN, guninfo->name, guninfo);
+		guninfo->device = machine.input().device_class(DEVICE_CLASS_LIGHTGUN).add_device(guninfo->name, guninfo);
 		guninfo->poll = win32_lightgun_poll;
 	}
 
@@ -1433,9 +1447,9 @@ static BOOL CALLBACK dinput_mouse_enum(LPCDIDEVICEINSTANCE instance, LPVOID ref)
 		char *name = dinput_device_item_name(devinfo, offsetof(DIMOUSESTATE, lX) + axisnum * sizeof(LONG), default_axis_name[axisnum], NULL);
 
 		// add to the mouse device and optionally to the gun device as well
-		input_device_item_add(devinfo->device, name, &devinfo->mouse.state.lX + axisnum, (input_item_id)(ITEM_ID_XAXIS + axisnum), generic_axis_get_state);
+		devinfo->device->add_item(name, (input_item_id)(ITEM_ID_XAXIS + axisnum), generic_axis_get_state, &devinfo->mouse.state.lX + axisnum);
 		if (guninfo != NULL && axisnum < 2)
-			input_device_item_add(guninfo->device, name, &guninfo->mouse.state.lX + axisnum, (input_item_id)(ITEM_ID_XAXIS + axisnum), generic_axis_get_state);
+			guninfo->device->add_item(name, (input_item_id)(ITEM_ID_XAXIS + axisnum), generic_axis_get_state, &guninfo->mouse.state.lX + axisnum);
 
 		osd_free(name);
 	}
@@ -1448,9 +1462,9 @@ static BOOL CALLBACK dinput_mouse_enum(LPCDIDEVICEINSTANCE instance, LPVOID ref)
 
 		// add to the mouse device and optionally to the gun device as well
 		// note that the gun device points to the mouse buttons rather than its own
-		input_device_item_add(devinfo->device, name, &devinfo->mouse.state.rgbButtons[butnum], (input_item_id)(ITEM_ID_BUTTON1 + butnum), generic_button_get_state);
+		devinfo->device->add_item(name, (input_item_id)(ITEM_ID_BUTTON1 + butnum), generic_button_get_state, &devinfo->mouse.state.rgbButtons[butnum]);
 		if (guninfo != NULL)
-			input_device_item_add(guninfo->device, name, &devinfo->mouse.state.rgbButtons[butnum], (input_item_id)(ITEM_ID_BUTTON1 + butnum), generic_button_get_state);
+			guninfo->device->add_item(name, (input_item_id)(ITEM_ID_BUTTON1 + butnum), generic_button_get_state, &devinfo->mouse.state.rgbButtons[butnum]);
 
 		osd_free(name);
 	}
@@ -1489,14 +1503,14 @@ static void dinput_mouse_poll(device_info *devinfo)
 
 static BOOL CALLBACK dinput_joystick_enum(LPCDIDEVICEINSTANCE instance, LPVOID ref)
 {
-	DWORD cooperative_level = DISCL_FOREGROUND | DISCL_EXCLUSIVE;
+	DWORD cooperative_level = DISCL_FOREGROUND | DISCL_NONEXCLUSIVE;
 	int axisnum, axiscount, povnum, butnum;
 	running_machine &machine = *(running_machine *)ref;
 	device_info *devinfo;
 	HRESULT result;
 
 	if (win_window_list != NULL && win_has_menu(win_window_list)) {
-		cooperative_level = DISCL_BACKGROUND | DISCL_EXCLUSIVE;
+		cooperative_level = DISCL_BACKGROUND | DISCL_NONEXCLUSIVE;
 	}
 	// allocate and link in a new device
 	devinfo = dinput_device_create(machine, &joystick_list, instance, &c_dfDIJoystick, NULL, cooperative_level);
@@ -1505,17 +1519,17 @@ static BOOL CALLBACK dinput_joystick_enum(LPCDIDEVICEINSTANCE instance, LPVOID r
 
 	// set absolute mode
 	result = dinput_set_dword_property(devinfo->dinput.device, DIPROP_AXISMODE, 0, DIPH_DEVICE, DIPROPAXISMODE_ABS);
-	if (result != DI_OK)
+	if (result != DI_OK && result != DI_PROPNOEFFECT)
 		mame_printf_warning("DirectInput: Unable to set absolute mode for joystick %d (%s)\n", generic_device_index(joystick_list, devinfo), devinfo->name);
 
 	// turn off deadzone; we do our own calculations
 	result = dinput_set_dword_property(devinfo->dinput.device, DIPROP_DEADZONE, 0, DIPH_DEVICE, 0);
-	if (result != DI_OK)
+	if (result != DI_OK && result != DI_PROPNOEFFECT)
 		mame_printf_warning("DirectInput: Unable to reset deadzone for joystick %d (%s)\n", generic_device_index(joystick_list, devinfo), devinfo->name);
 
 	// turn off saturation; we do our own calculations
 	result = dinput_set_dword_property(devinfo->dinput.device, DIPROP_SATURATION, 0, DIPH_DEVICE, 10000);
-	if (result != DI_OK)
+	if (result != DI_OK && result != DI_PROPNOEFFECT)
 		mame_printf_warning("DirectInput: Unable to reset saturation for joystick %d (%s)\n", generic_device_index(joystick_list, devinfo), devinfo->name);
 
 	// cap the number of axes, POVs, and buttons based on the format
@@ -1524,7 +1538,7 @@ static BOOL CALLBACK dinput_joystick_enum(LPCDIDEVICEINSTANCE instance, LPVOID r
 	devinfo->dinput.caps.dwButtons = MIN(devinfo->dinput.caps.dwButtons, 128);
 
 	// add the device
-	devinfo->device = input_device_add(machine, DEVICE_CLASS_JOYSTICK, devinfo->name, devinfo);
+	devinfo->device = machine.input().device_class(DEVICE_CLASS_JOYSTICK).add_device(devinfo->name, devinfo);
 	devinfo->poll = dinput_joystick_poll;
 
 	// populate the axes
@@ -1546,7 +1560,7 @@ static BOOL CALLBACK dinput_joystick_enum(LPCDIDEVICEINSTANCE instance, LPVOID r
 
 		// populate the item description as well
 		name = dinput_device_item_name(devinfo, offsetof(DIJOYSTATE2, lX) + axisnum * sizeof(LONG), default_axis_name[axisnum], NULL);
-		input_device_item_add(devinfo->device, name, &devinfo->joystick.state.lX + axisnum, (input_item_id)(ITEM_ID_XAXIS + axisnum), generic_axis_get_state);
+		devinfo->device->add_item(name, (input_item_id)(ITEM_ID_XAXIS + axisnum), generic_axis_get_state, &devinfo->joystick.state.lX + axisnum);
 		osd_free(name);
 
 		axiscount++;
@@ -1559,22 +1573,22 @@ static BOOL CALLBACK dinput_joystick_enum(LPCDIDEVICEINSTANCE instance, LPVOID r
 
 		// left
 		name = dinput_device_item_name(devinfo, offsetof(DIJOYSTATE2, rgdwPOV) + povnum * sizeof(DWORD), default_pov_name(povnum), TEXT("L"));
-		input_device_item_add(devinfo->device, name, (void *)(FPTR)(povnum * 4 + POVDIR_LEFT), ITEM_ID_OTHER_SWITCH, dinput_joystick_pov_get_state);
+		devinfo->device->add_item(name, ITEM_ID_OTHER_SWITCH, dinput_joystick_pov_get_state, (void *)(FPTR)(povnum * 4 + POVDIR_LEFT));
 		osd_free(name);
 
 		// right
 		name = dinput_device_item_name(devinfo, offsetof(DIJOYSTATE2, rgdwPOV) + povnum * sizeof(DWORD), default_pov_name(povnum), TEXT("R"));
-		input_device_item_add(devinfo->device, name, (void *)(FPTR)(povnum * 4 + POVDIR_RIGHT), ITEM_ID_OTHER_SWITCH, dinput_joystick_pov_get_state);
+		devinfo->device->add_item(name, ITEM_ID_OTHER_SWITCH, dinput_joystick_pov_get_state, (void *)(FPTR)(povnum * 4 + POVDIR_RIGHT));
 		osd_free(name);
 
 		// up
 		name = dinput_device_item_name(devinfo, offsetof(DIJOYSTATE2, rgdwPOV) + povnum * sizeof(DWORD), default_pov_name(povnum), TEXT("U"));
-		input_device_item_add(devinfo->device, name, (void *)(FPTR)(povnum * 4 + POVDIR_UP), ITEM_ID_OTHER_SWITCH, dinput_joystick_pov_get_state);
+		devinfo->device->add_item(name, ITEM_ID_OTHER_SWITCH, dinput_joystick_pov_get_state, (void *)(FPTR)(povnum * 4 + POVDIR_UP));
 		osd_free(name);
 
 		// down
 		name = dinput_device_item_name(devinfo, offsetof(DIJOYSTATE2, rgdwPOV) + povnum * sizeof(DWORD), default_pov_name(povnum), TEXT("D"));
-		input_device_item_add(devinfo->device, name, (void *)(FPTR)(povnum * 4 + POVDIR_DOWN), ITEM_ID_OTHER_SWITCH, dinput_joystick_pov_get_state);
+		devinfo->device->add_item(name, ITEM_ID_OTHER_SWITCH, dinput_joystick_pov_get_state, (void *)(FPTR)(povnum * 4 + POVDIR_DOWN));
 		osd_free(name);
 	}
 
@@ -1583,7 +1597,7 @@ static BOOL CALLBACK dinput_joystick_enum(LPCDIDEVICEINSTANCE instance, LPVOID r
 	{
 		FPTR offset = (FPTR)(&((DIJOYSTATE2 *)NULL)->rgbButtons[butnum]);
 		char *name = dinput_device_item_name(devinfo, offset, default_button_name(butnum), NULL);
-		input_device_item_add(devinfo->device, name, &devinfo->joystick.state.rgbButtons[butnum], (butnum < 16) ? (input_item_id)(ITEM_ID_BUTTON1 + butnum) : ITEM_ID_OTHER_SWITCH, generic_button_get_state);
+		devinfo->device->add_item(name, (butnum < 16) ? (input_item_id)(ITEM_ID_BUTTON1 + butnum) : ITEM_ID_OTHER_SWITCH, generic_button_get_state, &devinfo->joystick.state.rgbButtons[butnum]);
 		osd_free(name);
 	}
 
@@ -1635,10 +1649,10 @@ static INT32 dinput_joystick_pov_get_state(void *device_internal, void *item_int
 	// return the current state
 	switch (povdir)
 	{
-		case POVDIR_LEFT:	result = (pov >= 22500 && pov <= 31500);	break;
-		case POVDIR_RIGHT:	result = (pov >= 4500 && pov <= 13500);		break;
-		case POVDIR_UP:		result = (pov >= 31500 || pov <= 4500);		break;
-		case POVDIR_DOWN:	result = (pov >= 13500 && pov <= 22500);	break;
+		case POVDIR_LEFT:   result = (pov >= 22500 && pov <= 31500);    break;
+		case POVDIR_RIGHT:  result = (pov >= 4500 && pov <= 13500);     break;
+		case POVDIR_UP:     result = (pov >= 31500 || pov <= 4500);     break;
+		case POVDIR_DOWN:   result = (pov >= 13500 && pov <= 22500);    break;
 	}
 	return result;
 }
@@ -1656,7 +1670,7 @@ static void rawinput_init(running_machine &machine)
 	HMODULE user32;
 
 	// we need pause and exit callbacks
-	machine.add_notifier(MACHINE_NOTIFY_EXIT, rawinput_exit);
+	machine.add_notifier(MACHINE_NOTIFY_EXIT, machine_notify_delegate(FUNC(rawinput_exit), &machine));
 
 	// look in user32 for the raw input APIs
 	user32 = LoadLibrary(TEXT("user32.dll"));
@@ -1963,7 +1977,7 @@ static void rawinput_keyboard_enum(running_machine &machine, PRAWINPUTDEVICELIST
 		return;
 
 	// add the device
-	devinfo->device = input_device_add(machine, DEVICE_CLASS_KEYBOARD, devinfo->name, devinfo);
+	devinfo->device = machine.input().device_class(DEVICE_CLASS_KEYBOARD).add_device(devinfo->name, devinfo);
 
 	// populate it
 	for (keynum = 0; keynum < MAX_KEYS; keynum++)
@@ -1978,7 +1992,7 @@ static void rawinput_keyboard_enum(running_machine &machine, PRAWINPUTDEVICELIST
 		name = utf8_from_tstring(keyname);
 
 		// add the item to the device
-		input_device_item_add(devinfo->device, name, &devinfo->keyboard.state[keynum], itemid, generic_button_get_state);
+		devinfo->device->add_item(name, itemid, generic_button_get_state, &devinfo->keyboard.state[keynum]);
 		osd_free(name);
 	}
 }
@@ -2036,10 +2050,10 @@ static void rawinput_mouse_enum(running_machine &machine, PRAWINPUTDEVICELIST de
 	}
 
 	// add the device
-	devinfo->device = input_device_add(machine, DEVICE_CLASS_MOUSE, devinfo->name, devinfo);
+	devinfo->device = machine.input().device_class(DEVICE_CLASS_MOUSE).add_device(devinfo->name, devinfo);
 	if (guninfo != NULL)
 	{
-		guninfo->device = input_device_add(machine, DEVICE_CLASS_LIGHTGUN, guninfo->name, guninfo);
+		guninfo->device = machine.input().device_class(DEVICE_CLASS_LIGHTGUN).add_device(guninfo->name, guninfo);
 		guninfo->poll = NULL;
 	}
 
@@ -2049,9 +2063,9 @@ static void rawinput_mouse_enum(running_machine &machine, PRAWINPUTDEVICELIST de
 		char *name = utf8_from_tstring(default_axis_name[axisnum]);
 
 		// add to the mouse device and optionally to the gun device as well
-		input_device_item_add(devinfo->device, name, &devinfo->mouse.state.lX + axisnum, (input_item_id)(ITEM_ID_XAXIS + axisnum), generic_axis_get_state);
+		devinfo->device->add_item(name, (input_item_id)(ITEM_ID_XAXIS + axisnum), generic_axis_get_state, &devinfo->mouse.state.lX + axisnum);
 		if (guninfo != NULL && axisnum < 2)
-			input_device_item_add(guninfo->device, name, &guninfo->mouse.state.lX + axisnum, (input_item_id)(ITEM_ID_XAXIS + axisnum), generic_axis_get_state);
+			guninfo->device->add_item(name, (input_item_id)(ITEM_ID_XAXIS + axisnum), generic_axis_get_state, &guninfo->mouse.state.lX + axisnum);
 
 		osd_free(name);
 	}
@@ -2062,9 +2076,9 @@ static void rawinput_mouse_enum(running_machine &machine, PRAWINPUTDEVICELIST de
 		char *name = utf8_from_tstring(default_button_name(butnum));
 
 		// add to the mouse device and optionally to the gun device as well
-		input_device_item_add(devinfo->device, name, &devinfo->mouse.state.rgbButtons[butnum], (input_item_id)(ITEM_ID_BUTTON1 + butnum), generic_button_get_state);
+		devinfo->device->add_item(name, (input_item_id)(ITEM_ID_BUTTON1 + butnum), generic_button_get_state, &devinfo->mouse.state.rgbButtons[butnum]);
 		if (guninfo != NULL)
-			input_device_item_add(guninfo->device, name, &guninfo->mouse.state.rgbButtons[butnum], (input_item_id)(ITEM_ID_BUTTON1 + butnum), generic_button_get_state);
+			guninfo->device->add_item(name, (input_item_id)(ITEM_ID_BUTTON1 + butnum), generic_button_get_state, &guninfo->mouse.state.rgbButtons[butnum]);
 
 		osd_free(name);
 	}

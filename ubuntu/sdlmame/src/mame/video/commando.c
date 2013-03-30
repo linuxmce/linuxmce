@@ -10,107 +10,98 @@
 #include "includes/commando.h"
 
 
-WRITE8_HANDLER( commando_videoram_w )
+WRITE8_MEMBER(commando_state::commando_videoram_w)
 {
-	commando_state *state = space->machine().driver_data<commando_state>();
 
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_videoram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( commando_colorram_w )
+WRITE8_MEMBER(commando_state::commando_colorram_w)
 {
-	commando_state *state = space->machine().driver_data<commando_state>();
 
-	state->m_colorram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_colorram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( commando_videoram2_w )
+WRITE8_MEMBER(commando_state::commando_videoram2_w)
 {
-	commando_state *state = space->machine().driver_data<commando_state>();
 
-	state->m_videoram2[offset] = data;
-	tilemap_mark_tile_dirty(state->m_fg_tilemap, offset);
+	m_videoram2[offset] = data;
+	m_fg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( commando_colorram2_w )
+WRITE8_MEMBER(commando_state::commando_colorram2_w)
 {
-	commando_state *state = space->machine().driver_data<commando_state>();
 
-	state->m_colorram2[offset] = data;
-	tilemap_mark_tile_dirty(state->m_fg_tilemap, offset);
+	m_colorram2[offset] = data;
+	m_fg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( commando_scrollx_w )
+WRITE8_MEMBER(commando_state::commando_scrollx_w)
 {
-	commando_state *state = space->machine().driver_data<commando_state>();
 
-	state->m_scroll_x[offset] = data;
-	tilemap_set_scrollx(state->m_bg_tilemap, 0, state->m_scroll_x[0] | (state->m_scroll_x[1] << 8));
+	m_scroll_x[offset] = data;
+	m_bg_tilemap->set_scrollx(0, m_scroll_x[0] | (m_scroll_x[1] << 8));
 }
 
-WRITE8_HANDLER( commando_scrolly_w )
+WRITE8_MEMBER(commando_state::commando_scrolly_w)
 {
-	commando_state *state = space->machine().driver_data<commando_state>();
 
-	state->m_scroll_y[offset] = data;
-	tilemap_set_scrolly(state->m_bg_tilemap, 0, state->m_scroll_y[0] | (state->m_scroll_y[1] << 8));
+	m_scroll_y[offset] = data;
+	m_bg_tilemap->set_scrolly(0, m_scroll_y[0] | (m_scroll_y[1] << 8));
 }
 
-WRITE8_HANDLER( commando_c804_w )
+WRITE8_MEMBER(commando_state::commando_c804_w)
 {
-	commando_state *state = space->machine().driver_data<commando_state>();
 
 	// bits 0 and 1 are coin counters
-	coin_counter_w(space->machine(), 0, data & 0x01);
-	coin_counter_w(space->machine(), 1, data & 0x02);
+	coin_counter_w(machine(), 0, data & 0x01);
+	coin_counter_w(machine(), 1, data & 0x02);
 
 	// bit 4 resets the sound CPU
-	device_set_input_line(state->m_audiocpu, INPUT_LINE_RESET, (data & 0x10) ? ASSERT_LINE : CLEAR_LINE);
+	m_audiocpu->set_input_line(INPUT_LINE_RESET, (data & 0x10) ? ASSERT_LINE : CLEAR_LINE);
 
 	// bit 7 flips screen
-	flip_screen_set(space->machine(), data & 0x80);
+	flip_screen_set(data & 0x80);
 }
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(commando_state::get_bg_tile_info)
 {
-	commando_state *state = machine.driver_data<commando_state>();
-	int attr = state->m_colorram[tile_index];
-	int code = state->m_videoram[tile_index] + ((attr & 0xc0) << 2);
+	int attr = m_colorram[tile_index];
+	int code = m_videoram[tile_index] + ((attr & 0xc0) << 2);
 	int color = attr & 0x0f;
 	int flags = TILE_FLIPYX((attr & 0x30) >> 4);
 
-	SET_TILE_INFO(1, code, color, flags);
+	SET_TILE_INFO_MEMBER(1, code, color, flags);
 }
 
-static TILE_GET_INFO( get_fg_tile_info )
+TILE_GET_INFO_MEMBER(commando_state::get_fg_tile_info)
 {
-	commando_state *state = machine.driver_data<commando_state>();
-	int attr = state->m_colorram2[tile_index];
-	int code = state->m_videoram2[tile_index] + ((attr & 0xc0) << 2);
+	int attr = m_colorram2[tile_index];
+	int code = m_videoram2[tile_index] + ((attr & 0xc0) << 2);
 	int color = attr & 0x0f;
 	int flags = TILE_FLIPYX((attr & 0x30) >> 4);
 
-	SET_TILE_INFO(0, code, color, flags);
+	SET_TILE_INFO_MEMBER(0, code, color, flags);
 }
 
-VIDEO_START( commando )
+void commando_state::video_start()
+{
+
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(commando_state::get_bg_tile_info),this), TILEMAP_SCAN_COLS, 16, 16, 32, 32);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(commando_state::get_fg_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
+
+	m_fg_tilemap->set_transparent_pen(3);
+}
+
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	commando_state *state = machine.driver_data<commando_state>();
-
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_cols, 16, 16, 32, 32);
-	state->m_fg_tilemap = tilemap_create(machine, get_fg_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
-
-	tilemap_set_transparent_pen(state->m_fg_tilemap, 3);
-}
-
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
-{
-	UINT8 *buffered_spriteram = machine.generic.buffered_spriteram.u8;
+	UINT8 *buffered_spriteram = state->m_spriteram->buffer();
 	int offs;
 
-	for (offs = machine.generic.spriteram_size - 4; offs >= 0; offs -= 4)
+	for (offs = state->m_spriteram->bytes() - 4; offs >= 0; offs -= 4)
 	{
 		// bit 1 of attr is not used
 		int attr = buffered_spriteram[offs + 1];
@@ -122,7 +113,7 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 		int sx = buffered_spriteram[offs + 3] - ((attr & 0x01) << 8);
 		int sy = buffered_spriteram[offs + 2];
 
-		if (flip_screen_get(machine))
+		if (state->flip_screen())
 		{
 			sx = 240 - sx;
 			sy = 240 - sy;
@@ -135,19 +126,11 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 	}
 }
 
-SCREEN_UPDATE( commando )
+UINT32 commando_state::screen_update_commando(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	commando_state *state = screen->machine().driver_data<commando_state>();
 
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
-	draw_sprites(screen->machine(), bitmap, cliprect);
-	tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, 0, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
+	draw_sprites(machine(), bitmap, cliprect);
+	m_fg_tilemap->draw(bitmap, cliprect, 0, 0);
 	return 0;
-}
-
-SCREEN_EOF( commando )
-{
-	address_space *space = machine.device("maincpu")->memory().space(AS_PROGRAM);
-
-	buffer_spriteram_w(space, 0, 0);
 }

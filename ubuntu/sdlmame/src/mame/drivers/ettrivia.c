@@ -34,8 +34,10 @@ Notes:
 class ettrivia_state : public driver_device
 {
 public:
-	ettrivia_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	ettrivia_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_fg_videoram(*this, "fg_videoram"),
+		m_bg_videoram(*this, "bg_videoram"){ }
 
 	int m_palreg;
 	int m_gfx_bank;
@@ -43,95 +45,101 @@ public:
 	int m_b000_val;
 	int m_b000_ret;
 	int m_b800_prev;
-	UINT8 *m_bg_videoram;
-	UINT8 *m_fg_videoram;
+	required_shared_ptr<UINT8> m_fg_videoram;
+	required_shared_ptr<UINT8> m_bg_videoram;
 	tilemap_t *m_bg_tilemap;
 	tilemap_t *m_fg_tilemap;
+	DECLARE_WRITE8_MEMBER(ettrivia_fg_w);
+	DECLARE_WRITE8_MEMBER(ettrivia_bg_w);
+	DECLARE_WRITE8_MEMBER(ettrivia_control_w);
+	DECLARE_READ8_MEMBER(ettrivia_question_r);
+	DECLARE_WRITE8_MEMBER(b000_w);
+	DECLARE_READ8_MEMBER(b000_r);
+	DECLARE_WRITE8_MEMBER(b800_w);
+	TILE_GET_INFO_MEMBER(get_tile_info_bg);
+	TILE_GET_INFO_MEMBER(get_tile_info_fg);
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_ettrivia(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(ettrivia_interrupt);
 };
 
 
-static WRITE8_HANDLER( ettrivia_fg_w )
+WRITE8_MEMBER(ettrivia_state::ettrivia_fg_w)
 {
-	ettrivia_state *state = space->machine().driver_data<ettrivia_state>();
-	state->m_fg_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_fg_tilemap,offset);
+	m_fg_videoram[offset] = data;
+	m_fg_tilemap->mark_tile_dirty(offset);
 }
 
-static WRITE8_HANDLER( ettrivia_bg_w )
+WRITE8_MEMBER(ettrivia_state::ettrivia_bg_w)
 {
-	ettrivia_state *state = space->machine().driver_data<ettrivia_state>();
-	state->m_bg_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap,offset);
+	m_bg_videoram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-static WRITE8_HANDLER( ettrivia_control_w )
+WRITE8_MEMBER(ettrivia_state::ettrivia_control_w)
 {
-	ettrivia_state *state = space->machine().driver_data<ettrivia_state>();
-	tilemap_mark_all_tiles_dirty_all(space->machine());
+	machine().tilemap().mark_all_dirty();
 
-	state->m_palreg  = (data >> 1) & 3;
-	state->m_gfx_bank = (data >> 2) & 1;
+	m_palreg  = (data >> 1) & 3;
+	m_gfx_bank = (data >> 2) & 1;
 
-	state->m_question_bank = (data >> 3) & 3;
+	m_question_bank = (data >> 3) & 3;
 
-	coin_counter_w(space->machine(), 0, data & 0x80);
+	coin_counter_w(machine(), 0, data & 0x80);
 
-	flip_screen_set(space->machine(), data & 1);
+	flip_screen_set(data & 1);
 }
 
-static READ8_HANDLER( ettrivia_question_r )
+READ8_MEMBER(ettrivia_state::ettrivia_question_r)
 {
-	ettrivia_state *state = space->machine().driver_data<ettrivia_state>();
-	UINT8 *QUESTIONS = space->machine().region("user1")->base();
-	return QUESTIONS[offset + 0x10000 * state->m_question_bank];
+	UINT8 *QUESTIONS = memregion("user1")->base();
+	return QUESTIONS[offset + 0x10000 * m_question_bank];
 }
 
-static WRITE8_HANDLER( b000_w )
+WRITE8_MEMBER(ettrivia_state::b000_w)
 {
-	ettrivia_state *state = space->machine().driver_data<ettrivia_state>();
-	state->m_b000_val = data;
+	m_b000_val = data;
 }
 
-static READ8_HANDLER( b000_r )
+READ8_MEMBER(ettrivia_state::b000_r)
 {
-	ettrivia_state *state = space->machine().driver_data<ettrivia_state>();
-	if(state->m_b800_prev)
-		return state->m_b000_ret;
+	if(m_b800_prev)
+		return m_b000_ret;
 	else
-		return state->m_b000_val;
+		return m_b000_val;
 }
 
-static WRITE8_HANDLER( b800_w )
+WRITE8_MEMBER(ettrivia_state::b800_w)
 {
-	ettrivia_state *state = space->machine().driver_data<ettrivia_state>();
 	switch(data)
 	{
 		/* special case to return the value written to 0xb000 */
 		/* does it reset the chips too ? */
-		case 0:	break;
-		case 0xc4: state->m_b000_ret = ay8910_r(space->machine().device("ay1"), 0);	break;
-		case 0x94: state->m_b000_ret = ay8910_r(space->machine().device("ay2"), 0);	break;
-		case 0x86: state->m_b000_ret = ay8910_r(space->machine().device("ay3"), 0);	break;
+		case 0: break;
+		case 0xc4: m_b000_ret = ay8910_r(machine().device("ay1"), space, 0);    break;
+		case 0x94: m_b000_ret = ay8910_r(machine().device("ay2"), space, 0);    break;
+		case 0x86: m_b000_ret = ay8910_r(machine().device("ay3"), space, 0);    break;
 
 		case 0x80:
-			switch(state->m_b800_prev)
+			switch(m_b800_prev)
 			{
-				case 0xe0: ay8910_address_w(space->machine().device("ay1"),0,state->m_b000_val);	break;
-				case 0x98: ay8910_address_w(space->machine().device("ay2"),0,state->m_b000_val);	break;
-				case 0x83: ay8910_address_w(space->machine().device("ay3"),0,state->m_b000_val);	break;
+				case 0xe0: ay8910_address_w(machine().device("ay1"),space,0,m_b000_val);    break;
+				case 0x98: ay8910_address_w(machine().device("ay2"),space,0,m_b000_val);    break;
+				case 0x83: ay8910_address_w(machine().device("ay3"),space,0,m_b000_val);    break;
 
-				case 0xa0: ay8910_data_w(space->machine().device("ay1"),0,state->m_b000_val);	break;
-				case 0x88: ay8910_data_w(space->machine().device("ay2"),0,state->m_b000_val);	break;
-				case 0x81: ay8910_data_w(space->machine().device("ay3"),0,state->m_b000_val);	break;
+				case 0xa0: ay8910_data_w(machine().device("ay1"),space,0,m_b000_val);   break;
+				case 0x88: ay8910_data_w(machine().device("ay2"),space,0,m_b000_val);   break;
+				case 0x81: ay8910_data_w(machine().device("ay3"),space,0,m_b000_val);   break;
 
 			}
 		break;
 	}
 
-	state->m_b800_prev = data;
+	m_b800_prev = data;
 }
 
-static ADDRESS_MAP_START( cpu_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( cpu_map, AS_PROGRAM, 8, ettrivia_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x87ff) AM_RAM AM_SHARE("nvram")
 	AM_RANGE(0x9000, 0x9000) AM_WRITE(ettrivia_control_w)
@@ -139,11 +147,11 @@ static ADDRESS_MAP_START( cpu_map, AS_PROGRAM, 8 )
 	AM_RANGE(0xa000, 0xa000) AM_WRITENOP
 	AM_RANGE(0xb000, 0xb000) AM_READ(b000_r) AM_WRITE(b000_w)
 	AM_RANGE(0xb800, 0xb800) AM_WRITE(b800_w)
-	AM_RANGE(0xc000, 0xc7ff) AM_RAM_WRITE(ettrivia_fg_w) AM_BASE_MEMBER(ettrivia_state, m_fg_videoram)
-	AM_RANGE(0xe000, 0xe7ff) AM_RAM_WRITE(ettrivia_bg_w) AM_BASE_MEMBER(ettrivia_state, m_bg_videoram)
+	AM_RANGE(0xc000, 0xc7ff) AM_RAM_WRITE(ettrivia_fg_w) AM_SHARE("fg_videoram")
+	AM_RANGE(0xe000, 0xe7ff) AM_RAM_WRITE(ettrivia_bg_w) AM_SHARE("bg_videoram")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( io_map, AS_IO, 8, ettrivia_state )
 	AM_RANGE(0x0000, 0xffff) AM_READ(ettrivia_question_r)
 ADDRESS_MAP_END
 
@@ -188,7 +196,7 @@ static GFXDECODE_START( ettrivia )
 	GFXDECODE_ENTRY( "gfx2", 0, charlayout, 32*4, 32 )
 GFXDECODE_END
 
-INLINE void get_tile_info(running_machine &machine, tile_data *tileinfo, int tile_index, UINT8 *vidram, int gfx_code)
+INLINE void get_tile_info(running_machine &machine, tile_data &tileinfo, int tile_index, UINT8 *vidram, int gfx_code)
 {
 	ettrivia_state *state = machine.driver_data<ettrivia_state>();
 	int code = vidram[tile_index];
@@ -199,20 +207,19 @@ INLINE void get_tile_info(running_machine &machine, tile_data *tileinfo, int til
 	SET_TILE_INFO(gfx_code,code,color,0);
 }
 
-static TILE_GET_INFO( get_tile_info_bg )
+TILE_GET_INFO_MEMBER(ettrivia_state::get_tile_info_bg)
 {
-	ettrivia_state *state = machine.driver_data<ettrivia_state>();
-	get_tile_info(machine, tileinfo, tile_index, state->m_bg_videoram, 0);
+	get_tile_info(machine(), tileinfo, tile_index, m_bg_videoram, 0);
 }
 
-static TILE_GET_INFO( get_tile_info_fg )
+TILE_GET_INFO_MEMBER(ettrivia_state::get_tile_info_fg)
 {
-	ettrivia_state *state = machine.driver_data<ettrivia_state>();
-	get_tile_info(machine, tileinfo, tile_index, state->m_fg_videoram, 1);
+	get_tile_info(machine(), tileinfo, tile_index, m_fg_videoram, 1);
 }
 
-static PALETTE_INIT( ettrivia )
+void ettrivia_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	static const int resistances[2] = { 270, 130 };
 	double weights[2];
 	int i;
@@ -223,7 +230,7 @@ static PALETTE_INIT( ettrivia )
 			2, resistances, weights, 0, 0,
 			0, 0, 0, 0, 0);
 
-	for (i = 0;i < machine.total_colors(); i++)
+	for (i = 0;i < machine().total_colors(); i++)
 	{
 		int bit0, bit1;
 		int r, g, b;
@@ -243,24 +250,22 @@ static PALETTE_INIT( ettrivia )
 		bit1 = (color_prom[i+0x100] >> 1) & 0x01;
 		b = combine_2_weights(weights, bit0, bit1);
 
-		palette_set_color(machine, BITSWAP8(i,5,7,6,2,1,0,4,3), MAKE_RGB(r, g, b));
+		palette_set_color(machine(), BITSWAP8(i,5,7,6,2,1,0,4,3), MAKE_RGB(r, g, b));
 	}
 }
 
-static VIDEO_START( ettrivia )
+void ettrivia_state::video_start()
 {
-	ettrivia_state *state = machine.driver_data<ettrivia_state>();
-	state->m_bg_tilemap = tilemap_create( machine, get_tile_info_bg,tilemap_scan_rows,8,8,64,32 );
-	state->m_fg_tilemap = tilemap_create( machine, get_tile_info_fg,tilemap_scan_rows,8,8,64,32 );
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(ettrivia_state::get_tile_info_bg),this),TILEMAP_SCAN_ROWS,8,8,64,32 );
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(ettrivia_state::get_tile_info_fg),this),TILEMAP_SCAN_ROWS,8,8,64,32 );
 
-	tilemap_set_transparent_pen(state->m_fg_tilemap,0);
+	m_fg_tilemap->set_transparent_pen(0);
 }
 
-static SCREEN_UPDATE( ettrivia )
+UINT32 ettrivia_state::screen_update_ettrivia(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	ettrivia_state *state = screen->machine().driver_data<ettrivia_state>();
-	tilemap_draw(bitmap,cliprect,state->m_bg_tilemap,0,0);
-	tilemap_draw(bitmap,cliprect,state->m_fg_tilemap,0,0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0,0);
+	m_fg_tilemap->draw(bitmap, cliprect, 0,0);
 	return 0;
 }
 
@@ -285,19 +290,19 @@ static const ay8910_interface ay8912_interface_3 =
 };
 
 
-static INTERRUPT_GEN( ettrivia_interrupt )
+INTERRUPT_GEN_MEMBER(ettrivia_state::ettrivia_interrupt)
 {
-	if( input_port_read(device->machine(), "COIN") & 0x01 )
-		device_set_input_line(device, INPUT_LINE_NMI, PULSE_LINE);
+	if( machine().root_device().ioport("COIN")->read() & 0x01 )
+		device.execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 	else
-		device_set_input_line(device, 0, HOLD_LINE);
+		device.execute().set_input_line(0, HOLD_LINE);
 }
 
 static MACHINE_CONFIG_START( ettrivia, ettrivia_state )
 	MCFG_CPU_ADD("maincpu", Z80,12000000/4-48000) //should be ok, it gives the 300 interrupts expected
 	MCFG_CPU_PROGRAM_MAP(cpu_map)
 	MCFG_CPU_IO_MAP(io_map)
-	MCFG_CPU_VBLANK_INT("screen", ettrivia_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", ettrivia_state,  ettrivia_interrupt)
 
 	MCFG_NVRAM_ADD_0FILL("nvram")
 
@@ -305,16 +310,13 @@ static MACHINE_CONFIG_START( ettrivia, ettrivia_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(256, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 0*8, 28*8-1)
-	MCFG_SCREEN_UPDATE(ettrivia)
+	MCFG_SCREEN_UPDATE_DRIVER(ettrivia_state, screen_update_ettrivia)
 
 	MCFG_GFXDECODE(ettrivia)
 	MCFG_PALETTE_LENGTH(256)
 
-	MCFG_PALETTE_INIT(ettrivia)
-	MCFG_VIDEO_START(ettrivia)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -474,8 +476,8 @@ ROM_START( strvmstr )
 	ROM_LOAD( "entrtn.hi3",   0x38000, 0x8000, CRC(a8cf603b) SHA1(6efa5753d8d252452b3f5be8635a28364e4d8de1) )
 ROM_END
 
-GAME( 1985, promutrv, 0,        ettrivia, ettrivia, 0, ROT270, "Enerdyne Technologies Inc.", "Progressive Music Trivia (Question set 1)", 0 )
-GAME( 1985, promutrva,promutrv, ettrivia, ettrivia, 0, ROT270, "Enerdyne Technologies Inc.", "Progressive Music Trivia (Question set 2)", 0 )
-GAME( 1985, promutrvb,promutrv, ettrivia, ettrivia, 0, ROT270, "Enerdyne Technologies Inc.", "Progressive Music Trivia (Question set 3)", 0 )
-GAME( 1985, promutrvc,promutrv, ettrivia, ettrivia, 0, ROT270, "Enerdyne Technologies Inc.", "Progressive Music Trivia (Question set 4)", 0 )
-GAME( 1986, strvmstr, 0,        ettrivia, ettrivia, 0, ROT270, "Enerdyne Technologies Inc.", "Super Trivia Master", GAME_WRONG_COLORS )
+GAME( 1985, promutrv, 0,        ettrivia, ettrivia, driver_device, 0, ROT270, "Enerdyne Technologies Inc.", "Progressive Music Trivia (Question set 1)", 0 )
+GAME( 1985, promutrva,promutrv, ettrivia, ettrivia, driver_device, 0, ROT270, "Enerdyne Technologies Inc.", "Progressive Music Trivia (Question set 2)", 0 )
+GAME( 1985, promutrvb,promutrv, ettrivia, ettrivia, driver_device, 0, ROT270, "Enerdyne Technologies Inc.", "Progressive Music Trivia (Question set 3)", 0 )
+GAME( 1985, promutrvc,promutrv, ettrivia, ettrivia, driver_device, 0, ROT270, "Enerdyne Technologies Inc.", "Progressive Music Trivia (Question set 4)", 0 )
+GAME( 1986, strvmstr, 0,        ettrivia, ettrivia, driver_device, 0, ROT270, "Enerdyne Technologies Inc.", "Super Trivia Master", GAME_WRONG_COLORS )

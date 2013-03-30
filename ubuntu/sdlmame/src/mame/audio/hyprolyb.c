@@ -3,12 +3,11 @@
 #include "sound/msm5205.h"
 #include "audio/hyprolyb.h"
 
-typedef struct _hyprolyb_adpcm_state hyprolyb_adpcm_state;
-struct _hyprolyb_adpcm_state
+struct hyprolyb_adpcm_state
 {
 	device_t *m_msm;
 	address_space *m_space;
-	UINT8    m_adpcm_ready;	// only bootlegs
+	UINT8    m_adpcm_ready; // only bootlegs
 	UINT8    m_adpcm_busy;
 	UINT8    m_vck_ready;
 };
@@ -18,16 +17,16 @@ INLINE hyprolyb_adpcm_state *get_safe_token( device_t *device )
 	assert(device != NULL);
 	assert(device->type() == HYPROLYB_ADPCM);
 
-	return (hyprolyb_adpcm_state *)downcast<legacy_device_base *>(device)->token();
+	return (hyprolyb_adpcm_state *)downcast<hyprolyb_adpcm_device *>(device)->token();
 }
 
 static DEVICE_START( hyprolyb_adpcm )
 {
 	hyprolyb_adpcm_state *state = get_safe_token(device);
 
-	state->m_space = device->machine().device("audiocpu")->memory().space(AS_PROGRAM);
+	state->m_space = &device->machine().device("audiocpu")->memory().space(AS_PROGRAM);
 	state->m_msm = device->machine().device("msm");
-	device->save_item(NAME(state->m_adpcm_ready));	// only bootlegs
+	device->save_item(NAME(state->m_adpcm_ready));  // only bootlegs
 	device->save_item(NAME(state->m_adpcm_busy));
 	device->save_item(NAME(state->m_vck_ready));
 }
@@ -45,8 +44,8 @@ static DEVICE_RESET( hyprolyb_adpcm )
 WRITE8_DEVICE_HANDLER( hyprolyb_adpcm_w )
 {
 	hyprolyb_adpcm_state *state = get_safe_token(device);
-
-	soundlatch2_w(state->m_space, offset, data);
+	driver_device *drvstate = space.machine().driver_data<driver_device>();
+	drvstate->soundlatch2_byte_w(*state->m_space, offset, data);
 	state->m_adpcm_ready = 0x80;
 }
 
@@ -84,17 +83,17 @@ static READ8_DEVICE_HANDLER( hyprolyb_adpcm_ready_r )
 static READ8_DEVICE_HANDLER( hyprolyb_adpcm_data_r )
 {
 	hyprolyb_adpcm_state *state = get_safe_token(device);
-
+	driver_device *drvstate = space.machine().driver_data<driver_device>();
 	state->m_adpcm_ready = 0x00;
-	return soundlatch2_r(state->m_space, offset);
+	return drvstate->soundlatch2_byte_r(*state->m_space, offset);
 }
 
-static ADDRESS_MAP_START( hyprolyb_adpcm_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( hyprolyb_adpcm_map, AS_PROGRAM, 8, driver_device )
 	AM_RANGE(0x0000, 0x007f) AM_RAM
-	AM_RANGE(0x1000, 0x1000) AM_DEVREAD("hyprolyb_adpcm", hyprolyb_adpcm_data_r)
-	AM_RANGE(0x1001, 0x1001) AM_DEVREAD("hyprolyb_adpcm", hyprolyb_adpcm_ready_r)
-	AM_RANGE(0x1002, 0x1002) AM_DEVWRITE("hyprolyb_adpcm", hyprolyb_msm_data_w)
-	AM_RANGE(0x1003, 0x1003) AM_DEVREAD("hyprolyb_adpcm", hyprolyb_msm_vck_r)
+	AM_RANGE(0x1000, 0x1000) AM_DEVREAD_LEGACY("hyprolyb_adpcm", hyprolyb_adpcm_data_r)
+	AM_RANGE(0x1001, 0x1001) AM_DEVREAD_LEGACY("hyprolyb_adpcm", hyprolyb_adpcm_ready_r)
+	AM_RANGE(0x1002, 0x1002) AM_DEVWRITE_LEGACY("hyprolyb_adpcm", hyprolyb_msm_data_w)
+	AM_RANGE(0x1003, 0x1003) AM_DEVREAD_LEGACY("hyprolyb_adpcm", hyprolyb_msm_vck_r)
 		// on init:
 		//    $1003 = $00
 		//    $1002 = $FF
@@ -121,12 +120,12 @@ static void adpcm_vck_callback( device_t *device )
 
 static const msm5205_interface hyprolyb_msm5205_config =
 {
-	adpcm_vck_callback,	/* VCK function */
-	MSM5205_S96_4B		/* 4 kHz */
+	adpcm_vck_callback, /* VCK function */
+	MSM5205_S96_4B      /* 4 kHz */
 };
 
 MACHINE_CONFIG_FRAGMENT( hyprolyb_adpcm )
-	MCFG_CPU_ADD("adpcm", M6802, XTAL_14_31818MHz/8)	/* unknown clock */
+	MCFG_CPU_ADD("adpcm", M6802, XTAL_14_31818MHz/8)    /* unknown clock */
 	MCFG_CPU_PROGRAM_MAP(hyprolyb_adpcm_map)
 
 	MCFG_SOUND_ADD("hyprolyb_adpcm", HYPROLYB_ADPCM, 0)
@@ -136,16 +135,49 @@ MACHINE_CONFIG_FRAGMENT( hyprolyb_adpcm )
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 MACHINE_CONFIG_END
 
-/*****************************************************************************
-    DEVICE DEFINITION
-*****************************************************************************/
+const device_type HYPROLYB_ADPCM = &device_creator<hyprolyb_adpcm_device>;
 
-static const char DEVTEMPLATE_SOURCE[] = __FILE__;
+hyprolyb_adpcm_device::hyprolyb_adpcm_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, HYPROLYB_ADPCM, "Hyper Olympics Audio", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
+{
+	m_token = global_alloc_clear(hyprolyb_adpcm_state);
+}
 
-#define DEVTEMPLATE_ID(p,s)				p##hyprolyb_adpcm##s
-#define DEVTEMPLATE_FEATURES			DT_HAS_START | DT_HAS_RESET
-#define DEVTEMPLATE_NAME				"Hyper Olympics Audio"
-#define DEVTEMPLATE_FAMILY				"Hyper Olympics Audio IC"
-#include "devtempl.h"
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
 
-DEFINE_LEGACY_SOUND_DEVICE(HYPROLYB_ADPCM, hyprolyb_adpcm);
+void hyprolyb_adpcm_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void hyprolyb_adpcm_device::device_start()
+{
+	DEVICE_START_NAME( hyprolyb_adpcm )(this);
+}
+
+//-------------------------------------------------
+//  device_reset - device-specific reset
+//-------------------------------------------------
+
+void hyprolyb_adpcm_device::device_reset()
+{
+	DEVICE_RESET_NAME( hyprolyb_adpcm )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void hyprolyb_adpcm_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}

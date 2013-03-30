@@ -107,86 +107,85 @@
 
 /***************************************************************************/
 
-static READ32_HANDLER(test2_r)
+READ32_MEMBER(deco_mlc_state::test2_r)
 {
 //  if (offset==0)
-//      return input_port_read(space->machine(), "IN0"); //0xffffffff;
-//   logerror("%08x:  Test2_r %d\n",cpu_get_pc(&space->device()),offset);
-	return space->machine().rand(); //0xffffffff;
+//      return ioport("IN0")->read(); //0xffffffff;
+//   logerror("%08x:  Test2_r %d\n",space.device().safe_pc(),offset);
+	return machine().rand(); //0xffffffff;
 }
 
-static READ32_HANDLER(test3_r)
+READ32_MEMBER(deco_mlc_state::test3_r)
 {
 /*
     test3 7 - vbl loop on 0x10 0000 at end of IRQ
 
 */
 //if (offset==0)
-//  return space->machine().rand()|(space->machine().rand()<<16);
-//  logerror("%08x:  Test3_r %d\n",cpu_get_pc(&space->device()),offset);
+//  return machine().rand()|(machine().rand()<<16);
+//  logerror("%08x:  Test3_r %d\n",space.device().safe_pc(),offset);
 	return 0xffffffff;
 }
 
-static WRITE32_DEVICE_HANDLER( avengrs_eprom_w )
+WRITE32_MEMBER(deco_mlc_state::avengrs_eprom_w)
 {
+	device_t *device = machine().device("eeprom");
 	if (ACCESSING_BITS_8_15) {
 		UINT8 ebyte=(data>>8)&0xff;
 //      if (ebyte&0x80) {
-			eeprom_set_clock_line(device, (ebyte & 0x2) ? ASSERT_LINE : CLEAR_LINE);
-			eeprom_write_bit(device, ebyte & 0x1);
-			eeprom_set_cs_line(device, (ebyte & 0x4) ? CLEAR_LINE : ASSERT_LINE);
+			eeprom_device *eeprom = downcast<eeprom_device *>(device);
+			eeprom->set_clock_line((ebyte & 0x2) ? ASSERT_LINE : CLEAR_LINE);
+			eeprom->write_bit(ebyte & 0x1);
+			eeprom->set_cs_line((ebyte & 0x4) ? CLEAR_LINE : ASSERT_LINE);
 //      }
 	}
 	else if (ACCESSING_BITS_0_7) {
 		//volume control todo
 	}
 	else
-		logerror("%s:  eprom_w %08x mask %08x\n",device->machine().describe_context(),data,mem_mask);
+		logerror("%s:  eprom_w %08x mask %08x\n",machine().describe_context(),data,mem_mask);
 }
 
-static WRITE32_HANDLER( avengrs_palette_w )
+WRITE32_MEMBER(deco_mlc_state::avengrs_palette_w)
 {
-	COMBINE_DATA(&space->machine().generic.paletteram.u32[offset]);
+	COMBINE_DATA(&m_generic_paletteram_32[offset]);
 	/* x bbbbb ggggg rrrrr */
-	palette_set_color_rgb(space->machine(),offset,pal5bit(space->machine().generic.paletteram.u32[offset] >> 0),pal5bit(space->machine().generic.paletteram.u32[offset] >> 5),pal5bit(space->machine().generic.paletteram.u32[offset] >> 10));
+	palette_set_color_rgb(machine(),offset,pal5bit(m_generic_paletteram_32[offset] >> 0),pal5bit(m_generic_paletteram_32[offset] >> 5),pal5bit(m_generic_paletteram_32[offset] >> 10));
 }
 
-static READ32_HANDLER( decomlc_vbl_r )
+READ32_MEMBER(deco_mlc_state::decomlc_vbl_r)
 {
-	deco_mlc_state *state = space->machine().driver_data<deco_mlc_state>();
-	state->m_vbl_i ^=0xffffffff;
-//logerror("vbl r %08x\n", cpu_get_pc(&space->device()));
+	m_vbl_i ^=0xffffffff;
+//logerror("vbl r %08x\n", space.device().safe_pc());
 	// Todo: Vblank probably in $10
-	return state->m_vbl_i;
+	return m_vbl_i;
 }
 
-static READ32_HANDLER( mlc_scanline_r )
+READ32_MEMBER(deco_mlc_state::mlc_scanline_r)
 {
-//  logerror("read scanline counter (%d)\n", space->machine().primary_screen->vpos());
-	return space->machine().primary_screen->vpos();
+//  logerror("read scanline counter (%d)\n", machine().primary_screen->vpos());
+	return machine().primary_screen->vpos();
 }
 
-static TIMER_DEVICE_CALLBACK( interrupt_gen )
+TIMER_DEVICE_CALLBACK_MEMBER(deco_mlc_state::interrupt_gen)
 {
-	deco_mlc_state *state = timer.machine().driver_data<deco_mlc_state>();
 //  logerror("hit scanline IRQ %d (%08x)\n", machine.primary_screen->vpos(), info.i);
-	cputag_set_input_line(timer.machine(), "maincpu", state->m_mainCpuIsArm ? ARM_IRQ_LINE : 1, HOLD_LINE);
+	machine().device("maincpu")->execute().set_input_line(m_mainCpuIsArm ? ARM_IRQ_LINE : 1, HOLD_LINE);
 }
 
-static WRITE32_HANDLER( mlc_irq_w )
+WRITE32_MEMBER(deco_mlc_state::mlc_irq_w)
 {
-	deco_mlc_state *state = space->machine().driver_data<deco_mlc_state>();
-	int scanline=space->machine().primary_screen->vpos();
-	state->m_irq_ram[offset]=data&0xffff;
+	int scanline=machine().primary_screen->vpos();
+	m_irq_ram[offset]=data&0xffff;
 
 	switch (offset*4)
 	{
 	case 0x10: /* IRQ ack.  Value written doesn't matter */
-		cputag_set_input_line(space->machine(), "maincpu", state->m_mainCpuIsArm ? ARM_IRQ_LINE : 1, CLEAR_LINE);
+		machine().device("maincpu")->execute().set_input_line(m_mainCpuIsArm ? ARM_IRQ_LINE : 1, CLEAR_LINE);
 		return;
 	case 0x14: /* Prepare scanline interrupt */
-		state->m_raster_irq_timer->adjust(space->machine().primary_screen->time_until_pos(state->m_irq_ram[0x14/4]));
-		//logerror("prepare scanline to fire at %d (currently on %d)\n", state->m_irq_ram[0x14/4], space->machine().primary_screen->vpos());
+		m_raster_irq_timer->adjust(machine().primary_screen->time_until_pos(m_irq_ram[0x14/4]));
+		//logerror("prepare scanline to fire at %d (currently on %d)\n", m_irq_ram[0x14/4], machine().primary_screen->vpos());
 		return;
 	case 0x18:
 	case 0x1c:
@@ -200,17 +199,17 @@ static WRITE32_HANDLER( mlc_irq_w )
 		if (scanline > 255)
 			scanline = 255;
 		/* Update scanlines up to present line */
-		while (state->m_lastScanline[offset-6]<scanline)
+		while (m_lastScanline[offset-6]<scanline)
 		{
-			state->m_mlc_raster_table[offset-6][state->m_lastScanline[offset-6]+1]=state->m_mlc_raster_table[offset-6][state->m_lastScanline[offset-6]];
-			state->m_lastScanline[offset-6]++;
+			m_mlc_raster_table[offset-6][m_lastScanline[offset-6]+1]=m_mlc_raster_table[offset-6][m_lastScanline[offset-6]];
+			m_lastScanline[offset-6]++;
 		}
 
-		if (state->m_lastScanline[offset-6] > scanline)
-			state->m_lastScanline[offset-6]=0;
+		if (m_lastScanline[offset-6] > scanline)
+			m_lastScanline[offset-6]=0;
 
 		/* Set current scanline value */
-		state->m_mlc_raster_table[offset-6][scanline]=data&0xffff;
+		m_mlc_raster_table[offset-6][scanline]=data&0xffff;
 		break;
 
 	default:
@@ -220,30 +219,28 @@ static WRITE32_HANDLER( mlc_irq_w )
 //  logerror("irqw %04x %04x (%d)\n", offset * 4, data&0xffff, scanline);
 }
 
-static READ32_HANDLER(mlc_spriteram_r)
+READ32_MEMBER(deco_mlc_state::mlc_spriteram_r)
 {
-	deco_mlc_state *state = space->machine().driver_data<deco_mlc_state>();
-	return state->m_spriteram[offset]&0xffff;
+	return m_spriteram[offset]&0xffff;
 }
 
-static READ32_HANDLER(mlc_vram_r)
+READ32_MEMBER(deco_mlc_state::mlc_vram_r)
 {
-	deco_mlc_state *state = space->machine().driver_data<deco_mlc_state>();
-	return state->m_mlc_vram[offset]&0xffff;
+	return m_mlc_vram[offset]&0xffff;
 }
 
-static READ32_HANDLER(stadhr96_prot_146_r)
+READ32_MEMBER(deco_mlc_state::stadhr96_prot_146_r)
 {
 	/*
-        cpu #0 (PC=00041BD0): unmapped program memory dword write to 00708004 = 000F0000 & FFFFFFFF
-        cpu #0 (PC=00041BFC): unmapped program memory dword write to 0070F0C8 = 00028800 & FFFFFFFF
-        cpu #0 (PC=00041C08): unmapped program memory dword write to 0070F010 = 00081920 & FFFFFFFF
-        cpu #0 (PC=00041C14): unmapped program memory dword write to 0070F020 = 00040960 & FFFFFFFF
-        cpu #0 (PC=00041C20): unmapped program memory dword write to 0070F03C = 5A5A5A5A & FFFFFFFF
-    */
+	    cpu #0 (PC=00041BD0): unmapped program memory dword write to 00708004 = 000F0000 & FFFFFFFF
+	    cpu #0 (PC=00041BFC): unmapped program memory dword write to 0070F0C8 = 00028800 & FFFFFFFF
+	    cpu #0 (PC=00041C08): unmapped program memory dword write to 0070F010 = 00081920 & FFFFFFFF
+	    cpu #0 (PC=00041C14): unmapped program memory dword write to 0070F020 = 00040960 & FFFFFFFF
+	    cpu #0 (PC=00041C20): unmapped program memory dword write to 0070F03C = 5A5A5A5A & FFFFFFFF
+	*/
 	offset<<=1;
 
-	logerror("%08x:  Read prot %04x\n", cpu_get_pc(&space->device()), offset);
+	logerror("%08x:  Read prot %04x\n", space.device().safe_pc(), offset);
 
 	if (offset==0x5c4)
 		return 0xaa55 << 16;
@@ -259,25 +256,25 @@ static READ32_HANDLER(stadhr96_prot_146_r)
 
 /******************************************************************************/
 
-static ADDRESS_MAP_START( decomlc_map, AS_PROGRAM, 32 )
+static ADDRESS_MAP_START( decomlc_map, AS_PROGRAM, 32, deco_mlc_state )
 	AM_RANGE(0x0000000, 0x00fffff) AM_ROM AM_MIRROR(0xff000000)
-	AM_RANGE(0x0100000, 0x011ffff) AM_RAM AM_BASE_MEMBER(deco_mlc_state, m_mlc_ram) AM_MIRROR(0xff000000)
+	AM_RANGE(0x0100000, 0x011ffff) AM_RAM AM_SHARE("mlc_ram") AM_MIRROR(0xff000000)
 	AM_RANGE(0x0200000, 0x020000f) AM_READNOP AM_MIRROR(0xff000000)/* IRQ control? */
 	AM_RANGE(0x0200070, 0x0200073) AM_READ(decomlc_vbl_r) AM_MIRROR(0xff000000)
 	AM_RANGE(0x0200074, 0x0200077) AM_READ(mlc_scanline_r) AM_MIRROR(0xff000000)
-	AM_RANGE(0x0200078, 0x020007f) AM_READ(test2_r)	AM_MIRROR(0xff000000)
-	AM_RANGE(0x0200000, 0x020007f) AM_WRITE(mlc_irq_w) AM_BASE_MEMBER(deco_mlc_state, m_irq_ram) AM_MIRROR(0xff000000)
-	AM_RANGE(0x0200080, 0x02000ff) AM_RAM AM_BASE_MEMBER(deco_mlc_state, m_mlc_clip_ram) AM_MIRROR(0xff000000)
-	AM_RANGE(0x0204000, 0x0206fff) AM_RAM_READ(mlc_spriteram_r) AM_BASE_SIZE_MEMBER(deco_mlc_state, m_spriteram, m_spriteram_size) AM_MIRROR(0xff000000)
-	AM_RANGE(0x0280000, 0x029ffff) AM_RAM_READ(mlc_vram_r) AM_BASE_MEMBER(deco_mlc_state, m_mlc_vram) AM_MIRROR(0xff000000)
-	AM_RANGE(0x0300000, 0x0307fff) AM_RAM_WRITE(avengrs_palette_w) AM_BASE_GENERIC(paletteram) AM_MIRROR(0xff000000)
+	AM_RANGE(0x0200078, 0x020007f) AM_READ(test2_r) AM_MIRROR(0xff000000)
+	AM_RANGE(0x0200000, 0x020007f) AM_WRITE(mlc_irq_w) AM_SHARE("irq_ram") AM_MIRROR(0xff000000)
+	AM_RANGE(0x0200080, 0x02000ff) AM_RAM AM_SHARE("mlc_clip_ram") AM_MIRROR(0xff000000)
+	AM_RANGE(0x0204000, 0x0206fff) AM_RAM_READ(mlc_spriteram_r) AM_SHARE("spriteram") AM_MIRROR(0xff000000)
+	AM_RANGE(0x0280000, 0x029ffff) AM_RAM_READ(mlc_vram_r) AM_SHARE("mlc_vram") AM_MIRROR(0xff000000)
+	AM_RANGE(0x0300000, 0x0307fff) AM_RAM_WRITE(avengrs_palette_w) AM_SHARE("paletteram") AM_MIRROR(0xff000000)
 	AM_RANGE(0x0400000, 0x0400003) AM_READ_PORT("INPUTS") AM_MIRROR(0xff000000)
-	AM_RANGE(0x0440000, 0x044001f) AM_READ(test3_r)	AM_MIRROR(0xff000000)
+	AM_RANGE(0x0440000, 0x044001f) AM_READ(test3_r) AM_MIRROR(0xff000000)
 	AM_RANGE(0x044001c, 0x044001f) AM_WRITENOP AM_MIRROR(0xff000000)
-	AM_RANGE(0x0500000, 0x0500003) AM_DEVWRITE("eeprom", avengrs_eprom_w) AM_MIRROR(0xff000000)
-	AM_RANGE(0x0600000, 0x0600007) AM_DEVREADWRITE8("ymz", ymz280b_r, ymz280b_w, 0xff000000) AM_MIRROR(0xff000000)
+	AM_RANGE(0x0500000, 0x0500003) AM_WRITE(avengrs_eprom_w) AM_MIRROR(0xff000000)
+	AM_RANGE(0x0600000, 0x0600007) AM_DEVREADWRITE8_LEGACY("ymz", ymz280b_r, ymz280b_w, 0xff000000) AM_MIRROR(0xff000000)
 	AM_RANGE(0x070f000, 0x070ffff) AM_READ(stadhr96_prot_146_r) AM_MIRROR(0xff000000)
-//  AM_RANGE(0x070f000, 0x070ffff) AM_READ(stadhr96_prot_146_w) AM_BASE(&deco32_prot_ram)
+//  AM_RANGE(0x070f000, 0x070ffff) AM_READ_LEGACY(stadhr96_prot_146_w) AM_SHARE("prot32ram")
 ADDRESS_MAP_END
 
 /******************************************************************************/
@@ -308,7 +305,7 @@ static INPUT_PORTS_START( mlc )
 	PORT_BIT( 0x00100000, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x00200000, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x00400000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x00800000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE("eeprom", eeprom_read_bit)
+	PORT_BIT( 0x00800000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE_MEMBER("eeprom", eeprom_device, read_bit)
 	PORT_BIT( 0x01000000, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(1)
 	PORT_BIT( 0x02000000, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x04000000, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -371,11 +368,10 @@ GFXDECODE_END
 
 /******************************************************************************/
 
-static MACHINE_RESET( mlc )
+MACHINE_RESET_MEMBER(deco_mlc_state,mlc)
 {
-	deco_mlc_state *state = machine.driver_data<deco_mlc_state>();
-	state->m_vbl_i = 0xffffffff;
-	state->m_raster_irq_timer = machine.device<timer_device>("int_timer");
+	m_vbl_i = 0xffffffff;
+	m_raster_irq_timer = machine().device<timer_device>("int_timer");
 }
 
 static MACHINE_CONFIG_START( avengrgs, deco_mlc_state )
@@ -384,24 +380,23 @@ static MACHINE_CONFIG_START( avengrgs, deco_mlc_state )
 	MCFG_CPU_ADD("maincpu", SH2,42000000/2) /* 21 MHz clock confirmed on real board */
 	MCFG_CPU_PROGRAM_MAP(decomlc_map)
 
-	MCFG_MACHINE_RESET(mlc)
+	MCFG_MACHINE_RESET_OVERRIDE(deco_mlc_state,mlc)
 	MCFG_EEPROM_93C46_ADD("eeprom") /* Actually 93c45 */
 
-	MCFG_TIMER_ADD("int_timer", interrupt_gen)
+	MCFG_TIMER_DRIVER_ADD("int_timer", deco_mlc_state, interrupt_gen)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(58)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
 	MCFG_SCREEN_SIZE(40*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 40*8-1, 1*8, 31*8-1)
-	MCFG_SCREEN_UPDATE(mlc)
-	MCFG_SCREEN_EOF(mlc)
+	MCFG_SCREEN_UPDATE_DRIVER(deco_mlc_state, screen_update_mlc)
+	MCFG_SCREEN_VBLANK_DRIVER(deco_mlc_state, screen_eof_mlc)
 
 	MCFG_GFXDECODE(deco_mlc)
 	MCFG_PALETTE_LENGTH(2048)
 
-	MCFG_VIDEO_START(mlc)
+	MCFG_VIDEO_START_OVERRIDE(deco_mlc_state,mlc)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
@@ -417,24 +412,23 @@ static MACHINE_CONFIG_START( mlc, deco_mlc_state )
 	MCFG_CPU_ADD("maincpu", ARM,42000000/6) /* 42 MHz -> 7MHz clock confirmed on real board */
 	MCFG_CPU_PROGRAM_MAP(decomlc_map)
 
-	MCFG_MACHINE_RESET(mlc)
+	MCFG_MACHINE_RESET_OVERRIDE(deco_mlc_state,mlc)
 	MCFG_EEPROM_93C46_ADD("eeprom") /* Actually 93c45 */
 
-	MCFG_TIMER_ADD("int_timer", interrupt_gen)
+	MCFG_TIMER_DRIVER_ADD("int_timer", deco_mlc_state, interrupt_gen)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(58)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
 	MCFG_SCREEN_SIZE(40*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 40*8-1, 1*8, 31*8-1)
-	MCFG_SCREEN_UPDATE(mlc)
-	MCFG_SCREEN_EOF(mlc)
+	MCFG_SCREEN_UPDATE_DRIVER(deco_mlc_state, screen_update_mlc)
+	MCFG_SCREEN_VBLANK_DRIVER(deco_mlc_state, screen_eof_mlc)
 
 	MCFG_GFXDECODE(deco_mlc)
 	MCFG_PALETTE_LENGTH(2048)
 
-	MCFG_VIDEO_START(mlc)
+	MCFG_VIDEO_START_OVERRIDE(deco_mlc_state,mlc)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
@@ -604,7 +598,7 @@ ROM_END
 ROM_START( hoops95 )
 	ROM_REGION( 0x100000, "maincpu", 0 )
 	ROM_LOAD32_WORD( "hoops.a2", 0x000000, 0x80000, CRC(02b8c61a) SHA1(ae49f6bd8a3bffa181fa6a2740d92287e9d5dc02) )
-	ROM_LOAD32_WORD( "hoops.b2", 0x000002, 0x80000, CRC(b54c63d1) SHA1(21d9327675226a6e60d0447d461d7897212db33a) )
+	ROM_LOAD32_WORD( "hoops.b2", 0x000002, 0x80000, CRC(a1dc3519) SHA1(73a292c34f4172cf12827a21b100cc6653650a5b) )
 
 	ROM_REGION( 0x0c00000, "gfx1",ROMREGION_ERASE00 )
 	ROM_LOAD16_BYTE( "mce-00.2e", 0x0000001, 0x200000, CRC(11b9bd96) SHA1(ed17fa9008b8e42951fd1f4c50939f1dd99cfeaf) )
@@ -614,7 +608,7 @@ ROM_START( hoops95 )
 	ROM_LOAD32_WORD_SWAP( "mce-04.8n", 0x0800000, 0x200000, CRC(91da9b4f) SHA1(25c3a7abbaca006ad345150b5d689faf8b13affb) ) // extra plane of gfx, needs rearranging to decode
 
 	ROM_REGION( 0x80000, "gfx2", ROMREGION_ERASEFF ) /* Code Lookup */
-	ROM_LOAD( "hoops.h6", 0x020000, 0x20000, CRC(bc702733) SHA1(830d5da5eb53727ff4221c59c5676e01e444aa27) )
+	ROM_LOAD( "rl02-0.6h", 0x020000, 0x20000, CRC(9490041c) SHA1(febedd0683dbcb080d304d03e4a3b501caeb6bb8) )
 
 	ROM_REGION( 0x400000, "ymz", 0 )
 	ROM_LOAD( "mce-05.6a",  0x000000, 0x400000,  CRC(e7a9355a) SHA1(039b23666e224c33ebb02baa80e496f8bce0514f) )
@@ -698,8 +692,8 @@ ROM_END
 static void descramble_sound( running_machine &machine )
 {
 	/* the same as simpl156 / heavy smash? */
-	UINT8 *rom = machine.region("ymz")->base();
-	int length = machine.region("ymz")->bytes();
+	UINT8 *rom = machine.root_device().memregion("ymz")->base();
+	int length = machine.root_device().memregion("ymz")->bytes();
 	UINT8 *buf1 = auto_alloc_array(machine, UINT8, length);
 
 	UINT32 x;
@@ -709,11 +703,11 @@ static void descramble_sound( running_machine &machine )
 		UINT32 addr;
 
 		addr = BITSWAP24 (x,23,22,21,0, 20,
-		                    19,18,17,16,
-		                    15,14,13,12,
-		                    11,10,9, 8,
-		                    7, 6, 5, 4,
-		                    3, 2, 1 );
+							19,18,17,16,
+							15,14,13,12,
+							11,10,9, 8,
+							7, 6, 5, 4,
+							3, 2, 1 );
 
 		buf1[addr] = rom[x];
 	}
@@ -723,52 +717,49 @@ static void descramble_sound( running_machine &machine )
 	auto_free (machine, buf1);
 }
 
-static READ32_HANDLER( avengrgs_speedup_r )
+READ32_MEMBER(deco_mlc_state::avengrgs_speedup_r)
 {
-	deco_mlc_state *state = space->machine().driver_data<deco_mlc_state>();
-	UINT32 a=state->m_mlc_ram[0x89a0/4];
-	UINT32 p=cpu_get_pc(&space->device());
+	UINT32 a=m_mlc_ram[0x89a0/4];
+	UINT32 p=space.device().safe_pc();
 
-	if ((p==0x3234 || p==0x32dc) && (a&1)) device_spin_until_interrupt(&space->device());
+	if ((p==0x3234 || p==0x32dc) && (a&1)) space.device().execute().spin_until_interrupt();
 
 	return a;
 }
 
-static DRIVER_INIT( avengrgs )
+DRIVER_INIT_MEMBER(deco_mlc_state,avengrgs)
 {
-	deco_mlc_state *state = machine.driver_data<deco_mlc_state>();
 	// init options
-	sh2drc_set_options(machine.device("maincpu"), SH2DRC_FASTEST_OPTIONS);
+	sh2drc_set_options(machine().device("maincpu"), SH2DRC_FASTEST_OPTIONS);
 
 	// set up speed cheat
-	sh2drc_add_pcflush(machine.device("maincpu"), 0x3234);
-	sh2drc_add_pcflush(machine.device("maincpu"), 0x32dc);
+	sh2drc_add_pcflush(machine().device("maincpu"), 0x3234);
+	sh2drc_add_pcflush(machine().device("maincpu"), 0x32dc);
 
-	state->m_mainCpuIsArm = 0;
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x01089a0, 0x01089a3, FUNC(avengrgs_speedup_r) );
-	descramble_sound(machine);
+	m_mainCpuIsArm = 0;
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(0x01089a0, 0x01089a3, read32_delegate(FUNC(deco_mlc_state::avengrgs_speedup_r),this));
+	descramble_sound(machine());
 }
 
-static DRIVER_INIT( mlc )
+DRIVER_INIT_MEMBER(deco_mlc_state,mlc)
 {
-	deco_mlc_state *state = machine.driver_data<deco_mlc_state>();
 	/* The timing in the ARM core isn't as accurate as it should be, so bump up the
-        effective clock rate here to compensate otherwise we have slowdowns in
-        Skull Fung where there probably shouldn't be. */
-	machine.device("maincpu")->set_clock_scale(2.0f);
-	state->m_mainCpuIsArm = 1;
-	deco156_decrypt(machine);
-	descramble_sound(machine);
+	    effective clock rate here to compensate otherwise we have slowdowns in
+	    Skull Fung where there probably shouldn't be. */
+	machine().device("maincpu")->set_clock_scale(2.0f);
+	m_mainCpuIsArm = 1;
+	deco156_decrypt(machine());
+	descramble_sound(machine());
 }
 
 /***************************************************************************/
 
-GAME( 1995, avengrgs, 0,        avengrgs, mlc, avengrgs, ROT0,   "Data East Corporation", "Avengers In Galactic Storm (US)", 0 )
-GAME( 1995, avengrgsj,avengrgs, avengrgs, mlc, avengrgs, ROT0,   "Data East Corporation", "Avengers In Galactic Storm (Japan)", 0 )
-GAME( 1996, stadhr96, 0,        mlc_6bpp, mlc, mlc,      ROT0,   "Data East Corporation", "Stadium Hero 96 (World, EAJ)", GAME_UNEMULATED_PROTECTION | GAME_NOT_WORKING ) // Rom labels are EAJ  ^^
-GAME( 1996, stadhr96j,stadhr96, mlc_6bpp, mlc, mlc,      ROT0,   "Data East Corporation", "Stadium Hero 96 (Japan, EAD)", GAME_UNEMULATED_PROTECTION | GAME_NOT_WORKING ) // Rom labels are EAD (this isn't a Konami region code!)
-GAME( 1996, skullfng, 0,        mlc_6bpp, mlc, mlc,      ROT270, "Data East Corporation", "Skull Fang (World)", 0 ) /* Version 1.13, Europe, Master 96.02.19 */
-GAME( 1996, skullfngj,skullfng, mlc_6bpp, mlc, mlc,      ROT270, "Data East Corporation", "Skull Fang (Japan)", 0 ) /* Version 1.09, Japan, Master 96.02.08 */
-GAME( 1996, hoops96,  0,        mlc_5bpp, mlc, mlc,      ROT0,   "Data East Corporation", "Hoops '96 (Europe/Asia 2.0)", 0 )
-GAME( 1995, ddream95, hoops96,  mlc_5bpp, mlc, mlc,      ROT0,   "Data East Corporation", "Dunk Dream '95 (Japan 1.4, EAM)", 0 )
-GAME( 1995, hoops95,  hoops96,  mlc_5bpp, mlc, mlc,      ROT0,   "Data East Corporation", "Hoops (Europe/Asia 1.7)", 0 )
+GAME( 1995, avengrgs, 0,        avengrgs, mlc, deco_mlc_state, avengrgs, ROT0,   "Data East Corporation", "Avengers In Galactic Storm (US)", 0 )
+GAME( 1995, avengrgsj,avengrgs, avengrgs, mlc, deco_mlc_state, avengrgs, ROT0,   "Data East Corporation", "Avengers In Galactic Storm (Japan)", 0 )
+GAME( 1996, stadhr96, 0,        mlc_6bpp, mlc, deco_mlc_state, mlc,      ROT0,   "Data East Corporation", "Stadium Hero 96 (World, EAJ)", GAME_UNEMULATED_PROTECTION | GAME_NOT_WORKING ) // Rom labels are EAJ  ^^
+GAME( 1996, stadhr96j,stadhr96, mlc_6bpp, mlc, deco_mlc_state, mlc,      ROT0,   "Data East Corporation", "Stadium Hero 96 (Japan, EAD)", GAME_UNEMULATED_PROTECTION | GAME_NOT_WORKING ) // Rom labels are EAD (this isn't a Konami region code!)
+GAME( 1996, skullfng, 0,        mlc_6bpp, mlc, deco_mlc_state, mlc,      ROT270, "Data East Corporation", "Skull Fang (World)", 0 ) /* Version 1.13, Europe, Master 96.02.19 */
+GAME( 1996, skullfngj,skullfng, mlc_6bpp, mlc, deco_mlc_state, mlc,      ROT270, "Data East Corporation", "Skull Fang (Japan)", 0 ) /* Version 1.09, Japan, Master 96.02.08 */
+GAME( 1996, hoops96,  0,        mlc_5bpp, mlc, deco_mlc_state, mlc,      ROT0,   "Data East Corporation", "Hoops '96 (Europe/Asia 2.0)", 0 )
+GAME( 1995, ddream95, hoops96,  mlc_5bpp, mlc, deco_mlc_state, mlc,      ROT0,   "Data East Corporation", "Dunk Dream '95 (Japan 1.4, EAM)", 0 )
+GAME( 1995, hoops95,  hoops96,  mlc_5bpp, mlc, deco_mlc_state, mlc,      ROT0,   "Data East Corporation", "Hoops (Europe/Asia 1.7)", 0 )

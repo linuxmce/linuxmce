@@ -26,6 +26,7 @@
 #include "emu.h"
 #include "cpu/m68000/m68000.h"
 #include "audio/atarijsa.h"
+#include "video/atarimo.h"
 #include "includes/eprom.h"
 
 
@@ -36,33 +37,22 @@
  *
  *************************************/
 
-static void update_interrupts(running_machine &machine)
+void eprom_state::update_interrupts()
 {
-	eprom_state *state = machine.driver_data<eprom_state>();
+	subdevice("maincpu")->execute().set_input_line(4, m_video_int_state ? ASSERT_LINE : CLEAR_LINE);
 
-	cputag_set_input_line(machine, "maincpu", 4, state->m_video_int_state ? ASSERT_LINE : CLEAR_LINE);
+	if (subdevice("extra") != NULL)
+		subdevice("extra")->execute().set_input_line(4, m_video_int_state ? ASSERT_LINE : CLEAR_LINE);
 
-	if (machine.device("extra") != NULL)
-		cputag_set_input_line(machine, "extra", 4, state->m_video_int_state ? ASSERT_LINE : CLEAR_LINE);
-
-	cputag_set_input_line(machine, "maincpu", 6, state->m_sound_int_state ? ASSERT_LINE : CLEAR_LINE);
+	subdevice("maincpu")->execute().set_input_line(6, m_sound_int_state ? ASSERT_LINE : CLEAR_LINE);
 }
 
 
-static MACHINE_START( eprom )
+MACHINE_RESET_MEMBER(eprom_state,eprom)
 {
-	atarigen_init(machine);
-}
-
-
-static MACHINE_RESET( eprom )
-{
-	eprom_state *state = machine.driver_data<eprom_state>();
-
-	atarigen_eeprom_reset(state);
-	atarigen_interrupt_reset(state, update_interrupts);
-	atarigen_scanline_timer_reset(*machine.primary_screen, eprom_scanline_update, 8);
-	atarijsa_reset();
+	atarigen_state::machine_reset();
+	scanline_timer_reset(*machine().primary_screen, 8);
+	atarijsa_reset(machine());
 }
 
 
@@ -73,26 +63,24 @@ static MACHINE_RESET( eprom )
  *
  *************************************/
 
-static READ16_HANDLER( special_port1_r )
+READ16_MEMBER(eprom_state::special_port1_r)
 {
-	eprom_state *state = space->machine().driver_data<eprom_state>();
-	int result = input_port_read(space->machine(), "260010");
+	int result = ioport("260010")->read();
 
-	if (state->m_sound_to_cpu_ready) result ^= 0x0004;
-	if (state->m_cpu_to_sound_ready) result ^= 0x0008;
+	if (m_sound_to_cpu_ready) result ^= 0x0004;
+	if (m_cpu_to_sound_ready) result ^= 0x0008;
 	result ^= 0x0010;
 
 	return result;
 }
 
 
-static READ16_HANDLER( adc_r )
+READ16_MEMBER(eprom_state::adc_r)
 {
-	eprom_state *state = space->machine().driver_data<eprom_state>();
 	static const char *const adcnames[] = { "ADC0", "ADC1", "ADC2", "ADC3" };
-	int result = input_port_read(space->machine(), adcnames[state->m_last_offset & 3]);
+	int result = ioport(adcnames[m_last_offset & 3])->read();
 
-	state->m_last_offset = offset;
+	m_last_offset = offset;
 	return result;
 }
 
@@ -104,23 +92,22 @@ static READ16_HANDLER( adc_r )
  *
  *************************************/
 
-static WRITE16_HANDLER( eprom_latch_w )
+WRITE16_MEMBER(eprom_state::eprom_latch_w)
 {
-	eprom_state *state = space->machine().driver_data<eprom_state>();
 
-	if (ACCESSING_BITS_0_7 && (space->machine().device("extra") != NULL))
+	if (ACCESSING_BITS_0_7 && (machine().device("extra") != NULL))
 	{
 		/* bit 0: reset extra CPU */
 		if (data & 1)
-			cputag_set_input_line(space->machine(), "extra", INPUT_LINE_RESET, CLEAR_LINE);
+			machine().device("extra")->execute().set_input_line(INPUT_LINE_RESET, CLEAR_LINE);
 		else
-			cputag_set_input_line(space->machine(), "extra", INPUT_LINE_RESET, ASSERT_LINE);
+			machine().device("extra")->execute().set_input_line(INPUT_LINE_RESET, ASSERT_LINE);
 
 		/* bits 1-4: screen intensity */
-		state->m_screen_intensity = (data & 0x1e) >> 1;
+		m_screen_intensity = (data & 0x1e) >> 1;
 
 		/* bit 5: video disable */
-		state->m_video_disable = (data & 0x20);
+		m_video_disable = (data & 0x20);
 	}
 }
 
@@ -132,23 +119,21 @@ static WRITE16_HANDLER( eprom_latch_w )
  *
  *************************************/
 
-static READ16_HANDLER( sync_r )
+READ16_MEMBER(eprom_state::sync_r)
 {
-	eprom_state *state = space->machine().driver_data<eprom_state>();
-	return state->m_sync_data[offset];
+	return m_sync_data[offset];
 }
 
 
-static WRITE16_HANDLER( sync_w )
+WRITE16_MEMBER(eprom_state::sync_w)
 {
-	eprom_state *state = space->machine().driver_data<eprom_state>();
-	int oldword = state->m_sync_data[offset];
+	int oldword = m_sync_data[offset];
 	int newword = oldword;
 	COMBINE_DATA(&newword);
 
-	state->m_sync_data[offset] = newword;
+	m_sync_data[offset] = newword;
 	if ((oldword & 0xff00) != (newword & 0xff00))
-		device_yield(&space->device());
+		space.device().execute().yield();
 }
 
 
@@ -159,52 +144,52 @@ static WRITE16_HANDLER( sync_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16, eprom_state )
 	AM_RANGE(0x000000, 0x09ffff) AM_ROM
-	AM_RANGE(0x0e0000, 0x0e0fff) AM_READWRITE(atarigen_eeprom_r, atarigen_eeprom_w) AM_SHARE("eeprom")
-	AM_RANGE(0x16cc00, 0x16cc01) AM_RAM AM_SHARE("share2")
+	AM_RANGE(0x0e0000, 0x0e0fff) AM_READWRITE(eeprom_r, eeprom_w) AM_SHARE("eeprom")
+	AM_RANGE(0x16cc00, 0x16cc01) AM_RAM AM_SHARE("sync_data")
 	AM_RANGE(0x160000, 0x16ffff) AM_RAM AM_SHARE("share1")
-	AM_RANGE(0x1f0000, 0x1fffff) AM_WRITE(atarigen_eeprom_enable_w)
+	AM_RANGE(0x1f0000, 0x1fffff) AM_WRITE(eeprom_enable_w)
 	AM_RANGE(0x260000, 0x26000f) AM_READ_PORT("260000")
 	AM_RANGE(0x260010, 0x26001f) AM_READ(special_port1_r)
 	AM_RANGE(0x260020, 0x26002f) AM_READ(adc_r)
-	AM_RANGE(0x260030, 0x260031) AM_READ(atarigen_sound_r)
+	AM_RANGE(0x260030, 0x260031) AM_READ8(sound_r, 0x00ff)
 	AM_RANGE(0x2e0000, 0x2e0001) AM_WRITE(watchdog_reset16_w)
-	AM_RANGE(0x360000, 0x360001) AM_WRITE(atarigen_video_int_ack_w)
+	AM_RANGE(0x360000, 0x360001) AM_WRITE(video_int_ack_w)
 	AM_RANGE(0x360010, 0x360011) AM_WRITE(eprom_latch_w)
-	AM_RANGE(0x360020, 0x360021) AM_WRITE(atarigen_sound_reset_w)
-	AM_RANGE(0x360030, 0x360031) AM_WRITE(atarigen_sound_w)
-	AM_RANGE(0x3e0000, 0x3e0fff) AM_RAM AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0x3f0000, 0x3f1fff) AM_WRITE(atarigen_playfield_w) AM_BASE_MEMBER(eprom_state, m_playfield)
-	AM_RANGE(0x3f2000, 0x3f3fff) AM_WRITE(atarimo_0_spriteram_w) AM_BASE(&atarimo_0_spriteram)
-	AM_RANGE(0x3f4000, 0x3f4f7f) AM_WRITE(atarigen_alpha_w) AM_BASE_MEMBER(eprom_state, m_alpha)
-	AM_RANGE(0x3f4f80, 0x3f4fff) AM_WRITE(atarimo_0_slipram_w) AM_BASE(&atarimo_0_slipram)
-	AM_RANGE(0x3f8000, 0x3f9fff) AM_WRITE(atarigen_playfield_upper_w) AM_BASE_MEMBER(eprom_state, m_playfield_upper)
+	AM_RANGE(0x360020, 0x360021) AM_WRITE(sound_reset_w)
+	AM_RANGE(0x360030, 0x360031) AM_WRITE8(sound_w, 0x00ff)
+	AM_RANGE(0x3e0000, 0x3e0fff) AM_RAM AM_SHARE("paletteram")
+	AM_RANGE(0x3f0000, 0x3f1fff) AM_WRITE(playfield_w) AM_SHARE("playfield")
+	AM_RANGE(0x3f2000, 0x3f3fff) AM_READWRITE_LEGACY(atarimo_0_spriteram_r, atarimo_0_spriteram_w)
+	AM_RANGE(0x3f4000, 0x3f4f7f) AM_WRITE(alpha_w) AM_SHARE("alpha")
+	AM_RANGE(0x3f4f80, 0x3f4fff) AM_READWRITE_LEGACY(atarimo_0_slipram_r, atarimo_0_slipram_w)
+	AM_RANGE(0x3f8000, 0x3f9fff) AM_WRITE(playfield_upper_w) AM_SHARE("playfield_up")
 	AM_RANGE(0x3f0000, 0x3f9fff) AM_RAM
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( guts_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( guts_map, AS_PROGRAM, 16, eprom_state )
 	AM_RANGE(0x000000, 0x09ffff) AM_ROM
-	AM_RANGE(0x0e0000, 0x0e0fff) AM_READWRITE(atarigen_eeprom_r, atarigen_eeprom_w) AM_SHARE("eeprom")
-	AM_RANGE(0x16cc00, 0x16cc01) AM_RAM AM_SHARE("share2")
+	AM_RANGE(0x0e0000, 0x0e0fff) AM_READWRITE(eeprom_r, eeprom_w) AM_SHARE("eeprom")
+	AM_RANGE(0x16cc00, 0x16cc01) AM_RAM AM_SHARE("sync_data")
 	AM_RANGE(0x160000, 0x16ffff) AM_RAM AM_SHARE("share1")
-	AM_RANGE(0x1f0000, 0x1fffff) AM_WRITE(atarigen_eeprom_enable_w)
+	AM_RANGE(0x1f0000, 0x1fffff) AM_WRITE(eeprom_enable_w)
 	AM_RANGE(0x260000, 0x26000f) AM_READ_PORT("260000")
 	AM_RANGE(0x260010, 0x26001f) AM_READ(special_port1_r)
 	AM_RANGE(0x260020, 0x26002f) AM_READ(adc_r)
-	AM_RANGE(0x260030, 0x260031) AM_READ(atarigen_sound_r)
+	AM_RANGE(0x260030, 0x260031) AM_READ8(sound_r, 0x00ff)
 	AM_RANGE(0x2e0000, 0x2e0001) AM_WRITE(watchdog_reset16_w)
-	AM_RANGE(0x360000, 0x360001) AM_WRITE(atarigen_video_int_ack_w)
+	AM_RANGE(0x360000, 0x360001) AM_WRITE(video_int_ack_w)
 //  AM_RANGE(0x360010, 0x360011) AM_WRITE(eprom_latch_w)
-	AM_RANGE(0x360020, 0x360021) AM_WRITE(atarigen_sound_reset_w)
-	AM_RANGE(0x360030, 0x360031) AM_WRITE(atarigen_sound_w)
-	AM_RANGE(0x3e0000, 0x3e0fff) AM_RAM AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0xff0000, 0xff1fff) AM_WRITE(atarigen_playfield_upper_w) AM_BASE_MEMBER(eprom_state, m_playfield_upper)
-	AM_RANGE(0xff8000, 0xff9fff) AM_WRITE(atarigen_playfield_w) AM_BASE_MEMBER(eprom_state, m_playfield)
-	AM_RANGE(0xffa000, 0xffbfff) AM_WRITE(atarimo_0_spriteram_w) AM_BASE(&atarimo_0_spriteram)
-	AM_RANGE(0xffc000, 0xffcf7f) AM_WRITE(atarigen_alpha_w) AM_BASE_MEMBER(eprom_state, m_alpha)
-	AM_RANGE(0xffcf80, 0xffcfff) AM_WRITE(atarimo_0_slipram_w) AM_BASE(&atarimo_0_slipram)
+	AM_RANGE(0x360020, 0x360021) AM_WRITE(sound_reset_w)
+	AM_RANGE(0x360030, 0x360031) AM_WRITE8(sound_w, 0x00ff)
+	AM_RANGE(0x3e0000, 0x3e0fff) AM_RAM AM_SHARE("paletteram")
+	AM_RANGE(0xff0000, 0xff1fff) AM_WRITE(playfield_upper_w) AM_SHARE("playfield_up")
+	AM_RANGE(0xff8000, 0xff9fff) AM_WRITE(playfield_w) AM_SHARE("playfield")
+	AM_RANGE(0xffa000, 0xffbfff) AM_READWRITE_LEGACY(atarimo_0_spriteram_r, atarimo_0_spriteram_w)
+	AM_RANGE(0xffc000, 0xffcf7f) AM_WRITE(alpha_w) AM_SHARE("alpha")
+	AM_RANGE(0xffcf80, 0xffcfff) AM_READWRITE_LEGACY(atarimo_0_slipram_r, atarimo_0_slipram_w)
 	AM_RANGE(0xff0000, 0xff1fff) AM_RAM
 	AM_RANGE(0xff8000, 0xffffff) AM_RAM
 ADDRESS_MAP_END
@@ -217,18 +202,18 @@ ADDRESS_MAP_END
  *
  *************************************/
 
-static ADDRESS_MAP_START( extra_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( extra_map, AS_PROGRAM, 16, eprom_state )
 	AM_RANGE(0x000000, 0x07ffff) AM_ROM
-	AM_RANGE(0x16cc00, 0x16cc01) AM_READWRITE(sync_r, sync_w) AM_SHARE("share2") AM_BASE_MEMBER(eprom_state, m_sync_data)
+	AM_RANGE(0x16cc00, 0x16cc01) AM_READWRITE(sync_r, sync_w) AM_SHARE("sync_data")
 	AM_RANGE(0x160000, 0x16ffff) AM_RAM AM_SHARE("share1")
 	AM_RANGE(0x260000, 0x26000f) AM_READ_PORT("260000")
 	AM_RANGE(0x260010, 0x26001f) AM_READ(special_port1_r)
 	AM_RANGE(0x260020, 0x26002f) AM_READ(adc_r)
-	AM_RANGE(0x260030, 0x260031) AM_READ(atarigen_sound_r)
-	AM_RANGE(0x360000, 0x360001) AM_WRITE(atarigen_video_int_ack_w)
+	AM_RANGE(0x260030, 0x260031) AM_READ8(sound_r, 0x00ff)
+	AM_RANGE(0x360000, 0x360001) AM_WRITE(video_int_ack_w)
 	AM_RANGE(0x360010, 0x360011) AM_WRITE(eprom_latch_w)
-	AM_RANGE(0x360020, 0x360021) AM_WRITE(atarigen_sound_reset_w)
-	AM_RANGE(0x360030, 0x360031) AM_WRITE(atarigen_sound_w)
+	AM_RANGE(0x360020, 0x360021) AM_WRITE(sound_reset_w)
+	AM_RANGE(0x360030, 0x360031) AM_WRITE8(sound_w, 0x00ff)
 ADDRESS_MAP_END
 
 
@@ -249,9 +234,9 @@ static INPUT_PORTS_START( eprom )
 	PORT_BIT( 0xf000, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("260010")
-	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_SERVICE( 0x0002, IP_ACTIVE_LOW )
-	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_UNUSED )	/* Input buffer full (@260030) */
+	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_UNUSED )   /* Input buffer full (@260030) */
 	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_UNUSED ) /* Output buffer full (@360030) */
 	PORT_BIT( 0x0010, IP_ACTIVE_HIGH, IPT_UNUSED ) /* ADEOC, end of conversion */
 	PORT_BIT( 0x00e0, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -261,23 +246,23 @@ static INPUT_PORTS_START( eprom )
 	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
 	PORT_BIT( 0xf000, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("ADC0")			/* ADC0 @ 0x260020 */
+	PORT_START("ADC0")          /* ADC0 @ 0x260020 */
 	PORT_BIT( 0x00ff, 0x0080, IPT_AD_STICK_Y ) PORT_MINMAX(0x10,0xf0) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_PLAYER(1)
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("ADC1")			/* ADC1 @ 0x260022 */
+	PORT_START("ADC1")          /* ADC1 @ 0x260022 */
 	PORT_BIT( 0x00ff, 0x0080, IPT_AD_STICK_X ) PORT_MINMAX(0x10,0xf0) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_REVERSE PORT_PLAYER(1)
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("ADC2")			/* ADC0 @ 0x260024 */
+	PORT_START("ADC2")          /* ADC0 @ 0x260024 */
 	PORT_BIT( 0x00ff, 0x0080, IPT_AD_STICK_Y ) PORT_MINMAX(0x10,0xf0) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_PLAYER(2)
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("ADC3")			/* ADC1 @ 0x260026 */
+	PORT_START("ADC3")          /* ADC1 @ 0x260026 */
 	PORT_BIT( 0x00ff, 0x0080, IPT_AD_STICK_X ) PORT_MINMAX(0x10,0xf0) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_REVERSE PORT_PLAYER(2)
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_INCLUDE( atarijsa_i )		/* audio port */
+	PORT_INCLUDE( atarijsa_i )      /* audio port */
 INPUT_PORTS_END
 
 
@@ -294,9 +279,9 @@ static INPUT_PORTS_START( klaxp )
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(1)
 
 	PORT_START("260010")
-	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_SERVICE( 0x0002, IP_ACTIVE_LOW )
-	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_UNUSED )	/* Input buffer full (@260030) */
+	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_UNUSED )   /* Input buffer full (@260030) */
 	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_UNUSED ) /* Output buffer full (@360030) */
 	PORT_BIT( 0x0010, IP_ACTIVE_HIGH, IPT_UNUSED ) /* ADEOC, end of conversion */
 	PORT_BIT( 0x00e0, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -309,12 +294,12 @@ static INPUT_PORTS_START( klaxp )
 	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(2)
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(2)
 
-	PORT_INCLUDE( atarijsa_ii )		/* audio board port */
+	PORT_INCLUDE( atarijsa_ii )     /* audio board port */
 INPUT_PORTS_END
 
 
 static INPUT_PORTS_START( guts )
-	PORT_START("260000")		/* 260000 */
+	PORT_START("260000")        /* 260000 */
 	PORT_BIT( 0x00ff, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
 	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
@@ -322,10 +307,10 @@ static INPUT_PORTS_START( guts )
 	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(1)
 	PORT_BIT( 0xf000, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("260010")		/* 260010 */
-	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_START("260010")        /* 260010 */
+	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_SERVICE( 0x0002, IP_ACTIVE_LOW )
-	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_UNUSED )	/* Input buffer full (@260030) */
+	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_UNUSED )   /* Input buffer full (@260030) */
 	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_UNUSED ) /* Output buffer full (@360030) */
 	PORT_BIT( 0x0010, IP_ACTIVE_HIGH, IPT_UNUSED ) /* ADEOC, end of conversion */
 	PORT_BIT( 0x00e0, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -335,23 +320,23 @@ static INPUT_PORTS_START( guts )
 	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
 	PORT_BIT( 0xf000, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("ADC0")			/* ADC0 @ 0x260020 */
+	PORT_START("ADC0")          /* ADC0 @ 0x260020 */
 	PORT_BIT( 0x00ff, 0x0080, IPT_AD_STICK_Y ) PORT_MINMAX(0x10,0xf0) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_PLAYER(1)
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("ADC1")			/* ADC1 @ 0x260022 */
+	PORT_START("ADC1")          /* ADC1 @ 0x260022 */
 	PORT_BIT( 0x00ff, 0x0080, IPT_AD_STICK_X ) PORT_MINMAX(0x10,0xf0) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_PLAYER(1) PORT_REVERSE
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("ADC2")			/* ADC0 @ 0x260024 */
+	PORT_START("ADC2")          /* ADC0 @ 0x260024 */
 	PORT_BIT( 0x00ff, 0x0080, IPT_AD_STICK_Y ) PORT_MINMAX(0x10,0xf0) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_PLAYER(2)
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("ADC3")			/* ADC1 @ 0x260026 */
+	PORT_START("ADC3")          /* ADC1 @ 0x260026 */
 	PORT_BIT( 0x00ff, 0x0080, IPT_AD_STICK_X ) PORT_MINMAX(0x10,0xf0) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_PLAYER(2) PORT_REVERSE
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_INCLUDE( atarijsa_ii )		/* audio board port */
+	PORT_INCLUDE( atarijsa_ii )     /* audio board port */
 INPUT_PORTS_END
 
 
@@ -387,15 +372,15 @@ static const gfx_layout pfmolayout =
 
 
 static GFXDECODE_START( eprom )
-	GFXDECODE_ENTRY( "gfx1", 0, pfmolayout,  256, 32 )	/* sprites & playfield */
-	GFXDECODE_ENTRY( "gfx2", 0, anlayout,      0, 64 )	/* characters 8x8 */
+	GFXDECODE_ENTRY( "gfx1", 0, pfmolayout,  256, 32 )  /* sprites & playfield */
+	GFXDECODE_ENTRY( "gfx2", 0, anlayout,      0, 64 )  /* characters 8x8 */
 GFXDECODE_END
 
 
 static GFXDECODE_START( guts )
-	GFXDECODE_ENTRY( "gfx1", 0, pfmolayout,  256, 32 )	/* sprites */
-	GFXDECODE_ENTRY( "gfx2", 0, anlayout,      0, 64 )	/* characters 8x8 */
-	GFXDECODE_ENTRY( "gfx3", 0, pfmolayout,  256, 32 )	/* playfield */
+	GFXDECODE_ENTRY( "gfx1", 0, pfmolayout,  256, 32 )  /* sprites */
+	GFXDECODE_ENTRY( "gfx2", 0, anlayout,      0, 64 )  /* characters 8x8 */
+	GFXDECODE_ENTRY( "gfx3", 0, pfmolayout,  256, 32 )  /* playfield */
 GFXDECODE_END
 
 
@@ -411,15 +396,14 @@ static MACHINE_CONFIG_START( eprom, eprom_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, ATARI_CLOCK_14MHz/2)
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT("screen", atarigen_video_int_gen)
+	MCFG_DEVICE_VBLANK_INT_DRIVER("screen", atarigen_state, video_int_gen)
 
 	MCFG_CPU_ADD("extra", M68000, ATARI_CLOCK_14MHz/2)
 	MCFG_CPU_PROGRAM_MAP(extra_map)
 
 	MCFG_QUANTUM_TIME(attotime::from_hz(6000))
 
-	MCFG_MACHINE_START(eprom)
-	MCFG_MACHINE_RESET(eprom)
+	MCFG_MACHINE_RESET_OVERRIDE(eprom_state,eprom)
 	MCFG_NVRAM_ADD_1FILL("eeprom")
 
 	/* video hardware */
@@ -428,13 +412,12 @@ static MACHINE_CONFIG_START( eprom, eprom_state )
 	MCFG_PALETTE_LENGTH(2048)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	/* note: these parameters are from published specs, not derived */
 	/* the board uses a SYNGEN chip to generate video signals */
 	MCFG_SCREEN_RAW_PARAMS(ATARI_CLOCK_14MHz/2, 456, 0, 336, 262, 0, 240)
-	MCFG_SCREEN_UPDATE(eprom)
+	MCFG_SCREEN_UPDATE_DRIVER(eprom_state, screen_update_eprom)
 
-	MCFG_VIDEO_START(eprom)
+	MCFG_VIDEO_START_OVERRIDE(eprom_state,eprom)
 
 	/* sound hardware */
 	MCFG_FRAGMENT_ADD(jsa_i_mono_speech)
@@ -446,12 +429,11 @@ static MACHINE_CONFIG_START( klaxp, eprom_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, ATARI_CLOCK_14MHz/2)
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT("screen", atarigen_video_int_gen)
+	MCFG_DEVICE_VBLANK_INT_DRIVER("screen", atarigen_state, video_int_gen)
 
 	MCFG_QUANTUM_TIME(attotime::from_hz(600))
 
-	MCFG_MACHINE_START(eprom)
-	MCFG_MACHINE_RESET(eprom)
+	MCFG_MACHINE_RESET_OVERRIDE(eprom_state,eprom)
 	MCFG_NVRAM_ADD_1FILL("eeprom")
 
 	/* video hardware */
@@ -460,13 +442,12 @@ static MACHINE_CONFIG_START( klaxp, eprom_state )
 	MCFG_PALETTE_LENGTH(2048)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	/* note: these parameters are from published specs, not derived */
 	/* the board uses a SYNGEN chip to generate video signals */
 	MCFG_SCREEN_RAW_PARAMS(ATARI_CLOCK_14MHz/2, 456, 0, 336, 262, 0, 240)
-	MCFG_SCREEN_UPDATE(eprom)
+	MCFG_SCREEN_UPDATE_DRIVER(eprom_state, screen_update_eprom)
 
-	MCFG_VIDEO_START(eprom)
+	MCFG_VIDEO_START_OVERRIDE(eprom_state,eprom)
 
 	/* sound hardware */
 	MCFG_FRAGMENT_ADD(jsa_ii_mono)
@@ -478,12 +459,11 @@ static MACHINE_CONFIG_START( guts, eprom_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, ATARI_CLOCK_14MHz/2)
 	MCFG_CPU_PROGRAM_MAP(guts_map)
-	MCFG_CPU_VBLANK_INT("screen", atarigen_video_int_gen)
+	MCFG_DEVICE_VBLANK_INT_DRIVER("screen", atarigen_state, video_int_gen)
 
 	MCFG_QUANTUM_TIME(attotime::from_hz(600))
 
-	MCFG_MACHINE_START(eprom)
-	MCFG_MACHINE_RESET(eprom)
+	MCFG_MACHINE_RESET_OVERRIDE(eprom_state,eprom)
 	MCFG_NVRAM_ADD_1FILL("eeprom")
 
 	/* video hardware */
@@ -492,13 +472,12 @@ static MACHINE_CONFIG_START( guts, eprom_state )
 	MCFG_PALETTE_LENGTH(2048)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	/* note: these parameters are from published specs, not derived */
 	/* the board uses a SYNGEN chip to generate video signals */
 	MCFG_SCREEN_RAW_PARAMS(ATARI_CLOCK_14MHz/2, 456, 0, 336, 262, 0, 240)
-	MCFG_SCREEN_UPDATE(guts)
+	MCFG_SCREEN_UPDATE_DRIVER(eprom_state, screen_update_guts)
 
-	MCFG_VIDEO_START(guts)
+	MCFG_VIDEO_START_OVERRIDE(eprom_state,guts)
 
 	/* sound hardware */
 	MCFG_FRAGMENT_ADD(jsa_ii_mono)
@@ -513,7 +492,7 @@ MACHINE_CONFIG_END
  *************************************/
 
 ROM_START( eprom )
-	ROM_REGION( 0xa0000, "maincpu", 0 )	/* 10*64k for 68000 code */
+	ROM_REGION( 0xa0000, "maincpu", 0 ) /* 10*64k for 68000 code */
 	ROM_LOAD16_BYTE( "136069-3025.50a",   0x00000, 0x10000, CRC(08888dec) SHA1(a0a137828b9e1efbdbc0e5ddaf4d73d24b36948a) )
 	ROM_LOAD16_BYTE( "136069-3024.40a",   0x00001, 0x10000, CRC(29cb1e97) SHA1(ccf7024dccbd61983d61450f15c805422e4eee09) )
 	ROM_LOAD16_BYTE( "136069-4027.50b",   0x20000, 0x10000, CRC(702241c9) SHA1(cba27e92f64fd201c16aed6a8f2dc64c4f887e4f) )
@@ -523,12 +502,12 @@ ROM_START( eprom )
 	ROM_LOAD16_BYTE( "136069-2033.40k",   0x60000, 0x10000, CRC(130650f6) SHA1(bea7780d54a4e1f3e93f14494c82446a4bb48e19) )
 	ROM_LOAD16_BYTE( "136069-2032.50k",   0x60001, 0x10000, CRC(1da21ed8) SHA1(3b00e3cf5a25918c1f3158d8b2192158f77cb521) )
 
-	ROM_REGION( 0x80000, "extra", 0 )	/* 8*64k for 68000 code */
+	ROM_REGION( 0x80000, "extra", 0 )   /* 8*64k for 68000 code */
 	ROM_LOAD16_BYTE( "136069-2035.10s",   0x00000, 0x10000, CRC(deff6469) SHA1(2fe4d42d60965581579e8edad49b86fbd321d1db) )
 	ROM_LOAD16_BYTE( "136069-2034.10u",   0x00001, 0x10000, CRC(5d7afca2) SHA1(a37ecd2909049dd0b3ddbe602f0173c44b065f6f) )
 	ROM_COPY( "maincpu", 0x60000,  0x60000, 0x20000 )
 
-	ROM_REGION( 0x14000, "jsa", 0 )	/* 64k + 16k for 6502 code */
+	ROM_REGION( 0x14000, "jsa", 0 ) /* 64k + 16k for 6502 code */
 	ROM_LOAD( "136069-1040.7b",    0x10000, 0x4000, CRC(86e93695) SHA1(63ddab02df139dd41a8260c303798b2a550b9fe6) )
 	ROM_CONTINUE(             0x04000, 0xc000 )
 
@@ -564,7 +543,7 @@ ROM_END
 
 
 ROM_START( eprom2 )
-	ROM_REGION( 0xa0000, "maincpu", 0 )	/* 10*64k for 68000 code */
+	ROM_REGION( 0xa0000, "maincpu", 0 ) /* 10*64k for 68000 code */
 	ROM_LOAD16_BYTE( "136069-1025.50a",   0x00000, 0x10000, CRC(b0c9a476) SHA1(6d0edeeb9458e92191f6623307eddc9b2f830d4d) )
 	ROM_LOAD16_BYTE( "136069-1024.40a",   0x00001, 0x10000, CRC(4cc2c50c) SHA1(088908cc57b07d71a5d664674e38fa02c55bb4fc) )
 	ROM_LOAD16_BYTE( "136069-1027.50b",   0x20000, 0x10000, CRC(84f533ea) SHA1(c1da671be5149bff26acd19b14cd18db0df695b7) )
@@ -576,12 +555,12 @@ ROM_START( eprom2 )
 	ROM_LOAD16_BYTE( "136069-1037.50e",   0x80000, 0x10000, CRC(ad39a3dd) SHA1(00dcdcb30b7f8441df4216f9be4de15791ac5fc8) )
 	ROM_LOAD16_BYTE( "136069-1036.40e",   0x80001, 0x10000, CRC(34fc8895) SHA1(0c167c3a778e064a37517b52fd7a52f16d844f77) )
 
-	ROM_REGION( 0x80000, "extra", 0 )	/* 8*64k for 68000 code */
+	ROM_REGION( 0x80000, "extra", 0 )   /* 8*64k for 68000 code */
 	ROM_LOAD16_BYTE( "136069-1035.10s",    0x00000, 0x10000, CRC(ffeb5647) SHA1(fbd9217a96e51dd0c0cbc0ba9dfdaaa36fbc1ae9) )
 	ROM_LOAD16_BYTE( "136069-1034.10u",    0x00001, 0x10000, CRC(c68f58dd) SHA1(0ec300f32e67b710ac33efb60b8eccceb43faca6) )
 	ROM_COPY( "maincpu", 0x60000, 0x60000, 0x20000 )
 
-	ROM_REGION( 0x14000, "jsa", 0 )	/* 64k + 16k for 6502 code */
+	ROM_REGION( 0x14000, "jsa", 0 ) /* 64k + 16k for 6502 code */
 	ROM_LOAD( "136069-1040.7b",    0x10000, 0x4000, CRC(86e93695) SHA1(63ddab02df139dd41a8260c303798b2a550b9fe6) )
 	ROM_CONTINUE(             0x04000, 0xc000 )
 
@@ -617,11 +596,11 @@ ROM_END
 
 
 ROM_START( klaxp1 )
-	ROM_REGION( 0xa0000, "maincpu", 0 )	/* 10*64k for 68000 code */
+	ROM_REGION( 0xa0000, "maincpu", 0 ) /* 10*64k for 68000 code */
 	ROM_LOAD16_BYTE( "klax_ft1.50a",   0x00000, 0x10000, CRC(87ee72d1) SHA1(39ae6f8406f0768480bcc80d395a14d9c2c65dca) )
 	ROM_LOAD16_BYTE( "klax_ft1.40a",   0x00001, 0x10000, CRC(ba139fdb) SHA1(98a8ac5e0349b934f55d0d9de85abacd3fd0d77d) )
 
-	ROM_REGION( 0x14000, "jsa", 0 )	/* 64k + 16k for 6502 code */
+	ROM_REGION( 0x14000, "jsa", 0 ) /* 64k + 16k for 6502 code */
 	ROM_LOAD( "klaxsnd.10c",  0x10000, 0x4000, CRC(744734cb) SHA1(3630428d69ddd2a4d5dd76bb4ee9485c943129e9) )
 	ROM_CONTINUE(             0x04000, 0xc000 )
 
@@ -634,18 +613,18 @@ ROM_START( klaxp1 )
 	ROM_REGION( 0x04000, "gfx2", 0 )
 	ROM_LOAD( "klax125d",  0x00000, 0x04000, CRC(409d818e) SHA1(63dcde3ce87c1a9d5afef8089432c499cc70f8f0) )
 
-	ROM_REGION( 0x40000, "adpcm", 0 )	/* ADPCM data */
+	ROM_REGION( 0x40000, "adpcm", 0 )   /* ADPCM data */
 	ROM_LOAD( "klaxadp0.1f", 0x00000, 0x10000, CRC(ba1e864f) SHA1(7c45e9040701b54c8be398c6e5cdf9201dc37c17) )
 	ROM_LOAD( "klaxadp1.1e", 0x10000, 0x10000, CRC(dec9a5ac) SHA1(8039d946ac3613fa6193b557cc8775c81871831d) )
 ROM_END
 
 
 ROM_START( klaxp2 )
-	ROM_REGION( 0xa0000, "maincpu", 0 )	/* 10*64k for 68000 code */
+	ROM_REGION( 0xa0000, "maincpu", 0 ) /* 10*64k for 68000 code */
 	ROM_LOAD16_BYTE( "klax_ft2.50a",   0x00000, 0x10000, CRC(7d401937) SHA1(8db0560528a86b9cb01c4598a49694bd44b00dba) )
 	ROM_LOAD16_BYTE( "klax_ft2.40a",   0x00001, 0x10000, CRC(c5ca33a9) SHA1(c2e2948f987ba43f61c043baed06ffea8787be43) )
 
-	ROM_REGION( 0x14000, "jsa", 0 )	/* 64k + 16k for 6502 code */
+	ROM_REGION( 0x14000, "jsa", 0 ) /* 64k + 16k for 6502 code */
 	ROM_LOAD( "klaxsnd.10c",  0x10000, 0x4000, CRC(744734cb) SHA1(3630428d69ddd2a4d5dd76bb4ee9485c943129e9) )
 	ROM_CONTINUE(             0x04000, 0xc000 )
 
@@ -658,20 +637,20 @@ ROM_START( klaxp2 )
 	ROM_REGION( 0x04000, "gfx2", 0 )
 	ROM_LOAD( "klax125d",  0x00000, 0x04000, CRC(409d818e) SHA1(63dcde3ce87c1a9d5afef8089432c499cc70f8f0) )
 
-	ROM_REGION( 0x40000, "adpcm", 0 )	/* ADPCM data */
+	ROM_REGION( 0x40000, "adpcm", 0 )   /* ADPCM data */
 	ROM_LOAD( "klaxadp0.1f", 0x00000, 0x10000, CRC(ba1e864f) SHA1(7c45e9040701b54c8be398c6e5cdf9201dc37c17) )
 	ROM_LOAD( "klaxadp1.1e", 0x10000, 0x10000, CRC(dec9a5ac) SHA1(8039d946ac3613fa6193b557cc8775c81871831d) )
 ROM_END
 
 
 ROM_START( guts )
-	ROM_REGION( 0xa0000, "maincpu", 0 )	/* 10*64k for 68000 code */
+	ROM_REGION( 0xa0000, "maincpu", 0 ) /* 10*64k for 68000 code */
 	ROM_LOAD16_BYTE( "guts-hi0.50a", 0x00000, 0x10000, CRC(3afca24a) SHA1(4910c958ac2124de13d4069420fb2cfd18b12cec) )
 	ROM_LOAD16_BYTE( "guts-lo0.40a", 0x00001, 0x10000, CRC(ce86cf23) SHA1(28504e2e8dcf1eaa96364eed1faf00fec9e98788) )
 	ROM_LOAD16_BYTE( "guts-hi1.50b", 0x20000, 0x10000, CRC(a231f65d) SHA1(9c8ccd265ed0e9f6d7181d216ed41a0c5cc0cd5f) )
 	ROM_LOAD16_BYTE( "guts-lo1.40b", 0x20001, 0x10000, CRC(dbdd4910) SHA1(9ca22321398b6397902aa99a3ef46f1a78ccc438) )
 
-	ROM_REGION( 0x14000, "jsa", 0 )	/* 64k + 16k for 6502 code */
+	ROM_REGION( 0x14000, "jsa", 0 ) /* 64k + 16k for 6502 code */
 	ROM_LOAD( "guts-snd.10c", 0x10000, 0x4000, CRC(9fe065d7) SHA1(0d202af3d6c62fdcfc3bb2ea95bbf4e37c0d43cf) )
 	ROM_CONTINUE(             0x04000, 0xc000 )
 
@@ -710,7 +689,7 @@ ROM_START( guts )
 	ROM_LOAD( "guts-pfd.bin", 0xd0000, 0x10000, CRC(979af5b2) SHA1(574a41552eb641668841cf01aeed442ccd3bc8e5) )
 	ROM_LOAD( "guts-pfe.bin", 0xe0000, 0x10000, CRC(bf384e4d) SHA1(c4810b5a3ee754b169efa01f06941a02b50c53a0) )
 
-	ROM_REGION( 0x40000, "adpcm", 0 )	/* ADPCM data */
+	ROM_REGION( 0x40000, "adpcm", 0 )   /* ADPCM data */
 	ROM_LOAD( "guts-adpcm0.1f", 0x00000, 0x10000, CRC(92e9c35d) SHA1(dcc724f915e113bc34f499af9fd7c8ebb6d8ba98) )
 	ROM_LOAD( "guts-adpcm1.1e", 0x10000, 0x10000, CRC(0afddd3a) SHA1(e1a43825ad02325a64869ec8048c8176da01b286) )
 ROM_END
@@ -723,27 +702,26 @@ ROM_END
  *
  *************************************/
 
-static DRIVER_INIT( eprom )
+DRIVER_INIT_MEMBER(eprom_state,eprom)
 {
-	eprom_state *state = machine.driver_data<eprom_state>();
 
-	atarijsa_init(machine, "260010", 0x0002);
+	atarijsa_init(machine(), "260010", 0x0002);
 
 	/* install CPU synchronization handlers */
-	state->m_sync_data = machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_readwrite_handler(0x16cc00, 0x16cc01, FUNC(sync_r), FUNC(sync_w));
-	state->m_sync_data = machine.device("extra")->memory().space(AS_PROGRAM)->install_legacy_readwrite_handler(0x16cc00, 0x16cc01, FUNC(sync_r), FUNC(sync_w));
+	m_sync_data = machine().device("maincpu")->memory().space(AS_PROGRAM).install_readwrite_handler(0x16cc00, 0x16cc01, read16_delegate(FUNC(eprom_state::sync_r),this), write16_delegate(FUNC(eprom_state::sync_w),this));
+	m_sync_data = machine().device("extra")->memory().space(AS_PROGRAM).install_readwrite_handler(0x16cc00, 0x16cc01, read16_delegate(FUNC(eprom_state::sync_r),this), write16_delegate(FUNC(eprom_state::sync_w),this));
 }
 
 
-static DRIVER_INIT( klaxp )
+DRIVER_INIT_MEMBER(eprom_state,klaxp)
 {
-	atarijsa_init(machine, "260010", 0x0002);
+	atarijsa_init(machine(), "260010", 0x0002);
 }
 
 
-static DRIVER_INIT( guts )
+DRIVER_INIT_MEMBER(eprom_state,guts)
 {
-	atarijsa_init(machine, "260010", 0x0002);
+	atarijsa_init(machine(), "260010", 0x0002);
 }
 
 
@@ -754,8 +732,8 @@ static DRIVER_INIT( guts )
  *
  *************************************/
 
-GAME( 1989, eprom,  0,     eprom, eprom, eprom, ROT0, "Atari Games", "Escape from the Planet of the Robot Monsters (set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1989, eprom2, eprom, eprom, eprom, eprom, ROT0, "Atari Games", "Escape from the Planet of the Robot Monsters (set 2)", GAME_SUPPORTS_SAVE )
-GAME( 1989, klaxp1, klax,  klaxp, klaxp, klaxp, ROT0, "Atari Games", "Klax (prototype set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1989, klaxp2, klax,  klaxp, klaxp, klaxp, ROT0, "Atari Games", "Klax (prototype set 2)", GAME_SUPPORTS_SAVE )
-GAME( 1989, guts,   0,     guts,  guts,  guts,  ROT0, "Atari Games", "Guts n' Glory (prototype)", 0 )
+GAME( 1989, eprom,  0,     eprom, eprom, eprom_state, eprom, ROT0, "Atari Games", "Escape from the Planet of the Robot Monsters (set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1989, eprom2, eprom, eprom, eprom, eprom_state, eprom, ROT0, "Atari Games", "Escape from the Planet of the Robot Monsters (set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1989, klaxp1, klax,  klaxp, klaxp, eprom_state, klaxp, ROT0, "Atari Games", "Klax (prototype set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1989, klaxp2, klax,  klaxp, klaxp, eprom_state, klaxp, ROT0, "Atari Games", "Klax (prototype set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1989, guts,   0,     guts,  guts, eprom_state,  guts,  ROT0, "Atari Games", "Guts n' Glory (prototype)", 0 )

@@ -1,37 +1,45 @@
 class popeye_state : public driver_device
 {
 public:
-	popeye_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	popeye_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_background_pos(*this, "background_pos"),
+		m_palettebank(*this, "palettebank"),
+		m_spriteram(*this, "spriteram"),
+		m_videoram(*this, "videoram"),
+		m_colorram(*this, "colorram"){ }
 
 	UINT8 m_prot0;
 	UINT8 m_prot1;
 	UINT8 m_prot_shift;
 	int m_dswbit;
-	UINT8 *m_videoram;
-	UINT8 *m_colorram;
-	UINT8 *m_background_pos;
-	UINT8 *m_palettebank;
+	required_shared_ptr<UINT8> m_background_pos;
+	required_shared_ptr<UINT8> m_palettebank;
+	required_shared_ptr<UINT8> m_spriteram;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_colorram;
 	UINT8 *m_bitmapram;
-	bitmap_t *m_tmpbitmap2;
+	bitmap_ind16 *m_tmpbitmap2;
 	UINT8 m_invertmask;
 	UINT8 m_bitmap_type;
 	tilemap_t *m_fg_tilemap;
 	UINT8 m_lastflip;
-	UINT8 *m_spriteram;
-	size_t m_spriteram_size;
+
+	DECLARE_READ8_MEMBER(protection_r);
+	DECLARE_WRITE8_MEMBER(protection_w);
+	DECLARE_WRITE8_MEMBER(popeye_videoram_w);
+	DECLARE_WRITE8_MEMBER(popeye_colorram_w);
+	DECLARE_WRITE8_MEMBER(popeye_bitmap_w);
+	DECLARE_WRITE8_MEMBER(skyskipr_bitmap_w);
+	DECLARE_WRITE8_MEMBER(popeye_portB_w);
+	DECLARE_READ8_MEMBER(popeye_portA_r);
+	DECLARE_DRIVER_INIT(skyskipr);
+	DECLARE_DRIVER_INIT(popeye);
+	TILE_GET_INFO_MEMBER(get_fg_tile_info);
+	virtual void video_start();
+	virtual void palette_init();
+	DECLARE_VIDEO_START(popeye);
+	DECLARE_PALETTE_INIT(popeyebl);
+	UINT32 screen_update_popeye(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(popeye_interrupt);
 };
-
-
-/*----------- defined in video/popeye.c -----------*/
-
-WRITE8_HANDLER( popeye_videoram_w );
-WRITE8_HANDLER( popeye_colorram_w );
-WRITE8_HANDLER( popeye_bitmap_w );
-WRITE8_HANDLER( skyskipr_bitmap_w );
-
-PALETTE_INIT( popeye );
-PALETTE_INIT( popeyebl );
-VIDEO_START( skyskipr );
-VIDEO_START( popeye );
-SCREEN_UPDATE( popeye );

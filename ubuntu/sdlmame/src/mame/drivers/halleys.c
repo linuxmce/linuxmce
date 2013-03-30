@@ -19,6 +19,8 @@ Halley's Comet, 1986 Taito
       instead of costly bitmaps.
     - Ben Bero Beh has collision problems with the falling fireballs and a minor
       priority glitch with the "Elevator Action" baddies.
+    - IRQ system needs a complete rewrite
+    - De-achoize the blitter code
 
     * Halley's Comet's undocumented DIP switches only work if the player1 start button
       is depressed during boot-up.
@@ -160,7 +162,6 @@ Video sync   6 F   Video sync                 Post   6 F   Post
 #include "emu.h"
 #include "cpu/z80/z80.h"
 #include "includes/taitoipt.h"
-#include "deprecat.h"
 #include "cpu/m6809/m6809.h"
 #include "sound/ay8910.h"
 
@@ -208,8 +209,10 @@ Video sync   6 F   Video sync                 Post   6 F   Post
 class halleys_state : public driver_device
 {
 public:
-	halleys_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	halleys_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_blitter_ram(*this, "blitter_ram"),
+		m_io_ram(*this, "io_ram"){ }
 
 	UINT16 *m_render_layer[MAX_LAYERS];
 	UINT8 m_sound_fifo[MAX_SOUNDS];
@@ -224,10 +227,8 @@ public:
 	UINT32 *m_alpha_table;
 	UINT8 *m_cpu1_base;
 	UINT8 *m_gfx1_base;
-	UINT8 *m_blitter_ram;
-	UINT8 *m_io_ram;
-	size_t m_blitter_ramsize;
-	size_t m_io_ramsize;
+	required_shared_ptr<UINT8> m_blitter_ram;
+	required_shared_ptr<UINT8> m_io_ram;
 	int m_game_id;
 	int m_blitter_busy;
 	int m_collision_count;
@@ -242,6 +243,32 @@ public:
 	emu_timer *m_blitter_reset_timer;
 	offs_t m_collision_detection;
 	int m_latch_delay;
+	DECLARE_WRITE8_MEMBER(bgtile_w);
+	DECLARE_READ8_MEMBER(blitter_status_r);
+	DECLARE_READ8_MEMBER(blitter_r);
+	DECLARE_WRITE8_MEMBER(blitter_w);
+	DECLARE_READ8_MEMBER(collision_id_r);
+	DECLARE_WRITE8_MEMBER(halleys_paletteram_IIRRGGBB_w);
+	DECLARE_READ8_MEMBER(zero_r);
+	DECLARE_READ8_MEMBER(debug_r);
+	DECLARE_READ8_MEMBER(vector_r);
+	DECLARE_WRITE8_MEMBER(firq_ack_w);
+	DECLARE_WRITE8_MEMBER(soundcommand_w);
+	DECLARE_READ8_MEMBER(coin_lockout_r);
+	DECLARE_READ8_MEMBER(io_mirror_r);
+	void blit(int offset);
+	DECLARE_WRITE8_MEMBER(sndnmi_msk_w);
+	DECLARE_DRIVER_INIT(halley87);
+	DECLARE_DRIVER_INIT(benberob);
+	DECLARE_DRIVER_INIT(halleys);
+	virtual void machine_reset();
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_halleys(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_benberob(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	TIMER_CALLBACK_MEMBER(blitter_reset);
+	TIMER_DEVICE_CALLBACK_MEMBER(halleys_scanline);
+	TIMER_DEVICE_CALLBACK_MEMBER(benberob_scanline);
 };
 
 
@@ -249,7 +276,7 @@ public:
 //**************************************************************************
 // MB1551x Blitter Functions
 
-static void blit(halleys_state *state, int offset)
+void halleys_state::blit(int offset)
 {
 /*
     The render layers can be converted to standard MAME bitmaps but
@@ -333,7 +360,7 @@ static void blit(halleys_state *state, int offset)
 	UINT16 ax; UINT8 al, ah;      // partial regs
 
 
-	param = state->m_blitter_ram + offset;
+	param = m_blitter_ram + offset;
 
 
 #if HALLEYS_DEBUG
@@ -355,11 +382,11 @@ if (0) {
 	// update sprite status
 	layer = (code>>3 & 2) | (code>>7 & 1);
 	offset >>= 4;
-	status = (stptr) ? state->m_cpu1_base[stptr] : ACTIVE;
+	status = (stptr) ? m_cpu1_base[stptr] : ACTIVE;
 	flags = mode;
 	group = mode & GROUP;
 	command = code & COMMAND;
-	if (state->m_game_id == GAME_HALLEYS)
+	if (m_game_id == GAME_HALLEYS)
 	{
 		if (!layer) flags |= PPCD_ON;
 		if (offset >= HALLEYS_SPLIT) flags |= AD_HIGH; else
@@ -387,7 +414,7 @@ if (0) {
 	src1 &= 0x3fff;
 	src2 &= 0x3fff;
 	bank = ((code & BANKBIT0) | (color & BANKBIT1)) << 8;
-	pal_ptr = state->m_internal_palette;
+	pal_ptr = m_internal_palette;
 
 
 	// the crossroad of fate
@@ -403,7 +430,7 @@ if (0) {
 
 	// clip objects against the visible area
 	yclip = y; xclip = x; hclip = h; wclip = w;
-	src_yskip = src_xskip = dst_skip = 0;
+	src_yskip = src_xskip = 0;
 	if (yclip < VIS_MINY) { src_yskip = VIS_MINY - yclip; yclip = VIS_MINY; hclip -= src_yskip; }
 	if (yclip + hclip > VIS_MAXY+1) { hclip = VIS_MAXY+1 - yclip; }
 	if (xclip < VIS_MINX) { src_xskip = VIS_MINX - xclip; xclip = VIS_MINX; wclip -= src_xskip; }
@@ -434,8 +461,8 @@ if (0) {
 
 
 	// calculate entry points and loop constants
-	src1_ptr = state->m_gfx_plane02 + ((bank + src1)<<3) + eax;
-	src2_ptr = state->m_gfx_plane13 + ((bank + src2)<<3) + eax;
+	src1_ptr = m_gfx_plane02 + ((bank + src1)<<3) + eax;
+	src2_ptr = m_gfx_plane13 + ((bank + src2)<<3) + eax;
 
 	if (!(flags & (S1_IDLE | S2_IDLE)))
 	{
@@ -445,7 +472,7 @@ if (0) {
 	}
 	else src_dy = src_dx = 0;
 
-	dst_ptr = state->m_render_layer[layer] + dst_skip;
+	dst_ptr = m_render_layer[layer] + dst_skip;
 
 
 	// look up pen values and set rendering flags
@@ -555,11 +582,11 @@ if (0) {
 		// update collision list if object collided with the other group
 		if (status & ACTIVE && ax & SP_COLLD)
 		{
-			state->m_collision_list[state->m_collision_count & (MAX_SPRITES-1)] = offset;
-			state->m_collision_count++;
+			m_collision_list[m_collision_count & (MAX_SPRITES-1)] = offset;
+			m_collision_count++;
 
 			#if HALLEYS_DEBUG
-				popmessage("ID:%02x CC:%3d", offset, state->m_collision_count);
+				popmessage("ID:%02x CC:%3d", offset, m_collision_count);
 			#endif
 		}
 
@@ -704,10 +731,10 @@ COMMAND_MODE:
 	if (flags & S1_IDLE) src_dx = 0; else src_dx = 1;
 	if (flags & S1_REV ) src_dx = -src_dx;
 
-	src_base = state->m_gfx1_base + bank;
+	src_base = m_gfx1_base + bank;
 
 	if (command == STARPASS1 || command == STARPASS2) layer = (layer & 1) + 4;
-	dst_base = state->m_render_layer[layer];
+	dst_base = m_render_layer[layer];
 
 
 //--------------------------------------------------------------------------
@@ -731,17 +758,17 @@ COMMAND_MODE:
 		if (!command && y == 0xff && h == 1)
 		{
 			y = 0; h = SCREEN_HEIGHT;
-			dst_base = state->m_render_layer[(layer&1)+4];
+			dst_base = m_render_layer[(layer&1)+4];
 			WARP_WIPE_COMMON
 
-			state->m_stars_enabled = ~layer & 1;
+			m_stars_enabled = ~layer & 1;
 		}
 
 		// wipe background and chain-wipe corresponding sprite layer when the command is zero
 		else
 		{
 			WARP_WIPE_COMMON
-			if (!command) { dst_base = state->m_render_layer[layer&1]; WARP_WIPE_COMMON }
+			if (!command) { dst_base = m_render_layer[layer&1]; WARP_WIPE_COMMON }
 		}
 
 	} else
@@ -752,21 +779,21 @@ COMMAND_MODE:
 	if (command == STARPASS1 && flags & COLOR_ON)
 	{
 		/*
-            Each star map is generated by two data sets pointed by the second source
-            address. The first 256-byte set has scattered bits to reflect the star
-            population while the second 256-byte set appears to have random values.
-            When the game runs the the star fields are updated a small portion at a
-            time by a third data set containing gradient patterns which may indicate
-            gray shades or alpha levels.
+		    Each star map is generated by two data sets pointed by the second source
+		    address. The first 256-byte set has scattered bits to reflect the star
+		    population while the second 256-byte set appears to have random values.
+		    When the game runs the the star fields are updated a small portion at a
+		    time by a third data set containing gradient patterns which may indicate
+		    gray shades or alpha levels.
 
-            Halley's Comet draws and clears the two star fields as if they are
-            independent from the backgrounds, making it a total of four scrollable
-            layers. However, only two pairs of scroll registers are in use and they
-            affect the stars and the backgrounds together - possibly afterthoughts
-            on the original Ben Bero Beh hardware.
+		    Halley's Comet draws and clears the two star fields as if they are
+		    independent from the backgrounds, making it a total of four scrollable
+		    layers. However, only two pairs of scroll registers are in use and they
+		    affect the stars and the backgrounds together - possibly afterthoughts
+		    on the original Ben Bero Beh hardware.
 
-            This algorithm is based on speculation and deemed inaccurate.
-        */
+		    This algorithm is based on speculation and deemed inaccurate.
+		*/
 		#define RORB(R,N) ( ((R>>N)|(R<<(8-N))) & 0xff )
 		#define C2S(X,Y,O) ( (((Y+(O>>4))&YMASK)<<SCREEN_WIDTH_L2) + ((X+(O&0xf))&XMASK) )
 
@@ -793,7 +820,7 @@ COMMAND_MODE:
 			}
 		}
 
-		state->m_stars_enabled = layer & 1;
+		m_stars_enabled = layer & 1;
 
 		#undef RORB
 		#undef C2S
@@ -834,21 +861,21 @@ COMMAND_MODE:
 	if (command == TILEPASS1 && flags & COLOR_ON)
 	{
 		/*
-            Tile positioning in this mode is very cryptic and different from
-            others. The coordinate system seems banked and influenced by layer
-            number and whether the blit code is written to the upper or lower
-            off-screen area. These conditions may also imply height-doubling,
-            Y-flipping and draw-from-bottom attributes.
+		    Tile positioning in this mode is very cryptic and different from
+		    others. The coordinate system seems banked and influenced by layer
+		    number and whether the blit code is written to the upper or lower
+		    off-screen area. These conditions may also imply height-doubling,
+		    Y-flipping and draw-from-bottom attributes.
 
-            Pixel and color information is embedded but the game draws a
-            second pass at the same location with zeroes. In addition the
-            X and Y values passed to the blitter do not reflect the tiles true
-            locations. For example, tiles near the top or bottom of the screen
-            are positioned resonably close but those in the middle are oddly
-            shifted toward either side. The tiles also resemble predefined
-            patterns but I don't know if there are supposed to be lookup tables
-            in ROM or hard-wired to the blitter chips.
-        */
+		    Pixel and color information is embedded but the game draws a
+		    second pass at the same location with zeroes. In addition the
+		    X and Y values passed to the blitter do not reflect the tiles true
+		    locations. For example, tiles near the top or bottom of the screen
+		    are positioned resonably close but those in the middle are oddly
+		    shifted toward either side. The tiles also resemble predefined
+		    patterns but I don't know if there are supposed to be lookup tables
+		    in ROM or hard-wired to the blitter chips.
+		*/
 		if (y & 1) x -= 8;
 		y = tyremap[y] << 3;
 
@@ -861,7 +888,7 @@ COMMAND_MODE:
 		if (flags & IGNORE_0) { w=8; h=8; WARP_WIPE_COMMON }
 
 		src1_ptr = src_base + src1;
-		dst_ptr = state->m_render_layer[2] + (y << SCREEN_WIDTH_L2);
+		dst_ptr = m_render_layer[2] + (y << SCREEN_WIDTH_L2);
 
 		src1_ptr += 8;
 		edx = -8;
@@ -973,14 +1000,13 @@ COMMAND_MODE:
 
 
 // draws Ben Bero Beh's color backdrop(verification required)
-static WRITE8_HANDLER( bgtile_w )
+WRITE8_MEMBER(halleys_state::bgtile_w)
 {
-	halleys_state *state = space->machine().driver_data<halleys_state>();
 	int yskip, xskip, ecx;
 	UINT16 *edi;
 	UINT16 ax;
 
-	state->m_cpu1_base[0x1f00+offset] = data;
+	m_cpu1_base[0x1f00+offset] = data;
 	offset -= 0x18;
 
 	if (offset >= 191) return;
@@ -991,7 +1017,7 @@ static WRITE8_HANDLER( bgtile_w )
 	yskip = yskip * 48 + 24;
 	xskip = xskip * 5 + 2;
 
-	edi = state->m_render_layer[2] + (yskip<<SCREEN_WIDTH_L2) + xskip + (48<<SCREEN_WIDTH_L2);
+	edi = m_render_layer[2] + (yskip<<SCREEN_WIDTH_L2) + xskip + (48<<SCREEN_WIDTH_L2);
 	ecx = -(48<<SCREEN_WIDTH_L2);
 	ax = (UINT16)data | BG_RGB;
 
@@ -999,61 +1025,56 @@ static WRITE8_HANDLER( bgtile_w )
 }
 
 
-static READ8_HANDLER( blitter_status_r )
+READ8_MEMBER(halleys_state::blitter_status_r)
 {
-	halleys_state *state = space->machine().driver_data<halleys_state>();
-	if (state->m_game_id==GAME_HALLEYS && cpu_get_pc(&space->device())==0x8017) return(0x55); // HACK: trick SRAM test on startup
+	if (m_game_id==GAME_HALLEYS && space.device().safe_pc()==0x8017) return(0x55); // HACK: trick SRAM test on startup
 
 	return(0);
 }
 
 
-static READ8_HANDLER( blitter_r )
+READ8_MEMBER(halleys_state::blitter_r)
 {
-	halleys_state *state = space->machine().driver_data<halleys_state>();
 	int i = offset & 0xf;
 
 	if (i==0 || i==4) return(1);
 
-	return(state->m_blitter_ram[offset]);
+	return(m_blitter_ram[offset]);
 }
 
 
-static TIMER_CALLBACK( blitter_reset )
+TIMER_CALLBACK_MEMBER(halleys_state::blitter_reset)
 {
-	halleys_state *state = machine.driver_data<halleys_state>();
-	state->m_blitter_busy = 0;
+	m_blitter_busy = 0;
 }
 
 
-static WRITE8_HANDLER( blitter_w )
+WRITE8_MEMBER(halleys_state::blitter_w)
 {
-	halleys_state *state = space->machine().driver_data<halleys_state>();
 	int i = offset & 0xf;
 
-	state->m_blitter_ram[offset] = data;
+	m_blitter_ram[offset] = data;
 
-	if (i==0) blit(state, offset);
+	if (i==0) blit(offset);
 
-	if (state->m_game_id == GAME_BENBEROB)
+	if (m_game_id == GAME_BENBEROB)
 	{
 		if (i==0 || (i==4 && !data))
 		{
-			state->m_blitter_busy = 0;
-			if (state->m_firq_level) cputag_set_input_line(space->machine(), "maincpu", M6809_FIRQ_LINE, ASSERT_LINE); // make up delayed FIRQ's
+			m_blitter_busy = 0;
+			if (m_firq_level) machine().device("maincpu")->execute().set_input_line(M6809_FIRQ_LINE, ASSERT_LINE); // make up delayed FIRQ's
 		}
 		else
 		{
-			state->m_blitter_busy = 1;
-			state->m_blitter_reset_timer->adjust(downcast<cpu_device *>(&space->device())->cycles_to_attotime(100)); // free blitter if no updates in 100 cycles
+			m_blitter_busy = 1;
+			m_blitter_reset_timer->adjust(downcast<cpu_device *>(&space.device())->cycles_to_attotime(100)); // free blitter if no updates in 100 cycles
 		}
 	}
 }
 
 
-static READ8_HANDLER( collision_id_r )
+READ8_MEMBER(halleys_state::collision_id_r)
 {
-	halleys_state *state = space->machine().driver_data<halleys_state>();
 /*
     Collision detection abstract:
 
@@ -1076,30 +1097,29 @@ static READ8_HANDLER( collision_id_r )
     UPDATE: re-implemented pixel collision to accompany the hack method.
 */
 
-	if (state->m_game_id==GAME_HALLEYS && cpu_get_pc(&space->device())==state->m_collision_detection) // HACK: collision detection bypass
+	if (m_game_id==GAME_HALLEYS && space.device().safe_pc()==m_collision_detection) // HACK: collision detection bypass
 	{
-		if (state->m_collision_count) { state->m_collision_count--; return(state->m_collision_list[state->m_collision_count]); }
+		if (m_collision_count) { m_collision_count--; return(m_collision_list[m_collision_count]); }
 
 		return(0);
 	}
 
-	return(state->m_io_ram[0x66]);
+	return(m_io_ram[0x66]);
 }
 
 
 //**************************************************************************
 // Video Initializations and Updates
 
-static PALETTE_INIT( halleys )
+void halleys_state::palette_init()
 {
-	halleys_state *state = machine.driver_data<halleys_state>();
 	UINT32 d, r, g, b, i, j, count;
-	UINT32 *pal_ptr = state->m_internal_palette;
+	UINT32 *pal_ptr = m_internal_palette;
 
 	for (count=0; count<1024; count++)
 	{
 		pal_ptr[count] = 0;
-		palette_set_color(machine, count, MAKE_RGB(0, 0, 0));
+		palette_set_color(machine(), count, MAKE_RGB(0, 0, 0));
 	}
 
 	// 00-31: palette RAM(ffc0-ffdf)
@@ -1120,7 +1140,7 @@ static PALETTE_INIT( halleys )
 			g = r + count + BG_MONO;
 			r += i;
 			pal_ptr[g] = d;
-			palette_set_color(machine, g, MAKE_RGB(r, r, r));
+			palette_set_color(machine(), g, MAKE_RGB(r, r, r));
 		}
 	}
 
@@ -1135,7 +1155,7 @@ static PALETTE_INIT( halleys )
 		g = d    & 0x0c; g |= i;
 		b = d<<2 & 0x0c; b |= i;
 
-		palette_set_color_rgb(machine, j, pal4bit(r), pal4bit(g), pal4bit(b));
+		palette_set_color_rgb(machine(), j, pal4bit(r), pal4bit(g), pal4bit(b));
 	}
 }
 
@@ -1146,6 +1166,7 @@ static void halleys_decode_rgb(running_machine &machine, UINT32 *r, UINT32 *g, U
         00 00 00 00 c5 0b f3 17 fd cf 1f ef df bf 7f ff
         00 00 00 00 01 61 29 26 0b f5 e2 17 57 fb cf f7
 */
+	halleys_state *state = machine.driver_data<halleys_state>();
 	int latch1_273, latch2_273;
 	UINT8 *sram_189;
 	UINT8 *prom_6330;
@@ -1153,10 +1174,10 @@ static void halleys_decode_rgb(running_machine &machine, UINT32 *r, UINT32 *g, U
 	int bit0, bit1, bit2, bit3, bit4;
 
 	// the four 16x4-bit SN74S189 SRAM chips are assumed be the game's 32-byte palette RAM
-	sram_189 = machine.generic.paletteram.u8;
+	sram_189 = state->m_generic_paletteram_8;
 
 	// each of the three 32-byte 6330 PROM is wired to an RGB component output
-	prom_6330 = machine.region("proms")->base();
+	prom_6330 = state->memregion("proms")->base();
 
 	// latch1 holds 8 bits from the selected palette RAM address
 	latch1_273 = sram_189[addr];
@@ -1184,13 +1205,12 @@ static void halleys_decode_rgb(running_machine &machine, UINT32 *r, UINT32 *g, U
 	*b = prom_6330[0x40 + (bit0|bit1|bit2|bit3|bit4)];
 }
 
-static WRITE8_HANDLER( halleys_paletteram_IIRRGGBB_w )
+WRITE8_MEMBER(halleys_state::halleys_paletteram_IIRRGGBB_w)
 {
-	halleys_state *state = space->machine().driver_data<halleys_state>();
 	UINT32 d, r, g, b, i, j;
-	UINT32 *pal_ptr = state->m_internal_palette;
+	UINT32 *pal_ptr = m_internal_palette;
 
-	space->machine().generic.paletteram.u8[offset] = data;
+	m_generic_paletteram_8[offset] = data;
 	d = (UINT32)data;
 	j = d | BG_RGB;
 	pal_ptr[offset] = j;
@@ -1204,19 +1224,18 @@ static WRITE8_HANDLER( halleys_paletteram_IIRRGGBB_w )
 	g = d    & 0x0c; g |= i;  g = g<<4 | g;
 	b = d<<2 & 0x0c; b |= i;  b = b<<4 | b;
 
-	palette_set_color(space->machine(), offset, MAKE_RGB(r, g, b));
-	palette_set_color(space->machine(), offset+SP_2BACK, MAKE_RGB(r, g, b));
-	palette_set_color(space->machine(), offset+SP_ALPHA, MAKE_RGB(r, g, b));
-	palette_set_color(space->machine(), offset+SP_COLLD, MAKE_RGB(r, g, b));
+	palette_set_color(machine(), offset, MAKE_RGB(r, g, b));
+	palette_set_color(machine(), offset+SP_2BACK, MAKE_RGB(r, g, b));
+	palette_set_color(machine(), offset+SP_ALPHA, MAKE_RGB(r, g, b));
+	palette_set_color(machine(), offset+SP_COLLD, MAKE_RGB(r, g, b));
 
-	halleys_decode_rgb(space->machine(), &r, &g, &b, offset, 0);
-	palette_set_color(space->machine(), offset+0x20, MAKE_RGB(r, g, b));
+	halleys_decode_rgb(machine(), &r, &g, &b, offset, 0);
+	palette_set_color(machine(), offset+0x20, MAKE_RGB(r, g, b));
 }
 
 
-static VIDEO_START( halleys )
+void halleys_state::video_start()
 {
-	halleys_state *state = machine.driver_data<halleys_state>();
 #define HALLEYS_Y0  0x8e
 #define HALLEYS_X0  0x9a
 #define HALLEYS_Y1  0xa2
@@ -1225,10 +1244,10 @@ static VIDEO_START( halleys )
 	int dst, src, c;
 
 	// create short cuts to scroll registers
-	state->m_scrolly0 = state->m_io_ram + HALLEYS_Y0;
-	state->m_scrollx0 = state->m_io_ram + HALLEYS_X0;
-	state->m_scrolly1 = state->m_io_ram + HALLEYS_Y1;
-	state->m_scrollx1 = state->m_io_ram + HALLEYS_X1;
+	m_scrolly0 = m_io_ram + HALLEYS_Y0;
+	m_scrollx0 = m_io_ram + HALLEYS_X0;
+	m_scrolly1 = m_io_ram + HALLEYS_Y1;
+	m_scrollx1 = m_io_ram + HALLEYS_X1;
 
 	// fill alpha table
 	for (src=0; src<256; src++)
@@ -1239,12 +1258,12 @@ static VIDEO_START( halleys )
 		c += (((src&0x0c)+(dst&0x0c))>>1) & 0x0c;
 		c += (((src&0x03)+(dst&0x03))>>1) & 0x03;
 
-		state->m_alpha_table[(src<<8)+dst] = c | BG_RGB;
+		m_alpha_table[(src<<8)+dst] = c | BG_RGB;
 	}
 }
 
 
-static void copy_scroll_op(bitmap_t *bitmap, UINT16 *source, int sx, int sy)
+static void copy_scroll_op(bitmap_ind16 &bitmap, UINT16 *source, int sx, int sy)
 {
 
 //--------------------------------------------------------------------------
@@ -1267,8 +1286,8 @@ static void copy_scroll_op(bitmap_t *bitmap, UINT16 *source, int sx, int sy)
 	if ((bch = CLIP_H - sy) < 0) bch = 0;
 
 	esi = source + CLIP_SKIP + (sy << SCREEN_WIDTH_L2);
-	edi = BITMAP_ADDR16(bitmap, VIS_MINY, VIS_MINX);
-	edx = bitmap->rowpixels;
+	edi = &bitmap.pix16(VIS_MINY, VIS_MINX);
+	edx = bitmap.rowpixels();
 
 	// draw top split
 	for (ecx=bch; ecx; ecx--) OPCOPY_COMMON
@@ -1282,7 +1301,7 @@ static void copy_scroll_op(bitmap_t *bitmap, UINT16 *source, int sx, int sy)
 }
 
 
-static void copy_scroll_xp(bitmap_t *bitmap, UINT16 *source, int sx, int sy)
+static void copy_scroll_xp(bitmap_ind16 &bitmap, UINT16 *source, int sx, int sy)
 {
 
 //--------------------------------------------------------------------------
@@ -1324,8 +1343,8 @@ static void copy_scroll_xp(bitmap_t *bitmap, UINT16 *source, int sx, int sy)
 	if ((bch = CLIP_H - sy) < 0) bch = 0;
 
 	src_base = source + CLIP_SKIP + (sy << SCREEN_WIDTH_L2);
-	edi = BITMAP_ADDR16(bitmap, VIS_MINY, VIS_MINX);
-	dst_adv = bitmap->rowpixels - CLIP_W;
+	edi = &bitmap.pix16(VIS_MINY, VIS_MINX);
+	dst_adv = bitmap.rowpixels() - CLIP_W;
 
 	// draw top split
 	for (edx=bch; edx; edx--) YCOPY_COMMON
@@ -1341,15 +1360,15 @@ static void copy_scroll_xp(bitmap_t *bitmap, UINT16 *source, int sx, int sy)
 
 
 
-static void copy_fixed_xp(bitmap_t *bitmap, UINT16 *source)
+static void copy_fixed_xp(bitmap_ind16 &bitmap, UINT16 *source)
 {
 	UINT16 *esi, *edi;
 	int dst_pitch, ecx, edx;
 	UINT16 ax, bx;
 
 	esi = source + CLIP_SKIP + CLIP_W;
-	edi = BITMAP_ADDR16(bitmap, VIS_MINY, VIS_MINX + CLIP_W);
-	dst_pitch = bitmap->rowpixels;
+	edi = &bitmap.pix16(VIS_MINY, VIS_MINX + CLIP_W);
+	dst_pitch = bitmap.rowpixels();
 	ecx = -CLIP_W;
 	edx = CLIP_H;
 
@@ -1376,15 +1395,15 @@ static void copy_fixed_xp(bitmap_t *bitmap, UINT16 *source)
 }
 
 
-static void copy_fixed_2b(bitmap_t *bitmap, UINT16 *source)
+static void copy_fixed_2b(bitmap_ind16 &bitmap, UINT16 *source)
 {
 	UINT16 *esi, *edi;
 	int dst_pitch, ecx, edx;
 	UINT16 ax, bx;
 
 	esi = source + CLIP_SKIP + CLIP_W;
-	edi = BITMAP_ADDR16(bitmap, VIS_MINY, VIS_MINX + CLIP_W);
-	dst_pitch = bitmap->rowpixels;
+	edi = &bitmap.pix16(VIS_MINY, VIS_MINX + CLIP_W);
+	dst_pitch = bitmap.rowpixels();
 	ecx = -CLIP_W;
 	edx = CLIP_H;
 
@@ -1423,7 +1442,7 @@ static void copy_fixed_2b(bitmap_t *bitmap, UINT16 *source)
 }
 
 
-static void filter_bitmap(running_machine &machine, bitmap_t *bitmap, int mask)
+static void filter_bitmap(running_machine &machine, bitmap_ind16 &bitmap, int mask)
 {
 	halleys_state *state = machine.driver_data<halleys_state>();
 	int dst_pitch;
@@ -1433,8 +1452,8 @@ static void filter_bitmap(running_machine &machine, bitmap_t *bitmap, int mask)
 
 	pal_ptr = state->m_internal_palette;
 	esi = mask | 0xffffff00;
-	edi = (UINT32*)BITMAP_ADDR16(bitmap, VIS_MINY, VIS_MINX + CLIP_W);
-	dst_pitch = bitmap->rowpixels >> 1;
+	edi = (UINT32*)&bitmap.pix16(VIS_MINY, VIS_MINX + CLIP_W);
+	dst_pitch = bitmap.rowpixels() >> 1;
 	ecx = -(CLIP_W>>1);
 	edx = CLIP_H;
 
@@ -1464,45 +1483,43 @@ static void filter_bitmap(running_machine &machine, bitmap_t *bitmap, int mask)
 }
 
 
-static SCREEN_UPDATE( halleys )
+UINT32 halleys_state::screen_update_halleys(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	halleys_state *state = screen->machine().driver_data<halleys_state>();
 	int i, j;
 
-	if (state->m_stars_enabled)
+	if (m_stars_enabled)
 	{
-		copy_scroll_op(bitmap, state->m_render_layer[5], *state->m_scrollx0, *state->m_scrolly0);
-		copy_scroll_xp(bitmap, state->m_render_layer[4], *state->m_scrollx1, *state->m_scrolly1);
+		copy_scroll_op(bitmap, m_render_layer[5], *m_scrollx0, *m_scrolly0);
+		copy_scroll_xp(bitmap, m_render_layer[4], *m_scrollx1, *m_scrolly1);
 	}
 	else
-		bitmap_fill(bitmap, cliprect, state->m_bgcolor);
+		bitmap.fill(m_bgcolor, cliprect);
 
 #ifdef MAME_DEBUG
-	if (input_port_read(screen->machine(), "DEBUG")) copy_scroll_xp(bitmap, state->m_render_layer[3], *state->m_scrollx0, *state->m_scrolly0); // not used???
+	if (machine().root_device().ioport("DEBUG")->read()) copy_scroll_xp(bitmap, m_render_layer[3], *m_scrollx0, *m_scrolly0); // not used???
 #endif
 
-	copy_scroll_xp(bitmap, state->m_render_layer[2], *state->m_scrollx1, *state->m_scrolly1);
-	copy_fixed_2b (bitmap, state->m_render_layer[1]);
-	copy_fixed_xp (bitmap, state->m_render_layer[0]);
+	copy_scroll_xp(bitmap, m_render_layer[2], *m_scrollx1, *m_scrolly1);
+	copy_fixed_2b (bitmap, m_render_layer[1]);
+	copy_fixed_xp (bitmap, m_render_layer[0]);
 
 	// HALF-HACK: apply RGB filter when the following conditions are met
-	i = state->m_io_ram[0xa0];
-	j = state->m_io_ram[0xa1];
-	if (state->m_io_ram[0x2b] && (i>0xc6 && i<0xfe) && (j==0xc0 || j==0xed)) filter_bitmap(screen->machine(), bitmap, i);
+	i = m_io_ram[0xa0];
+	j = m_io_ram[0xa1];
+	if (m_io_ram[0x2b] && (i>0xc6 && i<0xfe) && (j==0xc0 || j==0xed)) filter_bitmap(machine(), bitmap, i);
 	return 0;
 }
 
 
-static SCREEN_UPDATE( benberob )
+UINT32 halleys_state::screen_update_benberob(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	halleys_state *state = screen->machine().driver_data<halleys_state>();
-	if (state->m_io_ram[0xa0] & 0x80)
-		copy_scroll_op(bitmap, state->m_render_layer[2], *state->m_scrollx1, *state->m_scrolly1);
+	if (m_io_ram[0xa0] & 0x80)
+		copy_scroll_op(bitmap, m_render_layer[2], *m_scrollx1, *m_scrolly1);
 	else
-		bitmap_fill(bitmap, cliprect, state->m_bgcolor);
+		bitmap.fill(m_bgcolor, cliprect);
 
-	copy_fixed_xp (bitmap, state->m_render_layer[1]);
-	copy_fixed_xp (bitmap, state->m_render_layer[0]);
+	copy_fixed_xp (bitmap, m_render_layer[1]);
+	copy_fixed_xp (bitmap, m_render_layer[0]);
 	return 0;
 }
 
@@ -1512,12 +1529,11 @@ static SCREEN_UPDATE( benberob )
 
 #if HALLEYS_DEBUG
 
-static READ8_HANDLER( zero_r ) { return(0); }
+READ8_MEMBER(halleys_state::zero_r){ return(0); }
 
-static READ8_HANDLER( debug_r )
+READ8_MEMBER(halleys_state::debug_r)
 {
-	halleys_state *state = space->machine().driver_data<halleys_state>();
-	return(state->m_io_ram[offset]);
+	return(m_io_ram[offset]);
 }
 
 #endif
@@ -1526,137 +1542,98 @@ static READ8_HANDLER( debug_r )
 //**************************************************************************
 // Interrupt and Hardware Handlers
 
-static INTERRUPT_GEN( halleys_interrupt )
+
+TIMER_DEVICE_CALLBACK_MEMBER(halleys_state::halleys_scanline)
 {
-	halleys_state *state = device->machine().driver_data<halleys_state>();
-	UINT8 latch_data;
+	int scanline = param;
 
-	switch (cpu_getiloops(device))
+	/* TODO: fix this */
+	switch (scanline)
 	{
-		case 0:
-			/*
-                How the custom chips handle sound latching is largely unknown.
-                Halley's Comet dumps sound commands to register ff8a so
-                rapidly the AY8910 core sometimes fails to reset itself and
-                the music stops. Masking sound NMI is not enough to ensure
-                successive writes are processed properly so it is advisable to
-                queue sound commands or make the main CPU yield for a minimum
-                of 600 Z80 cycles. Furthermore, soundlatch NMI interval should
-                not be too much shorter than music IRQ's period(27306667ns),
-                and must be longer in case of a reset(00).
-
-                Current implementation is quite safe although not 100% foul-proof.
-            */
-			if (state->m_latch_delay) state->m_latch_delay--; else
-			if (state->m_ffcount)
-			{
-				state->m_ffcount--;
-				latch_data = state->m_sound_fifo[state->m_fftail];
-				state->m_fftail = (state->m_fftail + 1) & (MAX_SOUNDS - 1);
-				state->m_latch_delay = (latch_data) ? 0 : 4;
-				soundlatch_w( device->memory().space(AS_PROGRAM), 0, latch_data);
-				cputag_set_input_line(device->machine(), "audiocpu", INPUT_LINE_NMI, PULSE_LINE);
-			}
-
+		case 248:
 			// clear collision list of this frame unconditionally
-			state->m_collision_count = 0;
-		break;
+			m_collision_count = 0;
+			break;
 
 		// In Halley's Comet, NMI is used exclusively to handle coin input
-		case 1:
-			device_set_input_line(device, INPUT_LINE_NMI, PULSE_LINE);
-		break;
+		case 56*3:
+			machine().device("maincpu")->execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
+			break;
 
 		// FIRQ drives gameplay; we need both types of NMI each frame.
-		case 2:
-			state->m_mVectorType = 1; device_set_input_line(device, M6809_FIRQ_LINE, ASSERT_LINE);
-		break;
+		case 56*2:
+			m_mVectorType = 1; machine().device("maincpu")->execute().set_input_line(M6809_FIRQ_LINE, ASSERT_LINE);
+			break;
 
-		case 3:
-			state->m_mVectorType = 0; device_set_input_line(device, M6809_FIRQ_LINE, ASSERT_LINE);
-		break;
+		case 56:
+			m_mVectorType = 0; machine().device("maincpu")->execute().set_input_line(M6809_FIRQ_LINE, ASSERT_LINE);
+			break;
 	}
 }
 
 
-static INTERRUPT_GEN( benberob_interrupt )
+TIMER_DEVICE_CALLBACK_MEMBER(halleys_state::benberob_scanline)
 {
-	halleys_state *state = device->machine().driver_data<halleys_state>();
-	UINT8 latch_data;
+	int scanline = param;
 
-	switch (cpu_getiloops(device))
+	/* TODO: fix this */
+	switch (scanline)
 	{
-		case 0:
-			if (state->m_latch_delay) state->m_latch_delay--; else
-			if (state->m_ffcount)
-			{
-				state->m_ffcount--;
-				latch_data = state->m_sound_fifo[state->m_fftail];
-				state->m_fftail = (state->m_fftail + 1) & (MAX_SOUNDS - 1);
-				state->m_latch_delay = (latch_data) ? 0 : 4;
-				soundlatch_w(device->memory().space(AS_PROGRAM), 0, latch_data);
-				cputag_set_input_line(device->machine(), "audiocpu", INPUT_LINE_NMI, PULSE_LINE);
-			}
-		break;
+		case 248:
+			break;
 
-		case 1:
-			device_set_input_line(device, INPUT_LINE_NMI, PULSE_LINE);
-		break;
+		case 56*3:
+			machine().device("maincpu")->execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
+			break;
 
-		case 2:
-		case 3:
+		case 56*2:
+		case 56*1:
 			// FIRQ must not happen when the blitter is being updated or it'll cause serious screen artifacts
-			if (!state->m_blitter_busy) device_set_input_line(device, M6809_FIRQ_LINE, ASSERT_LINE); else state->m_firq_level++;
-		break;
+			if (!m_blitter_busy) machine().device("maincpu")->execute().set_input_line(M6809_FIRQ_LINE, ASSERT_LINE); else m_firq_level++;
+			break;
 	}
 }
 
 
-static READ8_HANDLER( vector_r )
+READ8_MEMBER(halleys_state::vector_r)
 {
-	halleys_state *state = space->machine().driver_data<halleys_state>();
-	return(state->m_cpu1_base[0xffe0 + (offset^(state->m_mVectorType<<4))]);
+	return(m_cpu1_base[0xffe0 + (offset^(m_mVectorType<<4))]);
 }
 
 
-static WRITE8_HANDLER( firq_ack_w )
+WRITE8_MEMBER(halleys_state::firq_ack_w)
 {
-	halleys_state *state = space->machine().driver_data<halleys_state>();
-	state->m_io_ram[0x9c] = data;
+	m_io_ram[0x9c] = data;
 
-	if (state->m_firq_level) state->m_firq_level--;
-	cputag_set_input_line(space->machine(), "maincpu", M6809_FIRQ_LINE, CLEAR_LINE);
+	if (m_firq_level) m_firq_level--;
+	machine().device("maincpu")->execute().set_input_line(M6809_FIRQ_LINE, CLEAR_LINE);
 }
 
 
-static WRITE8_DEVICE_HANDLER( sndnmi_msk_w )
+WRITE8_MEMBER(halleys_state::sndnmi_msk_w)
 {
-	halleys_state *state = device->machine().driver_data<halleys_state>();
-	state->m_sndnmi_mask = data & 1;
+	m_sndnmi_mask = data & 1;
 }
 
 
-static WRITE8_HANDLER( soundcommand_w )
+WRITE8_MEMBER(halleys_state::soundcommand_w)
 {
-	halleys_state *state = space->machine().driver_data<halleys_state>();
-	if (state->m_ffcount < MAX_SOUNDS)
-	{
-		state->m_ffcount++;
-		state->m_sound_fifo[state->m_ffhead] = state->m_io_ram[0x8a] = data;
-		state->m_ffhead = (state->m_ffhead + 1) & (MAX_SOUNDS - 1);
-	}
+
+	m_io_ram[0x8a] = data;
+	soundlatch_byte_w(space,offset,data);
+	machine().device("audiocpu")->execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 }
 
 
-static READ8_HANDLER( coin_lockout_r )
+READ8_MEMBER(halleys_state::coin_lockout_r)
 {
 	// This is a hack, but it lets you coin up when COIN1 or COIN2 are signaled.
 	// See NMI for the twisted logic that is involved in handling coin input :
 	//   0x8599 : 'benberob'
 	//   0x83e2 : 'halleys', 'halleysc', 'halleycj'
 	//   0x83df : 'halley87'
-	int inp = input_port_read(space->machine(), "IN0");
-	int result = ((input_port_read(space->machine(), "DSW4")) & 0x20) >> 5;
+	int inp = ioport("IN0")->read();
+	int result = ((ioport("DSW4")->read()) & 0x20) >> 5;
 
 	if (inp & 0x80) result |= 0x02;
 	if (inp & 0x40) result |= 0x04;
@@ -1665,53 +1642,53 @@ static READ8_HANDLER( coin_lockout_r )
 }
 
 
-static READ8_HANDLER( io_mirror_r )
+READ8_MEMBER(halleys_state::io_mirror_r)
 {
 	static const char *const portnames[] = { "IN0", "IN1", "IN2", "IN3" };
 
-	return input_port_read(space->machine(), portnames[offset]);
+	return ioport(portnames[offset])->read();
 }
 
 
 //**************************************************************************
 // Memory Maps
 
-static ADDRESS_MAP_START( halleys_map, AS_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0x0fff) AM_READWRITE(blitter_r, blitter_w) AM_BASE_MEMBER(halleys_state, m_blitter_ram) AM_SIZE_MEMBER(halleys_state, m_blitter_ramsize)
-	AM_RANGE(0x1f00, 0x1fff) AM_WRITE(bgtile_w)		// background tiles?(Ben Bero Beh only)
+static ADDRESS_MAP_START( halleys_map, AS_PROGRAM, 8, halleys_state )
+	AM_RANGE(0x0000, 0x0fff) AM_READWRITE(blitter_r, blitter_w) AM_SHARE("blitter_ram")
+	AM_RANGE(0x1f00, 0x1fff) AM_WRITE(bgtile_w)     // background tiles?(Ben Bero Beh only)
 	AM_RANGE(0x1000, 0xefff) AM_ROM
-	AM_RANGE(0xf000, 0xfeff) AM_RAM					// work ram
+	AM_RANGE(0xf000, 0xfeff) AM_RAM                 // work ram
 
 	AM_RANGE(0xff66, 0xff66) AM_READ(collision_id_r) // HACK: collision detection bypass(Halley's Comet only)
 	AM_RANGE(0xff71, 0xff71) AM_READ(blitter_status_r)
 	AM_RANGE(0xff80, 0xff83) AM_READ(io_mirror_r)
 	AM_RANGE(0xff8a, 0xff8a) AM_WRITE(soundcommand_w)
-	AM_RANGE(0xff90, 0xff90) AM_READ_PORT("IN0")	// coin/start
-	AM_RANGE(0xff91, 0xff91) AM_READ_PORT("IN1")	// player 1
-	AM_RANGE(0xff92, 0xff92) AM_READ_PORT("IN2")	// player 2
-	AM_RANGE(0xff93, 0xff93) AM_READ_PORT("IN3")	// unused?
+	AM_RANGE(0xff90, 0xff90) AM_READ_PORT("IN0")    // coin/start
+	AM_RANGE(0xff91, 0xff91) AM_READ_PORT("IN1")    // player 1
+	AM_RANGE(0xff92, 0xff92) AM_READ_PORT("IN2")    // player 2
+	AM_RANGE(0xff93, 0xff93) AM_READ_PORT("IN3")    // unused?
 	AM_RANGE(0xff94, 0xff94) AM_READ(coin_lockout_r)
-	AM_RANGE(0xff95, 0xff95) AM_READ_PORT("DSW1")	// dipswitch 4
-	AM_RANGE(0xff96, 0xff96) AM_READ_PORT("DSW2")	// dipswitch 3
-	AM_RANGE(0xff97, 0xff97) AM_READ_PORT("DSW3")	// dipswitch 2
+	AM_RANGE(0xff95, 0xff95) AM_READ_PORT("DSW1")   // dipswitch 4
+	AM_RANGE(0xff96, 0xff96) AM_READ_PORT("DSW2")   // dipswitch 3
+	AM_RANGE(0xff97, 0xff97) AM_READ_PORT("DSW3")   // dipswitch 2
 	AM_RANGE(0xff9c, 0xff9c) AM_WRITE(firq_ack_w)
-	AM_RANGE(0xff00, 0xffbf) AM_RAM AM_BASE_MEMBER(halleys_state, m_io_ram) AM_SIZE_MEMBER(halleys_state, m_io_ramsize)	// I/O write fall-through
+	AM_RANGE(0xff00, 0xffbf) AM_RAM AM_SHARE("io_ram")  // I/O write fall-through
 
-	AM_RANGE(0xffc0, 0xffdf) AM_RAM_WRITE(halleys_paletteram_IIRRGGBB_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0xffc0, 0xffdf) AM_RAM_WRITE(halleys_paletteram_IIRRGGBB_w) AM_SHARE("paletteram")
 	AM_RANGE(0xffe0, 0xffff) AM_READ(vector_r)
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, halleys_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
 	AM_RANGE(0x4000, 0x47ff) AM_RAM
-	AM_RANGE(0x4800, 0x4801) AM_DEVWRITE("ay2", ay8910_address_data_w)
-	AM_RANGE(0x4801, 0x4801) AM_DEVREAD("ay2", ay8910_r)
-	AM_RANGE(0x4802, 0x4803) AM_DEVWRITE("ay3", ay8910_address_data_w)
-	AM_RANGE(0x4803, 0x4803) AM_DEVREAD("ay3", ay8910_r)
-	AM_RANGE(0x4804, 0x4805) AM_DEVWRITE("ay4", ay8910_address_data_w)
-	AM_RANGE(0x4805, 0x4805) AM_DEVREAD("ay4", ay8910_r)
-	AM_RANGE(0x5000, 0x5000) AM_READ(soundlatch_r)
+	AM_RANGE(0x4800, 0x4801) AM_DEVWRITE_LEGACY("ay2", ay8910_address_data_w)
+	AM_RANGE(0x4801, 0x4801) AM_DEVREAD_LEGACY("ay2", ay8910_r)
+	AM_RANGE(0x4802, 0x4803) AM_DEVWRITE_LEGACY("ay3", ay8910_address_data_w)
+	AM_RANGE(0x4803, 0x4803) AM_DEVREAD_LEGACY("ay3", ay8910_r)
+	AM_RANGE(0x4804, 0x4805) AM_DEVWRITE_LEGACY("ay4", ay8910_address_data_w)
+	AM_RANGE(0x4805, 0x4805) AM_DEVREAD_LEGACY("ay4", ay8910_r)
+	AM_RANGE(0x5000, 0x5000) AM_READ(soundlatch_byte_r)
 	AM_RANGE(0xe000, 0xefff) AM_ROM // space for diagnostic ROM
 ADDRESS_MAP_END
 
@@ -1720,7 +1697,7 @@ ADDRESS_MAP_END
 // Port Maps
 
 static INPUT_PORTS_START( benberob )
-	PORT_START("DSW1")	/* 0xff95 */
+	PORT_START("DSW1")  /* 0xff95 */
 	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Bonus_Life ) )       /* code at 0xb00e */
 	PORT_DIPSETTING(    0x02, "Every 100k" )
 	PORT_DIPSETTING(    0x03, "100k 300k 200k+" )
@@ -1733,7 +1710,7 @@ static INPUT_PORTS_START( benberob )
 	PORT_DIPSETTING(    0x08, "3" )
 	PORT_DIPSETTING(    0x10, "4" )
 	PORT_DIPSETTING(    0x18, "5" )
-	PORT_DIPSETTING(    0x00, "Infinite (Cheat)" )
+	PORT_DIPSETTING(    0x00, DEF_STR( Infinite ) )
 	PORT_DIPUNKNOWN( 0x20, IP_ACTIVE_LOW )
 	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Flip_Screen ) )      /* TO DO : confirm OFF/ON when screen flipping emulated */
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
@@ -1742,7 +1719,7 @@ static INPUT_PORTS_START( benberob )
 	PORT_DIPSETTING(    0x80, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Cocktail ) )
 
-	PORT_START("DSW2")	/* 0xff96 */
+	PORT_START("DSW2")  /* 0xff96 */
 	PORT_DIPNAME( 0x0f, 0x00, DEF_STR( Coin_A ) )
 	PORT_DIPSETTING(    0x0f, DEF_STR( 9C_1C ) )
 	PORT_DIPSETTING(    0x0e, DEF_STR( 8C_1C ) )
@@ -1778,7 +1755,7 @@ static INPUT_PORTS_START( benberob )
 	PORT_DIPSETTING(    0x60, DEF_STR( 1C_7C ) )
 	PORT_DIPSETTING(    0x70, DEF_STR( 1C_8C ) )
 
-	PORT_START("DSW3")	/* 0xff97 */
+	PORT_START("DSW3")  /* 0xff97 */
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Difficulty ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Easy ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Hard ) )
@@ -1796,14 +1773,14 @@ static INPUT_PORTS_START( benberob )
 	PORT_DIPNAME( 0x20, 0x20, "Show Year" )
 	PORT_DIPSETTING(    0x00, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( Yes ) )
-	PORT_DIPNAME( 0x40, 0x40, "No Hit (Cheat)" )
+	PORT_DIPNAME( 0x40, 0x40, "No Hit" )
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x80, 0x80, "Maximum Credits" )
 	PORT_DIPSETTING(    0x80, "9" )
 	PORT_DIPSETTING(    0x00, "16" )
 
-	PORT_START("DSW4")	/* 0xff94 - read by coin_lockout_r */
+	PORT_START("DSW4")  /* 0xff94 - read by coin_lockout_r */
 	PORT_DIPUNUSED( 0x01, IP_ACTIVE_LOW )
 	PORT_DIPUNUSED( 0x02, IP_ACTIVE_LOW )
 	PORT_DIPUNUSED( 0x04, IP_ACTIVE_LOW )
@@ -1815,7 +1792,7 @@ static INPUT_PORTS_START( benberob )
 	PORT_DIPUNUSED( 0x40, IP_ACTIVE_LOW )
 	PORT_DIPUNUSED( 0x80, IP_ACTIVE_LOW )
 
-	PORT_START("IN0")	/* 0xff90 */
+	PORT_START("IN0")   /* 0xff90 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_START1 )
@@ -1825,7 +1802,7 @@ static INPUT_PORTS_START( benberob )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_COIN2 )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN1 )
 
-	PORT_START("IN1")	/* 0xff91 */
+	PORT_START("IN1")   /* 0xff91 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT )  PORT_8WAY
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN )  PORT_8WAY
@@ -1835,7 +1812,7 @@ static INPUT_PORTS_START( benberob )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 )
 
-	PORT_START("IN2")	/* 0xff92 */
+	PORT_START("IN2")   /* 0xff92 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT )  PORT_8WAY PORT_COCKTAIL
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_COCKTAIL
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN )  PORT_8WAY PORT_COCKTAIL
@@ -1845,16 +1822,16 @@ static INPUT_PORTS_START( benberob )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
 
-	PORT_START("IN3")	/* 0xff93 */
+	PORT_START("IN3")   /* 0xff93 */
 INPUT_PORTS_END
 
 
 static INPUT_PORTS_START( halleys )
-	PORT_START("DSW1")	/* 0xff95 */
+	PORT_START("DSW1")  /* 0xff95 */
 	TAITO_MACHINE_COCKTAIL_LOC(SW4)
 	TAITO_COINAGE_JAPAN_OLD_LOC(SW4)
 
-	PORT_START("DSW2")	/* 0xff96 */
+	PORT_START("DSW2")  /* 0xff96 */
 	TAITO_DIFFICULTY_LOC(SW3)
 	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Bonus_Life ) )       PORT_DIPLOCATION("SW3:3,4")   /* index of tables at 0x1a2f or 0x19b5 */
 	PORT_DIPSETTING(    0x00, "100k 600k 500k+" )           /* last bonus life at 5600k : max. 12 bonus lives */
@@ -1872,13 +1849,13 @@ static INPUT_PORTS_START( halleys )
 	PORT_DIPUNUSED_DIPLOC( 0x80, IP_ACTIVE_LOW, "SW3:8" )
 
 	/* From US manual : "DIP SW 2 is not used and all contacts should be set off."
-       However, they enable debug features if you press START1 during the boot sequence. */
-	PORT_START("DSW3")	/* 0xff97 */
+	   However, they enable debug features if you press START1 during the boot sequence. */
+	PORT_START("DSW3")  /* 0xff97 */
 	PORT_DIPUNUSED_DIPLOC( 0x01, IP_ACTIVE_LOW, "SW2:1" )
-	PORT_DIPNAME( 0x02, 0x02, "Free Play (Cheat)" )         PORT_DIPLOCATION("SW2:2")
+	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Free_Play ) )         PORT_DIPLOCATION("SW2:2")
 	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x1c, 0x1c, "Start Area (Cheat)" )        PORT_DIPLOCATION("SW2:3,4,5")
+	PORT_DIPNAME( 0x1c, 0x1c, "Start Area" )        PORT_DIPLOCATION("SW2:3,4,5")
 	PORT_DIPSETTING( 0x1c, "1 (Earth)" )
 	PORT_DIPSETTING( 0x18, "4 (Venus)" )
 	PORT_DIPSETTING( 0x14, "7 (Mercury)" )
@@ -1888,16 +1865,16 @@ static INPUT_PORTS_START( halleys )
 	PORT_DIPSETTING( 0x04, "19 (Uranus)" )
 	PORT_DIPSETTING( 0x00, "22 (Saturn)" )
 	PORT_DIPUNUSED_DIPLOC( 0x20, IP_ACTIVE_LOW, "SW2:6" )
-	PORT_DIPNAME( 0x40, 0x40, "Invincibility (Cheat)")      PORT_DIPLOCATION("SW2:7")
+	PORT_DIPNAME( 0x40, 0x40, "Invincibility")      PORT_DIPLOCATION("SW2:7")
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, "Infinite Lives (Cheat)" )    PORT_DIPLOCATION("SW2:8")
+	PORT_DIPNAME( 0x80, 0x80, "Infinite Lives" )    PORT_DIPLOCATION("SW2:8")
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	/* From US manual : "Coin mechs system can be optioned by setting DIP SW 1.
-       Position 6 on for single coin selector.  Position 6 off for twin coin selector." */
-	PORT_START("DSW4")	/* 0xff94 - read by coin_lockout_r */
+	   Position 6 on for single coin selector.  Position 6 off for twin coin selector." */
+	PORT_START("DSW4")  /* 0xff94 - read by coin_lockout_r */
 	PORT_DIPUNUSED_DIPLOC( 0x01, IP_ACTIVE_LOW, "SW1:1" )
 	PORT_DIPUNUSED_DIPLOC( 0x02, IP_ACTIVE_LOW, "SW1:2" )
 	PORT_DIPUNUSED_DIPLOC( 0x04, IP_ACTIVE_LOW, "SW1:3" )
@@ -1909,7 +1886,7 @@ static INPUT_PORTS_START( halleys )
 	PORT_DIPUNUSED_DIPLOC( 0x40, IP_ACTIVE_LOW, "SW1:7" )
 	PORT_DIPUNUSED_DIPLOC( 0x80, IP_ACTIVE_LOW, "SW1:8" )
 
-	PORT_START("IN0")	/* 0xff90 */
+	PORT_START("IN0")   /* 0xff90 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_START1 )
@@ -1919,7 +1896,7 @@ static INPUT_PORTS_START( halleys )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_COIN2 )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN1 )
 
-	PORT_START("IN1")	/* 0xff91 */
+	PORT_START("IN1")   /* 0xff91 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT )  PORT_8WAY
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN )  PORT_8WAY
@@ -1929,7 +1906,7 @@ static INPUT_PORTS_START( halleys )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 )
 
-	PORT_START("IN2")	/* 0xff92 */
+	PORT_START("IN2")   /* 0xff92 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT )  PORT_8WAY PORT_COCKTAIL
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_COCKTAIL
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN )  PORT_8WAY PORT_COCKTAIL
@@ -1939,10 +1916,10 @@ static INPUT_PORTS_START( halleys )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
 
-	PORT_START("IN3")	/* 0xff93 */
+	PORT_START("IN3")   /* 0xff93 */
 
 #ifdef MAME_DEBUG
-	PORT_START("DEBUG")	/* just to be safe */
+	PORT_START("DEBUG") /* just to be safe */
 	PORT_DIPNAME( 0x01, 0x00, "Show Unused Layer" )
 	PORT_DIPSETTING(    0x00, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Yes ) )
@@ -1953,19 +1930,18 @@ INPUT_PORTS_END
 //**************************************************************************
 // Machine Definitions and Initializations
 
-static MACHINE_RESET( halleys )
+void halleys_state::machine_reset()
 {
-	halleys_state *state = machine.driver_data<halleys_state>();
-	state->m_mVectorType     = 0;
-	state->m_firq_level      = 0;
-	state->m_blitter_busy    = 0;
-	state->m_collision_count = 0;
-	state->m_stars_enabled   = 0;
-	state->m_bgcolor         = get_black_pen(machine);
-	state->m_fftail = state->m_ffhead = state->m_ffcount = 0;
+	m_mVectorType     = 0;
+	m_firq_level      = 0;
+	m_blitter_busy    = 0;
+	m_collision_count = 0;
+	m_stars_enabled   = 0;
+	m_bgcolor         = get_black_pen(machine());
+	m_fftail = m_ffhead = m_ffcount = 0;
 
-	memset(state->m_io_ram, 0xff, state->m_io_ramsize);
-	memset(state->m_render_layer[0], 0, SCREEN_BYTESIZE * MAX_LAYERS);
+	memset(m_io_ram, 0xff, m_io_ram.bytes());
+	memset(m_render_layer[0], 0, SCREEN_BYTESIZE * MAX_LAYERS);
 }
 
 
@@ -1976,35 +1952,31 @@ static const ay8910_interface ay8910_config =
 	DEVCB_NULL,
 	DEVCB_NULL,
 	DEVCB_NULL,
-	DEVCB_HANDLER(sndnmi_msk_w) // port Bwrite
+	DEVCB_DRIVER_MEMBER(halleys_state,sndnmi_msk_w) // port Bwrite
 };
 
 
 static MACHINE_CONFIG_START( halleys, halleys_state )
 	MCFG_CPU_ADD("maincpu", M6809, XTAL_19_968MHz/12) /* verified on pcb */
 	MCFG_CPU_PROGRAM_MAP(halleys_map)
-	MCFG_CPU_VBLANK_INT_HACK(halleys_interrupt, 4)
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("scantimer", halleys_state, halleys_scanline, "screen", 0, 1)
 
 	MCFG_CPU_ADD("audiocpu", Z80, XTAL_6MHz/2) /* verified on pcb */
 	MCFG_CPU_PROGRAM_MAP(sound_map)
-	MCFG_CPU_PERIODIC_INT(irq0_line_hold, (double)6000000/(4*16*16*10*16))
+	MCFG_CPU_PERIODIC_INT_DRIVER(halleys_state, irq0_line_hold,  (double)6000000/(4*16*16*10*16))
 
-	MCFG_MACHINE_RESET(halleys)
 
 	// video hardware
 
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_REFRESH_RATE(59.50)	/* verified on PCB */
+	MCFG_SCREEN_REFRESH_RATE(59.50) /* verified on PCB */
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(SCREEN_WIDTH, SCREEN_HEIGHT)
 	MCFG_SCREEN_VISIBLE_AREA(VIS_MINX, VIS_MAXX, VIS_MINY, VIS_MAXY)
-	MCFG_SCREEN_UPDATE(halleys)
+	MCFG_SCREEN_UPDATE_DRIVER(halleys_state, screen_update_halleys)
 
 	MCFG_PALETTE_LENGTH(PALETTE_SIZE)
-	MCFG_PALETTE_INIT(halleys)
 
-	MCFG_VIDEO_START(halleys)
 
 	// sound hardware
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -2027,10 +1999,11 @@ MACHINE_CONFIG_END
 static MACHINE_CONFIG_DERIVED( benberob, halleys )
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_CLOCK(XTAL_19_968MHz/12) /* not verified but pcb identical to halley's comet */
-	MCFG_CPU_VBLANK_INT_HACK(benberob_interrupt, 4)
+	MCFG_TIMER_MODIFY("scantimer")
+	MCFG_TIMER_DRIVER_CALLBACK(halleys_state, benberob_scanline)
 
 	MCFG_SCREEN_MODIFY("screen")
-	MCFG_SCREEN_UPDATE(benberob)
+	MCFG_SCREEN_UPDATE_DRIVER(halleys_state, screen_update_benberob)
 MACHINE_CONFIG_END
 
 
@@ -2214,7 +2187,7 @@ static void init_common(running_machine &machine)
 
 
 	// decrypt main program ROM
-	rom = state->m_cpu1_base = machine.region("maincpu")->base();
+	rom = state->m_cpu1_base = state->memregion("maincpu")->base();
 	buf = state->m_gfx1_base;
 
 	for (i=0; i<0x10000; i++)
@@ -2227,7 +2200,7 @@ static void init_common(running_machine &machine)
 
 
 	// swap graphics ROM addresses and unpack each pixel
-	rom = machine.region("gfx1")->base();
+	rom = machine.root_device().memregion("gfx1")->base();
 	buf = state->m_gfx_plane02;
 
 	for (i=0xffff; i>=0; i--)
@@ -2259,41 +2232,38 @@ static void init_common(running_machine &machine)
 }
 
 
-static DRIVER_INIT( benberob )
+DRIVER_INIT_MEMBER(halleys_state,benberob)
 {
-	halleys_state *state = machine.driver_data<halleys_state>();
-	state->m_game_id = GAME_BENBEROB;
+	m_game_id = GAME_BENBEROB;
 
-	init_common(machine);
+	init_common(machine());
 
-	state->m_blitter_reset_timer = machine.scheduler().timer_alloc(FUNC(blitter_reset));
+	m_blitter_reset_timer = machine().scheduler().timer_alloc(timer_expired_delegate(FUNC(halleys_state::blitter_reset),this));
 }
 
 
-static DRIVER_INIT( halleys )
+DRIVER_INIT_MEMBER(halleys_state,halleys)
 {
-	halleys_state *state = machine.driver_data<halleys_state>();
-	state->m_game_id = GAME_HALLEYS;
-	state->m_collision_detection = 0xb114;
+	m_game_id = GAME_HALLEYS;
+	m_collision_detection = 0xb114;
 
-	init_common(machine);
+	init_common(machine());
 }
 
-static DRIVER_INIT( halley87 )
+DRIVER_INIT_MEMBER(halleys_state,halley87)
 {
-	halleys_state *state = machine.driver_data<halleys_state>();
-	state->m_game_id = GAME_HALLEYS;
-	state->m_collision_detection = 0xb10d;
+	m_game_id = GAME_HALLEYS;
+	m_collision_detection = 0xb10d;
 
-	init_common(machine);
+	init_common(machine());
 }
 
 
 //**************************************************************************
 // Game Definitions
 
-GAME( 1984, benberob, 0,       benberob, benberob, benberob,  ROT0,  "Taito", "Ben Bero Beh (Japan)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_COLORS | GAME_NO_COCKTAIL )
-GAME( 1986, halleys,  0,       halleys,  halleys,  halleys,   ROT90, "Taito America Corporation (Coin-It license)", "Halley's Comet (US)", GAME_IMPERFECT_GRAPHICS | GAME_NO_COCKTAIL )
-GAME( 1986, halleysc, halleys, halleys,  halleys,  halleys,   ROT90, "Taito Corporation", "Halley's Comet (Japan, Newer)", GAME_IMPERFECT_GRAPHICS | GAME_NO_COCKTAIL )
-GAME( 1986, halleycj, halleys, halleys,  halleys,  halleys,   ROT90, "Taito Corporation", "Halley's Comet (Japan, Older)", GAME_IMPERFECT_GRAPHICS | GAME_NO_COCKTAIL )
-GAME( 1986, halley87, halleys, halleys,  halleys,  halley87,  ROT90, "Taito Corporation", "Halley's Comet '87", GAME_IMPERFECT_GRAPHICS | GAME_NO_COCKTAIL )
+GAME( 1984, benberob, 0,       benberob, benberob, halleys_state, benberob,  ROT0,  "Taito", "Ben Bero Beh (Japan)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_COLORS | GAME_NO_COCKTAIL )
+GAME( 1986, halleys,  0,       halleys,  halleys, halleys_state,  halleys,   ROT90, "Taito America Corporation (Coin-It license)", "Halley's Comet (US)", GAME_IMPERFECT_GRAPHICS | GAME_NO_COCKTAIL )
+GAME( 1986, halleysc, halleys, halleys,  halleys, halleys_state,  halleys,   ROT90, "Taito Corporation", "Halley's Comet (Japan, Newer)", GAME_IMPERFECT_GRAPHICS | GAME_NO_COCKTAIL )
+GAME( 1986, halleycj, halleys, halleys,  halleys, halleys_state,  halleys,   ROT90, "Taito Corporation", "Halley's Comet (Japan, Older)", GAME_IMPERFECT_GRAPHICS | GAME_NO_COCKTAIL )
+GAME( 1986, halley87, halleys, halleys,  halleys, halleys_state,  halley87,  ROT90, "Taito Corporation", "Halley's Comet '87", GAME_IMPERFECT_GRAPHICS | GAME_NO_COCKTAIL )

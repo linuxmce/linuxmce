@@ -34,13 +34,16 @@
 #include "video/vector.h"
 #include "cpu/ccpu/ccpu.h"
 #include "includes/cinemat.h"
-#include "rendlay.h"
 
 #include "armora.lh"
+#include "barrier.lh"
+#include "demon.lh"
 #include "starcas.lh"
 #include "solarq.lh"
+#include "sundance.lh"
+#include "tailg.lh"
 
-#define MASTER_CLOCK			XTAL_19_923MHz
+#define MASTER_CLOCK            XTAL_19_923MHz
 
 
 /*************************************
@@ -49,24 +52,22 @@
  *
  *************************************/
 
-static MACHINE_START( cinemat )
+void cinemat_state::machine_start()
 {
-	cinemat_state *state = machine.driver_data<cinemat_state>();
-	state_save_register_global(machine, state->m_coin_detected);
-	state_save_register_global(machine, state->m_coin_last_reset);
-	state_save_register_global(machine, state->m_mux_select);
+	state_save_register_global(machine(), m_coin_detected);
+	state_save_register_global(machine(), m_coin_last_reset);
+	state_save_register_global(machine(), m_mux_select);
 }
 
 
-MACHINE_RESET( cinemat )
+void cinemat_state::machine_reset()
 {
-	cinemat_state *state = machine.driver_data<cinemat_state>();
 	/* reset the coin states */
-	state->m_coin_detected = 0;
-	state->m_coin_last_reset = 0;
+	m_coin_detected = 0;
+	m_coin_last_reset = 0;
 
 	/* reset mux select */
-	state->m_mux_select = 0;
+	m_mux_select = 0;
 }
 
 
@@ -77,16 +78,16 @@ MACHINE_RESET( cinemat )
  *
  *************************************/
 
-static READ8_HANDLER( inputs_r )
+READ8_MEMBER(cinemat_state::inputs_r)
 {
-	return (input_port_read(space->machine(), "INPUTS") >> offset) & 1;
+	return (ioport("INPUTS")->read() >> offset) & 1;
 }
 
 
-static READ8_HANDLER( switches_r )
+READ8_MEMBER(cinemat_state::switches_r)
 {
 	static const UINT8 switch_shuffle[8] = { 2,5,4,3,0,1,6,7 };
-	return (input_port_read(space->machine(), "SWITCHES") >> switch_shuffle[offset]) & 1;
+	return (ioport("SWITCHES")->read() >> switch_shuffle[offset]) & 1;
 }
 
 
@@ -97,19 +98,17 @@ static READ8_HANDLER( switches_r )
  *
  *************************************/
 
-static INPUT_CHANGED( coin_inserted )
+INPUT_CHANGED_MEMBER(cinemat_state::coin_inserted)
 {
-	cinemat_state *state = field->port->machine().driver_data<cinemat_state>();
 	/* on the falling edge of a new coin, set the coin_detected flag */
 	if (newval == 0)
-		state->m_coin_detected = 1;
+		m_coin_detected = 1;
 }
 
 
-static READ8_HANDLER( coin_input_r )
+READ8_MEMBER(cinemat_state::coin_input_r)
 {
-	cinemat_state *state = space->machine().driver_data<cinemat_state>();
-	return !state->m_coin_detected;
+	return !m_coin_detected;
 }
 
 
@@ -120,20 +119,18 @@ static READ8_HANDLER( coin_input_r )
  *
  *************************************/
 
-static WRITE8_HANDLER( coin_reset_w )
+WRITE8_MEMBER(cinemat_state::coin_reset_w)
 {
-	cinemat_state *state = space->machine().driver_data<cinemat_state>();
 	/* on the rising edge of a coin reset, clear the coin_detected flag */
-	if (state->m_coin_last_reset != data && data != 0)
-		state->m_coin_detected = 0;
-	state->m_coin_last_reset = data;
+	if (m_coin_last_reset != data && data != 0)
+		m_coin_detected = 0;
+	m_coin_last_reset = data;
 }
 
 
-static WRITE8_HANDLER( mux_select_w )
+WRITE8_MEMBER(cinemat_state::mux_select_w)
 {
-	cinemat_state *state = space->machine().driver_data<cinemat_state>();
-	state->m_mux_select = data;
+	m_mux_select = data;
 	cinemat_sound_control_w(space, 0x07, data);
 }
 
@@ -152,8 +149,8 @@ static UINT8 joystick_read(device_t *device)
 		return 0;
 	else
 	{
-		int xval = (INT16)(cpu_get_reg(device, CCPU_X) << 4) >> 4;
-		return (input_port_read_safe(device->machine(), state->m_mux_select ? "ANALOGX" : "ANALOGY", 0) - xval) < 0x800;
+		int xval = (INT16)(device->state().state_int(CCPU_X) << 4) >> 4;
+		return (state->ioport(state->m_mux_select ? "ANALOGX" : "ANALOGY")->read_safe(0) - xval) < 0x800;
 	}
 }
 
@@ -165,36 +162,35 @@ static UINT8 joystick_read(device_t *device)
  *
  *************************************/
 
-static READ8_HANDLER( speedfrk_wheel_r )
+READ8_MEMBER(cinemat_state::speedfrk_wheel_r)
 {
 	static const UINT8 speedfrk_steer[] = {0xe, 0x6, 0x2, 0x0, 0x3, 0x7, 0xf};
 	int delta_wheel;
 
-    /* the shift register is cleared once per 'frame' */
-    delta_wheel = (INT8)input_port_read(space->machine(), "WHEEL") / 8;
-    if (delta_wheel > 3)
-        delta_wheel = 3;
-    else if (delta_wheel < -3)
-        delta_wheel = -3;
+	/* the shift register is cleared once per 'frame' */
+	delta_wheel = (INT8)ioport("WHEEL")->read() / 8;
+	if (delta_wheel > 3)
+		delta_wheel = 3;
+	else if (delta_wheel < -3)
+		delta_wheel = -3;
 
-    return (speedfrk_steer[delta_wheel + 3] >> offset) & 1;
+	return (speedfrk_steer[delta_wheel + 3] >> offset) & 1;
 }
 
 
-static READ8_HANDLER( speedfrk_gear_r )
+READ8_MEMBER(cinemat_state::speedfrk_gear_r)
 {
-	cinemat_state *state = space->machine().driver_data<cinemat_state>();
-	int gearval = input_port_read(space->machine(), "GEAR");
+	int gearval = ioport("GEAR")->read();
 
 	/* check the fake gear input port and determine the bit settings for the gear */
 	if ((gearval & 0x0f) != 0x0f)
-        state->m_gear = gearval & 0x0f;
+		m_gear = gearval & 0x0f;
 
 	/* add the start key into the mix -- note that it overlaps 4th gear */
-	if (!(input_port_read(space->machine(), "INPUTS") & 0x80))
-        state->m_gear &= ~0x08;
+	if (!(ioport("INPUTS")->read() & 0x80))
+		m_gear &= ~0x08;
 
-	return (state->m_gear >> offset) & 1;
+	return (m_gear >> offset) & 1;
 }
 
 
@@ -211,7 +207,7 @@ static const struct
 	UINT16 bitmask;
 } sundance_port_map[16] =
 {
-	{ "PAD1", 0x155 },	/* bit  0 is set if P1 1,3,5,7,9 is pressed */
+	{ "PAD1", 0x155 },  /* bit  0 is set if P1 1,3,5,7,9 is pressed */
 	{ NULL, 0 },
 	{ NULL, 0 },
 	{ NULL, 0 },
@@ -221,25 +217,25 @@ static const struct
 	{ NULL, 0 },
 	{ NULL, 0 },
 
-	{ "PAD2", 0x1a1 },	/* bit  8 is set if P2 1,6,8,9 is pressed */
-	{ "PAD1", 0x1a1 },	/* bit  9 is set if P1 1,6,8,9 is pressed */
-	{ "PAD2", 0x155 },	/* bit 10 is set if P2 1,3,5,7,9 is pressed */
+	{ "PAD2", 0x1a1 },  /* bit  8 is set if P2 1,6,8,9 is pressed */
+	{ "PAD1", 0x1a1 },  /* bit  9 is set if P1 1,6,8,9 is pressed */
+	{ "PAD2", 0x155 },  /* bit 10 is set if P2 1,3,5,7,9 is pressed */
 	{ NULL, 0 },
 
-	{ "PAD1", 0x093 },	/* bit 12 is set if P1 1,2,5,8 is pressed */
-	{ "PAD2", 0x093 },	/* bit 13 is set if P2 1,2,5,8 is pressed */
-	{ "PAD1", 0x048 },	/* bit 14 is set if P1 4,8 is pressed */
-	{ "PAD2", 0x048 },	/* bit 15 is set if P2 4,8 is pressed */
+	{ "PAD1", 0x093 },  /* bit 12 is set if P1 1,2,5,8 is pressed */
+	{ "PAD2", 0x093 },  /* bit 13 is set if P2 1,2,5,8 is pressed */
+	{ "PAD1", 0x048 },  /* bit 14 is set if P1 4,8 is pressed */
+	{ "PAD2", 0x048 },  /* bit 15 is set if P2 4,8 is pressed */
 };
 
 
-static READ8_HANDLER( sundance_inputs_r )
+READ8_MEMBER(cinemat_state::sundance_inputs_r)
 {
 	/* handle special keys first */
 	if (sundance_port_map[offset].portname)
-		return (input_port_read(space->machine(), sundance_port_map[offset].portname) & sundance_port_map[offset].bitmask) ? 0 : 1;
+		return (ioport(sundance_port_map[offset].portname)->read() & sundance_port_map[offset].bitmask) ? 0 : 1;
 	else
-		return (input_port_read(space->machine(), "INPUTS") >> offset) & 1;
+		return (ioport("INPUTS")->read() >> offset) & 1;
 }
 
 
@@ -250,11 +246,10 @@ static READ8_HANDLER( sundance_inputs_r )
  *
  *************************************/
 
-static READ8_HANDLER( boxingb_dial_r )
+READ8_MEMBER(cinemat_state::boxingb_dial_r)
 {
-	cinemat_state *state = space->machine().driver_data<cinemat_state>();
-	int value = input_port_read(space->machine(), "DIAL");
-	if (!state->m_mux_select) offset += 4;
+	int value = ioport("DIAL")->read();
+	if (!m_mux_select) offset += 4;
 	return (value >> offset) & 1;
 }
 
@@ -266,10 +261,10 @@ static READ8_HANDLER( boxingb_dial_r )
  *
  *************************************/
 
-static READ8_HANDLER( qb3_frame_r )
+READ8_MEMBER(cinemat_state::qb3_frame_r)
 {
-	attotime next_update = space->machine().primary_screen->time_until_update();
-	attotime frame_period = space->machine().primary_screen->frame_period();
+	attotime next_update = machine().primary_screen->time_until_update();
+	attotime frame_period = machine().primary_screen->frame_period();
 	int percent = next_update.attoseconds / (frame_period.attoseconds / 100);
 
 	/* note this is just an approximation... */
@@ -277,9 +272,9 @@ static READ8_HANDLER( qb3_frame_r )
 }
 
 
-static WRITE8_HANDLER( qb3_ram_bank_w )
+WRITE8_MEMBER(cinemat_state::qb3_ram_bank_w)
 {
-	memory_set_bank(space->machine(), "bank1", cpu_get_reg(space->machine().device("maincpu"), CCPU_P) & 3);
+	membank("bank1")->set_entry(machine().device("maincpu")->state().state_int(CCPU_P) & 3);
 }
 
 
@@ -290,38 +285,38 @@ static WRITE8_HANDLER( qb3_ram_bank_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( program_map_4k, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( program_map_4k, AS_PROGRAM, 8, cinemat_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xfff)
 	AM_RANGE(0x0000, 0x0fff) AM_ROM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( program_map_8k, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( program_map_8k, AS_PROGRAM, 8, cinemat_state )
 	ADDRESS_MAP_GLOBAL_MASK(0x3fff)
 	AM_RANGE(0x0000, 0x0fff) AM_MIRROR(0x1000) AM_ROM
 	AM_RANGE(0x2000, 0x2fff) AM_MIRROR(0x1000) AM_ROM AM_REGION("maincpu", 0x1000)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( program_map_16k, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( program_map_16k, AS_PROGRAM, 8, cinemat_state )
 	ADDRESS_MAP_GLOBAL_MASK(0x3fff)
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( program_map_32k, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( program_map_32k, AS_PROGRAM, 8, cinemat_state )
 	ADDRESS_MAP_GLOBAL_MASK(0x7fff)
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( data_map, AS_DATA, 16 )
+static ADDRESS_MAP_START( data_map, AS_DATA, 16, cinemat_state )
 	AM_RANGE(0x0000, 0x00ff) AM_RAM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( data_map_qb3, AS_DATA, 16 )
-	AM_RANGE(0x0000, 0x03ff) AM_RAMBANK("bank1") AM_BASE_MEMBER(cinemat_state, m_rambase)
+static ADDRESS_MAP_START( data_map_qb3, AS_DATA, 16, cinemat_state )
+	AM_RANGE(0x0000, 0x03ff) AM_RAMBANK("bank1") AM_SHARE("rambase")
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( io_map, AS_IO, 8, cinemat_state )
 	AM_RANGE(0x00, 0x0f) AM_READ(inputs_r)
 	AM_RANGE(0x10, 0x16) AM_READ(switches_r)
 	AM_RANGE(0x17, 0x17) AM_READ(coin_input_r)
@@ -362,16 +357,16 @@ static INPUT_PORTS_START( spacewar )
 	PORT_DIPNAME( 0x03, 0x00,  "Time" )
 	PORT_DIPSETTING(    0x03, "0:45/coin" )
 	PORT_DIPSETTING(    0x00, "1:00/coin" )
-	PORT_DIPSETTING(	0x01, "1:30/coin" )
-	PORT_DIPSETTING(	0x02, "2:00/coin" )
+	PORT_DIPSETTING(    0x01, "1:30/coin" )
+	PORT_DIPSETTING(    0x02, "2:00/coin" )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(1)
 	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(	0x40, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED(coin_inserted, 0)
+	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED_MEMBER(DEVICE_SELF, cinemat_state,coin_inserted, 0)
 INPUT_PORTS_END
 
 
@@ -380,10 +375,10 @@ static INPUT_PORTS_START( spaceshp )
 
 	PORT_MODIFY("SWITCHES")
 	PORT_DIPNAME( 0x03, 0x00, "Time" ) PORT_DIPLOCATION("SW1:!4,!3")
-	PORT_DIPSETTING(	0x00, "1:00/coin" )
-	PORT_DIPSETTING(	0x01, "1:30/coin" )
-	PORT_DIPSETTING(	0x02, "2:00/coin" )
-	PORT_DIPSETTING(	0x03, "2:30/coin" )
+	PORT_DIPSETTING(    0x00, "1:00/coin" )
+	PORT_DIPSETTING(    0x01, "1:30/coin" )
+	PORT_DIPSETTING(    0x02, "2:00/coin" )
+	PORT_DIPSETTING(    0x03, "2:30/coin" )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_DIPUNUSED_DIPLOC( 0x04, 0x04, "SW1:!1" )
 	PORT_DIPUNUSED_DIPLOC( 0x08, 0x08, "SW1:!2" )
@@ -431,7 +426,7 @@ static INPUT_PORTS_START( barrier )
 	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED(coin_inserted, 0)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED_MEMBER(DEVICE_SELF, cinemat_state,coin_inserted, 0)
 INPUT_PORTS_END
 
 
@@ -464,7 +459,7 @@ static INPUT_PORTS_START( speedfrk )
 	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED(coin_inserted, 0)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED_MEMBER(DEVICE_SELF, cinemat_state,coin_inserted, 0)
 
 	PORT_START("WHEEL")
 	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_RESET
@@ -498,18 +493,18 @@ static INPUT_PORTS_START( starhawk )
 
 	PORT_START("SWITCHES")
 	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Game_Time ) )
-	PORT_DIPSETTING(	0x03, "2:00/4:00" )
-	PORT_DIPSETTING(	0x01, "1:30/3:00" )
-	PORT_DIPSETTING(	0x02, "1:00/2:00" )
-	PORT_DIPSETTING(	0x00, "0:45/1:30" )
+	PORT_DIPSETTING(    0x03, "2:00/4:00" )
+	PORT_DIPSETTING(    0x01, "1:30/3:00" )
+	PORT_DIPSETTING(    0x02, "1:00/2:00" )
+	PORT_DIPSETTING(    0x00, "0:45/1:30" )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
-	PORT_DIPNAME( 0x40,	0x40, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(	0x40, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED(coin_inserted, 0)
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED_MEMBER(DEVICE_SELF, cinemat_state,coin_inserted, 0)
 INPUT_PORTS_END
 
 
@@ -534,13 +529,13 @@ static INPUT_PORTS_START( sundance )
 
 	PORT_START("SWITCHES")
 	PORT_DIPNAME( 0x03, 0x02, "Time" )
-	PORT_DIPSETTING(	0x00, "0:45/coin" )
-	PORT_DIPSETTING(	0x02, "1:00/coin" )
-	PORT_DIPSETTING(	0x01, "1:30/coin" )
-	PORT_DIPSETTING(	0x03, "2:00/coin" )
-	PORT_DIPNAME( 0x04,	0x00, DEF_STR( Language ) )
-	PORT_DIPSETTING(	0x04, DEF_STR( Japanese ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( English ) )
+	PORT_DIPSETTING(    0x00, "0:45/coin" )
+	PORT_DIPSETTING(    0x02, "1:00/coin" )
+	PORT_DIPSETTING(    0x01, "1:30/coin" )
+	PORT_DIPSETTING(    0x03, "2:00/coin" )
+	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Language ) )
+	PORT_DIPSETTING(    0x04, DEF_STR( Japanese ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( English ) )
 	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) ) /* supposedly coinage, doesn't work */
 	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -553,7 +548,7 @@ static INPUT_PORTS_START( sundance )
 	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED(coin_inserted, 0)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED_MEMBER(DEVICE_SELF, cinemat_state,coin_inserted, 0)
 
 	PORT_START("PAD1")
 	PORT_BIT( 0x0001, IP_ACTIVE_HIGH, IPT_OTHER ) PORT_NAME("P1 Pad 1") PORT_CODE(KEYCODE_7_PAD) PORT_PLAYER(1)
@@ -589,17 +584,17 @@ static INPUT_PORTS_START( tailg )
 
 	PORT_START("SWITCHES")
 	PORT_DIPNAME( 0x23, 0x23, "Shield Points" )
-	PORT_DIPSETTING(	0x00, "15" )
-	PORT_DIPSETTING(	0x02, "20" )
-	PORT_DIPSETTING(	0x01, "30" )
-	PORT_DIPSETTING(	0x03, "40" )
-	PORT_DIPSETTING(	0x20, "50" )
-	PORT_DIPSETTING(	0x22, "60" )
-	PORT_DIPSETTING(	0x21, "70" )
-	PORT_DIPSETTING(	0x23, "80" )
-	PORT_DIPNAME( 0x04,	0x04, DEF_STR( Coinage ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0x04, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x00, "15" )
+	PORT_DIPSETTING(    0x02, "20" )
+	PORT_DIPSETTING(    0x01, "30" )
+	PORT_DIPSETTING(    0x03, "40" )
+	PORT_DIPSETTING(    0x20, "50" )
+	PORT_DIPSETTING(    0x22, "60" )
+	PORT_DIPSETTING(    0x21, "70" )
+	PORT_DIPSETTING(    0x23, "80" )
+	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Coinage ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x04, DEF_STR( 1C_1C ) )
 	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -609,7 +604,7 @@ static INPUT_PORTS_START( tailg )
 	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED(coin_inserted, 0)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED_MEMBER(DEVICE_SELF, cinemat_state,coin_inserted, 0)
 
 	PORT_START("ANALOGX")
 	PORT_BIT( 0xfff, 0x800, IPT_AD_STICK_X ) PORT_MINMAX(0x200,0xe00) PORT_SENSITIVITY(100) PORT_KEYDELTA(50)
@@ -654,7 +649,7 @@ static INPUT_PORTS_START( warrior )
 	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED(coin_inserted, 0)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED_MEMBER(DEVICE_SELF, cinemat_state,coin_inserted, 0)
 INPUT_PORTS_END
 
 
@@ -690,7 +685,7 @@ static INPUT_PORTS_START( armora )
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_SERVICE( 0x40, IP_ACTIVE_HIGH )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED(coin_inserted, 0)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED_MEMBER(DEVICE_SELF, cinemat_state,coin_inserted, 0)
 INPUT_PORTS_END
 
 
@@ -710,23 +705,23 @@ static INPUT_PORTS_START( ripoff )
 
 	PORT_START("SWITCHES")
 	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Lives ) )
-	PORT_DIPSETTING(	0x01, "4" )
-	PORT_DIPSETTING(	0x03, "8" )
-	PORT_DIPSETTING(	0x00, "12" )
-	PORT_DIPSETTING(	0x02, "16" )
+	PORT_DIPSETTING(    0x01, "4" )
+	PORT_DIPSETTING(    0x03, "8" )
+	PORT_DIPSETTING(    0x00, "12" )
+	PORT_DIPSETTING(    0x02, "16" )
 	PORT_DIPNAME( 0x0c, 0x00, DEF_STR( Coinage ) )
-	PORT_DIPSETTING(	0x04, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0x0c, DEF_STR( 4C_3C ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0x08, DEF_STR( 2C_3C ) )
-	PORT_DIPNAME( 0x10,	0x10, DEF_STR( Demo_Sounds ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x10, DEF_STR( On ) )
-	PORT_DIPNAME( 0x20,	0x00, "Scores" )
-	PORT_DIPSETTING(	0x00, "Individual" )
-	PORT_DIPSETTING(	0x20, "Combined" )
-	PORT_SERVICE( 0x40,	IP_ACTIVE_LOW )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED(coin_inserted, 0)
+	PORT_DIPSETTING(    0x04, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x0c, DEF_STR( 4C_3C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x08, DEF_STR( 2C_3C ) )
+	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Demo_Sounds ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( On ) )
+	PORT_DIPNAME( 0x20, 0x00, "Scores" )
+	PORT_DIPSETTING(    0x00, "Individual" )
+	PORT_DIPSETTING(    0x20, "Combined" )
+	PORT_SERVICE( 0x40, IP_ACTIVE_LOW )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED_MEMBER(DEVICE_SELF, cinemat_state,coin_inserted, 0)
 INPUT_PORTS_END
 
 
@@ -763,7 +758,7 @@ static INPUT_PORTS_START( starcas )
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_SERVICE( 0x40, IP_ACTIVE_HIGH )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED(coin_inserted, 0)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED_MEMBER(DEVICE_SELF, cinemat_state,coin_inserted, 0)
 INPUT_PORTS_END
 
 
@@ -779,23 +774,23 @@ static INPUT_PORTS_START( solarq )
 
 	PORT_START("SWITCHES")
 	PORT_DIPNAME( 0x05, 0x05, DEF_STR( Coinage ) )
-	PORT_DIPSETTING(	0x01, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( 4C_3C ) )
-	PORT_DIPSETTING(	0x05, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0x04, DEF_STR( 2C_3C ) )
-	PORT_DIPNAME( 0x02,	0x02, DEF_STR( Bonus_Life ) )
-	PORT_DIPSETTING(	0x02, "25 captures" )
-	PORT_DIPSETTING(	0x00, "40 captures" )
+	PORT_DIPSETTING(    0x01, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 4C_3C ) )
+	PORT_DIPSETTING(    0x05, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x04, DEF_STR( 2C_3C ) )
+	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Bonus_Life ) )
+	PORT_DIPSETTING(    0x02, "25 captures" )
+	PORT_DIPSETTING(    0x00, "40 captures" )
 	PORT_DIPNAME( 0x18, 0x10, DEF_STR( Lives ) )
-	PORT_DIPSETTING(	0x18, "2" )
-	PORT_DIPSETTING(	0x08, "3" )
-	PORT_DIPSETTING(	0x10, "4" )
-	PORT_DIPSETTING(	0x00, "5" )
-	PORT_DIPNAME( 0x20,	0x20, DEF_STR( Free_Play ) )
-	PORT_DIPSETTING(	0x20, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
-	PORT_SERVICE( 0x40,	IP_ACTIVE_HIGH )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED(coin_inserted, 0)
+	PORT_DIPSETTING(    0x18, "2" )
+	PORT_DIPSETTING(    0x08, "3" )
+	PORT_DIPSETTING(    0x10, "4" )
+	PORT_DIPSETTING(    0x00, "5" )
+	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Free_Play ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_SERVICE( 0x40, IP_ACTIVE_HIGH )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED_MEMBER(DEVICE_SELF, cinemat_state,coin_inserted, 0)
 INPUT_PORTS_END
 
 
@@ -808,28 +803,28 @@ static INPUT_PORTS_START( boxingb )
 	PORT_BIT( 0x0010, IP_ACTIVE_LOW,  IPT_BUTTON2 ) PORT_PLAYER(1)
 	PORT_BIT( 0x0020, IP_ACTIVE_LOW,  IPT_BUTTON1 ) PORT_PLAYER(1)
 	PORT_BIT( 0x0fc0, IP_ACTIVE_LOW,  IPT_UNUSED )
-	PORT_BIT( 0xf000, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* dial */
+	PORT_BIT( 0xf000, IP_ACTIVE_HIGH, IPT_SPECIAL ) /* dial */
 
 	PORT_START("SWITCHES")
 	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coinage ) )
-	PORT_DIPSETTING(	0x01, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( 4C_3C ) )
-	PORT_DIPSETTING(	0x03, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0x02, DEF_STR( 2C_3C ) )
-	PORT_DIPNAME( 0x04,	0x00, DEF_STR( Lives ) )
-	PORT_DIPSETTING(	0x04, "3" )
-	PORT_DIPSETTING(	0x00, "5" )
-	PORT_DIPNAME( 0x08,	0x00, DEF_STR( Bonus_Life ) )
-	PORT_DIPSETTING(	0x00, "30,000" )
-	PORT_DIPSETTING(	0x08, "50,000" )
-	PORT_DIPNAME( 0x10,	0x00, DEF_STR( Demo_Sounds ) )
-	PORT_DIPSETTING(	0x10, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x20,	0x20, DEF_STR( Free_Play ) )
-	PORT_DIPSETTING(	0x20, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
-	PORT_SERVICE( 0x40,	IP_ACTIVE_LOW )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED(coin_inserted, 0)
+	PORT_DIPSETTING(    0x01, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 4C_3C ) )
+	PORT_DIPSETTING(    0x03, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x02, DEF_STR( 2C_3C ) )
+	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Lives ) )
+	PORT_DIPSETTING(    0x04, "3" )
+	PORT_DIPSETTING(    0x00, "5" )
+	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Bonus_Life ) )
+	PORT_DIPSETTING(    0x00, "30,000" )
+	PORT_DIPSETTING(    0x08, "50,000" )
+	PORT_DIPNAME( 0x10, 0x00, DEF_STR( Demo_Sounds ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Free_Play ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_SERVICE( 0x40, IP_ACTIVE_LOW )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED_MEMBER(DEVICE_SELF, cinemat_state,coin_inserted, 0)
 
 	PORT_START("DIAL")
 	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_REVERSE PORT_SENSITIVITY(100) PORT_KEYDELTA(5)
@@ -871,7 +866,7 @@ static INPUT_PORTS_START( wotw )
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_SERVICE( 0x40, IP_ACTIVE_LOW )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED(coin_inserted, 0)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED_MEMBER(DEVICE_SELF, cinemat_state,coin_inserted, 0)
 INPUT_PORTS_END
 
 
@@ -913,7 +908,7 @@ static INPUT_PORTS_START( demon )
 	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Free_Play ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED(coin_inserted, 0)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED_MEMBER(DEVICE_SELF, cinemat_state,coin_inserted, 0)
 INPUT_PORTS_END
 
 
@@ -927,39 +922,39 @@ static INPUT_PORTS_START( qb3 )
 	PORT_BIT( 0x0020, IP_ACTIVE_LOW,  IPT_JOYSTICKRIGHT_DOWN )
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW,  IPT_START1 )
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW,  IPT_START2 )
-	PORT_BIT( 0x0100, IP_ACTIVE_LOW,  IPT_BUTTON4 )					// read at $1a5; if 0 add 8 to $25
+	PORT_BIT( 0x0100, IP_ACTIVE_LOW,  IPT_BUTTON4 )                 // read at $1a5; if 0 add 8 to $25
 	PORT_DIPNAME( 0x0200, 0x0200, "Debug" )
-	PORT_DIPSETTING(	  0x0200, DEF_STR( Off ) )
-	PORT_DIPSETTING(	  0x0000, DEF_STR( On ) )
-	PORT_BIT( 0x0400, IP_ACTIVE_LOW,  IPT_BUTTON2 )					// read at $c7; jmp to $3AF1 if 0
+	PORT_DIPSETTING(      0x0200, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+	PORT_BIT( 0x0400, IP_ACTIVE_LOW,  IPT_BUTTON2 )                 // read at $c7; jmp to $3AF1 if 0
 	PORT_BIT( 0x0800, IP_ACTIVE_LOW,  IPT_JOYSTICKLEFT_RIGHT )
 	PORT_DIPNAME( 0x1000, 0x1000, "Infinite Lives" )
-	PORT_DIPSETTING(	  0x1000, DEF_STR( Off ) )
-	PORT_DIPSETTING(	  0x0000, DEF_STR( On ) )
+	PORT_DIPSETTING(      0x1000, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 	PORT_BIT( 0x2000, IP_ACTIVE_LOW,  IPT_JOYSTICKLEFT_LEFT )
 	PORT_BIT( 0x4000, IP_ACTIVE_LOW,  IPT_BUTTON1 )
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW,  IPT_SPECIAL )
 
 	PORT_START("SWITCHES")
 	PORT_DIPNAME( 0x03, 0x02, DEF_STR( Lives ) )
-	PORT_DIPSETTING(	0x00, "2" )
-	PORT_DIPSETTING(	0x02, "3" )
-	PORT_DIPSETTING(	0x01, "4" )
-	PORT_DIPSETTING(	0x03, "5" )
-	PORT_DIPNAME( 0x04,	0x00, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(	0x04, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x08,	0x08, DEF_STR( Free_Play ) )	// read at $244, $2c1
-	PORT_DIPSETTING(	0x08, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x10,	0x00, DEF_STR( Unknown ) )	// read at $27d
-	PORT_DIPSETTING(	0x10, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x20,	0x20, DEF_STR( Unknown ) )	 // read at $282
-	PORT_DIPSETTING(	0x20, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
-	PORT_SERVICE( 0x40,	IP_ACTIVE_LOW )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED(coin_inserted, 0)
+	PORT_DIPSETTING(    0x00, "2" )
+	PORT_DIPSETTING(    0x02, "3" )
+	PORT_DIPSETTING(    0x01, "4" )
+	PORT_DIPSETTING(    0x03, "5" )
+	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Free_Play ) )    // read at $244, $2c1
+	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x10, 0x00, DEF_STR( Unknown ) )  // read at $27d
+	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )   // read at $282
+	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_SERVICE( 0x40, IP_ACTIVE_LOW )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED_MEMBER(DEVICE_SELF, cinemat_state,coin_inserted, 0)
 INPUT_PORTS_END
 
 
@@ -999,8 +994,6 @@ static MACHINE_CONFIG_START( cinemat_nojmi_4k, cinemat_state )
 	MCFG_CPU_DATA_MAP(data_map)
 	MCFG_CPU_IO_MAP(io_map)
 
-	MCFG_MACHINE_START(cinemat)
-	MCFG_MACHINE_RESET(cinemat)
 
 	/* video hardware */
 	MCFG_VIDEO_ATTRIBUTES(VIDEO_ALWAYS_UPDATE)
@@ -1009,9 +1002,8 @@ static MACHINE_CONFIG_START( cinemat_nojmi_4k, cinemat_state )
 	MCFG_SCREEN_REFRESH_RATE(MASTER_CLOCK/4/16/16/16/16/2)
 	MCFG_SCREEN_SIZE(1024, 768)
 	MCFG_SCREEN_VISIBLE_AREA(0, 1023, 0, 767)
-	MCFG_SCREEN_UPDATE(cinemat)
+	MCFG_SCREEN_UPDATE_DRIVER(cinemat_state, screen_update_cinemat)
 
-	MCFG_VIDEO_START(cinemat_bilevel)
 MACHINE_CONFIG_END
 
 
@@ -1056,7 +1048,7 @@ MACHINE_CONFIG_END
 static MACHINE_CONFIG_DERIVED( spacewar, cinemat_nojmi_4k )
 	MCFG_FRAGMENT_ADD(spacewar_sound)
 	MCFG_SCREEN_MODIFY("screen")
-	MCFG_SCREEN_UPDATE(spacewar)
+	MCFG_SCREEN_UPDATE_DRIVER(cinemat_state, screen_update_spacewar)
 MACHINE_CONFIG_END
 
 
@@ -1077,7 +1069,7 @@ MACHINE_CONFIG_END
 
 static MACHINE_CONFIG_DERIVED( sundance, cinemat_jmi_8k )
 	MCFG_FRAGMENT_ADD(sundance_sound)
-	MCFG_VIDEO_START(cinemat_16level)
+	MCFG_VIDEO_START_OVERRIDE(cinemat_state,cinemat_16level)
 MACHINE_CONFIG_END
 
 
@@ -1108,7 +1100,7 @@ MACHINE_CONFIG_END
 
 static MACHINE_CONFIG_DERIVED( solarq, cinemat_jmi_16k )
 	MCFG_FRAGMENT_ADD(solarq_sound)
-	MCFG_VIDEO_START(cinemat_64level)
+	MCFG_VIDEO_START_OVERRIDE(cinemat_state,cinemat_64level)
 MACHINE_CONFIG_END
 
 
@@ -1116,7 +1108,7 @@ static MACHINE_CONFIG_DERIVED( boxingb, cinemat_jmi_32k )
 	MCFG_FRAGMENT_ADD(boxingb_sound)
 	MCFG_SCREEN_MODIFY("screen")
 	MCFG_SCREEN_VISIBLE_AREA(0, 1024, 0, 788)
-	MCFG_VIDEO_START(cinemat_color)
+	MCFG_VIDEO_START_OVERRIDE(cinemat_state,cinemat_color)
 MACHINE_CONFIG_END
 
 
@@ -1128,8 +1120,8 @@ MACHINE_CONFIG_END
 
 
 static MACHINE_CONFIG_DERIVED( wotwc, cinemat_jmi_16k )
-	MCFG_FRAGMENT_ADD(wotwc_sound)
-	MCFG_VIDEO_START(cinemat_color)
+	MCFG_FRAGMENT_ADD(wotw_sound)
+	MCFG_VIDEO_START_OVERRIDE(cinemat_state,cinemat_color)
 MACHINE_CONFIG_END
 
 
@@ -1146,7 +1138,7 @@ static MACHINE_CONFIG_DERIVED( qb3, cinemat_jmi_32k )
 	MCFG_CPU_DATA_MAP(data_map_qb3)
 	MCFG_SCREEN_MODIFY("screen")
 	MCFG_SCREEN_VISIBLE_AREA(0, 1120, 0, 780)
-	MCFG_VIDEO_START(cinemat_qb3color)
+	MCFG_VIDEO_START_OVERRIDE(cinemat_state,cinemat_qb3color)
 MACHINE_CONFIG_END
 
 
@@ -1361,9 +1353,9 @@ ROM_START( spaceftr )
 	ROM_LOAD16_BYTE( "fortrest7.7t", 0x0000, 0x0800, CRC(65d0a225) SHA1(e1fbee5ff42dd040ab2e90bbe2189fcb76d6167e) )
 
 	/* The original fortresp7.7p ROM image was a bad dump, a comparison showed only two bytes difference between it
-    and starcast.p7 from starcas1. A disassembly proved that the two affected bytes resulted in bogus opcodes, which
-    ultimately caused the game to fail. The current ROM taken from starcas1 can be assumed to be equal to a correct
-    dump of fortresp7.7p. The BAD_DUMP flag is kept in just to be sure. */
+	and starcast.p7 from starcas1. A disassembly proved that the two affected bytes resulted in bogus opcodes, which
+	ultimately caused the game to fail. The current ROM taken from starcas1 can be assumed to be equal to a correct
+	dump of fortresp7.7p. The BAD_DUMP flag is kept in just to be sure. */
 	ROM_LOAD16_BYTE( "fortresp7.7p", 0x0001, 0x0800, BAD_DUMP CRC(d8f58d9a) SHA1(abba459431dcacc75099b0d340b957be71b89cfd) ) // taken from starcas1, read note above
 
 	ROM_LOAD16_BYTE( "fortresu7.7u", 0x1000, 0x0800, CRC(13b0287c) SHA1(366a23fd10684975bd5ee190e5227e47a0298ad5) )
@@ -1456,41 +1448,39 @@ ROM_END
  *
  *************************************/
 
-static DRIVER_INIT( speedfrk )
+DRIVER_INIT_MEMBER(cinemat_state,speedfrk)
 {
-	cinemat_state *state = machine.driver_data<cinemat_state>();
-	state->m_gear = 0xe;
-	machine.device("maincpu")->memory().space(AS_IO)->install_legacy_read_handler(0x00, 0x03, FUNC(speedfrk_wheel_r));
-	machine.device("maincpu")->memory().space(AS_IO)->install_legacy_read_handler(0x04, 0x06, FUNC(speedfrk_gear_r));
+	m_gear = 0xe;
+	machine().device("maincpu")->memory().space(AS_IO).install_read_handler(0x00, 0x03, read8_delegate(FUNC(cinemat_state::speedfrk_wheel_r),this));
+	machine().device("maincpu")->memory().space(AS_IO).install_read_handler(0x04, 0x06, read8_delegate(FUNC(cinemat_state::speedfrk_gear_r),this));
 }
 
 
-static DRIVER_INIT( sundance )
+DRIVER_INIT_MEMBER(cinemat_state,sundance)
 {
-	machine.device("maincpu")->memory().space(AS_IO)->install_legacy_read_handler(0x00, 0x0f, FUNC(sundance_inputs_r));
+	machine().device("maincpu")->memory().space(AS_IO).install_read_handler(0x00, 0x0f, read8_delegate(FUNC(cinemat_state::sundance_inputs_r),this));
 }
 
 
-static DRIVER_INIT( tailg )
+DRIVER_INIT_MEMBER(cinemat_state,tailg)
 {
-	machine.device("maincpu")->memory().space(AS_IO)->install_legacy_write_handler(0x07, 0x07, FUNC(mux_select_w));
+	machine().device("maincpu")->memory().space(AS_IO).install_write_handler(0x07, 0x07, write8_delegate(FUNC(cinemat_state::mux_select_w),this));
 }
 
 
-static DRIVER_INIT( boxingb )
+DRIVER_INIT_MEMBER(cinemat_state,boxingb)
 {
-	machine.device("maincpu")->memory().space(AS_IO)->install_legacy_read_handler(0x0c, 0x0f, FUNC(boxingb_dial_r));
-	machine.device("maincpu")->memory().space(AS_IO)->install_legacy_write_handler(0x07, 0x07, FUNC(mux_select_w));
+	machine().device("maincpu")->memory().space(AS_IO).install_read_handler(0x0c, 0x0f, read8_delegate(FUNC(cinemat_state::boxingb_dial_r),this));
+	machine().device("maincpu")->memory().space(AS_IO).install_write_handler(0x07, 0x07, write8_delegate(FUNC(cinemat_state::mux_select_w),this));
 }
 
 
-static DRIVER_INIT( qb3 )
+DRIVER_INIT_MEMBER(cinemat_state,qb3)
 {
-	cinemat_state *state = machine.driver_data<cinemat_state>();
-	machine.device("maincpu")->memory().space(AS_IO)->install_legacy_read_handler(0x0f, 0x0f, FUNC(qb3_frame_r));
-	machine.device("maincpu")->memory().space(AS_IO)->install_legacy_write_handler(0x00, 0x00, FUNC(qb3_ram_bank_w));
+	machine().device("maincpu")->memory().space(AS_IO).install_read_handler(0x0f, 0x0f, read8_delegate(FUNC(cinemat_state::qb3_frame_r),this));
+	machine().device("maincpu")->memory().space(AS_IO).install_write_handler(0x00, 0x00, write8_delegate(FUNC(cinemat_state::qb3_ram_bank_w),this));
 
-	memory_configure_bank(machine, "bank1", 0, 4, state->m_rambase, 0x100*2);
+	membank("bank1")->configure_entries(0, 4, m_rambase, 0x100*2);
 }
 
 
@@ -1501,27 +1491,27 @@ static DRIVER_INIT( qb3 )
  *
  *************************************/
 
-GAME( 1977, spacewar, 0,       spacewar, spacewar, 0,        ORIENTATION_FLIP_Y,   "Cinematronics", "Space Wars", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1978, spaceshp, spacewar,spacewar, spaceshp, 0,        ORIENTATION_FLIP_Y,   "Cinematronics (Sega license)", "Space Ship", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1979, barrier,  0,       barrier,  barrier,  0,        ORIENTATION_FLIP_X ^ ROT270, "Vectorbeam", "Barrier", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1979, speedfrk, 0,       speedfrk, speedfrk, speedfrk, ORIENTATION_FLIP_Y,   "Vectorbeam", "Speed Freak", GAME_NO_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1979, starhawk, 0,       starhawk, starhawk, 0,        ORIENTATION_FLIP_Y,   "Cinematronics", "Star Hawk", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAMEL(1979, sundance, 0,       sundance, sundance, sundance, ORIENTATION_FLIP_X ^ ROT270, "Cinematronics", "Sundance", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_voffff20 )
-GAMEL(1979, tailg,    0,       tailg,    tailg,    tailg,    ORIENTATION_FLIP_Y,   "Cinematronics", "Tailgunner", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_ho20ffff )
-GAME( 1979, warrior,  0,       warrior,  warrior,  0,        ORIENTATION_FLIP_Y,   "Vectorbeam", "Warrior", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAMEL(1980, armora,   0,       armora,   armora,   0,        ORIENTATION_FLIP_Y,   "Cinematronics", "Armor Attack", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_armora )
-GAMEL(1980, armorap,  armora,  armora,   armora,   0,        ORIENTATION_FLIP_Y,   "Cinematronics", "Armor Attack (prototype)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_armora )
-GAMEL(1980, armorar,  armora,  armora,   armora,   0,        ORIENTATION_FLIP_Y,   "Cinematronics (Rock-Ola license)", "Armor Attack (Rock-Ola)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_armora )
-GAME( 1980, ripoff,   0,       ripoff,   ripoff,   0,        ORIENTATION_FLIP_Y,   "Cinematronics", "Rip Off", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAMEL(1980, starcas,  0,       starcas,  starcas,  0,        ORIENTATION_FLIP_Y,   "Cinematronics", "Star Castle (version 3)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_starcas )
-GAMEL(1980, starcas1, starcas, starcas,  starcas,  0,        ORIENTATION_FLIP_Y,   "Cinematronics", "Star Castle (older)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_starcas )
-GAMEL(1980, starcasp, starcas, starcas,  starcas,  0,        ORIENTATION_FLIP_Y,   "Cinematronics", "Star Castle (prototype)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_starcas )
-GAMEL(1980, starcase, starcas, starcas,  starcas,  0,        ORIENTATION_FLIP_Y,   "Cinematronics (Mottoeis license)", "Star Castle (Mottoeis)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_starcas )
-GAMEL(1980, stellcas, starcas, starcas,  starcas,  0,        ORIENTATION_FLIP_Y,   "bootleg (Elettronolo)", "Stellar Castle (Elettronolo)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_starcas )
-GAMEL(1981, spaceftr, starcas, starcas,  starcas,  0,        ORIENTATION_FLIP_Y,   "Cinematronics (Zaccaria license)", "Space Fortress (Zaccaria)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_starcas )
-GAMEL(1981, solarq,   0,       solarq,   solarq,   0,        ORIENTATION_FLIP_Y ^ ORIENTATION_FLIP_X, "Cinematronics", "Solar Quest", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_solarq )
-GAME( 1981, boxingb,  0,       boxingb,  boxingb,  boxingb,  ORIENTATION_FLIP_Y,   "Cinematronics", "Boxing Bugs", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1981, wotw,     0,       wotw,     wotw,     0,        ORIENTATION_FLIP_Y,   "Cinematronics", "War of the Worlds", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1981, wotwc,    wotw,    wotwc,    wotw,     0,        ORIENTATION_FLIP_Y,   "Cinematronics", "War of the Worlds (color)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1982, demon,    0,       demon,    demon,    0,        ORIENTATION_FLIP_Y,   "Rock-Ola", "Demon", GAME_SUPPORTS_SAVE )
-GAME( 1982, qb3,      0,       qb3,      qb3,      qb3,      ORIENTATION_FLIP_Y,   "Rock-Ola", "QB-3 (prototype)", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
+GAME( 1977, spacewar, 0,       spacewar, spacewar, driver_device, 0,        ORIENTATION_FLIP_Y,   "Cinematronics", "Space Wars", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1978, spaceshp, spacewar,spacewar, spaceshp, driver_device, 0,        ORIENTATION_FLIP_Y,   "Cinematronics (Sega license)", "Space Ship", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAMEL(1979, barrier,  0,       barrier,  barrier, driver_device,  0,        ORIENTATION_FLIP_X ^ ROT270, "Cinematronics (Vectorbeam license)", "Barrier", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_barrier ) // developed by Cinematronics, then (when they noticed it wasn't going to be a successful game) sold to Vectorbeam, and ultimately back in the hands of Cinematronics again after they bought the dying company Vectorbeam
+GAME( 1979, speedfrk, 0,       speedfrk, speedfrk, cinemat_state, speedfrk, ORIENTATION_FLIP_Y,   "Vectorbeam", "Speed Freak", GAME_NO_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1979, starhawk, 0,       starhawk, starhawk, driver_device, 0,        ORIENTATION_FLIP_Y,   "Cinematronics", "Star Hawk", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAMEL(1979, sundance, 0,       sundance, sundance, cinemat_state, sundance, ORIENTATION_FLIP_X ^ ROT270, "Cinematronics", "Sundance", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_sundance )
+GAMEL(1979, tailg,    0,       tailg,    tailg, cinemat_state,    tailg,    ORIENTATION_FLIP_Y,   "Cinematronics", "Tailgunner", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_tailg )
+GAME( 1979, warrior,  0,       warrior,  warrior, driver_device,  0,        ORIENTATION_FLIP_Y,   "Vectorbeam", "Warrior", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAMEL(1980, armora,   0,       armora,   armora, driver_device,   0,        ORIENTATION_FLIP_Y,   "Cinematronics", "Armor Attack", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_armora )
+GAMEL(1980, armorap,  armora,  armora,   armora, driver_device,   0,        ORIENTATION_FLIP_Y,   "Cinematronics", "Armor Attack (prototype)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_armora )
+GAMEL(1980, armorar,  armora,  armora,   armora, driver_device,   0,        ORIENTATION_FLIP_Y,   "Cinematronics (Rock-Ola license)", "Armor Attack (Rock-Ola)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_armora )
+GAME( 1980, ripoff,   0,       ripoff,   ripoff, driver_device,   0,        ORIENTATION_FLIP_Y,   "Cinematronics", "Rip Off", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAMEL(1980, starcas,  0,       starcas,  starcas, driver_device,  0,        ORIENTATION_FLIP_Y,   "Cinematronics", "Star Castle (version 3)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_starcas )
+GAMEL(1980, starcas1, starcas, starcas,  starcas, driver_device,  0,        ORIENTATION_FLIP_Y,   "Cinematronics", "Star Castle (older)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_starcas )
+GAMEL(1980, starcasp, starcas, starcas,  starcas, driver_device,  0,        ORIENTATION_FLIP_Y,   "Cinematronics", "Star Castle (prototype)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_starcas )
+GAMEL(1980, starcase, starcas, starcas,  starcas, driver_device,  0,        ORIENTATION_FLIP_Y,   "Cinematronics (Mottoeis license)", "Star Castle (Mottoeis)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_starcas )
+GAMEL(1980, stellcas, starcas, starcas,  starcas, driver_device,  0,        ORIENTATION_FLIP_Y,   "bootleg (Elettronolo)", "Stellar Castle (Elettronolo)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_starcas )
+GAMEL(1981, spaceftr, starcas, starcas,  starcas, driver_device,  0,        ORIENTATION_FLIP_Y,   "Cinematronics (Zaccaria license)", "Space Fortress (Zaccaria)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_starcas )
+GAMEL(1981, solarq,   0,       solarq,   solarq, driver_device,   0,        ORIENTATION_FLIP_Y ^ ORIENTATION_FLIP_X, "Cinematronics", "Solar Quest", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_solarq )
+GAME( 1981, boxingb,  0,       boxingb,  boxingb, cinemat_state,  boxingb,  ORIENTATION_FLIP_Y,   "Cinematronics", "Boxing Bugs", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1981, wotw,     0,       wotw,     wotw, driver_device,     0,        ORIENTATION_FLIP_Y,   "Cinematronics", "War of the Worlds", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1981, wotwc,    wotw,    wotwc,    wotw, driver_device,     0,        ORIENTATION_FLIP_Y,   "Cinematronics", "War of the Worlds (color)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAMEL(1982, demon,    0,       demon,    demon, driver_device,    0,        ORIENTATION_FLIP_Y,   "Rock-Ola", "Demon", GAME_SUPPORTS_SAVE, layout_demon )
+GAME( 1982, qb3,      0,       qb3,      qb3, cinemat_state,      qb3,      ORIENTATION_FLIP_Y,   "Rock-Ola", "QB-3 (prototype)", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )

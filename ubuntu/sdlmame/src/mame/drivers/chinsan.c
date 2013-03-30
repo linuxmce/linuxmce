@@ -50,18 +50,32 @@ MM63.10N
 class chinsan_state : public driver_device
 {
 public:
-	chinsan_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	chinsan_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_video(*this, "video"){ }
 
 	/* memory pointers */
-	UINT8 *  m_video;
+	required_shared_ptr<UINT8> m_video;
 
 	/* misc */
 	UINT8    m_port_select;
 	UINT32   m_adpcm_pos;
 	UINT8    m_adpcm_idle;
-	UINT8	 m_adpcm_data;
+	UINT8    m_adpcm_data;
 	UINT8    m_trigger;
+	DECLARE_WRITE8_MEMBER(ctrl_w);
+	DECLARE_WRITE8_MEMBER(chinsan_port00_w);
+	DECLARE_READ8_MEMBER(chinsan_input_port_0_r);
+	DECLARE_READ8_MEMBER(chinsan_input_port_1_r);
+	DECLARE_WRITE8_MEMBER(ym_port_w1);
+	DECLARE_WRITE8_MEMBER(ym_port_w2);
+	DECLARE_WRITE8_MEMBER(chin_adpcm_w);
+	DECLARE_DRIVER_INIT(chinsan);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_chinsan(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
@@ -71,22 +85,21 @@ public:
  *
  *************************************/
 
-static PALETTE_INIT( chinsan )
+void chinsan_state::palette_init()
 {
-	UINT8 *src = machine.region( "color_proms" )->base();
+	UINT8 *src = machine().root_device().memregion( "color_proms" )->base();
 	int i;
 
 	for (i = 0; i < 0x100; i++)
-		palette_set_color_rgb(machine, i, pal4bit(src[i + 0x200]), pal4bit(src[i + 0x100]), pal4bit(src[i + 0x000]));
+		palette_set_color_rgb(machine(), i, pal4bit(src[i + 0x200]), pal4bit(src[i + 0x100]), pal4bit(src[i + 0x000]));
 }
 
-static VIDEO_START( chinsan )
+void chinsan_state::video_start()
 {
 }
 
-static SCREEN_UPDATE( chinsan )
+UINT32 chinsan_state::screen_update_chinsan(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	chinsan_state *state = screen->machine().driver_data<chinsan_state>();
 	int y, x, count;
 	count = 0;
 	for (y = 0; y < 32; y++)
@@ -94,9 +107,9 @@ static SCREEN_UPDATE( chinsan )
 		for (x = 0; x < 64; x++)
 		{
 			int tileno, colour;
-			tileno = state->m_video[count] | (state->m_video[count + 0x800] << 8);
-			colour = state->m_video[count + 0x1000] >> 3;
-			drawgfx_opaque(bitmap,cliprect,screen->machine().gfx[0],tileno,colour,0,0,x*8,y*8);
+			tileno = m_video[count] | (m_video[count + 0x800] << 8);
+			colour = m_video[count + 0x1000] >> 3;
+			drawgfx_opaque(bitmap,cliprect,machine().gfx[0],tileno,colour,0,0,x*8,y*8);
 			count++;
 		}
 	}
@@ -112,18 +125,18 @@ static SCREEN_UPDATE( chinsan )
  *
  *************************************/
 
-static WRITE8_HANDLER( ctrl_w )
+WRITE8_MEMBER(chinsan_state::ctrl_w)
 {
-	memory_set_bank(space->machine(), "bank1", data >> 6);
+	membank("bank1")->set_entry(data >> 6);
 }
 
-static WRITE8_DEVICE_HANDLER( ym_port_w1 )
+WRITE8_MEMBER(chinsan_state::ym_port_w1)
 {
 	logerror("ym_write port 1 %02x\n", data);
 }
 
 
-static WRITE8_DEVICE_HANDLER( ym_port_w2 )
+WRITE8_MEMBER(chinsan_state::ym_port_w2)
 {
 	logerror("ym_write port 2 %02x\n", data);
 }
@@ -136,98 +149,96 @@ static const ym2203_interface ym2203_config =
 		AY8910_DEFAULT_LOADS,
 		DEVCB_INPUT_PORT("DSW1"),
 		DEVCB_INPUT_PORT("DSW2"),
-		DEVCB_HANDLER(ym_port_w1),
-		DEVCB_HANDLER(ym_port_w2)
+		DEVCB_DRIVER_MEMBER(chinsan_state,ym_port_w1),
+		DEVCB_DRIVER_MEMBER(chinsan_state,ym_port_w2)
 	},
+	DEVCB_NULL
 };
 
-static WRITE8_HANDLER( chinsan_port00_w )
+WRITE8_MEMBER(chinsan_state::chinsan_port00_w)
 {
-	chinsan_state *state = space->machine().driver_data<chinsan_state>();
 
-	state->m_port_select = data;
+	m_port_select = data;
 
 	if (
-	   (data != 0x40) &&
-	   (data != 0x4f) &&
-	   (data != 0x53) &&
-	   (data != 0x57) &&
-	   (data != 0x5b) &&
-	   (data != 0x5d) &&
-	   (data != 0x5e))
+		(data != 0x40) &&
+		(data != 0x4f) &&
+		(data != 0x53) &&
+		(data != 0x57) &&
+		(data != 0x5b) &&
+		(data != 0x5d) &&
+		(data != 0x5e))
 		logerror("write port 00 %02x\n", data);
 
 }
 
-static READ8_HANDLER( chinsan_input_port_0_r )
+READ8_MEMBER(chinsan_state::chinsan_input_port_0_r)
 {
-	chinsan_state *state = space->machine().driver_data<chinsan_state>();
 
 	//return 0xff; // the inputs don't seem to work, so just return ff for now
 
-	switch (state->m_port_select)
+	switch (m_port_select)
 	{
 		/* i doubt these are both really the same.. */
 		case 0x40:
 		case 0x4f:
-			return input_port_read(space->machine(), "MAHJONG_P2_1");
+			return ioport("MAHJONG_P2_1")->read();
 
 		case 0x53:
-			return input_port_read(space->machine(), "MAHJONG_P2_2");
+			return ioport("MAHJONG_P2_2")->read();
 
 		case 0x57:
-			return input_port_read(space->machine(), "MAHJONG_P2_3");
+			return ioport("MAHJONG_P2_3")->read();
 
 		case 0x5b:
-			return input_port_read(space->machine(), "MAHJONG_P2_4");
+			return ioport("MAHJONG_P2_4")->read();
 
 		case 0x5d:
-			return input_port_read(space->machine(), "MAHJONG_P2_5");
+			return ioport("MAHJONG_P2_5")->read();
 
 		case 0x5e:
-			return input_port_read(space->machine(), "MAHJONG_P2_6");
+			return ioport("MAHJONG_P2_6")->read();
 	}
 
-	printf("chinsan_input_port_0_r unk_r %02x\n", state->m_port_select);
-	return space->machine().rand();
+	printf("chinsan_input_port_0_r unk_r %02x\n", m_port_select);
+	return machine().rand();
 }
 
-static READ8_HANDLER( chinsan_input_port_1_r )
+READ8_MEMBER(chinsan_state::chinsan_input_port_1_r)
 {
-	chinsan_state *state = space->machine().driver_data<chinsan_state>();
 
-	switch (state->m_port_select)
+	switch (m_port_select)
 	{
 		/* i doubt these are both really the same.. */
 		case 0x40:
 		case 0x4f:
-			return input_port_read(space->machine(), "MAHJONG_P1_1");
+			return ioport("MAHJONG_P1_1")->read();
 
 		case 0x53:
-			return input_port_read(space->machine(), "MAHJONG_P1_2");
+			return ioport("MAHJONG_P1_2")->read();
 
 		case 0x57:
-			return input_port_read(space->machine(), "MAHJONG_P1_3");
+			return ioport("MAHJONG_P1_3")->read();
 
 		case 0x5b:
-			return input_port_read(space->machine(), "MAHJONG_P1_4");
+			return ioport("MAHJONG_P1_4")->read();
 
 		case 0x5d:
-			return input_port_read(space->machine(), "MAHJONG_P1_5");
+			return ioport("MAHJONG_P1_5")->read();
 
 		case 0x5e:
-			return input_port_read(space->machine(), "MAHJONG_P1_6");
+			return ioport("MAHJONG_P1_6")->read();
 	}
 
-	printf("chinsan_input_port_1_r unk_r %02x\n", state->m_port_select);
-	return space->machine().rand();
+	printf("chinsan_input_port_1_r unk_r %02x\n", m_port_select);
+	return machine().rand();
 }
 
-static WRITE8_DEVICE_HANDLER( chin_adpcm_w )
+WRITE8_MEMBER(chinsan_state::chin_adpcm_w)
 {
-	chinsan_state *state = device->machine().driver_data<chinsan_state>();
-	state->m_adpcm_pos = (data & 0xff) * 0x100;
-	state->m_adpcm_idle = 0;
+	device_t *device = machine().device("adpcm");
+	m_adpcm_pos = (data & 0xff) * 0x100;
+	m_adpcm_idle = 0;
 	msm5205_reset_w(device, 0);
 }
 
@@ -237,21 +248,21 @@ static WRITE8_DEVICE_HANDLER( chin_adpcm_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( chinsan_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( chinsan_map, AS_PROGRAM, 8, chinsan_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0xbfff) AM_ROMBANK("bank1")
 	AM_RANGE(0xc000, 0xdfff) AM_RAM
-	AM_RANGE(0xe000, 0xf7ff) AM_RAM AM_BASE_MEMBER(chinsan_state, m_video)
+	AM_RANGE(0xe000, 0xf7ff) AM_RAM AM_SHARE("video")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( chinsan_io, AS_IO, 8 )
+static ADDRESS_MAP_START( chinsan_io, AS_IO, 8, chinsan_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0x00) AM_WRITE(chinsan_port00_w)
 	AM_RANGE(0x01, 0x01) AM_READ(chinsan_input_port_0_r)
 	AM_RANGE(0x02, 0x02) AM_READ(chinsan_input_port_1_r)
-	AM_RANGE(0x10, 0x11) AM_DEVREADWRITE("ymsnd", ym2203_r, ym2203_w)
-	AM_RANGE(0x20, 0x20) AM_DEVWRITE("adpcm", chin_adpcm_w)
-	AM_RANGE(0x30, 0x30) AM_WRITE(ctrl_w)	// ROM bank + unknown stuff (input mutliplex?)
+	AM_RANGE(0x10, 0x11) AM_DEVREADWRITE_LEGACY("ymsnd", ym2203_r, ym2203_w)
+	AM_RANGE(0x20, 0x20) AM_WRITE(chin_adpcm_w)
+	AM_RANGE(0x30, 0x30) AM_WRITE(ctrl_w)   // ROM bank + unknown stuff (input mutliplex?)
 ADDRESS_MAP_END
 
 
@@ -539,7 +550,7 @@ static void chin_adpcm_int( device_t *device )
 	}
 	else
 	{
-		UINT8 *ROM = device->machine().region("adpcm")->base();
+		UINT8 *ROM = device->machine().root_device().memregion("adpcm")->base();
 
 		state->m_adpcm_data = ((state->m_trigger ? (ROM[state->m_adpcm_pos] & 0x0f) : (ROM[state->m_adpcm_pos] & 0xf0) >> 4));
 		msm5205_data_w(device, state->m_adpcm_data & 0xf);
@@ -555,8 +566,8 @@ static void chin_adpcm_int( device_t *device )
 
 static const msm5205_interface msm5205_config =
 {
-	chin_adpcm_int,	/* interrupt function */
-	MSM5205_S64_4B	/* 8kHz */
+	chin_adpcm_int, /* interrupt function */
+	MSM5205_S64_4B  /* 8kHz */
 };
 
 /*************************************
@@ -565,56 +576,49 @@ static const msm5205_interface msm5205_config =
  *
  *************************************/
 
-static MACHINE_START( chinsan )
+void chinsan_state::machine_start()
 {
-	chinsan_state *state = machine.driver_data<chinsan_state>();
 
-	memory_configure_bank(machine, "bank1", 0, 4, machine.region("maincpu")->base() + 0x10000, 0x4000);
+	membank("bank1")->configure_entries(0, 4, memregion("maincpu")->base() + 0x10000, 0x4000);
 
-	state->save_item(NAME(state->m_adpcm_idle));
-	state->save_item(NAME(state->m_port_select));
-	state->save_item(NAME(state->m_adpcm_pos));
-	state->save_item(NAME(state->m_adpcm_data));
-	state->save_item(NAME(state->m_trigger));
+	save_item(NAME(m_adpcm_idle));
+	save_item(NAME(m_port_select));
+	save_item(NAME(m_adpcm_pos));
+	save_item(NAME(m_adpcm_data));
+	save_item(NAME(m_trigger));
 }
 
-static MACHINE_RESET( chinsan )
+void chinsan_state::machine_reset()
 {
-	chinsan_state *state = machine.driver_data<chinsan_state>();
 
-	state->m_adpcm_idle = 1;
-	state->m_port_select = 0;
-	state->m_adpcm_pos = 0;
-	state->m_adpcm_data = 0;
-	state->m_trigger = 0;
+	m_adpcm_idle = 1;
+	m_port_select = 0;
+	m_adpcm_pos = 0;
+	m_adpcm_data = 0;
+	m_trigger = 0;
 }
 
 
 static MACHINE_CONFIG_START( chinsan, chinsan_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80,10000000/2)		 /* ? MHz */
+	MCFG_CPU_ADD("maincpu", Z80,10000000/2)      /* ? MHz */
 	MCFG_CPU_PROGRAM_MAP(chinsan_map)
 	MCFG_CPU_IO_MAP(chinsan_io)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", chinsan_state,  irq0_line_hold)
 
-	MCFG_MACHINE_START( chinsan )
-	MCFG_MACHINE_RESET( chinsan )
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(512, 256)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
 	MCFG_SCREEN_VISIBLE_AREA(24, 512-24-1, 16, 256-16-1)
-	MCFG_SCREEN_UPDATE(chinsan)
+	MCFG_SCREEN_UPDATE_DRIVER(chinsan_state, screen_update_chinsan)
 
 	MCFG_GFXDECODE(chinsan)
 	MCFG_PALETTE_LENGTH(0x100)
-	MCFG_PALETTE_INIT(chinsan)
 
-	MCFG_VIDEO_START(chinsan)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -642,7 +646,7 @@ MACHINE_CONFIG_END
 ROM_START( chinsan )
 	ROM_REGION( 0x20000, "maincpu", 0 ) /* encrypted code / data */
 	ROM_LOAD( "mm00.7d", 0x00000, 0x08000, CRC(f7a4414f) SHA1(f65223b2928f610ab97fda2f2c008806cf2420e5) )
-	ROM_CONTINUE(        0x00000, 0x08000 )	// first half is blank
+	ROM_CONTINUE(        0x00000, 0x08000 ) // first half is blank
 	ROM_LOAD( "mm01.8d", 0x10000, 0x10000, CRC(c69ddbf5) SHA1(9533365c1761b113174d53a2e23ce6a7baca7dfe) )
 
 	ROM_REGION( 0x2000, "user1", 0 ) /* MC8123 key */
@@ -672,9 +676,9 @@ ROM_END
  *
  *************************************/
 
-static DRIVER_INIT( chinsan )
+DRIVER_INIT_MEMBER(chinsan_state,chinsan)
 {
-	mc8123_decrypt_rom(machine, "maincpu", "user1", "bank1", 4);
+	mc8123_decrypt_rom(machine(), "maincpu", "user1", "bank1", 4);
 }
 
 
@@ -684,4 +688,4 @@ static DRIVER_INIT( chinsan )
  *
  *************************************/
 
-GAME( 1987, chinsan,  0,    chinsan, chinsan, chinsan, ROT0, "Sanritsu", "Ganbare Chinsan Ooshoubu (MC-8123A, 317-5012)", GAME_SUPPORTS_SAVE )
+GAME( 1987, chinsan,  0,    chinsan, chinsan, chinsan_state, chinsan, ROT0, "Sanritsu", "Ganbare Chinsan Ooshoubu (MC-8123A, 317-5012)", GAME_SUPPORTS_SAVE )

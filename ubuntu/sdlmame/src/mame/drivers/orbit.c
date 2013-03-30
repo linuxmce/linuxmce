@@ -23,7 +23,7 @@ Atari Orbit Driver
 #include "sound/discrete.h"
 
 
-#define MASTER_CLOCK		XTAL_12_096MHz
+#define MASTER_CLOCK        XTAL_12_096MHz
 
 /*************************************
  *
@@ -31,26 +31,24 @@ Atari Orbit Driver
  *
  *************************************/
 
-static TIMER_DEVICE_CALLBACK( nmi_32v )
+TIMER_DEVICE_CALLBACK_MEMBER(orbit_state::nmi_32v)
 {
-	orbit_state *state = timer.machine().driver_data<orbit_state>();
 	int scanline = param;
-	int nmistate = (scanline & 32) && (state->m_misc_flags & 4);
-	device_set_input_line(state->m_maincpu, INPUT_LINE_NMI, nmistate ? ASSERT_LINE : CLEAR_LINE);
+	int nmistate = (scanline & 32) && (m_misc_flags & 4);
+	m_maincpu->set_input_line(INPUT_LINE_NMI, nmistate ? ASSERT_LINE : CLEAR_LINE);
 }
 
 
-static TIMER_CALLBACK( irq_off )
+TIMER_CALLBACK_MEMBER(orbit_state::irq_off)
 {
-	orbit_state *state = machine.driver_data<orbit_state>();
-	device_set_input_line(state->m_maincpu, 0, CLEAR_LINE);
+	m_maincpu->set_input_line(0, CLEAR_LINE);
 }
 
 
-static INTERRUPT_GEN( orbit_interrupt )
+INTERRUPT_GEN_MEMBER(orbit_state::orbit_interrupt)
 {
-	device_set_input_line(device, 0, ASSERT_LINE);
-	device->machine().scheduler().timer_set(device->machine().primary_screen->time_until_vblank_end(), FUNC(irq_off));
+	device.execute().set_input_line(0, ASSERT_LINE);
+	machine().scheduler().timer_set(machine().primary_screen->time_until_vblank_end(), timer_expired_delegate(FUNC(orbit_state::irq_off),this));
 }
 
 
@@ -61,9 +59,9 @@ static INTERRUPT_GEN( orbit_interrupt )
  *
  *************************************/
 
-static void update_misc_flags(running_machine &machine, UINT8 val)
+static void update_misc_flags(address_space &space, UINT8 val)
 {
-	orbit_state *state = machine.driver_data<orbit_state>();
+	orbit_state *state = space.machine().driver_data<orbit_state>();
 
 	state->m_misc_flags = val;
 
@@ -76,25 +74,24 @@ static void update_misc_flags(running_machine &machine, UINT8 val)
 	/* BIT6 => HYPER LED    */
 	/* BIT7 => WARNING SND  */
 
-	discrete_sound_w(state->m_discrete, ORBIT_WARNING_EN, BIT(state->m_misc_flags, 7));
+	discrete_sound_w(state->m_discrete, space, ORBIT_WARNING_EN, BIT(state->m_misc_flags, 7));
 
-	set_led_status(machine, 0, BIT(state->m_misc_flags, 3));
-	set_led_status(machine, 1, BIT(state->m_misc_flags, 6));
+	set_led_status(space.machine(), 0, BIT(state->m_misc_flags, 3));
+	set_led_status(space.machine(), 1, BIT(state->m_misc_flags, 6));
 
-	coin_lockout_w(machine, 0, !BIT(state->m_misc_flags, 1));
-	coin_lockout_w(machine, 1, !BIT(state->m_misc_flags, 1));
+	coin_lockout_w(space.machine(), 0, !BIT(state->m_misc_flags, 1));
+	coin_lockout_w(space.machine(), 1, !BIT(state->m_misc_flags, 1));
 }
 
 
-static WRITE8_HANDLER( orbit_misc_w )
+WRITE8_MEMBER(orbit_state::orbit_misc_w)
 {
-	orbit_state *state = space->machine().driver_data<orbit_state>();
 	UINT8 bit = offset >> 1;
 
 	if (offset & 1)
-		update_misc_flags(space->machine(), state->m_misc_flags | (1 << bit));
+		update_misc_flags(space, m_misc_flags | (1 << bit));
 	else
-		update_misc_flags(space->machine(), state->m_misc_flags & ~(1 << bit));
+		update_misc_flags(space, m_misc_flags & ~(1 << bit));
 }
 
 
@@ -105,7 +102,7 @@ static WRITE8_HANDLER( orbit_misc_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( orbit_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( orbit_map, AS_PROGRAM, 8, orbit_state )
 	ADDRESS_MAP_GLOBAL_MASK(0x7fff)
 	AM_RANGE(0x0000, 0x00ff) AM_MIRROR(0x0700) AM_RAM
 	AM_RANGE(0x0800, 0x0800) AM_MIRROR(0x07ff) AM_READ_PORT("P1")
@@ -113,13 +110,13 @@ static ADDRESS_MAP_START( orbit_map, AS_PROGRAM, 8 )
 	AM_RANGE(0x1800, 0x1800) AM_MIRROR(0x07ff) AM_READ_PORT("DSW1")
 	AM_RANGE(0x2000, 0x2000) AM_MIRROR(0x07ff) AM_READ_PORT("DSW2")
 	AM_RANGE(0x2800, 0x2800) AM_MIRROR(0x07ff) AM_READ_PORT("BUTTONS")
-	AM_RANGE(0x3000, 0x33bf) AM_MIRROR(0x0400) AM_RAM_WRITE(orbit_playfield_w) AM_BASE_MEMBER(orbit_state, m_playfield_ram)
-	AM_RANGE(0x33c0, 0x33ff) AM_MIRROR(0x0400) AM_RAM AM_BASE_MEMBER(orbit_state, m_sprite_ram)
-	AM_RANGE(0x3800, 0x3800) AM_MIRROR(0x00ff) AM_DEVWRITE("discrete", orbit_note_w)
-	AM_RANGE(0x3900, 0x3900) AM_MIRROR(0x00ff) AM_DEVWRITE("discrete", orbit_noise_amp_w)
-	AM_RANGE(0x3a00, 0x3a00) AM_MIRROR(0x00ff) AM_DEVWRITE("discrete", orbit_note_amp_w)
+	AM_RANGE(0x3000, 0x33bf) AM_MIRROR(0x0400) AM_RAM_WRITE(orbit_playfield_w) AM_SHARE("playfield_ram")
+	AM_RANGE(0x33c0, 0x33ff) AM_MIRROR(0x0400) AM_RAM AM_SHARE("sprite_ram")
+	AM_RANGE(0x3800, 0x3800) AM_MIRROR(0x00ff) AM_WRITE(orbit_note_w)
+	AM_RANGE(0x3900, 0x3900) AM_MIRROR(0x00ff) AM_WRITE(orbit_noise_amp_w)
+	AM_RANGE(0x3a00, 0x3a00) AM_MIRROR(0x00ff) AM_WRITE(orbit_note_amp_w)
 	AM_RANGE(0x3c00, 0x3c0f) AM_MIRROR(0x00f0) AM_WRITE(orbit_misc_w)
-	AM_RANGE(0x3e00, 0x3e00) AM_MIRROR(0x00ff) AM_DEVWRITE("discrete", orbit_noise_rst_w)
+	AM_RANGE(0x3e00, 0x3e00) AM_MIRROR(0x00ff) AM_WRITE(orbit_noise_rst_w)
 	AM_RANGE(0x3f00, 0x3f00) AM_MIRROR(0x00ff) AM_WRITE(watchdog_reset_w)
 	AM_RANGE(0x6000, 0x7fff) AM_ROM
 ADDRESS_MAP_END
@@ -133,7 +130,7 @@ ADDRESS_MAP_END
  *************************************/
 
 static INPUT_PORTS_START( orbit )
-	PORT_START("P1")	/* 0800 */
+	PORT_START("P1")    /* 0800 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(1) /* actually buttons */
@@ -143,7 +140,7 @@ static INPUT_PORTS_START( orbit )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_TILT )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )
 
-	PORT_START("P2")	/* 1000 */
+	PORT_START("P2")    /* 1000 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(2) /* actually buttons */
@@ -153,7 +150,7 @@ static INPUT_PORTS_START( orbit )
 	PORT_SERVICE( 0x40, IP_ACTIVE_LOW )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )
 
-	PORT_START("DSW1")	/* 1800 */
+	PORT_START("DSW1")  /* 1800 */
 	PORT_DIPNAME( 0x07, 0x00, "Play Time Per Credit" ) PORT_DIPLOCATION("DSW1:1,2,3")
 	PORT_DIPSETTING( 0x00, "0:30" )
 	PORT_DIPSETTING( 0x01, "1:00" )
@@ -174,7 +171,7 @@ static INPUT_PORTS_START( orbit )
 	PORT_DIPUNUSED_DIPLOC( 0x40, 0x00, "DSW1:7" )
 	PORT_DIPUNUSED_DIPLOC( 0x80, 0x00, "DSW1:8" )
 
-	PORT_START("DSW2")	/* 2000 */
+	PORT_START("DSW2")  /* 2000 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_NAME("Game Reset") PORT_CODE(KEYCODE_PLUS_PAD)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_NAME("Game 9") PORT_CODE(KEYCODE_9_PAD)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_NAME("Game 8") PORT_CODE(KEYCODE_8_PAD)
@@ -188,9 +185,9 @@ static INPUT_PORTS_START( orbit )
 	PORT_DIPNAME( 0x40, 0x40, "DIAG TEST" ) /* should be off */
 	PORT_DIPSETTING( 0x40, DEF_STR( Off ))
 	PORT_DIPSETTING( 0x00, DEF_STR( On ))
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_VBLANK )
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 
-	PORT_START("BUTTONS")	/* 2800 */
+	PORT_START("BUTTONS")   /* 2800 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_NAME("Game 7 / Strong Gravity") PORT_CODE(KEYCODE_7_PAD)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_NAME("Game 6 / Stars") PORT_CODE(KEYCODE_6_PAD)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_NAME("Game 5 / Unlimited Supplies") PORT_CODE(KEYCODE_5_PAD)
@@ -272,23 +269,19 @@ GFXDECODE_END
  *
  *************************************/
 
-static MACHINE_START( orbit )
+void orbit_state::machine_start()
 {
-	orbit_state *state = machine.driver_data<orbit_state>();
 
-	state->m_maincpu = machine.device("maincpu");
-	state->m_discrete = machine.device("discrete");
+	m_maincpu = machine().device<cpu_device>("maincpu");
 
-	state->save_item(NAME(state->m_misc_flags));
-	state->save_item(NAME(state->m_flip_screen));
+	save_item(NAME(m_misc_flags));
+	save_item(NAME(m_flip_screen));
 }
 
-static MACHINE_RESET( orbit )
+void orbit_state::machine_reset()
 {
-	orbit_state *state = machine.driver_data<orbit_state>();
-
-	update_misc_flags(machine, 0);
-	state->m_flip_screen = 0;
+	update_misc_flags(generic_space(), 0);
+	m_flip_screen = 0;
 }
 
 
@@ -303,23 +296,19 @@ static MACHINE_CONFIG_START( orbit, orbit_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6800, MASTER_CLOCK / 16)
 	MCFG_CPU_PROGRAM_MAP(orbit_map)
-	MCFG_CPU_VBLANK_INT("screen", orbit_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", orbit_state,  orbit_interrupt)
 
-	MCFG_TIMER_ADD_SCANLINE("32v", nmi_32v, "screen", 0, 32)
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("32v", orbit_state, nmi_32v, "screen", 0, 32)
 
-	MCFG_MACHINE_START(orbit)
-	MCFG_MACHINE_RESET(orbit)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_RAW_PARAMS(MASTER_CLOCK*2, 384*2, 0, 256*2, 261*2, 0, 240*2)
-	MCFG_SCREEN_UPDATE(orbit)
+	MCFG_SCREEN_UPDATE_DRIVER(orbit_state, screen_update_orbit)
 
 	MCFG_GFXDECODE(orbit)
 	MCFG_PALETTE_LENGTH(2)
 	MCFG_PALETTE_INIT(black_and_white)
-	MCFG_VIDEO_START(orbit)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
@@ -374,4 +363,4 @@ ROM_END
  *
  *************************************/
 
-GAME( 1978, orbit, 0, orbit, orbit, 0, 0, "Atari", "Orbit", GAME_SUPPORTS_SAVE )
+GAME( 1978, orbit, 0, orbit, orbit, driver_device, 0, 0, "Atari", "Orbit", GAME_SUPPORTS_SAVE )

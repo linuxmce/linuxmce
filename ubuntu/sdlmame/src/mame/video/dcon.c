@@ -10,148 +10,136 @@
 
 /******************************************************************************/
 
-READ16_HANDLER( dcon_control_r )
+READ16_MEMBER(dcon_state::dcon_control_r)
 {
-	dcon_state *state = space->machine().driver_data<dcon_state>();
-	return state->m_enable;
+	return m_enable;
 }
 
-WRITE16_HANDLER( dcon_control_w )
+WRITE16_MEMBER(dcon_state::dcon_control_w)
 {
-	dcon_state *state = space->machine().driver_data<dcon_state>();
 	if (ACCESSING_BITS_0_7)
 	{
-		state->m_enable=data;
-		if ((state->m_enable&4)==4)
-			tilemap_set_enable(state->m_foreground_layer,0);
+		m_enable=data;
+		if ((m_enable&4)==4)
+			m_foreground_layer->enable(0);
 		else
-			tilemap_set_enable(state->m_foreground_layer,1);
+			m_foreground_layer->enable(1);
 
-		if ((state->m_enable&2)==2)
-			tilemap_set_enable(state->m_midground_layer,0);
+		if ((m_enable&2)==2)
+			m_midground_layer->enable(0);
 		else
-			tilemap_set_enable(state->m_midground_layer,1);
+			m_midground_layer->enable(1);
 
-		if ((state->m_enable&1)==1)
-			tilemap_set_enable(state->m_background_layer,0);
+		if ((m_enable&1)==1)
+			m_background_layer->enable(0);
 		else
-			tilemap_set_enable(state->m_background_layer,1);
+			m_background_layer->enable(1);
 	}
 }
 
-WRITE16_HANDLER( dcon_gfxbank_w )
+WRITE16_MEMBER(dcon_state::dcon_gfxbank_w)
 {
-	dcon_state *state = space->machine().driver_data<dcon_state>();
 	if (data&1)
-		state->m_gfx_bank_select=0x1000;
+		m_gfx_bank_select=0x1000;
 	else
-		state->m_gfx_bank_select=0;
+		m_gfx_bank_select=0;
 }
 
-WRITE16_HANDLER( dcon_background_w )
+WRITE16_MEMBER(dcon_state::dcon_background_w)
 {
-	dcon_state *state = space->machine().driver_data<dcon_state>();
-	COMBINE_DATA(&state->m_back_data[offset]);
-	tilemap_mark_tile_dirty(state->m_background_layer,offset);
+	COMBINE_DATA(&m_back_data[offset]);
+	m_background_layer->mark_tile_dirty(offset);
 }
 
-WRITE16_HANDLER( dcon_foreground_w )
+WRITE16_MEMBER(dcon_state::dcon_foreground_w)
 {
-	dcon_state *state = space->machine().driver_data<dcon_state>();
-	COMBINE_DATA(&state->m_fore_data[offset]);
-	tilemap_mark_tile_dirty(state->m_foreground_layer,offset);
+	COMBINE_DATA(&m_fore_data[offset]);
+	m_foreground_layer->mark_tile_dirty(offset);
 }
 
-WRITE16_HANDLER( dcon_midground_w )
+WRITE16_MEMBER(dcon_state::dcon_midground_w)
 {
-	dcon_state *state = space->machine().driver_data<dcon_state>();
-	COMBINE_DATA(&state->m_mid_data[offset]);
-	tilemap_mark_tile_dirty(state->m_midground_layer,offset);
+	COMBINE_DATA(&m_mid_data[offset]);
+	m_midground_layer->mark_tile_dirty(offset);
 }
 
-WRITE16_HANDLER( dcon_text_w )
+WRITE16_MEMBER(dcon_state::dcon_text_w)
 {
-	dcon_state *state = space->machine().driver_data<dcon_state>();
-	COMBINE_DATA(&state->m_textram[offset]);
-	tilemap_mark_tile_dirty(state->m_text_layer,offset);
+	COMBINE_DATA(&m_textram[offset]);
+	m_text_layer->mark_tile_dirty(offset);
 }
 
-static TILE_GET_INFO( get_back_tile_info )
+TILE_GET_INFO_MEMBER(dcon_state::get_back_tile_info)
 {
-	dcon_state *state = machine.driver_data<dcon_state>();
-	int tile=state->m_back_data[tile_index];
+	int tile=m_back_data[tile_index];
 	int color=(tile>>12)&0xf;
 
 	tile&=0xfff;
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			1,
 			tile,
 			color,
 			0);
 }
 
-static TILE_GET_INFO( get_fore_tile_info )
+TILE_GET_INFO_MEMBER(dcon_state::get_fore_tile_info)
 {
-	dcon_state *state = machine.driver_data<dcon_state>();
-	int tile=state->m_fore_data[tile_index];
+	int tile=m_fore_data[tile_index];
 	int color=(tile>>12)&0xf;
 
 	tile&=0xfff;
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			2,
 			tile,
 			color,
 			0);
 }
 
-static TILE_GET_INFO( get_mid_tile_info )
+TILE_GET_INFO_MEMBER(dcon_state::get_mid_tile_info)
 {
-	dcon_state *state = machine.driver_data<dcon_state>();
-	int tile=state->m_mid_data[tile_index];
+	int tile=m_mid_data[tile_index];
 	int color=(tile>>12)&0xf;
 
 	tile&=0xfff;
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			3,
-			tile|state->m_gfx_bank_select,
+			tile|m_gfx_bank_select,
 			color,
 			0);
 }
 
-static TILE_GET_INFO( get_text_tile_info )
+TILE_GET_INFO_MEMBER(dcon_state::get_text_tile_info)
 {
-	dcon_state *state = machine.driver_data<dcon_state>();
-	int tile = state->m_textram[tile_index];
+	int tile = m_textram[tile_index];
 	int color=(tile>>12)&0xf;
 
 	tile&=0xfff;
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			0,
 			tile,
 			color,
 			0);
 }
 
-VIDEO_START( dcon )
+void dcon_state::video_start()
 {
-	dcon_state *state = machine.driver_data<dcon_state>();
-	state->m_background_layer = tilemap_create(machine, get_back_tile_info,tilemap_scan_rows,     16,16,32,32);
-	state->m_foreground_layer = tilemap_create(machine, get_fore_tile_info,tilemap_scan_rows,16,16,32,32);
-	state->m_midground_layer =  tilemap_create(machine, get_mid_tile_info, tilemap_scan_rows,16,16,32,32);
-	state->m_text_layer =       tilemap_create(machine, get_text_tile_info,tilemap_scan_rows,  8,8,64,32);
+	m_background_layer = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(dcon_state::get_back_tile_info),this),TILEMAP_SCAN_ROWS,     16,16,32,32);
+	m_foreground_layer = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(dcon_state::get_fore_tile_info),this),TILEMAP_SCAN_ROWS,16,16,32,32);
+	m_midground_layer =  &machine().tilemap().create(tilemap_get_info_delegate(FUNC(dcon_state::get_mid_tile_info),this), TILEMAP_SCAN_ROWS,16,16,32,32);
+	m_text_layer =       &machine().tilemap().create(tilemap_get_info_delegate(FUNC(dcon_state::get_text_tile_info),this),TILEMAP_SCAN_ROWS,  8,8,64,32);
 
-	tilemap_set_transparent_pen(state->m_midground_layer,15);
-	tilemap_set_transparent_pen(state->m_foreground_layer,15);
-	tilemap_set_transparent_pen(state->m_text_layer,15);
+	m_midground_layer->set_transparent_pen(15);
+	m_foreground_layer->set_transparent_pen(15);
+	m_text_layer->set_transparent_pen(15);
 
-	state->m_gfx_bank_select = 0;
+	m_gfx_bank_select = 0;
 }
 
-static void draw_sprites(running_machine& machine, bitmap_t *bitmap,const rectangle *cliprect)
+static void draw_sprites(running_machine& machine, bitmap_ind16 &bitmap,const rectangle &cliprect)
 {
 	dcon_state *state = machine.driver_data<dcon_state>();
 	UINT16 *spriteram16 = state->m_spriteram;
@@ -277,64 +265,62 @@ static void draw_sprites(running_machine& machine, bitmap_t *bitmap,const rectan
 	}
 }
 
-SCREEN_UPDATE( dcon )
+UINT32 dcon_state::screen_update_dcon(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	dcon_state *state = screen->machine().driver_data<dcon_state>();
-	bitmap_fill(screen->machine().priority_bitmap,cliprect,0);
+	machine().priority_bitmap.fill(0, cliprect);
 
 	/* Setup the tilemaps */
-	tilemap_set_scrollx( state->m_background_layer,0, state->m_scroll_ram[0] );
-	tilemap_set_scrolly( state->m_background_layer,0, state->m_scroll_ram[1] );
-	tilemap_set_scrollx( state->m_midground_layer, 0, state->m_scroll_ram[2] );
-	tilemap_set_scrolly( state->m_midground_layer, 0, state->m_scroll_ram[3] );
-	tilemap_set_scrollx( state->m_foreground_layer,0, state->m_scroll_ram[4] );
-	tilemap_set_scrolly( state->m_foreground_layer,0, state->m_scroll_ram[5] );
+	m_background_layer->set_scrollx(0, m_scroll_ram[0] );
+	m_background_layer->set_scrolly(0, m_scroll_ram[1] );
+	m_midground_layer->set_scrollx(0, m_scroll_ram[2] );
+	m_midground_layer->set_scrolly(0, m_scroll_ram[3] );
+	m_foreground_layer->set_scrollx(0, m_scroll_ram[4] );
+	m_foreground_layer->set_scrolly(0, m_scroll_ram[5] );
 
-	if ((state->m_enable&1)!=1)
-		tilemap_draw(bitmap,cliprect,state->m_background_layer,0,0);
+	if ((m_enable&1)!=1)
+		m_background_layer->draw(bitmap, cliprect, 0,0);
 	else
-		bitmap_fill(bitmap,cliprect,15); /* Should always be black, not pen 15 */
+		bitmap.fill(15, cliprect); /* Should always be black, not pen 15 */
 
-	tilemap_draw(bitmap,cliprect,state->m_midground_layer,0,1);
-	tilemap_draw(bitmap,cliprect,state->m_foreground_layer,0,2);
-	tilemap_draw(bitmap,cliprect,state->m_text_layer,0,4);
+	m_midground_layer->draw(bitmap, cliprect, 0,1);
+	m_foreground_layer->draw(bitmap, cliprect, 0,2);
+	m_text_layer->draw(bitmap, cliprect, 0,4);
 
-	draw_sprites(screen->machine(),bitmap,cliprect);
+	draw_sprites(machine(),bitmap,cliprect);
 	return 0;
 }
 
-SCREEN_UPDATE( sdgndmps )
+UINT32 dcon_state::screen_update_sdgndmps(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	dcon_state *state = screen->machine().driver_data<dcon_state>();
 
-	bitmap_fill(screen->machine().priority_bitmap,cliprect,0);
+	machine().priority_bitmap.fill(0, cliprect);
 
 	/* Gfx banking */
-	if (state->m_last_gfx_bank!=state->m_gfx_bank_select)
+	if (m_last_gfx_bank!=m_gfx_bank_select)
 	{
-		tilemap_mark_all_tiles_dirty(state->m_midground_layer);
-		state->m_last_gfx_bank=state->m_gfx_bank_select;
+		m_midground_layer->mark_all_dirty();
+		m_last_gfx_bank=m_gfx_bank_select;
 	}
 
 	/* Setup the tilemaps */
-	tilemap_set_scrollx( state->m_background_layer,0, state->m_scroll_ram[0]+128 );
-	tilemap_set_scrolly( state->m_background_layer,0, state->m_scroll_ram[1] );
-	tilemap_set_scrollx( state->m_midground_layer, 0, state->m_scroll_ram[2]+128 );
-	tilemap_set_scrolly( state->m_midground_layer, 0, state->m_scroll_ram[3] );
-	tilemap_set_scrollx( state->m_foreground_layer,0, state->m_scroll_ram[4]+128 );
-	tilemap_set_scrolly( state->m_foreground_layer,0, state->m_scroll_ram[5] );
-	tilemap_set_scrollx( state->m_text_layer,0, /*state->m_scroll_ram[6] + */ 128 );
-	tilemap_set_scrolly( state->m_text_layer,0, /*state->m_scroll_ram[7] + */ 0 );
+	m_background_layer->set_scrollx(0, m_scroll_ram[0]+128 );
+	m_background_layer->set_scrolly(0, m_scroll_ram[1] );
+	m_midground_layer->set_scrollx(0, m_scroll_ram[2]+128 );
+	m_midground_layer->set_scrolly(0, m_scroll_ram[3] );
+	m_foreground_layer->set_scrollx(0, m_scroll_ram[4]+128 );
+	m_foreground_layer->set_scrolly(0, m_scroll_ram[5] );
+	m_text_layer->set_scrollx(0, /*m_scroll_ram[6] + */ 128 );
+	m_text_layer->set_scrolly(0, /*m_scroll_ram[7] + */ 0 );
 
-	if ((state->m_enable&1)!=1)
-		tilemap_draw(bitmap,cliprect,state->m_background_layer,0,0);
+	if ((m_enable&1)!=1)
+		m_background_layer->draw(bitmap, cliprect, 0,0);
 	else
-		bitmap_fill(bitmap,cliprect,15); /* Should always be black, not pen 15 */
+		bitmap.fill(15, cliprect); /* Should always be black, not pen 15 */
 
-	tilemap_draw(bitmap,cliprect,state->m_midground_layer,0,1);
-	tilemap_draw(bitmap,cliprect,state->m_foreground_layer,0,2);
-	tilemap_draw(bitmap,cliprect,state->m_text_layer,0,4);
+	m_midground_layer->draw(bitmap, cliprect, 0,1);
+	m_foreground_layer->draw(bitmap, cliprect, 0,2);
+	m_text_layer->draw(bitmap, cliprect, 0,4);
 
-	draw_sprites(screen->machine(),bitmap,cliprect);
+	draw_sprites(machine(),bitmap,cliprect);
 	return 0;
 }

@@ -10,11 +10,10 @@
 #include "emu.h"
 #include "includes/warpwarp.h"
 
-#define CLOCK_16H	(18432000/3/2/16)
+#define CLOCK_16H   (18432000/3/2/16)
 #define CLOCK_1V    (18432000/3/2/384)
 
-typedef struct _warpwarp_sound_state warpwarp_sound_state;
-struct _warpwarp_sound_state
+struct warpwarp_sound_state
 {
 	INT16 *m_decay;
 	sound_stream *m_channel;
@@ -40,7 +39,7 @@ INLINE warpwarp_sound_state *get_safe_token(device_t *device)
 	assert(device != NULL);
 	assert(device->type() == WARPWARP);
 
-	return (warpwarp_sound_state *)downcast<legacy_device_base *>(device)->token();
+	return (warpwarp_sound_state *)downcast<warpwarp_sound_device *>(device)->token();
 }
 
 static TIMER_CALLBACK( sound_volume_decay )
@@ -64,26 +63,26 @@ WRITE8_DEVICE_HANDLER( warpwarp_sound_w )
 	if( state->m_sound_latch & 8 )
 	{
 		/*
-         * R85(?) is 10k, Rb is 0, C92 is 1uF
-         * charge time t1 = 0.693 * (R24 + Rb) * C57 -> 0.22176s
-         * discharge time t2 = 0.693 * (Rb) * C57 -> 0
-         * C90(?) is only charged via D17 (1N914), no discharge!
-         * Decay:
-         * discharge C90(?) (1uF) through R13||R14 (22k||47k)
-         * 0.639 * 15k * 1uF -> 0.9585s
-         */
+		 * R85(?) is 10k, Rb is 0, C92 is 1uF
+		 * charge time t1 = 0.693 * (R24 + Rb) * C57 -> 0.22176s
+		 * discharge time t2 = 0.693 * (Rb) * C57 -> 0
+		 * C90(?) is only charged via D17 (1N914), no discharge!
+		 * Decay:
+		 * discharge C90(?) (1uF) through R13||R14 (22k||47k)
+		 * 0.639 * 15k * 1uF -> 0.9585s
+		 */
 		attotime period = attotime::from_hz(32768) * 95850 / 100000;
 		state->m_sound_volume_timer->adjust(period, 0, period);
 	}
 	else
 	{
 		/*
-         * discharge only after R93 (100k) and through the 10k
-         * potentiometerin the amplifier section.
-         * 0.639 * 110k * 1uF -> 7.0290s
-         * ...but this is not very realistic for the game sound :(
-         * maybe there _is_ a discharge through the diode D17?
-         */
+		 * discharge only after R93 (100k) and through the 10k
+		 * potentiometerin the amplifier section.
+		 * 0.639 * 110k * 1uF -> 7.0290s
+		 * ...but this is not very realistic for the game sound :(
+		 * maybe there _is_ a discharge through the diode D17?
+		 */
 		//attotime period = attotime::from_hz(32768) * 702900 / 100000;
 		attotime period = attotime::from_hz(32768) * 191700 / 100000;
 		state->m_sound_volume_timer->adjust(period, 0, period);
@@ -115,25 +114,25 @@ WRITE8_DEVICE_HANDLER( warpwarp_music2_w )
 	if( state->m_music2_latch & 0x10 )
 	{
 		/*
-         * Ra (R83?) is 10k, Rb is 0, C92 is 1uF
-         * charge time t1 = 0.693 * (Ra + Rb) * C -> 0.22176s
-         * discharge time is (nearly) zero, because Rb is zero
-         * C95(?) is only charged via D17, not discharged!
-         * Decay:
-         * discharge C95(?) (10uF) through R13||R14 (22k||47k)
-         * 0.639 * 15k * 10uF -> 9.585s
-         * ...I'm sure this is off by one number of magnitude :/
-         */
+		 * Ra (R83?) is 10k, Rb is 0, C92 is 1uF
+		 * charge time t1 = 0.693 * (Ra + Rb) * C -> 0.22176s
+		 * discharge time is (nearly) zero, because Rb is zero
+		 * C95(?) is only charged via D17, not discharged!
+		 * Decay:
+		 * discharge C95(?) (10uF) through R13||R14 (22k||47k)
+		 * 0.639 * 15k * 10uF -> 9.585s
+		 * ...I'm sure this is off by one number of magnitude :/
+		 */
 		attotime period = attotime::from_hz(32768) * 95850 / 100000;
 		state->m_music_volume_timer->adjust(period, 0, period);
 	}
 	else
 	{
 		/*
-         * discharge through R14 (47k),
-         * discharge C95(?) (10uF) through R14 (47k)
-         * 0.639 * 47k * 10uF -> 30.033s
-         */
+		 * discharge through R14 (47k),
+		 * discharge C95(?) (10uF) through R14 (47k)
+		 * 0.639 * 47k * 10uF -> 30.033s
+		 */
 		//attotime period = attotime::from_hz(32768) * 3003300 / 100000;
 		attotime period = attotime::from_hz(32768) * 300330 / 100000;
 		state->m_music_volume_timer->adjust(period, 0, period);
@@ -151,18 +150,18 @@ static STREAM_UPDATE( warpwarp_sound_update )
 		*buffer++ = (state->m_sound_signal + state->m_music_signal) / 2;
 
 		/*
-         * The music signal is selected at a rate of 2H (1.536MHz) from the
-         * four bits of a 4 bit binary counter which is clocked with 16H,
-         * which is 192kHz, and is divided by 4 times (64 - music1_latch).
-         *  0 = 256 steps -> 750 Hz
-         *  1 = 252 steps -> 761.9 Hz
-         * ...
-         * 32 = 128 steps -> 1500 Hz
-         * ...
-         * 48 =  64 steps -> 3000 Hz
-         * ...
-         * 63 =   4 steps -> 48 kHz
-         */
+		 * The music signal is selected at a rate of 2H (1.536MHz) from the
+		 * four bits of a 4 bit binary counter which is clocked with 16H,
+		 * which is 192kHz, and is divided by 4 times (64 - music1_latch).
+		 *  0 = 256 steps -> 750 Hz
+		 *  1 = 252 steps -> 761.9 Hz
+		 * ...
+		 * 32 = 128 steps -> 1500 Hz
+		 * ...
+		 * 48 =  64 steps -> 3000 Hz
+		 * ...
+		 * 63 =   4 steps -> 48 kHz
+		 */
 		state->m_mcarry -= CLOCK_16H / (4 * (64 - state->m_music1_latch));
 		while( state->m_mcarry < 0 )
 		{
@@ -241,21 +240,41 @@ static DEVICE_START( warpwarp_sound )
 }
 
 
-DEVICE_GET_INFO( warpwarp_sound )
+
+const device_type WARPWARP = &device_creator<warpwarp_sound_device>;
+
+warpwarp_sound_device::warpwarp_sound_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, WARPWARP, "Warp Warp Custom", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
 {
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(warpwarp_sound_state);			break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME(warpwarp_sound);	break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "Warp Warp Custom");			break;
-		case DEVINFO_STR_SOURCE_FILE:						strcpy(info->s, __FILE__);						break;
-	}
+	m_token = global_alloc_clear(warpwarp_sound_state);
 }
 
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
 
-DEFINE_LEGACY_SOUND_DEVICE(WARPWARP, warpwarp_sound);
+void warpwarp_sound_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void warpwarp_sound_device::device_start()
+{
+	DEVICE_START_NAME( warpwarp_sound )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void warpwarp_sound_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}

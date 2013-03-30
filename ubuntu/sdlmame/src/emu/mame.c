@@ -77,12 +77,9 @@
 #include "osdepend.h"
 #include "config.h"
 #include "debugger.h"
-#include "image.h"
-#include "profiler.h"
 #include "render.h"
 #include "cheat.h"
 #include "ui.h"
-#include "uimenu.h"
 #include "uiinput.h"
 #include "crsshair.h"
 #include "validity.h"
@@ -104,19 +101,19 @@ static bool print_verbose = false;
 static running_machine *global_machine;
 
 /* output channels */
-static output_callback_func output_cb[OUTPUT_CHANNEL_COUNT];
-static void *output_cb_param[OUTPUT_CHANNEL_COUNT];
-
-/* the "disclaimer" that should be printed when run with no parameters */
-const char mame_disclaimer[] =
-	"MAME is an emulator: it reproduces, more or less faithfully, the behaviour of\n"
-	"several arcade machines. But hardware is useless without software, so an image\n"
-	"of the ROMs which run on that hardware is required. Such ROMs, like any other\n"
-	"commercial software, are copyrighted material and it is therefore illegal to\n"
-	"use them if you don't own the original arcade machine. Needless to say, ROMs\n"
-	"are not distributed together with MAME. Distribution of MAME together with ROM\n"
-	"images is a violation of copyright law and should be promptly reported to the\n"
-	"authors so that appropriate legal action can be taken.\n";
+static output_delegate output_cb[OUTPUT_CHANNEL_COUNT] =
+{
+	output_delegate(FUNC(mame_file_output_callback), stderr),   // OUTPUT_CHANNEL_ERROR
+	output_delegate(FUNC(mame_file_output_callback), stderr),   // OUTPUT_CHANNEL_WARNING
+	output_delegate(FUNC(mame_file_output_callback), stdout),   // OUTPUT_CHANNEL_INFO
+#ifdef MAME_DEBUG
+	output_delegate(FUNC(mame_file_output_callback), stdout),   // OUTPUT_CHANNEL_DEBUG
+#else
+	output_delegate(FUNC(mame_null_output_callback), stdout),   // OUTPUT_CHANNEL_DEBUG
+#endif
+	output_delegate(FUNC(mame_file_output_callback), stdout),   // OUTPUT_CHANNEL_VERBOSE
+	output_delegate(FUNC(mame_file_output_callback), stdout)    // OUTPUT_CHANNEL_LOG
+};
 
 
 
@@ -157,14 +154,10 @@ int mame_execute(emu_options &options, osd_interface &osd)
 		const game_driver *system = options.system();
 		if (system == NULL)
 		{
-			system = &GAME_NAME(empty);
+			system = &GAME_NAME(___empty);
 			if (firstgame)
 				started_empty = true;
 		}
-
-		// otherwise, perform validity checks before anything else
-		else
-			validate_drivers(options, system);
 
 		firstgame = false;
 
@@ -175,12 +168,20 @@ int mame_execute(emu_options &options, osd_interface &osd)
 			astring errors;
 			options.parse_standard_inis(errors);
 		}
+		// otherwise, perform validity checks before anything else
+		if (system != NULL)
+		{
+			validity_checker valid(options);
+			valid.check_shared_source(*system);
+		}
 
 		// create the machine configuration
 		machine_config config(*system, options);
 
 		// create the machine structure and driver
 		running_machine machine(config, osd, started_empty);
+
+		ui_show_mouse(machine.system().flags & GAME_CLICKABLE_ARTWORK);
 
 		// looooong term: remove this
 		global_machine = &machine;
@@ -216,20 +217,17 @@ int mame_execute(emu_options &options, osd_interface &osd)
     channel
 -------------------------------------------------*/
 
-void mame_set_output_channel(output_channel channel, output_callback_func callback, void *param, output_callback_func *prevcb, void **prevparam)
+output_delegate mame_set_output_channel(output_channel channel, output_delegate callback)
 {
 	assert(channel < OUTPUT_CHANNEL_COUNT);
-	assert(callback != NULL);
+	assert(!callback.isnull());
 
 	/* return the originals if requested */
-	if (prevcb != NULL)
-		*prevcb = output_cb[channel];
-	if (prevparam != NULL)
-		*prevparam = output_cb_param[channel];
+	output_delegate prevcb = output_cb[channel];
 
 	/* set the new ones */
 	output_cb[channel] = callback;
-	output_cb_param[channel] = param;
+	return prevcb;
 }
 
 
@@ -238,9 +236,9 @@ void mame_set_output_channel(output_channel channel, output_callback_func callba
     for file output
 -------------------------------------------------*/
 
-void mame_file_output_callback(void *param, const char *format, va_list argptr)
+void mame_file_output_callback(FILE *param, const char *format, va_list argptr)
 {
-	vfprintf((FILE *)param, format, argptr);
+	vfprintf(param, format, argptr);
 }
 
 
@@ -249,7 +247,7 @@ void mame_file_output_callback(void *param, const char *format, va_list argptr)
     for no output
 -------------------------------------------------*/
 
-void mame_null_output_callback(void *param, const char *format, va_list argptr)
+void mame_null_output_callback(FILE *param, const char *format, va_list argptr)
 {
 }
 
@@ -263,16 +261,9 @@ void mame_printf_error(const char *format, ...)
 {
 	va_list argptr;
 
-	/* by default, we go to stderr */
-	if (output_cb[OUTPUT_CHANNEL_ERROR] == NULL)
-	{
-		output_cb[OUTPUT_CHANNEL_ERROR] = mame_file_output_callback;
-		output_cb_param[OUTPUT_CHANNEL_ERROR] = stderr;
-	}
-
 	/* do the output */
 	va_start(argptr, format);
-	(*output_cb[OUTPUT_CHANNEL_ERROR])(output_cb_param[OUTPUT_CHANNEL_ERROR], format, argptr);
+	output_cb[OUTPUT_CHANNEL_ERROR](format, argptr);
 	va_end(argptr);
 }
 
@@ -286,16 +277,9 @@ void mame_printf_warning(const char *format, ...)
 {
 	va_list argptr;
 
-	/* by default, we go to stderr */
-	if (output_cb[OUTPUT_CHANNEL_WARNING] == NULL)
-	{
-		output_cb[OUTPUT_CHANNEL_WARNING] = mame_file_output_callback;
-		output_cb_param[OUTPUT_CHANNEL_WARNING] = stderr;
-	}
-
 	/* do the output */
 	va_start(argptr, format);
-	(*output_cb[OUTPUT_CHANNEL_WARNING])(output_cb_param[OUTPUT_CHANNEL_WARNING], format, argptr);
+	output_cb[OUTPUT_CHANNEL_WARNING](format, argptr);
 	va_end(argptr);
 }
 
@@ -309,16 +293,9 @@ void mame_printf_info(const char *format, ...)
 {
 	va_list argptr;
 
-	/* by default, we go to stdout */
-	if (output_cb[OUTPUT_CHANNEL_INFO] == NULL)
-	{
-		output_cb[OUTPUT_CHANNEL_INFO] = mame_file_output_callback;
-		output_cb_param[OUTPUT_CHANNEL_INFO] = stdout;
-	}
-
 	/* do the output */
 	va_start(argptr, format);
-	(*output_cb[OUTPUT_CHANNEL_INFO])(output_cb_param[OUTPUT_CHANNEL_INFO], format, argptr);
+	output_cb[OUTPUT_CHANNEL_INFO](format, argptr);
 	va_end(argptr);
 }
 
@@ -336,16 +313,9 @@ void mame_printf_verbose(const char *format, ...)
 	if (!print_verbose)
 		return;
 
-	/* by default, we go to stdout */
-	if (output_cb[OUTPUT_CHANNEL_VERBOSE] == NULL)
-	{
-		output_cb[OUTPUT_CHANNEL_VERBOSE] = mame_file_output_callback;
-		output_cb_param[OUTPUT_CHANNEL_VERBOSE] = stdout;
-	}
-
 	/* do the output */
 	va_start(argptr, format);
-	(*output_cb[OUTPUT_CHANNEL_VERBOSE])(output_cb_param[OUTPUT_CHANNEL_VERBOSE], format, argptr);
+	output_cb[OUTPUT_CHANNEL_VERBOSE](format, argptr);
 	va_end(argptr);
 }
 
@@ -359,21 +329,9 @@ void mame_printf_debug(const char *format, ...)
 {
 	va_list argptr;
 
-	/* by default, we go to stderr */
-	if (output_cb[OUTPUT_CHANNEL_DEBUG] == NULL)
-	{
-#ifdef MAME_DEBUG
-		output_cb[OUTPUT_CHANNEL_DEBUG] = mame_file_output_callback;
-		output_cb_param[OUTPUT_CHANNEL_DEBUG] = stdout;
-#else
-		output_cb[OUTPUT_CHANNEL_DEBUG] = mame_null_output_callback;
-		output_cb_param[OUTPUT_CHANNEL_DEBUG] = NULL;
-#endif
-	}
-
 	/* do the output */
 	va_start(argptr, format);
-	(*output_cb[OUTPUT_CHANNEL_DEBUG])(output_cb_param[OUTPUT_CHANNEL_DEBUG], format, argptr);
+	output_cb[OUTPUT_CHANNEL_DEBUG](format, argptr);
 	va_end(argptr);
 }
 
@@ -388,16 +346,9 @@ void mame_printf_log(const char *format, ...)
 {
 	va_list argptr;
 
-	/* by default, we go to stderr */
-	if (output_cb[OUTPUT_CHANNEL_LOG] == NULL)
-	{
-		output_cb[OUTPUT_CHANNEL_LOG] = mame_file_output_callback;
-		output_cb_param[OUTPUT_CHANNEL_LOG] = stderr;
-	}
-
 	/* do the output */
 	va_start(argptr, format);
-	(*output_cb[OUTPUT_CHANNEL_LOG])(output_cb_param[OUTPUT_CHANNEL_LOG], format, argptr);
+	output_cb[OUTPUT_CHANNEL_LOG])(format, argptr);
 	va_end(argptr);
 }
 #endif
@@ -441,12 +392,20 @@ void CLIB_DECL popmessage(const char *format, ...)
 
 void CLIB_DECL logerror(const char *format, ...)
 {
-	if (global_machine != NULL)
-	{
-		va_list arg;
-		va_start(arg, format);
-		global_machine->vlogerror(format, arg);
-		va_end(arg);
-	}
+	va_list arg;
+	va_start(arg, format);
+	vlogerror(format, arg);
+	va_end(arg);
 }
 
+
+/*-------------------------------------------------
+    vlogerror - log to the debugger and any other
+    OSD-defined output streams
+-------------------------------------------------*/
+
+void CLIB_DECL vlogerror(const char *format, va_list arg)
+{
+	if (global_machine != NULL)
+		global_machine->vlogerror(format, arg);
+}

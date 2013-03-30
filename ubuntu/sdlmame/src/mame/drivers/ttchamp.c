@@ -48,26 +48,64 @@ The PCB is Spanish and manufacured by Gamart.
 class ttchamp_state : public driver_device
 {
 public:
-	ttchamp_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	ttchamp_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag)
+	{ }
 
-	UINT16 *m_peno_vram;
+	UINT16* m_peno_vram;
+	UINT16* m_peno_mainram;
+
 	UINT16 m_paloff;
+	DECLARE_WRITE16_MEMBER(paloff_w);
+	DECLARE_WRITE16_MEMBER(pcup_prgbank_w);
+	DECLARE_WRITE16_MEMBER(paldat_w);
+	DECLARE_READ16_MEMBER(peno_rand);
+	DECLARE_READ16_MEMBER(peno_rand2);
+	DECLARE_DRIVER_INIT(ttchamp);
+
+	DECLARE_WRITE16_MEMBER( penocup_vid_w )
+	{
+		offset &=0x7fff;
+		COMBINE_DATA(&m_peno_vram[offset]);
+	}
+
+	DECLARE_READ16_MEMBER( penocup_mainram_r )
+	{
+		return m_peno_mainram[offset];
+	}
+
+	DECLARE_WRITE16_MEMBER( penocup_mainram_w )
+	{
+		offset &=0x7fff;
+		COMBINE_DATA(&m_peno_mainram[offset]);
+//      COMBINE_DATA(&m_peno_vram[offset]);
+	}
+
+
+
+	virtual void video_start();
+	UINT32 screen_update_ttchamp(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(ttchamp_irq);
 };
 
 
-static VIDEO_START(ttchamp)
+
+void ttchamp_state::video_start()
 {
+	m_peno_vram = (UINT16*)auto_alloc_array_clear(machine(), UINT16, 0x10000/2);
+	m_peno_mainram = (UINT16*)auto_alloc_array_clear(machine(), UINT16, 0x10000/2);
+
+
+
 }
 
-static SCREEN_UPDATE(ttchamp)
+UINT32 ttchamp_state::screen_update_ttchamp(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	ttchamp_state *state = screen->machine().driver_data<ttchamp_state>();
 	int y,x,count;
 //  int i;
 	static const int xxx=320,yyy=204;
 
-	bitmap_fill(bitmap, 0, get_black_pen(screen->machine()));
+	bitmap.fill(get_black_pen(machine()));
 
 //  for (i=0;i<256;i++)
 //  {
@@ -77,160 +115,164 @@ static SCREEN_UPDATE(ttchamp)
 //      b = (dat>>10)&0x1f;
 //      g = (dat>>5)&0x1f;
 //      r = (dat>>0)&0x1f;
-//      palette_set_color_rgb(machine,i,pal5bit(r),pal5bit(g),pal5bit(b));
+//      palette_set_color_rgb(machine(),i,pal5bit(r),pal5bit(g),pal5bit(b));
 //  }
 
 	count=0;
+	UINT8 *videoram = (UINT8*)m_peno_vram;
 	for (y=0;y<yyy;y++)
 	{
 		for(x=0;x<xxx;x++)
 		{
-			/*if(hotblock_port0&0x40)*/*BITMAP_ADDR16(bitmap, y, x) = ((UINT8 *)state->m_peno_vram)[BYTE_XOR_LE(count)]+0x300;
-            count++;
-        }
-    }
-    return 0;
+			/*if(hotblock_port0&0x40)*/bitmap.pix16(y, x) = videoram[BYTE_XOR_LE(count)]+0x300;
+			count++;
+		}
+	}
+	return 0;
 }
 
 
-static WRITE16_HANDLER( paloff_w )
+WRITE16_MEMBER(ttchamp_state::paloff_w)
 {
-	ttchamp_state *state = space->machine().driver_data<ttchamp_state>();
-    COMBINE_DATA(&state->m_paloff);
+	COMBINE_DATA(&m_paloff);
 }
 
 #ifdef UNUSED_FUNCTION
-static WRITE16_HANDLER( pcup_prgbank_w )
+WRITE16_MEMBER(ttchamp_state::pcup_prgbank_w)
 {
-    int bank;
-    UINT8 *ROM1 = space->machine().region("user1")->base();
+	int bank;
+	UINT8 *ROM1 = memregion("user1")->base();
 
-    if (ACCESSING_BITS_0_7)
-    {
-        bank = (data>>4) &0x07;
-        memory_set_bankptr(space->machine(), "bank2",&ROM1[0x80000*(bank)]);
-    }
+	if (ACCESSING_BITS_0_7)
+	{
+		bank = (data>>4) &0x07;
+		membank("bank2")->set_base(&ROM1[0x80000*(bank)]);
+	}
 }
 #endif
 
-static WRITE16_HANDLER( paldat_w )
+WRITE16_MEMBER(ttchamp_state::paldat_w)
 {
-	ttchamp_state *state = space->machine().driver_data<ttchamp_state>();
-    palette_set_color_rgb(space->machine(),state->m_paloff & 0x7fff,pal5bit(data>>0),pal5bit(data>>5),pal5bit(data>>10));
+	palette_set_color_rgb(machine(),m_paloff & 0x7fff,pal5bit(data>>0),pal5bit(data>>5),pal5bit(data>>10));
 }
 
-static READ16_HANDLER( peno_rand )
+READ16_MEMBER(ttchamp_state::peno_rand)
 {
-    return 0xffff;// space->machine().rand();
+	return 0xffff;// machine().rand();
 }
 
 #ifdef UNUSED_FUNCTION
-static READ16_HANDLER( peno_rand2 )
+READ16_MEMBER(ttchamp_state::peno_rand2)
 {
-    return space->machine().rand();
+	return machine().rand();
 }
 #endif
 
-static ADDRESS_MAP_START( ttchamp_map, AS_PROGRAM, 16 )
-    AM_RANGE(0x00000, 0x0ffff) AM_RAM
-    AM_RANGE(0x10000, 0x1ffff) AM_RAM AM_BASE_MEMBER(ttchamp_state, m_peno_vram)
-    AM_RANGE(0x20000, 0x7ffff) AM_ROMBANK("bank1") // ?
-    AM_RANGE(0x80000, 0xfffff) AM_ROMBANK("bank2") // ?
+static ADDRESS_MAP_START( ttchamp_map, AS_PROGRAM, 16, ttchamp_state )
+	AM_RANGE(0x00000, 0x0ffff) AM_RAM AM_READWRITE(penocup_mainram_r, penocup_mainram_w)
+
+	/* 0x10000 - 0x1ffff is where it writes most image stuff, but other address get written to 0 where the left edge of 'sprites' would be? why? bad code execution, or some kind of write address based blitter?
+	see for example the lines written down the side of where the (not displayed) CREDIT text would go, as well as beside the actual credit number.. also ingame if you can get it to start
+	*/
+
+	AM_RANGE(0x10000, 0xfffff) AM_WRITE(penocup_vid_w)
+
+	// how are these banked? what are the bank sizes? data needed for startup is at 0x20000-0x2ffff (strings) and 0x30000-0x3ffff (code) the rest seems to be graphics..
+	AM_RANGE(0x00000, 0x7ffff) AM_ROMBANK("bank1") // ?
+	AM_RANGE(0x80000, 0xfffff) AM_ROMBANK("bank2") // ?
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( ttchamp_io, AS_IO, 16 )
-    AM_RANGE(0x0000, 0x0001) AM_WRITENOP
+static ADDRESS_MAP_START( ttchamp_io, AS_IO, 16, ttchamp_state )
+	AM_RANGE(0x0000, 0x0001) AM_WRITENOP
 
-    AM_RANGE(0x0002, 0x0003) AM_READ_PORT("SYSTEM")
-    AM_RANGE(0x0004, 0x0005) AM_READ_PORT("P1_P2")
+	AM_RANGE(0x0002, 0x0003) AM_READ_PORT("SYSTEM")
+	AM_RANGE(0x0004, 0x0005) AM_READ_PORT("P1_P2")
 
 //  AM_RANGE(0x0018, 0x0019) AM_READ(peno_rand2)
 //  AM_RANGE(0x001e, 0x001f) AM_READ(peno_rand2)
 
-    AM_RANGE(0x0008, 0x0009) AM_WRITE(paldat_w)
-    AM_RANGE(0x000a, 0x000b) AM_WRITE(paloff_w)
+	AM_RANGE(0x0008, 0x0009) AM_WRITE(paldat_w)
+	AM_RANGE(0x000a, 0x000b) AM_WRITE(paloff_w)
 
 //  AM_RANGE(0x0010, 0x0010) AM_WRITE(pcup_prgbank_w)
-    AM_RANGE(0x0010, 0x0011) AM_WRITENOP
+	AM_RANGE(0x0010, 0x0011) AM_WRITENOP
 
-    AM_RANGE(0x0020, 0x0021) AM_WRITENOP
+	AM_RANGE(0x0020, 0x0021) AM_WRITENOP
 
-    AM_RANGE(0x0034, 0x0035) AM_READ(peno_rand) AM_WRITENOP
+	AM_RANGE(0x0034, 0x0035) AM_READ(peno_rand) AM_WRITENOP
 ADDRESS_MAP_END
 
 
 
 static INPUT_PORTS_START(ttchamp)
-    PORT_START("SYSTEM")
-    PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_COIN1 )
-    PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_COIN2 )
-    PORT_DIPNAME( 0x0004, 0x0004, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(    0x0004, DEF_STR( Off ) )
-    PORT_DIPSETTING(    0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x0008, 0x0008, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(    0x0008, DEF_STR( Off ) )
-    PORT_DIPSETTING(    0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x0010, 0x0010, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(    0x0010, DEF_STR( Off ) )
-    PORT_DIPSETTING(    0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x0020, 0x0020, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(    0x0020, DEF_STR( Off ) )
-    PORT_DIPSETTING(    0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x0040, 0x0040, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(    0x0040, DEF_STR( Off ) )
-    PORT_DIPSETTING(    0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(    0x0080, DEF_STR( Off ) )
-    PORT_DIPSETTING(    0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x0100, 0x0100, "0x000003" )
-    PORT_DIPSETTING(    0x0100, DEF_STR( Off ) )
-    PORT_DIPSETTING(    0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x0200, 0x0200, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(    0x0200, DEF_STR( Off ) )
-    PORT_DIPSETTING(    0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x0400, 0x0400, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(    0x0400, DEF_STR( Off ) )
-    PORT_DIPSETTING(    0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x0800, 0x0800, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(    0x0800, DEF_STR( Off ) )
-    PORT_DIPSETTING(    0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x1000, 0x1000, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(    0x1000, DEF_STR( Off ) )
-    PORT_DIPSETTING(    0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x2000, 0x2000, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(    0x2000, DEF_STR( Off ) )
-    PORT_DIPSETTING(    0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x4000, 0x4000, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(    0x4000, DEF_STR( Off ) )
-    PORT_DIPSETTING(    0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x8000, 0x8000, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(    0x8000, DEF_STR( Off ) )
-    PORT_DIPSETTING(    0x0000, DEF_STR( On ) )
+	PORT_START("SYSTEM")
+	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_COIN1 )
+	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_COIN2 )
+	PORT_SERVICE( 0x0004, IP_ACTIVE_LOW )
+	PORT_DIPNAME( 0x0008, 0x0008, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(    0x0008, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x0010, 0x0010, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(    0x0010, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x0020, 0x0020, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(    0x0020, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x0040, 0x0040, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(    0x0040, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(    0x0080, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x0100, 0x0100, "0x000003" )
+	PORT_DIPSETTING(    0x0100, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x0200, 0x0200, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(    0x0200, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x0400, 0x0400, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(    0x0400, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x0800, 0x0800, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(    0x0800, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x1000, 0x1000, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(    0x1000, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x2000, 0x2000, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(    0x2000, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x4000, 0x4000, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(    0x4000, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x8000, 0x8000, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(    0x8000, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x0000, DEF_STR( On ) )
 
-    PORT_START("P1_P2")
-    PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(1) PORT_8WAY
-    PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(1) PORT_8WAY
-    PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(1) PORT_8WAY
-    PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(1) PORT_8WAY
-    PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
-    PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
-    PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(1)
-    PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_START1 )
-    PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(2) PORT_8WAY
-    PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(2) PORT_8WAY
-    PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(2) PORT_8WAY
-    PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(2) PORT_8WAY
-    PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
-    PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
-    PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
-    PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_START1 )
+	PORT_START("P1_P2")
+	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(1) PORT_8WAY
+	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(1) PORT_8WAY
+	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(1) PORT_8WAY
+	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(1) PORT_8WAY
+	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
+	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
+	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(1)
+	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_START1 )
+	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(2) PORT_8WAY
+	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(2) PORT_8WAY
+	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(2) PORT_8WAY
+	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(2) PORT_8WAY
+	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
+	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
+	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
+	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_START2 )
 
 INPUT_PORTS_END
 
 
-static INTERRUPT_GEN( ttchamp_irq ) /* right? */
+INTERRUPT_GEN_MEMBER(ttchamp_state::ttchamp_irq)/* right? */
 {
-	device_set_input_line(device, INPUT_LINE_NMI, PULSE_LINE);
+	device.execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 }
 
 static MACHINE_CONFIG_START( ttchamp, ttchamp_state )
@@ -238,20 +280,18 @@ static MACHINE_CONFIG_START( ttchamp, ttchamp_state )
 	MCFG_CPU_ADD("maincpu", V30, 8000000)
 	MCFG_CPU_PROGRAM_MAP(ttchamp_map)
 	MCFG_CPU_IO_MAP(ttchamp_io)
-	MCFG_CPU_VBLANK_INT("screen", ttchamp_irq)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", ttchamp_state,  ttchamp_irq)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(1024,1024)
 	MCFG_SCREEN_VISIBLE_AREA(0, 320-1, 0, 200-1)
-	MCFG_SCREEN_UPDATE(ttchamp)
+	MCFG_SCREEN_UPDATE_DRIVER(ttchamp_state, screen_update_ttchamp)
 
 	MCFG_PALETTE_LENGTH(0x8000)
 
-	MCFG_VIDEO_START(ttchamp)
 MACHINE_CONFIG_END
 
 ROM_START( ttchamp )
@@ -331,12 +371,12 @@ ROM_START( ttchampa )
 	ROM_LOAD( "27c020.1", 0x000000, 0x040000,  CRC(e2c4fe95) SHA1(da349035cc348db220a1e12b4c2a6021e2168425) )
 ROM_END
 
-static DRIVER_INIT (ttchamp)
+DRIVER_INIT_MEMBER(ttchamp_state,ttchamp)
 {
-	UINT8 *ROM1 = machine.region("user1")->base();
-	memory_set_bankptr(machine, "bank1",&ROM1[0x120000]);
-	memory_set_bankptr(machine, "bank2",&ROM1[0x180000]);
+	UINT8 *ROM1 = machine().root_device().memregion("user1")->base();
+	machine().root_device().membank("bank1")->set_base(&ROM1[0x100000]);
+	machine().root_device().membank("bank2")->set_base(&ROM1[0x180000]);
 }
 
-GAME( 199?, ttchamp, 0,        ttchamp, ttchamp, ttchamp, ROT0,  "Gamart?", "Table Tennis Champions (set 1)", GAME_NOT_WORKING|GAME_NO_SOUND )
-GAME( 199?, ttchampa,ttchamp,  ttchamp, ttchamp, ttchamp, ROT0,  "Gamart?", "Table Tennis Champions (set 2)", GAME_NOT_WORKING|GAME_NO_SOUND )
+GAME( 199?, ttchamp, 0,        ttchamp, ttchamp, ttchamp_state, ttchamp, ROT0,  "Gamart?", "Table Tennis Champions (set 1)", GAME_NOT_WORKING|GAME_NO_SOUND )
+GAME( 199?, ttchampa,ttchamp,  ttchamp, ttchamp, ttchamp_state, ttchamp, ROT0,  "Gamart?", "Table Tennis Champions (set 2)", GAME_NOT_WORKING|GAME_NO_SOUND )

@@ -29,7 +29,7 @@ YM2151:
 ***************************************************************************/
 #include "emu.h"
 #include "cpu/z80/z80.h"
-#include "audio/seibu.h"	// for seibu_sound_decrypt on the MAIN cpu (not sound)
+#include "audio/seibu.h"    // for seibu_sound_decrypt on the MAIN cpu (not sound)
 #include "audio/t5182.h"
 #include "includes/mustache.h"
 
@@ -42,15 +42,15 @@ YM2151:
 #define YM_CLOCK    (XTAL1/4)
 
 
-static ADDRESS_MAP_START( memmap, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( memmap, AS_PROGRAM, 8, mustache_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0xbfff) AM_ROM
-	AM_RANGE(0xc000, 0xcfff) AM_RAM_WRITE(mustache_videoram_w) AM_BASE_MEMBER(mustache_state, m_videoram)
-	AM_RANGE(0xd000, 0xd000) AM_WRITE(t5182_sound_irq_w)
-	AM_RANGE(0xd001, 0xd001) AM_READ(t5182_sharedram_semaphore_snd_r)
-	AM_RANGE(0xd002, 0xd002) AM_WRITE(t5182_sharedram_semaphore_main_acquire_w)
-	AM_RANGE(0xd003, 0xd003) AM_WRITE(t5182_sharedram_semaphore_main_release_w)
-	AM_RANGE(0xd400, 0xd4ff) AM_READWRITE(t5182_sharedram_r, t5182_sharedram_w)
+	AM_RANGE(0xc000, 0xcfff) AM_RAM_WRITE(mustache_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0xd000, 0xd000) AM_WRITE_LEGACY(t5182_sound_irq_w)
+	AM_RANGE(0xd001, 0xd001) AM_READ_LEGACY(t5182_sharedram_semaphore_snd_r)
+	AM_RANGE(0xd002, 0xd002) AM_WRITE_LEGACY(t5182_sharedram_semaphore_main_acquire_w)
+	AM_RANGE(0xd003, 0xd003) AM_WRITE_LEGACY(t5182_sharedram_semaphore_main_release_w)
+	AM_RANGE(0xd400, 0xd4ff) AM_READWRITE_LEGACY(t5182_sharedram_r, t5182_sharedram_w)
 	AM_RANGE(0xd800, 0xd800) AM_READ_PORT("P1")
 	AM_RANGE(0xd801, 0xd801) AM_READ_PORT("P2")
 	AM_RANGE(0xd802, 0xd802) AM_READ_PORT("START")
@@ -58,7 +58,7 @@ static ADDRESS_MAP_START( memmap, AS_PROGRAM, 8 )
 	AM_RANGE(0xd804, 0xd804) AM_READ_PORT("DSWB")
 	AM_RANGE(0xd806, 0xd806) AM_WRITE(mustache_scroll_w)
 	AM_RANGE(0xd807, 0xd807) AM_WRITE(mustache_video_control_w)
-	AM_RANGE(0xe800, 0xefff) AM_WRITEONLY AM_BASE_SIZE_MEMBER(mustache_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0xe800, 0xefff) AM_WRITEONLY AM_SHARE("spriteram")
 	AM_RANGE(0xf000, 0xffff) AM_RAM
 ADDRESS_MAP_END
 
@@ -157,66 +157,48 @@ static GFXDECODE_START( mustache )
 	GFXDECODE_ENTRY( "gfx2", 0, spritelayout, 0x80, 8 )
 GFXDECODE_END
 
-static TIMER_CALLBACK( clear_irq_cb )
+TIMER_DEVICE_CALLBACK_MEMBER(mustache_state::mustache_scanline)
 {
-	cputag_set_input_line(machine, "maincpu", 0, CLEAR_LINE);
+	int scanline = param;
+
+	if(scanline == 240) // vblank-out irq
+		machine().device("maincpu")->execute().set_input_line_and_vector(0, HOLD_LINE,0x10); /* RST 10h */
+
+	if(scanline == 0) // vblank-in irq
+		machine().device("maincpu")->execute().set_input_line_and_vector(0, HOLD_LINE,0x08); /* RST 08h */
 }
 
-static INTERRUPT_GEN( assert_irq )
-{
-	mustache_state *state = device->machine().driver_data<mustache_state>();
-	device_set_input_line(device, 0, ASSERT_LINE);
-    state->m_clear_irq_timer->adjust(downcast<cpu_device *>(device)->cycles_to_attotime(14288));
-       /* Timing here is an educated GUESS, Z80 /INT must stay high so the irq
-          fires no less than TWICE per frame, else game doesn't work right.
-      6000000 / 56.747 = 105732.4616 cycles per frame, we'll call it A
-      screen size is 256x256, though less is visible.
-          lets assume we have 256 lines L and 40 'lines' (really line-times)
-          of vblank V:
-      So (A/(L+V))*V = the number of cycles spent in vblank.
-      (105732.4616 / (256+40)) * 40 = 14288.17049 z80 clocks in vblank
-       */
-}
 
-static MACHINE_START( mustache )
-{
-	mustache_state *state = machine.driver_data<mustache_state>();
-	state->m_clear_irq_timer = machine.scheduler().timer_alloc(FUNC(clear_irq_cb));
-}
 
 static MACHINE_CONFIG_START( mustache, mustache_state )
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", Z80, CPU_CLOCK)
 	MCFG_CPU_PROGRAM_MAP(memmap)
-	MCFG_CPU_VBLANK_INT("screen", assert_irq)
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("scantimer", mustache_state, mustache_scanline, "screen", 0, 1)
 
 	MCFG_CPU_ADD(CPUTAG_T5182,Z80, T5182_CLOCK)
 	MCFG_CPU_PROGRAM_MAP(t5182_map)
 	MCFG_CPU_IO_MAP(t5182_io)
 
-	MCFG_MACHINE_START(mustache)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(56.747)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(1*8, 31*8-1, 0, 31*8-1)
-	MCFG_SCREEN_UPDATE(mustache)
+	MCFG_SCREEN_UPDATE_DRIVER(mustache_state, screen_update_mustache)
 
 	MCFG_GFXDECODE(mustache)
 	MCFG_PALETTE_LENGTH(8*16+16*8)
 
-	MCFG_PALETTE_INIT(mustache)
-	MCFG_VIDEO_START(mustache)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("ymsnd", YM2151, YM_CLOCK)
-	MCFG_SOUND_CONFIG(t5182_ym2151_interface)
+	MCFG_YM2151_ADD("ymsnd", YM_CLOCK)
+	MCFG_YM2151_IRQ_HANDLER(WRITELINE(driver_device, member_wrapper_line<t5182_ym2151_irq_handler>))
 	MCFG_SOUND_ROUTE(0, "mono", 1.0)
 	MCFG_SOUND_ROUTE(1, "mono", 1.0)
 MACHINE_CONFIG_END
@@ -230,18 +212,18 @@ ROM_START( mustache )
 	ROM_LOAD( "t5182.rom",   0x0000, 0x2000, CRC(d354c8fc) SHA1(a1c9e1ac293f107f69cc5788cf6abc3db1646e33) )
 	ROM_LOAD( "mustache.e5", 0x8000, 0x8000, CRC(efbb1943) SHA1(3320e9eaeb776d09ed63f7dedc79e720674e6718) )
 
-	ROM_REGION( 0x0c000, "gfx1",0)	/* BG tiles  */
+	ROM_REGION( 0x0c000, "gfx1",0)  /* BG tiles  */
 	ROM_LOAD( "mustache.a13", 0x0000,  0x4000, CRC(9baee4a7) SHA1(31bcec838789462e67e54ebe7256db9fc4e51b69) )
 	ROM_LOAD( "mustache.a14", 0x4000,  0x4000, CRC(8155387d) SHA1(5f0a394c7671442519a831b0eeeaba4eecd5a406) )
 	ROM_LOAD( "mustache.a16", 0x8000,  0x4000, CRC(4db4448d) SHA1(50a94fd65c263d95fd24b4009dbb87707929fdcb) )
 
-	ROM_REGION( 0x20000, "gfx2",0 )	/* sprites */
+	ROM_REGION( 0x20000, "gfx2",0 ) /* sprites */
 	ROM_LOAD( "mustache.a4", 0x00000,  0x8000, CRC(d5c3bbbf) SHA1(914e3feea54246476701f492c31bd094ad9cea10) )
 	ROM_LOAD( "mustache.a7", 0x08000,  0x8000, CRC(e2a6012d) SHA1(4e4cd1a186870c8a88924d5bff917c6889da953d) )
 	ROM_LOAD( "mustache.a5", 0x10000,  0x8000, CRC(c975fb06) SHA1(4d166bd79e19c7cae422673de3e095ad8101e013) )
 	ROM_LOAD( "mustache.a8", 0x18000,  0x8000, CRC(2e180ee4) SHA1(a5684a25c337aeb4effeda7982164d35bc190af9) )
 
-	ROM_REGION( 0x1300, "proms",0 )	/* proms */
+	ROM_REGION( 0x1300, "proms",0 ) /* proms */
 	ROM_LOAD( "mustache.c3",0x0000, 0x0100, CRC(68575300) SHA1(bc93a38df91ad8c2f335f9bccc98b52376f9b483) )
 	ROM_LOAD( "mustache.c2",0x0100, 0x0100, CRC(eb008d62) SHA1(a370fbd1affaa489210ea36eb9e365263fb4e232) )
 	ROM_LOAD( "mustache.c1",0x0200, 0x0100, CRC(65da3604) SHA1(e4874d4152a57944d4e47306250833ea5cd0d89b) )
@@ -249,15 +231,17 @@ ROM_START( mustache )
 	ROM_LOAD( "mustache.b6",0x0300, 0x1000, CRC(5f83fa35) SHA1(cb13e63577762d818e5dcbb52b8a53f66e284e8f) ) /* 63S281N near SEI0070BU */
 ROM_END
 
-static DRIVER_INIT( mustache )
+DRIVER_INIT_MEMBER(mustache_state,mustache)
 {
+	t5182_init(machine());
+
 	int i;
 
-	int G1 = machine.region("gfx1")->bytes()/3;
-	int G2 = machine.region("gfx2")->bytes()/2;
-	UINT8 *gfx1 = machine.region("gfx1")->base();
-	UINT8 *gfx2 = machine.region("gfx2")->base();
-	UINT8 *buf=auto_alloc_array(machine, UINT8, G2*2);
+	int G1 = machine().root_device().memregion("gfx1")->bytes()/3;
+	int G2 = machine().root_device().memregion("gfx2")->bytes()/2;
+	UINT8 *gfx1 = machine().root_device().memregion("gfx1")->base();
+	UINT8 *gfx2 = machine().root_device().memregion("gfx2")->base();
+	UINT8 *buf=auto_alloc_array(machine(), UINT8, G2*2);
 
 	/* BG data lines */
 	for (i=0;i<G1; i++)
@@ -293,9 +277,9 @@ static DRIVER_INIT( mustache )
 	for (i = 0; i < 2*G2; i++)
 		gfx2[i] = buf[BITSWAP24(i,23,22,21,20,19,18,17,16,15,12,11,10,9,8,7,6,5,4,13,14,3,2,1,0)];
 
-	auto_free(machine, buf);
-	seibu_sound_decrypt(machine,"maincpu",0x8000);
+	auto_free(machine(), buf);
+	seibu_sound_decrypt(machine(),"maincpu",0x8000);
 }
 
 
-GAME( 1987, mustache, 0, mustache, mustache, mustache, ROT90, "Seibu Kaihatsu (March license)", "Mustache Boy", 0 )
+GAME( 1987, mustache, 0, mustache, mustache, mustache_state, mustache, ROT90, "Seibu Kaihatsu (March license)", "Mustache Boy", 0 )

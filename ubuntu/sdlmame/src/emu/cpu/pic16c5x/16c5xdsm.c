@@ -1,25 +1,25 @@
- /**************************************************************************\
- *                      Microchip PIC16C5x Emulator                         *
- *                                                                          *
- *                    Copyright Tony La Porta                               *
- *                 Originally written for the MAME project.                 *
- *                                                                          *
- *                                                                          *
- *      Addressing architecture is based on the Harvard addressing scheme.  *
- *                                                                          *
- *         Many thanks to those involved in the i8039 Disassembler          *
- *                        as this was based on it.                          *
- *                                                                          *
- *                                                                          *
- *                                                                          *
- * A Address to jump to.                                                    *
- * B Bit address within an 8-bit file register.                             *
- * D Destination select (0 = store result in W (accumulator))               *
- *                      (1 = store result in file register)                 *
- * F Register file address (00-1F).                                         *
- * K Literal field, constant data.                                          *
- *                                                                          *
- \**************************************************************************/
+	/**************************************************************************\
+	*                      Microchip PIC16C5x Emulator                         *
+	*                                                                          *
+	*                    Copyright Tony La Porta                               *
+	*                 Originally written for the MAME project.                 *
+	*                                                                          *
+	*                                                                          *
+	*      Addressing architecture is based on the Harvard addressing scheme.  *
+	*                                                                          *
+	*         Many thanks to those involved in the i8039 Disassembler          *
+	*                        as this was based on it.                          *
+	*                                                                          *
+	*                                                                          *
+	*                                                                          *
+	* A Address to jump to.                                                    *
+	* B Bit address within an 8-bit file register.                             *
+	* D Destination select (0 = store result in W (accumulator))               *
+	*                      (1 = store result in file register)                 *
+	* F Register file address (00-1F).                                         *
+	* K Literal field, constant data.                                          *
+	*                                                                          *
+	\**************************************************************************/
 
 #include "emu.h"
 #include <ctype.h>
@@ -39,9 +39,9 @@ typedef unsigned short int word;
 #define PTRS_PER_FORMAT 2
 
 static const char *const regfile[32] = { "Reg$00 (IND)",    "Reg$01 (TMR)",    "Reg$02 (PCL)",  "Reg$03 (ST)", "Reg$04 (FSR)", "Reg$05 (PTA)", "Reg$06 (PTB)", "Reg$07 (PTC)",
-								 "Reg$08", "Reg$09", "Reg$0A", "Reg$0B", "Reg$0C", "Reg$0D", "Reg$0E", "Reg$0F",
-								 "Reg$10", "Reg$11", "Reg$12", "Reg$13", "Reg$14", "Reg$15", "Reg$16", "Reg$17",
-								 "Reg$18", "Reg$19", "Reg$1A", "Reg$1B", "Reg$1C", "Reg$1D", "Reg$1E", "Reg$1F" };
+									"Reg$08", "Reg$09", "Reg$0A", "Reg$0B", "Reg$0C", "Reg$0D", "Reg$0E", "Reg$0F",
+									"Reg$10", "Reg$11", "Reg$12", "Reg$13", "Reg$14", "Reg$15", "Reg$16", "Reg$17",
+									"Reg$18", "Reg$19", "Reg$1A", "Reg$1B", "Reg$1C", "Reg$1D", "Reg$1E", "Reg$1F" };
 
 static const char *const dest[2] = { "W", "Reg" };
 
@@ -86,13 +86,13 @@ static const char *const PIC16C5xFormats[] = {
 
 #define MAX_OPS (((sizeof(PIC16C5xFormats) / sizeof(PIC16C5xFormats[0])) - 1) / PTRS_PER_FORMAT)
 
-typedef struct opcode {
-	word mask;			/* instruction mask */
-	word bits;			/* constant bits */
-	word extcode;		/* value that gets extension code */
-	const char *parse;	/* how to parse bits */
-	const char *fmt;	/* instruction format */
-} PIC16C5xOpcode;
+struct PIC16C5xOpcode  {
+	word mask;          /* instruction mask */
+	word bits;          /* constant bits */
+	word extcode;       /* value that gets extension code */
+	const char *parse;  /* how to parse bits */
+	const char *fmt;    /* instruction format */
+};
 
 static PIC16C5xOpcode Op[MAX_OPS+1];
 static int OpInizialized = 0;
@@ -124,13 +124,13 @@ static void InitDasm16C5x(void)
 				case 'k':
 					bit --;
 					break;
-				default: fatalerror("Invalid instruction encoding '%s %s'",
+				default: fatalerror("Invalid instruction encoding '%s %s'\n",
 					ops[0],ops[1]);
 			}
 		}
 		if (bit != -1 )
 		{
-			fatalerror("not enough bits in encoding '%s %s' %d",
+			fatalerror("not enough bits in encoding '%s %s' %d\n",
 				ops[0],ops[1],bit);
 		}
 		while (isspace((UINT8)*p)) p++;
@@ -149,14 +149,14 @@ static void InitDasm16C5x(void)
 
 CPU_DISASSEMBLE( pic16c5x )
 {
-	int a, b, d, f, k;	/* these can all be filled in by parsing an instruction */
+	int a, b, d, f, k;  /* these can all be filled in by parsing an instruction */
 	int i;
 	int op;
 	int cnt = 1;
 	int code;
 	int bit;
 	//char *buffertmp;
-	const char *cp;				/* character pointer in OpFormats */
+	const char *cp;             /* character pointer in OpFormats */
 	UINT32 flags = 0;
 
 	rombase = oprom;
@@ -165,7 +165,7 @@ CPU_DISASSEMBLE( pic16c5x )
 
 	if (!OpInizialized) InitDasm16C5x();
 
-	op = -1;				/* no matching opcode */
+	op = -1;                /* no matching opcode */
 	code = READOP16(2*pc);
 	for ( i = 0; i < MAX_OPS; i++)
 	{
@@ -185,7 +185,7 @@ CPU_DISASSEMBLE( pic16c5x )
 		return cnt;
 	}
 	//buffertmp = buffer;
-	if (Op[op].extcode)		/* Actually, theres no double length opcodes */
+	if (Op[op].extcode)     /* Actually, theres no double length opcodes */
 	{
 		bit = 27;
 		code <<= 16;
@@ -213,7 +213,7 @@ CPU_DISASSEMBLE( pic16c5x )
 			case 'k': k <<=1; k |= ((code & (1<<bit)) ? 1 : 0); bit--; break;
 			case ' ': break;
 			case '1': case '0':  bit--; break;
-			case '\0': fatalerror("premature end of parse string, opcode %x, bit = %d",code,bit);
+			case '\0': fatalerror("premature end of parse string, opcode %x, bit = %d\n",code,bit);
 		}
 		cp++;
 	}
@@ -239,7 +239,7 @@ CPU_DISASSEMBLE( pic16c5x )
 				case 'F': sprintf(num,"%s",regfile[f]); break;
 				case 'K': sprintf(num,"%02Xh",k); break;
 				default:
-					fatalerror("illegal escape character in format '%s'",Op[op].fmt);
+					fatalerror("illegal escape character in format '%s'\n",Op[op].fmt);
 			}
 			q = num; while (*q) *buffer++ = *q++;
 			*buffer = '\0';

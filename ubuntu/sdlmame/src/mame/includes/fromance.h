@@ -7,18 +7,24 @@
 
 ***************************************************************************/
 
+#include "video/vsystem_spr2.h"
+
 class fromance_state : public driver_device
 {
 public:
-	fromance_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	fromance_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+		m_videoram(*this, "videoram"),
+		m_spriteram(*this, "spriteram"),
+		m_spr_old(*this, "vsystem_spr_old")
+	{ }
 
 	/* memory pointers (used by pipedrm) */
-	UINT8 *  m_videoram;
-	UINT8 *  m_spriteram;
+	optional_shared_ptr<UINT8> m_videoram;
+	optional_shared_ptr<UINT8> m_spriteram;
 //  UINT8 *  m_paletteram;    // currently this uses generic palette handling
-	size_t   m_videoram_size;
-	size_t   m_spriteram_size;
+
+	optional_device<vsystem_spr2_device> m_spr_old; // only used by pipe dream, split this state up and clean things...
 
 	/* video-related */
 	tilemap_t  *m_bg_tilemap;
@@ -50,28 +56,42 @@ public:
 	UINT8    m_sound_command;
 
 	/* devices */
-	device_t *m_subcpu;
+	cpu_device *m_subcpu;
+	DECLARE_READ8_MEMBER(fromance_commanddata_r);
+	DECLARE_WRITE8_MEMBER(fromance_commanddata_w);
+	DECLARE_READ8_MEMBER(fromance_busycheck_main_r);
+	DECLARE_READ8_MEMBER(fromance_busycheck_sub_r);
+	DECLARE_WRITE8_MEMBER(fromance_busycheck_sub_w);
+	DECLARE_WRITE8_MEMBER(fromance_rombank_w);
+	DECLARE_WRITE8_MEMBER(fromance_adpcm_w);
+	DECLARE_WRITE8_MEMBER(fromance_portselect_w);
+	DECLARE_READ8_MEMBER(fromance_keymatrix_r);
+	DECLARE_WRITE8_MEMBER(fromance_coinctr_w);
+	DECLARE_WRITE8_MEMBER(fromance_gfxreg_w);
+	DECLARE_READ8_MEMBER(fromance_paletteram_r);
+	DECLARE_WRITE8_MEMBER(fromance_paletteram_w);
+	DECLARE_READ8_MEMBER(fromance_videoram_r);
+	DECLARE_WRITE8_MEMBER(fromance_videoram_w);
+	DECLARE_WRITE8_MEMBER(fromance_scroll_w);
+	DECLARE_WRITE8_MEMBER(fromance_crtc_data_w);
+	DECLARE_WRITE8_MEMBER(fromance_crtc_register_w);
+	DECLARE_WRITE8_MEMBER(fromance_adpcm_reset_w);
+	DECLARE_DRIVER_INIT(pipedrm);
+	DECLARE_DRIVER_INIT(hatris);
+	TILE_GET_INFO_MEMBER(get_fromance_bg_tile_info);
+	TILE_GET_INFO_MEMBER(get_fromance_fg_tile_info);
+	TILE_GET_INFO_MEMBER(get_nekkyoku_bg_tile_info);
+	TILE_GET_INFO_MEMBER(get_nekkyoku_fg_tile_info);
+	DECLARE_MACHINE_START(fromance);
+	DECLARE_MACHINE_RESET(fromance);
+	DECLARE_VIDEO_START(nekkyoku);
+	DECLARE_VIDEO_START(fromance);
+	DECLARE_MACHINE_START(pipedrm);
+	DECLARE_MACHINE_RESET(pipedrm);
+	DECLARE_VIDEO_START(pipedrm);
+	DECLARE_VIDEO_START(hatris);
+	UINT32 screen_update_fromance(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_pipedrm(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	TIMER_CALLBACK_MEMBER(deferred_commanddata_w);
+	TIMER_CALLBACK_MEMBER(crtc_interrupt_gen);
 };
-
-
-/*----------- defined in video/fromance.c -----------*/
-
-VIDEO_START( fromance );
-VIDEO_START( nekkyoku );
-VIDEO_START( pipedrm );
-VIDEO_START( hatris );
-SCREEN_UPDATE( fromance );
-SCREEN_UPDATE( pipedrm );
-
-WRITE8_HANDLER( fromance_crtc_data_w );
-WRITE8_HANDLER( fromance_crtc_register_w );
-
-WRITE8_HANDLER( fromance_gfxreg_w );
-
-WRITE8_HANDLER( fromance_scroll_w );
-
-READ8_HANDLER( fromance_paletteram_r );
-WRITE8_HANDLER( fromance_paletteram_w );
-
-READ8_HANDLER( fromance_videoram_r );
-WRITE8_HANDLER( fromance_videoram_w );

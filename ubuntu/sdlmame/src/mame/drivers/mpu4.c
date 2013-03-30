@@ -1,2797 +1,2733 @@
-/***********************************************************************************************************
-  Barcrest MPU4 highly preliminary driver by J.Wallace, and Anonymous.
+/* these are the MPU4 set listings / set specific code, for hardware emulation see mpu4hw.c */
 
-  This is the core driver, no video specific stuff should go in here.
-  This driver holds all the mechanical games.
+/* todo: driver inits (basic hw reel, protection configs etc.) should probably be moved here
+         once the actual code for them is cleaned up and can be put into neater structures
+         like bfm_sc4
 
-     01-2011: Adding the missing 'OKI' sound card, and documented it.
-     05-2009: Miscellaneous lamp fixes, based on data from FME Forever.
-     09-2007: Haze: Added Deal 'Em video support.
-  03-08-2007: J Wallace: Removed audio filter for now, since sound is more accurate without them.
-                         Connect 4 now has the right sound.
-  03-07-2007: J Wallace: Several major changes, including input relabelling, and system timer improvements.
-     06-2007: Atari Ace, many cleanups and optimizations of I/O routines
-  09-06-2007: J Wallace: Fixed 50Hz detection circuit.
-  09-04-2007: J Wallace: Corrected a lot of out of date info in this revision history.
-                         Revisionism, if you will.
-  17-02-2007: J Wallace: Added Deal 'Em - still needs some work.
-  10-02-2007: J Wallace: Improved input timing.
-  30-01-2007: J Wallace: Characteriser rewritten to run the 'extra' data needed by some games.
-  24-01-2007: J Wallace: With thanks to Canonman and HIGHWAYMAN/System 80, I was able to confirm a seemingly
-              ghastly misuse of a PIA is actually on the real hardware. This fixes the meters.
+         due to the vast number of sets here this might be further split up by manufacturer
 
-See http://agemame.mameworld.info/techinfo/mpu4.php for Information.
+*/
 
---- Board Setup ---
-
-The MPU4 BOARD is the driver board, originally designed to run Fruit Machines made by the Barcrest Group, but later
-licensed to other firms as a general purpose unit (even some old Photo-Me booths used the unit).
-
-This board uses a ~1.72 Mhz 6809B CPU, and a number of PIA6821 chips for multiplexing inputs and the like.
-
-To some extent, the hardware feels like a revision of the MPU3 design, integrating into the base unit features that were
-previously added through expansion ports. However, there is no backwards compatibility, and the entire memory map has been
-reworked.
-
-Like MPU3, a 6840PTM is used for internal timing, and other miscellaneous control functions, including as a crude analogue sound device
-(a square wave from the PTM being used as the alarm sound generator). However, the main sound functionality is provided by
-dedicated hardware (an AY8913).
-
-A MPU4 GAME CARD (cartridge) plugs into the MPU4 board containing the game, and a protection PAL (the 'characteriser').
-This PAL, as well as protecting the games, also controlled some of the lamp address matrix for many games, and acted as
-an anti-tampering device which helped to prevent the hacking of certain titles in a manner which broke UK gaming laws.
-
-Like MPU3, over the years developers have added more capabilities through the spare inputs and outputs provided. These provided
-support for more reels, lamps and LEDs through daughtercards.
-Several solutions were released depending on the manufacturer of the machine, all are emulated here.
-
-In later revisions of the main board (MOD4 onwards), the AY8913 was removed entirely, as two official alternatives for sound had been produced.
-In one, a YM2413 is built into the gameboard, and in the other an OKI MSM6376 is interfaced with a PIA and PTM to allow sophisticated
-sampled sound.
-
-The lamping and input handling side of the machine rely entirely on a column by column 'strobe' system, with lights and LEDs selected in turn.
-In the inputs there are two orange connectors (sampled every 8ms) and two black ones (sampled every 16ms), giving 32 multiplexed inputs.
-
-In addition there are two auxiliary ports taht can be accessed separately to these and are bidirectional
-
---- Preliminary MPU4 Memorymap  ---
-
-(NV) indicates an item which is not present on the video version, which has a Comms card instead.
-
-   hex     |r/w| D D D D D D D D |
- location  |   | 7 6 5 4 3 2 1 0 | function
------------+---+-----------------+--------------------------------------------------------------------------
- 0000-07FF |R/W| D D D D D D D D | 2k RAM
------------+---+-----------------+--------------------------------------------------------------------------
- 0800      |R/W|                 | Characteriser (Security PAL) (NV)
------------+---+-----------------+--------------------------------------------------------------------------
- 0850 ?    | W | ??????????????? | page latch (NV)
------------+---+-----------------+--------------------------------------------------------------------------
- 0880      |R/W| D D D D D D D D | PIA6821 on soundboard (Oki MSM6376@16MHz)
-           |   |                 | port A = ??
-           |   |                 | port B (882)
-           |   |                 |        b7 = 0 if OKI busy
-           |   |                 |             1 if OKI ready
-           |   |                 |        b6 = ??
-           |   |                 |        b5 = volume control clock
-           |   |                 |        b4 = volume control direction (0= up, 1 = down)
-           |   |                 |        b3 = ??
-           |   |                 |        b2 = ??
-           |   |                 |        b1 = ??
-           |   |                 |        b0 = ??
------------+---+-----------------+--------------------------------------------------------------------------
- 08C0      |   |                 | MC6840 on sound board
------------+---+-----------------+--------------------------------------------------------------------------
- 0900-     |R/W| D D D D D D D D | MC6840 PTM IC2
-
-
-  Clock1 <--------------------------------------
-     |                                          |
-     V                                          |
-  Output1 ---> Clock2                           |
-                                                |
-               Output2 --+-> Clock3             |
-                         |                      |
-                         |   Output3 ---> 'to audio amp' ??
-                         |
-                         +--------> CA1 IC3 (
-
-IRQ line connected to CPU
-
------------+---+-----------------+--------------------------------------------------------------------------
- 0A00-0A03 |R/W| D D D D D D D D | PIA6821 IC3 port A Lamp Drives 1,2,3,4,6,7,8,9 (sic)(IC14)
-           |   |                 |
-           |   |                 |          CA1 <= output2 from PTM6840 (IC2)
-           |   |                 |          CA2 => alpha data
-           |   |                 |
-           |   |                 |          port B Lamp Drives 10,11,12,13,14,15,16,17 (sic)(IC13)
-           |   |                 |
-           |   |                 |          CB2 => alpha reset (clock on Dutch systems)
-           |   |                 |
------------+---+-----------------+--------------------------------------------------------------------------
- 0B00-0B03 |R/W| D D D D D D D D | PIA6821 IC4 port A = data for 7seg leds (pins 10 - 17, via IC32)
-           |   |                 |
-           |   |                 |             CA1 INPUT, 50 Hz input (used to generate IRQ)
-           |   |                 |             CA2 OUTPUT, connected to pin2 74LS138 CE for multiplexer
-           |   |                 |                        (B on LED strobe multiplexer)
-           |   |                 |             IRQA connected to IRQ of CPU
-           |   |                 |             port B
-           |   |                 |                    PB7 = INPUT, serial port Receive data (Rx)
-           |   |                 |                    PB6 = INPUT, reel A sensor
-           |   |                 |                    PB5 = INPUT, reel B sensor
-           |   |                 |                    PB4 = INPUT, reel C sensor
-           |   |                 |                    PB3 = INPUT, reel D sensor
-           |   |                 |                    PB2 = INPUT, Connected to CA1 (50Hz signal)
-           |   |                 |                    PB1 = INPUT, undercurrent sense
-           |   |                 |                    PB0 = INPUT, overcurrent  sense
-           |   |                 |
-           |   |                 |             CB1 INPUT,  used to generate IRQ on edge of serial input line
-           |   |                 |             CB2 OUTPUT, enable signal for reel optics
-           |   |                 |             IRQB connected to IRQ of CPU
-           |   |                 |
------------+---+-----------------+--------------------------------------------------------------------------
- 0C00-0C03 |R/W| D D D D D D D D | PIA6821 IC5 port A
-           |   |                 |
-           |   |                 |                    PA0-PA7, INPUT AUX1 connector
-           |   |                 |
-           |   |                 |             CA2  OUTPUT, serial port Transmit line
-           |   |                 |             CA1  not connected
-           |   |                 |             IRQA connected to IRQ of CPU
-           |   |                 |
-           |   |                 |             port B
-           |   |                 |
-           |   |                 |                    PB0-PB7 INPUT, AUX2 connector
-           |   |                 |
-           |   |                 |             CB1  INPUT,  connected to PB7 (Aux2 connector pin 4)
-           |   |                 |
-           |   |                 |             CB2  OUTPUT, AY8913 chip select line
-           |   |                 |             IRQB connected to IRQ of CPU
-           |   |                 |
------------+---+-----------------+--------------------------------------------------------------------------
- 0D00-0D03 |R/W| D D D D D D D D | PIA6821 IC6
-           |   |                 |
-           |   |                 |  port A
-           |   |                 |
-           |   |                 |        PA0 - PA7 (INPUT/OUTPUT) data port AY8913 sound chip
-           |   |                 |
-           |   |                 |        CA1 INPUT,  not connected
-           |   |                 |        CA2 OUTPUT, BC1 pin AY8913 sound chip
-           |   |                 |        IRQA , connected to IRQ CPU
-           |   |                 |
-           |   |                 |  port B
-           |   |                 |
-           |   |                 |        PB0-PB3 OUTPUT, reel A
-           |   |                 |        PB4-PB7 OUTPUT, reel B
-           |   |                 |
-           |   |                 |        CB1 INPUT,  not connected
-           |   |                 |        CB2 OUTPUT, B01R pin AY8913 sound chip
-           |   |                 |        IRQB , connected to IRQ CPU
-           |   |                 |
------------+---+-----------------+--------------------------------------------------------------------------
- 0E00-0E03 |R/W| D D D D D D D D | PIA6821 IC7
-           |   |                 |
-           |   |                 |  port A
-           |   |                 |
-           |   |                 |        PA0-PA3 OUTPUT, reel C
-           |   |                 |        PA4-PA7 OUTPUT, reel D
-           |   |                 |        CA1     INPUT,  not connected
-           |   |                 |        CA2     OUTPUT, A on LED strobe multiplexer
-           |   |                 |        IRQA , connected to IRQ CPU
-           |   |                 |
-           |   |                 |  port B
-           |   |                 |
-           |   |                 |        PB0-PB6 OUTPUT mech meter 1-7 or reel E + F
-           |   |                 |        PB7     Voltage drop sensor
-           |   |                 |        CB1     INPUT, not connected
-           |   |                 |        CB2     OUTPUT,mech meter 8
-           |   |                 |        IRQB , connected to IRQ CPU
-           |   |                 |
------------+---+-----------------+--------------------------------------------------------------------------
- 0F00-0F03 |R/W| D D D D D D D D | PIA6821 IC8
-           |   |                 |
-           |   |                 | port A
-           |   |                 |
-           |   |                 |        PA0-PA7 INPUT  multiplexed inputs data
-           |   |                 |
-           |   |                 |        CA1     INPUT, not connected
-           |   |                 |        CA2    OUTPUT, C on LED strobe multiplexer
-           |   |                 |        IRQA           connected to IRQ CPU
-           |   |                 |
-           |   |                 | port B
-           |   |                 |
-           |   |                 |        PB0-PB7 OUTPUT  triacs outputs connector PL6
-           |   |                 |        used for slides / hoppers
-           |   |                 |
-           |   |                 |        CB1     INPUT, not connected
-           |   |                 |        CB2    OUTPUT, pin1 alpha display PL7 (clock signal)
-           |   |                 |        IRQB           connected to IRQ CPU
-           |   |                 |
------------+---+-----------------+--------------------------------------------------------------------------
- 1000-FFFF | R | D D D D D D D D | ROM (can be bank switched by 0x850 in 8 banks of 64 k ) (NV)
------------+---+-----------------+--------------------------------------------------------------------------
-
-TODO: - Distinguish door switches using manual
-      - Complete stubs for hoppers (needs slightly better 68681 emulation, and new 'hoppers' device emulation)
-      - It seems that the MPU4 core program relies on some degree of persistence when switching strobes and handling
-      writes to the various hardware ports. This explains the occasional lamping/LED blackout and switching bugs
-      For now, we're ignoring any extra writes to strobes, as the alternative is to assign a timer to *everything*
-      - Flo's move in Great Escape gives spin alarms - need a different opto setting for reverse spin reels?
-      - Fix BwB characteriser, need to be able to calculate stabiliser bytes. Anyone fancy reading 6809 source?
-      - Fix MSM6376 - We're triggering 'contact MAMEDEV' since we need all features of the chip,
-      including dynamic sample rate adjustment and BEEP.
-***********************************************************************************************************/
 #include "emu.h"
-#include "machine/6821pia.h"
-#include "machine/6840ptm.h"
-#include "machine/nvram.h"
-
-#include "cpu/m6809/m6809.h"
-#include "sound/ay8910.h"
-#include "sound/okim6376.h"
-#include "sound/2413intf.h"
-#include "machine/steppers.h"
-#include "machine/roc10937.h"
-#include "machine/meters.h"
-
-#ifdef MAME_DEBUG
-#define MPU4VERBOSE 1
-#else
-#define MPU4VERBOSE 0
-#endif
-
-#define LOG(x)	do { if (MPU4VERBOSE) logerror x; } while (0)
-#define LOG_CHR(x)	do { if (MPU4VERBOSE) logerror x; } while (0)
-#define LOG_CHR_FULL(x)	do { if (MPU4VERBOSE) logerror x; } while (0)
-#define LOG_IC3(x)	do { if (MPU4VERBOSE) logerror x; } while (0)
-#define LOG_IC8(x)	do { if (MPU4VERBOSE) logerror x; } while (0)
-#define LOG_SS(x)	do { if (MPU4VERBOSE) logerror x; } while (0)
-
-#include "video/awpvid.h"		//Fruit Machines Only
-#include "connect4.lh"
-#include "gamball.lh"
-#include "mpu4.lh"
-#include "mpu4ext.lh"
-#define MPU4_MASTER_CLOCK (6880000)
-
-static TIMER_CALLBACK( ic24_timeout );
-
-
-static const UINT8 reel_mux_table[8]= {0,4,2,6,1,5,3,7};//include 7, although I don't think it's used
-static const UINT8 reel_mux_table7[8]= {3,1,5,6,4,2,0,7};
-
-#define STANDARD_REEL  0	/* As originally designed 3/4 reels*/
-#define FIVE_REEL_5TO8 1	/* Interfaces to meter port, allows some mechanical metering, but there is significant 'bounce' in the extra reel*/
-#define FIVE_REEL_8TO5 2	/* Mounted backwards for space reasons, but different board*/
-#define FIVE_REEL_3TO6 3	/* Connected to the centre of the meter connector, taking up meters 3 to 6 */
-#define SIX_REEL_1TO8  4	/* Two reels on the meter drives*/
-#define SIX_REEL_5TO8  5	/* Like FIVE_REEL_5TO8, but with an extra reel elsewhere*/
-#define SEVEN_REEL     6	/* Mainly club machines, significant reworking of reel hardware*/
-#define FLUTTERBOX     7	/* Will you start the fans, please!  A fan using a reel mux-like setup, but not actually a reel*/
-
-#define NO_EXTENDER			0	/* As originally designed */
-#define SMALL_CARD			1
-#define LARGE_CARD_A		2 //96 Lamps
-#define LARGE_CARD_B		3 // 96 Lamps, 16 LEDs - as used by BwB
-#define LARGE_CARD_C		4 //Identical to B, no built in LED support
-
-#define CARD_A			1
-#define CARD_B			2
-#define CARD_C			3
-
-#define TUBES				0
-#define HOPPER_DUART_A		1
-#define HOPPER_DUART_B		2
-#define HOPPER_DUART_C		3
-#define HOPPER_NONDUART_A	4
-#define HOPPER_NONDUART_B	5
-
-/* Lookup table for CHR data */
-
-struct mpu4_chr_table
-{
-	UINT8 call;
-	UINT8 response;
-};
-
-/* Video stuff */
-struct ef9369_t
-{
-	UINT32 addr;
-	UINT16 clut[16];	/* 13-bits - a marking bit and a 444 color */
-};
-
-struct bt471_t
-{
-	UINT8 address;
-	UINT8 addr_cnt;
-	UINT8 pixmask;
-	UINT8 command;
-	rgb_t color;
-};
-
-
-class mpu4_state : public driver_device
-{
-public:
-	mpu4_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
-
-	int m_mod_number;
-	int m_mmtr_data;
-	int m_alpha_data_line;
-	int m_alpha_clock;
-	int m_ay8913_address;
-	int m_serial_data;
-	int m_signal_50hz;
-	int m_ic4_input_b;
-	int m_aux1_input;
-	int m_aux2_input;
-	int m_IC23G1;
-	int m_IC23G2A;
-	int m_IC23G2B;
-	int m_IC23GC;
-	int m_IC23GB;
-	int m_IC23GA;
-	int m_prot_col;
-	int m_lamp_col;
-	int m_init_col;
-	int m_reel_flag;
-	int m_ic23_active;
-	int m_led_lamp;
-	int m_link7a_connected;
-	emu_timer *m_ic24_timer;
-	int m_expansion_latch;
-	int m_global_volume;
-	int m_input_strobe;
-	UINT8 m_lamp_strobe;
-	UINT8 m_lamp_strobe2;
-	UINT8 m_led_strobe;
-	UINT8 m_ay_data;
-	int m_optic_pattern;
-	int m_active_reel;
-	int m_remote_meter;
-	int m_reel_mux;
-	int m_lamp_extender;
-	int m_last_b7;
-	int m_last_latch;
-	int m_lamp_sense;
-	int m_card_live;
-	int m_led_extender;
-	int m_bwb_bank;
-	int m_hopper;
-	const mpu4_chr_table* m_current_chr_table;
-
-	//Video
-	UINT8 m_m6840_irq_state;
-	UINT8 m_m6850_irq_state;
-	UINT8 m_scn2674_irq_state;
-	UINT8 m_m68k_m6809_line;
-	UINT8 m_m6809_m68k_line;
-	UINT8 m_m68k_acia_cts;
-	UINT8 m_m6809_acia_cts;
-	UINT8 m_m6809_acia_rts;
-	UINT8 m_m6809_acia_dcd;
-	int m_gfx_index;
-	UINT16 * m_vid_vidram;
-	UINT16 * m_vid_mainram;
-	UINT8 m_scn2674_IR[16];
-	UINT8 m_scn2675_IR_pointer;
-	UINT8 m_scn2674_screen1_l;
-	UINT8 m_scn2674_screen1_h;
-	UINT8 m_scn2674_cursor_l;
-	UINT8 m_scn2674_cursor_h;
-	UINT8 m_scn2674_screen2_l;
-	UINT8 m_scn2674_screen2_h;
-	UINT8 m_scn2674_irq_register;
-	UINT8 m_scn2674_status_register;
-	UINT8 m_scn2674_irq_mask;
-	UINT8 m_scn2674_gfx_enabled;
-	UINT8 m_scn2674_display_enabled;
-	UINT8 m_scn2674_cursor_enabled;
-	UINT8 m_IR0_scn2674_double_ht_wd;
-	UINT8 m_IR0_scn2674_scanline_per_char_row;
-	UINT8 m_IR0_scn2674_sync_select;
-	UINT8 m_IR0_scn2674_buffer_mode_select;
-	UINT8 m_IR1_scn2674_interlace_enable;
-	UINT8 m_IR1_scn2674_equalizing_constant;
-	UINT8 m_IR2_scn2674_row_table;
-	UINT8 m_IR2_scn2674_horz_sync_width;
-	UINT8 m_IR2_scn2674_horz_back_porch;
-	UINT8 m_IR3_scn2674_vert_front_porch;
-	UINT8 m_IR3_scn2674_vert_back_porch;
-	UINT8 m_IR4_scn2674_rows_per_screen;
-	UINT8 m_IR4_scn2674_character_blink_rate;
-	UINT8 m_IR5_scn2674_character_per_row;
-	UINT8 m_IR8_scn2674_display_buffer_first_address_LSB;
-	UINT8 m_IR9_scn2674_display_buffer_first_address_MSB;
-	UINT8 m_IR9_scn2674_display_buffer_last_address;
-	UINT8 m_IR10_scn2674_display_pointer_address_lower;
-	UINT8 m_IR11_scn2674_display_pointer_address_upper;
-	UINT8 m_IR12_scn2674_scroll_start;
-	UINT8 m_IR12_scn2674_split_register_1;
-	UINT8 m_IR13_scn2674_scroll_end;
-	UINT8 m_IR13_scn2674_split_register_2;
-	INT8 m_cur[2];
-	UINT8 *m_dealem_videoram;
-	int m_rowcounter;
-	int m_linecounter;
-	struct ef9369_t m_pal;
-	struct bt471_t m_bt471;
-};
-
-/*
-LED Segments related to pins (5 is not connected):
-Unlike the controllers emulated in the layout code, each
-segment of an MPU4 LED can be set individually, even
-being used as individual lamps. However, we can get away
-with settings like this in the majority of cases.
-   _9_
-  |   |
-  3   8
-  |   |
-   _2_
-  |   |
-  4   7
-  |_ _|
-    6  1
-
-8 display enables (pins 10 - 17)
-*/
-
-static void lamp_extend_small(int data)
-{
-	int lamp_strobe_ext,column,i;
-	column = data & 0x07;
-
-	lamp_strobe_ext = 0x1f - ((data & 0xf8) >> 3);
-	if ( lamp_strobe_ext )
-	{
-		for (i = 0; i < 5; i++)
-		{
-			output_set_lamp_value((5*column)+i+128,((lamp_strobe_ext  & (1 << i)) != 0));
-		}
-    }
-}
-
-static void lamp_extend_largea(mpu4_state *state, int data,int column,int active)
-{
-	int lampbase,i,byte7;
-
-	state->m_lamp_sense = 0;
-	byte7 = data & 0x80;
-	if ( byte7 != state->m_last_b7 )
-	{
-		if ( byte7 )
-		{
-			lampbase = 128 + column * 8;
-		}
-		else
-		{
-			lampbase = 192 + column * 8;
-		}
-		if ( data & 0x3f )
-		{
-			state->m_lamp_sense = 1;
-		}
-		if ( active )
-		{
-			for (i = 0; i < 6; i++)
-			{
-				output_set_lamp_value(lampbase+i,(data  & (1 << i)) != 0);
-			}
-		}
-    }
-    state->m_last_b7 = byte7;
-}
-
-static void lamp_extend_largebc(mpu4_state *state, int data,int column,int active)
-{
-	int lampbase,i,byte7;
-
-	state->m_lamp_sense = 0;
-	byte7 = data & 0x80;
-	if ( byte7 != state->m_last_b7 )
-	{
-		state->m_card_live = 1;
-		if ( byte7 )
-		{
-			lampbase = 128 + column * 8;
-		}
-		else
-		{
-			lampbase = 192 + column * 8;
-		}
-		if ( data & 0x3f )
-		{
-			state->m_lamp_sense = 1;
-		}
-		if ( active )
-		{
-			for (i = 0; i < 6; i++)
-			{
-				output_set_lamp_value(lampbase+i,(data  & (1 << i)) != 0);
-			}
-		}
-		state->m_last_b7 = byte7;
-	}
-	else
-	{
-		state->m_card_live = 0;
-	}
-}
-
-static void led_write_latch(mpu4_state *state, int latch, int data, int column)
-{
-	int diff,i;
-
-	diff = (latch ^ state->m_last_latch) & latch;
-	column = 7 - column; // like main board, these are wired up in reverse
-	data = ~data;//inverted?
-
-	for(i=0; i<5; i++)
-	{
-		if (diff & (1<<i))
-		{
-			column += (i*8);
-		}
-	}
-	output_set_digit_value(column, data);
-
-	state->m_last_latch = diff;
-}
-
-
-static void update_meters(mpu4_state *state)
-{
-	int meter;
-	int data = ((state->m_mmtr_data & 0x7f) | state->m_remote_meter);
-	switch (state->m_reel_mux)
-	{
-		case STANDARD_REEL:
-		// Change nothing
-		break;
-		case FIVE_REEL_5TO8:
-		stepper_update(4, ((data >> 4) & 0x0f));
-		data = (data & 0x0F); //Strip reel data from meter drives, leaving active elements
-		awp_draw_reel(4);
-		break;
-		case FIVE_REEL_8TO5:
-		stepper_update(4, (((data & 0x01) + ((data & 0x08) >> 2) + ((data & 0x20) >> 3) + ((data & 0x80) >> 4)) & 0x0f)) ;
-		data = 0x00; //Strip all reel data from meter drives, nothing is connected
-		awp_draw_reel(4);
-		break;
-		case FIVE_REEL_3TO6:
-		stepper_update(4, ((data >> 2) & 0x0f));
-		data = 0x00; //Strip all reel data from meter drives
-		awp_draw_reel(4);
-		break;
-		case SIX_REEL_1TO8:
-		stepper_update(4, (data & 0x0f));
-		stepper_update(5, ((data >> 4) & 0x0f));
-		data = 0x00; //Strip all reel data from meter drives
-		awp_draw_reel(4);
-		awp_draw_reel(5);
-		break;
-		case SIX_REEL_5TO8:
-		stepper_update(4, ((data >> 4) & 0x0f));
-		data = 0x00; //Strip all reel data from meter drives
-		awp_draw_reel(4);
-		break;
-		case SEVEN_REEL:
-		stepper_update(0, (((data & 0x01) + ((data & 0x08) >> 2) + ((data & 0x20) >> 3) + ((data & 0x80) >> 4)) & 0x0f)) ;
-		data = 0x00; //Strip all reel data from meter drives
-		awp_draw_reel(0);
-		break;
-		case FLUTTERBOX: //The backbox fan assembly fits in a reel unit sized box, wired to the remote meter pin, so we can handle it here
-		output_set_value("flutterbox", data & 0x80);
-		data &= ~0x80; //Strip flutterbox data from meter drives
-	}
-
-	MechMtr_update(7, (data & 0x80));
-	for (meter = 0; meter < 4; meter ++)
-	{
-		MechMtr_update(meter, (data & (1 << meter)));
-	}
-	if (state->m_reel_mux == STANDARD_REEL)
-	{
-		for (meter = 4; meter < 7; meter ++)
-		{
-			MechMtr_update(meter, (data & (1 << meter)));
-		}
-	}
-}
-
-/* called if board is reset */
-static void mpu4_stepper_reset(mpu4_state *state)
-{
-	int pattern = 0,reel;
-	for (reel = 0; reel < 6; reel++)
-	{
-		stepper_reset_position(reel);
-		if (stepper_optic_state(reel)) pattern |= 1<<reel;
-	}
-	state->m_optic_pattern = pattern;
-}
-
-
-static MACHINE_RESET( mpu4 )
-{
-	mpu4_state *state = machine.driver_data<mpu4_state>();
-	ROC10937_reset(0);	/* reset display1 */
-
-	mpu4_stepper_reset(state);
-
-	state->m_lamp_strobe    = 0;
-	state->m_lamp_strobe2   = 0;
-	state->m_led_strobe     = 0;
-
-	state->m_IC23GC    = 0;
-	state->m_IC23GB    = 0;
-	state->m_IC23GA    = 0;
-	state->m_IC23G1    = 1;
-	state->m_IC23G2A   = 0;
-	state->m_IC23G2B   = 0;
-
-	state->m_prot_col  = 0;
-
-/* init rom bank, some games don't set this */
-	{
-		UINT8 *rom = machine.region("maincpu")->base();
-
-		memory_configure_bank(machine, "bank1", 0, 8, &rom[0x01000], 0x10000);
-
-		memory_set_bank(machine, "bank1",0);
-		machine.device("maincpu")->reset();
-	}
-
-}
-
-
-/* 6809 IRQ handler */
-static WRITE_LINE_DEVICE_HANDLER( cpu0_irq )
-{
-	mpu4_state *drvstate = device->machine().driver_data<mpu4_state>();
-	device_t *pia3 = device->machine().device("pia_ic3");
-	device_t *pia4 = device->machine().device("pia_ic4");
-	device_t *pia5 = device->machine().device("pia_ic5");
-	device_t *pia6 = device->machine().device("pia_ic6");
-	device_t *pia7 = device->machine().device("pia_ic7");
-	device_t *pia8 = device->machine().device("pia_ic8");
-	device_t *ptm2 = device->machine().device("ptm_ic2");
-
-	/* The PIA and PTM IRQ lines are all connected to a common PCB track, leading directly to the 6809 IRQ line. */
-	int combined_state = pia6821_get_irq_a(pia3) | pia6821_get_irq_b(pia3) |
-						 pia6821_get_irq_a(pia4) | pia6821_get_irq_b(pia4) |
-						 pia6821_get_irq_a(pia5) | pia6821_get_irq_b(pia5) |
-						 pia6821_get_irq_a(pia6) | pia6821_get_irq_b(pia6) |
-						 pia6821_get_irq_a(pia7) | pia6821_get_irq_b(pia7) |
-						 pia6821_get_irq_a(pia8) | pia6821_get_irq_b(pia8) |
-						 ptm6840_get_irq(ptm2);
-
-	if (!drvstate->m_link7a_connected) //7B = IRQ, 7A = FIRQ, both = NMI
-	{
-		cputag_set_input_line(device->machine(), "maincpu", M6809_IRQ_LINE, combined_state ? ASSERT_LINE : CLEAR_LINE);
-		LOG(("6809 int%d \n", combined_state));
-	}
-	else
-	{
-		cputag_set_input_line(device->machine(), "maincpu", M6809_FIRQ_LINE, combined_state ? ASSERT_LINE : CLEAR_LINE);
-		LOG(("6809 fint%d \n", combined_state));
-	}
-}
-
-/* Bankswitching */
-static WRITE8_HANDLER( bankswitch_w )
-{
-	memory_set_bank(space->machine(), "bank1",data & 0x07);
-}
-
-
-static READ8_HANDLER( bankswitch_r )
-{
-	return memory_get_bank(space->machine(), "bank1");
-}
-
-
-/* IC2 6840 PTM handler */
-static WRITE8_DEVICE_HANDLER( ic2_o1_callback )
-{
-	ptm6840_set_c2(device, 0, data);
-
-	/* copy output value to IC2 c2
-    this output is the clock for timer2 */
-	/* 1200Hz System interrupt timer */
-}
-
-
-static WRITE8_DEVICE_HANDLER( ic2_o2_callback )
-{
-	device_t *pia = device->machine().device("pia_ic3");
-	pia6821_ca1_w(pia, data); /* copy output value to IC3 ca1 */
-	/* the output from timer2 is the input clock for timer3 */
-	/* miscellaneous interrupts generated here */
-	ptm6840_set_c3(device, 0, data);
-}
-
-
-static WRITE8_DEVICE_HANDLER( ic2_o3_callback )
-{
-	/* the output from timer3 is used as a square wave for the alarm output
-    and as an external clock source for timer 1! */
-	/* also runs lamp fade */
-	ptm6840_set_c1(device, 0, data);
-}
-
-
-static const ptm6840_interface ptm_ic2_intf =
-{
-	MPU4_MASTER_CLOCK / 4,
-	{ 0, 0, 0 },
-	{ DEVCB_HANDLER(ic2_o1_callback),
-	  DEVCB_HANDLER(ic2_o2_callback),
-	  DEVCB_HANDLER(ic2_o3_callback) },
-	DEVCB_LINE(cpu0_irq)
-};
-
-
-/* 6821 PIA handlers */
-/* IC3, lamp data lines + alpha numeric display */
-static WRITE8_DEVICE_HANDLER( pia_ic3_porta_w )
-{
-	mpu4_state *state = device->machine().driver_data<mpu4_state>();
-	int i;
-	LOG_IC3(("%s: IC3 PIA Port A Set to %2x (lamp strobes 1 - 9)\n", device->machine().describe_context(),data));
-
-	if(state->m_ic23_active)
-	{
-		if (state->m_lamp_strobe != state->m_input_strobe)
-		{
-			// Because of the nature of the lamping circuit, there is an element of persistance
-			// As a consequence, the lamp column data can change before the input strobe without
-			// causing the relevant lamps to black out.
-
-			for (i = 0; i < 8; i++)
-			{
-				output_set_lamp_value((8*state->m_input_strobe)+i, ((data  & (1 << i)) !=0));
-			}
-			state->m_lamp_strobe = state->m_input_strobe;
-		}
-	}
-}
-
-static WRITE8_DEVICE_HANDLER( pia_ic3_portb_w )
-{
-	mpu4_state *state = device->machine().driver_data<mpu4_state>();
-	int i;
-	LOG_IC3(("%s: IC3 PIA Port B Set to %2x  (lamp strobes 10 - 17)\n", device->machine().describe_context(),data));
-
-	if(state->m_ic23_active)
-	{
-		if (state->m_lamp_strobe2 != state->m_input_strobe)
-		{
-			for (i = 0; i < 8; i++)
-			{
-				output_set_lamp_value((8*state->m_input_strobe)+i+64, ((data  & (1 << i)) !=0));
-			}
-			state->m_lamp_strobe2 = state->m_input_strobe;
-		}
-
-		if (state->m_led_lamp)
-		{
-			/* Some games (like Connect 4) use 'programmable' LED displays, built from light display lines in section 2. */
-			/* These are mostly low-tech machines, where such wiring proved cheaper than an extender card */
-			UINT8 pled_segs[2] = {0,0};
-
-			static const int lamps1[8] = { 106, 107, 108, 109, 104, 105, 110, 133 };
-			static const int lamps2[8] = { 114, 115, 116, 117, 112, 113, 118, 119 };
-
-			for (i = 0; i < 8; i++)
-			{
-				if (output_get_lamp_value(lamps1[i])) pled_segs[0] |= (1 << i);
-				if (output_get_lamp_value(lamps2[i])) pled_segs[1] |= (1 << i);
-			}
-
-			output_set_digit_value(8,pled_segs[0]);
-			output_set_digit_value(9,pled_segs[1]);
-		}
-	}
-}
-
-static WRITE_LINE_DEVICE_HANDLER( pia_ic3_ca2_w )
-{
-	mpu4_state *drvstate = device->machine().driver_data<mpu4_state>();
-	LOG_IC3(("%s: IC3 PIA Write CA2 (alpha data), %02X\n", device->machine().describe_context(),state));
-
-	drvstate->m_alpha_data_line = state;
-	ROC10937_draw_16seg(0);
-}
-
-
-static WRITE_LINE_DEVICE_HANDLER( pia_ic3_cb2_w )
-{
-	LOG_IC3(("%s: IC3 PIA Write CB (alpha reset), %02X\n",device->machine().describe_context(),state));
-
-	if ( state ) ROC10937_reset(0);
-	ROC10937_draw_16seg(0);
-}
-
-
-static const pia6821_interface pia_ic3_intf =
-{
-	DEVCB_NULL,		/* port A in */
-	DEVCB_NULL,		/* port B in */
-	DEVCB_NULL,		/* line CA1 in */
-	DEVCB_NULL,		/* line CB1 in */
-	DEVCB_NULL,		/* line CA2 in */
-	DEVCB_NULL,		/* line CB2 in */
-	DEVCB_HANDLER(pia_ic3_porta_w),		/* port A out */
-	DEVCB_HANDLER(pia_ic3_portb_w),		/* port B out */
-	DEVCB_LINE(pia_ic3_ca2_w),			/* line CA2 out */
-	DEVCB_LINE(pia_ic3_cb2_w),			/* port CB2 out */
-	DEVCB_LINE(cpu0_irq),				/* IRQA */
-	DEVCB_LINE(cpu0_irq)				/* IRQB */
-};
-
-
-/*
-IC23 emulation
-
-IC23 is a 74LS138 1-of-8 Decoder
-
-It is used as a multiplexer for the LEDs, lamp selects and inputs.*/
-
-static void ic23_update(mpu4_state *state)
-{
-	if (!state->m_IC23G2A)
-	{
-		if (!state->m_IC23G2B)
-		{
-			if (state->m_IC23G1)
-			{
-				if ( state->m_IC23GA ) state->m_input_strobe |= 0x01;
-				else				 state->m_input_strobe &= ~0x01;
-
-				if ( state->m_IC23GB ) state->m_input_strobe |= 0x02;
-				else		         state->m_input_strobe &= ~0x02;
-
-				if ( state->m_IC23GC ) state->m_input_strobe |= 0x04;
-				else				 state->m_input_strobe &= ~0x04;
-			}
-		}
-	}
-	else
-	if ((state->m_IC23G2A)||(state->m_IC23G2B))
-	{
-		state->m_input_strobe = 0x00;
-	}
-}
-
-
-/*
-IC24 emulation
-
-IC24 is a 74LS122 pulse generator
-
-CLEAR and B2 are tied high and A1 and A2 tied low, meaning any pulse
-on B1 will give a low pulse on the output pin.
-*/
-static void ic24_output(mpu4_state *state, int data)
-{
-	state->m_IC23G2A = data;
-	ic23_update(state);
-}
-
-
-static void ic24_setup(mpu4_state *state)
-{
-	if (state->m_IC23GA)
-	{
-		double duration = TIME_OF_74LS123((220*1000),(0.1*0.000001));
-		{
-			state->m_ic23_active=1;
-			ic24_output(state, 0);
-			state->m_ic24_timer->adjust(attotime::from_double(duration));
-		}
-	}
-}
-
-
-static TIMER_CALLBACK( ic24_timeout )
-{
-	mpu4_state *state = machine.driver_data<mpu4_state>();
-	state->m_ic23_active=0;
-	ic24_output(state, 1);
-}
-
-
-/* IC4, 7 seg leds, 50Hz timer reel sensors, current sensors */
-static WRITE8_DEVICE_HANDLER( pia_ic4_porta_w )
-{
-	mpu4_state *state = device->machine().driver_data<mpu4_state>();
-	if(state->m_ic23_active)
-	{
-		if (((state->m_lamp_extender == NO_EXTENDER)||(state->m_lamp_extender == SMALL_CARD)||(state->m_lamp_extender == LARGE_CARD_C))&& (state->m_led_extender == NO_EXTENDER))
-		{
-			if(state->m_led_strobe != state->m_input_strobe)
-			{
-				output_set_digit_value(7 - state->m_input_strobe,data);
-			}
-			state->m_led_strobe = state->m_input_strobe;
-		}
-	}
-}
-
-static WRITE8_DEVICE_HANDLER( pia_ic4_portb_w )
-{
-	mpu4_state *state = device->machine().driver_data<mpu4_state>();
-	if (state->m_reel_mux)
-	{
-		/* A write here connects one reel (and only one)
-        to the optic test circuit. This allows 8 reels
-        to be supported instead of 4. */
-		if (state->m_reel_mux == SEVEN_REEL)
-		{
-			state->m_active_reel= reel_mux_table7[(data >> 4) & 0x07];
-		}
-		else
-		state->m_active_reel= reel_mux_table[(data >> 4) & 0x07];
-	}
-}
-
-static READ8_DEVICE_HANDLER( pia_ic4_portb_r )
-{
-	mpu4_state *state = device->machine().driver_data<mpu4_state>();
-	if ( state->m_serial_data )
-	{
-		state->m_ic4_input_b |=  0x80;
-		pia6821_cb1_w(device, 1);
-	}
-	else
-	{
-		state->m_ic4_input_b &= ~0x80;
-		pia6821_cb1_w(device, 0);
-	}
-
-	if (!state->m_reel_mux)
-	{
-		if ( state->m_optic_pattern & 0x01 ) state->m_ic4_input_b |=  0x40; /* reel A tab */
-		else							   state->m_ic4_input_b &= ~0x40;
-
-		if ( state->m_optic_pattern & 0x02 ) state->m_ic4_input_b |=  0x20; /* reel B tab */
-		else							   state->m_ic4_input_b &= ~0x20;
-
-		if ( state->m_optic_pattern & 0x04 ) state->m_ic4_input_b |=  0x10; /* reel C tab */
-		else							   state->m_ic4_input_b &= ~0x10;
-
-		if ( state->m_optic_pattern & 0x08 ) state->m_ic4_input_b |=  0x08; /* reel D tab */
-		else							   state->m_ic4_input_b &= ~0x08;
-
-	}
-	else
-	{
-		if (stepper_optic_state(state->m_active_reel))
-		{
-			state->m_ic4_input_b |=  0x08;
-		}
-		else
-		{
-			state->m_ic4_input_b &= ~0x08;
-		}
-	}
-	if ( state->m_signal_50hz )			state->m_ic4_input_b |=  0x04; /* 50 Hz */
-	else								state->m_ic4_input_b &= ~0x04;
-
-	if (state->m_ic4_input_b & 0x02)
-	{
-		state->m_ic4_input_b &= ~0x02;
-	}
-	else
-	{
-		state->m_ic4_input_b |= 0x02; //Pulse the overcurrent line with every read to show the CPU each lamp has lit
-	}
-	#ifdef UNUSED_FUNCTION
-	if ( lamp_undercurrent ) state->m_ic4_input_b |= 0x01;
-	#endif
-
-	LOG_IC3(("%s: IC4 PIA Read of Port B %x\n",device->machine().describe_context(),state->m_ic4_input_b));
-	return state->m_ic4_input_b;
-}
-
-
-static WRITE_LINE_DEVICE_HANDLER( pia_ic4_ca2_w )
-{
-	mpu4_state *drvstate = device->machine().driver_data<mpu4_state>();
-	LOG_IC3(("%s: IC4 PIA Write CA (input MUX strobe /LED B), %02X\n", device->machine().describe_context(),state));
-
-	drvstate->m_IC23GB = state;
-	ic23_update(drvstate);
-}
-
-static WRITE_LINE_DEVICE_HANDLER( pia_ic4_cb2_w )
-{
-	mpu4_state *drvstate = device->machine().driver_data<mpu4_state>();
-	LOG_IC3(("%s: IC4 PIA Write CA (input MUX strobe /LED B), %02X\n", device->machine().describe_context(),state));
-	drvstate->m_reel_flag=state;
-}
-static const pia6821_interface pia_ic4_intf =
-{
-	DEVCB_NULL,		/* port A in */
-	DEVCB_HANDLER(pia_ic4_portb_r),	/* port B in */
-	DEVCB_NULL,		/* line CA1 in */
-	DEVCB_NULL,		/* line CB1 in */
-	DEVCB_NULL,		/* line CA2 in */
-	DEVCB_NULL,		/* line CB2 in */
-	DEVCB_HANDLER(pia_ic4_porta_w),		/* port A out */
-	DEVCB_HANDLER(pia_ic4_portb_w),		/* port B out */
-	DEVCB_LINE(pia_ic4_ca2_w),		/* line CA2 out */
-	DEVCB_LINE(pia_ic4_cb2_w),		/* line CB2 out */
-	DEVCB_LINE(cpu0_irq),		/* IRQA */
-	DEVCB_LINE(cpu0_irq)		/* IRQB */
-};
-
-/* IC5, AUX ports, coin lockouts and AY sound chip select (MODs below 4 only) */
-static READ8_DEVICE_HANDLER( pia_ic5_porta_r )
-{
-	mpu4_state *state = device->machine().driver_data<mpu4_state>();
-	if (state->m_lamp_extender == LARGE_CARD_A)
-	{
-		if (state->m_lamp_sense && state->m_ic23_active)
-		{
-			state->m_aux1_input |= 0x40;
-		}
-		else
-		{
-			state->m_aux1_input &= ~0x40; //Pulse the overcurrent line with every read to show the CPU each lamp has lit
-		}
-	}
-	if (state->m_hopper == HOPPER_NONDUART_A)
-	{
-/*      if (hopper1_active)
-        {
-            state->m_aux1_input |= 0x04;
-        }
-        else
-        {
-            state->m_aux1_input &= ~0x04;
-        }*/
-	}
-	LOG(("%s: IC5 PIA Read of Port A (AUX1)\n",device->machine().describe_context()));
-
-	return input_port_read(device->machine(), "AUX1")|state->m_aux1_input;
-}
-
-static WRITE8_DEVICE_HANDLER( pia_ic5_porta_w )
-{
-	mpu4_state *state = device->machine().driver_data<mpu4_state>();
-	device_t *pia_ic4 = device->machine().device("pia_ic4");
-	if (state->m_hopper == HOPPER_NONDUART_A)
-	{
-		//hopper1_drive_sensor(data&0x10);
-	}
-	switch (state->m_lamp_extender)
-	{
-		case NO_EXTENDER:
-		if (state->m_led_extender == CARD_B)
-		{
-			led_write_latch(state, data & 0x1f, pia6821_get_output_a(pia_ic4),state->m_input_strobe);
-		}
-		else if ((state->m_led_extender != CARD_A)||(state->m_led_extender != NO_EXTENDER))
-		{
-			output_set_digit_value((state->m_input_strobe+8),data);
-		}
-		break;
-		case SMALL_CARD:
-		if(state->m_ic23_active)
-		{
-			lamp_extend_small(data);
-		}
-		break;
-		case LARGE_CARD_A:
-		lamp_extend_largea(state,data,state->m_input_strobe,state->m_ic23_active);
-		break;
-		case LARGE_CARD_B:
-		lamp_extend_largebc(state,data,state->m_input_strobe,state->m_ic23_active);
-		if ((state->m_ic23_active) && state->m_card_live)
-		{
-			output_set_digit_value(((8*(state->m_last_b7 >>7))+state->m_input_strobe),~data);
-		}
-		break;
-		case LARGE_CARD_C:
-		lamp_extend_largebc(state,data,state->m_input_strobe,state->m_ic23_active);
-		break;
-	}
-	if (state->m_reel_mux == SIX_REEL_5TO8)
-	{
-		stepper_update(4, data&0x0F);
-		stepper_update(5, (data >> 4)&0x0F);
-		awp_draw_reel(4);
-		awp_draw_reel(5);
-	}
-	else
-	if (state->m_reel_mux == SEVEN_REEL)
-	{
-		stepper_update(1, data&0x0F);
-		stepper_update(2, (data >> 4)&0x0F);
-		awp_draw_reel(1);
-		awp_draw_reel(2);
-	}
-
-		if (mame_stricmp(device->machine().system().name, "m_gmball") == 0)
-	{
-		/* The 'Gamball' device is a unique piece of mechanical equipment, designed to
-        provide a truly fair hi-lo gamble for an AWP machine. Functionally, it consists of
-        a ping-pong ball or similar enclosed in the machine's backbox, on a platform with 12
-        holes. When the low 4 bytes of AUX1 are triggered, this fires the ball out from the
-        hole it's currently in, to land in another. Landing in the same hole cause the machine to
-        refire the ball. The ball detection is done by the high 4 bytes of AUX1.
-        Here we call the MAME RNG, clamping it to 16 values, with the unused
-        values effectively asking the machine to 'roll again'. We then trigger the switches corresponding to
-        the correct number. This appears to be the best way of making the game fair, short of simulating
-        the physics of a bouncing ball ;)*/
-		if (data & 0x0f)
-		{
-			switch (device->machine().rand() & 0xf)
-			{
-			case 0x00:
-			default:
-			break;// stay where we are if we roll a zero, or roll more than 12
-			case 0x01:
-			state->m_aux1_input = (state->m_aux1_input & 0x0f);
-			state->m_aux1_input|= 0x50;
-			break;
-			case 0x02:
-			state->m_aux1_input = (state->m_aux1_input & 0x0f);
-			state->m_aux1_input|= 0x90;
-			break;
-			case 0x03:
-			state->m_aux1_input = (state->m_aux1_input & 0x0f);
-			state->m_aux1_input|= 0x20;
-			break;
-			case 0x04:
-			state->m_aux1_input = (state->m_aux1_input & 0x0f);
-			state->m_aux1_input|= 0xb0;
-			break;
-			case 0x05:
-			state->m_aux1_input = (state->m_aux1_input & 0x0f);
-			state->m_aux1_input|= 0x00;
-			break;
-			case 0x06:
-			state->m_aux1_input = (state->m_aux1_input & 0x0f);
-			state->m_aux1_input|= 0x30;
-			break;
-			case 0x07:
-			state->m_aux1_input = (state->m_aux1_input & 0x0f);
-			state->m_aux1_input|= 0xa0;
-			break;
-			case 0x08:
-			state->m_aux1_input = (state->m_aux1_input & 0x0f);
-			state->m_aux1_input|= 0xd0;
-			break;
-			case 0x09:
-			state->m_aux1_input = (state->m_aux1_input & 0x0f);
-			state->m_aux1_input|= 0xd0;
-			break;
-			case 0x0a:
-			state->m_aux1_input = (state->m_aux1_input & 0x0f);
-			state->m_aux1_input|= 0x10;
-			break;
-			case 0xb:
-			state->m_aux1_input = (state->m_aux1_input & 0x0f);
-			state->m_aux1_input|= 0x80;
-			break;
-			case 0xc:
-			state->m_aux1_input = (state->m_aux1_input & 0x0f);
-			state->m_aux1_input|= 0x40;
-			break;
-			}
-		}
-	}
-}
-
-static WRITE8_DEVICE_HANDLER( pia_ic5_portb_w )
-{
-	mpu4_state *state = device->machine().driver_data<mpu4_state>();
-	if (state->m_hopper == HOPPER_NONDUART_B)
-	{
-		//hopper1_drive_motor(data &0x01)
-		//hopper1_drive_sensor(data &0x08)
-	}
-	if (state->m_led_extender == CARD_A)
-	{
-		// led_write_latch(state, data & 0x07, pia_get_output_a(pia_ic4),state->m_input_strobe)
-	}
-
-}
-static READ8_DEVICE_HANDLER( pia_ic5_portb_r )
-{
-	mpu4_state *state = device->machine().driver_data<mpu4_state>();
-	device_t *pia_ic5 = device->machine().device("pia_ic5");
-	if (state->m_hopper == HOPPER_NONDUART_B)
-	{/*
-        if (hopper1_active)
-        {
-            state->m_aux2_input |= 0x08;
-        }
-        else
-        {
-            state->m_aux2_input &= ~0x08;
-        }*/
-	}
-
-	LOG(("%s: IC5 PIA Read of Port B (coin input AUX2)\n",device->machine().describe_context()));
-	coin_lockout_w(device->machine(), 0, (pia6821_get_output_b(pia_ic5) & 0x01) );
-	coin_lockout_w(device->machine(), 1, (pia6821_get_output_b(pia_ic5) & 0x02) );
-	coin_lockout_w(device->machine(), 2, (pia6821_get_output_b(pia_ic5) & 0x04) );
-	coin_lockout_w(device->machine(), 3, (pia6821_get_output_b(pia_ic5) & 0x08) );
-	return input_port_read(device->machine(), "AUX2") | state->m_aux2_input;
-}
-
-
-static WRITE_LINE_DEVICE_HANDLER( pia_ic5_ca2_w )
-{
-	mpu4_state *drvstate = device->machine().driver_data<mpu4_state>();
-	LOG(("%s: IC5 PIA Write CA2 (Serial Tx) %2x\n",device->machine().describe_context(),state));
-	drvstate->m_serial_data = state;
-}
-
-
-/* ---------------------------------------
-   AY Chip sound function selection -
-   ---------------------------------------
-The databus of the AY sound chip is connected to IC6 Port A.
-Data is read from/written to the AY chip through this port.
-
-If this sounds familiar, Amstrad did something very similar with their home computers.
-
-The PSG function, defined by the BC1,BC2 and BDIR signals, is controlled by CA2 and CB2 of IC6.
-
-PSG function selection:
------------------------
-BDIR = IC6 CB2 and BC1 = IC6 CA2
-
-Pin            | PSG Function
-BDIR BC1       |
-0    0         | Inactive
-0    1         | Read from selected PSG register. When function is set, the PSG will make the register data available to Port A.
-1    0         | Write to selected PSG register. When set, the PSG will take the data at Port A and write it into the selected PSG register.
-1    1         | Select PSG register. When set, the PSG will take the data at Port A and select a register.
-*/
-
-/* PSG function selected */
-static void update_ay(device_t *device)
-{
-	mpu4_state *state = device->machine().driver_data<mpu4_state>();
-	if (!pia6821_get_output_cb2(device))
-	{
-		switch (state->m_ay8913_address)
-		{
-			case 0x00:
-			{
-				/* Inactive */
-				break;
-			}
-			case 0x01:
-			{	/* CA2 = 1 CB2 = 0? : Read from selected PSG register and make the register data available to Port A */
-				device_t *pia_ic6 = device->machine().device("pia_ic6");
-				LOG(("AY8913 address = %d \n",pia6821_get_output_a(pia_ic6)&0x0f));
-				break;
-			}
-			case 0x02:
-			{/* CA2 = 0 CB2 = 1? : Write to selected PSG register and write data to Port A */
-				device_t *pia_ic6 = device->machine().device("pia_ic6");
-				device_t *ay = device->machine().device("ay8913");
-				ay8910_data_w(ay, 0, pia6821_get_output_a(pia_ic6));
-				LOG(("AY Chip Write \n"));
-				break;
-			}
-			case 0x03:
-			{/* CA2 = 1 CB2 = 1? : The register will now be selected and the user can read from or write to it.
-             The register will remain selected until another is chosen.*/
-				device_t *pia_ic6 = device->machine().device("pia_ic6");
-				device_t *ay = device->machine().device("ay8913");
-				ay8910_address_w(ay, 0, pia6821_get_output_a(pia_ic6));
-				LOG(("AY Chip Select \n"));
-				break;
-			}
-			default:
-			{
-				LOG(("AY Chip error \n"));
-			}
-		}
-	}
-}
-
-
-static WRITE_LINE_DEVICE_HANDLER( pia_ic5_cb2_w )
-{
-    update_ay(device);
-}
-
-
-static const pia6821_interface pia_ic5_intf =
-{
-	DEVCB_HANDLER(pia_ic5_porta_r),		/* port A in */
-	DEVCB_HANDLER(pia_ic5_portb_r),	/* port B in */
-	DEVCB_NULL,		/* line CA1 in */
-	DEVCB_NULL,		/* line CB1 in */
-	DEVCB_NULL,		/* line CA2 in */
-	DEVCB_NULL,		/* line CB2 in */
-	DEVCB_HANDLER(pia_ic5_porta_w),		/* port A out */
-	DEVCB_HANDLER(pia_ic5_portb_w),		/* port B out */
-	DEVCB_LINE(pia_ic5_ca2_w),		/* line CA2 out */
-	DEVCB_LINE(pia_ic5_cb2_w),		/* port CB2 out */
-	DEVCB_LINE(cpu0_irq),			/* IRQA */
-	DEVCB_LINE(cpu0_irq)			/* IRQB */
-};
-
-
-/* IC6, Reel A and B and AY registers (MODs below 4 only) */
-static WRITE8_DEVICE_HANDLER( pia_ic6_portb_w )
-{
-	mpu4_state *state = device->machine().driver_data<mpu4_state>();
-	LOG(("%s: IC6 PIA Port B Set to %2x (Reel A and B)\n", device->machine().describe_context(),data));
-
-	if (state->m_reel_mux == SEVEN_REEL)
-	{
-		stepper_update(3, data&0x0F);
-		stepper_update(4, (data >> 4)&0x0F);
-		awp_draw_reel(3);
-		awp_draw_reel(4);
-	}
-	else
-	{
-		stepper_update(0, data & 0x0F );
-		stepper_update(1, (data>>4) & 0x0F );
-		awp_draw_reel(0);
-		awp_draw_reel(1);
-	}
-
-	if (state->m_reel_flag && (state->m_reel_mux == STANDARD_REEL))
-	{
-		if ( stepper_optic_state(0) ) state->m_optic_pattern |=  0x01;
-		else                          state->m_optic_pattern &= ~0x01;
-
-		if ( stepper_optic_state(1) ) state->m_optic_pattern |=  0x02;
-		else                          state->m_optic_pattern &= ~0x02;
-	}
-}
-
-
-static WRITE8_DEVICE_HANDLER( pia_ic6_porta_w )
-{
-	mpu4_state *state = device->machine().driver_data<mpu4_state>();
-	LOG(("%s: IC6 PIA Write A %2x\n", device->machine().describe_context(),data));
-	if (state->m_mod_number <4)
-	{
-		state->m_ay_data = data;
-		update_ay(device);
-	}
-}
-
-
-static WRITE_LINE_DEVICE_HANDLER( pia_ic6_ca2_w )
-{
-	mpu4_state *drvstate = device->machine().driver_data<mpu4_state>();
-	LOG(("%s: IC6 PIA write CA2 %2x (AY8913 BC1)\n", device->machine().describe_context(),state));
-	if (drvstate->m_mod_number <4)
-	{
-		if ( state ) drvstate->m_ay8913_address |=  0x01;
-		else         drvstate->m_ay8913_address &= ~0x01;
-		update_ay(device);
-	}
-}
-
-
-static WRITE_LINE_DEVICE_HANDLER( pia_ic6_cb2_w )
-{
-	mpu4_state *drvstate = device->machine().driver_data<mpu4_state>();
-	LOG(("%s: IC6 PIA write CB2 %2x (AY8913 BCDIR)\n", device->machine().describe_context(),state));
-	if (drvstate->m_mod_number <4)
-	{
-		if ( state ) drvstate->m_ay8913_address |=  0x02;
-		else         drvstate->m_ay8913_address &= ~0x02;
-		update_ay(device);
-	}
-}
-
-
-static const pia6821_interface pia_ic6_intf =
-{
-	DEVCB_NULL,		/* port A in */
-	DEVCB_NULL,		/* port B in */
-	DEVCB_NULL,		/* line CA1 in */
-	DEVCB_NULL,		/* line CB1 in */
-	DEVCB_NULL,		/* line CA2 in */
-	DEVCB_NULL,		/* line CB2 in */
-	DEVCB_HANDLER(pia_ic6_porta_w),		/* port A out */
-	DEVCB_HANDLER(pia_ic6_portb_w),		/* port B out */
-	DEVCB_LINE(pia_ic6_ca2_w),			/* line CA2 out */
-	DEVCB_LINE(pia_ic6_cb2_w),			/* port CB2 out */
-	DEVCB_LINE(cpu0_irq),				/* IRQA */
-	DEVCB_LINE(cpu0_irq)				/* IRQB */
-};
-
-
-/* IC7 Reel C and D, mechanical meters/Reel E and F, input strobe bit A */
-static WRITE8_DEVICE_HANDLER( pia_ic7_porta_w )
-{
-	mpu4_state *state = device->machine().driver_data<mpu4_state>();
-	LOG(("%s: IC7 PIA Port A Set to %2x (Reel C and D)\n", device->machine().describe_context(),data));
-	if (state->m_reel_mux == SEVEN_REEL)
-	{
-		stepper_update(5, data&0x0F);
-		stepper_update(6, (data >> 4)&0x0F);
-		awp_draw_reel(5);
-		awp_draw_reel(6);
-	}
-	else
-	{
-		stepper_update(2, data & 0x0F );
-		stepper_update(3, (data>>4) & 0x0F );
-		awp_draw_reel(2);
-		awp_draw_reel(3);
-	}
-
-	if (state->m_reel_flag && (state->m_reel_mux == STANDARD_REEL))
-	{
-		if ( stepper_optic_state(2) ) state->m_optic_pattern |=  0x04;
-		else                          state->m_optic_pattern &= ~0x04;
-		if ( stepper_optic_state(3) ) state->m_optic_pattern |=  0x08;
-		else                          state->m_optic_pattern &= ~0x08;
-	}
-}
-
-static WRITE8_DEVICE_HANDLER( pia_ic7_portb_w )
-{
-	mpu4_state *state = device->machine().driver_data<mpu4_state>();
-	if (state->m_hopper == HOPPER_DUART_A)
-	{
-		//duart write data
-	}
-	else if (state->m_hopper == HOPPER_NONDUART_A)
-	{
-		//hoppr1_drive_motor(data & 0x10);
-	}
-
-    state->m_mmtr_data = data;
-}
-
-static READ8_DEVICE_HANDLER( pia_ic7_portb_r )
-{
-/* The meters are connected to a voltage drop sensor, where current
-flowing through them also passes through pin B7, meaning that when
-any meter is activated, pin B7 goes high.
-As for why they connected this to an output port rather than using
-CB1, no idea, although it proved of benefit when the reel multiplexer was designed
-as it allows a separate meter to be used when the rest of the port is blocked.
-This appears to have confounded the schematic drawer, who has assumed that
-all eight meters are driven from this port, giving the 8 line driver chip
-9 connections in total. */
-
-	//This may be overkill, but the meter sensing is VERY picky
-
-	int combined_meter = MechMtr_GetActivity(0) | MechMtr_GetActivity(1) |
-						 MechMtr_GetActivity(2) | MechMtr_GetActivity(3) |
-						 MechMtr_GetActivity(4) | MechMtr_GetActivity(5) |
-						 MechMtr_GetActivity(6) | MechMtr_GetActivity(7);
-
-	if(combined_meter)
-	{
-		return 0x80;
-	}
-	else
-	{
-		return 0x00;
-	}
-}
-
-
-
-
-
-
-
-static WRITE_LINE_DEVICE_HANDLER( pia_ic7_ca2_w )
-{
-	mpu4_state *drvstate = device->machine().driver_data<mpu4_state>();
-	LOG(("%s: IC7 PIA write CA2 %2x (input strobe bit 0 / LED A)\n", device->machine().describe_context(),state));
-
-	drvstate->m_IC23GA = state;
-	ic24_setup(drvstate);
-	ic23_update(drvstate);
-}
-
-static WRITE_LINE_DEVICE_HANDLER( pia_ic7_cb2_w )
-{
-	mpu4_state *drvstate = device->machine().driver_data<mpu4_state>();
-	drvstate->m_remote_meter = state?0x80:0x00;
-}
-
-static const pia6821_interface pia_ic7_intf =
-{
-	DEVCB_NULL,		/* port A in */
-	DEVCB_HANDLER(pia_ic7_portb_r),		/* port B in */
-	DEVCB_NULL,		/* line CA1 in */
-	DEVCB_NULL,		/* line CB1 in */
-	DEVCB_NULL,		/* line CA2 in */
-	DEVCB_NULL,		/* line CB2 in */
-	DEVCB_HANDLER(pia_ic7_porta_w),		/* port A out */
-	DEVCB_HANDLER(pia_ic7_portb_w),		/* port B out */
-	DEVCB_LINE(pia_ic7_ca2_w),			/* line CA2 out */
-	DEVCB_LINE(pia_ic7_cb2_w),			/* line CB2 out */
-	DEVCB_LINE(cpu0_irq),				/* IRQA */
-	DEVCB_LINE(cpu0_irq)				/* IRQB */
-};
-
-
-/* IC8, Inputs, TRIACS, alpha clock */
-static READ8_DEVICE_HANDLER( pia_ic8_porta_r )
-{
-	mpu4_state *state = device->machine().driver_data<mpu4_state>();
-	static const char *const portnames[] = { "ORANGE1", "ORANGE2", "BLACK1", "BLACK2", "ORANGE1", "ORANGE2", "DIL1", "DIL2" };
-	device_t *pia_ic5 = device->machine().device("pia_ic5");
-
-	LOG_IC8(("%s: IC8 PIA Read of Port A (MUX input data)\n", device->machine().describe_context()));
-/* The orange inputs are polled twice as often as the black ones, for reasons of efficiency.
-   This is achieved via connecting every input line to an AND gate, thus allowing two strobes
-   to represent each orange input bank (strobes are active low). */
-	pia6821_cb1_w(pia_ic5, (input_port_read(device->machine(), "AUX2") & 0x80));
-	return input_port_read(device->machine(), portnames[state->m_input_strobe]);
-}
-
-
-static WRITE8_DEVICE_HANDLER( pia_ic8_portb_w )
-{
-	mpu4_state *state = device->machine().driver_data<mpu4_state>();
-	if (state->m_hopper == HOPPER_DUART_B)
-	{
-//      duart.drive_sensor(data & 0x04, data & 0x01, 0, 0);
-	}
-	else if (state->m_hopper == HOPPER_DUART_C)
-	{
-//      duart.drive_sensor(data & 0x04, data & 0x01, data & 0x04, data & 0x02);
-	}
-	int i;
-	LOG_IC8(("%s: IC8 PIA Port B Set to %2x (OUTPUT PORT, TRIACS)\n", device->machine().describe_context(),data));
-	for (i = 0; i < 8; i++)
-	{
-		output_set_indexed_value("triac", i, data & (1 << i));
-	}
-}
-
-static WRITE_LINE_DEVICE_HANDLER( pia_ic8_ca2_w )
-{
-	mpu4_state *drvstate = device->machine().driver_data<mpu4_state>();
-	LOG_IC8(("%s: IC8 PIA write CA2 (input_strobe bit 2 / LED C) %02X\n", device->machine().describe_context(), state & 0xFF));
-
-	drvstate->m_IC23GC = state;
-	ic23_update(drvstate);
-}
-
-
-static WRITE_LINE_DEVICE_HANDLER( pia_ic8_cb2_w )
-{
-	mpu4_state *drvstate = device->machine().driver_data<mpu4_state>();
-	LOG_IC8(("%s: IC8 PIA write CB2 (alpha clock) %02X\n", device->machine().describe_context(), state & 0xFF));
-
-	if ( !drvstate->m_alpha_clock && (state) )
-	{
-		ROC10937_shift_data(0, drvstate->m_alpha_data_line&0x01?0:1);
-	}
-	drvstate->m_alpha_clock = state;
-	ROC10937_draw_16seg(0);
-}
-
-
-static const pia6821_interface pia_ic8_intf =
-{
-	DEVCB_HANDLER(pia_ic8_porta_r),		/* port A in */
-	DEVCB_NULL,		/* port B in */
-	DEVCB_NULL,		/* line CA1 in */
-	DEVCB_NULL,		/* line CB1 in */
-	DEVCB_NULL,		/* line CA2 in */
-	DEVCB_NULL,		/* line CB2 in */
-	DEVCB_NULL,		/* port A out */
-	DEVCB_HANDLER(pia_ic8_portb_w),		/* port B out */
-	DEVCB_LINE(pia_ic8_ca2_w),			/* line CA2 out */
-	DEVCB_LINE(pia_ic8_cb2_w),			/* port CB2 out */
-	DEVCB_LINE(cpu0_irq),				/* IRQA */
-	DEVCB_LINE(cpu0_irq)				/* IRQB */
-};
-
-// universal sampled sound program card PCB 683077
-// Sampled sound card, using a PIA and PTM for timing and data handling
-static WRITE8_DEVICE_HANDLER( pia_gb_porta_w )
-{
-	device_t *msm6376 = device->machine().device("msm6376");
-	LOG_SS(("%s: GAMEBOARD: PIA Port A Set to %2x\n", device->machine().describe_context(),data));
-	okim6376_w(msm6376, 0, data);
-}
-
-static WRITE8_DEVICE_HANDLER( pia_gb_portb_w )
-{
-	mpu4_state *state = device->machine().driver_data<mpu4_state>();
-	int changed = state->m_expansion_latch^data;
-
-	LOG_SS(("%s: GAMEBOARD: PIA Port A Set to %2x\n", device->machine().describe_context(),data));
-
-	state->m_expansion_latch = data;
-
-	if ( changed & 0x20)
-	{ // digital volume clock line changed
-		if ( !(data & 0x20) )
-		{ // changed from high to low,
-			if ( !(data & 0x10) )
-			{
-				if ( state->m_global_volume < 31 ) state->m_global_volume++; //steps unknown
-			}
-			else
-			{
-				if ( state->m_global_volume > 0  ) state->m_global_volume--;
-			}
-
-			{
-//              float percent = (32-state->m_global_volume)/32.0; //volume_override?1.0:(32-state->m_global_volume)/32.0;
-//              LOG(("GAMEBOARD: OKI volume %f \n",percent));
-			}
-		}
-	}
-}
-static READ8_DEVICE_HANDLER( pia_gb_portb_r )
-{
-	device_t *msm6376 = device->machine().device("msm6376");
-	LOG_SS(("%s: GAMEBOARD: PIA Read of Port B\n",device->machine().describe_context()));
-	//
-	// b7, 1 = OKI ready, 0 = OKI busy
-	// b5, vol clock
-	// b4, 1 = Vol down, 0 = Vol up
-	//
-
-	return okim6376_r(msm6376,0);
-}
-
-static WRITE_LINE_DEVICE_HANDLER( pia_gb_ca2_w )
-{
-	LOG_SS(("%s: GAMEBOARD: OKI RESET data = %02X\n", device->machine().describe_context(), state));
-
-//  reset line
-}
-
-static WRITE_LINE_DEVICE_HANDLER( pia_gb_cb2_w )
-{
-	mpu4_state *mstate = device->machine().driver_data<mpu4_state>();
-	//Some BWB games use this to drive the bankswitching
-	if (mstate->m_bwb_bank)
-	{
-		memory_set_bank(device->machine(), "bank1",state);
-	}
-}
-
-static const pia6821_interface pia_ic4ss_intf =
-{
-	DEVCB_NULL,		/* port A in */
-	DEVCB_HANDLER(pia_gb_portb_r),	/* port B in */
-	DEVCB_NULL,		/* line CA1 in */
-	DEVCB_NULL,		/* line CB1 in */
-	DEVCB_NULL,		/* line CA2 in */
-	DEVCB_NULL,		/* line CB2 in */
-	DEVCB_HANDLER(pia_gb_porta_w),		/* port A out */
-	DEVCB_HANDLER(pia_gb_portb_w),		/* port B out */
-	DEVCB_LINE(pia_gb_ca2_w),		/* line CA2 out */
-	DEVCB_LINE(pia_gb_cb2_w),		/* line CB2 out */
-	DEVCB_NULL,		/* IRQA */
-	DEVCB_NULL		/* IRQB */
-};
-
-//Sampled sound timer
-/*
-FIXME
-The MSM6376 sound chip is configured in a slightly strange way, to enable dynamic
-sample rate changes (8Khz, 10.6 Khz, 16 KHz) by varying the clock.
-According to the BwB programmer's guide, the formula is:
-MSM6376 clock frequency:-
-freq = (1720000/((t3L+1)(t3H+1)))*[(t3H(T3L+1)+1)/(2(t1+1))]
-where [] means rounded up integer,
-t3L is the LSB of Clock 3,
-t3H is the MSB of Clock 3,
-+and t1 is the initial value in clock 1.
-
-The sample speed divisor is f/300
-*/
-
-//O3 -> G1  O1 -> c2 o2 -> c1
-static WRITE8_DEVICE_HANDLER( ic3ss_o1_callback )
-{
-	ptm6840_set_c2(device, 0, data);
-}
-
-
-static WRITE8_DEVICE_HANDLER( ic3ss_o2_callback )//Generates 'beep' tone
-{
-	ptm6840_set_c1(device, 0, data);//?
-}
-
-
-static WRITE8_DEVICE_HANDLER( ic3ss_o3_callback )
-{
-	ptm6840_set_g1(device, 0, data); /* this output is the clock for timer1 */
-}
-
-
-static const ptm6840_interface ptm_ic3ss_intf =
-{
-	MPU4_MASTER_CLOCK / 4,
-	{ 0, 0, 0 },
-	{ DEVCB_HANDLER(ic3ss_o1_callback),
-	  DEVCB_HANDLER(ic3ss_o2_callback),
-	  DEVCB_HANDLER(ic3ss_o3_callback) },
-	DEVCB_NULL//LINE(cpu1_ptm_irq)
-};
-
-/* input ports for MPU4 board */
-static INPUT_PORTS_START( mpu4 )
-	PORT_START("ORANGE1")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("00")
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("01")
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("02")
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("03")
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("04")
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("05")
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("06")
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("07")
-
-	PORT_START("ORANGE2")
-	PORT_BIT(0x01, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("08")
-	PORT_BIT(0x02, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("09")
-	PORT_BIT(0x04, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("10")
-	PORT_BIT(0x08, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("11")
-	PORT_BIT(0x10, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("12")
-	PORT_BIT(0x20, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("13")
-	PORT_BIT(0x40, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("14")
-	PORT_BIT(0x80, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("15")
-
-	PORT_START("BLACK1")
-	PORT_BIT(0x01, IP_ACTIVE_HIGH, IPT_BUTTON1) PORT_NAME("Hi")
-	PORT_BIT(0x02, IP_ACTIVE_HIGH, IPT_BUTTON2) PORT_NAME("Lo")
-	PORT_BIT(0x04, IP_ACTIVE_HIGH, IPT_OTHER)   PORT_NAME("18")
-	PORT_BIT(0x08, IP_ACTIVE_HIGH, IPT_OTHER)   PORT_NAME("19")
-	PORT_BIT(0x10, IP_ACTIVE_HIGH, IPT_OTHER)	PORT_NAME("20")
-	PORT_BIT(0x20, IP_ACTIVE_HIGH, IPT_SERVICE) PORT_NAME("Test Button") PORT_CODE(KEYCODE_W)
-	PORT_BIT(0x40, IP_ACTIVE_HIGH, IPT_SERVICE) PORT_NAME("Refill Key") PORT_CODE(KEYCODE_R) PORT_TOGGLE
-	PORT_BIT(0x80, IP_ACTIVE_HIGH, IPT_INTERLOCK) PORT_NAME("Cashbox Door")  PORT_CODE(KEYCODE_Q) PORT_TOGGLE
-
-	PORT_START("BLACK2")
-	PORT_BIT(0x01, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("24")
-	PORT_BIT(0x02, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("25")
-	PORT_BIT(0x04, IP_ACTIVE_HIGH, IPT_BUTTON3) PORT_NAME("Cancel")
-	PORT_BIT(0x08, IP_ACTIVE_HIGH, IPT_BUTTON4) PORT_NAME("Hold 1")
-	PORT_BIT(0x10, IP_ACTIVE_HIGH, IPT_BUTTON5) PORT_NAME("Hold 2")
-	PORT_BIT(0x20, IP_ACTIVE_HIGH, IPT_BUTTON6) PORT_NAME("Hold 3")
-	PORT_BIT(0x40, IP_ACTIVE_HIGH, IPT_BUTTON7) PORT_NAME("Hold 4")
-	PORT_BIT(0x80, IP_ACTIVE_HIGH, IPT_START1)
-
-	PORT_START("DIL1")
-	PORT_DIPNAME( 0x01, 0x00, "DIL101" ) PORT_DIPLOCATION("DIL1:01")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x01, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x02, 0x00, "DIL102" ) PORT_DIPLOCATION("DIL1:02")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x02, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x04, 0x00, "DIL103" ) PORT_DIPLOCATION("DIL1:03")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x04, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x08, 0x00, "DIL104" ) PORT_DIPLOCATION("DIL1:04")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x08, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x10, 0x00, "DIL105" ) PORT_DIPLOCATION("DIL1:05")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x10, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x20, 0x00, "DIL106" ) PORT_DIPLOCATION("DIL1:06")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x20, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x40, 0x00, "DIL107" ) PORT_DIPLOCATION("DIL1:07")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x40, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x80, 0x00, "DIL108" ) PORT_DIPLOCATION("DIL1:08")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x80, DEF_STR( On  ) )
-
-	PORT_START("DIL2")
-	PORT_DIPNAME( 0x01, 0x00, "DIL201" ) PORT_DIPLOCATION("DIL2:01")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x01, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x02, 0x00, "DIL202" ) PORT_DIPLOCATION("DIL2:02")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x02, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x04, 0x00, "DIL203" ) PORT_DIPLOCATION("DIL2:03")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x04, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x08, 0x00, "DIL204" ) PORT_DIPLOCATION("DIL2:04")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x08, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x10, 0x00, "DIL205" ) PORT_DIPLOCATION("DIL2:05")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x10, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x20, 0x00, "DIL206" ) PORT_DIPLOCATION("DIL2:06")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x20, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x40, 0x00, "DIL207" ) PORT_DIPLOCATION("DIL2:07")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x40, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x80, 0x00, "DIL208" ) PORT_DIPLOCATION("DIL2:08")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x80, DEF_STR( On  ) )
-
-	PORT_START("AUX1")
-	PORT_BIT(0x01, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("0")
-	PORT_BIT(0x02, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("1")
-	PORT_BIT(0x04, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("2")
-	PORT_BIT(0x08, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("3")
-	PORT_BIT(0x10, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("4")
-	PORT_BIT(0x20, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("5")
-	PORT_BIT(0x40, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("6")
-	PORT_BIT(0x80, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("7")
-
-	PORT_START("AUX2")
-	PORT_BIT(0x01, IP_ACTIVE_HIGH, IPT_SPECIAL)
-	PORT_BIT(0x02, IP_ACTIVE_HIGH, IPT_SPECIAL)
-	PORT_BIT(0x04, IP_ACTIVE_HIGH, IPT_SPECIAL)
-	PORT_BIT(0x08, IP_ACTIVE_HIGH, IPT_SPECIAL)
-	PORT_BIT(0x10, IP_ACTIVE_HIGH, IPT_COIN1) PORT_NAME("10p")PORT_IMPULSE(5)
-	PORT_BIT(0x20, IP_ACTIVE_HIGH, IPT_COIN2) PORT_NAME("20p")PORT_IMPULSE(5)
-	PORT_BIT(0x40, IP_ACTIVE_HIGH, IPT_COIN3) PORT_NAME("50p")PORT_IMPULSE(5)
-	PORT_BIT(0x80, IP_ACTIVE_HIGH, IPT_COIN4) PORT_NAME("100p")PORT_IMPULSE(5)
-INPUT_PORTS_END
-
-
-static INPUT_PORTS_START( connect4 )
-	PORT_START("ORANGE1")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("00")
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("01")
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("02")
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("03")
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("04")
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("05")
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("06")
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("07")
-
-	PORT_START("ORANGE2")
-	PORT_BIT(0x01, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("08")
-	PORT_BIT(0x02, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("09")
-	PORT_BIT(0x04, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("10")
-	PORT_BIT(0x08, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("11")
-	PORT_BIT(0x10, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("12")
-	PORT_BIT(0x20, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("13")
-	PORT_BIT(0x40, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("14")
-	PORT_BIT(0x80, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("15")
-
-	PORT_START("BLACK1")
-	PORT_BIT(0x01, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("16")
-	PORT_BIT(0x02, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("17")
-	PORT_BIT(0x04, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("18")
-	PORT_BIT(0x08, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("19")
-	PORT_BIT(0x10, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("20")
-	PORT_BIT(0x20, IP_ACTIVE_HIGH, IPT_SERVICE) PORT_NAME("Test Switch")
-	PORT_BIT(0x40, IP_ACTIVE_HIGH, IPT_SERVICE) PORT_NAME("Refill Key") PORT_CODE(KEYCODE_R) PORT_TOGGLE
-	PORT_BIT(0x80, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("Door Switch?") PORT_TOGGLE
-
-	PORT_START("BLACK2")
-	PORT_BIT(0x01, IP_ACTIVE_HIGH, IPT_BUTTON1) PORT_NAME("Select")
-	PORT_BIT(0x02, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("25")
-	PORT_BIT(0x04, IP_ACTIVE_HIGH, IPT_START2) PORT_NAME("Pass")
-	PORT_BIT(0x08, IP_ACTIVE_HIGH, IPT_START1) PORT_NAME("Play")
-	PORT_BIT(0x10, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("28")
-	PORT_BIT(0x20, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("29")
-	PORT_BIT(0x40, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("30")
-	PORT_BIT(0x80, IP_ACTIVE_HIGH, IPT_BUTTON2) PORT_NAME("Drop")
-
-	PORT_START("DIL1")
-	PORT_DIPNAME( 0x01, 0x00, "DIL101" ) PORT_DIPLOCATION("DIL1:01")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x01, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x02, 0x00, "DIL102" ) PORT_DIPLOCATION("DIL1:02")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x02, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x04, 0x00, "DIL103" ) PORT_DIPLOCATION("DIL1:03")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x04, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x08, 0x00, "DIL104" ) PORT_DIPLOCATION("DIL1:04")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x08, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x10, 0x00, "DIL105" ) PORT_DIPLOCATION("DIL1:05")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x10, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x20, 0x00, "DIL106" ) PORT_DIPLOCATION("DIL1:06")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x20, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x40, 0x00, "DIL107" ) PORT_DIPLOCATION("DIL1:07")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x40, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x80, 0x00, "Invert Alpha?" ) PORT_DIPLOCATION("DIL1:08")
-	PORT_DIPSETTING(    0x00, DEF_STR( No ) )
-	PORT_DIPSETTING(    0x80, DEF_STR( Yes  ) )
-
-	PORT_START("DIL2")
-	PORT_DIPNAME( 0x01, 0x00, "DIL201" ) PORT_DIPLOCATION("DIL2:01")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x01, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x02, 0x00, "DIL202" ) PORT_DIPLOCATION("DIL2:02")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x02, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x04, 0x00, "DIL203" ) PORT_DIPLOCATION("DIL2:03")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x04, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x08, 0x00, "DIL204" ) PORT_DIPLOCATION("DIL2:04")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x08, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x10, 0x00, "DIL205" ) PORT_DIPLOCATION("DIL2:05")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x10, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x20, 0x00, "DIL206" ) PORT_DIPLOCATION("DIL2:06")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x20, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x40, 0x00, "DIL207" ) PORT_DIPLOCATION("DIL2:07")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x40, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x80, 0x00, "DIL208" ) PORT_DIPLOCATION("DIL2:08")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x80, DEF_STR( On  ) )
-
-	PORT_START("AUX1")
-	PORT_BIT(0x01, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("0")
-	PORT_BIT(0x02, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("1")
-	PORT_BIT(0x04, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("2")
-	PORT_BIT(0x08, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("3")
-	PORT_BIT(0x10, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("4")
-	PORT_BIT(0x20, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("5")
-	PORT_BIT(0x40, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("6")
-	PORT_BIT(0x80, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("7")
-
-	PORT_START("AUX2")
-	PORT_BIT(0x01, IP_ACTIVE_HIGH, IPT_SPECIAL)
-	PORT_BIT(0x02, IP_ACTIVE_HIGH, IPT_SPECIAL)
-	PORT_BIT(0x04, IP_ACTIVE_HIGH, IPT_SPECIAL)
-	PORT_BIT(0x08, IP_ACTIVE_HIGH, IPT_SPECIAL)
-	PORT_BIT(0x10, IP_ACTIVE_HIGH, IPT_COIN1) PORT_NAME("10p")PORT_IMPULSE(5)
-	PORT_BIT(0x20, IP_ACTIVE_HIGH, IPT_COIN2) PORT_NAME("20p")PORT_IMPULSE(5)
-	PORT_BIT(0x40, IP_ACTIVE_HIGH, IPT_COIN3) PORT_NAME("50p")PORT_IMPULSE(5)
-	PORT_BIT(0x80, IP_ACTIVE_HIGH, IPT_COIN4) PORT_NAME("100p")PORT_IMPULSE(5)
-INPUT_PORTS_END
-
-static INPUT_PORTS_START( gamball )
-	PORT_START("ORANGE1")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("00")
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("01")
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("02")
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("03")
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("04")
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("05")
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("06")
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("07")
-
-	PORT_START("ORANGE2")
-	PORT_BIT(0x01, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("08")
-	PORT_BIT(0x02, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("09")
-	PORT_BIT(0x04, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("10")
-	PORT_BIT(0x08, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("11")
-	PORT_BIT(0x10, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("12")
-	PORT_BIT(0x20, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("13")
-	PORT_BIT(0x40, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("14")
-	PORT_BIT(0x80, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("15")
-
-	PORT_START("BLACK1")
-	PORT_BIT(0x01, IP_ACTIVE_HIGH, IPT_BUTTON1) PORT_NAME("Hi")
-	PORT_BIT(0x02, IP_ACTIVE_HIGH, IPT_BUTTON2) PORT_NAME("Lo")
-	PORT_BIT(0x04, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("18")
-	PORT_BIT(0x08, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("19")
-	PORT_BIT(0x10, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("20")
-	PORT_BIT(0x20, IP_ACTIVE_HIGH, IPT_SERVICE) PORT_NAME("Test Button") PORT_CODE(KEYCODE_W)
-	PORT_BIT(0x40, IP_ACTIVE_HIGH, IPT_SERVICE) PORT_NAME("Refill Key") PORT_CODE(KEYCODE_R) PORT_TOGGLE
-	PORT_BIT(0x80, IP_ACTIVE_HIGH, IPT_INTERLOCK) PORT_NAME("Cashbox Door")  PORT_CODE(KEYCODE_Q) PORT_TOGGLE
-
-	PORT_START("BLACK2")
-	PORT_BIT(0x01, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("24")
-	PORT_BIT(0x02, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("25")
-	PORT_BIT(0x04, IP_ACTIVE_HIGH, IPT_BUTTON3) PORT_NAME("Cancel/Collect")
-	PORT_BIT(0x08, IP_ACTIVE_HIGH, IPT_BUTTON4) PORT_NAME("Hold/Nudge 1")
-	PORT_BIT(0x10, IP_ACTIVE_HIGH, IPT_BUTTON5) PORT_NAME("Hold/Nudge 2")
-	PORT_BIT(0x20, IP_ACTIVE_HIGH, IPT_BUTTON6) PORT_NAME("Hold/Nudge 3")
-	PORT_BIT(0x40, IP_ACTIVE_HIGH, IPT_BUTTON7) PORT_NAME("Hold/Nudge 4")
-	PORT_BIT(0x80, IP_ACTIVE_HIGH, IPT_START1)
-
-	PORT_START("DIL1")
-	PORT_DIPNAME( 0x01, 0x00, "DIL101" ) PORT_DIPLOCATION("DIL1:01")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x01, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x02, 0x00, "DIL102" ) PORT_DIPLOCATION("DIL1:02")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x02, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x04, 0x00, "DIL103" ) PORT_DIPLOCATION("DIL1:03")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x04, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x08, 0x00, "DIL104" ) PORT_DIPLOCATION("DIL1:04")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x08, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x10, 0x00, "DIL105" ) PORT_DIPLOCATION("DIL1:05")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x10, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x20, 0x00, "DIL106" ) PORT_DIPLOCATION("DIL1:06")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x20, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x40, 0x00, "DIL107" ) PORT_DIPLOCATION("DIL1:07")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x40, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x80, 0x00, "DIL108" ) PORT_DIPLOCATION("DIL1:08")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x80, DEF_STR( On  ) )
-
-	PORT_START("DIL2")
-	PORT_DIPNAME( 0x01, 0x00, "DIL201" ) PORT_DIPLOCATION("DIL2:01")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x01, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x02, 0x00, "DIL202" ) PORT_DIPLOCATION("DIL2:02")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x02, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x04, 0x00, "DIL203" ) PORT_DIPLOCATION("DIL2:03")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x04, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x08, 0x00, "DIL204" ) PORT_DIPLOCATION("DIL2:04")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x08, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x10, 0x00, "DIL205" ) PORT_DIPLOCATION("DIL2:05")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x10, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x20, 0x00, "DIL206" ) PORT_DIPLOCATION("DIL2:06")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x20, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x40, 0x00, "DIL207" ) PORT_DIPLOCATION("DIL2:07")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x40, DEF_STR( On  ) )
-	PORT_DIPNAME( 0x80, 0x00, "DIL208" ) PORT_DIPLOCATION("DIL2:08")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x80, DEF_STR( On  ) )
-
-	PORT_START("AUX1")
-	PORT_BIT(0xFF, IP_ACTIVE_HIGH, IPT_SPECIAL)//Handled by Gamball unit
-
-	PORT_START("AUX2")
-	PORT_BIT(0x01, IP_ACTIVE_HIGH, IPT_SPECIAL)
-	PORT_BIT(0x02, IP_ACTIVE_HIGH, IPT_SPECIAL)
-	PORT_BIT(0x04, IP_ACTIVE_HIGH, IPT_SPECIAL)
-	PORT_BIT(0x08, IP_ACTIVE_HIGH, IPT_SPECIAL)
-	PORT_BIT(0x10, IP_ACTIVE_HIGH, IPT_COIN1) PORT_NAME("10p")PORT_IMPULSE(5)
-	PORT_BIT(0x20, IP_ACTIVE_HIGH, IPT_COIN2) PORT_NAME("20p")PORT_IMPULSE(5)
-	PORT_BIT(0x40, IP_ACTIVE_HIGH, IPT_COIN3) PORT_NAME("50p")PORT_IMPULSE(5)
-	PORT_BIT(0x80, IP_ACTIVE_HIGH, IPT_COIN4) PORT_NAME("100p")PORT_IMPULSE(5)
-INPUT_PORTS_END
-
-static const stepper_interface barcrest_reel_interface =
-{
-	BARCREST_48STEP_REEL,
-	92,
-	4,
-	0x00
-};
-static const stepper_interface barcrest_opto1_interface =
-{
-	BARCREST_48STEP_REEL,
-	4,
-	12,
-	0x00
-};
-
-static const stepper_interface barcrest_opto2_interface =
-{
-	BARCREST_48STEP_REEL,
-	92,
-	3,
-	0x00
-};
-
-static const stepper_interface barcrest_opto3_interface =
-{
-	BARCREST_48STEP_REEL,
-	0,
-	5,
-	0x00
-};
-
-static const stepper_interface bwb_opto1_interface =
-{
-	BARCREST_48STEP_REEL,
-	96,
-	3,
-	0x00
-};
-
-/* Common configurations */
-static void mpu4_config_common(running_machine &machine)
-{
-	mpu4_state *state = machine.driver_data<mpu4_state>();
-	state->m_ic24_timer = machine.scheduler().timer_alloc(FUNC(ic24_timeout));
-}
-
-static void mpu4_config_common_reels(running_machine &machine,int reels)
-{
-	int n;
-	/* setup n default 96 half step reels, using the standard optic flag */
-	for ( n = 0; n < reels; n++ )
-	{
-		stepper_config(machine, n, &barcrest_reel_interface);
-	}
-	awp_reel_setup();
-}
-
-static MACHINE_START( mpu4mod2 )
-{
-	mpu4_state *state = machine.driver_data<mpu4_state>();
-	mpu4_config_common(machine);
-
-	state->m_link7a_connected=0;
-	state->m_mod_number=2;
-
-	/* setup 8 mechanical meters */
-	MechMtr_config(machine,8);
-
-	/* setup the standard oki MSC1937 display */
-	ROC10937_init(0, MSC1937,0);
-}
-
-static MACHINE_START( mpu4dutch )
-{
-	mpu4_state *state = machine.driver_data<mpu4_state>();
-	mpu4_config_common(machine);
-
-	state->m_link7a_connected=0;
-
-// setup 8 mechanical meters ////////////////////////////////////////////
-	MechMtr_config(machine,8);
-
-// setup the standard oki MSC1937 display ///////////////////////////////
-	ROC10937_init(0, MSC1937,0);	// does oldtimer use a OKI MSC1937 alpha display controller?
-}
-
-static MACHINE_START( mpu4mod4 )
-{
-	mpu4_state *state = machine.driver_data<mpu4_state>();
-	mpu4_config_common(machine);
-
-	state->m_link7a_connected=0;
-	state->m_mod_number=4;
-
-// setup 8 mechanical meters ////////////////////////////////////////////
-	MechMtr_config(machine,8);
-
-// setup the standard oki MSC1937 display ///////////////////////////////
-	ROC10937_init(0, MSC1937,0);
-}
-
-/*
-Characteriser (CHR)
-
-As built, the CHR is a PAL which can perform basic bit manipulation according to
-an as yet unknown unique key. However, the programmers decided to best use this protection device in read/write/compare
-cycles, storing almost the entire 'hidden' data table in the ROMs in plain sight. Only later rebuilds by BwB
-avoided this 'feature' of the development kit, and will need a different setup.
-
-This information has been used to generate the CHR tables loaded by the programs, until a key can be determined.
-
-For most Barcrest games, the following method was used:
-
-The initial 'PALTEST' routine as found in the Barcrest programs simply writes the first 'call' to the CHR space,
-to read back the 'response'. There is no attempt to alter the order or anything else, just
-a simple runthrough of the entire data table. The only 'catch' in this is to note that the CHR chip always scans
-through the table starting at the last accessed data value, unless 00 is used to reset to the beginning.
-
-However, a final 8 byte row, that controls the lamp matrix is not tested - to date, no-one outside of Barcrest knows
-how this is generated, and currently trial and error is the only sensible method. It is noted that the default,
-of all 00, is sometimes the correct answer, particularly in non-Barcrest use of the CHR chip, though when used normally,
-there are again fixed call values.
-*/
-
-
-static WRITE8_HANDLER( characteriser_w )
-{
-	mpu4_state *state = space->machine().driver_data<mpu4_state>();
-	int x;
-	int call=data;
-	LOG_CHR_FULL(("%04x Characteriser write offset %02X data %02X", cpu_get_previouspc(&space->device()),offset,data));
-	if (!state->m_current_chr_table)
-		fatalerror("No Characteriser Table @ %04x\n", cpu_get_previouspc(&space->device()));
-
-	if (offset == 0)
-	{
-		{
-			if (call == 0)
-			{
-				state->m_prot_col = 0;
-			}
-			else
-			{
-				for (x = state->m_prot_col; x < 64; x++)
-				{
-					if	(state->m_current_chr_table[(x)].call == call)
-					{
-						state->m_prot_col = x;
-						LOG_CHR(("Characteriser find column %02X\n",state->m_prot_col));
-						break;
-					}
-				}
-			}
-		}
-	}
-	else if (offset == 2)
-	{
-		LOG_CHR(("Characteriser write 2 data %02X\n",data));
-		switch (call)
-		// Rather than the search strategy, we can map the calls directly here. Note that they are hex versions of the square number series
-		{
-			case 0x00:
-			state->m_lamp_col = 0;
-			break;
-			case 0x01:
-			state->m_lamp_col = 1;
-			break;
-			case 0x04:
-			state->m_lamp_col = 2;
-			break;
-			case 0x09:
-			state->m_lamp_col = 3;
-			break;
-			case 0x10:
-			state->m_lamp_col = 4;
-			break;
-			case 0x19:
-			state->m_lamp_col = 5;
-			break;
-			case 0x24:
-			state->m_lamp_col = 6;
-			break;
-			case 0x31:
-			state->m_lamp_col = 7;
-			break;
-		}
-		LOG_CHR(("Characteriser find 2 column %02X\n",state->m_lamp_col));
-	}
-}
-
-
-static READ8_HANDLER( characteriser_r )
-{
-	mpu4_state *state = space->machine().driver_data<mpu4_state>();
-	if (!state->m_current_chr_table)
-		fatalerror("No Characteriser Table @ %04x\n", cpu_get_previouspc(&space->device()));
-
-	LOG_CHR(("Characteriser read offset %02X \n",offset));
-	if (offset == 0)
-	{
-		LOG_CHR(("Characteriser read data %02X \n",state->m_current_chr_table[state->m_prot_col].response));
-		return state->m_current_chr_table[state->m_prot_col].response;
-	}
-	if (offset == 3)
-	{
-		LOG_CHR(("Characteriser read data off 3 %02X \n",state->m_current_chr_table[state->m_lamp_col+64].response));
-		return state->m_current_chr_table[state->m_lamp_col+64].response;
-	}
-	return 0;
-}
-
-/*
-BwB Characteriser (CHR)
-
-The BwB method of protection is considerably different to the Barcrest one, with any
-incorrect behaviour manifesting in ridiculously large payouts.
-
-In fact, the software seems deliberately designed to mislead, but is (fortunately for
-us) prone to similar weaknesses that allow a per game solution.
-
-*/
-
-
-static WRITE8_HANDLER( bwb_characteriser_w )
-{
-	mpu4_state *state = space->machine().driver_data<mpu4_state>();
-	int x;
-	int call=data;
-	LOG_CHR_FULL(("%04x Characteriser write offset %02X data %02X \n", cpu_get_previouspc(&space->device()),offset,data));
-	if (!state->m_current_chr_table)
-		fatalerror("No Characteriser Table @ %04x\n", cpu_get_previouspc(&space->device()));
-
-	if (offset == 0)//initialisation is always at 0x800
-	{
-		{
-			if (call == 0)
-			{
-				state->m_init_col =0;
-			}
-			else
-			{
-				for (x = state->m_init_col; x < 64; x++)
-				{
-					if	(state->m_current_chr_table[(x)].call == call)
-					{
-						state->m_init_col = x;
-						LOG_CHR_FULL(("BwB Characteriser init column %02X\n",state->m_init_col));
-						break;
-					}
-				}
-			}
-		}
-	}
-	else
-	{
-		for (x = state->m_prot_col; x < 64;)
-		{
-			x++;
-			if	(state->m_current_chr_table[(x)].call == call)
-			{
-				state->m_prot_col = x;
-				LOG_CHR(("BwB Characteriser init column %02X\n",state->m_prot_col));
-				break;
-			}
-		}
-	}
-}
-
-static READ8_HANDLER( bwb_characteriser_r )
-{
-	mpu4_state *state = space->machine().driver_data<mpu4_state>();
-	if (!state->m_current_chr_table)
-		fatalerror("No Characteriser Table @ %04x\n", cpu_get_previouspc(&space->device()));
-
-	LOG_CHR(("Characteriser read offset %02X \n",offset));
-
-
-	if (offset ==0)
-	{
-		LOG_CHR(("Characteriser read data %02X \n",state->m_current_chr_table[state->m_init_col].response));
-		return state->m_current_chr_table[state->m_init_col].response;
-	}
-	else
-	{
-		LOG_CHR(("Characteriser read BwB data %02X \n",state->m_current_chr_table[state->m_prot_col].response));
-		return state->m_current_chr_table[state->m_prot_col].response;
-	}
-}
-
-static const mpu4_chr_table ccelbr_data[72] = {
-{0x00, 0x00},{0x1a, 0x84},{0x04, 0x8c},{0x10, 0xb8},{0x18, 0x74},{0x0f, 0x80},{0x13, 0x1c},{0x1b, 0xb4},
-{0x03, 0xd8},{0x07, 0x74},{0x17, 0x00},{0x1d, 0xd4},{0x36, 0xc8},{0x35, 0x78},{0x2b, 0xa4},{0x28, 0x4c},
-{0x39, 0xe0},{0x21, 0xdc},{0x22, 0xf4},{0x25, 0x88},{0x2c, 0x78},{0x29, 0x24},{0x31, 0x84},{0x34, 0xcc},
-{0x0a, 0xb8},{0x1f, 0x74},{0x06, 0x90},{0x0e, 0x48},{0x1c, 0xa0},{0x12, 0x1c},{0x1e, 0x24},{0x0d, 0x94},
-{0x14, 0xc8},{0x0a, 0xb8},{0x19, 0x74},{0x15, 0x00},{0x06, 0x94},{0x0f, 0x48},{0x08, 0x30},{0x1b, 0x90},
-{0x1e, 0x08},{0x04, 0x60},{0x01, 0xd4},{0x0c, 0x58},{0x18, 0xf4},{0x1a, 0x18},{0x11, 0x74},{0x0b, 0x80},
-{0x03, 0xdc},{0x17, 0x74},{0x10, 0xd0},{0x1d, 0x58},{0x0e, 0x24},{0x07, 0x94},{0x12, 0xd8},{0x09, 0x34},
-{0x0d, 0x90},{0x1f, 0x58},{0x16, 0xf4},{0x05, 0x88},{0x13, 0x38},{0x1c, 0x24},{0x02, 0xd4},{0x00, 0x00},
-{0x00, 0x00},{0x01, 0x50},{0x04, 0x00},{0x09, 0x50},{0x10, 0x10},{0x19, 0x40},{0x24, 0x04},{0x31, 0x00}
-};
-
-static const mpu4_chr_table gmball_data[72] = {
-{0x00, 0x00},{0x1a, 0x0c},{0x04, 0x50},{0x10, 0x90},{0x18, 0xb0},{0x0f, 0x38},{0x13, 0xd4},{0x1b, 0xa0},
-{0x03, 0xbc},{0x07, 0xd4},{0x17, 0x30},{0x1d, 0x90},{0x36, 0x38},{0x35, 0xc4},{0x2b, 0xac},{0x28, 0x70},
-{0x39, 0x98},{0x21, 0xdc},{0x22, 0xdc},{0x25, 0x54},{0x2c, 0x80},{0x29, 0xb4},{0x31, 0x38},{0x34, 0xcc},
-{0x0a, 0xe8},{0x1f, 0xf8},{0x06, 0xd4},{0x0e, 0x30},{0x1c, 0x00},{0x12, 0x84},{0x1e, 0x2c},{0x0d, 0xc8},
-{0x14, 0xf8},{0x0a, 0x4c},{0x19, 0x58},{0x15, 0xd4},{0x06, 0xa8},{0x0f, 0x78},{0x08, 0x44},{0x1b, 0x0c},
-{0x1e, 0x48},{0x04, 0x50},{0x01, 0x98},{0x0c, 0xd4},{0x18, 0xb0},{0x1a, 0xa0},{0x11, 0xa4},{0x0b, 0x3c},
-{0x03, 0xdc},{0x17, 0xd4},{0x10, 0xb8},{0x1d, 0xd4},{0x0e, 0x30},{0x07, 0x88},{0x12, 0xe0},{0x09, 0x24},
-{0x0d, 0x8c},{0x1f, 0xf8},{0x16, 0xcc},{0x05, 0x70},{0x13, 0x90},{0x1c, 0x20},{0x02, 0x9c},{0x00, 0x00},
-{0x00, 0x00},{0x01, 0x18},{0x04, 0x08},{0x09, 0x10},{0x10, 0x00},{0x19, 0x18},{0x24, 0x08},{0x31, 0x00}
-};
-
-static const mpu4_chr_table grtecp_data[72] = {
-{0x00, 0x00},{0x1a, 0x84},{0x04, 0xa4},{0x10, 0xac},{0x18, 0x70},{0x0f, 0x80},{0x13, 0x2c},{0x1b, 0xc0},
-{0x03, 0xbc},{0x07, 0x5c},{0x17, 0x5c},{0x1d, 0x5c},{0x36, 0xdc},{0x35, 0x5c},{0x2b, 0xcc},{0x28, 0x68},
-{0x39, 0xd0},{0x21, 0xb8},{0x22, 0xdc},{0x25, 0x54},{0x2c, 0x08},{0x29, 0x58},{0x31, 0x54},{0x34, 0x90},
-{0x0a, 0xb8},{0x1f, 0x5c},{0x06, 0x5c},{0x0e, 0x44},{0x1c, 0x84},{0x12, 0xac},{0x1e, 0xe0},{0x0d, 0xbc},
-{0x14, 0xcc},{0x0a, 0xe8},{0x19, 0x70},{0x15, 0x00},{0x06, 0x8c},{0x0f, 0x70},{0x08, 0x00},{0x1b, 0x84},
-{0x1e, 0xa4},{0x04, 0xa4},{0x01, 0xbc},{0x0c, 0xdc},{0x18, 0x5c},{0x1a, 0xcc},{0x11, 0xe8},{0x0b, 0xe0},
-{0x03, 0xbc},{0x17, 0x4c},{0x10, 0xc8},{0x1d, 0xf8},{0x0e, 0xd4},{0x07, 0xa8},{0x12, 0x68},{0x09, 0x40},
-{0x0d, 0x0c},{0x1f, 0xd8},{0x16, 0xdc},{0x05, 0x54},{0x13, 0x98},{0x1c, 0x44},{0x02, 0x9c},{0x00, 0x00},
-{0x00, 0x00},{0x01, 0x18},{0x04, 0x00},{0x09, 0x18},{0x10, 0x08},{0x19, 0x10},{0x24, 0x00},{0x31, 0x00}
-};
-
-static const mpu4_chr_table oldtmr_data[72] = {
-{0x00, 0x00},{0x1a, 0x90},{0x04, 0xc0},{0x10, 0x54},{0x18, 0xa4},{0x0f, 0xf0},{0x13, 0x64},{0x1b, 0x90},
-{0x03, 0xe4},{0x07, 0xd4},{0x17, 0x60},{0x1d, 0xb4},{0x36, 0xc0},{0x35, 0x70},{0x2b, 0x80},{0x28, 0x74},
-{0x39, 0xa4},{0x21, 0xf4},{0x22, 0xe4},{0x25, 0xd0},{0x2c, 0x64},{0x29, 0x10},{0x31, 0x20},{0x34, 0x90},
-{0x0a, 0xe4},{0x1f, 0xf4},{0x06, 0xc4},{0x0e, 0x70},{0x1c, 0x00},{0x12, 0x14},{0x1e, 0x00},{0x0d, 0x14},
-{0x14, 0xa0},{0x0a, 0xf0},{0x19, 0x64},{0x15, 0x10},{0x06, 0x84},{0x0f, 0x70},{0x08, 0x00},{0x1b, 0x90},
-{0x1e, 0x40},{0x04, 0x90},{0x01, 0xe4},{0x0c, 0xf4},{0x18, 0x64},{0x1a, 0x90},{0x11, 0x64},{0x0b, 0x90},
-{0x03, 0xe4},{0x17, 0x50},{0x10, 0x24},{0x1d, 0xb4},{0x0e, 0xe0},{0x07, 0xd4},{0x12, 0xe4},{0x09, 0x50},
-{0x0d, 0x04},{0x1f, 0xb4},{0x16, 0xc0},{0x05, 0xd0},{0x13, 0x64},{0x1c, 0x90},{0x02, 0xe4},{0x00, 0x00},
-{0x00, 0x00},{0x01, 0x00},{0x04, 0x00},{0x09, 0x00},{0x10, 0x00},{0x19, 0x10},{0x24, 0x00},{0x31, 0x00}
-};
-
-static const mpu4_chr_table blsbys_data[72] = {
-{0x00, 0x00},{0x00, 0x00},{0x00, 0x00},{0x00, 0x00},{0x00, 0x00},{0x00, 0x00},{0x2e, 0x36},{0x20, 0x42},
-{0x0f, 0x27},{0x24, 0x42},{0x3c, 0x09},{0x2c, 0x01},{0x01, 0x1d},{0x1d, 0x40},{0x40, 0xd2},{0xd2, 0x01},
-{0x01, 0xf9},{0xb1, 0x41},{0x41, 0x1c},{0x1c, 0x01},{0x01, 0xf9},{0x04, 0x54},{0x54, 0x02},{0x02, 0x00},
-{0x00, 0x00},{0x00, 0x2e},{0x2e, 0x20},{0x20, 0x0f},{0x0f, 0x24},{0x24, 0x3c},{0x3c, 0x39},{0x3c, 0xc9},
-{0xc9, 0x05},{0x05, 0x04},{0x04, 0x54},{0x54, 0x02},{0x02, 0x00},{0x00, 0x00},{0x00, 0x2e},{0x2e, 0x20},
-{0x20, 0x0f},{0x0f, 0x24},{0x24, 0x3c},{0x3c, 0x39},{0x3c, 0x36},{0x36, 0x00},{0x42, 0x04},{0x27, 0x04},
-{0x42, 0x0c},{0x09, 0x0c},{0x42, 0x1c},{0x27, 0x14},{0x42, 0x2c},{0x42, 0x5c},{0x09, 0x2c},
-//All this may be garbage - it never gets called, but is in the ROM (?)
-{0x0A, 0x00},
-{0x31, 0x20},{0x34, 0x90}, {0x1e, 0x40},{0x04, 0x90},{0x01, 0xe4},{0x0c, 0xf4},{0x18, 0x64},{0x19, 0x10},
-{0x00, 0x00},{0x01, 0x00},{0x04, 0x00},{0x09, 0x00},{0x10, 0x00},{0x19, 0x10},{0x24, 0x00},{0x31, 0x00}
-};
-
-// set percentage and other options. 2e 20 0f
-// PAL Codes
-// 0   1   2  3  4  5  6  7  8
-// 42  2E 20 0F 24 3C 36 27 09
-   //      6  0  7  0  8  0  7  0  0  8
-//request 36 42 27 42 09 42 27 42 42 09
-//verify  00 04 04 0C 0C 1C 14 2C 5C 2C
-
-static DRIVER_INIT (m_oldtmr)
-{
-	mpu4_state *state = machine.driver_data<mpu4_state>();
-	state->m_reel_mux=SIX_REEL_1TO8;
-
-	stepper_config(machine, 0, &barcrest_opto1_interface);
-	stepper_config(machine, 1, &barcrest_opto1_interface);
-	stepper_config(machine, 2, &barcrest_opto1_interface);
-	stepper_config(machine, 3, &barcrest_opto1_interface);
-	stepper_config(machine, 4, &barcrest_opto1_interface);
-	stepper_config(machine, 5, &barcrest_opto1_interface);
-
-	awp_reel_setup();
-	state->m_current_chr_table = oldtmr_data;
-}
-
-static DRIVER_INIT (m_ccelbr)
-{
-	mpu4_state *state = machine.driver_data<mpu4_state>();
-	state->m_reel_mux=STANDARD_REEL;
-	// setup 4 default 96 half step reels ///////////////////////////////////
-	mpu4_config_common_reels(machine,4);
-
-	state->m_current_chr_table = ccelbr_data;
-}
-
-static DRIVER_INIT (m_gmball)
-{
-	mpu4_state *state = machine.driver_data<mpu4_state>();
-	state->m_reel_mux=STANDARD_REEL;
-	// setup 4 default 96 half step reels ///////////////////////////////////
-	mpu4_config_common_reels(machine,4);
-
-	state->m_current_chr_table = gmball_data;
-}
-
-static DRIVER_INIT (m_grtecp)
-{
-	mpu4_state *state = machine.driver_data<mpu4_state>();
-	state->m_reel_mux=FIVE_REEL_5TO8;
-	state->m_lamp_extender=SMALL_CARD;
-	// setup 5 default 96 half step reels with the mux board
-	mpu4_config_common_reels(machine,5);
-	state->m_current_chr_table = grtecp_data;
-}
-
-static DRIVER_INIT (m_blsbys)
-{
-	mpu4_state *state = machine.driver_data<mpu4_state>();
-	state->m_bwb_bank=1;
-	state->m_reel_mux=FIVE_REEL_5TO8;
-
-	stepper_config(machine, 0, &bwb_opto1_interface);
-	stepper_config(machine, 1, &bwb_opto1_interface);
-	stepper_config(machine, 2, &bwb_opto1_interface);
-	stepper_config(machine, 3, &bwb_opto1_interface);
-	stepper_config(machine, 4, &bwb_opto1_interface);
-	state->m_current_chr_table = blsbys_data;
-}
-
-static DRIVER_INIT (mpu4tst2)
-{
-	mpu4_state *state = machine.driver_data<mpu4_state>();
-	state->m_reel_mux=STANDARD_REEL;
-	// setup 5 default 96 half step reels with the mux board
-	mpu4_config_common_reels(machine,4);
-
-}
-
-static DRIVER_INIT (mpu4utst)
-{
-	mpu4_state *state = machine.driver_data<mpu4_state>();
-	state->m_reel_mux=STANDARD_REEL;
-	// setup 4 default 96 half step reels ///////////////////////////////////
-	mpu4_config_common_reels(machine,4);
-}
-
-static DRIVER_INIT (connect4)
-{
-	mpu4_state *state = machine.driver_data<mpu4_state>();
-	state->m_led_lamp=1;
-}
-
-/* generate a 50 Hz signal (based on an RC time) */
-static TIMER_DEVICE_CALLBACK( gen_50hz )
-{
-	mpu4_state *state = timer.machine().driver_data<mpu4_state>();
-	/* Although reported as a '50Hz' signal, the fact that both rising and
-    falling edges of the pulse are used means the timer actually gives a 100Hz
-    oscillating signal.*/
-	state->m_signal_50hz = state->m_signal_50hz?0:1;
-	pia6821_ca1_w(timer.machine().device("pia_ic4"), state->m_signal_50hz);	/* signal is connected to IC4 CA1 */
-
-	if (state->m_signal_50hz)
-	{
-		update_meters(state);
-	}
-}
-
-static ADDRESS_MAP_START( mod2_memmap, AS_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0x07ff) AM_RAM AM_SHARE("nvram")
-	AM_RANGE(0x0800, 0x0810) AM_READWRITE(characteriser_r,characteriser_w)
-
-	AM_RANGE(0x0850, 0x0850) AM_READWRITE(bankswitch_r,bankswitch_w)	/* write bank (rom page select) */
-
-/*  AM_RANGE(0x08e0, 0x08e7) AM_READWRITE(68681_duart_r,68681_duart_w) */ //Runs hoppers
-
-	AM_RANGE(0x0900, 0x0907) AM_DEVREADWRITE("ptm_ic2", ptm6840_read, ptm6840_write)/* PTM6840 IC2 */
-
-	AM_RANGE(0x0a00, 0x0a03) AM_DEVREADWRITE("pia_ic3", pia6821_r, pia6821_w)		/* PIA6821 IC3 */
-	AM_RANGE(0x0b00, 0x0b03) AM_DEVREADWRITE("pia_ic4", pia6821_r, pia6821_w)		/* PIA6821 IC4 */
-	AM_RANGE(0x0c00, 0x0c03) AM_DEVREADWRITE("pia_ic5", pia6821_r, pia6821_w)		/* PIA6821 IC5 */
-	AM_RANGE(0x0d00, 0x0d03) AM_DEVREADWRITE("pia_ic6", pia6821_r, pia6821_w)		/* PIA6821 IC6 */
-	AM_RANGE(0x0e00, 0x0e03) AM_DEVREADWRITE("pia_ic7", pia6821_r, pia6821_w)		/* PIA6821 IC7 */
-	AM_RANGE(0x0f00, 0x0f03) AM_DEVREADWRITE("pia_ic8", pia6821_r, pia6821_w)		/* PIA6821 IC8 */
-
-	AM_RANGE(0x1000, 0xffff) AM_ROMBANK("bank1")	/* 64k  paged ROM (4 pages)  */
-ADDRESS_MAP_END
-
-static ADDRESS_MAP_START( mod4_yam_map, AS_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0x07ff) AM_RAM AM_SHARE("nvram")
-
-	AM_RANGE(0x0800, 0x0810) AM_READWRITE(characteriser_r,characteriser_w)
-
-	AM_RANGE(0x0850, 0x0850) AM_WRITE(bankswitch_w)	// write bank (rom page select)
-
-	AM_RANGE(0x0880, 0x0881) AM_DEVWRITE( "ym2413", ym2413_w )
-
-/*  AM_RANGE(0x08e0, 0x08e7) AM_READWRITE(68681_duart_r,68681_duart_w) */ //Runs hoppers
-
-	AM_RANGE(0x0900, 0x0907) AM_DEVREADWRITE("ptm_ic2", ptm6840_read, ptm6840_write)/* PTM6840 IC2 */
-
-	AM_RANGE(0x0a00, 0x0a03) AM_DEVREADWRITE("pia_ic3", pia6821_r, pia6821_w)		/* PIA6821 IC3 */
-	AM_RANGE(0x0b00, 0x0b03) AM_DEVREADWRITE("pia_ic4", pia6821_r, pia6821_w)		/* PIA6821 IC4 */
-	AM_RANGE(0x0c00, 0x0c03) AM_DEVREADWRITE("pia_ic5", pia6821_r, pia6821_w)		/* PIA6821 IC5 */
-	AM_RANGE(0x0d00, 0x0d03) AM_DEVREADWRITE("pia_ic6", pia6821_r, pia6821_w)		/* PIA6821 IC6 */
-	AM_RANGE(0x0e00, 0x0e03) AM_DEVREADWRITE("pia_ic7", pia6821_r, pia6821_w)		/* PIA6821 IC7 */
-	AM_RANGE(0x0f00, 0x0f03) AM_DEVREADWRITE("pia_ic8", pia6821_r, pia6821_w)		/* PIA6821 IC8 */
-
-	AM_RANGE(0x1000, 0xffff) AM_ROMBANK("bank1")	// 64k  paged ROM (4 pages)
-ADDRESS_MAP_END
-
-static ADDRESS_MAP_START( mod4_oki_map, AS_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0x07ff) AM_RAM AM_SHARE("nvram")
-
-	AM_RANGE(0x0800, 0x0810) AM_READWRITE(characteriser_r,characteriser_w)
-
-	AM_RANGE(0x0850, 0x0850) AM_WRITE(bankswitch_w)	// write bank (rom page select)
-
-	AM_RANGE(0x0880, 0x0883) AM_DEVREADWRITE("pia_ic4ss", pia6821_r,pia6821_w)      // PIA6821 on sampled sound board
-
-	AM_RANGE(0x08c0, 0x08c7) AM_DEVREADWRITE("ptm_ic3ss", ptm6840_read, ptm6840_write)  // 6840PTM on sampled sound board
-
-//  AM_RANGE(0x08e0, 0x08e7) AM_READWRITE(68681_duart_r,68681_duart_w) //Runs hoppers
-
-	AM_RANGE(0x0900, 0x0907) AM_DEVREADWRITE("ptm_ic2", ptm6840_read, ptm6840_write)/* PTM6840 IC2 */
-
-	AM_RANGE(0x0a00, 0x0a03) AM_DEVREADWRITE("pia_ic3", pia6821_r, pia6821_w)		/* PIA6821 IC3 */
-	AM_RANGE(0x0b00, 0x0b03) AM_DEVREADWRITE("pia_ic4", pia6821_r, pia6821_w)		/* PIA6821 IC4 */
-	AM_RANGE(0x0c00, 0x0c03) AM_DEVREADWRITE("pia_ic5", pia6821_r, pia6821_w)		/* PIA6821 IC5 */
-	AM_RANGE(0x0d00, 0x0d03) AM_DEVREADWRITE("pia_ic6", pia6821_r, pia6821_w)		/* PIA6821 IC6 */
-	AM_RANGE(0x0e00, 0x0e03) AM_DEVREADWRITE("pia_ic7", pia6821_r, pia6821_w)		/* PIA6821 IC7 */
-	AM_RANGE(0x0f00, 0x0f03) AM_DEVREADWRITE("pia_ic8", pia6821_r, pia6821_w)		/* PIA6821 IC8 */
-
-	AM_RANGE(0x1000, 0xffff) AM_ROMBANK("bank1")	// 64k  paged ROM (4 pages)
-ADDRESS_MAP_END
-
-static ADDRESS_MAP_START( mpu4_bwb_map, AS_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0x07ff) AM_RAM AM_SHARE("nvram")
-
-	AM_RANGE(0x0800, 0x083F) AM_READWRITE(bwb_characteriser_r,bwb_characteriser_w)// Game selects a random value within this range
-
-	AM_RANGE(0x0850, 0x0850) AM_WRITE(bankswitch_w)	// write bank (rom page select)
-
-	AM_RANGE(0x0858, 0x0858) AM_WRITE(bankswitch_w)	// write bank (rom page select)
-	AM_RANGE(0x0880, 0x0883) AM_DEVREADWRITE("pia_ic4ss", pia6821_r,pia6821_w)      // PIA6821 on sampled sound board
-
-	AM_RANGE(0x08c0, 0x08c7) AM_DEVREADWRITE("ptm_ic3ss", ptm6840_read, ptm6840_write)  // 6840PTM on sampled sound board
-
-//  AM_RANGE(0x08e0, 0x08e7) AM_READWRITE(68681_duart_r,68681_duart_w) //Runs hoppers
-
-	AM_RANGE(0x0900, 0x0907) AM_DEVREADWRITE("ptm_ic2", ptm6840_read, ptm6840_write)/* PTM6840 IC2 */
-
-	AM_RANGE(0x0a00, 0x0a03) AM_DEVREADWRITE("pia_ic3", pia6821_r, pia6821_w)		/* PIA6821 IC3 */
-	AM_RANGE(0x0b00, 0x0b03) AM_DEVREADWRITE("pia_ic4", pia6821_r, pia6821_w)		/* PIA6821 IC4 */
-	AM_RANGE(0x0c00, 0x0c03) AM_DEVREADWRITE("pia_ic5", pia6821_r, pia6821_w)		/* PIA6821 IC5 */
-	AM_RANGE(0x0d00, 0x0d03) AM_DEVREADWRITE("pia_ic6", pia6821_r, pia6821_w)		/* PIA6821 IC6 */
-	AM_RANGE(0x0e00, 0x0e03) AM_DEVREADWRITE("pia_ic7", pia6821_r, pia6821_w)		/* PIA6821 IC7 */
-	AM_RANGE(0x0f00, 0x0f03) AM_DEVREADWRITE("pia_ic8", pia6821_r, pia6821_w)		/* PIA6821 IC8 */
-
-	AM_RANGE(0x1000, 0xffff) AM_ROMBANK("bank1")	// 64k  paged ROM (4 pages)
-ADDRESS_MAP_END
-
-// memory map for barcrest mpu4 board /////////////////////////////////////
-
-static ADDRESS_MAP_START( dutch_memmap, AS_PROGRAM, 8 )
-
-	AM_RANGE(0x0000, 0x07ff) AM_RAM AM_SHARE("nvram")
-
-//  AM_RANGE(0x0800, 0x0810) AM_READWRITE(characteriser_r,characteriser_w)
-
-	AM_RANGE(0x0850, 0x0850) AM_WRITE(bankswitch_w)	// write bank (rom page select)
-	AM_RANGE(0x0880, 0x0883) AM_DEVREADWRITE("pia_ic4ss", pia6821_r,pia6821_w)      // PIA6821 on sampled sound board
-
-	AM_RANGE(0x08c0, 0x08c7) AM_DEVREADWRITE("ptm_ic3ss", ptm6840_read, ptm6840_write)  // 6840PTM on sampled sound board
-
-//  AM_RANGE(0x08e0, 0x08e7) AM_READWRITE(68681_duart_r,68681_duart_w) //Runs hoppers
-
-	AM_RANGE(0x0900, 0x0907) AM_DEVREADWRITE("ptm_ic2", ptm6840_read, ptm6840_write)/* PTM6840 IC2 */
-
-	AM_RANGE(0x0a00, 0x0a03) AM_DEVREADWRITE("pia_ic3", pia6821_r, pia6821_w)		/* PIA6821 IC3 */
-	AM_RANGE(0x0b00, 0x0b03) AM_DEVREADWRITE("pia_ic4", pia6821_r, pia6821_w)		/* PIA6821 IC4 */
-	AM_RANGE(0x0c00, 0x0c03) AM_DEVREADWRITE("pia_ic5", pia6821_r, pia6821_w)		/* PIA6821 IC5 */
-	AM_RANGE(0x0d00, 0x0d03) AM_DEVREADWRITE("pia_ic6", pia6821_r, pia6821_w)		/* PIA6821 IC6 */
-	AM_RANGE(0x0e00, 0x0e03) AM_DEVREADWRITE("pia_ic7", pia6821_r, pia6821_w)		/* PIA6821 IC7 */
-	AM_RANGE(0x0f00, 0x0f03) AM_DEVREADWRITE("pia_ic8", pia6821_r, pia6821_w)		/* PIA6821 IC8 */
-
-	AM_RANGE(0x1000, 0xffff) AM_ROMBANK("bank1")	// 64k paged ROM (4 pages)
-ADDRESS_MAP_END
-
-static const ay8910_interface ay8910_config =
-{
-	AY8910_SINGLE_OUTPUT,
-	{820,0,0},
-	DEVCB_NULL,
-	DEVCB_NULL,
-	DEVCB_NULL,
-	DEVCB_NULL
-};
-
-
-/* machine driver for MOD 2 board */
-static MACHINE_CONFIG_START( mpu4mod2, mpu4_state )
-
-	MCFG_MACHINE_START(mpu4mod2)
-	MCFG_MACHINE_RESET(mpu4)
-	MCFG_CPU_ADD("maincpu", M6809, MPU4_MASTER_CLOCK/4)
-	MCFG_CPU_PROGRAM_MAP(mod2_memmap)
-
-	MCFG_TIMER_ADD_PERIODIC("50hz",gen_50hz, attotime::from_hz(100))
-
-	/* 6840 PTM */
-	MCFG_PTM6840_ADD("ptm_ic2", ptm_ic2_intf)
-
-	MCFG_PIA6821_ADD("pia_ic3", pia_ic3_intf)
-	MCFG_PIA6821_ADD("pia_ic4", pia_ic4_intf)
-	MCFG_PIA6821_ADD("pia_ic5", pia_ic5_intf)
-	MCFG_PIA6821_ADD("pia_ic6", pia_ic6_intf)
-	MCFG_PIA6821_ADD("pia_ic7", pia_ic7_intf)
-	MCFG_PIA6821_ADD("pia_ic8", pia_ic8_intf)
-
-	MCFG_SPEAKER_STANDARD_MONO("mono")
-	MCFG_SOUND_ADD("ay8913",AY8913, MPU4_MASTER_CLOCK/4)
-	MCFG_SOUND_CONFIG(ay8910_config)
-	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
-
-	MCFG_NVRAM_ADD_0FILL("nvram")
-
-	MCFG_DEFAULT_LAYOUT(layout_mpu4)
-MACHINE_CONFIG_END
-
-static MACHINE_CONFIG_DERIVED( mod4yam, mpu4mod2 )
-	MCFG_MACHINE_START(mpu4mod4)
-
-	MCFG_CPU_MODIFY("maincpu")
-	MCFG_CPU_PROGRAM_MAP(mod4_yam_map)
-
-	MCFG_DEVICE_REMOVE("ay8913")
-	MCFG_SOUND_ADD("ym2413", YM2413, MPU4_MASTER_CLOCK/4)
-	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.5)
-MACHINE_CONFIG_END
-
-static MACHINE_CONFIG_DERIVED( mod4oki, mpu4mod2 )
-	MCFG_MACHINE_START(mpu4mod4)
-
-	MCFG_PTM6840_ADD("ptm_ic3ss", ptm_ic3ss_intf)
-	MCFG_PIA6821_ADD("pia_ic4ss", pia_ic4ss_intf)
-
-	MCFG_CPU_MODIFY("maincpu")
-	MCFG_CPU_PROGRAM_MAP(mod4_oki_map)
-
-	MCFG_DEVICE_REMOVE("ay8913")
-	MCFG_SOUND_ADD("msm6376", OKIM6376, 64000) //Dynamic, can also be 85430 at 10.5KHz and 128000 at 16KHz
-	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
-MACHINE_CONFIG_END
-
-static MACHINE_CONFIG_DERIVED( mpu4dutch, mod4oki )
-	MCFG_CPU_MODIFY("maincpu")
-	MCFG_CPU_PROGRAM_MAP(dutch_memmap)				// setup read and write memorymap
-	MCFG_MACHINE_START(mpu4dutch)					// main mpu4 board initialisation
-MACHINE_CONFIG_END
-
-static MACHINE_CONFIG_DERIVED(bwboki, mod4oki )
-	MCFG_CPU_MODIFY("maincpu")
-	MCFG_CPU_PROGRAM_MAP(mpu4_bwb_map)				// setup read and write memorymap
-MACHINE_CONFIG_END
-
-ROM_START( m_oldtmr )
-	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD( "dot11.bin",  0x00000, 0x10000,  CRC(da095666) SHA1(bc7654dc9da1f830a43f925db8079f27e18bb61e))
-
-	ROM_REGION( 0x200000, "msm6376", 0 )
-	ROM_LOAD( "snd.p1",  0x000000, 0x080000,  NO_DUMP )
-	ROM_LOAD( "snd.p2",  0x080000, 0x080000,  NO_DUMP )
-ROM_END
-
-ROM_START( m_ccelbr )
-	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD( "cels.p1",  0x00000, 0x10000,  CRC(19d2162f) SHA1(24fe435809352725e7614c32e2184142f355298e))
-ROM_END
-
-ROM_START( m_gmball )
-	ROM_REGION( 0x10000, "maincpu", ROMREGION_ERASE00  )
-	ROM_LOAD( "gbbx.p1",	0x0000, 0x10000,  CRC(0b5adcd0) SHA1(1a198bd4a1e7d6bf4cf025c43d35aaef351415fc))
-ROM_END
-
-ROM_START( connect4 )
-	ROM_REGION( 0x10000, "maincpu", ROMREGION_ERASE00  )
-	ROM_LOAD( "connect4.p2",  0x8000, 0x4000,  CRC(6090633c) SHA1(0cd2725a235bf93cfe94f2ca648d5fccb87b8e5c) )
-	ROM_LOAD( "connect4.p1",  0xC000, 0x4000,  CRC(b1af50c0) SHA1(7c9645ea378f0857b849ca24a239d9114f62da7f) )
-ROM_END
-
-ROM_START( mpu4utst )
+#include "includes/mpu4.h"
+
+MACHINE_CONFIG_EXTERN( mod4oki );
+MACHINE_CONFIG_EXTERN( mod4yam );
+MACHINE_CONFIG_EXTERN( mpu4crys );
+MACHINE_CONFIG_EXTERN( bwboki );
+MACHINE_CONFIG_EXTERN( mod2 );
+
+INPUT_PORTS_EXTERN( mpu4 );
+INPUT_PORTS_EXTERN( mpu4jackpot8tkn );
+INPUT_PORTS_EXTERN( mpu4jackpot8per );
+INPUT_PORTS_EXTERN( grtecp );
+
+ROM_START( m4tst )
 	ROM_REGION( 0x10000, "maincpu", ROMREGION_ERASE00  )
 	ROM_LOAD( "ut4.p1",  0xC000, 0x4000,  CRC(086dc325) SHA1(923caeb61347ac9d3e6bcec45998ddf04b2c8ffd))
 ROM_END
 
-ROM_START( mpu4tst2 )
+ROM_START( m4tst2 )
 	ROM_REGION( 0x10000, "maincpu", ROMREGION_ERASE00  )
 	ROM_LOAD( "ut2.p1",  0xE000, 0x2000,  CRC(f7fb6575) SHA1(f7961cbd0801b9561d8cd2d23081043d733e1902))
 ROM_END
 
-ROM_START( mpu4met0 )
+ROM_START( m4clr )
 	ROM_REGION( 0x10000, "maincpu", ROMREGION_ERASE00  )
 	ROM_LOAD( "meter-zero.p1",  0x8000, 0x8000,  CRC(e74297e5) SHA1(49a2cc85eda14199975ec37a794b685c839d3ab9))
 ROM_END
 
-ROM_START( m_grtecp )
+
+
+
+
+
+ROM_START( m4addrd )
 	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD("an2k.p1",  0x00000, 0x10000,  CRC(c0886dff) SHA1(ef2b509fde05ef4ef055a09275afc9e153f50efc))
-
-	ROM_REGION( 0x200000, "msm6376", 0 )
-	ROM_LOAD( "an2snd.p1",  0x000000, 0x080000,  CRC(5394e9ae) SHA1(86ccd8531fc87f34d3c5482ba7e5a2c06ea69491) )
-	ROM_LOAD( "an2snd.p2",  0x080000, 0x080000,  CRC(109ace1f) SHA1(9f0e8065186beb61ed50fea834de2d91e68db953) )
+	ROM_LOAD( "dal12.bin", 0x0000, 0x010000, CRC(4affa79a) SHA1(68bceab42b3616641a34a64a83306175ffc1ce32) )
 ROM_END
 
-ROM_START( m_blsbys )
+
+
+
+
+
+
+ROM_START( m4amhiwy )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "dah20", 0x0000, 0x010000, CRC(e3f92f00) SHA1(122c8a429a1f75dac80b90c4f218bd311813daf5) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "sdr6_1.snd", 0x000000, 0x080000, CRC(63ad952d) SHA1(acc0ac3898fcc281e2d7ba19ada52d727885fe06) )
+	ROM_LOAD( "sdr6_2.snd", 0x080000, 0x080000, CRC(48d2ace5) SHA1(ada0180cc60266c0a6d981a019d66bbedbced21a) )
+ROM_END
+
+
+
+
+
+
+
+
+
+ROM_START( m4blkwhd )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "dbw11.bin", 0x0000, 0x010000, CRC(337aaa2c) SHA1(26b12ea3ada9668293c6b44d62458590e5b4ac8f) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "bwsnd.bin", 0x0000, 0x080000, CRC(f247ba83) SHA1(9b173503e63a4a861d1380b2ab1fe14af1a189bd) )
+ROM_END
+
+
+
+ROM_START( m4blkbul )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "cbb08.epr", 0x0000, 0x010000, CRC(09376df6) SHA1(ba3b101accb6bbfbf75b9d22621dbda4efcb7769) )
+ROM_END
+
+ROM_START( m4blkcat )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "dbl14.bin", 0x0000, 0x010000, CRC(c5db9532) SHA1(309b5122b4a1cb33bbccfb97faf4fa996d29432e) )
+
+	ROM_REGION( 0x080000, "msm6376", 0 )
+	ROM_LOAD( "dblcsnd.bin", 0x0000, 0x080000, CRC(c90fa8ad) SHA1(a98f03d4b6f5892333279bff7537d4d6d887da62) )
+
+	ROM_REGION( 0x200000, "msm6376_alt", 0 ) // bad dump of some sound rom?
+	ROM_LOAD( "sdbl_1.snd", 0x0000, 0x18008e, CRC(e36f71ae) SHA1(ebb643cfa02d28550f2bef135ceefc902baf0df6) )
+ROM_END
+
+
+
+
+
+
+
+ROM_START( m4bluedm )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "dbd10.bin", 0x0000, 0x010000, CRC(b75e319d) SHA1(8b81e852e318cfde1f5ff2123e1ef7076b208253) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "bdsnd.bin", 0x0000, 0x080000, CRC(8ac4aae6) SHA1(70dba43b398010a8bd0d82cf91553d3f5e0921f0) )
+ROM_END
+
+
+
+
+ROM_START( m4brook )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "brkl10.epr", 0x0000, 0x010000, CRC(857255b3) SHA1(cfd77918a19b2532a02b8bb3fa8e2716db31fb0e) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "brkl_snd.epr", 0x0000, 0x080000, CRC(50450909) SHA1(181659b0594ba8d196b7130c5999c91676a363c0) )
+ROM_END
+
+
+
+ROM_START( m4bucks )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "bufd.p1", 0x0000, 0x010000, CRC(02c575d3) SHA1(92dc7a0c298e4d2d19bf754a5c82cc15e4e6456c) )
+	ROM_LOAD( "bufs.p1", 0x0000, 0x010000, CRC(e394ae40) SHA1(911077053c47cebba1bed9d359cd38bd676a46f1) )
+ROM_END
+
+
+ROM_START( m4calicl )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "ca2s.p1", 0x0000, 0x010000, CRC(fad153fd) SHA1(bd1f1a5c73624df45d01cb4853d87e998e434d7a) )
+	ROM_REGION( 0x48, "fakechr", 0 )
+	ROM_LOAD( "ca2s.chr", 0x0000, 0x000048, CRC(97618d38) SHA1(7958e99684d50b9bdb56c97f7fcfe161f0824578) )
+ROM_END
+
+ROM_START( m4calicla )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "ca2d.p1", 0x0000, 0x010000, CRC(75eb8c6f) SHA1(1bb923d06dcfa24eaf9533c083f68f4bd840834f) )
+	ROM_REGION( 0x48, "fakechr", 0 )
+	ROM_LOAD( "ca2s.chr", 0x0000, 0x000048, CRC(97618d38) SHA1(7958e99684d50b9bdb56c97f7fcfe161f0824578) )
+ROM_END
+
+ROM_START( m4caliclb )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "ca2f.p1", 0x0000, 0x010000, CRC(6c53cf29) SHA1(2e58453891ab4faa17ef58a81c5f3c0618d046a5) )
+	ROM_REGION( 0x48, "fakechr", 0 )
+	ROM_LOAD( "ca2s.chr", 0x0000, 0x000048, CRC(97618d38) SHA1(7958e99684d50b9bdb56c97f7fcfe161f0824578) )
+ROM_END
+
+ROM_START( m4caliclc )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "cald.p1", 0x0000, 0x010000, CRC(296fdeeb) SHA1(7782c0c7d8f44e2c0d48cc24c13015241e47b9ec) )
+	ROM_REGION( 0x48, "fakechr", 0 )
+	ROM_LOAD( "ca2s.chr", 0x0000, 0x000048, CRC(97618d38) SHA1(7958e99684d50b9bdb56c97f7fcfe161f0824578) )
+ROM_END
+
+ROM_START( m4calicld )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "cals.p1", 0x0000, 0x010000, CRC(28a1c5fe) SHA1(e8474df609ea7f3517780b54d6f493987aad3650) )
+	ROM_REGION( 0x48, "fakechr", 0 )
+	ROM_LOAD( "ca2s.chr", 0x0000, 0x000048, CRC(97618d38) SHA1(7958e99684d50b9bdb56c97f7fcfe161f0824578) )
+ROM_END
+
+
+
+
+
+ROM_START( m4casmul )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "casinomultiplay.bin", 0x0000, 0x010000, CRC(2ebd1800) SHA1(d15e2593d17d8db9c6946af3366cf429ad291f76) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "casinomultiplaysnd.bin", 0x0000, 0x080000, CRC(be293e95) SHA1(bf0d419c898920a7546b542d8b205e25004ef04f) )
+ROM_END
+
+ROM_START( m4oldtmr )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "dot11.bin",  0x00000, 0x10000,  CRC(da095666) SHA1(bc7654dc9da1f830a43f925db8079f27e18bb61e))
+
+	ROM_REGION( 0x48, "fakechr", 0 )
+	ROM_LOAD( "m470.chr", 0x0000, 0x000048, CRC(10d302d4) SHA1(5858e550470a25dcd64efe004c79e6e9783bce07) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "sdot01.bin", 0x0000, 0x080000, CRC(f247ba83) SHA1(9b173503e63a4a861d1380b2ab1fe14af1a189bd) )
+ROM_END
+
+ROM_START( m4casot )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "casrom.bin",  0x00000, 0x10000,  CRC(da095666) SHA1(bc7654dc9da1f830a43f925db8079f27e18bb61e) ) // == old timer   (aka b&wrom.bin)
+
+	ROM_REGION( 0x48, "fakechr", 0 )
+	ROM_LOAD( "caschar.chr", 0x0000, 0x000048, CRC(10d302d4) SHA1(5858e550470a25dcd64efe004c79e6e9783bce07) ) // ( aka b&wchrt.chr )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "cassound.bin", 0x0000, 0x080000, CRC(50450909) SHA1(181659b0594ba8d196b7130c5999c91676a363c0) ) // ( aka b&wsound.bin )
+ROM_END
+
+
+
+ROM_START( m4jpmcla )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "jcv2.epr",  0x00000, 0x10000,  CRC(da095666) SHA1(bc7654dc9da1f830a43f925db8079f27e18bb61e) ) // == old timer
+
+	ROM_REGION( 0x48, "fakechr", 0 )
+	ROM_LOAD( "jcchr.chr", 0x0000, 0x000048, CRC(e370e271) SHA1(2b712dd3590c31356e8b0b62ffc64ff8ce444f73) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "sjcv2.snd", 0x0000, 0x080000, CRC(f247ba83) SHA1(9b173503e63a4a861d1380b2ab1fe14af1a189bd) )
+ROM_END
+
+
+ROM_START( m4ceptr )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "dce10.bin", 0x0000, 0x010000, CRC(c94d41ef) SHA1(58fdff2de8dd3ead3980f6f34362183d084ce917) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "cepsnd.p1", 0x000000, 0x080000, CRC(3a91784a) SHA1(7297ccec3264aa9f1e7b3a2841f5f8a1e4ca6c54) )
+	ROM_LOAD( "cepsnd.p2", 0x080000, 0x080000, CRC(a82f0096) SHA1(45b6b5a2ae06b45add9cdbb9f5e6f834687b4902) )
+ROM_END
+
+
+#define M4CHASEI_EXTRAS \
+	ROM_REGION( 0x48, "fakechr", 0 ) \
+	ROM_LOAD( "chaseinvaders.chr", 0x0000, 0x000048, CRC(d7703dcd) SHA1(16fd998d1b44f35c10e5486882aa7f2d018dc82b) ) \
+	ROM_REGION( 0x100000, "msm6376", 0 ) \
+	ROM_LOAD( "cha.s1", 0x000000, 0x080000, CRC(8200b6bc) SHA1(bcc4ffbddcdcc1dd994fe29e9b24e83272f59442) ) \
+	ROM_LOAD( "cha.s2", 0x080000, 0x080000, CRC(542863fa) SHA1(501d66b2badb5036bb5dd8bac3cdb681f630a982) ) \
+
+
+ROM_START( m4chasei )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "ci2c.p1", 0x0000, 0x010000, CRC(fc49a2e1) SHA1(f4f02e168cd9bf0245c2b7340fe151da66f09c5c) )
+	M4CHASEI_EXTRAS
+ROM_END
+
+ROM_START( m4chaseia )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "ch20p8pn.rom", 0x0000, 0x010000, CRC(712bd2e7) SHA1(0e83fa077f42a051aaa07a7e13196955b0ac840d) )
+	M4CHASEI_EXTRAS
+ROM_END
+
+ROM_START( m4chaseib )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "chin2010l", 0x0000, 0x010000, CRC(7fe97181) SHA1(1ccf65ff108bdaa46efcb3f831fccc953297b9ac) )
+	M4CHASEI_EXTRAS
+ROM_END
+
+ROM_START( m4chaseic )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "ci2k.p1", 0x0000, 0x010000, CRC(8d715b8a) SHA1(5dd6f8d3d6710b0741df37af8792d942f41062d2) )
+	M4CHASEI_EXTRAS
+ROM_END
+
+ROM_START( m4chaseid )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "ci2s.p1", 0x0000, 0x010000, CRC(8175e1e3) SHA1(9a4b0a0288508e7900ceac8bc3b245ac1f898b19) )
+	M4CHASEI_EXTRAS
+ROM_END
+
+ROM_START( m4chaseie )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "ci2y.p1", 0x0000, 0x010000, CRC(80410946) SHA1(60a4f73eb9a35e5c246d8ef7b25bcf25b28bf8ed) )
+	M4CHASEI_EXTRAS
+ROM_END
+
+ROM_START( m4chaseif )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "chase invaders 8.bin", 0x0000, 0x010000, BAD_DUMP CRC(0bf6a8a0) SHA1(cea5ea40d71484a455615e14f6708b1bc06bbbe8) ) // bad prg (no vectors?)
+	M4CHASEI_EXTRAS
+ROM_END
+
+
+
+ROM_START( m4c9c )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "cncs.p1", 0x0000, 0x010000, CRC(10f15e2a) SHA1(c17ab13764d74302246984245485cb7692913b44) )
+ROM_END
+
+
+
+
+
+
+
+
+
+
+
+#define M4CLBVEG_EXTRAS \
+	ROM_REGION( 0x48, "fakechr", 0 ) \
+	ROM_LOAD( "cvegas.chr", 0x0000, 0x000048, CRC(a6c341b0) SHA1(c8c838c9bb1ced52889504b9cea8d88f1e7fa79f) ) \
+	ROM_REGION( 0x100000, "msm6376", 0 ) \
+	ROM_LOAD( "cvegass1.hex", 0x0000, 0x080000, CRC(13a8c857) SHA1(c66e10bca1ad54f467b9c5eacd502c54397c09b2) ) \
+	ROM_LOAD( "cvegass2.hex", 0x0000, 0x080000, CRC(88b37145) SHA1(1c6c9ad2010e1688d3370d1f2a5ae83dc683b500) ) \
+
+
+ROM_START( m4clbveg )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "clas.p1", 0x0000, 0x010000, CRC(6aad03f0) SHA1(2f611cc6f020e334dc4b87d2d907727ba15ff7ff) )
+	M4CLBVEG_EXTRAS
+ROM_END
+
+ROM_START( m4clbvega )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "claf.p1", 0x0000, 0x010000, CRC(79b83184) SHA1(7319a405b2b0b274e03f5cd1465436f8548065e4) )
+	M4CLBVEG_EXTRAS
+ROM_END
+
+ROM_START( m4clbvegb )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "clal.p1", 0x0000, 0x010000, CRC(db0bb5a2) SHA1(2735e02642fb92bb824e3b1f415a1a3ef13a856d) )
+	M4CLBVEG_EXTRAS
+ROM_END
+
+ROM_START( m4clbvegc )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "clad.p1", 0x0000, 0x010000, CRC(4fa45cce) SHA1(58a5d6cc8608eb1aa453429e26eacea589afa524) )
+	M4CLBVEG_EXTRAS
+ROM_END
+
+#define M4CLBX_EXTRAS \
+	ROM_REGION( 0x100000, "msm6376", 0 ) \
+	ROM_LOAD( "cxs1.hex", 0x000000, 0x080000, CRC(4ce005f1) SHA1(ee0f59a9c7e0222dd63fa63ccff8f194abd01ddb) ) \
+	ROM_LOAD( "cxs2.hex", 0x080000, 0x080000, CRC(495e0730) SHA1(7ba8150fbcf974ac494a82fd373ff02185543e35) ) \
+
+
+ROM_START( m4clbx )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "clx12s.p1", 0x0000, 0x020000, CRC(6798c153) SHA1(e621e341a0fed1cb35637edb0769ae1cca72a663) )
+	M4CLBX_EXTRAS
+ROM_END
+
+ROM_START( m4clbxa )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "clx12d.p1", 0x0000, 0x020000, CRC(43e797ba) SHA1(fb2fc843176fe50c1039214d48815d6e9871ae27) )
+	M4CLBX_EXTRAS
+ROM_END
+
+ROM_START( m4clbxb )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "clx12f.p1", 0x0000, 0x020000, CRC(3e6a82fe) SHA1(01ef9a15a3cf9b1191c573b36fb5758e79c3adc1) )
+	M4CLBX_EXTRAS
+ROM_END
+
+
+
+
+ROM_START( m4crzjk )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "crjok2.04.bin", 0x0000, 0x010000, CRC(838336d6) SHA1(6f36de20c930cbbff479af2667c11152c6adb43e) )
+ROM_END
+
+#define M4CRZJWL_EXTRAS \
+	ROM_REGION( 0x180000, "msm6376", 0 ) \
+	ROM_LOAD( "cjsound1.bin", 0x000000, 0x080000, CRC(b023f6b9) SHA1(04c362c6511442d3ab775a5ff2051bfe26d5e624) ) \
+	ROM_LOAD( "cjsound2.bin", 0x080000, 0x080000, CRC(02563a43) SHA1(dfcee4e0fdf81c726c8e13278e7950459bcaab18) ) \
+	ROM_LOAD( "cjsound3.bin", 0x100000, 0x080000, CRC(e722e438) SHA1(070f3772920fa64d5214843c313b27a5b2a4c105) ) \
+
+
+ROM_START( m4crzjwl )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "cj11bin", 0x0000, 0x020000, CRC(208fda73) SHA1(8b15c197693ea7749bc961fe4e5e36b317f9f6f8) ) // crown jewels (german)
+	M4CRZJWL_EXTRAS
+ROM_END
+
+ROM_START( m4crzjwla )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "cjexlow", 0x0000, 0x020000, CRC(07c227c1) SHA1(286341ed44ef7cd08ca411f2b3e6936b5e83a5f3) ) // crown jewels (german)
+	M4CRZJWL_EXTRAS
+ROM_END
+
+ROM_START( m4crzjwlb )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "cjgerman", 0x0000, 0x020000, CRC(b090e690) SHA1(bdbe4041085c995761306280c15f782ea3bdc110) )
+	M4CRZJWL_EXTRAS
+ROM_END
+
+ROM_START( m4crzjwlc )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "cjj54.bin", 0x0000, 0x020000, CRC(16dc92e7) SHA1(b791535054d5864c7053243408a54accfa014bd1) )
+	M4CRZJWL_EXTRAS
+ROM_END
+
+ROM_START( m4crzjwld )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "gcn11", 0x0000, 0x020000, CRC(51493500) SHA1(901e60c1a7e9e628d723e199579fc82cf2e433e6) )
+	M4CRZJWL_EXTRAS
+ROM_END
+
+ROM_START( m4crzjwle )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "gcn111", 0x0000, 0x020000, CRC(b1152ce6) SHA1(1d236bad57ad38b11215efe44008bb8e4014939e) )
+	M4CRZJWL_EXTRAS
+ROM_END
+
+ROM_START( m4crzjwlf )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "gjv4", 0x0000, 0x020000, CRC(df63105d) SHA1(56e28adef9ec8921da7ab8045859e834731196c5) )
+	M4CRZJWL_EXTRAS
+ROM_END
+
+ROM_START( m4crzjwlg )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "gjv5", 0x0000, 0x020000, CRC(e4f0bab2) SHA1(1a13d97ff2c4fbae39327f2a5a8b110f2617857e) )
+	M4CRZJWL_EXTRAS
+ROM_END
+
+ROM_START( m4crzjwlh )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "cjg.p1", 0x0000, 0x020000, CRC(1f4743bf) SHA1(f9a0da2ed9cad5e6685c8a6d1d09e5d4bbcfacec) )    // Crown Jewels Deluxe (german)
+	M4CRZJWL_EXTRAS
+ROM_END
+
+
+#define M4CRJWL_EXTRAS \
+	ROM_REGION( 0x100000, "msm6376", ROMREGION_ERASE00 ) \
+	/* Missing? or in above set? */ \
+
+
+ROM_START( m4crjwl )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "cjcf.p1", 0x0000, 0x010000, CRC(7feccc74) SHA1(4d1c7c6d2085492ee4205a7383ad7dc1de4e8d60) )
+	M4CRJWL_EXTRAS
+ROM_END
+
+ROM_START( m4crjwla )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "cjcd.p1", 0x0000, 0x010000, CRC(cb83f226) SHA1(f09996436b3db3c8f0fe237884d9125be2b7855e) )
+	M4CRJWL_EXTRAS
+ROM_END
+
+ROM_START( m4crjwlb )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "cjcs.p1", 0x0000, 0x010000, CRC(1054e02d) SHA1(067705f20862f6cfc4334c74e0fab1a1016d427c) )
+	M4CRJWL_EXTRAS
+ROM_END
+
+ROM_START( m4crjwlc )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "cjn02.p1", 0x0000, 0x010000, CRC(a3d50e20) SHA1(15698e74a37d5f95a5634d48ae2a9a5d19faa2b6) )
+	M4CRJWL_EXTRAS
+ROM_END
+
+#define M4CRJWL2_EXTRAS \
+	ROM_REGION( 0x48, "fakechr", 0 ) \
+	ROM_LOAD( "chr.chr", 0x0000, 0x000048, CRC(c5812913) SHA1(d167b1f512c183cf01a1f4e1c1588ea0ae21331b) ) \
+	ROM_REGION( 0x100000, "msm6376", 0 ) \
+	ROM_LOAD( "cjcs1.hex", 0x000000, 0x080000, CRC(2ac3ba9f) SHA1(3332f29f81918c34aeec3da6f7d001dc9922840d) ) \
+	ROM_LOAD( "cjcs2.hex", 0x080000, 0x080000, CRC(89838a9d) SHA1(502243cc0a14e63882b537f05c4cc0eb852e4a0c) ) \
+
+
+ROM_START( m4crjwl2 )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "cj214f.p1", 0x0000, 0x010000, CRC(7ee4d30c) SHA1(2bf702bc925c473f7e9eaeb5b3ae0b00e124161a) )
+	M4CRJWL2_EXTRAS
+ROM_END
+
+ROM_START( m4crjwl2a )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "cj214d.p1", 0x0000, 0x010000, CRC(359e2a73) SHA1(c85eeebafca14e6f975953f5daf2772a62693051) )
+	M4CRJWL2_EXTRAS
+ROM_END
+
+ROM_START( m4crjwl2b )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "cj214s.hex", 0x0000, 0x010000, CRC(296aa885) SHA1(045b02848b37e8a04d950d54301dc6888d6178ad) )
+	M4CRJWL2_EXTRAS
+ROM_END
+
+
+
+#define M4DRAC_EXTRAS \
+	ROM_REGION( 0x200000, "msm6376", 0 ) \
+	ROM_LOAD( "drasnd.p1", 0x000000, 0x080000, CRC(54c3821c) SHA1(1fcc62e2b127dd7f1d5d27a3afdf56dc27f122f8) ) \
+	ROM_LOAD( "drasnd.p2", 0x080000, 0x080000, CRC(9096d2bc) SHA1(1b4c530b7b0fde869980d519255e2585c5461e13) ) \
+	ROM_LOAD( "drasnd.p3", 0x100000, 0x080000, CRC(a07f412b) SHA1(cca8f5cfe620ece45ca40bf801f0643cd76547e9) ) \
+	ROM_LOAD( "drasnd.p4", 0x180000, 0x080000, CRC(018ed789) SHA1(64202da2c542f5ef208faeb04945eb1a758d4746) ) \
+
+
+ROM_START( m4drac )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "dra21.bin", 0x0000, 0x020000, CRC(23be387e) SHA1(08a78f4b8ddef46069d1c75113300b21e52338c1) )
+	M4DRAC_EXTRAS
+ROM_END
+
+ROM_START( m4draca )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "dra24.bin", 0x0000, 0x020000, CRC(3db112ae) SHA1(b5303e2a65476931d4769327ca62afd0f6a9eda7) )
+	M4DRAC_EXTRAS
+ROM_END
+
+ROM_START( m4dracb )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "dra27.p1", 0x0000, 0x020000, CRC(8a095175) SHA1(41006e298f1688499ce6820ec28196c7578684b9) )
+	M4DRAC_EXTRAS
+ROM_END
+
+
+
+
+
+
+ROM_START( m4exgam )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "czep30.bin", 0x0000, 0x010000, CRC(4614e6f6) SHA1(5602a68e9b47394cb31bbcd49a9920e19af6242f) )
+
+	ROM_REGION( 0x48, "fakechr", 0 )
+	ROM_LOAD( "ceg.chr", 0x0000, 0x000048, CRC(f694224e) SHA1(936ab5e349fa59accbb37959cce9519fd97f3978) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "sczep.bin", 0x0000, 0x080000, CRC(50450909) SHA1(181659b0594ba8d196b7130c5999c91676a363c0) )
+ROM_END
+
+
+
+#define M4FORTCB_EXTRAS \
+	ROM_REGION( 0x100000, "msm6376", 0 ) \
+	ROM_LOAD( "cfosnd.p1", 0x000000, 0x080000, CRC(74bbf913) SHA1(52ddc89ab34b11ede2c0e9b9b27e119b0c1eb2d9) ) \
+	ROM_LOAD( "cfosnd.p2", 0x080000, 0x080000, CRC(1b2bb79a) SHA1(5f19ea000f34bb404ed6c8ea5ec7b809ccb1ae36) ) \
+
+ROM_START( m4fortcb )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "cfod.p1", 0x0000, 0x010000, CRC(9d0e2b63) SHA1(cce871d2bbe486793de5de9fadfbddf67c382e5c) )
+	M4FORTCB_EXTRAS
+ROM_END
+
+ROM_START( m4fortcba )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "cfof.p1", 0x0000, 0x010000, CRC(010b3c1f) SHA1(b44c22c21d22603b277138eabf803e6d46ad4aae) )
+	M4FORTCB_EXTRAS
+ROM_END
+
+ROM_START( m4fortcbb )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "cfos.p1", 0x0000, 0x010000, CRC(f3b47df4) SHA1(3ad674864ba3a24283af14caaf2c999d4fde11fc) )
+	M4FORTCB_EXTRAS
+ROM_END
+
+
+
+
+
+
+ROM_START( m4frtgm )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "fruit.bin", 0x0000, 0x010000, CRC(dbe44316) SHA1(15cd49dd2e6166f7a7668663f7fea802d6cbb12f) )
+
+	ROM_REGION( 0x800000, "msm6376", 0 ) /* this isn't OKI, or is corrupt (bad size) */
+	ROM_LOAD( "fruitsnd.bin", 0x0000, 0x010000, CRC(86547dc7) SHA1(4bf64f22e84c0ee82d961b0ba64932b8bf6a521f) ) // matches 'Replay' on SC1 hardware, probably just belongs there.. or this is eurocoin with different sound hw here?
+ROM_END
+
+
+
+
+
+
+
+
+
+
+
+ROM_START( m4gldgat )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "dgg22.bin", 0x0000, 0x010000, CRC(ef8498df) SHA1(6bf164ef18445e83e4510a000bc924cbe916ad99) )
+
+	ROM_REGION( 0x48, "fakechr", 0 )
+	ROM_LOAD( "m450.chr", 0x0000, 0x000048, CRC(fb7b2a45) SHA1(b6d5537bde9c05a3e79221a5577b8ae77bace9e6) )
+ROM_END
+
+ROM_START( m4gldjok )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "dgj12.bin", 0x0000, 0x010000, CRC(93ee0c35) SHA1(5ae67b14f7f3d8528fa106519a8a27437c997a70) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "sdgj.snd", 0x0000, 0x080000, CRC(b6cd118b) SHA1(51c5d694ed0dfde8d3fd682f2471d83eec236736) )
+ROM_END
+
+
+
+
+
+
+ROM_START( m4gnsmk )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "dgu16", 0x0000, 0x010000, CRC(6aa23345) SHA1(45e129ec95b1a796f334bedd08469f2ab47a18f8) )
+
+	ROM_REGION( 0x200000, "msm6376", 0 )
+	ROM_LOAD( "sdgu01.s1", 0x000000, 0x080000, CRC(bfb284a2) SHA1(860b98d54a3180fbb00b7b03feae049fb4cf9d7f) )
+	ROM_LOAD( "sdgu01.s2", 0x080000, 0x080000, CRC(1a46ba28) SHA1(d7154e5f92be8631207620eb313b28990c6a1c7f) )
+	ROM_LOAD( "sdgu01.s3", 0x100000, 0x080000, CRC(88bffcf4) SHA1(1da853193f6a22889edff5aafd9440c676a82ea6) )
+	ROM_LOAD( "sdgu01.s4", 0x180000, 0x080000, CRC(a6160bef) SHA1(807f7d470728a479a55c782fca3df1eacd0b594c) )
+	ROM_END
+
+ROM_START( m4blkbuld )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "dgu16", 0x0000, 0x010000, CRC(6aa23345) SHA1(45e129ec95b1a796f334bedd08469f2ab47a18f8) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "dbbsnd.p1", 0x000000, 0x080000, CRC(a913ad0d) SHA1(5f39b661912da903ce8d6658b7848081b191ea56) )
+	ROM_LOAD( "dbbsnd.p2", 0x080000, 0x080000, CRC(6a22b39f) SHA1(0e0dbeac4310e03490b665fff514392481ad265f) )
+ROM_END
+
+
+ROM_START( m4hpyjok )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "dhj12", 0x0000, 0x010000, CRC(982439d7) SHA1(8d27fcecf7a6a7fd774678580074f945675758f4) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "dhjsnd", 0x0000, 0x080000, CRC(8ac4aae6) SHA1(70dba43b398010a8bd0d82cf91553d3f5e0921f0) )
+ROM_END
+
+ROM_START( m4hirise )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "hiix.p1", 0x0000, 0x010000, CRC(c68c816c) SHA1(2ec89d83f3b658700433fc165358290ce58eba64) )
+ROM_END
+
+ROM_START( m4hirisea )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "hirs.p1", 0x0000, 0x010000, CRC(a38f771e) SHA1(c1502200671389a1fe6dcb9c043d22583d5991dc) )
+ROM_END
+
+ROM_START( m4hiriseb )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "hirs20dd", 0x0000, 0x010000, CRC(89941670) SHA1(28859adfa79dce53c348c63b46f6f5a068f2b2de) )
+ROM_END
+
+ROM_START( m4hirisec )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "hirx.p1", 0x0000, 0x010000, CRC(4280a16b) SHA1(c9179ec17404a6f084679ad5f04e53a50f00af98) )
+ROM_END
+
+ROM_START( m4hirised )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "hirxc.p1", 0x0000, 0x010000, CRC(1ad1d942) SHA1(91d02212606e22b280be9640433e013bc50e5ea8) )
+ROM_END
+
+ROM_START( m4hirisee )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "hrise206", 0x0000, 0x010000, CRC(58b4bbdd) SHA1(0b76d27147fbadba97328eb9d2dc81cff9d576e0) )
+ROM_END
+
+
+
+
+
+ROM_START( m4holdtm )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "dht10.hex", 0x0000, 0x010000, CRC(217d382b) SHA1(a27dd107c554d4787967633dff998d3962ee0ea5) )
+
+	ROM_REGION( 0x48, "fakechr", 0 )
+	ROM_LOAD( "ht01.chr", 0x0000, 0x000048, CRC(0fc2bb52) SHA1(0d0e47938f6e00166e7352732ddfb7c610f44db2) )
+	ROM_LOAD( "m400.chr", 0x0000, 0x000048, CRC(8f00f720) SHA1(ea59fa2a3b016a7ae83be3caf863de87ce7aeffa) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "sun01.hex", 0x0000, 0x080000, CRC(50450909) SHA1(181659b0594ba8d196b7130c5999c91676a363c0) )
+ROM_END
+
+
+
+
+
+
+ROM_START( m4jok300 )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "cjo", 0x0000, 0x020000, CRC(386e99db) SHA1(5bb0b513ef63ffaedd98b8e9e7206658fe784fda) )
+
+	ROM_REGION( 0x100000, "msm6376", ROMREGION_ERASEFF )
+	/* missing? */
+ROM_END
+
+ROM_START( m4jokmil )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "cjm03.epr", 0x0000, 0x020000, CRC(e5e4986e) SHA1(149b950a739ad308f7759927c344de8193ce67c5) )
+
+	ROM_REGION( 0x100000, "msm6376", ROMREGION_ERASEFF )
+	/* missing? */
+ROM_END
+
+
+
+
+
+
+
+ROM_START( m4joljokh )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "jollyjokerhungarian.bin", 0x0000, 0x010000, CRC(85b6a406) SHA1(e277f9d3b62faead04d65efbc06de7f4a50ae38d) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "jollyjokerhungariansnd.bin", 0x0000, 0x080000, CRC(93460383) SHA1(2b179a1dde09ebdfe8c84641899df7be87d443e5) )
+ROM_END
+
+
+
+
+
+
+
+
+
+ROM_START( m4lineup )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "lineup5p1.bin", 0xc000, 0x004000, CRC(9ba9edbd) SHA1(385e01816b5631b6896e85343ae96b3c36f9647a) )
+	ROM_LOAD( "lineup5p2.bin", 0x8000, 0x004000, CRC(e9e4dfb0) SHA1(46a0efa84770036366c7a6a33ef1d42c7b2b782b) )
+	ROM_LOAD( "lineup5p3.bin", 0x6000, 0x002000, CRC(86623376) SHA1(e29442bfcd401361287852b87673368322e946b5) )
+ROM_END
+
+ROM_START( m4lineupa )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "lu2_10p1.bin", 0x0000, 0x004000, CRC(2fb89062) SHA1(55e86de8fd0d36cca9aab8ad5aae7b4f5a62b940) )
+	ROM_LOAD( "lu2_10p2.bin", 0x0000, 0x004000, CRC(9d820af2) SHA1(63d27df91f80e47eb8c9685fcd2c3eff902a2ef8) )
+	ROM_LOAD( "lu2_10p3.bin", 0x0000, 0x002000, CRC(8c8a210c) SHA1(2599d979f1a62e9ef6acc70d0ad5c9b4a65d712a) )
+ROM_END
+
+
+ROM_START( m4luck7 )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "dl716.bin", 0x0000, 0x010000, CRC(141b23a9) SHA1(3bfb82ea0ee4104bd8739b545aba617f84bef770) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "dl7snd.bin", 0x0000, 0x080000, CRC(c90fa8ad) SHA1(a98f03d4b6f5892333279bff7537d4d6d887da62) )
+ROM_END
+
+ROM_START( m4luckdv )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "cld_16.bin", 0x0000, 0x010000, CRC(89f63938) SHA1(8d3a5628e2c0bf39784afe2f00a007d40ea35423) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "cld_snd1.snd", 0x000000, 0x080000, CRC(f247ba83) SHA1(9b173503e63a4a861d1380b2ab1fe14af1a189bd) )
+	ROM_LOAD( "cld_snd2.snd", 0x080000, 0x080000, CRC(50450909) SHA1(181659b0594ba8d196b7130c5999c91676a363c0) )
+ROM_END
+
+ROM_START( m4luckdvd )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "dld13", 0x0000, 0x010000, CRC(b8ceb29b) SHA1(84b6ebad300214610635fb8141d18de2b7065435) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "sdld01.snd", 0x000000, 0x080000, CRC(9b035fa6) SHA1(51b7e5bc3abdf4f1beba2347146a91a2b3f4de35) )
+ROM_END
+
+
+#define M4LUCKWB_EXTRAS \
+	ROM_REGION( 0x100000, "msm6376", 0 ) /* these are all different sound roms... */  \
+	ROM_LOAD( "lwbs3.bin", 0x0000, 0x07dc89, CRC(ee102376) SHA1(3fed581a4654acf285dd430fbfbac33cd67411b8) ) \
+	ROM_LOAD( "lwbs7.bin", 0x0000, 0x080000, CRC(5d4177c7) SHA1(e13f145885bb719b0021ae4ce289261a3eaa2e18) ) \
+	ROM_LOAD( "lwbs8.bin", 0x0000, 0x080000, CRC(187cdf5b) SHA1(87ec189af27c95f278a7531ec13df53a08889af8) ) \
+	ROM_LOAD( "lwbs9.bin", 0x0000, 0x080000, CRC(2e02b617) SHA1(2502a1d2cff155a7fc5148e23a4723d4d60e9d42) ) \
+
+
+ROM_START( m4luckwb )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "lwb10.bin", 0x0000, 0x010000, CRC(6d43a14e) SHA1(267aba1a01bfd5f0eaa7683d041d5fcb2d301934) )
+	M4LUCKWB_EXTRAS
+ROM_END
+
+ROM_START( m4luckwba )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "lwb15.bin", 0x0000, 0x010000, CRC(b5af8cb2) SHA1(474975b83803627ad3ac4217d8cecb2d2db16fec) )
+	M4LUCKWB_EXTRAS
+ROM_END
+
+ROM_START( m4luckwbb )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "lwb21.bin", 0x0000, 0x010000, CRC(6c570733) SHA1(7488318ca9689371e4f80be0a0fddd8ad141733e) )
+	M4LUCKWB_EXTRAS
+ROM_END
+
+ROM_START( m4luckwbc )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "lwb22.bin", 0x0000, 0x010000, CRC(05b952a7) SHA1(952e328b280a18c1ffe253b6a56f2b5e893b1b72) )
+	M4LUCKWB_EXTRAS
+ROM_END
+
+ROM_START( m4luckwbd )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "lwb27.bin", 0x0000, 0x010000, CRC(9d6b6637) SHA1(65bad12cd08de128ca31c9488e32e3cebfb8eedb) )
+	M4LUCKWB_EXTRAS
+ROM_END
+
+ROM_START( m4luckwbe )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "lwb6.bin", 0x0000, 0x010000, CRC(8e7d4594) SHA1(4824a9a4628585a170c41e00f7b3fcb8a2330c02) )
+	M4LUCKWB_EXTRAS
+ROM_END
+
+ROM_START( m4luckwbf )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "lwb7.bin", 0x0000, 0x010000, CRC(8e651705) SHA1(bd4d09d586d14759a17d4d7d4016c427f3eef015) )
+	M4LUCKWB_EXTRAS
+ROM_END
+
+
+
+
+ROM_START( m4magdrg )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "dmd10.bin", 0x0000, 0x010000, CRC(9cc4f2f8) SHA1(46a90ffa18d35ad2b06542f91120c02bc34f0c40) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "mdsnd.bin", 0x000000, 0x080000, CRC(50450909) SHA1(181659b0594ba8d196b7130c5999c91676a363c0) )
+ROM_END
+
+ROM_START( m4maglin )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "dma21.bin", 0x0000, 0x010000, CRC(836a25e6) SHA1(5f83bb8a2c77dd3b02724c076d6b37d2c1c93b93) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "mlsound1.p1", 0x000000, 0x080000, CRC(ff8749ff) SHA1(509b53f09cdfe5ee865e60ab42fd578586ac53ea) )
+	ROM_LOAD( "mlsound2.p2", 0x080000, 0x080000, CRC(c8165b6c) SHA1(7c5059ee8630da31fc3ad50d84a4730297757d46) )
+ROM_END
+
+ROM_START( m4magrep )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "dmr13.bin", 0x0000, 0x010000, CRC(c3015da3) SHA1(23cd505eedf666c012e4064a5fcf5a983f098e83) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "mrdsound.bin", 0x000000, 0x080000, CRC(9b035fa6) SHA1(51b7e5bc3abdf4f1beba2347146a91a2b3f4de35) )
+ROM_END
+
+
+
+
+
+
+
+
+
+
+
+ROM_START( m4nspot )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "ns2s.p1", 0x0000, 0x010000, CRC(ba0f5a81) SHA1(7015176d4528636cb8a753249c824c37941e8eae) )
+ROM_END
+
+ROM_START( m4nspota )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "ns2d.p1", 0x0000, 0x010000, CRC(5e66b7e0) SHA1(e82044e3c1e5cf3a2baf1fde7b7ab8b6e221d360) )
+ROM_END
+
+ROM_START( m4nspotb )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "nits.p1", 0x0000, 0x010000, CRC(47c965e6) SHA1(41a337a9a367c4e704a60e32d56b262d03f97b59) )
+ROM_END
+
+ROM_START( m4nile )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "gjn08.p1", 0x0000, 0x020000, CRC(2bafac0c) SHA1(363d08f798b5bea409510b1a9415098a69f19ee0) )
+
+	ROM_REGION( 0x200000, "msm6376", 0 )
+	ROM_LOAD( "gjnsnd.p1", 0x000000, 0x080000, CRC(1d839591) SHA1(2e4ba74f96e7c0592b85409a3f50ec81e00e064c) )
+	ROM_LOAD( "gjnsnd.p2", 0x080000, 0x080000, CRC(e2829c42) SHA1(2139c1625ad163cce99a522c2cf02ee47a8f9007) )
+	ROM_LOAD( "gjnsnd.p3", 0x100000, 0x080000, CRC(db084eb4) SHA1(9b46a3cb16974942b0edd25b1b080d30fc60c3df) )
+	ROM_LOAD( "gjnsnd.p4", 0x180000, 0x080000, CRC(da785b0a) SHA1(63358ab197eb1de8e489a9fd6ffbc2039efc9536) )
+ROM_END
+
+
+
+
+ROM_START( m4nudshf )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "nusx.p1", 0x0000, 0x010000, CRC(87caab84) SHA1(e2492ad0d25ded4d760c4cbe05e9b51ca1a10544) )
+ROM_END
+
+ROM_START( m4nudshfa )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "nus6", 0x0000, 0x010000, CRC(017c5354) SHA1(07491e4b03ab62ad923f8479300c1af4633e3e8c) )
+ROM_END
+
+ROM_START( m4nudshfb )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "nuss.bin", 0x0000, 0x010000, CRC(d3b860ee) SHA1(d5d1262c715e4684748b0cae708eeed31b1dc50f) )
+ROM_END
+
+ROM_START( m4nudshfc )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "nusxc.p1", 0x0000, 0x010000, CRC(e2557b45) SHA1(a9d1514d4fe3897f6fcef22a5039d6bdff8126ff) )
+ROM_END
+
+
+
+ROM_START( m4ordmnd )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "rab01.p1", 0x0000, 0x020000, CRC(99964fe7) SHA1(3745d09e7a4f417c8e85270d3ffec3e37ee1344d) )
+
+	ROM_REGION( 0x200000, "msm6376", 0 )
+	ROM_LOAD( "odsnd1.bin", 0x000000, 0x080000, CRC(d746bae4) SHA1(293e1dc9edf88a183cc23dbb4576cefbc8f9d028) )
+	ROM_LOAD( "odsnd2.bin", 0x080000, 0x080000, CRC(84ace1f4) SHA1(9cc70e59e9d26006870ea1cc522de33e71b71692) )
+	ROM_LOAD( "odsnd3.bin", 0x100000, 0x080000, CRC(b1b12def) SHA1(d8debf8cfb3af2157d5d1571927588dc1c8d07b6) )
+ROM_END
+
+
+ROM_START( m4ptblkc )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "potblackcasinoprg.bin", 0x0000, 0x020000, CRC(29190084) SHA1(c7a778331369c0fac796ef3e306e12c98605f365) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "potblackcasinosnd.p1", 0x000000, 0x080000, CRC(72a3331d) SHA1(b7475ba0ad86a6277e3d4f7b4311a98f3fc29802) )
+	ROM_LOAD( "potblackcasinosnd.p2", 0x080000, 0x080000, CRC(c2460eec) SHA1(7c62fbc69ffaa788bf3839e37a75a812a7b8caef) )
+ROM_END
+
+
+
+
+
+ROM_START( m4prem )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "dpm14.bin", 0x0000, 0x010000, CRC(de344759) SHA1(d3e7514da83bbf1eba63661fb0675a6230af93cd) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "dpms.bin", 0x0000, 0x080000, CRC(93fd4253) SHA1(69feda7ffc56defd515c9cd1ce204af3d9731a3f) )
+ROM_END
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ROM_START( m4rdht )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "drh12", 0x0000, 0x010000, CRC(b26cd308) SHA1(4e29f6cce773232a1c43cd2fb3ce9b844c446bb8) ) // aka gdjb
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "drh_1.snd", 0x0000, 0x080000, CRC(f652cd0c) SHA1(9ce986bc12bcf22a57e065329e82671d19cc96d7) ) // aka gn.snd
+ROM_END
+
+
+
+
+
+
+
+ROM_START( m4rwb )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "drw14.bin", 0x0000, 0x010000, CRC(22c30ebe) SHA1(479f66732aac56dae60c80d11f05c084865f9389) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "rwb_1.snd", 0x000000, 0x080000, CRC(e0a6def5) SHA1(e3867b83e588fd6a9039b8d45186480a9d0433ea) )
+	ROM_LOAD( "rwb_2.snd", 0x080000, 0x080000, CRC(54a2b2fd) SHA1(25875ff873bf22df510e7a4c56c336fbabcbdedb) )
+ROM_END
+
+
+
+
+
+
+ROM_START( m4magtbo )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "crmtb14.epr", 0x0000, 0x010000, CRC(79e1746c) SHA1(794317f3aba7b1a7994cde89d81abc2b687d0821) )
+
+	ROM_REGION( 0x48, "fakechr", 0 )
+	ROM_LOAD( "ctp.chr", 0x0000, 0x000048, CRC(ead61793) SHA1(f38a38601a67804111b8f8cf0a05d35ed79b7ed1) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "scrmtb.snd", 0x000000, 0x080000, CRC(50450909) SHA1(181659b0594ba8d196b7130c5999c91676a363c0) )
+ROM_END
+
+
+
+
+
+
+
+ROM_START( m4reeltm )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "real.bin", 0x0000, 0x010000, CRC(5bd54924) SHA1(23fcf13c52ee7b9b39f30f999a9102171fffd642) )
+
+	ROM_REGION( 0x48, "fakechr", 0 )
+	ROM_LOAD( "charter.chr", 0x0000, 0x000048, CRC(4ff4eda2) SHA1(092435e34d79775910316a7bed0f90c4f086e5c4) )
+
+	ROM_REGION( 0x100000, "msm6376", ROMREGION_ERASE00 )
+
+ROM_END
+
+ROM_START( m4ringfr )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "rof03s.p1", 0x0000, 0x020000, CRC(4b4703fe) SHA1(853ce1f5932e09af2b5f3b5314709f13aa35cf19) )
+
+	ROM_REGION( 0x100000, "msm6376", ROMREGION_ERASE00 )
+	/* missing? */
+ROM_END
+
+
+
+
+
+
+ROM_START( m4roadrn )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "dro19", 0x0000, 0x010000, CRC(8b591766) SHA1(df156390b427e31cdda64826a6c1d2457c915f25) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "dro_1.snd", 0x000000, 0x080000, CRC(895cfe63) SHA1(02134e149cef3526bbdb6cb93ef3efa283b9d6a2) )
+	ROM_LOAD( "dro_2.snd", 0x080000, 0x080000, CRC(1d5c8d4f) SHA1(15c18ae7286807cdc0feb825b958eae808445690) )
+ROM_END
+
+
+
+
+ROM_START( m4royjwl )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "rj.bin", 0x0000, 0x020000, CRC(3ffbe4a8) SHA1(47a0309cc9ff315ad9f64e6855863409443e94e2) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "rj_sound1.bin", 0x000000, 0x080000, CRC(443c4901) SHA1(7b3c6737b47dfe04c072f0e157d83c09340c3f9b) )
+	ROM_LOAD( "rj_sound2.bin", 0x080000, 0x080000, CRC(9456523e) SHA1(ea1b6bf16b7d1015c188ad83760336d9851de391) )
+ROM_END
+
+
+
+ROM_START( m4salsa )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "dsa15.epr", 0x0000, 0x010000, CRC(22b60b0b) SHA1(4ad184d1557bfd01650684ea9d8ad794fded65f7) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "dsa_1#97c2.snd", 0x0000, 0x080000, CRC(0281a6dd) SHA1(a35a8cd0da32c51f77856ea3eeff7c58fd032333) )
+ROM_END
+
+
+
+
+
+
+ROM_START( m4showtm )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "dsh13.bin", 0x0000, 0x010000, CRC(4ce40ff1) SHA1(f145d6c8e926ca4368d43dacda0fa38615988d84) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "sdsh01s1.snd", 0x0000, 0x080000, CRC(f247ba83) SHA1(9b173503e63a4a861d1380b2ab1fe14af1a189bd) )
+ROM_END
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ROM_START( m4steptm )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "dst11.bin", 0x0000, 0x010000, CRC(3960f210) SHA1(c7c4fe74cb9a53eaa9114a84240de3bce4ffe75e) )
+
+	ROM_REGION( 0x080000, "msm6376", 0 )
+	ROM_LOAD( "sdun01.bin", 0x0000, 0x080000, CRC(50450909) SHA1(181659b0594ba8d196b7130c5999c91676a363c0) )
+ROM_END
+
+
+
+
+
+
+
+#define M4SUPBJC_EXTRAS \
+	ROM_REGION( 0x48, "fakechr", 0 ) \
+	ROM_LOAD( "sbj.chr", 0x0000, 0x000048, CRC(cc4b7911) SHA1(9f8a96a1f8b0f9b33b852e93483ce5c684703349) ) \
+	ROM_REGION( 0x100000, "altmsm6376", 0 ) \
+	ROM_LOAD( "sbjsnd1.hex", 0x000000, 0x080000, CRC(70388bec) SHA1(256fa01b57049d73e88b0bb270fccb555b12dfb7) ) \
+	ROM_LOAD( "sbjsnd2.hex", 0x080000, 0x080000, CRC(1d588554) SHA1(48c092ce83d2f881fc217a3d566e896718ad6f24) ) \
+	ROM_REGION( 0x100000, "msm6376", 0 ) \
+	ROM_LOAD( "sbj.s1", 0x000000, 0x080000, CRC(9bcba966) SHA1(5ced282aca9d39ebf0828aa19357026d5298e955) ) \
+	ROM_LOAD( "sbj.s2", 0x080000, 0x080000, CRC(1d588554) SHA1(48c092ce83d2f881fc217a3d566e896718ad6f24) ) \
+
+
+
+ROM_START( m4supbjc )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "sbjs.p1", 0x0000, 0x010000, CRC(f7fb2b99) SHA1(c860d3f95ee3fde02bf00b2e20eeee0ebaf01912) )
+	M4SUPBJC_EXTRAS
+ROM_END
+
+ROM_START( m4supbjca )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "sbjd.p1", 0x0000, 0x010000, CRC(555361f4) SHA1(f5327b811ab3421307dc59d209a216798cd54393) )
+	M4SUPBJC_EXTRAS
+ROM_END
+
+ROM_START( m4supbjcb )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "sbjf.p1", 0x0000, 0x010000, CRC(7966deff) SHA1(5cdb6c80ef56b27878eb1fffd6fdf31060e56291) )
+	M4SUPBJC_EXTRAS
+ROM_END
+
+ROM_START( m4supbjcc )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "sbjl.p1", 0x0000, 0x010000, CRC(fc47ed74) SHA1(f29b2caac8168410e534e2f224c98dd4bbb9a7f7) )
+	M4SUPBJC_EXTRAS
+ROM_END
+
+ROM_START( m4supbjcd )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "superbjclub.bin", 0x0000, 0x010000, CRC(68d11d27) SHA1(a0303f845fb5f5b396a7be3ca17a9eaf1a7baef4) )
+	M4SUPBJC_EXTRAS
+ROM_END
+
+
+ROM_START( m4supbf )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "sbff.p1", 0x0000, 0x010000, CRC(f27feba0) SHA1(157bf28e2d5fc2fa58bed11b3285cf56ae18abb8) )
+ROM_END
+
+ROM_START( m4supbfa )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "sbfs.p1", 0x0000, 0x010000, CRC(c8c52d5e) SHA1(d53513b9faabc307623a7c2f5be0225fb812beeb) )
+ROM_END
+
+
+
+
+
+
+
+ROM_START( m4take5 )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "take5.bin", 0x0000, 0x020000, CRC(24beb7d6) SHA1(746beccaf57fd0c54c8cf8d742b8ef50563a40fd) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "tfive1.hex", 0x000000, 0x080000, CRC(70f16892) SHA1(e6448831d3ce7fa251b40023bc7d5d6dee9d6793) )
+	ROM_LOAD( "tfive2.hex", 0x080000, 0x080000, CRC(5fc888b0) SHA1(8d50ee4f36bd36aed5d0e7a77f76bd6caffc6376) )
+ROM_END
+
+
+
+
+#define M4TECHNO_EXTRAS \
+	ROM_REGION( 0x080000, "msm6376", 0 ) \
+	ROM_LOAD( "techno.bin", 0x0000, 0x080000, CRC(3e80f8bd) SHA1(2e3a195b49448da11cc0c089a8a9b462894c766b) ) \
+
+
+ROM_START( m4techno )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "dte13.bin", 0x0000, 0x010000, CRC(cf661d06) SHA1(316b2c42e7253a03b2c12b713821045d9f95a8a7) )
+	M4TECHNO_EXTRAS
+ROM_END
+
+ROM_START( m4technoa )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "dte13hack.bin", 0x0000, 0x010000, CRC(8b8eafe3) SHA1(93a7714eb4c749b7b19f4f844cf88da9443b0bb7) )
+	M4TECHNO_EXTRAS
+ROM_END
+
+
+
+
+
+
+
+
+ROM_START( m4toma )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "dtk23.bin", 0x0000, 0x010000, CRC(ffba2b96) SHA1(c7635023ac5181e661e808c6b44ac1add58f4f56) )
+ROM_END
+
+
+
+
+ROM_START( m4topdk )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "dtd26pj.bin", 0x0000, 0x010000, CRC(1f84d995) SHA1(7412632cf79008b980e48f14aea89c3f8d742ed2) )
+ROM_END
+
+
+ROM_START( m4toprn )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "toprun_v1_1.bin", 0xc000, 0x004000, CRC(9b924324) SHA1(7b155467f30cc22f7cda301ae770fb2a889c9c66) )
+	ROM_LOAD( "toprun_v1_2.bin", 0x8000, 0x004000, CRC(940fafa9) SHA1(2a8b669c51c8df50710bd8b552ab30a5d1a136ab) )
+ROM_END
+
+
+
+#define M4TOPTIM_EXTRAS \
+	ROM_REGION( 0x48, "fakechr", 0 ) \
+	ROM_LOAD( "ttimer.chr", 0x0000, 0x000048, CRC(f694224e) SHA1(936ab5e349fa59accbb37959cce9519fd97f3978) ) \
+	ROM_REGION( 0x080000, "msm6376", 0 ) \
+	ROM_LOAD( "toptimer-snd.bin", 0x0000, 0x080000, CRC(50450909) SHA1(181659b0594ba8d196b7130c5999c91676a363c0) ) \
+
+
+ROM_START( m4toptim )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "toptimer.bin", 0x0000, 0x010000, CRC(74804012) SHA1(0d9460ba6b1d359d358483c4e8bfd5518f364518) )
+	M4TOPTIM_EXTRAS
+ROM_END
+
+
+ROM_START( m4toptima )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "dtt2-1.bin", 0x0000, 0x010000, CRC(f9c84a34) SHA1(ad654442f580d6a49658f0e4e39bacbd9d0d0018) )
+	M4TOPTIM_EXTRAS
+ROM_END
+
+
+
+
+
+#define M4TROPCL_EXTRAS \
+	ROM_REGION( 0x48, "fakechr", 0 ) \
+	ROM_LOAD( "tro20.chr", 0x0000, 0x000048, CRC(97618d38) SHA1(7958e99684d50b9bdb56c97f7fcfe161f0824578) ) \
+
+
+ROM_START( m4tropcl )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "tros.p1", 0x0000, 0x010000, CRC(5e86c3fc) SHA1(ce2419991559839a8875060c1afe0f030190010a) )
+	M4TROPCL_EXTRAS
+ROM_END
+
+ROM_START( m4tropcla )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "tr2d.p1", 0x0000, 0x010000, CRC(0cc23f89) SHA1(a66c8c28073f53381c43e3e597f15f81c5c61479) )
+	M4TROPCL_EXTRAS
+ROM_END
+
+ROM_START( m4tropclb )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "tr2f.p1", 0x0000, 0x010000, CRC(fbdcd06f) SHA1(27ccdc83e60a62227d33d8cf3d516fc43908ab99) )
+	M4TROPCL_EXTRAS
+ROM_END
+
+ROM_START( m4tropclc )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "tr2s.p1", 0x0000, 0x010000, CRC(6d43375c) SHA1(5be1dc85374c6a1235e0b137b46ebd7a2d7d922a) )
+	M4TROPCL_EXTRAS
+ROM_END
+
+ROM_START( m4tropcld )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "trod.p1", 0x0000, 0x010000, CRC(60c84612) SHA1(84dc8b34e41436331832c1a32ddac0fce269488a) )
+	M4TROPCL_EXTRAS
+ROM_END
+
+
+#define M4TBPLAY_EXTRAS \
+	ROM_REGION( 0x48, "fakechr", 0 ) \
+	ROM_LOAD( "dtpchr.chr", 0x0000, 0x000048, CRC(7743df66) SHA1(69b1943837ccf8671861ac8ef690138b41de0e5b) ) \
+	ROM_REGION( 0x100000, "msm6376", 0 ) \
+	ROM_LOAD( "dtps10_1", 0x000000, 0x080000, CRC(d1d2c981) SHA1(6a4940248b0bc8df0a9de0d60e98cfebf1962504) ) \
+	ROM_LOAD( "dtps20_1", 0x080000, 0x080000, CRC(f77c4f39) SHA1(dc0e056f4d8c00824b3e672a02da64613bbf204e) ) \
+
+
+ROM_START( m4tbplay )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "dtp13", 0x0000, 0x010000, CRC(de424bc3) SHA1(c82dd56a0b3ccea78325cd90ed8e72ed68a1af77) )
+	M4TBPLAY_EXTRAS
+ROM_END
+
+ROM_START( m4tbplaya )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "rmtp4b", 0x0000, 0x010000, CRC(33a1764e) SHA1(7475f460dee015a2cd78fc3e0d1d14fd96fdbb9c) )
+	M4TBPLAY_EXTRAS
+ROM_END
+
+ROM_START( m4tbplayb )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "trmyid", 0x0000, 0x010000, CRC(e7af5944) SHA1(64559c97375a3536f7929d7f4d8d19c30527a3ec) )
+	M4TBPLAY_EXTRAS
+ROM_END
+
+
+
+
+
+
+
+
+
+
+
+
+
+ROM_START( m4twintm )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "d2t11.bin", 0x0000, 0x010000, CRC(6a76ac6f) SHA1(824912ff1fc3155d11d32b597be53481532fdf5e) )
+
+	ROM_REGION( 0x48, "fakechr", 0 )
+	ROM_LOAD( "m533.chr", 0x0000, 0x000048, CRC(b1d7e29b) SHA1(e8ef07f85780e24b5f406478de50287b740379d9) )
+
+	ROM_REGION( 0x080000, "msm6376", 0 )
+	ROM_LOAD( "sdun01.bin", 0x0000, 0x080000, CRC(50450909) SHA1(181659b0594ba8d196b7130c5999c91676a363c0) )
+ROM_END
+
+
+ROM_START( m4twist )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "twist_again_mk29-6", 0x8000, 0x008000, CRC(cb331bee) SHA1(a88099a3f35caf02925f1a3f548fbf65c11e3ec9) )
+ROM_END
+
+ROM_START( m4twista )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "twistagain-98-mkii.bin", 0x0000, 0x008000, CRC(1cbc7b58) SHA1(eda998a64272fe6796243c2db48ef988b9668c35) )
+ROM_END
+
+ROM_START( m4twistb )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "twistagain-mki-27.bin", 0x0000, 0x008000, CRC(357f7072) SHA1(8a23509fff79a83a819b27eff8de8db08c679e3f) )
+ROM_END
+
+
+
+
+ROM_START( m4univ )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "dun20", 0x0000, 0x010000, CRC(6a845d4d) SHA1(82bfc3f3a0ede76a4d482efc71b0390610db7acf) )
+
+	ROM_REGION( 0x48, "fakechr", 0 )
+	ROM_LOAD( "dunchr.chr", 0x0000, 0x000048, CRC(f694224e) SHA1(936ab5e349fa59accbb37959cce9519fd97f3978) )
+
+	ROM_REGION( 0x080000, "msm6376", 0 )
+	ROM_LOAD( "sdun01.bin", 0x0000, 0x080000, CRC(50450909) SHA1(181659b0594ba8d196b7130c5999c91676a363c0) )
+ROM_END
+
+
+
+
+ROM_START( m4vegastg )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "vs.p1", 0x0000, 0x020000, CRC(4099d572) SHA1(91a7c1575013e61c754b2c2cb841e7687b76d7f9) )
+
+	ROM_REGION( 0x200000, "msm6376", 0 )
+	ROM_LOAD( "vssound.bin", 0x0000, 0x16ee37, CRC(456da6be) SHA1(f0e293f0a383878b581326f869c2e49bec61d0c5) )
+ROM_END
+
+
+
+
+
+
+ROM_START( m4vivalvd )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "dlv11.bin", 0x0000, 0x010000, CRC(a890184c) SHA1(26d9952bf2eb4b55d21cdb934ffc73ff1a1cfbac) )
+
+	ROM_REGION( 0x080000, "msm6376", 0 )
+	ROM_LOAD( "vegssnd.bin", 0x0000, 0x080000, CRC(93fd4253) SHA1(69feda7ffc56defd515c9cd1ce204af3d9731a3f) )
+ROM_END
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ROM_START( m4wildtm )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "wildtimer.bin", 0x0000, 0x010000, CRC(5bd54924) SHA1(23fcf13c52ee7b9b39f30f999a9102171fffd642) )
+
+	ROM_REGION( 0x48, "fakechr", 0 )
+	ROM_LOAD( "charter.chr", 0x0000, 0x000048, CRC(4ff4eda2) SHA1(092435e34d79775910316a7bed0f90c4f086e5c4) )
+
+	ROM_REGION( 0x080000, "msm6376", 0 )
+	ROM_LOAD( "wildtimer-snd.bin", 0x0000, 0x080000, CRC(50450909) SHA1(181659b0594ba8d196b7130c5999c91676a363c0) )
+ROM_END
+
+
+
+ROM_START( m4ch30 )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "ch301s", 0x0000, 0x010000, CRC(d31c9081) SHA1(21d1f4cc3de2343d830e3ee02e3a53abd12b6b9d) )
+
+	ROM_REGION( 0x100000, "msm6376", ROMREGION_ERASE00 )
+	/* missing */
+ROM_END
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ROM_START( m4czne )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "czone 6.bin", 0x0000, 0x010000, CRC(e5b2b64e) SHA1(b73a2aed7b04184bc7c5c3d0a11d44e624a47428) )
+ROM_END
+
+ROM_START( m4fourmr )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "frmr5p26.bin", 0x8000, 0x008000, CRC(f0c5bd8a) SHA1(39026459008ed5b5bd3a10841799227fef70e5b5) )
+ROM_END
+
+ROM_START( m4holywd )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "hollywood 5p.bin", 0x0000, 0x010000, CRC(fb4ebb6e) SHA1(1ccfa81c173011ce70640097c85b532fd44f5a6e) )
+ROM_END
+
+
+
+
+
+
+#define M4LAZY_EXTRAS \
+	ROM_REGION( 0x180000, "msm6376", ROMREGION_ERASE00 ) \
+	/* missing? */ \
+
+
+ROM_START( m4lazy )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "lb_sj___.1_0", 0x0000, 0x020000, CRC(8628dcf1) SHA1(80cb9348e2704d0f72a44b4aa74b24fe03e279bc) )
+	M4LAZY_EXTRAS
+ROM_END
+
+ROM_START( m4lazya )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "lb_sj___.1_2", 0x0000, 0x020000, CRC(2b906f52) SHA1(802bcf6b3679e135308026752a55e55f00f21e85) )
+	M4LAZY_EXTRAS
+ROM_END
+
+ROM_START( m4lazyb )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "lb_sj_d_.1_2", 0x0000, 0x020000, CRC(a7691bad) SHA1(6cda3f3c18c13c04dbe0e4c1e4c817eedc34aa92) )
+	M4LAZY_EXTRAS
+ROM_END
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ROM_START( m4specu )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "speculator.bin", 0x8000, 0x008000, CRC(4035d20c) SHA1(4a534294c5c7332eacd09ca44f351d6a6850cc29) )
+ROM_END
+
+
+
+
+
+
+
+
+
+ROM_START( m4sunclb )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "sucxe__0.2", 0x0000, 0x010000, CRC(fd702a6f) SHA1(0f6d553fcb096ca4874bb971425dabfbe18db31d) )
+ROM_END
+
+ROM_START( m4sunclba )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "sucxed_0.2", 0x0000, 0x010000, CRC(70802bc3) SHA1(69b36f716cb608931f933cb58e47232b18064f9d) )
+ROM_END
+
+
+
+ROM_START( m4sunscl )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "sc_xe___.3_3", 0x0000, 0x010000, CRC(e3732cc6) SHA1(77f0368bb29ad00030f83af794a52df92fe97e5d) )
+ROM_END
+
+ROM_START( m4sunscla )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "sc_xe_d_.3_3", 0x0000, 0x010000, CRC(b8627c4a) SHA1(ad616d38773cbd82376b518aa15dc3d7027237c5) )
+ROM_END
+
+ROM_START( m4sunsclb )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "sc_xef__.3_3", 0x0000, 0x010000, CRC(8e7e1100) SHA1(7648ea860a546081388a213845e27312730f46d9) )
+ROM_END
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ROM_START( m4aao )
+	ROM_REGION( 0x010000, "maincpu", 0 )
+	ROM_LOAD( "aao2_8.bin", 0x0000, 0x010000, CRC(94ce4016) SHA1(2aecb6dbe798b7bbfb3d27f4d115b6611c7d990f) )
+
+	ROM_REGION( 0x080000, "msm6376", 0 )
+	ROM_LOAD( "aaosnd.bin", 0x0000, 0x080000, CRC(7bf30b96) SHA1(f0086ae239b1d973018a3ea04e816a87f8f20bad) )
+ROM_END
+
+
+
+ROM_START( m4bandgd )
+	ROM_REGION( 0x020000, "maincpu", 0 )
+	ROM_LOAD( "bog.bin", 0x0000, 0x020000, CRC(21186fb9) SHA1(3d536098c7541cbdf02d68a18a38cae71155d7ff) )
+
+	ROM_REGION( 0x080000, "msm6376", 0 )
+	ROM_LOAD( "bandsofgoldsnd.bin", 0x0000, 0x080000, CRC(95c6235f) SHA1(a13afa048b73fabfad229b5c2f8ef5ee9948d9fb) )
+ROM_END
+
+
+
+ROM_START( m4bigben )
+	ROM_REGION( 0x010000, "maincpu", 0 )
+	ROM_LOAD( "b_bv2_7.bin", 0x0000, 0x010000, CRC(9f3a7638) SHA1(b7169dc26a6e136d6daaf8d012f4c3d017e99e4a) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "big-bensnd1.bin", 0x000000, 0x080000, CRC(e41c3ec1) SHA1(a0c09f51229afcd14f09bb9080d4f3bb198b2050) )
+	ROM_LOAD( "big-bensnd2.bin", 0x080000, 0x080000, CRC(ed71dbe1) SHA1(e67ca3c178caacb99118bacfcd7612e699f40455) )
+ROM_END
+
+ROM_START( m4bigbena )
+	ROM_REGION( 0x010000, "maincpu", 0 )
+	ROM_LOAD( "b_bv2_9.bin", 0x0000, 0x010000, CRC(86a745ee) SHA1(2347e8e38c743ea4d00faee6a56bb77e05c9c94d) ) // aka bb2_9.bin
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "big-bensnd1.bin", 0x000000, 0x080000, CRC(e41c3ec1) SHA1(a0c09f51229afcd14f09bb9080d4f3bb198b2050) )
+	ROM_LOAD( "big-bensnd2.bin", 0x080000, 0x080000, CRC(ed71dbe1) SHA1(e67ca3c178caacb99118bacfcd7612e699f40455) )
+ROM_END
+
+ROM_START( m4bigbenb )
+	ROM_REGION( 0x010000, "maincpu", 0 )
+	ROM_LOAD( "bb1_9p.bin", 0x0000, 0x010000, CRC(c76c5a09) SHA1(b0e3b38998428f535841ab5373d57cb0d5b21ed3) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "big-bensnd1.bin", 0x000000, 0x080000, CRC(e41c3ec1) SHA1(a0c09f51229afcd14f09bb9080d4f3bb198b2050) )
+	ROM_LOAD( "big-bensnd2.bin", 0x080000, 0x080000, CRC(ed71dbe1) SHA1(e67ca3c178caacb99118bacfcd7612e699f40455) )
+ROM_END
+
+
+
+ROM_START( m4bigbend )
+	ROM_REGION( 0x010000, "maincpu", 0 )
+	ROM_LOAD( "bb_2_1.bin", 0x0000, 0x010000, CRC(d3511805) SHA1(c86756998d36e729874c71a5d6442785069c57e9) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "big-bensnd1.bin", 0x000000, 0x080000, CRC(e41c3ec1) SHA1(a0c09f51229afcd14f09bb9080d4f3bb198b2050) )
+	ROM_LOAD( "big-bensnd2.bin", 0x080000, 0x080000, CRC(ed71dbe1) SHA1(e67ca3c178caacb99118bacfcd7612e699f40455) )
+ROM_END
+
+ROM_START( m4bigbene )
+	ROM_REGION( 0x010000, "maincpu", 0 )
+	ROM_LOAD( "bbs_2_9p.bin", 0x0000, 0x010000, CRC(0107608d) SHA1(9e5def90e77f65c366aea2a9ac24d5f17c4d0ae8) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "big-bensnd1.bin", 0x000000, 0x080000, CRC(e41c3ec1) SHA1(a0c09f51229afcd14f09bb9080d4f3bb198b2050) )
+	ROM_LOAD( "big-bensnd2.bin", 0x080000, 0x080000, CRC(ed71dbe1) SHA1(e67ca3c178caacb99118bacfcd7612e699f40455) )
+ROM_END
+
+
+
+
+
+ROM_START( m4boltbl )
+	ROM_REGION( 0x010000, "maincpu", 0 )
+	ROM_LOAD( "bfb.bin", 0x8000, 0x008000, CRC(63058a6b) SHA1(ebccc647a937c36ffc6c7cfc01389f04f829999c) )
+ROM_END
+
+ROM_START( m4boltbla )
+	ROM_REGION( 0x010000, "maincpu", 0 )
+	ROM_LOAD( "bfb1.1.bin", 0x8000, 0x008000, CRC(7a91122d) SHA1(28229e86feb4411978e556f7f7bd85bfd996b8aa) )
+ROM_END
+
+ROM_START( m4boltblb )
+	ROM_REGION( 0x010000, "maincpu", 0 )
+	ROM_LOAD( "bfb9 5p cash.bin", 0x8000, 0x008000, CRC(792bff34) SHA1(6996e87f22df6bac7bbe9908534b7e0480f03ede) )
+ROM_END
+
+ROM_START( m4boltblc )
+	ROM_REGION( 0x010000, "maincpu", 0 )
+	ROM_LOAD( "bolt-gilwern.bin", 0x8000, 0x008000, CRC(74e2c821) SHA1(1dcdc58585d1dcfc93e2aeb3df0cd41705cde196) )
+ROM_END
+
+ROM_START( m4dblchn )
+	ROM_REGION( 0x010000, "maincpu", 0 )
+	ROM_LOAD( "doublechance.bin", 0x0000, 0x010000, CRC(6feeeb7d) SHA1(40fe67d854fbf48959e08fdb5743e14d340c16e7) )
+
+	ROM_REGION( 0x080000, "msm6376", 0 )
+	ROM_LOAD( "doublechancesnd.bin", 0x0000, 0x080000, CRC(3e80f8bd) SHA1(2e3a195b49448da11cc0c089a8a9b462894c766b) )
+ROM_END
+
+
+ROM_START( m4kqclub )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "kingsque.p1", 0x8000, 0x008000, CRC(6501e501) SHA1(e289a9418c640415967fafda43f20877b38e3671) )
+ROM_END
+
+ROM_START( m4snookr )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "snooker.ts2", 0x8000, 0x004000, CRC(a6906eb3) SHA1(43b91e88f909b758f880d83df4f889f15aa17eb3) )
+	ROM_LOAD( "snooker.ts1", 0xc000, 0x004000, CRC(3e3072dd) SHA1(9ea8b270044b48767a2e6c19e8ed257d5491c1d0) )
+ROM_END
+
+
+
+ROM_START( m4stakex )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "stakex.bin", 0x0000, 0x010000, CRC(098c7117) SHA1(27f04cfb88ef870fc30afd055cf32ffe448275ea) )
+
+	ROM_REGION( 0x080000, "msm6376", 0 )
+	ROM_LOAD( "stakexsnd.bin", 0x0000, 0x080000, CRC(baf17991) SHA1(282e0ac9d18299e9f7a0fecaf9edf0cb4205ef0e) )
+ROM_END
+
+ROM_START( m4stakexa )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "stakex2.bin", 0x0000, 0x010000, CRC(77ae3f63) SHA1(c5f1cfd5bffcf3156f584757de57ef6530214511) )
+
+	ROM_REGION( 0x080000, "msm6376", 0 )
+	ROM_LOAD( "stakexsnd.bin", 0x0000, 0x080000, CRC(baf17991) SHA1(282e0ac9d18299e9f7a0fecaf9edf0cb4205ef0e) )
+ROM_END
+
+
+ROM_START( m4stand2 )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "stand 2 del 8.bin", 0x08000, 0x08000, CRC(a9a5edc7) SHA1(035d3f3b3373cec475753f1b0de2f4db48d6d288) )
+ROM_END
+
+
+
+
+
+
+
+
+
+
+ROM_START( m4bigban )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "big04.p1", 0x0000, 0x020000, CRC(f7ead9c6) SHA1(46c10abb892cb6d427ad508aae96752c14b4cb83) )
+	ROM_REGION( 0x100000, "msm6376", ROMREGION_ERASE00 )
+	/* Missing? */
+ROM_END
+
+ROM_START( m4crzcsn )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "crz03.bin", 0x0000, 0x020000, CRC(48610c4f) SHA1(a62ac8b3ee704ee4e98f9d56bfc723d4cbb25b54) )
+	ROM_REGION( 0x100000, "msm6376", ROMREGION_ERASE00 )
+	/* Missing? */
+ROM_END
+
+ROM_START( m4crzcav )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "gcv05.p1", 0x0000, 0x020000, CRC(b9ba46f6) SHA1(78b745d85b36444c39747982987088a772b20a7e) )
+	ROM_REGION( 0x100000, "msm6376", ROMREGION_ERASE00 )
+	/* Missing? */
+ROM_END
+
+ROM_START( m4dragon )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "dgl01.p1", 0x0000, 0x020000, CRC(d7d39c9b) SHA1(5350c9db549edee30815516b1ce74a018390ff3d) )
+	ROM_REGION( 0x100000, "msm6376", ROMREGION_ERASE00 )
+	/* Missing? */
+ROM_END
+
+ROM_START( m4hilonv )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "hnc02.p1", 0x0000, 0x020000, CRC(33a8022b) SHA1(5168b8f32630aa2cb56f30c941695f1728e4fb7a) )
+	ROM_REGION( 0x100000, "msm6376", ROMREGION_ERASE00 )
+	/* Missing? */
+ROM_END
+
+ROM_START( m4octo )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "oct03.p1", 0x0000, 0x020000, CRC(8df66e94) SHA1(e1ab93982846d83becae36b5814ebbd515b9078e) )
+	ROM_REGION( 0x100000, "msm6376", ROMREGION_ERASE00 )
+	/* Missing? */
+ROM_END
+
+ROM_START( m4sctagt )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "gse3_0.p1", 0x0000, 0x010000, CRC(eff705ff) SHA1(6bf96872ef4bcc8f8041c5384d892f072c72be2b) )
+	ROM_REGION( 0x100000, "msm6376", ROMREGION_ERASE00 )
+	/* Missing? */
+ROM_END
+
+
+
+
+
+
+
+
+
+
+ROM_START( m4cld02 )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "cru0_2.bin", 0x0000, 0x010000, CRC(e3c01944) SHA1(33a2b2c05686f53811349b2980e590fdc4b72756) )
+	ROM_REGION( 0x080000, "msm6376", ROMREGION_ERASE00 )
+	/* missing */
+ROM_END
+
+ROM_START( m4barcrz )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "barcrazy.bin", 0x0000, 0x010000, CRC(917ad749) SHA1(cb0a3f6737b8f183d2efb0a3f8adbf86d40a38ff) )
+
+	ROM_REGION( 0x080000, "msm6376", 0 )
+	ROM_LOAD( "barcrazysnd.bin", 0x0000, 0x080000, CRC(0e155193) SHA1(7583e9f3e3624f82f2329565bdcbdaa5a5b03ee0) )
+ROM_END
+
+ROM_START( m4bonzbn )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "bingo-bonanza_v1.bin", 0x0000, 0x010000, CRC(3d137ddf) SHA1(1ce23db111448e44a166554dd8853dc379e787da) )
+
+	ROM_REGION( 0x100000, "msm6376", 0 )
+	ROM_LOAD( "bingo-bonanzasnd1.bin", 0x000000, 0x080000, CRC(e0eb2a92) SHA1(cbc0b3bba7857d87535d1c2a7459aed60709734a) )
+	ROM_LOAD( "bingo-bonanzasnd2.bin", 0x080000, 0x080000, CRC(7db27b28) SHA1(98c5fa4bf8c7f67fae90a1ca98b74057f5ed9b6b) )
+ROM_END
+
+ROM_START( m4dnj )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "d.n.j 1-02", 0x0000, 0x010000, CRC(5750843d) SHA1(b87923e84071ea4a1af7566a7f413f8e30e208e9) )
+ROM_END
+
+ROM_START( m4dnja )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "d.n.j 1-03", 0x0000, 0x010000, CRC(7b805255) SHA1(f62765bfa66e2422ac0a71ebaff27f1ccd470fe2) )
+ROM_END
+
+ROM_START( m4dnjb )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "d.n.j 1-06", 0x0000, 0x010000, CRC(aab770c7) SHA1(f24fff8346915017bc43fef9fac356a067676d86) )
+ROM_END
+
+
+ROM_START( m4matdr )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "matador.bin", 0x0000, 0x020000, CRC(367788a4) SHA1(3c9b077a64f993cb60107558efdfcbee0fe5c958) )
+
+	ROM_REGION( 0x100000, "msm6376", ROMREGION_ERASE00 )
+	/* missing */
+ROM_END
+
+
+
+ROM_START( m4hslo )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "hot30", 0x0000, 0x010000, CRC(62f2c420) SHA1(5ae89a1b585738255e8d9ae153c3c63b4a2893e4) )
+ROM_END
+
+#define M4SBX_EXTRAS \
+	ROM_REGION( 0x40000, "upd", 0 ) /* not oki at least... */ \
+	ROM_LOAD( "sbsnd", 0x0000, 0x040000, CRC(27fd9fe6) SHA1(856fdc95a833affde0ada7041c68a4b6b729b715) ) \
+
+
+ROM_START( m4sbx )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "sbx-2.1-cash.bin", 0x8000, 0x008000, CRC(2dca703e) SHA1(aef398f4ed38ba34f28009058c9486a570f64e0f) )
+	M4SBX_EXTRAS
+ROM_END
+
+ROM_START( m4sbxa )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "b_sbx23.bin", 0x8000, 0x008000, CRC(8188e94f) SHA1(dfbfc549d12c8f7c7db6c12ba766c28f1cf0873f) )
+	M4SBX_EXTRAS
+ROM_END
+
+ROM_START( m4sbxb )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "s bears v1-4 20p po.bin", 0x8000, 0x008000, CRC(03486714) SHA1(91c237956bbec58cc08a3e92543488d8e2daa673) )
+	M4SBX_EXTRAS
+ROM_END
+
+ROM_START( m4sbxc )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "s bears v2-4 10p 8.bin", 0x8000, 0x008000, CRC(9b94f8d0) SHA1(9808386def14c8a058730e90135a4d6506e6ed3d) )
+	M4SBX_EXTRAS
+ROM_END
+
+ROM_START( m4sbxd )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "s bears v2-4 20p po.bin", 0x8000, 0x008000, CRC(ad8f8d9d) SHA1(abd808f95b587a84e8b3aad1af9fe1cb613c9821) )
+	M4SBX_EXTRAS
+ROM_END
+
+ROM_START( m4sbxe )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "superbea.10p", 0x8000, 0x008000, CRC(70020466) SHA1(473c9feb9ce0024b870612af19ec8a47a7798506) )
+	M4SBX_EXTRAS
+ROM_END
+
+
+
+ROM_START( m4bclimb )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "bc8pv4.bin", 0x8000, 0x008000, CRC(229a7607) SHA1(b20b2c9f9d19ccd6146affdf519fa4bc0322c971) )
+
+	ROM_REGION( 0x40000, "upd", 0 ) // not oki at least...
+	ROM_LOAD( "sbsnd", 0x0000, 0x040000, CRC(27fd9fe6) SHA1(856fdc95a833affde0ada7041c68a4b6b729b715) )
+ROM_END
+
+ROM_START( m4captb )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "c_bear21.rom", 0x8000, 0x008000, CRC(2e9a42e9) SHA1(0c3f33311f1543daf2ff5c0443dc8c000d49c26d) )
+
+	ROM_REGION( 0x40000, "upd", ROMREGION_ERASE00 ) // not oki at least...
+//  ROM_LOAD( "sbsnd", 0x0000, 0x040000, CRC(27fd9fe6) SHA1(856fdc95a833affde0ada7041c68a4b6b729b715) )
+ROM_END
+
+#define M4JUNGJ_EXTRAS \
+	ROM_REGION( 0x40000, "upd", ROMREGION_ERASE00 ) \
+	/* missing? */ \
+
+ROM_START( m4jungj )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "jj2410p.bin", 0x8000, 0x008000, CRC(490838c6) SHA1(a1e9963df9a429ae594592312e977f22f96c6073) )
+	M4JUNGJ_EXTRAS
+ROM_END
+
+ROM_START( m4jungja )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "jj2420p.bin", 0x8000, 0x008000, CRC(39329ccf) SHA1(6b79e4fc553bad935ec9989ad5ef3e186e720633) )
+	M4JUNGJ_EXTRAS
+ROM_END
+
+ROM_START( m4jungjb )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "jjv2_4p.bin", 0x8000, 0x008000, CRC(125a8138) SHA1(18c62df5b331bd09d6dcda6280351e94b7b816fd) )
+	M4JUNGJ_EXTRAS
+ROM_END
+
+ROM_START( m4jungjc )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "jjv4.bin", 0x8000, 0x008000, CRC(bf583156) SHA1(084c5ed3d96c92f265ad08cc7aed7fe6092217a5) )
+	M4JUNGJ_EXTRAS
+ROM_END
+
+
+#define M4FSX_EXTRAS \
+	ROM_REGION( 0x40000, "upd", ROMREGION_ERASE00 ) \
+	/* missing? */ \
+
+
+ROM_START( m4fsx )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD("funspotx.10p", 0x8000, 0x008000, CRC(55199f36) SHA1(7af376781e381582b06972725a2022cc28ba60b3) )
+	M4FSX_EXTRAS
+ROM_END
+
+ROM_START( m4fsxa )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "funspotx.20p", 0x8000, 0x008000, CRC(08d1eb6e) SHA1(7c7c02d9c34696d75490df8596ffe64fba93dcc4) )
+	M4FSX_EXTRAS
+ROM_END
+
+ROM_START( m4fsxb )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "b_fsv1.bin", 0x8000, 0x008000, CRC(b077f944) SHA1(97d96594b8d2d7232bad087cc55912dec02d7484) )
+	M4FSX_EXTRAS
+ROM_END
+
+#define M4CCOP_EXTRAS \
+	ROM_REGION( 0x100000, "alt1msm6376", ROMREGION_ERASE00 ) \
+	ROM_LOAD( "cash-copssnd1-de.bin", 0x000000, 0x080000, CRC(cd03f7f7) SHA1(4c09a86bcdf9a9eb224b19b932b75c9db3784fad) ) \
+	ROM_LOAD( "cash-copssnd2-de.bin", 0x080000, 0x080000, CRC(107816a2) SHA1(f5d4a0390b85a665a3536da4689ec91b1a2da3ae) ) \
+	ROM_REGION( 0x100000, "alt2msm6376", ROMREGION_ERASE00 ) \
+	ROM_LOAD( "cash-copssnd1.bin", 0x000000, 0x080000, CRC(776a303d) SHA1(a5a282674674f25bc6ca169eeebee7309239871f) ) \
+	ROM_LOAD( "cash-copssnd2.bin", 0x080000, 0x080000, CRC(107816a2) SHA1(f5d4a0390b85a665a3536da4689ec91b1a2da3ae) ) \
+	ROM_REGION( 0x100000, "msm6376", ROMREGION_ERASE00 ) \
+	ROM_LOAD( "cashcops.p1", 0x000000, 0x080000, CRC(9a59a3a1) SHA1(72cfc99b22ec5fb89714c6d2d66760d86dc19f2f) ) \
+	ROM_LOAD( "cashcops.p2", 0x080000, 0x080000, CRC(deb3e755) SHA1(01f92881c451919be549a1c58afa1fa4630bf171) ) \
+
+
+ROM_START( m4ccop )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "cashcop9.bin", 0x0000, 0x010000, CRC(5f993207) SHA1(ab0614e6a1355d275158b1a32f65086e40c2f890) )
+	M4CCOP_EXTRAS
+ROM_END
+
+ROM_START( m4ccopa )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "cash-cops_v4-de.bin", 0x0000, 0x010000, CRC(df3da824) SHA1(c275a33e4a89f1b9ecbae80cb7b62007b29b9fd2) )
+	M4CCOP_EXTRAS
+ROM_END
+
+ROM_START( m4ccopb )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "cashcop8.bin", 0x0000, 0x010000, CRC(165603df) SHA1(d301696a340ed136a43c5753c8bf73283a925fd7) )
+	M4CCOP_EXTRAS
+ROM_END
+
+ROM_START( m4ccc )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "ccc12.bin", 0x8000, 0x008000, CRC(570cc766) SHA1(036c95ff6428ab38cceb0537dcc990be78fb331a) )
+
+	ROM_REGION( 0x100000, "msm6376", ROMREGION_ERASE00 )
+	ROM_LOAD( "criss cross crazy sound (27c2001)", 0x0000, 0x040000, CRC(1994c509) SHA1(2bbe91a43aa9953b7776faf67e81e30a4f7b7cb2) )
+ROM_END
+
+
+ROM_START( m4treel )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "trgv1.1s", 0x0000, 0x010000, CRC(a9c76b08) SHA1(a5b3bc980eb58e346cb02d8ca43401f304e5b6de) )
+	ROM_REGION( 0x100000, "msm6376", ROMREGION_ERASE00 )
+ROM_END
+
+ROM_START( m4treela )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "trgv1.1b", 0x0000, 0x020000, CRC(7eaebef6) SHA1(5ab86329041e7df09cc2e3ce8d5afd44d88c246c) )
+	ROM_REGION( 0x100000, "msm6376", ROMREGION_ERASE00 )
+ROM_END
+
+
+
+ROM_START( m4unkjok )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "joker 10p 3.bin", 0x0000, 0x010000, CRC(009823ac) SHA1(5ab25da5876c87a8d8701f84446bb3d377e4c1ca) )
+ROM_END
+
+ROM_START( m4unkjoka )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "joker 10p 6.bin", 0x0000, 0x010000, CRC(f25f0704) SHA1(35298b49f79c5029277f4777fe88d5e4344c115f) )
+ROM_END
+
+ROM_START( m4unkjokb )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "joker 20p 3 or 6.bin", 0x0000, 0x010000, CRC(cae4397e) SHA1(53b61fd41c97a6ed29ce6a7b555e061ecf2b0ae2) )
+ROM_END
+
+ROM_START( m4unkjokc )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "joker new 20p 6 or 3.bin", 0x0000, 0x010000, CRC(b8d77b97) SHA1(54f69823bb3fd9c2cca014dc7c51913b2d6c8058) )
+ROM_END
+
+ROM_START( m4remag )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "remagv2", 0x0000, 0x010000, CRC(80d9c1c2) SHA1(c77d443d92084c324ef75575acca66ffbd9beef3) )
+ROM_END
+
+ROM_START( m4rmg )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "rmgicdd", 0x0000, 0x010000, CRC(bd64be0d) SHA1(772b80619c7d514a7a253f35137896d6a73bf4c6) )
+ROM_END
+
+ROM_START( m4wnud )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "wnudge.bin", 0x8000, 0x008000, CRC(1d935575) SHA1(c4177c41473c0fb511e0ee035961f55ad43be14d) )
+ROM_END
+
+ROM_START( m4t266 )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "t2 66.bin", 0x0000, 0x010000, CRC(5c99c6bb) SHA1(7b74e0e5207c00b31cb1859e0cc458c0412a1a07) )
+ROM_END
+
+ROM_START( m4brnze )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "bv25", 0x0000, 0x010000, CRC(5c66f460) SHA1(c7587a6e992549ad8814f77c65b33a17a3641431) )
+	ROM_REGION( 0x100000, "msm6376", ROMREGION_ERASE00 )
+ROM_END
+
+ROM_START( m4brnzea )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "bv25v2", 0x0000, 0x010000, CRC(a675edb3) SHA1(a3c6ee6a0bfb301fed72b45ee8e363d77b8b8dbb) )
+	ROM_REGION( 0x100000, "msm6376", ROMREGION_ERASE00 )
+ROM_END
+
+ROM_START( m4brnzeb )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "bv55", 0x0000, 0x010000, CRC(93905bc9) SHA1(e8d3cd125dced43fc2cf23cbccc59110561d2a40) )
+	ROM_REGION( 0x100000, "msm6376", ROMREGION_ERASE00 )
+ROM_END
+
+ROM_START( m4riotrp )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "drt10.bin", 0x0000, 0x010000, CRC(a1badb8a) SHA1(871786ea4e65ecbf61c9a776100321253922d11e) )
+
+	ROM_REGION( 0x100000, "msm6376", ROMREGION_ERASE00 )
+	ROM_LOAD( "dblcsnd.bin", 0x0000, 0x080000, CRC(c90fa8ad) SHA1(a98f03d4b6f5892333279bff7537d4d6d887da62) )
+ROM_END
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#define M4SURF_EXTRAS \
+	ROM_REGION( 0x200000, "msm6376", 0 ) \
+	ROM_LOAD( "s_surf.sn1", 0x000000, 0x080000, CRC(f20a7d69) SHA1(7887230613b497dc71a60125dd1e265ebbc8eb23) ) \
+	ROM_LOAD( "s_surf.sn2", 0x080000, 0x080000, CRC(6c4a9074) SHA1(3b993120156677de893e5dc1e0c5d6e0285c5570) ) \
+
+
+ROM_START( m4surf )
+	ROM_REGION( 0x80000, "maincpu", 0 )
+	ROM_LOAD( "s_surfin._pound5", 0x0000, 0x020000, CRC(5f800636) SHA1(5b1789890eea44e5275e13f360876374d862935f) )
+	M4SURF_EXTRAS
+ROM_END
+
+ROM_START( m4surfa )
+	ROM_REGION( 0x80000, "maincpu", 0 )
+	ROM_LOAD( "s_surfin.upd", 0x0000, 0x020000, CRC(d0bef9cd) SHA1(9d53bfe8d928b190202bf747c0d7bb4cc0ae0efd) )
+	M4SURF_EXTRAS
+ROM_END
+
+ROM_START( m4surfb )
+	ROM_REGION( 0x80000, "maincpu", 0 )
+	ROM_LOAD( "s_surfin._pound15", 0x0000, 0x020000, CRC(eabce7fd) SHA1(4bb2bbcc7d2917eca72385a21ab85d2d94a882ec) )
+	M4SURF_EXTRAS
+ROM_END
+
+
+ROM_START( m4wife )
+	ROM_REGION( 0x80000, "maincpu", 0 )
+	ROM_LOAD( "moy_wife.p1", 0x0000, 0x020000, CRC(293d35a6) SHA1(980a28ca5e9ec3ca2e1a5b34f658b622dca4cf50) )
+
+	ROM_REGION( 0x200000, "msm6376", ROMREGION_ERASE00 )
+	// missing?
+ROM_END
+
+#define M4BLKGD_EXTRAS \
+	ROM_REGION( 0x200000, "msm6376", 0 ) \
+	ROM_LOAD( "blackgoldsnd1.bin", 0x000000, 0x080000, CRC(d251b59e) SHA1(960b81b87f0fb5000028c863892a273362cb897f) ) \
+	ROM_LOAD( "blackgoldsnd2.bin", 0x080000, 0x080000, CRC(87cbcd1e) SHA1(a6cd186af7c5682e216f549b77735b9bf1b985ae) ) \
+	ROM_LOAD( "blackgoldsnd3.bin", 0x100000, 0x080000, CRC(258f7b83) SHA1(a6df577d98ade8c5c5ff68ef891667e65e83ac17) ) \
+
+ROM_START( m4blkgd )
+	ROM_REGION( 0x80000, "maincpu", 0 )
+	ROM_LOAD( "blackgoldprg.bin", 0x0000, 0x080000, CRC(a04736b2) SHA1(9e060cc79e7922b38115f1412ed76f8c76deb917) )
+	M4BLKGD_EXTRAS
+ROM_END
+
+ROM_START( m4blkgda )
+	ROM_REGION( 0x80000, "maincpu", 0 )
+	ROM_LOAD( "blackgoldversion2.4.bin", 0x0000, 0x040000, CRC(fad4e360) SHA1(23c6a13e8d1ca307b0ef22edffed536675985aca) )
+	M4BLKGD_EXTRAS
+ROM_END
+
+#define M4ZILL_EXTRAS \
+	ROM_REGION( 0x200000, "msm6376", 0 ) \
+	ROM_LOAD( "zillsnd.bin", 0x0000, 0x080000, CRC(171ed677) SHA1(25d63f4d9c64f13bec4feffa265c5b0c5f6be4ec) ) \
+
+
+ROM_START( m4zill )
+	ROM_REGION( 0x80000, "maincpu", 0 )
+	ROM_LOAD( "zillprgh.bin", 0x0000, 0x080000, CRC(6f831f6d) SHA1(6ab6d7f1752d27bc216bc11533b90178ce188715) )
+	M4ZILL_EXTRAS
+ROM_END
+
+ROM_START( m4zilla )
+	ROM_REGION( 0x80000, "maincpu", 0 )
+	ROM_LOAD( "zillprog.bin", 0x0000, 0x080000, CRC(0f730bab) SHA1(3ea82c8f7d62c70897a5c132273820c9f192cd72) )
+	M4ZILL_EXTRAS
+ROM_END
+
+
+#define M4HSTR_EXTRAS \
+	ROM_REGION( 0x200000, "altmsm6376", 0 ) \
+	ROM_LOAD( "happystreak.p1", 0x0000, 0x080000, CRC(b1f328ff) SHA1(2bc6605965cb5743a2f8b813d68cf1646a4bcac1) ) \
+	ROM_REGION( 0x200000, "msm6376", 0 ) \
+	ROM_LOAD( "happystreaksnd.p1", 0x0000, 0x080000, CRC(76cda195) SHA1(21a985cd6cf1f63f4aa799563099a0527a7c0ea2) ) \
+	ROM_LOAD( "happystreaksnd.p2", 0x080000, 0x080000, CRC(f3b4c763) SHA1(7fd6230c13b66a16daad9d45935c7803a5a4c35c) ) \
+
+
+ROM_START( m4hstr )
+	ROM_REGION( 0x80000, "maincpu", 0 )
+	ROM_LOAD( "h_s_v1_2.bin", 0x0000, 0x010000, CRC(ef3d3461) SHA1(aa5b1934ab1c6739f36ac7b55d3fda2c640fe4f4) )
+	M4HSTR_EXTRAS
+ROM_END
+
+ROM_START( m4hstra )
+	ROM_REGION( 0x80000, "maincpu", 0 )
+	ROM_LOAD( "hs2_5.bin", 0x0000, 0x010000, CRC(f669a4c9) SHA1(46813ba7104c97eaa851b50019af9b80046d03b3) )
+	M4HSTR_EXTRAS
+ROM_END
+
+ROM_START( m4hstrb )
+	ROM_REGION( 0x80000, "maincpu", 0 )
+	ROM_LOAD( "hs2_5p.bin", 0x0000, 0x010000, CRC(71c981aa) SHA1(5effe7487e7216078127d3dc4a0a7ad02ad84390) )
+	M4HSTR_EXTRAS
+ROM_END
+
+
+ROM_START( m4hstrcs )
+	ROM_REGION( 0x80000, "maincpu", 0 )
+	ROM_LOAD( "chs3_6.bin", 0x0000, 0x010000, CRC(d097ae0c) SHA1(bd78c14e7f057f173859bcb1db5e6a142d0c4062) )
+	M4HSTR_EXTRAS
+ROM_END
+
+ROM_START( m4hstrcsa )
+	ROM_REGION( 0x80000, "maincpu", 0 )
+	ROM_LOAD( "chs3_6p.bin", 0x0000, 0x010000, CRC(57378b6f) SHA1(cf1cf528b9790c1013d87ccf63dcbf59f365067f) )
+	M4HSTR_EXTRAS
+ROM_END
+
+ROM_START( m4hstrcsb )
+	ROM_REGION( 0x80000, "maincpu", 0 )
+	ROM_LOAD( "chs3_6pk.bin", 0x0000, 0x010000, CRC(f95f1afe) SHA1(fffa409e8c7148a840d5dedf490fd9f6975e9476) )
+	M4HSTR_EXTRAS
+ROM_END
+
+ROM_START( m4hstrcsc )
+	ROM_REGION( 0x80000, "maincpu", 0 )
+	ROM_LOAD( "chs3_6k.bin", 0x0000, 0x010000, CRC(7eff3f9d) SHA1(31dedb0d9476633e8eb947a687c7b8a94b0e182c) )
+	M4HSTR_EXTRAS
+ROM_END
+
+ROM_START( m4hstrcsd )
+	ROM_REGION( 0x80000, "maincpu", 0 )
+	ROM_LOAD( "chs_4_2.bin", 0x0000, 0x010000, CRC(ec148b65) SHA1(2d6252ce68719281f5597955227a1f662743f006) )
+	M4HSTR_EXTRAS
+ROM_END
+
+
+#define M4DDB_EXTRAS \
+	ROM_REGION( 0x200000, "msm6376", 0 ) \
+	ROM_LOAD( "ddbsound1", 0x000000, 0x080000, CRC(47c87bd5) SHA1(c1578ae553c38e93235cea2142cb139170de2a7e) ) \
+	ROM_LOAD( "ddbsound2", 0x080000, 0x080000, CRC(9c733ab1) SHA1(a83c3ebe99703bb016370a8caf76bdeaff5f2f40) ) \
+
+ROM_START( m4ddb )
+	ROM_REGION( 0x80000, "maincpu", 0 )
+	ROM_LOAD( "ddb3_1.bin", 0x0000, 0x010000, CRC(3b2da727) SHA1(8a677be3b82464d1bf1e97d22adad3b27374079f) )
+	M4DDB_EXTRAS
+ROM_END
+
+ROM_START( m4ddba )
+	ROM_REGION( 0x80000, "maincpu", 0 )
+	ROM_LOAD( "ddb3_1p.bin", 0x0000, 0x010000, CRC(bc8d8244) SHA1(9b8e0706b3add42e5e4a8b6c6a2f80a333a2f49e) )
+	M4DDB_EXTRAS
+ROM_END
+
+
+ROM_START( m4hapfrt )
+	ROM_REGION( 0x80000, "maincpu", 0 )
+	ROM_LOAD( "hf1_1.bin", 0x0000, 0x010000, CRC(6c16cb05) SHA1(421b164c8410629956177355e505859757c97a6b) )
+	ROM_REGION( 0x200000, "msm6376", ROMREGION_ERASE00 )
+ROM_END
+
+ROM_START( m4hapfrta )
+	ROM_REGION( 0x80000, "maincpu", 0 )
+	ROM_LOAD( "hf1_1p.bin", 0x0000, 0x010000, CRC(ebb6ee66) SHA1(1f9b67260e5becd013d95358cc89acb1099d655d) )
+	ROM_REGION( 0x200000, "msm6376", ROMREGION_ERASE00 )
+ROM_END
+
+ROM_START( m4hapfrtb )
+	ROM_REGION( 0x80000, "maincpu", 0 )
+	ROM_LOAD( "hf1_4pk.bin", 0x0000, 0x010000, CRC(0944b3c6) SHA1(00cdb75dda4f8984f77806047ad79fe9a1a8760a) )
+	ROM_REGION( 0x200000, "msm6376", ROMREGION_ERASE00 )
+ROM_END
+
+
+
+
+
+
+
+
+ROM_START( m4sunday )
+	ROM_REGION( 0x80000, "maincpu", 0 )
+	ROM_LOAD( "sunday_sport_v11", 0x0000, 0x010000, CRC(14147d59) SHA1(03b14f4f83a545b3252702267ac012b3be76013d) )
+	ROM_REGION( 0x200000, "msm6376", ROMREGION_ERASE00 )
+ROM_END
+
+ROM_START( m4jp777 )
+	ROM_REGION( 0x80000, "maincpu", 0 )
+	ROM_LOAD( "jpot71", 0x0000, 0x010000, CRC(f4564a05) SHA1(97d21e2268e5d99e6e51cb12c45e09445cff1f50) )
+	ROM_REGION( 0x200000, "msm6376", ROMREGION_ERASE00 )
+ROM_END
+
+ROM_START( m4booze )
+	ROM_REGION( 0x80000, "maincpu", 0 )
+	ROM_LOAD( "boozecruise10_v10.bin", 0x0000, 0x010000, CRC(b37f752b) SHA1(166f7d17694689bd9d51d859c13ddafa1c6e5e7f) )
+	ROM_REGION( 0x200000, "msm6376", ROMREGION_ERASE00 )
+ROM_END
+
+ROM_START( m4cbing )
+	ROM_REGION( 0x80000, "maincpu", 0 )
+	ROM_LOAD( "cherrybingoprg.bin", 0x0000, 0x010000, CRC(00c1d4f3) SHA1(626df7f2f597ed13c32ce0fa8846f2e27ca68eae) )
+	ROM_REGION( 0x200000, "msm6376", ROMREGION_ERASE00 ) // not oki!
+	ROM_LOAD( "cherrybingosnd.p1", 0x000000, 0x100000, CRC(11bed9f9) SHA1(63ed45122dda8e412bb1eaeb967d8a0f925d4bde) )
+	ROM_LOAD( "cherrybingosnd.p2", 0x100000, 0x100000, CRC(b2a7ec28) SHA1(307f19ffb46f4a2e8e93923ddb666e50de43a00e) )
+ROM_END
+
+
+
+ROM_START( m4nod )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "nod.bin", 0x0000, 0x010000, CRC(bc738af5) SHA1(8df436139554ccfb48c4db0a32e3333dbf3c4f46) )
+	ROM_REGION( 0x200000, "upd", ROMREGION_ERASE00 )
+	ROM_LOAD( "nodsnd.bin", 0x0000, 0x080000, CRC(2134494a) SHA1(3b665bf79567a71195b20e76c50b02707d15b78d) )
+ROM_END
+
+
+
+
+
+ROM_START( m4aliz )
 	ROM_REGION( 0x40000, "maincpu", 0 )
-	ROM_LOAD("bbprog.bin",  0x00000, 0x20000,  CRC(c262cfda) SHA1(f004895e0dd3f8420683927915554e19e41bd20b))
+	ROM_LOAD( "70000000.bin", 0x0000, 0x040000, CRC(56f64dd9) SHA1(11f990c9a6864a969dc9a4146e1ac2c963e3eb9b) )
 
-	ROM_REGION( 0x200000, "msm6376", 0 )
-	ROM_LOAD( "bbsnd.p1",  0x000000, 0x080000,  CRC(715c9e95) SHA1(6a0c9c63e56cfc21bf77cf29c1b844b8e0844c1e) )
-	ROM_LOAD( "bbsnd.p2",  0x080000, 0x080000,  CRC(594a87f8) SHA1(edfef7d08fab41fb5814c92930f08a565371eae1) )
+	ROM_REGION( 0x200000, "msm6376", ROMREGION_ERASE00 )
+	ROM_LOAD( "alizsnd.hi", 0x0000, 0x080000, CRC(c7bd937a) SHA1(cc4d85a3d4cdf57fa96c812a4cd78b599c7052ff) )
+	ROM_LOAD( "alizsnd.lo", 0x080000, 0x04e15e, CRC(111cc111) SHA1(413efedbc9e85240df833c10d680b0e907da10b3) )
+
+	ROM_REGION( 0x200000, "misc", ROMREGION_ERASE00 ) // i think this is just the sound roms as intelhex
+	ROM_LOAD( "71000000.hi", 0x0000, 0x0bbe9c, CRC(867058c1) SHA1(bd980cb0bb3075854cc2e9b829c31f3742f4f1c2) )
+	ROM_LOAD( "71000000.lo", 0x0000, 0x134084, CRC(53046751) SHA1(b8f9eca933315b497732c895f4311f62103344fc) )
 ROM_END
 
-//    year,  name,    parent,  machine,  input,   init,     monitor,company,        fullname,                     flags
-GAME( 198?,  m_oldtmr,0,      mpu4dutch,mpu4,	  m_oldtmr, ROT0,   "Barcrest",		"Old Timer",				  GAME_NOT_WORKING|GAME_NO_SOUND|GAME_REQUIRES_ARTWORK )
-GAME( 198?,  m_ccelbr,0,      mpu4mod2, mpu4,	  m_ccelbr, ROT0,   "Barcrest",		"Club Celebration",			  GAME_NOT_WORKING|GAME_REQUIRES_ARTWORK )
-GAMEL(198?,  m_gmball,0,      mod4yam,  gamball,  m_gmball, ROT0,   "Barcrest",     "Gamball",					  GAME_NOT_WORKING|GAME_REQUIRES_ARTWORK|GAME_MECHANICAL,layout_gamball )//Mechanical ball launcher
-GAMEL(198?,  m_grtecp,0,      mod4oki,  mpu4,	  m_grtecp, ROT0,   "Barcrest",		"Andy's Great Escape",		  GAME_NOT_WORKING|GAME_REQUIRES_ARTWORK,layout_mpu4ext )//5 reel meter mux
-GAME(199?,   m_blsbys,0,	  bwboki,   mpu4,	  m_blsbys, ROT0,   "Barcrest",		"Blues Boys (Version 6)",	  GAME_NOT_WORKING|GAME_REQUIRES_ARTWORK )
 
-//SWP
-GAMEL(1989?,connect4,        0, mpu4mod2,   connect4,   connect4,   ROT0, "Dolbeck Systems","Connect 4",GAME_IMPERFECT_GRAPHICS|GAME_REQUIRES_ARTWORK,layout_connect4 )
 
-//Diagnostic ROMs
-GAME( 198?, mpu4utst,        0, mpu4mod2,   mpu4,       mpu4utst,   ROT0, "Barcrest","MPU4 Unit Test (Program 4)",GAME_MECHANICAL )
-GAME( 198?, mpu4tst2,        0, mpu4mod2,   mpu4,       mpu4tst2,   ROT0, "Barcrest","MPU4 Unit Test (Program 2)",GAME_MECHANICAL )
-GAME( 198?, mpu4met0,        0, mpu4mod2,   mpu4,       0,          ROT0, "Barcrest","MPU4 Meter Clear ROM",GAME_MECHANICAL )
 
-#include "drivers/mpu4drvr.c"
+ROM_START( m4c2 )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "ci2-0601.bin", 0x0000, 0x010000, CRC(84cc8aca) SHA1(1471e3ad9c9ba957b6cc99c204fe588cc55fbc50) )
+	ROM_REGION( 0x200000, "msm6376", ROMREGION_ERASE00 )
+ROM_END
+
+
+ROM_START( m4coney )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "70000060.bin", 0x0000, 0x010000, CRC(fda208e4) SHA1(b1a243b2681faa03add4ab6e4df98814f9c52fc5) )
+	ROM_REGION( 0x200000, "msm6376", ROMREGION_ERASE00 )
+ROM_END
+
+
+
+
+
+ROM_START( m4goldnn )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "goldenyears10.bin", 0x0000, 0x020000, CRC(1074bac6) SHA1(967ee64f267a80017fc95bbc6c5a38354e9cab65) )
+
+	ROM_REGION( 0x200000, "msm6376", ROMREGION_ERASE00 )
+	ROM_LOAD( "tgyosnd.p1", 0x000000, 0x080000, CRC(bda49b46) SHA1(fac143003641824bf0db4ac6841292e509fa00da) )
+	ROM_LOAD( "tgyosnd.p2", 0x080000, 0x080000, CRC(43d28a0a) SHA1(5863e493e84641e4fabcd69e6402e3bcca87dde2) )
+	ROM_LOAD( "tgyosnd.p3", 0x100000, 0x080000, CRC(b5b9eb68) SHA1(8d5a0a687dd7096da8dfd2a59c6fe96f4b1949f9) )
+ROM_END
+
+
+
+
+
+
+ROM_START( m4mgpn )
+	ROM_REGION( 0x40000, "maincpu", 0 )
+	ROM_LOAD( "mgp15.p1", 0x0000, 0x010000, CRC(ec76233f) SHA1(aa8595c639c83026d7fe5c3a161f8b08ff9a8b46) )
+
+	ROM_REGION( 0x200000, "msm6376", ROMREGION_ERASE00 )
+	ROM_LOAD( "mgpsnd.p1", 0x000000, 0x080000, CRC(d5f0b845) SHA1(6d97d0d4d07407bb0a51e1d62da95c664418a9e9) )
+	ROM_LOAD( "mgpsnd.p2", 0x080000, 0x080000, CRC(cefeea06) SHA1(45142ca1bab898dc6f3c32e382ee9157132810a6) )
+	ROM_LOAD( "mgpsnd.p3", 0x100000, 0x080000, CRC(be4b3bd0) SHA1(f14c08dc770a24db8bbd00a65d3edf6ee9895ca3) )
+	ROM_LOAD( "mgpsnd.p4", 0x180000, 0x080000, CRC(d74b4b03) SHA1(a35c99040a72485a6c2d4a4fdfc203634f6a9ad0) )
+ROM_END
+
+
+
+
+
+
+
+
+ROM_START( m4spotln )
+	ROM_REGION( 0x20000, "maincpu", 0 )
+	ROM_LOAD( "gsp01.p1", 0x0000, 0x020000, CRC(54c56a07) SHA1(27f21872a7ffe0c497983fa5bbb59e967bf48974) )
+	ROM_REGION( 0x200000, "msm6376", ROMREGION_ERASE00 )
+ROM_END
+
+
+
+
+
+
+ROM_START( m4vivan )
+	ROM_REGION( 0x40000, "maincpu", 0 )
+	ROM_LOAD( "vlv.bin", 0x0000, 0x010000, CRC(f20c4858) SHA1(94bf19cfa79a1f5347ab61a80cbbce06942187a2) )
+
+	ROM_REGION( 0x200000, "msm6376", ROMREGION_ERASE00 )
+	ROM_LOAD( "vlvsound1.bin", 0x0000, 0x080000, CRC(ce4da47a) SHA1(7407f8053ee482db4d8d0732fdd7229aa531b405) )
+	ROM_LOAD( "vlvsound2.bin", 0x0000, 0x080000, CRC(571c00d1) SHA1(5e7be40d3caae88dc3a580415f8ab796f6efd67f) )
+ROM_END
+
+
+
+
+
+
+
+ROM_START( m4sunseta )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "b2512s.p1", 0x0000, 0x010000, CRC(8c509538) SHA1(eab6a1e44e77cb48cf490616facc74932acc93c5) )
+	ROM_REGION( 0x48, "fakechr", 0 )
+	ROM_LOAD( "sunsetb.chr", 0x0000, 0x000048, CRC(f166963b) SHA1(5cc6ada61036d8dbeca470e9548f9f5d2bd545a8) )
+	ROM_REGION( 0x100000, "msm6376", ROMREGION_ERASE00 )
+ROM_END
+
+ROM_START( m4sunsetb )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "b2512y.p1", 0x0000, 0x010000, CRC(65fa2cd9) SHA1(d2ab1ae25d5425a0788f86535a20d3ebe4a9db2b) )
+	ROM_REGION( 0x48, "fakechr", 0 )
+	ROM_LOAD( "sunsetb.chr", 0x0000, 0x000048, CRC(f166963b) SHA1(5cc6ada61036d8dbeca470e9548f9f5d2bd545a8) )
+	ROM_REGION( 0x100000, "msm6376", ROMREGION_ERASE00 )
+ROM_END
+
+ROM_START( m4sunsetc )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "sunboul-5p3.bin", 0x0000, 0x010000, CRC(5ccbf062) SHA1(cf587018511d1a06624d271f2fde4e40f16ec87c) )
+	ROM_REGION( 0x48, "fakechr", 0 )
+	ROM_LOAD( "sunsetb.chr", 0x0000, 0x000048, CRC(f166963b) SHA1(5cc6ada61036d8dbeca470e9548f9f5d2bd545a8) )
+	ROM_REGION( 0x100000, "msm6376", ROMREGION_ERASE00 )
+ROM_END
+
+ROM_START( m4funh )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "funhouse.bin", 0x00000, 0x10000, CRC(4e342025) SHA1(288125ff5e3da7249d89dfcc3cd0915f791f7d43) )
+	ROM_REGION( 0x200000, "msm6376", ROMREGION_ERASE00 ) // no idea if it uses an OKI
+ROM_END
+
+
+/* Barcrest */
+GAME( 198?, m4tst,        0, mod2    ,   mpu4, mpu4_state,       m4tst,   ROT0, "Barcrest","MPU4 Unit Test (Program 4)",GAME_MECHANICAL )
+GAME( 198?, m4tst2,       0, mod2    ,   mpu4, mpu4_state,       m4tst2,  ROT0, "Barcrest","MPU4 Unit Test (Program 2)",GAME_MECHANICAL )
+GAME( 198?, m4clr,        0, mod2    ,   mpu4, driver_device,       0,       ROT0, "Barcrest","MPU4 Meter Clear ROM",GAME_MECHANICAL )
+
+#define GAME_FLAGS (GAME_NOT_WORKING|GAME_REQUIRES_ARTWORK)
+
+
+
+
+// other issues
+GAME(199?, m4casmul ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Casino Multiplay (Barcrest) (MPU4)",GAME_FLAGS )
+
+
+
+// barcrest, to split
+GAME(199?, m4c9c    ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Cloud Nine Club (Barcrest) (MPU4) (CNC 2.1)",GAME_FLAGS ) // doesn't boot
+GAME(199?, m4ch30   ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","unknown MPU4 'CH3 0.1' (Barcrest) (MPU4)",GAME_FLAGS )
+
+// corrupt vfd (bwb?)
+GAME(199?, m4clbx   ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default_big  ,ROT0,   "Barcrest","Club X (Barcrest) (MPU4) (set 1)",GAME_FLAGS )
+GAME(199?, m4clbxa  ,m4clbx     ,mod4oki    ,mpu4               , mpu4_state,m4default_big  ,ROT0,   "Barcrest","Club X (Barcrest) (MPU4) (set 2)",GAME_FLAGS )
+GAME(199?, m4clbxb  ,m4clbx     ,mod4oki    ,mpu4               , mpu4_state,m4default_big  ,ROT0,   "Barcrest","Club X (Barcrest) (MPU4) (set 3)",GAME_FLAGS )
+
+GAME(199?, m4ringfr ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default_big  ,ROT0,   "Barcrest","Ring Of Fire (Barcrest) (MPU4)",GAME_FLAGS )
+GAME(199?, m4royjwl ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Royal Jewels (Barcrest) (MPU4)",GAME_FLAGS )
+
+// play but behavior isn't like barcrest
+GAME(199?, m4crjwl  ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Crown Jewels Club (Barcrest) (MPU4) (set 1)",GAME_FLAGS )
+GAME(199?, m4crjwla ,m4crjwl    ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Crown Jewels Club (Barcrest) (MPU4) (set 2)",GAME_FLAGS )
+GAME(199?, m4crjwlb ,m4crjwl    ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Crown Jewels Club (Barcrest) (MPU4) (set 3)",GAME_FLAGS )
+GAME(199?, m4crjwlc ,m4crjwl    ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Crown Jewels Club (Barcrest) (MPU4) (set 4)",GAME_FLAGS )
+
+GAME(199?, m4crjwl2 ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Crown Jewels Mk II Club (Barcrest) (MPU4) (set 1)",GAME_FLAGS )
+GAME(199?, m4crjwl2a,m4crjwl2   ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Crown Jewels Mk II Club (Barcrest) (MPU4) (set 2)",GAME_FLAGS )
+GAME(199?, m4crjwl2b,m4crjwl2   ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Crown Jewels Mk II Club (Barcrest) (MPU4) (set 3)",GAME_FLAGS )
+
+GAME(199?, m4supbjc ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Super Blackjack Club (Barcrest) (MPU4) (set 1)",GAME_FLAGS ) // set stake
+GAME(199?, m4supbjca,m4supbjc   ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Super Blackjack Club (Barcrest) (MPU4) (set 2)",GAME_FLAGS ) // set stake
+GAME(199?, m4supbjcb,m4supbjc   ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Super Blackjack Club (Barcrest) (MPU4) (set 3)",GAME_FLAGS ) // set stake
+GAME(199?, m4supbjcc,m4supbjc   ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Super Blackjack Club (Barcrest) (MPU4) (set 4)",GAME_FLAGS ) // set stake
+GAME(199?, m4supbjcd,m4supbjc   ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Super Blackjack Club (Barcrest) (MPU4) (set 5)",GAME_FLAGS ) // set stake
+
+
+
+// corrupt VFD (many XX)
+GAME(199?, m4luckwb     ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Lucky Wild Boar (Barcrest) (MPU4) (set 1)",GAME_FLAGS )
+GAME(199?, m4luckwba    ,m4luckwb   ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Lucky Wild Boar (Barcrest) (MPU4) (set 2)",GAME_FLAGS )
+GAME(199?, m4luckwbb    ,m4luckwb   ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Lucky Wild Boar (Barcrest) (MPU4) (set 3)",GAME_FLAGS )
+GAME(199?, m4luckwbc    ,m4luckwb   ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Lucky Wild Boar (Barcrest) (MPU4) (set 4)",GAME_FLAGS )
+GAME(199?, m4luckwbd    ,m4luckwb   ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Lucky Wild Boar (Barcrest) (MPU4) (set 5)",GAME_FLAGS )
+GAME(199?, m4luckwbe    ,m4luckwb   ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Lucky Wild Boar (Barcrest) (MPU4) (set 6)",GAME_FLAGS )
+GAME(199?, m4luckwbf    ,m4luckwb   ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Lucky Wild Boar (Barcrest) (MPU4) (set 7)",GAME_FLAGS )
+
+
+// won't boot with current reel setup, not even in test mode
+GAME(199?, m4maglin ,0          ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Magic Liner (Barcrest) (MPU4) (DMA2.1)",GAME_FLAGS )
+GAME(199?, m4magdrg ,0          ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Magic Dragon (Barcrest) (MPU4) (DMD1.0)",GAME_FLAGS )
+GAME(199?, m4clbveg ,0          ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Club Vegas (Barcrest) (MPU4) (set 1)",GAME_FLAGS )
+GAME(199?, m4clbvega,m4clbveg   ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Club Vegas (Barcrest) (MPU4) (set 2)",GAME_FLAGS )
+GAME(199?, m4clbvegb,m4clbveg   ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Club Vegas (Barcrest) (MPU4) (set 3)",GAME_FLAGS )
+GAME(199?, m4clbvegc,m4clbveg   ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Club Vegas (Barcrest) (MPU4) (set 4)",GAME_FLAGS )
+GAME(199?, m4chasei ,0          ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Chase Invaders (Barcrest) (MPU4) (set 1)",GAME_FLAGS )
+GAME(199?, m4chaseia,m4chasei   ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Chase Invaders (Barcrest) (MPU4) (set 2)",GAME_FLAGS )
+GAME(199?, m4chaseib,m4chasei   ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Chase Invaders (Barcrest) (MPU4) (set 3)",GAME_FLAGS )
+GAME(199?, m4chaseic,m4chasei   ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Chase Invaders (Barcrest) (MPU4) (set 4)",GAME_FLAGS )
+GAME(199?, m4chaseid,m4chasei   ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Chase Invaders (Barcrest) (MPU4) (set 5)",GAME_FLAGS )
+GAME(199?, m4chaseie,m4chasei   ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Chase Invaders (Barcrest) (MPU4) (set 6)",GAME_FLAGS )
+GAME(199?, m4chaseif,m4chasei   ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Chase Invaders (Barcrest) (MPU4) (set 7)",GAME_FLAGS )
+
+GAME(199?, m4bluedm ,0          ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Blue Diamond (Barcrest) (MPU4) (DBD1.0)",GAME_FLAGS )
+GAME(199?, m4amhiwy ,0          ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","American Highway (Barcrest) (MPU4) (DAH)",GAME_FLAGS )
+GAME(199?, m4addrd  ,m4addr     ,mod2       ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Adders & Ladders (Barcrest) (DAL, Dutch) (MPU4)",GAME_FLAGS )
+GAME(199?, m4nudshf ,0          ,mod2       ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Nudge Shuffle (Barcrest) (MPU4) (set 1)",GAME_FLAGS )
+GAME(199?, m4nudshfa,m4nudshf   ,mod2       ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Nudge Shuffle (Barcrest) (MPU4) (set 2)",GAME_FLAGS )
+GAME(199?, m4nudshfb,m4nudshf   ,mod2       ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Nudge Shuffle (Barcrest) (MPU4) (set 3)",GAME_FLAGS )
+GAME(199?, m4nudshfc,m4nudshf   ,mod2       ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Nudge Shuffle (Barcrest) (MPU4) (set 4)",GAME_FLAGS )
+
+GAME(199?, m4prem   ,0          ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Premier (Barcrest) (MPU4) (DPM)",GAME_FLAGS )
+GAME(199?, m4rdht   ,0          ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Red Heat (Golden Nugget?) (Barcrest) (MPU4) (DRH 1.2)",GAME_FLAGS )
+GAME(199?, m4rwb    ,0          ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Red White & Blue (Barcrest) (MPU4) (DRW)",GAME_FLAGS )
+GAME(199?, m4salsa  ,0          ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Salsa (Barcrest) (MPU4) (DSA)",GAME_FLAGS )
+GAME(199?, m4techno ,0          ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Techno Reel (Barcrest) (MPU4) (DTE) (set 1)",GAME_FLAGS )
+GAME(199?, m4technoa,m4techno   ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Techno Reel (Barcrest) (MPU4) (DTE) (set 2)",GAME_FLAGS )
+GAME(199?, m4twintm ,0          ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Twin Timer (Barcrest) (MPU4) (D2T 1.1)",GAME_FLAGS )
+GAME(199?, m4blkbul ,0          ,mod2       ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Super Play (Black Bull?) (Czech) (Barcrest) [XSP] (MPU4)",GAME_FLAGS ) // complains about coin dip
+GAME(199?, m4calicl ,0          ,mod2       ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","California Club (Barcrest) (MPU4) (set 1)",GAME_FLAGS )
+GAME(199?, m4calicla,m4calicl   ,mod2       ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","California Club (Barcrest) (MPU4) (set 2)",GAME_FLAGS )
+GAME(199?, m4caliclb,m4calicl   ,mod2       ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","California Club (Barcrest) (MPU4) (set 3)",GAME_FLAGS )
+GAME(199?, m4caliclc,m4calicl   ,mod2       ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","California Club (Barcrest) (MPU4) (set 4)",GAME_FLAGS )
+GAME(199?, m4calicld,m4calicl   ,mod2       ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","California Club (Barcrest) (MPU4) (set 5)",GAME_FLAGS )
+
+GAME(199?, m4bucks  ,0          ,mod2       ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Bucks Fizz Club (Barcrest) (MPU4)",GAME_FLAGS )
+
+GAME(199?, m4gldgat ,0          ,mod2       ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Golden Gate (Barcrest) [DGG, Dutch] (MPU4)",GAME_FLAGS )
+GAME(199?, m4hirise ,0          ,mod2       ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","High Rise (Barcrest) (MPU4) (set 1)",GAME_FLAGS )
+GAME(199?, m4hirisea,m4hirise   ,mod2       ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","High Rise (Barcrest) (MPU4) (set 2)",GAME_FLAGS )
+GAME(199?, m4hiriseb,m4hirise   ,mod2       ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","High Rise (Barcrest) (MPU4) (set 3)",GAME_FLAGS )
+GAME(199?, m4hirisec,m4hirise   ,mod2       ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","High Rise (Barcrest) (MPU4) (set 4)",GAME_FLAGS )
+GAME(199?, m4hirised,m4hirise   ,mod2       ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","High Rise (Barcrest) (MPU4) (set 5)",GAME_FLAGS )
+GAME(199?, m4hirisee,m4hirise   ,mod2       ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","High Rise (Barcrest) (MPU4) (set 6)",GAME_FLAGS )
+
+GAME(199?, m4nspot  ,0          ,mod2       ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Night Spot Club (Barcrest) (MPU4) (set 1)",GAME_FLAGS )
+GAME(199?, m4nspota ,m4nspot    ,mod2       ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Night Spot Club (Barcrest) (MPU4) (set 2)",GAME_FLAGS )
+GAME(199?, m4nspotb ,m4nspot    ,mod2       ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Night Spot Club (Barcrest) (MPU4) (set 3)",GAME_FLAGS )
+
+GAME(199?, m4supbf  ,0          ,mod2       ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Super Bucks Fizz Club (Barcrest) (MPU4) (set 1)",GAME_FLAGS )
+GAME(199?, m4supbfa ,m4supbf    ,mod2       ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Super Bucks Fizz Club (Barcrest) (MPU4) (set 2)",GAME_FLAGS )
+
+GAME(199?, m4toma   ,0          ,mod2       ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Tomahawk (Barcrest) (MPU4)",GAME_FLAGS )
+GAME(199?, m4tropcl ,0          ,mod2       ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Tropicana Club (Barcrest) (MPU4) (set 1)",GAME_FLAGS )
+GAME(199?, m4tropcla,m4tropcl   ,mod2       ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Tropicana Club (Barcrest) (MPU4) (set 2)",GAME_FLAGS )
+GAME(199?, m4tropclb,m4tropcl   ,mod2       ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Tropicana Club (Barcrest) (MPU4) (set 3)",GAME_FLAGS )
+GAME(199?, m4tropclc,m4tropcl   ,mod2       ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Tropicana Club (Barcrest) (MPU4) (set 4)",GAME_FLAGS )
+GAME(199?, m4tropcld,m4tropcl   ,mod2       ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Tropicana Club (Barcrest) (MPU4) (set 5)",GAME_FLAGS )
+
+
+// these all seem quite close to Old Timer (unsurprising, many are called XX timer), the 'altreels' is just the same as the oldtimer init, but with the 'guess' CHR emulation
+GAME(199?, m4holdtm ,0          ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Hold Timer (Barcrest) (Dutch) (MPU4) (DHT)",GAME_FLAGS )
+GAME(199?, m4exgam  ,0          ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Extra Game (Fairplay - Barcrest) (MPU4)",GAME_FLAGS )
+GAME(199?, m4brook  ,0          ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Brooklyn (Barcrest) (MPU4) (PFT 1.8)",GAME_FLAGS )
+GAME(199?, m4roadrn ,0          ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Road Runner (Barcrest) (Dutch) (MPU4) (DRO1.9)",GAME_FLAGS )
+GAME(199?, m4showtm ,0          ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Show Timer (Barcrest) (Dutch) (MPU4) (DSH1.3)",GAME_FLAGS )
+GAME(199?, m4steptm ,0          ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Step Timer (Barcrest) (Dutch) (MPU4) (DST 1.1)",GAME_FLAGS )
+GAME(199?, m4toptim ,0          ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Top Timer (Barcrest) (Dutch) (MPU4) (DTT) (set 1)",GAME_FLAGS )
+GAME(199?, m4toptima,m4toptim   ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Top Timer (Barcrest) (Dutch) (MPU4) (DTT) (set 2)",GAME_FLAGS )
+
+GAME(199?, m4univ   ,0          ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Universe (Barcrest) (Dutch) (MPU4) (DUN)",GAME_FLAGS )
+GAME(199?, m4wildtm ,0          ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Wild Timer (Barcrest) (Dutch) (MPU4) (DWT 1.3)",GAME_FLAGS )
+
+
+GAME(199?, m4frtgm  ,0          ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Fruit Game (Barcrest) (MPU4)",GAME_FLAGS ) // SAMPLE EEPROM ALARM (and has a weird sample rom..)
+GAME(199?, m4reeltm ,0          ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Reel Timer (Barcrest) (MPU4) (DWT)",GAME_FLAGS ) // SAMPLE EEPROM ALARM
+GAME(199?, m4fortcb     ,0                  ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Fortune Club (Barcrest) (MPU4) (set 1)",GAME_FLAGS ) // INVALID ALARM
+GAME(199?, m4fortcba    ,m4fortcb           ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Fortune Club (Barcrest) (MPU4) (set 2)",GAME_FLAGS ) // INVALID ALARM
+GAME(199?, m4fortcbb    ,m4fortcb           ,mod4oki    ,mpu4               , mpu4_state,m4altreels         ,ROT0,   "Barcrest","Fortune Club (Barcrest) (MPU4) (set 3)",GAME_FLAGS ) // INVALID ALARM
+
+
+
+// GEEN TUBES (even in test mode)
+GAME(199?, m4topdk  ,0          ,mod2       ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Top Deck (Barcrest) (Dutch) (MPU4)",GAME_FLAGS )
+
+// non-english sets
+GAME(199?, m4magrep ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Magic Replay (Barcrest) (Dutch) (MPU4)",GAME_FLAGS )
+GAME(199?, m4nile   ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default_big  ,ROT0,   "Barcrest","Nile Jewels (Barcrest) (German) (MPU4) (GJN0.8)",GAME_FLAGS ) // DM1 SW ALM
+GAME(199?, m4jokmil ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default_big  ,ROT0,   "Barcrest","Jokers Millennium (Barcrest) (German) (MPU4)",GAME_FLAGS ) // DM1 SW ALM
+GAME(199?, m4drac   ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default_big  ,ROT0,   "Barcrest","Dracula (Barcrest - Nova) (German) (MPU4) (set 1)",GAME_FLAGS ) // DM1 SW ALM
+GAME(199?, m4draca  ,m4drac     ,mod4oki    ,mpu4               , mpu4_state,m4default_big  ,ROT0,   "Barcrest","Dracula (Barcrest - Nova) (German) (MPU4) (set 2)",GAME_FLAGS ) // DM1 SW ALM
+GAME(199?, m4dracb  ,m4drac     ,mod4oki    ,mpu4               , mpu4_state,m4default_big  ,ROT0,   "Barcrest","Dracula (Barcrest - Nova) (German) (MPU4) (set 3)",GAME_FLAGS ) // DM1 SW ALM
+GAME(199?, m4crzjwl ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default_big  ,ROT0,   "Barcrest","Crown Jewels (Barcrest) (German) (MPU4) (set 1)",GAME_FLAGS ) // DM1 SW ALM
+GAME(199?, m4crzjwla,m4crzjwl   ,mod4oki    ,mpu4               , mpu4_state,m4default_big  ,ROT0,   "Barcrest","Crown Jewels (Barcrest) (German) (MPU4) (set 2)",GAME_FLAGS ) // DM1 SW ALM
+GAME(199?, m4crzjwlb,m4crzjwl   ,mod4oki    ,mpu4               , mpu4_state,m4default_big  ,ROT0,   "Barcrest","Crown Jewels (Barcrest) (German) (MPU4) (set 3)",GAME_FLAGS ) // DM1 SW ALM
+GAME(199?, m4crzjwlc,m4crzjwl   ,mod4oki    ,mpu4               , mpu4_state,m4default_big  ,ROT0,   "Barcrest","Crown Jewels (Barcrest) (German) (MPU4) (set 4)",GAME_FLAGS ) // DM1 SW ALM
+GAME(199?, m4crzjwld,m4crzjwl   ,mod4oki    ,mpu4               , mpu4_state,m4default_big  ,ROT0,   "Barcrest","Crown Jewels (Barcrest) (German) (MPU4) (set 5)",GAME_FLAGS ) // DM1 SW ALM
+GAME(199?, m4crzjwle,m4crzjwl   ,mod4oki    ,mpu4               , mpu4_state,m4default_big  ,ROT0,   "Barcrest","Crown Jewels (Barcrest) (German) (MPU4) (set 6)",GAME_FLAGS ) // DM1 SW ALM
+GAME(199?, m4crzjwlf,m4crzjwl   ,mod4oki    ,mpu4               , mpu4_state,m4default_big  ,ROT0,   "Barcrest","Crown Jewels (Barcrest) (German) (MPU4) (set 7)",GAME_FLAGS ) // DM1 SW ALM
+GAME(199?, m4crzjwlg,m4crzjwl   ,mod4oki    ,mpu4               , mpu4_state,m4default_big  ,ROT0,   "Barcrest","Crown Jewels (Barcrest) (German) (MPU4) (set 8)",GAME_FLAGS ) // DM1 SW ALM
+GAME(199?, m4crzjwlh,m4crzjwl   ,mod4oki    ,mpu4               , mpu4_state,m4default_big  ,ROT0,   "Barcrest","Crown Jewels (Barcrest) (German) (MPU4) (set 9)",GAME_FLAGS ) // DM1 SW ALM
+
+GAME(199?, m4vegastg,m4vegast   ,mod4oki    ,mpu4               , mpu4_state,m4default_big  ,ROT0,   "Barcrest","Vegas Strip (Barcrest) [German] (MPU4)",GAME_FLAGS ) // 1 DM SW ALM
+GAME(199?, m4jok300 ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default_big  ,ROT0,   "Barcrest","Jokers 300 (Barcrest) (German?) (MPU4)",GAME_FLAGS ) // also contains crystal maze stuff??
+GAME(199?, m4luckdv ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Lucky Devil (Barcrest) [Czech] (MPU4)",GAME_FLAGS ) // AUX2 locked
+GAME(199?, m4luckdvd,m4luckdv   ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Lucky Devil (Barcrest) [Dutch] (MPU4) (DLD)",GAME_FLAGS )
+GAME(199?, m4luck7  ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Lucky 7 (Barcrest) (Dutch) (MPU4)",GAME_FLAGS ) // '1,2' error
+GAME(199?, m4joljokh,m4joljok   ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Jolly Joker (Barcrest) [Hungarian] (MPU4) (HJJ)",GAME_FLAGS )
+GAME(199?, m4hpyjok ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Happy Joker (Barcrest) (Dutch) (MPU4) (DHJ1.2)",GAME_FLAGS )
+GAME(199?, m4gldjok ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Golden Joker (Barcrest) (Dutch) (MPU4) (DGJ 1.2)",GAME_FLAGS )
+GAME(199?, m4ceptr  ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Ceptor (Barcrest) (Dutch) (MPU4) (DCE 1.0)",GAME_FLAGS )
+GAME(199?, m4blkcat ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Black Cat (Barcrest) (Dutch) (MPU4) (DBL 1.4)",GAME_FLAGS )
+GAME(199?, m4gnsmk  ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Gun Smoke (Barcrest) (Dutch) (MPU4)",GAME_FLAGS )
+GAME(199?, m4blkbuld,m4blkbul   ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Gun Smoke (Barcrest) (Dutch, alt sound roms) (MPU4)",GAME_FLAGS ) // not sure either set of sound roms is right
+GAME(199?, m4blkwhd ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Black & White (Barcrest) [Dutch] (MPU4) (DBW 1.1)",GAME_FLAGS )
+GAME(199?, m4oldtmr ,0          ,mod4oki    ,mpu4               , mpu4_state,m_oldtmr           ,ROT0,   "Barcrest","Old Timer (Barcrest) (Dutch) (MPU4) (DOT1.1)",GAME_FLAGS )
+GAME(199?, m4casot  ,m4oldtmr   ,mod4oki    ,mpu4               , mpu4_state,m_oldtmr           ,ROT0,   "Barcrest","Old Timer (Barcrest) (Dutch, alt 'Black and White' sound roms) (DOT1.1)",GAME_FLAGS ) // uses the same program???
+GAME(199?, m4jpmcla ,m4oldtmr   ,mod4oki    ,mpu4               , mpu4_state,m_oldtmr           ,ROT0,   "Barcrest","Old Timer (Barcrest) (Dutch, alt 'JPM Classic' sound roms) (DOT1.1)",GAME_FLAGS ) // uses the same program???
+GAME(199?, m4tbplay ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Turbo Play (Barcrest) (Dutch) (MPU4) (DTP) (set 1)",GAME_FLAGS )
+GAME(199?, m4tbplaya,m4tbplay   ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Turbo Play (Barcrest) (Dutch) (MPU4) (DTP) (set 2)",GAME_FLAGS )
+GAME(199?, m4tbplayb,m4tbplay   ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Turbo Play (Barcrest) (Dutch) (MPU4) (DTP) (set 3)",GAME_FLAGS )
+
+GAME(199?, m4vivalvd,m4vivalv   ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Viva Las Vegas (Barcrest) [Dutch] (MPU4) (DLV)",GAME_FLAGS )
+
+GAME(199?, m4toprn  ,0          ,mod2       ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Top Run (Barcrest) (Dutch) (MPU4)",GAME_FLAGS ) // unique behavior  (START UP IN countdown)
+
+GAME(199?, m4magtbo ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Magic Turbo  (Barcrest) (MPU4)",GAME_FLAGS )
+
+// bwb/nova?
+GAME(199?, m4ordmnd ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default_big  ,ROT0,   "Barcrest","Oriental Diamonds (Barcrest) (German) (MPU4)",GAME_FLAGS )
+// ?
+GAME(199?, m4ptblkc ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default_big  ,ROT0,   "Barcrest","Pot Black Casino (Bwb - Barcrest) (MPU4)",GAME_FLAGS ) // main cpu crashes?
+
+
+// badchr
+GAME(199?, m4take5  ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default_big  ,ROT0,   "Barcrest","Take 5 (Barcrest) (MPU4)",GAME_FLAGS )
+
+// REEL 1 FAULT
+GAME(199?, m4twist  ,0          ,mod2       ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Twist Again (Barcrest) (MPU4) (set 1)",GAME_FLAGS ) // TA 9.6  REEL 1 FAULT
+GAME(199?, m4twista ,m4twist    ,mod2       ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Twist Again (Barcrest) (MPU4) (set 2)",GAME_FLAGS ) // TA 9.6  REEL 1 FAULT
+GAME(199?, m4twistb ,m4twist    ,mod2       ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Twist Again (Barcrest) (MPU4) (set 3)",GAME_FLAGS ) // TA 9.6  REEL 1 FAULT
+
+
+
+// might need samples, but run silent with none
+GAME(199?, m4lineup     ,0          ,mod2       ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Line Up (Bwb - Barcrest) (MPU4) (set 1)",GAME_FLAGS ) // no sound with any system?
+GAME(199?, m4lineupa    ,m4lineup   ,mod2       ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Line Up (Bwb - Barcrest) (MPU4) (set 2)",GAME_FLAGS ) // no sound with any system?
+
+GAME(199?, m4czne   ,0          ,mod2       ,mpu4               , mpu4_state,m4default          ,ROT0,   "Bwb","Cash Zone (Bwb) (MPU4)",GAME_FLAGS )
+GAME(199?, m4fourmr ,0          ,mod2       ,mpu4               , mpu4_state,m4default          ,ROT0,   "Bwb","Four More (Bwb) (MPU4)",GAME_FLAGS ) // no sound with either system?
+GAME(199?, m4holywd ,0          ,mod2       ,mpu4               , mpu4_state,m4default          ,ROT0,   "Bwb","Hollywood (Bwb) (MPU4)",GAME_FLAGS )
+GAME(199?, m4specu  ,0          ,mod2       ,mpu4               , mpu4_state,m4default          ,ROT0,   "Bwb","Speculator Club (Bwb) (MPU4)",GAME_FLAGS ) // no sound with either system
+
+
+GAME(199?, m4lazy   ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default_big  ,ROT0,   "Bwb","Lazy Bones (Bwb) (MPU4) (set 1)",GAME_FLAGS )
+GAME(199?, m4lazya  ,m4lazy     ,mod4oki    ,mpu4               , mpu4_state,m4default_big  ,ROT0,   "Bwb","Lazy Bones (Bwb) (MPU4) (set 2)",GAME_FLAGS )
+GAME(199?, m4lazyb  ,m4lazy     ,mod4oki    ,mpu4               , mpu4_state,m4default_big  ,ROT0,   "Bwb","Lazy Bones (Bwb) (MPU4) (set 3)",GAME_FLAGS )
+
+GAME(199?, m4sunclb ,0          ,mod2       ,mpu4               , mpu4_state,m4default          ,ROT0,   "Bwb","Sun Club (Bwb) (MPU4) (set 1)",GAME_FLAGS )
+GAME(199?, m4sunclba,m4sunclb   ,mod2       ,mpu4               , mpu4_state,m4default          ,ROT0,   "Bwb","Sun Club (Bwb) (MPU4) (set 2)",GAME_FLAGS )
+
+GAME(199?, m4sunscl ,0          ,mod2       ,mpu4               , mpu4_state,m4default          ,ROT0,   "Bwb","Sunset Club (Bwb) (MPU4) (set 1)",GAME_FLAGS )
+GAME(199?, m4sunscla,m4sunscl   ,mod2       ,mpu4               , mpu4_state,m4default          ,ROT0,   "Bwb","Sunset Club (Bwb) (MPU4) (set 2)",GAME_FLAGS )
+GAME(199?, m4sunsclb,m4sunscl   ,mod2       ,mpu4               , mpu4_state,m4default          ,ROT0,   "Bwb","Sunset Club (Bwb) (MPU4) (set 3)",GAME_FLAGS )
+
+GAME(199?, m4bigban ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Nova","Big Bandit (Nova) (MPU4)",GAME_FLAGS )
+GAME(199?, m4crzcsn ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Nova","Crazy Casino (Nova) (MPU4)",GAME_FLAGS )
+GAME(199?, m4crzcav ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Nova","Crazy Cavern (Nova) (MPU4)",GAME_FLAGS )
+GAME(199?, m4dragon ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Nova","Dragon (Nova) (MPU4)",GAME_FLAGS )
+GAME(199?, m4hilonv ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Nova","Hi Lo Casino (Nova) (MPU4)",GAME_FLAGS )
+GAME(199?, m4octo   ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Nova","Octopus (Nova) (MPU4)",GAME_FLAGS )
+GAME(199?, m4sctagt ,0          ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Nova","Secret Agent (Nova) (MPU4)",GAME_FLAGS )
+
+
+
+/* Others */
+
+
+GAME(199?, m4aao,     0,        mod4oki, mpu4, mpu4_state, m4default, ROT0,   "Eurotek","Against All Odds (Eurotek) (MPU4)",GAME_FLAGS )
+GAME(199?, m4bandgd,  0,        mod4oki, mpu4, mpu4_state, m4default, ROT0,   "Eurogames","Bands Of Gold (Eurogames) (MPU4)",GAME_FLAGS )
+
+GAME(199?, m4bigben,  0,        mod4oki, mpu4, mpu4_state, m4default, ROT0,   "Coinworld","Big Ben (Coinworld) (MPU4, set 1)",GAME_FLAGS )
+GAME(199?, m4bigbena, m4bigben, mod4oki, mpu4, mpu4_state, m4default, ROT0,   "Coinworld","Big Ben (Coinworld) (MPU4, set 2)",GAME_FLAGS )
+GAME(199?, m4bigbenb, m4bigben, mod4oki, mpu4, mpu4_state, m4default, ROT0,   "Coinworld","Big Ben (Coinworld) (MPU4, set 3)",GAME_FLAGS )
+GAME(199?, m4bigbend, m4bigben, mod4oki, mpu4, mpu4_state, m4default, ROT0,   "Coinworld","Big Ben (Coinworld) (MPU4, set 4)",GAME_FLAGS )
+GAME(199?, m4bigbene, m4bigben, mod4oki, mpu4, mpu4_state, m4default, ROT0,   "Coinworld","Big Ben (Coinworld) (MPU4, set 5)",GAME_FLAGS )
+GAME(199?, m4kqclub,  0,        mod2    ,mpu4, mpu4_state, m4default, ROT0,   "Newby","Kings & Queens Club (Newby) (MPU4)",GAME_FLAGS )
+GAME(199?, m4snookr,  0,        mod2    ,mpu4, mpu4_state, m4default, ROT0,   "Eurocoin","Snooker (Eurocoin) (MPU4)",GAME_FLAGS ) // works?
+GAME(199?, m4stakex,  0,        mod4oki, mpu4, mpu4_state, m4default, ROT0,   "Leisurama","Stake X (Leisurama) (MPU4, set 1)",GAME_FLAGS ) // has issues with coins in 'separate bank' (default) mode, reel issues
+GAME(199?, m4stakexa, m4stakex, mod4oki, mpu4, mpu4_state, m4default, ROT0,   "Leisurama","Stake X (Leisurama) (MPU4, set 2)",GAME_FLAGS ) // like above, but doesn't default to separate bank?
+GAME(199?, m4boltbl,  0,        mod2    ,mpu4, mpu4_state, m4default, ROT0,   "DJE","Bolt From The Blue (DJE) (MPU4, set 1)",GAME_FLAGS ) // Reel 1 Fault
+GAME(199?, m4boltbla, m4boltbl, mod2    ,mpu4, mpu4_state, m4default, ROT0,   "DJE","Bolt From The Blue (DJE) (MPU4, set 2)",GAME_FLAGS )
+GAME(199?, m4boltblb, m4boltbl, mod2    ,mpu4, mpu4_state, m4default, ROT0,   "DJE","Bolt From The Blue (DJE) (MPU4, set 3)",GAME_FLAGS )
+GAME(199?, m4boltblc, m4boltbl, mod2    ,mpu4, mpu4_state, m4default, ROT0,   "DJE","Bolt From The Blue (DJE) (MPU4, set 4)",GAME_FLAGS )
+GAME(199?, m4stand2,  0,        mod2    ,mpu4, mpu4_state, m4default, ROT0,   "DJE","Stand To Deliver (DJE) (MPU4)",GAME_FLAGS ) // Reel 1 Fault
+GAME(199?, m4dblchn,  0,        mod4oki, mpu4, mpu4_state, m4default, ROT0,   "DJE","Double Chance (DJE) (MPU4)",GAME_FLAGS ) // Reels spin forever
+
+/* Unknown stuff that looks like it might be MPU4, but needs further verification, some could be bad */
+
+GAME(199?, m4barcrz ,  0,       mod4oki ,mpu4, mpu4_state, m4default, ROT0,   "<unknown>","Bar Crazy (unknown) (MPU4?)",GAME_FLAGS )
+GAME(199?, m4bonzbn ,  0,       mod4oki ,mpu4, mpu4_state, m4default, ROT0,   "<unknown>","Bingo Bonanza (unknown) (MPU4?)",GAME_FLAGS )
+GAME(199?, m4cld02  ,  0,       mod4oki ,mpu4, mpu4_state, m4default, ROT0,   "<unknown>","unknown MPU4 'CLD 0.2C' (MPU4?)",GAME_FLAGS )
+GAME(199?, m4matdr  ,  0,       mod4oki ,mpu4, mpu4_state, m4default, ROT0,   "<unknown>","Matador (unknown) (MPU4?)",GAME_FLAGS )
+GAME(199?, m4hslo   ,  0,       mod2    ,mpu4, mpu4_state, m4default, ROT0,   "<unknown>","unknown MPU4 'HOT 3.0' (MPU4?)",GAME_FLAGS )
+GAME(199?, m4unkjok ,  0,       mod2    ,mpu4, mpu4_state, m4default, ROT0,   "<unknown>","unknown MPU4 'Joker' (MPU4?) (set 1)",GAME_FLAGS ) // bad chr
+GAME(199?, m4unkjoka,  m4unkjok,mod2    ,mpu4, mpu4_state, m4default, ROT0,   "<unknown>","unknown MPU4 'Joker' (MPU4?) (set 2)",GAME_FLAGS ) // bad chr
+GAME(199?, m4unkjokb,  m4unkjok,mod2    ,mpu4, mpu4_state, m4default, ROT0,   "<unknown>","unknown MPU4 'Joker' (MPU4?) (set 3)",GAME_FLAGS ) // bad chr
+GAME(199?, m4unkjokc,  m4unkjok,mod2    ,mpu4, mpu4_state, m4default, ROT0,   "<unknown>","unknown MPU4 'Joker' (MPU4?) (set 4)",GAME_FLAGS ) // bad chr
+GAME(199?, m4remag  ,  0,       mod2    ,mpu4, mpu4_state, m4default, ROT0,   "<unknown>","unknown MPU4 'ZTP 0.7' (MPU4?)",GAME_FLAGS )
+GAME(199?, m4rmg    ,  0,       mod2    ,mpu4, mpu4_state, m4default, ROT0,   "<unknown>","unknown MPU4 'CTP 0.4' (MPU4?)",GAME_FLAGS )
+GAME(199?, m4wnud   ,  0,       mod2    ,mpu4, mpu4_state, m4default, ROT0,   "<unknown>","unknown MPU4 'W Nudge' (MPU4?)",GAME_FLAGS )
+GAME(199?, m4t266   ,  0,       mod2    ,mpu4, mpu4_state, m4default, ROT0,   "<unknown>","unknown MPU4 'TTO 1.1' (MPU4?)",GAME_FLAGS )
+GAME(199?, m4brnze  ,  0,       mod4oki, mpu4, mpu4_state, m4default, ROT0,   "<unknown>","Bronze Voyage (unknown) (MPU4) (set 1)",GAME_FLAGS )
+GAME(199?, m4brnzea ,  m4brnze, mod4oki, mpu4, mpu4_state, m4default, ROT0,   "<unknown>","Bronze Voyage (unknown) (MPU4) (set 2)",GAME_FLAGS )
+GAME(199?, m4brnzeb ,  m4brnze, mod4oki, mpu4, mpu4_state, m4default, ROT0,   "<unknown>","Bronze Voyage (unknown) (MPU4) (set 3)",GAME_FLAGS )
+
+GAME(199?, m4riotrp ,  0,       mod4oki, mpu4, mpu4_state, m4default, ROT0,   "<unknown>","Rio Tropico (unknown) (MPU4)",GAME_FLAGS )
+
+/* *if* these are MPU4 they have a different sound system at least - The copyright strings in them are 'AET' tho (Ace?) - Could be related to the Crystal stuff? */
+GAME(199?, m4sbx    ,  0,       mpu4crys    ,mpu4, mpu4_state, m_frkstn, ROT0,   "AET/Coinworld","Super Bear X (MPU4?) (set 1)",GAME_FLAGS )
+GAME(199?, m4sbxa   ,  m4sbx,   mpu4crys    ,mpu4, mpu4_state, m_frkstn, ROT0,   "AET/Coinworld","Super Bear X (MPU4?) (set 2)",GAME_FLAGS )
+GAME(199?, m4sbxb   ,  m4sbx,   mpu4crys    ,mpu4, mpu4_state, m_frkstn, ROT0,   "AET/Coinworld","Super Bear X (MPU4?) (set 3)",GAME_FLAGS )
+GAME(199?, m4sbxc   ,  m4sbx,   mpu4crys    ,mpu4, mpu4_state, m_frkstn, ROT0,   "AET/Coinworld","Super Bear X (MPU4?) (set 4)",GAME_FLAGS )
+GAME(199?, m4sbxd   ,  m4sbx,   mpu4crys    ,mpu4, mpu4_state, m_frkstn, ROT0,   "AET/Coinworld","Super Bear X (MPU4?) (set 5)",GAME_FLAGS )
+GAME(199?, m4sbxe   ,  m4sbx,   mpu4crys    ,mpu4, mpu4_state, m_frkstn, ROT0,   "AET/Coinworld","Super Bear X (MPU4?) (set 6)",GAME_FLAGS )
+
+GAME(199?, m4bclimb ,  0,       mpu4crys    ,mpu4, mpu4_state, m_frkstn, ROT0,   "AET/Coinworld","Bear Climber (MPU4?)",GAME_FLAGS )
+GAME(199?, m4captb  ,  0,       mpu4crys    ,mpu4, mpu4_state, m_frkstn, ROT0,   "AET/Coinworld","Captain Bear (MPU4?)",GAME_FLAGS )
+GAME(199?, m4jungj  ,  0,       mpu4crys    ,mpu4, mpu4_state, m_frkstn, ROT0,   "AET/Coinworld","Jungle Japes (MPU4?) (set 1)",GAME_FLAGS )
+GAME(199?, m4jungja ,  m4jungj, mpu4crys    ,mpu4, mpu4_state, m_frkstn, ROT0,   "AET/Coinworld","Jungle Japes (MPU4?) (set 2)",GAME_FLAGS )
+GAME(199?, m4jungjb ,  m4jungj, mpu4crys    ,mpu4, mpu4_state, m_frkstn, ROT0,   "AET/Coinworld","Jungle Japes (MPU4?) (set 3)",GAME_FLAGS )
+GAME(199?, m4jungjc ,  m4jungj, mpu4crys    ,mpu4, mpu4_state, m_frkstn, ROT0,   "AET/Coinworld","Jungle Japes (MPU4?) (set 4)",GAME_FLAGS )
+
+GAME(199?, m4fsx    ,  0,       mpu4crys    ,mpu4, mpu4_state, m_frkstn, ROT0,   "AET/Coinworld","Fun Spot X (MPU4?) (set 1)",GAME_FLAGS )
+GAME(199?, m4fsxa   ,  m4fsx,   mpu4crys    ,mpu4, mpu4_state, m_frkstn, ROT0,   "AET/Coinworld","Fun Spot X (MPU4?) (set 2)",GAME_FLAGS )
+GAME(199?, m4fsxb   ,  m4fsx,   mpu4crys    ,mpu4, mpu4_state, m_frkstn, ROT0,   "AET/Coinworld","Fun Spot X (MPU4?) (set 3)",GAME_FLAGS )
+
+GAME(199?, m4ccop   ,  0,       mod4oki     ,mpu4, mpu4_state, m4default, ROT0,   "Coinworld","Cash Cops (MPU4?) (set 1)",GAME_FLAGS )
+GAME(199?, m4ccopa  ,  m4ccop,  mod4oki     ,mpu4, mpu4_state, m4default, ROT0,   "Coinworld","Cash Cops (MPU4?) (set 2)",GAME_FLAGS )
+GAME(199?, m4ccopb  ,  m4ccop,  mod4oki     ,mpu4, mpu4_state, m4default, ROT0,   "Coinworld","Cash Cops (MPU4?) (set 3)",GAME_FLAGS )
+
+GAME(199?, m4ccc    ,  0,       mod4oki     ,mpu4, mpu4_state, m4default, ROT0,   "Coinworld","Criss Cross Crazy (Coinworld) (MPU4?)",GAME_FLAGS )
+GAME(199?, m4treel  ,  0,       mod2        ,mpu4, mpu4_state, m4default, ROT0,   "<unknown>","Turbo Reels (unknown) (MPU4?) (set 1)",GAME_FLAGS )
+GAME(199?, m4treela ,  m4treel, mod2        ,mpu4, mpu4_state, m4default, ROT0,   "<unknown>","Turbo Reels (unknown) (MPU4?) (set 2)",GAME_FLAGS )
+
+
+
+
+GAME(199?, m4surf, 0,           mod4oki    ,mpu4, mpu4_state, m4default, ROT0,   "Gemini","Super Surfin' (Gemini) (MPU4) (set 1)",GAME_FLAGS )
+GAME(199?, m4surfa,m4surf,      mod4oki    ,mpu4, mpu4_state, m4default, ROT0,   "Gemini","Super Surfin' (Gemini) (MPU4) (set 2)",GAME_FLAGS )
+GAME(199?, m4surfb,m4surf,      mod4oki    ,mpu4, mpu4_state, m4default, ROT0,   "Gemini","Super Surfin' (Gemini) (MPU4) (set 3)",GAME_FLAGS )
+GAME(199?, m4wife, 0,           mod4oki    ,mpu4, mpu4_state, m4default, ROT0,   "Gemini","Money Or Yer Wife (Gemini) (MPU4)",GAME_FLAGS )
+GAME(199?, m4blkgd, 0,          mod4oki    ,mpu4, mpu4_state, m4default, ROT0,   "Gemini","Black Gold (Gemini) (MPU4) (set 1)",GAME_FLAGS )
+GAME(199?, m4blkgda,m4blkgd,    mod4oki    ,mpu4, mpu4_state, m4default, ROT0,   "Gemini","Black Gold (Gemini) (MPU4) (set 2)",GAME_FLAGS )
+
+GAME(199?, m4zill, 0,           mod4oki    ,mpu4, mpu4_state, m4default, ROT0,   "Pure Leisure","Zillionare's Challenge (Pure Leisure) (MPU4) (set 1)",GAME_FLAGS )
+GAME(199?, m4zilla, m4zill,     mod4oki    ,mpu4, mpu4_state, m4default, ROT0,   "Pure Leisure","Zillionare's Challenge (Pure Leisure) (MPU4) (set 2)",GAME_FLAGS )
+
+GAME(199?, m4hstr, 0,           mod4oki    ,mpu4, mpu4_state, m4default, ROT0,   "Coinworld","Happy Streak (Coinworld) (MPU4) (set 1)",GAME_FLAGS )
+GAME(199?, m4hstra,m4hstr,      mod4oki    ,mpu4, mpu4_state, m4default, ROT0,   "Coinworld","Happy Streak (Coinworld) (MPU4) (set 2)",GAME_FLAGS )
+GAME(199?, m4hstrb,m4hstr,      mod4oki    ,mpu4, mpu4_state, m4default, ROT0,   "Coinworld","Happy Streak (Coinworld) (MPU4) (set 3)",GAME_FLAGS )
+
+GAME(199?, m4hstrcs, 0,         mod4oki    ,mpu4, mpu4_state, m4default, ROT0,   "Coinworld","Casino Happy Streak (Coinworld) (MPU4) (set 1)",GAME_FLAGS )
+GAME(199?, m4hstrcsa,m4hstrcs,  mod4oki    ,mpu4, mpu4_state, m4default, ROT0,   "Coinworld","Casino Happy Streak (Coinworld) (MPU4) (set 2)",GAME_FLAGS )
+GAME(199?, m4hstrcsb,m4hstrcs,  mod4oki    ,mpu4, mpu4_state, m4default, ROT0,   "Coinworld","Casino Happy Streak (Coinworld) (MPU4) (set 3)",GAME_FLAGS )
+GAME(199?, m4hstrcsc,m4hstrcs,  mod4oki    ,mpu4, mpu4_state, m4default, ROT0,   "Coinworld","Casino Happy Streak (Coinworld) (MPU4) (set 4)",GAME_FLAGS )
+GAME(199?, m4hstrcsd,m4hstrcs,  mod4oki    ,mpu4, mpu4_state, m4default, ROT0,   "Coinworld","Casino Happy Streak (Coinworld) (MPU4) (set 5)",GAME_FLAGS )
+
+GAME(199?, m4ddb,  0,           mod4oki    ,mpu4, mpu4_state, m4default, ROT0,   "Coinworld","Ding Dong Bells (Coinworld) (MPU4) (set 1)",GAME_FLAGS )
+GAME(199?, m4ddba, m4ddb,       mod4oki    ,mpu4, mpu4_state, m4default, ROT0,   "Coinworld","Ding Dong Bells (Coinworld) (MPU4) (set 2)",GAME_FLAGS )
+
+GAME(199?, m4hapfrt,  0,            mod4oki    ,mpu4, mpu4_state, m4default, ROT0,   "Coinworld","Happy Fruits (Coinworld) (MPU4) (set 1)",GAME_FLAGS )
+GAME(199?, m4hapfrta, m4hapfrt,     mod4oki    ,mpu4, mpu4_state, m4default, ROT0,   "Coinworld","Happy Fruits (Coinworld) (MPU4) (set 2)",GAME_FLAGS )
+GAME(199?, m4hapfrtb, m4hapfrt,     mod4oki    ,mpu4, mpu4_state, m4default, ROT0,   "Coinworld","Happy Fruits (Coinworld) (MPU4) (set 3)",GAME_FLAGS )
+
+
+GAME(199?, m4sunday, 0,         mod4oki    ,mpu4, mpu4_state, m4default, ROT0,   "Pcp","Sunday Sport (Pcp) (MPU4)",GAME_FLAGS )
+
+GAME(199?, m4jp777, 0,          mod4oki    ,mpu4, mpu4_state, m4default, ROT0,   "Cotswold Microsystems","Jackpot 777 (Cotswold Microsystems) (MPU4)",GAME_FLAGS ) /* Hopper Fault */
+GAME(199?, m4dnj    ,  0,       mod4oki ,mpu4, mpu4_state, m4default, ROT0,   "<unknown>","Double Nudge (unknown) (MPU4) (set 1)",GAME_FLAGS ) /* Hopper Fault */
+GAME(199?, m4dnja   ,  m4dnj,   mod4oki ,mpu4, mpu4_state, m4default, ROT0,   "<unknown>","Double Nudge (unknown) (MPU4) (set 2)",GAME_FLAGS ) /* Hopper Fault */
+GAME(199?, m4dnjb   ,  m4dnj,   mod4oki ,mpu4, mpu4_state, m4default, ROT0,   "<unknown>","Double Nudge (unknown) (MPU4) (set 3)",GAME_FLAGS ) /* Hopper Fault */
+
+GAME(199?, m4booze, 0,          mod4oki    ,mpu4, mpu4_state, m4default, ROT0,   "Extreme","Booze Cruise (Extreme) (MPU4)",GAME_FLAGS )
+GAME(199?, m4cbing, 0,          mod4oki    ,mpu4, mpu4_state, m4default, ROT0,   "Redpoint Systems","Cherry Bingo (Redpoint Systems) (MPU4)",GAME_FLAGS ) // custom sound system
+
+
+GAME( 199?, m4nod       , 0         ,  mod4oki      , mpu4      , mpu4_state, m4default     , 0,         "Eurotech",   "Nod And A Wink (Eurotech) (MPU4)",GAME_FLAGS|GAME_MECHANICAL|GAME_SUPPORTS_SAVE) // this has valid strings in it BEFORE the bfm decode, but decodes to valid code, does it use some funky mapping, or did they just fill unused space with valid looking data?
+
+
+// not sure about several of the nova ones
+GAME( 199?, m4aliz      , 0         ,  mod4oki      , mpu4      , mpu4_state, m4default     , 0,         "Qps",  "AlizBaz (Qps) (German) (MPU4)",GAME_FLAGS|GAME_MECHANICAL|GAME_SUPPORTS_SAVE)
+GAME( 199?, m4coney     , 0         ,  mod4oki      , mpu4      , mpu4_state, m4default     , 0,         "Qps",   "Coney Island (Qps) (MPU4)",GAME_FLAGS|GAME_MECHANICAL|GAME_SUPPORTS_SAVE)
+GAME( 199?, m4crzjk     , 0         ,  mod2         , mpu4      , mpu4_state, m4default     , 0,         "Nova?", "Crazy Jokers (Nova?) (MPU4)",GAME_FLAGS )  // COIN   ALM
+GAME( 199?, m4c2        , 0         ,  mod4oki      , mpu4      , mpu4_state, m4default     , 0,         "Nova?", "Circus Circus 2 (Nova?) (MPU4)",GAME_FLAGS|GAME_MECHANICAL|GAME_SUPPORTS_SAVE) // COIN   ALM
+// regular barcrest structure
+GAME( 199?, m4vivan     , 0         ,  mod4oki      , mpu4      , mpu4_state, m4default     , 0,         "Nova",  "Viva Las Vegas (Nova) (MPU4)",GAME_FLAGS|GAME_MECHANICAL|GAME_SUPPORTS_SAVE)
+GAME( 199?, m4spotln    , 0         ,  mod4oki      , mpu4      , mpu4_state, m4default     , 0,         "Nova",  "Spotlight (Nova) (MPU4)",GAME_FLAGS|GAME_MECHANICAL|GAME_SUPPORTS_SAVE)
+GAME( 199?, m4mgpn      , 0         ,  mod4oki      , mpu4      , mpu4_state, m4default     , 0,         "Nova",  "Monaco Grand Prix (Nova) (MPU4)",GAME_FLAGS|GAME_MECHANICAL|GAME_SUPPORTS_SAVE)
+GAME( 199?, m4goldnn    , 0         ,  mod4oki      , mpu4      , mpu4_state, m4default     , 0,         "Nova",  "Golden Years (Nova) (MPU4)",GAME_FLAGS|GAME_MECHANICAL|GAME_SUPPORTS_SAVE)
+
+
+
+
+GAME( 198?, m4funh      , 0         , mod4oki           , mpu4  , mpu4_state, m4default         , 0,       "unknown",      "Fun House (unknown) (MPU4)", GAME_FLAGS ) // TUNE ALARM  (was in the SC1 Fun House set)
+
+
+GAME(199?, m4sunseta    ,m4sunset   ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Sunset Boulevard (Barcrest) (MPU4) (B25 1.2, set 1)",GAME_FLAGS )
+GAME(199?, m4sunsetb    ,m4sunset   ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Sunset Boulevard (Barcrest) (MPU4) (B25 1.2, set 2)",GAME_FLAGS )
+GAME(199?, m4sunsetc    ,m4sunset   ,mod4oki    ,mpu4               , mpu4_state,m4default          ,ROT0,   "Barcrest","Sunset Boulevard (Barcrest) (MPU4) (OSB 0.2)",GAME_FLAGS ) // might be a mod 2

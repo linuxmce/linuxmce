@@ -22,14 +22,15 @@
 #include "sound/fmopl.h"
 
 
-typedef struct _ym3526_state ym3526_state;
-struct _ym3526_state
+struct ym3526_state
 {
-	sound_stream *	stream;
-	emu_timer *		timer[2];
-	void *			chip;
+	sound_stream *  stream;
+	emu_timer *     timer[2];
+	void *          chip;
 	const ym3526_interface *intf;
 	device_t *device;
+
+	devcb_resolved_write_line out_int_func;
 };
 
 
@@ -37,7 +38,7 @@ INLINE ym3526_state *get_safe_token(device_t *device)
 {
 	assert(device != NULL);
 	assert(device->type() == YM3526);
-	return (ym3526_state *)downcast<legacy_device_base *>(device)->token();
+	return (ym3526_state *)downcast<ym3526_device *>(device)->token();
 }
 
 
@@ -45,7 +46,7 @@ INLINE ym3526_state *get_safe_token(device_t *device)
 static void IRQHandler(void *param,int irq)
 {
 	ym3526_state *info = (ym3526_state *)param;
-	if (info->intf->handler) (info->intf->handler)(info->device, irq ? ASSERT_LINE : CLEAR_LINE);
+	info->out_int_func(irq ? ASSERT_LINE : CLEAR_LINE);
 }
 /* Timer overflow callback from timer.c */
 static TIMER_CALLBACK( timer_callback_0 )
@@ -63,11 +64,11 @@ static void TimerHandler(void *param,int c,attotime period)
 {
 	ym3526_state *info = (ym3526_state *)param;
 	if( period == attotime::zero )
-	{	/* Reset FM Timer */
+	{   /* Reset FM Timer */
 		info->timer[c]->enable(false);
 	}
 	else
-	{	/* Start FM Timer */
+	{   /* Start FM Timer */
 		info->timer[c]->adjust(period);
 	}
 }
@@ -88,12 +89,15 @@ static void _stream_update(void *param, int interval)
 
 static DEVICE_START( ym3526 )
 {
-	static const ym3526_interface dummy = { 0 };
+	static const ym3526_interface dummy = { DEVCB_NULL };
 	ym3526_state *info = get_safe_token(device);
 	int rate = device->clock()/72;
 
-	info->intf = device->baseconfig().static_config() ? (const ym3526_interface *)device->baseconfig().static_config() : &dummy;
+	info->intf = device->static_config() ? (const ym3526_interface *)device->static_config() : &dummy;
 	info->device = device;
+
+	// resolve callbacks
+	info->out_int_func.resolve(info->intf->out_int_func, *device);
 
 	/* stream system initialize */
 	info->chip = ym3526_init(device,device->clock(),rate);
@@ -134,36 +138,64 @@ WRITE8_DEVICE_HANDLER( ym3526_w )
 	ym3526_write(info->chip, offset & 1, data);
 }
 
-READ8_DEVICE_HANDLER( ym3526_status_port_r ) { return ym3526_r(device, 0); }
-READ8_DEVICE_HANDLER( ym3526_read_port_r ) { return ym3526_r(device, 1); }
-WRITE8_DEVICE_HANDLER( ym3526_control_port_w ) { ym3526_w(device, 0, data); }
-WRITE8_DEVICE_HANDLER( ym3526_write_port_w ) { ym3526_w(device, 1, data); }
+READ8_DEVICE_HANDLER( ym3526_status_port_r ) { return ym3526_r(device, space, 0); }
+READ8_DEVICE_HANDLER( ym3526_read_port_r ) { return ym3526_r(device, space, 1); }
+WRITE8_DEVICE_HANDLER( ym3526_control_port_w ) { ym3526_w(device, space, 0, data); }
+WRITE8_DEVICE_HANDLER( ym3526_write_port_w ) { ym3526_w(device, space, 1, data); }
 
 
-/**************************************************************************
- * Generic get_info
- **************************************************************************/
+const device_type YM3526 = &device_creator<ym3526_device>;
 
-DEVICE_GET_INFO( ym3526 )
+ym3526_device::ym3526_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, YM3526, "YM3526", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
 {
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(ym3526_state);				break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME( ym3526 );				break;
-		case DEVINFO_FCT_STOP:							info->stop = DEVICE_STOP_NAME( ym3526 );				break;
-		case DEVINFO_FCT_RESET:							info->reset = DEVICE_RESET_NAME( ym3526 );				break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "YM3526");							break;
-		case DEVINFO_STR_FAMILY:					strcpy(info->s, "Yamaha FM");						break;
-		case DEVINFO_STR_VERSION:					strcpy(info->s, "1.0");								break;
-		case DEVINFO_STR_SOURCE_FILE:						strcpy(info->s, __FILE__);							break;
-		case DEVINFO_STR_CREDITS:					strcpy(info->s, "Copyright Nicola Salmoria and the MAME Team"); break;
-	}
+	m_token = global_alloc_clear(ym3526_state);
 }
 
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
 
-DEFINE_LEGACY_SOUND_DEVICE(YM3526, ym3526);
+void ym3526_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void ym3526_device::device_start()
+{
+	DEVICE_START_NAME( ym3526 )(this);
+}
+
+//-------------------------------------------------
+//  device_reset - device-specific reset
+//-------------------------------------------------
+
+void ym3526_device::device_reset()
+{
+	DEVICE_RESET_NAME( ym3526 )(this);
+}
+
+//-------------------------------------------------
+//  device_stop - device-specific stop
+//-------------------------------------------------
+
+void ym3526_device::device_stop()
+{
+	DEVICE_STOP_NAME( ym3526 )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void ym3526_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}

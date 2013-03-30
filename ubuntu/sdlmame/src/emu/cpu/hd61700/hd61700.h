@@ -14,13 +14,7 @@
 //**************************************************************************
 
 #define MCFG_HD61700_CONFIG(_config) \
-	hd61700_cpu_device_config::static_set_config(device, _config); \
-
-//**************************************************************************
-//  DEVICE TYPE DEFINITION
-//**************************************************************************
-
-extern const device_type HD61700;
+	hd61700_cpu_device::static_set_config(*device, _config); \
 
 //**************************************************************************
 //  DEFINITIONS
@@ -28,7 +22,6 @@ extern const device_type HD61700;
 
 // class definition
 class hd61700_cpu_device;
-class hd61700_cpu_device_config;
 
 // cpu port callbacks types
 typedef void   (*hd61700_lcd_control_func)(hd61700_cpu_device &device, UINT8 data);
@@ -42,13 +35,13 @@ typedef void   (*hd61700_port_w_func)(hd61700_cpu_device &device, UINT8 data);
 // device config
 struct hd61700_config
 {
-	hd61700_lcd_control_func	m_lcd_control;		//lcd control
-	hd61700_lcd_data_r_func		m_lcd_data_r;		//lcd data read
-	hd61700_lcd_data_w_func		m_lcd_data_w;		//lcd data write
-	hd61700_kb_r_func			m_kb_r;				//keyboard matrix read
-	hd61700_kb_w_func			m_kb_w;				//keyboard matrix write
-	hd61700_port_r_func			m_port_r;			//8 bit port read
-	hd61700_port_w_func			m_port_w;			//8 bit port write
+	hd61700_lcd_control_func    m_lcd_control;      //lcd control
+	hd61700_lcd_data_r_func     m_lcd_data_r;       //lcd data read
+	hd61700_lcd_data_w_func     m_lcd_data_w;       //lcd data write
+	hd61700_kb_r_func           m_kb_r;             //keyboard matrix read
+	hd61700_kb_w_func           m_kb_w;             //keyboard matrix write
+	hd61700_port_r_func         m_port_r;           //8 bit port read
+	hd61700_port_w_func         m_port_w;           //8 bit port write
 };
 
 
@@ -72,57 +65,27 @@ enum
 };
 
 
-// ======================> hd61700_cpu_device_config
-
-class hd61700_cpu_device_config : public cpu_device_config,
-								  public hd61700_config
-{
-	friend class hd61700_cpu_device;
-
-protected:
-	// construction/destruction
-	hd61700_cpu_device_config(const machine_config &mconfig, device_type _type, const char *_tag, const device_config *_owner, UINT32 _clock);
-
-public:
-	static device_config *static_alloc_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock);
-	virtual device_t *alloc_device(running_machine &machine) const;
-
-	// inline configuration helpers
-	static void static_set_config(device_config *device, const hd61700_config &config);
-protected:
-	// device_config_execute_interface overrides
-	virtual UINT32 execute_min_cycles() const { return 1; }
-	virtual UINT32 execute_max_cycles() const { return 52; }
-	virtual UINT32 execute_input_lines() const { return 6; }
-
-	// device_config_memory_interface overrides
-	virtual const address_space_config *memory_space_config(address_spacenum spacenum = AS_0) const { return (spacenum == AS_PROGRAM) ? &m_program_config : NULL; }
-
-	// device_config_disasm_interface overrides
-	virtual UINT32 disasm_min_opcode_bytes() const { return 1; }
-	virtual UINT32 disasm_max_opcode_bytes() const { return 16; }
-
-	// internal state
-	address_space_config m_program_config;
-};
-
-
 // ======================> hd61700_cpu_device
 
-class hd61700_cpu_device : public cpu_device
+class hd61700_cpu_device : public cpu_device,
+							public hd61700_config
 {
-	friend class hd61700_cpu_device_config;
+public:
+	// construction/destruction
+	hd61700_cpu_device(const machine_config &mconfig, const char *_tag, device_t *_owner, UINT32 _clock);
+
+	static void static_set_config(device_t &device, const hd61700_config &config);
 
 protected:
-	// construction/destruction
-	hd61700_cpu_device(running_machine &machine, const hd61700_cpu_device_config &config);
-
 	// device-level overrides
 	virtual void device_start();
 	virtual void device_reset();
 	virtual void device_timer(emu_timer &timer, device_timer_id id, int param, void *ptr);
 
 	// device_execute_interface overrides
+	virtual UINT32 execute_min_cycles() const { return 1; }
+	virtual UINT32 execute_max_cycles() const { return 52; }
+	virtual UINT32 execute_input_lines() const { return 6; }
 	virtual void execute_run();
 	virtual void execute_set_input(int inputnum, int state);
 
@@ -130,8 +93,12 @@ protected:
 	virtual void state_import(const device_state_entry &entry);
 	void state_string_export(const device_state_entry &entry, astring &string);
 
+	// device_memory_interface overrides
+	virtual const address_space_config *memory_space_config(address_spacenum spacenum = AS_0) const { return (spacenum == AS_PROGRAM) ? &m_program_config : NULL; }
 
 	// device_disasm_interface overrides
+	virtual UINT32 disasm_min_opcode_bytes() const { return 1; }
+	virtual UINT32 disasm_max_opcode_bytes() const { return 16; }
 	virtual offs_t disasm_disassemble(char *buffer, offs_t pc, const UINT8 *oprom, const UINT8 *opram, UINT32 options);
 
 	// interrupts
@@ -159,7 +126,7 @@ protected:
 protected:
 
 	// internal state
-	const hd61700_cpu_device_config &m_cpu_config;		// reference to the config
+	address_space_config m_program_config;
 	static const device_timer_id SEC_TIMER = 1;
 	emu_timer *m_sec_timer;
 
@@ -168,25 +135,28 @@ protected:
 	UINT16         m_pc;
 	UINT8          m_flags;
 	UINT32         m_fetch_addr;
-	UINT8          m_regsir[3];							// 5bit register (sx, sy, sz)
-	UINT8          m_reg8bit[8];						// 8bit register (pe, pd, ib, ua, ia, ie, tm, tm)
-	UINT16         m_reg16bit[8];						// 16bit register (ix, iy, iz, us, ss, ky, ky, ky)
-	UINT8          m_regmain[0x20];						// main registers
+	UINT8          m_regsir[3];                         // 5bit register (sx, sy, sz)
+	UINT8          m_reg8bit[8];                        // 8bit register (pe, pd, ib, ua, ia, ie, tm, tm)
+	UINT16         m_reg16bit[8];                       // 16bit register (ix, iy, iz, us, ss, ky, ky, ky)
+	UINT8          m_regmain[0x20];                     // main registers
 	UINT8          m_irq_status;
 	UINT8          m_state;
-	UINT8		   prev_ua;
+	UINT8          prev_ua;
 	int            m_lines_status[6];
 	int            m_icount;
 
 	address_space *m_program;
 
 	// flag definitions
-	static const int FLAG_Z		= 0x80;
-	static const int FLAG_C		= 0x40;
-	static const int FLAG_LZ	= 0x20;
-	static const int FLAG_UZ	= 0x10;
-	static const int FLAG_SW	= 0x08;
-	static const int FLAG_APO	= 0x04;
+	static const int FLAG_Z     = 0x80;
+	static const int FLAG_C     = 0x40;
+	static const int FLAG_LZ    = 0x20;
+	static const int FLAG_UZ    = 0x10;
+	static const int FLAG_SW    = 0x08;
+	static const int FLAG_APO   = 0x04;
 };
+
+extern const device_type HD61700;
+
 
 #endif /* __HD61700_H__ */

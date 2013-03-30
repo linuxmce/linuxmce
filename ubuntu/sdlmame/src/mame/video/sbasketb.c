@@ -26,20 +26,21 @@
 
 ***************************************************************************/
 
-PALETTE_INIT( sbasketb )
+void sbasketb_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	static const int resistances[4] = { 2000, 1000, 470, 220 };
 	double rweights[4], gweights[4], bweights[4];
 	int i;
 
 	/* compute the color output resistor weights */
-	compute_resistor_weights(0,	255, -1.0,
+	compute_resistor_weights(0, 255, -1.0,
 			4, resistances, rweights, 1000, 0,
 			4, resistances, gweights, 1000, 0,
 			4, resistances, bweights, 1000, 0);
 
 	/* allocate the colortable */
-	machine.colortable = colortable_alloc(machine, 0x100);
+	machine().colortable = colortable_alloc(machine(), 0x100);
 
 	/* create a lookup table for the palette */
 	for (i = 0; i < 0x100; i++)
@@ -68,7 +69,7 @@ PALETTE_INIT( sbasketb )
 		bit3 = (color_prom[i + 0x200] >> 3) & 0x01;
 		b = combine_4_weights(bweights, bit0, bit1, bit2, bit3);
 
-		colortable_palette_set_color(machine.colortable, i, MAKE_RGB(r, g, b));
+		colortable_palette_set_color(machine().colortable, i, MAKE_RGB(r, g, b));
 	}
 
 	/* color_prom now points to the beginning of the lookup table,*/
@@ -78,7 +79,7 @@ PALETTE_INIT( sbasketb )
 	for (i = 0; i < 0x100; i++)
 	{
 		UINT8 ctabentry = (color_prom[i] & 0x0f) | 0xf0;
-		colortable_entry_set_value(machine.colortable, i, ctabentry);
+		colortable_entry_set_value(machine().colortable, i, ctabentry);
 	}
 
 	/* sprites use colors 0-256 (?) in 16 banks */
@@ -89,53 +90,49 @@ PALETTE_INIT( sbasketb )
 		for (j = 0; j < 0x10; j++)
 		{
 			UINT8 ctabentry = (j << 4) | (color_prom[i + 0x100] & 0x0f);
-			colortable_entry_set_value(machine.colortable, 0x100 + ((j << 8) | i), ctabentry);
+			colortable_entry_set_value(machine().colortable, 0x100 + ((j << 8) | i), ctabentry);
 		}
 	}
 }
 
-WRITE8_HANDLER( sbasketb_videoram_w )
+WRITE8_MEMBER(sbasketb_state::sbasketb_videoram_w)
 {
-	sbasketb_state *state = space->machine().driver_data<sbasketb_state>();
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_videoram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( sbasketb_colorram_w )
+WRITE8_MEMBER(sbasketb_state::sbasketb_colorram_w)
 {
-	sbasketb_state *state = space->machine().driver_data<sbasketb_state>();
-	state->m_colorram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_colorram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( sbasketb_flipscreen_w )
+WRITE8_MEMBER(sbasketb_state::sbasketb_flipscreen_w)
 {
-	if (flip_screen_get(space->machine()) != data)
+	if (flip_screen() != data)
 	{
-		flip_screen_set(space->machine(), data);
-		tilemap_mark_all_tiles_dirty_all(space->machine());
+		flip_screen_set(data);
+		machine().tilemap().mark_all_dirty();
 	}
 }
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(sbasketb_state::get_bg_tile_info)
 {
-	sbasketb_state *state = machine.driver_data<sbasketb_state>();
-	int code = state->m_videoram[tile_index] + ((state->m_colorram[tile_index] & 0x20) << 3);
-	int color = state->m_colorram[tile_index] & 0x0f;
-	int flags = ((state->m_colorram[tile_index] & 0x40) ? TILE_FLIPX : 0) | ((state->m_colorram[tile_index] & 0x80) ? TILE_FLIPY : 0);
+	int code = m_videoram[tile_index] + ((m_colorram[tile_index] & 0x20) << 3);
+	int color = m_colorram[tile_index] & 0x0f;
+	int flags = ((m_colorram[tile_index] & 0x40) ? TILE_FLIPX : 0) | ((m_colorram[tile_index] & 0x80) ? TILE_FLIPY : 0);
 
-	SET_TILE_INFO(0, code, color, flags);
+	SET_TILE_INFO_MEMBER(0, code, color, flags);
 }
 
-VIDEO_START( sbasketb )
+void sbasketb_state::video_start()
 {
-	sbasketb_state *state = machine.driver_data<sbasketb_state>();
 
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
-	tilemap_set_scroll_cols(state->m_bg_tilemap, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(sbasketb_state::get_bg_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
+	m_bg_tilemap->set_scroll_cols(32);
 }
 
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	sbasketb_state *state = machine.driver_data<sbasketb_state>();
 	UINT8 *spriteram = state->m_spriteram;
@@ -154,7 +151,7 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 			int flipx =  spriteram[offs + 1] & 0x40;
 			int flipy =  spriteram[offs + 1] & 0x80;
 
-			if (flip_screen_get(machine))
+			if (state->flip_screen())
 			{
 				sx = 240 - sx;
 				sy = 240 - sy;
@@ -171,15 +168,14 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 	}
 }
 
-SCREEN_UPDATE( sbasketb )
+UINT32 sbasketb_state::screen_update_sbasketb(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	sbasketb_state *state = screen->machine().driver_data<sbasketb_state>();
 	int col;
 
 	for (col = 6; col < 32; col++)
-		tilemap_set_scrolly(state->m_bg_tilemap, col, *state->m_scroll);
+		m_bg_tilemap->set_scrolly(col, *m_scroll);
 
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
-	draw_sprites(screen->machine(), bitmap, cliprect);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
+	draw_sprites(machine(), bitmap, cliprect);
 	return 0;
 }

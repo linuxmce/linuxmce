@@ -2,16 +2,19 @@
 class bigevglf_state : public driver_device
 {
 public:
-	bigevglf_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	bigevglf_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_paletteram(*this, "paletteram"),
+		m_spriteram1(*this, "spriteram1"),
+		m_spriteram2(*this, "spriteram2"){ }
 
 	/* memory pointers */
-	UINT8 *  m_paletteram;
-	UINT8 *  m_spriteram1;
-	UINT8 *  m_spriteram2;
+	required_shared_ptr<UINT8> m_paletteram;
+	required_shared_ptr<UINT8> m_spriteram1;
+	required_shared_ptr<UINT8> m_spriteram2;
 
 	/* video-related */
-	bitmap_t *m_tmp_bitmap[4];
+	bitmap_ind16 m_tmp_bitmap[4];
 	UINT8    *m_vidram;
 	UINT32   m_vidram_bank;
 	UINT32   m_plane_selected;
@@ -45,36 +48,49 @@ public:
 	UINT8    m_port_select;     /* for muxed controls */
 
 	/* devices */
-	device_t *m_audiocpu;
+	cpu_device *m_audiocpu;
 	device_t *m_mcu;
+	DECLARE_WRITE8_MEMBER(beg_banking_w);
+	DECLARE_WRITE8_MEMBER(beg_fromsound_w);
+	DECLARE_READ8_MEMBER(beg_fromsound_r);
+	DECLARE_READ8_MEMBER(beg_soundstate_r);
+	DECLARE_READ8_MEMBER(soundstate_r);
+	DECLARE_WRITE8_MEMBER(sound_command_w);
+	DECLARE_READ8_MEMBER(sound_command_r);
+	DECLARE_WRITE8_MEMBER(nmi_disable_w);
+	DECLARE_WRITE8_MEMBER(nmi_enable_w);
+	DECLARE_WRITE8_MEMBER(beg13_a_clr_w);
+	DECLARE_WRITE8_MEMBER(beg13_b_clr_w);
+	DECLARE_WRITE8_MEMBER(beg13_a_set_w);
+	DECLARE_WRITE8_MEMBER(beg13_b_set_w);
+	DECLARE_READ8_MEMBER(beg_status_r);
+	DECLARE_READ8_MEMBER(beg_trackball_x_r);
+	DECLARE_READ8_MEMBER(beg_trackball_y_r);
+	DECLARE_WRITE8_MEMBER(beg_port08_w);
+	DECLARE_READ8_MEMBER(sub_cpu_mcu_coin_port_r);
+	DECLARE_READ8_MEMBER(bigevglf_68705_port_a_r);
+	DECLARE_WRITE8_MEMBER(bigevglf_68705_port_a_w);
+	DECLARE_WRITE8_MEMBER(bigevglf_68705_ddr_a_w);
+	DECLARE_READ8_MEMBER(bigevglf_68705_port_b_r);
+	DECLARE_WRITE8_MEMBER(bigevglf_68705_port_b_w);
+	DECLARE_WRITE8_MEMBER(bigevglf_68705_ddr_b_w);
+	DECLARE_READ8_MEMBER(bigevglf_68705_port_c_r);
+	DECLARE_WRITE8_MEMBER(bigevglf_68705_port_c_w);
+	DECLARE_WRITE8_MEMBER(bigevglf_68705_ddr_c_w);
+	DECLARE_WRITE8_MEMBER(bigevglf_mcu_w);
+	DECLARE_READ8_MEMBER(bigevglf_mcu_r);
+	DECLARE_READ8_MEMBER(bigevglf_mcu_status_r);
+	DECLARE_WRITE8_MEMBER(bigevglf_palette_w);
+	DECLARE_WRITE8_MEMBER(bigevglf_gfxcontrol_w);
+	DECLARE_WRITE8_MEMBER(bigevglf_vidram_addr_w);
+	DECLARE_WRITE8_MEMBER(bigevglf_vidram_w);
+	DECLARE_READ8_MEMBER(bigevglf_vidram_r);
+	DECLARE_DRIVER_INIT(bigevglf);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	UINT32 screen_update_bigevglf(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	TIMER_CALLBACK_MEMBER(from_sound_latch_callback);
+	TIMER_CALLBACK_MEMBER(nmi_callback);
+	TIMER_CALLBACK_MEMBER(deferred_ls74_w);
 };
-
-
-/*----------- defined in machine/bigevglf.c -----------*/
-
-READ8_HANDLER( bigevglf_68705_port_a_r );
-WRITE8_HANDLER( bigevglf_68705_port_a_w );
-READ8_HANDLER( bigevglf_68705_port_b_r );
-WRITE8_HANDLER( bigevglf_68705_port_b_w );
-READ8_HANDLER( bigevglf_68705_port_c_r );
-WRITE8_HANDLER( bigevglf_68705_port_c_w );
-WRITE8_HANDLER( bigevglf_68705_ddr_a_w );
-WRITE8_HANDLER( bigevglf_68705_ddr_b_w );
-WRITE8_HANDLER( bigevglf_68705_ddr_c_w );
-
-WRITE8_HANDLER( bigevglf_mcu_w );
-READ8_HANDLER( bigevglf_mcu_r );
-READ8_HANDLER( bigevglf_mcu_status_r );
-
-
-/*----------- defined in video/bigevglf.c -----------*/
-
-VIDEO_START( bigevglf );
-SCREEN_UPDATE( bigevglf );
-
-READ8_HANDLER( bigevglf_vidram_r );
-WRITE8_HANDLER( bigevglf_vidram_w );
-WRITE8_HANDLER( bigevglf_vidram_addr_w );
-
-WRITE8_HANDLER( bigevglf_gfxcontrol_w );
-WRITE8_HANDLER( bigevglf_palette_w );

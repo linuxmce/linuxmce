@@ -26,7 +26,7 @@
     CONSTANTS
 ***************************************************************************/
 
-#define MAX_GLOBALS		1000
+#define MAX_GLOBALS     1000
 
 
 
@@ -34,45 +34,41 @@
     TYPE DEFINITIONS
 ***************************************************************************/
 
-typedef struct _global_entry global_entry;
-struct _global_entry
+struct global_entry
 {
-	void *		base;
-	UINT32		size;
+	void *      base;
+	UINT32      size;
 };
 
 
-typedef struct _cheat_map cheat_map;
-struct _cheat_map
+struct cheat_map
 {
-	UINT64		offset;
-	UINT64		first_value;
-	UINT64		previous_value;
-	UINT8		state:1;
-	UINT8		undo:7;
+	UINT64      offset;
+	UINT64      first_value;
+	UINT64      previous_value;
+	UINT8       state:1;
+	UINT8       undo:7;
 };
 
 
-typedef struct _cheat_system cheat_system;
-struct _cheat_system
+struct cheat_system
 {
-	char		cpu;
-	UINT64		length;
-	UINT8		width;
-	cheat_map *	cheatmap;
-	UINT8		undo;
-	UINT8		signed_cheat;
-	UINT8		swapped_cheat;
+	char        cpu;
+	UINT64      length;
+	UINT8       width;
+	cheat_map * cheatmap;
+	UINT8       undo;
+	UINT8       signed_cheat;
+	UINT8       swapped_cheat;
 };
 
 
-typedef struct _cheat_region_map cheat_region_map;
-struct _cheat_region_map
+struct cheat_region_map
 {
-	UINT64		offset;
-	UINT64		endoffset;
+	UINT64      offset;
+	UINT64      endoffset;
 	const char *share;
-	UINT8		disabled;
+	UINT8       disabled;
 };
 
 
@@ -149,7 +145,9 @@ static void execute_memdump(running_machine &machine, int ref, int params, const
 static void execute_symlist(running_machine &machine, int ref, int params, const char **param);
 static void execute_softreset(running_machine &machine, int ref, int params, const char **param);
 static void execute_hardreset(running_machine &machine, int ref, int params, const char **param);
-
+static void execute_images(running_machine &machine, int ref, int params, const char **param);
+static void execute_mount(running_machine &machine, int ref, int params, const char **param);
+static void execute_unmount(running_machine &machine, int ref, int params, const char **param);
 
 
 /***************************************************************************
@@ -161,9 +159,9 @@ static void execute_hardreset(running_machine &machine, int ref, int params, con
     given address is valid for cheating
 -------------------------------------------------*/
 
-INLINE int cheat_address_is_valid(address_space *space, offs_t address)
+INLINE int cheat_address_is_valid(address_space &space, offs_t address)
 {
-	return debug_cpu_translate(space, TRANSLATE_READ, &address) && (space->get_write_ptr(address) != NULL);
+	return debug_cpu_translate(space, TRANSLATE_READ, &address) && (space.get_write_ptr(address) != NULL);
 }
 
 
@@ -178,9 +176,9 @@ INLINE UINT64 cheat_sign_extend(const cheat_system *cheatsys, UINT64 value)
 	{
 		switch (cheatsys->width)
 		{
-			case 1:	value = (INT8)value;	break;
-			case 2:	value = (INT16)value;	break;
-			case 4:	value = (INT32)value;	break;
+			case 1: value = (INT8)value;    break;
+			case 2: value = (INT16)value;   break;
+			case 4: value = (INT32)value;   break;
 		}
 	}
 	return value;
@@ -195,10 +193,10 @@ INLINE UINT64 cheat_byte_swap(const cheat_system *cheatsys, UINT64 value)
 	{
 		switch (cheatsys->width)
 		{
-			case 2:	value = ((value >> 8) & 0x00ff) | ((value << 8) & 0xff00);	break;
-			case 4:	value = ((value >> 24) & 0x000000ff) | ((value >> 8) & 0x0000ff00) | ((value << 8) & 0x00ff0000) | ((value << 24) & 0xff000000);	break;
-			case 8:	value = ((value >> 56) & U64(0x00000000000000ff)) | ((value >> 40) & U64(0x000000000000ff00)) | ((value >> 24) & U64(0x0000000000ff0000)) | ((value >> 8) & U64(0x00000000ff000000)) |
-							((value << 8) & U64(0x000000ff00000000)) | ((value << 24) & U64(0x0000ff0000000000)) | ((value << 40) & U64(0x00ff000000000000)) | ((value << 56) & U64(0xff00000000000000));	break;
+			case 2: value = ((value >> 8) & 0x00ff) | ((value << 8) & 0xff00);  break;
+			case 4: value = ((value >> 24) & 0x000000ff) | ((value >> 8) & 0x0000ff00) | ((value << 8) & 0x00ff0000) | ((value << 24) & 0xff000000);    break;
+			case 8: value = ((value >> 56) & U64(0x00000000000000ff)) | ((value >> 40) & U64(0x000000000000ff00)) | ((value >> 24) & U64(0x0000000000ff0000)) | ((value >> 8) & U64(0x00000000ff000000)) |
+							((value << 8) & U64(0x000000ff00000000)) | ((value << 24) & U64(0x0000ff0000000000)) | ((value << 40) & U64(0x00ff000000000000)) | ((value << 56) & U64(0xff00000000000000));   break;
 		}
 	}
 	return value;
@@ -210,7 +208,7 @@ INLINE UINT64 cheat_byte_swap(const cheat_system *cheatsys, UINT64 value)
     and swapping if necessary
 -------------------------------------------------*/
 
-INLINE UINT64 cheat_read_extended(const cheat_system *cheatsys, address_space *space, offs_t address)
+INLINE UINT64 cheat_read_extended(const cheat_system *cheatsys, address_space &space, offs_t address)
 {
 	return cheat_sign_extend(cheatsys, cheat_byte_swap(cheatsys, debug_read_memory(space, address, cheatsys->width, TRUE)));
 }
@@ -244,7 +242,7 @@ void debug_command_init(running_machine &machine)
 		void *base;
 
 		/* stop when we run out of items */
-		name = machine.state().indexed_item(itemnum, base, valsize, valcount);
+		name = machine.save().indexed_item(itemnum, base, valsize, valcount);
 		if (name == NULL)
 			break;
 
@@ -286,10 +284,10 @@ void debug_command_init(running_machine &machine)
 	debug_console_register_command(machine, "ignore",    CMDFLAG_NONE, 0, 0, MAX_COMMAND_PARAMS, execute_ignore);
 	debug_console_register_command(machine, "observe",   CMDFLAG_NONE, 0, 0, MAX_COMMAND_PARAMS, execute_observe);
 
-	debug_console_register_command(machine, "comadd",	CMDFLAG_NONE, 0, 1, 2, execute_comment);
+	debug_console_register_command(machine, "comadd",   CMDFLAG_NONE, 0, 1, 2, execute_comment);
 	debug_console_register_command(machine, "//",        CMDFLAG_NONE, 0, 1, 2, execute_comment);
-	debug_console_register_command(machine, "comdelete",	CMDFLAG_NONE, 0, 1, 1, execute_comment_del);
-	debug_console_register_command(machine, "comsave",	CMDFLAG_NONE, 0, 0, 0, execute_comment_save);
+	debug_console_register_command(machine, "comdelete",    CMDFLAG_NONE, 0, 1, 1, execute_comment_del);
+	debug_console_register_command(machine, "comsave",  CMDFLAG_NONE, 0, 0, 0, execute_comment_save);
 
 	debug_console_register_command(machine, "bpset",     CMDFLAG_NONE, 0, 1, 3, execute_bpset);
 	debug_console_register_command(machine, "bp",        CMDFLAG_NONE, 0, 1, 3, execute_bpset);
@@ -359,17 +357,21 @@ void debug_command_init(running_machine &machine)
 
 	debug_console_register_command(machine, "source",    CMDFLAG_NONE, 0, 1, 1, execute_source);
 
-	debug_console_register_command(machine, "map",		CMDFLAG_NONE, AS_PROGRAM, 1, 1, execute_map);
-	debug_console_register_command(machine, "mapd",		CMDFLAG_NONE, AS_DATA, 1, 1, execute_map);
-	debug_console_register_command(machine, "mapi",		CMDFLAG_NONE, AS_IO, 1, 1, execute_map);
-	debug_console_register_command(machine, "memdump",	CMDFLAG_NONE, 0, 0, 1, execute_memdump);
+	debug_console_register_command(machine, "map",      CMDFLAG_NONE, AS_PROGRAM, 1, 1, execute_map);
+	debug_console_register_command(machine, "mapd",     CMDFLAG_NONE, AS_DATA, 1, 1, execute_map);
+	debug_console_register_command(machine, "mapi",     CMDFLAG_NONE, AS_IO, 1, 1, execute_map);
+	debug_console_register_command(machine, "memdump",  CMDFLAG_NONE, 0, 0, 1, execute_memdump);
 
-	debug_console_register_command(machine, "symlist",	CMDFLAG_NONE, 0, 0, 1, execute_symlist);
+	debug_console_register_command(machine, "symlist",  CMDFLAG_NONE, 0, 0, 1, execute_symlist);
 
-	debug_console_register_command(machine, "softreset",	CMDFLAG_NONE, 0, 0, 1, execute_softreset);
-	debug_console_register_command(machine, "hardreset",	CMDFLAG_NONE, 0, 0, 1, execute_hardreset);
+	debug_console_register_command(machine, "softreset",    CMDFLAG_NONE, 0, 0, 1, execute_softreset);
+	debug_console_register_command(machine, "hardreset",    CMDFLAG_NONE, 0, 0, 1, execute_hardreset);
 
-	machine.add_notifier(MACHINE_NOTIFY_EXIT, debug_command_exit);
+	debug_console_register_command(machine, "images",   CMDFLAG_NONE, 0, 0, 0, execute_images);
+	debug_console_register_command(machine, "mount",    CMDFLAG_NONE, 0, 2, 2, execute_mount);
+	debug_console_register_command(machine, "unmount",  CMDFLAG_NONE, 0, 1, 1, execute_unmount);
+
+	machine.add_notifier(MACHINE_NOTIFY_EXIT, machine_notify_delegate(FUNC(debug_command_exit), &machine));
 
 	/* set up the initial debugscript if specified */
 	name = machine.options().debug_script();
@@ -384,10 +386,6 @@ void debug_command_init(running_machine &machine)
 
 static void debug_command_exit(running_machine &machine)
 {
-	/* turn off all traces */
-	for (device_t *device = machine.m_devicelist.first(); device != NULL; device = device->next())
-		device->debug()->trace(NULL, 0, NULL);
-
 	if (cheat.length)
 		auto_free(machine, cheat.cheatmap);
 }
@@ -442,10 +440,10 @@ static UINT64 global_get(symbol_table &table, void *ref)
 	global_entry *global = (global_entry *)ref;
 	switch (global->size)
 	{
-		case 1:		return *(UINT8 *)global->base;
-		case 2:		return *(UINT16 *)global->base;
-		case 4:		return *(UINT32 *)global->base;
-		case 8:		return *(UINT64 *)global->base;
+		case 1:     return *(UINT8 *)global->base;
+		case 2:     return *(UINT16 *)global->base;
+		case 4:     return *(UINT32 *)global->base;
+		case 8:     return *(UINT64 *)global->base;
 	}
 	return ~0;
 }
@@ -460,10 +458,10 @@ static void global_set(symbol_table &table, void *ref, UINT64 value)
 	global_entry *global = (global_entry *)ref;
 	switch (global->size)
 	{
-		case 1:		*(UINT8 *)global->base = value;	break;
-		case 2:		*(UINT16 *)global->base = value;	break;
-		case 4:		*(UINT32 *)global->base = value;	break;
-		case 8:		*(UINT64 *)global->base = value;	break;
+		case 1:     *(UINT8 *)global->base = value; break;
+		case 2:     *(UINT16 *)global->base = value;    break;
+		case 4:     *(UINT32 *)global->base = value;    break;
+		case 8:     *(UINT64 *)global->base = value;    break;
 	}
 }
 
@@ -539,8 +537,8 @@ int debug_command_parameter_cpu(running_machine &machine, const char *param, dev
 	}
 
 	/* if we got a valid one, return */
-	device_execute_interface *exec = NULL;
-	for (bool gotone = machine.m_devicelist.first(exec); gotone; gotone = exec->next(exec))
+	execute_interface_iterator iter(machine.root_device());
+	for (device_execute_interface *exec = iter.first(); exec != NULL; exec = iter.next())
 		if (cpunum-- == 0)
 		{
 			*result = &exec->device();
@@ -559,7 +557,7 @@ int debug_command_parameter_cpu(running_machine &machine, const char *param, dev
     address space
 -------------------------------------------------*/
 
-int debug_command_parameter_cpu_space(running_machine &machine, const char *param, int spacenum, address_space **result)
+int debug_command_parameter_cpu_space(running_machine &machine, const char *param, int spacenum, address_space *&result)
 {
 	device_t *cpu;
 
@@ -568,12 +566,12 @@ int debug_command_parameter_cpu_space(running_machine &machine, const char *para
 		return FALSE;
 
 	/* fetch the space pointer */
-	*result = cpu->memory().space(spacenum);
-	if (*result == NULL)
+	if (!cpu->memory().has_space(spacenum))
 	{
 		debug_console_printf(machine, "No matching memory space found for CPU '%s'\n", cpu->tag());
 		return FALSE;
 	}
+	result = &cpu->memory().space(spacenum);
 	return TRUE;
 }
 
@@ -693,9 +691,9 @@ static int mini_printf(running_machine &machine, char *buffer, const char *forma
 			if (!c) break;
 			switch (c)
 			{
-				case '\\':	*p++ = c;		break;
-				case 'n':	*p++ = '\n';	break;
-				default:					break;
+				case '\\':  *p++ = c;       break;
+				case 'n':   *p++ = '\n';    break;
+				default:                    break;
 			}
 			continue;
 		}
@@ -976,8 +974,8 @@ static void execute_focus(running_machine &machine, int ref, int params, const c
 	cpu->debug()->ignore(false);
 
 	/* then loop over CPUs and set the ignore flags on all other CPUs */
-	device_execute_interface *exec = NULL;
-	for (bool gotone = machine.m_devicelist.first(exec); gotone; gotone = exec->next(exec))
+	execute_interface_iterator iter(machine.root_device());
+	for (device_execute_interface *exec = iter.first(); exec != NULL; exec = iter.next())
 		if (&exec->device() != cpu)
 			exec->device().debug()->ignore(true);
 	debug_console_printf(machine, "Now focused on CPU '%s'\n", cpu->tag());
@@ -996,8 +994,8 @@ static void execute_ignore(running_machine &machine, int ref, int params, const 
 		astring buffer;
 
 		/* loop over all executable devices */
-		device_execute_interface *exec = NULL;
-		for (bool gotone = machine.m_devicelist.first(exec); gotone; gotone = exec->next(exec))
+		execute_interface_iterator iter(machine.root_device());
+		for (device_execute_interface *exec = iter.first(); exec != NULL; exec = iter.next())
 
 			/* build up a comma-separated list */
 			if (!exec->device().debug()->observing())
@@ -1028,11 +1026,14 @@ static void execute_ignore(running_machine &machine, int ref, int params, const 
 		for (int paramnum = 0; paramnum < params; paramnum++)
 		{
 			/* make sure this isn't the last live CPU */
-			device_execute_interface *exec = NULL;
-			bool gotone;
-			for (gotone = machine.m_devicelist.first(exec); gotone; gotone = exec->next(exec))
+			execute_interface_iterator iter(machine.root_device());
+			bool gotone = false;
+			for (device_execute_interface *exec = iter.first(); exec != NULL; exec = iter.next())
 				if (&exec->device() != devicelist[paramnum] && exec->device().debug()->observing())
+				{
+					gotone = true;
 					break;
+				}
 			if (!gotone)
 			{
 				debug_console_printf(machine, "Can't ignore all devices!\n");
@@ -1058,8 +1059,8 @@ static void execute_observe(running_machine &machine, int ref, int params, const
 		astring buffer;
 
 		/* loop over all executable devices */
-		device_execute_interface *exec = NULL;
-		for (bool gotone = machine.m_devicelist.first(exec); gotone; gotone = exec->next(exec))
+		execute_interface_iterator iter(machine.root_device());
+		for (device_execute_interface *exec = iter.first(); exec != NULL; exec = iter.next())
 
 			/* build up a comma-separated list */
 			if (exec->device().debug()->observing())
@@ -1208,7 +1209,8 @@ static void execute_bpclear(running_machine &machine, int ref, int params, const
 	/* if 0 parameters, clear all */
 	if (params == 0)
 	{
-		for (device_t *device = machine.m_devicelist.first(); device != NULL; device = device->next())
+		device_iterator iter(machine.root_device());
+		for (device_t *device = iter.first(); device != NULL; device = iter.next())
 			device->debug()->breakpoint_clear_all();
 		debug_console_printf(machine, "Cleared all breakpoints\n");
 	}
@@ -1218,8 +1220,9 @@ static void execute_bpclear(running_machine &machine, int ref, int params, const
 		return;
 	else
 	{
+		device_iterator iter(machine.root_device());
 		bool found = false;
-		for (device_t *device = machine.m_devicelist.first(); device != NULL; device = device->next())
+		for (device_t *device = iter.first(); device != NULL; device = iter.next())
 			if (device->debug()->breakpoint_clear(bpindex))
 				found = true;
 		if (found)
@@ -1242,7 +1245,8 @@ static void execute_bpdisenable(running_machine &machine, int ref, int params, c
 	/* if 0 parameters, clear all */
 	if (params == 0)
 	{
-		for (device_t *device = machine.m_devicelist.first(); device != NULL; device = device->next())
+		device_iterator iter(machine.root_device());
+		for (device_t *device = iter.first(); device != NULL; device = iter.next())
 			device->debug()->breakpoint_enable_all(ref);
 		if (ref == 0)
 			debug_console_printf(machine, "Disabled all breakpoints\n");
@@ -1255,8 +1259,9 @@ static void execute_bpdisenable(running_machine &machine, int ref, int params, c
 		return;
 	else
 	{
+		device_iterator iter(machine.root_device());
 		bool found = false;
-		for (device_t *device = machine.m_devicelist.first(); device != NULL; device = device->next())
+		for (device_t *device = iter.first(); device != NULL; device = iter.next())
 			if (device->debug()->breakpoint_enable(bpindex, ref))
 				found = true;
 		if (found)
@@ -1278,7 +1283,8 @@ static void execute_bplist(running_machine &machine, int ref, int params, const 
 	astring buffer;
 
 	/* loop over all CPUs */
-	for (device_t *device = machine.m_devicelist.first(); device != NULL; device = device->next())
+	device_iterator iter(machine.root_device());
+	for (device_t *device = iter.first(); device != NULL; device = iter.next())
 		if (device->debug()->breakpoint_first() != NULL)
 		{
 			debug_console_printf(machine, "Device '%s' breakpoints:\n", device->tag());
@@ -1315,7 +1321,7 @@ static void execute_wpset(running_machine &machine, int ref, int params, const c
 	int wpnum;
 
 	/* CPU is implicit */
-	if (!debug_command_parameter_cpu_space(machine, NULL, ref, &space))
+	if (!debug_command_parameter_cpu_space(machine, NULL, ref, space))
 		return;
 
 	/* param 1 is the address */
@@ -1366,7 +1372,8 @@ static void execute_wpclear(running_machine &machine, int ref, int params, const
 	/* if 0 parameters, clear all */
 	if (params == 0)
 	{
-		for (device_t *device = machine.m_devicelist.first(); device != NULL; device = device->next())
+		device_iterator iter(machine.root_device());
+		for (device_t *device = iter.first(); device != NULL; device = iter.next())
 			device->debug()->watchpoint_clear_all();
 		debug_console_printf(machine, "Cleared all watchpoints\n");
 	}
@@ -1376,8 +1383,9 @@ static void execute_wpclear(running_machine &machine, int ref, int params, const
 		return;
 	else
 	{
+		device_iterator iter(machine.root_device());
 		bool found = false;
-		for (device_t *device = machine.m_devicelist.first(); device != NULL; device = device->next())
+		for (device_t *device = iter.first(); device != NULL; device = iter.next())
 			if (device->debug()->watchpoint_clear(wpindex))
 				found = true;
 		if (found)
@@ -1400,7 +1408,8 @@ static void execute_wpdisenable(running_machine &machine, int ref, int params, c
 	/* if 0 parameters, clear all */
 	if (params == 0)
 	{
-		for (device_t *device = machine.m_devicelist.first(); device != NULL; device = device->next())
+		device_iterator iter(machine.root_device());
+		for (device_t *device = iter.first(); device != NULL; device = iter.next())
 			device->debug()->watchpoint_enable_all(ref);
 		if (ref == 0)
 			debug_console_printf(machine, "Disabled all watchpoints\n");
@@ -1413,8 +1422,9 @@ static void execute_wpdisenable(running_machine &machine, int ref, int params, c
 		return;
 	else
 	{
+		device_iterator iter(machine.root_device());
 		bool found = false;
-		for (device_t *device = machine.m_devicelist.first(); device != NULL; device = device->next())
+		for (device_t *device = iter.first(); device != NULL; device = iter.next())
 			if (device->debug()->watchpoint_enable(wpindex, ref))
 				found = true;
 		if (found)
@@ -1436,7 +1446,8 @@ static void execute_wplist(running_machine &machine, int ref, int params, const 
 	astring buffer;
 
 	/* loop over all CPUs */
-	for (device_t *device = machine.m_devicelist.first(); device != NULL; device = device->next())
+	device_iterator iter(machine.root_device());
+	for (device_t *device = iter.first(); device != NULL; device = iter.next())
 		for (address_spacenum spacenum = AS_0; spacenum < ADDRESS_SPACES; spacenum++)
 			if (device->debug()->watchpoint_first(spacenum) != NULL)
 			{
@@ -1478,7 +1489,8 @@ static void execute_hotspot(running_machine &machine, int ref, int params, const
 		bool cleared = false;
 
 		/* loop over CPUs and find live spots */
-		for (device_t *device = machine.m_devicelist.first(); device != NULL; device = device->next())
+		device_iterator iter(machine.root_device());
+		for (device_t *device = iter.first(); device != NULL; device = iter.next())
 			if (device->debug()->hotspot_tracking_enabled())
 			{
 				device->debug()->hotspot_track(0, 0);
@@ -1524,7 +1536,7 @@ static void execute_save(running_machine &machine, int ref, int params, const ch
 		return;
 	if (!debug_command_parameter_number(machine, param[2], &length))
 		return;
-	if (!debug_command_parameter_cpu_space(machine, (params > 3) ? param[3] : NULL, ref, &space))
+	if (!debug_command_parameter_cpu_space(machine, (params > 3) ? param[3] : NULL, ref, space))
 		return;
 
 	/* determine the addresses to write */
@@ -1542,7 +1554,7 @@ static void execute_save(running_machine &machine, int ref, int params, const ch
 	/* now write the data out */
 	for (i = offset; i <= endoffset; i++)
 	{
-		UINT8 byte = debug_read_byte(space, i, TRUE);
+		UINT8 byte = debug_read_byte(*space, i, TRUE);
 		fwrite(&byte, 1, 1, f);
 	}
 
@@ -1568,7 +1580,7 @@ static void execute_load(running_machine &machine, int ref, int params, const ch
 		return;
 	if (!debug_command_parameter_number(machine, param[2], &length))
 		return;
-	if (!debug_command_parameter_cpu_space(machine, (params > 3) ? param[3] : NULL, ref, &space))
+	if (!debug_command_parameter_cpu_space(machine, (params > 3) ? param[3] : NULL, ref, space))
 		return;
 
 	/* determine the addresses to read */
@@ -1591,7 +1603,7 @@ static void execute_load(running_machine &machine, int ref, int params, const ch
 		/* check if end of file has been reached and stop loading if it has */
 		if (feof(f))
 			break;
-		debug_write_byte(space, i, byte, TRUE);
+		debug_write_byte(*space, i, byte, TRUE);
 	}
 	/* close the file */
 	fclose(f);
@@ -1622,7 +1634,7 @@ static void execute_dump(running_machine &machine, int ref, int params, const ch
 		return;
 	if (!debug_command_parameter_number(machine, param[4], &ascii))
 		return;
-	if (!debug_command_parameter_cpu_space(machine, (params > 5) ? param[5] : NULL, ref, &space))
+	if (!debug_command_parameter_cpu_space(machine, (params > 5) ? param[5] : NULL, ref, space))
 		return;
 
 	/* further validation */
@@ -1661,9 +1673,9 @@ static void execute_dump(running_machine &machine, int ref, int params, const ch
 			if (i + j <= endoffset)
 			{
 				offs_t curaddr = i + j;
-				if (debug_cpu_translate(space, TRANSLATE_READ_DEBUG, &curaddr))
+				if (debug_cpu_translate(*space, TRANSLATE_READ_DEBUG, &curaddr))
 				{
-					UINT64 value = debug_read_memory(space, i + j, width, TRUE);
+					UINT64 value = debug_read_memory(*space, i + j, width, TRUE);
 					outdex += sprintf(&output[outdex], " %s", core_i64_hex_format(value, width * 2));
 				}
 				else
@@ -1680,10 +1692,10 @@ static void execute_dump(running_machine &machine, int ref, int params, const ch
 			for (j = 0; j < 16 && (i + j) <= endoffset; j++)
 			{
 				offs_t curaddr = i + j;
-				if (debug_cpu_translate(space, TRANSLATE_READ_DEBUG, &curaddr))
+				if (debug_cpu_translate(*space, TRANSLATE_READ_DEBUG, &curaddr))
 				{
-					UINT8 byte = debug_read_byte(space, i + j, TRUE);
-					outdex += sprintf(&output[outdex], "%c", (byte >= 32 && byte < 128) ? byte : '.');
+					UINT8 byte = debug_read_byte(*space, i + j, TRUE);
+					outdex += sprintf(&output[outdex], "%c", (byte >= 32 && byte < 127) ? byte : '.');
 				}
 				else
 					outdex += sprintf(&output[outdex], " ");
@@ -1718,7 +1730,7 @@ static void execute_cheatinit(running_machine &machine, int ref, int params, con
 	memset(cheat_region, 0, sizeof(cheat_region));
 
 	/* validate parameters */
-	if (!debug_command_parameter_cpu_space(machine, (params > 3) ? param[3] : NULL, AS_PROGRAM, &space))
+	if (!debug_command_parameter_cpu_space(machine, (params > 3) ? param[3] : NULL, AS_PROGRAM, space))
 		return;
 
 	if (ref == 0)
@@ -1803,7 +1815,7 @@ static void execute_cheatinit(running_machine &machine, int ref, int params, con
 	for (i = 0; i <= region_count; i++)
 		if (!cheat_region[i].disabled)
 			for (curaddr = cheat_region[i].offset; curaddr <= cheat_region[i].endoffset; curaddr += cheat.width)
-				if (cheat_address_is_valid(space, curaddr))
+				if (cheat_address_is_valid(*space, curaddr))
 					real_length++;
 
 	if (real_length == 0)
@@ -1832,7 +1844,7 @@ static void execute_cheatinit(running_machine &machine, int ref, int params, con
 			return;
 		}
 
-		if (!debug_command_parameter_cpu_space(machine, &cheat.cpu, AS_PROGRAM, &space))
+		if (!debug_command_parameter_cpu_space(machine, &cheat.cpu, AS_PROGRAM, space))
 			return;
 
 		cheat_map *newmap = auto_alloc_array(machine, cheat_map, cheat.length + real_length);
@@ -1849,9 +1861,9 @@ static void execute_cheatinit(running_machine &machine, int ref, int params, con
 	for (i = 0; i < region_count; i++)
 		if (!cheat_region[i].disabled)
 			for (curaddr = cheat_region[i].offset; curaddr <= cheat_region[i].endoffset; curaddr += cheat.width)
-				if (cheat_address_is_valid(space, curaddr))
+				if (cheat_address_is_valid(*space, curaddr))
 				{
-					cheat.cheatmap[active_cheat].previous_value = cheat_read_extended(&cheat, space, curaddr);
+					cheat.cheatmap[active_cheat].previous_value = cheat_read_extended(&cheat, *space, curaddr);
 					cheat.cheatmap[active_cheat].first_value = cheat.cheatmap[active_cheat].previous_value;
 					cheat.cheatmap[active_cheat].offset = curaddr;
 					cheat.cheatmap[active_cheat].state = 1;
@@ -1899,7 +1911,7 @@ static void execute_cheatnext(running_machine &machine, int ref, int params, con
 		return;
 	}
 
-	if (!debug_command_parameter_cpu_space(machine, &cheat.cpu, AS_PROGRAM, &space))
+	if (!debug_command_parameter_cpu_space(machine, &cheat.cpu, AS_PROGRAM, space))
 		return;
 
 	if (params > 1 && !debug_command_parameter_number(machine, param[1], &comp_value))
@@ -1939,7 +1951,7 @@ static void execute_cheatnext(running_machine &machine, int ref, int params, con
 	for (cheatindex = 0; cheatindex < cheat.length; cheatindex += 1)
 		if (cheat.cheatmap[cheatindex].state == 1)
 		{
-			UINT64 cheat_value = cheat_read_extended(&cheat, space, cheat.cheatmap[cheatindex].offset);
+			UINT64 cheat_value = cheat_read_extended(&cheat, *space, cheat.cheatmap[cheatindex].offset);
 			UINT64 comp_byte = (ref == 0) ? cheat.cheatmap[cheatindex].previous_value : cheat.cheatmap[cheatindex].first_value;
 			UINT8 disable_byte = FALSE;
 
@@ -2054,7 +2066,7 @@ static void execute_cheatlist(running_machine &machine, int ref, int params, con
 	UINT64 sizemask;
 	FILE *f = NULL;
 
-	if (!debug_command_parameter_cpu_space(machine, &cheat.cpu, AS_PROGRAM, &space))
+	if (!debug_command_parameter_cpu_space(machine, &cheat.cpu, AS_PROGRAM, space))
 		return;
 
 	if (!debug_command_parameter_cpu(machine, &cheat.cpu, &cpu))
@@ -2066,18 +2078,18 @@ static void execute_cheatlist(running_machine &machine, int ref, int params, con
 	switch (space->spacenum())
 	{
 		default:
-		case AS_PROGRAM:	spaceletter = 'p';	break;
-		case AS_DATA:	spaceletter = 'd';	break;
-		case AS_IO:		spaceletter = 'i';	break;
+		case AS_PROGRAM:    spaceletter = 'p';  break;
+		case AS_DATA:   spaceletter = 'd';  break;
+		case AS_IO:     spaceletter = 'i';  break;
 	}
 
 	switch (cheat.width)
 	{
 		default:
-		case 1:						sizeletter = 'b';	sizemask = 0xff;					break;
-		case 2:						sizeletter = 'w';	sizemask = 0xffff;					break;
-		case 4:						sizeletter = 'd';	sizemask = 0xffffffff;				break;
-		case 8:						sizeletter = 'q';	sizemask = U64(0xffffffffffffffff);	break;
+		case 1:                     sizeletter = 'b';   sizemask = 0xff;                    break;
+		case 2:                     sizeletter = 'w';   sizemask = 0xffff;                  break;
+		case 4:                     sizeletter = 'd';   sizemask = 0xffffffff;              break;
+		case 8:                     sizeletter = 'q';   sizemask = U64(0xffffffffffffffff); break;
 	}
 
 	/* write the cheat list */
@@ -2085,7 +2097,7 @@ static void execute_cheatlist(running_machine &machine, int ref, int params, con
 	{
 		if (cheat.cheatmap[cheatindex].state == 1)
 		{
-			UINT64 value = cheat_byte_swap(&cheat, cheat_read_extended(&cheat, space, cheat.cheatmap[cheatindex].offset)) & sizemask;
+			UINT64 value = cheat_byte_swap(&cheat, cheat_read_extended(&cheat, *space, cheat.cheatmap[cheatindex].offset)) & sizemask;
 			offs_t address = space->byte_to_address(cheat.cheatmap[cheatindex].offset);
 
 			if (params > 0)
@@ -2155,7 +2167,7 @@ static void execute_find(running_machine &machine, int ref, int params, const ch
 		return;
 	if (!debug_command_parameter_number(machine, param[1], &length))
 		return;
-	if (!debug_command_parameter_cpu_space(machine, NULL, ref, &space))
+	if (!debug_command_parameter_cpu_space(machine, NULL, ref, space))
 		return;
 
 	/* further validation */
@@ -2211,11 +2223,11 @@ static void execute_find(running_machine &machine, int ref, int params, const ch
 		{
 			switch (data_size[j])
 			{
-				case 1:	match = ((UINT8)debug_read_byte(space, i + suboffset, TRUE) == (UINT8)data_to_find[j]);	break;
-				case 2:	match = ((UINT16)debug_read_word(space, i + suboffset, TRUE) == (UINT16)data_to_find[j]);	break;
-				case 4:	match = ((UINT32)debug_read_dword(space, i + suboffset, TRUE) == (UINT32)data_to_find[j]);	break;
-				case 8:	match = ((UINT64)debug_read_qword(space, i + suboffset, TRUE) == (UINT64)data_to_find[j]);	break;
-				default:	/* all other cases are wildcards */		break;
+				case 1: match = ((UINT8)debug_read_byte(*space, i + suboffset, TRUE) == (UINT8)data_to_find[j]);    break;
+				case 2: match = ((UINT16)debug_read_word(*space, i + suboffset, TRUE) == (UINT16)data_to_find[j]);  break;
+				case 4: match = ((UINT32)debug_read_dword(*space, i + suboffset, TRUE) == (UINT32)data_to_find[j]); break;
+				case 8: match = ((UINT64)debug_read_qword(*space, i + suboffset, TRUE) == (UINT64)data_to_find[j]); break;
+				default:    /* all other cases are wildcards */     break;
 			}
 			suboffset += data_size[j] & 0x0f;
 		}
@@ -2253,7 +2265,7 @@ static void execute_dasm(running_machine &machine, int ref, int params, const ch
 		return;
 	if (!debug_command_parameter_number(machine, param[3], &bytes))
 		return;
-	if (!debug_command_parameter_cpu_space(machine, (params > 4) ? param[4] : NULL, AS_PROGRAM, &space))
+	if (!debug_command_parameter_cpu_space(machine, (params > 4) ? param[4] : NULL, AS_PROGRAM, space))
 		return;
 
 	/* determine the width of the bytes */
@@ -2290,15 +2302,15 @@ static void execute_dasm(running_machine &machine, int ref, int params, const ch
 
 		/* make sure we can translate the address */
 		tempaddr = pcbyte;
-		if (debug_cpu_translate(space, TRANSLATE_FETCH_DEBUG, &tempaddr))
+		if (debug_cpu_translate(*space, TRANSLATE_FETCH_DEBUG, &tempaddr))
 		{
 			UINT8 opbuf[64], argbuf[64];
 
 			/* fetch the bytes up to the maximum */
 			for (numbytes = 0; numbytes < maxbytes; numbytes++)
 			{
-				opbuf[numbytes] = debug_read_opcode(space, pcbyte + numbytes, 1, FALSE);
-				argbuf[numbytes] = debug_read_opcode(space, pcbyte + numbytes, 1, TRUE);
+				opbuf[numbytes] = debug_read_opcode(*space, pcbyte + numbytes, 1, FALSE);
+				argbuf[numbytes] = debug_read_opcode(*space, pcbyte + numbytes, 1, TRUE);
 			}
 
 			/* disassemble the result */
@@ -2311,7 +2323,7 @@ static void execute_dasm(running_machine &machine, int ref, int params, const ch
 			int startdex = outdex;
 			numbytes = space->address_to_byte(numbytes);
 			for (j = 0; j < numbytes; j += minbytes)
-				outdex += sprintf(&output[outdex], "%s ", core_i64_hex_format(debug_read_opcode(space, pcbyte + j, minbytes, FALSE), minbytes * 2));
+				outdex += sprintf(&output[outdex], "%s ", core_i64_hex_format(debug_read_opcode(*space, pcbyte + j, minbytes, FALSE), minbytes * 2));
 			if (outdex - startdex < byteswidth)
 				outdex += sprintf(&output[outdex], "%*s", byteswidth - (outdex - startdex), "");
 			outdex += sprintf(&output[outdex], "  ");
@@ -2437,7 +2449,7 @@ static void execute_history(running_machine &machine, int ref, int params, const
 {
 	/* validate parameters */
 	address_space *space;
-	if (!debug_command_parameter_cpu_space(machine, (params > 0) ? param[0] : NULL, AS_PROGRAM, &space))
+	if (!debug_command_parameter_cpu_space(machine, (params > 0) ? param[0] : NULL, AS_PROGRAM, space))
 		return;
 
 	UINT64 count = device_debug::HISTORY_SIZE;
@@ -2461,8 +2473,8 @@ static void execute_history(running_machine &machine, int ref, int params, const
 		UINT8 opbuf[64], argbuf[64];
 		for (int numbytes = 0; numbytes < maxbytes; numbytes++)
 		{
-			opbuf[numbytes] = debug_read_opcode(space, pcbyte + numbytes, 1, false);
-			argbuf[numbytes] = debug_read_opcode(space, pcbyte + numbytes, 1, true);
+			opbuf[numbytes] = debug_read_opcode(*space, pcbyte + numbytes, 1, false);
+			argbuf[numbytes] = debug_read_opcode(*space, pcbyte + numbytes, 1, true);
 		}
 
 		char buffer[200];
@@ -2492,7 +2504,8 @@ static void execute_snap(running_machine &machine, int ref, int params, const ch
 		const char *filename = param[0];
 		int scrnum = (params > 1) ? atoi(param[1]) : 0;
 
-		screen_device *screen = downcast<screen_device *>(machine.m_devicelist.find(SCREEN, scrnum));
+		screen_device_iterator iter(machine.root_device());
+		screen_device *screen = iter.byindex(scrnum);
 
 		if ((screen == NULL) || !machine.render().is_live(*screen))
 		{
@@ -2544,7 +2557,7 @@ static void execute_map(running_machine &machine, int ref, int params, const cha
 		return;
 
 	/* CPU is implicit */
-	if (!debug_command_parameter_cpu_space(machine, NULL, ref, &space))
+	if (!debug_command_parameter_cpu_space(machine, NULL, ref, space))
 		return;
 
 	/* do the translation first */
@@ -2552,9 +2565,9 @@ static void execute_map(running_machine &machine, int ref, int params, const cha
 	{
 		static const char *const intnames[] = { "Read", "Write", "Fetch" };
 		taddress = space->address_to_byte(address) & space->bytemask();
-		if (debug_cpu_translate(space, intention, &taddress))
+		if (debug_cpu_translate(*space, intention, &taddress))
 		{
-			const char *mapname = const_cast<address_space *>(space)->get_handler_string((intention == TRANSLATE_WRITE_DEBUG) ? ROW_WRITE : ROW_READ, taddress);
+			const char *mapname = space->get_handler_string((intention == TRANSLATE_WRITE_DEBUG) ? ROW_WRITE : ROW_READ, taddress);
 			debug_console_printf(machine, "%7s: %s logical == %s physical -> %s\n", intnames[intention & 3], core_i64_hex_format(address, space->logaddrchars()), core_i64_hex_format(space->byte_to_address(taddress), space->addrchars()), mapname);
 		}
 		else
@@ -2579,7 +2592,7 @@ static void execute_memdump(running_machine &machine, int ref, int params, const
 	file = fopen(filename, "w");
 	if (file)
 	{
-		memory_dump(machine, file);
+		machine.memory().dump(file);
 		fclose(file);
 	}
 }
@@ -2667,4 +2680,66 @@ static void execute_softreset(running_machine &machine, int ref, int params, con
 static void execute_hardreset(running_machine &machine, int ref, int params, const char **param)
 {
 	machine.schedule_hard_reset();
+}
+
+/*-------------------------------------------------
+    execute_images - lists all image devices with
+    mounted files
+-------------------------------------------------*/
+
+static void execute_images(running_machine &machine, int ref, int params, const char **param)
+{
+	image_interface_iterator iter(machine.root_device());
+	for (device_image_interface *img = iter.first(); img != NULL; img = iter.next())
+	{
+		debug_console_printf(machine, "%s: %s\n",img->brief_instance_name(),img->exists() ? img->filename() : "[empty slot]");
+	}
+	if (iter.first() == NULL) {
+		debug_console_printf(machine, "No image devices in this driver\n");
+	}
+}
+
+/*-------------------------------------------------
+    execute_mount - execute the image mount command
+-------------------------------------------------*/
+
+static void execute_mount(running_machine &machine, int ref, int params, const char **param)
+{
+	image_interface_iterator iter(machine.root_device());
+	bool done = false;
+	for (device_image_interface *img = iter.first(); img != NULL; img = iter.next())
+	{
+		if (strcmp(img->brief_instance_name(),param[0])==0) {
+			if (img->load(param[1])==IMAGE_INIT_FAIL) {
+				debug_console_printf(machine, "Unable to mount file %s on %s\n",param[1],param[0]);
+			} else {
+				debug_console_printf(machine, "File %s mounted on %s\n",param[1],param[0]);
+			}
+			done = true;
+			break;
+		}
+	}
+	if (!done)
+		debug_console_printf(machine, "There is no image device :%s\n",param[0]);
+}
+
+/*-------------------------------------------------
+    execute_unmount - execute the image unmount command
+-------------------------------------------------*/
+
+static void execute_unmount(running_machine &machine, int ref, int params, const char **param)
+{
+	image_interface_iterator iter(machine.root_device());
+	bool done = false;
+	for (device_image_interface *img = iter.first(); img != NULL; img = iter.next())
+	{
+		if (strcmp(img->brief_instance_name(),param[0])==0) {
+			img->unload();
+			debug_console_printf(machine, "Unmounted file from : %s\n",param[0]);
+			done = true;
+			break;
+		}
+	}
+	if (!done)
+		debug_console_printf(machine, "There is no image device :%s\n",param[0]);
 }

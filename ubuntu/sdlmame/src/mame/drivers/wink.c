@@ -20,22 +20,38 @@
 class wink_state : public driver_device
 {
 public:
-	wink_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	wink_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"){ }
 
-	UINT8 *m_videoram;
+	required_shared_ptr<UINT8> m_videoram;
 	tilemap_t *m_bg_tilemap;
 	UINT8 m_sound_flag;
 	UINT8 m_tile_bank;
+	DECLARE_WRITE8_MEMBER(bgram_w);
+	DECLARE_WRITE8_MEMBER(player_mux_w);
+	DECLARE_WRITE8_MEMBER(tile_banking_w);
+	DECLARE_WRITE8_MEMBER(wink_coin_counter_w);
+	DECLARE_READ8_MEMBER(analog_port_r);
+	DECLARE_READ8_MEMBER(player_inputs_r);
+	DECLARE_WRITE8_MEMBER(sound_irq_w);
+	DECLARE_READ8_MEMBER(prot_r);
+	DECLARE_WRITE8_MEMBER(prot_w);
+	DECLARE_READ8_MEMBER(sound_r);
+	DECLARE_DRIVER_INIT(wink);
+	TILE_GET_INFO_MEMBER(get_bg_tile_info);
+	virtual void machine_reset();
+	virtual void video_start();
+	UINT32 screen_update_wink(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(wink_sound);
 };
 
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(wink_state::get_bg_tile_info)
 {
-	wink_state *state = machine.driver_data<wink_state>();
-	UINT8 *videoram = state->m_videoram;
+	UINT8 *videoram = m_videoram;
 	int code = videoram[tile_index];
-	code |= 0x200 * state->m_tile_bank;
+	code |= 0x200 * m_tile_bank;
 
 	// the 2 parts of the screen use different tile banking
 	if(tile_index < 0x360)
@@ -43,74 +59,70 @@ static TILE_GET_INFO( get_bg_tile_info )
 		code |= 0x100;
 	}
 
-	SET_TILE_INFO(0, code, 0, 0);
+	SET_TILE_INFO_MEMBER(0, code, 0, 0);
 }
 
-static VIDEO_START( wink )
+void wink_state::video_start()
 {
-	wink_state *state = machine.driver_data<wink_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(wink_state::get_bg_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
 }
 
-static SCREEN_UPDATE( wink )
+UINT32 wink_state::screen_update_wink(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	wink_state *state = screen->machine().driver_data<wink_state>();
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
 	return 0;
 }
 
-static WRITE8_HANDLER( bgram_w )
+WRITE8_MEMBER(wink_state::bgram_w)
 {
-	wink_state *state = space->machine().driver_data<wink_state>();
-	UINT8 *videoram = state->m_videoram;
+	UINT8 *videoram = m_videoram;
 	videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-static WRITE8_HANDLER( player_mux_w )
+WRITE8_MEMBER(wink_state::player_mux_w)
 {
 	//player_mux = data & 1;
 	//no mux / cocktail mode in the real pcb? strange...
 }
 
-static WRITE8_HANDLER( tile_banking_w )
+WRITE8_MEMBER(wink_state::tile_banking_w)
 {
-	wink_state *state = space->machine().driver_data<wink_state>();
-	state->m_tile_bank = data & 1;
-	tilemap_mark_all_tiles_dirty(state->m_bg_tilemap);
+	m_tile_bank = data & 1;
+	m_bg_tilemap->mark_all_dirty();
 }
 
-static WRITE8_HANDLER( wink_coin_counter_w )
+WRITE8_MEMBER(wink_state::wink_coin_counter_w)
 {
-	coin_counter_w(space->machine(), offset,data & 1);
+	coin_counter_w(machine(), offset,data & 1);
 }
 
-static READ8_HANDLER( analog_port_r )
+READ8_MEMBER(wink_state::analog_port_r)
 {
-	return input_port_read(space->machine(), /* player_mux ? "DIAL2" : */ "DIAL1");
+	return ioport(/* player_mux ? "DIAL2" : */ "DIAL1")->read();
 }
 
-static READ8_HANDLER( player_inputs_r )
+READ8_MEMBER(wink_state::player_inputs_r)
 {
-	return input_port_read(space->machine(), /* player_mux ? "INPUTS2" : */ "INPUTS1");
+	return ioport(/* player_mux ? "INPUTS2" : */ "INPUTS1")->read();
 }
 
-static WRITE8_HANDLER( sound_irq_w )
+WRITE8_MEMBER(wink_state::sound_irq_w)
 {
-	cputag_set_input_line(space->machine(), "audiocpu", 0, HOLD_LINE);
+	machine().device("audiocpu")->execute().set_input_line(0, HOLD_LINE);
 	//sync with sound cpu (but it still loses some soundlatches...)
-	//space->machine().scheduler().synchronize();
+	//machine().scheduler().synchronize();
 }
 
-static ADDRESS_MAP_START( wink_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( wink_map, AS_PROGRAM, 8, wink_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x87ff) AM_RAM
-	AM_RANGE(0x9000, 0x97ff) AM_RAM	AM_SHARE("nvram")
-	AM_RANGE(0xa000, 0xa3ff) AM_RAM_WRITE(bgram_w) AM_BASE_MEMBER(wink_state, m_videoram)
+	AM_RANGE(0x9000, 0x97ff) AM_RAM AM_SHARE("nvram")
+	AM_RANGE(0xa000, 0xa3ff) AM_RAM_WRITE(bgram_w) AM_SHARE("videoram")
 ADDRESS_MAP_END
 
 
-static READ8_HANDLER( prot_r )
+READ8_MEMBER(wink_state::prot_r)
 {
 	//take a0-a7 and do some math using the variable created from the upper address-lines,
 	//put the result onto the databus.
@@ -130,44 +142,44 @@ the 8bit result is placed on the databus.
 	return 0x20; //hack to pass the jump calculated using this value
 }
 
-static WRITE8_HANDLER( prot_w )
+WRITE8_MEMBER(wink_state::prot_w)
 {
 	//take a9-a15 and stuff them in a variable for later use.
 }
 
-static ADDRESS_MAP_START( wink_io, AS_IO, 8 )
+static ADDRESS_MAP_START( wink_io, AS_IO, 8, wink_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x1f) AM_RAM_WRITE(paletteram_xxxxBBBBRRRRGGGG_le_w) AM_BASE_GENERIC(paletteram) //0x10-0x1f is likely to be something else
+	AM_RANGE(0x00, 0x1f) AM_RAM_WRITE(paletteram_xxxxBBBBRRRRGGGG_byte_le_w) AM_SHARE("paletteram") //0x10-0x1f is likely to be something else
 //  AM_RANGE(0x20, 0x20) AM_WRITENOP                //??? seems unused..
-	AM_RANGE(0x21, 0x21) AM_WRITE(player_mux_w)		//??? no mux on the pcb.
+	AM_RANGE(0x21, 0x21) AM_WRITE(player_mux_w)     //??? no mux on the pcb.
 	AM_RANGE(0x22, 0x22) AM_WRITE(tile_banking_w)
 //  AM_RANGE(0x23, 0x23) AM_WRITENOP                //?
 //  AM_RANGE(0x24, 0x24) AM_WRITENOP                //cab Knocker like in q-bert!
 	AM_RANGE(0x25, 0x27) AM_WRITE(wink_coin_counter_w)
-	AM_RANGE(0x40, 0x40) AM_WRITE(soundlatch_w)
+	AM_RANGE(0x40, 0x40) AM_WRITE(soundlatch_byte_w)
 	AM_RANGE(0x60, 0x60) AM_WRITE(sound_irq_w)
 	AM_RANGE(0x80, 0x80) AM_READ(analog_port_r)
 	AM_RANGE(0xa0, 0xa0) AM_READ(player_inputs_r)
-	AM_RANGE(0xa4, 0xa4) AM_READ_PORT("DSW1")	//dipswitch bank2
-	AM_RANGE(0xa8, 0xa8) AM_READ_PORT("DSW2")	//dipswitch bank1
+	AM_RANGE(0xa4, 0xa4) AM_READ_PORT("DSW1")   //dipswitch bank2
+	AM_RANGE(0xa8, 0xa8) AM_READ_PORT("DSW2")   //dipswitch bank1
 //  AM_RANGE(0xac, 0xac) AM_WRITENOP            //protection - loads video xor unit (written only once at startup)
-	AM_RANGE(0xb0, 0xb0) AM_READ_PORT("DSW3")	//unused inputs
-	AM_RANGE(0xb4, 0xb4) AM_READ_PORT("DSW4")	//dipswitch bank3
-	AM_RANGE(0xc0, 0xdf) AM_WRITE(prot_w)		//load load protection-buffer from upper address bus
-	AM_RANGE(0xc3, 0xc3) AM_READNOP				//watchdog?
-	AM_RANGE(0xe0, 0xff) AM_READ(prot_r)		//load math unit from buffer & lower address-bus
+	AM_RANGE(0xb0, 0xb0) AM_READ_PORT("DSW3")   //unused inputs
+	AM_RANGE(0xb4, 0xb4) AM_READ_PORT("DSW4")   //dipswitch bank3
+	AM_RANGE(0xc0, 0xdf) AM_WRITE(prot_w)       //load load protection-buffer from upper address bus
+	AM_RANGE(0xc3, 0xc3) AM_READNOP             //watchdog?
+	AM_RANGE(0xe0, 0xff) AM_READ(prot_r)        //load math unit from buffer & lower address-bus
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( wink_sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( wink_sound_map, AS_PROGRAM, 8, wink_state )
 	AM_RANGE(0x0000, 0x1fff) AM_ROM
 	AM_RANGE(0x4000, 0x43ff) AM_RAM
-	AM_RANGE(0x8000, 0x8000) AM_READ(soundlatch_r)
+	AM_RANGE(0x8000, 0x8000) AM_READ(soundlatch_byte_r)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( wink_sound_io, AS_IO, 8 )
+static ADDRESS_MAP_START( wink_sound_io, AS_IO, 8, wink_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x00) AM_DEVREADWRITE("aysnd", ay8910_r, ay8910_data_w)
-	AM_RANGE(0x80, 0x80) AM_DEVWRITE("aysnd", ay8910_address_w)
+	AM_RANGE(0x00, 0x00) AM_DEVREADWRITE_LEGACY("aysnd", ay8910_r, ay8910_data_w)
+	AM_RANGE(0x80, 0x80) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_w)
 ADDRESS_MAP_END
 
 static INPUT_PORTS_START( wink )
@@ -175,14 +187,14 @@ static INPUT_PORTS_START( wink )
 	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_SENSITIVITY(50) PORT_KEYDELTA(3) PORT_REVERSE
 
 	PORT_START("INPUTS1")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON2 )	// right curve
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 )	// left curve
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON2 )    // right curve
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 )    // left curve
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_COIN3 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN1 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON3 )	// slam
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON3 )    // slam
 
 	PORT_START("DSW1")
 	PORT_DIPNAME( 0x01, 0x01, "1" )
@@ -289,7 +301,7 @@ INPUT_PORTS_END
 
 static const gfx_layout charlayout =
 {
-	8,8,	/* 8*8 characters */
+	8,8,    /* 8*8 characters */
 	RGN_FRAC(1,3),
 	3,
 	{ RGN_FRAC(0,3), RGN_FRAC(1,3), RGN_FRAC(2,3) },
@@ -302,33 +314,30 @@ static GFXDECODE_START( wink )
 	GFXDECODE_ENTRY( "gfx1", 0, charlayout, 0, 4 )
 GFXDECODE_END
 
-static READ8_DEVICE_HANDLER( sound_r )
+READ8_MEMBER(wink_state::sound_r)
 {
-	wink_state *state = device->machine().driver_data<wink_state>();
-	return state->m_sound_flag;
+	return m_sound_flag;
 }
 
 static const ay8910_interface ay8912_interface =
 {
 	AY8910_LEGACY_OUTPUT,
 	AY8910_DEFAULT_LOADS,
-	DEVCB_HANDLER(sound_r),
+	DEVCB_DRIVER_MEMBER(wink_state,sound_r),
 	DEVCB_NULL,
 	DEVCB_NULL,
 	DEVCB_NULL
 };
 
 //AY portA is fed by an input clock at 15625 Hz
-static INTERRUPT_GEN( wink_sound )
+INTERRUPT_GEN_MEMBER(wink_state::wink_sound)
 {
-	wink_state *state = device->machine().driver_data<wink_state>();
-	state->m_sound_flag ^= 0x80;
+	m_sound_flag ^= 0x80;
 }
 
-static MACHINE_RESET( wink )
+void wink_state::machine_reset()
 {
-	wink_state *state = machine.driver_data<wink_state>();
-	state->m_sound_flag = 0;
+	m_sound_flag = 0;
 }
 
 static MACHINE_CONFIG_START( wink, wink_state )
@@ -336,29 +345,26 @@ static MACHINE_CONFIG_START( wink, wink_state )
 	MCFG_CPU_ADD("maincpu", Z80, 12000000 / 4)
 	MCFG_CPU_PROGRAM_MAP(wink_map)
 	MCFG_CPU_IO_MAP(wink_io)
-	MCFG_CPU_VBLANK_INT("screen", nmi_line_pulse)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", wink_state,  nmi_line_pulse)
 
 	MCFG_CPU_ADD("audiocpu", Z80, 12000000 / 8)
 	MCFG_CPU_PROGRAM_MAP(wink_sound_map)
 	MCFG_CPU_IO_MAP(wink_sound_io)
-	MCFG_CPU_PERIODIC_INT(wink_sound, 15625)
+	MCFG_CPU_PERIODIC_INT_DRIVER(wink_state, wink_sound,  15625)
 
 	MCFG_NVRAM_ADD_1FILL("nvram")
-	MCFG_MACHINE_RESET(wink)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 0*8, 32*8-1)
-	MCFG_SCREEN_UPDATE(wink)
+	MCFG_SCREEN_UPDATE_DRIVER(wink_state, screen_update_wink)
 
 	MCFG_GFXDECODE(wink)
 	MCFG_PALETTE_LENGTH(16)
 
-	MCFG_VIDEO_START(wink)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -401,11 +407,11 @@ ROM_START( winka )
 	ROM_LOAD( "wink4.bin",    0x4000, 0x2000, CRC(06dd229b) SHA1(9057cf10e9ec4119297c2d40b26f0ce0c1d7b86a) )
 ROM_END
 
-static DRIVER_INIT( wink )
+DRIVER_INIT_MEMBER(wink_state,wink)
 {
 	UINT32 i;
-	UINT8 *ROM = machine.region("maincpu")->base();
-	UINT8 *buffer = auto_alloc_array(machine, UINT8, 0x8000);
+	UINT8 *ROM = machine().root_device().memregion("maincpu")->base();
+	UINT8 *buffer = auto_alloc_array(machine(), UINT8, 0x8000);
 
 	// protection module reverse engineered by HIGHWAYMAN
 
@@ -423,11 +429,11 @@ static DRIVER_INIT( wink )
 	for (i = 0x6000; i <= 0x7fff; i++)
 		ROM[i] = buffer[BITSWAP16(i,15,14,13, 11,12, 7, 9, 8,10, 6, 4, 5, 1, 2, 3, 0)];
 
-	auto_free(machine, buffer);
+	auto_free(machine(), buffer);
 
 	for (i = 0; i < 0x8000; i++)
 		ROM[i] += BITSWAP8(i & 0xff, 7,5,3,1,6,4,2,0);
 }
 
-GAME( 1985, wink,  0,    wink, wink, wink, ROT0, "Midcoin", "Wink (set 1)", GAME_IMPERFECT_SOUND | GAME_UNEMULATED_PROTECTION )
-GAME( 1985, winka, wink, wink, wink, wink, ROT0, "Midcoin", "Wink (set 2)", GAME_IMPERFECT_SOUND | GAME_UNEMULATED_PROTECTION )
+GAME( 1985, wink,  0,    wink, wink, wink_state, wink, ROT0, "Midcoin", "Wink (set 1)", GAME_IMPERFECT_SOUND | GAME_UNEMULATED_PROTECTION )
+GAME( 1985, winka, wink, wink, wink, wink_state, wink, ROT0, "Midcoin", "Wink (set 2)", GAME_IMPERFECT_SOUND | GAME_UNEMULATED_PROTECTION )

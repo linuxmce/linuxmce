@@ -18,8 +18,6 @@
 #ifndef __IMAGE_H__
 #define __IMAGE_H__
 
-#include "ioprocs.h"
-
 void image_init(running_machine &machine);
 void image_postdevice_init(running_machine &machine);
 
@@ -28,10 +26,5 @@ extern struct io_procs image_ioprocs;
 void image_battery_load_by_name(emu_options &options, const char *filename, void *buffer, int length, int fill);
 void image_battery_save_by_name(emu_options &options, const char *filename, const void *buffer, int length);
 
-astring *image_info_astring(running_machine &machine, astring *string);
-
-device_image_interface *image_from_absolute_index(running_machine &machine, int absolute_index);
-
-void image_add_device_with_subdevices(device_t *owner, device_type type, const char *tag, UINT32 clock);
-
+astring &image_info_astring(running_machine &machine, astring &string);
 #endif /* __IMAGE_H__ */

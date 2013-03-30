@@ -5,11 +5,14 @@
 class seibuspi_state : public driver_device
 {
 public:
-	seibuspi_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	seibuspi_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_spi_scrollram(*this, "spi_scrollram"),
+		m_spimainram(*this, "spimainram"){ }
 
-	UINT32 *m_spimainram;
-	UINT32 *m_spi_scrollram;
+	optional_shared_ptr<UINT32> m_spi_scrollram;
+	required_shared_ptr<UINT32> m_spimainram;
+
 	intel_e28f008sa_device *m_flash[2];
 	UINT8 *m_z80_rom;
 	int m_z80_prg_fifo_pos;
@@ -43,30 +46,78 @@ public:
 	UINT32 m_bg_fore_layer_position;
 	UINT8 m_alpha_table[8192];
 	UINT8 m_sprite_bpp;
+	DECLARE_READ32_MEMBER(ejanhs_speedup_r);
+	DECLARE_READ32_MEMBER(spi_layer_bank_r);
+	DECLARE_WRITE32_MEMBER(spi_layer_bank_w);
+	DECLARE_READ32_MEMBER(spi_layer_enable_r);
+	DECLARE_WRITE32_MEMBER(spi_layer_enable_w);
+	DECLARE_WRITE32_MEMBER(tilemap_dma_start_w);
+	DECLARE_WRITE32_MEMBER(palette_dma_start_w);
+	DECLARE_WRITE32_MEMBER(sprite_dma_start_w);
+	DECLARE_WRITE32_MEMBER(video_dma_length_w);
+	DECLARE_WRITE32_MEMBER(video_dma_address_w);
+	DECLARE_CUSTOM_INPUT_MEMBER(ejsakura_keyboard_r);
+	DECLARE_CUSTOM_INPUT_MEMBER(ejanhs_encode);
+	DECLARE_READ32_MEMBER(sb_coin_r);
+	DECLARE_WRITE8_MEMBER(sb_coin_w);
+	DECLARE_READ32_MEMBER(sound_fifo_r);
+	DECLARE_WRITE32_MEMBER(sound_fifo_w);
+	DECLARE_READ32_MEMBER(sound_fifo_status_r);
+	DECLARE_READ32_MEMBER(spi_int_r);
+	DECLARE_READ32_MEMBER(spi_unknown_r);
+	DECLARE_WRITE32_MEMBER(z80_prg_fifo_w);
+	DECLARE_WRITE32_MEMBER(z80_enable_w);
+	DECLARE_READ32_MEMBER(spi_controls1_r);
+	DECLARE_READ32_MEMBER(spi_controls2_r);
+	DECLARE_READ8_MEMBER(z80_soundfifo_r);
+	DECLARE_WRITE8_MEMBER(z80_soundfifo_w);
+	DECLARE_READ8_MEMBER(z80_soundfifo_status_r);
+	DECLARE_WRITE8_MEMBER(z80_bank_w);
+	DECLARE_READ8_MEMBER(z80_jp1_r);
+	DECLARE_READ8_MEMBER(z80_coin_r);
+	DECLARE_READ32_MEMBER(soundrom_r);
+	DECLARE_WRITE32_MEMBER(input_select_w);
+	DECLARE_READ32_MEMBER(senkyu_speedup_r);
+	DECLARE_READ32_MEMBER(senkyua_speedup_r);
+	DECLARE_READ32_MEMBER(batlball_speedup_r);
+	DECLARE_READ32_MEMBER(rdft_speedup_r);
+	DECLARE_READ32_MEMBER(viprp1_speedup_r);
+	DECLARE_READ32_MEMBER(viprp1o_speedup_r);
+	DECLARE_READ32_MEMBER(rf2_speedup_r);
+	DECLARE_READ32_MEMBER(rfjet_speedup_r);
+	DECLARE_WRITE32_MEMBER(eeprom_w);
+	DECLARE_READ8_MEMBER(flashrom_read);
+	DECLARE_WRITE8_MEMBER(flashrom_write);
+	DECLARE_WRITE32_MEMBER(sys386f2_eeprom_w);
+	DECLARE_DRIVER_INIT(batlball);
+	DECLARE_DRIVER_INIT(senkyu);
+	DECLARE_DRIVER_INIT(viprp1);
+	DECLARE_DRIVER_INIT(rfjet2k);
+	DECLARE_DRIVER_INIT(viprp1o);
+	DECLARE_DRIVER_INIT(rdft);
+	DECLARE_DRIVER_INIT(rfjet);
+	DECLARE_DRIVER_INIT(rdft22kc);
+	DECLARE_DRIVER_INIT(senkyua);
+	DECLARE_DRIVER_INIT(rdft2);
+	DECLARE_DRIVER_INIT(ejanhs);
+	DECLARE_DRIVER_INIT(sys386f2);
+	DECLARE_DRIVER_INIT(rdft2us);
+	TILE_GET_INFO_MEMBER(get_text_tile_info);
+	TILE_GET_INFO_MEMBER(get_back_tile_info);
+	TILE_GET_INFO_MEMBER(get_mid_tile_info);
+	TILE_GET_INFO_MEMBER(get_fore_tile_info);
+	DECLARE_MACHINE_START(spi);
+	DECLARE_MACHINE_RESET(spi);
+	DECLARE_VIDEO_START(spi);
+	DECLARE_MACHINE_RESET(seibu386);
+	DECLARE_VIDEO_START(sys386f2);
+	DECLARE_MACHINE_START(sxx2f);
+	DECLARE_MACHINE_RESET(sxx2f);
+	UINT32 screen_update_spi(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_sys386f2(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(spi_interrupt);
 };
-
-
 /*----------- defined in machine/spisprit.c -----------*/
-
 void seibuspi_sprite_decrypt(UINT8 *src, int romsize);
-
-
 /*----------- defined in video/seibuspi.c -----------*/
-
-VIDEO_START( spi );
-SCREEN_UPDATE( spi );
-
-VIDEO_START( sys386f2 );
-SCREEN_UPDATE( sys386f2 );
-
-READ32_HANDLER( spi_layer_bank_r );
-WRITE32_HANDLER( spi_layer_bank_w );
-WRITE32_HANDLER( spi_layer_enable_w );
-
 void rf2_set_layer_banks(running_machine &machine, int banks);
-
-WRITE32_HANDLER( tilemap_dma_start_w );
-WRITE32_HANDLER( palette_dma_start_w );
-WRITE32_HANDLER( video_dma_length_w );
-WRITE32_HANDLER( video_dma_address_w );
-WRITE32_HANDLER( sprite_dma_start_w );

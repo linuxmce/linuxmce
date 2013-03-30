@@ -15,14 +15,14 @@
 // reading the original raw data
 static void mystwarr_decode_tiles(running_machine &machine)
 {
-	UINT8 *s = machine.region("gfx1")->base();
-	int len = machine.region("gfx1")->bytes();
+	UINT8 *s = machine.root_device().memregion("gfx1")->base();
+	int len = machine.root_device().memregion("gfx1")->bytes();
 	UINT8 *pFinish = s+len-3;
 	UINT8 *d, *decoded;
 	int gfxnum;
 
 	for (gfxnum = 0; gfxnum < ARRAY_LENGTH(machine.gfx); gfxnum++)
-		if (machine.gfx[gfxnum] != NULL && machine.gfx[gfxnum]->srcdata == s)
+		if (machine.gfx[gfxnum] != NULL && machine.gfx[gfxnum]->srcdata() == s)
 			break;
 	assert(gfxnum != ARRAY_LENGTH(machine.gfx));
 
@@ -33,17 +33,17 @@ static void mystwarr_decode_tiles(running_machine &machine)
 	while (s < pFinish)
 	{
 		/* convert the whole mess to 5bpp planar in System GX's format
-               (p3 p1 p2 p0 p5)
-               (the original ROMs are stored as chunky for the first 4 bits
-               and the 5th bit is planar, which is undecodable as-is) */
+		       (p3 p1 p2 p0 p5)
+		       (the original ROMs are stored as chunky for the first 4 bits
+		       and the 5th bit is planar, which is undecodable as-is) */
 		int d0 = ((s[0]&0x80)   )|((s[0]&0x08)<<3)|((s[1]&0x80)>>2)|((s[1]&0x08)<<1)|
-		         ((s[2]&0x80)>>4)|((s[2]&0x08)>>1)|((s[3]&0x80)>>6)|((s[3]&0x08)>>3);
+					((s[2]&0x80)>>4)|((s[2]&0x08)>>1)|((s[3]&0x80)>>6)|((s[3]&0x08)>>3);
 		int d1 = ((s[0]&0x40)<<1)|((s[0]&0x04)<<4)|((s[1]&0x40)>>1)|((s[1]&0x04)<<2)|
-		         ((s[2]&0x40)>>3)|((s[2]&0x04)   )|((s[3]&0x40)>>5)|((s[3]&0x04)>>2);
+					((s[2]&0x40)>>3)|((s[2]&0x04)   )|((s[3]&0x40)>>5)|((s[3]&0x04)>>2);
 		int d2 = ((s[0]&0x20)<<2)|((s[0]&0x02)<<5)|((s[1]&0x20)   )|((s[1]&0x02)<<3)|
-		         ((s[2]&0x20)>>2)|((s[2]&0x02)<<1)|((s[3]&0x20)>>4)|((s[3]&0x02)>>1);
+					((s[2]&0x20)>>2)|((s[2]&0x02)<<1)|((s[3]&0x20)>>4)|((s[3]&0x02)>>1);
 		int d3 = ((s[0]&0x10)<<3)|((s[0]&0x01)<<6)|((s[1]&0x10)<<1)|((s[1]&0x01)<<4)|
-		         ((s[2]&0x10)>>1)|((s[2]&0x01)<<2)|((s[3]&0x10)>>3)|((s[3]&0x01)   );
+					((s[2]&0x10)>>1)|((s[2]&0x01)<<2)|((s[3]&0x10)>>3)|((s[3]&0x01)   );
 
 		d[0] = d3;
 		d[1] = d1;
@@ -55,7 +55,7 @@ static void mystwarr_decode_tiles(running_machine &machine)
 		d += 5;
 	}
 
-	gfx_element_set_source(machine.gfx[gfxnum], decoded);
+	machine.gfx[gfxnum]->set_source(decoded);
 }
 
 
@@ -140,11 +140,10 @@ static void martchmp_sprite_callback(running_machine &machine, int *code, int *c
 
 
 
-static TILE_GET_INFO( get_gai_936_tile_info )
+TILE_GET_INFO_MEMBER(mystwarr_state::get_gai_936_tile_info)
 {
-	mystwarr_state *state = machine.driver_data<mystwarr_state>();
 	int tileno, colour;
-	UINT8 *ROM = machine.region("gfx4")->base();
+	UINT8 *ROM = memregion("gfx4")->base();
 	UINT8 *dat1 = ROM, *dat2 = ROM + 0x20000, *dat3 = ROM + 0x60000;
 
 	tileno = dat3[tile_index] | ((dat2[tile_index]&0x3f)<<8);
@@ -156,26 +155,25 @@ static TILE_GET_INFO( get_gai_936_tile_info )
 
 	if (dat2[tile_index] & 0x80) colour |= 0x10;
 
-	colour |= state->m_sub1_colorbase << 4;
+	colour |= m_sub1_colorbase << 4;
 
-	SET_TILE_INFO(0, tileno, colour, 0);
+	SET_TILE_INFO_MEMBER(0, tileno, colour, 0);
 }
 
-VIDEO_START(gaiapols)
+VIDEO_START_MEMBER(mystwarr_state,gaiapols)
 {
-	mystwarr_state *state = machine.driver_data<mystwarr_state>();
-	K055555_vh_start(machine);
-	K054338_vh_start(machine);
+	K055555_vh_start(machine());
+	K054338_vh_start(machine());
 
-	state->m_gametype = 0;
+	m_gametype = 0;
 
-	K056832_vh_start(machine, "gfx1", K056832_BPP_5, 0, NULL, game4bpp_tile_callback, 0);
+	K056832_vh_start(machine(), "gfx1", K056832_BPP_5, 0, NULL, game4bpp_tile_callback, 0);
 
-	mystwarr_decode_tiles(machine);
+	mystwarr_decode_tiles(machine());
 
-	K055673_vh_start(machine, "gfx2", 1, -61, -22, gaiapols_sprite_callback); // stage2 brick walls
+	K055673_vh_start(machine(), "gfx2", 1, -61, -22, gaiapols_sprite_callback); // stage2 brick walls
 
-	konamigx_mixer_init(machine, 0);
+	konamigx_mixer_init(machine(), 0);
 
 	K056832_set_LayerOffset(0, -2+2-1, 0-1);
 	K056832_set_LayerOffset(1,  0+2, 0);
@@ -185,39 +183,37 @@ VIDEO_START(gaiapols)
 	K053936_wraparound_enable(0, 1);
 	K053936GP_set_offset(0, -10,  0); // floor tiles in demo loop2 (Elaine vs. boss)
 
-	state->m_ult_936_tilemap = tilemap_create(machine, get_gai_936_tile_info, tilemap_scan_rows,  16, 16, 512, 512);
-	tilemap_set_transparent_pen(state->m_ult_936_tilemap, 0);
+	m_ult_936_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(mystwarr_state::get_gai_936_tile_info),this), TILEMAP_SCAN_ROWS,  16, 16, 512, 512);
+	m_ult_936_tilemap->set_transparent_pen(0);
 }
 
-static TILE_GET_INFO( get_ult_936_tile_info )
+TILE_GET_INFO_MEMBER(mystwarr_state::get_ult_936_tile_info)
 {
-	mystwarr_state *state = machine.driver_data<mystwarr_state>();
 	int tileno, colour;
-	UINT8 *ROM = machine.region("gfx4")->base();
+	UINT8 *ROM = memregion("gfx4")->base();
 	UINT8 *dat1 = ROM, *dat2 = ROM + 0x40000;
 
 	tileno = dat2[tile_index] | ((dat1[tile_index]&0x1f)<<8);
 
-	colour = state->m_sub1_colorbase;
+	colour = m_sub1_colorbase;
 
-	SET_TILE_INFO(0, tileno, colour, (dat1[tile_index]&0x40) ? TILE_FLIPX : 0);
+	SET_TILE_INFO_MEMBER(0, tileno, colour, (dat1[tile_index]&0x40) ? TILE_FLIPX : 0);
 }
 
-VIDEO_START(dadandrn)
+VIDEO_START_MEMBER(mystwarr_state,dadandrn)
 {
-	mystwarr_state *state = machine.driver_data<mystwarr_state>();
-	K055555_vh_start(machine);
-	K054338_vh_start(machine);
+	K055555_vh_start(machine());
+	K054338_vh_start(machine());
 
-	state->m_gametype = 1;
+	m_gametype = 1;
 
-	K056832_vh_start(machine, "gfx1", K056832_BPP_5, 0, NULL, game5bpp_tile_callback, 0);
+	K056832_vh_start(machine(), "gfx1", K056832_BPP_5, 0, NULL, game5bpp_tile_callback, 0);
 
-	mystwarr_decode_tiles(machine);
+	mystwarr_decode_tiles(machine());
 
-	K055673_vh_start(machine, "gfx2", 0, -42, -22, gaiapols_sprite_callback);
+	K055673_vh_start(machine(), "gfx2", 0, -42, -22, gaiapols_sprite_callback);
 
-	konamigx_mixer_init(machine, 0);
+	konamigx_mixer_init(machine(), 0);
 
 	konamigx_mixer_primode(1);
 
@@ -229,77 +225,70 @@ VIDEO_START(dadandrn)
 	K053936_wraparound_enable(0, 1);
 	K053936GP_set_offset(0, -8, 0); // Brainy's laser
 
-	state->m_ult_936_tilemap = tilemap_create(machine, get_ult_936_tile_info, tilemap_scan_rows,  16, 16, 512, 512);
-	tilemap_set_transparent_pen(state->m_ult_936_tilemap, 0);
+	m_ult_936_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(mystwarr_state::get_ult_936_tile_info),this), TILEMAP_SCAN_ROWS,  16, 16, 512, 512);
+	m_ult_936_tilemap->set_transparent_pen(0);
 }
 
-VIDEO_START(mystwarr)
+VIDEO_START_MEMBER(mystwarr_state,mystwarr)
 {
-	mystwarr_state *state = machine.driver_data<mystwarr_state>();
-	K055555_vh_start(machine);
-	K054338_vh_start(machine);
+	K055555_vh_start(machine());
+	K054338_vh_start(machine());
 
-	state->m_gametype = 0;
+	m_gametype = 0;
 
-	K056832_vh_start(machine, "gfx1", K056832_BPP_5, 0, NULL, mystwarr_tile_callback, 0);
+	K056832_vh_start(machine(), "gfx1", K056832_BPP_5, 0, NULL, mystwarr_tile_callback, 0);
 
-	mystwarr_decode_tiles(machine);
+	mystwarr_decode_tiles(machine());
 
-	K055673_vh_start(machine, "gfx2", 0, -48, -24, mystwarr_sprite_callback);
+	K055673_vh_start(machine(), "gfx2", 0, -48, -24, mystwarr_sprite_callback);
 
-	konamigx_mixer_init(machine, 0);
+	konamigx_mixer_init(machine(), 0);
 
 	K056832_set_LayerOffset(0, -2-3, 0);
 	K056832_set_LayerOffset(1,  0-3, 0);
 	K056832_set_LayerOffset(2,  2-3, 0);
 	K056832_set_LayerOffset(3,  3-3, 0);
 
-	state->m_cbparam = 0;
+	m_cbparam = 0;
 }
 
-VIDEO_START(metamrph)
+VIDEO_START_MEMBER(mystwarr_state,metamrph)
 {
-	mystwarr_state *state = machine.driver_data<mystwarr_state>();
-	const char * rgn_250 = "gfx3";
 
-	state->m_gametype = 0;
+	m_gametype = 0;
 
-	K055555_vh_start(machine);
-	K054338_vh_start(machine);
-	K053250_vh_start(machine, 1, &rgn_250);
+	K055555_vh_start(machine());
+	K054338_vh_start(machine());
 
-	K056832_vh_start(machine, "gfx1", K056832_BPP_5, 0, NULL, game4bpp_tile_callback, 0);
+	K056832_vh_start(machine(), "gfx1", K056832_BPP_5, 0, NULL, game4bpp_tile_callback, 0);
 
-	mystwarr_decode_tiles(machine);
+	mystwarr_decode_tiles(machine());
 
-	K055673_vh_start(machine, "gfx2", 1, -51, -22, metamrph_sprite_callback);
+	K055673_vh_start(machine(), "gfx2", 1, -51, -22, metamrph_sprite_callback);
 
-	konamigx_mixer_init(machine, 0);
+	konamigx_mixer_init(machine(), 0);
 
 	// other reference, floor at first boss
 	K056832_set_LayerOffset(0, -2+4, 0); // text
 	K056832_set_LayerOffset(1,  0+4, 0); // attract sea
 	K056832_set_LayerOffset(2,  2+4, 0); // attract red monster in background of sea
 	K056832_set_LayerOffset(3,  3+4, 0); // attract sky background to sea
-
-	K053250_set_LayerOffset(0, -7, 0);
 }
 
-VIDEO_START(viostorm)
+VIDEO_START_MEMBER(mystwarr_state,viostorm)
 {
-	mystwarr_state *state = machine.driver_data<mystwarr_state>();
-	state->m_gametype = 0;
+	m_gametype = 0;
 
-	K055555_vh_start(machine);
-	K054338_vh_start(machine);
+	K055555_vh_start(machine());
+	K054338_vh_start(machine());
 
-	K056832_vh_start(machine, "gfx1", K056832_BPP_5, 0, NULL, game4bpp_tile_callback, 0);
+	K056832_vh_start(machine(), "gfx1", K056832_BPP_5, 0, NULL, game4bpp_tile_callback, 0);
 
-	mystwarr_decode_tiles(machine);
+	mystwarr_decode_tiles(machine());
 
-	K055673_vh_start(machine, "gfx2", 1, -62, -23, metamrph_sprite_callback);
+	K055673_vh_start(machine(), "gfx2", 1, -62, -23, metamrph_sprite_callback);
 
-	konamigx_mixer_init(machine, 0);
+	konamigx_mixer_init(machine(), 0);
 
 	K056832_set_LayerOffset(0, -2+1, 0);
 	K056832_set_LayerOffset(1,  0+1, 0);
@@ -307,21 +296,20 @@ VIDEO_START(viostorm)
 	K056832_set_LayerOffset(3,  3+1, 0);
 }
 
-VIDEO_START(martchmp)
+VIDEO_START_MEMBER(mystwarr_state,martchmp)
 {
-	mystwarr_state *state = machine.driver_data<mystwarr_state>();
-	state->m_gametype = 0;
+	m_gametype = 0;
 
-	K055555_vh_start(machine);
-	K054338_vh_start(machine);
+	K055555_vh_start(machine());
+	K054338_vh_start(machine());
 
-	K056832_vh_start(machine, "gfx1", K056832_BPP_5, 0, NULL, game5bpp_tile_callback, 0);
+	K056832_vh_start(machine(), "gfx1", K056832_BPP_5, 0, NULL, game5bpp_tile_callback, 0);
 
-	mystwarr_decode_tiles(machine);
+	mystwarr_decode_tiles(machine());
 
-	K055673_vh_start(machine, "gfx2", 0, -58, -23, martchmp_sprite_callback);
+	K055673_vh_start(machine(), "gfx2", 0, -58, -23, martchmp_sprite_callback);
 
-	konamigx_mixer_init(machine, 0);
+	konamigx_mixer_init(machine(), 0);
 
 	K056832_set_LayerOffset(0, -2-4, 0);
 	K056832_set_LayerOffset(1,  0-4, 0);
@@ -333,83 +321,78 @@ VIDEO_START(martchmp)
 
 
 
-SCREEN_UPDATE(mystwarr)
+UINT32 mystwarr_state::screen_update_mystwarr(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	mystwarr_state *state = screen->machine().driver_data<mystwarr_state>();
 	int i, old, blendmode=0;
 
-	if (state->m_cbparam<0) state->m_cbparam=0; else if (state->m_cbparam>=32) blendmode=(1<<16|GXMIX_BLEND_FORCE)<<2; //* water hack (TEMPORARY)
+	if (m_cbparam<0) m_cbparam=0; else if (m_cbparam>=32) blendmode=(1<<16|GXMIX_BLEND_FORCE)<<2; //* water hack (TEMPORARY)
 
 	for (i = 0; i < 4; i++)
 	{
-		old = state->m_layer_colorbase[i];
-		state->m_layer_colorbase[i] = K055555_get_palette_index(i)<<4;
-		if( old != state->m_layer_colorbase[i] ) K056832_mark_plane_dirty(i);
+		old = m_layer_colorbase[i];
+		m_layer_colorbase[i] = K055555_get_palette_index(i)<<4;
+		if( old != m_layer_colorbase[i] ) K056832_mark_plane_dirty(i);
 	}
 
-	state->m_sprite_colorbase = K055555_get_palette_index(4)<<5;
+	m_sprite_colorbase = K055555_get_palette_index(4)<<5;
 
-	konamigx_mixer(screen->machine(), bitmap, cliprect, 0, 0, 0, 0, blendmode, 0, 0);
+	konamigx_mixer(machine(), bitmap, cliprect, 0, 0, 0, 0, blendmode, 0, 0);
 	return 0;
 }
 
-SCREEN_UPDATE(metamrph)
+UINT32 mystwarr_state::screen_update_metamrph(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	mystwarr_state *state = screen->machine().driver_data<mystwarr_state>();
 	int i, old;
 
 	for (i = 0; i < 4; i++)
 	{
-		old = state->m_layer_colorbase[i];
-		state->m_layer_colorbase[i] = K055555_get_palette_index(i)<<4;
-		if (old != state->m_layer_colorbase[i]) K056832_mark_plane_dirty(i);
+		old = m_layer_colorbase[i];
+		m_layer_colorbase[i] = K055555_get_palette_index(i)<<4;
+		if (old != m_layer_colorbase[i]) K056832_mark_plane_dirty(i);
 	}
 
-	state->m_sprite_colorbase = K055555_get_palette_index(4)<<4;
+	m_sprite_colorbase = K055555_get_palette_index(4)<<4;
 
-	konamigx_mixer(screen->machine(), bitmap, cliprect, 0, GXSUB_K053250 | GXSUB_4BPP, 0, 0, 0, 0, 0);
+	konamigx_mixer(machine(), bitmap, cliprect, 0, GXSUB_K053250 | GXSUB_4BPP, 0, 0, 0, 0, 0);
 	return 0;
 }
 
-SCREEN_UPDATE(martchmp)
+UINT32 mystwarr_state::screen_update_martchmp(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	mystwarr_state *state = screen->machine().driver_data<mystwarr_state>();
 	int i, old, blendmode;
 
 	for (i = 0; i < 4; i++)
 	{
-		old = state->m_layer_colorbase[i];
-		state->m_layer_colorbase[i] = K055555_get_palette_index(i)<<4;
-		if (old != state->m_layer_colorbase[i]) K056832_mark_plane_dirty(i);
+		old = m_layer_colorbase[i];
+		m_layer_colorbase[i] = K055555_get_palette_index(i)<<4;
+		if (old != m_layer_colorbase[i]) K056832_mark_plane_dirty(i);
 	}
 
-	state->m_sprite_colorbase = K055555_get_palette_index(4)<<5;
+	m_sprite_colorbase = K055555_get_palette_index(4)<<5;
 
-	state->m_cbparam = K055555_read_register(K55_PRIINP_8);
-	state->m_oinprion = K055555_read_register(K55_OINPRI_ON);
+	m_cbparam = K055555_read_register(K55_PRIINP_8);
+	m_oinprion = K055555_read_register(K55_OINPRI_ON);
 
 	// not quite right
-	blendmode = (state->m_oinprion==0xef && K054338_read_register(K338_REG_PBLEND)) ? ((1<<16|GXMIX_BLEND_FORCE)<<2) : 0;
+	blendmode = (m_oinprion==0xef && K054338_read_register(K338_REG_PBLEND)) ? ((1<<16|GXMIX_BLEND_FORCE)<<2) : 0;
 
-	konamigx_mixer(screen->machine(), bitmap, cliprect, 0, 0, 0, 0, blendmode, 0, 0);
+	konamigx_mixer(machine(), bitmap, cliprect, 0, 0, 0, 0, blendmode, 0, 0);
 	return 0;
 }
 
 
 
-WRITE16_HANDLER(ddd_053936_enable_w)
+WRITE16_MEMBER(mystwarr_state::ddd_053936_enable_w)
 {
-	mystwarr_state *state = space->machine().driver_data<mystwarr_state>();
 	if (ACCESSING_BITS_8_15)
 	{
-		state->m_roz_enable = data & 0x0100;
-		state->m_roz_rombank = (data & 0xc000)>>14;
+		m_roz_enable = data & 0x0100;
+		m_roz_rombank = (data & 0xc000)>>14;
 	}
 }
 
-WRITE16_HANDLER(ddd_053936_clip_w)
+WRITE16_MEMBER(mystwarr_state::ddd_053936_clip_w)
 {
-	mystwarr_state *state = space->machine().driver_data<mystwarr_state>();
 	int old, clip_x, clip_y, size_x, size_y;
 	int minx, maxx, miny, maxy;
 
@@ -419,14 +402,14 @@ WRITE16_HANDLER(ddd_053936_clip_w)
 	}
 	else
 	{
-		old = state->m_clip;
-		COMBINE_DATA(&state->m_clip);
-		if (state->m_clip != old)
+		old = m_clip;
+		COMBINE_DATA(&m_clip);
+		if (m_clip != old)
 		{
-			clip_x = (state->m_clip & 0x003f) >> 0;
-			clip_y = (state->m_clip & 0x0fc0) >> 6;
-			size_x = (state->m_clip & 0x3000) >> 12;
-			size_y = (state->m_clip & 0xc000) >> 14;
+			clip_x = (m_clip & 0x003f) >> 0;
+			clip_y = (m_clip & 0x0fc0) >> 6;
+			size_x = (m_clip & 0x3000) >> 12;
+			size_y = (m_clip & 0xc000) >> 14;
 
 			switch (size_x)
 			{
@@ -453,10 +436,10 @@ WRITE16_HANDLER(ddd_053936_clip_w)
 }
 
 // reference: 223e5c in gaiapolis (ROMs 34j and 36m)
-READ16_HANDLER(gai_053936_tilerom_0_r)
+READ16_MEMBER(mystwarr_state::gai_053936_tilerom_0_r)
 {
-	UINT8 *ROM1 = (UINT8 *)space->machine().region("gfx4")->base();
-	UINT8 *ROM2 = (UINT8 *)space->machine().region("gfx4")->base();
+	UINT8 *ROM1 = (UINT8 *)machine().root_device().memregion("gfx4")->base();
+	UINT8 *ROM2 = (UINT8 *)machine().root_device().memregion("gfx4")->base();
 
 	ROM1 += 0x20000;
 	ROM2 += 0x20000+0x40000;
@@ -464,10 +447,10 @@ READ16_HANDLER(gai_053936_tilerom_0_r)
 	return ((ROM1[offset]<<8) | ROM2[offset]);
 }
 
-READ16_HANDLER(ddd_053936_tilerom_0_r)
+READ16_MEMBER(mystwarr_state::ddd_053936_tilerom_0_r)
 {
-	UINT8 *ROM1 = (UINT8 *)space->machine().region("gfx4")->base();
-	UINT8 *ROM2 = (UINT8 *)space->machine().region("gfx4")->base();
+	UINT8 *ROM1 = (UINT8 *)machine().root_device().memregion("gfx4")->base();
+	UINT8 *ROM2 = (UINT8 *)machine().root_device().memregion("gfx4")->base();
 
 	ROM2 += 0x40000;
 
@@ -475,47 +458,44 @@ READ16_HANDLER(ddd_053936_tilerom_0_r)
 }
 
 // reference: 223e1a in gaiapolis (ROM 36j)
-READ16_HANDLER(ddd_053936_tilerom_1_r)
+READ16_MEMBER(mystwarr_state::ddd_053936_tilerom_1_r)
 {
-	UINT8 *ROM = (UINT8 *)space->machine().region("gfx4")->base();
+	UINT8 *ROM = (UINT8 *)machine().root_device().memregion("gfx4")->base();
 
 	return ROM[offset/2];
 }
 
 // reference: 223db0 in gaiapolis (ROMs 32n, 29n, 26n)
-READ16_HANDLER(gai_053936_tilerom_2_r)
+READ16_MEMBER(mystwarr_state::gai_053936_tilerom_2_r)
 {
-	mystwarr_state *state = space->machine().driver_data<mystwarr_state>();
-	UINT8 *ROM = (UINT8 *)space->machine().region("gfx3")->base();
+	UINT8 *ROM = (UINT8 *)machine().root_device().memregion("gfx3")->base();
 
-	offset += (state->m_roz_rombank * 0x100000);
+	offset += (m_roz_rombank * 0x100000);
 
 	return ROM[offset/2]<<8;
 }
 
-READ16_HANDLER(ddd_053936_tilerom_2_r)
+READ16_MEMBER(mystwarr_state::ddd_053936_tilerom_2_r)
 {
-	mystwarr_state *state = space->machine().driver_data<mystwarr_state>();
-	UINT8 *ROM = (UINT8 *)space->machine().region("gfx3")->base();
+	UINT8 *ROM = (UINT8 *)machine().root_device().memregion("gfx3")->base();
 
-	offset += (state->m_roz_rombank * 0x100000);
+	offset += (m_roz_rombank * 0x100000);
 
 	return ROM[offset]<<8;
 }
 
-SCREEN_UPDATE(dadandrn) /* and gaiapols */
+UINT32 mystwarr_state::screen_update_dadandrn(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)/* and gaiapols */
 {
-	mystwarr_state *state = screen->machine().driver_data<mystwarr_state>();
 	int i, newbase, dirty, rozmode;
 
-	if (state->m_gametype == 0)
+	if (m_gametype == 0)
 	{
-		state->m_sprite_colorbase = (K055555_get_palette_index(4)<<4)&0x7f;
+		m_sprite_colorbase = (K055555_get_palette_index(4)<<4)&0x7f;
 		rozmode = GXSUB_4BPP;
 	}
 	else
 	{
-		state->m_sprite_colorbase = (K055555_get_palette_index(4)<<3)&0x7f;
+		m_sprite_colorbase = (K055555_get_palette_index(4)<<3)&0x7f;
 		rozmode = GXSUB_8BPP;
 	}
 
@@ -524,9 +504,9 @@ SCREEN_UPDATE(dadandrn) /* and gaiapols */
 		for (i=0; i<4; i++)
 		{
 			newbase = K055555_get_palette_index(i)<<4;
-			if (state->m_layer_colorbase[i] != newbase)
+			if (m_layer_colorbase[i] != newbase)
 			{
-				state->m_layer_colorbase[i] = newbase;
+				m_layer_colorbase[i] = newbase;
 				K056832_mark_plane_dirty(i);
 			}
 		}
@@ -536,9 +516,9 @@ SCREEN_UPDATE(dadandrn) /* and gaiapols */
 		for (dirty=0, i=0; i<4; i++)
 		{
 			newbase = K055555_get_palette_index(i)<<4;
-			if (state->m_layer_colorbase[i] != newbase)
+			if (m_layer_colorbase[i] != newbase)
 			{
-				state->m_layer_colorbase[i] = newbase;
+				m_layer_colorbase[i] = newbase;
 				dirty = 1;
 			}
 		}
@@ -546,17 +526,17 @@ SCREEN_UPDATE(dadandrn) /* and gaiapols */
 
 	}
 
-	state->m_last_psac_colorbase = state->m_sub1_colorbase;
-	state->m_sub1_colorbase = K055555_get_palette_index(5);
+	m_last_psac_colorbase = m_sub1_colorbase;
+	m_sub1_colorbase = K055555_get_palette_index(5);
 
-	if (state->m_last_psac_colorbase != state->m_sub1_colorbase)
+	if (m_last_psac_colorbase != m_sub1_colorbase)
 	{
-		tilemap_mark_all_tiles_dirty(state->m_ult_936_tilemap);
+		m_ult_936_tilemap->mark_all_dirty();
 
 		if (MW_VERBOSE)
 			popmessage("K053936: PSAC colorbase changed");
 	}
 
-	konamigx_mixer(screen->machine(), bitmap, cliprect, (state->m_roz_enable) ? state->m_ult_936_tilemap : 0, rozmode, 0, 0, 0, 0, 0);
+	konamigx_mixer(machine(), bitmap, cliprect, (m_roz_enable) ? m_ult_936_tilemap : 0, rozmode, 0, 0, 0, 0, 0);
 	return 0;
 }

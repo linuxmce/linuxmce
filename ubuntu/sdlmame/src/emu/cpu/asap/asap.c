@@ -46,30 +46,22 @@
 
 
 //**************************************************************************
-//  DEVICE DEFINITIONS
-//**************************************************************************
-
-const device_type ASAP = asap_device_config::static_alloc_device_config;
-
-
-
-//**************************************************************************
 //  CONSTANTS
 //**************************************************************************
 
-const UINT32 PS_CFLAG			= 0x00000001;
-const UINT32 PS_VFLAG			= 0x00000002;
-const UINT32 PS_ZFLAG			= 0x00000004;
-const UINT32 PS_NFLAG			= 0x00000008;
-const UINT32 PS_IFLAG			= 0x00000010;
-const UINT32 PS_PFLAG			= 0x00000020;
+const UINT32 PS_CFLAG           = 0x00000001;
+const UINT32 PS_VFLAG           = 0x00000002;
+const UINT32 PS_ZFLAG           = 0x00000004;
+const UINT32 PS_NFLAG           = 0x00000008;
+const UINT32 PS_IFLAG           = 0x00000010;
+const UINT32 PS_PFLAG           = 0x00000020;
 
-const int EXCEPTION_RESET		= 0;
-const int EXCEPTION_TRAP0		= 1;
-const int EXCEPTION_TRAPF		= 2;
-const int EXCEPTION_INTERRUPT	= 3;
+const int EXCEPTION_RESET       = 0;
+const int EXCEPTION_TRAP0       = 1;
+const int EXCEPTION_TRAPF       = 2;
+const int EXCEPTION_INTERRUPT   = 3;
 
-const int REGBASE				= 0xffe0;
+const int REGBASE               = 0xffe0;
 
 
 
@@ -77,25 +69,25 @@ const int REGBASE				= 0xffe0;
 //  MACROS
 //**************************************************************************
 
-#define SET_C_ADD(a,b)			(m_cflag = (UINT32)(b) > (UINT32)(~(a)))
-#define SET_C_SUB(a,b)			(m_cflag = (UINT32)(b) <= (UINT32)(a))
-#define SET_V_ADD(r,a,b)		(m_vflag = ~((a) ^ (b)) & ((a) ^ (r)))
-#define SET_V_SUB(r,a,b)		(m_vflag =  ((a) ^ (b)) & ((a) ^ (r)))
-#define SET_ZN(r)				(m_znflag = (r))
-#define SET_ZNCV_ADD(r,a,b)		SET_ZN(r); SET_C_ADD(a,b); SET_V_ADD(r,a,b)
-#define SET_ZNCV_SUB(r,a,b)		SET_ZN(r); SET_C_SUB(a,b); SET_V_SUB(r,a,b)
+#define SET_C_ADD(a,b)          (m_cflag = (UINT32)(b) > (UINT32)(~(a)))
+#define SET_C_SUB(a,b)          (m_cflag = (UINT32)(b) <= (UINT32)(a))
+#define SET_V_ADD(r,a,b)        (m_vflag = ~((a) ^ (b)) & ((a) ^ (r)))
+#define SET_V_SUB(r,a,b)        (m_vflag =  ((a) ^ (b)) & ((a) ^ (r)))
+#define SET_ZN(r)               (m_znflag = (r))
+#define SET_ZNCV_ADD(r,a,b)     SET_ZN(r); SET_C_ADD(a,b); SET_V_ADD(r,a,b)
+#define SET_ZNCV_SUB(r,a,b)     SET_ZN(r); SET_C_SUB(a,b); SET_V_SUB(r,a,b)
 
-#define SET_VFLAG(val)			(m_vflag = (val) << 31)
-#define SET_CFLAG(val)			(m_cflag = (val))
+#define SET_VFLAG(val)          (m_vflag = (val) << 31)
+#define SET_CFLAG(val)          (m_cflag = (val))
 
-#define GET_FLAGS()				(m_cflag | \
-								 ((m_vflag >> 30) & PS_VFLAG) | \
-								 ((m_znflag == 0) << 2) | \
-								 ((m_znflag >> 28) & PS_NFLAG) | \
-								 (m_iflag << 4) | \
-								 (m_pflag << 5))
+#define GET_FLAGS()             (m_cflag | \
+									((m_vflag >> 30) & PS_VFLAG) | \
+									((m_znflag == 0) << 2) | \
+									((m_znflag >> 28) & PS_NFLAG) | \
+									(m_iflag << 4) | \
+									(m_pflag << 5))
 
-#define SET_FLAGS(v)			do { \
+#define SET_FLAGS(v)            do { \
 									m_cflag = (v) & PS_CFLAG; \
 									m_vflag = ((v) & PS_VFLAG) << 30; \
 									m_znflag = ((v) & PS_ZFLAG) ? 0 : ((v) & PS_NFLAG) ? -1 : 1; \
@@ -103,12 +95,12 @@ const int REGBASE				= 0xffe0;
 									m_pflag = ((v) & PS_PFLAG) >> 5; \
 								} while (0);
 
-#define OPCODE					(m_op >> 27)
-#define DSTREG					((m_op >> 22) & 31)
-#define DSTVAL					m_src2val[REGBASE + DSTREG]
-#define SRC1REG					((m_op >> 16) & 31)
-#define SRC1VAL					m_src2val[REGBASE + SRC1REG]
-#define SRC2VAL					m_src2val[m_op & 0xffff]
+#define OPCODE                  (m_op >> 27)
+#define DSTREG                  ((m_op >> 22) & 31)
+#define DSTVAL                  m_src2val[REGBASE + DSTREG]
+#define SRC1REG                 ((m_op >> 16) & 31)
+#define SRC1VAL                 m_src2val[REGBASE + SRC1REG]
+#define SRC2VAL                 m_src2val[m_op & 0xffff]
 
 
 
@@ -118,38 +110,38 @@ const int REGBASE				= 0xffe0;
 
 const asap_device::ophandler asap_device::s_opcodetable[32][4] =
 {
-	{	&asap_device::trap0,	&asap_device::trap0,	&asap_device::trap0,	&asap_device::trap0		},
-	{	&asap_device::noop,		&asap_device::noop,		&asap_device::noop,		&asap_device::noop		},
-	{	&asap_device::bsr,		&asap_device::bsr_0,	&asap_device::bsr,		&asap_device::bsr_0		},
-	{	&asap_device::lea,		&asap_device::noop,		&asap_device::lea_c,	&asap_device::lea_c0	},
-	{	&asap_device::leah,		&asap_device::noop,		&asap_device::leah_c,	&asap_device::leah_c0	},
-	{	&asap_device::subr,		&asap_device::noop,		&asap_device::subr_c,	&asap_device::subr_c0	},
-	{	&asap_device::xor_,		&asap_device::noop,		&asap_device::xor_c,	&asap_device::xor_c0	},
-	{	&asap_device::xorn,		&asap_device::noop,		&asap_device::xorn_c,	&asap_device::xorn_c0	},
-	{	&asap_device::add,		&asap_device::noop,		&asap_device::add_c,	&asap_device::add_c0	},
-	{	&asap_device::sub,		&asap_device::noop,		&asap_device::sub_c,	&asap_device::sub_c0	},
-	{	&asap_device::addc,		&asap_device::noop,		&asap_device::addc_c,	&asap_device::addc_c0	},
-	{	&asap_device::subc,		&asap_device::noop,		&asap_device::subc_c,	&asap_device::subc_c0	},
-	{	&asap_device::and_,		&asap_device::noop,		&asap_device::and_c,	&asap_device::and_c0	},
-	{	&asap_device::andn,		&asap_device::noop,		&asap_device::andn_c,	&asap_device::andn_c0	},
-	{	&asap_device::or_,		&asap_device::noop,		&asap_device::or_c,		&asap_device::or_c0		},
-	{	&asap_device::orn,		&asap_device::noop,		&asap_device::orn_c,	&asap_device::orn_c0	},
-	{	&asap_device::ld,		&asap_device::ld_0,		&asap_device::ld_c,		&asap_device::ld_c0		},
-	{	&asap_device::ldh,		&asap_device::ldh_0,	&asap_device::ldh_c,	&asap_device::ldh_c0	},
-	{	&asap_device::lduh,		&asap_device::lduh_0,	&asap_device::lduh_c,	&asap_device::lduh_c0	},
-	{	&asap_device::sth,		&asap_device::sth_0,	&asap_device::sth_c,	&asap_device::sth_c0	},
-	{	&asap_device::st,		&asap_device::st_0,		&asap_device::st_c,		&asap_device::st_c0		},
-	{	&asap_device::ldb,		&asap_device::ldb_0,	&asap_device::ldb_c,	&asap_device::ldb_c0	},
-	{	&asap_device::ldub,		&asap_device::ldub_0,	&asap_device::ldub_c,	&asap_device::ldub_c0	},
-	{	&asap_device::stb,		&asap_device::stb_0,	&asap_device::stb_c,	&asap_device::stb_c0	},
-	{	&asap_device::ashr,		&asap_device::noop,		&asap_device::ashr_c,	&asap_device::ashr_c0	},
-	{	&asap_device::lshr,		&asap_device::noop,		&asap_device::lshr_c,	&asap_device::lshr_c0	},
-	{	&asap_device::ashl,		&asap_device::noop,		&asap_device::ashl_c,	&asap_device::ashl_c0	},
-	{	&asap_device::rotl,		&asap_device::noop,		&asap_device::rotl_c,	&asap_device::rotl_c0	},
-	{	&asap_device::getps,	&asap_device::noop,		&asap_device::getps,	&asap_device::noop		},
-	{	&asap_device::putps,	&asap_device::putps,	&asap_device::putps,	&asap_device::putps		},
-	{	&asap_device::jsr,		&asap_device::jsr_0,	&asap_device::jsr_c,	&asap_device::jsr_c0	},
-	{	&asap_device::trapf,	&asap_device::trapf,	&asap_device::trapf,	&asap_device::trapf		}
+	{   &asap_device::trap0,    &asap_device::trap0,    &asap_device::trap0,    &asap_device::trap0     },
+	{   &asap_device::noop,     &asap_device::noop,     &asap_device::noop,     &asap_device::noop      },
+	{   &asap_device::bsr,      &asap_device::bsr_0,    &asap_device::bsr,      &asap_device::bsr_0     },
+	{   &asap_device::lea,      &asap_device::noop,     &asap_device::lea_c,    &asap_device::lea_c0    },
+	{   &asap_device::leah,     &asap_device::noop,     &asap_device::leah_c,   &asap_device::leah_c0   },
+	{   &asap_device::subr,     &asap_device::noop,     &asap_device::subr_c,   &asap_device::subr_c0   },
+	{   &asap_device::xor_,     &asap_device::noop,     &asap_device::xor_c,    &asap_device::xor_c0    },
+	{   &asap_device::xorn,     &asap_device::noop,     &asap_device::xorn_c,   &asap_device::xorn_c0   },
+	{   &asap_device::add,      &asap_device::noop,     &asap_device::add_c,    &asap_device::add_c0    },
+	{   &asap_device::sub,      &asap_device::noop,     &asap_device::sub_c,    &asap_device::sub_c0    },
+	{   &asap_device::addc,     &asap_device::noop,     &asap_device::addc_c,   &asap_device::addc_c0   },
+	{   &asap_device::subc,     &asap_device::noop,     &asap_device::subc_c,   &asap_device::subc_c0   },
+	{   &asap_device::and_,     &asap_device::noop,     &asap_device::and_c,    &asap_device::and_c0    },
+	{   &asap_device::andn,     &asap_device::noop,     &asap_device::andn_c,   &asap_device::andn_c0   },
+	{   &asap_device::or_,      &asap_device::noop,     &asap_device::or_c,     &asap_device::or_c0     },
+	{   &asap_device::orn,      &asap_device::noop,     &asap_device::orn_c,    &asap_device::orn_c0    },
+	{   &asap_device::ld,       &asap_device::ld_0,     &asap_device::ld_c,     &asap_device::ld_c0     },
+	{   &asap_device::ldh,      &asap_device::ldh_0,    &asap_device::ldh_c,    &asap_device::ldh_c0    },
+	{   &asap_device::lduh,     &asap_device::lduh_0,   &asap_device::lduh_c,   &asap_device::lduh_c0   },
+	{   &asap_device::sth,      &asap_device::sth_0,    &asap_device::sth_c,    &asap_device::sth_c0    },
+	{   &asap_device::st,       &asap_device::st_0,     &asap_device::st_c,     &asap_device::st_c0     },
+	{   &asap_device::ldb,      &asap_device::ldb_0,    &asap_device::ldb_c,    &asap_device::ldb_c0    },
+	{   &asap_device::ldub,     &asap_device::ldub_0,   &asap_device::ldub_c,   &asap_device::ldub_c0   },
+	{   &asap_device::stb,      &asap_device::stb_0,    &asap_device::stb_c,    &asap_device::stb_c0    },
+	{   &asap_device::ashr,     &asap_device::noop,     &asap_device::ashr_c,   &asap_device::ashr_c0   },
+	{   &asap_device::lshr,     &asap_device::noop,     &asap_device::lshr_c,   &asap_device::lshr_c0   },
+	{   &asap_device::ashl,     &asap_device::noop,     &asap_device::ashl_c,   &asap_device::ashl_c0   },
+	{   &asap_device::rotl,     &asap_device::noop,     &asap_device::rotl_c,   &asap_device::rotl_c0   },
+	{   &asap_device::getps,    &asap_device::noop,     &asap_device::getps,    &asap_device::noop      },
+	{   &asap_device::putps,    &asap_device::putps,    &asap_device::putps,    &asap_device::putps     },
+	{   &asap_device::jsr,      &asap_device::jsr_0,    &asap_device::jsr_c,    &asap_device::jsr_c0    },
+	{   &asap_device::trapf,    &asap_device::trapf,    &asap_device::trapf,    &asap_device::trapf     }
 };
 
 const asap_device::ophandler asap_device::s_conditiontable[16] =
@@ -163,133 +155,33 @@ const asap_device::ophandler asap_device::s_conditiontable[16] =
 
 
 //**************************************************************************
-//  ASAP DEVICE CONFIG
-//**************************************************************************
-
-//-------------------------------------------------
-//  asap_device_config - constructor
-//-------------------------------------------------
-
-asap_device_config::asap_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock)
-	: cpu_device_config(mconfig, static_alloc_device_config, "ASAP", tag, owner, clock),
-	  m_program_config("program", ENDIANNESS_LITTLE, 32, 32)
-{
-}
-
-
-//-------------------------------------------------
-//  static_alloc_device_config - allocate a new
-//  configuration object
-//-------------------------------------------------
-
-device_config *asap_device_config::static_alloc_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock)
-{
-	return global_alloc(asap_device_config(mconfig, tag, owner, clock));
-}
-
-
-//-------------------------------------------------
-//  alloc_device - allocate a new device object
-//-------------------------------------------------
-
-device_t *asap_device_config::alloc_device(running_machine &machine) const
-{
-	return auto_alloc(machine, asap_device(machine, *this));
-}
-
-
-//-------------------------------------------------
-//  execute_min_cycles - return minimum number of
-//  cycles it takes for one instruction to execute
-//-------------------------------------------------
-
-UINT32 asap_device_config::execute_min_cycles() const
-{
-	return 1;
-}
-
-
-//-------------------------------------------------
-//  execute_max_cycles - return maximum number of
-//  cycles it takes for one instruction to execute
-//-------------------------------------------------
-
-UINT32 asap_device_config::execute_max_cycles() const
-{
-	return 2;
-}
-
-
-//-------------------------------------------------
-//  execute_input_lines - return the number of
-//  input/interrupt lines
-//-------------------------------------------------
-
-UINT32 asap_device_config::execute_input_lines() const
-{
-	return 1;
-}
-
-
-//-------------------------------------------------
-//  memory_space_config - return the configuration
-//  of the specified address space, or NULL if
-//  the space doesn't exist
-//-------------------------------------------------
-
-const address_space_config *asap_device_config::memory_space_config(address_spacenum spacenum) const
-{
-	return (spacenum == AS_PROGRAM) ? &m_program_config : NULL;
-}
-
-
-//-------------------------------------------------
-//  disasm_min_opcode_bytes - return the length
-//  of the shortest instruction, in bytes
-//-------------------------------------------------
-
-UINT32 asap_device_config::disasm_min_opcode_bytes() const
-{
-	return 4;
-}
-
-
-//-------------------------------------------------
-//  disasm_max_opcode_bytes - return the length
-//  of the longest instruction, in bytes
-//-------------------------------------------------
-
-UINT32 asap_device_config::disasm_max_opcode_bytes() const
-{
-	return 12;
-}
-
-
-
-//**************************************************************************
 //  DEVICE INTERFACE
 //**************************************************************************
+
+// device type definition
+const device_type ASAP = &device_creator<asap_device>;
 
 //-------------------------------------------------
 //  asap_device - constructor
 //-------------------------------------------------
 
-asap_device::asap_device(running_machine &_machine, const asap_device_config &config)
-	: cpu_device(_machine, config),
-	  m_pc(0),
-	  m_pflag(0),
-	  m_iflag(0),
-	  m_cflag(0),
-	  m_vflag(0),
-	  m_znflag(0),
-	  m_flagsio(0),
-	  m_op(0),
-	  m_ppc(0),
-	  m_nextpc(0),
-	  m_irq_state(0),
-	  m_icount(0),
-	  m_program(NULL),
-	  m_direct(NULL)
+asap_device::asap_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: cpu_device(mconfig, ASAP, "ASAP", tag, owner, clock),
+		m_program_config("program", ENDIANNESS_LITTLE, 32, 32),
+		m_pc(0),
+		m_pflag(0),
+		m_iflag(0),
+		m_cflag(0),
+		m_vflag(0),
+		m_znflag(0),
+		m_flagsio(0),
+		m_op(0),
+		m_ppc(0),
+		m_nextpc(0),
+		m_irq_state(0),
+		m_icount(0),
+		m_program(NULL),
+		m_direct(NULL)
 {
 	// initialize the src2val table to contain immediates for low values
 	for (int i = 0; i < REGBASE; i++)
@@ -319,7 +211,7 @@ asap_device::asap_device(running_machine &_machine, const asap_device_config &co
 void asap_device::device_start()
 {
 	// get our address spaces
-	m_program = space(AS_PROGRAM);
+	m_program = &space(AS_PROGRAM);
 	m_direct = &m_program->direct();
 
 	// register our state for the debugger
@@ -364,6 +256,18 @@ void asap_device::device_reset()
 	m_ppc = 0;
 	m_nextpc = ~0;
 	m_irq_state = 0;
+}
+
+
+//-------------------------------------------------
+//  memory_space_config - return the configuration
+//  of the specified address space, or NULL if
+//  the space doesn't exist
+//-------------------------------------------------
+
+const address_space_config *asap_device::memory_space_config(address_spacenum spacenum) const
+{
+	return (spacenum == AS_PROGRAM) ? &m_program_config : NULL;
 }
 
 
@@ -420,6 +324,28 @@ void asap_device::state_string_export(const device_state_entry &entry, astring &
 							m_cflag ? 'C' : '.');
 			break;
 	}
+}
+
+
+//-------------------------------------------------
+//  disasm_min_opcode_bytes - return the length
+//  of the shortest instruction, in bytes
+//-------------------------------------------------
+
+UINT32 asap_device::disasm_min_opcode_bytes() const
+{
+	return 4;
+}
+
+
+//-------------------------------------------------
+//  disasm_max_opcode_bytes - return the length
+//  of the longest instruction, in bytes
+//-------------------------------------------------
+
+UINT32 asap_device::disasm_max_opcode_bytes() const
+{
+	return 12;
 }
 
 
@@ -623,6 +549,39 @@ inline void asap_device::execute_instruction()
 }
 
 
+//-------------------------------------------------
+//  execute_min_cycles - return minimum number of
+//  cycles it takes for one instruction to execute
+//-------------------------------------------------
+
+UINT32 asap_device::execute_min_cycles() const
+{
+	return 1;
+}
+
+
+//-------------------------------------------------
+//  execute_max_cycles - return maximum number of
+//  cycles it takes for one instruction to execute
+//-------------------------------------------------
+
+UINT32 asap_device::execute_max_cycles() const
+{
+	return 2;
+}
+
+
+//-------------------------------------------------
+//  execute_input_lines - return the number of
+//  input/interrupt lines
+//-------------------------------------------------
+
+UINT32 asap_device::execute_input_lines() const
+{
+	return 1;
+}
+
+
 void asap_device::execute_set_input(int inputnum, int state)
 {
 	m_irq_state = (state != CLEAR_LINE);
@@ -635,7 +594,7 @@ void asap_device::execute_run()
 	check_irqs();
 
 	// core execution loop
-	if ((device_t::m_machine.debug_flags & DEBUG_FLAG_ENABLED) == 0)
+	if ((device_t::machine().debug_flags & DEBUG_FLAG_ENABLED) == 0)
 	{
 		do
 		{

@@ -3,13 +3,14 @@
 
     Written by Mariusz Wojcieszek
     Updated by Jonathan Gevaryahu AKA Lord Nightmare
+    Improved interrupt handling by R. Belmont
 */
 
 #include "emu.h"
 #include "68681.h"
 
 #define VERBOSE 0
-#define LOG(x)	do { if (VERBOSE) logerror x; } while (0)
+#define LOG(x)  do { if (VERBOSE) logerror x; } while (0)
 
 static const char *const duart68681_reg_read_names[0x10] =
 {
@@ -21,29 +22,29 @@ static const char *const duart68681_reg_write_names[0x10] =
 	"MRA", "CSRA", "CRA", "THRA", "ACR", "IMR", "CRUR", "CTLR", "MRB", "CSRB", "CRB", "THRB", "IVR", "OPCR", "Set OP Bits", "Reset OP Bits"
 };
 
-#define INT_INPUT_PORT_CHANGE		0x80
-#define INT_DELTA_BREAK_B			0x40
-#define INT_RXRDY_FFULLB			0x20
-#define INT_TXRDYB					0x10
-#define INT_COUNTER_READY			0x08
-#define INT_DELTA_BREAK_A			0x04
-#define INT_RXRDY_FFULLA			0x02
-#define INT_TXRDYA					0x01
+#define INT_INPUT_PORT_CHANGE       0x80
+#define INT_DELTA_BREAK_B           0x40
+#define INT_RXRDY_FFULLB            0x20
+#define INT_TXRDYB                  0x10
+#define INT_COUNTER_READY           0x08
+#define INT_DELTA_BREAK_A           0x04
+#define INT_RXRDY_FFULLA            0x02
+#define INT_TXRDYA                  0x01
 
-#define STATUS_RECEIVED_BREAK		0x80
-#define STATUS_FRAMING_ERROR		0x40
-#define STATUS_PARITY_ERROR			0x20
-#define STATUS_OVERRUN_ERROR		0x10
-#define STATUS_TRANSMITTER_EMPTY	0x08
-#define STATUS_TRANSMITTER_READY	0x04
-#define STATUS_FIFO_FULL			0x02
-#define STATUS_RECEIVER_READY		0x01
+#define STATUS_RECEIVED_BREAK       0x80
+#define STATUS_FRAMING_ERROR        0x40
+#define STATUS_PARITY_ERROR         0x20
+#define STATUS_OVERRUN_ERROR        0x10
+#define STATUS_TRANSMITTER_EMPTY    0x08
+#define STATUS_TRANSMITTER_READY    0x04
+#define STATUS_FIFO_FULL            0x02
+#define STATUS_RECEIVER_READY       0x01
 
-#define MODE_RX_INT_SELECT_BIT		0x40
+#define MODE_RX_INT_SELECT_BIT      0x40
 
-#define RX_FIFO_SIZE				3
+#define RX_FIFO_SIZE                3
 
-typedef struct
+struct DUART68681_CHANNEL
 {
 	/* Registers */
 	UINT8 CR;  /* Command register */
@@ -69,9 +70,9 @@ typedef struct
 	UINT8 tx_ready;
 	emu_timer *tx_timer;
 
-} DUART68681_CHANNEL;
+};
 
-typedef struct
+struct duart68681_state
 {
 	/* device */
 	device_t *device;
@@ -92,38 +93,39 @@ typedef struct
 	UINT8 IP_last_state; /* last state of IP bits */
 
 	/* timer */
+	UINT8 half_period;
 	emu_timer *duart_timer;
 
 	/* UART channels */
 	DUART68681_CHANNEL channel[2];
 
-} duart68681_state;
+};
 
 INLINE duart68681_state *get_safe_token(device_t *device)
 {
 	assert(device != NULL);
 	assert(device->type() == DUART68681);
 
-	return (duart68681_state *)downcast<legacy_device_base *>(device)->token();
+	return (duart68681_state *)downcast<duart68681_device *>(device)->token();
 }
 
 static void duart68681_update_interrupts(duart68681_state *duart68681)
 {
 	/* update SR state and update interrupt ISR state for the following bits:
-    SRn: bits 7-4: handled elsewhere.
-    SRn: bit 3 (TxEMTn) (we can assume since we're not actually emulating the delay/timing of sending bits, that as long as TxRDYn is set, TxEMTn is also set since the transmit byte has 'already happened', therefore TxEMTn is always 1 assuming tx is enabled on channel n and the MSR2n mode is 0 or 2; in mode 1 it is explicitly zeroed, and mode 3 is undefined)
-    SRn: bit 2 (TxRDYn) (we COULD assume since we're not emulating delay and timing output, that as long as tx is enabled on channel n, TxRDY is 1 for channel n and the MSR2n mode is 0 or 2; in mode 1 it is explicitly zeroed, and mode 3 is undefined; however, tx_ready is already nicely handled for us elsewhere, so we can use that instead for now, though we may need to retool that code as well)
-    SRn: bit 1 (FFULLn) (this bit we actually emulate; if the receive fifo for channel n is full, this bit is 1, otherwise it is 0. the receive fifo should be three words long.)
-    SRn: bit 0 (RxRDYn) (this bit we also emulate; the bit is always asserted if the receive fifo is not empty)
-    ISR: bit 7: Input Port change; this should be handled elsewhere, on the input port handler
-    ISR: bit 6: Delta Break B; this should be handled elsewhere, on the data receive handler
-    ISR: bit 5: RxRDYB/FFULLB: this is handled here; depending on whether MSR1B bit 6 is 0 or 1, this bit holds the state of SRB bit 0 or bit 1 respectively
-    ISR: bit 4: TxRDYB: this is handled here; it mirrors SRB bit 2
-    ISR: bit 3: Counter ready; this should be handled by the timer generator
-    ISR: bit 2: Delta Break A; this should be handled elsewhere, on the data receive handler
-    ISR: bit 1: RxRDYA/FFULLA: this is handled here; depending on whether MSR1A bit 6 is 0 or 1, this bit holds the state of SRA bit 0 or bit 1 respectively
-    ISR: bit 0: TxRDYA: this is handled here; it mirrors SRA bit 2
-    */
+	SRn: bits 7-4: handled elsewhere.
+	SRn: bit 3 (TxEMTn) (we can assume since we're not actually emulating the delay/timing of sending bits, that as long as TxRDYn is set, TxEMTn is also set since the transmit byte has 'already happened', therefore TxEMTn is always 1 assuming tx is enabled on channel n and the MSR2n mode is 0 or 2; in mode 1 it is explicitly zeroed, and mode 3 is undefined)
+	SRn: bit 2 (TxRDYn) (we COULD assume since we're not emulating delay and timing output, that as long as tx is enabled on channel n, TxRDY is 1 for channel n and the MSR2n mode is 0 or 2; in mode 1 it is explicitly zeroed, and mode 3 is undefined; however, tx_ready is already nicely handled for us elsewhere, so we can use that instead for now, though we may need to retool that code as well)
+	SRn: bit 1 (FFULLn) (this bit we actually emulate; if the receive fifo for channel n is full, this bit is 1, otherwise it is 0. the receive fifo should be three words long.)
+	SRn: bit 0 (RxRDYn) (this bit we also emulate; the bit is always asserted if the receive fifo is not empty)
+	ISR: bit 7: Input Port change; this should be handled elsewhere, on the input port handler
+	ISR: bit 6: Delta Break B; this should be handled elsewhere, on the data receive handler
+	ISR: bit 5: RxRDYB/FFULLB: this is handled here; depending on whether MSR1B bit 6 is 0 or 1, this bit holds the state of SRB bit 0 or bit 1 respectively
+	ISR: bit 4: TxRDYB: this is handled here; it mirrors SRB bit 2
+	ISR: bit 3: Counter ready; this should be handled by the timer generator
+	ISR: bit 2: Delta Break A; this should be handled elsewhere, on the data receive handler
+	ISR: bit 1: RxRDYA/FFULLA: this is handled here; depending on whether MSR1A bit 6 is 0 or 1, this bit holds the state of SRA bit 0 or bit 1 respectively
+	ISR: bit 0: TxRDYA: this is handled here; it mirrors SRA bit 2
+	*/
 	UINT8 ch = 0;
 	//logerror("DEBUG: 68681 int check: upon func call, SRA is %02X, SRB is %02X, ISR is %02X\n", duart68681->channel[0].SR, duart68681->channel[1].SR, duart68681->ISR);
 	for (ch = 0; ch < 2; ch++)
@@ -230,25 +232,102 @@ static void duart68681_update_interrupts(duart68681_state *duart68681)
 		if ( duart68681->duart_config->irq_handler )
 		{
 			LOG(( "68681: Interrupt line active (IMR & ISR = %02X)\n", (duart68681->ISR & duart68681->IMR) ));
-			duart68681->duart_config->irq_handler( duart68681->device, duart68681->IVR );
+			duart68681->duart_config->irq_handler( duart68681->device, ASSERT_LINE, duart68681->IVR );
+		}
+	}
+	else
+	{
+		if ( duart68681->duart_config->irq_handler )
+		{
+			LOG(( "68681: Interrupt line not active (IMR & ISR = %02X)\n", (duart68681->ISR & duart68681->IMR) ));
+			duart68681->duart_config->irq_handler( duart68681->device, CLEAR_LINE, duart68681->IVR );
 		}
 	}
 };
 
+double duart68681_get_ct_rate(duart68681_state *duart68681)
+{
+	double rate = 0.0f;
+
+	if (duart68681->ACR & 0x40)
+	{
+		// Timer mode
+		switch ((duart68681->ACR >> 4) & 3)
+		{
+			case 0: // IP2
+			case 1: // IP2 / 16
+				//logerror( "68681 (%s): Unhandled timer/counter mode %d\n", duart68681->tag(), (duart68681->ACR >> 4) & 3);
+				rate = duart68681->device->clock();
+				break;
+			case 2: // X1/CLK
+				rate = duart68681->device->clock();
+				break;
+			case 3: // X1/CLK / 16
+				rate = duart68681->device->clock() / 16;
+				break;
+		}
+	}
+	else
+	{
+		// Counter mode
+		switch ((duart68681->ACR >> 4) & 3)
+		{
+			case 0: // IP2
+			case 1: // TxCA
+			case 2: // TxCB
+				//logerror( "68681 (%s): Unhandled timer/counter mode %d\n", device->tag(), (duart68681->ACR >> 4) & 3);
+				rate = duart68681->device->clock();
+				break;
+			case 3: // X1/CLK / 16
+				rate = duart68681->device->clock() / 16;
+				break;
+		}
+	}
+
+	return rate;
+}
+
+UINT16 duart68681_get_ct_count(duart68681_state *duart68681)
+{
+	double clock = duart68681_get_ct_rate(duart68681);
+	return (duart68681->duart_timer->remaining() * clock).as_double();
+}
+
+void duart68681_start_ct(duart68681_state *duart68681, int count)
+{
+	double clock = duart68681_get_ct_rate(duart68681);
+	duart68681->duart_timer->adjust(attotime::from_hz(clock) * count, 0);
+}
+
 static TIMER_CALLBACK( duart_timer_callback )
 {
 	device_t *device = (device_t *)ptr;
-	duart68681_state	*duart68681 = get_safe_token(device);
+	duart68681_state *duart68681 = get_safe_token(device);
 
-	duart68681->ISR |= INT_COUNTER_READY;
-	duart68681_update_interrupts(duart68681);
+	if (duart68681->ACR & 0x40)
+	{
+		// Timer mode
+		duart68681->half_period ^= 1;
 
-//  if ((duart68681->OPCR & 0x0c)== 0x04) {
-//      duart68681->OPR ^= 0x08;
-//      if (duart68681->duart_config->output_port_write)
-//          duart68681->duart_config->output_port_write(duart68681->device, duart68681->OPR ^ 0xff);
-//
-//  }
+		// TODO: Set OP3
+
+		if (!duart68681->half_period)
+		{
+			duart68681->ISR |= INT_COUNTER_READY;
+			duart68681_update_interrupts(duart68681);
+		}
+
+		int count = MAX(duart68681->CTR.w.l, 1);
+		duart68681_start_ct(duart68681, count);
+	}
+	else
+	{
+		// Counter mode
+		duart68681->ISR |= INT_COUNTER_READY;
+		duart68681_update_interrupts(duart68681);
+		duart68681_start_ct(duart68681, 0xffff);
+	}
+
 };
 
 static void duart68681_write_MR(duart68681_state *duart68681, int ch, UINT8 data)
@@ -355,7 +434,6 @@ static void duart68681_write_CR(duart68681_state *duart68681, int ch, UINT8 data
 			LOG(( "68681: Unhandled command (%x) in CR%d\n", (data >> 4) & 0x07, ch ));
 			break;
 	}
-	duart68681_update_interrupts(duart68681);
 
 	if (BIT(data, 0)) {
 		duart68681->channel[ch].rx_enabled = 1;
@@ -384,6 +462,7 @@ static void duart68681_write_CR(duart68681_state *duart68681, int ch, UINT8 data
 			duart68681->ISR &= ~INT_TXRDYB;
 	}
 
+	duart68681_update_interrupts(duart68681);
 };
 
 static UINT8 duart68681_read_rx_fifo(duart68681_state *duart68681, int ch)
@@ -411,7 +490,7 @@ static UINT8 duart68681_read_rx_fifo(duart68681_state *duart68681, int ch)
 static TIMER_CALLBACK( tx_timer_callback )
 {
 	device_t *device = (device_t *)ptr;
-	duart68681_state	*duart68681 = get_safe_token(device);
+	duart68681_state    *duart68681 = get_safe_token(device);
 	int ch = param & 1;
 
 	// send the byte unless we're in loopback mode;
@@ -472,7 +551,7 @@ static void duart68681_write_TX(duart68681_state* duart68681, int ch, UINT8 data
 
 };
 
-READ8_DEVICE_HANDLER(duart68681_r)
+READ8_DEVICE_HANDLER( duart68681_r )
 {
 	duart68681_state* duart68681 = get_safe_token(device);
 	UINT8 r = 0xff;
@@ -494,29 +573,42 @@ READ8_DEVICE_HANDLER(duart68681_r)
 				r = duart68681->channel[0].MR2;
 			}
 			break;
+
 		case 0x01: /* SRA */
 			r = duart68681->channel[0].SR;
 			break;
+
 		case 0x03: /* Rx Holding Register A */
 			r = duart68681_read_rx_fifo(duart68681, 0);
 			break;
-		case 0x04: /* IPCR */
-			{
-				UINT8 IP;
-				if ( duart68681->duart_config->input_port_read != NULL )
-					IP = duart68681->duart_config->input_port_read(duart68681->device);
-				else
-					IP = 0x0;
 
-				r = (((duart68681->IP_last_state ^ IP) & 0x0f) << 4) | (IP & 0x0f);
-				duart68681->IP_last_state = IP;
-				duart68681->ISR &= ~INT_INPUT_PORT_CHANGE;
-				duart68681_update_interrupts(duart68681);
-			}
-			break;
+		case 0x04: /* IPCR */
+		{
+			UINT8 IP;
+			if ( duart68681->duart_config->input_port_read != NULL )
+				IP = duart68681->duart_config->input_port_read(duart68681->device);
+			else
+				IP = 0x0;
+
+			r = (((duart68681->IP_last_state ^ IP) & 0x0f) << 4) | (IP & 0x0f);
+			duart68681->IP_last_state = IP;
+			duart68681->ISR &= ~INT_INPUT_PORT_CHANGE;
+			duart68681_update_interrupts(duart68681);
+		}
+		break;
+
 		case 0x05: /* ISR */
 			r = duart68681->ISR;
 			break;
+
+		case 0x06: /* CUR */
+			r = duart68681_get_ct_count(duart68681) >> 8;
+			break;
+
+		case 0x07: /* CLR */
+			r = duart68681_get_ct_count(duart68681) & 0xff;
+			break;
+
 		case 0x08: /* MR1B/MR2B */
 			if ( duart68681->channel[1].MR_ptr == 0 )
 			{
@@ -528,63 +620,58 @@ READ8_DEVICE_HANDLER(duart68681_r)
 				r = duart68681->channel[1].MR2;
 			}
 			break;
+
 		case 0x09: /* SRB */
 			r = duart68681->channel[1].SR;
 			break;
+
 		case 0x0b: /* RHRB */
 			r = duart68681_read_rx_fifo(duart68681, 1);
 			break;
+
 		case 0x0d: /* IP */
 			if ( duart68681->duart_config->input_port_read != NULL )
 				r = duart68681->duart_config->input_port_read(duart68681->device);
 			else
-				{
-					r = 0xff;
-#if 0
-					if (input_code_pressed(device->machine(), KEYCODE_1)) r ^= 0x0001;
-					if (input_code_pressed(device->machine(), KEYCODE_2)) r ^= 0x0002;
-					if (input_code_pressed(device->machine(), KEYCODE_3)) r ^= 0x0004;
-					if (input_code_pressed(device->machine(), KEYCODE_4)) r ^= 0x0008;
-					if (input_code_pressed(device->machine(), KEYCODE_5)) r ^= 0x0010;
-					if (input_code_pressed(device->machine(), KEYCODE_6)) r ^= 0x0020;
-					if (input_code_pressed(device->machine(), KEYCODE_7)) r ^= 0x0040;
-					if (input_code_pressed(device->machine(), KEYCODE_8)) r ^= 0x0080;
-#endif
-				}
-			break;
-		case 0x0e: /* Start counter command */
-			switch( (duart68681->ACR >> 4) & 0x07 )
 			{
-				/* TODO: implement modes 0,1,2,4,5 */
-				case 0x03: /* Counter, CLK/16 */
-					{
-						attotime rate = attotime::from_hz(2*device->clock()/(2*16*16*duart68681->CTR.w.l));
-						duart68681->duart_timer->adjust(rate, 0, rate);
-					}
-					break;
-				case 0x06: /* Timer, CLK/1 */
-					{
-						attotime rate = attotime::from_hz(2*device->clock()/(2*16*duart68681->CTR.w.l));
-						duart68681->duart_timer->adjust(rate, 0, rate);
-					}
-					break;
-				case 0x07: /* Timer, CLK/16 */
-					{
-						//double hz;
-						//attotime rate = attotime::from_hz(duart68681->clock) * (16*duart68681->CTR.w.l);
-						attotime rate = attotime::from_hz(2*device->clock()/(2*16*16*duart68681->CTR.w.l));
-						//hz = ATTOSECONDS_TO_HZ(rate.attoseconds);
-						duart68681->duart_timer->adjust(rate, 0, rate);
-					}
-					break;
+				r = 0xff;
+#if 0
+				if (device->machine().input().code_pressed(KEYCODE_1)) r ^= 0x0001;
+				if (device->machine().input().code_pressed(KEYCODE_2)) r ^= 0x0002;
+				if (device->machine().input().code_pressed(KEYCODE_3)) r ^= 0x0004;
+				if (device->machine().input().code_pressed(KEYCODE_4)) r ^= 0x0008;
+				if (device->machine().input().code_pressed(KEYCODE_5)) r ^= 0x0010;
+				if (device->machine().input().code_pressed(KEYCODE_6)) r ^= 0x0020;
+				if (device->machine().input().code_pressed(KEYCODE_7)) r ^= 0x0040;
+				if (device->machine().input().code_pressed(KEYCODE_8)) r ^= 0x0080;
+#endif
 			}
 			break;
+
+		case 0x0e: /* Start counter command */
+		{
+			if (duart68681->ACR & 0x40)
+			{
+				// Reset the timer
+				duart68681->half_period = 0;
+				// TODO: Set OP3 to 1
+			}
+
+			int count = MAX(duart68681->CTR.w.l, 1);
+			duart68681_start_ct(duart68681, count);
+			break;
+		}
+
 		case 0x0f: /* Stop counter command */
 			duart68681->ISR &= ~INT_COUNTER_READY;
-			if (((duart68681->ACR >>4)& 0x07) < 4) // if in counter mode...
-			duart68681->duart_timer->adjust(attotime::never); // shut down timer
+
+			// Stop the counter only
+			if (!(duart68681->ACR & 0x40))
+				duart68681->duart_timer->adjust(attotime::never);
+
 			duart68681_update_interrupts(duart68681);
 			break;
+
 		default:
 			LOG(( "Reading unhandled 68681 reg %x\n", offset ));
 			break;
@@ -594,7 +681,7 @@ READ8_DEVICE_HANDLER(duart68681_r)
 	return r;
 }
 
-WRITE8_DEVICE_HANDLER(duart68681_w)
+WRITE8_DEVICE_HANDLER( duart68681_w )
 {
 	duart68681_state* duart68681 = get_safe_token(device);
 
@@ -606,66 +693,94 @@ WRITE8_DEVICE_HANDLER(duart68681_w)
 		case 0x00: /* MRA */
 			duart68681_write_MR(duart68681, 0, data);
 			break;
+
 		case 0x01: /* CSRA */
 			duart68681_write_CSR(duart68681, 0, data, duart68681->ACR);
 			break;
+
 		case 0x02: /* CRA */
 			duart68681_write_CR(duart68681, 0, data);
 			break;
+
 		case 0x03: /* THRA */
 			duart68681_write_TX(duart68681, 0, data);
 			break;
+
 		case 0x04: /* ACR */
+		{
+			UINT8 old_acr = duart68681->ACR;
 			duart68681->ACR = data;
+
 			//       bits 6-4: Counter/Timer Mode And Clock Source Select
 			//       bits 3-0: IP3-0 Change-Of-State Interrupt Enable
-			switch ((data >> 4) & 0x07)
+			if ((old_acr ^ data) & 0x40)
 			{
-				case 0: case 1: case 2: case 4: case 5: // TODO: handle these cases!
-				logerror( "68681 (%s): Unhandled timer/counter mode %d\n", device->tag(), (data >> 4) & 0x07);
-				break;
-				case 3: case 6: case 7:
-				break;
+				if (data & 0x40)
+				{
+					// Entering timer mode
+					UINT16 count = MAX(duart68681->CTR.w.l, 1);
+					duart68681->half_period = 0;
+
+					// TODO: Set OP3
+					duart68681_start_ct(duart68681, count);
+				}
+				else
+				{
+					// Leaving timer mode (TODO: is this correct?)
+					duart68681->duart_timer->adjust(attotime::never);
+				}
 			}
+
 			duart68681_write_CSR(duart68681, 0, duart68681->channel[0].CSR, data);
 			duart68681_write_CSR(duart68681, 1, duart68681->channel[1].CSR, data);
 			duart68681_update_interrupts(duart68681); // need to add ACR checking for IP delta ints
 			break;
+		}
 		case 0x05: /* IMR */
 			duart68681->IMR = data;
 			duart68681_update_interrupts(duart68681);
 			break;
+
 		case 0x06: /* CTUR */
 			duart68681->CTR.b.h = data;
 			break;
+
 		case 0x07: /* CTLR */
 			duart68681->CTR.b.l = data;
 			break;
+
 		case 0x08: /* MRB */
 			duart68681_write_MR(duart68681, 1, data);
 			break;
+
 		case 0x09: /* CSRB */
 			duart68681_write_CSR(duart68681, 1, data, duart68681->ACR);
 			break;
+
 		case 0x0a: /* CRB */
 			duart68681_write_CR(duart68681, 1, data);
 			break;
+
 		case 0x0b: /* THRB */
 			duart68681_write_TX(duart68681, 1, data);
 			break;
+
 		case 0x0c: /* IVR */
 			duart68681->IVR = data;
 			break;
+
 		case 0x0d: /* OPCR */
 			if (data != 0x00)
 				logerror( "68681 (%s): Unhandled OPCR value: %02x\n", device->tag(), data);
 			duart68681->OPCR = data;
 			break;
+
 		case 0x0e: /* Set Output Port Bits */
 			duart68681->OPR |= data;
 			if (duart68681->duart_config->output_port_write)
 				duart68681->duart_config->output_port_write(duart68681->device, duart68681->OPR ^ 0xff);
 			break;
+
 		case 0x0f: /* Reset Output Port Bits */
 			duart68681->OPR &= ~data;
 			if (duart68681->duart_config->output_port_write)
@@ -707,7 +822,7 @@ static DEVICE_START(duart68681)
 	/* validate arguments */
 	assert(device != NULL);
 
-	duart68681->duart_config = (const duart68681_config *)device->baseconfig().static_config();
+	duart68681->duart_config = (const duart68681_config *)device->static_config();
 	duart68681->device = device;
 
 	duart68681->channel[0].tx_timer = device->machine().scheduler().timer_alloc(FUNC(tx_timer_callback), (void*)device);
@@ -721,6 +836,7 @@ static DEVICE_START(duart68681)
 	device->save_item(NAME(duart68681->OPCR));
 	device->save_item(NAME(duart68681->CTR));
 	device->save_item(NAME(duart68681->IP_last_state));
+	device->save_item(NAME(duart68681->half_period));
 
 	device->save_item(NAME(duart68681->channel[0].CR));
 	device->save_item(NAME(duart68681->channel[0].CSR));
@@ -787,30 +903,38 @@ static DEVICE_RESET(duart68681)
 	duart68681->channel[1].tx_timer->adjust(attotime::never, 1);
 }
 
-/*-------------------------------------------------
-    device get info callback
--------------------------------------------------*/
+const device_type DUART68681 = &device_creator<duart68681_device>;
 
-DEVICE_GET_INFO(duart68681)
+duart68681_device::duart68681_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, DUART68681, "DUART 68681", tag, owner, clock)
 {
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:			info->i = sizeof(duart68681_state);	break;
-		case DEVINFO_INT_INLINE_CONFIG_BYTES:	info->i = sizeof(duart68681_config);	break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:					info->start = DEVICE_START_NAME(duart68681); break;
-		case DEVINFO_FCT_STOP:					/* nothing */ break;
-		case DEVINFO_FCT_RESET:					info->reset = DEVICE_RESET_NAME(duart68681);break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:					strcpy(info->s, "DUART 68681");			break;
-		case DEVINFO_STR_FAMILY:				strcpy(info->s, "DUART");				break;
-		case DEVINFO_STR_VERSION:				strcpy(info->s, "1.0");					break;
-		case DEVINFO_STR_SOURCE_FILE:			strcpy(info->s, __FILE__);				break;
-		case DEVINFO_STR_CREDITS:				strcpy(info->s, "Copyright Nicola Salmoria and the MAME Team"); break;
-	}
+	m_token = global_alloc_clear(duart68681_state);
 }
 
-DEFINE_LEGACY_DEVICE(DUART68681, duart68681);
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
+
+void duart68681_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void duart68681_device::device_start()
+{
+	DEVICE_START_NAME( duart68681 )(this);
+}
+
+//-------------------------------------------------
+//  device_reset - device-specific reset
+//-------------------------------------------------
+
+void duart68681_device::device_reset()
+{
+	DEVICE_RESET_NAME( duart68681 )(this);
+}

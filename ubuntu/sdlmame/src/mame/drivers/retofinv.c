@@ -30,89 +30,82 @@ Notes:
 
 #include "emu.h"
 #include "cpu/z80/z80.h"
-#include "deprecat.h"
 #include "cpu/m6805/m6805.h"
 #include "sound/sn76496.h"
 #include "includes/retofinv.h"
 
 
 
-static WRITE8_HANDLER( cpu1_reset_w )
+WRITE8_MEMBER(retofinv_state::cpu1_reset_w)
 {
-	cputag_set_input_line(space->machine(), "sub", INPUT_LINE_RESET, data ? CLEAR_LINE : ASSERT_LINE);
+	machine().device("sub")->execute().set_input_line(INPUT_LINE_RESET, data ? CLEAR_LINE : ASSERT_LINE);
 }
 
-static WRITE8_HANDLER( cpu2_reset_w )
+WRITE8_MEMBER(retofinv_state::cpu2_reset_w)
 {
-	cputag_set_input_line(space->machine(), "audiocpu", INPUT_LINE_RESET, data ? CLEAR_LINE : ASSERT_LINE);
+	machine().device("audiocpu")->execute().set_input_line(INPUT_LINE_RESET, data ? CLEAR_LINE : ASSERT_LINE);
 }
 
-static WRITE8_HANDLER( mcu_reset_w )
+WRITE8_MEMBER(retofinv_state::mcu_reset_w)
 {
 	/* the bootlegs don't have a MCU, so make sure it's there before trying to reset it */
-	if (space->machine().device("68705") != NULL)
-		cputag_set_input_line(space->machine(), "68705", INPUT_LINE_RESET, data ? CLEAR_LINE : ASSERT_LINE);
+	if (machine().device("68705") != NULL)
+		machine().device("68705")->execute().set_input_line(INPUT_LINE_RESET, data ? CLEAR_LINE : ASSERT_LINE);
 }
 
-static WRITE8_HANDLER( cpu2_m6000_w )
+WRITE8_MEMBER(retofinv_state::cpu2_m6000_w)
 {
-	retofinv_state *state = space->machine().driver_data<retofinv_state>();
-	state->m_cpu2_m6000 = data;
+	m_cpu2_m6000 = data;
 }
 
-static READ8_HANDLER( cpu0_mf800_r )
+READ8_MEMBER(retofinv_state::cpu0_mf800_r)
 {
-	retofinv_state *state = space->machine().driver_data<retofinv_state>();
-	return state->m_cpu2_m6000;
+	return m_cpu2_m6000;
 }
 
-static WRITE8_HANDLER( soundcommand_w )
+WRITE8_MEMBER(retofinv_state::soundcommand_w)
 {
-      soundlatch_w(space, 0, data);
-      cputag_set_input_line(space->machine(), "audiocpu", 0, HOLD_LINE);
+		soundlatch_byte_w(space, 0, data);
+		machine().device("audiocpu")->execute().set_input_line(0, HOLD_LINE);
 }
 
-static WRITE8_HANDLER( irq0_ack_w )
+WRITE8_MEMBER(retofinv_state::irq0_ack_w)
 {
-	int bit = data & 1;
-
-	cpu_interrupt_enable(space->machine().device("maincpu"), bit);
-	if (!bit)
-		cputag_set_input_line(space->machine(), "maincpu", 0, CLEAR_LINE);
+	m_main_irq_mask = data & 1;
+	if (!m_main_irq_mask)
+		machine().device("maincpu")->execute().set_input_line(0, CLEAR_LINE);
 }
 
-static WRITE8_HANDLER( irq1_ack_w )
+WRITE8_MEMBER(retofinv_state::irq1_ack_w)
 {
-	int bit = data & 1;
-
-	cpu_interrupt_enable(space->machine().device("sub"), bit);
-	if (!bit)
-		cputag_set_input_line(space->machine(), "sub", 0, CLEAR_LINE);
+	m_sub_irq_mask = data & 1;
+	if (!m_sub_irq_mask)
+		machine().device("sub")->execute().set_input_line(0, CLEAR_LINE);
 }
 
-static WRITE8_HANDLER( coincounter_w )
+WRITE8_MEMBER(retofinv_state::coincounter_w)
 {
-	coin_counter_w(space->machine(), 0, data & 1);
+	coin_counter_w(machine(), 0, data & 1);
 }
 
-static WRITE8_HANDLER( coinlockout_w )
+WRITE8_MEMBER(retofinv_state::coinlockout_w)
 {
-	coin_lockout_w(space->machine(), 0,~data & 1);
+	coin_lockout_w(machine(), 0,~data & 1);
 }
 
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, retofinv_state )
 	AM_RANGE(0x0000, 0x5fff) AM_ROM
 	AM_RANGE(0x7fff, 0x7fff) AM_WRITE(coincounter_w)
-	AM_RANGE(0x7b00, 0x7bff) AM_ROM	/* space for diagnostic ROM? The code looks */
+	AM_RANGE(0x7b00, 0x7bff) AM_ROM /* space for diagnostic ROM? The code looks */
 									/* for a string here, and jumps if it's present */
-	AM_RANGE(0x8000, 0x87ff) AM_RAM_WRITE(retofinv_fg_videoram_w) AM_SHARE("share2") AM_BASE_MEMBER(retofinv_state, m_fg_videoram)
-	AM_RANGE(0x8800, 0x9fff) AM_RAM AM_SHARE("share1") AM_BASE_MEMBER(retofinv_state, m_sharedram)
-	AM_RANGE(0xa000, 0xa7ff) AM_RAM_WRITE(retofinv_bg_videoram_w) AM_SHARE("share3") AM_BASE_MEMBER(retofinv_state, m_bg_videoram)
+	AM_RANGE(0x8000, 0x87ff) AM_RAM_WRITE(retofinv_fg_videoram_w) AM_SHARE("fg_videoram")
+	AM_RANGE(0x8800, 0x9fff) AM_RAM AM_SHARE("sharedram")
+	AM_RANGE(0xa000, 0xa7ff) AM_RAM_WRITE(retofinv_bg_videoram_w) AM_SHARE("bg_videoram")
 	AM_RANGE(0xb800, 0xb802) AM_WRITE(retofinv_gfx_ctrl_w)
 	AM_RANGE(0xc000, 0xc000) AM_READ_PORT("P1")
 	AM_RANGE(0xc001, 0xc001) AM_READ_PORT("P2")
-	AM_RANGE(0xc002, 0xc002) AM_READNOP	/* bit 7 must be 0, otherwise game resets */
+	AM_RANGE(0xc002, 0xc002) AM_READNOP /* bit 7 must be 0, otherwise game resets */
 	AM_RANGE(0xc003, 0xc003) AM_READ(retofinv_mcu_status_r)
 	AM_RANGE(0xc004, 0xc004) AM_READ_PORT("SYSTEM")
 	AM_RANGE(0xc005, 0xc005) AM_READ_PORT("DSW1")
@@ -131,25 +124,25 @@ static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
 	AM_RANGE(0xf800, 0xf800) AM_READ(cpu0_mf800_r)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sub_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sub_map, AS_PROGRAM, 8, retofinv_state )
 	AM_RANGE(0x0000, 0x1fff) AM_ROM
-	AM_RANGE(0x8000, 0x87ff) AM_RAM_WRITE(retofinv_fg_videoram_w) AM_SHARE("share2")
-	AM_RANGE(0x8800, 0x9fff) AM_RAM AM_SHARE("share1")
-	AM_RANGE(0xa000, 0xa7ff) AM_RAM_WRITE(retofinv_bg_videoram_w) AM_SHARE("share3")
+	AM_RANGE(0x8000, 0x87ff) AM_RAM_WRITE(retofinv_fg_videoram_w) AM_SHARE("fg_videoram")
+	AM_RANGE(0x8800, 0x9fff) AM_RAM AM_SHARE("sharedram")
+	AM_RANGE(0xa000, 0xa7ff) AM_RAM_WRITE(retofinv_bg_videoram_w) AM_SHARE("bg_videoram")
 	AM_RANGE(0xc804, 0xc804) AM_WRITE(irq1_ack_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, retofinv_state )
 	AM_RANGE(0x0000, 0x1fff) AM_ROM
 	AM_RANGE(0x2000, 0x27ff) AM_RAM
-	AM_RANGE(0x4000, 0x4000) AM_READ(soundlatch_r)
+	AM_RANGE(0x4000, 0x4000) AM_READ(soundlatch_byte_r)
 	AM_RANGE(0x6000, 0x6000) AM_WRITE(cpu2_m6000_w)
-	AM_RANGE(0x8000, 0x8000) AM_DEVWRITE("sn1", sn76496_w)
-	AM_RANGE(0xa000, 0xa000) AM_DEVWRITE("sn2", sn76496_w)
-	AM_RANGE(0xe000, 0xffff) AM_ROM 		/* space for diagnostic ROM */
+	AM_RANGE(0x8000, 0x8000) AM_DEVWRITE("sn1", sn76496_device, write)
+	AM_RANGE(0xa000, 0xa000) AM_DEVWRITE("sn2", sn76496_device, write)
+	AM_RANGE(0xe000, 0xffff) AM_ROM         /* space for diagnostic ROM */
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( mcu_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( mcu_map, AS_PROGRAM, 8, retofinv_state )
 	ADDRESS_MAP_GLOBAL_MASK(0x7ff)
 	AM_RANGE(0x0000, 0x0000) AM_READWRITE(retofinv_68705_portA_r, retofinv_68705_portA_w)
 	AM_RANGE(0x0001, 0x0001) AM_READWRITE(retofinv_68705_portB_r, retofinv_68705_portB_w)
@@ -208,7 +201,7 @@ static INPUT_PORTS_START( retofinv )
 	PORT_DIPSETTING(    0x10, "2" )
 	PORT_DIPSETTING(    0x08, "3" )
 	PORT_DIPSETTING(    0x00, "5" )
-	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unused ) )	// according to manual
+	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unused ) )   // according to manual
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Flip_Screen ) )
@@ -218,7 +211,7 @@ static INPUT_PORTS_START( retofinv )
 	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( Cocktail ) )
 
-    PORT_START("DSW2")
+	PORT_START("DSW2")
 	PORT_DIPNAME( 0x0f, 0x00, DEF_STR( Coin_A ) )
 	PORT_DIPSETTING(    0x0f, DEF_STR( 9C_1C ) )
 	PORT_DIPSETTING(    0x0e, DEF_STR( 8C_1C ) )
@@ -258,13 +251,13 @@ static INPUT_PORTS_START( retofinv )
 	PORT_DIPNAME( 0x01, 0x01, "Push Start to Skip Stage (Cheat)")
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unused ) )	// according to manual
+	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unused ) )   // according to manual
 	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unused ) )	// according to manual
+	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unused ) )   // according to manual
 	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unused ) )	// according to manual
+	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unused ) )   // according to manual
 	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x10, 0x10, "Coin Per Play Display" )
@@ -276,7 +269,7 @@ static INPUT_PORTS_START( retofinv )
 	PORT_DIPNAME( 0x40, 0x40, "Invulnerability (Cheat)")
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Coinage ) )	// unused according to manual
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Coinage ) )  // unused according to manual
 	PORT_DIPSETTING(    0x80, "A and B" )
 	PORT_DIPSETTING(    0x00, "A only" )
 INPUT_PORTS_END
@@ -297,7 +290,7 @@ INPUT_PORTS_END
 static const gfx_layout charlayout =
 {
 	8,8,
-	RGN_FRAC(1,2),	/* bottom half of ROM is empty */
+	RGN_FRAC(1,2),  /* bottom half of ROM is empty */
 	1,
 	{ 0 },
 	{ 7, 6, 5, 4, 3, 2, 1, 0 },
@@ -335,51 +328,80 @@ static GFXDECODE_START( retofinv )
 	GFXDECODE_ENTRY( "gfx3", 0, bglayout,     64*16+256*2,  64 )
 GFXDECODE_END
 
+INTERRUPT_GEN_MEMBER(retofinv_state::main_vblank_irq)
+{
+
+	if(m_main_irq_mask)
+		device.execute().set_input_line(0, ASSERT_LINE);
+}
+
+INTERRUPT_GEN_MEMBER(retofinv_state::sub_vblank_irq)
+{
+
+	if(m_sub_irq_mask)
+		device.execute().set_input_line(0, ASSERT_LINE);
+}
+
+
+/*************************************
+ *
+ *  Sound interface
+ *
+ *************************************/
+
+
+//-------------------------------------------------
+//  sn76496_config psg_intf
+//-------------------------------------------------
+
+static const sn76496_config psg_intf =
+{
+	DEVCB_NULL
+};
 
 
 static MACHINE_CONFIG_START( retofinv, retofinv_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, 18432000/6)	/* 3.072 MHz? */
+	MCFG_CPU_ADD("maincpu", Z80, 18432000/6)    /* 3.072 MHz? */
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_assert)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", retofinv_state,  main_vblank_irq)
 
-	MCFG_CPU_ADD("sub", Z80, 18432000/6)	/* 3.072 MHz? */
+	MCFG_CPU_ADD("sub", Z80, 18432000/6)    /* 3.072 MHz? */
 	MCFG_CPU_PROGRAM_MAP(sub_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_assert)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", retofinv_state,  sub_vblank_irq)
 
-	MCFG_CPU_ADD("audiocpu", Z80, 18432000/6)	/* 3.072 MHz? */
+	MCFG_CPU_ADD("audiocpu", Z80, 18432000/6)   /* 3.072 MHz? */
 	MCFG_CPU_PROGRAM_MAP(sound_map)
-	MCFG_CPU_VBLANK_INT_HACK(nmi_line_pulse,2)
+	MCFG_CPU_PERIODIC_INT_DRIVER(retofinv_state, nmi_line_pulse, 2*60)
 
-	MCFG_CPU_ADD("68705", M68705,18432000/6)	/* 3.072 MHz? */
+	MCFG_CPU_ADD("68705", M68705,18432000/6)    /* 3.072 MHz? */
 	MCFG_CPU_PROGRAM_MAP(mcu_map)
 
-	MCFG_QUANTUM_TIME(attotime::from_hz(6000))	/* 100 CPU slices per frame - enough for the sound CPU to read all commands */
+	MCFG_QUANTUM_TIME(attotime::from_hz(6000))  /* 100 CPU slices per frame - enough for the sound CPU to read all commands */
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(36*8, 28*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 36*8-1, 0*8, 28*8-1)
-	MCFG_SCREEN_UPDATE(retofinv)
+	MCFG_SCREEN_UPDATE_DRIVER(retofinv_state, screen_update_retofinv)
 
 	MCFG_GFXDECODE(retofinv)
 	MCFG_PALETTE_LENGTH(256*2+64*16+64*16)
 
-	MCFG_PALETTE_INIT(retofinv)
-	MCFG_VIDEO_START(retofinv)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
 	MCFG_SOUND_ADD("sn1", SN76496, 18432000/6)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.80)
+	MCFG_SOUND_CONFIG(psg_intf)
 
 	MCFG_SOUND_ADD("sn2", SN76496, 18432000/6)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.80)
+	MCFG_SOUND_CONFIG(psg_intf)
 MACHINE_CONFIG_END
 
 
@@ -408,7 +430,7 @@ ROM_START( retofinv )
 	ROM_REGION( 0x10000, "audiocpu", 0 )
 	ROM_LOAD( "a37-05.17", 0x0000, 0x2000, CRC(9025abea) SHA1(2f03e8572f23624d7cd1215a55109e97fd66e271) )
 
-	ROM_REGION( 0x0800, "68705", 0 )	/* 8k for the microcontroller */
+	ROM_REGION( 0x0800, "68705", 0 )    /* 8k for the microcontroller */
 	/* the only available dump is from a bootleg board, and is not the real thing (see notes at top of driver) */
 	ROM_LOAD( "a37-09.37", 0x00000, 0x0800, BAD_DUMP CRC(79bd6ded) SHA1(4967e95b4461c1bfb4e933d1804677799014f77b) )
 
@@ -426,10 +448,10 @@ ROM_START( retofinv )
 	ROM_LOAD( "a37-15.56", 0x2000, 0x2000, CRC(03b40905) SHA1(c10d87796e8a6e6a2a37c6fb713821cc87299cc8) )
 
 	ROM_REGION( 0x0b00, "proms", 0 )
-	ROM_LOAD( "a37-06.13", 0x0000, 0x0100, CRC(e9643b8b) SHA1(7bbb92a42e7c3effb701fc7b2c24f2470f31b063) )	/* palette red bits  */
-	ROM_LOAD( "a37-07.4",  0x0100, 0x0100, CRC(e8f34e11) SHA1(8f438561b8d46ffff00747ed8baf0ebb6a081615) )	/* palette green bits */
-	ROM_LOAD( "a37-08.3",  0x0200, 0x0100, CRC(50030af0) SHA1(e748ae0b8702b7d20fb65c254dceee23246b3d13) )	/* palette blue bits   */
-	ROM_LOAD( "82s191n",   0x0300, 0x0800, CRC(93c891e3) SHA1(643a0107717b6a434432dda73a0102e6e8adbca7) )	/* lookup table */
+	ROM_LOAD( "a37-06.13", 0x0000, 0x0100, CRC(e9643b8b) SHA1(7bbb92a42e7c3effb701fc7b2c24f2470f31b063) )   /* palette red bits  */
+	ROM_LOAD( "a37-07.4",  0x0100, 0x0100, CRC(e8f34e11) SHA1(8f438561b8d46ffff00747ed8baf0ebb6a081615) )   /* palette green bits */
+	ROM_LOAD( "a37-08.3",  0x0200, 0x0100, CRC(50030af0) SHA1(e748ae0b8702b7d20fb65c254dceee23246b3d13) )   /* palette blue bits   */
+	ROM_LOAD( "82s191n",   0x0300, 0x0800, CRC(93c891e3) SHA1(643a0107717b6a434432dda73a0102e6e8adbca7) )   /* lookup table */
 ROM_END
 
 ROM_START( retofinv1 )
@@ -458,10 +480,10 @@ ROM_START( retofinv1 )
 	ROM_LOAD( "a37-15.56", 0x2000, 0x2000, CRC(03b40905) SHA1(c10d87796e8a6e6a2a37c6fb713821cc87299cc8) )
 
 	ROM_REGION( 0x0b00, "proms", 0 )
-	ROM_LOAD( "a37-06.13", 0x0000, 0x0100, CRC(e9643b8b) SHA1(7bbb92a42e7c3effb701fc7b2c24f2470f31b063) )	/* palette red bits  */
-	ROM_LOAD( "a37-07.4",  0x0100, 0x0100, CRC(e8f34e11) SHA1(8f438561b8d46ffff00747ed8baf0ebb6a081615) )	/* palette green bits */
-	ROM_LOAD( "a37-08.3",  0x0200, 0x0100, CRC(50030af0) SHA1(e748ae0b8702b7d20fb65c254dceee23246b3d13) )	/* palette blue bits   */
-	ROM_LOAD( "82s191n",   0x0300, 0x0800, CRC(93c891e3) SHA1(643a0107717b6a434432dda73a0102e6e8adbca7) )	/* lookup table */
+	ROM_LOAD( "a37-06.13", 0x0000, 0x0100, CRC(e9643b8b) SHA1(7bbb92a42e7c3effb701fc7b2c24f2470f31b063) )   /* palette red bits  */
+	ROM_LOAD( "a37-07.4",  0x0100, 0x0100, CRC(e8f34e11) SHA1(8f438561b8d46ffff00747ed8baf0ebb6a081615) )   /* palette green bits */
+	ROM_LOAD( "a37-08.3",  0x0200, 0x0100, CRC(50030af0) SHA1(e748ae0b8702b7d20fb65c254dceee23246b3d13) )   /* palette blue bits   */
+	ROM_LOAD( "82s191n",   0x0300, 0x0800, CRC(93c891e3) SHA1(643a0107717b6a434432dda73a0102e6e8adbca7) )   /* lookup table */
 ROM_END
 
 ROM_START( retofinv2 )
@@ -490,14 +512,14 @@ ROM_START( retofinv2 )
 	ROM_LOAD( "a37-15.56", 0x2000, 0x2000, CRC(03b40905) SHA1(c10d87796e8a6e6a2a37c6fb713821cc87299cc8) )
 
 	ROM_REGION( 0x0b00, "proms", 0 )
-	ROM_LOAD( "a37-06.13", 0x0000, 0x0100, CRC(e9643b8b) SHA1(7bbb92a42e7c3effb701fc7b2c24f2470f31b063) )	/* palette red bits  */
-	ROM_LOAD( "a37-07.4",  0x0100, 0x0100, CRC(e8f34e11) SHA1(8f438561b8d46ffff00747ed8baf0ebb6a081615) )	/* palette green bits */
-	ROM_LOAD( "a37-08.3",  0x0200, 0x0100, CRC(50030af0) SHA1(e748ae0b8702b7d20fb65c254dceee23246b3d13) )	/* palette blue bits   */
-	ROM_LOAD( "82s191n",   0x0300, 0x0800, CRC(93c891e3) SHA1(643a0107717b6a434432dda73a0102e6e8adbca7) )	/* lookup table */
+	ROM_LOAD( "a37-06.13", 0x0000, 0x0100, CRC(e9643b8b) SHA1(7bbb92a42e7c3effb701fc7b2c24f2470f31b063) )   /* palette red bits  */
+	ROM_LOAD( "a37-07.4",  0x0100, 0x0100, CRC(e8f34e11) SHA1(8f438561b8d46ffff00747ed8baf0ebb6a081615) )   /* palette green bits */
+	ROM_LOAD( "a37-08.3",  0x0200, 0x0100, CRC(50030af0) SHA1(e748ae0b8702b7d20fb65c254dceee23246b3d13) )   /* palette blue bits   */
+	ROM_LOAD( "82s191n",   0x0300, 0x0800, CRC(93c891e3) SHA1(643a0107717b6a434432dda73a0102e6e8adbca7) )   /* lookup table */
 ROM_END
 
 
 
-GAME( 1985, retofinv, 0,        retofinv, retofinv, 0, ROT90, "Taito Corporation", "Return of the Invaders", 0 )
-GAME( 1985, retofinv1,retofinv, retofinb, retofinv, 0, ROT90, "bootleg", "Return of the Invaders (bootleg set 1)", 0 )
-GAME( 1985, retofinv2,retofinv, retofinb, retofin2, 0, ROT90, "bootleg", "Return of the Invaders (bootleg set 2)", 0 )
+GAME( 1985, retofinv, 0,        retofinv, retofinv, driver_device, 0, ROT90, "Taito Corporation", "Return of the Invaders", 0 )
+GAME( 1985, retofinv1,retofinv, retofinb, retofinv, driver_device, 0, ROT90, "bootleg", "Return of the Invaders (bootleg set 1)", 0 )
+GAME( 1985, retofinv2,retofinv, retofinb, retofin2, driver_device, 0, ROT90, "bootleg", "Return of the Invaders (bootleg set 2)", 0 )

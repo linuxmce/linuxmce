@@ -40,7 +40,7 @@
 #include "emu.h"
 #include <ctype.h>
 
-enum _display_type
+enum display_type
 {
 	_8bit,
 	_8bitx,
@@ -59,30 +59,29 @@ enum _display_type
 	_64be,
 	_64le
 };
-typedef enum _display_type display_type;
 
 
-typedef struct _dasm_table_entry dasm_table_entry;
-struct _dasm_table_entry
+struct dasm_table_entry
 {
-	const char *			name;
-	display_type			display;
-	INT8					pcshift;
-	cpu_disassemble_func	func;
+	const char *            name;
+	display_type            display;
+	INT8                    pcshift;
+	cpu_disassemble_func    func;
 };
 
 
-typedef struct _options options;
-struct _options
+struct options
 {
-	const char *			filename;
-	offs_t					basepc;
-	UINT8					norawbytes;
-	UINT8					lower;
-	UINT8					upper;
-	UINT8					flipped;
-	int						mode;
+	const char *            filename;
+	offs_t                  basepc;
+	UINT8                   norawbytes;
+	UINT8                   lower;
+	UINT8                   upper;
+	UINT8                   flipped;
+	int                     mode;
 	const dasm_table_entry *dasm;
+	UINT32                  skip;
+	UINT32                  count;
 };
 
 
@@ -126,13 +125,6 @@ CPU_DISASSEMBLE( konami );
 CPU_DISASSEMBLE( lh5801 );
 CPU_DISASSEMBLE( lr35902 );
 CPU_DISASSEMBLE( m37710_generic );
-CPU_DISASSEMBLE( m6502 );
-CPU_DISASSEMBLE( m65sc02 );
-CPU_DISASSEMBLE( m65c02 );
-CPU_DISASSEMBLE( m65ce02 );
-CPU_DISASSEMBLE( m6510 );
-CPU_DISASSEMBLE( deco16 );
-CPU_DISASSEMBLE( m4510 );
 CPU_DISASSEMBLE( m6800 );
 CPU_DISASSEMBLE( m6801 );
 CPU_DISASSEMBLE( m6802 );
@@ -195,7 +187,7 @@ CPU_DISASSEMBLE( tms3203x );
 CPU_DISASSEMBLE( tms32051 );
 CPU_DISASSEMBLE( tms34010 );
 CPU_DISASSEMBLE( tms34020 );
-CPU_DISASSEMBLE( tms57002 );
+//CPU_DISASSEMBLE( tms57002 );
 CPU_DISASSEMBLE( tms7000 );
 CPU_DISASSEMBLE( upd7810 );
 CPU_DISASSEMBLE( upd7807 );
@@ -212,56 +204,49 @@ CPU_DISASSEMBLE( z8 );
 
 static const dasm_table_entry dasm_table[] =
 {
-	{ "adsp21xx",	_24le, -2, CPU_DISASSEMBLE_NAME(adsp21xx) },
-	{ "alpha8201",	_8bit,  0, CPU_DISASSEMBLE_NAME(alpha8201) },
-	{ "arm",		_32le,  0, CPU_DISASSEMBLE_NAME(arm) },
-	{ "arm7",		_32le,  0, CPU_DISASSEMBLE_NAME(arm7arm) },
-	{ "arm7thumb",	_16le,  0, CPU_DISASSEMBLE_NAME(arm7thumb) },
-	{ "asap",		_32le,  0, CPU_DISASSEMBLE_NAME(asap) },
-	{ "avr8",		_16le,  0, CPU_DISASSEMBLE_NAME(avr8) },
-	{ "ccpu",		_8bit,  0, CPU_DISASSEMBLE_NAME(ccpu) },
-	{ "cop410",		_8bit,  0, CPU_DISASSEMBLE_NAME(cop410) },
-	{ "cop420",		_8bit,  0, CPU_DISASSEMBLE_NAME(cop420) },
-	{ "cop444",		_8bit,  0, CPU_DISASSEMBLE_NAME(cop444) },
-	{ "cosmac",		_8bit,  0, CPU_DISASSEMBLE_NAME(cosmac) },
-	{ "cp1610",		_16be, -1, CPU_DISASSEMBLE_NAME(cp1610) },
-	{ "cquestsnd",	_64be, -3, CPU_DISASSEMBLE_NAME(cquestsnd) },
-	{ "cquestrot",	_64be, -3, CPU_DISASSEMBLE_NAME(cquestrot) },
-	{ "cquestlin",	_64be, -3, CPU_DISASSEMBLE_NAME(cquestlin) },
-	{ "dsp16a",		_16le, -1, CPU_DISASSEMBLE_NAME(dsp16a) },
-	{ "dsp32c",		_32le,  0, CPU_DISASSEMBLE_NAME(dsp32c) },
-	{ "dsp56k",		_16le, -1, CPU_DISASSEMBLE_NAME(dsp56k) },
-	{ "hyperstone",	_16be,  0, CPU_DISASSEMBLE_NAME(hyperstone_generic) },
-	{ "hd61700",	_8bit,  0, CPU_DISASSEMBLE_NAME(hd61700) },
-	{ "esrip",		_64be,  0, CPU_DISASSEMBLE_NAME(esrip) },
-	{ "f8",			_8bit,  0, CPU_DISASSEMBLE_NAME(f8) },
-	{ "g65816",		_8bit,  0, CPU_DISASSEMBLE_NAME(g65816_generic) },
-	{ "h6280",		_8bit,  0, CPU_DISASSEMBLE_NAME(h6280) },
-	{ "h8",			_16be,  0, CPU_DISASSEMBLE_NAME(h8) },
-	{ "hd6309",		_8bit,  0, CPU_DISASSEMBLE_NAME(hd6309) },
-	{ "i386",		_8bit,  0, CPU_DISASSEMBLE_NAME(x86_32) },
-	{ "i4004",		_8bit,  0, CPU_DISASSEMBLE_NAME(i4004) },
-	{ "i8008",		_8bit,  0, CPU_DISASSEMBLE_NAME(i8008) },
-	{ "i8085",		_8bit,  0, CPU_DISASSEMBLE_NAME(i8085) },
-	{ "i80286",		_8bit,  0, CPU_DISASSEMBLE_NAME(x86_16) },
-	{ "i8086",		_8bit,  0, CPU_DISASSEMBLE_NAME(x86_16) },
-	{ "i960",		_32le,  0, CPU_DISASSEMBLE_NAME(i960) },
-	{ "jaguargpu",	_16be,  0, CPU_DISASSEMBLE_NAME(jaguargpu) },
-	{ "jaguardsp",	_16be,  0, CPU_DISASSEMBLE_NAME(jaguardsp) },
-	{ "x86_16",		_8bit,  0, CPU_DISASSEMBLE_NAME(x86_16) },
-	{ "x86_32",		_8bit,  0, CPU_DISASSEMBLE_NAME(x86_32) },
-	{ "x86_64",		_8bit,  0, CPU_DISASSEMBLE_NAME(x86_64) },
+	{ "adsp21xx",   _24le, -2, CPU_DISASSEMBLE_NAME(adsp21xx) },
+	{ "alpha8201",  _8bit,  0, CPU_DISASSEMBLE_NAME(alpha8201) },
+	{ "arm",        _32le,  0, CPU_DISASSEMBLE_NAME(arm) },
+	{ "arm7",       _32le,  0, CPU_DISASSEMBLE_NAME(arm7arm) },
+	{ "arm7thumb",  _16le,  0, CPU_DISASSEMBLE_NAME(arm7thumb) },
+	{ "asap",       _32le,  0, CPU_DISASSEMBLE_NAME(asap) },
+	{ "avr8",       _16le,  0, CPU_DISASSEMBLE_NAME(avr8) },
+	{ "ccpu",       _8bit,  0, CPU_DISASSEMBLE_NAME(ccpu) },
+	{ "cop410",     _8bit,  0, CPU_DISASSEMBLE_NAME(cop410) },
+	{ "cop420",     _8bit,  0, CPU_DISASSEMBLE_NAME(cop420) },
+	{ "cop444",     _8bit,  0, CPU_DISASSEMBLE_NAME(cop444) },
+	{ "cosmac",     _8bit,  0, CPU_DISASSEMBLE_NAME(cosmac) },
+	{ "cp1610",     _16be, -1, CPU_DISASSEMBLE_NAME(cp1610) },
+	{ "cquestsnd",  _64be, -3, CPU_DISASSEMBLE_NAME(cquestsnd) },
+	{ "cquestrot",  _64be, -3, CPU_DISASSEMBLE_NAME(cquestrot) },
+	{ "cquestlin",  _64be, -3, CPU_DISASSEMBLE_NAME(cquestlin) },
+	{ "dsp16a",     _16le, -1, CPU_DISASSEMBLE_NAME(dsp16a) },
+	{ "dsp32c",     _32le,  0, CPU_DISASSEMBLE_NAME(dsp32c) },
+	{ "dsp56k",     _16le, -1, CPU_DISASSEMBLE_NAME(dsp56k) },
+	{ "hyperstone", _16be,  0, CPU_DISASSEMBLE_NAME(hyperstone_generic) },
+	{ "hd61700",    _8bit,  0, CPU_DISASSEMBLE_NAME(hd61700) },
+	{ "esrip",      _64be,  0, CPU_DISASSEMBLE_NAME(esrip) },
+	{ "f8",         _8bit,  0, CPU_DISASSEMBLE_NAME(f8) },
+	{ "g65816",     _8bit,  0, CPU_DISASSEMBLE_NAME(g65816_generic) },
+	{ "h6280",      _8bit,  0, CPU_DISASSEMBLE_NAME(h6280) },
+	{ "h8",         _16be,  0, CPU_DISASSEMBLE_NAME(h8) },
+	{ "hd6309",     _8bit,  0, CPU_DISASSEMBLE_NAME(hd6309) },
+	{ "i386",       _8bit,  0, CPU_DISASSEMBLE_NAME(x86_32) },
+	{ "i4004",      _8bit,  0, CPU_DISASSEMBLE_NAME(i4004) },
+	{ "i8008",      _8bit,  0, CPU_DISASSEMBLE_NAME(i8008) },
+	{ "i8085",      _8bit,  0, CPU_DISASSEMBLE_NAME(i8085) },
+	{ "i80286",     _8bit,  0, CPU_DISASSEMBLE_NAME(x86_16) },
+	{ "i8086",      _8bit,  0, CPU_DISASSEMBLE_NAME(x86_16) },
+	{ "i960",       _32le,  0, CPU_DISASSEMBLE_NAME(i960) },
+	{ "jaguargpu",  _16be,  0, CPU_DISASSEMBLE_NAME(jaguargpu) },
+	{ "jaguardsp",  _16be,  0, CPU_DISASSEMBLE_NAME(jaguardsp) },
+	{ "x86_16",     _8bit,  0, CPU_DISASSEMBLE_NAME(x86_16) },
+	{ "x86_32",     _8bit,  0, CPU_DISASSEMBLE_NAME(x86_32) },
+	{ "x86_64",     _8bit,  0, CPU_DISASSEMBLE_NAME(x86_64) },
 	{ "konami",     _8bit,  0, CPU_DISASSEMBLE_NAME(konami) },
 	{ "lh5801",     _8bit,  0, CPU_DISASSEMBLE_NAME(lh5801) },
 	{ "lr35902",    _8bit,  0, CPU_DISASSEMBLE_NAME(lr35902) },
 	{ "m37710",     _8bit,  0, CPU_DISASSEMBLE_NAME(m37710_generic) },
-	{ "m6502",      _8bit,  0, CPU_DISASSEMBLE_NAME(m6502) },
-	{ "m65sc02",    _8bit,  0, CPU_DISASSEMBLE_NAME(m65sc02) },
-	{ "m65c02",     _8bit,  0, CPU_DISASSEMBLE_NAME(m65c02) },
-	{ "m65ce02",    _8bit,  0, CPU_DISASSEMBLE_NAME(m65ce02) },
-	{ "m6510",      _8bit,  0, CPU_DISASSEMBLE_NAME(m6510) },
-	{ "deco16",     _8bit,  0, CPU_DISASSEMBLE_NAME(deco16) },
-	{ "m4510",      _8bit,  0, CPU_DISASSEMBLE_NAME(m4510) },
 	{ "m6800",      _8bit,  0, CPU_DISASSEMBLE_NAME(m6800) },
 	{ "m6801",      _8bit,  0, CPU_DISASSEMBLE_NAME(m6801) },
 	{ "m6802",      _8bit,  0, CPU_DISASSEMBLE_NAME(m6802) },
@@ -293,7 +278,7 @@ static const dasm_table_entry dasm_table[] =
 	{ "r3000le",    _32le,  0, CPU_DISASSEMBLE_NAME(r3000le) },
 	{ "nec",        _8bit,  0, CPU_DISASSEMBLE_NAME(nec_generic) },
 	{ "pdp1",       _32be,  0, CPU_DISASSEMBLE_NAME(pdp1) },
-	{ "pps4",		_8bit,  0, CPU_DISASSEMBLE_NAME(pps4) },
+	{ "pps4",       _8bit,  0, CPU_DISASSEMBLE_NAME(pps4) },
 	{ "tx0_64kw",   _32be, -2, CPU_DISASSEMBLE_NAME(tx0_64kw) },
 	{ "tx0_8kw",    _32be, -2, CPU_DISASSEMBLE_NAME(tx0_8kw) },
 	{ "pic16c5x",   _16le, -1, CPU_DISASSEMBLE_NAME(pic16c5x) },
@@ -303,11 +288,11 @@ static const dasm_table_entry dasm_table[] =
 	{ "s2650",      _8bit,  0, CPU_DISASSEMBLE_NAME(s2650) },
 	{ "saturn",     _8bit,  0, CPU_DISASSEMBLE_NAME(saturn) },
 	{ "sc61860",    _8bit,  0, CPU_DISASSEMBLE_NAME(sc61860) },
-	{ "scmp",   	_8bit,  0, CPU_DISASSEMBLE_NAME(scmp) },
+	{ "scmp",       _8bit,  0, CPU_DISASSEMBLE_NAME(scmp) },
 	{ "se3208",     _16le,  0, CPU_DISASSEMBLE_NAME(se3208) },
 	{ "sh2",        _16be,  0, CPU_DISASSEMBLE_NAME(sh2) },
 	{ "sh4",        _16le,  0, CPU_DISASSEMBLE_NAME(sh4) },
-	{ "sharc",      _64le, -3, CPU_DISASSEMBLE_NAME(sharc) },
+	{ "sharc",      _48le, -2, CPU_DISASSEMBLE_NAME(sharc) },
 	{ "sm8500",     _8bit,  0, CPU_DISASSEMBLE_NAME(sm8500) },
 	{ "spc700",     _8bit,  0, CPU_DISASSEMBLE_NAME(spc700) },
 	{ "ssem",       _32le,  0, CPU_DISASSEMBLE_NAME(ssem) },
@@ -324,7 +309,7 @@ static const dasm_table_entry dasm_table[] =
 	{ "tms32051",   _16le, -1, CPU_DISASSEMBLE_NAME(tms32051) },
 	{ "tms34010",   _8bit,  3, CPU_DISASSEMBLE_NAME(tms34010) },
 	{ "tms34020",   _8bit,  3, CPU_DISASSEMBLE_NAME(tms34020) },
-	{ "tms57002",   _32le, -2, CPU_DISASSEMBLE_NAME(tms57002) },
+	//  { "tms57002",   _32le, -2, CPU_DISASSEMBLE_NAME(tms57002) },
 	{ "tms7000",    _8bit,  0, CPU_DISASSEMBLE_NAME(tms7000) },
 	{ "upd7810",    _8bit,  0, CPU_DISASSEMBLE_NAME(upd7810) },
 	{ "upd7807",    _8bit,  0, CPU_DISASSEMBLE_NAME(upd7807) },
@@ -335,8 +320,8 @@ static const dasm_table_entry dasm_table[] =
 	{ "v810",       _16le,  0, CPU_DISASSEMBLE_NAME(v810) },
 	{ "z180",       _8bit,  0, CPU_DISASSEMBLE_NAME(z180) },
 //  { "z8000",      _16be,  0, CPU_DISASSEMBLE_NAME(z8000) },
-	{ "z80",		_8bit,  0, CPU_DISASSEMBLE_NAME(z80) },
-	{ "z8",			_8bit,  0, CPU_DISASSEMBLE_NAME(z8) },
+	{ "z80",        _8bit,  0, CPU_DISASSEMBLE_NAME(z80) },
+	{ "z8",         _8bit,  0, CPU_DISASSEMBLE_NAME(z8) },
 };
 
 void CLIB_DECL logerror(const char *format, ...)
@@ -356,6 +341,8 @@ static int parse_options(int argc, char *argv[], options *opts)
 	int pending_base = FALSE;
 	int pending_arch = FALSE;
 	int pending_mode = FALSE;
+	int pending_skip = FALSE;
+	int pending_count = FALSE;
 	int curarch;
 	int numrows;
 	int arg;
@@ -370,7 +357,7 @@ static int parse_options(int argc, char *argv[], options *opts)
 		// is it a switch?
 		if (curarg[0] == '-')
 		{
-			if (pending_base || pending_arch || pending_mode)
+			if (pending_base || pending_arch || pending_mode || pending_skip || pending_count)
 				goto usage;
 
 			if (tolower((UINT8)curarg[1]) == 'a')
@@ -383,6 +370,10 @@ static int parse_options(int argc, char *argv[], options *opts)
 				opts->lower = TRUE;
 			else if (tolower((UINT8)curarg[1]) == 'm')
 				pending_mode = TRUE;
+			else if (tolower((UINT8)curarg[1]) == 's')
+				pending_skip = TRUE;
+			else if (tolower((UINT8)curarg[1]) == 'c')
+				pending_count = TRUE;
 			else if (tolower((UINT8)curarg[1]) == 'n')
 				opts->norawbytes = TRUE;
 			else if (tolower((UINT8)curarg[1]) == 'u')
@@ -426,6 +417,22 @@ static int parse_options(int argc, char *argv[], options *opts)
 			pending_arch = FALSE;
 		}
 
+		// skip bytes
+		else if (pending_skip)
+		{
+			if (sscanf(curarg, "%d", &opts->skip) != 1)
+				goto usage;
+			pending_skip = FALSE;
+		}
+
+		// size
+		else if (pending_count)
+		{
+			if (sscanf(curarg, "%d", &opts->count) != 1)
+				goto usage;
+			pending_count = FALSE;
+		}
+
 		// filename
 		else if (opts->filename == NULL)
 			opts->filename = curarg;
@@ -436,7 +443,7 @@ static int parse_options(int argc, char *argv[], options *opts)
 	}
 
 	// if we have a dangling option, error
-	if (pending_base || pending_arch || pending_mode)
+	if (pending_base || pending_arch || pending_mode || pending_skip || pending_count)
 		goto usage;
 
 	// if no file or no architecture, fail
@@ -447,6 +454,7 @@ static int parse_options(int argc, char *argv[], options *opts)
 usage:
 	printf("Usage: %s <filename> -arch <architecture> [-basepc <pc>] \n", argv[0]);
 	printf("   [-mode <n>] [-norawbytes] [-flipped] [-upper] [-lower]\n");
+	printf("   [-skip <n>] [-count <n>]\n");
 	printf("\n");
 	printf("Supported architectures:");
 	numrows = (ARRAY_LENGTH(dasm_table) + 6) / 7;
@@ -496,18 +504,22 @@ int main(int argc, char *argv[])
 	displayendian = opts.dasm->display % 2;
 	switch (displaychunk)
 	{
-		case 1:		maxchunks = 6;	break;
-		case 2:		maxchunks = 3;	break;
-		default:	maxchunks = 1;	break;
+		case 1:     maxchunks = 6;  break;
+		case 2:     maxchunks = 3;  break;
+		default:    maxchunks = 1;  break;
 	}
 
 	// run it
 	try
 	{
+		if (length > opts.skip)
+			length = length - opts.skip;
+		if ((length > opts.count) && (opts.count != 0))
+			length = opts.count;
 		curpc = opts.basepc;
 		for (curbyte = 0; curbyte < length; curbyte += numbytes)
 		{
-			UINT8 *oprom = (UINT8 *)data + curbyte;
+			UINT8 *oprom = (UINT8 *)data + opts.skip + curbyte;
 			char buffer[1024];
 			UINT32 pcdelta;
 			int numchunks;
@@ -628,6 +640,8 @@ int main(int argc, char *argv[])
 	{
 		fprintf(stderr, "Caught unhandled exception\n");
 	}
+
+	osd_free(data);
 
 	return result;
 }

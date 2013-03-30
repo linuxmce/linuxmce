@@ -9,26 +9,26 @@
 class kangaroo_state : public driver_device
 {
 public:
-	kangaroo_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	kangaroo_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_video_control(*this, "video_control"){ }
 
 	/* memory pointers */
-	UINT8 *      m_video_control;
+	required_shared_ptr<UINT8> m_video_control;
 
 	/* video-related */
 	UINT32       *m_videoram;
 
 	/* misc */
-	UINT8        m_clock;
+	UINT8        m_mcu_clock;
+	DECLARE_READ8_MEMBER(mcu_sim_r);
+	DECLARE_WRITE8_MEMBER(mcu_sim_w);
+	DECLARE_WRITE8_MEMBER(kangaroo_coin_counter_w);
+	DECLARE_WRITE8_MEMBER(kangaroo_videoram_w);
+	DECLARE_WRITE8_MEMBER(kangaroo_video_control_w);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	DECLARE_MACHINE_START(kangaroo_mcu);
+	UINT32 screen_update_kangaroo(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
 };
-
-
-
-
-/*----------- defined in video/kangaroo.c -----------*/
-
-VIDEO_START( kangaroo );
-SCREEN_UPDATE( kangaroo );
-
-WRITE8_HANDLER( kangaroo_videoram_w );
-WRITE8_HANDLER( kangaroo_video_control_w );

@@ -88,55 +88,56 @@
 #include "sound/okim6295.h"
 #include "video/deco16ic.h"
 #include "video/decocomn.h"
+#include "video/decospr.h"
 
-static ADDRESS_MAP_START( boogwing_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( boogwing_map, AS_PROGRAM, 16, boogwing_state )
 	AM_RANGE(0x000000, 0x0fffff) AM_ROM
 	AM_RANGE(0x200000, 0x20ffff) AM_RAM
 
-	AM_RANGE(0x220000, 0x220001) AM_DEVWRITE("deco_common", decocomn_priority_w)
+	AM_RANGE(0x220000, 0x220001) AM_DEVWRITE_LEGACY("deco_common", decocomn_priority_w)
 	AM_RANGE(0x220002, 0x22000f) AM_NOP
 
-	AM_RANGE(0x240000, 0x240001) AM_WRITE(buffer_spriteram16_w)
-	AM_RANGE(0x242000, 0x2427ff) AM_RAM AM_BASE_SIZE_GENERIC(spriteram)
-	AM_RANGE(0x244000, 0x244001) AM_WRITE(buffer_spriteram16_2_w)
-	AM_RANGE(0x246000, 0x2467ff) AM_RAM AM_BASE_SIZE_GENERIC(spriteram2)
+	AM_RANGE(0x240000, 0x240001) AM_DEVWRITE("spriteram", buffered_spriteram16_device, write)
+	AM_RANGE(0x242000, 0x2427ff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0x244000, 0x244001) AM_DEVWRITE("spriteram2", buffered_spriteram16_device, write)
+	AM_RANGE(0x246000, 0x2467ff) AM_RAM AM_SHARE("spriteram2")
 
 	AM_RANGE(0x24e6c0, 0x24e6c1) AM_READ_PORT("DSW")
 	AM_RANGE(0x24e138, 0x24e139) AM_READ_PORT("SYSTEM")
 	AM_RANGE(0x24e344, 0x24e345) AM_READ_PORT("INPUTS")
-	AM_RANGE(0x24e000, 0x24e7ff) AM_WRITE(deco16_104_prot_w) AM_BASE(&deco16_prot_ram)
+	AM_RANGE(0x24e000, 0x24e7ff) AM_WRITE_LEGACY(deco16_104_prot_w) AM_SHARE("prot16ram")
 
-	AM_RANGE(0x260000, 0x26000f) AM_DEVWRITE("tilegen1", deco16ic_pf_control_w)
-	AM_RANGE(0x264000, 0x265fff) AM_DEVREADWRITE("tilegen1", deco16ic_pf1_data_r, deco16ic_pf1_data_w)
-	AM_RANGE(0x266000, 0x267fff) AM_DEVREADWRITE("tilegen1", deco16ic_pf2_data_r, deco16ic_pf2_data_w)
-	AM_RANGE(0x268000, 0x268fff) AM_RAM AM_BASE_MEMBER(boogwing_state, m_pf1_rowscroll)
-	AM_RANGE(0x26a000, 0x26afff) AM_RAM AM_BASE_MEMBER(boogwing_state, m_pf2_rowscroll)
+	AM_RANGE(0x260000, 0x26000f) AM_DEVWRITE_LEGACY("tilegen1", deco16ic_pf_control_w)
+	AM_RANGE(0x264000, 0x265fff) AM_DEVREADWRITE_LEGACY("tilegen1", deco16ic_pf1_data_r, deco16ic_pf1_data_w)
+	AM_RANGE(0x266000, 0x267fff) AM_DEVREADWRITE_LEGACY("tilegen1", deco16ic_pf2_data_r, deco16ic_pf2_data_w)
+	AM_RANGE(0x268000, 0x268fff) AM_RAM AM_SHARE("pf1_rowscroll")
+	AM_RANGE(0x26a000, 0x26afff) AM_RAM AM_SHARE("pf2_rowscroll")
 
-	AM_RANGE(0x270000, 0x27000f) AM_DEVWRITE("tilegen2", deco16ic_pf_control_w)
-	AM_RANGE(0x274000, 0x275fff) AM_RAM_DEVWRITE("tilegen2", deco16ic_pf1_data_w)
-	AM_RANGE(0x276000, 0x277fff) AM_RAM_DEVWRITE("tilegen2", deco16ic_pf2_data_w)
-	AM_RANGE(0x278000, 0x278fff) AM_RAM AM_BASE_MEMBER(boogwing_state, m_pf3_rowscroll)
-	AM_RANGE(0x27a000, 0x27afff) AM_RAM AM_BASE_MEMBER(boogwing_state, m_pf4_rowscroll)
+	AM_RANGE(0x270000, 0x27000f) AM_DEVWRITE_LEGACY("tilegen2", deco16ic_pf_control_w)
+	AM_RANGE(0x274000, 0x275fff) AM_RAM_DEVWRITE_LEGACY("tilegen2", deco16ic_pf1_data_w)
+	AM_RANGE(0x276000, 0x277fff) AM_RAM_DEVWRITE_LEGACY("tilegen2", deco16ic_pf2_data_w)
+	AM_RANGE(0x278000, 0x278fff) AM_RAM AM_SHARE("pf3_rowscroll")
+	AM_RANGE(0x27a000, 0x27afff) AM_RAM AM_SHARE("pf4_rowscroll")
 
 	AM_RANGE(0x280000, 0x28000f) AM_NOP // ?
 	AM_RANGE(0x282000, 0x282001) AM_NOP // Palette setup?
-	AM_RANGE(0x282008, 0x282009) AM_DEVWRITE("deco_common", decocomn_palette_dma_w)
-	AM_RANGE(0x284000, 0x285fff) AM_DEVWRITE("deco_common", decocomn_buffered_palette_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x282008, 0x282009) AM_DEVWRITE_LEGACY("deco_common", decocomn_palette_dma_w)
+	AM_RANGE(0x284000, 0x285fff) AM_DEVWRITE_LEGACY("deco_common", decocomn_buffered_palette_w) AM_SHARE("paletteram")
 
 	AM_RANGE(0x3c0000, 0x3c004f) AM_RAM // ?
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( audio_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( audio_map, AS_PROGRAM, 8, boogwing_state )
 	AM_RANGE(0x000000, 0x00ffff) AM_ROM
 	AM_RANGE(0x100000, 0x100001) AM_NOP
-	AM_RANGE(0x110000, 0x110001) AM_DEVREADWRITE("ymsnd", ym2151_r, ym2151_w)
-	AM_RANGE(0x120000, 0x120001) AM_DEVREADWRITE_MODERN("oki1", okim6295_device, read, write)
-	AM_RANGE(0x130000, 0x130001) AM_DEVREADWRITE_MODERN("oki2", okim6295_device, read, write)
-	AM_RANGE(0x140000, 0x140001) AM_READ(soundlatch_r)
+	AM_RANGE(0x110000, 0x110001) AM_DEVREADWRITE("ymsnd", ym2151_device, read, write)
+	AM_RANGE(0x120000, 0x120001) AM_DEVREADWRITE("oki1", okim6295_device, read, write)
+	AM_RANGE(0x130000, 0x130001) AM_DEVREADWRITE("oki2", okim6295_device, read, write)
+	AM_RANGE(0x140000, 0x140001) AM_READ(soundlatch_byte_r)
 	AM_RANGE(0x1f0000, 0x1f1fff) AM_RAMBANK("bank8")
-	AM_RANGE(0x1fec00, 0x1fec01) AM_WRITE(h6280_timer_w)
-	AM_RANGE(0x1ff400, 0x1ff403) AM_WRITE(h6280_irq_status_w)
+	AM_RANGE(0x1fec00, 0x1fec01) AM_DEVWRITE("audiocpu", h6280_device, timer_w)
+	AM_RANGE(0x1ff400, 0x1ff403) AM_DEVWRITE("audiocpu", h6280_device, irq_status_w)
 ADDRESS_MAP_END
 
 
@@ -147,7 +148,7 @@ static INPUT_PORTS_START( boogwing )
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_SERVICE1 )
-	PORT_BIT( 0x0008, IP_ACTIVE_HIGH, IPT_VBLANK )
+	PORT_BIT( 0x0008, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 
 	PORT_START("DSW")
 	PORT_DIPNAME( 0x0007, 0x0007, DEF_STR( Coin_A ) ) PORT_DIPLOCATION("SW1:1,2,3")
@@ -187,7 +188,7 @@ static INPUT_PORTS_START( boogwing )
 	PORT_DIPNAME( 0x1000, 0x1000, "Coin Slots" ) PORT_DIPLOCATION("SW2:5")
 	PORT_DIPSETTING(      0x1000, "Common" )
 	PORT_DIPSETTING(      0x0000, "Individual" )
-	PORT_DIPNAME( 0x2000, 0x2000, "Stage Reset" ) PORT_DIPLOCATION("SW2:6")	/* At loss of life */
+	PORT_DIPNAME( 0x2000, 0x2000, "Stage Reset" ) PORT_DIPLOCATION("SW2:6") /* At loss of life */
 	PORT_DIPSETTING(      0x2000, "Point of Termination" )
 	PORT_DIPSETTING(      0x0000, "Beginning of Stage" )
 	PORT_DIPNAME( 0x4000, 0x4000, DEF_STR( Unknown ) ) PORT_DIPLOCATION("SW2:7") /* Manual shows as OFF and states "Don't Change" */
@@ -259,39 +260,26 @@ static const gfx_layout spritelayout =
 	{ 24,8,16,0 },
 	{ 512,513,514,515,516,517,518,519, 0, 1, 2, 3, 4, 5, 6, 7 },
 	{ 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
-	  8*32, 9*32,10*32,11*32,12*32,13*32,14*32,15*32},
+		8*32, 9*32,10*32,11*32,12*32,13*32,14*32,15*32},
 	32*32
 };
 
 
 static GFXDECODE_START( boogwing )
-	GFXDECODE_ENTRY( "tiles1", 0, tile_8x8_layout,            0, 16 )	/* Tiles (8x8) */
-	GFXDECODE_ENTRY( "tiles2", 0, tile_16x16_layout_5bpp, 0x100, 16 )	/* Tiles (16x16) */
-	GFXDECODE_ENTRY( "tiles3", 0, tile_16x16_layout,      0x300, 32 )	/* Tiles (16x16) */
-	GFXDECODE_ENTRY( "sprites1", 0, spritelayout,           0x500, 32 )	/* Sprites (16x16) */
-	GFXDECODE_ENTRY( "sprites2", 0, spritelayout,           0x700, 16 )	/* Sprites (16x16) */
+	GFXDECODE_ENTRY( "tiles1", 0, tile_8x8_layout,            0, 16 )   /* Tiles (8x8) */
+	GFXDECODE_ENTRY( "tiles2", 0, tile_16x16_layout_5bpp, 0x100, 16 )   /* Tiles (16x16) */
+	GFXDECODE_ENTRY( "tiles3", 0, tile_16x16_layout,      0x300, 32 )   /* Tiles (16x16) */
+	GFXDECODE_ENTRY( "sprites1", 0, spritelayout,           0x500, 32 ) /* Sprites (16x16) */
+	GFXDECODE_ENTRY( "sprites2", 0, spritelayout,           0x700, 16 ) /* Sprites (16x16) */
 GFXDECODE_END
 
 /**********************************************************************************/
 
-static void sound_irq(device_t *device, int state)
+WRITE8_MEMBER(boogwing_state::sound_bankswitch_w)
 {
-	boogwing_state *driver_state = device->machine().driver_data<boogwing_state>();
-	device_set_input_line(driver_state->m_audiocpu, 1, state); /* IRQ 2 */
+	m_oki2->set_bank_base(((data & 2) >> 1) * 0x40000);
+	m_oki1->set_bank_base((data & 1) * 0x40000);
 }
-
-static WRITE8_DEVICE_HANDLER( sound_bankswitch_w )
-{
-	boogwing_state *state = device->machine().driver_data<boogwing_state>();
-	state->m_oki2->set_bank_base(((data & 2) >> 1) * 0x40000);
-	state->m_oki1->set_bank_base((data & 1) * 0x40000);
-}
-
-static const ym2151_interface ym2151_config =
-{
-	sound_irq,
-	sound_bankswitch_w
-};
 
 
 static int boogwing_bank_callback( const int bank )
@@ -319,7 +307,7 @@ static const deco16ic_interface boogwing_deco16ic_tilegen1_intf =
 	0, 1,
 	0x0f, 0x1f, /* trans masks (pf2 has 5bpp graphics) */
 	0, 0,  /* color base (pf2 is non default) */
-	0x0f, 0x0f,	/* color masks (default values) */
+	0x0f, 0x0f, /* color masks (default values) */
 	NULL,
 	boogwing_bank_callback,
 	0, 1
@@ -341,37 +329,45 @@ static const deco16ic_interface boogwing_deco16ic_tilegen2_intf =
 static MACHINE_CONFIG_START( boogwing, boogwing_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M68000, 14000000)	/* DE102 */
+	MCFG_CPU_ADD("maincpu", M68000, 14000000)   /* DE102 */
 	MCFG_CPU_PROGRAM_MAP(boogwing_map)
-	MCFG_CPU_VBLANK_INT("screen", irq6_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", boogwing_state,  irq6_line_hold)
 
-	MCFG_CPU_ADD("audiocpu", H6280,32220000/4)
+	MCFG_CPU_ADD("audiocpu", H6280, 32220000/4)
 	MCFG_CPU_PROGRAM_MAP(audio_map)
 
 	/* video hardware */
-	MCFG_VIDEO_ATTRIBUTES(VIDEO_BUFFERS_SPRITERAM )
-
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(58)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
 	MCFG_SCREEN_SIZE(40*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 40*8-1, 1*8, 31*8-1)
-	MCFG_SCREEN_UPDATE(boogwing)
+	MCFG_SCREEN_UPDATE_DRIVER(boogwing_state, screen_update_boogwing)
 
 	MCFG_PALETTE_LENGTH(2048)
 	MCFG_GFXDECODE(boogwing)
+
+
+	MCFG_BUFFERED_SPRITERAM16_ADD("spriteram")
+	MCFG_BUFFERED_SPRITERAM16_ADD("spriteram2")
 
 	MCFG_DECOCOMN_ADD("deco_common", boogwing_decocomn_intf)
 
 	MCFG_DECO16IC_ADD("tilegen1", boogwing_deco16ic_tilegen1_intf)
 	MCFG_DECO16IC_ADD("tilegen2", boogwing_deco16ic_tilegen2_intf)
 
+	MCFG_DEVICE_ADD("spritegen1", DECO_SPRITE, 0)
+	decospr_device::set_gfx_region(*device, 3);
+
+	MCFG_DEVICE_ADD("spritegen2", DECO_SPRITE, 0)
+	decospr_device::set_gfx_region(*device, 4);
+
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
 
-	MCFG_SOUND_ADD("ymsnd", YM2151, 32220000/9)
-	MCFG_SOUND_CONFIG(ym2151_config)
+	MCFG_YM2151_ADD("ymsnd", 32220000/9)
+	MCFG_YM2151_IRQ_HANDLER(INPUTLINE("audiocpu", 1)) /* IRQ2 */
+	MCFG_YM2151_PORT_WRITE_HANDLER(WRITE8(boogwing_state, sound_bankswitch_w))
 	MCFG_SOUND_ROUTE(0, "lspeaker", 0.80)
 	MCFG_SOUND_ROUTE(1, "rspeaker", 0.80)
 
@@ -562,20 +558,22 @@ ROM_START( ragtimea ) /* VER 1.3 JPN 92.11.26 */
 	ROM_LOAD( "kj-00.15n",    0x000000, 0x00400, CRC(add4d50b) SHA1(080e5a8192a146d5141aef5c8d9996ddf8cd3ab4) )
 ROM_END
 
-static DRIVER_INIT( boogwing )
+DRIVER_INIT_MEMBER(boogwing_state,boogwing)
 {
-	const UINT8* src = machine.region("gfx6")->base();
-	UINT8* dst = machine.region("tiles2")->base() + 0x200000;
+	const UINT8* src = machine().root_device().memregion("gfx6")->base();
+	UINT8* dst = machine().root_device().memregion("tiles2")->base() + 0x200000;
 
-	deco56_decrypt_gfx(machine, "tiles1");
-	deco56_decrypt_gfx(machine, "tiles2");
-	deco56_decrypt_gfx(machine, "tiles3");
-	deco56_remap_gfx(machine, "gfx6");
-	deco102_decrypt_cpu(machine, "maincpu", 0x42ba, 0x00, 0x18);
+	deco56_decrypt_gfx(machine(), "tiles1");
+	deco56_decrypt_gfx(machine(), "tiles2");
+	deco56_decrypt_gfx(machine(), "tiles3");
+	deco56_remap_gfx(machine(), "gfx6");
+	deco102_decrypt_cpu(machine(), "maincpu", 0x42ba, 0x00, 0x18);
 	memcpy(dst, src, 0x100000);
+
+	decoprot_reset(machine());
 }
 
-GAME( 1992, boogwing, 0,        boogwing, boogwing,  boogwing,  ROT0, "Data East Corporation", "Boogie Wings (Euro v1.5, 92.12.07)", GAME_SUPPORTS_SAVE )
-GAME( 1992, boogwinga,boogwing, boogwing, boogwing,  boogwing,  ROT0, "Data East Corporation", "Boogie Wings (Asia v1.5, 92.12.07)", GAME_SUPPORTS_SAVE )
-GAME( 1992, ragtime,  boogwing, boogwing, boogwing,  boogwing,  ROT0, "Data East Corporation", "The Great Ragtime Show (Japan v1.5, 92.12.07)", GAME_SUPPORTS_SAVE )
-GAME( 1992, ragtimea, boogwing, boogwing, boogwing,  boogwing,  ROT0, "Data East Corporation", "The Great Ragtime Show (Japan v1.3, 92.11.26)", GAME_SUPPORTS_SAVE )
+GAME( 1992, boogwing, 0,        boogwing, boogwing, boogwing_state,  boogwing,  ROT0, "Data East Corporation", "Boogie Wings (Euro v1.5, 92.12.07)", GAME_SUPPORTS_SAVE )
+GAME( 1992, boogwinga,boogwing, boogwing, boogwing, boogwing_state,  boogwing,  ROT0, "Data East Corporation", "Boogie Wings (Asia v1.5, 92.12.07)", GAME_SUPPORTS_SAVE )
+GAME( 1992, ragtime,  boogwing, boogwing, boogwing, boogwing_state,  boogwing,  ROT0, "Data East Corporation", "The Great Ragtime Show (Japan v1.5, 92.12.07)", GAME_SUPPORTS_SAVE )
+GAME( 1992, ragtimea, boogwing, boogwing, boogwing, boogwing_state,  boogwing,  ROT0, "Data East Corporation", "The Great Ragtime Show (Japan v1.3, 92.11.26)", GAME_SUPPORTS_SAVE )

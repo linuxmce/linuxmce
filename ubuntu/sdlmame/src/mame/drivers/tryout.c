@@ -25,40 +25,40 @@ $208 strikes count
 #include "sound/2203intf.h"
 #include "includes/tryout.h"
 
-static WRITE8_HANDLER( tryout_nmi_ack_w )
+WRITE8_MEMBER(tryout_state::tryout_nmi_ack_w)
 {
-	cputag_set_input_line(space->machine(), "maincpu", INPUT_LINE_NMI, CLEAR_LINE );
+	machine().device("maincpu")->execute().set_input_line(INPUT_LINE_NMI, CLEAR_LINE );
 }
 
-static WRITE8_HANDLER( tryout_sound_w )
+WRITE8_MEMBER(tryout_state::tryout_sound_w)
 {
-	soundlatch_w(space, 0, data);
-	cputag_set_input_line(space->machine(), "audiocpu", 0, HOLD_LINE);
+	soundlatch_byte_w(space, 0, data);
+	machine().device("audiocpu")->execute().set_input_line(0, HOLD_LINE);
 }
 
 /*this is actually irq/nmi mask, polls only four values at start up (81->01->81->01) and then
   stays on this state.*/
-static WRITE8_HANDLER( tryout_sound_irq_ack_w )
+WRITE8_MEMBER(tryout_state::tryout_sound_irq_ack_w)
 {
-//  cputag_set_input_line(space->machine(), "audiocpu", 0, CLEAR_LINE);
+//  machine().device("audiocpu")->execute().set_input_line(0, CLEAR_LINE);
 }
 
-static WRITE8_HANDLER( tryout_bankswitch_w )
+WRITE8_MEMBER(tryout_state::tryout_bankswitch_w)
 {
-	UINT8 *RAM = space->machine().region("maincpu")->base();
+	UINT8 *RAM = memregion("maincpu")->base();
 	int bankaddress;
 
 	bankaddress = 0x10000 + (data & 0x01) * 0x2000;
-	memory_set_bankptr(space->machine(), "bank1", &RAM[bankaddress]);
+	membank("bank1")->set_base(&RAM[bankaddress]);
 }
 
-static ADDRESS_MAP_START( main_cpu, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_cpu, AS_PROGRAM, 8, tryout_state )
 	AM_RANGE(0x0000, 0x07ff) AM_RAM
-	AM_RANGE(0x1000, 0x17ff) AM_RAM_WRITE(tryout_videoram_w) AM_BASE_MEMBER(tryout_state, m_videoram)
+	AM_RANGE(0x1000, 0x17ff) AM_RAM_WRITE(tryout_videoram_w) AM_SHARE("videoram")
 	AM_RANGE(0x2000, 0x3fff) AM_ROMBANK("bank1")
 	AM_RANGE(0x4000, 0xbfff) AM_ROM
-	AM_RANGE(0xc800, 0xc87f) AM_RAM AM_BASE_MEMBER(tryout_state, m_spriteram)
-	AM_RANGE(0xcc00, 0xcc7f) AM_RAM AM_BASE_MEMBER(tryout_state, m_spriteram2)
+	AM_RANGE(0xc800, 0xc87f) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0xcc00, 0xcc7f) AM_RAM AM_SHARE("spriteram2")
 	AM_RANGE(0xd000, 0xd7ff) AM_READWRITE(tryout_vram_r, tryout_vram_w)
 	AM_RANGE(0xe000, 0xe000) AM_READ_PORT("DSW")
 	AM_RANGE(0xe001, 0xe001) AM_READ_PORT("P1")
@@ -67,24 +67,24 @@ static ADDRESS_MAP_START( main_cpu, AS_PROGRAM, 8 )
 	AM_RANGE(0xe301, 0xe301) AM_WRITE(tryout_flipscreen_w)
 	AM_RANGE(0xe302, 0xe302) AM_WRITE(tryout_bankswitch_w)
 	AM_RANGE(0xe401, 0xe401) AM_WRITE(tryout_vram_bankswitch_w)
-	AM_RANGE(0xe402, 0xe404) AM_WRITEONLY AM_BASE_MEMBER(tryout_state, m_gfx_control)
+	AM_RANGE(0xe402, 0xe404) AM_WRITEONLY AM_SHARE("gfx_control")
 	AM_RANGE(0xe414, 0xe414) AM_WRITE(tryout_sound_w)
 	AM_RANGE(0xe417, 0xe417) AM_WRITE(tryout_nmi_ack_w)
 	AM_RANGE(0xfff0, 0xffff) AM_ROM AM_REGION("maincpu", 0xbff0) /* reset vectors */
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sound_cpu, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_cpu, AS_PROGRAM, 8, tryout_state )
 	AM_RANGE(0x0000, 0x07ff) AM_RAM
-	AM_RANGE(0x4000, 0x4001) AM_DEVREADWRITE("ymsnd", ym2203_r, ym2203_w)
-	AM_RANGE(0xa000, 0xa000) AM_READ(soundlatch_r)
+	AM_RANGE(0x4000, 0x4001) AM_DEVREADWRITE_LEGACY("ymsnd", ym2203_r, ym2203_w)
+	AM_RANGE(0xa000, 0xa000) AM_READ(soundlatch_byte_r)
 	AM_RANGE(0xd000, 0xd000) AM_WRITE(tryout_sound_irq_ack_w)
 	AM_RANGE(0xc000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
-static INPUT_CHANGED( coin_inserted )
+INPUT_CHANGED_MEMBER(tryout_state::coin_inserted)
 {
-	if(newval != oldval)
-		cputag_set_input_line(field->port->machine(), "maincpu", INPUT_LINE_NMI, ASSERT_LINE);
+	if (oldval)
+		machine().device("maincpu")->execute().set_input_line(INPUT_LINE_NMI, ASSERT_LINE);
 }
 
 static INPUT_PORTS_START( tryout )
@@ -136,22 +136,22 @@ static INPUT_PORTS_START( tryout )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE1 ) PORT_IMPULSE(2)
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED(coin_inserted, 0)
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_COIN2 ) PORT_CHANGED(coin_inserted, 0)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED_MEMBER(DEVICE_SELF, tryout_state,coin_inserted, 0)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_COIN2 ) PORT_CHANGED_MEMBER(DEVICE_SELF, tryout_state,coin_inserted, 0)
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 INPUT_PORTS_END
 
 static const gfx_layout charlayout =
 {
-	8,8,	/* 8*8 characters */
+	8,8,    /* 8*8 characters */
 	RGN_FRAC(1,2),
-	2,	/* 2 bits per pixel */
-	{ 0, 4 },	/* the two bitplanes for 4 pixels are packed into one byte */
+	2,  /* 2 bits per pixel */
+	{ 0, 4 },   /* the two bitplanes for 4 pixels are packed into one byte */
 	{ 3, 2, 1, 0, RGN_FRAC(1,2)+3, RGN_FRAC(1,2)+2, RGN_FRAC(1,2)+1, RGN_FRAC(1,2)+0 },
 	{ 7*8, 6*8, 5*8, 4*8, 3*8, 2*8, 1*8, 0*8 },
-	8*8	/* every char takes 8 consecutive bytes */
+	8*8 /* every char takes 8 consecutive bytes */
 };
 
 static const gfx_layout vramlayout =
@@ -162,7 +162,7 @@ static const gfx_layout vramlayout =
 	{ 0x0000 * 8, 0x2000 * 8, 0x4000 * 8 },
 	{ 7, 6, 5, 4, 128+7, 128+6, 128+5, 128+4, 256+7, 256+6, 256+5, 256+4, 384+7, 384+6, 384+5, 384+4  },
 	{ 15*8, 14*8, 13*8, 12*8, 11*8, 10*8, 9*8, 8*8,
-	  7*8, 6*8,5*8,4*8,3*8,2*8,1*8,0*8 },
+		7*8, 6*8,5*8,4*8,3*8,2*8,1*8,0*8 },
 	64*8
 };
 
@@ -182,32 +182,29 @@ static const gfx_layout spritelayout =
 static GFXDECODE_START( tryout )
 	GFXDECODE_ENTRY( "gfx1", 0, charlayout,   0, 8 )
 	GFXDECODE_ENTRY( "gfx2", 0, spritelayout, 0, 4 )
-	GFXDECODE_ENTRY( NULL,	 0, vramlayout,   0, 4 )
+	GFXDECODE_ENTRY( NULL,   0, vramlayout,   0, 4 )
 GFXDECODE_END
 
 static MACHINE_CONFIG_START( tryout, tryout_state )
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M6502, 2000000)		/* ? */
+	MCFG_CPU_ADD("maincpu", M6502, 2000000)     /* ? */
 	MCFG_CPU_PROGRAM_MAP(main_cpu)
 
-	MCFG_CPU_ADD("audiocpu", M6502, 1500000)	/* ? */
+	MCFG_CPU_ADD("audiocpu", M6502, 1500000)    /* ? */
 	MCFG_CPU_PROGRAM_MAP(sound_cpu)
-	MCFG_CPU_PERIODIC_INT(nmi_line_pulse,1000) /* controls BGM tempo, 1000 is an hand-tuned value to match a side-by-side video */
+	MCFG_CPU_PERIODIC_INT_DRIVER(tryout_state, nmi_line_pulse, 1000) /* controls BGM tempo, 1000 is an hand-tuned value to match a side-by-side video */
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(256, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 1*8, 31*8-1)
-	MCFG_SCREEN_UPDATE(tryout)
+	MCFG_SCREEN_UPDATE_DRIVER(tryout_state, screen_update_tryout)
 
 	MCFG_GFXDECODE(tryout)
 	MCFG_PALETTE_LENGTH(0x20)
-	MCFG_PALETTE_INIT(tryout)
 
-	MCFG_VIDEO_START(tryout)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -243,4 +240,4 @@ ROM_START( tryout )
 	ROM_LOAD( "ch14.bpr",     0x00000, 0x0020, CRC(8ce19925) SHA1(12f8f6022f1148b6ba1d019a34247452637063a7) )
 ROM_END
 
-GAME( 1985, tryout, 0, tryout, tryout, 0, ROT90, "Data East Corporation", "Pro Baseball Skill Tryout (Japan)", GAME_NO_COCKTAIL )
+GAME( 1985, tryout, 0, tryout, tryout, driver_device, 0, ROT90, "Data East Corporation", "Pro Baseball Skill Tryout (Japan)", GAME_NO_COCKTAIL )

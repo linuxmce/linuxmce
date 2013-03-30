@@ -7,19 +7,19 @@
 #include "video/konicdev.h"
 #include "includes/djmain.h"
 
-#define NUM_SPRITES	(0x800 / 16)
-#define NUM_LAYERS	2
+#define NUM_SPRITES (0x800 / 16)
+#define NUM_LAYERS  2
 
 
 
-static void draw_sprites(running_machine& machine, bitmap_t *bitmap, const rectangle *cliprect)
+static void draw_sprites(running_machine& machine, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
 	djmain_state *state = machine.driver_data<djmain_state>();
 	device_t *k055555 = machine.device("k055555");
 	int offs, pri_code;
 	int sortedlist[NUM_SPRITES];
 
-	machine.gfx[0]->color_base = k055555_read_register(k055555, K55_PALBASE_SUB2) * 0x400;
+	machine.gfx[0]->set_colorbase(k055555_read_register(k055555, K55_PALBASE_SUB2) * 0x400);
 
 	for (offs = 0; offs < NUM_SPRITES; offs++)
 		sortedlist[offs] = -1;
@@ -97,17 +97,17 @@ static void draw_sprites(running_machine& machine, bitmap_t *bitmap, const recta
 					int zh = oy + (((y + 1) * yscale + (1 << 11)) >> 12) - sy;
 
 					drawgfxzoom_transpen(bitmap,
-					            cliprect,
-					            machine.gfx[0],
-					            c,
-					            color,
-					            flipx,
-					            flipy,
-					            sx,
-					            sy,
-					            (zw << 16) / 16,
-					            (zh << 16) / 16,
-					            0);
+								cliprect,
+								machine.gfx[0],
+								c,
+								color,
+								flipx,
+								flipy,
+								sx,
+								sy,
+								(zw << 16) / 16,
+								(zh << 16) / 16,
+								0);
 				}
 				else
 				{
@@ -115,15 +115,15 @@ static void draw_sprites(running_machine& machine, bitmap_t *bitmap, const recta
 					int sy = oy + (y << 4);
 
 					drawgfx_transpen(bitmap,
-					        cliprect,
-					        machine.gfx[0],
-					        c,
-					        color,
-					        flipx,
-					        flipy,
-					        sx,
-					        sy,
-					        0);
+							cliprect,
+							machine.gfx[0],
+							c,
+							color,
+							flipx,
+							flipy,
+							sx,
+							sy,
+							0);
 				}
 			}
 	}
@@ -134,19 +134,19 @@ void djmain_tile_callback(running_machine& machine, int layer, int *code, int *c
 {
 }
 
-VIDEO_START( djmain )
+void djmain_state::video_start()
 {
-	device_t *k056832 = machine.device("k056832");
+	device_t *k056832 = machine().device("k056832");
 
 	k056832_set_layer_offs(k056832, 0, -92, -27);
 	// k056832_set_layer_offs(k056832, 1, -87, -27);
 	k056832_set_layer_offs(k056832, 1, -88, -27);
 }
 
-SCREEN_UPDATE( djmain )
+UINT32 djmain_state::screen_update_djmain(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	device_t *k056832 = screen->machine().device("k056832");
-	device_t *k055555 = screen->machine().device("k055555");
+	device_t *k056832 = machine().device("k056832");
+	device_t *k055555 = machine().device("k055555");
 	int enables = k055555_read_register(k055555, K55_INPUT_ENABLES);
 	int pri[NUM_LAYERS + 1];
 	int order[NUM_LAYERS + 1];
@@ -169,7 +169,7 @@ SCREEN_UPDATE( djmain )
 				order[j] = temp;
 			}
 
-	bitmap_fill(bitmap, cliprect, screen->machine().pens[0]);
+	bitmap.fill(machine().pens[0], cliprect);
 
 	for (i = 0; i < NUM_LAYERS + 1; i++)
 	{
@@ -178,7 +178,7 @@ SCREEN_UPDATE( djmain )
 		if (layer == NUM_LAYERS)
 		{
 			if (enables & K55_INP_SUB2)
-				draw_sprites(screen->machine(), bitmap, cliprect);
+				draw_sprites(machine(), bitmap, cliprect);
 		}
 		else
 		{

@@ -67,7 +67,7 @@ Stephh's notes (based on the games Z80 code and some tests) :
 #include "cpu/z80/z80.h"
 #include "machine/z80ctc.h"
 #include "sound/2203intf.h"
-#include "machine/8255ppi.h"
+#include "machine/i8255.h"
 #include "cpu/z80/z80daisy.h"
 #include "cpu/m6805/m6805.h"
 
@@ -75,38 +75,52 @@ Stephh's notes (based on the games Z80 code and some tests) :
 class pipeline_state : public driver_device
 {
 public:
-	pipeline_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	pipeline_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_vram1(*this, "vram1"),
+		m_vram2(*this, "vram2"){ }
 
 	tilemap_t *m_tilemap1;
 	tilemap_t *m_tilemap2;
-	UINT8 *m_vram1;
-	UINT8 *m_vram2;
+	required_shared_ptr<UINT8> m_vram1;
+	required_shared_ptr<UINT8> m_vram2;
 	UINT8 m_vidctrl;
 	UINT8 *m_palram;
 	UINT8 m_toMCU;
 	UINT8 m_fromMCU;
 	UINT8 m_ddrA;
+	DECLARE_WRITE8_MEMBER(vram2_w);
+	DECLARE_WRITE8_MEMBER(vram1_w);
+	DECLARE_WRITE8_MEMBER(mcu_portA_w);
+	DECLARE_READ8_MEMBER(mcu_portA_r);
+	DECLARE_WRITE8_MEMBER(mcu_ddrA_w);
+	DECLARE_WRITE8_MEMBER(vidctrl_w);
+	DECLARE_READ8_MEMBER(protection_r);
+	DECLARE_WRITE8_MEMBER(protection_w);
+	TILE_GET_INFO_MEMBER(get_tile_info);
+	TILE_GET_INFO_MEMBER(get_tile_info2);
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_pipeline(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	TIMER_CALLBACK_MEMBER(protection_deferred_w);
 };
 
 
-static TILE_GET_INFO( get_tile_info )
+TILE_GET_INFO_MEMBER(pipeline_state::get_tile_info)
 {
-	pipeline_state *state = machine.driver_data<pipeline_state>();
-	int code = state->m_vram2[tile_index]+state->m_vram2[tile_index+0x800]*256;
-	SET_TILE_INFO(
+	int code = m_vram2[tile_index]+m_vram2[tile_index+0x800]*256;
+	SET_TILE_INFO_MEMBER(
 		0,
 		code,
 		0,
 		0);
 }
 
-static TILE_GET_INFO( get_tile_info2 )
+TILE_GET_INFO_MEMBER(pipeline_state::get_tile_info2)
 {
-	pipeline_state *state = machine.driver_data<pipeline_state>();
-	int code =state->m_vram1[tile_index]+((state->m_vram1[tile_index+0x800]>>4))*256;
-	int color=((state->m_vram1[tile_index+0x800])&0xf);
-	SET_TILE_INFO
+	int code =m_vram1[tile_index]+((m_vram1[tile_index+0x800]>>4))*256;
+	int color=((m_vram1[tile_index+0x800])&0xf);
+	SET_TILE_INFO_MEMBER
 	(
 		1,
 		code,
@@ -115,116 +129,106 @@ static TILE_GET_INFO( get_tile_info2 )
 	);
 }
 
-static VIDEO_START ( pipeline )
+void pipeline_state::video_start()
 {
-	pipeline_state *state = machine.driver_data<pipeline_state>();
-	state->m_palram=auto_alloc_array(machine, UINT8, 0x1000);
-	state->m_tilemap1 = tilemap_create( machine, get_tile_info,tilemap_scan_rows,8,8,64,32 );
-	state->m_tilemap2 = tilemap_create( machine, get_tile_info2,tilemap_scan_rows,8,8,64,32 );
-	tilemap_set_transparent_pen(state->m_tilemap2,0);
+	m_palram=auto_alloc_array(machine(), UINT8, 0x1000);
+	m_tilemap1 = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(pipeline_state::get_tile_info),this),TILEMAP_SCAN_ROWS,8,8,64,32 );
+	m_tilemap2 = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(pipeline_state::get_tile_info2),this),TILEMAP_SCAN_ROWS,8,8,64,32 );
+	m_tilemap2->set_transparent_pen(0);
 }
 
-static SCREEN_UPDATE( pipeline )
+UINT32 pipeline_state::screen_update_pipeline(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	pipeline_state *state = screen->machine().driver_data<pipeline_state>();
-	tilemap_draw(bitmap,cliprect,state->m_tilemap1, 0,0);
-	tilemap_draw(bitmap,cliprect,state->m_tilemap2, 0,0);
+	m_tilemap1->draw(bitmap, cliprect, 0,0);
+	m_tilemap2->draw(bitmap, cliprect, 0,0);
 	return 0;
 }
 
 
-static WRITE8_DEVICE_HANDLER(vidctrl_w)
+WRITE8_MEMBER(pipeline_state::vidctrl_w)
 {
-	pipeline_state *state = device->machine().driver_data<pipeline_state>();
-	state->m_vidctrl=data;
+	m_vidctrl=data;
 }
 
-static WRITE8_HANDLER(vram2_w)
+WRITE8_MEMBER(pipeline_state::vram2_w)
 {
-	pipeline_state *state = space->machine().driver_data<pipeline_state>();
-	if(!(state->m_vidctrl&1))
+	if(!(m_vidctrl&1))
 	{
-		tilemap_mark_tile_dirty(state->m_tilemap1,offset&0x7ff);
-		state->m_vram2[offset]=data;
+		m_tilemap1->mark_tile_dirty(offset&0x7ff);
+		m_vram2[offset]=data;
 	}
 	else
 	{
-		 state->m_palram[offset]=data;
-		 if(offset<0x300)
-		 {
+			m_palram[offset]=data;
+			if(offset<0x300)
+			{
 			offset&=0xff;
-			palette_set_color_rgb(space->machine(), offset, pal6bit(state->m_palram[offset]), pal6bit(state->m_palram[offset+0x100]), pal6bit(state->m_palram[offset+0x200]));
-		 }
+			palette_set_color_rgb(machine(), offset, pal6bit(m_palram[offset]), pal6bit(m_palram[offset+0x100]), pal6bit(m_palram[offset+0x200]));
+			}
 	}
 }
 
-static WRITE8_HANDLER(vram1_w)
+WRITE8_MEMBER(pipeline_state::vram1_w)
 {
-	pipeline_state *state = space->machine().driver_data<pipeline_state>();
-	tilemap_mark_tile_dirty(state->m_tilemap2,offset&0x7ff);
-	state->m_vram1[offset]=data;
+	m_tilemap2->mark_tile_dirty(offset&0x7ff);
+	m_vram1[offset]=data;
 }
 
-static READ8_DEVICE_HANDLER(protection_r)
+READ8_MEMBER(pipeline_state::protection_r)
 {
-	pipeline_state *state = device->machine().driver_data<pipeline_state>();
-	return state->m_fromMCU;
+	return m_fromMCU;
 }
 
-static TIMER_CALLBACK( protection_deferred_w )
+TIMER_CALLBACK_MEMBER(pipeline_state::protection_deferred_w)
 {
-	pipeline_state *state = machine.driver_data<pipeline_state>();
-	state->m_toMCU = param;
+	m_toMCU = param;
 }
 
-static WRITE8_DEVICE_HANDLER(protection_w)
+WRITE8_MEMBER(pipeline_state::protection_w)
 {
-	device->machine().scheduler().synchronize(FUNC(protection_deferred_w), data);
-	device->machine().scheduler().boost_interleave(attotime::zero, attotime::from_usec(100));
+	machine().scheduler().synchronize(timer_expired_delegate(FUNC(pipeline_state::protection_deferred_w),this), data);
+	machine().scheduler().boost_interleave(attotime::zero, attotime::from_usec(100));
 }
 
-static ADDRESS_MAP_START( cpu0_mem, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( cpu0_mem, AS_PROGRAM, 8, pipeline_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x87ff) AM_RAM
-	AM_RANGE(0x8800, 0x97ff) AM_RAM_WRITE(vram1_w) AM_BASE_MEMBER(pipeline_state, m_vram1)
-	AM_RANGE(0x9800, 0xa7ff) AM_RAM_WRITE(vram2_w) AM_BASE_MEMBER(pipeline_state, m_vram2)
-	AM_RANGE(0xb800, 0xb803) AM_DEVREADWRITE("ppi8255_0", ppi8255_r, ppi8255_w)
-	AM_RANGE(0xb810, 0xb813) AM_DEVREADWRITE("ppi8255_1", ppi8255_r, ppi8255_w)
+	AM_RANGE(0x8800, 0x97ff) AM_RAM_WRITE(vram1_w) AM_SHARE("vram1")
+	AM_RANGE(0x9800, 0xa7ff) AM_RAM_WRITE(vram2_w) AM_SHARE("vram2")
+	AM_RANGE(0xb800, 0xb803) AM_DEVREADWRITE("ppi8255_0", i8255_device, read, write)
+	AM_RANGE(0xb810, 0xb813) AM_DEVREADWRITE("ppi8255_1", i8255_device, read, write)
 	AM_RANGE(0xb830, 0xb830) AM_NOP
 	AM_RANGE(0xb840, 0xb840) AM_NOP
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( cpu1_mem, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( cpu1_mem, AS_PROGRAM, 8, pipeline_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0xc000, 0xc7ff) AM_RAM
-	AM_RANGE(0xe000, 0xe003) AM_DEVREADWRITE("ppi8255_2", ppi8255_r, ppi8255_w)
+	AM_RANGE(0xe000, 0xe003) AM_DEVREADWRITE("ppi8255_2", i8255_device, read, write)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sound_port, AS_IO, 8 )
+static ADDRESS_MAP_START( sound_port, AS_IO, 8, pipeline_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x03) AM_DEVREADWRITE("ctc", z80ctc_r, z80ctc_w)
+	AM_RANGE(0x00, 0x03) AM_DEVREADWRITE("ctc", z80ctc_device, read, write)
 	AM_RANGE(0x06, 0x07) AM_NOP
 ADDRESS_MAP_END
 
-static WRITE8_HANDLER(mcu_portA_w)
+WRITE8_MEMBER(pipeline_state::mcu_portA_w)
 {
-	pipeline_state *state = space->machine().driver_data<pipeline_state>();
-	state->m_fromMCU=data;
+	m_fromMCU=data;
 }
 
-static READ8_HANDLER(mcu_portA_r)
+READ8_MEMBER(pipeline_state::mcu_portA_r)
 {
-	pipeline_state *state = space->machine().driver_data<pipeline_state>();
-	return (state->m_fromMCU&state->m_ddrA)|(state->m_toMCU& ~state->m_ddrA);
+	return (m_fromMCU&m_ddrA)|(m_toMCU& ~m_ddrA);
 }
 
-static WRITE8_HANDLER(mcu_ddrA_w)
+WRITE8_MEMBER(pipeline_state::mcu_ddrA_w)
 {
-	pipeline_state *state = space->machine().driver_data<pipeline_state>();
-	state->m_ddrA=data;
+	m_ddrA=data;
 }
 
-static ADDRESS_MAP_START( mcu_mem, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( mcu_mem, AS_PROGRAM, 8, pipeline_state )
 	AM_RANGE(0x0000, 0x0000) AM_READ(mcu_portA_r) AM_WRITE(mcu_portA_w)
 	AM_RANGE(0x0004, 0x0004) AM_WRITE(mcu_ddrA_w)
 	AM_RANGE(0x0010, 0x007f) AM_RAM
@@ -247,17 +251,17 @@ static INPUT_PORTS_START( pipeline )
 	PORT_START("DSW1")
 	/* bits 0 to 6 are tested from less to most significant - code at 0x00dd */
 	PORT_DIPNAME( 0x7f, 0x00, DEF_STR( Coinage ) )
-	PORT_DIPSETTING(	0x07, "10 Coins/1 Credit" )
-	PORT_DIPSETTING(	0x03, DEF_STR( 5C_1C ) )
-	PORT_DIPSETTING(	0x01, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x07, "10 Coins/1 Credit" )
+	PORT_DIPSETTING(    0x03, DEF_STR( 5C_1C ) )
+	PORT_DIPSETTING(    0x01, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
 //  PORT_DIPSETTING(    0x7f, DEF_STR( 1C_1C ) )            /* duplicated setting */
-	PORT_DIPSETTING(	0x0f, DEF_STR( 1C_2C ) )
-	PORT_DIPSETTING(	0x1f, DEF_STR( 1C_3C ) )
-	PORT_DIPSETTING(	0x3f, DEF_STR( 1C_4C ) )
+	PORT_DIPSETTING(    0x0f, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(    0x1f, DEF_STR( 1C_3C ) )
+	PORT_DIPSETTING(    0x3f, DEF_STR( 1C_4C ) )
 	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Lives ) )
-	PORT_DIPSETTING(	0x80, "1" )
-	PORT_DIPSETTING(	0x00, "2" )
+	PORT_DIPSETTING(    0x80, "1" )
+	PORT_DIPSETTING(    0x00, "2" )
 
 	PORT_START("DSW2")
 	/* bits 0 to 2 are tested from less to most significant - code at 0x0181 */
@@ -272,13 +276,13 @@ static INPUT_PORTS_START( pipeline )
 	PORT_DIPSETTING(    0x08, "Fast" )                      /* 0x0d */
 	PORT_DIPSETTING(    0x00, "Fastest" )                   /* 0x08 */
 	PORT_DIPNAME( 0x20, 0x20, "Continue" )                  /* check code at 0x0ffd - see notes */
-	PORT_DIPSETTING(	0x20, DEF_STR( Normal ) )
-	PORT_DIPSETTING(	0x00, "Checkpoints" )
+	PORT_DIPSETTING(    0x20, DEF_STR( Normal ) )
+	PORT_DIPSETTING(    0x00, "Checkpoints" )
 	PORT_DIPNAME( 0xc0, 0x00, "Sounds/Music" )              /* check code at 0x1c0a - determine if it really affects music once it is supported */
-	PORT_DIPSETTING(	0xc0, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x40, "Attract Mode" )
-	PORT_DIPSETTING(	0x80, "Normal Game" )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0xc0, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x40, "Attract Mode" )
+	PORT_DIPSETTING(    0x80, "Normal Game" )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 INPUT_PORTS_END
 
 
@@ -311,11 +315,10 @@ GFXDECODE_END
 
 static Z80CTC_INTERFACE( ctc_intf )
 {
-	0,							// timer disables
-	DEVCB_CPU_INPUT_LINE("audiocpu", INPUT_LINE_IRQ0),		// interrupt handler
-	DEVCB_NULL,					// ZC/TO0 callback
-	DEVCB_NULL,					// ZC/TO1 callback
-	DEVCB_NULL					// ZC/TO2 callback
+	DEVCB_CPU_INPUT_LINE("audiocpu", INPUT_LINE_IRQ0),      // interrupt handler
+	DEVCB_NULL,                 // ZC/TO0 callback
+	DEVCB_NULL,                 // ZC/TO1 callback
+	DEVCB_NULL                  // ZC/TO2 callback
 };
 
 static const z80_daisy_config daisy_chain_sound[] =
@@ -324,32 +327,34 @@ static const z80_daisy_config daisy_chain_sound[] =
 	{ NULL }
 };
 
-static const ppi8255_interface ppi8255_intf[3] =
+static I8255A_INTERFACE( ppi8255_0_intf )
 {
-	{
-		DEVCB_INPUT_PORT("P1"),			/* Port A read */
-		DEVCB_NULL,						/* Port B read */
-		DEVCB_NULL,						/* Port C read */
-		DEVCB_NULL,						/* Port A write */
-		DEVCB_NULL,						/* Port B write */  /* related to sound/music : check code at 0x1c0a */
-		DEVCB_HANDLER(vidctrl_w)		/* Port C write */
-	},
-	{
-		DEVCB_INPUT_PORT("DSW1"),		/* Port A read */
-		DEVCB_INPUT_PORT("DSW2"),		/* Port B read */
-		DEVCB_HANDLER(protection_r),	/* Port C read */
-		DEVCB_NULL,						/* Port A write */
-		DEVCB_NULL,						/* Port B write */
-		DEVCB_HANDLER(protection_w)		/* Port C write */
-	},
-	{
-		DEVCB_NULL,						/* Port A read */
-		DEVCB_NULL,						/* Port B read */
-		DEVCB_NULL,						/* Port C read */
-		DEVCB_NULL,						/* Port A write */
-		DEVCB_NULL,						/* Port B write */
-		DEVCB_NULL						/* Port C write */
-	}
+	DEVCB_INPUT_PORT("P1"),             /* Port A read */
+	DEVCB_NULL,                         /* Port A write */
+	DEVCB_NULL,                         /* Port B read */
+	DEVCB_NULL,                         /* Port B write */  // related to sound/music : check code at 0x1c0a
+	DEVCB_NULL,                         /* Port C read */
+	DEVCB_DRIVER_MEMBER(pipeline_state,vidctrl_w)           /* Port C write */
+};
+
+static I8255A_INTERFACE( ppi8255_1_intf )
+{
+	DEVCB_INPUT_PORT("DSW1"),           /* Port A read */
+	DEVCB_NULL,                         /* Port A write */
+	DEVCB_INPUT_PORT("DSW2"),           /* Port B read */
+	DEVCB_NULL,                         /* Port B write */
+	DEVCB_DRIVER_MEMBER(pipeline_state,protection_r),       /* Port C read */
+	DEVCB_DRIVER_MEMBER(pipeline_state,protection_w)            /* Port C write */
+};
+
+static I8255A_INTERFACE( ppi8255_2_intf )
+{
+	DEVCB_NULL,                         /* Port A read */
+	DEVCB_NULL,                         /* Port A write */
+	DEVCB_NULL,                         /* Port B read */
+	DEVCB_NULL,                         /* Port B write */
+	DEVCB_NULL,                         /* Port C read */
+	DEVCB_NULL                          /* Port C write */
 };
 
 static const ym2203_interface ym2203_config =
@@ -359,14 +364,14 @@ static const ym2203_interface ym2203_config =
 		AY8910_DEFAULT_LOADS,
 		DEVCB_NULL, DEVCB_NULL, DEVCB_NULL, DEVCB_NULL
 	},
-	NULL
+	DEVCB_NULL
 };
 
-static PALETTE_INIT(pipeline)
+void pipeline_state::palette_init()
 {
 	int r,g,b,i,c;
-	UINT8 *prom1 = &machine.region("proms")->base()[0x000];
-	UINT8 *prom2 = &machine.region("proms")->base()[0x100];
+	UINT8 *prom1 = &machine().root_device().memregion("proms")->base()[0x000];
+	UINT8 *prom2 = &machine().root_device().memregion("proms")->base()[0x100];
 
 	for(i=0;i<0x100;i++)
 	{
@@ -377,7 +382,7 @@ static PALETTE_INIT(pipeline)
 		r*=36;
 		g*=36;
 		b*=85;
-		palette_set_color(machine, 0x100+i, MAKE_RGB(r, g, b));
+		palette_set_color(machine(), 0x100+i, MAKE_RGB(r, g, b));
 	}
 }
 
@@ -386,7 +391,7 @@ static MACHINE_CONFIG_START( pipeline, pipeline_state )
 
 	MCFG_CPU_ADD("maincpu", Z80, 7372800/2)
 	MCFG_CPU_PROGRAM_MAP(cpu0_mem)
-	MCFG_CPU_VBLANK_INT("screen", nmi_line_pulse)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", pipeline_state,  nmi_line_pulse)
 
 	MCFG_CPU_ADD("audiocpu", Z80, 7372800/2)
 	MCFG_CPU_CONFIG(daisy_chain_sound)
@@ -398,25 +403,22 @@ static MACHINE_CONFIG_START( pipeline, pipeline_state )
 
 	MCFG_Z80CTC_ADD( "ctc", 7372800/2 /* same as "audiocpu" */, ctc_intf )
 
-	MCFG_PPI8255_ADD( "ppi8255_0", ppi8255_intf[0] )
-	MCFG_PPI8255_ADD( "ppi8255_1", ppi8255_intf[1] )
-	MCFG_PPI8255_ADD( "ppi8255_2", ppi8255_intf[2] )
+	MCFG_I8255A_ADD( "ppi8255_0", ppi8255_0_intf )
+	MCFG_I8255A_ADD( "ppi8255_1", ppi8255_1_intf )
+	MCFG_I8255A_ADD( "ppi8255_2", ppi8255_2_intf )
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(512, 512)
 	MCFG_SCREEN_VISIBLE_AREA(0, 319, 16, 239)
-	MCFG_SCREEN_UPDATE(pipeline)
+	MCFG_SCREEN_UPDATE_DRIVER(pipeline_state, screen_update_pipeline)
 
 	MCFG_GFXDECODE(pipeline)
 
-	MCFG_PALETTE_INIT(pipeline)
 	MCFG_PALETTE_LENGTH(0x100+0x100)
 
-	MCFG_VIDEO_START(pipeline)
 
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
@@ -457,4 +459,4 @@ ROM_START( pipeline )
 	ROM_LOAD( "82s123.u79", 0x00200, 0x00020,CRC(6df3f972) SHA1(0096a7f7452b70cac6c0752cb62e24b643015b5c) )
 ROM_END
 
-GAME( 1990, pipeline, 0, pipeline, pipeline, 0, ROT0, "Daehyun Electronics", "Pipeline",GAME_NO_SOUND )
+GAME( 1990, pipeline, 0, pipeline, pipeline, driver_device, 0, ROT0, "Daehyun Electronics", "Pipeline",GAME_NO_SOUND )

@@ -26,7 +26,7 @@
 
 ********************************************************************************/
 
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	topspeed_state *state = machine.driver_data<topspeed_state>();
 	UINT16 *spriteram = state->m_spriteram;
@@ -35,7 +35,7 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 	UINT16 data, tilenum, code, color;
 	UINT8 flipx, flipy, priority, bad_chunks;
 	UINT8 j, k, px, py, zx, zy, zoomx, zoomy;
-	static const int primasks[2] = { 0xff00, 0xfffc };	/* Sprites are over bottom layer or under top layer */
+	static const int primasks[2] = { 0xff00, 0xfffc };  /* Sprites are over bottom layer or under top layer */
 
 	/* Most of spriteram is not used by the 68000: rest is scratch space for the h/w perhaps ? */
 	for (offs = 0; offs < (0x2c0 / 2); offs += 4)
@@ -54,7 +54,7 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 //      unknown = (data & 0x2000) >> 13;
 
 		if (y == 0x180)
-			continue;	/* dead sprite */
+			continue;   /* dead sprite */
 
 		map_offset = tilenum << 7;
 
@@ -109,45 +109,44 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 
 /***************************************************************************/
 
-SCREEN_UPDATE( topspeed )
+UINT32 topspeed_state::screen_update_topspeed(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	topspeed_state *state = screen->machine().driver_data<topspeed_state>();
 	UINT8 layer[4];
 
 #ifdef MAME_DEBUG
-	if (input_code_pressed_once (screen->machine(), KEYCODE_V))
+	if (machine().input().code_pressed_once (KEYCODE_V))
 	{
-		state->m_dislayer[0] ^= 1;
-		popmessage("bg: %01x", state->m_dislayer[0]);
+		m_dislayer[0] ^= 1;
+		popmessage("bg: %01x", m_dislayer[0]);
 	}
 
-	if (input_code_pressed_once (screen->machine(), KEYCODE_B))
+	if (machine().input().code_pressed_once (KEYCODE_B))
 	{
-		state->m_dislayer[1] ^= 1;
-		popmessage("fg: %01x", state->m_dislayer[1]);
+		m_dislayer[1] ^= 1;
+		popmessage("fg: %01x", m_dislayer[1]);
 	}
 
-	if (input_code_pressed_once (screen->machine(), KEYCODE_N))
+	if (machine().input().code_pressed_once (KEYCODE_N))
 	{
-		state->m_dislayer[2] ^= 1;
-		popmessage("bg2: %01x", state->m_dislayer[2]);
+		m_dislayer[2] ^= 1;
+		popmessage("bg2: %01x", m_dislayer[2]);
 	}
 
-	if (input_code_pressed_once (screen->machine(), KEYCODE_M))
+	if (machine().input().code_pressed_once (KEYCODE_M))
 	{
-		state->m_dislayer[3] ^= 1;
-		popmessage("fg2: %01x", state->m_dislayer[3]);
+		m_dislayer[3] ^= 1;
+		popmessage("fg2: %01x", m_dislayer[3]);
 	}
 
-	if (input_code_pressed_once (screen->machine(), KEYCODE_C))
+	if (machine().input().code_pressed_once (KEYCODE_C))
 	{
-		state->m_dislayer[4] ^= 1;
-		popmessage("sprites: %01x", state->m_dislayer[4]);
+		m_dislayer[4] ^= 1;
+		popmessage("sprites: %01x", m_dislayer[4]);
 	}
 #endif
 
-	pc080sn_tilemap_update(state->m_pc080sn_1);
-	pc080sn_tilemap_update(state->m_pc080sn_2);
+	pc080sn_tilemap_update(m_pc080sn_1);
+	pc080sn_tilemap_update(m_pc080sn_2);
 
 	/* Tilemap layer priority seems hardwired (the order is odd, too) */
 	layer[0] = 1;
@@ -155,33 +154,33 @@ SCREEN_UPDATE( topspeed )
 	layer[2] = 1;
 	layer[3] = 0;
 
-	bitmap_fill(screen->machine().priority_bitmap, cliprect, 0);
-	bitmap_fill(bitmap, cliprect, 0);
+	machine().priority_bitmap.fill(0, cliprect);
+	bitmap.fill(0, cliprect);
 
 #ifdef MAME_DEBUG
-	if (state->m_dislayer[3] == 0)
+	if (m_dislayer[3] == 0)
 #endif
-	pc080sn_tilemap_draw(state->m_pc080sn_2, bitmap, cliprect, layer[0], TILEMAP_DRAW_OPAQUE, 1);
+	pc080sn_tilemap_draw(m_pc080sn_2, bitmap, cliprect, layer[0], TILEMAP_DRAW_OPAQUE, 1);
 
 #ifdef MAME_DEBUG
-	if (state->m_dislayer[2] == 0)
+	if (m_dislayer[2] == 0)
 #endif
-	pc080sn_tilemap_draw_special(state->m_pc080sn_2, bitmap, cliprect, layer[1], 0, 2, state->m_raster_ctrl);
+	pc080sn_tilemap_draw_special(m_pc080sn_2, bitmap, cliprect, layer[1], 0, 2, m_raster_ctrl);
 
 #ifdef MAME_DEBUG
-	if (state->m_dislayer[1] == 0)
+	if (m_dislayer[1] == 0)
 #endif
-	pc080sn_tilemap_draw_special(state->m_pc080sn_1, bitmap, cliprect, layer[2], 0, 4, state->m_raster_ctrl + 0x100);
+	pc080sn_tilemap_draw_special(m_pc080sn_1, bitmap, cliprect, layer[2], 0, 4, m_raster_ctrl + 0x100);
 
 #ifdef MAME_DEBUG
-	if (state->m_dislayer[0] == 0)
+	if (m_dislayer[0] == 0)
 #endif
-	pc080sn_tilemap_draw(state->m_pc080sn_1, bitmap, cliprect, layer[3], 0, 8);
+	pc080sn_tilemap_draw(m_pc080sn_1, bitmap, cliprect, layer[3], 0, 8);
 
 #ifdef MAME_DEBUG
-	if (state->m_dislayer[4] == 0)
+	if (m_dislayer[4] == 0)
 #endif
 
-	draw_sprites(screen->machine(), bitmap,cliprect);
+	draw_sprites(machine(), bitmap,cliprect);
 	return 0;
 }

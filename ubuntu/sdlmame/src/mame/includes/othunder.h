@@ -4,6 +4,8 @@
 
 *************************************************************************/
 
+#include "machine/eeprom.h"
+
 struct othunder_tempsprite
 {
 	int gfx;
@@ -18,12 +20,12 @@ struct othunder_tempsprite
 class othunder_state : public driver_device
 {
 public:
-	othunder_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	othunder_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+		m_spriteram(*this,"spriteram") { }
 
 	/* memory pointers */
-	UINT16 *   m_spriteram;
-	size_t     m_spriteram_size;
+	required_shared_ptr<UINT16> m_spriteram;
 
 	/* video-related */
 	struct othunder_tempsprite *m_spritelist;
@@ -35,9 +37,9 @@ public:
 	int        m_pan[4];
 
 	/* devices */
-	device_t *m_maincpu;
-	device_t *m_audiocpu;
-	device_t *m_eeprom;
+	cpu_device *m_maincpu;
+	cpu_device *m_audiocpu;
+	eeprom_device *m_eeprom;
 	device_t *m_tc0220ioc;
 	device_t *m_tc0100scn;
 	device_t *m_tc0110pcr;
@@ -48,10 +50,19 @@ public:
 	device_t *m_2610_1r;
 	device_t *m_2610_2l;
 	device_t *m_2610_2r;
+	DECLARE_WRITE16_MEMBER(irq_ack_w);
+	DECLARE_WRITE16_MEMBER(othunder_tc0220ioc_w);
+	DECLARE_READ16_MEMBER(othunder_tc0220ioc_r);
+	DECLARE_READ16_MEMBER(othunder_lightgun_r);
+	DECLARE_WRITE16_MEMBER(othunder_lightgun_w);
+	DECLARE_WRITE8_MEMBER(sound_bankswitch_w);
+	DECLARE_WRITE16_MEMBER(othunder_sound_w);
+	DECLARE_READ16_MEMBER(othunder_sound_r);
+	DECLARE_WRITE8_MEMBER(othunder_TC0310FAM_w);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	UINT32 screen_update_othunder(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(vblank_interrupt);
+	TIMER_CALLBACK_MEMBER(ad_interrupt);
 };
-
-
-/*----------- defined in video/othunder.c -----------*/
-
-VIDEO_START( othunder );
-SCREEN_UPDATE( othunder );

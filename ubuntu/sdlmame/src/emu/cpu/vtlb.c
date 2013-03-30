@@ -19,7 +19,7 @@
     DEBUGGING
 ***************************************************************************/
 
-#define PRINTF_TLB			(0)
+#define PRINTF_TLB          (0)
 
 
 
@@ -28,19 +28,19 @@
 ***************************************************************************/
 
 /* VTLB state */
-struct _vtlb_state
+struct vtlb_state
 {
-	cpu_device *		cpudevice;			/* CPU device */
-	address_spacenum	space;				/* address space */
-	int 				dynamic;			/* number of dynamic entries */
-	int					fixed;				/* number of fixed entries */
-	int					dynindex;			/* index of next dynamic entry */
-	int					pageshift;			/* bits to shift to get page index */
-	int					addrwidth;			/* logical address bus width */
-	offs_t *			live;				/* array of live entries by table index */
-	int *				fixedpages;			/* number of pages each fixed entry covers */
-	vtlb_entry *		table;				/* table of entries by address */
-	vtlb_entry *		save;				/* cache of live table entries for saving */
+	cpu_device *        cpudevice;          /* CPU device */
+	address_spacenum    space;              /* address space */
+	int                 dynamic;            /* number of dynamic entries */
+	int                 fixed;              /* number of fixed entries */
+	int                 dynindex;           /* index of next dynamic entry */
+	int                 pageshift;          /* bits to shift to get page index */
+	int                 addrwidth;          /* logical address bus width */
+	offs_t *            live;               /* array of live entries by table index */
+	int *               fixedpages;         /* number of pages each fixed entry covers */
+	vtlb_entry *        table;              /* table of entries by address */
+	vtlb_entry *        save;               /* cache of live table entries for saving */
 };
 
 
@@ -66,7 +66,7 @@ vtlb_state *vtlb_alloc(device_t *cpu, address_spacenum space, int fixed_entries,
 	vtlb->space = space;
 	vtlb->dynamic = dynamic_entries;
 	vtlb->fixed = fixed_entries;
-	const address_space_config *spaceconfig = devconfig_get_space_config(cpu->baseconfig(), space);
+	const address_space_config *spaceconfig = device_get_space_config(*cpu, space);
 	assert(spaceconfig != NULL);
 	vtlb->pageshift = spaceconfig->m_page_shift;
 	vtlb->addrwidth = spaceconfig->m_logaddr_width;

@@ -29,21 +29,22 @@
 
 ***************************************************************************/
 
-PALETTE_INIT( trackfld )
+PALETTE_INIT_MEMBER(trackfld_state,trackfld)
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	static const int resistances_rg[3] = { 1000, 470, 220 };
 	static const int resistances_b [2] = { 470, 220 };
 	double rweights[3], gweights[3], bweights[2];
 	int i;
 
 	/* compute the color output resistor weights */
-	compute_resistor_weights(0,	255, -1.0,
+	compute_resistor_weights(0, 255, -1.0,
 			3, &resistances_rg[0], rweights, 1000, 0,
 			3, &resistances_rg[0], gweights, 1000, 0,
 			2, &resistances_b[0],  bweights, 1000, 0);
 
 	/* allocate the colortable */
-	machine.colortable = colortable_alloc(machine, 0x20);
+	machine().colortable = colortable_alloc(machine(), 0x20);
 
 	/* create a lookup table for the palette */
 	for (i = 0; i < 0x20; i++)
@@ -68,7 +69,7 @@ PALETTE_INIT( trackfld )
 		bit1 = (color_prom[i] >> 7) & 0x01;
 		b = combine_2_weights(bweights, bit0, bit1);
 
-		colortable_palette_set_color(machine.colortable, i, MAKE_RGB(r, g, b));
+		colortable_palette_set_color(machine().colortable, i, MAKE_RGB(r, g, b));
 	}
 
 	/* color_prom now points to the beginning of the lookup table */
@@ -78,128 +79,122 @@ PALETTE_INIT( trackfld )
 	for (i = 0; i < 0x100; i++)
 	{
 		UINT8 ctabentry = color_prom[i] & 0x0f;
-		colortable_entry_set_value(machine.colortable, i, ctabentry);
+		colortable_entry_set_value(machine().colortable, i, ctabentry);
 	}
 
 	/* characters */
 	for (i = 0x100; i < 0x200; i++)
 	{
 		UINT8 ctabentry = (color_prom[i] & 0x0f) | 0x10;
-		colortable_entry_set_value(machine.colortable, i, ctabentry);
+		colortable_entry_set_value(machine().colortable, i, ctabentry);
 	}
 }
 
-WRITE8_HANDLER( trackfld_videoram_w )
+WRITE8_MEMBER(trackfld_state::trackfld_videoram_w)
 {
-	trackfld_state *state = space->machine().driver_data<trackfld_state>();
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_videoram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( trackfld_colorram_w )
+WRITE8_MEMBER(trackfld_state::trackfld_colorram_w)
 {
-	trackfld_state *state = space->machine().driver_data<trackfld_state>();
-	state->m_colorram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_colorram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( trackfld_flipscreen_w )
+WRITE8_MEMBER(trackfld_state::trackfld_flipscreen_w)
 {
-	if (flip_screen_get(space->machine()) != data)
+	if (flip_screen() != data)
 	{
-		flip_screen_set(space->machine(), data);
-		tilemap_mark_all_tiles_dirty_all(space->machine());
+		flip_screen_set(data);
+		machine().tilemap().mark_all_dirty();
 	}
 }
 
-WRITE8_HANDLER( atlantol_gfxbank_w )
+WRITE8_MEMBER(trackfld_state::atlantol_gfxbank_w)
 {
-	trackfld_state *state = space->machine().driver_data<trackfld_state>();
 	if (data & 1)
 	{
 		/* male / female sprites switch */
-		if ((state->m_old_gfx_bank == 1 && (data & 1) == 1) || (state->m_old_gfx_bank == 0 && (data & 1) == 1))
-			state->m_sprite_bank2 = 0x200;
+		if ((m_old_gfx_bank == 1 && (data & 1) == 1) || (m_old_gfx_bank == 0 && (data & 1) == 1))
+			m_sprite_bank2 = 0x200;
 		else
-			state->m_sprite_bank2 = 0;
+			m_sprite_bank2 = 0;
 
-		state->m_sprite_bank1 = 0;
-		state->m_old_gfx_bank = data & 1;
+		m_sprite_bank1 = 0;
+		m_old_gfx_bank = data & 1;
 	}
 	else
 	{
 		/* male / female sprites switch */
-		if ((state->m_old_gfx_bank == 0 && (data & 1) == 0) || (state->m_old_gfx_bank == 1 && (data & 1) == 0))
-			state->m_sprite_bank2 = 0;
+		if ((m_old_gfx_bank == 0 && (data & 1) == 0) || (m_old_gfx_bank == 1 && (data & 1) == 0))
+			m_sprite_bank2 = 0;
 		else
-			state->m_sprite_bank2 = 0x200;
+			m_sprite_bank2 = 0x200;
 
-		state->m_sprite_bank1 = 0;
-		state->m_old_gfx_bank = data & 1;
+		m_sprite_bank1 = 0;
+		m_old_gfx_bank = data & 1;
 	}
 
 	if ((data & 3) == 3)
 	{
-		if (state->m_sprite_bank2)
-			state->m_sprite_bank1 = 0x500;
+		if (m_sprite_bank2)
+			m_sprite_bank1 = 0x500;
 		else
-			state->m_sprite_bank1 = 0x300;
+			m_sprite_bank1 = 0x300;
 	}
 	else if ((data & 3) == 2)
 	{
-		if (state->m_sprite_bank2)
-			state->m_sprite_bank1 = 0x300;
+		if (m_sprite_bank2)
+			m_sprite_bank1 = 0x300;
 		else
-			state->m_sprite_bank1 = 0x100;
+			m_sprite_bank1 = 0x100;
 	}
 
-	if (state->m_bg_bank != (data & 0x8))
+	if (m_bg_bank != (data & 0x8))
 	{
-		state->m_bg_bank = data & 0x8;
-		tilemap_mark_all_tiles_dirty(state->m_bg_tilemap);
+		m_bg_bank = data & 0x8;
+		m_bg_tilemap->mark_all_dirty();
 	}
 }
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(trackfld_state::get_bg_tile_info)
 {
-	trackfld_state *state = machine.driver_data<trackfld_state>();
-	int attr = state->m_colorram[tile_index];
-	int code = state->m_videoram[tile_index] + 4 * (attr & 0xc0);
+	int attr = m_colorram[tile_index];
+	int code = m_videoram[tile_index] + 4 * (attr & 0xc0);
 	int color = attr & 0x0f;
 	int flags = ((attr & 0x10) ? TILE_FLIPX : 0) | ((attr & 0x20) ? TILE_FLIPY : 0);
 
-	if (state->m_bg_bank)
+	if (m_bg_bank)
 		code |= 0x400;
 
-	SET_TILE_INFO(1, code, color, flags);
+	SET_TILE_INFO_MEMBER(1, code, color, flags);
 }
 
-VIDEO_START( trackfld )
+VIDEO_START_MEMBER(trackfld_state,trackfld)
 {
-	trackfld_state *state = machine.driver_data<trackfld_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_rows, 8, 8, 64, 32);
-	tilemap_set_scroll_rows(state->m_bg_tilemap, 32);
-	state->m_sprites_gfx_banked = 0;
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(trackfld_state::get_bg_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 64, 32);
+	m_bg_tilemap->set_scroll_rows(32);
+	m_sprites_gfx_banked = 0;
 }
 
 
-VIDEO_START( atlantol )
+VIDEO_START_MEMBER(trackfld_state,atlantol)
 {
-	trackfld_state *state = machine.driver_data<trackfld_state>();
-	VIDEO_START_CALL( trackfld );
-	state->m_sprites_gfx_banked = 1;
+	VIDEO_START_CALL_MEMBER( trackfld );
+	m_sprites_gfx_banked = 1;
 }
 
 
 
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	trackfld_state *state = machine.driver_data<trackfld_state>();
 	UINT8 *spriteram = state->m_spriteram;
 	UINT8 *spriteram_2 = state->m_spriteram2;
 	int offs;
 
-	for (offs = state->m_spriteram_size - 2; offs >= 0; offs -= 2)
+	for (offs = state->m_spriteram.bytes() - 2; offs >= 0; offs -= 2)
 	{
 		int attr = spriteram_2[offs];
 		int code = spriteram[offs + 1];
@@ -211,7 +206,7 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 		int sx = spriteram[offs] - 1;
 		int sy = 240 - spriteram_2[offs + 1];
 
-		if (flip_screen_get(machine))
+		if (state->flip_screen())
 		{
 			sy = 240 - sy;
 			flipy = !flipy;
@@ -248,20 +243,18 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 
 
 
-SCREEN_UPDATE( trackfld )
+UINT32 trackfld_state::screen_update_trackfld(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	trackfld_state *state = screen->machine().driver_data<trackfld_state>();
 	int row, scrollx;
 
 	for (row = 0; row < 32; row++)
 	{
-		scrollx = state->m_scroll[row] + 256 * (state->m_scroll2[row] & 0x01);
-		if (flip_screen_get(screen->machine())) scrollx = -scrollx;
-		tilemap_set_scrollx(state->m_bg_tilemap, row, scrollx);
+		scrollx = m_scroll[row] + 256 * (m_scroll2[row] & 0x01);
+		if (flip_screen()) scrollx = -scrollx;
+		m_bg_tilemap->set_scrollx(row, scrollx);
 	}
 
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
-	draw_sprites(screen->machine(), bitmap, cliprect);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
+	draw_sprites(machine(), bitmap, cliprect);
 	return 0;
 }
-

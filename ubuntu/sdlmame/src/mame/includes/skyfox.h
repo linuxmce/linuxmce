@@ -7,12 +7,12 @@
 class skyfox_state : public driver_device
 {
 public:
-	skyfox_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	skyfox_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_spriteram(*this, "spriteram"){ }
 
 	/* memory pointers */
-	UINT8 *    m_spriteram;
-	size_t     m_spriteram_size;
+	required_shared_ptr<UINT8> m_spriteram;
 
 	/* video-related */
 	UINT8      m_vreg[8];
@@ -23,14 +23,14 @@ public:
 	int        m_palette_selected;
 
 	/* devices */
-	device_t *m_maincpu;
+	cpu_device *m_maincpu;
+	DECLARE_READ8_MEMBER(skyfox_vregs_r);
+	DECLARE_WRITE8_MEMBER(skyfox_vregs_w);
+	DECLARE_INPUT_CHANGED_MEMBER(coin_inserted);
+	DECLARE_DRIVER_INIT(skyfox);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void palette_init();
+	UINT32 screen_update_skyfox(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(skyfox_interrupt);
 };
-
-/*----------- defined in video/skyfox.c -----------*/
-
-WRITE8_HANDLER( skyfox_vregs_w );
-
-PALETTE_INIT( skyfox );
-
-SCREEN_UPDATE( skyfox );
-

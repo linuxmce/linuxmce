@@ -9,7 +9,6 @@
 
 #include "emu.h"
 #include "nmc9306.h"
-#include "machine/devhelpr.h"
 
 
 
@@ -26,18 +25,18 @@
 enum
 {
 	OTHER = 0,
-	WRITE,			// write register A3A2A1A0
-	READ,			// read register  A3A2A1A0
-	ERASE			// erase register A3A2A1A0
+	WRITE,          // write register A3A2A1A0
+	READ,           // read register  A3A2A1A0
+	ERASE           // erase register A3A2A1A0
 };
 
 // other instructions
 enum
 {
-	EWDS = 0,		// erase/write disable
-	WRAL,			// write all registers
-	ERAL,			// erase all registers
-	EWEN,			// erase/write enable
+	EWDS = 0,       // erase/write disable
+	WRAL,           // write all registers
+	ERAL,           // erase all registers
+	EWEN,           // erase/write enable
 };
 
 // states
@@ -54,53 +53,11 @@ enum
 
 
 //**************************************************************************
-//  DEVICE DEFINITIONS
-//**************************************************************************
-
-const device_type NMC9306 = nmc9306_device_config::static_alloc_device_config;
-
-
-
-//**************************************************************************
-//  DEVICE CONFIGURATION
-//**************************************************************************
-
-//-------------------------------------------------
-//  nmc9306_device_config - constructor
-//-------------------------------------------------
-
-nmc9306_device_config::nmc9306_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock)
-	: device_config(mconfig, static_alloc_device_config, "NMC9306", tag, owner, clock),
-	  device_config_nvram_interface(mconfig, *this)
-{
-}
-
-
-//-------------------------------------------------
-//  static_alloc_device_config - allocate a new
-//  configuration object
-//-------------------------------------------------
-
-device_config *nmc9306_device_config::static_alloc_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock)
-{
-	return global_alloc(nmc9306_device_config(mconfig, tag, owner, clock));
-}
-
-
-//-------------------------------------------------
-//  alloc_device - allocate a new device object
-//-------------------------------------------------
-
-device_t *nmc9306_device_config::alloc_device(running_machine &machine) const
-{
-	return auto_alloc(machine, nmc9306_device(machine, *this));
-}
-
-
-
-//**************************************************************************
 //  INLINE HELPERS
 //**************************************************************************
+
+// device type definition
+const device_type NMC9306 = &device_creator<nmc9306_device>;
 
 //-------------------------------------------------
 //  nmc9306_device - constructor
@@ -147,12 +104,11 @@ inline void nmc9306_device::erase(offs_t offset)
 //  nmc9306_device - constructor
 //-------------------------------------------------
 
-nmc9306_device::nmc9306_device(running_machine &_machine, const nmc9306_device_config &config)
-    : device_t(_machine, config),
-	  device_nvram_interface(_machine, config, *this),
-	  m_state(STATE_IDLE),
-	  m_ewen(false),
-      m_config(config)
+nmc9306_device::nmc9306_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, NMC9306, "NMC9306", tag, owner, clock),
+		device_nvram_interface(mconfig, *this),
+		m_state(STATE_IDLE),
+		m_ewen(false)
 {
 }
 

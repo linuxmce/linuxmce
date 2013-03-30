@@ -6,7 +6,7 @@ Hardware is based on MSX1, excluding i8255 PPI:
  64KB EPROM (2764-15, contains hacked BIOS and game ROM)
  Z80 @ 3.58MHz
  GI AY-3-8910
- TI TMS9928
+ TI TMS9928A
  (no dipswitches)
 
 Games:
@@ -29,26 +29,32 @@ found/dumped yet. */
 class forte2_state : public driver_device
 {
 public:
-	forte2_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	forte2_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) { }
 
 	UINT8 m_input_mask;
+	DECLARE_READ8_MEMBER(forte2_ay8910_read_input);
+	DECLARE_WRITE8_MEMBER(forte2_ay8910_set_input_mask);
+	DECLARE_WRITE_LINE_MEMBER(vdp_interrupt);
+	DECLARE_DRIVER_INIT(pesadelo);
+	virtual void machine_start();
+	virtual void machine_reset();
 };
 
 
 
-static ADDRESS_MAP_START( program_mem, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( program_mem, AS_PROGRAM, 8, forte2_state )
 	AM_RANGE(0x0000, 0xbfff) AM_ROM
 	AM_RANGE(0xc000, 0xffff) AM_RAM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( io_mem, AS_IO, 8 )
+static ADDRESS_MAP_START( io_mem, AS_IO, 8, forte2_state )
 	ADDRESS_MAP_UNMAP_HIGH
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x98, 0x98) AM_READWRITE( TMS9928A_vram_r, TMS9928A_vram_w )
-	AM_RANGE(0x99, 0x99) AM_READWRITE( TMS9928A_register_r, TMS9928A_register_w )
-	AM_RANGE(0xa0, 0xa1) AM_DEVWRITE("aysnd", ay8910_address_data_w)
-	AM_RANGE(0xa2, 0xa2) AM_DEVREAD("aysnd", ay8910_r)
+	AM_RANGE(0x98, 0x98) AM_DEVREADWRITE( "tms9928a", tms9928a_device, vram_read, vram_write )
+	AM_RANGE(0x99, 0x99) AM_DEVREADWRITE( "tms9928a", tms9928a_device, register_read, register_write )
+	AM_RANGE(0xa0, 0xa1) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_data_w)
+	AM_RANGE(0xa2, 0xa2) AM_DEVREAD_LEGACY("aysnd", ay8910_r)
 
 /* Ports a8-ab are originally for communicating with the i8255 PPI on MSX.
 Since this arcade board doesn't have one, those ports should be unmapped. */
@@ -69,87 +75,64 @@ static INPUT_PORTS_START( pesadelo )
 INPUT_PORTS_END
 
 
-static READ8_DEVICE_HANDLER(forte2_ay8910_read_input)
+READ8_MEMBER(forte2_state::forte2_ay8910_read_input)
 {
-	forte2_state *state = device->machine().driver_data<forte2_state>();
-	return input_port_read(device->machine(), "IN0") | (state->m_input_mask&0x3f);
+	return ioport("IN0")->read() | (m_input_mask&0x3f);
 }
 
-static WRITE8_DEVICE_HANDLER( forte2_ay8910_set_input_mask )
+WRITE8_MEMBER(forte2_state::forte2_ay8910_set_input_mask)
 {
-	forte2_state *state = device->machine().driver_data<forte2_state>();
 	/* PSG reg 15, writes 0 at coin insert, 0xff at boot and game over */
-	state->m_input_mask = data;
+	m_input_mask = data;
 }
 
 static const ay8910_interface forte2_ay8910_interface =
 {
 	AY8910_LEGACY_OUTPUT,
 	AY8910_DEFAULT_LOADS,
-	DEVCB_HANDLER(forte2_ay8910_read_input),
+	DEVCB_DRIVER_MEMBER(forte2_state,forte2_ay8910_read_input),
 	DEVCB_NULL,
 	DEVCB_NULL,
-	DEVCB_HANDLER(forte2_ay8910_set_input_mask)
+	DEVCB_DRIVER_MEMBER(forte2_state,forte2_ay8910_set_input_mask)
 };
 
 
-static void vdp_interrupt(running_machine &machine, int i)
+WRITE_LINE_MEMBER(forte2_state::vdp_interrupt)
 {
-	cputag_set_input_line(machine, "maincpu", 0, (i ? HOLD_LINE : CLEAR_LINE));
+	machine().device("maincpu")->execute().set_input_line(0, (state ? HOLD_LINE : CLEAR_LINE));
 }
 
-static const TMS9928a_interface tms9928a_interface =
+static TMS9928A_INTERFACE(forte2_tms9928a_interface)
 {
-	TMS99x8A,
+	"screen",
 	0x4000,
-	0, 0,
-	vdp_interrupt
+	DEVCB_DRIVER_LINE_MEMBER(forte2_state,vdp_interrupt)
 };
 
-static STATE_POSTLOAD ( forte2 )
+void forte2_state::machine_reset()
 {
-	TMS9928A_post_load(machine);
+	m_input_mask = 0xff;
 }
 
-static MACHINE_START( forte2 )
+void forte2_state::machine_start()
 {
-	forte2_state *state = machine.driver_data<forte2_state>();
-	TMS9928A_configure(&tms9928a_interface);
-
-	state->m_input_mask = 0xff;
 
 	/* register for save states */
-	state_save_register_global(machine, state->m_input_mask);
-	machine.state().register_postload(forte2, NULL);
-}
-
-static MACHINE_RESET( forte2 )
-{
-	TMS9928A_reset();
-}
-
-static INTERRUPT_GEN( pesadelo_interrupt )
-{
-	TMS9928A_interrupt(device->machine());
+	state_save_register_global(machine(), m_input_mask);
 }
 
 
 static MACHINE_CONFIG_START( pesadelo, forte2_state )
 
-	MCFG_CPU_ADD("maincpu", Z80, 3579545)		  /* 3.579545 Mhz */
+	MCFG_CPU_ADD("maincpu", Z80, XTAL_3_579545MHz)
 	MCFG_CPU_PROGRAM_MAP(program_mem)
 	MCFG_CPU_IO_MAP(io_mem)
-	MCFG_CPU_VBLANK_INT("screen",pesadelo_interrupt)
 
-	MCFG_MACHINE_START( forte2 )
-	MCFG_MACHINE_RESET( forte2 )
 
 	/* video hardware */
-	MCFG_FRAGMENT_ADD(tms9928a)
-	MCFG_SCREEN_MODIFY("screen")
-	MCFG_SCREEN_REFRESH_RATE((float)XTAL_10_738635MHz/2/342/262)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
-	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(4395)) /* 69 lines */
+	MCFG_TMS9928A_ADD( "tms9928a", TMS9928A, forte2_tms9928a_interface )
+	MCFG_TMS9928A_SCREEN_ADD_NTSC( "screen" )
+	MCFG_SCREEN_UPDATE_DEVICE( "tms9928a", tms9928a_device, screen_update )
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -158,11 +141,11 @@ static MACHINE_CONFIG_START( pesadelo, forte2_state )
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 MACHINE_CONFIG_END
 
-static DRIVER_INIT(pesadelo)
+DRIVER_INIT_MEMBER(forte2_state,pesadelo)
 {
 	int i;
-	UINT8 *mem = machine.region("maincpu")->base();
-	int memsize = machine.region("maincpu")->bytes();
+	UINT8 *mem = machine().root_device().memregion("maincpu")->base();
+	int memsize = machine().root_device().memregion("maincpu")->bytes();
 	UINT8 *buf;
 
 	// data swap
@@ -172,13 +155,13 @@ static DRIVER_INIT(pesadelo)
 	}
 
 	// address line swap
-	buf = auto_alloc_array(machine, UINT8, memsize);
+	buf = auto_alloc_array(machine(), UINT8, memsize);
 	memcpy(buf, mem, memsize);
 	for ( i = 0; i < memsize; i++ )
 	{
 		mem[BITSWAP16(i,11,9,8,13,14,15,12,7,6,5,4,3,2,1,0,10)] = buf[i];
 	}
-	auto_free(machine, buf);
+	auto_free(machine(), buf);
 
 }
 
@@ -187,4 +170,4 @@ ROM_START( pesadelo )
 	ROM_LOAD( "epr2764.15", 0x00000, 0x10000, CRC(1ae2f724) SHA1(12880dd7ad82acf04861843fb9d4f0f926d18f6b) )
 ROM_END
 
-GAME( 1989, pesadelo, 0, pesadelo, pesadelo, pesadelo, ROT0, "bootleg (Forte II Games) / Konami", "Pesadelo (bootleg of Knightmare on MSX)", GAME_SUPPORTS_SAVE )
+GAME( 1989, pesadelo, 0, pesadelo, pesadelo, forte2_state, pesadelo, ROT0, "bootleg (Forte II Games) / Konami", "Pesadelo (bootleg of Knightmare on MSX)", GAME_SUPPORTS_SAVE )

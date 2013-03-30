@@ -7,37 +7,34 @@ Atari Orbit video emulation
 #include "emu.h"
 #include "includes/orbit.h"
 
-WRITE8_HANDLER( orbit_playfield_w )
+WRITE8_MEMBER(orbit_state::orbit_playfield_w)
 {
-	orbit_state *state = space->machine().driver_data<orbit_state>();
-	state->m_playfield_ram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_playfield_ram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
 
-static TILE_GET_INFO( get_tile_info )
+TILE_GET_INFO_MEMBER(orbit_state::get_tile_info)
 {
-	orbit_state *state = machine.driver_data<orbit_state>();
-	UINT8 code = state->m_playfield_ram[tile_index];
+	UINT8 code = m_playfield_ram[tile_index];
 	int flags = 0;
 
 	if (BIT(code, 6))
 		flags |= TILE_FLIPX;
-	if (state->m_flip_screen)
+	if (m_flip_screen)
 		flags |= TILE_FLIPY;
 
-	SET_TILE_INFO(3, code & 0x3f, 0, flags);
+	SET_TILE_INFO_MEMBER(3, code & 0x3f, 0, flags);
 }
 
 
-VIDEO_START( orbit )
+void orbit_state::video_start()
 {
-	orbit_state *state = machine.driver_data<orbit_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_tile_info, tilemap_scan_rows, 16, 16, 32, 30);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(orbit_state::get_tile_info),this), TILEMAP_SCAN_ROWS, 16, 16, 32, 30);
 }
 
 
-static void draw_sprites( running_machine &machine, bitmap_t* bitmap, const rectangle* cliprect )
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	orbit_state *state = machine.driver_data<orbit_state>();
 	const UINT8* p = state->m_sprite_ram;
@@ -79,14 +76,13 @@ static void draw_sprites( running_machine &machine, bitmap_t* bitmap, const rect
 }
 
 
-SCREEN_UPDATE( orbit )
+UINT32 orbit_state::screen_update_orbit(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	orbit_state *state = screen->machine().driver_data<orbit_state>();
 
-	state->m_flip_screen = input_port_read(screen->machine(), "DSW2") & 8;
+	m_flip_screen = machine().root_device().ioport("DSW2")->read() & 8;
 
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
 
-	draw_sprites(screen->machine(), bitmap, cliprect);
+	draw_sprites(machine(), bitmap, cliprect);
 	return 0;
 }

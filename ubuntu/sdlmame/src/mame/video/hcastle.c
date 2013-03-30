@@ -9,12 +9,13 @@
 #include "includes/hcastle.h"
 
 
-PALETTE_INIT( hcastle )
+void hcastle_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int chip;
 
 	/* allocate the colortable */
-	machine.colortable = colortable_alloc(machine, 0x80);
+	machine().colortable = colortable_alloc(machine(), 0x80);
 
 	for (chip = 0; chip < 2; chip++)
 	{
@@ -34,7 +35,7 @@ PALETTE_INIT( hcastle )
 				else
 					ctabentry = (pal << 4) | (color_prom[(clut << 8) | i] & 0x0f);
 
-				colortable_entry_set_value(machine.colortable, (chip << 11) | (pal << 8) | i, ctabentry);
+				colortable_entry_set_value(machine().colortable, (chip << 11) | (pal << 8) | i, ctabentry);
 			}
 		}
 	}
@@ -64,23 +65,22 @@ static void set_pens(running_machine &machine)
 
 ***************************************************************************/
 
-static TILEMAP_MAPPER( tilemap_scan )
+TILEMAP_MAPPER_MEMBER(hcastle_state::tilemap_scan)
 {
 	/* logical (col,row) -> memory offset */
-	return (col & 0x1f) + ((row & 0x1f) << 5) + ((col & 0x20) << 6);	/* skip 0x400 */
+	return (col & 0x1f) + ((row & 0x1f) << 5) + ((col & 0x20) << 6);    /* skip 0x400 */
 }
 
-static TILE_GET_INFO( get_fg_tile_info )
+TILE_GET_INFO_MEMBER(hcastle_state::get_fg_tile_info)
 {
-	hcastle_state *state = machine.driver_data<hcastle_state>();
-	UINT8 ctrl_5 = k007121_ctrlram_r(state->m_k007121_1, 5);
-	UINT8 ctrl_6 = k007121_ctrlram_r(state->m_k007121_1, 6);
+	UINT8 ctrl_5 = k007121_ctrlram_r(m_k007121_1, generic_space(), 5);
+	UINT8 ctrl_6 = k007121_ctrlram_r(m_k007121_1, generic_space(), 6);
 	int bit0 = (ctrl_5 >> 0) & 0x03;
 	int bit1 = (ctrl_5 >> 2) & 0x03;
 	int bit2 = (ctrl_5 >> 4) & 0x03;
 	int bit3 = (ctrl_5 >> 6) & 0x03;
-	int attr = state->m_pf1_videoram[tile_index];
-	int tile = state->m_pf1_videoram[tile_index + 0x400];
+	int attr = m_pf1_videoram[tile_index];
+	int tile = m_pf1_videoram[tile_index + 0x400];
 	int color = attr & 0x7;
 	int bank =  ((attr & 0x80) >> 7) |
 				((attr >> (bit0 + 2)) & 0x02) |
@@ -88,24 +88,23 @@ static TILE_GET_INFO( get_fg_tile_info )
 				((attr >> (bit2    )) & 0x08) |
 				((attr >> (bit3 - 1)) & 0x10);
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			0,
-			tile + bank * 0x100 + state->m_pf1_bankbase,
+			tile + bank * 0x100 + m_pf1_bankbase,
 			((ctrl_6 & 0x30) * 2 + 16) + color,
 			0);
 }
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(hcastle_state::get_bg_tile_info)
 {
-	hcastle_state *state = machine.driver_data<hcastle_state>();
-	UINT8 ctrl_5 = k007121_ctrlram_r(state->m_k007121_2, 5);
-	UINT8 ctrl_6 = k007121_ctrlram_r(state->m_k007121_2, 6);
+	UINT8 ctrl_5 = k007121_ctrlram_r(m_k007121_2, generic_space(), 5);
+	UINT8 ctrl_6 = k007121_ctrlram_r(m_k007121_2, generic_space(), 6);
 	int bit0 = (ctrl_5 >> 0) & 0x03;
 	int bit1 = (ctrl_5 >> 2) & 0x03;
 	int bit2 = (ctrl_5 >> 4) & 0x03;
 	int bit3 = (ctrl_5 >> 6) & 0x03;
-	int attr = state->m_pf2_videoram[tile_index];
-	int tile = state->m_pf2_videoram[tile_index + 0x400];
+	int attr = m_pf2_videoram[tile_index];
+	int tile = m_pf2_videoram[tile_index + 0x400];
 	int color = attr & 0x7;
 	int bank =  ((attr & 0x80) >> 7) |
 				((attr >> (bit0 + 2)) & 0x02) |
@@ -113,9 +112,9 @@ static TILE_GET_INFO( get_bg_tile_info )
 				((attr >> (bit2    )) & 0x08) |
 				((attr >> (bit3 - 1)) & 0x10);
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			1,
-			tile + bank * 0x100 + state->m_pf2_bankbase,
+			tile + bank * 0x100 + m_pf2_bankbase,
 			((ctrl_6 & 0x30) * 2 + 16) + color,
 			0);
 }
@@ -128,14 +127,13 @@ static TILE_GET_INFO( get_bg_tile_info )
 
 ***************************************************************************/
 
-VIDEO_START( hcastle )
+void hcastle_state::video_start()
 {
-	hcastle_state *state = machine.driver_data<hcastle_state>();
 
-	state->m_fg_tilemap = tilemap_create(machine, get_fg_tile_info, tilemap_scan, 8, 8, 64, 32);
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan, 8, 8, 64, 32);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(hcastle_state::get_fg_tile_info),this), tilemap_mapper_delegate(FUNC(hcastle_state::tilemap_scan),this), 8, 8, 64, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(hcastle_state::get_bg_tile_info),this), tilemap_mapper_delegate(FUNC(hcastle_state::tilemap_scan),this), 8, 8, 64, 32);
 
-	tilemap_set_transparent_pen(state->m_fg_tilemap, 0);
+	m_fg_tilemap->set_transparent_pen(0);
 }
 
 
@@ -146,75 +144,70 @@ VIDEO_START( hcastle )
 
 ***************************************************************************/
 
-WRITE8_HANDLER( hcastle_pf1_video_w )
+WRITE8_MEMBER(hcastle_state::hcastle_pf1_video_w)
 {
-	hcastle_state *state = space->machine().driver_data<hcastle_state>();
-	state->m_pf1_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_fg_tilemap, offset & 0xbff);
+	m_pf1_videoram[offset] = data;
+	m_fg_tilemap->mark_tile_dirty(offset & 0xbff);
 }
 
-WRITE8_HANDLER( hcastle_pf2_video_w )
+WRITE8_MEMBER(hcastle_state::hcastle_pf2_video_w)
 {
-	hcastle_state *state = space->machine().driver_data<hcastle_state>();
-	state->m_pf2_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset & 0xbff);
+	m_pf2_videoram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset & 0xbff);
 }
 
-WRITE8_HANDLER( hcastle_gfxbank_w )
+WRITE8_MEMBER(hcastle_state::hcastle_gfxbank_w)
 {
-	hcastle_state *state = space->machine().driver_data<hcastle_state>();
-	state->m_gfx_bank = data;
+	m_gfx_bank = data;
 }
 
-READ8_HANDLER( hcastle_gfxbank_r )
+READ8_MEMBER(hcastle_state::hcastle_gfxbank_r)
 {
-	hcastle_state *state = space->machine().driver_data<hcastle_state>();
-	return state->m_gfx_bank;
+	return m_gfx_bank;
 }
 
-WRITE8_HANDLER( hcastle_pf1_control_w )
+WRITE8_MEMBER(hcastle_state::hcastle_pf1_control_w)
 {
-	hcastle_state *state = space->machine().driver_data<hcastle_state>();
 
 	if (offset == 3)
 	{
 		if ((data & 0x8) == 0)
-			buffer_spriteram(space->machine(), space->machine().generic.spriteram.u8 + 0x800, 0x800);
+			m_spriteram->copy(0x800, 0x800);
 		else
-			buffer_spriteram(space->machine(), space->machine().generic.spriteram.u8, 0x800);
+			m_spriteram->copy(0x000, 0x800);
 	}
 	else if (offset == 7)
 	{
-		tilemap_set_flip(state->m_fg_tilemap, (data & 0x08) ? (TILEMAP_FLIPY | TILEMAP_FLIPX) : 0);
+		m_fg_tilemap->set_flip((data & 0x08) ? (TILEMAP_FLIPY | TILEMAP_FLIPX) : 0);
 	}
-	k007121_ctrl_w(state->m_k007121_1, offset, data);
+	k007121_ctrl_w(m_k007121_1, space, offset, data);
 }
 
-WRITE8_HANDLER( hcastle_pf2_control_w )
+WRITE8_MEMBER(hcastle_state::hcastle_pf2_control_w)
 {
-	hcastle_state *state = space->machine().driver_data<hcastle_state>();
 
 	if (offset == 3)
 	{
 		if ((data & 0x8) == 0)
-			buffer_spriteram_2(space->machine(), space->machine().generic.spriteram2.u8 + 0x800, 0x800);
+			m_spriteram2->copy(0x800, 0x800);
 		else
-			buffer_spriteram_2(space->machine(), space->machine().generic.spriteram2.u8, 0x800);
+			m_spriteram2->copy(0x000, 0x800);
 	}
 	else if (offset == 7)
 	{
-		tilemap_set_flip(state->m_bg_tilemap, (data & 0x08) ? (TILEMAP_FLIPY | TILEMAP_FLIPX) : 0);
+		m_bg_tilemap->set_flip((data & 0x08) ? (TILEMAP_FLIPY | TILEMAP_FLIPX) : 0);
 	}
-	k007121_ctrl_w(state->m_k007121_2, offset, data);
+	k007121_ctrl_w(m_k007121_2, space, offset, data);
 }
 
 /*****************************************************************************/
 
-static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, UINT8 *sbank, int bank )
+static void draw_sprites(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, UINT8 *sbank, int bank )
 {
 	hcastle_state *state = machine.driver_data<hcastle_state>();
 	device_t *k007121 = bank ? state->m_k007121_2 : state->m_k007121_1;
-	int base_color = (k007121_ctrlram_r(k007121, 6) & 0x30) * 2;
+	address_space &space = machine.driver_data()->generic_space();
+	int base_color = (k007121_ctrlram_r(k007121, space, 6) & 0x30) * 2;
 	int bank_base = (bank == 0) ? 0x4000 * (state->m_gfx_bank & 1) : 0;
 
 	k007121_sprites_draw(k007121, bitmap, cliprect, machine.gfx[bank], machine.colortable, sbank, base_color, 0, bank_base, (UINT32)-1);
@@ -222,58 +215,58 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 
 /*****************************************************************************/
 
-SCREEN_UPDATE( hcastle )
+UINT32 hcastle_state::screen_update_hcastle(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	hcastle_state *state = screen->machine().driver_data<hcastle_state>();
+	address_space &space = machine().driver_data()->generic_space();
 
-	UINT8 ctrl_1_0 = k007121_ctrlram_r(state->m_k007121_1, 0);
-	UINT8 ctrl_1_1 = k007121_ctrlram_r(state->m_k007121_1, 1);
-	UINT8 ctrl_1_2 = k007121_ctrlram_r(state->m_k007121_1, 2);
-	UINT8 ctrl_1_3 = k007121_ctrlram_r(state->m_k007121_1, 3);
-	UINT8 ctrl_2_0 = k007121_ctrlram_r(state->m_k007121_2, 0);
-	UINT8 ctrl_2_1 = k007121_ctrlram_r(state->m_k007121_2, 1);
-	UINT8 ctrl_2_2 = k007121_ctrlram_r(state->m_k007121_2, 2);
-	UINT8 ctrl_2_3 = k007121_ctrlram_r(state->m_k007121_2, 3);
+	UINT8 ctrl_1_0 = k007121_ctrlram_r(m_k007121_1, space, 0);
+	UINT8 ctrl_1_1 = k007121_ctrlram_r(m_k007121_1, space, 1);
+	UINT8 ctrl_1_2 = k007121_ctrlram_r(m_k007121_1, space, 2);
+	UINT8 ctrl_1_3 = k007121_ctrlram_r(m_k007121_1, space, 3);
+	UINT8 ctrl_2_0 = k007121_ctrlram_r(m_k007121_2, space, 0);
+	UINT8 ctrl_2_1 = k007121_ctrlram_r(m_k007121_2, space, 1);
+	UINT8 ctrl_2_2 = k007121_ctrlram_r(m_k007121_2, space, 2);
+	UINT8 ctrl_2_3 = k007121_ctrlram_r(m_k007121_2, space, 3);
 
-	set_pens(screen->machine());
+	set_pens(machine());
 
-	state->m_pf1_bankbase = 0x0000;
-	state->m_pf2_bankbase = 0x4000 * ((state->m_gfx_bank & 2) >> 1);
+	m_pf1_bankbase = 0x0000;
+	m_pf2_bankbase = 0x4000 * ((m_gfx_bank & 2) >> 1);
 
 	if (ctrl_1_3 & 0x01)
-		state->m_pf1_bankbase += 0x2000;
+		m_pf1_bankbase += 0x2000;
 	if (ctrl_2_3 & 0x01)
-		state->m_pf2_bankbase += 0x2000;
+		m_pf2_bankbase += 0x2000;
 
-	if (state->m_pf1_bankbase != state->m_old_pf1)
-		tilemap_mark_all_tiles_dirty(state->m_fg_tilemap);
+	if (m_pf1_bankbase != m_old_pf1)
+		m_fg_tilemap->mark_all_dirty();
 
-	if (state->m_pf2_bankbase != state->m_old_pf2)
-		tilemap_mark_all_tiles_dirty(state->m_bg_tilemap);
+	if (m_pf2_bankbase != m_old_pf2)
+		m_bg_tilemap->mark_all_dirty();
 
-	state->m_old_pf1 = state->m_pf1_bankbase;
-	state->m_old_pf2 = state->m_pf2_bankbase;
+	m_old_pf1 = m_pf1_bankbase;
+	m_old_pf2 = m_pf2_bankbase;
 
-	tilemap_set_scrolly(state->m_bg_tilemap, 0, ctrl_2_2);
-	tilemap_set_scrollx(state->m_bg_tilemap, 0, ((ctrl_2_1 << 8) + ctrl_2_0));
-	tilemap_set_scrolly(state->m_fg_tilemap, 0, ctrl_1_2);
-	tilemap_set_scrollx(state->m_fg_tilemap, 0, ((ctrl_1_1 << 8) + ctrl_1_0));
+	m_bg_tilemap->set_scrolly(0, ctrl_2_2);
+	m_bg_tilemap->set_scrollx(0, ((ctrl_2_1 << 8) + ctrl_2_0));
+	m_fg_tilemap->set_scrolly(0, ctrl_1_2);
+	m_fg_tilemap->set_scrollx(0, ((ctrl_1_1 << 8) + ctrl_1_0));
 
 //  /* Sprite priority */
 //  if (ctrl_1_3 & 0x20)
-	if ((state->m_gfx_bank & 0x04) == 0)
+	if ((m_gfx_bank & 0x04) == 0)
 	{
-		tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
-		draw_sprites(screen->machine(), bitmap, cliprect, screen->machine().generic.buffered_spriteram.u8, 0);
-		draw_sprites(screen->machine(), bitmap, cliprect, screen->machine().generic.buffered_spriteram2.u8, 1);
-		tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, 0, 0);
+		m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
+		draw_sprites(machine(), bitmap, cliprect, m_spriteram->buffer(), 0);
+		draw_sprites(machine(), bitmap, cliprect, m_spriteram2->buffer(), 1);
+		m_fg_tilemap->draw(bitmap, cliprect, 0, 0);
 	}
 	else
 	{
-		tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
-		tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, 0, 0);
-		draw_sprites(screen->machine(), bitmap, cliprect, screen->machine().generic.buffered_spriteram.u8, 0);
-		draw_sprites(screen->machine(), bitmap, cliprect, screen->machine().generic.buffered_spriteram2.u8, 1);
+		m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
+		m_fg_tilemap->draw(bitmap, cliprect, 0, 0);
+		draw_sprites(machine(), bitmap, cliprect, m_spriteram->buffer(), 0);
+		draw_sprites(machine(), bitmap, cliprect, m_spriteram2->buffer(), 1);
 	}
 	return 0;
 }

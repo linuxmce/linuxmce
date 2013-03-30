@@ -11,14 +11,56 @@
 
 #include "emu.h"
 #include "emuopts.h"
-#include "uimenu.h"
+#include "chd.h"
 #include "cpu/mcs48/mcs48.h"
-#include "machine/laserdsc.h"
+#include "machine/ldpr8210.h"
+#include "machine/ldv1000.h"
 #include <ctype.h>
 
 #include "pr8210.lh"
 
 
+#define APPNAME                 "MAME"
+#define APPNAME_LOWER           "mame"
+#define CONFIGNAME              "mame"
+#define APPLONGNAME             "M.A.M.E."
+#define FULLLONGNAME            "Multiple Arcade Machine Emulator"
+#define CAPGAMENOUN             "GAME"
+#define CAPSTARTGAMENOUN        "Game"
+#define GAMENOUN                "game"
+#define GAMESNOUN               "games"
+#define COPYRIGHT               "Copyright Nicola Salmoria\nand the MAME team\nhttp://mamedev.org"
+#define COPYRIGHT_INFO          "Copyright Nicola Salmoria and the MAME team"
+#define DISCLAIMER              "MAME is an emulator: it reproduces, more or less faithfully, the behaviour of\n" \
+								"several arcade machines. But hardware is useless without software, so an image\n" \
+								"of the ROMs which run on that hardware is required. Such ROMs, like any other\n" \
+								"commercial software, are copyrighted material and it is therefore illegal to\n" \
+								"use them if you don't own the original arcade machine. Needless to say, ROMs\n" \
+								"are not distributed together with MAME. Distribution of MAME together with ROM\n" \
+								"images is a violation of copyright law and should be promptly reported to the\n" \
+								"authors so that appropriate legal action can be taken.\n"
+#define USAGE                   "Usage:  %s [%s] [options]"
+#define XML_ROOT                "mame"
+#define XML_TOP                 "game"
+#define STATE_MAGIC_NUM         "MAMESAVE"
+
+const char * emulator_info::get_appname() { return APPNAME;}
+const char * emulator_info::get_appname_lower() { return APPNAME_LOWER;}
+const char * emulator_info::get_configname() { return CONFIGNAME;}
+const char * emulator_info::get_applongname() { return APPLONGNAME;}
+const char * emulator_info::get_fulllongname() { return FULLLONGNAME;}
+const char * emulator_info::get_capgamenoun() { return CAPGAMENOUN;}
+const char * emulator_info::get_capstartgamenoun() { return CAPSTARTGAMENOUN;}
+const char * emulator_info::get_gamenoun() { return GAMENOUN;}
+const char * emulator_info::get_gamesnoun() { return GAMESNOUN;}
+const char * emulator_info::get_copyright() { return COPYRIGHT;}
+const char * emulator_info::get_copyright_info() { return COPYRIGHT_INFO;}
+const char * emulator_info::get_disclaimer() { return DISCLAIMER;}
+const char * emulator_info::get_usage() { return USAGE;}
+const char * emulator_info::get_xml_root() { return XML_ROOT;}
+const char * emulator_info::get_xml_top() { return XML_TOP;}
+const char * emulator_info::get_state_magic_num() { return STATE_MAGIC_NUM;}
+void emulator_info::printf_usage(const char *par1, const char *par2) { mame_printf_info(USAGE, par1, par2); }
 
 /*************************************
  *
@@ -26,53 +68,134 @@
  *
  *************************************/
 
-enum
-{
-	CMD_SCAN_REVERSE,
-	CMD_STEP_REVERSE,
-	CMD_SLOW_REVERSE,
-	CMD_FAST_REVERSE,
-	CMD_SCAN_FORWARD,
-	CMD_STEP_FORWARD,
-	CMD_SLOW_FORWARD,
-	CMD_FAST_FORWARD,
-	CMD_PLAY,
-	CMD_PAUSE,
-	CMD_FRAME_TOGGLE,
-	CMD_CHAPTER_TOGGLE,
-	CMD_CH1_TOGGLE,
-	CMD_CH2_TOGGLE,
-	CMD_0,
-	CMD_1,
-	CMD_2,
-	CMD_3,
-	CMD_4,
-	CMD_5,
-	CMD_6,
-	CMD_7,
-	CMD_8,
-	CMD_9,
-	CMD_SEARCH
-};
-
-
-
 /*************************************
  *
  *  Globals
  *
  *************************************/
 
-static astring filename;
+class ldplayer_state : public driver_device
+{
+public:
+	// construction/destruction
+	ldplayer_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+			m_last_controls(0),
+			m_playing(false) { }
 
-static input_port_value last_controls;
-static UINT8 playing;
+	// callback hook
+	static chd_file *get_disc_static(device_t *dummy, laserdisc_device &device) { return device.machine().driver_data<ldplayer_state>()->get_disc(); }
 
-static emu_timer *pr8210_bit_timer;
-static UINT32 pr8210_command_buffer_in, pr8210_command_buffer_out;
-static UINT8 pr8210_command_buffer[10];
+protected:
+	// device overrides
+	virtual void device_timer(emu_timer &timer, device_timer_id id, int param, void *ptr);
+	virtual void machine_start();
+	virtual void machine_reset();
 
-static void (*execute_command)(device_t *laserdisc, int command);
+	// internal helpers
+	chd_file *get_disc();
+	void process_commands();
+
+	// derived classes
+	virtual void execute_command(int command) { assert(false); }
+
+	// timer IDs
+	enum
+	{
+		TIMER_ID_AUTOPLAY,
+		TIMER_ID_VSYNC_UPDATE
+	};
+
+	// commands
+	enum
+	{
+		CMD_SCAN_REVERSE,
+		CMD_STEP_REVERSE,
+		CMD_SLOW_REVERSE,
+		CMD_FAST_REVERSE,
+		CMD_SCAN_FORWARD,
+		CMD_STEP_FORWARD,
+		CMD_SLOW_FORWARD,
+		CMD_FAST_FORWARD,
+		CMD_PLAY,
+		CMD_PAUSE,
+		CMD_FRAME_TOGGLE,
+		CMD_CHAPTER_TOGGLE,
+		CMD_CH1_TOGGLE,
+		CMD_CH2_TOGGLE,
+		CMD_0,
+		CMD_1,
+		CMD_2,
+		CMD_3,
+		CMD_4,
+		CMD_5,
+		CMD_6,
+		CMD_7,
+		CMD_8,
+		CMD_9,
+		CMD_SEARCH
+	};
+
+	// internal state
+	astring m_filename;
+	ioport_value m_last_controls;
+	bool m_playing;
+};
+
+
+class pr8210_state : public ldplayer_state
+{
+public:
+	// construction/destruction
+	pr8210_state(const machine_config &mconfig, device_type type, const char *tag)
+		: ldplayer_state(mconfig, type, tag),
+			m_laserdisc(*this, "laserdisc"),
+			m_command_buffer_in(0),
+			m_command_buffer_out(0) { }
+
+protected:
+	// device overrides
+	virtual void device_timer(emu_timer &timer, device_timer_id id, int param, void *ptr);
+	virtual void machine_start();
+	virtual void machine_reset();
+
+	// command execution hook
+	virtual void execute_command(int command);
+
+	// internal helpers
+	inline void add_command(UINT8 command);
+
+	// timer IDs
+	enum
+	{
+		TIMER_ID_BIT = 100,
+		TIMER_ID_BIT_OFF
+	};
+
+	required_device<pioneer_pr8210_device> m_laserdisc;
+
+	// internal state
+	emu_timer *m_bit_timer;
+	UINT32 m_command_buffer_in;
+	UINT32 m_command_buffer_out;
+	UINT8 m_command_buffer[10];
+};
+
+
+class ldv1000_state : public ldplayer_state
+{
+public:
+	// construction/destruction
+	ldv1000_state(const machine_config &mconfig, device_type type, const char *tag)
+		: ldplayer_state(mconfig, type, tag),
+			m_laserdisc(*this, "laserdisc") { }
+
+protected:
+	required_device<pioneer_ldv1000_device> m_laserdisc;
+
+	// command execution hook
+	virtual void execute_command(int command);
+};
 
 
 
@@ -82,62 +205,50 @@ static void (*execute_command)(device_t *laserdisc, int command);
  *
  *************************************/
 
-static void free_string(running_machine &machine)
+chd_file *ldplayer_state::get_disc()
 {
-}
+	bool found = FALSE;
+	// open a path to the ROMs and find the first CHD file
+	file_enumerator path(machine().options().media_path());
 
-
-static chd_file *get_disc(device_t *device)
-{
-	emu_file *image_file = NULL;
-	chd_file *image_chd = NULL;
-
-	/* open a path to the ROMs and find the first CHD file */
-	file_enumerator path(device->machine().options().media_path());
+	// iterate while we get new objects
 	const osd_directory_entry *dir;
-
-	/* iterate while we get new objects */
 	while ((dir = path.next()) != NULL)
 	{
 		int length = strlen(dir->name);
 
-		/* look for files ending in .chd */
+		// look for files ending in .chd
 		if (length > 4 &&
 			dir->name[length - 4] == '.' &&
 			tolower(dir->name[length - 3]) == 'c' &&
 			tolower(dir->name[length - 2]) == 'h' &&
 			tolower(dir->name[length - 1]) == 'd')
 		{
-			file_error filerr;
-			chd_error chderr;
-
-			/* open the file itself via our search path */
-			image_file = auto_alloc(device->machine(), emu_file(device->machine().options().media_path(), OPEN_FLAG_READ));
-			filerr = image_file->open(dir->name);
+			// open the file itself via our search path
+			emu_file image_file(machine().options().media_path(), OPEN_FLAG_READ);
+			file_error filerr = image_file.open(dir->name);
 			if (filerr == FILERR_NONE)
 			{
-				/* try to open the CHD */
-				chderr = chd_open_file(*image_file, CHD_OPEN_READ, NULL, &image_chd);
-				if (chderr == CHDERR_NONE)
+				astring fullpath(image_file.fullpath());
+				image_file.close();
+
+				// try to open the CHD
+
+				if (set_disk_handle(machine(), "laserdisc", fullpath) == CHDERR_NONE)
 				{
-					set_disk_handle(device->machine(), "laserdisc", *image_file, *image_chd);
-					filename.cpy(dir->name);
-					device->machine().add_notifier(MACHINE_NOTIFY_EXIT, free_string);
+					m_filename.cpy(dir->name);
+					found = TRUE;
 					break;
 				}
 			}
-
-			/* close the file on failure */
-			auto_free(device->machine(), image_file);
-			image_file = NULL;
 		}
 	}
 
-	/* if we failed, pop a message and exit */
-	if (image_file == NULL)
-		fatalerror("No valid image file found!\n");
+	// if we failed, pop a message and exit
+	if (found == FALSE)
+		throw emu_fatalerror("No valid image file found!\n");
 
-	return get_disk_handle(device->machine(), "laserdisc");
+	return get_disk_handle(machine(), "laserdisc");
 }
 
 
@@ -148,119 +259,119 @@ static chd_file *get_disc(device_t *device)
  *
  *************************************/
 
-static void process_commands(device_t *laserdisc)
+void ldplayer_state::process_commands()
 {
-	input_port_value controls = input_port_read(laserdisc->machine(), "controls");
+	ioport_value controls = machine().root_device().ioport("controls")->read();
 	int number;
 
-	/* step backwards */
-	if (!(last_controls & 0x01) && (controls & 0x01))
-		(*execute_command)(laserdisc, CMD_STEP_REVERSE);
+	// step backwards
+	if (!(m_last_controls & 0x01) && (controls & 0x01))
+		execute_command(CMD_STEP_REVERSE);
 
-	/* step forwards */
-	if (!(last_controls & 0x02) && (controls & 0x02))
-		(*execute_command)(laserdisc, CMD_STEP_FORWARD);
+	// step forwards
+	if (!(m_last_controls & 0x02) && (controls & 0x02))
+		execute_command(CMD_STEP_FORWARD);
 
-	/* scan backwards */
+	// scan backwards
 	if (controls & 0x04)
-		(*execute_command)(laserdisc, CMD_SCAN_REVERSE);
+		execute_command(CMD_SCAN_REVERSE);
 
-	/* scan forwards */
+	// scan forwards
 	if (controls & 0x08)
-		(*execute_command)(laserdisc, CMD_SCAN_FORWARD);
+		execute_command(CMD_SCAN_FORWARD);
 
-	/* slow backwards */
-	if (!(last_controls & 0x10) && (controls & 0x10))
-		(*execute_command)(laserdisc, CMD_SLOW_REVERSE);
+	// slow backwards
+	if (!(m_last_controls & 0x10) && (controls & 0x10))
+		execute_command(CMD_SLOW_REVERSE);
 
-	/* slow forwards */
-	if (!(last_controls & 0x20) && (controls & 0x20))
-		(*execute_command)(laserdisc, CMD_SLOW_FORWARD);
+	// slow forwards
+	if (!(m_last_controls & 0x20) && (controls & 0x20))
+		execute_command(CMD_SLOW_FORWARD);
 
-	/* fast backwards */
+	// fast backwards
 	if (controls & 0x40)
-		(*execute_command)(laserdisc, CMD_FAST_REVERSE);
+		execute_command(CMD_FAST_REVERSE);
 
-	/* fast forwards */
+	// fast forwards
 	if (controls & 0x80)
-		(*execute_command)(laserdisc, CMD_FAST_FORWARD);
+		execute_command(CMD_FAST_FORWARD);
 
-	/* play/pause */
-	if (!(last_controls & 0x100) && (controls & 0x100))
+	// play/pause
+	if (!(m_last_controls & 0x100) && (controls & 0x100))
 	{
-		playing = !playing;
-		(*execute_command)(laserdisc, playing ? CMD_PLAY : CMD_PAUSE);
+		m_playing = !m_playing;
+		execute_command(m_playing ? CMD_PLAY : CMD_PAUSE);
 	}
 
-	/* toggle frame display */
-	if (!(last_controls & 0x200) && (controls & 0x200))
-		(*execute_command)(laserdisc, CMD_FRAME_TOGGLE);
+	// toggle frame display
+	if (!(m_last_controls & 0x200) && (controls & 0x200))
+		execute_command(CMD_FRAME_TOGGLE);
 
-	/* toggle chapter display */
-	if (!(last_controls & 0x400) && (controls & 0x400))
-		(*execute_command)(laserdisc, CMD_CHAPTER_TOGGLE);
+	// toggle chapter display
+	if (!(m_last_controls & 0x400) && (controls & 0x400))
+		execute_command(CMD_CHAPTER_TOGGLE);
 
-	/* toggle left channel */
-	if (!(last_controls & 0x800) && (controls & 0x800))
-		(*execute_command)(laserdisc, CMD_CH1_TOGGLE);
+	// toggle left channel
+	if (!(m_last_controls & 0x800) && (controls & 0x800))
+		execute_command(CMD_CH1_TOGGLE);
 
-	/* toggle right channel */
-	if (!(last_controls & 0x1000) && (controls & 0x1000))
-		(*execute_command)(laserdisc, CMD_CH2_TOGGLE);
+	// toggle right channel
+	if (!(m_last_controls & 0x1000) && (controls & 0x1000))
+		execute_command(CMD_CH2_TOGGLE);
 
-	/* numbers */
+	// numbers
 	for (number = 0; number < 10; number++)
-		if (!(last_controls & (0x10000 << number)) && (controls & (0x10000 << number)))
-			(*execute_command)(laserdisc, CMD_0 + number);
+		if (!(m_last_controls & (0x10000 << number)) && (controls & (0x10000 << number)))
+			execute_command(CMD_0 + number);
 
-	/* enter */
-	if (!(last_controls & 0x4000000) && (controls & 0x4000000))
-		(*execute_command)(laserdisc, CMD_SEARCH);
+	// enter
+	if (!(m_last_controls & 0x4000000) && (controls & 0x4000000))
+		execute_command(CMD_SEARCH);
 
-	last_controls = controls;
+	m_last_controls = controls;
 }
 
 
-static TIMER_CALLBACK( vsync_update )
+void ldplayer_state::device_timer(emu_timer &timer, device_timer_id id, int param, void *ptr)
 {
-	device_t *laserdisc = machine.m_devicelist.first(LASERDISC);
-	int vblank_scanline;
-	attotime target;
+	switch (id)
+	{
+		case TIMER_ID_VSYNC_UPDATE:
+		{
+			// handle commands
+			if (param == 0)
+				process_commands();
 
-	/* handle commands */
-	if (!param)
-		process_commands(laserdisc);
+			// set a timer to go off on the next VBLANK
+			int vblank_scanline = machine().primary_screen->visible_area().max_y + 1;
+			attotime target = machine().primary_screen->time_until_pos(vblank_scanline);
+			timer_set(target, TIMER_ID_VSYNC_UPDATE);
+			break;
+		}
 
-	/* set a timer to go off on the next VBLANK */
-	vblank_scanline = machine.primary_screen->visible_area().max_y + 1;
-	target = machine.primary_screen->time_until_pos(vblank_scanline);
-	machine.scheduler().timer_set(target, FUNC(vsync_update));
+		case TIMER_ID_AUTOPLAY:
+			// start playing
+			execute_command(CMD_PLAY);
+			m_playing = true;
+			break;
+	}
 }
 
 
-static MACHINE_START( ldplayer )
+void ldplayer_state::machine_start()
 {
-	vsync_update(machine, NULL, 1);
+	// start the vsync timer going
+	timer_set(attotime::zero, TIMER_ID_VSYNC_UPDATE, 1);
 }
 
 
-static TIMER_CALLBACK( autoplay )
+void ldplayer_state::machine_reset()
 {
-	device_t *laserdisc = machine.m_devicelist.first(LASERDISC);
+	// set up a timer to start playing immediately
+	timer_set(attotime::zero, TIMER_ID_AUTOPLAY);
 
-	/* start playing */
-	(*execute_command)(laserdisc, CMD_PLAY);
-	playing = TRUE;
-}
-
-
-static MACHINE_RESET( ldplayer )
-{
-	/* set up a timer to start playing immediately */
-	machine.scheduler().timer_set(attotime::zero, FUNC(autoplay));
-
-	/* indicate the name of the file we opened */
-	popmessage("Opened %s\n", filename.cstr());
+	// indicate the name of the file we opened
+	popmessage("Opened %s\n", m_filename.cstr());
 }
 
 
@@ -271,153 +382,157 @@ static MACHINE_RESET( ldplayer )
  *
  *************************************/
 
-INLINE void pr8210_add_command(UINT8 command)
+void pr8210_state::add_command(UINT8 command)
 {
-	pr8210_command_buffer[pr8210_command_buffer_in++ % ARRAY_LENGTH(pr8210_command_buffer)] = (command & 0x1f) | 0x20;
-	pr8210_command_buffer[pr8210_command_buffer_in++ % ARRAY_LENGTH(pr8210_command_buffer)] = 0x00 | 0x20;
+	m_command_buffer[m_command_buffer_in++ % ARRAY_LENGTH(m_command_buffer)] = (command & 0x1f) | 0x20;
+	m_command_buffer[m_command_buffer_in++ % ARRAY_LENGTH(m_command_buffer)] = 0x00 | 0x20;
 }
 
 
-static TIMER_CALLBACK( pr8210_bit_off_callback )
+void pr8210_state::device_timer(emu_timer &timer, device_timer_id id, int param, void *ptr)
 {
-	device_t *laserdisc = (device_t *)ptr;
-
-	/* deassert the control line */
-	laserdisc_line_w(laserdisc, LASERDISC_LINE_CONTROL, CLEAR_LINE);
-}
-
-
-static TIMER_CALLBACK( pr8210_bit_callback )
-{
-	attotime duration = attotime::from_msec(30);
-	device_t *laserdisc = (device_t *)ptr;
-	UINT8 bitsleft = param >> 16;
-	UINT8 data = param;
-
-	/* if we have bits, process */
-	if (bitsleft != 0)
+	switch (id)
 	{
-		/* assert the line and set a timer for deassertion */
-		laserdisc_line_w(laserdisc, LASERDISC_LINE_CONTROL, ASSERT_LINE);
-		machine.scheduler().timer_set(attotime::from_usec(250), FUNC(pr8210_bit_off_callback), 0, ptr);
+		case TIMER_ID_BIT:
+		{
+			attotime duration = attotime::from_msec(30);
+			UINT8 bitsleft = param >> 16;
+			UINT8 data = param;
 
-		/* space 0 bits apart by 1msec, and 1 bits by 2msec */
-		duration = attotime::from_msec((data & 0x80) ? 2 : 1);
-		data <<= 1;
-		bitsleft--;
+			// if we have bits, process
+			if (bitsleft != 0)
+			{
+				// assert the line and set a timer for deassertion
+				m_laserdisc->control_w(ASSERT_LINE);
+				timer_set(attotime::from_usec(250), TIMER_ID_BIT_OFF);
+
+				// space 0 bits apart by 1msec, and 1 bits by 2msec
+				duration = attotime::from_msec((data & 0x80) ? 2 : 1);
+				data <<= 1;
+				bitsleft--;
+			}
+
+			// if we're out of bits, queue up the next command
+			else if (bitsleft == 0 && m_command_buffer_in != m_command_buffer_out)
+			{
+				data = m_command_buffer[m_command_buffer_out++ % ARRAY_LENGTH(m_command_buffer)];
+				bitsleft = 12;
+			}
+			m_bit_timer->adjust(duration, (bitsleft << 16) | data);
+			break;
+		}
+
+		// deassert the control line
+		case TIMER_ID_BIT_OFF:
+			m_laserdisc->control_w(CLEAR_LINE);
+			break;
+
+		// others to the parent class
+		default:
+			ldplayer_state::device_timer(timer, id, param, ptr);
+			break;
 	}
-
-	/* if we're out of bits, queue up the next command */
-	else if (bitsleft == 0 && pr8210_command_buffer_in != pr8210_command_buffer_out)
-	{
-		data = pr8210_command_buffer[pr8210_command_buffer_out++ % ARRAY_LENGTH(pr8210_command_buffer)];
-		bitsleft = 12;
-	}
-	pr8210_bit_timer->adjust(duration, (bitsleft << 16) | data);
 }
 
-
-static MACHINE_START( pr8210 )
+void pr8210_state::machine_start()
 {
-	device_t *laserdisc = machine.m_devicelist.first(LASERDISC);
-	MACHINE_START_CALL(ldplayer);
-	pr8210_bit_timer = machine.scheduler().timer_alloc(FUNC(pr8210_bit_callback), (void *)laserdisc);
+	ldplayer_state::machine_start();
+	m_bit_timer = timer_alloc(TIMER_ID_BIT);
 }
 
-
-static MACHINE_RESET( pr8210 )
+void pr8210_state::machine_reset()
 {
-	MACHINE_RESET_CALL(ldplayer);
-	pr8210_bit_timer->adjust(attotime::zero);
+	ldplayer_state::machine_reset();
+	m_bit_timer->adjust(attotime::zero);
 }
 
 
-static void pr8210_execute(device_t *laserdisc, int command)
+void pr8210_state::execute_command(int command)
 {
 	static const UINT8 digits[10] = { 0x01, 0x11, 0x09, 0x19, 0x05, 0x15, 0x0d, 0x1d, 0x03, 0x13 };
 
 	switch (command)
 	{
 		case CMD_SCAN_REVERSE:
-			if (pr8210_command_buffer_in == pr8210_command_buffer_out ||
-				pr8210_command_buffer_in == (pr8210_command_buffer_out + 1) % ARRAY_LENGTH(pr8210_command_buffer))
+			if (m_command_buffer_in == m_command_buffer_out ||
+				m_command_buffer_in == (m_command_buffer_out + 1) % ARRAY_LENGTH(m_command_buffer))
 			{
-				pr8210_add_command(0x1c);
-				playing = TRUE;
+				add_command(0x1c);
+				m_playing = true;
 			}
 			break;
 
 		case CMD_STEP_REVERSE:
-			pr8210_add_command(0x12);
-			playing = FALSE;
+			add_command(0x12);
+			m_playing = false;
 			break;
 
 		case CMD_SLOW_REVERSE:
-			pr8210_add_command(0x02);
-			playing = TRUE;
+			add_command(0x02);
+			m_playing = true;
 			break;
 
 		case CMD_FAST_REVERSE:
-			if (pr8210_command_buffer_in == pr8210_command_buffer_out ||
-				pr8210_command_buffer_in == (pr8210_command_buffer_out + 1) % ARRAY_LENGTH(pr8210_command_buffer))
+			if (m_command_buffer_in == m_command_buffer_out ||
+				m_command_buffer_in == (m_command_buffer_out + 1) % ARRAY_LENGTH(m_command_buffer))
 			{
-				pr8210_add_command(0x0c);
-				playing = TRUE;
+				add_command(0x0c);
+				m_playing = true;
 			}
 			break;
 
 		case CMD_SCAN_FORWARD:
-			if (pr8210_command_buffer_in == pr8210_command_buffer_out ||
-				pr8210_command_buffer_in == (pr8210_command_buffer_out + 1) % ARRAY_LENGTH(pr8210_command_buffer))
+			if (m_command_buffer_in == m_command_buffer_out ||
+				m_command_buffer_in == (m_command_buffer_out + 1) % ARRAY_LENGTH(m_command_buffer))
 			{
-				pr8210_add_command(0x08);
-				playing = TRUE;
+				add_command(0x08);
+				m_playing = true;
 			}
 			break;
 
 		case CMD_STEP_FORWARD:
-			pr8210_add_command(0x04);
-			playing = FALSE;
+			add_command(0x04);
+			m_playing = false;
 			break;
 
 		case CMD_SLOW_FORWARD:
-			pr8210_add_command(0x18);
-			playing = TRUE;
+			add_command(0x18);
+			m_playing = true;
 			break;
 
 		case CMD_FAST_FORWARD:
-			if (pr8210_command_buffer_in == pr8210_command_buffer_out ||
-				pr8210_command_buffer_in == (pr8210_command_buffer_out + 1) % ARRAY_LENGTH(pr8210_command_buffer))
+			if (m_command_buffer_in == m_command_buffer_out ||
+				m_command_buffer_in == (m_command_buffer_out + 1) % ARRAY_LENGTH(m_command_buffer))
 			{
-				pr8210_add_command(0x10);
-				playing = TRUE;
+				add_command(0x10);
+				m_playing = true;
 			}
 			break;
 
 		case CMD_PLAY:
-			pr8210_add_command(0x14);
-			playing = TRUE;
+			add_command(0x14);
+			m_playing = true;
 			break;
 
 		case CMD_PAUSE:
-			pr8210_add_command(0x0a);
-			playing = FALSE;
+			add_command(0x0a);
+			m_playing = false;
 			break;
 
 		case CMD_FRAME_TOGGLE:
-			pr8210_add_command(0x0b);
+			add_command(0x0b);
 			break;
 
 		case CMD_CHAPTER_TOGGLE:
-			pr8210_add_command(0x06);
+			add_command(0x06);
 			break;
 
 		case CMD_CH1_TOGGLE:
-			pr8210_add_command(0x0e);
+			add_command(0x0e);
 			break;
 
 		case CMD_CH2_TOGGLE:
-			pr8210_add_command(0x16);
+			add_command(0x16);
 			break;
 
 		case CMD_0:
@@ -430,12 +545,12 @@ static void pr8210_execute(device_t *laserdisc, int command)
 		case CMD_7:
 		case CMD_8:
 		case CMD_9:
-			pr8210_add_command(digits[command - CMD_0]);
+			add_command(digits[command - CMD_0]);
 			break;
 
 		case CMD_SEARCH:
-			pr8210_add_command(0x1a);
-			playing = FALSE;
+			add_command(0x1a);
+			m_playing = false;
 			break;
 	}
 }
@@ -448,43 +563,43 @@ static void pr8210_execute(device_t *laserdisc, int command)
  *
  *************************************/
 
-static void ldv1000_execute(device_t *laserdisc, int command)
+void ldv1000_state::execute_command(int command)
 {
 	static const UINT8 digits[10] = { 0x3f, 0x0f, 0x8f, 0x4f, 0x2f, 0xaf, 0x6f, 0x1f, 0x9f, 0x5f };
 	switch (command)
 	{
 		case CMD_SCAN_REVERSE:
-			laserdisc_data_w(laserdisc, 0xf8);
-			playing = TRUE;
+			m_laserdisc->data_w(0xf8);
+			m_playing = true;
 			break;
 
 		case CMD_STEP_REVERSE:
-			laserdisc_data_w(laserdisc, 0xfe);
-			playing = FALSE;
+			m_laserdisc->data_w(0xfe);
+			m_playing = false;
 			break;
 
 		case CMD_SCAN_FORWARD:
-			laserdisc_data_w(laserdisc, 0xf0);
-			playing = TRUE;
+			m_laserdisc->data_w(0xf0);
+			m_playing = true;
 			break;
 
 		case CMD_STEP_FORWARD:
-			laserdisc_data_w(laserdisc, 0xf6);
-			playing = FALSE;
+			m_laserdisc->data_w(0xf6);
+			m_playing = false;
 			break;
 
 		case CMD_PLAY:
-			laserdisc_data_w(laserdisc, 0xfd);
-			playing = TRUE;
+			m_laserdisc->data_w(0xfd);
+			m_playing = true;
 			break;
 
 		case CMD_PAUSE:
-			laserdisc_data_w(laserdisc, 0xa0);
-			playing = FALSE;
+			m_laserdisc->data_w(0xa0);
+			m_playing = false;
 			break;
 
 		case CMD_FRAME_TOGGLE:
-			laserdisc_data_w(laserdisc, 0xf1);
+			m_laserdisc->data_w(0xf1);
 			break;
 
 		case CMD_0:
@@ -497,12 +612,12 @@ static void ldv1000_execute(device_t *laserdisc, int command)
 		case CMD_7:
 		case CMD_8:
 		case CMD_9:
-			laserdisc_data_w(laserdisc, digits[command - CMD_0]);
+			m_laserdisc->data_w(digits[command - CMD_0]);
 			break;
 
 		case CMD_SEARCH:
-			laserdisc_data_w(laserdisc, 0xf7);
-			playing = FALSE;
+			m_laserdisc->data_w(0xf7);
+			m_playing = false;
 			break;
 	}
 }
@@ -551,36 +666,31 @@ INPUT_PORTS_END
  *
  *************************************/
 
-static MACHINE_CONFIG_FRAGMENT( ldplayer_core )
+static MACHINE_CONFIG_START( ldplayer_ntsc, ldplayer_state )
+MACHINE_CONFIG_END
 
-	MCFG_MACHINE_START(ldplayer)
-	MCFG_MACHINE_RESET(ldplayer)
 
-	/* audio hardware */
+static MACHINE_CONFIG_DERIVED_CLASS( ldv1000, ldplayer_ntsc, ldv1000_state )
+	MCFG_LASERDISC_LDV1000_ADD("laserdisc")
+	MCFG_LASERDISC_GET_DISC(laserdisc_get_disc_delegate(FUNC(ldplayer_state::get_disc_static), device))
+	MCFG_LASERDISC_SCREEN_ADD_NTSC("screen", "laserdisc")
+
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
-
-	MCFG_SOUND_ADD("ldsound", LASERDISC_SOUND, 0)
+	MCFG_SOUND_MODIFY("laserdisc")
 	MCFG_SOUND_ROUTE(0, "lspeaker", 1.0)
 	MCFG_SOUND_ROUTE(1, "rspeaker", 1.0)
 MACHINE_CONFIG_END
 
 
-static MACHINE_CONFIG_DERIVED( ldplayer_ntsc, ldplayer_core )
-	MCFG_LASERDISC_SCREEN_ADD_NTSC("screen", BITMAP_FORMAT_RGB32)
-MACHINE_CONFIG_END
+static MACHINE_CONFIG_DERIVED_CLASS( pr8210, ldplayer_ntsc, pr8210_state )
+	MCFG_LASERDISC_PR8210_ADD("laserdisc")
+	MCFG_LASERDISC_GET_DISC(laserdisc_get_disc_delegate(FUNC(ldplayer_state::get_disc_static), device))
+	MCFG_LASERDISC_SCREEN_ADD_NTSC("screen", "laserdisc")
 
-
-static MACHINE_CONFIG_DERIVED( ldv1000, ldplayer_ntsc )
-	MCFG_LASERDISC_ADD("laserdisc", PIONEER_LDV1000, "screen", "ldsound")
-	MCFG_LASERDISC_GET_DISC(get_disc)
-MACHINE_CONFIG_END
-
-
-static MACHINE_CONFIG_DERIVED( pr8210, ldplayer_ntsc )
-	MCFG_MACHINE_START(pr8210)
-	MCFG_MACHINE_RESET(pr8210)
-	MCFG_LASERDISC_ADD("laserdisc", PIONEER_PR8210, "screen", "ldsound")
-	MCFG_LASERDISC_GET_DISC(get_disc)
+	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
+	MCFG_SOUND_MODIFY("laserdisc")
+	MCFG_SOUND_ROUTE(0, "lspeaker", 1.0)
+	MCFG_SOUND_ROUTE(1, "rspeaker", 1.0)
 MACHINE_CONFIG_END
 
 
@@ -604,20 +714,9 @@ ROM_END
 
 /*************************************
  *
- *  Driver initialization
- *
- *************************************/
-
-static DRIVER_INIT( ldv1000 ) { execute_command = ldv1000_execute; }
-static DRIVER_INIT( pr8210 )  { execute_command = pr8210_execute; }
-
-
-
-/*************************************
- *
  *  Game drivers
  *
  *************************************/
 
-GAME( 2008, ldv1000, 0, ldv1000, ldplayer, ldv1000, ROT0, "MAME", "Pioneer LDV-1000 Simulator", 0 )
-GAMEL(2008, pr8210,  0, pr8210,  ldplayer, pr8210,  ROT0, "MAME", "Pioneer PR-8210 Simulator", 0, layout_pr8210 )
+GAME( 2008, ldv1000, 0, ldv1000, ldplayer, driver_device, 0, ROT0, "MAME", "Pioneer LDV-1000 Simulator", 0 )
+GAMEL(2008, pr8210,  0, pr8210,  ldplayer, driver_device, 0, ROT0, "MAME", "Pioneer PR-8210 Simulator", 0, layout_pr8210 )

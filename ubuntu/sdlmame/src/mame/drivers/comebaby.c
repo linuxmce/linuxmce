@@ -1,6 +1,9 @@
 /* Come On Baby
   (c) 2000 ExPotato Co. Ltd (Excellent Potato)
 
+TODO:
+can't be emulated without proper mb bios
+
   There also appears to be a sequel which may be running on the same hardware
   Come On Baby - Ballympic Heroes!  (c) 2001
 
@@ -56,6 +59,7 @@
   Easy enough to fix a broken game if you have the controls to plug into it.
 */
 
+
 #include "emu.h"
 #include "cpu/i386/i386.h"
 
@@ -63,22 +67,33 @@
 class comebaby_state : public driver_device
 {
 public:
-	comebaby_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	comebaby_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+			m_maincpu(*this, "maincpu")
+	{ }
 
+	UINT32 screen_update(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+
+protected:
+
+	// devices
+	required_device<cpu_device> m_maincpu;
+
+	// driver_device overrides
+	virtual void video_start();
 };
 
 
-static VIDEO_START(comebaby)
+void comebaby_state::video_start()
 {
 }
 
-static SCREEN_UPDATE(comebaby)
+UINT32 comebaby_state::screen_update(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	return 0;
 }
 
-static ADDRESS_MAP_START( comebaby_map, AS_PROGRAM, 32 )
+static ADDRESS_MAP_START( comebaby_map, AS_PROGRAM, 32, comebaby_state )
 	AM_RANGE(0x00000000, 0x0001ffff) AM_ROM
 ADDRESS_MAP_END
 
@@ -93,21 +108,18 @@ static MACHINE_CONFIG_START( comebaby, comebaby_state )
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
+	MCFG_SCREEN_UPDATE_DRIVER(comebaby_state, screen_update)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 64*8-1, 0*8, 32*8-1)
-	MCFG_SCREEN_UPDATE(comebaby)
 
 	MCFG_PALETTE_LENGTH(0x100)
-
-	MCFG_VIDEO_START(comebaby)
 MACHINE_CONFIG_END
 
 
 ROM_START(comebaby)
-	ROM_REGION32_LE(0x20000, "maincpu", 0)	/* motherboard bios */
+	ROM_REGION32_LE(0x20000, "maincpu", 0)  /* motherboard bios */
 	ROM_LOAD("comeonbaby.pcbios", 0x000000, 0x10000, NO_DUMP )
 
 	DISK_REGION( "disks" )
@@ -115,4 +127,4 @@ ROM_START(comebaby)
 ROM_END
 
 
-GAME( 2000, comebaby,  0,   comebaby, comebaby, 0, ROT0, "ExPotato", "Come On Baby", GAME_NOT_WORKING|GAME_NO_SOUND )
+GAME( 2000, comebaby,  0,   comebaby,  comebaby, driver_device,  0,  ROT0,  "ExPotato",    "Come On Baby",   GAME_NOT_WORKING|GAME_NO_SOUND )

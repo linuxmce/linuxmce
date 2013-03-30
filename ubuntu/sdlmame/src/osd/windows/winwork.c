@@ -52,14 +52,15 @@
 
 // MAME headers
 #include "osdcore.h"
+#include "eminline.h"
 
 
 //============================================================
 //  DEBUGGING
 //============================================================
 
-#define KEEP_STATISTICS			(0)
-#define USE_SCALABLE_LOCKS		(0)
+#define KEEP_STATISTICS         (0)
+#define USE_SCALABLE_LOCKS      (0)
 
 
 
@@ -67,7 +68,7 @@
 //  PARAMETERS
 //============================================================
 
-#define SPIN_LOOP_TIME			(osd_ticks_per_second() / 1000)
+#define SPIN_LOOP_TIME          (osd_ticks_per_second() / 1000)
 
 
 
@@ -76,13 +77,13 @@
 //============================================================
 
 #if KEEP_STATISTICS
-#define add_to_stat(v,x)		do { interlocked_add((v), (x)); } while (0)
-#define begin_timing(v)			do { (v) -= get_profile_ticks(); } while (0)
-#define end_timing(v)			do { (v) += get_profile_ticks(); } while (0)
+#define add_to_stat(v,x)        do { atomic_add32((v), (x)); } while (0)
+#define begin_timing(v)         do { (v) -= get_profile_ticks(); } while (0)
+#define end_timing(v)           do { (v) += get_profile_ticks(); } while (0)
 #else
-#define add_to_stat(v,x)		do { } while (0)
-#define begin_timing(v)			do { } while (0)
-#define end_timing(v)			do { } while (0)
+#define add_to_stat(v,x)        do { } while (0)
+#define begin_timing(v)         do { } while (0)
+#define end_timing(v)           do { } while (0)
 #endif
 
 #ifndef YieldProcessor
@@ -105,74 +106,72 @@ INLINE void YieldProcessor(void)
 //  TYPE DEFINITIONS
 //============================================================
 
-typedef struct _scalable_lock scalable_lock;
-struct _scalable_lock
+struct scalable_lock
 {
 #if USE_SCALABLE_LOCKS
-   struct
-   {
-      volatile INT32	haslock;		// do we have the lock?
-      INT32 			filler[64/4-1];	// assumes a 64-byte cache line
-   } slot[WORK_MAX_THREADS];			// one slot per thread
-   volatile INT32		nextindex;		// index of next slot to use
+	struct
+	{
+		volatile INT32  haslock;        // do we have the lock?
+		INT32           filler[64/4-1]; // assumes a 64-byte cache line
+	} slot[WORK_MAX_THREADS];           // one slot per thread
+	volatile INT32      nextindex;      // index of next slot to use
 #else
-	CRITICAL_SECTION	section;
+	CRITICAL_SECTION    section;
 #endif
 };
 
 
-typedef struct _work_thread_info work_thread_info;
-struct _work_thread_info
+struct work_thread_info
 {
-	osd_work_queue *	queue;			// pointer back to the queue
-	HANDLE				handle;			// handle to the thread
-	HANDLE				wakeevent;		// wake event for the thread
-	volatile INT32		active;			// are we actively processing work?
+	osd_work_queue *    queue;          // pointer back to the queue
+	HANDLE              handle;         // handle to the thread
+	HANDLE              wakeevent;      // wake event for the thread
+	volatile INT32      active;         // are we actively processing work?
 
 #if KEEP_STATISTICS
-	INT32				itemsdone;
-	osd_ticks_t			actruntime;
-	osd_ticks_t			runtime;
-	osd_ticks_t			spintime;
-	osd_ticks_t			waittime;
+	INT32               itemsdone;
+	osd_ticks_t         actruntime;
+	osd_ticks_t         runtime;
+	osd_ticks_t         spintime;
+	osd_ticks_t         waittime;
 #endif
 };
 
 
-struct _osd_work_queue
+struct osd_work_queue
 {
-	scalable_lock		lock;			// lock for protecting the queue
-	osd_work_item * volatile list;		// list of items in the queue
-	osd_work_item ** volatile tailptr;	// pointer to the tail pointer of work items in the queue
-	osd_work_item * volatile free;		// free list of work items
-	volatile INT32		items;			// items in the queue
-	volatile INT32		livethreads;	// number of live threads
-	volatile INT32		waiting;		// is someone waiting on the queue to complete?
-	volatile UINT8		exiting;		// should the threads exit on their next opportunity?
-	UINT32				threads;		// number of threads in this queue
-	UINT32				flags;			// creation flags
-	work_thread_info *	thread;			// array of thread information
-	HANDLE				doneevent;		// event signalled when work is complete
+	scalable_lock       lock;           // lock for protecting the queue
+	osd_work_item * volatile list;      // list of items in the queue
+	osd_work_item ** volatile tailptr;  // pointer to the tail pointer of work items in the queue
+	osd_work_item * volatile free;      // free list of work items
+	volatile INT32      items;          // items in the queue
+	volatile INT32      livethreads;    // number of live threads
+	volatile INT32      waiting;        // is someone waiting on the queue to complete?
+	volatile UINT8      exiting;        // should the threads exit on their next opportunity?
+	UINT32              threads;        // number of threads in this queue
+	UINT32              flags;          // creation flags
+	work_thread_info *  thread;         // array of thread information
+	HANDLE              doneevent;      // event signalled when work is complete
 
 #if KEEP_STATISTICS
-	volatile INT32		itemsqueued;	// total items queued
-	volatile INT32		setevents;		// number of times we called SetEvent
-	volatile INT32		extraitems;		// how many extra items we got after the first in the queue loop
-	volatile INT32		spinloops;		// how many times spinning bought us more items
+	volatile INT32      itemsqueued;    // total items queued
+	volatile INT32      setevents;      // number of times we called SetEvent
+	volatile INT32      extraitems;     // how many extra items we got after the first in the queue loop
+	volatile INT32      spinloops;      // how many times spinning bought us more items
 #endif
 };
 
 
-struct _osd_work_item
+struct osd_work_item
 {
-	osd_work_item *		next;			// pointer to next item
-	osd_work_queue *	queue;			// pointer back to the owning queue
-	osd_work_callback	callback;		// callback function
-	void *				param;			// callback parameter
-	void *				result;			// callback result
-	HANDLE				event;			// event signalled when complete
-	UINT32				flags;			// creation flags
-	volatile INT32		done;			// is the item done?
+	osd_work_item *     next;           // pointer to next item
+	osd_work_queue *    queue;          // pointer back to the owning queue
+	osd_work_callback   callback;       // callback function
+	void *              param;          // callback parameter
+	void *              result;         // callback result
+	HANDLE              event;          // event signalled when complete
+	UINT32              flags;          // creation flags
+	volatile INT32      done;           // is the item done?
 };
 
 //============================================================
@@ -188,47 +187,6 @@ int osd_num_processors = 0;
 static int effective_num_processors(void);
 static unsigned __stdcall worker_thread_entry(void *param);
 static void worker_thread_process(osd_work_queue *queue, work_thread_info *thread);
-
-
-
-//============================================================
-//  INLINE FUNCTIONS
-//============================================================
-
-INLINE void *compare_exchange_ptr(void * volatile *ptr, void *compare, void *exchange)
-{
-#ifdef PTR64
-	INT64 result = InterlockedCompareExchange64((LONGLONG *)ptr, (LONGLONG)exchange, (LONGLONG)compare);
-	return (void *)result;
-#else
-	INT32 result = InterlockedCompareExchange((LPLONG)ptr, (LONG)exchange, (LONG)compare);
-	return (void *)result;
-#endif
-}
-
-
-INLINE INT32 interlocked_exchange32(INT32 volatile *ptr, INT32 value)
-{
-	return InterlockedExchange((LPLONG)ptr, value);
-}
-
-
-INLINE INT32 interlocked_increment(INT32 volatile *ptr)
-{
-	return InterlockedIncrement((LPLONG)ptr);
-}
-
-
-INLINE INT32 interlocked_decrement(INT32 volatile *ptr)
-{
-	return InterlockedDecrement((LPLONG)ptr);
-}
-
-
-INLINE INT32 interlocked_add(INT32 volatile *ptr, INT32 add)
-{
-	return InterlockedExchangeAdd((LPLONG)ptr, add) + add;
-}
 
 
 
@@ -250,7 +208,7 @@ INLINE void scalable_lock_init(scalable_lock *lock)
 INLINE INT32 scalable_lock_acquire(scalable_lock *lock)
 {
 #if USE_SCALABLE_LOCKS
-	INT32 myslot = (interlocked_increment(&lock->nextindex) - 1) & (WORK_MAX_THREADS - 1);
+	INT32 myslot = (atomic_increment32(&lock->nextindex) - 1) & (WORK_MAX_THREADS - 1);
 	INT32 backoff = 1;
 
 	while (!lock->slot[myslot].haslock)
@@ -272,12 +230,20 @@ INLINE INT32 scalable_lock_acquire(scalable_lock *lock)
 INLINE void scalable_lock_release(scalable_lock *lock, INT32 myslot)
 {
 #if USE_SCALABLE_LOCKS
-	interlocked_exchange32(&lock->slot[(myslot + 1) & (WORK_MAX_THREADS - 1)].haslock, TRUE);
+	atomic_exchange32(&lock->slot[(myslot + 1) & (WORK_MAX_THREADS - 1)].haslock, TRUE);
 #else
 	LeaveCriticalSection(&lock->section);
 #endif
 }
 
+
+INLINE void scalable_lock_delete(scalable_lock *lock)
+{
+#if USE_SCALABLE_LOCKS
+#else
+	DeleteCriticalSection(&lock->section);
+#endif
+}
 
 
 //============================================================
@@ -301,7 +267,7 @@ osd_work_queue *osd_work_queue_alloc(int flags)
 	queue->flags = flags;
 
 	// allocate events for the queue
-	queue->doneevent = CreateEvent(NULL, TRUE, TRUE, NULL);		// manual reset, signalled
+	queue->doneevent = CreateEvent(NULL, TRUE, TRUE, NULL);     // manual reset, signalled
 	if (queue->doneevent == NULL)
 		goto error;
 
@@ -313,9 +279,14 @@ osd_work_queue *osd_work_queue_alloc(int flags)
 	if (numprocs == 1)
 		queue->threads = (flags & WORK_QUEUE_FLAG_IO) ? 1 : 0;
 
-	// on an n-CPU system, create (n-1) threads for multi queues, and 1 thread for everything else
+	// on an n-CPU system, create n threads for multi queues, and 1 thread for everything else
 	else
-		queue->threads = (flags & WORK_QUEUE_FLAG_MULTI) ? (numprocs - 1) : 1;
+		queue->threads = (flags & WORK_QUEUE_FLAG_MULTI) ? numprocs : 1;
+
+	// multi-queues with high frequency items should top out at 4 for now
+	// since we have scaling problems above that
+	if ((flags & WORK_QUEUE_FLAG_HIGH_FREQ) && queue->threads > 1)
+		queue->threads = MIN(queue->threads - 1, 4);
 
 	// clamp to the maximum
 	queue->threads = MIN(queue->threads, WORK_MAX_THREADS);
@@ -336,7 +307,7 @@ osd_work_queue *osd_work_queue_alloc(int flags)
 		thread->queue = queue;
 
 		// create the per-thread wake event
-		thread->wakeevent = CreateEvent(NULL, FALSE, FALSE, NULL);	// auto-reset, not signalled
+		thread->wakeevent = CreateEvent(NULL, FALSE, FALSE, NULL);  // auto-reset, not signalled
 		if (thread->wakeevent == NULL)
 			goto error;
 
@@ -417,10 +388,10 @@ int osd_work_queue_wait(osd_work_queue *queue, osd_ticks_t timeout)
 
 	// reset our done event and double-check the items before waiting
 	ResetEvent(queue->doneevent);
-	interlocked_exchange32(&queue->waiting, TRUE);
+	atomic_exchange32(&queue->waiting, TRUE);
 	if (queue->items != 0)
 		WaitForSingleObject(queue->doneevent, timeout * 1000 / osd_ticks_per_second());
-	interlocked_exchange32(&queue->waiting, FALSE);
+	atomic_exchange32(&queue->waiting, FALSE);
 
 	// return TRUE if we actually hit 0
 	return (queue->items == 0);
@@ -486,6 +457,8 @@ void osd_work_queue_free(osd_work_queue *queue)
 	// free the list
 	if (queue->thread != NULL)
 		free(queue->thread);
+
+	scalable_lock_delete(&queue->lock);
 
 	// free all the events
 	if (queue->doneevent != NULL)
@@ -578,7 +551,7 @@ osd_work_item *osd_work_item_queue_multiple(osd_work_queue *queue, osd_work_call
 	scalable_lock_release(&queue->lock, lockslot);
 
 	// increment the number of items in the queue
-	interlocked_add(&queue->items, numitems);
+	atomic_add32(&queue->items, numitems);
 	add_to_stat(&queue->itemsqueued, numitems);
 
 	// look for free threads to do the work
@@ -625,7 +598,7 @@ int osd_work_item_wait(osd_work_item *item, osd_ticks_t timeout)
 
 	// if we don't have an event, create one
 	if (item->event == NULL)
-		item->event = CreateEvent(NULL, TRUE, FALSE, NULL);		// manual reset, not signalled
+		item->event = CreateEvent(NULL, TRUE, FALSE, NULL);     // manual reset, not signalled
 	else
 		ResetEvent(item->event);
 
@@ -696,13 +669,12 @@ static int effective_num_processors(void)
 		int numprocs = 0;
 
 		// if the OSDPROCESSORS environment variable is set, use that value if valid
+		// note that we permit more than the real number of processors for testing
 		procsoverride = _tgetenv(_T("OSDPROCESSORS"));
 		if (procsoverride != NULL && _stscanf(procsoverride, _T("%d"), &numprocs) == 1 && numprocs > 0)
-			// Be well behaved ...
 			return MIN(info.dwNumberOfProcessors * 4, numprocs);
 
-		// max out at 4 for now since scaling above that seems to do poorly
-		return MIN(info.dwNumberOfProcessors, 4);
+		return info.dwNumberOfProcessors;
 	}
 }
 
@@ -719,22 +691,19 @@ static unsigned __stdcall worker_thread_entry(void *param)
 	// loop until we exit
 	for ( ;; )
 	{
-		// block waiting for work or exit
-		DWORD result = WAIT_OBJECT_0;
-
 		// bail on exit, and only wait if there are no pending items in queue
 		if (!queue->exiting && queue->list == NULL)
 		{
 			begin_timing(thread->waittime);
-			result = WaitForSingleObject(thread->wakeevent, INFINITE);
+			WaitForSingleObject(thread->wakeevent, INFINITE);
 			end_timing(thread->waittime);
 		}
 		if (queue->exiting)
 			break;
 
 		// indicate that we are live
-		interlocked_exchange32(&thread->active, TRUE);
-		interlocked_increment(&queue->livethreads);
+		atomic_exchange32(&thread->active, TRUE);
+		atomic_increment32(&queue->livethreads);
 
 		// process work items
 		for ( ;; )
@@ -762,8 +731,8 @@ static unsigned __stdcall worker_thread_entry(void *param)
 		}
 
 		// decrement the live thread count
-		interlocked_exchange32(&thread->active, FALSE);
-		interlocked_decrement(&queue->livethreads);
+		atomic_exchange32(&thread->active, FALSE);
+		atomic_decrement32(&queue->livethreads);
 	}
 	return 0;
 }
@@ -808,8 +777,8 @@ static void worker_thread_process(osd_work_queue *queue, work_thread_info *threa
 			end_timing(thread->actruntime);
 
 			// decrement the item count after we are done
-			interlocked_decrement(&queue->items);
-			interlocked_exchange32(&item->done, TRUE);
+			atomic_decrement32(&queue->items);
+			atomic_exchange32(&item->done, TRUE);
 			add_to_stat(&thread->itemsdone, 1);
 
 			// if it's an auto-release item, release it

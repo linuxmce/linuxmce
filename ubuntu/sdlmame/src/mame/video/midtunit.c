@@ -5,13 +5,14 @@
 **************************************************************************/
 
 #include "emu.h"
-#include "profiler.h"
 #include "cpu/tms34010/tms34010.h"
 #include "includes/midtunit.h"
+#include "includes/midwunit.h"
+#include "includes/midxunit.h"
 
 
 /* compile-time options */
-#define LOG_DMA				0		/* DMAs are logged if the 'L' key is pressed */
+#define LOG_DMA             0       /* DMAs are logged if the 'L' key is pressed */
 
 
 /* constants for the  DMA chip */
@@ -31,50 +32,50 @@ enum
 	DMA_SCALE_Y,
 	DMA_TOPCLIP,
 	DMA_BOTCLIP,
-	DMA_UNKNOWN_E,	/* MK1/2 never write here; NBA only writes 0 */
+	DMA_UNKNOWN_E,  /* MK1/2 never write here; NBA only writes 0 */
 	DMA_CONFIG,
-	DMA_LEFTCLIP,	/* pseudo-register */
-	DMA_RIGHTCLIP	/* pseudo-register */
+	DMA_LEFTCLIP,   /* pseudo-register */
+	DMA_RIGHTCLIP   /* pseudo-register */
 };
 
 
 
 /* graphics-related variables */
-       UINT8 *	midtunit_gfx_rom;
-       size_t	midtunit_gfx_rom_size;
-       UINT8	midtunit_gfx_rom_large;
-static UINT16	midtunit_control;
+		UINT8   midtunit_gfx_rom_large;
+static UINT16   midtunit_control;
 
 /* videoram-related variables */
-static UINT32	gfxbank_offset[2];
-static UINT16 *	local_videoram;
-static UINT8	videobank_select;
+static UINT32   gfxbank_offset[2];
+static UINT16 * local_videoram;
+static UINT8    videobank_select;
 
 /* DMA-related variables */
-static UINT16	dma_register[18];
+static UINT16   dma_register[18];
 static struct
 {
-	UINT32		offset;			/* source offset, in bits */
-	INT32		rowbits;		/* source bits to skip each row */
-	INT32		xpos;			/* x position, clipped */
-	INT32		ypos;			/* y position, clipped */
-	INT32		width;			/* horizontal pixel count */
-	INT32		height;			/* vertical pixel count */
-	UINT16		palette;		/* palette base */
-	UINT16		color;			/* current foreground color with palette */
+	UINT8 *     gfxrom;
 
-	UINT8		yflip;			/* yflip? */
-	UINT8		bpp;			/* bits per pixel */
-	UINT8		preskip;		/* preskip scale */
-	UINT8		postskip;		/* postskip scale */
-	INT32		topclip;		/* top clipping scanline */
-	INT32		botclip;		/* bottom clipping scanline */
-	INT32		leftclip;		/* left clipping column */
-	INT32		rightclip;		/* right clipping column */
-	INT32		startskip;		/* pixels to skip at start */
-	INT32		endskip;		/* pixels to skip at end */
-	UINT16		xstep;			/* 8.8 fixed number scale x factor */
-	UINT16		ystep;			/* 8.8 fixed number scale y factor */
+	UINT32      offset;         /* source offset, in bits */
+	INT32       rowbits;        /* source bits to skip each row */
+	INT32       xpos;           /* x position, clipped */
+	INT32       ypos;           /* y position, clipped */
+	INT32       width;          /* horizontal pixel count */
+	INT32       height;         /* vertical pixel count */
+	UINT16      palette;        /* palette base */
+	UINT16      color;          /* current foreground color with palette */
+
+	UINT8       yflip;          /* yflip? */
+	UINT8       bpp;            /* bits per pixel */
+	UINT8       preskip;        /* preskip scale */
+	UINT8       postskip;       /* postskip scale */
+	INT32       topclip;        /* top clipping scanline */
+	INT32       botclip;        /* bottom clipping scanline */
+	INT32       leftclip;       /* left clipping column */
+	INT32       rightclip;      /* right clipping column */
+	INT32       startskip;      /* pixels to skip at start */
+	INT32       endskip;        /* pixels to skip at end */
+	UINT16      xstep;          /* 8.8 fixed number scale x factor */
+	UINT16      ystep;          /* 8.8 fixed number scale y factor */
 } dma_state;
 
 
@@ -85,10 +86,10 @@ static struct
  *
  *************************************/
 
-VIDEO_START( midtunit )
+VIDEO_START_MEMBER(midtunit_state,midtunit)
 {
 	/* allocate memory */
-	local_videoram = auto_alloc_array(machine, UINT16, 0x100000/2);
+	local_videoram = auto_alloc_array(machine(), UINT16, 0x100000/2);
 
 	/* reset all the globals */
 	gfxbank_offset[0] = 0x000000;
@@ -96,26 +97,27 @@ VIDEO_START( midtunit )
 
 	memset(dma_register, 0, sizeof(dma_register));
 	memset(&dma_state, 0, sizeof(dma_state));
+	dma_state.gfxrom = m_gfxrom->base();
 
 	/* register for state saving */
-	state_save_register_global(machine, midtunit_control);
-	state_save_register_global_array(machine, gfxbank_offset);
-	state_save_register_global_pointer(machine, local_videoram, 0x100000/sizeof(local_videoram[0]));
-	state_save_register_global(machine, videobank_select);
-	state_save_register_global_array(machine, dma_register);
+	state_save_register_global(machine(), midtunit_control);
+	state_save_register_global_array(machine(), gfxbank_offset);
+	state_save_register_global_pointer(machine(), local_videoram, 0x100000/sizeof(local_videoram[0]));
+	state_save_register_global(machine(), videobank_select);
+	state_save_register_global_array(machine(), dma_register);
 }
 
 
-VIDEO_START( midwunit )
+VIDEO_START_MEMBER(midwunit_state,midwunit)
 {
-	VIDEO_START_CALL(midtunit);
+	VIDEO_START_CALL_MEMBER(midtunit);
 	midtunit_gfx_rom_large = 1;
 }
 
 
-VIDEO_START( midxunit )
+VIDEO_START_MEMBER(midxunit_state,midxunit)
 {
-	VIDEO_START_CALL(midtunit);
+	VIDEO_START_CALL_MEMBER(midtunit);
 	midtunit_gfx_rom_large = 1;
 	videobank_select = 1;
 }
@@ -128,17 +130,17 @@ VIDEO_START( midxunit )
  *
  *************************************/
 
-READ16_HANDLER( midtunit_gfxrom_r )
+READ16_MEMBER(midtunit_state::midtunit_gfxrom_r)
 {
-	UINT8 *base = &midtunit_gfx_rom[gfxbank_offset[(offset >> 21) & 1]];
+	UINT8 *base = m_gfxrom->base() + gfxbank_offset[(offset >> 21) & 1];
 	offset = (offset & 0x01fffff) * 2;
 	return base[offset] | (base[offset + 1] << 8);
 }
 
 
-READ16_HANDLER( midwunit_gfxrom_r )
+READ16_MEMBER(midtunit_state::midwunit_gfxrom_r)
 {
-	UINT8 *base = &midtunit_gfx_rom[gfxbank_offset[0]];
+	UINT8 *base = m_gfxrom->base() + gfxbank_offset[0];
 	offset *= 2;
 	return base[offset] | (base[offset + 1] << 8);
 }
@@ -151,7 +153,7 @@ READ16_HANDLER( midwunit_gfxrom_r )
  *
  *************************************/
 
-WRITE16_HANDLER( midtunit_vram_w )
+WRITE16_MEMBER(midtunit_state::midtunit_vram_w)
 {
 	offset *= 2;
 	if (videobank_select)
@@ -171,7 +173,7 @@ WRITE16_HANDLER( midtunit_vram_w )
 }
 
 
-WRITE16_HANDLER( midtunit_vram_data_w )
+WRITE16_MEMBER(midtunit_state::midtunit_vram_data_w)
 {
 	offset *= 2;
 	if (ACCESSING_BITS_0_7)
@@ -181,7 +183,7 @@ WRITE16_HANDLER( midtunit_vram_data_w )
 }
 
 
-WRITE16_HANDLER( midtunit_vram_color_w )
+WRITE16_MEMBER(midtunit_state::midtunit_vram_color_w)
 {
 	offset *= 2;
 	if (ACCESSING_BITS_0_7)
@@ -191,7 +193,7 @@ WRITE16_HANDLER( midtunit_vram_color_w )
 }
 
 
-READ16_HANDLER( midtunit_vram_r )
+READ16_MEMBER(midtunit_state::midtunit_vram_r)
 {
 	offset *= 2;
 	if (videobank_select)
@@ -201,14 +203,14 @@ READ16_HANDLER( midtunit_vram_r )
 }
 
 
-READ16_HANDLER( midtunit_vram_data_r )
+READ16_MEMBER(midtunit_state::midtunit_vram_data_r)
 {
 	offset *= 2;
 	return (local_videoram[offset] & 0x00ff) | (local_videoram[offset + 1] << 8);
 }
 
 
-READ16_HANDLER( midtunit_vram_color_r )
+READ16_MEMBER(midtunit_state::midtunit_vram_color_r)
 {
 	offset *= 2;
 	return (local_videoram[offset] >> 8) | (local_videoram[offset + 1] & 0xff00);
@@ -222,13 +224,13 @@ READ16_HANDLER( midtunit_vram_color_r )
  *
  *************************************/
 
-void midtunit_to_shiftreg(address_space *space, UINT32 address, UINT16 *shiftreg)
+void midtunit_to_shiftreg(address_space &space, UINT32 address, UINT16 *shiftreg)
 {
 	memcpy(shiftreg, &local_videoram[address >> 3], 2 * 512 * sizeof(UINT16));
 }
 
 
-void midtunit_from_shiftreg(address_space *space, UINT32 address, UINT16 *shiftreg)
+void midtunit_from_shiftreg(address_space &space, UINT32 address, UINT16 *shiftreg)
 {
 	memcpy(&local_videoram[address >> 3], shiftreg, 2 * 512 * sizeof(UINT16));
 }
@@ -241,12 +243,12 @@ void midtunit_from_shiftreg(address_space *space, UINT32 address, UINT16 *shiftr
  *
  *************************************/
 
-WRITE16_HANDLER( midtunit_control_w )
+WRITE16_MEMBER(midtunit_state::midtunit_control_w)
 {
 	/*
-        other important bits:
-            bit 2 (0x0004) is toggled periodically
-    */
+	    other important bits:
+	        bit 2 (0x0004) is toggled periodically
+	*/
 	logerror("T-unit control = %04X\n", data);
 
 	COMBINE_DATA(&midtunit_control);
@@ -262,12 +264,12 @@ WRITE16_HANDLER( midtunit_control_w )
 }
 
 
-WRITE16_HANDLER( midwunit_control_w )
+WRITE16_MEMBER(midtunit_state::midwunit_control_w)
 {
 	/*
-        other important bits:
-            bit 2 (0x0004) is toggled periodically
-    */
+	    other important bits:
+	        bit 2 (0x0004) is toggled periodically
+	*/
 	logerror("Wolf-unit control = %04X\n", data);
 
 	COMBINE_DATA(&midtunit_control);
@@ -280,7 +282,7 @@ WRITE16_HANDLER( midwunit_control_w )
 }
 
 
-READ16_HANDLER( midwunit_control_r )
+READ16_MEMBER(midtunit_state::midwunit_control_r)
 {
 	return midtunit_control;
 }
@@ -293,26 +295,26 @@ READ16_HANDLER( midwunit_control_r )
  *
  *************************************/
 
-WRITE16_HANDLER( midtunit_paletteram_w )
+WRITE16_MEMBER(midtunit_state::midtunit_paletteram_w)
 {
 	//int newword;
 
-	COMBINE_DATA(&space->machine().generic.paletteram.u16[offset]);
-	//newword = space->machine().generic.paletteram.u16[offset];
-	palette_set_color_rgb(space->machine(), offset, pal5bit(data >> 10), pal5bit(data >> 5), pal5bit(data >> 0));
+	COMBINE_DATA(&m_generic_paletteram_16[offset]);
+	//newword = m_generic_paletteram_16[offset];
+	palette_set_color_rgb(machine(), offset, pal5bit(data >> 10), pal5bit(data >> 5), pal5bit(data >> 0));
 }
 
 
-WRITE16_HANDLER( midxunit_paletteram_w )
+WRITE16_MEMBER(midtunit_state::midxunit_paletteram_w)
 {
 	if (!(offset & 1))
 		midtunit_paletteram_w(space, offset / 2, data, mem_mask);
 }
 
 
-READ16_HANDLER( midxunit_paletteram_r )
+READ16_MEMBER(midtunit_state::midxunit_paletteram_r)
 {
-	return space->machine().generic.paletteram.u16[offset / 2];
+	return m_generic_paletteram_16[offset / 2];
 }
 
 
@@ -324,21 +326,21 @@ READ16_HANDLER( midxunit_paletteram_r )
  *************************************/
 
 /*** constant definitions ***/
-#define	PIXEL_SKIP		0
-#define PIXEL_COLOR		1
-#define PIXEL_COPY		2
+#define PIXEL_SKIP      0
+#define PIXEL_COLOR     1
+#define PIXEL_COPY      2
 
-#define XFLIP_NO		0
-#define XFLIP_YES		1
+#define XFLIP_NO        0
+#define XFLIP_YES       1
 
-#define SKIP_NO			0
-#define SKIP_YES		1
+#define SKIP_NO         0
+#define SKIP_YES        1
 
-#define SCALE_NO		0
-#define SCALE_YES		1
+#define SCALE_NO        0
+#define SCALE_YES       1
 
-#define XPOSMASK		0x3ff
-#define YPOSMASK		0x1ff
+#define XPOSMASK        0x3ff
+#define YPOSMASK        0x1ff
 
 
 typedef void (*dma_draw_func)(void);
@@ -346,190 +348,190 @@ typedef void (*dma_draw_func)(void);
 
 /*** fast pixel extractors ***/
 #if !defined(ALIGN_SHORTS) && defined(LSB_FIRST)
-#define EXTRACTGEN(m)	((*(UINT16 *)&base[o >> 3] >> (o & 7)) & (m))
+#define EXTRACTGEN(m)   ((*(UINT16 *)&base[o >> 3] >> (o & 7)) & (m))
 #elif defined(powerc)
-#define EXTRACTGEN(m)	((__lhbrx(base, o >> 3) >> (o & 7)) & (m))
+#define EXTRACTGEN(m)   ((__lhbrx(base, o >> 3) >> (o & 7)) & (m))
 #else
-#define EXTRACTGEN(m)	(((base[o >> 3] | (base[(o >> 3) + 1] << 8)) >> (o & 7)) & (m))
+#define EXTRACTGEN(m)   (((base[o >> 3] | (base[(o >> 3) + 1] << 8)) >> (o & 7)) & (m))
 #endif
 
 /*** core blitter routine macro ***/
 #define DMA_DRAW_FUNC_BODY(name, bitsperpixel, extractor, xflip, skip, scale, zero, nonzero) \
-{																				\
-	int height = dma_state.height << 8;											\
-	UINT8 *base = midtunit_gfx_rom;													\
-	UINT32 offset = dma_state.offset;											\
-	UINT16 pal = dma_state.palette;												\
-	UINT16 color = pal | dma_state.color;										\
-	int sy = dma_state.ypos, iy = 0, ty;										\
-	int bpp = bitsperpixel;														\
-	int mask = (1 << bpp) - 1;													\
-	int xstep = scale ? dma_state.xstep : 0x100;								\
+{                                                                               \
+	int height = dma_state.height << 8;                                         \
+	UINT8 *base = dma_state.gfxrom;                                                 \
+	UINT32 offset = dma_state.offset;                                           \
+	UINT16 pal = dma_state.palette;                                             \
+	UINT16 color = pal | dma_state.color;                                       \
+	int sy = dma_state.ypos, iy = 0, ty;                                        \
+	int bpp = bitsperpixel;                                                     \
+	int mask = (1 << bpp) - 1;                                                  \
+	int xstep = scale ? dma_state.xstep : 0x100;                                \
 																				\
-	/* loop over the height */													\
-	while (iy < height)															\
-	{																			\
-		int startskip = dma_state.startskip << 8;								\
-		int endskip = dma_state.endskip << 8;									\
-		int width = dma_state.width << 8;										\
-		int sx = dma_state.xpos, ix = 0, tx;									\
-		UINT32 o = offset;														\
-		int pre, post;															\
-		UINT16 *d;																\
+	/* loop over the height */                                                  \
+	while (iy < height)                                                         \
+	{                                                                           \
+		int startskip = dma_state.startskip << 8;                               \
+		int endskip = dma_state.endskip << 8;                                   \
+		int width = dma_state.width << 8;                                       \
+		int sx = dma_state.xpos, ix = 0, tx;                                    \
+		UINT32 o = offset;                                                      \
+		int pre, post;                                                          \
+		UINT16 *d;                                                              \
 																				\
-		/* handle skipping */													\
-		if (skip)																\
-		{																		\
-			UINT8 value = EXTRACTGEN(0xff);										\
-			o += 8;																\
+		/* handle skipping */                                                   \
+		if (skip)                                                               \
+		{                                                                       \
+			UINT8 value = EXTRACTGEN(0xff);                                     \
+			o += 8;                                                             \
 																				\
-			/* adjust for preskip */											\
-			pre = (value & 0x0f) << (dma_state.preskip + 8);					\
-			tx = pre / xstep;													\
-			if (xflip)															\
-				sx = (sx - tx) & XPOSMASK;										\
-			else																\
-				sx = (sx + tx) & XPOSMASK;										\
-			ix += tx * xstep;													\
+			/* adjust for preskip */                                            \
+			pre = (value & 0x0f) << (dma_state.preskip + 8);                    \
+			tx = pre / xstep;                                                   \
+			if (xflip)                                                          \
+				sx = (sx - tx) & XPOSMASK;                                      \
+			else                                                                \
+				sx = (sx + tx) & XPOSMASK;                                      \
+			ix += tx * xstep;                                                   \
 																				\
-			/* adjust for postskip */											\
-			post = ((value >> 4) & 0x0f) << (dma_state.postskip + 8);			\
-			width -= post;														\
-			endskip -= post;													\
-		}																		\
+			/* adjust for postskip */                                           \
+			post = ((value >> 4) & 0x0f) << (dma_state.postskip + 8);           \
+			width -= post;                                                      \
+			endskip -= post;                                                    \
+		}                                                                       \
 																				\
-		/* handle Y clipping */													\
-		if (sy < dma_state.topclip || sy > dma_state.botclip)					\
-			goto clipy;															\
+		/* handle Y clipping */                                                 \
+		if (sy < dma_state.topclip || sy > dma_state.botclip)                   \
+			goto clipy;                                                         \
 																				\
-		/* handle start skip */													\
-		if (ix < startskip)														\
-		{																		\
-			tx = ((startskip - ix) / xstep) * xstep;							\
-			ix += tx;															\
-			o += (tx >> 8) * bpp;												\
-		}																		\
+		/* handle start skip */                                                 \
+		if (ix < startskip)                                                     \
+		{                                                                       \
+			tx = ((startskip - ix) / xstep) * xstep;                            \
+			ix += tx;                                                           \
+			o += (tx >> 8) * bpp;                                               \
+		}                                                                       \
 																				\
-		/* handle end skip */													\
-		if ((width >> 8) > dma_state.width - dma_state.endskip)					\
-			width = (dma_state.width - dma_state.endskip) << 8;					\
+		/* handle end skip */                                                   \
+		if ((width >> 8) > dma_state.width - dma_state.endskip)                 \
+			width = (dma_state.width - dma_state.endskip) << 8;                 \
 																				\
-		/* determine destination pointer */										\
-		d = &local_videoram[sy * 512];											\
+		/* determine destination pointer */                                     \
+		d = &local_videoram[sy * 512];                                          \
 																				\
-		/* loop until we draw the entire width */								\
-		while (ix < width)														\
-		{																		\
-			/* only process if not clipped */									\
-			if (sx >= dma_state.leftclip && sx <= dma_state.rightclip)			\
-			{																	\
-				/* special case similar handling of zero/non-zero */			\
-				if (zero == nonzero)											\
-				{																\
-					if (zero == PIXEL_COLOR)									\
-						d[sx] = color;											\
-					else if (zero == PIXEL_COPY)								\
-						d[sx] = (extractor(mask)) | pal;						\
-				}																\
+		/* loop until we draw the entire width */                               \
+		while (ix < width)                                                      \
+		{                                                                       \
+			/* only process if not clipped */                                   \
+			if (sx >= dma_state.leftclip && sx <= dma_state.rightclip)          \
+			{                                                                   \
+				/* special case similar handling of zero/non-zero */            \
+				if (zero == nonzero)                                            \
+				{                                                               \
+					if (zero == PIXEL_COLOR)                                    \
+						d[sx] = color;                                          \
+					else if (zero == PIXEL_COPY)                                \
+						d[sx] = (extractor(mask)) | pal;                        \
+				}                                                               \
 																				\
-				/* otherwise, read the pixel and look */						\
-				else															\
-				{																\
-					int pixel = (extractor(mask));								\
+				/* otherwise, read the pixel and look */                        \
+				else                                                            \
+				{                                                               \
+					int pixel = (extractor(mask));                              \
 																				\
-					/* non-zero pixel case */									\
-					if (pixel)													\
-					{															\
-						if (nonzero == PIXEL_COLOR)								\
-							d[sx] = color;										\
-						else if (nonzero == PIXEL_COPY)							\
-							d[sx] = pixel | pal;								\
-					}															\
+					/* non-zero pixel case */                                   \
+					if (pixel)                                                  \
+					{                                                           \
+						if (nonzero == PIXEL_COLOR)                             \
+							d[sx] = color;                                      \
+						else if (nonzero == PIXEL_COPY)                         \
+							d[sx] = pixel | pal;                                \
+					}                                                           \
 																				\
-					/* zero pixel case */										\
-					else														\
-					{															\
-						if (zero == PIXEL_COLOR)								\
-							d[sx] = color;										\
-						else if (zero == PIXEL_COPY)							\
-							d[sx] = pal;										\
-					}															\
-				}																\
-			}																	\
+					/* zero pixel case */                                       \
+					else                                                        \
+					{                                                           \
+						if (zero == PIXEL_COLOR)                                \
+							d[sx] = color;                                      \
+						else if (zero == PIXEL_COPY)                            \
+							d[sx] = pal;                                        \
+					}                                                           \
+				}                                                               \
+			}                                                                   \
 																				\
-			/* update pointers */												\
-			if (xflip)															\
-				sx = (sx - 1) & XPOSMASK;										\
-			else																\
-				sx = (sx + 1) & XPOSMASK;										\
+			/* update pointers */                                               \
+			if (xflip)                                                          \
+				sx = (sx - 1) & XPOSMASK;                                       \
+			else                                                                \
+				sx = (sx + 1) & XPOSMASK;                                       \
 																				\
-			/* advance to the next pixel */										\
-			if (!scale)															\
-			{																	\
-				ix += 0x100;													\
-				o += bpp;														\
-			}																	\
-			else																\
-			{																	\
-				tx = ix >> 8;													\
-				ix += xstep;													\
-				tx = (ix >> 8) - tx;											\
-				o += bpp * tx;													\
-			}																	\
-		}																		\
+			/* advance to the next pixel */                                     \
+			if (!scale)                                                         \
+			{                                                                   \
+				ix += 0x100;                                                    \
+				o += bpp;                                                       \
+			}                                                                   \
+			else                                                                \
+			{                                                                   \
+				tx = ix >> 8;                                                   \
+				ix += xstep;                                                    \
+				tx = (ix >> 8) - tx;                                            \
+				o += bpp * tx;                                                  \
+			}                                                                   \
+		}                                                                       \
 																				\
-	clipy:																		\
-		/* advance to the next row */											\
-		if (dma_state.yflip)													\
-			sy = (sy - 1) & YPOSMASK;											\
-		else																	\
-			sy = (sy + 1) & YPOSMASK;											\
-		if (!scale)																\
-		{																		\
-			iy += 0x100;														\
-			width = dma_state.width;											\
-			if (skip)															\
-			{																	\
-				offset += 8;													\
-				width -= (pre + post) >> 8;										\
-				if (width > 0) offset += width * bpp;							\
-			}																	\
-			else																\
-				offset += width * bpp;											\
-		}																		\
-		else																	\
-		{																		\
-			ty = iy >> 8;														\
-			iy += dma_state.ystep;												\
-			ty = (iy >> 8) - ty;												\
-			if (!skip)															\
-				offset += ty * dma_state.width * bpp;							\
-			else if (ty--)														\
-			{																	\
-				o = offset + 8;													\
-				width = dma_state.width - ((pre + post) >> 8);					\
-				if (width > 0) o += width * bpp;								\
-				while (ty--)													\
-				{																\
-					UINT8 value = EXTRACTGEN(0xff);								\
-					o += 8;														\
-					pre = (value & 0x0f) << dma_state.preskip;					\
-					post = ((value >> 4) & 0x0f) << dma_state.postskip;			\
-					width = dma_state.width - pre - post;						\
-					if (width > 0) o += width * bpp;							\
-				}																\
-				offset = o;														\
-			}																	\
-		}																		\
-	}																			\
+	clipy:                                                                      \
+		/* advance to the next row */                                           \
+		if (dma_state.yflip)                                                    \
+			sy = (sy - 1) & YPOSMASK;                                           \
+		else                                                                    \
+			sy = (sy + 1) & YPOSMASK;                                           \
+		if (!scale)                                                             \
+		{                                                                       \
+			iy += 0x100;                                                        \
+			width = dma_state.width;                                            \
+			if (skip)                                                           \
+			{                                                                   \
+				offset += 8;                                                    \
+				width -= (pre + post) >> 8;                                     \
+				if (width > 0) offset += width * bpp;                           \
+			}                                                                   \
+			else                                                                \
+				offset += width * bpp;                                          \
+		}                                                                       \
+		else                                                                    \
+		{                                                                       \
+			ty = iy >> 8;                                                       \
+			iy += dma_state.ystep;                                              \
+			ty = (iy >> 8) - ty;                                                \
+			if (!skip)                                                          \
+				offset += ty * dma_state.width * bpp;                           \
+			else if (ty--)                                                      \
+			{                                                                   \
+				o = offset + 8;                                                 \
+				width = dma_state.width - ((pre + post) >> 8);                  \
+				if (width > 0) o += width * bpp;                                \
+				while (ty--)                                                    \
+				{                                                               \
+					UINT8 value = EXTRACTGEN(0xff);                             \
+					o += 8;                                                     \
+					pre = (value & 0x0f) << dma_state.preskip;                  \
+					post = ((value >> 4) & 0x0f) << dma_state.postskip;         \
+					width = dma_state.width - pre - post;                       \
+					if (width > 0) o += width * bpp;                            \
+				}                                                               \
+				offset = o;                                                     \
+			}                                                                   \
+		}                                                                       \
+	}                                                                           \
 }
 
 
 /*** slightly simplified one for most blitters ***/
-#define DMA_DRAW_FUNC(name, bpp, extract, xflip, skip, scale, zero, nonzero)	\
-static void name(void)															\
-{																				\
-	DMA_DRAW_FUNC_BODY(name, bpp, extract, xflip, skip, scale, zero, nonzero)	\
+#define DMA_DRAW_FUNC(name, bpp, extract, xflip, skip, scale, zero, nonzero)    \
+static void name(void)                                                          \
+{                                                                               \
+	DMA_DRAW_FUNC_BODY(name, bpp, extract, xflip, skip, scale, zero, nonzero)   \
 }
 
 /*** empty blitter ***/
@@ -538,37 +540,37 @@ static void dma_draw_none(void)
 }
 
 /*** super macro for declaring an entire blitter family ***/
-#define DECLARE_BLITTER_SET(prefix, bpp, extract, skip, scale)										\
-DMA_DRAW_FUNC(prefix##_p0,      bpp, extract, XFLIP_NO,  skip, scale, PIXEL_COPY,  PIXEL_SKIP)		\
-DMA_DRAW_FUNC(prefix##_p1,      bpp, extract, XFLIP_NO,  skip, scale, PIXEL_SKIP,  PIXEL_COPY)		\
-DMA_DRAW_FUNC(prefix##_c0,      bpp, extract, XFLIP_NO,  skip, scale, PIXEL_COLOR, PIXEL_SKIP)		\
-DMA_DRAW_FUNC(prefix##_c1,      bpp, extract, XFLIP_NO,  skip, scale, PIXEL_SKIP,  PIXEL_COLOR)		\
-DMA_DRAW_FUNC(prefix##_p0p1,    bpp, extract, XFLIP_NO,  skip, scale, PIXEL_COPY,  PIXEL_COPY)		\
-DMA_DRAW_FUNC(prefix##_c0c1,    bpp, extract, XFLIP_NO,  skip, scale, PIXEL_COLOR, PIXEL_COLOR)		\
-DMA_DRAW_FUNC(prefix##_c0p1,    bpp, extract, XFLIP_NO,  skip, scale, PIXEL_COLOR, PIXEL_COPY)		\
-DMA_DRAW_FUNC(prefix##_p0c1,    bpp, extract, XFLIP_NO,  skip, scale, PIXEL_COPY,  PIXEL_COLOR)		\
+#define DECLARE_BLITTER_SET(prefix, bpp, extract, skip, scale)                                      \
+DMA_DRAW_FUNC(prefix##_p0,      bpp, extract, XFLIP_NO,  skip, scale, PIXEL_COPY,  PIXEL_SKIP)      \
+DMA_DRAW_FUNC(prefix##_p1,      bpp, extract, XFLIP_NO,  skip, scale, PIXEL_SKIP,  PIXEL_COPY)      \
+DMA_DRAW_FUNC(prefix##_c0,      bpp, extract, XFLIP_NO,  skip, scale, PIXEL_COLOR, PIXEL_SKIP)      \
+DMA_DRAW_FUNC(prefix##_c1,      bpp, extract, XFLIP_NO,  skip, scale, PIXEL_SKIP,  PIXEL_COLOR)     \
+DMA_DRAW_FUNC(prefix##_p0p1,    bpp, extract, XFLIP_NO,  skip, scale, PIXEL_COPY,  PIXEL_COPY)      \
+DMA_DRAW_FUNC(prefix##_c0c1,    bpp, extract, XFLIP_NO,  skip, scale, PIXEL_COLOR, PIXEL_COLOR)     \
+DMA_DRAW_FUNC(prefix##_c0p1,    bpp, extract, XFLIP_NO,  skip, scale, PIXEL_COLOR, PIXEL_COPY)      \
+DMA_DRAW_FUNC(prefix##_p0c1,    bpp, extract, XFLIP_NO,  skip, scale, PIXEL_COPY,  PIXEL_COLOR)     \
 																									\
-DMA_DRAW_FUNC(prefix##_p0_xf,   bpp, extract, XFLIP_YES, skip, scale, PIXEL_COPY,  PIXEL_SKIP)		\
-DMA_DRAW_FUNC(prefix##_p1_xf,   bpp, extract, XFLIP_YES, skip, scale, PIXEL_SKIP,  PIXEL_COPY)		\
-DMA_DRAW_FUNC(prefix##_c0_xf,   bpp, extract, XFLIP_YES, skip, scale, PIXEL_COLOR, PIXEL_SKIP)		\
-DMA_DRAW_FUNC(prefix##_c1_xf,   bpp, extract, XFLIP_YES, skip, scale, PIXEL_SKIP,  PIXEL_COLOR)		\
-DMA_DRAW_FUNC(prefix##_p0p1_xf, bpp, extract, XFLIP_YES, skip, scale, PIXEL_COPY,  PIXEL_COPY)		\
-DMA_DRAW_FUNC(prefix##_c0c1_xf, bpp, extract, XFLIP_YES, skip, scale, PIXEL_COLOR, PIXEL_COLOR)		\
-DMA_DRAW_FUNC(prefix##_c0p1_xf, bpp, extract, XFLIP_YES, skip, scale, PIXEL_COLOR, PIXEL_COPY)		\
-DMA_DRAW_FUNC(prefix##_p0c1_xf, bpp, extract, XFLIP_YES, skip, scale, PIXEL_COPY,  PIXEL_COLOR)		\
+DMA_DRAW_FUNC(prefix##_p0_xf,   bpp, extract, XFLIP_YES, skip, scale, PIXEL_COPY,  PIXEL_SKIP)      \
+DMA_DRAW_FUNC(prefix##_p1_xf,   bpp, extract, XFLIP_YES, skip, scale, PIXEL_SKIP,  PIXEL_COPY)      \
+DMA_DRAW_FUNC(prefix##_c0_xf,   bpp, extract, XFLIP_YES, skip, scale, PIXEL_COLOR, PIXEL_SKIP)      \
+DMA_DRAW_FUNC(prefix##_c1_xf,   bpp, extract, XFLIP_YES, skip, scale, PIXEL_SKIP,  PIXEL_COLOR)     \
+DMA_DRAW_FUNC(prefix##_p0p1_xf, bpp, extract, XFLIP_YES, skip, scale, PIXEL_COPY,  PIXEL_COPY)      \
+DMA_DRAW_FUNC(prefix##_c0c1_xf, bpp, extract, XFLIP_YES, skip, scale, PIXEL_COLOR, PIXEL_COLOR)     \
+DMA_DRAW_FUNC(prefix##_c0p1_xf, bpp, extract, XFLIP_YES, skip, scale, PIXEL_COLOR, PIXEL_COPY)      \
+DMA_DRAW_FUNC(prefix##_p0c1_xf, bpp, extract, XFLIP_YES, skip, scale, PIXEL_COPY,  PIXEL_COLOR)     \
 																											\
-static const dma_draw_func prefix[32] =																			\
-{																											\
-/*  B0:N / B1:N         B0:Y / B1:N         B0:N / B1:Y         B0:Y / B1:Y */								\
-	dma_draw_none,		prefix##_p0,		prefix##_p1,		prefix##_p0p1,		/* no color */			\
-	prefix##_c0,		prefix##_c0,		prefix##_c0p1,		prefix##_c0p1,		/* color 0 pixels */	\
-	prefix##_c1,		prefix##_p0c1,		prefix##_c1,		prefix##_p0c1,		/* color non-0 pixels */\
-	prefix##_c0c1,		prefix##_c0c1,		prefix##_c0c1,		prefix##_c0c1,		/* fill */				\
+static const dma_draw_func prefix[32] =                                                                         \
+{                                                                                                           \
+/*  B0:N / B1:N         B0:Y / B1:N         B0:N / B1:Y         B0:Y / B1:Y */                              \
+	dma_draw_none,      prefix##_p0,        prefix##_p1,        prefix##_p0p1,      /* no color */          \
+	prefix##_c0,        prefix##_c0,        prefix##_c0p1,      prefix##_c0p1,      /* color 0 pixels */    \
+	prefix##_c1,        prefix##_p0c1,      prefix##_c1,        prefix##_p0c1,      /* color non-0 pixels */\
+	prefix##_c0c1,      prefix##_c0c1,      prefix##_c0c1,      prefix##_c0c1,      /* fill */              \
 																											\
-	dma_draw_none,		prefix##_p0_xf,		prefix##_p1_xf,		prefix##_p0p1_xf,	/* no color */			\
-	prefix##_c0_xf,		prefix##_c0_xf,		prefix##_c0p1_xf,	prefix##_c0p1_xf,	/* color 0 pixels */	\
-	prefix##_c1_xf,		prefix##_p0c1_xf,	prefix##_c1_xf,		prefix##_p0c1_xf,	/* color non-0 pixels */\
-	prefix##_c0c1_xf,	prefix##_c0c1_xf,	prefix##_c0c1_xf,	prefix##_c0c1_xf	/* fill */				\
+	dma_draw_none,      prefix##_p0_xf,     prefix##_p1_xf,     prefix##_p0p1_xf,   /* no color */          \
+	prefix##_c0_xf,     prefix##_c0_xf,     prefix##_c0p1_xf,   prefix##_c0p1_xf,   /* color 0 pixels */    \
+	prefix##_c1_xf,     prefix##_p0c1_xf,   prefix##_c1_xf,     prefix##_p0c1_xf,   /* color non-0 pixels */\
+	prefix##_c0c1_xf,   prefix##_c0c1_xf,   prefix##_c0c1_xf,   prefix##_c0c1_xf    /* fill */              \
 };
 
 
@@ -586,10 +588,10 @@ DECLARE_BLITTER_SET(dma_draw_noskip_noscale,   dma_state.bpp, EXTRACTGEN,   SKIP
  *
  *************************************/
 
-static TIMER_CALLBACK( dma_callback )
+TIMER_CALLBACK_MEMBER(midtunit_state::dma_callback)
 {
 	dma_register[DMA_COMMAND] &= ~0x8000; /* tell the cpu we're done */
-	cputag_set_input_line(machine, "maincpu", 0, ASSERT_LINE);
+	machine().device("maincpu")->execute().set_input_line(0, ASSERT_LINE);
 }
 
 
@@ -600,7 +602,7 @@ static TIMER_CALLBACK( dma_callback )
  *
  *************************************/
 
-READ16_HANDLER( midtunit_dma_r )
+READ16_MEMBER(midtunit_state::midtunit_dma_r)
 {
 	/* rmpgwt sometimes reads register 0, expecting it to return the */
 	/* current DMA status; thus we map register 0 to register 1 */
@@ -657,7 +659,7 @@ READ16_HANDLER( midtunit_dma_r )
  *           | ----------2----- | select top/bottom or left/right for reg 12/13
  */
 
-WRITE16_HANDLER( midtunit_dma_w )
+WRITE16_MEMBER(midtunit_state::midtunit_dma_w)
 {
 	static const UINT8 register_map[2][16] =
 	{
@@ -679,7 +681,7 @@ WRITE16_HANDLER( midtunit_dma_w )
 
 	/* high bit triggers action */
 	command = dma_register[DMA_COMMAND];
-	cputag_set_input_line(space->machine(), "maincpu", 0, CLEAR_LINE);
+	machine().device("maincpu")->execute().set_input_line(0, CLEAR_LINE);
 	if (!(command & 0x8000))
 		return;
 
@@ -715,7 +717,7 @@ WRITE16_HANDLER( midtunit_dma_w )
 
 if (LOG_DMA)
 {
-	if (input_code_pressed(space->machine(), KEYCODE_L))
+	if (machine().input().code_pressed(KEYCODE_L))
 	{
 		logerror("DMA command %04X: (bpp=%d skip=%d xflip=%d yflip=%d preskip=%d postskip=%d)\n",
 				command, (command >> 12) & 7, (command >> 7) & 1, (command >> 4) & 1, (command >> 5) & 1, (command >> 8) & 3, (command >> 10) & 3);
@@ -789,7 +791,7 @@ if (LOG_DMA)
 
 	/* signal we're done */
 skipdma:
-	space->machine().scheduler().timer_set(attotime::from_nsec(41 * pixels), FUNC(dma_callback));
+	machine().scheduler().timer_set(attotime::from_nsec(41 * pixels), timer_expired_delegate(FUNC(midtunit_state::dma_callback),this));
 
 	g_profiler.stop();
 }
@@ -802,10 +804,10 @@ skipdma:
  *
  *************************************/
 
-void midtunit_scanline_update(screen_device &screen, bitmap_t *bitmap, int scanline, const tms34010_display_params *params)
+void midtunit_scanline_update(screen_device &screen, bitmap_ind16 &bitmap, int scanline, const tms34010_display_params *params)
 {
 	UINT16 *src = &local_videoram[(params->rowaddr << 9) & 0x3fe00];
-	UINT16 *dest = BITMAP_ADDR16(bitmap, scanline, 0);
+	UINT16 *dest = &bitmap.pix16(scanline);
 	int coladdr = params->coladdr << 1;
 	int x;
 
@@ -814,11 +816,11 @@ void midtunit_scanline_update(screen_device &screen, bitmap_t *bitmap, int scanl
 		dest[x] = src[coladdr++ & 0x1ff] & 0x7fff;
 }
 
-void midxunit_scanline_update(screen_device &screen, bitmap_t *bitmap, int scanline, const tms34010_display_params *params)
+void midxunit_scanline_update(screen_device &screen, bitmap_ind16 &bitmap, int scanline, const tms34010_display_params *params)
 {
 	UINT32 fulladdr = ((params->rowaddr << 16) | params->coladdr) >> 3;
 	UINT16 *src = &local_videoram[fulladdr & 0x3fe00];
-	UINT16 *dest = BITMAP_ADDR16(bitmap, scanline, 0);
+	UINT16 *dest = &bitmap.pix16(scanline);
 	int x;
 
 	/* copy the non-blanked portions of this scanline */

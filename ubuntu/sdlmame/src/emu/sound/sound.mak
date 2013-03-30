@@ -62,7 +62,7 @@ ifneq ($(filter DISCRETE,$(SOUNDS)),)
 SOUNDOBJS += $(SOUNDOBJ)/discrete.o
 endif
 
-$(SOUNDOBJ)/discrete.o:	$(SOUNDSRC)/discrete.c \
+$(SOUNDOBJ)/discrete.o: $(SOUNDSRC)/discrete.c \
 						$(SOUNDSRC)/discrete.h \
 						$(SOUNDSRC)/disc_dev.c \
 						$(SOUNDSRC)/disc_sys.c \
@@ -80,6 +80,9 @@ ifneq ($(filter ASC,$(SOUNDS)),)
 SOUNDOBJS += $(SOUNDOBJ)/asc.o
 endif
 
+ifneq ($(filter AWACS,$(SOUNDS)),)
+SOUNDOBJS += $(SOUNDOBJ)/awacs.o
+endif
 
 
 #-------------------------------------------------
@@ -241,6 +244,16 @@ endif
 
 
 #-------------------------------------------------
+# Imagetek I5000 sound
+#-------------------------------------------------
+
+ifneq ($(filter I5000_SND,$(SOUNDS)),)
+SOUNDOBJS += $(SOUNDOBJ)/i5000.o
+endif
+
+
+
+#-------------------------------------------------
 # Irem custom sound chips
 #-------------------------------------------------
 
@@ -276,6 +289,16 @@ endif
 
 ifneq ($(filter K056800,$(SOUNDS)),)
 SOUNDOBJS += $(SOUNDOBJ)/k056800.o
+endif
+
+
+
+#-------------------------------------------------
+# LMC1992 mixer chip
+#-------------------------------------------------
+
+ifneq ($(filter LMC1992,$(SOUNDS)),)
+SOUNDOBJS += $(SOUNDOBJ)/lmc1992.o
 endif
 
 
@@ -356,11 +379,11 @@ endif
 # OKI ADPCM sample players
 #-------------------------------------------------
 
-ifneq ($(filter OKIM6258 OKIM9810,$(SOUNDS)),)
+ifneq ($(filter OKIM6258 OKIM6295 OKIM9810 I5000_SND,$(SOUNDS)),)
 SOUNDOBJS += $(SOUNDOBJ)/okiadpcm.o
 endif
 
-ifneq ($(filter MSM5205,$(SOUNDS)),)
+ifneq ($(filter MSM5205 MSM6585,$(SOUNDS)),)
 SOUNDOBJS += $(SOUNDOBJ)/msm5205.o
 endif
 
@@ -397,6 +420,16 @@ endif
 
 
 #-------------------------------------------------
+# AdMOS QS1000
+#-------------------------------------------------
+
+#ifneq ($(filter QS1000,$(SOUNDS)),)
+SOUNDOBJS += $(SOUNDOBJ)/qs1000.o
+#endif
+
+
+
+#-------------------------------------------------
 # QSound sample player
 #-------------------------------------------------
 
@@ -419,6 +452,7 @@ SOUNDOBJS += $(SOUNDOBJ)/rf5c400.o
 endif
 
 
+
 #-------------------------------------------------
 # S2636 wave generator
 #-------------------------------------------------
@@ -426,6 +460,8 @@ endif
 ifneq ($(filter S2636,$(SOUNDS)),)
 SOUNDOBJS += $(SOUNDOBJ)/s2636.o
 endif
+
+
 
 #-------------------------------------------------
 # Sega custom sound chips
@@ -447,8 +483,9 @@ ifneq ($(filter AICA,$(SOUNDS)),)
 SOUNDOBJS += $(SOUNDOBJ)/aica.o $(SOUNDOBJ)/aicadsp.o
 endif
 
-$(SOUNDOBJ)/scsp.o:	$(SOUNDSRC)/scsplfo.c
-$(SOUNDOBJ)/aica.o:	$(SOUNDSRC)/aicalfo.c
+$(SOUNDOBJ)/scsp.o: $(SOUNDSRC)/scsplfo.c
+$(SOUNDOBJ)/aica.o: $(SOUNDSRC)/aicalfo.c
+
 
 
 #-------------------------------------------------
@@ -539,6 +576,8 @@ ifneq ($(filter S14001A,$(SOUNDS)),)
 SOUNDOBJS += $(SOUNDOBJ)/s14001a.o
 endif
 
+
+
 #-------------------------------------------------
 # Texas Instruments SN76477 analog chip
 #-------------------------------------------------
@@ -591,8 +630,19 @@ ifneq ($(filter TMS5220,$(SOUNDS)),)
 SOUNDOBJS += $(SOUNDOBJ)/tms5220.o
 endif
 
-$(SOUNDOBJ)/tms5110.o:	$(SOUNDSRC)/tms5110r.c
-$(SOUNDOBJ)/tms5220.o:	$(SOUNDSRC)/tms5220r.c
+$(SOUNDOBJ)/tms5110.o:  $(SOUNDSRC)/tms5110r.c
+$(SOUNDOBJ)/tms5220.o:  $(SOUNDSRC)/tms5220r.c
+
+
+
+#-------------------------------------------------
+# Toshiba TC8830F sample player/recorder
+#-------------------------------------------------
+
+ifneq ($(filter TC8830F,$(SOUNDS)),)
+SOUNDOBJS += $(SOUNDOBJ)/tc8830f.o
+endif
+
 
 
 #-------------------------------------------------
@@ -695,6 +745,14 @@ endif
 
 ifneq ($(filter YMZ280B,$(SOUNDS)),)
 SOUNDOBJS += $(SOUNDOBJ)/ymz280b.o
+endif
+
+#-------------------------------------------------
+# Yamaha YMZ770 AMM
+#-------------------------------------------------
+
+ifneq ($(filter YMZ770,$(SOUNDS)),)
+SOUNDOBJS += $(SOUNDOBJ)/ymz770.o $(SOUNDOBJ)/mpeg_audio.o
 endif
 
 #-------------------------------------------------

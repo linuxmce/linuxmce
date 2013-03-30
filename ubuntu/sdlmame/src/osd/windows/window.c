@@ -39,8 +39,8 @@
 //
 //============================================================
 
-#define LOG_THREADS			0
-#define LOG_TEMP_PAUSE		0
+#define LOG_THREADS         0
+#define LOG_TEMP_PAUSE      0
 
 // Needed for RAW Input
 #define WM_INPUT 0x00FF
@@ -80,29 +80,29 @@ extern int drawd3d_init(running_machine &machine, win_draw_callbacks *callbacks)
 //============================================================
 
 // window styles
-#define WINDOW_STYLE					WS_OVERLAPPEDWINDOW
-#define WINDOW_STYLE_EX					0
+#define WINDOW_STYLE                    WS_OVERLAPPEDWINDOW
+#define WINDOW_STYLE_EX                 0
 
 // debugger window styles
-#define DEBUG_WINDOW_STYLE				WS_OVERLAPPED
-#define DEBUG_WINDOW_STYLE_EX			0
+#define DEBUG_WINDOW_STYLE              WS_OVERLAPPED
+#define DEBUG_WINDOW_STYLE_EX           0
 
 // full screen window styles
-#define FULLSCREEN_STYLE				WS_POPUP
-#define FULLSCREEN_STYLE_EX				WS_EX_TOPMOST
+#define FULLSCREEN_STYLE                WS_POPUP
+#define FULLSCREEN_STYLE_EX             WS_EX_TOPMOST
 
 // minimum window dimension
-#define MIN_WINDOW_DIM					200
+#define MIN_WINDOW_DIM                  200
 
 // custom window messages
-#define WM_USER_FINISH_CREATE_WINDOW	(WM_USER + 0)
-#define WM_USER_SELF_TERMINATE			(WM_USER + 1)
-#define WM_USER_REDRAW					(WM_USER + 2)
-#define WM_USER_SET_FULLSCREEN			(WM_USER + 3)
-#define WM_USER_SET_MAXSIZE				(WM_USER + 4)
-#define WM_USER_SET_MINSIZE				(WM_USER + 5)
-#define WM_USER_UI_TEMP_PAUSE			(WM_USER + 6)
-#define WM_USER_EXEC_FUNC				(WM_USER + 7)
+#define WM_USER_FINISH_CREATE_WINDOW    (WM_USER + 0)
+#define WM_USER_SELF_TERMINATE          (WM_USER + 1)
+#define WM_USER_REDRAW                  (WM_USER + 2)
+#define WM_USER_SET_FULLSCREEN          (WM_USER + 3)
+#define WM_USER_SET_MAXSIZE             (WM_USER + 4)
+#define WM_USER_SET_MINSIZE             (WM_USER + 5)
+#define WM_USER_UI_TEMP_PAUSE           (WM_USER + 6)
+#define WM_USER_EXEC_FUNC               (WM_USER + 7)
 
 
 
@@ -173,18 +173,18 @@ static void set_fullscreen(win_window_info *window, int fullscreen);
 
 // temporary hacks
 #if LOG_THREADS
-struct _mtlog
+struct mtlog
 {
-	osd_ticks_t	timestamp;
+	osd_ticks_t timestamp;
 	const char *event;
 };
 
-static struct _mtlog mtlog[100000];
+static mtlog mtlog[100000];
 static volatile LONG mtlogindex;
 
 void mtlog_add(const char *event)
 {
-	int index = InterlockedIncrement((LONG *) &mtlogindex) - 1;
+	int index = atomic_increment32((LONG *) &mtlogindex) - 1;
 	if (index < ARRAY_LENGTH(mtlog))
 	{
 		mtlog[index].timestamp = osd_ticks();
@@ -230,7 +230,7 @@ void winwindow_init(running_machine &machine)
 	main_threadid = GetCurrentThreadId();
 
 	// ensure we get called on the way out
-	machine.add_notifier(MACHINE_NOTIFY_EXIT, winwindow_exit);
+	machine.add_notifier(MACHINE_NOTIFY_EXIT, machine_notify_delegate(FUNC(winwindow_exit), &machine));
 
 	// set up window class and register it
 	create_window_class();
@@ -238,7 +238,7 @@ void winwindow_init(running_machine &machine)
 	// create an event to signal UI pausing
 	ui_pause_event = CreateEvent(NULL, TRUE, FALSE, NULL);
 	if (!ui_pause_event)
-		fatalerror("Failed to create pause event");
+		fatalerror("Failed to create pause event\n");
 
 	// if multithreading, create a thread to run the windows
 	if (multithreading_enabled)
@@ -246,13 +246,13 @@ void winwindow_init(running_machine &machine)
 		// create an event to signal when the window thread is ready
 		window_thread_ready_event = CreateEvent(NULL, TRUE, FALSE, NULL);
 		if (!window_thread_ready_event)
-			fatalerror("Failed to create window thread ready event");
+			fatalerror("Failed to create window thread ready event\n");
 
 		// create a thread to run the windows from
 		temp = _beginthreadex(NULL, 0, thread_entry, NULL, 0, (unsigned *)&window_threadid);
 		window_thread = (HANDLE)temp;
 		if (window_thread == NULL)
-			fatalerror("Failed to create window thread");
+			fatalerror("Failed to create window thread\n");
 
 		// set the thread priority equal to the main MAME thread
 		SetThreadPriority(window_thread, GetThreadPriority(GetCurrentThread()));
@@ -499,6 +499,52 @@ void winwindow_dispatch_message(running_machine &machine, MSG *message)
 
 
 //============================================================
+//  winwindow_take_snap
+//  (main thread)
+//============================================================
+
+void winwindow_take_snap(void)
+{
+	if (draw.window_record == NULL)
+		return;
+
+	win_window_info *window;
+
+	assert(GetCurrentThreadId() == main_threadid);
+
+	// iterate over windows and request a snap
+	for (window = win_window_list; window != NULL; window = window->next)
+	{
+		(*draw.window_save)(window);
+	}
+}
+
+
+
+//============================================================
+//  winwindow_take_video
+//  (main thread)
+//============================================================
+
+void winwindow_take_video(void)
+{
+	if (draw.window_record == NULL)
+		return;
+
+	win_window_info *window;
+
+	assert(GetCurrentThreadId() == main_threadid);
+
+	// iterate over windows and request a snap
+	for (window = win_window_list; window != NULL; window = window->next)
+	{
+		(*draw.window_record)(window);
+	}
+}
+
+
+
+//============================================================
 //  winwindow_toggle_full_screen
 //  (main thread)
 //============================================================
@@ -555,7 +601,7 @@ void winwindow_update_cursor_state(running_machine &machine)
 
 	assert(GetCurrentThreadId() == main_threadid);
 
-	// if we should hide the mouse, then do it
+	// if we should hide the mouse cursor, then do it
 	// rules are:
 	//   1. we must have focus before hiding the cursor
 	//   2. we also hide the cursor in full screen mode and when the window doesn't have a menu
@@ -609,13 +655,12 @@ void winwindow_video_window_create(running_machine &machine, int index, win_moni
 	assert(GetCurrentThreadId() == main_threadid);
 
 	// allocate a new window object
-	window = global_alloc_clear(win_window_info);
+	window = global_alloc_clear(win_window_info(machine));
 	window->maxwidth = config->width;
 	window->maxheight = config->height;
 	window->refresh = config->refresh;
 	window->monitor = monitor;
 	window->fullscreen = !video_config.windowed;
-	window->m_machine = &machine;
 
 	// see if we are safe for fullscreen
 	window->fullscreen_safe = TRUE;
@@ -644,9 +689,9 @@ void winwindow_video_window_create(running_machine &machine, int index, win_moni
 
 	// make the window title
 	if (video_config.numscreens == 1)
-		sprintf(window->title, APPNAME ": %s [%s]", machine.system().description, machine.system().name);
+		sprintf(window->title, "%s: %s [%s]", emulator_info::get_appname(), machine.system().description, machine.system().name);
 	else
-		sprintf(window->title, APPNAME ": %s [%s] - Screen %d", machine.system().description, machine.system().name, index);
+		sprintf(window->title, "%s: %s [%s] - Screen %d", emulator_info::get_appname(), machine.system().description, machine.system().name, index);
 
 	// set the initial maximized state
 	window->startmaximized = options.maximize();
@@ -666,7 +711,7 @@ void winwindow_video_window_create(running_machine &machine, int index, win_moni
 
 	// handle error conditions
 	if (window->init_state == -1)
-		fatalerror("Unable to complete window creation");
+		fatalerror("Unable to complete window creation\n");
 }
 
 
@@ -827,15 +872,15 @@ static void create_window_class(void)
 		WNDCLASS wc = { 0 };
 
 		// initialize the description of the window class
-		wc.lpszClassName	= TEXT("MAME");
-		wc.hInstance		= GetModuleHandle(NULL);
-		wc.lpfnWndProc		= winwindow_video_window_proc_ui;
-		wc.hCursor			= LoadCursor(NULL, IDC_ARROW);
-		wc.hIcon			= LoadIcon(NULL, IDI_APPLICATION);
+		wc.lpszClassName    = TEXT("MAME");
+		wc.hInstance        = GetModuleHandle(NULL);
+		wc.lpfnWndProc      = winwindow_video_window_proc_ui;
+		wc.hCursor          = LoadCursor(NULL, IDC_ARROW);
+		wc.hIcon            = LoadIcon(wc.hInstance, MAKEINTRESOURCE(2));
 
 		// register the class; fail if we can't
 		if (!RegisterClass(&wc))
-			fatalerror("Failed to create window class");
+			fatalerror("Failed to create window class\n");
 		classes_created = TRUE;
 	}
 }

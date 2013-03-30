@@ -38,39 +38,24 @@ todo:
 #include "emu.h"
 #include "decmxc06.h"
 
-deco_mxc06_device_config::deco_mxc06_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock)
-	: device_config(mconfig, static_alloc_device_config, "decmxc06_device", tag, owner, clock)
+void deco_mxc06_device::set_gfx_region(device_t &device, int region)
 {
-	m_gfxregion = 0;
-}
-
-device_config *deco_mxc06_device_config::static_alloc_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock)
-{
-	return global_alloc(deco_mxc06_device_config(mconfig, tag, owner, clock));
-}
-
-device_t *deco_mxc06_device_config::alloc_device(running_machine &machine) const
-{
-	return auto_alloc(machine, deco_mxc06_device(machine, *this));
-}
-
-void deco_mxc06_device_config::set_gfx_region(device_config *device, int region)
-{
-	deco_mxc06_device_config *dev = downcast<deco_mxc06_device_config *>(device);
-	dev->m_gfxregion = region;
+	deco_mxc06_device &dev = downcast<deco_mxc06_device &>(device);
+	dev.m_gfxregion = region;
 }
 
 
-deco_mxc06_device::deco_mxc06_device(running_machine &_machine, const deco_mxc06_device_config &config)
-	: device_t(_machine, config),
-	  m_config(config),
-	  m_gfxregion(m_config.m_gfxregion)
+const device_type DECO_MXC06 = &device_creator<deco_mxc06_device>;
+
+deco_mxc06_device::deco_mxc06_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, DECO_MXC06, "decmxc06_device", tag, owner, clock),
+		m_gfxregion(0)
 {
 }
 
 
 /* this implementation was originally from Mad Motor */
-void deco_mxc06_device::draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, UINT16* spriteram, int pri_mask, int pri_val, int col_mask )
+void deco_mxc06_device::draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, UINT16* spriteram, int pri_mask, int pri_val, int col_mask )
 {
 	int offs;
 
@@ -87,8 +72,8 @@ void deco_mxc06_device::draw_sprites( running_machine &machine, bitmap_t *bitmap
 
 		flipx = sy & 0x2000;
 		flipy = sy & 0x4000;
-		h = (1 << ((sy & 0x1800) >> 11));	/* 1x, 2x, 4x, 8x height */
-		w = (1 << ((sy & 0x0600) >>  9));	/* 1x, 2x, 4x, 8x width */
+		h = (1 << ((sy & 0x1800) >> 11));   /* 1x, 2x, 4x, 8x height */
+		w = (1 << ((sy & 0x0600) >>  9));   /* 1x, 2x, 4x, 8x width */
 		/* multi width used only on the title screen? */
 
 
@@ -101,7 +86,7 @@ void deco_mxc06_device::draw_sprites( running_machine &machine, bitmap_t *bitmap
 		sy = 240 - sy;
 
 
-		if (flip_screen_get(machine))
+		if (machine.driver_data()->flip_screen())
 		{
 			sy = 240 - sy;
 			sx = 240 - sx;
@@ -167,11 +152,44 @@ void deco_mxc06_device::draw_sprites( running_machine &machine, bitmap_t *bitmap
 
 			offs += 4;
 			if (offs >= 0x800 / 2)
-				 return;
+					return;
 		}
 	}
 }
 
+/* this is used by the automat bootleg, it seems to have greatly simplified sprites compared to the real chip */
+/* spriteram is twice the size tho! */
+void deco_mxc06_device::draw_sprites_bootleg( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, UINT16* spriteram, int pri_mask, int pri_val, int col_mask )
+{
+	int offs;
+
+	offs = 0;
+	while (offs < 0x800 / 2)
+	{
+		int sx, sy, code, color, flipx, flipy;
+
+		code =  spriteram[offs];
+		sy = 240-spriteram[offs + 1]; // 241- will align robocop with the ground but causes other issues too
+		sx = spriteram[offs + 2];
+		code |= (spriteram[offs + 3] &0x0f)<<8;
+		flipx = !(spriteram[offs + 3] &0x20);
+		flipy = (spriteram[offs + 3] &0x40);
+		color = (spriteram[offs + 0x400]&0xf0)>>4;
+		sx |= (spriteram[offs + 0x400]&0x01)<<8;
+		sx -= 16;
+		sx &=0x1ff;
+
+		sx -= 0x100;
+
+		drawgfx_transpen(bitmap,cliprect,machine.gfx[m_gfxregion],
+			code,
+			color & col_mask,
+			flipx,flipy,
+			sx,sy,0);
+
+		offs += 4;
+	}
+}
 
 void deco_mxc06_device::device_start()
 {
@@ -182,4 +200,3 @@ void deco_mxc06_device::device_reset()
 {
 
 }
-

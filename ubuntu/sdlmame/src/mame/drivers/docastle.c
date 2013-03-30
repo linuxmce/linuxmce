@@ -153,7 +153,6 @@ Dip locations verified with manual for docastle, dorunrun and dowild.
 
 #include "emu.h"
 #include "cpu/z80/z80.h"
-#include "deprecat.h"
 #include "sound/msm5205.h"
 #include "sound/sn76496.h"
 #include "includes/docastle.h"
@@ -165,7 +164,7 @@ static void idsoccer_adpcm_int( device_t *device )
 {
 	docastle_state *state = device->machine().driver_data<docastle_state>();
 
-	if (state->m_adpcm_pos >= device->machine().region("adpcm")->bytes())
+	if (state->m_adpcm_pos >= state->memregion("adpcm")->bytes())
 	{
 		state->m_adpcm_idle = 1;
 		msm5205_reset_w(device, 1);
@@ -177,50 +176,48 @@ static void idsoccer_adpcm_int( device_t *device )
 	}
 	else
 	{
-		state->m_adpcm_data = device->machine().region("adpcm")->base()[state->m_adpcm_pos++];
+		state->m_adpcm_data = device->machine().root_device().memregion("adpcm")->base()[state->m_adpcm_pos++];
 		msm5205_data_w(device, state->m_adpcm_data >> 4);
 	}
 }
 
-static READ8_DEVICE_HANDLER( idsoccer_adpcm_status_r )
+READ8_MEMBER(docastle_state::idsoccer_adpcm_status_r)
 {
-	docastle_state *state = device->machine().driver_data<docastle_state>();
-
 	// this is wrong, but the samples work anyway!!
-	state->m_adpcm_status ^= 0x80;
-	return state->m_adpcm_status;
+	m_adpcm_status ^= 0x80;
+	return m_adpcm_status;
 }
 
-static WRITE8_DEVICE_HANDLER( idsoccer_adpcm_w )
+WRITE8_MEMBER(docastle_state::idsoccer_adpcm_w)
 {
-	docastle_state *state = device->machine().driver_data<docastle_state>();
+	device_t *device = machine().device("msm");
 
 	if (data & 0x80)
 	{
-		state->m_adpcm_idle = 1;
+		m_adpcm_idle = 1;
 		msm5205_reset_w(device, 1);
 	}
 	else
 	{
-		state->m_adpcm_pos = (data & 0x7f) * 0x200;
-		state->m_adpcm_idle = 0;
+		m_adpcm_pos = (data & 0x7f) * 0x200;
+		m_adpcm_idle = 0;
 		msm5205_reset_w(device, 0);
 	}
 }
 
 /* Memory Maps */
-static ADDRESS_MAP_START( docastle_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( docastle_map, AS_PROGRAM, 8, docastle_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x97ff) AM_RAM
-	AM_RANGE(0x9800, 0x99ff) AM_RAM AM_BASE_SIZE_MEMBER(docastle_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0x9800, 0x99ff) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0xa000, 0xa008) AM_READWRITE(docastle_shared0_r, docastle_shared1_w)
 	AM_RANGE(0xa800, 0xa800) AM_WRITE(watchdog_reset_w)
-	AM_RANGE(0xb000, 0xb3ff) AM_MIRROR(0x0800) AM_RAM_WRITE(docastle_videoram_w) AM_BASE_MEMBER(docastle_state, m_videoram)
-	AM_RANGE(0xb400, 0xb7ff) AM_MIRROR(0x0800) AM_RAM_WRITE(docastle_colorram_w) AM_BASE_MEMBER(docastle_state, m_colorram)
+	AM_RANGE(0xb000, 0xb3ff) AM_MIRROR(0x0800) AM_RAM_WRITE(docastle_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0xb400, 0xb7ff) AM_MIRROR(0x0800) AM_RAM_WRITE(docastle_colorram_w) AM_SHARE("colorram")
 	AM_RANGE(0xe000, 0xe000) AM_WRITE(docastle_nmitrigger_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( docastle_map2, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( docastle_map2, AS_PROGRAM, 8, docastle_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
 	AM_RANGE(0x8000, 0x87ff) AM_RAM
 	AM_RANGE(0xa000, 0xa008) AM_READWRITE(docastle_shared1_r, docastle_shared0_w)
@@ -231,46 +228,46 @@ static ADDRESS_MAP_START( docastle_map2, AS_PROGRAM, 8 )
 	AM_RANGE(0xc005, 0xc005) AM_MIRROR(0x0080) AM_READ_PORT("BUTTONS")
 	AM_RANGE(0xc007, 0xc007) AM_MIRROR(0x0080) AM_READ_PORT("SYSTEM")
 	AM_RANGE(0xc084, 0xc084) AM_READWRITE(docastle_flipscreen_on_r, docastle_flipscreen_on_w)
-	AM_RANGE(0xe000, 0xe000) AM_DEVWRITE("sn1", sn76496_w)
-	AM_RANGE(0xe400, 0xe400) AM_DEVWRITE("sn2", sn76496_w)
-	AM_RANGE(0xe800, 0xe800) AM_DEVWRITE("sn3", sn76496_w)
-	AM_RANGE(0xec00, 0xec00) AM_DEVWRITE("sn4", sn76496_w)
+	AM_RANGE(0xe000, 0xe000) AM_DEVWRITE("sn1", sn76489a_device, write)
+	AM_RANGE(0xe400, 0xe400) AM_DEVWRITE("sn2", sn76489a_device, write)
+	AM_RANGE(0xe800, 0xe800) AM_DEVWRITE("sn3", sn76489a_device, write)
+	AM_RANGE(0xec00, 0xec00) AM_DEVWRITE("sn4", sn76489a_device, write)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( docastle_map3, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( docastle_map3, AS_PROGRAM, 8, docastle_state )
 	AM_RANGE(0x0000, 0x00ff) AM_ROM
 	AM_RANGE(0x4000, 0x47ff) AM_RAM
-	AM_RANGE(0x8000, 0x8008) AM_READ(docastle_shared1_r)	// ???
+	AM_RANGE(0x8000, 0x8008) AM_READ(docastle_shared1_r)    // ???
 	AM_RANGE(0xc003, 0xc003) AM_NOP // EP according to schematics
-	AM_RANGE(0xc432, 0xc435) AM_NOP	// ???
+	AM_RANGE(0xc432, 0xc435) AM_NOP // ???
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( docastle_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( docastle_io_map, AS_IO, 8, docastle_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0x00) AM_NOP // goes to CRT 46505S
 	AM_RANGE(0x02, 0x02) AM_NOP // goes to CRT 46505S
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( dorunrun_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( dorunrun_map, AS_PROGRAM, 8, docastle_state )
 	AM_RANGE(0x0000, 0x1fff) AM_ROM
 	AM_RANGE(0x2000, 0x37ff) AM_RAM
-	AM_RANGE(0x3800, 0x39ff) AM_RAM AM_BASE_SIZE_MEMBER(docastle_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0x3800, 0x39ff) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0x4000, 0x9fff) AM_ROM
 	AM_RANGE(0xa000, 0xa008) AM_READWRITE(docastle_shared0_r, docastle_shared1_w)
 	AM_RANGE(0xa800, 0xa800) AM_WRITE(watchdog_reset_w)
-	AM_RANGE(0xb000, 0xb3ff) AM_RAM_WRITE(docastle_videoram_w) AM_BASE_MEMBER(docastle_state, m_videoram)
-	AM_RANGE(0xb400, 0xb7ff) AM_RAM_WRITE(docastle_colorram_w) AM_BASE_MEMBER(docastle_state, m_colorram)
+	AM_RANGE(0xb000, 0xb3ff) AM_RAM_WRITE(docastle_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0xb400, 0xb7ff) AM_RAM_WRITE(docastle_colorram_w) AM_SHARE("colorram")
 	AM_RANGE(0xb800, 0xb800) AM_WRITE(docastle_nmitrigger_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( dorunrun_map2, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( dorunrun_map2, AS_PROGRAM, 8, docastle_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
 	AM_RANGE(0x8000, 0x87ff) AM_RAM
-	AM_RANGE(0xa000, 0xa000) AM_DEVWRITE("sn1", sn76496_w)
-	AM_RANGE(0xa400, 0xa400) AM_DEVWRITE("sn2", sn76496_w)
-	AM_RANGE(0xa800, 0xa800) AM_DEVWRITE("sn3", sn76496_w)
-	AM_RANGE(0xac00, 0xac00) AM_DEVWRITE("sn4", sn76496_w)
+	AM_RANGE(0xa000, 0xa000) AM_DEVWRITE("sn1", sn76489a_device, write)
+	AM_RANGE(0xa400, 0xa400) AM_DEVWRITE("sn2", sn76489a_device, write)
+	AM_RANGE(0xa800, 0xa800) AM_DEVWRITE("sn3", sn76489a_device, write)
+	AM_RANGE(0xac00, 0xac00) AM_DEVWRITE("sn4", sn76489a_device, write)
 	AM_RANGE(0xc001, 0xc001) AM_MIRROR(0x0080) AM_READ_PORT("DSW2")
 	AM_RANGE(0xc002, 0xc002) AM_MIRROR(0x0080) AM_READ_PORT("DSW1")
 	AM_RANGE(0xc003, 0xc003) AM_MIRROR(0x0080) AM_READ_PORT("JOYS")
@@ -282,20 +279,20 @@ static ADDRESS_MAP_START( dorunrun_map2, AS_PROGRAM, 8 )
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( idsoccer_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( idsoccer_map, AS_PROGRAM, 8, docastle_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
 	AM_RANGE(0x4000, 0x57ff) AM_RAM
-	AM_RANGE(0x5800, 0x59ff) AM_RAM AM_BASE_SIZE_MEMBER(docastle_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0x5800, 0x59ff) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0x6000, 0x9fff) AM_ROM
 	AM_RANGE(0xa000, 0xa008) AM_READWRITE(docastle_shared0_r, docastle_shared1_w)
 	AM_RANGE(0xa800, 0xa800) AM_WRITE(watchdog_reset_w)
-	AM_RANGE(0xb000, 0xb3ff) AM_MIRROR(0x0800) AM_RAM_WRITE(docastle_videoram_w) AM_BASE_MEMBER(docastle_state, m_videoram)
-	AM_RANGE(0xb400, 0xb7ff) AM_MIRROR(0x0800) AM_RAM_WRITE(docastle_colorram_w) AM_BASE_MEMBER(docastle_state, m_colorram)
-	AM_RANGE(0xc000, 0xc000) AM_DEVREADWRITE("msm", idsoccer_adpcm_status_r, idsoccer_adpcm_w)
+	AM_RANGE(0xb000, 0xb3ff) AM_MIRROR(0x0800) AM_RAM_WRITE(docastle_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0xb400, 0xb7ff) AM_MIRROR(0x0800) AM_RAM_WRITE(docastle_colorram_w) AM_SHARE("colorram")
+	AM_RANGE(0xc000, 0xc000) AM_READWRITE(idsoccer_adpcm_status_r, idsoccer_adpcm_w)
 	AM_RANGE(0xe000, 0xe000) AM_WRITE(docastle_nmitrigger_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( idsoccer_map2, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( idsoccer_map2, AS_PROGRAM, 8, docastle_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
 	AM_RANGE(0x8000, 0x87ff) AM_RAM
 	AM_RANGE(0xa000, 0xa008) AM_READWRITE(docastle_shared1_r, docastle_shared0_w)
@@ -306,10 +303,10 @@ static ADDRESS_MAP_START( idsoccer_map2, AS_PROGRAM, 8 )
 	AM_RANGE(0xc005, 0xc005) AM_MIRROR(0x0080) AM_READ_PORT("BUTTONS")
 	AM_RANGE(0xc007, 0xc007) AM_MIRROR(0x0080) AM_READ_PORT("SYSTEM")
 	AM_RANGE(0xc084, 0xc084) AM_READ_PORT("JOYS_RIGHT") AM_WRITE(docastle_flipscreen_on_w)
-	AM_RANGE(0xe000, 0xe000) AM_DEVWRITE("sn1", sn76496_w)
-	AM_RANGE(0xe400, 0xe400) AM_DEVWRITE("sn2", sn76496_w)
-	AM_RANGE(0xe800, 0xe800) AM_DEVWRITE("sn3", sn76496_w)
-	AM_RANGE(0xec00, 0xec00) AM_DEVWRITE("sn4", sn76496_w)
+	AM_RANGE(0xe000, 0xe000) AM_DEVWRITE("sn1", sn76489a_device, write)
+	AM_RANGE(0xe400, 0xe400) AM_DEVWRITE("sn2", sn76489a_device, write)
+	AM_RANGE(0xe800, 0xe800) AM_DEVWRITE("sn3", sn76489a_device, write)
+	AM_RANGE(0xec00, 0xec00) AM_DEVWRITE("sn4", sn76489a_device, write)
 ADDRESS_MAP_END
 
 /* Input Ports */
@@ -491,16 +488,16 @@ static INPUT_PORTS_START( idsoccer )
 	PORT_DIPSETTING(    0x02, DEF_STR( Medium ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Hard ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) )
-	PORT_DIPNAME( 0x04, 0x04, "One Player vs. Computer" ) PORT_DIPLOCATION("SW1:!6")	// Additional time extended for winning score
+	PORT_DIPNAME( 0x04, 0x04, "One Player vs. Computer" ) PORT_DIPLOCATION("SW1:!6")    // Additional time extended for winning score
 	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Flip_Screen ) ) PORT_DIPLOCATION("SW1:5")
 	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x10, 0x10, "Player 2 Time Extension" ) PORT_DIPLOCATION("SW1:4")	// Player may play same game with additional credit
+	PORT_DIPNAME( 0x10, 0x10, "Player 2 Time Extension" ) PORT_DIPLOCATION("SW1:4") // Player may play same game with additional credit
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x10, DEF_STR( On ) )
-	PORT_DIPNAME( 0x20, 0x20, "Player 1 Time Extension" ) PORT_DIPLOCATION("SW1:3")	// Player may play same game with additional credit
+	PORT_DIPNAME( 0x20, 0x20, "Player 1 Time Extension" ) PORT_DIPLOCATION("SW1:3") // Player may play same game with additional credit
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( On ) )
 	PORT_DIPNAME( 0xc0, 0xc0, "Real Game Time" ) PORT_DIPLOCATION("SW1:1,2") // Indicator always shows 3:00 and counts down
@@ -555,41 +552,50 @@ GFXDECODE_END
 
 static const msm5205_interface msm5205_config =
 {
-	idsoccer_adpcm_int,	// interrupt function
-	MSM5205_S64_4B		// 6 kHz    ???
+	idsoccer_adpcm_int, // interrupt function
+	MSM5205_S64_4B      // 6 kHz    ???
 };
+
+
+//-------------------------------------------------
+//  sn76496_config psg_intf
+//-------------------------------------------------
+
+static const sn76496_config psg_intf =
+{
+	DEVCB_NULL
+};
+
 
 /* Machine Drivers */
 
-static MACHINE_RESET( docastle )
+void docastle_state::machine_reset()
 {
-	docastle_state *state = machine.driver_data<docastle_state>();
 	int i;
 
 	for (i = 0; i < 9; i++)
 	{
-		state->m_buffer0[i] = 0;
-		state->m_buffer1[i] = 0;
+		m_buffer0[i] = 0;
+		m_buffer1[i] = 0;
 	}
 
-	state->m_adpcm_pos = state->m_adpcm_idle = 0;
-	state->m_adpcm_data = -1;
-	state->m_adpcm_status = 0;
+	m_adpcm_pos = m_adpcm_idle = 0;
+	m_adpcm_data = -1;
+	m_adpcm_status = 0;
 }
 
-static MACHINE_START( docastle )
+void docastle_state::machine_start()
 {
-	docastle_state *state = machine.driver_data<docastle_state>();
 
-	state->m_maincpu = machine.device<cpu_device>("maincpu");
-	state->m_slave = machine.device<cpu_device>("slave");
+	m_maincpu = machine().device<cpu_device>("maincpu");
+	m_slave = machine().device<cpu_device>("slave");
 
-	state->save_item(NAME(state->m_adpcm_pos));
-	state->save_item(NAME(state->m_adpcm_data));
-	state->save_item(NAME(state->m_adpcm_idle));
-	state->save_item(NAME(state->m_adpcm_status));
-	state->save_item(NAME(state->m_buffer0));
-	state->save_item(NAME(state->m_buffer1));
+	save_item(NAME(m_adpcm_pos));
+	save_item(NAME(m_adpcm_data));
+	save_item(NAME(m_adpcm_idle));
+	save_item(NAME(m_adpcm_status));
+	save_item(NAME(m_buffer0));
+	save_item(NAME(m_buffer1));
 }
 
 static MACHINE_CONFIG_START( docastle, docastle_state )
@@ -598,48 +604,47 @@ static MACHINE_CONFIG_START( docastle, docastle_state )
 	MCFG_CPU_ADD("maincpu", Z80, XTAL_4MHz)
 	MCFG_CPU_PROGRAM_MAP(docastle_map)
 	MCFG_CPU_IO_MAP(docastle_io_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", docastle_state,  irq0_line_hold)
 
 	MCFG_CPU_ADD("slave", Z80, XTAL_4MHz)
 	MCFG_CPU_PROGRAM_MAP(docastle_map2)
-	MCFG_CPU_VBLANK_INT_HACK(irq0_line_hold, 8)
+	MCFG_CPU_PERIODIC_INT_DRIVER(docastle_state, irq0_line_hold,  8*60)
 
 	MCFG_CPU_ADD("cpu3", Z80, XTAL_4MHz)
 	MCFG_CPU_PROGRAM_MAP(docastle_map3)
-	MCFG_CPU_VBLANK_INT("screen", nmi_line_pulse)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", docastle_state,  nmi_line_pulse)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_REFRESH_RATE(59.60)	// measured on pcb, real refresh rate should be derived from XTAL_9_828MHz, how?
+	MCFG_SCREEN_REFRESH_RATE(59.60) // measured on pcb, real refresh rate should be derived from XTAL_9_828MHz, how?
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(1*8, 31*8-1, 4*8, 28*8-1)
-	MCFG_SCREEN_UPDATE(docastle)
+	MCFG_SCREEN_UPDATE_DRIVER(docastle_state, screen_update_docastle)
 
 	MCFG_GFXDECODE(docastle)
 	MCFG_PALETTE_LENGTH(512)
 
-	MCFG_PALETTE_INIT(docastle)
-	MCFG_VIDEO_START(docastle)
 
-	MCFG_MACHINE_RESET( docastle )
-	MCFG_MACHINE_START( docastle )
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
 	MCFG_SOUND_ADD("sn1", SN76489A, XTAL_4MHz)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.25)
+	MCFG_SOUND_CONFIG(psg_intf)
 
 	MCFG_SOUND_ADD("sn2", SN76489A, XTAL_4MHz)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.25)
+	MCFG_SOUND_CONFIG(psg_intf)
 
 	MCFG_SOUND_ADD("sn3", SN76489A, XTAL_4MHz)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.25)
+	MCFG_SOUND_CONFIG(psg_intf)
 
 	MCFG_SOUND_ADD("sn4", SN76489A, XTAL_4MHz)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.25)
+	MCFG_SOUND_CONFIG(psg_intf)
 MACHINE_CONFIG_END
 
 static MACHINE_CONFIG_DERIVED( dorunrun, docastle )
@@ -653,7 +658,7 @@ static MACHINE_CONFIG_DERIVED( dorunrun, docastle )
 	MCFG_CPU_PROGRAM_MAP(dorunrun_map2)
 
 	/* video hardware */
-	MCFG_VIDEO_START(dorunrun)
+	MCFG_VIDEO_START_OVERRIDE(docastle_state,dorunrun)
 MACHINE_CONFIG_END
 
 static MACHINE_CONFIG_DERIVED( idsoccer, docastle )
@@ -667,7 +672,7 @@ static MACHINE_CONFIG_DERIVED( idsoccer, docastle )
 	MCFG_CPU_PROGRAM_MAP(idsoccer_map2)
 
 	/* video hardware */
-	MCFG_VIDEO_START(dorunrun)
+	MCFG_VIDEO_START_OVERRIDE(docastle_state,dorunrun)
 
 	/* sound hardware */
 	MCFG_SOUND_ADD("msm", MSM5205, XTAL_384kHz) /* Crystal verified on American Soccer board. */
@@ -731,7 +736,7 @@ ROM_END
 
 ROM_START( docastleo )
 	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD( "c1.bin", 	0x0000, 0x2000, CRC(c9ce96ab) SHA1(3166aef4556ce334ecef27dceb285f51de371c35) )
+	ROM_LOAD( "c1.bin",     0x0000, 0x2000, CRC(c9ce96ab) SHA1(3166aef4556ce334ecef27dceb285f51de371c35) )
 	ROM_LOAD( "c2.bin",     0x2000, 0x2000, CRC(42b28369) SHA1(8c9a618984db52cdc4ec3a6bcfa7659866d2709c) )
 	ROM_LOAD( "c3.bin",     0x4000, 0x2000, CRC(c8c13124) SHA1(2cfc15b232744b40350c174b0d89677495c077eb) )
 	ROM_LOAD( "c4.bin",     0x6000, 0x2000, CRC(7ca78471) SHA1(2804f9be825973e69bc35aa703145b3ef22a5ecd) )
@@ -1066,7 +1071,7 @@ ROM_START( asoccer )
 	ROM_LOAD( "as1.e10",   0x00000, 0x2000, CRC(e9d61bbf) SHA1(8f9b3a6fd99f136698035263a20f39c3174b70cf) )
 	ROM_LOAD( "as2.f10",   0x02000, 0x2000, CRC(62b2e4c8) SHA1(4270148652b18006c7df1f612f9b19f06e5400de) )
 	ROM_LOAD( "as3.h10",   0x06000, 0x2000, CRC(25bbd0d8) SHA1(fa7fb4b78e5ac4200ff5f57f94794632af450ce0) )
-    ROM_LOAD( "as4.k10",   0x08000, 0x2000, CRC(8d8bdc08) SHA1(75da310576047102af45c3a5f7d20893ef260d40) )
+	ROM_LOAD( "as4.k10",   0x08000, 0x2000, CRC(8d8bdc08) SHA1(75da310576047102af45c3a5f7d20893ef260d40) )
 
 	ROM_REGION( 0x10000, "slave", 0 ) /* These roms are located on the 8461-A board. */
 	ROM_LOAD( "as0.e2",    0x00000, 0x4000, CRC(05d613bf) SHA1(ab822fc532fc7f1122b5ff0385b268513e7e193e) )
@@ -1085,7 +1090,7 @@ ROM_START( asoccer )
 
 	ROM_REGION( 0x10000, "adpcm", 0 ) /* These roms are located on the 8461-SUB board. */
 	ROM_LOAD( "1.ic1",     0x00000, 0x4000, CRC(3bb65dc7) SHA1(499151903b3da9fa2455b3d2c04863b3e33e853d) )
-    /* Verified on board that IC2 is not populated. */
+	/* Verified on board that IC2 is not populated. */
 	ROM_LOAD( "3.ic3",     0x08000, 0x4000, CRC(27bebba3) SHA1(cf752b22603c1e2a0b33958481c652d6d56ebf68) )
 	ROM_LOAD( "4.ic4",     0x0c000, 0x4000, CRC(dd5ffaa2) SHA1(4bc4330a54ca93448a8fe05207d3fb1a3a9872e1) )
 
@@ -1095,18 +1100,18 @@ ROM_END
 
 /* Game Drivers */
 
-GAME( 1983, docastle,  0,        docastle, docastle, 0, ROT270, "Universal", "Mr. Do's Castle (set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1983, docastle2, docastle, docastle, docastle, 0, ROT270, "Universal", "Mr. Do's Castle (set 2)", GAME_SUPPORTS_SAVE )
-GAME( 1983, docastleo, docastle, docastle, docastle, 0, ROT270, "Universal", "Mr. Do's Castle (older)", GAME_SUPPORTS_SAVE )
-GAME( 1983, douni,     docastle, docastle, docastle, 0, ROT270, "Universal", "Mr. Do vs. Unicorns", GAME_SUPPORTS_SAVE )
-GAME( 1984, dorunrun,  0,        dorunrun, dorunrun, 0, ROT0,   "Universal", "Do! Run Run (set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1984, dorunrun2, dorunrun, dorunrun, dorunrun, 0, ROT0,   "Universal", "Do! Run Run (set 2)", GAME_SUPPORTS_SAVE )
-GAME( 1984, dorunrunc, dorunrun, docastle, dorunrun, 0, ROT0,   "Universal", "Do! Run Run (Do's Castle hardware, set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1984, dorunrunca,dorunrun, docastle, dorunrun, 0, ROT0,   "Universal", "Do! Run Run (Do's Castle hardware, set 2)", GAME_SUPPORTS_SAVE )
-GAME( 1987, spiero,    dorunrun, dorunrun, dorunrun, 0, ROT0,   "Universal", "Super Pierrot (Japan)", GAME_SUPPORTS_SAVE )
-GAME( 1984, dowild,    0,        dorunrun, dowild,   0, ROT0,   "Universal", "Mr. Do's Wild Ride", GAME_SUPPORTS_SAVE )
-GAME( 1984, jjack,     0,        dorunrun, jjack,    0, ROT270, "Universal", "Jumping Jack", GAME_SUPPORTS_SAVE )
-GAME( 1984, kickridr,  0,        dorunrun, kickridr, 0, ROT0,   "Universal", "Kick Rider", GAME_SUPPORTS_SAVE )
-GAME( 1985, idsoccer,  0,        idsoccer, idsoccer, 0, ROT0,   "Universal", "Indoor Soccer (set 1)", GAME_SUPPORTS_SAVE | GAME_NO_COCKTAIL )
-GAME( 1985, idsoccera, idsoccer, idsoccer, idsoccer, 0, ROT0,   "Universal", "Indoor Soccer (set 2)", GAME_SUPPORTS_SAVE | GAME_NO_COCKTAIL | GAME_IMPERFECT_SOUND )
-GAME( 1987, asoccer,   idsoccer, idsoccer, idsoccer, 0, ROT0,   "Universal", "American Soccer", GAME_SUPPORTS_SAVE | GAME_NO_COCKTAIL | GAME_IMPERFECT_SOUND )
+GAME( 1983, docastle,  0,        docastle, docastle, driver_device, 0, ROT270, "Universal", "Mr. Do's Castle (set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1983, docastle2, docastle, docastle, docastle, driver_device, 0, ROT270, "Universal", "Mr. Do's Castle (set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1983, docastleo, docastle, docastle, docastle, driver_device, 0, ROT270, "Universal", "Mr. Do's Castle (older)", GAME_SUPPORTS_SAVE )
+GAME( 1983, douni,     docastle, docastle, docastle, driver_device, 0, ROT270, "Universal", "Mr. Do vs. Unicorns", GAME_SUPPORTS_SAVE )
+GAME( 1984, dorunrun,  0,        dorunrun, dorunrun, driver_device, 0, ROT0,   "Universal", "Do! Run Run (set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1984, dorunrun2, dorunrun, dorunrun, dorunrun, driver_device, 0, ROT0,   "Universal", "Do! Run Run (set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1984, dorunrunc, dorunrun, docastle, dorunrun, driver_device, 0, ROT0,   "Universal", "Do! Run Run (Do's Castle hardware, set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1984, dorunrunca,dorunrun, docastle, dorunrun, driver_device, 0, ROT0,   "Universal", "Do! Run Run (Do's Castle hardware, set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1987, spiero,    dorunrun, dorunrun, dorunrun, driver_device, 0, ROT0,   "Universal", "Super Pierrot (Japan)", GAME_SUPPORTS_SAVE )
+GAME( 1984, dowild,    0,        dorunrun, dowild, driver_device,   0, ROT0,   "Universal", "Mr. Do's Wild Ride", GAME_SUPPORTS_SAVE )
+GAME( 1984, jjack,     0,        dorunrun, jjack, driver_device,    0, ROT270, "Universal", "Jumping Jack", GAME_SUPPORTS_SAVE )
+GAME( 1984, kickridr,  0,        dorunrun, kickridr, driver_device, 0, ROT0,   "Universal", "Kick Rider", GAME_SUPPORTS_SAVE )
+GAME( 1985, idsoccer,  0,        idsoccer, idsoccer, driver_device, 0, ROT0,   "Universal", "Indoor Soccer (set 1)", GAME_SUPPORTS_SAVE | GAME_NO_COCKTAIL )
+GAME( 1985, idsoccera, idsoccer, idsoccer, idsoccer, driver_device, 0, ROT0,   "Universal", "Indoor Soccer (set 2)", GAME_SUPPORTS_SAVE | GAME_NO_COCKTAIL | GAME_IMPERFECT_SOUND )
+GAME( 1987, asoccer,   idsoccer, idsoccer, idsoccer, driver_device, 0, ROT0,   "Universal", "American Soccer", GAME_SUPPORTS_SAVE | GAME_NO_COCKTAIL | GAME_IMPERFECT_SOUND )

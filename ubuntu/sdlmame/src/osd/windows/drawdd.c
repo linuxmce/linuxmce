@@ -51,29 +51,12 @@
 #include "render.h"
 #include "rendutil.h"
 #include "options.h"
+#include "rendersw.c"
 
 // MAMEOS headers
 #include "winmain.h"
 #include "window.h"
 #include "config.h"
-
-
-
-//============================================================
-//  DEBUGGING
-//============================================================
-
-
-
-//============================================================
-//  CONSTANTS
-//============================================================
-
-
-
-//============================================================
-//  MACROS
-//============================================================
 
 
 
@@ -86,57 +69,54 @@ typedef HRESULT (WINAPI *directdrawenumerateex_ptr)(LPDDENUMCALLBACKEXA lpCallba
 
 
 /* dd_info is the information about DirectDraw for the current screen */
-typedef struct _dd_info dd_info;
-struct _dd_info
+struct dd_info
 {
-	GUID					adapter;					// current display adapter
-	GUID *					adapter_ptr;				// pointer to current display adapter
-	int						width, height;				// current width, height
-	int						refresh;					// current refresh rate
-	int						clearouter;					// clear the outer areas?
+	GUID                    adapter;                    // current display adapter
+	GUID *                  adapter_ptr;                // pointer to current display adapter
+	int                     width, height;              // current width, height
+	int                     refresh;                    // current refresh rate
+	int                     clearouter;                 // clear the outer areas?
 
-	INT32					blitwidth, blitheight;		// current blit width/height values
-	RECT					lastdest;					// last destination rectangle
+	INT32                   blitwidth, blitheight;      // current blit width/height values
+	RECT                    lastdest;                   // last destination rectangle
 
-	IDirectDraw7 *			ddraw;						// pointer to the DirectDraw object
-	IDirectDrawSurface7 *	primary;					// pointer to the primary surface object
-	IDirectDrawSurface7 *	back;						// pointer to the back buffer surface object
-	IDirectDrawSurface7 *	blit;						// pointer to the blit surface object
-	IDirectDrawClipper *	clipper;					// pointer to the clipper object
-	IDirectDrawGammaControl *gamma;						// pointer to the gamma control object
+	IDirectDraw7 *          ddraw;                      // pointer to the DirectDraw object
+	IDirectDrawSurface7 *   primary;                    // pointer to the primary surface object
+	IDirectDrawSurface7 *   back;                       // pointer to the back buffer surface object
+	IDirectDrawSurface7 *   blit;                       // pointer to the blit surface object
+	IDirectDrawClipper *    clipper;                    // pointer to the clipper object
+	IDirectDrawGammaControl *gamma;                     // pointer to the gamma control object
 
-	DDSURFACEDESC2			primarydesc;				// description of the primary surface
-	DDSURFACEDESC2			blitdesc;					// description of the blitting surface
-	DDSURFACEDESC2			origmode;					// original video mode
+	DDSURFACEDESC2          primarydesc;                // description of the primary surface
+	DDSURFACEDESC2          blitdesc;                   // description of the blitting surface
+	DDSURFACEDESC2          origmode;                   // original video mode
 
-	DDCAPS					ddcaps;						// capabilities of the device
-	DDCAPS					helcaps;					// capabilities of the hardware
+	DDCAPS                  ddcaps;                     // capabilities of the device
+	DDCAPS                  helcaps;                    // capabilities of the hardware
 
-	void *					membuffer;					// memory buffer for complex rendering
-	UINT32					membuffersize;				// current size of the memory buffer
+	void *                  membuffer;                  // memory buffer for complex rendering
+	UINT32                  membuffersize;              // current size of the memory buffer
 };
 
 
 /* monitor_enum_info holds information during a monitor enumeration */
-typedef struct _monitor_enum_info monitor_enum_info;
-struct _monitor_enum_info
+struct monitor_enum_info
 {
-	win_monitor_info *		monitor;					// pointer to monitor we want
-	GUID					guid;						// GUID of the one we found
-	GUID *					guid_ptr;					// pointer to our GUID
-	int						foundit;					// TRUE if we found what we wanted
+	win_monitor_info *      monitor;                    // pointer to monitor we want
+	GUID                    guid;                       // GUID of the one we found
+	GUID *                  guid_ptr;                   // pointer to our GUID
+	int                     foundit;                    // TRUE if we found what we wanted
 };
 
 
 /* mode_enum_info holds information during a display mode enumeration */
-typedef struct _mode_enum_info mode_enum_info;
-struct _mode_enum_info
+struct mode_enum_info
 {
-	win_window_info *		window;
-	INT32					minimum_width, minimum_height;
-	INT32					target_width, target_height;
-	double					target_refresh;
-	float					best_score;
+	win_window_info *       window;
+	INT32                   minimum_width, minimum_height;
+	INT32                   target_width, target_height;
+	double                  target_refresh;
+	float                   best_score;
 };
 
 
@@ -200,16 +180,6 @@ static int config_adapter_mode(win_window_info *window);
 static void get_adapter_for_monitor(dd_info *dd, win_monitor_info *monitor);
 static void pick_best_mode(win_window_info *window);
 
-// rendering
-static void drawdd_rgb888_draw_primitives(const render_primitive_list &primlist, void *dstdata, UINT32 width, UINT32 height, UINT32 pitch);
-static void drawdd_bgr888_draw_primitives(const render_primitive_list &primlist, void *dstdata, UINT32 width, UINT32 height, UINT32 pitch);
-static void drawdd_rgb565_draw_primitives(const render_primitive_list &primlist, void *dstdata, UINT32 width, UINT32 height, UINT32 pitch);
-static void drawdd_rgb555_draw_primitives(const render_primitive_list &primlist, void *dstdata, UINT32 width, UINT32 height, UINT32 pitch);
-static void drawdd_rgb888_nr_draw_primitives(const render_primitive_list &primlist, void *dstdata, UINT32 width, UINT32 height, UINT32 pitch);
-static void drawdd_bgr888_nr_draw_primitives(const render_primitive_list &primlist, void *dstdata, UINT32 width, UINT32 height, UINT32 pitch);
-static void drawdd_rgb565_nr_draw_primitives(const render_primitive_list &primlist, void *dstdata, UINT32 width, UINT32 height, UINT32 pitch);
-static void drawdd_rgb555_nr_draw_primitives(const render_primitive_list &primlist, void *dstdata, UINT32 width, UINT32 height, UINT32 pitch);
-
 
 
 //============================================================
@@ -251,6 +221,8 @@ int drawdd_init(running_machine &machine, win_draw_callbacks *callbacks)
 	callbacks->window_init = drawdd_window_init;
 	callbacks->window_get_primitives = drawdd_window_get_primitives;
 	callbacks->window_draw = drawdd_window_draw;
+	callbacks->window_save = NULL;
+	callbacks->window_record = NULL;
 	callbacks->window_destroy = drawdd_window_destroy;
 
 	mame_printf_verbose("DirectDraw: Using DirectDraw 7\n");
@@ -405,10 +377,10 @@ static int drawdd_window_draw(win_window_info *window, HDC dc, int update)
 		// based on the target format, use one of our standard renderers
 		switch (dd->blitdesc.ddpfPixelFormat.dwRBitMask)
 		{
-			case 0x00ff0000:	drawdd_rgb888_draw_primitives(*window->primlist, dd->membuffer, dd->blitwidth, dd->blitheight, dd->blitwidth);	break;
-			case 0x000000ff:	drawdd_bgr888_draw_primitives(*window->primlist, dd->membuffer, dd->blitwidth, dd->blitheight, dd->blitwidth);	break;
-			case 0xf800:		drawdd_rgb565_draw_primitives(*window->primlist, dd->membuffer, dd->blitwidth, dd->blitheight, dd->blitwidth);	break;
-			case 0x7c00:		drawdd_rgb555_draw_primitives(*window->primlist, dd->membuffer, dd->blitwidth, dd->blitheight, dd->blitwidth);	break;
+			case 0x00ff0000:    software_renderer<UINT32, 0,0,0, 16,8,0>::draw_primitives(*window->primlist, dd->membuffer, dd->blitwidth, dd->blitheight, dd->blitwidth);  break;
+			case 0x000000ff:    software_renderer<UINT32, 0,0,0, 0,8,16>::draw_primitives(*window->primlist, dd->membuffer, dd->blitwidth, dd->blitheight, dd->blitwidth);  break;
+			case 0xf800:        software_renderer<UINT16, 3,2,3, 11,5,0>::draw_primitives(*window->primlist, dd->membuffer, dd->blitwidth, dd->blitheight, dd->blitwidth);  break;
+			case 0x7c00:        software_renderer<UINT16, 3,3,3, 10,5,0>::draw_primitives(*window->primlist, dd->membuffer, dd->blitwidth, dd->blitheight, dd->blitwidth);  break;
 			default:
 				mame_printf_verbose("DirectDraw: Unknown target mode: R=%08X G=%08X B=%08X\n", (int)dd->blitdesc.ddpfPixelFormat.dwRBitMask, (int)dd->blitdesc.ddpfPixelFormat.dwGBitMask, (int)dd->blitdesc.ddpfPixelFormat.dwBBitMask);
 				break;
@@ -441,10 +413,10 @@ static int drawdd_window_draw(win_window_info *window, HDC dc, int update)
 		// based on the target format, use one of our standard renderers
 		switch (dd->blitdesc.ddpfPixelFormat.dwRBitMask)
 		{
-			case 0x00ff0000:	drawdd_rgb888_nr_draw_primitives(*window->primlist, dd->blitdesc.lpSurface, dd->blitwidth, dd->blitheight, dd->blitdesc.lPitch / 4);	break;
-			case 0x000000ff:	drawdd_bgr888_nr_draw_primitives(*window->primlist, dd->blitdesc.lpSurface, dd->blitwidth, dd->blitheight, dd->blitdesc.lPitch / 4);	break;
-			case 0xf800:		drawdd_rgb565_nr_draw_primitives(*window->primlist, dd->blitdesc.lpSurface, dd->blitwidth, dd->blitheight, dd->blitdesc.lPitch / 2);	break;
-			case 0x7c00:		drawdd_rgb555_nr_draw_primitives(*window->primlist, dd->blitdesc.lpSurface, dd->blitwidth, dd->blitheight, dd->blitdesc.lPitch / 2);	break;
+			case 0x00ff0000:    software_renderer<UINT32, 0,0,0, 16,8,0, true>::draw_primitives(*window->primlist, dd->blitdesc.lpSurface, dd->blitwidth, dd->blitheight, dd->blitdesc.lPitch / 4); break;
+			case 0x000000ff:    software_renderer<UINT32, 0,0,0, 0,8,16, true>::draw_primitives(*window->primlist, dd->blitdesc.lpSurface, dd->blitwidth, dd->blitheight, dd->blitdesc.lPitch / 4); break;
+			case 0xf800:        software_renderer<UINT16, 3,2,3, 11,5,0, true>::draw_primitives(*window->primlist, dd->blitdesc.lpSurface, dd->blitwidth, dd->blitheight, dd->blitdesc.lPitch / 2); break;
+			case 0x7c00:        software_renderer<UINT16, 3,3,3, 10,5,0, true>::draw_primitives(*window->primlist, dd->blitdesc.lpSurface, dd->blitwidth, dd->blitheight, dd->blitdesc.lPitch / 2); break;
 			default:
 				mame_printf_verbose("DirectDraw: Unknown target mode: R=%08X G=%08X B=%08X\n", (int)dd->blitdesc.ddpfPixelFormat.dwRBitMask, (int)dd->blitdesc.ddpfPixelFormat.dwGBitMask, (int)dd->blitdesc.ddpfPixelFormat.dwBBitMask);
 				break;
@@ -1328,9 +1300,9 @@ static void pick_best_mode(win_window_info *window)
 
 	// determine the refresh rate of the primary screen
 	einfo.target_refresh = 60.0;
-	const screen_device_config *primary_screen = window->machine().config().first_screen();
+	const screen_device *primary_screen = window->machine().config().first_screen();
 	if (primary_screen != NULL)
-		einfo.target_refresh = ATTOSECONDS_TO_HZ(primary_screen->refresh());
+		einfo.target_refresh = ATTOSECONDS_TO_HZ(primary_screen->refresh_attoseconds());
 	printf("Target refresh = %f\n", einfo.target_refresh);
 
 	// if we're not stretching, allow some slop on the minimum since we can handle it
@@ -1357,107 +1329,3 @@ static void pick_best_mode(win_window_info *window)
 	if (result != DD_OK) mame_printf_verbose("DirectDraw: Error %08X during EnumDisplayModes call\n", (int)result);
 	mame_printf_verbose("DirectDraw: Mode selected = %4dx%4d@%3dHz\n", dd->width, dd->height, dd->refresh);
 }
-
-
-
-//============================================================
-//  SOFTWARE RENDERING
-//============================================================
-
-#define FUNC_PREFIX(x)		drawdd_rgb888_##x
-#define PIXEL_TYPE			UINT32
-#define SRCSHIFT_R			0
-#define SRCSHIFT_G			0
-#define SRCSHIFT_B			0
-#define DSTSHIFT_R			16
-#define DSTSHIFT_G			8
-#define DSTSHIFT_B			0
-
-#include "rendersw.c"
-
-#define FUNC_PREFIX(x)		drawdd_bgr888_##x
-#define PIXEL_TYPE			UINT32
-#define SRCSHIFT_R			0
-#define SRCSHIFT_G			0
-#define SRCSHIFT_B			0
-#define DSTSHIFT_R			0
-#define DSTSHIFT_G			8
-#define DSTSHIFT_B			16
-
-#include "rendersw.c"
-
-#define FUNC_PREFIX(x)		drawdd_rgb565_##x
-#define PIXEL_TYPE			UINT16
-#define SRCSHIFT_R			3
-#define SRCSHIFT_G			2
-#define SRCSHIFT_B			3
-#define DSTSHIFT_R			11
-#define DSTSHIFT_G			5
-#define DSTSHIFT_B			0
-
-#include "rendersw.c"
-
-#define FUNC_PREFIX(x)		drawdd_rgb555_##x
-#define PIXEL_TYPE			UINT16
-#define SRCSHIFT_R			3
-#define SRCSHIFT_G			3
-#define SRCSHIFT_B			3
-#define DSTSHIFT_R			10
-#define DSTSHIFT_G			5
-#define DSTSHIFT_B			0
-
-#include "rendersw.c"
-
-
-
-//============================================================
-//  SOFTWARE RENDERING -- NO READING VARIANTS
-//============================================================
-
-#define FUNC_PREFIX(x)		drawdd_rgb888_nr_##x
-#define PIXEL_TYPE			UINT32
-#define SRCSHIFT_R			0
-#define SRCSHIFT_G			0
-#define SRCSHIFT_B			0
-#define DSTSHIFT_R			16
-#define DSTSHIFT_G			8
-#define DSTSHIFT_B			0
-#define NO_DEST_READ		1
-
-#include "rendersw.c"
-
-#define FUNC_PREFIX(x)		drawdd_bgr888_nr_##x
-#define PIXEL_TYPE			UINT32
-#define SRCSHIFT_R			0
-#define SRCSHIFT_G			0
-#define SRCSHIFT_B			0
-#define DSTSHIFT_R			0
-#define DSTSHIFT_G			8
-#define DSTSHIFT_B			16
-#define NO_DEST_READ		1
-
-#include "rendersw.c"
-
-#define FUNC_PREFIX(x)		drawdd_rgb565_nr_##x
-#define PIXEL_TYPE			UINT16
-#define SRCSHIFT_R			3
-#define SRCSHIFT_G			2
-#define SRCSHIFT_B			3
-#define DSTSHIFT_R			11
-#define DSTSHIFT_G			5
-#define DSTSHIFT_B			0
-#define NO_DEST_READ		1
-
-#include "rendersw.c"
-
-#define FUNC_PREFIX(x)		drawdd_rgb555_nr_##x
-#define PIXEL_TYPE			UINT16
-#define SRCSHIFT_R			3
-#define SRCSHIFT_G			3
-#define SRCSHIFT_B			3
-#define DSTSHIFT_R			10
-#define DSTSHIFT_G			5
-#define DSTSHIFT_B			0
-#define NO_DEST_READ		1
-
-#include "rendersw.c"

@@ -4,18 +4,17 @@
 #include "kan_panb.h"
 #include "includes/snowbros.h"
 
-SCREEN_UPDATE( honeydol )
+UINT32 snowbros_state::screen_update_honeydol(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	snowbros_state *state = screen->machine().driver_data<snowbros_state>();
-	UINT16 *spriteram16 = state->m_bootleg_spriteram16;
+	UINT16 *spriteram16 = m_bootleg_spriteram16;
 	int sx=0, sy=0, x=0, y=0, offs;
 	/* sprites clip on left / right edges when scrolling, but it seems correct,
-       no extra sprite attribute bits are set during this time, the sprite co-ordinates
-       are simply set to 0 */
+	   no extra sprite attribute bits are set during this time, the sprite co-ordinates
+	   are simply set to 0 */
 
 	/* not standard snowbros video */
 
-	bitmap_fill(bitmap,cliprect,0xf0);
+	bitmap.fill(0xf0, cliprect);
 
 	for (offs = 0x0000/2;offs < 0x2000/2;offs += 8)
 	{
@@ -33,7 +32,7 @@ SCREEN_UPDATE( honeydol )
 		x = dx;
 		y = dy;
 
-		if (flip_screen_get(screen->machine()))
+		if (flip_screen())
 		{
 			sx = 240 - x;
 			sy = 240 - y;
@@ -46,7 +45,7 @@ SCREEN_UPDATE( honeydol )
 			sy = y;
 		}
 
-		drawgfx_transpen(bitmap,cliprect,screen->machine().gfx[1],
+		drawgfx_transpen(bitmap,cliprect,machine().gfx[1],
 				tile,
 				tilecolour,
 				flipx, flipy,
@@ -64,7 +63,7 @@ SCREEN_UPDATE( honeydol )
 		x = dx;
 		y = dy;
 
-		if (flip_screen_get(screen->machine()))
+		if (flip_screen())
 		{
 			sx = 240 - x;
 			sy = 240 - y;
@@ -80,7 +79,7 @@ SCREEN_UPDATE( honeydol )
 		tilecolour = (tilecolour&0x03f0) >> 4;
 		tilecolour ^=0x3f; // unusual, but correct..
 
-		drawgfx_transpen(bitmap,cliprect,screen->machine().gfx[0],
+		drawgfx_transpen(bitmap,cliprect,machine().gfx[0],
 				tile,
 				tilecolour,
 				flipx, flipy,
@@ -90,18 +89,17 @@ SCREEN_UPDATE( honeydol )
 }
 
 
-SCREEN_UPDATE( twinadv )
+UINT32 snowbros_state::screen_update_twinadv(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	snowbros_state *state = screen->machine().driver_data<snowbros_state>();
-	UINT16 *spriteram16 = state->m_bootleg_spriteram16;
+	UINT16 *spriteram16 = m_bootleg_spriteram16;
 	int sx=0, sy=0, x=0, y=0, offs;
 	/* sprites clip on left / right edges when scrolling, but it seems correct,
-       no extra sprite attribute bits are set during this time, the sprite co-ordinates
-       are simply set to 0 */
+	   no extra sprite attribute bits are set during this time, the sprite co-ordinates
+	   are simply set to 0 */
 
 	/* not standard snowbros video */
 
-	bitmap_fill(bitmap,cliprect,0xf0);
+	bitmap.fill(0xf0, cliprect);
 
 	for (offs = 0x0000/2;offs < 0x2000/2;offs += 8)
 	{
@@ -120,7 +118,7 @@ SCREEN_UPDATE( twinadv )
 		x = dx;
 		y = dy;
 
-		if (flip_screen_get(screen->machine()))
+		if (flip_screen())
 		{
 			sx = 240 - x;
 			sy = 240 - y;
@@ -136,7 +134,7 @@ SCREEN_UPDATE( twinadv )
 		tilecolour = (tilecolour&0x00f0) >> 4;
 		tilecolour ^=0xf; // unusual, but correct..
 
-		drawgfx_transpen(bitmap,cliprect,screen->machine().gfx[0],
+		drawgfx_transpen(bitmap,cliprect,machine().gfx[0],
 				tile,
 				tilecolour,
 				flipx, flipy,
@@ -146,15 +144,14 @@ SCREEN_UPDATE( twinadv )
 }
 
 
-SCREEN_UPDATE( wintbob )
+UINT32 snowbros_state::screen_update_wintbob(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	snowbros_state *state = screen->machine().driver_data<snowbros_state>();
-	UINT16 *spriteram16 = state->m_bootleg_spriteram16;
+	UINT16 *spriteram16 = m_bootleg_spriteram16;
 	int offs;
 
-	bitmap_fill(bitmap,cliprect,get_black_pen(screen->machine()));
+	bitmap.fill(get_black_pen(machine()), cliprect);
 
-	for (offs = 0;offs < state->m_spriteram_size/2;offs += 8)
+	for (offs = 0;offs < m_bootleg_spriteram16.bytes()/2;offs += 8)
 	{
 		int xpos  = spriteram16[offs] & 0xff;
 		int ypos  = spriteram16[offs+4] & 0xff;
@@ -169,7 +166,7 @@ SCREEN_UPDATE( wintbob )
 
 		if (wrapr == 8) xpos -= 256;
 
-		if (flip_screen_get(screen->machine()))
+		if (flip_screen())
 		{
 			xpos = 240 - xpos;
 			ypos = 240 - ypos;
@@ -179,7 +176,7 @@ SCREEN_UPDATE( wintbob )
 
 		if ((xpos > -16) && (ypos > 0) && (xpos < 256) && (ypos < 240) && (disbl !=2))
 		{
-			drawgfx_transpen(bitmap,cliprect,screen->machine().gfx[0],
+			drawgfx_transpen(bitmap,cliprect,machine().gfx[0],
 					tilen,
 					colr,
 					flipx, flipy,
@@ -190,41 +187,40 @@ SCREEN_UPDATE( wintbob )
 }
 
 
-SCREEN_UPDATE( snowbro3 )
+UINT32 snowbros_state::screen_update_snowbro3(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	snowbros_state *state = screen->machine().driver_data<snowbros_state>();
-	UINT16 *spriteram16 = state->m_bootleg_spriteram16;
+	UINT16 *spriteram16 = m_bootleg_spriteram16;
 	int sx=0, sy=0, x=0, y=0, offs;
 
 	/*
-     * Sprite Tile Format
-     * ------------------
-     *
-     * Byte | Bit(s)   | Use
-     * -----+-76543210-+----------------
-     *  0-5 | -------- | ?
-     *  6   | -------- | ?
-     *  7   | xxxx.... | Palette Bank
-     *  7   | .......x | XPos - Sign Bit
-     *  9   | xxxxxxxx | XPos
-     *  7   | ......x. | YPos - Sign Bit
-     *  B   | xxxxxxxx | YPos
-     *  7   | .....x.. | Use Relative offsets
-     *  C   | -------- | ?
-     *  D   | xxxxxxxx | Sprite Number (low 8 bits)
-     *  E   | -------- | ?
-     *  F   | ....xxxx | Sprite Number (high 4 bits)
-     *  F   | x....... | Flip Sprite Y-Axis
-     *  F   | .x...... | Flip Sprite X-Axis
-     */
+	 * Sprite Tile Format
+	 * ------------------
+	 *
+	 * Byte | Bit(s)   | Use
+	 * -----+-76543210-+----------------
+	 *  0-5 | -------- | ?
+	 *  6   | -------- | ?
+	 *  7   | xxxx.... | Palette Bank
+	 *  7   | .......x | XPos - Sign Bit
+	 *  9   | xxxxxxxx | XPos
+	 *  7   | ......x. | YPos - Sign Bit
+	 *  B   | xxxxxxxx | YPos
+	 *  7   | .....x.. | Use Relative offsets
+	 *  C   | -------- | ?
+	 *  D   | xxxxxxxx | Sprite Number (low 8 bits)
+	 *  E   | -------- | ?
+	 *  F   | ....xxxx | Sprite Number (high 4 bits)
+	 *  F   | x....... | Flip Sprite Y-Axis
+	 *  F   | .x...... | Flip Sprite X-Axis
+	 */
 
 	/* This clears & redraws the entire screen each pass */
 
-	bitmap_fill(bitmap,cliprect,get_black_pen(screen->machine()));
+	bitmap.fill(get_black_pen(machine()), cliprect);
 
-	for (offs = 0;offs < state->m_spriteram_size/2;offs += 8)
+	for (offs = 0;offs < m_bootleg_spriteram16.bytes()/2;offs += 8)
 	{
-		gfx_element *gfx = screen->machine().gfx[0];
+		gfx_element *gfx = machine().gfx[0];
 		int dx = spriteram16[offs+4] & 0xff;
 		int dy = spriteram16[offs+5] & 0xff;
 		int tilecolour = spriteram16[offs+3];
@@ -249,7 +245,7 @@ SCREEN_UPDATE( snowbro3 )
 		if (x > 511) x &= 0x1ff;
 		if (y > 511) y &= 0x1ff;
 
-		if (flip_screen_get(screen->machine()))
+		if (flip_screen())
 		{
 			sx = 240 - x;
 			sy = 240 - y;
@@ -264,7 +260,7 @@ SCREEN_UPDATE( snowbro3 )
 
 		if (offs < 0x800) /* i guess this is the right way */
 		{
-			gfx = screen->machine().gfx[1];
+			gfx = machine().gfx[1];
 			tilecolour = 0x10;
 		}
 

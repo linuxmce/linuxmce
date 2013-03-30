@@ -7,16 +7,19 @@
 class ginganin_state : public driver_device
 {
 public:
-	ginganin_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	ginganin_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_txtram(*this, "txtram"),
+		m_spriteram(*this, "spriteram"),
+		m_vregs(*this, "vregs"),
+		m_fgram(*this, "fgram"){ }
 
 	/* memory pointers */
-	UINT16 *    m_fgram;
-	UINT16 *    m_txtram;
-	UINT16 *    m_vregs;
-	UINT16 *    m_spriteram;
+	required_shared_ptr<UINT16> m_txtram;
+	required_shared_ptr<UINT16> m_spriteram;
+	required_shared_ptr<UINT16> m_vregs;
+	required_shared_ptr<UINT16> m_fgram;
 //  UINT16 *    m_paletteram; // currently this uses generic palette handling
-	size_t      m_spriteram_size;
 
 	/* video-related */
 	tilemap_t     *m_bg_tilemap;
@@ -28,27 +31,19 @@ public:
 	int         m_posx;
 	int         m_posy;
 #endif
-	/* sound-related */
-	UINT8       m_MC6840_index0;
-	UINT8       m_MC6840_register0;
-	UINT8       m_MC6840_index1;
-	UINT8       m_MC6840_register1;
-	int         m_S_TEMPO;
-	int         m_S_TEMPO_OLD;
-	int         m_MC6809_CTR;
-	int         m_MC6809_FLAG;
 
 	/* devices */
-	device_t *m_audiocpu;
+	cpu_device *m_audiocpu;
+	DECLARE_WRITE16_MEMBER(ginganin_fgram16_w);
+	DECLARE_WRITE16_MEMBER(ginganin_txtram16_w);
+	DECLARE_WRITE16_MEMBER(ginganin_vregs16_w);
+	DECLARE_WRITE8_MEMBER(ptm_irq);
+	DECLARE_DRIVER_INIT(ginganin);
+	TILE_GET_INFO_MEMBER(get_bg_tile_info);
+	TILE_GET_INFO_MEMBER(get_fg_tile_info);
+	TILE_GET_INFO_MEMBER(get_txt_tile_info);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	UINT32 screen_update_ginganin(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
-
-
-
-/*----------- defined in video/ginganin.c -----------*/
-
-WRITE16_HANDLER( ginganin_fgram16_w );
-WRITE16_HANDLER( ginganin_txtram16_w );
-WRITE16_HANDLER( ginganin_vregs16_w );
-
-VIDEO_START( ginganin );
-SCREEN_UPDATE( ginganin );

@@ -27,59 +27,44 @@
 
 *********************************************************************************/
 
+
 #include "emu.h"
 #include "includes/zerozone.h"
 #include "cpu/z80/z80.h"
 #include "cpu/m68000/m68000.h"
 #include "sound/okim6295.h"
 
-static READ16_HANDLER( zerozone_input_r )
+
+WRITE16_MEMBER( zerozone_state::sound_w )
 {
-	switch (offset)
-	{
-		case 0x00:
-			return input_port_read(space->machine(), "SYSTEM");
-		case 0x01:
-			return input_port_read(space->machine(), "INPUTS");
-		case 0x04:
-			return input_port_read(space->machine(), "DSWB");
-		case 0x05:
-			return input_port_read(space->machine(), "DSWA");
-	}
-
-	logerror("CPU #0 PC %06x: warning - read unmapped memory address %06x\n", cpu_get_pc(&space->device()), 0x800000 + offset);
-	return 0x00;
-}
-
-
-static WRITE16_HANDLER( zerozone_sound_w )
-{
-	zerozone_state *state = space->machine().driver_data<zerozone_state>();
-
 	if (ACCESSING_BITS_8_15)
 	{
-		soundlatch_w(space, offset, data >> 8);
-		device_set_input_line_and_vector(state->m_audiocpu, 0, HOLD_LINE, 0xff);
+		soundlatch_byte_w(space, offset, data >> 8);
+		m_audiocpu->set_input_line_and_vector(0, HOLD_LINE, 0xff);
 	}
 }
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16 )
+
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16, zerozone_state )
 	AM_RANGE(0x000000, 0x01ffff) AM_ROM
-	AM_RANGE(0x080000, 0x08000f) AM_READ(zerozone_input_r)
-	AM_RANGE(0x084000, 0x084001) AM_WRITE(zerozone_sound_w)
-	AM_RANGE(0x088000, 0x0881ff) AM_RAM_WRITE(paletteram16_RRRRGGGGBBBBRGBx_word_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0x098000, 0x098001) AM_RAM		/* Watchdog? */
-	AM_RANGE(0x09ce00, 0x09ffff) AM_RAM_WRITE(zerozone_tilemap_w) AM_BASE_SIZE_MEMBER(zerozone_state, m_videoram, m_videoram_size)
-	AM_RANGE(0x0b4000, 0x0b4001) AM_WRITE(zerozone_tilebank_w)
+	AM_RANGE(0x080000, 0x080001) AM_READ_PORT("SYSTEM")
+	AM_RANGE(0x080002, 0x080003) AM_READ_PORT("INPUTS")
+	AM_RANGE(0x080008, 0x080009) AM_READ_PORT("DSWB")
+	AM_RANGE(0x08000a, 0x08000b) AM_READ_PORT("DSWA")
+	AM_RANGE(0x084000, 0x084001) AM_WRITE(sound_w)
+	AM_RANGE(0x088000, 0x0881ff) AM_RAM_WRITE(paletteram_RRRRGGGGBBBBRGBx_word_w) AM_SHARE("paletteram")
+	AM_RANGE(0x098000, 0x098001) AM_RAM     /* Watchdog? */
+	AM_RANGE(0x09ce00, 0x09ffff) AM_RAM_WRITE(tilemap_w) AM_SHARE("videoram")
+	AM_RANGE(0x0b4000, 0x0b4001) AM_WRITE(tilebank_w)
 	AM_RANGE(0x0c0000, 0x0cffff) AM_RAM
-	AM_RANGE(0x0f8000, 0x0f87ff) AM_RAM		/* Never read from */
+	AM_RANGE(0x0f8000, 0x0f87ff) AM_RAM     /* Never read from */
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, zerozone_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x87ff) AM_RAM
-	AM_RANGE(0x9800, 0x9800) AM_DEVREADWRITE_MODERN("oki", okim6295_device, read, write)
-	AM_RANGE(0xa000, 0xa000) AM_READ(soundlatch_r)
+	AM_RANGE(0x9800, 0x9800) AM_DEVREADWRITE("oki", okim6295_device, read, write)
+	AM_RANGE(0xa000, 0xa000) AM_READ(soundlatch_byte_r)
 ADDRESS_MAP_END
 
 
@@ -123,11 +108,11 @@ static INPUT_PORTS_START( zerozone )
 	PORT_DIPSETTING(      0x0005, DEF_STR( 1C_3C ) )
 	PORT_DIPSETTING(      0x0004, DEF_STR( 1C_4C ) )
 	PORT_DIPNAME( 0x0008, 0x0008, DEF_STR( Difficulty ) )
-	PORT_DIPSETTING(      0x0008, "In Game Default" )		// 130, 162 or 255 "lines"
-	PORT_DIPSETTING(      0x0000, "Always Hard" )			// 255 "lines"
+	PORT_DIPSETTING(      0x0008, "In Game Default" )       // 130, 162 or 255 "lines"
+	PORT_DIPSETTING(      0x0000, "Always Hard" )           // 255 "lines"
 	PORT_DIPNAME( 0x0010, 0x0010, "Speed" )
-	PORT_DIPSETTING(      0x0010, DEF_STR( Normal ) )			// Drop every 20 frames
-	PORT_DIPSETTING(      0x0000, "Fast" )				// Drop every 18 frames
+	PORT_DIPSETTING(      0x0010, DEF_STR( Normal ) )           // Drop every 20 frames
+	PORT_DIPSETTING(      0x0000, "Fast" )              // Drop every 18 frames
 	PORT_DIPNAME( 0x0020, 0x0020, DEF_STR( Demo_Sounds ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0020, DEF_STR( On ) )
@@ -154,13 +139,13 @@ INPUT_PORTS_END
 
 static const gfx_layout charlayout =
 {
-	8,8,	/* 8*8 characters */
-	RGN_FRAC(1,1),	/* 4096 characters */
-	4,	/* 4 bits per pixel */
+	8,8,    /* 8*8 characters */
+	RGN_FRAC(1,1),  /* 4096 characters */
+	4,  /* 4 bits per pixel */
 	{ 0, 1, 2, 3 },
 	{ 0, 4, 8+0, 8+4, 16+0, 16+4, 24+0, 24+4 },
 	{ 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32 },
-	32*8	/* every sprite takes 32 consecutive bytes */
+	32*8    /* every sprite takes 32 consecutive bytes */
 };
 
 
@@ -169,49 +154,38 @@ static GFXDECODE_START( zerozone )
 GFXDECODE_END
 
 
-static MACHINE_START( zerozone )
+void zerozone_state::machine_start()
 {
-	zerozone_state *state = machine.driver_data<zerozone_state>();
-
-	state->m_audiocpu = machine.device("audiocpu");
-
-	state->save_item(NAME(state->m_tilebank));
+	save_item(NAME(m_tilebank));
 }
 
-static MACHINE_RESET( zerozone )
+void zerozone_state::machine_reset()
 {
-	zerozone_state *state = machine.driver_data<zerozone_state>();
-	state->m_tilebank = 0;
+	m_tilebank = 0;
 }
 
 static MACHINE_CONFIG_START( zerozone, zerozone_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M68000, 10000000)	/* 10 MHz */
+	MCFG_CPU_ADD("maincpu", M68000, 10000000)   /* 10 MHz */
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT("screen", irq1_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", zerozone_state,  irq1_line_hold)
 
-	MCFG_CPU_ADD("audiocpu", Z80, 1000000)	/* 1 MHz ??? */
+	MCFG_CPU_ADD("audiocpu", Z80, 1000000)  /* 1 MHz ??? */
 	MCFG_CPU_PROGRAM_MAP(sound_map)
 
 	MCFG_QUANTUM_TIME(attotime::from_hz(600))
-
-	MCFG_MACHINE_START(zerozone)
-	MCFG_MACHINE_RESET(zerozone)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
+	MCFG_SCREEN_UPDATE_DRIVER(zerozone_state, screen_update)
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(1*8, 47*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(zerozone)
 
 	MCFG_GFXDECODE(zerozone)
 	MCFG_PALETTE_LENGTH(256)
-
-	MCFG_VIDEO_START(zerozone)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -262,5 +236,5 @@ ROM_START( lvgirl94 )
 ROM_END
 
 
-GAME( 1993, zerozone, 0, zerozone, zerozone, 0, ROT0, "Comad", "Zero Zone", GAME_SUPPORTS_SAVE )
-GAME( 1994, lvgirl94, 0, zerozone, zerozone, 0, ROT0, "Comad", "Las Vegas Girl (Girl '94)", GAME_SUPPORTS_SAVE )
+GAME( 1993, zerozone, 0, zerozone, zerozone, driver_device, 0, ROT0, "Comad", "Zero Zone", GAME_SUPPORTS_SAVE )
+GAME( 1994, lvgirl94, 0, zerozone, zerozone, driver_device, 0, ROT0, "Comad", "Las Vegas Girl (Girl '94)", GAME_SUPPORTS_SAVE )

@@ -9,7 +9,6 @@
 
 #include "emu.h"
 #include "msm6255.h"
-#include "machine/devhelpr.h"
 
 
 
@@ -35,32 +34,32 @@ enum
 };
 
 
-#define MOR_GRAPHICS		0x01
-#define MOR_4_BIT_PARALLEL	0x02
-#define MOR_2_BIT_PARALLEL	0x04
-#define MOR_DISPLAY_ON		0x08
-#define MOR_CURSOR_BLINK	0x10
-#define MOR_CURSOR_ON		0x20
-#define MOR_BLINK_TIME_16	0x40
+#define MOR_GRAPHICS        0x01
+#define MOR_4_BIT_PARALLEL  0x02
+#define MOR_2_BIT_PARALLEL  0x04
+#define MOR_DISPLAY_ON      0x08
+#define MOR_CURSOR_BLINK    0x10
+#define MOR_CURSOR_ON       0x20
+#define MOR_BLINK_TIME_16   0x40
 
 
-#define PR_HP_4				0x03
-#define PR_HP_5				0x04
-#define PR_HP_6				0x05
-#define PR_HP_7				0x06
-#define PR_HP_8				0x07
-#define PR_HP_MASK			0x07
-#define PR_VP_MASK			0xf0
+#define PR_HP_4             0x03
+#define PR_HP_5             0x04
+#define PR_HP_6             0x05
+#define PR_HP_7             0x06
+#define PR_HP_8             0x07
+#define PR_HP_MASK          0x07
+#define PR_VP_MASK          0xf0
 
 
-#define HNR_HN_MASK			0x7f
+#define HNR_HN_MASK         0x7f
 
 
-#define DVR_DN_MASK			0x7f
+#define DVR_DN_MASK         0x7f
 
 
-#define CPR_CPD_MASK		0x0f
-#define CPR_CPU_MASK		0xf0
+#define CPR_CPD_MASK        0x0f
+#define CPR_CPU_MASK        0xf0
 
 
 
@@ -68,40 +67,14 @@ enum
 //  GLOBAL VARIABLES
 //**************************************************************************
 
-// devices
-const device_type MSM6255 = msm6255_device_config::static_alloc_device_config;
+// device type definition
+const device_type MSM6255 = &device_creator<msm6255_device>;
 
 
-
-//**************************************************************************
-//  DEVICE CONFIGURATION
-//**************************************************************************
-
-GENERIC_DEVICE_CONFIG_SETUP(msm6255, "MSM6255")
-
-
-//-------------------------------------------------
-//  device_config_complete - perform any
-//  operations now that the configuration is
-//  complete
-//-------------------------------------------------
-
-void msm6255_device_config::device_config_complete()
-{
-	// inherit a copy of the static data
-	const msm6255_interface *intf = reinterpret_cast<const msm6255_interface *>(static_config());
-	if (intf != NULL)
-	{
-		*static_cast<msm6255_interface *>(this) = *intf;
-
-		m_char_ram_r = intf->m_char_ram_r;
-	}
-	// or initialize to defaults if none provided
-	else
-	{
-		fatalerror("Interface not specified!");
-	}
-}
+// default address map
+static ADDRESS_MAP_START( msm6255, AS_0, 8, msm6255_device )
+	AM_RANGE(0x00000, 0xfffff) AM_RAM
+ADDRESS_MAP_END
 
 
 
@@ -110,12 +83,23 @@ void msm6255_device_config::device_config_complete()
 //**************************************************************************
 
 //-------------------------------------------------
-//  read_video_data - read video ROM/RAM
+//  read_byte -
 //-------------------------------------------------
 
-inline UINT8 msm6255_device::read_video_data(UINT16 ma, UINT8 ra)
+inline UINT8 msm6255_device::read_byte(UINT16 ma, UINT8 ra)
 {
-	return m_config.m_char_ram_r(this, ma, ra);
+	offs_t offset;
+
+	if (m_mor & MOR_GRAPHICS)
+	{
+		offset = ma;
+	}
+	else
+	{
+		offset = ((offs_t)ma << 4) | ra;
+	}
+
+	return space().read_byte(offset);
 }
 
 
@@ -128,11 +112,27 @@ inline UINT8 msm6255_device::read_video_data(UINT16 ma, UINT8 ra)
 //  msm6255_device - constructor
 //-------------------------------------------------
 
-msm6255_device::msm6255_device(running_machine &_machine, const msm6255_device_config &config)
-    : device_t(_machine, config),
-	  m_cursor(0),
-      m_config(config)
+msm6255_device::msm6255_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, MSM6255, "MSM6255", tag, owner, clock),
+		device_memory_interface(mconfig, *this),
+		m_space_config("videoram", ENDIANNESS_LITTLE, 8, 20, 0, NULL, *ADDRESS_MAP_NAME(msm6255)),
+		m_cursor(0)
 {
+}
+
+
+//-------------------------------------------------
+//  static_set_config - configuration helper
+//-------------------------------------------------
+
+void msm6255_device::static_set_config(device_t &device, int char_clock, const char *screen_tag)
+{
+	msm6255_device &msm6255 = downcast<msm6255_device &>(device);
+
+	assert(screen_tag != NULL);
+
+	msm6255.m_char_clock = char_clock;
+	msm6255.m_screen_tag = screen_tag;
 }
 
 
@@ -143,7 +143,7 @@ msm6255_device::msm6255_device(running_machine &_machine, const msm6255_device_c
 void msm6255_device::device_start()
 {
 	// find screen
-	m_screen = m_machine.device<screen_device>(m_config.m_screen_tag);
+	m_screen = machine().device<screen_device>(m_screen_tag);
 
 	// register for state saving
 	save_item(NAME(m_ir));
@@ -168,6 +168,17 @@ void msm6255_device::device_start()
 void msm6255_device::device_reset()
 {
 	m_frame = 0;
+}
+
+
+//-------------------------------------------------
+//  memory_space_config - return a description of
+//  any address spaces owned by this device
+//-------------------------------------------------
+
+const address_space_config *msm6255_device::memory_space_config(address_spacenum spacenum) const
+{
+	return (spacenum == AS_0) ? &m_space_config : NULL;
 }
 
 
@@ -332,7 +343,7 @@ void msm6255_device::update_cursor()
 //  draw_scanline -
 //-------------------------------------------------
 
-void msm6255_device::draw_scanline(bitmap_t *bitmap, const rectangle *cliprect, int y, UINT16 ma, UINT8 ra)
+void msm6255_device::draw_scanline(bitmap_ind16 &bitmap, const rectangle &cliprect, int y, UINT16 ma, UINT8 ra)
 {
 	UINT8 hp = (m_pr & PR_HP_MASK) + 1;
 	UINT8 hn = (m_hnr & HNR_HN_MASK) + 1;
@@ -344,7 +355,7 @@ void msm6255_device::draw_scanline(bitmap_t *bitmap, const rectangle *cliprect, 
 
 	for (sx = 0; sx < hn; sx++)
 	{
-		UINT8 data = read_video_data(ma, ra);
+		UINT8 data = read_byte(ma, ra);
 
 		if (m_cursor)
 		{
@@ -359,7 +370,7 @@ void msm6255_device::draw_scanline(bitmap_t *bitmap, const rectangle *cliprect, 
 
 		for (x = 0; x < hp; x++)
 		{
-			*BITMAP_ADDR16(bitmap, y, (sx * hp) + x) = BIT(data, 7);
+			bitmap.pix16(y, (sx * hp) + x) = BIT(data, 7);
 
 			data <<= 1;
 		}
@@ -373,7 +384,7 @@ void msm6255_device::draw_scanline(bitmap_t *bitmap, const rectangle *cliprect, 
 //  update_graphics -
 //-------------------------------------------------
 
-void msm6255_device::update_graphics(bitmap_t *bitmap, const rectangle *cliprect)
+void msm6255_device::update_graphics(bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	UINT8 hn = (m_hnr & HNR_HN_MASK) + 1;
 	UINT8 nx = (m_dvr & DVR_DN_MASK) + 1;
@@ -388,11 +399,11 @@ void msm6255_device::update_graphics(bitmap_t *bitmap, const rectangle *cliprect
 	{
 		// draw upper half scanline
 		UINT16 ma = sar + (y * hn);
-		draw_scanline(bitmap, cliprect, y, ma, 0);
+		draw_scanline(bitmap, cliprect, y, ma);
 
 		// draw lower half scanline
 		ma = sar + ((y + nx) * hn);
-		draw_scanline(bitmap, cliprect, y + nx, ma, 0);
+		draw_scanline(bitmap, cliprect, y + nx, ma);
 	}
 }
 
@@ -401,7 +412,7 @@ void msm6255_device::update_graphics(bitmap_t *bitmap, const rectangle *cliprect
 //  update_text -
 //-------------------------------------------------
 
-void msm6255_device::update_text(bitmap_t *bitmap, const rectangle *cliprect)
+void msm6255_device::update_text(bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	UINT8 hn = (m_hnr & HNR_HN_MASK) + 1;
 	UINT8 vp = (m_pr & PR_VP_MASK) + 1;
@@ -432,7 +443,7 @@ void msm6255_device::update_text(bitmap_t *bitmap, const rectangle *cliprect)
 //  update_screen - update screen
 //-------------------------------------------------
 
-void msm6255_device::update_screen(bitmap_t *bitmap, const rectangle *cliprect)
+UINT32 msm6255_device::screen_update(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	if (m_mor & MOR_DISPLAY_ON)
 	{
@@ -447,6 +458,8 @@ void msm6255_device::update_screen(bitmap_t *bitmap, const rectangle *cliprect)
 	}
 	else
 	{
-		bitmap_fill(bitmap, cliprect, get_black_pen(m_machine));
+		bitmap.fill(0, cliprect);
 	}
+
+	return 0;
 }

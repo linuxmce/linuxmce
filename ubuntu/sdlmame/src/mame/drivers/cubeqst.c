@@ -21,22 +21,44 @@
 #include "cpu/m68000/m68000.h"
 #include "cpu/cubeqcpu/cubeqcpu.h"
 #include "sound/dac.h"
-#include "machine/laserdsc.h"
+#include "machine/ldpr8210.h"
 #include "machine/nvram.h"
 
 
 class cubeqst_state : public driver_device
 {
 public:
-	cubeqst_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	cubeqst_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+			m_laserdisc(*this, "laserdisc") { }
 
 	UINT8 *m_depth_buffer;
 	int m_video_field;
 	UINT8 m_io_latch;
 	UINT8 m_reset_latch;
-	device_t *m_laserdisc;
+	required_device<simutrek_special_device> m_laserdisc;
 	rgb_t *m_colormap;
+	DECLARE_WRITE16_MEMBER(palette_w);
+	DECLARE_READ16_MEMBER(line_r);
+	DECLARE_WRITE16_MEMBER(laserdisc_w);
+	DECLARE_READ16_MEMBER(laserdisc_r);
+	DECLARE_WRITE16_MEMBER(ldaud_w);
+	DECLARE_WRITE16_MEMBER(control_w);
+	DECLARE_WRITE16_MEMBER(reset_w);
+	DECLARE_WRITE16_MEMBER(io_w);
+	DECLARE_READ16_MEMBER(io_r);
+	DECLARE_READ16_MEMBER(chop_r);
+	DECLARE_READ16_MEMBER(read_rotram);
+	DECLARE_WRITE16_MEMBER(write_rotram);
+	DECLARE_READ16_MEMBER(read_sndram);
+	DECLARE_WRITE16_MEMBER(write_sndram);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_cubeqst(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(vblank);
+	TIMER_CALLBACK_MEMBER(delayed_bank_swap);
 };
 
 
@@ -48,8 +70,8 @@ public:
  *************************************/
 
 /* TODO */
-#define CUBEQST_HBLANK		320
-#define CUBEQST_VCOUNT		280
+#define CUBEQST_HBLANK      320
+#define CUBEQST_VCOUNT      280
 
 
 /*************************************
@@ -58,22 +80,18 @@ public:
  *
  *************************************/
 
-static const rectangle overlay_clip = { 0, 320-1, 0, 256-8 };
-
-static VIDEO_START( cubeqst )
+void cubeqst_state::video_start()
 {
-	cubeqst_state *state = machine.driver_data<cubeqst_state>();
-	state->m_video_field = 0;
-	state->m_depth_buffer = auto_alloc_array(machine, UINT8, 512);
+	m_video_field = 0;
+	m_depth_buffer = auto_alloc_array(machine(), UINT8, 512);
 }
 
 /* TODO: Use resistor values */
-static PALETTE_INIT( cubeqst )
+void cubeqst_state::palette_init()
 {
-	cubeqst_state *state = machine.driver_data<cubeqst_state>();
 	int i;
 
-	state->m_colormap = auto_alloc_array(machine, rgb_t, 65536);
+	m_colormap = auto_alloc_array(machine(), rgb_t, 65536);
 	for (i = 0; i < 65536; ++i)
 	{
 		UINT8 a, r, g, b, y;
@@ -84,41 +102,40 @@ static PALETTE_INIT( cubeqst )
 		r = (i >> 8) & 7;
 		y = ((i >> 12) & 0xf) * 2;
 
-		state->m_colormap[i] = MAKE_ARGB(a ? 0 : 255, y*r, y*g, y*b);
+		m_colormap[i] = MAKE_ARGB(a ? 0 : 255, y*r, y*g, y*b);
 	}
 }
 
-static WRITE16_HANDLER( palette_w )
+WRITE16_MEMBER(cubeqst_state::palette_w)
 {
-	space->machine().primary_screen->update_now();
-	COMBINE_DATA(&space->machine().generic.paletteram.u16[offset]);
+	machine().primary_screen->update_now();
+	COMBINE_DATA(&m_generic_paletteram_16[offset]);
 }
 
 /* TODO: This is a simplified version of what actually happens */
-static SCREEN_UPDATE( cubeqst )
+UINT32 cubeqst_state::screen_update_cubeqst(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	cubeqst_state *state = screen->machine().driver_data<cubeqst_state>();
 	int y;
 
 	/*
-     * Clear the display with palette RAM entry 0xff
-     * This will be either transparent or an actual colour
-    */
+	 * Clear the display with palette RAM entry 0xff
+	 * This will be either transparent or an actual colour
+	*/
 
 	/* Bit 3 selects LD/#GRAPHICS */
-	bitmap_fill(bitmap, cliprect, state->m_colormap[255]);
+	bitmap.fill(m_colormap[255], cliprect);
 
 	/* TODO: Add 1 for linebuffering? */
-	for (y = cliprect->min_y; y <= cliprect->max_y; ++y)
+	for (y = cliprect.min_y; y <= cliprect.max_y; ++y)
 	{
 		int i;
-		int num_entries = cubeqcpu_get_ptr_ram_val(screen->machine().device("line_cpu"), y);
-		UINT32 *stk_ram = cubeqcpu_get_stack_ram(screen->machine().device("line_cpu"));
-		UINT32 *dest = BITMAP_ADDR32(bitmap, y, 0);
+		int num_entries = cubeqcpu_get_ptr_ram_val(machine().device("line_cpu"), y);
+		UINT32 *stk_ram = cubeqcpu_get_stack_ram(machine().device("line_cpu"));
+		UINT32 *dest = &bitmap.pix32(y);
 		UINT32 pen;
 
 		/* Zap the depth buffer */
-		memset(state->m_depth_buffer, 0xff, 512);
+		memset(m_depth_buffer, 0xff, 512);
 
 		/* Process all the spans on this scanline */
 		if (y < 256)
@@ -155,13 +172,13 @@ static SCREEN_UPDATE( cubeqst )
 				}
 
 				/* Draw the span, testing for depth */
-				pen = state->m_colormap[screen->machine().generic.paletteram.u16[color]];
+				pen = m_colormap[m_generic_paletteram_16[color]];
 				for (x = h1; x <= h2; ++x)
 				{
-					if (!(state->m_depth_buffer[x] < depth))
+					if (!(m_depth_buffer[x] < depth))
 					{
 						dest[x] = pen;
-						state->m_depth_buffer[x] = depth;
+						m_depth_buffer[x] = depth;
 					}
 				}
 			}
@@ -171,21 +188,20 @@ static SCREEN_UPDATE( cubeqst )
 	return 0;
 }
 
-static READ16_HANDLER( line_r )
+READ16_MEMBER(cubeqst_state::line_r)
 {
 	/* I think this is unusued */
-	return space->machine().primary_screen->vpos();
+	return machine().primary_screen->vpos();
 }
 
-static INTERRUPT_GEN( vblank )
+INTERRUPT_GEN_MEMBER(cubeqst_state::vblank)
 {
-	cubeqst_state *state = device->machine().driver_data<cubeqst_state>();
-	int int_level = state->m_video_field == 0 ? 5 : 6;
+	int int_level = m_video_field == 0 ? 5 : 6;
 
-	device_set_input_line(device, int_level, HOLD_LINE);
+	device.execute().set_input_line(int_level, HOLD_LINE);
 
 	/* Update the laserdisc */
-	state->m_video_field ^= 1;
+	m_video_field ^= 1;
 }
 
 
@@ -195,31 +211,28 @@ static INTERRUPT_GEN( vblank )
  *
  *************************************/
 
-static WRITE16_HANDLER( laserdisc_w )
+WRITE16_MEMBER(cubeqst_state::laserdisc_w)
 {
-	cubeqst_state *state = space->machine().driver_data<cubeqst_state>();
-	laserdisc_data_w(state->m_laserdisc, data & 0xff);
+	m_laserdisc->data_w(data & 0xff);
 }
 
 /*
     D0: Command acknowledge
     D1: Seek status (0 = searching, 1 = ready)
 */
-static READ16_HANDLER( laserdisc_r )
+READ16_MEMBER(cubeqst_state::laserdisc_r)
 {
-	cubeqst_state *state = space->machine().driver_data<cubeqst_state>();
-	int ldp_command_flag = (laserdisc_line_r(state->m_laserdisc, LASERDISC_LINE_READY) == ASSERT_LINE) ? 0 : 1;
-	int ldp_seek_status = (laserdisc_line_r(state->m_laserdisc, LASERDISC_LINE_STATUS) == ASSERT_LINE) ? 1 : 0;
+	int ldp_command_flag = (m_laserdisc->ready_r() == ASSERT_LINE) ? 0 : 1;
+	int ldp_seek_status = (m_laserdisc->status_r() == ASSERT_LINE) ? 1 : 0;
 
 	return (ldp_seek_status << 1) | ldp_command_flag;
 }
 
 
 /* LDP audio squelch control */
-static WRITE16_HANDLER( ldaud_w )
+WRITE16_MEMBER(cubeqst_state::ldaud_w)
 {
-	cubeqst_state *state = space->machine().driver_data<cubeqst_state>();
-	simutrek_set_audio_squelch(state->m_laserdisc, data & 1 ? ASSERT_LINE : CLEAR_LINE);
+	m_laserdisc->set_external_audio_squelch(data & 1 ? ASSERT_LINE : CLEAR_LINE);
 }
 
 /*
@@ -232,10 +245,9 @@ static WRITE16_HANDLER( ldaud_w )
 
     Note: Can only be written during VBLANK (as with palette RAM)
 */
-static WRITE16_HANDLER( control_w )
+WRITE16_MEMBER(cubeqst_state::control_w)
 {
-	cubeqst_state *state = space->machine().driver_data<cubeqst_state>();
-	laserdisc_video_enable(state->m_laserdisc, data & 1);
+	m_laserdisc->video_enable(data & 1);
 }
 
 
@@ -245,19 +257,20 @@ static WRITE16_HANDLER( control_w )
  *
  *************************************/
 
-static TIMER_CALLBACK( delayed_bank_swap )
+TIMER_CALLBACK_MEMBER(cubeqst_state::delayed_bank_swap)
 {
-	cubeqcpu_swap_line_banks(machine.device("line_cpu"));
+	cubeqcpu_swap_line_banks(machine().device("line_cpu"));
 
 	/* TODO: This is a little dubious */
-	cubeqcpu_clear_stack(machine.device("line_cpu"));
+	cubeqcpu_clear_stack(machine().device("line_cpu"));
 }
 
 
 static void swap_linecpu_banks(running_machine &machine)
 {
+	cubeqst_state *state = machine.driver_data<cubeqst_state>();
 	/* Best sync up before we switch banks around */
-	machine.scheduler().synchronize(FUNC(delayed_bank_swap));
+	machine.scheduler().synchronize(timer_expired_delegate(FUNC(cubeqst_state::delayed_bank_swap),state));
 }
 
 
@@ -269,21 +282,20 @@ static void swap_linecpu_banks(running_machine &machine)
     D1: /Sound
     D2: /Disk
 */
-static WRITE16_HANDLER( reset_w )
+WRITE16_MEMBER(cubeqst_state::reset_w)
 {
-	cubeqst_state *state = space->machine().driver_data<cubeqst_state>();
-	cputag_set_input_line(space->machine(), "rotate_cpu", INPUT_LINE_RESET, data & 1 ? CLEAR_LINE : ASSERT_LINE);
-	cputag_set_input_line(space->machine(), "line_cpu", INPUT_LINE_RESET, data & 1 ? CLEAR_LINE : ASSERT_LINE);
-	cputag_set_input_line(space->machine(), "sound_cpu", INPUT_LINE_RESET, data & 2 ? CLEAR_LINE : ASSERT_LINE);
+	machine().device("rotate_cpu")->execute().set_input_line(INPUT_LINE_RESET, data & 1 ? CLEAR_LINE : ASSERT_LINE);
+	machine().device("line_cpu")->execute().set_input_line(INPUT_LINE_RESET, data & 1 ? CLEAR_LINE : ASSERT_LINE);
+	machine().device("sound_cpu")->execute().set_input_line(INPUT_LINE_RESET, data & 2 ? CLEAR_LINE : ASSERT_LINE);
 
 	/* Swap stack and pointer RAM banks on rising edge of display reset */
-	if (!BIT(state->m_reset_latch, 0) && BIT(data, 0))
-		swap_linecpu_banks(space->machine());
+	if (!BIT(m_reset_latch, 0) && BIT(data, 0))
+		swap_linecpu_banks(machine());
 
 	if (!BIT(data, 2))
-		state->m_laserdisc->reset();
+		m_laserdisc->reset();
 
-	state->m_reset_latch = data & 0xff;
+	m_reset_latch = data & 0xff;
 }
 
 
@@ -293,48 +305,46 @@ static WRITE16_HANDLER( reset_w )
  *
  *************************************/
 
-static WRITE16_HANDLER( io_w )
+WRITE16_MEMBER(cubeqst_state::io_w)
 {
-	cubeqst_state *state = space->machine().driver_data<cubeqst_state>();
 	/*
-       0: Spare lamp
-       1: Spare driver
-       2: Coin counter
-       3: Left-front lamp
-       4: Right-front lamp
-       5: Righ back lamp
-       6: Spare lamp
-       7: LED latch clock
-    */
+	   0: Spare lamp
+	   1: Spare driver
+	   2: Coin counter
+	   3: Left-front lamp
+	   4: Right-front lamp
+	   5: Righ back lamp
+	   6: Spare lamp
+	   7: LED latch clock
+	*/
 
 	/* TODO: On rising edge of Q7, status LED latch is written */
-	if ( !BIT(state->m_io_latch, 7) && BIT(data, 7) )
+	if ( !BIT(m_io_latch, 7) && BIT(data, 7) )
 	{
 		/*
-            0: Battery failure
-            1: Bad coin
-            2: No laser unit
-        */
+		    0: Battery failure
+		    1: Bad coin
+		    2: No laser unit
+		*/
 	}
 
-	state->m_io_latch = data;
+	m_io_latch = data;
 }
 
-static READ16_HANDLER( io_r )
+READ16_MEMBER(cubeqst_state::io_r)
 {
-	cubeqst_state *state = space->machine().driver_data<cubeqst_state>();
-	UINT16 port_data = input_port_read(space->machine(), "IO");
+	UINT16 port_data = ioport("IO")->read();
 
 	/*
-         Certain bits depend on Q7 of the IO latch:
+	     Certain bits depend on Q7 of the IO latch:
 
-          5: Cube   / Trackball H clock
-          6: R-Fire / Trackball H data
-          7: L-Fire / Trackball V clock
-         10: Spare  / Trackball V data
-    */
+	      5: Cube   / Trackball H clock
+	      6: R-Fire / Trackball H data
+	      7: L-Fire / Trackball V clock
+	     10: Spare  / Trackball V data
+	*/
 
-	if ( !BIT(state->m_io_latch, 7) )
+	if ( !BIT(m_io_latch, 7) )
 		return port_data;
 	else
 		/* Return zeroes for the trackball signals for now */
@@ -342,9 +352,9 @@ static READ16_HANDLER( io_r )
 }
 
 /* Trackball ('CHOP') */
-static READ16_HANDLER( chop_r )
+READ16_MEMBER(cubeqst_state::chop_r)
 {
-	return (input_port_read(space->machine(), "TRACK_X") << 8) | input_port_read(space->machine(), "TRACK_Y");
+	return (ioport("TRACK_X")->read() << 8) | ioport("TRACK_Y")->read();
 }
 
 
@@ -383,27 +393,27 @@ INPUT_PORTS_END
  *
  *************************************/
 
-static READ16_HANDLER( read_rotram )
+READ16_MEMBER(cubeqst_state::read_rotram)
 {
-	return cubeqcpu_rotram_r(space->machine().device("rotate_cpu"), offset, mem_mask);
+	return cubeqcpu_rotram_r(machine().device("rotate_cpu"), space, offset, mem_mask);
 }
 
-static WRITE16_HANDLER( write_rotram )
+WRITE16_MEMBER(cubeqst_state::write_rotram)
 {
-	cubeqcpu_rotram_w(space->machine().device("rotate_cpu"), offset, data, mem_mask);
+	cubeqcpu_rotram_w(machine().device("rotate_cpu"), space, offset, data, mem_mask);
 }
 
-static READ16_HANDLER( read_sndram )
+READ16_MEMBER(cubeqst_state::read_sndram)
 {
-	return cubeqcpu_sndram_r(space->machine().device("sound_cpu"), offset, mem_mask);
+	return cubeqcpu_sndram_r(machine().device("sound_cpu"), space, offset, mem_mask);
 }
 
-static WRITE16_HANDLER( write_sndram )
+WRITE16_MEMBER(cubeqst_state::write_sndram)
 {
-	cubeqcpu_sndram_w(space->machine().device("sound_cpu"), offset, data, mem_mask);
+	cubeqcpu_sndram_w(machine().device("sound_cpu"), space, offset, data, mem_mask);
 }
 
-static ADDRESS_MAP_START( m68k_program_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( m68k_program_map, AS_PROGRAM, 16, cubeqst_state )
 	ADDRESS_MAP_GLOBAL_MASK(0x03ffff)
 	AM_RANGE(0x000000, 0x01ffff) AM_ROM
 	AM_RANGE(0x020000, 0x027fff) AM_READWRITE(read_rotram, write_rotram)
@@ -412,7 +422,7 @@ static ADDRESS_MAP_START( m68k_program_map, AS_PROGRAM, 16 )
 	AM_RANGE(0x038002, 0x038003) AM_READWRITE(chop_r, ldaud_w)
 	AM_RANGE(0x038008, 0x038009) AM_READWRITE(line_r, reset_w)
 	AM_RANGE(0x03800e, 0x03800f) AM_READWRITE(laserdisc_r, laserdisc_w)
-	AM_RANGE(0x03c800, 0x03c9ff) AM_RAM_WRITE(palette_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x03c800, 0x03c9ff) AM_RAM_WRITE(palette_w) AM_SHARE("paletteram")
 	AM_RANGE(0x03cc00, 0x03cc01) AM_WRITE(control_w)
 	AM_RANGE(0x03e000, 0x03efff) AM_RAM AM_SHARE("nvram")
 	AM_RANGE(0x03f000, 0x03ffff) AM_RAM
@@ -420,11 +430,11 @@ ADDRESS_MAP_END
 
 
 /* For the bit-sliced CPUs */
-static ADDRESS_MAP_START( rotate_map, AS_PROGRAM, 64 )
+static ADDRESS_MAP_START( rotate_map, AS_PROGRAM, 64, cubeqst_state )
 	AM_RANGE(0x000, 0x1ff) AM_ROM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( line_sound_map, AS_PROGRAM, 64 )
+static ADDRESS_MAP_START( line_sound_map, AS_PROGRAM, 64, cubeqst_state )
 	AM_RANGE(0x000, 0x0ff) AM_ROM
 ADDRESS_MAP_END
 
@@ -435,21 +445,18 @@ ADDRESS_MAP_END
  *
  *************************************/
 
-static MACHINE_START( cubeqst )
+void cubeqst_state::machine_start()
 {
-	cubeqst_state *state = machine.driver_data<cubeqst_state>();
-	state->m_laserdisc = machine.device("laserdisc");
 }
 
-static MACHINE_RESET( cubeqst )
+void cubeqst_state::machine_reset()
 {
-	cubeqst_state *state = machine.driver_data<cubeqst_state>();
-	state->m_reset_latch = 0;
+	m_reset_latch = 0;
 
 	/* Auxillary CPUs are held in reset */
-	cputag_set_input_line(machine, "sound_cpu", INPUT_LINE_RESET, ASSERT_LINE);
-	cputag_set_input_line(machine, "rotate_cpu", INPUT_LINE_RESET, ASSERT_LINE);
-	cputag_set_input_line(machine, "line_cpu", INPUT_LINE_RESET, ASSERT_LINE);
+	machine().device("sound_cpu")->execute().set_input_line(INPUT_LINE_RESET, ASSERT_LINE);
+	machine().device("rotate_cpu")->execute().set_input_line(INPUT_LINE_RESET, ASSERT_LINE);
+	machine().device("line_cpu")->execute().set_input_line(INPUT_LINE_RESET, ASSERT_LINE);
 }
 
 
@@ -479,7 +486,7 @@ static void sound_dac_w(device_t *device, UINT16 data)
 		"rdac6", "ldac6",
 		"rdac7", "ldac7"
 	};
-	dac_signed_data_16_w(device->machine().device(dacs[data & 15]), (data & 0xfff0) ^ 0x8000);
+	device->machine().device<dac_device>(dacs[data & 15])->write_signed16((data & 0xfff0) ^ 0x8000);
 }
 
 static const cubeqst_snd_config snd_config =
@@ -508,7 +515,7 @@ static const cubeqst_lin_config lin_config =
 static MACHINE_CONFIG_START( cubeqst, cubeqst_state )
 	MCFG_CPU_ADD("main_cpu", M68000, XTAL_16MHz / 2)
 	MCFG_CPU_PROGRAM_MAP(m68k_program_map)
-	MCFG_CPU_VBLANK_INT("screen", vblank)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", cubeqst_state,  vblank)
 
 	MCFG_CPU_ADD("rotate_cpu", CQUESTROT, XTAL_10MHz / 2)
 	MCFG_CPU_PROGRAM_MAP(rotate_map)
@@ -524,58 +531,54 @@ static MACHINE_CONFIG_START( cubeqst, cubeqst_state )
 
 	MCFG_QUANTUM_TIME(attotime::from_hz(48000))
 
-	MCFG_MACHINE_START(cubeqst)
-	MCFG_MACHINE_RESET(cubeqst)
 	MCFG_NVRAM_ADD_0FILL("nvram")
 
-	MCFG_LASERDISC_SCREEN_ADD_NTSC("screen", BITMAP_FORMAT_RGB32)
-	MCFG_VIDEO_START(cubeqst)
-
-	MCFG_PALETTE_INIT(cubeqst)
-
-	MCFG_LASERDISC_ADD("laserdisc", SIMUTREK_SPECIAL, "screen", "ldsound")
-	MCFG_LASERDISC_OVERLAY(cubeqst, CUBEQST_HBLANK, CUBEQST_VCOUNT, BITMAP_FORMAT_RGB32)
+	MCFG_LASERDISC_SIMUTREK_ADD("laserdisc")
+	MCFG_LASERDISC_OVERLAY_DRIVER(CUBEQST_HBLANK, CUBEQST_VCOUNT, cubeqst_state, screen_update_cubeqst)
 	MCFG_LASERDISC_OVERLAY_CLIP(0, 320-1, 0, 256-8)
-	MCFG_LASERDISC_OVERLAY_POSITION(0.002, -0.018)
-	MCFG_LASERDISC_OVERLAY_SCALE(1.0, 1.030)
+	MCFG_LASERDISC_OVERLAY_POSITION(0.002f, -0.018f)
+	MCFG_LASERDISC_OVERLAY_SCALE(1.0f, 1.030f)
+
+	MCFG_LASERDISC_SCREEN_ADD_NTSC("screen", "laserdisc")
+
 
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
 
-	MCFG_SOUND_ADD("ldsound", LASERDISC_SOUND, 0)
+	MCFG_SOUND_MODIFY("laserdisc")
 	MCFG_SOUND_ROUTE(0, "lspeaker", 1.0)
 	MCFG_SOUND_ROUTE(1, "rspeaker", 1.0)
 
-	MCFG_SOUND_ADD("rdac0", DAC, 0)
+	MCFG_DAC_ADD("rdac0")
 	MCFG_SOUND_ROUTE(0, "rspeaker", 0.125)
-	MCFG_SOUND_ADD("ldac0", DAC, 0)
+	MCFG_DAC_ADD("ldac0")
 	MCFG_SOUND_ROUTE(0, "lspeaker", 0.125)
-	MCFG_SOUND_ADD("rdac1", DAC, 0)
+	MCFG_DAC_ADD("rdac1")
 	MCFG_SOUND_ROUTE(0, "rspeaker", 0.125)
-	MCFG_SOUND_ADD("ldac1", DAC, 0)
+	MCFG_DAC_ADD("ldac1")
 	MCFG_SOUND_ROUTE(0, "lspeaker", 0.125)
-	MCFG_SOUND_ADD("rdac2", DAC, 0)
+	MCFG_DAC_ADD("rdac2")
 	MCFG_SOUND_ROUTE(0, "rspeaker", 0.125)
-	MCFG_SOUND_ADD("ldac2", DAC, 0)
+	MCFG_DAC_ADD("ldac2")
 	MCFG_SOUND_ROUTE(0, "lspeaker", 0.125)
-	MCFG_SOUND_ADD("rdac3", DAC, 0)
+	MCFG_DAC_ADD("rdac3")
 	MCFG_SOUND_ROUTE(0, "rspeaker", 0.125)
-	MCFG_SOUND_ADD("ldac3", DAC, 0)
+	MCFG_DAC_ADD("ldac3")
 	MCFG_SOUND_ROUTE(0, "lspeaker", 0.125)
-	MCFG_SOUND_ADD("rdac4", DAC, 0)
+	MCFG_DAC_ADD("rdac4")
 	MCFG_SOUND_ROUTE(0, "rspeaker", 0.125)
-	MCFG_SOUND_ADD("ldac4", DAC, 0)
+	MCFG_DAC_ADD("ldac4")
 	MCFG_SOUND_ROUTE(0, "lspeaker", 0.125)
-	MCFG_SOUND_ADD("rdac5", DAC, 0)
+	MCFG_DAC_ADD("rdac5")
 	MCFG_SOUND_ROUTE(0, "rspeaker", 0.125)
-	MCFG_SOUND_ADD("ldac5", DAC, 0)
+	MCFG_DAC_ADD("ldac5")
 	MCFG_SOUND_ROUTE(0, "lspeaker", 0.125)
-	MCFG_SOUND_ADD("rdac6", DAC, 0)
+	MCFG_DAC_ADD("rdac6")
 	MCFG_SOUND_ROUTE(0, "rspeaker", 0.125)
-	MCFG_SOUND_ADD("ldac6", DAC, 0)
+	MCFG_DAC_ADD("ldac6")
 	MCFG_SOUND_ROUTE(0, "lspeaker", 0.125)
-	MCFG_SOUND_ADD("rdac7", DAC, 0)
+	MCFG_DAC_ADD("rdac7")
 	MCFG_SOUND_ROUTE(0, "rspeaker", 0.125)
-	MCFG_SOUND_ADD("ldac7", DAC, 0)
+	MCFG_DAC_ADD("ldac7")
 	MCFG_SOUND_ROUTE(0, "lspeaker", 0.125)
 MACHINE_CONFIG_END
 
@@ -765,5 +768,5 @@ ROM_END
  *
  *************************************/
 
-GAME( 1983, cubeqst,  0,       cubeqst, cubeqst, 0, ROT0, "Simutrek", "Cube Quest (01/04/84)", 0 )
-GAME( 1983, cubeqsta, cubeqst, cubeqst, cubeqst, 0, ROT0, "Simutrek", "Cube Quest (12/30/83)", 0 )
+GAME( 1983, cubeqst,  0,       cubeqst, cubeqst, driver_device, 0, ROT0, "Simutrek", "Cube Quest (01/04/84)", 0 )
+GAME( 1983, cubeqsta, cubeqst, cubeqst, cubeqst, driver_device, 0, ROT0, "Simutrek", "Cube Quest (12/30/83)", 0 )

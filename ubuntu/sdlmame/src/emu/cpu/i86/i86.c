@@ -18,19 +18,17 @@ extern int i386_dasm_one(char *buffer, UINT32 eip, const UINT8 *oprom, int mode)
 
 
 /* All pre-i286 CPUs have a 1MB address space */
-#define AMASK	0xfffff
+#define AMASK   0xfffff
 
 
 /* I86 registers */
-typedef union
-{									   /* eight general registers */
-	UINT16 w[8];					   /* viewed as 16 bits registers */
-	UINT8 b[16];					   /* or as 8 bit registers */
-}
-i8086basicregs;
+union i8086basicregs
+{                                      /* eight general registers */
+	UINT16 w[8];                       /* viewed as 16 bits registers */
+	UINT8 b[16];                       /* or as 8 bit registers */
+};
 
-typedef struct _i8086_state i8086_state;
-struct _i8086_state
+struct i8086_state
 {
 	i8086basicregs regs;
 	offs_t fetch_xor;
@@ -39,11 +37,11 @@ struct _i8086_state
 	UINT32 base[4];
 	UINT16 sregs[4];
 	UINT16 flags;
-	device_irq_callback irq_callback;
-	INT32 AuxVal, OverVal, SignVal, ZeroVal, CarryVal, DirVal;		/* 0 or non-0 valued flags */
+	device_irq_acknowledge_callback irq_callback;
+	INT32 AuxVal, OverVal, SignVal, ZeroVal, CarryVal, DirVal;      /* 0 or non-0 valued flags */
 	UINT8 ParityVal;
-	UINT8 TF, IF;				   /* 0 or 1 valued flags */
-	UINT8 MF;						   /* V30 mode flag */
+	UINT8 TF, IF;                  /* 0 or 1 valued flags */
+	UINT8 MF;                          /* V30 mode flag */
 	UINT8 int_vector;
 	INT8 nmi_state;
 	INT8 irq_state;
@@ -62,23 +60,23 @@ struct _i8086_state
 	address_space *io;
 	int icount;
 
-	char seg_prefix;				   /* prefix segment indicator */
-	UINT8	prefix_seg;					/* The prefixed segment */
+	char seg_prefix;                   /* prefix segment indicator */
+	UINT8   prefix_seg;                 /* The prefixed segment */
 	unsigned ea;
 	UINT16 eo; /* HJB 12/13/98 effective offset of the address (before segment is added) */
-	UINT8 ea_seg;	/* effective segment of the address */
+	UINT8 ea_seg;   /* effective segment of the address */
 
-	devcb_resolved_write_line	out_tmrout0_func;
-	devcb_resolved_write_line	out_tmrout1_func;
+	devcb_resolved_write_line   out_tmrout0_func;
+	devcb_resolved_write_line   out_tmrout1_func;
 };
 
 INLINE i8086_state *get_safe_token(device_t *device)
 {
 	assert(device != NULL);
 	assert(device->type() == I8086 ||
-		   device->type() == I8088 ||
-		   device->type() == I80186 ||
-		   device->type() == I80188);
+			device->type() == I8088 ||
+			device->type() == I80186 ||
+			device->type() == I80188);
 	return (i8086_state *)downcast<legacy_cpu_device *>(device)->token();
 }
 
@@ -135,8 +133,8 @@ static void i8086_state_register(device_t *device)
 	device->save_item(NAME(cpustate->irq_state));
 	device->save_item(NAME(cpustate->extra_cycles));
 	device->save_item(NAME(cpustate->halted));
-	device->save_item(NAME(cpustate->test_state));	/* PJB 03/05 */
-	device->save_item(NAME(cpustate->rep_in_progress));	/* PJB 03/05 */
+	device->save_item(NAME(cpustate->test_state));  /* PJB 03/05 */
+	device->save_item(NAME(cpustate->rep_in_progress)); /* PJB 03/05 */
 }
 
 static CPU_INIT( i8086 )
@@ -167,9 +165,9 @@ static CPU_INIT( i8086 )
 
 	cpustate->irq_callback = irqcallback;
 	cpustate->device = device;
-	cpustate->program = device->space(AS_PROGRAM);
+	cpustate->program = &device->space(AS_PROGRAM);
 	cpustate->direct = &cpustate->program->direct();
-	cpustate->io = device->space(AS_IO);
+	cpustate->io = &device->space(AS_IO);
 
 	/* set up the state table */
 	{
@@ -220,29 +218,29 @@ static CPU_INIT( i80186 )
 	CPU_INIT_CALL(i8086);
 
 	/* resolve callbacks */
-	i80186_interface *intf = (i80186_interface *) device->baseconfig().static_config();
+	i80186_interface *intf = (i80186_interface *) device->static_config();
 
 	if (intf != NULL)
 	{
-		devcb_resolve_write_line(&cpustate->out_tmrout0_func, &intf->out_tmrout0_func, device);
-		devcb_resolve_write_line(&cpustate->out_tmrout1_func, &intf->out_tmrout1_func, device);
+		cpustate->out_tmrout0_func.resolve(intf->out_tmrout0_func, *device);
+		cpustate->out_tmrout1_func.resolve(intf->out_tmrout1_func, *device);
 	}
 }
 
 static CPU_RESET( i8086 )
 {
 	i8086_state *cpustate = get_safe_token(device);
-	device_irq_callback save_irqcallback;
+	device_irq_acknowledge_callback save_irqcallback;
 
 	save_irqcallback = cpustate->irq_callback;
 	memset(cpustate, 0, sizeof(*cpustate));
 	cpustate->irq_callback = save_irqcallback;
 	cpustate->device = device;
-	cpustate->program = device->space(AS_PROGRAM);
+	cpustate->program = &device->space(AS_PROGRAM);
 	cpustate->direct = &cpustate->program->direct();
-	cpustate->io = device->space(AS_IO);
+	cpustate->io = &device->space(AS_IO);
 
-	cpustate->sregs[CS] = 0xf000;
+	cpustate->sregs[CS] = 0xffff;
 	cpustate->base[CS] = SegBase(CS);
 	cpustate->pc = 0xffff0 & AMASK;
 	ExpandFlags(cpustate->flags);
@@ -377,7 +375,7 @@ static CPU_EXECUTE( i80186 )
 	while (cpustate->icount > 0)
 	{
 		LOG(("[%04x:%04x]=%02x\tAX=%04x\tBX=%04x\tCX=%04x\tDX=%04x\n", cpustate->sregs[CS], cpustate->pc, ReadByte(cpustate->pc), cpustate->regs.w[AX],
-			   cpustate->regs.w[BX], cpustate->regs.w[CX], cpustate->regs.w[DX]));
+				cpustate->regs.w[BX], cpustate->regs.w[CX], cpustate->regs.w[DX]));
 		debugger_instruction_hook(device, cpustate->pc);
 
 		cpustate->seg_prefix = FALSE;
@@ -495,21 +493,21 @@ static CPU_EXPORT_STRING( i8086 )
 		case STATE_GENFLAGS:
 			cpustate->flags = CompressFlags();
 			string.printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c",
-					cpustate->flags & 0x8000 ? '?' : '.',
-					cpustate->flags & 0x4000 ? '?' : '.',
-					cpustate->flags & 0x2000 ? '?' : '.',
-					cpustate->flags & 0x1000 ? '?' : '.',
+					cpustate->flags & 0x8000 ? '1' : '.',
+					cpustate->flags & 0x4000 ? '1' : '.',
+					cpustate->flags & 0x2000 ? '1' : '.',
+					cpustate->flags & 0x1000 ? '1' : '.',
 					cpustate->flags & 0x0800 ? 'O' : '.',
 					cpustate->flags & 0x0400 ? 'D' : '.',
 					cpustate->flags & 0x0200 ? 'I' : '.',
 					cpustate->flags & 0x0100 ? 'T' : '.',
 					cpustate->flags & 0x0080 ? 'S' : '.',
 					cpustate->flags & 0x0040 ? 'Z' : '.',
-					cpustate->flags & 0x0020 ? '?' : '.',
+					cpustate->flags & 0x0020 ? '0' : '.',
 					cpustate->flags & 0x0010 ? 'A' : '.',
-					cpustate->flags & 0x0008 ? '?' : '.',
+					cpustate->flags & 0x0008 ? '0' : '.',
 					cpustate->flags & 0x0004 ? 'P' : '.',
-					cpustate->flags & 0x0002 ? 'N' : '.',
+					cpustate->flags & 0x0002 ? '1' : '.',
 					cpustate->flags & 0x0001 ? 'C' : '.');
 			break;
 
@@ -531,9 +529,9 @@ static CPU_SET_INFO( i8086 )
 	switch (state)
 	{
 		/* --- the following bits of info are set as 64-bit signed integers --- */
-		case CPUINFO_INT_INPUT_STATE + 0:				set_irq_line(cpustate, 0, info->i);					break;
-		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_NMI:	set_irq_line(cpustate, INPUT_LINE_NMI, info->i);	break;
-		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_TEST:	set_test_line(cpustate, info->i);					break; /* PJB 03/05 */
+		case CPUINFO_INT_INPUT_STATE + 0:               set_irq_line(cpustate, 0, info->i);                 break;
+		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_NMI:  set_irq_line(cpustate, INPUT_LINE_NMI, info->i);    break;
+		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_TEST: set_test_line(cpustate, info->i);                   break; /* PJB 03/05 */
 	}
 }
 
@@ -550,53 +548,53 @@ CPU_GET_INFO( i8086 )
 	switch (state)
 	{
 		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case CPUINFO_INT_CONTEXT_SIZE:					info->i = sizeof(i8086_state);			break;
-		case CPUINFO_INT_INPUT_LINES:					info->i = 1;							break;
-		case CPUINFO_INT_DEFAULT_IRQ_VECTOR:			info->i = 0xff;							break;
-		case DEVINFO_INT_ENDIANNESS:					info->i = ENDIANNESS_LITTLE;					break;
-		case CPUINFO_INT_CLOCK_MULTIPLIER:				info->i = 1;							break;
-		case CPUINFO_INT_CLOCK_DIVIDER:					info->i = 1;							break;
-		case CPUINFO_INT_MIN_INSTRUCTION_BYTES:			info->i = 1;							break;
-		case CPUINFO_INT_MAX_INSTRUCTION_BYTES:			info->i = 8;							break;
-		case CPUINFO_INT_MIN_CYCLES:					info->i = 1;							break;
-		case CPUINFO_INT_MAX_CYCLES:					info->i = 50;							break;
+		case CPUINFO_INT_CONTEXT_SIZE:                  info->i = sizeof(i8086_state);          break;
+		case CPUINFO_INT_INPUT_LINES:                   info->i = 1;                            break;
+		case CPUINFO_INT_DEFAULT_IRQ_VECTOR:            info->i = 0xff;                         break;
+		case CPUINFO_INT_ENDIANNESS:                    info->i = ENDIANNESS_LITTLE;                    break;
+		case CPUINFO_INT_CLOCK_MULTIPLIER:              info->i = 1;                            break;
+		case CPUINFO_INT_CLOCK_DIVIDER:                 info->i = 1;                            break;
+		case CPUINFO_INT_MIN_INSTRUCTION_BYTES:         info->i = 1;                            break;
+		case CPUINFO_INT_MAX_INSTRUCTION_BYTES:         info->i = 8;                            break;
+		case CPUINFO_INT_MIN_CYCLES:                    info->i = 1;                            break;
+		case CPUINFO_INT_MAX_CYCLES:                    info->i = 50;                           break;
 
-		case DEVINFO_INT_DATABUS_WIDTH + AS_PROGRAM:	info->i = 16;					break;
-		case DEVINFO_INT_ADDRBUS_WIDTH + AS_PROGRAM: info->i = 20;					break;
-		case DEVINFO_INT_ADDRBUS_SHIFT + AS_PROGRAM: info->i = 0;					break;
-		case DEVINFO_INT_DATABUS_WIDTH + AS_DATA:	info->i = 0;					break;
-		case DEVINFO_INT_ADDRBUS_WIDTH + AS_DATA:	info->i = 0;					break;
-		case DEVINFO_INT_ADDRBUS_SHIFT + AS_DATA:	info->i = 0;					break;
-		case DEVINFO_INT_DATABUS_WIDTH + AS_IO:		info->i = 16;					break;
-		case DEVINFO_INT_ADDRBUS_WIDTH + AS_IO:		info->i = 16;					break;
-		case DEVINFO_INT_ADDRBUS_SHIFT + AS_IO:		info->i = 0;					break;
+		case CPUINFO_INT_DATABUS_WIDTH + AS_PROGRAM:    info->i = 16;                   break;
+		case CPUINFO_INT_ADDRBUS_WIDTH + AS_PROGRAM: info->i = 20;                  break;
+		case CPUINFO_INT_ADDRBUS_SHIFT + AS_PROGRAM: info->i = 0;                   break;
+		case CPUINFO_INT_DATABUS_WIDTH + AS_DATA:   info->i = 0;                    break;
+		case CPUINFO_INT_ADDRBUS_WIDTH + AS_DATA:   info->i = 0;                    break;
+		case CPUINFO_INT_ADDRBUS_SHIFT + AS_DATA:   info->i = 0;                    break;
+		case CPUINFO_INT_DATABUS_WIDTH + AS_IO:     info->i = 16;                   break;
+		case CPUINFO_INT_ADDRBUS_WIDTH + AS_IO:     info->i = 16;                   break;
+		case CPUINFO_INT_ADDRBUS_SHIFT + AS_IO:     info->i = 0;                    break;
 
-		case CPUINFO_INT_INPUT_STATE + 0:				info->i = cpustate->irq_state;					break;
-		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_NMI:	info->i = cpustate->nmi_state;					break;
+		case CPUINFO_INT_INPUT_STATE + 0:               info->i = cpustate->irq_state;                  break;
+		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_NMI:  info->i = cpustate->nmi_state;                  break;
 
-		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_TEST:	info->i = cpustate->test_state;					break; /* PJB 03/05 */
+		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_TEST: info->i = cpustate->test_state;                 break; /* PJB 03/05 */
 
-		case CPUINFO_INT_PREVIOUSPC:					info->i = cpustate->prevpc;						break;
+		case CPUINFO_INT_PREVIOUSPC:                    info->i = cpustate->prevpc;                     break;
 
 		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case CPUINFO_FCT_SET_INFO:						info->setinfo = CPU_SET_INFO_NAME(i8086);			break;
-		case CPUINFO_FCT_INIT:							info->init = CPU_INIT_NAME(i8086);					break;
-		case CPUINFO_FCT_RESET:							info->reset = CPU_RESET_NAME(i8086);				break;
-		case CPUINFO_FCT_EXIT:							info->exit = CPU_EXIT_NAME(i8086);					break;
-		case CPUINFO_FCT_EXECUTE:						info->execute = CPU_EXECUTE_NAME(i8086);			break;
-		case CPUINFO_FCT_BURN:							info->burn = NULL;									break;
-		case CPUINFO_FCT_DISASSEMBLE:					info->disassemble = CPU_DISASSEMBLE_NAME(i8086);	break;
-		case CPUINFO_PTR_INSTRUCTION_COUNTER:			info->icount = &cpustate->icount;					break;
-		case CPUINFO_FCT_IMPORT_STATE:					info->import_state = CPU_IMPORT_STATE_NAME(i8086);	break;
-		case CPUINFO_FCT_EXPORT_STATE:					info->export_state = CPU_EXPORT_STATE_NAME(i8086);	break;
-		case CPUINFO_FCT_EXPORT_STRING:					info->export_string = CPU_EXPORT_STRING_NAME(i8086);break;
+		case CPUINFO_FCT_SET_INFO:                      info->setinfo = CPU_SET_INFO_NAME(i8086);           break;
+		case CPUINFO_FCT_INIT:                          info->init = CPU_INIT_NAME(i8086);                  break;
+		case CPUINFO_FCT_RESET:                         info->reset = CPU_RESET_NAME(i8086);                break;
+		case CPUINFO_FCT_EXIT:                          info->exit = CPU_EXIT_NAME(i8086);                  break;
+		case CPUINFO_FCT_EXECUTE:                       info->execute = CPU_EXECUTE_NAME(i8086);            break;
+		case CPUINFO_FCT_BURN:                          info->burn = NULL;                                  break;
+		case CPUINFO_FCT_DISASSEMBLE:                   info->disassemble = CPU_DISASSEMBLE_NAME(i8086);    break;
+		case CPUINFO_PTR_INSTRUCTION_COUNTER:           info->icount = &cpustate->icount;                   break;
+		case CPUINFO_FCT_IMPORT_STATE:                  info->import_state = CPU_IMPORT_STATE_NAME(i8086);  break;
+		case CPUINFO_FCT_EXPORT_STATE:                  info->export_state = CPU_EXPORT_STATE_NAME(i8086);  break;
+		case CPUINFO_FCT_EXPORT_STRING:                 info->export_string = CPU_EXPORT_STRING_NAME(i8086);break;
 
 		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "8086");				break;
-		case DEVINFO_STR_FAMILY:						strcpy(info->s, "Intel 80x86");			break;
-		case DEVINFO_STR_VERSION:						strcpy(info->s, "1.4");					break;
-		case DEVINFO_STR_SOURCE_FILE:					strcpy(info->s, __FILE__);				break;
-		case DEVINFO_STR_CREDITS:						strcpy(info->s, "Real mode i286 emulator v1.4 by Fabrice Frances\n(initial work cpustate->based on David Hedley's pcemu)"); break;
+		case CPUINFO_STR_NAME:                          strcpy(info->s, "8086");                break;
+		case CPUINFO_STR_FAMILY:                        strcpy(info->s, "Intel 80x86");         break;
+		case CPUINFO_STR_VERSION:                       strcpy(info->s, "1.4");                 break;
+		case CPUINFO_STR_SOURCE_FILE:                   strcpy(info->s, __FILE__);              break;
+		case CPUINFO_STR_CREDITS:                       strcpy(info->s, "Real mode i286 emulator v1.4 by Fabrice Frances\n(initial work cpustate->based on David Hedley's pcemu)"); break;
 	}
 }
 
@@ -610,16 +608,16 @@ CPU_GET_INFO( i8088 )
 	switch (state)
 	{
 		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_DATABUS_WIDTH + AS_PROGRAM:	info->i = 8;					break;
-		case DEVINFO_INT_DATABUS_WIDTH + AS_IO:		info->i = 8;					break;
+		case CPUINFO_INT_DATABUS_WIDTH + AS_PROGRAM:    info->i = 8;                    break;
+		case CPUINFO_INT_DATABUS_WIDTH + AS_IO:     info->i = 8;                    break;
 
 		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case CPUINFO_FCT_INIT:							info->init = CPU_INIT_NAME(i8088);		break;
+		case CPUINFO_FCT_INIT:                          info->init = CPU_INIT_NAME(i8088);      break;
 
 		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "8088");				break;
+		case CPUINFO_STR_NAME:                          strcpy(info->s, "8088");                break;
 
-		default:										CPU_GET_INFO_CALL(i8086);				break;
+		default:                                        CPU_GET_INFO_CALL(i8086);               break;
 	}
 }
 
@@ -635,16 +633,16 @@ static CPU_SET_INFO( i80186 )
 	switch (state)
 	{
 		/* --- the following bits of info are set as 64-bit signed integers --- */
-		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_INT0:		set_irq_line(cpustate, 0, info->i);					break;
-		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_INT1:		set_irq_line(cpustate, 1, info->i);					break;
-		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_INT2:		set_irq_line(cpustate, 2, info->i);					break;
-		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_INT3:		set_irq_line(cpustate, 3, info->i);					break;
-		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_DRQ0:		set_drq_line(cpustate, 0, info->i);					break;
-		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_DRQ1:		set_drq_line(cpustate, 1, info->i);					break;
-		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_TMRIN0:	set_tmrin_line(cpustate, 0, info->i);				break;
-		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_TMRIN1:	set_tmrin_line(cpustate, 1, info->i);				break;
-		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_NMI:		set_irq_line(cpustate, INPUT_LINE_NMI, info->i);	break;
-		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_TEST:		set_test_line(cpustate, info->i);					break; /* PJB 03/05 */
+		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_INT0:     set_irq_line(cpustate, 0, info->i);                 break;
+		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_INT1:     set_irq_line(cpustate, 1, info->i);                 break;
+		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_INT2:     set_irq_line(cpustate, 2, info->i);                 break;
+		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_INT3:     set_irq_line(cpustate, 3, info->i);                 break;
+		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_DRQ0:     set_drq_line(cpustate, 0, info->i);                 break;
+		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_DRQ1:     set_drq_line(cpustate, 1, info->i);                 break;
+		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_TMRIN0:   set_tmrin_line(cpustate, 0, info->i);               break;
+		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_TMRIN1:   set_tmrin_line(cpustate, 1, info->i);               break;
+		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_NMI:      set_irq_line(cpustate, INPUT_LINE_NMI, info->i);    break;
+		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_TEST:     set_test_line(cpustate, info->i);                   break; /* PJB 03/05 */
 	}
 }
 
@@ -653,18 +651,18 @@ CPU_GET_INFO( i80186 )
 	switch (state)
 	{
 		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case CPUINFO_INT_CLOCK_MULTIPLIER:				info->i = 1;								break;
-		case CPUINFO_INT_CLOCK_DIVIDER:					info->i = 2;								break;
+		case CPUINFO_INT_CLOCK_MULTIPLIER:              info->i = 1;                                break;
+		case CPUINFO_INT_CLOCK_DIVIDER:                 info->i = 2;                                break;
 
 		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case CPUINFO_FCT_SET_INFO:						info->setinfo = CPU_SET_INFO_NAME(i80186);	break;
-		case CPUINFO_FCT_INIT:							info->init = CPU_INIT_NAME(i80186);			break;
-		case CPUINFO_FCT_EXECUTE:						info->execute = CPU_EXECUTE_NAME(i80186);	break;
+		case CPUINFO_FCT_SET_INFO:                      info->setinfo = CPU_SET_INFO_NAME(i80186);  break;
+		case CPUINFO_FCT_INIT:                          info->init = CPU_INIT_NAME(i80186);         break;
+		case CPUINFO_FCT_EXECUTE:                       info->execute = CPU_EXECUTE_NAME(i80186);   break;
 
 		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "80186");					break;
+		case CPUINFO_STR_NAME:                          strcpy(info->s, "80186");                   break;
 
-		default:										CPU_GET_INFO_CALL(i8086);					break;
+		default:                                        CPU_GET_INFO_CALL(i8086);                   break;
 	}
 }
 
@@ -678,17 +676,17 @@ CPU_GET_INFO( i80188 )
 	switch (state)
 	{
 		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_DATABUS_WIDTH + AS_PROGRAM:	info->i = 8;					break;
-		case DEVINFO_INT_DATABUS_WIDTH + AS_IO:		info->i = 8;					break;
+		case CPUINFO_INT_DATABUS_WIDTH + AS_PROGRAM:    info->i = 8;                    break;
+		case CPUINFO_INT_DATABUS_WIDTH + AS_IO:     info->i = 8;                    break;
 
 		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case CPUINFO_FCT_INIT:							info->init = CPU_INIT_NAME(i8088);		break;
-		case CPUINFO_FCT_EXECUTE:						info->execute = CPU_EXECUTE_NAME(i80186);break;
+		case CPUINFO_FCT_INIT:                          info->init = CPU_INIT_NAME(i8088);      break;
+		case CPUINFO_FCT_EXECUTE:                       info->execute = CPU_EXECUTE_NAME(i80186);break;
 
 		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "80188");				break;
+		case CPUINFO_STR_NAME:                          strcpy(info->s, "80188");               break;
 
-		default:										CPU_GET_INFO_CALL(i8086);				break;
+		default:                                        CPU_GET_INFO_CALL(i8086);               break;
 	}
 }
 

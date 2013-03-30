@@ -7,8 +7,9 @@
 class asuka_state : public driver_device
 {
 public:
-	asuka_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	asuka_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+			m_cadash_shared_ram(*this, "sharedram") { }
 
 	/* memory pointers */
 //  UINT16 *    paletteram; // this currently uses generic palette handlers
@@ -29,27 +30,34 @@ public:
 	int         m_adpcm_pos;
 	int         m_adpcm_data;
 
+	optional_shared_ptr<UINT8> m_cadash_shared_ram;
+
 	/* devices */
-	device_t *m_maincpu;
-	device_t *m_audiocpu;
+	cpu_device *m_maincpu;
+	cpu_device *m_audiocpu;
 	device_t *m_pc090oj;
 	device_t *m_tc0100scn;
+	DECLARE_WRITE8_MEMBER(sound_bankswitch_w);
+	DECLARE_WRITE8_MEMBER(asuka_msm5205_address_w);
+	DECLARE_READ16_MEMBER(cadash_share_r);
+	DECLARE_WRITE16_MEMBER(cadash_share_w);
+	DECLARE_WRITE16_MEMBER(asuka_spritectrl_w);
+	DECLARE_WRITE8_MEMBER(sound_bankswitch_2151_w);
+	DECLARE_WRITE8_MEMBER(asuka_msm5205_start_w);
+	DECLARE_WRITE8_MEMBER(asuka_msm5205_stop_w);
+	virtual void machine_start();
+	virtual void machine_reset();
+	UINT32 screen_update_bonzeadv(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_asuka(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	void screen_eof_asuka(screen_device &screen, bool state);
+	INTERRUPT_GEN_MEMBER(cadash_interrupt);
+	TIMER_CALLBACK_MEMBER(cadash_interrupt5);
 };
-
-
 
 /*----------- defined in machine/bonzeadv.c -----------*/
 
-READ16_HANDLER( bonzeadv_cchip_ctrl_r );
-READ16_HANDLER( bonzeadv_cchip_ram_r );
-WRITE16_HANDLER( bonzeadv_cchip_ctrl_w );
-WRITE16_HANDLER( bonzeadv_cchip_bank_w );
-WRITE16_HANDLER( bonzeadv_cchip_ram_w );
-
-
-/*----------- defined in video/asuka.c -----------*/
-
-WRITE16_HANDLER( asuka_spritectrl_w );
-
-SCREEN_UPDATE( asuka );
-SCREEN_UPDATE( bonzeadv );
+DECLARE_READ16_HANDLER( bonzeadv_cchip_ctrl_r );
+DECLARE_READ16_HANDLER( bonzeadv_cchip_ram_r );
+DECLARE_WRITE16_HANDLER( bonzeadv_cchip_ctrl_w );
+DECLARE_WRITE16_HANDLER( bonzeadv_cchip_bank_w );
+DECLARE_WRITE16_HANDLER( bonzeadv_cchip_ram_w );

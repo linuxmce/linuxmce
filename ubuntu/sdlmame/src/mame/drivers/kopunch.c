@@ -8,33 +8,33 @@
 #include "cpu/i8085/i8085.h"
 #include "includes/kopunch.h"
 
-static INTERRUPT_GEN( kopunch_interrupt )
+INTERRUPT_GEN_MEMBER(kopunch_state::kopunch_interrupt)
 {
-	device_set_input_line(device, I8085_RST75_LINE, ASSERT_LINE);
-	device_set_input_line(device, I8085_RST75_LINE, CLEAR_LINE);
+	device.execute().set_input_line(I8085_RST75_LINE, ASSERT_LINE);
+	device.execute().set_input_line(I8085_RST75_LINE, CLEAR_LINE);
 }
 
-static READ8_HANDLER( kopunch_in_r )
+READ8_MEMBER(kopunch_state::kopunch_in_r)
 {
 	/* port 31 + low 3 bits of port 32 contain the punch strength */
 	if (offset == 0)
-		return space->machine().rand();
+		return machine().rand();
 	else
-		return (space->machine().rand() & 0x07) | input_port_read(space->machine(), "SYSTEM");
+		return (machine().rand() & 0x07) | ioport("SYSTEM")->read();
 }
 
-static WRITE8_HANDLER( kopunch_lamp_w )
+WRITE8_MEMBER(kopunch_state::kopunch_lamp_w)
 {
-	set_led_status(space->machine(), 0, ~data & 0x80);
+	set_led_status(machine(), 0, ~data & 0x80);
 
 //  if ((data & 0x7f) != 0x7f)
 //      popmessage("port 38 = %02x",data);
 }
 
-static WRITE8_HANDLER( kopunch_coin_w )
+WRITE8_MEMBER(kopunch_state::kopunch_coin_w)
 {
-	coin_counter_w(space->machine(), 0, ~data & 0x80);
-	coin_counter_w(space->machine(), 1, ~data & 0x40);
+	coin_counter_w(machine(), 0, ~data & 0x80);
+	coin_counter_w(machine(), 1, ~data & 0x40);
 
 //  if ((data & 0x3f) != 0x3f)
 //      popmessage("port 34 = %02x",data);
@@ -42,15 +42,15 @@ static WRITE8_HANDLER( kopunch_coin_w )
 
 
 
-static ADDRESS_MAP_START( kopunch_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( kopunch_map, AS_PROGRAM, 8, kopunch_state )
 	AM_RANGE(0x0000, 0x1fff) AM_ROM
 	AM_RANGE(0x2000, 0x23ff) AM_RAM
-	AM_RANGE(0x6000, 0x63ff) AM_RAM_WRITE(kopunch_videoram_w) AM_BASE_MEMBER(kopunch_state, m_videoram)
-	AM_RANGE(0x7000, 0x70ff) AM_RAM_WRITE(kopunch_videoram2_w) AM_BASE_MEMBER(kopunch_state, m_videoram2)
-	AM_RANGE(0x7100, 0x7aff) AM_RAM	// ???
+	AM_RANGE(0x6000, 0x63ff) AM_RAM_WRITE(kopunch_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0x7000, 0x70ff) AM_RAM_WRITE(kopunch_videoram2_w) AM_SHARE("videoram2")
+	AM_RANGE(0x7100, 0x7aff) AM_RAM // ???
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( kopunch_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( kopunch_io_map, AS_IO, 8, kopunch_state )
 	AM_RANGE(0x30, 0x30) AM_READ_PORT("P1")
 	AM_RANGE(0x31, 0x32) AM_READ(kopunch_in_r)
 	AM_RANGE(0x33, 0x33) AM_WRITENOP
@@ -68,22 +68,20 @@ static ADDRESS_MAP_START( kopunch_io_map, AS_IO, 8 )
 	AM_RANGE(0x3f, 0x3f) AM_WRITENOP
 ADDRESS_MAP_END
 
-static INPUT_CHANGED( left_coin_inserted )
+INPUT_CHANGED_MEMBER(kopunch_state::left_coin_inserted)
 {
-	kopunch_state *state = field->port->machine().driver_data<kopunch_state>();
 
 	/* left coin insertion causes a rst6.5 (vector 0x34) */
 	if (newval)
-		device_set_input_line(state->m_maincpu, I8085_RST65_LINE, HOLD_LINE);
+		m_maincpu->set_input_line(I8085_RST65_LINE, HOLD_LINE);
 }
 
-static INPUT_CHANGED( right_coin_inserted )
+INPUT_CHANGED_MEMBER(kopunch_state::right_coin_inserted)
 {
-	kopunch_state *state = field->port->machine().driver_data<kopunch_state>();
 
 	/* right coin insertion causes a rst5.5 (vector 0x2c) */
 	if (newval)
-		device_set_input_line(state->m_maincpu, I8085_RST55_LINE, HOLD_LINE);
+		m_maincpu->set_input_line(I8085_RST55_LINE, HOLD_LINE);
 }
 
 static INPUT_PORTS_START( kopunch )
@@ -98,12 +96,12 @@ static INPUT_PORTS_START( kopunch )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON4 )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x07, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* punch strength (high 3 bits) */
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN2 ) PORT_IMPULSE(1) PORT_CHANGED(right_coin_inserted, 0)
+	PORT_BIT( 0x07, IP_ACTIVE_HIGH, IPT_SPECIAL )   /* punch strength (high 3 bits) */
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN2 ) PORT_IMPULSE(1) PORT_CHANGED_MEMBER(DEVICE_SELF, kopunch_state,right_coin_inserted, 0)
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON5 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON6 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON7 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_IMPULSE(1) PORT_CHANGED(left_coin_inserted, 0)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_IMPULSE(1) PORT_CHANGED_MEMBER(DEVICE_SELF, kopunch_state,left_coin_inserted, 0)
 
 	PORT_START("DSW")
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
@@ -171,47 +169,40 @@ static GFXDECODE_START( kopunch )
 GFXDECODE_END
 
 
-static MACHINE_START( kopunch )
+void kopunch_state::machine_start()
 {
-	kopunch_state *state = machine.driver_data<kopunch_state>();
 
-	state->m_maincpu = machine.device("maincpu");
+	m_maincpu = machine().device<cpu_device>("maincpu");
 
-	state->save_item(NAME(state->m_gfxbank));
+	save_item(NAME(m_gfxbank));
 }
 
-static MACHINE_RESET( kopunch )
+void kopunch_state::machine_reset()
 {
-	kopunch_state *state = machine.driver_data<kopunch_state>();
 
-	state->m_gfxbank = 0;
+	m_gfxbank = 0;
 }
 
 static MACHINE_CONFIG_START( kopunch, kopunch_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", I8085A, 4000000)	/* 4 MHz ???? Uses SIM, must be 8085 */
+	MCFG_CPU_ADD("maincpu", I8085A, 4000000)    /* 4 MHz ???? Uses SIM, must be 8085 */
 	MCFG_CPU_PROGRAM_MAP(kopunch_map)
 	MCFG_CPU_IO_MAP(kopunch_io_map)
-	MCFG_CPU_VBLANK_INT("screen",kopunch_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", kopunch_state, kopunch_interrupt)
 
-	MCFG_MACHINE_START(kopunch)
-	MCFG_MACHINE_RESET(kopunch)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 1*8, 31*8-1)
-	MCFG_SCREEN_UPDATE(kopunch)
+	MCFG_SCREEN_UPDATE_DRIVER(kopunch_state, screen_update_kopunch)
 
 	MCFG_GFXDECODE(kopunch)
 	MCFG_PALETTE_LENGTH(8)
 
-	MCFG_PALETTE_INIT(kopunch)
-	MCFG_VIDEO_START(kopunch)
 
 	/* sound hardware */
 MACHINE_CONFIG_END
@@ -242,9 +233,9 @@ ROM_START( kopunch )
 	ROM_LOAD( "epr1111",      0x5000, 0x1000, CRC(28530ec9) SHA1(1a8782d37128cdb43133fc891cde93d2bdd5476b) )
 
 	ROM_REGION( 0x0060, "proms", 0 )
-	ROM_LOAD( "epr1101",      0x0000, 0x0020, CRC(15600f5d) SHA1(130179f79761cb16316c544e3c689bc10431db30) )	/* palette */
-	ROM_LOAD( "epr1099",      0x0020, 0x0020, CRC(fc58c456) SHA1(f27c3ad669dfdc33bcd7e0481fa01bf34973e816) )	/* unknown */
-	ROM_LOAD( "epr1100",      0x0040, 0x0020, CRC(bedb66b1) SHA1(8e78bb205d900075b761e1baa5f5813174ff28ba) )	/* unknown */
+	ROM_LOAD( "epr1101",      0x0000, 0x0020, CRC(15600f5d) SHA1(130179f79761cb16316c544e3c689bc10431db30) )    /* palette */
+	ROM_LOAD( "epr1099",      0x0020, 0x0020, CRC(fc58c456) SHA1(f27c3ad669dfdc33bcd7e0481fa01bf34973e816) )    /* unknown */
+	ROM_LOAD( "epr1100",      0x0040, 0x0020, CRC(bedb66b1) SHA1(8e78bb205d900075b761e1baa5f5813174ff28ba) )    /* unknown */
 ROM_END
 
-GAME( 1981, kopunch, 0, kopunch, kopunch, 0, ROT270, "Sega", "KO Punch", GAME_NO_SOUND | GAME_NOT_WORKING | GAME_SUPPORTS_SAVE )
+GAME( 1981, kopunch, 0, kopunch, kopunch, driver_device, 0, ROT270, "Sega", "KO Punch", GAME_NO_SOUND | GAME_NOT_WORKING | GAME_SUPPORTS_SAVE )

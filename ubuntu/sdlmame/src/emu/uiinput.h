@@ -21,7 +21,7 @@
     TYPE DEFINITIONS
 ***************************************************************************/
 
-enum _ui_event_type
+enum ui_event_type
 {
 	UI_EVENT_NONE,
 	UI_EVENT_MOUSE_MOVE,
@@ -31,18 +31,16 @@ enum _ui_event_type
 	UI_EVENT_MOUSE_DOUBLE_CLICK,
 	UI_EVENT_CHAR
 };
-typedef enum _ui_event_type ui_event_type;
 
 
-typedef struct _ui_event ui_event;
-struct _ui_event
+struct ui_event
 {
-	ui_event_type		event_type;
-	render_target *		target;
-	INT32				mouse_x;
-	INT32				mouse_y;
-	input_item_id		key;
-	unicode_char		ch;
+	ui_event_type       event_type;
+	render_target *     target;
+	INT32               mouse_x;
+	INT32               mouse_y;
+	input_item_id       key;
+	unicode_char        ch;
 };
 
 
@@ -186,4 +184,4 @@ INLINE void ui_input_push_char_event(running_machine &machine, render_target *ta
 }
 
 
-#endif	/* __UIINPUT_H__ */
+#endif  /* __UIINPUT_H__ */

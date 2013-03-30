@@ -4,48 +4,41 @@
 
 **************************************************************************/
 
-class midwunit_state : public driver_device
+class midwunit_state : public midtunit_state
 {
 public:
-	midwunit_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config),
-		  m_nvram(*this, "nvram") { }
+	midwunit_state(const machine_config &mconfig, device_type type, const char *tag)
+		: midtunit_state(mconfig, type, tag),
+			m_nvram(*this, "nvram") { }
 
-	required_shared_ptr<UINT16>	m_nvram;
-	UINT8 *m_decode_memory;
+	required_shared_ptr<UINT16> m_nvram;
 	UINT8 m_cmos_write_enable;
 	UINT16 m_iodata[8];
 	UINT8 m_ioshuffle[16];
 	UINT8 m_uart[8];
 	UINT8 m_security_bits;
 	UINT16 *m_umk3_palette;
+	DECLARE_WRITE16_MEMBER(midwunit_cmos_enable_w);
+	DECLARE_WRITE16_MEMBER(midwunit_cmos_w);
+	DECLARE_READ16_MEMBER(midwunit_cmos_r);
+	DECLARE_WRITE16_MEMBER(midwunit_io_w);
+	DECLARE_READ16_MEMBER(midwunit_io_r);
+	DECLARE_READ16_MEMBER(midwunit_security_r);
+	DECLARE_WRITE16_MEMBER(midwunit_security_w);
+	DECLARE_READ16_MEMBER(midwunit_sound_r);
+	DECLARE_READ16_MEMBER(midwunit_sound_state_r);
+	DECLARE_WRITE16_MEMBER(midwunit_sound_w);
+	DECLARE_WRITE16_MEMBER(umk3_palette_hack_w);
+	DECLARE_WRITE16_MEMBER(wwfmania_io_0_w);
+	DECLARE_DRIVER_INIT(mk3r10);
+	DECLARE_DRIVER_INIT(nbahangt);
+	DECLARE_DRIVER_INIT(wwfmania);
+	DECLARE_DRIVER_INIT(umk3);
+	DECLARE_DRIVER_INIT(mk3);
+	DECLARE_DRIVER_INIT(openice);
+	DECLARE_DRIVER_INIT(rmpgwt);
+	DECLARE_DRIVER_INIT(umk3r11);
+	DECLARE_DRIVER_INIT(mk3r20);
+	DECLARE_MACHINE_RESET(midwunit);
+	DECLARE_VIDEO_START(midwunit);
 };
-
-/*----------- defined in machine/midwunit.c -----------*/
-
-WRITE16_HANDLER( midwunit_cmos_enable_w );
-WRITE16_HANDLER( midwunit_cmos_w );
-READ16_HANDLER( midwunit_cmos_r );
-
-WRITE16_HANDLER( midwunit_io_w );
-
-READ16_HANDLER( midwunit_io_r );
-
-DRIVER_INIT( mk3 );
-DRIVER_INIT( mk3r20 );
-DRIVER_INIT( mk3r10 );
-DRIVER_INIT( umk3 );
-DRIVER_INIT( umk3r11 );
-
-DRIVER_INIT( openice );
-DRIVER_INIT( nbahangt );
-DRIVER_INIT( wwfmania );
-DRIVER_INIT( rmpgwt );
-
-MACHINE_RESET( midwunit );
-
-READ16_HANDLER( midwunit_security_r );
-WRITE16_HANDLER( midwunit_security_w );
-
-READ16_HANDLER( midwunit_sound_r );
-WRITE16_HANDLER( midwunit_sound_w );

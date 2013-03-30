@@ -10,15 +10,17 @@
 
     Games running on this hardware:
 
-    * Draw Poker,    1984, IGT - International Game Technology
+    * Draw Poker,          1984, IGT - International Game Technology
 
-    * Video Poker,   1984, InterFlip.
-    * Black Jack,    1984, InterFlip.
-    * Video Dado,    1987, InterFlip.
-    * Video Cordoba, 1987, InterFlip.
+    * Video Poker,         1984, InterFlip.
+    * Black Jack,          1984, InterFlip.
+    * Video Dado,          1987, InterFlip.
+    * Video Cordoba,       1987, InterFlip.
 
-    * Baby Poker,    1989, Recreativos Franco.
-    * Baby Dado,     1989, Recreativos Franco.
+    * Baby Poker,          1989, Recreativos Franco.
+    * Baby Dado,           1989, Recreativos Franco.
+
+    * Video Poker (v1403), 198?, Recreativos Franco?.
 
 
 ***************************************************************************
@@ -274,10 +276,10 @@
 **************************************************************************/
 
 
-#define CPU_CLOCK		(XTAL_6MHz)			/* main cpu clock */
-#define CPU_CLOCK_ALT	(XTAL_8MHz)			/* alternative main cpu clock for newer games */
-#define SOUND_CLOCK		(XTAL_8MHz)			/* sound cpu clock */
-#define VIDEO_CLOCK		(XTAL_7.8643MHz)
+#define CPU_CLOCK       (XTAL_6MHz)         /* main cpu clock */
+#define CPU_CLOCK_ALT   (XTAL_8MHz)         /* alternative main cpu clock for newer games */
+#define SOUND_CLOCK     (XTAL_8MHz)         /* sound cpu clock */
+#define VIDEO_CLOCK     (XTAL_7.8643MHz)
 
 
 #include "emu.h"
@@ -297,8 +299,8 @@
 class videopkr_state : public driver_device
 {
 public:
-	videopkr_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	videopkr_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) { }
 
 	UINT8 m_data_ram[0x100];
 	UINT8 m_video_ram[0x0400];
@@ -334,6 +336,35 @@ public:
 	UINT8 m_sbp2;
 	UINT8 m_sbp3;
 	tilemap_t *m_bg_tilemap;
+	DECLARE_READ8_MEMBER(videopkr_io_r);
+	DECLARE_WRITE8_MEMBER(videopkr_io_w);
+	DECLARE_READ8_MEMBER(videopkr_p1_data_r);
+	DECLARE_READ8_MEMBER(videopkr_p2_data_r);
+	DECLARE_WRITE8_MEMBER(videopkr_p1_data_w);
+	DECLARE_WRITE8_MEMBER(videopkr_p2_data_w);
+	DECLARE_READ8_MEMBER(videopkr_t0_latch);
+	DECLARE_WRITE8_MEMBER(prog_w);
+	DECLARE_READ8_MEMBER(sound_io_r);
+	DECLARE_WRITE8_MEMBER(sound_io_w);
+	DECLARE_READ8_MEMBER(sound_p2_r);
+	DECLARE_WRITE8_MEMBER(sound_p2_w);
+	DECLARE_READ8_MEMBER(baby_sound_p0_r);
+	DECLARE_WRITE8_MEMBER(baby_sound_p0_w);
+	DECLARE_READ8_MEMBER(baby_sound_p1_r);
+	DECLARE_WRITE8_MEMBER(baby_sound_p1_w);
+	DECLARE_READ8_MEMBER(baby_sound_p2_r);
+	DECLARE_WRITE8_MEMBER(baby_sound_p2_w);
+	DECLARE_READ8_MEMBER(baby_sound_p3_r);
+	DECLARE_WRITE8_MEMBER(baby_sound_p3_w);
+	TILE_GET_INFO_MEMBER(get_bg_tile_info);
+	virtual void machine_start();
+	virtual void video_start();
+	virtual void palette_init();
+	DECLARE_VIDEO_START(vidadcba);
+	DECLARE_PALETTE_INIT(babypkr);
+	DECLARE_PALETTE_INIT(fortune1);
+	UINT32 screen_update_videopkr(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	TIMER_DEVICE_CALLBACK_MEMBER(sound_t1_callback);
 };
 
 
@@ -379,11 +410,12 @@ static void count_7dig(unsigned long data, UINT8 index)
 	}
 }
 
-static PALETTE_INIT( videopkr )
+void videopkr_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int j;
 
-	for (j = 0; j < machine.total_colors(); j++)
+	for (j = 0; j < machine().total_colors(); j++)
 	{
 		int r, g, b, tr, tg, tb, i;
 
@@ -401,15 +433,16 @@ static PALETTE_INIT( videopkr )
 		tb = 0xf0 - (0xf0 * ((color_prom[j] >> 2) & 0x01));
 		b = tb - (i * (tb / 5));
 
-		palette_set_color(machine, j, MAKE_RGB(r, g, b));
+		palette_set_color(machine(), j, MAKE_RGB(r, g, b));
 	}
 }
 
-static PALETTE_INIT( babypkr )
+PALETTE_INIT_MEMBER(videopkr_state,babypkr)
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int j;
 
-	for (j = 0; j < machine.total_colors(); j++)
+	for (j = 0; j < machine().total_colors(); j++)
 	{
 		int r, g, b, tr, tg, tb, i, top;
 
@@ -431,15 +464,16 @@ static PALETTE_INIT( babypkr )
 		tb =  0xdf * ((color_prom[j] >> 2) & 0x01);
 		b = top - ((tb * top) / 0x100);
 
-		palette_set_color(machine, j, MAKE_RGB(r, g, b));
+		palette_set_color(machine(), j, MAKE_RGB(r, g, b));
 	}
 }
 
-static PALETTE_INIT( fortune1 )
+PALETTE_INIT_MEMBER(videopkr_state,fortune1)
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int j;
 
-	for (j = 0; j < machine.total_colors(); j++)
+	for (j = 0; j < machine().total_colors(); j++)
 	{
 		int r, g, b, tr, tg, tb, i, c;
 
@@ -463,39 +497,35 @@ static PALETTE_INIT( fortune1 )
 		if ((c % 4) == 1 || (c % 4) == 2)
 			c = ((int)(c / 4) * 4) + (3 - (c % 4));
 
-		palette_set_color(machine, c, MAKE_RGB(r, g, b));
+		palette_set_color(machine(), c, MAKE_RGB(r, g, b));
 	}
 }
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(videopkr_state::get_bg_tile_info)
 {
-	videopkr_state *state = machine.driver_data<videopkr_state>();
 	int offs = tile_index;
-	int attr = state->m_color_ram[offs] + input_port_read(machine, "IN2"); /* Color Switch Action */
-	int code = state->m_video_ram[offs];
+	int attr = m_color_ram[offs] + ioport("IN2")->read(); /* Color Switch Action */
+	int code = m_video_ram[offs];
 	int color = attr;
-	SET_TILE_INFO(0, code, color, 0);
+	SET_TILE_INFO_MEMBER(0, code, color, 0);
 }
 
 
-static VIDEO_START( videopkr )
+void videopkr_state::video_start()
 {
-	videopkr_state *state = machine.driver_data<videopkr_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(videopkr_state::get_bg_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
 }
 
-static VIDEO_START( vidadcba )
+VIDEO_START_MEMBER(videopkr_state,vidadcba)
 {
-	videopkr_state *state = machine.driver_data<videopkr_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_rows, 16, 8, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(videopkr_state::get_bg_tile_info),this), TILEMAP_SCAN_ROWS, 16, 8, 32, 32);
 }
 
 
-static SCREEN_UPDATE( videopkr )
+UINT32 videopkr_state::screen_update_videopkr(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	videopkr_state *state = screen->machine().driver_data<videopkr_state>();
-	tilemap_mark_all_tiles_dirty(state->m_bg_tilemap);
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
+	m_bg_tilemap->mark_all_dirty();
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
 	return 0;
 }
 
@@ -504,38 +534,37 @@ static SCREEN_UPDATE( videopkr )
 *      R/W Handlers      *
 *************************/
 
-static READ8_HANDLER( videopkr_io_r )
+READ8_MEMBER(videopkr_state::videopkr_io_r)
 {
-	videopkr_state *state = space->machine().driver_data<videopkr_state>();
 	UINT8 valor = 0, hf, co;
 
 	UINT16 kbdin;
 
-	switch (state->m_p2)
+	switch (m_p2)
 	{
-		case 0xef:	/* inputs are multiplexed through a diode matrix */
+		case 0xef:  /* inputs are multiplexed through a diode matrix */
 		{
-			hf = ((input_port_read(space->machine(), "IN1") & 0x10 ) >> 4) & 1;			/* Hopper full detection */
-			co = 0x10 * ((input_port_read(space->machine(), "IN1") & 0x20 ) >> 5);		/* Coin Out detection */
-			kbdin = ((input_port_read(space->machine(), "IN1") & 0xaf ) << 8) + input_port_read(space->machine(), "IN0");
+			hf = ((ioport("IN1")->read() & 0x10 ) >> 4) & 1;            /* Hopper full detection */
+			co = 0x10 * ((ioport("IN1")->read() & 0x20 ) >> 5);     /* Coin Out detection */
+			kbdin = ((ioport("IN1")->read() & 0xaf ) << 8) + ioport("IN0")->read();
 
 			switch (kbdin)
 			{
 				case 0x0000: valor = 0x00; break;
-				case 0x0001: valor = 0x01; break;	/* Door */
+				case 0x0001: valor = 0x01; break;   /* Door */
 				case 0x4000: valor = 0x02; break;
-				case 0x8000: valor = 0x03; break;	/* Hand Pay */
-				case 0x0002: valor = 0x04; break;	/* Books */
-				case 0x0004: valor = 0x05; break;	/* Coin In */
-				case 0x0008: valor = 0x07; break;	/* Start */
-				case 0x0010: valor = 0x08; break;	/* Discard */
-				case 0x0020: valor = 0x09; break;	/* Cancel */
-				case 0x0040: valor = 0x0a; break;	/* Hold 1 */
-				case 0x0080: valor = 0x0b; break;	/* Hold 2 */
-				case 0x0100: valor = 0x0c; break;	/* Hold 3 */
-				case 0x0200: valor = 0x0d; break;	/* Hold 4 */
-				case 0x0400: valor = 0x0e; break;	/* Hold 5 */
-				case 0x0800: valor = 0x06; break;	/* Bet */
+				case 0x8000: valor = 0x03; break;   /* Hand Pay */
+				case 0x0002: valor = 0x04; break;   /* Books */
+				case 0x0004: valor = 0x05; break;   /* Coin In */
+				case 0x0008: valor = 0x07; break;   /* Start */
+				case 0x0010: valor = 0x08; break;   /* Discard */
+				case 0x0020: valor = 0x09; break;   /* Cancel */
+				case 0x0040: valor = 0x0a; break;   /* Hold 1 */
+				case 0x0080: valor = 0x0b; break;   /* Hold 2 */
+				case 0x0100: valor = 0x0c; break;   /* Hold 3 */
+				case 0x0200: valor = 0x0d; break;   /* Hold 4 */
+				case 0x0400: valor = 0x0e; break;   /* Hold 5 */
+				case 0x0800: valor = 0x06; break;   /* Bet */
 			}
 
 			if ((valor == 0x00) & hf )
@@ -549,15 +578,15 @@ static READ8_HANDLER( videopkr_io_r )
 
 		case 0xdf:
 		{
-			state->m_n_offs = ((state->m_p1 & 0xc0) << 2 ) + offset;
-			valor = state->m_data_ram[offset];
+			m_n_offs = ((m_p1 & 0xc0) << 2 ) + offset;
+			valor = m_data_ram[offset];
 			break;
 		}
 
 		case 0x5f:
 		{
-			state->m_n_offs = ((state->m_p1 & 0xc0) << 2 ) + offset;
-			valor = state->m_data_ram[offset];
+			m_n_offs = ((m_p1 & 0xc0) << 2 ) + offset;
+			valor = m_data_ram[offset];
 			break;
 		}
 
@@ -566,8 +595,8 @@ static READ8_HANDLER( videopkr_io_r )
 		case 0x7e:
 		case 0x7f:
 		{
-			state->m_n_offs = ((state->m_p1 & 0xc0) << 2 ) + offset;
-			valor = state->m_color_ram[state->m_n_offs];
+			m_n_offs = ((m_p1 & 0xc0) << 2 ) + offset;
+			valor = m_color_ram[m_n_offs];
 			break;
 		}
 
@@ -576,8 +605,8 @@ static READ8_HANDLER( videopkr_io_r )
 		case 0xbe:
 		case 0xbf:
 		{
-			state->m_n_offs = ((state->m_p1 & 0xc0) << 2 ) + offset;
-			valor = state->m_video_ram[state->m_n_offs];
+			m_n_offs = ((m_p1 & 0xc0) << 2 ) + offset;
+			valor = m_video_ram[m_n_offs];
 			break;
 		}
 	}
@@ -585,26 +614,25 @@ static READ8_HANDLER( videopkr_io_r )
 	return valor;
 }
 
-static WRITE8_HANDLER( videopkr_io_w )
+WRITE8_MEMBER(videopkr_state::videopkr_io_w)
 {
-	videopkr_state *state = space->machine().driver_data<videopkr_state>();
-	switch (state->m_p2)
+	switch (m_p2)
 	{
 		case 0x3c:
 		case 0x3d:
 		case 0x3e:
 		case 0x3f:
 		{
-			state->m_n_offs = ((state->m_p1 & 0xc0) << 2 ) + offset;
-			state->m_color_ram[state->m_n_offs] = data & 0x0f;
-			state->m_video_ram[state->m_n_offs] = data;
-			tilemap_mark_tile_dirty(state->m_bg_tilemap, state->m_n_offs);
+			m_n_offs = ((m_p1 & 0xc0) << 2 ) + offset;
+			m_color_ram[m_n_offs] = data & 0x0f;
+			m_video_ram[m_n_offs] = data;
+			m_bg_tilemap->mark_tile_dirty(m_n_offs);
 			break;
 		}
 
 		case 0xdf:
 		{
-			state->m_data_ram[offset] = (data & 0x0f) + 0xf0;
+			m_data_ram[offset] = (data & 0x0f) + 0xf0;
 			break;
 		}
 
@@ -613,9 +641,9 @@ static WRITE8_HANDLER( videopkr_io_w )
 		case 0x7e:
 		case 0x7f:
 		{
-			state->m_n_offs = ((state->m_p1 & 0xc0) << 2 ) + offset;
-			state->m_color_ram[state->m_n_offs] = data & 0x0f;
-			tilemap_mark_tile_dirty(state->m_bg_tilemap, state->m_n_offs);
+			m_n_offs = ((m_p1 & 0xc0) << 2 ) + offset;
+			m_color_ram[m_n_offs] = data & 0x0f;
+			m_bg_tilemap->mark_tile_dirty(m_n_offs);
 			break;
 		}
 
@@ -624,108 +652,103 @@ static WRITE8_HANDLER( videopkr_io_w )
 		case 0xbe:
 		case 0xbf:
 		{
-			state->m_n_offs = ((state->m_p1 & 0xc0) << 2 ) + offset;
-			state->m_video_ram[state->m_n_offs] = data;
-			tilemap_mark_tile_dirty(state->m_bg_tilemap, state->m_n_offs);
+			m_n_offs = ((m_p1 & 0xc0) << 2 ) + offset;
+			m_video_ram[m_n_offs] = data;
+			m_bg_tilemap->mark_tile_dirty(m_n_offs);
 			break;
 		}
 
-		case 0xef:	/* Port 2.4 */
+		case 0xef:  /* Port 2.4 */
 		{
-			output_set_lamp_value(0, (data & 1));			/* L_1 */
-			output_set_lamp_value(1, ((data >> 1)& 1));		/* L_2 */
-			output_set_lamp_value(2, ((data >> 2) & 1));	/* L_3 */
-			output_set_lamp_value(3, ((data >> 3) & 1));	/* L_4 */
-			output_set_lamp_value(4, ((data >> 4) & 1));	/* Coin */
-			output_set_lamp_value(5, ((data >> 5) & 1));	/* Hopper_1 */
-			output_set_lamp_value(6, ((data >> 6) & 1));	/* Hopper_2 */
-			output_set_lamp_value(7, ((data >> 7) & 1));	/* Diverter */
-			state->m_p24_data = data;
-			state->m_hp_1 = (~state->m_p24_data >> 6) & 1;
-			state->m_hp_2 = (~state->m_p24_data >> 5) & 1;
-			state->m_dvrt = (~state->m_p24_data >> 7) & 1;
+			output_set_lamp_value(0, (data & 1));           /* L_1 */
+			output_set_lamp_value(1, ((data >> 1)& 1));     /* L_2 */
+			output_set_lamp_value(2, ((data >> 2) & 1));    /* L_3 */
+			output_set_lamp_value(3, ((data >> 3) & 1));    /* L_4 */
+			output_set_lamp_value(4, ((data >> 4) & 1));    /* Coin */
+			output_set_lamp_value(5, ((data >> 5) & 1));    /* Hopper_1 */
+			output_set_lamp_value(6, ((data >> 6) & 1));    /* Hopper_2 */
+			output_set_lamp_value(7, ((data >> 7) & 1));    /* Diverter */
+			m_p24_data = data;
+			m_hp_1 = (~m_p24_data >> 6) & 1;
+			m_hp_2 = (~m_p24_data >> 5) & 1;
+			m_dvrt = (~m_p24_data >> 7) & 1;
 			break;
 		}
 
 		case 0xff:
 		{
-			state->m_t0_latch = state->m_t0_latch ^ 0x01;		/* fix the bookkeeping mode */
+			m_t0_latch = m_t0_latch ^ 0x01;     /* fix the bookkeeping mode */
 			break;
 		}
 	}
 }
 
-static READ8_HANDLER( videopkr_p1_data_r )
+READ8_MEMBER(videopkr_state::videopkr_p1_data_r)
 {
-	videopkr_state *state = space->machine().driver_data<videopkr_state>();
-	return state->m_p1;
+	return m_p1;
 }
 
-static READ8_HANDLER( videopkr_p2_data_r )
+READ8_MEMBER(videopkr_state::videopkr_p2_data_r)
 {
-	videopkr_state *state = space->machine().driver_data<videopkr_state>();
-	return state->m_p2;
+	return m_p2;
 }
 
-static WRITE8_HANDLER( videopkr_p1_data_w )
+WRITE8_MEMBER(videopkr_state::videopkr_p1_data_w)
 {
-	videopkr_state *state = space->machine().driver_data<videopkr_state>();
-	state->m_p1 = data;
+	m_p1 = data;
 
-	output_set_lamp_value(8, (data & 1));			/* Aux_0 - Jackpot mech. counter (Baby Games)*/
-	output_set_lamp_value(9, ((data >> 1) & 1));	/* Aux_1 - */
-	output_set_lamp_value(10, ((data >> 2) & 1));	/* Aux_2 - */
-	output_set_lamp_value(11, ((data >> 3) & 1));	/* Aux_3 - */
-	output_set_lamp_value(12, ((data >> 4) & 1));	/* Aux_4 - Bell */
-	output_set_lamp_value(13, ((data >> 5) & 1));	/* Aux_5 - /CIO */
+	output_set_lamp_value(8, (data & 1));           /* Aux_0 - Jackpot mech. counter (Baby Games)*/
+	output_set_lamp_value(9, ((data >> 1) & 1));    /* Aux_1 - */
+	output_set_lamp_value(10, ((data >> 2) & 1));   /* Aux_2 - */
+	output_set_lamp_value(11, ((data >> 3) & 1));   /* Aux_3 - */
+	output_set_lamp_value(12, ((data >> 4) & 1));   /* Aux_4 - Bell */
+	output_set_lamp_value(13, ((data >> 5) & 1));   /* Aux_5 - /CIO */
 
-	state->m_jckp = state->m_p1 & 1;
+	m_jckp = m_p1 & 1;
 
-	if ((~state->m_c_io & 1) & state->m_ant_cio & state->m_hp_1 & state->m_hp_2)
+	if ((~m_c_io & 1) & m_ant_cio & m_hp_1 & m_hp_2)
 	{
-		++state->m_count1;	/* Decoded Coin In Mech. Counter*/
+		++m_count1; /* Decoded Coin In Mech. Counter*/
 	}
 
-	if ((~state->m_c_io & 1) & state->m_ant_cio & (~state->m_hp_1 & 1) & (~state->m_hp_2 & 1))
+	if ((~m_c_io & 1) & m_ant_cio & (~m_hp_1 & 1) & (~m_hp_2 & 1))
 	{
-		++state->m_count2;	/* Decoded Coind Out Mech. Counter */
+		++m_count2; /* Decoded Coind Out Mech. Counter */
 	}
 
-	if (~state->m_c_io & state->m_ant_cio & state->m_hp_1 & state->m_hp_2 & ~state->m_dvrt)
+	if (~m_c_io & m_ant_cio & m_hp_1 & m_hp_2 & ~m_dvrt)
 	{
-		++state->m_count3;	/* Decoded Coin to Drop Mech. Counter */
+		++m_count3; /* Decoded Coin to Drop Mech. Counter */
 	}
 
-	if (~state->m_jckp & state->m_ant_jckp)
+	if (~m_jckp & m_ant_jckp)
 	{
-		++state->m_count4;	/* Decoded Jackpot Mech. Counter */
+		++m_count4; /* Decoded Jackpot Mech. Counter */
 	}
 
-	count_7dig(state->m_count1, 0);
-	count_7dig(state->m_count2, 7);
-	count_7dig(state->m_count3, 14);
-	count_7dig(state->m_count4, 21);
+	count_7dig(m_count1, 0);
+	count_7dig(m_count2, 7);
+	count_7dig(m_count3, 14);
+	count_7dig(m_count4, 21);
 
-	state->m_ant_cio = state->m_c_io;
-	state->m_ant_jckp = state->m_jckp;
+	m_ant_cio = m_c_io;
+	m_ant_jckp = m_jckp;
 }
 
-static WRITE8_HANDLER( videopkr_p2_data_w )
+WRITE8_MEMBER(videopkr_state::videopkr_p2_data_w)
 {
-	videopkr_state *state = space->machine().driver_data<videopkr_state>();
-	state->m_p2 = data;
+	m_p2 = data;
 }
 
-static READ8_HANDLER( videopkr_t0_latch )
+READ8_MEMBER(videopkr_state::videopkr_t0_latch)
 {
-	videopkr_state *state = space->machine().driver_data<videopkr_state>();
-	return state->m_t0_latch;
+	return m_t0_latch;
 }
 
-static WRITE8_HANDLER( prog_w )
+WRITE8_MEMBER(videopkr_state::prog_w)
 {
 	if (!data)
-		cputag_set_input_line(space->machine(), "maincpu", 0, CLEAR_LINE);	/* clear interrupt FF */
+		machine().device("maincpu")->execute().set_input_line(0, CLEAR_LINE);   /* clear interrupt FF */
 }
 
 /*************************
@@ -764,70 +787,66 @@ static WRITE8_HANDLER( prog_w )
 
 */
 
-static READ8_HANDLER(sound_io_r)
+READ8_MEMBER(videopkr_state::sound_io_r)
 {
-	videopkr_state *state = space->machine().driver_data<videopkr_state>();
-	switch (state->m_vp_sound_p2)
+	switch (m_vp_sound_p2)
 	{
 		case 0xbf:
 		{
-			state->m_c_io = (state->m_p1 >> 5) & 1;
-			state->m_hp_1 = (~state->m_p24_data >> 6) & 1;
-			state->m_hp_2 = (~state->m_p24_data >> 5) & 1;
-			state->m_bell = (state->m_p1 >> 4) & 1;
-			state->m_aux3 = (state->m_p1 >> 3) & 1;
-			state->m_dvrt = (~state->m_p24_data >> 7) & 1;
-			state->m_sound_ant = state->m_sound_latch;
-			state->m_sound_latch = state->m_c_io + (state->m_hp_1 << 1) + (state->m_hp_2 << 2) + (state->m_bell << 3) + 0xf0;
+			m_c_io = (m_p1 >> 5) & 1;
+			m_hp_1 = (~m_p24_data >> 6) & 1;
+			m_hp_2 = (~m_p24_data >> 5) & 1;
+			m_bell = (m_p1 >> 4) & 1;
+			m_aux3 = (m_p1 >> 3) & 1;
+			m_dvrt = (~m_p24_data >> 7) & 1;
+			m_sound_ant = m_sound_latch;
+			m_sound_latch = m_c_io + (m_hp_1 << 1) + (m_hp_2 << 2) + (m_bell << 3) + 0xf0;
 
 			break;
 		}
 	}
 
-	return state->m_sound_latch;
+	return m_sound_latch;
 }
 
-static WRITE8_HANDLER(sound_io_w)
+WRITE8_MEMBER(videopkr_state::sound_io_w)
 {
-	videopkr_state *state = space->machine().driver_data<videopkr_state>();
-	if (state->m_vp_sound_p2 == 0x5f || state->m_vp_sound_p2 == 0xdf)
+	if (m_vp_sound_p2 == 0x5f || m_vp_sound_p2 == 0xdf)
 	{
-		state->m_dc_40103 = data;
-		state->m_dc_4020 = 0;
+		m_dc_40103 = data;
+		m_dc_4020 = 0;
 	}
 }
 
-static READ8_HANDLER(sound_p2_r)
+READ8_MEMBER(videopkr_state::sound_p2_r)
 {
-	videopkr_state *state = space->machine().driver_data<videopkr_state>();
-	return state->m_vp_sound_p2;
+	return m_vp_sound_p2;
 }
 
-static WRITE8_HANDLER(sound_p2_w)
+WRITE8_MEMBER(videopkr_state::sound_p2_w)
 {
-	videopkr_state *state = space->machine().driver_data<videopkr_state>();
-	state->m_vp_sound_p2 = data;
+	m_vp_sound_p2 = data;
 
 	switch (data)
 	{
 		case 0x5f:
 		{
-			state->m_te_40103 = 0;	/* p2.7 LOW */
-			state->m_ld_40103 = 0;	/* p2.5 LOW */
+			m_te_40103 = 0; /* p2.7 LOW */
+			m_ld_40103 = 0; /* p2.5 LOW */
 			break;
 		}
 
 		case 0x7f:
 		{
-			state->m_te_40103 = 0;
-			state->m_ld_40103 = 1;
+			m_te_40103 = 0;
+			m_ld_40103 = 1;
 			break;
 		}
 
 		case 0xff:
 		{
-			state->m_te_40103 = 1;
-			state->m_ld_40103 = 1;
+			m_te_40103 = 1;
+			m_ld_40103 = 1;
 			break;
 		}
 	}
@@ -836,98 +855,91 @@ static WRITE8_HANDLER(sound_p2_w)
 
 /* Baby Sound Handlers */
 
-static READ8_HANDLER(baby_sound_p0_r)
+READ8_MEMBER(videopkr_state::baby_sound_p0_r)
 {
-	videopkr_state *state = space->machine().driver_data<videopkr_state>();
-	return state->m_sbp0;
+	return m_sbp0;
 }
 
-static WRITE8_HANDLER(baby_sound_p0_w)
+WRITE8_MEMBER(videopkr_state::baby_sound_p0_w)
 {
-	videopkr_state *state = space->machine().driver_data<videopkr_state>();
-	state->m_sbp0 = data;
+	m_sbp0 = data;
 }
 
-static READ8_HANDLER(baby_sound_p1_r)
+READ8_MEMBER(videopkr_state::baby_sound_p1_r)
 {
-	videopkr_state *state = space->machine().driver_data<videopkr_state>();
-	state->m_c_io = (state->m_p1 >> 5) & 1;
-	state->m_hp_1 = (~state->m_p24_data >> 6) & 1;
-	state->m_hp_2 = (~state->m_p24_data >> 5) & 1;
-	state->m_bell = (state->m_p1 >> 4) & 1;
-	state->m_aux3 = (state->m_p1 >> 3) & 1;
-	state->m_baby_latch = state->m_c_io + (state->m_hp_1 << 1) + (state->m_hp_2 << 2) + (state->m_bell << 3) + (state->m_aux3 << 4) + 0xe0;
-	return state->m_baby_latch;
+	m_c_io = (m_p1 >> 5) & 1;
+	m_hp_1 = (~m_p24_data >> 6) & 1;
+	m_hp_2 = (~m_p24_data >> 5) & 1;
+	m_bell = (m_p1 >> 4) & 1;
+	m_aux3 = (m_p1 >> 3) & 1;
+	m_baby_latch = m_c_io + (m_hp_1 << 1) + (m_hp_2 << 2) + (m_bell << 3) + (m_aux3 << 4) + 0xe0;
+	return m_baby_latch;
 }
 
-static WRITE8_HANDLER(baby_sound_p1_w)
+WRITE8_MEMBER(videopkr_state::baby_sound_p1_w)
 {
-	videopkr_state *state = space->machine().driver_data<videopkr_state>();
-	state->m_baby_latch = state->m_baby_latch | data;
+	m_baby_latch = m_baby_latch | data;
 }
 
-static READ8_HANDLER(baby_sound_p2_r)
+READ8_MEMBER(videopkr_state::baby_sound_p2_r)
 {
-	videopkr_state *state = space->machine().driver_data<videopkr_state>();
-	return state->m_sbp2;
+	return m_sbp2;
 }
 
-static WRITE8_DEVICE_HANDLER(baby_sound_p2_w)
+WRITE8_MEMBER(videopkr_state::baby_sound_p2_w)
 {
-	videopkr_state *state = device->machine().driver_data<videopkr_state>();
-	state->m_sbp2 = data;
-	dac_data_w(device, data);
+	dac_device *device = machine().device<dac_device>("dac");
+	m_sbp2 = data;
+	device->write_unsigned8(data);
 }
 
-static READ8_DEVICE_HANDLER(baby_sound_p3_r)
+READ8_MEMBER(videopkr_state::baby_sound_p3_r)
 {
-	videopkr_state *state = device->machine().driver_data<videopkr_state>();
-	return state->m_sbp3;
+	return m_sbp3;
 }
 
-static WRITE8_DEVICE_HANDLER(baby_sound_p3_w)
+WRITE8_MEMBER(videopkr_state::baby_sound_p3_w)
 {
-	videopkr_state *state = device->machine().driver_data<videopkr_state>();
+	device_t *device = machine().device("aysnd");
 	UINT8 lmp_ports, ay_intf;
-	state->m_sbp3 = data;
-	lmp_ports = state->m_sbp3 >> 1 & 0x07;
+	m_sbp3 = data;
+	lmp_ports = m_sbp3 >> 1 & 0x07;
 
 	output_set_value("TOP_1", (lmp_ports >> 0) & 1);
 	output_set_value("TOP_2", (lmp_ports >> 1) & 1);
 	output_set_value("TOP_3", (lmp_ports >> 2) & 1);
 
-	if (!(state->m_sbp3 & 0x10))
+	if (!(m_sbp3 & 0x10))
 	{
-		device->reset();
+		reset();
 		logerror("AY3-8910: Reset\n");
 	}
 
-	ay_intf = (state->m_sbp3 >> 5) & 0x07;
+	ay_intf = (m_sbp3 >> 5) & 0x07;
 
 	switch (ay_intf)
 	{
-		case 0x00:	break;
-		case 0x01:	break;
-		case 0x02:	break;
-		case 0x03:	ay8910_data_w(device, 1, state->m_sbp0); break;
-		case 0x04:	break;
-		case 0x05:	state->m_sbp0 = ay8910_r(device, state->m_sbp0); break;
-		case 0x06:	break;
-		case 0x07:	ay8910_address_w(device, 0, state->m_sbp0); break;
+		case 0x00:  break;
+		case 0x01:  break;
+		case 0x02:  break;
+		case 0x03:  ay8910_data_w(device, space, 1, m_sbp0); break;
+		case 0x04:  break;
+		case 0x05:  m_sbp0 = ay8910_r(device, space, m_sbp0); break;
+		case 0x06:  break;
+		case 0x07:  ay8910_address_w(device, space, 0, m_sbp0); break;
 	}
 }
 
 
-static TIMER_DEVICE_CALLBACK(sound_t1_callback)
+TIMER_DEVICE_CALLBACK_MEMBER(videopkr_state::sound_t1_callback)
 {
-	videopkr_state *state = timer.machine().driver_data<videopkr_state>();
-	if (state->m_te_40103 == 1)
+	if (m_te_40103 == 1)
 	{
-		state->m_dc_40103++;
+		m_dc_40103++;
 
-		if (state->m_dc_40103 == 0)
+		if (m_dc_40103 == 0)
 		{
-			cputag_set_input_line(timer.machine(), "soundcpu", 0, ASSERT_LINE);
+			machine().device("soundcpu")->execute().set_input_line(0, ASSERT_LINE);
 		}
 	}
 }
@@ -936,11 +948,11 @@ static TIMER_DEVICE_CALLBACK(sound_t1_callback)
 * Memory Map Information *
 *************************/
 
-static ADDRESS_MAP_START( i8039_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( i8039_map, AS_PROGRAM, 8, videopkr_state )
 	AM_RANGE(0x0000, 0x0fff) AM_ROM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( i8039_io_port, AS_IO, 8 )
+static ADDRESS_MAP_START( i8039_io_port, AS_IO, 8, videopkr_state )
 	AM_RANGE(0x00,            0xff           ) AM_READWRITE(videopkr_io_r, videopkr_io_w)
 	AM_RANGE(MCS48_PORT_P1,   MCS48_PORT_P1  ) AM_READWRITE(videopkr_p1_data_r, videopkr_p1_data_w)
 	AM_RANGE(MCS48_PORT_P2,   MCS48_PORT_P2  ) AM_READWRITE(videopkr_p2_data_r, videopkr_p2_data_w)
@@ -948,28 +960,28 @@ static ADDRESS_MAP_START( i8039_io_port, AS_IO, 8 )
 	AM_RANGE(MCS48_PORT_T0,   MCS48_PORT_T0  ) AM_READ(videopkr_t0_latch)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( i8039_sound_mem, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( i8039_sound_mem, AS_PROGRAM, 8, videopkr_state )
 	AM_RANGE(0x0000, 0x0fff) AM_ROM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( i8039_sound_port, AS_IO, 8 )
+static ADDRESS_MAP_START( i8039_sound_port, AS_IO, 8, videopkr_state )
 	AM_RANGE(0x00         , 0xff         ) AM_READWRITE(sound_io_r, sound_io_w)
-	AM_RANGE(MCS48_PORT_P1, MCS48_PORT_P1) AM_DEVWRITE("dac", dac_w)
+	AM_RANGE(MCS48_PORT_P1, MCS48_PORT_P1) AM_DEVWRITE("dac", dac_device, write_unsigned8)
 	AM_RANGE(MCS48_PORT_P2, MCS48_PORT_P2) AM_READWRITE(sound_p2_r, sound_p2_w)
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( i8051_sound_mem, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( i8051_sound_mem, AS_PROGRAM, 8, videopkr_state )
 	AM_RANGE(0x0000, 0x0fff) AM_ROM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( i8051_sound_port, AS_IO, 8 )
+static ADDRESS_MAP_START( i8051_sound_port, AS_IO, 8, videopkr_state )
 	AM_RANGE(0x0000, 0x1ff) AM_RAM
 	/* ports */
 	AM_RANGE(MCS51_PORT_P0, MCS51_PORT_P0) AM_READWRITE(baby_sound_p0_r, baby_sound_p0_w)
 	AM_RANGE(MCS51_PORT_P1, MCS51_PORT_P1) AM_READWRITE(baby_sound_p1_r, baby_sound_p1_w)
-	AM_RANGE(MCS51_PORT_P2, MCS51_PORT_P2) AM_READ(baby_sound_p2_r) AM_DEVWRITE("dac", baby_sound_p2_w)
-	AM_RANGE(MCS51_PORT_P3, MCS51_PORT_P3) AM_DEVREADWRITE("aysnd", baby_sound_p3_r, baby_sound_p3_w)
+	AM_RANGE(MCS51_PORT_P2, MCS51_PORT_P2) AM_READ(baby_sound_p2_r) AM_WRITE(baby_sound_p2_w)
+	AM_RANGE(MCS51_PORT_P3, MCS51_PORT_P3) AM_READWRITE(baby_sound_p3_r, baby_sound_p3_w)
 ADDRESS_MAP_END
 
 
@@ -999,7 +1011,7 @@ static INPUT_PORTS_START( videopkr )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNUSED )
 
 	PORT_START("IN2")
-	PORT_DIPNAME( 0x20, 0x00, "Color Sw." )		PORT_DIPLOCATION("SW1:1")
+	PORT_DIPNAME( 0x20, 0x00, "Color Sw." )     PORT_DIPLOCATION("SW1:1")
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On  ) )
 
@@ -1026,7 +1038,7 @@ static INPUT_PORTS_START( blckjack )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNUSED )
 
 	PORT_START("IN2")
-	PORT_DIPNAME( 0x20, 0x00, "Color Sw." )		PORT_DIPLOCATION("SW1:1")
+	PORT_DIPNAME( 0x20, 0x00, "Color Sw." )     PORT_DIPLOCATION("SW1:1")
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On  ) )
 INPUT_PORTS_END
@@ -1053,7 +1065,7 @@ static INPUT_PORTS_START( videodad )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNUSED )
 
 	PORT_START("IN2")
-	PORT_DIPNAME( 0x20, 0x00, "Color Sw." )		PORT_DIPLOCATION("SW1:1")
+	PORT_DIPNAME( 0x20, 0x00, "Color Sw." )     PORT_DIPLOCATION("SW1:1")
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On  ) )
 INPUT_PORTS_END
@@ -1080,7 +1092,7 @@ static INPUT_PORTS_START( videocba )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNUSED )
 
 	PORT_START("IN2")
-	PORT_DIPNAME( 0x20, 0x00, "Color Sw." )		PORT_DIPLOCATION("SW1:1")
+	PORT_DIPNAME( 0x20, 0x00, "Color Sw." )     PORT_DIPLOCATION("SW1:1")
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On  ) )
 INPUT_PORTS_END
@@ -1108,7 +1120,7 @@ static INPUT_PORTS_START( babypkr )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("Hand Pay") PORT_CODE(KEYCODE_W)
 
 	PORT_START("IN2")
-	PORT_DIPNAME( 0x20, 0x00, "Color Sw." )		PORT_DIPLOCATION("SW1:1")
+	PORT_DIPNAME( 0x20, 0x00, "Color Sw." )     PORT_DIPLOCATION("SW1:1")
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On  ) )
 
@@ -1133,10 +1145,10 @@ static INPUT_PORTS_START( babydad )
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("Hopper") PORT_TOGGLE PORT_CODE(KEYCODE_H)
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_GAMBLE_PAYOUT)
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNUSED  )
-    PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("Hand Pay") PORT_CODE(KEYCODE_W)
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_OTHER) PORT_NAME("Hand Pay") PORT_CODE(KEYCODE_W)
 
 	PORT_START("IN2")
-	PORT_DIPNAME( 0x20, 0x00, "Color Sw." )		PORT_DIPLOCATION("SW1:1")
+	PORT_DIPNAME( 0x20, 0x00, "Color Sw." )     PORT_DIPLOCATION("SW1:1")
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On  ) )
 
@@ -1191,17 +1203,16 @@ GFXDECODE_END
 *    Machine Start / Reset     *
 *******************************/
 
-static MACHINE_START(videopkr)
+void videopkr_state::machine_start()
 {
-	videopkr_state *state = machine.driver_data<videopkr_state>();
-	state->m_vp_sound_p2 = 0xff;	/* default P2 latch value */
-	state->m_sound_latch = 0xff;	/* default sound data latch value */
-	state->m_p24_data = 0xff;
-	state->m_p1 = 0xff;
-	state->m_ant_cio = 0;
-	state->m_count0 = 0;
+	m_vp_sound_p2 = 0xff;   /* default P2 latch value */
+	m_sound_latch = 0xff;   /* default sound data latch value */
+	m_p24_data = 0xff;
+	m_p1 = 0xff;
+	m_ant_cio = 0;
+	m_count0 = 0;
 
-	machine.device<nvram_device>("nvram")->set_base(state->m_data_ram, sizeof(state->m_data_ram));
+	machine().device<nvram_device>("nvram")->set_base(m_data_ram, sizeof(m_data_ram));
 }
 
 static const ay8910_interface ay8910_config =
@@ -1226,35 +1237,31 @@ static MACHINE_CONFIG_START( videopkr, videopkr_state )
 	MCFG_CPU_PROGRAM_MAP(i8039_map)
 	MCFG_CPU_IO_MAP(i8039_io_port)
 
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_assert)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", videopkr_state,  irq0_line_assert)
 
 	MCFG_CPU_ADD("soundcpu", I8039, SOUND_CLOCK)
 	MCFG_CPU_PROGRAM_MAP(i8039_sound_mem)
 	MCFG_CPU_IO_MAP(i8039_sound_port)
-	MCFG_MACHINE_START(videopkr)
 	MCFG_NVRAM_ADD_0FILL("nvram")
 
-	MCFG_TIMER_ADD_PERIODIC("t1_timer", sound_t1_callback, attotime::from_hz(50))
+	MCFG_TIMER_DRIVER_ADD_PERIODIC("t1_timer", videopkr_state, sound_t1_callback, attotime::from_hz(50))
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(5*8, 31*8-1, 3*8, 29*8-1)
 
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(2080)
-	MCFG_SCREEN_UPDATE(videopkr)
+	MCFG_SCREEN_UPDATE_DRIVER(videopkr_state, screen_update_videopkr)
 
 	MCFG_GFXDECODE(videopkr)
-	MCFG_PALETTE_INIT(videopkr)
 	MCFG_PALETTE_LENGTH(256)
-	MCFG_VIDEO_START(videopkr)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
-	MCFG_SOUND_ADD("dac", DAC, 0)
+	MCFG_DAC_ADD("dac")
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.55)
 MACHINE_CONFIG_END
 
@@ -1282,7 +1289,7 @@ static MACHINE_CONFIG_DERIVED( videodad, videopkr )
 	MCFG_SCREEN_VISIBLE_AREA(4*16, 31*16-1, 2*8, 30*8-1)
 
 	MCFG_GFXDECODE(videodad)
-	MCFG_VIDEO_START(vidadcba)
+	MCFG_VIDEO_START_OVERRIDE(videopkr_state,vidadcba)
 MACHINE_CONFIG_END
 
 
@@ -1301,9 +1308,9 @@ static MACHINE_CONFIG_DERIVED( babypkr, videopkr )
 	MCFG_SCREEN_SIZE(32*16, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(5*16, 31*16-1, 3*8, 29*8-1)
 
-	MCFG_PALETTE_INIT(babypkr)
+	MCFG_PALETTE_INIT_OVERRIDE(videopkr_state,babypkr)
 	MCFG_GFXDECODE(videodad)
-	MCFG_VIDEO_START(vidadcba)
+	MCFG_VIDEO_START_OVERRIDE(videopkr_state,vidadcba)
 
 	MCFG_SOUND_ADD("aysnd", AY8910, CPU_CLOCK / 6)
 	MCFG_SOUND_CONFIG(ay8910_config)
@@ -1316,7 +1323,7 @@ static MACHINE_CONFIG_DERIVED( fortune1, videopkr )
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_CLOCK(CPU_CLOCK_ALT)
 
-	MCFG_PALETTE_INIT(fortune1)
+	MCFG_PALETTE_INIT_OVERRIDE(videopkr_state,fortune1)
 MACHINE_CONFIG_END
 
 /*************************
@@ -1325,108 +1332,197 @@ MACHINE_CONFIG_END
 
 ROM_START( videopkr )
 	ROM_REGION( 0x1000, "maincpu", 0 )
-	ROM_LOAD( "vpoker.c5",		0x0000, 0x0800,	CRC(200d21e4) SHA1(d991c9f10a36a02491bb0aba32129675fed77a10) )
-	ROM_LOAD( "vpoker.c7",		0x0800, 0x0800,	CRC(f72c2a90) SHA1(e9c54d1f895cde0aaca4121a252da40594195a25) )
+	ROM_LOAD( "vpoker.c5",      0x0000, 0x0800, CRC(200d21e4) SHA1(d991c9f10a36a02491bb0aba32129675fed77a10) )
+	ROM_LOAD( "vpoker.c7",      0x0800, 0x0800, CRC(f72c2a90) SHA1(e9c54d1f895cde0aaca4121a252da40594195a25) )
 
-	ROM_REGION( 0x1000, "soundcpu", 0 )	/* sound cpu program */
-	ROM_LOAD( "vpsona3.pbj",	0x0000, 0x0800,	CRC(a4f7bf7f) SHA1(a08287821f3471cb3e1ae0528811da930fd57387) )
-	ROM_LOAD( "vpsona2.pbj",	0x0800, 0x0800,	CRC(583a9b95) SHA1(a10e85452e285b2a63f885f4e39b7f76ee8b2407) )
+	ROM_REGION( 0x1000, "soundcpu", 0 ) /* sound cpu program */
+	ROM_LOAD( "vpsona3.pbj",    0x0000, 0x0800, CRC(a4f7bf7f) SHA1(a08287821f3471cb3e1ae0528811da930fd57387) )
+	ROM_LOAD( "vpsona2.pbj",    0x0800, 0x0800, CRC(583a9b95) SHA1(a10e85452e285b2a63f885f4e39b7f76ee8b2407) )
 
 	ROM_REGION( 0x1000, "tiles", 0 )
-    ROM_LOAD( "vpbj_b15.org",	0x0000, 0x0800,	CRC(67468e3a) SHA1(761766f0fb92693d32179a914e11da517cc5747d) )
-    ROM_LOAD( "vpbj_b12.org",	0x0800, 0x0800,	CRC(4aba166e) SHA1(930cea2216a39b5d72021d1b449db018a121adce) )
+	ROM_LOAD( "vpbj_b15.org",   0x0000, 0x0800, CRC(67468e3a) SHA1(761766f0fb92693d32179a914e11da517cc5747d) )
+	ROM_LOAD( "vpbj_b12.org",   0x0800, 0x0800, CRC(4aba166e) SHA1(930cea2216a39b5d72021d1b449db018a121adce) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "vpbjorg.col",	0x0000, 0x0100,	CRC(09abf5f1) SHA1(f2d6b4f2f08b47b93728dafb50576d5ca859255f) )
+	ROM_LOAD( "vpbjorg.col",    0x0000, 0x0100, CRC(09abf5f1) SHA1(f2d6b4f2f08b47b93728dafb50576d5ca859255f) )
 	ROM_END
 
 ROM_START( blckjack )
 	ROM_REGION( 0x1000, "maincpu", 0 )
-	ROM_LOAD( "bjc5org.old",	0x0000, 0x0800,	CRC(e266a28a) SHA1(1f90c85a2a817f1927c9ab2cbf79cfa2dd116dc8) )
-	ROM_LOAD( "bjc7org.old",	0x0800, 0x0800,	CRC(c60c565f) SHA1(c9ed232301750288bd000ac4e2dcf2253745ff0a) )
+	ROM_LOAD( "bjc5org.old",    0x0000, 0x0800, CRC(e266a28a) SHA1(1f90c85a2a817f1927c9ab2cbf79cfa2dd116dc8) )
+	ROM_LOAD( "bjc7org.old",    0x0800, 0x0800, CRC(c60c565f) SHA1(c9ed232301750288bd000ac4e2dcf2253745ff0a) )
 
-	ROM_REGION( 0x1000, "soundcpu", 0 )	/* sound cpu program */
-	ROM_LOAD( "vpsona3.pbj",	0x0000, 0x0800,	CRC(a4f7bf7f) SHA1(a08287821f3471cb3e1ae0528811da930fd57387) )
-	ROM_LOAD( "vpsona2.pbj",	0x0800, 0x0800,	CRC(583a9b95) SHA1(a10e85452e285b2a63f885f4e39b7f76ee8b2407) )
+	ROM_REGION( 0x1000, "soundcpu", 0 ) /* sound cpu program */
+	ROM_LOAD( "vpsona3.pbj",    0x0000, 0x0800, CRC(a4f7bf7f) SHA1(a08287821f3471cb3e1ae0528811da930fd57387) )
+	ROM_LOAD( "vpsona2.pbj",    0x0800, 0x0800, CRC(583a9b95) SHA1(a10e85452e285b2a63f885f4e39b7f76ee8b2407) )
 
 	ROM_REGION( 0x1000, "tiles", 0 )
-	ROM_LOAD( "vpbj_b15.org",	0x0000, 0x0800,	CRC(67468e3a) SHA1(761766f0fb92693d32179a914e11da517cc5747d) )
-	ROM_LOAD( "vpbj_b12.org",	0x0800, 0x0800,	CRC(4aba166e) SHA1(930cea2216a39b5d72021d1b449db018a121adce) )
+	ROM_LOAD( "vpbj_b15.org",   0x0000, 0x0800, CRC(67468e3a) SHA1(761766f0fb92693d32179a914e11da517cc5747d) )
+	ROM_LOAD( "vpbj_b12.org",   0x0800, 0x0800, CRC(4aba166e) SHA1(930cea2216a39b5d72021d1b449db018a121adce) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "vpbjorg.col",	0x0000, 0x0100,	CRC(09abf5f1) SHA1(f2d6b4f2f08b47b93728dafb50576d5ca859255f) )
+	ROM_LOAD( "vpbjorg.col",    0x0000, 0x0100, CRC(09abf5f1) SHA1(f2d6b4f2f08b47b93728dafb50576d5ca859255f) )
 ROM_END
 
 ROM_START( videodad )
 	ROM_REGION( 0x1000, "maincpu", 0 )
-	ROM_LOAD( "dac5org.old",	0x0000, 0x0800,	CRC(b373c8e9) SHA1(7a99d6aa152f8e6adeddbfdfd13278edeaa529bc) )
-	ROM_LOAD( "dac7org.old",	0x0800, 0x0800,	CRC(afabae30) SHA1(c4198ba8de6811e3367b0154ff479f6738721bfa) )
+	ROM_LOAD( "dac5org.old",    0x0000, 0x0800, CRC(b373c8e9) SHA1(7a99d6aa152f8e6adeddbfdfd13278edeaa529bc) )
+	ROM_LOAD( "dac7org.old",    0x0800, 0x0800, CRC(afabae30) SHA1(c4198ba8de6811e3367b0154ff479f6738721bfa) )
 
-	ROM_REGION( 0x1000, "soundcpu", 0 )	/* sound cpu program */
-	ROM_LOAD( "vdsona3.dad",	0x0000, 0x0800,	CRC(13f7a462) SHA1(2e2e904637ca7873a2ed67d7ab1524e51b324660) )
-	ROM_LOAD( "vdsona2.dad",	0x0800, 0x0800,	CRC(120e4512) SHA1(207748d4f5793180305bb115af877042517d901f) )
+	ROM_REGION( 0x1000, "soundcpu", 0 ) /* sound cpu program */
+	ROM_LOAD( "vdsona3.dad",    0x0000, 0x0800, CRC(13f7a462) SHA1(2e2e904637ca7873a2ed67d7ab1524e51b324660) )
+	ROM_LOAD( "vdsona2.dad",    0x0800, 0x0800, CRC(120e4512) SHA1(207748d4f5793180305bb115af877042517d901f) )
 
 	ROM_REGION( 0x2000, "tiles", 0 )
-	ROM_LOAD( "vdadob15.bin",	0x0000, 0x0800,	CRC(caa6a4b0) SHA1(af99da30b8ee63d54ac1f1e6737ed707501a5a25) )
-	ROM_LOAD( "vdadob14.bin",	0x0800, 0x0800,	CRC(eabfae6b) SHA1(189b38da5e9c99f99c5425cdfefccc6991e3f85e) )
-	ROM_LOAD( "vdadob12.bin",	0x1000, 0x0800,	CRC(176f7b31) SHA1(613521ed9caf904db22860686e0424d0c0e0cba6) )
-	ROM_LOAD( "vdadob11.bin",	0x1800, 0x0800,	CRC(259492c7) SHA1(003cc40a88f2b9fad0089574963e7e654211bb16) )
+	ROM_LOAD( "vdadob15.bin",   0x0000, 0x0800, CRC(caa6a4b0) SHA1(af99da30b8ee63d54ac1f1e6737ed707501a5a25) )
+	ROM_LOAD( "vdadob14.bin",   0x0800, 0x0800, CRC(eabfae6b) SHA1(189b38da5e9c99f99c5425cdfefccc6991e3f85e) )
+	ROM_LOAD( "vdadob12.bin",   0x1000, 0x0800, CRC(176f7b31) SHA1(613521ed9caf904db22860686e0424d0c0e0cba6) )
+	ROM_LOAD( "vdadob11.bin",   0x1800, 0x0800, CRC(259492c7) SHA1(003cc40a88f2b9fad0089574963e7e654211bb16) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "vdvcorg.col",	0x0000, 0x0100,	CRC(741b1a22) SHA1(50983ea37f0479793ba38a112a0266c2edc4b5ef) )
+	ROM_LOAD( "vdvcorg.col",    0x0000, 0x0100, CRC(741b1a22) SHA1(50983ea37f0479793ba38a112a0266c2edc4b5ef) )
 ROM_END
 
 ROM_START( videocba )
 	ROM_REGION( 0x1000, "maincpu", 0 )
-	ROM_LOAD( "vcc5org.old",	0x0000, 0x0800,	CRC(96d72283) SHA1(056197a9e2ad40d1d6610bbe8a1855b81c0a6715) )
-	ROM_LOAD( "vcc7org.old",	0x0800, 0x0800,	CRC(fdec55c1) SHA1(19b740f3b7f2acaa0fc09f4c0a2fe69721ebbcaf) )
+	ROM_LOAD( "vcc5org.old",    0x0000, 0x0800, CRC(96d72283) SHA1(056197a9e2ad40d1d6610bbe8a1855b81c0a6715) )
+	ROM_LOAD( "vcc7org.old",    0x0800, 0x0800, CRC(fdec55c1) SHA1(19b740f3b7f2acaa0fc09f4c0a2fe69721ebbcaf) )
 
-	ROM_REGION( 0x1000, "soundcpu", 0 )	/* sound cpu program */
-	ROM_LOAD( "vcsona3.rod",	0x0000, 0x0800,	CRC(b0948d6c) SHA1(6c45d350288f69b4b2b5ac16ab2b418f14c6eded) )
-	ROM_LOAD( "vcsona2.rod",	0x0800, 0x0800,	CRC(44ff9e85) SHA1(5d7988d2d3bca932b77e014dc61f7a2347b01603) )
+	ROM_REGION( 0x1000, "soundcpu", 0 ) /* sound cpu program */
+	ROM_LOAD( "vcsona3.rod",    0x0000, 0x0800, CRC(b0948d6c) SHA1(6c45d350288f69b4b2b5ac16ab2b418f14c6eded) )
+	ROM_LOAD( "vcsona2.rod",    0x0800, 0x0800, CRC(44ff9e85) SHA1(5d7988d2d3bca932b77e014dc61f7a2347b01603) )
 
 	ROM_REGION( 0x2000, "tiles", 0 )
-	ROM_LOAD( "vcbab15.bin",	0x0000, 0x0800,	CRC(fce8c772) SHA1(f9736b724b620d60a17d77f6b773f39b99b47190) )
-	ROM_LOAD( "vcbab14.bin",	0x0800, 0x0800,	CRC(6fd66330) SHA1(0ee3b3329b94ded81f028ebb687e580787c74ded) )
-	ROM_LOAD( "vcbab12.bin",	0x1000, 0x0800,	CRC(e534d6c3) SHA1(7a93c6c07b5a28558ee005fed2098dc2933c3252) )
-	ROM_LOAD( "vcbab11.bin",	0x1800, 0x0800,	CRC(e2069a6d) SHA1(2d4e71f2838451215e6f9629e2d1a35808510353) )
+	ROM_LOAD( "vcbab15.bin",    0x0000, 0x0800, CRC(fce8c772) SHA1(f9736b724b620d60a17d77f6b773f39b99b47190) )
+	ROM_LOAD( "vcbab14.bin",    0x0800, 0x0800, CRC(6fd66330) SHA1(0ee3b3329b94ded81f028ebb687e580787c74ded) )
+	ROM_LOAD( "vcbab12.bin",    0x1000, 0x0800, CRC(e534d6c3) SHA1(7a93c6c07b5a28558ee005fed2098dc2933c3252) )
+	ROM_LOAD( "vcbab11.bin",    0x1800, 0x0800, CRC(e2069a6d) SHA1(2d4e71f2838451215e6f9629e2d1a35808510353) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "vdcbaorg.col",	0x0000, 0x0100,	CRC(6cdca5ae) SHA1(f7430af1adfa24fdd68a026ee431ead7d47ba269) )
+	ROM_LOAD( "vdcbaorg.col",   0x0000, 0x0100, CRC(6cdca5ae) SHA1(f7430af1adfa24fdd68a026ee431ead7d47ba269) )
 ROM_END
 
 ROM_START( babypkr )
 	ROM_REGION( 0x4000, "maincpu", 0 )
-	ROM_LOAD( "pok8039.old",	0x0000, 0x4000,	CRC(c5400ef1) SHA1(1f27c92d2979319070a695f71ed494f6d47fe88f) )
+	ROM_LOAD( "pok8039.old",    0x0000, 0x4000, CRC(c5400ef1) SHA1(1f27c92d2979319070a695f71ed494f6d47fe88f) )
 
 	ROM_REGION( 0x1000, "soundcpu", 0 )
-	ROM_LOAD( "dadvpbj.son",	0x0000, 0x1000,	CRC(7b71cd30) SHA1(d782c50689a5aea632b6d274a1a7435a092ad20c) )
+	ROM_LOAD( "dadvpbj.son",    0x0000, 0x1000, CRC(7b71cd30) SHA1(d782c50689a5aea632b6d274a1a7435a092ad20c) )
 
 	ROM_REGION( 0x20000, "tiles", 0 )
-	ROM_LOAD( "vpbjep15.mme",	0x00000, 0x8000,CRC(cad0f7cf) SHA1(0721b8b30dbf2a5da2967b0cfce24b4cd62d3f9d) )
-	ROM_LOAD( "vpbjep14.mme",	0x08000, 0x8000,CRC(96f512fa) SHA1(f5344aeb57f53c43156e923fb7f0d8d37c73dbe9) )
-	ROM_LOAD( "vpbjep12.mme",	0x10000, 0x8000,CRC(cfdca530) SHA1(609a5ad6f34e6b5c1c35584ddc62d4ff87546415) )
-	ROM_LOAD( "vpbjep11.mme",	0x18000, 0x8000,CRC(44e6c489) SHA1(ca211cb3807c476cd8c5ac98b0d18b4b2724df45) )
+	ROM_LOAD( "vpbjep15.mme",   0x00000, 0x8000,CRC(cad0f7cf) SHA1(0721b8b30dbf2a5da2967b0cfce24b4cd62d3f9d) )
+	ROM_LOAD( "vpbjep14.mme",   0x08000, 0x8000,CRC(96f512fa) SHA1(f5344aeb57f53c43156e923fb7f0d8d37c73dbe9) )
+	ROM_LOAD( "vpbjep12.mme",   0x10000, 0x8000,CRC(cfdca530) SHA1(609a5ad6f34e6b5c1c35584ddc62d4ff87546415) )
+	ROM_LOAD( "vpbjep11.mme",   0x18000, 0x8000,CRC(44e6c489) SHA1(ca211cb3807c476cd8c5ac98b0d18b4b2724df45) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "babypok.col",	0x0000, 0x0100,	CRC(2b98e88a) SHA1(bb22ef090e9e5dddc5c160d41a5f52df0db6feb6) )
+	ROM_LOAD( "babypok.col",    0x0000, 0x0100, CRC(2b98e88a) SHA1(bb22ef090e9e5dddc5c160d41a5f52df0db6feb6) )
 ROM_END
 
 ROM_START( babydad )
 	ROM_REGION( 0x4000, "maincpu", 0 )
-	ROM_LOAD( "da400org.old",	0x0000, 0x4000,	CRC(cbca3a0c) SHA1(5d9428f26edf2c5531398a6ae36b4e9169b2c1c1) )
+	ROM_LOAD( "da400org.old",   0x0000, 0x4000, CRC(cbca3a0c) SHA1(5d9428f26edf2c5531398a6ae36b4e9169b2c1c1) )
 
 	ROM_REGION( 0x1000, "soundcpu", 0 )
-	ROM_LOAD( "dadvpbj.son",	0x0000, 0x1000,	CRC(7b71cd30) SHA1(d782c50689a5aea632b6d274a1a7435a092ad20c) )
+	ROM_LOAD( "dadvpbj.son",    0x0000, 0x1000, CRC(7b71cd30) SHA1(d782c50689a5aea632b6d274a1a7435a092ad20c) )
 
 	ROM_REGION( 0x20000, "tiles", 0 )
-	ROM_LOAD( "ep15dad.dad",	0x00000, 0x8000,CRC(21bd102d) SHA1(52788d09dbe38fa29b8ff044a1c5249cad3d45b4) )
-	ROM_LOAD( "ep14dad.dad",	0x08000, 0x8000,CRC(b6e2c8a2) SHA1(352d88e1d764da5133de2be9987d4875f0c9237f) )
-	ROM_LOAD( "ep12dad.dad",	0x10000, 0x8000,CRC(98702beb) SHA1(6d42ea48df7546932570da1e9b0be7a1f01f930c) )
-	ROM_LOAD( "ep11dad.dad",	0x18000, 0x8000,CRC(90aac63b) SHA1(8b312f2313334b4b5b0344b786aa1a7a4979ea92) )
+	ROM_LOAD( "ep15dad.dad",    0x00000, 0x8000,CRC(21bd102d) SHA1(52788d09dbe38fa29b8ff044a1c5249cad3d45b4) )
+	ROM_LOAD( "ep14dad.dad",    0x08000, 0x8000,CRC(b6e2c8a2) SHA1(352d88e1d764da5133de2be9987d4875f0c9237f) )
+	ROM_LOAD( "ep12dad.dad",    0x10000, 0x8000,CRC(98702beb) SHA1(6d42ea48df7546932570da1e9b0be7a1f01f930c) )
+	ROM_LOAD( "ep11dad.dad",    0x18000, 0x8000,CRC(90aac63b) SHA1(8b312f2313334b4b5b0344b786aa1a7a4979ea92) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "babydad.col",	0x0000, 0x0100,	CRC(b3358b3f) SHA1(d499a08fefaa3566de2e6fcddd237d6dfa840d8a) )
+	ROM_LOAD( "babydad.col",    0x0000, 0x0100, CRC(b3358b3f) SHA1(d499a08fefaa3566de2e6fcddd237d6dfa840d8a) )
+ROM_END
+
+/*
+Video Poker PCB
+-----------------
+
+Main + daughterboard...
+
+
+MAINBOARD:
+----------
+
+1x AMD D8751H.
+1x AY-3-8910A.
+1x LM380N.
+1x 6.0 MHz. Xtal.
+
+5x pots:
+- 3 together on the connectors opposit side (maybe RGB).
+- 1 near the AY-3-8910.
+- 1 opposit to the sound circuitry.
+
+1x 8.0000 MHz. Xtal, near the 3 pots (RGB).
+NOTE: silkscreened 7.8643 MHz. on the PCB.
+
+ROMs:
+
+conf_11_poker_ver_1.00_9055.bin : AMD Am27C256.
+checksum : 00779055h
+CRC-32 : B8ABC965h
+
+conf_12_poker_ver_1.00_3909.bin : AMD Am27C256.
+checksum : 00753909h
+CRC-32 : 3E72D96Ch
+
+conf_14_poker_ver_1.00_813a.bin : AMD Am27C256.
+checksum : 0074813Ah
+CRC-32 : F3D6A741h
+
+conf_15_poker_ver_1.00_ea91.bin : AMD Am27C256.
+checksum : 0074EA91h
+CRC-32 : 4EFEA023h
+
+sonido_dados_poker_y_b.jack_3d2f_(d8751h).bin : AMD D8751H.
+checksum : 000C3D2Fh
+CRC-32 : 7B71CD30h
+
+
+DAUGHTERBOARD:
+--------------
+
+1x AMD P80C31BH (8031 CPU)
+1x AMD P8255A (PPI)
+1x 40-pin empty socket (silkscreened 'zocalo' = socket)
+
+1x NEC D4464C-15 SRAM
+1x DALLAS DS1232
+
+1x 27256 ROM:
+
+b_poker_ver_1403.bin
+
+FUJITSU MBM27256.
+-Buffer checksum : 003D1403h
+-CRC-32 : 61ECA2F6h
+
+1x 8.0000 MHz. Xtal.
+
+1x 3-pin connector (JP2).
+1x 7-pin connector (JP4).
+1x 8-pin connector (JP3).
+1x 14-pin connector (impresora).
+
+*/
+ROM_START( bpoker )
+	ROM_REGION( 0x8000, "maincpu", 0 )
+	ROM_LOAD( "b_poker_ver_1403.bin", 0x0000, 0x8000, CRC(61eca2f6) SHA1(62a671e86b94005a9ffc4b6545a90c43880e0a11) )
+
+	ROM_REGION( 0x1000, "soundcpu", 0 )
+	ROM_LOAD( "sonido_dados_poker_y_b.jack_3d2f_(d8751h).bin", 0x0000, 0x1000, CRC(7b71cd30) SHA1(d782c50689a5aea632b6d274a1a7435a092ad20c) )
+
+	ROM_REGION( 0x20000, "tiles", 0 )
+	ROM_LOAD( "conf_15_poker_ver_1.00_ea91.bin", 0x00000, 0x8000, CRC(4efea023) SHA1(c10a30353d793a54eab14bd5e9687668743b66de) )
+	ROM_LOAD( "conf_14_poker_ver_1.00_813a.bin", 0x08000, 0x8000, CRC(f3d6a741) SHA1(5fbfcf4b8fdd1ef9f3d0f9acc735d5c23f45b607) )
+	ROM_LOAD( "conf_12_poker_ver_1.00_3909.bin", 0x10000, 0x8000, CRC(3e72d96c) SHA1(3d921b9a79b8116984f58954141800d1856d8311) )
+	ROM_LOAD( "conf_11_poker_ver_1.00_9055.bin", 0x18000, 0x8000, CRC(b8abc965) SHA1(61a6cdcfd4cd65d4a7ce02c6a2c4216ab6da095c) )
+
+	ROM_REGION( 0x0100, "proms", 0 )
+	ROM_LOAD( "babypok.col",    0x0000, 0x0100, BAD_DUMP CRC(2b98e88a) SHA1(bb22ef090e9e5dddc5c160d41a5f52df0db6feb6) )
 ROM_END
 
 ROM_START( fortune1 )
@@ -1435,12 +1531,12 @@ ROM_START( fortune1 )
 	ROM_LOAD( "pk485-s-800-fff.c7",   0x0800, 0x0800, CRC(490da6b0) SHA1(4b7afd058aeda929821d62c58e234769d64339e1) )
 
 	ROM_REGION( 0x1000, "soundcpu", 0 )
-	ROM_LOAD( "vpsona3.pbj",	0x0000, 0x0800,	CRC(a4f7bf7f) SHA1(a08287821f3471cb3e1ae0528811da930fd57387) )
-	ROM_LOAD( "vpsona2.pbj",	0x0800, 0x0800,	CRC(583a9b95) SHA1(a10e85452e285b2a63f885f4e39b7f76ee8b2407) )
+	ROM_LOAD( "vpsona3.pbj",    0x0000, 0x0800, CRC(a4f7bf7f) SHA1(a08287821f3471cb3e1ae0528811da930fd57387) )
+	ROM_LOAD( "vpsona2.pbj",    0x0800, 0x0800, CRC(583a9b95) SHA1(a10e85452e285b2a63f885f4e39b7f76ee8b2407) )
 
 	ROM_REGION( 0x1000, "tiles", 0 )
-	ROM_LOAD( "cg073-cg0-a.b12",	 0x0000, 0x0800, CRC(fff2d7aa) SHA1(935b8623fda5b4b25ba1aaea869ebb2baded515c) )
-	ROM_LOAD( "cg073-cg1-a.b15",	 0x0800, 0x0800, CRC(a7cb05c4) SHA1(7cd76ade7cf9c50421b054ee525108829c31307c) )
+	ROM_LOAD( "cg073-cg0-a.b12",     0x0000, 0x0800, CRC(fff2d7aa) SHA1(935b8623fda5b4b25ba1aaea869ebb2baded515c) )
+	ROM_LOAD( "cg073-cg1-a.b15",     0x0800, 0x0800, CRC(a7cb05c4) SHA1(7cd76ade7cf9c50421b054ee525108829c31307c) )
 
 	ROM_REGION( 0x100, "proms", 0 )
 	ROM_LOAD( "3140-cap8.b8", 0x0000, 0x0100, CRC(09abf5f1) SHA1(f2d6b4f2f08b47b93728dafb50576d5ca859255f) )
@@ -1449,11 +1545,12 @@ ROM_END
 /*************************
 *      Game Drivers      *
 *************************/
-/*     YEAR  NAME      PARENT    MACHINE   INPUT     INIT  ROT    COMPANY                                 FULLNAME                              FLAGS  LAYOUT      */
-GAMEL( 1984, videopkr, 0,        videopkr, videopkr, 0,    ROT0, "InterFlip",                             "Video Poker",                        0,     layout_videopkr )
-GAMEL( 1984, fortune1, videopkr, fortune1, videopkr, 0,    ROT0, "IGT - International Gaming Technology", "Fortune I (PK485-S) Draw Poker",     0,     layout_videopkr )
-GAMEL( 1984, blckjack, videopkr, blckjack, blckjack, 0,    ROT0, "InterFlip",                             "Black Jack",                         0,     layout_blckjack )
-GAMEL( 1987, videodad, videopkr, videodad, videodad, 0,    ROT0, "InterFlip",                             "Video Dado",                         0,     layout_videodad )
-GAMEL( 1987, videocba, videopkr, videodad, videocba, 0,    ROT0, "InterFlip",                             "Video Cordoba",                      0,     layout_videocba )
-GAMEL( 1987, babypkr , videopkr, babypkr , babypkr , 0,    ROT0, "Recreativos Franco",                    "Baby Poker",                         0,     layout_babypkr  )
-GAMEL( 1987, babydad , videopkr, babypkr , babydad , 0,    ROT0, "Recreativos Franco",                    "Baby Dado",                          0,     layout_babydad  )
+/*     YEAR  NAME      PARENT    MACHINE   INPUT     INIT  ROT    COMPANY                                 FULLNAME                              FLAGS             LAYOUT      */
+GAMEL( 1984, videopkr, 0,        videopkr, videopkr, driver_device, 0,    ROT0, "InterFlip",                             "Video Poker",                        0,                layout_videopkr )
+GAMEL( 1984, fortune1, videopkr, fortune1, videopkr, driver_device, 0,    ROT0, "IGT - International Gaming Technology", "Fortune I (PK485-S) Draw Poker",     0,                layout_videopkr )
+GAMEL( 1984, blckjack, videopkr, blckjack, blckjack, driver_device, 0,    ROT0, "InterFlip",                             "Black Jack",                         0,                layout_blckjack )
+GAMEL( 1987, videodad, videopkr, videodad, videodad, driver_device, 0,    ROT0, "InterFlip",                             "Video Dado",                         0,                layout_videodad )
+GAMEL( 1987, videocba, videopkr, videodad, videocba, driver_device, 0,    ROT0, "InterFlip",                             "Video Cordoba",                      0,                layout_videocba )
+GAMEL( 1987, babypkr , videopkr, babypkr,  babypkr, driver_device,  0,    ROT0, "Recreativos Franco",                    "Baby Poker",                         0,                layout_babypkr  )
+GAMEL( 1987, babydad , videopkr, babypkr,  babydad, driver_device,  0,    ROT0, "Recreativos Franco",                    "Baby Dado",                          0,                layout_babydad  )
+GAMEL( 198?, bpoker ,  videopkr, babypkr,  babypkr, driver_device,  0,    ROT0, "Recreativos Franco",                    "Video Poker (v1403)",                GAME_NOT_WORKING, layout_babypkr  )

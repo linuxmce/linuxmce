@@ -38,28 +38,26 @@
       0  | xxxx---- -------- | color
 */
 
-static TILE_GET_INFO( get_tile_info_splash_tilemap0 )
+TILE_GET_INFO_MEMBER(splash_state::get_tile_info_splash_tilemap0)
 {
-	splash_state *state = machine.driver_data<splash_state>();
-	int data = state->m_videoram[tile_index];
+	int data = m_videoram[tile_index];
 	int attr = data >> 8;
 	int code = data & 0xff;
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			0,
 			code + ((0x20 + (attr & 0x0f)) << 8),
 			(attr & 0xf0) >> 4,
 			0);
 }
 
-static TILE_GET_INFO( get_tile_info_splash_tilemap1 )
+TILE_GET_INFO_MEMBER(splash_state::get_tile_info_splash_tilemap1)
 {
-	splash_state *state = machine.driver_data<splash_state>();
-	int data = state->m_videoram[(0x1000/2) + tile_index];
+	int data = m_videoram[(0x1000/2) + tile_index];
 	int attr = data >> 8;
 	int code = data & 0xff;
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			1,
 			(code >> 2) + ((0x30 + (attr & 0x0f)) << 6),
 			(attr & 0xf0) >> 4,
@@ -72,15 +70,14 @@ static TILE_GET_INFO( get_tile_info_splash_tilemap1 )
 
 ***************************************************************************/
 
-WRITE16_HANDLER( splash_vram_w )
+WRITE16_MEMBER(splash_state::splash_vram_w)
 {
-	splash_state *state = space->machine().driver_data<splash_state>();
 
-	COMBINE_DATA(&state->m_videoram[offset]);
-	tilemap_mark_tile_dirty(state->m_bg_tilemap[offset >> 11],((offset << 1) & 0x0fff) >> 1);
+	COMBINE_DATA(&m_videoram[offset]);
+	m_bg_tilemap[offset >> 11]->mark_tile_dirty(((offset << 1) & 0x0fff) >> 1);
 }
 
-static void draw_bitmap(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect)
+static void draw_bitmap(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	splash_state *state = machine.driver_data<splash_state>();
 	int sx,sy,color,count,colxor,bitswap;
@@ -156,8 +153,8 @@ static void draw_bitmap(running_machine &machine, bitmap_t *bitmap, const rectan
 				break;
 			}
 
-			if (sy >= cliprect->min_y && sy <= cliprect->max_y && sx-9 >= cliprect->min_x && sx-9 <= cliprect->max_x)
-				*BITMAP_ADDR16(bitmap, sy, sx-9) = 0x300+(color^colxor);
+			if (sy >= cliprect.min_y && sy <= cliprect.max_y && sx-9 >= cliprect.min_x && sx-9 <= cliprect.max_x)
+				bitmap.pix16(sy, sx-9) = 0x300+(color^colxor);
 		}
 	}
 
@@ -168,17 +165,16 @@ static void draw_bitmap(running_machine &machine, bitmap_t *bitmap, const rectan
 
 ***************************************************************************/
 
-VIDEO_START( splash )
+void splash_state::video_start()
 {
-	splash_state *state = machine.driver_data<splash_state>();
 
-	state->m_bg_tilemap[0] = tilemap_create(machine, get_tile_info_splash_tilemap0, tilemap_scan_rows,  8,  8, 64, 32);
-	state->m_bg_tilemap[1] = tilemap_create(machine, get_tile_info_splash_tilemap1, tilemap_scan_rows, 16, 16, 32, 32);
+	m_bg_tilemap[0] = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(splash_state::get_tile_info_splash_tilemap0),this), TILEMAP_SCAN_ROWS,  8,  8, 64, 32);
+	m_bg_tilemap[1] = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(splash_state::get_tile_info_splash_tilemap1),this), TILEMAP_SCAN_ROWS, 16, 16, 32, 32);
 
-	tilemap_set_transparent_pen(state->m_bg_tilemap[0], 0);
-	tilemap_set_transparent_pen(state->m_bg_tilemap[1], 0);
+	m_bg_tilemap[0]->set_transparent_pen(0);
+	m_bg_tilemap[1]->set_transparent_pen(0);
 
-	tilemap_set_scrollx(state->m_bg_tilemap[0], 0, 4);
+	m_bg_tilemap[0]->set_scrollx(0, 4);
 }
 
 /***************************************************************************
@@ -210,11 +206,11 @@ VIDEO_START( splash )
       400| xxxxxxxx -------- | unused
 */
 
-static void splash_draw_sprites(running_machine &machine, bitmap_t *bitmap,const rectangle *cliprect)
+static void splash_draw_sprites(running_machine &machine, bitmap_ind16 &bitmap,const rectangle &cliprect)
 {
 	splash_state *state = machine.driver_data<splash_state>();
 	int i;
-	const gfx_element *gfx = machine.gfx[1];
+	gfx_element *gfx = machine.gfx[1];
 
 	for (i = 0; i < 0x400; i += 4){
 		int sx = state->m_spriteram[i+2] & 0xff;
@@ -231,11 +227,11 @@ static void splash_draw_sprites(running_machine &machine, bitmap_t *bitmap,const
 	}
 }
 
-static void funystrp_draw_sprites(running_machine &machine, bitmap_t *bitmap,const rectangle *cliprect)
+static void funystrp_draw_sprites(running_machine &machine, bitmap_ind16 &bitmap,const rectangle &cliprect)
 {
 	splash_state *state = machine.driver_data<splash_state>();
 	int i;
-	const gfx_element *gfx = machine.gfx[1];
+	gfx_element *gfx = machine.gfx[1];
 
 	for (i = 0; i < 0x400; i += 4){
 		int sx = state->m_spriteram[i+2] & 0xff;
@@ -258,35 +254,33 @@ static void funystrp_draw_sprites(running_machine &machine, bitmap_t *bitmap,con
 
 ***************************************************************************/
 
-SCREEN_UPDATE( splash )
+UINT32 splash_state::screen_update_splash(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	splash_state *state = screen->machine().driver_data<splash_state>();
 
 	/* set scroll registers */
-	tilemap_set_scrolly(state->m_bg_tilemap[0], 0, state->m_vregs[0]);
-	tilemap_set_scrolly(state->m_bg_tilemap[1], 0, state->m_vregs[1]);
+	m_bg_tilemap[0]->set_scrolly(0, m_vregs[0]);
+	m_bg_tilemap[1]->set_scrolly(0, m_vregs[1]);
 
-	draw_bitmap(screen->machine(), bitmap, cliprect);
+	draw_bitmap(machine(), bitmap, cliprect);
 
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap[1], 0, 0);
-	splash_draw_sprites(screen->machine(), bitmap, cliprect);
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap[0], 0, 0);
+	m_bg_tilemap[1]->draw(bitmap, cliprect, 0, 0);
+	splash_draw_sprites(machine(), bitmap, cliprect);
+	m_bg_tilemap[0]->draw(bitmap, cliprect, 0, 0);
 	return 0;
 }
 
-SCREEN_UPDATE( funystrp )
+UINT32 splash_state::screen_update_funystrp(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	splash_state *state = screen->machine().driver_data<splash_state>();
 
 	/* set scroll registers */
-	tilemap_set_scrolly(state->m_bg_tilemap[0], 0, state->m_vregs[0]);
-	tilemap_set_scrolly(state->m_bg_tilemap[1], 0, state->m_vregs[1]);
+	m_bg_tilemap[0]->set_scrolly(0, m_vregs[0]);
+	m_bg_tilemap[1]->set_scrolly(0, m_vregs[1]);
 
-	draw_bitmap(screen->machine(), bitmap, cliprect);
+	draw_bitmap(machine(), bitmap, cliprect);
 
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap[1], 0, 0);
+	m_bg_tilemap[1]->draw(bitmap, cliprect, 0, 0);
 	/*Sprite chip is similar but not the same*/
-	funystrp_draw_sprites(screen->machine(), bitmap, cliprect);
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap[0], 0, 0);
+	funystrp_draw_sprites(machine(), bitmap, cliprect);
+	m_bg_tilemap[0]->draw(bitmap, cliprect, 0, 0);
 	return 0;
 }

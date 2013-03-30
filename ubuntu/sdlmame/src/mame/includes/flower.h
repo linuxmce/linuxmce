@@ -3,39 +3,72 @@
 class flower_state : public driver_device
 {
 public:
-	flower_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	flower_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_sn_nmi_enable(*this, "sn_nmi_enable"),
+		m_spriteram(*this, "spriteram"),
+		m_textram(*this, "textram"),
+		m_bg0ram(*this, "bg0ram"),
+		m_bg1ram(*this, "bg1ram"),
+		m_bg0_scroll(*this, "bg0_scroll"),
+		m_bg1_scroll(*this, "bg1_scroll"){ }
 
-	UINT8 *m_spriteram;
-	UINT8 *m_sn_irq_enable;
-	UINT8 *m_sn_nmi_enable;
-	UINT8 *m_textram;
-	UINT8 *m_bg0ram;
-	UINT8 *m_bg1ram;
-	UINT8 *m_bg0_scroll;
-	UINT8 *m_bg1_scroll;
+	required_shared_ptr<UINT8> m_sn_nmi_enable;
+	required_shared_ptr<UINT8> m_spriteram;
+	required_shared_ptr<UINT8> m_textram;
+	required_shared_ptr<UINT8> m_bg0ram;
+	required_shared_ptr<UINT8> m_bg1ram;
+	required_shared_ptr<UINT8> m_bg0_scroll;
+	required_shared_ptr<UINT8> m_bg1_scroll;
 	tilemap_t *m_bg0_tilemap;
 	tilemap_t *m_bg1_tilemap;
 	tilemap_t *m_text_tilemap;
 	tilemap_t *m_text_right_tilemap;
+	DECLARE_WRITE8_MEMBER(flower_maincpu_irq_ack);
+	DECLARE_WRITE8_MEMBER(flower_subcpu_irq_ack);
+	DECLARE_WRITE8_MEMBER(flower_soundcpu_irq_ack);
+	DECLARE_WRITE8_MEMBER(flower_coin_counter_w);
+	DECLARE_WRITE8_MEMBER(flower_coin_lockout_w);
+	DECLARE_WRITE8_MEMBER(sound_command_w);
+	DECLARE_WRITE8_MEMBER(flower_textram_w);
+	DECLARE_WRITE8_MEMBER(flower_bg0ram_w);
+	DECLARE_WRITE8_MEMBER(flower_bg1ram_w);
+	DECLARE_WRITE8_MEMBER(flower_flipscreen_w);
+	DECLARE_INPUT_CHANGED_MEMBER(coin_inserted);
+	TILE_GET_INFO_MEMBER(get_bg0_tile_info);
+	TILE_GET_INFO_MEMBER(get_bg1_tile_info);
+	TILE_GET_INFO_MEMBER(get_text_tile_info);
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_flower(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
 /*----------- defined in audio/flower.c -----------*/
 
-WRITE8_DEVICE_HANDLER( flower_sound1_w );
-WRITE8_DEVICE_HANDLER( flower_sound2_w );
+DECLARE_WRITE8_DEVICE_HANDLER( flower_sound1_w );
+DECLARE_WRITE8_DEVICE_HANDLER( flower_sound2_w );
 
-DECLARE_LEGACY_SOUND_DEVICE(FLOWER, flower_sound);
+class flower_sound_device : public device_t,
+									public device_sound_interface
+{
+public:
+	flower_sound_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock);
+	~flower_sound_device() { global_free(m_token); }
 
+	// access to legacy token
+	void *token() const { assert(m_token != NULL); return m_token; }
+protected:
+	// device-level overrides
+	virtual void device_config_complete();
+	virtual void device_start();
+	virtual void device_reset();
 
-/*----------- defined in video/flower.c -----------*/
+	// sound stream update overrides
+	virtual void sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples);
+private:
+	// internal state
+	void *m_token;
+};
 
-WRITE8_HANDLER( flower_textram_w );
-WRITE8_HANDLER( flower_bg0ram_w );
-WRITE8_HANDLER( flower_bg1ram_w );
-WRITE8_HANDLER( flower_flipscreen_w );
-
-SCREEN_UPDATE( flower );
-VIDEO_START( flower );
-PALETTE_INIT( flower );
+extern const device_type FLOWER;

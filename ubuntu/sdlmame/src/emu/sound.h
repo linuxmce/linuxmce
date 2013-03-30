@@ -60,16 +60,15 @@
 //**************************************************************************
 
 // forward references
-class speaker_device;
-typedef struct _wav_file wav_file;
+struct wav_file;
 
 
-// structure describing an indexed speaker
-struct speaker_input
+// structure describing an indexed mixer
+struct mixer_input
 {
-	speaker_device *	speaker;					// owning device
-	sound_stream *		stream;						// stream within the device
-	int					inputnum;					// input on the stream
+	device_mixer_interface *mixer;          // owning device interface
+	sound_stream *          stream;         // stream within the device
+	int                     inputnum;       // input on the stream
 };
 
 
@@ -88,12 +87,13 @@ class sound_stream
 	public:
 		// construction/destruction
 		stream_output();
+		stream_output &operator=(const stream_output &rhs) { assert(false); return *this; }
 
 		// internal state
-		sound_stream *		m_stream;				// owning stream
-		stream_sample_t *	m_buffer;				// output buffer
-		int					m_dependents;			// number of dependents
-		INT16				m_gain;					// gain to apply to the output
+		sound_stream *      m_stream;               // owning stream
+		dynamic_array<stream_sample_t> m_buffer;    // output buffer
+		int                 m_dependents;           // number of dependents
+		INT16               m_gain;                 // gain to apply to the output
 	};
 
 	// stream input class
@@ -102,22 +102,21 @@ class sound_stream
 	public:
 		// construction/destruction
 		stream_input();
+		stream_input &operator=(const stream_input &rhs) { assert(false); return *this; }
 
 		// internal state
-		stream_output *		m_source;				// pointer to the sound_output for this source
-		stream_sample_t *	m_resample;				// buffer for resampling to the stream's sample rate
-		UINT32				m_bufsize;				// size of output buffer, in samples
-		UINT32				m_bufalloc;				// allocated size of output buffer, in samples
-		attoseconds_t		m_latency_attoseconds;	// latency between this stream and the input stream
-		INT16				m_gain;					// gain to apply to this input
-		INT16				m_initial_gain;			// initial gain supplied at creation
+		stream_output *     m_source;               // pointer to the sound_output for this source
+		dynamic_array<stream_sample_t> m_resample;  // buffer for resampling to the stream's sample rate
+		attoseconds_t       m_latency_attoseconds;  // latency between this stream and the input stream
+		INT16               m_gain;                 // gain to apply to this input
+		INT16               m_user_gain;            // user-controlled gain to apply to this input
 	};
 
 	// constants
-	static const int OUTPUT_BUFFER_UPDATES		= 5;
-	static const UINT32 FRAC_BITS				= 22;
-	static const UINT32 FRAC_ONE				= 1 << FRAC_BITS;
-	static const UINT32 FRAC_MASK				= FRAC_ONE - 1;
+	static const int OUTPUT_BUFFER_UPDATES      = 5;
+	static const UINT32 FRAC_BITS               = 22;
+	static const UINT32 FRAC_ONE                = 1 << FRAC_BITS;
+	static const UINT32 FRAC_MASK               = FRAC_ONE - 1;
 
 	// construction/destruction
 	sound_stream(device_t &device, int inputs, int outputs, int sample_rate, void *param = NULL, stream_update_func callback = &sound_stream::device_stream_update_stub);
@@ -129,11 +128,13 @@ public:
 	int sample_rate() const { return (m_new_sample_rate != 0) ? m_new_sample_rate : m_sample_rate; }
 	attotime sample_time() const;
 	attotime sample_period() const { return attotime(0, m_attoseconds_per_sample); }
-	int input_count() const { return m_inputs; }
-	int output_count() const { return m_outputs; }
-	float input_gain(int inputnum) const;
-	float initial_input_gain(int inputnum) const;
+	int input_count() const { return m_input.count(); }
+	int output_count() const { return m_output.count(); }
 	const char *input_name(int inputnum, astring &string) const;
+	device_t *input_source_device(int inputnum) const;
+	int input_source_outputnum(int inputnum) const;
+	float user_gain(int inputnum) const;
+	float input_gain(int inputnum) const;
 	float output_gain(int outputnum) const;
 
 	// operations
@@ -143,6 +144,7 @@ public:
 
 	// timing
 	void set_sample_rate(int sample_rate);
+	void set_user_gain(int inputnum, float gain);
 	void set_input_gain(int inputnum, float gain);
 	void set_output_gain(int outputnum, float gain);
 
@@ -161,39 +163,37 @@ private:
 	stream_sample_t *generate_resampled_data(stream_input &input, UINT32 numsamples);
 
 	// linking information
-	device_t &			m_device;				// owning device
-	sound_stream *		m_next;					// next stream in the chain
+	device_t &          m_device;               // owning device
+	sound_stream *      m_next;                 // next stream in the chain
 
 	// general information
-	UINT32				m_sample_rate;			// sample rate of this stream
-	UINT32				m_new_sample_rate;		// newly-set sample rate for the stream
+	UINT32              m_sample_rate;          // sample rate of this stream
+	UINT32              m_new_sample_rate;      // newly-set sample rate for the stream
 
 	// timing information
-	attoseconds_t		m_attoseconds_per_sample;// number of attoseconds per sample
-	INT32				m_max_samples_per_update;// maximum samples per update
+	attoseconds_t       m_attoseconds_per_sample;// number of attoseconds per sample
+	INT32               m_max_samples_per_update;// maximum samples per update
 
 	// input information
-	int					m_inputs;				// number of inputs
-	stream_input *		m_input;				// list of streams we directly depend upon
-	stream_sample_t **	m_input_array;			// array of inputs for passing to the callback
+	dynamic_array<stream_input> m_input;        // list of streams we directly depend upon
+	dynamic_array<stream_sample_t *> m_input_array; // array of inputs for passing to the callback
 
 	// resample buffer information
-	UINT32				m_resample_bufalloc;	// allocated size of each resample buffer
+	UINT32              m_resample_bufalloc;    // allocated size of each resample buffer
 
 	// output information
-	int					m_outputs;				// number of outputs
-	stream_output *		m_output;				// list of streams which directly depend upon us
-	stream_sample_t **	m_output_array;			// array of outputs for passing to the callback
+	dynamic_array<stream_output> m_output;      // list of streams which directly depend upon us
+	dynamic_array<stream_sample_t *> m_output_array; // array of outputs for passing to the callback
 
 	// output buffer information
-	UINT32				m_output_bufalloc;		// allocated size of each output buffer
-	INT32				m_output_sampindex;		// current position within each output buffer
-	INT32				m_output_update_sampindex;// position at time of last global update
-	INT32				m_output_base_sampindex;// sample at base of buffer, relative to the current emulated second
+	UINT32              m_output_bufalloc;      // allocated size of each output buffer
+	INT32               m_output_sampindex;     // current position within each output buffer
+	INT32               m_output_update_sampindex;// position at time of last global update
+	INT32               m_output_base_sampindex;// sample at base of buffer, relative to the current emulated second
 
 	// callback information
-	stream_update_func	m_callback;				// callback function
-	void *				m_param;				// callback function parameter
+	stream_update_func  m_callback;             // callback function
+	void *              m_param;                // callback function parameter
 };
 
 
@@ -220,6 +220,7 @@ public:
 	~sound_manager();
 
 	// getters
+	running_machine &machine() const { return m_machine; }
 	int attenuation() const { return m_attenuation; }
 	sound_stream *first_stream() const { return m_stream_list.first(); }
 	attotime last_update() const { return m_last_update; }
@@ -236,40 +237,39 @@ public:
 	void system_enable(bool turn_on = true) { mute(!turn_on, MUTE_REASON_SYSTEM); }
 
 	// user gain controls
-	bool indexed_speaker_input(int index, speaker_input &info) const;
+	bool indexed_mixer_input(int index, mixer_input &info) const;
 
 private:
 	// internal helpers
 	void mute(bool mute, UINT8 reason);
-	static void reset(running_machine &machine);
-	static void pause(running_machine &machine);
-	static void resume(running_machine &machine);
-	static void config_load(running_machine &machine, int config_type, xml_data_node *parentnode);
-	static void config_save(running_machine &machine, int config_type, xml_data_node *parentnode);
+	void reset();
+	void pause();
+	void resume();
+	void config_load(int config_type, xml_data_node *parentnode);
+	void config_save(int config_type, xml_data_node *parentnode);
 
-	static TIMER_CALLBACK( update_static ) { reinterpret_cast<sound_manager *>(ptr)->update(); }
-	void update();
+	void update(void *ptr = NULL, INT32 param = 0);
 
 	// internal state
-	running_machine &	m_machine;				// reference to our machine
-	emu_timer *			m_update_timer;			// timer to drive periodic updates
+	running_machine &   m_machine;              // reference to our machine
+	emu_timer *         m_update_timer;         // timer to drive periodic updates
 
-	UINT32				m_finalmix_leftover;
-	INT16 *				m_finalmix;
-	INT32 *				m_leftmix;
-	INT32 *				m_rightmix;
+	UINT32              m_finalmix_leftover;
+	dynamic_array<INT16> m_finalmix;
+	dynamic_array<INT32> m_leftmix;
+	dynamic_array<INT32> m_rightmix;
 
-	UINT8				m_muted;
-	int 				m_attenuation;
-	int 				m_nosound_mode;
+	UINT8               m_muted;
+	int                 m_attenuation;
+	int                 m_nosound_mode;
 
-	wav_file *			m_wavfile;
+	wav_file *          m_wavfile;
 
 	// streams data
-	simple_list<sound_stream> m_stream_list;	// list of streams
-	attoseconds_t		m_update_attoseconds;	// attoseconds between global updates
-	attotime			m_last_update;			// last update time
+	simple_list<sound_stream> m_stream_list;    // list of streams
+	attoseconds_t       m_update_attoseconds;   // attoseconds between global updates
+	attotime            m_last_update;          // last update time
 };
 
 
-#endif	/* __SOUND_H__ */
+#endif  /* __SOUND_H__ */

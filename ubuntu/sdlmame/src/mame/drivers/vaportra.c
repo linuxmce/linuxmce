@@ -20,26 +20,25 @@
 
 /******************************************************************************/
 
-static WRITE16_HANDLER( vaportra_sound_w )
+WRITE16_MEMBER(vaportra_state::vaportra_sound_w)
 {
-	vaportra_state *state = space->machine().driver_data<vaportra_state>();
 
 	/* Force synchronisation between CPUs with fake timer */
-	space->machine().scheduler().synchronize();
-	soundlatch_w(space, 0, data & 0xff);
-	device_set_input_line(state->m_audiocpu, 0, ASSERT_LINE);
+	machine().scheduler().synchronize();
+	soundlatch_byte_w(space, 0, data & 0xff);
+	m_audiocpu->set_input_line(0, ASSERT_LINE);
 }
 
-static READ16_HANDLER( vaportra_control_r )
+READ16_MEMBER(vaportra_state::vaportra_control_r)
 {
 	switch (offset << 1)
 	{
 		case 4:
-			return input_port_read(space->machine(), "DSW");
+			return ioport("DSW")->read();
 		case 2:
-			return input_port_read(space->machine(), "COINS");
+			return ioport("COINS")->read();
 		case 0:
-			return input_port_read(space->machine(), "PLAYERS");
+			return ioport("PLAYERS")->read();
 	}
 
 	logerror("Unknown control read at %d\n",offset);
@@ -48,45 +47,44 @@ static READ16_HANDLER( vaportra_control_r )
 
 /******************************************************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16, vaportra_state )
 	AM_RANGE(0x000000, 0x07ffff) AM_ROM
 	AM_RANGE(0x100000, 0x100003) AM_WRITE(vaportra_priority_w)
 	AM_RANGE(0x100006, 0x100007) AM_WRITE(vaportra_sound_w)
 	AM_RANGE(0x100000, 0x10000f) AM_READ(vaportra_control_r)
-	AM_RANGE(0x200000, 0x201fff) AM_DEVREADWRITE("tilegen2", deco16ic_pf1_data_r, deco16ic_pf1_data_w)
-	AM_RANGE(0x202000, 0x203fff) AM_DEVREADWRITE("tilegen2", deco16ic_pf2_data_r, deco16ic_pf2_data_w)
-	AM_RANGE(0x240000, 0x24000f) AM_DEVWRITE("tilegen2", deco16ic_pf_control_w)
-	AM_RANGE(0x280000, 0x281fff) AM_DEVREADWRITE("tilegen1", deco16ic_pf1_data_r, deco16ic_pf1_data_w)
-	AM_RANGE(0x282000, 0x283fff) AM_DEVREADWRITE("tilegen1", deco16ic_pf2_data_r, deco16ic_pf2_data_w)
-	AM_RANGE(0x2c0000, 0x2c000f) AM_DEVWRITE("tilegen1", deco16ic_pf_control_w)
-	AM_RANGE(0x300000, 0x3009ff) AM_RAM_WRITE(vaportra_palette_24bit_rg_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0x304000, 0x3049ff) AM_RAM_WRITE(vaportra_palette_24bit_b_w) AM_BASE_GENERIC(paletteram2)
+	AM_RANGE(0x200000, 0x201fff) AM_DEVREADWRITE_LEGACY("tilegen2", deco16ic_pf1_data_r, deco16ic_pf1_data_w)
+	AM_RANGE(0x202000, 0x203fff) AM_DEVREADWRITE_LEGACY("tilegen2", deco16ic_pf2_data_r, deco16ic_pf2_data_w)
+	AM_RANGE(0x240000, 0x24000f) AM_DEVWRITE_LEGACY("tilegen2", deco16ic_pf_control_w)
+	AM_RANGE(0x280000, 0x281fff) AM_DEVREADWRITE_LEGACY("tilegen1", deco16ic_pf1_data_r, deco16ic_pf1_data_w)
+	AM_RANGE(0x282000, 0x283fff) AM_DEVREADWRITE_LEGACY("tilegen1", deco16ic_pf2_data_r, deco16ic_pf2_data_w)
+	AM_RANGE(0x2c0000, 0x2c000f) AM_DEVWRITE_LEGACY("tilegen1", deco16ic_pf_control_w)
+	AM_RANGE(0x300000, 0x3009ff) AM_RAM_WRITE(vaportra_palette_24bit_rg_w) AM_SHARE("paletteram")
+	AM_RANGE(0x304000, 0x3049ff) AM_RAM_WRITE(vaportra_palette_24bit_b_w) AM_SHARE("paletteram2")
 	AM_RANGE(0x308000, 0x308001) AM_NOP
-	AM_RANGE(0x30c000, 0x30c001) AM_WRITE(buffer_spriteram16_w)
-	AM_RANGE(0xff8000, 0xff87ff) AM_RAM AM_BASE_SIZE_GENERIC(spriteram)
+	AM_RANGE(0x30c000, 0x30c001) AM_DEVWRITE("spriteram", buffered_spriteram16_device, write)
+	AM_RANGE(0xff8000, 0xff87ff) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0xffc000, 0xffffff) AM_RAM
 ADDRESS_MAP_END
 
 
 /******************************************************************************/
 
-static READ8_HANDLER( vaportra_soundlatch_r )
+READ8_MEMBER(vaportra_state::vaportra_soundlatch_r)
 {
-	vaportra_state *state = space->machine().driver_data<vaportra_state>();
-	device_set_input_line(state->m_audiocpu, 0, CLEAR_LINE);
-	return soundlatch_r(space, offset);
+	m_audiocpu->set_input_line(0, CLEAR_LINE);
+	return soundlatch_byte_r(space, offset);
 }
 
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, vaportra_state )
 	AM_RANGE(0x000000, 0x00ffff) AM_ROM
-	AM_RANGE(0x100000, 0x100001) AM_DEVREADWRITE("ym1", ym2203_r, ym2203_w)
-	AM_RANGE(0x110000, 0x110001) AM_DEVREADWRITE("ym2", ym2151_r, ym2151_w)
-	AM_RANGE(0x120000, 0x120001) AM_DEVREADWRITE_MODERN("oki1", okim6295_device, read, write)
-	AM_RANGE(0x130000, 0x130001) AM_DEVREADWRITE_MODERN("oki2", okim6295_device, read, write)
+	AM_RANGE(0x100000, 0x100001) AM_DEVREADWRITE_LEGACY("ym1", ym2203_r, ym2203_w)
+	AM_RANGE(0x110000, 0x110001) AM_DEVREADWRITE("ym2", ym2151_device, read, write)
+	AM_RANGE(0x120000, 0x120001) AM_DEVREADWRITE("oki1", okim6295_device, read, write)
+	AM_RANGE(0x130000, 0x130001) AM_DEVREADWRITE("oki2", okim6295_device, read, write)
 	AM_RANGE(0x140000, 0x140001) AM_READ(vaportra_soundlatch_r)
 	AM_RANGE(0x1f0000, 0x1f1fff) AM_RAMBANK("bank8")  /* ??? LOOKUP ??? */
-	AM_RANGE(0x1fec00, 0x1fec01) AM_WRITE(h6280_timer_w)
-	AM_RANGE(0x1ff400, 0x1ff403) AM_WRITE(h6280_irq_status_w)
+	AM_RANGE(0x1fec00, 0x1fec01) AM_DEVWRITE("audiocpu", h6280_device, timer_w)
+	AM_RANGE(0x1ff400, 0x1ff403) AM_DEVWRITE("audiocpu", h6280_device, irq_status_w)
 ADDRESS_MAP_END
 
 /******************************************************************************/
@@ -114,7 +112,7 @@ static INPUT_PORTS_START( vaportra )
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_COIN3 )
-	PORT_BIT( 0x0008, IP_ACTIVE_HIGH, IPT_VBLANK )
+	PORT_BIT( 0x0008, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -192,26 +190,14 @@ static const gfx_layout tilelayout =
 };
 
 static GFXDECODE_START( vaportra )
-	GFXDECODE_ENTRY( "gfx1", 0x000000, charlayout,    0x000, 0x500 )	/* Characters 8x8 */
-	GFXDECODE_ENTRY( "gfx1", 0x000000, tilelayout,    0x000, 0x500 )	/* Tiles 16x16 */
-	GFXDECODE_ENTRY( "gfx2", 0x000000, charlayout,    0x000, 0x500 )	/* Characters 8x8 */
-	GFXDECODE_ENTRY( "gfx2", 0x000000, tilelayout,    0x000, 0x500 )	/* Tiles 16x16 */ // ok
-	GFXDECODE_ENTRY( "gfx3", 0x000000, tilelayout,    0x100, 16 )	/* Sprites 16x16 */
+	GFXDECODE_ENTRY( "gfx1", 0x000000, charlayout,    0x000, 0x500 )    /* Characters 8x8 */
+	GFXDECODE_ENTRY( "gfx1", 0x000000, tilelayout,    0x000, 0x500 )    /* Tiles 16x16 */
+	GFXDECODE_ENTRY( "gfx2", 0x000000, charlayout,    0x000, 0x500 )    /* Characters 8x8 */
+	GFXDECODE_ENTRY( "gfx2", 0x000000, tilelayout,    0x000, 0x500 )    /* Tiles 16x16 */ // ok
+	GFXDECODE_ENTRY( "gfx3", 0x000000, tilelayout,    0x100, 16 )   /* Sprites 16x16 */
 GFXDECODE_END
 
 /******************************************************************************/
-
-static void sound_irq( device_t *device, int state )
-{
-	vaportra_state *driver_state = device->machine().driver_data<vaportra_state>();
-	device_set_input_line(driver_state->m_audiocpu, 1, state); /* IRQ 2 */
-}
-
-static const ym2151_interface ym2151_config =
-{
-	sound_irq
-};
-
 
 static int vaportra_bank_callback( const int bank )
 {
@@ -235,32 +221,30 @@ static const deco16ic_interface vaportra_deco16ic_tilegen2_intf =
 {
 	"screen",
 	0, 1,
-	0x0f, 0x0f,	/* trans masks (default values) */
+	0x0f, 0x0f, /* trans masks (default values) */
 	0x30, 0x40, /* color base */
-	0x0f, 0x0f,	/* color masks (default values) */
+	0x0f, 0x0f, /* color masks (default values) */
 	vaportra_bank_callback,
 	vaportra_bank_callback,
 	2,3
 };
 
-static MACHINE_START( vaportra )
+void vaportra_state::machine_start()
 {
-	vaportra_state *state = machine.driver_data<vaportra_state>();
 
-	state->m_maincpu = machine.device("maincpu");
-	state->m_audiocpu = machine.device("audiocpu");
-	state->m_deco_tilegen1 = machine.device("tilegen1");
-	state->m_deco_tilegen2 = machine.device("tilegen2");
+	m_maincpu = machine().device<cpu_device>("maincpu");
+	m_audiocpu = machine().device<cpu_device>("audiocpu");
+	m_deco_tilegen1 = machine().device("tilegen1");
+	m_deco_tilegen2 = machine().device("tilegen2");
 
-	state->save_item(NAME(state->m_priority));
+	save_item(NAME(m_priority));
 }
 
-static MACHINE_RESET( vaportra )
+void vaportra_state::machine_reset()
 {
-	vaportra_state *state = machine.driver_data<vaportra_state>();
 
-	state->m_priority[0] = 0;
-	state->m_priority[1] = 0;
+	m_priority[0] = 0;
+	m_priority[1] = 0;
 }
 
 static MACHINE_CONFIG_START( vaportra, vaportra_state )
@@ -268,24 +252,21 @@ static MACHINE_CONFIG_START( vaportra, vaportra_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000,12000000) /* Custom chip 59 */
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT("screen", irq6_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", vaportra_state,  irq6_line_hold)
 
 	MCFG_CPU_ADD("audiocpu", H6280, 32220000/4) /* Custom chip 45; Audio section crystal is 32.220 MHz */
 	MCFG_CPU_PROGRAM_MAP(sound_map)
 
-	MCFG_MACHINE_START(vaportra)
-	MCFG_MACHINE_RESET(vaportra)
 
 	/* video hardware */
-	MCFG_VIDEO_ATTRIBUTES(VIDEO_BUFFERS_SPRITERAM)
+	MCFG_BUFFERED_SPRITERAM16_ADD("spriteram")
 
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(58)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(529))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 1*8, 31*8-1)
-	MCFG_SCREEN_UPDATE(vaportra)
+	MCFG_SCREEN_UPDATE_DRIVER(vaportra_state, screen_update_vaportra)
 	MCFG_GFXDECODE(vaportra)
 	MCFG_PALETTE_LENGTH(1280)
 
@@ -294,8 +275,8 @@ static MACHINE_CONFIG_START( vaportra, vaportra_state )
 
 	MCFG_DECO16IC_ADD("tilegen2", vaportra_deco16ic_tilegen2_intf)
 
-	MCFG_DEVICE_ADD("spritegen", deco_mxc06_, 0)
-	deco_mxc06_device_config::set_gfx_region(device, 4);
+	MCFG_DEVICE_ADD("spritegen", DECO_MXC06, 0)
+	deco_mxc06_device::set_gfx_region(*device, 4);
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -303,8 +284,8 @@ static MACHINE_CONFIG_START( vaportra, vaportra_state )
 	MCFG_SOUND_ADD("ym1", YM2203, 32220000/8)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.60)
 
-	MCFG_SOUND_ADD("ym2", YM2151, 32220000/9)
-	MCFG_SOUND_CONFIG(ym2151_config)
+	MCFG_YM2151_ADD("ym2", 32220000/9)
+	MCFG_YM2151_IRQ_HANDLER(INPUTLINE("audiocpu", 1)) /* IRQ 2 */
 	MCFG_SOUND_ROUTE(0, "mono", 0.60)
 	MCFG_SOUND_ROUTE(1, "mono", 0.60)
 
@@ -324,7 +305,7 @@ ROM_START( vaportra )
 	ROM_LOAD16_BYTE( "fl_03.bin",   0x40000, 0x20000, CRC(80bd2844) SHA1(3fcaa409c7134388fa9458df8e8aaecc93f085e6) )
 	ROM_LOAD16_BYTE( "fl_01.bin",   0x40001, 0x20000, CRC(9474b085) SHA1(5510309ddab5fbf1dbb0a7b1e424a5dff5ec263d) )
 
-	ROM_REGION( 0x10000, "audiocpu", 0 )	/* Sound CPU */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* Sound CPU */
 	ROM_LOAD( "fj04",    0x00000, 0x10000, CRC(e9aedf9b) SHA1(f7bcf8f666015140aaad8ee5cf619636934b7066) )
 
 	ROM_REGION( 0x080000, "gfx1", 0 )
@@ -338,10 +319,10 @@ ROM_START( vaportra )
 	ROM_LOAD( "vtmaa03.bin",   0x000000, 0x80000, CRC(1a30bf81) SHA1(00e6c713e12133a99d64ca80638c9cbc8e26b2c8) ) /* sprites */
 	ROM_LOAD( "vtmaa04.bin",   0x080000, 0x80000, CRC(b713e9cc) SHA1(af33943d75d2ee3a7385f624537008dca9e1d5d8) )
 
-	ROM_REGION( 0x40000, "oki1", 0 )	/* ADPCM samples */
+	ROM_REGION( 0x40000, "oki1", 0 )    /* ADPCM samples */
 	ROM_LOAD( "fj06",    0x00000, 0x20000, CRC(6e98a235) SHA1(374564b4e494d03cd1330c06e321b9452c22a075) )
 
-	ROM_REGION( 0x40000, "oki2", 0 )	/* ADPCM samples */
+	ROM_REGION( 0x40000, "oki2", 0 )    /* ADPCM samples */
 	ROM_LOAD( "fj05",    0x00000, 0x20000, CRC(39cda2b5) SHA1(f5c5a305025d451ab48f84cd63e36a3bbdefda96) )
 
 	ROM_REGION( 0x200, "proms", 0 )
@@ -362,7 +343,7 @@ ROM_START( vaportra3 ) // 74 bytes of 68k code have been changed compared to vap
 	ROM_LOAD16_BYTE( "fl_03.bin",   0x40000, 0x20000, CRC(80bd2844) SHA1(3fcaa409c7134388fa9458df8e8aaecc93f085e6) )
 	ROM_LOAD16_BYTE( "fl_01.bin",   0x40001, 0x20000, CRC(9474b085) SHA1(5510309ddab5fbf1dbb0a7b1e424a5dff5ec263d) )
 
-	ROM_REGION( 0x10000, "audiocpu", 0 )	/* Sound CPU */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* Sound CPU */
 	ROM_LOAD( "fj04",    0x00000, 0x10000, CRC(e9aedf9b) SHA1(f7bcf8f666015140aaad8ee5cf619636934b7066) )
 
 	ROM_REGION( 0x080000, "gfx1", 0 ) // original DE board with mask rom split into 4 roms
@@ -379,10 +360,10 @@ ROM_START( vaportra3 ) // 74 bytes of 68k code have been changed compared to vap
 	ROM_LOAD( "vtmaa03.bin",   0x000000, 0x80000, CRC(1a30bf81) SHA1(00e6c713e12133a99d64ca80638c9cbc8e26b2c8) ) /* sprites */
 	ROM_LOAD( "vtmaa04.bin",   0x080000, 0x80000, CRC(b713e9cc) SHA1(af33943d75d2ee3a7385f624537008dca9e1d5d8) )
 
-	ROM_REGION( 0x40000, "oki1", 0 )	/* ADPCM samples */
+	ROM_REGION( 0x40000, "oki1", 0 )    /* ADPCM samples */
 	ROM_LOAD( "fj06",    0x00000, 0x20000, CRC(6e98a235) SHA1(374564b4e494d03cd1330c06e321b9452c22a075) )
 
-	ROM_REGION( 0x40000, "oki2", 0 )	/* ADPCM samples */
+	ROM_REGION( 0x40000, "oki2", 0 )    /* ADPCM samples */
 	ROM_LOAD( "fj05",    0x00000, 0x20000, CRC(39cda2b5) SHA1(f5c5a305025d451ab48f84cd63e36a3bbdefda96) )
 
 	ROM_REGION( 0x200, "proms", 0 )
@@ -403,7 +384,7 @@ ROM_START( vaportrau )
 	ROM_LOAD16_BYTE( "fj03",   0x40000, 0x20000, CRC(44893379) SHA1(da1340bc1821a552c317cb9a7c1ba69eb080b055) )
 	ROM_LOAD16_BYTE( "fj01",   0x40001, 0x20000, CRC(97fbc107) SHA1(b2899eb4347c0471397b83051e46c94dff3526f5) )
 
-	ROM_REGION( 0x10000, "audiocpu", 0 )	/* Sound CPU */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* Sound CPU */
 	ROM_LOAD( "fj04",    0x00000, 0x10000, CRC(e9aedf9b) SHA1(f7bcf8f666015140aaad8ee5cf619636934b7066) )
 
 	ROM_REGION( 0x080000, "gfx1", 0 )
@@ -417,10 +398,10 @@ ROM_START( vaportrau )
 	ROM_LOAD( "vtmaa03.bin",   0x000000, 0x80000, CRC(1a30bf81) SHA1(00e6c713e12133a99d64ca80638c9cbc8e26b2c8) ) /* sprites */
 	ROM_LOAD( "vtmaa04.bin",   0x080000, 0x80000, CRC(b713e9cc) SHA1(af33943d75d2ee3a7385f624537008dca9e1d5d8) )
 
-	ROM_REGION( 0x40000, "oki1", 0 )	/* ADPCM samples */
+	ROM_REGION( 0x40000, "oki1", 0 )    /* ADPCM samples */
 	ROM_LOAD( "fj06",    0x00000, 0x20000, CRC(6e98a235) SHA1(374564b4e494d03cd1330c06e321b9452c22a075) )
 
-	ROM_REGION( 0x40000, "oki2", 0 )	/* ADPCM samples */
+	ROM_REGION( 0x40000, "oki2", 0 )    /* ADPCM samples */
 	ROM_LOAD( "fj05",    0x00000, 0x20000, CRC(39cda2b5) SHA1(f5c5a305025d451ab48f84cd63e36a3bbdefda96) )
 
 	ROM_REGION( 0x200, "proms", 0 )
@@ -441,7 +422,7 @@ ROM_START( kuhga )
 	ROM_LOAD16_BYTE( "fp03.bin",   0x40000, 0x20000, CRC(ea0da0f1) SHA1(ca40e694cb0aa0c13672c14fd4a389bc6d26cbc6) )
 	ROM_LOAD16_BYTE( "fp01.bin",   0x40001, 0x20000, CRC(e3ecbe86) SHA1(382e959111ec37ad94da8fd6dcefe2d2aab346b6) )
 
-	ROM_REGION( 0x10000, "audiocpu", 0 )	/* Sound CPU */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* Sound CPU */
 	ROM_LOAD( "fj04",    0x00000, 0x10000, CRC(e9aedf9b) SHA1(f7bcf8f666015140aaad8ee5cf619636934b7066) )
 
 	ROM_REGION( 0x080000, "gfx1", 0 )
@@ -455,10 +436,10 @@ ROM_START( kuhga )
 	ROM_LOAD( "vtmaa03.bin",   0x000000, 0x80000, CRC(1a30bf81) SHA1(00e6c713e12133a99d64ca80638c9cbc8e26b2c8) ) /* sprites */
 	ROM_LOAD( "vtmaa04.bin",   0x080000, 0x80000, CRC(b713e9cc) SHA1(af33943d75d2ee3a7385f624537008dca9e1d5d8) )
 
-	ROM_REGION( 0x40000, "oki1", 0 )	/* ADPCM samples */
+	ROM_REGION( 0x40000, "oki1", 0 )    /* ADPCM samples */
 	ROM_LOAD( "fj06",    0x00000, 0x20000, CRC(6e98a235) SHA1(374564b4e494d03cd1330c06e321b9452c22a075) )
 
-	ROM_REGION( 0x40000, "oki2", 0 )	/* ADPCM samples */
+	ROM_REGION( 0x40000, "oki2", 0 )    /* ADPCM samples */
 	ROM_LOAD( "fj05",    0x00000, 0x20000, CRC(39cda2b5) SHA1(f5c5a305025d451ab48f84cd63e36a3bbdefda96) )
 
 	ROM_REGION( 0x200, "proms", 0 )
@@ -856,9 +837,9 @@ C3D54*
 */
 /******************************************************************************/
 
-static DRIVER_INIT( vaportra )
+DRIVER_INIT_MEMBER(vaportra_state,vaportra)
 {
-	UINT8 *RAM = machine.region("maincpu")->base();
+	UINT8 *RAM = machine().root_device().memregion("maincpu")->base();
 	int i;
 
 	for (i = 0x00000; i < 0x80000; i++)
@@ -867,7 +848,7 @@ static DRIVER_INIT( vaportra )
 
 /******************************************************************************/
 
-GAME( 1989, vaportra, 0,        vaportra, vaportra, vaportra, ROT270, "Data East Corporation", "Vapor Trail - Hyper Offence Formation (World revision 1)", GAME_SUPPORTS_SAVE )
-GAME( 1989, vaportra3,vaportra, vaportra, vaportra, vaportra, ROT270, "Data East Corporation", "Vapor Trail - Hyper Offence Formation (World revision 3?)", GAME_SUPPORTS_SAVE )
-GAME( 1989, vaportrau,vaportra, vaportra, vaportra, vaportra, ROT270, "Data East USA", "Vapor Trail - Hyper Offence Formation (US)", GAME_SUPPORTS_SAVE )
-GAME( 1989, kuhga,    vaportra, vaportra, vaportra, vaportra, ROT270, "Data East Corporation", "Kuhga - Operation Code 'Vapor Trail' (Japan revision 3)", GAME_SUPPORTS_SAVE )
+GAME( 1989, vaportra, 0,        vaportra, vaportra, vaportra_state, vaportra, ROT270, "Data East Corporation", "Vapor Trail - Hyper Offence Formation (World revision 1)", GAME_SUPPORTS_SAVE )
+GAME( 1989, vaportra3,vaportra, vaportra, vaportra, vaportra_state, vaportra, ROT270, "Data East Corporation", "Vapor Trail - Hyper Offence Formation (World revision 3?)", GAME_SUPPORTS_SAVE )
+GAME( 1989, vaportrau,vaportra, vaportra, vaportra, vaportra_state, vaportra, ROT270, "Data East USA", "Vapor Trail - Hyper Offence Formation (US)", GAME_SUPPORTS_SAVE )
+GAME( 1989, kuhga,    vaportra, vaportra, vaportra, vaportra_state, vaportra, ROT270, "Data East Corporation", "Kuhga - Operation Code 'Vapor Trail' (Japan revision 3)", GAME_SUPPORTS_SAVE )

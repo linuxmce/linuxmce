@@ -71,8 +71,13 @@
 class pengo_state : public pacman_state
 {
 public:
-	pengo_state(running_machine &machine, const driver_device_config_base &config)
-		: pacman_state(machine, config) { }
+	pengo_state(const machine_config &mconfig, device_type type, const char *tag)
+		: pacman_state(mconfig, type, tag) { }
+	DECLARE_WRITE8_MEMBER(pengo_coin_counter_w);
+	DECLARE_WRITE8_MEMBER(irq_mask_w);
+	DECLARE_DRIVER_INIT(penta);
+	DECLARE_DRIVER_INIT(pengo);
+	INTERRUPT_GEN_MEMBER(vblank_irq);
 };
 
 
@@ -84,18 +89,18 @@ public:
  *
  *************************************/
 
-#define MASTER_CLOCK		(18432000)
+#define MASTER_CLOCK        (18432000)
 
-#define PIXEL_CLOCK			(MASTER_CLOCK/3)
+#define PIXEL_CLOCK         (MASTER_CLOCK/3)
 
 /* H counts from 128->511, HBLANK starts at 128+16=144 and ends at 128+64+32+16=240 */
-#define HTOTAL				(384)
-#define HBEND				(0)		/*(96+16)*/
-#define HBSTART				(288)	/*(16)*/
+#define HTOTAL              (384)
+#define HBEND               (0)     /*(96+16)*/
+#define HBSTART             (288)   /*(16)*/
 
-#define VTOTAL				(264)
-#define VBEND				(0)		/*(16)*/
-#define VBSTART				(224)	/*(224+16)*/
+#define VTOTAL              (264)
+#define VBEND               (0)     /*(16)*/
+#define VBSTART             (224)   /*(224+16)*/
 
 
 
@@ -105,24 +110,30 @@ public:
  *
  *************************************/
 
-static WRITE8_HANDLER( pengo_coin_counter_w )
+WRITE8_MEMBER(pengo_state::pengo_coin_counter_w)
 {
-	coin_counter_w(space->machine(), offset, data & 1);
+	coin_counter_w(machine(), offset, data & 1);
 }
 
+WRITE8_MEMBER(pengo_state::irq_mask_w)
+{
 
-static ADDRESS_MAP_START( pengo_map, AS_PROGRAM, 8 )
+
+	m_irq_mask = data & 1;
+}
+
+static ADDRESS_MAP_START( pengo_map, AS_PROGRAM, 8, pengo_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
-	AM_RANGE(0x8000, 0x83ff) AM_RAM_WRITE(pacman_videoram_w) AM_BASE_MEMBER(pengo_state, m_videoram) /* video and color RAM, scratchpad RAM, sprite codes */
-	AM_RANGE(0x8400, 0x87ff) AM_RAM_WRITE(pacman_colorram_w) AM_BASE_MEMBER(pengo_state, m_colorram)
+	AM_RANGE(0x8000, 0x83ff) AM_RAM_WRITE(pacman_videoram_w) AM_SHARE("videoram") /* video and color RAM, scratchpad RAM, sprite codes */
+	AM_RANGE(0x8400, 0x87ff) AM_RAM_WRITE(pacman_colorram_w) AM_SHARE("colorram")
 	AM_RANGE(0x8800, 0x8fef) AM_RAM
-	AM_RANGE(0x8ff0, 0x8fff) AM_RAM AM_BASE_SIZE_GENERIC(spriteram)
-	AM_RANGE(0x9000, 0x901f) AM_DEVWRITE("namco", pacman_sound_w)
-	AM_RANGE(0x9020, 0x902f) AM_WRITEONLY AM_BASE_GENERIC(spriteram2)
+	AM_RANGE(0x8ff0, 0x8fff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0x9000, 0x901f) AM_DEVWRITE_LEGACY("namco", pacman_sound_w)
+	AM_RANGE(0x9020, 0x902f) AM_WRITEONLY AM_SHARE("spriteram2")
 	AM_RANGE(0x9000, 0x903f) AM_READ_PORT("DSW1")
 	AM_RANGE(0x9040, 0x907f) AM_READ_PORT("DSW0")
-	AM_RANGE(0x9040, 0x9040) AM_WRITE(interrupt_enable_w)
-	AM_RANGE(0x9041, 0x9041) AM_DEVWRITE("namco", pacman_sound_enable_w)
+	AM_RANGE(0x9040, 0x9040) AM_WRITE(irq_mask_w)
+	AM_RANGE(0x9041, 0x9041) AM_DEVWRITE_LEGACY("namco", pacman_sound_enable_w)
 	AM_RANGE(0x9042, 0x9042) AM_WRITE(pengo_palettebank_w)
 	AM_RANGE(0x9043, 0x9043) AM_WRITE(pacman_flipscreen_w)
 	AM_RANGE(0x9044, 0x9045) AM_WRITE(pengo_coin_counter_w)
@@ -134,17 +145,17 @@ static ADDRESS_MAP_START( pengo_map, AS_PROGRAM, 8 )
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( jrpacmbl_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( jrpacmbl_map, AS_PROGRAM, 8, pengo_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
-	AM_RANGE(0x8000, 0x87ff) AM_RAM_WRITE(jrpacman_videoram_w) AM_BASE_MEMBER(pengo_state, m_videoram)
+	AM_RANGE(0x8000, 0x87ff) AM_RAM_WRITE(jrpacman_videoram_w) AM_SHARE("videoram")
 	AM_RANGE(0x8800, 0x8fef) AM_RAM
-	AM_RANGE(0x8ff0, 0x8fff) AM_RAM AM_BASE_SIZE_GENERIC(spriteram)
-	AM_RANGE(0x9000, 0x901f) AM_DEVWRITE("namco", pacman_sound_w)
-	AM_RANGE(0x9020, 0x902f) AM_WRITEONLY AM_BASE_GENERIC(spriteram2)
+	AM_RANGE(0x8ff0, 0x8fff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0x9000, 0x901f) AM_DEVWRITE_LEGACY("namco", pacman_sound_w)
+	AM_RANGE(0x9020, 0x902f) AM_WRITEONLY AM_SHARE("spriteram2")
 	AM_RANGE(0x9030, 0x9030) AM_WRITE(jrpacman_scroll_w)
 	AM_RANGE(0x9040, 0x904f) AM_READ_PORT("DSW")
-	AM_RANGE(0x9040, 0x9040) AM_WRITE(interrupt_enable_w)
-	AM_RANGE(0x9041, 0x9041) AM_DEVWRITE("namco", pacman_sound_enable_w)
+	AM_RANGE(0x9040, 0x9040) AM_WRITE(irq_mask_w)
+	AM_RANGE(0x9041, 0x9041) AM_DEVWRITE_LEGACY("namco", pacman_sound_enable_w)
 	AM_RANGE(0x9042, 0x9042) AM_WRITE(pengo_palettebank_w)
 	AM_RANGE(0x9043, 0x9043) AM_WRITE(pacman_flipscreen_w)
 	AM_RANGE(0x9044, 0x9044) AM_WRITE(jrpacman_bgpriority_w)
@@ -192,31 +203,31 @@ static INPUT_PORTS_START( pengo )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
 
 	PORT_START("DSW0")
-	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Bonus_Life ) )		PORT_DIPLOCATION("SW1:1")
+	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Bonus_Life ) )       PORT_DIPLOCATION("SW1:1")
 	PORT_DIPSETTING(    0x00, "30000" )
 	PORT_DIPSETTING(    0x01, "50000" )
-	PORT_DIPNAME( 0x02, 0x00, DEF_STR( Demo_Sounds ) )		PORT_DIPLOCATION("SW1:2")
+	PORT_DIPNAME( 0x02, 0x00, DEF_STR( Demo_Sounds ) )      PORT_DIPLOCATION("SW1:2")
 	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Cabinet ) )			PORT_DIPLOCATION("SW1:3")
+	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Cabinet ) )          PORT_DIPLOCATION("SW1:3")
 	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( Cocktail ) )
-	PORT_DIPNAME( 0x18, 0x10, DEF_STR( Lives ) )			PORT_DIPLOCATION("SW1:4,5")
+	PORT_DIPNAME( 0x18, 0x10, DEF_STR( Lives ) )            PORT_DIPLOCATION("SW1:4,5")
 	PORT_DIPSETTING(    0x18, "2" )
 	PORT_DIPSETTING(    0x10, "3" )
 	PORT_DIPSETTING(    0x08, "4" )
 	PORT_DIPSETTING(    0x00, "5" )
-	PORT_DIPNAME( 0x20, 0x20, "Rack Test (Cheat)" ) PORT_CODE(KEYCODE_F1)	PORT_DIPLOCATION("SW1:6")
+	PORT_DIPNAME( 0x20, 0x20, "Rack Test (Cheat)" ) PORT_CODE(KEYCODE_F1)   PORT_DIPLOCATION("SW1:6")
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0xc0, 0x80, DEF_STR( Difficulty ) )		PORT_DIPLOCATION("SW1:7,8")
+	PORT_DIPNAME( 0xc0, 0x80, DEF_STR( Difficulty ) )       PORT_DIPLOCATION("SW1:7,8")
 	PORT_DIPSETTING(    0xc0, DEF_STR( Easy ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( Medium ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( Hard ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) )
 
 	PORT_START("DSW1")
-	PORT_DIPNAME( 0x0f, 0x0c, DEF_STR( Coin_A ) )			PORT_DIPLOCATION("SW2:1,2,3,4")
+	PORT_DIPNAME( 0x0f, 0x0c, DEF_STR( Coin_A ) )           PORT_DIPLOCATION("SW2:1,2,3,4")
 	PORT_DIPSETTING(    0x00, DEF_STR( 4C_1C ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( 2C_1C ) )
@@ -233,7 +244,7 @@ static INPUT_PORTS_START( pengo )
 	PORT_DIPSETTING(    0x06, DEF_STR( 1C_4C ) )
 	PORT_DIPSETTING(    0x0e, DEF_STR( 1C_5C ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( 1C_6C ) )
-	PORT_DIPNAME( 0xf0, 0xc0, DEF_STR( Coin_B ) )			PORT_DIPLOCATION("SW2:5,6,7,8")
+	PORT_DIPNAME( 0xf0, 0xc0, DEF_STR( Coin_B ) )           PORT_DIPLOCATION("SW2:5,6,7,8")
 	PORT_DIPSETTING(    0x00, DEF_STR( 4C_1C ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( 2C_1C ) )
@@ -258,7 +269,7 @@ static INPUT_PORTS_START( jrpacmbl )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_4WAY
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_4WAY
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_4WAY
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT )	PORT_4WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_4WAY
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN3 )
@@ -275,25 +286,25 @@ static INPUT_PORTS_START( jrpacmbl )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START("DSW")
-	PORT_DIPNAME( 0x03, 0x01, DEF_STR( Coinage ) )			PORT_DIPLOCATION("SW1:1,2")
+	PORT_DIPNAME( 0x03, 0x01, DEF_STR( Coinage ) )          PORT_DIPLOCATION("SW1:1,2")
 	PORT_DIPSETTING(    0x03, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
-	PORT_DIPNAME( 0x0c, 0x08, DEF_STR( Lives ) )			PORT_DIPLOCATION("SW1:3,4")
+	PORT_DIPNAME( 0x0c, 0x08, DEF_STR( Lives ) )            PORT_DIPLOCATION("SW1:3,4")
 	PORT_DIPSETTING(    0x00, "1" )
 	PORT_DIPSETTING(    0x04, "2" )
 	PORT_DIPSETTING(    0x08, "3" )
 	PORT_DIPSETTING(    0x0c, "5" )
-	PORT_DIPNAME( 0x30, 0x00, DEF_STR( Bonus_Life ) )		PORT_DIPLOCATION("SW1:5,6")
+	PORT_DIPNAME( 0x30, 0x00, DEF_STR( Bonus_Life ) )       PORT_DIPLOCATION("SW1:5,6")
 	PORT_DIPSETTING(    0x00, "10000" )
 	PORT_DIPSETTING(    0x10, "15000" )
 	PORT_DIPSETTING(    0x20, "20000" )
 	PORT_DIPSETTING(    0x30, "30000" )
-	PORT_DIPNAME( 0x40, 0x40, "Rack Test (Cheat)" ) PORT_CODE(KEYCODE_F1)	PORT_DIPLOCATION("SW1:7")
+	PORT_DIPNAME( 0x40, 0x40, "Rack Test (Cheat)" ) PORT_CODE(KEYCODE_F1)   PORT_DIPLOCATION("SW1:7")
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Cabinet ) )			PORT_DIPLOCATION("SW1:8")
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Cabinet ) )          PORT_DIPLOCATION("SW1:8")
 	PORT_DIPSETTING(    0x80, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Cocktail ) )
 INPUT_PORTS_END
@@ -308,27 +319,27 @@ INPUT_PORTS_END
 
 static const gfx_layout tilelayout =
 {
-	8,8,	/* 8*8 characters */
-    RGN_FRAC(1,2),    /* 256 characters */
-    2,  /* 2 bits per pixel */
-    { 0, 4 },   /* the two bitplanes for 4 pixels are packed into one byte */
-    { 8*8+0, 8*8+1, 8*8+2, 8*8+3, 0, 1, 2, 3 }, /* bits are packed in groups of four */
-    { 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
-    16*8    /* every char takes 16 bytes */
+	8,8,    /* 8*8 characters */
+	RGN_FRAC(1,2),    /* 256 characters */
+	2,  /* 2 bits per pixel */
+	{ 0, 4 },   /* the two bitplanes for 4 pixels are packed into one byte */
+	{ 8*8+0, 8*8+1, 8*8+2, 8*8+3, 0, 1, 2, 3 }, /* bits are packed in groups of four */
+	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
+	16*8    /* every char takes 16 bytes */
 };
 
 
 static const gfx_layout spritelayout =
 {
-	16,16,	/* 16*16 sprites */
-	RGN_FRAC(1,2),	/* 64 sprites */
-	2,	/* 2 bits per pixel */
-	{ 0, 4 },	/* the two bitplanes for 4 pixels are packed into one byte */
+	16,16,  /* 16*16 sprites */
+	RGN_FRAC(1,2),  /* 64 sprites */
+	2,  /* 2 bits per pixel */
+	{ 0, 4 },   /* the two bitplanes for 4 pixels are packed into one byte */
 	{ 8*8, 8*8+1, 8*8+2, 8*8+3, 16*8+0, 16*8+1, 16*8+2, 16*8+3,
 			24*8+0, 24*8+1, 24*8+2, 24*8+3, 0, 1, 2, 3 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8 },
-	64*8	/* every sprite takes 64 bytes */
+	64*8    /* every sprite takes 64 bytes */
 };
 
 
@@ -347,8 +358,8 @@ GFXDECODE_END
 
 static const namco_interface namco_config =
 {
-	3,			/* number of voices */
-	0			/* stereo */
+	3,          /* number of voices */
+	0           /* stereo */
 };
 
 
@@ -359,24 +370,31 @@ static const namco_interface namco_config =
  *
  *************************************/
 
+INTERRUPT_GEN_MEMBER(pengo_state::vblank_irq)
+{
+
+	if(m_irq_mask)
+		device.execute().set_input_line(0, HOLD_LINE);
+}
+
+
 static MACHINE_CONFIG_START( pengo, pengo_state )
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", Z80, MASTER_CLOCK/6)
 	MCFG_CPU_PROGRAM_MAP(pengo_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", pengo_state,  vblank_irq)
 
 	/* video hardware */
 	MCFG_GFXDECODE(pengo)
 	MCFG_PALETTE_LENGTH(128*4)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_RAW_PARAMS(PIXEL_CLOCK, HTOTAL, HBEND, HBSTART, VTOTAL, VBEND, VBSTART)
-	MCFG_SCREEN_UPDATE(pacman)
+	MCFG_SCREEN_UPDATE_DRIVER(pengo_state, screen_update_pacman)
 
-	MCFG_PALETTE_INIT(pacman)
-	MCFG_VIDEO_START(pengo)
+	MCFG_PALETTE_INIT_OVERRIDE(pengo_state,pacman)
+	MCFG_VIDEO_START_OVERRIDE(pengo_state,pengo)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -395,7 +413,7 @@ static MACHINE_CONFIG_DERIVED( jrpacmbl, pengo )
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_PROGRAM_MAP(jrpacmbl_map)
 
-	MCFG_VIDEO_START(jrpacman)
+	MCFG_VIDEO_START_OVERRIDE(pengo_state,jrpacman)
 MACHINE_CONFIG_END
 
 
@@ -613,7 +631,7 @@ ROM_START( jrpacmbl )
 	ROM_LOAD_NIB_HIGH( "jrprom.9f", 0x0000, 0x0100, CRC(eee34a79) SHA1(7561f8ccab2af85c111af6a02af6986eb67503e5) ) /* color palette (high bits) */
 	ROM_LOAD( "jrprom.9p",          0x0020, 0x0100, CRC(9f6ea9d8) SHA1(62cf15513934d34641433c891a7f73bef82e2fb1) ) /* color lookup table */
 
-	ROM_REGION( 0x0200, "namco", 0 )	/* waveform */
+	ROM_REGION( 0x0200, "namco", 0 )    /* waveform */
 	ROM_LOAD( "jrprom.7p",          0x0000, 0x0100, CRC(a9cc86bf) SHA1(bbcec0570aeceb582ff8238a4bc8546a23430081) ) /* waveform */
 	ROM_LOAD( "jrprom.5s",          0x0100, 0x0100, CRC(77245b66) SHA1(0c4d0bee858b97632411c440bea6948a74759746) ) /* timing - not used */
 ROM_END
@@ -626,13 +644,13 @@ ROM_END
  *
  *************************************/
 
-static DRIVER_INIT( pengo )
+DRIVER_INIT_MEMBER(pengo_state,pengo)
 {
-	pengo_decode(machine, "maincpu");
+	pengo_decode(machine(), "maincpu");
 }
 
 
-static DRIVER_INIT( penta )
+DRIVER_INIT_MEMBER(pengo_state,penta)
 {
 /*
     the values vary, but the translation mask is always laid out like this:
@@ -660,26 +678,26 @@ static DRIVER_INIT( penta )
 */
 	static const UINT8 data_xortable[2][8] =
 	{
-		{ 0xa0,0x82,0x28,0x0a,0x82,0xa0,0x0a,0x28 },	/* ...............0 */
-		{ 0x88,0x0a,0x82,0x00,0x88,0x0a,0x82,0x00 }		/* ...............1 */
+		{ 0xa0,0x82,0x28,0x0a,0x82,0xa0,0x0a,0x28 },    /* ...............0 */
+		{ 0x88,0x0a,0x82,0x00,0x88,0x0a,0x82,0x00 }     /* ...............1 */
 	};
 	static const UINT8 opcode_xortable[8][8] =
 	{
-		{ 0x02,0x08,0x2a,0x20,0x20,0x2a,0x08,0x02 },	/* ...0...0...0.... */
-		{ 0x88,0x88,0x00,0x00,0x88,0x88,0x00,0x00 },	/* ...0...0...1.... */
-		{ 0x88,0x0a,0x82,0x00,0xa0,0x22,0xaa,0x28 },	/* ...0...1...0.... */
-		{ 0x88,0x0a,0x82,0x00,0xa0,0x22,0xaa,0x28 },	/* ...0...1...1.... */
-		{ 0x2a,0x08,0x2a,0x08,0x8a,0xa8,0x8a,0xa8 },	/* ...1...0...0.... */
-		{ 0x2a,0x08,0x2a,0x08,0x8a,0xa8,0x8a,0xa8 },	/* ...1...0...1.... */
-		{ 0x88,0x0a,0x82,0x00,0xa0,0x22,0xaa,0x28 },	/* ...1...1...0.... */
-		{ 0x88,0x0a,0x82,0x00,0xa0,0x22,0xaa,0x28 }		/* ...1...1...1.... */
+		{ 0x02,0x08,0x2a,0x20,0x20,0x2a,0x08,0x02 },    /* ...0...0...0.... */
+		{ 0x88,0x88,0x00,0x00,0x88,0x88,0x00,0x00 },    /* ...0...0...1.... */
+		{ 0x88,0x0a,0x82,0x00,0xa0,0x22,0xaa,0x28 },    /* ...0...1...0.... */
+		{ 0x88,0x0a,0x82,0x00,0xa0,0x22,0xaa,0x28 },    /* ...0...1...1.... */
+		{ 0x2a,0x08,0x2a,0x08,0x8a,0xa8,0x8a,0xa8 },    /* ...1...0...0.... */
+		{ 0x2a,0x08,0x2a,0x08,0x8a,0xa8,0x8a,0xa8 },    /* ...1...0...1.... */
+		{ 0x88,0x0a,0x82,0x00,0xa0,0x22,0xaa,0x28 },    /* ...1...1...0.... */
+		{ 0x88,0x0a,0x82,0x00,0xa0,0x22,0xaa,0x28 }     /* ...1...1...1.... */
 	};
-	address_space *space = machine.device("maincpu")->memory().space(AS_PROGRAM);
-	UINT8 *decrypt = auto_alloc_array(machine, UINT8, 0x8000);
-	UINT8 *rom = machine.region("maincpu")->base();
+	address_space &space = machine().device("maincpu")->memory().space(AS_PROGRAM);
+	UINT8 *decrypt = auto_alloc_array(machine(), UINT8, 0x8000);
+	UINT8 *rom = machine().root_device().memregion("maincpu")->base();
 	int A;
 
-	space->set_decrypted_region(0x0000, 0x7fff, decrypt);
+	space.set_decrypted_region(0x0000, 0x7fff, decrypt);
 
 	for (A = 0x0000;A < 0x8000;A++)
 	{
@@ -714,11 +732,11 @@ static DRIVER_INIT( penta )
  *
  *************************************/
 
-GAME( 1982, pengo,    0,     pengo, pengo, pengo,    ROT90, "Sega", "Pengo (set 1 rev c)", GAME_SUPPORTS_SAVE )
-GAME( 1982, pengo2,   pengo, pengo, pengo, pengo,    ROT90, "Sega", "Pengo (set 2)", GAME_SUPPORTS_SAVE )
-GAME( 1982, pengo2u,  pengo, pengo, pengo, 0,        ROT90, "Sega", "Pengo (set 2 not encrypted)", GAME_SUPPORTS_SAVE )
-GAME( 1982, pengo3u,  pengo, pengo, pengo, 0,        ROT90, "Sega", "Pengo (set 3 not encrypted)", GAME_SUPPORTS_SAVE )
-GAME( 1982, pengo4,   pengo, pengo, pengo, pengo,    ROT90, "Sega", "Pengo (set 4)", GAME_SUPPORTS_SAVE )
-GAME( 1982, pengob,   pengo, pengo, pengo, penta,    ROT90, "bootleg", "Pengo (bootleg)", GAME_SUPPORTS_SAVE )
-GAME( 1982, penta,    pengo, pengo, pengo, penta,    ROT90, "bootleg", "Penta", GAME_SUPPORTS_SAVE )
-GAME( 1983, jrpacmbl, jrpacman, jrpacmbl, jrpacmbl, 0, ROT90, "bootleg", "Jr. Pac-Man (Pengo hardware)", GAME_NO_COCKTAIL | GAME_SUPPORTS_SAVE )
+GAME( 1982, pengo,    0,     pengo, pengo, pengo_state, pengo,    ROT90, "Sega", "Pengo (set 1 rev c)", GAME_SUPPORTS_SAVE )
+GAME( 1982, pengo2,   pengo, pengo, pengo, pengo_state, pengo,    ROT90, "Sega", "Pengo (set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1982, pengo2u,  pengo, pengo, pengo, driver_device, 0,        ROT90, "Sega", "Pengo (set 2 not encrypted)", GAME_SUPPORTS_SAVE )
+GAME( 1982, pengo3u,  pengo, pengo, pengo, driver_device, 0,        ROT90, "Sega", "Pengo (set 3 not encrypted)", GAME_SUPPORTS_SAVE )
+GAME( 1982, pengo4,   pengo, pengo, pengo, pengo_state, pengo,    ROT90, "Sega", "Pengo (set 4)", GAME_SUPPORTS_SAVE )
+GAME( 1982, pengob,   pengo, pengo, pengo, pengo_state, penta,    ROT90, "bootleg", "Pengo (bootleg)", GAME_SUPPORTS_SAVE )
+GAME( 1982, penta,    pengo, pengo, pengo, pengo_state, penta,    ROT90, "bootleg", "Penta", GAME_SUPPORTS_SAVE )
+GAME( 1983, jrpacmbl, jrpacman, jrpacmbl, jrpacmbl, driver_device, 0, ROT90, "bootleg", "Jr. Pac-Man (Pengo hardware)", GAME_NO_COCKTAIL | GAME_SUPPORTS_SAVE )

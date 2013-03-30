@@ -308,24 +308,26 @@ GFXDECODE_END
 
 static const eeprom_interface eeprom_interface_93C56 =
 {
-	8,		// address bits 8
-	8,		// data bits    8
-	"*110x",	// read         110x aaaaaaaa
-	"*101x",	// write        101x aaaaaaaa dddddddd
-	"*111x",	// erase        111x aaaaaaaa
+	8,      // address bits 8
+	8,      // data bits    8
+	"*110x",    // read         110x aaaaaaaa
+	"*101x",    // write        101x aaaaaaaa dddddddd
+	"*111x",    // erase        111x aaaaaaaa
 	"*10000xxxxxxx",// lock         100x 00xxxx
 	"*10011xxxxxxx",// unlock       100x 11xxxx
 //  "*10001xxxx",   // write all    1 00 01xxxx dddddddddddddddd
 //  "*10010xxxx"    // erase all    1 00 10xxxx
 };
 
-static WRITE32_DEVICE_HANDLER( psh_eeprom_w )
+WRITE32_MEMBER(psikyosh_state::psh_eeprom_w)
 {
+	device_t *device = machine().device("eeprom");
 	if (ACCESSING_BITS_24_31)
 	{
-		eeprom_write_bit(device, (data & 0x20000000) ? 1 : 0);
-		eeprom_set_cs_line(device, (data & 0x80000000) ? CLEAR_LINE : ASSERT_LINE);
-		eeprom_set_clock_line(device, (data & 0x40000000) ? ASSERT_LINE : CLEAR_LINE);
+		eeprom_device *eeprom = downcast<eeprom_device *>(device);
+		eeprom->write_bit((data & 0x20000000) ? 1 : 0);
+		eeprom->set_cs_line((data & 0x80000000) ? CLEAR_LINE : ASSERT_LINE);
+		eeprom->set_clock_line((data & 0x40000000) ? ASSERT_LINE : CLEAR_LINE);
 
 		return;
 	}
@@ -333,11 +335,11 @@ static WRITE32_DEVICE_HANDLER( psh_eeprom_w )
 	logerror("Unk EEPROM write %x mask %x\n", data, mem_mask);
 }
 
-static READ32_DEVICE_HANDLER( psh_eeprom_r )
+READ32_MEMBER(psikyosh_state::psh_eeprom_r)
 {
 	if (ACCESSING_BITS_24_31)
 	{
-		return input_port_read(device->machine(), "JP4");
+		return machine().root_device().ioport("JP4")->read();
 	}
 
 	logerror("Unk EEPROM read mask %x\n", mem_mask);
@@ -345,57 +347,46 @@ static READ32_DEVICE_HANDLER( psh_eeprom_r )
 	return 0;
 }
 
-static INTERRUPT_GEN(psikyosh_interrupt)
+INTERRUPT_GEN_MEMBER(psikyosh_state::psikyosh_interrupt)
 {
-	device_set_input_line(device, 4, ASSERT_LINE);
+	device.execute().set_input_line(4, ASSERT_LINE);
 }
 
 // VBL handler writes 0x00 on entry, 0xc0 on exit
 // bit 0 controls game speed on readback, mechanism is a little weird
-static WRITE32_HANDLER( psikyosh_irqctrl_w )
+WRITE32_MEMBER(psikyosh_state::psikyosh_irqctrl_w)
 {
-	psikyosh_state *state = space->machine().driver_data<psikyosh_state>();
 	if (!(data & 0x00c00000))
 	{
-		device_set_input_line(state->m_maincpu, 4, CLEAR_LINE);
+		m_maincpu->set_input_line(4, CLEAR_LINE);
 	}
 }
 
-static WRITE32_HANDLER( paletteram32_RRRRRRRRGGGGGGGGBBBBBBBBxxxxxxxx_dword_w )
+WRITE32_MEMBER(psikyosh_state::paletteram32_RRRRRRRRGGGGGGGGBBBBBBBBxxxxxxxx_dword_w)
 {
-	psikyosh_state *state = space->machine().driver_data<psikyosh_state>();
 	int r, g, b;
-	COMBINE_DATA(&state->m_paletteram[offset]);
+	COMBINE_DATA(&m_paletteram[offset]);
 
-	b = ((state->m_paletteram[offset] & 0x0000ff00) >>8);
-	g = ((state->m_paletteram[offset] & 0x00ff0000) >>16);
-	r = ((state->m_paletteram[offset] & 0xff000000) >>24);
+	b = ((m_paletteram[offset] & 0x0000ff00) >>8);
+	g = ((m_paletteram[offset] & 0x00ff0000) >>16);
+	r = ((m_paletteram[offset] & 0xff000000) >>24);
 
-	palette_set_color(space->machine(), offset, MAKE_RGB(r, g, b));
+	palette_set_color(machine(), offset, MAKE_RGB(r, g, b));
 }
 
-static WRITE32_HANDLER( psikyosh_vidregs_w )
+WRITE32_MEMBER(psikyosh_state::psikyosh_vidregs_w)
 {
-	psikyosh_state *state = space->machine().driver_data<psikyosh_state>();
-	COMBINE_DATA(&state->m_vidregs[offset]);
+	COMBINE_DATA(&m_vidregs[offset]);
 
 	if (offset == 4) /* Configure bank for gfx test */
 	{
-		if (ACCESSING_BITS_0_15)	// Bank
-			memory_set_bank(space->machine(), "bank2", state->m_vidregs[offset] & 0xfff);
+		if (ACCESSING_BITS_0_15)    // Bank
+			membank("bank2")->set_entry(m_vidregs[offset] & 0xfff);
 	}
 }
 
-static READ32_HANDLER( psh_sample_r ) /* Send sample data for test */
-{
-	psikyosh_state *state = space->machine().driver_data<psikyosh_state>();
-	UINT8 *ROM = space->machine().region("ymf")->base();
-
-	return ROM[state->m_sample_offs++] << 16;
-}
-
 /* Mahjong Panel */
-static READ32_HANDLER( mjgtaste_input_r )
+READ32_MEMBER(psikyosh_state::mjgtaste_input_r)
 {
 /*
 Mahjong keyboard encoder -> JAMMA adapter (SK-G001). Created to allow the use of a Mahjong panel with the existing, recycled Dragon Blaze boards.
@@ -447,8 +438,8 @@ P1KEY11  29|30  P2KEY11
     GND  55|56  GND
 */
 
-	UINT32 controls = input_port_read(space->machine(), "CONTROLLER");
-	UINT32 value = input_port_read(space->machine(), "INPUTS");
+	UINT32 controls = ioport("CONTROLLER")->read();
+	UINT32 value = ioport("INPUTS")->read();
 
 	if(controls) {
 		// Clearly has ghosting, game will only recognise one key depressed at once, and keyboard can only represent keys with distinct rows and columns
@@ -493,7 +484,7 @@ P1KEY11  29|30  P2KEY11
 			KEY11 | KEY6, // Ron
 			KEY1 | KEY3   // Start
 		}; // generic Mahjong keyboard encoder, corresponds to ordering in input port
-		UINT32 keys = input_port_read(space->machine(), "MAHJONG");
+		UINT32 keys = ioport("MAHJONG")->read();
 		UINT32 which_key = 0x1;
 		int count = 0;
 
@@ -518,54 +509,50 @@ P1KEY11  29|30  P2KEY11
 
 
 // ps3v1
-static ADDRESS_MAP_START( ps3v1_map, AS_PROGRAM, 32 )
+static ADDRESS_MAP_START( ps3v1_map, AS_PROGRAM, 32, psikyosh_state )
 // rom mapping
 	AM_RANGE(0x00000000, 0x000fffff) AM_ROM // program ROM (1 meg)
 	AM_RANGE(0x02000000, 0x021fffff) AM_ROMBANK("bank1") // data ROM
 // video chip
-	AM_RANGE(0x03000000, 0x03003fff) AM_RAM AM_BASE_SIZE_GENERIC(spriteram) // video banks0-7 (sprites and sprite list)
-	AM_RANGE(0x03004000, 0x0300ffff) AM_RAM AM_BASE_MEMBER(psikyosh_state, m_bgram) // video banks 7-0x1f (backgrounds and other effects)
-	AM_RANGE(0x03040000, 0x03044fff) AM_RAM_WRITE(paletteram32_RRRRRRRRGGGGGGGGBBBBBBBBxxxxxxxx_dword_w) AM_BASE_MEMBER(psikyosh_state, m_paletteram) // palette..
-	AM_RANGE(0x03050000, 0x030501ff) AM_RAM AM_BASE_MEMBER(psikyosh_state, m_zoomram) // sprite zoom lookup table
+	AM_RANGE(0x03000000, 0x03003fff) AM_RAM AM_SHARE("spriteram") // video banks0-7 (sprites and sprite list)
+	AM_RANGE(0x03004000, 0x0300ffff) AM_RAM AM_SHARE("bgram") // video banks 7-0x1f (backgrounds and other effects)
+	AM_RANGE(0x03040000, 0x03044fff) AM_RAM_WRITE(paletteram32_RRRRRRRRGGGGGGGGBBBBBBBBxxxxxxxx_dword_w) AM_SHARE("paletteram") // palette..
+	AM_RANGE(0x03050000, 0x030501ff) AM_RAM AM_SHARE("zoomram") // sprite zoom lookup table
 	AM_RANGE(0x0305ffdc, 0x0305ffdf) AM_READNOP AM_WRITE(psikyosh_irqctrl_w) // also writes to this address - might be vblank reads?
-	AM_RANGE(0x0305ffe0, 0x0305ffff) AM_RAM_WRITE(psikyosh_vidregs_w) AM_BASE_MEMBER(psikyosh_state, m_vidregs) //  video registers
+	AM_RANGE(0x0305ffe0, 0x0305ffff) AM_RAM_WRITE(psikyosh_vidregs_w) AM_SHARE("vidregs") //  video registers
 	AM_RANGE(0x03060000, 0x0307ffff) AM_ROMBANK("bank2") // data for rom tests (gfx), data is controlled by vidreg
 // rom mapping
 	AM_RANGE(0x04060000, 0x0407ffff) AM_ROMBANK("bank2") // data for rom tests (gfx) (Mirrored?)
 // sound chip
-	AM_RANGE(0x05000000, 0x05000003) AM_DEVREAD8("ymf", ymf278b_r, 0xffffffff) // read YMF status
-	AM_RANGE(0x05000004, 0x05000007) AM_READ(psh_sample_r) // data for rom tests (Used to verify Sample rom)
-	AM_RANGE(0x05000000, 0x05000007) AM_DEVWRITE8("ymf", ymf278b_w, 0xffffffff)
+	AM_RANGE(0x05000000, 0x05000007) AM_DEVREADWRITE8_LEGACY("ymf", ymf278b_r, ymf278b_w, 0xffffffff)
 // inputs/eeprom
 	AM_RANGE(0x05800000, 0x05800003) AM_READ_PORT("INPUTS")
-	AM_RANGE(0x05800004, 0x05800007) AM_DEVREADWRITE("eeprom", psh_eeprom_r, psh_eeprom_w)
+	AM_RANGE(0x05800004, 0x05800007) AM_READWRITE(psh_eeprom_r, psh_eeprom_w)
 // ram
-	AM_RANGE(0x06000000, 0x060fffff) AM_RAM AM_BASE_MEMBER(psikyosh_state, m_ram) // main RAM (1 meg)
+	AM_RANGE(0x06000000, 0x060fffff) AM_RAM AM_SHARE("ram") // main RAM (1 meg)
 ADDRESS_MAP_END
 
 // ps5, ps5v2
-static ADDRESS_MAP_START( ps5_map, AS_PROGRAM, 32 )
+static ADDRESS_MAP_START( ps5_map, AS_PROGRAM, 32, psikyosh_state )
 // rom mapping
 	AM_RANGE(0x00000000, 0x000fffff) AM_ROM // program ROM (1 meg)
 // inputs/eeprom
 	AM_RANGE(0x03000000, 0x03000003) AM_READ_PORT("INPUTS")
-	AM_RANGE(0x03000004, 0x03000007) AM_DEVREADWRITE("eeprom", psh_eeprom_r, psh_eeprom_w)
+	AM_RANGE(0x03000004, 0x03000007) AM_READWRITE(psh_eeprom_r, psh_eeprom_w)
 // sound chip
-	AM_RANGE(0x03100000, 0x03100003) AM_DEVREAD8("ymf", ymf278b_r, 0xffffffff)
-	AM_RANGE(0x03100004, 0x03100007) AM_READ(psh_sample_r) // data for rom tests (Used to verify Sample rom)
-	AM_RANGE(0x03100000, 0x03100007) AM_DEVWRITE8("ymf", ymf278b_w, 0xffffffff)
+	AM_RANGE(0x03100000, 0x03100007) AM_DEVREADWRITE8_LEGACY("ymf", ymf278b_r, ymf278b_w, 0xffffffff)
 // video chip
-	AM_RANGE(0x04000000, 0x04003fff) AM_RAM AM_BASE_SIZE_GENERIC(spriteram) // video banks0-7 (sprites and sprite list)
-	AM_RANGE(0x04004000, 0x0400ffff) AM_RAM AM_BASE_MEMBER(psikyosh_state, m_bgram) // video banks 7-0x1f (backgrounds and other effects)
-	AM_RANGE(0x04040000, 0x04044fff) AM_RAM_WRITE(paletteram32_RRRRRRRRGGGGGGGGBBBBBBBBxxxxxxxx_dword_w) AM_BASE_MEMBER(psikyosh_state, m_paletteram)
-	AM_RANGE(0x04050000, 0x040501ff) AM_RAM AM_BASE_MEMBER(psikyosh_state, m_zoomram) // sprite zoom lookup table
+	AM_RANGE(0x04000000, 0x04003fff) AM_RAM AM_SHARE("spriteram") // video banks0-7 (sprites and sprite list)
+	AM_RANGE(0x04004000, 0x0400ffff) AM_RAM AM_SHARE("bgram") // video banks 7-0x1f (backgrounds and other effects)
+	AM_RANGE(0x04040000, 0x04044fff) AM_RAM_WRITE(paletteram32_RRRRRRRRGGGGGGGGBBBBBBBBxxxxxxxx_dword_w) AM_SHARE("paletteram")
+	AM_RANGE(0x04050000, 0x040501ff) AM_RAM AM_SHARE("zoomram") // sprite zoom lookup table
 	AM_RANGE(0x0405ffdc, 0x0405ffdf) AM_READNOP AM_WRITE(psikyosh_irqctrl_w) // also writes to this address - might be vblank reads?
-	AM_RANGE(0x0405ffe0, 0x0405ffff) AM_RAM_WRITE(psikyosh_vidregs_w) AM_BASE_MEMBER(psikyosh_state, m_vidregs) // video registers
+	AM_RANGE(0x0405ffe0, 0x0405ffff) AM_RAM_WRITE(psikyosh_vidregs_w) AM_SHARE("vidregs") // video registers
 	AM_RANGE(0x04060000, 0x0407ffff) AM_ROMBANK("bank2") // data for rom tests (gfx), data is controlled by vidreg
 // rom mapping
 	AM_RANGE(0x05000000, 0x0507ffff) AM_ROMBANK("bank1") // data ROM
 // ram
-	AM_RANGE(0x06000000, 0x060fffff) AM_RAM AM_BASE_MEMBER(psikyosh_state, m_ram)
+	AM_RANGE(0x06000000, 0x060fffff) AM_RAM AM_SHARE("ram")
 ADDRESS_MAP_END
 
 
@@ -578,7 +565,7 @@ static INPUT_PORTS_START( common )
 	PORT_BIT( 0x00000008, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x00000010, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_SERVICE_NO_TOGGLE( 0x00000020, IP_ACTIVE_LOW )
-	PORT_DIPNAME( 0x00000040, 0x00000040, "Debug" )		/* Debug stuff. Resets EEPROM? */
+	PORT_DIPNAME( 0x00000040, 0x00000040, "Debug" )     /* Debug stuff. Resets EEPROM? */
 	PORT_DIPSETTING(          0x00000040, DEF_STR( Off ) )
 	PORT_DIPSETTING(          0x00000000, DEF_STR( On ) )
 	PORT_BIT( 0x00000080, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -614,24 +601,24 @@ static INPUT_PORTS_START( s1945ii )
 	PORT_INCLUDE( common )
 
 	PORT_MODIFY("INPUTS")
-	PORT_BIT( 0x00020000, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* No button 3 */
-	PORT_BIT( 0x02000000, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* No button 3 */
+	PORT_BIT( 0x00020000, IP_ACTIVE_LOW, IPT_UNKNOWN )  /* No button 3 */
+	PORT_BIT( 0x02000000, IP_ACTIVE_LOW, IPT_UNKNOWN )  /* No button 3 */
 
-	PORT_START("JP4")	/* jumper pads on the PCB */
+	PORT_START("JP4")   /* jumper pads on the PCB */
 	PORT_DIPNAME( 0x01000000, 0x01000000, DEF_STR( Region ) )
 	PORT_DIPSETTING(          0x00000000, DEF_STR( Japan ) )
 	PORT_DIPSETTING(          0x01000000, DEF_STR( World ) )
-	PORT_BIT( 0x10000000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE("eeprom", eeprom_read_bit)
+	PORT_BIT( 0x10000000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE_MEMBER("eeprom", eeprom_device, read_bit)
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( soldivid )
 	PORT_INCLUDE( common )
 
-	PORT_START("JP4")	/* jumper pads on the PCB */
+	PORT_START("JP4")   /* jumper pads on the PCB */
 	PORT_DIPNAME( 0x01000000, 0x01000000, DEF_STR( Region ) )
 	PORT_DIPSETTING(          0x00000000, DEF_STR( Japan ) )
 	PORT_DIPSETTING(          0x01000000, DEF_STR( World ) )
-	PORT_BIT( 0x10000000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE("eeprom", eeprom_read_bit)
+	PORT_BIT( 0x10000000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE_MEMBER("eeprom", eeprom_device, read_bit)
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( daraku )
@@ -642,14 +629,14 @@ static INPUT_PORTS_START( daraku )
 	PORT_BIT( 0x00000800, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
 	PORT_BIT( 0x00004000, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(1)
 	PORT_BIT( 0x00008000, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(1)
-	PORT_BIT( 0x00020000, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* No button 3 here */
-	PORT_BIT( 0x02000000, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* No button 3 here */
+	PORT_BIT( 0x00020000, IP_ACTIVE_LOW, IPT_UNKNOWN )  /* No button 3 here */
+	PORT_BIT( 0x02000000, IP_ACTIVE_LOW, IPT_UNKNOWN )  /* No button 3 here */
 
-	PORT_START("JP4")	/* jumper pads on the PCB */
+	PORT_START("JP4")   /* jumper pads on the PCB */
 	PORT_DIPNAME( 0x01000000, 0x01000000, DEF_STR( Region ) )
 	PORT_DIPSETTING(          0x00000000, DEF_STR( Japan ) )
 	PORT_DIPSETTING(          0x01000000, DEF_STR( World ) ) /* Title screen is different, English is default now */
-	PORT_BIT( 0x10000000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE("eeprom", eeprom_read_bit)
+	PORT_BIT( 0x10000000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE_MEMBER("eeprom", eeprom_device, read_bit)
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( sbomberb )
@@ -657,78 +644,87 @@ static INPUT_PORTS_START( sbomberb )
 	/* If Debug is HIGH then you can perform rom test, but EEPROM resets? */
 
 	PORT_MODIFY("INPUTS")
-	PORT_BIT( 0x00020000, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* No button 3 */
-	PORT_BIT( 0x02000000, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* No button 3 */
+	PORT_BIT( 0x00020000, IP_ACTIVE_LOW, IPT_UNKNOWN )  /* No button 3 */
+	PORT_BIT( 0x02000000, IP_ACTIVE_LOW, IPT_UNKNOWN )  /* No button 3 */
 
-	PORT_START("JP4")	/* jumper pads on the PCB */
+	PORT_START("JP4")   /* jumper pads on the PCB */
 	PORT_DIPNAME( 0x01000000, 0x01000000, DEF_STR( Region ) )
 	PORT_DIPSETTING(          0x00000000, DEF_STR( Japan ) )
 	PORT_DIPSETTING(          0x01000000, DEF_STR( World ) )
-	PORT_BIT( 0x10000000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE("eeprom", eeprom_read_bit)
+	PORT_BIT( 0x10000000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE_MEMBER("eeprom", eeprom_device, read_bit)
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( gunbird2 ) /* Different Region */
 	PORT_INCLUDE( common )
 	/* If Debug is HIGH then you can perform rom test, but EEPROM resets */
 
-	PORT_START("JP4")	/* jumper pads on the PCB */
+	PORT_START("JP4")   /* jumper pads on the PCB */
 	PORT_DIPNAME( 0x03000000, 0x02000000, DEF_STR( Region ) )
 	PORT_DIPSETTING(          0x00000000, DEF_STR( Japan ) )
 	PORT_DIPSETTING(          0x01000000, "International Ver A." )
 	PORT_DIPSETTING(          0x02000000, "International Ver B." )
-	PORT_BIT( 0x10000000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE("eeprom", eeprom_read_bit)
+	PORT_BIT( 0x10000000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE_MEMBER("eeprom", eeprom_device, read_bit)
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( s1945iii ) /* Different Region again */
 	PORT_INCLUDE( common )
 	/* If Debug is HIGH then you can perform rom test, EEPROM doesn't reset */
 
-	PORT_START("JP4")	/* jumper pads on the PCB */
+	PORT_START("JP4")   /* jumper pads on the PCB */
 	PORT_DIPNAME( 0x03000000, 0x01000000, DEF_STR( Region ) )
 	PORT_DIPSETTING(          0x00000000, DEF_STR( Japan ) )
 	PORT_DIPSETTING(          0x02000000, "International Ver A." )
 	PORT_DIPSETTING(          0x01000000, "International Ver B." )
-	PORT_BIT( 0x10000000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE("eeprom", eeprom_read_bit)
+	PORT_BIT( 0x10000000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE_MEMBER("eeprom", eeprom_device, read_bit)
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( dragnblz ) /* Security requires bit high */
 	PORT_INCLUDE( common )
 
 	PORT_MODIFY("INPUTS")
-	PORT_DIPNAME( 0x00000040, 0x00000000, "Debug" )		/* Must be HIGH (Or Security Error), so can perform test */
+	PORT_DIPNAME( 0x00000040, 0x00000000, "Debug" )     /* Must be HIGH (Or Security Error), so can perform test */
 	PORT_DIPSETTING(          0x00000040, DEF_STR( Off ) )
 	PORT_DIPSETTING(          0x00000000, DEF_STR( On ) )
 
-	PORT_START("JP4")	/* jumper pads on the PCB */
+	PORT_START("JP4")   /* jumper pads on the PCB */
 	PORT_DIPNAME( 0x03000000, 0x01000000, DEF_STR( Region ) )
 	PORT_DIPSETTING(          0x00000000, DEF_STR( Japan ) )
 	PORT_DIPSETTING(          0x02000000, "International Ver A." )
 	PORT_DIPSETTING(          0x01000000, "International Ver B." )
-	PORT_BIT( 0x10000000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE("eeprom", eeprom_read_bit)
+	PORT_BIT( 0x10000000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE_MEMBER("eeprom", eeprom_device, read_bit)
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( gnbarich ) /* Same as S1945iii except only one button */
 	PORT_INCLUDE( common )
 	/* If Debug is HIGH then you can perform rom test, but EEPROM resets? */
 
-	PORT_START("JP4")	/* jumper pads on the PCB */
+	PORT_START("JP4")   /* jumper pads on the PCB */
 	PORT_DIPNAME( 0x03000000, 0x01000000, DEF_STR( Region ) )
 	PORT_DIPSETTING(          0x00000000, DEF_STR( Japan ) )
 	PORT_DIPSETTING(          0x02000000, "International Ver A." )
 	PORT_DIPSETTING(          0x01000000, "International Ver B." )
-	PORT_BIT( 0x10000000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE("eeprom", eeprom_read_bit)
+	PORT_BIT( 0x10000000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE_MEMBER("eeprom", eeprom_device, read_bit)
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( tgm2 )
 	PORT_INCLUDE( common )
 	/* sticks should actually be PORT_4WAY according to manual */
+	PORT_MODIFY("INPUTS")
+	PORT_BIT( 0x00100000, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_4WAY PORT_PLAYER(2)
+	PORT_BIT( 0x00200000, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_4WAY PORT_PLAYER(2)
+	PORT_BIT( 0x00400000, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_4WAY PORT_PLAYER(2)
+	PORT_BIT( 0x00800000, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_4WAY PORT_PLAYER(2)
+	PORT_BIT( 0x10000000, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_4WAY PORT_PLAYER(1)
+	PORT_BIT( 0x20000000, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_4WAY PORT_PLAYER(1)
+	PORT_BIT( 0x40000000, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_4WAY PORT_PLAYER(1)
+	PORT_BIT( 0x80000000, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_4WAY PORT_PLAYER(1)
 
-	PORT_START("JP4")	/* jumper pads on the PCB. Checked and discarded. However, if you force word 0x6060000 to 1/2/3 you can have various effects. Disbled at compile time */
+	PORT_START("JP4")   /* jumper pads on the PCB. Checked and discarded. However, if you force word 0x6060000 to 1/2/3 you can have various effects. Disbled at compile time */
 //  PORT_DIPNAME( 0x03000000, 0x01000000, DEF_STR( Region ) )
 //  PORT_DIPSETTING(          0x00000000, DEF_STR( Japan ) )
 //  PORT_DIPSETTING(          0x02000000, "International Ver A." )
 //  PORT_DIPSETTING(          0x01000000, "International Ver B." )
-	PORT_BIT( 0x10000000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE("eeprom", eeprom_read_bit)
+	PORT_BIT( 0x10000000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE_MEMBER("eeprom", eeprom_device, read_bit)
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( mjgtaste )
@@ -738,7 +734,7 @@ static INPUT_PORTS_START( mjgtaste )
 
 	PORT_BIT( 0x00000010, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_SERVICE_NO_TOGGLE( 0x00000020, IP_ACTIVE_LOW )
-	PORT_DIPNAME( 0x00000040, 0x00000040, "Debug" )		/* Debug stuff. Resets EEPROM? */
+	PORT_DIPNAME( 0x00000040, 0x00000040, "Debug" )     /* Debug stuff. Resets EEPROM? */
 	PORT_DIPSETTING(          0x00000040, DEF_STR( Off ) )
 	PORT_DIPSETTING(          0x00000000, DEF_STR( On ) )
 
@@ -752,8 +748,8 @@ static INPUT_PORTS_START( mjgtaste )
 	// Make the user pick the input scheme since the game can't handle both simultaneously
 	PORT_START("CONTROLLER")
 	PORT_CONFNAME( 0x00000001, 0x00000001, DEF_STR ( Controller ) )
-    PORT_CONFSETTING(          0x00000000, DEF_STR( Joystick ) )
-    PORT_CONFSETTING(          0x00000001, "Mahjong Panel" )
+	PORT_CONFSETTING(          0x00000000, DEF_STR( Joystick ) )
+	PORT_CONFSETTING(          0x00000001, "Mahjong Panel" )
 
 	PORT_START("MAHJONG") /* articifial enumeration for mahjong encoder */
 	PORT_BIT( 0x00000001, IP_ACTIVE_HIGH, IPT_MAHJONG_A ) PORT_PLAYER(1)
@@ -777,19 +773,19 @@ static INPUT_PORTS_START( mjgtaste )
 	PORT_BIT( 0x00040000, IP_ACTIVE_HIGH, IPT_MAHJONG_RON ) PORT_PLAYER(1)
 //  PORT_BIT( 0x00080000, IP_ACTIVE_HIGH, IPT_START1 ) /* start on panel, hacked in from the regular one to avoid duplicates in the UI */
 
-	PORT_START("JP4")	/* jumper pads on the PCB */
+	PORT_START("JP4")   /* jumper pads on the PCB */
 //  PORT_DIPNAME( 0x03000000, 0x01000000, DEF_STR( Region ) )
 //  PORT_DIPSETTING(          0x00000000, DEF_STR( Japan ) )
 //  PORT_DIPSETTING(          0x02000000, "International Ver A." )
 //  PORT_DIPSETTING(          0x01000000, "International Ver B." )
-	PORT_BIT( 0x10000000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE("eeprom", eeprom_read_bit)
+	PORT_BIT( 0x10000000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE_MEMBER("eeprom", eeprom_device, read_bit)
 INPUT_PORTS_END
 
 
 static void irqhandler(device_t *device, int linestate)
 {
 	psikyosh_state *state = device->machine().driver_data<psikyosh_state>();
-	device_set_input_line(state->m_maincpu, 12, linestate ? ASSERT_LINE : CLEAR_LINE);
+	state->m_maincpu->set_input_line(12, linestate ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static const ymf278b_interface ymf278b_config =
@@ -798,16 +794,12 @@ static const ymf278b_interface ymf278b_config =
 };
 
 
-static MACHINE_START( psikyosh )
+void psikyosh_state::machine_start()
 {
-	psikyosh_state *state = machine.driver_data<psikyosh_state>();
 
-	state->m_maincpu = machine.device("maincpu");
+	m_maincpu = machine().device<cpu_device>("maincpu");
 
-	memory_configure_bank(machine, "bank2", 0, 0x1000, machine.region("gfx1")->base(), 0x20000);
-
-	state->m_sample_offs = 0;
-	state->save_item(NAME(state->m_sample_offs));
+	membank("bank2")->configure_entries(0, 0x1000, memregion("gfx1")->base(), 0x20000);
 }
 
 
@@ -816,29 +808,26 @@ static MACHINE_CONFIG_START( psikyo3v1, psikyosh_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", SH2, MASTER_CLOCK/2)
 	MCFG_CPU_PROGRAM_MAP(ps3v1_map)
-	MCFG_CPU_VBLANK_INT("screen", psikyosh_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", psikyosh_state,  psikyosh_interrupt)
 
-	MCFG_MACHINE_START(psikyosh)
 
 	MCFG_EEPROM_ADD("eeprom", eeprom_interface_93C56)
 	MCFG_EEPROM_DEFAULT_VALUE(0)
 
 	/* video hardware */
-	MCFG_VIDEO_ATTRIBUTES(VIDEO_BUFFERS_SPRITERAM ) /* If using alpha */
+	MCFG_BUFFERED_SPRITERAM32_ADD("spriteram") /* If using alpha */
 
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0, 40*8-1, 0, 28*8-1)
-	MCFG_SCREEN_UPDATE(psikyosh)
-	MCFG_SCREEN_EOF(psikyosh)
+	MCFG_SCREEN_UPDATE_DRIVER(psikyosh_state, screen_update_psikyosh)
+	MCFG_SCREEN_VBLANK_DEVICE("spriteram", buffered_spriteram32_device, vblank_copy_rising)
 
 	MCFG_GFXDECODE(psikyosh)
 	MCFG_PALETTE_LENGTH(0x5000/4)
 
-	MCFG_VIDEO_START(psikyosh)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
@@ -895,7 +884,7 @@ ROM_START( s1945ii )
 	ROM_LOAD32_WORD_SWAP( "2_prog_l.u18", 0x000002, 0x080000, CRC(20a911b8) SHA1(82ba7b93bd621fc45a4dc2722752077b59a0a233) )
 	ROM_LOAD32_WORD_SWAP( "1_prog_h.u17", 0x000000, 0x080000, CRC(4c0fe85e) SHA1(74f810a1c3e9d629c8b190f68d73ce07b11f77b7) )
 
-	ROM_REGION( 0x2000000, "gfx1", 0 )	/* Tiles */
+	ROM_REGION( 0x2000000, "gfx1", 0 )  /* Tiles */
 	ROM_LOAD32_WORD( "0l.u4",    0x0000000, 0x400000, CRC(bfacf98d) SHA1(19954f12881e6e95e808bd1f2c2f5a425786727f) )
 	ROM_LOAD32_WORD( "0h.u13",   0x0000002, 0x400000, CRC(1266f67c) SHA1(cf93423a827aa92aa54afbbecf8509d2590edc9b) )
 	ROM_LOAD32_WORD( "1l.u3",    0x0800000, 0x400000, CRC(2d3332c9) SHA1(f2e54100a48061bfd589e8765f59ca051176a38b) )
@@ -1045,7 +1034,7 @@ ROM_START( dragnblz )
 	ROM_LOAD32_WORD_SWAP( "2prog_h.u21",   0x000000, 0x080000, CRC(fc5eade8) SHA1(e5d05543641e4a3900b0d42e0d5f75734683d635) )
 	ROM_LOAD32_WORD_SWAP( "1prog_l.u22",   0x000002, 0x080000, CRC(95d6fd02) SHA1(2b2830e7fa66cbd13666191762bfddc40571caec) )
 
-	ROM_REGION( 0x2c00000, "gfx1", 0 )	/* Sprites */
+	ROM_REGION( 0x2c00000, "gfx1", 0 )  /* Sprites */
 	ROM_LOAD32_WORD( "1l.u4",  0x0400000, 0x200000, CRC(c2eb565c) SHA1(07e41b36cc03a87f28d091754fdb0d1a7316a532) )
 	ROM_LOAD32_WORD( "1h.u12", 0x0400002, 0x200000, CRC(23cb46b7) SHA1(005b7cc40eea103688a64a72c219c7535970dbfb) )
 	ROM_LOAD32_WORD( "2l.u5",  0x0800000, 0x200000, CRC(bc256aea) SHA1(1f1d678e8a63513a95f296b8a07d2ea485d1e53f) )
@@ -1087,7 +1076,7 @@ ROM_START( gnbarich )
 	ROM_LOAD32_WORD_SWAP( "2-prog_l.u21",   0x000000, 0x080000, CRC(c136cd9c) SHA1(ab66c4f5196a66a97dbb5832336a203421cf40fa) )
 	ROM_LOAD32_WORD_SWAP( "1-prog_h.u22",   0x000002, 0x080000, CRC(6588fc96) SHA1(3db29fcf17e8b2aee465319b557bd3e45bc966b2) )
 
-	ROM_REGION( 0x2c00000, "gfx1", 0 )	/* Sprites */
+	ROM_REGION( 0x2c00000, "gfx1", 0 )  /* Sprites */
 //  ROM_LOAD32_WORD( "1l.u4",  0x0400000, 0x200000, CRC(c2eb565c) SHA1(07e41b36cc03a87f28d091754fdb0d1a7316a532) ) /* From Dragon Blaze */
 //  ROM_LOAD32_WORD( "1h.u12", 0x0400002, 0x200000, CRC(23cb46b7) SHA1(005b7cc40eea103688a64a72c219c7535970dbfb) ) /* From Dragon Blaze */
 //  ROM_LOAD32_WORD( "2l.u5",  0x0800000, 0x200000, CRC(bc256aea) SHA1(1f1d678e8a63513a95f296b8a07d2ea485d1e53f) ) /* From Dragon Blaze */
@@ -1121,7 +1110,7 @@ ROM_START( mjgtaste )
 	ROM_LOAD32_WORD_SWAP( "2.u21",   0x000000, 0x080000, CRC(5f2041dc) SHA1(f3862ffdb8df0cf921ce1cb0236935731e7729a7) )
 	ROM_LOAD32_WORD_SWAP( "1.u22",   0x000002, 0x080000, CRC(f5ff7876) SHA1(4c909db9c97f29fd79df6dacd29762688701b973) )
 
-	ROM_REGION( 0x2c00000, "gfx1", ROMREGION_ERASE00 )	/* Sprites */
+	ROM_REGION( 0x2c00000, "gfx1", ROMREGION_ERASE00 )  /* Sprites */
 	ROM_LOAD32_WORD( "1l.u4",  0x0400000, 0x200000, CRC(30da42b1) SHA1(8485f2c0e7769b50b95d962afe14fa7ae74cd887) )
 	ROM_LOAD32_WORD( "1h.u12", 0x0400002, 0x200000, CRC(629c1d44) SHA1(61909091328bb7b6d3e6e0bff91e14c9b4b86c2c) )
 	ROM_LOAD32_WORD( "2l.u5",  0x0800000, 0x200000, CRC(1f6126ab) SHA1(e9fc70ca42798c04a4d4e1ef1113a59477c77fdc) )
@@ -1155,7 +1144,7 @@ ROM_START( tgm2 )
 	ROM_LOAD32_WORD_SWAP( "2.u21",   0x000000, 0x080000, CRC(b19f6c31) SHA1(c58346c575db71262aebc3993743cb031c41e4af) )
 	ROM_LOAD32_WORD_SWAP( "1.u22",   0x000002, 0x080000, CRC(c521bf24) SHA1(0ee5b9f74b6b8bcc01b2270c53f30d99e877ed64) )
 
-	ROM_REGION( 0x3000000, "gfx1", 0 )	/* Sprites */
+	ROM_REGION( 0x3000000, "gfx1", 0 )  /* Sprites */
 	// Lower positions not populated
 	ROM_LOAD32_WORD( "81ts_3l.u6",   0x0c00000, 0x200000, CRC(d77cff9c) SHA1(93ee48c350110ebf9a80cca95c599c90a523147d) )
 	ROM_LOAD32_WORD( "82ts_3h.u14",  0x0c00002, 0x200000, CRC(f012b583) SHA1(907e1c93cbfa6a0285f96c53f5ccb63e313053d7) )
@@ -1187,7 +1176,7 @@ ROM_START( tgm2p )
 	ROM_LOAD32_WORD_SWAP( "2b.u21",   0x000000, 0x080000, CRC(38bc626c) SHA1(783e8413b11f1fa08d331b09ef4ed63f62b87ead) )
 	ROM_LOAD32_WORD_SWAP( "1b.u22",   0x000002, 0x080000, CRC(7599fb19) SHA1(3f7e81756470c173cc17a7e7dee91437571fd0c3) )
 
-	ROM_REGION( 0x3000000, "gfx1", 0 )	/* Sprites */
+	ROM_REGION( 0x3000000, "gfx1", 0 )  /* Sprites */
 	// Lower positions not populated
 	ROM_LOAD32_WORD( "81ts_3l.u6",   0x0c00000, 0x200000, CRC(d77cff9c) SHA1(93ee48c350110ebf9a80cca95c599c90a523147d) )
 	ROM_LOAD32_WORD( "82ts_3h.u14",  0x0c00002, 0x200000, CRC(f012b583) SHA1(907e1c93cbfa6a0285f96c53f5ccb63e313053d7) )
@@ -1215,81 +1204,81 @@ ROM_START( tgm2p )
 ROM_END
 
 
-static DRIVER_INIT( soldivid )
+DRIVER_INIT_MEMBER(psikyosh_state,soldivid)
 {
-	sh2drc_set_options(machine.device("maincpu"), SH2DRC_FASTEST_OPTIONS);
+	sh2drc_set_options(machine().device("maincpu"), SH2DRC_FASTEST_OPTIONS);
 }
 
-static DRIVER_INIT( s1945ii )
+DRIVER_INIT_MEMBER(psikyosh_state,s1945ii)
 {
-	sh2drc_set_options(machine.device("maincpu"), SH2DRC_FASTEST_OPTIONS);
+	sh2drc_set_options(machine().device("maincpu"), SH2DRC_FASTEST_OPTIONS);
 }
 
-static DRIVER_INIT( daraku )
+DRIVER_INIT_MEMBER(psikyosh_state,daraku)
 {
-	UINT8 *RAM = machine.region("maincpu")->base();
-	memory_set_bankptr(machine, "bank1", &RAM[0x100000]);
-	sh2drc_set_options(machine.device("maincpu"), SH2DRC_FASTEST_OPTIONS);
+	UINT8 *RAM = machine().root_device().memregion("maincpu")->base();
+	machine().root_device().membank("bank1")->set_base(&RAM[0x100000]);
+	sh2drc_set_options(machine().device("maincpu"), SH2DRC_FASTEST_OPTIONS);
 }
 
-static DRIVER_INIT( sbomberb )
+DRIVER_INIT_MEMBER(psikyosh_state,sbomberb)
 {
-	sh2drc_set_options(machine.device("maincpu"), SH2DRC_FASTEST_OPTIONS);
+	sh2drc_set_options(machine().device("maincpu"), SH2DRC_FASTEST_OPTIONS);
 }
 
-static DRIVER_INIT( gunbird2 )
+DRIVER_INIT_MEMBER(psikyosh_state,gunbird2)
 {
-	UINT8 *RAM = machine.region("maincpu")->base();
-	memory_set_bankptr(machine, "bank1", &RAM[0x100000]);
-	sh2drc_set_options(machine.device("maincpu"), SH2DRC_FASTEST_OPTIONS);
+	UINT8 *RAM = machine().root_device().memregion("maincpu")->base();
+	machine().root_device().membank("bank1")->set_base(&RAM[0x100000]);
+	sh2drc_set_options(machine().device("maincpu"), SH2DRC_FASTEST_OPTIONS);
 }
 
-static DRIVER_INIT( s1945iii )
+DRIVER_INIT_MEMBER(psikyosh_state,s1945iii)
 {
-	UINT8 *RAM = machine.region("maincpu")->base();
-	memory_set_bankptr(machine, "bank1", &RAM[0x100000]);
-	sh2drc_set_options(machine.device("maincpu"), SH2DRC_FASTEST_OPTIONS);
+	UINT8 *RAM = machine().root_device().memregion("maincpu")->base();
+	machine().root_device().membank("bank1")->set_base(&RAM[0x100000]);
+	sh2drc_set_options(machine().device("maincpu"), SH2DRC_FASTEST_OPTIONS);
 }
 
-static DRIVER_INIT( dragnblz )
+DRIVER_INIT_MEMBER(psikyosh_state,dragnblz)
 {
-	sh2drc_set_options(machine.device("maincpu"), SH2DRC_FASTEST_OPTIONS);
+	sh2drc_set_options(machine().device("maincpu"), SH2DRC_FASTEST_OPTIONS);
 }
 
-static DRIVER_INIT( gnbarich )
+DRIVER_INIT_MEMBER(psikyosh_state,gnbarich)
 {
-	sh2drc_set_options(machine.device("maincpu"), SH2DRC_FASTEST_OPTIONS);
+	sh2drc_set_options(machine().device("maincpu"), SH2DRC_FASTEST_OPTIONS);
 }
 
-static DRIVER_INIT( tgm2 )
+DRIVER_INIT_MEMBER(psikyosh_state,tgm2)
 {
-	sh2drc_set_options(machine.device("maincpu"), SH2DRC_FASTEST_OPTIONS);
+	sh2drc_set_options(machine().device("maincpu"), SH2DRC_FASTEST_OPTIONS);
 }
 
-static DRIVER_INIT( mjgtaste )
+DRIVER_INIT_MEMBER(psikyosh_state,mjgtaste)
 {
-	sh2drc_set_options(machine.device("maincpu"), SH2DRC_FASTEST_OPTIONS);
+	sh2drc_set_options(machine().device("maincpu"), SH2DRC_FASTEST_OPTIONS);
 	/* needs to install mahjong controls too (can select joystick in test mode tho) */
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x03000000, 0x03000003, FUNC(mjgtaste_input_r));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(0x03000000, 0x03000003, read32_delegate(FUNC(psikyosh_state::mjgtaste_input_r),this));
 }
 
 
 /*     YEAR  NAME      PARENT    MACHINE    INPUT     INIT      MONITOR COMPANY   FULLNAME FLAGS */
 
 /* ps3-v1 */
-GAME( 1997, soldivid, 0,        psikyo3v1,   soldivid, soldivid, ROT0,   "Psikyo", "Sol Divide - The Sword Of Darkness", GAME_SUPPORTS_SAVE )
-GAME( 1997, s1945ii,  0,        psikyo3v1,   s1945ii,  s1945ii,  ROT270, "Psikyo", "Strikers 1945 II", GAME_SUPPORTS_SAVE )
-GAME( 1998, daraku,   0,        psikyo3v1,   daraku,   daraku,   ROT0,   "Psikyo", "Daraku Tenshi - The Fallen Angels", GAME_SUPPORTS_SAVE )
-GAME( 1998, sbomber,  0,        psikyo3v1,   sbomberb, sbomberb, ROT270, "Psikyo", "Space Bomber (ver. B)", GAME_SUPPORTS_SAVE )
-GAME( 1998, sbombera, sbomber,  psikyo3v1,   sbomberb, sbomberb, ROT270, "Psikyo", "Space Bomber", GAME_SUPPORTS_SAVE )
+GAME( 1997, soldivid, 0,        psikyo3v1,   soldivid, psikyosh_state, soldivid, ROT0,   "Psikyo", "Sol Divide - The Sword Of Darkness", GAME_SUPPORTS_SAVE )
+GAME( 1997, s1945ii,  0,        psikyo3v1,   s1945ii, psikyosh_state,  s1945ii,  ROT270, "Psikyo", "Strikers 1945 II", GAME_SUPPORTS_SAVE )
+GAME( 1998, daraku,   0,        psikyo3v1,   daraku, psikyosh_state,   daraku,   ROT0,   "Psikyo", "Daraku Tenshi - The Fallen Angels", GAME_SUPPORTS_SAVE )
+GAME( 1998, sbomber,  0,        psikyo3v1,   sbomberb, psikyosh_state, sbomberb, ROT270, "Psikyo", "Space Bomber (ver. B)", GAME_SUPPORTS_SAVE )
+GAME( 1998, sbombera, sbomber,  psikyo3v1,   sbomberb, psikyosh_state, sbomberb, ROT270, "Psikyo", "Space Bomber", GAME_SUPPORTS_SAVE )
 
 /* ps5 */
-GAME( 1998, gunbird2, 0,        psikyo5,     gunbird2, gunbird2, ROT270, "Psikyo", "Gunbird 2", GAME_SUPPORTS_SAVE )
-GAME( 1999, s1945iii, 0,        psikyo5,     s1945iii, s1945iii, ROT270, "Psikyo", "Strikers 1945 III (World) / Strikers 1999 (Japan)", GAME_SUPPORTS_SAVE )
+GAME( 1998, gunbird2, 0,        psikyo5,     gunbird2, psikyosh_state, gunbird2, ROT270, "Psikyo", "Gunbird 2", GAME_SUPPORTS_SAVE )
+GAME( 1999, s1945iii, 0,        psikyo5,     s1945iii, psikyosh_state, s1945iii, ROT270, "Psikyo", "Strikers 1945 III (World) / Strikers 1999 (Japan)", GAME_SUPPORTS_SAVE )
 
 /* ps5v2 */
-GAME( 2000, dragnblz, 0,        psikyo5,     dragnblz, dragnblz, ROT270, "Psikyo", "Dragon Blaze", GAME_SUPPORTS_SAVE )
-GAME( 2000, tgm2,     0,        psikyo5_240, tgm2,     tgm2,     ROT0,   "Arika",  "Tetris the Absolute The Grand Master 2", GAME_SUPPORTS_SAVE )
-GAME( 2000, tgm2p,    tgm2,     psikyo5_240, tgm2,     tgm2,     ROT0,   "Arika",  "Tetris the Absolute The Grand Master 2 Plus", GAME_SUPPORTS_SAVE )
-GAME( 2001, gnbarich, 0,        psikyo5,     gnbarich, gnbarich, ROT270, "Psikyo", "Gunbarich", GAME_SUPPORTS_SAVE )
-GAME( 2002, mjgtaste, 0,        psikyo5,     mjgtaste, mjgtaste, ROT0,   "Psikyo", "Mahjong G-Taste", GAME_SUPPORTS_SAVE )
+GAME( 2000, dragnblz, 0,        psikyo5,     dragnblz, psikyosh_state, dragnblz, ROT270, "Psikyo", "Dragon Blaze", GAME_SUPPORTS_SAVE )
+GAME( 2000, tgm2,     0,        psikyo5_240, tgm2, psikyosh_state,     tgm2,     ROT0,   "Arika",  "Tetris the Absolute The Grand Master 2", GAME_SUPPORTS_SAVE )
+GAME( 2000, tgm2p,    tgm2,     psikyo5_240, tgm2, psikyosh_state,     tgm2,     ROT0,   "Arika",  "Tetris the Absolute The Grand Master 2 Plus", GAME_SUPPORTS_SAVE )
+GAME( 2001, gnbarich, 0,        psikyo5,     gnbarich, psikyosh_state, gnbarich, ROT270, "Psikyo", "Gunbarich", GAME_SUPPORTS_SAVE )
+GAME( 2002, mjgtaste, 0,        psikyo5,     mjgtaste, psikyosh_state, mjgtaste, ROT0,   "Psikyo", "Mahjong G-Taste", GAME_SUPPORTS_SAVE )

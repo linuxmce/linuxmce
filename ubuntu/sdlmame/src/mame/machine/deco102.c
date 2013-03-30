@@ -38,7 +38,7 @@ static UINT16 decrypt(UINT16 data, int address, int select_xor)
 
 	// calculate xor to use
 	j = (address ^ select_xor) & 0x0f;
-	if (address & 0x40000) j ^= 2;	// boogwing
+	if (address & 0x40000) j ^= 2;  // boogwing
 	xorval = xors[j];
 
 	// decrypt
@@ -50,15 +50,15 @@ static UINT16 decrypt(UINT16 data, int address, int select_xor)
 void deco102_decrypt_cpu(running_machine &machine, const char *cputag, int address_xor, int data_select_xor, int opcode_select_xor)
 {
 	int i;
-	address_space *space = machine.device(cputag)->memory().space(AS_PROGRAM);
-	UINT16 *rom = (UINT16 *)machine.region(cputag)->base();
-	int size = machine.region(cputag)->bytes();
+	address_space &space = machine.device(cputag)->memory().space(AS_PROGRAM);
+	UINT16 *rom = (UINT16 *)machine.root_device().memregion(cputag)->base();
+	int size = machine.root_device().memregion(cputag)->bytes();
 	UINT16 *opcodes = auto_alloc_array(machine, UINT16, size / 2);
 	UINT16 *buf = auto_alloc_array(machine, UINT16, size / 2);
 
 	memcpy(buf, rom, size);
 
-	space->set_decrypted_region(0, size - 1, opcodes);
+	space.set_decrypted_region(0, size - 1, opcodes);
 	m68k_set_encrypted_opcode_range(machine.device(cputag), 0, size);
 
 	for (i = 0; i < size / 2; i++)

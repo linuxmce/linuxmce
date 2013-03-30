@@ -1,8 +1,14 @@
+/******************************************************************************
+
+    UPL "sprite framebuffer" hardware
+
+    Functions to emulate the video hardware
+
+******************************************************************************/
+
 #include "emu.h"
 #include "includes/ninjakd2.h"
 
-
-#define TRANSPARENTCODE (15)
 
 /*************************************
  *
@@ -10,67 +16,64 @@
  *
  *************************************/
 
-static TILE_GET_INFO( get_fg_tile_info )
+TILE_GET_INFO_MEMBER(ninjakd2_state::get_fg_tile_info)
 {
-	ninjakd2_state *state = machine.driver_data<ninjakd2_state>();
-	int const lo = state->m_fg_videoram[(tile_index << 1)];
-	int const hi = state->m_fg_videoram[(tile_index << 1) | 1];
+	int const lo = m_fg_videoram[(tile_index << 1)];
+	int const hi = m_fg_videoram[(tile_index << 1) | 1];
 	int const tile = ((hi & 0xc0) << 2) | lo;
 	int const flipyx = (hi & 0x30) >> 4;
 	int const color = hi & 0x0f;
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			0,
 			tile,
 			color,
 			TILE_FLIPYX(flipyx));
 }
 
-static TILE_GET_INFO( ninjakd2_get_bg_tile_info )
+TILE_GET_INFO_MEMBER(ninjakd2_state::ninjakd2_get_bg_tile_info)
 {
-	ninjakd2_state *state = machine.driver_data<ninjakd2_state>();
-	int const lo = state->m_bg_videoram[(tile_index << 1)];
-	int const hi = state->m_bg_videoram[(tile_index << 1) | 1];
+	int const lo = m_bg_videoram[(tile_index << 1)];
+	int const hi = m_bg_videoram[(tile_index << 1) | 1];
 	int const tile = ((hi & 0xc0) << 2) | lo;
 	int const flipyx = (hi & 0x30) >> 4;
 	int const color = hi & 0x0f;
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			2,
 			tile,
 			color,
 			TILE_FLIPYX(flipyx));
 }
 
-static TILE_GET_INFO( mnight_get_bg_tile_info )
+TILE_GET_INFO_MEMBER(ninjakd2_state::mnight_get_bg_tile_info)
 {
-	ninjakd2_state *state = machine.driver_data<ninjakd2_state>();
-	int const lo = state->m_bg_videoram[(tile_index << 1)];
-	int const hi = state->m_bg_videoram[(tile_index << 1) | 1];
+	int const lo = m_bg_videoram[(tile_index << 1)];
+	int const hi = m_bg_videoram[(tile_index << 1) | 1];
 	int const tile = ((hi & 0x10) << 6) | ((hi & 0xc0) << 2) | lo;
 	int const flipy = (hi & 0x20) >> 5;
 	int const color = hi & 0x0f;
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			2,
 			tile,
 			color,
 			flipy ? TILE_FLIPY : 0);
 }
 
-static TILEMAP_MAPPER( robokid_bg_scan )
+TILEMAP_MAPPER_MEMBER(ninjakd2_state::robokid_bg_scan)
 {
 	/* logical (col,row) -> memory offset */
 	return (col & 0x0f) | ((row & 0x1f) << 4) | ((col & 0x10) << 5);
 }
 
-static TILEMAP_MAPPER( omegaf_bg_scan )
+TILEMAP_MAPPER_MEMBER(ninjakd2_state::omegaf_bg_scan)
 {
 	/* logical (col,row) -> memory offset */
 	return (col & 0x0f) | ((row & 0x1f) << 4) | ((col & 0x70) << 5);
 }
 
-static void robokid_get_bg_tile_info(running_machine& machine, tile_data* const tileinfo, tilemap_memory_index const tile_index, int const gfxnum, const UINT8* const videoram)
+static void robokid_get_bg_tile_info(running_machine& machine, tile_data& tileinfo, tilemap_memory_index const tile_index, int const gfxnum, const UINT8* const videoram)
 {
 	int const lo = videoram[(tile_index << 1)];
 	int const hi = videoram[(tile_index << 1) | 1];
@@ -84,22 +87,19 @@ static void robokid_get_bg_tile_info(running_machine& machine, tile_data* const 
 			0);
 }
 
-static TILE_GET_INFO( robokid_get_bg0_tile_info )
+TILE_GET_INFO_MEMBER(ninjakd2_state::robokid_get_bg0_tile_info)
 {
-	ninjakd2_state *state = machine.driver_data<ninjakd2_state>();
-	robokid_get_bg_tile_info(machine, tileinfo, tile_index, 2, state->m_robokid_bg0_videoram);
+	robokid_get_bg_tile_info(machine(), tileinfo, tile_index, 2, m_robokid_bg0_videoram);
 }
 
-static TILE_GET_INFO( robokid_get_bg1_tile_info )
+TILE_GET_INFO_MEMBER(ninjakd2_state::robokid_get_bg1_tile_info)
 {
-	ninjakd2_state *state = machine.driver_data<ninjakd2_state>();
-	robokid_get_bg_tile_info(machine, tileinfo, tile_index, 3, state->m_robokid_bg1_videoram);
+	robokid_get_bg_tile_info(machine(), tileinfo, tile_index, 3, m_robokid_bg1_videoram);
 }
 
-static TILE_GET_INFO( robokid_get_bg2_tile_info )
+TILE_GET_INFO_MEMBER(ninjakd2_state::robokid_get_bg2_tile_info)
 {
-	ninjakd2_state *state = machine.driver_data<ninjakd2_state>();
-	robokid_get_bg_tile_info(machine, tileinfo, tile_index, 4, state->m_robokid_bg2_videoram);
+	robokid_get_bg_tile_info(machine(), tileinfo, tile_index, 4, m_robokid_bg2_videoram);
 }
 
 
@@ -110,18 +110,35 @@ static TILE_GET_INFO( robokid_get_bg2_tile_info )
  *
  *************************************/
 
-static void videoram_alloc(running_machine& machine, int const size)
+void ninjakd2_state::video_init_common(UINT32 vram_alloc_size)
 {
-	ninjakd2_state *state = machine.driver_data<ninjakd2_state>();
-	if (size)
+	// create video ram
+	if (vram_alloc_size)
 	{
-		/* create video ram */
-		state->m_robokid_bg0_videoram = auto_alloc_array_clear(machine, UINT8, size);
-		state->m_robokid_bg1_videoram = auto_alloc_array_clear(machine, UINT8, size);
-		state->m_robokid_bg2_videoram = auto_alloc_array_clear(machine, UINT8, size);
+		m_robokid_bg0_videoram = auto_alloc_array_clear(machine(), UINT8, vram_alloc_size);
+		m_robokid_bg1_videoram = auto_alloc_array_clear(machine(), UINT8, vram_alloc_size);
+		m_robokid_bg2_videoram = auto_alloc_array_clear(machine(), UINT8, vram_alloc_size);
+
+		save_pointer(NAME(m_robokid_bg0_videoram), vram_alloc_size);
+		save_pointer(NAME(m_robokid_bg1_videoram), vram_alloc_size);
+		save_pointer(NAME(m_robokid_bg2_videoram), vram_alloc_size);
 	}
 
-	state->m_sp_bitmap = machine.primary_screen->alloc_compatible_bitmap();
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(ninjakd2_state::get_fg_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
+	m_fg_tilemap->set_transparent_pen(0xf);
+
+	machine().primary_screen->register_screen_bitmap(m_sprites_bitmap);
+
+	m_sprites_updated = 0;
+	m_robokid_sprites = 0;
+	m_vram_bank_mask = 0;
+
+	// register for save states
+	save_item(NAME(m_sprites_updated));
+	save_item(NAME(m_next_sprite_overdraw_enabled));
+	save_item(NAME(m_robokid_bg0_bank));
+	save_item(NAME(m_robokid_bg1_bank));
+	save_item(NAME(m_robokid_bg2_bank));
 }
 
 static int stencil_ninjakd2( UINT16 pal );
@@ -130,87 +147,64 @@ static int stencil_arkarea(  UINT16 pal );
 static int stencil_robokid(  UINT16 pal );
 static int stencil_omegaf(   UINT16 pal );
 
-VIDEO_START( ninjakd2 )
+void ninjakd2_state::video_start()
 {
-	ninjakd2_state *state = machine.driver_data<ninjakd2_state>();
-	videoram_alloc(machine, 0);
+	video_init_common(0);
 
-	state->m_fg_tilemap = tilemap_create(         machine, get_fg_tile_info, tilemap_scan_rows,   8,  8, 32, 32);
-	state->m_bg_tilemap = tilemap_create(machine, ninjakd2_get_bg_tile_info, tilemap_scan_rows,  16, 16, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(ninjakd2_state::ninjakd2_get_bg_tile_info),this), TILEMAP_SCAN_ROWS, 16, 16, 32, 32);
 
-	tilemap_set_transparent_pen(state->m_fg_tilemap, TRANSPARENTCODE);
-
-	state->m_robokid_sprites = 0;
-	state->m_stencil_compare_function = stencil_ninjakd2;
+	m_stencil_compare_function = stencil_ninjakd2;
 }
 
-VIDEO_START( mnight )
+VIDEO_START_MEMBER(ninjakd2_state,mnight)
 {
-	ninjakd2_state *state = machine.driver_data<ninjakd2_state>();
-	videoram_alloc(machine, 0);
+	video_init_common(0);
 
-	state->m_fg_tilemap = tilemap_create(       machine, get_fg_tile_info, tilemap_scan_rows,   8,  8, 32, 32);
-	state->m_bg_tilemap = tilemap_create(machine, mnight_get_bg_tile_info, tilemap_scan_rows,  16, 16, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(ninjakd2_state::mnight_get_bg_tile_info),this), TILEMAP_SCAN_ROWS, 16, 16, 32, 32);
 
-	tilemap_set_transparent_pen(state->m_fg_tilemap, TRANSPARENTCODE);
-
-	state->m_robokid_sprites = 0;
-	state->m_stencil_compare_function = stencil_mnight;
+	m_stencil_compare_function = stencil_mnight;
 }
 
-VIDEO_START( arkarea )
+VIDEO_START_MEMBER(ninjakd2_state,arkarea)
 {
-	ninjakd2_state *state = machine.driver_data<ninjakd2_state>();
-	videoram_alloc(machine, 0);
+	video_init_common(0);
 
-	state->m_fg_tilemap = tilemap_create(       machine, get_fg_tile_info, tilemap_scan_rows,   8,  8, 32, 32);
-	state->m_bg_tilemap = tilemap_create(machine, mnight_get_bg_tile_info, tilemap_scan_rows,  16, 16, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(ninjakd2_state::mnight_get_bg_tile_info),this), TILEMAP_SCAN_ROWS, 16, 16, 32, 32);
 
-	tilemap_set_transparent_pen(state->m_fg_tilemap, TRANSPARENTCODE);
-
-	state->m_robokid_sprites = 0;
-	state->m_stencil_compare_function = stencil_arkarea;
+	m_stencil_compare_function = stencil_arkarea;
 }
 
-VIDEO_START( robokid )
+VIDEO_START_MEMBER(ninjakd2_state,robokid)
 {
-	ninjakd2_state *state = machine.driver_data<ninjakd2_state>();
-	state->m_bank_mask = 1;
+	video_init_common(0x0800);
+	m_vram_bank_mask = 1;
+	m_robokid_sprites = 1;
 
-	videoram_alloc(machine, 0x0800);
+	m_bg0_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(ninjakd2_state::robokid_get_bg0_tile_info),this), tilemap_mapper_delegate(FUNC(ninjakd2_state::robokid_bg_scan),this), 16, 16, 32, 32);
+	m_bg1_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(ninjakd2_state::robokid_get_bg1_tile_info),this), tilemap_mapper_delegate(FUNC(ninjakd2_state::robokid_bg_scan),this), 16, 16, 32, 32);
+	m_bg2_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(ninjakd2_state::robokid_get_bg2_tile_info),this), tilemap_mapper_delegate(FUNC(ninjakd2_state::robokid_bg_scan),this), 16, 16, 32, 32);
 
-	state->m_fg_tilemap  = tilemap_create(        machine, get_fg_tile_info,  tilemap_scan_rows,   8,  8, 32, 32);
-	state->m_bg0_tilemap = tilemap_create(machine, robokid_get_bg0_tile_info, robokid_bg_scan,    16, 16, 32, 32);
-	state->m_bg1_tilemap = tilemap_create(machine, robokid_get_bg1_tile_info, robokid_bg_scan,    16, 16, 32, 32);
-	state->m_bg2_tilemap = tilemap_create(machine, robokid_get_bg2_tile_info, robokid_bg_scan,    16, 16, 32, 32);
+	m_bg1_tilemap->set_transparent_pen(0xf);
+	m_bg2_tilemap->set_transparent_pen(0xf);
 
-	tilemap_set_transparent_pen(state->m_fg_tilemap,  TRANSPARENTCODE);
-	tilemap_set_transparent_pen(state->m_bg1_tilemap, TRANSPARENTCODE);
-	tilemap_set_transparent_pen(state->m_bg2_tilemap, TRANSPARENTCODE);
-
-	state->m_robokid_sprites = 1;
-	state->m_stencil_compare_function = stencil_robokid;
+	m_stencil_compare_function = stencil_robokid;
 }
 
-VIDEO_START( omegaf )
+VIDEO_START_MEMBER(ninjakd2_state,omegaf)
 {
-	ninjakd2_state *state = machine.driver_data<ninjakd2_state>();
-	state->m_bank_mask = 7;
+	video_init_common(0x2000);
+	m_vram_bank_mask = 7;
+	m_robokid_sprites = 1;
 
-	videoram_alloc(machine, 0x2000);
+	m_bg0_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(ninjakd2_state::robokid_get_bg0_tile_info),this), tilemap_mapper_delegate(FUNC(ninjakd2_state::omegaf_bg_scan),this), 16, 16, 128, 32);
+	m_bg1_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(ninjakd2_state::robokid_get_bg1_tile_info),this), tilemap_mapper_delegate(FUNC(ninjakd2_state::omegaf_bg_scan),this), 16, 16, 128, 32);
+	m_bg2_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(ninjakd2_state::robokid_get_bg2_tile_info),this), tilemap_mapper_delegate(FUNC(ninjakd2_state::omegaf_bg_scan),this), 16, 16, 128, 32);
 
-	state->m_fg_tilemap  = tilemap_create(        machine, get_fg_tile_info,  tilemap_scan_rows,   8,  8,  32, 32);
-	state->m_bg0_tilemap = tilemap_create(machine, robokid_get_bg0_tile_info, omegaf_bg_scan,     16, 16, 128, 32);
-	state->m_bg1_tilemap = tilemap_create(machine, robokid_get_bg1_tile_info, omegaf_bg_scan,     16, 16, 128, 32);
-	state->m_bg2_tilemap = tilemap_create(machine, robokid_get_bg2_tile_info, omegaf_bg_scan,     16, 16, 128, 32);
+	m_bg0_tilemap->set_transparent_pen(0xf);
+	m_bg1_tilemap->set_transparent_pen(0xf);
+	m_bg2_tilemap->set_transparent_pen(0xf);
 
-	tilemap_set_transparent_pen(state->m_fg_tilemap,  TRANSPARENTCODE);
-	tilemap_set_transparent_pen(state->m_bg0_tilemap, TRANSPARENTCODE);
-	tilemap_set_transparent_pen(state->m_bg1_tilemap, TRANSPARENTCODE);
-	tilemap_set_transparent_pen(state->m_bg2_tilemap, TRANSPARENTCODE);
-
-	state->m_robokid_sprites = 1;
-	state->m_stencil_compare_function = stencil_omegaf;
+	m_stencil_compare_function = stencil_omegaf;
 }
 
 
@@ -221,135 +215,116 @@ VIDEO_START( omegaf )
  *
  *************************************/
 
-WRITE8_HANDLER( ninjakd2_bgvideoram_w )
+WRITE8_MEMBER(ninjakd2_state::ninjakd2_bgvideoram_w)
 {
-	ninjakd2_state *state = space->machine().driver_data<ninjakd2_state>();
-	state->m_bg_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset >> 1);
+	m_bg_videoram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset >> 1);
 }
 
-WRITE8_HANDLER( ninjakd2_fgvideoram_w )
+WRITE8_MEMBER(ninjakd2_state::ninjakd2_fgvideoram_w)
 {
-	ninjakd2_state *state = space->machine().driver_data<ninjakd2_state>();
-	state->m_fg_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_fg_tilemap, offset >> 1);
+	m_fg_videoram[offset] = data;
+	m_fg_tilemap->mark_tile_dirty(offset >> 1);
 }
 
 
-
-WRITE8_HANDLER( robokid_bg0_bank_w )
+WRITE8_MEMBER(ninjakd2_state::robokid_bg0_bank_w)
 {
-	ninjakd2_state *state = space->machine().driver_data<ninjakd2_state>();
-	state->m_robokid_bg0_bank = data & state->m_bank_mask;
+	m_robokid_bg0_bank = data & m_vram_bank_mask;
 }
 
-WRITE8_HANDLER( robokid_bg1_bank_w )
+WRITE8_MEMBER(ninjakd2_state::robokid_bg1_bank_w)
 {
-	ninjakd2_state *state = space->machine().driver_data<ninjakd2_state>();
-	state->m_robokid_bg1_bank = data & state->m_bank_mask;
+	m_robokid_bg1_bank = data & m_vram_bank_mask;
 }
 
-WRITE8_HANDLER( robokid_bg2_bank_w )
+WRITE8_MEMBER(ninjakd2_state::robokid_bg2_bank_w)
 {
-	ninjakd2_state *state = space->machine().driver_data<ninjakd2_state>();
-	state->m_robokid_bg2_bank = data & state->m_bank_mask;
+	m_robokid_bg2_bank = data & m_vram_bank_mask;
 }
 
-READ8_HANDLER( robokid_bg0_videoram_r )
+READ8_MEMBER(ninjakd2_state::robokid_bg0_videoram_r)
 {
-	ninjakd2_state *state = space->machine().driver_data<ninjakd2_state>();
-	return state->m_robokid_bg0_videoram[(state->m_robokid_bg0_bank << 10) | offset];
+	return m_robokid_bg0_videoram[(m_robokid_bg0_bank << 10) | offset];
 }
 
-READ8_HANDLER( robokid_bg1_videoram_r )
+READ8_MEMBER(ninjakd2_state::robokid_bg1_videoram_r)
 {
-	ninjakd2_state *state = space->machine().driver_data<ninjakd2_state>();
-	return state->m_robokid_bg1_videoram[(state->m_robokid_bg1_bank << 10) | offset];
+	return m_robokid_bg1_videoram[(m_robokid_bg1_bank << 10) | offset];
 }
 
-READ8_HANDLER( robokid_bg2_videoram_r )
+READ8_MEMBER(ninjakd2_state::robokid_bg2_videoram_r)
 {
-	ninjakd2_state *state = space->machine().driver_data<ninjakd2_state>();
-	return state->m_robokid_bg2_videoram[(state->m_robokid_bg2_bank << 10) | offset];
+	return m_robokid_bg2_videoram[(m_robokid_bg2_bank << 10) | offset];
 }
 
-WRITE8_HANDLER( robokid_bg0_videoram_w )
+WRITE8_MEMBER(ninjakd2_state::robokid_bg0_videoram_w)
 {
-	ninjakd2_state *state = space->machine().driver_data<ninjakd2_state>();
-	int const address = (state->m_robokid_bg0_bank << 10 ) | offset;
+	int const address = (m_robokid_bg0_bank << 10 ) | offset;
 
-	state->m_robokid_bg0_videoram[address] = data;
-	tilemap_mark_tile_dirty(state->m_bg0_tilemap, address >> 1);
+	m_robokid_bg0_videoram[address] = data;
+	m_bg0_tilemap->mark_tile_dirty(address >> 1);
 }
 
-WRITE8_HANDLER( robokid_bg1_videoram_w )
+WRITE8_MEMBER(ninjakd2_state::robokid_bg1_videoram_w)
 {
-	ninjakd2_state *state = space->machine().driver_data<ninjakd2_state>();
-	int const address = (state->m_robokid_bg1_bank << 10 ) | offset;
+	int const address = (m_robokid_bg1_bank << 10 ) | offset;
 
-	state->m_robokid_bg1_videoram[address] = data;
-	tilemap_mark_tile_dirty(state->m_bg1_tilemap, address >> 1);
+	m_robokid_bg1_videoram[address] = data;
+	m_bg1_tilemap->mark_tile_dirty(address >> 1);
 }
 
-WRITE8_HANDLER( robokid_bg2_videoram_w )
+WRITE8_MEMBER(ninjakd2_state::robokid_bg2_videoram_w)
 {
-	ninjakd2_state *state = space->machine().driver_data<ninjakd2_state>();
-	int const address = (state->m_robokid_bg2_bank << 10 ) | offset;
+	int const address = (m_robokid_bg2_bank << 10 ) | offset;
 
-	state->m_robokid_bg2_videoram[address] = data;
-	tilemap_mark_tile_dirty(state->m_bg2_tilemap, address >> 1);
+	m_robokid_bg2_videoram[address] = data;
+	m_bg2_tilemap->mark_tile_dirty(address >> 1);
 }
-
 
 
 static void bg_ctrl(int offset, int data, tilemap_t* tilemap)
 {
-	int scrollx = tilemap_get_scrollx(tilemap, 0);
-	int scrolly = tilemap_get_scrolly(tilemap, 0);
+	int scrollx = tilemap->scrollx(0);
+	int scrolly = tilemap->scrolly(0);
 
 	switch (offset)
 	{
-		case 0:	scrollx = ((scrollx & 0x100) | data);        break;
-		case 1:	scrollx = ((scrollx & 0x0ff) | (data << 8)); break;
-		case 2:	scrolly = ((scrolly & 0x100) | data);        break;
-		case 3:	scrolly = ((scrolly & 0x0ff) | (data << 8)); break;
-		case 4:	tilemap_set_enable(tilemap, data & 1);       break;
+		case 0: scrollx = ((scrollx & 0x100) | data);        break;
+		case 1: scrollx = ((scrollx & 0x0ff) | (data << 8)); break;
+		case 2: scrolly = ((scrolly & 0x100) | data);        break;
+		case 3: scrolly = ((scrolly & 0x0ff) | (data << 8)); break;
+		case 4: tilemap->enable(data & 1); break;
 	}
 
-	tilemap_set_scrollx(tilemap, 0, scrollx);
-	tilemap_set_scrolly(tilemap, 0, scrolly);
+	tilemap->set_scrollx(0, scrollx);
+	tilemap->set_scrolly(0, scrolly);
 }
 
-WRITE8_HANDLER( ninjakd2_bg_ctrl_w )
+WRITE8_MEMBER(ninjakd2_state::ninjakd2_bg_ctrl_w)
 {
-	ninjakd2_state *state = space->machine().driver_data<ninjakd2_state>();
-	bg_ctrl(offset, data, state->m_bg_tilemap);
+	bg_ctrl(offset, data, m_bg_tilemap);
 }
 
-WRITE8_HANDLER( robokid_bg0_ctrl_w )
+WRITE8_MEMBER(ninjakd2_state::robokid_bg0_ctrl_w)
 {
-	ninjakd2_state *state = space->machine().driver_data<ninjakd2_state>();
-	bg_ctrl(offset, data, state->m_bg0_tilemap);
+	bg_ctrl(offset, data, m_bg0_tilemap);
 }
 
-WRITE8_HANDLER( robokid_bg1_ctrl_w )
+WRITE8_MEMBER(ninjakd2_state::robokid_bg1_ctrl_w)
 {
-	ninjakd2_state *state = space->machine().driver_data<ninjakd2_state>();
-	bg_ctrl(offset, data, state->m_bg1_tilemap);
+	bg_ctrl(offset, data, m_bg1_tilemap);
 }
 
-WRITE8_HANDLER( robokid_bg2_ctrl_w )
+WRITE8_MEMBER(ninjakd2_state::robokid_bg2_ctrl_w)
 {
-	ninjakd2_state *state = space->machine().driver_data<ninjakd2_state>();
-	bg_ctrl(offset, data, state->m_bg2_tilemap);
+	bg_ctrl(offset, data, m_bg2_tilemap);
 }
 
 
-
-WRITE8_HANDLER( ninjakd2_sprite_overdraw_w )
+WRITE8_MEMBER(ninjakd2_state::ninjakd2_sprite_overdraw_w)
 {
-	ninjakd2_state *state = space->machine().driver_data<ninjakd2_state>();
-	state->m_next_sprite_overdraw_enabled = data & 1;
+	m_next_sprite_overdraw_enabled = data & 1;
 }
 
 
@@ -360,23 +335,24 @@ WRITE8_HANDLER( ninjakd2_sprite_overdraw_w )
  *
  *************************************/
 
-static void draw_sprites(running_machine& machine, bitmap_t* bitmap)
+static void draw_sprites(running_machine& machine, bitmap_ind16 &bitmap)
 {
 	ninjakd2_state *state = machine.driver_data<ninjakd2_state>();
-	const gfx_element* const gfx = machine.gfx[1];
+	gfx_element* const gfx = machine.gfx[1];
 	int const big_xshift = state->m_robokid_sprites ? 1 : 0;
 	int const big_yshift = state->m_robokid_sprites ? 0 : 1;
 
 	UINT8* sprptr = &state->m_spriteram[11];
 	int sprites_drawn = 0;
 
-	// the sprite generator draws exactly 96 16x16 sprites per frame. When big
-	// (32x32) sprites are drawn, this counts for 4 sprites drawn, so the sprite
-	// list is reduced accordingly (i.e. three slots at the end of the list will
-	// be ignored). Note that a disabled sprite, even if it is not drawn, still
-	// counts as one sprite drawn.
-	// This is proven by Mutant Night, which doesn't work correctly (leaves shots
-	// on screen) if we don't take big sprites into account.
+	/* The sprite generator draws exactly 96 16x16 sprites per frame. When big
+	   (32x32) sprites are drawn, this counts for 4 sprites drawn, so the sprite
+	   list is reduced accordingly (i.e. three slots at the end of the list will
+	   be ignored). Note that a disabled sprite, even if it is not drawn, still
+	   counts as one sprite drawn.
+	   This is proven by Mutant Night, which doesn't work correctly (leaves shots
+	   on screen) if we don't take big sprites into account.
+	*/
 
 	for (;;)
 	{
@@ -392,7 +368,7 @@ static void draw_sprites(running_machine& machine, bitmap_t* bitmap)
 			// Ninja Kid II doesn't use the 'big' feature so it might not be available on the board
 			int const big = (sprptr[2] & 0x04) >> 2;
 
-			if (flip_screen_get(machine))
+			if (state->flip_screen())
 			{
 				sx = 240 - 16*big - sx;
 				sy = 240 - 16*big - sy;
@@ -407,25 +383,21 @@ static void draw_sprites(running_machine& machine, bitmap_t* bitmap)
 				code ^= flipy << big_yshift;
 			}
 
+			for (int y = 0; y <= big; ++y)
 			{
-				int y;
-				for (y = 0; y <= big; ++y)
+				for (int x = 0; x <= big; ++x)
 				{
-					int x;
-					for (x = 0; x <= big; ++x)
-					{
-						int const tile = code ^ (x << big_xshift) ^ (y << big_yshift);
+					int const tile = code ^ (x << big_xshift) ^ (y << big_yshift);
 
-						drawgfx_transpen(bitmap, 0, gfx,
-								tile,
-								color,
-								flipx,flipy,
-								sx + 16*x, sy + 16*y, 15);
+					drawgfx_transpen(bitmap, bitmap.cliprect(), gfx,
+							tile,
+							color,
+							flipx,flipy,
+							sx + 16*x, sy + 16*y, 0xf);
 
-						++sprites_drawn;
-						if (sprites_drawn >= 96)
-							return;
-					}
+					++sprites_drawn;
+					if (sprites_drawn >= 96)
+						return;
 				}
 			}
 		}
@@ -456,23 +428,23 @@ static int stencil_omegaf(   UINT16 pal ) { return( TRUE ); }
 // This is very hackish.
 // (Is there a possibility that software can't select it but hardware can?)
 
-static void erase_sprites(running_machine& machine, bitmap_t* bitmap, const rectangle* cliprect)
+static void erase_sprites(running_machine& machine, bitmap_ind16 &bitmap)
 {
 	ninjakd2_state *state = machine.driver_data<ninjakd2_state>();
+
 	// if sprite overdraw is disabled, clear the sprite framebuffer
 	if (!state->m_next_sprite_overdraw_enabled)
-		bitmap_fill(state->m_sp_bitmap, cliprect, TRANSPARENTCODE);
+	{
+		state->m_sprites_bitmap.fill(0xf);
+	}
 	else
 	{
-		int y;
-		for (y = 0; y < state->m_sp_bitmap->height; ++y)
+		for (int y = 0; y < state->m_sprites_bitmap.height(); ++y)
 		{
-			int x;
-			for (x = 0; x < state->m_sp_bitmap->width; ++x)
+			for (int x = 0; x < state->m_sprites_bitmap.width(); ++x)
 			{
-				UINT16* const ptr = BITMAP_ADDR16(state->m_sp_bitmap, y, x);
-
-				if ( (*state->m_stencil_compare_function)(*ptr) ) *ptr = TRANSPARENTCODE ;
+				UINT16* const ptr = &state->m_sprites_bitmap.pix16(y, x);
+				if ( (*state->m_stencil_compare_function)(*ptr) ) *ptr = 0xf;
 			}
 		}
 	}
@@ -482,83 +454,74 @@ static void erase_sprites(running_machine& machine, bitmap_t* bitmap, const rect
 static void update_sprites(running_machine& machine)
 {
 	ninjakd2_state *state = machine.driver_data<ninjakd2_state>();
-	erase_sprites(machine, state->m_sp_bitmap, 0);
-	draw_sprites(machine, state->m_sp_bitmap);
-}
+
 	////// Before modified, this was written.
 		// we want to erase the sprites with the old setting and draw them with the
 		// new one. Not doing this causes a glitch in Ninja Kid II when taking the top
 		// exit from stage 3.
 	////// The glitch is correct behavior.
+	erase_sprites(machine, state->m_sprites_bitmap);
+	draw_sprites(machine, state->m_sprites_bitmap);
+}
 
 
-SCREEN_UPDATE( ninjakd2 )
+UINT32 ninjakd2_state::screen_update_ninjakd2(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	ninjakd2_state *state = screen->machine().driver_data<ninjakd2_state>();
 	// updating sprites here instead than in screen_eof avoids a palette glitch
 	// at the end of the "rainbow sky" screens.
-	update_sprites(screen->machine());
-	state->m_sprites_updated = 1;
+	update_sprites(machine());
+	m_sprites_updated = 1;
 
-	bitmap_fill(bitmap, cliprect, 0);
+	bitmap.fill(0, cliprect);
 
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
-
-	copybitmap_trans(bitmap, state->m_sp_bitmap, 0, 0, 0, 0, cliprect, TRANSPARENTCODE);
-
-	tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, 0, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
+	copybitmap_trans(bitmap, m_sprites_bitmap, 0, 0, 0, 0, cliprect, 0xf);
+	m_fg_tilemap->draw(bitmap, cliprect, 0, 0);
 
 	return 0;
 }
 
-SCREEN_UPDATE( robokid )
+UINT32 ninjakd2_state::screen_update_robokid(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	ninjakd2_state *state = screen->machine().driver_data<ninjakd2_state>();
-	update_sprites(screen->machine());
-	state->m_sprites_updated = 1;
+	update_sprites(machine());
+	m_sprites_updated = 1;
 
-	bitmap_fill(bitmap, cliprect, 0);
+	bitmap.fill(0, cliprect);
 
-	tilemap_draw(bitmap, cliprect, state->m_bg0_tilemap, 0, 0);
-
-	tilemap_draw(bitmap, cliprect, state->m_bg1_tilemap, 0, 0);
-
-	copybitmap_trans(bitmap, state->m_sp_bitmap, 0, 0, 0, 0, cliprect, TRANSPARENTCODE);
-
-	tilemap_draw(bitmap, cliprect, state->m_bg2_tilemap, 0, 0);
-
-	tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, 0, 0);
+	m_bg0_tilemap->draw(bitmap, cliprect, 0, 0);
+	m_bg1_tilemap->draw(bitmap, cliprect, 0, 0);
+	copybitmap_trans(bitmap, m_sprites_bitmap, 0, 0, 0, 0, cliprect, 0xf);
+	m_bg2_tilemap->draw(bitmap, cliprect, 0, 0);
+	m_fg_tilemap->draw(bitmap, cliprect, 0, 0);
 
 	return 0;
 }
 
-SCREEN_UPDATE( omegaf )
+UINT32 ninjakd2_state::screen_update_omegaf(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	ninjakd2_state *state = screen->machine().driver_data<ninjakd2_state>();
-	update_sprites(screen->machine());
-	state->m_sprites_updated = 1;
+	update_sprites(machine());
+	m_sprites_updated = 1;
 
-	bitmap_fill(bitmap, cliprect, 0);
+	bitmap.fill(0, cliprect);
 
-	tilemap_draw(bitmap, cliprect, state->m_bg0_tilemap, 0, 0);
-
-	tilemap_draw(bitmap, cliprect, state->m_bg1_tilemap, 0, 0);
-
-	tilemap_draw(bitmap, cliprect, state->m_bg2_tilemap, 0, 0);
-
-	copybitmap_trans(bitmap, state->m_sp_bitmap, 0, 0, 0, 0, cliprect, TRANSPARENTCODE);
-
-	tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, 0, 0);
+	m_bg0_tilemap->draw(bitmap, cliprect, 0, 0);
+	m_bg1_tilemap->draw(bitmap, cliprect, 0, 0);
+	m_bg2_tilemap->draw(bitmap, cliprect, 0, 0);
+	copybitmap_trans(bitmap, m_sprites_bitmap, 0, 0, 0, 0, cliprect, 0xf);
+	m_fg_tilemap->draw(bitmap, cliprect, 0, 0);
 
 	return 0;
 }
 
 
-SCREEN_EOF( ninjakd2 )
+void ninjakd2_state::screen_eof_ninjakd2(screen_device &screen, bool state)
 {
-	ninjakd2_state *state = machine.driver_data<ninjakd2_state>();
-	if (!state->m_sprites_updated)
-		update_sprites(machine);
+	// rising edge
+	if (state)
+	{
+		if (!m_sprites_updated)
+			update_sprites(machine());
 
-	state->m_sprites_updated = 0;
+		m_sprites_updated = 0;
+	}
 }

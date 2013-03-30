@@ -6,6 +6,9 @@ Strength & Skill (c) 1984 Sun Electronics
 
     19/Jun/2001 -
 
+TODO:
+- needs merging with Ikki driver;
+
 Notes:
  Banbam has a Fujitsu MB8841 4-Bit MCU for protection labeled SUN 8212.
  Its internal ROM has been imaged, manually typed, and decoded as sun-8212.ic3.
@@ -16,73 +19,72 @@ Notes:
 #include "emu.h"
 #include "cpu/z80/z80.h"
 #include "cpu/mb88xx/mb88xx.h"
-#include "deprecat.h"
 #include "sound/sn76496.h"
 #include "includes/strnskil.h"
 
 /****************************************************************************/
 
-static READ8_HANDLER( strnskil_d800_r )
+READ8_MEMBER(strnskil_state::strnskil_d800_r)
 {
-    /* bit0: interrupt type?, bit1: CPU2 busack? */
-	if (cpu_getiloops(&space->device()) == 0)
-		return 0;
-	return 1;
+
+/* bit0: interrupt type?, bit1: CPU2 busack? */
+
+	return (m_irq_source);
 }
 
 /****************************************************************************/
 
-static READ8_HANDLER( pettanp_protection_r )
+READ8_MEMBER(strnskil_state::pettanp_protection_r)
 {
 	int res;
 
-	switch (cpu_get_pc(&space->device()))
+	switch (space.device().safe_pc())
 	{
-		case 0x6066:	res = 0xa5;	break;
-		case 0x60dc:	res = 0x20;	break;	/* bits 0-3 unknown */
-		case 0x615d:	res = 0x30;	break;	/* bits 0-3 unknown */
-		case 0x61b9:	res = 0x60|(space->machine().rand()&0x0f);	break;	/* bits 0-3 unknown */
-		case 0x6219:	res = 0x77;	break;
-		case 0x626c:	res = 0xb4;	break;
-		default:		res = 0xff; break;
+		case 0x6066:    res = 0xa5; break;
+		case 0x60dc:    res = 0x20; break;  /* bits 0-3 unknown */
+		case 0x615d:    res = 0x30; break;  /* bits 0-3 unknown */
+		case 0x61b9:    res = 0x60|(machine().rand()&0x0f); break;  /* bits 0-3 unknown */
+		case 0x6219:    res = 0x77; break;
+		case 0x626c:    res = 0xb4; break;
+		default:        res = 0xff; break;
 	}
 
-	logerror("%04x: protection_r -> %02x\n",cpu_get_pc(&space->device()),res);
+	logerror("%04x: protection_r -> %02x\n",space.device().safe_pc(),res);
 	return res;
 }
 
-static READ8_HANDLER( banbam_protection_r )
+READ8_MEMBER(strnskil_state::banbam_protection_r)
 {
 	int res;
 
-	switch (cpu_get_pc(&space->device()))
+	switch (space.device().safe_pc())
 	{
-		case 0x6094:	res = 0xa5;	break;
-		case 0x6118:	res = 0x20;	break;	/* bits 0-3 unknown */
-		case 0x6199:	res = 0x30;	break;	/* bits 0-3 unknown */
-		case 0x61f5:	res = 0x60|(space->machine().rand()&0x0f);	break;	/* bits 0-3 unknown */
-		case 0x6255:	res = 0x77;	break;
-		case 0x62a8:	res = 0xb4;	break;
-		default:		res = 0xff; break;
+		case 0x6094:    res = 0xa5; break;
+		case 0x6118:    res = 0x20; break;  /* bits 0-3 unknown */
+		case 0x6199:    res = 0x30; break;  /* bits 0-3 unknown */
+		case 0x61f5:    res = 0x60|(machine().rand()&0x0f); break;  /* bits 0-3 unknown */
+		case 0x6255:    res = 0x77; break;
+		case 0x62a8:    res = 0xb4; break;
+		default:        res = 0xff; break;
 	}
 
-	logerror("%04x: protection_r -> %02x\n",cpu_get_pc(&space->device()),res);
+	logerror("%04x: protection_r -> %02x\n",space.device().safe_pc(),res);
 	return res;
 }
 
-static WRITE8_HANDLER( protection_w )
+WRITE8_MEMBER(strnskil_state::protection_w)
 {
-	logerror("%04x: protection_w %02x\n",cpu_get_pc(&space->device()),data);
+	logerror("%04x: protection_w %02x\n",space.device().safe_pc(),data);
 }
 
 /****************************************************************************/
 
-static ADDRESS_MAP_START( strnskil_map1, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( strnskil_map1, AS_PROGRAM, 8, strnskil_state )
 	AM_RANGE(0x0000, 0x9fff) AM_ROM
 
 	AM_RANGE(0xc000, 0xc7ff) AM_RAM
 	AM_RANGE(0xc800, 0xcfff) AM_RAM AM_SHARE("share1")
-	AM_RANGE(0xd000, 0xd7ff) AM_RAM_WRITE(strnskil_videoram_w) AM_BASE_MEMBER(strnskil_state, m_videoram)
+	AM_RANGE(0xd000, 0xd7ff) AM_RAM_WRITE(strnskil_videoram_w) AM_SHARE("videoram")
 
 	AM_RANGE(0xd800, 0xd800) AM_READ(strnskil_d800_r)
 	AM_RANGE(0xd801, 0xd801) AM_READ_PORT("DSW1")
@@ -93,22 +95,22 @@ static ADDRESS_MAP_START( strnskil_map1, AS_PROGRAM, 8 )
 
 	AM_RANGE(0xd808, 0xd808) AM_WRITE(strnskil_scrl_ctrl_w)
 	AM_RANGE(0xd809, 0xd809) AM_WRITENOP /* coin counter? */
-	AM_RANGE(0xd80a, 0xd80b) AM_WRITEONLY AM_BASE_MEMBER(strnskil_state, m_xscroll)
+	AM_RANGE(0xd80a, 0xd80b) AM_WRITEONLY AM_SHARE("xscroll")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( strnskil_map2, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( strnskil_map2, AS_PROGRAM, 8, strnskil_state )
 	AM_RANGE(0x0000, 0x5fff) AM_ROM
-	AM_RANGE(0xc000, 0xc7ff) AM_RAM AM_BASE_SIZE_MEMBER(strnskil_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0xc000, 0xc7ff) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0xc800, 0xcfff) AM_RAM AM_SHARE("share1")
 
-	AM_RANGE(0xd801, 0xd801) AM_DEVWRITE("sn1", sn76496_w)
-	AM_RANGE(0xd802, 0xd802) AM_DEVWRITE("sn2", sn76496_w)
+	AM_RANGE(0xd801, 0xd801) AM_DEVWRITE("sn1", sn76496_device, write)
+	AM_RANGE(0xd802, 0xd802) AM_DEVWRITE("sn2", sn76496_device, write)
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( mcu_io_map, AS_IO, 8 )
-//  AM_RANGE(MB88_PORTK,  MB88_PORTK)  AM_READ(mcu_portk_r)
-//  AM_RANGE(MB88_PORTR0, MB88_PORTR0) AM_READWRITE(mcu_portr0_r, mcu_portr0_w)
+static ADDRESS_MAP_START( mcu_io_map, AS_IO, 8, strnskil_state )
+//  AM_RANGE(MB88_PORTK,  MB88_PORTK)  AM_READ_LEGACY(mcu_portk_r)
+//  AM_RANGE(MB88_PORTR0, MB88_PORTR0) AM_READWRITE_LEGACY(mcu_portr0_r, mcu_portr0_w)
 ADDRESS_MAP_END
 
 /****************************************************************************/
@@ -171,7 +173,7 @@ static INPUT_PORTS_START( strnskil )
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( On ) )
 
-	PORT_START("P1")		/* d804 */
+	PORT_START("P1")        /* d804 */
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON2 )
@@ -181,7 +183,7 @@ static INPUT_PORTS_START( strnskil )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_8WAY
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_8WAY
 
-	PORT_START("P2")		/* d805 */
+	PORT_START("P2")        /* d805 */
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_COCKTAIL
@@ -191,7 +193,7 @@ static INPUT_PORTS_START( strnskil )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_COCKTAIL
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_COCKTAIL
 
-	PORT_START("SYSTEM")	/* d803 */
+	PORT_START("SYSTEM")    /* d803 */
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SERVICE1 )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_SERVICE( 0x20, IP_ACTIVE_HIGH )
@@ -244,14 +246,14 @@ static INPUT_PORTS_START( banbam )
 	PORT_DIPNAME( 0x08, 0x00, "Second Practice" ) PORT_DIPLOCATION("SW2:4")
 	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPUNUSED_DIPLOC( 0x10, 0x10, "SW2:5" )	/*  These four dips are unused according to the manual */
+	PORT_DIPUNUSED_DIPLOC( 0x10, 0x10, "SW2:5" )    /*  These four dips are unused according to the manual */
 	PORT_DIPUNUSED_DIPLOC( 0x20, 0x20, "SW2:6" )
 	PORT_DIPUNUSED_DIPLOC( 0x40, 0x40, "SW2:7" )
 	PORT_DIPNAME( 0x80, 0x00, "Freeze" ) PORT_DIPLOCATION("SW2:8") //game stands in a tight loop at $14-$16 -> $866 if this is putted off
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( On ) )
 
-	PORT_START("P1")		/* d804 */
+	PORT_START("P1")        /* d804 */
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN )
@@ -261,7 +263,7 @@ static INPUT_PORTS_START( banbam )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_4WAY
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_4WAY
 
-	PORT_START("P2")		/* d805 */
+	PORT_START("P2")        /* d805 */
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN )
@@ -271,7 +273,7 @@ static INPUT_PORTS_START( banbam )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_4WAY PORT_COCKTAIL
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_4WAY PORT_COCKTAIL
 
-	PORT_START("SYSTEM")	/* d803 */
+	PORT_START("SYSTEM")    /* d803 */
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SERVICE1 )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_SERVICE( 0x20, IP_ACTIVE_HIGH )
@@ -315,48 +317,77 @@ static GFXDECODE_START( strnskil )
 GFXDECODE_END
 
 
+TIMER_DEVICE_CALLBACK_MEMBER(strnskil_state::strnskil_irq)
+{
+	int scanline = param;
+
+	if(scanline == 240 || scanline == 96)
+	{
+		m_maincpu->set_input_line(0,HOLD_LINE);
+
+		m_irq_source = (scanline != 240);
+	}
+}
+
+
+/*************************************
+ *
+ *  Sound interface
+ *
+ *************************************/
+
+//-------------------------------------------------
+//  sn76496_config psg_intf
+//-------------------------------------------------
+
+static const sn76496_config psg_intf =
+{
+	DEVCB_NULL
+};
+
+
 static MACHINE_CONFIG_START( strnskil, strnskil_state )
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", Z80,8000000/2) /* 4.000MHz */
 	MCFG_CPU_PROGRAM_MAP(strnskil_map1)
-	MCFG_CPU_VBLANK_INT_HACK(irq0_line_hold,2)
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("scantimer", strnskil_state, strnskil_irq, "screen", 0, 1)
 
 	MCFG_CPU_ADD("sub", Z80,8000000/2) /* 4.000MHz */
 	MCFG_CPU_PROGRAM_MAP(strnskil_map2)
-	MCFG_CPU_VBLANK_INT_HACK(irq0_line_hold,2)
+	MCFG_CPU_PERIODIC_INT_DRIVER(strnskil_state, irq0_line_hold, 2*60)
 
+//  MCFG_QUANTUM_PERFECT_CPU("maincpu")
 	MCFG_QUANTUM_TIME(attotime::from_hz(6000))
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
-	MCFG_SCREEN_SIZE(32*8, 32*8)
+	MCFG_SCREEN_SIZE(32*8+3*8, 32*8+3*8)
 	MCFG_SCREEN_VISIBLE_AREA(1*8, 31*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(strnskil)
+	MCFG_SCREEN_UPDATE_DRIVER(strnskil_state, screen_update_strnskil)
 
 	MCFG_GFXDECODE(strnskil)
 	MCFG_PALETTE_LENGTH(1024)
 
-	MCFG_PALETTE_INIT(strnskil)
-	MCFG_VIDEO_START(strnskil)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
 	MCFG_SOUND_ADD("sn1", SN76496, 8000000/4)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.75)
+	MCFG_SOUND_CONFIG(psg_intf)
 
 	MCFG_SOUND_ADD("sn2", SN76496, 8000000/2)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.75)
+	MCFG_SOUND_CONFIG(psg_intf)
 MACHINE_CONFIG_END
 
 
 static MACHINE_CONFIG_DERIVED( banbam, strnskil )
-    MCFG_CPU_ADD("mcu", MB8841, 8000000/2)
-    MCFG_CPU_IO_MAP(mcu_io_map)
+	MCFG_CPU_ADD("mcu", MB8841, 8000000/2)
+	MCFG_CPU_IO_MAP(mcu_io_map)
 MACHINE_CONFIG_END
 
 /****************************************************************************/
@@ -500,26 +531,26 @@ ROM_START( banbam )
 	ROM_LOAD( "sun-8212.ic3", 0x000,  0x800, BAD_DUMP CRC(8869611e) SHA1(c6443f3bcb0cdb4d7b1b19afcbfe339c300f36aa) )
 ROM_END
 
-static DRIVER_INIT( pettanp )
+DRIVER_INIT_MEMBER(strnskil_state,pettanp)
 {
 //  AM_RANGE(0xd80c, 0xd80c) AM_WRITENOP     /* protection reset? */
 //  AM_RANGE(0xd80d, 0xd80d) AM_WRITE(protection_w) /* protection data write (pettanp) */
-//  AM_RANGE(0xd806, 0xd806) AM_READ(protection_r) /* protection data read (pettanp) */
+//  AM_RANGE(0xd806, 0xd806) AM_READ_LEGACY(protection_r) /* protection data read (pettanp) */
 
 	/* Fujitsu MB8841 4-Bit MCU */
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0xd806, 0xd806, FUNC(pettanp_protection_r));
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0xd80d, 0xd80d, FUNC(protection_w));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(0xd806, 0xd806, read8_delegate(FUNC(strnskil_state::pettanp_protection_r),this));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0xd80d, 0xd80d, write8_delegate(FUNC(strnskil_state::protection_w),this));
 
 }
 
-static DRIVER_INIT( banbam )
+DRIVER_INIT_MEMBER(strnskil_state,banbam)
 {
 	/* Fujitsu MB8841 4-Bit MCU */
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0xd806, 0xd806, FUNC(banbam_protection_r));
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0xd80d, 0xd80d, FUNC(protection_w));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(0xd806, 0xd806, read8_delegate(FUNC(strnskil_state::banbam_protection_r),this));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0xd80d, 0xd80d, write8_delegate(FUNC(strnskil_state::protection_w),this));
 }
 
-GAME( 1984, strnskil, 0,        strnskil, strnskil, 0,       ROT0, "Sun Electronics", "Strength & Skill", 0 )
-GAME( 1984, guiness,  strnskil, strnskil, strnskil, 0,       ROT0, "Sun Electronics", "The Guiness (Japan)", 0 )
-GAME( 1984, banbam,   0,        banbam,   banbam,   banbam,  ROT0, "Sun Electronics", "BanBam", GAME_NOT_WORKING | GAME_UNEMULATED_PROTECTION )
-GAME( 1984, pettanp,  banbam,   strnskil, banbam,   pettanp, ROT0, "Sun Electronics", "Pettan Pyuu (Japan)", GAME_NOT_WORKING | GAME_UNEMULATED_PROTECTION )
+GAME( 1984, strnskil, 0,        strnskil, strnskil, driver_device, 0,       ROT0, "Sun Electronics", "Strength & Skill", 0 )
+GAME( 1984, guiness,  strnskil, strnskil, strnskil, driver_device, 0,       ROT0, "Sun Electronics", "The Guiness (Japan)", 0 )
+GAME( 1984, banbam,   0,        banbam,   banbam, strnskil_state,   banbam,  ROT0, "Sun Electronics", "BanBam", GAME_UNEMULATED_PROTECTION )
+GAME( 1984, pettanp,  banbam,   strnskil, banbam, strnskil_state,   pettanp, ROT0, "Sun Electronics", "Pettan Pyuu (Japan)", GAME_UNEMULATED_PROTECTION )

@@ -21,18 +21,16 @@
 #include "includes/gatron.h"
 
 
-WRITE8_HANDLER( gat_videoram_w )
+WRITE8_MEMBER(gatron_state::gat_videoram_w)
 {
-	gatron_state *state = space->machine().driver_data<gatron_state>();
-	UINT8 *videoram = state->m_videoram;
+	UINT8 *videoram = m_videoram;
 	videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(gatron_state::get_bg_tile_info)
 {
-	gatron_state *state = machine.driver_data<gatron_state>();
-	UINT8 *videoram = state->m_videoram;
+	UINT8 *videoram = m_videoram;
 /*  - bits -
     7654 3210
     xxxx xxxx   tiles code.
@@ -42,23 +40,20 @@ static TILE_GET_INFO( get_bg_tile_info )
 
 	int code = videoram[tile_index];
 
-	SET_TILE_INFO(0, code, 0, 0);
+	SET_TILE_INFO_MEMBER(0, code, 0, 0);
 }
 
-VIDEO_START( gat )
+void gatron_state::video_start()
 {
-	gatron_state *state = machine.driver_data<gatron_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_cols, 8, 16, 48, 16);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(gatron_state::get_bg_tile_info),this), TILEMAP_SCAN_COLS, 8, 16, 48, 16);
 }
 
-SCREEN_UPDATE( gat )
+UINT32 gatron_state::screen_update_gat(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	gatron_state *state = screen->machine().driver_data<gatron_state>();
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
 	return 0;
 }
 
-PALETTE_INIT( gat )
+void gatron_state::palette_init()
 {
 }
-

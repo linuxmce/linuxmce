@@ -7,17 +7,21 @@
 class bogeyman_state : public driver_device
 {
 public:
-	bogeyman_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	bogeyman_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"),
+		m_videoram2(*this, "videoram2"),
+		m_colorram(*this, "colorram"),
+		m_colorram2(*this, "colorram2"),
+		m_spriteram(*this, "spriteram"){ }
 
 	/* memory pointers */
-	UINT8 *    m_videoram;
-	UINT8 *    m_videoram2;
-	UINT8 *    m_colorram;
-	UINT8 *    m_colorram2;
-	UINT8 *    m_spriteram;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_videoram2;
+	required_shared_ptr<UINT8> m_colorram;
+	required_shared_ptr<UINT8> m_colorram2;
+	required_shared_ptr<UINT8> m_spriteram;
 //  UINT8 *    m_paletteram;  // currently this uses generic palette handling
-	size_t     m_spriteram_size;
 
 	/* video-related */
 	tilemap_t    *m_bg_tilemap;
@@ -27,17 +31,19 @@ public:
 	int        m_psg_latch;
 	int        m_last_write;
 	int        m_colbank;
+	DECLARE_WRITE8_MEMBER(bogeyman_8910_latch_w);
+	DECLARE_WRITE8_MEMBER(bogeyman_8910_control_w);
+	DECLARE_WRITE8_MEMBER(bogeyman_videoram_w);
+	DECLARE_WRITE8_MEMBER(bogeyman_colorram_w);
+	DECLARE_WRITE8_MEMBER(bogeyman_videoram2_w);
+	DECLARE_WRITE8_MEMBER(bogeyman_colorram2_w);
+	DECLARE_WRITE8_MEMBER(bogeyman_paletteram_w);
+	DECLARE_WRITE8_MEMBER(bogeyman_colbank_w);
+	TILE_GET_INFO_MEMBER(get_bg_tile_info);
+	TILE_GET_INFO_MEMBER(get_fg_tile_info);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_bogeyman(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
-
-
-/*----------- defined in video/bogeyman.c -----------*/
-
-WRITE8_HANDLER( bogeyman_videoram_w );
-WRITE8_HANDLER( bogeyman_colorram_w );
-WRITE8_HANDLER( bogeyman_videoram2_w );
-WRITE8_HANDLER( bogeyman_colorram2_w );
-WRITE8_HANDLER( bogeyman_paletteram_w );
-
-PALETTE_INIT( bogeyman );
-VIDEO_START( bogeyman );
-SCREEN_UPDATE( bogeyman );

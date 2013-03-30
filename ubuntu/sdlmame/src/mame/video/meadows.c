@@ -18,11 +18,10 @@
  *
  *************************************/
 
-static TILE_GET_INFO( get_tile_info )
+TILE_GET_INFO_MEMBER(meadows_state::get_tile_info)
 {
-	meadows_state *state = machine.driver_data<meadows_state>();
-	UINT8 *videoram = state->m_videoram;
-	SET_TILE_INFO(0, videoram[tile_index] & 0x7f, 0, 0);
+	UINT8 *videoram = m_videoram;
+	SET_TILE_INFO_MEMBER(0, videoram[tile_index] & 0x7f, 0, 0);
 }
 
 
@@ -33,10 +32,9 @@ static TILE_GET_INFO( get_tile_info )
  *
  *************************************/
 
-VIDEO_START( meadows )
+void meadows_state::video_start()
 {
-	meadows_state *state = machine.driver_data<meadows_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_tile_info, tilemap_scan_rows,  8,8, 32,30);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(meadows_state::get_tile_info),this), TILEMAP_SCAN_ROWS,  8,8, 32,30);
 }
 
 
@@ -47,12 +45,11 @@ VIDEO_START( meadows )
  *
  *************************************/
 
-WRITE8_HANDLER( meadows_videoram_w )
+WRITE8_MEMBER(meadows_state::meadows_videoram_w)
 {
-	meadows_state *state = space->machine().driver_data<meadows_state>();
-	UINT8 *videoram = state->m_videoram;
+	UINT8 *videoram = m_videoram;
 	videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
 
@@ -63,11 +60,10 @@ WRITE8_HANDLER( meadows_videoram_w )
  *
  *************************************/
 
-WRITE8_HANDLER( meadows_spriteram_w )
+WRITE8_MEMBER(meadows_state::meadows_spriteram_w)
 {
-	meadows_state *state = space->machine().driver_data<meadows_state>();
-	space->machine().primary_screen->update_now();
-	state->m_spriteram[offset] = data;
+	machine().primary_screen->update_now();
+	m_spriteram[offset] = data;
 }
 
 
@@ -78,7 +74,7 @@ WRITE8_HANDLER( meadows_spriteram_w )
  *
  *************************************/
 
-static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const rectangle *clip)
+static void draw_sprites(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &clip)
 {
 	meadows_state *state = machine.driver_data<meadows_state>();
 	UINT8 *spriteram = state->m_spriteram;
@@ -88,10 +84,10 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 	{
 		int x = spriteram[i+0] + SPR_ADJUST_X;
 		int y = spriteram[i+4] + SPR_ADJUST_Y;
-		int code = spriteram[i+8] & 0x0f;		/* bit #0 .. #3 select sprite */
+		int code = spriteram[i+8] & 0x0f;       /* bit #0 .. #3 select sprite */
 /*      int bank = (spriteram[i+8] >> 4) & 1;      bit #4 selects prom ???    */
-		int bank = i;							/* that fixes it for now :-/ */
-		int flip = spriteram[i+8] >> 5;			/* bit #5 flip vertical flag */
+		int bank = i;                           /* that fixes it for now :-/ */
+		int flip = spriteram[i+8] >> 5;         /* bit #5 flip vertical flag */
 
 		drawgfx_transpen(bitmap, clip, machine.gfx[bank + 1], code, 0, flip, 0, x, y, 0);
 	}
@@ -105,14 +101,13 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
  *
  *************************************/
 
-SCREEN_UPDATE( meadows )
+UINT32 meadows_state::screen_update_meadows(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	meadows_state *state = screen->machine().driver_data<meadows_state>();
 	/* draw the background */
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
 
 	/* draw the sprites */
-	if (screen->machine().gfx[1])
-		draw_sprites(screen->machine(), bitmap, cliprect);
+	if (machine().gfx[1])
+		draw_sprites(machine(), bitmap, cliprect);
 	return 0;
 }

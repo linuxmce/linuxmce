@@ -2,7 +2,6 @@
 
 #include "emu.h"
 #include "includes/namcoic.h"
-#include "includes/namcos2.h"
 #include "includes/namcofl.h"
 
 
@@ -14,7 +13,7 @@ INLINE UINT16
 nth_word32( const UINT32 *source, int which )
 {
 	source += which/2;
-	which ^= 1;	/* i960 is little-endian */
+	which ^= 1; /* i960 is little-endian */
 	if( which&1 )
 	{
 		return (*source)&0xffff;
@@ -35,7 +34,7 @@ nth_byte32( const UINT32 *pSource, int which )
 {
 		UINT32 data = pSource[which/4];
 
-		which ^= 3;	/* i960 is little-endian */
+		which ^= 3; /* i960 is little-endian */
 		switch( which&3 )
 		{
 		case 0: return data>>24;
@@ -48,17 +47,18 @@ nth_byte32( const UINT32 *pSource, int which )
 
 static void namcofl_install_palette(running_machine &machine)
 {
+	namcofl_state *state = machine.driver_data<namcofl_state>();
 	int pen, page, dword_offset, byte_offset;
 	UINT32 r,g,b;
 	UINT32 *pSource;
 
 	/* this is unnecessarily expensive.  Better would be to mark palette entries dirty as
-     * they are modified, and only process those that have changed.
-     */
+	 * they are modified, and only process those that have changed.
+	 */
 	pen = 0;
 	for( page=0; page<4; page++ )
 	{
-		pSource = &machine.generic.paletteram.u32[page*0x2000/4];
+		pSource = &state->m_generic_paletteram_32[page*0x2000/4];
 		for( dword_offset=0; dword_offset<0x800/4; dword_offset++ )
 		{
 			r = pSource[dword_offset+0x0000/4];
@@ -80,20 +80,20 @@ static void TilemapCB(running_machine &machine, UINT16 code, int *tile, int *mas
 }
 
 
-SCREEN_UPDATE( namcofl )
+UINT32 namcofl_state::screen_update_namcofl(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	int pri;
 
-	namcofl_install_palette(screen->machine());
+	namcofl_install_palette(machine());
 
-	bitmap_fill( bitmap, cliprect , get_black_pen(screen->machine()));
+	bitmap.fill(get_black_pen(machine()), cliprect );
 
 	for( pri=0; pri<16; pri++ )
 	{
-		namco_roz_draw( bitmap,cliprect,pri );
+		c169_roz_draw(bitmap, cliprect, pri);
 		if((pri&1)==0)
 			namco_tilemap_draw( bitmap, cliprect, pri>>1 );
-		namco_obj_draw(screen->machine(), bitmap, cliprect, pri );
+		c355_obj_draw(bitmap, cliprect, pri );
 	}
 
 	return 0;
@@ -103,10 +103,9 @@ SCREEN_UPDATE( namcofl )
 //        groups of sprites.  I am unsure how to differentiate those groups
 //        at this time however.
 
-WRITE32_HANDLER(namcofl_spritebank_w)
+WRITE32_MEMBER(namcofl_state::namcofl_spritebank_w)
 {
-	namcofl_state *state = space->machine().driver_data<namcofl_state>();
-	COMBINE_DATA(&state->m_sprbank);
+	COMBINE_DATA(&m_sprbank);
 }
 
 static int FLobjcode2tile( running_machine &machine, int code )
@@ -117,9 +116,9 @@ static int FLobjcode2tile( running_machine &machine, int code )
 	return code;
 }
 
-VIDEO_START( namcofl )
+VIDEO_START_MEMBER(namcofl_state,namcofl)
 {
-	namco_tilemap_init( machine, NAMCOFL_TILEGFX, machine.region(NAMCOFL_TILEMASKREGION)->base(), TilemapCB );
-	namco_obj_init(machine,NAMCOFL_SPRITEGFX,0x0,FLobjcode2tile);
-	namco_roz_init(machine,NAMCOFL_ROTGFX,NAMCOFL_ROTMASKREGION);
+	namco_tilemap_init(NAMCOFL_TILEGFX, machine().root_device().memregion(NAMCOFL_TILEMASKREGION)->base(), TilemapCB );
+	c355_obj_init(NAMCOFL_SPRITEGFX,0x0,namcos2_shared_state::c355_obj_code2tile_delegate(FUNC(FLobjcode2tile), &machine()));
+	c169_roz_init(NAMCOFL_ROTGFX,NAMCOFL_ROTMASKREGION);
 }

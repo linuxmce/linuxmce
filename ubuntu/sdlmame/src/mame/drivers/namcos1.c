@@ -350,41 +350,41 @@ C - uses sub board with support for player 3 and 4 controls
 
 /**********************************************************************/
 
-static WRITE8_HANDLER( namcos1_sub_firq_w )
+WRITE8_MEMBER(namcos1_state::namcos1_sub_firq_w)
 {
-	cputag_set_input_line(space->machine(), "sub", M6809_FIRQ_LINE, ASSERT_LINE);
+	machine().device("sub")->execute().set_input_line(M6809_FIRQ_LINE, ASSERT_LINE);
 }
 
-static WRITE8_HANDLER( irq_ack_w )
+WRITE8_MEMBER(namcos1_state::irq_ack_w)
 {
-	device_set_input_line(&space->device(), 0, CLEAR_LINE);
+	space.device().execute().set_input_line(0, CLEAR_LINE);
 }
 
-static WRITE8_HANDLER( firq_ack_w )
+WRITE8_MEMBER(namcos1_state::firq_ack_w)
 {
-	device_set_input_line(&space->device(), M6809_FIRQ_LINE, CLEAR_LINE);
+	space.device().execute().set_input_line(M6809_FIRQ_LINE, CLEAR_LINE);
 }
 
 
 
-static READ8_HANDLER( dsw_r )
+READ8_MEMBER(namcos1_state::dsw_r)
 {
-	int ret = input_port_read(space->machine(), "DIPSW");
+	int ret = ioport("DIPSW")->read();
 	if (!(offset & 2)) ret >>= 4;
 	return 0xf0 | ret;
 }
 
-static WRITE8_HANDLER( namcos1_coin_w )
+WRITE8_MEMBER(namcos1_state::namcos1_coin_w)
 {
-	coin_lockout_global_w(space->machine(), ~data & 1);
-	coin_counter_w(space->machine(), 0,data & 2);
-	coin_counter_w(space->machine(), 1,data & 4);
+	coin_lockout_global_w(machine(), ~data & 1);
+	coin_counter_w(machine(), 0,data & 2);
+	coin_counter_w(machine(), 1,data & 4);
 }
 
 static void namcos1_update_DACs(running_machine &machine)
 {
 	namcos1_state *state = machine.driver_data<namcos1_state>();
-	dac_signed_data_16_w(machine.device("dac"),0x8000 + (state->m_dac0_value * state->m_dac0_gain) + (state->m_dac1_value * state->m_dac1_gain));
+	machine.device<dac_device>("dac")->write_signed16(0x8000 + (state->m_dac0_value * state->m_dac0_gain) + (state->m_dac1_value * state->m_dac1_gain));
 }
 
 void namcos1_init_DACs(running_machine &machine)
@@ -396,39 +396,36 @@ void namcos1_init_DACs(running_machine &machine)
 	state->m_dac1_gain=0x80;
 }
 
-static WRITE8_HANDLER( namcos1_dac_gain_w )
+WRITE8_MEMBER(namcos1_state::namcos1_dac_gain_w)
 {
-	namcos1_state *state = space->machine().driver_data<namcos1_state>();
 	int value;
 
 	/* DAC0 (bits 0,2) */
 	value = (data & 1) | ((data >> 1) & 2); /* GAIN0,GAIN1 */
-	state->m_dac0_gain = 0x20 * (value+1);
+	m_dac0_gain = 0x20 * (value+1);
 
 	/* DAC1 (bits 3,4) */
 	value = (data >> 3) & 3; /* GAIN2,GAIN3 */
-	state->m_dac1_gain = 0x20 * (value+1);
+	m_dac1_gain = 0x20 * (value+1);
 
-	namcos1_update_DACs(space->machine());
+	namcos1_update_DACs(machine());
 }
 
-static WRITE8_HANDLER( namcos1_dac0_w )
+WRITE8_MEMBER(namcos1_state::namcos1_dac0_w)
 {
-	namcos1_state *state = space->machine().driver_data<namcos1_state>();
-	state->m_dac0_value = data - 0x80; /* shift zero point */
-	namcos1_update_DACs(space->machine());
+	m_dac0_value = data - 0x80; /* shift zero point */
+	namcos1_update_DACs(machine());
 }
 
-static WRITE8_HANDLER( namcos1_dac1_w )
+WRITE8_MEMBER(namcos1_state::namcos1_dac1_w)
 {
-	namcos1_state *state = space->machine().driver_data<namcos1_state>();
-	state->m_dac1_value = data - 0x80; /* shift zero point */
-	namcos1_update_DACs(space->machine());
+	m_dac1_value = data - 0x80; /* shift zero point */
+	namcos1_update_DACs(machine());
 }
 
 
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, namcos1_state )
 	AM_RANGE(0x0000, 0x1fff) AM_RAMBANK("bank1")
 	AM_RANGE(0x2000, 0x3fff) AM_RAMBANK("bank2")
 	AM_RANGE(0x4000, 0x5fff) AM_RAMBANK("bank3")
@@ -448,7 +445,7 @@ static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( sub_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sub_map, AS_PROGRAM, 8, namcos1_state )
 	AM_RANGE(0x0000, 0x1fff) AM_RAMBANK("bank9")
 	AM_RANGE(0x2000, 0x3fff) AM_RAMBANK("bank10")
 	AM_RANGE(0x4000, 0x5fff) AM_RAMBANK("bank11")
@@ -466,13 +463,13 @@ static ADDRESS_MAP_START( sub_map, AS_PROGRAM, 8 )
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0x3fff) AM_ROMBANK("bank17")	/* Banked ROMs */
-	AM_RANGE(0x4000, 0x4001) AM_DEVREAD("ymsnd", ym2151_status_port_r)
-	AM_RANGE(0x4000, 0x4001) AM_DEVREADWRITE("ymsnd", ym2151_r, ym2151_w)
-	AM_RANGE(0x5000, 0x53ff) AM_DEVREADWRITE("namco", namcos1_cus30_r, namcos1_cus30_w) AM_MIRROR(0x400) /* PSG ( Shared ) */
-	AM_RANGE(0x7000, 0x77ff) AM_RAMBANK("bank18")	/* TRIRAM (shared) */
-	AM_RANGE(0x8000, 0x9fff) AM_RAM	/* Sound RAM 3 */
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, namcos1_state )
+	AM_RANGE(0x0000, 0x3fff) AM_ROMBANK("bank17")   /* Banked ROMs */
+	AM_RANGE(0x4000, 0x4001) AM_DEVREAD("ymsnd", ym2151_device, status_r)
+	AM_RANGE(0x4000, 0x4001) AM_DEVREADWRITE("ymsnd", ym2151_device, read, write)
+	AM_RANGE(0x5000, 0x53ff) AM_DEVREADWRITE_LEGACY("namco", namcos1_cus30_r, namcos1_cus30_w) AM_MIRROR(0x400) /* PSG ( Shared ) */
+	AM_RANGE(0x7000, 0x77ff) AM_RAMBANK("bank18")   /* TRIRAM (shared) */
+	AM_RANGE(0x8000, 0x9fff) AM_RAM /* Sound RAM 3 */
 	AM_RANGE(0xc000, 0xc001) AM_WRITE(namcos1_sound_bankswitch_w) /* ROM bank selector */
 	AM_RANGE(0xd001, 0xd001) AM_WRITE(namcos1_watchdog_w)
 	AM_RANGE(0xe000, 0xe000) AM_WRITE(irq_ack_w)
@@ -480,15 +477,15 @@ static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( mcu_map, AS_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0x001f) AM_READWRITE(m6801_io_r, m6801_io_w)
+static ADDRESS_MAP_START( mcu_map, AS_PROGRAM, 8, namcos1_state )
+	AM_RANGE(0x0000, 0x001f) AM_READWRITE_LEGACY(m6801_io_r, m6801_io_w)
 	AM_RANGE(0x0080, 0x00ff) AM_RAM /* built in RAM */
 	AM_RANGE(0x1000, 0x1003) AM_READ(dsw_r)
 	AM_RANGE(0x1400, 0x1400) AM_READ_PORT("CONTROL0")
 	AM_RANGE(0x1401, 0x1401) AM_READ_PORT("CONTROL1")
 	AM_RANGE(0x4000, 0xbfff) AM_ROMBANK("bank20") /* banked ROM */
-	AM_RANGE(0xc000, 0xc000) AM_WRITE(namcos1_mcu_patch_w)	/* kludge! see notes */
-	AM_RANGE(0xc000, 0xc7ff) AM_RAMBANK("bank19")	/* TRIRAM (shared) */
+	AM_RANGE(0xc000, 0xc000) AM_WRITE(namcos1_mcu_patch_w)  /* kludge! see notes */
+	AM_RANGE(0xc000, 0xc7ff) AM_RAMBANK("bank19")   /* TRIRAM (shared) */
 	AM_RANGE(0xc800, 0xcfff) AM_RAM AM_SHARE("nvram") /* EEPROM */
 	AM_RANGE(0xd000, 0xd000) AM_WRITE(namcos1_dac0_w)
 	AM_RANGE(0xd400, 0xd400) AM_WRITE(namcos1_dac1_w)
@@ -497,7 +494,7 @@ static ADDRESS_MAP_START( mcu_map, AS_PROGRAM, 8 )
 	AM_RANGE(0xf000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( mcu_port_map, AS_IO, 8 )
+static ADDRESS_MAP_START( mcu_port_map, AS_IO, 8, namcos1_state )
 	AM_RANGE(M6801_PORT1, M6801_PORT1) AM_READ_PORT("COIN") AM_WRITE(namcos1_coin_w)
 	AM_RANGE(M6801_PORT2, M6801_PORT2) AM_READNOP AM_WRITE(namcos1_dac_gain_w)
 ADDRESS_MAP_END
@@ -543,7 +540,7 @@ static INPUT_PORTS_START( ns1 )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_SPECIAL )   /* OUT:coin counter 2 */
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_COIN1 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME("Service Button") PORT_CODE(KEYCODE_F1)	// service switch from the edge connector
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME("Service Button") PORT_CODE(KEYCODE_F1)  // service switch from the edge connector
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 INPUT_PORTS_END
@@ -557,7 +554,7 @@ static INPUT_PORTS_START( shadowld )
 	PORT_DIPNAME( 0x40, 0x40, "Freeze" ) PORT_DIPLOCATION("SW:2")
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x20, 0x20, "Alternate sound effects" ) PORT_DIPLOCATION("SW:3")	// e.g. the red bird
+	PORT_DIPNAME( 0x20, 0x20, "Alternate sound effects" ) PORT_DIPLOCATION("SW:3")  // e.g. the red bird
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 INPUT_PORTS_END
@@ -568,33 +565,33 @@ static INPUT_PORTS_START( dspirit )
 
 	PORT_MODIFY( "DIPSW" )
 	#ifdef PRIORITY_EASINESS_TO_PLAY
-	  PORT_DIPNAME( 0x7f, 0x7f, "Life" ) PORT_DIPLOCATION("SW:8,7,6,5,4,3,2")
-	  PORT_DIPSETTING(    0x7f, "2" )
-	  PORT_DIPSETTING(    0x16, "3" )
+		PORT_DIPNAME( 0x7f, 0x7f, "Life" ) PORT_DIPLOCATION("SW:8,7,6,5,4,3,2")
+		PORT_DIPSETTING(    0x7f, "2" )
+		PORT_DIPSETTING(    0x16, "3" )
 	#else
-	  PORT_DIPNAME( 0x40, 0x40, "Open 3rd Life (step1of7)" ) PORT_DIPLOCATION("SW:2")
-	  PORT_DIPSETTING(    0x40, "No (off)" )
-	  PORT_DIPSETTING(    0x00, "Yes (on)" )
-	  PORT_DIPNAME( 0x20, 0x20, "Open 3rd Life (step2of7)" ) PORT_DIPLOCATION("SW:3")
-	  PORT_DIPSETTING(    0x20, "No (off)" )
-	  PORT_DIPSETTING(    0x00, "Yes (on)" )
-	  PORT_DIPNAME( 0x10, 0x10, "Open 3rd Life (step3of7)" ) PORT_DIPLOCATION("SW:4")
-	  PORT_DIPSETTING(    0x10, "Yes (off)" )
-	  PORT_DIPSETTING(    0x00, "No (on)" )
-	  PORT_DIPNAME( 0x08, 0x08, "Open 3rd Life (step4of7)" ) PORT_DIPLOCATION("SW:5")
-	  PORT_DIPSETTING(    0x08, "No (off)" )
-	  PORT_DIPSETTING(    0x00, "Yes (on)" )
-	  PORT_DIPNAME( 0x04, 0x04, "Open 3rd Life (step5of7)" ) PORT_DIPLOCATION("SW:6")
-	  PORT_DIPSETTING(    0x04, "Yes (off)" )
-	  PORT_DIPSETTING(    0x00, "No (on)" )
-	  PORT_DIPNAME( 0x02, 0x02, "Open 3rd Life (step6of7)" ) PORT_DIPLOCATION("SW:7")
-	  PORT_DIPSETTING(    0x02, "Yes (off)" )
-	  PORT_DIPSETTING(    0x00, "No (on)" )
-	  PORT_DIPNAME( 0x01, 0x01, "Open 3rd Life (step7of7)" ) PORT_DIPLOCATION("SW:8")
-	  PORT_DIPSETTING(    0x01, "No (off)" )
-	  PORT_DIPSETTING(    0x00, "Yes (on)" )
-	  //  Allow "Open 3rd Life" = _ooxoxxo
-	  //                          12345678
+		PORT_DIPNAME( 0x40, 0x40, "Open 3rd Life (step1of7)" ) PORT_DIPLOCATION("SW:2")
+		PORT_DIPSETTING(    0x40, "No (off)" )
+		PORT_DIPSETTING(    0x00, "Yes (on)" )
+		PORT_DIPNAME( 0x20, 0x20, "Open 3rd Life (step2of7)" ) PORT_DIPLOCATION("SW:3")
+		PORT_DIPSETTING(    0x20, "No (off)" )
+		PORT_DIPSETTING(    0x00, "Yes (on)" )
+		PORT_DIPNAME( 0x10, 0x10, "Open 3rd Life (step3of7)" ) PORT_DIPLOCATION("SW:4")
+		PORT_DIPSETTING(    0x10, "Yes (off)" )
+		PORT_DIPSETTING(    0x00, "No (on)" )
+		PORT_DIPNAME( 0x08, 0x08, "Open 3rd Life (step4of7)" ) PORT_DIPLOCATION("SW:5")
+		PORT_DIPSETTING(    0x08, "No (off)" )
+		PORT_DIPSETTING(    0x00, "Yes (on)" )
+		PORT_DIPNAME( 0x04, 0x04, "Open 3rd Life (step5of7)" ) PORT_DIPLOCATION("SW:6")
+		PORT_DIPSETTING(    0x04, "Yes (off)" )
+		PORT_DIPSETTING(    0x00, "No (on)" )
+		PORT_DIPNAME( 0x02, 0x02, "Open 3rd Life (step6of7)" ) PORT_DIPLOCATION("SW:7")
+		PORT_DIPSETTING(    0x02, "Yes (off)" )
+		PORT_DIPSETTING(    0x00, "No (on)" )
+		PORT_DIPNAME( 0x01, 0x01, "Open 3rd Life (step7of7)" ) PORT_DIPLOCATION("SW:8")
+		PORT_DIPSETTING(    0x01, "No (off)" )
+		PORT_DIPSETTING(    0x00, "Yes (on)" )
+		//  Allow "Open 3rd Life" = _ooxoxxo
+		//                          12345678
 	#endif
 INPUT_PORTS_END
 
@@ -617,7 +614,7 @@ static INPUT_PORTS_START( quester )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 )
 
 	PORT_MODIFY( "DIPSW" )
-	PORT_DIPNAME( 0x40, 0x40, "Unk 1" ) PORT_DIPLOCATION("SW:2")	// read @ fac7
+	PORT_DIPNAME( 0x40, 0x40, "Unk 1" ) PORT_DIPLOCATION("SW:2")    // read @ fac7
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x10, 0x10, "Freeze" ) PORT_DIPLOCATION("SW:4")
@@ -630,10 +627,10 @@ static INPUT_PORTS_START( quester )
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-	PORT_START( "PADDLE0" )	/* fake input port for player 1 paddle */
+	PORT_START( "PADDLE0" ) /* fake input port for player 1 paddle */
 	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_SENSITIVITY(30) PORT_KEYDELTA(15)
 
-	PORT_START( "PADDLE1" )	/* fake input port for player 2 paddle */
+	PORT_START( "PADDLE1" ) /* fake input port for player 2 paddle */
 	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_SENSITIVITY(30) PORT_KEYDELTA(15) PORT_PLAYER(2)
 INPUT_PORTS_END
 
@@ -660,21 +657,21 @@ static INPUT_PORTS_START( tankfrc4 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START( "IN1" )
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(2)
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(2)
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(2)
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(2)
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2) // and start2
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
-
-	PORT_START( "IN2" )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(3)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(3)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(3)
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(3)
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(3) // and start3
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNUSED )
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
+
+	PORT_START( "IN2" )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(2)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(2)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(2)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(2)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2) // and start2
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -717,18 +714,18 @@ static INPUT_PORTS_START( galaga88 )
 
 	PORT_MODIFY( "DIPSW" )
 	#ifdef PRIORITY_EASINESS_TO_PLAY
-	  PORT_DIPNAME( 0x28, 0x28, "Auto Data Sampling" ) PORT_DIPLOCATION("SW:5,3")
-	  PORT_DIPSETTING(    0x28, DEF_STR( Off ) )
-	  PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+		PORT_DIPNAME( 0x28, 0x28, "Auto Data Sampling" ) PORT_DIPLOCATION("SW:5,3")
+		PORT_DIPSETTING(    0x28, DEF_STR( Off ) )
+		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	#else
-	  PORT_DIPNAME( 0x20, 0x20, "Auto Data Sampling (step1of2)" ) PORT_DIPLOCATION("SW:3")
-	  PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-	  PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	  PORT_DIPNAME( 0x08, 0x08, "Auto Data Sampling (step2of2)" ) PORT_DIPLOCATION("SW:5")
-	  PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
-	  PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	  //  Allow "Auto Data Sampling" = __o_o___
-	  //                               12345678
+		PORT_DIPNAME( 0x20, 0x20, "Auto Data Sampling (step1of2)" ) PORT_DIPLOCATION("SW:3")
+		PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
+		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+		PORT_DIPNAME( 0x08, 0x08, "Auto Data Sampling (step2of2)" ) PORT_DIPLOCATION("SW:5")
+		PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
+		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+		//  Allow "Auto Data Sampling" = __o_o___
+		//                               12345678
 	#endif
 INPUT_PORTS_END
 
@@ -752,15 +749,15 @@ static INPUT_PORTS_START( berabohm )
 
 #ifdef PRESSURE_SENSITIVE
 	/*
-    buttons (pressure sensitive)
-    each button has two switches: the first is closed as soon as the button is
-    pressed, the second a little later, depending on how hard the button is
-    pressed.
-    bits 0-5 control strength (0x00 = max 0x3f = min)
-    bit 6 indicates the button is pressed
-    bit 7 is not actually read by the game but I use it to simulate the second
-          switch
-    */
+	buttons (pressure sensitive)
+	each button has two switches: the first is closed as soon as the button is
+	pressed, the second a little later, depending on how hard the button is
+	pressed.
+	bits 0-5 control strength (0x00 = max 0x3f = min)
+	bit 6 indicates the button is pressed
+	bit 7 is not actually read by the game but I use it to simulate the second
+	      switch
+	*/
 	PORT_START( "IN0" )
 	PORT_BIT( 0x3f, 0x00, IPT_SPECIAL )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON3 )
@@ -841,31 +838,31 @@ static INPUT_PORTS_START( wldcourt )
 
 	PORT_MODIFY( "DIPSW" )
 	#ifdef PRIORITY_EASINESS_TO_PLAY
-	  /* see code @ e331. The lines this draws can't even be seen because they are erased afterwards */
-	  PORT_DIPNAME( 0x7e, 0x7e, "Draw Debug Lines" ) PORT_DIPLOCATION("SW:7,6,5,4,3,2")
-	  PORT_DIPSETTING(    0x7e, DEF_STR( Off ) )
-	  PORT_DIPSETTING(    0x5c, DEF_STR( On ) )
+		/* see code @ e331. The lines this draws can't even be seen because they are erased afterwards */
+		PORT_DIPNAME( 0x7e, 0x7e, "Draw Debug Lines" ) PORT_DIPLOCATION("SW:7,6,5,4,3,2")
+		PORT_DIPSETTING(    0x7e, DEF_STR( Off ) )
+		PORT_DIPSETTING(    0x5c, DEF_STR( On ) )
 	#else
-	  PORT_DIPNAME( 0x40, 0x40, "Draw Debug Lines (step1of6)" ) PORT_DIPLOCATION("SW:2")
-	  PORT_DIPSETTING(    0x40, "Yes (off)" )
-	  PORT_DIPSETTING(    0x00, "No (on)" )
-	  PORT_DIPNAME( 0x20, 0x20, "Draw Debug Lines (step2of6)" ) PORT_DIPLOCATION("SW:3")
-	  PORT_DIPSETTING(    0x20, "No (off)" )
-	  PORT_DIPSETTING(    0x00, "Yes (on)" )
-	  PORT_DIPNAME( 0x10, 0x10, "Draw Debug Lines (step3of6)" ) PORT_DIPLOCATION("SW:4")
-	  PORT_DIPSETTING(    0x10, "Yes (off)" )
-	  PORT_DIPSETTING(    0x00, "No (on)" )
-	  PORT_DIPNAME( 0x08, 0x08, "Draw Debug Lines (step4of6)" ) PORT_DIPLOCATION("SW:5")
-	  PORT_DIPSETTING(    0x08, "Yes (off)" )
-	  PORT_DIPSETTING(    0x00, "No (on)" )
-	  PORT_DIPNAME( 0x04, 0x04, "Draw Debug Lines (step5of6)" ) PORT_DIPLOCATION("SW:6")
-	  PORT_DIPSETTING(    0x04, "Yes (off)" )
-	  PORT_DIPSETTING(    0x00, "No (on)" )
-	  PORT_DIPNAME( 0x02, 0x02, "Draw Debug Lines (step6of6)" ) PORT_DIPLOCATION("SW:7")
-	  PORT_DIPSETTING(    0x02, "No (off)" )
-	  PORT_DIPSETTING(    0x00, "Yes (on)" )
-	  //  Allow "Draw Debug Lines" = _xxoxxo_
-	  //                             12345678
+		PORT_DIPNAME( 0x40, 0x40, "Draw Debug Lines (step1of6)" ) PORT_DIPLOCATION("SW:2")
+		PORT_DIPSETTING(    0x40, "Yes (off)" )
+		PORT_DIPSETTING(    0x00, "No (on)" )
+		PORT_DIPNAME( 0x20, 0x20, "Draw Debug Lines (step2of6)" ) PORT_DIPLOCATION("SW:3")
+		PORT_DIPSETTING(    0x20, "No (off)" )
+		PORT_DIPSETTING(    0x00, "Yes (on)" )
+		PORT_DIPNAME( 0x10, 0x10, "Draw Debug Lines (step3of6)" ) PORT_DIPLOCATION("SW:4")
+		PORT_DIPSETTING(    0x10, "Yes (off)" )
+		PORT_DIPSETTING(    0x00, "No (on)" )
+		PORT_DIPNAME( 0x08, 0x08, "Draw Debug Lines (step4of6)" ) PORT_DIPLOCATION("SW:5")
+		PORT_DIPSETTING(    0x08, "Yes (off)" )
+		PORT_DIPSETTING(    0x00, "No (on)" )
+		PORT_DIPNAME( 0x04, 0x04, "Draw Debug Lines (step5of6)" ) PORT_DIPLOCATION("SW:6")
+		PORT_DIPSETTING(    0x04, "Yes (off)" )
+		PORT_DIPSETTING(    0x00, "No (on)" )
+		PORT_DIPNAME( 0x02, 0x02, "Draw Debug Lines (step6of6)" ) PORT_DIPLOCATION("SW:7")
+		PORT_DIPSETTING(    0x02, "No (off)" )
+		PORT_DIPSETTING(    0x00, "Yes (on)" )
+		//  Allow "Draw Debug Lines" = _xxoxxo_
+		//                             12345678
 	#endif
 	PORT_DIPNAME( 0x01, 0x01, "Freeze" ) PORT_DIPLOCATION("SW:8")
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
@@ -879,32 +876,32 @@ static INPUT_PORTS_START( splatter )
 	PORT_MODIFY( "DIPSW" )
 	/* these two don't seem to have much use... */
 	#ifdef PRIORITY_EASINESS_TO_PLAY
-	  PORT_DIPNAME( 0x11, 0x11, "CPU #0 Kick Watchdog in IRQ" ) PORT_DIPLOCATION("SW:8,4")
-	  PORT_DIPSETTING(    0x11, DEF_STR( No ) )
-	  PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
+		PORT_DIPNAME( 0x11, 0x11, "CPU #0 Kick Watchdog in IRQ" ) PORT_DIPLOCATION("SW:8,4")
+		PORT_DIPSETTING(    0x11, DEF_STR( No ) )
+		PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
 	#else
-	  PORT_DIPNAME( 0x10, 0x10, "CPU #0 Kick Watchdog in IRQ (step1of2)" ) PORT_DIPLOCATION("SW:4")
-	  PORT_DIPSETTING(    0x10, DEF_STR( No ) )
-	  PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
-	  PORT_DIPNAME( 0x01, 0x01, "CPU #0 Kick Watchdog in IRQ (step2of2)" ) PORT_DIPLOCATION("SW:8")
-	  PORT_DIPSETTING(    0x01, DEF_STR( No ) )
-	  PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
-	  //  Allow "CPU #0 Kick Watchdog in IRQ" = ___o___o
-	  //                                        12345678
+		PORT_DIPNAME( 0x10, 0x10, "CPU #0 Kick Watchdog in IRQ (step1of2)" ) PORT_DIPLOCATION("SW:4")
+		PORT_DIPSETTING(    0x10, DEF_STR( No ) )
+		PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
+		PORT_DIPNAME( 0x01, 0x01, "CPU #0 Kick Watchdog in IRQ (step2of2)" ) PORT_DIPLOCATION("SW:8")
+		PORT_DIPSETTING(    0x01, DEF_STR( No ) )
+		PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
+		//  Allow "CPU #0 Kick Watchdog in IRQ" = ___o___o
+		//                                        12345678
 	#endif
 	#ifdef PRIORITY_EASINESS_TO_PLAY
-	  PORT_DIPNAME( 0x06, 0x06, "CPU #0&1 Kick Watchdog in IRQ" ) PORT_DIPLOCATION("SW:7,6")
-	  PORT_DIPSETTING(    0x06, DEF_STR( No ) )
-	  PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
+		PORT_DIPNAME( 0x06, 0x06, "CPU #0&1 Kick Watchdog in IRQ" ) PORT_DIPLOCATION("SW:7,6")
+		PORT_DIPSETTING(    0x06, DEF_STR( No ) )
+		PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
 	#else
-	  PORT_DIPNAME( 0x04, 0x04, "CPU #0&1 Kick Watchdog in IRQ (step1of2)" ) PORT_DIPLOCATION("SW:6")
-	  PORT_DIPSETTING(    0x04, DEF_STR( No ) )
-	  PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
-	  PORT_DIPNAME( 0x02, 0x02, "CPU #0&1 Kick Watchdog in IRQ (step2of2)" ) PORT_DIPLOCATION("SW:7")
-	  PORT_DIPSETTING(    0x02, DEF_STR( No ) )
-	  PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
-	  //  Allow "CPU #0&1 Kick Watchdog in IRQ" = _____oo_
-	  //                                          12345678
+		PORT_DIPNAME( 0x04, 0x04, "CPU #0&1 Kick Watchdog in IRQ (step1of2)" ) PORT_DIPLOCATION("SW:6")
+		PORT_DIPSETTING(    0x04, DEF_STR( No ) )
+		PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
+		PORT_DIPNAME( 0x02, 0x02, "CPU #0&1 Kick Watchdog in IRQ (step2of2)" ) PORT_DIPLOCATION("SW:7")
+		PORT_DIPSETTING(    0x02, DEF_STR( No ) )
+		PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
+		//  Allow "CPU #0&1 Kick Watchdog in IRQ" = _____oo_
+		//                                          12345678
 	#endif
 	PORT_DIPNAME( 0x20, 0x20, "Stage Select (ver. SH3 only)" )
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
@@ -1042,13 +1039,13 @@ static const gfx_layout spritelayout =
 	4,
 	{ 0, 1, 2, 3 },
 	{  0*4,  1*4,  2*4,  3*4,  4*4,  5*4,  6*4,  7*4,
-	   8*4,  9*4, 10*4, 11*4, 12*4, 13*4, 14*4, 15*4,
-	 256*4,257*4,258*4,259*4,260*4,261*4,262*4,263*4,
-	 264*4,265*4,266*4,267*4,268*4,269*4,270*4,271*4},
+		8*4,  9*4, 10*4, 11*4, 12*4, 13*4, 14*4, 15*4,
+		256*4,257*4,258*4,259*4,260*4,261*4,262*4,263*4,
+		264*4,265*4,266*4,267*4,268*4,269*4,270*4,271*4},
 	{ 0*64, 1*64,  2*64,  3*64,  4*64,  5*64,  6*64,  7*64,
-	  8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64,
-	 32*64,33*64, 34*64, 35*64, 36*64, 37*64, 38*64, 39*64,
-	 40*64,41*64, 42*64, 43*64, 44*64, 45*64, 46*64, 47*64 },
+		8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64,
+		32*64,33*64, 34*64, 35*64, 36*64, 37*64, 38*64, 39*64,
+		40*64,41*64, 42*64, 43*64, 44*64, 45*64, 46*64, 47*64 },
 	32*32*4
 };
 
@@ -1058,16 +1055,6 @@ static GFXDECODE_START( namcos1 )
 GFXDECODE_END
 
 
-
-static void namcos1_sound_interrupt( device_t *device, int irq )
-{
-	cputag_set_input_line(device->machine(), "audiocpu", M6809_FIRQ_LINE, irq ? ASSERT_LINE : CLEAR_LINE);
-}
-
-static const ym2151_interface ym2151_config =
-{
-	namcos1_sound_interrupt
-};
 
 static const namco_interface namco_config =
 {
@@ -1086,25 +1073,24 @@ static MACHINE_CONFIG_START( ns1, namcos1_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6809,49152000/32)
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_assert)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", namcos1_state,  irq0_line_assert)
 
 	MCFG_CPU_ADD("sub", M6809,49152000/32)
 	MCFG_CPU_PROGRAM_MAP(sub_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_assert)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", namcos1_state,  irq0_line_assert)
 
 	MCFG_CPU_ADD("audiocpu", M6809,49152000/32)
 	MCFG_CPU_PROGRAM_MAP(sound_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_assert)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", namcos1_state,  irq0_line_assert)
 
 	MCFG_CPU_ADD("mcu",HD63701,49152000/8)
 	MCFG_CPU_PROGRAM_MAP(mcu_map)
 	MCFG_CPU_IO_MAP(mcu_port_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_assert)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", namcos1_state,  irq0_line_assert)
 
 	// heavy sync required to prevent CPUs from fighting for video RAM access and going into deadlocks
 	MCFG_QUANTUM_TIME(attotime::from_hz(38400))
 
-	MCFG_MACHINE_RESET(namcos1)
 	MCFG_NVRAM_ADD_0FILL("nvram")
 
 	/* video hardware */
@@ -1113,22 +1099,20 @@ static MACHINE_CONFIG_START( ns1, namcos1_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60.606060)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 64*8)
 	MCFG_SCREEN_VISIBLE_AREA(9 + 8*8, 9 + 44*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(namcos1)
-	MCFG_SCREEN_EOF(namcos1)
+	MCFG_SCREEN_UPDATE_DRIVER(namcos1_state, screen_update_namcos1)
+	MCFG_SCREEN_VBLANK_DRIVER(namcos1_state, screen_eof_namcos1)
 
 	MCFG_GFXDECODE(namcos1)
 	MCFG_PALETTE_LENGTH(0x2000)
 
-	MCFG_VIDEO_START(namcos1)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
 
-	MCFG_SOUND_ADD("ymsnd", YM2151, 3579580)
-	MCFG_SOUND_CONFIG(ym2151_config)
+	MCFG_YM2151_ADD("ymsnd", 3579580)
+	MCFG_YM2151_IRQ_HANDLER(INPUTLINE("audiocpu", M6809_FIRQ_LINE))
 	MCFG_SOUND_ROUTE(0, "lspeaker", 0.50)
 	MCFG_SOUND_ROUTE(1, "rspeaker", 0.50)
 
@@ -1137,7 +1121,7 @@ static MACHINE_CONFIG_START( ns1, namcos1_state )
 	MCFG_SOUND_ROUTE(0, "lspeaker", 0.50)
 	MCFG_SOUND_ROUTE(1, "rspeaker", 0.50)
 
-	MCFG_SOUND_ADD("dac", DAC, 0)
+	MCFG_DAC_ADD("dac")
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "lspeaker", 1.0)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "rspeaker", 1.0)
 MACHINE_CONFIG_END
@@ -2708,39 +2692,39 @@ ROM_END
 
 
 
-GAME( 1987, shadowld, 0,        ns1,     shadowld, shadowld, ROT180, "Namco", "Shadowland", 0 )
-GAME( 1987, youkaidk, shadowld, ns1,     shadowld, shadowld, ROT180, "Namco", "Yokai Douchuuki (Japan new version)", 0 )
-GAME( 1987, youkaidko,shadowld, ns1,     shadowld, shadowld, ROT180, "Namco", "Yokai Douchuuki (Japan old version)", 0 )
-GAME( 1987, dspirit,  0,        ns1,     dspirit,  dspirit,  ROT90,  "Namco", "Dragon Spirit (new version)", 0 )
-GAME( 1987, dspirito, dspirit,  ns1,     dspirit,  dspirit,  ROT90,  "Namco", "Dragon Spirit (old version)", 0 )
-GAME( 1987, dspirita, dspirit,  ns1,     dspirit,  dspirit,  ROT90,  "Namco (Atari license)", "Dragon Spirit (Atari license)", 0 )
-GAME( 1987, blazer,   0,        ns1,     ns1,      blazer,   ROT90,  "Namco", "Blazer (Japan)", 0 )
-GAME( 1987, quester,  0,        ns1,     quester,  quester,  ROT90,  "Namco", "Quester (Japan)", 0 )
-GAME( 1987, questers, quester,  ns1,     quester,  quester,  ROT90,  "Namco", "Quester Special Edition (Japan)", 0 )
-GAME( 1987, pacmania, 0,        ns1,     pacmania, pacmania, ROT270, "Namco", "Pac-Mania", 0 )
-GAME( 1987, pacmaniaj,pacmania, ns1,     pacmania, pacmania, ROT90,  "Namco", "Pac-Mania (Japan)", 0 )
-GAME( 1987, galaga88, 0,        ns1,     galaga88, galaga88, ROT270, "Namco", "Galaga '88", 0 )
-GAME( 1987, galaga88j,galaga88, ns1,     galaga88, galaga88, ROT90,  "Namco", "Galaga '88 (Japan)", 0 )
-GAME( 1988, ws,       0,        ns1,     ns1,      ws,       ROT180, "Namco", "World Stadium (Japan)", 0 )
-GAME( 1988, berabohm, 0,        ns1,     berabohm, berabohm, ROT180, "Namco", "Beraboh Man (Japan version C)", 0 )
-GAME( 1988, berabohmo,berabohm, ns1,     berabohm, berabohm, ROT180, "Namco", "Beraboh Man (Japan version B)", 0 )
-GAME( 1988, mmaze,    0,        ns1,     mmaze,    alice,    ROT180, "Namco", "Marchen Maze (Japan)", 0 )
-GAME( 1988, bakutotu, 0,        ns1,     bakutotu, bakutotu, ROT180, "Namco", "Bakutotsu Kijuutei", 0 )
-GAME( 1988, wldcourt, 0,        ns1,     wldcourt, wldcourt, ROT180, "Namco", "World Court (Japan)", 0 )
-GAME( 1988, splatter, 0,        ns1,     splatter, splatter, ROT180, "Namco", "Splatter House (World new version)", 0 )
-GAME( 1988, splattero,splatter, ns1,     splatter, splatter, ROT180, "Namco", "Splatter House (World old version)", 0 )
-GAME( 1988, splatterj,splatter, ns1,     splatter, splatter, ROT180, "Namco", "Splatter House (Japan)", 0 )
-GAME( 1988, faceoff,  0,        ns1,     faceoff,  faceoff,  ROT180, "Namco", "Face Off (Japan)", 0 )
-GAME( 1989, rompers,  0,        ns1,     ns1,      rompers,  ROT90,  "Namco", "Rompers (Japan)", 0 )
-GAME( 1989, romperso, rompers,  ns1,     ns1,      rompers,  ROT90,  "Namco", "Rompers (Japan old version)", 0 )
-GAME( 1989, blastoff, 0,        ns1,     ns1,      blastoff, ROT90,  "Namco", "Blast Off (Japan)", 0 )
-GAME( 1989, ws89,     ws,       ns1,     ws89,     ws89,     ROT180, "Namco", "World Stadium '89 (Japan)", 0 )
-GAME( 1989, dangseed, 0,        ns1,     dangseed, dangseed, ROT90,  "Namco", "Dangerous Seed (Japan)", 0 )
-GAME( 1990, ws90,     ws,       ns1,     ws90,     ws90,     ROT180, "Namco", "World Stadium '90 (Japan)", 0 )
-GAME( 1990, pistoldm, 0,        ns1,     ns1,      pistoldm, ROT0,   "Namco", "Pistol Daimyo no Bouken (Japan)", 0 )
-GAME( 1990, boxyboy,  0,        ns1,     boxyboy,  soukobdx, ROT0,   "Namco", "Boxy Boy (US)", 0 )
-GAME( 1990, soukobdx, boxyboy,  ns1,     boxyboy,  soukobdx, ROT0,   "Namco", "Souko Ban Deluxe (Japan)", 0 )
-GAME( 1990, puzlclub, 0,        ns1,     puzlclub, puzlclub, ROT90,  "Namco", "Puzzle Club (Japan prototype)", 0 )
-GAME( 1991, tankfrce, 0,        ns1,     ns1,      tankfrce, ROT0,   "Namco", "Tank Force (US, 2 Player)", 0 )
-GAME( 1991, tankfrce4,tankfrce, ns1,     tankfrc4, tankfrc4, ROT0,   "Namco", "Tank Force (US, 4 Player)", 0 )
-GAME( 1991, tankfrcej,tankfrce, ns1,     ns1,      tankfrce, ROT0,   "Namco", "Tank Force (Japan)", 0 )
+GAME( 1987, shadowld, 0,        ns1,     shadowld, namcos1_state, shadowld, ROT180, "Namco", "Shadowland", 0 )
+GAME( 1987, youkaidk, shadowld, ns1,     shadowld, namcos1_state, shadowld, ROT180, "Namco", "Yokai Douchuuki (Japan new version)", 0 )
+GAME( 1987, youkaidko,shadowld, ns1,     shadowld, namcos1_state, shadowld, ROT180, "Namco", "Yokai Douchuuki (Japan old version)", 0 )
+GAME( 1987, dspirit,  0,        ns1,     dspirit, namcos1_state,  dspirit,  ROT90,  "Namco", "Dragon Spirit (new version)", 0 )
+GAME( 1987, dspirito, dspirit,  ns1,     dspirit, namcos1_state,  dspirit,  ROT90,  "Namco", "Dragon Spirit (old version)", 0 )
+GAME( 1987, dspirita, dspirit,  ns1,     dspirit, namcos1_state,  dspirit,  ROT90,  "Namco (Atari license)", "Dragon Spirit (Atari license)", 0 )
+GAME( 1987, blazer,   0,        ns1,     ns1, namcos1_state,      blazer,   ROT90,  "Namco", "Blazer (Japan)", 0 )
+GAME( 1987, quester,  0,        ns1,     quester, namcos1_state,  quester,  ROT90,  "Namco", "Quester (Japan)", 0 )
+GAME( 1987, questers, quester,  ns1,     quester, namcos1_state,  quester,  ROT90,  "Namco", "Quester Special Edition (Japan)", 0 )
+GAME( 1987, pacmania, 0,        ns1,     pacmania, namcos1_state, pacmania, ROT270, "Namco", "Pac-Mania", 0 )
+GAME( 1987, pacmaniaj,pacmania, ns1,     pacmania, namcos1_state, pacmania, ROT90,  "Namco", "Pac-Mania (Japan)", 0 )
+GAME( 1987, galaga88, 0,        ns1,     galaga88, namcos1_state, galaga88, ROT270, "Namco", "Galaga '88", 0 )
+GAME( 1987, galaga88j,galaga88, ns1,     galaga88, namcos1_state, galaga88, ROT90,  "Namco", "Galaga '88 (Japan)", 0 )
+GAME( 1988, ws,       0,        ns1,     ns1, namcos1_state,      ws,       ROT180, "Namco", "World Stadium (Japan)", 0 )
+GAME( 1988, berabohm, 0,        ns1,     berabohm, namcos1_state, berabohm, ROT180, "Namco", "Beraboh Man (Japan version C)", 0 )
+GAME( 1988, berabohmo,berabohm, ns1,     berabohm, namcos1_state, berabohm, ROT180, "Namco", "Beraboh Man (Japan version B)", 0 )
+GAME( 1988, mmaze,    0,        ns1,     mmaze, namcos1_state,    alice,    ROT180, "Namco", "Marchen Maze (Japan)", 0 )
+GAME( 1988, bakutotu, 0,        ns1,     bakutotu, namcos1_state, bakutotu, ROT180, "Namco", "Bakutotsu Kijuutei", 0 )
+GAME( 1988, wldcourt, 0,        ns1,     wldcourt, namcos1_state, wldcourt, ROT180, "Namco", "World Court (Japan)", 0 )
+GAME( 1988, splatter, 0,        ns1,     splatter, namcos1_state, splatter, ROT180, "Namco", "Splatter House (World new version)", 0 )
+GAME( 1988, splattero,splatter, ns1,     splatter, namcos1_state, splatter, ROT180, "Namco", "Splatter House (World old version)", 0 )
+GAME( 1988, splatterj,splatter, ns1,     splatter, namcos1_state, splatter, ROT180, "Namco", "Splatter House (Japan)", 0 )
+GAME( 1988, faceoff,  0,        ns1,     faceoff, namcos1_state,  faceoff,  ROT180, "Namco", "Face Off (Japan)", 0 )
+GAME( 1989, rompers,  0,        ns1,     ns1, namcos1_state,      rompers,  ROT90,  "Namco", "Rompers (Japan)", 0 )
+GAME( 1989, romperso, rompers,  ns1,     ns1, namcos1_state,      rompers,  ROT90,  "Namco", "Rompers (Japan old version)", 0 )
+GAME( 1989, blastoff, 0,        ns1,     ns1, namcos1_state,      blastoff, ROT90,  "Namco", "Blast Off (Japan)", 0 )
+GAME( 1989, ws89,     ws,       ns1,     ws89, namcos1_state,     ws89,     ROT180, "Namco", "World Stadium '89 (Japan)", 0 )
+GAME( 1989, dangseed, 0,        ns1,     dangseed, namcos1_state, dangseed, ROT90,  "Namco", "Dangerous Seed (Japan)", 0 )
+GAME( 1990, ws90,     ws,       ns1,     ws90, namcos1_state,     ws90,     ROT180, "Namco", "World Stadium '90 (Japan)", 0 )
+GAME( 1990, pistoldm, 0,        ns1,     ns1, namcos1_state,      pistoldm, ROT0,   "Namco", "Pistol Daimyo no Bouken (Japan)", 0 )
+GAME( 1990, boxyboy,  0,        ns1,     boxyboy, namcos1_state,  soukobdx, ROT0,   "Namco", "Boxy Boy (US)", 0 )
+GAME( 1990, soukobdx, boxyboy,  ns1,     boxyboy, namcos1_state,  soukobdx, ROT0,   "Namco", "Souko Ban Deluxe (Japan)", 0 )
+GAME( 1990, puzlclub, 0,        ns1,     puzlclub, namcos1_state, puzlclub, ROT90,  "Namco", "Puzzle Club (Japan prototype)", 0 )
+GAME( 1991, tankfrce, 0,        ns1,     ns1, namcos1_state,      tankfrce, ROT0,   "Namco", "Tank Force (US, 2 Player)", 0 )
+GAME( 1991, tankfrce4,tankfrce, ns1,     tankfrc4, namcos1_state, tankfrc4, ROT0,   "Namco", "Tank Force (US, 4 Player)", 0 )
+GAME( 1991, tankfrcej,tankfrce, ns1,     ns1, namcos1_state,      tankfrce, ROT0,   "Namco", "Tank Force (Japan)", 0 )

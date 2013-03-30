@@ -11,14 +11,17 @@
 
     TODO:
 
-    - test mode
+    - set tp = 64 Hz when out of test mode
+    - test mode is mostly untested (is used by MS-DOS 6.2x in PC-98xx)
 
 */
 
-#include "emu.h"
 #include "upd1990a.h"
-#include "machine/devhelpr.h"
 
+
+// device type definition
+const device_type UPD1990A = &device_creator<upd1990a_device>;
+const device_type UPD4990A = &device_creator<upd4990a_device>;
 
 
 //**************************************************************************
@@ -38,131 +41,8 @@ enum
 	MODE_TP_64HZ_SET,
 	MODE_TP_256HZ_SET,
 	MODE_TP_2048HZ_SET,
-	MODE_TEST,
+	MODE_TEST
 };
-
-
-
-//**************************************************************************
-//  GLOBAL VARIABLES
-//**************************************************************************
-
-// devices
-const device_type UPD1990A = upd1990a_device_config::static_alloc_device_config;
-
-
-
-//**************************************************************************
-//  DEVICE CONFIGURATION
-//**************************************************************************
-
-GENERIC_DEVICE_CONFIG_SETUP(upd1990a, "uPD1990A")
-
-
-//-------------------------------------------------
-//  device_config_complete - perform any
-//  operations now that the configuration is
-//  complete
-//-------------------------------------------------
-
-void upd1990a_device_config::device_config_complete()
-{
-	// inherit a copy of the static data
-	const upd1990a_interface *intf = reinterpret_cast<const upd1990a_interface *>(static_config());
-	if (intf != NULL)
-		*static_cast<upd1990a_interface *>(this) = *intf;
-
-	// or initialize to defaults if none provided
-	else
-	{
-//      memset(&in_pa_func, 0, sizeof(in_pa_func));
-	}
-}
-
-
-
-//**************************************************************************
-//  INLINE HELPERS
-//**************************************************************************
-
-//-------------------------------------------------
-//  convert_to_bcd -
-//-------------------------------------------------
-
-inline UINT8 upd1990a_device::convert_to_bcd(int val)
-{
-	return ((val / 10) << 4) | (val % 10);
-}
-
-
-//-------------------------------------------------
-//  bcd_to_integer -
-//-------------------------------------------------
-
-inline int upd1990a_device::bcd_to_integer(UINT8 val)
-{
-	return (((val & 0xf0) >> 4) * 10) + (val & 0x0f);
-}
-
-
-//-------------------------------------------------
-//  advance_seconds -
-//-------------------------------------------------
-
-inline void upd1990a_device::advance_seconds()
-{
-	static const int days_per_month[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-
-	int seconds = bcd_to_integer(m_time_counter[0]);
-	int minutes = bcd_to_integer(m_time_counter[1]);
-	int hours = bcd_to_integer(m_time_counter[2]);
-	int days = bcd_to_integer(m_time_counter[3]);
-	int day_of_week = m_time_counter[4] & 0x0f;
-	int month = (m_time_counter[4] & 0xf0) >> 4;
-
-	seconds++;
-
-	if (seconds > 59)
-	{
-		seconds = 0;
-		minutes++;
-	}
-
-	if (minutes > 59)
-	{
-		minutes = 0;
-		hours++;
-	}
-
-	if (hours > 23)
-	{
-		hours = 0;
-		days++;
-		day_of_week++;
-	}
-
-	if (day_of_week > 6)
-	{
-		day_of_week++;
-	}
-
-	if (days > days_per_month[month - 1])
-	{
-		days = 1;
-		month++;
-	}
-
-	if (month > 12)
-	{
-		month = 1;
-	}
-
-	m_time_counter[0] = convert_to_bcd(seconds);
-	m_time_counter[1] = convert_to_bcd(minutes);
-	m_time_counter[2] = convert_to_bcd(hours);
-	m_time_counter[3] = convert_to_bcd(days);
-	m_time_counter[4] = (month << 4) | day_of_week;
-}
 
 
 
@@ -174,10 +54,47 @@ inline void upd1990a_device::advance_seconds()
 //  upd1990a_device - constructor
 //-------------------------------------------------
 
-upd1990a_device::upd1990a_device(running_machine &_machine, const upd1990a_device_config &config)
-    : device_t(_machine, config),
-      m_config(config)
+upd1990a_rtc_device::upd1990a_rtc_device(const machine_config &mconfig, device_type type, const char* name, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, type, name, tag, owner, clock),
+		device_rtc_interface(mconfig, *this),
+		m_data_out(0)
 {
+}
+
+
+upd1990a_device::upd1990a_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+		: upd1990a_rtc_device(mconfig, UPD1990A, "uPD1990A", tag, owner, clock)
+{
+	m_device_type = TYPE_UPD1990A;
+}
+
+
+upd4990a_device::upd4990a_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+		: upd1990a_rtc_device(mconfig, UPD4990A, "uPD4990A", tag, owner, clock)
+{
+	m_device_type = TYPE_UPD4990A;
+}
+
+
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
+
+void upd1990a_rtc_device::device_config_complete()
+{
+	// inherit a copy of the static data
+	const upd1990a_interface *intf = reinterpret_cast<const upd1990a_interface *>(static_config());
+	if (intf != NULL)
+		*static_cast<upd1990a_interface *>(this) = *intf;
+
+	// or initialize to defaults if none provided
+	else
+	{
+		memset(&m_out_data_cb, 0, sizeof(m_out_data_cb));
+		memset(&m_out_tp_cb, 0, sizeof(m_out_tp_cb));
+	}
 }
 
 
@@ -185,17 +102,18 @@ upd1990a_device::upd1990a_device(running_machine &_machine, const upd1990a_devic
 //  device_start - device-specific startup
 //-------------------------------------------------
 
-void upd1990a_device::device_start()
+void upd1990a_rtc_device::device_start()
 {
 	// resolve callbacks
-	devcb_resolve_write_line(&m_out_data_func, &m_config.m_out_data_func, this);
-	devcb_resolve_write_line(&m_out_tp_func, &m_config.m_out_tp_func, this);
+	m_out_data_func.resolve(m_out_data_cb, *this);
+	m_out_tp_func.resolve(m_out_tp_cb, *this);
 
 	// allocate timers
 	m_timer_clock = timer_alloc(TIMER_CLOCK);
-	m_timer_clock->adjust(attotime::zero, 0, attotime::from_hz(1));
+	m_timer_clock->adjust(attotime::from_hz(clock() / 32768), 0, attotime::from_hz(clock() / 32768));
 	m_timer_tp = timer_alloc(TIMER_TP);
 	m_timer_data_out = timer_alloc(TIMER_DATA_OUT);
+	m_timer_test_mode = timer_alloc(TIMER_TEST_MODE);
 
 	// state saving
 	save_item(NAME(m_time_counter));
@@ -208,6 +126,7 @@ void upd1990a_device::device_start()
 	save_item(NAME(m_c));
 	save_item(NAME(m_clk));
 	save_item(NAME(m_tp));
+	save_item(NAME(m_c_unlatched));
 }
 
 
@@ -215,19 +134,9 @@ void upd1990a_device::device_start()
 //  device_reset - device-specific reset
 //-------------------------------------------------
 
-void upd1990a_device::device_reset()
+void upd1990a_rtc_device::device_reset()
 {
-	system_time curtime, *systime = &curtime;
-
-	machine().current_datetime(curtime);
-
-	// HACK: load time counter from system time
-	m_time_counter[0] = convert_to_bcd(systime->local_time.second);
-	m_time_counter[1] = convert_to_bcd(systime->local_time.minute);
-	m_time_counter[2] = convert_to_bcd(systime->local_time.hour);
-	m_time_counter[3] = convert_to_bcd(systime->local_time.mday);
-	m_time_counter[4] = systime->local_time.weekday;
-	m_time_counter[4] |= (systime->local_time.month + 1) << 4;
+	set_current_time(machine());
 }
 
 
@@ -235,7 +144,7 @@ void upd1990a_device::device_reset()
 //  device_timer - handler timer events
 //-------------------------------------------------
 
-void upd1990a_device::device_timer(emu_timer &timer, device_timer_id id, int param, void *ptr)
+void upd1990a_rtc_device::device_timer(emu_timer &timer, device_timer_id id, int param, void *ptr)
 {
 	switch (id)
 	{
@@ -246,19 +155,67 @@ void upd1990a_device::device_timer(emu_timer &timer, device_timer_id id, int par
 	case TIMER_TP:
 		m_tp = !m_tp;
 
-		if (LOG) logerror("UPD1990A TP %u\n", m_tp);
+		if (LOG) logerror("uPD1990A '%s' TP %u\n", tag(), m_tp);
 
-		devcb_call_write_line(&m_out_tp_func, m_tp);
+		m_out_tp_func(m_tp);
 		break;
 
 	case TIMER_DATA_OUT:
 		m_data_out = !m_data_out;
 
-		if (LOG) logerror("UPD1990A DATA OUT TICK %u\n", m_data_out);
+		if (LOG) logerror("uPD1990A '%s' DATA OUT TICK %u\n", tag(), m_data_out);
 
-		devcb_call_write_line(&m_out_data_func, m_data_out);
+		m_out_data_func(m_data_out);
+		break;
+
+	case TIMER_TEST_MODE:
+		if (m_oe)
+		{
+			/* TODO: completely untested */
+			/* time counter is advanced at 1024 Hz from "Second" counter input */
+			int i;
+
+			m_data_out = (m_time_counter[4] == 0);
+
+			for(i=0;i<5;i++)
+			{
+				m_time_counter[i]++;
+				if(m_time_counter[i] != 0)
+					return;
+			}
+		}
+		else // parallel
+		{
+			int i;
+			/* each counter is advanced at 1024 Hz in parallel, overflow carry does not affect next counter */
+			m_time_counter[0]++;
+			m_time_counter[1]++;
+			m_time_counter[2]++;
+			m_time_counter[3]++;
+			m_time_counter[4]++;
+
+			m_data_out = 0;
+
+			for(i=0;i<5;i++)
+				m_data_out |= (m_time_counter[i] == 0);
+		}
+
 		break;
 	}
+}
+
+
+//-------------------------------------------------
+//  rtc_clock_updated -
+//-------------------------------------------------
+
+void upd1990a_rtc_device::rtc_clock_updated(int year, int month, int day, int day_of_week, int hour, int minute, int second)
+{
+	m_time_counter[0] = convert_to_bcd(second);
+	m_time_counter[1] = convert_to_bcd(minute);
+	m_time_counter[2] = convert_to_bcd(hour);
+	m_time_counter[3] = convert_to_bcd(day);
+	m_time_counter[4] = (month << 4) | day_of_week;
 }
 
 
@@ -266,9 +223,9 @@ void upd1990a_device::device_timer(emu_timer &timer, device_timer_id id, int par
 //  oe_w -
 //-------------------------------------------------
 
-WRITE_LINE_MEMBER( upd1990a_device::oe_w )
+WRITE_LINE_MEMBER( upd1990a_rtc_device::oe_w )
 {
-	if (LOG) logerror("UPD1990A OE %u\n", state);
+	if (LOG) logerror("uPD1990A '%s' OE %u\n", tag(), state);
 
 	m_oe = state;
 }
@@ -278,9 +235,9 @@ WRITE_LINE_MEMBER( upd1990a_device::oe_w )
 //  cs_w -
 //-------------------------------------------------
 
-WRITE_LINE_MEMBER( upd1990a_device::cs_w )
+WRITE_LINE_MEMBER( upd1990a_rtc_device::cs_w )
 {
-	if (LOG) logerror("UPD1990A CS %u\n", state);
+	if (LOG) logerror("uPD1990A '%s' CS %u\n", tag(), state);
 
 	m_cs = state;
 }
@@ -290,21 +247,25 @@ WRITE_LINE_MEMBER( upd1990a_device::cs_w )
 //  stb_w -
 //-------------------------------------------------
 
-WRITE_LINE_MEMBER( upd1990a_device::stb_w )
+WRITE_LINE_MEMBER( upd1990a_rtc_device::stb_w )
 {
-	if (LOG) logerror("UPD1990A STB %u\n", state);
+	if (LOG) logerror("uPD1990A '%s' STB %u\n", tag(), state);
 
 	m_stb = state;
 
 	if (m_cs && m_stb && !m_clk)
 	{
+		m_c = m_c_unlatched;            // if STB = 1, latch in the command bits
+
 		switch (m_c)
 		{
 		case MODE_REGISTER_HOLD:
-			if (LOG) logerror("UPD1990A Register Hold Mode\n");
+			if (LOG) logerror("uPD1990A '%s' Register Hold Mode\n", tag());
 
 			/* enable time counter */
 			m_timer_clock->enable(1);
+
+			m_timer_test_mode->enable(0);
 
 			/* 1 Hz data out pulse */
 			m_data_out = 1;
@@ -315,7 +276,7 @@ WRITE_LINE_MEMBER( upd1990a_device::stb_w )
 			break;
 
 		case MODE_SHIFT:
-			if (LOG) logerror("UPD1990A Shift Mode\n");
+			if (LOG) logerror("uPD1990A '%s' Shift Mode\n", tag());
 
 			/* enable time counter */
 			m_timer_clock->enable(1);
@@ -323,20 +284,19 @@ WRITE_LINE_MEMBER( upd1990a_device::stb_w )
 			/* disable data out pulse */
 			m_timer_data_out->enable(0);
 
+			m_timer_test_mode->enable(0);
+
 			/* output LSB of shift register */
 			m_data_out = BIT(m_shift_reg[0], 0);
-			devcb_call_write_line(&m_out_data_func, m_data_out);
+			m_out_data_func(m_data_out);
 
 			/* 32 Hz time pulse */
 			m_timer_tp->adjust(attotime::zero, 0, attotime::from_hz(32*2));
 			break;
 
 		case MODE_TIME_SET:
-			{
-			int i;
-
-			if (LOG) logerror("UPD1990A Time Set Mode\n");
-			if (LOG) logerror("UPD1990A Shift Register %02x%02x%02x%02x%02x\n", m_shift_reg[4], m_shift_reg[3], m_shift_reg[2], m_shift_reg[1], m_shift_reg[0]);
+			if (LOG) logerror("uPD1990A '%s' Time Set Mode\n", tag());
+			if (LOG) logerror("uPD1990A '%s' Shift Register %02x%02x%02x%02x%02x\n", tag(), m_shift_reg[4], m_shift_reg[3], m_shift_reg[2], m_shift_reg[1], m_shift_reg[0]);
 
 			/* disable time counter */
 			m_timer_clock->enable(0);
@@ -344,37 +304,39 @@ WRITE_LINE_MEMBER( upd1990a_device::stb_w )
 			/* disable data out pulse */
 			m_timer_data_out->enable(0);
 
+			m_timer_test_mode->enable(0);
+
 			/* output LSB of shift register */
 			m_data_out = BIT(m_shift_reg[0], 0);
-			devcb_call_write_line(&m_out_data_func, m_data_out);
+			m_out_data_func(m_data_out);
 
 			/* load shift register data into time counter */
-			for (i = 0; i < 5; i++)
+			for (int i = 0; i < 5; i++)
 			{
 				m_time_counter[i] = m_shift_reg[i];
+
+				set_time(false, 0, m_time_counter[4] >> 4, m_time_counter[4] & 0x0f, m_time_counter[3], m_time_counter[2], m_time_counter[1], m_time_counter[0]);
 			}
 
 			/* 32 Hz time pulse */
 			m_timer_tp->adjust(attotime::zero, 0, attotime::from_hz(32*2));
-			}
 			break;
 
 		case MODE_TIME_READ:
-			{
-			int i;
-
-			if (LOG) logerror("UPD1990A Time Read Mode\n");
+			if (LOG) logerror("uPD1990A '%s' Time Read Mode\n", tag());
 
 			/* enable time counter */
 			m_timer_clock->enable(1);
 
+			m_timer_test_mode->enable(0);
+
 			/* load time counter data into shift register */
-			for (i = 0; i < 5; i++)
+			for (int i = 0; i < 5; i++)
 			{
 				m_shift_reg[i] = m_time_counter[i];
 			}
 
-			if (LOG) logerror("UPD1990A Shift Register %02x%02x%02x%02x%02x\n", m_shift_reg[4], m_shift_reg[3], m_shift_reg[2], m_shift_reg[1], m_shift_reg[0]);
+			if (LOG) logerror("uPD1990A '%s' Shift Register %02x%02x%02x%02x%02x\n", tag(), m_shift_reg[4], m_shift_reg[3], m_shift_reg[2], m_shift_reg[1], m_shift_reg[0]);
 
 			/* 512 Hz data out pulse */
 			m_data_out = 1;
@@ -382,42 +344,47 @@ WRITE_LINE_MEMBER( upd1990a_device::stb_w )
 
 			/* 32 Hz time pulse */
 			m_timer_tp->adjust(attotime::zero, 0, attotime::from_hz(32*2));
-			}
 			break;
 
 		case MODE_TP_64HZ_SET:
-			if (LOG) logerror("UPD1990A TP = 64 Hz Set Mode\n");
+			if (LOG) logerror("uPD1990A '%s' TP = 64 Hz Set Mode\n", tag());
+
+			m_timer_test_mode->enable(0);
 
 			/* 64 Hz time pulse */
 			m_timer_tp->adjust(attotime::zero, 0, attotime::from_hz(64*2));
 			break;
 
 		case MODE_TP_256HZ_SET:
-			if (LOG) logerror("UPD1990A TP = 256 Hz Set Mode\n");
+			if (LOG) logerror("uPD1990A '%s' TP = 256 Hz Set Mode\n", tag());
+
+			m_timer_test_mode->enable(0);
 
 			/* 256 Hz time pulse */
 			m_timer_tp->adjust(attotime::zero, 0, attotime::from_hz(256*2));
 			break;
 
 		case MODE_TP_2048HZ_SET:
-			if (LOG) logerror("UPD1990A TP = 2048 Hz Set Mode\n");
+			if (LOG) logerror("uPD1990A '%s' TP = 2048 Hz Set Mode\n", tag());
+
+			m_timer_test_mode->enable(0);
 
 			/* 2048 Hz time pulse */
 			m_timer_tp->adjust(attotime::zero, 0, attotime::from_hz(2048*2));
 			break;
 
 		case MODE_TEST:
-			if (LOG) logerror("UPD1990A Test Mode not supported!\n");
+			if (LOG) logerror("uPD1990A '%s' Test Mode\n", tag());
 
-			if (m_oe)
-			{
-				/* time counter is advanced at 1024 Hz from "Second" counter input */
-			}
-			else
-			{
-				/* each counter is advanced at 1024 Hz in parallel, overflow carry does not affect next counter */
-			}
+			/* disable time counter */
+			m_timer_clock->enable(0);
 
+			/* disable data out pulse */
+			m_timer_data_out->enable(0);
+
+			m_timer_test_mode->enable(1);
+
+			m_timer_test_mode->adjust(attotime::zero, 0, attotime::from_hz(1024));
 			break;
 		}
 	}
@@ -428,9 +395,9 @@ WRITE_LINE_MEMBER( upd1990a_device::stb_w )
 //  clk_w -
 //-------------------------------------------------
 
-WRITE_LINE_MEMBER( upd1990a_device::clk_w )
+WRITE_LINE_MEMBER( upd1990a_rtc_device::clk_w )
 {
-	if (LOG) logerror("UPD1990A CLK %u\n", state);
+	if (LOG) logerror("uPD1990A '%s' CLK %u\n", tag(), state);
 
 	if (!m_clk && state) // rising edge
 	{
@@ -455,9 +422,9 @@ WRITE_LINE_MEMBER( upd1990a_device::clk_w )
 			{
 				m_data_out = BIT(m_shift_reg[0], 0);
 
-				if (LOG) logerror("UPD1990A DATA OUT %u\n", m_data_out);
+				if (LOG) logerror("uPD1990A '%s' DATA OUT %u\n", tag(), m_data_out);
 
-				devcb_call_write_line(&m_out_data_func, m_data_out);
+				m_out_data_func(m_data_out);
 			}
 		}
 	}
@@ -470,11 +437,11 @@ WRITE_LINE_MEMBER( upd1990a_device::clk_w )
 //  c0_w -
 //-------------------------------------------------
 
-WRITE_LINE_MEMBER( upd1990a_device::c0_w )
+WRITE_LINE_MEMBER( upd1990a_rtc_device::c0_w )
 {
-	if (LOG) logerror("UPD1990A C0 %u\n", state);
+	if (LOG) logerror("uPD1990A '%s' C0 %u\n", tag(), state);
 
-	m_c = (m_c & 0x06) | state;
+	m_c_unlatched = (m_c_unlatched & 0x06) | state;
 }
 
 
@@ -482,11 +449,11 @@ WRITE_LINE_MEMBER( upd1990a_device::c0_w )
 //  c1_w -
 //-------------------------------------------------
 
-WRITE_LINE_MEMBER( upd1990a_device::c1_w )
+WRITE_LINE_MEMBER( upd1990a_rtc_device::c1_w )
 {
-	if (LOG) logerror("UPD1990A C1 %u\n", state);
+	if (LOG) logerror("uPD1990A '%s' C1 %u\n", tag(), state);
 
-	m_c = (m_c & 0x05) | (state << 1);
+	m_c_unlatched = (m_c_unlatched & 0x05) | (state << 1);
 }
 
 
@@ -494,11 +461,11 @@ WRITE_LINE_MEMBER( upd1990a_device::c1_w )
 //  c2_w -
 //-------------------------------------------------
 
-WRITE_LINE_MEMBER( upd1990a_device::c2_w )
+WRITE_LINE_MEMBER( upd1990a_rtc_device::c2_w )
 {
-	if (LOG) logerror("UPD1990A C2 %u\n", state);
+	if (LOG) logerror("uPD1990A '%s' C2 %u\n", tag(), state);
 
-	m_c = (m_c & 0x03) | (state << 2);
+	m_c_unlatched = (m_c_unlatched & 0x03) | (state << 2);
 }
 
 
@@ -506,9 +473,9 @@ WRITE_LINE_MEMBER( upd1990a_device::c2_w )
 //  data_in_w -
 //-------------------------------------------------
 
-WRITE_LINE_MEMBER( upd1990a_device::data_in_w )
+WRITE_LINE_MEMBER( upd1990a_rtc_device::data_in_w )
 {
-	if (LOG) logerror("UPD1990A DATA IN %u\n", state);
+	if (LOG) logerror("uPD1990A '%s' DATA IN %u\n", tag(), state);
 
 	m_data_in = state;
 }
@@ -518,7 +485,7 @@ WRITE_LINE_MEMBER( upd1990a_device::data_in_w )
 //  data_out_r -
 //-------------------------------------------------
 
-READ_LINE_MEMBER( upd1990a_device::data_out_r )
+READ_LINE_MEMBER( upd1990a_rtc_device::data_out_r )
 {
 	return m_data_out;
 }
@@ -528,7 +495,7 @@ READ_LINE_MEMBER( upd1990a_device::data_out_r )
 //  tp_r -
 //-------------------------------------------------
 
-READ_LINE_MEMBER( upd1990a_device::tp_r )
+READ_LINE_MEMBER( upd1990a_rtc_device::tp_r )
 {
 	return m_tp;
 }

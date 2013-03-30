@@ -50,15 +50,14 @@
     TYPE DEFINITIONS
 ***************************************************************************/
 
-typedef struct _hard_disk_file hard_disk_file;
+struct hard_disk_file;
 
-typedef struct _hard_disk_info hard_disk_info;
-struct _hard_disk_info
+struct hard_disk_info
 {
-	UINT32			cylinders;
-	UINT32			heads;
-	UINT32			sectors;
-	UINT32			sectorbytes;
+	UINT32          cylinders;
+	UINT32          heads;
+	UINT32          sectors;
+	UINT32          sectorbytes;
 };
 
 
@@ -76,4 +75,4 @@ hard_disk_info *hard_disk_get_info(hard_disk_file *file);
 UINT32 hard_disk_read(hard_disk_file *file, UINT32 lbasector, void *buffer);
 UINT32 hard_disk_write(hard_disk_file *file, UINT32 lbasector, const void *buffer);
 
-#endif	/* __HARDDISK_H__ */
+#endif  /* __HARDDISK_H__ */

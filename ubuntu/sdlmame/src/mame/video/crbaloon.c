@@ -23,11 +23,11 @@
 
 ***************************************************************************/
 
-PALETTE_INIT( crbaloon )
+void crbaloon_state::palette_init()
 {
 	int i;
 
-	for (i = 0; i < machine.total_colors(); i++)
+	for (i = 0; i < machine().total_colors(); i++)
 	{
 		UINT8 pen;
 		int h, r, g, b;
@@ -42,41 +42,37 @@ PALETTE_INIT( crbaloon )
 		g = h * ((~pen >> 1) & 1);
 		b = h * ((~pen >> 2) & 1);
 
-		palette_set_color(machine, i, MAKE_RGB(r, g, b));
+		palette_set_color(machine(), i, MAKE_RGB(r, g, b));
 	}
 }
 
 
-WRITE8_HANDLER( crbaloon_videoram_w )
+WRITE8_MEMBER(crbaloon_state::crbaloon_videoram_w)
 {
-	crbaloon_state *state = space->machine().driver_data<crbaloon_state>();
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_videoram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( crbaloon_colorram_w )
+WRITE8_MEMBER(crbaloon_state::crbaloon_colorram_w)
 {
-	crbaloon_state *state = space->machine().driver_data<crbaloon_state>();
-	state->m_colorram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_colorram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(crbaloon_state::get_bg_tile_info)
 {
-	crbaloon_state *state = machine.driver_data<crbaloon_state>();
-	int code = state->m_videoram[tile_index];
-	int color = state->m_colorram[tile_index] & 0x0f;
+	int code = m_videoram[tile_index];
+	int color = m_colorram[tile_index] & 0x0f;
 
-	SET_TILE_INFO(0, code, color, 0);
+	SET_TILE_INFO_MEMBER(0, code, color, 0);
 }
 
-VIDEO_START( crbaloon )
+void crbaloon_state::video_start()
 {
-	crbaloon_state *state = machine.driver_data<crbaloon_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_rows_flip_xy,  8, 8, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(crbaloon_state::get_bg_tile_info),this), TILEMAP_SCAN_ROWS_FLIP_XY,  8, 8, 32, 32);
 
-	state->save_item(NAME(state->m_collision_address));
-	state->save_item(NAME(state->m_collision_address_clear));
+	save_item(NAME(m_collision_address));
+	save_item(NAME(m_collision_address_clear));
 }
 
 
@@ -95,7 +91,7 @@ void crbaloon_set_clear_collision_address(running_machine &machine, int _crbaloo
 
 
 
-static void draw_sprite_and_check_collision(running_machine &machine, bitmap_t *bitmap)
+static void draw_sprite_and_check_collision(running_machine &machine, bitmap_ind16 &bitmap)
 {
 	crbaloon_state *state = machine.driver_data<crbaloon_state>();
 	int y;
@@ -103,14 +99,14 @@ static void draw_sprite_and_check_collision(running_machine &machine, bitmap_t *
 	UINT8 color = state->m_spriteram[0] >> 4;
 	UINT8 sy = state->m_spriteram[2] - 32;
 
-	UINT8 *gfx = machine.region("gfx2")->base() + (code << 7);
+	UINT8 *gfx = state->memregion("gfx2")->base() + (code << 7);
 
 
-	if (flip_screen_get(machine))
+	if (state->flip_screen())
 		sy += 32;
 
 	/* assume no collision */
-    state->m_collision_address = 0xffff;
+	state->m_collision_address = 0xffff;
 
 	for (y = 0x1f; y >= 0; y--)
 	{
@@ -131,29 +127,28 @@ static void draw_sprite_and_check_collision(running_machine &machine, bitmap_t *
 			/* draw the current pixel, but check collision first */
 			if (bit)
 			{
-				if (*BITMAP_ADDR16(bitmap, sy, sx) & 0x01)
+				if (bitmap.pix16(sy, sx) & 0x01)
 					/* compute the collision address -- the +1 is via observation
-                       of the game code, probably wrong for cocktail mode */
+					   of the game code, probably wrong for cocktail mode */
 					state->m_collision_address = ((((sy ^ 0xff) >> 3) << 5) | ((sx ^ 0xff) >> 3)) + 1;
 
-				*BITMAP_ADDR16(bitmap, sy, sx) = (color << 1) | 1;
+				bitmap.pix16(sy, sx) = (color << 1) | 1;
 			}
 
 			sx = sx + 1;
 			data = data << 1;
-        }
+		}
 
-        sy = sy + 1;
+		sy = sy + 1;
 	}
 }
 
 
-SCREEN_UPDATE( crbaloon )
+UINT32 crbaloon_state::screen_update_crbaloon(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	crbaloon_state *state = screen->machine().driver_data<crbaloon_state>();
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
 
-	draw_sprite_and_check_collision(screen->machine(), bitmap);
+	draw_sprite_and_check_collision(machine(), bitmap);
 
 	return 0;
 }

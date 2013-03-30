@@ -7,12 +7,15 @@
 class zaxxon_state : public driver_device
 {
 public:
-	zaxxon_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	zaxxon_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"),
+		m_spriteram(*this, "spriteram"),
+		m_colorram(*this, "colorram"){ }
 
-	UINT8 *m_colorram;
-	UINT8 *m_videoram;
-	UINT8 *m_spriteram;
+	required_shared_ptr<UINT8> m_videoram;
+	optional_shared_ptr<UINT8> m_spriteram;
+	optional_shared_ptr<UINT8> m_colorram;
 
 	UINT8 m_int_enabled;
 	UINT8 m_coin_status[3];
@@ -34,44 +37,50 @@ public:
 	const UINT8 *m_color_codes;
 	tilemap_t *m_fg_tilemap;
 	tilemap_t *m_bg_tilemap;
+	DECLARE_WRITE8_MEMBER(int_enable_w);
+	DECLARE_READ8_MEMBER(razmataz_counter_r);
+	DECLARE_WRITE8_MEMBER(zaxxon_coin_counter_w);
+	DECLARE_WRITE8_MEMBER(zaxxon_coin_enable_w);
+	DECLARE_WRITE8_MEMBER(zaxxon_flipscreen_w);
+	DECLARE_WRITE8_MEMBER(zaxxon_fg_color_w);
+	DECLARE_WRITE8_MEMBER(zaxxon_bg_position_w);
+	DECLARE_WRITE8_MEMBER(zaxxon_bg_color_w);
+	DECLARE_WRITE8_MEMBER(zaxxon_bg_enable_w);
+	DECLARE_WRITE8_MEMBER(congo_fg_bank_w);
+	DECLARE_WRITE8_MEMBER(congo_color_bank_w);
+	DECLARE_WRITE8_MEMBER(zaxxon_videoram_w);
+	DECLARE_WRITE8_MEMBER(congo_colorram_w);
+	DECLARE_WRITE8_MEMBER(congo_sprite_custom_w);
+	DECLARE_CUSTOM_INPUT_MEMBER(razmataz_dial_r);
+	DECLARE_CUSTOM_INPUT_MEMBER(zaxxon_coin_r);
+	DECLARE_INPUT_CHANGED_MEMBER(service_switch);
+	DECLARE_INPUT_CHANGED_MEMBER(zaxxon_coin_inserted);
+	DECLARE_DRIVER_INIT(razmataz);
+	DECLARE_DRIVER_INIT(futspy);
+	DECLARE_DRIVER_INIT(zaxxonj);
+	DECLARE_DRIVER_INIT(szaxxon);
+	TILE_GET_INFO_MEMBER(get_bg_tile_info);
+	TILE_GET_INFO_MEMBER(zaxxon_get_fg_tile_info);
+	TILE_GET_INFO_MEMBER(razmataz_get_fg_tile_info);
+	TILE_GET_INFO_MEMBER(congo_get_fg_tile_info);
+	virtual void machine_start();
+	virtual void video_start();
+	virtual void palette_init();
+	DECLARE_VIDEO_START(razmataz);
+	DECLARE_VIDEO_START(congo);
+	UINT32 screen_update_zaxxon(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_futspy(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_razmataz(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_congo(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(vblank_int);
+	DECLARE_WRITE8_MEMBER(zaxxon_sound_a_w);
+	DECLARE_WRITE8_MEMBER(zaxxon_sound_b_w);
+	DECLARE_WRITE8_MEMBER(zaxxon_sound_c_w);
+	DECLARE_WRITE8_MEMBER(congo_sound_b_w);
+	DECLARE_WRITE8_MEMBER(congo_sound_c_w);
 };
 
 
 /*----------- defined in audio/zaxxon.c -----------*/
-
-WRITE8_DEVICE_HANDLER( zaxxon_sound_a_w );
-WRITE8_DEVICE_HANDLER( zaxxon_sound_b_w );
-WRITE8_DEVICE_HANDLER( zaxxon_sound_c_w );
-
-WRITE8_DEVICE_HANDLER( congo_sound_b_w );
-WRITE8_DEVICE_HANDLER( congo_sound_c_w );
-
 MACHINE_CONFIG_EXTERN( zaxxon_samples );
 MACHINE_CONFIG_EXTERN( congo_samples );
-
-
-/*----------- defined in video/zaxxon.c -----------*/
-
-WRITE8_HANDLER( zaxxon_flipscreen_w );
-WRITE8_HANDLER( zaxxon_fg_color_w );
-WRITE8_HANDLER( zaxxon_bg_position_w );
-WRITE8_HANDLER( zaxxon_bg_color_w );
-WRITE8_HANDLER( zaxxon_bg_enable_w );
-
-WRITE8_HANDLER( zaxxon_videoram_w );
-WRITE8_HANDLER( congo_colorram_w );
-
-WRITE8_HANDLER( congo_fg_bank_w );
-WRITE8_HANDLER( congo_color_bank_w );
-WRITE8_HANDLER( congo_sprite_custom_w );
-
-PALETTE_INIT( zaxxon );
-
-VIDEO_START( zaxxon );
-VIDEO_START( razmataz );
-VIDEO_START( congo );
-
-SCREEN_UPDATE( zaxxon );
-SCREEN_UPDATE( razmataz );
-SCREEN_UPDATE( congo );
-SCREEN_UPDATE( futspy );

@@ -16,13 +16,12 @@
 #include "2608intf.h"
 #include "fm.h"
 
-typedef struct _ym2608_state ym2608_state;
-struct _ym2608_state
+struct ym2608_state
 {
-	sound_stream *	stream;
-	emu_timer *	timer[2];
-	void *			chip;
-	void *			psg;
+	sound_stream *  stream;
+	emu_timer * timer[2];
+	void *          chip;
+	void *          psg;
 	const ym2608_interface *intf;
 	device_t *device;
 };
@@ -32,7 +31,7 @@ INLINE ym2608_state *get_safe_token(device_t *device)
 {
 	assert(device != NULL);
 	assert(device->type() == YM2608);
-	return (ym2608_state *)downcast<legacy_device_base *>(device)->token();
+	return (ym2608_state *)downcast<ym2608_device *>(device)->token();
 }
 
 
@@ -94,11 +93,11 @@ static void timer_handler(void *param,int c,int count,int clock)
 {
 	ym2608_state *info = (ym2608_state *)param;
 	if( count == 0 )
-	{	/* Reset FM Timer */
+	{   /* Reset FM Timer */
 		info->timer[c]->enable(false);
 	}
 	else
-	{	/* Start FM Timer */
+	{   /* Start FM Timer */
 		attotime period = attotime::from_hz(clock) * count;
 		if (!info->timer[c]->enable(true))
 			info->timer[c]->adjust(period);
@@ -119,9 +118,8 @@ static STREAM_UPDATE( ym2608_stream_update )
 }
 
 
-static STATE_POSTLOAD( ym2608_intf_postload )
+static void ym2608_intf_postload(ym2608_state *info)
 {
-	ym2608_state *info = (ym2608_state *)param;
 	ym2608_postload(info->chip);
 }
 
@@ -137,7 +135,7 @@ static DEVICE_START( ym2608 )
 		},
 		NULL
 	};
-	const ym2608_interface *intf = device->baseconfig().static_config() ? (const ym2608_interface *)device->baseconfig().static_config() : &generic_2608;
+	const ym2608_interface *intf = device->static_config() ? (const ym2608_interface *)device->static_config() : &generic_2608;
 	int rate = device->clock()/72;
 	void *pcmbufa;
 	int  pcmsizea;
@@ -163,11 +161,11 @@ static DEVICE_START( ym2608 )
 
 	/* initialize YM2608 */
 	info->chip = ym2608_init(info,device,device->clock(),rate,
-		           pcmbufa,pcmsizea,
-		           timer_handler,IRQHandler,&psgintf);
+					pcmbufa,pcmsizea,
+					timer_handler,IRQHandler,&psgintf);
 	assert_always(info->chip != NULL, "Error creating YM2608 chip");
 
-	device->machine().state().register_postload(ym2608_intf_postload, info);
+	device->machine().save().register_postload(save_prepost_delegate(FUNC(ym2608_intf_postload), info));
 }
 
 static DEVICE_STOP( ym2608 )
@@ -196,41 +194,67 @@ WRITE8_DEVICE_HANDLER( ym2608_w )
 	ym2608_write(info->chip, offset & 3, data);
 }
 
-READ8_DEVICE_HANDLER( ym2608_read_port_r ) { return ym2608_r(device, 1); }
-READ8_DEVICE_HANDLER( ym2608_status_port_a_r ) { return ym2608_r(device, 0); }
-READ8_DEVICE_HANDLER( ym2608_status_port_b_r ) { return ym2608_r(device, 2); }
+READ8_DEVICE_HANDLER( ym2608_read_port_r ) { return ym2608_r(device, space, 1); }
+READ8_DEVICE_HANDLER( ym2608_status_port_a_r ) { return ym2608_r(device, space, 0); }
+READ8_DEVICE_HANDLER( ym2608_status_port_b_r ) { return ym2608_r(device, space, 2); }
 
-WRITE8_DEVICE_HANDLER( ym2608_control_port_a_w ) { ym2608_w(device, 0, data); }
-WRITE8_DEVICE_HANDLER( ym2608_control_port_b_w ) { ym2608_w(device, 2, data); }
-WRITE8_DEVICE_HANDLER( ym2608_data_port_a_w ) { ym2608_w(device, 1, data); }
-WRITE8_DEVICE_HANDLER( ym2608_data_port_b_w ) { ym2608_w(device, 3, data); }
+WRITE8_DEVICE_HANDLER( ym2608_control_port_a_w ) { ym2608_w(device, space, 0, data); }
+WRITE8_DEVICE_HANDLER( ym2608_control_port_b_w ) { ym2608_w(device, space, 2, data); }
+WRITE8_DEVICE_HANDLER( ym2608_data_port_a_w ) { ym2608_w(device, space, 1, data); }
+WRITE8_DEVICE_HANDLER( ym2608_data_port_b_w ) { ym2608_w(device, space, 3, data); }
 
+const device_type YM2608 = &device_creator<ym2608_device>;
 
-
-/**************************************************************************
- * Generic get_info
- **************************************************************************/
-
-DEVICE_GET_INFO( ym2608 )
+ym2608_device::ym2608_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, YM2608, "YM2608", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
 {
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(ym2608_state);				break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME( ym2608 );				break;
-		case DEVINFO_FCT_STOP:							info->stop = DEVICE_STOP_NAME( ym2608 );				break;
-		case DEVINFO_FCT_RESET:							info->reset = DEVICE_RESET_NAME( ym2608 );				break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "YM2608");							break;
-		case DEVINFO_STR_FAMILY:					strcpy(info->s, "Yamaha FM");						break;
-		case DEVINFO_STR_VERSION:					strcpy(info->s, "1.0");								break;
-		case DEVINFO_STR_SOURCE_FILE:						strcpy(info->s, __FILE__);							break;
-		case DEVINFO_STR_CREDITS:					strcpy(info->s, "Copyright Nicola Salmoria and the MAME Team"); break;
-	}
+	m_token = global_alloc_clear(ym2608_state);
 }
 
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
 
-DEFINE_LEGACY_SOUND_DEVICE(YM2608, ym2608);
+void ym2608_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void ym2608_device::device_start()
+{
+	DEVICE_START_NAME( ym2608 )(this);
+}
+
+//-------------------------------------------------
+//  device_reset - device-specific reset
+//-------------------------------------------------
+
+void ym2608_device::device_reset()
+{
+	DEVICE_RESET_NAME( ym2608 )(this);
+}
+
+//-------------------------------------------------
+//  device_stop - device-specific stop
+//-------------------------------------------------
+
+void ym2608_device::device_stop()
+{
+	DEVICE_STOP_NAME( ym2608 )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void ym2608_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}

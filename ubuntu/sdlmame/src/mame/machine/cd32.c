@@ -20,54 +20,57 @@ TODO: Add CDDA support
 
 *********************************************************************************/
 
-#define LOG_AKIKO		0
-#define LOG_AKIKO_CD	0
+#define LOG_AKIKO       0
+#define LOG_AKIKO_CD    0
 
-#define CD_SECTOR_TIME		(1000/((150*1024)/2048))	/* 1X CDROM sector time in msec (300KBps) */
+#define CD_SECTOR_TIME      (1000/((150*1024)/2048))    /* 1X CDROM sector time in msec (300KBps) */
 
 
-typedef struct _akiko_state akiko_state;
-struct _akiko_state
+class akiko_state
 {
+public:
 	running_machine &machine() const { assert(m_machine != NULL); return *m_machine; }
+	void set_machine(running_machine &machine) { m_machine = &machine; }
 
-	running_machine *m_machine;
 	address_space *m_space;
 
 	/* chunky to planar converter */
-	UINT32	m_c2p_input_buffer[8];
-	UINT32	m_c2p_output_buffer[8];
-	UINT32	m_c2p_input_index;
-	UINT32	m_c2p_output_index;
+	UINT32  m_c2p_input_buffer[8];
+	UINT32  m_c2p_output_buffer[8];
+	UINT32  m_c2p_input_index;
+	UINT32  m_c2p_output_index;
 
 	/* i2c bus */
-	int		m_i2c_scl_out;
-	int		m_i2c_scl_dir;
-	int		m_i2c_sda_out;
-	int		m_i2c_sda_dir;
+	int     m_i2c_scl_out;
+	int     m_i2c_scl_dir;
+	int     m_i2c_sda_out;
+	int     m_i2c_sda_dir;
 
 	/* cdrom */
-	UINT32	m_cdrom_status[2];
-	UINT32	m_cdrom_address[2];
-	UINT32	m_cdrom_track_index;
-	UINT32	m_cdrom_lba_start;
-	UINT32	m_cdrom_lba_end;
-	UINT32	m_cdrom_lba_cur;
-	UINT16	m_cdrom_readmask;
-	UINT16	m_cdrom_readreqmask;
-	UINT32	m_cdrom_dmacontrol;
-	UINT32	m_cdrom_numtracks;
-	UINT8	m_cdrom_speed;
-	UINT8	m_cdrom_cmd_start;
-	UINT8	m_cdrom_cmd_end;
-	UINT8	m_cdrom_cmd_resp;
+	UINT32  m_cdrom_status[2];
+	UINT32  m_cdrom_address[2];
+	UINT32  m_cdrom_track_index;
+	UINT32  m_cdrom_lba_start;
+	UINT32  m_cdrom_lba_end;
+	UINT32  m_cdrom_lba_cur;
+	UINT16  m_cdrom_readmask;
+	UINT16  m_cdrom_readreqmask;
+	UINT32  m_cdrom_dmacontrol;
+	UINT32  m_cdrom_numtracks;
+	UINT8   m_cdrom_speed;
+	UINT8   m_cdrom_cmd_start;
+	UINT8   m_cdrom_cmd_end;
+	UINT8   m_cdrom_cmd_resp;
 	cdrom_file *m_cdrom;
-	UINT8 *	m_cdrom_toc;
+	UINT8 * m_cdrom_toc;
 	emu_timer *m_dma_timer;
 	emu_timer *m_frame_timer;
 	device_t *m_i2cmem;
 
 	int m_cdrom_is_device;
+
+private:
+	running_machine *m_machine;
 };
 
 static TIMER_CALLBACK(akiko_dma_proc);
@@ -78,7 +81,7 @@ INLINE akiko_state *get_safe_token(device_t *device)
 	assert(device != NULL);
 	assert(device->type() == AKIKO);
 
-	return (akiko_state *)downcast<legacy_device_base *>(device)->token();
+	return (akiko_state *)downcast<akiko_device *>(device)->token();
 }
 
 static DEVICE_STOP( akiko )
@@ -86,7 +89,6 @@ static DEVICE_STOP( akiko )
 	akiko_state *state = get_safe_token(device);
 	if (!state->m_cdrom_is_device)
 	{
-		akiko_state *state = get_safe_token(device);
 		if( state->m_cdrom )
 		{
 			cdrom_close(state->m_cdrom);
@@ -100,18 +102,17 @@ static DEVICE_RESET( akiko )
 	running_machine &machine = device->machine();
 	akiko_state *state = get_safe_token(device);
 
-	device_t *cddevice;
-	cddevice = machine.device("cdrom");
+	cdrom_image_device *cddevice = machine.device<cdrom_image_device>("cdrom");
 	if (cddevice!=NULL)
 	{
 		// MESS case
-		state->m_cdrom = cd_get_cdrom_file(cddevice);
+		state->m_cdrom = cddevice->get_cdrom_file();
 		state->m_cdrom_is_device = 1;
 	}
 	else
 	{
 		// MAME case
-		state->m_cdrom = cdrom_open(get_disk_handle(machine, "cdrom"));
+		state->m_cdrom = cdrom_open(get_disk_handle(machine, ":cdrom"));
 		state->m_cdrom_is_device = 0;
 	}
 
@@ -120,8 +121,8 @@ static DEVICE_RESET( akiko )
 	if ( state->m_cdrom != NULL && cdrom_get_last_track(state->m_cdrom) )
 	{
 		UINT8 *p;
-		int		i, addrctrl = cdrom_get_adr_control( state->m_cdrom, 0 );
-		UINT32	discend;
+		int     i, addrctrl = cdrom_get_adr_control( state->m_cdrom, 0 );
+		UINT32  discend;
 
 		discend = cdrom_get_track_start(state->m_cdrom,cdrom_get_last_track(state->m_cdrom)-1);
 		discend += cdrom_get_toc(state->m_cdrom)->tracks[cdrom_get_last_track(state->m_cdrom)-1].frames;
@@ -150,7 +151,7 @@ static DEVICE_RESET( akiko )
 
 		for( i = 0; i < cdrom_get_last_track(state->m_cdrom); i++ )
 		{
-			UINT32	trackpos = cdrom_get_track_start(state->m_cdrom,i);
+			UINT32  trackpos = cdrom_get_track_start(state->m_cdrom,i);
 
 			trackpos = lba_to_msf(trackpos);
 			addrctrl = cdrom_get_adr_control( state->m_cdrom, i );
@@ -172,8 +173,8 @@ static DEVICE_START( akiko )
 	running_machine &machine = device->machine();
 	akiko_state *state = get_safe_token(device);
 
-	state->m_machine = &machine;
-	state->m_space = machine.device("maincpu")->memory().space(AS_PROGRAM);
+	state->set_machine(machine);
+	state->m_space = &machine.device("maincpu")->memory().space(AS_PROGRAM);
 	state->m_c2p_input_index = 0;
 	state->m_c2p_output_index = 0;
 
@@ -218,7 +219,7 @@ static void akiko_nvram_write(akiko_state *state, UINT32 data)
 
 static UINT32 akiko_nvram_read(akiko_state *state)
 {
-	UINT32	v = 0;
+	UINT32  v = 0;
 
 	if ( state->m_i2c_scl_dir )
 	{
@@ -284,21 +285,21 @@ static UINT32 akiko_c2p_read(akiko_state *state)
 
 static const char *const akiko_reg_names[] =
 {
-	/*0*/	"ID",
-	/*1*/	"CDROM STATUS 1",
-	/*2*/	"CDROM_STATUS 2",
-	/*3*/	"???",
-	/*4*/	"CDROM ADDRESS 1",
-	/*5*/	"CDROM ADDRESS 2",
-	/*6*/	"CDROM COMMAND 1",
-	/*7*/	"CDROM COMMAND 2",
-	/*8*/	"CDROM READMASK",
-	/*9*/	"CDROM DMACONTROL",
-	/*A*/	"???",
-	/*B*/	"???",
-	/*C*/	"NVRAM",
-	/*D*/	"???",
-	/*E*/	"C2P"
+	/*0*/   "ID",
+	/*1*/   "CDROM STATUS 1",
+	/*2*/   "CDROM_STATUS 2",
+	/*3*/   "???",
+	/*4*/   "CDROM ADDRESS 1",
+	/*5*/   "CDROM ADDRESS 2",
+	/*6*/   "CDROM COMMAND 1",
+	/*7*/   "CDROM COMMAND 2",
+	/*8*/   "CDROM READMASK",
+	/*9*/   "CDROM DMACONTROL",
+	/*A*/   "???",
+	/*B*/   "???",
+	/*C*/   "NVRAM",
+	/*D*/   "???",
+	/*E*/   "C2P"
 };
 
 static const char* get_akiko_reg_name(int reg)
@@ -375,20 +376,20 @@ static UINT8 akiko_cdda_getstatus(akiko_state *state, UINT32 *lba)
 
 			if (cdda_audio_paused(cdda))
 			{
-				return 0x12;	/* audio paused */
+				return 0x12;    /* audio paused */
 			}
 			else
 			{
-				return 0x11;	/* audio in progress */
+				return 0x11;    /* audio in progress */
 			}
 		}
 		else if (cdda_audio_ended(cdda))
 		{
-			return 0x13;	/* audio ended */
+			return 0x13;    /* audio ended */
 		}
 	}
 
-	return 0x15;	/* no audio status */
+	return 0x15;    /* no audio status */
 }
 
 static void akiko_set_cd_status(akiko_state *state, UINT32 status)
@@ -398,7 +399,7 @@ static void akiko_set_cd_status(akiko_state *state, UINT32 status)
 	if ( state->m_cdrom_status[0] & state->m_cdrom_status[1] )
 	{
 		if (LOG_AKIKO_CD) logerror( "Akiko CD IRQ\n" );
-		amiga_custom_w(state->m_space, REG_INTREQ, 0x8000 | INTENA_PORTS, 0xffff);
+		amiga_custom_w(*state->m_space, REG_INTREQ, 0x8000 | INTENA_PORTS, 0xffff);
 	}
 }
 
@@ -411,11 +412,11 @@ static TIMER_CALLBACK(akiko_frame_proc)
 
 	if (cdda != NULL)
 	{
-		UINT8	s = akiko_cdda_getstatus(state, NULL);
+		UINT8   s = akiko_cdda_getstatus(state, NULL);
 
 		if ( s == 0x11 )
 		{
-			akiko_set_cd_status(state, 0x80000000);	/* subcode ready */
+			akiko_set_cd_status(state, 0x80000000); /* subcode ready */
 		}
 
 		state->m_frame_timer->adjust( attotime::from_hz( 75 ) );
@@ -424,7 +425,7 @@ static TIMER_CALLBACK(akiko_frame_proc)
 
 static UINT32 lba_from_triplet( UINT8 *triplet )
 {
-	UINT32	r;
+	UINT32  r;
 
 	r = bcd_2_dec(triplet[0]) * (60*75);
 	r += bcd_2_dec(triplet[1]) * 75;
@@ -436,8 +437,8 @@ static UINT32 lba_from_triplet( UINT8 *triplet )
 static TIMER_CALLBACK(akiko_dma_proc)
 {
 	akiko_state *state = (akiko_state *)ptr;
-	UINT8	buf[2352];
-	int		index;
+	UINT8   buf[2352];
+	int     index;
 
 	if ( (state->m_cdrom_dmacontrol & 0x04000000) == 0 )
 		return;
@@ -450,12 +451,12 @@ static TIMER_CALLBACK(akiko_dma_proc)
 	if ( state->m_cdrom_readreqmask & ( 1 << index ) )
 	{
 		amiga_state *amiga = machine.driver_data<amiga_state>();
-		UINT32	track = cdrom_get_track( state->m_cdrom, state->m_cdrom_lba_cur );
-		UINT32	datasize = cdrom_get_toc( state->m_cdrom )->tracks[track].datasize;
-		UINT32	subsize = cdrom_get_toc( state->m_cdrom )->tracks[track].subsize;
-		int		i;
+		UINT32  track = cdrom_get_track( state->m_cdrom, state->m_cdrom_lba_cur );
+		UINT32  datasize = cdrom_get_toc( state->m_cdrom )->tracks[track].datasize;
+		UINT32  subsize = cdrom_get_toc( state->m_cdrom )->tracks[track].subsize;
+		int     i;
 
-		UINT32	curmsf = lba_to_msf( state->m_cdrom_lba_cur );
+		UINT32  curmsf = lba_to_msf( state->m_cdrom_lba_cur );
 		memset( buf, 0, 16 );
 
 		buf[3] = state->m_cdrom_lba_cur - state->m_cdrom_lba_start;
@@ -486,7 +487,7 @@ static TIMER_CALLBACK(akiko_dma_proc)
 
 		for( i = 0; i < 2352; i += 2 )
 		{
-			UINT16	data;
+			UINT16  data;
 
 			data = buf[i];
 			data <<= 8;
@@ -524,10 +525,10 @@ static void akiko_start_dma(akiko_state *state)
 
 static void akiko_setup_response( akiko_state *state, int len, UINT8 *r1 )
 {
-	int		resp_addr = state->m_cdrom_address[1];
-	UINT8	resp_csum = 0xff;
-	UINT8	resp_buffer[32];
-	int		i;
+	int     resp_addr = state->m_cdrom_address[1];
+	UINT8   resp_csum = 0xff;
+	UINT8   resp_buffer[32];
+	int     i;
 
 	memset( resp_buffer, 0, sizeof( resp_buffer ) );
 
@@ -552,8 +553,8 @@ static void akiko_setup_response( akiko_state *state, int len, UINT8 *r1 )
 static TIMER_CALLBACK( akiko_cd_delayed_cmd )
 {
 	akiko_state *state = (akiko_state *)ptr;
-	UINT8	resp[32];
-	UINT8	cddastatus;
+	UINT8   resp[32];
+	UINT8   cddastatus;
 
 	if ( state->m_cdrom_status[0] & 0x10000000 )
 		return;
@@ -593,15 +594,15 @@ static TIMER_CALLBACK( akiko_cd_delayed_cmd )
 
 static void akiko_update_cdrom(akiko_state *state)
 {
-	UINT8	resp[32], cmdbuf[32];
+	UINT8   resp[32], cmdbuf[32];
 
 	if ( state->m_cdrom_status[0] & 0x10000000 )
 		return;
 
 	while ( state->m_cdrom_cmd_start != state->m_cdrom_cmd_end )
 	{
-		UINT32	cmd_addr = state->m_cdrom_address[1] + 0x200 + state->m_cdrom_cmd_start;
-		int		cmd = state->m_space->read_byte( cmd_addr );
+		UINT32  cmd_addr = state->m_cdrom_address[1] + 0x200 + state->m_cdrom_cmd_start;
+		int     cmd = state->m_space->read_byte( cmd_addr );
 
 		memset( resp, 0, sizeof( resp ) );
 		resp[0] = cmd;
@@ -638,8 +639,8 @@ static void akiko_update_cdrom(akiko_state *state)
 		}
 		else if ( cmd == 0x04 ) /* seek/read/play cd multi command */
 		{
-			int	i;
-			UINT32	startpos, endpos;
+			int i;
+			UINT32  startpos, endpos;
 
 			for( i = 0; i < 13; i++ )
 			{
@@ -709,7 +710,7 @@ static void akiko_update_cdrom(akiko_state *state)
 		}
 		else if ( cmd == 0x06 ) /* read subq */
 		{
-			UINT32	lba;
+			UINT32  lba;
 
 			resp[1] = 0x00;
 
@@ -717,10 +718,10 @@ static void akiko_update_cdrom(akiko_state *state)
 
 			if ( lba > 0 )
 			{
-				UINT32	disk_pos;
-				UINT32	track_pos;
-				UINT32	track;
-				int		addrctrl;
+				UINT32  disk_pos;
+				UINT32  track_pos;
+				UINT32  track;
+				int     addrctrl;
 
 				track = cdrom_get_track(state->m_cdrom, lba);
 				addrctrl = cdrom_get_adr_control(state->m_cdrom, track);
@@ -751,7 +752,7 @@ static void akiko_update_cdrom(akiko_state *state)
 
 			akiko_setup_response( state, 15, resp );
 		}
-		else if ( cmd == 0x07 )	/* check door status */
+		else if ( cmd == 0x07 ) /* check door status */
 		{
 			resp[1] = 0x01;
 
@@ -773,33 +774,32 @@ static void akiko_update_cdrom(akiko_state *state)
 READ32_DEVICE_HANDLER( amiga_akiko32_r )
 {
 	akiko_state *state = get_safe_token(device);
-	address_space *space = state->m_space;
-	UINT32		retval;
+	UINT32      retval;
 
 	if ( LOG_AKIKO && offset < (0x30/4) )
 	{
-		logerror( "Reading AKIKO reg %0x [%s] at PC=%06x\n", offset, get_akiko_reg_name(offset), cpu_get_pc(&space->device()) );
+		logerror( "Reading AKIKO reg %0x [%s] at PC=%06x\n", offset, get_akiko_reg_name(offset), state->m_space->device().safe_pc() );
 	}
 
 	switch( offset )
 	{
-		case 0x00/4:	/* ID */
-			if ( state->m_cdrom != NULL ) cdda_set_cdrom(space->machine().device("cdda"), state->m_cdrom);
+		case 0x00/4:    /* ID */
+			if ( state->m_cdrom != NULL ) cdda_set_cdrom(state->m_space->machine().device("cdda"), state->m_cdrom);
 			return 0x0000cafe;
 
-		case 0x04/4:	/* CDROM STATUS 1 */
+		case 0x04/4:    /* CDROM STATUS 1 */
 			return state->m_cdrom_status[0];
 
-		case 0x08/4:	/* CDROM STATUS 2 */
+		case 0x08/4:    /* CDROM STATUS 2 */
 			return state->m_cdrom_status[1];
 
-		case 0x10/4:	/* CDROM ADDRESS 1 */
+		case 0x10/4:    /* CDROM ADDRESS 1 */
 			return state->m_cdrom_address[0];
 
-		case 0x14/4:	/* CDROM ADDRESS 2 */
+		case 0x14/4:    /* CDROM ADDRESS 2 */
 			return state->m_cdrom_address[1];
 
-		case 0x18/4:	/* CDROM COMMAND 1 */
+		case 0x18/4:    /* CDROM COMMAND 1 */
 			akiko_update_cdrom(state);
 			retval = state->m_cdrom_cmd_start;
 			retval <<= 8;
@@ -807,24 +807,24 @@ READ32_DEVICE_HANDLER( amiga_akiko32_r )
 			retval <<= 8;
 			return retval;
 
-		case 0x1C/4:	/* CDROM COMMAND 2 */
+		case 0x1C/4:    /* CDROM COMMAND 2 */
 			akiko_update_cdrom(state);
 			retval = state->m_cdrom_cmd_end;
 			retval <<= 16;
 			return retval;
 
-		case 0x20/4:	/* CDROM DMA SECTOR READ MASK */
+		case 0x20/4:    /* CDROM DMA SECTOR READ MASK */
 			retval = state->m_cdrom_readmask << 16;
 			return retval;
 
-		case 0x24/4:	/* CDROM DMA ENABLE? */
+		case 0x24/4:    /* CDROM DMA ENABLE? */
 			retval = state->m_cdrom_dmacontrol;
 			return retval;
 
-		case 0x30/4:	/* NVRAM */
+		case 0x30/4:    /* NVRAM */
 			return akiko_nvram_read(state);
 
-		case 0x38/4:	/* C2P */
+		case 0x38/4:    /* C2P */
 			return akiko_c2p_read(state);
 
 		default:
@@ -837,33 +837,32 @@ READ32_DEVICE_HANDLER( amiga_akiko32_r )
 WRITE32_DEVICE_HANDLER( amiga_akiko32_w )
 {
 	akiko_state *state = get_safe_token(device);
-	address_space *space = state->m_space;
 
 	if ( LOG_AKIKO && offset < (0x30/4) )
 	{
-		logerror( "Writing AKIKO reg %0x [%s] with %08x at PC=%06x\n", offset, get_akiko_reg_name(offset), data, cpu_get_pc(&space->device()) );
+		logerror( "Writing AKIKO reg %0x [%s] with %08x at PC=%06x\n", offset, get_akiko_reg_name(offset), data, state->m_space->device().safe_pc() );
 	}
 
 	switch( offset )
 	{
-		case 0x04/4:	/* CDROM STATUS 1 */
+		case 0x04/4:    /* CDROM STATUS 1 */
 			state->m_cdrom_status[0] = data;
 			break;
 
-		case 0x08/4:	/* CDROM STATUS 2 */
+		case 0x08/4:    /* CDROM STATUS 2 */
 			state->m_cdrom_status[1] = data;
 			state->m_cdrom_status[0] &= data;
 			break;
 
-		case 0x10/4:	/* CDROM ADDRESS 1 */
+		case 0x10/4:    /* CDROM ADDRESS 1 */
 			state->m_cdrom_address[0] = data;
 			break;
 
-		case 0x14/4:	/* CDROM ADDRESS 2 */
+		case 0x14/4:    /* CDROM ADDRESS 2 */
 			state->m_cdrom_address[1] = data;
 			break;
 
-		case 0x18/4:	/* CDROM COMMAND 1 */
+		case 0x18/4:    /* CDROM COMMAND 1 */
 			if ( ACCESSING_BITS_16_23 )
 				state->m_cdrom_cmd_start = ( data >> 16 ) & 0xff;
 
@@ -873,14 +872,14 @@ WRITE32_DEVICE_HANDLER( amiga_akiko32_w )
 			akiko_update_cdrom(state);
 			break;
 
-		case 0x1C/4:	/* CDROM COMMAND 2 */
+		case 0x1C/4:    /* CDROM COMMAND 2 */
 			if ( ACCESSING_BITS_16_23 )
 				state->m_cdrom_cmd_end = ( data >> 16 ) & 0xff;
 
 			akiko_update_cdrom(state);
 			break;
 
-		case 0x20/4:	/* CDROM DMA SECTOR READ REQUEST WRITE */
+		case 0x20/4:    /* CDROM DMA SECTOR READ REQUEST WRITE */
 			if (LOG_AKIKO_CD) logerror( "Read Req mask W: data %08x - mem mask %08x\n", data, mem_mask );
 			if ( ACCESSING_BITS_16_31 )
 			{
@@ -889,7 +888,7 @@ WRITE32_DEVICE_HANDLER( amiga_akiko32_w )
 			}
 			break;
 
-		case 0x24/4:	/* CDROM DMA ENABLE? */
+		case 0x24/4:    /* CDROM DMA ENABLE? */
 			if (LOG_AKIKO_CD) logerror( "DMA enable W: data %08x - mem mask %08x\n", data, mem_mask );
 			if ( ( state->m_cdrom_dmacontrol ^ data ) & 0x04000000 )
 			{
@@ -912,17 +911,47 @@ WRITE32_DEVICE_HANDLER( amiga_akiko32_w )
 	}
 }
 
-/*-------------------------------------------------
-    device definition
--------------------------------------------------*/
+const device_type AKIKO = &device_creator<akiko_device>;
 
-static const char DEVTEMPLATE_SOURCE[] = __FILE__;
+akiko_device::akiko_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, AKIKO, "Akiko", tag, owner, clock)
+{
+	m_token = global_alloc_clear(akiko_state);
+}
 
-#define DEVTEMPLATE_ID(p,s)		p##akiko##s
-#define DEVTEMPLATE_FEATURES	DT_HAS_START | DT_HAS_STOP | DT_HAS_RESET
-#define DEVTEMPLATE_NAME		"Akiko"
-#define DEVTEMPLATE_FAMILY		"Amiga"
-#include "devtempl.h"
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
 
+void akiko_device::device_config_complete()
+{
+}
 
-DEFINE_LEGACY_DEVICE(AKIKO, akiko);
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void akiko_device::device_start()
+{
+	DEVICE_START_NAME( akiko )(this);
+}
+
+//-------------------------------------------------
+//  device_reset - device-specific reset
+//-------------------------------------------------
+
+void akiko_device::device_reset()
+{
+	DEVICE_RESET_NAME( akiko )(this);
+}
+
+//-------------------------------------------------
+//  device_stop - device-specific stop
+//-------------------------------------------------
+
+void akiko_device::device_stop()
+{
+	DEVICE_STOP_NAME( akiko )(this);
+}

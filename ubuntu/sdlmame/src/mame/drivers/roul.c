@@ -70,20 +70,28 @@ Stephh's notes (based on the game Z80 code and some tests) :
 class roul_state : public driver_device
 {
 public:
-	roul_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	roul_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) { }
 
 	UINT8 m_reg[0x10];
 	UINT8 *m_videobuf;
 	UINT8 m_lamp_old;
+	DECLARE_READ8_MEMBER(blitter_status_r);
+	DECLARE_WRITE8_MEMBER(blitter_cmd_w);
+	DECLARE_WRITE8_MEMBER(sound_latch_w);
+	DECLARE_WRITE8_MEMBER(ball_w);
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_roul(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
 #define VIDEOBUF_SIZE 256*256
 
 
-static PALETTE_INIT( roul )
+void roul_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int bit6, bit7, bit0, bit1, r, g, b;
 	int i;
 
@@ -102,12 +110,12 @@ static PALETTE_INIT( roul )
 		bit1 = (color_prom[0] >> 5) & 0x01;
 		r = 0x0e * bit6 + 0x1f * bit7 + 0x43 * bit0 + 0x8f * bit1;
 
-		palette_set_color(machine, i, MAKE_RGB(r, g, b));
+		palette_set_color(machine(), i, MAKE_RGB(r, g, b));
 		color_prom++;
 	}
 }
 
-static READ8_HANDLER( blitter_status_r )
+READ8_MEMBER(roul_state::blitter_status_r)
 {
 /*
 code check bit 6 and bit 7
@@ -115,74 +123,72 @@ bit 7 -> blitter ready
 bit 6 -> ??? (after unknown blitter command : [80][80][08][02])
 */
 //  return 0x80; // blitter ready
-//  logerror("Read unknown port $f5 at %04x\n",cpu_get_pc(&space->device()));
-	return space->machine().rand() & 0x00c0;
+//  logerror("Read unknown port $f5 at %04x\n",space.device().safe_pc());
+	return machine().rand() & 0x00c0;
 }
 
-static WRITE8_HANDLER( blitter_cmd_w )
+WRITE8_MEMBER(roul_state::blitter_cmd_w)
 {
-	roul_state *state = space->machine().driver_data<roul_state>();
-	state->m_reg[offset] = data;
+	m_reg[offset] = data;
 	if (offset==2)
 	{
 		int i,j;
-		int width	= state->m_reg[2];
-		int y		= state->m_reg[0];
-		int x		= state->m_reg[1];
-		int color	= state->m_reg[3] & 0x0f;
+		int width   = m_reg[2];
+		int y       = m_reg[0];
+		int x       = m_reg[1];
+		int color   = m_reg[3] & 0x0f;
 		int xdirection = 1, ydirection = 1;
 
-		if (state->m_reg[3] & 0x10) ydirection = -1;
-		if (state->m_reg[3] & 0x20) xdirection = -1;
+		if (m_reg[3] & 0x10) ydirection = -1;
+		if (m_reg[3] & 0x20) xdirection = -1;
 
 		if (width == 0x00) width = 0x100;
 
-		switch(state->m_reg[3] & 0xc0)
+		switch(m_reg[3] & 0xc0)
 		{
-			case 0x00: // state->m_reg[4] used?
+			case 0x00: // m_reg[4] used?
 				for (i = - width / 2; i < width / 2; i++)
 					for (j = - width / 2; j < width / 2; j++)
-						state->m_videobuf[(y + j) * 256 + x + i] = color;
-				logerror("Blitter command 0 : [%02x][%02x][%02x][%02x][%02x]\n",state->m_reg[0],state->m_reg[1],state->m_reg[2],state->m_reg[3],state->m_reg[4]);
+						m_videobuf[(y + j) * 256 + x + i] = color;
+				logerror("Blitter command 0 : [%02x][%02x][%02x][%02x][%02x]\n",m_reg[0],m_reg[1],m_reg[2],m_reg[3],m_reg[4]);
 				break;
-			case 0x40: // vertical line - state->m_reg[4] not used
+			case 0x40: // vertical line - m_reg[4] not used
 				for (i = 0; i < width; i++ )
-					state->m_videobuf[(y + i * ydirection) * 256 + x] = color;
+					m_videobuf[(y + i * ydirection) * 256 + x] = color;
 				break;
-			case 0x80: // horizontal line - state->m_reg[4] not used
+			case 0x80: // horizontal line - m_reg[4] not used
 				for (i = 0; i < width; i++ )
-					state->m_videobuf[y * 256 + x + i * xdirection] = color;
+					m_videobuf[y * 256 + x + i * xdirection] = color;
 				break;
-			case 0xc0: // diagonal line - state->m_reg[4] not used
+			case 0xc0: // diagonal line - m_reg[4] not used
 				for (i = 0; i < width; i++ )
-					state->m_videobuf[(y + i * ydirection) * 256 + x + i * xdirection] = color;
+					m_videobuf[(y + i * ydirection) * 256 + x + i * xdirection] = color;
 		}
 	}
 
 }
 
-static WRITE8_HANDLER( sound_latch_w )
+WRITE8_MEMBER(roul_state::sound_latch_w)
 {
-	soundlatch_w(space, 0, data & 0xff);
-	cputag_set_input_line(space->machine(), "soundcpu", 0, HOLD_LINE);
+	soundlatch_byte_w(space, 0, data & 0xff);
+	machine().device("soundcpu")->execute().set_input_line(0, HOLD_LINE);
 }
 
-static WRITE8_HANDLER( ball_w )
+WRITE8_MEMBER(roul_state::ball_w)
 {
-	roul_state *state = space->machine().driver_data<roul_state>();
 	int lamp = data;
 
 	output_set_lamp_value(data, 1);
-	output_set_lamp_value(state->m_lamp_old, 0);
-	state->m_lamp_old = lamp;
+	output_set_lamp_value(m_lamp_old, 0);
+	m_lamp_old = lamp;
 }
 
-static ADDRESS_MAP_START( roul_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( roul_map, AS_PROGRAM, 8, roul_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x8fff) AM_RAM AM_SHARE("nvram")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( roul_cpu_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( roul_cpu_io_map, AS_IO, 8, roul_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0xf0, 0xf4) AM_WRITE(blitter_cmd_w)
 	AM_RANGE(0xf5, 0xf5) AM_READ(blitter_status_r)
@@ -193,30 +199,28 @@ static ADDRESS_MAP_START( roul_cpu_io_map, AS_IO, 8 )
 	AM_RANGE(0xfe, 0xfe) AM_WRITE(sound_latch_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, roul_state )
 	AM_RANGE(0x0000, 0x0fff) AM_ROM
 	AM_RANGE(0x1000, 0x13ff) AM_RAM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sound_cpu_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( sound_cpu_io_map, AS_IO, 8, roul_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x00) AM_READ(soundlatch_r)
-	AM_RANGE(0x00, 0x01) AM_DEVWRITE("aysnd", ay8910_address_data_w)
+	AM_RANGE(0x00, 0x00) AM_READ(soundlatch_byte_r)
+	AM_RANGE(0x00, 0x01) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_data_w)
 ADDRESS_MAP_END
 
-static VIDEO_START(roul)
+void roul_state::video_start()
 {
-	roul_state *state = machine.driver_data<roul_state>();
-	state->m_videobuf = auto_alloc_array_clear(machine, UINT8, VIDEOBUF_SIZE);
+	m_videobuf = auto_alloc_array_clear(machine(), UINT8, VIDEOBUF_SIZE);
 }
 
-static SCREEN_UPDATE(roul)
+UINT32 roul_state::screen_update_roul(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	roul_state *state = screen->machine().driver_data<roul_state>();
 	int i,j;
 	for (i = 0; i < 256; i++)
 		for (j = 0; j < 256; j++)
-			*BITMAP_ADDR16(bitmap, j, i) = state->m_videobuf[j * 256 + 255 - i];
+			bitmap.pix16(j, i) = m_videobuf[j * 256 + 255 - i];
 	return 0;
 }
 
@@ -244,7 +248,7 @@ static INPUT_PORTS_START( roul )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START("DSW")
-    /* single - split - street - square / double street / dozen - column - 1 to 18 - 19 to 36 - red - black - odd - even */
+	/* single - split - street - square / double street / dozen - column - 1 to 18 - 19 to 36 - red - black - odd - even */
 	PORT_DIPNAME( 0x81, 0x00, "Max Bet" )
 	PORT_DIPSETTING(    0x00, "10 / 30 / 30" )
 	PORT_DIPSETTING(    0x80, "20 / 40 / 50" )
@@ -275,7 +279,7 @@ static MACHINE_CONFIG_START( roul, roul_state )
 	MCFG_CPU_ADD("maincpu", Z80, 4000000)
 	MCFG_CPU_PROGRAM_MAP(roul_map)
 	MCFG_CPU_IO_MAP(roul_cpu_io_map)
-	MCFG_CPU_VBLANK_INT("screen",nmi_line_pulse)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", roul_state, nmi_line_pulse)
 
 	MCFG_CPU_ADD("soundcpu", Z80, 4000000)
 	MCFG_CPU_PROGRAM_MAP(sound_map)
@@ -283,20 +287,17 @@ static MACHINE_CONFIG_START( roul, roul_state )
 
 	MCFG_NVRAM_ADD_0FILL("nvram")
 
-	MCFG_PALETTE_INIT(roul)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 0*8, 32*8-1)
-	MCFG_SCREEN_UPDATE(roul)
+	MCFG_SCREEN_UPDATE_DRIVER(roul_state, screen_update_roul)
 
 	MCFG_PALETTE_LENGTH(0x100)
 
-	MCFG_VIDEO_START(roul)
 
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 	MCFG_SOUND_ADD("aysnd", AY8910, 1000000)
@@ -305,15 +306,15 @@ MACHINE_CONFIG_END
 
 ROM_START(roul)
 	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD("roul.u19",	0x0000, 0x8000, CRC(1ec37876) SHA1(c2877646dad9daebc55db57d513ad448b1f4c923) )
+	ROM_LOAD("roul.u19",    0x0000, 0x8000, CRC(1ec37876) SHA1(c2877646dad9daebc55db57d513ad448b1f4c923) )
 
 	ROM_REGION( 0x10000, "soundcpu", 0 )
-	ROM_LOAD("roul.u12",	0x0000, 0x1000, CRC(356fe025) SHA1(bca69e090a852454e921130afbdd28021b62c44e) )
+	ROM_LOAD("roul.u12",    0x0000, 0x1000, CRC(356fe025) SHA1(bca69e090a852454e921130afbdd28021b62c44e) )
 	ROM_CONTINUE(0x0000,0x1000)
 
 	ROM_REGION( 0x0040, "proms", 0 )
-	ROM_LOAD( "roul.u53",	0x0000, 0x0020, CRC(1965dfaa) SHA1(114eccd3e478902ac7dbb10b9425784231ff581e) )
-	ROM_LOAD( "roul.u38",	0x0020, 0x0020, CRC(23ae22c1) SHA1(bf0383462976ec6341ffa8a173264ce820bc654a) )
+	ROM_LOAD( "roul.u53",   0x0000, 0x0020, CRC(1965dfaa) SHA1(114eccd3e478902ac7dbb10b9425784231ff581e) )
+	ROM_LOAD( "roul.u38",   0x0020, 0x0020, CRC(23ae22c1) SHA1(bf0383462976ec6341ffa8a173264ce820bc654a) )
 ROM_END
 
-GAMEL( 1990, roul,  0,   roul, roul, 0, ROT0, "bootleg", "Super Lucky Roulette", GAME_IMPERFECT_GRAPHICS, layout_roul )
+GAMEL( 1990, roul,  0,   roul, roul, driver_device, 0, ROT0, "bootleg", "Super Lucky Roulette", GAME_IMPERFECT_GRAPHICS, layout_roul )

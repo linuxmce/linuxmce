@@ -10,8 +10,8 @@
 #include "includes/arabian.h"
 
 /* Constants */
-#define BITMAP_WIDTH		256
-#define BITMAP_HEIGHT		256
+#define BITMAP_WIDTH        256
+#define BITMAP_HEIGHT       256
 
 
 /*************************************
@@ -20,7 +20,7 @@
  *
  *************************************/
 
-PALETTE_INIT( arabian )
+void arabian_state::palette_init()
 {
 	int i;
 
@@ -46,89 +46,89 @@ PALETTE_INIT( arabian )
 		int planea = (az | ar | ag | ab) & ena;
 
 		/*-------------------------------------------------------------------------
-            red derivation:
+		    red derivation:
 
-            ROUT.1200   = !IC192.11
-                        = !(!(!IC117.11 | !IC118.12))
-                        = !IC117.11 | !IC118.12
-                        = !(IC99.8 ^ IC119.6) | !(!(!BLNK & IC119.11 & BR))
-                        = !((!ARHF & !BLNK & AR & AZ) ^ !(AR & !BLNK)) | (!BLNK & IC119.11 & BR)
-                        = !BLNK & (!((!ARHF & AR & AZ) ^ !AR) | (IC119.11 & BR))
-                        = !BLNK & ((!(!ARHF & AR & AZ) ^ AR) | (BR & !(AZ | AR | AG | AB)))
+		    ROUT.1200   = !IC192.11
+		                = !(!(!IC117.11 | !IC118.12))
+		                = !IC117.11 | !IC118.12
+		                = !(IC99.8 ^ IC119.6) | !(!(!BLNK & IC119.11 & BR))
+		                = !((!ARHF & !BLNK & AR & AZ) ^ !(AR & !BLNK)) | (!BLNK & IC119.11 & BR)
+		                = !BLNK & (!((!ARHF & AR & AZ) ^ !AR) | (IC119.11 & BR))
+		                = !BLNK & ((!(!ARHF & AR & AZ) ^ AR) | (BR & !(AZ | AR | AG | AB)))
 
-            ROUT.1800   = !IC192.3
-                        = !(!(!IC119.6 | !IC118.12))
-                        = !IC119.6 | !IC118.12
-                        = !(!(AR & !BLNK) | !(!(!BLNK & IC119.11 & BZ)))
-                        = (AR & !BLNK) | (!BLNK & IC119.11 & BZ)
-                        = !BLNK & (AR | (BZ & !(AZ | AR | AG | AB)))
+		    ROUT.1800   = !IC192.3
+		                = !(!(!IC119.6 | !IC118.12))
+		                = !IC119.6 | !IC118.12
+		                = !(!(AR & !BLNK) | !(!(!BLNK & IC119.11 & BZ)))
+		                = (AR & !BLNK) | (!BLNK & IC119.11 & BZ)
+		                = !BLNK & (AR | (BZ & !(AZ | AR | AG | AB)))
 
-            RENA        = IC116.6
-                        = !IC192.11 | !IC192.3
-                        = ROUT.1200 | ROUT.1800
+		    RENA        = IC116.6
+		                = !IC192.11 | !IC192.3
+		                = ROUT.1200 | ROUT.1800
 
-            red.hi   = planea ? ar : bz;
-            red.lo   = planea ? ((!arhf & az) ? 0 : ar) : br;
-            red.base = (red.hi | red.lo)
-        -------------------------------------------------------------------------*/
+		    red.hi   = planea ? ar : bz;
+		    red.lo   = planea ? ((!arhf & az) ? 0 : ar) : br;
+		    red.base = (red.hi | red.lo)
+		-------------------------------------------------------------------------*/
 
 		int rhi = planea ? ar : enb ? bz : 0;
 		int rlo = planea ? (((!arhf) & az) ? 0 : ar) : enb ? br : 0;
 
 		/*-------------------------------------------------------------------------
-            green derivation:
+		    green derivation:
 
-            GOUT.750    = !IC192.8
-                        = !(!(!IC119.8 | !IC120.8))
-                        = !IC119.8 | !IC120.8
-                        = !(!(AG & !BLNK)) | !(!(!BLNK & IC119.11 & BB))
-                        = (AG & !BLNK) | (!BLNK & IC119.11 & BB)
-                        = !BLNK & (AG | (IC119.11 & BB))
-                        = !BLNK & (AG | (BB & !(AZ | AR | AG | AB)))
+		    GOUT.750    = !IC192.8
+		                = !(!(!IC119.8 | !IC120.8))
+		                = !IC119.8 | !IC120.8
+		                = !(!(AG & !BLNK)) | !(!(!BLNK & IC119.11 & BB))
+		                = (AG & !BLNK) | (!BLNK & IC119.11 & BB)
+		                = !BLNK & (AG | (IC119.11 & BB))
+		                = !BLNK & (AG | (BB & !(AZ | AR | AG | AB)))
 
-            GOUT.1200   = !IC192.6
-                        = !(!(!IC117.3 | !IC118.6))
-                        = !IC117.3 | !IC118.6
-                        = !(IC99.6 ^ IC119.8) | !(!(!BLNK & IC119.11 & BG))
-                        = !((!AGHF & !BLNK & AG & AZ) ^ !(AG & !BLNK)) | (!BLNK & IC119.11 & BG)
-                        = !BLNK & (!((!AGHF & AG & AZ) ^ !AG) | (IC119.11 & BG))
-                        = !BLNK & ((!(!AGHF & AG & AZ) ^ AG) | (BG & !(AZ | AR | AG | AB)))
+		    GOUT.1200   = !IC192.6
+		                = !(!(!IC117.3 | !IC118.6))
+		                = !IC117.3 | !IC118.6
+		                = !(IC99.6 ^ IC119.8) | !(!(!BLNK & IC119.11 & BG))
+		                = !((!AGHF & !BLNK & AG & AZ) ^ !(AG & !BLNK)) | (!BLNK & IC119.11 & BG)
+		                = !BLNK & (!((!AGHF & AG & AZ) ^ !AG) | (IC119.11 & BG))
+		                = !BLNK & ((!(!AGHF & AG & AZ) ^ AG) | (BG & !(AZ | AR | AG | AB)))
 
-            GENA        = IC116.8
-                        = !IC192.8 | !IC192.6
-                        = GOUT.750 | GOUT.1200
+		    GENA        = IC116.8
+		                = !IC192.8 | !IC192.6
+		                = GOUT.750 | GOUT.1200
 
-            grn.hi   = planea ? ag : bb;
-            grn.lo   = planea ? ((!aghf & az) ? 0 : ag) : bg;
-            grn.base = (grn.hi | grn.lo)
-        -------------------------------------------------------------------------*/
+		    grn.hi   = planea ? ag : bb;
+		    grn.lo   = planea ? ((!aghf & az) ? 0 : ag) : bg;
+		    grn.base = (grn.hi | grn.lo)
+		-------------------------------------------------------------------------*/
 
 		int ghi = planea ? ag : enb ? bb : 0;
 		int glo = planea ? (((!aghf) & az) ? 0 : ag) : enb ? bg : 0;
 
 		/*-------------------------------------------------------------------------
-            blue derivation:
+		    blue derivation:
 
-            BOUT.1200   = !IC117.6
-                        = !IC119.3
-                        = !(!(AB & !BLNK))
-                        = !BLNK & AB
+		    BOUT.1200   = !IC117.6
+		                = !IC119.3
+		                = !(!(AB & !BLNK))
+		                = !BLNK & AB
 
-            BENA        = !IC117.8
-                        = !(IC189.6 ^ IC119.3)
-                        = !((!ABHF & !BLNK & AB & AZ) ^ !(AB & !BLNK))
-                        = (!(!ABHF & !BLNK & AB & AZ) ^ (AB & !BLNK))
-                        = !BLNK & (!(!ABHF & AB & AZ) ^ AB)
+		    BENA        = !IC117.8
+		                = !(IC189.6 ^ IC119.3)
+		                = !((!ABHF & !BLNK & AB & AZ) ^ !(AB & !BLNK))
+		                = (!(!ABHF & !BLNK & AB & AZ) ^ (AB & !BLNK))
+		                = !BLNK & (!(!ABHF & AB & AZ) ^ AB)
 
-            blu.hi   = ab;
-            blu.base = ((!abhf & az) ? 0 : ab);
-        -------------------------------------------------------------------------*/
+		    blu.hi   = ab;
+		    blu.base = ((!abhf & az) ? 0 : ab);
+		-------------------------------------------------------------------------*/
 
 		int bhi = ab;
 		int bbase = ((!abhf) & az) ? 0 : ab;
 
 		/* convert an RGB color -
-           there are effectively 6 bits of color: 2 red, 2 green, 2 blue */
+		   there are effectively 6 bits of color: 2 red, 2 green, 2 blue */
 		r = ( rhi * (int)(((153.0 * 192) / 255) + 0.5)) +
 			( rlo * (int)(((102.0 * 192) / 255) + 0.5)) +
 			((rhi | rlo) ? 63 : 0);
@@ -139,7 +139,7 @@ PALETTE_INIT( arabian )
 
 		b = (bhi * 192) + (bbase * 63);
 
-		palette_set_color(machine, i, MAKE_RGB(r, g, b));
+		palette_set_color(machine(), i, MAKE_RGB(r, g, b));
 	}
 }
 
@@ -151,37 +151,36 @@ PALETTE_INIT( arabian )
  *
  *************************************/
 
-VIDEO_START( arabian )
+void arabian_state::video_start()
 {
-	arabian_state *state = machine.driver_data<arabian_state>();
-	UINT8 *gfxbase = machine.region("gfx1")->base();
+	UINT8 *gfxbase = memregion("gfx1")->base();
 	int offs;
 
 	/* allocate a common bitmap to use for both planes */
 	/* plane A (top plane with motion objects) is in the upper 4 bits */
 	/* plane B (bottom plane with playfield) is in the lower 4 bits */
-	state->m_main_bitmap = auto_alloc_array(machine, UINT8, BITMAP_WIDTH * BITMAP_HEIGHT);
+	m_main_bitmap = auto_alloc_array(machine(), UINT8, BITMAP_WIDTH * BITMAP_HEIGHT);
 
 	/* allocate memory for the converted graphics data */
-	state->m_converted_gfx = auto_alloc_array(machine, UINT8, 0x8000 * 2);
+	m_converted_gfx = auto_alloc_array(machine(), UINT8, 0x8000 * 2);
 
 	/*--------------------------------------------------
-        transform graphics data into more usable format
-        which is coded like this:
+	    transform graphics data into more usable format
+	    which is coded like this:
 
-          byte adr+0x4000  byte adr
-          DCBA DCBA        DCBA DCBA
+	      byte adr+0x4000  byte adr
+	      DCBA DCBA        DCBA DCBA
 
-        D-bits of pixel 4
-        C-bits of pixel 3
-        B-bits of pixel 2
-        A-bits of pixel 1
+	    D-bits of pixel 4
+	    C-bits of pixel 3
+	    B-bits of pixel 2
+	    A-bits of pixel 1
 
-        after conversion :
+	    after conversion :
 
-          byte adr+0x4000  byte adr
-          DDDD CCCC        BBBB AAAA
-    --------------------------------------------------*/
+	      byte adr+0x4000  byte adr
+	      DDDD CCCC        BBBB AAAA
+	--------------------------------------------------*/
 
 	for (offs = 0; offs < 0x4000; offs++)
 	{
@@ -200,16 +199,16 @@ VIDEO_START( arabian )
 		v2 >>= 1;
 		p4 = (v1 & 0x01) | ((v1 & 0x10) >> 3) | ((v2 & 0x01) << 2) | ((v2 & 0x10) >> 1);
 
-		state->m_converted_gfx[offs * 4 + 3] = p1;
-		state->m_converted_gfx[offs * 4 + 2] = p2;
-		state->m_converted_gfx[offs * 4 + 1] = p3;
-		state->m_converted_gfx[offs * 4 + 0] = p4;
+		m_converted_gfx[offs * 4 + 3] = p1;
+		m_converted_gfx[offs * 4 + 2] = p2;
+		m_converted_gfx[offs * 4 + 1] = p3;
+		m_converted_gfx[offs * 4 + 0] = p4;
 	}
 
-    state->save_pointer(NAME(state->m_main_bitmap), BITMAP_WIDTH * BITMAP_HEIGHT);
-    state->save_pointer(NAME(state->m_converted_gfx), 0x8000 * 2);
-    state->save_item(NAME(state->m_video_control));
-    state->save_item(NAME(state->m_flip_screen));
+	save_pointer(NAME(m_main_bitmap), BITMAP_WIDTH * BITMAP_HEIGHT);
+	save_pointer(NAME(m_converted_gfx), 0x8000 * 2);
+	save_item(NAME(m_video_control));
+	save_item(NAME(m_flip_screen));
 }
 
 
@@ -267,26 +266,25 @@ static void blit_area( running_machine &machine, UINT8 plane, UINT16 src, UINT8 
  *
  *************************************/
 
-WRITE8_HANDLER( arabian_blitter_w )
+WRITE8_MEMBER(arabian_state::arabian_blitter_w)
 {
-	arabian_state *state = space->machine().driver_data<arabian_state>();
 
 	/* write the data */
-	state->m_blitter[offset] = data;
+	m_blitter[offset] = data;
 
 	/* watch for a write to offset 6 -- that triggers the blit */
 	if (offset == 6)
 	{
 		/* extract the data */
-		int plane = state->m_blitter[0];
-		int src   = state->m_blitter[1] | (state->m_blitter[2] << 8);
-		int x     = state->m_blitter[4] << 2;
-		int y     = state->m_blitter[3];
-		int sx    = state->m_blitter[6];
-		int sy    = state->m_blitter[5];
+		int plane = m_blitter[0];
+		int src   = m_blitter[1] | (m_blitter[2] << 8);
+		int x     = m_blitter[4] << 2;
+		int y     = m_blitter[3];
+		int sx    = m_blitter[6];
+		int sy    = m_blitter[5];
 
 		/* blit it */
-		blit_area(space->machine(), plane, src, x, y, sx, sy);
+		blit_area(machine(), plane, src, x, y, sx, sy);
 	}
 }
 
@@ -298,9 +296,8 @@ WRITE8_HANDLER( arabian_blitter_w )
  *
  *************************************/
 
-WRITE8_HANDLER( arabian_videoram_w )
+WRITE8_MEMBER(arabian_state::arabian_videoram_w)
 {
-	arabian_state *state = space->machine().driver_data<arabian_state>();
 	UINT8 *base;
 	UINT8 x, y;
 
@@ -309,22 +306,22 @@ WRITE8_HANDLER( arabian_videoram_w )
 	y = offset & 0xff;
 
 	/* get a pointer to the pixels */
-	base = &state->m_main_bitmap[y * BITMAP_WIDTH + x];
+	base = &m_main_bitmap[y * BITMAP_WIDTH + x];
 
 	/* the data is written as 4 2-bit values, as follows:
 
-            bit 7 = pixel 3, upper bit
-            bit 6 = pixel 2, upper bit
-            bit 5 = pixel 1, upper bit
-            bit 4 = pixel 0, upper bit
-            bit 3 = pixel 3, lower bit
-            bit 2 = pixel 2, lower bit
-            bit 1 = pixel 1, lower bit
-            bit 0 = pixel 0, lower bit
-    */
+	        bit 7 = pixel 3, upper bit
+	        bit 6 = pixel 2, upper bit
+	        bit 5 = pixel 1, upper bit
+	        bit 4 = pixel 0, upper bit
+	        bit 3 = pixel 3, lower bit
+	        bit 2 = pixel 2, lower bit
+	        bit 1 = pixel 1, lower bit
+	        bit 0 = pixel 0, lower bit
+	*/
 
 	/* enable writes to AZ/AR */
-	if (state->m_blitter[0] & 0x08)
+	if (m_blitter[0] & 0x08)
 	{
 		base[0] = (base[0] & ~0x03) | ((data & 0x10) >> 3) | ((data & 0x01) >> 0);
 		base[1] = (base[1] & ~0x03) | ((data & 0x20) >> 4) | ((data & 0x02) >> 1);
@@ -333,7 +330,7 @@ WRITE8_HANDLER( arabian_videoram_w )
 	}
 
 	/* enable writes to AG/AB */
-	if (state->m_blitter[0] & 0x04)
+	if (m_blitter[0] & 0x04)
 	{
 		base[0] = (base[0] & ~0x0c) | ((data & 0x10) >> 1) | ((data & 0x01) << 2);
 		base[1] = (base[1] & ~0x0c) | ((data & 0x20) >> 2) | ((data & 0x02) << 1);
@@ -342,7 +339,7 @@ WRITE8_HANDLER( arabian_videoram_w )
 	}
 
 	/* enable writes to BZ/BR */
-	if (state->m_blitter[0] & 0x02)
+	if (m_blitter[0] & 0x02)
 	{
 		base[0] = (base[0] & ~0x30) | ((data & 0x10) << 1) | ((data & 0x01) << 4);
 		base[1] = (base[1] & ~0x30) | ((data & 0x20) << 0) | ((data & 0x02) << 3);
@@ -351,7 +348,7 @@ WRITE8_HANDLER( arabian_videoram_w )
 	}
 
 	/* enable writes to BG/BB */
-	if (state->m_blitter[0] & 0x01)
+	if (m_blitter[0] & 0x01)
 	{
 		base[0] = (base[0] & ~0xc0) | ((data & 0x10) << 3) | ((data & 0x01) << 6);
 		base[1] = (base[1] & ~0xc0) | ((data & 0x20) << 2) | ((data & 0x02) << 5);
@@ -368,18 +365,17 @@ WRITE8_HANDLER( arabian_videoram_w )
  *
  *************************************/
 
-SCREEN_UPDATE( arabian )
+UINT32 arabian_state::screen_update_arabian(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	arabian_state *state = screen->machine().driver_data<arabian_state>();
-	const pen_t *pens = &screen->machine().pens[(state->m_video_control >> 3) << 8];
+	const pen_t *pens = &machine().pens[(m_video_control >> 3) << 8];
 	int y;
 
 	/* render the screen from the bitmap */
 	for (y = 0; y < BITMAP_HEIGHT; y++)
 	{
 		/* non-flipped case */
-		if (!state->m_flip_screen)
-			draw_scanline8(bitmap, 0, y, BITMAP_WIDTH, &state->m_main_bitmap[y * BITMAP_WIDTH], pens);
+		if (!m_flip_screen)
+			draw_scanline8(bitmap, 0, y, BITMAP_WIDTH, &m_main_bitmap[y * BITMAP_WIDTH], pens);
 
 		/* flipped case */
 		else
@@ -387,7 +383,7 @@ SCREEN_UPDATE( arabian )
 			UINT8 scanline[BITMAP_WIDTH];
 			int x;
 			for (x = 0; x < BITMAP_WIDTH; x++)
-				scanline[BITMAP_WIDTH - 1 - x] = state->m_main_bitmap[y * BITMAP_WIDTH + x];
+				scanline[BITMAP_WIDTH - 1 - x] = m_main_bitmap[y * BITMAP_WIDTH + x];
 			draw_scanline8(bitmap, 0, BITMAP_HEIGHT - 1 - y, BITMAP_WIDTH, scanline, pens);
 		}
 	}

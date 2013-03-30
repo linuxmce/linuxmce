@@ -2,6 +2,8 @@
 
     Dynamo Skeet Shot
 
+Notes: Pop Shot is a prototype sequal (or upgrade) to Skeet Shot
+
 ***************************************************************************/
 
 #include "emu.h"
@@ -20,16 +22,26 @@
 class skeetsht_state : public driver_device
 {
 public:
-	skeetsht_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	skeetsht_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_tms_vram(*this, "tms_vram"){ }
 
-	UINT16 *m_tms_vram;
+	required_shared_ptr<UINT16> m_tms_vram;
 	UINT8 m_porta_latch;
 	UINT8 m_ay_sel;
 	UINT8 m_lastdataw;
 	UINT16 m_lastdatar;
 	device_t *m_ay;
 	device_t *m_tms;
+	DECLARE_READ16_MEMBER(ramdac_r);
+	DECLARE_WRITE16_MEMBER(ramdac_w);
+	DECLARE_WRITE8_MEMBER(tms_w);
+	DECLARE_READ8_MEMBER(tms_r);
+	DECLARE_READ8_MEMBER(hc11_porta_r);
+	DECLARE_WRITE8_MEMBER(hc11_porta_w);
+	DECLARE_WRITE8_MEMBER(ay8910_w);
+	virtual void machine_reset();
+	virtual void video_start();
 };
 
 
@@ -39,12 +51,11 @@ public:
  *
  *************************************/
 
-static MACHINE_RESET( skeetsht )
+void skeetsht_state::machine_reset()
 {
-	skeetsht_state *state = machine.driver_data<skeetsht_state>();
 
-	state->m_ay = machine.device("aysnd");
-	state->m_tms = machine.device("tms");
+	m_ay = machine().device("aysnd");
+	m_tms = machine().device("tms");
 }
 
 
@@ -54,16 +65,16 @@ static MACHINE_RESET( skeetsht )
  *
  *************************************/
 
-static VIDEO_START ( skeetsht )
+void skeetsht_state::video_start()
 {
 }
 
-static void skeetsht_scanline_update(screen_device &screen, bitmap_t *bitmap, int scanline, const tms34010_display_params *params)
+static void skeetsht_scanline_update(screen_device &screen, bitmap_rgb32 &bitmap, int scanline, const tms34010_display_params *params)
 {
 	skeetsht_state *state = screen.machine().driver_data<skeetsht_state>();
 	const rgb_t *const pens = tlc34076_get_pens(screen.machine().device("tlc34076"));
 	UINT16 *vram = &state->m_tms_vram[(params->rowaddr << 8) & 0x3ff00];
-	UINT32 *dest = BITMAP_ADDR32(bitmap, scanline, 0);
+	UINT32 *dest = &bitmap.pix32(scanline);
 	int coladdr = params->coladdr;
 	int x;
 
@@ -75,24 +86,24 @@ static void skeetsht_scanline_update(screen_device &screen, bitmap_t *bitmap, in
 	}
 }
 
-static READ16_HANDLER( ramdac_r )
+READ16_MEMBER(skeetsht_state::ramdac_r)
 {
 	offset = (offset >> 12) & ~4;
 
 	if (offset & 8)
 		offset = (offset & ~8) | 4;
 
-	return tlc34076_r(space->machine().device("tlc34076"), offset);
+	return tlc34076_r(machine().device("tlc34076"), space, offset);
 }
 
-static WRITE16_HANDLER( ramdac_w )
+WRITE16_MEMBER(skeetsht_state::ramdac_w)
 {
 	offset = (offset >> 12) & ~4;
 
 	if (offset & 8)
 		offset = (offset & ~8) | 4;
 
-	tlc34076_w(space->machine().device("tlc34076"), offset, data);
+	tlc34076_w(machine().device("tlc34076"), space, offset, data);
 }
 
 
@@ -104,28 +115,26 @@ static WRITE16_HANDLER( ramdac_w )
 
 static void skeetsht_tms_irq(device_t *device, int state)
 {
-	cputag_set_input_line(device->machine(), "68hc11", MC68HC11_IRQ_LINE, state ? ASSERT_LINE : CLEAR_LINE);
+	device->machine().device("68hc11")->execute().set_input_line(MC68HC11_IRQ_LINE, state ? ASSERT_LINE : CLEAR_LINE);
 }
 
 
-static WRITE8_HANDLER( tms_w )
+WRITE8_MEMBER(skeetsht_state::tms_w)
 {
-	skeetsht_state *state = space->machine().driver_data<skeetsht_state>();
 
 	if ((offset & 1) == 0)
-		state->m_lastdataw = data;
+		m_lastdataw = data;
 	else
-		tms34010_host_w(state->m_tms, offset >> 1, (state->m_lastdataw << 8) | data);
+		tms34010_host_w(m_tms, offset >> 1, (m_lastdataw << 8) | data);
 }
 
-static READ8_HANDLER( tms_r )
+READ8_MEMBER(skeetsht_state::tms_r)
 {
-	skeetsht_state *state = space->machine().driver_data<skeetsht_state>();
 
 	if ((offset & 1) == 0)
-		state->m_lastdatar = tms34010_host_r(state->m_tms, offset >> 1);
+		m_lastdatar = tms34010_host_r(m_tms, offset >> 1);
 
-	return state->m_lastdatar >> ((offset & 1) ? 0 : 8);
+	return m_lastdatar >> ((offset & 1) ? 0 : 8);
 }
 
 
@@ -135,31 +144,28 @@ static READ8_HANDLER( tms_r )
  *
  *************************************/
 
-static READ8_HANDLER( hc11_porta_r )
+READ8_MEMBER(skeetsht_state::hc11_porta_r)
 {
-	skeetsht_state *state = space->machine().driver_data<skeetsht_state>();
 
-	return state->m_porta_latch;
+	return m_porta_latch;
 }
 
-static WRITE8_HANDLER( hc11_porta_w )
+WRITE8_MEMBER(skeetsht_state::hc11_porta_w)
 {
-	skeetsht_state *state = space->machine().driver_data<skeetsht_state>();
 
-	if (!(data & 0x8) && (state->m_porta_latch & 8))
-		state->m_ay_sel = state->m_porta_latch & 0x10;
+	if (!(data & 0x8) && (m_porta_latch & 8))
+		m_ay_sel = m_porta_latch & 0x10;
 
-	state->m_porta_latch = data;
+	m_porta_latch = data;
 }
 
-static WRITE8_HANDLER( ay8910_w )
+WRITE8_MEMBER(skeetsht_state::ay8910_w)
 {
-	skeetsht_state *state = space->machine().driver_data<skeetsht_state>();
 
-	if (state->m_ay_sel)
-		ay8910_data_w(state->m_ay, 0, data);
+	if (m_ay_sel)
+		ay8910_data_w(m_ay, space, 0, data);
 	else
-		ay8910_address_w(state->m_ay, 0, data);
+		ay8910_address_w(m_ay, space, 0, data);
 }
 
 
@@ -169,14 +175,14 @@ static WRITE8_HANDLER( ay8910_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( hc11_pgm_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( hc11_pgm_map, AS_PROGRAM, 8, skeetsht_state )
 	AM_RANGE(0x2800, 0x2807) AM_READWRITE(tms_r, tms_w)
 	AM_RANGE(0x1800, 0x1800) AM_WRITE(ay8910_w)
 	AM_RANGE(0xb600, 0xbdff) AM_RAM //internal EEPROM
 	AM_RANGE(0x0000, 0xffff) AM_ROM AM_REGION("68hc11", 0)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( hc11_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( hc11_io_map, AS_IO, 8, skeetsht_state )
 	AM_RANGE(MC68HC11_IO_PORTA, MC68HC11_IO_PORTA) AM_READWRITE(hc11_porta_r, hc11_porta_w)
 ADDRESS_MAP_END
 
@@ -187,9 +193,9 @@ ADDRESS_MAP_END
  *
  *************************************/
 
-static ADDRESS_MAP_START( tms_program_map, AS_PROGRAM, 16 )
-	AM_RANGE(0xc0000000, 0xc00001ff) AM_READWRITE(tms34010_io_register_r, tms34010_io_register_w)
-	AM_RANGE(0x00000000, 0x003fffff) AM_RAM AM_BASE_MEMBER(skeetsht_state,m_tms_vram)
+static ADDRESS_MAP_START( tms_program_map, AS_PROGRAM, 16, skeetsht_state )
+	AM_RANGE(0xc0000000, 0xc00001ff) AM_READWRITE_LEGACY(tms34010_io_register_r, tms34010_io_register_w)
+	AM_RANGE(0x00000000, 0x003fffff) AM_RAM AM_SHARE("tms_vram")
 	AM_RANGE(0x00440000, 0x004fffff) AM_READWRITE(ramdac_r, ramdac_w)
 	AM_RANGE(0xff800000, 0xffbfffff) AM_ROM AM_MIRROR(0x00400000) AM_REGION("tms", 0)
 ADDRESS_MAP_END
@@ -214,7 +220,8 @@ INPUT_PORTS_END
 static const hc11_config skeetsht_hc11_config =
 {
 	0,
-	0x100,	/* 256 bytes RAM */
+	0x100,  /* 256 bytes RAM */
+	0x01,
 //  0x200,  /* 512 bytes EEPROM */
 };
 
@@ -231,7 +238,8 @@ static const tms34010_config tms_config =
 	"screen",                   /* the screen operated on */
 	48000000 / 8,               /* pixel clock */
 	1,                          /* pixels per clock */
-	skeetsht_scanline_update,   /* scanline updater */
+	NULL,                       /* scanline updater (indexed16) */
+	skeetsht_scanline_update,   /* scanline updater (rgb32) */
 	skeetsht_tms_irq,           /* generate interrupt */
 	NULL,                       /* write to shiftreg function */
 	NULL                        /* read from shiftreg function */
@@ -256,16 +264,13 @@ static MACHINE_CONFIG_START( skeetsht, skeetsht_state )
 	MCFG_CPU_CONFIG(tms_config)
 	MCFG_CPU_PROGRAM_MAP(tms_program_map)
 
-	MCFG_MACHINE_RESET(skeetsht)
 
-	MCFG_TLC34076_ADD("tlc34076", TLC34076_6_BIT)
+	MCFG_TLC34076_ADD("tlc34076", tlc34076_6_bit_intf)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
 	MCFG_SCREEN_RAW_PARAMS(48000000 / 8, 156*4, 0, 100*4, 328, 0, 300) // FIXME
-	MCFG_SCREEN_UPDATE(tms340x0)
+	MCFG_SCREEN_UPDATE_STATIC(tms340x0_rgb32)
 
-	MCFG_VIDEO_START(skeetsht)
 
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
@@ -290,6 +295,16 @@ ROM_START( skeetsht )
 	ROM_LOAD16_BYTE( "odd_v1.2.u13",  0x000001, 0x40000, CRC(ea4402fb) SHA1(b0b6b191a8b48bead660a385c638363943a6ffe2) )
 ROM_END
 
+ROM_START( popshot )
+	ROM_REGION( 0x40000, "68hc11", 0 )
+	ROM_LOAD( "popshot_hc68.u34",  0x00000, 0x20000, CRC(90de8bd3) SHA1(1809f209ead8e304464c697f42e9f6ac2d0ca594) )
+	ROM_LOAD( "sound.u35",         0x20000, 0x20000, CRC(0d9be853) SHA1(51eda4e0a99d50e09476704eb75310b5ee2690f4) )
+
+	ROM_REGION16_LE( 0x200000, "tms", 0 )
+	ROM_LOAD16_BYTE( "popshot_tms34_even.u14", 0x000000, 0x80000, CRC(bf2f7309) SHA1(6ca252f857e5dc2e5267c176403c44e7a15f539e) )
+	ROM_LOAD16_BYTE( "popshot_tms34_odd.u13",  0x000001, 0x80000, CRC(82d616d8) SHA1(83ab33727ebab882b79c9ebd3557e2c319b3387a) )
+ROM_END
+
 
 /*************************************
  *
@@ -297,4 +312,5 @@ ROM_END
  *
  *************************************/
 
-GAME( 1991, skeetsht, 0, skeetsht, skeetsht, 0, ROT0, "Dynamo", "Skeet Shot", GAME_NOT_WORKING )
+GAME( 1991, skeetsht, 0, skeetsht, skeetsht, driver_device, 0, ROT0, "Dynamo", "Skeet Shot", GAME_NOT_WORKING )
+GAME( 1991, popshot,  0, skeetsht, skeetsht, driver_device, 0, ROT0, "Dynamo", "Pop Shot (prototype)", GAME_NOT_WORKING )

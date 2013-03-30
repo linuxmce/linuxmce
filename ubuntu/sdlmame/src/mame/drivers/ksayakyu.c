@@ -72,39 +72,36 @@ SRAM:
 #define MAIN_CLOCK XTAL_18_432MHz
 
 
-static WRITE8_HANDLER( bank_select_w )
+WRITE8_MEMBER(ksayakyu_state::bank_select_w)
 {
 	/*
-        bits:
-        76543210
-               x - ROM bank
-        xxxxxxx  - unused ?
+	    bits:
+	    76543210
+	           x - ROM bank
+	    xxxxxxx  - unused ?
 
-    */
-	memory_set_bank(space->machine(), "bank1", data & 0x01);
+	*/
+	membank("bank1")->set_entry(data & 0x01);
 }
 
-static WRITE8_HANDLER( latch_w )
+WRITE8_MEMBER(ksayakyu_state::latch_w)
 {
-	ksayakyu_state *state = space->machine().driver_data<ksayakyu_state>();
-	state->m_sound_status &= ~0x80;
-	soundlatch_w(space, 0, data | 0x80);
+	m_sound_status &= ~0x80;
+	soundlatch_byte_w(space, 0, data | 0x80);
 }
 
-static READ8_HANDLER (sound_status_r)
+READ8_MEMBER(ksayakyu_state::sound_status_r)
 {
-	ksayakyu_state *state = space->machine().driver_data<ksayakyu_state>();
-	return state->m_sound_status | 4;
+	return m_sound_status | 4;
 }
 
-static WRITE8_HANDLER(tomaincpu_w)
+WRITE8_MEMBER(ksayakyu_state::tomaincpu_w)
 {
-	ksayakyu_state *state = space->machine().driver_data<ksayakyu_state>();
-	state->m_sound_status |= 0x80;
-	soundlatch_w(space, 0, data);
+	m_sound_status |= 0x80;
+	soundlatch_byte_w(space, 0, data);
 }
 
-static ADDRESS_MAP_START( maincpu_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( maincpu_map, AS_PROGRAM, 8, ksayakyu_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
 	AM_RANGE(0x4000, 0x7fff) AM_ROMBANK("bank1")
 	AM_RANGE(0x8000, 0x9fff) AM_ROM
@@ -118,17 +115,17 @@ static ADDRESS_MAP_START( maincpu_map, AS_PROGRAM, 8 )
 	AM_RANGE(0xa806, 0xa806) AM_READ(sound_status_r)
 	AM_RANGE(0xa807, 0xa807) AM_READNOP /* watchdog ? */
 	AM_RANGE(0xa808, 0xa808) AM_WRITE(bank_select_w)
-	AM_RANGE(0xb000, 0xb7ff) AM_RAM_WRITE(ksayakyu_videoram_w) AM_BASE_MEMBER(ksayakyu_state, m_videoram)
-	AM_RANGE(0xb800, 0xbfff) AM_RAM AM_BASE_SIZE_MEMBER(ksayakyu_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0xb000, 0xb7ff) AM_RAM_WRITE(ksayakyu_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0xb800, 0xbfff) AM_RAM AM_SHARE("spriteram")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( soundcpu_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( soundcpu_map, AS_PROGRAM, 8, ksayakyu_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x83ff) AM_RAM
-	AM_RANGE(0xa001, 0xa001) AM_DEVREAD("ay1", ay8910_r)
-	AM_RANGE(0xa002, 0xa003) AM_DEVWRITE("ay1", ay8910_data_address_w)
-	AM_RANGE(0xa006, 0xa007) AM_DEVWRITE("ay2", ay8910_data_address_w)
-	AM_RANGE(0xa008, 0xa008) AM_DEVWRITE("dac", dac_w)
+	AM_RANGE(0xa001, 0xa001) AM_DEVREAD_LEGACY("ay1", ay8910_r)
+	AM_RANGE(0xa002, 0xa003) AM_DEVWRITE_LEGACY("ay1", ay8910_data_address_w)
+	AM_RANGE(0xa006, 0xa007) AM_DEVWRITE_LEGACY("ay2", ay8910_data_address_w)
+	AM_RANGE(0xa008, 0xa008) AM_DEVWRITE("dac", dac_device, write_unsigned8)
 	AM_RANGE(0xa00c, 0xa00c) AM_WRITE(tomaincpu_w)
 	AM_RANGE(0xa010, 0xa010) AM_WRITENOP //a timer of some sort?
 ADDRESS_MAP_END
@@ -171,17 +168,17 @@ static INPUT_PORTS_START( ksayakyu )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN1 )
 INPUT_PORTS_END
 
-static WRITE8_DEVICE_HANDLER(dummy1_w)
+WRITE8_MEMBER(ksayakyu_state::dummy1_w)
 {
 //  printf("%02x 1\n", data);
 }
 
-static WRITE8_DEVICE_HANDLER(dummy2_w)
+WRITE8_MEMBER(ksayakyu_state::dummy2_w)
 {
 //  printf("%02x 2\n", data);
 }
 
-static WRITE8_DEVICE_HANDLER(dummy3_w)
+WRITE8_MEMBER(ksayakyu_state::dummy3_w)
 {
 //  printf("%02x 3\n", data);
 }
@@ -191,10 +188,10 @@ static const ay8910_interface ay8910_interface_1 =
 {
 	AY8910_LEGACY_OUTPUT,
 	AY8910_DEFAULT_LOADS,
-	DEVCB_MEMORY_HANDLER("audiocpu", PROGRAM, soundlatch_r),
+	DEVCB_DRIVER_MEMBER(driver_device, soundlatch_byte_r),
 	DEVCB_NULL,
 	DEVCB_NULL,
-	DEVCB_HANDLER(dummy1_w)
+	DEVCB_DRIVER_MEMBER(ksayakyu_state,dummy1_w)
 };
 
 static const ay8910_interface ay8910_interface_2 =
@@ -203,8 +200,8 @@ static const ay8910_interface ay8910_interface_2 =
 	AY8910_DEFAULT_LOADS,
 	DEVCB_NULL,
 	DEVCB_NULL,
-	DEVCB_HANDLER(dummy2_w),
-	DEVCB_HANDLER(dummy3_w)
+	DEVCB_DRIVER_MEMBER(ksayakyu_state,dummy2_w),
+	DEVCB_DRIVER_MEMBER(ksayakyu_state,dummy3_w)
 };
 
 static const gfx_layout charlayout =
@@ -250,25 +247,23 @@ static GFXDECODE_START( ksayakyu )
 GFXDECODE_END
 
 
-static MACHINE_START( ksayakyu )
+void ksayakyu_state::machine_start()
 {
-	ksayakyu_state *state = machine.driver_data<ksayakyu_state>();
-	UINT8 *ROM = machine.region("maincpu")->base();
+	UINT8 *ROM = memregion("maincpu")->base();
 
-	memory_configure_bank(machine, "bank1", 0, 2, &ROM[0x10000], 0x4000);
+	membank("bank1")->configure_entries(0, 2, &ROM[0x10000], 0x4000);
 
-	state->save_item(NAME(state->m_sound_status));
-	state->save_item(NAME(state->m_video_ctrl));
-	state->save_item(NAME(state->m_flipscreen));
+	save_item(NAME(m_sound_status));
+	save_item(NAME(m_video_ctrl));
+	save_item(NAME(m_flipscreen));
 }
 
-static MACHINE_RESET( ksayakyu )
+void ksayakyu_state::machine_reset()
 {
-	ksayakyu_state *state = machine.driver_data<ksayakyu_state>();
 
-	state->m_sound_status = 0xff;
-	state->m_video_ctrl = 0;
-	state->m_flipscreen = 0;
+	m_sound_status = 0xff;
+	m_video_ctrl = 0;
+	m_flipscreen = 0;
 }
 
 static MACHINE_CONFIG_START( ksayakyu, ksayakyu_state )
@@ -276,31 +271,26 @@ static MACHINE_CONFIG_START( ksayakyu, ksayakyu_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", Z80,MAIN_CLOCK/8) //divider is guessed
 	MCFG_CPU_PROGRAM_MAP(maincpu_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", ksayakyu_state,  irq0_line_hold)
 
 	MCFG_CPU_ADD("audiocpu", Z80, MAIN_CLOCK/8) //divider is guessed, controls DAC tempo
 	MCFG_CPU_PROGRAM_MAP(soundcpu_map)
-	MCFG_CPU_PERIODIC_INT(irq0_line_hold,60) //guess, controls music tempo
+	MCFG_CPU_PERIODIC_INT_DRIVER(ksayakyu_state, irq0_line_hold, 60) //guess, controls music tempo
 
 	MCFG_QUANTUM_TIME(attotime::from_hz(60000))
 
-	MCFG_MACHINE_START(ksayakyu)
-	MCFG_MACHINE_RESET(ksayakyu)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(256, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(ksayakyu)
+	MCFG_SCREEN_UPDATE_DRIVER(ksayakyu_state, screen_update_ksayakyu)
 
 	MCFG_GFXDECODE(ksayakyu)
-	MCFG_PALETTE_INIT(ksayakyu)
 	MCFG_PALETTE_LENGTH(256)
 
-	MCFG_VIDEO_START(ksayakyu)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -313,7 +303,7 @@ static MACHINE_CONFIG_START( ksayakyu, ksayakyu_state )
 	MCFG_SOUND_CONFIG(ay8910_interface_2)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.25)
 
-	MCFG_SOUND_ADD("dac", DAC, 0)
+	MCFG_DAC_ADD("dac")
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.20)
 MACHINE_CONFIG_END
 
@@ -353,4 +343,4 @@ ROM_START( ksayakyu )
 	ROM_LOAD( "9f.bin", 0x0000, 0x0100, CRC(ff71b27f) SHA1(6aad2bd2be997595a05ddb81d24df8fe1435910b) )
 ROM_END
 
-GAME( 1985, ksayakyu, 0, ksayakyu, ksayakyu, 0, ORIENTATION_FLIP_Y, "Taito Corporation", "Kusayakyuu", GAME_SUPPORTS_SAVE )
+GAME( 1985, ksayakyu, 0, ksayakyu, ksayakyu, driver_device, 0, ORIENTATION_FLIP_Y, "Taito Corporation", "Kusayakyuu", GAME_SUPPORTS_SAVE )

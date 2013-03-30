@@ -52,30 +52,29 @@ c1  ??
 
 #include "emu.h"
 #include "cpu/z80/z80.h"
-#include "deprecat.h"
 #include "sound/3812intf.h"
 #include "includes/speedbal.h"
 #include "machine/nvram.h"
 
-static WRITE8_HANDLER( speedbal_coincounter_w )
+WRITE8_MEMBER(speedbal_state::speedbal_coincounter_w)
 {
-	coin_counter_w(space->machine(), 0, data & 0x80);
-	coin_counter_w(space->machine(), 1, data & 0x40);
-	flip_screen_set(space->machine(), data & 8); // also changes data & 0x10 at the same time too (flipx and flipy?)
+	coin_counter_w(machine(), 0, data & 0x80);
+	coin_counter_w(machine(), 1, data & 0x40);
+	flip_screen_set(data & 8); // also changes data & 0x10 at the same time too (flipx and flipy?)
 	/* unknown: (data & 0x10) and (data & 4) */
 }
 
-static ADDRESS_MAP_START( main_cpu_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_cpu_map, AS_PROGRAM, 8, speedbal_state )
 	AM_RANGE(0x0000, 0xdbff) AM_ROM
 	AM_RANGE(0xdc00, 0xdfff) AM_RAM AM_SHARE("share1") // shared with SOUND
-	AM_RANGE(0xe000, 0xe1ff) AM_RAM_WRITE(speedbal_background_videoram_w) AM_BASE_MEMBER(speedbal_state, m_background_videoram)
-	AM_RANGE(0xe800, 0xefff) AM_RAM_WRITE(speedbal_foreground_videoram_w) AM_BASE_MEMBER(speedbal_state, m_foreground_videoram)
-	AM_RANGE(0xf000, 0xf5ff) AM_RAM_WRITE(paletteram_RRRRGGGGBBBBxxxx_be_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0xe000, 0xe1ff) AM_RAM_WRITE(speedbal_background_videoram_w) AM_SHARE("bg_videoram")
+	AM_RANGE(0xe800, 0xefff) AM_RAM_WRITE(speedbal_foreground_videoram_w) AM_SHARE("fg_videoram")
+	AM_RANGE(0xf000, 0xf5ff) AM_RAM_WRITE(paletteram_RRRRGGGGBBBBxxxx_byte_be_w) AM_SHARE("paletteram")
 	AM_RANGE(0xf600, 0xfeff) AM_RAM AM_SHARE("nvram")
-	AM_RANGE(0xff00, 0xffff) AM_RAM AM_BASE_SIZE_MEMBER(speedbal_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0xff00, 0xffff) AM_RAM AM_SHARE("spriteram")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( main_cpu_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( main_cpu_io_map, AS_IO, 8, speedbal_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0x00) AM_READ_PORT("DSW2")
 	AM_RANGE(0x10, 0x10) AM_READ_PORT("DSW1")
@@ -85,16 +84,16 @@ static ADDRESS_MAP_START( main_cpu_io_map, AS_IO, 8 )
 	AM_RANGE(0x50, 0x50) AM_WRITENOP
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sound_cpu_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_cpu_map, AS_PROGRAM, 8, speedbal_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0xd000, 0xdbff) AM_RAM
 	AM_RANGE(0xdc00, 0xdfff) AM_RAM AM_SHARE("share1") // shared with MAIN CPU
 	AM_RANGE(0xf000, 0xffff) AM_RAM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sound_cpu_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( sound_cpu_io_map, AS_IO, 8, speedbal_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x01) AM_DEVREADWRITE("ymsnd", ym3812_r, ym3812_w)
+	AM_RANGE(0x00, 0x01) AM_DEVREADWRITE_LEGACY("ymsnd", ym3812_r, ym3812_w)
 	AM_RANGE(0x40, 0x40) AM_WRITENOP
 	AM_RANGE(0x80, 0x80) AM_WRITENOP
 	AM_RANGE(0x82, 0x82) AM_WRITENOP
@@ -181,7 +180,7 @@ static const gfx_layout charlayout =
 	{ 1024*16*8+4, 1024*16*8+0, 4, 0 },
 	{ 8+3, 8+2, 8+1, 8+0, 3, 2, 1, 0 },
 	{ 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16 },   /* characters are rotated 90 degrees */
-	16*8	   /* every char takes 16 bytes */
+	16*8       /* every char takes 16 bytes */
 };
 
 static const gfx_layout tilelayout =
@@ -211,8 +210,8 @@ static const gfx_layout spritelayout =
 };
 
 static GFXDECODE_START( speedbal )
-	GFXDECODE_ENTRY( "gfx1", 0, charlayout,	 256, 16 )
-	GFXDECODE_ENTRY( "gfx2", 0, tilelayout,	 512, 16 )
+	GFXDECODE_ENTRY( "gfx1", 0, charlayout,  256, 16 )
+	GFXDECODE_ENTRY( "gfx2", 0, tilelayout,  512, 16 )
 	GFXDECODE_ENTRY( "gfx3", 0, spritelayout,   0, 16 )
 GFXDECODE_END
 
@@ -221,15 +220,15 @@ GFXDECODE_END
 static MACHINE_CONFIG_START( speedbal, speedbal_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, 4000000)	/* 4 MHz ??? */
+	MCFG_CPU_ADD("maincpu", Z80, 4000000)   /* 4 MHz ??? */
 	MCFG_CPU_PROGRAM_MAP(main_cpu_map)
 	MCFG_CPU_IO_MAP(main_cpu_io_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", speedbal_state,  irq0_line_hold)
 
-	MCFG_CPU_ADD("audiocpu", Z80, 2660000)	/* 2.66 MHz ???  Maybe yes */
+	MCFG_CPU_ADD("audiocpu", Z80, 2660000)  /* 2.66 MHz ???  Maybe yes */
 	MCFG_CPU_PROGRAM_MAP(sound_cpu_map)
 	MCFG_CPU_IO_MAP(sound_cpu_io_map)
-	MCFG_CPU_VBLANK_INT_HACK(irq0_line_hold,8)
+	MCFG_CPU_PERIODIC_INT_DRIVER(speedbal_state, irq0_line_hold, 8*60)
 
 	MCFG_NVRAM_ADD_1FILL("nvram")
 
@@ -237,15 +236,13 @@ static MACHINE_CONFIG_START( speedbal, speedbal_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(speedbal)
+	MCFG_SCREEN_UPDATE_DRIVER(speedbal_state, screen_update_speedbal)
 
 	MCFG_GFXDECODE(speedbal)
 	MCFG_PALETTE_LENGTH(768)
 
-	MCFG_VIDEO_START(speedbal)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -285,4 +282,4 @@ ROM_START( speedbal )
 ROM_END
 
 
-GAME( 1987, speedbal, 0, speedbal, speedbal, 0, ROT270, "Tecfri", "Speed Ball", 0 )
+GAME( 1987, speedbal, 0, speedbal, speedbal, driver_device, 0, ROT270, "Tecfri", "Speed Ball", 0 )

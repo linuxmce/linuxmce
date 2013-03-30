@@ -51,50 +51,47 @@
 //  CONSTANTS
 //**************************************************************************
 
-// by convention, tags should all lowercase and between 2-15 characters
-#define MIN_TAG_LENGTH			2
-#define MAX_TAG_LENGTH			15
+// by convention, tags should all lowercase and between 1-15 characters
+#define MIN_TAG_LENGTH          1
+#define MAX_TAG_LENGTH          15
 
 
 
 // ----- flags for video_attributes -----
 
 // should VIDEO_UPDATE by called at the start of VBLANK or at the end?
-#define	VIDEO_UPDATE_BEFORE_VBLANK		0x0000
-#define	VIDEO_UPDATE_AFTER_VBLANK		0x0004
+#define VIDEO_UPDATE_BEFORE_VBLANK      0x0000
+#define VIDEO_UPDATE_AFTER_VBLANK       0x0004
 
 // indicates VIDEO_UPDATE will add container bits its
-#define VIDEO_SELF_RENDER				0x0008
+#define VIDEO_SELF_RENDER               0x0008
 
 // automatically extend the palette creating a darker copy for shadows
-#define VIDEO_HAS_SHADOWS				0x0010
+#define VIDEO_HAS_SHADOWS               0x0010
 
 // automatically extend the palette creating a brighter copy for highlights
-#define VIDEO_HAS_HIGHLIGHTS			0x0020
-
-// Mish 181099:  See comments in video/generic.c for details
-#define VIDEO_BUFFERS_SPRITERAM			0x0040
+#define VIDEO_HAS_HIGHLIGHTS            0x0020
 
 // force VIDEO_UPDATE to be called even for skipped frames
-#define VIDEO_ALWAYS_UPDATE				0x0080
+#define VIDEO_ALWAYS_UPDATE             0x0080
 
 // calls VIDEO_UPDATE for every visible scanline, even for skipped frames
-#define VIDEO_UPDATE_SCANLINE			0x0100
+#define VIDEO_UPDATE_SCANLINE           0x0100
 
 
 
-#define NVRAM_HANDLER_NAME(name)	nvram_handler_##name
-#define NVRAM_HANDLER(name)			void NVRAM_HANDLER_NAME(name)(running_machine &machine, emu_file *file, int read_or_write)
-#define NVRAM_HANDLER_CALL(name)	NVRAM_HANDLER_NAME(name)(machine, file, read_or_write)
+#define NVRAM_HANDLER_NAME(name)    nvram_handler_##name
+#define NVRAM_HANDLER(name)         void NVRAM_HANDLER_NAME(name)(running_machine &machine, emu_file *file, int read_or_write)
+#define NVRAM_HANDLER_CALL(name)    NVRAM_HANDLER_NAME(name)(machine, file, read_or_write)
 
-#define MEMCARD_HANDLER_NAME(name)	memcard_handler_##name
-#define MEMCARD_HANDLER(name)		void MEMCARD_HANDLER_NAME(name)(running_machine &machine, emu_file &file, int action)
-#define MEMCARD_HANDLER_CALL(name)	MEMCARD_HANDLER_NAME(name)(machine, file, action)
+#define MEMCARD_HANDLER_NAME(name)  memcard_handler_##name
+#define MEMCARD_HANDLER(name)       void MEMCARD_HANDLER_NAME(name)(running_machine &machine, emu_file &file, int action)
+#define MEMCARD_HANDLER_CALL(name)  MEMCARD_HANDLER_NAME(name)(machine, file, action)
 
 
 // NULL versions
-#define nvram_handler_0 			NULL
-#define memcard_handler_0			NULL
+#define nvram_handler_0             NULL
+#define memcard_handler_0           NULL
 
 
 
@@ -105,7 +102,7 @@
 // forward references
 struct gfx_decode_entry;
 class driver_device;
-class screen_device_config;
+class screen_device;
 
 
 
@@ -131,35 +128,39 @@ public:
 
 	// getters
 	const game_driver &gamedrv() const { return m_gamedrv; }
-	const device_config *first_device() const { return m_devicelist.first(); }
-	screen_device_config *first_screen() const;
+	device_t &root_device() const { assert(m_root_device != NULL); return *m_root_device; }
+	screen_device *first_screen() const;
 	emu_options &options() const { return m_options; }
+	inline device_t *device(const char *tag) const { return root_device().subdevice(tag); }
+	template<class _DeviceClass> inline _DeviceClass *device(const char *tag) const { return downcast<_DeviceClass *>(device(tag)); }
 
 	// public state
-	attotime				m_minimum_quantum;			// minimum scheduling quantum
-	const char *			m_perfect_cpu_quantum;		// tag of CPU to use for "perfect" scheduling
-	INT32					m_watchdog_vblank_count;	// number of VBLANKs until the watchdog kills us
-	attotime				m_watchdog_time;			// length of time until the watchdog kills us
+	attotime                m_minimum_quantum;          // minimum scheduling quantum
+	astring                 m_perfect_cpu_quantum;      // tag of CPU to use for "perfect" scheduling
+	INT32                   m_watchdog_vblank_count;    // number of VBLANKs until the watchdog kills us
+	attotime                m_watchdog_time;            // length of time until the watchdog kills us
 
-	nvram_handler_func		m_nvram_handler;			// NVRAM save/load callback
-	memcard_handler_func	m_memcard_handler;			// memory card save/load callback
+	// legacy callbacks
+	nvram_handler_func      m_nvram_handler;            // NVRAM save/load callback
+	memcard_handler_func    m_memcard_handler;          // memory card save/load callback
 
-	UINT32					m_video_attributes;			// flags describing the video system
-	const gfx_decode_entry *m_gfxdecodeinfo;			// pointer to array of graphics decoding information
-	UINT32					m_total_colors;				// total number of colors in the palette
-	const char *			m_default_layout;			// default layout for this machine
-
-	device_config_list		m_devicelist;				// list of device configs
+	// other parameters
+	UINT32                  m_video_attributes;         // flags describing the video system
+	const gfx_decode_entry *m_gfxdecodeinfo;            // pointer to array of graphics decoding information
+	UINT32                  m_total_colors;             // total number of colors in the palette
+	const char *            m_default_layout;           // default layout for this machine
 
 	// helpers during configuration; not for general use
-	device_config *device_add(device_config *owner, const char *tag, device_type type, UINT32 clock);
-	device_config *device_replace(device_config *owner, const char *tag, device_type type, UINT32 clock);
-	device_config *device_remove(device_config *owner, const char *tag);
-	device_config *device_find(device_config *owner, const char *tag);
+	device_t *device_add(device_t *owner, const char *tag, device_type type, UINT32 clock);
+	device_t *device_replace(device_t *owner, const char *tag, device_type type, UINT32 clock);
+	device_t *device_remove(device_t *owner, const char *tag);
+	device_t *device_find(device_t *owner, const char *tag);
 
 private:
-	const game_driver &		m_gamedrv;
-	emu_options &			m_options;
+	// internal state
+	const game_driver &     m_gamedrv;
+	emu_options &           m_options;
+	device_t *              m_root_device;
 };
 
 
@@ -172,45 +173,41 @@ private:
 #define MACHINE_CONFIG_NAME(_name) construct_machine_config_##_name
 
 #define MACHINE_CONFIG_START(_name, _class) \
-device_config *MACHINE_CONFIG_NAME(_name)(machine_config &config, device_config *owner) \
+ATTR_COLD device_t *MACHINE_CONFIG_NAME(_name)(machine_config &config, device_t *owner) \
 { \
-	device_config *device = NULL; \
-	const char *tag; \
-	astring tempstring; \
+	device_t *device = NULL; \
 	(void)device; \
-	(void)tag; \
-	if (owner == NULL) owner = config.device_add(NULL, "root", &driver_device_config<_class>::static_alloc_device_config, 0); \
+	devcb2_base *devcb = NULL; \
+	(void)devcb; \
+	if (owner == NULL) owner = config.device_add(NULL, "root", &driver_device_creator<_class>, 0); \
 
 #define MACHINE_CONFIG_FRAGMENT(_name) \
-device_config *MACHINE_CONFIG_NAME(_name)(machine_config &config, device_config *owner) \
+ATTR_COLD device_t *MACHINE_CONFIG_NAME(_name)(machine_config &config, device_t *owner) \
 { \
-	device_config *device = NULL; \
-	const char *tag; \
-	astring tempstring; \
+	device_t *device = NULL; \
 	(void)device; \
-	(void)tag; \
+	devcb2_base *devcb = NULL; \
+	(void)devcb; \
 	assert(owner != NULL); \
 
 #define MACHINE_CONFIG_DERIVED(_name, _base) \
-device_config *MACHINE_CONFIG_NAME(_name)(machine_config &config, device_config *owner) \
+ATTR_COLD device_t *MACHINE_CONFIG_NAME(_name)(machine_config &config, device_t *owner) \
 { \
-	device_config *device = NULL; \
-	const char *tag; \
-	astring tempstring; \
+	device_t *device = NULL; \
 	(void)device; \
-	(void)tag; \
+	devcb2_base *devcb = NULL; \
+	(void)devcb; \
 	owner = MACHINE_CONFIG_NAME(_base)(config, owner); \
 	assert(owner != NULL); \
 
 #define MACHINE_CONFIG_DERIVED_CLASS(_name, _base, _class) \
-device_config *MACHINE_CONFIG_NAME(_name)(machine_config &config, device_config *owner) \
+ATTR_COLD device_t *MACHINE_CONFIG_NAME(_name)(machine_config &config, device_t *owner) \
 { \
-	device_config *device = NULL; \
-	const char *tag; \
-	astring tempstring; \
+	device_t *device = NULL; \
 	(void)device; \
-	(void)tag; \
-	if (owner == NULL) owner = config.device_add(NULL, "root", &driver_device_config<_class>::static_alloc_device_config, 0); \
+	devcb2_base *devcb = NULL; \
+	(void)devcb; \
+	if (owner == NULL) owner = config.device_add(NULL, "root", &driver_device_creator<_class>, 0); \
 	owner = MACHINE_CONFIG_NAME(_base)(config, owner); \
 
 #define MACHINE_CONFIG_END \
@@ -219,7 +216,7 @@ device_config *MACHINE_CONFIG_NAME(_name)(machine_config &config, device_config 
 
 // use this to declare external references to a machine driver
 #define MACHINE_CONFIG_EXTERN(_name) \
-	extern device_config *MACHINE_CONFIG_NAME(_name)(machine_config &config, device_config *owner)
+	extern device_t *MACHINE_CONFIG_NAME(_name)(machine_config &config, device_t *owner)
 
 
 // importing data from other machine drivers
@@ -227,13 +224,16 @@ device_config *MACHINE_CONFIG_NAME(_name)(machine_config &config, device_config 
 	MACHINE_CONFIG_NAME(_name)(config, owner);
 
 
-// core parameters
+// scheduling parameters
 #define MCFG_QUANTUM_TIME(_time) \
 	config.m_minimum_quantum = _time; \
 
 #define MCFG_QUANTUM_PERFECT_CPU(_cputag) \
-	config.m_perfect_cpu_quantum = _cputag; \
+	owner->subtag(config.m_perfect_cpu_quantum, _cputag); \
 
+
+
+// watchdog configuration
 #define MCFG_WATCHDOG_VBLANK_INIT(_count) \
 	config.m_watchdog_vblank_count = _count; \
 
@@ -247,6 +247,9 @@ device_config *MACHINE_CONFIG_NAME(_name)(machine_config &config, device_config 
 
 #define MCFG_MEMCARD_HANDLER(_func) \
 	config.m_memcard_handler = MEMCARD_HANDLER_NAME(_func); \
+
+#define MCFG_NVRAM_HANDLER_CLEAR() \
+	config.m_nvram_handler = NULL; \
 
 
 // core video parameters
@@ -263,33 +266,6 @@ device_config *MACHINE_CONFIG_NAME(_name)(machine_config &config, device_config 
 	config.m_default_layout = &(_layout)[0]; \
 
 
-// core machine functions
-#define MCFG_MACHINE_START(_func) \
-	driver_device_config_base::static_set_callback(owner, driver_device_config_base::CB_MACHINE_START, MACHINE_START_NAME(_func)); \
-
-#define MCFG_MACHINE_RESET(_func) \
-	driver_device_config_base::static_set_callback(owner, driver_device_config_base::CB_MACHINE_RESET, MACHINE_RESET_NAME(_func)); \
-
-
-// core sound functions
-#define MCFG_SOUND_START(_func) \
-	driver_device_config_base::static_set_callback(owner, driver_device_config_base::CB_SOUND_START, SOUND_START_NAME(_func)); \
-
-#define MCFG_SOUND_RESET(_func) \
-	driver_device_config_base::static_set_callback(owner, driver_device_config_base::CB_SOUND_RESET, SOUND_RESET_NAME(_func)); \
-
-
-// core video functions
-#define MCFG_PALETTE_INIT(_func) \
-	driver_device_config_base::static_set_palette_init(owner, PALETTE_INIT_NAME(_func)); \
-
-#define MCFG_VIDEO_START(_func) \
-	driver_device_config_base::static_set_callback(owner, driver_device_config_base::CB_VIDEO_START, VIDEO_START_NAME(_func)); \
-
-#define MCFG_VIDEO_RESET(_func) \
-	driver_device_config_base::static_set_callback(owner, driver_device_config_base::CB_VIDEO_RESET, VIDEO_RESET_NAME(_func)); \
-
-
 // add/remove devices
 #define MCFG_DEVICE_ADD(_tag, _type, _clock) \
 	device = config.device_add(owner, _tag, _type, _clock); \
@@ -300,8 +276,8 @@ device_config *MACHINE_CONFIG_NAME(_name)(machine_config &config, device_config 
 #define MCFG_DEVICE_REMOVE(_tag) \
 	device = config.device_remove(owner, _tag); \
 
-#define MCFG_DEVICE_MODIFY(_tag)	\
+#define MCFG_DEVICE_MODIFY(_tag)    \
 	device = config.device_find(owner, _tag); \
 
 
-#endif	/* __MCONFIG_H__ */
+#endif  /* __MCONFIG_H__ */

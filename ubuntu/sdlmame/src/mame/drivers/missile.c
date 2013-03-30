@@ -6,7 +6,7 @@
         * Missile Command
 
     Known issues:
-        * none at this time
+        * bootleg sets don't work yet
 
 ******************************************************************************************
 
@@ -320,10 +320,10 @@ Notes:
                                 On  ( Unused )
                                 Off ( Unused )
 
-    -there are 2 different versions of the Super Missile Attack board.  It's not known if
+    There are 2 different versions of the Super Missile Attack board.  It's not known if
     the roms are different.  The SMA manual mentions a set 3(035822-03E) that will work
     as well as set 2. Missile Command set 1 will not work with the SMA board. It would
-        appear set 1 and set 2 as labeled by mame are reversed.
+    appear set 1 and set 2 as labeled by mame are reversed.
 
 ****************************************************************************
 
@@ -355,41 +355,56 @@ Super Missile Attack Board Layout
 class missile_state : public driver_device
 {
 public:
-	missile_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	missile_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+		m_maincpu(*this,"maincpu"),
+		m_videoram(*this, "videoram")
+	{ }
 
-	UINT8 *m_videoram;
+	required_device<m6502_device> m_maincpu;
+	required_shared_ptr<UINT8> m_videoram;
+
 	const UINT8 *m_writeprom;
 	emu_timer *m_irq_timer;
 	emu_timer *m_cpu_timer;
 	UINT8 m_irq_state;
 	UINT8 m_ctrld;
 	UINT8 m_flipscreen;
-	UINT8 m_madsel_delay;
-	UINT16 m_madsel_lastpc;
+	UINT64 m_madsel_lastcycles;
+
+	DECLARE_WRITE8_MEMBER(missile_w);
+	DECLARE_READ8_MEMBER(missile_r);
+	DECLARE_CUSTOM_INPUT_MEMBER(get_vblank);
+	DECLARE_DIRECT_UPDATE_MEMBER(missile_direct_handler);
+	DECLARE_DRIVER_INIT(missilem);
+	DECLARE_DRIVER_INIT(suprmatk);
+	virtual void machine_start();
+	virtual void machine_reset();
+	UINT32 screen_update_missile(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+
+	inline int scanline_to_v(int scanline);
+	inline int v_to_scanline(int v);
+	inline void schedule_next_irq(int curv);
+	inline bool get_madsel();
+	inline offs_t get_bit3_addr(offs_t pixaddr);
+	void write_vram(address_space &space, offs_t address, UINT8 data);
+	UINT8 read_vram(address_space &space, offs_t address);
+
+	TIMER_CALLBACK_MEMBER(clock_irq);
+	TIMER_CALLBACK_MEMBER(adjust_cpu_speed);
 };
 
 
 
-#define MASTER_CLOCK	XTAL_10MHz
+#define MASTER_CLOCK    XTAL_10MHz
 
-#define PIXEL_CLOCK		(MASTER_CLOCK/2)
-#define HTOTAL			(320)
-#define HBSTART			(256)
-#define HBEND			(0)
-#define VTOTAL			(256)
-#define VBSTART			(256)
-#define VBEND			(25)	/* 24 causes a garbage line at the top of the screen */
-
-
-/*************************************
- *
- *  Globals
- *
- *************************************/
-
-
-
+#define PIXEL_CLOCK     (MASTER_CLOCK/2)
+#define HTOTAL          (320)
+#define HBSTART         (256)
+#define HBEND           (0)
+#define VTOTAL          (256)
+#define VBSTART         (256)
+#define VBEND           (25)    /* 24 causes a garbage line at the top of the screen */
 
 
 
@@ -399,59 +414,56 @@ public:
  *
  *************************************/
 
-INLINE int scanline_to_v(missile_state *state, int scanline)
+int missile_state::scanline_to_v(int scanline)
 {
 	/* since the vertical sync counter counts backwards when flipped,
-        this function returns the current effective V value, given
-        that vpos() only counts forward */
-	return state->m_flipscreen ? (256 - scanline) : scanline;
+	    this function returns the current effective V value, given
+	    that vpos() only counts forward */
+	return m_flipscreen ? (256 - scanline) : scanline;
 }
 
 
-INLINE int v_to_scanline(missile_state *state, int v)
+int missile_state::v_to_scanline(int v)
 {
 	/* same as a above, but the opposite transformation */
-	return state->m_flipscreen ? (256 - v) : v;
+	return m_flipscreen ? (256 - v) : v;
 }
 
 
-INLINE void schedule_next_irq(running_machine &machine, int curv)
+void missile_state::schedule_next_irq(int curv)
 {
-	missile_state *state = machine.driver_data<missile_state>();
 	/* IRQ = /32V, clocked by /16V ^ flip */
 	/* When not flipped, clocks on 0, 64, 128, 192 */
 	/* When flipped, clocks on 16, 80, 144, 208 */
-	if (state->m_flipscreen)
+	if (m_flipscreen)
 		curv = ((curv - 32) & 0xff) | 0x10;
 	else
 		curv = ((curv + 32) & 0xff) & ~0x10;
 
 	/* next one at the start of this scanline */
-	state->m_irq_timer->adjust(machine.primary_screen->time_until_pos(v_to_scanline(state, curv)), curv);
+	m_irq_timer->adjust(machine().primary_screen->time_until_pos(v_to_scanline(curv)), curv);
 }
 
 
-static TIMER_CALLBACK( clock_irq )
+TIMER_CALLBACK_MEMBER(missile_state::clock_irq)
 {
-	missile_state *state = machine.driver_data<missile_state>();
 	int curv = param;
 
 	/* assert the IRQ if not already asserted */
-	state->m_irq_state = (~curv >> 5) & 1;
-	cputag_set_input_line(machine, "maincpu", 0, state->m_irq_state ? ASSERT_LINE : CLEAR_LINE);
+	m_irq_state = (~curv >> 5) & 1;
+	m_maincpu->set_input_line(0, m_irq_state ? ASSERT_LINE : CLEAR_LINE);
 
 	/* force an update while we're here */
-	machine.primary_screen->update_partial(v_to_scanline(state, curv));
+	machine().primary_screen->update_partial(v_to_scanline(curv));
 
 	/* find the next edge */
-	schedule_next_irq(machine, curv);
+	schedule_next_irq(curv);
 }
 
 
-static CUSTOM_INPUT( get_vblank )
+CUSTOM_INPUT_MEMBER(missile_state::get_vblank)
 {
-	missile_state *state = field->port->machine().driver_data<missile_state>();
-	int v = scanline_to_v(state, field->port->machine().primary_screen->vpos());
+	int v = scanline_to_v(machine().primary_screen->vpos());
 	return v < 24;
 }
 
@@ -463,135 +475,95 @@ static CUSTOM_INPUT( get_vblank )
  *
  *************************************/
 
-static TIMER_CALLBACK( adjust_cpu_speed )
+TIMER_CALLBACK_MEMBER(missile_state::adjust_cpu_speed)
 {
-	missile_state *state = machine.driver_data<missile_state>();
 	int curv = param;
 
 	/* starting at scanline 224, the CPU runs at half speed */
 	if (curv == 224)
-		machine.device("maincpu")->set_unscaled_clock(MASTER_CLOCK/16);
+		m_maincpu->set_unscaled_clock(MASTER_CLOCK/16);
 	else
-		machine.device("maincpu")->set_unscaled_clock(MASTER_CLOCK/8);
+		m_maincpu->set_unscaled_clock(MASTER_CLOCK/8);
 
 	/* scanline for the next run */
 	curv ^= 224;
-	state->m_cpu_timer->adjust(machine.primary_screen->time_until_pos(v_to_scanline(state, curv)), curv);
+	m_cpu_timer->adjust(machine().primary_screen->time_until_pos(v_to_scanline(curv)), curv);
 }
 
 
-DIRECT_UPDATE_HANDLER( missile_direct_handler )
+void missile_state::machine_start()
 {
-	/* offset accounts for lack of A15 decoding */
-	int offset = address & 0x8000;
-	address &= 0x7fff;
 
-	/* RAM? */
-	if (address < 0x4000)
-	{
-		missile_state *state = direct.space().machine().driver_data<missile_state>();
-		direct.explicit_configure(0x0000 | offset, 0x3fff | offset, 0x3fff, state->m_videoram);
-		return ~0;
-	}
-
-	/* ROM? */
-	else if (address >= 0x5000)
-	{
-		direct.explicit_configure(0x5000 | offset, 0x7fff | offset, 0x7fff, direct.space().machine().region("maincpu")->base() + 0x5000);
-		return ~0;
-	}
-
-	/* anything else falls through */
-	return address;
-}
-
-
-static MACHINE_START( missile )
-{
-	missile_state *state = machine.driver_data<missile_state>();
 	/* initialize globals */
-	state->m_writeprom = machine.region("proms")->base();
-	state->m_flipscreen = 0;
-
-	/* set up an opcode base handler since we use mapped handlers for RAM */
-	address_space *space = machine.device<m6502_device>("maincpu")->space(AS_PROGRAM);
-	space->set_direct_update_handler(direct_update_delegate_create_static(missile_direct_handler, machine));
+	m_writeprom = memregion("proms")->base();
+	m_flipscreen = 0;
 
 	/* create a timer to speed/slow the CPU */
-	state->m_cpu_timer = machine.scheduler().timer_alloc(FUNC(adjust_cpu_speed));
-	state->m_cpu_timer->adjust(machine.primary_screen->time_until_pos(v_to_scanline(state, 0), 0));
+	m_cpu_timer = machine().scheduler().timer_alloc(timer_expired_delegate(FUNC(missile_state::adjust_cpu_speed),this));
+	m_cpu_timer->adjust(machine().primary_screen->time_until_pos(v_to_scanline(0), 0));
 
 	/* create a timer for IRQs and set up the first callback */
-	state->m_irq_timer = machine.scheduler().timer_alloc(FUNC(clock_irq));
-	state->m_irq_state = 0;
-	schedule_next_irq(machine, -32);
+	m_irq_timer = machine().scheduler().timer_alloc(timer_expired_delegate(FUNC(missile_state::clock_irq),this));
+	m_irq_state = 0;
+	schedule_next_irq(-32);
 
 	/* setup for save states */
-	state->save_item(NAME(state->m_irq_state));
-	state->save_item(NAME(state->m_ctrld));
-	state->save_item(NAME(state->m_flipscreen));
-	state->save_item(NAME(state->m_madsel_delay));
-	state->save_item(NAME(state->m_madsel_lastpc));
+	save_item(NAME(m_irq_state));
+	save_item(NAME(m_ctrld));
+	save_item(NAME(m_flipscreen));
+	save_item(NAME(m_madsel_lastcycles));
 }
 
 
-static MACHINE_RESET( missile )
+void missile_state::machine_reset()
 {
-	missile_state *state = machine.driver_data<missile_state>();
-	cputag_set_input_line(machine, "maincpu", 0, CLEAR_LINE);
-	state->m_irq_state = 0;
+	m_maincpu->set_input_line(0, CLEAR_LINE);
+	m_irq_state = 0;
+	m_madsel_lastcycles = 0;
 }
 
 
 
 /*************************************
  *
- *  VRAM access override
+ *  VRAM access
  *
  *************************************/
 
-INLINE int get_madsel(address_space *space)
+bool missile_state::get_madsel()
 {
-	missile_state *state = space->machine().driver_data<missile_state>();
-	UINT16 pc = cpu_get_previouspc(&space->device());
+	/* the MADSEL signal disables standard address decoding and routes
+	    writes to video RAM; it goes high 5 cycles after an opcode
+	    fetch where the low 5 bits are 0x01 and the IRQ signal is clear.
+	*/
+	bool madsel = false;
 
-	/* if we're at a different instruction than last time, reset our delay counter */
-	if (pc != state->m_madsel_lastpc)
-		state->m_madsel_delay = 0;
-
-	/* MADSEL signal disables standard address decoding and routes
-        writes to video RAM; it is enabled if the IRQ signal is clear
-        and the low 5 bits of the fetched opcode are 0x01 */
-	if (!state->m_irq_state && (space->direct().read_decrypted_byte(pc) & 0x1f) == 0x01)
+	if (m_madsel_lastcycles)
 	{
-		/* the MADSEL signal goes high 5 cycles after the opcode is identified;
-            this effectively skips the indirect memory read. Since this is difficult
-            to do in MAME, we just ignore the first two positive hits on MADSEL
-            and only return TRUE on the third or later */
-		state->m_madsel_lastpc = pc;
-		return (++state->m_madsel_delay >= 4);
+		madsel = (m_maincpu->total_cycles() - m_madsel_lastcycles) == 5;
+
+		/* reset the count until next time */
+		if (madsel)
+			m_madsel_lastcycles = 0;
 	}
-	state->m_madsel_delay = 0;
-	return 0;
+
+	return madsel;
 }
 
-
-INLINE offs_t get_bit3_addr(offs_t pixaddr)
+offs_t missile_state::get_bit3_addr(offs_t pixaddr)
 {
 	/* the 3rd bit of video RAM is scattered about various areas
-        we take a 16-bit pixel address here and convert it into
-        a video RAM address based on logic in the schematics */
-	return	(( pixaddr & 0x0800) >> 1) |
+	    we take a 16-bit pixel address here and convert it into
+	    a video RAM address based on logic in the schematics */
+	return  (( pixaddr & 0x0800) >> 1) |
 			((~pixaddr & 0x0800) >> 2) |
 			(( pixaddr & 0x07f8) >> 2) |
 			(( pixaddr & 0x1000) >> 12);
 }
 
 
-static void write_vram(address_space *space, offs_t address, UINT8 data)
+void missile_state::write_vram(address_space &space, offs_t address, UINT8 data)
 {
-	missile_state *state = space->machine().driver_data<missile_state>();
-	UINT8 *videoram = state->m_videoram;
 	static const UINT8 data_lookup[4] = { 0x00, 0x0f, 0xf0, 0xff };
 	offs_t vramaddr;
 	UINT8 vramdata;
@@ -602,8 +574,8 @@ static void write_vram(address_space *space, offs_t address, UINT8 data)
 	/* this should only be called if MADSEL == 1 */
 	vramaddr = address >> 2;
 	vramdata = data_lookup[data >> 6];
-	vrammask = state->m_writeprom[(address & 7) | 0x10];
-	videoram[vramaddr] = (videoram[vramaddr] & vrammask) | (vramdata & ~vrammask);
+	vrammask = m_writeprom[(address & 7) | 0x10];
+	m_videoram[vramaddr] = (m_videoram[vramaddr] & vrammask) | (vramdata & ~vrammask);
 
 	/* 3-bit VRAM writes use an extra clock to write the 3rd bit elsewhere */
 	/* on the schematics, this is the MUSHROOM == 1 case */
@@ -611,19 +583,17 @@ static void write_vram(address_space *space, offs_t address, UINT8 data)
 	{
 		vramaddr = get_bit3_addr(address);
 		vramdata = -((data >> 5) & 1);
-		vrammask = state->m_writeprom[(address & 7) | 0x18];
-		videoram[vramaddr] = (videoram[vramaddr] & vrammask) | (vramdata & ~vrammask);
+		vrammask = m_writeprom[(address & 7) | 0x18];
+		m_videoram[vramaddr] = (m_videoram[vramaddr] & vrammask) | (vramdata & ~vrammask);
 
 		/* account for the extra clock cycle */
-		device_adjust_icount(&space->device(), -1);
+		space.device().execute().adjust_icount(-1);
 	}
 }
 
 
-static UINT8 read_vram(address_space *space, offs_t address)
+UINT8 missile_state::read_vram(address_space &space, offs_t address)
 {
-	missile_state *state = space->machine().driver_data<missile_state>();
-	UINT8 *videoram = state->m_videoram;
 	offs_t vramaddr;
 	UINT8 vramdata;
 	UINT8 vrammask;
@@ -634,7 +604,7 @@ static UINT8 read_vram(address_space *space, offs_t address)
 	/* this should only be called if MADSEL == 1 */
 	vramaddr = address >> 2;
 	vrammask = 0x11 << (address & 3);
-	vramdata = videoram[vramaddr] & vrammask;
+	vramdata = m_videoram[vramaddr] & vrammask;
 	if ((vramdata & 0xf0) == 0)
 		result &= ~0x80;
 	if ((vramdata & 0x0f) == 0)
@@ -646,12 +616,12 @@ static UINT8 read_vram(address_space *space, offs_t address)
 	{
 		vramaddr = get_bit3_addr(address);
 		vrammask = 1 << (address & 7);
-		vramdata = videoram[vramaddr] & vrammask;
+		vramdata = m_videoram[vramaddr] & vrammask;
 		if (vramdata == 0)
 			result &= ~0x20;
 
 		/* account for the extra clock cycle */
-		device_adjust_icount(&space->device(), -1);
+		space.device().execute().adjust_icount(-1);
 	}
 	return result;
 }
@@ -664,18 +634,17 @@ static UINT8 read_vram(address_space *space, offs_t address)
  *
  *************************************/
 
-static SCREEN_UPDATE( missile )
+UINT32 missile_state::screen_update_missile(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	missile_state *state = screen->machine().driver_data<missile_state>();
-	UINT8 *videoram = state->m_videoram;
+	UINT8 *videoram = m_videoram;
 	int x, y;
 
 	/* draw the bitmap to the screen, looping over Y */
-	for (y = cliprect->min_y; y <= cliprect->max_y; y++)
+	for (y = cliprect.min_y; y <= cliprect.max_y; y++)
 	{
-		UINT16 *dst = (UINT16 *)bitmap->base + y * bitmap->rowpixels;
+		UINT16 *dst = &bitmap.pix16(y);
 
-		int effy = state->m_flipscreen ? ((256+24 - y) & 0xff) : y;
+		int effy = m_flipscreen ? ((256+24 - y) & 0xff) : y;
 		UINT8 *src = &videoram[effy * 64];
 		UINT8 *src3 = NULL;
 
@@ -684,7 +653,7 @@ static SCREEN_UPDATE( missile )
 			src3 = &videoram[get_bit3_addr(effy << 8)];
 
 		/* loop over X */
-		for (x = cliprect->min_x; x <= cliprect->max_x; x++)
+		for (x = cliprect.min_x; x <= cliprect.max_x; x++)
 		{
 			UINT8 pix = src[x / 4] >> (x & 3);
 			pix = ((pix >> 2) & 4) | ((pix << 1) & 2);
@@ -707,12 +676,12 @@ static SCREEN_UPDATE( missile )
  *
  *************************************/
 
-static WRITE8_HANDLER( missile_w )
+WRITE8_MEMBER(missile_state::missile_w)
 {
-	missile_state *state = space->machine().driver_data<missile_state>();
-	UINT8 *videoram = state->m_videoram;
-	/* if we're in MADSEL mode, write to video RAM */
-	if (get_madsel(space))
+	UINT8 *videoram = m_videoram;
+
+	/* if this is a MADSEL cycle, write to video RAM */
+	if (get_madsel())
 	{
 		write_vram(space, offset, data);
 		return;
@@ -727,52 +696,54 @@ static WRITE8_HANDLER( missile_w )
 
 	/* POKEY */
 	else if (offset < 0x4800)
-		pokey_w(space->machine().device("pokey"), offset & 0x0f, data);
+	{
+		pokey_device *pokey_dev = downcast<pokey_device *>(machine().device("pokey"));
+		pokey_dev->write(machine().firstcpu->space(), offset, data, 0xff);
+	}
 
 	/* OUT0 */
 	else if (offset < 0x4900)
 	{
-		state->m_flipscreen = ~data & 0x40;
-		coin_counter_w(space->machine(), 0, data & 0x20);
-		coin_counter_w(space->machine(), 1, data & 0x10);
-		coin_counter_w(space->machine(), 2, data & 0x08);
-		set_led_status(space->machine(), 1, ~data & 0x04);
-		set_led_status(space->machine(), 0, ~data & 0x02);
-		state->m_ctrld = data & 1;
+		m_flipscreen = ~data & 0x40;
+		coin_counter_w(machine(), 0, data & 0x20);
+		coin_counter_w(machine(), 1, data & 0x10);
+		coin_counter_w(machine(), 2, data & 0x08);
+		set_led_status(machine(), 1, ~data & 0x04);
+		set_led_status(machine(), 0, ~data & 0x02);
+		m_ctrld = data & 1;
 	}
 
 	/* color RAM */
 	else if (offset >= 0x4b00 && offset < 0x4c00)
-		palette_set_color_rgb(space->machine(), offset & 7, pal1bit(~data >> 3), pal1bit(~data >> 2), pal1bit(~data >> 1));
+		palette_set_color_rgb(machine(), offset & 7, pal1bit(~data >> 3), pal1bit(~data >> 2), pal1bit(~data >> 1));
 
 	/* watchdog */
 	else if (offset >= 0x4c00 && offset < 0x4d00)
-		watchdog_reset(space->machine());
+		machine().watchdog_reset();
 
 	/* interrupt ack */
 	else if (offset >= 0x4d00 && offset < 0x4e00)
 	{
-		if (state->m_irq_state)
+		if (m_irq_state)
 		{
-			cputag_set_input_line(space->machine(), "maincpu", 0, CLEAR_LINE);
-			state->m_irq_state = 0;
+			m_maincpu->set_input_line(0, CLEAR_LINE);
+			m_irq_state = 0;
 		}
 	}
 
 	/* anything else */
 	else
-		logerror("%04X:Unknown write to %04X = %02X\n", cpu_get_pc(&space->device()), offset, data);
+		logerror("%04X:Unknown write to %04X = %02X\n", space.device().safe_pc(), offset, data);
 }
 
 
-static READ8_HANDLER( missile_r )
+READ8_MEMBER(missile_state::missile_r)
 {
-	missile_state *state = space->machine().driver_data<missile_state>();
-	UINT8 *videoram = state->m_videoram;
+	UINT8 *videoram = m_videoram;
 	UINT8 result = 0xff;
 
-	/* if we're in MADSEL mode, read from video RAM */
-	if (get_madsel(space))
+	/* if this is a MADSEL cycle, read from video RAM */
+	if (get_madsel())
 		return read_vram(space, offset);
 
 	/* otherwise, strip A15 and handle manually */
@@ -784,37 +755,46 @@ static READ8_HANDLER( missile_r )
 
 	/* ROM */
 	else if (offset >= 0x5000)
-		result = space->machine().region("maincpu")->base()[offset];
+		result = memregion("maincpu")->base()[offset];
 
 	/* POKEY */
 	else if (offset < 0x4800)
-		result = pokey_r(space->machine().device("pokey"), offset & 0x0f);
+	{
+		pokey_device *pokey_dev = downcast<pokey_device *>(machine().device("pokey"));
+		result = pokey_dev->read(machine().firstcpu->space(), offset & 0x0f, 0xff);
+	}
 
 	/* IN0 */
 	else if (offset < 0x4900)
 	{
-		if (state->m_ctrld)	/* trackball */
+		if (m_ctrld)    /* trackball */
 		{
-			if (!state->m_flipscreen)
-			    result = ((input_port_read(space->machine(), "TRACK0_Y") << 4) & 0xf0) | (input_port_read(space->machine(), "TRACK0_X") & 0x0f);
+			if (!m_flipscreen)
+				result = ((ioport("TRACK0_Y")->read() << 4) & 0xf0) | (ioport("TRACK0_X")->read() & 0x0f);
 			else
-			    result = ((input_port_read(space->machine(), "TRACK1_Y") << 4) & 0xf0) | (input_port_read(space->machine(), "TRACK1_X") & 0x0f);
+				result = ((ioport("TRACK1_Y")->read() << 4) & 0xf0) | (ioport("TRACK1_X")->read() & 0x0f);
 		}
-		else	/* buttons */
-			result = input_port_read(space->machine(), "IN0");
+		else    /* buttons */
+			result = ioport("IN0")->read();
 	}
 
 	/* IN1 */
 	else if (offset < 0x4a00)
-		result = input_port_read(space->machine(), "IN1");
+		result = ioport("IN1")->read();
 
 	/* IN2 */
 	else if (offset < 0x4b00)
-		result = input_port_read(space->machine(), "R10");
+		result = ioport("R10")->read();
 
 	/* anything else */
 	else
-		logerror("%04X:Unknown read from %04X\n", cpu_get_pc(&space->device()), offset);
+		logerror("%04X:Unknown read from %04X\n", space.device().safe_pc(), offset);
+
+
+	/* update the MADSEL state */
+	if (!m_irq_state && ((result & 0x1f) == 0x01) && m_maincpu->get_sync())
+		m_madsel_lastcycles = m_maincpu->total_cycles();
+
 	return result;
 }
 
@@ -827,8 +807,8 @@ static READ8_HANDLER( missile_r )
  *************************************/
 
 /* complete memory map derived from schematics (implemented above) */
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0xffff) AM_READWRITE(missile_r, missile_w) AM_BASE_MEMBER(missile_state, m_videoram)
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, missile_state )
+	AM_RANGE(0x0000, 0xffff) AM_READWRITE(missile_r, missile_w) AM_SHARE("videoram")
 ADDRESS_MAP_END
 
 
@@ -840,7 +820,7 @@ ADDRESS_MAP_END
  *************************************/
 
 static INPUT_PORTS_START( missile )
-	PORT_START("IN0")	/* IN0 */
+	PORT_START("IN0")   /* IN0 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_COCKTAIL
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
@@ -850,16 +830,16 @@ static INPUT_PORTS_START( missile )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN3 )
 
-	PORT_START("IN1")	/* IN1 */
+	PORT_START("IN1")   /* IN1 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON3 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x18, IP_ACTIVE_HIGH, IPT_SPECIAL )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_TILT )
 	PORT_SERVICE( 0x40, IP_ACTIVE_LOW )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(get_vblank, NULL)
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, missile_state,get_vblank, NULL)
 
-	PORT_START("R10")	/* IN2 */
+	PORT_START("R10")   /* IN2 */
 	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Coinage ) ) PORT_DIPLOCATION("R10:1,2")
 	PORT_DIPSETTING(    0x01, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
@@ -882,7 +862,7 @@ static INPUT_PORTS_START( missile )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-	PORT_START("R8")	/* IN3 */
+	PORT_START("R8")    /* IN3 */
 	PORT_DIPNAME( 0x03, 0x00, "Cities" ) PORT_DIPLOCATION("R8:1,2")
 	PORT_DIPSETTING(    0x02, "4" )
 	PORT_DIPSETTING(    0x01, "5" )
@@ -907,22 +887,22 @@ static INPUT_PORTS_START( missile )
 	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( Cocktail ) )
 
-	PORT_START("TRACK0_X")	/* FAKE */
+	PORT_START("TRACK0_X")  /* FAKE */
 	PORT_BIT( 0x0f, 0x00, IPT_TRACKBALL_X ) PORT_SENSITIVITY(20) PORT_KEYDELTA(10)
 
-	PORT_START("TRACK0_Y")	/* FAKE */
+	PORT_START("TRACK0_Y")  /* FAKE */
 	PORT_BIT( 0x0f, 0x00, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(20) PORT_KEYDELTA(10) PORT_REVERSE
 
-	PORT_START("TRACK1_X")	/* FAKE */
+	PORT_START("TRACK1_X")  /* FAKE */
 	PORT_BIT( 0x0f, 0x00, IPT_TRACKBALL_X ) PORT_SENSITIVITY(20) PORT_KEYDELTA(10) PORT_REVERSE PORT_COCKTAIL
 
-	PORT_START("TRACK1_Y")	/* FAKE */
+	PORT_START("TRACK1_Y")  /* FAKE */
 	PORT_BIT( 0x0f, 0x00, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(20) PORT_KEYDELTA(10) PORT_REVERSE PORT_COCKTAIL
 INPUT_PORTS_END
 
 
 static INPUT_PORTS_START( suprmatk )
-	PORT_START("IN0")	/* IN0 */
+	PORT_START("IN0")   /* IN0 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_COCKTAIL
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
@@ -932,16 +912,16 @@ static INPUT_PORTS_START( suprmatk )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN3 )
 
-	PORT_START("IN1")	/* IN1 */
+	PORT_START("IN1")   /* IN1 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON3 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x18, IP_ACTIVE_HIGH, IPT_SPECIAL )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_TILT )
 	PORT_SERVICE( 0x40, IP_ACTIVE_LOW )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(get_vblank, NULL)
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, missile_state,get_vblank, NULL)
 
-	PORT_START("R10")	/* IN2 */
+	PORT_START("R10")   /* IN2 */
 	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Coinage ) ) PORT_DIPLOCATION("R10:1,2")
 	PORT_DIPSETTING(    0x01, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
@@ -964,7 +944,7 @@ static INPUT_PORTS_START( suprmatk )
 	PORT_DIPSETTING(    0x80, "Reg. Super Missile Attack" )
 	PORT_DIPSETTING(    0xc0, "Hard Super Missile Attack" )
 
-	PORT_START("R8")	/* IN3 */
+	PORT_START("R8")    /* IN3 */
 	PORT_DIPNAME( 0x03, 0x00, "Cities" ) PORT_DIPLOCATION("R8:1,2")
 	PORT_DIPSETTING(    0x02, "4" )
 	PORT_DIPSETTING(    0x01, "5" )
@@ -989,16 +969,16 @@ static INPUT_PORTS_START( suprmatk )
 	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( Cocktail ) )
 
-	PORT_START("TRACK0_X")	/* FAKE */
+	PORT_START("TRACK0_X")  /* FAKE */
 	PORT_BIT( 0x0f, 0x00, IPT_TRACKBALL_X ) PORT_SENSITIVITY(20) PORT_KEYDELTA(10)
 
-	PORT_START("TRACK0_Y")	/* FAKE */
+	PORT_START("TRACK0_Y")  /* FAKE */
 	PORT_BIT( 0x0f, 0x00, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(20) PORT_KEYDELTA(10) PORT_REVERSE
 
-	PORT_START("TRACK1_X")	/* FAKE */
+	PORT_START("TRACK1_X")  /* FAKE */
 	PORT_BIT( 0x0f, 0x00, IPT_TRACKBALL_X ) PORT_SENSITIVITY(20) PORT_KEYDELTA(10) PORT_REVERSE PORT_COCKTAIL
 
-	PORT_START("TRACK1_Y")	/* FAKE */
+	PORT_START("TRACK1_Y")  /* FAKE */
 	PORT_BIT( 0x0f, 0x00, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(20) PORT_KEYDELTA(10) PORT_REVERSE PORT_COCKTAIL
 INPUT_PORTS_END
 
@@ -1030,23 +1010,22 @@ static MACHINE_CONFIG_START( missile, missile_state )
 	MCFG_CPU_ADD("maincpu", M6502, MASTER_CLOCK/8)
 	MCFG_CPU_PROGRAM_MAP(main_map)
 
-	MCFG_MACHINE_START(missile)
-	MCFG_MACHINE_RESET(missile)
 	MCFG_WATCHDOG_VBLANK_INIT(8)
 
 	/* video hardware */
 	MCFG_PALETTE_LENGTH(8)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_RAW_PARAMS(PIXEL_CLOCK, HTOTAL, HBEND, HBSTART, VTOTAL, VBEND, VBSTART)
-	MCFG_SCREEN_UPDATE(missile)
+	MCFG_SCREEN_UPDATE_DRIVER(missile_state, screen_update_missile)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("pokey", POKEY, MASTER_CLOCK/8)
-	MCFG_SOUND_CONFIG(pokey_config)
+	MCFG_POKEY_ADD("pokey", MASTER_CLOCK/8)
+	MCFG_POKEY_CONFIG(pokey_config)
+	MCFG_POKEY_OUTPUT_RC(RES_K(10), CAP_U(0.1), 5.0)
+
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 MACHINE_CONFIG_END
 
@@ -1062,7 +1041,7 @@ ROM_START( missile )
 	ROM_REGION( 0x8000, "maincpu", 0 )
 	ROM_LOAD( "035820-02.h1",  0x5000, 0x0800, CRC(7a62ce6a) SHA1(9a39978138dc28fdefe193bfae1b226391e471db) )
 	ROM_LOAD( "035821-02.jk1", 0x5800, 0x0800, CRC(df3bd57f) SHA1(0916925d3c94d766d33f0e4badf6b0add835d748) )
-	ROM_LOAD( "035822-02.kl1", 0x6000, 0x0800, CRC(a1cd384a) SHA1(a1dd0953423750a0fbc6e3dccbf2ca64ef5a1f54) )
+	ROM_LOAD( "035822-03e.kl1",0x6000, 0x0800, CRC(1a2f599a) SHA1(2deb1219223032a9c83114e4e8b2fc11a570754c) )
 	ROM_LOAD( "035823-02.ln1", 0x6800, 0x0800, CRC(82e552bb) SHA1(d0f22894f779c74ceef644c9f03d840d9545efea) )
 	ROM_LOAD( "035824-02.np1", 0x7000, 0x0800, CRC(606e42e0) SHA1(9718f84a73c66b4e8ef7805a7ab638a7380624e1) )
 	ROM_LOAD( "035825-02.r1",  0x7800, 0x0800, CRC(f752eaeb) SHA1(0339a6ce6744d2091cc7e07675e509b202b0f380) )
@@ -1073,6 +1052,20 @@ ROM_END
 
 
 ROM_START( missile2 )
+	ROM_REGION( 0x8000, "maincpu", 0 )
+	ROM_LOAD( "035820-02.h1",  0x5000, 0x0800, CRC(7a62ce6a) SHA1(9a39978138dc28fdefe193bfae1b226391e471db) )
+	ROM_LOAD( "035821-02.jk1", 0x5800, 0x0800, CRC(df3bd57f) SHA1(0916925d3c94d766d33f0e4badf6b0add835d748) )
+	ROM_LOAD( "035822-02.kl1", 0x6000, 0x0800, CRC(a1cd384a) SHA1(a1dd0953423750a0fbc6e3dccbf2ca64ef5a1f54) )
+	ROM_LOAD( "035823-02.ln1", 0x6800, 0x0800, CRC(82e552bb) SHA1(d0f22894f779c74ceef644c9f03d840d9545efea) )
+	ROM_LOAD( "035824-02.np1", 0x7000, 0x0800, CRC(606e42e0) SHA1(9718f84a73c66b4e8ef7805a7ab638a7380624e1) )
+	ROM_LOAD( "035825-02.r1",  0x7800, 0x0800, CRC(f752eaeb) SHA1(0339a6ce6744d2091cc7e07675e509b202b0f380) )
+
+	ROM_REGION( 0x0020, "proms", 0 )
+	ROM_LOAD( "035826-01.l6",  0x0000, 0x0020, CRC(86a22140) SHA1(2beebf7855e29849ada1823eae031fc98220bc43) )
+ROM_END
+
+
+ROM_START( missile1 )
 	ROM_REGION( 0x8000, "maincpu", 0 )
 	ROM_LOAD( "35820-01.h1",  0x5000, 0x0800, CRC(41cbb8f2) SHA1(5dcb58276c08d75d36baadb6cefe30d4916de9b0) )
 	ROM_LOAD( "35821-01.jk1", 0x5800, 0x0800, CRC(728702c8) SHA1(6f25af7133d3ec79029117162649f94e93f36e0e) )
@@ -1122,6 +1115,31 @@ ROM_END
 
 /*
 
+Missile Command Multigame, produced by Braze Technologies
+from 2005(1st version) to 2007(version 1d). This kit combines
+Missile Command and Super Missile Attack on a daughterboard
+plugged into the main pcb cpu slot.
+
+- M6502 CPU (from main pcb)
+- 27C512 64KB EPROM
+- 93C46P E2PROM for saving highscore/settings
+- two 74LS chips (labels sandpapered off)
+
+*/
+
+ROM_START( missilem )
+	ROM_REGION( 0x10000, "maincpu", ROMREGION_ERASE00 ) // banked, decrypted rom goes here
+
+	ROM_REGION( 0x10000, "user1", 0 )
+	ROM_LOAD("mcm001d.512", 0x00000, 0x10000, CRC(0a5845b5) SHA1(4828866018a984e7cd7f55a33613f43ece5d8d63) )
+
+	ROM_REGION( 0x0020, "proms", 0 )
+	ROM_LOAD( "035826-01.l6", 0x0000, 0x0020, CRC(86a22140) SHA1(2beebf7855e29849ada1823eae031fc98220bc43) )
+ROM_END
+
+
+/*
+
 Missile Combat bootlegs by 'Videotron'
 
 1x 6502A (main)
@@ -1159,83 +1177,119 @@ ROM_START( mcombata )
 	ROM_LOAD( "mmi6331.6f",   0x0000, 0x0020, CRC(86a22140) SHA1(2beebf7855e29849ada1823eae031fc98220bc43) )
 ROM_END
 
+ROM_START( mcombats ) /* bootleg (Sidam) @ $ */
+	ROM_REGION( 0x8000, "maincpu", 0 )
+	ROM_LOAD( "002-0-0.10a",  0x5000, 0x0800, CRC(589b81de) SHA1(06f18a837cedb0da5464dfaa04f92bd035db3752) ) // 002-0.0a
+	ROM_LOAD( "002-1-1.9a",   0x5800, 0x0800, CRC(08796a78) SHA1(e5aabe775889752ad1581098fcbf52ff1fa03b3b) ) // 002-1.1a
+	ROM_LOAD( "002-2-2.8a",   0x6000, 0x0800, CRC(59ab750c) SHA1(4555c27ddeb22ba895610a9c516fe574664a6f4b) ) // 002-2.2a
+	ROM_LOAD( "002-3.3a",     0x6800, 0x0800, CRC(3ad69b83) SHA1(847fa697fc8e9c890ebf3794fb14fedad81aee19) )
+	ROM_LOAD( "002-4.4a",     0x7000, 0x0800, CRC(aac71e95) SHA1(7daf115eb2cdde69b7c4de1e1a6ee68cd2fd0f2c) )
+	ROM_LOAD( "002-5-5.5a",   0x7800, 0x0800, CRC(1b9a16e2) SHA1(03fb292bb6f815724b2fc4b2f561398000367373) ) // 002-5.5a
+
+	ROM_REGION( 0x0020, "proms", 0 )
+	ROM_LOAD( "mmi6331.6f",   0x0000, 0x0020, CRC(86a22140) SHA1(2beebf7855e29849ada1823eae031fc98220bc43) )
+ROM_END
+
+
+
+
 /*************************************
  *
  *  Driver initialization
  *
  *************************************/
 
-static DRIVER_INIT( suprmatk )
+DRIVER_INIT_MEMBER(missile_state,suprmatk)
 {
 	int i;
-	UINT8 *rom = machine.region("maincpu")->base();
+	UINT8 *rom = machine().root_device().memregion("maincpu")->base();
 
 	for (i = 0; i < 0x40; i++)
 	{
-        rom[0x7CC0+i] = rom[0x8000+i];
-        rom[0x5440+i] = rom[0x8040+i];
-        rom[0x5B00+i] = rom[0x8080+i];
-        rom[0x5740+i] = rom[0x80C0+i];
-        rom[0x6000+i] = rom[0x8100+i];
-        rom[0x6540+i] = rom[0x8140+i];
-        rom[0x7500+i] = rom[0x8180+i];
-        rom[0x7100+i] = rom[0x81C0+i];
-        rom[0x7800+i] = rom[0x8200+i];
-        rom[0x5580+i] = rom[0x8240+i];
-        rom[0x5380+i] = rom[0x8280+i];
-        rom[0x6900+i] = rom[0x82C0+i];
-        rom[0x6E00+i] = rom[0x8300+i];
-        rom[0x6CC0+i] = rom[0x8340+i];
-        rom[0x7DC0+i] = rom[0x8380+i];
-        rom[0x5B80+i] = rom[0x83C0+i];
-        rom[0x5000+i] = rom[0x8400+i];
-        rom[0x7240+i] = rom[0x8440+i];
-        rom[0x7040+i] = rom[0x8480+i];
-        rom[0x62C0+i] = rom[0x84C0+i];
-        rom[0x6840+i] = rom[0x8500+i];
-        rom[0x7EC0+i] = rom[0x8540+i];
-        rom[0x7D40+i] = rom[0x8580+i];
-        rom[0x66C0+i] = rom[0x85C0+i];
-        rom[0x72C0+i] = rom[0x8600+i];
-        rom[0x7080+i] = rom[0x8640+i];
-        rom[0x7D00+i] = rom[0x8680+i];
-        rom[0x5F00+i] = rom[0x86C0+i];
-        rom[0x55C0+i] = rom[0x8700+i];
-        rom[0x5A80+i] = rom[0x8740+i];
-        rom[0x6080+i] = rom[0x8780+i];
-        rom[0x7140+i] = rom[0x87C0+i];
-        rom[0x7000+i] = rom[0x8800+i];
-        rom[0x6100+i] = rom[0x8840+i];
-        rom[0x5400+i] = rom[0x8880+i];
-        rom[0x5BC0+i] = rom[0x88C0+i];
-        rom[0x7E00+i] = rom[0x8900+i];
-        rom[0x71C0+i] = rom[0x8940+i];
-        rom[0x6040+i] = rom[0x8980+i];
-        rom[0x6E40+i] = rom[0x89C0+i];
-        rom[0x5800+i] = rom[0x8A00+i];
-        rom[0x7D80+i] = rom[0x8A40+i];
-        rom[0x7A80+i] = rom[0x8A80+i];
-        rom[0x53C0+i] = rom[0x8AC0+i];
-        rom[0x6140+i] = rom[0x8B00+i];
-        rom[0x6700+i] = rom[0x8B40+i];
-        rom[0x7280+i] = rom[0x8B80+i];
-        rom[0x7F00+i] = rom[0x8BC0+i];
-        rom[0x5480+i] = rom[0x8C00+i];
-        rom[0x70C0+i] = rom[0x8C40+i];
-        rom[0x7F80+i] = rom[0x8C80+i];
-        rom[0x5780+i] = rom[0x8CC0+i];
-        rom[0x6680+i] = rom[0x8D00+i];
-        rom[0x7200+i] = rom[0x8D40+i];
-        rom[0x7E40+i] = rom[0x8D80+i];
-        rom[0x7AC0+i] = rom[0x8DC0+i];
-        rom[0x6300+i] = rom[0x8E00+i];
-        rom[0x7180+i] = rom[0x8E40+i];
-        rom[0x7E80+i] = rom[0x8E80+i];
-        rom[0x6280+i] = rom[0x8EC0+i];
-        rom[0x7F40+i] = rom[0x8F00+i];
-        rom[0x6740+i] = rom[0x8F40+i];
-        rom[0x74C0+i] = rom[0x8F80+i];
-        rom[0x7FC0+i] = rom[0x8FC0+i];
+		rom[0x7CC0+i] = rom[0x8000+i];
+		rom[0x5440+i] = rom[0x8040+i];
+		rom[0x5B00+i] = rom[0x8080+i];
+		rom[0x5740+i] = rom[0x80C0+i];
+		rom[0x6000+i] = rom[0x8100+i];
+		rom[0x6540+i] = rom[0x8140+i];
+		rom[0x7500+i] = rom[0x8180+i];
+		rom[0x7100+i] = rom[0x81C0+i];
+		rom[0x7800+i] = rom[0x8200+i];
+		rom[0x5580+i] = rom[0x8240+i];
+		rom[0x5380+i] = rom[0x8280+i];
+		rom[0x6900+i] = rom[0x82C0+i];
+		rom[0x6E00+i] = rom[0x8300+i];
+		rom[0x6CC0+i] = rom[0x8340+i];
+		rom[0x7DC0+i] = rom[0x8380+i];
+		rom[0x5B80+i] = rom[0x83C0+i];
+		rom[0x5000+i] = rom[0x8400+i];
+		rom[0x7240+i] = rom[0x8440+i];
+		rom[0x7040+i] = rom[0x8480+i];
+		rom[0x62C0+i] = rom[0x84C0+i];
+		rom[0x6840+i] = rom[0x8500+i];
+		rom[0x7EC0+i] = rom[0x8540+i];
+		rom[0x7D40+i] = rom[0x8580+i];
+		rom[0x66C0+i] = rom[0x85C0+i];
+		rom[0x72C0+i] = rom[0x8600+i];
+		rom[0x7080+i] = rom[0x8640+i];
+		rom[0x7D00+i] = rom[0x8680+i];
+		rom[0x5F00+i] = rom[0x86C0+i];
+		rom[0x55C0+i] = rom[0x8700+i];
+		rom[0x5A80+i] = rom[0x8740+i];
+		rom[0x6080+i] = rom[0x8780+i];
+		rom[0x7140+i] = rom[0x87C0+i];
+		rom[0x7000+i] = rom[0x8800+i];
+		rom[0x6100+i] = rom[0x8840+i];
+		rom[0x5400+i] = rom[0x8880+i];
+		rom[0x5BC0+i] = rom[0x88C0+i];
+		rom[0x7E00+i] = rom[0x8900+i];
+		rom[0x71C0+i] = rom[0x8940+i];
+		rom[0x6040+i] = rom[0x8980+i];
+		rom[0x6E40+i] = rom[0x89C0+i];
+		rom[0x5800+i] = rom[0x8A00+i];
+		rom[0x7D80+i] = rom[0x8A40+i];
+		rom[0x7A80+i] = rom[0x8A80+i];
+		rom[0x53C0+i] = rom[0x8AC0+i];
+		rom[0x6140+i] = rom[0x8B00+i];
+		rom[0x6700+i] = rom[0x8B40+i];
+		rom[0x7280+i] = rom[0x8B80+i];
+		rom[0x7F00+i] = rom[0x8BC0+i];
+		rom[0x5480+i] = rom[0x8C00+i];
+		rom[0x70C0+i] = rom[0x8C40+i];
+		rom[0x7F80+i] = rom[0x8C80+i];
+		rom[0x5780+i] = rom[0x8CC0+i];
+		rom[0x6680+i] = rom[0x8D00+i];
+		rom[0x7200+i] = rom[0x8D40+i];
+		rom[0x7E40+i] = rom[0x8D80+i];
+		rom[0x7AC0+i] = rom[0x8DC0+i];
+		rom[0x6300+i] = rom[0x8E00+i];
+		rom[0x7180+i] = rom[0x8E40+i];
+		rom[0x7E80+i] = rom[0x8E80+i];
+		rom[0x6280+i] = rom[0x8EC0+i];
+		rom[0x7F40+i] = rom[0x8F00+i];
+		rom[0x6740+i] = rom[0x8F40+i];
+		rom[0x74C0+i] = rom[0x8F80+i];
+		rom[0x7FC0+i] = rom[0x8FC0+i];
+	}
+}
+
+DRIVER_INIT_MEMBER(missile_state,missilem)
+{
+	UINT8 *src = machine().root_device().memregion("user1")->base();
+	UINT8 *dest = machine().root_device().memregion("maincpu")->base();
+
+	// decrypt rom and put in maincpu region (result looks correct, but is untested)
+	for (int i = 0; i < 0x10000; i++)
+	{
+		int a = BITSWAP16(i, 15,2,3,0,8,9,7,5,1,4,6,14,13,12,10,11);
+		int d = BITSWAP8(src[a], 3,2,4,5,6,1,7,0);
+
+		a = i;
+		a ^= (~a >> 1 & 0x400);
+		a ^= (~a >> 4 & 0x100);
+		a ^= ( a >> 7 & 0x100);
+
+		dest[a] = d;
 	}
 }
 
@@ -1246,11 +1300,14 @@ static DRIVER_INIT( suprmatk )
  *
  *************************************/
 
-GAME( 1980, missile,  0,       missile, missile,         0, ROT0, "Atari", "Missile Command (set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1980, missile2, missile, missile, missile,         0, ROT0, "Atari", "Missile Command (set 2)", GAME_SUPPORTS_SAVE )
-GAME( 1981, suprmatk, missile, missile, suprmatk, suprmatk, ROT0, "Atari / Gencomp", "Super Missile Attack (for set 2)", GAME_SUPPORTS_SAVE )
-GAME( 1981, suprmatkd,missile, missile, suprmatk,        0, ROT0, "Atari / Gencomp", "Super Missile Attack (not encrypted)", GAME_SUPPORTS_SAVE )
+GAME( 1980, missile,  0,       missile, missile, driver_device,         0, ROT0, "Atari", "Missile Command (rev 3)", GAME_SUPPORTS_SAVE )
+GAME( 1980, missile2, missile, missile, missile, driver_device,         0, ROT0, "Atari", "Missile Command (rev 2)", GAME_SUPPORTS_SAVE )
+GAME( 1980, missile1, missile, missile, missile, driver_device,         0, ROT0, "Atari", "Missile Command (rev 1)", GAME_SUPPORTS_SAVE )
+GAME( 1981, suprmatk, missile, missile, suprmatk, missile_state, suprmatk, ROT0, "Atari / General Computer Corporation", "Super Missile Attack (for rev 1)", GAME_SUPPORTS_SAVE )
+GAME( 1981, suprmatkd,missile, missile, suprmatk, driver_device,        0, ROT0, "Atari / General Computer Corporation", "Super Missile Attack (not encrypted)", GAME_SUPPORTS_SAVE )
 
 /* the bootlegs are on different hardware and don't work */
-GAME( 198?, mcombat,  missile, missile, missile,         0, ROT0, "bootleg (Videotron)", "Missile Combat (Videotron bootleg, set 1)", GAME_NOT_WORKING )
-GAME( 198?, mcombata, missile, missile, missile,         0, ROT0, "bootleg (Videotron)", "Missile Combat (Videotron bootleg, set 2)", GAME_NOT_WORKING )
+GAME( 1980, mcombat,  missile, missile, missile, driver_device,         0, ROT0, "bootleg (Videotron)", "Missile Combat (Videotron bootleg, set 1)", GAME_NOT_WORKING )
+GAME( 1980, mcombata, missile, missile, missile, driver_device,         0, ROT0, "bootleg (Videotron)", "Missile Combat (Videotron bootleg, set 2)", GAME_NOT_WORKING )
+GAME( 1980, mcombats, missile, missile, missile, driver_device,         0, ROT0, "bootleg (Sidam)", "Missile Combat (Sidam bootleg)", GAME_NOT_WORKING )
+GAME( 2005, missilem, missile, missile, missile, missile_state,  missilem, ROT0, "hack (Braze Technologies)", "Missile Command Multigame", GAME_NOT_WORKING )

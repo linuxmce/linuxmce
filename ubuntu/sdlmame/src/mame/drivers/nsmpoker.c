@@ -57,22 +57,33 @@
 *******************************************************************************/
 
 
-#define MASTER_CLOCK	XTAL_22_1184MHz
+#define MASTER_CLOCK    XTAL_22_1184MHz
 
 #include "emu.h"
-#include "cpu/tms9900/tms9900.h"
+#include "cpu/tms9900/tms9900l.h"
 #include "sound/ay8910.h"
 
 
 class nsmpoker_state : public driver_device
 {
 public:
-	nsmpoker_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	nsmpoker_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"),
+		m_colorram(*this, "colorram"){ }
 
-	UINT8 *m_videoram;
-	UINT8 *m_colorram;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_colorram;
 	tilemap_t *m_bg_tilemap;
+	DECLARE_WRITE8_MEMBER(nsmpoker_videoram_w);
+	DECLARE_WRITE8_MEMBER(nsmpoker_colorram_w);
+	DECLARE_WRITE8_MEMBER(debug_w);
+	DECLARE_READ8_MEMBER(debug_r);
+	TILE_GET_INFO_MEMBER(get_bg_tile_info);
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_nsmpoker(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(nsmpoker_interrupt);
 };
 
 
@@ -81,56 +92,51 @@ public:
 *************************/
 
 
-static WRITE8_HANDLER( nsmpoker_videoram_w )
+WRITE8_MEMBER(nsmpoker_state::nsmpoker_videoram_w)
 {
-	nsmpoker_state *state = space->machine().driver_data<nsmpoker_state>();
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_videoram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
 
-static WRITE8_HANDLER( nsmpoker_colorram_w )
+WRITE8_MEMBER(nsmpoker_state::nsmpoker_colorram_w)
 {
-	nsmpoker_state *state = space->machine().driver_data<nsmpoker_state>();
-	state->m_colorram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_colorram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(nsmpoker_state::get_bg_tile_info)
 {
-	nsmpoker_state *state = machine.driver_data<nsmpoker_state>();
 /*  - bits -
     7654 3210
     ---- ----   bank select.
     ---- ----   color code.
     ---- ----   seems unused.
 */
-//  int attr = state->m_colorram[tile_index];
-	int code = state->m_videoram[tile_index];
+//  int attr = m_colorram[tile_index];
+	int code = m_videoram[tile_index];
 //  int bank = (attr & 0x08) >> 3;
 //  int color = (attr & 0x03);
 
-	SET_TILE_INFO( 0 /* bank */, code, 0 /* color */, 0);
+	SET_TILE_INFO_MEMBER( 0 /* bank */, code, 0 /* color */, 0);
 }
 
 
-static VIDEO_START( nsmpoker )
+void nsmpoker_state::video_start()
 {
-	nsmpoker_state *state = machine.driver_data<nsmpoker_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(nsmpoker_state::get_bg_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
 }
 
 
-static SCREEN_UPDATE( nsmpoker )
+UINT32 nsmpoker_state::screen_update_nsmpoker(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	nsmpoker_state *state = screen->machine().driver_data<nsmpoker_state>();
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
 	return 0;
 }
 
 
-static PALETTE_INIT( nsmpoker )
+void nsmpoker_state::palette_init()
 {
 
 }
@@ -140,19 +146,19 @@ static PALETTE_INIT( nsmpoker )
 *  Read / Write Handlers  *
 **************************/
 
-static INTERRUPT_GEN( nsmpoker_interrupt )
+INTERRUPT_GEN_MEMBER(nsmpoker_state::nsmpoker_interrupt)
 {
-	device_set_input_line_and_vector(device, 0, ASSERT_LINE, 3);//2=nmi  3,4,5,6
+	device.execute().set_input_line_and_vector(0, ASSERT_LINE, 3);//2=nmi  3,4,5,6
 }
 
-//static WRITE8_HANDLER( debug_w )
+//WRITE8_MEMBER(nsmpoker_state::debug_w)
 //{
 //  popmessage("written : %02X", data);
 //}
 
-static READ8_HANDLER( debug_r )
+READ8_MEMBER(nsmpoker_state::debug_r)
 {
-	return space->machine().rand() & 0xff;
+	return machine().rand() & 0xff;
 }
 
 
@@ -160,17 +166,17 @@ static READ8_HANDLER( debug_r )
 * Memory Map Information *
 *************************/
 
-static ADDRESS_MAP_START( nsmpoker_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( nsmpoker_map, AS_PROGRAM, 8, nsmpoker_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
-	AM_RANGE(0x9000, 0xafff) AM_RAM	// OK... cleared at beginning.
-	AM_RANGE(0xb000, 0xcfff) AM_ROM	// WRONG... just to map the last rom somewhere.
-	AM_RANGE(0xe000, 0xefff) AM_RAM_WRITE(nsmpoker_videoram_w) AM_BASE_MEMBER(nsmpoker_state, m_videoram) // WRONG... just a placeholder.
-	AM_RANGE(0xf000, 0xffff) AM_RAM_WRITE(nsmpoker_colorram_w) AM_BASE_MEMBER(nsmpoker_state, m_colorram) // WRONG... just a placeholder.
+	AM_RANGE(0x9000, 0xafff) AM_RAM // OK... cleared at beginning.
+	AM_RANGE(0xb000, 0xcfff) AM_ROM // WRONG... just to map the last rom somewhere.
+	AM_RANGE(0xe000, 0xefff) AM_RAM_WRITE(nsmpoker_videoram_w) AM_SHARE("videoram") // WRONG... just a placeholder.
+	AM_RANGE(0xf000, 0xffff) AM_RAM_WRITE(nsmpoker_colorram_w) AM_SHARE("colorram") // WRONG... just a placeholder.
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( nsmpoker_portmap, AS_IO, 8 )
+static ADDRESS_MAP_START( nsmpoker_portmap, AS_IO, 8, nsmpoker_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0xf0, 0xf0) AM_READ(debug_r)	// kind of trap at begining
+	AM_RANGE(0xf0, 0xf0) AM_READ(debug_r)   // kind of trap at beginning
 ADDRESS_MAP_END
 
 /* I/O byte R/W
@@ -358,7 +364,7 @@ static const gfx_layout charlayout =
 	{ 0, RGN_FRAC(1,4), RGN_FRAC(2,4), RGN_FRAC(3,4) },    /* bitplanes are separated */
 	{ 0, 1, 2, 3, 4, 5, 6, 7 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
-	8*8	/* every char takes 8 consecutive bytes */
+	8*8 /* every char takes 8 consecutive bytes */
 };
 
 static const gfx_layout tilelayout =
@@ -369,7 +375,7 @@ static const gfx_layout tilelayout =
 	{ 0 },
 	{ 0, 1, 2, 3, 4, 5, 6, 7 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
-	8*8	/* every char takes 8 consecutive bytes */
+	8*8 /* every char takes 8 consecutive bytes */
 };
 
 
@@ -390,26 +396,23 @@ GFXDECODE_END
 static MACHINE_CONFIG_START( nsmpoker, nsmpoker_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", TMS9995, MASTER_CLOCK/2)	/* guess */
+	MCFG_CPU_ADD("maincpu", TMS9995L, MASTER_CLOCK/2)   /* guess */
 	MCFG_CPU_PROGRAM_MAP(nsmpoker_map)
 	MCFG_CPU_IO_MAP(nsmpoker_portmap)
-	MCFG_CPU_VBLANK_INT("screen", nsmpoker_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", nsmpoker_state,  nsmpoker_interrupt)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 0*8, 32*8-1)
-	MCFG_SCREEN_UPDATE(nsmpoker)
+	MCFG_SCREEN_UPDATE_DRIVER(nsmpoker_state, screen_update_nsmpoker)
 
 	MCFG_GFXDECODE(nsmpoker)
 
-	MCFG_PALETTE_INIT(nsmpoker)
 	MCFG_PALETTE_LENGTH(8)
 
-	MCFG_VIDEO_START(nsmpoker)
 
 MACHINE_CONFIG_END
 
@@ -429,11 +432,11 @@ ROM_START( nsmpoker )
 //  ROM_LOAD( "113_281.2g", 0x6000, 0x2000, CRC(4b9b448a) SHA1(3ca1f5714cf5535d2ea1e7e03bca456c89af222c) )
 
 	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD( "113_277.6e",	0x0000, 0x2000, CRC(247ad554) SHA1(5cfdfb95920d7e89e3e485a06d0099191e8d41a0) )
-	ROM_LOAD( "113_278.6g",	0x2000, 0x2000, CRC(08eb7305) SHA1(4e555aa481c6b4476b71909ddabf405dd6f767ed) )
-	ROM_LOAD( "113_279.5g",	0x4000, 0x2000, CRC(ac6ab327) SHA1(1012dc581b2be7df5e079ace44a721d17d21366a) )
-	ROM_LOAD( "113_280.3g",	0x6000, 0x2000, CRC(9b9be79d) SHA1(8301e74c4869d04eba680d156de9edaadd7ff83b) )
-	ROM_LOAD( "113_281.2g",	0xb000, 0x2000, CRC(4b9b448a) SHA1(3ca1f5714cf5535d2ea1e7e03bca456c89af222c) )
+	ROM_LOAD( "113_277.6e", 0x0000, 0x2000, CRC(247ad554) SHA1(5cfdfb95920d7e89e3e485a06d0099191e8d41a0) )
+	ROM_LOAD( "113_278.6g", 0x2000, 0x2000, CRC(08eb7305) SHA1(4e555aa481c6b4476b71909ddabf405dd6f767ed) )
+	ROM_LOAD( "113_279.5g", 0x4000, 0x2000, CRC(ac6ab327) SHA1(1012dc581b2be7df5e079ace44a721d17d21366a) )
+	ROM_LOAD( "113_280.3g", 0x6000, 0x2000, CRC(9b9be79d) SHA1(8301e74c4869d04eba680d156de9edaadd7ff83b) )
+	ROM_LOAD( "113_281.2g", 0xb000, 0x2000, CRC(4b9b448a) SHA1(3ca1f5714cf5535d2ea1e7e03bca456c89af222c) )
 ROM_END
 
 
@@ -442,4 +445,4 @@ ROM_END
 *************************/
 
 /*    YEAR  NAME      PARENT  MACHINE   INPUT     INIT  ROT    COMPANY   FULLNAME              FLAGS */
-GAME( 198?, nsmpoker, 0,      nsmpoker, nsmpoker, 0,    ROT0, "NSM",    "NSM Poker (TMS9995)", GAME_NO_SOUND | GAME_NOT_WORKING )
+GAME( 198?, nsmpoker, 0,      nsmpoker, nsmpoker, driver_device, 0,    ROT0, "NSM",    "NSM Poker (TMS9995)", GAME_NO_SOUND | GAME_NOT_WORKING )

@@ -1,31 +1,47 @@
-/*
+/*********************************************************************************
+
+    Pinball
     DataEast/Sega Version 1
-*/
+
+**********************************************************************************/
+
+
 #include "emu.h"
 #include "cpu/m6800/m6800.h"
-
-extern const char layout_pinball[];
 
 class de_1_state : public driver_device
 {
 public:
-	de_1_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	de_1_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+			m_maincpu(*this, "maincpu")
+	{ }
+
+protected:
+
+	// devices
+	required_device<cpu_device> m_maincpu;
+
+	// driver_device overrides
+	virtual void machine_reset();
+public:
+	DECLARE_DRIVER_INIT(de_1);
 };
 
 
-static ADDRESS_MAP_START( de_1_map, AS_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0xffff) AM_NOP
+static ADDRESS_MAP_START( de_1_map, AS_PROGRAM, 8, de_1_state )
+	AM_RANGE(0x0000, 0x7fff) AM_RAM
+	AM_RANGE(0x8000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
 static INPUT_PORTS_START( de_1 )
 INPUT_PORTS_END
 
-static MACHINE_RESET( de_1 )
+void de_1_state::machine_reset()
 {
 }
 
-static DRIVER_INIT( de_1 )
+DRIVER_INIT_MEMBER(de_1_state,de_1)
 {
 }
 
@@ -33,11 +49,6 @@ static MACHINE_CONFIG_START( de_1, de_1_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6800, 1000000)
 	MCFG_CPU_PROGRAM_MAP(de_1_map)
-
-	MCFG_MACHINE_RESET( de_1 )
-
-	/* video hardware */
-	MCFG_DEFAULT_LAYOUT(layout_pinball)
 MACHINE_CONFIG_END
 
 /*-------------------------------------------------------------------
@@ -67,5 +78,6 @@ ROM_START(lwar_e90)
 	ROM_RELOAD( 0x30000, 0x10000)
 ROM_END
 
-GAME(1987,	lwar_a83,		0,			de_1,	de_1,	de_1,	ROT0,	"Data East",	"Laser War (8.3)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1987,	lwar_e90,		lwar_a83,	de_1,	de_1,	de_1,	ROT0,	"Data East",	"Laser War (9.0 Europe)",		GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
+
+GAME(1987,  lwar_a83,  0,         de_1,  de_1, de_1_state,  de_1,  ROT0,  "Data East",    "Laser War (8.3)",           GAME_IS_SKELETON_MECHANICAL)
+GAME(1987,  lwar_e90,  lwar_a83,  de_1,  de_1, de_1_state,  de_1,  ROT0,  "Data East",    "Laser War (9.0 Europe)",    GAME_IS_SKELETON_MECHANICAL)

@@ -92,87 +92,86 @@ Notes:
 #include "includes/jailbrek.h"
 
 
-static WRITE8_HANDLER( ctrl_w )
+WRITE8_MEMBER(jailbrek_state::ctrl_w)
 {
-	jailbrek_state *state = space->machine().driver_data<jailbrek_state>();
 
-	state->m_nmi_enable = data & 0x01;
-	state->m_irq_enable = data & 0x02;
-	flip_screen_set(space->machine(), data & 0x08);
+	m_nmi_enable = data & 0x01;
+	m_irq_enable = data & 0x02;
+	flip_screen_set(data & 0x08);
 }
 
-static INTERRUPT_GEN( jb_interrupt )
+INTERRUPT_GEN_MEMBER(jailbrek_state::jb_interrupt)
 {
-	jailbrek_state *state = device->machine().driver_data<jailbrek_state>();
 
-	if (state->m_irq_enable)
-		device_set_input_line(device, 0, HOLD_LINE);
+	if (m_irq_enable)
+		device.execute().set_input_line(0, HOLD_LINE);
 }
 
-static INTERRUPT_GEN( jb_interrupt_nmi )
+INTERRUPT_GEN_MEMBER(jailbrek_state::jb_interrupt_nmi)
 {
-	jailbrek_state *state = device->machine().driver_data<jailbrek_state>();
 
-	if (state->m_nmi_enable)
-		device_set_input_line(device, INPUT_LINE_NMI, PULSE_LINE);
+	if (m_nmi_enable)
+		device.execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 }
 
 
-static READ8_DEVICE_HANDLER( jailbrek_speech_r )
+READ8_MEMBER(jailbrek_state::jailbrek_speech_r)
 {
+	device_t *device = machine().device("vlm");
 	return (vlm5030_bsy(device) ? 1 : 0);
 }
 
-static WRITE8_DEVICE_HANDLER( jailbrek_speech_w )
+WRITE8_MEMBER(jailbrek_state::jailbrek_speech_w)
 {
+	device_t *device = machine().device("vlm");
 	/* bit 0 could be latch direction like in yiear */
 	vlm5030_st(device, (data >> 1) & 1);
 	vlm5030_rst(device, (data >> 2) & 1);
 }
 
-static ADDRESS_MAP_START( jailbrek_map, AS_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0x07ff) AM_RAM_WRITE(jailbrek_colorram_w) AM_BASE_MEMBER(jailbrek_state, m_colorram)
-	AM_RANGE(0x0800, 0x0fff) AM_RAM_WRITE(jailbrek_videoram_w) AM_BASE_MEMBER(jailbrek_state, m_videoram)
-	AM_RANGE(0x1000, 0x10bf) AM_RAM AM_BASE_SIZE_MEMBER(jailbrek_state, m_spriteram, m_spriteram_size)
+static ADDRESS_MAP_START( jailbrek_map, AS_PROGRAM, 8, jailbrek_state )
+	AM_RANGE(0x0000, 0x07ff) AM_RAM_WRITE(jailbrek_colorram_w) AM_SHARE("colorram")
+	AM_RANGE(0x0800, 0x0fff) AM_RAM_WRITE(jailbrek_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0x1000, 0x10bf) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0x10c0, 0x14ff) AM_RAM /* ??? */
 	AM_RANGE(0x1500, 0x1fff) AM_RAM /* work ram */
-	AM_RANGE(0x2000, 0x203f) AM_RAM AM_BASE_MEMBER(jailbrek_state, m_scroll_x)
+	AM_RANGE(0x2000, 0x203f) AM_RAM AM_SHARE("scroll_x")
 	AM_RANGE(0x2040, 0x2040) AM_WRITENOP /* ??? */
 	AM_RANGE(0x2041, 0x2041) AM_WRITENOP /* ??? */
-	AM_RANGE(0x2042, 0x2042) AM_RAM AM_BASE_MEMBER(jailbrek_state, m_scroll_dir) /* bit 2 = scroll direction */
+	AM_RANGE(0x2042, 0x2042) AM_RAM AM_SHARE("scroll_dir") /* bit 2 = scroll direction */
 	AM_RANGE(0x2043, 0x2043) AM_WRITENOP /* ??? */
 	AM_RANGE(0x2044, 0x2044) AM_WRITE(ctrl_w) /* irq, nmi enable, screen flip */
 	AM_RANGE(0x3000, 0x307f) AM_RAM /* related to sprites? */
-	AM_RANGE(0x3100, 0x3100) AM_READ_PORT("DSW2") AM_DEVWRITE("snsnd", sn76496_w)
+	AM_RANGE(0x3100, 0x3100) AM_READ_PORT("DSW2") AM_DEVWRITE("snsnd", sn76489a_device, write)
 	AM_RANGE(0x3200, 0x3200) AM_READ_PORT("DSW3") AM_WRITENOP /* mirror of the previous? */
 	AM_RANGE(0x3300, 0x3300) AM_READ_PORT("SYSTEM") AM_WRITE(watchdog_reset_w)
 	AM_RANGE(0x3301, 0x3301) AM_READ_PORT("P1")
 	AM_RANGE(0x3302, 0x3302) AM_READ_PORT("P2")
 	AM_RANGE(0x3303, 0x3303) AM_READ_PORT("DSW1")
-	AM_RANGE(0x4000, 0x4000) AM_DEVWRITE("vlm", jailbrek_speech_w) /* speech pins */
-	AM_RANGE(0x5000, 0x5000) AM_DEVWRITE("vlm", vlm5030_data_w) /* speech data */
-	AM_RANGE(0x6000, 0x6000) AM_DEVREAD("vlm", jailbrek_speech_r)
+	AM_RANGE(0x4000, 0x4000) AM_WRITE(jailbrek_speech_w) /* speech pins */
+	AM_RANGE(0x5000, 0x5000) AM_DEVWRITE_LEGACY("vlm", vlm5030_data_w) /* speech data */
+	AM_RANGE(0x6000, 0x6000) AM_READ(jailbrek_speech_r)
 	AM_RANGE(0x8000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
 
 
 static INPUT_PORTS_START( jailbrek )
-	PORT_START("SYSTEM")	/* $3300 */
+	PORT_START("SYSTEM")    /* $3300 */
 	KONAMI8_SYSTEM_10
 	PORT_BIT( 0xe0, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("P1")		/* $3301 */
-	KONAMI8_B12_UNK(1)	// button1 = shoot, button2 = select
+	PORT_START("P1")        /* $3301 */
+	KONAMI8_B12_UNK(1)  // button1 = shoot, button2 = select
 
-	PORT_START("P2")		/* $3302 */
+	PORT_START("P2")        /* $3302 */
 	KONAMI8_B12_UNK(2)
 
-	PORT_START("DSW1")		/* $3303 */
+	PORT_START("DSW1")      /* $3303 */
 	KONAMI_COINAGE_LOC(DEF_STR( Free_Play ), "Invalid", SW1)
 	/* "Invalid" = both coin slots disabled */
 
-	PORT_START("DSW2")		/* $3100 */
+	PORT_START("DSW2")      /* $3100 */
 	PORT_DIPNAME( 0x03, 0x01, DEF_STR( Lives ) )       PORT_DIPLOCATION( "SW2:1,2" )
 	PORT_DIPSETTING(    0x03, "1" )
 	PORT_DIPSETTING(    0x02, "2" )
@@ -194,10 +193,10 @@ static INPUT_PORTS_START( jailbrek )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-	PORT_START("DSW3")		/* $3200 */
+	PORT_START("DSW3")      /* $3200 */
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Flip_Screen ) ) PORT_DIPLOCATION( "SW3:1" )
-	PORT_DIPSETTING(	0x01, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x02, 0x02, "Upright Controls" )     PORT_DIPLOCATION( "SW3:2" )
 	PORT_DIPSETTING(    0x02, DEF_STR( Single ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Dual ) )
@@ -208,26 +207,26 @@ INPUT_PORTS_END
 
 static const gfx_layout charlayout =
 {
-	8,8,	/* 8*8 characters */
-	1024,	/* 1024 characters */
-	4,	/* 4 bits per pixel */
-	{ 0, 1, 2, 3 },	/* the four bitplanes are packed in one nibble */
+	8,8,    /* 8*8 characters */
+	1024,   /* 1024 characters */
+	4,  /* 4 bits per pixel */
+	{ 0, 1, 2, 3 }, /* the four bitplanes are packed in one nibble */
 	{ 0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4 },
 	{ 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32 },
-	32*8	/* every char takes 32 consecutive bytes */
+	32*8    /* every char takes 32 consecutive bytes */
 };
 
 static const gfx_layout spritelayout =
 {
-	16,16,	/* 16*16 sprites */
-	512,	/* 512 sprites */
-	4,	/* 4 bits per pixel */
-	{ 0, 1, 2, 3 },	/* the bitplanes are packed in one nibble */
+	16,16,  /* 16*16 sprites */
+	512,    /* 512 sprites */
+	4,  /* 4 bits per pixel */
+	{ 0, 1, 2, 3 }, /* the bitplanes are packed in one nibble */
 	{ 0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4,
 			32*8+0*4, 32*8+1*4, 32*8+2*4, 32*8+3*4, 32*8+4*4, 32*8+5*4, 32*8+6*4, 32*8+7*4 },
 	{ 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
 			16*32, 17*32, 18*32, 19*32, 20*32, 21*32, 22*32, 23*32 },
-	128*8	/* every sprite takes 128 consecutive bytes */
+	128*8   /* every sprite takes 128 consecutive bytes */
 };
 
 static GFXDECODE_START( jailbrek )
@@ -236,19 +235,33 @@ static GFXDECODE_START( jailbrek )
 GFXDECODE_END
 
 
+/*************************************
+ *
+ *  Sound definitions
+ *
+ *************************************/
 
-static MACHINE_START( jailbrek )
+
+//-------------------------------------------------
+//  sn76496_config psg_intf
+//-------------------------------------------------
+
+static const sn76496_config psg_intf =
 {
-	jailbrek_state *state = machine.driver_data<jailbrek_state>();
-	state->save_item(NAME(state->m_irq_enable));
-	state->save_item(NAME(state->m_nmi_enable));
+	DEVCB_NULL
+};
+
+
+void jailbrek_state::machine_start()
+{
+	save_item(NAME(m_irq_enable));
+	save_item(NAME(m_nmi_enable));
 }
 
-static MACHINE_RESET( jailbrek )
+void jailbrek_state::machine_reset()
 {
-	jailbrek_state *state = machine.driver_data<jailbrek_state>();
-	state->m_irq_enable = 0;
-	state->m_nmi_enable = 0;
+	m_irq_enable = 0;
+	m_nmi_enable = 0;
 }
 
 static MACHINE_CONFIG_START( jailbrek, jailbrek_state )
@@ -256,11 +269,9 @@ static MACHINE_CONFIG_START( jailbrek, jailbrek_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6809, MASTER_CLOCK/12)
 	MCFG_CPU_PROGRAM_MAP(jailbrek_map)
-	MCFG_CPU_VBLANK_INT("screen", jb_interrupt)
-	MCFG_CPU_PERIODIC_INT(jb_interrupt_nmi, 500) /* ? */
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", jailbrek_state,  jb_interrupt)
+	MCFG_CPU_PERIODIC_INT_DRIVER(jailbrek_state, jb_interrupt_nmi,  500) /* ? */
 
-	MCFG_MACHINE_START(jailbrek)
-	MCFG_MACHINE_RESET(jailbrek)
 
 	/* video hardware */
 	MCFG_GFXDECODE(jailbrek)
@@ -268,17 +279,15 @@ static MACHINE_CONFIG_START( jailbrek, jailbrek_state )
 
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_RAW_PARAMS(MASTER_CLOCK/3, 396, 8, 248, 256, 16, 240)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
-	MCFG_SCREEN_UPDATE(jailbrek)
+	MCFG_SCREEN_UPDATE_DRIVER(jailbrek_state, screen_update_jailbrek)
 
-	MCFG_PALETTE_INIT(jailbrek)
-	MCFG_VIDEO_START(jailbrek)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
 	MCFG_SOUND_ADD("snsnd", SN76489A, MASTER_CLOCK/12)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
+	MCFG_SOUND_CONFIG(psg_intf)
 
 	MCFG_SOUND_ADD("vlm", VLM5030, VOICE_CLOCK)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
@@ -297,11 +306,11 @@ ROM_START( jailbrek )
 	ROM_LOAD( "507p02.9d",  0xc000, 0x4000, CRC(444b7d8e) SHA1(c708b67c2d249448dae9a3d10c24d13ba6849597) )
 
 	ROM_REGION( 0x08000, "gfx1", 0 )
-	ROM_LOAD( "507l08.4f",  0x0000, 0x4000, CRC(e3b7a226) SHA1(c19a02a2def65648bf198fccec98ebbd2fc7c0fb) )	/* characters */
+	ROM_LOAD( "507l08.4f",  0x0000, 0x4000, CRC(e3b7a226) SHA1(c19a02a2def65648bf198fccec98ebbd2fc7c0fb) )  /* characters */
 	ROM_LOAD( "507j09.5f",  0x4000, 0x4000, CRC(504f0912) SHA1(b51a45dd5506bccdf0061dd6edd7f49ac86ed0f8) )
 
 	ROM_REGION( 0x10000, "gfx2", 0 )
-	ROM_LOAD( "507j04.3e",  0x0000, 0x4000, CRC(0d269524) SHA1(a10ddb405e884bfec521a3c7a29d22f63e535b59) )	/* sprites */
+	ROM_LOAD( "507j04.3e",  0x0000, 0x4000, CRC(0d269524) SHA1(a10ddb405e884bfec521a3c7a29d22f63e535b59) )  /* sprites */
 	ROM_LOAD( "507j05.4e",  0x4000, 0x4000, CRC(27d4f6f4) SHA1(c42c064dbd7c5cf0b1d99651367e0bee1728a5b0) )
 	ROM_LOAD( "507j06.5e",  0x8000, 0x4000, CRC(717485cb) SHA1(22609489186dcb3d7cd49b7ddfdc6f04d0739354) )
 	ROM_LOAD( "507j07.3f",  0xc000, 0x4000, CRC(e933086f) SHA1(c0fd1e8d23c0f7e14c0b75f629448034420cf8ef) )
@@ -322,11 +331,11 @@ ROM_START( manhatan )
 	ROM_LOAD( "507n02.9d",  0xc000, 0x4000, CRC(143cc62c) SHA1(9520dbb1b6f1fa439e03d4caa9bed96ef8f805f2) )
 
 	ROM_REGION( 0x08000, "gfx1", 0 )
-	ROM_LOAD( "507j08.4f",  0x0000, 0x4000, CRC(175e1b49) SHA1(4cfe982cdf7729bd05c6da803480571876320bf6) )	/* characters */
+	ROM_LOAD( "507j08.4f",  0x0000, 0x4000, CRC(175e1b49) SHA1(4cfe982cdf7729bd05c6da803480571876320bf6) )  /* characters */
 	ROM_LOAD( "507j09.5f",  0x4000, 0x4000, CRC(504f0912) SHA1(b51a45dd5506bccdf0061dd6edd7f49ac86ed0f8) )
 
 	ROM_REGION( 0x10000, "gfx2", 0 )
-	ROM_LOAD( "507j04.3e",  0x0000, 0x4000, CRC(0d269524) SHA1(a10ddb405e884bfec521a3c7a29d22f63e535b59) )	/* sprites */
+	ROM_LOAD( "507j04.3e",  0x0000, 0x4000, CRC(0d269524) SHA1(a10ddb405e884bfec521a3c7a29d22f63e535b59) )  /* sprites */
 	ROM_LOAD( "507j05.4e",  0x4000, 0x4000, CRC(27d4f6f4) SHA1(c42c064dbd7c5cf0b1d99651367e0bee1728a5b0) )
 	ROM_LOAD( "507j06.5e",  0x8000, 0x4000, CRC(717485cb) SHA1(22609489186dcb3d7cd49b7ddfdc6f04d0739354) )
 	ROM_LOAD( "507j07.3f",  0xc000, 0x4000, CRC(e933086f) SHA1(c0fd1e8d23c0f7e14c0b75f629448034420cf8ef) )
@@ -404,31 +413,31 @@ ROM_START( jailbrekb )
 	ROM_LOAD( "k8.bin",  0x0000, 0x0001, NO_DUMP ) /* PAL16L8 */
 ROM_END
 
-static DRIVER_INIT( jailbrek )
+DRIVER_INIT_MEMBER(jailbrek_state,jailbrek)
 {
-	UINT8 *SPEECH_ROM = machine.region("vlm")->base();
+	UINT8 *SPEECH_ROM = machine().root_device().memregion("vlm")->base();
 	int ind;
 
-    /*
-       Check if the rom used for the speech is not a 2764, but a 27128.  If a
-       27128 is used then the data is stored in the upper half of the eprom.
-       (The schematics and board refer to a 2764, but all the boards I have seen
-       use a 27128.  According to the schematics pin 26 is tied high so if a 2764
-       is used then the pin is ignored, but if a 27128 is used then pin 26
-       represents address line A13.)
-    */
+	/*
+	   Check if the rom used for the speech is not a 2764, but a 27128.  If a
+	   27128 is used then the data is stored in the upper half of the eprom.
+	   (The schematics and board refer to a 2764, but all the boards I have seen
+	   use a 27128.  According to the schematics pin 26 is tied high so if a 2764
+	   is used then the pin is ignored, but if a 27128 is used then pin 26
+	   represents address line A13.)
+	*/
 
-    if (machine.region("vlm")->bytes() == 0x4000)
-    {
-        for (ind = 0; ind < 0x2000; ++ind)
-        {
-            SPEECH_ROM[ind] = SPEECH_ROM[ind + 0x2000];
-        }
-    }
+	if (machine().root_device().memregion("vlm")->bytes() == 0x4000)
+	{
+		for (ind = 0; ind < 0x2000; ++ind)
+		{
+			SPEECH_ROM[ind] = SPEECH_ROM[ind + 0x2000];
+		}
+	}
 
-    konami1_decode(machine, "maincpu");
+	konami1_decode(machine(), "maincpu");
 }
 
-GAME( 1986, jailbrek, 0,        jailbrek, jailbrek, jailbrek, ROT0, "Konami", "Jail Break", GAME_SUPPORTS_SAVE )
-GAME( 1986, jailbrekb,jailbrek, jailbrek, jailbrek, jailbrek, ROT0, "bootleg","Jail Break (bootleg)", GAME_SUPPORTS_SAVE )
-GAME( 1986, manhatan, jailbrek, jailbrek, jailbrek, jailbrek, ROT0, "Konami", "Manhattan 24 Bunsyo (Japan)", GAME_SUPPORTS_SAVE )
+GAME( 1986, jailbrek, 0,        jailbrek, jailbrek, jailbrek_state, jailbrek, ROT0, "Konami", "Jail Break", GAME_SUPPORTS_SAVE )
+GAME( 1986, jailbrekb,jailbrek, jailbrek, jailbrek, jailbrek_state, jailbrek, ROT0, "bootleg","Jail Break (bootleg)", GAME_SUPPORTS_SAVE )
+GAME( 1986, manhatan, jailbrek, jailbrek, jailbrek, jailbrek_state, jailbrek, ROT0, "Konami", "Manhattan 24 Bunsyo (Japan)", GAME_SUPPORTS_SAVE )

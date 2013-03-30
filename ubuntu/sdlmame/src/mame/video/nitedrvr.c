@@ -7,41 +7,37 @@
 #include "emu.h"
 #include "includes/nitedrvr.h"
 
-WRITE8_HANDLER( nitedrvr_videoram_w )
+WRITE8_MEMBER(nitedrvr_state::nitedrvr_videoram_w)
 {
-	nitedrvr_state *state = space->machine().driver_data<nitedrvr_state>();
 
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_videoram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( nitedrvr_hvc_w )
+WRITE8_MEMBER(nitedrvr_state::nitedrvr_hvc_w)
 {
-	nitedrvr_state *state = space->machine().driver_data<nitedrvr_state>();
 
-	state->m_hvc[offset & 0x3f] = data;
+	m_hvc[offset & 0x3f] = data;
 
 	if ((offset & 0x30) == 0x30)
 		watchdog_reset_w(space, 0, 0);
 }
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(nitedrvr_state::get_bg_tile_info)
 {
-	nitedrvr_state *state = machine.driver_data<nitedrvr_state>();
-	int code = state->m_videoram[tile_index] & 0x3f;
+	int code = m_videoram[tile_index] & 0x3f;
 
-	SET_TILE_INFO(0, code, 0, 0);
+	SET_TILE_INFO_MEMBER(0, code, 0, 0);
 }
 
 
 
-VIDEO_START( nitedrvr )
+void nitedrvr_state::video_start()
 {
-	nitedrvr_state *state = machine.driver_data<nitedrvr_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(nitedrvr_state::get_bg_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
 }
 
-static void draw_box( bitmap_t *bitmap, int bx, int by, int ex, int ey )
+static void draw_box( bitmap_ind16 &bitmap, int bx, int by, int ex, int ey )
 {
 	int x, y;
 
@@ -49,13 +45,13 @@ static void draw_box( bitmap_t *bitmap, int bx, int by, int ex, int ey )
 	{
 		for (x = bx; x < ex; x++)
 			if ((y < 256) && (x < 256))
-				*BITMAP_ADDR16(bitmap, y, x) = 1;
+				bitmap.pix16(y, x) = 1;
 	}
 
 	return;
 }
 
-static void draw_roadway( running_machine &machine, bitmap_t *bitmap )
+static void draw_roadway( running_machine &machine, bitmap_ind16 &bitmap )
 {
 	nitedrvr_state *state = machine.driver_data<nitedrvr_state>();
 	int roadway;
@@ -73,11 +69,10 @@ static void draw_roadway( running_machine &machine, bitmap_t *bitmap )
 	}
 }
 
-SCREEN_UPDATE( nitedrvr )
+UINT32 nitedrvr_state::screen_update_nitedrvr(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	nitedrvr_state *state = screen->machine().driver_data<nitedrvr_state>();
 
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
-	draw_roadway(screen->machine(), bitmap);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
+	draw_roadway(machine(), bitmap);
 	return 0;
 }

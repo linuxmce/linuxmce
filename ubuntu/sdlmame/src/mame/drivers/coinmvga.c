@@ -208,10 +208,10 @@
 *******************************************************************************/
 
 
-#define CPU_CLOCK	XTAL_14_7456MHz
-#define MACH_CLOCK	XTAL_50MHz		// 50.35
-#define COM_CLOCK	XTAL_20MHz
-#define SND_CLOCK	XTAL_16_9344MHz
+#define CPU_CLOCK   XTAL_14_7456MHz
+#define MACH_CLOCK  XTAL_50MHz      // 50.35
+#define COM_CLOCK   XTAL_20MHz
+#define SND_CLOCK   XTAL_16_9344MHz
 
 #include "emu.h"
 #include "cpu/h83002/h8.h"
@@ -222,11 +222,22 @@
 class coinmvga_state : public driver_device
 {
 public:
-	coinmvga_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	coinmvga_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_vram(*this, "vram"){ }
 
-	UINT16 *m_vram;
+	required_shared_ptr<UINT16> m_vram;
 	struct { int r,g,b,offs,offs_internal; } m_bgpal, m_fgpal;
+	DECLARE_WRITE8_MEMBER(debug_w);
+	DECLARE_WRITE16_MEMBER(ramdac_bg_w);
+	DECLARE_WRITE16_MEMBER(ramdac_fg_w);
+	DECLARE_READ16_MEMBER(test_r);
+	DECLARE_DRIVER_INIT(colorama);
+	DECLARE_DRIVER_INIT(cmrltv75);
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_coinmvga(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(vblank_irq);
 };
 
 
@@ -235,15 +246,14 @@ public:
 *************************/
 
 
-static VIDEO_START( coinmvga )
+void coinmvga_state::video_start()
 {
 }
 
 
-static SCREEN_UPDATE( coinmvga )
+UINT32 coinmvga_state::screen_update_coinmvga(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	coinmvga_state *state = screen->machine().driver_data<coinmvga_state>();
-	const gfx_element *gfx = screen->machine().gfx[0];
+	gfx_element *gfx = machine().gfx[0];
 	int count = 0x04000/2;
 
 	int y,x;
@@ -253,7 +263,7 @@ static SCREEN_UPDATE( coinmvga )
 	{
 		for (x=0;x<128;x++)
 		{
-			int tile = state->m_vram[count];
+			int tile = m_vram[count];
 			//int colour = tile>>12;
 			drawgfx_opaque(bitmap,cliprect,gfx,tile,0,0,0,x*8,y*8);
 
@@ -266,7 +276,7 @@ static SCREEN_UPDATE( coinmvga )
 }
 
 
-static PALETTE_INIT( coinmvga )
+void coinmvga_state::palette_init()
 {
 
 }
@@ -276,104 +286,104 @@ static PALETTE_INIT( coinmvga )
 *  Read / Write Handlers  *
 **************************/
 
-//static WRITE8_HANDLER( debug_w )
+//WRITE8_MEMBER(coinmvga_state::debug_w)
 //{
 //  popmessage("written : %02X", data);
 //}
 
-static WRITE16_HANDLER( ramdac_bg_w )
+WRITE16_MEMBER(coinmvga_state::ramdac_bg_w)
 {
-	coinmvga_state *state = space->machine().driver_data<coinmvga_state>();
 	if(ACCESSING_BITS_8_15)
 	{
-		state->m_bgpal.offs = data >> 8;
-		state->m_bgpal.offs_internal = 0;
+		m_bgpal.offs = data >> 8;
+		m_bgpal.offs_internal = 0;
 	}
 	else //if(mem_mask == 0x00ff)
 	{
-		switch(state->m_bgpal.offs_internal)
+		switch(m_bgpal.offs_internal)
 		{
 			case 0:
-				state->m_bgpal.r = ((data & 0x3f) << 2) | ((data & 0x30) >> 4);
-				state->m_bgpal.offs_internal++;
+				m_bgpal.r = ((data & 0x3f) << 2) | ((data & 0x30) >> 4);
+				m_bgpal.offs_internal++;
 				break;
 			case 1:
-				state->m_bgpal.g = ((data & 0x3f) << 2) | ((data & 0x30) >> 4);
-				state->m_bgpal.offs_internal++;
+				m_bgpal.g = ((data & 0x3f) << 2) | ((data & 0x30) >> 4);
+				m_bgpal.offs_internal++;
 				break;
 			case 2:
-				state->m_bgpal.b = ((data & 0x3f) << 2) | ((data & 0x30) >> 4);
-				palette_set_color(space->machine(), state->m_bgpal.offs, MAKE_RGB(state->m_bgpal.r, state->m_bgpal.g, state->m_bgpal.b));
-				state->m_bgpal.offs_internal = 0;
-				state->m_bgpal.offs++;
+				m_bgpal.b = ((data & 0x3f) << 2) | ((data & 0x30) >> 4);
+				palette_set_color(machine(), m_bgpal.offs, MAKE_RGB(m_bgpal.r, m_bgpal.g, m_bgpal.b));
+				m_bgpal.offs_internal = 0;
+				m_bgpal.offs++;
 				break;
 		}
 	}
 }
 
 
-static WRITE16_HANDLER( ramdac_fg_w )
+WRITE16_MEMBER(coinmvga_state::ramdac_fg_w)
 {
-	coinmvga_state *state = space->machine().driver_data<coinmvga_state>();
 	if(ACCESSING_BITS_8_15)
 	{
-		state->m_fgpal.offs = data >> 8;
-		state->m_fgpal.offs_internal = 0;
+		m_fgpal.offs = data >> 8;
+		m_fgpal.offs_internal = 0;
 	}
 	else
 	{
-		switch(state->m_fgpal.offs_internal)
+		switch(m_fgpal.offs_internal)
 		{
 			case 0:
-				state->m_fgpal.r = ((data & 0x3f) << 2) | ((data & 0x30) >> 4);
-				state->m_fgpal.offs_internal++;
+				m_fgpal.r = ((data & 0x3f) << 2) | ((data & 0x30) >> 4);
+				m_fgpal.offs_internal++;
 				break;
 			case 1:
-				state->m_fgpal.g = ((data & 0x3f) << 2) | ((data & 0x30) >> 4);
-				state->m_fgpal.offs_internal++;
+				m_fgpal.g = ((data & 0x3f) << 2) | ((data & 0x30) >> 4);
+				m_fgpal.offs_internal++;
 				break;
 			case 2:
-				state->m_fgpal.b = ((data & 0x3f) << 2) | ((data & 0x30) >> 4);
-				palette_set_color(space->machine(), 0x100+state->m_fgpal.offs, MAKE_RGB(state->m_fgpal.r, state->m_fgpal.g, state->m_fgpal.b));
-				state->m_fgpal.offs_internal = 0;
-				state->m_fgpal.offs++;
+				m_fgpal.b = ((data & 0x3f) << 2) | ((data & 0x30) >> 4);
+				palette_set_color(machine(), 0x100+m_fgpal.offs, MAKE_RGB(m_fgpal.r, m_fgpal.g, m_fgpal.b));
+				m_fgpal.offs_internal = 0;
+				m_fgpal.offs++;
 				break;
 		}
 	}
 }
 
 /*
-static READ16_HANDLER( test_r )
+READ16_MEMBER(coinmvga_state::test_r)
 {
-    return space->machine().rand();
+    return machine().rand();
 }*/
 
 /*************************
 * Memory Map Information *
 *************************/
 
-static ADDRESS_MAP_START( coinmvga_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( coinmvga_map, AS_PROGRAM, 16, coinmvga_state )
 	AM_RANGE(0x000000, 0x07ffff) AM_ROM
 	AM_RANGE(0x080000, 0x0fffff) AM_ROM AM_REGION("maincpu", 0) //maybe not
 
 //  AM_RANGE(0x0a0000, 0x0fffff) AM_RAM
 //  AM_RANGE(0x100000, 0x1fffff) AM_RAM //colorama
-	AM_RANGE(0x210000, 0x21ffff) AM_RAM AM_BASE_MEMBER(coinmvga_state, m_vram)
+	AM_RANGE(0x210000, 0x21ffff) AM_RAM AM_SHARE("vram")
 //  AM_RANGE(0x40746e, 0x40746f) AM_READ(test_r) AM_WRITENOP //touch screen related, colorama
 //  AM_RANGE(0x403afa, 0x403afb) AM_READ(test_r) AM_WRITENOP //touch screen related, cmrltv75
 	AM_RANGE(0x400000, 0x40ffff) AM_RAM
 
 	AM_RANGE(0x600000, 0x600001) AM_WRITE(ramdac_bg_w)
 	AM_RANGE(0x600004, 0x600005) AM_WRITE(ramdac_fg_w)
-	AM_RANGE(0x600008, 0x600009) AM_DEVREADWRITE8("ymz", ymz280b_r, ymz280b_w, 0xffff)
+	AM_RANGE(0x600008, 0x600009) AM_DEVREADWRITE8_LEGACY("ymz", ymz280b_r, ymz280b_w, 0xffff)
 	AM_RANGE(0x610000, 0x61000f) AM_RAM //touch screen i/o
+
+	AM_RANGE(0x700000, 0x7fffff) AM_ROM AM_REGION("maincpu", 0) // ?
 
 	AM_RANGE(0x800000, 0x800001) AM_READ_PORT("DSW1") //"arrow" r?
 	AM_RANGE(0x800002, 0x800003) AM_READ_PORT("DSW2")
 	//0x800008 "arrow" w?
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( coinmvga_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( coinmvga_io_map, AS_IO, 8, coinmvga_state )
 /*  Digital I/O ports (ports 4-B are valid on 16-bit H8/3xx) */
 //  AM_RANGE(H8_PORT_4, H8_PORT_4)
 //  AM_RANGE(H8_PORT_5, H8_PORT_5)
@@ -635,8 +645,8 @@ static const gfx_layout tiles16x16_layout =
 ******************************/
 
 static GFXDECODE_START( coinmvga )
-	GFXDECODE_ENTRY( "gfx1", 0, tiles8x8_layout,   0x100, 16 )	/* Foreground GFX */
-	GFXDECODE_ENTRY( "gfx2", 0, tiles16x16_layout, 0x000, 16 )	/* Background GFX */
+	GFXDECODE_ENTRY( "gfx1", 0, tiles8x8_layout,   0x100, 16 )  /* Foreground GFX */
+	GFXDECODE_ENTRY( "gfx2", 0, tiles16x16_layout, 0x000, 16 )  /* Background GFX */
 GFXDECODE_END
 
 
@@ -646,13 +656,13 @@ GFXDECODE_END
 
 static const ymz280b_interface ymz280b_intf =
 {
-	0	// irq ?
+	0   // irq ?
 };
 
-static INTERRUPT_GEN( vblank_irq )
+INTERRUPT_GEN_MEMBER(coinmvga_state::vblank_irq)
 {
 	//printf("1\n");
-	device_set_input_line(device, 2, HOLD_LINE);
+	device.execute().set_input_line(2, HOLD_LINE);
 }
 
 
@@ -663,10 +673,10 @@ static INTERRUPT_GEN( vblank_irq )
 static MACHINE_CONFIG_START( coinmvga, coinmvga_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", H83007, CPU_CLOCK)	/* xtal */
+	MCFG_CPU_ADD("maincpu", H83007, CPU_CLOCK)  /* xtal */
 	MCFG_CPU_PROGRAM_MAP(coinmvga_map)
 	MCFG_CPU_IO_MAP(coinmvga_io_map)
-	MCFG_CPU_VBLANK_INT("screen", vblank_irq)	/* wrong, fix me */
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", coinmvga_state,  vblank_irq)   /* wrong, fix me */
 
 //  MCFG_NVRAM_ADD_0FILL("nvram")
 
@@ -674,17 +684,14 @@ static MACHINE_CONFIG_START( coinmvga, coinmvga_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(640,480)
 	MCFG_SCREEN_VISIBLE_AREA(0, 640-1, 0, 480-1)
-	MCFG_SCREEN_UPDATE(coinmvga)
+	MCFG_SCREEN_UPDATE_DRIVER(coinmvga_state, screen_update_coinmvga)
 
 	MCFG_GFXDECODE(coinmvga)
 
-	MCFG_PALETTE_INIT(coinmvga)
 	MCFG_PALETTE_LENGTH(512)
 
-	MCFG_VIDEO_START(coinmvga)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
@@ -711,20 +718,20 @@ ROM_START( colorama )
 	ROM_LOAD16_BYTE( "p521_prg2.cp2", 0x00000, 0x80000, CRC(6db85d66) SHA1(21009aa01db5193d1be588deaeba8f89582d53dd) )
 
 	ROM_REGION( 0x100000, "gfx1", 0 )
-	ROM_LOAD16_BYTE( "p521_fore1.fg1",	0x00001, 0x80000, CRC(0a8fe27a) SHA1(29500040e2bd0b6f349abaf51bb7f8aaac73e8cf) )
-	ROM_LOAD16_BYTE( "p521_fore2.fg2",	0x00000, 0x80000, CRC(3ae78445) SHA1(ef590a6042969718d88732244d2639b7cd8ab507) )
+	ROM_LOAD16_BYTE( "p521_fore1.fg1",  0x00001, 0x80000, CRC(0a8fe27a) SHA1(29500040e2bd0b6f349abaf51bb7f8aaac73e8cf) )
+	ROM_LOAD16_BYTE( "p521_fore2.fg2",  0x00000, 0x80000, CRC(3ae78445) SHA1(ef590a6042969718d88732244d2639b7cd8ab507) )
 
 	ROM_REGION( 0x400000, "gfx2", 0 )
-	ROM_LOAD16_BYTE( "p521_back1.bg1",	0x200001, 0x100000, CRC(0c1a7a2d) SHA1(a7827c6091d0f78e146419261eca427cd229d445) )
-	ROM_LOAD16_BYTE( "p521_back2.bg2",	0x200000, 0x100000, CRC(218912d7) SHA1(64e3dc22ff6ae296e1843b6d6bfb02eb0d202db5) )
-	ROM_LOAD16_BYTE( "p521_back3.bg3",	0x000001, 0x100000, CRC(8ddad7d1) SHA1(0a41ca166c8a9eca2ee27d35a3ae41ddb8759dce) )
-	ROM_LOAD16_BYTE( "p521_back4.bg4",	0x000000, 0x100000, CRC(28d54ce1) SHA1(0dadae2e11f9b86dddb6a0c33abfbdb8b6f2d862) )
+	ROM_LOAD16_BYTE( "p521_back1.bg1",  0x200001, 0x100000, CRC(0c1a7a2d) SHA1(a7827c6091d0f78e146419261eca427cd229d445) )
+	ROM_LOAD16_BYTE( "p521_back2.bg2",  0x200000, 0x100000, CRC(218912d7) SHA1(64e3dc22ff6ae296e1843b6d6bfb02eb0d202db5) )
+	ROM_LOAD16_BYTE( "p521_back3.bg3",  0x000001, 0x100000, CRC(8ddad7d1) SHA1(0a41ca166c8a9eca2ee27d35a3ae41ddb8759dce) )
+	ROM_LOAD16_BYTE( "p521_back4.bg4",  0x000000, 0x100000, CRC(28d54ce1) SHA1(0dadae2e11f9b86dddb6a0c33abfbdb8b6f2d862) )
 
 	ROM_REGION( 0x100000, "ymz", 0 )
-	ROM_LOAD( "p521_snd.sp1",	0x00000, 0x100000, CRC(5c87bb98) SHA1(bc1b8c090fbae166e3a7e1da74bfd2e84c1a03f6) )
+	ROM_LOAD( "p521_snd.sp1",   0x00000, 0x100000, CRC(5c87bb98) SHA1(bc1b8c090fbae166e3a7e1da74bfd2e84c1a03f6) )
 
 	ROM_REGION( 0x0200, "plds", 0 )
-	ROM_LOAD( "palce22v10h25.u11",	0x0000, 0x0200, NO_DUMP )
+	ROM_LOAD( "palce22v10h25.u11",  0x0000, 0x0200, NO_DUMP )
 
 ROM_END
 
@@ -736,27 +743,27 @@ ROM_END
 
 ROM_START( cmrltv75 )
 
-    /*** Bet Station ***/
+	/*** Bet Station ***/
 
 	ROM_REGION( 0x100000, "maincpu", 0 )
 	ROM_LOAD16_BYTE( "bet.cp1",   0x00001, 0x80000, CRC(2dc1c899) SHA1(2be488d23df5e50bbcfa4e66a49a455c617b29b4) )
 	ROM_LOAD16_BYTE( "bet.cp2",   0x00000, 0x80000, CRC(fcab8825) SHA1(79cb862ac5363ab90e91184efd9cfaec86bb82a5) )
 
 	ROM_REGION( 0x100000, "gfx1", 0 )
-	ROM_LOAD16_BYTE( "p497.fg1",	0x00001, 0x80000, CRC(ce5f9fe9) SHA1(a30f5f375eaa651ede4057449c1648c64d207577) )
-	ROM_LOAD16_BYTE( "p497.fg2",	0x00000, 0x80000, CRC(3846fad0) SHA1(409725ab8c9353a8d5774c5f010ace1077b3fd35) )
+	ROM_LOAD16_BYTE( "p497.fg1",    0x00001, 0x80000, CRC(ce5f9fe9) SHA1(a30f5f375eaa651ede4057449c1648c64d207577) )
+	ROM_LOAD16_BYTE( "p497.fg2",    0x00000, 0x80000, CRC(3846fad0) SHA1(409725ab8c9353a8d5774c5f010ace1077b3fd35) )
 
 	ROM_REGION( 0x400000, "gfx2", 0 )
-	ROM_LOAD16_BYTE( "p497.bg1",	0x200001, 0x100000, CRC(fadf2a5a) SHA1(ac5413ff213ef5c6210e716a24cd41519b81a54a) )
-	ROM_LOAD16_BYTE( "p497.bg2",	0x200000, 0x100000, CRC(5d648914) SHA1(2a4a2839293529aee500aacfbf1d6b12b328b2eb) )
-	ROM_LOAD16_BYTE( "p497.bg3",	0x000001, 0x100000, CRC(627e236c) SHA1(a4bd8b482cbac2bf2ab1723ee61d32480ede8985) )
-	ROM_LOAD16_BYTE( "p497.bg4",	0x000000, 0x100000, CRC(3698f748) SHA1(856eeed8eff79273ba3aafbbd5d0b1d89e9cff5b) )
+	ROM_LOAD16_BYTE( "p497.bg1",    0x200001, 0x100000, CRC(fadf2a5a) SHA1(ac5413ff213ef5c6210e716a24cd41519b81a54a) )
+	ROM_LOAD16_BYTE( "p497.bg2",    0x200000, 0x100000, CRC(5d648914) SHA1(2a4a2839293529aee500aacfbf1d6b12b328b2eb) )
+	ROM_LOAD16_BYTE( "p497.bg3",    0x000001, 0x100000, CRC(627e236c) SHA1(a4bd8b482cbac2bf2ab1723ee61d32480ede8985) )
+	ROM_LOAD16_BYTE( "p497.bg4",    0x000000, 0x100000, CRC(3698f748) SHA1(856eeed8eff79273ba3aafbbd5d0b1d89e9cff5b) )
 
 	ROM_REGION( 0x100000, "ymz", 0 )
-	ROM_LOAD( "betsound.sp1",	0x00000, 0x100000, CRC(979ecd0e) SHA1(827e8c86b27e5252368960fffe42ace167aa4495) )
+	ROM_LOAD( "betsound.sp1",   0x00000, 0x100000, CRC(979ecd0e) SHA1(827e8c86b27e5252368960fffe42ace167aa4495) )
 
 	ROM_REGION( 0x0200, "plds", 0 )
-	ROM_LOAD( "palce22v10h25.u11",	0x0000, 0x0200, NO_DUMP )
+	ROM_LOAD( "palce22v10h25.u11",  0x0000, 0x0200, NO_DUMP )
 
 	/*** Wheel Controller ***/
 
@@ -765,12 +772,12 @@ ROM_START( cmrltv75 )
 	ROM_LOAD16_BYTE( "wheel.cp2",   0x00000, 0x80000, CRC(a8441b04) SHA1(cc8f10390947c2a15b2c94b11574c5eeb69fded5) )
 
 	ROM_REGION( 0x800000, "wheelsnd", 0 ) /* the wheel controller has 8 sockets */
-	ROM_LOAD( "rwc497ym.sp1",	0x000000, 0x100000, CRC(13d6cff5) SHA1(ad1858f251e11017a427cbf7219d78bb2b854528) )
-	ROM_LOAD( "rwc497ym.sp2",	0x100000, 0x100000, CRC(f8c7efd1) SHA1(e86a7ef0617c85415334e1f39a9059d5b16bc7d1) )
-	ROM_LOAD( "rwc497ym.sp3",	0x200000, 0x100000, CRC(a1977dff) SHA1(c405bf1f1721ae864a2ff91ec7d637f03e431ad4) )
-	ROM_LOAD( "rwc497ym.sp4",	0x300000, 0x100000, CRC(f8cb0fb8) SHA1(3ea8f268bc8745a257eb4b20d7e79196d0f1fb9e) )
-	ROM_LOAD( "rwc497ym.sp5",	0x400000, 0x100000, CRC(788b52f7) SHA1(1b339cb984b807a08e6fde260b5ee2bc8ca66f62) )
-	ROM_LOAD( "rwc497ym.sp6",	0x500000, 0x100000, CRC(be94fd18) SHA1(2884cae7cf96008a78e77f42e8efb5c3ca8f4a4d) )
+	ROM_LOAD( "rwc497ym.sp1",   0x000000, 0x100000, CRC(13d6cff5) SHA1(ad1858f251e11017a427cbf7219d78bb2b854528) )
+	ROM_LOAD( "rwc497ym.sp2",   0x100000, 0x100000, CRC(f8c7efd1) SHA1(e86a7ef0617c85415334e1f39a9059d5b16bc7d1) )
+	ROM_LOAD( "rwc497ym.sp3",   0x200000, 0x100000, CRC(a1977dff) SHA1(c405bf1f1721ae864a2ff91ec7d637f03e431ad4) )
+	ROM_LOAD( "rwc497ym.sp4",   0x300000, 0x100000, CRC(f8cb0fb8) SHA1(3ea8f268bc8745a257eb4b20d7e79196d0f1fb9e) )
+	ROM_LOAD( "rwc497ym.sp5",   0x400000, 0x100000, CRC(788b52f7) SHA1(1b339cb984b807a08e6fde260b5ee2bc8ca66f62) )
+	ROM_LOAD( "rwc497ym.sp6",   0x500000, 0x100000, CRC(be94fd18) SHA1(2884cae7cf96008a78e77f42e8efb5c3ca8f4a4d) )
 
 ROM_END
 
@@ -782,27 +789,27 @@ ROM_END
 
 ROM_START( cmkenosp )
 
-    /*** Bet Station ***/
+	/*** Bet Station ***/
 
 	ROM_REGION( 0x100000, "maincpu", 0 )
 	ROM_LOAD16_BYTE( "bet1.cp1",   0x00001, 0x80000, CRC(ee04b815) SHA1(cea29973cf9caa5c06bc312fc3b19e146c1ae063) )
 	ROM_LOAD16_BYTE( "bet2.cp2",   0x00000, 0x80000, CRC(32071845) SHA1(278217a70ea777f82ae91d11d51b832383eafdbe) )
 
 	ROM_REGION( 0x100000, "gfx1", 0 )
-	ROM_LOAD16_BYTE( "fore1.fg1",	0x00001, 0x80000, CRC(a3548c2a) SHA1(02f98ee09581a235df3704951683f9d2aab3b1e8) )
-	ROM_LOAD16_BYTE( "fore2.fg2",	0x00000, 0x80000, CRC(8b1afa73) SHA1(efd176dfb55f047b8e01b9460469936c86953417) )
+	ROM_LOAD16_BYTE( "fore1.fg1",   0x00001, 0x80000, CRC(a3548c2a) SHA1(02f98ee09581a235df3704951683f9d2aab3b1e8) )
+	ROM_LOAD16_BYTE( "fore2.fg2",   0x00000, 0x80000, CRC(8b1afa73) SHA1(efd176dfb55f047b8e01b9460469936c86953417) )
 
 	ROM_REGION( 0x400000, "gfx2", 0 )
-	ROM_LOAD16_BYTE( "back1.bg1",	0x200001, 0x100000, CRC(8e9d1753) SHA1(4a733bc6b284571b2dae9e80ba8b88724e9dbffb) )
-	ROM_LOAD16_BYTE( "back2.bg2",	0x200000, 0x100000, CRC(aa4fe1ba) SHA1(241cf6ee13664d4cf0c559c26170cb561afca016) )
-	ROM_LOAD16_BYTE( "back3.bg3",	0x000001, 0x100000, CRC(9f26f0e0) SHA1(0c3d78e2befc6fdeb8c3534f5278d2d275106219) )
-	ROM_LOAD16_BYTE( "back4.bg4",	0x000000, 0x100000, CRC(96d33887) SHA1(ca7eb9f2cfeb65c69e837246c8c78ea56c057e66) )
+	ROM_LOAD16_BYTE( "back1.bg1",   0x200001, 0x100000, CRC(8e9d1753) SHA1(4a733bc6b284571b2dae9e80ba8b88724e9dbffb) )
+	ROM_LOAD16_BYTE( "back2.bg2",   0x200000, 0x100000, CRC(aa4fe1ba) SHA1(241cf6ee13664d4cf0c559c26170cb561afca016) )
+	ROM_LOAD16_BYTE( "back3.bg3",   0x000001, 0x100000, CRC(9f26f0e0) SHA1(0c3d78e2befc6fdeb8c3534f5278d2d275106219) )
+	ROM_LOAD16_BYTE( "back4.bg4",   0x000000, 0x100000, CRC(96d33887) SHA1(ca7eb9f2cfeb65c69e837246c8c78ea56c057e66) )
 
 	ROM_REGION( 0x100000, "ymz", 0 )
-	ROM_LOAD( "betsound.sp1",	0x00000, 0x100000, CRC(979ecd0e) SHA1(827e8c86b27e5252368960fffe42ace167aa4495) )
+	ROM_LOAD( "betsound.sp1",   0x00000, 0x100000, CRC(979ecd0e) SHA1(827e8c86b27e5252368960fffe42ace167aa4495) )
 
 	ROM_REGION( 0x0200, "plds", 0 )
-	ROM_LOAD( "palce22v10h25.u11",	0x0000, 0x0200, NO_DUMP )
+	ROM_LOAD( "palce22v10h25.u11",  0x0000, 0x0200, NO_DUMP )
 
 	/*** Wheel Controller ***/
 
@@ -811,10 +818,10 @@ ROM_START( cmkenosp )
 	ROM_LOAD16_BYTE( "wheel_prog_2.cp2",   0x00000, 0x80000, CRC(cfc02d3e) SHA1(09e41b26c62137b31f8673184dad565932881f47) )
 
 	ROM_REGION( 0x800000, "wheelsnd", 0 ) /* the wheel controller has 8 sockets */
-	ROM_LOAD( "rwc497ym.sp1",	0x000000, 0x100000, CRC(90a93951) SHA1(73603f402eb3b62e69a745af9d45738f35bc0b4e) )
-	ROM_LOAD( "rwc497ym.sp2",	0x100000, 0x100000, CRC(f5d0a6e7) SHA1(c4a1c333854c95e37c0040fed35b72ac1e853832) )
-	ROM_LOAD( "rwc497ym.sp3",	0x200000, 0x100000, CRC(0e53c1a9) SHA1(0785c52b24277c9ba24d0fbf0ac335acb0235e23) )
-	ROM_LOAD( "rwc497ym.sp4",	0x300000, 0x100000, CRC(b5729ae7) SHA1(0e63fbb81ff5f2fef3c653f769db8073dff1214b) )
+	ROM_LOAD( "rwc497ym.sp1",   0x000000, 0x100000, CRC(90a93951) SHA1(73603f402eb3b62e69a745af9d45738f35bc0b4e) )
+	ROM_LOAD( "rwc497ym.sp2",   0x100000, 0x100000, CRC(f5d0a6e7) SHA1(c4a1c333854c95e37c0040fed35b72ac1e853832) )
+	ROM_LOAD( "rwc497ym.sp3",   0x200000, 0x100000, CRC(0e53c1a9) SHA1(0785c52b24277c9ba24d0fbf0ac335acb0235e23) )
+	ROM_LOAD( "rwc497ym.sp4",   0x300000, 0x100000, CRC(b5729ae7) SHA1(0e63fbb81ff5f2fef3c653f769db8073dff1214b) )
 
 ROM_END
 
@@ -826,27 +833,27 @@ ROM_END
 
 ROM_START( cmkenospa )
 
-    /*** Bet Station ***/
+	/*** Bet Station ***/
 
 	ROM_REGION( 0x100000, "maincpu", 0 )
 	ROM_LOAD16_BYTE( "bet.cp1",   0x00001, 0x80000, CRC(ffdc69a0) SHA1(2ba6a36cb0953474164d4fb80a60bf8ca27e9a0c) )
 	ROM_LOAD16_BYTE( "bet.cp2",   0x00000, 0x80000, CRC(c46f237c) SHA1(75a60ace7277a90b3d7acd7838d1271fd41517f1) )
 
 	ROM_REGION( 0x100000, "gfx1", 0 )
-	ROM_LOAD16_BYTE( "fore1.fg1",	0x00001, 0x80000, CRC(a3548c2a) SHA1(02f98ee09581a235df3704951683f9d2aab3b1e8) )
-	ROM_LOAD16_BYTE( "fore2.fg2",	0x00000, 0x80000, CRC(8b1afa73) SHA1(efd176dfb55f047b8e01b9460469936c86953417) )
+	ROM_LOAD16_BYTE( "fore1.fg1",   0x00001, 0x80000, CRC(a3548c2a) SHA1(02f98ee09581a235df3704951683f9d2aab3b1e8) )
+	ROM_LOAD16_BYTE( "fore2.fg2",   0x00000, 0x80000, CRC(8b1afa73) SHA1(efd176dfb55f047b8e01b9460469936c86953417) )
 
 	ROM_REGION( 0x400000, "gfx2", 0 )
-	ROM_LOAD16_BYTE( "back1.bg1",	0x200001, 0x100000, CRC(8e9d1753) SHA1(4a733bc6b284571b2dae9e80ba8b88724e9dbffb) )
-	ROM_LOAD16_BYTE( "back2.bg2",	0x200000, 0x100000, CRC(aa4fe1ba) SHA1(241cf6ee13664d4cf0c559c26170cb561afca016) )
-	ROM_LOAD16_BYTE( "back3.bg3",	0x000001, 0x100000, CRC(9f26f0e0) SHA1(0c3d78e2befc6fdeb8c3534f5278d2d275106219) )
-	ROM_LOAD16_BYTE( "back4.bg4",	0x000000, 0x100000, CRC(96d33887) SHA1(ca7eb9f2cfeb65c69e837246c8c78ea56c057e66) )
+	ROM_LOAD16_BYTE( "back1.bg1",   0x200001, 0x100000, CRC(8e9d1753) SHA1(4a733bc6b284571b2dae9e80ba8b88724e9dbffb) )
+	ROM_LOAD16_BYTE( "back2.bg2",   0x200000, 0x100000, CRC(aa4fe1ba) SHA1(241cf6ee13664d4cf0c559c26170cb561afca016) )
+	ROM_LOAD16_BYTE( "back3.bg3",   0x000001, 0x100000, CRC(9f26f0e0) SHA1(0c3d78e2befc6fdeb8c3534f5278d2d275106219) )
+	ROM_LOAD16_BYTE( "back4.bg4",   0x000000, 0x100000, CRC(96d33887) SHA1(ca7eb9f2cfeb65c69e837246c8c78ea56c057e66) )
 
 	ROM_REGION( 0x100000, "ymz", 0 )
-	ROM_LOAD( "betsound.sp1",	0x00000, 0x100000, CRC(979ecd0e) SHA1(827e8c86b27e5252368960fffe42ace167aa4495) )
+	ROM_LOAD( "betsound.sp1",   0x00000, 0x100000, CRC(979ecd0e) SHA1(827e8c86b27e5252368960fffe42ace167aa4495) )
 
 	ROM_REGION( 0x0200, "plds", 0 )
-	ROM_LOAD( "palce22v10h25.u11",	0x0000, 0x0200, NO_DUMP )
+	ROM_LOAD( "palce22v10h25.u11",  0x0000, 0x0200, NO_DUMP )
 
 	/*** Wheel Controller ***/
 
@@ -855,10 +862,10 @@ ROM_START( cmkenospa )
 	ROM_LOAD16_BYTE( "wheel.cp2",   0x00000, 0x80000, CRC(49a50ae7) SHA1(89857ebd94ebbfa040d99648a46779c9ba8f85dd) )
 
 	ROM_REGION( 0x800000, "wheelsnd", 0 ) /* the wheel controller has 8 sockets */
-	ROM_LOAD( "rwc497ym.sp1",	0x000000, 0x100000, CRC(90a93951) SHA1(73603f402eb3b62e69a745af9d45738f35bc0b4e) )
-	ROM_LOAD( "rwc497ym.sp2",	0x100000, 0x100000, CRC(f5d0a6e7) SHA1(c4a1c333854c95e37c0040fed35b72ac1e853832) )
-	ROM_LOAD( "rwc497ym.sp3",	0x200000, 0x100000, CRC(0e53c1a9) SHA1(0785c52b24277c9ba24d0fbf0ac335acb0235e23) )
-	ROM_LOAD( "rwc497ym.sp4",	0x300000, 0x100000, CRC(b5729ae7) SHA1(0e63fbb81ff5f2fef3c653f769db8073dff1214b) )
+	ROM_LOAD( "rwc497ym.sp1",   0x000000, 0x100000, CRC(90a93951) SHA1(73603f402eb3b62e69a745af9d45738f35bc0b4e) )
+	ROM_LOAD( "rwc497ym.sp2",   0x100000, 0x100000, CRC(f5d0a6e7) SHA1(c4a1c333854c95e37c0040fed35b72ac1e853832) )
+	ROM_LOAD( "rwc497ym.sp3",   0x200000, 0x100000, CRC(0e53c1a9) SHA1(0785c52b24277c9ba24d0fbf0ac335acb0235e23) )
+	ROM_LOAD( "rwc497ym.sp4",   0x300000, 0x100000, CRC(b5729ae7) SHA1(0e63fbb81ff5f2fef3c653f769db8073dff1214b) )
 
 ROM_END
 
@@ -867,10 +874,10 @@ ROM_END
 *      Driver Init       *
 *************************/
 
-static DRIVER_INIT( colorama )
+DRIVER_INIT_MEMBER(coinmvga_state,colorama)
 {
 	UINT16 *ROM;
-	ROM = (UINT16 *)machine.region("maincpu")->base();
+	ROM = (UINT16 *)machine().root_device().memregion("maincpu")->base();
 
 	// rte in non-irq routines? wtf? patch them to rts...
 	ROM[0x02B476/2] = 0x5470;
@@ -884,10 +891,10 @@ static DRIVER_INIT( colorama )
 	ROM[0x02a94e/2] = 0x5470;
 }
 
-static DRIVER_INIT( cmrltv75 )
+DRIVER_INIT_MEMBER(coinmvga_state,cmrltv75)
 {
 	UINT16 *ROM;
-	ROM = (UINT16 *)machine.region("maincpu")->base();
+	ROM = (UINT16 *)machine().root_device().memregion("maincpu")->base();
 
 	// rte in non-irq routines? wtf? patch them to rts...
 	ROM[0x056fd6/2] = 0x5470;
@@ -904,7 +911,7 @@ static DRIVER_INIT( cmrltv75 )
 *************************/
 
 /*    YEAR  NAME       PARENT    MACHINE   INPUT     INIT      ROT     COMPANY                    FULLNAME                                     FLAGS */
-GAME( 2001, colorama,  0,        coinmvga, coinmvga, colorama, ROT0,  "Coinmaster-Gaming, Ltd.", "Colorama (English)",                         GAME_IMPERFECT_GRAPHICS | GAME_NO_SOUND | GAME_NOT_WORKING )
-GAME( 2001, cmrltv75,  0,        coinmvga, coinmvga, cmrltv75, ROT90, "Coinmaster-Gaming, Ltd.", "Coinmaster Roulette V75 (Y2K, Spanish)",     GAME_IMPERFECT_GRAPHICS | GAME_NO_SOUND | GAME_NOT_WORKING )
-GAME( 2000, cmkenosp,  0,        coinmvga, coinmvga, 0,        ROT90, "Coinmaster-Gaming, Ltd.", "Coinmaster Keno (Y2K, Spanish, 2000-12-14)", GAME_IMPERFECT_GRAPHICS | GAME_NO_SOUND | GAME_NOT_WORKING )
-GAME( 2000, cmkenospa, cmkenosp, coinmvga, coinmvga, 0,        ROT90, "Coinmaster-Gaming, Ltd.", "Coinmaster Keno (Y2K, Spanish, 2000-12-02)", GAME_IMPERFECT_GRAPHICS | GAME_NO_SOUND | GAME_NOT_WORKING )
+GAME( 2001, colorama,  0,        coinmvga, coinmvga, coinmvga_state, colorama, ROT0,  "Coinmaster-Gaming, Ltd.", "Colorama (English)",                         GAME_IMPERFECT_GRAPHICS | GAME_NO_SOUND | GAME_NOT_WORKING )
+GAME( 2001, cmrltv75,  0,        coinmvga, coinmvga, coinmvga_state, cmrltv75, ROT90, "Coinmaster-Gaming, Ltd.", "Coinmaster Roulette V75 (Y2K, Spanish)",     GAME_IMPERFECT_GRAPHICS | GAME_NO_SOUND | GAME_NOT_WORKING )
+GAME( 2000, cmkenosp,  0,        coinmvga, coinmvga, driver_device, 0,        ROT90, "Coinmaster-Gaming, Ltd.", "Coinmaster Keno (Y2K, Spanish, 2000-12-14)", GAME_IMPERFECT_GRAPHICS | GAME_NO_SOUND | GAME_NOT_WORKING )
+GAME( 2000, cmkenospa, cmkenosp, coinmvga, coinmvga, driver_device, 0,        ROT90, "Coinmaster-Gaming, Ltd.", "Coinmaster Keno (Y2K, Spanish, 2000-12-02)", GAME_IMPERFECT_GRAPHICS | GAME_NO_SOUND | GAME_NOT_WORKING )

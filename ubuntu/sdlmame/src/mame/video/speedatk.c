@@ -8,12 +8,13 @@
 #include "video/mc6845.h"
 
 
-PALETTE_INIT( speedatk )
+void speedatk_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 
 	/* allocate the colortable */
-	machine.colortable = colortable_alloc(machine, 0x10);
+	machine().colortable = colortable_alloc(machine(), 0x10);
 
 	/* create a lookup table for the palette */
 	for (i = 0; i < 0x10; i++)
@@ -39,7 +40,7 @@ PALETTE_INIT( speedatk )
 		bit2 = (color_prom[i] >> 7) & 0x01;
 		b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 
-		colortable_palette_set_color(machine.colortable, i, MAKE_RGB(r, g, b));
+		colortable_palette_set_color(machine().colortable, i, MAKE_RGB(r, g, b));
 	}
 
 	/* color_prom now points to the beginning of the lookup table */
@@ -48,70 +49,66 @@ PALETTE_INIT( speedatk )
 	for (i = 0; i < 0x100; i++)
 	{
 		UINT8 ctabentry = color_prom[i] & 0x0f;
-		colortable_entry_set_value(machine.colortable, i, ctabentry);
+		colortable_entry_set_value(machine().colortable, i, ctabentry);
 	}
 }
 
-WRITE8_HANDLER( speedatk_videoram_w )
+WRITE8_MEMBER(speedatk_state::speedatk_videoram_w)
 {
-	speedatk_state *state = space->machine().driver_data<speedatk_state>();
 
-	state->m_videoram[offset] = data;
+	m_videoram[offset] = data;
 }
 
-WRITE8_HANDLER( speedatk_colorram_w )
+WRITE8_MEMBER(speedatk_state::speedatk_colorram_w)
 {
-	speedatk_state *state = space->machine().driver_data<speedatk_state>();
 
-	state->m_colorram[offset] = data;
+	m_colorram[offset] = data;
 }
 
-VIDEO_START( speedatk )
+void speedatk_state::video_start()
 {
 
 }
 
-WRITE8_HANDLER( speedatk_6845_w )
+WRITE8_MEMBER(speedatk_state::speedatk_6845_w)
 {
-	speedatk_state *state = space->machine().driver_data<speedatk_state>();
 
 	if(offset == 0)
 	{
-		state->m_crtc_index = data;
-		mc6845_address_w(space->machine().device("crtc"),0,data);
+		m_crtc_index = data;
+		machine().device<mc6845_device>("crtc")->address_w(space,0,data);
 	}
 	else
 	{
-		state->m_crtc_vreg[state->m_crtc_index] = data;
-		mc6845_register_w(space->machine().device("crtc"),0,data);
+		m_crtc_vreg[m_crtc_index] = data;
+		machine().device<mc6845_device>("crtc")->register_w(space,0,data);
 	}
 }
 
-SCREEN_UPDATE( speedatk )
+UINT32 speedatk_state::screen_update_speedatk(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	speedatk_state *state = screen->machine().driver_data<speedatk_state>();
 	int x,y;
 	int count;
 	UINT16 tile;
 	UINT8 color, region;
 
-	bitmap_fill(bitmap, cliprect, 0);
+	bitmap.fill(0, cliprect);
 
-	count = (state->m_crtc_vreg[0x0c]<<8)|(state->m_crtc_vreg[0x0d] & 0xff);
+	count = (m_crtc_vreg[0x0c]<<8)|(m_crtc_vreg[0x0d] & 0xff);
 
-	if(state->m_flip_scr) { count = 0x3ff - count; }
+	if(m_flip_scr) { count = 0x3ff - count; }
 
-	for(y=0;y<state->m_crtc_vreg[6];y++)
+	for(y=0;y<m_crtc_vreg[6];y++)
 	{
-		for(x=0;x<state->m_crtc_vreg[1];x++)
+		for(x=0;x<m_crtc_vreg[1];x++)
 		{
-			tile = state->m_videoram[count] + ((state->m_colorram[count] & 0xe0) << 3);
-			color = state->m_colorram[count] & 0x1f;
-			region = (state->m_colorram[count] & 0x10) >> 4;
+			tile = m_videoram[count] + ((m_colorram[count] & 0xe0) << 3);
+			color = m_colorram[count] & 0x1f;
+			region = (m_colorram[count] & 0x10) >> 4;
 
-			drawgfx_opaque(bitmap,cliprect,screen->machine().gfx[region],tile,color,state->m_flip_scr,state->m_flip_scr,x*8,y*8);
+			drawgfx_opaque(bitmap,cliprect,machine().gfx[region],tile,color,m_flip_scr,m_flip_scr,x*8,y*8);
 
-			count = (state->m_flip_scr) ? count-1 : count+1;
+			count = (m_flip_scr) ? count-1 : count+1;
 			count&=0x3ff;
 		}
 	}

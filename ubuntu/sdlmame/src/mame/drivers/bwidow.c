@@ -222,22 +222,14 @@
 #include "video/avgdvg.h"
 #include "machine/atari_vg.h"
 #include "sound/pokey.h"
+#include "sound/discrete.h"
+
+#include "includes/bwidow.h"
 
 
-class bwidow_state : public driver_device
-{
-public:
-	bwidow_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
-
-	int m_lastdata;
-};
 
 
-#define MASTER_CLOCK (12096000)
-#define CLOCK_3KHZ  (MASTER_CLOCK / 4096)
-
-#define IN_LEFT	(1 << 0)
+#define IN_LEFT (1 << 0)
 #define IN_RIGHT (1 << 1)
 #define IN_FIRE (1 << 2)
 #define IN_SHIELD (1 << 3)
@@ -263,16 +255,16 @@ Typically, only the high 2 bits are read.
 
 */
 
-static READ8_HANDLER( spacduel_IN3_r )
+READ8_MEMBER(bwidow_state::spacduel_IN3_r)
 {
 	int res;
 	int res1;
 	int res2;
 	int res3;
 
-	res1 = input_port_read(space->machine(), "IN3");
-	res2 = input_port_read(space->machine(), "IN4");
-	res3 = input_port_read_safe(space->machine(), "DSW2", 0);
+	res1 = ioport("IN3")->read();
+	res2 = ioport("IN4")->read();
+	res3 = ioport("DSW2")->read_safe(0);
 	res = 0x00;
 
 	switch (offset & 0x07)
@@ -314,9 +306,9 @@ static READ8_HANDLER( spacduel_IN3_r )
 	return res;
 }
 
-static CUSTOM_INPUT( clock_r )
+CUSTOM_INPUT_MEMBER(bwidow_state::clock_r)
 {
-	return (field->port->machine().device<cpu_device>("maincpu")->total_cycles() & 0x100) ? 1 : 0;
+	return (machine().device<cpu_device>("maincpu")->total_cycles() & 0x100) ? 1 : 0;
 }
 
 
@@ -326,22 +318,21 @@ static CUSTOM_INPUT( clock_r )
  *
  *************************************/
 
-static WRITE8_HANDLER( bwidow_misc_w )
+WRITE8_MEMBER(bwidow_state::bwidow_misc_w)
 {
-	bwidow_state *state = space->machine().driver_data<bwidow_state>();
 	/*
-        0x10 = p1 led
-        0x20 = p2 led
-        0x01 = coin counter 1
-        0x02 = coin counter 2
-    */
+	    0x10 = p1 led
+	    0x20 = p2 led
+	    0x01 = coin counter 1
+	    0x02 = coin counter 2
+	*/
 
-	if (data == state->m_lastdata) return;
-	set_led_status(space->machine(), 0,~data & 0x10);
-	set_led_status(space->machine(), 1,~data & 0x20);
-	coin_counter_w(space->machine(), 0, data & 0x01);
-	coin_counter_w(space->machine(), 1, data & 0x02);
-	state->m_lastdata = data;
+	if (data == m_lastdata) return;
+	set_led_status(machine(), 0,~data & 0x10);
+	set_led_status(machine(), 1,~data & 0x20);
+	coin_counter_w(machine(), 0, data & 0x01);
+	coin_counter_w(machine(), 1, data & 0x02);
+	m_lastdata = data;
 }
 
 /*************************************
@@ -350,9 +341,9 @@ static WRITE8_HANDLER( bwidow_misc_w )
  *
  *************************************/
 
-static WRITE8_HANDLER( irq_ack_w )
+WRITE8_MEMBER(bwidow_state::irq_ack_w)
 {
-	cputag_set_input_line(space->machine(), "maincpu", 0, CLEAR_LINE);
+	machine().device("maincpu")->execute().set_input_line(0, CLEAR_LINE);
 }
 
 
@@ -362,43 +353,43 @@ static WRITE8_HANDLER( irq_ack_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( bwidow_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( bwidow_map, AS_PROGRAM, 8, bwidow_state )
 	AM_RANGE(0x0000, 0x07ff) AM_RAM
-	AM_RANGE(0x2000, 0x27ff) AM_RAM AM_BASE(&avgdvg_vectorram) AM_SIZE(&avgdvg_vectorram_size) AM_REGION("maincpu", 0x2000)
+	AM_RANGE(0x2000, 0x27ff) AM_RAM AM_SHARE("vectorram") AM_REGION("maincpu", 0x2000)
 	AM_RANGE(0x2800, 0x5fff) AM_ROM
-	AM_RANGE(0x6000, 0x67ff) AM_DEVREADWRITE("pokey1", pokey_r, pokey_w)
-	AM_RANGE(0x6800, 0x6fff) AM_DEVREADWRITE("pokey2", pokey_r, pokey_w)
-	AM_RANGE(0x7000, 0x7000) AM_DEVREAD("earom", atari_vg_earom_r)
+	AM_RANGE(0x6000, 0x67ff) AM_DEVREADWRITE("pokey1", pokey_device, read, write)
+	AM_RANGE(0x6800, 0x6fff) AM_DEVREADWRITE("pokey2", pokey_device, read, write)
+	AM_RANGE(0x7000, 0x7000) AM_DEVREAD("earom", atari_vg_earom_device, read)
 	AM_RANGE(0x7800, 0x7800) AM_READ_PORT("IN0")
 	AM_RANGE(0x8000, 0x8000) AM_READ_PORT("IN3")
 	AM_RANGE(0x8800, 0x8800) AM_READ_PORT("IN4")
 	AM_RANGE(0x8800, 0x8800) AM_WRITE(bwidow_misc_w) /* coin counters, leds */
-	AM_RANGE(0x8840, 0x8840) AM_WRITE(avgdvg_go_w)
-	AM_RANGE(0x8880, 0x8880) AM_WRITE(avgdvg_reset_w)
+	AM_RANGE(0x8840, 0x8840) AM_WRITE_LEGACY(avgdvg_go_w)
+	AM_RANGE(0x8880, 0x8880) AM_WRITE_LEGACY(avgdvg_reset_w)
 	AM_RANGE(0x88c0, 0x88c0) AM_WRITE(irq_ack_w) /* interrupt acknowledge */
-	AM_RANGE(0x8900, 0x8900) AM_DEVWRITE("earom", atari_vg_earom_ctrl_w)
-	AM_RANGE(0x8940, 0x897f) AM_DEVWRITE("earom", atari_vg_earom_w)
+	AM_RANGE(0x8900, 0x8900) AM_DEVWRITE("earom", atari_vg_earom_device, ctrl_w)
+	AM_RANGE(0x8940, 0x897f) AM_DEVWRITE("earom", atari_vg_earom_device, write)
 	AM_RANGE(0x8980, 0x89ed) AM_WRITENOP /* watchdog clear */
 	AM_RANGE(0x9000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( spacduel_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( spacduel_map, AS_PROGRAM, 8, bwidow_state )
 	AM_RANGE(0x0000, 0x03ff) AM_RAM
 	AM_RANGE(0x0800, 0x0800) AM_READ_PORT("IN0")
-	AM_RANGE(0x0900, 0x0907) AM_READ(spacduel_IN3_r)	/* IN1 */
+	AM_RANGE(0x0900, 0x0907) AM_READ(spacduel_IN3_r)    /* IN1 */
 	AM_RANGE(0x0905, 0x0906) AM_WRITENOP /* ignore? */
-	AM_RANGE(0x0a00, 0x0a00) AM_DEVREAD("earom", atari_vg_earom_r)
-//  AM_RANGE(0x0c00, 0x0c00) AM_WRITE(coin_counter_w) /* coin out */
-	AM_RANGE(0x0c80, 0x0c80) AM_WRITE(avgdvg_go_w)
+	AM_RANGE(0x0a00, 0x0a00) AM_DEVREAD("earom", atari_vg_earom_device, read)
+//  AM_RANGE(0x0c00, 0x0c00) AM_WRITE_LEGACY(coin_counter_w) /* coin out */
+	AM_RANGE(0x0c80, 0x0c80) AM_WRITE_LEGACY(avgdvg_go_w)
 	AM_RANGE(0x0d00, 0x0d00) AM_WRITENOP /* watchdog clear */
-	AM_RANGE(0x0d80, 0x0d80) AM_WRITE(avgdvg_reset_w)
+	AM_RANGE(0x0d80, 0x0d80) AM_WRITE_LEGACY(avgdvg_reset_w)
 	AM_RANGE(0x0e00, 0x0e00) AM_WRITE(irq_ack_w) /* interrupt acknowledge */
-	AM_RANGE(0x0e80, 0x0e80) AM_DEVWRITE("earom", atari_vg_earom_ctrl_w)
-	AM_RANGE(0x0f00, 0x0f3f) AM_DEVWRITE("earom", atari_vg_earom_w)
-	AM_RANGE(0x1000, 0x100f) AM_DEVREADWRITE("pokey1", pokey_r, pokey_w)
-	AM_RANGE(0x1400, 0x140f) AM_DEVREADWRITE("pokey2", pokey_r, pokey_w)
-	AM_RANGE(0x2000, 0x27ff) AM_RAM AM_BASE(&avgdvg_vectorram) AM_SIZE(&avgdvg_vectorram_size) AM_REGION("maincpu", 0x2000)
+	AM_RANGE(0x0e80, 0x0e80) AM_DEVWRITE("earom", atari_vg_earom_device, ctrl_w)
+	AM_RANGE(0x0f00, 0x0f3f) AM_DEVWRITE("earom", atari_vg_earom_device, write)
+	AM_RANGE(0x1000, 0x100f) AM_DEVREADWRITE("pokey1", pokey_device, read, write)
+	AM_RANGE(0x1400, 0x140f) AM_DEVREADWRITE("pokey2", pokey_device, read, write)
+	AM_RANGE(0x2000, 0x27ff) AM_RAM AM_SHARE("vectorram") AM_REGION("maincpu", 0x2000)
 	AM_RANGE(0x2800, 0x3fff) AM_ROM
 	AM_RANGE(0x4000, 0xffff) AM_ROM
 ADDRESS_MAP_END
@@ -413,8 +404,8 @@ ADDRESS_MAP_END
 
 static INPUT_PORTS_START( bwidow )
 	PORT_START("IN0")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN2 )	// To fit "Coin B" Dip Switch
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN1 )	// To fit "Coin A" Dip Switch
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN2 )  // To fit "Coin B" Dip Switch
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN1 )  // To fit "Coin A" Dip Switch
 	PORT_BIT( 0x0c, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME("Diagnostic Step") PORT_CODE(KEYCODE_F1)
@@ -422,7 +413,7 @@ static INPUT_PORTS_START( bwidow )
 	/* per default (busy vector processor). */
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(avgdvg_done_r, NULL)
 	/* bit 7 is tied to a 3kHz clock */
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(clock_r, NULL)
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, bwidow_state,clock_r, NULL)
 
 	PORT_START("DSW0")
 	PORT_DIPNAME(0x03, 0x00, DEF_STR( Coinage ) ) PORT_DIPLOCATION("D4:!7,!8")
@@ -468,7 +459,7 @@ static INPUT_PORTS_START( bwidow )
 	PORT_DIPSETTING (  0x80, "40000" )
 	PORT_DIPSETTING (  0xc0, DEF_STR( None ) )
 
-	PORT_START("IN3")	/* IN3 - Movement joystick */
+	PORT_START("IN3")   /* IN3 - Movement joystick */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_RIGHT ) PORT_8WAY
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_LEFT ) PORT_8WAY
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_DOWN ) PORT_8WAY
@@ -478,7 +469,7 @@ static INPUT_PORTS_START( bwidow )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("IN4")	/* IN4 - Firing joystick */
+	PORT_START("IN4")   /* IN4 - Firing joystick */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_RIGHT ) PORT_8WAY
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_LEFT ) PORT_8WAY
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_DOWN ) PORT_8WAY
@@ -492,8 +483,8 @@ INPUT_PORTS_END
 
 static INPUT_PORTS_START( gravitar )
 	PORT_START("IN0")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN2 )	// To fit "Coin B" Dip Switch
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN1 )	// To fit "Coin A" Dip Switch
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN2 )  // To fit "Coin B" Dip Switch
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN1 )  // To fit "Coin A" Dip Switch
 	PORT_BIT( 0x0c, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME("Diagnostic Step") PORT_CODE(KEYCODE_F1)
@@ -501,7 +492,7 @@ static INPUT_PORTS_START( gravitar )
 	/* per default (busy vector processor). */
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(avgdvg_done_r, NULL)
 	/* bit 7 is tied to a 3kHz clock */
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(clock_r, NULL)
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, bwidow_state,clock_r, NULL)
 
 	PORT_START("DSW0")
 	PORT_DIPUNUSED_DIPLOC( 0x03, IP_ACTIVE_HIGH, "D4:!7,!8" )
@@ -566,8 +557,8 @@ INPUT_PORTS_END
 
 static INPUT_PORTS_START( lunarbat )
 	PORT_START("IN0")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN2 )	// To be similar with other games
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN1 )	// To be similar with other games
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN2 )  // To be similar with other games
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN1 )  // To be similar with other games
 	PORT_BIT( 0x0c, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -575,12 +566,12 @@ static INPUT_PORTS_START( lunarbat )
 	/* per default (busy vector processor). */
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(avgdvg_done_r, NULL)
 	/* bit 7 is tied to a 3kHz clock */
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(clock_r, NULL)
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, bwidow_state,clock_r, NULL)
 
-	PORT_START("DSW0")	/* DSW0 - Not read */
+	PORT_START("DSW0")  /* DSW0 - Not read */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("DSW1")	/* DSW1 - Not read */
+	PORT_START("DSW1")  /* DSW1 - Not read */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("IN3")
@@ -593,15 +584,15 @@ static INPUT_PORTS_START( lunarbat )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_START2 )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNUSED )
 
-	PORT_START("IN4")	/* IN4 - Not read */
+	PORT_START("IN4")   /* IN4 - Not read */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 INPUT_PORTS_END
 
 
 static INPUT_PORTS_START( spacduel )
 	PORT_START("IN0")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN2 )	// To fit "Coin B" Dip Switch
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN1 )	// To fit "Coin A" Dip Switch
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN2 )  // To fit "Coin B" Dip Switch
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN1 )  // To fit "Coin A" Dip Switch
 	PORT_BIT( 0x0c, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME("Diagnostic Step") PORT_CODE(KEYCODE_F1)
@@ -609,7 +600,7 @@ static INPUT_PORTS_START( spacduel )
 	/* per default (busy vector processor). */
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(avgdvg_done_r, NULL)
 	/* bit 7 is tied to a 3kHz clock */
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(clock_r, NULL)
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, bwidow_state,clock_r, NULL)
 
 	PORT_START("DSW0")
 	PORT_DIPNAME(0x03, 0x01, DEF_STR( Lives ) ) PORT_DIPLOCATION("D4:!7,!8")
@@ -670,7 +661,7 @@ static INPUT_PORTS_START( spacduel )
 	PORT_DIPSETTING (  0x00, "game" )
 
 	/* See machine/spacduel.c for more info on these 2 ports */
-	PORT_START("IN3")	/* IN3 - Player 1 - spread over 8 memory locations */
+	PORT_START("IN3")   /* IN3 - Player 1 - spread over 8 memory locations */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_PLAYER(1)
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_PLAYER(1)
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(1)
@@ -680,7 +671,7 @@ static INPUT_PORTS_START( spacduel )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_START2 ) PORT_NAME("Select")
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNUSED )
 
-	PORT_START("IN4")	/* IN4 - Player 2 - spread over 8 memory locations */
+	PORT_START("IN4")   /* IN4 - Player 2 - spread over 8 memory locations */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_PLAYER(2)
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_PLAYER(2)
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(2)
@@ -691,26 +682,6 @@ static INPUT_PORTS_START( spacduel )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNUSED )
 INPUT_PORTS_END
 
-
-
-/*************************************
- *
- *  Sound interfaces
- *
- *************************************/
-
-static const pokey_interface pokey_interface_1 =
-{
-	{ DEVCB_NULL },
-	DEVCB_INPUT_PORT("DSW0")
-};
-
-
-static const pokey_interface pokey_interface_2 =
-{
-	{ DEVCB_NULL },
-	DEVCB_INPUT_PORT("DSW1")
-};
 
 
 
@@ -725,7 +696,7 @@ static MACHINE_CONFIG_START( bwidow, bwidow_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6502, MASTER_CLOCK / 8)
 	MCFG_CPU_PROGRAM_MAP(bwidow_map)
-	MCFG_CPU_PERIODIC_INT(irq0_line_assert, (double)MASTER_CLOCK / 4096 / 12)
+	MCFG_CPU_PERIODIC_INT_DRIVER(bwidow_state, irq0_line_assert,  (double)MASTER_CLOCK / 4096 / 12)
 
 	MCFG_ATARIVGEAROM_ADD("earom")
 
@@ -734,22 +705,14 @@ static MACHINE_CONFIG_START( bwidow, bwidow_state )
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_SIZE(400, 300)
 	MCFG_SCREEN_VISIBLE_AREA(0, 480, 0, 440)
-	MCFG_SCREEN_UPDATE(vector)
+	MCFG_SCREEN_UPDATE_STATIC(vector)
 
 	MCFG_VIDEO_START(avg)
 
 	/* sound hardware */
-	MCFG_SPEAKER_STANDARD_MONO("mono")
+	MCFG_FRAGMENT_ADD(bwidow_audio)
 
-	MCFG_SOUND_ADD("pokey1", POKEY, MASTER_CLOCK / 8)
-	MCFG_SOUND_CONFIG(pokey_interface_1)
-	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
-
-	MCFG_SOUND_ADD("pokey2", POKEY, MASTER_CLOCK / 8)
-	MCFG_SOUND_CONFIG(pokey_interface_2)
-	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 MACHINE_CONFIG_END
-
 
 static MACHINE_CONFIG_DERIVED( gravitar, bwidow )
 
@@ -758,6 +721,9 @@ static MACHINE_CONFIG_DERIVED( gravitar, bwidow )
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
 	MCFG_SCREEN_VISIBLE_AREA(0, 420, 0, 400)
+
+	/* sound hardware */
+	MCFG_FRAGMENT_ADD(gravitar_audio)
 MACHINE_CONFIG_END
 
 
@@ -808,7 +774,7 @@ ROM_START( bwidow )
 	ROM_LOAD( "136017-104.j1",   0xc000, 0x1000, CRC(44f9943f) SHA1(e83d8242e4592149719be6a68cf3aba46116072f) )
 	ROM_LOAD( "136017-105.kl1",  0xd000, 0x1000, CRC(1fdf801c) SHA1(33da2ba3cefa3d0dddc8647f9b6caf5d5bfe9b3b) )
 	ROM_LOAD( "136017-106.m1",   0xe000, 0x1000, CRC(ccc9b26c) SHA1(f1398e3ff2b62af1509bc117028845b671ff1ca2) )
-	ROM_RELOAD(                  0xf000, 0x1000 )	/* for reset/interrupt vectors */
+	ROM_RELOAD(                  0xf000, 0x1000 )   /* for reset/interrupt vectors */
 	/* AVG PROM */
 	ROM_REGION( 0x100, "user1", 0 )
 	ROM_LOAD( "136002-125.n4",   0x0000, 0x0100, CRC(5903af03) SHA1(24bc0366f394ad0ec486919212e38be0f08d0239) )
@@ -828,10 +794,10 @@ ROM_START( gravitar )
 	ROM_LOAD( "136010.304",   0xc000, 0x1000, CRC(467ad5da) SHA1(822b06be6f2d6298b2b10161fbabbb2caa74b2ef) )
 	ROM_LOAD( "136010.305",   0xd000, 0x1000, CRC(840603af) SHA1(4a7124f91d3ee940686c51374a861efe6cb5d282) )
 	ROM_LOAD( "136010.306",   0xe000, 0x1000, CRC(3f3805ad) SHA1(baf080deaa8eea43af2f3be71dacc63e4666c453) )
-	ROM_RELOAD(              0xf000, 0x1000 )	/* for reset/interrupt vectors */
+	ROM_RELOAD(              0xf000, 0x1000 )   /* for reset/interrupt vectors */
 	/* AVG PROM */
 	ROM_REGION( 0x100, "user1", 0 )
-	ROM_LOAD( "136002-125.n4",	 0x0000, 0x0100, CRC(5903af03) SHA1(24bc0366f394ad0ec486919212e38be0f08d0239) )
+	ROM_LOAD( "136002-125.n4",   0x0000, 0x0100, CRC(5903af03) SHA1(24bc0366f394ad0ec486919212e38be0f08d0239) )
 ROM_END
 
 ROM_START( gravitar2 )
@@ -848,10 +814,10 @@ ROM_START( gravitar2 )
 	ROM_LOAD( "136010.204",   0xc000, 0x1000, CRC(5d6bc29e) SHA1(fdd442644209ab858eb4ed1b4cdeb1db26f80108) )
 	ROM_LOAD( "136010.205",   0xd000, 0x1000, CRC(0db1ff34) SHA1(288d9ffff9d18025621be249ea25a7444f58f3a9) )
 	ROM_LOAD( "136010.206",   0xe000, 0x1000, CRC(4521ca48) SHA1(5770cb46c4ac28d632ad5910723a9edda8283ce5) )
-	ROM_RELOAD(              0xf000, 0x1000 )	/* for reset/interrupt vectors */
+	ROM_RELOAD(              0xf000, 0x1000 )   /* for reset/interrupt vectors */
 	/* AVG PROM */
 	ROM_REGION( 0x100, "user1", 0 )
-	ROM_LOAD( "136002-125.n4",	 0x0000, 0x0100, CRC(5903af03) SHA1(24bc0366f394ad0ec486919212e38be0f08d0239) )
+	ROM_LOAD( "136002-125.n4",   0x0000, 0x0100, CRC(5903af03) SHA1(24bc0366f394ad0ec486919212e38be0f08d0239) )
 ROM_END
 
 ROM_START( gravp )
@@ -868,10 +834,10 @@ ROM_START( gravp )
 	ROM_LOAD( "j1.bin",   0xc000, 0x1000, CRC(33d19ef6) SHA1(68f95e237427959d6ef64a5b4dd1e03db7389271) )
 	ROM_LOAD( "kl1.bin",  0xd000, 0x1000, CRC(032b5806) SHA1(b719792a177e74ec49e6952e445b9cdeaca7505f) )
 	ROM_LOAD( "m1.bin",   0xe000, 0x1000, CRC(47fe97a0) SHA1(7cbde4b59abde679c28d7547700b342f25762e4a) )
-	ROM_RELOAD(           0xf000, 0x1000 )	/* for reset/interrupt vectors */
+	ROM_RELOAD(           0xf000, 0x1000 )  /* for reset/interrupt vectors */
 	/* AVG PROM */
 	ROM_REGION( 0x100, "user1", 0 )
-	ROM_LOAD( "136002-125.n4",	 0x0000, 0x0100, CRC(5903af03) SHA1(24bc0366f394ad0ec486919212e38be0f08d0239) )
+	ROM_LOAD( "136002-125.n4",   0x0000, 0x0100, CRC(5903af03) SHA1(24bc0366f394ad0ec486919212e38be0f08d0239) )
 ROM_END
 
 ROM_START( lunarbat )
@@ -887,10 +853,10 @@ ROM_START( lunarbat )
 	ROM_LOAD( "004.010",      0xc000, 0x1000, CRC(c407764f) SHA1(f202a9fe6c10975bb124b4b1e902341da578da8f) )
 	ROM_LOAD( "005.010",      0xd000, 0x1000, CRC(4feb6f81) SHA1(b852f1093e56343225c1b2b2554a93c88fc58637) )
 	ROM_LOAD( "006.010",      0xe000, 0x1000, CRC(f8ad139d) SHA1(e9e0dcb0872b19af09825a979f8b3747c9632091) )
-	ROM_RELOAD(               0xf000, 0x1000 )	/* for reset/interrupt vectors */
+	ROM_RELOAD(               0xf000, 0x1000 )  /* for reset/interrupt vectors */
 	/* AVG PROM */
 	ROM_REGION( 0x100, "user1", 0 )
-	ROM_LOAD( "136002-125.n4",	 0x0000, 0x0100, CRC(5903af03) SHA1(24bc0366f394ad0ec486919212e38be0f08d0239) )
+	ROM_LOAD( "136002-125.n4",   0x0000, 0x0100, CRC(5903af03) SHA1(24bc0366f394ad0ec486919212e38be0f08d0239) )
 ROM_END
 
 ROM_START( lunarba1 )
@@ -910,10 +876,10 @@ ROM_START( lunarba1 )
 	ROM_RELOAD(              0xc000, 0x1000 )
 	ROM_RELOAD(              0xd000, 0x1000 )
 	ROM_RELOAD(              0xe000, 0x1000 )
-	ROM_RELOAD(              0xf000, 0x1000 )	/* for reset/interrupt vectors */
+	ROM_RELOAD(              0xf000, 0x1000 )   /* for reset/interrupt vectors */
 	/* AVG PROM */
 	ROM_REGION( 0x100, "user1", 0 )
-	ROM_LOAD( "136002-125.n4",	 0x0000, 0x0100, CRC(5903af03) SHA1(24bc0366f394ad0ec486919212e38be0f08d0239) )
+	ROM_LOAD( "136002-125.n4",   0x0000, 0x0100, CRC(5903af03) SHA1(24bc0366f394ad0ec486919212e38be0f08d0239) )
 ROM_END
 
 ROM_START( spacduel )
@@ -934,10 +900,10 @@ ROM_START( spacduel )
 	ROM_RELOAD(              0xd000, 0x1000 )
 	ROM_RELOAD(              0xe000, 0x1000 )
 
-	ROM_RELOAD(              0xf000, 0x1000 )	/* for reset/interrupt vectors */
+	ROM_RELOAD(              0xf000, 0x1000 )   /* for reset/interrupt vectors */
 	/* AVG PROM */
 	ROM_REGION( 0x100, "user1", 0 )
-	ROM_LOAD( "136002-125.n4",	 0x0000, 0x0100, CRC(5903af03) SHA1(24bc0366f394ad0ec486919212e38be0f08d0239) )
+	ROM_LOAD( "136002-125.n4",   0x0000, 0x0100, CRC(5903af03) SHA1(24bc0366f394ad0ec486919212e38be0f08d0239) )
 ROM_END
 
 
@@ -948,10 +914,10 @@ ROM_END
  *
  *************************************/
 
-GAME( 1980, spacduel, 0,        spacduel, spacduel, 0, ROT0, "Atari", "Space Duel", GAME_SUPPORTS_SAVE )
-GAME( 1982, bwidow,   0,        bwidow,   bwidow,   0, ROT0, "Atari", "Black Widow", GAME_SUPPORTS_SAVE )
-GAME( 1982, gravitar, 0,        gravitar, gravitar, 0, ROT0, "Atari", "Gravitar (version 3)", GAME_SUPPORTS_SAVE )
-GAME( 1982, gravitar2,gravitar, gravitar, gravitar, 0, ROT0, "Atari", "Gravitar (version 2)", GAME_SUPPORTS_SAVE )
-GAME( 1982, gravp,    gravitar, gravitar, gravitar, 0, ROT0, "Atari", "Gravitar (prototype)", GAME_SUPPORTS_SAVE )
-GAME( 1982, lunarbat, gravitar, gravitar, gravitar, 0, ROT0, "Atari", "Lunar Battle (prototype, later)", GAME_SUPPORTS_SAVE )
-GAME( 1982, lunarba1, gravitar, lunarbat, lunarbat, 0, ROT0, "Atari", "Lunar Battle (prototype, earlier)", GAME_SUPPORTS_SAVE )
+GAME( 1980, spacduel, 0,        spacduel, spacduel, driver_device, 0, ROT0, "Atari", "Space Duel", GAME_SUPPORTS_SAVE )
+GAME( 1982, bwidow,   0,        bwidow,   bwidow, driver_device,   0, ROT0, "Atari", "Black Widow", GAME_SUPPORTS_SAVE )
+GAME( 1982, gravitar, 0,        gravitar, gravitar, driver_device, 0, ROT0, "Atari", "Gravitar (version 3)", GAME_SUPPORTS_SAVE )
+GAME( 1982, gravitar2,gravitar, gravitar, gravitar, driver_device, 0, ROT0, "Atari", "Gravitar (version 2)", GAME_SUPPORTS_SAVE )
+GAME( 1982, gravp,    gravitar, gravitar, gravitar, driver_device, 0, ROT0, "Atari", "Gravitar (prototype)", GAME_SUPPORTS_SAVE )
+GAME( 1982, lunarbat, gravitar, gravitar, gravitar, driver_device, 0, ROT0, "Atari", "Lunar Battle (prototype, later)", GAME_SUPPORTS_SAVE )
+GAME( 1982, lunarba1, gravitar, lunarbat, lunarbat, driver_device, 0, ROT0, "Atari", "Lunar Battle (prototype, earlier)", GAME_SUPPORTS_SAVE )

@@ -24,7 +24,6 @@ Decrypt Space Position Somehow (not something I
 can do)
 Unknown Reads / Writes
 Whats the Prom for? nothing important?
-Clock Speeds etc.
 Is the level order correct?
 the progress sprite on the side of the screen re-appears at the bottom when you get
 to the top, but the wrap-around is needed for other things, actual game bug?
@@ -130,18 +129,18 @@ Dumped by Chackn
 #include "sound/2203intf.h"
 #include "includes/angelkds.h"
 
-static READ8_HANDLER( angelkds_main_sound_r );
-static WRITE8_HANDLER( angelkds_main_sound_w );
-static READ8_HANDLER( angelkds_sub_sound_r );
-static WRITE8_HANDLER( angelkds_sub_sound_w );
+
+
+
+
 
 /*** CPU Banking
 
 */
 
-static WRITE8_HANDLER( angelkds_cpu_bank_write )
+WRITE8_MEMBER(angelkds_state::angelkds_cpu_bank_write)
 {
-	memory_set_bank(space->machine(), "bank1", data & 0x0f);	// shall we check (data & 0x0f) < # of available banks (8 or 10 resp.)?
+	membank("bank1")->set_entry(data & 0x0f);   // shall we check (data & 0x0f) < # of available banks (8 or 10 resp.)?
 }
 
 
@@ -155,24 +154,24 @@ these make the game a bit easier for testing purposes
 
 #if FAKEINPUTS
 
-static READ8_HANDLER( angelkds_input_r )
+READ8_MEMBER(angelkds_state::angelkds_input_r)
 {
 	int fake;
 	static const char *const portnames[] = { "I81", "I82" };
 	static const char *const fakenames[] = { "FAKE1", "FAKE2" };
 
-	fake = input_port_read(space->machine(), fakenames[offset]);
+	fake = ioport(fakenames[offset])->read();
 
-	return ((fake & 0x01) ? fake  : input_port_read(space->machine(), portnames[offset]));
+	return ((fake & 0x01) ? fake  : ioport(portnames[offset])->read());
 }
 
 #else
 
-static READ8_HANDLER( angelkds_input_r )
+READ8_MEMBER(angelkds_state::angelkds_input_r)
 {
 	static const char *const portnames[] = { "I81", "I82" };
 
-	return input_port_read(space->machine(), portnames[offset]);
+	return ioport(portnames[offset])->read();
 }
 
 #endif
@@ -193,15 +192,15 @@ contain a level.
 
 */
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, angelkds_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0xbfff) AM_ROMBANK("bank1")
 	AM_RANGE(0xc000, 0xdfff) AM_RAM
-	AM_RANGE(0xe000, 0xe3ff) AM_RAM_WRITE(angelkds_bgtopvideoram_w) AM_BASE_MEMBER(angelkds_state, m_bgtopvideoram) /* Top Half of Screen */
-	AM_RANGE(0xe400, 0xe7ff) AM_RAM_WRITE(angelkds_bgbotvideoram_w) AM_BASE_MEMBER(angelkds_state, m_bgbotvideoram) /* Bottom Half of Screen */
-	AM_RANGE(0xe800, 0xebff) AM_RAM_WRITE(angelkds_txvideoram_w) AM_BASE_MEMBER(angelkds_state, m_txvideoram)
-	AM_RANGE(0xec00, 0xecff) AM_RAM AM_BASE_MEMBER(angelkds_state, m_spriteram)
-	AM_RANGE(0xed00, 0xeeff) AM_RAM_WRITE(angelkds_paletteram_w) AM_BASE_MEMBER(angelkds_state, m_paletteram)
+	AM_RANGE(0xe000, 0xe3ff) AM_RAM_WRITE(angelkds_bgtopvideoram_w) AM_SHARE("bgtopvideoram") /* Top Half of Screen */
+	AM_RANGE(0xe400, 0xe7ff) AM_RAM_WRITE(angelkds_bgbotvideoram_w) AM_SHARE("bgbotvideoram") /* Bottom Half of Screen */
+	AM_RANGE(0xe800, 0xebff) AM_RAM_WRITE(angelkds_txvideoram_w) AM_SHARE("txvideoram")
+	AM_RANGE(0xec00, 0xecff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0xed00, 0xeeff) AM_RAM_WRITE(angelkds_paletteram_w) AM_SHARE("paletteram")
 	AM_RANGE(0xef00, 0xefff) AM_RAM
 	AM_RANGE(0xf000, 0xf000) AM_WRITE(angelkds_bgtopbank_write)
 	AM_RANGE(0xf001, 0xf001) AM_WRITE(angelkds_bgtopscroll_write)
@@ -211,23 +210,23 @@ static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
 	AM_RANGE(0xf005, 0xf005) AM_WRITE(angelkds_layer_ctrl_write)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( main_portmap, AS_IO, 8 )
+static ADDRESS_MAP_START( main_portmap, AS_IO, 8, angelkds_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0x00) AM_WRITENOP // 00 on start-up, not again
 	AM_RANGE(0x42, 0x42) AM_WRITE(angelkds_cpu_bank_write)
 	AM_RANGE(0x43, 0x43) AM_WRITENOP // 9a on start-up, not again
-	AM_RANGE(0x40, 0x40) AM_READ_PORT("I40")	/* "Coinage" Dip Switches */
-	AM_RANGE(0x41, 0x41) AM_READ_PORT("I41")	/* Other Dip Switches */
-	AM_RANGE(0x42, 0x42) AM_READ_PORT("I42")	/* Players inputs (not needed ?) */
-	AM_RANGE(0x80, 0x80) AM_READ_PORT("I80")	/* System inputs */
-	AM_RANGE(0x81, 0x82) AM_READ(angelkds_input_r)	/* Players inputs */
+	AM_RANGE(0x40, 0x40) AM_READ_PORT("I40")    /* "Coinage" Dip Switches */
+	AM_RANGE(0x41, 0x41) AM_READ_PORT("I41")    /* Other Dip Switches */
+	AM_RANGE(0x42, 0x42) AM_READ_PORT("I42")    /* Players inputs (not needed ?) */
+	AM_RANGE(0x80, 0x80) AM_READ_PORT("I80")    /* System inputs */
+	AM_RANGE(0x81, 0x82) AM_READ(angelkds_input_r)  /* Players inputs */
 	AM_RANGE(0x83, 0x83) AM_WRITENOP // 9b on start-up, not again
 	AM_RANGE(0xc0, 0xc3) AM_READWRITE(angelkds_main_sound_r, angelkds_main_sound_w) // 02 various points
 ADDRESS_MAP_END
 
 /* sub cpu */
 
-static ADDRESS_MAP_START( sub_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sub_map, AS_PROGRAM, 8, angelkds_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x87ff) AM_RAM
 	AM_RANGE(0xaaa9, 0xaaa9) AM_READNOP
@@ -235,10 +234,10 @@ static ADDRESS_MAP_START( sub_map, AS_PROGRAM, 8 )
 	AM_RANGE(0xaaac, 0xaaac) AM_READNOP
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sub_portmap, AS_IO, 8 )
+static ADDRESS_MAP_START( sub_portmap, AS_IO, 8, angelkds_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x01) AM_DEVREADWRITE("ym1", ym2203_r, ym2203_w)
-	AM_RANGE(0x40, 0x41) AM_DEVREADWRITE("ym2", ym2203_r, ym2203_w)
+	AM_RANGE(0x00, 0x01) AM_DEVREADWRITE_LEGACY("ym1", ym2203_r, ym2203_w)
+	AM_RANGE(0x40, 0x41) AM_DEVREADWRITE_LEGACY("ym2", ym2203_r, ym2203_w)
 	AM_RANGE(0x80, 0x83) AM_READWRITE(angelkds_sub_sound_r, angelkds_sub_sound_w) // spcpostn
 ADDRESS_MAP_END
 
@@ -256,94 +255,94 @@ ADDRESS_MAP_END
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_RIGHT ) PORT_PLAYER(player) PORT_8WAY
 
 #define ANGELDSK_FAKE_PLAYERS_INPUT( player ) \
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(player)	/* To enter initials */ \
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )		/* Unused */ \
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(player)    /* To enter initials */ \
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )        /* Unused */ \
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(player) PORT_8WAY \
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(player) PORT_8WAY \
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(player) PORT_8WAY \
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(player) PORT_8WAY \
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(player)	/* To shorten the rope and */ \
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(player)    /* To shorten the rope and */ \
 										/* move right in hiscores table */
 
 
 static INPUT_PORTS_START( angelkds )
 	/*
-        Free Play: Set SW1:1-8 ON (A:Free Play & B:Free Play).
-        Sound Test: Set SW1:1-8 ON (A:Free Play & B:Free Play), hold test switch and reboot.
-        Joystick Test: Set SW1:1-7 ON & SW1:8 OFF (A:Free Play & B:3C_1C), hold test switch and reboot.
-        Joystick Test Coin_A & Coin_B seem to be switched, only works when setting A to 3C_1C and B to Free Play.
-    */
-	PORT_START("I40")		/* inport $40 */
-	PORT_DIPNAME( 0xf0, 0xf0, DEF_STR( Coin_A ) )		PORT_DIPLOCATION("SW1:1,2,3,4")
-	PORT_DIPSETTING(	0x70, DEF_STR( 4C_1C ) )
-	PORT_DIPSETTING(	0x80, DEF_STR( 3C_1C ) )
-	PORT_DIPSETTING(	0x90, DEF_STR( 2C_1C ) )
+	    Free Play: Set SW1:1-8 ON (A:Free Play & B:Free Play).
+	    Sound Test: Set SW1:1-8 ON (A:Free Play & B:Free Play), hold test switch and reboot.
+	    Joystick Test: Set SW1:1-7 ON & SW1:8 OFF (A:Free Play & B:3C_1C), hold test switch and reboot.
+	    Joystick Test Coin_A & Coin_B seem to be switched, only works when setting A to 3C_1C and B to Free Play.
+	*/
+	PORT_START("I40")       /* inport $40 */
+	PORT_DIPNAME( 0xf0, 0xf0, DEF_STR( Coin_A ) )       PORT_DIPLOCATION("SW1:1,2,3,4")
+	PORT_DIPSETTING(    0x70, DEF_STR( 4C_1C ) )
+	PORT_DIPSETTING(    0x80, DEF_STR( 3C_1C ) )
+	PORT_DIPSETTING(    0x90, DEF_STR( 2C_1C ) )
 //  PORT_DIPSETTING(    0x60, DEF_STR( 2C_1C ) )
 //  PORT_DIPSETTING(    0x50, DEF_STR( 2C_1C ) )
 //  PORT_DIPSETTING(    0x40, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0xf0, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0xf0, DEF_STR( 1C_1C ) )
 //  PORT_DIPSETTING(    0x30, DEF_STR( 1C_1C ) )
 //  PORT_DIPSETTING(    0x20, DEF_STR( 1C_1C ) )
 //  PORT_DIPSETTING(    0x10, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0xe0, DEF_STR( 1C_2C ) )
-	PORT_DIPSETTING(	0xd0, DEF_STR( 1C_3C ) )
-	PORT_DIPSETTING(	0xc0, DEF_STR( 1C_4C ) )
-	PORT_DIPSETTING(	0xb0, DEF_STR( 1C_5C ) )
-	PORT_DIPSETTING(	0xa0, DEF_STR( 1C_6C ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Free_Play ) )
+	PORT_DIPSETTING(    0xe0, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(    0xd0, DEF_STR( 1C_3C ) )
+	PORT_DIPSETTING(    0xc0, DEF_STR( 1C_4C ) )
+	PORT_DIPSETTING(    0xb0, DEF_STR( 1C_5C ) )
+	PORT_DIPSETTING(    0xa0, DEF_STR( 1C_6C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
 
-	PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( Coin_B ) )		PORT_DIPLOCATION("SW1:5,6,7,8")
-	PORT_DIPSETTING(	0x07, DEF_STR( 4C_1C ) )
-	PORT_DIPSETTING(	0x08, DEF_STR( 3C_1C ) )
-	PORT_DIPSETTING(	0x09, DEF_STR( 2C_1C ) )
+	PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( Coin_B ) )       PORT_DIPLOCATION("SW1:5,6,7,8")
+	PORT_DIPSETTING(    0x07, DEF_STR( 4C_1C ) )
+	PORT_DIPSETTING(    0x08, DEF_STR( 3C_1C ) )
+	PORT_DIPSETTING(    0x09, DEF_STR( 2C_1C ) )
 //  PORT_DIPSETTING(    0x06, DEF_STR( 2C_1C ) )
 //  PORT_DIPSETTING(    0x05, DEF_STR( 2C_1C ) )
 //  PORT_DIPSETTING(    0x04, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0x0f, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x0f, DEF_STR( 1C_1C ) )
 //  PORT_DIPSETTING(    0x03, DEF_STR( 1C_1C ) )
 //  PORT_DIPSETTING(    0x02, DEF_STR( 1C_1C ) )
 //  PORT_DIPSETTING(    0x01, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0x0e, DEF_STR( 1C_2C ) )
-	PORT_DIPSETTING(	0x0d, DEF_STR( 1C_3C ) )
-	PORT_DIPSETTING(	0x0c, DEF_STR( 1C_4C ) )
-	PORT_DIPSETTING(	0x0b, DEF_STR( 1C_5C ) )
-	PORT_DIPSETTING(	0x0a, DEF_STR( 1C_6C ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Free_Play ) )
+	PORT_DIPSETTING(    0x0e, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(    0x0d, DEF_STR( 1C_3C ) )
+	PORT_DIPSETTING(    0x0c, DEF_STR( 1C_4C ) )
+	PORT_DIPSETTING(    0x0b, DEF_STR( 1C_5C ) )
+	PORT_DIPSETTING(    0x0a, DEF_STR( 1C_6C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
 
-	PORT_START("I41")		/* inport $41 */
-	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Cabinet ) )				PORT_DIPLOCATION("SW2:1")
+	PORT_START("I41")       /* inport $41 */
+	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Cabinet ) )              PORT_DIPLOCATION("SW2:1")
 	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Cocktail ) )
-	PORT_DIPNAME( 0x02, 0x00, "High Score Characters" )			PORT_DIPLOCATION("SW2:2")
+	PORT_DIPNAME( 0x02, 0x00, "High Score Characters" )         PORT_DIPLOCATION("SW2:2")
 	PORT_DIPSETTING(    0x00, "3" )
 	PORT_DIPSETTING(    0x02, "10" )
-	PORT_DIPNAME( 0x0c, 0x08, DEF_STR( Bonus_Life ) )			PORT_DIPLOCATION("SW2:3,4")
+	PORT_DIPNAME( 0x0c, 0x08, DEF_STR( Bonus_Life ) )           PORT_DIPLOCATION("SW2:3,4")
 	PORT_DIPSETTING(    0x0c, "20k, 50k, 100k, 200k and 500k" )
 	PORT_DIPSETTING(    0x08, "50k, 100k, 200k and 500k" )
 	PORT_DIPSETTING(    0x04, "100k, 200k and 500k" )
 	PORT_DIPSETTING(    0x00, DEF_STR( None ) )
-	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Lives ) )				PORT_DIPLOCATION("SW2:5,6")
+	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Lives ) )                PORT_DIPLOCATION("SW2:5,6")
 	PORT_DIPSETTING(    0x30, "3" )
 	PORT_DIPSETTING(    0x20, "4" )
 	PORT_DIPSETTING(    0x10, "5" )
 	PORT_DIPSETTING(    0x00, "99 (Cheat)" )
-	PORT_DIPNAME( 0xc0, 0xc0, DEF_STR( Difficulty ) )			PORT_DIPLOCATION("SW2:7,8") /* Stored at 0xc023 */
+	PORT_DIPNAME( 0xc0, 0xc0, DEF_STR( Difficulty ) )           PORT_DIPLOCATION("SW2:7,8") /* Stored at 0xc023 */
 	PORT_DIPSETTING(    0xc0, DEF_STR( Very_Easy ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( Easy ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( Hard ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Very_Hard ) )
 
-	PORT_START("I42")		/* inport $42 */
+	PORT_START("I42")       /* inport $42 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )	// duplicated IPT_JOYSTICK_LEFTRIGHT
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN ) PORT_8WAY	// duplicated IPT_JOYSTICK_LEFTRIGHT
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )    // duplicated IPT_JOYSTICK_LEFTRIGHT
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN ) PORT_8WAY  // duplicated IPT_JOYSTICK_LEFTRIGHT
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN ) PORT_8WAY PORT_COCKTAIL
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("I80")		/* inport $80 */
+	PORT_START("I80")       /* inport $80 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE1 )
@@ -353,10 +352,10 @@ static INPUT_PORTS_START( angelkds )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
 
-	PORT_START("I81")		/* inport $81 */
+	PORT_START("I81")       /* inport $81 */
 	ANGELDSK_PLAYERS_INPUT( 1 )
 
-	PORT_START("I82")		/* inport $82 */
+	PORT_START("I82")       /* inport $82 */
 	ANGELDSK_PLAYERS_INPUT( 2 )
 
 #if FAKEINPUTS
@@ -364,14 +363,14 @@ static INPUT_PORTS_START( angelkds )
 	/* Fake inputs to allow to play the game with 1 joystick instead of 2 */
 	PORT_START("FAKE1")
 	PORT_DIPNAME( 0x01, 0x00, "FAKE (for debug) Joysticks (Player 1)" )
-	PORT_DIPSETTING(	0x01, "1" )
-	PORT_DIPSETTING(	0x00, "2" )
+	PORT_DIPSETTING(    0x01, "1" )
+	PORT_DIPSETTING(    0x00, "2" )
 	ANGELDSK_FAKE_PLAYERS_INPUT( 1 )
 
 	PORT_START("FAKE2")
 	PORT_DIPNAME( 0x01, 0x00, "FAKE (for debug) Joysticks (Player 2)" )
-	PORT_DIPSETTING(	0x01, "1" )
-	PORT_DIPSETTING(	0x00, "2" )
+	PORT_DIPSETTING(    0x01, "1" )
+	PORT_DIPSETTING(    0x00, "2" )
 	ANGELDSK_FAKE_PLAYERS_INPUT( 2 )
 
 #endif
@@ -379,8 +378,8 @@ static INPUT_PORTS_START( angelkds )
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( spcpostn )
-	PORT_START("I40")		/* inport $40 */
-	PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( Coin_A ) )			PORT_DIPLOCATION("SW1:1,2,3,4")
+	PORT_START("I40")       /* inport $40 */
+	PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( Coin_A ) )           PORT_DIPLOCATION("SW1:1,2,3,4")
 	PORT_DIPSETTING(    0x02, DEF_STR( 4C_1C ) )
 	PORT_DIPSETTING(    0x05, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( 2C_1C ) )
@@ -397,7 +396,7 @@ static INPUT_PORTS_START( spcpostn )
 	PORT_DIPSETTING(    0x0a, DEF_STR( 1C_6C ) )
 	PORT_DIPSETTING(    0x09, DEF_STR( 1C_7C ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
-	PORT_DIPNAME( 0xf0, 0xf0, DEF_STR( Coin_B ) )			PORT_DIPLOCATION("SW1:5,6,7,8")
+	PORT_DIPNAME( 0xf0, 0xf0, DEF_STR( Coin_B ) )           PORT_DIPLOCATION("SW1:5,6,7,8")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( 4C_1C ) )
 	PORT_DIPSETTING(    0x50, DEF_STR( 3C_1C ) )
@@ -415,29 +414,29 @@ static INPUT_PORTS_START( spcpostn )
 	PORT_DIPSETTING(    0xa0, DEF_STR( 1C_6C ) )
 	PORT_DIPSETTING(    0x90, DEF_STR( 1C_7C ) )
 
-	PORT_START("I41")		/* inport $41 */
-	PORT_DIPNAME( 0x01, 0x01, DEF_STR(Allow_Continue ) )	PORT_DIPLOCATION("SW2:1")
+	PORT_START("I41")       /* inport $41 */
+	PORT_DIPNAME( 0x01, 0x01, DEF_STR(Allow_Continue ) )    PORT_DIPLOCATION("SW2:1")
 	PORT_DIPSETTING(    0x01, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
-	PORT_DIPNAME( 0x02, 0x02, "Obstruction Car" )			PORT_DIPLOCATION("SW2:2")
+	PORT_DIPNAME( 0x02, 0x02, "Obstruction Car" )           PORT_DIPLOCATION("SW2:2")
 	PORT_DIPSETTING(    0x02, DEF_STR( Normal ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Hard ) )
-	PORT_DIPNAME( 0x0c, 0x08, "Time Limit" )				PORT_DIPLOCATION("SW2:3,4")
+	PORT_DIPNAME( 0x0c, 0x08, "Time Limit" )                PORT_DIPLOCATION("SW2:3,4")
 	PORT_DIPSETTING(    0x00, "1:10" )
 	PORT_DIPSETTING(    0x04, "1:20" )
 	PORT_DIPSETTING(    0x08, "1:30" )
 	PORT_DIPSETTING(    0x0c, "1:40" )
-	PORT_DIPNAME( 0x30, 0x20, "Power Down" )				PORT_DIPLOCATION("SW2:5,6")
+	PORT_DIPNAME( 0x30, 0x20, "Power Down" )                PORT_DIPLOCATION("SW2:5,6")
 	PORT_DIPSETTING(    0x30, "Slow" )
 	PORT_DIPSETTING(    0x20, DEF_STR( Normal ) )
 	PORT_DIPSETTING(    0x10, "Fast" )
 	PORT_DIPSETTING(    0x00, "Fastest" )
-	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Demo_Sounds ) )		PORT_DIPLOCATION("SW2:7")
+	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Demo_Sounds ) )      PORT_DIPLOCATION("SW2:7")
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPUNUSED_DIPLOC( 0x80, 0x80, "SW2:8" )			/* Listed as "Unused" */
+	PORT_DIPUNUSED_DIPLOC( 0x80, 0x80, "SW2:8" )            /* Listed as "Unused" */
 
-	PORT_START("I42")		/* inport $42 */
+	PORT_START("I42")       /* inport $42 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -447,7 +446,7 @@ static INPUT_PORTS_START( spcpostn )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("I80")		/* inport $80 */
+	PORT_START("I80")       /* inport $80 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE1 )
@@ -457,7 +456,7 @@ static INPUT_PORTS_START( spcpostn )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
 
-	PORT_START("I81")		/* inport $81 */
+	PORT_START("I81")       /* inport $81 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP )    PORT_PLAYER(1) PORT_8WAY
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN )  PORT_PLAYER(1) PORT_8WAY
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT )  PORT_PLAYER(1) PORT_8WAY
@@ -467,7 +466,7 @@ static INPUT_PORTS_START( spcpostn )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED ) PORT_PLAYER(1) // probably unused
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED ) PORT_PLAYER(1) // probably unused
 
-	PORT_START("I82")		/* inport $82 */
+	PORT_START("I82")       /* inport $82 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP )    PORT_PLAYER(2) PORT_8WAY
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN )  PORT_PLAYER(2) PORT_8WAY
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT )  PORT_PLAYER(2) PORT_8WAY
@@ -487,35 +486,31 @@ sound related ?
 
 */
 
-static WRITE8_HANDLER( angelkds_main_sound_w )
+WRITE8_MEMBER(angelkds_state::angelkds_main_sound_w)
 {
-	angelkds_state *state = space->machine().driver_data<angelkds_state>();
-	state->m_sound[offset] = data;
+	m_sound[offset] = data;
 }
 
-static READ8_HANDLER( angelkds_main_sound_r )
+READ8_MEMBER(angelkds_state::angelkds_main_sound_r)
 {
-	angelkds_state *state = space->machine().driver_data<angelkds_state>();
-	return state->m_sound2[offset];
+	return m_sound2[offset];
 }
 
-static WRITE8_HANDLER( angelkds_sub_sound_w )
+WRITE8_MEMBER(angelkds_state::angelkds_sub_sound_w)
 {
-	angelkds_state *state = space->machine().driver_data<angelkds_state>();
-	state->m_sound2[offset] = data;
+	m_sound2[offset] = data;
 }
 
-static READ8_HANDLER( angelkds_sub_sound_r )
+READ8_MEMBER(angelkds_state::angelkds_sub_sound_r)
 {
-	angelkds_state *state = space->machine().driver_data<angelkds_state>();
-	return state->m_sound[offset];
+	return m_sound[offset];
 }
 
 
 static void irqhandler( device_t *device, int irq )
 {
 	angelkds_state *state = device->machine().driver_data<angelkds_state>();
-	device_set_input_line(state->m_subcpu, 0, irq ? ASSERT_LINE : CLEAR_LINE);
+	state->m_subcpu->set_input_line(0, irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static const ym2203_interface ym2203_config =
@@ -525,7 +520,7 @@ static const ym2203_interface ym2203_config =
 		AY8910_DEFAULT_LOADS,
 		DEVCB_NULL, DEVCB_NULL, DEVCB_NULL, DEVCB_NULL
 	},
-	irqhandler
+	DEVCB_LINE(irqhandler)
 };
 
 /*** Graphics Decoding
@@ -551,7 +546,7 @@ static const gfx_layout angelkds_spritelayout =
 	16,16,
 	RGN_FRAC(1,2),
 	4,
-	{ 0,4,	RGN_FRAC(1,2)+0,	RGN_FRAC(1,2)+4 },
+	{ 0,4,  RGN_FRAC(1,2)+0,    RGN_FRAC(1,2)+4 },
 	{ 0, 1, 2, 3, 8, 9, 10, 11, 16,17,18,19, 24,25,26,27 },
 	{ 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32, 8*32, 9*32, 10*32, 11*32, 12*32, 13*32, 14*32, 15*32  },
 	16*32
@@ -573,50 +568,46 @@ GFXDECODE_END
 
 */
 
-static MACHINE_START( angelkds )
+void angelkds_state::machine_start()
 {
-	angelkds_state *state = machine.driver_data<angelkds_state>();
 
-	state->m_subcpu = machine.device("sub");
+	m_subcpu = machine().device<cpu_device>("sub");
 
-	state->save_item(NAME(state->m_layer_ctrl));
-	state->save_item(NAME(state->m_txbank));
-	state->save_item(NAME(state->m_bgbotbank));
-	state->save_item(NAME(state->m_bgtopbank));
-	state->save_item(NAME(state->m_sound));
-	state->save_item(NAME(state->m_sound2));
+	save_item(NAME(m_layer_ctrl));
+	save_item(NAME(m_txbank));
+	save_item(NAME(m_bgbotbank));
+	save_item(NAME(m_bgtopbank));
+	save_item(NAME(m_sound));
+	save_item(NAME(m_sound2));
 }
 
-static MACHINE_RESET( angelkds )
+void angelkds_state::machine_reset()
 {
-	angelkds_state *state = machine.driver_data<angelkds_state>();
 	int i;
 
 	for (i = 0; i < 4; i++)
 	{
-		state->m_sound[i] = 0;
-		state->m_sound2[i] = 0;
+		m_sound[i] = 0;
+		m_sound2[i] = 0;
 	}
 
-	state->m_layer_ctrl = 0;
-	state->m_txbank = 0;
-	state->m_bgbotbank = 0;
-	state->m_bgtopbank = 0;
+	m_layer_ctrl = 0;
+	m_txbank = 0;
+	m_bgbotbank = 0;
+	m_bgtopbank = 0;
 }
 
 static MACHINE_CONFIG_START( angelkds, angelkds_state )
 
-	MCFG_CPU_ADD("maincpu", Z80, 8000000) /* 8MHz? 6 seems too slow? */
+	MCFG_CPU_ADD("maincpu", Z80, XTAL_6MHz)
 	MCFG_CPU_PROGRAM_MAP(main_map)
 	MCFG_CPU_IO_MAP(main_portmap)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", angelkds_state,  irq0_line_hold)
 
-	MCFG_CPU_ADD("sub", Z80, 4000000) /* 8 MHz? */
+	MCFG_CPU_ADD("sub", Z80, XTAL_4MHz)
 	MCFG_CPU_PROGRAM_MAP(sub_map)
 	MCFG_CPU_IO_MAP(sub_portmap)
 
-	MCFG_MACHINE_START(angelkds)
-	MCFG_MACHINE_RESET(angelkds)
 
 	MCFG_QUANTUM_TIME(attotime::from_hz(6000))
 
@@ -624,26 +615,24 @@ static MACHINE_CONFIG_START( angelkds, angelkds_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 1*8, 31*8-1)
-	MCFG_SCREEN_UPDATE(angelkds)
+	MCFG_SCREEN_UPDATE_DRIVER(angelkds_state, screen_update_angelkds)
 
 	MCFG_GFXDECODE(angelkds)
 	MCFG_PALETTE_LENGTH(0x100)
 
-	MCFG_VIDEO_START(angelkds)
 
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("ym1", YM2203, 4000000)
+	MCFG_SOUND_ADD("ym1", YM2203, XTAL_4MHz)
 	MCFG_SOUND_CONFIG(ym2203_config)
 	MCFG_SOUND_ROUTE(0, "mono", 0.65)
 	MCFG_SOUND_ROUTE(1, "mono", 0.65)
 	MCFG_SOUND_ROUTE(2, "mono", 0.65)
 	MCFG_SOUND_ROUTE(3, "mono", 0.45)
 
-	MCFG_SOUND_ADD("ym2", YM2203, 4000000)
+	MCFG_SOUND_ADD("ym2", YM2203, XTAL_4MHz)
 	MCFG_SOUND_ROUTE(0, "mono", 0.65)
 	MCFG_SOUND_ROUTE(1, "mono", 0.65)
 	MCFG_SOUND_ROUTE(2, "mono", 0.65)
@@ -707,7 +696,7 @@ ROM_START( angelkds )
 	ROM_LOAD( "11438",        0x38000, 0x08000, CRC(d640f89e) SHA1(38fb67bcb2a3d1ad614fc62e42f22a66bc757137) )
 
 	ROM_REGION( 0x20, "proms", 0 )
-	ROM_LOAD( "63s081n.u5",	  0x00,    0x20,    CRC(36b98627) SHA1(d2d54d92d1d47e7cc85104989ee421ce5d80a42a) )
+	ROM_LOAD( "63s081n.u5",   0x00,    0x20,    CRC(36b98627) SHA1(d2d54d92d1d47e7cc85104989ee421ce5d80a42a) )
 ROM_END
 
 ROM_START( spcpostn )
@@ -748,20 +737,20 @@ ROM_START( spcpostn )
 ROM_END
 
 
-static DRIVER_INIT( angelkds )
+DRIVER_INIT_MEMBER(angelkds_state,angelkds)
 {
-	UINT8 *RAM = machine.region("user1")->base();
-	memory_configure_bank(machine, "bank1", 0, 8, &RAM[0x0000], 0x4000);
+	UINT8 *RAM = machine().root_device().memregion("user1")->base();
+	machine().root_device().membank("bank1")->configure_entries(0, 8, &RAM[0x0000], 0x4000);
 }
 
-static DRIVER_INIT( spcpostn )
+DRIVER_INIT_MEMBER(angelkds_state,spcpostn)
 {
-	UINT8 *RAM = machine.region("user1")->base();
+	UINT8 *RAM = machine().root_device().memregion("user1")->base();
 
-	sega_317_0005_decode(machine, "maincpu");
-	memory_configure_bank(machine, "bank1", 0, 10, &RAM[0x0000], 0x4000);
+	sega_317_0005_decode(machine(), "maincpu");
+	machine().root_device().membank("bank1")->configure_entries(0, 10, &RAM[0x0000], 0x4000);
 }
 
 
-GAME( 1988, angelkds, 0, angelkds, angelkds, angelkds,  ROT90,  "Sega / Nasco?", "Angel Kids (Japan)" ,     GAME_SUPPORTS_SAVE) /* Nasco not displayed but 'Exa Planning' is */
-GAME( 1986, spcpostn, 0, angelkds, spcpostn, spcpostn,  ROT90,  "Sega / Nasco",  "Space Position (Japan)" , GAME_SUPPORTS_SAVE) /* encrypted */
+GAME( 1988, angelkds, 0, angelkds, angelkds, angelkds_state, angelkds,  ROT90,  "Sega / Nasco?", "Angel Kids (Japan)" ,     GAME_SUPPORTS_SAVE) /* Nasco not displayed but 'Exa Planning' is */
+GAME( 1986, spcpostn, 0, angelkds, spcpostn, angelkds_state, spcpostn,  ROT90,  "Sega / Nasco",  "Space Position (Japan)" , GAME_SUPPORTS_SAVE) /* encrypted */

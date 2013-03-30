@@ -160,11 +160,11 @@
 #include "includes/kangaroo.h"
 
 
-#define MASTER_CLOCK		XTAL_10MHz
+#define MASTER_CLOCK        XTAL_10MHz
 
 
-static READ8_HANDLER(mcu_sim_r);
-static WRITE8_HANDLER(mcu_sim_w);
+
+
 
 /*************************************
  *
@@ -172,25 +172,22 @@ static WRITE8_HANDLER(mcu_sim_w);
  *
  *************************************/
 
-static MACHINE_START( kangaroo )
+void kangaroo_state::machine_start()
 {
-	memory_configure_bank(machine, "bank1", 0, 2, machine.region("gfx1")->base(), 0x2000);
+	machine().root_device().membank("bank1")->configure_entries(0, 2, machine().root_device().memregion("gfx1")->base(), 0x2000);
 }
 
 
-static MACHINE_START( kangaroo_mcu )
+MACHINE_START_MEMBER(kangaroo_state,kangaroo_mcu)
 {
-	kangaroo_state *state = machine.driver_data<kangaroo_state>();
-
-	MACHINE_START_CALL(kangaroo);
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_readwrite_handler(0xef00, 0xefff, FUNC(mcu_sim_r), FUNC(mcu_sim_w));
-	state->save_item(NAME(state->m_clock));
+	kangaroo_state::machine_start();
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_readwrite_handler(0xef00, 0xefff, read8_delegate(FUNC(kangaroo_state::mcu_sim_r),this), write8_delegate(FUNC(kangaroo_state::mcu_sim_w),this));
+	save_item(NAME(m_mcu_clock));
 }
 
 
-static MACHINE_RESET( kangaroo )
+void kangaroo_state::machine_reset()
 {
-	kangaroo_state *state = machine.driver_data<kangaroo_state>();
 
 	/* I think there is a bug in the startup checks of the game. At the very */
 	/* beginning, during the RAM check, it goes one byte too far, and ends up */
@@ -203,9 +200,9 @@ static MACHINE_RESET( kangaroo )
 	/* the copy protection. */
 	/* Anyway, what I do here is just immediately generate the NMI, so the game */
 	/* properly starts. */
-	cputag_set_input_line(machine, "maincpu", INPUT_LINE_NMI, PULSE_LINE);
+	machine().device("maincpu")->execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 
-	state->m_clock = 0;
+	m_mcu_clock = 0;
 }
 
 
@@ -220,13 +217,12 @@ static MACHINE_RESET( kangaroo )
    this just seems to do the trick -V-
 */
 
-static READ8_HANDLER( mcu_sim_r )
+READ8_MEMBER(kangaroo_state::mcu_sim_r)
 {
-	kangaroo_state *state = space->machine().driver_data<kangaroo_state>();
-	return ++state->m_clock & 0x0f;
+	return ++m_mcu_clock & 0x0f;
 }
 
-static WRITE8_HANDLER( mcu_sim_w )
+WRITE8_MEMBER(kangaroo_state::mcu_sim_w)
 {
 }
 
@@ -238,10 +234,10 @@ static WRITE8_HANDLER( mcu_sim_w )
  *
  *************************************/
 
-static WRITE8_HANDLER( kangaroo_coin_counter_w )
+WRITE8_MEMBER(kangaroo_state::kangaroo_coin_counter_w)
 {
-	coin_counter_w(space->machine(), 0, data & 1);
-	coin_counter_w(space->machine(), 1, data & 2);
+	coin_counter_w(machine(), 0, data & 1);
+	coin_counter_w(machine(), 1, data & 2);
 }
 
 
@@ -252,14 +248,14 @@ static WRITE8_HANDLER( kangaroo_coin_counter_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, kangaroo_state )
 	AM_RANGE(0x0000, 0x5fff) AM_ROM
 	AM_RANGE(0x8000, 0xbfff) AM_WRITE(kangaroo_videoram_w)
 	AM_RANGE(0xc000, 0xdfff) AM_ROMBANK("bank1")
 	AM_RANGE(0xe000, 0xe3ff) AM_RAM
 	AM_RANGE(0xe400, 0xe400) AM_MIRROR(0x03ff) AM_READ_PORT("DSW0")
-	AM_RANGE(0xe800, 0xe80a) AM_MIRROR(0x03f0) AM_WRITE(kangaroo_video_control_w) AM_BASE_MEMBER(kangaroo_state, m_video_control)
-	AM_RANGE(0xec00, 0xec00) AM_MIRROR(0x00ff) AM_READ_PORT("IN0") AM_WRITE(soundlatch_w)
+	AM_RANGE(0xe800, 0xe80a) AM_MIRROR(0x03f0) AM_WRITE(kangaroo_video_control_w) AM_SHARE("video_control")
+	AM_RANGE(0xec00, 0xec00) AM_MIRROR(0x00ff) AM_READ_PORT("IN0") AM_WRITE(soundlatch_byte_w)
 	AM_RANGE(0xed00, 0xed00) AM_MIRROR(0x00ff) AM_READ_PORT("IN1") AM_WRITE(kangaroo_coin_counter_w)
 	AM_RANGE(0xee00, 0xee00) AM_MIRROR(0x00ff) AM_READ_PORT("IN2")
 ADDRESS_MAP_END
@@ -272,22 +268,22 @@ ADDRESS_MAP_END
  *
  *************************************/
 
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, kangaroo_state )
 	AM_RANGE(0x0000, 0x0fff) AM_ROM
 	AM_RANGE(0x4000, 0x43ff) AM_MIRROR(0x0c00) AM_RAM
-	AM_RANGE(0x6000, 0x6000) AM_MIRROR(0x0fff) AM_READ(soundlatch_r)
-	AM_RANGE(0x7000, 0x7000) AM_MIRROR(0x0fff) AM_DEVWRITE("aysnd", ay8910_data_w)
-	AM_RANGE(0x8000, 0x8000) AM_MIRROR(0x0fff) AM_DEVWRITE("aysnd", ay8910_address_w)
+	AM_RANGE(0x6000, 0x6000) AM_MIRROR(0x0fff) AM_READ(soundlatch_byte_r)
+	AM_RANGE(0x7000, 0x7000) AM_MIRROR(0x0fff) AM_DEVWRITE_LEGACY("aysnd", ay8910_data_w)
+	AM_RANGE(0x8000, 0x8000) AM_MIRROR(0x0fff) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_w)
 ADDRESS_MAP_END
 
 
 /* yes, this is identical */
-static ADDRESS_MAP_START( sound_portmap, AS_IO, 8 )
+static ADDRESS_MAP_START( sound_portmap, AS_IO, 8, kangaroo_state )
 	AM_RANGE(0x0000, 0x0fff) AM_ROM
 	AM_RANGE(0x4000, 0x43ff) AM_MIRROR(0x0c00) AM_RAM
-	AM_RANGE(0x6000, 0x6000) AM_MIRROR(0x0fff) AM_READ(soundlatch_r)
-	AM_RANGE(0x7000, 0x7000) AM_MIRROR(0x0fff) AM_DEVWRITE("aysnd", ay8910_data_w)
-	AM_RANGE(0x8000, 0x8000) AM_MIRROR(0x0fff) AM_DEVWRITE("aysnd", ay8910_address_w)
+	AM_RANGE(0x6000, 0x6000) AM_MIRROR(0x0fff) AM_READ(soundlatch_byte_r)
+	AM_RANGE(0x7000, 0x7000) AM_MIRROR(0x0fff) AM_DEVWRITE_LEGACY("aysnd", ay8910_data_w)
+	AM_RANGE(0x8000, 0x8000) AM_MIRROR(0x0fff) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_w)
 ADDRESS_MAP_END
 
 
@@ -432,25 +428,21 @@ static MACHINE_CONFIG_START( nomcu, kangaroo_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", Z80, MASTER_CLOCK/4)
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", kangaroo_state,  irq0_line_hold)
 
 	MCFG_CPU_ADD("audiocpu", Z80, MASTER_CLOCK/8)
 	MCFG_CPU_PROGRAM_MAP(sound_map)
 	MCFG_CPU_IO_MAP(sound_portmap)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", kangaroo_state,  irq0_line_hold)
 
-	MCFG_MACHINE_START(kangaroo)
-	MCFG_MACHINE_RESET(kangaroo)
 
 	/* video hardware */
 	MCFG_VIDEO_ATTRIBUTES(VIDEO_UPDATE_SCANLINE)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
 	MCFG_SCREEN_RAW_PARAMS(MASTER_CLOCK, 320*2, 0*2, 256*2, 260, 8, 248)
-	MCFG_SCREEN_UPDATE(kangaroo)
+	MCFG_SCREEN_UPDATE_DRIVER(kangaroo_state, screen_update_kangaroo)
 
-	MCFG_VIDEO_START(kangaroo)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -461,7 +453,7 @@ MACHINE_CONFIG_END
 
 static MACHINE_CONFIG_DERIVED( mcu, nomcu )
 
-	MCFG_MACHINE_START(kangaroo_mcu)
+	MCFG_MACHINE_START_OVERRIDE(kangaroo_state,kangaroo_mcu)
 
 	MCFG_CPU_ADD("mcu", MB8841, MASTER_CLOCK/4/2)
 	MCFG_DEVICE_DISABLE()
@@ -505,10 +497,10 @@ ROM_START( kangaroo )
 	ROM_REGION( 0x10000, "audiocpu", 0 ) /* On TVG-1-CPU-B board */
 	ROM_LOAD( "tvg_81.8",    0x0000, 0x1000, CRC(fb449bfd) SHA1(f593a0339f47e121736a927587132aeb52704557) ) /* IC24 */
 
-	ROM_REGION( 0x0800, "mcu", 0 )	/* internal ROM from the 8841 custom MCU */
+	ROM_REGION( 0x0800, "mcu", 0 )  /* internal ROM from the 8841 custom MCU */
 	ROM_LOAD( "mb8841.ic29",    0x0000, 0x0800, NO_DUMP )
 
-	ROM_REGION( 0x0800, "user1", 0 )	/* data for the 8841 custom MCU */
+	ROM_REGION( 0x0800, "user1", 0 )    /* data for the 8841 custom MCU */
 	ROM_LOAD( "tvg_82.12",   0x0000, 0x0800, CRC(57766f69) SHA1(94a7a557d8325799523d5e1a88653a9a3fbe34f9) ) /* IC28 */
 
 	ROM_REGION( 0x4000, "gfx1", 0 ) /* On TVG-1-VIDEO-B board */
@@ -531,10 +523,10 @@ ROM_START( kangarooa )
 	ROM_REGION( 0x10000, "audiocpu", 0 )
 	ROM_LOAD( "136008-107.ic24",   0x0000, 0x1000, CRC(fb449bfd) SHA1(f593a0339f47e121736a927587132aeb52704557) )
 
-	ROM_REGION( 0x0800, "mcu", 0 )	/* internal ROM from the 8841 custom MCU */
+	ROM_REGION( 0x0800, "mcu", 0 )  /* internal ROM from the 8841 custom MCU */
 	ROM_LOAD( "mb8841.ic29",          0x0000, 0x0800, NO_DUMP )
 
-	ROM_REGION( 0x0800, "user1", 0 )	/* data for the 8841 custom MCU */
+	ROM_REGION( 0x0800, "user1", 0 )    /* data for the 8841 custom MCU */
 	ROM_LOAD( "136008-112.ic28",   0x0000, 0x0800, CRC(57766f69) SHA1(94a7a557d8325799523d5e1a88653a9a3fbe34f9) )
 
 	ROM_REGION( 0x4000, "gfx1", 0 )
@@ -572,7 +564,7 @@ ROM_END
  *
  *************************************/
 
-GAME( 1981, fnkyfish,  0,        nomcu, fnkyfish, 0, ROT90, "Sun Electronics",                 "Funky Fish", GAME_SUPPORTS_SAVE )
-GAME( 1982, kangaroo,  0,        mcu,   kangaroo, 0, ROT90, "Sun Electronics",                 "Kangaroo", GAME_SUPPORTS_SAVE )
-GAME( 1982, kangarooa, kangaroo, mcu,   kangaroo, 0, ROT90, "Sun Electronics (Atari license)", "Kangaroo (Atari)", GAME_SUPPORTS_SAVE )
-GAME( 1982, kangaroob, kangaroo, nomcu, kangaroo, 0, ROT90, "bootleg",                         "Kangaroo (bootleg)", GAME_SUPPORTS_SAVE )
+GAME( 1981, fnkyfish,  0,        nomcu, fnkyfish, driver_device, 0, ROT90, "Sun Electronics",                 "Funky Fish", GAME_SUPPORTS_SAVE )
+GAME( 1982, kangaroo,  0,        mcu,   kangaroo, driver_device, 0, ROT90, "Sun Electronics",                 "Kangaroo", GAME_SUPPORTS_SAVE )
+GAME( 1982, kangarooa, kangaroo, mcu,   kangaroo, driver_device, 0, ROT90, "Sun Electronics (Atari license)", "Kangaroo (Atari)", GAME_SUPPORTS_SAVE )
+GAME( 1982, kangaroob, kangaroo, nomcu, kangaroo, driver_device, 0, ROT90, "bootleg",                         "Kangaroo (bootleg)", GAME_SUPPORTS_SAVE )

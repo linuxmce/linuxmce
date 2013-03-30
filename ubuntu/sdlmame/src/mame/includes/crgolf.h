@@ -4,23 +4,28 @@
 
 **************************************************************************/
 
-#define MASTER_CLOCK		18432000
+#define MASTER_CLOCK        18432000
 
 
 class crgolf_state : public driver_device
 {
 public:
-	crgolf_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	crgolf_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_color_select(*this, "color_select"),
+		m_screen_flip(*this, "screen_flip"),
+		m_screen_select(*this, "screen_select"),
+		m_screenb_enable(*this, "screenb_enable"),
+		m_screena_enable(*this, "screena_enable"){ }
 
 	/* memory pointers */
 	UINT8 *  m_videoram_a;
 	UINT8 *  m_videoram_b;
-	UINT8 *  m_color_select;
-	UINT8 *  m_screen_flip;
-	UINT8 *  m_screen_select;
-	UINT8 *  m_screena_enable;
-	UINT8 *  m_screenb_enable;
+	required_shared_ptr<UINT8> m_color_select;
+	required_shared_ptr<UINT8> m_screen_flip;
+	required_shared_ptr<UINT8> m_screen_select;
+	required_shared_ptr<UINT8> m_screenb_enable;
+	required_shared_ptr<UINT8> m_screena_enable;
 
 	/* misc */
 	UINT8    m_port_select;
@@ -30,13 +35,28 @@ public:
 	UINT8    m_sample_count;
 
 	/* devices */
-	device_t *m_maincpu;
-	device_t *m_audiocpu;
+	cpu_device *m_maincpu;
+	cpu_device *m_audiocpu;
+	DECLARE_WRITE8_MEMBER(rom_bank_select_w);
+	DECLARE_READ8_MEMBER(switch_input_r);
+	DECLARE_READ8_MEMBER(analog_input_r);
+	DECLARE_WRITE8_MEMBER(switch_input_select_w);
+	DECLARE_WRITE8_MEMBER(unknown_w);
+	DECLARE_WRITE8_MEMBER(main_to_sound_w);
+	DECLARE_READ8_MEMBER(main_to_sound_r);
+	DECLARE_WRITE8_MEMBER(sound_to_main_w);
+	DECLARE_READ8_MEMBER(sound_to_main_r);
+	DECLARE_WRITE8_MEMBER(crgolf_videoram_w);
+	DECLARE_READ8_MEMBER(crgolf_videoram_r);
+	DECLARE_WRITE8_MEMBER(crgolfhi_sample_w);
+	DECLARE_DRIVER_INIT(crgolfhi);
+	virtual void machine_start();
+	virtual void machine_reset();
+	DECLARE_VIDEO_START(crgolf);
+	UINT32 screen_update_crgolf(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
+	TIMER_CALLBACK_MEMBER(main_to_sound_callback);
+	TIMER_CALLBACK_MEMBER(sound_to_main_callback);
 };
 
 /*----------- defined in video/crgolf.c -----------*/
-
-WRITE8_HANDLER( crgolf_videoram_w );
-READ8_HANDLER( crgolf_videoram_r );
-
 MACHINE_CONFIG_EXTERN( crgolf_video );

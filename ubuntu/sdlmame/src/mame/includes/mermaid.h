@@ -7,24 +7,30 @@
 class mermaid_state : public driver_device
 {
 public:
-	mermaid_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	mermaid_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram2(*this, "videoram2"),
+		m_videoram(*this, "videoram"),
+		m_bg_scrollram(*this, "bg_scrollram"),
+		m_fg_scrollram(*this, "fg_scrollram"),
+		m_spriteram(*this, "spriteram"),
+		m_colorram(*this, "colorram"),
+		m_ay8910_enable(*this, "ay8910_enable"){ }
 
 	/* memory pointers */
-	UINT8 *    m_videoram;
-	UINT8 *    m_colorram;
-	UINT8 *    m_videoram2;
-	UINT8 *    m_spriteram;
-	UINT8 *    m_bg_scrollram;
-	UINT8 *    m_fg_scrollram;
-	UINT8 *    m_ay8910_enable;
-	size_t     m_spriteram_size;
+	required_shared_ptr<UINT8> m_videoram2;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_bg_scrollram;
+	required_shared_ptr<UINT8> m_fg_scrollram;
+	required_shared_ptr<UINT8> m_spriteram;
+	required_shared_ptr<UINT8> m_colorram;
+	required_shared_ptr<UINT8> m_ay8910_enable;
 
 	/* video-related */
 	tilemap_t *m_bg_tilemap;
 	tilemap_t *m_fg_tilemap;
-	bitmap_t* m_helper;
-	bitmap_t* m_helper2;
+	bitmap_ind16 m_helper;
+	bitmap_ind16 m_helper2;
 	int m_coll_bit0;
 	int m_coll_bit1;
 	int m_coll_bit2;
@@ -43,28 +49,35 @@ public:
 	UINT8    m_adpcm_play_reg;
 
 	/* devices */
-	device_t *m_maincpu;
+	cpu_device *m_maincpu;
 	device_t *m_ay1;
 	device_t *m_ay2;
+
+	UINT8    m_nmi_mask;
+	DECLARE_WRITE8_MEMBER(mermaid_ay8910_write_port_w);
+	DECLARE_WRITE8_MEMBER(mermaid_ay8910_control_port_w);
+	DECLARE_WRITE8_MEMBER(nmi_mask_w);
+	DECLARE_WRITE8_MEMBER(rougien_sample_rom_lo_w);
+	DECLARE_WRITE8_MEMBER(rougien_sample_rom_hi_w);
+	DECLARE_WRITE8_MEMBER(rougien_sample_playback_w);
+	DECLARE_WRITE8_MEMBER(mermaid_videoram2_w);
+	DECLARE_WRITE8_MEMBER(mermaid_videoram_w);
+	DECLARE_WRITE8_MEMBER(mermaid_colorram_w);
+	DECLARE_WRITE8_MEMBER(mermaid_flip_screen_x_w);
+	DECLARE_WRITE8_MEMBER(mermaid_flip_screen_y_w);
+	DECLARE_WRITE8_MEMBER(mermaid_bg_scroll_w);
+	DECLARE_WRITE8_MEMBER(mermaid_fg_scroll_w);
+	DECLARE_WRITE8_MEMBER(rougien_gfxbankswitch1_w);
+	DECLARE_WRITE8_MEMBER(rougien_gfxbankswitch2_w);
+	DECLARE_READ8_MEMBER(mermaid_collision_r);
+	TILE_GET_INFO_MEMBER(get_bg_tile_info);
+	TILE_GET_INFO_MEMBER(get_fg_tile_info);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	virtual void palette_init();
+	DECLARE_PALETTE_INIT(rougien);
+	UINT32 screen_update_mermaid(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	void screen_eof_mermaid(screen_device &screen, bool state);
+	INTERRUPT_GEN_MEMBER(vblank_irq);
 };
-
-
-
-/*----------- defined in video/mermaid.c -----------*/
-
-WRITE8_HANDLER( mermaid_videoram2_w );
-WRITE8_HANDLER( mermaid_videoram_w );
-WRITE8_HANDLER( mermaid_colorram_w );
-WRITE8_HANDLER( mermaid_flip_screen_x_w );
-WRITE8_HANDLER( mermaid_flip_screen_y_w );
-WRITE8_HANDLER( mermaid_bg_scroll_w );
-WRITE8_HANDLER( mermaid_fg_scroll_w );
-WRITE8_HANDLER( rougien_gfxbankswitch1_w );
-WRITE8_HANDLER( rougien_gfxbankswitch2_w );
-READ8_HANDLER( mermaid_collision_r );
-
-PALETTE_INIT( mermaid );
-PALETTE_INIT( rougien );
-VIDEO_START( mermaid );
-SCREEN_UPDATE( mermaid );
-SCREEN_EOF( mermaid );

@@ -7,15 +7,17 @@
 class amspdwy_state : public driver_device
 {
 public:
-	amspdwy_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	amspdwy_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"),
+		m_spriteram(*this, "spriteram"),
+		m_colorram(*this, "colorram"){ }
 
 	/* memory pointers */
-	UINT8 *    m_videoram;
-	UINT8 *    m_spriteram;
-	UINT8 *    m_colorram;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_spriteram;
+	required_shared_ptr<UINT8> m_colorram;
 //  UINT8 *    paletteram;  // currently this uses generic palette handling
-	size_t     m_spriteram_size;
 
 	/* video-related */
 	tilemap_t    *m_bg_tilemap;
@@ -26,16 +28,20 @@ public:
 	UINT8      m_wheel_return[2];
 
 	/* devices */
-	device_t *m_audiocpu;
+	cpu_device *m_audiocpu;
+	DECLARE_READ8_MEMBER(amspdwy_wheel_0_r);
+	DECLARE_READ8_MEMBER(amspdwy_wheel_1_r);
+	DECLARE_WRITE8_MEMBER(amspdwy_sound_w);
+	DECLARE_READ8_MEMBER(amspdwy_port_r);
+	DECLARE_WRITE8_MEMBER(amspdwy_paletteram_w);
+	DECLARE_WRITE8_MEMBER(amspdwy_flipscreen_w);
+	DECLARE_WRITE8_MEMBER(amspdwy_videoram_w);
+	DECLARE_WRITE8_MEMBER(amspdwy_colorram_w);
+	DECLARE_READ8_MEMBER(amspdwy_sound_r);
+	TILE_GET_INFO_MEMBER(get_tile_info);
+	TILEMAP_MAPPER_MEMBER(tilemap_scan_cols_back);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	UINT32 screen_update_amspdwy(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
-
-
-/*----------- defined in video/amspdwy.c -----------*/
-
-WRITE8_HANDLER( amspdwy_videoram_w );
-WRITE8_HANDLER( amspdwy_colorram_w );
-WRITE8_HANDLER( amspdwy_paletteram_w );
-WRITE8_HANDLER( amspdwy_flipscreen_w );
-
-VIDEO_START( amspdwy );
-SCREEN_UPDATE( amspdwy );

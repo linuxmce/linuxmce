@@ -66,10 +66,10 @@ Added Dip locations according to manual.
  *
  *************************************/
 
-static PALETTE_INIT( copsnrob )
+void copsnrob_state::palette_init()
 {
-	palette_set_color(machine,0,MAKE_RGB(0x00,0x00,0x00)); /* black */
-	palette_set_color(machine,1,MAKE_RGB(0xff,0xff,0xff));  /* white */
+	palette_set_color(machine(),0,MAKE_RGB(0x00,0x00,0x00)); /* black */
+	palette_set_color(machine(),1,MAKE_RGB(0xff,0xff,0xff));  /* white */
 }
 
 
@@ -79,18 +79,17 @@ static PALETTE_INIT( copsnrob )
  *
  *************************************/
 
-static READ8_HANDLER( copsnrob_misc_r )
+READ8_MEMBER(copsnrob_state::copsnrob_misc_r)
 {
-	return input_port_read(space->machine(), "IN0") & 0x80;
+	return ioport("IN0")->read() & 0x80;
 }
 
-static WRITE8_HANDLER( copsnrob_misc2_w )
+WRITE8_MEMBER(copsnrob_state::copsnrob_misc2_w)
 {
-	copsnrob_state *state = space->machine().driver_data<copsnrob_state>();
 
-	state->m_misc = data & 0x7f;
+	m_misc = data & 0x7f;
 	/* Multi Player Start */
-	set_led_status(space->machine(), 1, !((data >> 6) & 0x01));
+	set_led_status(machine(), 1, !((data >> 6) & 0x01));
 }
 
 
@@ -101,17 +100,17 @@ static WRITE8_HANDLER( copsnrob_misc2_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, copsnrob_state )
 	ADDRESS_MAP_GLOBAL_MASK(0x1fff)
 	AM_RANGE(0x0000, 0x01ff) AM_RAM
 	AM_RANGE(0x0500, 0x0507) AM_WRITE(copsnrob_misc_w)
-	AM_RANGE(0x0600, 0x0600) AM_WRITEONLY AM_BASE_MEMBER(copsnrob_state, m_trucky)
-	AM_RANGE(0x0700, 0x07ff) AM_WRITEONLY AM_BASE_MEMBER(copsnrob_state, m_truckram)
-	AM_RANGE(0x0800, 0x08ff) AM_RAM AM_BASE_MEMBER(copsnrob_state, m_bulletsram)
-	AM_RANGE(0x0900, 0x0903) AM_WRITEONLY AM_BASE_MEMBER(copsnrob_state, m_carimage)
-	AM_RANGE(0x0a00, 0x0a03) AM_WRITEONLY AM_BASE_MEMBER(copsnrob_state, m_cary)
+	AM_RANGE(0x0600, 0x0600) AM_WRITEONLY AM_SHARE("trucky")
+	AM_RANGE(0x0700, 0x07ff) AM_WRITEONLY AM_SHARE("truckram")
+	AM_RANGE(0x0800, 0x08ff) AM_RAM AM_SHARE("bulletsram")
+	AM_RANGE(0x0900, 0x0903) AM_WRITEONLY AM_SHARE("carimage")
+	AM_RANGE(0x0a00, 0x0a03) AM_WRITEONLY AM_SHARE("cary")
 	AM_RANGE(0x0b00, 0x0bff) AM_RAM
-	AM_RANGE(0x0c00, 0x0fff) AM_RAM AM_BASE_SIZE_MEMBER(copsnrob_state, m_videoram, m_videoram_size)
+	AM_RANGE(0x0c00, 0x0fff) AM_RAM AM_SHARE("videoram")
 //  AM_RANGE(0x1000, 0x1003) AM_WRITENOP
 //  AM_RANGE(0x1000, 0x1000) AM_READ_PORT("IN0")
 	AM_RANGE(0x1000, 0x1000) AM_READ(copsnrob_misc_r)
@@ -134,11 +133,11 @@ ADDRESS_MAP_END
  *
  *************************************/
 
-static const int gun_table[] = {0x3f, 0x5f, 0x6f, 0x77, 0x7b, 0x7d, 0x7e};
+static const ioport_value gun_table[] = {0x3f, 0x5f, 0x6f, 0x77, 0x7b, 0x7d, 0x7e};
 
 static INPUT_PORTS_START( copsnrob )
 	PORT_START("IN0")
-	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 
 	PORT_START("IN1")
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START1 )
@@ -191,47 +190,47 @@ INPUT_PORTS_END
 
 static const gfx_layout charlayout =
 {
-    8,8,
-    64,
-    1,
-    { 0 },
-    { 0, 1, 2, 3, 4, 5, 6, 7},
-    { 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
-    8*8
+	8,8,
+	64,
+	1,
+	{ 0 },
+	{ 0, 1, 2, 3, 4, 5, 6, 7},
+	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
+	8*8
 };
 
 
 static const gfx_layout carlayout =
 {
-    32,32,
-    16,
-    1,
-    { 0 },
-    {  7,  6,  5,  4,  3,  2,  1,  0,
-      15, 14, 13, 12, 11, 10,  9,  8,
-      23, 22, 21, 20, 19, 18, 17, 16,
-      31, 30, 29, 28, 27, 26, 25, 24},
-    {  0*32,  1*32,  2*32,  3*32,  4*32,  5*32,  6*32,  7*32,
-       8*32,  9*32, 10*32, 11*32, 12*32, 13*32, 14*32, 15*32,
-      16*32, 17*32, 18*32, 19*32, 20*32, 21*32, 22*32, 23*32,
-      24*32, 25*32, 26*32, 27*32, 28*32, 29*32, 30*32, 31*32 },
-    32*32
+	32,32,
+	16,
+	1,
+	{ 0 },
+	{  7,  6,  5,  4,  3,  2,  1,  0,
+		15, 14, 13, 12, 11, 10,  9,  8,
+		23, 22, 21, 20, 19, 18, 17, 16,
+		31, 30, 29, 28, 27, 26, 25, 24},
+	{  0*32,  1*32,  2*32,  3*32,  4*32,  5*32,  6*32,  7*32,
+		8*32,  9*32, 10*32, 11*32, 12*32, 13*32, 14*32, 15*32,
+		16*32, 17*32, 18*32, 19*32, 20*32, 21*32, 22*32, 23*32,
+		24*32, 25*32, 26*32, 27*32, 28*32, 29*32, 30*32, 31*32 },
+	32*32
 };
 
 
 static const gfx_layout trucklayout =
 {
-    16,32,
-    2,
-    1,
-    { 0 },
-    { 3*256+4, 3*256+5, 3*256+6, 3*256+7, 2*256+4, 2*256+5, 2*256+6, 2*256+7,
-      1*256+4, 1*256+5, 1*256+6, 1*256+7, 0*256+4, 0*256+5, 0*256+6, 0*256+7 },
-    { 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-      8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8,
-      16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8,
-      24*8, 25*8, 26*8, 27*8, 28*8, 29*8, 30*8, 31*8 },
-    32*32
+	16,32,
+	2,
+	1,
+	{ 0 },
+	{ 3*256+4, 3*256+5, 3*256+6, 3*256+7, 2*256+4, 2*256+5, 2*256+6, 2*256+7,
+		1*256+4, 1*256+5, 1*256+6, 1*256+7, 0*256+4, 0*256+5, 0*256+6, 0*256+7 },
+	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+		8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8,
+		16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8,
+		24*8, 25*8, 26*8, 27*8, 28*8, 29*8, 30*8, 31*8 },
+	32*32
 };
 
 
@@ -249,45 +248,39 @@ GFXDECODE_END
  *
  *************************************/
 
-static MACHINE_START( copsnrob )
+void copsnrob_state::machine_start()
 {
-	copsnrob_state *state = machine.driver_data<copsnrob_state>();
 
-	state->save_item(NAME(state->m_ic_h3_data));
-	state->save_item(NAME(state->m_misc));
+	save_item(NAME(m_ic_h3_data));
+	save_item(NAME(m_misc));
 }
 
-static MACHINE_RESET( copsnrob )
+void copsnrob_state::machine_reset()
 {
-	copsnrob_state *state = machine.driver_data<copsnrob_state>();
 
-	state->m_ic_h3_data = 0;
-	state->m_misc = 0;
+	m_ic_h3_data = 0;
+	m_misc = 0;
 }
 
 
 static MACHINE_CONFIG_START( copsnrob, copsnrob_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M6502,14318180/16)		/* 894886.25 kHz */
+	MCFG_CPU_ADD("maincpu", M6502,14318180/16)      /* 894886.25 kHz */
 	MCFG_CPU_PROGRAM_MAP(main_map)
 
-	MCFG_MACHINE_START(copsnrob)
-	MCFG_MACHINE_RESET(copsnrob)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 0*8, 26*8-1)
-	MCFG_SCREEN_UPDATE(copsnrob)
+	MCFG_SCREEN_UPDATE_DRIVER(copsnrob_state, screen_update_copsnrob)
 
 	MCFG_GFXDECODE(copsnrob)
 	MCFG_PALETTE_LENGTH(2)
 
-	MCFG_PALETTE_INIT(copsnrob)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
@@ -328,7 +321,7 @@ ROM_START( copsnrob )
 	ROM_REGION( 0x0100, "gfx3", 0 )
 	ROM_LOAD( "5770.m2",      0x0000, 0x0100, CRC(b00bbe77) SHA1(3fd6113aa3a572ec9f5ff248ba1bf53fc9225dfb) )
 
-	ROM_REGION( 0x0260, "proms", 0 )	 /* misc. PROMs (timing?) */
+	ROM_REGION( 0x0260, "proms", 0 )     /* misc. PROMs (timing?) */
 	ROM_LOAD( "5765.h8",      0x0000, 0x0020, CRC(6cd58931) SHA1(a90ae8ddffdfc33f60cb9ff8f42f9155c2b09ca1) )
 	ROM_LOAD( "5766.k8",      0x0020, 0x0020, CRC(e63edf4f) SHA1(1dc8691dde033062491b03d4c926047229c45a14) )
 	ROM_LOAD( "5767.j8",      0x0040, 0x0020, CRC(381b5ae4) SHA1(91cd237878c0e092197e3025c2498b8f26f90109) )
@@ -344,4 +337,4 @@ ROM_END
  *
  *************************************/
 
-GAMEL( 1976, copsnrob, 0, copsnrob, copsnrob, 0, ROT0, "Atari", "Cops'n Robbers", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_copsnrob )
+GAMEL( 1976, copsnrob, 0, copsnrob, copsnrob, driver_device, 0, ROT0, "Atari", "Cops'n Robbers", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_copsnrob )

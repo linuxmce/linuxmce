@@ -9,45 +9,23 @@
 #include "emu.h"
 #include "ds2404.h"
 #include <time.h>
-#include "devhelpr.h"
 
-/***************************************************************************
-    IMPLEMENTATION
-***************************************************************************/
 
 //**************************************************************************
-//  DEVICE CONFIGURATION
+//  LIVE DEVICE
 //**************************************************************************
 
+// device type definition
+const device_type DS2404 = &device_creator<ds2404_device>;
+
 //-------------------------------------------------
-//  ds2404_device_config - constructor
+//  ds2404_device - constructor
 //-------------------------------------------------
 
-ds2404_device_config::ds2404_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock)
-    : device_config(mconfig, static_alloc_device_config, "DS2404", tag, owner, clock),
-      device_config_nvram_interface(mconfig, *this)
+ds2404_device::ds2404_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, DS2404, "DS2404", tag, owner, clock),
+		device_nvram_interface(mconfig, *this)
 {
-}
-
-
-//-------------------------------------------------
-//  static_alloc_device_config - allocate a new
-//  configuration object
-//-------------------------------------------------
-
-device_config *ds2404_device_config::static_alloc_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock)
-{
-    return global_alloc(ds2404_device_config(mconfig, tag, owner, clock));
-}
-
-
-//-------------------------------------------------
-//  alloc_device - allocate a new device object
-//-------------------------------------------------
-
-device_t *ds2404_device_config::alloc_device(running_machine &machine) const
-{
-    return auto_alloc(machine, ds2404_device(machine, *this));
 }
 
 
@@ -56,10 +34,10 @@ device_t *ds2404_device_config::alloc_device(running_machine &machine) const
 //  to set the reference year
 //-------------------------------------------------
 
-void ds2404_device_config::static_set_ref_year(device_config *device, UINT32 year)
+void ds2404_device::static_set_ref_year(device_t &device, UINT32 year)
 {
-	ds2404_device_config *ds2404 = downcast<ds2404_device_config *>(device);
-	ds2404->m_ref_year = year;
+	ds2404_device &ds2404 = downcast<ds2404_device &>(device);
+	ds2404.m_ref_year = year;
 }
 
 
@@ -68,10 +46,10 @@ void ds2404_device_config::static_set_ref_year(device_config *device, UINT32 yea
 //  to set the reference month
 //-------------------------------------------------
 
-void ds2404_device_config::static_set_ref_month(device_config *device, UINT8 month)
+void ds2404_device::static_set_ref_month(device_t &device, UINT8 month)
 {
-	ds2404_device_config *ds2404 = downcast<ds2404_device_config *>(device);
-	ds2404->m_ref_month = month;
+	ds2404_device &ds2404 = downcast<ds2404_device &>(device);
+	ds2404.m_ref_month = month;
 }
 
 
@@ -80,29 +58,12 @@ void ds2404_device_config::static_set_ref_month(device_config *device, UINT8 mon
 //  to set the reference day
 //-------------------------------------------------
 
-void ds2404_device_config::static_set_ref_day(device_config *device, UINT8 day)
+void ds2404_device::static_set_ref_day(device_t &device, UINT8 day)
 {
-	ds2404_device_config *ds2404 = downcast<ds2404_device_config *>(device);
-	ds2404->m_ref_day = day;
+	ds2404_device &ds2404 = downcast<ds2404_device &>(device);
+	ds2404.m_ref_day = day;
 }
 
-
-//**************************************************************************
-//  LIVE DEVICE
-//**************************************************************************
-
-const device_type DS2404 = ds2404_device_config::static_alloc_device_config;
-
-//-------------------------------------------------
-//  ds2404_device - constructor
-//-------------------------------------------------
-
-ds2404_device::ds2404_device(running_machine &_machine, const ds2404_device_config &config)
-    : device_t(_machine, config),
-	  device_nvram_interface(_machine, config, *this),
-      m_config(config)
-{
-}
 
 //-------------------------------------------------
 //  device_start - device-specific startup
@@ -113,9 +74,9 @@ void ds2404_device::device_start()
 	struct tm ref_tm;
 
 	memset(&ref_tm, 0, sizeof(ref_tm));
-	ref_tm.tm_year = m_config.m_ref_year - 1900;
-	ref_tm.tm_mon = m_config.m_ref_month - 1;
-	ref_tm.tm_mday = m_config.m_ref_day;
+	ref_tm.tm_year = m_ref_year - 1900;
+	ref_tm.tm_mon = m_ref_month - 1;
+	ref_tm.tm_mday = m_ref_day;
 
 	time_t ref_time = mktime(&ref_tm);
 
@@ -129,7 +90,7 @@ void ds2404_device::device_start()
 	m_rtc[3] = (current_time >> 16) & 0xff;
 	m_rtc[4] = (current_time >> 24) & 0xff;
 
-	emu_timer *timer = m_machine.scheduler().timer_alloc(FUNC(ds2404_tick_callback), (void *)this);
+	emu_timer *timer = machine().scheduler().timer_alloc(FUNC(ds2404_tick_callback), (void *)this);
 	timer->adjust(attotime::from_hz(256), 0, attotime::from_hz(256));
 }
 
@@ -138,13 +99,13 @@ void ds2404_device::ds2404_rom_cmd(UINT8 cmd)
 {
 	switch(cmd)
 	{
-		case 0xcc:		/* Skip ROM */
+		case 0xcc:      /* Skip ROM */
 			m_state[0] = DS2404_STATE_COMMAND;
 			m_state_ptr = 0;
 			break;
 
 		default:
-			fatalerror("DS2404: Unknown ROM command %02X", cmd);
+			fatalerror("DS2404: Unknown ROM command %02X\n", cmd);
 			break;
 	}
 }
@@ -153,7 +114,7 @@ void ds2404_device::ds2404_cmd(UINT8 cmd)
 {
 	switch(cmd)
 	{
-		case 0x0f:		/* Write scratchpad */
+		case 0x0f:      /* Write scratchpad */
 			m_state[0] = DS2404_STATE_ADDRESS1;
 			m_state[1] = DS2404_STATE_ADDRESS2;
 			m_state[2] = DS2404_STATE_INIT_COMMAND;
@@ -161,7 +122,7 @@ void ds2404_device::ds2404_cmd(UINT8 cmd)
 			m_state_ptr = 0;
 			break;
 
-		case 0x55:		/* Copy scratchpad */
+		case 0x55:      /* Copy scratchpad */
 			m_state[0] = DS2404_STATE_ADDRESS1;
 			m_state[1] = DS2404_STATE_ADDRESS2;
 			m_state[2] = DS2404_STATE_OFFSET;
@@ -170,7 +131,7 @@ void ds2404_device::ds2404_cmd(UINT8 cmd)
 			m_state_ptr = 0;
 			break;
 
-		case 0xf0:		/* Read memory */
+		case 0xf0:      /* Read memory */
 			m_state[0] = DS2404_STATE_ADDRESS1;
 			m_state[1] = DS2404_STATE_ADDRESS2;
 			m_state[2] = DS2404_STATE_INIT_COMMAND;
@@ -179,7 +140,7 @@ void ds2404_device::ds2404_cmd(UINT8 cmd)
 			break;
 
 		default:
-			fatalerror("DS2404: Unknown command %02X", cmd);
+			fatalerror("DS2404: Unknown command %02X\n", cmd);
 			break;
 	}
 }
@@ -209,19 +170,19 @@ void ds2404_device::ds2404_writemem(UINT8 value)
 	}
 }
 
-WRITE8_DEVICE_HANDLER_TRAMPOLINE(ds2404, ds2404_1w_reset_w)
+WRITE8_MEMBER( ds2404_device::ds2404_1w_reset_w )
 {
 	m_state[0] = DS2404_STATE_IDLE;
 	m_state_ptr = 0;
 }
 
-WRITE8_DEVICE_HANDLER_TRAMPOLINE(ds2404, ds2404_3w_reset_w)
+WRITE8_MEMBER( ds2404_device::ds2404_3w_reset_w )
 {
 	m_state[0] = DS2404_STATE_COMMAND;
 	m_state_ptr = 0;
 }
 
-READ8_DEVICE_HANDLER_TRAMPOLINE(ds2404, ds2404_data_r)
+READ8_MEMBER( ds2404_device::ds2404_data_r )
 {
 	UINT8 value = 0;
 	switch(m_state[m_state_ptr])
@@ -255,7 +216,7 @@ READ8_DEVICE_HANDLER_TRAMPOLINE(ds2404, ds2404_data_r)
 	return value;
 }
 
-WRITE8_DEVICE_HANDLER_TRAMPOLINE(ds2404, ds2404_data_w)
+WRITE8_MEMBER( ds2404_device::ds2404_data_w )
 {
 	switch( m_state[m_state_ptr] )
 	{
@@ -348,7 +309,7 @@ WRITE8_DEVICE_HANDLER_TRAMPOLINE(ds2404, ds2404_data_w)
 	}
 }
 
-WRITE8_DEVICE_HANDLER_TRAMPOLINE(ds2404, ds2404_clk_w)
+WRITE8_MEMBER( ds2404_device::ds2404_clk_w )
 {
 	switch( m_state[m_state_ptr] )
 	{

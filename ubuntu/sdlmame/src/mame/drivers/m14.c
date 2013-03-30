@@ -57,19 +57,36 @@ Dumped by Chackn
 class m14_state : public driver_device
 {
 public:
-	m14_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	m14_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_video_ram(*this, "video_ram"),
+		m_color_ram(*this, "color_ram"){ }
 
 	/* video-related */
 	tilemap_t  *m_m14_tilemap;
-	UINT8 *  m_video_ram;
-	UINT8 *  m_color_ram;
+	required_shared_ptr<UINT8> m_video_ram;
+	required_shared_ptr<UINT8> m_color_ram;
 
 	/* input-related */
 	UINT8 m_hop_mux;
 
 	/* devices */
-	device_t *m_maincpu;
+	cpu_device *m_maincpu;
+	DECLARE_WRITE8_MEMBER(m14_vram_w);
+	DECLARE_WRITE8_MEMBER(m14_cram_w);
+	DECLARE_READ8_MEMBER(m14_rng_r);
+	DECLARE_READ8_MEMBER(input_buttons_r);
+	DECLARE_WRITE8_MEMBER(test_w);
+	DECLARE_WRITE8_MEMBER(hopper_w);
+	DECLARE_INPUT_CHANGED_MEMBER(left_coin_inserted);
+	DECLARE_INPUT_CHANGED_MEMBER(right_coin_inserted);
+	TILE_GET_INFO_MEMBER(m14_get_tile_info);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_m14(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(m14_irq);
 };
 
 
@@ -80,7 +97,7 @@ public:
  *************************************/
 
 /* guess, might not be 100% accurate. */
-static PALETTE_INIT( m14 )
+void m14_state::palette_init()
 {
 	int i;
 
@@ -93,56 +110,51 @@ static PALETTE_INIT( m14 )
 		else
 			color = (i & 0x10) ? RGB_WHITE : RGB_BLACK;
 
-		palette_set_color(machine, i, color);
+		palette_set_color(machine(), i, color);
 	}
 }
 
-static TILE_GET_INFO( m14_get_tile_info )
+TILE_GET_INFO_MEMBER(m14_state::m14_get_tile_info)
 {
-	m14_state *state = machine.driver_data<m14_state>();
 
-	int code = state->m_video_ram[tile_index];
-	int color = state->m_color_ram[tile_index] & 0x0f;
+	int code = m_video_ram[tile_index];
+	int color = m_color_ram[tile_index] & 0x0f;
 
 	/* colorram & 0xf0 used but unknown purpose*/
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			0,
 			code,
 			color,
 			0);
 }
 
-static VIDEO_START( m14 )
+void m14_state::video_start()
 {
-	m14_state *state = machine.driver_data<m14_state>();
 
-	state->m_m14_tilemap = tilemap_create(machine, m14_get_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
+	m_m14_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(m14_state::m14_get_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
 }
 
-static SCREEN_UPDATE( m14 )
+UINT32 m14_state::screen_update_m14(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	m14_state *state = screen->machine().driver_data<m14_state>();
 
-	tilemap_draw(bitmap, cliprect, state->m_m14_tilemap, 0, 0);
+	m_m14_tilemap->draw(bitmap, cliprect, 0, 0);
 	return 0;
 }
 
 
-static WRITE8_HANDLER( m14_vram_w )
+WRITE8_MEMBER(m14_state::m14_vram_w)
 {
-	m14_state *state = space->machine().driver_data<m14_state>();
 
-	state->m_video_ram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_m14_tilemap, offset);
+	m_video_ram[offset] = data;
+	m_m14_tilemap->mark_tile_dirty(offset);
 }
 
-static WRITE8_HANDLER( m14_cram_w )
+WRITE8_MEMBER(m14_state::m14_cram_w)
 {
-	m14_state *state = space->machine().driver_data<m14_state>();
 
-	state->m_color_ram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_m14_tilemap, offset);
+	m_color_ram[offset] = data;
+	m_m14_tilemap->mark_tile_dirty(offset);
 }
 
 /*************************************
@@ -151,28 +163,27 @@ static WRITE8_HANDLER( m14_cram_w )
  *
  *************************************/
 
-static READ8_HANDLER( m14_rng_r )
+READ8_MEMBER(m14_state::m14_rng_r)
 {
 	/* graphic artifacts happens if this doesn't return random values. */
-	return (space->machine().rand() & 0x0f) | 0xf0; /* | (input_port_read(space->machine(), "IN1") & 0x80)*/;
+	return (machine().rand() & 0x0f) | 0xf0; /* | (ioport("IN1")->read() & 0x80)*/;
 }
 
 /* Here routes the hopper & the inputs */
-static READ8_HANDLER( input_buttons_r )
+READ8_MEMBER(m14_state::input_buttons_r)
 {
-	m14_state *state = space->machine().driver_data<m14_state>();
 
-	if (state->m_hop_mux)
+	if (m_hop_mux)
 	{
-		state->m_hop_mux = 0;
+		m_hop_mux = 0;
 		return 0; //0x43 status bits
 	}
 	else
-		return input_port_read(space->machine(), "IN0");
+		return ioport("IN0")->read();
 }
 
 #if 0
-static WRITE8_HANDLER( test_w )
+WRITE8_MEMBER(m14_state::test_w)
 {
 	static UINT8 x[5];
 
@@ -182,13 +193,12 @@ static WRITE8_HANDLER( test_w )
 }
 #endif
 
-static WRITE8_HANDLER( hopper_w )
+WRITE8_MEMBER(m14_state::hopper_w)
 {
-	m14_state *state = space->machine().driver_data<m14_state>();
 
 	/* ---- x--- coin out */
 	/* ---- --x- hopper/input mux? */
-	state->m_hop_mux = data & 2;
+	m_hop_mux = data & 2;
 	//popmessage("%02x",data);
 }
 
@@ -198,14 +208,14 @@ static WRITE8_HANDLER( hopper_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( m14_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( m14_map, AS_PROGRAM, 8, m14_state )
 	AM_RANGE(0x0000, 0x1fff) AM_ROM
 	AM_RANGE(0x2000, 0x23ff) AM_RAM
-	AM_RANGE(0xe000, 0xe3ff) AM_RAM_WRITE(m14_vram_w) AM_BASE_MEMBER(m14_state, m_video_ram)
-	AM_RANGE(0xe400, 0xe7ff) AM_RAM_WRITE(m14_cram_w) AM_BASE_MEMBER(m14_state, m_color_ram)
+	AM_RANGE(0xe000, 0xe3ff) AM_RAM_WRITE(m14_vram_w) AM_SHARE("video_ram")
+	AM_RANGE(0xe400, 0xe7ff) AM_RAM_WRITE(m14_cram_w) AM_SHARE("color_ram")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( m14_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( m14_io_map, AS_IO, 8, m14_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0xf8, 0xf8) AM_READ_PORT("AN_PADDLE") AM_WRITENOP
 	AM_RANGE(0xf9, 0xf9) AM_READ(input_buttons_r) AM_WRITENOP
@@ -220,20 +230,18 @@ ADDRESS_MAP_END
  *
  *************************************/
 
-static INPUT_CHANGED( left_coin_inserted )
+INPUT_CHANGED_MEMBER(m14_state::left_coin_inserted)
 {
-	m14_state *state = field->port->machine().driver_data<m14_state>();
 	/* left coin insertion causes a rst6.5 (vector 0x34) */
 	if (newval)
-		device_set_input_line(state->m_maincpu, I8085_RST65_LINE, HOLD_LINE);
+		m_maincpu->set_input_line(I8085_RST65_LINE, HOLD_LINE);
 }
 
-static INPUT_CHANGED( right_coin_inserted )
+INPUT_CHANGED_MEMBER(m14_state::right_coin_inserted)
 {
-	m14_state *state = field->port->machine().driver_data<m14_state>();
 	/* right coin insertion causes a rst5.5 (vector 0x2c) */
 	if (newval)
-		device_set_input_line(state->m_maincpu, I8085_RST55_LINE, HOLD_LINE);
+		m_maincpu->set_input_line(I8085_RST55_LINE, HOLD_LINE);
 }
 
 static INPUT_PORTS_START( m14 )
@@ -287,8 +295,8 @@ static INPUT_PORTS_START( m14 )
 	PORT_DIPSETTING(    0x80, DEF_STR( On ) )
 
 	PORT_START("FAKE")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_IMPULSE(1) PORT_CHANGED(left_coin_inserted, 0) //coin x 5
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_COIN2 ) PORT_IMPULSE(1) PORT_CHANGED(right_coin_inserted, 0) //coin x 1
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_IMPULSE(1) PORT_CHANGED_MEMBER(DEVICE_SELF, m14_state,left_coin_inserted, 0) //coin x 5
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_COIN2 ) PORT_IMPULSE(1) PORT_CHANGED_MEMBER(DEVICE_SELF, m14_state,right_coin_inserted, 0) //coin x 1
 INPUT_PORTS_END
 
 static const gfx_layout charlayout =
@@ -306,26 +314,24 @@ static GFXDECODE_START( m14 )
 	GFXDECODE_ENTRY( "gfx1", 0, charlayout,     0, 0x10 )
 GFXDECODE_END
 
-static INTERRUPT_GEN( m14_irq )
+INTERRUPT_GEN_MEMBER(m14_state::m14_irq)
 {
-	device_set_input_line(device, I8085_RST75_LINE, ASSERT_LINE);
-	device_set_input_line(device, I8085_RST75_LINE, CLEAR_LINE);
+	device.execute().set_input_line(I8085_RST75_LINE, ASSERT_LINE);
+	device.execute().set_input_line(I8085_RST75_LINE, CLEAR_LINE);
 }
 
-static MACHINE_START( m14 )
+void m14_state::machine_start()
 {
-	m14_state *state = machine.driver_data<m14_state>();
 
-	state->m_maincpu = machine.device("maincpu");
+	m_maincpu = machine().device<cpu_device>("maincpu");
 
-	state->save_item(NAME(state->m_hop_mux));
+	save_item(NAME(m_hop_mux));
 }
 
-static MACHINE_RESET( m14 )
+void m14_state::machine_reset()
 {
-	m14_state *state = machine.driver_data<m14_state>();
 
-	state->m_hop_mux = 0;
+	m_hop_mux = 0;
 }
 
 
@@ -335,24 +341,19 @@ static MACHINE_CONFIG_START( m14, m14_state )
 	MCFG_CPU_ADD("maincpu",I8085A,6000000/2) //guess: 6 Mhz internally divided by 2
 	MCFG_CPU_PROGRAM_MAP(m14_map)
 	MCFG_CPU_IO_MAP(m14_io_map)
-	MCFG_CPU_VBLANK_INT("screen",m14_irq)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", m14_state, m14_irq)
 
-	MCFG_MACHINE_START(m14)
-	MCFG_MACHINE_RESET(m14)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500)) //not accurate
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 0*8, 28*8-1)
-	MCFG_SCREEN_UPDATE(m14)
+	MCFG_SCREEN_UPDATE_DRIVER(m14_state, screen_update_m14)
 	MCFG_GFXDECODE(m14)
 	MCFG_PALETTE_LENGTH(0x20)
-	MCFG_PALETTE_INIT(m14)
 
-	MCFG_VIDEO_START(m14)
 
 	/* sound hardware */
 //  MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -385,4 +386,4 @@ ROM_START( ptrmj )
 	ROM_LOAD( "mgpa10.bin",  0x0400, 0x0400, CRC(e1a4ebdc) SHA1(d9df42424ede17f0634d8d0a56c0374a33c55333) )
 ROM_END
 
-GAME( 1979, ptrmj,  0,       m14,  m14,  0, ROT0, "Irem", "PT Reach Mahjong (Japan)", GAME_NO_SOUND | GAME_SUPPORTS_SAVE ) // IPM or Irem?
+GAME( 1979, ptrmj,  0,       m14,  m14, driver_device,  0, ROT0, "Irem", "PT Reach Mahjong (Japan)", GAME_NO_SOUND | GAME_SUPPORTS_SAVE ) // IPM or Irem?

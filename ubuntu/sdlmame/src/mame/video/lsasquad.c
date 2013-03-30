@@ -1,7 +1,7 @@
 #include "emu.h"
 #include "includes/lsasquad.h"
 
-static void draw_layer( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, UINT8 *scrollram )
+static void draw_layer( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, UINT8 *scrollram )
 {
 	lsasquad_state *state = machine.driver_data<lsasquad_state>();
 	int offs, scrollx, scrolly;
@@ -15,7 +15,7 @@ static void draw_layer( running_machine &machine, bitmap_t *bitmap, const rectan
 
 		base = 64 * scrollram[offs + 1];
 		sx = 8 * (offs / 4) + scrollx;
-		if (flip_screen_get(machine))
+		if (state->flip_screen())
 			sx = 248 - sx;
 
 		sx &= 0xff;
@@ -25,7 +25,7 @@ static void draw_layer( running_machine &machine, bitmap_t *bitmap, const rectan
 			int attr;
 
 			sy = 8 * y + scrolly;
-			if (flip_screen_get(machine))
+			if (state->flip_screen())
 				sy = 248 - sy;
 			sy &= 0xff;
 
@@ -36,19 +36,19 @@ static void draw_layer( running_machine &machine, bitmap_t *bitmap, const rectan
 			drawgfx_transpen(bitmap,cliprect,machine.gfx[0],
 					code,
 					color,
-					flip_screen_get(machine),flip_screen_get(machine),
+					state->flip_screen(),state->flip_screen(),
 					sx,sy,15);
-			if (sx > 248)	/* wraparound */
+			if (sx > 248)   /* wraparound */
 				drawgfx_transpen(bitmap,cliprect,machine.gfx[0],
 						code,
 						color,
-						flip_screen_get(machine),flip_screen_get(machine),
+						state->flip_screen(),state->flip_screen(),
 						sx-256,sy,15);
 		}
 	}
 }
 
-static int draw_layer_daikaiju( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, int offs, int  * previd, int type )
+static int draw_layer_daikaiju( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, int offs, int  * previd, int type )
 {
 	lsasquad_state *state = machine.driver_data<lsasquad_state>();
 	int id, scrollx, scrolly, initoffs, globalscrollx;
@@ -63,7 +63,7 @@ static int draw_layer_daikaiju( running_machine &machine, bitmap_t *bitmap, cons
 	{
 		int base, y, sx, sy, code, color;
 
-		 //id change
+			//id change
 		if (id != state->m_scrollram[offs + 2])
 		{
 			*previd = id;
@@ -102,7 +102,7 @@ static int draw_layer_daikaiju( running_machine &machine, bitmap_t *bitmap, cons
 		base = 64 * state->m_scrollram[offs + 1];
 		sx = scrollx + stepx;
 
-		if (flip_screen_get(machine))
+		if (state->flip_screen())
 			sx = 248 - sx;
 		sx &= 0xff;
 
@@ -111,7 +111,7 @@ static int draw_layer_daikaiju( running_machine &machine, bitmap_t *bitmap, cons
 			int attr;
 
 			sy = 8 * y + scrolly;
-			if (flip_screen_get(machine))
+			if (state->flip_screen())
 				sy = 248 - sy;
 			sy &= 0xff;
 
@@ -124,13 +124,13 @@ static int draw_layer_daikaiju( running_machine &machine, bitmap_t *bitmap, cons
 				drawgfx_transpen(bitmap,cliprect,machine.gfx[0],
 					code,
 					color,
-					flip_screen_get(machine),flip_screen_get(machine),
+					state->flip_screen(),state->flip_screen(),
 					sx,sy,15);
-				if (sx > 248)	/* wraparound */
+				if (sx > 248)   /* wraparound */
 					drawgfx_transpen(bitmap,cliprect,machine.gfx[0],
 						code,
 						color,
-						flip_screen_get(machine),flip_screen_get(machine),
+						state->flip_screen(),state->flip_screen(),
 						sx-256,sy,15);
 			}
 		}
@@ -138,7 +138,7 @@ static int draw_layer_daikaiju( running_machine &machine, bitmap_t *bitmap, cons
 	return offs;
 }
 
-static void drawbg( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, int type )
+static void drawbg( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, int type )
 {
 	lsasquad_state *state = machine.driver_data<lsasquad_state>();
 	int i = 0;
@@ -158,13 +158,13 @@ static void drawbg( running_machine &machine, bitmap_t *bitmap, const rectangle 
 	}
 }
 
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	lsasquad_state *state = machine.driver_data<lsasquad_state>();
 	UINT8 *spriteram = state->m_spriteram;
 	int offs;
 
-	for (offs = state->m_spriteram_size - 4; offs >= 0; offs -= 4)
+	for (offs = state->m_spriteram.bytes() - 4; offs >= 0; offs -= 4)
 	{
 		int sx, sy, attr, code, color, flipx, flipy;
 
@@ -176,7 +176,7 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 		flipx = attr & 0x40;
 		flipy = attr & 0x80;
 
-		if (flip_screen_get(machine))
+		if (state->flip_screen())
 		{
 			sx = 240 - sx;
 			sy = 240 - sy;
@@ -198,24 +198,23 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 	}
 }
 
-SCREEN_UPDATE( lsasquad )
+UINT32 lsasquad_state::screen_update_lsasquad(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	lsasquad_state *state = screen->machine().driver_data<lsasquad_state>();
-	bitmap_fill(bitmap, cliprect, 511);
+	bitmap.fill(511, cliprect);
 
-	draw_layer(screen->machine(), bitmap, cliprect, state->m_scrollram + 0x000);
-	draw_layer(screen->machine(), bitmap, cliprect, state->m_scrollram + 0x080);
-	draw_sprites(screen->machine(), bitmap, cliprect);
-	draw_layer(screen->machine(), bitmap, cliprect, state->m_scrollram + 0x100);
+	draw_layer(machine(), bitmap, cliprect, m_scrollram + 0x000);
+	draw_layer(machine(), bitmap, cliprect, m_scrollram + 0x080);
+	draw_sprites(machine(), bitmap, cliprect);
+	draw_layer(machine(), bitmap, cliprect, m_scrollram + 0x100);
 	return 0;
 }
 
 
-SCREEN_UPDATE( daikaiju )
+UINT32 lsasquad_state::screen_update_daikaiju(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	bitmap_fill(bitmap, cliprect, 511);
-	drawbg(screen->machine(), bitmap, cliprect, 0); // bottom
-	draw_sprites(screen->machine(), bitmap, cliprect);
-	drawbg(screen->machine(), bitmap, cliprect, 1);	// top = pallete $d ?
+	bitmap.fill(511, cliprect);
+	drawbg(machine(), bitmap, cliprect, 0); // bottom
+	draw_sprites(machine(), bitmap, cliprect);
+	drawbg(machine(), bitmap, cliprect, 1); // top = palette $d ?
 	return 0;
 }

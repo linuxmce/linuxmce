@@ -7,22 +7,25 @@
 
 #include "emu.h"
 #include "cpu/i8085/i8085.h"
-#include "deprecat.h"
 
 #include "sstrangr.lh"
 
 
-#define NUM_PENS	(8)
+#define NUM_PENS    (8)
 
 class sstrangr_state : public driver_device
 {
 public:
-	sstrangr_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	sstrangr_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_ram(*this, "ram"){ }
 
-	UINT8 *m_ram;
+	required_shared_ptr<UINT8> m_ram;
 	UINT8 m_flip_screen;
 	UINT8 *m_proms;
+	DECLARE_WRITE8_MEMBER(port_w);
+	UINT32 screen_update_sstrangr(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_sstrngr2(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
 };
 
 
@@ -33,9 +36,8 @@ public:
  *
  *************************************/
 
-static SCREEN_UPDATE( sstrangr )
+UINT32 sstrangr_state::screen_update_sstrangr(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	sstrangr_state *state = screen->machine().driver_data<sstrangr_state>();
 	offs_t offs;
 
 	for (offs = 0; offs < 0x2000; offs++)
@@ -44,13 +46,13 @@ static SCREEN_UPDATE( sstrangr )
 
 		UINT8 x = offs << 3;
 		int y = offs >> 5;
-		UINT8 data = state->m_ram[offs];
+		UINT8 data = m_ram[offs];
 
 		for (i = 0; i < 8; i++)
 		{
 			pen_t pen;
 
-			if (state->m_flip_screen)
+			if (m_flip_screen)
 			{
 				pen = (data & 0x80) ? RGB_WHITE : RGB_BLACK;
 				data = data << 1;
@@ -61,7 +63,7 @@ static SCREEN_UPDATE( sstrangr )
 				data = data >> 1;
 			}
 
-			*BITMAP_ADDR32(bitmap, y, x) = pen;
+			bitmap.pix32(y, x) = pen;
 
 			x = x + 1;
 		}
@@ -82,16 +84,15 @@ static void get_pens(pen_t *pens)
 }
 
 
-static SCREEN_UPDATE( sstrngr2 )
+UINT32 sstrangr_state::screen_update_sstrngr2(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	sstrangr_state *state = screen->machine().driver_data<sstrangr_state>();
 	pen_t pens[NUM_PENS];
 	offs_t offs;
 	UINT8 *color_map_base;
 
 	get_pens(pens);
 
-	color_map_base = &screen->machine().region("proms")->base()[state->m_flip_screen ? 0x0000 : 0x0200];
+	color_map_base = &memregion("proms")->base()[m_flip_screen ? 0x0000 : 0x0200];
 
 	for (offs = 0; offs < 0x2000; offs++)
 	{
@@ -102,14 +103,14 @@ static SCREEN_UPDATE( sstrngr2 )
 
 		offs_t color_address = (offs >> 9 << 5) | (offs & 0x1f);
 
-		UINT8 data = state->m_ram[offs];
+		UINT8 data = m_ram[offs];
 		UINT8 fore_color = color_map_base[color_address] & 0x07;
 
 		for (i = 0; i < 8; i++)
 		{
 			UINT8 color;
 
-			if (state->m_flip_screen)
+			if (m_flip_screen)
 			{
 				color = (data & 0x80) ? fore_color : 0;
 				data = data << 1;
@@ -120,7 +121,7 @@ static SCREEN_UPDATE( sstrngr2 )
 				data = data >> 1;
 			}
 
-			*BITMAP_ADDR32(bitmap, y, x) = pens[color];
+			bitmap.pix32(y, x) = pens[color];
 
 			x = x + 1;
 		}
@@ -130,24 +131,23 @@ static SCREEN_UPDATE( sstrngr2 )
 }
 
 
-static WRITE8_HANDLER( port_w )
+WRITE8_MEMBER(sstrangr_state::port_w)
 {
-	sstrangr_state *state = space->machine().driver_data<sstrangr_state>();
 
-	state->m_flip_screen = data & 0x20;
+	m_flip_screen = data & 0x20;
 }
 
 
 
-static ADDRESS_MAP_START( sstrangr_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sstrangr_map, AS_PROGRAM, 8, sstrangr_state )
 	ADDRESS_MAP_GLOBAL_MASK(0x7fff)
 	AM_RANGE(0x0000, 0x1fff) AM_ROM
-	AM_RANGE(0x2000, 0x3fff) AM_RAM AM_BASE_MEMBER(sstrangr_state,m_ram)
+	AM_RANGE(0x2000, 0x3fff) AM_RAM AM_SHARE("ram")
 	AM_RANGE(0x6000, 0x63ff) AM_ROM
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( sstrangr_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( sstrangr_io_map, AS_IO, 8, sstrangr_state )
 	AM_RANGE(0x41, 0x41) AM_READ_PORT("DSW")
 	AM_RANGE(0x42, 0x42) AM_READ_PORT("INPUTS")
 	AM_RANGE(0x44, 0x44) AM_READ_PORT("EXT") AM_WRITE(port_w)
@@ -186,7 +186,7 @@ static INPUT_PORTS_START( sstrangr )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY
 
 	PORT_START("EXT")      /* External switches */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_VBLANK )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_BIT( 0xfe, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 INPUT_PORTS_END
 
@@ -194,18 +194,17 @@ INPUT_PORTS_END
 static MACHINE_CONFIG_START( sstrangr, sstrangr_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu",I8080,1996800)	/* clock is a guess, taken from mw8080bw */
+	MCFG_CPU_ADD("maincpu",I8080,1996800)   /* clock is a guess, taken from mw8080bw */
 	MCFG_CPU_PROGRAM_MAP(sstrangr_map)
 	MCFG_CPU_IO_MAP(sstrangr_io_map)
-	MCFG_CPU_VBLANK_INT_HACK(irq0_line_hold,2)
+	MCFG_CPU_PERIODIC_INT_DRIVER(sstrangr_state, irq0_line_hold, 2*60)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
-	MCFG_SCREEN_SIZE(32*8, 262)		/* vert size is a guess, taken from mw8080bw */
+	MCFG_SCREEN_SIZE(32*8, 262)     /* vert size is a guess, taken from mw8080bw */
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 4*8, 32*8-1)
 	MCFG_SCREEN_REFRESH_RATE(60)
-	MCFG_SCREEN_UPDATE(sstrangr)
+	MCFG_SCREEN_UPDATE_DRIVER(sstrangr_state, screen_update_sstrangr)
 
 	/* sound hardware */
 
@@ -254,7 +253,7 @@ static INPUT_PORTS_START( sstrngr2 )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_PLAYER(1)
 
 	PORT_START("EXT")      /* External switches */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_VBLANK )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_DIPNAME( 0x02, 0x00, "Player's Bullet Speed (Cheat)" )
 	PORT_DIPSETTING(    0x00, "Slow" )
 	PORT_DIPSETTING(    0x02, "Fast" )
@@ -268,7 +267,7 @@ static MACHINE_CONFIG_DERIVED( sstrngr2, sstrangr )
 
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
-	MCFG_SCREEN_UPDATE(sstrngr2)
+	MCFG_SCREEN_UPDATE_DRIVER(sstrangr_state, screen_update_sstrngr2)
 
 MACHINE_CONFIG_END
 
@@ -291,10 +290,10 @@ ROM_START( sstrangr2 )
 	ROM_LOAD( "4764.09",      0x0000, 0x2000, CRC(d88f86cc) SHA1(9f284ee50caf3c64bd04a79a798de620348881bc) )
 	ROM_LOAD( "2708.10",      0x6000, 0x0400, CRC(eba304c1) SHA1(3fa6fbb29fa46c146283f69a712bfc51cbb2a43c) )
 
-	ROM_REGION( 0x0400, "proms", 0 )		/* color maps player 1/player 2 */
+	ROM_REGION( 0x0400, "proms", 0 )        /* color maps player 1/player 2 */
 	ROM_LOAD( "2708.15",      0x0000, 0x0400, CRC(c176a89d) SHA1(955dd540dc3787091c3f34ae122a13e6b7523414) )
 ROM_END
 
 
-GAMEL( 1978, sstrangr, 0,        sstrangr, sstrangr, 0, ROT270, "Yachiyo Electronics, Ltd.", "Space Stranger", GAME_NO_SOUND, layout_sstrangr )
-GAME( 1979, sstrangr2,sstrangr, sstrngr2, sstrngr2, 0, ROT270, "Yachiyo Electronics, Ltd.", "Space Stranger 2", GAME_NO_SOUND )
+GAMEL( 1978, sstrangr, 0,        sstrangr, sstrangr, driver_device, 0, ROT270, "Yachiyo Electronics, Ltd.", "Space Stranger", GAME_NO_SOUND, layout_sstrangr )
+GAME( 1979, sstrangr2,sstrangr, sstrngr2, sstrngr2, driver_device, 0, ROT270, "Yachiyo Electronics, Ltd.", "Space Stranger 2", GAME_NO_SOUND )

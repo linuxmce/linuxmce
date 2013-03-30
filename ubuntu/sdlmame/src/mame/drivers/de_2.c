@@ -1,31 +1,43 @@
 /*
     DataEast/Sega Version 2
 */
+
+
 #include "emu.h"
 #include "cpu/m6800/m6800.h"
-
-extern const char layout_pinball[];
 
 class de_2_state : public driver_device
 {
 public:
-	de_2_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	de_2_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+			m_maincpu(*this, "maincpu")
+	{ }
+
+protected:
+
+	// devices
+	required_device<cpu_device> m_maincpu;
+
+	// driver_device overrides
+	virtual void machine_reset();
+public:
+	DECLARE_DRIVER_INIT(de_2);
 };
 
 
-static ADDRESS_MAP_START( de_2_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( de_2_map, AS_PROGRAM, 8, de_2_state )
 	AM_RANGE(0x0000, 0xffff) AM_NOP
 ADDRESS_MAP_END
 
 static INPUT_PORTS_START( de_2 )
 INPUT_PORTS_END
 
-static MACHINE_RESET( de_2 )
+void de_2_state::machine_reset()
 {
 }
 
-static DRIVER_INIT( de_2 )
+DRIVER_INIT_MEMBER(de_2_state,de_2)
 {
 }
 
@@ -33,11 +45,6 @@ static MACHINE_CONFIG_START( de_2, de_2_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6800, 1000000)
 	MCFG_CPU_PROGRAM_MAP(de_2_map)
-
-	MCFG_MACHINE_RESET( de_2 )
-
-	/* video hardware */
-	MCFG_DEFAULT_LAYOUT(layout_pinball)
 MACHINE_CONFIG_END
 
 /*-----------------------------------------------------------------------------------
@@ -120,6 +127,19 @@ ROM_START(ssvc_a26)
 	ROM_RELOAD( 0x30000, 0x10000)
 ROM_END
 
+ROM_START(ssvc_b26)
+	ROM_REGION(0x10000, "maincpu", 0)
+	ROM_LOAD("ssvc2-6.b5", 0x0000, 0x8000, CRC(e5eab8cd) SHA1(63cb678084d4fb2131ba64ed9de1294830057960))
+	ROM_LOAD("ssvc2-6.c5", 0x8000, 0x8000, CRC(171b97ae) SHA1(9d678b7b91a5d50ea3cf4f2352094c2355f917b2))
+	ROM_REGION(0x10000, "cpu2", 0)
+	ROM_LOAD("sssndf7b.rom", 0x8000, 0x8000, CRC(4bd6b16a) SHA1(b9438a16cd35820628fe6eb82287b2c39fe4b1c6))
+	ROM_REGION(0x40000, "sound1", 0)
+	ROM_LOAD("ssv1f6.rom", 0x00000, 0x10000, CRC(ccbc72f8) SHA1(c5c13fb8d05d7fb4005636655073d88b4d12d65e))
+	ROM_RELOAD( 0x10000, 0x10000)
+	ROM_LOAD("ssv2f4.rom", 0x20000, 0x10000, CRC(53832d16) SHA1(2227eb784e0221f1bf2bdf7ea48ecd122433f1ea))
+	ROM_RELOAD( 0x30000, 0x10000)
+ROM_END
+
 /*--------------------------------------------------------------------------
 / Time Machine - CPU Rev 2 /Alpha Type 2 16/32K Roms - 32/64K Sound Roms
 /--------------------------------------------------------------------------*/
@@ -165,11 +185,12 @@ ROM_START(torp_e21)
 	ROM_RELOAD( 0x30000, 0x10000)
 ROM_END
 
-GAME(1989,	mnfb_c27,		0,			de_2,	de_2,	de_2,	ROT0,	"Data East",		"Monday Night Football (2.7, 50cts)",		GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1990,	poto_a32,		0,			de_2,	de_2,	de_2,	ROT0,	"Data East",		"The Phantom of the Opera (3.2)",			GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1989,	play_a24,		0,			de_2,	de_2,	de_2,	ROT0,	"Data East",		"Playboy 35th Anniversary (2.4)",			GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1989,	robo_a34,		0,			de_2,	de_2,	de_2,	ROT0,	"Data East",		"Robocop (3.4)",							GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1988,	ssvc_a26,		0,			de_2,	de_2,	de_2,	ROT0,	"Data East",		"Secret Service (2.6)",						GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1988,	tmac_a24,		0,			de_2,	de_2,	de_2,	ROT0,	"Data East",		"Time Machine (2.4)",						GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1988,	tmac_a18,		tmac_a24,	de_2,	de_2,	de_2,	ROT0,	"Data East",		"Time Machine (1.8)",						GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1988,	torp_e21,		0,			de_2,	de_2,	de_2,	ROT0,	"Data East",		"Torpedo Alley (2.1, Europe)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
+GAME(1989,  mnfb_c27,       0,          de_2,   de_2, de_2_state,   de_2,   ROT0,   "Data East",        "Monday Night Football (2.7, 50cts)",       GAME_IS_SKELETON_MECHANICAL)
+GAME(1990,  poto_a32,       0,          de_2,   de_2, de_2_state,   de_2,   ROT0,   "Data East",        "The Phantom of the Opera (3.2)",           GAME_IS_SKELETON_MECHANICAL)
+GAME(1989,  play_a24,       0,          de_2,   de_2, de_2_state,   de_2,   ROT0,   "Data East",        "Playboy 35th Anniversary (2.4)",           GAME_IS_SKELETON_MECHANICAL)
+GAME(1989,  robo_a34,       0,          de_2,   de_2, de_2_state,   de_2,   ROT0,   "Data East",        "Robocop (3.4)",                            GAME_IS_SKELETON_MECHANICAL)
+GAME(1988,  ssvc_a26,       0,          de_2,   de_2, de_2_state,   de_2,   ROT0,   "Data East",        "Secret Service (2.6)",                     GAME_IS_SKELETON_MECHANICAL)
+GAME(1988,  ssvc_b26,       ssvc_a26,   de_2,   de_2, de_2_state,   de_2,   ROT0,   "Data East",        "Secret Service (2.6 alternate sound)",     GAME_IS_SKELETON_MECHANICAL)
+GAME(1988,  tmac_a24,       0,          de_2,   de_2, de_2_state,   de_2,   ROT0,   "Data East",        "Time Machine (2.4)",                       GAME_IS_SKELETON_MECHANICAL)
+GAME(1988,  tmac_a18,       tmac_a24,   de_2,   de_2, de_2_state,   de_2,   ROT0,   "Data East",        "Time Machine (1.8)",                       GAME_IS_SKELETON_MECHANICAL)
+GAME(1988,  torp_e21,       0,          de_2,   de_2, de_2_state,   de_2,   ROT0,   "Data East",        "Torpedo Alley (2.1, Europe)",              GAME_IS_SKELETON_MECHANICAL)

@@ -54,29 +54,31 @@ Stephh's notes (based on the games Z80 code and some tests) :
 #include "machine/7474.h"
 
 
-class dambustr_state : public driver_device
+class dambustr_state : public galaxold_state
 {
 public:
-	dambustr_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	dambustr_state(const machine_config &mconfig, device_type type, const char *tag)
+		: galaxold_state(mconfig, type, tag) { }
 
 	int m_noise_data;
+	DECLARE_WRITE8_MEMBER(dambustr_noise_enable_w);
+	DECLARE_DRIVER_INIT(dambustr);
 };
 
 
 
 /* FIXME: Really needed? - Should be handled by either interface */
-static WRITE8_DEVICE_HANDLER( dambustr_noise_enable_w )
+WRITE8_MEMBER(dambustr_state::dambustr_noise_enable_w)
 {
-	dambustr_state *state = device->machine().driver_data<dambustr_state>();
-	if (data != state->m_noise_data) {
-		state->m_noise_data = data;
-		galaxian_noise_enable_w(device, offset, data);
+	device_t *device = machine().device(GAL_AUDIO);
+	if (data != m_noise_data) {
+		m_noise_data = data;
+		galaxian_noise_enable_w(device, space, offset, data);
 	}
 }
 
 
-static ADDRESS_MAP_START( dambustr_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( dambustr_map, AS_PROGRAM, 8, dambustr_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 
 	AM_RANGE(0x8000, 0x8000) AM_WRITE(dambustr_bg_color_w)
@@ -84,24 +86,24 @@ static ADDRESS_MAP_START( dambustr_map, AS_PROGRAM, 8 )
 
 	AM_RANGE(0xc000, 0xc7ff) AM_RAM
 
-	AM_RANGE(0xd000, 0xd3ff) AM_RAM_WRITE(galaxold_videoram_w) AM_BASE(&galaxold_videoram)
+	AM_RANGE(0xd000, 0xd3ff) AM_RAM_WRITE(galaxold_videoram_w) AM_SHARE("videoram")
 	AM_RANGE(0xd400, 0xd7ff) AM_READ(galaxold_videoram_r)
-	AM_RANGE(0xd800, 0xd83f) AM_RAM_WRITE(galaxold_attributesram_w) AM_BASE(&galaxold_attributesram)
-	AM_RANGE(0xd840, 0xd85f) AM_RAM AM_BASE(&galaxold_spriteram) AM_SIZE(&galaxold_spriteram_size)
-	AM_RANGE(0xd860, 0xd87f) AM_RAM AM_BASE(&galaxold_bulletsram) AM_SIZE(&galaxold_bulletsram_size)
+	AM_RANGE(0xd800, 0xd83f) AM_RAM_WRITE(galaxold_attributesram_w) AM_SHARE("attributesram")
+	AM_RANGE(0xd840, 0xd85f) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0xd860, 0xd87f) AM_RAM AM_SHARE("bulletsram")
 
 	AM_RANGE(0xd880, 0xd8ff) AM_RAM
 
 	AM_RANGE(0xe000, 0xe000) AM_READ_PORT("IN0")
 	AM_RANGE(0xe002, 0xe003) AM_WRITE(galaxold_coin_counter_w)
-	AM_RANGE(0xe004, 0xe007) AM_DEVWRITE(GAL_AUDIO, galaxian_lfo_freq_w)
+	AM_RANGE(0xe004, 0xe007) AM_DEVWRITE_LEGACY(GAL_AUDIO, galaxian_lfo_freq_w)
 
 	AM_RANGE(0xe800, 0xefff) AM_READ_PORT("IN1")
-	AM_RANGE(0xe800, 0xe802) AM_DEVWRITE(GAL_AUDIO, galaxian_background_enable_w)
-	AM_RANGE(0xe803, 0xe803) AM_DEVWRITE(GAL_AUDIO, dambustr_noise_enable_w)
-	AM_RANGE(0xe804, 0xe804) AM_DEVWRITE(GAL_AUDIO, galaxian_shoot_enable_w)	// probably louder than normal shot
-	AM_RANGE(0xe805, 0xe805) AM_DEVWRITE(GAL_AUDIO, galaxian_shoot_enable_w)	// normal shot (like Galaxian)
-	AM_RANGE(0xe806, 0xe807) AM_DEVWRITE(GAL_AUDIO, galaxian_vol_w)
+	AM_RANGE(0xe800, 0xe802) AM_DEVWRITE_LEGACY(GAL_AUDIO, galaxian_background_enable_w)
+	AM_RANGE(0xe803, 0xe803) AM_WRITE(dambustr_noise_enable_w)
+	AM_RANGE(0xe804, 0xe804) AM_DEVWRITE_LEGACY(GAL_AUDIO, galaxian_shoot_enable_w) // probably louder than normal shot
+	AM_RANGE(0xe805, 0xe805) AM_DEVWRITE_LEGACY(GAL_AUDIO, galaxian_shoot_enable_w) // normal shot (like Galaxian)
+	AM_RANGE(0xe806, 0xe807) AM_DEVWRITE_LEGACY(GAL_AUDIO, galaxian_vol_w)
 
 	AM_RANGE(0xf000, 0xf7ff) AM_READ_PORT("DSW")
 	AM_RANGE(0xf001, 0xf001) AM_WRITE(galaxold_nmi_enable_w)
@@ -109,7 +111,7 @@ static ADDRESS_MAP_START( dambustr_map, AS_PROGRAM, 8 )
 	AM_RANGE(0xf006, 0xf006) AM_WRITE(galaxold_flip_screen_x_w)
 	AM_RANGE(0xf007, 0xf007) AM_WRITE(galaxold_flip_screen_y_w)
 
-	AM_RANGE(0xf800, 0xf800) AM_DEVWRITE(GAL_AUDIO, galaxian_pitch_w)
+	AM_RANGE(0xf800, 0xf800) AM_DEVWRITE_LEGACY(GAL_AUDIO, galaxian_pitch_w)
 	AM_RANGE(0xf800, 0xffff) AM_READ(watchdog_reset_r)
 ADDRESS_MAP_END
 
@@ -136,10 +138,10 @@ static INPUT_PORTS_START( dambustr )
 	PORT_DIPSETTING(    0x00, "1" )
 	PORT_DIPSETTING(    0x40, "2" )
 	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Coinage ) ) PORT_DIPLOCATION("SW:!2")
-	PORT_DIPSETTING(    0x80, DEF_STR( 1C_1C ) )   PORT_CONDITION("IN1", 0x40, PORTCOND_EQUALS, 0x00)
-	PORT_DIPSETTING(    0x00, DEF_STR( 1C_2C ) )   PORT_CONDITION("IN1", 0x40, PORTCOND_EQUALS, 0x00)
-	PORT_DIPSETTING(    0x80, "A 1/1  B 1/2" )     PORT_CONDITION("IN1", 0x40, PORTCOND_EQUALS, 0x40)
-	PORT_DIPSETTING(    0x00, "A 1/2  B 1/6" )     PORT_CONDITION("IN1", 0x40, PORTCOND_EQUALS, 0x40)
+	PORT_DIPSETTING(    0x80, DEF_STR( 1C_1C ) )   PORT_CONDITION("IN1", 0x40, EQUALS, 0x00)
+	PORT_DIPSETTING(    0x00, DEF_STR( 1C_2C ) )   PORT_CONDITION("IN1", 0x40, EQUALS, 0x00)
+	PORT_DIPSETTING(    0x80, "A 1/1  B 1/2" )     PORT_CONDITION("IN1", 0x40, EQUALS, 0x40)
+	PORT_DIPSETTING(    0x00, "A 1/2  B 1/6" )     PORT_CONDITION("IN1", 0x40, EQUALS, 0x40)
 
 	PORT_START("DSW")
 	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Lives ) ) PORT_DIPLOCATION("SW:!3,!4")
@@ -162,10 +164,10 @@ static INPUT_PORTS_START( dambustruk )
 
 	PORT_MODIFY("IN1")
 	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Coinage ) ) PORT_DIPLOCATION("SW:!2")
-	PORT_DIPSETTING(    0x80, DEF_STR( 1C_1C ) )   PORT_CONDITION("IN1", 0x40, PORTCOND_EQUALS, 0x00)
-	PORT_DIPSETTING(    0x00, DEF_STR( 1C_2C ) )   PORT_CONDITION("IN1", 0x40, PORTCOND_EQUALS, 0x00)
-	PORT_DIPSETTING(    0x80, "A 1/1  B 1/6" )     PORT_CONDITION("IN1", 0x40, PORTCOND_EQUALS, 0x40)
-	PORT_DIPSETTING(    0x00, "A 1/2  B 1/12" )    PORT_CONDITION("IN1", 0x40, PORTCOND_EQUALS, 0x40)
+	PORT_DIPSETTING(    0x80, DEF_STR( 1C_1C ) )   PORT_CONDITION("IN1", 0x40, EQUALS, 0x00)
+	PORT_DIPSETTING(    0x00, DEF_STR( 1C_2C ) )   PORT_CONDITION("IN1", 0x40, EQUALS, 0x00)
+	PORT_DIPSETTING(    0x80, "A 1/1  B 1/6" )     PORT_CONDITION("IN1", 0x40, EQUALS, 0x40)
+	PORT_DIPSETTING(    0x00, "A 1/2  B 1/12" )    PORT_CONDITION("IN1", 0x40, EQUALS, 0x40)
 INPUT_PORTS_END
 
 
@@ -201,13 +203,13 @@ static GFXDECODE_START( dambustr )
 GFXDECODE_END
 
 
-static DRIVER_INIT(dambustr)
+DRIVER_INIT_MEMBER(dambustr_state,dambustr)
 {
 	int i, j, tmp;
 	int tmpram[16];
-	UINT8 *rom = machine.region("maincpu")->base();
-	UINT8 *usr = machine.region("user1")->base();
-	UINT8 *gfx = machine.region("gfx1")->base();
+	UINT8 *rom = machine().root_device().memregion("maincpu")->base();
+	UINT8 *usr = machine().root_device().memregion("user1")->base();
+	UINT8 *gfx = machine().root_device().memregion("gfx1")->base();
 
 	// Bit swap addresses
 	for(i=0; i<4096*4; i++) {
@@ -224,13 +226,13 @@ static DRIVER_INIT(dambustr)
 
 	// Bit swap in $1000-$1fff and $4000-$5fff
 	for(i=0; i<0x1000; i++) {
-		rom[0x1000+i] =	BITSWAP8(rom[0x1000+i],7,6,5,1,3,2,4,0);
-		rom[0x4000+i] =	BITSWAP8(rom[0x4000+i],7,6,5,1,3,2,4,0);
-		rom[0x5000+i] =	BITSWAP8(rom[0x5000+i],7,6,5,1,3,2,4,0);
+		rom[0x1000+i] = BITSWAP8(rom[0x1000+i],7,6,5,1,3,2,4,0);
+		rom[0x4000+i] = BITSWAP8(rom[0x4000+i],7,6,5,1,3,2,4,0);
+		rom[0x5000+i] = BITSWAP8(rom[0x5000+i],7,6,5,1,3,2,4,0);
 	};
 
 	// Swap graphics ROMs
-	for(i=0;i<0x4000;i+=16)	{
+	for(i=0;i<0x4000;i+=16) {
 		for(j=0; j<16; j++)
 			tmpram[j] = gfx[i+j];
 		for(j=0; j<8; j++) {
@@ -244,29 +246,28 @@ static DRIVER_INIT(dambustr)
 
 static MACHINE_CONFIG_START( dambustr, dambustr_state )
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, 18432000/6)	/* 3.072 MHz */
+	MCFG_CPU_ADD("maincpu", Z80, 18432000/6)    /* 3.072 MHz */
 	MCFG_CPU_PROGRAM_MAP(dambustr_map)
 
-	MCFG_MACHINE_RESET(galaxold)
+	MCFG_MACHINE_RESET_OVERRIDE(dambustr_state,galaxold)
 
-	MCFG_7474_ADD("7474_9m_1", "7474_9m_1", galaxold_7474_9m_1_callback, NULL)
-	MCFG_7474_ADD("7474_9m_2", "7474_9m_1", NULL, galaxold_7474_9m_2_q_callback)
+	MCFG_7474_ADD("7474_9m_1", WRITELINE(dambustr_state,galaxold_7474_9m_1_callback), NOOP)
+	MCFG_7474_ADD("7474_9m_2", NOOP, WRITELINE(dambustr_state,galaxold_7474_9m_2_q_callback))
 
-	MCFG_TIMER_ADD("int_timer", galaxold_interrupt_timer)
+	MCFG_TIMER_DRIVER_ADD("int_timer", dambustr_state, galaxold_interrupt_timer)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(16000.0/132/2)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(dambustr)
+	MCFG_SCREEN_UPDATE_DRIVER(dambustr_state, screen_update_dambustr)
 
 	MCFG_GFXDECODE(dambustr)
-	MCFG_PALETTE_LENGTH(32+2+64+8)		/* 32 for the characters, 2 for the bullets, 64 for the stars, 8 for the background */
+	MCFG_PALETTE_LENGTH(32+2+64+8)      /* 32 for the characters, 2 for the bullets, 64 for the stars, 8 for the background */
 
-	MCFG_PALETTE_INIT(dambustr)
-	MCFG_VIDEO_START(dambustr)
+	MCFG_PALETTE_INIT_OVERRIDE(dambustr_state,dambustr)
+	MCFG_VIDEO_START_OVERRIDE(dambustr_state,dambustr)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -356,6 +357,6 @@ ROM_START( dambustruk )
 ROM_END
 
 
-GAME( 1981, dambustr,   0,        dambustr, dambustr,   dambustr, ROT90, "South West Research", "Dambusters (US, set 1)", 0 )
-GAME( 1981, dambustra,  dambustr, dambustr, dambustr,   dambustr, ROT90, "South West Research", "Dambusters (US, set 2)", 0 )
-GAME( 1981, dambustruk, dambustr, dambustr, dambustruk, dambustr, ROT90, "South West Research", "Dambusters (UK)", 0 )
+GAME( 1981, dambustr,   0,        dambustr, dambustr, dambustr_state,   dambustr, ROT90, "South West Research", "Dambusters (US, set 1)", 0 )
+GAME( 1981, dambustra,  dambustr, dambustr, dambustr, dambustr_state,   dambustr, ROT90, "South West Research", "Dambusters (US, set 2)", 0 )
+GAME( 1981, dambustruk, dambustr, dambustr, dambustruk, dambustr_state, dambustr, ROT90, "South West Research", "Dambusters (UK)", 0 )

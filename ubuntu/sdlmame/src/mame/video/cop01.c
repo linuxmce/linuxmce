@@ -10,12 +10,13 @@
 #include "includes/cop01.h"
 
 
-PALETTE_INIT( cop01 )
+void cop01_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 
 	/* allocate the colortable */
-	machine.colortable = colortable_alloc(machine, 0x100);
+	machine().colortable = colortable_alloc(machine(), 0x100);
 
 	/* create a lookup table for the palette */
 	for (i = 0; i < 0x100; i++)
@@ -24,7 +25,7 @@ PALETTE_INIT( cop01 )
 		int g = pal4bit(color_prom[i + 0x100]);
 		int b = pal4bit(color_prom[i + 0x200]);
 
-		colortable_palette_set_color(machine.colortable, i, MAKE_RGB(r, g, b));
+		colortable_palette_set_color(machine().colortable, i, MAKE_RGB(r, g, b));
 	}
 
 	/* color_prom now points to the beginning of the lookup table */
@@ -32,7 +33,7 @@ PALETTE_INIT( cop01 )
 
 	/* characters use colors 0x00-0x0f (or 0x00-0x7f, but the eight rows are identical) */
 	for (i = 0; i < 0x10; i++)
-		colortable_entry_set_value(machine.colortable, i, i);
+		colortable_entry_set_value(machine().colortable, i, i);
 
 	/* background tiles use colors 0xc0-0xff */
 	/* I don't know how much of the lookup table PROM is hooked up, */
@@ -40,15 +41,15 @@ PALETTE_INIT( cop01 )
 	for (i = 0x10; i < 0x90; i++)
 	{
 		UINT8 ctabentry = 0xc0 | ((i - 0x10) & 0x30) |
-						  (color_prom[(((i - 0x10) & 0x40) >> 2) | ((i - 0x10) & 0x0f)] & 0x0f);
-		colortable_entry_set_value(machine.colortable, i, ctabentry);
+							(color_prom[(((i - 0x10) & 0x40) >> 2) | ((i - 0x10) & 0x0f)] & 0x0f);
+		colortable_entry_set_value(machine().colortable, i, ctabentry);
 	}
 
 	/* sprites use colors 0x80-0x8f (or 0x80-0xbf, but the four rows are identical) */
 	for (i = 0x90; i < 0x190; i++)
 	{
 		UINT8 ctabentry = 0x80 | (color_prom[i - 0x90 + 0x100] & 0x0f);
-		colortable_entry_set_value(machine.colortable, i, ctabentry);
+		colortable_entry_set_value(machine().colortable, i, ctabentry);
 	}
 }
 
@@ -60,35 +61,33 @@ PALETTE_INIT( cop01 )
 
 ***************************************************************************/
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(cop01_state::get_bg_tile_info)
 {
-	cop01_state *state = machine.driver_data<cop01_state>();
-	int tile = state->m_bgvideoram[tile_index];
-	int attr = state->m_bgvideoram[tile_index + 0x800];
+	int tile = m_bgvideoram[tile_index];
+	int attr = m_bgvideoram[tile_index + 0x800];
 	int pri = (attr & 0x80) >> 7;
 
 	/* kludge: priority is not actually pen based, but color based. Since the
-     * game uses a lookup table, the two are not the same thing.
-     * Palette entries with bits 2&3 set have priority over sprites.
-     * tilemap.c can't handle that yet, so I'm cheating, because I know that
-     * color codes using the second row of the lookup table don't use palette
-     * entries 12-15.
-     * The only place where this has any effect is the beach at the bottom of
-     * the screen right at the beginning of mightguy. cop01 doesn't seem to
-     * use priority at all.
-     */
+	 * game uses a lookup table, the two are not the same thing.
+	 * Palette entries with bits 2&3 set have priority over sprites.
+	 * tilemap.c can't handle that yet, so I'm cheating, because I know that
+	 * color codes using the second row of the lookup table don't use palette
+	 * entries 12-15.
+	 * The only place where this has any effect is the beach at the bottom of
+	 * the screen right at the beginning of mightguy. cop01 doesn't seem to
+	 * use priority at all.
+	 */
 	if (attr & 0x10)
 		pri = 0;
 
-	SET_TILE_INFO(1, tile + ((attr & 0x03) << 8), (attr & 0x1c) >> 2, 0);
-	tileinfo->group = pri;
+	SET_TILE_INFO_MEMBER(1, tile + ((attr & 0x03) << 8), (attr & 0x1c) >> 2, 0);
+	tileinfo.group = pri;
 }
 
-static TILE_GET_INFO( get_fg_tile_info )
+TILE_GET_INFO_MEMBER(cop01_state::get_fg_tile_info)
 {
-	cop01_state *state = machine.driver_data<cop01_state>();
-	int tile = state->m_fgvideoram[tile_index];
-	SET_TILE_INFO(0, tile, 0, 0);
+	int tile = m_fgvideoram[tile_index];
+	SET_TILE_INFO_MEMBER(0, tile, 0, 0);
 }
 
 
@@ -99,17 +98,16 @@ static TILE_GET_INFO( get_fg_tile_info )
 
 ***************************************************************************/
 
-VIDEO_START( cop01 )
+void cop01_state::video_start()
 {
-	cop01_state *state = machine.driver_data<cop01_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info,tilemap_scan_rows, 8, 8, 64, 32);
-	state->m_fg_tilemap = tilemap_create(machine, get_fg_tile_info,tilemap_scan_rows, 8, 8, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(cop01_state::get_bg_tile_info),this),TILEMAP_SCAN_ROWS, 8, 8, 64, 32);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(cop01_state::get_fg_tile_info),this),TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
 
-	tilemap_set_transparent_pen(state->m_fg_tilemap, 15);
+	m_fg_tilemap->set_transparent_pen(15);
 
 	/* priority doesn't exactly work this way, see above */
-	tilemap_set_transmask(state->m_bg_tilemap, 0, 0xffff, 0x0000); /* split type 0 is totally transparent in front half */
-	tilemap_set_transmask(state->m_bg_tilemap, 1, 0x0fff, 0xf000); /* split type 1 has pens 0-11 transparent in front half */
+	m_bg_tilemap->set_transmask(0, 0xffff, 0x0000); /* split type 0 is totally transparent in front half */
+	m_bg_tilemap->set_transmask(1, 0x0fff, 0xf000); /* split type 1 has pens 0-11 transparent in front half */
 }
 
 
@@ -120,41 +118,38 @@ VIDEO_START( cop01 )
 
 ***************************************************************************/
 
-WRITE8_HANDLER( cop01_background_w )
+WRITE8_MEMBER(cop01_state::cop01_background_w)
 {
-	cop01_state *state = space->machine().driver_data<cop01_state>();
-	state->m_bgvideoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset & 0x7ff);
+	m_bgvideoram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset & 0x7ff);
 }
 
-WRITE8_HANDLER( cop01_foreground_w )
+WRITE8_MEMBER(cop01_state::cop01_foreground_w)
 {
-	cop01_state *state = space->machine().driver_data<cop01_state>();
-	state->m_fgvideoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_fg_tilemap, offset);
+	m_fgvideoram[offset] = data;
+	m_fg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( cop01_vreg_w )
+WRITE8_MEMBER(cop01_state::cop01_vreg_w)
 {
 	/*  0x40: --xx---- sprite bank, coin counters, flip screen
-     *        -----x-- flip screen
-     *        ------xx coin counters
-     *  0x41: xxxxxxxx xscroll
-     *  0x42: ---xx--- ? matches the bg tile color most of the time, but not
-     *                 during level transitions. Maybe sprite palette bank?
-     *                 (the four banks in the PROM are identical)
-     *        ------x- unused (xscroll overflow)
-     *        -------x msb xscroll
-     *  0x43: xxxxxxxx yscroll
-     */
-	cop01_state *state = space->machine().driver_data<cop01_state>();
-	state->m_vreg[offset] = data;
+	 *        -----x-- flip screen
+	 *        ------xx coin counters
+	 *  0x41: xxxxxxxx xscroll
+	 *  0x42: ---xx--- ? matches the bg tile color most of the time, but not
+	 *                 during level transitions. Maybe sprite palette bank?
+	 *                 (the four banks in the PROM are identical)
+	 *        ------x- unused (xscroll overflow)
+	 *        -------x msb xscroll
+	 *  0x43: xxxxxxxx yscroll
+	 */
+	m_vreg[offset] = data;
 
 	if (offset == 0)
 	{
-		coin_counter_w(space->machine(), 0, data & 1);
-		coin_counter_w(space->machine(), 1, data & 2);
-		flip_screen_set(space->machine(), data & 4);
+		coin_counter_w(machine(), 0, data & 1);
+		coin_counter_w(machine(), 1, data & 2);
+		flip_screen_set(data & 4);
 	}
 }
 
@@ -166,19 +161,19 @@ WRITE8_HANDLER( cop01_vreg_w )
 
 ***************************************************************************/
 
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	cop01_state *state = machine.driver_data<cop01_state>();
 	int offs, code, attr, sx, sy, flipx, flipy, color;
 
-	for (offs = 0; offs < state->m_spriteram_size; offs += 4)
+	for (offs = 0; offs < state->m_spriteram.bytes(); offs += 4)
 	{
 		code = state->m_spriteram[offs + 1];
 		attr = state->m_spriteram[offs + 2];
 		/* xxxx---- color
-         * ----xx-- flipy,flipx
-         * -------x msbx
-         */
+		 * ----xx-- flipy,flipx
+		 * -------x msbx
+		 */
 		color = attr>>4;
 		flipx = attr & 0x04;
 		flipy = attr & 0x08;
@@ -186,7 +181,7 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 		sx = (state->m_spriteram[offs + 3] - 0x80) + 256 * (attr & 0x01);
 		sy = 240 - state->m_spriteram[offs];
 
-		if (flip_screen_get(machine))
+		if (state->flip_screen())
 		{
 			sx = 240 - sx;
 			sy = 240 - sy;
@@ -206,15 +201,14 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 }
 
 
-SCREEN_UPDATE( cop01 )
+UINT32 cop01_state::screen_update_cop01(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	cop01_state *state = screen->machine().driver_data<cop01_state>();
-	tilemap_set_scrollx(state->m_bg_tilemap, 0, state->m_vreg[1] + 256 * (state->m_vreg[2] & 1));
-	tilemap_set_scrolly(state->m_bg_tilemap, 0, state->m_vreg[3]);
+	m_bg_tilemap->set_scrollx(0, m_vreg[1] + 256 * (m_vreg[2] & 1));
+	m_bg_tilemap->set_scrolly(0, m_vreg[3]);
 
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, TILEMAP_DRAW_LAYER1, 0);
-	draw_sprites(screen->machine(), bitmap, cliprect);
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, TILEMAP_DRAW_LAYER0, 0);
-	tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, 0, 0 );
+	m_bg_tilemap->draw(bitmap, cliprect, TILEMAP_DRAW_LAYER1, 0);
+	draw_sprites(machine(), bitmap, cliprect);
+	m_bg_tilemap->draw(bitmap, cliprect, TILEMAP_DRAW_LAYER0, 0);
+	m_fg_tilemap->draw(bitmap, cliprect, 0, 0 );
 	return 0;
 }

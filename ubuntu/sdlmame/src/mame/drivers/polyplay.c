@@ -85,12 +85,12 @@ emulated now. ;)
 
 
 /* I/O Port handling */
-static READ8_HANDLER( polyplay_random_read );
+
 
 /* timer handling */
-static TIMER_DEVICE_CALLBACK( polyplay_timer_callback );
-static WRITE8_HANDLER( polyplay_start_timer2 );
-static WRITE8_HANDLER( polyplay_sound_channel );
+
+
+
 
 
 /* Polyplay Sound Interface */
@@ -102,58 +102,56 @@ static const samples_interface polyplay_samples_interface =
 };
 
 
-static MACHINE_RESET( polyplay )
+void polyplay_state::machine_reset()
 {
-	polyplay_state *state = machine.driver_data<polyplay_state>();
-	state->m_channel1_active = 0;
-	state->m_channel1_const = 0;
-	state->m_channel2_active = 0;
-	state->m_channel2_const = 0;
+	m_channel1_active = 0;
+	m_channel1_const = 0;
+	m_channel2_active = 0;
+	m_channel2_const = 0;
 
-	polyplay_set_channel1(machine, 0);
-	polyplay_play_channel1(machine, 0);
-	polyplay_set_channel2(machine, 0);
-	polyplay_play_channel2(machine, 0);
+	polyplay_set_channel1(machine(), 0);
+	polyplay_play_channel1(machine(), 0);
+	polyplay_set_channel2(machine(), 0);
+	polyplay_play_channel2(machine(), 0);
 
-	state->m_timer = machine.device<timer_device>("timer");
+	m_timer = machine().device<timer_device>("timer");
 }
 
 
-static INTERRUPT_GEN( periodic_interrupt )
+INTERRUPT_GEN_MEMBER(polyplay_state::periodic_interrupt)
 {
-	device_set_input_line_and_vector(device, 0, HOLD_LINE, 0x4e);
+	device.execute().set_input_line_and_vector(0, HOLD_LINE, 0x4e);
 }
 
 
-static INTERRUPT_GEN( coin_interrupt )
+INTERRUPT_GEN_MEMBER(polyplay_state::coin_interrupt)
 {
-	polyplay_state *state = device->machine().driver_data<polyplay_state>();
 
-	if (input_port_read(device->machine(), "INPUT") & 0x80)
-		state->m_last = 0;
+	if (ioport("INPUT")->read() & 0x80)
+		m_last = 0;
 	else
 	{
-		if (state->m_last == 0)    /* coin inserted */
-			device_set_input_line_and_vector(device, 0, HOLD_LINE, 0x50);
+		if (m_last == 0)    /* coin inserted */
+			device.execute().set_input_line_and_vector(0, HOLD_LINE, 0x50);
 
-		state->m_last = 1;
+		m_last = 1;
 	}
 }
 
 
 /* memory mapping */
-static ADDRESS_MAP_START( polyplay_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( polyplay_map, AS_PROGRAM, 8, polyplay_state )
 	AM_RANGE(0x0000, 0x0bff) AM_ROM
 	AM_RANGE(0x0c00, 0x0fff) AM_RAM
 	AM_RANGE(0x1000, 0x8fff) AM_ROM
 	AM_RANGE(0xe800, 0xebff) AM_ROM AM_REGION("gfx1", 0)
-	AM_RANGE(0xec00, 0xf7ff) AM_RAM_WRITE(polyplay_characterram_w) AM_BASE_MEMBER(polyplay_state, m_characterram)
-	AM_RANGE(0xf800, 0xffff) AM_RAM AM_BASE_MEMBER(polyplay_state, m_videoram)
+	AM_RANGE(0xec00, 0xf7ff) AM_RAM_WRITE(polyplay_characterram_w) AM_SHARE("characterram")
+	AM_RANGE(0xf800, 0xffff) AM_RAM AM_SHARE("videoram")
 ADDRESS_MAP_END
 
 
 /* port mapping */
-static ADDRESS_MAP_START( polyplay_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( polyplay_io_map, AS_IO, 8, polyplay_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x80, 0x81) AM_WRITE(polyplay_sound_channel)
 	AM_RANGE(0x82, 0x82) AM_WRITE(polyplay_start_timer2)
@@ -163,7 +161,7 @@ ADDRESS_MAP_END
 
 
 static INPUT_PORTS_START( polyplay )
-	PORT_START("INPUT")	/* IN0 */
+	PORT_START("INPUT") /* IN0 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
@@ -175,91 +173,89 @@ static INPUT_PORTS_START( polyplay )
 INPUT_PORTS_END
 
 
-static WRITE8_HANDLER( polyplay_sound_channel )
+WRITE8_MEMBER(polyplay_state::polyplay_sound_channel)
 {
-	polyplay_state *state = space->machine().driver_data<polyplay_state>();
 	switch(offset) {
 	case 0x00:
-		if (state->m_channel1_const) {
+		if (m_channel1_const) {
 			if (data <= 1) {
-				polyplay_set_channel1(space->machine(), 0);
+				polyplay_set_channel1(machine(), 0);
 			}
-			state->m_channel1_const = 0;
-			polyplay_play_channel1(space->machine(), data*state->m_prescale1);
+			m_channel1_const = 0;
+			polyplay_play_channel1(machine(), data*m_prescale1);
 
 		}
 		else {
-			state->m_prescale1 = (data & 0x20) ? 16 : 1;
+			m_prescale1 = (data & 0x20) ? 16 : 1;
 			if (data & 0x04) {
-				polyplay_set_channel1(space->machine(), 1);
-				state->m_channel1_const = 1;
+				polyplay_set_channel1(machine(), 1);
+				m_channel1_const = 1;
 			}
 			if ((data == 0x41) || (data == 0x65) || (data == 0x45)) {
-				polyplay_set_channel1(space->machine(), 0);
-				polyplay_play_channel1(space->machine(), 0);
+				polyplay_set_channel1(machine(), 0);
+				polyplay_play_channel1(machine(), 0);
 			}
 		}
 		break;
 	case 0x01:
-		if (state->m_channel2_const) {
+		if (m_channel2_const) {
 			if (data <= 1) {
-				polyplay_set_channel2(space->machine(), 0);
+				polyplay_set_channel2(machine(), 0);
 			}
-			state->m_channel2_const = 0;
-			polyplay_play_channel2(space->machine(), data*state->m_prescale2);
+			m_channel2_const = 0;
+			polyplay_play_channel2(machine(), data*m_prescale2);
 
 		}
 		else {
-			state->m_prescale2 = (data & 0x20) ? 16 : 1;
+			m_prescale2 = (data & 0x20) ? 16 : 1;
 			if (data & 0x04) {
-				polyplay_set_channel2(space->machine(), 1);
-				state->m_channel2_const = 1;
+				polyplay_set_channel2(machine(), 1);
+				m_channel2_const = 1;
 			}
 			if ((data == 0x41) || (data == 0x65) || (data == 0x45)) {
-				polyplay_set_channel2(space->machine(), 0);
-				polyplay_play_channel2(space->machine(), 0);
+				polyplay_set_channel2(machine(), 0);
+				polyplay_play_channel2(machine(), 0);
 			}
 		}
 		break;
 	}
 }
 
-static WRITE8_HANDLER( polyplay_start_timer2 )
+WRITE8_MEMBER(polyplay_state::polyplay_start_timer2)
 {
-	polyplay_state *state = space->machine().driver_data<polyplay_state>();
 	if (data == 0x03)
-		state->m_timer->reset();
+		m_timer->reset();
 
 	if (data == 0xb5)
-		state->m_timer->adjust(attotime::from_hz(40), 0, attotime::from_hz(40));
+		m_timer->adjust(attotime::from_hz(40), 0, attotime::from_hz(40));
 }
 
-static READ8_HANDLER( polyplay_random_read )
+READ8_MEMBER(polyplay_state::polyplay_random_read)
 {
-	return space->machine().rand() & 0xff;
+	return machine().rand() & 0xff;
 }
 
 /* graphic structures */
 static const gfx_layout charlayout_1_bit =
 {
-	8,8,	/* 8*8 characters */
-	128,	/* 128 characters */
-	1,  	/* 1 bit per pixel */
+	8,8,    /* 8*8 characters */
+	128,    /* 128 characters */
+	1,      /* 1 bit per pixel */
 	{ 0 },
 	{ 0, 1, 2, 3, 4, 5, 6, 7 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
-	8*8	/* every char takes 8 consecutive bytes */
+	8*8 /* every char takes 8 consecutive bytes */
 };
 
 static const gfx_layout charlayout_3_bit =
 {
-	8,8,	/* 8*8 characters */
-	128,	/* 128 characters */
-	3,  	/* 3 bit per pixel */
+	8,8,    /* 8*8 characters */
+	128,    /* 128 characters */
+	3,      /* 3 bit per pixel */
 	{ 0, 128*8*8, 128*8*8 + 128*8*8 },    /* offset for each bitplane */
 	{ 0, 1, 2, 3, 4, 5, 6, 7 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
-	8*8	/* every char takes 8 consecutive bytes */
+	8*8 /* every char takes 8 consecutive bytes */
 };
 
 static GFXDECODE_START( polyplay )
@@ -276,33 +272,28 @@ static MACHINE_CONFIG_START( polyplay, polyplay_state )
 	MCFG_CPU_ADD("maincpu", Z80, 9830400/4)
 	MCFG_CPU_PROGRAM_MAP(polyplay_map)
 	MCFG_CPU_IO_MAP(polyplay_io_map)
-	MCFG_CPU_PERIODIC_INT(periodic_interrupt,75)
-	MCFG_CPU_VBLANK_INT("screen", coin_interrupt)
+	MCFG_CPU_PERIODIC_INT_DRIVER(polyplay_state, periodic_interrupt, 75)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", polyplay_state,  coin_interrupt)
 
-	MCFG_MACHINE_RESET(polyplay)
 
-	MCFG_TIMER_ADD("timer", polyplay_timer_callback)
+	MCFG_TIMER_DRIVER_ADD("timer", polyplay_state, polyplay_timer_callback)
 
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(50)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 64*8-1, 0*8, 32*8-1)
-	MCFG_SCREEN_UPDATE(polyplay)
+	MCFG_SCREEN_UPDATE_DRIVER(polyplay_state, screen_update_polyplay)
 
 	MCFG_GFXDECODE(polyplay)
 	MCFG_PALETTE_LENGTH(10)
 
-	MCFG_PALETTE_INIT(polyplay)
-	MCFG_VIDEO_START(polyplay)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("samples", SAMPLES, 0)
-	MCFG_SOUND_CONFIG(polyplay_samples_interface)
+	MCFG_SAMPLES_ADD("samples", polyplay_samples_interface)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.25)
 MACHINE_CONFIG_END
 
@@ -351,10 +342,10 @@ ROM_START( polyplay )
 ROM_END
 
 
-static TIMER_DEVICE_CALLBACK( polyplay_timer_callback )
+TIMER_DEVICE_CALLBACK_MEMBER(polyplay_state::polyplay_timer_callback)
 {
-	cputag_set_input_line_and_vector(timer.machine(), "maincpu", 0, HOLD_LINE, 0x4c);
+	machine().device("maincpu")->execute().set_input_line_and_vector(0, HOLD_LINE, 0x4c);
 }
 
 /* game driver */
-GAME( 1985, polyplay, 0, polyplay, polyplay, 0, ROT0, "VEB Polytechnik Karl-Marx-Stadt", "Poly-Play", 0 )
+GAME( 1985, polyplay, 0, polyplay, polyplay, driver_device, 0, ROT0, "VEB Polytechnik Karl-Marx-Stadt", "Poly-Play", 0 )

@@ -24,21 +24,43 @@ TODO:
 #include "emu.h"
 #include "cpu/z80/z80.h"
 #include "sound/sn76496.h"
-#include "sound/okim6295.h"
+#include "sound/okiadpcm.h"
 #include "includes/mjkjidai.h"
 
-/* Start of ADPCM custom chip code */
-typedef struct _mjkjidai_adpcm_state mjkjidai_adpcm_state;
-struct _mjkjidai_adpcm_state
+class mjkjidai_adpcm_device : public device_t,
+									public device_sound_interface
 {
-	adpcm_state m_adpcm;
+public:
+	mjkjidai_adpcm_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock);
+	~mjkjidai_adpcm_device() { global_free(m_token); }
+
+	// access to legacy token
+	void *token() const { assert(m_token != NULL); return m_token; }
+protected:
+	// device-level overrides
+	virtual void device_config_complete();
+	virtual void device_start();
+
+	// sound stream update overrides
+	virtual void sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples);
+private:
+	// internal state
+	void *m_token;
+};
+
+extern const device_type MJKJIDAI;
+
+/* Start of ADPCM custom chip code */
+struct mjkjidai_adpcm_state
+{
+	oki_adpcm_state m_adpcm;
 	sound_stream *m_stream;
 	UINT32 m_current;
 	UINT32 m_end;
 	UINT8 m_nibble;
 	UINT8 m_playing;
 	UINT8 *m_base;
-};
+} _mjkjidai_adpcm_state_dummy;
 
 static STREAM_UPDATE( mjkjidai_adpcm_callback )
 {
@@ -70,31 +92,53 @@ static STREAM_UPDATE( mjkjidai_adpcm_callback )
 static DEVICE_START( mjkjidai_adpcm )
 {
 	running_machine &machine = device->machine();
-	mjkjidai_adpcm_state *state = (mjkjidai_adpcm_state *)downcast<legacy_device_base *>(device)->token();
+	mjkjidai_adpcm_state *state = (mjkjidai_adpcm_state *)downcast<mjkjidai_adpcm_device *>(device)->token();
 
 	state->m_playing = 0;
 	state->m_stream = device->machine().sound().stream_alloc(*device, 0, 1, device->clock(), state, mjkjidai_adpcm_callback);
-	state->m_base = machine.region("adpcm")->base();
+	state->m_base = machine.root_device().memregion("adpcm")->base();
 	state->m_adpcm.reset();
 }
 
-DEVICE_GET_INFO( mjkjidai_adpcm )
+const device_type MJKJIDAI = &device_creator<mjkjidai_adpcm_device>;
+
+mjkjidai_adpcm_device::mjkjidai_adpcm_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, MJKJIDAI, "Custom ADPCM", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
 {
-	switch (state)
-	{
-		case DEVINFO_INT_TOKEN_BYTES: info->i = sizeof(mjkjidai_adpcm_state); break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME(mjkjidai_adpcm);break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "Custom ADPCM");				break;
-		case DEVINFO_STR_SOURCE_FILE:						strcpy(info->s, __FILE__);						break;
-	}
+	m_token = global_alloc_clear(mjkjidai_adpcm_state);
 }
 
-DECLARE_LEGACY_SOUND_DEVICE(MJKJIDAI, mjkjidai_adpcm);
-DEFINE_LEGACY_SOUND_DEVICE(MJKJIDAI, mjkjidai_adpcm);
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
+
+void mjkjidai_adpcm_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void mjkjidai_adpcm_device::device_start()
+{
+	DEVICE_START_NAME( mjkjidai_adpcm )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void mjkjidai_adpcm_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}
+
+
 
 
 static void mjkjidai_adpcm_play (mjkjidai_adpcm_state *state, int offset, int length)
@@ -105,52 +149,51 @@ static void mjkjidai_adpcm_play (mjkjidai_adpcm_state *state, int offset, int le
 	state->m_playing = 1;
 }
 
-static WRITE8_DEVICE_HANDLER( adpcm_w )
+WRITE8_MEMBER(mjkjidai_state::adpcm_w)
 {
-	mjkjidai_adpcm_state *state = (mjkjidai_adpcm_state *)downcast<legacy_device_base *>(device)->token();
+	device_t *device = machine().device("adpcm");
+	mjkjidai_adpcm_state *state = (mjkjidai_adpcm_state *)downcast<mjkjidai_adpcm_device *>(device)->token();
 	mjkjidai_adpcm_play (state, (data & 0x07) * 0x1000, 0x1000 * 2);
 }
 /* End of ADPCM custom chip code */
 
 
-static READ8_HANDLER( keyboard_r )
+READ8_MEMBER(mjkjidai_state::keyboard_r)
 {
-	mjkjidai_state *state = space->machine().driver_data<mjkjidai_state>();
 	int res = 0x3f,i;
 	static const char *const keynames[] = { "PL2_1", "PL2_2", "PL2_3", "PL2_4", "PL2_5", "PL2_6", "PL1_1", "PL1_2", "PL1_3", "PL1_4", "PL1_5", "PL1_6" };
 
-//  logerror("%04x: keyboard_r\n", cpu_get_pc(&space->device()));
+//  logerror("%04x: keyboard_r\n", space.device().safe_pc());
 
 	for (i = 0; i < 12; i++)
 	{
-		if (~state->m_keyb & (1 << i))
+		if (~m_keyb & (1 << i))
 		{
-			res = input_port_read(space->machine(), keynames[i]) & 0x3f;
+			res = ioport(keynames[i])->read() & 0x3f;
 			break;
 		}
 	}
 
-	res |= (input_port_read(space->machine(), "IN3") & 0xc0);
+	res |= (ioport("IN3")->read() & 0xc0);
 
-	if (state->m_nvram_init_count)
+	if (m_nvram_init_count)
 	{
-		state->m_nvram_init_count--;
+		m_nvram_init_count--;
 		res &= 0xbf;
 	}
 
 	return res;
 }
 
-static WRITE8_HANDLER( keyboard_select_w )
+WRITE8_MEMBER(mjkjidai_state::keyboard_select_w)
 {
-	mjkjidai_state *state = space->machine().driver_data<mjkjidai_state>();
 
-//  logerror("%04x: keyboard_select %d = %02x\n",cpu_get_pc(&space->device()),offset,data);
+//  logerror("%04x: keyboard_select %d = %02x\n",space.device().safe_pc(),offset,data);
 
 	switch (offset)
 	{
-		case 0: state->m_keyb = (state->m_keyb & 0xff00) | (data);      break;
-		case 1: state->m_keyb = (state->m_keyb & 0x00ff) | (data << 8); break;
+		case 0: m_keyb = (m_keyb & 0xff00) | (data);      break;
+		case 1: m_keyb = (m_keyb & 0x00ff) | (data << 8); break;
 	}
 }
 
@@ -159,9 +202,9 @@ static NVRAM_HANDLER( mjkjidai )
 	mjkjidai_state *state = machine.driver_data<mjkjidai_state>();
 
 	if (read_or_write)
-		file->write(state->m_nvram, state->m_nvram_size);
+		file->write(state->m_nvram, state->m_nvram.bytes());
 	else if (file)
-		file->read(state->m_nvram, state->m_nvram_size);
+		file->read(state->m_nvram, state->m_nvram.bytes());
 	else
 	{
 		state->m_nvram_init_count = 1;
@@ -170,29 +213,29 @@ static NVRAM_HANDLER( mjkjidai )
 
 
 
-static ADDRESS_MAP_START( mjkjidai_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( mjkjidai_map, AS_PROGRAM, 8, mjkjidai_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0xbfff) AM_ROMBANK("bank1")
 	AM_RANGE(0xc000, 0xcfff) AM_RAM
-	AM_RANGE(0xd000, 0xdfff) AM_RAM	AM_BASE_SIZE_MEMBER(mjkjidai_state,m_nvram,m_nvram_size)	// cleared and initialized on startup if bit 6 if port 00 is 0
-	AM_RANGE(0xe000, 0xe01f) AM_RAM AM_BASE_MEMBER(mjkjidai_state,m_spriteram1)			// shared with tilemap ram
-	AM_RANGE(0xe800, 0xe81f) AM_RAM AM_BASE_MEMBER(mjkjidai_state,m_spriteram2)		// shared with tilemap ram
-	AM_RANGE(0xf000, 0xf01f) AM_RAM AM_BASE_MEMBER(mjkjidai_state,m_spriteram3)		// shared with tilemap ram
-	AM_RANGE(0xe000, 0xf7ff) AM_RAM_WRITE(mjkjidai_videoram_w) AM_BASE_MEMBER(mjkjidai_state,m_videoram)
+	AM_RANGE(0xd000, 0xdfff) AM_RAM AM_SHARE("nvram")   // cleared and initialized on startup if bit 6 if port 00 is 0
+	AM_RANGE(0xe000, 0xe01f) AM_RAM AM_SHARE("spriteram1")          // shared with tilemap ram
+	AM_RANGE(0xe800, 0xe81f) AM_RAM AM_SHARE("spriteram2")      // shared with tilemap ram
+	AM_RANGE(0xf000, 0xf01f) AM_RAM AM_SHARE("spriteram3")      // shared with tilemap ram
+	AM_RANGE(0xe000, 0xf7ff) AM_RAM_WRITE(mjkjidai_videoram_w) AM_SHARE("videoram")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( mjkjidai_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( mjkjidai_io_map, AS_IO, 8, mjkjidai_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0x00) AM_READ(keyboard_r)
-	AM_RANGE(0x01, 0x01) AM_READNOP	// ???
+	AM_RANGE(0x01, 0x01) AM_READNOP // ???
 	AM_RANGE(0x02, 0x02) AM_READ_PORT("IN2")
 	AM_RANGE(0x01, 0x02) AM_WRITE(keyboard_select_w)
-	AM_RANGE(0x10, 0x10) AM_WRITE(mjkjidai_ctrl_w)	// rom bank, coin counter, flip screen etc
+	AM_RANGE(0x10, 0x10) AM_WRITE(mjkjidai_ctrl_w)  // rom bank, coin counter, flip screen etc
 	AM_RANGE(0x11, 0x11) AM_READ_PORT("IN0")
 	AM_RANGE(0x12, 0x12) AM_READ_PORT("IN1")
-	AM_RANGE(0x20, 0x20) AM_DEVWRITE("sn1", sn76496_w)
-	AM_RANGE(0x30, 0x30) AM_DEVWRITE("sn2", sn76496_w)
-	AM_RANGE(0x40, 0x40) AM_DEVWRITE("adpcm", adpcm_w)
+	AM_RANGE(0x20, 0x20) AM_DEVWRITE("sn1", sn76489_device, write)
+	AM_RANGE(0x30, 0x30) AM_DEVWRITE("sn2", sn76489_device, write)
+	AM_RANGE(0x40, 0x40) AM_WRITE(adpcm_w)
 ADDRESS_MAP_END
 
 
@@ -252,7 +295,7 @@ static INPUT_PORTS_START( mjkjidai )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(2)
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE )	// service mode
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE )    // service mode
 	PORT_DIPNAME( 0x20, 0x20, "Statistics" )
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -260,7 +303,7 @@ static INPUT_PORTS_START( mjkjidai )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START4 )
 
 	PORT_START("IN3")
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_TILT )	// reinitialize NVRAM and reset the game
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_TILT )   // reinitialize NVRAM and reset the game
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )
 
 	PORT_START("PL1_1")
@@ -371,14 +414,38 @@ static GFXDECODE_START( mjkjidai )
 	GFXDECODE_ENTRY( "gfx1", 0, spritelayout, 0, 16 )
 GFXDECODE_END
 
+INTERRUPT_GEN_MEMBER(mjkjidai_state::vblank_irq)
+{
+
+	if(m_nmi_mask)
+		device.execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
+}
+
+
+/*************************************
+ *
+ *  Sound interface
+ *
+ *************************************/
+
+
+//-------------------------------------------------
+//  sn76496_config psg_intf
+//-------------------------------------------------
+
+static const sn76496_config psg_intf =
+{
+	DEVCB_NULL
+};
+
 
 static MACHINE_CONFIG_START( mjkjidai, mjkjidai_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80,10000000/2)	/* 5 MHz ??? */
+	MCFG_CPU_ADD("maincpu", Z80,10000000/2) /* 5 MHz ??? */
 	MCFG_CPU_PROGRAM_MAP(mjkjidai_map)
 	MCFG_CPU_IO_MAP(mjkjidai_io_map)
-	MCFG_CPU_VBLANK_INT("screen", nmi_line_pulse)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", mjkjidai_state,  vblank_irq)
 
 	MCFG_NVRAM_HANDLER(mjkjidai)
 
@@ -386,25 +453,25 @@ static MACHINE_CONFIG_START( mjkjidai, mjkjidai_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(3*8, 61*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(mjkjidai)
+	MCFG_SCREEN_UPDATE_DRIVER(mjkjidai_state, screen_update_mjkjidai)
 
 	MCFG_GFXDECODE(mjkjidai)
 	MCFG_PALETTE_LENGTH(0x100)
 
 	MCFG_PALETTE_INIT(RRRR_GGGG_BBBB)
-	MCFG_VIDEO_START(mjkjidai)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
 	MCFG_SOUND_ADD("sn1", SN76489, 10000000/4)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
+	MCFG_SOUND_CONFIG(psg_intf)
 
 	MCFG_SOUND_ADD("sn2", SN76489, 10000000/4)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
+	MCFG_SOUND_CONFIG(psg_intf)
 
 	MCFG_SOUND_ADD("adpcm", MJKJIDAI, 6000)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
@@ -421,7 +488,7 @@ MACHINE_CONFIG_END
 ROM_START( mjkjidai )
 	ROM_REGION( 0x1c000, "maincpu", 0 )
 	ROM_LOAD( "mkj-00.14g",   0x00000, 0x8000, CRC(188a27e9) SHA1(2306ad112aaf8d9ac77a89d0e4c3a17f36945130) )
-	ROM_LOAD( "mkj-01.15g",   0x08000, 0x4000, CRC(a6a5e9c7) SHA1(974f4343f4347a0065f833c1fdcc47e96d42932d) )	/* banked, there is code flowing from 7fff to this bank */
+	ROM_LOAD( "mkj-01.15g",   0x08000, 0x4000, CRC(a6a5e9c7) SHA1(974f4343f4347a0065f833c1fdcc47e96d42932d) )   /* banked, there is code flowing from 7fff to this bank */
 	ROM_CONTINUE(             0x10000, 0x4000 )
 	ROM_LOAD( "mkj-02.16g",   0x14000, 0x8000, CRC(fb312927) SHA1(b71db72ba881474f9c2523d0617757889af9f28e) )
 
@@ -438,10 +505,9 @@ ROM_START( mjkjidai )
 	ROM_LOAD( "mkj-61.14a",   0x0100, 0x0100, CRC(e9e90d55) SHA1(a14177df3bab59e0f9ce41094e03ef3593329149) )
 	ROM_LOAD( "mkj-62.15a",   0x0200, 0x0100, CRC(934f1d53) SHA1(2b3b2dc77789b814810b25cda3f5adcfd7e0e57e) )
 
-	ROM_REGION( 0x8000, "adpcm", 0 )	/* ADPCM samples */
+	ROM_REGION( 0x8000, "adpcm", 0 )    /* ADPCM samples */
 	ROM_LOAD( "mkj-40.14c",   0x00000, 0x8000, CRC(4d8fcc4a) SHA1(24c2b8031367035c89c6649a084bce0714f3e8d4) )
 ROM_END
 
 
-GAME( 1986, mjkjidai, 0, mjkjidai, mjkjidai, 0, ROT0, "Sanritsu",  "Mahjong Kyou Jidai (Japan)", GAME_IMPERFECT_GRAPHICS )
-
+GAME( 1986, mjkjidai, 0, mjkjidai, mjkjidai, driver_device, 0, ROT0, "Sanritsu",  "Mahjong Kyou Jidai (Japan)", GAME_IMPERFECT_GRAPHICS )

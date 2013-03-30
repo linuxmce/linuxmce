@@ -37,81 +37,78 @@ Note:   if MAME_DEBUG is defined, pressing Z with:
 
 ***************************************************************************/
 
-WRITE8_HANDLER( yunsung8_videobank_w )
+WRITE8_MEMBER(yunsung8_state::yunsung8_videobank_w)
 {
-	yunsung8_state *state = space->machine().driver_data<yunsung8_state>();
-	state->m_videobank = data;
+	m_videobank = data;
 }
 
 
-READ8_HANDLER( yunsung8_videoram_r )
+READ8_MEMBER(yunsung8_state::yunsung8_videoram_r)
 {
-	yunsung8_state *state = space->machine().driver_data<yunsung8_state>();
 	int bank;
 
 	/*  Bit 1 of the bankswitching register contols the c000-c7ff
-        area (Palette). Bit 0 controls the c800-dfff area (Tiles) */
+	    area (Palette). Bit 0 controls the c800-dfff area (Tiles) */
 
 	if (offset < 0x0800)
-		bank = state->m_videobank & 2;
+		bank = m_videobank & 2;
 	else
-		bank = state->m_videobank & 1;
+		bank = m_videobank & 1;
 
 	if (bank)
-		return state->m_videoram_0[offset];
+		return m_videoram_0[offset];
 	else
-		return state->m_videoram_1[offset];
+		return m_videoram_1[offset];
 }
 
 
-WRITE8_HANDLER( yunsung8_videoram_w )
+WRITE8_MEMBER(yunsung8_state::yunsung8_videoram_w)
 {
-	yunsung8_state *state = space->machine().driver_data<yunsung8_state>();
 
-	if (offset < 0x0800)		// c000-c7ff    Banked Palette RAM
+	if (offset < 0x0800)        // c000-c7ff    Banked Palette RAM
 	{
-		int bank = state->m_videobank & 2;
+		int bank = m_videobank & 2;
 		UINT8 *RAM;
 		int color;
 
 		if (bank)
-			RAM = state->m_videoram_0;
+			RAM = m_videoram_0;
 		else
-			RAM = state->m_videoram_1;
+			RAM = m_videoram_1;
 
 		RAM[offset] = data;
 		color = RAM[offset & ~1] | (RAM[offset | 1] << 8);
 
 		/* BBBBBGGGGGRRRRRx */
-		palette_set_color_rgb(space->machine(), offset / 2 + (bank ? 0x400 : 0), pal5bit(color >> 0), pal5bit(color >> 5), pal5bit(color >> 10));
+		palette_set_color_rgb(machine(), offset / 2 + (bank ? 0x400 : 0), pal5bit(color >> 0), pal5bit(color >> 5), pal5bit(color >> 10));
 	}
 	else
 	{
 		int tile;
-		int bank = state->m_videobank & 1;
+		int bank = m_videobank & 1;
 
 		if (offset < 0x1000)
-			tile = (offset - 0x0800);		// c800-cfff: Banked Color RAM
+			tile = (offset - 0x0800);       // c800-cfff: Banked Color RAM
 		else
-			tile = (offset - 0x1000) / 2;	// d000-dfff: Banked Tiles RAM
+			tile = (offset - 0x1000) / 2;   // d000-dfff: Banked Tiles RAM
 
 		if (bank)
 		{
-			state->m_videoram_0[offset] = data;
-			tilemap_mark_tile_dirty(state->m_tilemap_0, tile);
+			m_videoram_0[offset] = data;
+			m_tilemap_0->mark_tile_dirty(tile);
 		}
 		else
 		{
-			state->m_videoram_1[offset] = data;
-			tilemap_mark_tile_dirty(state->m_tilemap_1, tile);
+			m_videoram_1[offset] = data;
+			m_tilemap_1->mark_tile_dirty(tile);
 		}
 	}
 }
 
 
-WRITE8_HANDLER( yunsung8_flipscreen_w )
+WRITE8_MEMBER(yunsung8_state::yunsung8_flipscreen_w)
 {
-	tilemap_set_flip_all(space->machine(), (data & 1) ? (TILEMAP_FLIPX | TILEMAP_FLIPY) : 0);
+	machine().tilemap().set_flip_all((data & 1) ? (TILEMAP_FLIPX | TILEMAP_FLIPY) : 0);
 }
 
 
@@ -131,15 +128,14 @@ WRITE8_HANDLER( yunsung8_flipscreen_w )
 
 /* Background */
 
-#define DIM_NX_0			(0x40)
-#define DIM_NY_0			(0x20)
+#define DIM_NX_0            (0x40)
+#define DIM_NY_0            (0x20)
 
-static TILE_GET_INFO( get_tile_info_0 )
+TILE_GET_INFO_MEMBER(yunsung8_state::get_tile_info_0)
 {
-	yunsung8_state *state = machine.driver_data<yunsung8_state>();
-	int code  =  state->m_videoram_0[0x1000 + tile_index * 2 + 0] + state->m_videoram_0[0x1000 + tile_index * 2 + 1] * 256;
-	int color =  state->m_videoram_0[0x0800 + tile_index] & 0x07;
-	SET_TILE_INFO(
+	int code  =  m_videoram_0[0x1000 + tile_index * 2 + 0] + m_videoram_0[0x1000 + tile_index * 2 + 1] * 256;
+	int color =  m_videoram_0[0x0800 + tile_index] & 0x07;
+	SET_TILE_INFO_MEMBER(
 			0,
 			code,
 			color,
@@ -148,15 +144,14 @@ static TILE_GET_INFO( get_tile_info_0 )
 
 /* Text Plane */
 
-#define DIM_NX_1			(0x40)
-#define DIM_NY_1			(0x20)
+#define DIM_NX_1            (0x40)
+#define DIM_NY_1            (0x20)
 
-static TILE_GET_INFO( get_tile_info_1 )
+TILE_GET_INFO_MEMBER(yunsung8_state::get_tile_info_1)
 {
-	yunsung8_state *state = machine.driver_data<yunsung8_state>();
-	int code  =  state->m_videoram_1[0x1000 + tile_index * 2 + 0] + state->m_videoram_1[0x1000 + tile_index * 2 + 1] * 256;
-	int color =  state->m_videoram_1[0x0800 + tile_index] & 0x3f;
-	SET_TILE_INFO(
+	int code  =  m_videoram_1[0x1000 + tile_index * 2 + 0] + m_videoram_1[0x1000 + tile_index * 2 + 1] * 256;
+	int color =  m_videoram_1[0x0800 + tile_index] & 0x3f;
+	SET_TILE_INFO_MEMBER(
 			1,
 			code,
 			color,
@@ -174,14 +169,13 @@ static TILE_GET_INFO( get_tile_info_1 )
 
 ***************************************************************************/
 
-VIDEO_START( yunsung8 )
+void yunsung8_state::video_start()
 {
-	yunsung8_state *state = machine.driver_data<yunsung8_state>();
 
-	state->m_tilemap_0 = tilemap_create(machine, get_tile_info_0, tilemap_scan_rows, 8, 8, DIM_NX_0, DIM_NY_0 );
-	state->m_tilemap_1 = tilemap_create(machine, get_tile_info_1, tilemap_scan_rows, 8, 8, DIM_NX_1, DIM_NY_1 );
+	m_tilemap_0 = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(yunsung8_state::get_tile_info_0),this), TILEMAP_SCAN_ROWS, 8, 8, DIM_NX_0, DIM_NY_0 );
+	m_tilemap_1 = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(yunsung8_state::get_tile_info_1),this), TILEMAP_SCAN_ROWS, 8, 8, DIM_NX_1, DIM_NY_1 );
 
-	tilemap_set_transparent_pen(state->m_tilemap_1, 0);
+	m_tilemap_1->set_transparent_pen(0);
 }
 
 
@@ -194,28 +188,27 @@ VIDEO_START( yunsung8 )
 
 ***************************************************************************/
 
-SCREEN_UPDATE( yunsung8 )
+UINT32 yunsung8_state::screen_update_yunsung8(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	yunsung8_state *state = screen->machine().driver_data<yunsung8_state>();
-	int layers_ctrl = (~state->m_layers_ctrl) >> 4;
+	int layers_ctrl = (~m_layers_ctrl) >> 4;
 
 #ifdef MAME_DEBUG
-if (input_code_pressed(screen->machine(), KEYCODE_Z))
+if (machine().input().code_pressed(KEYCODE_Z))
 {
 	int msk = 0;
-	if (input_code_pressed(screen->machine(), KEYCODE_Q))	msk |= 1;
-	if (input_code_pressed(screen->machine(), KEYCODE_W))	msk |= 2;
+	if (machine().input().code_pressed(KEYCODE_Q))  msk |= 1;
+	if (machine().input().code_pressed(KEYCODE_W))  msk |= 2;
 	if (msk != 0) layers_ctrl &= msk;
 }
 #endif
 
 	if (layers_ctrl & 1)
-		tilemap_draw(bitmap, cliprect, state->m_tilemap_0, 0, 0);
+		m_tilemap_0->draw(bitmap, cliprect, 0, 0);
 	else
-		bitmap_fill(bitmap, cliprect, 0);
+		bitmap.fill(0, cliprect);
 
 	if (layers_ctrl & 2)
-		tilemap_draw(bitmap, cliprect, state->m_tilemap_1, 0, 0);
+		m_tilemap_1->draw(bitmap, cliprect, 0, 0);
 
 	return 0;
 }

@@ -7,19 +7,24 @@
 class finalizr_state : public driver_device
 {
 public:
-	finalizr_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	finalizr_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_scroll(*this, "scroll"),
+		m_colorram(*this, "colorram"),
+		m_videoram(*this, "videoram"),
+		m_colorram2(*this, "colorram2"),
+		m_videoram2(*this, "videoram2"),
+		m_spriteram(*this, "spriteram"),
+		m_spriteram_2(*this, "spriteram_2"){ }
 
 	/* memory pointers */
-	UINT8 *       m_videoram;
-	UINT8 *       m_colorram;
-	UINT8 *       m_videoram2;
-	UINT8 *       m_colorram2;
-	UINT8 *       m_scroll;
-	UINT8 *       m_spriteram;
-	UINT8 *       m_spriteram_2;
-	size_t        m_videoram_size;
-	size_t        m_spriteram_size;
+	required_shared_ptr<UINT8> m_scroll;
+	required_shared_ptr<UINT8> m_colorram;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_colorram2;
+	required_shared_ptr<UINT8> m_videoram2;
+	required_shared_ptr<UINT8> m_spriteram;
+	required_shared_ptr<UINT8> m_spriteram_2;
 
 	/* video-related */
 	tilemap_t       *m_fg_tilemap;
@@ -34,13 +39,20 @@ public:
 
 	/* devices */
 	device_t *m_audio_cpu;
+	DECLARE_WRITE8_MEMBER(finalizr_coin_w);
+	DECLARE_WRITE8_MEMBER(finalizr_flipscreen_w);
+	DECLARE_WRITE8_MEMBER(finalizr_i8039_irq_w);
+	DECLARE_WRITE8_MEMBER(i8039_irqen_w);
+	DECLARE_READ8_MEMBER(i8039_T1_r);
+	DECLARE_WRITE8_MEMBER(i8039_T0_w);
+	DECLARE_WRITE8_MEMBER(finalizr_videoctrl_w);
+	DECLARE_DRIVER_INIT(finalizr);
+	TILE_GET_INFO_MEMBER(get_bg_tile_info);
+	TILE_GET_INFO_MEMBER(get_fg_tile_info);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_finalizr(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	TIMER_DEVICE_CALLBACK_MEMBER(finalizr_scanline);
 };
-
-
-/*----------- defined in video/finalizr.c -----------*/
-
-WRITE8_HANDLER( finalizr_videoctrl_w );
-
-PALETTE_INIT( finalizr );
-VIDEO_START( finalizr );
-SCREEN_UPDATE( finalizr );

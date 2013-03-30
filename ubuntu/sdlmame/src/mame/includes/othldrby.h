@@ -9,8 +9,8 @@
 class othldrby_state : public driver_device
 {
 public:
-	othldrby_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	othldrby_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) { }
 
 	/* memory pointers */
 	UINT16 *     m_vram;
@@ -25,17 +25,22 @@ public:
 
 	/* misc */
 	int          m_toggle;
+	DECLARE_READ16_MEMBER(othldrby_scanline_r);
+	DECLARE_WRITE16_MEMBER(coinctrl_w);
+	DECLARE_WRITE16_MEMBER(calendar_w);
+	DECLARE_READ16_MEMBER(calendar_r);
+	DECLARE_WRITE16_MEMBER(othldrby_videoram_addr_w);
+	DECLARE_READ16_MEMBER(othldrby_videoram_r);
+	DECLARE_WRITE16_MEMBER(othldrby_videoram_w);
+	DECLARE_WRITE16_MEMBER(othldrby_vreg_addr_w);
+	DECLARE_WRITE16_MEMBER(othldrby_vreg_w);
+	DECLARE_WRITE16_MEMBER(oki_bankswitch_w);
+	TILE_GET_INFO_MEMBER(get_tile_info0);
+	TILE_GET_INFO_MEMBER(get_tile_info1);
+	TILE_GET_INFO_MEMBER(get_tile_info2);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	UINT32 screen_update_othldrby(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	void screen_eof_othldrby(screen_device &screen, bool state);
 };
-
-
-/*----------- defined in video/othldrby.c -----------*/
-
-WRITE16_HANDLER( othldrby_videoram_addr_w );
-READ16_HANDLER( othldrby_videoram_r );
-WRITE16_HANDLER( othldrby_videoram_w );
-WRITE16_HANDLER( othldrby_vreg_addr_w );
-WRITE16_HANDLER( othldrby_vreg_w );
-
-VIDEO_START( othldrby );
-SCREEN_EOF( othldrby );
-SCREEN_UPDATE( othldrby );

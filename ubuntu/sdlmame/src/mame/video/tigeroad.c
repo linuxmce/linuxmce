@@ -2,17 +2,15 @@
 #include "includes/tigeroad.h"
 
 
-WRITE16_HANDLER( tigeroad_videoram_w )
+WRITE16_MEMBER(tigeroad_state::tigeroad_videoram_w)
 {
-	tigeroad_state *state = space->machine().driver_data<tigeroad_state>();
-	UINT16 *videoram = state->m_videoram;
+	UINT16 *videoram = m_videoram;
 	COMBINE_DATA(&videoram[offset]);
-	tilemap_mark_tile_dirty(state->m_fg_tilemap, offset);
+	m_fg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE16_HANDLER( tigeroad_videoctrl_w )
+WRITE16_MEMBER(tigeroad_state::tigeroad_videoctrl_w)
 {
-	tigeroad_state *state = space->machine().driver_data<tigeroad_state>();
 	int bank;
 
 	if (ACCESSING_BITS_8_15)
@@ -21,37 +19,36 @@ WRITE16_HANDLER( tigeroad_videoctrl_w )
 
 		/* bit 1 flips screen */
 
-		if (flip_screen_get(space->machine()) != (data & 0x02))
+		if (flip_screen() != (data & 0x02))
 		{
-			flip_screen_set(space->machine(), data & 0x02);
-			tilemap_mark_all_tiles_dirty_all(space->machine());
+			flip_screen_set(data & 0x02);
+			machine().tilemap().mark_all_dirty();
 		}
 
 		/* bit 2 selects bg char bank */
 
 		bank = (data & 0x04) >> 2;
 
-		if (state->m_bgcharbank != bank)
+		if (m_bgcharbank != bank)
 		{
-			state->m_bgcharbank = bank;
-			tilemap_mark_all_tiles_dirty(state->m_bg_tilemap);
+			m_bgcharbank = bank;
+			m_bg_tilemap->mark_all_dirty();
 		}
 
 		/* bits 4-5 are coin lockouts */
 
-		coin_lockout_w(space->machine(), 0, !(data & 0x10));
-		coin_lockout_w(space->machine(), 1, !(data & 0x20));
+		coin_lockout_w(machine(), 0, !(data & 0x10));
+		coin_lockout_w(machine(), 1, !(data & 0x20));
 
 		/* bits 6-7 are coin counters */
 
-		coin_counter_w(space->machine(), 0, data & 0x40);
-		coin_counter_w(space->machine(), 1, data & 0x80);
+		coin_counter_w(machine(), 0, data & 0x40);
+		coin_counter_w(machine(), 1, data & 0x80);
 	}
 }
 
-WRITE16_HANDLER( tigeroad_scroll_w )
+WRITE16_MEMBER(tigeroad_state::tigeroad_scroll_w)
 {
-	tigeroad_state *state = space->machine().driver_data<tigeroad_state>();
 	int scroll = 0;
 
 	COMBINE_DATA(&scroll);
@@ -59,18 +56,19 @@ WRITE16_HANDLER( tigeroad_scroll_w )
 	switch (offset)
 	{
 	case 0:
-		tilemap_set_scrollx(state->m_bg_tilemap, 0, scroll);
+		m_bg_tilemap->set_scrollx(0, scroll);
 		break;
 	case 1:
-		tilemap_set_scrolly(state->m_bg_tilemap, 0, -scroll - 32 * 8);
+		m_bg_tilemap->set_scrolly(0, -scroll - 32 * 8);
 		break;
 	}
 }
 
-static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, int priority )
+static void draw_sprites(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, int priority )
 {
-	UINT16 *source = &machine.generic.buffered_spriteram.u16[machine.generic.spriteram_size/2] - 4;
-	UINT16 *finish = machine.generic.buffered_spriteram.u16;
+	tigeroad_state *state = machine.driver_data<tigeroad_state>();
+	UINT16 *source = &state->m_spriteram->buffer()[state->m_spriteram->bytes()/2] - 4;
+	UINT16 *finish = state->m_spriteram->buffer();
 
 	// TODO: The Track Map should probably be drawn on top of the background tilemap...
 	//       Also convert the below into a for loop!
@@ -91,7 +89,7 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 			if (sx > 0x100) sx -= 0x200;
 			if (sy > 0x100) sy -= 0x200;
 
-			if (flip_screen_get(machine))
+			if (state->flip_screen())
 			{
 				sx = 240 - sx;
 				sy = 240 - sy;
@@ -111,69 +109,58 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 	}
 }
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(tigeroad_state::get_bg_tile_info)
 {
-	tigeroad_state *state = machine.driver_data<tigeroad_state>();
-	UINT8 *tilerom = machine.region("gfx4")->base();
+	UINT8 *tilerom = memregion("gfx4")->base();
 
 	int data = tilerom[tile_index];
 	int attr = tilerom[tile_index + 1];
-	int code = data + ((attr & 0xc0) << 2) + (state->m_bgcharbank << 10);
+	int code = data + ((attr & 0xc0) << 2) + (m_bgcharbank << 10);
 	int color = attr & 0x0f;
 	int flags = (attr & 0x20) ? TILE_FLIPX : 0;
 
-	SET_TILE_INFO(1, code, color, flags);
-	tileinfo->group = (attr & 0x10) ? 1 : 0;
+	SET_TILE_INFO_MEMBER(1, code, color, flags);
+	tileinfo.group = (attr & 0x10) ? 1 : 0;
 }
 
-static TILE_GET_INFO( get_fg_tile_info )
+TILE_GET_INFO_MEMBER(tigeroad_state::get_fg_tile_info)
 {
-	tigeroad_state *state = machine.driver_data<tigeroad_state>();
-	UINT16 *videoram = state->m_videoram;
+	UINT16 *videoram = m_videoram;
 	int data = videoram[tile_index];
 	int attr = data >> 8;
 	int code = (data & 0xff) + ((attr & 0xc0) << 2) + ((attr & 0x20) << 5);
 	int color = attr & 0x0f;
 	int flags = (attr & 0x10) ? TILE_FLIPY : 0;
 
-	SET_TILE_INFO(0, code, color, flags);
+	SET_TILE_INFO_MEMBER(0, code, color, flags);
 }
 
-static TILEMAP_MAPPER( tigeroad_tilemap_scan )
+TILEMAP_MAPPER_MEMBER(tigeroad_state::tigeroad_tilemap_scan)
 {
 	/* logical (col,row) -> memory offset */
 	return 2 * (col % 8) + 16 * ((127 - row) % 8) + 128 * (col / 8) + 2048 * ((127 - row) / 8);
 }
 
-VIDEO_START( tigeroad )
+void tigeroad_state::video_start()
 {
-	tigeroad_state *state = machine.driver_data<tigeroad_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tigeroad_tilemap_scan,
-		 32, 32, 128, 128);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(tigeroad_state::get_bg_tile_info),this), tilemap_mapper_delegate(FUNC(tigeroad_state::tigeroad_tilemap_scan),this),
+			32, 32, 128, 128);
 
-	state->m_fg_tilemap = tilemap_create(machine, get_fg_tile_info, tilemap_scan_rows,
-		 8, 8, 32, 32);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(tigeroad_state::get_fg_tile_info),this), TILEMAP_SCAN_ROWS,
+			8, 8, 32, 32);
 
-	tilemap_set_transmask(state->m_bg_tilemap, 0, 0xffff, 0);
-	tilemap_set_transmask(state->m_bg_tilemap, 1, 0x1ff, 0xfe00);
+	m_bg_tilemap->set_transmask(0, 0xffff, 0);
+	m_bg_tilemap->set_transmask(1, 0x1ff, 0xfe00);
 
-	tilemap_set_transparent_pen(state->m_fg_tilemap, 3);
+	m_fg_tilemap->set_transparent_pen(3);
 }
 
-SCREEN_UPDATE( tigeroad )
+UINT32 tigeroad_state::screen_update_tigeroad(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	tigeroad_state *state = screen->machine().driver_data<tigeroad_state>();
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, TILEMAP_DRAW_LAYER1, 0);
-	draw_sprites(screen->machine(), bitmap, cliprect, 0);
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, TILEMAP_DRAW_LAYER0, 1);
-	//draw_sprites(screen->machine(), bitmap, cliprect, 1); draw priority sprites?
-	tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, 0, 2);
+	m_bg_tilemap->draw(bitmap, cliprect, TILEMAP_DRAW_LAYER1, 0);
+	draw_sprites(machine(), bitmap, cliprect, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, TILEMAP_DRAW_LAYER0, 1);
+	//draw_sprites(machine(), bitmap, cliprect, 1); draw priority sprites?
+	m_fg_tilemap->draw(bitmap, cliprect, 0, 2);
 	return 0;
-}
-
-SCREEN_EOF( tigeroad )
-{
-	address_space *space = machine.device("maincpu")->memory().space(AS_PROGRAM);
-
-	buffer_spriteram16_w(space, 0, 0, 0xffff);
 }

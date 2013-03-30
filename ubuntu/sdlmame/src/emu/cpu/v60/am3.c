@@ -718,13 +718,13 @@ static UINT32 am3DirectAddressDeferredIndexed(v60_state *cpustate)
 
 static UINT32 am3Immediate(v60_state *cpustate)
 {
-	fatalerror("CPU - AM3 - IMM (cpustate->PC=%06x)", cpustate->PC);
+	fatalerror("CPU - AM3 - IMM (cpustate->PC=%06x)\n", cpustate->PC);
 	return 0; /* never reached, fatalerror won't return */
 }
 
 static UINT32 am3ImmediateQuick(v60_state *cpustate)
 {
-	fatalerror("CPU - AM3 - IMMQ (cpustate->PC=%06x)", cpustate->PC);
+	fatalerror("CPU - AM3 - IMMQ (cpustate->PC=%06x)\n", cpustate->PC);
 	return 0; /* never reached, fatalerror won't return */
 }
 
@@ -735,33 +735,33 @@ static UINT32 am3ImmediateQuick(v60_state *cpustate)
 
 static UINT32 am3Error1(v60_state *cpustate)
 {
-	fatalerror("CPU - AM3 - 1 (cpustate->PC=%06x)", cpustate->PC);
+	fatalerror("CPU - AM3 - 1 (cpustate->PC=%06x)\n", cpustate->PC);
 	return 0; /* never reached, fatalerror won't return */
 }
 
 static UINT32 am3Error2(v60_state *cpustate)
 {
-	fatalerror("CPU - AM3 - 2 (cpustate->PC=%06x)", cpustate->PC);
+	fatalerror("CPU - AM3 - 2 (cpustate->PC=%06x)\n", cpustate->PC);
 	return 0; /* never reached, fatalerror won't return */
 }
 
 #ifdef UNUSED_FUNCTION
 static UINT32 am3Error3(v60_state *cpustate)
 {
-	fatalerror("CPU - AM3 - 3 (cpustate->PC=%06x)", cpustate->PC);
+	fatalerror("CPU - AM3 - 3 (cpustate->PC=%06x)\n", cpustate->PC);
 	return 0; /* never reached, fatalerror won't return */
 }
 #endif
 
 static UINT32 am3Error4(v60_state *cpustate)
 {
-	fatalerror("CPU - AM3 - 4 (cpustate->PC=%06x)", cpustate->PC);
+	fatalerror("CPU - AM3 - 4 (cpustate->PC=%06x)\n", cpustate->PC);
 	return 0; /* never reached, fatalerror won't return */
 }
 
 static UINT32 am3Error5(v60_state *cpustate)
 {
-	fatalerror("CPU - AM3 - 5 (cpustate->PC=%06x)", cpustate->PC);
+	fatalerror("CPU - AM3 - 5 (cpustate->PC=%06x)\n", cpustate->PC);
 	return 0; /* never reached, fatalerror won't return */
 }
 
@@ -814,19 +814,19 @@ static UINT32 (*const AMTable3_G7[32])(v60_state *) =
 	am3PCDisplacement8,
 	am3PCDisplacement16,
 	am3PCDisplacement32,
-  am3DirectAddress,
+	am3DirectAddress,
 	am3Immediate,
 	am3Error2,
 	am3Error2,
 	am3Error2,
-  am3PCDisplacementIndirect8,
-  am3PCDisplacementIndirect16,
-  am3PCDisplacementIndirect32,
+	am3PCDisplacementIndirect8,
+	am3PCDisplacementIndirect16,
+	am3PCDisplacementIndirect32,
 	am3DirectAddressDeferred,
 	am3PCDoubleDisplacement8,
 	am3PCDoubleDisplacement16,
 	am3PCDoubleDisplacement32,
-  am3Error2
+	am3Error2
 };
 
 static UINT32 (*const AMTable3_G6[8])(v60_state *) =
@@ -882,6 +882,3 @@ static UINT32 (*const AMTable3[2][8])(v60_state *) =
 		am3Error1
 	}
 };
-
-
-

@@ -10,29 +10,7 @@
 #include "cpu/m6800/m6800.h"
 #include "cpu/m6805/m6805.h"
 #include "cpu/m6809/m6809.h"
-#include "sound/sn76496.h"
 #include "includes/qix.h"
-
-
-
-/*************************************
- *
- *  Static function prototypes
- *
- *************************************/
-
-static READ8_DEVICE_HANDLER( qixmcu_coin_r );
-static WRITE8_DEVICE_HANDLER( qixmcu_coinctrl_w );
-static WRITE8_DEVICE_HANDLER( qixmcu_coin_w );
-
-static WRITE8_DEVICE_HANDLER( qix_coinctl_w );
-
-static WRITE8_DEVICE_HANDLER( slither_76489_0_w );
-static WRITE8_DEVICE_HANDLER( slither_76489_1_w );
-
-static READ8_DEVICE_HANDLER( slither_trak_lr_r );
-static READ8_DEVICE_HANDLER( slither_trak_ud_r );
-
 
 
 /***************************************************************************
@@ -88,50 +66,50 @@ static READ8_DEVICE_HANDLER( slither_trak_ud_r );
 
 const pia6821_interface qix_pia_0_intf =
 {
-	DEVCB_INPUT_PORT("P1"),		/* port A in */
-	DEVCB_INPUT_PORT("COIN"),	/* port B in */
-	DEVCB_NULL,		/* line CA1 in */
-	DEVCB_NULL,		/* line CB1 in */
-	DEVCB_NULL,		/* line CA2 in */
-	DEVCB_NULL,		/* line CB2 in */
-	DEVCB_NULL,		/* port A out */
-	DEVCB_NULL,		/* port B out */
-	DEVCB_NULL,		/* line CA2 out */
-	DEVCB_NULL,		/* port CB2 out */
-	DEVCB_NULL,		/* IRQA */
-	DEVCB_NULL		/* IRQB */
+	DEVCB_INPUT_PORT("P1"),     /* port A in */
+	DEVCB_INPUT_PORT("COIN"),   /* port B in */
+	DEVCB_NULL,     /* line CA1 in */
+	DEVCB_NULL,     /* line CB1 in */
+	DEVCB_NULL,     /* line CA2 in */
+	DEVCB_NULL,     /* line CB2 in */
+	DEVCB_NULL,     /* port A out */
+	DEVCB_NULL,     /* port B out */
+	DEVCB_NULL,     /* line CA2 out */
+	DEVCB_NULL,     /* port CB2 out */
+	DEVCB_NULL,     /* IRQA */
+	DEVCB_NULL      /* IRQB */
 };
 
 const pia6821_interface qix_pia_1_intf =
 {
-	DEVCB_INPUT_PORT("SPARE"),	/* port A in */
-	DEVCB_INPUT_PORT("IN0"),	/* port B in */
-	DEVCB_NULL,		/* line CA1 in */
-	DEVCB_NULL,		/* line CB1 in */
-	DEVCB_NULL,		/* line CA2 in */
-	DEVCB_NULL,		/* line CB2 in */
-	DEVCB_NULL,		/* port A out */
-	DEVCB_NULL,		/* port B out */
-	DEVCB_NULL,		/* line CA2 out */
-	DEVCB_NULL,		/* port CB2 out */
-	DEVCB_NULL,		/* IRQA */
-	DEVCB_NULL		/* IRQB */
+	DEVCB_INPUT_PORT("SPARE"),  /* port A in */
+	DEVCB_INPUT_PORT("IN0"),    /* port B in */
+	DEVCB_NULL,     /* line CA1 in */
+	DEVCB_NULL,     /* line CB1 in */
+	DEVCB_NULL,     /* line CA2 in */
+	DEVCB_NULL,     /* line CB2 in */
+	DEVCB_NULL,     /* port A out */
+	DEVCB_NULL,     /* port B out */
+	DEVCB_NULL,     /* line CA2 out */
+	DEVCB_NULL,     /* port CB2 out */
+	DEVCB_NULL,     /* IRQA */
+	DEVCB_NULL      /* IRQB */
 };
 
 const pia6821_interface qix_pia_2_intf =
 {
-	DEVCB_INPUT_PORT("P2"),				/* port A in */
-	DEVCB_NULL,		/* port B in */
-	DEVCB_NULL,		/* line CA1 in */
-	DEVCB_NULL,		/* line CB1 in */
-	DEVCB_NULL,		/* line CA2 in */
-	DEVCB_NULL,		/* line CB2 in */
-	DEVCB_NULL,		/* port A out */
-	DEVCB_HANDLER(qix_coinctl_w),		/* port B out */
-	DEVCB_NULL,		/* line CA2 out */
-	DEVCB_NULL,		/* port CB2 out */
-	DEVCB_NULL,		/* IRQA */
-	DEVCB_NULL		/* IRQB */
+	DEVCB_INPUT_PORT("P2"),             /* port A in */
+	DEVCB_NULL,     /* port B in */
+	DEVCB_NULL,     /* line CA1 in */
+	DEVCB_NULL,     /* line CB1 in */
+	DEVCB_NULL,     /* line CA2 in */
+	DEVCB_NULL,     /* line CB2 in */
+	DEVCB_NULL,     /* port A out */
+	DEVCB_DRIVER_MEMBER(qix_state,qix_coinctl_w),       /* port B out */
+	DEVCB_NULL,     /* line CA2 out */
+	DEVCB_NULL,     /* port CB2 out */
+	DEVCB_NULL,     /* IRQA */
+	DEVCB_NULL      /* IRQB */
 };
 
 
@@ -145,34 +123,34 @@ const pia6821_interface qix_pia_2_intf =
 
 const pia6821_interface qixmcu_pia_0_intf =
 {
-	DEVCB_INPUT_PORT("P1"),			/* port A in */
-	DEVCB_HANDLER(qixmcu_coin_r),	/* port B in */
-	DEVCB_NULL,		/* line CA1 in */
-	DEVCB_NULL,		/* line CB1 in */
-	DEVCB_NULL,		/* line CA2 in */
-	DEVCB_NULL,		/* line CB2 in */
-	DEVCB_NULL,		/* port A out */
-	DEVCB_HANDLER(qixmcu_coin_w),	/* port B out */
-	DEVCB_NULL,		/* line CA2 out */
-	DEVCB_NULL,		/* port CB2 out */
-	DEVCB_NULL,		/* IRQA */
-	DEVCB_NULL		/* IRQB */
+	DEVCB_INPUT_PORT("P1"),         /* port A in */
+	DEVCB_DRIVER_MEMBER(qix_state,qixmcu_coin_r),   /* port B in */
+	DEVCB_NULL,     /* line CA1 in */
+	DEVCB_NULL,     /* line CB1 in */
+	DEVCB_NULL,     /* line CA2 in */
+	DEVCB_NULL,     /* line CB2 in */
+	DEVCB_NULL,     /* port A out */
+	DEVCB_DRIVER_MEMBER(qix_state,qixmcu_coin_w),   /* port B out */
+	DEVCB_NULL,     /* line CA2 out */
+	DEVCB_NULL,     /* port CB2 out */
+	DEVCB_NULL,     /* IRQA */
+	DEVCB_NULL      /* IRQB */
 };
 
 const pia6821_interface qixmcu_pia_2_intf =
 {
-	DEVCB_INPUT_PORT("P2"),				/* port A in */
-	DEVCB_NULL,		/* port B in */
-	DEVCB_NULL,		/* line CA1 in */
-	DEVCB_NULL,		/* line CB1 in */
-	DEVCB_NULL,		/* line CA2 in */
-	DEVCB_NULL,		/* line CB2 in */
-	DEVCB_NULL,		/* port A out */
-	DEVCB_HANDLER(qixmcu_coinctrl_w),	/* port B out */
-	DEVCB_NULL,		/* line CA2 out */
-	DEVCB_NULL,		/* port CB2 out */
-	DEVCB_NULL,		/* IRQA */
-	DEVCB_NULL		/* IRQB */
+	DEVCB_INPUT_PORT("P2"),             /* port A in */
+	DEVCB_NULL,     /* port B in */
+	DEVCB_NULL,     /* line CA1 in */
+	DEVCB_NULL,     /* line CB1 in */
+	DEVCB_NULL,     /* line CA2 in */
+	DEVCB_NULL,     /* line CB2 in */
+	DEVCB_NULL,     /* port A out */
+	DEVCB_DRIVER_MEMBER(qix_state,qixmcu_coinctrl_w),   /* port B out */
+	DEVCB_NULL,     /* line CA2 out */
+	DEVCB_NULL,     /* port CB2 out */
+	DEVCB_NULL,     /* IRQA */
+	DEVCB_NULL      /* IRQB */
 };
 
 
@@ -186,34 +164,34 @@ const pia6821_interface qixmcu_pia_2_intf =
 
 const pia6821_interface slither_pia_1_intf =
 {
-	DEVCB_HANDLER(slither_trak_lr_r),	/* port A in */
-	DEVCB_NULL,		/* port B in */
-	DEVCB_NULL,		/* line CA1 in */
-	DEVCB_NULL,		/* line CB1 in */
-	DEVCB_NULL,		/* line CA2 in */
-	DEVCB_NULL,		/* line CB2 in */
-	DEVCB_NULL,		/* port A out */
-	DEVCB_HANDLER(slither_76489_0_w),		/* port B out */
-	DEVCB_NULL,		/* line CA2 out */
-	DEVCB_NULL,		/* port CB2 out */
-	DEVCB_NULL,		/* IRQA */
-	DEVCB_NULL		/* IRQB */
+	DEVCB_DRIVER_MEMBER(qix_state,slither_trak_lr_r),   /* port A in */
+	DEVCB_NULL,     /* port B in */
+	DEVCB_NULL,     /* line CA1 in */
+	DEVCB_NULL,     /* line CB1 in */
+	DEVCB_NULL,     /* line CA2 in */
+	DEVCB_NULL,     /* line CB2 in */
+	DEVCB_NULL,     /* port A out */
+	DEVCB_DRIVER_MEMBER(qix_state,slither_76489_0_w),       /* port B out */
+	DEVCB_NULL,     /* line CA2 out */
+	DEVCB_NULL,     /* port CB2 out */
+	DEVCB_NULL,     /* IRQA */
+	DEVCB_NULL      /* IRQB */
 };
 
 const pia6821_interface slither_pia_2_intf =
 {
-	DEVCB_HANDLER(slither_trak_ud_r),	/* port A in */
-	DEVCB_NULL,		/* port B in */
-	DEVCB_NULL,		/* line CA1 in */
-	DEVCB_NULL,		/* line CB1 in */
-	DEVCB_NULL,		/* line CA2 in */
-	DEVCB_NULL,		/* line CB2 in */
-	DEVCB_NULL,		/* port A out */
-	DEVCB_HANDLER(slither_76489_1_w),		/* port B out */
-	DEVCB_NULL,		/* line CA2 out */
-	DEVCB_NULL,		/* port CB2 out */
-	DEVCB_NULL,		/* IRQA */
-	DEVCB_NULL		/* IRQB */
+	DEVCB_DRIVER_MEMBER(qix_state,slither_trak_ud_r),   /* port A in */
+	DEVCB_NULL,     /* port B in */
+	DEVCB_NULL,     /* line CA1 in */
+	DEVCB_NULL,     /* line CB1 in */
+	DEVCB_NULL,     /* line CA2 in */
+	DEVCB_NULL,     /* line CB2 in */
+	DEVCB_NULL,     /* port A out */
+	DEVCB_DRIVER_MEMBER(qix_state,slither_76489_1_w),       /* port B out */
+	DEVCB_NULL,     /* line CA2 out */
+	DEVCB_NULL,     /* port CB2 out */
+	DEVCB_NULL,     /* IRQA */
+	DEVCB_NULL      /* IRQB */
 };
 
 
@@ -224,22 +202,20 @@ const pia6821_interface slither_pia_2_intf =
  *
  *************************************/
 
-MACHINE_RESET( qix )
+void qix_state::machine_reset()
 {
-	qix_state *state = machine.driver_data<qix_state>();
 
 	/* reset the coin counter register */
-	state->m_coinctrl = 0x00;
+	m_coinctrl = 0x00;
 }
 
 
-MACHINE_START( qixmcu )
+MACHINE_START_MEMBER(qix_state,qixmcu)
 {
-	qix_state *state = machine.driver_data<qix_state>();
 
 	/* set up save states */
-	state->save_item(NAME(state->m_68705_port_in));
-	state->save_item(NAME(state->m_coinctrl));
+	save_item(NAME(m_68705_port_in));
+	save_item(NAME(m_coinctrl));
 }
 
 
@@ -250,10 +226,10 @@ MACHINE_START( qixmcu )
  *
  *************************************/
 
-WRITE_LINE_DEVICE_HANDLER( qix_vsync_changed )
+WRITE_LINE_MEMBER(qix_state::qix_vsync_changed)
 {
-	device_t *pia = device->machine().device("sndpia0");
-	pia6821_cb1_w(pia, state);
+	pia6821_device *pia = machine().device<pia6821_device>("sndpia0");
+	pia->cb1_w(state);
 }
 
 
@@ -264,9 +240,9 @@ WRITE_LINE_DEVICE_HANDLER( qix_vsync_changed )
  *
  *************************************/
 
-WRITE8_HANDLER( zookeep_bankswitch_w )
+WRITE8_MEMBER(qix_state::zookeep_bankswitch_w)
 {
-	memory_set_bank(space->machine(), "bank1", (data >> 2) & 1);
+	membank("bank1")->set_entry((data >> 2) & 1);
 	/* not necessary, but technically correct */
 	qix_palettebank_w(space, offset, data);
 }
@@ -279,28 +255,28 @@ WRITE8_HANDLER( zookeep_bankswitch_w )
  *
  *************************************/
 
-WRITE8_HANDLER( qix_data_firq_w )
+WRITE8_MEMBER(qix_state::qix_data_firq_w)
 {
-	cputag_set_input_line(space->machine(), "maincpu", M6809_FIRQ_LINE, ASSERT_LINE);
+	machine().device("maincpu")->execute().set_input_line(M6809_FIRQ_LINE, ASSERT_LINE);
 }
 
 
-WRITE8_HANDLER( qix_data_firq_ack_w )
+WRITE8_MEMBER(qix_state::qix_data_firq_ack_w)
 {
-	cputag_set_input_line(space->machine(), "maincpu", M6809_FIRQ_LINE, CLEAR_LINE);
+	machine().device("maincpu")->execute().set_input_line(M6809_FIRQ_LINE, CLEAR_LINE);
 }
 
 
-READ8_HANDLER( qix_data_firq_r )
+READ8_MEMBER(qix_state::qix_data_firq_r)
 {
-	cputag_set_input_line(space->machine(), "maincpu", M6809_FIRQ_LINE, ASSERT_LINE);
+	machine().device("maincpu")->execute().set_input_line(M6809_FIRQ_LINE, ASSERT_LINE);
 	return 0xff;
 }
 
 
-READ8_HANDLER( qix_data_firq_ack_r )
+READ8_MEMBER(qix_state::qix_data_firq_ack_r)
 {
-	cputag_set_input_line(space->machine(), "maincpu", M6809_FIRQ_LINE, CLEAR_LINE);
+	machine().device("maincpu")->execute().set_input_line(M6809_FIRQ_LINE, CLEAR_LINE);
 	return 0xff;
 }
 
@@ -312,28 +288,28 @@ READ8_HANDLER( qix_data_firq_ack_r )
  *
  *************************************/
 
-WRITE8_HANDLER( qix_video_firq_w )
+WRITE8_MEMBER(qix_state::qix_video_firq_w)
 {
-	cputag_set_input_line(space->machine(), "videocpu", M6809_FIRQ_LINE, ASSERT_LINE);
+	machine().device("videocpu")->execute().set_input_line(M6809_FIRQ_LINE, ASSERT_LINE);
 }
 
 
-WRITE8_HANDLER( qix_video_firq_ack_w )
+WRITE8_MEMBER(qix_state::qix_video_firq_ack_w)
 {
-	cputag_set_input_line(space->machine(), "videocpu", M6809_FIRQ_LINE, CLEAR_LINE);
+	machine().device("videocpu")->execute().set_input_line(M6809_FIRQ_LINE, CLEAR_LINE);
 }
 
 
-READ8_HANDLER( qix_video_firq_r )
+READ8_MEMBER(qix_state::qix_video_firq_r)
 {
-	cputag_set_input_line(space->machine(), "videocpu", M6809_FIRQ_LINE, ASSERT_LINE);
+	machine().device("videocpu")->execute().set_input_line(M6809_FIRQ_LINE, ASSERT_LINE);
 	return 0xff;
 }
 
 
-READ8_HANDLER( qix_video_firq_ack_r )
+READ8_MEMBER(qix_state::qix_video_firq_ack_r)
 {
-	cputag_set_input_line(space->machine(), "videocpu", M6809_FIRQ_LINE, CLEAR_LINE);
+	machine().device("videocpu")->execute().set_input_line(M6809_FIRQ_LINE, CLEAR_LINE);
 	return 0xff;
 }
 
@@ -345,44 +321,41 @@ READ8_HANDLER( qix_video_firq_ack_r )
  *
  *************************************/
 
-READ8_DEVICE_HANDLER( qixmcu_coin_r )
+READ8_MEMBER(qix_state::qixmcu_coin_r)
 {
-	qix_state *state = device->machine().driver_data<qix_state>();
 
-	logerror("6809:qixmcu_coin_r = %02X\n", state->m_68705_port_out[0]);
-	return state->m_68705_port_out[0];
+	logerror("6809:qixmcu_coin_r = %02X\n", m_68705_port_out[0]);
+	return m_68705_port_out[0];
 }
 
 
-static WRITE8_DEVICE_HANDLER( qixmcu_coin_w )
+WRITE8_MEMBER(qix_state::qixmcu_coin_w)
 {
-	qix_state *state = device->machine().driver_data<qix_state>();
 
 	logerror("6809:qixmcu_coin_w = %02X\n", data);
-	/* this is a callback called by pia6821_w(), so I don't need to synchronize */
+	/* this is a callback called by pia6821_device::write(), so I don't need to synchronize */
 	/* the CPUs - they have already been synchronized by qix_pia_w() */
-	state->m_68705_port_in[0] = data;
+	m_68705_port_in[0] = data;
 }
 
 
-static WRITE8_DEVICE_HANDLER( qixmcu_coinctrl_w )
+WRITE8_MEMBER(qix_state::qixmcu_coinctrl_w)
 {
-	qix_state *state = device->machine().driver_data<qix_state>();
 
 	/* if (!(data & 0x04)) */
 	if (data & 0x04)
 	{
-		cputag_set_input_line(device->machine(), "mcu", M68705_IRQ_LINE, ASSERT_LINE);
+		machine().device("mcu")->execute().set_input_line(M68705_IRQ_LINE, ASSERT_LINE);
 		/* temporarily boost the interleave to sync things up */
 		/* note: I'm using 50 because 30 is not enough for space dungeon at game over */
-		device->machine().scheduler().boost_interleave(attotime::zero, attotime::from_usec(50));
+		machine().scheduler().boost_interleave(attotime::zero, attotime::from_usec(50));
 	}
 	else
-		cputag_set_input_line(device->machine(), "mcu", M68705_IRQ_LINE, CLEAR_LINE);
+		machine().device("mcu")->execute().set_input_line(M68705_IRQ_LINE, CLEAR_LINE);
 
-	/* this is a callback called by pia6821_w(), so I don't need to synchronize */
+	/* this is a callback called by pia6821_device::write(), so I don't need to synchronize */
 	/* the CPUs - they have already been synchronized by qix_pia_w() */
-	state->m_coinctrl = data;
+	m_coinctrl = data;
 	logerror("6809:qixmcu_coinctrl_w = %02X\n", data);
 }
 
@@ -394,36 +367,33 @@ static WRITE8_DEVICE_HANDLER( qixmcu_coinctrl_w )
  *
  *************************************/
 
-READ8_HANDLER( qix_68705_portA_r )
+READ8_MEMBER(qix_state::qix_68705_portA_r)
 {
-	qix_state *state = space->machine().driver_data<qix_state>();
 
-	UINT8 ddr = state->m_68705_ddr[0];
-	UINT8 out = state->m_68705_port_out[0];
-	UINT8 in = state->m_68705_port_in[0];
+	UINT8 ddr = m_68705_ddr[0];
+	UINT8 out = m_68705_port_out[0];
+	UINT8 in = m_68705_port_in[0];
 	logerror("68705:portA_r = %02X (%02X)\n", (out & ddr) | (in & ~ddr), in);
 	return (out & ddr) | (in & ~ddr);
 }
 
 
-READ8_HANDLER( qix_68705_portB_r )
+READ8_MEMBER(qix_state::qix_68705_portB_r)
 {
-	qix_state *state = space->machine().driver_data<qix_state>();
 
-	UINT8 ddr = state->m_68705_ddr[1];
-	UINT8 out = state->m_68705_port_out[1];
-	UINT8 in = (input_port_read(space->machine(), "COIN") & 0x0f) | ((input_port_read(space->machine(), "COIN") & 0x80) >> 3);
+	UINT8 ddr = m_68705_ddr[1];
+	UINT8 out = m_68705_port_out[1];
+	UINT8 in = (ioport("COIN")->read() & 0x0f) | ((ioport("COIN")->read() & 0x80) >> 3);
 	return (out & ddr) | (in & ~ddr);
 }
 
 
-READ8_HANDLER( qix_68705_portC_r )
+READ8_MEMBER(qix_state::qix_68705_portC_r)
 {
-	qix_state *state = space->machine().driver_data<qix_state>();
 
-	UINT8 ddr = state->m_68705_ddr[2];
-	UINT8 out = state->m_68705_port_out[2];
-	UINT8 in = (state->m_coinctrl & 0x08) | ((input_port_read(space->machine(), "COIN") & 0x70) >> 4);
+	UINT8 ddr = m_68705_ddr[2];
+	UINT8 out = m_68705_port_out[2];
+	UINT8 in = (m_coinctrl & 0x08) | ((ioport("COIN")->read() & 0x70) >> 4);
 	return (out & ddr) | (in & ~ddr);
 }
 
@@ -435,30 +405,27 @@ READ8_HANDLER( qix_68705_portC_r )
  *
  *************************************/
 
-WRITE8_HANDLER( qix_68705_portA_w )
+WRITE8_MEMBER(qix_state::qix_68705_portA_w)
 {
-	qix_state *state = space->machine().driver_data<qix_state>();
 
 	logerror("68705:portA_w = %02X\n", data);
-	state->m_68705_port_out[0] = data;
+	m_68705_port_out[0] = data;
 }
 
 
-WRITE8_HANDLER( qix_68705_portB_w )
+WRITE8_MEMBER(qix_state::qix_68705_portB_w)
 {
-	qix_state *state = space->machine().driver_data<qix_state>();
 
-	state->m_68705_port_out[1] = data;
-	coin_lockout_w(space->machine(), 0, (~data >> 6) & 1);
-	coin_counter_w(space->machine(), 0, (data >> 7) & 1);
+	m_68705_port_out[1] = data;
+	coin_lockout_w(machine(), 0, (~data >> 6) & 1);
+	coin_counter_w(machine(), 0, (data >> 7) & 1);
 }
 
 
-WRITE8_HANDLER( qix_68705_portC_w )
+WRITE8_MEMBER(qix_state::qix_68705_portC_w)
 {
-	qix_state *state = space->machine().driver_data<qix_state>();
 
-	state->m_68705_port_out[2] = data;
+	m_68705_port_out[2] = data;
 }
 
 
@@ -469,18 +436,18 @@ WRITE8_HANDLER( qix_68705_portC_w )
  *
  *************************************/
 
-static TIMER_CALLBACK( pia_w_callback )
+TIMER_CALLBACK_MEMBER(qix_state::pia_w_callback)
 {
-	device_t *device = (device_t *)ptr;
-	pia6821_w(device, param >> 8, param & 0xff);
+	pia6821_device *device = (pia6821_device *)ptr;
+	device->write(device->machine().driver_data()->generic_space(), param >> 8, param & 0xff);
 }
 
 
-WRITE8_DEVICE_HANDLER( qix_pia_w )
+WRITE8_MEMBER(qix_state::qix_pia_w)
 {
 	/* make all the CPUs synchronize, and only AFTER that write the command to the PIA */
 	/* otherwise the 68705 will miss commands */
-	device->machine().scheduler().synchronize(FUNC(pia_w_callback), data | (offset << 8), (void *)device);
+	machine().scheduler().synchronize(timer_expired_delegate(FUNC(qix_state::pia_w_callback),this), data | (offset << 8), (void *)downcast<pia6821_device *>(machine().device("pia0")));
 }
 
 
@@ -491,10 +458,10 @@ WRITE8_DEVICE_HANDLER( qix_pia_w )
  *
  *************************************/
 
-static WRITE8_DEVICE_HANDLER( qix_coinctl_w )
+WRITE8_MEMBER(qix_state::qix_coinctl_w)
 {
-	coin_lockout_w(device->machine(), 0, (~data >> 2) & 1);
-	coin_counter_w(device->machine(), 0, (data >> 1) & 1);
+	coin_lockout_w(machine(), 0, (~data >> 2) & 1);
+	coin_counter_w(machine(), 0, (data >> 1) & 1);
 }
 
 
@@ -505,25 +472,28 @@ static WRITE8_DEVICE_HANDLER( qix_coinctl_w )
  *
  *************************************/
 
-static WRITE8_DEVICE_HANDLER( slither_76489_0_w )
+	WRITE8_MEMBER(qix_state::slither_76489_0_w)
 {
 	/* write to the sound chip */
-	sn76496_w(device->machine().device("sn1"), 0, data);
+	m_sn1->write(space.machine().device<legacy_cpu_device>("maincpu")->space(), 0, data);
 
 	/* clock the ready line going back into CB1 */
-	pia6821_cb1_w(device, 0);
-	pia6821_cb1_w(device, 1);
+	pia6821_device *pia = downcast<pia6821_device *>(machine().device("pia1"));
+	pia->cb1_w(0);
+	pia->cb1_w(1);
 }
 
 
-static WRITE8_DEVICE_HANDLER( slither_76489_1_w )
+WRITE8_MEMBER(qix_state::slither_76489_1_w)
 {
+
 	/* write to the sound chip */
-	sn76496_w(device->machine().device("sn2"), 0, data);
+	m_sn2->write(machine().device<legacy_cpu_device>("maincpu")->space(), 0, data);
 
 	/* clock the ready line going back into CB1 */
-	pia6821_cb1_w(device, 0);
-	pia6821_cb1_w(device, 1);
+	pia6821_device *pia = downcast<pia6821_device *>(machine().device("pia2"));
+	pia->cb1_w(0);
+	pia->cb1_w(1);
 }
 
 
@@ -534,17 +504,15 @@ static WRITE8_DEVICE_HANDLER( slither_76489_1_w )
  *
  *************************************/
 
-static READ8_DEVICE_HANDLER( slither_trak_lr_r )
+READ8_MEMBER(qix_state::slither_trak_lr_r)
 {
-	qix_state *state = device->machine().driver_data<qix_state>();
 
-	return input_port_read(device->machine(), state->m_flip ? "AN3" : "AN1");
+	return ioport(m_flip ? "AN3" : "AN1")->read();
 }
 
 
-static READ8_DEVICE_HANDLER( slither_trak_ud_r )
+READ8_MEMBER(qix_state::slither_trak_ud_r)
 {
-	qix_state *state = device->machine().driver_data<qix_state>();
 
-	return input_port_read(device->machine(), state->m_flip ? "AN2" : "AN0");
+	return ioport(m_flip ? "AN2" : "AN0")->read();
 }

@@ -35,6 +35,7 @@
 #include "includes/cd32.h"
 #include "sound/cdda.h"
 #include "imagedev/chd_cd.h"
+#include "machine/amigafdc.h"
 
 #define CD32PAL_XTAL_X1   XTAL_28_37516MHz
 #define CD32PAL_XTAL_X2   XTAL_4_433619MHz
@@ -42,28 +43,28 @@
 
 
 /* set to 0 to use control panel with only buttons (as in quiz games) - joy is default in dispenser setup */
-#define MGPREM11_USE_JOY	1
-#define MGNUMBER_USE_JOY	1
+#define MGPREM11_USE_JOY    1
+#define MGNUMBER_USE_JOY    1
 
 
 static void handle_cd32_joystick_cia(running_machine &machine, UINT8 pra, UINT8 dra);
 
-static WRITE32_HANDLER( aga_overlay_w )
+WRITE32_MEMBER(cd32_state::aga_overlay_w)
 {
 	if (ACCESSING_BITS_16_23)
 	{
 		data = (data >> 16) & 1;
 
 		/* switch banks as appropriate */
-		memory_set_bank(space->machine(), "bank1", data & 1);
+		membank("bank1")->set_entry(data & 1);
 
 		/* swap the write handlers between ROM and bank 1 based on the bit */
 		if ((data & 1) == 0)
 			/* overlay disabled, map RAM on 0x000000 */
-			space->install_write_bank(0x000000, 0x1fffff, "bank1");
+			space.install_write_bank(0x000000, 0x1fffff, "bank1");
 		else
 			/* overlay enabled, map Amiga system ROM on 0x000000 */
-			space->unmap_write(0x000000, 0x1fffff);
+			space.unmap_write(0x000000, 0x1fffff);
 	}
 }
 
@@ -82,15 +83,16 @@ static WRITE32_HANDLER( aga_overlay_w )
  *
  *************************************/
 
-static WRITE8_DEVICE_HANDLER( cd32_cia_0_porta_w )
+WRITE8_MEMBER(cd32_state::cd32_cia_0_porta_w)
 {
+	device_t *device = machine().device("cia_0");
 	/* bit 1 = cd audio mute */
-	device->machine().device<cdda_device>("cdda")->set_output_gain( 0, ( data & 1 ) ? 0.0 : 1.0 );
+	machine().device<cdda_device>("cdda")->set_output_gain( 0, ( data & 1 ) ? 0.0 : 1.0 );
 
 	/* bit 2 = Power Led on Amiga */
-	set_led_status(device->machine(), 0, (data & 2) ? 0 : 1);
+	set_led_status(machine(), 0, (data & 2) ? 0 : 1);
 
-	handle_cd32_joystick_cia(device->machine(), data, mos6526_r(device, 2));
+	handle_cd32_joystick_cia(machine(), data, mos6526_r(device, space, 2));
 }
 
 /*************************************
@@ -108,31 +110,31 @@ static WRITE8_DEVICE_HANDLER( cd32_cia_0_porta_w )
  *
  *************************************/
 
-static READ8_DEVICE_HANDLER( cd32_cia_0_portb_r )
+READ8_MEMBER(cd32_state::cd32_cia_0_portb_r)
 {
 	/* parallel port */
-	logerror("%s:CIA0_portb_r\n", device->machine().describe_context());
+	logerror("%s:CIA0_portb_r\n", machine().describe_context());
 	return 0xff;
 }
 
-static WRITE8_DEVICE_HANDLER( cd32_cia_0_portb_w )
+WRITE8_MEMBER(cd32_state::cd32_cia_0_portb_w)
 {
 	/* parallel port */
-	logerror("%s:CIA0_portb_w(%02x)\n", device->machine().describe_context(), data);
+	logerror("%s:CIA0_portb_w(%02x)\n", machine().describe_context(), data);
 }
 
-static ADDRESS_MAP_START( cd32_map, AS_PROGRAM, 32 )
+static ADDRESS_MAP_START( cd32_map, AS_PROGRAM, 32, cd32_state )
 	ADDRESS_MAP_UNMAP_HIGH
-	AM_RANGE(0x000000, 0x1fffff) AM_RAMBANK("bank1") AM_BASE_SIZE_MEMBER(cd32_state, m_chip_ram, m_chip_ram_size)
+	AM_RANGE(0x000000, 0x1fffff) AM_RAMBANK("bank1") AM_SHARE("chip_ram")
 	AM_RANGE(0x800000, 0x800003) AM_READ_PORT("DIPSW1")
 	AM_RANGE(0x800010, 0x800013) AM_READ_PORT("DIPSW2")
-	AM_RANGE(0xb80000, 0xb8003f) AM_DEVREADWRITE("akiko", amiga_akiko32_r, amiga_akiko32_w)
+	AM_RANGE(0xb80000, 0xb8003f) AM_DEVREADWRITE_LEGACY("akiko", amiga_akiko32_r, amiga_akiko32_w)
 	AM_RANGE(0xbfa000, 0xbfa003) AM_WRITE(aga_overlay_w)
-	AM_RANGE(0xbfd000, 0xbfefff) AM_READWRITE16(amiga_cia_r, amiga_cia_w, 0xffffffff)
-	AM_RANGE(0xc00000, 0xdfffff) AM_READWRITE16(amiga_custom_r, amiga_custom_w, 0xffffffff) AM_BASE_MEMBER(cd32_state, m_custom_regs)
-	AM_RANGE(0xe00000, 0xe7ffff) AM_ROM AM_REGION("user1", 0x80000)	/* CD32 Extended ROM */
+	AM_RANGE(0xbfd000, 0xbfefff) AM_READWRITE16_LEGACY(amiga_cia_r, amiga_cia_w, 0xffffffff)
+	AM_RANGE(0xc00000, 0xdfffff) AM_READWRITE16_LEGACY(amiga_custom_r, amiga_custom_w, 0xffffffff) AM_SHARE("custom_regs")
+	AM_RANGE(0xe00000, 0xe7ffff) AM_ROM AM_REGION("user1", 0x80000) /* CD32 Extended ROM */
 	AM_RANGE(0xa00000, 0xf7ffff) AM_NOP
-	AM_RANGE(0xf80000, 0xffffff) AM_ROM AM_REGION("user1", 0x0)		/* Kickstart */
+	AM_RANGE(0xf80000, 0xffffff) AM_ROM AM_REGION("user1", 0x0)     /* Kickstart */
 ADDRESS_MAP_END
 
 /*************************************
@@ -222,68 +224,80 @@ static UINT16 handle_joystick_potgor(running_machine &machine, UINT16 potgor)
 		/* shift at 1 == return one, >1 = return button states */
 		if (state->m_cd32_shifter[i] == 0)
 			potgor &= ~p9dat; /* shift at zero == return zero */
-		if (state->m_cd32_shifter[i] >= 2 && (input_port_read(machine, player_portname[i]) & (1 << (state->m_cd32_shifter[i] - 2))))
+		if (state->m_cd32_shifter[i] >= 2 && (state->ioport(player_portname[i])->read() & (1 << (state->m_cd32_shifter[i] - 2))))
 			potgor &= ~p9dat;
 	}
 	return potgor;
 }
 
-static CUSTOM_INPUT(cubo_input)
+CUSTOM_INPUT_MEMBER(cd32_state::cubo_input)
 {
-	cd32_state *state = field->port->machine().driver_data<cd32_state>();
-	return handle_joystick_potgor(field->port->machine(), state->m_potgo_value) >> 10;
+	return handle_joystick_potgor(machine(), m_potgo_value) >> 8;
 }
+
+
+
+CUSTOM_INPUT_MEMBER(cd32_state::cd32_sel_mirror_input)
+{
+	UINT8 bits = ioport((const char *)param)->read();
+	return (bits & 0x20)>>5;
+}
+
+
 
 static INPUT_PORTS_START( cd32 )
 	PORT_START("CIA0PORTA")
-	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x3f, IP_ACTIVE_LOW, IPT_SPECIAL )
+	/* this is the regular port for reading a single button joystick on the Amiga, many CD32 games require this to mirror the pad start button! */
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, cd32_state,cd32_sel_mirror_input, "P2")
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, cd32_state,cd32_sel_mirror_input, "P1")
 
 	PORT_START("CIA0PORTB")
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START("JOY0DAT")
-	PORT_BIT( 0x0303, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(amiga_joystick_convert, "P2JOY")
+	PORT_BIT( 0x0303, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, cd32_state,amiga_joystick_convert, "P2JOY")
 	PORT_BIT( 0xfcfc, IP_ACTIVE_HIGH, IPT_UNUSED )
 
 	PORT_START("JOY1DAT")
-	PORT_BIT( 0x0303, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(amiga_joystick_convert, "P1JOY")
+	PORT_BIT( 0x0303, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, cd32_state,amiga_joystick_convert, "P1JOY")
 	PORT_BIT( 0xfcfc, IP_ACTIVE_HIGH, IPT_UNUSED )
 
 	PORT_START("POTGO")
-	PORT_BIT( 0x4400, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(cubo_input, 0)
-	PORT_BIT( 0xbbff, IP_ACTIVE_HIGH, IPT_UNUSED )
+	PORT_BIT( 0xff00, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, cd32_state,cubo_input, 0)
+	PORT_BIT( 0x00ff, IP_ACTIVE_HIGH, IPT_UNUSED )
 
+
+	// CD32 '11' button pad (4 dpad directions + 7 buttons), not read directly
+	PORT_START("P1")
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(1) PORT_NAME("P1 ||>")
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_PLAYER(1) PORT_NAME("P1 <<") /* left trigger */
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_BUTTON3 ) PORT_PLAYER(1) PORT_NAME("P1 >>") /* right trigger */
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_BUTTON4 ) PORT_PLAYER(1) PORT_NAME("P1 Green")    /* BUTTON3 */
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON5 ) PORT_PLAYER(1) PORT_NAME("P1 Yellow")   /* BUTTON4 */
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON6 ) PORT_PLAYER(1) PORT_NAME("P1 Red / SELECT")  /* BUTTON1 = START1 */
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON7 ) PORT_PLAYER(1) PORT_NAME("P1 Blue / STOP") /* BUTTON2 */
 	PORT_START("P1JOY")
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP )    PORT_PLAYER(1)
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN )  PORT_PLAYER(1)
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT )  PORT_PLAYER(1)
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(1)
 
+	// CD32 '11' button pad (4 dpad directions + 7 buttons), not read directly
+	PORT_START("P2")
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(2) PORT_NAME("P2 ||>")
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_PLAYER(2) PORT_NAME("P2 <<") /* left trigger */
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_BUTTON3 ) PORT_PLAYER(2) PORT_NAME("P2 >>") /* right trigger */
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_BUTTON4 ) PORT_PLAYER(2) PORT_NAME("P2 Green")   /* BUTTON3 */
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON5 ) PORT_PLAYER(2) PORT_NAME("P2 Yellow")   /* BUTTON4 */
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON6 ) PORT_PLAYER(2) PORT_NAME("P2 Red / SELECT")  /* BUTTON1 = START2 */
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON7 ) PORT_PLAYER(2) PORT_NAME("P2 Blue / STOP") /* BUTTON2 */
 	PORT_START("P2JOY")
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP )    PORT_PLAYER(2)
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN )  PORT_PLAYER(2)
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT )  PORT_PLAYER(2)
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(2)
 
-	PORT_START("P1")
-	PORT_BIT( 0x0001, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(1)
-	PORT_BIT( 0x0002, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_PLAYER(1)
-	PORT_BIT( 0x0004, IP_ACTIVE_HIGH, IPT_BUTTON3 ) PORT_PLAYER(1)
-	PORT_BIT( 0x0008, IP_ACTIVE_HIGH, IPT_BUTTON4 ) PORT_PLAYER(1)    /* BUTTON3 */
-	PORT_BIT( 0x0010, IP_ACTIVE_HIGH, IPT_BUTTON5 ) PORT_PLAYER(1)    /* BUTTON4 */
-	PORT_BIT( 0x0020, IP_ACTIVE_HIGH, IPT_BUTTON6 ) PORT_PLAYER(1)    /* BUTTON1 = START1 */
-	PORT_BIT( 0x0040, IP_ACTIVE_HIGH, IPT_BUTTON7 ) PORT_PLAYER(1)    /* BUTTON2 */
-	PORT_BIT( 0x0080, IP_ACTIVE_HIGH, IPT_BUTTON8 ) PORT_PLAYER(1)
-
-	PORT_START("P2")
-	PORT_BIT( 0x0001, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(2)
-	PORT_BIT( 0x0002, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_PLAYER(2)
-	PORT_BIT( 0x0004, IP_ACTIVE_HIGH, IPT_BUTTON3 ) PORT_PLAYER(2)
-	PORT_BIT( 0x0008, IP_ACTIVE_HIGH, IPT_BUTTON4 ) PORT_PLAYER(2)    /* BUTTON3 */
-	PORT_BIT( 0x0010, IP_ACTIVE_HIGH, IPT_BUTTON5 ) PORT_PLAYER(2)    /* BUTTON4 */
-	PORT_BIT( 0x0020, IP_ACTIVE_HIGH, IPT_BUTTON6 ) PORT_PLAYER(2)    /* BUTTON1 = START2 */
-	PORT_BIT( 0x0040, IP_ACTIVE_HIGH, IPT_BUTTON7 ) PORT_PLAYER(2)    /* BUTTON2 */
-	PORT_BIT( 0x0080, IP_ACTIVE_HIGH, IPT_BUTTON8 ) PORT_PLAYER(2)
 
 	PORT_START("DIPSW1")
 	PORT_DIPNAME( 0x01, 0x01, "DSW1 1" )
@@ -724,24 +738,22 @@ INPUT_PORTS_END
  *
  *************************************/
 
-static const mos6526_interface cia_0_intf =
+static const legacy_mos6526_interface cia_0_intf =
 {
-	0,													/* tod_clock */
-	DEVCB_LINE(amiga_cia_0_irq),									/* irq_func */
-	DEVCB_NULL,	/* pc_func */
+	DEVCB_LINE(amiga_cia_0_irq),                                    /* irq_func */
+	DEVCB_NULL, /* pc_func */
 	DEVCB_NULL,
 	DEVCB_NULL,
 	DEVCB_INPUT_PORT("CIA0PORTA"),
-	DEVCB_HANDLER(cd32_cia_0_porta_w),		/* port A */
-	DEVCB_HANDLER(cd32_cia_0_portb_r),
-	DEVCB_HANDLER(cd32_cia_0_portb_w)		/* port B */
+	DEVCB_DRIVER_MEMBER(cd32_state,cd32_cia_0_porta_w),     /* port A */
+	DEVCB_DRIVER_MEMBER(cd32_state,cd32_cia_0_portb_r),
+	DEVCB_DRIVER_MEMBER(cd32_state,cd32_cia_0_portb_w)      /* port B */
 };
 
-static const mos6526_interface cia_1_intf =
+static const legacy_mos6526_interface cia_1_intf =
 {
-	0,													/* tod_clock */
-	DEVCB_LINE(amiga_cia_1_irq),									/* irq_func */
-	DEVCB_NULL,	/* pc_func */
+	DEVCB_LINE(amiga_cia_1_irq),                                    /* irq_func */
+	DEVCB_NULL, /* pc_func */
 	DEVCB_NULL,
 	DEVCB_NULL,
 	DEVCB_NULL,
@@ -750,12 +762,18 @@ static const mos6526_interface cia_1_intf =
 	DEVCB_NULL
 };
 
-#define	NVRAM_SIZE 1024
-#define	NVRAM_PAGE_SIZE	16	/* max size of one write request */
+#define NVRAM_SIZE 1024
+#define NVRAM_PAGE_SIZE 16  /* max size of one write request */
 
 static const i2cmem_interface i2cmem_interface =
 {
 	I2CMEM_SLAVE_ADDRESS, NVRAM_PAGE_SIZE, NVRAM_SIZE
+};
+
+static const microtouch_interface cd32_microtouch_config =
+{
+	DEVCB_DRIVER_MEMBER(cd32_state, microtouch_tx),
+	NULL
 };
 
 static MACHINE_CONFIG_START( cd32base, cd32_state )
@@ -765,7 +783,7 @@ static MACHINE_CONFIG_START( cd32base, cd32_state )
 	MCFG_CPU_PROGRAM_MAP(cd32_map)
 	MCFG_DEVICE_ADD("akiko", AKIKO, 0)
 
-	MCFG_MACHINE_RESET(amiga)
+	MCFG_MACHINE_RESET_OVERRIDE(amiga_state,amiga)
 
 	MCFG_I2CMEM_ADD("i2cmem",i2cmem_interface)
 
@@ -775,12 +793,11 @@ static MACHINE_CONFIG_START( cd32base, cd32_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(50)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
 	MCFG_SCREEN_SIZE(512*2, 312)
 	MCFG_SCREEN_VISIBLE_AREA((129-8-8)*2, (449+8-1+8)*2, 44-8, 300+8-1)
-	MCFG_SCREEN_UPDATE(amiga_aga)
+	MCFG_SCREEN_UPDATE_DRIVER(amiga_state, screen_update_amiga_aga)
 
-	MCFG_VIDEO_START(amiga_aga)
+	MCFG_VIDEO_START_OVERRIDE(cd32_state,amiga_aga)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
@@ -796,15 +813,24 @@ static MACHINE_CONFIG_START( cd32base, cd32_state )
 	MCFG_SOUND_ROUTE( 1, "rspeaker", 0.50 )
 
 	/* cia */
-	MCFG_MOS8520_ADD("cia_0", AMIGA_68EC020_PAL_CLOCK / 10, cia_0_intf)
-	MCFG_MOS8520_ADD("cia_1", AMIGA_68EC020_PAL_CLOCK / 10, cia_1_intf)
+	// these are setup differently on other amiga drivers (needed for floppy to work) which is correct / why?
+	MCFG_LEGACY_MOS8520_ADD("cia_0", AMIGA_68EC020_PAL_CLOCK / 10, 0, cia_0_intf)
+	MCFG_LEGACY_MOS8520_ADD("cia_1", AMIGA_68EC020_PAL_CLOCK / 10, 0, cia_1_intf)
+
+	MCFG_MICROTOUCH_ADD( "microtouch", cd32_microtouch_config )
+
+	/* fdc */
+	MCFG_AMIGA_FDC_ADD("fdc", AMIGA_68000_NTSC_CLOCK)
 MACHINE_CONFIG_END
 
-
+struct cdrom_interface cd32_cdrom =
+{
+	"cd32_cdrom",
+	NULL
+};
 
 static MACHINE_CONFIG_DERIVED( cd32, cd32base )
-	MCFG_CDROM_ADD( "cdrom" )
-	MCFG_CDROM_INTERFACE("cd32_cdrom")
+	MCFG_CDROM_ADD( "cdrom", cd32_cdrom )
 	MCFG_SOFTWARE_LIST_ADD("cd_list","cd32")
 MACHINE_CONFIG_END
 
@@ -821,34 +847,36 @@ ROM_START( cd32 )
 	CD32_BIOS
 ROM_END
 
+ROM_START( cd32bios )
+	CD32_BIOS
+ROM_END
 /***************************************************************************************************/
 
-static DRIVER_INIT( cd32 )
+DRIVER_INIT_MEMBER(cd32_state,cd32)
 {
-	cd32_state *state = machine.driver_data<cd32_state>();
 	static const amiga_machine_interface cd32_intf =
 	{
 		AGA_CHIP_RAM_MASK,
 		NULL, NULL, cd32_potgo_w,
-		NULL, NULL, NULL,
+		NULL,
 		NULL, NULL,
 		NULL,
-		FLAGS_AGA_CHIPSET
+		FLAGS_AGA_CHIPSET | FLAGS_IS_32BIT
 	};
 
 	/* configure our Amiga setup */
-	amiga_machine_config(machine, &cd32_intf);
+	amiga_machine_config(machine(), &cd32_intf);
 
 	/* set up memory */
-	memory_configure_bank(machine, "bank1", 0, 1, state->m_chip_ram, 0);
-	memory_configure_bank(machine, "bank1", 1, 1, machine.region("user1")->base(), 0);
+	membank("bank1")->configure_entry(0, m_chip_ram);
+	membank("bank1")->configure_entry(1, machine().root_device().memregion("user1")->base());
 
 	/* input hack */
-	state->m_input_hack = NULL;
+	m_input_hack = NULL;
 }
 
 /* BIOS */
-CONS( 1993, cd32,    0,       0,      cd32,   cd32,   cd32,   "Commodore Business Machines",  "Amiga CD32 (PAL)" , GAME_NOT_WORKING|GAME_IS_BIOS_ROOT )
+CONS( 1993, cd32,    0,       0,      cd32,   cd32,   cd32_state, cd32,   "Commodore Business Machines",  "Amiga CD32 (PAL)" , GAME_NOT_WORKING )
 
 
 /*
@@ -1161,56 +1189,56 @@ ROM_START( cndypuzl )
 	CD32_BIOS
 
 	DISK_REGION( "cdrom" )
-	DISK_IMAGE_READONLY( "cndypuzl", 0, SHA1(5f41ed3521b3e05d233ac1245b78cb0b118b2b90) )
+	DISK_IMAGE_READONLY( "cndypuzl", 0, BAD_DUMP SHA1(5f41ed3521b3e05d233ac1245b78cb0b118b2b90) )
 ROM_END
 
 ROM_START( haremchl )
 	CD32_BIOS
 
 	DISK_REGION( "cdrom" )
-	DISK_IMAGE_READONLY( "haremchl", 0, SHA1(abbab347c0d7c5eef0465d0eee770754a452e874) )
+	DISK_IMAGE_READONLY( "haremchl", 0, BAD_DUMP SHA1(abbab347c0d7c5eef0465d0eee770754a452e874) )
 ROM_END
 
 ROM_START( lsrquiz )
 	CD32_BIOS
 
 	DISK_REGION( "cdrom" )
-	DISK_IMAGE_READONLY( "lsrquiz", 0, SHA1(41fb6cd0c9d36bd77e9c3db69d36801edc791e96) )
+	DISK_IMAGE_READONLY( "lsrquiz", 0, BAD_DUMP SHA1(41fb6cd0c9d36bd77e9c3db69d36801edc791e96) )
 ROM_END
 
 ROM_START( lsrquiz2 )
 	CD32_BIOS
 
 	DISK_REGION( "cdrom" )
-	DISK_IMAGE_READONLY( "lsrquiz2", 0, SHA1(78e261df1c548fa492e6cf37a9469640bb8816bf) )
+	DISK_IMAGE_READONLY( "lsrquiz2", 0, BAD_DUMP SHA1(78e261df1c548fa492e6cf37a9469640bb8816bf) )
 ROM_END
 
 ROM_START( mgprem11 )
 	CD32_BIOS
 
 	DISK_REGION( "cdrom" )
-	DISK_IMAGE_READONLY( "mgprem11", 0, SHA1(7808db33d5949f6c86d12b32bc388c12377e7038) )
+	DISK_IMAGE_READONLY( "mgprem11", 0, BAD_DUMP SHA1(7808db33d5949f6c86d12b32bc388c12377e7038) )
 ROM_END
 
 ROM_START( lasstixx )
 	CD32_BIOS
 
 	DISK_REGION( "cdrom" )
-	DISK_IMAGE_READONLY( "lasstixx", 0, SHA1(b8f6138e1f1840c193e786c56dab03c512f3e21f) )
+	DISK_IMAGE_READONLY( "lasstixx", 0, BAD_DUMP SHA1(b8f6138e1f1840c193e786c56dab03c512f3e21f) )
 ROM_END
 
 ROM_START( mgnumber )
 	CD32_BIOS
 
 	DISK_REGION( "cdrom" )
-	DISK_IMAGE_READONLY( "magicnumber", 0, SHA1(60e1fadc42694742d19cc0ac2b6e99e9e33faa3d) )
+	DISK_IMAGE_READONLY( "magicnumber", 0, BAD_DUMP SHA1(60e1fadc42694742d19cc0ac2b6e99e9e33faa3d) )
 ROM_END
 
 ROM_START( odeontw2 )
 	CD32_BIOS
 
 	DISK_REGION( "cdrom" )
-	DISK_IMAGE_READONLY( "odeontw2", 0, SHA1(f39e09f35b65a6ae9f1eba4a22f970626b7d3b71) )
+	DISK_IMAGE_READONLY( "odeontw2", 0, BAD_DUMP SHA1(f39e09f35b65a6ae9f1eba4a22f970626b7d3b71) )
 ROM_END
 
 
@@ -1225,62 +1253,59 @@ static void cndypuzl_input_hack(running_machine &machine)
 {
 	cd32_state *state = machine.driver_data<cd32_state>();
 
-	if (cpu_get_pc(machine.device("maincpu")) < state->m_chip_ram_size)
+	if (machine.device("maincpu")->safe_pc() < state->m_chip_ram.bytes())
 	{
 		//(*state->m_chip_ram_w)(0x051c02, 0x0000);
 
-		UINT32 r_A5 = cpu_get_reg(machine.device("maincpu"), M68K_A5);
+		UINT32 r_A5 = machine.device("maincpu")->state().state_int(M68K_A5);
 		(*state->m_chip_ram_w)(state, r_A5 - 0x7ebe, 0x0000);
 	}
 }
 
-static DRIVER_INIT(cndypuzl)
+DRIVER_INIT_MEMBER(cd32_state,cndypuzl)
 {
-	cd32_state *state = machine.driver_data<cd32_state>();
 	DRIVER_INIT_CALL(cd32);
-	state->m_input_hack = cndypuzl_input_hack;
+	m_input_hack = cndypuzl_input_hack;
 }
 
 static void haremchl_input_hack(running_machine &machine)
 {
 	cd32_state *state = machine.driver_data<cd32_state>();
 
-	if (cpu_get_pc(machine.device("maincpu")) < state->m_chip_ram_size)
+	if (machine.device("maincpu")->safe_pc() < state->m_chip_ram.bytes())
 	{
 		//amiga_chip_ram_w8(state, 0x002907, 0x00);
 
-		UINT32 r_A5 = cpu_get_reg(machine.device("maincpu"), M68K_A5);
+		UINT32 r_A5 = machine.device("maincpu")->state().state_int(M68K_A5);
 		UINT32 r_A2 = ((*state->m_chip_ram_r)(state, r_A5 - 0x7f00 + 0) << 16) | ((*state->m_chip_ram_r)(state, r_A5 - 0x7f00 + 2));
 		amiga_chip_ram_w8(state, r_A2 + 0x1f, 0x00);
 	}
 }
 
-static DRIVER_INIT(haremchl)
+DRIVER_INIT_MEMBER(cd32_state,haremchl)
 {
-	cd32_state *state = machine.driver_data<cd32_state>();
 	DRIVER_INIT_CALL(cd32);
-	state->m_input_hack = haremchl_input_hack;
+	m_input_hack = haremchl_input_hack;
 }
 
 static void lsrquiz_input_hack(running_machine &machine)
 {
 	cd32_state *state = machine.driver_data<cd32_state>();
 
-	if (cpu_get_pc(machine.device("maincpu")) < state->m_chip_ram_size)
+	if (machine.device("maincpu")->safe_pc() < state->m_chip_ram.bytes())
 	{
 		//amiga_chip_ram_w8(state, 0x001e1b, 0x00);
 
-		UINT32 r_A5 = cpu_get_reg(machine.device("maincpu"), M68K_A5);
+		UINT32 r_A5 = machine.device("maincpu")->state().state_int(M68K_A5);
 		UINT32 r_A2 = ((*state->m_chip_ram_r)(state, r_A5 - 0x7fe0 + 0) << 16) | ((*state->m_chip_ram_r)(state, r_A5 - 0x7fe0 + 2));
 		amiga_chip_ram_w8(state, r_A2 + 0x13, 0x00);
 	}
 }
 
-static DRIVER_INIT(lsrquiz)
+DRIVER_INIT_MEMBER(cd32_state,lsrquiz)
 {
-	cd32_state *state = machine.driver_data<cd32_state>();
 	DRIVER_INIT_CALL(cd32);
-	state->m_input_hack = lsrquiz_input_hack;
+	m_input_hack = lsrquiz_input_hack;
 }
 
 /* The hack isn't working if you exit the test mode with P1 button 2 ! */
@@ -1288,92 +1313,188 @@ static void lsrquiz2_input_hack(running_machine &machine)
 {
 	cd32_state *state = machine.driver_data<cd32_state>();
 
-	if (cpu_get_pc(machine.device("maincpu")) < state->m_chip_ram_size)
+	if (machine.device("maincpu")->safe_pc() < state->m_chip_ram.bytes())
 	{
 		//amiga_chip_ram_w8(state, 0x046107, 0x00);
 
-		UINT32 r_A5 = cpu_get_reg(machine.device("maincpu"), M68K_A5);
+		UINT32 r_A5 = machine.device("maincpu")->state().state_int(M68K_A5);
 		UINT32 r_A2 = ((*state->m_chip_ram_r)(state, r_A5 - 0x7fdc + 0) << 16) | ((*state->m_chip_ram_r)(state, r_A5 - 0x7fdc + 2));
 		amiga_chip_ram_w8(state, r_A2 + 0x17, 0x00);
 	}
 }
 
-static DRIVER_INIT(lsrquiz2)
+DRIVER_INIT_MEMBER(cd32_state,lsrquiz2)
 {
-	cd32_state *state = machine.driver_data<cd32_state>();
 	DRIVER_INIT_CALL(cd32);
-	state->m_input_hack = lsrquiz2_input_hack;
+	m_input_hack = lsrquiz2_input_hack;
 }
 
 static void lasstixx_input_hack(running_machine &machine)
 {
 	cd32_state *state = machine.driver_data<cd32_state>();
 
-	if (cpu_get_pc(machine.device("maincpu")) < state->m_chip_ram_size)
+	if (machine.device("maincpu")->safe_pc() < state->m_chip_ram.bytes())
 	{
 		//amiga_chip_ram_w8(state, 0x00281c, 0x00);
 
-		UINT32 r_A5 = cpu_get_reg(machine.device("maincpu"), M68K_A5);
+		UINT32 r_A5 = machine.device("maincpu")->state().state_int(M68K_A5);
 		UINT32 r_A2 = ((*state->m_chip_ram_r)(state, r_A5 - 0x7fa2 + 0) << 16) | ((*state->m_chip_ram_r)(state, r_A5 - 0x7fa2 + 2));
 		amiga_chip_ram_w8(state, r_A2 + 0x24, 0x00);
 	}
 }
 
-static DRIVER_INIT(lasstixx)
+DRIVER_INIT_MEMBER(cd32_state,lasstixx)
 {
-	cd32_state *state = machine.driver_data<cd32_state>();
 	DRIVER_INIT_CALL(cd32);
-	state->m_input_hack = lasstixx_input_hack;
+	m_input_hack = lasstixx_input_hack;
 }
 
 static void mgnumber_input_hack(running_machine &machine)
 {
 	cd32_state *state = machine.driver_data<cd32_state>();
 
-	if (cpu_get_pc(machine.device("maincpu")) < state->m_chip_ram_size)
+	if (machine.device("maincpu")->safe_pc() < state->m_chip_ram.bytes())
 	{
 		//(*state->m_chip_ram_w)(0x04bfa0, 0x0000);
 
-		UINT32 r_A5 = cpu_get_reg(machine.device("maincpu"), M68K_A5);
+		UINT32 r_A5 = machine.device("maincpu")->state().state_int(M68K_A5);
 		(*state->m_chip_ram_w)(state, r_A5 - 0x7ed8, 0x0000);
 	}
 }
 
-static DRIVER_INIT(mgnumber)
+DRIVER_INIT_MEMBER(cd32_state,mgnumber)
 {
-	cd32_state *state = machine.driver_data<cd32_state>();
 	DRIVER_INIT_CALL(cd32);
-	state->m_input_hack = mgnumber_input_hack;
+	m_input_hack = mgnumber_input_hack;
 }
 
 static void mgprem11_input_hack(running_machine &machine)
 {
 	cd32_state *state = machine.driver_data<cd32_state>();
 
-	if (cpu_get_pc(machine.device("maincpu")) < state->m_chip_ram_size)
+	if (machine.device("maincpu")->safe_pc() < state->m_chip_ram.bytes())
 	{
 		//amiga_chip_ram_w8(state, 0x044f7e, 0x00);
 
-		UINT32 r_A5 = cpu_get_reg(machine.device("maincpu"), M68K_A5);
+		UINT32 r_A5 = machine.device("maincpu")->state().state_int(M68K_A5);
 		amiga_chip_ram_w8(state, r_A5 - 0x7eca, 0x00);
 	}
 }
 
-static DRIVER_INIT(mgprem11)
+DRIVER_INIT_MEMBER(cd32_state,mgprem11)
+{
+	DRIVER_INIT_CALL(cd32);
+	m_input_hack = mgprem11_input_hack;
+}
+
+static INPUT_PORTS_START( odeontw2 )
+//  PORT_INCLUDE( cd32 )
+	PORT_START("CIA0PORTA")
+	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )
+
+	PORT_START("CIA0PORTB")
+	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )
+
+
+	PORT_START("DIPSW1")
+	PORT_DIPNAME( 0x01, 0x01, "DSW1 1" )
+	PORT_DIPSETTING(    0x01, "Reset" )
+	PORT_DIPSETTING(    0x00, "Set" )
+	PORT_DIPNAME( 0x02, 0x02, "DSW1 2" )
+	PORT_DIPSETTING(    0x02, "Reset" )
+	PORT_DIPSETTING(    0x00, "Set" )
+	PORT_DIPNAME( 0x04, 0x04, "DSW1 3" )
+	PORT_DIPSETTING(    0x04, "Reset" )
+	PORT_DIPSETTING(    0x00, "Set" )
+	PORT_DIPNAME( 0x08, 0x08, "DSW1 4" )
+	PORT_DIPSETTING(    0x08, "Reset" )
+	PORT_DIPSETTING(    0x00, "Set" )
+	PORT_DIPNAME( 0x10, 0x10, "DSW1 5" )
+	PORT_DIPSETTING(    0x10, "Reset" )
+	PORT_DIPSETTING(    0x00, "Set" )
+	PORT_DIPNAME( 0x20, 0x20, "DSW1 6" )
+	PORT_DIPSETTING(    0x20, "Reset" )
+	PORT_DIPSETTING(    0x00, "Set" )
+	PORT_DIPNAME( 0x40, 0x40, "DSW1 7" )
+	PORT_DIPSETTING(    0x40, "Reset" )
+	PORT_DIPSETTING(    0x00, "Set" )
+	PORT_DIPNAME( 0x80, 0x80, "DSW1 8" )
+	PORT_DIPSETTING(    0x80, "Reset" )
+	PORT_DIPSETTING(    0x00, "Set" )
+
+	PORT_START("DIPSW2")
+	PORT_DIPNAME( 0x01, 0x01, "DSW2 1" )
+	PORT_DIPSETTING(    0x01, "Reset" )
+	PORT_DIPSETTING(    0x00, "Set" )
+	PORT_DIPNAME( 0x02, 0x02, "DSW2 2" )
+	PORT_DIPSETTING(    0x02, "Reset" )
+	PORT_DIPSETTING(    0x00, "Set" )
+	PORT_DIPNAME( 0x04, 0x04, "DSW2 3" )
+	PORT_DIPSETTING(    0x04, "Reset" )
+	PORT_DIPSETTING(    0x00, "Set" )
+	PORT_DIPNAME( 0x08, 0x08, "DSW2 4" )
+	PORT_DIPSETTING(    0x08, "Reset" )
+	PORT_DIPSETTING(    0x00, "Set" )
+	PORT_DIPNAME( 0x10, 0x10, "DSW2 5" )
+	PORT_DIPSETTING(    0x10, "Reset" )
+	PORT_DIPSETTING(    0x00, "Set" )
+	PORT_DIPNAME( 0x20, 0x20, "DSW2 6" )
+	PORT_DIPSETTING(    0x20, "Reset" )
+	PORT_DIPSETTING(    0x00, "Set" )
+	PORT_DIPNAME( 0x40, 0x40, "DSW2 7" )
+	PORT_DIPSETTING(    0x40, "Reset" )
+	PORT_DIPSETTING(    0x00, "Set" )
+	PORT_DIPNAME( 0x80, 0x80, "DSW2 8" )
+	PORT_DIPSETTING(    0x80, "Reset" )
+	PORT_DIPSETTING(    0x00, "Set" )
+
+INPUT_PORTS_END
+
+static void serial_w(running_machine &machine, UINT16 data)
 {
 	cd32_state *state = machine.driver_data<cd32_state>();
-	DRIVER_INIT_CALL(cd32);
-	state->m_input_hack = mgprem11_input_hack;
+	UINT8 data8 = data & 0xff;
+	if ( data8 != 0x00 )
+		state->m_microtouch->rx(machine.driver_data()->generic_space(), 0, data8);
+}
+
+WRITE8_MEMBER (cd32_state::microtouch_tx)
+{
+	amiga_serial_in_w(machine(), data);
+}
+
+DRIVER_INIT_MEMBER(cd32_state,odeontw2)
+{
+	static const amiga_machine_interface cd32_intf =
+	{
+		AGA_CHIP_RAM_MASK,
+		NULL, NULL, cd32_potgo_w,
+		serial_w,
+		NULL, NULL,
+		NULL,
+		FLAGS_AGA_CHIPSET
+	};
+
+	/* configure our Amiga setup */
+	amiga_machine_config(machine(), &cd32_intf);
+
+	/* set up memory */
+	membank("bank1")->configure_entry(0, m_chip_ram);
+	membank("bank1")->configure_entry(1, machine().root_device().memregion("user1")->base());
+
+	/* input hack */
+	m_input_hack = NULL;
 }
 
 /***************************************************************************************************/
 
 // these are clones of the cd32 SYSTEM because they run on a stock retail unit, with additional HW
-GAME( 1995, cndypuzl, cd32, cd32base, cndypuzl, cndypuzl, ROT0, "CD Express", "Candy Puzzle (v1.0)",       GAME_IMPERFECT_GRAPHICS|GAME_IMPERFECT_SOUND )
-GAME( 1995, haremchl, cd32, cd32base, haremchl, haremchl, ROT0, "CD Express", "Harem Challenge",           GAME_IMPERFECT_GRAPHICS|GAME_IMPERFECT_SOUND )
-GAME( 1995, lsrquiz,  cd32, cd32base, lsrquiz,  lsrquiz,  ROT0, "CD Express", "Laser Quiz Italy",          GAME_IMPERFECT_GRAPHICS|GAME_IMPERFECT_SOUND )  /* no player 2 inputs (ingame) */
-GAME( 1995, lsrquiz2, cd32, cd32base, lsrquiz2, lsrquiz2, ROT0, "CD Express", "Laser Quiz 2 Italy (v1.0)", GAME_IMPERFECT_GRAPHICS|GAME_IMPERFECT_SOUND )
-GAME( 1995, lasstixx, cd32, cd32base, lasstixx, lasstixx, ROT0, "CD Express", "Laser Strixx 2",            GAME_IMPERFECT_GRAPHICS|GAME_IMPERFECT_SOUND )
-GAME( 1995, mgnumber, cd32, cd32base, mgnumber, mgnumber, ROT0, "CD Express", "Magic Number",              GAME_IMPERFECT_GRAPHICS|GAME_IMPERFECT_SOUND )
-GAME( 1996, mgprem11, cd32, cd32base, mgprem11, mgprem11, ROT0, "CD Express", "Magic Premium (v1.1)",      GAME_IMPERFECT_GRAPHICS|GAME_IMPERFECT_SOUND )
-GAME( 1999, odeontw2, cd32, cd32base, cd32,     cd32,     ROT0, "CD Express", "Odeon Twister 2 (v202.19)", GAME_NOT_WORKING )
+GAME( 1993, cd32bios, 0,        cd32base, cd32,     cd32_state, cd32,    ROT0, "Commodore Business Machines", "CD32 Bios",       GAME_IMPERFECT_GRAPHICS|GAME_IMPERFECT_SOUND | GAME_IS_BIOS_ROOT )
+GAME( 1995, cndypuzl, cd32bios, cd32base, cndypuzl, cd32_state, cndypuzl, ROT0, "CD Express", "Candy Puzzle (v1.0)",       GAME_IMPERFECT_GRAPHICS|GAME_IMPERFECT_SOUND )
+GAME( 1995, haremchl, cd32bios, cd32base, haremchl, cd32_state, haremchl, ROT0, "CD Express", "Harem Challenge",           GAME_IMPERFECT_GRAPHICS|GAME_IMPERFECT_SOUND )
+GAME( 1995, lsrquiz,  cd32bios, cd32base, lsrquiz,  cd32_state,  lsrquiz,  ROT0, "CD Express", "Laser Quiz Italy",          GAME_IMPERFECT_GRAPHICS|GAME_IMPERFECT_SOUND )  /* no player 2 inputs (ingame) */
+GAME( 1995, lsrquiz2, cd32bios, cd32base, lsrquiz2, cd32_state, lsrquiz2, ROT0, "CD Express", "Laser Quiz 2 Italy (v1.0)", GAME_IMPERFECT_GRAPHICS|GAME_IMPERFECT_SOUND )
+GAME( 1995, lasstixx, cd32bios, cd32base, lasstixx, cd32_state, lasstixx, ROT0, "CD Express", "Laser Strixx 2",            GAME_IMPERFECT_GRAPHICS|GAME_IMPERFECT_SOUND )
+GAME( 1995, mgnumber, cd32bios, cd32base, mgnumber, cd32_state, mgnumber, ROT0, "CD Express", "Magic Number",              GAME_IMPERFECT_GRAPHICS|GAME_IMPERFECT_SOUND )
+GAME( 1996, mgprem11, cd32bios, cd32base, mgprem11, cd32_state, mgprem11, ROT0, "CD Express", "Magic Premium (v1.1)",      GAME_IMPERFECT_GRAPHICS|GAME_IMPERFECT_SOUND )
+GAME( 1999, odeontw2, cd32bios, cd32base, odeontw2, cd32_state, odeontw2, ROT0, "CD Express", "Odeon Twister 2 (v202.19)", GAME_NOT_WORKING )

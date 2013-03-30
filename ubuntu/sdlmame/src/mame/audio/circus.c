@@ -5,68 +5,68 @@
 static const char *const circus_sample_names[] =
 {
 	"*circus",
-	"pop.wav",
-	"miss.wav",
-	"bounce.wav",
+	"pop",
+	"miss",
+	"bounce",
 	0
 };
 
 const samples_interface circus_samples_interface =
 {
-	3,	/* 3 channels */
+	3,  /* 3 channels */
 	circus_sample_names
 };
 
 static const char *const crash_sample_names[] =
 {
 	"*crash",
-	"crash.wav",
+	"crash",
 	0
 };
 
 const samples_interface crash_samples_interface =
 {
-	1,	/* 1 channel */
+	1,  /* 1 channel */
 	crash_sample_names
 };
 
 static const char *const ripcord_sample_names[] =
 {
 	"*ripcord",
-	"splash.wav",
-	"scream.wav",
-	"chute.wav",
-	"whistle.wav",
+	"splash",
+	"scream",
+	"chute",
+	"whistle",
 	0
 };
 
 const samples_interface ripcord_samples_interface =
 {
-	4,	/* 4 channels */
+	4,  /* 4 channels */
 	ripcord_sample_names
 };
 
 static const char *const robotbwl_sample_names[] =
 {
 	"*robotbwl",
-	"hit.wav",
-	"roll.wav",
-	"balldrop.wav",
-	"demerit.wav",
-	"reward.wav",
+	"hit",
+	"roll",
+	"balldrop",
+	"demerit",
+	"reward",
 	0
 };
 
 const samples_interface robotbwl_samples_interface =
 {
-	5,	/* 5 channels */
+	5,  /* 5 channels */
 	robotbwl_sample_names
 };
 
 /* Nodes - Inputs */
-#define CIRCUS_MUSIC_BIT	NODE_01
+#define CIRCUS_MUSIC_BIT    NODE_01
 /* Nodes - Sounds */
-#define CIRCUS_MUSIC_SND	NODE_10
+#define CIRCUS_MUSIC_SND    NODE_10
 
 DISCRETE_SOUND_START(circus)
 	/************************************************/
@@ -77,7 +77,7 @@ DISCRETE_SOUND_START(circus)
 	/************************************************/
 	/* Music is just a 1 bit DAC                    */
 	/************************************************/
-	DISCRETE_CRFILTER(CIRCUS_MUSIC_SND, CIRCUS_MUSIC_BIT, RES_K(50), CAP_U(.1))	/* 50K is just an average value */
+	DISCRETE_CRFILTER(CIRCUS_MUSIC_SND, CIRCUS_MUSIC_BIT, RES_K(50), CAP_U(.1)) /* 50K is just an average value */
 
 	DISCRETE_OUTPUT(CIRCUS_MUSIC_SND, 1)
 DISCRETE_SOUND_END
@@ -94,26 +94,26 @@ static const discrete_mixer_desc crash_mixer =
 static const discrete_555_desc crash_beeper_555m =
 {
 	DISC_555_OUT_SQW | DISC_555_OUT_DC | DISC_555_TRIGGER_IS_LOGIC,
-	5,		// B+ voltage of 555
+	5,      // B+ voltage of 555
 	DEFAULT_555_VALUES
 };
 
 static const discrete_555_desc crash_beeper_555a =
 {
 	DISC_555_OUT_SQW | DISC_555_OUT_DC,
-	5,		// B+ voltage of 555
+	5,      // B+ voltage of 555
 	DEFAULT_555_VALUES
 };
 
 /* Nodes - Inputs */
-#define CRASH_MUSIC_BIT		NODE_01
-#define CRASH_BEEPER_EN		NODE_02
+#define CRASH_MUSIC_BIT     NODE_01
+#define CRASH_BEEPER_EN     NODE_02
 /* Nodes - Adjusters */
-#define CRASH_R63			NODE_10
-#define CRASH_R39			NODE_11
+#define CRASH_R63           NODE_10
+#define CRASH_R39           NODE_11
 /* Nodes - Sounds */
-#define CRASH_MUSIC_SND		NODE_20
-#define CRASH_BEEPER_SND	NODE_21
+#define CRASH_MUSIC_SND     NODE_20
+#define CRASH_BEEPER_SND    NODE_21
 
 DISCRETE_SOUND_START(crash)
 	/************************************************/
@@ -146,9 +146,9 @@ DISCRETE_SOUND_START(crash)
 DISCRETE_SOUND_END
 
 /* Nodes - Inputs */
-#define ROBOTBWL_MUSIC_BIT		NODE_01
+#define ROBOTBWL_MUSIC_BIT      NODE_01
 /* Nodes - Sounds */
-#define ROBOTBWL_MUSIC_SND		NODE_10
+#define ROBOTBWL_MUSIC_SND      NODE_10
 
 DISCRETE_SOUND_START(robotbwl)
 	/************************************************/
@@ -170,99 +170,98 @@ DISCRETE_SOUND_END
 /* and also is used to enable the amplifier and trigger the   */
 /* discrete circuitry that produces sound effects and music   */
 
-WRITE8_HANDLER( circus_clown_z_w )
+WRITE8_MEMBER(circus_state::circus_clown_z_w)
 {
-	circus_state *state = space->machine().driver_data<circus_state>();
 
-	state->m_clown_z = (data & 0x0f);
-	*(space->machine().region("maincpu")->base() + 0x8000) = data; logerror("Z:%02x\n",data); //DEBUG
+	m_clown_z = (data & 0x0f);
+	*(machine().root_device().memregion("maincpu")->base() + 0x8000) = data; logerror("Z:%02x\n",data); //DEBUG
 
 	/* Bits 4-6 enable/disable trigger different events */
-	switch (state->m_game_id)
+	switch (m_game_id)
 	{
-		case 1:	/* circus */
-		case 4:	/* ripcord */
+		case 1: /* circus */
+		case 4: /* ripcord */
 			switch ((data & 0x70) >> 4)
 			{
 				case 0 : /* All Off */
-					discrete_sound_w(state->m_discrete, CIRCUS_MUSIC_BIT, 0);
+					discrete_sound_w(m_discrete, space, CIRCUS_MUSIC_BIT, 0);
 					break;
 
 				case 1 : /* Music */
-					discrete_sound_w(state->m_discrete, CIRCUS_MUSIC_BIT, 1);
+					discrete_sound_w(m_discrete, space, CIRCUS_MUSIC_BIT, 1);
 					break;
 
 				case 2 : /* Circus = Pop; Rip Cord = Splash */
-					sample_start(state->m_samples, 0, 0, 0);
+					m_samples->start(0, 0);
 					break;
 
 				case 3 : /* Normal Video */
 					break;
 
 				case 4 : /* Circus = Miss; Rip Cord = Scream */
-					sample_start(state->m_samples, 1, 1, 0);
+					m_samples->start(1, 1);
 					break;
 
 				case 5 : /* Invert Video */
 					break;
 
 				case 6 : /* Circus = Bounce; Rip Cord = Chute Open */
-					sample_start(state->m_samples, 2, 2, 0);
+					m_samples->start(2, 2);
 					break;
 
 				case 7 : /* Circus = not used; Rip Cord = Whistle */
-					if (state->m_game_id == 4)
-						sample_start(state->m_samples, 3, 3, 0);
+					if (m_game_id == 4)
+						m_samples->start(3, 3);
 					break;
 			}
 			break;
 
-		case 2:	/* robotbwl */
-			discrete_sound_w(state->m_discrete, ROBOTBWL_MUSIC_BIT, data & 0x08);	/* Footsteps */
+		case 2: /* robotbwl */
+			discrete_sound_w(m_discrete, space, ROBOTBWL_MUSIC_BIT, data & 0x08);   /* Footsteps */
 
-			if (data & 0x40)	/* Hit */
-				sample_start(state->m_samples, 0, 0, 0);
+			if (data & 0x40)    /* Hit */
+				m_samples->start(0, 0);
 
-			if (data & 0x20)	/* Roll */
-				sample_start(state->m_samples, 1, 1, 0);
+			if (data & 0x20)    /* Roll */
+				m_samples->start(1, 1);
 
-			if (data & 0x10)	/* Ball Drop */
-				sample_start(state->m_samples, 2, 2, 0);
+			if (data & 0x10)    /* Ball Drop */
+				m_samples->start(2, 2);
 
-			if (data & 0x02)	/* Demerit */
-				sample_start(state->m_samples, 3, 3, 0);
+			if (data & 0x02)    /* Demerit */
+				m_samples->start(3, 3);
 
-			if (data & 0x01)	/* Reward */
-				sample_start(state->m_samples, 4, 4, 0);
+			if (data & 0x01)    /* Reward */
+				m_samples->start(4, 4);
 
 			// if (data & 0x04) /* Invert */
 			break;
 
-		case 3:	/* crash */
+		case 3: /* crash */
 			/* Only the crash can be done with a sample */
 			switch ((data & 0x70) >> 4)
 			{
 				case 0 : /* All Off */
-					discrete_sound_w(state->m_discrete, CRASH_MUSIC_BIT, 0);
+					discrete_sound_w(m_discrete, space, CRASH_MUSIC_BIT, 0);
 					break;
 
 				case 1 : /* Music */
-					discrete_sound_w(state->m_discrete, CRASH_MUSIC_BIT, 1);
+					discrete_sound_w(m_discrete, space, CRASH_MUSIC_BIT, 1);
 					break;
 
 				case 2 : /* Crash */
-					sample_start(state->m_samples, 0, 0, 0);
+					m_samples->start(0, 0);
 					break;
 
 				case 3 : /* Normal Video and Beep */
-					discrete_sound_w(state->m_discrete, CRASH_BEEPER_EN, 0);
+					discrete_sound_w(m_discrete, space, CRASH_BEEPER_EN, 0);
 					break;
 
 				case 4 : /* Skid */
 					break;
 
 				case 5 : /* Invert Video and Beep */
-					discrete_sound_w(state->m_discrete, CRASH_BEEPER_EN, 0);
+					discrete_sound_w(m_discrete, space, CRASH_BEEPER_EN, 0);
 					break;
 
 				case 6 : /* Hi Motor */
@@ -275,5 +274,5 @@ WRITE8_HANDLER( circus_clown_z_w )
 	}
 
 	/* Bit 7 enables amplifier (0 = on) */
-	space->machine().sound().system_mute(data & 0x80);
+	machine().sound().system_mute(data & 0x80);
 }

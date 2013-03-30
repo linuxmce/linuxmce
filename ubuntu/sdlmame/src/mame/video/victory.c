@@ -13,13 +13,13 @@
 /* from what I can tell, this should be divided by 32, not 8  */
 /* but the interrupt test does some precise timing, and fails */
 /* if it's not 8 */
-#define VICTORY_MICRO_STATE_CLOCK	(XTAL_11_289MHz)
-#define MICRO_STATE_CLOCK_PERIOD	attotime::from_hz(VICTORY_MICRO_STATE_CLOCK / 8)
+#define VICTORY_MICRO_STATE_CLOCK   (XTAL_11_289MHz)
+#define MICRO_STATE_CLOCK_PERIOD    attotime::from_hz(VICTORY_MICRO_STATE_CLOCK / 8)
 
 
 /* debugging constants */
-#define LOG_MICROCODE		0
-#define LOG_COLLISION		0
+#define LOG_MICROCODE       0
+#define LOG_COLLISION       0
 
 
 /* function prototypes */
@@ -38,29 +38,28 @@ static int command7(running_machine &machine);
  *
  *************************************/
 
-VIDEO_START( victory )
+void victory_state::video_start()
 {
-	victory_state *state = machine.driver_data<victory_state>();
 	/* allocate bitmapram */
-	state->m_rram = auto_alloc_array(machine, UINT8, 0x4000);
-	state->m_gram = auto_alloc_array(machine, UINT8, 0x4000);
-	state->m_bram = auto_alloc_array(machine, UINT8, 0x4000);
+	m_rram = auto_alloc_array(machine(), UINT8, 0x4000);
+	m_gram = auto_alloc_array(machine(), UINT8, 0x4000);
+	m_bram = auto_alloc_array(machine(), UINT8, 0x4000);
 
 	/* allocate bitmaps */
-	state->m_bgbitmap = auto_alloc_array(machine, UINT8, 256 * 256);
-	state->m_fgbitmap = auto_alloc_array(machine, UINT8, 256 * 256);
+	m_bgbitmap = auto_alloc_array(machine(), UINT8, 256 * 256);
+	m_fgbitmap = auto_alloc_array(machine(), UINT8, 256 * 256);
 
 	/* reset globals */
-	state->m_vblank_irq = 0;
-	state->m_fgcoll = state->m_fgcollx = state->m_fgcolly = 0;
-	state->m_bgcoll = state->m_bgcollx = state->m_bgcolly = 0;
-	state->m_scrollx = state->m_scrolly = 0;
-	state->m_video_control = 0;
-	memset(&state->m_micro, 0, sizeof(state->m_micro));
-	state->m_micro.timer = machine.scheduler().timer_alloc(FUNC(NULL));
+	m_vblank_irq = 0;
+	m_fgcoll = m_fgcollx = m_fgcolly = 0;
+	m_bgcoll = m_bgcollx = m_bgcolly = 0;
+	m_scrollx = m_scrolly = 0;
+	m_video_control = 0;
+	memset(&m_micro, 0, sizeof(m_micro));
+	m_micro.timer = machine().scheduler().timer_alloc(FUNC_NULL);
 
 	/* register for state saving */
-	state_save_register_global_array(machine, state->m_paletteram);
+	state_save_register_global_array(machine(), m_paletteram);
 }
 
 
@@ -75,18 +74,17 @@ static void victory_update_irq(running_machine &machine)
 {
 	victory_state *state = machine.driver_data<victory_state>();
 	if (state->m_vblank_irq || state->m_fgcoll || (state->m_bgcoll && (state->m_video_control & 0x20)))
-		cputag_set_input_line(machine, "maincpu", 0, ASSERT_LINE);
+		machine.device("maincpu")->execute().set_input_line(0, ASSERT_LINE);
 	else
-		cputag_set_input_line(machine, "maincpu", 0, CLEAR_LINE);
+		machine.device("maincpu")->execute().set_input_line(0, CLEAR_LINE);
 }
 
 
-INTERRUPT_GEN( victory_vblank_interrupt )
+INTERRUPT_GEN_MEMBER(victory_state::victory_vblank_interrupt)
 {
-	victory_state *state = device->machine().driver_data<victory_state>();
-	state->m_vblank_irq = 1;
+	m_vblank_irq = 1;
 
-	victory_update_irq(device->machine());
+	victory_update_irq(machine());
 }
 
 
@@ -97,10 +95,9 @@ INTERRUPT_GEN( victory_vblank_interrupt )
  *
  *************************************/
 
-WRITE8_HANDLER( victory_paletteram_w )
+WRITE8_MEMBER(victory_state::victory_paletteram_w)
 {
-	victory_state *state = space->machine().driver_data<victory_state>();
-	state->m_paletteram[offset & 0x3f] = ((offset & 0x80) << 1) | data;
+	m_paletteram[offset & 0x3f] = ((offset & 0x80) << 1) | data;
 }
 
 
@@ -125,60 +122,59 @@ static void set_palette(running_machine &machine)
  *
  *************************************/
 
-READ8_HANDLER( victory_video_control_r )
+READ8_MEMBER(victory_state::victory_video_control_r)
 {
-	victory_state *state = space->machine().driver_data<victory_state>();
 	int result = 0;
 
 	switch (offset)
 	{
-		case 0x00:	/* 5XFIQ */
-			result = state->m_fgcollx;
-			if (LOG_COLLISION) logerror("%04X:5XFIQ read = %02X\n", cpu_get_previouspc(&space->device()), result);
+		case 0x00:  /* 5XFIQ */
+			result = m_fgcollx;
+			if (LOG_COLLISION) logerror("%04X:5XFIQ read = %02X\n", space.device().safe_pcbase(), result);
 			return result;
 
-		case 0x01:	/* 5CLFIQ */
-			result = state->m_fgcolly;
-			if (state->m_fgcoll)
+		case 0x01:  /* 5CLFIQ */
+			result = m_fgcolly;
+			if (m_fgcoll)
 			{
-				state->m_fgcoll = 0;
-				victory_update_irq(space->machine());
+				m_fgcoll = 0;
+				victory_update_irq(machine());
 			}
-			if (LOG_COLLISION) logerror("%04X:5CLFIQ read = %02X\n", cpu_get_previouspc(&space->device()), result);
+			if (LOG_COLLISION) logerror("%04X:5CLFIQ read = %02X\n", space.device().safe_pcbase(), result);
 			return result;
 
-		case 0x02:	/* 5BACKX */
-			result = state->m_bgcollx & 0xfc;
-			if (LOG_COLLISION) logerror("%04X:5BACKX read = %02X\n", cpu_get_previouspc(&space->device()), result);
+		case 0x02:  /* 5BACKX */
+			result = m_bgcollx & 0xfc;
+			if (LOG_COLLISION) logerror("%04X:5BACKX read = %02X\n", space.device().safe_pcbase(), result);
 			return result;
 
-		case 0x03:	/* 5BACKY */
-			result = state->m_bgcolly;
-			if (state->m_bgcoll)
+		case 0x03:  /* 5BACKY */
+			result = m_bgcolly;
+			if (m_bgcoll)
 			{
-				state->m_bgcoll = 0;
-				victory_update_irq(space->machine());
+				m_bgcoll = 0;
+				victory_update_irq(machine());
 			}
-			if (LOG_COLLISION) logerror("%04X:5BACKY read = %02X\n", cpu_get_previouspc(&space->device()), result);
+			if (LOG_COLLISION) logerror("%04X:5BACKY read = %02X\n", space.device().safe_pcbase(), result);
 			return result;
 
-		case 0x04:	/* 5STAT */
+		case 0x04:  /* 5STAT */
 			// D7 = BUSY (9A1) -- microcode
 			// D6 = 5FCIRQ (3B1)
 			// D5 = 5VIRQ
 			// D4 = 5BCIRQ (3B1)
 			// D3 = SL256
-			if (state->m_micro.timer_active && state->m_micro.timer->elapsed() < state->m_micro.endtime)
+			if (m_micro.timer_active && m_micro.timer->elapsed() < m_micro.endtime)
 				result |= 0x80;
-			result |= (~state->m_fgcoll & 1) << 6;
-			result |= (~state->m_vblank_irq & 1) << 5;
-			result |= (~state->m_bgcoll & 1) << 4;
-			result |= (space->machine().primary_screen->vpos() & 0x100) >> 5;
-			if (LOG_COLLISION) logerror("%04X:5STAT read = %02X\n", cpu_get_previouspc(&space->device()), result);
+			result |= (~m_fgcoll & 1) << 6;
+			result |= (~m_vblank_irq & 1) << 5;
+			result |= (~m_bgcoll & 1) << 4;
+			result |= (machine().primary_screen->vpos() & 0x100) >> 5;
+			if (LOG_COLLISION) logerror("%04X:5STAT read = %02X\n", space.device().safe_pcbase(), result);
 			return result;
 
 		default:
-			logerror("%04X:victory_video_control_r(%02X)\n", cpu_get_previouspc(&space->device()), offset);
+			logerror("%04X:victory_video_control_r(%02X)\n", space.device().safe_pcbase(), offset);
 			break;
 	}
 	return 0;
@@ -192,29 +188,28 @@ READ8_HANDLER( victory_video_control_r )
  *
  *************************************/
 
-WRITE8_HANDLER( victory_video_control_w )
+WRITE8_MEMBER(victory_state::victory_video_control_w)
 {
-	victory_state *state = space->machine().driver_data<victory_state>();
-	struct micro_t &micro = state->m_micro;
+	struct micro_t &micro = m_micro;
 	switch (offset)
 	{
-		case 0x00:	/* LOAD IL */
-			if (LOG_MICROCODE) logerror("%04X:IL=%02X\n", cpu_get_previouspc(&space->device()), data);
+		case 0x00:  /* LOAD IL */
+			if (LOG_MICROCODE) logerror("%04X:IL=%02X\n", space.device().safe_pcbase(), data);
 			micro.i = (micro.i & 0xff00) | (data & 0x00ff);
 			break;
 
-		case 0x01:	/* LOAD IH */
-			if (LOG_MICROCODE) logerror("%04X:IH=%02X\n", cpu_get_previouspc(&space->device()), data);
+		case 0x01:  /* LOAD IH */
+			if (LOG_MICROCODE) logerror("%04X:IH=%02X\n", space.device().safe_pcbase(), data);
 			micro.i = (micro.i & 0x00ff) | ((data << 8) & 0xff00);
 			if (micro.cmdlo == 5)
 			{
 				if (LOG_MICROCODE) logerror("  Command 5 triggered by write to IH\n");
-				command5(space->machine());
+				command5(machine());
 			}
 			break;
 
-		case 0x02:	/* LOAD CMD */
-			if (LOG_MICROCODE) logerror("%04X:CMD=%02X\n", cpu_get_previouspc(&space->device()), data);
+		case 0x02:  /* LOAD CMD */
+			if (LOG_MICROCODE) logerror("%04X:CMD=%02X\n", space.device().safe_pcbase(), data);
 			micro.cmd = data;
 			micro.cmdlo = data & 7;
 			if (micro.cmdlo == 0)
@@ -224,66 +219,66 @@ WRITE8_HANDLER( victory_video_control_w )
 			else if (micro.cmdlo == 6)
 			{
 				if (LOG_MICROCODE) logerror("  Command 6 triggered\n");
-				command6(space->machine());
+				command6(machine());
 			}
 			break;
 
-		case 0x03:	/* LOAD G */
-			if (LOG_MICROCODE) logerror("%04X:G=%02X\n", cpu_get_previouspc(&space->device()), data);
+		case 0x03:  /* LOAD G */
+			if (LOG_MICROCODE) logerror("%04X:G=%02X\n", space.device().safe_pcbase(), data);
 			micro.g = data;
 			break;
 
-		case 0x04:	/* LOAD X */
-			if (LOG_MICROCODE) logerror("%04X:X=%02X\n", cpu_get_previouspc(&space->device()), data);
+		case 0x04:  /* LOAD X */
+			if (LOG_MICROCODE) logerror("%04X:X=%02X\n", space.device().safe_pcbase(), data);
 			micro.xp = data;
 			if (micro.cmdlo == 3)
 			{
 				if (LOG_MICROCODE) logerror(" Command 3 triggered by write to X\n");
-				command3(space->machine());
+				command3(machine());
 			}
 			break;
 
-		case 0x05:	/* LOAD Y */
-			if (LOG_MICROCODE) logerror("%04X:Y=%02X\n", cpu_get_previouspc(&space->device()), data);
+		case 0x05:  /* LOAD Y */
+			if (LOG_MICROCODE) logerror("%04X:Y=%02X\n", space.device().safe_pcbase(), data);
 			micro.yp = data;
 			if (micro.cmdlo == 4)
 			{
 				if (LOG_MICROCODE) logerror("  Command 4 triggered by write to Y\n");
-				command4(space->machine());
+				command4(machine());
 			}
 			break;
 
-		case 0x06:	/* LOAD R */
-			if (LOG_MICROCODE) logerror("%04X:R=%02X\n", cpu_get_previouspc(&space->device()), data);
+		case 0x06:  /* LOAD R */
+			if (LOG_MICROCODE) logerror("%04X:R=%02X\n", space.device().safe_pcbase(), data);
 			micro.r = data;
 			break;
 
-		case 0x07:	/* LOAD B */
-			if (LOG_MICROCODE) logerror("%04X:B=%02X\n", cpu_get_previouspc(&space->device()), data);
+		case 0x07:  /* LOAD B */
+			if (LOG_MICROCODE) logerror("%04X:B=%02X\n", space.device().safe_pcbase(), data);
 			micro.b = data;
 			if (micro.cmdlo == 2)
 			{
 				if (LOG_MICROCODE) logerror("  Command 2 triggered by write to B\n");
-				command2(space->machine());
+				command2(machine());
 			}
 			else if (micro.cmdlo == 7)
 			{
 				if (LOG_MICROCODE) logerror("  Command 7 triggered by write to B\n");
-				command7(space->machine());
+				command7(machine());
 			}
 			break;
 
-		case 0x08:	/* SCROLLX */
-			if (LOG_MICROCODE) logerror("%04X:SCROLLX write = %02X\n", cpu_get_previouspc(&space->device()), data);
-			state->m_scrollx = data;
+		case 0x08:  /* SCROLLX */
+			if (LOG_MICROCODE) logerror("%04X:SCROLLX write = %02X\n", space.device().safe_pcbase(), data);
+			m_scrollx = data;
 			break;
 
-		case 0x09:	/* SCROLLY */
-			if (LOG_MICROCODE) logerror("%04X:SCROLLY write = %02X\n", cpu_get_previouspc(&space->device()), data);
-			state->m_scrolly = data;
+		case 0x09:  /* SCROLLY */
+			if (LOG_MICROCODE) logerror("%04X:SCROLLY write = %02X\n", space.device().safe_pcbase(), data);
+			m_scrolly = data;
 			break;
 
-		case 0x0a:	/* CONTROL */
+		case 0x0a:  /* CONTROL */
 			// D7 = HLMBK
 			// D6 = VLMBK
 			// D5 = BIRQEA
@@ -291,18 +286,18 @@ WRITE8_HANDLER( victory_video_control_w )
 			// D3 = SINVERT
 			// D2 = BIR12
 			// D1 = SELOVER
-			if (LOG_MICROCODE) logerror("%04X:CONTROL write = %02X\n", cpu_get_previouspc(&space->device()), data);
-			state->m_video_control = data;
+			if (LOG_MICROCODE) logerror("%04X:CONTROL write = %02X\n", space.device().safe_pcbase(), data);
+			m_video_control = data;
 			break;
 
-		case 0x0b:	/* CLRVIRQ */
-			if (LOG_MICROCODE) logerror("%04X:CLRVIRQ write = %02X\n", cpu_get_previouspc(&space->device()), data);
-			state->m_vblank_irq = 0;
-			victory_update_irq(space->machine());
+		case 0x0b:  /* CLRVIRQ */
+			if (LOG_MICROCODE) logerror("%04X:CLRVIRQ write = %02X\n", space.device().safe_pcbase(), data);
+			m_vblank_irq = 0;
+			victory_update_irq(machine());
 			break;
 
 		default:
-			if (LOG_MICROCODE) logerror("%04X:victory_video_control_w(%02X) = %02X\n", cpu_get_previouspc(&space->device()), offset, data);
+			if (LOG_MICROCODE) logerror("%04X:victory_video_control_w(%02X) = %02X\n", space.device().safe_pcbase(), offset, data);
 			break;
 	}
 }
@@ -714,14 +709,14 @@ static int command4(running_machine &machine)
 
 		switch (micro.cmdlo)
 		{
-			case 0:												break;
-			case 1:												break;
-			case 2:	keep_going = command2(machine);					break;
-			case 3:	keep_going = command3(machine);				break;
-			case 4:	micro.pc = micro.yp << 1; keep_going = 1;	break;
-			case 5:	keep_going = command5(machine);				break;
-			case 6:	keep_going = command6(machine);					break;
-			case 7:	keep_going = command7(machine);				break;
+			case 0:                                             break;
+			case 1:                                             break;
+			case 2: keep_going = command2(machine);                 break;
+			case 3: keep_going = command3(machine);             break;
+			case 4: micro.pc = micro.yp << 1; keep_going = 1;   break;
+			case 5: keep_going = command5(machine);             break;
+			case 6: keep_going = command6(machine);                 break;
+			case 7: keep_going = command7(machine);             break;
 		}
 	} while (keep_going);
 
@@ -1073,13 +1068,12 @@ static void update_foreground(running_machine &machine)
 }
 
 
-static TIMER_CALLBACK( bgcoll_irq_callback )
+TIMER_CALLBACK_MEMBER(victory_state::bgcoll_irq_callback)
 {
-	victory_state *state = machine.driver_data<victory_state>();
-	state->m_bgcollx = param & 0xff;
-	state->m_bgcolly = param >> 8;
-	state->m_bgcoll = 1;
-	victory_update_irq(machine);
+	m_bgcollx = param & 0xff;
+	m_bgcolly = param >> 8;
+	m_bgcoll = 1;
+	victory_update_irq(machine());
 }
 
 
@@ -1090,36 +1084,35 @@ static TIMER_CALLBACK( bgcoll_irq_callback )
  *
  *************************************/
 
-SCREEN_UPDATE( victory )
+UINT32 victory_state::screen_update_victory(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	victory_state *state = screen->machine().driver_data<victory_state>();
-	int bgcollmask = (state->m_video_control & 4) ? 4 : 7;
+	int bgcollmask = (m_video_control & 4) ? 4 : 7;
 	int count = 0;
 	int x, y;
 
 	/* copy the palette from palette RAM */
-	set_palette(screen->machine());
+	set_palette(machine());
 
 	/* update the foreground & background */
-	update_foreground(screen->machine());
-	update_background(screen->machine());
+	update_foreground(machine());
+	update_background(machine());
 
 	/* blend the bitmaps and do collision detection */
 	for (y = 0; y < 256; y++)
 	{
-		UINT16 *scanline = BITMAP_ADDR16(bitmap, y, 0);
-		UINT8 sy = state->m_scrolly + y;
-		UINT8 *fg = &state->m_fgbitmap[y * 256];
-		UINT8 *bg = &state->m_bgbitmap[sy * 256];
+		UINT16 *scanline = &bitmap.pix16(y);
+		UINT8 sy = m_scrolly + y;
+		UINT8 *fg = &m_fgbitmap[y * 256];
+		UINT8 *bg = &m_bgbitmap[sy * 256];
 
 		/* do the blending */
 		for (x = 0; x < 256; x++)
 		{
 			int fpix = *fg++;
-			int bpix = bg[(x + state->m_scrollx) & 255];
+			int bpix = bg[(x + m_scrollx) & 255];
 			scanline[x] = bpix | (fpix << 3);
 			if (fpix && (bpix & bgcollmask) && count++ < 128)
-				screen->machine().scheduler().timer_set(screen->time_until_pos(y, x), FUNC(bgcoll_irq_callback), x | (y << 8));
+				machine().scheduler().timer_set(screen.time_until_pos(y, x), timer_expired_delegate(FUNC(victory_state::bgcoll_irq_callback),this), x | (y << 8));
 		}
 	}
 

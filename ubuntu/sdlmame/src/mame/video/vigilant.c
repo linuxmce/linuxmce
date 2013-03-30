@@ -6,10 +6,6 @@
 
   TODO:
 
-  - Get a dump of the PAL16L8 (IC38 - 4M).  This controls transparency.
-    It takes as input 4 bits of sprite color, and 6 bits of background tile
-    color.  It outputs a sprite enable line, a background enable line, and
-    a background select (which layer of background to draw).
   - Add cocktail flipping.
 
 ***************************************************************************/
@@ -18,30 +14,24 @@
 #include "includes/vigilant.h"
 
 
-static const rectangle bottomvisiblearea =
-{
-	16*8, 48*8-1,
-	6*8, 32*8-1
-};
+static const rectangle bottomvisiblearea(16*8, 48*8-1, 6*8, 32*8-1);
 
 
-VIDEO_START( vigilant )
+void vigilant_state::video_start()
 {
-	vigilant_state *state = machine.driver_data<vigilant_state>();
-	state->m_bg_bitmap = auto_bitmap_alloc(machine,512*4,256,machine.primary_screen->format());
+	m_bg_bitmap = auto_bitmap_ind16_alloc(machine(),512*4,256);
 }
 
 
-VIDEO_RESET( vigilant )
+void vigilant_state::video_reset()
 {
-	vigilant_state *state = machine.driver_data<vigilant_state>();
-	state->m_horiz_scroll_low = 0;
-	state->m_horiz_scroll_high = 0;
-	state->m_rear_horiz_scroll_low = 0;
-	state->m_rear_horiz_scroll_high = 0;
-	state->m_rear_color = 0;
-	state->m_rear_disable = 1;
-	state->m_rear_refresh = 1;
+	m_horiz_scroll_low = 0;
+	m_horiz_scroll_high = 0;
+	m_rear_horiz_scroll_low = 0;
+	m_rear_horiz_scroll_high = 0;
+	m_rear_color = 0;
+	m_rear_disable = 1;
+	m_rear_refresh = 1;
 }
 
 
@@ -67,8 +57,8 @@ static void update_background(running_machine &machine)
 		{
 			for( col=0; col<512; col+=32 )
 			{
-				drawgfx_opaque(state->m_bg_bitmap,
-						0,machine.gfx[2],
+				drawgfx_opaque(*state->m_bg_bitmap,
+						state->m_bg_bitmap->cliprect(),machine.gfx[2],
 						charcode,
 						row < 128 ? 0 : 1,
 						0,0,
@@ -95,21 +85,21 @@ static void update_background(running_machine &machine)
  These are used to index a color triplet of RGB.  The triplet is read
  from RAM, and output to R0-R4, G0-G4, and B0-B4.
  **************************************************************************/
-WRITE8_HANDLER( vigilant_paletteram_w )
+WRITE8_MEMBER(vigilant_state::vigilant_paletteram_w)
 {
 	int bank,r,g,b;
 
 
-	space->machine().generic.paletteram.u8[offset] = data;
+	m_generic_paletteram_8[offset] = data;
 
 	bank = offset & 0x400;
 	offset &= 0xff;
 
-	r = (space->machine().generic.paletteram.u8[bank + offset + 0x000] << 3) & 0xFF;
-	g = (space->machine().generic.paletteram.u8[bank + offset + 0x100] << 3) & 0xFF;
-	b = (space->machine().generic.paletteram.u8[bank + offset + 0x200] << 3) & 0xFF;
+	r = (m_generic_paletteram_8[bank + offset + 0x000] << 3) & 0xFF;
+	g = (m_generic_paletteram_8[bank + offset + 0x100] << 3) & 0xFF;
+	b = (m_generic_paletteram_8[bank + offset + 0x200] << 3) & 0xFF;
 
-	palette_set_color(space->machine(), (bank >> 2) + offset,MAKE_RGB(r,g,b));
+	palette_set_color(machine(), (bank >> 2) + offset,MAKE_RGB(r,g,b));
 }
 
 
@@ -120,13 +110,12 @@ WRITE8_HANDLER( vigilant_paletteram_w )
  horiz_scroll_low  = HSPL, an 8-bit register
  horiz_scroll_high = HSPH, a 1-bit register
  **************************************************************************/
-WRITE8_HANDLER( vigilant_horiz_scroll_w )
+WRITE8_MEMBER(vigilant_state::vigilant_horiz_scroll_w)
 {
-	vigilant_state *state = space->machine().driver_data<vigilant_state>();
 	if (offset==0)
-		state->m_horiz_scroll_low = data;
+		m_horiz_scroll_low = data;
 	else
-		state->m_horiz_scroll_high = (data & 0x01) * 256;
+		m_horiz_scroll_high = (data & 0x01) * 256;
 }
 
 /***************************************************************************
@@ -135,13 +124,12 @@ WRITE8_HANDLER( vigilant_horiz_scroll_w )
  rear_horiz_scroll_low  = RHSPL, an 8-bit register
  rear_horiz_scroll_high = RHSPH, an 8-bit register but only 3 bits are saved
 ***************************************************************************/
-WRITE8_HANDLER( vigilant_rear_horiz_scroll_w )
+WRITE8_MEMBER(vigilant_state::vigilant_rear_horiz_scroll_w)
 {
-	vigilant_state *state = space->machine().driver_data<vigilant_state>();
 	if (offset==0)
-		state->m_rear_horiz_scroll_low = data;
+		m_rear_horiz_scroll_low = data;
 	else
-		state->m_rear_horiz_scroll_high = (data & 0x07) * 256;
+		m_rear_horiz_scroll_high = (data & 0x07) * 256;
 }
 
 /***************************************************************************
@@ -159,11 +147,10 @@ WRITE8_HANDLER( vigilant_rear_horiz_scroll_w )
  palette.  However, the top four bits of the palette inputs are labelled:
  "RCC3", "RCC2", "V256E", "RCC0".  Methinks there's a typo.
  **************************************************************************/
-WRITE8_HANDLER( vigilant_rear_color_w )
+WRITE8_MEMBER(vigilant_state::vigilant_rear_color_w)
 {
-	vigilant_state *state = space->machine().driver_data<vigilant_state>();
-	state->m_rear_disable = data & 0x40;
-	state->m_rear_color = (data & 0x0d);
+	m_rear_disable = data & 0x40;
+	m_rear_color = (data & 0x0d);
 }
 
 /***************************************************************************
@@ -172,7 +159,7 @@ WRITE8_HANDLER( vigilant_rear_color_w )
  ???
  **************************************************************************/
 
-static void draw_foreground(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, int priority, int opaque )
+static void draw_foreground(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, int priority, int opaque )
 {
 	vigilant_state *state = machine.driver_data<vigilant_state>();
 	UINT8 *videoram = state->m_videoram;
@@ -188,15 +175,15 @@ static void draw_foreground(running_machine &machine, bitmap_t *bitmap, const re
 		int color = attributes & 0x0F;
 		int tile_number = videoram[offs] | ((attributes & 0xF0) << 4);
 
-		if (priority)	 /* foreground */
+		if (priority)    /* foreground */
 		{
-			if ((color & 0x0c) == 0x0c)	/* mask sprites */
+			if ((color & 0x0c) == 0x0c) /* mask sprites */
 			{
 				if (sy >= 48)
 				{
 					sx = (sx + scroll) & 0x1ff;
 
-					drawgfx_transmask(bitmap,&bottomvisiblearea,machine.gfx[0],
+					drawgfx_transmask(bitmap,bottomvisiblearea,machine.gfx[0],
 							tile_number,
 							color,
 							0,0,
@@ -204,7 +191,7 @@ static void draw_foreground(running_machine &machine, bitmap_t *bitmap, const re
 				}
 			}
 		}
-		else	 /* background */
+		else     /* background */
 		{
 			if (sy >= 48)
 				sx = (sx + scroll) & 0x1ff;
@@ -221,7 +208,7 @@ static void draw_foreground(running_machine &machine, bitmap_t *bitmap, const re
 
 
 
-static void draw_background(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect)
+static void draw_background(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	vigilant_state *state = machine.driver_data<vigilant_state>();
 	int scrollx = 0x17a + 16*8 - (state->m_rear_horiz_scroll_low + state->m_rear_horiz_scroll_high);
@@ -233,17 +220,17 @@ static void draw_background(running_machine &machine, bitmap_t *bitmap, const re
 		state->m_rear_refresh=0;
 	}
 
-	copyscrollbitmap(bitmap,state->m_bg_bitmap,1,&scrollx,0,0,&bottomvisiblearea);
+	copyscrollbitmap(bitmap,*state->m_bg_bitmap,1,&scrollx,0,0,bottomvisiblearea);
 }
 
 
-static void draw_sprites(running_machine &machine, bitmap_t *bitmap,const rectangle *cliprect)
+static void draw_sprites(running_machine &machine, bitmap_ind16 &bitmap,const rectangle &cliprect)
 {
 	vigilant_state *state = machine.driver_data<vigilant_state>();
 	UINT8 *spriteram = state->m_spriteram;
 	int offs;
 
-	for (offs = 0;offs < state->m_spriteram_size;offs += 8)
+	for (offs = 0;offs < state->m_spriteram.bytes();offs += 8)
 	{
 		int code,color,sx,sy,flipx,flipy,h,y;
 
@@ -274,10 +261,9 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap,const rectan
 	}
 }
 
-SCREEN_UPDATE( kikcubic )
+UINT32 vigilant_state::screen_update_kikcubic(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	vigilant_state *state = screen->machine().driver_data<vigilant_state>();
-	UINT8 *videoram = state->m_videoram;
+	UINT8 *videoram = m_videoram;
 	int offs;
 
 	for (offs = 0; offs < 0x1000; offs += 2)
@@ -288,20 +274,19 @@ SCREEN_UPDATE( kikcubic )
 		int color = (attributes & 0xF0) >> 4;
 		int tile_number = videoram[offs] | ((attributes & 0x0F) << 8);
 
-		drawgfx_opaque(bitmap,cliprect,screen->machine().gfx[0],
+		drawgfx_opaque(bitmap,cliprect,machine().gfx[0],
 				tile_number,
 				color,
 				0,0,
 				sx,sy);
 	}
 
-	draw_sprites(screen->machine(),bitmap,cliprect);
+	draw_sprites(machine(),bitmap,cliprect);
 	return 0;
 }
 
-SCREEN_UPDATE( vigilant )
+UINT32 vigilant_state::screen_update_vigilant(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	vigilant_state *state = screen->machine().driver_data<vigilant_state>();
 	int i;
 
 	/* copy the background palette */
@@ -310,31 +295,31 @@ SCREEN_UPDATE( vigilant )
 		int r,g,b;
 
 
-		r = (screen->machine().generic.paletteram.u8[0x400 + 16 * state->m_rear_color + i] << 3) & 0xFF;
-		g = (screen->machine().generic.paletteram.u8[0x500 + 16 * state->m_rear_color + i] << 3) & 0xFF;
-		b = (screen->machine().generic.paletteram.u8[0x600 + 16 * state->m_rear_color + i] << 3) & 0xFF;
+		r = (m_generic_paletteram_8[0x400 + 16 * m_rear_color + i] << 3) & 0xFF;
+		g = (m_generic_paletteram_8[0x500 + 16 * m_rear_color + i] << 3) & 0xFF;
+		b = (m_generic_paletteram_8[0x600 + 16 * m_rear_color + i] << 3) & 0xFF;
 
-		palette_set_color(screen->machine(),512 + i,MAKE_RGB(r,g,b));
+		palette_set_color(machine(),512 + i,MAKE_RGB(r,g,b));
 
-		r = (screen->machine().generic.paletteram.u8[0x400 + 16 * state->m_rear_color + 32 + i] << 3) & 0xFF;
-		g = (screen->machine().generic.paletteram.u8[0x500 + 16 * state->m_rear_color + 32 + i] << 3) & 0xFF;
-		b = (screen->machine().generic.paletteram.u8[0x600 + 16 * state->m_rear_color + 32 + i] << 3) & 0xFF;
+		r = (m_generic_paletteram_8[0x400 + 16 * m_rear_color + 32 + i] << 3) & 0xFF;
+		g = (m_generic_paletteram_8[0x500 + 16 * m_rear_color + 32 + i] << 3) & 0xFF;
+		b = (m_generic_paletteram_8[0x600 + 16 * m_rear_color + 32 + i] << 3) & 0xFF;
 
-		palette_set_color(screen->machine(),512 + 16 + i,MAKE_RGB(r,g,b));
+		palette_set_color(machine(),512 + 16 + i,MAKE_RGB(r,g,b));
 	}
 
-	if (state->m_rear_disable)	 /* opaque foreground */
+	if (m_rear_disable)  /* opaque foreground */
 	{
-		draw_foreground(screen->machine(),bitmap,cliprect,0,1);
-		draw_sprites(screen->machine(),bitmap,&bottomvisiblearea);
-		draw_foreground(screen->machine(),bitmap,cliprect,1,0);
+		draw_foreground(machine(),bitmap,cliprect,0,1);
+		draw_sprites(machine(),bitmap,bottomvisiblearea);
+		draw_foreground(machine(),bitmap,cliprect,1,0);
 	}
 	else
 	{
-		draw_background(screen->machine(),bitmap,cliprect);
-		draw_foreground(screen->machine(),bitmap,cliprect,0,0);
-		draw_sprites(screen->machine(),bitmap,&bottomvisiblearea);
-		draw_foreground(screen->machine(),bitmap,cliprect,1,0); // priority tiles
+		draw_background(machine(),bitmap,cliprect);
+		draw_foreground(machine(),bitmap,cliprect,0,0);
+		draw_sprites(machine(),bitmap,bottomvisiblearea);
+		draw_foreground(machine(),bitmap,cliprect,1,0); // priority tiles
 	}
 	return 0;
 }

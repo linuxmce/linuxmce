@@ -10,90 +10,84 @@ XX Mission (c) 1986 UPL
 
 #include "emu.h"
 #include "cpu/z80/z80.h"
-#include "deprecat.h"
 #include "sound/2203intf.h"
 #include "includes/xxmissio.h"
 
 
-static WRITE8_HANDLER( xxmissio_bank_sel_w )
+WRITE8_MEMBER(xxmissio_state::xxmissio_bank_sel_w)
 {
-	memory_set_bank(space->machine(), "bank1", data & 7);
+	membank("bank1")->set_entry(data & 7);
 }
 
-static CUSTOM_INPUT( xxmissio_status_r )
+CUSTOM_INPUT_MEMBER(xxmissio_state::xxmissio_status_r)
 {
-	xxmissio_state *state = field->port->machine().driver_data<xxmissio_state>();
 	int bit_mask = (FPTR)param;
-	return (state->m_status & bit_mask) ? 1 : 0;
+	return (m_status & bit_mask) ? 1 : 0;
 }
 
-static WRITE8_HANDLER ( xxmissio_status_m_w )
+WRITE8_MEMBER(xxmissio_state::xxmissio_status_m_w)
 {
-	xxmissio_state *state = space->machine().driver_data<xxmissio_state>();
 	switch (data)
 	{
 		case 0x00:
-			state->m_status |= 0x20;
+			m_status |= 0x20;
 			break;
 
 		case 0x40:
-			state->m_status &= ~0x08;
-			cputag_set_input_line_and_vector(space->machine(), "sub", 0, HOLD_LINE, 0x10);
+			m_status &= ~0x08;
+			machine().device("sub")->execute().set_input_line_and_vector(0, HOLD_LINE, 0x10);
 			break;
 
 		case 0x80:
-			state->m_status |= 0x04;
+			m_status |= 0x04;
 			break;
 	}
 }
 
-static WRITE8_HANDLER ( xxmissio_status_s_w )
+WRITE8_MEMBER(xxmissio_state::xxmissio_status_s_w)
 {
-	xxmissio_state *state = space->machine().driver_data<xxmissio_state>();
 	switch (data)
 	{
 		case 0x00:
-			state->m_status |= 0x10;
+			m_status |= 0x10;
 			break;
 
 		case 0x40:
-			state->m_status |= 0x08;
+			m_status |= 0x08;
 			break;
 
 		case 0x80:
-			state->m_status &= ~0x04;
-			cputag_set_input_line_and_vector(space->machine(), "maincpu", 0, HOLD_LINE, 0x10);
+			m_status &= ~0x04;
+			machine().device("maincpu")->execute().set_input_line_and_vector(0, HOLD_LINE, 0x10);
 			break;
 	}
 }
 
-static INTERRUPT_GEN( xxmissio_interrupt_m )
+INTERRUPT_GEN_MEMBER(xxmissio_state::xxmissio_interrupt_m)
 {
-	xxmissio_state *state = device->machine().driver_data<xxmissio_state>();
-	state->m_status &= ~0x20;
-	device_set_input_line(device, 0, HOLD_LINE);
+	m_status &= ~0x20;
+	device.execute().set_input_line(0, HOLD_LINE);
 }
 
-static INTERRUPT_GEN( xxmissio_interrupt_s )
+INTERRUPT_GEN_MEMBER(xxmissio_state::xxmissio_interrupt_s)
 {
-	xxmissio_state *state = device->machine().driver_data<xxmissio_state>();
-	state->m_status &= ~0x10;
-	device_set_input_line(device, 0, HOLD_LINE);
+	m_status &= ~0x10;
+	device.execute().set_input_line(0, HOLD_LINE);
 }
 
-static MACHINE_START( xxmissio )
+void xxmissio_state::machine_start()
 {
-	memory_configure_bank(machine, "bank1", 0, 8, machine.region("user1")->base(), 0x4000);
-	memory_set_bank(machine, "bank1", 0);
+	machine().root_device().membank("bank1")->configure_entries(0, 8, machine().root_device().memregion("user1")->base(), 0x4000);
+	machine().root_device().membank("bank1")->set_entry(0);
 }
 
 /****************************************************************************/
 
-static ADDRESS_MAP_START( map1, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( map1, AS_PROGRAM, 8, xxmissio_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 
-	AM_RANGE(0x8000, 0x8001) AM_DEVREADWRITE("ym1", ym2203_r, ym2203_w)
-	AM_RANGE(0x8002, 0x8003) AM_DEVREADWRITE("ym2", ym2203_r, ym2203_w)
+	AM_RANGE(0x8000, 0x8001) AM_DEVREADWRITE_LEGACY("ym1", ym2203_r, ym2203_w)
+	AM_RANGE(0x8002, 0x8003) AM_DEVREADWRITE_LEGACY("ym2", ym2203_r, ym2203_w)
 
 	AM_RANGE(0xa000, 0xa000) AM_READ_PORT("P1")
 	AM_RANGE(0xa001, 0xa001) AM_READ_PORT("P2")
@@ -101,23 +95,23 @@ static ADDRESS_MAP_START( map1, AS_PROGRAM, 8 )
 	AM_RANGE(0xa002, 0xa002) AM_WRITE(xxmissio_status_m_w)
 	AM_RANGE(0xa003, 0xa003) AM_WRITE(xxmissio_flipscreen_w)
 
-	AM_RANGE(0xc000, 0xc7ff) AM_SHARE("share1") AM_RAM AM_BASE_MEMBER(xxmissio_state, m_fgram)
-	AM_RANGE(0xc800, 0xcfff) AM_SHARE("share2") AM_READWRITE(xxmissio_bgram_r, xxmissio_bgram_w) AM_BASE_MEMBER(xxmissio_state, m_bgram)
-	AM_RANGE(0xd000, 0xd7ff) AM_SHARE("share3") AM_RAM AM_BASE_MEMBER(xxmissio_state, m_spriteram)
+	AM_RANGE(0xc000, 0xc7ff) AM_RAM AM_SHARE("fgram")
+	AM_RANGE(0xc800, 0xcfff) AM_READWRITE(xxmissio_bgram_r, xxmissio_bgram_w) AM_SHARE("bgram")
+	AM_RANGE(0xd000, 0xd7ff) AM_RAM AM_SHARE("spriteram")
 
-	AM_RANGE(0xd800, 0xdaff) AM_SHARE("share4") AM_RAM_WRITE(xxmissio_paletteram_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0xd800, 0xdaff) AM_SHARE("paletteram") AM_RAM_WRITE(xxmissio_paletteram_w)
 
 	AM_RANGE(0xe000, 0xefff) AM_SHARE("share5") AM_RAM
 	AM_RANGE(0xf000, 0xffff) AM_SHARE("share6") AM_RAM
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( map2, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( map2, AS_PROGRAM, 8, xxmissio_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
 	AM_RANGE(0x4000, 0x7fff) AM_ROMBANK("bank1")
 
-	AM_RANGE(0x8000, 0x8001) AM_DEVREADWRITE("ym1", ym2203_r, ym2203_w)
-	AM_RANGE(0x8002, 0x8003) AM_DEVREADWRITE("ym2", ym2203_r, ym2203_w)
+	AM_RANGE(0x8000, 0x8001) AM_DEVREADWRITE_LEGACY("ym1", ym2203_r, ym2203_w)
+	AM_RANGE(0x8002, 0x8003) AM_DEVREADWRITE_LEGACY("ym2", ym2203_r, ym2203_w)
 	AM_RANGE(0x8006, 0x8006) AM_WRITE(xxmissio_bank_sel_w)
 
 	AM_RANGE(0xa000, 0xa000) AM_READ_PORT("P1")
@@ -126,11 +120,11 @@ static ADDRESS_MAP_START( map2, AS_PROGRAM, 8 )
 	AM_RANGE(0xa002, 0xa002) AM_WRITE(xxmissio_status_s_w)
 	AM_RANGE(0xa003, 0xa003) AM_WRITE(xxmissio_flipscreen_w)
 
-	AM_RANGE(0xc000, 0xc7ff) AM_SHARE("share1") AM_RAM
-	AM_RANGE(0xc800, 0xcfff) AM_SHARE("share2") AM_READWRITE(xxmissio_bgram_r, xxmissio_bgram_w)
-	AM_RANGE(0xd000, 0xd7ff) AM_SHARE("share3") AM_RAM
+	AM_RANGE(0xc000, 0xc7ff) AM_SHARE("fgram") AM_RAM
+	AM_RANGE(0xc800, 0xcfff) AM_SHARE("bgram") AM_READWRITE(xxmissio_bgram_r, xxmissio_bgram_w)
+	AM_RANGE(0xd000, 0xd7ff) AM_SHARE("spriteram") AM_RAM
 
-	AM_RANGE(0xd800, 0xdaff) AM_SHARE("share4") AM_RAM_WRITE(xxmissio_paletteram_w)
+	AM_RANGE(0xd800, 0xdaff) AM_SHARE("paletteram") AM_RAM_WRITE(xxmissio_paletteram_w)
 
 	AM_RANGE(0xe000, 0xefff) AM_SHARE("share6") AM_RAM
 	AM_RANGE(0xf000, 0xffff) AM_SHARE("share5") AM_RAM
@@ -161,61 +155,55 @@ static INPUT_PORTS_START( xxmissio )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_COCKTAIL
 
 	PORT_START("DSW1")
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coinage ) )
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coinage ) )      PORT_DIPLOCATION("SW1:1,2")
 	PORT_DIPSETTING(    0x00, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x03, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( 1C_2C ) )
-	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Flip_Screen ) )
+	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Flip_Screen ) )  PORT_DIPLOCATION("SW1:3")
 	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Demo_Sounds ) )
+	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW1:4")
 	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Difficulty ) )
+	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("SW1:5")
 	PORT_DIPSETTING(    0x10, DEF_STR( Normal ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Hard ) )
-	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Cabinet ) )
+	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Cabinet ) )      PORT_DIPLOCATION("SW1:6")
 	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( Cocktail ) )
-	PORT_DIPNAME( 0x40, 0x40, "Endless Game (Cheat)")
+	PORT_DIPNAME( 0x40, 0x40, "Endless Game (Cheat)")   PORT_DIPLOCATION("SW1:7") /* Shown as "Unused" in the manual */
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
+	PORT_SERVICE_DIPLOC(  0x80, IP_ACTIVE_LOW, "SW1:8" )     /* Shown as "Unused" in the manual */
 
 	PORT_START("DSW2")
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Lives ) )
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW2:1,2")
 	PORT_DIPSETTING(    0x01, "2" )
 	PORT_DIPSETTING(    0x03, "3" )
 	PORT_DIPSETTING(    0x02, "4" )
 	PORT_DIPSETTING(    0x00, "5" )
-	PORT_DIPNAME( 0x04, 0x04, "First Bonus" )
+	PORT_DIPNAME( 0x04, 0x04, "First Bonus" )       PORT_DIPLOCATION("SW2:3")
 	PORT_DIPSETTING(    0x04, "30000" )
 	PORT_DIPSETTING(    0x00, "40000" )
-	PORT_DIPNAME( 0x18, 0x08, "Bonus Every" )
+	PORT_DIPNAME( 0x18, 0x08, "Bonus Every" )       PORT_DIPLOCATION("SW2:4,5")
 	PORT_DIPSETTING(    0x18, "50000" )
 	PORT_DIPSETTING(    0x08, "70000" )
 	PORT_DIPSETTING(    0x10, "90000" )
 	PORT_DIPSETTING(    0x00, DEF_STR( None ) )
-	PORT_DIPNAME( 0x20, 0x20, "Unknown 2-6" )
-	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x40, 0x40, "Unknown 2-7" )
-	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, "Unknown 2-8" )
-	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPUNUSED_DIPLOC( 0x20, 0x20, "SW2:6" ) /* Shown as "Unused" in the manual */
+	PORT_DIPUNUSED_DIPLOC( 0x40, 0x40, "SW2:7" ) /* Shown as "Unused" in the manual */
+	PORT_DIPUNUSED_DIPLOC( 0x80, 0x80, "SW2:8" ) /* Shown as "Unused" in the manual */
 
 	PORT_START("STATUS")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(xxmissio_status_r, (void *)0x01)
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_VBLANK )
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(xxmissio_status_r, (void *)0x04)
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(xxmissio_status_r, (void *)0x08)
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(xxmissio_status_r, (void *)0x10)
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(xxmissio_status_r, (void *)0x20)
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(xxmissio_status_r, (void *)0x40)
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(xxmissio_status_r, (void *)0x80)
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, xxmissio_state,xxmissio_status_r, (void *)0x01)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, xxmissio_state,xxmissio_status_r, (void *)0x04)
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, xxmissio_state,xxmissio_status_r, (void *)0x08)
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, xxmissio_state,xxmissio_status_r, (void *)0x10)
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, xxmissio_state,xxmissio_status_r, (void *)0x20)
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, xxmissio_state,xxmissio_status_r, (void *)0x40)
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, xxmissio_state,xxmissio_status_r, (void *)0x80)
 INPUT_PORTS_END
 
 /****************************************************************************/
@@ -234,15 +222,15 @@ static const gfx_layout charlayout =
 static const gfx_layout spritelayout =
 {
 	32,16,    /* 32*16 characters */
-	512,	  /* 512 sprites */
+	512,      /* 512 sprites */
 	4,        /* 4 bits per pixel */
 	{0,1,2,3},
 	{0,4,8,12,16,20,24,28,
-	 32,36,40,44,48,52,56,60,
-	 8*64+0,8*64+4,8*64+8,8*64+12,8*64+16,8*64+20,8*64+24,8*64+28,
-	 8*64+32,8*64+36,8*64+40,8*64+44,8*64+48,8*64+52,8*64+56,8*64+60},
+		32,36,40,44,48,52,56,60,
+		8*64+0,8*64+4,8*64+8,8*64+12,8*64+16,8*64+20,8*64+24,8*64+28,
+		8*64+32,8*64+36,8*64+40,8*64+44,8*64+48,8*64+52,8*64+56,8*64+60},
 	{64*0, 64*1, 64*2, 64*3, 64*4, 64*5, 64*6, 64*7,
-	 64*16, 64*17, 64*18, 64*19, 64*20, 64*21, 64*22, 64*23},
+		64*16, 64*17, 64*18, 64*19, 64*20, 64*21, 64*22, 64*23},
 	64*8*4
 };
 
@@ -275,7 +263,7 @@ static const ym2203_interface ym2203_interface_1 =
 		DEVCB_NULL,
 		DEVCB_NULL
 	},
-	NULL
+	DEVCB_NULL
 };
 
 static const ym2203_interface ym2203_interface_2 =
@@ -285,40 +273,37 @@ static const ym2203_interface ym2203_interface_2 =
 		AY8910_DEFAULT_LOADS,
 		DEVCB_NULL,
 		DEVCB_NULL,
-		DEVCB_HANDLER(xxmissio_scroll_x_w),
-		DEVCB_HANDLER(xxmissio_scroll_y_w)
+		DEVCB_DRIVER_MEMBER(xxmissio_state, xxmissio_scroll_x_w),
+		DEVCB_DRIVER_MEMBER(xxmissio_state, xxmissio_scroll_y_w)
 	},
-	NULL
+	DEVCB_NULL
 };
 
 static MACHINE_CONFIG_START( xxmissio, xxmissio_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80,12000000/4)	/* 3.0MHz */
+	MCFG_CPU_ADD("maincpu", Z80,12000000/4) /* 3.0MHz */
 	MCFG_CPU_PROGRAM_MAP(map1)
-	MCFG_CPU_VBLANK_INT("screen", xxmissio_interrupt_m)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", xxmissio_state,  xxmissio_interrupt_m)
 
-	MCFG_CPU_ADD("sub", Z80,12000000/4)	/* 3.0MHz */
+	MCFG_CPU_ADD("sub", Z80,12000000/4) /* 3.0MHz */
 	MCFG_CPU_PROGRAM_MAP(map2)
-	MCFG_CPU_VBLANK_INT_HACK(xxmissio_interrupt_s,2)
+	MCFG_CPU_PERIODIC_INT_DRIVER(xxmissio_state, xxmissio_interrupt_s, 2*60)
 
 	MCFG_QUANTUM_TIME(attotime::from_hz(6000))
 
-	MCFG_MACHINE_START(xxmissio)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 64*8-1, 4*8, 28*8-1)
-	MCFG_SCREEN_UPDATE(xxmissio)
+	MCFG_SCREEN_UPDATE_DRIVER(xxmissio_state, screen_update_xxmissio)
 
 	MCFG_GFXDECODE(xxmissio)
 	MCFG_PALETTE_LENGTH(768)
 
-	MCFG_VIDEO_START(xxmissio)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -363,4 +348,4 @@ ROM_START( xxmissio )
 	ROM_LOAD16_BYTE( "xx11.4b", 0x0001,  0x8000, CRC(d9dd827c) SHA1(aea3a5abd871adf7f75ad4d6cc57eff0833135c7) )
 ROM_END
 
-GAME( 1986, xxmissio, 0, xxmissio, xxmissio, 0, ROT90, "UPL", "XX Mission", 0 )
+GAME( 1986, xxmissio, 0, xxmissio, xxmissio, driver_device, 0, ROT90, "UPL", "XX Mission", 0 )

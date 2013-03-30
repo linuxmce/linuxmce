@@ -11,15 +11,15 @@
 class liberatr_state : public atarigen_state
 {
 public:
-	liberatr_state(running_machine &machine, const driver_device_config_base &config)
-		: atarigen_state(machine, config),
-		  m_base_ram(*this, "base_ram"),
-		  m_planet_frame(*this, "planet_frame"),
-		  m_planet_select(*this, "planet_select"),
-		  m_xcoord(*this, "xcoord"),
-		  m_ycoord(*this, "ycoord"),
-		  m_bitmapram(*this, "bitmapram"),
-		  m_colorram(*this, "colorram") { }
+	liberatr_state(const machine_config &mconfig, device_type type, const char *tag)
+		: atarigen_state(mconfig, type, tag),
+			m_base_ram(*this, "base_ram"),
+			m_planet_frame(*this, "planet_frame"),
+			m_planet_select(*this, "planet_select"),
+			m_xcoord(*this, "xcoord"),
+			m_ycoord(*this, "ycoord"),
+			m_bitmapram(*this, "bitmapram"),
+			m_colorram(*this, "colorram") { }
 
 	DECLARE_WRITE8_MEMBER( led_w );
 	DECLARE_WRITE8_MEMBER( coin_counter_w );
@@ -31,18 +31,20 @@ public:
 	DECLARE_READ8_MEMBER( bitmap_xy_r );
 	DECLARE_WRITE8_MEMBER( bitmap_xy_w );
 
+	UINT32 screen_update(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
+
 protected:
-	struct planet;
-
 	virtual void machine_start();
-
 	virtual void video_start();
-	virtual bool screen_update(screen_device &screen, bitmap_t &bitmap, const rectangle &cliprect);
+
+	virtual void update_interrupts() { }
+
+	struct planet;
 
 	void init_planet(planet &liberatr_planet, UINT8 *planet_rom);
 	void get_pens(pen_t *pens);
-	void draw_planet(bitmap_t &bitmap, pen_t *pens);
-	void draw_bitmap(bitmap_t &bitmap, pen_t *pens);
+	void draw_planet(bitmap_rgb32 &bitmap, pen_t *pens);
+	void draw_bitmap(bitmap_rgb32 &bitmap, pen_t *pens);
 
 	required_shared_ptr<UINT8> m_base_ram;
 	required_shared_ptr<UINT8> m_planet_frame;
@@ -52,9 +54,9 @@ protected:
 	required_shared_ptr<UINT8> m_bitmapram;
 	required_shared_ptr<UINT8> m_colorram;
 
-	UINT8		m_trackball_offset;
-	UINT8		m_ctrld;
-	UINT8		m_videoram[0x10000];
+	UINT8       m_trackball_offset;
+	UINT8       m_ctrld;
+	UINT8       m_videoram[0x10000];
 
 	// The following structure describes the (up to 32) line segments
 	// that make up one horizontal line (latitude) for one display frame of the planet.
@@ -62,10 +64,10 @@ protected:
 	// data before it is packed for actual use.
 	struct planet_frame_line
 	{
-		UINT8 segment_count;	// the number of segments on this line
-		UINT8 max_x;			// the maximum value of x_array for this line
-		UINT8 color_array[32];	// the color values
-		UINT8 x_array[32];		// and maximum x values for each segment
+		UINT8 segment_count;    // the number of segments on this line
+		UINT8 max_x;            // the maximum value of x_array for this line
+		UINT8 color_array[32];  // the color values
+		UINT8 x_array[32];      // and maximum x values for each segment
 	};
 
 	// The following structure describes the lines (latitudes)

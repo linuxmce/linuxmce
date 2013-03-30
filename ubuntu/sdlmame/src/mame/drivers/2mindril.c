@@ -7,25 +7,13 @@
  preliminary driver by
   David Haywood
   Tomasz Slanina
+  Angelo Salese
 
 TODO:
  - understand the ball hit sensor
  - simulate the sensors (there are still some shutter errors/defender errors that pops up)
  - Hook-up timers for shutter/defender sensors (check service mode)
  - Dip-Switches
- - find video control regs (layer enable, scroll)
-
-BG scroll:
-BG maps are 2048x256 (128x16 16x16 tiles).
-There's some kind of double buffering - odd/even screens are at
-x offsets 0 and 512 (it's visible during distance count after throw (odd/even numbers))
-
-looks like regs @460000 are used,  pairs at N, and N+8, so
-460000, 460008
-460002, 46000a
-460004, 46000c
-460006, 46000e
-
 
  Brief hardware overview:
  ------------------------
@@ -34,10 +22,10 @@ looks like regs @460000 are used,  pairs at N, and N+8, so
 
  Sound            - Yamaha YM2610B
 
- Taito custom ICs - TC0400YSC
-                  - TC0260DAR
-                  - TC0630FDP
-                  - TC0510NI0
+ Taito custom ICs - TC0400YSC (m68k -> ym2610 communication)
+                  - TC0260DAR (palette chip)
+                  - TC0630FDP (Taito F3 video chip)
+                  - TC0510NIO (known input chip)
 
 DAC               -26.6860Mhz
                   -32.0000Mhz
@@ -47,103 +35,57 @@ DAC               -26.6860Mhz
 #include "emu.h"
 #include "cpu/m68000/m68000.h"
 #include "sound/2610intf.h"
+#include "includes/taito_f3.h"
 
 
-class _2mindril_state : public driver_device
+class _2mindril_state : public taito_f3_state
 {
 public:
-	_2mindril_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	_2mindril_state(const machine_config &mconfig, device_type type, const char *tag)
+		: taito_f3_state(mconfig, type, tag),
+			m_iodata(*this, "iodata") { }
 
 	/* memory pointers */
-	UINT16 *      m_map1ram;
-	UINT16 *      m_map2ram;
-	UINT16 *      m_map3ram;
-	UINT16 *      m_map4ram;
-	UINT16 *      m_charram;
-	UINT16 *      m_textram;
-	UINT16 *      m_unkram;
-//  UINT16 *      m_paletteram;   // currently this uses generic palette handling
-	UINT16 *      m_iodata;
+	required_shared_ptr<UINT16> m_iodata;
 
 	/* input-related */
 	UINT16        m_defender_sensor;
-	UINT16		  m_shutter_sensor;
+	UINT16        m_shutter_sensor;
+	UINT16        irq_reg;
 
 	/* devices */
-	device_t *m_maincpu;
+	cpu_device *m_maincpu;
+	DECLARE_READ16_MEMBER(drill_io_r);
+	DECLARE_WRITE16_MEMBER(drill_io_w);
+	DECLARE_WRITE16_MEMBER(sensors_w);
+	DECLARE_READ16_MEMBER(drill_irq_r);
+	DECLARE_WRITE16_MEMBER(drill_irq_w);
+	DECLARE_DRIVER_INIT(drill);
+	DECLARE_MACHINE_START(drill);
+	DECLARE_MACHINE_RESET(drill);
+	INTERRUPT_GEN_MEMBER(drill_vblank_irq);
+	//INTERRUPT_GEN_MEMBER(drill_device_irq);
+	TIMER_CALLBACK_MEMBER(shutter_req);
+	TIMER_CALLBACK_MEMBER(defender_req);
+	void tile_decode();
 };
 
 
-
-#define DRAW_MAP(map,num)	\
-			{	int x, y; \
-				for (y = 0; y < 16; y++) \
-					for (x = 0; x < 128; x++) \
-					{ \
-						UINT16 data0 = map[y * 128 + x * 2]; \
-						UINT16 data1 = map[y * 128 + x * 2 + 1]; \
-						drawgfx_transpen(bitmap, \
-							cliprect,screen->machine().gfx[0], data1, \
-							data0 & 0xff, \
-							data0 & 0x4000, data0 & 0x8000, \
-							x * 16 - 512 /*+(((INT16)(state->m_unkram[0x60000 / 2 + num])) / 32)*/, \
-							y * 16 /*+(((INT16)(state->m_unkram[0x60008 / 2 + num])) / 32)*/,0); \
-					}	\
-			}
-
-static SCREEN_UPDATE( drill )
+READ16_MEMBER(_2mindril_state::drill_io_r)
 {
-	_2mindril_state *state = screen->machine().driver_data<_2mindril_state>();
-	bitmap_fill(bitmap, NULL, 0);
 
-	DRAW_MAP(state->m_map1ram, 0)
-	DRAW_MAP(state->m_map2ram, 1)
-	DRAW_MAP(state->m_map3ram, 2)
-	DRAW_MAP(state->m_map4ram, 3)
-
-	{
-		int x, y;
-		for (y = 0; y < 64; y++)
-			for(x = 0; x < 64; x++)
-			{
-				drawgfx_transpen(	bitmap,
-						cliprect,
-						screen->machine().gfx[1],
-						state->m_textram[y * 64 + x] & 0xff, //1ff ??
-						((state->m_textram[y * 64 + x] >> 9) & 0xf),
-						0, 0,
-						x*8,y*8,0);
-			}
-	}
-	/*printf("%.4X %.4X %.4X %.4X %.4X %.4X\n", state->m_unkram[0x60000 / 2], state->m_unkram[0x60000 / 2 + 1], state->m_unkram[0x60000 / 2 + 2],
-                                    state->m_unkram[0x60000 / 2 + 3], state->m_unkram[0x60000 / 2 + 4], state->m_unkram[0x60000 / 2 + 5]);*/
-	return 0;
-}
-
-static VIDEO_START( drill )
-{
-	_2mindril_state *state = machine.driver_data<_2mindril_state>();
-
-	machine.gfx[0]->color_granularity = 16;
-	gfx_element_set_source(machine.gfx[1], (UINT8 *)state->m_charram);
-}
-
-static READ16_HANDLER( drill_io_r )
-{
-	_2mindril_state *state = space->machine().driver_data<_2mindril_state>();
 
 //  if (offset * 2 == 0x4)
-	/*popmessage("PC=%08x %04x %04x %04x %04x %04x %04x %04x %04x", cpu_get_pc(&space->device()), state->m_iodata[0/2], state->m_iodata[2/2], state->m_iodata[4/2], state->m_iodata[6/2],
-                                        state->m_iodata[8/2], state->m_iodata[0xa/2], state->m_iodata[0xc/2], state->m_iodata[0xe/2]);*/
+	/*popmessage("PC=%08x %04x %04x %04x %04x %04x %04x %04x %04x", space.device().safe_pc(), m_iodata[0/2], m_iodata[2/2], m_iodata[4/2], m_iodata[6/2],
+	                                    m_iodata[8/2], m_iodata[0xa/2], m_iodata[0xc/2], m_iodata[0xe/2]);*/
 
 	switch(offset)
 	{
-		case 0x0/2: return input_port_read(space->machine(), "DSW");
+		case 0x0/2: return ioport("DSW")->read();
 		case 0x2/2:
 		{
-			int arm_pwr = input_port_read(space->machine(), "IN0");//throw
-			//popmessage("PC=%08x %02x",cpu_get_pc(&space->device()),arm_pwr);
+			int arm_pwr = ioport("IN0")->read();//throw
+			//popmessage("PC=%08x %02x",space.device().safe_pc(),arm_pwr);
 
 			if(arm_pwr > 0xe0) return ~0x1800;
 			if(arm_pwr > 0xc0) return ~0x1400;
@@ -151,31 +93,31 @@ static READ16_HANDLER( drill_io_r )
 			if(arm_pwr > 0x40) return ~0x1000;
 			else return ~0x0000;
 		}
-		case 0x4/2: return (state->m_defender_sensor) | (state->m_shutter_sensor);
-		case 0xe/2: return input_port_read(space->machine(), "IN2");//coins
-//      default:  printf("PC=%08x [%04x] -> %04x R\n", cpu_get_pc(&space->device()), offset * 2, state->m_iodata[offset]);
+		case 0x4/2: return (m_defender_sensor) | (m_shutter_sensor);
+		case 0xe/2: return ioport("IN2")->read();//coins
+//      default:  printf("PC=%08x [%04x] -> %04x R\n", space.device().safe_pc(), offset * 2, m_iodata[offset]);
 	}
 
 	return 0xffff;
 }
 
-static WRITE16_HANDLER( drill_io_w )
+WRITE16_MEMBER(_2mindril_state::drill_io_w)
 {
-	_2mindril_state *state = space->machine().driver_data<_2mindril_state>();
-	COMBINE_DATA(&state->m_iodata[offset]);
+
+	COMBINE_DATA(&m_iodata[offset]);
 
 	switch(offset)
 	{
 		case 0x8/2:
-			coin_counter_w(space->machine(), 0, state->m_iodata[offset] & 0x0400);
-			coin_counter_w(space->machine(), 1, state->m_iodata[offset] & 0x0800);
-			coin_lockout_w(space->machine(), 0, ~state->m_iodata[offset] & 0x0100);
-			coin_lockout_w(space->machine(), 1, ~state->m_iodata[offset] & 0x0200);
+			coin_counter_w(machine(), 0, m_iodata[offset] & 0x0400);
+			coin_counter_w(machine(), 1, m_iodata[offset] & 0x0800);
+			coin_lockout_w(machine(), 0, ~m_iodata[offset] & 0x0100);
+			coin_lockout_w(machine(), 1, ~m_iodata[offset] & 0x0200);
 			break;
 	}
 
 //  if(data != 0 && offset != 8)
-//  printf("PC=%08x [%04x] <- %04x W\n", cpu_get_pc(&space->device()), offset * 2, data);
+//  printf("PC=%08x [%04x] <- %04x W\n", space.device().safe_pc(), offset * 2, data);
 }
 
 /*
@@ -193,73 +135,91 @@ static WRITE16_HANDLER( drill_io_w )
     PORT_DIPSETTING(      0x0800, DEF_STR( On ) )
 */
 #ifdef UNUSED_FUNCTION
-static TIMER_CALLBACK( shutter_req )
+TIMER_CALLBACK_MEMBER(_2mindril_state::shutter_req)
 {
-	_2mindril_state *state = machine.driver_data<_2mindril_state>();
-	state->m_shutter_sensor = param;
+	m_shutter_sensor = param;
 }
 
-static TIMER_CALLBACK( defender_req )
+TIMER_CALLBACK_MEMBER(_2mindril_state::defender_req)
 {
-	_2mindril_state *state = machine.driver_data<_2mindril_state>();
-	state->m_defender_sensor = param;
+	m_defender_sensor = param;
 }
 #endif
 
-static WRITE16_HANDLER( sensors_w )
+WRITE16_MEMBER(_2mindril_state::sensors_w)
 {
-	_2mindril_state *state = space->machine().driver_data<_2mindril_state>();
+
 
 	/*---- xxxx ---- ---- select "lamps" (guess)*/
 	/*---- ---- ---- -x-- lamp*/
 	if (data & 1)
 	{
-		//space->machine().scheduler().timer_set(attotime::from_seconds(2), FUNC(shutter_req ), 0x100);
-		state->m_shutter_sensor = 0x100;
+		//machine().scheduler().timer_set(attotime::from_seconds(2), FUNC(shutter_req ), 0x100);
+		m_shutter_sensor = 0x100;
 	}
 	else if (data & 2)
 	{
-		//space->machine().scheduler().timer_set( attotime::from_seconds(2), FUNC(shutter_req ), 0x200);
-		state->m_shutter_sensor = 0x200;
+		//machine().scheduler().timer_set( attotime::from_seconds(2), FUNC(shutter_req ), 0x200);
+		m_shutter_sensor = 0x200;
 	}
 
 	if (data & 0x1000 || data & 0x4000)
 	{
-		//space->machine().scheduler().timer_set( attotime::from_seconds(2), FUNC(defender_req ), 0x800);
-		state->m_defender_sensor = 0x800;
+		//machine().scheduler().timer_set( attotime::from_seconds(2), FUNC(defender_req ), 0x800);
+		m_defender_sensor = 0x800;
 	}
 	else if (data & 0x2000 || data & 0x8000)
 	{
-		//space->machine().scheduler().timer_set( attotime::from_seconds(2), FUNC(defender_req ), 0x400);
-		state->m_defender_sensor = 0x400;
+		//machine().scheduler().timer_set( attotime::from_seconds(2), FUNC(defender_req ), 0x400);
+		m_defender_sensor = 0x400;
 	}
 }
 
-static WRITE16_HANDLER( charram_w )
+READ16_MEMBER(_2mindril_state::drill_irq_r)
 {
-	_2mindril_state *state = space->machine().driver_data<_2mindril_state>();
 
-	COMBINE_DATA(&state->m_charram[offset]);
-	gfx_element_mark_dirty(space->machine().gfx[1], offset / 16);
+	return irq_reg;
 }
 
-static ADDRESS_MAP_START( drill_map, AS_PROGRAM, 16 )
+WRITE16_MEMBER(_2mindril_state::drill_irq_w)
+{
+
+	/*
+	(note: could rather be irq mask)
+	---- ---- ---x ---- irq lv 5 ack, 0->1 latch
+	---- ---- ---- x--- irq lv 4 ack, 0->1 latch
+	---- ---- -??- -??? connected to the other levels?
+	*/
+	if(((irq_reg & 8) == 0) && data & 8)
+		machine().device("maincpu")->execute().set_input_line(4, CLEAR_LINE);
+
+	if(((irq_reg & 0x10) == 0) && data & 0x10)
+		machine().device("maincpu")->execute().set_input_line(5, CLEAR_LINE);
+
+	if(data & 0xffe7)
+		printf("%04x\n",data);
+
+	COMBINE_DATA(&irq_reg);
+}
+
+static ADDRESS_MAP_START( drill_map, AS_PROGRAM, 16, _2mindril_state )
 	AM_RANGE(0x000000, 0x07ffff) AM_ROM
 	AM_RANGE(0x200000, 0x20ffff) AM_RAM
 	AM_RANGE(0x300000, 0x3000ff) AM_RAM
-	AM_RANGE(0x410000, 0x411fff) AM_RAM AM_BASE_MEMBER(_2mindril_state, m_map1ram)
-	AM_RANGE(0x412000, 0x413fff) AM_RAM AM_BASE_MEMBER(_2mindril_state, m_map2ram)
-	AM_RANGE(0x414000, 0x415fff) AM_RAM AM_BASE_MEMBER(_2mindril_state, m_map3ram)
-	AM_RANGE(0x416000, 0x417fff) AM_RAM AM_BASE_MEMBER(_2mindril_state, m_map4ram)
-	AM_RANGE(0x41c000, 0x41dfff) AM_RAM AM_BASE_MEMBER(_2mindril_state, m_textram)
-	AM_RANGE(0x41e000, 0x41ffff) AM_RAM_WRITE(charram_w) AM_BASE_MEMBER(_2mindril_state, m_charram)
-	AM_RANGE(0x400000, 0x4fffff) AM_RAM AM_BASE_MEMBER(_2mindril_state, m_unkram)// video stuff, 460000 - video regs ?
-	AM_RANGE(0x500000, 0x501fff) AM_RAM_WRITE(paletteram16_RRRRGGGGBBBBRGBx_word_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0x502000, 0x503fff) AM_RAM
-	AM_RANGE(0x600000, 0x600007) AM_DEVREADWRITE8("ymsnd", ym2610_r, ym2610_w, 0x00ff)
-	AM_RANGE(0x60000c, 0x60000d) AM_RAM
-	AM_RANGE(0x60000e, 0x60000f) AM_RAM
-	AM_RANGE(0x700000, 0x70000f) AM_READWRITE(drill_io_r,drill_io_w) AM_BASE_MEMBER(_2mindril_state, m_iodata) // i/o
+	AM_RANGE(0x400000, 0x40ffff) AM_READWRITE(f3_spriteram_r,f3_spriteram_w)
+	AM_RANGE(0x410000, 0x41bfff) AM_READWRITE(f3_pf_data_r,f3_pf_data_w)
+	AM_RANGE(0x41c000, 0x41dfff) AM_READWRITE(f3_videoram_r,f3_videoram_w)
+	AM_RANGE(0x41e000, 0x41ffff) AM_READWRITE(f3_vram_r,f3_vram_w)
+	AM_RANGE(0x420000, 0x42ffff) AM_READWRITE(f3_lineram_r,f3_lineram_w)
+	AM_RANGE(0x430000, 0x43ffff) AM_READWRITE(f3_pivot_r,f3_pivot_w)
+	AM_RANGE(0x460000, 0x46000f) AM_WRITE(f3_control_0_w)
+	AM_RANGE(0x460010, 0x46001f) AM_WRITE(f3_control_1_w)
+	AM_RANGE(0x500000, 0x501fff) AM_RAM_WRITE(paletteram_RRRRGGGGBBBBRGBx_word_w) AM_SHARE("paletteram")
+	AM_RANGE(0x502022, 0x502023) AM_WRITENOP //countinously switches between 0 and 2
+	AM_RANGE(0x600000, 0x600007) AM_DEVREADWRITE8_LEGACY("ymsnd", ym2610_r, ym2610_w, 0x00ff)
+	AM_RANGE(0x60000c, 0x60000d) AM_READWRITE(drill_irq_r,drill_irq_w)
+	AM_RANGE(0x60000e, 0x60000f) AM_RAM // unknown purpose, zeroed at start-up and nothing else
+	AM_RANGE(0x700000, 0x70000f) AM_READWRITE(drill_io_r,drill_io_w) AM_SHARE("iodata") // i/o
 	AM_RANGE(0x800000, 0x800001) AM_WRITE(sensors_w)
 ADDRESS_MAP_END
 
@@ -379,44 +339,86 @@ static INPUT_PORTS_START( drill )
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_NAME("Select SW-4")
 INPUT_PORTS_END
 
-static const gfx_layout drill_layout =
+static const gfx_layout charlayout =
+{
+	8,8,
+	256,
+	4,
+	{ 0,1,2,3 },
+	{ 20, 16, 28, 24, 4, 0, 12, 8 },
+	{ 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32 },
+	32*8
+};
+
+static const gfx_layout pivotlayout =
+{
+	8,8,
+	2048,
+	4,
+	{ 0,1,2,3 },
+	{ 20, 16, 28, 24, 4, 0, 12, 8 },
+	{ 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32 },
+	32*8
+};
+
+static const gfx_layout spriteram_layout =
 {
 	16,16,
 	RGN_FRAC(1,2),
-	6,
-	{ RGN_FRAC(1,2)+1, RGN_FRAC(1,2)+0 ,0,1,2,3 },
-	{ 20, 16, 28, 24, 4, 0, 12, 8,        52, 48, 60, 56, 36, 32, 44, 40 },
-	{ 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64, 8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64 },
-	16*64
+	6,  /* Palettes have 4 bpp indexes despite up to 6 bpp data */
+	{ RGN_FRAC(1,2)+0, RGN_FRAC(1,2)+1, 0, 1, 2, 3 },
+	{
+	4, 0, 12, 8,
+	16+4, 16+0, 16+12, 16+8,
+	32+4, 32+0, 32+12, 32+8,
+	48+4, 48+0, 48+12, 48+8 },
+	{ 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64,
+			8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64 },
+	128*8   /* every sprite takes 128 consecutive bytes */
 };
 
-static const gfx_layout vramlayout=
+static const gfx_layout tile_layout =
 {
-    8,8,
-    256,
-    4,
-    { 0, 1, 2, 3 },
-    {20,16,28,24,4,0,12,8},
-	  { 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32 },
-    32*8
+	16,16,
+	RGN_FRAC(1,2),
+	6,  /* Palettes have 4 bpp indexes despite up to 6 bpp data */
+	{ RGN_FRAC(1,2)+2, RGN_FRAC(1,2)+3, 0, 1, 2, 3 },
+	{
+	4, 0, 16+4, 16+0,
+	8+4, 8+0, 24+4, 24+0,
+	32+4, 32+0, 48+4, 48+0,
+	40+4, 40+0, 56+4, 56+0,
+	},
+	{ 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64,
+			8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64 },
+	128*8   /* every sprite takes 128 consecutive bytes */
 };
 
 static GFXDECODE_START( 2mindril )
-	GFXDECODE_ENTRY( "gfx1", 0, drill_layout,  0, 256  )
-	GFXDECODE_ENTRY( NULL,   0, vramlayout,    0, 256 )
+	GFXDECODE_ENTRY( NULL,   0x000000, charlayout,       0x0000, 0x0400>>4 ) /* Dynamically modified */
+	GFXDECODE_ENTRY( "gfx2", 0x000000, tile_layout,      0x0000, 0x2000>>4 ) /* Tiles area */
+	GFXDECODE_ENTRY( "gfx1", 0x000000, spriteram_layout, 0x1000, 0x1000>>4 ) /* Sprites area */
+	GFXDECODE_ENTRY( NULL,   0x000000, pivotlayout,      0x0000,  0x400>>4 ) /* Dynamically modified */
 GFXDECODE_END
 
 
-static INTERRUPT_GEN( drill_interrupt )
+INTERRUPT_GEN_MEMBER(_2mindril_state::drill_vblank_irq)
 {
-	device_set_input_line(device, 4, HOLD_LINE);
+	device.execute().set_input_line(4, ASSERT_LINE);
 }
+
+#if 0
+INTERRUPT_GEN_MEMBER(_2mindril_state::drill_device_irq)
+{
+	device.execute().set_input_line(5, ASSERT_LINE);
+}
+#endif
 
 /* WRONG,it does something with 60000c & 700002,likely to be called when the player throws the ball.*/
 static void irqhandler(device_t *device, int irq)
 {
 //  _2mindril_state *state = machine.driver_data<_2mindril_state>();
-//  device_set_input_line(state->m_maincpu, 5, irq ? ASSERT_LINE : CLEAR_LINE);
+//  state->m_maincpu->set_input_line(5, irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static const ym2610_interface ym2610_config =
@@ -425,49 +427,49 @@ static const ym2610_interface ym2610_config =
 };
 
 
-static MACHINE_START( drill )
+MACHINE_START_MEMBER(_2mindril_state,drill)
 {
-	_2mindril_state *state = machine.driver_data<_2mindril_state>();
 
-	state->m_maincpu = machine.device("maincpu");
+	m_maincpu = machine().device<cpu_device>("maincpu");
 
-	state->save_item(NAME(state->m_defender_sensor));
-	state->save_item(NAME(state->m_shutter_sensor));
+	save_item(NAME(m_defender_sensor));
+	save_item(NAME(m_shutter_sensor));
 }
 
-static MACHINE_RESET( drill )
+MACHINE_RESET_MEMBER(_2mindril_state,drill)
 {
-	_2mindril_state *state = machine.driver_data<_2mindril_state>();
 
-	state->m_defender_sensor = 0;
-	state->m_shutter_sensor = 0;
+	m_defender_sensor = 0;
+	m_shutter_sensor = 0;
+	irq_reg = 0;
 }
 
 static MACHINE_CONFIG_START( drill, _2mindril_state )
 
 	MCFG_CPU_ADD("maincpu", M68000, 16000000 )
 	MCFG_CPU_PROGRAM_MAP(drill_map)
-	MCFG_CPU_VBLANK_INT("screen", drill_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", _2mindril_state,  drill_vblank_irq)
+	//MCFG_CPU_PERIODIC_INT_DRIVER(_2mindril_state, drill_device_irq, 60)
 	MCFG_GFXDECODE(2mindril)
 
-	MCFG_MACHINE_START(drill)
-	MCFG_MACHINE_RESET(drill)
+	MCFG_MACHINE_START_OVERRIDE(_2mindril_state,drill)
+	MCFG_MACHINE_RESET_OVERRIDE(_2mindril_state,drill)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
-	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
-	MCFG_SCREEN_SIZE(128*16, 64*8)
-	MCFG_SCREEN_VISIBLE_AREA(0, 319, 0, 239-16)
-	MCFG_SCREEN_UPDATE(drill)
+	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500)) /* inaccurate, same as Taito F3? (needs screen raw params anyway) */
+	MCFG_SCREEN_SIZE(40*8+48*2, 32*8)
+	MCFG_SCREEN_VISIBLE_AREA(46, 40*8-1 + 46, 24, 24+224-1)
+	MCFG_SCREEN_UPDATE_DRIVER(_2mindril_state, screen_update_f3)
+	MCFG_SCREEN_VBLANK_DRIVER(_2mindril_state, screen_eof_f3)
 
-	MCFG_PALETTE_LENGTH(0x1000)
+	MCFG_PALETTE_LENGTH(0x2000)
 
-	MCFG_VIDEO_START(drill)
+	MCFG_VIDEO_START_OVERRIDE(_2mindril_state,f3)
 
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
 
-	MCFG_SOUND_ADD("ymsnd", YM2610, 16000000/2)
+	MCFG_SOUND_ADD("ymsnd", YM2610B, 16000000/2)
 	MCFG_SOUND_CONFIG(ym2610_config)
 	MCFG_SOUND_ROUTE(0, "lspeaker",  0.25)
 	MCFG_SOUND_ROUTE(0, "rspeaker", 0.25)
@@ -485,33 +487,78 @@ ROM_START( 2mindril )
 	ROM_LOAD( "d58-11.ic31", 0x000000, 0x200000,  CRC(dc26d58d) SHA1(cffb18667da18f5367b02af85a2f7674dd61ae97) )
 
 	ROM_REGION( 0x800000, "gfx1", ROMREGION_ERASE00 )
-	ROM_LOAD32_WORD( "d58-09.ic28", 0x000000, 0x200000, CRC(d8f6a86a) SHA1(d6b2ec309e21064574ee63e025ae4716b1982a98) )
-	ROM_LOAD32_WORD( "d58-08.ic27", 0x000002, 0x200000, CRC(9f5a3f52) SHA1(7b696bd823819965b974c853cebc1660750db61e) )
 
-	ROM_REGION( 0x400000, "gfx2", 0 )
-	ROM_LOAD32_WORD( "d58-10.ic29", 0x000000, 0x200000, CRC(74c87e08) SHA1(f39b3a64f8338ccf5ca6eb76cee92a10fe0aad8f) )
+	ROM_REGION( 0x800000, "gfx2", 0 )
+	ROM_LOAD16_BYTE( "d58-09.ic28", 0x000001, 0x200000, CRC(d8f6a86a) SHA1(d6b2ec309e21064574ee63e025ae4716b1982a98) )
+	ROM_LOAD16_BYTE( "d58-08.ic27", 0x000000, 0x200000, CRC(9f5a3f52) SHA1(7b696bd823819965b974c853cebc1660750db61e) )
+	ROM_LOAD( "d58-10.ic29", 0x400000, 0x200000, CRC(74c87e08) SHA1(f39b3a64f8338ccf5ca6eb76cee92a10fe0aad8f) )
+	ROM_RELOAD(              0x600000, 0x200000 )
 ROM_END
 
-static DRIVER_INIT( drill )
+void _2mindril_state::tile_decode()
 {
-	// rearrange gfx roms to something we can decode, two of the roms form 4bpp of the graphics, the third forms another 2bpp but is in a different format
-	UINT32 *src = (UINT32*)machine.region( "gfx2" )->base();
-	UINT32 *dst = (UINT32*)machine.region( "gfx1" )->base();// + 0x400000;
-//  UINT8 *rom = machine.region( "maincpu" )->base();
-	int i;
+	UINT8 lsb,msb;
+	UINT32 offset,i;
+	UINT8 *gfx = machine().root_device().memregion("gfx2")->base();
+	int size=machine().root_device().memregion("gfx2")->bytes();
+	int data;
 
-	for (i = 0; i < 0x400000 / 4; i++)
+	/* Setup ROM formats:
+
+	    Some games will only use 4 or 5 bpp sprites, and some only use 4 bpp tiles,
+	    I don't believe this is software or prom controlled but simply the unused data lines
+	    are tied low on the game board if unused.  This is backed up by the fact the palette
+	    indices are always related to 4 bpp data, even in 6 bpp games.
+
+	    Most (all?) games with 5bpp tiles have the sixth bit set. Also, in Arabian Magic
+	    sprites 1200-120f contain 6bpp data which is probably bogus.
+	    VIDEO_START( f3 ) clears the fifth and sixth bit of the decoded graphics according
+	    to the bit depth specified in f3_config_table.
+
+	*/
+
+	offset = size/2;
+	for (i = size/2+size/4; i<size; i+=2)
 	{
-		UINT32 dat1 = src[i];
-		dat1 = BITSWAP32(dat1, 3, 11, 19, 27, 2, 10, 18, 26, 1, 9, 17, 25, 0, 8, 16, 24, 7, 15, 23, 31, 6, 14, 22, 30, 5, 13, 21, 29, 4, 12, 20, 28 );
-		dst[(0x400000 / 4) + i] = dat1;
+		/* Expand 2bits into 4bits format */
+		lsb = gfx[i+1];
+		msb = gfx[i];
+
+		gfx[offset+0]=((msb&0x02)<<3) | ((msb&0x01)>>0) | ((lsb&0x02)<<4) | ((lsb&0x01)<<1);
+		gfx[offset+2]=((msb&0x08)<<1) | ((msb&0x04)>>2) | ((lsb&0x08)<<2) | ((lsb&0x04)>>1);
+		gfx[offset+1]=((msb&0x20)>>1) | ((msb&0x10)>>4) | ((lsb&0x20)<<0) | ((lsb&0x10)>>3);
+		gfx[offset+3]=((msb&0x80)>>3) | ((msb&0x40)>>6) | ((lsb&0x80)>>2) | ((lsb&0x40)>>5);
+
+		offset+=4;
 	}
 
-	//enable some kind of debug mode (ignore errors)
-//  rom[0x7fffb] = 0;
-//  rom[0x7fffc] = 0;
-//  rom[0x7fffd] = 0;
-//  rom[0x7fffe] = 0;
+	gfx = machine().root_device().memregion("gfx1")->base();
+	size=machine().root_device().memregion("gfx1")->bytes();
+
+	offset = size/2;
+	for (i = size/2+size/4; i<size; i++)
+	{
+		int d1,d2,d3,d4;
+
+		/* Expand 2bits into 4bits format */
+		data = gfx[i];
+		d1 = (data>>0) & 3;
+		d2 = (data>>2) & 3;
+		d3 = (data>>4) & 3;
+		d4 = (data>>6) & 3;
+
+		gfx[offset] = (d1<<2) | (d2<<6);
+		offset++;
+
+		gfx[offset] = (d3<<2) | (d4<<6);
+		offset++;
+	}
 }
 
-GAME( 1993, 2mindril,    0,        drill,    drill,    drill, ROT0,  "Taito", "Two Minute Drill", GAME_NOT_WORKING | GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE | GAME_MECHANICAL)
+DRIVER_INIT_MEMBER(_2mindril_state,drill)
+{
+	m_f3_game=TMDRILL;
+	tile_decode();
+}
+
+GAME( 1993, 2mindril,    0,        drill,    drill, _2mindril_state,    drill, ROT0,  "Taito", "Two Minute Drill", GAME_NOT_WORKING | GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE | GAME_MECHANICAL)

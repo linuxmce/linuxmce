@@ -26,59 +26,56 @@
 #include "includes/konamipt.h"
 #include "includes/spy.h"
 
-static INTERRUPT_GEN( spy_interrupt )
+INTERRUPT_GEN_MEMBER(spy_state::spy_interrupt)
 {
-	spy_state *state = device->machine().driver_data<spy_state>();
 
-	if (k052109_is_irq_enabled(state->m_k052109))
-		device_set_input_line(device, 0, HOLD_LINE);
+	if (k052109_is_irq_enabled(m_k052109))
+		device.execute().set_input_line(0, HOLD_LINE);
 }
 
-static READ8_HANDLER( spy_bankedram1_r )
+READ8_MEMBER(spy_state::spy_bankedram1_r)
 {
-	spy_state *state = space->machine().driver_data<spy_state>();
 
-	if (state->m_rambank & 1)
+	if (m_rambank & 1)
 	{
-		return space->machine().generic.paletteram.u8[offset];
+		return m_generic_paletteram_8[offset];
 	}
-	else if (state->m_rambank & 2)
+	else if (m_rambank & 2)
 	{
-		if (state->m_pmcbank)
+		if (m_pmcbank)
 		{
-			//logerror("%04x read pmcram %04x\n", cpu_get_pc(&space->device()), offset);
-			return state->m_pmcram[offset];
+			//logerror("%04x read pmcram %04x\n", space.device().safe_pc(), offset);
+			return m_pmcram[offset];
 		}
 		else
 		{
-			//logerror("%04x read pmc internal ram %04x\n", cpu_get_pc(&space->device()), offset);
+			//logerror("%04x read pmc internal ram %04x\n", space.device().safe_pc(), offset);
 			return 0;
 		}
 	}
 	else
-		return state->m_ram[offset];
+		return m_ram[offset];
 }
 
-static WRITE8_HANDLER( spy_bankedram1_w )
+WRITE8_MEMBER(spy_state::spy_bankedram1_w)
 {
-	spy_state *state = space->machine().driver_data<spy_state>();
 
-	if (state->m_rambank & 1)
+	if (m_rambank & 1)
 	{
-		paletteram_xBBBBBGGGGGRRRRR_be_w(space,offset,data);
+		paletteram_xBBBBBGGGGGRRRRR_byte_be_w(space,offset,data);
 	}
-	else if (state->m_rambank & 2)
+	else if (m_rambank & 2)
 	{
-		if (state->m_pmcbank)
+		if (m_pmcbank)
 		{
-			//logerror("%04x pmcram %04x = %02x\n", cpu_get_pc(&space->device()), offset, data);
-			state->m_pmcram[offset] = data;
+			//logerror("%04x pmcram %04x = %02x\n", space.device().safe_pc(), offset, data);
+			m_pmcram[offset] = data;
 		}
 		//else
-			//logerror("%04x pmc internal ram %04x = %02x\n", cpu_get_pc(&space->device()), offset, data);
+			//logerror("%04x pmc internal ram %04x = %02x\n", space.device().safe_pc(), offset, data);
 	}
 	else
-		state->m_ram[offset] = data;
+		m_ram[offset] = data;
 }
 
 /*
@@ -149,7 +146,7 @@ this is the data written to internal ram on startup:
 3f: 5f 7e 00 ce 08
 */
 
-static WRITE8_HANDLER( bankswitch_w )
+WRITE8_MEMBER(spy_state::bankswitch_w)
 {
 	int bank;
 
@@ -163,7 +160,7 @@ static WRITE8_HANDLER( bankswitch_w )
 	else
 		bank = ((data & 0x0e) >> 1);
 
-	memory_set_bank(space->machine(), "bank1", bank);
+	membank("bank1")->set_entry(bank);
 }
 
 static void spy_collision( running_machine &machine )
@@ -249,67 +246,66 @@ static void spy_collision( running_machine &machine )
 }
 
 
-static WRITE8_HANDLER( spy_3f90_w )
+WRITE8_MEMBER(spy_state::spy_3f90_w)
 {
-	spy_state *state = space->machine().driver_data<spy_state>();
 
 	/*********************************************************************
-    *
-    * Signals, from schematic:
-    *   Bit 0 - CTR1 0x01
-    *   Bit 1 - CTR2 0x02
-    *   Bit 2 - CHA-RD 0x04
-    *   Bit 3 - TV-KILL 0x08  +TV-KILL & COLORBLK to pin 7 of
-    *                                    052535 video chips
-    *
-    *   Bit 4 - COLORBK/RVBK 0x10
-    *   Bit 5 - PMCBK 0x20  GX857 053180 PAL20P Pin 7 (MCE1)
-    *   Bit 6 - PMC-START 0x40  PMC START
-    *   Bit 7 - PMC-BK 0x80  PMC BK
-    *
-    *   PMC takes AB0-AB12, D0-D7 from 6809E, outputs EA0-EA10, ED0-ED7,
-    *   tied to A and D bus of 2128SL
-    *
-    *   See "MCPU" page of S.P.Y schematics for more...
-    *
-    *    PMC ERWE -> ~WR of 2128SL
-    *    PMC ERCS -> ~CE of 2128SL
-    *    PMC EROE -> ~OE of 2128SL
-    *
-    *    PMCOUTO -> PMCFIRQ -> 6809E ~FIRQ and PORT4, bit 0x08
-    *
-    *   PMC selected by PMC/RVRAMCS signal: pin 16 of PAL20P 05318
-    *
-    *    AB0xC -> 0x1000, so if address & 0x1000, appears PMC is selected.
-    *
-    *   Other apparent selects:
-    *
-    *    0x0800 -> COLORCS (color enable?)
-    *    0x2000 -> ~CS1 on 6264W
-    *    0x4000 -> ~OE on S63 27512
-    *    0x8000 -> ~OE on S22 27512
-    *
-    ********************************************************************/
+	*
+	* Signals, from schematic:
+	*   Bit 0 - CTR1 0x01
+	*   Bit 1 - CTR2 0x02
+	*   Bit 2 - CHA-RD 0x04
+	*   Bit 3 - TV-KILL 0x08  +TV-KILL & COLORBLK to pin 7 of
+	*                                    052535 video chips
+	*
+	*   Bit 4 - COLORBK/RVBK 0x10
+	*   Bit 5 - PMCBK 0x20  GX857 053180 PAL20P Pin 7 (MCE1)
+	*   Bit 6 - PMC-START 0x40  PMC START
+	*   Bit 7 - PMC-BK 0x80  PMC BK
+	*
+	*   PMC takes AB0-AB12, D0-D7 from 6809E, outputs EA0-EA10, ED0-ED7,
+	*   tied to A and D bus of 2128SL
+	*
+	*   See "MCPU" page of S.P.Y schematics for more...
+	*
+	*    PMC ERWE -> ~WR of 2128SL
+	*    PMC ERCS -> ~CE of 2128SL
+	*    PMC EROE -> ~OE of 2128SL
+	*
+	*    PMCOUTO -> PMCFIRQ -> 6809E ~FIRQ and PORT4, bit 0x08
+	*
+	*   PMC selected by PMC/RVRAMCS signal: pin 16 of PAL20P 05318
+	*
+	*    AB0xC -> 0x1000, so if address & 0x1000, appears PMC is selected.
+	*
+	*   Other apparent selects:
+	*
+	*    0x0800 -> COLORCS (color enable?)
+	*    0x2000 -> ~CS1 on 6264W
+	*    0x4000 -> ~OE on S63 27512
+	*    0x8000 -> ~OE on S22 27512
+	*
+	********************************************************************/
 
 	/* bits 0/1 = coin counters */
-	coin_counter_w(space->machine(), 0, data & 0x01);
-	coin_counter_w(space->machine(), 1, data & 0x02);
+	coin_counter_w(machine(), 0, data & 0x01);
+	coin_counter_w(machine(), 1, data & 0x02);
 
 	/* bit 2 = enable char ROM reading through the video RAM */
-	k052109_set_rmrd_line(state->m_k052109, (data & 0x04) ? ASSERT_LINE : CLEAR_LINE);
+	k052109_set_rmrd_line(m_k052109, (data & 0x04) ? ASSERT_LINE : CLEAR_LINE);
 
 	/* bit 3 = disable video */
-	state->m_video_enable = ~(data & 0x08);
+	m_video_enable = ~(data & 0x08);
 
 	/* bit 4 = read RAM at 0000 (if set) else read color palette RAM */
 	/* bit 5 = PMCBK */
-	state->m_rambank = (data & 0x30) >> 4;
+	m_rambank = (data & 0x30) >> 4;
 	/* bit 7 = PMC-BK */
-	state->m_pmcbank = (data & 0x80) >> 7;
+	m_pmcbank = (data & 0x80) >> 7;
 
-//logerror("%04x: 3f90_w %02x\n", cpu_get_pc(&space->device()), data);
+//logerror("%04x: 3f90_w %02x\n", space.device().safe_pc(), data);
 	/* bit 6 = PMC-START */
-	if ((data & 0x40) && !(state->m_old_3f90 & 0x40))
+	if ((data & 0x40) && !(m_old_3f90 & 0x40))
 	{
 		/* we should handle collision here */
 //AT
@@ -320,77 +316,73 @@ static WRITE8_HANDLER( spy_3f90_w )
 			logerror("collision test:\n");
 			for (i = 0; i < 0xfe; i++)
 			{
-				logerror("%02x ", state->m_pmcram[i]);
+				logerror("%02x ", m_pmcram[i]);
 				if (i == 0x0f || (i > 0x10 && (i - 0x10) % 14 == 13))
 				logerror("\n");
 			}
 		}
-		spy_collision(space->machine());
+		spy_collision(machine());
 //ZT
-		device_set_input_line(state->m_maincpu, M6809_FIRQ_LINE, HOLD_LINE);
+		m_maincpu->set_input_line(M6809_FIRQ_LINE, HOLD_LINE);
 	}
 
-	state->m_old_3f90 = data;
+	m_old_3f90 = data;
 }
 
 
-static WRITE8_HANDLER( spy_sh_irqtrigger_w )
+WRITE8_MEMBER(spy_state::spy_sh_irqtrigger_w)
 {
-	spy_state *state = space->machine().driver_data<spy_state>();
-	device_set_input_line_and_vector(state->m_audiocpu, 0, HOLD_LINE, 0xff);
+	m_audiocpu->set_input_line_and_vector(0, HOLD_LINE, 0xff);
 }
 
-static WRITE8_HANDLER( sound_bank_w )
+WRITE8_MEMBER(spy_state::sound_bank_w)
 {
-	spy_state *state = space->machine().driver_data<spy_state>();
 	int bank_A, bank_B;
 
 	bank_A = (data >> 0) & 0x03;
 	bank_B = (data >> 2) & 0x03;
-	k007232_set_bank(state->m_k007232_1, bank_A, bank_B);
+	k007232_set_bank(m_k007232_1, bank_A, bank_B);
 
 	bank_A = (data >> 4) & 0x03;
 	bank_B = (data >> 6) & 0x03;
-	k007232_set_bank(state->m_k007232_2, bank_A, bank_B);
+	k007232_set_bank(m_k007232_2, bank_A, bank_B);
 }
 
 
-static READ8_HANDLER( k052109_051960_r )
+READ8_MEMBER(spy_state::k052109_051960_r)
 {
-	spy_state *state = space->machine().driver_data<spy_state>();
 
-	if (k052109_get_rmrd_line(state->m_k052109) == CLEAR_LINE)
+	if (k052109_get_rmrd_line(m_k052109) == CLEAR_LINE)
 	{
 		if (offset >= 0x3800 && offset < 0x3808)
-			return k051937_r(state->m_k051960, offset - 0x3800);
+			return k051937_r(m_k051960, space, offset - 0x3800);
 		else if (offset < 0x3c00)
-			return k052109_r(state->m_k052109, offset);
+			return k052109_r(m_k052109, space, offset);
 		else
-			return k051960_r(state->m_k051960, offset - 0x3c00);
+			return k051960_r(m_k051960, space, offset - 0x3c00);
 	}
 	else
-		return k052109_r(state->m_k052109, offset);
+		return k052109_r(m_k052109, space, offset);
 }
 
-static WRITE8_HANDLER( k052109_051960_w )
+WRITE8_MEMBER(spy_state::k052109_051960_w)
 {
-	spy_state *state = space->machine().driver_data<spy_state>();
 
 	if (offset >= 0x3800 && offset < 0x3808)
-		k051937_w(state->m_k051960, offset - 0x3800, data);
+		k051937_w(m_k051960, space, offset - 0x3800, data);
 	else if (offset < 0x3c00)
-		k052109_w(state->m_k052109, offset, data);
+		k052109_w(m_k052109, space, offset, data);
 	else
-		k051960_w(state->m_k051960, offset - 0x3c00, data);
+		k051960_w(m_k051960, space, offset - 0x3c00, data);
 }
 
-static ADDRESS_MAP_START( spy_map, AS_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0x07ff) AM_READWRITE(spy_bankedram1_r, spy_bankedram1_w) AM_BASE_MEMBER(spy_state, m_ram)
+static ADDRESS_MAP_START( spy_map, AS_PROGRAM, 8, spy_state )
+	AM_RANGE(0x0000, 0x07ff) AM_READWRITE(spy_bankedram1_r, spy_bankedram1_w) AM_SHARE("ram")
 	AM_RANGE(0x0800, 0x1aff) AM_RAM
 	AM_RANGE(0x3f80, 0x3f80) AM_WRITE(bankswitch_w)
 	AM_RANGE(0x3f90, 0x3f90) AM_WRITE(spy_3f90_w)
 	AM_RANGE(0x3fa0, 0x3fa0) AM_WRITE(watchdog_reset_w)
-	AM_RANGE(0x3fb0, 0x3fb0) AM_WRITE(soundlatch_w)
+	AM_RANGE(0x3fb0, 0x3fb0) AM_WRITE(soundlatch_byte_w)
 	AM_RANGE(0x3fc0, 0x3fc0) AM_WRITE(spy_sh_irqtrigger_w)
 	AM_RANGE(0x3fd0, 0x3fd0) AM_READ_PORT("SYSTEM")
 	AM_RANGE(0x3fd1, 0x3fd1) AM_READ_PORT("P1")
@@ -402,48 +394,46 @@ static ADDRESS_MAP_START( spy_map, AS_PROGRAM, 8 )
 	AM_RANGE(0x8000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( spy_sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( spy_sound_map, AS_PROGRAM, 8, spy_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x87ff) AM_RAM
 	AM_RANGE(0x9000, 0x9000) AM_WRITE(sound_bank_w)
-	AM_RANGE(0xa000, 0xa00d) AM_DEVREADWRITE("k007232_1", k007232_r, k007232_w)
-	AM_RANGE(0xb000, 0xb00d) AM_DEVREADWRITE("k007232_2", k007232_r, k007232_w)
-	AM_RANGE(0xc000, 0xc001) AM_DEVREADWRITE("ymsnd", ym3812_r,ym3812_w)
-	AM_RANGE(0xd000, 0xd000) AM_READ(soundlatch_r)
+	AM_RANGE(0xa000, 0xa00d) AM_DEVREADWRITE_LEGACY("k007232_1", k007232_r, k007232_w)
+	AM_RANGE(0xb000, 0xb00d) AM_DEVREADWRITE_LEGACY("k007232_2", k007232_r, k007232_w)
+	AM_RANGE(0xc000, 0xc001) AM_DEVREADWRITE_LEGACY("ymsnd", ym3812_r,ym3812_w)
+	AM_RANGE(0xd000, 0xd000) AM_READ(soundlatch_byte_r)
 ADDRESS_MAP_END
 
 
 static INPUT_PORTS_START( spy )
 	PORT_START("P1")
-	KONAMI8_ALT_B21(1)	/* button 3 unused */
+	KONAMI8_ALT_B21(1)  /* button 3 unused */
 
 	PORT_START("P2")
-	KONAMI8_ALT_B21(2)	/* button 3 unused */
+	KONAMI8_ALT_B21(2)  /* button 3 unused */
 
 	PORT_START("DSW1")
-	KONAMI_COINAGE(DEF_STR( Free_Play ), "Invalid")
+	KONAMI_COINAGE_LOC(DEF_STR( Free_Play ), "Invalid", SW1)
 	/* "Invalid" = both coin slots disabled */
 
 	PORT_START("DSW2")
-	PORT_DIPNAME( 0x03, 0x02, DEF_STR( Lives ) )
+	PORT_DIPNAME( 0x03, 0x02, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW2:1,2")
 	PORT_DIPSETTING(    0x03, "2" )
 	PORT_DIPSETTING(    0x02, "3" )
 	PORT_DIPSETTING(    0x01, "5" )
 	PORT_DIPSETTING(    0x00, "7" )
-	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unused ) )
-	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x18, 0x08, DEF_STR( Bonus_Life ) )
+	PORT_DIPUNUSED_DIPLOC( 0x04, IP_ACTIVE_LOW, "SW2:3" )
+	PORT_DIPNAME( 0x18, 0x08, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION("SW2:4,5")
 	PORT_DIPSETTING(    0x18, "10k and every 20k" )
 	PORT_DIPSETTING(    0x10, "20k and every 30k" )
 	PORT_DIPSETTING(    0x08, "20k only" )
 	PORT_DIPSETTING(    0x00, "30k only" )
-	PORT_DIPNAME( 0x60, 0x40, DEF_STR( Difficulty ) )
+	PORT_DIPNAME( 0x60, 0x40, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("SW2:6,7")
 	PORT_DIPSETTING(    0x60, DEF_STR( Easy ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( Normal ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( Difficult ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Very_Difficult ) )
-	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Demo_Sounds ) )
+	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW2:8")
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
@@ -451,17 +441,15 @@ static INPUT_PORTS_START( spy )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE1 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SPECIAL )	/* PMCFIRQ signal from the PMC */
-	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Flip_Screen ) )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SPECIAL )        /* PMCFIRQ signal from the PMC */
+	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Flip_Screen ) )  PORT_DIPLOCATION("SW3:1")
 	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unused ) )
-	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_SERVICE( 0x40, IP_ACTIVE_LOW )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Continues ) )
-	PORT_DIPSETTING(    0x80, "Unlimited" )
+	PORT_DIPUNUSED_DIPLOC( 0x20, IP_ACTIVE_LOW, "SW3:2" )
+	PORT_SERVICE_DIPLOC( 0x40, IP_ACTIVE_LOW, "SW3:3" )
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Allow_Continue ) ) PORT_DIPLOCATION("SW3:4")
 	PORT_DIPSETTING(    0x00, "5 Times" )
+	PORT_DIPSETTING(    0x80, "Unlimited" )
 INPUT_PORTS_END
 
 
@@ -481,7 +469,7 @@ static const k007232_interface spy_k007232_interface =
 static void irqhandler( device_t *device, int linestate )
 {
 	spy_state *state = device->machine().driver_data<spy_state>();
-	device_set_input_line(state->m_audiocpu, INPUT_LINE_NMI, linestate);
+	state->m_audiocpu->set_input_line(INPUT_LINE_NMI, linestate);
 }
 
 static const ym3812_interface ym3812_config =
@@ -506,39 +494,36 @@ static const k051960_interface spy_k051960_intf =
 	spy_sprite_callback
 };
 
-static MACHINE_START( spy )
+void spy_state::machine_start()
 {
-	spy_state *state = machine.driver_data<spy_state>();
-	UINT8 *ROM = machine.region("maincpu")->base();
+	UINT8 *ROM = memregion("maincpu")->base();
 
-	memory_configure_bank(machine, "bank1", 0, 12, &ROM[0x10000], 0x2000);
+	membank("bank1")->configure_entries(0, 12, &ROM[0x10000], 0x2000);
 
-	machine.generic.paletteram.u8 = auto_alloc_array_clear(machine, UINT8, 0x800);
-	memset(state->m_pmcram, 0, sizeof(state->m_pmcram));
+	m_generic_paletteram_8.allocate(0x800);
+	memset(m_pmcram, 0, sizeof(m_pmcram));
 
-	state->m_maincpu = machine.device("maincpu");
-	state->m_audiocpu = machine.device("audiocpu");
-	state->m_k052109 = machine.device("k052109");
-	state->m_k051960 = machine.device("k051960");
-	state->m_k007232_1 = machine.device("k007232_1");
-	state->m_k007232_2 = machine.device("k007232_2");
+	m_maincpu = machine().device<cpu_device>("maincpu");
+	m_audiocpu = machine().device<cpu_device>("audiocpu");
+	m_k052109 = machine().device("k052109");
+	m_k051960 = machine().device("k051960");
+	m_k007232_1 = machine().device("k007232_1");
+	m_k007232_2 = machine().device("k007232_2");
 
-	state->save_item(NAME(state->m_rambank));
-	state->save_item(NAME(state->m_pmcbank));
-	state->save_item(NAME(state->m_video_enable));
-	state->save_item(NAME(state->m_old_3f90));
-	state->save_pointer(NAME(machine.generic.paletteram.u8), 0x800);
-	state->save_item(NAME(state->m_pmcram));
+	save_item(NAME(m_rambank));
+	save_item(NAME(m_pmcbank));
+	save_item(NAME(m_video_enable));
+	save_item(NAME(m_old_3f90));
+	save_item(NAME(m_pmcram));
 }
 
-static MACHINE_RESET( spy )
+void spy_state::machine_reset()
 {
-	spy_state *state = machine.driver_data<spy_state>();
 
-	state->m_rambank = 0;
-	state->m_pmcbank = 0;
-	state->m_video_enable = 0;
-	state->m_old_3f90 = -1;
+	m_rambank = 0;
+	m_pmcbank = 0;
+	m_video_enable = 0;
+	m_old_3f90 = -1;
 }
 
 static MACHINE_CONFIG_START( spy, spy_state )
@@ -546,14 +531,12 @@ static MACHINE_CONFIG_START( spy, spy_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6809, 3000000) /* ? */
 	MCFG_CPU_PROGRAM_MAP(spy_map)
-	MCFG_CPU_VBLANK_INT("screen", spy_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", spy_state,  spy_interrupt)
 
 	MCFG_CPU_ADD("audiocpu", Z80, 3579545)
 	MCFG_CPU_PROGRAM_MAP(spy_sound_map)
 								/* nmi by the sound chip */
 
-	MCFG_MACHINE_START(spy)
-	MCFG_MACHINE_RESET(spy)
 
 	/* video hardware */
 	MCFG_VIDEO_ATTRIBUTES(VIDEO_HAS_SHADOWS)
@@ -561,14 +544,12 @@ static MACHINE_CONFIG_START( spy, spy_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(13*8, (64-13)*8-1, 2*8, 30*8-1 )
-	MCFG_SCREEN_UPDATE(spy)
+	MCFG_SCREEN_UPDATE_DRIVER(spy_state, screen_update_spy)
 
 	MCFG_PALETTE_LENGTH(1024)
 
-	MCFG_VIDEO_START(spy)
 
 	MCFG_K052109_ADD("k052109", spy_k052109_intf)
 	MCFG_K051960_ADD("k051960", spy_k051960_intf)
@@ -608,15 +589,15 @@ ROM_START( spy )
 	ROM_LOAD( "857d01.bin",   0x0000, 0x8000, CRC(aad4210f) SHA1(bb40b8673939b5ce51012606da86b4dcbfc52a57) )
 
 	ROM_REGION( 0x080000, "gfx1", 0 ) /* graphics ( dont dispose as the program can read them, 0 ) */
-	ROM_LOAD( "857b09.bin",   0x00000, 0x40000, CRC(b8780966) SHA1(6c255f1e4d1398fa9010a1ae0f5172dc524df109) )	/* characters */
+	ROM_LOAD( "857b09.bin",   0x00000, 0x40000, CRC(b8780966) SHA1(6c255f1e4d1398fa9010a1ae0f5172dc524df109) )  /* characters */
 	ROM_LOAD( "857b08.bin",   0x40000, 0x40000, CRC(3e4d8d50) SHA1(70f45a725bf1e9d15285ffb6b280945f7ce7faf0) )
 
 	ROM_REGION( 0x100000, "gfx2", 0 ) /* graphics ( dont dispose as the program can read them, 0 ) */
-	ROM_LOAD( "857b06.bin",   0x00000, 0x80000, CRC(7b515fb1) SHA1(3830649d47964940023760b76e2bf94bb9163f23) )	/* sprites */
+	ROM_LOAD( "857b06.bin",   0x00000, 0x80000, CRC(7b515fb1) SHA1(3830649d47964940023760b76e2bf94bb9163f23) )  /* sprites */
 	ROM_LOAD( "857b05.bin",   0x80000, 0x80000, CRC(27b0f73b) SHA1(6b6a3da11c3005e3a62e6280818c18ae2ea31800) )
 
 	ROM_REGION( 0x0200, "proms", 0 )
-	ROM_LOAD( "857a10.bin",   0x0000, 0x0100, CRC(32758507) SHA1(c21f89ad253502968a755fb0d23da98319f9cd93) )	/* priority encoder (not used) */
+	ROM_LOAD( "857a10.bin",   0x0000, 0x0100, CRC(32758507) SHA1(c21f89ad253502968a755fb0d23da98319f9cd93) )    /* priority encoder (not used) */
 
 	ROM_REGION( 0x40000, "k007232_1", 0 ) /* samples for 007232 #0 */
 	ROM_LOAD( "857b07.bin",   0x00000, 0x40000, CRC(ce3512d4) SHA1(1e7c3feabfc3ac89056982b76de39e283cf5894d) )
@@ -635,15 +616,15 @@ ROM_START( spyu )
 	ROM_LOAD( "857d01.bin",   0x0000, 0x8000, CRC(aad4210f) SHA1(bb40b8673939b5ce51012606da86b4dcbfc52a57) )
 
 	ROM_REGION( 0x080000, "gfx1", 0 ) /* graphics ( dont dispose as the program can read them, 0 ) */
-	ROM_LOAD( "857b09.bin",   0x00000, 0x40000, CRC(b8780966) SHA1(6c255f1e4d1398fa9010a1ae0f5172dc524df109) )	/* characters */
+	ROM_LOAD( "857b09.bin",   0x00000, 0x40000, CRC(b8780966) SHA1(6c255f1e4d1398fa9010a1ae0f5172dc524df109) )  /* characters */
 	ROM_LOAD( "857b08.bin",   0x40000, 0x40000, CRC(3e4d8d50) SHA1(70f45a725bf1e9d15285ffb6b280945f7ce7faf0) )
 
 	ROM_REGION( 0x100000, "gfx2", 0 ) /* graphics ( dont dispose as the program can read them, 0 ) */
-	ROM_LOAD( "857b06.bin",   0x00000, 0x80000, CRC(7b515fb1) SHA1(3830649d47964940023760b76e2bf94bb9163f23) )	/* sprites */
+	ROM_LOAD( "857b06.bin",   0x00000, 0x80000, CRC(7b515fb1) SHA1(3830649d47964940023760b76e2bf94bb9163f23) )  /* sprites */
 	ROM_LOAD( "857b05.bin",   0x80000, 0x80000, CRC(27b0f73b) SHA1(6b6a3da11c3005e3a62e6280818c18ae2ea31800) )
 
 	ROM_REGION( 0x0200, "proms", 0 )
-	ROM_LOAD( "857a10.bin",   0x0000, 0x0100, CRC(32758507) SHA1(c21f89ad253502968a755fb0d23da98319f9cd93) )	/* priority encoder (not used) */
+	ROM_LOAD( "857a10.bin",   0x0000, 0x0100, CRC(32758507) SHA1(c21f89ad253502968a755fb0d23da98319f9cd93) )    /* priority encoder (not used) */
 
 	ROM_REGION( 0x40000, "k007232_1", 0 ) /* samples for 007232 #0 */
 	ROM_LOAD( "857b07.bin",   0x00000, 0x40000, CRC(ce3512d4) SHA1(1e7c3feabfc3ac89056982b76de39e283cf5894d) )
@@ -653,5 +634,5 @@ ROM_START( spyu )
 ROM_END
 
 
-GAME( 1989, spy,  0,   spy, spy, 0, ROT0, "Konami", "S.P.Y. - Special Project Y (World ver. N)", GAME_SUPPORTS_SAVE )
-GAME( 1989, spyu, spy, spy, spy, 0, ROT0, "Konami", "S.P.Y. - Special Project Y (US ver. M)", GAME_SUPPORTS_SAVE )
+GAME( 1989, spy,  0,   spy, spy, driver_device, 0, ROT0, "Konami", "S.P.Y. - Special Project Y (World ver. N)", GAME_SUPPORTS_SAVE )
+GAME( 1989, spyu, spy, spy, spy, driver_device, 0, ROT0, "Konami", "S.P.Y. - Special Project Y (US ver. M)", GAME_SUPPORTS_SAVE )

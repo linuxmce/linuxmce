@@ -17,7 +17,7 @@ silence compression: '00 nn' must be replaced by nn+1 times '80'.
 #include "n63701x.h"
 
 
-typedef struct
+struct voice
 {
 	int select;
 	int playing;
@@ -25,15 +25,14 @@ typedef struct
 	int position;
 	int volume;
 	int silence_counter;
-} voice;
+};
 
 
-typedef struct _namco_63701x namco_63701x;
-struct _namco_63701x
+struct namco_63701x
 {
 	voice voices[2];
-	sound_stream * stream;		/* channel assigned by the mixer */
-	UINT8 *rom;		/* pointer to sample ROM */
+	sound_stream * stream;      /* channel assigned by the mixer */
+	UINT8 *rom;     /* pointer to sample ROM */
 };
 
 
@@ -50,7 +49,7 @@ INLINE namco_63701x *get_safe_token(device_t *device)
 {
 	assert(device != NULL);
 	assert(device->type() == NAMCO_63701X);
-	return (namco_63701x *)downcast<legacy_device_base *>(device)->token();
+	return (namco_63701x *)downcast<namco_63701x_device *>(device)->token();
 }
 
 
@@ -82,12 +81,12 @@ static STREAM_UPDATE( namco_63701x_update )
 				{
 					int data = base[(pos++) & 0xffff];
 
-					if (data == 0xff)	/* end of sample */
+					if (data == 0xff)   /* end of sample */
 					{
 						v->playing = 0;
 						break;
 					}
-					else if (data == 0x00)	/* silence compression */
+					else if (data == 0x00)  /* silence compression */
 					{
 						data = base[(pos++) & 0xffff];
 						v->silence_counter = data;
@@ -129,11 +128,11 @@ WRITE8_DEVICE_HANDLER( namco_63701x_w )
 	else
 	{
 		/*
-          should we stop the playing sample if voice_select[ch] == 0 ?
-          originally we were, but this makes us lose a sample in genpeitd,
-          after the continue counter reaches 0. Either we shouldn't stop
-          the sample, or genpeitd is returning to the title screen too soon.
-         */
+		  should we stop the playing sample if voice_select[ch] == 0 ?
+		  originally we were, but this makes us lose a sample in genpeitd,
+		  after the continue counter reaches 0. Either we shouldn't stop
+		  the sample, or genpeitd is returning to the title screen too soon.
+		 */
 		if (chip->voices[ch].select & 0x1f)
 		{
 			int rom_offs;
@@ -154,35 +153,40 @@ WRITE8_DEVICE_HANDLER( namco_63701x_w )
 	}
 }
 
+const device_type NAMCO_63701X = &device_creator<namco_63701x_device>;
 
-
-
-
-
-/**************************************************************************
- * Generic get_info
- **************************************************************************/
-
-DEVICE_GET_INFO( namco_63701x )
+namco_63701x_device::namco_63701x_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, NAMCO_63701X, "Namco 63701X", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
 {
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(namco_63701x);						break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME( namco_63701x );	break;
-		case DEVINFO_FCT_STOP:							/* Nothing */										break;
-		case DEVINFO_FCT_RESET:							/* Nothing */										break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "Namco 63701X");					break;
-		case DEVINFO_STR_FAMILY:					strcpy(info->s, "Namco custom");					break;
-		case DEVINFO_STR_VERSION:					strcpy(info->s, "1.0");								break;
-		case DEVINFO_STR_SOURCE_FILE:						strcpy(info->s, __FILE__);							break;
-		case DEVINFO_STR_CREDITS:					strcpy(info->s, "Copyright Nicola Salmoria and the MAME Team"); break;
-	}
+	m_token = global_alloc_clear(namco_63701x);
 }
 
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
 
-DEFINE_LEGACY_SOUND_DEVICE(NAMCO_63701X, namco_63701x);
+void namco_63701x_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void namco_63701x_device::device_start()
+{
+	DEVICE_START_NAME( namco_63701x )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void namco_63701x_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}

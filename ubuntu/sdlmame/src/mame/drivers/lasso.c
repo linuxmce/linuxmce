@@ -4,21 +4,22 @@
 
         driver by Phil Stroffolino, Nicola Salmoria, Luca Elia
 
----------------------------------------------------------------------------
-Year + Game                 By              CPUs        Sound Chips
----------------------------------------------------------------------------
+--------------------------------------------------------------------------------------
+Year + Game                 By              CPUs        Sound Chips         Misc Info
+--------------------------------------------------------------------------------------
 82  Lasso                   SNK             3 x 6502    2 x SN76489
 83  Chameleon               Jaleco          2 x 6502    2 x SN76489
 84  Wai Wai Jockey Gate-In! Jaleco/Casio    2 x 6502    2 x SN76489 + DAC
-84  Pinbo                   Jaleco          6502 + Z80  2 x AY-8910
----------------------------------------------------------------------------
+84  Pinbo                   Jaleco          6502 + Z80  2 x AY-8910         6502 @ 18MHz/24, Z80 @ 18MHz/6, AY @ 18MHz/12
+--------------------------------------------------------------------------------------
 
 Notes:
 
-- unknown CPU speeds (affect game timing), currently using same as the
-  Rock-Ola games of the same area.  Lot of similarities between these
-  hardware.  The music ends at the perfect time with this clock speed
+- unknown CPU speeds unless noted above (affect game timing), currently using
+  same as the Rock-Ola games of the same area.  Lot of similarities between
+  these hardware.  The music ends at the perfect time with this clock speed
 - Lasso: fire button auto-repeats on high score entry screen (real behavior?)
+- Pinbo: bgcolor is wrong, how does it generate it? ($a0, should be darkblue)
 
 ***************************************************************************
 
@@ -31,98 +32,87 @@ DIP locations verified for:
 #include "cpu/m6502/m6502.h"
 #include "cpu/z80/z80.h"
 #include "sound/dac.h"
-#include "sound/sn76496.h"
 #include "sound/ay8910.h"
 #include "includes/lasso.h"
 
 
-static INPUT_CHANGED( coin_inserted )
+INPUT_CHANGED_MEMBER(lasso_state::coin_inserted)
 {
-	lasso_state *state = field->port->machine().driver_data<lasso_state>();
 
 	/* coin insertion causes an NMI */
-	device_set_input_line(state->m_maincpu, INPUT_LINE_NMI, newval ? CLEAR_LINE : ASSERT_LINE);
+	m_maincpu->set_input_line(INPUT_LINE_NMI, newval ? CLEAR_LINE : ASSERT_LINE);
 }
 
 
 /* Write to the sound latch and generate an IRQ on the sound CPU */
-static WRITE8_HANDLER( sound_command_w )
+WRITE8_MEMBER(lasso_state::sound_command_w)
 {
-	lasso_state *state = space->machine().driver_data<lasso_state>();
-	soundlatch_w(space, offset, data);
-	generic_pulse_irq_line(state->m_audiocpu, 0);
+	soundlatch_byte_w(space, offset, data);
+	m_audiocpu->set_input_line(0, HOLD_LINE);
 }
 
-static WRITE8_HANDLER( pinbo_sound_command_w )
-{
-	lasso_state *state = space->machine().driver_data<lasso_state>();
-	soundlatch_w(space, offset, data);
-	device_set_input_line(state->m_audiocpu, 0, HOLD_LINE);
-}
-
-static READ8_HANDLER( sound_status_r )
+READ8_MEMBER(lasso_state::sound_status_r)
 {
 	/*  0x01: chip#0 ready; 0x02: chip#1 ready */
 	return 0x03;
 }
 
-static WRITE8_HANDLER( sound_select_w )
+WRITE8_MEMBER(lasso_state::sound_select_w)
 {
-	lasso_state *state = space->machine().driver_data<lasso_state>();
-	UINT8 to_write = BITSWAP8(*state->m_chip_data, 0, 1, 2, 3, 4, 5, 6, 7);
+	UINT8 to_write = BITSWAP8(*m_chip_data, 0, 1, 2, 3, 4, 5, 6, 7);
 
-	if (~data & 0x01)	/* chip #0 */
-		sn76496_w(state->m_sn_1, 0, to_write);
+	if (~data & 0x01)   /* chip #0 */
+		m_sn_1->write(space, 0, to_write);
 
-	if (~data & 0x02)	/* chip #1 */
-		sn76496_w(state->m_sn_2, 0, to_write);
+	if (~data & 0x02)   /* chip #1 */
+		m_sn_2->write(space, 0, to_write);
 }
 
 
-static ADDRESS_MAP_START( lasso_main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( lasso_main_map, AS_PROGRAM, 8, lasso_state )
 	AM_RANGE(0x0000, 0x03ff) AM_RAM
-	AM_RANGE(0x0400, 0x07ff) AM_RAM_WRITE(lasso_videoram_w) AM_BASE_MEMBER(lasso_state, m_videoram)
-	AM_RANGE(0x0800, 0x0bff) AM_RAM_WRITE(lasso_colorram_w) AM_BASE_MEMBER(lasso_state, m_colorram)
-	AM_RANGE(0x0c00, 0x0c7f) AM_RAM AM_BASE_SIZE_MEMBER(lasso_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0x0400, 0x07ff) AM_RAM_WRITE(lasso_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0x0800, 0x0bff) AM_RAM_WRITE(lasso_colorram_w) AM_SHARE("colorram")
+	AM_RANGE(0x0c00, 0x0c7f) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0x1000, 0x17ff) AM_RAM AM_SHARE("share1")
 	AM_RANGE(0x1800, 0x1800) AM_WRITE(sound_command_w)
-	AM_RANGE(0x1801, 0x1801) AM_WRITEONLY AM_BASE_MEMBER(lasso_state, m_back_color)
+	AM_RANGE(0x1801, 0x1801) AM_WRITEONLY AM_SHARE("back_color")
 	AM_RANGE(0x1802, 0x1802) AM_WRITE(lasso_video_control_w)
 	AM_RANGE(0x1804, 0x1804) AM_READ_PORT("1804")
 	AM_RANGE(0x1805, 0x1805) AM_READ_PORT("1805")
-	AM_RANGE(0x1806, 0x1806) AM_READ_PORT("1806") AM_WRITENOP	/* game uses 'lsr' to read port */
+	AM_RANGE(0x1806, 0x1806) AM_READ_PORT("1806") AM_WRITENOP   /* game uses 'lsr' to read port */
 	AM_RANGE(0x1807, 0x1807) AM_READ_PORT("1807")
 	AM_RANGE(0x8000, 0xbfff) AM_MIRROR(0x4000) AM_ROM
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( lasso_audio_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( lasso_audio_map, AS_PROGRAM, 8, lasso_state )
 	AM_RANGE(0x0000, 0x01ff) AM_RAM
 	AM_RANGE(0x5000, 0x7fff) AM_ROM
-	AM_RANGE(0xb000, 0xb000) AM_WRITEONLY AM_BASE_MEMBER(lasso_state, m_chip_data)
+	AM_RANGE(0xb000, 0xb000) AM_WRITEONLY AM_SHARE("chip_data")
 	AM_RANGE(0xb001, 0xb001) AM_WRITE(sound_select_w)
 	AM_RANGE(0xb004, 0xb004) AM_READ(sound_status_r)
-	AM_RANGE(0xb005, 0xb005) AM_READ(soundlatch_r)
+	AM_RANGE(0xb005, 0xb005) AM_READ(soundlatch_byte_r)
 	AM_RANGE(0xf000, 0xffff) AM_ROM AM_REGION("audiocpu", 0x7000)
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( lasso_coprocessor_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( lasso_coprocessor_map, AS_PROGRAM, 8, lasso_state )
 	AM_RANGE(0x0000, 0x07ff) AM_RAM AM_SHARE("share1")
-	AM_RANGE(0x2000, 0x3fff) AM_RAM AM_BASE_MEMBER(lasso_state, m_bitmap_ram)
+	AM_RANGE(0x2000, 0x3fff) AM_RAM AM_SHARE("bitmap_ram")
 	AM_RANGE(0x8000, 0x8fff) AM_MIRROR(0x7000) AM_ROM
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( chameleo_main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( chameleo_main_map, AS_PROGRAM, 8, lasso_state )
 	AM_RANGE(0x0000, 0x03ff) AM_RAM
-	AM_RANGE(0x0400, 0x07ff) AM_RAM_WRITE(lasso_videoram_w) AM_BASE_MEMBER(lasso_state, m_videoram)
-	AM_RANGE(0x0800, 0x0bff) AM_RAM_WRITE(lasso_colorram_w) AM_BASE_MEMBER(lasso_state, m_colorram)
+	AM_RANGE(0x0400, 0x07ff) AM_RAM_WRITE(lasso_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0x0800, 0x0bff) AM_RAM_WRITE(lasso_colorram_w) AM_SHARE("colorram")
 	AM_RANGE(0x0c00, 0x0fff) AM_RAM
-	AM_RANGE(0x1000, 0x107f) AM_RAM AM_BASE_SIZE_MEMBER(lasso_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0x1000, 0x107f) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0x1080, 0x10ff) AM_RAM
 	AM_RANGE(0x1800, 0x1800) AM_WRITE(sound_command_w)
-	AM_RANGE(0x1801, 0x1801) AM_WRITEONLY AM_BASE_MEMBER(lasso_state, m_back_color)
+	AM_RANGE(0x1801, 0x1801) AM_WRITEONLY AM_SHARE("back_color")
 	AM_RANGE(0x1802, 0x1802) AM_WRITE(lasso_video_control_w)
 	AM_RANGE(0x1804, 0x1804) AM_READ_PORT("1804")
 	AM_RANGE(0x1805, 0x1805) AM_READ_PORT("1805")
@@ -133,54 +123,55 @@ static ADDRESS_MAP_START( chameleo_main_map, AS_PROGRAM, 8 )
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( chameleo_audio_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( chameleo_audio_map, AS_PROGRAM, 8, lasso_state )
 	AM_RANGE(0x0000, 0x01ff) AM_RAM
 	AM_RANGE(0x1000, 0x1fff) AM_ROM
 	AM_RANGE(0x6000, 0x7fff) AM_ROM
-	AM_RANGE(0xb000, 0xb000) AM_WRITEONLY AM_BASE_MEMBER(lasso_state, m_chip_data)
+	AM_RANGE(0xb000, 0xb000) AM_WRITEONLY AM_SHARE("chip_data")
 	AM_RANGE(0xb001, 0xb001) AM_WRITE(sound_select_w)
 	AM_RANGE(0xb004, 0xb004) AM_READ(sound_status_r)
-	AM_RANGE(0xb005, 0xb005) AM_READ(soundlatch_r)
+	AM_RANGE(0xb005, 0xb005) AM_READ(soundlatch_byte_r)
 	AM_RANGE(0xf000, 0xffff) AM_ROM AM_REGION("audiocpu", 0x7000)
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( wwjgtin_main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( wwjgtin_main_map, AS_PROGRAM, 8, lasso_state )
 	AM_RANGE(0x0000, 0x07ff) AM_RAM
-	AM_RANGE(0x0800, 0x0bff) AM_RAM_WRITE(lasso_videoram_w) AM_BASE_MEMBER(lasso_state, m_videoram)
-	AM_RANGE(0x0c00, 0x0fff) AM_RAM_WRITE(lasso_colorram_w) AM_BASE_MEMBER(lasso_state, m_colorram)
-	AM_RANGE(0x1000, 0x10ff) AM_RAM AM_BASE_SIZE_MEMBER(lasso_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0x0800, 0x0bff) AM_RAM_WRITE(lasso_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0x0c00, 0x0fff) AM_RAM_WRITE(lasso_colorram_w) AM_SHARE("colorram")
+	AM_RANGE(0x1000, 0x10ff) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0x1800, 0x1800) AM_WRITE(sound_command_w)
-	AM_RANGE(0x1801, 0x1801) AM_WRITEONLY AM_BASE_MEMBER(lasso_state, m_back_color)
+	AM_RANGE(0x1801, 0x1801) AM_WRITEONLY AM_SHARE("back_color")
 	AM_RANGE(0x1802, 0x1802) AM_WRITE(wwjgtin_video_control_w)
 	AM_RANGE(0x1804, 0x1804) AM_READ_PORT("1804")
 	AM_RANGE(0x1805, 0x1805) AM_READ_PORT("1805")
 	AM_RANGE(0x1806, 0x1806) AM_READ_PORT("1806")
 	AM_RANGE(0x1807, 0x1807) AM_READ_PORT("1807")
-	AM_RANGE(0x1c00, 0x1c02) AM_WRITEONLY AM_BASE_MEMBER(lasso_state, m_last_colors)
-	AM_RANGE(0x1c04, 0x1c07) AM_WRITEONLY AM_BASE_MEMBER(lasso_state, m_track_scroll)
+	AM_RANGE(0x1c00, 0x1c02) AM_WRITEONLY AM_SHARE("last_colors")
+	AM_RANGE(0x1c04, 0x1c07) AM_WRITEONLY AM_SHARE("track_scroll")
 	AM_RANGE(0x4000, 0xbfff) AM_ROM
 	AM_RANGE(0xc000, 0xffff) AM_ROM AM_REGION("maincpu", 0x8000)
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( wwjgtin_audio_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( wwjgtin_audio_map, AS_PROGRAM, 8, lasso_state )
 	AM_RANGE(0x0000, 0x01ff) AM_RAM
 	AM_RANGE(0x4000, 0x7fff) AM_MIRROR(0x8000) AM_ROM
-	AM_RANGE(0xb000, 0xb000) AM_WRITEONLY AM_BASE_MEMBER(lasso_state, m_chip_data)
+	AM_RANGE(0xb000, 0xb000) AM_WRITEONLY AM_SHARE("chip_data")
 	AM_RANGE(0xb001, 0xb001) AM_WRITE(sound_select_w)
-	AM_RANGE(0xb003, 0xb003) AM_DEVWRITE("dac", dac_w)
+	AM_RANGE(0xb003, 0xb003) AM_DEVWRITE("dac", dac_device, write_unsigned8)
 	AM_RANGE(0xb004, 0xb004) AM_READ(sound_status_r)
-	AM_RANGE(0xb005, 0xb005) AM_READ(soundlatch_r)
+	AM_RANGE(0xb005, 0xb005) AM_READ(soundlatch_byte_r)
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( pinbo_main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( pinbo_main_map, AS_PROGRAM, 8, lasso_state )
 	AM_RANGE(0x0000, 0x03ff) AM_RAM
-	AM_RANGE(0x0400, 0x07ff) AM_RAM_WRITE(lasso_videoram_w) AM_BASE_MEMBER(lasso_state, m_videoram)
-	AM_RANGE(0x0800, 0x0bff) AM_RAM_WRITE(lasso_colorram_w) AM_BASE_MEMBER(lasso_state, m_colorram)
-	AM_RANGE(0x1000, 0x10ff) AM_RAM AM_BASE_SIZE_MEMBER(lasso_state, m_spriteram, m_spriteram_size)
-	AM_RANGE(0x1800, 0x1800) AM_WRITE(pinbo_sound_command_w)
+	AM_RANGE(0x0400, 0x07ff) AM_RAM_WRITE(lasso_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0x0800, 0x0bff) AM_RAM_WRITE(lasso_colorram_w) AM_SHARE("colorram")
+	AM_RANGE(0x1000, 0x10ff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0x1800, 0x1800) AM_WRITE(sound_command_w)
+	AM_RANGE(0x1801, 0x1801) AM_WRITEONLY AM_SHARE("back_color")
 	AM_RANGE(0x1802, 0x1802) AM_WRITE(pinbo_video_control_w)
 	AM_RANGE(0x1804, 0x1804) AM_READ_PORT("1804")
 	AM_RANGE(0x1805, 0x1805) AM_READ_PORT("1805")
@@ -192,20 +183,20 @@ static ADDRESS_MAP_START( pinbo_main_map, AS_PROGRAM, 8 )
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( pinbo_audio_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( pinbo_audio_map, AS_PROGRAM, 8, lasso_state )
 	AM_RANGE(0x0000, 0x1fff) AM_ROM
 	AM_RANGE(0xf000, 0xffff) AM_RAM
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( pinbo_audio_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( pinbo_audio_io_map, AS_IO, 8, lasso_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x01) AM_DEVWRITE("ay1", ay8910_address_data_w)
-	AM_RANGE(0x02, 0x02) AM_DEVREAD("ay1", ay8910_r)
-	AM_RANGE(0x04, 0x05) AM_DEVWRITE("ay2", ay8910_address_data_w)
-	AM_RANGE(0x06, 0x06) AM_DEVREAD("ay2", ay8910_r)
-	AM_RANGE(0x08, 0x08) AM_READ(soundlatch_r) AM_WRITENOP /* ??? */
-	AM_RANGE(0x14, 0x14) AM_WRITENOP	/* ??? */
+	AM_RANGE(0x00, 0x01) AM_DEVWRITE_LEGACY("ay1", ay8910_address_data_w)
+	AM_RANGE(0x02, 0x02) AM_DEVREAD_LEGACY("ay1", ay8910_r)
+	AM_RANGE(0x04, 0x05) AM_DEVWRITE_LEGACY("ay2", ay8910_address_data_w)
+	AM_RANGE(0x06, 0x06) AM_DEVREAD_LEGACY("ay2", ay8910_r)
+	AM_RANGE(0x08, 0x08) AM_READ(soundlatch_byte_r) AM_WRITENOP /* ??? */
+	AM_RANGE(0x14, 0x14) AM_WRITENOP    /* ??? */
 ADDRESS_MAP_END
 
 
@@ -232,43 +223,43 @@ static INPUT_PORTS_START( lasso )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNUSED )
 
 	PORT_START("1806")
-	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Cabinet ) )		PORT_DIPLOCATION("SW2:!1")
-	PORT_DIPSETTING(	0x01, DEF_STR( Upright ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Cocktail ) )
-	PORT_DIPNAME( 0x0e, 0x00, DEF_STR( Coin_A ) )		PORT_DIPLOCATION("SW2:!2,!3,!4")
-	PORT_DIPSETTING(	0x02, DEF_STR( 2C_1C ) )
+	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Cabinet ) )      PORT_DIPLOCATION("SW2:!1")
+	PORT_DIPSETTING(    0x01, DEF_STR( Upright ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Cocktail ) )
+	PORT_DIPNAME( 0x0e, 0x00, DEF_STR( Coin_A ) )       PORT_DIPLOCATION("SW2:!2,!3,!4")
+	PORT_DIPSETTING(    0x02, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0x08, DEF_STR( 1C_2C ) )
-	PORT_DIPSETTING(	0x04, DEF_STR( 1C_3C ) )
-	PORT_DIPSETTING(	0x0c, DEF_STR( 1C_6C ) )
+	PORT_DIPSETTING(    0x08, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(    0x04, DEF_STR( 1C_3C ) )
+	PORT_DIPSETTING(    0x0c, DEF_STR( 1C_6C ) )
 //  PORT_DIPSETTING(    0x06, DEF_STR( 1C_1C ) )        /* Not documented */
 //  PORT_DIPSETTING(    0x0a, DEF_STR( 1C_1C ) )        /* Not documented */
 //  PORT_DIPSETTING(    0x0e, DEF_STR( 1C_1C ) )        /* Not documented */
-	PORT_DIPNAME( 0x30, 0x00, DEF_STR( Lives ) )		PORT_DIPLOCATION("SW2:!5,!6")
+	PORT_DIPNAME( 0x30, 0x00, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW2:!5,!6")
 	PORT_DIPSETTING(    0x00, "3" )
 	PORT_DIPSETTING(    0x10, "4" )
 	PORT_DIPSETTING(    0x20, "5" )
 //  PORT_DIPSETTING(    0x30, "3" )                     /* Not documented */
-	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Coin_B ) )		PORT_DIPLOCATION("SW1:!1")
-	PORT_DIPSETTING(	0x40, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( 1C_1C ) )
-	PORT_DIPNAME( 0x80, 0x80, "Warm-Up Instructions" )	PORT_DIPLOCATION("SW1:!4") /* Listed as "Unused" */
-	PORT_DIPSETTING(	0x00, DEF_STR( No ) )
-	PORT_DIPSETTING(	0x80, DEF_STR( Yes ) )
+	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Coin_B ) )       PORT_DIPLOCATION("SW1:!1")
+	PORT_DIPSETTING(    0x40, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
+	PORT_DIPNAME( 0x80, 0x80, "Warm-Up Instructions" )  PORT_DIPLOCATION("SW1:!4") /* Listed as "Unused" */
+	PORT_DIPSETTING(    0x00, DEF_STR( No ) )
+	PORT_DIPSETTING(    0x80, DEF_STR( Yes ) )
 
 	PORT_START("1807")
-	PORT_DIPNAME( 0x01, 0x00, "Warm-Up" )				PORT_DIPLOCATION("SW1:!3")
+	PORT_DIPNAME( 0x01, 0x00, "Warm-Up" )               PORT_DIPLOCATION("SW1:!3")
 	PORT_DIPSETTING(    0x01, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
-	PORT_DIPNAME( 0x02, 0x00, "Warm-Up Language" )		PORT_DIPLOCATION("SW1:!2")
+	PORT_DIPNAME( 0x02, 0x00, "Warm-Up Language" )      PORT_DIPLOCATION("SW1:!2")
 	PORT_DIPSETTING(    0x00, DEF_STR( English ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( German ) )
-	PORT_DIPUNUSED_DIPLOC( 0x04, 0x00, "SW1:!5" )		/* Listed as "Unused" */
+	PORT_DIPUNUSED_DIPLOC( 0x04, 0x00, "SW1:!5" )       /* Listed as "Unused" */
 	PORT_DIPNAME( 0x08, 0x00, "Invulnerability (Cheat)") PORT_DIPLOCATION("SW1:!6") /* Listed as "Test" */
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( On ) )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_COIN2 ) PORT_CHANGED(coin_inserted, 0)
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED(coin_inserted, 0)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_COIN2 ) PORT_CHANGED_MEMBER(DEVICE_SELF, lasso_state,coin_inserted, 0)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED_MEMBER(DEVICE_SELF, lasso_state,coin_inserted, 0)
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_START2  )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_START1  )
 INPUT_PORTS_END
@@ -283,7 +274,7 @@ static INPUT_PORTS_START( chameleo )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNUSED )
 
 	PORT_MODIFY("1806")
-	PORT_DIPNAME( 0x30, 0x00, DEF_STR( Lives ) )		PORT_DIPLOCATION("SW2:!5,!6")
+	PORT_DIPNAME( 0x30, 0x00, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW2:!5,!6")
 	PORT_DIPSETTING(    0x00, "3" )
 	PORT_DIPSETTING(    0x30, "5" )
 //  PORT_DIPSETTING(    0x10, "5" )
@@ -291,10 +282,10 @@ static INPUT_PORTS_START( chameleo )
 	PORT_DIPUNKNOWN_DIPLOC( 0x80, 0x00, "SW1:!4" )
 
 	PORT_MODIFY("1807")
-	PORT_DIPUNKNOWN_DIPLOC( 0x01, 0x00, "SW1:!3" )		/* Probably unused */
-	PORT_DIPUNKNOWN_DIPLOC( 0x02, 0x00, "SW1:!2" )		/* Probably unused */
-	PORT_DIPUNKNOWN_DIPLOC( 0x04, 0x00, "SW1:!5" )		/* Probably unused */
-	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Demo_Sounds ) )	PORT_DIPLOCATION("SW1:!6")
+	PORT_DIPUNKNOWN_DIPLOC( 0x01, 0x00, "SW1:!3" )      /* Probably unused */
+	PORT_DIPUNKNOWN_DIPLOC( 0x02, 0x00, "SW1:!2" )      /* Probably unused */
+	PORT_DIPUNKNOWN_DIPLOC( 0x04, 0x00, "SW1:!5" )      /* Probably unused */
+	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW1:!6")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( On ) )
 INPUT_PORTS_END
@@ -311,22 +302,22 @@ static INPUT_PORTS_START( wwjgtin )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_PLAYER(2)
 
 	PORT_MODIFY("1806")
-	PORT_DIPUNKNOWN_DIPLOC( 0x01, 0x00, "SW2:!1" )		/* used - has to do with the controls */
-	PORT_DIPUNKNOWN_DIPLOC( 0x10, 0x00, "SW2:!5" )		/* probably unused */
-	PORT_DIPUNKNOWN_DIPLOC( 0x20, 0x00, "SW2:!6" )		/* probably unused */
-	PORT_DIPUNKNOWN_DIPLOC( 0x80, 0x00, "SW1:!4" )		/* probably unused */
+	PORT_DIPUNKNOWN_DIPLOC( 0x01, 0x00, "SW2:!1" )      /* used - has to do with the controls */
+	PORT_DIPUNKNOWN_DIPLOC( 0x10, 0x00, "SW2:!5" )      /* probably unused */
+	PORT_DIPUNKNOWN_DIPLOC( 0x20, 0x00, "SW2:!6" )      /* probably unused */
+	PORT_DIPUNKNOWN_DIPLOC( 0x80, 0x00, "SW1:!4" )      /* probably unused */
 
 	PORT_MODIFY("1807")
-	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Bonus_Life) )	PORT_DIPLOCATION("SW1:!3")
+	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Bonus_Life) )    PORT_DIPLOCATION("SW1:!3")
 	PORT_DIPSETTING(    0x00, "20k" )
 	PORT_DIPSETTING(    0x01, "50k" )
-	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Demo_Sounds ) )	PORT_DIPLOCATION("SW1:!2")
+	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW1:!2")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( On ) )
-	PORT_DIPUNKNOWN_DIPLOC( 0x04, 0x00, "SW1:!5" )		/* probably unused */
-	PORT_DIPUNKNOWN_DIPLOC( 0x08, 0x00, "SW1:!6" )		/* probably unused */
-	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_COIN2 ) PORT_CHANGED(coin_inserted, 0)
-	PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_COIN1 ) PORT_CHANGED(coin_inserted, 0)
+	PORT_DIPUNKNOWN_DIPLOC( 0x04, 0x00, "SW1:!5" )      /* probably unused */
+	PORT_DIPUNKNOWN_DIPLOC( 0x08, 0x00, "SW1:!6" )      /* probably unused */
+	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_COIN2 ) PORT_CHANGED_MEMBER(DEVICE_SELF, lasso_state,coin_inserted, 0)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_COIN1 ) PORT_CHANGED_MEMBER(DEVICE_SELF, lasso_state,coin_inserted, 0)
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_START1 )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_START2 )
 INPUT_PORTS_END
@@ -355,22 +346,22 @@ static INPUT_PORTS_START( pinbo )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 
 	PORT_MODIFY("1806")
-	PORT_DIPNAME( 0x30, 0x00, DEF_STR( Lives ) )		PORT_DIPLOCATION("SW2:!5,!6")
+	PORT_DIPNAME( 0x30, 0x00, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW2:!5,!6")
 	PORT_DIPSETTING(    0x00, "3" )
 	PORT_DIPSETTING(    0x10, "4" )
 	PORT_DIPSETTING(    0x20, "5" )
 	PORT_DIPSETTING(    0x30, "70 (Cheat)")
-	PORT_DIPUNKNOWN_DIPLOC( 0x80, 0x00, "SW1:!4" )		/* probably unused */
+	PORT_DIPUNKNOWN_DIPLOC( 0x80, 0x00, "SW1:!4" )      /* probably unused */
 
 	PORT_MODIFY("1807")
-	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Bonus_Life) )	PORT_DIPLOCATION("SW1:!3")
+	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Bonus_Life) )    PORT_DIPLOCATION("SW1:!3")
 	PORT_DIPSETTING(    0x00, "500000, 1000000" )
 	PORT_DIPSETTING(    0x01, DEF_STR( None ) )
-	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Controls ) )		PORT_DIPLOCATION("SW1:!2")
+	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Controls ) )     PORT_DIPLOCATION("SW1:!2")
 	PORT_DIPSETTING(    0x02, DEF_STR( Normal ) )
 	PORT_DIPSETTING(    0x00, "Reversed" )
-	PORT_DIPUNUSED_DIPLOC( 0x04, 0x00, "SW1:!5" )		/* probably unused */
-	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Demo_Sounds ) )	PORT_DIPLOCATION("SW1:!6")
+	PORT_DIPUNUSED_DIPLOC( 0x04, 0x00, "SW1:!5" )       /* probably unused */
+	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW1:!6")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( On ) )
 INPUT_PORTS_END
@@ -379,7 +370,7 @@ static INPUT_PORTS_START( pinboa )
 	PORT_INCLUDE( pinbo )
 
 	PORT_MODIFY("1806")
-	PORT_DIPNAME( 0x30, 0x00, DEF_STR( Lives ) )		PORT_DIPLOCATION("SW2:!5,!6")
+	PORT_DIPNAME( 0x30, 0x00, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW2:!5,!6")
 	PORT_DIPSETTING(    0x00, "1" )
 	PORT_DIPSETTING(    0x10, "2" )
 	PORT_DIPSETTING(    0x20, "3" )
@@ -461,88 +452,95 @@ static GFXDECODE_START( pinbo )
 GFXDECODE_END
 
 
+/*************************************
+ *
+ *  Sound interface
+ *
+ *************************************/
 
-static MACHINE_START( lasso )
+
+//-------------------------------------------------
+//  sn76496_config psg_intf
+//-------------------------------------------------
+
+static const sn76496_config psg_intf =
 {
-	lasso_state *state = machine.driver_data<lasso_state>();
+	DEVCB_NULL
+};
 
-	state->m_maincpu = machine.device("maincpu");
-	state->m_audiocpu = machine.device("audiocpu");
-	state->m_sn_1 = machine.device("sn76489.1");
-	state->m_sn_2 = machine.device("sn76489.2");
 
-	state->save_item(NAME(state->m_gfxbank));
+void lasso_state::machine_start()
+{
+
+	m_maincpu = machine().device<cpu_device>("maincpu");
+	m_audiocpu = machine().device<cpu_device>("audiocpu");
+
+	save_item(NAME(m_gfxbank));
 }
 
-static MACHINE_START( wwjgtin )
+MACHINE_START_MEMBER(lasso_state,wwjgtin)
 {
-	lasso_state *state = machine.driver_data<lasso_state>();
 
-	MACHINE_START_CALL(lasso);
+	lasso_state::machine_start();
 
-	state->save_item(NAME(state->m_track_enable));
+	save_item(NAME(m_track_enable));
 }
 
-static MACHINE_RESET( lasso )
+void lasso_state::machine_reset()
 {
-	lasso_state *state = machine.driver_data<lasso_state>();
 
-	state->m_gfxbank = 0;
+	m_gfxbank = 0;
 }
 
-static MACHINE_RESET( wwjgtin )
+MACHINE_RESET_MEMBER(lasso_state,wwjgtin)
 {
-	lasso_state *state = machine.driver_data<lasso_state>();
 
-	MACHINE_RESET_CALL(lasso);
+	lasso_state::machine_reset();
 
-	state->m_track_enable = 0;
+	m_track_enable = 0;
 }
 
 static MACHINE_CONFIG_START( base, lasso_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M6502, 11289000/16)	/* guess */
+	MCFG_CPU_ADD("maincpu", M6502, 11289000/16) /* guess */
 	MCFG_CPU_PROGRAM_MAP(lasso_main_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", lasso_state,  irq0_line_hold)
 
 	MCFG_CPU_ADD("audiocpu", M6502, 600000)
 	MCFG_CPU_PROGRAM_MAP(lasso_audio_map)
 
 	MCFG_QUANTUM_TIME(attotime::from_hz(6000))
 
-	MCFG_MACHINE_START(lasso)
-	MCFG_MACHINE_RESET(lasso)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_REFRESH_RATE(57)	/* guess, but avoids glitching of Chameleon's high score table */
+	MCFG_SCREEN_REFRESH_RATE(57)    /* guess, but avoids glitching of Chameleon's high score table */
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(lasso)
+	MCFG_SCREEN_UPDATE_DRIVER(lasso_state, screen_update_lasso)
 
 	MCFG_GFXDECODE(lasso)
 	MCFG_PALETTE_LENGTH(0x40)
 
-	MCFG_PALETTE_INIT(lasso)
-	MCFG_VIDEO_START(lasso)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
 	MCFG_SOUND_ADD("sn76489.1", SN76489, 2000000)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
+	MCFG_SOUND_CONFIG(psg_intf)
 
 	MCFG_SOUND_ADD("sn76489.2", SN76489, 2000000)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
+	MCFG_SOUND_CONFIG(psg_intf)
 MACHINE_CONFIG_END
 
 static MACHINE_CONFIG_DERIVED( lasso, base )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("blitter", M6502, 11289000/16)	/* guess */
+	MCFG_CPU_ADD("blitter", M6502, 11289000/16) /* guess */
 	MCFG_CPU_PROGRAM_MAP(lasso_coprocessor_map)
 
 MACHINE_CONFIG_END
@@ -558,7 +556,7 @@ static MACHINE_CONFIG_DERIVED( chameleo, base )
 
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
-	MCFG_SCREEN_UPDATE(chameleo)
+	MCFG_SCREEN_UPDATE_DRIVER(lasso_state, screen_update_chameleo)
 MACHINE_CONFIG_END
 
 static MACHINE_CONFIG_DERIVED( wwjgtin, base )
@@ -570,51 +568,51 @@ static MACHINE_CONFIG_DERIVED( wwjgtin, base )
 	MCFG_CPU_MODIFY("audiocpu")
 	MCFG_CPU_PROGRAM_MAP(wwjgtin_audio_map)
 
-	MCFG_MACHINE_START(wwjgtin)
-	MCFG_MACHINE_RESET(wwjgtin)
+	MCFG_MACHINE_START_OVERRIDE(lasso_state,wwjgtin)
+	MCFG_MACHINE_RESET_OVERRIDE(lasso_state,wwjgtin)
 
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
-	MCFG_SCREEN_VISIBLE_AREA(1*8, 31*8-1, 2*8, 30*8-1)	// Smaller visible area?
-	MCFG_SCREEN_UPDATE(wwjgtin)
-	MCFG_GFXDECODE(wwjgtin)	// Has 1 additional layer
+	MCFG_SCREEN_VISIBLE_AREA(1*8, 31*8-1, 2*8, 30*8-1)  // Smaller visible area?
+	MCFG_SCREEN_UPDATE_DRIVER(lasso_state, screen_update_wwjgtin)
+	MCFG_GFXDECODE(wwjgtin) // Has 1 additional layer
 	MCFG_PALETTE_LENGTH(0x40 + 16*16)
 
-	MCFG_PALETTE_INIT(wwjgtin)
-	MCFG_VIDEO_START(wwjgtin)
+	MCFG_PALETTE_INIT_OVERRIDE(lasso_state,wwjgtin)
+	MCFG_VIDEO_START_OVERRIDE(lasso_state,wwjgtin)
 
 	/* sound hardware */
-	MCFG_SOUND_ADD("dac", DAC, 0)
+	MCFG_DAC_ADD("dac")
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 MACHINE_CONFIG_END
 
 static MACHINE_CONFIG_DERIVED( pinbo, base )
 
 	/* basic machine hardware */
-	MCFG_CPU_MODIFY("maincpu")
+	MCFG_CPU_REPLACE("maincpu", M6502, XTAL_18MHz/24)
 	MCFG_CPU_PROGRAM_MAP(pinbo_main_map)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", lasso_state,  irq0_line_hold)
 
-	MCFG_CPU_REPLACE("audiocpu", Z80, 3000000)
+	MCFG_CPU_REPLACE("audiocpu", Z80, XTAL_18MHz/6)
 	MCFG_CPU_PROGRAM_MAP(pinbo_audio_map)
 	MCFG_CPU_IO_MAP(pinbo_audio_io_map)
 
 	/* video hardware */
 	MCFG_GFXDECODE(pinbo)
 	MCFG_PALETTE_LENGTH(256)
-
 	MCFG_PALETTE_INIT(RRRR_GGGG_BBBB)
-	MCFG_VIDEO_START(pinbo)
+	MCFG_VIDEO_START_OVERRIDE(lasso_state,pinbo)
 	MCFG_SCREEN_MODIFY("screen")
-	MCFG_SCREEN_UPDATE(pinbo)
+	MCFG_SCREEN_UPDATE_DRIVER(lasso_state, screen_update_chameleo)
 
 	/* sound hardware */
 	MCFG_DEVICE_REMOVE("sn76489.1")
 	MCFG_DEVICE_REMOVE("sn76489.2")
 
-	MCFG_SOUND_ADD("ay1", AY8910, 1250000)
+	MCFG_SOUND_ADD("ay1", AY8910, XTAL_18MHz/12)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.55)
 
-	MCFG_SOUND_ADD("ay2", AY8910, 1250000)
+	MCFG_SOUND_ADD("ay2", AY8910, XTAL_18MHz/12)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.55)
 MACHINE_CONFIG_END
 
@@ -701,12 +699,12 @@ ROM_START( wwjgtin )
 	ROM_CONTINUE(       0x7800, 0x0800 )
 
 	ROM_REGION( 0x4000, "gfx2", 0 )
-	ROM_LOAD( "ic47.3", 0x0000, 0x2000, CRC(40594c59) SHA1(94533be8e267d9aa5bcdd52b45f6974436d3fed5) )	// 1xxxxxxxxxxxx = 0xFF
+	ROM_LOAD( "ic47.3", 0x0000, 0x2000, CRC(40594c59) SHA1(94533be8e267d9aa5bcdd52b45f6974436d3fed5) )  // 1xxxxxxxxxxxx = 0xFF
 	ROM_LOAD( "ic46.4", 0x2000, 0x2000, CRC(d1921348) SHA1(8b5506ff80a31ce721aed515cad1b4a7e52e47a2) )
 
-	ROM_REGION( 0x4000, "user1", 0 )				/* tilemap */
+	ROM_REGION( 0x4000, "user1", 0 )                /* tilemap */
 	ROM_LOAD( "ic48.2", 0x0000, 0x2000, CRC(a4a7df77) SHA1(476aab702346a402169ab404a8b06589e4932d37) )
-	ROM_LOAD( "ic49.1", 0x2000, 0x2000, CRC(e480fbba) SHA1(197c86747ef8477040169f90eb6e04d928aedbe5) )	// FIXED BITS (1111xxxx)
+	ROM_LOAD( "ic49.1", 0x2000, 0x2000, CRC(e480fbba) SHA1(197c86747ef8477040169f90eb6e04d928aedbe5) )  // FIXED BITS (1111xxxx)
 
 	ROM_REGION( 0x40, "proms", 0 )
 	ROM_LOAD( "2.bpr",  0x0000, 0x0020, CRC(79adda5d) SHA1(e54de3eb02f744d49f524cd81e1cf993338916e3) )
@@ -740,12 +738,12 @@ ROM_START( photof )
 	ROM_CONTINUE(       0x7800, 0x0800 )
 
 	ROM_REGION( 0x4000, "gfx2", 0 )
-	ROM_LOAD( "3-ic47.bin", 0x0000, 0x2000, CRC(40594c59) SHA1(94533be8e267d9aa5bcdd52b45f6974436d3fed5) )	// 1xxxxxxxxxxxx = 0xFF
+	ROM_LOAD( "3-ic47.bin", 0x0000, 0x2000, CRC(40594c59) SHA1(94533be8e267d9aa5bcdd52b45f6974436d3fed5) )  // 1xxxxxxxxxxxx = 0xFF
 	ROM_LOAD( "4-ic46.bin", 0x2000, 0x2000, CRC(d1921348) SHA1(8b5506ff80a31ce721aed515cad1b4a7e52e47a2) )
 
-	ROM_REGION( 0x4000, "user1", 0 )				/* tilemap */
+	ROM_REGION( 0x4000, "user1", 0 )                /* tilemap */
 	ROM_LOAD( "2-ic48.bin", 0x0000, 0x2000, CRC(a4a7df77) SHA1(476aab702346a402169ab404a8b06589e4932d37) )
-	ROM_LOAD( "1-ic49.bin", 0x2000, 0x2000, CRC(e480fbba) SHA1(197c86747ef8477040169f90eb6e04d928aedbe5) )	// FIXED BITS (1111xxxx)
+	ROM_LOAD( "1-ic49.bin", 0x2000, 0x2000, CRC(e480fbba) SHA1(197c86747ef8477040169f90eb6e04d928aedbe5) )  // FIXED BITS (1111xxxx)
 
 	ROM_REGION( 0x40, "proms", 0 )
 	ROM_LOAD( "2.bpr",  0x0000, 0x0020, CRC(79adda5d) SHA1(e54de3eb02f744d49f524cd81e1cf993338916e3) )
@@ -763,35 +761,35 @@ ROM_START( pinbo )
 	ROM_LOAD( "rom1.s8",     0x0000, 0x2000, CRC(ca45a1be) SHA1(d0b2d8f1e6d01b60cba83d2bd458a57548549b4b) )
 
 	ROM_REGION( 0xc000, "gfx1", 0 )
-	ROM_LOAD( "rom6.a1",     0x0000, 0x0800, CRC(74fe8e98) SHA1(3c9ac38d7054b2831a515786b6f204b1804aaea3) )	/* tiles   */
-	ROM_CONTINUE(       	 0x2000, 0x0800 )
-	ROM_CONTINUE(       	 0x0800, 0x0800 )
-	ROM_CONTINUE(       	 0x2800, 0x0800 )
-	ROM_CONTINUE(       	 0x1000, 0x0800 )
-	ROM_CONTINUE(       	 0x3000, 0x0800 )
-	ROM_CONTINUE(       	 0x1800, 0x0800 )
-	ROM_CONTINUE(       	 0x3800, 0x0800 )
+	ROM_LOAD( "rom6.a1",     0x0000, 0x0800, CRC(74fe8e98) SHA1(3c9ac38d7054b2831a515786b6f204b1804aaea3) ) /* tiles   */
+	ROM_CONTINUE(            0x2000, 0x0800 )
+	ROM_CONTINUE(            0x0800, 0x0800 )
+	ROM_CONTINUE(            0x2800, 0x0800 )
+	ROM_CONTINUE(            0x1000, 0x0800 )
+	ROM_CONTINUE(            0x3000, 0x0800 )
+	ROM_CONTINUE(            0x1800, 0x0800 )
+	ROM_CONTINUE(            0x3800, 0x0800 )
 	ROM_LOAD( "rom8.c1",     0x4000, 0x0800, CRC(5a800fe7) SHA1(375269ec73fab7f0cf017a79e002e31b006f5ad7) )
-	ROM_CONTINUE(       	 0x6000, 0x0800 )
-	ROM_CONTINUE(       	 0x4800, 0x0800 )
-	ROM_CONTINUE(       	 0x6800, 0x0800 )
-	ROM_CONTINUE(       	 0x5000, 0x0800 )
-	ROM_CONTINUE(       	 0x7000, 0x0800 )
-	ROM_CONTINUE(       	 0x5800, 0x0800 )
-	ROM_CONTINUE(       	 0x7800, 0x0800 )
-	ROM_LOAD( "rom7.d1",     0x8000, 0x0800, CRC(327a3c21) SHA1(e938915d28ac4ec033b20d33728788493e3f30f6) )	/* 3rd bitplane */
-	ROM_CONTINUE(       	 0xa000, 0x0800 )
-	ROM_CONTINUE(       	 0x8800, 0x0800 )
-	ROM_CONTINUE(       	 0xa800, 0x0800 )
-	ROM_CONTINUE(       	 0x9000, 0x0800 )
-	ROM_CONTINUE(       	 0xb000, 0x0800 )
-	ROM_CONTINUE(       	 0x9800, 0x0800 )
-	ROM_CONTINUE(       	 0xb800, 0x0800 )
+	ROM_CONTINUE(            0x6000, 0x0800 )
+	ROM_CONTINUE(            0x4800, 0x0800 )
+	ROM_CONTINUE(            0x6800, 0x0800 )
+	ROM_CONTINUE(            0x5000, 0x0800 )
+	ROM_CONTINUE(            0x7000, 0x0800 )
+	ROM_CONTINUE(            0x5800, 0x0800 )
+	ROM_CONTINUE(            0x7800, 0x0800 )
+	ROM_LOAD( "rom7.d1",     0x8000, 0x0800, CRC(327a3c21) SHA1(e938915d28ac4ec033b20d33728788493e3f30f6) ) /* 3rd bitplane */
+	ROM_CONTINUE(            0xa000, 0x0800 )
+	ROM_CONTINUE(            0x8800, 0x0800 )
+	ROM_CONTINUE(            0xa800, 0x0800 )
+	ROM_CONTINUE(            0x9000, 0x0800 )
+	ROM_CONTINUE(            0xb000, 0x0800 )
+	ROM_CONTINUE(            0x9800, 0x0800 )
+	ROM_CONTINUE(            0xb800, 0x0800 )
 
 	ROM_REGION( 0x00300, "proms", 0 )
-	ROM_LOAD( "red.l10",     0x0000, 0x0100, CRC(e6c9ba52) SHA1(6ea96f9bd71de6181d675b0f2d59a8c5e1be5aa3) )
-	ROM_LOAD( "green.k10",   0x0100, 0x0100, CRC(1bf2d335) SHA1(dcb074d3de939dfc652743e25bc66bd6fbdc3289) )
-	ROM_LOAD( "blue.n10",    0x0200, 0x0100, CRC(e41250ad) SHA1(2e9a2babbacb1753057d46cf1dd6dc183611747e) )
+	ROM_LOAD( "red.l10",     0x0000, 0x0100, CRC(e6c9ba52) SHA1(6ea96f9bd71de6181d675b0f2d59a8c5e1be5aa3) ) // 2nd half is garbage?
+	ROM_LOAD( "green.k10",   0x0100, 0x0100, CRC(1bf2d335) SHA1(dcb074d3de939dfc652743e25bc66bd6fbdc3289) ) // "
+	ROM_LOAD( "blue.n10",    0x0200, 0x0100, CRC(e41250ad) SHA1(2e9a2babbacb1753057d46cf1dd6dc183611747e) ) // "
 ROM_END
 
 ROM_START( pinboa )
@@ -805,30 +803,30 @@ ROM_START( pinboa )
 	ROM_LOAD( "8.bin",       0x0000, 0x2000, CRC(32d1df14) SHA1(c0d4181378bbd6f2c594e923e2f8b21647c7fb0e) )
 
 	ROM_REGION( 0xc000, "gfx1", 0 )
-	ROM_LOAD( "rom6.a1",     0x0000, 0x0800, CRC(74fe8e98) SHA1(3c9ac38d7054b2831a515786b6f204b1804aaea3) )	/* tiles   */
-	ROM_CONTINUE(       	 0x2000, 0x0800 )
-	ROM_CONTINUE(       	 0x0800, 0x0800 )
-	ROM_CONTINUE(       	 0x2800, 0x0800 )
-	ROM_CONTINUE(       	 0x1000, 0x0800 )
-	ROM_CONTINUE(       	 0x3000, 0x0800 )
-	ROM_CONTINUE(       	 0x1800, 0x0800 )
-	ROM_CONTINUE(       	 0x3800, 0x0800 )
+	ROM_LOAD( "rom6.a1",     0x0000, 0x0800, CRC(74fe8e98) SHA1(3c9ac38d7054b2831a515786b6f204b1804aaea3) ) /* tiles   */
+	ROM_CONTINUE(            0x2000, 0x0800 )
+	ROM_CONTINUE(            0x0800, 0x0800 )
+	ROM_CONTINUE(            0x2800, 0x0800 )
+	ROM_CONTINUE(            0x1000, 0x0800 )
+	ROM_CONTINUE(            0x3000, 0x0800 )
+	ROM_CONTINUE(            0x1800, 0x0800 )
+	ROM_CONTINUE(            0x3800, 0x0800 )
 	ROM_LOAD( "rom8.c1",     0x4000, 0x0800, CRC(5a800fe7) SHA1(375269ec73fab7f0cf017a79e002e31b006f5ad7) )
-	ROM_CONTINUE(       	 0x6000, 0x0800 )
-	ROM_CONTINUE(       	 0x4800, 0x0800 )
-	ROM_CONTINUE(       	 0x6800, 0x0800 )
-	ROM_CONTINUE(       	 0x5000, 0x0800 )
-	ROM_CONTINUE(       	 0x7000, 0x0800 )
-	ROM_CONTINUE(       	 0x5800, 0x0800 )
-	ROM_CONTINUE(       	 0x7800, 0x0800 )
+	ROM_CONTINUE(            0x6000, 0x0800 )
+	ROM_CONTINUE(            0x4800, 0x0800 )
+	ROM_CONTINUE(            0x6800, 0x0800 )
+	ROM_CONTINUE(            0x5000, 0x0800 )
+	ROM_CONTINUE(            0x7000, 0x0800 )
+	ROM_CONTINUE(            0x5800, 0x0800 )
+	ROM_CONTINUE(            0x7800, 0x0800 )
 	ROM_LOAD( "2.bin",       0x8000, 0x0800, CRC(33cac92e) SHA1(55d4ff3ae9c9519a59bd6021a53584c873b4d327) ) /* 3rd bitplane */
-	ROM_CONTINUE(       	 0xa000, 0x0800 )
-	ROM_CONTINUE(       	 0x8800, 0x0800 )
-	ROM_CONTINUE(       	 0xa800, 0x0800 )
-	ROM_CONTINUE(       	 0x9000, 0x0800 )
-	ROM_CONTINUE(       	 0xb000, 0x0800 )
-	ROM_CONTINUE(       	 0x9800, 0x0800 )
-	ROM_CONTINUE(       	 0xb800, 0x0800 )
+	ROM_CONTINUE(            0xa000, 0x0800 )
+	ROM_CONTINUE(            0x8800, 0x0800 )
+	ROM_CONTINUE(            0xa800, 0x0800 )
+	ROM_CONTINUE(            0x9000, 0x0800 )
+	ROM_CONTINUE(            0xb000, 0x0800 )
+	ROM_CONTINUE(            0x9800, 0x0800 )
+	ROM_CONTINUE(            0xb800, 0x0800 )
 
 	ROM_REGION( 0x00300, "proms", 0 )
 	ROM_LOAD( "red.l10",     0x0000, 0x0100, CRC(e6c9ba52) SHA1(6ea96f9bd71de6181d675b0f2d59a8c5e1be5aa3) )
@@ -847,30 +845,30 @@ ROM_START( pinbos )
 	ROM_LOAD( "b8.bin",      0x0000, 0x2000, CRC(32d1df14) SHA1(c0d4181378bbd6f2c594e923e2f8b21647c7fb0e) )
 
 	ROM_REGION( 0xc000, "gfx1", 0 )
-	ROM_LOAD( "rom6.a1",     0x0000, 0x0800, CRC(74fe8e98) SHA1(3c9ac38d7054b2831a515786b6f204b1804aaea3) )	/* tiles   */
-	ROM_CONTINUE(       	 0x2000, 0x0800 )
-	ROM_CONTINUE(       	 0x0800, 0x0800 )
-	ROM_CONTINUE(       	 0x2800, 0x0800 )
-	ROM_CONTINUE(       	 0x1000, 0x0800 )
-	ROM_CONTINUE(       	 0x3000, 0x0800 )
-	ROM_CONTINUE(       	 0x1800, 0x0800 )
-	ROM_CONTINUE(       	 0x3800, 0x0800 )
+	ROM_LOAD( "rom6.a1",     0x0000, 0x0800, CRC(74fe8e98) SHA1(3c9ac38d7054b2831a515786b6f204b1804aaea3) ) /* tiles   */
+	ROM_CONTINUE(            0x2000, 0x0800 )
+	ROM_CONTINUE(            0x0800, 0x0800 )
+	ROM_CONTINUE(            0x2800, 0x0800 )
+	ROM_CONTINUE(            0x1000, 0x0800 )
+	ROM_CONTINUE(            0x3000, 0x0800 )
+	ROM_CONTINUE(            0x1800, 0x0800 )
+	ROM_CONTINUE(            0x3800, 0x0800 )
 	ROM_LOAD( "rom8.c1",     0x4000, 0x0800, CRC(5a800fe7) SHA1(375269ec73fab7f0cf017a79e002e31b006f5ad7) )
-	ROM_CONTINUE(       	 0x6000, 0x0800 )
-	ROM_CONTINUE(       	 0x4800, 0x0800 )
-	ROM_CONTINUE(       	 0x6800, 0x0800 )
-	ROM_CONTINUE(       	 0x5000, 0x0800 )
-	ROM_CONTINUE(       	 0x7000, 0x0800 )
-	ROM_CONTINUE(       	 0x5800, 0x0800 )
-	ROM_CONTINUE(       	 0x7800, 0x0800 )
-	ROM_LOAD( "rom7.d1",     0x8000, 0x0800, CRC(327a3c21) SHA1(e938915d28ac4ec033b20d33728788493e3f30f6) )	/* 3rd bitplane */
-	ROM_CONTINUE(       	 0xa000, 0x0800 )
-	ROM_CONTINUE(       	 0x8800, 0x0800 )
-	ROM_CONTINUE(       	 0xa800, 0x0800 )
-	ROM_CONTINUE(       	 0x9000, 0x0800 )
-	ROM_CONTINUE(       	 0xb000, 0x0800 )
-	ROM_CONTINUE(       	 0x9800, 0x0800 )
-	ROM_CONTINUE(       	 0xb800, 0x0800 )
+	ROM_CONTINUE(            0x6000, 0x0800 )
+	ROM_CONTINUE(            0x4800, 0x0800 )
+	ROM_CONTINUE(            0x6800, 0x0800 )
+	ROM_CONTINUE(            0x5000, 0x0800 )
+	ROM_CONTINUE(            0x7000, 0x0800 )
+	ROM_CONTINUE(            0x5800, 0x0800 )
+	ROM_CONTINUE(            0x7800, 0x0800 )
+	ROM_LOAD( "rom7.d1",     0x8000, 0x0800, CRC(327a3c21) SHA1(e938915d28ac4ec033b20d33728788493e3f30f6) ) /* 3rd bitplane */
+	ROM_CONTINUE(            0xa000, 0x0800 )
+	ROM_CONTINUE(            0x8800, 0x0800 )
+	ROM_CONTINUE(            0xa800, 0x0800 )
+	ROM_CONTINUE(            0x9000, 0x0800 )
+	ROM_CONTINUE(            0xb000, 0x0800 )
+	ROM_CONTINUE(            0x9800, 0x0800 )
+	ROM_CONTINUE(            0xb800, 0x0800 )
 
 	ROM_REGION( 0x00300, "proms", 0 )
 	ROM_LOAD( "red.l10",     0x0000, 0x0100, CRC(e6c9ba52) SHA1(6ea96f9bd71de6181d675b0f2d59a8c5e1be5aa3) )
@@ -886,10 +884,10 @@ ROM_END
 
 ***************************************************************************/
 
-GAME( 1982, lasso,    0,       lasso,    lasso,    0, ROT90, "SNK",            "Lasso", GAME_SUPPORTS_SAVE )
-GAME( 1983, chameleo, 0,       chameleo, chameleo, 0, ROT0,  "Jaleco",         "Chameleon", GAME_SUPPORTS_SAVE )
-GAME( 1984, wwjgtin,  0,       wwjgtin,  wwjgtin,  0, ROT0,  "Jaleco / Casio", "Wai Wai Jockey Gate-In!", GAME_SUPPORTS_SAVE )
-GAME( 1991, photof,   wwjgtin, wwjgtin,  wwjgtin,  0, ROT0,  "bootleg?",	   "Photo Finish", GAME_SUPPORTS_SAVE )
-GAME( 1984, pinbo,    0,       pinbo,    pinbo,    0, ROT90, "Jaleco",         "Pinbo (set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1984, pinboa,   pinbo,   pinbo,    pinboa,   0, ROT90, "Jaleco",         "Pinbo (set 2)", GAME_SUPPORTS_SAVE )
-GAME( 1985, pinbos,   pinbo,   pinbo,    pinboa,   0, ROT90, "bootleg?",       "Pinbo (Strike)", GAME_SUPPORTS_SAVE )
+GAME( 1982, lasso,    0,       lasso,    lasso,    driver_device,  0, ROT90, "SNK",              "Lasso", GAME_SUPPORTS_SAVE )
+GAME( 1983, chameleo, 0,       chameleo, chameleo, driver_device,  0, ROT0,  "Jaleco",           "Chameleon", GAME_SUPPORTS_SAVE )
+GAME( 1984, wwjgtin,  0,       wwjgtin,  wwjgtin,  driver_device,  0, ROT0,  "Jaleco / Casio",   "Wai Wai Jockey Gate-In!", GAME_SUPPORTS_SAVE )
+GAME( 1991, photof,   wwjgtin, wwjgtin,  wwjgtin,  driver_device,  0, ROT0,  "Jaleco / Casio",   "Photo Finish (bootleg?)", GAME_SUPPORTS_SAVE )
+GAME( 1984, pinbo,    0,       pinbo,    pinbo,    driver_device,  0, ROT90, "Jaleco",           "Pinbo (set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1984, pinboa,   pinbo,   pinbo,    pinboa,   driver_device,  0, ROT90, "Jaleco",           "Pinbo (set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1985, pinbos,   pinbo,   pinbo,    pinboa,   driver_device,  0, ROT90, "bootleg (Strike)", "Pinbo (bootleg)", GAME_SUPPORTS_SAVE )

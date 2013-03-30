@@ -50,55 +50,53 @@ Stephh's notes (based on the games M68000 code and some tests) :
 #include "video/deco16ic.h"
 #include "video/decospr.h"
 
-#define TUMBLEP_HACK	0
+#define TUMBLEP_HACK    0
 
 /******************************************************************************/
 
 #ifdef UNUSED_FUNCTION
-static WRITE16_DEVICE_HANDLER( tumblep_oki_w )
+WRITE16_MEMBER(tumblep_state::tumblep_oki_w)
 {
 	okim6295_device *oki = downcast<okim6295_device *>(device);
 	oki->write(0, data & 0xff);
-    /* STUFF IN OTHER BYTE TOO..*/
+	/* STUFF IN OTHER BYTE TOO..*/
 }
 
-static READ16_HANDLER( tumblep_prot_r )
+READ16_MEMBER(tumblep_state::tumblep_prot_r)
 {
 	return ~0;
 }
 #endif
 
-static WRITE16_HANDLER( tumblep_sound_w )
+WRITE16_MEMBER(tumblep_state::tumblep_sound_w)
 {
-	tumblep_state *state = space->machine().driver_data<tumblep_state>();
-	soundlatch_w(space, 0, data & 0xff);
-	device_set_input_line(state->m_audiocpu, 0, HOLD_LINE);
+	soundlatch_byte_w(space, 0, data & 0xff);
+	m_audiocpu->set_input_line(0, HOLD_LINE);
 }
 
 #ifdef UNUSED_FUNCTION
-static WRITE16_HANDLER( jumppop_sound_w )
+WRITE16_MEMBER(tumblep_state::jumppop_sound_w)
 {
-	tumblep_state *state = space->machine().driver_data<tumblep_state>();
-	soundlatch_w(space, 0, data & 0xff);
-	cputag_set_input_line(state->m_audiocpu, 0, ASSERT_LINE );
+	soundlatch_byte_w(space, 0, data & 0xff);
+	m_audiocpu.device(0)->execute().set_input_line(ASSERT_LINE );
 }
 #endif
 
 /******************************************************************************/
 
-static READ16_HANDLER( tumblepop_controls_r )
+READ16_MEMBER(tumblep_state::tumblepop_controls_r)
 {
 	switch (offset << 1)
 	{
 		case 0:
-			return input_port_read(space->machine(), "PLAYERS");
+			return ioport("PLAYERS")->read();
 		case 2:
-			return input_port_read(space->machine(), "DSW");
+			return ioport("DSW")->read();
 		case 8:
-			return input_port_read(space->machine(), "SYSTEM");
+			return ioport("SYSTEM")->read();
 		case 10: /* ? */
 		case 12:
-        	return 0;
+			return 0;
 	}
 
 	return ~0;
@@ -106,39 +104,39 @@ static READ16_HANDLER( tumblepop_controls_r )
 
 /******************************************************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16, tumblep_state )
 #if TUMBLEP_HACK
-	AM_RANGE(0x000000, 0x07ffff) AM_WRITEONLY	// To write levels modifications
+	AM_RANGE(0x000000, 0x07ffff) AM_WRITEONLY   // To write levels modifications
 	AM_RANGE(0x000000, 0x07ffff) AM_ROM
 #else
 	AM_RANGE(0x000000, 0x07ffff) AM_ROM
 #endif
 	AM_RANGE(0x100000, 0x100001) AM_WRITE(tumblep_sound_w)
 	AM_RANGE(0x120000, 0x123fff) AM_RAM
-	AM_RANGE(0x140000, 0x1407ff) AM_RAM_WRITE(paletteram16_xxxxBBBBGGGGRRRR_word_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x140000, 0x1407ff) AM_RAM_WRITE(paletteram_xxxxBBBBGGGGRRRR_word_w) AM_SHARE("paletteram")
 	AM_RANGE(0x180000, 0x18000f) AM_READ(tumblepop_controls_r)
 	AM_RANGE(0x18000c, 0x18000d) AM_WRITENOP
-	AM_RANGE(0x1a0000, 0x1a07ff) AM_RAM AM_BASE_SIZE_MEMBER(tumblep_state, m_spriteram, m_spriteram_size)
-	AM_RANGE(0x300000, 0x30000f) AM_DEVWRITE("tilegen1", deco16ic_pf_control_w)
-	AM_RANGE(0x320000, 0x320fff) AM_DEVREADWRITE("tilegen1", deco16ic_pf1_data_r, deco16ic_pf1_data_w)
-	AM_RANGE(0x322000, 0x322fff) AM_DEVREADWRITE("tilegen1", deco16ic_pf2_data_r, deco16ic_pf2_data_w)
-	AM_RANGE(0x340000, 0x3407ff) AM_WRITEONLY AM_BASE_MEMBER(tumblep_state, m_pf1_rowscroll) // unused
-	AM_RANGE(0x342000, 0x3427ff) AM_WRITEONLY AM_BASE_MEMBER(tumblep_state, m_pf2_rowscroll) // unused
+	AM_RANGE(0x1a0000, 0x1a07ff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0x300000, 0x30000f) AM_DEVWRITE_LEGACY("tilegen1", deco16ic_pf_control_w)
+	AM_RANGE(0x320000, 0x320fff) AM_DEVREADWRITE_LEGACY("tilegen1", deco16ic_pf1_data_r, deco16ic_pf1_data_w)
+	AM_RANGE(0x322000, 0x322fff) AM_DEVREADWRITE_LEGACY("tilegen1", deco16ic_pf2_data_r, deco16ic_pf2_data_w)
+	AM_RANGE(0x340000, 0x3407ff) AM_WRITEONLY AM_SHARE("pf1_rowscroll") // unused
+	AM_RANGE(0x342000, 0x3427ff) AM_WRITEONLY AM_SHARE("pf2_rowscroll") // unused
 ADDRESS_MAP_END
 
 /******************************************************************************/
 
 /* Physical memory map (21 bits) */
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, tumblep_state )
 	AM_RANGE(0x000000, 0x00ffff) AM_ROM
-	AM_RANGE(0x100000, 0x100001) AM_NOP	/* YM2203 - this board doesn't have one */
-	AM_RANGE(0x110000, 0x110001) AM_DEVREADWRITE("ymsnd", ym2151_r, ym2151_w)
-	AM_RANGE(0x120000, 0x120001) AM_DEVREADWRITE_MODERN("oki", okim6295_device, read, write)
-	AM_RANGE(0x130000, 0x130001) AM_NOP	/* This board only has 1 oki chip */
-	AM_RANGE(0x140000, 0x140001) AM_READ(soundlatch_r)
+	AM_RANGE(0x100000, 0x100001) AM_NOP /* YM2203 - this board doesn't have one */
+	AM_RANGE(0x110000, 0x110001) AM_DEVREADWRITE("ymsnd", ym2151_device, read, write)
+	AM_RANGE(0x120000, 0x120001) AM_DEVREADWRITE("oki", okim6295_device, read, write)
+	AM_RANGE(0x130000, 0x130001) AM_NOP /* This board only has 1 oki chip */
+	AM_RANGE(0x140000, 0x140001) AM_READ(soundlatch_byte_r)
 	AM_RANGE(0x1f0000, 0x1f1fff) AM_RAMBANK("bank8")
-	AM_RANGE(0x1fec00, 0x1fec01) AM_WRITE(h6280_timer_w)
-	AM_RANGE(0x1ff400, 0x1ff403) AM_WRITE(h6280_irq_status_w)
+	AM_RANGE(0x1fec00, 0x1fec01) AM_DEVWRITE("audiocpu", h6280_device, timer_w)
+	AM_RANGE(0x1ff400, 0x1ff403) AM_DEVWRITE("audiocpu", h6280_device, irq_status_w)
 ADDRESS_MAP_END
 
 /******************************************************************************/
@@ -151,7 +149,7 @@ static INPUT_PORTS_START( tumblep )
 	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(1)
 	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
 	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
-	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* button 3 - unused */
+	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN )  /* button 3 - unused */
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(2)
 	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(2)
@@ -159,14 +157,14 @@ static INPUT_PORTS_START( tumblep )
 	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(2)
 	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
-	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* button 3 - unused */
+	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN )  /* button 3 - unused */
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_START2 )
 
 	PORT_START("SYSTEM")
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_SERVICE1 )
-	PORT_BIT( 0x0008, IP_ACTIVE_HIGH, IPT_VBLANK )
+	PORT_BIT( 0x0008, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -211,14 +209,14 @@ static INPUT_PORTS_START( tumblep )
 #if TUMBLEP_HACK
 	PORT_DIPNAME( 0x0800, 0x0800, "Remove Monsters" )
 #else
-	PORT_DIPNAME( 0x0800, 0x0800, DEF_STR( Unused ) )		// See notes
+	PORT_DIPNAME( 0x0800, 0x0800, DEF_STR( Unused ) )       // See notes
 #endif
 	PORT_DIPSETTING(    0x0800, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x0000, DEF_STR( On ) )
 #if TUMBLEP_HACK
 	PORT_DIPNAME( 0x0400, 0x0400, "Edit Levels" )
 #else
-	PORT_DIPNAME( 0x0400, 0x0400, DEF_STR( Unused ) )		// See notes
+	PORT_DIPNAME( 0x0400, 0x0400, DEF_STR( Unused ) )       // See notes
 #endif
 	PORT_DIPSETTING(    0x0400, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x0000, DEF_STR( On ) )
@@ -262,47 +260,35 @@ static const gfx_layout spritelayout =
 	{ 24,8,16,0 },
 	{ 512,513,514,515,516,517,518,519, 0, 1, 2, 3, 4, 5, 6, 7 },
 	{ 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
-	  8*32, 9*32,10*32,11*32,12*32,13*32,14*32,15*32},
+		8*32, 9*32,10*32,11*32,12*32,13*32,14*32,15*32},
 	32*32
 };
 
 static GFXDECODE_START( tumblep )
-	GFXDECODE_ENTRY( "gfx1", 0, tile_8x8_layout,     0x100, 32 )	/* Tiles (8x8) */
-	GFXDECODE_ENTRY( "gfx1", 0, tile_16x16_layout,   0x100, 32 )	/* Tiles (16x16) */
-	GFXDECODE_ENTRY( "gfx2", 0, spritelayout,        0, 16 )	/* Sprites (16x16) */
+	GFXDECODE_ENTRY( "gfx1", 0, tile_8x8_layout,     0x100, 32 )    /* Tiles (8x8) */
+	GFXDECODE_ENTRY( "gfx1", 0, tile_16x16_layout,   0x100, 32 )    /* Tiles (16x16) */
+	GFXDECODE_ENTRY( "gfx2", 0, spritelayout,        0, 16 )    /* Sprites (16x16) */
 GFXDECODE_END
 
 /***************************************************************************/
-
-static void sound_irq(device_t *device, int state)
-{
-	tumblep_state *driver_state = device->machine().driver_data<tumblep_state>();
-	device_set_input_line(driver_state->m_audiocpu, 1, state); /* IRQ 2 */
-}
-
-static const ym2151_interface ym2151_config =
-{
-	sound_irq
-};
 
 static const deco16ic_interface tumblep_deco16ic_tilegen1_intf =
 {
 	"screen",
 	0, 1,
-	0x0f, 0x0f,	/* trans masks (default values) */
+	0x0f, 0x0f, /* trans masks (default values) */
 	0, 16, /* color base (default values) */
-	0x0f, 0x0f,	/* color masks (default values) */
+	0x0f, 0x0f, /* color masks (default values) */
 	NULL, NULL,
 	0,1
 };
 
-static MACHINE_START( tumblep )
+void tumblep_state::machine_start()
 {
-	tumblep_state *state = machine.driver_data<tumblep_state>();
 
-	state->m_maincpu = machine.device("maincpu");
-	state->m_audiocpu = machine.device("audiocpu");
-	state->m_deco_tilegen1 = machine.device("tilegen1");
+	m_maincpu = machine().device<cpu_device>("maincpu");
+	m_audiocpu = machine().device<cpu_device>("audiocpu");
+	m_deco_tilegen1 = machine().device("tilegen1");
 }
 
 static MACHINE_CONFIG_START( tumblep, tumblep_state )
@@ -310,34 +296,32 @@ static MACHINE_CONFIG_START( tumblep, tumblep_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, 14000000)
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT("screen", irq6_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", tumblep_state,  irq6_line_hold)
 
-	MCFG_CPU_ADD("audiocpu", H6280, 32220000/8)	/* Custom chip 45; Audio section crystal is 32.220 MHz */
+	MCFG_CPU_ADD("audiocpu", H6280, 32220000/8) /* Custom chip 45; Audio section crystal is 32.220 MHz */
 	MCFG_CPU_PROGRAM_MAP(sound_map)
 
-	MCFG_MACHINE_START(tumblep)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(58)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(529))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(40*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 40*8-2, 1*8, 31*8-1) // hmm
-	MCFG_SCREEN_UPDATE(tumblep)
+	MCFG_SCREEN_UPDATE_DRIVER(tumblep_state, screen_update_tumblep)
 
 	MCFG_GFXDECODE(tumblep)
 	MCFG_PALETTE_LENGTH(1024)
 
 	MCFG_DECO16IC_ADD("tilegen1", tumblep_deco16ic_tilegen1_intf)
-	MCFG_DEVICE_ADD("spritegen", decospr_, 0)
-	decospr_device_config::set_gfx_region(device, 2);
+	MCFG_DEVICE_ADD("spritegen", DECO_SPRITE, 0)
+	decospr_device::set_gfx_region(*device, 2);
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
 
-	MCFG_SOUND_ADD("ymsnd", YM2151, 32220000/9)
-	MCFG_SOUND_CONFIG(ym2151_config)
+	MCFG_YM2151_ADD("ymsnd", 32220000/9)
+	MCFG_YM2151_IRQ_HANDLER(INPUTLINE("audiocpu", 1)) /* IRQ 2 */
 	MCFG_SOUND_ROUTE(0, "lspeaker", 0.45)
 	MCFG_SOUND_ROUTE(1, "rspeaker", 0.45)
 
@@ -357,7 +341,7 @@ ROM_START( tumblep )
 	ROM_LOAD( "hl02-.f16",    0x00000, 0x10000, CRC(a5cab888) SHA1(622f6adb01e31b8f3adbaed2b9900b54c5922c57) )
 
 	ROM_REGION( 0x080000, "gfx1", 0 )
-	ROM_LOAD( "map-02.rom",   0x00000, 0x80000, CRC(dfceaa26) SHA1(83e391ff39efda71e5fa368ac68ba7d6134bac21) )	// encrypted
+	ROM_LOAD( "map-02.rom",   0x00000, 0x80000, CRC(dfceaa26) SHA1(83e391ff39efda71e5fa368ac68ba7d6134bac21) )  // encrypted
 
 	ROM_REGION( 0x100000, "gfx2", 0 )
 	ROM_LOAD16_BYTE( "map-01.rom",   0x00000, 0x80000, CRC(e81ffa09) SHA1(01ada9557ead91eb76cf00db118d6c432104a398) )
@@ -376,7 +360,7 @@ ROM_START( tumblepj )
 	ROM_LOAD( "hl02-.f16",    0x00000, 0x10000, CRC(a5cab888) SHA1(622f6adb01e31b8f3adbaed2b9900b54c5922c57) )
 
 	ROM_REGION( 0x080000, "gfx1", 0 )
-	ROM_LOAD( "map-02.rom",   0x00000, 0x80000, CRC(dfceaa26) SHA1(83e391ff39efda71e5fa368ac68ba7d6134bac21) )	// encrypted
+	ROM_LOAD( "map-02.rom",   0x00000, 0x80000, CRC(dfceaa26) SHA1(83e391ff39efda71e5fa368ac68ba7d6134bac21) )  // encrypted
 
 	ROM_REGION( 0x100000, "gfx2", 0 )
 	ROM_LOAD16_BYTE( "map-01.rom",   0x00000, 0x80000, CRC(e81ffa09) SHA1(01ada9557ead91eb76cf00db118d6c432104a398) )
@@ -392,15 +376,15 @@ ROM_END
 void tumblep_patch_code(UINT16 offset)
 {
 	/* A hack which enables all Dip Switches effects */
-	UINT16 *RAM = (UINT16 *)machine.region("maincpu")->base();
+	UINT16 *RAM = (UINT16 *)machine.root_device().memregion("maincpu")->base();
 	RAM[(offset + 0)/2] = 0x0240;
-	RAM[(offset + 2)/2] = 0xffff;	// andi.w  #$f3ff, D0
+	RAM[(offset + 2)/2] = 0xffff;   // andi.w  #$f3ff, D0
 }
 #endif
 
-static DRIVER_INIT( tumblep )
+DRIVER_INIT_MEMBER(tumblep_state,tumblep)
 {
-	deco56_decrypt_gfx(machine, "gfx1");
+	deco56_decrypt_gfx(machine(), "gfx1");
 
 	#if TUMBLEP_HACK
 	tumblep_patch_code(0x000132);
@@ -409,6 +393,6 @@ static DRIVER_INIT( tumblep )
 
 /******************************************************************************/
 
-GAME( 1991, tumblep,  0,       tumblep,   tumblep,  tumblep,  ROT0, "Data East Corporation", "Tumble Pop (World)", GAME_SUPPORTS_SAVE )
-GAME( 1991, tumblepj, tumblep, tumblep,   tumblep,  tumblep,  ROT0, "Data East Corporation", "Tumble Pop (Japan)", GAME_SUPPORTS_SAVE )
+GAME( 1991, tumblep,  0,       tumblep,   tumblep, tumblep_state,  tumblep,  ROT0, "Data East Corporation", "Tumble Pop (World)", GAME_SUPPORTS_SAVE )
+GAME( 1991, tumblepj, tumblep, tumblep,   tumblep, tumblep_state,  tumblep,  ROT0, "Data East Corporation", "Tumble Pop (Japan)", GAME_SUPPORTS_SAVE )
 /* for bootlegs and games on similar hardware see tumbleb.c */

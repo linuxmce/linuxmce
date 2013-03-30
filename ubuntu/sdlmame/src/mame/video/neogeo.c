@@ -8,9 +8,9 @@
 #include "includes/neogeo.h"
 #include "video/resnet.h"
 
-#define NUM_PENS	(0x1000)
+#define NUM_PENS    (0x1000)
 
-#define VERBOSE 	(0)
+#define VERBOSE     (0)
 
 /*************************************
  *
@@ -75,27 +75,27 @@ static void compute_rgb_weights( running_machine &machine )
 	static const int resistances[] = { 220, 470, 1000, 2200, 3900 };
 
 	/* compute four sets of weights - with or without the pulldowns -
-       ensuring that we use the same scaler for all */
+	   ensuring that we use the same scaler for all */
 
 	double scaler = compute_resistor_weights(0, 0xff, -1,
-							 5, resistances, state->m_rgb_weights_normal, 0, 0,
-							 0, 0, 0, 0, 0,
-							 0, 0, 0, 0, 0);
+								5, resistances, state->m_rgb_weights_normal, 0, 0,
+								0, 0, 0, 0, 0,
+								0, 0, 0, 0, 0);
 
 	compute_resistor_weights(0, 0xff, scaler,
-							 5, resistances, state->m_rgb_weights_normal_bit15, 8200, 0,
-							 0, 0, 0, 0, 0,
-							 0, 0, 0, 0, 0);
+								5, resistances, state->m_rgb_weights_normal_bit15, 8200, 0,
+								0, 0, 0, 0, 0,
+								0, 0, 0, 0, 0);
 
 	compute_resistor_weights(0, 0xff, scaler,
-							 5, resistances, state->m_rgb_weights_dark, 150, 0,
-							 0, 0, 0, 0, 0,
-							 0, 0, 0, 0, 0);
+								5, resistances, state->m_rgb_weights_dark, 150, 0,
+								0, 0, 0, 0, 0,
+								0, 0, 0, 0, 0);
 
 	compute_resistor_weights(0, 0xff, scaler,
-							 5, resistances, state->m_rgb_weights_dark_bit15, 1 / ((1.0 / 8200) + (1.0 / 150)), 0,
-							 0, 0, 0, 0, 0,
-							 0, 0, 0, 0, 0);
+								5, resistances, state->m_rgb_weights_dark_bit15, 1 / ((1.0 / 8200) + (1.0 / 150)), 0,
+								0, 0, 0, 0, 0,
+								0, 0, 0, 0, 0);
 }
 
 
@@ -121,31 +121,31 @@ static pen_t get_pen( running_machine &machine, UINT16 data )
 	}
 
 	r = combine_5_weights(weights,
-						  (data >> 11) & 0x01,
-						  (data >> 10) & 0x01,
-						  (data >>  9) & 0x01,
-						  (data >>  8) & 0x01,
-						  (data >> 14) & 0x01);
+							(data >> 11) & 0x01,
+							(data >> 10) & 0x01,
+							(data >>  9) & 0x01,
+							(data >>  8) & 0x01,
+							(data >> 14) & 0x01);
 
 	g = combine_5_weights(weights,
-						  (data >>  7) & 0x01,
-						  (data >>  6) & 0x01,
-						  (data >>  5) & 0x01,
-						  (data >>  4) & 0x01,
-						  (data >> 13) & 0x01);
+							(data >>  7) & 0x01,
+							(data >>  6) & 0x01,
+							(data >>  5) & 0x01,
+							(data >>  4) & 0x01,
+							(data >> 13) & 0x01);
 
 	b = combine_5_weights(weights,
-						  (data >>  3) & 0x01,
-						  (data >>  2) & 0x01,
-						  (data >>  1) & 0x01,
-						  (data >>  0) & 0x01,
-						  (data >> 12) & 0x01);
+							(data >>  3) & 0x01,
+							(data >>  2) & 0x01,
+							(data >>  1) & 0x01,
+							(data >>  0) & 0x01,
+							(data >> 12) & 0x01);
 
 	return MAKE_RGB(r, g, b);
 }
 
 
-static STATE_POSTLOAD( regenerate_pens )
+static void regenerate_pens(running_machine &machine)
 {
 	neogeo_state *state = machine.driver_data<neogeo_state>();
 	int i;
@@ -162,7 +162,7 @@ void neogeo_set_palette_bank( running_machine &machine, UINT8 data )
 	{
 		state->m_palette_bank = data;
 
-		regenerate_pens(machine, NULL);
+		regenerate_pens(machine);
 	}
 }
 
@@ -174,26 +174,24 @@ void neogeo_set_screen_dark( running_machine &machine, UINT8 data )
 	{
 		state->m_screen_dark = data;
 
-		regenerate_pens(machine, NULL);
+		regenerate_pens(machine);
 	}
 }
 
 
-READ16_HANDLER( neogeo_paletteram_r )
+READ16_MEMBER(neogeo_state::neogeo_paletteram_r)
 {
-	neogeo_state *state = space->machine().driver_data<neogeo_state>();
-	return state->m_palettes[state->m_palette_bank][offset];
+	return m_palettes[m_palette_bank][offset];
 }
 
 
-WRITE16_HANDLER( neogeo_paletteram_w )
+WRITE16_MEMBER(neogeo_state::neogeo_paletteram_w)
 {
-	neogeo_state *state = space->machine().driver_data<neogeo_state>();
-	UINT16 *addr = &state->m_palettes[state->m_palette_bank][offset];
+	UINT16 *addr = &m_palettes[m_palette_bank][offset];
 
 	COMBINE_DATA(addr);
 
-	state->m_pens[offset] = get_pen(space->machine(), *addr);
+	m_pens[offset] = get_pen(machine(), *addr);
 }
 
 
@@ -225,25 +223,24 @@ UINT8 neogeo_get_auto_animation_counter( running_machine &machine )
 }
 
 
-static TIMER_CALLBACK( auto_animation_timer_callback )
+TIMER_CALLBACK_MEMBER(neogeo_state::auto_animation_timer_callback)
 {
-	neogeo_state *state = machine.driver_data<neogeo_state>();
-	if (state->m_auto_animation_frame_counter == 0)
+	if (m_auto_animation_frame_counter == 0)
 	{
-		state->m_auto_animation_frame_counter = state->m_auto_animation_speed;
-		state->m_auto_animation_counter += 1;
+		m_auto_animation_frame_counter = m_auto_animation_speed;
+		m_auto_animation_counter += 1;
 	}
 	else
-		state->m_auto_animation_frame_counter = state->m_auto_animation_frame_counter - 1;
+		m_auto_animation_frame_counter = m_auto_animation_frame_counter - 1;
 
-	state->m_auto_animation_timer->adjust(machine.primary_screen->time_until_pos(NEOGEO_VSSTART));
+	m_auto_animation_timer->adjust(machine().primary_screen->time_until_pos(NEOGEO_VSSTART));
 }
 
 
 static void create_auto_animation_timer( running_machine &machine )
 {
 	neogeo_state *state = machine.driver_data<neogeo_state>();
-	state->m_auto_animation_timer = machine.scheduler().timer_alloc(FUNC(auto_animation_timer_callback));
+	state->m_auto_animation_timer = machine.scheduler().timer_alloc(timer_expired_delegate(FUNC(neogeo_state::auto_animation_timer_callback),state));
 }
 
 
@@ -268,15 +265,15 @@ void neogeo_set_fixed_layer_source( running_machine &machine, UINT8 data )
 }
 
 
-static void draw_fixed_layer( running_machine &machine, bitmap_t *bitmap, int scanline )
+static void draw_fixed_layer( running_machine &machine, bitmap_rgb32 &bitmap, int scanline )
 {
 	neogeo_state *state = machine.driver_data<neogeo_state>();
 	int x;
 
-	UINT8* gfx_base = machine.region(state->m_fixed_layer_source ? "fixed" : "fixedbios")->base();
-	UINT32 addr_mask = machine.region(state->m_fixed_layer_source ? "fixed" : "fixedbios")->bytes() - 1;
+	UINT8* gfx_base = state->memregion(state->m_fixed_layer_source ? "fixed" : "fixedbios")->base();
+	UINT32 addr_mask = state->memregion(state->m_fixed_layer_source ? "fixed" : "fixedbios")->bytes() - 1;
 	UINT16 *video_data = &state->m_videoram[0x7000 | (scanline >> 3)];
-	UINT32 *pixel_addr = BITMAP_ADDR32(bitmap, scanline, NEOGEO_HBEND);
+	UINT32 *pixel_addr = &bitmap.pix32(scanline, NEOGEO_HBEND);
 
 	int garouoffsets[32];
 	int banked = state->m_fixed_layer_source && (addr_mask > 0x1ffff);
@@ -393,7 +390,7 @@ INLINE int rows_to_height(int rows)
 INLINE int sprite_on_scanline(int scanline, int y, int rows)
 {
 	/* check if the current scanline falls inside this sprite,
-       two possible scenerios, wrap around or not */
+	   two possible scenerios, wrap around or not */
 	int max_y = (y + rows_to_height(rows) - 1) & 0x1ff;
 
 	return (((max_y >= y) &&  (scanline >= y) && (scanline <= max_y)) ||
@@ -401,7 +398,7 @@ INLINE int sprite_on_scanline(int scanline, int y, int rows)
 }
 
 
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, int scanline )
+static void draw_sprites( running_machine &machine, bitmap_rgb32 &bitmap, int scanline )
 {
 	neogeo_state *state = machine.driver_data<neogeo_state>();
 	int sprite_index;
@@ -421,8 +418,8 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, int scanli
 		sprite_list = &state->m_videoram[0x8600];
 
 	/* optimization -- find last non-zero entry and only draw that many +1
-       sprite.  This is not 100% correct as the hardware will keep drawing
-       the #0 sprite over and over, but we need the speed */
+	   sprite.  This is not 100% correct as the hardware will keep drawing
+	   the #0 sprite over and over, but we need the speed */
 	for (max_sprite_index = (MAX_SPRITES_PER_LINE - 1); max_sprite_index >= 0; max_sprite_index--)
 	{
 		if (sprite_list[max_sprite_index] != 0)
@@ -460,7 +457,7 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, int scanli
 			continue;
 
 		/* double check the Y coordinate, in case somebody modified the sprite coordinate
-           since we buffered it */
+		   since we buffered it */
 		if (sprite_on_scanline(scanline, y, rows))
 		{
 			int sprite_y;
@@ -540,7 +537,7 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, int scanli
 			{
 				int i;
 
-				UINT32 *pixel_addr = BITMAP_ADDR32(bitmap, scanline, x + NEOGEO_HBEND);
+				UINT32 *pixel_addr = &bitmap.pix32(scanline, x + NEOGEO_HBEND);
 
 				for (i = 0; i < 0x10; i++)
 				{
@@ -562,7 +559,7 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, int scanli
 				int i;
 
 				int x_save = x;
-				UINT32 *pixel_addr = BITMAP_ADDR32(bitmap, scanline, NEOGEO_HBEND);
+				UINT32 *pixel_addr = &bitmap.pix32(scanline, NEOGEO_HBEND);
 
 				for (i = 0; i < 0x10; i++)
 				{
@@ -642,29 +639,28 @@ static void parse_sprites( running_machine &machine, int scanline )
 }
 
 
-static TIMER_CALLBACK( sprite_line_timer_callback )
+TIMER_CALLBACK_MEMBER(neogeo_state::sprite_line_timer_callback)
 {
-	neogeo_state *state = machine.driver_data<neogeo_state>();
 	int scanline = param;
 
 	/* we are at the beginning of a scanline -
-       we need to draw the previous scanline and parse the sprites on the current one */
+	   we need to draw the previous scanline and parse the sprites on the current one */
 	if (scanline != 0)
-		machine.primary_screen->update_partial(scanline - 1);
+		machine().primary_screen->update_partial(scanline - 1);
 
-	parse_sprites(machine, scanline);
+	parse_sprites(machine(), scanline);
 
 	/* let's come back at the beginning of the next line */
 	scanline = (scanline + 1) % NEOGEO_VTOTAL;
 
-	state->m_sprite_line_timer->adjust(machine.primary_screen->time_until_pos(scanline), scanline);
+	m_sprite_line_timer->adjust(machine().primary_screen->time_until_pos(scanline), scanline);
 }
 
 
 static void create_sprite_line_timer( running_machine &machine )
 {
 	neogeo_state *state = machine.driver_data<neogeo_state>();
-	state->m_sprite_line_timer = machine.scheduler().timer_alloc(FUNC(sprite_line_timer_callback));
+	state->m_sprite_line_timer = machine.scheduler().timer_alloc(timer_expired_delegate(FUNC(neogeo_state::sprite_line_timer_callback),state));
 }
 
 
@@ -680,7 +676,7 @@ static void optimize_sprite_data( running_machine &machine )
 	neogeo_state *state = machine.driver_data<neogeo_state>();
 
 	/* convert the sprite graphics data into a format that
-       allows faster blitting */
+	   allows faster blitting */
 	int i;
 	int len;
 	UINT8 *src;
@@ -688,10 +684,10 @@ static void optimize_sprite_data( running_machine &machine )
 	UINT32 bit;
 
 	/* get mask based on the length rounded up to the nearest
-       power of 2 */
+	   power of 2 */
 	state->m_sprite_gfx_address_mask = 0xffffffff;
 
-	len = machine.region("sprites")->bytes();
+	len = state->memregion("sprites")->bytes();
 
 	for (bit = 0x80000000; bit != 0; bit >>= 1)
 	{
@@ -703,7 +699,7 @@ static void optimize_sprite_data( running_machine &machine )
 
 	state->m_sprite_gfx = auto_alloc_array_clear(machine, UINT8, state->m_sprite_gfx_address_mask + 1);
 
-	src = machine.region("sprites")->base();
+	src = machine.root_device().memregion("sprites")->base();
 	dest = state->m_sprite_gfx;
 
 	for (i = 0; i < len; i += 0x80, src += 0x80)
@@ -717,7 +713,7 @@ static void optimize_sprite_data( running_machine &machine )
 			for (x = 0; x < 8; x++)
 			{
 				*(dest++) = (((src[0x43 | (y << 2)] >> x) & 0x01) << 3) |
-						    (((src[0x41 | (y << 2)] >> x) & 0x01) << 2) |
+							(((src[0x41 | (y << 2)] >> x) & 0x01) << 2) |
 							(((src[0x42 | (y << 2)] >> x) & 0x01) << 1) |
 							(((src[0x40 | (y << 2)] >> x) & 0x01) << 0);
 			}
@@ -725,7 +721,7 @@ static void optimize_sprite_data( running_machine &machine )
 			for (x = 0; x < 8; x++)
 			{
 				*(dest++) = (((src[0x03 | (y << 2)] >> x) & 0x01) << 3) |
-						    (((src[0x01 | (y << 2)] >> x) & 0x01) << 2) |
+							(((src[0x01 | (y << 2)] >> x) & 0x01) << 2) |
 							(((src[0x02 | (y << 2)] >> x) & 0x01) << 1) |
 							(((src[0x00 | (y << 2)] >> x) & 0x01) << 0);
 			}
@@ -747,25 +743,25 @@ static UINT16 get_video_control( running_machine &machine )
 	UINT16 v_counter;
 
 	/*
-        The format of this very important location is:  AAAA AAAA A??? BCCC
+	    The format of this very important location is:  AAAA AAAA A??? BCCC
 
-        A is the raster line counter. mosyougi relies solely on this to do the
-          raster effects on the title screen; sdodgeb loops waiting for the top
-          bit to be 1; zedblade heavily depends on it to work correctly (it
-          checks the top bit in the IRQ2 handler).
-        B is definitely a PAL/NTSC flag. Evidence:
-          1) trally changes the position of the speed indicator depending on
-             it (0 = lower 1 = higher).
-          2) samsho3 sets a variable to 60 when the bit is 0 and 50 when it's 1.
-             This is obviously the video refresh rate in Hz.
-          3) samsho3 sets another variable to 256 or 307. This could be the total
-             screen height (including vblank), or close to that.
-          Some games (e.g. lstbld2, samsho3) do this (or similar):
-          bclr    #$0, $3c000e.l
-          when the bit is set, so 3c000e (whose function is unknown) has to be
-          related
-        C animation counter lower 3 bits
-    */
+	    A is the raster line counter. mosyougi relies solely on this to do the
+	      raster effects on the title screen; sdodgeb loops waiting for the top
+	      bit to be 1; zedblade heavily depends on it to work correctly (it
+	      checks the top bit in the IRQ2 handler).
+	    B is definitely a PAL/NTSC flag. Evidence:
+	      1) trally changes the position of the speed indicator depending on
+	         it (0 = lower 1 = higher).
+	      2) samsho3 sets a variable to 60 when the bit is 0 and 50 when it's 1.
+	         This is obviously the video refresh rate in Hz.
+	      3) samsho3 sets another variable to 256 or 307. This could be the total
+	         screen height (including vblank), or close to that.
+	      Some games (e.g. lstbld2, samsho3) do this (or similar):
+	      bclr    #$0, $3c000e.l
+	      when the bit is set, so 3c000e (whose function is unknown) has to be
+	      related
+	    C animation counter lower 3 bits
+	*/
 
 	/* the vertical counter chain goes from 0xf8 - 0x1ff */
 	v_counter = machine.primary_screen->vpos() + 0x100;
@@ -793,7 +789,7 @@ static void set_video_control( running_machine &machine, UINT16 data )
 }
 
 
-READ16_HANDLER( neogeo_video_register_r )
+READ16_MEMBER(neogeo_state::neogeo_video_register_r)
 {
 	UINT16 ret;
 
@@ -806,9 +802,9 @@ READ16_HANDLER( neogeo_video_register_r )
 		{
 		default:
 		case 0x00:
-		case 0x01: ret = get_videoram_data(space->machine()); break;
-		case 0x02: ret = get_videoram_modulo(space->machine()); break;
-		case 0x03: ret = get_video_control(space->machine()); break;
+		case 0x01: ret = get_videoram_data(machine()); break;
+		case 0x02: ret = get_videoram_modulo(machine()); break;
+		case 0x03: ret = get_video_control(machine()); break;
 		}
 	}
 
@@ -816,7 +812,7 @@ READ16_HANDLER( neogeo_video_register_r )
 }
 
 
-WRITE16_HANDLER( neogeo_video_register_w )
+WRITE16_MEMBER(neogeo_state::neogeo_video_register_w)
 {
 	/* accessing the LSB only is not mapped */
 	if (mem_mask != 0x00ff)
@@ -827,13 +823,13 @@ WRITE16_HANDLER( neogeo_video_register_w )
 
 		switch (offset)
 		{
-		case 0x00: set_videoram_offset(space->machine(), data); break;
-		case 0x01: set_videoram_data(space->machine(), data); break;
-		case 0x02: set_videoram_modulo(space->machine(), data); break;
-		case 0x03: set_video_control(space->machine(), data); break;
+		case 0x00: set_videoram_offset(machine(), data); break;
+		case 0x01: set_videoram_data(machine(), data); break;
+		case 0x02: set_videoram_modulo(machine(), data); break;
+		case 0x03: set_video_control(machine(), data); break;
 		case 0x04: neogeo_set_display_counter_msb(space, data); break;
 		case 0x05: neogeo_set_display_counter_lsb(space, data); break;
-		case 0x06: neogeo_acknowledge_interrupt(space->machine(), data); break;
+		case 0x06: neogeo_acknowledge_interrupt(machine(), data); break;
 		case 0x07: break; /* unknown, see get_video_control */
 		}
 	}
@@ -847,54 +843,53 @@ WRITE16_HANDLER( neogeo_video_register_w )
  *
  *************************************/
 
-VIDEO_START( neogeo )
+void neogeo_state::video_start()
 {
-	neogeo_state *state = machine.driver_data<neogeo_state>();
 
 	/* allocate memory not directly mapped */
-	state->m_palettes[0] = auto_alloc_array(machine, UINT16, NUM_PENS);
-	state->m_palettes[1] = auto_alloc_array(machine, UINT16, NUM_PENS);
-	state->m_pens = auto_alloc_array(machine, pen_t, NUM_PENS);
-	state->m_videoram = auto_alloc_array(machine, UINT16, 0x20000/2);
+	m_palettes[0] = auto_alloc_array(machine(), UINT16, NUM_PENS);
+	m_palettes[1] = auto_alloc_array(machine(), UINT16, NUM_PENS);
+	m_pens = auto_alloc_array(machine(), pen_t, NUM_PENS);
+	m_videoram = auto_alloc_array(machine(), UINT16, 0x20000/2);
 
 	/* clear allocated memory */
-	memset(state->m_palettes[0], 0x00, NUM_PENS * sizeof(UINT16));
-	memset(state->m_palettes[1], 0x00, NUM_PENS * sizeof(UINT16));
-	memset(state->m_pens, 0x00, NUM_PENS * sizeof(pen_t));
-	memset(state->m_videoram, 0x00, 0x20000);
+	memset(m_palettes[0], 0x00, NUM_PENS * sizeof(UINT16));
+	memset(m_palettes[1], 0x00, NUM_PENS * sizeof(UINT16));
+	memset(m_pens, 0x00, NUM_PENS * sizeof(pen_t));
+	memset(m_videoram, 0x00, 0x20000);
 
-	compute_rgb_weights(machine);
-	create_sprite_line_timer(machine);
-	create_auto_animation_timer(machine);
-	optimize_sprite_data(machine);
+	compute_rgb_weights(machine());
+	create_sprite_line_timer(machine());
+	create_auto_animation_timer(machine());
+	optimize_sprite_data(machine());
 
 	/* initialize values that are not modified on a reset */
-	state->m_videoram_read_buffer = 0;
-	state->m_videoram_offset = 0;
-	state->m_videoram_modulo = 0;
-	state->m_auto_animation_speed = 0;
-	state->m_auto_animation_disabled = 0;
-	state->m_auto_animation_counter = 0;
-	state->m_auto_animation_frame_counter = 0;
+	m_videoram_read_buffer = 0;
+	m_videoram_offset = 0;
+	m_videoram_modulo = 0;
+	m_auto_animation_speed = 0;
+	m_auto_animation_disabled = 0;
+	m_auto_animation_counter = 0;
+	m_auto_animation_frame_counter = 0;
 
 	/* register for state saving */
-	state->save_pointer(NAME(state->m_palettes[0]), NUM_PENS);
-	state->save_pointer(NAME(state->m_palettes[1]), NUM_PENS);
-	state->save_pointer(NAME(state->m_videoram), 0x20000/2);
-	state->save_item(NAME(state->m_videoram_read_buffer));
-	state->save_item(NAME(state->m_videoram_modulo));
-	state->save_item(NAME(state->m_videoram_offset));
-	state->save_item(NAME(state->m_fixed_layer_source));
-	state->save_item(NAME(state->m_screen_dark));
-	state->save_item(NAME(state->m_palette_bank));
-	state->save_item(NAME(state->m_auto_animation_speed));
-	state->save_item(NAME(state->m_auto_animation_disabled));
-	state->save_item(NAME(state->m_auto_animation_counter));
-	state->save_item(NAME(state->m_auto_animation_frame_counter));
+	save_pointer(NAME(m_palettes[0]), NUM_PENS);
+	save_pointer(NAME(m_palettes[1]), NUM_PENS);
+	save_pointer(NAME(m_videoram), 0x20000/2);
+	save_item(NAME(m_videoram_read_buffer));
+	save_item(NAME(m_videoram_modulo));
+	save_item(NAME(m_videoram_offset));
+	save_item(NAME(m_fixed_layer_source));
+	save_item(NAME(m_screen_dark));
+	save_item(NAME(m_palette_bank));
+	save_item(NAME(m_auto_animation_speed));
+	save_item(NAME(m_auto_animation_disabled));
+	save_item(NAME(m_auto_animation_counter));
+	save_item(NAME(m_auto_animation_frame_counter));
 
-	machine.state().register_postload(regenerate_pens, NULL);
+	machine().save().register_postload(save_prepost_delegate(FUNC(regenerate_pens), &machine()));
 
-	state->m_region_zoomy = machine.region("zoomy")->base();
+	m_region_zoomy = memregion("zoomy")->base();
 }
 
 
@@ -905,11 +900,11 @@ VIDEO_START( neogeo )
  *
  *************************************/
 
-VIDEO_RESET( neogeo )
+void neogeo_state::video_reset()
 {
-	start_sprite_line_timer(machine);
-	start_auto_animation_timer(machine);
-	optimize_sprite_data(machine);
+	start_sprite_line_timer(machine());
+	start_auto_animation_timer(machine());
+	optimize_sprite_data(machine());
 }
 
 
@@ -920,16 +915,15 @@ VIDEO_RESET( neogeo )
  *
  *************************************/
 
-SCREEN_UPDATE( neogeo )
+UINT32 neogeo_state::screen_update_neogeo(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	neogeo_state *state = screen->machine().driver_data<neogeo_state>();
 
 	/* fill with background color first */
-	bitmap_fill(bitmap, cliprect, state->m_pens[0x0fff]);
+	bitmap.fill(m_pens[0x0fff], cliprect);
 
-	draw_sprites(screen->machine(), bitmap, cliprect->min_y);
+	if (m_has_sprite_bus) draw_sprites(machine(), bitmap, cliprect.min_y);
 
-	draw_fixed_layer(screen->machine(), bitmap, cliprect->min_y);
+	if (m_has_text_bus) draw_fixed_layer(machine(), bitmap, cliprect.min_y);
 
 	return 0;
 }

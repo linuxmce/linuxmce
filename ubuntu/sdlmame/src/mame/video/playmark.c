@@ -8,103 +8,94 @@
 
 ***************************************************************************/
 
-static TILE_GET_INFO( bigtwin_get_tx_tile_info )
+TILE_GET_INFO_MEMBER(playmark_state::bigtwin_get_tx_tile_info)
 {
-	playmark_state *state = machine.driver_data<playmark_state>();
-	UINT16 code = state->m_videoram1[2 * tile_index];
-	UINT16 color = state->m_videoram1[2 * tile_index + 1];
-	SET_TILE_INFO(
+	UINT16 code = m_videoram1[2 * tile_index];
+	UINT16 color = m_videoram1[2 * tile_index + 1];
+	SET_TILE_INFO_MEMBER(
 			2,
 			code,
 			color,
 			0);
 }
 
-static TILE_GET_INFO( bigtwin_get_fg_tile_info )
+TILE_GET_INFO_MEMBER(playmark_state::bigtwin_get_fg_tile_info)
 {
-	playmark_state *state = machine.driver_data<playmark_state>();
-	UINT16 code = state->m_videoram2[2 * tile_index];
-	UINT16 color = state->m_videoram2[2 * tile_index + 1];
-	SET_TILE_INFO(
+	UINT16 code = m_videoram2[2 * tile_index];
+	UINT16 color = m_videoram2[2 * tile_index + 1];
+	SET_TILE_INFO_MEMBER(
 			1,
 			code,
 			color,
 			0);
 }
 
-static TILE_GET_INFO( wbeachvl_get_tx_tile_info )
+TILE_GET_INFO_MEMBER(playmark_state::wbeachvl_get_tx_tile_info)
 {
-	playmark_state *state = machine.driver_data<playmark_state>();
-	UINT16 code = state->m_videoram1[2 * tile_index];
-	UINT16 color = state->m_videoram1[2 * tile_index + 1];
+	UINT16 code = m_videoram1[2 * tile_index];
+	UINT16 color = m_videoram1[2 * tile_index + 1];
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			2,
 			code,
 			color / 4,
 			0);
 }
 
-static TILE_GET_INFO( wbeachvl_get_fg_tile_info )
+TILE_GET_INFO_MEMBER(playmark_state::wbeachvl_get_fg_tile_info)
 {
-	playmark_state *state = machine.driver_data<playmark_state>();
-	UINT16 code = state->m_videoram2[2 * tile_index];
-	UINT16 color = state->m_videoram2[2 * tile_index + 1];
+	UINT16 code = m_videoram2[2 * tile_index];
+	UINT16 color = m_videoram2[2 * tile_index + 1];
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			1,
 			code & 0x7fff,
 			color / 4 + 8,
 			(code & 0x8000) ? TILE_FLIPX : 0);
 }
 
-static TILE_GET_INFO( wbeachvl_get_bg_tile_info )
+TILE_GET_INFO_MEMBER(playmark_state::wbeachvl_get_bg_tile_info)
 {
-	playmark_state *state = machine.driver_data<playmark_state>();
-	UINT16 code = state->m_videoram3[2 * tile_index];
-	UINT16 color = state->m_videoram3[2 * tile_index + 1];
+	UINT16 code = m_videoram3[2 * tile_index];
+	UINT16 color = m_videoram3[2 * tile_index + 1];
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			1,
 			code & 0x7fff,
 			color / 4,
 			(code & 0x8000) ? TILE_FLIPX : 0);
 }
 
-static TILE_GET_INFO( hrdtimes_get_tx_tile_info )
+TILE_GET_INFO_MEMBER(playmark_state::hrdtimes_get_tx_tile_info)
 {
-	playmark_state *state = machine.driver_data<playmark_state>();
-	int code = state->m_videoram1[tile_index] & 0x03ff;
-	int colr = state->m_videoram1[tile_index] & 0xe000;
+	int code = m_videoram1[tile_index] & 0x03ff;
+	int colr = m_videoram1[tile_index] & 0xe000;
 
-	SET_TILE_INFO(2,code + state->m_txt_tile_offset, colr >> 13, 0);
+	SET_TILE_INFO_MEMBER(2,code + m_txt_tile_offset, colr >> 13, 0);
 }
 
-static TILE_GET_INFO( bigtwinb_get_tx_tile_info )
+TILE_GET_INFO_MEMBER(playmark_state::bigtwinb_get_tx_tile_info)
 {
-	playmark_state *state = machine.driver_data<playmark_state>();
-	int code = state->m_videoram1[tile_index] & 0x0fff;
-	int colr = state->m_videoram1[tile_index] & 0xf000;
+	int code = m_videoram1[tile_index] & 0x0fff;
+	int colr = m_videoram1[tile_index] & 0xf000;
 
-	SET_TILE_INFO(2,code + state->m_txt_tile_offset, colr >> 12, 0);
+	SET_TILE_INFO_MEMBER(2,code + m_txt_tile_offset, colr >> 12, 0);
 }
 
-static TILE_GET_INFO( hrdtimes_get_fg_tile_info )
+TILE_GET_INFO_MEMBER(playmark_state::hrdtimes_get_fg_tile_info)
 {
-	playmark_state *state = machine.driver_data<playmark_state>();
-	int code = state->m_videoram2[tile_index] & 0x1fff;
-	int colr = state->m_videoram2[tile_index] & 0xe000;
+	int code = m_videoram2[tile_index] & 0x1fff;
+	int colr = m_videoram2[tile_index] & 0xe000;
 
-	SET_TILE_INFO(1,code + 0x2000,(colr >> 13) + 8,0);
+	SET_TILE_INFO_MEMBER(1,code + 0x2000,(colr >> 13) + 8,0);
 }
 
-static TILE_GET_INFO( hrdtimes_get_bg_tile_info )
+TILE_GET_INFO_MEMBER(playmark_state::hrdtimes_get_bg_tile_info)
 {
-	playmark_state *state = machine.driver_data<playmark_state>();
-	int code = state->m_videoram3[tile_index] & 0x1fff;
-	int colr = state->m_videoram3[tile_index] & 0xe000;
+	int code = m_videoram3[tile_index] & 0x1fff;
+	int colr = m_videoram3[tile_index] & 0xe000;
 
-	SET_TILE_INFO(1, code, colr >> 13, 0);
+	SET_TILE_INFO_MEMBER(1, code, colr >> 13, 0);
 }
 
 /***************************************************************************
@@ -113,132 +104,126 @@ static TILE_GET_INFO( hrdtimes_get_bg_tile_info )
 
 ***************************************************************************/
 
-VIDEO_START( bigtwin )
+VIDEO_START_MEMBER(playmark_state,bigtwin)
 {
-	playmark_state *state = machine.driver_data<playmark_state>();
 
-	state->m_tx_tilemap = tilemap_create(machine, bigtwin_get_tx_tile_info, tilemap_scan_rows, 8, 8, 64, 32);
-	state->m_fg_tilemap = tilemap_create(machine, bigtwin_get_fg_tile_info, tilemap_scan_rows, 16, 16, 32, 32);
+	m_tx_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(playmark_state::bigtwin_get_tx_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 64, 32);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(playmark_state::bigtwin_get_fg_tile_info),this), TILEMAP_SCAN_ROWS, 16, 16, 32, 32);
 
-	tilemap_set_transparent_pen(state->m_tx_tilemap, 0);
+	m_tx_tilemap->set_transparent_pen(0);
 
-	state->m_xoffset = 0;
-	state->m_yoffset = 0;
-	state->m_txt_tile_offset = 0;
+	m_xoffset = 0;
+	m_yoffset = 0;
+	m_txt_tile_offset = 0;
 
-	state->m_pri_masks[0] = 0;
-	state->m_pri_masks[1] = 0;
-	state->m_pri_masks[2] = 0;
+	m_pri_masks[0] = 0;
+	m_pri_masks[1] = 0;
+	m_pri_masks[2] = 0;
 }
 
 
-VIDEO_START( bigtwinb )
+VIDEO_START_MEMBER(playmark_state,bigtwinb)
 {
-	playmark_state *state = machine.driver_data<playmark_state>();
 
-	state->m_tx_tilemap = tilemap_create(machine, bigtwinb_get_tx_tile_info,tilemap_scan_rows, 8, 8, 64, 64);
-	state->m_fg_tilemap = tilemap_create(machine, hrdtimes_get_fg_tile_info,tilemap_scan_rows, 16, 16, 32, 32);
-	state->m_bg_tilemap = tilemap_create(machine, hrdtimes_get_bg_tile_info,tilemap_scan_rows, 16, 16, 32, 32);
+	m_tx_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(playmark_state::bigtwinb_get_tx_tile_info),this),TILEMAP_SCAN_ROWS, 8, 8, 64, 64);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(playmark_state::hrdtimes_get_fg_tile_info),this),TILEMAP_SCAN_ROWS, 16, 16, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(playmark_state::hrdtimes_get_bg_tile_info),this),TILEMAP_SCAN_ROWS, 16, 16, 32, 32);
 
-	tilemap_set_transparent_pen(state->m_tx_tilemap, 0);
-	tilemap_set_transparent_pen(state->m_fg_tilemap, 0);
+	m_tx_tilemap->set_transparent_pen(0);
+	m_fg_tilemap->set_transparent_pen(0);
 
-	tilemap_set_scrolldx(state->m_bg_tilemap, -4, -4);
+	m_bg_tilemap->set_scrolldx(-4, -4);
 
-	state->m_xoffset = 1;
-	state->m_yoffset = 0;
-	state->m_txt_tile_offset = 0x8000;
+	m_xoffset = 1;
+	m_yoffset = 0;
+	m_txt_tile_offset = 0x8000;
 
-	state->m_pri_masks[0] = 0;
-	state->m_pri_masks[1] = 0;
-	state->m_pri_masks[2] = 0;
+	m_pri_masks[0] = 0;
+	m_pri_masks[1] = 0;
+	m_pri_masks[2] = 0;
 }
 
 
-VIDEO_START( wbeachvl )
+VIDEO_START_MEMBER(playmark_state,wbeachvl)
 {
-	playmark_state *state = machine.driver_data<playmark_state>();
 
-	state->m_tx_tilemap = tilemap_create(machine, wbeachvl_get_tx_tile_info, tilemap_scan_rows, 8, 8, 64, 32);
-	state->m_fg_tilemap = tilemap_create(machine, wbeachvl_get_fg_tile_info, tilemap_scan_rows, 16, 16, 64, 32);
-	state->m_bg_tilemap = tilemap_create(machine, wbeachvl_get_bg_tile_info, tilemap_scan_rows, 16, 16, 64, 32);
+	m_tx_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(playmark_state::wbeachvl_get_tx_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 64, 32);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(playmark_state::wbeachvl_get_fg_tile_info),this), TILEMAP_SCAN_ROWS, 16, 16, 64, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(playmark_state::wbeachvl_get_bg_tile_info),this), TILEMAP_SCAN_ROWS, 16, 16, 64, 32);
 
-	tilemap_set_transparent_pen(state->m_tx_tilemap, 0);
-	tilemap_set_transparent_pen(state->m_fg_tilemap, 0);
+	m_tx_tilemap->set_transparent_pen(0);
+	m_fg_tilemap->set_transparent_pen(0);
 
-	state->m_xoffset = 0;
-	state->m_yoffset = 0;
-	state->m_txt_tile_offset = 0;
+	m_xoffset = 0;
+	m_yoffset = 0;
+	m_txt_tile_offset = 0;
 
-	state->m_pri_masks[0] = 0xfff0;
-	state->m_pri_masks[1] = 0xfffc;
-	state->m_pri_masks[2] = 0;
+	m_pri_masks[0] = 0xfff0;
+	m_pri_masks[1] = 0xfffc;
+	m_pri_masks[2] = 0;
 }
 
-VIDEO_START( excelsr )
+VIDEO_START_MEMBER(playmark_state,excelsr)
 {
-	playmark_state *state = machine.driver_data<playmark_state>();
 
-	state->m_tx_tilemap = tilemap_create(machine, bigtwin_get_tx_tile_info, tilemap_scan_rows, 16, 16, 32, 32);
-	state->m_fg_tilemap = tilemap_create(machine, bigtwin_get_fg_tile_info, tilemap_scan_rows, 16, 16, 32, 32);
+	m_tx_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(playmark_state::bigtwin_get_tx_tile_info),this), TILEMAP_SCAN_ROWS, 16, 16, 32, 32);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(playmark_state::bigtwin_get_fg_tile_info),this), TILEMAP_SCAN_ROWS, 16, 16, 32, 32);
 
-	tilemap_set_transparent_pen(state->m_tx_tilemap, 0);
+	m_tx_tilemap->set_transparent_pen(0);
 
-	state->m_xoffset = 0;
-	state->m_yoffset = 0;
-	state->m_txt_tile_offset = 0;
+	m_xoffset = 0;
+	m_yoffset = 0;
+	m_txt_tile_offset = 0;
 
-	state->m_pri_masks[0] = 0;
-	state->m_pri_masks[1] = 0xfffc;
-	state->m_pri_masks[2] = 0xfff0;
+	m_pri_masks[0] = 0;
+	m_pri_masks[1] = 0xfffc;
+	m_pri_masks[2] = 0xfff0;
 }
 
-VIDEO_START( hotmind )
+VIDEO_START_MEMBER(playmark_state,hotmind)
 {
-	playmark_state *state = machine.driver_data<playmark_state>();
 
-	state->m_tx_tilemap = tilemap_create(machine, hrdtimes_get_tx_tile_info, tilemap_scan_rows, 8, 8, 64, 64);
-	state->m_fg_tilemap = tilemap_create(machine, hrdtimes_get_fg_tile_info, tilemap_scan_rows, 16, 16, 32, 32);
-	state->m_bg_tilemap = tilemap_create(machine, hrdtimes_get_bg_tile_info, tilemap_scan_rows, 16, 16, 32, 32);
+	m_tx_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(playmark_state::hrdtimes_get_tx_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 64, 64);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(playmark_state::hrdtimes_get_fg_tile_info),this), TILEMAP_SCAN_ROWS, 16, 16, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(playmark_state::hrdtimes_get_bg_tile_info),this), TILEMAP_SCAN_ROWS, 16, 16, 32, 32);
 
-	tilemap_set_transparent_pen(state->m_tx_tilemap, 0);
-	tilemap_set_transparent_pen(state->m_fg_tilemap, 0);
+	m_tx_tilemap->set_transparent_pen(0);
+	m_fg_tilemap->set_transparent_pen(0);
 
-	tilemap_set_scrolldx(state->m_tx_tilemap, -14, -14);
-	tilemap_set_scrolldx(state->m_fg_tilemap, -14, -14);
-	tilemap_set_scrolldx(state->m_bg_tilemap, -14, -14);
+	m_tx_tilemap->set_scrolldx(-14, -14);
+	m_fg_tilemap->set_scrolldx(-14, -14);
+	m_bg_tilemap->set_scrolldx(-14, -14);
 
-	state->m_xoffset = -9;
-	state->m_yoffset = -8;
-	state->m_txt_tile_offset = 0x9000;
+	m_xoffset = -9;
+	m_yoffset = -8;
+	m_txt_tile_offset = 0x9000;
 
-	state->m_pri_masks[0] = 0xfff0;
-	state->m_pri_masks[1] = 0xfffc;
-	state->m_pri_masks[2] = 0;
+	m_pri_masks[0] = 0xfff0;
+	m_pri_masks[1] = 0xfffc;
+	m_pri_masks[2] = 0;
 }
 
-VIDEO_START( hrdtimes )
+VIDEO_START_MEMBER(playmark_state,hrdtimes)
 {
-	playmark_state *state = machine.driver_data<playmark_state>();
 
-	state->m_tx_tilemap = tilemap_create(machine, hrdtimes_get_tx_tile_info,tilemap_scan_rows, 8, 8, 64, 64);
-	state->m_fg_tilemap = tilemap_create(machine, hrdtimes_get_fg_tile_info,tilemap_scan_rows, 16, 16, 32, 32);
-	state->m_bg_tilemap = tilemap_create(machine, hrdtimes_get_bg_tile_info,tilemap_scan_rows, 16, 16, 32, 32);
+	m_tx_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(playmark_state::hrdtimes_get_tx_tile_info),this),TILEMAP_SCAN_ROWS, 8, 8, 64, 64);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(playmark_state::hrdtimes_get_fg_tile_info),this),TILEMAP_SCAN_ROWS, 16, 16, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(playmark_state::hrdtimes_get_bg_tile_info),this),TILEMAP_SCAN_ROWS, 16, 16, 32, 32);
 
-	tilemap_set_transparent_pen(state->m_tx_tilemap, 0);
-	tilemap_set_transparent_pen(state->m_fg_tilemap, 0);
+	m_tx_tilemap->set_transparent_pen(0);
+	m_fg_tilemap->set_transparent_pen(0);
 
-	tilemap_set_scrolldx(state->m_tx_tilemap, -14, -14);
-	tilemap_set_scrolldx(state->m_fg_tilemap, -10, -10);
-	tilemap_set_scrolldx(state->m_bg_tilemap, -12, -12);
+	m_tx_tilemap->set_scrolldx(-14, -14);
+	m_fg_tilemap->set_scrolldx(-10, -10);
+	m_bg_tilemap->set_scrolldx(-12, -12);
 
-	state->m_xoffset = -8;
-	state->m_yoffset = -8;
-	state->m_txt_tile_offset = 0xfc00;
+	m_xoffset = -8;
+	m_yoffset = -8;
+	m_txt_tile_offset = 0xfc00;
 
-	state->m_pri_masks[0] = 0xfff0;
-	state->m_pri_masks[1] = 0xfffc;
-	state->m_pri_masks[2] = 0;
+	m_pri_masks[0] = 0xfff0;
+	m_pri_masks[1] = 0xfffc;
+	m_pri_masks[2] = 0;
 }
 
 /***************************************************************************
@@ -247,62 +232,56 @@ VIDEO_START( hrdtimes )
 
 ***************************************************************************/
 
-WRITE16_HANDLER( wbeachvl_txvideoram_w )
+WRITE16_MEMBER(playmark_state::wbeachvl_txvideoram_w)
 {
-	playmark_state *state = space->machine().driver_data<playmark_state>();
 
-	COMBINE_DATA(&state->m_videoram1[offset]);
-	tilemap_mark_tile_dirty(state->m_tx_tilemap, offset / 2);
+	COMBINE_DATA(&m_videoram1[offset]);
+	m_tx_tilemap->mark_tile_dirty(offset / 2);
 }
 
-WRITE16_HANDLER( wbeachvl_fgvideoram_w )
+WRITE16_MEMBER(playmark_state::wbeachvl_fgvideoram_w)
 {
-	playmark_state *state = space->machine().driver_data<playmark_state>();
 
-	COMBINE_DATA(&state->m_videoram2[offset]);
-	tilemap_mark_tile_dirty(state->m_fg_tilemap, offset / 2);
+	COMBINE_DATA(&m_videoram2[offset]);
+	m_fg_tilemap->mark_tile_dirty(offset / 2);
 }
 
-WRITE16_HANDLER( wbeachvl_bgvideoram_w )
+WRITE16_MEMBER(playmark_state::wbeachvl_bgvideoram_w)
 {
-	playmark_state *state = space->machine().driver_data<playmark_state>();
 
-	COMBINE_DATA(&state->m_videoram3[offset]);
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset / 2);
+	COMBINE_DATA(&m_videoram3[offset]);
+	m_bg_tilemap->mark_tile_dirty(offset / 2);
 }
 
-WRITE16_HANDLER( hrdtimes_txvideoram_w )
+WRITE16_MEMBER(playmark_state::hrdtimes_txvideoram_w)
 {
-	playmark_state *state = space->machine().driver_data<playmark_state>();
 
-	COMBINE_DATA(&state->m_videoram1[offset]);
-	tilemap_mark_tile_dirty(state->m_tx_tilemap, offset);
+	COMBINE_DATA(&m_videoram1[offset]);
+	m_tx_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE16_HANDLER( hrdtimes_fgvideoram_w )
+WRITE16_MEMBER(playmark_state::hrdtimes_fgvideoram_w)
 {
-	playmark_state *state = space->machine().driver_data<playmark_state>();
 
-	COMBINE_DATA(&state->m_videoram2[offset]);
-	tilemap_mark_tile_dirty(state->m_fg_tilemap, offset);
+	COMBINE_DATA(&m_videoram2[offset]);
+	m_fg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE16_HANDLER( hrdtimes_bgvideoram_w )
+WRITE16_MEMBER(playmark_state::hrdtimes_bgvideoram_w)
 {
-	playmark_state *state = space->machine().driver_data<playmark_state>();
 
-	COMBINE_DATA(&state->m_videoram3[offset]);
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	COMBINE_DATA(&m_videoram3[offset]);
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
 
-WRITE16_HANDLER( bigtwin_paletteram_w )
+WRITE16_MEMBER(playmark_state::bigtwin_paletteram_w)
 {
 	int r, g, b, val;
 
-	COMBINE_DATA(&space->machine().generic.paletteram.u16[offset]);
+	COMBINE_DATA(&m_generic_paletteram_16[offset]);
 
-	val = space->machine().generic.paletteram.u16[offset];
+	val = m_generic_paletteram_16[offset];
 	r = (val >> 11) & 0x1e;
 	g = (val >>  7) & 0x1e;
 	b = (val >>  3) & 0x1e;
@@ -311,82 +290,78 @@ WRITE16_HANDLER( bigtwin_paletteram_w )
 	g |= ((val & 0x04) >> 2);
 	b |= ((val & 0x02) >> 1);
 
-	palette_set_color_rgb(space->machine(), offset, pal5bit(r), pal5bit(g), pal5bit(b));
+	palette_set_color_rgb(machine(), offset, pal5bit(r), pal5bit(g), pal5bit(b));
 }
 
-WRITE16_HANDLER( bigtwin_scroll_w )
+WRITE16_MEMBER(playmark_state::bigtwin_scroll_w)
 {
-	playmark_state *state = space->machine().driver_data<playmark_state>();
 
-	data = COMBINE_DATA(&state->m_scroll[offset]);
+	data = COMBINE_DATA(&m_scroll[offset]);
 
 	switch (offset)
 	{
-		case 0: 	tilemap_set_scrollx(state->m_tx_tilemap, 0, data + 2); break;
-		case 1: 	tilemap_set_scrolly(state->m_tx_tilemap, 0, data);   break;
-		case 2: 	state->m_bgscrollx = -(data + 4);                    break;
-		case 3: 	state->m_bgscrolly = (-data) & 0x1ff;
-				state->m_bg_enable = data & 0x0200;
-				state->m_bg_full_size = data & 0x0400;
+		case 0:     m_tx_tilemap->set_scrollx(0, data + 2); break;
+		case 1:     m_tx_tilemap->set_scrolly(0, data);   break;
+		case 2:     m_bgscrollx = -(data + 4);                    break;
+		case 3:     m_bgscrolly = (-data) & 0x1ff;
+				m_bg_enable = data & 0x0200;
+				m_bg_full_size = data & 0x0400;
 				break;
-		case 4: 	tilemap_set_scrollx(state->m_fg_tilemap, 0, data + 6); break;
-		case 5: 	tilemap_set_scrolly(state->m_fg_tilemap, 0, data);   break;
+		case 4:     m_fg_tilemap->set_scrollx(0, data + 6); break;
+		case 5:     m_fg_tilemap->set_scrolly(0, data);   break;
 	}
 }
 
-WRITE16_HANDLER( wbeachvl_scroll_w )
+WRITE16_MEMBER(playmark_state::wbeachvl_scroll_w)
 {
-	playmark_state *state = space->machine().driver_data<playmark_state>();
 
-	data = COMBINE_DATA(&state->m_scroll[offset]);
+	data = COMBINE_DATA(&m_scroll[offset]);
 
 	switch (offset)
 	{
-		case 0: 	tilemap_set_scrollx(state->m_tx_tilemap, 0, data + 2); break;
-		case 1: 	tilemap_set_scrolly(state->m_tx_tilemap, 0, data);   break;
-		case 2: 	state->m_fgscrollx = data + 4;break;
-		case 3: 	tilemap_set_scrolly(state->m_fg_tilemap, 0, data & 0x3ff);
-				state->m_fg_rowscroll_enable = data & 0x0800;
+		case 0:     m_tx_tilemap->set_scrollx(0, data + 2); break;
+		case 1:     m_tx_tilemap->set_scrolly(0, data);   break;
+		case 2:     m_fgscrollx = data + 4;break;
+		case 3:     m_fg_tilemap->set_scrolly(0, data & 0x3ff);
+				m_fg_rowscroll_enable = data & 0x0800;
 				break;
-		case 4: 	tilemap_set_scrollx(state->m_bg_tilemap, 0, data + 6); break;
-		case 5: 	tilemap_set_scrolly(state->m_bg_tilemap, 0, data);   break;
+		case 4:     m_bg_tilemap->set_scrollx(0, data + 6); break;
+		case 5:     m_bg_tilemap->set_scrolly(0, data);   break;
 	}
 }
 
-WRITE16_HANDLER( excelsr_scroll_w )
+WRITE16_MEMBER(playmark_state::excelsr_scroll_w)
 {
-	playmark_state *state = space->machine().driver_data<playmark_state>();
 
-	data = COMBINE_DATA(&state->m_scroll[offset]);
+	data = COMBINE_DATA(&m_scroll[offset]);
 
 	switch (offset)
 	{
-		case 0:	tilemap_set_scrollx(state->m_tx_tilemap, 0, data + 2); break;
-		case 1: 	tilemap_set_scrolly(state->m_tx_tilemap, 0, data);   break;
-		case 2: 	state->m_bgscrollx = -data;	break;
-		case 3: 	state->m_bgscrolly = (-data + 2)& 0x1ff;
-				state->m_bg_enable = data & 0x0200;
-				state->m_bg_full_size = data & 0x0400;
+		case 0: m_tx_tilemap->set_scrollx(0, data + 2); break;
+		case 1:     m_tx_tilemap->set_scrolly(0, data);   break;
+		case 2:     m_bgscrollx = -data;    break;
+		case 3:     m_bgscrolly = (-data + 2)& 0x1ff;
+				m_bg_enable = data & 0x0200;
+				m_bg_full_size = data & 0x0400;
 				break;
-		case 4:	tilemap_set_scrollx(state->m_fg_tilemap, 0, data + 6); break;
-		case 5:	tilemap_set_scrolly(state->m_fg_tilemap, 0, data);   break;
+		case 4: m_fg_tilemap->set_scrollx(0, data + 6); break;
+		case 5: m_fg_tilemap->set_scrolly(0, data);   break;
 	}
 }
 
-WRITE16_HANDLER( hrdtimes_scroll_w )
+WRITE16_MEMBER(playmark_state::hrdtimes_scroll_w)
 {
-	playmark_state *state = space->machine().driver_data<playmark_state>();
 
-	data = COMBINE_DATA(&state->m_scroll[offset]);
+	data = COMBINE_DATA(&m_scroll[offset]);
 
 	switch (offset)
 	{
-		case 0: tilemap_set_scrollx(state->m_tx_tilemap, 0, data); break;
-		case 1: tilemap_set_scrolly(state->m_tx_tilemap, 0, data); break;
-		case 2: tilemap_set_scrollx(state->m_fg_tilemap, 0, data); break;
-		case 3: tilemap_set_scrolly(state->m_fg_tilemap, 0, data); break;
-		case 4: tilemap_set_scrollx(state->m_bg_tilemap, 0, data); break;
-		case 5: tilemap_set_scrolly(state->m_bg_tilemap, 0, data); break;
+		case 0: m_tx_tilemap->set_scrollx(0, data); break;
+		case 1: m_tx_tilemap->set_scrolly(0, data); break;
+		case 2: m_fg_tilemap->set_scrollx(0, data); break;
+		case 3: m_fg_tilemap->set_scrolly(0, data); break;
+		case 4: m_bg_tilemap->set_scrollx(0, data); break;
+		case 5: m_bg_tilemap->set_scrolly(0, data); break;
 	}
 }
 
@@ -396,16 +371,16 @@ WRITE16_HANDLER( hrdtimes_scroll_w )
 
 ***************************************************************************/
 
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, int codeshift )
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, int codeshift )
 {
 	playmark_state *state = machine.driver_data<playmark_state>();
-	int offs, start_offset = state->m_spriteram_size / 2 - 4;
-	int height = machine.gfx[0]->height;
-	int colordiv = machine.gfx[0]->color_granularity / 16;
+	int offs, start_offset = state->m_spriteram.bytes() / 2 - 4;
+	int height = machine.gfx[0]->height();
+	int colordiv = machine.gfx[0]->granularity() / 16;
 	UINT16 *spriteram = state->m_spriteram;
 
 	// find the "end of list" to draw the sprites in reverse order
-	for (offs = 4; offs < state->m_spriteram_size / 2; offs += 4)
+	for (offs = 4; offs < state->m_spriteram.bytes() / 2; offs += 4)
 	{
 		if (spriteram[offs + 3 - 4] == 0x2000) /* end of list marker */
 		{
@@ -418,7 +393,7 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 	{
 		int sx, sy, code, color, flipx, pri;
 
-		sy = spriteram[offs + 3 - 4];	/* -4? what the... ??? */
+		sy = spriteram[offs + 3 - 4];   /* -4? what the... ??? */
 
 		flipx = sy & 0x4000;
 		sx = (spriteram[offs + 1] & 0x01ff) - 16 - 7;
@@ -431,24 +406,24 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 			pri = 2;
 
 		pdrawgfx_transpen(bitmap,cliprect,machine.gfx[0],
-				 code,
-				 color,
-				 flipx,0,
-				 sx + state->m_xoffset,sy + state->m_yoffset,
-				 machine.priority_bitmap,state->m_pri_masks[pri],0);
+					code,
+					color,
+					flipx,0,
+					sx + state->m_xoffset,sy + state->m_yoffset,
+					machine.priority_bitmap,state->m_pri_masks[pri],0);
 	}
 }
 
 
-static void bigtwinb_draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, int codeshift )
+static void bigtwinb_draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, int codeshift )
 {
 	playmark_state *state = machine.driver_data<playmark_state>();
-	int offs, start_offset = state->m_spriteram_size / 2 - 4;
-	int height = machine.gfx[0]->height;
+	int offs, start_offset = state->m_spriteram.bytes() / 2 - 4;
+	int height = machine.gfx[0]->height();
 	UINT16 *spriteram = state->m_spriteram;
 
 	// find the "end of list" to draw the sprites in reverse order
-	for (offs = 4; offs < state->m_spriteram_size / 2; offs += 4)
+	for (offs = 4; offs < state->m_spriteram.bytes() / 2; offs += 4)
 	{
 		if (spriteram[offs + 3 - 4] == 0x2000) /* end of list marker */
 		{
@@ -461,7 +436,7 @@ static void bigtwinb_draw_sprites( running_machine &machine, bitmap_t *bitmap, c
 	{
 		int sx, sy, code, color, flipx;
 
-		sy = spriteram[offs + 3 - 4];	/* -4? what the... ??? */
+		sy = spriteram[offs + 3 - 4];   /* -4? what the... ??? */
 
 		flipx = sy & 0x4000;
 		sx = (spriteram[offs + 1] & 0x01ff) - 16 - 7;
@@ -470,14 +445,14 @@ static void bigtwinb_draw_sprites( running_machine &machine, bitmap_t *bitmap, c
 		color = ((spriteram[offs + 1] & 0xf000) >> 12);
 
 		drawgfx_transpen(bitmap,cliprect,machine.gfx[0],
-				 code,
-				 color,
-				 flipx,0,
-				 sx + state->m_xoffset,sy + state->m_yoffset, 0);
+					code,
+					color,
+					flipx,0,
+					sx + state->m_xoffset,sy + state->m_yoffset, 0);
 	}
 }
 
-static void draw_bitmap( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_bitmap( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	playmark_state *state = machine.driver_data<playmark_state>();
 	int x, y, count;
@@ -495,9 +470,9 @@ static void draw_bitmap( running_machine &machine, bitmap_t *bitmap, const recta
 			{
 				if (state->m_bg_full_size)
 				{
-					*BITMAP_ADDR16(bitmap, (y + state->m_bgscrolly) & 0x1ff, (x + state->m_bgscrollx) & 0x1ff) = 0x100 + color;
+					bitmap.pix16((y + state->m_bgscrolly) & 0x1ff, (x + state->m_bgscrollx) & 0x1ff) = 0x100 + color;
 
-					pri = BITMAP_ADDR8(machine.priority_bitmap, (y + state->m_bgscrolly) & 0x1ff, 0);
+					pri = &machine.priority_bitmap.pix8((y + state->m_bgscrolly) & 0x1ff);
 					pri[(x + state->m_bgscrollx) & 0x1ff] |= 2;
 				}
 				else
@@ -505,9 +480,9 @@ static void draw_bitmap( running_machine &machine, bitmap_t *bitmap, const recta
 					/* 50% size */
 					if(!(x % 2) && !(y % 2))
 					{
-						*BITMAP_ADDR16(bitmap, (y / 2 + state->m_bgscrolly) & 0x1ff, (x / 2 + state->m_bgscrollx) & 0x1ff) = 0x100 + color;
+						bitmap.pix16((y / 2 + state->m_bgscrolly) & 0x1ff, (x / 2 + state->m_bgscrollx) & 0x1ff) = 0x100 + color;
 
-						pri = BITMAP_ADDR8(machine.priority_bitmap, (y / 2 + state->m_bgscrolly) & 0x1ff, 0);
+						pri = &machine.priority_bitmap.pix8((y / 2 + state->m_bgscrolly) & 0x1ff);
 						pri[(x / 2 + state->m_bgscrollx) & 0x1ff] |= 2;
 					}
 				}
@@ -518,94 +493,89 @@ static void draw_bitmap( running_machine &machine, bitmap_t *bitmap, const recta
 	}
 }
 
-SCREEN_UPDATE( bigtwin )
+UINT32 playmark_state::screen_update_bigtwin(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	playmark_state *state = screen->machine().driver_data<playmark_state>();
 
-	bitmap_fill(screen->machine().priority_bitmap, cliprect, 0);
+	machine().priority_bitmap.fill(0, cliprect);
 
-	tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, 0, 0);
-	if (state->m_bg_enable)
-		draw_bitmap(screen->machine(), bitmap, cliprect);
-	draw_sprites(screen->machine(), bitmap, cliprect, 4);
-	tilemap_draw(bitmap, cliprect, state->m_tx_tilemap, 0, 0);
+	m_fg_tilemap->draw(bitmap, cliprect, 0, 0);
+	if (m_bg_enable)
+		draw_bitmap(machine(), bitmap, cliprect);
+	draw_sprites(machine(), bitmap, cliprect, 4);
+	m_tx_tilemap->draw(bitmap, cliprect, 0, 0);
 	return 0;
 }
 
 
-SCREEN_UPDATE( bigtwinb )
+UINT32 playmark_state::screen_update_bigtwinb(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	playmark_state *state = screen->machine().driver_data<playmark_state>();
 
 	// video enabled
-	if (state->m_scroll[6] & 1)
+	if (m_scroll[6] & 1)
 	{
-		tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
-		tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, 0, 0);
-		bigtwinb_draw_sprites(screen->machine(), bitmap, cliprect, 4);
-		tilemap_draw(bitmap, cliprect, state->m_tx_tilemap, 0, 0);
+		m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
+		m_fg_tilemap->draw(bitmap, cliprect, 0, 0);
+		bigtwinb_draw_sprites(machine(), bitmap, cliprect, 4);
+		m_tx_tilemap->draw(bitmap, cliprect, 0, 0);
 	}
 	else
-		bitmap_fill(bitmap, cliprect, get_black_pen(screen->machine()));
+		bitmap.fill(get_black_pen(machine()), cliprect);
 	return 0;
 }
 
-SCREEN_UPDATE( excelsr )
+UINT32 playmark_state::screen_update_excelsr(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	playmark_state *state = screen->machine().driver_data<playmark_state>();
 
-	bitmap_fill(screen->machine().priority_bitmap, cliprect, 0);
+	machine().priority_bitmap.fill(0, cliprect);
 
-	tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, 0, 1);
-	if (state->m_bg_enable)
-		draw_bitmap(screen->machine(), bitmap, cliprect);
-	tilemap_draw(bitmap, cliprect, state->m_tx_tilemap, 0, 4);
-	draw_sprites(screen->machine(), bitmap, cliprect, 2);
+	m_fg_tilemap->draw(bitmap, cliprect, 0, 1);
+	if (m_bg_enable)
+		draw_bitmap(machine(), bitmap, cliprect);
+	m_tx_tilemap->draw(bitmap, cliprect, 0, 4);
+	draw_sprites(machine(), bitmap, cliprect, 2);
 	return 0;
 }
 
-SCREEN_UPDATE( wbeachvl )
+UINT32 playmark_state::screen_update_wbeachvl(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	playmark_state *state = screen->machine().driver_data<playmark_state>();
 
-	if (state->m_fg_rowscroll_enable)
+	if (m_fg_rowscroll_enable)
 	{
 		int i;
 
-		tilemap_set_scroll_rows(state->m_fg_tilemap, 512);
+		m_fg_tilemap->set_scroll_rows(512);
 		for (i = 0; i < 256; i++)
-			tilemap_set_scrollx(state->m_fg_tilemap, i + 1, state->m_rowscroll[8 * i]);
+			m_fg_tilemap->set_scrollx(i + 1, m_rowscroll[8 * i]);
 	}
 	else
 	{
-		tilemap_set_scroll_rows(state->m_fg_tilemap, 1);
-		tilemap_set_scrollx(state->m_fg_tilemap, 0, state->m_fgscrollx);
+		m_fg_tilemap->set_scroll_rows(1);
+		m_fg_tilemap->set_scrollx(0, m_fgscrollx);
 	}
 
-	bitmap_fill(screen->machine().priority_bitmap, cliprect, 0);
+	machine().priority_bitmap.fill(0, cliprect);
 
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 1);
-	tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, 0, 2);
-	draw_sprites(screen->machine(), bitmap, cliprect, 0);
-	tilemap_draw(bitmap, cliprect, state->m_tx_tilemap, 0, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 1);
+	m_fg_tilemap->draw(bitmap, cliprect, 0, 2);
+	draw_sprites(machine(), bitmap, cliprect, 0);
+	m_tx_tilemap->draw(bitmap, cliprect, 0, 0);
 	return 0;
 }
 
-SCREEN_UPDATE( hrdtimes )
+UINT32 playmark_state::screen_update_hrdtimes(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	playmark_state *state = screen->machine().driver_data<playmark_state>();
 
-	bitmap_fill(screen->machine().priority_bitmap, cliprect, 0);
+	machine().priority_bitmap.fill(0, cliprect);
 
 	// video enabled
-	if (state->m_scroll[6] & 1)
+	if (m_scroll[6] & 1)
 	{
-		tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 1);
-		tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, 0, 2);
-		draw_sprites(screen->machine(), bitmap, cliprect, 2);
-		tilemap_draw(bitmap, cliprect, state->m_tx_tilemap, 0, 0);
+		m_bg_tilemap->draw(bitmap, cliprect, 0, 1);
+		m_fg_tilemap->draw(bitmap, cliprect, 0, 2);
+		draw_sprites(machine(), bitmap, cliprect, 2);
+		m_tx_tilemap->draw(bitmap, cliprect, 0, 0);
 	}
 	else
-		bitmap_fill(bitmap, cliprect, get_black_pen(screen->machine()));
+		bitmap.fill(get_black_pen(machine()), cliprect);
 	return 0;
 }

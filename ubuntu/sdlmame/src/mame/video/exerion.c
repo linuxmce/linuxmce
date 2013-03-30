@@ -9,12 +9,12 @@
 #include "includes/exerion.h"
 
 
-#define BACKGROUND_X_START		32
+#define BACKGROUND_X_START      32
 
-#define VISIBLE_X_MIN			(12*8)
-#define VISIBLE_X_MAX			(52*8)
-#define VISIBLE_Y_MIN			(2*8)
-#define VISIBLE_Y_MAX			(30*8)
+#define VISIBLE_X_MIN           (12*8)
+#define VISIBLE_X_MAX           (52*8)
+#define VISIBLE_Y_MIN           (2*8)
+#define VISIBLE_Y_MAX           (30*8)
 
 
 /***************************************************************************
@@ -34,21 +34,22 @@
 
 ***************************************************************************/
 
-PALETTE_INIT( exerion )
+void exerion_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	static const int resistances_rg[3] = { 1000, 470, 220 };
 	static const int resistances_b [2] = { 470, 220 };
 	double rweights[3], gweights[3], bweights[2];
 	int i;
 
 	/* compute the color output resistor weights */
-	compute_resistor_weights(0,	255, -1.0,
+	compute_resistor_weights(0, 255, -1.0,
 			3, &resistances_rg[0], rweights, 0, 0,
 			3, &resistances_rg[0], gweights, 0, 0,
 			2, &resistances_b[0],  bweights, 0, 0);
 
 	/* allocate the colortable */
-	machine.colortable = colortable_alloc(machine, 0x20);
+	machine().colortable = colortable_alloc(machine(), 0x20);
 
 	/* create a lookup table for the palette */
 	for (i = 0; i < 0x20; i++)
@@ -73,7 +74,7 @@ PALETTE_INIT( exerion )
 		bit1 = (color_prom[i] >> 7) & 0x01;
 		b = combine_2_weights(bweights, bit0, bit1);
 
-		colortable_palette_set_color(machine.colortable, i, MAKE_RGB(r, g, b));
+		colortable_palette_set_color(machine().colortable, i, MAKE_RGB(r, g, b));
 	}
 
 	/* color_prom now points to the beginning of the lookup table */
@@ -83,7 +84,7 @@ PALETTE_INIT( exerion )
 	for (i = 0; i < 0x200; i++)
 	{
 		UINT8 ctabentry = 0x10 | (color_prom[(i & 0x1c0) | ((i & 3) << 4) | ((i >> 2) & 0x0f)] & 0x0f);
-		colortable_entry_set_value(machine.colortable, i, ctabentry);
+		colortable_entry_set_value(machine().colortable, i, ctabentry);
 	}
 
 	/* bg chars (this is not the full story... there are four layers mixed */
@@ -91,7 +92,7 @@ PALETTE_INIT( exerion )
 	for (i = 0x200; i < 0x300; i++)
 	{
 		UINT8 ctabentry = color_prom[i] & 0x0f;
-		colortable_entry_set_value(machine.colortable, i, ctabentry);
+		colortable_entry_set_value(machine().colortable, i, ctabentry);
 	}
 }
 
@@ -103,45 +104,44 @@ PALETTE_INIT( exerion )
  *
  *************************************/
 
-VIDEO_START( exerion )
+void exerion_state::video_start()
 {
-	exerion_state *state = machine.driver_data<exerion_state>();
 	int i;
 	UINT8 *gfx;
 
 	/* get pointers to the mixing and lookup PROMs */
-	state->m_background_mixer = machine.region("proms")->base() + 0x320;
+	m_background_mixer = memregion("proms")->base() + 0x320;
 
 	/* allocate memory for the decoded background graphics */
-	state->m_background_gfx[0] = auto_alloc_array(machine, UINT16, 256 * 256 * 4);
-	state->m_background_gfx[1] = state->m_background_gfx[0] + 256 * 256;
-	state->m_background_gfx[2] = state->m_background_gfx[1] + 256 * 256;
-	state->m_background_gfx[3] = state->m_background_gfx[2] + 256 * 256;
+	m_background_gfx[0] = auto_alloc_array(machine(), UINT16, 256 * 256 * 4);
+	m_background_gfx[1] = m_background_gfx[0] + 256 * 256;
+	m_background_gfx[2] = m_background_gfx[1] + 256 * 256;
+	m_background_gfx[3] = m_background_gfx[2] + 256 * 256;
 
-	state->save_pointer(NAME(state->m_background_gfx[0]), 256 * 256 * 4);
+	save_pointer(NAME(m_background_gfx[0]), 256 * 256 * 4);
 
 	/*---------------------------------
-     * Decode the background graphics
-     *
-     * We decode the 4 background layers separately, but shuffle the bits so that
-     * we can OR all four layers together. Each layer has 2 bits per pixel. Each
-     * layer is decoded into the following bit patterns:
-     *
-     *  000a 0000 00AA
-     *  00b0 0000 BB00
-     *  0c00 00CC 0000
-     *  d000 DD00 0000
-     *
-     * Where AA,BB,CC,DD are the 2bpp data for the pixel,and a,b,c,d are the OR
-     * of these two bits together.
-     */
-	gfx = machine.region("gfx3")->base();
+	 * Decode the background graphics
+	 *
+	 * We decode the 4 background layers separately, but shuffle the bits so that
+	 * we can OR all four layers together. Each layer has 2 bits per pixel. Each
+	 * layer is decoded into the following bit patterns:
+	 *
+	 *  000a 0000 00AA
+	 *  00b0 0000 BB00
+	 *  0c00 00CC 0000
+	 *  d000 DD00 0000
+	 *
+	 * Where AA,BB,CC,DD are the 2bpp data for the pixel,and a,b,c,d are the OR
+	 * of these two bits together.
+	 */
+	gfx = memregion("gfx3")->base();
 	for (i = 0; i < 4; i++)
 	{
 		int y;
 
 		UINT8 *src = gfx + i * 0x2000;
-		UINT16 *dst = state->m_background_gfx[i];
+		UINT16 *dst = m_background_gfx[i];
 
 		for (y = 0; y < 0x100; y++)
 		{
@@ -183,48 +183,46 @@ VIDEO_START( exerion )
  *
  *************************************/
 
-WRITE8_HANDLER( exerion_videoreg_w )
+WRITE8_MEMBER(exerion_state::exerion_videoreg_w)
 {
-	exerion_state *state = space->machine().driver_data<exerion_state>();
 
 	/* bit 0 = flip screen and joystick input multiplexer */
-	state->m_cocktail_flip = data & 1;
+	m_cocktail_flip = data & 1;
 
 	/* bits 1-2 char lookup table bank */
-	state->m_char_palette = (data & 0x06) >> 1;
+	m_char_palette = (data & 0x06) >> 1;
 
 	/* bits 3 char bank */
-	state->m_char_bank = (data & 0x08) >> 3;
+	m_char_bank = (data & 0x08) >> 3;
 
 	/* bits 4-5 unused */
 
 	/* bits 6-7 sprite lookup table bank */
-	state->m_sprite_palette = (data & 0xc0) >> 6;
+	m_sprite_palette = (data & 0xc0) >> 6;
 }
 
 
-WRITE8_HANDLER( exerion_video_latch_w )
+WRITE8_MEMBER(exerion_state::exerion_video_latch_w)
 {
-	exerion_state *state = space->machine().driver_data<exerion_state>();
-	int scanline = space->machine().primary_screen->vpos();
+	int scanline = machine().primary_screen->vpos();
 	if (scanline > 0)
-		space->machine().primary_screen->update_partial(scanline - 1);
-	state->m_background_latches[offset] = data;
+		machine().primary_screen->update_partial(scanline - 1);
+	m_background_latches[offset] = data;
 }
 
 
-READ8_HANDLER( exerion_video_timing_r )
+READ8_MEMBER(exerion_state::exerion_video_timing_r)
 {
 	/* bit 0 is the SNMI signal, which is the negated value of H6, if H7=1 & H8=1 & VBLANK=0, otherwise 1 */
 	/* bit 1 is VBLANK */
 
-	UINT16 hcounter = space->machine().primary_screen->hpos() + EXERION_HCOUNT_START;
+	UINT16 hcounter = machine().primary_screen->hpos() + EXERION_HCOUNT_START;
 	UINT8 snmi = 1;
 
-	if (((hcounter & 0x180) == 0x180) && !space->machine().primary_screen->vblank())
+	if (((hcounter & 0x180) == 0x180) && !machine().primary_screen->vblank())
 		snmi = !((hcounter >> 6) & 0x01);
 
-	return (space->machine().primary_screen->vblank() << 1) | snmi;
+	return (machine().primary_screen->vblank() << 1) | snmi;
 }
 
 
@@ -234,13 +232,13 @@ READ8_HANDLER( exerion_video_timing_r )
  *
  *************************************/
 
-static void draw_background( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect)
+static void draw_background( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	exerion_state *state = machine.driver_data<exerion_state>();
 	int x, y;
 
 	/* loop over all visible scanlines */
-	for (y = cliprect->min_y; y <= cliprect->max_y; y++)
+	for (y = cliprect.min_y; y <= cliprect.max_y; y++)
 	{
 		UINT16 *src0 = &state->m_background_gfx[0][state->m_background_latches[1] * 256];
 		UINT16 *src1 = &state->m_background_gfx[1][state->m_background_latches[3] * 256];
@@ -266,7 +264,7 @@ static void draw_background( running_machine &machine, bitmap_t *bitmap, const r
 		if (!state->m_cocktail_flip)
 		{
 			/* skip processing anything that's not visible */
-			for (x = BACKGROUND_X_START; x < cliprect->min_x; x++)
+			for (x = BACKGROUND_X_START; x < cliprect.min_x; x++)
 			{
 				if (!(++xoffs0 & 0x1f)) start0++, stop0++;
 				if (!(++xoffs1 & 0x1f)) start1++, stop1++;
@@ -275,7 +273,7 @@ static void draw_background( running_machine &machine, bitmap_t *bitmap, const r
 			}
 
 			/* draw the rest of the scanline fully */
-			for (x = cliprect->min_x; x <= cliprect->max_x; x++)
+			for (x = cliprect.min_x; x <= cliprect.max_x; x++)
 			{
 				UINT16 combined = 0;
 				UINT8 lookupval;
@@ -303,7 +301,7 @@ static void draw_background( running_machine &machine, bitmap_t *bitmap, const r
 		else
 		{
 			/* skip processing anything that's not visible */
-			for (x = BACKGROUND_X_START; x < cliprect->min_x; x++)
+			for (x = BACKGROUND_X_START; x < cliprect.min_x; x++)
 			{
 				if (!(xoffs0-- & 0x1f)) start0++, stop0++;
 				if (!(xoffs1-- & 0x1f)) start1++, stop1++;
@@ -312,7 +310,7 @@ static void draw_background( running_machine &machine, bitmap_t *bitmap, const r
 			}
 
 			/* draw the rest of the scanline fully */
-			for (x = cliprect->min_x; x <= cliprect->max_x; x++)
+			for (x = cliprect.min_x; x <= cliprect.max_x; x++)
 			{
 				UINT16 combined = 0;
 				UINT8 lookupval;
@@ -339,7 +337,7 @@ static void draw_background( running_machine &machine, bitmap_t *bitmap, const r
 		}
 
 		/* draw the scanline */
-		draw_scanline16(bitmap, cliprect->min_x, y, cliprect->max_x - cliprect->min_x + 1, &scanline[cliprect->min_x], NULL);
+		draw_scanline16(bitmap, cliprect.min_x, y, cliprect.width(), &scanline[cliprect.min_x], NULL);
 	}
 }
 
@@ -350,21 +348,20 @@ static void draw_background( running_machine &machine, bitmap_t *bitmap, const r
  *
  *************************************/
 
-SCREEN_UPDATE( exerion )
+UINT32 exerion_state::screen_update_exerion(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	exerion_state *state = screen->machine().driver_data<exerion_state>();
 	int sx, sy, offs, i;
 
 	/* draw background */
-	draw_background(screen->machine(), bitmap, cliprect);
+	draw_background(machine(), bitmap, cliprect);
 
 	/* draw sprites */
-	for (i = 0; i < state->m_spriteram_size; i += 4)
+	for (i = 0; i < m_spriteram.bytes(); i += 4)
 	{
-		int flags = state->m_spriteram[i + 0];
-		int y = state->m_spriteram[i + 1] ^ 255;
-		int code = state->m_spriteram[i + 2];
-		int x = state->m_spriteram[i + 3] * 2 + 72;
+		int flags = m_spriteram[i + 0];
+		int y = m_spriteram[i + 1] ^ 255;
+		int code = m_spriteram[i + 2];
+		int x = m_spriteram[i + 3] * 2 + 72;
 
 		int xflip = flags & 0x80;
 		int yflip = flags & 0x40;
@@ -372,14 +369,14 @@ SCREEN_UPDATE( exerion )
 		int wide = flags & 0x08;
 		int code2 = code;
 
-		int color = ((flags >> 1) & 0x03) | ((code >> 5) & 0x04) | (code & 0x08) | (state->m_sprite_palette * 16);
-		const gfx_element *gfx = doubled ? screen->machine().gfx[2] : screen->machine().gfx[1];
+		int color = ((flags >> 1) & 0x03) | ((code >> 5) & 0x04) | (code & 0x08) | (m_sprite_palette * 16);
+		gfx_element *gfx = doubled ? machine().gfx[2] : machine().gfx[1];
 
-		if (state->m_cocktail_flip)
+		if (m_cocktail_flip)
 		{
-			x = 64*8 - gfx->width - x;
-			y = 32*8 - gfx->height - y;
-			if (wide) y -= gfx->height;
+			x = 64*8 - gfx->width() - x;
+			y = 32*8 - gfx->height() - y;
+			if (wide) y -= gfx->height();
 			xflip = !xflip;
 			yflip = !yflip;
 		}
@@ -391,28 +388,28 @@ SCREEN_UPDATE( exerion )
 			else
 				code &= ~0x10, code2 |= 0x10;
 
-			drawgfx_transmask(bitmap, cliprect, gfx, code2, color, xflip, yflip, x, y + gfx->height,
-			        colortable_get_transpen_mask(screen->machine().colortable, gfx, color, 0x10));
+			drawgfx_transmask(bitmap, cliprect, gfx, code2, color, xflip, yflip, x, y + gfx->height(),
+					colortable_get_transpen_mask(machine().colortable, gfx, color, 0x10));
 		}
 
 		drawgfx_transmask(bitmap, cliprect, gfx, code, color, xflip, yflip, x, y,
-			    colortable_get_transpen_mask(screen->machine().colortable, gfx, color, 0x10));
+				colortable_get_transpen_mask(machine().colortable, gfx, color, 0x10));
 
 		if (doubled) i += 4;
 	}
 
 	/* draw the visible text layer */
-	for (sy = cliprect->min_y/8; sy <= cliprect->max_y/8; sy++)
+	for (sy = cliprect.min_y/8; sy <= cliprect.max_y/8; sy++)
 		for (sx = VISIBLE_X_MIN/8; sx < VISIBLE_X_MAX/8; sx++)
 		{
-			int x = state->m_cocktail_flip ? (63*8 - 8*sx) : 8*sx;
-			int y = state->m_cocktail_flip ? (31*8 - 8*sy) : 8*sy;
+			int x = m_cocktail_flip ? (63*8 - 8*sx) : 8*sx;
+			int y = m_cocktail_flip ? (31*8 - 8*sy) : 8*sy;
 
 			offs = sx + sy * 64;
-			drawgfx_transpen(bitmap, cliprect, screen->machine().gfx[0],
-				state->m_videoram[offs] + 256 * state->m_char_bank,
-				((state->m_videoram[offs] & 0xf0) >> 4) + state->m_char_palette * 16,
-				state->m_cocktail_flip, state->m_cocktail_flip, x, y, 0);
+			drawgfx_transpen(bitmap, cliprect, machine().gfx[0],
+				m_videoram[offs] + 256 * m_char_bank,
+				((m_videoram[offs] & 0xf0) >> 4) + m_char_palette * 16,
+				m_cocktail_flip, m_cocktail_flip, x, y, 0);
 		}
 
 	return 0;

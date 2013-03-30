@@ -30,11 +30,12 @@
 
 ***************************************************************************/
 
-PALETTE_INIT( m57 )
+void m57_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 
-	machine.colortable = colortable_alloc(machine, 32 * 8 + 16);
+	machine().colortable = colortable_alloc(machine(), 32 * 8 + 16);
 
 	/* character palette */
 	for (i = 0; i < 256; i++)
@@ -57,8 +58,8 @@ PALETTE_INIT( m57 )
 		bit2 = (color_prom[0] >> 2) & 0x01;
 		b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 
-		colortable_palette_set_color(machine.colortable, i, MAKE_RGB(r,g,b));
-		colortable_entry_set_value(machine.colortable, i, i);
+		colortable_palette_set_color(machine().colortable, i, MAKE_RGB(r,g,b));
+		colortable_entry_set_value(machine().colortable, i, i);
 		color_prom++;
 	}
 
@@ -86,7 +87,7 @@ PALETTE_INIT( m57 )
 		bit2 = (*color_prom >> 2) & 0x01;
 		b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 
-		colortable_palette_set_color(machine.colortable, i + 256, MAKE_RGB(r,g,b));
+		colortable_palette_set_color(machine().colortable, i + 256, MAKE_RGB(r,g,b));
 		color_prom++;
 	}
 
@@ -97,7 +98,7 @@ PALETTE_INIT( m57 )
 	/* sprite lookup table */
 	for (i = 0; i < 32 * 8; i++)
 	{
-		colortable_entry_set_value(machine.colortable, i + 32 * 8, 256 + (~*color_prom & 0x0f));
+		colortable_entry_set_value(machine().colortable, i + 32 * 8, 256 + (~*color_prom & 0x0f));
 		color_prom++;
 	}
 }
@@ -109,14 +110,13 @@ PALETTE_INIT( m57 )
  *
  *************************************/
 
-static TILE_GET_INFO( get_tile_info )
+TILE_GET_INFO_MEMBER(m57_state::get_tile_info)
 {
-	m57_state *state = machine.driver_data<m57_state>();
 
-	UINT8 attr = state->m_videoram[tile_index * 2 + 0];
-	UINT16 code = state->m_videoram[tile_index * 2 + 1] | ((attr & 0xc0) << 2);
+	UINT8 attr = m_videoram[tile_index * 2 + 0];
+	UINT16 code = m_videoram[tile_index * 2 + 1] | ((attr & 0xc0) << 2);
 
-	SET_TILE_INFO(0, code, attr & 0x0f, TILE_FLIPXY(attr >> 4));
+	SET_TILE_INFO_MEMBER(0, code, attr & 0x0f, TILE_FLIPXY(attr >> 4));
 }
 
 
@@ -126,12 +126,11 @@ static TILE_GET_INFO( get_tile_info )
  *
  *************************************/
 
-WRITE8_HANDLER( m57_videoram_w )
+WRITE8_MEMBER(m57_state::m57_videoram_w)
 {
-	m57_state *state = space->machine().driver_data<m57_state>();
 
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset / 2);
+	m_videoram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset / 2);
 }
 
 
@@ -141,14 +140,13 @@ WRITE8_HANDLER( m57_videoram_w )
  *
  *************************************/
 
-VIDEO_START( m57 )
+void m57_state::video_start()
 {
-	m57_state *state = machine.driver_data<m57_state>();
 
-	state->m_bg_tilemap = tilemap_create(machine, get_tile_info, tilemap_scan_rows,  8, 8, 32, 32);
-	tilemap_set_scroll_rows(state->m_bg_tilemap, 256);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(m57_state::get_tile_info),this), TILEMAP_SCAN_ROWS,  8, 8, 32, 32);
+	m_bg_tilemap->set_scroll_rows(256);
 
-	state->save_item(NAME(state->m_flipscreen));
+	save_item(NAME(m_flipscreen));
 }
 
 
@@ -158,16 +156,15 @@ VIDEO_START( m57 )
  *
  *************************************/
 
-WRITE8_HANDLER( m57_flipscreen_w )
+WRITE8_MEMBER(m57_state::m57_flipscreen_w)
 {
-	m57_state *state = space->machine().driver_data<m57_state>();
 
 	/* screen flip is handled both by software and hardware */
-	state->m_flipscreen = (data & 0x01) ^ (~input_port_read(space->machine(), "DSW2") & 0x01);
-	tilemap_set_flip(state->m_bg_tilemap, state->m_flipscreen ? (TILEMAP_FLIPY | TILEMAP_FLIPX) : 0);
+	m_flipscreen = (data & 0x01) ^ (~ioport("DSW2")->read() & 0x01);
+	m_bg_tilemap->set_flip(m_flipscreen ? (TILEMAP_FLIPY | TILEMAP_FLIPX) : 0);
 
-	coin_counter_w(space->machine(), 0,data & 0x02);
-	coin_counter_w(space->machine(), 1,data & 0x20);
+	coin_counter_w(machine(), 0,data & 0x02);
+	coin_counter_w(machine(), 1,data & 0x20);
 }
 
 
@@ -177,7 +174,7 @@ WRITE8_HANDLER( m57_flipscreen_w )
  *
  *************************************/
 
-static void draw_background(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect)
+static void draw_background(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	m57_state *state = machine.driver_data<m57_state>();
 	int y,x;
@@ -185,31 +182,31 @@ static void draw_background(running_machine &machine, bitmap_t *bitmap, const re
 
 	// from 64 to 127: not wrapped
 	for (y = 64; y < 128; y++)
-		tilemap_set_scrollx(state->m_bg_tilemap, y, state->m_scrollram[0x40]);
+		state->m_bg_tilemap->set_scrollx(y, state->m_scrollram[0x40]);
 
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
+	state->m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
 
 	// from 128 to 255: wrapped
-	for (y = 128; y <= cliprect->max_y; y++)
+	for (y = 128; y <= cliprect.max_y; y++)
 	{
 		scrolly = state->m_scrollram[y] + (state->m_scrollram[y + 0x100] << 8);
 
 		if (scrolly >= 0)
 		{
-			for (x = cliprect->min_x; x <= cliprect->max_x; x++)
+			for (x = cliprect.min_x; x <= cliprect.max_x; x++)
 			{
-				if ((x + scrolly) <= cliprect->max_x)
-					*BITMAP_ADDR16(bitmap, y, x) = *BITMAP_ADDR16(bitmap, y, x + scrolly);
+				if ((x + scrolly) <= cliprect.max_x)
+					bitmap.pix16(y, x) = bitmap.pix16(y, x + scrolly);
 				else
-					*BITMAP_ADDR16(bitmap, y, x) = *BITMAP_ADDR16(bitmap, y, cliprect->max_x);
+					bitmap.pix16(y, x) = bitmap.pix16(y, cliprect.max_x);
 			}
 		} else {
-			for (x = cliprect->max_x; x >= cliprect->min_x; x--)
+			for (x = cliprect.max_x; x >= cliprect.min_x; x--)
 			{
-				if ((x + scrolly) >= cliprect->min_x)
-					*BITMAP_ADDR16(bitmap, y, x) = *BITMAP_ADDR16(bitmap, y, x + scrolly);
+				if ((x + scrolly) >= cliprect.min_x)
+					bitmap.pix16(y, x) = bitmap.pix16(y, x + scrolly);
 				else
-					*BITMAP_ADDR16(bitmap, y, x) = *BITMAP_ADDR16(bitmap, y, cliprect->min_x);
+					bitmap.pix16(y, x) = bitmap.pix16(y, cliprect.min_x);
 			}
 		}
 	}
@@ -221,12 +218,12 @@ static void draw_background(running_machine &machine, bitmap_t *bitmap, const re
  *
  *************************************/
 
-static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect)
+static void draw_sprites(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	m57_state *state = machine.driver_data<m57_state>();
 	int offs;
 
-	for (offs = state->m_spriteram_size - 4; offs >= 0; offs -= 4)
+	for (offs = state->m_spriteram.bytes() - 4; offs >= 0; offs -= 4)
 	{
 		UINT8 attributes = state->m_spriteram[offs + 1];
 		int sx = state->m_spriteram[offs + 3];
@@ -267,9 +264,9 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
  *
  *************************************/
 
-SCREEN_UPDATE( m57 )
+UINT32 m57_state::screen_update_m57(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	draw_background(screen->machine(), bitmap, cliprect);
-	draw_sprites(screen->machine(), bitmap, cliprect);
+	draw_background(machine(), bitmap, cliprect);
+	draw_sprites(machine(), bitmap, cliprect);
 	return 0;
 }

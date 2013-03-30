@@ -20,6 +20,7 @@
 #include "emu.h"
 #include "cpu/m68000/m68000.h"
 #include "audio/atarijsa.h"
+#include "video/atarimo.h"
 #include "includes/vindictr.h"
 
 
@@ -30,28 +31,18 @@
  *
  *************************************/
 
-static void update_interrupts(running_machine &machine)
+void vindictr_state::update_interrupts()
 {
-	vindictr_state *state = machine.driver_data<vindictr_state>();
-	cputag_set_input_line(machine, "maincpu", 4, state->m_scanline_int_state ? ASSERT_LINE : CLEAR_LINE);
-	cputag_set_input_line(machine, "maincpu", 6, state->m_sound_int_state ? ASSERT_LINE : CLEAR_LINE);
+	subdevice("maincpu")->execute().set_input_line(4, m_scanline_int_state ? ASSERT_LINE : CLEAR_LINE);
+	subdevice("maincpu")->execute().set_input_line(6, m_sound_int_state ? ASSERT_LINE : CLEAR_LINE);
 }
 
 
-static MACHINE_START( vindictr )
+MACHINE_RESET_MEMBER(vindictr_state,vindictr)
 {
-	atarigen_init(machine);
-}
-
-
-static MACHINE_RESET( vindictr )
-{
-	vindictr_state *state = machine.driver_data<vindictr_state>();
-
-	atarigen_eeprom_reset(state);
-	atarigen_interrupt_reset(state, update_interrupts);
-	atarigen_scanline_timer_reset(*machine.primary_screen, vindictr_scanline_update, 8);
-	atarijsa_reset();
+	atarigen_state::machine_reset();
+	scanline_timer_reset(*machine().primary_screen, 8);
+	atarijsa_reset(machine());
 }
 
 
@@ -62,12 +53,11 @@ static MACHINE_RESET( vindictr )
  *
  *************************************/
 
-static READ16_HANDLER( port1_r )
+READ16_MEMBER(vindictr_state::port1_r)
 {
-	vindictr_state *state = space->machine().driver_data<vindictr_state>();
-	int result = input_port_read(space->machine(), "260010");
-	if (state->m_sound_to_cpu_ready) result ^= 0x0004;
-	if (state->m_cpu_to_sound_ready) result ^= 0x0008;
+	int result = ioport("260010")->read();
+	if (m_sound_to_cpu_ready) result ^= 0x0004;
+	if (m_cpu_to_sound_ready) result ^= 0x0008;
 	result ^= 0x0010;
 	return result;
 }
@@ -80,26 +70,26 @@ static READ16_HANDLER( port1_r )
  *
  *************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16, vindictr_state )
 	ADDRESS_MAP_UNMAP_HIGH
 	ADDRESS_MAP_GLOBAL_MASK(0x3fffff)
 	AM_RANGE(0x000000, 0x05ffff) AM_ROM
-	AM_RANGE(0x0e0000, 0x0e0fff) AM_READWRITE(atarigen_eeprom_r, atarigen_eeprom_w) AM_SHARE("eeprom")
-	AM_RANGE(0x1f0000, 0x1fffff) AM_WRITE(atarigen_eeprom_enable_w)
+	AM_RANGE(0x0e0000, 0x0e0fff) AM_READWRITE(eeprom_r, eeprom_w) AM_SHARE("eeprom")
+	AM_RANGE(0x1f0000, 0x1fffff) AM_WRITE(eeprom_enable_w)
 	AM_RANGE(0x260000, 0x26000f) AM_READ_PORT("260000")
 	AM_RANGE(0x260010, 0x26001f) AM_READ(port1_r)
 	AM_RANGE(0x260020, 0x26002f) AM_READ_PORT("260020")
-	AM_RANGE(0x260030, 0x260031) AM_READ(atarigen_sound_r)
+	AM_RANGE(0x260030, 0x260031) AM_READ8(sound_r, 0x00ff)
 	AM_RANGE(0x2e0000, 0x2e0001) AM_WRITE(watchdog_reset16_w)
-	AM_RANGE(0x360000, 0x360001) AM_WRITE(atarigen_scanline_int_ack_w)
+	AM_RANGE(0x360000, 0x360001) AM_WRITE(scanline_int_ack_w)
 	AM_RANGE(0x360010, 0x360011) AM_WRITENOP
-	AM_RANGE(0x360020, 0x360021) AM_WRITE(atarigen_sound_reset_w)
-	AM_RANGE(0x360030, 0x360031) AM_WRITE(atarigen_sound_w)
-	AM_RANGE(0x3e0000, 0x3e0fff) AM_RAM_WRITE(vindictr_paletteram_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0x3f0000, 0x3f1fff) AM_MIRROR(0x8000) AM_RAM_WRITE(atarigen_playfield_w) AM_BASE_MEMBER(vindictr_state, m_playfield)
-	AM_RANGE(0x3f2000, 0x3f3fff) AM_MIRROR(0x8000) AM_RAM_WRITE(atarimo_0_spriteram_w) AM_BASE(&atarimo_0_spriteram)
-	AM_RANGE(0x3f4000, 0x3f4f7f) AM_MIRROR(0x8000) AM_RAM_WRITE(atarigen_alpha_w) AM_BASE_MEMBER(vindictr_state, m_alpha)
-	AM_RANGE(0x3f4f80, 0x3f4fff) AM_MIRROR(0x8000) AM_RAM_WRITE(atarimo_0_slipram_w) AM_BASE(&atarimo_0_slipram)
+	AM_RANGE(0x360020, 0x360021) AM_WRITE(sound_reset_w)
+	AM_RANGE(0x360030, 0x360031) AM_WRITE8(sound_w, 0x00ff)
+	AM_RANGE(0x3e0000, 0x3e0fff) AM_RAM_WRITE_LEGACY(vindictr_paletteram_w) AM_SHARE("paletteram")
+	AM_RANGE(0x3f0000, 0x3f1fff) AM_MIRROR(0x8000) AM_RAM_WRITE(playfield_w) AM_SHARE("playfield")
+	AM_RANGE(0x3f2000, 0x3f3fff) AM_MIRROR(0x8000) AM_READWRITE_LEGACY(atarimo_0_spriteram_r, atarimo_0_spriteram_w)
+	AM_RANGE(0x3f4000, 0x3f4f7f) AM_MIRROR(0x8000) AM_RAM_WRITE(alpha_w) AM_SHARE("alpha")
+	AM_RANGE(0x3f4f80, 0x3f4fff) AM_MIRROR(0x8000) AM_READWRITE_LEGACY(atarimo_0_slipram_r, atarimo_0_slipram_w)
 	AM_RANGE(0x3f5000, 0x3f7fff) AM_MIRROR(0x8000) AM_RAM
 ADDRESS_MAP_END
 
@@ -124,7 +114,7 @@ static INPUT_PORTS_START( vindictr )
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_DOWN ) PORT_2WAY PORT_PLAYER(1)
 
 	PORT_START("260010")
-	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_SERVICE( 0x0002, IP_ACTIVE_LOW )
 	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -145,7 +135,7 @@ static INPUT_PORTS_START( vindictr )
 	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT( 0xfc00, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_INCLUDE( atarijsa_i )		/* audio port */
+	PORT_INCLUDE( atarijsa_i )      /* audio port */
 INPUT_PORTS_END
 
 
@@ -181,8 +171,8 @@ static const gfx_layout pfmolayout =
 
 
 static GFXDECODE_START( vindictr )
-	GFXDECODE_ENTRY( "gfx1", 0, pfmolayout,  256, 32 )		/* sprites & playfield */
-	GFXDECODE_ENTRY( "gfx2", 0, anlayout,      0, 64 )		/* characters 8x8 */
+	GFXDECODE_ENTRY( "gfx1", 0, pfmolayout,  256, 32 )      /* sprites & playfield */
+	GFXDECODE_ENTRY( "gfx2", 0, anlayout,      0, 64 )      /* characters 8x8 */
 GFXDECODE_END
 
 
@@ -199,8 +189,7 @@ static MACHINE_CONFIG_START( vindictr, vindictr_state )
 	MCFG_CPU_ADD("maincpu", M68010, ATARI_CLOCK_14MHz/2)
 	MCFG_CPU_PROGRAM_MAP(main_map)
 
-	MCFG_MACHINE_START(vindictr)
-	MCFG_MACHINE_RESET(vindictr)
+	MCFG_MACHINE_RESET_OVERRIDE(vindictr_state,vindictr)
 	MCFG_NVRAM_ADD_1FILL("eeprom")
 
 	/* video hardware */
@@ -209,13 +198,12 @@ static MACHINE_CONFIG_START( vindictr, vindictr_state )
 	MCFG_PALETTE_LENGTH(2048*8)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	/* note: these parameters are from published specs, not derived */
 	/* the board uses a SYNGEN chip to generate video signals */
 	MCFG_SCREEN_RAW_PARAMS(ATARI_CLOCK_14MHz/2, 456, 0, 336, 262, 0, 240)
-	MCFG_SCREEN_UPDATE(vindictr)
+	MCFG_SCREEN_UPDATE_DRIVER(vindictr_state, screen_update_vindictr)
 
-	MCFG_VIDEO_START(vindictr)
+	MCFG_VIDEO_START_OVERRIDE(vindictr_state,vindictr)
 
 	/* sound hardware */
 	MCFG_FRAGMENT_ADD(jsa_i_stereo_pokey)
@@ -230,7 +218,7 @@ MACHINE_CONFIG_END
  *************************************/
 
 ROM_START( vindictr )
-	ROM_REGION( 0x60000, "maincpu", 0 )	/* 6*64k for 68000 code */
+	ROM_REGION( 0x60000, "maincpu", 0 ) /* 6*64k for 68000 code */
 	ROM_LOAD16_BYTE( "136059-5117.d1",  0x000000, 0x010000, CRC(2e5135e4) SHA1(804b3ba201088ac2c35cfcbd530acbd73548ea8c) )
 	ROM_LOAD16_BYTE( "136059-5118.d3",  0x000001, 0x010000, CRC(e357fa79) SHA1(220a10287f4bf9d981fd412c8dd0a9c106eaf342) )
 	ROM_LOAD16_BYTE( "136059-5119.f1",  0x020000, 0x010000, CRC(0deb7330) SHA1(e9fb311e96bcf57f2136fff87a973a5a3b5208b3) )
@@ -238,7 +226,7 @@ ROM_START( vindictr )
 	ROM_LOAD16_BYTE( "136059-5121.k1",  0x040000, 0x010000, CRC(96b150c5) SHA1(405c848f7990c981fefd355ca635bfb0ac24eb26) )
 	ROM_LOAD16_BYTE( "136059-5122.k3",  0x040001, 0x010000, CRC(6415d312) SHA1(0115e32c1c42421cb3d978cc8642f7f88d492043) )
 
-	ROM_REGION( 0x14000, "jsa", 0 )	/* 64k + 16k for 6502 code */
+	ROM_REGION( 0x14000, "jsa", 0 ) /* 64k + 16k for 6502 code */
 	ROM_LOAD( "136059-1124.2k",  0x010000, 0x004000, CRC(d2212c0a) SHA1(df11fe76d74abc0cea23f18264cef4b0f33b1ffd) )
 	ROM_CONTINUE(                0x004000, 0x00c000 )
 
@@ -268,7 +256,7 @@ ROM_END
 
 
 ROM_START( vindictre )
-	ROM_REGION( 0x60000, "maincpu", 0 )	/* 6*64k for 68000 code */
+	ROM_REGION( 0x60000, "maincpu", 0 ) /* 6*64k for 68000 code */
 	ROM_LOAD16_BYTE( "136059-5717.d1",  0x000000, 0x010000, CRC(af5ba4a8) SHA1(fdb6e7f0707af94b39368cc39ae45c53209ce32e) )
 	ROM_LOAD16_BYTE( "136059-5718.d3",  0x000001, 0x010000, CRC(c87b0581) SHA1(f33c72e83e8c811d3405deb470573327c7b68ea6) )
 	ROM_LOAD16_BYTE( "136059-5719.f1",  0x020000, 0x010000, CRC(1e5f94e1) SHA1(bf14e4d3c26507ad3a78ad28b6b54e4ea0939ceb) )
@@ -276,7 +264,7 @@ ROM_START( vindictre )
 	ROM_LOAD16_BYTE( "136059-5721.k1",  0x040000, 0x010000, CRC(96b150c5) SHA1(405c848f7990c981fefd355ca635bfb0ac24eb26) )
 	ROM_LOAD16_BYTE( "136059-5722.k3",  0x040001, 0x010000, CRC(6415d312) SHA1(0115e32c1c42421cb3d978cc8642f7f88d492043) )
 
-	ROM_REGION( 0x14000, "jsa", 0 )	/* 64k + 16k for 6502 code */
+	ROM_REGION( 0x14000, "jsa", 0 ) /* 64k + 16k for 6502 code */
 	ROM_LOAD( "136059-1124.2k",  0x010000, 0x004000, CRC(d2212c0a) SHA1(df11fe76d74abc0cea23f18264cef4b0f33b1ffd) )
 	ROM_CONTINUE(                0x004000, 0x00c000 )
 
@@ -306,7 +294,7 @@ ROM_END
 
 
 ROM_START( vindictrg )
-	ROM_REGION( 0x60000, "maincpu", 0 )	/* 6*64k for 68000 code */
+	ROM_REGION( 0x60000, "maincpu", 0 ) /* 6*64k for 68000 code */
 	ROM_LOAD16_BYTE( "136059-1217.d1",  0x000000, 0x010000, CRC(0a589e9a) SHA1(6770212b57599cd9bcdeb126aec30d9815608005) )
 	ROM_LOAD16_BYTE( "136059-1218.d3",  0x000001, 0x010000, CRC(e8b7959a) SHA1(b63747934b188f44a5e59a54f52d15b33f9d676b) )
 	ROM_LOAD16_BYTE( "136059-1219.f1",  0x020000, 0x010000, CRC(2534fcbc) SHA1(d8a2121de88efabf99a153fd477c7bf2fddc88c9) )
@@ -314,7 +302,7 @@ ROM_START( vindictrg )
 	ROM_LOAD16_BYTE( "136059-1221.k1",  0x040000, 0x010000, CRC(ee1b1014) SHA1(ddfe01cdec4654a42c9e49660e3532e5c865a9b7) )
 	ROM_LOAD16_BYTE( "136059-1222.k3",  0x040001, 0x010000, CRC(517b33f0) SHA1(f6430862bb00e11a68e964c89adcad1f05bc021b) )
 
-	ROM_REGION( 0x14000, "jsa", 0 )	/* 64k + 16k for 6502 code */
+	ROM_REGION( 0x14000, "jsa", 0 ) /* 64k + 16k for 6502 code */
 	ROM_LOAD( "136059-1124.2k",  0x010000, 0x004000, CRC(d2212c0a) SHA1(df11fe76d74abc0cea23f18264cef4b0f33b1ffd) )
 	ROM_CONTINUE(                0x004000, 0x00c000 )
 
@@ -344,7 +332,7 @@ ROM_END
 
 
 ROM_START( vindictre4 )
-	ROM_REGION( 0x60000, "maincpu", 0 )	/* 6*64k for 68000 code */
+	ROM_REGION( 0x60000, "maincpu", 0 ) /* 6*64k for 68000 code */
 	ROM_LOAD16_BYTE( "136059-1117.d1",  0x000000, 0x010000, CRC(2e5135e4) SHA1(804b3ba201088ac2c35cfcbd530acbd73548ea8c) )
 	ROM_LOAD16_BYTE( "136059-1118.d3",  0x000001, 0x010000, CRC(e357fa79) SHA1(220a10287f4bf9d981fd412c8dd0a9c106eaf342) )
 	ROM_LOAD16_BYTE( "136059-4719.f1",  0x020000, 0x010000, CRC(3b27ab80) SHA1(330a6fe0e0265cce40c913aa5c3607429afe510b) )
@@ -352,7 +340,7 @@ ROM_START( vindictre4 )
 	ROM_LOAD16_BYTE( "136059-4121.k1",  0x040000, 0x010000, CRC(9a0444ee) SHA1(211be931a8b6ca42dd140baf3e165ce23f75431f) )
 	ROM_LOAD16_BYTE( "136059-4122.k3",  0x040001, 0x010000, CRC(d5022d78) SHA1(eeb6876ee6994f5736114a786c5c4ba97f26ef01) )
 
-	ROM_REGION( 0x14000, "jsa", 0 )	/* 64k + 16k for 6502 code */
+	ROM_REGION( 0x14000, "jsa", 0 ) /* 64k + 16k for 6502 code */
 	ROM_LOAD( "136059-1124.2k",  0x010000, 0x004000, CRC(d2212c0a) SHA1(df11fe76d74abc0cea23f18264cef4b0f33b1ffd) )
 	ROM_CONTINUE(                0x004000, 0x00c000 )
 
@@ -382,7 +370,7 @@ ROM_END
 
 
 ROM_START( vindictr4 )
-	ROM_REGION( 0x60000, "maincpu", 0 )	/* 6*64k for 68000 code */
+	ROM_REGION( 0x60000, "maincpu", 0 ) /* 6*64k for 68000 code */
 	ROM_LOAD16_BYTE( "136059-1117.d1",  0x000000, 0x010000, CRC(2e5135e4) SHA1(804b3ba201088ac2c35cfcbd530acbd73548ea8c) )
 	ROM_LOAD16_BYTE( "136059-1118.d3",  0x000001, 0x010000, CRC(e357fa79) SHA1(220a10287f4bf9d981fd412c8dd0a9c106eaf342) )
 	ROM_LOAD16_BYTE( "136059-4119.f1",  0x020000, 0x010000, CRC(44c77ee0) SHA1(f47307126a4960d59d19d1783497971f76ee00a5) )
@@ -390,7 +378,7 @@ ROM_START( vindictr4 )
 	ROM_LOAD16_BYTE( "136059-4121.k1",  0x040000, 0x010000, CRC(9a0444ee) SHA1(211be931a8b6ca42dd140baf3e165ce23f75431f) )
 	ROM_LOAD16_BYTE( "136059-4122.k3",  0x040001, 0x010000, CRC(d5022d78) SHA1(eeb6876ee6994f5736114a786c5c4ba97f26ef01) )
 
-	ROM_REGION( 0x14000, "jsa", 0 )	/* 64k + 16k for 6502 code */
+	ROM_REGION( 0x14000, "jsa", 0 ) /* 64k + 16k for 6502 code */
 	ROM_LOAD( "136059-1124.2k",  0x010000, 0x004000, CRC(d2212c0a) SHA1(df11fe76d74abc0cea23f18264cef4b0f33b1ffd) )
 	ROM_CONTINUE(             0x004000, 0x00c000 )
 
@@ -420,7 +408,7 @@ ROM_END
 
 
 ROM_START( vindictre3 )
-	ROM_REGION( 0x60000, "maincpu", 0 )	/* 6*64k for 68000 code */
+	ROM_REGION( 0x60000, "maincpu", 0 ) /* 6*64k for 68000 code */
 	ROM_LOAD16_BYTE( "136059-3117.d1",  0x000000, 0x010000, CRC(af5ba4a8) SHA1(fdb6e7f0707af94b39368cc39ae45c53209ce32e) )
 	ROM_LOAD16_BYTE( "136059-3118.d3",  0x000001, 0x010000, CRC(c87b0581) SHA1(f33c72e83e8c811d3405deb470573327c7b68ea6) )
 	ROM_LOAD16_BYTE( "136059-3119.f1",  0x020000, 0x010000, CRC(f0516142) SHA1(16f23a9a8939cead728108fc23fccebf2529d553) )
@@ -428,7 +416,7 @@ ROM_START( vindictre3 )
 	ROM_LOAD16_BYTE( "136059-2121.k1",  0x040000, 0x010000, CRC(9b6111e0) SHA1(427197b21a5db2a06751ab281fde7a2f63818db8) )
 	ROM_LOAD16_BYTE( "136059-2122.k3",  0x040001, 0x010000, CRC(8d029a28) SHA1(a166d2a767f70050397f0f12add44ad1f5bc9fde) )
 
-	ROM_REGION( 0x14000, "jsa", 0 )	/* 64k + 16k for 6502 code */
+	ROM_REGION( 0x14000, "jsa", 0 ) /* 64k + 16k for 6502 code */
 	ROM_LOAD( "136059-1124.2k",  0x010000, 0x004000, CRC(d2212c0a) SHA1(df11fe76d74abc0cea23f18264cef4b0f33b1ffd) )
 	ROM_CONTINUE(                0x004000, 0x00c000 )
 
@@ -458,7 +446,7 @@ ROM_END
 
 
 ROM_START( vindictr2 )
-	ROM_REGION( 0x60000, "maincpu", 0 )	/* 6*64k for 68000 code */
+	ROM_REGION( 0x60000, "maincpu", 0 ) /* 6*64k for 68000 code */
 	ROM_LOAD16_BYTE( "136059-1117.d1",  0x000000, 0x010000, CRC(2e5135e4) SHA1(804b3ba201088ac2c35cfcbd530acbd73548ea8c) )
 	ROM_LOAD16_BYTE( "136059-1118.d3",  0x000001, 0x010000, CRC(e357fa79) SHA1(220a10287f4bf9d981fd412c8dd0a9c106eaf342) )
 	ROM_LOAD16_BYTE( "136059-2119.f1",  0x020000, 0x010000, CRC(7f8c044e) SHA1(56cd047ff12ff2968bf403b38b86fdceb9c2b83d) )
@@ -466,7 +454,7 @@ ROM_START( vindictr2 )
 	ROM_LOAD16_BYTE( "136059-2121.k1",  0x040000, 0x010000, CRC(9b6111e0) SHA1(427197b21a5db2a06751ab281fde7a2f63818db8) )
 	ROM_LOAD16_BYTE( "136059-2122.k3",  0x040001, 0x010000, CRC(8d029a28) SHA1(a166d2a767f70050397f0f12add44ad1f5bc9fde) )
 
-	ROM_REGION( 0x14000, "jsa", 0 )	/* 64k + 16k for 6502 code */
+	ROM_REGION( 0x14000, "jsa", 0 ) /* 64k + 16k for 6502 code */
 	ROM_LOAD( "136059-1124.2k",  0x010000, 0x004000, CRC(d2212c0a) SHA1(df11fe76d74abc0cea23f18264cef4b0f33b1ffd) )
 	ROM_CONTINUE(                0x004000, 0x00c000 )
 
@@ -496,7 +484,7 @@ ROM_END
 
 
 ROM_START( vindictr1 )
-	ROM_REGION( 0x60000, "maincpu", 0 )	/* 6*64k for 68000 code */
+	ROM_REGION( 0x60000, "maincpu", 0 ) /* 6*64k for 68000 code */
 	ROM_LOAD16_BYTE( "136059-1117.d1",  0x000000, 0x010000, CRC(2e5135e4) SHA1(804b3ba201088ac2c35cfcbd530acbd73548ea8c) )
 	ROM_LOAD16_BYTE( "136059-1118.d3",  0x000001, 0x010000, CRC(e357fa79) SHA1(220a10287f4bf9d981fd412c8dd0a9c106eaf342) )
 	ROM_LOAD16_BYTE( "136059-1119.f1",  0x020000, 0x010000, CRC(48938c95) SHA1(061771b074135b945621d781fbde7ec1260f31a1) )
@@ -504,7 +492,7 @@ ROM_START( vindictr1 )
 	ROM_LOAD16_BYTE( "136059-1121.k1",  0x040000, 0x010000, CRC(9b6111e0) SHA1(427197b21a5db2a06751ab281fde7a2f63818db8) )
 	ROM_LOAD16_BYTE( "136059-1122.k3",  0x040001, 0x010000, CRC(a94773f1) SHA1(2be841ab755d4ce319f3d562e9990918923384ee) )
 
-	ROM_REGION( 0x14000, "jsa", 0 )	/* 64k + 16k for 6502 code */
+	ROM_REGION( 0x14000, "jsa", 0 ) /* 64k + 16k for 6502 code */
 	ROM_LOAD( "136059-1124.2k",  0x010000, 0x004000, CRC(d2212c0a) SHA1(df11fe76d74abc0cea23f18264cef4b0f33b1ffd) )
 	ROM_CONTINUE(                0x004000, 0x00c000 )
 
@@ -540,9 +528,9 @@ ROM_END
  *
  *************************************/
 
-static DRIVER_INIT( vindictr )
+DRIVER_INIT_MEMBER(vindictr_state,vindictr)
 {
-	atarijsa_init(machine, "260010", 0x0002);
+	atarijsa_init(machine(), "260010", 0x0002);
 }
 
 
@@ -553,11 +541,11 @@ static DRIVER_INIT( vindictr )
  *
  *************************************/
 
-GAME( 1988, vindictr,  0,        vindictr, vindictr, vindictr, ROT0, "Atari Games", "Vindicators (rev 5)", 0 )
-GAME( 1988, vindictre, vindictr, vindictr, vindictr, vindictr, ROT0, "Atari Games", "Vindicators (Europe, rev 5)", 0 )
-GAME( 1988, vindictrg, vindictr, vindictr, vindictr, vindictr, ROT0, "Atari Games", "Vindicators (German, rev 1)", 0 )
-GAME( 1988, vindictre4,vindictr, vindictr, vindictr, vindictr, ROT0, "Atari Games", "Vindicators (Europe, rev 4)", 0 )
-GAME( 1988, vindictr4, vindictr, vindictr, vindictr, vindictr, ROT0, "Atari Games", "Vindicators (rev 4)", 0 )
-GAME( 1988, vindictre3,vindictr, vindictr, vindictr, vindictr, ROT0, "Atari Games", "Vindicators (Europe, rev 3)", 0 )
-GAME( 1988, vindictr2, vindictr, vindictr, vindictr, vindictr, ROT0, "Atari Games", "Vindicators (rev 2)", 0 )
-GAME( 1988, vindictr1, vindictr, vindictr, vindictr, vindictr, ROT0, "Atari Games", "Vindicators (rev 1)", 0 )
+GAME( 1988, vindictr,  0,        vindictr, vindictr, vindictr_state, vindictr, ROT0, "Atari Games", "Vindicators (rev 5)", 0 )
+GAME( 1988, vindictre, vindictr, vindictr, vindictr, vindictr_state, vindictr, ROT0, "Atari Games", "Vindicators (Europe, rev 5)", 0 )
+GAME( 1988, vindictrg, vindictr, vindictr, vindictr, vindictr_state, vindictr, ROT0, "Atari Games", "Vindicators (German, rev 1)", 0 )
+GAME( 1988, vindictre4,vindictr, vindictr, vindictr, vindictr_state, vindictr, ROT0, "Atari Games", "Vindicators (Europe, rev 4)", 0 )
+GAME( 1988, vindictr4, vindictr, vindictr, vindictr, vindictr_state, vindictr, ROT0, "Atari Games", "Vindicators (rev 4)", 0 )
+GAME( 1988, vindictre3,vindictr, vindictr, vindictr, vindictr_state, vindictr, ROT0, "Atari Games", "Vindicators (Europe, rev 3)", 0 )
+GAME( 1988, vindictr2, vindictr, vindictr, vindictr, vindictr_state, vindictr, ROT0, "Atari Games", "Vindicators (rev 2)", 0 )
+GAME( 1988, vindictr1, vindictr, vindictr, vindictr, vindictr_state, vindictr, ROT0, "Atari Games", "Vindicators (rev 1)", 0 )

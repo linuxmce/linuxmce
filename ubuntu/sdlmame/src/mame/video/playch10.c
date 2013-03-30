@@ -4,19 +4,20 @@
 
 
 
-WRITE8_HANDLER( playch10_videoram_w )
+WRITE8_MEMBER(playch10_state::playch10_videoram_w)
 {
-	playch10_state *state = space->machine().driver_data<playch10_state>();
-	UINT8 *videoram = state->m_videoram;
-	if (state->m_pc10_sdcs)
+	UINT8 *videoram = m_videoram;
+	if (m_pc10_sdcs)
 	{
 		videoram[offset] = data;
-		tilemap_mark_tile_dirty(state->m_bg_tilemap, offset / 2);
+		m_bg_tilemap->mark_tile_dirty(offset / 2);
 	}
 }
 
-PALETTE_INIT( playch10 )
+void playch10_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
+	ppu2c0x_device *ppu = machine().device<ppu2c0x_device>("ppu");
 	int i;
 
 	for (i = 0; i < 256; i++)
@@ -49,18 +50,18 @@ PALETTE_INIT( playch10 )
 
 		b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 
-		palette_set_color(machine,i,MAKE_RGB(r,g,b));
+		palette_set_color(machine(),i,MAKE_RGB(r,g,b));
 
 		color_prom++;
 	}
 
-	ppu2c0x_init_palette_rgb(machine, 256 );
+	ppu->init_palette_rgb(machine(), 256);
 }
 
 static void ppu_irq( device_t *device, int *ppu_regs )
 {
 	playch10_state *state = device->machine().driver_data<playch10_state>();
-	cputag_set_input_line(device->machine(), "cart", INPUT_LINE_NMI, PULSE_LINE );
+	device->machine().device("cart")->execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE );
 	state->m_pc10_int_detect = 1;
 }
 
@@ -70,49 +71,40 @@ static void ppu_irq( device_t *device, int *ppu_regs )
 
 const ppu2c0x_interface playch10_ppu_interface =
 {
-	1,					/* gfxlayout num */
-	256,				/* color base */
-	PPU_MIRROR_NONE,	/* mirroring */
-	ppu_irq				/* irq */
+	"cart",
+	"bottom",
+	1,                  /* gfxlayout num */
+	256,                /* color base */
+	PPU_MIRROR_NONE,    /* mirroring */
+	ppu_irq             /* irq */
 };
 
-const ppu2c0x_interface playch10_ppu_interface_hboard =
+TILE_GET_INFO_MEMBER(playch10_state::get_bg_tile_info)
 {
-	1,					/* gfxlayout num */
-	256,				/* color base */
-	PPU_MIRROR_NONE,	/* mirroring */
-	ppu_irq				/* irq */
-};
-
-static TILE_GET_INFO( get_bg_tile_info )
-{
-	playch10_state *state = machine.driver_data<playch10_state>();
-	UINT8 *videoram = state->m_videoram;
+	UINT8 *videoram = m_videoram;
 	int offs = tile_index * 2;
 	int code = videoram[offs] + ((videoram[offs + 1] & 0x07) << 8);
 	int color = (videoram[offs + 1] >> 3) & 0x1f;
 
-	SET_TILE_INFO(0, code, color, 0);
+	SET_TILE_INFO_MEMBER(0, code, color, 0);
 }
 
-VIDEO_START( playch10 )
+void playch10_state::video_start()
 {
-	playch10_state *state = machine.driver_data<playch10_state>();
-	const UINT8 *bios = machine.region("maincpu")->base();
-	state->m_pc10_bios = (bios[3] == 0x2a) ? 1 : 2;
+	const UINT8 *bios = memregion("maincpu")->base();
+	m_pc10_bios = (bios[3] == 0x2a) ? 1 : 2;
 
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_rows,
-		 8, 8, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(playch10_state::get_bg_tile_info),this), TILEMAP_SCAN_ROWS,
+			8, 8, 32, 32);
 }
 
-VIDEO_START( playch10_hboard )
+VIDEO_START_MEMBER(playch10_state,playch10_hboard)
 {
-	playch10_state *state = machine.driver_data<playch10_state>();
-	const UINT8 *bios = machine.region("maincpu")->base();
-	state->m_pc10_bios = (bios[3] == 0x2a) ? 1 : 2;
+	const UINT8 *bios = memregion("maincpu")->base();
+	m_pc10_bios = (bios[3] == 0x2a) ? 1 : 2;
 
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_rows,
-		 8, 8, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(playch10_state::get_bg_tile_info),this), TILEMAP_SCAN_ROWS,
+			8, 8, 32, 32);
 }
 
 /***************************************************************************
@@ -121,63 +113,64 @@ VIDEO_START( playch10_hboard )
 
 ***************************************************************************/
 
-SCREEN_UPDATE( playch10 )
+UINT32 playch10_state::screen_update_playch10_single(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	playch10_state *state = screen->machine().driver_data<playch10_state>();
-	device_t *ppu = screen->machine().device("ppu");
+	ppu2c0x_device *ppu = machine().device<ppu2c0x_device>("ppu");
 
-	/* Dual monitor version */
-	if (state->m_pc10_bios == 1)
+	rectangle top_monitor = screen.visible_area();
+
+	top_monitor.max_y = ( top_monitor.max_y - top_monitor.min_y ) / 2;
+
+	if(m_pc10_dispmask_old != m_pc10_dispmask)
 	{
-		device_t *top_screen = screen->machine().device("top");
+		m_pc10_dispmask_old = m_pc10_dispmask;
 
-		/* On Playchoice 10 single monitor, this bit toggles    */
-		/* between PPU and BIOS display.                        */
-		/* We support the multi-monitor layout. In this case,   */
-		/* if the bit is not set, then we should display        */
-		/* the PPU portion.                                     */
-
-		if (screen == top_screen)
-		{
-			if ( !state->m_pc10_dispmask )
-				/* render the ppu */
-				ppu2c0x_render( ppu, bitmap, 0, 0, 0, 0 );
-			else
-				bitmap_fill(bitmap, cliprect, 0);
-		}
-		else
-		{
-			/* When the bios is accessing vram, the video circuitry can't access it */
-
-			if ( !state->m_pc10_sdcs )
-				tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
-			else
-				bitmap_fill(bitmap, cliprect, 0);
-		}
+		if(m_pc10_dispmask)
+			m_pc10_game_mode ^= 1;
 	}
-	else	/* Single Monitor version */
+
+	if ( m_pc10_game_mode )
+		/* render the ppu */
+		ppu->render(bitmap, 0, 0, 0, 0 );
+	else
 	{
-		rectangle top_monitor = screen->visible_area();
-
-		top_monitor.max_y = ( top_monitor.max_y - top_monitor.min_y ) / 2;
-
-		if(state->m_pc10_dispmask_old != state->m_pc10_dispmask)
-		{
-			state->m_pc10_dispmask_old = state->m_pc10_dispmask;
-
-			if(state->m_pc10_dispmask)
-				state->m_pc10_game_mode ^= 1;
-		}
-
-		if ( state->m_pc10_game_mode )
-			/* render the ppu */
-			ppu2c0x_render( ppu, bitmap, 0, 0, 0, 0 );
-		else
-		{
-			/* When the bios is accessing vram, the video circuitry can't access it */
-			if ( !state->m_pc10_sdcs )
-				tilemap_draw(bitmap, &top_monitor, state->m_bg_tilemap, 0, 0);
-		}
+		/* When the bios is accessing vram, the video circuitry can't access it */
+		if ( !m_pc10_sdcs )
+			m_bg_tilemap->draw(bitmap, top_monitor, 0, 0);
 	}
+	return 0;
+}
+
+UINT32 playch10_state::screen_update_playch10_top(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
+{
+	ppu2c0x_device *ppu = machine().device<ppu2c0x_device>("ppu");
+
+	/* Single Monitor version */
+	if (m_pc10_bios != 1)
+		return screen_update_playch10_single(screen, bitmap, cliprect);
+
+	if (!m_pc10_dispmask)
+		/* render the ppu */
+		ppu->render(bitmap, 0, 0, 0, 0);
+	else
+		bitmap.fill(0, cliprect);
+
+	return 0;
+}
+
+UINT32 playch10_state::screen_update_playch10_bottom(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
+{
+
+	/* Single Monitor version */
+	if (m_pc10_bios != 1)
+		return screen_update_playch10_single(screen, bitmap, cliprect);
+
+	/* When the bios is accessing vram, the video circuitry can't access it */
+
+	if ( !m_pc10_sdcs )
+		m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
+	else
+		bitmap.fill(0, cliprect);
+
 	return 0;
 }

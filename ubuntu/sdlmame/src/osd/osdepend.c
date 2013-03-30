@@ -171,10 +171,10 @@ void osd_interface::set_mastervolume(int attenuation)
 	//
 	// Attenuation is the attenuation in dB (a negative number).
 	// To convert from dB to a linear volume scale do the following:
-    //    volume = MAX_VOLUME;
-    //    while (attenuation++ < 0)
-    //       volume /= 1.122018454;      //  = (10 ^ (1/20)) = 1dB
-    //
+	//    volume = MAX_VOLUME;
+	//    while (attenuation++ < 0)
+	//       volume /= 1.122018454;      //  = (10 ^ (1/20)) = 1dB
+	//
 }
 
 
@@ -183,7 +183,7 @@ void osd_interface::set_mastervolume(int attenuation)
 //  additions/modifications to the input list
 //-------------------------------------------------
 
-void osd_interface::customize_input_type_list(input_type_desc *typelist)
+void osd_interface::customize_input_type_list(simple_list<input_type_entry> &typelist)
 {
 	//
 	// inptport.c defines some general purpose defaults for key and joystick bindings.
@@ -227,7 +227,16 @@ void osd_interface::font_close(osd_font font)
 //  pixel of a black & white font
 //-------------------------------------------------
 
-bitmap_t *osd_interface::font_get_bitmap(osd_font font, unicode_char chnum, INT32 &width, INT32 &xoffs, INT32 &yoffs)
+bool osd_interface::font_get_bitmap(osd_font font, unicode_char chnum, bitmap_argb32 &bitmap, INT32 &width, INT32 &xoffs, INT32 &yoffs)
+{
+	return false;
+}
+
+//-------------------------------------------------
+//  get_slider_list - allocate and populate a
+//  list of OS-dependent slider values.
+//-------------------------------------------------
+void *osd_interface::get_slider_list()
 {
 	return NULL;
 }

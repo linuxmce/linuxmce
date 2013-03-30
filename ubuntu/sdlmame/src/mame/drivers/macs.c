@@ -61,116 +61,123 @@ KISEKAE -- info
 #include "includes/st0016.h"
 
 
-class macs_state : public driver_device
+class macs_state : public st0016_state
 {
 public:
-	macs_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	macs_state(const machine_config &mconfig, device_type type, const char *tag)
+		: st0016_state(mconfig, type, tag),
+			m_ram2(*this, "ram2") { }
 
 	UINT8 m_mux_data;
 	UINT8 m_rev;
 	UINT8 *m_ram1;
-	UINT8 *m_ram2;
+	required_shared_ptr<UINT8> m_ram2;
+	DECLARE_WRITE8_MEMBER(rambank_w);
+	DECLARE_READ8_MEMBER(macs_input_r);
+	DECLARE_WRITE8_MEMBER(macs_rom_bank_w);
+	DECLARE_WRITE8_MEMBER(macs_output_w);
+	DECLARE_DRIVER_INIT(macs);
+	DECLARE_DRIVER_INIT(kisekaeh);
+	DECLARE_DRIVER_INIT(kisekaem);
+	DECLARE_DRIVER_INIT(macs2);
+	DECLARE_MACHINE_RESET(macs);
 };
 
 
-static MACHINE_RESET(macs);
 
 
-static ADDRESS_MAP_START( macs_mem, AS_PROGRAM, 8 )
+
+static ADDRESS_MAP_START( macs_mem, AS_PROGRAM, 8, macs_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROMBANK("bank4")
 	AM_RANGE(0x8000, 0xbfff) AM_ROMBANK("bank1")
 	AM_RANGE(0xc000, 0xcfff) AM_READ(st0016_sprite_ram_r) AM_WRITE(st0016_sprite_ram_w)
 	AM_RANGE(0xd000, 0xdfff) AM_READ(st0016_sprite2_ram_r) AM_WRITE(st0016_sprite2_ram_w)
 	AM_RANGE(0xe000, 0xe7ff) AM_RAM /* work ram ? */
-	AM_RANGE(0xe800, 0xe87f) AM_RAM AM_BASE_MEMBER(macs_state, m_ram2)
-	AM_RANGE(0xe900, 0xe9ff) AM_DEVREADWRITE("stsnd", st0016_snd_r, st0016_snd_w)
+	AM_RANGE(0xe800, 0xe87f) AM_RAM AM_SHARE("ram2")
+	AM_RANGE(0xe900, 0xe9ff) AM_DEVREADWRITE_LEGACY("stsnd", st0016_snd_r, st0016_snd_w)
 	AM_RANGE(0xea00, 0xebff) AM_READ(st0016_palette_ram_r) AM_WRITE(st0016_palette_ram_w)
 	AM_RANGE(0xec00, 0xec1f) AM_READ(st0016_character_ram_r) AM_WRITE(st0016_character_ram_w)
 	AM_RANGE(0xf000, 0xf7ff) AM_RAMBANK("bank3") /* common /backup ram ?*/
 	AM_RANGE(0xf800, 0xffff) AM_RAMBANK("bank2") /* common /backup ram ?*/
 ADDRESS_MAP_END
 
-static WRITE8_HANDLER(rambank_w)
+WRITE8_MEMBER(macs_state::rambank_w)
 {
-	macs_state *state = space->machine().driver_data<macs_state>();
-	memory_set_bankptr(space->machine(),  "bank3", &state->m_ram1[0x10000+(data&1)*0x800] );
+	membank("bank3")->set_base(&m_ram1[0x10000+(data&1)*0x800] );
 }
 
-static READ8_HANDLER( macs_input_r )
+READ8_MEMBER(macs_state::macs_input_r)
 {
-	macs_state *state = space->machine().driver_data<macs_state>();
 	switch(offset)
 	{
 		case 0:
 		{
 			/*It's bit-wise*/
-			switch(state->m_mux_data&0x0f)
+			switch(m_mux_data&0x0f)
 			{
-				case 0x00: return input_port_read(space->machine(), "IN0");
-				case 0x01: return input_port_read(space->machine(), "IN1");
-				case 0x02: return input_port_read(space->machine(), "IN2");
-				case 0x04: return input_port_read(space->machine(), "IN3");
-				case 0x08: return input_port_read(space->machine(), "IN4");
+				case 0x00: return ioport("IN0")->read();
+				case 0x01: return ioport("IN1")->read();
+				case 0x02: return ioport("IN2")->read();
+				case 0x04: return ioport("IN3")->read();
+				case 0x08: return ioport("IN4")->read();
 				default:
-				logerror("Unmapped mahjong panel mux data %02x\n",state->m_mux_data);
+				logerror("Unmapped mahjong panel mux data %02x\n",m_mux_data);
 				return 0xff;
 			}
 		}
-		case 1: return input_port_read(space->machine(), "SYS0");
-		case 2: return input_port_read(space->machine(), "DSW0");
-		case 3: return input_port_read(space->machine(), "DSW1");
-		case 4: return input_port_read(space->machine(), "DSW2");
-		case 5: return input_port_read(space->machine(), "DSW3");
-		case 6: return input_port_read(space->machine(), "DSW4");
-		case 7: return input_port_read(space->machine(), "SYS1");
-		default:	popmessage("Unmapped I/O read at PC = %06x offset = %02x",cpu_get_pc(&space->device()),offset+0xc0);
+		case 1: return ioport("SYS0")->read();
+		case 2: return ioport("DSW0")->read();
+		case 3: return ioport("DSW1")->read();
+		case 4: return ioport("DSW2")->read();
+		case 5: return ioport("DSW3")->read();
+		case 6: return ioport("DSW4")->read();
+		case 7: return ioport("SYS1")->read();
+		default:    popmessage("Unmapped I/O read at PC = %06x offset = %02x",space.device().safe_pc(),offset+0xc0);
 	}
 
 	return 0xff;
 }
 
 
-static WRITE8_HANDLER( macs_rom_bank_w )
+WRITE8_MEMBER(macs_state::macs_rom_bank_w)
 {
-	memory_set_bankptr(space->machine(),  "bank1", space->machine().region("maincpu")->base() + (data* 0x4000) + 0x10000 + macs_cart_slot*0x400000 );
+	membank("bank1")->set_base(machine().root_device().memregion("maincpu")->base() + (data* 0x4000) + macs_cart_slot*0x400000 );
 
-	st0016_rom_bank=data;
+	m_st0016_rom_bank=data;
 }
 
-static WRITE8_HANDLER( macs_output_w )
+WRITE8_MEMBER(macs_state::macs_output_w)
 {
-	macs_state *state = space->machine().driver_data<macs_state>();
-	UINT8 *ROM = space->machine().region("maincpu")->base();
+	UINT8 *ROM = memregion("maincpu")->base();
 
 	switch(offset)
 	{
 		case 0:
 		/*
-        --x- ---- sets RAM bank?
-        ---- -x-- Cassette B slot
-        ---- --x- Cassette A slot
-        */
+		--x- ---- sets RAM bank?
+		---- -x-- Cassette B slot
+		---- --x- Cassette A slot
+		*/
 
-		if(state->m_rev == 1)
+		if(m_rev == 1)
 		{
 			/* FIXME: dunno if this RAM bank is right, DASM tracking made on the POST screens indicates that there's just one RAM bank,
-                      but then MACS2 games locks up. */
-			memory_set_bankptr(space->machine(),  "bank3", &state->m_ram1[((data&0x20)>>5)*0x1000+0x000] );
+			          but then MACS2 games locks up. */
+			membank("bank3")->set_base(&m_ram1[((data&0x20)>>5)*0x1000+0x000] );
 
 			macs_cart_slot = (data & 0xc) >> 2;
 
-			memory_set_bankptr(space->machine(),  "bank4", &ROM[macs_cart_slot*0x400000+0x10000] );
+			membank("bank4")->set_base(&ROM[macs_cart_slot*0x400000] );
 		}
 
-		memory_set_bankptr(space->machine(),  "bank2", &state->m_ram1[((data&0x20)>>5)*0x1000+0x800] );
+		membank("bank2")->set_base(&m_ram1[((data&0x20)>>5)*0x1000+0x800] );
 		break;
-		case 2: state->m_mux_data = data; break;
+		case 2: m_mux_data = data; break;
 
 	}
 }
 
-static ADDRESS_MAP_START( macs_io, AS_IO, 8 )
+static ADDRESS_MAP_START( macs_io, AS_IO, 8, macs_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0xbf) AM_READ(st0016_vregs_r) AM_WRITE(st0016_vregs_w) /* video/crt regs ? */
 	AM_RANGE(0xc0, 0xc7) AM_READWRITE(macs_input_r,macs_output_w)
@@ -325,8 +332,8 @@ static INPUT_PORTS_START( macs_base )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	/*
-    Note: These could likely to be switches that are on the game board and not Dip Switches
-    */
+	Note: These could likely to be switches that are on the game board and not Dip Switches
+	*/
 	PORT_START("SYS0")
 	PORT_BIT( 0x7f, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Note In") PORT_CODE(KEYCODE_4_PAD)
@@ -474,23 +481,22 @@ static MACHINE_CONFIG_START( macs, macs_state )
 	MCFG_CPU_PROGRAM_MAP(macs_mem)
 	MCFG_CPU_IO_MAP(macs_io)
 
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", macs_state,  irq0_line_hold)
 
-	MCFG_MACHINE_RESET(macs)
+	MCFG_MACHINE_RESET_OVERRIDE(macs_state,macs)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(128*8, 128*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 128*8-1, 0*8, 128*8-1)
-	MCFG_SCREEN_UPDATE(st0016)
+	MCFG_SCREEN_UPDATE_DRIVER(st0016_state, screen_update_st0016)
 
 	MCFG_GFXDECODE(macs)
 	MCFG_PALETTE_LENGTH(16*16*4+1)
 
-	MCFG_VIDEO_START(st0016)
+	MCFG_VIDEO_START_OVERRIDE(st0016_state,st0016)
 
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
 
@@ -518,8 +524,7 @@ ROM_START( macsbios )
 	ROM_REGION( 0x400000, "user3", ROMREGION_ERASEFF ) // Slot B
 
 	ROM_REGION( 0x1000000, "maincpu", 0 )
-	ROM_COPY( "user1",   0x00000, 0x010000, 0x400000 )
-	ROM_COPY( "user1",   0x00000, 0x000000, 0x0008000 )
+	ROM_COPY( "user1",   0x00000, 0x000000, 0x400000 ) // Bios
 ROM_END
 
 ROM_START( mac2bios )
@@ -528,8 +533,7 @@ ROM_START( mac2bios )
 	ROM_REGION( 0x400000, "user3", ROMREGION_ERASEFF ) // Slot B
 
 	ROM_REGION( 0x1000000, "maincpu", 0 )
-	ROM_COPY( "user1",   0x00000, 0x010000, 0x400000 )
-	ROM_COPY( "user1",   0x00000, 0x000000, 0x0008000 )
+	ROM_COPY( "user1",   0x00000, 0x000000, 0x400000 ) // Bios
 ROM_END
 
 ROM_START( kisekaem )
@@ -545,9 +549,8 @@ ROM_START( kisekaem )
 	ROM_REGION( 0x400000, "user3", ROMREGION_ERASEFF ) // Slot B
 
 	ROM_REGION( 0x1000000, "maincpu", 0 )
-	ROM_COPY( "user1",   0x00000, 0x010000, 0x400000 )
-	ROM_COPY( "user1",   0x00000, 0x000000, 0x008000 )
-	ROM_COPY( "user2",   0x00000, 0x410000, 0x400000 )
+	ROM_COPY( "user1",   0x00000, 0x000000, 0x400000 ) // Bios
+	ROM_COPY( "user2",   0x00000, 0x400000, 0x400000 ) // Slot A
 ROM_END
 
 ROM_START( kisekaeh )
@@ -563,9 +566,8 @@ ROM_START( kisekaeh )
 	ROM_REGION( 0x400000, "user3", ROMREGION_ERASEFF ) // Slot B
 
 	ROM_REGION( 0x1000000, "maincpu", 0 )
-	ROM_COPY( "user1",   0x00000, 0x010000, 0x400000 )
-	ROM_COPY( "user1",   0x00000, 0x000000, 0x008000 )
-	ROM_COPY( "user2",   0x00000, 0x410000, 0x400000 )
+	ROM_COPY( "user1",   0x00000, 0x000000, 0x400000 ) // Bios
+	ROM_COPY( "user2",   0x00000, 0x400000, 0x400000 ) // Slot A
 ROM_END
 
 ROM_START( cultname ) // uses printer - two different games ? (slot a - checks for printer, slot b - not)
@@ -586,10 +588,9 @@ ROM_START( cultname ) // uses printer - two different games ? (slot a - checks f
 
 
 	ROM_REGION( 0x1000000, "maincpu", 0 )
-	ROM_COPY( "user1",   0x00000, 0x010000, 0x400000 )
-	ROM_COPY( "user1",   0x00000, 0x000000, 0x008000 )
-	ROM_COPY( "user2",   0x00000, 0x410000, 0x400000 )
-	ROM_COPY( "user3",   0x00000, 0x810000, 0x400000 )
+	ROM_COPY( "user1",   0x00000, 0x000000, 0x400000 ) // Bios
+	ROM_COPY( "user2",   0x00000, 0x400000, 0x400000 ) // Slot A
+	ROM_COPY( "user3",   0x00000, 0x800000, 0x400000 ) // Slot B
 ROM_END
 
 /* these are listed as MACS2 sub-boards, is it the same?  - it's not ;) */
@@ -598,7 +599,6 @@ ROM_START( yuka )
 	MACS2_BIOS
 
 	ROM_REGION( 0x400000, "user2", 0 ) // Slot A
-
 	ROM_LOAD16_BYTE( "yu-ka_2.u6", 0x000001, 0x100000, CRC(c3c5728b) SHA1(e53cdcae556f34bab45d9342fd78ec29b6543c46) )
 	ROM_LOAD16_BYTE( "yu-ka_4.u5", 0x000000, 0x100000, CRC(7e391ee6) SHA1(3a0c122c9d0e2a91df6d8039fb958b6d00997747) )
 	ROM_LOAD16_BYTE( "yu-ka_1.u8", 0x200001, 0x100000, CRC(bccd1b15) SHA1(02511f3be60c53b5f5d90f12f0648f6e184ca667) )
@@ -607,8 +607,7 @@ ROM_START( yuka )
 	ROM_REGION( 0x400000, "user3", ROMREGION_ERASE00 ) // Slot B
 
 	ROM_REGION( 0x1000000, "maincpu", 0 )
-	ROM_COPY( "user2",   0x00000, 0x010000, 0x400000 )
-	ROM_COPY( "user2",   0x00000, 0x000000, 0x0008000 )
+	ROM_COPY( "user2",   0x00000, 0x000000, 0x400000 ) // Slot A
 ROM_END
 
 ROM_START( yujan )
@@ -623,8 +622,7 @@ ROM_START( yujan )
 	ROM_REGION( 0x400000, "user3", ROMREGION_ERASEFF ) // Slot B
 
 	ROM_REGION( 0x1000000, "maincpu", 0 )
-	ROM_COPY( "user2",   0x00000, 0x010000, 0x400000 )
-	ROM_COPY( "user2",   0x00000, 0x000000, 0x0008000 )
+	ROM_COPY( "user2",   0x00000, 0x000000, 0x400000 ) // Slot A
 ROM_END
 
 static const UINT8 ramdata[160]=
@@ -641,12 +639,11 @@ static const UINT8 ramdata[160]=
 	0xF0, 0xED, 0xB0, 0x3A, 0x0A, 0xE8, 0xE6, 0xF3, 0x32, 0x0A, 0xE8, 0xD3, 0xC0, 0xC9, 0x00, 0xF3
 };
 
-static MACHINE_RESET(macs)
+MACHINE_RESET_MEMBER(macs_state,macs)
 {
-	macs_state *state = machine.driver_data<macs_state>();
-	UINT8 *macs_ram1 = state->m_ram1;
+	UINT8 *macs_ram1 = m_ram1;
 	#if 0
-	UINT8 *macs_ram2 = state->m_ram2;
+	UINT8 *macs_ram2 = m_ram2;
 /*
         BIOS ram init:
 
@@ -675,13 +672,13 @@ static MACHINE_RESET(macs)
         730E: ED B0         ldir
         ...
 */
-		memcpy(macs_ram1 + 0x0e9f, machine.region("user1")->base()+0x7327, 0xc7);
-		memcpy(macs_ram1 + 0x1e9f, machine.region("user1")->base()+0x7327, 0xc7);
+		memcpy(macs_ram1 + 0x0e9f, memregion("user1")->base()+0x7327, 0xc7);
+		memcpy(macs_ram1 + 0x1e9f, memregion("user1")->base()+0x7327, 0xc7);
 
-		memcpy(macs_ram1 + 0x0800, machine.region("user1")->base()+0x73fa, 0x507);
-		memcpy(macs_ram1 + 0x1800, machine.region("user1")->base()+0x73fa, 0x507);
+		memcpy(macs_ram1 + 0x0800, memregion("user1")->base()+0x73fa, 0x507);
+		memcpy(macs_ram1 + 0x1800, memregion("user1")->base()+0x73fa, 0x507);
 
-#define MAKEJMP(n,m)	macs_ram2[(n) - 0xe800 + 0]=0xc3;\
+#define MAKEJMP(n,m)    macs_ram2[(n) - 0xe800 + 0]=0xc3;\
 						macs_ram2[(n) - 0xe800 + 1]=(m)&0xff;\
 						macs_ram2[(n) - 0xe800 + 2]=((m)>>8)&0xff;
 
@@ -715,50 +712,46 @@ static MACHINE_RESET(macs)
 		macs_ram1[0x1ff9]=0x07;
 		#endif
 
-		memory_set_bankptr(machine,  "bank1", machine.region("maincpu")->base() + 0x10000 );
-		memory_set_bankptr(machine,  "bank2", macs_ram1+0x800);
-		memory_set_bankptr(machine,  "bank3", macs_ram1+0x10000);
-		memory_set_bankptr(machine,  "bank4", machine.region("maincpu")->base() );
+		membank("bank1")->set_base(machine().root_device().memregion("maincpu")->base() );
+		membank("bank2")->set_base(macs_ram1+0x800);
+		membank("bank3")->set_base(macs_ram1+0x10000);
+		membank("bank4")->set_base(machine().root_device().memregion("maincpu")->base() );
 }
 
-static DRIVER_INIT(macs)
+DRIVER_INIT_MEMBER(macs_state,macs)
 {
-	macs_state *state = machine.driver_data<macs_state>();
-	state->m_ram1=auto_alloc_array(machine, UINT8, 0x20000);
+	m_ram1=auto_alloc_array(machine(), UINT8, 0x20000);
 	st0016_game=10|0x80;
-	state->m_rev = 1;
+	m_rev = 1;
 }
 
-static DRIVER_INIT(macs2)
+DRIVER_INIT_MEMBER(macs_state,macs2)
 {
-	macs_state *state = machine.driver_data<macs_state>();
-	state->m_ram1=auto_alloc_array(machine, UINT8, 0x20000);
+	m_ram1=auto_alloc_array(machine(), UINT8, 0x20000);
 	st0016_game=10|0x80;
-	state->m_rev = 2;
+	m_rev = 2;
 }
 
-static DRIVER_INIT(kisekaeh)
+DRIVER_INIT_MEMBER(macs_state,kisekaeh)
 {
-	macs_state *state = machine.driver_data<macs_state>();
-	state->m_ram1=auto_alloc_array(machine, UINT8, 0x20000);
+	m_ram1=auto_alloc_array(machine(), UINT8, 0x20000);
 	st0016_game=11|0x180;
-	state->m_rev = 1;
+	m_rev = 1;
 }
 
-static DRIVER_INIT(kisekaem)
+DRIVER_INIT_MEMBER(macs_state,kisekaem)
 {
-	macs_state *state = machine.driver_data<macs_state>();
-	state->m_ram1=auto_alloc_array(machine, UINT8, 0x20000);
+	m_ram1=auto_alloc_array(machine(), UINT8, 0x20000);
 	st0016_game=10|0x180;
-	state->m_rev = 1;
+	m_rev = 1;
 }
 
 
-GAME( 1995, macsbios, 0,        macs, macs_m, macs,     ROT0, "I'Max", "Multi Amenity Cassette System BIOS", GAME_IS_BIOS_ROOT | GAME_IMPERFECT_SOUND | GAME_NOT_WORKING )
-GAME( 1995, mac2bios, 0,        macs, macs_m, macs2,     ROT0, "I'Max", "Multi Amenity Cassette System 2 BIOS", GAME_IS_BIOS_ROOT | GAME_IMPERFECT_SOUND | GAME_NOT_WORKING )
+GAME( 1995, macsbios, 0,        macs, macs_m, macs_state, macs,     ROT0, "I'Max", "Multi Amenity Cassette System BIOS", GAME_IS_BIOS_ROOT | GAME_IMPERFECT_SOUND | GAME_NOT_WORKING )
+GAME( 1995, mac2bios, 0,        macs, macs_m, macs_state, macs2,     ROT0, "I'Max", "Multi Amenity Cassette System 2 BIOS", GAME_IS_BIOS_ROOT | GAME_IMPERFECT_SOUND | GAME_NOT_WORKING )
 
-GAME( 1995, kisekaem, macsbios, macs, kisekaem, kisekaem,   ROT0, "I'Max", "Kisekae Mahjong",  GAME_NOT_WORKING|GAME_IMPERFECT_SOUND )
-GAME( 1995, kisekaeh, macsbios, macs, macs_h,   kisekaeh,   ROT0, "I'Max", "Kisekae Hanafuda",  GAME_NOT_WORKING |GAME_IMPERFECT_SOUND)
-GAME( 1996, cultname, macsbios, macs, macs_m,   macs,       ROT0, "I'Max", "Seimei-Kantei-Meimei-Ki Cult Name",  GAME_NOT_WORKING |GAME_IMPERFECT_SOUND)
-GAME( 1999, yuka,     macsbios, macs, macs_h,   macs2,      ROT0, "Yubis / T.System", "Yu-Ka",  0 )
-GAME( 1999, yujan,    macsbios, macs, macs_m,   macs2,      ROT0, "Yubis / T.System", "Yu-Jan",  0 )
+GAME( 1995, kisekaem, macsbios, macs, kisekaem, macs_state, kisekaem,   ROT0, "I'Max", "Kisekae Mahjong",  GAME_NOT_WORKING|GAME_IMPERFECT_SOUND )
+GAME( 1995, kisekaeh, macsbios, macs, macs_h, macs_state,   kisekaeh,   ROT0, "I'Max", "Kisekae Hanafuda",  GAME_NOT_WORKING |GAME_IMPERFECT_SOUND)
+GAME( 1996, cultname, macsbios, macs, macs_m, macs_state,   macs,       ROT0, "I'Max", "Seimei-Kantei-Meimei-Ki Cult Name",  GAME_NOT_WORKING |GAME_IMPERFECT_SOUND)
+GAME( 1999, yuka,     macsbios, macs, macs_h, macs_state,   macs2,      ROT0, "Yubis / T.System", "Yu-Ka",  0 )
+GAME( 1999, yujan,    macsbios, macs, macs_m, macs_state,   macs2,      ROT0, "Yubis / T.System", "Yu-Jan",  0 )

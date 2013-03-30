@@ -30,43 +30,86 @@
 *************************************************************************************************************/
 
 
-#define MASTER_CLOCK		XTAL_12MHz	/* confirmed */
+#define MASTER_CLOCK        XTAL_12MHz  /* confirmed */
 
 #include "emu.h"
 #include "cpu/z80/z80.h"
 #include "sound/ay8910.h"
-#include "machine/8255ppi.h"
+#include "machine/i8255.h"
 #include "machine/nvram.h"
 
 
 class skylncr_state : public driver_device
 {
 public:
-	skylncr_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	skylncr_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"),
+		m_colorram(*this, "colorram"),
+		m_reeltiles_1_ram(*this, "reeltiles_1_ram"),
+		m_reeltiles_2_ram(*this, "reeltiles_2_ram"),
+		m_reeltiles_3_ram(*this, "reeltiles_3_ram"),
+		m_reeltiles_4_ram(*this, "reeltiles_4_ram"),
+		m_reeltileshigh_1_ram(*this, "rthigh_1_ram"),
+		m_reeltileshigh_2_ram(*this, "rthigh_2_ram"),
+		m_reeltileshigh_3_ram(*this, "rthigh_3_ram"),
+		m_reeltileshigh_4_ram(*this, "rthigh_4_ram"),
+		m_reelscroll1(*this, "reelscroll1"),
+		m_reelscroll2(*this, "reelscroll2"),
+		m_reelscroll3(*this, "reelscroll3"),
+		m_reelscroll4(*this, "reelscroll4"){ }
 
 	tilemap_t *m_tmap;
-	UINT8 *m_videoram;
-	UINT8 *m_colorram;
-	UINT8* m_reeltiles_1_ram;
-	UINT8* m_reeltiles_2_ram;
-	UINT8* m_reeltiles_3_ram;
-	UINT8* m_reeltiles_4_ram;
-	UINT8* m_reeltileshigh_1_ram;
-	UINT8* m_reeltileshigh_2_ram;
-	UINT8* m_reeltileshigh_3_ram;
-	UINT8* m_reeltileshigh_4_ram;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_colorram;
+	required_shared_ptr<UINT8> m_reeltiles_1_ram;
+	required_shared_ptr<UINT8> m_reeltiles_2_ram;
+	required_shared_ptr<UINT8> m_reeltiles_3_ram;
+	required_shared_ptr<UINT8> m_reeltiles_4_ram;
+	required_shared_ptr<UINT8> m_reeltileshigh_1_ram;
+	required_shared_ptr<UINT8> m_reeltileshigh_2_ram;
+	required_shared_ptr<UINT8> m_reeltileshigh_3_ram;
+	required_shared_ptr<UINT8> m_reeltileshigh_4_ram;
 	tilemap_t *m_reel_1_tilemap;
 	tilemap_t *m_reel_2_tilemap;
 	tilemap_t *m_reel_3_tilemap;
 	tilemap_t *m_reel_4_tilemap;
-	UINT8* m_reelscroll1;
-	UINT8* m_reelscroll2;
-	UINT8* m_reelscroll3;
-	UINT8* m_reelscroll4;
+	required_shared_ptr<UINT8> m_reelscroll1;
+	required_shared_ptr<UINT8> m_reelscroll2;
+	required_shared_ptr<UINT8> m_reelscroll3;
+	required_shared_ptr<UINT8> m_reelscroll4;
 	UINT8 m_nmi_enable;
 	int m_color;
 	int m_color2;
+	DECLARE_WRITE8_MEMBER(skylncr_videoram_w);
+	DECLARE_WRITE8_MEMBER(skylncr_colorram_w);
+	DECLARE_WRITE8_MEMBER(reeltiles_1_w);
+	DECLARE_WRITE8_MEMBER(reeltiles_2_w);
+	DECLARE_WRITE8_MEMBER(reeltiles_3_w);
+	DECLARE_WRITE8_MEMBER(reeltiles_4_w);
+	DECLARE_WRITE8_MEMBER(reeltileshigh_1_w);
+	DECLARE_WRITE8_MEMBER(reeltileshigh_2_w);
+	DECLARE_WRITE8_MEMBER(reeltileshigh_3_w);
+	DECLARE_WRITE8_MEMBER(reeltileshigh_4_w);
+	DECLARE_WRITE8_MEMBER(skylncr_paletteram_w);
+	DECLARE_WRITE8_MEMBER(skylncr_paletteram2_w);
+	DECLARE_WRITE8_MEMBER(reelscroll1_w);
+	DECLARE_WRITE8_MEMBER(reelscroll2_w);
+	DECLARE_WRITE8_MEMBER(reelscroll3_w);
+	DECLARE_WRITE8_MEMBER(reelscroll4_w);
+	DECLARE_WRITE8_MEMBER(skylncr_coin_w);
+	DECLARE_READ8_MEMBER(ret_ff);
+	DECLARE_READ8_MEMBER(ret_00);
+	DECLARE_WRITE8_MEMBER(skylncr_nmi_enable_w);
+	DECLARE_DRIVER_INIT(skylncr);
+	TILE_GET_INFO_MEMBER(get_tile_info);
+	TILE_GET_INFO_MEMBER(get_reel_1_tile_info);
+	TILE_GET_INFO_MEMBER(get_reel_2_tile_info);
+	TILE_GET_INFO_MEMBER(get_reel_3_tile_info);
+	TILE_GET_INFO_MEMBER(get_reel_4_tile_info);
+	virtual void video_start();
+	UINT32 screen_update_skylncr(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(skylncr_vblank_interrupt);
 };
 
 
@@ -74,239 +117,216 @@ public:
 *           Video Hardware            *
 **************************************/
 
-static WRITE8_HANDLER( skylncr_videoram_w )
+WRITE8_MEMBER(skylncr_state::skylncr_videoram_w)
 {
-	skylncr_state *state = space->machine().driver_data<skylncr_state>();
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_tmap, offset);
+	m_videoram[offset] = data;
+	m_tmap->mark_tile_dirty(offset);
 }
 
-static WRITE8_HANDLER( skylncr_colorram_w )
+WRITE8_MEMBER(skylncr_state::skylncr_colorram_w)
 {
-	skylncr_state *state = space->machine().driver_data<skylncr_state>();
-	state->m_colorram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_tmap, offset);
-}
-
-
-static TILE_GET_INFO( get_tile_info )
-{
-	skylncr_state *state = machine.driver_data<skylncr_state>();
-	UINT16 code = state->m_videoram[ tile_index ] + (state->m_colorram[ tile_index ] << 8);
-	SET_TILE_INFO(0, code, 0, TILE_FLIPYX( 0 ));
-}
-
-static TILE_GET_INFO( get_reel_1_tile_info )
-{
-	skylncr_state *state = machine.driver_data<skylncr_state>();
-	UINT16 code = state->m_reeltiles_1_ram[ tile_index ] + (state->m_reeltileshigh_1_ram[ tile_index ] << 8);
-	SET_TILE_INFO(1, code, 0, TILE_FLIPYX( 0 ));
-}
-
-static TILE_GET_INFO( get_reel_2_tile_info )
-{
-	skylncr_state *state = machine.driver_data<skylncr_state>();
-	UINT16 code = state->m_reeltiles_2_ram[ tile_index ] + (state->m_reeltileshigh_2_ram[ tile_index ] << 8);
-	SET_TILE_INFO(1, code, 0, TILE_FLIPYX( 0 ));
-}
-
-static TILE_GET_INFO( get_reel_3_tile_info )
-{
-	skylncr_state *state = machine.driver_data<skylncr_state>();
-	UINT16 code = state->m_reeltiles_3_ram[ tile_index ] + (state->m_reeltileshigh_3_ram[ tile_index ] << 8);
-	SET_TILE_INFO(1, code, 0, TILE_FLIPYX( 0 ));
-}
-
-static TILE_GET_INFO( get_reel_4_tile_info )
-{
-	skylncr_state *state = machine.driver_data<skylncr_state>();
-	UINT16 code = state->m_reeltiles_4_ram[ tile_index ] + (state->m_reeltileshigh_4_ram[ tile_index ] << 8);
-	SET_TILE_INFO(1, code, 0, TILE_FLIPYX( 0 ));
+	m_colorram[offset] = data;
+	m_tmap->mark_tile_dirty(offset);
 }
 
 
-static VIDEO_START( skylncr )
+TILE_GET_INFO_MEMBER(skylncr_state::get_tile_info)
 {
-	skylncr_state *state = machine.driver_data<skylncr_state>();
-
-	state->m_tmap = tilemap_create(	machine, get_tile_info, tilemap_scan_rows, 8, 8, 0x40, 0x20	);
-
-	state->m_reel_1_tilemap = tilemap_create(machine, get_reel_1_tile_info, tilemap_scan_rows, 8, 32, 64, 8 );
-	state->m_reel_2_tilemap = tilemap_create(machine, get_reel_2_tile_info, tilemap_scan_rows, 8, 32, 64, 8 );
-	state->m_reel_3_tilemap = tilemap_create(machine, get_reel_3_tile_info, tilemap_scan_rows, 8, 32, 64, 8 );
-	state->m_reel_4_tilemap = tilemap_create(machine, get_reel_4_tile_info, tilemap_scan_rows, 8, 32, 64, 8 );
-
-	tilemap_set_scroll_cols(state->m_reel_2_tilemap, 0x40);
-	tilemap_set_scroll_cols(state->m_reel_3_tilemap, 0x40);
-	tilemap_set_scroll_cols(state->m_reel_4_tilemap, 0x40);
-
-	tilemap_set_transparent_pen(state->m_reel_2_tilemap, 0);
-	tilemap_set_transparent_pen(state->m_reel_3_tilemap, 0);
-	tilemap_set_transparent_pen(state->m_reel_4_tilemap, 0);
-
-
-	tilemap_set_transparent_pen(state->m_tmap, 0);
+	UINT16 code = m_videoram[ tile_index ] + (m_colorram[ tile_index ] << 8);
+	SET_TILE_INFO_MEMBER(0, code, 0, TILE_FLIPYX( 0 ));
 }
 
-// are these hardcoded, or registers?
-static const rectangle visible1 = { 0*8, (20+48)*8-1,  4*8,  (4+7)*8-1 };
-static const rectangle visible2 = { 0*8, (20+48)*8-1, 12*8, (12+7)*8-1 };
-static const rectangle visible3 = { 0*8, (20+48)*8-1, 20*8, (20+7)*8-1 };
-
-
-static SCREEN_UPDATE( skylncr )
+TILE_GET_INFO_MEMBER(skylncr_state::get_reel_1_tile_info)
 {
-	skylncr_state *state = screen->machine().driver_data<skylncr_state>();
+	UINT16 code = m_reeltiles_1_ram[ tile_index ] + (m_reeltileshigh_1_ram[ tile_index ] << 8);
+	SET_TILE_INFO_MEMBER(1, code, 0, TILE_FLIPYX( 0 ));
+}
+
+TILE_GET_INFO_MEMBER(skylncr_state::get_reel_2_tile_info)
+{
+	UINT16 code = m_reeltiles_2_ram[ tile_index ] + (m_reeltileshigh_2_ram[ tile_index ] << 8);
+	SET_TILE_INFO_MEMBER(1, code, 0, TILE_FLIPYX( 0 ));
+}
+
+TILE_GET_INFO_MEMBER(skylncr_state::get_reel_3_tile_info)
+{
+	UINT16 code = m_reeltiles_3_ram[ tile_index ] + (m_reeltileshigh_3_ram[ tile_index ] << 8);
+	SET_TILE_INFO_MEMBER(1, code, 0, TILE_FLIPYX( 0 ));
+}
+
+TILE_GET_INFO_MEMBER(skylncr_state::get_reel_4_tile_info)
+{
+	UINT16 code = m_reeltiles_4_ram[ tile_index ] + (m_reeltileshigh_4_ram[ tile_index ] << 8);
+	SET_TILE_INFO_MEMBER(1, code, 0, TILE_FLIPYX( 0 ));
+}
+
+
+void skylncr_state::video_start()
+{
+
+	m_tmap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(skylncr_state::get_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 0x40, 0x20    );
+
+	m_reel_1_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(skylncr_state::get_reel_1_tile_info),this), TILEMAP_SCAN_ROWS, 8, 32, 64, 8 );
+	m_reel_2_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(skylncr_state::get_reel_2_tile_info),this), TILEMAP_SCAN_ROWS, 8, 32, 64, 8 );
+	m_reel_3_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(skylncr_state::get_reel_3_tile_info),this), TILEMAP_SCAN_ROWS, 8, 32, 64, 8 );
+	m_reel_4_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(skylncr_state::get_reel_4_tile_info),this), TILEMAP_SCAN_ROWS, 8, 32, 64, 8 );
+
+	m_reel_2_tilemap->set_scroll_cols(0x40);
+	m_reel_3_tilemap->set_scroll_cols(0x40);
+	m_reel_4_tilemap->set_scroll_cols(0x40);
+
+	m_reel_2_tilemap->set_transparent_pen(0);
+	m_reel_3_tilemap->set_transparent_pen(0);
+	m_reel_4_tilemap->set_transparent_pen(0);
+
+
+	m_tmap->set_transparent_pen(0);
+}
+
+
+UINT32 skylncr_state::screen_update_skylncr(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
+{
 	int i;
 
-	bitmap_fill(bitmap,cliprect,0);
-	tilemap_draw(bitmap,cliprect, state->m_reel_1_tilemap, 0, 0);
+	bitmap.fill(0, cliprect);
+	m_reel_1_tilemap->draw(bitmap, cliprect, 0, 0);
+
+	// are these hardcoded, or registers?
+	const rectangle visible1(0*8, (20+48)*8-1,  4*8,  (4+7)*8-1);
+	const rectangle visible2(0*8, (20+48)*8-1, 12*8, (12+7)*8-1);
+	const rectangle visible3(0*8, (20+48)*8-1, 20*8, (20+7)*8-1);
 
 	for (i= 0;i < 64;i++)
 	{
-		tilemap_set_scrolly(state->m_reel_2_tilemap, i, state->m_reelscroll2[i]);
-		tilemap_set_scrolly(state->m_reel_3_tilemap, i, state->m_reelscroll3[i]);
-		tilemap_set_scrolly(state->m_reel_4_tilemap, i, state->m_reelscroll4[i]);
+		m_reel_2_tilemap->set_scrolly(i, m_reelscroll2[i]);
+		m_reel_3_tilemap->set_scrolly(i, m_reelscroll3[i]);
+		m_reel_4_tilemap->set_scrolly(i, m_reelscroll4[i]);
 	}
 
-	tilemap_draw(bitmap,&visible1,state->m_reel_2_tilemap, 0, 0);
-	tilemap_draw(bitmap,&visible2,state->m_reel_3_tilemap, 0, 0);
-	tilemap_draw(bitmap,&visible3,state->m_reel_4_tilemap, 0, 0);
+	m_reel_2_tilemap->draw(bitmap, visible1, 0, 0);
+	m_reel_3_tilemap->draw(bitmap, visible2, 0, 0);
+	m_reel_4_tilemap->draw(bitmap, visible3, 0, 0);
 
 
-	tilemap_draw(bitmap,cliprect, state->m_tmap, 0, 0);
+	m_tmap->draw(bitmap, cliprect, 0, 0);
 	return 0;
 }
 
-static WRITE8_HANDLER( reeltiles_1_w )
+WRITE8_MEMBER(skylncr_state::reeltiles_1_w)
 {
-	skylncr_state *state = space->machine().driver_data<skylncr_state>();
-	state->m_reeltiles_1_ram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_reel_1_tilemap, offset);
+	m_reeltiles_1_ram[offset] = data;
+	m_reel_1_tilemap->mark_tile_dirty(offset);
 }
 
-static WRITE8_HANDLER( reeltiles_2_w )
+WRITE8_MEMBER(skylncr_state::reeltiles_2_w)
 {
-	skylncr_state *state = space->machine().driver_data<skylncr_state>();
-	state->m_reeltiles_2_ram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_reel_2_tilemap, offset);
+	m_reeltiles_2_ram[offset] = data;
+	m_reel_2_tilemap->mark_tile_dirty(offset);
 }
 
-static WRITE8_HANDLER( reeltiles_3_w )
+WRITE8_MEMBER(skylncr_state::reeltiles_3_w)
 {
-	skylncr_state *state = space->machine().driver_data<skylncr_state>();
-	state->m_reeltiles_3_ram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_reel_3_tilemap, offset);
+	m_reeltiles_3_ram[offset] = data;
+	m_reel_3_tilemap->mark_tile_dirty(offset);
 }
 
-static WRITE8_HANDLER( reeltiles_4_w )
+WRITE8_MEMBER(skylncr_state::reeltiles_4_w)
 {
-	skylncr_state *state = space->machine().driver_data<skylncr_state>();
-	state->m_reeltiles_4_ram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_reel_4_tilemap, offset);
+	m_reeltiles_4_ram[offset] = data;
+	m_reel_4_tilemap->mark_tile_dirty(offset);
 }
 
-static WRITE8_HANDLER( reeltileshigh_1_w )
+WRITE8_MEMBER(skylncr_state::reeltileshigh_1_w)
 {
-	skylncr_state *state = space->machine().driver_data<skylncr_state>();
-	state->m_reeltileshigh_1_ram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_reel_1_tilemap, offset);
+	m_reeltileshigh_1_ram[offset] = data;
+	m_reel_1_tilemap->mark_tile_dirty(offset);
 }
 
-static WRITE8_HANDLER( reeltileshigh_2_w )
+WRITE8_MEMBER(skylncr_state::reeltileshigh_2_w)
 {
-	skylncr_state *state = space->machine().driver_data<skylncr_state>();
-	state->m_reeltileshigh_2_ram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_reel_2_tilemap, offset);
+	m_reeltileshigh_2_ram[offset] = data;
+	m_reel_2_tilemap->mark_tile_dirty(offset);
 }
 
-static WRITE8_HANDLER( reeltileshigh_3_w )
+WRITE8_MEMBER(skylncr_state::reeltileshigh_3_w)
 {
-	skylncr_state *state = space->machine().driver_data<skylncr_state>();
-	state->m_reeltileshigh_3_ram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_reel_3_tilemap, offset);
+	m_reeltileshigh_3_ram[offset] = data;
+	m_reel_3_tilemap->mark_tile_dirty(offset);
 }
 
-static WRITE8_HANDLER( reeltileshigh_4_w )
+WRITE8_MEMBER(skylncr_state::reeltileshigh_4_w)
 {
-	skylncr_state *state = space->machine().driver_data<skylncr_state>();
-	state->m_reeltileshigh_4_ram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_reel_4_tilemap, offset);
+	m_reeltileshigh_4_ram[offset] = data;
+	m_reel_4_tilemap->mark_tile_dirty(offset);
 }
 
 
-static WRITE8_HANDLER( skylncr_paletteram_w )
+WRITE8_MEMBER(skylncr_state::skylncr_paletteram_w)
 {
-	skylncr_state *state = space->machine().driver_data<skylncr_state>();
 
 	if (offset == 0)
 	{
-		state->m_color = data;
+		m_color = data;
 	}
 	else
 	{
 		int r,g,b;
-		space->machine().generic.paletteram.u8[state->m_color] = data;
+		m_generic_paletteram_8[m_color] = data;
 
-		r = space->machine().generic.paletteram.u8[(state->m_color/3 * 3) + 0];
-		g = space->machine().generic.paletteram.u8[(state->m_color/3 * 3) + 1];
-		b = space->machine().generic.paletteram.u8[(state->m_color/3 * 3) + 2];
+		r = m_generic_paletteram_8[(m_color/3 * 3) + 0];
+		g = m_generic_paletteram_8[(m_color/3 * 3) + 1];
+		b = m_generic_paletteram_8[(m_color/3 * 3) + 2];
 		r = (r << 2) | (r >> 4);
 		g = (g << 2) | (g >> 4);
 		b = (b << 2) | (b >> 4);
 
-		palette_set_color(space->machine(), state->m_color / 3, MAKE_RGB(r, g, b));
-		state->m_color = (state->m_color + 1) % (0x100 * 3);
+		palette_set_color(machine(), m_color / 3, MAKE_RGB(r, g, b));
+		m_color = (m_color + 1) % (0x100 * 3);
 	}
 }
 
-static WRITE8_HANDLER( skylncr_paletteram2_w )
+WRITE8_MEMBER(skylncr_state::skylncr_paletteram2_w)
 {
-	skylncr_state *state = space->machine().driver_data<skylncr_state>();
 
 	if (offset == 0)
 	{
-		state->m_color2 = data;
+		m_color2 = data;
 	}
 	else
 	{
 		int r,g,b;
-		space->machine().generic.paletteram2.u8[state->m_color2] = data;
+		m_generic_paletteram2_8[m_color2] = data;
 
-		r = space->machine().generic.paletteram2.u8[(state->m_color2/3 * 3) + 0];
-		g = space->machine().generic.paletteram2.u8[(state->m_color2/3 * 3) + 1];
-		b = space->machine().generic.paletteram2.u8[(state->m_color2/3 * 3) + 2];
+		r = m_generic_paletteram2_8[(m_color2/3 * 3) + 0];
+		g = m_generic_paletteram2_8[(m_color2/3 * 3) + 1];
+		b = m_generic_paletteram2_8[(m_color2/3 * 3) + 2];
 		r = (r << 2) | (r >> 4);
 		g = (g << 2) | (g >> 4);
 		b = (b << 2) | (b >> 4);
 
-		palette_set_color(space->machine(), 0x100 + state->m_color2 / 3, MAKE_RGB(r, g, b));
-		state->m_color2 = (state->m_color2 + 1) % (0x100 * 3);
+		palette_set_color(machine(), 0x100 + m_color2 / 3, MAKE_RGB(r, g, b));
+		m_color2 = (m_color2 + 1) % (0x100 * 3);
 	}
 }
 
-static WRITE8_HANDLER( reelscroll1_w )
+WRITE8_MEMBER(skylncr_state::reelscroll1_w)
 {
-	skylncr_state *state = space->machine().driver_data<skylncr_state>();
-	state->m_reelscroll1[offset] = data;
+	m_reelscroll1[offset] = data;
 }
 
-static WRITE8_HANDLER( reelscroll2_w )
+WRITE8_MEMBER(skylncr_state::reelscroll2_w)
 {
-	skylncr_state *state = space->machine().driver_data<skylncr_state>();
-	state->m_reelscroll2[offset] = data;
+	m_reelscroll2[offset] = data;
 }
 
-static WRITE8_HANDLER( reelscroll3_w )
+WRITE8_MEMBER(skylncr_state::reelscroll3_w)
 {
-	skylncr_state *state = space->machine().driver_data<skylncr_state>();
-	state->m_reelscroll3[offset] = data;
+	m_reelscroll3[offset] = data;
 }
 
-static WRITE8_HANDLER( reelscroll4_w )
+WRITE8_MEMBER(skylncr_state::reelscroll4_w)
 {
-	skylncr_state *state = space->machine().driver_data<skylncr_state>();
-	state->m_reelscroll4[offset] = data;
+	m_reelscroll4[offset] = data;
 }
 
 
@@ -314,27 +334,26 @@ static WRITE8_HANDLER( reelscroll4_w )
 *         Other Handlers            *
 ************************************/
 
-static WRITE8_HANDLER( skylncr_coin_w )
+WRITE8_MEMBER(skylncr_state::skylncr_coin_w)
 {
-	coin_counter_w( space->machine(), 0, data & 0x04 );
+	coin_counter_w( machine(), 0, data & 0x04 );
 }
 
-static READ8_HANDLER( ret_ff )
+READ8_MEMBER(skylncr_state::ret_ff)
 {
 	return 0xff;
 }
 
 #ifdef UNUSED_FUNCTION
-static READ8_HANDLER( ret_00 )
+READ8_MEMBER(skylncr_state::ret_00)
 {
 	return 0x00;
 }
 #endif
 
-static WRITE8_HANDLER( skylncr_nmi_enable_w )
+WRITE8_MEMBER(skylncr_state::skylncr_nmi_enable_w)
 {
-	skylncr_state *state = space->machine().driver_data<skylncr_state>();
-	state->m_nmi_enable = data & 0x10;
+	m_nmi_enable = data & 0x10;
 }
 
 
@@ -342,25 +361,25 @@ static WRITE8_HANDLER( skylncr_nmi_enable_w )
 *             Memory Map              *
 **************************************/
 
-static ADDRESS_MAP_START( mem_map_skylncr, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( mem_map_skylncr, AS_PROGRAM, 8, skylncr_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x87ff) AM_RAM AM_SHARE("nvram")
 
-	AM_RANGE(0x8800, 0x8fff) AM_RAM_WRITE( skylncr_videoram_w ) AM_BASE_MEMBER(skylncr_state, m_videoram )
-	AM_RANGE(0x9000, 0x97ff) AM_RAM_WRITE( skylncr_colorram_w ) AM_BASE_MEMBER(skylncr_state, m_colorram )
+	AM_RANGE(0x8800, 0x8fff) AM_RAM_WRITE(skylncr_videoram_w ) AM_SHARE("videoram")
+	AM_RANGE(0x9000, 0x97ff) AM_RAM_WRITE(skylncr_colorram_w ) AM_SHARE("colorram")
 
-	AM_RANGE(0x9800, 0x99ff) AM_RAM_WRITE( reeltiles_1_w ) AM_BASE_MEMBER(skylncr_state, m_reeltiles_1_ram )
-	AM_RANGE(0x9a00, 0x9bff) AM_RAM_WRITE( reeltiles_2_w ) AM_BASE_MEMBER(skylncr_state, m_reeltiles_2_ram )
-	AM_RANGE(0x9c00, 0x9dff) AM_RAM_WRITE( reeltiles_3_w ) AM_BASE_MEMBER(skylncr_state, m_reeltiles_3_ram )
-	AM_RANGE(0x9e00, 0x9fff) AM_RAM_WRITE( reeltiles_4_w ) AM_BASE_MEMBER(skylncr_state, m_reeltiles_4_ram )
-	AM_RANGE(0xa000, 0xa1ff) AM_RAM_WRITE( reeltileshigh_1_w ) AM_BASE_MEMBER(skylncr_state, m_reeltileshigh_1_ram )
-	AM_RANGE(0xa200, 0xa3ff) AM_RAM_WRITE( reeltileshigh_2_w ) AM_BASE_MEMBER(skylncr_state, m_reeltileshigh_2_ram )
-	AM_RANGE(0xa400, 0xa5ff) AM_RAM_WRITE( reeltileshigh_3_w ) AM_BASE_MEMBER(skylncr_state, m_reeltileshigh_3_ram )
-	AM_RANGE(0xa600, 0xa7ff) AM_RAM_WRITE( reeltileshigh_4_w ) AM_BASE_MEMBER(skylncr_state, m_reeltileshigh_4_ram )
+	AM_RANGE(0x9800, 0x99ff) AM_RAM_WRITE(reeltiles_1_w ) AM_SHARE("reeltiles_1_ram")
+	AM_RANGE(0x9a00, 0x9bff) AM_RAM_WRITE(reeltiles_2_w ) AM_SHARE("reeltiles_2_ram")
+	AM_RANGE(0x9c00, 0x9dff) AM_RAM_WRITE(reeltiles_3_w ) AM_SHARE("reeltiles_3_ram")
+	AM_RANGE(0x9e00, 0x9fff) AM_RAM_WRITE(reeltiles_4_w ) AM_SHARE("reeltiles_4_ram")
+	AM_RANGE(0xa000, 0xa1ff) AM_RAM_WRITE(reeltileshigh_1_w ) AM_SHARE("rthigh_1_ram")
+	AM_RANGE(0xa200, 0xa3ff) AM_RAM_WRITE(reeltileshigh_2_w ) AM_SHARE("rthigh_2_ram")
+	AM_RANGE(0xa400, 0xa5ff) AM_RAM_WRITE(reeltileshigh_3_w ) AM_SHARE("rthigh_3_ram")
+	AM_RANGE(0xa600, 0xa7ff) AM_RAM_WRITE(reeltileshigh_4_w ) AM_SHARE("rthigh_4_ram")
 
-	AM_RANGE(0xaa55, 0xaa55) AM_READ( ret_ff )
+	AM_RANGE(0xaa55, 0xaa55) AM_READ(ret_ff )
 
-	AM_RANGE(0xb000, 0xb03f) AM_RAM_WRITE(reelscroll1_w) AM_BASE_MEMBER(skylncr_state, m_reelscroll1)
+	AM_RANGE(0xb000, 0xb03f) AM_RAM_WRITE(reelscroll1_w) AM_SHARE("reelscroll1")
 	AM_RANGE(0xb040, 0xb07f) AM_RAM_WRITE(reelscroll1_w)
 	AM_RANGE(0xb080, 0xb0bf) AM_RAM_WRITE(reelscroll1_w)
 	AM_RANGE(0xb0c0, 0xb0ff) AM_RAM_WRITE(reelscroll1_w)
@@ -369,7 +388,7 @@ static ADDRESS_MAP_START( mem_map_skylncr, AS_PROGRAM, 8 )
 	AM_RANGE(0xb180, 0xb1bf) AM_RAM_WRITE(reelscroll1_w)
 	AM_RANGE(0xb1c0, 0xb1ff) AM_RAM_WRITE(reelscroll1_w)
 
-	AM_RANGE(0xb200, 0xb23f) AM_RAM_WRITE(reelscroll2_w) AM_BASE_MEMBER(skylncr_state, m_reelscroll2)
+	AM_RANGE(0xb200, 0xb23f) AM_RAM_WRITE(reelscroll2_w) AM_SHARE("reelscroll2")
 	AM_RANGE(0xb240, 0xb27f) AM_RAM_WRITE(reelscroll2_w)
 	AM_RANGE(0xb280, 0xb2bf) AM_RAM_WRITE(reelscroll2_w)
 	AM_RANGE(0xb2c0, 0xb2ff) AM_RAM_WRITE(reelscroll2_w)
@@ -378,7 +397,7 @@ static ADDRESS_MAP_START( mem_map_skylncr, AS_PROGRAM, 8 )
 	AM_RANGE(0xb380, 0xb3bf) AM_RAM_WRITE(reelscroll2_w)
 	AM_RANGE(0xb3c0, 0xb3ff) AM_RAM_WRITE(reelscroll2_w)
 
-	AM_RANGE(0xb400, 0xb43f) AM_RAM_WRITE(reelscroll3_w) AM_BASE_MEMBER(skylncr_state, m_reelscroll3)
+	AM_RANGE(0xb400, 0xb43f) AM_RAM_WRITE(reelscroll3_w) AM_SHARE("reelscroll3")
 	AM_RANGE(0xb440, 0xb47f) AM_RAM_WRITE(reelscroll3_w)
 	AM_RANGE(0xb480, 0xb4bf) AM_RAM_WRITE(reelscroll3_w)
 	AM_RANGE(0xb4c0, 0xb4ff) AM_RAM_WRITE(reelscroll3_w)
@@ -387,7 +406,7 @@ static ADDRESS_MAP_START( mem_map_skylncr, AS_PROGRAM, 8 )
 	AM_RANGE(0xb580, 0xb5bf) AM_RAM_WRITE(reelscroll3_w)
 	AM_RANGE(0xb5c0, 0xb5ff) AM_RAM_WRITE(reelscroll3_w)
 
-	AM_RANGE(0xb600, 0xb63f) AM_RAM_WRITE(reelscroll4_w) AM_BASE_MEMBER(skylncr_state, m_reelscroll4)
+	AM_RANGE(0xb600, 0xb63f) AM_RAM_WRITE(reelscroll4_w) AM_SHARE("reelscroll4")
 	AM_RANGE(0xb640, 0xb67f) AM_RAM_WRITE(reelscroll4_w)
 	AM_RANGE(0xb680, 0xb6bf) AM_RAM_WRITE(reelscroll4_w)
 	AM_RANGE(0xb6c0, 0xb6ff) AM_RAM_WRITE(reelscroll4_w)
@@ -400,21 +419,21 @@ static ADDRESS_MAP_START( mem_map_skylncr, AS_PROGRAM, 8 )
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( io_map_skylncr, AS_IO, 8 )
+static ADDRESS_MAP_START( io_map_skylncr, AS_IO, 8, skylncr_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 
-	AM_RANGE(0x00, 0x03) AM_DEVREADWRITE("ppi8255_0", ppi8255_r, ppi8255_w)	/* Input Ports */
-	AM_RANGE(0x10, 0x13) AM_DEVREADWRITE("ppi8255_1", ppi8255_r, ppi8255_w)	/* Input Ports */
+	AM_RANGE(0x00, 0x03) AM_DEVREADWRITE("ppi8255_0", i8255_device, read, write)    /* Input Ports */
+	AM_RANGE(0x10, 0x13) AM_DEVREADWRITE("ppi8255_1", i8255_device, read, write)    /* Input Ports */
 
-	AM_RANGE(0x20, 0x20) AM_WRITE( skylncr_coin_w )
+	AM_RANGE(0x20, 0x20) AM_WRITE(skylncr_coin_w )
 
-	AM_RANGE(0x30, 0x31) AM_DEVWRITE( "aysnd", ay8910_address_data_w )
-	AM_RANGE(0x31, 0x31) AM_DEVREAD( "aysnd", ay8910_r )
+	AM_RANGE(0x30, 0x31) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_data_w )
+	AM_RANGE(0x31, 0x31) AM_DEVREAD_LEGACY("aysnd", ay8910_r )
 
-	AM_RANGE(0x40, 0x41) AM_WRITE( skylncr_paletteram_w )
-	AM_RANGE(0x50, 0x51) AM_WRITE( skylncr_paletteram2_w )
+	AM_RANGE(0x40, 0x41) AM_WRITE(skylncr_paletteram_w )
+	AM_RANGE(0x50, 0x51) AM_WRITE(skylncr_paletteram2_w )
 
-	AM_RANGE(0x70, 0x70) AM_WRITE( skylncr_nmi_enable_w )
+	AM_RANGE(0x70, 0x70) AM_WRITE(skylncr_nmi_enable_w )
 ADDRESS_MAP_END
 
 
@@ -484,9 +503,9 @@ static const gfx_layout layout8x32x8_rot =
 **************************************/
 
 static GFXDECODE_START( skylncr )
-	GFXDECODE_ENTRY( "gfx1", 0, layout8x8x8,		0, 2 )
-	GFXDECODE_ENTRY( "gfx2", 0, layout8x32x8,		0, 2 )
-	GFXDECODE_ENTRY( "gfx2", 0, layout8x32x8_rot,	0, 2 )
+	GFXDECODE_ENTRY( "gfx1", 0, layout8x8x8,        0, 2 )
+	GFXDECODE_ENTRY( "gfx2", 0, layout8x32x8,       0, 2 )
+	GFXDECODE_ENTRY( "gfx2", 0, layout8x32x8_rot,   0, 2 )
 GFXDECODE_END
 
 
@@ -495,7 +514,7 @@ GFXDECODE_END
 ***********************************/
 
 static INPUT_PORTS_START( skylncr )
-	PORT_START("IN1")	/* $00 (PPI0 port A) */
+	PORT_START("IN1")   /* $00 (PPI0 port A) */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_SLOT_STOP2)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SLOT_STOP1)
@@ -505,7 +524,7 @@ static INPUT_PORTS_START( skylncr )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN)
 
-	PORT_START("IN2")	/* $01 (PPI0 port B) */
+	PORT_START("IN2")   /* $01 (PPI0 port B) */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_GAMBLE_BET)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_OTHER) PORT_NAME("Option 2 (D-UP)") PORT_CODE(KEYCODE_S)
@@ -515,7 +534,7 @@ static INPUT_PORTS_START( skylncr )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN)
 
-	PORT_START("IN3")	/* $11 (PPI1 port B) */
+	PORT_START("IN3")   /* $11 (PPI1 port B) */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_IMPULSE(2)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 ) PORT_IMPULSE(2)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN3 ) PORT_IMPULSE(2)
@@ -525,17 +544,17 @@ static INPUT_PORTS_START( skylncr )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_GAMBLE_TAKE ) PORT_NAME("Take Score")
 
-	PORT_START("IN4")	/* $12 (PPI1 port C) */
+	PORT_START("IN4")   /* $12 (PPI1 port C) */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_CODE(KEYCODE_R) PORT_NAME("Reset")
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_GAMBLE_BOOK ) PORT_NAME("Stats")
-	PORT_SERVICE_NO_TOGGLE( 0x08, IP_ACTIVE_LOW )	/* Settings */
+	PORT_SERVICE_NO_TOGGLE( 0x08, IP_ACTIVE_LOW )   /* Settings */
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN)
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN)
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_GAMBLE_KEYOUT )
 
-	PORT_START("DSW1")	/* $02 (PPI0 port C) */
+	PORT_START("DSW1")  /* $02 (PPI0 port C) */
 	PORT_DIPNAME( 0x11, 0x01, "D-UP Percentage" )
 	PORT_DIPSETTING(    0x11, "60%" )
 	PORT_DIPSETTING(    0x01, "70%" )
@@ -560,7 +579,7 @@ static INPUT_PORTS_START( skylncr )
 	PORT_DIPSETTING(    0x80, "x100" )
 	PORT_DIPSETTING(    0x00, "x1" )
 
-	PORT_START("DSW2")	/* $10 (PPI1 port A) */
+	PORT_START("DSW2")  /* $10 (PPI1 port A) */
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -584,7 +603,7 @@ static INPUT_PORTS_START( skylncr )
 	PORT_DIPSETTING(    0x40, "80%" )
 	PORT_DIPSETTING(    0x00, "90%" )
 
-	PORT_START("DSW3")	/* AY8910 port A */
+	PORT_START("DSW3")  /* AY8910 port A */
 	PORT_DIPNAME( 0x07, 0x07, "Coinage A, B & C" )
 	PORT_DIPSETTING(    0x00, "1 Coin / 1 Credit" )
 	PORT_DIPSETTING(    0x01, "1 Coin / 5 Credits" )
@@ -609,7 +628,7 @@ static INPUT_PORTS_START( skylncr )
 	PORT_DIPSETTING(    0x40, "16" )
 	PORT_DIPSETTING(    0x00, "32" )
 
-	PORT_START("DSW4")	/* AY8910 port B */
+	PORT_START("DSW4")  /* AY8910 port B */
 	PORT_DIPNAME( 0x07, 0x07, "Remote Credits" )
 	PORT_DIPSETTING(    0x00, "1 Pulse / 100 Credits" )
 	PORT_DIPSETTING(    0x01, "1 Pulse / 110 Credits" )
@@ -640,24 +659,24 @@ INPUT_PORTS_END
 *       PPI 8255 (x2) Interface       *
 **************************************/
 
-static const ppi8255_interface ppi8255_intf[2] =
+static I8255A_INTERFACE( ppi8255_0_intf )
 {
-	{	/* A, B & C set as input */
-		DEVCB_INPUT_PORT("IN1"),	/* Port A read */
-		DEVCB_INPUT_PORT("IN2"),	/* Port B read */
-		DEVCB_INPUT_PORT("DSW1"),	/* Port C read */
-		DEVCB_NULL,					/* Port A write */
-		DEVCB_NULL,					/* Port B write */
-		DEVCB_NULL					/* Port C write */
-	},
-	{	/* A, B & C set as input */
-		DEVCB_INPUT_PORT("DSW2"),	/* Port A read */
-		DEVCB_INPUT_PORT("IN3"),	/* Port B read */
-		DEVCB_INPUT_PORT("IN4"),	/* Port C read */
-		DEVCB_NULL,					/* Port A write */
-		DEVCB_NULL,					/* Port B write */
-		DEVCB_NULL					/* Port C write */
-	}
+	DEVCB_INPUT_PORT("IN1"),            /* Port A read */
+	DEVCB_NULL,                         /* Port A write */
+	DEVCB_INPUT_PORT("IN2"),            /* Port B read */
+	DEVCB_NULL,                         /* Port B write */
+	DEVCB_INPUT_PORT("DSW1"),           /* Port C read */
+	DEVCB_NULL                          /* Port C write */
+};
+
+static I8255A_INTERFACE( ppi8255_1_intf )
+{
+	DEVCB_INPUT_PORT("DSW2"),           /* Port A read */
+	DEVCB_NULL,                         /* Port A write */
+	DEVCB_INPUT_PORT("IN3"),            /* Port B read */
+	DEVCB_NULL,                         /* Port B write */
+	DEVCB_INPUT_PORT("IN4"),            /* Port C read */
+	DEVCB_NULL                          /* Port C write */
 };
 
 
@@ -677,10 +696,9 @@ static const ay8910_interface ay8910_config =
 
 
 // It runs in IM 0, thus needs an opcode on the data bus
-static INTERRUPT_GEN( skylncr_vblank_interrupt )
+INTERRUPT_GEN_MEMBER(skylncr_state::skylncr_vblank_interrupt)
 {
-	skylncr_state *state = device->machine().driver_data<skylncr_state>();
-	if (state->m_nmi_enable) device_set_input_line(device, INPUT_LINE_NMI, PULSE_LINE);
+	if (m_nmi_enable) device.execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 }
 
 
@@ -694,27 +712,25 @@ static MACHINE_CONFIG_START( skylncr, skylncr_state )
 	MCFG_CPU_ADD("maincpu", Z80, MASTER_CLOCK/4)
 	MCFG_CPU_PROGRAM_MAP(mem_map_skylncr)
 	MCFG_CPU_IO_MAP(io_map_skylncr)
-	MCFG_CPU_VBLANK_INT("screen", skylncr_vblank_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", skylncr_state,  skylncr_vblank_interrupt)
 
 	MCFG_NVRAM_ADD_0FILL("nvram")
 
 	/* 1x M5M82C255, or 2x PPI8255 */
-	MCFG_PPI8255_ADD( "ppi8255_0", ppi8255_intf[0] )
-	MCFG_PPI8255_ADD( "ppi8255_1", ppi8255_intf[1] )
+	MCFG_I8255A_ADD( "ppi8255_0", ppi8255_0_intf )
+	MCFG_I8255A_ADD( "ppi8255_1", ppi8255_1_intf )
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(512, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 512-1, 0, 256-1)
-	MCFG_SCREEN_UPDATE(skylncr)
+	MCFG_SCREEN_UPDATE_DRIVER(skylncr_state, screen_update_skylncr)
 
 	MCFG_GFXDECODE(skylncr)
 	MCFG_PALETTE_LENGTH(0x200)
 
-	MCFG_VIDEO_START(skylncr)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -854,10 +870,10 @@ ROM_END
 *           Driver Init           *
 **********************************/
 
-static DRIVER_INIT( skylncr )
+DRIVER_INIT_MEMBER(skylncr_state,skylncr)
 {
-	machine.generic.paletteram.u8   = auto_alloc_array(machine, UINT8, 0x100 * 3);
-	machine.generic.paletteram2.u8 = auto_alloc_array(machine, UINT8, 0x100 * 3);
+	m_generic_paletteram_8.allocate(0x100 * 3);
+	m_generic_paletteram2_8.allocate(0x100 * 3);
 }
 
 
@@ -866,7 +882,7 @@ static DRIVER_INIT( skylncr )
 ****************************************************/
 
 /*    YEAR  NAME      PARENT   MACHINE   INPUT     INIT     ROT    COMPANY                 FULLNAME                            FLAGS  */
-GAME( 1995, skylncr,  0,       skylncr,  skylncr,  skylncr, ROT0, "Bordun International", "Sky Lancer (Bordun, ver.U450C)",    0 )
-GAME( 1995, butrfly,  0,       skylncr,  skylncr,  skylncr, ROT0, "Bordun International", "Butterfly Video Game (ver.U350C)",  0 )
-GAME( 1995, madzoo,   0,       skylncr,  skylncr,  skylncr, ROT0, "Bordun International", "Mad Zoo (ver.U450C)",               0 )
-GAME( 1995, leader,   0,       skylncr,  skylncr,  skylncr, ROT0, "bootleg",              "Leader",                            GAME_NOT_WORKING )
+GAME( 1995, skylncr,  0,       skylncr,  skylncr, skylncr_state,  skylncr, ROT0, "Bordun International", "Sky Lancer (Bordun, ver.U450C)",    0 )
+GAME( 1995, butrfly,  0,       skylncr,  skylncr, skylncr_state,  skylncr, ROT0, "Bordun International", "Butterfly Video Game (ver.U350C)",  0 )
+GAME( 1995, madzoo,   0,       skylncr,  skylncr, skylncr_state,  skylncr, ROT0, "Bordun International", "Mad Zoo (ver.U450C)",               0 )
+GAME( 1995, leader,   0,       skylncr,  skylncr, skylncr_state,  skylncr, ROT0, "bootleg",              "Leader",                            GAME_NOT_WORKING )

@@ -2,44 +2,57 @@
 class paradise_state : public driver_device
 {
 public:
-	paradise_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	paradise_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_vram_0(*this, "vram_0"),
+		m_vram_1(*this, "vram_1"),
+		m_vram_2(*this, "vram_2"),
+		m_videoram(*this, "videoram"),
+		m_paletteram(*this, "paletteram"),
+		m_spriteram(*this, "spriteram"){ }
 
 	/* memory pointers */
-	UINT8 *  m_vram_0;
-	UINT8 *  m_vram_1;
-	UINT8 *  m_vram_2;
-	UINT8 *  m_videoram;
-	UINT8 *  m_paletteram;
-	UINT8 *  m_spriteram;
-	size_t   m_spriteram_size;
+	required_shared_ptr<UINT8> m_vram_0;
+	required_shared_ptr<UINT8> m_vram_1;
+	required_shared_ptr<UINT8> m_vram_2;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_paletteram;
+	required_shared_ptr<UINT8> m_spriteram;
 
 	/* video-related */
 	tilemap_t *m_tilemap_0;
 	tilemap_t *m_tilemap_1;
 	tilemap_t *m_tilemap_2;
-	bitmap_t *m_tmpbitmap;
+	bitmap_ind16 m_tmpbitmap;
 	UINT8 m_palbank;
 	UINT8 m_priority;
+	UINT8 m_pixbank;
 	int m_sprite_inc;
+
+	int irq_count;
+	DECLARE_WRITE8_MEMBER(paradise_rombank_w);
+	DECLARE_WRITE8_MEMBER(torus_coin_counter_w);
+	DECLARE_WRITE8_MEMBER(paradise_flipscreen_w);
+	DECLARE_WRITE8_MEMBER(tgtball_flipscreen_w);
+	DECLARE_WRITE8_MEMBER(paradise_palette_w);
+	DECLARE_WRITE8_MEMBER(paradise_vram_0_w);
+	DECLARE_WRITE8_MEMBER(paradise_palbank_w);
+	DECLARE_WRITE8_MEMBER(paradise_vram_1_w);
+	DECLARE_WRITE8_MEMBER(paradise_vram_2_w);
+	DECLARE_WRITE8_MEMBER(paradise_pixmap_w);
+	DECLARE_WRITE8_MEMBER(paradise_priority_w);
+	DECLARE_WRITE8_MEMBER(paradise_okibank_w);
+	DECLARE_DRIVER_INIT(torus);
+	DECLARE_DRIVER_INIT(paradise);
+	DECLARE_DRIVER_INIT(tgtball);
+	TILE_GET_INFO_MEMBER(get_tile_info_0);
+	TILE_GET_INFO_MEMBER(get_tile_info_1);
+	TILE_GET_INFO_MEMBER(get_tile_info_2);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	UINT32 screen_update_paradise(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_torus(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_madball(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(paradise_irq);
 };
-
-/*----------- defined in video/paradise.c -----------*/
-
-WRITE8_HANDLER( paradise_vram_0_w );
-WRITE8_HANDLER( paradise_vram_1_w );
-WRITE8_HANDLER( paradise_vram_2_w );
-
-WRITE8_HANDLER( paradise_flipscreen_w );
-WRITE8_HANDLER( tgtball_flipscreen_w );
-WRITE8_HANDLER( paradise_palette_w );
-WRITE8_HANDLER( paradise_pixmap_w );
-
-WRITE8_HANDLER( paradise_priority_w );
-WRITE8_HANDLER( paradise_palbank_w );
-
-VIDEO_START( paradise );
-
-SCREEN_UPDATE( paradise );
-SCREEN_UPDATE( torus );
-SCREEN_UPDATE( madball );

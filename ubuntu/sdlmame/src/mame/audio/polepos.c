@@ -9,18 +9,17 @@
 #include "namco54.h"
 #include "includes/polepos.h"
 
-#define OUTPUT_RATE			24000
+#define OUTPUT_RATE         24000
 
-#define POLEPOS_R166		1000.0
-#define POLEPOS_R167		2200.0
-#define POLEPOS_R168		4700.0
+#define POLEPOS_R166        1000.0
+#define POLEPOS_R167        2200.0
+#define POLEPOS_R168        4700.0
 /* resistor values when shorted by 4066 running at 5V */
-#define POLEPOS_R166_SHUNT	1.0/(1.0/POLEPOS_R166 + 1.0/250)
-#define POLEPOS_R167_SHUNT	1.0/(1.0/POLEPOS_R166 + 1.0/250)
-#define POLEPOS_R168_SHUNT	1.0/(1.0/POLEPOS_R166 + 1.0/250)
+#define POLEPOS_R166_SHUNT  1.0/(1.0/POLEPOS_R166 + 1.0/250)
+#define POLEPOS_R167_SHUNT  1.0/(1.0/POLEPOS_R166 + 1.0/250)
+#define POLEPOS_R168_SHUNT  1.0/(1.0/POLEPOS_R166 + 1.0/250)
 
-typedef struct _polepos_sound_state polepos_sound_state;
-struct _polepos_sound_state
+struct polepos_sound_state
 {
 	UINT32 m_current_position;
 	int m_sample_msb;
@@ -51,7 +50,7 @@ INLINE polepos_sound_state *get_safe_token( device_t *device )
 	assert(device != NULL);
 	assert(device->type() == POLEPOS);
 
-	return (polepos_sound_state *)downcast<legacy_device_base *>(device)->token();
+	return (polepos_sound_state *)downcast<polepos_sound_device *>(device)->token();
 }
 
 /************************************/
@@ -80,7 +79,7 @@ static STREAM_UPDATE( engine_sound_update )
 	/* determine the volume */
 	slot = (state->m_sample_msb >> 3) & 7;
 	volume = volume_table[slot];
-	base = &device->machine().region("engine")->base()[slot * 0x800];
+	base = &device->machine().root_device().memregion("engine")->base()[slot * 0x800];
 
 	/* fill in the sample */
 	while (samples--)
@@ -94,13 +93,13 @@ static STREAM_UPDATE( engine_sound_update )
 		{
 			filter2_step(&state->m_filter_engine[loop]);
 			/* The op-amp powered @ 5V will clip to 0V & 3.5V.
-             * Adjusted to vRef of 2V, we will clip as follows: */
+			 * Adjusted to vRef of 2V, we will clip as follows: */
 			if (state->m_filter_engine[loop].y0 > 1.5) state->m_filter_engine[loop].y0 = 1.5;
 			if (state->m_filter_engine[loop].y0 < -2)  state->m_filter_engine[loop].y0 = -2;
 
 			i_total += state->m_filter_engine[loop].y0 / r_filt_out[loop];
 		}
-		i_total *= r_filt_total * 32000/2;	/* now contains voltage adjusted by final gain */
+		i_total *= r_filt_total * 32000/2;  /* now contains voltage adjusted by final gain */
 
 		*buffer++ = (int)i_total;
 		state->m_current_position += step;
@@ -123,7 +122,7 @@ static DEVICE_START( polepos_sound )
 	filter_opamp_m_bandpass_setup(device, RES_K(150), RES_K(22), RES_K(330), CAP_U(.0047),  CAP_U(.0047),
 									&state->m_filter_engine[1]);
 	/* Filter 3 is a little different.  Because of the input capacitor, it is
-     * a high pass filter. */
+	 * a high pass filter. */
 	filter2_setup(device, FILTER_HIGHPASS, 950, Q_TO_DAMP(.707), 1,
 									&state->m_filter_engine[2]);
 }
@@ -138,24 +137,6 @@ static DEVICE_RESET( polepos_sound )
 	for (loop = 0; loop < 3; loop++)
 		filter2_reset(&state->m_filter_engine[loop]);
 }
-
-DEVICE_GET_INFO( polepos_sound )
-{
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(polepos_sound_state);			break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME(polepos_sound);	break;
-		case DEVINFO_FCT_RESET:							info->reset = DEVICE_RESET_NAME(polepos_sound);	break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "Pole Position Custom");		break;
-		case DEVINFO_STR_SOURCE_FILE:						strcpy(info->s, __FILE__);						break;
-	}
-}
-
 
 /************************************/
 /* Write LSB of engine sound        */
@@ -189,32 +170,32 @@ WRITE8_DEVICE_HANDLER( polepos_engine_sound_msb_w )
  *************************************/
 
 /* nodes - sounds */
-#define POLEPOS_CHANL1_SND		NODE_11
-#define POLEPOS_CHANL2_SND		NODE_12
-#define POLEPOS_CHANL3_SND		NODE_13
-#define POLEPOS_CHANL4_SND		NODE_14
+#define POLEPOS_CHANL1_SND      NODE_11
+#define POLEPOS_CHANL2_SND      NODE_12
+#define POLEPOS_CHANL3_SND      NODE_13
+#define POLEPOS_CHANL4_SND      NODE_14
 
 #define POLEPOS_54XX_DAC_R (1.0 / (1.0 / RES_K(47) + 1.0 / RES_K(22) + 1.0 / RES_K(10) + 1.0 / RES_K(4.7)))
 static const discrete_dac_r1_ladder polepos_54xx_dac =
 {
-	4,				/* number of DAC bits */
+	4,              /* number of DAC bits */
 					/* 54XX_0   54XX_1  54XX_2 */
-	{ RES_K(47),	/* R124,    R136,   R152 */
-	  RES_K(22),	/* R120,    R132,   R142 */
-	  RES_K(10),	/* R119,    R131,   R138 */
-	  RES_K(4.7)},	/* R118,    R126,   R103 */
-	0, 0, 0, 0		/* nothing extra */
+	{ RES_K(47),    /* R124,    R136,   R152 */
+		RES_K(22),  /* R120,    R132,   R142 */
+		RES_K(10),  /* R119,    R131,   R138 */
+		RES_K(4.7)},    /* R118,    R126,   R103 */
+	0, 0, 0, 0      /* nothing extra */
 };
 
 #define POLEPOS_52XX_DAC_R (1.0 / (1.0 / RES_K(100) + 1.0 / RES_K(47) + 1.0 / RES_K(22) + 1.0 / RES_K(10)))
 static const discrete_dac_r1_ladder polepos_52xx_dac =
 {
-	4,				/* number of DAC bits */
-	{ RES_K(100),	/* R160 */
-	  RES_K(47),	/* R159 */
-	  RES_K(22),	/* R155 */
-	  RES_K(10)},	/* R154 */
-	0, 0, 0, 0		/* nothing extra */
+	4,              /* number of DAC bits */
+	{ RES_K(100),   /* R160 */
+		RES_K(47),  /* R159 */
+		RES_K(22),  /* R155 */
+		RES_K(10)}, /* R154 */
+	0, 0, 0, 0      /* nothing extra */
 };
 
 /*                           R117        R116         R117 */
@@ -222,146 +203,146 @@ static const discrete_dac_r1_ladder polepos_52xx_dac =
 
 static const discrete_op_amp_filt_info polepos_chanl1_filt =
 {
-	POLEPOS_54XX_DAC_R + RES_K(22),	/* R121 */
-	0,					/* no second input */
-	RES_K(12),			/* R125 */
-	0,					/* not used */
-	RES_K(120),			/* R122 */
-	CAP_U(0.0022),		/* C27 */
-	CAP_U(0.0022),		/* C28 */
-	0,					/* not used */
-	POLEPOS_VREF,		/* vRef */
-	5,					/* vP */
-	0					/* vN */
+	POLEPOS_54XX_DAC_R + RES_K(22), /* R121 */
+	0,                  /* no second input */
+	RES_K(12),          /* R125 */
+	0,                  /* not used */
+	RES_K(120),         /* R122 */
+	CAP_U(0.0022),      /* C27 */
+	CAP_U(0.0022),      /* C28 */
+	0,                  /* not used */
+	POLEPOS_VREF,       /* vRef */
+	5,                  /* vP */
+	0                   /* vN */
 };
 
 static const discrete_op_amp_filt_info polepos_chanl2_filt =
 {
-	POLEPOS_54XX_DAC_R + RES_K(15),	/* R133 */
-	0,					/* no second input */
-	RES_K(15),			/* R137 */
-	0,					/* not used */
-	RES_K(120),			/* R134 */
-	CAP_U(0.022),		/* C29 */
-	CAP_U(0.022),		/* C30 */
-	0,					/* not used */
-	POLEPOS_VREF,		/* vRef */
-	5,					/* vP */
-	0					/* vN */
+	POLEPOS_54XX_DAC_R + RES_K(15), /* R133 */
+	0,                  /* no second input */
+	RES_K(15),          /* R137 */
+	0,                  /* not used */
+	RES_K(120),         /* R134 */
+	CAP_U(0.022),       /* C29 */
+	CAP_U(0.022),       /* C30 */
+	0,                  /* not used */
+	POLEPOS_VREF,       /* vRef */
+	5,                  /* vP */
+	0                   /* vN */
 };
 
 static const discrete_op_amp_filt_info polepos_chanl3_filt =
 {
-	POLEPOS_54XX_DAC_R + RES_K(22),	/* R139 */
-	0,					/* no second input */
-	RES_K(22),			/* R143 */
-	0,					/* not used */
-	RES_K(180),			/* R140 */
-	CAP_U(0.047),		/* C33 */
-	CAP_U(0.047),		/* C34 */
-	0,					/* not used */
-	POLEPOS_VREF,		/* vRef */
-	5,					/* vP */
-	0					/* vN */
+	POLEPOS_54XX_DAC_R + RES_K(22), /* R139 */
+	0,                  /* no second input */
+	RES_K(22),          /* R143 */
+	0,                  /* not used */
+	RES_K(180),         /* R140 */
+	CAP_U(0.047),       /* C33 */
+	CAP_U(0.047),       /* C34 */
+	0,                  /* not used */
+	POLEPOS_VREF,       /* vRef */
+	5,                  /* vP */
+	0                   /* vN */
 };
 
 DISCRETE_SOUND_START(polepos)
 
 	/************************************************
-     * Input register mapping
-     ************************************************/
+	 * Input register mapping
+	 ************************************************/
 	DISCRETE_INPUT_DATA(NAMCO_54XX_0_DATA(NODE_01))
 	DISCRETE_INPUT_DATA(NAMCO_54XX_1_DATA(NODE_01))
 	DISCRETE_INPUT_DATA(NAMCO_54XX_2_DATA(NODE_01))
 	DISCRETE_INPUT_DATA(NAMCO_52XX_P_DATA(NODE_04))
 
 	/************************************************
-     * CHANL1 sound
-     ************************************************/
+	 * CHANL1 sound
+	 ************************************************/
 	DISCRETE_DAC_R1(NODE_20,
 					NAMCO_54XX_2_DATA(NODE_01),
-					4,			/* 4V - unmeasured*/
+					4,          /* 4V - unmeasured*/
 					&polepos_54xx_dac)
 	DISCRETE_OP_AMP_FILTER(NODE_21,
-					1,			/* ENAB */
-					NODE_20,	/* INP0 */
-					0,			/* INP1 - not used */
+					1,          /* ENAB */
+					NODE_20,    /* INP0 */
+					0,          /* INP1 - not used */
 					DISC_OP_AMP_FILTER_IS_BAND_PASS_1M, &polepos_chanl1_filt)
 	/* fake it so 0 is now vRef */
 	DISCRETE_ADDER2(POLEPOS_CHANL1_SND,
-					1,			/* ENAB */
+					1,          /* ENAB */
 					NODE_21, -POLEPOS_VREF)
 
 	/************************************************
-     * CHANL2 sound
-     ************************************************/
+	 * CHANL2 sound
+	 ************************************************/
 	DISCRETE_DAC_R1(NODE_30,
 					NAMCO_54XX_1_DATA(NODE_01),
-					4,			/* 4V - unmeasured*/
+					4,          /* 4V - unmeasured*/
 					&polepos_54xx_dac)
 	DISCRETE_OP_AMP_FILTER(NODE_31,
-					1,			/* ENAB */
-					NODE_30,	/* INP0 */
-					0,			/* INP1 - not used */
+					1,          /* ENAB */
+					NODE_30,    /* INP0 */
+					0,          /* INP1 - not used */
 					DISC_OP_AMP_FILTER_IS_BAND_PASS_1M, &polepos_chanl2_filt)
 	/* fake it so 0 is now vRef */
 	DISCRETE_ADDER2(POLEPOS_CHANL2_SND,
-					1,			/* ENAB */
+					1,          /* ENAB */
 					NODE_31, -POLEPOS_VREF)
 
 	/************************************************
-     * CHANL3 sound
-     ************************************************/
+	 * CHANL3 sound
+	 ************************************************/
 	DISCRETE_DAC_R1(NODE_40,
 					NAMCO_54XX_0_DATA(NODE_01),
-					4,			/* 4V - unmeasured*/
+					4,          /* 4V - unmeasured*/
 					&polepos_54xx_dac)
 	DISCRETE_OP_AMP_FILTER(NODE_41,
-					1,			/* ENAB */
-					NODE_40,	/* INP0 */
-					0,			/* INP1 - not used */
+					1,          /* ENAB */
+					NODE_40,    /* INP0 */
+					0,          /* INP1 - not used */
 					DISC_OP_AMP_FILTER_IS_BAND_PASS_1M, &polepos_chanl3_filt)
 	/* fake it so 0 is now vRef */
 	DISCRETE_ADDER2(POLEPOS_CHANL3_SND,
-					1,			/* ENAB */
+					1,          /* ENAB */
 					NODE_41, -POLEPOS_VREF)
 
 	/************************************************
-     * CHANL4 sound
-     ************************************************/
+	 * CHANL4 sound
+	 ************************************************/
 	/* this circuit was simulated in SPICE and an equivalent filter circuit generated */
 	DISCRETE_DAC_R1(NODE_50,
 					NAMCO_52XX_P_DATA(NODE_04),
-					4,			/* 4V - unmeasured*/
+					4,          /* 4V - unmeasured*/
 					&polepos_52xx_dac)
 	/* fake it so 0 is now vRef */
 	DISCRETE_ADDER2(NODE_51,
-					1,			/* ENAB */
+					1,          /* ENAB */
 					NODE_50, -POLEPOS_VREF)
 	DISCRETE_FILTER2(NODE_52,
-					1,			/* ENAB */
-					NODE_51,	/* INP0 */
-					100,		/* FREQ */
-					1.0 / 0.3,	/* DAMP */
+					1,          /* ENAB */
+					NODE_51,    /* INP0 */
+					100,        /* FREQ */
+					1.0 / 0.3,  /* DAMP */
 					DISC_FILTER_HIGHPASS)
 	DISCRETE_FILTER2(NODE_53,
-					1,			/* ENAB */
-					NODE_52,	/* INP0 */
-					1200,		/* FREQ */
-					1.0 / 0.8,	/* DAMP */
+					1,          /* ENAB */
+					NODE_52,    /* INP0 */
+					1200,       /* FREQ */
+					1.0 / 0.8,  /* DAMP */
 					DISC_FILTER_LOWPASS)
 	DISCRETE_GAIN(NODE_54,
-					NODE_53,	/* IN0 */
-					0.5			/* overall filter GAIN */)
+					NODE_53,    /* IN0 */
+					0.5         /* overall filter GAIN */)
 	/* clamp to the maximum of the op-amp shifted by vRef */
 	DISCRETE_CLAMP(POLEPOS_CHANL4_SND,
-					NODE_54,	/* IN0 */
-					0,			/* MIN */
-					5.0 - OP_AMP_VP_RAIL_OFFSET - POLEPOS_VREF)	/* MAX */
+					NODE_54,    /* IN0 */
+					0,          /* MIN */
+					5.0 - OP_AMP_VP_RAIL_OFFSET - POLEPOS_VREF) /* MAX */
 
 	/************************************************
-     * Output
-     ************************************************/
+	 * Output
+	 ************************************************/
 	DISCRETE_OUTPUT(POLEPOS_CHANL1_SND, 32767/2)
 	DISCRETE_OUTPUT(POLEPOS_CHANL2_SND, 32767/2)
 	DISCRETE_OUTPUT(POLEPOS_CHANL3_SND, 32767/2)
@@ -369,4 +350,49 @@ DISCRETE_SOUND_START(polepos)
 DISCRETE_SOUND_END
 
 
-DEFINE_LEGACY_SOUND_DEVICE(POLEPOS, polepos_sound);
+const device_type POLEPOS = &device_creator<polepos_sound_device>;
+
+polepos_sound_device::polepos_sound_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, POLEPOS, "Pole Position Custom", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
+{
+	m_token = global_alloc_clear(polepos_sound_state);
+}
+
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
+
+void polepos_sound_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void polepos_sound_device::device_start()
+{
+	DEVICE_START_NAME( polepos_sound )(this);
+}
+
+//-------------------------------------------------
+//  device_reset - device-specific reset
+//-------------------------------------------------
+
+void polepos_sound_device::device_reset()
+{
+	DEVICE_RESET_NAME( polepos_sound )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void polepos_sound_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}

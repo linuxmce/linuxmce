@@ -2,6 +2,13 @@
 
 Atari Flyball Driver
 
+Etched in copper on top of board:
+    FLYBALL
+    ATARI (c)1976
+    A005629
+    MADE IN USA
+    PAT NO 3793483
+
 ***************************************************************************/
 
 #include "emu.h"
@@ -14,12 +21,14 @@ Atari Flyball Driver
 class flyball_state : public driver_device
 {
 public:
-	flyball_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	flyball_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_playfield_ram(*this, "playfield_ram"),
+		m_rombase(*this, "rombase"){ }
 
 	/* memory pointers */
-	UINT8 *  m_rombase;
-	UINT8 *  m_playfield_ram;
+	required_shared_ptr<UINT8> m_playfield_ram;
+	required_shared_ptr<UINT8> m_rombase;
 
 	/* video-related */
 	tilemap_t  *m_tmap;
@@ -34,7 +43,26 @@ public:
 	UINT8    m_potsense;
 
 	/* devices */
-	device_t *m_maincpu;
+	cpu_device *m_maincpu;
+	DECLARE_READ8_MEMBER(flyball_input_r);
+	DECLARE_READ8_MEMBER(flyball_scanline_r);
+	DECLARE_READ8_MEMBER(flyball_potsense_r);
+	DECLARE_WRITE8_MEMBER(flyball_potmask_w);
+	DECLARE_WRITE8_MEMBER(flyball_pitcher_pic_w);
+	DECLARE_WRITE8_MEMBER(flyball_ball_vert_w);
+	DECLARE_WRITE8_MEMBER(flyball_ball_horz_w);
+	DECLARE_WRITE8_MEMBER(flyball_pitcher_vert_w);
+	DECLARE_WRITE8_MEMBER(flyball_pitcher_horz_w);
+	DECLARE_WRITE8_MEMBER(flyball_misc_w);
+	TILEMAP_MAPPER_MEMBER(flyball_get_memory_offset);
+	TILE_GET_INFO_MEMBER(flyball_get_tile_info);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_flyball(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	TIMER_CALLBACK_MEMBER(flyball_joystick_callback);
+	TIMER_CALLBACK_MEMBER(flyball_quarter_callback);
 };
 
 
@@ -44,7 +72,7 @@ public:
  *
  *************************************/
 
-static TILEMAP_MAPPER( flyball_get_memory_offset )
+TILEMAP_MAPPER_MEMBER(flyball_state::flyball_get_memory_offset)
 {
 	if (col == 0)
 		col = num_cols;
@@ -53,10 +81,9 @@ static TILEMAP_MAPPER( flyball_get_memory_offset )
 }
 
 
-static TILE_GET_INFO( flyball_get_tile_info )
+TILE_GET_INFO_MEMBER(flyball_state::flyball_get_tile_info)
 {
-	flyball_state *state = machine.driver_data<flyball_state>();
-	UINT8 data = state->m_playfield_ram[tile_index];
+	UINT8 data = m_playfield_ram[tile_index];
 	int flags = ((data & 0x40) ? TILE_FLIPX : 0) | ((data & 0x80) ? TILE_FLIPY : 0);
 	int code = data & 63;
 
@@ -65,86 +92,79 @@ static TILE_GET_INFO( flyball_get_tile_info )
 		code += 64;
 	}
 
-	SET_TILE_INFO(0, code, 0, flags);
+	SET_TILE_INFO_MEMBER(0, code, 0, flags);
 }
 
 
-static VIDEO_START( flyball )
+void flyball_state::video_start()
 {
-	flyball_state *state = machine.driver_data<flyball_state>();
-	state->m_tmap = tilemap_create(machine, flyball_get_tile_info, flyball_get_memory_offset, 8, 16, 32, 16);
+	m_tmap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(flyball_state::flyball_get_tile_info),this), tilemap_mapper_delegate(FUNC(flyball_state::flyball_get_memory_offset),this), 8, 16, 32, 16);
 }
 
 
-static SCREEN_UPDATE( flyball )
+UINT32 flyball_state::screen_update_flyball(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	flyball_state *state = screen->machine().driver_data<flyball_state>();
-	int pitcherx = state->m_pitcher_horz;
-	int pitchery = state->m_pitcher_vert - 31;
+	int pitcherx = m_pitcher_horz;
+	int pitchery = m_pitcher_vert - 31;
 
-	int ballx = state->m_ball_horz - 1;
-	int bally = state->m_ball_vert - 17;
+	int ballx = m_ball_horz - 1;
+	int bally = m_ball_vert - 17;
 
 	int x;
 	int y;
 
-	tilemap_mark_all_tiles_dirty(state->m_tmap);
+	m_tmap->mark_all_dirty();
 
 	/* draw playfield */
-	tilemap_draw(bitmap, cliprect, state->m_tmap, 0, 0);
+	m_tmap->draw(bitmap, cliprect, 0, 0);
 
 	/* draw pitcher */
-	drawgfx_transpen(bitmap, cliprect, screen->machine().gfx[1], state->m_pitcher_pic ^ 0xf, 0, 1, 0, pitcherx, pitchery, 1);
+	drawgfx_transpen(bitmap, cliprect, machine().gfx[1], m_pitcher_pic ^ 0xf, 0, 1, 0, pitcherx, pitchery, 1);
 
 	/* draw ball */
 
 	for (y = bally; y < bally + 2; y++)
 		for (x = ballx; x < ballx + 2; x++)
-			if (x >= cliprect->min_x &&
-			    x <= cliprect->max_x &&
-			    y >= cliprect->min_y &&
-			    y <= cliprect->max_y)
-				*BITMAP_ADDR16(bitmap, y, x) = 1;
+			if (cliprect.contains(x, y))
+				bitmap.pix16(y, x) = 1;
 	return 0;
 }
 
 
-static TIMER_CALLBACK( flyball_joystick_callback )
+TIMER_CALLBACK_MEMBER(flyball_state::flyball_joystick_callback)
 {
-	flyball_state *state = machine.driver_data<flyball_state>();
 	int potsense = param;
 
-	if (potsense & ~state->m_potmask)
-		generic_pulse_irq_line(state->m_maincpu, 0);
+	if (potsense & ~m_potmask)
+		generic_pulse_irq_line(*m_maincpu, 0, 1);
 
-	state->m_potsense |= potsense;
+	m_potsense |= potsense;
 }
 
 
-static TIMER_CALLBACK( flyball_quarter_callback	)
+TIMER_CALLBACK_MEMBER(flyball_state::flyball_quarter_callback)
 {
-	flyball_state *state = machine.driver_data<flyball_state>();
 	int scanline = param;
 	int potsense[64], i;
 
 	memset(potsense, 0, sizeof potsense);
 
-	potsense[input_port_read(machine, "STICK1_Y")] |= 1;
-	potsense[input_port_read(machine, "STICK1_X")] |= 2;
-	potsense[input_port_read(machine, "STICK0_Y")] |= 4;
-	potsense[input_port_read(machine, "STICK0_X")] |= 8;
+	potsense[ioport("STICK1_Y")->read()] |= 1;
+	potsense[ioport("STICK1_X")->read()] |= 2;
+	potsense[ioport("STICK0_Y")->read()] |= 4;
+	potsense[ioport("STICK0_X")->read()] |= 8;
 
 	for (i = 0; i < 64; i++)
 		if (potsense[i] != 0)
-			machine.scheduler().timer_set(machine.primary_screen->time_until_pos(scanline + i), FUNC(flyball_joystick_callback), potsense[i]);
+			machine().scheduler().timer_set(machine().primary_screen->time_until_pos(scanline + i), timer_expired_delegate(FUNC(flyball_state::flyball_joystick_callback),this), potsense[i]);
 
 	scanline += 0x40;
 	scanline &= 0xff;
 
-	machine.scheduler().timer_set(machine.primary_screen->time_until_pos(scanline), FUNC(flyball_quarter_callback), scanline);
+	machine().scheduler().timer_set(machine().primary_screen->time_until_pos(scanline), timer_expired_delegate(FUNC(flyball_state::flyball_quarter_callback),this), scanline);
 
-	state->m_potsense = 0;
-	state->m_potmask = 0;
+	m_potsense = 0;
+	m_potmask = 0;
 }
 
 
@@ -155,66 +175,59 @@ static TIMER_CALLBACK( flyball_quarter_callback	)
  *************************************/
 
 /* two physical buttons (start game and stop runner) share the same port bit */
-static READ8_HANDLER( flyball_input_r )
+READ8_MEMBER(flyball_state::flyball_input_r)
 {
-	return input_port_read(space->machine(), "IN0") & input_port_read(space->machine(), "IN1");
+	return ioport("IN0")->read() & ioport("IN1")->read();
 }
 
-static READ8_HANDLER( flyball_scanline_r )
+READ8_MEMBER(flyball_state::flyball_scanline_r)
 {
-	return space->machine().primary_screen->vpos() & 0x3f;
+	return machine().primary_screen->vpos() & 0x3f;
 }
 
-static READ8_HANDLER( flyball_potsense_r )
+READ8_MEMBER(flyball_state::flyball_potsense_r)
 {
-	flyball_state *state = space->machine().driver_data<flyball_state>();
-	return state->m_potsense & ~state->m_potmask;
+	return m_potsense & ~m_potmask;
 }
 
-static WRITE8_HANDLER( flyball_potmask_w )
+WRITE8_MEMBER(flyball_state::flyball_potmask_w)
 {
-	flyball_state *state = space->machine().driver_data<flyball_state>();
-	state->m_potmask |= data & 0xf;
+	m_potmask |= data & 0xf;
 }
 
-static WRITE8_HANDLER( flyball_pitcher_pic_w )
+WRITE8_MEMBER(flyball_state::flyball_pitcher_pic_w)
 {
-	flyball_state *state = space->machine().driver_data<flyball_state>();
-	state->m_pitcher_pic = data & 0xf;
+	m_pitcher_pic = data & 0xf;
 }
 
-static WRITE8_HANDLER( flyball_ball_vert_w )
+WRITE8_MEMBER(flyball_state::flyball_ball_vert_w)
 {
-	flyball_state *state = space->machine().driver_data<flyball_state>();
-	state->m_ball_vert = data;
+	m_ball_vert = data;
 }
 
-static WRITE8_HANDLER( flyball_ball_horz_w )
+WRITE8_MEMBER(flyball_state::flyball_ball_horz_w)
 {
-	flyball_state *state = space->machine().driver_data<flyball_state>();
-	state->m_ball_horz = data;
+	m_ball_horz = data;
 }
 
-static WRITE8_HANDLER( flyball_pitcher_vert_w )
+WRITE8_MEMBER(flyball_state::flyball_pitcher_vert_w)
 {
-	flyball_state *state = space->machine().driver_data<flyball_state>();
-	state->m_pitcher_vert = data;
+	m_pitcher_vert = data;
 }
 
-static WRITE8_HANDLER( flyball_pitcher_horz_w )
+WRITE8_MEMBER(flyball_state::flyball_pitcher_horz_w)
 {
-	flyball_state *state = space->machine().driver_data<flyball_state>();
-	state->m_pitcher_horz = data;
+	m_pitcher_horz = data;
 }
 
-static WRITE8_HANDLER( flyball_misc_w )
+WRITE8_MEMBER(flyball_state::flyball_misc_w)
 {
 	int bit = ~data & 1;
 
 	switch (offset)
 	{
 	case 0:
-		set_led_status(space->machine(), 0, bit);
+		set_led_status(machine(), 0, bit);
 		break;
 	case 1:
 		/* crowd very loud */
@@ -241,7 +254,7 @@ static WRITE8_HANDLER( flyball_misc_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( flyball_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( flyball_map, AS_PROGRAM, 8, flyball_state )
 	ADDRESS_MAP_GLOBAL_MASK(0x1fff)
 	AM_RANGE(0x0000, 0x00ff) AM_MIRROR(0x100) AM_RAM
 	AM_RANGE(0x0800, 0x0800) AM_NOP
@@ -255,8 +268,8 @@ static ADDRESS_MAP_START( flyball_map, AS_PROGRAM, 8 )
 	AM_RANGE(0x0900, 0x0900) AM_WRITE(flyball_potmask_w)
 	AM_RANGE(0x0a00, 0x0a07) AM_WRITE(flyball_misc_w)
 	AM_RANGE(0x0b00, 0x0b00) AM_READ(flyball_input_r)
-	AM_RANGE(0x0d00, 0x0eff) AM_WRITEONLY AM_BASE_MEMBER(flyball_state, m_playfield_ram)
-	AM_RANGE(0x1000, 0x1fff) AM_ROM AM_BASE_MEMBER(flyball_state, m_rombase) /* program */
+	AM_RANGE(0x0d00, 0x0eff) AM_WRITEONLY AM_SHARE("playfield_ram")
+	AM_RANGE(0x1000, 0x1fff) AM_ROM AM_SHARE("rombase") /* program */
 ADDRESS_MAP_END
 
 
@@ -344,12 +357,12 @@ static GFXDECODE_START( flyball )
 GFXDECODE_END
 
 
-static PALETTE_INIT( flyball )
+void flyball_state::palette_init()
 {
-	palette_set_color(machine, 0, MAKE_RGB(0x3F, 0x3F, 0x3F));  /* tiles, ball */
-	palette_set_color(machine, 1, MAKE_RGB(0xFF, 0xFF, 0xFF));
-	palette_set_color(machine, 2, MAKE_RGB(0xFF ,0xFF, 0xFF));  /* sprites */
-	palette_set_color(machine, 3, MAKE_RGB(0x00, 0x00, 0x00));
+	palette_set_color(machine(), 0, MAKE_RGB(0x3F, 0x3F, 0x3F));  /* tiles, ball */
+	palette_set_color(machine(), 1, MAKE_RGB(0xFF, 0xFF, 0xFF));
+	palette_set_color(machine(), 2, MAKE_RGB(0xFF ,0xFF, 0xFF));  /* sprites */
+	palette_set_color(machine(), 3, MAKE_RGB(0x00, 0x00, 0x00));
 }
 
 
@@ -359,43 +372,41 @@ static PALETTE_INIT( flyball )
  *
  *************************************/
 
-static MACHINE_START( flyball )
+void flyball_state::machine_start()
 {
-	flyball_state *state = machine.driver_data<flyball_state>();
 
-	state->m_maincpu = machine.device("maincpu");
+	m_maincpu = machine().device<cpu_device>("maincpu");
 
-	state->save_item(NAME(state->m_pitcher_vert));
-	state->save_item(NAME(state->m_pitcher_horz));
-	state->save_item(NAME(state->m_pitcher_pic));
-	state->save_item(NAME(state->m_ball_vert));
-	state->save_item(NAME(state->m_ball_horz));
-	state->save_item(NAME(state->m_potmask));
-	state->save_item(NAME(state->m_potsense));
+	save_item(NAME(m_pitcher_vert));
+	save_item(NAME(m_pitcher_horz));
+	save_item(NAME(m_pitcher_pic));
+	save_item(NAME(m_ball_vert));
+	save_item(NAME(m_ball_horz));
+	save_item(NAME(m_potmask));
+	save_item(NAME(m_potsense));
 }
 
-static MACHINE_RESET( flyball )
+void flyball_state::machine_reset()
 {
-	flyball_state *state = machine.driver_data<flyball_state>();
 	int i;
 
 	/* address bits 0 through 8 are inverted */
-	UINT8* ROM = machine.region("maincpu")->base() + 0x2000;
+	UINT8* ROM = memregion("maincpu")->base() + 0x2000;
 
 	for (i = 0; i < 0x1000; i++)
-		state->m_rombase[i] = ROM[i ^ 0x1ff];
+		m_rombase[i] = ROM[i ^ 0x1ff];
 
-	machine.device("maincpu")->reset();
+	machine().device("maincpu")->reset();
 
-	machine.scheduler().timer_set(machine.primary_screen->time_until_pos(0), FUNC(flyball_quarter_callback));
+	machine().scheduler().timer_set(machine().primary_screen->time_until_pos(0), timer_expired_delegate(FUNC(flyball_state::flyball_quarter_callback),this));
 
-	state->m_pitcher_vert = 0;
-	state->m_pitcher_horz = 0;
-	state->m_pitcher_pic = 0;
-	state->m_ball_vert = 0;
-	state->m_ball_horz = 0;
-	state->m_potmask = 0;
-	state->m_potsense = 0;
+	m_pitcher_vert = 0;
+	m_pitcher_horz = 0;
+	m_pitcher_pic = 0;
+	m_ball_vert = 0;
+	m_ball_horz = 0;
+	m_potmask = 0;
+	m_potsense = 0;
 }
 
 
@@ -404,24 +415,19 @@ static MACHINE_CONFIG_START( flyball, flyball_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6502, MASTER_CLOCK/16)
 	MCFG_CPU_PROGRAM_MAP(flyball_map)
-	MCFG_CPU_VBLANK_INT("screen", nmi_line_pulse)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", flyball_state,  nmi_line_pulse)
 
-	MCFG_MACHINE_START(flyball)
-	MCFG_MACHINE_RESET(flyball)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(256, 262)
 	MCFG_SCREEN_VISIBLE_AREA(0, 255, 0, 239)
-	MCFG_SCREEN_UPDATE(flyball)
+	MCFG_SCREEN_UPDATE_DRIVER(flyball_state, screen_update_flyball)
 
 	MCFG_GFXDECODE(flyball)
 	MCFG_PALETTE_LENGTH(4)
 
-	MCFG_PALETTE_INIT(flyball)
-	MCFG_VIDEO_START(flyball)
 
 	/* sound hardware */
 MACHINE_CONFIG_END
@@ -434,7 +440,29 @@ MACHINE_CONFIG_END
  *************************************/
 
 ROM_START( flyball )
-	ROM_REGION( 0x3000, "maincpu", 0 )                  /* program */
+	ROM_REGION( 0x3000, "maincpu", 0 )  /* program */
+	ROM_LOAD( "6129-02.d5", 0x2000, 0x0200, CRC(105ffe40) SHA1(20225571ccf76df5d96a42168d9223cccdff90a8) )
+	ROM_LOAD( "6130-02.f5", 0x2200, 0x0200, CRC(188210e1) SHA1(6d837dd9ea44d16f0d54ea9e14260de5f7c05b6b) )
+	ROM_LOAD( "6131-01.h5", 0x2400, 0x0200, CRC(a9c7e858) SHA1(aee4a359d6a5729dc1be5b8ce8fbe54d032d12b0) ) /* Roms found with and without the "-01" extension */
+	ROM_LOAD( "6132-01.j5", 0x2600, 0x0200, CRC(31fefd8a) SHA1(97e3ef278ce2175cd33c0f3147bdf7974752c836) ) /* Roms found with and without the "-01" extension */
+	ROM_LOAD( "6133-01.k5", 0x2800, 0x0200, CRC(6fdb09b1) SHA1(04ad412b437bb24739b3e31fa5a413e63d5897f8) ) /* Roms found with and without the "-01" extension */
+	ROM_LOAD( "6134-01.m5", 0x2A00, 0x0200, CRC(7b526c73) SHA1(e47c8f33b7edc143ab1713556c59b93571933daa) ) /* Roms found with and without the "-01" extension */
+	ROM_LOAD( "6135-01.n5", 0x2C00, 0x0200, CRC(b352cb51) SHA1(39b9062fb51d0a78a47dcd470ceae47fcdbd7891) ) /* Roms found with and without the "-01" extension */
+	ROM_LOAD( "6136-02.r5", 0x2E00, 0x0200, CRC(ae06a0f5) SHA1(6034176b255eeaa2980e8fef1b17ef6f0a743941) )
+
+	ROM_REGION( 0x0C00, "gfx1", 0 ) /* tiles */
+	ROM_LOAD( "6142.l2", 0x0000, 0x0200, CRC(65650cfa) SHA1(7d17455146fc9def22c7bd06f7fde32df0a0c2bc) )
+	ROM_LOAD( "6139.j2", 0x0200, 0x0200, CRC(a5d1358e) SHA1(33cecbe40ae299549a3395e3dffbe7b6021803ba) )
+	ROM_LOAD( "6141.m2", 0x0400, 0x0200, CRC(98b5f803) SHA1(c4e323ced2393fa4a9720ff0086c559fb9b3a9f8) )
+	ROM_LOAD( "6140.k2", 0x0600, 0x0200, CRC(66aeec61) SHA1(f577bad015fe9e3708fd95d5d2bc438997d14d2c) )
+
+	ROM_REGION( 0x0400, "gfx2", 0 ) /* sprites */
+	ROM_LOAD16_BYTE( "6137.e2", 0x0000, 0x0200, CRC(68961fda) SHA1(a06c7b453cce04716f49bd65ecfe1ba67cb8681e) )
+	ROM_LOAD16_BYTE( "6138.f2", 0x0001, 0x0200, CRC(aab314f6) SHA1(6625c719fdc000d6af94bc9474de8f7e977cee97) )
+ROM_END
+
+ROM_START( flyball1 )
+	ROM_REGION( 0x3000, "maincpu", 0 )  /* program */
 	ROM_LOAD( "6129.d5", 0x2000, 0x0200, CRC(17eda069) SHA1(e4ef0bf4546cf00668d759a188e0989a4f003825) )
 	ROM_LOAD( "6130.f5", 0x2200, 0x0200, CRC(a756955b) SHA1(220b7f1789bba4481d595b36b4bae25f98d3ad8d) )
 	ROM_LOAD( "6131.h5", 0x2400, 0x0200, CRC(a9c7e858) SHA1(aee4a359d6a5729dc1be5b8ce8fbe54d032d12b0) )
@@ -444,13 +472,13 @@ ROM_START( flyball )
 	ROM_LOAD( "6135.n5", 0x2C00, 0x0200, CRC(b352cb51) SHA1(39b9062fb51d0a78a47dcd470ceae47fcdbd7891) )
 	ROM_LOAD( "6136.r5", 0x2E00, 0x0200, CRC(1622d890) SHA1(9ad342aefdc02e022eb79d84d1c856bed538bebe) )
 
-	ROM_REGION( 0x0C00, "gfx1", 0 )   /* tiles */
+	ROM_REGION( 0x0C00, "gfx1", 0 ) /* tiles */
 	ROM_LOAD( "6142.l2", 0x0000, 0x0200, CRC(65650cfa) SHA1(7d17455146fc9def22c7bd06f7fde32df0a0c2bc) )
 	ROM_LOAD( "6139.j2", 0x0200, 0x0200, CRC(a5d1358e) SHA1(33cecbe40ae299549a3395e3dffbe7b6021803ba) )
 	ROM_LOAD( "6141.m2", 0x0400, 0x0200, CRC(98b5f803) SHA1(c4e323ced2393fa4a9720ff0086c559fb9b3a9f8) )
 	ROM_LOAD( "6140.k2", 0x0600, 0x0200, CRC(66aeec61) SHA1(f577bad015fe9e3708fd95d5d2bc438997d14d2c) )
 
-	ROM_REGION( 0x0400, "gfx2", 0 )   /* sprites */
+	ROM_REGION( 0x0400, "gfx2", 0 ) /* sprites */
 	ROM_LOAD16_BYTE( "6137.e2", 0x0000, 0x0200, CRC(68961fda) SHA1(a06c7b453cce04716f49bd65ecfe1ba67cb8681e) )
 	ROM_LOAD16_BYTE( "6138.f2", 0x0001, 0x0200, CRC(aab314f6) SHA1(6625c719fdc000d6af94bc9474de8f7e977cee97) )
 ROM_END
@@ -462,4 +490,5 @@ ROM_END
  *
  *************************************/
 
-GAME( 1976, flyball, 0, flyball, flyball, 0, 0, "Atari", "Flyball", GAME_NO_SOUND )
+GAME( 1976, flyball,  0,       flyball, flyball, driver_device, 0, 0, "Atari", "Flyball (rev 2)", GAME_NO_SOUND )
+GAME( 1976, flyball1, flyball, flyball, flyball, driver_device, 0, 0, "Atari", "Flyball (rev 1)", GAME_NO_SOUND )

@@ -2,61 +2,19 @@
 
     Bellfruit BD1 VFD module interface and emulation by J.Wallace
 
+    TODO: Implement flashing (our only datasheet has that section
+    completely illegible)
 **********************************************************************/
 
 #include "emu.h"
 #include "bfm_bd1.h"
 
-static struct
-{
-	UINT8	type,				// type of alpha display
+const device_type BFM_BD1 = &device_creator<bfm_bd1_t>;
 
-			changed,			// flag <>0, if contents are changed
-			window_start,		// display window start pos 0-15
-			window_end,			// display window end   pos 0-15
-			window_size,		// window  size
-			pad;				// unused align byte
-
-	INT8	pcursor_pos,		// previous cursor pos
-			cursor_pos;			// current cursor pos
-
-	UINT16  user_def,			// user defined character state
-			user_data;			// user defined character data (16 bit)
-
-	UINT8	scroll_active,		// flag <>0, scrolling active
-			display_mode,		// display scroll   mode, 0/1/2/3
-			display_blanking,	// display blanking mode, 0/1/2/3
-			flash_rate,			// flash rate 0-F
-			flash_control;		// flash control 0/1/2/3
-
-	UINT8	string[18];			// text buffer
-	UINT32  segments[16],		// segments
-			outputs[16];		// standardised outputs
-
-	UINT8	count,				// bit counter
-			data;				// receive register
-
-} bd1[MAX_BD1];
-
-
-// local prototypes ///////////////////////////////////////////////////////
-
-static void ScrollLeft( int id);
-static int  BD1_setdata(int id, int segdata, int data);
-
-// local vars /////////////////////////////////////////////////////////////
-
-//
-// Bellfruit BD1 charset to ASCII conversion table
-//
-static const char BD1ASCII[] =
-//0123456789ABCDEF0123456789ABC DEF01 23456789ABCDEF0123456789ABCDEF
- "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_ ?\"#$%%'()*+.-./0123456789&%<=>?"
- "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_ ?\"#$%%'()*+.-./0123456789&%<=>?"
- "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_ ?\"#$%%'()*+.-./0123456789&%<=>?";
 
 /*
-   BD1 14 segment charset lookup table
+   BD1 14 segment charset lookup table, according to datasheet (we rewire this later)
+
         2
     ---------
    |\   |3  /|
@@ -68,6 +26,8 @@ static const char BD1ASCII[] =
    |/   |   \|
     ---------  C
         9
+
+        8 is flashing
 
   */
 
@@ -110,7 +70,7 @@ static const UINT16 BD1charset[]=
 	0x0009, // 0000 0000 0000 1001 ".
 	0xC62A, // 1100 0110 0010 1010 #.
 	0xC62D, // 1100 0110 0010 1101 $.
-	0x0100, // 0000 0000 0000 0000 flash ?
+	0x0100, // 0000 0001 0000 0000 flash character
 	0x0000, // 0000 0000 0000 0000 not defined
 	0x0040, // 0000 0000 1000 0000 '.
 	0x0880, // 0000 1000 1000 0000 (.
@@ -139,279 +99,294 @@ static const UINT16 BD1charset[]=
 	0x4406, // 0100 0100 0000 0110 ?
 };
 
-///////////////////////////////////////////////////////////////////////////
-
-void BFM_BD1_init(int id)
+bfm_bd1_t::bfm_bd1_t(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, BFM_BD1, "BFM BD1 VFD controller", tag, owner, clock),
+	m_port_val(0)
 {
-	assert_always((id >= 0) && (id < MAX_BD1), "BFM_BD1_init called on an invalid display ID!");
-
-	memset( &bd1[id], 0, sizeof(bd1[0]));
-
-	BFM_BD1_reset(id);
 }
 
-///////////////////////////////////////////////////////////////////////////
-
-void BFM_BD1_reset(int id)
+void bfm_bd1_t::static_set_value(device_t &device, int val)
 {
-	bd1[id].window_end  = 15;
-	bd1[id].window_size = (bd1[id].window_end - bd1[id].window_start)+1;
-	memset(bd1[id].string, ' ', 16);
-
-	bd1[id].count      = 0;
-
-	bd1[id].changed |= 1;
+	bfm_bd1_t &bd1 = downcast<bfm_bd1_t &>(device);
+	bd1.m_port_val = val;
 }
 
-///////////////////////////////////////////////////////////////////////////
-
-UINT32 *BFM_BD1_get_segments(int id)
+void bfm_bd1_t::device_start()
 {
-	return bd1[id].segments;
+	save_item(NAME(m_cursor));
+	save_item(NAME(m_cursor_pos));
+	save_item(NAME(m_window_start));        // display window start pos 0-15
+	save_item(NAME(m_window_end));      // display window end   pos 0-15
+	save_item(NAME(m_window_size));     // window  size
+	save_item(NAME(m_shift_count));
+	save_item(NAME(m_shift_data));
+	save_item(NAME(m_pcursor_pos));
+	save_item(NAME(m_scroll_active));
+	save_item(NAME(m_display_mode));
+	save_item(NAME(m_flash_rate));
+	save_item(NAME(m_flash_control));
+	save_item(NAME(m_chars));
+	save_item(NAME(m_attrs));
+	save_item(NAME(m_outputs));
+	save_item(NAME(m_user_data));           // user defined character data (16 bit)
+	save_item(NAME(m_user_def));            // user defined character state
+
+	device_reset();
 }
 
-///////////////////////////////////////////////////////////////////////////
-
-UINT32 *BFM_BD1_get_outputs(int id)
+void bfm_bd1_t::device_reset()
 {
-	return bd1[id].outputs;
+	m_cursor = 0;
+	m_cursor_pos = 0;
+	m_window_start = 0;
+	m_window_end = 0;
+	m_window_size = 0;
+	m_shift_count = 0;
+	m_shift_data = 0;
+	m_pcursor_pos = 0;
+	m_scroll_active = 0;
+	m_display_mode = 0;
+	m_flash_rate = 0;
+	m_flash_control = 0;
+	m_user_data = 0;
+	m_user_def = 0;
+
+	memset(m_chars, 0, sizeof(m_chars));
+	memset(m_outputs, 0, sizeof(m_outputs));
+	memset(m_attrs, 0, sizeof(m_attrs));
 }
 
-///////////////////////////////////////////////////////////////////////////
-
-UINT32 *BFM_BD1_set_outputs(int id)
+UINT16 bfm_bd1_t::set_display(UINT16 segin)
 {
-	int cursor;
-	for (cursor = 0; cursor < 16; cursor++)
+	return BITSWAP16(segin,8,12,11,7,6,4,10,3,14,15,0,13,9,5,1,2);
+}
+
+void bfm_bd1_t::device_post_load()
+{
+	for (int i =0; i<16; i++)
 	{
-		if ( BFM_BD1_get_segments(id)[cursor] & 0x0004 )	bd1[id].outputs[cursor] |=  0x0001;
-		else    	                    					bd1[id].outputs[cursor] &= ~0x0001;
-		if ( BFM_BD1_get_segments(id)[cursor] & 0x0002 )	bd1[id].outputs[cursor] |=  0x0002;
-		else        	                					bd1[id].outputs[cursor] &= ~0x0002;
-		if ( BFM_BD1_get_segments(id)[cursor] & 0x0020 )	bd1[id].outputs[cursor] |=  0x0004;
-		else            	            					bd1[id].outputs[cursor] &= ~0x0004;
-		if ( BFM_BD1_get_segments(id)[cursor] & 0x0200 )	bd1[id].outputs[cursor] |=  0x0008;
-		else                	        					bd1[id].outputs[cursor] &= ~0x0008;
-		if ( BFM_BD1_get_segments(id)[cursor] & 0x2000 )	bd1[id].outputs[cursor] |=  0x0010;
-		else                    	    					bd1[id].outputs[cursor] &= ~0x0010;
-		if ( BFM_BD1_get_segments(id)[cursor] & 0x0001 )	bd1[id].outputs[cursor] |=  0x0020;
-		else                        						bd1[id].outputs[cursor] &= ~0x0020;
-		if ( BFM_BD1_get_segments(id)[cursor] & 0x8000 )	bd1[id].outputs[cursor] |=  0x0040;
-		else                        						bd1[id].outputs[cursor] &= ~0x0040;
-		if ( BFM_BD1_get_segments(id)[cursor] & 0x4000 )	bd1[id].outputs[cursor] |=  0x0080;
-		else                		        				bd1[id].outputs[cursor] &= ~0x0080;
-		if ( BFM_BD1_get_segments(id)[cursor] & 0x0008 )	bd1[id].outputs[cursor] |=  0x0100;
-		else        		                				bd1[id].outputs[cursor] &= ~0x0100;
-		if ( BFM_BD1_get_segments(id)[cursor] & 0x0400 )	bd1[id].outputs[cursor] |=  0x0200;
-		else                        						bd1[id].outputs[cursor] &= ~0x0200;
-		if ( BFM_BD1_get_segments(id)[cursor] & 0x0010 )	bd1[id].outputs[cursor] |=  0x0400;
-		else                        						bd1[id].outputs[cursor] &= ~0x0400;
-		if ( BFM_BD1_get_segments(id)[cursor] & 0x0040 )	bd1[id].outputs[cursor] |=  0x0800;
-		else                        						bd1[id].outputs[cursor] &= ~0x0800;
-		if ( BFM_BD1_get_segments(id)[cursor] & 0x0080 )	bd1[id].outputs[cursor] |=  0x1000;
-		else                        						bd1[id].outputs[cursor] &= ~0x1000;
-		if ( BFM_BD1_get_segments(id)[cursor] & 0x0800 )	bd1[id].outputs[cursor] |=  0x2000;
-		else                        						bd1[id].outputs[cursor] &= ~0x2000;
-		if ( BFM_BD1_get_segments(id)[cursor] & 0x1000 )	bd1[id].outputs[cursor] |=  0x4000;
-		else                        						bd1[id].outputs[cursor] &= ~0x4000;
-		//Flashing ? Set an unused pin as a control
-		if ( BFM_BD1_get_segments(id)[cursor] & 0x100 )	bd1[id].outputs[cursor] |=  0x40000;
-		else                        				bd1[id].outputs[cursor] &= ~0x40000;
+		output_set_indexed_value("vfd", (m_port_val*16) + i, m_outputs[i]);
 	}
-	return 0;
-}
-///////////////////////////////////////////////////////////////////////////
-
-char  *BFM_BD1_get_string( int id)
-{
-	return (char *)bd1[id].string;
 }
 
-///////////////////////////////////////////////////////////////////////////
-
-void BFM_BD1_shift_data(int id, int data)
+void bfm_bd1_t::update_display()
 {
-	bd1[id].data <<= 1;
-
-	if ( !data ) bd1[id].data |= 1;
-
-	if ( ++bd1[id].count >= 8 )
+	for (int i =0; i<16; i++)
 	{
-		if ( BFM_BD1_newdata(id, bd1[id].data) )
+		if (m_attrs[i] != AT_BLANK)
 		{
-			bd1[id].changed |= 1;
+			m_outputs[i] = set_display(m_chars[i]);
 		}
-		//logerror("vfd %3d -> %02X \"%s\"\n", id, bd1[id].data, bd1[id].string);
+		else
+		{
+			m_outputs[i] = 0;
+		}
+		output_set_indexed_value("vfd", (m_port_val*16) + i, m_outputs[i]);
+	}
+}
+///////////////////////////////////////////////////////////////////////////
+void bfm_bd1_t::blank(int data)
+{
+	switch ( data & 0x03 )
+	{
+		case 0x00:  //blank all
+		{
+			for (int i = 0; i < 15; i++)
+			{
+				m_attrs[i] = AT_BLANK;
+			}
+		}
 
-		bd1[id].count = 0;
-		bd1[id].data  = 0;
+		break;
+		case 0x01:  // blank inside window
+		if ( m_window_size > 0 )
+		{
+			for (int i = m_window_start; i < m_window_end ; i++)
+			{
+				m_attrs[i] = AT_BLANK;
+			}
+		}
+		break;
+		case 0x02:  // blank outside window
+		if ( m_window_size > 0 )
+		{
+			if ( m_window_start > 0 )
+			{
+				for (int i = 0; i < m_window_start; i++)
+				{
+					m_attrs[i] = AT_BLANK;
+				}
+			}
+
+			if (m_window_end < 15 )
+			{
+				for (int i = m_window_end; i < 15- m_window_end ; i++)
+				{
+					m_attrs[i] = AT_BLANK;
+				}
+			}
+		}
+		break;
+		case 0x03:  // clear blanking
+		{
+			for (int i = 0; i < 15; i++)
+			{
+				m_attrs[i] = 0;
+			}
+		}
+		break;
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////
-
-int BFM_BD1_newdata(int id, int data)
+int bfm_bd1_t::write_char(int data)
 {
 	int change = 0;
-	int cursor;
-
-	if ( bd1[id].user_def )
+	if ( m_user_def )
 	{
-		bd1[id].user_def--;
+		m_user_def--;
 
-		bd1[id].user_data <<= 8;
-		bd1[id].user_data |= data;
+		m_user_data <<= 8;
+		m_user_data |= data;
 
-		if ( bd1[id].user_def )
+		if ( m_user_def )
 		{
 			return 0;
 		}
 
-	data = '@';
-	change = BD1_setdata(id, bd1[id].user_def, data);
+		setdata( m_user_data, data);
+		change ++;
+
 	}
 	else
 	{
-	}
 
-	switch ( data & 0xF0 )
-	{
-		case 0x80:	// 0x80 - 0x8F Set display blanking
-
-		bd1[id].display_blanking = data & 0x0F;
-		change = 1;
-		break;
-
-		case 0x90:	// 0x90 - 0x9F Set cursor pos
-
-		bd1[id].cursor_pos = data & 0x0F;
-
-		bd1[id].scroll_active = 0;
-		if ( bd1[id].display_mode == 2 )
+		if(data < 0x80)//characters
 		{
-			if ( bd1[id].cursor_pos >= bd1[id].window_end) bd1[id].scroll_active = 1;
-		}
-		break;
-
-		case 0xA0:	// 0xA0 - 0xAF Set display mode
-
-		bd1[id].display_mode = data &0x03;
-		break;
-
-		case 0xB0:	// 0xB0 - 0xBF Clear display area
-
-		switch ( data & 0x03 )
-		{
-			case 0x00:	// clr nothing
-			break;
-
-			case 0x01:	// clr inside window
-
-			if ( bd1[id].window_size > 0 )
+			if (data > 0x3F)
 			{
-				memset( bd1[id].string+bd1[id].window_start, ' ',bd1[id].window_size );
+				//  logerror("Undefined character %x \n", data);
 			}
-			break;
 
-			case 0x02:	// clr outside window
-
-			if ( bd1[id].window_size > 0 )
+			setdata(BD1charset[(data & 0x3F)], data);
+		}
+		else
+		{
+			switch ( data & 0xF0 )
 			{
-				if ( bd1[id].window_start > 0 )
+				case 0x80:  // 0x80 - 0x8F Set display blanking
 				{
-					memset( bd1[id].string, ' ', bd1[id].window_start);
-					for (cursor = 0; cursor < bd1[id].window_start; cursor++)
-					{
-						bd1[id].segments[cursor] = 0x0000;
-					}
+					blank(data&0x03);//use the blanking data
 				}
+				break;
 
-				if (bd1[id].window_end < 15 )
+				case 0x90:  // 0x90 - 0x9F Set cursor pos
+				m_cursor_pos = data & 0x0F;
+				m_scroll_active = 0;
+				if ( m_display_mode == 2 )
 				{
-					memset( bd1[id].string+bd1[id].window_end, ' ', 15-bd1[id].window_end);
-					for (cursor = bd1[id].window_end; cursor < 15-bd1[id].window_end; cursor++)
+					if ( m_cursor_pos >= m_window_end) m_scroll_active = 1;
+				}
+				break;
+
+				case 0xA0:  // 0xA0 - 0xAF Set display mode
+				m_display_mode = data &0x03;
+				break;
+
+				case 0xB0:  // 0xB0 - 0xBF Clear display area
+
+				switch ( data & 0x03 )
+				{
+					case 0x00:  // clr nothing
+					break;
+
+					case 0x01:  // clr inside window
+					if ( m_window_size > 0 )
 					{
-						bd1[id].segments[cursor] = 0x0000;
+						memset(m_chars+m_window_start,0,m_window_size);
+						memset(m_attrs+m_window_start,0,m_window_size);
 					}
 
+					break;
+
+					case 0x02:  // clr outside window
+					if ( m_window_size > 0 )
+					{
+						if ( m_window_start > 0 )
+						{
+							for (int i = 0; i < m_window_start; i++)
+							{
+								memset(m_chars+i,0,i);
+								memset(m_attrs+i,0,i);
+							}
+						}
+
+						if (m_window_end < 15 )
+						{
+							for (int i = m_window_end; i < 15- m_window_end ; i++)
+							{
+								memset(m_chars+i,0,i);
+								memset(m_attrs+i,0,i);
+							}
+						}
+					}
+					case 0x03:  // clr entire display
+					{
+						memset(m_chars, 0, sizeof(m_chars));
+						memset(m_attrs, 0, sizeof(m_attrs));
+					}
 				}
-			}
-			case 0x03:	// clr entire display
+				break;
 
-			memset(bd1[id].string, ' ' , 16);
-			for (cursor = 0; cursor < 16; cursor++)
-			{
-				bd1[id].segments[cursor] = 0x0000;
-			}
-			break;
-		}
-		change = 1;
-		break;
+				case 0xC0:  // 0xC0 - 0xCF Set flash rate
+				m_flash_rate = data & 0x0F;
+				break;
 
-		case 0xC0:	// 0xC0 - 0xCF Set flash rate
+				case 0xD0:  // 0xD0 - 0xDF Set Flash control
+				m_flash_control = data & 0x03;
+				break;
 
-		bd1[id].flash_rate = data & 0x0F;
-		break;
+				case 0xE0:  // 0xE0 - 0xEF Set window start pos
+				m_window_start = data &0x0F;
+				m_window_size  = (m_window_end - m_window_start)+1;
+				break;
 
-		case 0xD0:	// 0xD0 - 0xDF Set Flash control
-
-		bd1[id].flash_control = data & 0x03;
-		break;
-
-		case 0xE0:	// 0xE0 - 0xEF Set window start pos
-
-		bd1[id].window_start = data &0x0F;
-		bd1[id].window_size  = (bd1[id].window_end - bd1[id].window_start)+1;
-		break;
-
-		case 0xF0:	// 0xF0 - 0xFF Set window end pos
-
-		bd1[id].window_end   = data &0x0F;
-		bd1[id].window_size  = (bd1[id].window_end - bd1[id].window_start)+1;
-
-		bd1[id].scroll_active = 0;
-		if ( bd1[id].display_mode == 2 )
-		{
-			if ( bd1[id].cursor_pos >= bd1[id].window_end)
-			{
-				bd1[id].scroll_active = 1;
-				bd1[id].cursor_pos    = bd1[id].window_end;
+				case 0xF0:  // 0xF0 - 0xFF Set window end pos
+				m_window_end   = data &0x0F;
+				m_window_size  = (m_window_end - m_window_start)+1;
+				m_scroll_active = 0;
+				if ( m_display_mode == 2 )
+				{
+					if ( m_cursor_pos >= m_window_end)
+					{
+						m_scroll_active = 1;
+						m_cursor_pos    = m_window_end;
+					}
+				}
+				break;
 			}
 		}
-		break;
-
-		default:	// normal character
-
-		change = BD1_setdata(id, BD1charset[data & 0x3F], data);
-		break;
 	}
-	return change;
-}
+	update_display();
 
+	return 0;
+}
 ///////////////////////////////////////////////////////////////////////////
 
-static void ScrollLeft(int id)
+void bfm_bd1_t::setdata(int segdata, int data)
 {
-	int i = bd1[id].window_start;
-
-	while ( i < bd1[id].window_end )
-	{
-		bd1[id].string[ i ] = bd1[id].string[ i+1 ];
-		bd1[id].segments[i] = bd1[id].segments[i+1];
-		i++;
-	}
-}
-
-///////////////////////////////////////////////////////////////////////////
-
-static int BD1_setdata(int id, int segdata, int data)
-{
-	int change = 0, move = 0;
-
+	int move = 0;
+	int change =0;
 	switch ( data )
 	{
-		case 0x25:	// flash
-		move++;
+		case 0x25:  // flash
+		if(m_chars[m_pcursor_pos] & (1<<8))
+		{
+			move++;
+		}
+		else
+		{
+			m_chars[m_pcursor_pos] |= (1<<8);
+		}
 		break;
 
 		case 0x26:  // undefined
@@ -420,148 +395,158 @@ static int BD1_setdata(int id, int segdata, int data)
 		case 0x2C:  // semicolon
 		case 0x2E:  // decimal point
 
-		bd1[id].segments[bd1[id].pcursor_pos] |= (1<<12);
-		change++;
+		if( m_chars[m_pcursor_pos] & (1<<12))
+		{
+			move++;
+		}
+		else
+		{
+			m_chars[m_pcursor_pos] |= (1<<12);
+		}
 		break;
 
-		case 0x3B:	// dummy char
+		case 0x3B:  // dummy char
 		move++;
 		break;
 
 		case 0x3A:
-		bd1[id].user_def = 2;
+		m_user_def = 2;
 		break;
 
 		default:
-		move   = 1;
-		change = 1;
+		move++;
+		change++;
 	}
 
 	if ( move )
 	{
-		int mode = bd1[id].display_mode;
 
-		bd1[id].pcursor_pos = bd1[id].cursor_pos;
+		int mode = m_display_mode;
 
-		if ( bd1[id].window_size <= 0 || (bd1[id].window_size > 16))
-		{ // no window selected default to rotate mode
+		m_pcursor_pos = m_cursor_pos;
+
+		if ( m_window_size <= 0 || (m_window_size > 16))
+		{ // if no window selected default to equivalent rotate mode
 				if ( mode == 2 )      mode = 0;
 				else if ( mode == 3 ) mode = 1;
-				//mode &= -2;
 		}
 
 		switch ( mode )
 		{
 		case 0: // rotate left
 
-		bd1[id].cursor_pos &= 0x0F;
+		m_cursor_pos &= 0x0F;
 
 		if ( change )
 		{
-			bd1[id].string[bd1[id].cursor_pos]   = BD1ASCII[data];
-			bd1[id].segments[bd1[id].cursor_pos] = segdata;
+			m_chars[m_cursor_pos] = segdata;
 		}
-		bd1[id].cursor_pos++;
-		if ( bd1[id].cursor_pos >= 16 ) bd1[id].cursor_pos = 0;
+		m_cursor_pos++;
+		if ( m_cursor_pos >= 16 ) m_cursor_pos = 0;
 		break;
 
 
 		case 1: // Rotate right
 
-		bd1[id].cursor_pos &= 0x0F;
+		m_cursor_pos &= 0x0F;
 
 		if ( change )
 		{
-			bd1[id].string[bd1[id].cursor_pos]   = BD1ASCII[data];
-			bd1[id].segments[bd1[id].cursor_pos] = segdata;
+			m_chars[m_cursor_pos] = segdata;
 		}
-		bd1[id].cursor_pos--;
-		if ( bd1[id].cursor_pos < 0  ) bd1[id].cursor_pos = 15;
+		m_cursor_pos--;
+		if ( m_cursor_pos < 0  ) m_cursor_pos = 15;
 		break;
 
 		case 2: // Scroll left
 
-		if ( bd1[id].cursor_pos < bd1[id].window_end )
+		if ( m_cursor_pos < m_window_end )
 		{
-			bd1[id].scroll_active = 0;
+			m_scroll_active = 0;
 			if ( change )
 			{
-				bd1[id].string[bd1[id].cursor_pos]   = BD1ASCII[data];
-				bd1[id].segments[bd1[id].cursor_pos] = segdata;
+				m_chars[m_cursor_pos] = segdata;
 			}
-			if ( move ) bd1[id].cursor_pos++;
+			m_cursor_pos++;
 		}
 		else
 		{
 			if ( move )
 			{
-				if   ( bd1[id].scroll_active ) ScrollLeft(id);
-				else                            bd1[id].scroll_active = 1;
+				if  ( m_scroll_active )
+				{
+					int i = m_window_start;
+					while ( i < m_window_end )
+					{
+						m_chars[i] = m_chars[i+1];
+						i++;
+					}
+				}
+				else   m_scroll_active = 1;
 			}
 
 			if ( change )
 			{
-				bd1[id].string[bd1[id].window_end]   = BD1ASCII[data];
-				bd1[id].segments[bd1[id].cursor_pos] = segdata;
+				m_chars[m_window_end] = segdata;
 			}
 			else
 			{
-				bd1[id].string[bd1[id].window_end]   = ' ';
-				bd1[id].segments[bd1[id].cursor_pos] = 0;
+				m_chars[m_window_end] = 0;
 			}
 		}
 		break;
 
 		case 3: // Scroll right
 
-			if ( bd1[id].cursor_pos > bd1[id].window_start )
+			if ( m_cursor_pos > m_window_start )
 			{
 				if ( change )
 				{
-					bd1[id].string[bd1[id].cursor_pos]   = BD1ASCII[data];
-					bd1[id].segments[bd1[id].cursor_pos] = segdata;
+					m_chars[m_cursor_pos] = segdata;
 				}
-				bd1[id].cursor_pos--;
+				m_cursor_pos--;
+				if ( m_cursor_pos > 15  ) m_cursor_pos = 0;
 			}
 			else
 			{
-				int i = bd1[id].window_end;
-
-				while ( i > bd1[id].window_start )
+				if ( move )
 				{
-					bd1[id].string[ i ] = bd1[id].string[ i-1 ];
-					bd1[id].segments[i] = bd1[id].segments[i-1];
-					i--;
-				}
+					if  ( m_scroll_active )
+					{
+						int i = m_window_end;
 
+						while ( i > m_window_start )
+						{
+							m_chars[i] = m_chars[i-1];
+							i--;
+						}
+					}
+					else   m_scroll_active = 1;
+				}
 				if ( change )
 				{
-					bd1[id].string[bd1[id].window_start]   = BD1ASCII[data];
-					bd1[id].segments[bd1[id].window_start] = segdata;
+						m_chars[m_window_start] = segdata;
+					}
+				else
+				{
+						m_chars[m_window_start] = 0;
 				}
 			}
 			break;
 		}
 	}
-	return change;
 }
 
-void BFM_BD1_draw(int id)
+void bfm_bd1_t::shift_data(int data)
 {
-	int cursor;
-	BFM_BD1_set_outputs(id);
+	m_shift_data <<= 1;
 
-	for (cursor = 0; cursor < 16; cursor++)
+	if ( !data ) m_shift_data |= 1;
+
+	if ( ++m_shift_count >= 8 )
 	{
-		output_set_indexed_value("vfd", (id*16)+cursor, BFM_BD1_get_outputs(id)[cursor]);
-
-		if (BFM_BD1_get_outputs(id)[cursor] & 0x40000)
-		{
-			//activate flashing (unimplemented, just toggle on and off)
-		}
-		else
-		{
-			//deactivate flashing (unimplemented)
-		}
+		write_char(m_shift_data);
+		m_shift_count = 0;
+		m_shift_data  = 0;
 	}
 }

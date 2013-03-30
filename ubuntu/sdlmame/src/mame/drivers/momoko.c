@@ -47,44 +47,44 @@ Stephh's notes (based on the game Z80 code and some tests) :
 #include "includes/momoko.h"
 
 
-static WRITE8_HANDLER( momoko_bg_read_bank_w )
+WRITE8_MEMBER(momoko_state::momoko_bg_read_bank_w)
 {
-	memory_set_bank(space->machine(), "bank1", data & 0x1f);
+	membank("bank1")->set_entry(data & 0x1f);
 }
 
 /****************************************************************************/
 
-static ADDRESS_MAP_START( momoko_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( momoko_map, AS_PROGRAM, 8, momoko_state )
 	AM_RANGE(0x0000, 0xbfff) AM_ROM
 	AM_RANGE(0xc000, 0xcfff) AM_RAM
-	AM_RANGE(0xd064, 0xd0ff) AM_RAM AM_BASE_SIZE_MEMBER(momoko_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0xd064, 0xd0ff) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0xd400, 0xd400) AM_READ_PORT("IN0") AM_WRITENOP /* interrupt ack? */
 	AM_RANGE(0xd402, 0xd402) AM_READ_PORT("IN1") AM_WRITE(momoko_flipscreen_w)
 	AM_RANGE(0xd404, 0xd404) AM_WRITE(watchdog_reset_w)
-	AM_RANGE(0xd406, 0xd406) AM_READ_PORT("DSW0") AM_WRITE(soundlatch_w)
+	AM_RANGE(0xd406, 0xd406) AM_READ_PORT("DSW0") AM_WRITE(soundlatch_byte_w)
 	AM_RANGE(0xd407, 0xd407) AM_READ_PORT("DSW1")
-	AM_RANGE(0xd800, 0xdbff) AM_RAM_WRITE(paletteram_xxxxRRRRGGGGBBBB_be_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0xd800, 0xdbff) AM_RAM_WRITE(paletteram_xxxxRRRRGGGGBBBB_byte_be_w) AM_SHARE("paletteram")
 	AM_RANGE(0xdc00, 0xdc00) AM_WRITE(momoko_fg_scrolly_w)
 	AM_RANGE(0xdc01, 0xdc01) AM_WRITE(momoko_fg_scrollx_w)
 	AM_RANGE(0xdc02, 0xdc02) AM_WRITE(momoko_fg_select_w)
-	AM_RANGE(0xe000, 0xe3ff) AM_RAM AM_BASE_SIZE_MEMBER(momoko_state, m_videoram, m_videoram_size)
+	AM_RANGE(0xe000, 0xe3ff) AM_RAM AM_SHARE("videoram")
 	AM_RANGE(0xe800, 0xe800) AM_WRITE(momoko_text_scrolly_w)
 	AM_RANGE(0xe801, 0xe801) AM_WRITE(momoko_text_mode_w)
 	AM_RANGE(0xf000, 0xffff) AM_ROMBANK("bank1")
-	AM_RANGE(0xf000, 0xf001) AM_WRITE(momoko_bg_scrolly_w) AM_BASE_MEMBER(momoko_state, m_bg_scrolly)
-	AM_RANGE(0xf002, 0xf003) AM_WRITE(momoko_bg_scrollx_w) AM_BASE_MEMBER(momoko_state, m_bg_scrollx)
+	AM_RANGE(0xf000, 0xf001) AM_WRITE(momoko_bg_scrolly_w) AM_SHARE("bg_scrolly")
+	AM_RANGE(0xf002, 0xf003) AM_WRITE(momoko_bg_scrollx_w) AM_SHARE("bg_scrollx")
 	AM_RANGE(0xf004, 0xf004) AM_WRITE(momoko_bg_read_bank_w)
 	AM_RANGE(0xf006, 0xf006) AM_WRITE(momoko_bg_select_w)
 	AM_RANGE(0xf007, 0xf007) AM_WRITE(momoko_bg_priority_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( momoko_sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( momoko_sound_map, AS_PROGRAM, 8, momoko_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x87ff) AM_RAM
 	AM_RANGE(0x9000, 0x9000) AM_WRITENOP /* unknown */
-	AM_RANGE(0xa000, 0xa001) AM_DEVREADWRITE("ym1", ym2203_r,ym2203_w)
+	AM_RANGE(0xa000, 0xa001) AM_DEVREADWRITE_LEGACY("ym1", ym2203_r,ym2203_w)
 	AM_RANGE(0xb000, 0xb000) AM_WRITENOP /* unknown */
-	AM_RANGE(0xc000, 0xc001) AM_DEVREADWRITE("ym2", ym2203_r,ym2203_w)
+	AM_RANGE(0xc000, 0xc001) AM_DEVREADWRITE_LEGACY("ym2", ym2203_r,ym2203_w)
 ADDRESS_MAP_END
 
 
@@ -152,8 +152,8 @@ static INPUT_PORTS_START( momoko )
 
 	PORT_START("FAKE")
 	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Flip_Screen ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x01, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x01, DEF_STR( On ) )
 INPUT_PORTS_END
 
 /****************************************************************************/
@@ -177,7 +177,7 @@ static const gfx_layout spritelayout =
 	{12,8,4,0},
 	{0, 1, 2, 3, 4096*8+0, 4096*8+1, 4096*8+2, 4096*8+3},
 	{0, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
-	 8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16},
+		8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16},
 	8*32
 };
 
@@ -217,70 +217,65 @@ static const ym2203_interface ym2203_config =
 	{
 		AY8910_LEGACY_OUTPUT,
 		AY8910_DEFAULT_LOADS,
-		DEVCB_MEMORY_HANDLER("audiocpu", PROGRAM, soundlatch_r),
+		DEVCB_DRIVER_MEMBER(driver_device, soundlatch_byte_r),
 		DEVCB_NULL,
 		DEVCB_NULL,
 		DEVCB_NULL
 	},
-	NULL
+	DEVCB_NULL
 };
 
-static MACHINE_START( momoko )
+void momoko_state::machine_start()
 {
-	momoko_state *state = machine.driver_data<momoko_state>();
-	UINT8 *BG_MAP = machine.region("user1")->base();
+	UINT8 *BG_MAP = memregion("user1")->base();
 
-	memory_configure_bank(machine, "bank1", 0, 32, &BG_MAP[0x0000], 0x1000);
+	membank("bank1")->configure_entries(0, 32, &BG_MAP[0x0000], 0x1000);
 
-	state->save_item(NAME(state->m_fg_scrollx));
-	state->save_item(NAME(state->m_fg_scrolly));
-	state->save_item(NAME(state->m_fg_select));
-	state->save_item(NAME(state->m_text_scrolly));
-	state->save_item(NAME(state->m_text_mode));
-	state->save_item(NAME(state->m_bg_select));
-	state->save_item(NAME(state->m_bg_priority));
-	state->save_item(NAME(state->m_bg_mask));
-	state->save_item(NAME(state->m_fg_mask));
-	state->save_item(NAME(state->m_flipscreen));
+	save_item(NAME(m_fg_scrollx));
+	save_item(NAME(m_fg_scrolly));
+	save_item(NAME(m_fg_select));
+	save_item(NAME(m_text_scrolly));
+	save_item(NAME(m_text_mode));
+	save_item(NAME(m_bg_select));
+	save_item(NAME(m_bg_priority));
+	save_item(NAME(m_bg_mask));
+	save_item(NAME(m_fg_mask));
+	save_item(NAME(m_flipscreen));
 }
 
-static MACHINE_RESET( momoko )
+void momoko_state::machine_reset()
 {
-	momoko_state *state = machine.driver_data<momoko_state>();
 
-	state->m_fg_scrollx = 0;
-	state->m_fg_scrolly = 0;
-	state->m_fg_select = 0;
-	state->m_text_scrolly = 0;
-	state->m_text_mode = 0;
-	state->m_bg_select = 0;
-	state->m_bg_priority = 0;
-	state->m_bg_mask = 0;
-	state->m_fg_mask = 0;
-	state->m_flipscreen = 0;
+	m_fg_scrollx = 0;
+	m_fg_scrolly = 0;
+	m_fg_select = 0;
+	m_text_scrolly = 0;
+	m_text_mode = 0;
+	m_bg_select = 0;
+	m_bg_priority = 0;
+	m_bg_mask = 0;
+	m_fg_mask = 0;
+	m_flipscreen = 0;
 }
 
 static MACHINE_CONFIG_START( momoko, momoko_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, 5000000)	/* 5.0MHz */
+	MCFG_CPU_ADD("maincpu", Z80, 5000000)   /* 5.0MHz */
 	MCFG_CPU_PROGRAM_MAP(momoko_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", momoko_state,  irq0_line_hold)
 
-	MCFG_CPU_ADD("audiocpu", Z80, 2500000)	/* 2.5MHz */
+	MCFG_CPU_ADD("audiocpu", Z80, 2500000)  /* 2.5MHz */
 	MCFG_CPU_PROGRAM_MAP(momoko_sound_map)
 
-	MCFG_MACHINE_START(momoko)
-	MCFG_MACHINE_RESET(momoko)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(1*8, 31*8-1, 2*8, 29*8-1)
-	MCFG_SCREEN_UPDATE(momoko)
+	MCFG_SCREEN_UPDATE_DRIVER(momoko_state, screen_update_momoko)
 
 	MCFG_GFXDECODE(momoko)
 	MCFG_PALETTE_LENGTH(512)
@@ -345,4 +340,4 @@ ROM_START( momoko )
 	ROM_LOAD( "momoko-b.bin", 0x0100,  0x0020, CRC(427b0e5c) SHA1(aa2797b899571527cc96013fd3420b841954ee67) )
 ROM_END
 
-GAME( 1986, momoko, 0, momoko, momoko, 0, ROT0, "Jaleco", "Momoko 120%", GAME_SUPPORTS_SAVE )
+GAME( 1986, momoko, 0, momoko, momoko, driver_device, 0, ROT0, "Jaleco", "Momoko 120%", GAME_SUPPORTS_SAVE )

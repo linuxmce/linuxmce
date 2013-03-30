@@ -40,74 +40,76 @@ TODO:
 #include "includes/hnayayoi.h"
 
 
-static READ8_HANDLER( keyboard_0_r )
+READ8_MEMBER(hnayayoi_state::keyboard_0_r)
 {
-	hnayayoi_state *state = space->machine().driver_data<hnayayoi_state>();
 	int res = 0x3f;
 	int i;
 	static const char *const keynames[] = { "KEY0", "KEY1", "KEY2", "KEY3", "KEY4" };
 
 	for (i = 0; i < 5; i++)
 	{
-		if (~state->m_keyb & (1 << i))
-			res &= input_port_read(space->machine(), keynames[i]);
+		if (~m_keyb & (1 << i))
+			res &= ioport(keynames[i])->read();
 	}
 
 	return res;
 }
 
-static READ8_HANDLER( keyboard_1_r )
+READ8_MEMBER(hnayayoi_state::keyboard_1_r)
 {
 	/* Player 2 not supported */
 	return 0x3f;
 }
 
-static WRITE8_HANDLER( keyboard_w )
+WRITE8_MEMBER(hnayayoi_state::keyboard_w)
 {
-	hnayayoi_state *state = space->machine().driver_data<hnayayoi_state>();
-	state->m_keyb = data;
+	m_keyb = data;
 }
 
 
-static WRITE8_DEVICE_HANDLER( adpcm_data_w )
+WRITE8_MEMBER(hnayayoi_state::adpcm_data_w)
 {
+	device_t *device = machine().device("msm");
 	msm5205_data_w(device, data);
 }
 
-static WRITE8_DEVICE_HANDLER( adpcm_vclk_w )
+WRITE8_MEMBER(hnayayoi_state::adpcm_vclk_w)
 {
+	device_t *device = machine().device("msm");
 	msm5205_vclk_w(device, data & 1);
 }
 
-static WRITE8_DEVICE_HANDLER( adpcm_reset_w )
+WRITE8_MEMBER(hnayayoi_state::adpcm_reset_w)
 {
+	device_t *device = machine().device("msm");
 	msm5205_reset_w(device, data & 1);
 }
 
-static WRITE8_DEVICE_HANDLER( adpcm_reset_inv_w )
+WRITE8_MEMBER(hnayayoi_state::adpcm_reset_inv_w)
 {
+	device_t *device = machine().device("msm");
 	msm5205_reset_w(device, ~data & 1);
 }
 
 
-static ADDRESS_MAP_START( hnayayoi_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( hnayayoi_map, AS_PROGRAM, 8, hnayayoi_state )
 	AM_RANGE(0x0000, 0x77ff) AM_ROM
 	AM_RANGE(0x7800, 0x7fff) AM_RAM AM_SHARE("nvram")
 	AM_RANGE(0x8000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( hnayayoi_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( hnayayoi_io_map, AS_IO, 8, hnayayoi_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x01) AM_DEVWRITE("ymsnd", ym2203_w)
-	AM_RANGE(0x02, 0x03) AM_DEVREAD("ymsnd", ym2203_r)
+	AM_RANGE(0x00, 0x01) AM_DEVWRITE_LEGACY("ymsnd", ym2203_w)
+	AM_RANGE(0x02, 0x03) AM_DEVREAD_LEGACY("ymsnd", ym2203_r)
 	AM_RANGE(0x04, 0x04) AM_READ_PORT("DSW3")
-	AM_RANGE(0x06, 0x06) AM_DEVWRITE("msm", adpcm_data_w)
+	AM_RANGE(0x06, 0x06) AM_WRITE(adpcm_data_w)
 //  AM_RANGE(0x08, 0x08) AM_WRITENOP // CRT Controller
 //  AM_RANGE(0x09, 0x09) AM_WRITENOP // CRT Controller
 	AM_RANGE(0x0a, 0x0a) AM_WRITE(dynax_blitter_rev1_start_w)
 	AM_RANGE(0x0c, 0x0c) AM_WRITE(dynax_blitter_rev1_clear_w)
-	AM_RANGE(0x23, 0x23) AM_DEVWRITE("msm", adpcm_vclk_w)
-	AM_RANGE(0x24, 0x24) AM_DEVWRITE("msm", adpcm_reset_w)
+	AM_RANGE(0x23, 0x23) AM_WRITE(adpcm_vclk_w)
+	AM_RANGE(0x24, 0x24) AM_WRITE(adpcm_reset_w)
 	AM_RANGE(0x40, 0x40) AM_WRITE(keyboard_w)
 	AM_RANGE(0x41, 0x41) AM_READ(keyboard_0_r)
 	AM_RANGE(0x42, 0x42) AM_READ(keyboard_1_r)
@@ -116,20 +118,20 @@ static ADDRESS_MAP_START( hnayayoi_io_map, AS_IO, 8 )
 	AM_RANGE(0x62, 0x67) AM_WRITE(dynax_blitter_rev1_param_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( hnfubuki_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( hnfubuki_map, AS_PROGRAM, 8, hnayayoi_state )
 	AM_RANGE(0x0000, 0x77ff) AM_ROM
 	AM_RANGE(0x7800, 0x7fff) AM_RAM AM_SHARE("nvram")
 	AM_RANGE(0x8000, 0xfeff) AM_ROM
-	AM_RANGE(0xff00, 0xff01) AM_DEVWRITE("ymsnd", ym2203_w)
-	AM_RANGE(0xff02, 0xff03) AM_DEVREAD("ymsnd", ym2203_r)
+	AM_RANGE(0xff00, 0xff01) AM_DEVWRITE_LEGACY("ymsnd", ym2203_w)
+	AM_RANGE(0xff02, 0xff03) AM_DEVREAD_LEGACY("ymsnd", ym2203_r)
 	AM_RANGE(0xff04, 0xff04) AM_READ_PORT("DSW3")
-	AM_RANGE(0xff06, 0xff06) AM_DEVWRITE("msm", adpcm_data_w)
+	AM_RANGE(0xff06, 0xff06) AM_WRITE(adpcm_data_w)
 //  AM_RANGE(0xff08, 0xff08) AM_WRITENOP // CRT Controller
 //  AM_RANGE(0xff09, 0xff09) AM_WRITENOP // CRT Controller
 	AM_RANGE(0xff0a, 0xff0a) AM_WRITE(dynax_blitter_rev1_start_w)
 	AM_RANGE(0xff0c, 0xff0c) AM_WRITE(dynax_blitter_rev1_clear_w)
-	AM_RANGE(0xff23, 0xff23) AM_DEVWRITE("msm", adpcm_vclk_w)
-	AM_RANGE(0xff24, 0xff24) AM_DEVWRITE("msm", adpcm_reset_inv_w)
+	AM_RANGE(0xff23, 0xff23) AM_WRITE(adpcm_vclk_w)
+	AM_RANGE(0xff24, 0xff24) AM_WRITE(adpcm_reset_inv_w)
 	AM_RANGE(0xff40, 0xff40) AM_WRITE(keyboard_w)
 	AM_RANGE(0xff41, 0xff41) AM_READ(keyboard_0_r)
 	AM_RANGE(0xff42, 0xff42) AM_READ(keyboard_1_r)
@@ -138,30 +140,30 @@ static ADDRESS_MAP_START( hnfubuki_map, AS_PROGRAM, 8 )
 	AM_RANGE(0xff62, 0xff67) AM_WRITE(dynax_blitter_rev1_param_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( untoucha_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( untoucha_map, AS_PROGRAM, 8, hnayayoi_state )
 	AM_RANGE(0x0000, 0x77ff) AM_ROM
 	AM_RANGE(0x7800, 0x7fff) AM_RAM AM_SHARE("nvram")
 	AM_RANGE(0x8000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( untoucha_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( untoucha_io_map, AS_IO, 8, hnayayoi_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x10, 0x10) AM_DEVWRITE("ymsnd", ym2203_control_port_w)
-	AM_RANGE(0x11, 0x11) AM_DEVREAD("ymsnd", ym2203_status_port_r)
+	AM_RANGE(0x10, 0x10) AM_DEVWRITE_LEGACY("ymsnd", ym2203_control_port_w)
+	AM_RANGE(0x11, 0x11) AM_DEVREAD_LEGACY("ymsnd", ym2203_status_port_r)
 //  AM_RANGE(0x12, 0x12) AM_WRITENOP // CRT Controller
-	AM_RANGE(0x13, 0x13) AM_DEVWRITE("msm", adpcm_data_w)
+	AM_RANGE(0x13, 0x13) AM_WRITE(adpcm_data_w)
 	AM_RANGE(0x14, 0x14) AM_READ_PORT("COIN")
 	AM_RANGE(0x15, 0x15) AM_READ(keyboard_1_r)
-	AM_RANGE(0x16, 0x16) AM_READ(keyboard_0_r)	// bit 7 = blitter busy flag
+	AM_RANGE(0x16, 0x16) AM_READ(keyboard_0_r)  // bit 7 = blitter busy flag
 	AM_RANGE(0x17, 0x17) AM_WRITE(keyboard_w)
 	AM_RANGE(0x18, 0x19) AM_WRITE(hnayayoi_palbank_w)
 	AM_RANGE(0x1a, 0x1f) AM_WRITE(dynax_blitter_rev1_param_w)
 	AM_RANGE(0x20, 0x20) AM_WRITE(dynax_blitter_rev1_clear_w)
 	AM_RANGE(0x28, 0x28) AM_WRITE(dynax_blitter_rev1_start_w)
-	AM_RANGE(0x31, 0x31) AM_DEVWRITE("msm", adpcm_vclk_w)
-	AM_RANGE(0x32, 0x32) AM_DEVWRITE("msm", adpcm_reset_inv_w)
-	AM_RANGE(0x50, 0x50) AM_DEVWRITE("ymsnd", ym2203_write_port_w)
-	AM_RANGE(0x51, 0x51) AM_DEVREAD("ymsnd", ym2203_read_port_r)
+	AM_RANGE(0x31, 0x31) AM_WRITE(adpcm_vclk_w)
+	AM_RANGE(0x32, 0x32) AM_WRITE(adpcm_reset_inv_w)
+	AM_RANGE(0x50, 0x50) AM_DEVWRITE_LEGACY("ymsnd", ym2203_write_port_w)
+	AM_RANGE(0x51, 0x51) AM_DEVREAD_LEGACY("ymsnd", ym2203_read_port_r)
 //  AM_RANGE(0x52, 0x52) AM_WRITENOP // CRT Controller
 ADDRESS_MAP_END
 
@@ -211,7 +213,7 @@ INPUT_PORTS_END
 
 
 static INPUT_PORTS_START( hnayayoi )
-	PORT_START("DSW1")	/* DSW1 */
+	PORT_START("DSW1")  /* DSW1 */
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -237,7 +239,7 @@ static INPUT_PORTS_START( hnayayoi )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-	PORT_START("DSW2")	/* DSW2 */
+	PORT_START("DSW2")  /* DSW2 */
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -263,8 +265,8 @@ static INPUT_PORTS_START( hnayayoi )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-	PORT_START("DSW3")	/* DSW3 */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL )	// blitter busy flag
+	PORT_START("DSW3")  /* DSW3 */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL )   // blitter busy flag
 	PORT_SERVICE( 0x02, IP_ACTIVE_LOW )
 	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
@@ -285,13 +287,13 @@ static INPUT_PORTS_START( hnayayoi )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-	PORT_START("COIN")	/* COIN */
+	PORT_START("COIN")  /* COIN */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME(DEF_STR( Test )) PORT_CODE(KEYCODE_F1)	/* Test */
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )	/* Analizer (Statistics) */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME(DEF_STR( Test )) PORT_CODE(KEYCODE_F1)   /* Test */
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )   /* Analizer (Statistics) */
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )	/* "Note" ("Paper Money") = 10 Credits */
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )  /* "Note" ("Paper Money") = 10 Credits */
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_IMPULSE(2)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )
 
@@ -299,7 +301,7 @@ static INPUT_PORTS_START( hnayayoi )
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( hnfubuki )
-	PORT_START("DSW1")	/* DSW1 */
+	PORT_START("DSW1")  /* DSW1 */
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -325,7 +327,7 @@ static INPUT_PORTS_START( hnfubuki )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-	PORT_START("DSW2")	/* DSW2 */
+	PORT_START("DSW2")  /* DSW2 */
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -351,8 +353,8 @@ static INPUT_PORTS_START( hnfubuki )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-	PORT_START("DSW3")	/* DSW3 */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL )	// blitter busy flag
+	PORT_START("DSW3")  /* DSW3 */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL )   // blitter busy flag
 	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -375,13 +377,13 @@ static INPUT_PORTS_START( hnfubuki )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-	PORT_START("COIN")	/* COIN */
+	PORT_START("COIN")  /* COIN */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME(DEF_STR( Test )) PORT_CODE(KEYCODE_F1)	/* Test */
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )	/* Analizer (Statistics) */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME(DEF_STR( Test )) PORT_CODE(KEYCODE_F1)   /* Test */
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )   /* Analizer (Statistics) */
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )	/* "Note" ("Paper Money") = 10 Credits */
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )  /* "Note" ("Paper Money") = 10 Credits */
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_IMPULSE(2)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )
 
@@ -390,7 +392,7 @@ INPUT_PORTS_END
 
 
 static INPUT_PORTS_START( untoucha )
-	PORT_START("DSW1")	/* DSW1 */
+	PORT_START("DSW1")  /* DSW1 */
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -416,7 +418,7 @@ static INPUT_PORTS_START( untoucha )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-	PORT_START("DSW2")	/* DSW2 */
+	PORT_START("DSW2")  /* DSW2 */
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -442,17 +444,17 @@ static INPUT_PORTS_START( untoucha )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-	PORT_START("COIN")	/* COIN */
+	PORT_START("COIN")  /* COIN */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME(DEF_STR(Test)) PORT_CODE(KEYCODE_F1)	/* Test */
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )	/* Analizer (Statistics) */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME(DEF_STR(Test)) PORT_CODE(KEYCODE_F1) /* Test */
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )   /* Analizer (Statistics) */
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )	/* "Note" ("Paper Money") = 10 Credits */
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )  /* "Note" ("Paper Money") = 10 Credits */
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_IMPULSE(2)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )
 
-	PORT_START("KEY0")	/* P1 keyboard */
+	PORT_START("KEY0")  /* P1 keyboard */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_POKER_HOLD1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_POKER_HOLD3 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_POKER_HOLD5 )
@@ -503,7 +505,7 @@ INPUT_PORTS_END
 static void irqhandler(device_t *device, int irq)
 {
 	popmessage("irq");
-//  cputag_set_input_line(device->machine(), "maincpu", 0, irq ? ASSERT_LINE : CLEAR_LINE);
+//  device->machine().device("maincpu")->execute().set_input_line(0, irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 
@@ -517,40 +519,38 @@ static const ym2203_interface ym2203_config =
 		DEVCB_NULL,
 		DEVCB_NULL,
 	},
-	irqhandler
+	DEVCB_LINE(irqhandler)
 };
 
 static const msm5205_interface msm5205_config =
 {
-	0,					/* IRQ handler */
+	0,                  /* IRQ handler */
 	MSM5205_SEX_4B
 };
 
 
 
-static MACHINE_START( hnayayoi )
+void hnayayoi_state::machine_start()
 {
-	hnayayoi_state *state = machine.driver_data<hnayayoi_state>();
 
-	state->save_item(NAME(state->m_palbank));
-	state->save_item(NAME(state->m_blit_layer));
-	state->save_item(NAME(state->m_blit_dest));
-	state->save_item(NAME(state->m_blit_src));
-	state->save_item(NAME(state->m_keyb));
+	save_item(NAME(m_palbank));
+	save_item(NAME(m_blit_layer));
+	save_item(NAME(m_blit_dest));
+	save_item(NAME(m_blit_src));
+	save_item(NAME(m_keyb));
 }
 
-static MACHINE_RESET( hnayayoi )
+void hnayayoi_state::machine_reset()
 {
-	hnayayoi_state *state = machine.driver_data<hnayayoi_state>();
 
 	/* start with the MSM5205 reset */
-	msm5205_reset_w(machine.device("msm"), 1);
+	msm5205_reset_w(machine().device("msm"), 1);
 
-	state->m_palbank = 0;
-	state->m_blit_layer = 0;
-	state->m_blit_dest = 0;
-	state->m_blit_src = 0;
-	state->m_keyb = 0;
+	m_palbank = 0;
+	m_blit_layer = 0;
+	m_blit_dest = 0;
+	m_blit_src = 0;
+	m_keyb = 0;
 }
 
 
@@ -560,11 +560,9 @@ static MACHINE_CONFIG_START( hnayayoi, hnayayoi_state )
 	MCFG_CPU_ADD("maincpu", Z80, 20000000/4 )        /* 5 MHz ???? */
 	MCFG_CPU_PROGRAM_MAP(hnayayoi_map)
 	MCFG_CPU_IO_MAP(hnayayoi_io_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
-	MCFG_CPU_PERIODIC_INT(nmi_line_pulse, 8000)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", hnayayoi_state,  irq0_line_hold)
+	MCFG_CPU_PERIODIC_INT_DRIVER(hnayayoi_state, nmi_line_pulse,  8000)
 
-	MCFG_MACHINE_START(hnayayoi)
-	MCFG_MACHINE_RESET(hnayayoi)
 
 	MCFG_NVRAM_ADD_0FILL("nvram")
 
@@ -572,15 +570,13 @@ static MACHINE_CONFIG_START( hnayayoi, hnayayoi_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(512, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 512-1, 0, 256-1)
-	MCFG_SCREEN_UPDATE(hnayayoi)
+	MCFG_SCREEN_UPDATE_DRIVER(hnayayoi_state, screen_update_hnayayoi)
 
 	MCFG_PALETTE_LENGTH(256)
 
 	MCFG_PALETTE_INIT(RRRR_GGGG_BBBB)
-	MCFG_VIDEO_START(hnayayoi)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -607,7 +603,7 @@ static MACHINE_CONFIG_DERIVED( untoucha, hnayayoi )
 	MCFG_CPU_PROGRAM_MAP(untoucha_map)
 	MCFG_CPU_IO_MAP(untoucha_io_map)
 
-	MCFG_VIDEO_START(untoucha)
+	MCFG_VIDEO_START_OVERRIDE(hnayayoi_state,untoucha)
 MACHINE_CONFIG_END
 
 
@@ -622,7 +618,7 @@ ROM_START( hnayayoi )
 	ROM_LOAD( "021.4a",     0x00000, 0x08000, CRC(d9734da4) SHA1(a2c8f5113c8136bea990c282d60f67b2793f9a2c) )
 	ROM_LOAD( "022.3a",     0x08000, 0x08000, CRC(e6be5af4) SHA1(cdc56705ba0d191930f892618512cb687975ecbb) )
 
-	ROM_REGION( 0x38000, "gfx1", 0 )	/* blitter data */
+	ROM_REGION( 0x38000, "gfx1", 0 )    /* blitter data */
 	ROM_LOAD( "023.8f",     0x00000, 0x08000, CRC(81ae7317) SHA1(9e37dad046420138b4655d0692fe4bac3a8e09de) )
 	ROM_LOAD( "024.9f",     0x08000, 0x08000, CRC(413ab77a) SHA1(4b44d2a76c37f25f126e3759ab61fadba02e2b55) )
 	ROM_LOAD( "025.10f",    0x10000, 0x08000, CRC(56d16426) SHA1(38162f2a240ce6828232d4280120acc576f71200) )
@@ -641,7 +637,7 @@ ROM_START( hnfubuki )
 	ROM_REGION( 0x10000, "maincpu", 0 )
 	ROM_LOAD( "s1.s2c",     0x00000, 0x10000, CRC(afe3179c) SHA1(fdfba1e7073318f9782d628f3c7dd0d9c84cbeea) )
 
-	ROM_REGION( 0x40000, "gfx1", 0 )	/* blitter data */
+	ROM_REGION( 0x40000, "gfx1", 0 )    /* blitter data */
 	ROM_LOAD( "062.8f",     0x00000, 0x10000, CRC(0d96a540) SHA1(1cadf19d8fd48962acb0e45a50431fabd6f13672) )
 	ROM_LOAD( "063.9f",     0x10000, 0x10000, CRC(14250093) SHA1(8459024ebe5f8c3fa146e3303a155c2cf5c487b3) )
 	ROM_LOAD( "064.10f",    0x20000, 0x10000, CRC(41546fb9) SHA1(3c6028c19aa65dcb7ccfc01c223c2cba36cc9bb4) )
@@ -657,7 +653,7 @@ ROM_START( untoucha )
 	ROM_REGION( 0x10000, "maincpu", 0 )
 	ROM_LOAD( "b4.10b",     0x00000, 0x10000, CRC(4df04e41) SHA1(4d5232c2f383640394d85417aa973f92c78184c9) )
 
-	ROM_REGION( 0x90000, "gfx1", 0 )	/* blitter data */
+	ROM_REGION( 0x90000, "gfx1", 0 )    /* blitter data */
 	ROM_LOAD( "081.10f",    0x00000, 0x10000, CRC(36ba990d) SHA1(10b2865f1d19c01cc898029a23489f47ade2ce86) )
 	ROM_LOAD( "082.12f",    0x10000, 0x10000, CRC(2beb6277) SHA1(ea57970051c674800a9bedd581d734bd9beaa894) )
 	ROM_LOAD( "083.13f",    0x20000, 0x10000, CRC(c3fed8ff) SHA1(405a6563ff7420686063e04fb99dfe6f0f7378dc) )
@@ -675,10 +671,10 @@ ROM_START( untoucha )
 ROM_END
 
 
-static DRIVER_INIT( hnfubuki )
+DRIVER_INIT_MEMBER(hnayayoi_state,hnfubuki)
 {
-	UINT8 *rom = machine.region("gfx1")->base();
-	int len = machine.region("gfx1")->bytes();
+	UINT8 *rom = machine().root_device().memregion("gfx1")->base();
+	int len = machine().root_device().memregion("gfx1")->bytes();
 	int i, j;
 
 	/* interestingly, the blitter data has a slight encryption */
@@ -702,6 +698,6 @@ static DRIVER_INIT( hnfubuki )
 }
 
 
-GAME( 1987, hnayayoi, 0,        hnayayoi, hnayayoi, 0,        ROT0, "Dyna Electronics", "Hana Yayoi (Japan)", GAME_SUPPORTS_SAVE )
-GAME( 1987, hnfubuki, hnayayoi, hnfubuki, hnfubuki, hnfubuki, ROT0, "Dynax", "Hana Fubuki [BET] (Japan)", GAME_SUPPORTS_SAVE )
-GAME( 1987, untoucha, 0,        untoucha, untoucha, 0,        ROT0, "Dynax", "Untouchable (Japan)", GAME_SUPPORTS_SAVE )
+GAME( 1987, hnayayoi, 0,        hnayayoi, hnayayoi, driver_device, 0,        ROT0, "Dyna Electronics", "Hana Yayoi (Japan)", GAME_SUPPORTS_SAVE )
+GAME( 1987, hnfubuki, hnayayoi, hnfubuki, hnfubuki, hnayayoi_state, hnfubuki, ROT0, "Dynax", "Hana Fubuki [BET] (Japan)", GAME_SUPPORTS_SAVE )
+GAME( 1987, untoucha, 0,        untoucha, untoucha, driver_device, 0,        ROT0, "Dynax", "Untouchable (Japan)", GAME_SUPPORTS_SAVE )

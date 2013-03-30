@@ -1,32 +1,52 @@
-/*
+/*******************************************************************************
+
+    Pinball
     Game Plan MPU-1
-*/
+
+********************************************************************************/
 
 #include "emu.h"
 #include "cpu/z80/z80.h"
 
-extern const char layout_pinball[];
-
 class gp_1_state : public driver_device
 {
 public:
-	gp_1_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	gp_1_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+	m_maincpu(*this, "maincpu")
+	{ }
+
+protected:
+
+	// devices
+	required_device<cpu_device> m_maincpu;
+
+	// driver_device overrides
+	virtual void machine_reset();
+public:
+	DECLARE_DRIVER_INIT(gp_1);
 };
 
 
-static ADDRESS_MAP_START( gp_1_map, AS_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0xffff) AM_NOP
+static ADDRESS_MAP_START( gp_1_map, AS_PROGRAM, 8, gp_1_state )
+	AM_RANGE(0x0000, 0x0fff) AM_ROM
+	AM_RANGE(0x8c00, 0x8cff) AM_RAM
+ADDRESS_MAP_END
+
+static ADDRESS_MAP_START( gp_1_io, AS_IO, 8, gp_1_state )
+	ADDRESS_MAP_GLOBAL_MASK(0xff)
+	//AM_RANGE(0x04, 0x07) AM_DEVREADWRITE("ppi", ppi8255_device, read, write)
+	//AM_RANGE(0x08, 0x0b) AM_DEVREADWRITE("ctc", z80ctc_device, read, write)
 ADDRESS_MAP_END
 
 static INPUT_PORTS_START( gp_1 )
 INPUT_PORTS_END
 
-static MACHINE_RESET( gp_1 )
+void gp_1_state::machine_reset()
 {
 }
 
-static DRIVER_INIT( gp_1 )
+DRIVER_INIT_MEMBER(gp_1_state,gp_1)
 {
 }
 
@@ -34,11 +54,7 @@ static MACHINE_CONFIG_START( gp_1, gp_1_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", Z80, 2457600)
 	MCFG_CPU_PROGRAM_MAP(gp_1_map)
-
-	MCFG_MACHINE_RESET( gp_1 )
-
-	/* video hardware */
-	MCFG_DEFAULT_LAYOUT(layout_pinball)
+	MCFG_CPU_IO_MAP(gp_1_io)
 MACHINE_CONFIG_END
 
 
@@ -48,7 +64,6 @@ ROM_START( gp_110 )
 	ROM_LOAD( "b1-110.u13", 0x0800, 0x0800, CRC(a223f2e8) SHA1(767e15e19e11399935c890c1d1034dccf1ad7f92))
 ROM_END
 
-GAME(1978,	gp_110,	0,	gp_1,	gp_1,	gp_1,	ROT0,	"Game Plan",	"Model 110",	GAME_IS_BIOS_ROOT)
 
 /*-------------------------------------------------------------------
 / Black Velvet (May 1978) - Model: Cocktail #110
@@ -92,11 +107,12 @@ ROM_START(startrip)
 	ROM_LOAD( "startrip.u13", 0x0800, 0x0800, CRC(b941a1a8) SHA1(a43f8acadb3db3e2274162d5305e30006f912339))
 ROM_END
 
-GAME(1978,	blvelvet,	gp_110,		gp_1,	gp_1,	gp_1,	ROT0,	"Game Plan",				"Black Velvet",		GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1978,	camlight,	gp_110,		gp_1,	gp_1,	gp_1,	ROT0,	"Game Plan",				"Camel Lights",		GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1978,	chucklck,	gp_110,		gp_1,	gp_1,	gp_1,	ROT0,	"Game Plan",				"Chuck-A-Luck",		GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1979,	famlyfun,	0,			gp_1,	gp_1,	gp_1,	ROT0,	"Game Plan",				"Family Fun!",		GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1978,	foxylady,	gp_110,		gp_1,	gp_1,	gp_1,	ROT0,	"Game Plan",				"Foxy Lady",		GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1978,	real,		gp_110,		gp_1,	gp_1,	gp_1,	ROT0,	"Game Plan",				"Real",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1978,	rio,		gp_110,		gp_1,	gp_1,	gp_1,	ROT0,	"Game Plan",				"Rio",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1979,	startrip,	0,			gp_1,	gp_1,	gp_1,	ROT0,	"Game Plan",				"Star Trip",		GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
+GAME(1978, gp_110,   0,        gp_1,     gp_1,     gp_1_state,  gp_1,   ROT0, "Game Plan", "Model 110",    GAME_IS_BIOS_ROOT)
+GAME(1978, blvelvet, gp_110,   gp_1,     gp_1,     gp_1_state,  gp_1,   ROT0, "Game Plan", "Black Velvet", GAME_IS_SKELETON_MECHANICAL)
+GAME(1978, camlight, gp_110,   gp_1,     gp_1,     gp_1_state,  gp_1,   ROT0, "Game Plan", "Camel Lights", GAME_IS_SKELETON_MECHANICAL)
+GAME(1978, chucklck, gp_110,   gp_1,     gp_1,     gp_1_state,  gp_1,   ROT0, "Game Plan", "Chuck-A-Luck", GAME_IS_SKELETON_MECHANICAL)
+GAME(1979, famlyfun, 0,        gp_1,     gp_1,     gp_1_state,  gp_1,   ROT0, "Game Plan", "Family Fun!",  GAME_IS_SKELETON_MECHANICAL)
+GAME(1978, foxylady, gp_110,   gp_1,     gp_1,     gp_1_state,  gp_1,   ROT0, "Game Plan", "Foxy Lady",    GAME_IS_SKELETON_MECHANICAL)
+GAME(1978, real,     gp_110,   gp_1,     gp_1,     gp_1_state,  gp_1,   ROT0, "Game Plan", "Real",         GAME_IS_SKELETON_MECHANICAL)
+GAME(1978, rio,      gp_110,   gp_1,     gp_1,     gp_1_state,  gp_1,   ROT0, "Game Plan", "Rio",          GAME_IS_SKELETON_MECHANICAL)
+GAME(1979, startrip, 0,        gp_1,     gp_1,     gp_1_state,  gp_1,   ROT0, "Game Plan", "Star Trip",    GAME_IS_SKELETON_MECHANICAL)

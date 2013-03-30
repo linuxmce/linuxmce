@@ -18,23 +18,33 @@
 #include "emu.h"
 #include "cpu/i8085/i8085.h"
 #include "includes/pk8000.h"
-#include "machine/i8255a.h"
+#include "machine/i8255.h"
 #include "sound/speaker.h"
 
 
 class photon_state : public driver_device
 {
 public:
-	photon_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	photon_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) { }
 
+	DECLARE_WRITE8_MEMBER(pk8000_80_porta_w);
+	DECLARE_READ8_MEMBER(pk8000_80_portb_r);
+	DECLARE_WRITE8_MEMBER(pk8000_80_portc_w);
+	DECLARE_READ8_MEMBER(pk8000_84_porta_r);
+	DECLARE_WRITE8_MEMBER(pk8000_84_porta_w);
+	DECLARE_WRITE8_MEMBER(pk8000_84_portc_w);
+	virtual void machine_reset();
+	virtual void video_start();
+	UINT32 screen_update_photon(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(pk8000_interrupt);
 };
 
 
 static void pk8000_set_bank(running_machine &machine,UINT8 data)
 {
-	UINT8 *rom = machine.region("maincpu")->base();
-	UINT8 *ram = machine.region("maincpu")->base();
+	UINT8 *rom = machine.root_device().memregion("maincpu")->base();
+	UINT8 *ram = machine.root_device().memregion("maincpu")->base();
 	UINT8 block1 = data & 3;
 	UINT8 block2 = (data >> 2) & 3;
 	UINT8 block3 = (data >> 4) & 3;
@@ -42,104 +52,104 @@ static void pk8000_set_bank(running_machine &machine,UINT8 data)
 
 	switch(block1) {
 		case 0:
-				memory_set_bankptr(machine, "bank1", rom + 0x10000);
-				memory_set_bankptr(machine, "bank5", ram);
+				machine.root_device().membank("bank1")->set_base(rom + 0x10000);
+				machine.root_device().membank("bank5")->set_base(ram);
 				break;
 		case 1: break;
 		case 2: break;
 		case 3:
-				memory_set_bankptr(machine, "bank1", ram);
-				memory_set_bankptr(machine, "bank5", ram);
+				machine.root_device().membank("bank1")->set_base(ram);
+				machine.root_device().membank("bank5")->set_base(ram);
 				break;
 	}
 
 	switch(block2) {
 		case 0:
-				memory_set_bankptr(machine, "bank2", rom + 0x14000);
-				memory_set_bankptr(machine, "bank6", ram + 0x4000);
+				machine.root_device().membank("bank2")->set_base(rom + 0x14000);
+				machine.root_device().membank("bank6")->set_base(ram + 0x4000);
 				break;
 		case 1: break;
 		case 2: break;
 		case 3:
-				memory_set_bankptr(machine, "bank2", ram + 0x4000);
-				memory_set_bankptr(machine, "bank6", ram + 0x4000);
+				machine.root_device().membank("bank2")->set_base(ram + 0x4000);
+				machine.root_device().membank("bank6")->set_base(ram + 0x4000);
 				break;
 	}
 	switch(block3) {
 		case 0:
-				memory_set_bankptr(machine, "bank3", rom + 0x18000);
-				memory_set_bankptr(machine, "bank7", ram + 0x8000);
+				machine.root_device().membank("bank3")->set_base(rom + 0x18000);
+				machine.root_device().membank("bank7")->set_base(ram + 0x8000);
 				break;
 		case 1: break;
 		case 2: break;
 		case 3:
-				memory_set_bankptr(machine, "bank3", ram + 0x8000);
-				memory_set_bankptr(machine, "bank7", ram + 0x8000);
+				machine.root_device().membank("bank3")->set_base(ram + 0x8000);
+				machine.root_device().membank("bank7")->set_base(ram + 0x8000);
 				break;
 	}
 	switch(block4) {
 		case 0:
-				memory_set_bankptr(machine, "bank4", rom + 0x1c000);
-				memory_set_bankptr(machine, "bank8", ram + 0xc000);
+				machine.root_device().membank("bank4")->set_base(rom + 0x1c000);
+				machine.root_device().membank("bank8")->set_base(ram + 0xc000);
 				break;
 		case 1: break;
 		case 2: break;
 		case 3:
-				memory_set_bankptr(machine, "bank4", ram + 0xc000);
-				memory_set_bankptr(machine, "bank8", ram + 0xc000);
+				machine.root_device().membank("bank4")->set_base(ram + 0xc000);
+				machine.root_device().membank("bank8")->set_base(ram + 0xc000);
 				break;
 	}
 }
-static WRITE8_DEVICE_HANDLER(pk8000_80_porta_w)
+WRITE8_MEMBER(photon_state::pk8000_80_porta_w)
 {
-	pk8000_set_bank(device->machine(),data);
+	pk8000_set_bank(machine(),data);
 }
 
-static READ8_DEVICE_HANDLER(pk8000_80_portb_r)
+READ8_MEMBER(photon_state::pk8000_80_portb_r)
 {
 	return 0xff;
 }
 
-static WRITE8_DEVICE_HANDLER(pk8000_80_portc_w)
+WRITE8_MEMBER(photon_state::pk8000_80_portc_w)
 {
-	speaker_level_w(device->machine().device("speaker"), BIT(data,7));
+	speaker_level_w(machine().device("speaker"), BIT(data,7));
 }
 
-static I8255A_INTERFACE( pk8000_ppi8255_interface_1 )
+static I8255_INTERFACE( pk8000_ppi8255_interface_1 )
 {
 	DEVCB_NULL,
-	DEVCB_HANDLER(pk8000_80_portb_r),
+	DEVCB_DRIVER_MEMBER(photon_state,pk8000_80_porta_w),
+	DEVCB_DRIVER_MEMBER(photon_state,pk8000_80_portb_r),
 	DEVCB_NULL,
-	DEVCB_HANDLER(pk8000_80_porta_w),
 	DEVCB_NULL,
-	DEVCB_HANDLER(pk8000_80_portc_w)
+	DEVCB_DRIVER_MEMBER(photon_state,pk8000_80_portc_w)
 };
 
-static READ8_DEVICE_HANDLER(pk8000_84_porta_r)
+READ8_MEMBER(photon_state::pk8000_84_porta_r)
 {
 	return pk8000_video_mode;
 }
 
-static WRITE8_DEVICE_HANDLER(pk8000_84_porta_w)
+WRITE8_MEMBER(photon_state::pk8000_84_porta_w)
 {
 	pk8000_video_mode = data;
 }
 
-static WRITE8_DEVICE_HANDLER(pk8000_84_portc_w)
+WRITE8_MEMBER(photon_state::pk8000_84_portc_w)
 {
 	pk8000_video_enable = BIT(data,4);
 }
 static I8255A_INTERFACE( pk8000_ppi8255_interface_2 )
 {
-	DEVCB_HANDLER(pk8000_84_porta_r),
+	DEVCB_DRIVER_MEMBER(photon_state,pk8000_84_porta_r),
+	DEVCB_DRIVER_MEMBER(photon_state,pk8000_84_porta_w),
 	DEVCB_NULL,
 	DEVCB_NULL,
-	DEVCB_HANDLER(pk8000_84_porta_w),
 	DEVCB_NULL,
-	DEVCB_HANDLER(pk8000_84_portc_w)
+	DEVCB_DRIVER_MEMBER(photon_state,pk8000_84_portc_w)
 };
 
-static ADDRESS_MAP_START(pk8000_mem, AS_PROGRAM, 8)
+static ADDRESS_MAP_START(pk8000_mem, AS_PROGRAM, 8, photon_state )
 	ADDRESS_MAP_UNMAP_HIGH
 	AM_RANGE( 0x0000, 0x3fff ) AM_READ_BANK("bank1") AM_WRITE_BANK("bank5")
 	AM_RANGE( 0x4000, 0x7fff ) AM_READ_BANK("bank2") AM_WRITE_BANK("bank6")
@@ -147,18 +157,18 @@ static ADDRESS_MAP_START(pk8000_mem, AS_PROGRAM, 8)
 	AM_RANGE( 0xc000, 0xffff ) AM_READ_BANK("bank4") AM_WRITE_BANK("bank8")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( pk8000_io , AS_IO, 8)
+static ADDRESS_MAP_START( pk8000_io , AS_IO, 8, photon_state )
 	ADDRESS_MAP_UNMAP_HIGH
-	AM_RANGE(0x80, 0x83) AM_DEVREADWRITE("ppi8255_1", i8255a_r, i8255a_w)
-	AM_RANGE(0x84, 0x87) AM_DEVREADWRITE("ppi8255_2", i8255a_r, i8255a_w)
-	AM_RANGE(0x88, 0x88) AM_READWRITE(pk8000_video_color_r,pk8000_video_color_w)
+	AM_RANGE(0x80, 0x83) AM_DEVREADWRITE("ppi8255_1", i8255_device, read, write)
+	AM_RANGE(0x84, 0x87) AM_DEVREADWRITE("ppi8255_2", i8255_device, read, write)
+	AM_RANGE(0x88, 0x88) AM_READWRITE_LEGACY(pk8000_video_color_r,pk8000_video_color_w)
 	AM_RANGE(0x8c, 0x8c) AM_READ_PORT("JOY1")
 	AM_RANGE(0x8d, 0x8d) AM_READ_PORT("JOY2")
-	AM_RANGE(0x90, 0x90) AM_READWRITE(pk8000_text_start_r,pk8000_text_start_w)
-	AM_RANGE(0x91, 0x91) AM_READWRITE(pk8000_chargen_start_r,pk8000_chargen_start_w)
-	AM_RANGE(0x92, 0x92) AM_READWRITE(pk8000_video_start_r,pk8000_video_start_w)
-	AM_RANGE(0x93, 0x93) AM_READWRITE(pk8000_color_start_r,pk8000_color_start_w)
-	AM_RANGE(0xa0, 0xbf) AM_READWRITE(pk8000_color_r,pk8000_color_w)
+	AM_RANGE(0x90, 0x90) AM_READWRITE_LEGACY(pk8000_text_start_r,pk8000_text_start_w)
+	AM_RANGE(0x91, 0x91) AM_READWRITE_LEGACY(pk8000_chargen_start_r,pk8000_chargen_start_w)
+	AM_RANGE(0x92, 0x92) AM_READWRITE_LEGACY(pk8000_video_start_r,pk8000_video_start_w)
+	AM_RANGE(0x93, 0x93) AM_READWRITE_LEGACY(pk8000_color_start_r,pk8000_color_start_w)
+	AM_RANGE(0xa0, 0xbf) AM_READWRITE_LEGACY(pk8000_color_r,pk8000_color_w)
 ADDRESS_MAP_END
 
 static INPUT_PORTS_START( photon )
@@ -176,9 +186,9 @@ static INPUT_PORTS_START( photon )
 	PORT_BIT(0xff, IP_ACTIVE_HIGH, IPT_UNUSED)
 INPUT_PORTS_END
 
-static INTERRUPT_GEN( pk8000_interrupt )
+INTERRUPT_GEN_MEMBER(photon_state::pk8000_interrupt)
 {
-	device_set_input_line(device, 0, HOLD_LINE);
+	device.execute().set_input_line(0, HOLD_LINE);
 }
 
 static IRQ_CALLBACK(pk8000_irq_callback)
@@ -187,48 +197,45 @@ static IRQ_CALLBACK(pk8000_irq_callback)
 }
 
 
-static MACHINE_RESET(pk8000)
+void photon_state::machine_reset()
 {
-	pk8000_set_bank(machine,0);
-	device_set_irq_callback(machine.device("maincpu"), pk8000_irq_callback);
+	pk8000_set_bank(machine(),0);
+	machine().device("maincpu")->execute().set_irq_acknowledge_callback(pk8000_irq_callback);
 }
 
-static VIDEO_START( photon )
+void photon_state::video_start()
 {
 }
 
-static SCREEN_UPDATE( photon )
+UINT32 photon_state::screen_update_photon(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	return pk8000_video_update(screen, bitmap, cliprect, screen->machine().region("maincpu")->base());
+	return pk8000_video_update(screen, bitmap, cliprect, machine().root_device().memregion("maincpu")->base());
 }
 
 static MACHINE_CONFIG_START( photon, photon_state )
 
-    /* basic machine hardware */
-    MCFG_CPU_ADD("maincpu",I8080, 1780000)
-    MCFG_CPU_PROGRAM_MAP(pk8000_mem)
-    MCFG_CPU_IO_MAP(pk8000_io)
-    MCFG_CPU_VBLANK_INT("screen", pk8000_interrupt)
+	/* basic machine hardware */
+	MCFG_CPU_ADD("maincpu",I8080, 1780000)
+	MCFG_CPU_PROGRAM_MAP(pk8000_mem)
+	MCFG_CPU_IO_MAP(pk8000_io)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", photon_state,  pk8000_interrupt)
 
-    MCFG_MACHINE_RESET(pk8000)
 
-    /* video hardware */
-    MCFG_SCREEN_ADD("screen", RASTER)
-    MCFG_SCREEN_REFRESH_RATE(50)
-    MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500)) /* not accurate */
-    MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
-    MCFG_SCREEN_SIZE(256+32, 192+32)
-    MCFG_SCREEN_VISIBLE_AREA(0, 256+32-1, 0, 192+32-1)
-    MCFG_SCREEN_UPDATE(photon)
-    MCFG_PALETTE_LENGTH(16)
-    MCFG_PALETTE_INIT(pk8000)
+	/* video hardware */
+	MCFG_SCREEN_ADD("screen", RASTER)
+	MCFG_SCREEN_REFRESH_RATE(50)
+	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500)) /* not accurate */
+	MCFG_SCREEN_SIZE(256+32, 192+32)
+	MCFG_SCREEN_VISIBLE_AREA(0, 256+32-1, 0, 192+32-1)
+	MCFG_SCREEN_UPDATE_DRIVER(photon_state, screen_update_photon)
+	MCFG_PALETTE_LENGTH(16)
+	MCFG_PALETTE_INIT(pk8000)
 
-    MCFG_VIDEO_START(photon)
 
-    MCFG_I8255A_ADD( "ppi8255_1", pk8000_ppi8255_interface_1 )
-    MCFG_I8255A_ADD( "ppi8255_2", pk8000_ppi8255_interface_2 )
+	MCFG_I8255_ADD( "ppi8255_1", pk8000_ppi8255_interface_1 )
+	MCFG_I8255_ADD( "ppi8255_2", pk8000_ppi8255_interface_2 )
 
-    /* audio hardware */
+	/* audio hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 	MCFG_SOUND_ADD("speaker", SPEAKER_SOUND, 0)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
@@ -273,6 +280,6 @@ ROM_START( phklad )
 	ROM_LOAD( "klad.bin", 0x10000, 0x4000, BAD_DUMP CRC(49cc7d65) SHA1(d966cfc1d973a533df8044a71fad37f7177da554) )
 ROM_END
 
-GAME( 19??,  phtetris, 0,      photon, photon, 0, ROT0, "<unknown>", "Tetris (Photon System)", 0 )
-GAME( 1989?, phpython,  0,     photon, photon, 0, ROT0, "<unknown>", "Python (Photon System)", 0 )
-GAME( 19??,  phklad,   0,      photon, photon, 0, ROT0, "<unknown>", "Klad / Labyrinth (Photon System)", 0 )
+GAME( 19??,  phtetris, 0,      photon, photon, driver_device, 0, ROT0, "<unknown>", "Tetris (Photon System)", 0 )
+GAME( 1989?, phpython,  0,     photon, photon, driver_device, 0, ROT0, "<unknown>", "Python (Photon System)", 0 )
+GAME( 19??,  phklad,   0,      photon, photon, driver_device, 0, ROT0, "<unknown>", "Klad / Labyrinth (Photon System)", 0 )

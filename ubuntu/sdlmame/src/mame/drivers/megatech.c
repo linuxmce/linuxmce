@@ -45,7 +45,7 @@ Out Run                    171-5783    837-6963-06       610-0239-06         MPR
 Alien Syndrome             171-5783    837-6963-07       610-0239-07         MPR-11194      (232011)      EPR-12368-07   (27256)   n/a
 Afterburner                171-5784    837-6963-10       610-0239-10         315-5235       (custom)      MPR-11271-T    (834000)  EPR-12368-10 (27256)
 Great Football             171-5783    837-6963-19       610-0239-19         MPR-10576F     (831000)      EPR-12368-19   (27256)   n/a
-World Championship Soccer  171-5782    837-6963-21       610-0239-21         MPR-126078     (uPD23C4000)  EPR-12607B     (27256)   n/a
+World Championship Soccer  171-5782    837-6963-21       610-0239-21         MPR-12607B     (uPD23C4000)  EPR-12368-21   (27256)   n/a
 Tetris                     171-5834    837-6963-22       610-0239-22         MPR-12356F     (831000)      MPR-12357F     (831000)  EPR-12368-22 (27256)
 Ghouls & Ghosts            171-5869A   -                 610-0239-23         MPR-12605      (40 pins)     MPR-12606      (40 pins) EPR-12368-23 (27256)
 Super Hang On              171-5782    837-6963-24       610-0239-24         MPR-12640      (234000)      EPR-12368-24   (27256)   n/a
@@ -77,7 +77,7 @@ Sonic Hedgehog 2           171-6215A   837-6963-62       610-0239-62         MPR
 #include "includes/megadriv.h"
 #include "imagedev/cartslot.h"
 
-#define MASTER_CLOCK		53693100
+#define MASTER_CLOCK        53693100
 
 /* not currently used */
 static INPUT_PORTS_START( megatech ) /* Genesis Input Ports */
@@ -209,7 +209,7 @@ INPUT_PORTS_END
 /* MEGATECH specific */
 static READ8_HANDLER( megatech_cart_select_r )
 {
-	mtech_state *state = space->machine().driver_data<mtech_state>();
+	mtech_state *state = space.machine().driver_data<mtech_state>();
 	return state->m_mt_cart_select_reg;
 }
 
@@ -222,25 +222,25 @@ static TIMER_CALLBACK( megatech_z80_run_state )
 	UINT8* game_region;
 
 	sprintf(tempname, "game%d", param);
-	game_region = machine.region(tempname)->base();
+	game_region = state->memregion(tempname)->base();
 
-	memcpy(machine.region("maincpu")->base(), game_region, 0x400000);
+	memcpy(state->memregion("maincpu")->base(), game_region, 0x400000);
 
 	if (!state->m_cart_is_genesis[param])
 	{
 		printf("enabling SMS Z80\n");
 		state->m_current_game_is_sms = 1;
 		megatech_set_genz80_as_sms_standard_map(machine, "genesis_snd_z80", MAPPER_STANDARD);
-		//cputag_set_input_line(machine, "genesis_snd_z80", INPUT_LINE_HALT, CLEAR_LINE);
-		cputag_set_input_line(machine, "genesis_snd_z80", INPUT_LINE_RESET, CLEAR_LINE);
+		//machine.device("genesis_snd_z80")->execute().set_input_line(INPUT_LINE_HALT, CLEAR_LINE);
+		machine.device("genesis_snd_z80")->execute().set_input_line(INPUT_LINE_RESET, CLEAR_LINE);
 	}
 	else
 	{
 		printf("disabling SMS Z80\n");
 		state->m_current_game_is_sms = 0;
 		megatech_set_megadrive_z80_as_megadrive_z80(machine, "genesis_snd_z80");
-		cputag_set_input_line(machine, "maincpu", INPUT_LINE_RESET, CLEAR_LINE);
-		//cputag_set_input_line(machine, "maincpu", INPUT_LINE_HALT, CLEAR_LINE);
+		machine.device("maincpu")->execute().set_input_line(INPUT_LINE_RESET, CLEAR_LINE);
+		//machine.device("maincpu")->execute().set_input_line(INPUT_LINE_HALT, CLEAR_LINE);
 	}
 }
 
@@ -252,15 +252,15 @@ static TIMER_CALLBACK( megatech_z80_stop_state )
 	printf("megatech_select_game %d\n", param+1);
 
 	sprintf(tempname, "game%d", param);
-	game_region = machine.region(tempname)->base();
+	game_region = machine.root_device().memregion(tempname)->base();
 
-	cputag_set_input_line(machine, "maincpu", INPUT_LINE_RESET, ASSERT_LINE);
-	cputag_set_input_line(machine, "genesis_snd_z80", INPUT_LINE_RESET, ASSERT_LINE);
-	//cputag_set_input_line(machine, "maincpu", INPUT_LINE_HALT, ASSERT_LINE);
-	//cputag_set_input_line(machine, "genesis_snd_z80", INPUT_LINE_HALT, ASSERT_LINE);
-	devtag_reset(machine, "ymsnd");
+	machine.device("maincpu")->execute().set_input_line(INPUT_LINE_RESET, ASSERT_LINE);
+	machine.device("genesis_snd_z80")->execute().set_input_line(INPUT_LINE_RESET, ASSERT_LINE);
+	//machine.device("maincpu")->execute().set_input_line(INPUT_LINE_HALT, ASSERT_LINE);
+	//machine.device("genesis_snd_z80")->execute().set_input_line(INPUT_LINE_HALT, ASSERT_LINE);
+	machine.device("ymsnd")->reset();
 
-	megadriv_stop_scanline_timer();// stop the scanline timer for the genesis vdp... it can be restarted in video eof when needed
+	megadriv_stop_scanline_timer(machine);// stop the scanline timer for the genesis vdp... it can be restarted in video eof when needed
 	segae_md_sms_stop_scanline_timer();// stop the scanline timer for the sms vdp
 
 
@@ -274,8 +274,8 @@ static TIMER_CALLBACK( megatech_z80_stop_state )
 	else
 	{
 		/* no cart.. */
-		memset(machine.region("mtbios")->base() + 0x8000, 0x00, 0x8000);
-		memset(machine.region("maincpu")->base(), 0x00, 0x400000);
+		memset(machine.root_device().memregion("mtbios")->base() + 0x8000, 0x00, 0x8000);
+		memset(machine.root_device().memregion("maincpu")->base(), 0x00, 0x400000);
 	}
 
 	return;
@@ -289,19 +289,19 @@ static void megatech_select_game(running_machine &machine, int gameno)
 static WRITE8_HANDLER( megatech_cart_select_w )
 {
 	/* seems to write the slot number..
-      but it stores something in (banked?) ram
-      because it always seems to show the
-      same instructions ... */
-	mtech_state *state = space->machine().driver_data<mtech_state>();
+	  but it stores something in (banked?) ram
+	  because it always seems to show the
+	  same instructions ... */
+	mtech_state *state = space.machine().driver_data<mtech_state>();
 	state->m_mt_cart_select_reg = data;
 
-	megatech_select_game(space->machine(), state->m_mt_cart_select_reg);
+	megatech_select_game(space.machine(), state->m_mt_cart_select_reg);
 }
 
 
 static READ8_HANDLER( bios_ctrl_r )
 {
-	mtech_state *state = space->machine().driver_data<mtech_state>();
+	mtech_state *state = space.machine().driver_data<mtech_state>();
 
 	if (offset == 0)
 		return 0;
@@ -313,11 +313,18 @@ static READ8_HANDLER( bios_ctrl_r )
 
 static WRITE8_HANDLER( bios_ctrl_w )
 {
-	mtech_state *state = space->machine().driver_data<mtech_state>();
+	mtech_state *state = space.machine().driver_data<mtech_state>();
+
 	if (offset == 1)
 	{
+		output_set_value("Alarm_sound", data>>7 & 0x01);
 		state->m_bios_ctrl_inputs = data & 0x04;  // Genesis/SMS input ports disable bit
 	}
+	else if (offset == 2)
+	{
+		output_set_value("Flash_screen", data>>1 & 0x01);
+	}
+
 	state->m_bios_ctrl[offset] = data;
 }
 
@@ -326,17 +333,17 @@ static WRITE8_HANDLER( bios_ctrl_w )
 
 static READ8_HANDLER( megatech_z80_read_68k_banked_data )
 {
-	mtech_state *state = space->machine().driver_data<mtech_state>();
-	address_space *space68k = space->machine().device<legacy_cpu_device>("maincpu")->space();
-	UINT8 ret = space68k->read_byte(state->m_mt_bank_addr + offset);
+	mtech_state *state = space.machine().driver_data<mtech_state>();
+	address_space &space68k = space.machine().device<legacy_cpu_device>("maincpu")->space();
+	UINT8 ret = space68k.read_byte(state->m_mt_bank_addr + offset);
 	return ret;
 }
 
 static WRITE8_HANDLER( megatech_z80_write_68k_banked_data )
 {
-	mtech_state *state = space->machine().driver_data<mtech_state>();
-	address_space *space68k = space->machine().device<legacy_cpu_device>("maincpu")->space();
-	space68k->write_byte(state->m_mt_bank_addr + offset,data);
+	mtech_state *state = space.machine().driver_data<mtech_state>();
+	address_space &space68k = space.machine().device<legacy_cpu_device>("maincpu")->space();
+	space68k.write_byte(state->m_mt_bank_addr + offset,data);
 }
 
 static void megatech_z80_bank_w(running_machine &machine, UINT16 data)
@@ -347,51 +354,51 @@ static void megatech_z80_bank_w(running_machine &machine, UINT16 data)
 
 static WRITE8_HANDLER( mt_z80_bank_w )
 {
-	megatech_z80_bank_w(space->machine(), data & 1);
+	megatech_z80_bank_w(space.machine(), data & 1);
 }
 
 static READ8_HANDLER( megatech_banked_ram_r )
 {
-	mtech_state *state = space->machine().driver_data<mtech_state>();
+	mtech_state *state = space.machine().driver_data<mtech_state>();
 	return state->m_megatech_banked_ram[offset + 0x1000 * (state->m_mt_cart_select_reg & 0x07)];
 }
 
 static WRITE8_HANDLER( megatech_banked_ram_w )
 {
-	mtech_state *state = space->machine().driver_data<mtech_state>();
+	mtech_state *state = space.machine().driver_data<mtech_state>();
 	state->m_megatech_banked_ram[offset + 0x1000 * (state->m_mt_cart_select_reg & 0x07)] = data;
 }
 
 
 
-static ADDRESS_MAP_START( megatech_bios_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( megatech_bios_map, AS_PROGRAM, 8, mtech_state )
 	AM_RANGE(0x0000, 0x2fff) AM_ROM // from bios rom (0x0000-0x2fff populated in ROM)
-	AM_RANGE(0x3000, 0x3fff) AM_READWRITE(megatech_banked_ram_r, megatech_banked_ram_w) // copies instruction data here at startup, must be banked
+	AM_RANGE(0x3000, 0x3fff) AM_READWRITE_LEGACY(megatech_banked_ram_r, megatech_banked_ram_w) // copies instruction data here at startup, must be banked
 	AM_RANGE(0x4000, 0x5fff) AM_RAM // plain ram?
-	AM_RANGE(0x6000, 0x6000) AM_WRITE( mt_z80_bank_w )
+	AM_RANGE(0x6000, 0x6000) AM_WRITE_LEGACY(mt_z80_bank_w )
 	AM_RANGE(0x6400, 0x6400) AM_READ_PORT("BIOS_DSW0")
 	AM_RANGE(0x6401, 0x6401) AM_READ_PORT("BIOS_DSW1")
-	AM_RANGE(0x6404, 0x6404) AM_READWRITE(megatech_cart_select_r, megatech_cart_select_w) // cart select & ram bank
+	AM_RANGE(0x6404, 0x6404) AM_READWRITE_LEGACY(megatech_cart_select_r, megatech_cart_select_w) // cart select & ram bank
 	AM_RANGE(0x6800, 0x6800) AM_READ_PORT("BIOS_IN0")
 	AM_RANGE(0x6801, 0x6801) AM_READ_PORT("BIOS_IN1")
-	AM_RANGE(0x6802, 0x6807) AM_READWRITE(bios_ctrl_r, bios_ctrl_w)
+	AM_RANGE(0x6802, 0x6807) AM_READWRITE_LEGACY(bios_ctrl_r, bios_ctrl_w)
 //  AM_RANGE(0x6805, 0x6805) AM_READ_PORT("???")
 	AM_RANGE(0x7000, 0x77ff) AM_ROM // from bios rom (0x7000-0x77ff populated in ROM)
 	//AM_RANGE(0x7800, 0x7fff) AM_RAM // ?
-	AM_RANGE(0x8000, 0x9fff) AM_READWRITE(megatech_z80_read_68k_banked_data, megatech_z80_write_68k_banked_data) // window into 68k address space, reads instr rom and writes to reset banks on z80 carts?
+	AM_RANGE(0x8000, 0x9fff) AM_READWRITE_LEGACY(megatech_z80_read_68k_banked_data, megatech_z80_write_68k_banked_data) // window into 68k address space, reads instr rom and writes to reset banks on z80 carts?
 ADDRESS_MAP_END
 
 
 static WRITE8_HANDLER( megatech_bios_port_ctrl_w )
 {
-	mtech_state *state = space->machine().driver_data<mtech_state>();
+	mtech_state *state = space.machine().driver_data<mtech_state>();
 	state->m_bios_port_ctrl = data;
 }
 
 static READ8_HANDLER( megatech_bios_joypad_r )
 {
-	mtech_state *state = space->machine().driver_data<mtech_state>();
-	return megatech_bios_port_cc_dc_r(space->machine(), offset, state->m_bios_port_ctrl);
+	mtech_state *state = space.machine().driver_data<mtech_state>();
+	return megatech_bios_port_cc_dc_r(space.machine(), offset, state->m_bios_port_ctrl);
 }
 
 static WRITE8_HANDLER (megatech_bios_port_7f_w)
@@ -401,87 +408,101 @@ static WRITE8_HANDLER (megatech_bios_port_7f_w)
 
 
 
-static ADDRESS_MAP_START( megatech_bios_portmap, AS_IO, 8 )
+static ADDRESS_MAP_START( megatech_bios_portmap, AS_IO, 8, mtech_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x3f, 0x3f) AM_WRITE(megatech_bios_port_ctrl_w)
+	AM_RANGE(0x3f, 0x3f) AM_WRITE_LEGACY(megatech_bios_port_ctrl_w)
 
-	AM_RANGE(0x7f, 0x7f) AM_READWRITE(sms_vcounter_r, megatech_bios_port_7f_w)
-	AM_RANGE(0xbe, 0xbe) AM_READWRITE(sms_vdp_data_r, sms_vdp_data_w)
-	AM_RANGE(0xbf, 0xbf) AM_READWRITE(sms_vdp_ctrl_r, sms_vdp_ctrl_w)
+	AM_RANGE(0x7f, 0x7f) AM_READWRITE_LEGACY(sms_vcounter_r, megatech_bios_port_7f_w)
+	AM_RANGE(0xbe, 0xbe) AM_DEVREADWRITE( "vdp1", sega315_5124_device, vram_read, vram_write )
+	AM_RANGE(0xbf, 0xbf) AM_DEVREADWRITE( "vdp1", sega315_5124_device, register_read, register_write )
 
-	AM_RANGE(0xdc, 0xdd) AM_READ(megatech_bios_joypad_r)  // player inputs
+	AM_RANGE(0xdc, 0xdd) AM_READ_LEGACY(megatech_bios_joypad_r)  // player inputs
 ADDRESS_MAP_END
 
 
 
-static DRIVER_INIT(mt_slot)
+DRIVER_INIT_MEMBER(mtech_state,mt_slot)
 {
-	mtech_state *state = machine.driver_data<mtech_state>();
-	state->m_megatech_banked_ram = auto_alloc_array(machine, UINT8, 0x1000*8);
+	m_megatech_banked_ram = auto_alloc_array(machine(), UINT8, 0x1000*8);
 
 	DRIVER_INIT_CALL(megadriv);
-	DRIVER_INIT_CALL(megatech_bios);
 
 	// this gets set in DEVICE_IMAGE_LOAD
-	memset(state->m_cart_is_genesis, 0, ARRAY_LENGTH(state->m_cart_is_genesis));
+	memset(m_cart_is_genesis, 0, sizeof(m_cart_is_genesis));
 }
 
-static DRIVER_INIT(mt_crt)
+DRIVER_INIT_MEMBER(mtech_state,mt_crt)
 {
-	mtech_state *state = machine.driver_data<mtech_state>();
-	UINT8* pin = machine.region("sms_pin")->base();
+	UINT8* pin = memregion("sms_pin")->base();
 	DRIVER_INIT_CALL(mt_slot);
 
-	state->m_cart_is_genesis[0] = !pin[0] ? 1 : 0;;
+	m_cart_is_genesis[0] = !pin[0] ? 1 : 0;;
 }
 
-static VIDEO_START(mtnew)
+VIDEO_START_MEMBER(mtech_state,mtnew)
 {
-	init_for_megadrive(machine); // create an sms vdp too, for compatibility mode
-	VIDEO_START_CALL(megadriv);
+	init_for_megadrive(machine()); // create an sms vdp too, for compatibility mode
+	VIDEO_START_CALL_LEGACY(megadriv);
 }
 
 //attotime::never
-static SCREEN_UPDATE(mtnew)
+UINT32 mtech_state::screen_update_mtnew(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	mtech_state *state = screen->machine().driver_data<mtech_state>();
-	device_t *megadriv_screen = screen->machine().device("megadriv");
-	device_t *menu_screen = screen->machine().device("menu");
 
-	if (screen == megadriv_screen)
-	{
-		/* if we're running an sms game then use the SMS update.. maybe this should be moved to the megadrive emulation core as compatibility mode is a feature of the chip */
-		if (!state->m_current_game_is_sms)
-			SCREEN_UPDATE_CALL(megadriv);
-		else
-			SCREEN_UPDATE_CALL(megatech_md_sms);
-	}
-	else if (screen == menu_screen)
-		SCREEN_UPDATE_CALL(megatech_bios);
+	/* if we're running an sms game then use the SMS update.. maybe this should be moved to the megadrive emulation core as compatibility mode is a feature of the chip */
+	if (!m_current_game_is_sms)
+		SCREEN_UPDATE32_CALL(megadriv);
+	else
+		SCREEN_UPDATE32_CALL(megatech_md_sms);
 	return 0;
 }
 
-static SCREEN_EOF(mtnew)
+void mtech_state::screen_eof_mtnew(screen_device &screen, bool state)
 {
-	mtech_state *state = machine.driver_data<mtech_state>();
-	if (!state->m_current_game_is_sms)
-		SCREEN_EOF_CALL(megadriv);
+	bool vblank_on = state;
+	if (!m_current_game_is_sms)
+		SCREEN_VBLANK_CALL(megadriv);
 	else
-		SCREEN_EOF_CALL(megatech_md_sms);
-
-	SCREEN_EOF_CALL(megatech_bios);
+		SCREEN_VBLANK_CALL(megatech_md_sms);
 }
 
-static MACHINE_RESET(mtnew)
+MACHINE_RESET_MEMBER(mtech_state,mtnew)
 {
-	mtech_state *state = machine.driver_data<mtech_state>();
-	state->m_mt_bank_addr = 0;
+	m_mt_bank_addr = 0;
 
-	MACHINE_RESET_CALL(megadriv);
-	MACHINE_RESET_CALL(megatech_bios);
-	MACHINE_RESET_CALL(megatech_md_sms);
-	megatech_select_game(machine, 0);
+	MACHINE_RESET_CALL_LEGACY(megadriv);
+	MACHINE_RESET_CALL_LEGACY(megatech_md_sms);
+	megatech_select_game(machine(), 0);
 }
+
+UINT32 mtech_state::screen_update_megatech_menu(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
+{
+	m_vdp1->screen_update(screen,bitmap,cliprect);
+	return 0;
+}
+
+
+
+WRITE_LINE_MEMBER( mtech_state::int_callback )
+{
+	m_bioscpu->set_input_line(0, state);
+}
+
+
+static const sega315_5124_interface _vdp_intf =
+{
+	false,
+	"menu",
+	DEVCB_DRIVER_LINE_MEMBER(mtech_state, int_callback),
+	DEVCB_NULL,
+};
+
+
+static const sn76496_config psg_intf =
+{
+	DEVCB_NULL
+};
+
 
 static MACHINE_CONFIG_START( megatech, mtech_state )
 	/* basic machine hardware */
@@ -492,25 +513,34 @@ static MACHINE_CONFIG_START( megatech, mtech_state )
 	MCFG_CPU_PROGRAM_MAP(megatech_bios_map)
 	MCFG_CPU_IO_MAP(megatech_bios_portmap)
 
-	MCFG_MACHINE_RESET(mtnew)
+	MCFG_MACHINE_RESET(0)
+	MCFG_MACHINE_RESET_OVERRIDE(mtech_state,mtnew)
 
-	MCFG_VIDEO_START(mtnew)
+	MCFG_VIDEO_START(0)
+	MCFG_VIDEO_START_OVERRIDE(mtech_state,mtnew)
 
 	MCFG_DEFAULT_LAYOUT(layout_dualhovu)
 
 	MCFG_SCREEN_ADD("menu", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB15)
-	MCFG_SCREEN_REFRESH_RATE(60)
-	MCFG_SCREEN_SIZE(342,262)
-	MCFG_SCREEN_VISIBLE_AREA(0, 256-1, 0, 224-1)
-	MCFG_SCREEN_UPDATE(mtnew)
+	// check frq
+	MCFG_SCREEN_RAW_PARAMS(XTAL_10_738635MHz/2, \
+		SEGA315_5124_WIDTH , SEGA315_5124_LBORDER_START + SEGA315_5124_LBORDER_WIDTH, SEGA315_5124_LBORDER_START + SEGA315_5124_LBORDER_WIDTH + 256, \
+		SEGA315_5124_HEIGHT_NTSC, SEGA315_5124_TBORDER_START + SEGA315_5124_NTSC_224_TBORDER_HEIGHT, SEGA315_5124_TBORDER_START + SEGA315_5124_NTSC_224_TBORDER_HEIGHT + 224)
+	MCFG_SCREEN_UPDATE_DRIVER(mtech_state, screen_update_megatech_menu)
+
+	MCFG_PALETTE_LENGTH(SEGA315_5124_PALETTE_SIZE)
+	MCFG_PALETTE_INIT(sega315_5124)
+
+	MCFG_SEGA315_5246_ADD("vdp1", _vdp_intf)
+
 
 	MCFG_SCREEN_MODIFY("megadriv")
-	MCFG_SCREEN_UPDATE(mtnew)
-	MCFG_SCREEN_EOF(mtnew)
+	MCFG_SCREEN_UPDATE_DRIVER(mtech_state, screen_update_mtnew)
+	MCFG_SCREEN_VBLANK_DRIVER(mtech_state, screen_eof_mtnew)
 
 	/* sound hardware */
 	MCFG_SOUND_ADD("sn2", SN76496, MASTER_CLOCK/15)
+	MCFG_SOUND_CONFIG(psg_intf)
 	MCFG_SOUND_ROUTE(0, "lspeaker", 0.50)
 	MCFG_SOUND_ROUTE(1, "rspeaker", 0.50)
 MACHINE_CONFIG_END
@@ -526,14 +556,14 @@ struct megatech_cart_region
 // we keep old region tags for compatibility with older macros... this might be changed at a later stage
 static const struct megatech_cart_region megatech_cart_table[] =
 {
-	{ "cart1", 0, "game0" },
-	{ "cart2", 1, "game1" },
-	{ "cart3", 2, "game2" },
-	{ "cart4", 3, "game3" },
-	{ "cart5", 4, "game4" },
-	{ "cart6", 5, "game5" },
-	{ "cart7", 6, "game6" },
-	{ "cart8", 7, "game7" },
+	{ ":cart1", 0, "game0" },
+	{ ":cart2", 1, "game1" },
+	{ ":cart3", 2, "game2" },
+	{ ":cart4", 3, "game3" },
+	{ ":cart5", 4, "game4" },
+	{ ":cart6", 5, "game5" },
+	{ ":cart7", 6, "game6" },
+	{ ":cart8", 7, "game7" },
 	{ 0 }
 };
 
@@ -541,7 +571,7 @@ static DEVICE_IMAGE_LOAD( megatech_cart )
 {
 	mtech_state *state = image.device().machine().driver_data<mtech_state>();
 	const struct megatech_cart_region *mt_cart = &megatech_cart_table[0], *this_cart;
-	const char	*pcb_name;
+	const char  *pcb_name;
 
 	/* First, determine where this cart has to be loaded */
 	while (mt_cart->tag)
@@ -558,7 +588,7 @@ static DEVICE_IMAGE_LOAD( megatech_cart )
 		return IMAGE_INIT_FAIL;
 
 	//printf("load list\n");
-	UINT8 *ROM = image.device().machine().region(this_cart->region)->base();
+	UINT8 *ROM = image.device().machine().root_device().memregion(this_cart->region)->base();
 	//printf("load list2\n");
 	UINT32 length = image.get_software_region_length("rom");
 	memcpy(ROM, image.get_software_region("rom"), length);
@@ -617,7 +647,12 @@ MACHINE_CONFIG_END
 #define MEGATECH_BIOS \
 	ROM_REGION( 0x400000, "maincpu", ROMREGION_ERASEFF ) \
 	ROM_REGION( 0x10000, "mtbios", 0 ) \
-	ROM_LOAD( "epr12664.20", 0x000000, 0x8000, CRC(f71e9526) SHA1(1c7887541d02c41426992d17f8e3db9e03975953) ) \
+	ROM_SYSTEM_BIOS( 0, "ver1", "Ver 1" ) \
+	ROMX_LOAD( "epr-12664.20",  0x000000, 0x8000, CRC(f71e9526) SHA1(1c7887541d02c41426992d17f8e3db9e03975953), ROM_BIOS(1)) \
+	ROM_SYSTEM_BIOS( 1, "ver0a", "Ver 0 Rev A" ) \
+	ROMX_LOAD( "epr-12263a.20", 0x000000, 0x8000, CRC(07c3f423) SHA1(50c28bbc2d4349c820d988ae3f20aae3f808545f), ROM_BIOS(2)) \
+	ROM_SYSTEM_BIOS( 2, "ver0b", "Ver 0 Rev B" ) \
+	ROMX_LOAD( "epr-12263b.20", 0x000000, 0x8000, CRC(ca26c87a) SHA1(987a18bede6e54cd73c4434426eb6c302a37cdc5), ROM_BIOS(3)) \
 
 /* no games */
 ROM_START( megatech )
@@ -1081,7 +1116,7 @@ ROM_START( mt_srage ) /* Streets of Rage */
 	MEGATECH_BIOS
 
 	ROM_REGION16_BE( 0x400000, "game0", ROMREGION_ERASE00 )
-	ROM_LOAD16_WORD_SWAP( "mpr-13571-s.ic1", 0x000000, 0x080000, CRC(db4ac746) SHA1(c7cc24e2329f279574513fa32bbf79f72f75aeea) )
+	ROM_LOAD16_WORD_SWAP( "mpr-14125-s.ic1", 0x000000, 0x080000, CRC(db4ac746) SHA1(c7cc24e2329f279574513fa32bbf79f72f75aeea) )
 	ROM_LOAD16_BYTE( "epr-12368-51.ic2", 0x300001, 0x08000, CRC(49b7d6f4) SHA1(96e69851c92715e7daf35b184cf374147a8d2880) )
 
 	ROM_REGION( 0x01, "sms_pin", ROMREGION_ERASE00 )
@@ -1229,69 +1264,69 @@ ROM_END
 
 
 /* nn */ /* nn is part of the instruction rom name, should there be a game for each number? */
-/* -- */ CONS( 1989, megatech, 0, 0,     megatech_slot, megatech, mt_slot, "Sega",                  "Mega-Tech", GAME_IS_BIOS_ROOT )
-/* 01 */ GAME( 1988, mt_beast, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Altered Beast (Mega-Tech)", GAME_NOT_WORKING )
-/* 02 */ GAME( 1988, mt_shar2, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Space Harrier II (Mega-Tech)", GAME_NOT_WORKING )
-/* 03 */ GAME( 1988, mt_stbld, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Super Thunder Blade (Mega-Tech)", GAME_NOT_WORKING )
-/* 04 */ GAME( 1987, mt_ggolf, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Great Golf (Mega-Tech, SMS based)", GAME_NOT_WORKING ) /* sms! */
-/* 05 */ GAME( 198?, mt_gsocr, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Great Soccer (Mega-Tech, SMS based)", GAME_NOT_WORKING ) /* sms! also bad */
-/* 06 */ GAME( 1987, mt_orun,  megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Out Run (Mega-Tech, SMS based)", GAME_NOT_WORKING ) /* sms! */
-/* 07 */ GAME( 1987, mt_asyn,  megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Alien Syndrome (Mega-Tech, SMS based)", GAME_NOT_WORKING ) /* sms! */
-/* 08 */ GAME( 1987, mt_shnbi, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Shinobi (Mega-Tech, SMS based)", GAME_NOT_WORKING) /* sms */
-/* 09 */ GAME( 1987, mt_fz,    megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Fantasy Zone (Mega-Tech, SMS based)", GAME_NOT_WORKING) /* sms */
-/* 10 */ GAME( 1987, mt_aftrb, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "After Burner (Mega-Tech, SMS based)", GAME_NOT_WORKING) /* sms */
-/* 11 */ GAME( 1989, mt_tfor2, megatech, megatech, megatech, mt_crt, ROT0, "Tecno Soft / Sega",     "Thunder Force II MD (Mega-Tech)", GAME_NOT_WORKING )
+/* -- */ CONS( 1989, megatech, 0, 0,     megatech_slot, megatech, mtech_state, mt_slot, "Sega",                  "Mega-Tech", GAME_IS_BIOS_ROOT )
+/* 01 */ GAME( 1988, mt_beast, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Altered Beast (Mega-Tech)", GAME_NOT_WORKING )
+/* 02 */ GAME( 1988, mt_shar2, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Space Harrier II (Mega-Tech)", GAME_NOT_WORKING )
+/* 03 */ GAME( 1988, mt_stbld, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Super Thunder Blade (Mega-Tech)", GAME_NOT_WORKING )
+/* 04 */ GAME( 1987, mt_ggolf, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Great Golf (Mega-Tech, SMS based)", GAME_NOT_WORKING ) /* sms! */
+/* 05 */ GAME( 198?, mt_gsocr, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Great Soccer (Mega-Tech, SMS based)", GAME_NOT_WORKING ) /* sms! also bad */
+/* 06 */ GAME( 1987, mt_orun,  megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Out Run (Mega-Tech, SMS based)", GAME_NOT_WORKING ) /* sms! */
+/* 07 */ GAME( 1987, mt_asyn,  megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Alien Syndrome (Mega-Tech, SMS based)", GAME_NOT_WORKING ) /* sms! */
+/* 08 */ GAME( 1987, mt_shnbi, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Shinobi (Mega-Tech, SMS based)", GAME_NOT_WORKING) /* sms */
+/* 09 */ GAME( 1987, mt_fz,    megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Fantasy Zone (Mega-Tech, SMS based)", GAME_NOT_WORKING) /* sms */
+/* 10 */ GAME( 1987, mt_aftrb, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "After Burner (Mega-Tech, SMS based)", GAME_NOT_WORKING) /* sms */
+/* 11 */ GAME( 1989, mt_tfor2, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Tecno Soft / Sega",     "Thunder Force II MD (Mega-Tech)", GAME_NOT_WORKING )
 /* 12 */ // unknown
-/* 13 */ GAME( 1986, mt_astro, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Astro Warrior (Mega-Tech, SMS based)", GAME_NOT_WORKING ) /* sms! */
+/* 13 */ GAME( 1986, mt_astro, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Astro Warrior (Mega-Tech, SMS based)", GAME_NOT_WORKING ) /* sms! */
 /* 14 */ // unknown
 /* 15 */ // unknown
 /* 16 */ // unknown
 /* 17 */ // unknown
-/* 18 */ // unknown
-/* 19 */ GAME( 1987, mt_gfoot, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Great Football (Mega-Tech, SMS based)", GAME_NOT_WORKING ) /* sms! */
-/* 20 */ GAME( 1989, mt_lastb, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Last Battle (Mega-Tech)", GAME_NOT_WORKING )
-/* 21 */ GAME( 1989, mt_wcsoc, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "World Championship Soccer (Mega-Tech)", GAME_NOT_WORKING )
-/* 22 */ GAME( 1989, mt_tetri, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Tetris (Mega-Tech)", GAME_NOT_WORKING )
-/* 23 */ GAME( 1989, mt_gng,   megatech, megatech, megatech, mt_crt, ROT0, "Capcom / Sega",         "Ghouls'n Ghosts (Mega-Tech)", GAME_NOT_WORKING )
-/* 24 */ GAME( 1989, mt_shang, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Super Hang-On (Mega-Tech)", GAME_NOT_WORKING )
-/* 25 */ GAME( 1989, mt_gaxe,  megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Golden Axe (Mega-Tech)", GAME_NOT_WORKING )
-/* 26 */ GAME( 1989, mt_fwrld, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Forgotten Worlds (Mega-Tech)", GAME_NOT_WORKING )
-/* 27 */ GAME( 1989, mt_mystd, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Mystic Defender (Mega-Tech)", GAME_NOT_WORKING )
-/* 28 */ GAME( 1989, mt_revsh, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "The Revenge of Shinobi (Mega-Tech)", GAME_NOT_WORKING )
-/* 29 */ GAME( 1987, mt_parlg, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Parlour Games (Mega-Tech, SMS based)", GAME_NOT_WORKING ) /* sms! */
+/* 18 */ // Kung Fu Kid (sms)
+/* 19 */ GAME( 1987, mt_gfoot, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Great Football (Mega-Tech, SMS based)", GAME_NOT_WORKING ) /* sms! */
+/* 20 */ GAME( 1989, mt_lastb, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Last Battle (Mega-Tech)", GAME_NOT_WORKING )
+/* 21 */ GAME( 1989, mt_wcsoc, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "World Championship Soccer (Mega-Tech)", GAME_NOT_WORKING )
+/* 22 */ GAME( 1989, mt_tetri, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Tetris (Mega-Tech)", GAME_NOT_WORKING )
+/* 23 */ GAME( 1989, mt_gng,   megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Capcom / Sega",         "Ghouls'n Ghosts (Mega-Tech)", GAME_NOT_WORKING )
+/* 24 */ GAME( 1989, mt_shang, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Super Hang-On (Mega-Tech)", GAME_NOT_WORKING )
+/* 25 */ GAME( 1989, mt_gaxe,  megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Golden Axe (Mega-Tech)", GAME_NOT_WORKING )
+/* 26 */ GAME( 1989, mt_fwrld, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Forgotten Worlds (Mega-Tech)", GAME_NOT_WORKING )
+/* 27 */ GAME( 1989, mt_mystd, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Mystic Defender (Mega-Tech)", GAME_NOT_WORKING )
+/* 28 */ GAME( 1989, mt_revsh, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "The Revenge of Shinobi (Mega-Tech)", GAME_NOT_WORKING )
+/* 29 */ GAME( 1987, mt_parlg, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Parlour Games (Mega-Tech, SMS based)", GAME_NOT_WORKING ) /* sms! */
 /* 30 */ // unknown
-/* 31 */ GAME( 1989, mt_tgolf, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Arnold Palmer Tournament Golf (Mega-Tech)", GAME_NOT_WORKING )
-/* 32 */ GAME( 1989, mt_srbb,  megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Super Real Basketball (Mega-Tech)", GAME_NOT_WORKING )
+/* 31 */ GAME( 1989, mt_tgolf, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Arnold Palmer Tournament Golf (Mega-Tech)", GAME_NOT_WORKING )
+/* 32 */ GAME( 1989, mt_srbb,  megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Super Real Basketball (Mega-Tech)", GAME_NOT_WORKING )
 /* 33 */ // unknown
 /* 34 */ // unknown
-/* 35 */ GAME( 1989, mt_tlbba, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Tommy Lasorda Baseball (Mega-Tech)", GAME_NOT_WORKING )
-/* 36 */ GAME( 1990, mt_cols,  megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Columns (Mega-Tech)", GAME_NOT_WORKING )
+/* 35 */ GAME( 1989, mt_tlbba, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Tommy Lasorda Baseball (Mega-Tech)", GAME_NOT_WORKING )
+/* 36 */ GAME( 1990, mt_cols,  megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Columns (Mega-Tech)", GAME_NOT_WORKING )
 /* 37 */ // unknown
-/* 38 */ GAME( 1990, mt_eswat, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Cyber Police ESWAT: Enhanced Special Weapons and Tactics (Mega-Tech)", GAME_NOT_WORKING )
-/* 39 */ GAME( 1990, mt_smgp,  megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Super Monaco GP (Mega-Tech)", GAME_NOT_WORKING )
-/* 40 */ GAME( 1990, mt_mwalk, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Michael Jackson's Moonwalker (Mega-Tech)", GAME_NOT_WORKING )
-/* 41 */ GAME( 1990, mt_crack, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Crack Down (Mega-Tech)", GAME_NOT_WORKING )
+/* 38 */ GAME( 1990, mt_eswat, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Cyber Police ESWAT: Enhanced Special Weapons and Tactics (Mega-Tech)", GAME_NOT_WORKING )
+/* 39 */ GAME( 1990, mt_smgp,  megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Super Monaco GP (Mega-Tech)", GAME_NOT_WORKING )
+/* 40 */ GAME( 1990, mt_mwalk, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Michael Jackson's Moonwalker (Mega-Tech)", GAME_NOT_WORKING )
+/* 41 */ GAME( 1990, mt_crack, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Crack Down (Mega-Tech)", GAME_NOT_WORKING )
 /* 42 */ // unknown
-/* 43 */ GAME( 1990, mt_shado, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Shadow Dancer (Mega-Tech)", GAME_NOT_WORKING )
-/* 44 */ GAME( 1990, mt_arrow, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Arrow Flash (Mega-Tech)", GAME_NOT_WORKING )
+/* 43 */ GAME( 1990, mt_shado, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Shadow Dancer (Mega-Tech)", GAME_NOT_WORKING )
+/* 44 */ GAME( 1990, mt_arrow, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Arrow Flash (Mega-Tech)", GAME_NOT_WORKING )
 /* 45 */ // unknown
 /* 46 */ // unknown
-/* 47 */ GAME( 1990, mt_astrm, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Alien Storm (Mega-Tech)", GAME_NOT_WORKING )
-/* 48 */ GAME( 1991, mt_wwar,  megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Wrestle War (Mega-Tech)", GAME_NOT_WORKING ) /* Copyright 1989, 1991 Sega */
-/* 49 */ GAME( 1991, mt_bbros, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Bonanza Bros. (Mega-Tech)", GAME_NOT_WORKING )
+/* 47 */ GAME( 1990, mt_astrm, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Alien Storm (Mega-Tech)", GAME_NOT_WORKING )
+/* 48 */ GAME( 1991, mt_wwar,  megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Wrestle War (Mega-Tech)", GAME_NOT_WORKING ) /* Copyright 1989, 1991 Sega */
+/* 49 */ GAME( 1991, mt_bbros, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Bonanza Bros. (Mega-Tech)", GAME_NOT_WORKING )
 /* 50 */ // unknown
-/* 51 */ GAME( 1991, mt_srage, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Streets of Rage (Mega-Tech)", GAME_NOT_WORKING )
-/* 52 */ GAME( 1991, mt_sonic, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Sonic The Hedgehog (Mega-Tech, set 1)", GAME_NOT_WORKING )
-/*    */ GAME( 1991, mt_sonia, mt_sonic, megatech, megatech, mt_crt, ROT0, "Sega",                  "Sonic The Hedgehog (Mega-Tech, set 2)", GAME_NOT_WORKING )
-/* 53 */ GAME( 1990, mt_fshrk, megatech, megatech, megatech, mt_crt, ROT0, "Toaplan / Sega",        "Fire Shark (Mega-Tech)", GAME_NOT_WORKING )
-/* 54 */ GAME( 1991, mt_spman, megatech, megatech, megatech, mt_crt, ROT0, "Marvel / Sega",         "Spider-Man vs The Kingpin (Mega-Tech)", GAME_NOT_WORKING )
-/* 55 */ GAME( 1991, mt_calga, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "California Games (Mega-Tech)", GAME_NOT_WORKING )
+/* 51 */ GAME( 1991, mt_srage, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Streets of Rage (Mega-Tech)", GAME_NOT_WORKING )
+/* 52 */ GAME( 1991, mt_sonic, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Sonic The Hedgehog (Mega-Tech, set 1)", GAME_NOT_WORKING )
+/*    */ GAME( 1991, mt_sonia, mt_sonic, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Sonic The Hedgehog (Mega-Tech, set 2)", GAME_NOT_WORKING )
+/* 53 */ GAME( 1990, mt_fshrk, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Toaplan / Sega",        "Fire Shark (Mega-Tech)", GAME_NOT_WORKING )
+/* 54 */ GAME( 1991, mt_spman, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Marvel / Sega",         "Spider-Man vs The Kingpin (Mega-Tech)", GAME_NOT_WORKING )
+/* 55 */ GAME( 1991, mt_calga, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "California Games (Mega-Tech)", GAME_NOT_WORKING )
 /* 56 */ // unknown
-/* 57 */ GAME( 1991, mt_gaxe2, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Golden Axe II (Mega-Tech)", GAME_NOT_WORKING )
-/* 58 */ GAME( 1991, mt_stf,   megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Joe Montana II: Sports Talk Football (Mega-Tech)", GAME_NOT_WORKING )
-/* 59 */ GAME( 1991, mt_mlh,   megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Mario Lemieux Hockey (Mega-Tech)", GAME_NOT_WORKING )
-/* 60 */ GAME( 1992, mt_kcham, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Kid Chameleon (Mega-Tech)", GAME_NOT_WORKING )
-/* 61 */ GAME( 1992, mt_tout,  megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Turbo Outrun (Mega-Tech)", GAME_NOT_WORKING )
-/* 62 */ GAME( 1992, mt_soni2, megatech, megatech, megatech, mt_crt, ROT0, "Sega",                  "Sonic The Hedgehog 2 (Mega-Tech)", GAME_NOT_WORKING )
+/* 57 */ GAME( 1991, mt_gaxe2, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Golden Axe II (Mega-Tech)", GAME_NOT_WORKING )
+/* 58 */ GAME( 1991, mt_stf,   megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Joe Montana II: Sports Talk Football (Mega-Tech)", GAME_NOT_WORKING )
+/* 59 */ GAME( 1991, mt_mlh,   megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Mario Lemieux Hockey (Mega-Tech)", GAME_NOT_WORKING )
+/* 60 */ GAME( 1992, mt_kcham, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Kid Chameleon (Mega-Tech)", GAME_NOT_WORKING )
+/* 61 */ GAME( 1992, mt_tout,  megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Turbo Outrun (Mega-Tech)", GAME_NOT_WORKING )
+/* 62 */ GAME( 1992, mt_soni2, megatech, megatech, megatech, mtech_state, mt_crt, ROT0, "Sega",                  "Sonic The Hedgehog 2 (Mega-Tech)", GAME_NOT_WORKING )
 
 /* more? */

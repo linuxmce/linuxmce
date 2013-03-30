@@ -10,79 +10,75 @@ Atari Sky Raider driver
 
 
 
-static PALETTE_INIT( skyraid )
+void skyraid_state::palette_init()
 {
-	palette_set_color(machine,  0, MAKE_RGB(0x00, 0x00, 0x00));	/* terrain */
-	palette_set_color(machine,  1, MAKE_RGB(0x18, 0x18, 0x18));
-	palette_set_color(machine,  2, MAKE_RGB(0x30, 0x30, 0x30));
-	palette_set_color(machine,  3, MAKE_RGB(0x48, 0x48, 0x48));
-	palette_set_color(machine,  4, MAKE_RGB(0x60, 0x60, 0x60));
-	palette_set_color(machine,  5, MAKE_RGB(0x78, 0x78, 0x78));
-	palette_set_color(machine,  6, MAKE_RGB(0x90, 0x90, 0x90));
-	palette_set_color(machine,  7, MAKE_RGB(0xA8, 0xA8, 0xA8));
-	palette_set_color(machine,  8, MAKE_RGB(0x10, 0x10, 0x10));	/* sprites */
-	palette_set_color(machine,  9, MAKE_RGB(0xE0, 0xE0, 0xE0));
-	palette_set_color(machine, 10, MAKE_RGB(0xA0, 0xA0, 0xA0));
-	palette_set_color(machine, 11, MAKE_RGB(0x48, 0x48, 0x48));
-	palette_set_color(machine, 12, MAKE_RGB(0x10, 0x10, 0x10));
-	palette_set_color(machine, 13, MAKE_RGB(0x48, 0x48, 0x48));
-	palette_set_color(machine, 14, MAKE_RGB(0xA0, 0xA0, 0xA0));
-	palette_set_color(machine, 15, MAKE_RGB(0xE0, 0xE0, 0xE0));
-	palette_set_color(machine, 16, MAKE_RGB(0x00, 0x00, 0x00));	/* missiles */
-	palette_set_color(machine, 17, MAKE_RGB(0xFF, 0xFF, 0xFF));
-	palette_set_color(machine, 18, MAKE_RGB(0x00, 0x00, 0x00));	/* text */
-	palette_set_color(machine, 19, MAKE_RGB(0xE0, 0xE0, 0xE0));
+	palette_set_color(machine(),  0, MAKE_RGB(0x00, 0x00, 0x00));   /* terrain */
+	palette_set_color(machine(),  1, MAKE_RGB(0x18, 0x18, 0x18));
+	palette_set_color(machine(),  2, MAKE_RGB(0x30, 0x30, 0x30));
+	palette_set_color(machine(),  3, MAKE_RGB(0x48, 0x48, 0x48));
+	palette_set_color(machine(),  4, MAKE_RGB(0x60, 0x60, 0x60));
+	palette_set_color(machine(),  5, MAKE_RGB(0x78, 0x78, 0x78));
+	palette_set_color(machine(),  6, MAKE_RGB(0x90, 0x90, 0x90));
+	palette_set_color(machine(),  7, MAKE_RGB(0xA8, 0xA8, 0xA8));
+	palette_set_color(machine(),  8, MAKE_RGB(0x10, 0x10, 0x10));   /* sprites */
+	palette_set_color(machine(),  9, MAKE_RGB(0xE0, 0xE0, 0xE0));
+	palette_set_color(machine(), 10, MAKE_RGB(0xA0, 0xA0, 0xA0));
+	palette_set_color(machine(), 11, MAKE_RGB(0x48, 0x48, 0x48));
+	palette_set_color(machine(), 12, MAKE_RGB(0x10, 0x10, 0x10));
+	palette_set_color(machine(), 13, MAKE_RGB(0x48, 0x48, 0x48));
+	palette_set_color(machine(), 14, MAKE_RGB(0xA0, 0xA0, 0xA0));
+	palette_set_color(machine(), 15, MAKE_RGB(0xE0, 0xE0, 0xE0));
+	palette_set_color(machine(), 16, MAKE_RGB(0x00, 0x00, 0x00));   /* missiles */
+	palette_set_color(machine(), 17, MAKE_RGB(0xFF, 0xFF, 0xFF));
+	palette_set_color(machine(), 18, MAKE_RGB(0x00, 0x00, 0x00));   /* text */
+	palette_set_color(machine(), 19, MAKE_RGB(0xE0, 0xE0, 0xE0));
 }
 
-static READ8_HANDLER( skyraid_port_0_r )
+READ8_MEMBER(skyraid_state::skyraid_port_0_r)
 {
-	skyraid_state *state = space->machine().driver_data<skyraid_state>();
-	UINT8 val = input_port_read(space->machine(), "LANGUAGE");
+	UINT8 val = ioport("LANGUAGE")->read();
 
-	if (input_port_read(space->machine(), "STICKY") > state->m_analog_range)
+	if (ioport("STICKY")->read() > m_analog_range)
 		val |= 0x40;
-	if (input_port_read(space->machine(), "STICKX") > state->m_analog_range)
+	if (ioport("STICKX")->read() > m_analog_range)
 		val |= 0x80;
 
 	return val;
 }
 
 
-static WRITE8_HANDLER( skyraid_range_w )
+WRITE8_MEMBER(skyraid_state::skyraid_range_w)
 {
-	skyraid_state *state = space->machine().driver_data<skyraid_state>();
 
-	state->m_analog_range = data & 0x3f;
+	m_analog_range = data & 0x3f;
 }
 
 
-static WRITE8_HANDLER( skyraid_offset_w )
+WRITE8_MEMBER(skyraid_state::skyraid_offset_w)
 {
-	skyraid_state *state = space->machine().driver_data<skyraid_state>();
 
-	state->m_analog_offset = data & 0x3f;
+	m_analog_offset = data & 0x3f;
 }
 
 
-static WRITE8_HANDLER( skyraid_scroll_w )
+WRITE8_MEMBER(skyraid_state::skyraid_scroll_w)
 {
-	skyraid_state *state = space->machine().driver_data<skyraid_state>();
 
-	state->m_scroll = data;
+	m_scroll = data;
 }
 
 
-static ADDRESS_MAP_START( skyraid_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( skyraid_map, AS_PROGRAM, 8, skyraid_state )
 	AM_RANGE(0x0000, 0x00ff) AM_RAM AM_MIRROR(0x300)
-	AM_RANGE(0x0400, 0x040f) AM_WRITEONLY AM_BASE_MEMBER(skyraid_state, m_pos_ram)
-	AM_RANGE(0x0800, 0x087f) AM_RAM AM_MIRROR(0x480) AM_BASE_MEMBER(skyraid_state, m_alpha_num_ram)
+	AM_RANGE(0x0400, 0x040f) AM_WRITEONLY AM_SHARE("pos_ram")
+	AM_RANGE(0x0800, 0x087f) AM_RAM AM_MIRROR(0x480) AM_SHARE("alpha_num_ram")
 	AM_RANGE(0x1000, 0x1000) AM_READ(skyraid_port_0_r)
 	AM_RANGE(0x1001, 0x1001) AM_READ_PORT("DSW")
 	AM_RANGE(0x1400, 0x1400) AM_READ_PORT("COIN")
 	AM_RANGE(0x1400, 0x1401) AM_READ_PORT("SYSTEM")
-	AM_RANGE(0x1c00, 0x1c0f) AM_WRITEONLY AM_BASE_MEMBER(skyraid_state, m_obj_ram)
+	AM_RANGE(0x1c00, 0x1c0f) AM_WRITEONLY AM_SHARE("obj_ram")
 	AM_RANGE(0x4000, 0x4000) AM_WRITE(skyraid_scroll_w)
-	AM_RANGE(0x4400, 0x4400) AM_DEVWRITE("discrete", skyraid_sound_w)
+	AM_RANGE(0x4400, 0x4400) AM_WRITE(skyraid_sound_w)
 	AM_RANGE(0x4800, 0x4800) AM_WRITE(skyraid_range_w)
 	AM_RANGE(0x5000, 0x5000) AM_WRITE(watchdog_reset_w)
 	AM_RANGE(0x5800, 0x5800) AM_WRITE(skyraid_offset_w)
@@ -106,7 +102,7 @@ static INPUT_PORTS_START( skyraid )
 	PORT_DIPSETTING(    0x10, "80 Seconds" )
 	PORT_DIPSETTING(    0x20, "100 Seconds" )
 	PORT_DIPSETTING(    0x30, "120 Seconds" )
-	PORT_DIPNAME( 0x40, 0x40, "DIP #5" )	/* must be OFF */
+	PORT_DIPNAME( 0x40, 0x40, "DIP #5" )    /* must be OFF */
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ))
 	PORT_DIPSETTING(    0x00, DEF_STR( On ))
 	PORT_DIPNAME( 0x80, 0x00, "Extended Play" )
@@ -176,7 +172,7 @@ static const gfx_layout skyraid_sprite_layout =
 	32, 32, /* width, height */
 	8,      /* total         */
 	2,      /* planes        */
-	        /* plane offsets */
+			/* plane offsets */
 	{ 0, 1 },
 	{
 		0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E,
@@ -224,24 +220,21 @@ static MACHINE_CONFIG_START( skyraid, skyraid_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6502, 12096000 / 12)
 	MCFG_CPU_PROGRAM_MAP(skyraid_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", skyraid_state,  irq0_line_hold)
 	MCFG_WATCHDOG_VBLANK_INIT(4)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(22 * 1000000 / 15750))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(512, 240)
 	MCFG_SCREEN_VISIBLE_AREA(0, 511, 0, 239)
-	MCFG_SCREEN_UPDATE(skyraid)
+	MCFG_SCREEN_UPDATE_DRIVER(skyraid_state, screen_update_skyraid)
 
 	MCFG_GFXDECODE(skyraid)
 
-	MCFG_PALETTE_INIT(skyraid)
 	MCFG_PALETTE_LENGTH(20)
 
-	MCFG_VIDEO_START(skyraid)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -282,4 +275,4 @@ ROM_START( skyraid )
 ROM_END
 
 
-GAME( 1978, skyraid, 0, skyraid, skyraid, 0, ORIENTATION_FLIP_Y, "Atari", "Sky Raider", GAME_IMPERFECT_COLORS )
+GAME( 1978, skyraid, 0, skyraid, skyraid, driver_device, 0, ORIENTATION_FLIP_Y, "Atari", "Sky Raider", GAME_IMPERFECT_COLORS )

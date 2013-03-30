@@ -5,34 +5,34 @@
 #define MAKE_MAME_REEEEAAALLLL_SLOW 0
 
 
-static void clear3d(running_machine &machine);	// TODO: Inline
+static void clear3d(running_machine &machine);  // TODO: Inline
 
 
 static void hng64_mark_all_tiles_dirty( hng64_state *state, int tilemap )
 {
 	if (tilemap == 0)
 	{
-		tilemap_mark_all_tiles_dirty (state->m_tilemap0_8x8);
-		tilemap_mark_all_tiles_dirty (state->m_tilemap0_16x16);
-		tilemap_mark_all_tiles_dirty (state->m_tilemap0_16x16_alt);
+		state->m_tilemap0_8x8->mark_all_dirty();
+		state->m_tilemap0_16x16->mark_all_dirty();
+		state->m_tilemap0_16x16_alt->mark_all_dirty();
 	}
 	else if (tilemap == 1)
 	{
-		tilemap_mark_all_tiles_dirty (state->m_tilemap1_8x8);
-		tilemap_mark_all_tiles_dirty (state->m_tilemap1_16x16);
-		tilemap_mark_all_tiles_dirty (state->m_tilemap1_16x16_alt);
+		state->m_tilemap1_8x8->mark_all_dirty();
+		state->m_tilemap1_16x16->mark_all_dirty();
+		state->m_tilemap1_16x16_alt->mark_all_dirty();
 	}
 	else if (tilemap == 2)
 	{
-		tilemap_mark_all_tiles_dirty (state->m_tilemap2_8x8);
-		tilemap_mark_all_tiles_dirty (state->m_tilemap2_16x16);
-		tilemap_mark_all_tiles_dirty (state->m_tilemap2_16x16_alt);
+		state->m_tilemap2_8x8->mark_all_dirty();
+		state->m_tilemap2_16x16->mark_all_dirty();
+		state->m_tilemap2_16x16_alt->mark_all_dirty();
 	}
 	else if (tilemap == 3)
 	{
-		tilemap_mark_all_tiles_dirty (state->m_tilemap3_8x8);
-		tilemap_mark_all_tiles_dirty (state->m_tilemap3_16x16);
-		tilemap_mark_all_tiles_dirty (state->m_tilemap3_16x16_alt);
+		state->m_tilemap3_8x8->mark_all_dirty();
+		state->m_tilemap3_16x16->mark_all_dirty();
+		state->m_tilemap3_16x16_alt->mark_all_dirty();
 	}
 }
 
@@ -40,40 +40,40 @@ static void hng64_mark_tile_dirty( hng64_state *state, int tilemap, int tile_ind
 {
 	if (tilemap == 0)
 	{
-		tilemap_mark_tile_dirty(state->m_tilemap0_8x8, tile_index);
-		tilemap_mark_tile_dirty(state->m_tilemap0_16x16, tile_index);
-		tilemap_mark_tile_dirty(state->m_tilemap0_16x16_alt, tile_index);
+		state->m_tilemap0_8x8->mark_tile_dirty(tile_index);
+		state->m_tilemap0_16x16->mark_tile_dirty(tile_index);
+		state->m_tilemap0_16x16_alt->mark_tile_dirty(tile_index);
 	}
 	else if (tilemap == 1)
 	{
-		tilemap_mark_tile_dirty(state->m_tilemap1_8x8, tile_index);
-		tilemap_mark_tile_dirty(state->m_tilemap1_16x16, tile_index);
-		tilemap_mark_tile_dirty(state->m_tilemap1_16x16_alt, tile_index);
+		state->m_tilemap1_8x8->mark_tile_dirty(tile_index);
+		state->m_tilemap1_16x16->mark_tile_dirty(tile_index);
+		state->m_tilemap1_16x16_alt->mark_tile_dirty(tile_index);
 	}
 	else if (tilemap == 2)
 	{
-		tilemap_mark_tile_dirty(state->m_tilemap2_8x8, tile_index);
-		tilemap_mark_tile_dirty(state->m_tilemap2_16x16, tile_index);
-		tilemap_mark_tile_dirty(state->m_tilemap2_16x16_alt, tile_index);
+		state->m_tilemap2_8x8->mark_tile_dirty(tile_index);
+		state->m_tilemap2_16x16->mark_tile_dirty(tile_index);
+		state->m_tilemap2_16x16_alt->mark_tile_dirty(tile_index);
 	}
 	else if (tilemap == 3)
 	{
-		tilemap_mark_tile_dirty(state->m_tilemap3_8x8, tile_index);
-		tilemap_mark_tile_dirty(state->m_tilemap3_16x16, tile_index);
-		tilemap_mark_tile_dirty(state->m_tilemap3_16x16_alt, tile_index);
+		state->m_tilemap3_8x8->mark_tile_dirty(tile_index);
+		state->m_tilemap3_16x16->mark_tile_dirty(tile_index);
+		state->m_tilemap3_16x16_alt->mark_tile_dirty(tile_index);
 	}
 }
 
 
-#define PIXEL_OP_REMAP_TRANSPEN_PRIORITY_ADDIIVE32(DEST, PRIORITY, SOURCE)					\
-do																					\
-{																					\
-	UINT32 srcdata = (SOURCE);														\
-	if (srcdata != transpen)														\
-	{																				\
-		if (((1 << ((PRIORITY) & 0x1f)) & pmask) == 0)								\
-		{																			\
-			UINT32 srcdata2 = paldata[srcdata];										\
+#define PIXEL_OP_REMAP_TRANSPEN_PRIORITY_ADDIIVE32(DEST, PRIORITY, SOURCE)                  \
+do                                                                                  \
+{                                                                                   \
+	UINT32 srcdata = (SOURCE);                                                      \
+	if (srcdata != transpen)                                                        \
+	{                                                                               \
+		if (((1 << ((PRIORITY) & 0x1f)) & pmask) == 0)                              \
+		{                                                                           \
+			UINT32 srcdata2 = paldata[srcdata];                                     \
 																					\
 			UINT32 add;                                                             \
 			add = (srcdata2 & 0x00ff0000) + (DEST & 0x00ff0000);                    \
@@ -85,32 +85,32 @@ do																					\
 			add = (srcdata2 & 0x0000ff00) + (DEST & 0x0000ff00);                    \
 			if (add & 0x00010000) DEST = (DEST & 0xffff00ff) | (0x0000ff00);        \
 			else DEST = (DEST & 0xffff00ff) | (add & 0x0000ff00);                   \
-		}																			\
-		(PRIORITY) = 31;															\
-	}																				\
-}																					\
-while (0)																			\
+		}                                                                           \
+		(PRIORITY) = 31;                                                            \
+	}                                                                               \
+}                                                                                   \
+while (0)                                                                           \
 
 
-static void pdrawgfx_transpen_additive(bitmap_t *dest, const rectangle *cliprect, const gfx_element *gfx,
+static void pdrawgfx_transpen_additive(bitmap_rgb32 &dest, const rectangle &cliprect, gfx_element *gfx,
 		UINT32 code, UINT32 color, int flipx, int flipy, INT32 destx, INT32 desty,
-		bitmap_t *priority, UINT32 pmask, UINT32 transpen)
+		bitmap_ind8 &priority, UINT32 pmask, UINT32 transpen)
 {
 	const pen_t *paldata;
 
-	assert(dest != NULL);
-	assert(dest->bpp == 32);
+	assert(dest.valid());
+	assert(dest.bpp() == 32);
 	assert(gfx != NULL);
 
 	/* get final code and color, and grab lookup tables */
-	code %= gfx->total_elements;
-	color %= gfx->total_colors;
-	paldata = &gfx->machine().pens[gfx->color_base + gfx->color_granularity * color];
+	code %= gfx->elements();
+	color %= gfx->colors();
+	paldata = &gfx->machine().pens[gfx->colorbase() + gfx->granularity() * color];
 
 	/* use pen usage to optimize */
-	if (gfx->pen_usage != NULL && !gfx->dirty[code])
+	if (gfx->has_pen_usage())
 	{
-		UINT32 usage = gfx->pen_usage[code];
+		UINT32 usage = gfx->pen_usage(code);
 
 		/* fully transparent; do nothing */
 		if ((usage & ~(1 << transpen)) == 0)
@@ -125,9 +125,9 @@ static void pdrawgfx_transpen_additive(bitmap_t *dest, const rectangle *cliprect
 }
 
 
-static void pdrawgfxzoom_transpen_additive(bitmap_t *dest, const rectangle *cliprect, const gfx_element *gfx,
+static void pdrawgfxzoom_transpen_additive(bitmap_rgb32 &dest, const rectangle &cliprect, gfx_element *gfx,
 		UINT32 code, UINT32 color, int flipx, int flipy, INT32 destx, INT32 desty,
-		UINT32 scalex, UINT32 scaley, bitmap_t *priority, UINT32 pmask,
+		UINT32 scalex, UINT32 scaley, bitmap_ind8 &priority, UINT32 pmask,
 		UINT32 transpen)
 {
 	const pen_t *paldata;
@@ -140,19 +140,19 @@ static void pdrawgfxzoom_transpen_additive(bitmap_t *dest, const rectangle *clip
 		return;
 	}
 
-	assert(dest != NULL);
-	assert(dest->bpp == 32);
+	assert(dest.valid());
+	assert(dest.bpp() == 32);
 	assert(gfx != NULL);
 
 	/* get final code and color, and grab lookup tables */
-	code %= gfx->total_elements;
-	color %= gfx->total_colors;
-	paldata = &gfx->machine().pens[gfx->color_base + gfx->color_granularity * color];
+	code %= gfx->elements();
+	color %= gfx->colors();
+	paldata = &gfx->machine().pens[gfx->colorbase() + gfx->granularity() * color];
 
 	/* use pen usage to optimize */
-	if (gfx->pen_usage != NULL && !gfx->dirty[code])
+	if (gfx->has_pen_usage())
 	{
-		UINT32 usage = gfx->pen_usage[code];
+		UINT32 usage = gfx->pen_usage(code);
 
 		/* fully transparent; do nothing */
 		if ((usage & ~(1 << transpen)) == 0)
@@ -207,10 +207,10 @@ static void pdrawgfxzoom_transpen_additive(bitmap_t *dest, const rectangle *clip
  * 0x0e0 in Samurai Shodown/Xrally games, 0x1c0 in all the others, zooming factor?
  */
 
-static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect)
+static void draw_sprites(running_machine &machine, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
 	hng64_state *state = machine.driver_data<hng64_state>();
-	const gfx_element *gfx;
+	gfx_element *gfx;
 	UINT32 *source = state->m_spriteram;
 	UINT32 *finish = state->m_spriteram + 0xc000/4;
 
@@ -310,7 +310,7 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 			pal&=0xf;
 		}
 
-		// Accomodate for chaining and flipping
+		// Accommodate for chaining and flipping
 		if(xflip)
 		{
 			xinc=-(int)(16.0f*foomX);
@@ -431,7 +431,7 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
  */
 
 /* this is broken for the 'How to Play' screen in Buriki after attract, disabled for now */
-static void transition_control(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect)
+static void transition_control(running_machine &machine, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
 	hng64_state *state = machine.driver_data<hng64_state>();
 	UINT32 *hng64_tcram = state->m_tcram;
@@ -455,11 +455,11 @@ static void transition_control(running_machine &machine, bitmap_t *bitmap, const
 		brigG = (INT32)((hng64_tcram[0x0000000a] >> 8)  & 0xff);
 		brigB = (INT32)((hng64_tcram[0x0000000a] >> 16) & 0xff);
 
-		for (i = cliprect->min_x; i < cliprect->max_x; i++)
+		for (i = cliprect.min_x; i < cliprect.max_x; i++)
 		{
-			for (j = cliprect->min_y; j < cliprect->max_y; j++)
+			for (j = cliprect.min_y; j < cliprect.max_y; j++)
 			{
-				UINT32* thePixel = BITMAP_ADDR32(bitmap, j, i);
+				UINT32* thePixel = &bitmap.pix32(j, i);
 
 				finR = (INT32)RGB_RED(*thePixel);
 				finG = (INT32)RGB_GREEN(*thePixel);
@@ -529,48 +529,47 @@ static void transition_control(running_machine &machine, bitmap_t *bitmap, const
 // pppppppp ff--atttt tttttttt tttttttt
 #define HNG64_GET_TILE_INFO                                                    \
 {                                                                              \
-	hng64_state *state = machine.driver_data<hng64_state>();                 \
-	UINT16 tilemapinfo = (state->m_videoregs[reg]>>shift)&0xffff;                 \
+	UINT16 tilemapinfo = (m_videoregs[reg]>>shift)&0xffff;                 \
 	int tileno,pal, flip;                                                      \
-                                                                               \
-	tileno = state->m_videoram[tile_index+(offset/4)];                            \
-                                                                               \
+																				\
+	tileno = m_videoram[tile_index+(offset/4)];                            \
+																				\
 	pal = (tileno&0xff000000)>>24;                                             \
 	flip =(tileno&0x00c00000)>>22;                                             \
-                                                                               \
+																				\
 	if (tileno&0x200000)                                                       \
 	{                                                                          \
-		tileno = (tileno & state->m_videoregs[0x0b]) | state->m_videoregs[0x0c];     \
+		tileno = (tileno & m_videoregs[0x0b]) | m_videoregs[0x0c];     \
 	}                                                                          \
-                                                                               \
+																				\
 	tileno &= 0x1fffff;                                                        \
-                                                                               \
+																				\
 	if (size==0)                                                               \
 	{                                                                          \
 		if (tilemapinfo&0x400)                                                 \
 		{                                                                      \
-			SET_TILE_INFO(1,tileno>>1,pal>>4,TILE_FLIPYX(flip));               \
+			SET_TILE_INFO_MEMBER(1,tileno>>1,pal>>4,TILE_FLIPYX(flip));               \
 		}                                                                      \
 		else                                                                   \
 		{                                                                      \
-			SET_TILE_INFO(0,tileno, pal,TILE_FLIPYX(flip));                    \
+			SET_TILE_INFO_MEMBER(0,tileno, pal,TILE_FLIPYX(flip));                    \
 		}                                                                      \
 	}                                                                          \
 	else                                                                       \
 	{                                                                          \
 		if (tilemapinfo&0x400)                                                 \
 		{                                                                      \
-			SET_TILE_INFO(3,tileno>>3,pal>>4,TILE_FLIPYX(flip));               \
+			SET_TILE_INFO_MEMBER(3,tileno>>3,pal>>4,TILE_FLIPYX(flip));               \
 		}                                                                      \
 		else                                                                   \
 		{                                                                      \
-			SET_TILE_INFO(2,tileno>>2, pal,TILE_FLIPYX(flip));                 \
+			SET_TILE_INFO_MEMBER(2,tileno>>2, pal,TILE_FLIPYX(flip));                 \
 		}                                                                      \
 	}                                                                          \
 }                                                                              \
-	                                                                           \
+																				\
 
-static TILE_GET_INFO( get_hng64_tile0_8x8_info )
+TILE_GET_INFO_MEMBER(hng64_state::get_hng64_tile0_8x8_info)
 {
 	int offset = 0x00000;
 	int size = 0;
@@ -580,7 +579,7 @@ static TILE_GET_INFO( get_hng64_tile0_8x8_info )
 	HNG64_GET_TILE_INFO
 }
 
-static TILE_GET_INFO( get_hng64_tile0_16x16_info )
+TILE_GET_INFO_MEMBER(hng64_state::get_hng64_tile0_16x16_info)
 {
 	int offset = 0x00000;
 	int size = 1;
@@ -590,7 +589,7 @@ static TILE_GET_INFO( get_hng64_tile0_16x16_info )
 	HNG64_GET_TILE_INFO
 }
 
-static TILE_GET_INFO( get_hng64_tile1_8x8_info )
+TILE_GET_INFO_MEMBER(hng64_state::get_hng64_tile1_8x8_info)
 {
 	int offset = 0x10000;
 	int size = 0;
@@ -600,7 +599,7 @@ static TILE_GET_INFO( get_hng64_tile1_8x8_info )
 	HNG64_GET_TILE_INFO
 }
 
-static TILE_GET_INFO( get_hng64_tile1_16x16_info )
+TILE_GET_INFO_MEMBER(hng64_state::get_hng64_tile1_16x16_info)
 {
 	int offset = 0x10000;
 	int size = 1;
@@ -610,7 +609,7 @@ static TILE_GET_INFO( get_hng64_tile1_16x16_info )
 	HNG64_GET_TILE_INFO
 }
 
-static TILE_GET_INFO( get_hng64_tile2_8x8_info )
+TILE_GET_INFO_MEMBER(hng64_state::get_hng64_tile2_8x8_info)
 {
 	int offset = 0x20000;
 	int size = 0;
@@ -620,7 +619,7 @@ static TILE_GET_INFO( get_hng64_tile2_8x8_info )
 	HNG64_GET_TILE_INFO
 }
 
-static TILE_GET_INFO( get_hng64_tile2_16x16_info )
+TILE_GET_INFO_MEMBER(hng64_state::get_hng64_tile2_16x16_info)
 {
 	int offset = 0x20000;
 	int size = 1;
@@ -630,7 +629,7 @@ static TILE_GET_INFO( get_hng64_tile2_16x16_info )
 	HNG64_GET_TILE_INFO
 }
 
-static TILE_GET_INFO( get_hng64_tile3_8x8_info )
+TILE_GET_INFO_MEMBER(hng64_state::get_hng64_tile3_8x8_info)
 {
 	int offset = 0x30000;
 	int size = 0;
@@ -640,7 +639,7 @@ static TILE_GET_INFO( get_hng64_tile3_8x8_info )
 	HNG64_GET_TILE_INFO
 }
 
-static TILE_GET_INFO( get_hng64_tile3_16x16_info )
+TILE_GET_INFO_MEMBER(hng64_state::get_hng64_tile3_16x16_info)
 {
 	int offset = 0x30000;
 	int size = 1;
@@ -651,12 +650,11 @@ static TILE_GET_INFO( get_hng64_tile3_16x16_info )
 }
 
 
-WRITE32_HANDLER( hng64_videoram_w )
+WRITE32_MEMBER(hng64_state::hng64_videoram_w)
 {
-	hng64_state *state = space->machine().driver_data<hng64_state>();
 	int realoff;
-
-	COMBINE_DATA(&state->m_videoram[offset]);
+	hng64_state *state = machine().driver_data<hng64_state>();
+	COMBINE_DATA(&m_videoram[offset]);
 
 	realoff = offset*4;
 
@@ -683,47 +681,37 @@ WRITE32_HANDLER( hng64_videoram_w )
 }
 
 /* internal set of transparency states for rendering */
-typedef enum
+enum hng64trans_t
 {
 	HNG64_TILEMAP_NORMAL = 1,
 	HNG64_TILEMAP_ADDITIVE,
 	HNG64_TILEMAP_ALPHA
-} hng64trans_t;
+};
 
 
-typedef struct _blit_parameters blit_parameters;
-struct _blit_parameters
+struct blit_parameters
 {
-	bitmap_t *			bitmap;
-	rectangle			cliprect;
-	UINT32				tilemap_priority_code;
-	UINT8				mask;
-	UINT8				value;
-	UINT8				alpha;
-	hng64trans_t		drawformat;
+	bitmap_rgb32 *          bitmap;
+	rectangle           cliprect;
+	UINT32              tilemap_priority_code;
+	UINT8               mask;
+	UINT8               value;
+	UINT8               alpha;
+	hng64trans_t        drawformat;
 };
 
 
 
-static void hng64_configure_blit_parameters(blit_parameters *blit, tilemap_t *tmap, bitmap_t *dest, const rectangle *cliprect, UINT32 flags, UINT8 priority, UINT8 priority_mask, hng64trans_t drawformat)
+static void hng64_configure_blit_parameters(blit_parameters *blit, tilemap_t *tmap, bitmap_rgb32 &dest, const rectangle &cliprect, UINT32 flags, UINT8 priority, UINT8 priority_mask, hng64trans_t drawformat)
 {
 	/* start with nothing */
 	memset(blit, 0, sizeof(*blit));
 
 	/* set the target bitmap */
-	blit->bitmap = dest;
+	blit->bitmap = &dest;
 
 	/* if we have a cliprect, copy */
-	if (cliprect != NULL)
-		blit->cliprect = *cliprect;
-
-	/* otherwise, make one up */
-	else
-	{
-		blit->cliprect.min_x = blit->cliprect.min_y = 0;
-		blit->cliprect.max_x = dest->width - 1;
-		blit->cliprect.max_y = dest->height - 1;
-	}
+	blit->cliprect = cliprect;
 
 	/* set the priority code and alpha */
 	//blit->tilemap_priority_code = priority | (priority_mask << 8) | (tmap->palette_offset << 16); // fixit
@@ -733,7 +721,7 @@ static void hng64_configure_blit_parameters(blit_parameters *blit, tilemap_t *tm
 
 	/* tile priority; unless otherwise specified, draw anything in layer 0 */
 	blit->mask = TILEMAP_PIXEL_CATEGORY_MASK;
-	blit->value	= flags & TILEMAP_PIXEL_CATEGORY_MASK;
+	blit->value = flags & TILEMAP_PIXEL_CATEGORY_MASK;
 
 	/* if no layers specified, draw layer 0 */
 	if ((flags & (TILEMAP_DRAW_LAYER0 | TILEMAP_DRAW_LAYER1 | TILEMAP_DRAW_LAYER2)) == 0)
@@ -780,28 +768,28 @@ INLINE UINT32 alpha_additive_r32(UINT32 d, UINT32 s, UINT8 level)
     and zoom
 -------------------------------------------------*/
 
-#define HNG64_ROZ_PLOT_PIXEL(INPUT_VAL)											        \
-do {																		        \
-	if (blit->drawformat == HNG64_TILEMAP_NORMAL)									\
-		*(UINT32 *)dest = clut[INPUT_VAL];									        \
-	else if (blit->drawformat == HNG64_TILEMAP_ADDITIVE)			                \
-		*(UINT32 *)dest = alpha_additive_r32(*(UINT32 *)dest, clut[INPUT_VAL], alpha);	\
-	else if (blit->drawformat == HNG64_TILEMAP_ALPHA)		                        \
-		*(UINT32 *)dest = alpha_blend_r32(*(UINT32 *)dest, clut[INPUT_VAL], alpha);	\
+#define HNG64_ROZ_PLOT_PIXEL(INPUT_VAL)                                                 \
+do {                                                                                \
+	if (blit->drawformat == HNG64_TILEMAP_NORMAL)                                   \
+		*(UINT32 *)dest = clut[INPUT_VAL];                                          \
+	else if (blit->drawformat == HNG64_TILEMAP_ADDITIVE)                            \
+		*(UINT32 *)dest = alpha_additive_r32(*(UINT32 *)dest, clut[INPUT_VAL], alpha);  \
+	else if (blit->drawformat == HNG64_TILEMAP_ALPHA)                               \
+		*(UINT32 *)dest = alpha_blend_r32(*(UINT32 *)dest, clut[INPUT_VAL], alpha); \
 } while (0)
 
 static void hng64_tilemap_draw_roz_core(running_machine& machine, tilemap_t *tmap, const blit_parameters *blit,
 		UINT32 startx, UINT32 starty, int incxx, int incxy, int incyx, int incyy, int wraparound)
 {
 	const pen_t *clut = &machine.pens[blit->tilemap_priority_code >> 16];
-	bitmap_t *priority_bitmap = machine.priority_bitmap;
-	bitmap_t *destbitmap = blit->bitmap;
-	bitmap_t *srcbitmap = tilemap_get_pixmap(tmap);
-	bitmap_t *flagsmap = tilemap_get_flagsmap(tmap);
-	const int xmask = srcbitmap->width-1;
-	const int ymask = srcbitmap->height-1;
-	const int widthshifted = srcbitmap->width << 16;
-	const int heightshifted = srcbitmap->height << 16;
+	bitmap_ind8 &priority_bitmap = machine.priority_bitmap;
+	bitmap_rgb32 &destbitmap = *blit->bitmap;
+	bitmap_ind16 &srcbitmap = tmap->pixmap();
+	bitmap_ind8 &flagsmap = tmap->flagsmap();
+	const int xmask = srcbitmap.width()-1;
+	const int ymask = srcbitmap.height()-1;
+	const int widthshifted = srcbitmap.width() << 16;
+	const int heightshifted = srcbitmap.height() << 16;
 	UINT32 priority = blit->tilemap_priority_code;
 	UINT8 mask = blit->mask;
 	UINT8 value = blit->value;
@@ -813,11 +801,10 @@ static void hng64_tilemap_draw_roz_core(running_machine& machine, tilemap_t *tma
 	int sy;
 	int ex;
 	int ey;
-	void *dest;
+	UINT32 *dest;
 	UINT8 *pri;
 	const UINT16 *src;
 	const UINT8 *maskptr;
-	int destadvance = destbitmap->bpp / 8;
 
 	/* pre-advance based on the cliprect */
 	startx += blit->cliprect.min_x * incxx + blit->cliprect.min_y * incyx;
@@ -855,10 +842,10 @@ static void hng64_tilemap_draw_roz_core(running_machine& machine, tilemap_t *tma
 				cy = starty >> 16;
 
 				/* get source and priority pointers */
-				pri = BITMAP_ADDR8(priority_bitmap, sy, sx);
-				src = BITMAP_ADDR16(srcbitmap, cy, 0);
-				maskptr = BITMAP_ADDR8(flagsmap, cy, 0);
-				dest = (UINT8 *)destbitmap->base + (destbitmap->rowpixels * sy + sx) * destadvance;
+				pri = &priority_bitmap.pix8(sy, sx);
+				src = &srcbitmap.pix16(cy);
+				maskptr = &flagsmap.pix8(cy);
+				dest = &destbitmap.pix32(sy, sx);
 
 				/* loop over columns */
 				while (x <= ex && cx < widthshifted)
@@ -873,7 +860,7 @@ static void hng64_tilemap_draw_roz_core(running_machine& machine, tilemap_t *tma
 					/* advance in X */
 					cx += incxx;
 					x++;
-					dest = (UINT8 *)dest + destadvance;
+					dest++;
 					pri++;
 				}
 			}
@@ -896,16 +883,16 @@ static void hng64_tilemap_draw_roz_core(running_machine& machine, tilemap_t *tma
 			cy = starty;
 
 			/* get dest and priority pointers */
-			dest = (UINT8 *)destbitmap->base + (destbitmap->rowpixels * sy + sx) * destadvance;
-			pri = BITMAP_ADDR8(priority_bitmap, sy, sx);
+			dest = &destbitmap.pix32(sy, sx);
+			pri = &priority_bitmap.pix8(sy, sx);
 
 			/* loop over columns */
 			while (x <= ex)
 			{
 				/* plot if we match the mask */
-				if ((*BITMAP_ADDR8(flagsmap, (cy >> 16) & ymask, (cx >> 16) & xmask) & mask) == value)
+				if ((flagsmap.pix8((cy >> 16) & ymask, (cx >> 16) & xmask) & mask) == value)
 				{
-					HNG64_ROZ_PLOT_PIXEL(*BITMAP_ADDR16(srcbitmap, (cy >> 16) & ymask, (cx >> 16) & xmask));
+					HNG64_ROZ_PLOT_PIXEL(srcbitmap.pix16((cy >> 16) & ymask, (cx >> 16) & xmask));
 					*pri = (*pri & (priority >> 8)) | priority;
 				}
 
@@ -913,7 +900,7 @@ static void hng64_tilemap_draw_roz_core(running_machine& machine, tilemap_t *tma
 				cx += incxx;
 				cy += incxy;
 				x++;
-				dest = (UINT8 *)dest + destadvance;
+				dest++;
 				pri++;
 			}
 
@@ -936,17 +923,17 @@ static void hng64_tilemap_draw_roz_core(running_machine& machine, tilemap_t *tma
 			cy = starty;
 
 			/* get dest and priority pointers */
-			dest = (UINT8 *)destbitmap->base + (destbitmap->rowpixels * sy + sx) * destadvance;
-			pri = BITMAP_ADDR8(priority_bitmap, sy, sx);
+			dest = &destbitmap.pix32(sy, sx);
+			pri = &priority_bitmap.pix8(sy, sx);
 
 			/* loop over columns */
 			while (x <= ex)
 			{
 				/* plot if we're within the bitmap and we match the mask */
 				if (cx < widthshifted && cy < heightshifted)
-					if ((*BITMAP_ADDR8(flagsmap, cy >> 16, cx >> 16) & mask) == value)
+					if ((flagsmap.pix8(cy >> 16, cx >> 16) & mask) == value)
 					{
-						HNG64_ROZ_PLOT_PIXEL(*BITMAP_ADDR16(srcbitmap, cy >> 16, cx >> 16));
+						HNG64_ROZ_PLOT_PIXEL(srcbitmap.pix16(cy >> 16, cx >> 16));
 						*pri = (*pri & (priority >> 8)) | priority;
 					}
 
@@ -954,7 +941,7 @@ static void hng64_tilemap_draw_roz_core(running_machine& machine, tilemap_t *tma
 				cx += incxx;
 				cy += incxy;
 				x++;
-				dest = (UINT8 *)dest + destadvance;
+				dest++;
 				pri++;
 			}
 
@@ -968,7 +955,7 @@ static void hng64_tilemap_draw_roz_core(running_machine& machine, tilemap_t *tma
 
 
 
-static void hng64_tilemap_draw_roz_primask(running_machine& machine, bitmap_t *dest, const rectangle *cliprect, tilemap_t *tmap,
+static void hng64_tilemap_draw_roz_primask(running_machine& machine, bitmap_rgb32 &dest, const rectangle &cliprect, tilemap_t *tmap,
 		UINT32 startx, UINT32 starty, int incxx, int incxy, int incyx, int incyy,
 		int wraparound, UINT32 flags, UINT8 priority, UINT8 priority_mask, hng64trans_t drawformat)
 {
@@ -988,7 +975,7 @@ g_profiler.start(PROFILER_TILEMAP_DRAW_ROZ);
 	hng64_configure_blit_parameters(&blit, tmap, dest, cliprect, flags, priority, priority_mask, drawformat);
 
 	/* get the full pixmap for the tilemap */
-	tilemap_get_pixmap(tmap);
+	tmap->pixmap();
 
 	/* then do the roz copy */
 	hng64_tilemap_draw_roz_core(machine, tmap, &blit, startx, starty, incxx, incxy, incyx, incyy, wraparound);
@@ -996,7 +983,7 @@ g_profiler.stop();
 }
 
 
-INLINE void hng64_tilemap_draw_roz(running_machine& machine, bitmap_t *dest, const rectangle *cliprect, tilemap_t *tmap,
+INLINE void hng64_tilemap_draw_roz(running_machine& machine, bitmap_rgb32 &dest, const rectangle &cliprect, tilemap_t *tmap,
 		UINT32 startx, UINT32 starty, int incxx, int incxy, int incyx, int incyy,
 		int wraparound, UINT32 flags, UINT8 priority, hng64trans_t drawformat)
 {
@@ -1005,7 +992,7 @@ INLINE void hng64_tilemap_draw_roz(running_machine& machine, bitmap_t *dest, con
 
 
 
-static void hng64_drawtilemap(running_machine& machine, bitmap_t *bitmap, const rectangle *cliprect, int tm )
+static void hng64_drawtilemap(running_machine& machine, bitmap_rgb32 &bitmap, const rectangle &cliprect, int tm )
 {
 	hng64_state *state = machine.driver_data<hng64_state>();
 	UINT32 *hng64_videoregs = state->m_videoregs;
@@ -1033,12 +1020,12 @@ static void hng64_drawtilemap(running_machine& machine, bitmap_t *bitmap, const 
 
 		if (global_dimensions==0)
 		{
-			if (tileregs&0x0200)	tilemap = state->m_tilemap0_16x16;
+			if (tileregs&0x0200)    tilemap = state->m_tilemap0_16x16;
 			else tilemap = state->m_tilemap0_8x8;
 		}
 		else
 		{
-			if (tileregs&0x0200)	tilemap = state->m_tilemap0_16x16_alt;
+			if (tileregs&0x0200)    tilemap = state->m_tilemap0_16x16_alt;
 			else tilemap = state->m_tilemap0_8x8; // _alt
 		}
 	}
@@ -1049,12 +1036,12 @@ static void hng64_drawtilemap(running_machine& machine, bitmap_t *bitmap, const 
 
 		if (global_dimensions==0)
 		{
-			if (tileregs&0x0200)	tilemap = state->m_tilemap1_16x16;
+			if (tileregs&0x0200)    tilemap = state->m_tilemap1_16x16;
 			else tilemap = state->m_tilemap1_8x8;
 		}
 		else
 		{
-			if (tileregs&0x0200)	tilemap = state->m_tilemap1_16x16_alt;
+			if (tileregs&0x0200)    tilemap = state->m_tilemap1_16x16_alt;
 			else tilemap = state->m_tilemap1_8x8; // _alt
 		}
 	}
@@ -1065,12 +1052,12 @@ static void hng64_drawtilemap(running_machine& machine, bitmap_t *bitmap, const 
 
 		if (global_dimensions==0)
 		{
-			if (tileregs&0x0200)	tilemap = state->m_tilemap2_16x16;
+			if (tileregs&0x0200)    tilemap = state->m_tilemap2_16x16;
 			else tilemap = state->m_tilemap2_8x8;
 		}
 		else
 		{
-			if (tileregs&0x0200)	tilemap = state->m_tilemap2_16x16_alt;
+			if (tileregs&0x0200)    tilemap = state->m_tilemap2_16x16_alt;
 			else tilemap = state->m_tilemap2_8x8; // _alt
 		}
 	}
@@ -1081,12 +1068,12 @@ static void hng64_drawtilemap(running_machine& machine, bitmap_t *bitmap, const 
 
 		if (global_dimensions==0)
 		{
-			if (tileregs&0x0200)	tilemap = state->m_tilemap3_16x16;
+			if (tileregs&0x0200)    tilemap = state->m_tilemap3_16x16;
 			else tilemap = state->m_tilemap3_8x8;
 		}
 		else
 		{
-			if (tileregs&0x0200)	tilemap = state->m_tilemap3_16x16_alt;
+			if (tileregs&0x0200)    tilemap = state->m_tilemap3_16x16_alt;
 			else tilemap = state->m_tilemap3_8x8; // _alt
 		}
 	}
@@ -1107,8 +1094,8 @@ static void hng64_drawtilemap(running_machine& machine, bitmap_t *bitmap, const 
 	if ((tileregs & 0x0800)==0x0000) // floor mode
 	{
 		/* Floor mode - per pixel simple / complex modes? -- every other line?
-          (there doesn't seem to be enough data in Buriki for every line at least)
-        */
+		  (there doesn't seem to be enough data in Buriki for every line at least)
+		*/
 		//if ((tileregs&0xf000) == 0x1000)
 		//{
 		//  popmessage("Floor is Active");
@@ -1120,26 +1107,23 @@ static void hng64_drawtilemap(running_machine& machine, bitmap_t *bitmap, const 
 		int xinc,yinc;
 
 		const rectangle &visarea = machine.primary_screen->visible_area();
-		clip.min_x = visarea.min_x;
-		clip.max_x = visarea.max_x;
-		clip.min_y = visarea.min_y;
-		clip.max_y = visarea.max_y;
+		clip = visarea;
 
 		if (global_tileregs&0x04000000) // globally selects alt scroll register layout???
 		{
 			/* logic would dictate that this should be the 'complex' scroll register layout,
-               but per-line.  That doesn't work however.
+			   but per-line.  That doesn't work however.
 
-               You only have line data for the number of lines on the screen, not enough for
-               the complex register layout
+			   You only have line data for the number of lines on the screen, not enough for
+			   the complex register layout
 
-               HOWEVER, using the code below doesn't work either.  This might be because
-               they have mosaic turned on, and it adopts a new meaning in linescroll modes?
+			   HOWEVER, using the code below doesn't work either.  This might be because
+			   they have mosaic turned on, and it adopts a new meaning in linescroll modes?
 
-               The code below could also be wrong, and rowscroll simply acts the same in all
-               modes, this is hard to know because ss64_2 barely uses it.
+			   The code below could also be wrong, and rowscroll simply acts the same in all
+			   modes, this is hard to know because ss64_2 barely uses it.
 
-            */
+			*/
 
 			popmessage("Unhandled rowscroll %02x", tileregs>>12);
 		}
@@ -1152,9 +1136,9 @@ static void hng64_drawtilemap(running_machine& machine, bitmap_t *bitmap, const 
 				if (hng64_videoregs[0x00]&0x00010000) // disable all scrolling / zoom (test screen) (maybe)
 				{
 					/* If this bit is active the scroll registers don't seem valid at all?
-                       It either disables zooming, or disables use of the scroll registers completely
-                       - used at startup
-                   */
+					   It either disables zooming, or disables use of the scroll registers completely
+					   - used at startup
+					*/
 
 					xtopleft = 0;
 					xmiddle = 256<<16;
@@ -1173,7 +1157,7 @@ static void hng64_drawtilemap(running_machine& machine, bitmap_t *bitmap, const 
 				xinc = (xmiddle - xtopleft) / 512;
 				yinc = (ymiddle - ytopleft) / 512;
 
-				hng64_tilemap_draw_roz(machine, bitmap,&clip,tilemap,xtopleft,ytopleft,
+				hng64_tilemap_draw_roz(machine, bitmap,clip,tilemap,xtopleft,ytopleft,
 						xinc<<1,0,0,yinc<<1,
 						1,
 						0,0, debug_blend_enabled?HNG64_TILEMAP_ADDITIVE:HNG64_TILEMAP_NORMAL);
@@ -1192,17 +1176,17 @@ static void hng64_drawtilemap(running_machine& machine, bitmap_t *bitmap, const 
 		{
 			/* complex zoom mode? */
 			/* with this scroll register layout rotation effects are possible
-               the most obvious use of rotation is the Buriki One logo after
-               attract mode; the text around the outside of the logo is rotated
-               onto the screen
+			   the most obvious use of rotation is the Buriki One logo after
+			   attract mode; the text around the outside of the logo is rotated
+			   onto the screen
 
-               see 1:32 in http://www.youtube.com/watch?v=PoYaHOILuGs
+			   see 1:32 in http://www.youtube.com/watch?v=PoYaHOILuGs
 
-               Xtreme Rally seems to have an issue with this mode on the communication check
-               screen at startup, but according to videos that should scroll, and no scroll
-               values are updated, so it might be an unrelated bug.
+			   Xtreme Rally seems to have an issue with this mode on the communication check
+			   screen at startup, but according to videos that should scroll, and no scroll
+			   values are updated, so it might be an unrelated bug.
 
-            */
+			*/
 
 			INT32 xtopleft,xmiddle, xalt;
 			INT32 ytopleft,ymiddle, yalt;
@@ -1240,9 +1224,9 @@ static void hng64_drawtilemap(running_machine& machine, bitmap_t *bitmap, const 
 			/* manual copy = slooow */
 			if (MAKE_MAME_REEEEAAALLLL_SLOW)
 			{
-				bitmap_t *bm = tilemap_get_pixmap(tilemap);
-				int bmheight = bm->height;
-				int bmwidth = bm->width;
+				bitmap_ind16 &bm = tilemap->pixmap();
+				int bmheight = bm.height();
+				int bmwidth = bm.width();
 				const pen_t *paldata = machine.pens;
 				UINT32* dstptr;
 				UINT16* srcptr;
@@ -1256,7 +1240,7 @@ static void hng64_drawtilemap(running_machine& machine, bitmap_t *bitmap, const 
 				for (yy=0;yy<448;yy++)
 				{
 
-					dstptr = BITMAP_ADDR32(bitmap,yy,0);
+					dstptr = &bitmap.pix32(yy);
 
 					tmp = xtopleft;
 					tmp2 = ytopleft;
@@ -1267,7 +1251,7 @@ static void hng64_drawtilemap(running_machine& machine, bitmap_t *bitmap, const 
 						int realsrcy = (ytopleft>>16)&(bmheight-1);
 						UINT16 pen;
 
-						srcptr = BITMAP_ADDR16(bm, realsrcy, 0);
+						srcptr = &bm.pix16(realsrcy);
 
 						pen = srcptr[realsrcx];
 
@@ -1296,7 +1280,7 @@ static void hng64_drawtilemap(running_machine& machine, bitmap_t *bitmap, const 
 		{
 			/* simple zoom mode? - only 4 regs? */
 			/* in this mode they can only specify the top left and middle screen points for each tilemap,
-               this allows simple zooming, but not rotation */
+			   this allows simple zooming, but not rotation */
 
 			INT32 xtopleft,xmiddle;
 			INT32 ytopleft,ymiddle;
@@ -1313,9 +1297,9 @@ static void hng64_drawtilemap(running_machine& machine, bitmap_t *bitmap, const 
 			if (hng64_videoregs[0x00]&0x00010000) // disable all scrolling / zoom (test screen) (maybe)
 			{
 				/* If this bit is active the scroll registers don't seem valid at all?
-                   It either disables zooming, or disables use of the scroll registers completely
-                   - used at startup
-               */
+				   It either disables zooming, or disables use of the scroll registers completely
+				   - used at startup
+				*/
 
 				xtopleft = 0;
 				xmiddle = 256<<16;
@@ -1338,9 +1322,9 @@ static void hng64_drawtilemap(running_machine& machine, bitmap_t *bitmap, const 
 			/* manual copy = slooow */
 			if (MAKE_MAME_REEEEAAALLLL_SLOW)
 			{
-				bitmap_t *bm = tilemap_get_pixmap(tilemap);
-				int bmheight = bm->height;
-				int bmwidth = bm->width;
+				bitmap_ind16 &bm = tilemap->pixmap();
+				int bmheight = bm.height();
+				int bmwidth = bm.width();
 				const pen_t *paldata = machine.pens;
 				UINT32* dstptr;
 				UINT16* srcptr;
@@ -1354,8 +1338,8 @@ static void hng64_drawtilemap(running_machine& machine, bitmap_t *bitmap, const 
 				{
 					int realsrcy = (ytopleft>>16)&(bmheight-1);
 
-					dstptr = BITMAP_ADDR32(bitmap,yy,0);
-					srcptr = BITMAP_ADDR16(bm, realsrcy, 0);
+					dstptr = &bitmap.pix32(yy);
+					srcptr = &bm.pix16(realsrcy);
 
 					xtopleft = tmp;
 
@@ -1446,12 +1430,11 @@ static void hng64_drawtilemap(running_machine& machine, bitmap_t *bitmap, const 
 
 #define IMPORTANT_DIRTY_TILEFLAG_MASK (0x0600)
 
-SCREEN_UPDATE( hng64 )
+UINT32 hng64_state::screen_update_hng64(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	hng64_state *state = screen->machine().driver_data<hng64_state>();
-	UINT32 *hng64_videoregs = state->m_videoregs;
-	UINT32 *hng64_videoram = state->m_videoram;
-	UINT32 *hng64_tcram = state->m_tcram;
+	UINT32 *hng64_videoregs = m_videoregs;
+	UINT32 *hng64_videoram = m_videoram;
+	UINT32 *hng64_tcram = m_tcram;
 	UINT32 animmask;
 	UINT32 animbits;
 	UINT16 tileflags0, tileflags1;
@@ -1461,17 +1444,17 @@ SCREEN_UPDATE( hng64 )
 	// press in sams64_2 attract mode for a nice debug screen from the game
 	// not sure how functional it is, and it doesn't appear to test everything (rowscroll modes etc.)
 	// but it could be useful
-	if ( input_code_pressed_once(screen->machine(), KEYCODE_L) )
+	if ( machine().input().code_pressed_once(KEYCODE_L) )
 	{
-		address_space *space = screen->machine().device("maincpu")->memory().space(AS_PROGRAM);
-		space->write_byte(0x2f27c8, 0x2);
+		address_space &space = machine().device("maincpu")->memory().space(AS_PROGRAM);
+		space.write_byte(0x2f27c8, 0x2);
 	}
 #endif
 
-	bitmap_fill(bitmap, 0, hng64_tcram[0x50/4] & 0x10000 ? get_black_pen(screen->machine()) : screen->machine().pens[0]); //FIXME: Is the register correct? check with HW tests
-	bitmap_fill(screen->machine().priority_bitmap, cliprect, 0x00);
+	bitmap.fill(hng64_tcram[0x50/4] & 0x10000 ? get_black_pen(machine()) : machine().pens[0], cliprect); //FIXME: Is the register correct? check with HW tests
+	machine().priority_bitmap.fill(0x00, cliprect);
 
-	if (state->m_screen_dis)
+	if (m_screen_dis)
 		return 0;
 
 	animmask = hng64_videoregs[0x0b];
@@ -1482,81 +1465,79 @@ SCREEN_UPDATE( hng64 )
 	tileflags3 = hng64_videoregs[0x03]&0xffff;
 
 	/* if the auto-animation mask or bits have changed search for tiles using them and mark as dirty */
-	if ((state->m_old_animmask != animmask) || (state->m_old_animbits != animbits))
+	if ((m_old_animmask != animmask) || (m_old_animbits != animbits))
 	{
 		int tile_index;
 		for (tile_index=0;tile_index<128*128;tile_index++)
 		{
 			if (hng64_videoram[tile_index+(0x00000/4)]&0x200000)
 			{
-				hng64_mark_tile_dirty(state, 0, tile_index);
+				hng64_mark_tile_dirty(this, 0, tile_index);
 			}
 			if (hng64_videoram[tile_index+(0x10000/4)]&0x200000)
 			{
-				hng64_mark_tile_dirty(state, 1, tile_index);
+				hng64_mark_tile_dirty(this, 1, tile_index);
 			}
 			if (hng64_videoram[tile_index+(0x20000/4)]&0x200000)
 			{
-				hng64_mark_tile_dirty(state, 2, tile_index);
+				hng64_mark_tile_dirty(this, 2, tile_index);
 			}
 			if (hng64_videoram[tile_index+(0x30000/4)]&0x200000)
 			{
-				hng64_mark_tile_dirty(state, 3, tile_index);
+				hng64_mark_tile_dirty(this, 3, tile_index);
 			}
 		}
 
-		state->m_old_animmask = animmask;
-		state->m_old_animbits = animbits;
+		m_old_animmask = animmask;
+		m_old_animbits = animbits;
 	}
 
-	if ((state->m_old_tileflags0&IMPORTANT_DIRTY_TILEFLAG_MASK)!=(tileflags0&IMPORTANT_DIRTY_TILEFLAG_MASK))
+	if ((m_old_tileflags0&IMPORTANT_DIRTY_TILEFLAG_MASK)!=(tileflags0&IMPORTANT_DIRTY_TILEFLAG_MASK))
 	{
-		hng64_mark_all_tiles_dirty(state, 0);
-		state->m_old_tileflags0 = tileflags0;
+		hng64_mark_all_tiles_dirty(this, 0);
+		m_old_tileflags0 = tileflags0;
 	}
 
-	if ((state->m_old_tileflags1&IMPORTANT_DIRTY_TILEFLAG_MASK)!=(tileflags1&IMPORTANT_DIRTY_TILEFLAG_MASK))
+	if ((m_old_tileflags1&IMPORTANT_DIRTY_TILEFLAG_MASK)!=(tileflags1&IMPORTANT_DIRTY_TILEFLAG_MASK))
 	{
-		hng64_mark_all_tiles_dirty(state, 1);
-		state->m_old_tileflags1 = tileflags1;
+		hng64_mark_all_tiles_dirty(this, 1);
+		m_old_tileflags1 = tileflags1;
 	}
 
-	if ((state->m_old_tileflags2&IMPORTANT_DIRTY_TILEFLAG_MASK)!=(tileflags2&IMPORTANT_DIRTY_TILEFLAG_MASK))
+	if ((m_old_tileflags2&IMPORTANT_DIRTY_TILEFLAG_MASK)!=(tileflags2&IMPORTANT_DIRTY_TILEFLAG_MASK))
 	{
-		hng64_mark_all_tiles_dirty(state, 2);
-		state->m_old_tileflags2 = tileflags2;
+		hng64_mark_all_tiles_dirty(this, 2);
+		m_old_tileflags2 = tileflags2;
 	}
 
-	if ((state->m_old_tileflags3&IMPORTANT_DIRTY_TILEFLAG_MASK)!=(tileflags3&IMPORTANT_DIRTY_TILEFLAG_MASK))
+	if ((m_old_tileflags3&IMPORTANT_DIRTY_TILEFLAG_MASK)!=(tileflags3&IMPORTANT_DIRTY_TILEFLAG_MASK))
 	{
-		hng64_mark_all_tiles_dirty(state, 3);
-		state->m_old_tileflags3 = tileflags3;
+		hng64_mark_all_tiles_dirty(this, 3);
+		m_old_tileflags3 = tileflags3;
 	}
 
 	// mark all frames as dirty if for some reason we don't trust the above code
-	//hng64_mark_all_tiles_dirty(state, 0);
-	//hng64_mark_all_tiles_dirty(state, 1);
-	//hng64_mark_all_tiles_dirty(state, 2);
-	//hng64_mark_all_tiles_dirty(state, 3);
+	//hng64_mark_all_tiles_dirty(this, 0);
+	//hng64_mark_all_tiles_dirty(this, 1);
+	//hng64_mark_all_tiles_dirty(this, 2);
+	//hng64_mark_all_tiles_dirty(this, 3);
 
-	hng64_drawtilemap(screen->machine(),bitmap,cliprect, 3);
-	hng64_drawtilemap(screen->machine(),bitmap,cliprect, 2);
-	hng64_drawtilemap(screen->machine(),bitmap,cliprect, 1);
-	hng64_drawtilemap(screen->machine(),bitmap,cliprect, 0);
-
-	draw_sprites(screen->machine(), bitmap,cliprect);
+	hng64_drawtilemap(machine(),bitmap,cliprect, 3);
+	hng64_drawtilemap(machine(),bitmap,cliprect, 2);
+	hng64_drawtilemap(machine(),bitmap,cliprect, 1);
+	hng64_drawtilemap(machine(),bitmap,cliprect, 0);
 
 	// 3d really shouldn't be last, but you don't see some cool stuff right now if it's put before sprites.
 	{
 		int x, y;
 
 		// Blit the color buffer into the primary bitmap
-		for (y = cliprect->min_y; y <= cliprect->max_y; y++)
+		for (y = cliprect.min_y; y <= cliprect.max_y; y++)
 		{
-			UINT32 *src = &state->m_colorBuffer3d[y * (cliprect->max_x-cliprect->min_x)];
-			UINT32 *dst = BITMAP_ADDR32(bitmap, y, cliprect->min_x);
+			UINT32 *src = &m_colorBuffer3d[y * cliprect.max_x];
+			UINT32 *dst = &bitmap.pix32(y, cliprect.min_x);
 
-			for (x = cliprect->min_x; x <= cliprect->max_x; x++)
+			for (x = cliprect.min_x; x <= cliprect.max_x; x++)
 			{
 				if(*src & 0xff000000)
 					*dst = *src;
@@ -1566,19 +1547,20 @@ SCREEN_UPDATE( hng64 )
 			}
 		}
 		//printf("NEW FRAME!\n");   /* Debug - ajg */
-		clear3d(screen->machine());
 	}
 
+	draw_sprites(machine(), bitmap,cliprect);
+
 	if(0)
-		transition_control(screen->machine(), bitmap, cliprect);
+		transition_control(machine(), bitmap, cliprect);
 
 	if (0)
-		popmessage("%08x %08x %08x %08x %08x", state->m_spriteregs[0], state->m_spriteregs[1], state->m_spriteregs[2], state->m_spriteregs[3], state->m_spriteregs[4]);
+		popmessage("%08x %08x %08x %08x %08x", m_spriteregs[0], m_spriteregs[1], m_spriteregs[2], m_spriteregs[3], m_spriteregs[4]);
 
 	if (0)
 	popmessage("%08x %08x TR(%04x %04x %04x %04x) SB(%04x %04x %04x %04x) %08x %08x %08x %08x %08x AA(%08x %08x) %08x %08x",
-	 hng64_videoregs[0x00],
-	 hng64_videoregs[0x01],
+		hng64_videoregs[0x00],
+		hng64_videoregs[0x01],
 	(hng64_videoregs[0x02]>>16)&0xf9ff, // ----  bits we're sure about are masked out
 	(hng64_videoregs[0x02]>>0)&0xf9ff,  //  ss64_2 debug mode indicates that 0x0040 is enable!
 	(hng64_videoregs[0x03]>>16)&0xf9ff, //   buriki agrees (debug data on text layer) xrally agress (pink layer)
@@ -1587,21 +1569,21 @@ SCREEN_UPDATE( hng64 )
 	(hng64_videoregs[0x04]>>0)&0xffff,
 	(hng64_videoregs[0x05]>>16)&0xffff,
 	(hng64_videoregs[0x05]>>0)&0xffff,
-	 hng64_videoregs[0x06],
-	 hng64_videoregs[0x07],
-	 hng64_videoregs[0x08],
-	 hng64_videoregs[0x09],
-	 hng64_videoregs[0x0a],
-	 hng64_videoregs[0x0b],
-	 hng64_videoregs[0x0c],
-	 hng64_videoregs[0x0d],
-	 hng64_videoregs[0x0e]);
+		hng64_videoregs[0x06],
+		hng64_videoregs[0x07],
+		hng64_videoregs[0x08],
+		hng64_videoregs[0x09],
+		hng64_videoregs[0x0a],
+		hng64_videoregs[0x0b],
+		hng64_videoregs[0x0c],
+		hng64_videoregs[0x0d],
+		hng64_videoregs[0x0e]);
 
 	if (0)
 	popmessage("3D: %08x %08x %08x %08x : %08x %08x %08x %08x : %08x %08x %08x %08x",
-		state->m_3dregs[0x00/4], state->m_3dregs[0x04/4], state->m_3dregs[0x08/4], state->m_3dregs[0x0c/4],
-		state->m_3dregs[0x10/4], state->m_3dregs[0x14/4], state->m_3dregs[0x18/4], state->m_3dregs[0x1c/4],
-		state->m_3dregs[0x20/4], state->m_3dregs[0x24/4], state->m_3dregs[0x28/4], state->m_3dregs[0x2c/4]);
+		m_3dregs[0x00/4], m_3dregs[0x04/4], m_3dregs[0x08/4], m_3dregs[0x0c/4],
+		m_3dregs[0x10/4], m_3dregs[0x14/4], m_3dregs[0x18/4], m_3dregs[0x1c/4],
+		m_3dregs[0x20/4], m_3dregs[0x24/4], m_3dregs[0x28/4], m_3dregs[0x2c/4]);
 
 	if (0)
 		popmessage("TC: %08x %08x %08x %08x : %08x %08x %08x %08x : %08x %08x %08x %08x : %08x %08x %08x %08x : %08x %08x %08x %08x : %08x %08x %08x %08x",
@@ -1630,80 +1612,86 @@ SCREEN_UPDATE( hng64 )
 		hng64_tcram[0x58/4],
 		hng64_tcram[0x5c/4]);
 
-	if ( input_code_pressed_once(screen->machine(), KEYCODE_T) )
+	if ( machine().input().code_pressed_once(KEYCODE_T) )
 	{
-		state->m_additive_tilemap_debug ^= 1;
-		popmessage("blend changed %02x", state->m_additive_tilemap_debug);
+		m_additive_tilemap_debug ^= 1;
+		popmessage("blend changed %02x", m_additive_tilemap_debug);
 	}
-	if ( input_code_pressed_once(screen->machine(), KEYCODE_Y) )
+	if ( machine().input().code_pressed_once(KEYCODE_Y) )
 	{
-		state->m_additive_tilemap_debug ^= 2;
-		popmessage("blend changed %02x", state->m_additive_tilemap_debug);
+		m_additive_tilemap_debug ^= 2;
+		popmessage("blend changed %02x", m_additive_tilemap_debug);
 	}
-	if ( input_code_pressed_once(screen->machine(), KEYCODE_U) )
+	if ( machine().input().code_pressed_once(KEYCODE_U) )
 	{
-		state->m_additive_tilemap_debug ^= 4;
-		popmessage("blend changed %02x", state->m_additive_tilemap_debug);
+		m_additive_tilemap_debug ^= 4;
+		popmessage("blend changed %02x", m_additive_tilemap_debug);
 	}
-	if ( input_code_pressed_once(screen->machine(), KEYCODE_I) )
+	if ( machine().input().code_pressed_once(KEYCODE_I) )
 	{
-		state->m_additive_tilemap_debug ^= 8;
-		popmessage("blend changed %02x", state->m_additive_tilemap_debug);
+		m_additive_tilemap_debug ^= 8;
+		popmessage("blend changed %02x", m_additive_tilemap_debug);
 	}
 
 	return 0;
 }
 
-VIDEO_START( hng64 )
+void hng64_state::screen_eof_hng64(screen_device &screen, bool state)
 {
-	hng64_state *state = machine.driver_data<hng64_state>();
-	const rectangle &visarea = machine.primary_screen->visible_area();
+	// rising edge
+	if (state)
+		clear3d(machine());
+}
 
-	state->m_old_animmask = -1;
-	state->m_old_animbits = -1;
-	state->m_old_tileflags0 = -1;
-	state->m_old_tileflags1 = -1;
-	state->m_old_tileflags2 = -1;
-	state->m_old_tileflags3 = -1;
+void hng64_state::video_start()
+{
+	const rectangle &visarea = machine().primary_screen->visible_area();
 
-	state->m_tilemap0_8x8       = tilemap_create(machine, get_hng64_tile0_8x8_info,   tilemap_scan_rows,  8,   8, 128, 128); /* 128x128x4 = 0x10000 */
-	state->m_tilemap0_16x16     = tilemap_create(machine, get_hng64_tile0_16x16_info, tilemap_scan_rows,  16, 16, 128, 128); /* 128x128x4 = 0x10000 */
-	state->m_tilemap0_16x16_alt = tilemap_create(machine, get_hng64_tile0_16x16_info, tilemap_scan_rows,  16, 16, 256,  64); /* 128x128x4 = 0x10000 */
+	m_old_animmask = -1;
+	m_old_animbits = -1;
+	m_old_tileflags0 = -1;
+	m_old_tileflags1 = -1;
+	m_old_tileflags2 = -1;
+	m_old_tileflags3 = -1;
 
-	state->m_tilemap1_8x8       = tilemap_create(machine, get_hng64_tile1_8x8_info,   tilemap_scan_rows,  8,   8, 128, 128); /* 128x128x4 = 0x10000 */
-	state->m_tilemap1_16x16     = tilemap_create(machine, get_hng64_tile1_16x16_info, tilemap_scan_rows,  16, 16, 128, 128); /* 128x128x4 = 0x10000 */
-	state->m_tilemap1_16x16_alt = tilemap_create(machine, get_hng64_tile1_16x16_info, tilemap_scan_rows,  16, 16, 256,  64); /* 128x128x4 = 0x10000 */
+	m_tilemap0_8x8       = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(hng64_state::get_hng64_tile0_8x8_info),this),   TILEMAP_SCAN_ROWS,  8,   8, 128, 128); /* 128x128x4 = 0x10000 */
+	m_tilemap0_16x16     = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(hng64_state::get_hng64_tile0_16x16_info),this), TILEMAP_SCAN_ROWS,  16, 16, 128, 128); /* 128x128x4 = 0x10000 */
+	m_tilemap0_16x16_alt = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(hng64_state::get_hng64_tile0_16x16_info),this), TILEMAP_SCAN_ROWS,  16, 16, 256,  64); /* 128x128x4 = 0x10000 */
 
-	state->m_tilemap2_8x8       = tilemap_create(machine, get_hng64_tile2_8x8_info,   tilemap_scan_rows,  8,   8, 128, 128); /* 128x128x4 = 0x10000 */
-	state->m_tilemap2_16x16     = tilemap_create(machine, get_hng64_tile2_16x16_info, tilemap_scan_rows,  16, 16, 128, 128); /* 128x128x4 = 0x10000 */
-	state->m_tilemap2_16x16_alt = tilemap_create(machine, get_hng64_tile2_16x16_info, tilemap_scan_rows,  16, 16, 256,  64); /* 128x128x4 = 0x10000 */
+	m_tilemap1_8x8       = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(hng64_state::get_hng64_tile1_8x8_info),this),   TILEMAP_SCAN_ROWS,  8,   8, 128, 128); /* 128x128x4 = 0x10000 */
+	m_tilemap1_16x16     = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(hng64_state::get_hng64_tile1_16x16_info),this), TILEMAP_SCAN_ROWS,  16, 16, 128, 128); /* 128x128x4 = 0x10000 */
+	m_tilemap1_16x16_alt = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(hng64_state::get_hng64_tile1_16x16_info),this), TILEMAP_SCAN_ROWS,  16, 16, 256,  64); /* 128x128x4 = 0x10000 */
 
-	state->m_tilemap3_8x8       = tilemap_create(machine, get_hng64_tile3_8x8_info,   tilemap_scan_rows,  8,   8, 128, 128); /* 128x128x4 = 0x10000 */
-	state->m_tilemap3_16x16     = tilemap_create(machine, get_hng64_tile3_16x16_info, tilemap_scan_rows,  16, 16, 128, 128); /* 128x128x4 = 0x10000 */
-	state->m_tilemap3_16x16_alt = tilemap_create(machine, get_hng64_tile3_16x16_info, tilemap_scan_rows,  16, 16, 256,  64); /* 128x128x4 = 0x10000 */
+	m_tilemap2_8x8       = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(hng64_state::get_hng64_tile2_8x8_info),this),   TILEMAP_SCAN_ROWS,  8,   8, 128, 128); /* 128x128x4 = 0x10000 */
+	m_tilemap2_16x16     = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(hng64_state::get_hng64_tile2_16x16_info),this), TILEMAP_SCAN_ROWS,  16, 16, 128, 128); /* 128x128x4 = 0x10000 */
+	m_tilemap2_16x16_alt = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(hng64_state::get_hng64_tile2_16x16_info),this), TILEMAP_SCAN_ROWS,  16, 16, 256,  64); /* 128x128x4 = 0x10000 */
 
-	tilemap_set_transparent_pen(state->m_tilemap0_8x8, 0);
-	tilemap_set_transparent_pen(state->m_tilemap0_16x16, 0);
-	tilemap_set_transparent_pen(state->m_tilemap0_16x16_alt, 0);
+	m_tilemap3_8x8       = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(hng64_state::get_hng64_tile3_8x8_info),this),   TILEMAP_SCAN_ROWS,  8,   8, 128, 128); /* 128x128x4 = 0x10000 */
+	m_tilemap3_16x16     = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(hng64_state::get_hng64_tile3_16x16_info),this), TILEMAP_SCAN_ROWS,  16, 16, 128, 128); /* 128x128x4 = 0x10000 */
+	m_tilemap3_16x16_alt = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(hng64_state::get_hng64_tile3_16x16_info),this), TILEMAP_SCAN_ROWS,  16, 16, 256,  64); /* 128x128x4 = 0x10000 */
 
-	tilemap_set_transparent_pen(state->m_tilemap1_8x8, 0);
-	tilemap_set_transparent_pen(state->m_tilemap1_16x16, 0);
-	tilemap_set_transparent_pen(state->m_tilemap1_16x16_alt, 0);
+	m_tilemap0_8x8->set_transparent_pen(0);
+	m_tilemap0_16x16->set_transparent_pen(0);
+	m_tilemap0_16x16_alt->set_transparent_pen(0);
 
-	tilemap_set_transparent_pen(state->m_tilemap2_8x8, 0);
-	tilemap_set_transparent_pen(state->m_tilemap2_16x16, 0);
-	tilemap_set_transparent_pen(state->m_tilemap2_16x16_alt, 0);
+	m_tilemap1_8x8->set_transparent_pen(0);
+	m_tilemap1_16x16->set_transparent_pen(0);
+	m_tilemap1_16x16_alt->set_transparent_pen(0);
 
-	tilemap_set_transparent_pen(state->m_tilemap3_8x8, 0);
-	tilemap_set_transparent_pen(state->m_tilemap3_16x16, 0);
-	tilemap_set_transparent_pen(state->m_tilemap3_16x16_alt, 0);
+	m_tilemap2_8x8->set_transparent_pen(0);
+	m_tilemap2_16x16->set_transparent_pen(0);
+	m_tilemap2_16x16_alt->set_transparent_pen(0);
+
+	m_tilemap3_8x8->set_transparent_pen(0);
+	m_tilemap3_16x16->set_transparent_pen(0);
+	m_tilemap3_16x16_alt->set_transparent_pen(0);
 
 	// Debug switch, turn on / off additive blending on a per-tilemap basis
-	state->m_additive_tilemap_debug = 0;
+	m_additive_tilemap_debug = 0;
 
 	// 3d Buffer Allocation
-	state->m_depthBuffer3d = auto_alloc_array(machine, float,  (visarea.max_x)*(visarea.max_y));
-	state->m_colorBuffer3d = auto_alloc_array(machine, UINT32, (visarea.max_x)*(visarea.max_y));
+	m_depthBuffer3d = auto_alloc_array(machine(), float,  (visarea.max_x + 1)*(visarea.max_y + 1));
+	m_colorBuffer3d = auto_alloc_array(machine(), UINT32, (visarea.max_x + 1)*(visarea.max_y + 1));
 }
 
 
@@ -1713,34 +1701,34 @@ VIDEO_START( hng64 )
 
 struct polyVert
 {
-	float worldCoords[4];	// World space coordinates (X Y Z 1.0)
+	float worldCoords[4];   // World space coordinates (X Y Z 1.0)
 
-	float texCoords[4];		// Texture coordinates (U V 0 1.0) -> OpenGL style...
+	float texCoords[4];     // Texture coordinates (U V 0 1.0) -> OpenGL style...
 
-	float normal[4];		// Normal (X Y Z 1.0)
-	float clipCoords[4];	// Homogeneous screen space coordinates (X Y Z W)
+	float normal[4];        // Normal (X Y Z 1.0)
+	float clipCoords[4];    // Homogeneous screen space coordinates (X Y Z W)
 
-	float light[3];			// The intensity of the illumination at this point
+	float light[3];         // The intensity of the illumination at this point
 };
 
 struct polygon
 {
-	int n;						// Number of sides
-	struct polyVert vert[10];	// Vertices (maximum number per polygon is 10 -> 3+6)
+	int n;                      // Number of sides
+	struct polyVert vert[10];   // Vertices (maximum number per polygon is 10 -> 3+6)
 
-	float faceNormal[4];		// Normal of the face overall - for calculating visibility and flat-shading...
-	int visible;				// Polygon visibility in scene
+	float faceNormal[4];        // Normal of the face overall - for calculating visibility and flat-shading...
+	int visible;                // Polygon visibility in scene
 
-	UINT8 texIndex;				// Which texture to draw from (0x00-0x0f)
-	UINT8 texType;				// How to index into the texture
+	UINT8 texIndex;             // Which texture to draw from (0x00-0x0f)
+	UINT8 texType;              // How to index into the texture
 	UINT8 texPageSmall;         // Does this polygon use 'small' texture pages?
 	UINT8 texPageHorizOffset;   // If it does use small texture pages, how far is this page horizontally offset?
 	UINT8 texPageVertOffset;    // If it does use small texture pages, how far is this page vertically offset?
 
-	UINT32 palOffset;			// The base offset where this object's palette starts.
-	UINT32 palPageSize;			// The size of the palette page that is being pointed to.
+	UINT32 palOffset;           // The base offset where this object's palette starts.
+	UINT32 palPageSize;         // The size of the palette page that is being pointed to.
 
-	UINT32 debugColor;			// Will go away someday.  Used to explicitly color polygons for debugging.
+	UINT32 debugColor;          // Will go away someday.  Used to explicitly color polygons for debugging.
 };
 
 static void setIdentity(float *matrix);
@@ -1797,24 +1785,24 @@ static void setCameraTransformation(hng64_state *state, const UINT16* packet)
 	float *cameraMatrix = state->m_cameraMatrix;
 
 	/*//////////////
-    // PACKET FORMAT
-    // [0]  - 0001 ... ID
-    // [1]  - xxxx ... Extrinsic camera matrix
-    // [2]  - xxxx ... Extrinsic camera matrix
-    // [3]  - xxxx ... Extrinsic camera matrix
-    // [4]  - xxxx ... Extrinsic camera matrix
-    // [5]  - xxxx ... Extrinsic camera matrix
-    // [6]  - xxxx ... Extrinsic camera matrix
-    // [7]  - xxxx ... Extrinsic camera matrix
-    // [8]  - xxxx ... Extrinsic camera matrix
-    // [9]  - xxxx ... Extrinsic camera matrix
-    // [10] - xxxx ... Extrinsic camera matrix
-    // [11] - xxxx ... Extrinsic camera matrix
-    // [12] - xxxx ... Extrinsic camera matrix
-    // [13] - ???? ... ? Flips per-frame during fatfurwa 'HNG64'
-    // [14] - ???? ... ? Could be some floating-point values during buriki 'door run'
-    // [15] - ???? ... ? Same as 13 & 14
-    ////////////*/
+	// PACKET FORMAT
+	// [0]  - 0001 ... ID
+	// [1]  - xxxx ... Extrinsic camera matrix
+	// [2]  - xxxx ... Extrinsic camera matrix
+	// [3]  - xxxx ... Extrinsic camera matrix
+	// [4]  - xxxx ... Extrinsic camera matrix
+	// [5]  - xxxx ... Extrinsic camera matrix
+	// [6]  - xxxx ... Extrinsic camera matrix
+	// [7]  - xxxx ... Extrinsic camera matrix
+	// [8]  - xxxx ... Extrinsic camera matrix
+	// [9]  - xxxx ... Extrinsic camera matrix
+	// [10] - xxxx ... Extrinsic camera matrix
+	// [11] - xxxx ... Extrinsic camera matrix
+	// [12] - xxxx ... Extrinsic camera matrix
+	// [13] - ???? ... ? Flips per-frame during fatfurwa 'HNG64'
+	// [14] - ???? ... ? Could be some floating-point values during buriki 'door run'
+	// [15] - ???? ... ? Same as 13 & 14
+	////////////*/
 	// CAMERA TRANSFORMATION MATRIX
 	cameraMatrix[0]  = uToF(packet[1]);
 	cameraMatrix[4]  = uToF(packet[2]);
@@ -1844,24 +1832,24 @@ static void setLighting(hng64_state *state, const UINT16* packet)
 	float *lightVector = state->m_lightVector;
 
 	/*//////////////
-    // PACKET FORMAT
-    // [0]  - 0010 ... ID
-    // [1]  - ???? ... ? Always zero
-    // [2]  - ???? ... ? Always zero
-    // [3]  - xxxx ... X light vector direction
-    // [4]  - xxxx ... Y light vector direction
-    // [5]  - xxxx ... Z light vector direction
-    // [6]  - ???? ... ? Seems to be another light vector ?
-    // [7]  - ???? ... ? Seems to be another light vector ?
-    // [8]  - ???? ... ? Seems to be another light vector ?
-    // [9]  - xxxx ... Strength according to sams64_2 [0000,01ff]
-    // [10] - ???? ... ? Used in fatfurwa
-    // [11] - ???? ... ? Used in fatfurwa
-    // [12] - ???? ... ? Used in fatfurwa
-    // [13] - ???? ... ? Used in fatfurwa
-    // [14] - ???? ... ? Used in fatfurwa
-    // [15] - ???? ... ? Used in fatfurwa
-    ////////////*/
+	// PACKET FORMAT
+	// [0]  - 0010 ... ID
+	// [1]  - ???? ... ? Always zero
+	// [2]  - ???? ... ? Always zero
+	// [3]  - xxxx ... X light vector direction
+	// [4]  - xxxx ... Y light vector direction
+	// [5]  - xxxx ... Z light vector direction
+	// [6]  - ???? ... ? Seems to be another light vector ?
+	// [7]  - ???? ... ? Seems to be another light vector ?
+	// [8]  - ???? ... ? Seems to be another light vector ?
+	// [9]  - xxxx ... Strength according to sams64_2 [0000,01ff]
+	// [10] - ???? ... ? Used in fatfurwa
+	// [11] - ???? ... ? Used in fatfurwa
+	// [12] - ???? ... ? Used in fatfurwa
+	// [13] - ???? ... ? Used in fatfurwa
+	// [14] - ???? ... ? Used in fatfurwa
+	// [15] - ???? ... ? Used in fatfurwa
+	////////////*/
 	if (packet[1] != 0x0000) printf("ZOMG!  packet[1] in setLighting function is non-zero!\n");
 	if (packet[2] != 0x0000) printf("ZOMG!  packet[2] in setLighting function is non-zero!\n");
 
@@ -1876,24 +1864,24 @@ static void setLighting(hng64_state *state, const UINT16* packet)
 static void set3dFlags(hng64_state *state, const UINT16* packet)
 {
 	/*//////////////
-    // PACKET FORMAT
-    // [0]  - 0011 ... ID
-    // [1]  - ???? ...
-    // [2]  - ???? ...
-    // [3]  - ???? ...
-    // [4]  - ???? ...
-    // [5]  - ???? ...
-    // [6]  - ???? ...
-    // [7]  - ???? ...
-    // [8]  - xx?? ... Palette offset & ??
-    // [9]  - ???? ... ? Very much used - seem to bounce around when characters are on screen
-    // [10] - ???? ... ? ''  ''
-    // [11] - ???? ... ? ''  ''
-    // [12] - ???? ... ? ''  ''
-    // [13] - ???? ... ? ''  ''
-    // [14] - ???? ... ? ''  ''
-    // [15] - ???? ... ? ''  ''
-    ////////////*/
+	// PACKET FORMAT
+	// [0]  - 0011 ... ID
+	// [1]  - ???? ...
+	// [2]  - ???? ...
+	// [3]  - ???? ...
+	// [4]  - ???? ...
+	// [5]  - ???? ...
+	// [6]  - ???? ...
+	// [7]  - ???? ...
+	// [8]  - xx?? ... Palette offset & ??
+	// [9]  - ???? ... ? Very much used - seem to bounce around when characters are on screen
+	// [10] - ???? ... ? ''  ''
+	// [11] - ???? ... ? ''  ''
+	// [12] - ???? ... ? ''  ''
+	// [13] - ???? ... ? ''  ''
+	// [14] - ???? ... ? ''  ''
+	// [15] - ???? ... ? ''  ''
+	////////////*/
 	state->m_paletteState3d = (packet[8] & 0xff00) >> 8;
 }
 
@@ -1904,24 +1892,24 @@ static void setCameraProjectionMatrix(hng64_state *state, const UINT16* packet)
 	float *projectionMatrix = state->m_projectionMatrix;
 
 	/*//////////////
-    // PACKET FORMAT
-    // [0]  - 0012 ... ID
-    // [1]  - ???? ... ? Contains a value in buriki's 'how to play' - probably a projection window/offset.
-    // [2]  - ???? ... ? Contains a value in buriki's 'how to play' - probably a projection window/offset.
-    // [3]  - ???? ... ? Contains a value
-    // [4]  - xxxx ... Camera projection near scale
-    // [5]  - xxxx ... Camera projection near height(?)
-    // [6]  - xxxx ... Camera projection near width(?)
-    // [7]  - xxxx ... Camera projection far scale
-    // [8]  - xxxx ... Camera projection far height(?)
-    // [9]  - xxxx ... Camera projection far width(?)
-    // [10] - xxxx ... Camera projection right
-    // [11] - xxxx ... Camera projection left
-    // [12] - xxxx ... Camera projection top
-    // [13] - xxxx ... Camera projection bottom
-    // [14] - ???? ... ? Gets data during buriki door-run
-    // [15] - ???? ... ? Gets data during buriki door-run
-    ////////////*/
+	// PACKET FORMAT
+	// [0]  - 0012 ... ID
+	// [1]  - ???? ... ? Contains a value in buriki's 'how to play' - probably a projection window/offset.
+	// [2]  - ???? ... ? Contains a value in buriki's 'how to play' - probably a projection window/offset.
+	// [3]  - ???? ... ? Contains a value
+	// [4]  - xxxx ... Camera projection near scale
+	// [5]  - xxxx ... Camera projection near height(?)
+	// [6]  - xxxx ... Camera projection near width(?)
+	// [7]  - xxxx ... Camera projection far scale
+	// [8]  - xxxx ... Camera projection far height(?)
+	// [9]  - xxxx ... Camera projection far width(?)
+	// [10] - xxxx ... Camera projection right
+	// [11] - xxxx ... Camera projection left
+	// [12] - xxxx ... Camera projection top
+	// [13] - xxxx ... Camera projection bottom
+	// [14] - ???? ... ? Gets data during buriki door-run
+	// [15] - ???? ... ? Gets data during buriki door-run
+	////////////*/
 
 	// Heisted from GLFrustum - 6 parameters...
 	float left, right, top, bottom, near_, far_;
@@ -1960,48 +1948,48 @@ static void setCameraProjectionMatrix(hng64_state *state, const UINT16* packet)
 static void recoverPolygonBlock(running_machine& machine, const UINT16* packet, struct polygon* polys, int* numPolys)
 {
 	/*//////////////
-    // PACKET FORMAT
-    // [0]  - 0100 ... ID
-    // [1]  - ?--- ... Flags [?000 = ???
-    //                        0?00 = ???
-    //                        00?0 = ???
-    //                        000? = ???]
-    // [1]  - -?-- ... Flags [?000 = ???
-    //                        0?00 = ???
-    //                        00?0 = ???
-    //                        000x = Dynamic palette bit]
-    // [1]  - --?- ... Flags [?000 = ???
-    //                        0?00 = ???
-    //                        00?0 = ???
-    //                        000? = ???]
-    // [1]  - ---? ... Flags [x000 = Apply lighting bit
-    //                        0?00 = ???
-    //                        00?0 = ???
-    //                        000? = ???]
-    // [2]  - xxxx ... offset into ROM
-    // [3]  - xxxx ... offset into ROM
-    // [4]  - xxxx ... Transformation matrix
-    // [5]  - xxxx ... Transformation matrix
-    // [6]  - xxxx ... Transformation matrix
-    // [7]  - xxxx ... Transformation matrix
-    // [8]  - xxxx ... Transformation matrix
-    // [9]  - xxxx ... Transformation matrix
-    // [10] - xxxx ... Transformation matrix
-    // [11] - xxxx ... Transformation matrix
-    // [12] - xxxx ... Transformation matrix
-    // [13] - xxxx ... Transformation matrix
-    // [14] - xxxx ... Transformation matrix
-    // [15] - xxxx ... Transformation matrix
-    ////////////*/
+	// PACKET FORMAT
+	// [0]  - 0100 ... ID
+	// [1]  - ?--- ... Flags [?000 = ???
+	//                        0?00 = ???
+	//                        00?0 = ???
+	//                        000? = ???]
+	// [1]  - -?-- ... Flags [?000 = ???
+	//                        0?00 = ???
+	//                        00?0 = ???
+	//                        000x = Dynamic palette bit]
+	// [1]  - --?- ... Flags [?000 = ???
+	//                        0?00 = ???
+	//                        00?0 = ???
+	//                        000? = ???]
+	// [1]  - ---? ... Flags [x000 = Apply lighting bit
+	//                        0?00 = ???
+	//                        00?0 = ???
+	//                        000? = ???]
+	// [2]  - xxxx ... offset into ROM
+	// [3]  - xxxx ... offset into ROM
+	// [4]  - xxxx ... Transformation matrix
+	// [5]  - xxxx ... Transformation matrix
+	// [6]  - xxxx ... Transformation matrix
+	// [7]  - xxxx ... Transformation matrix
+	// [8]  - xxxx ... Transformation matrix
+	// [9]  - xxxx ... Transformation matrix
+	// [10] - xxxx ... Transformation matrix
+	// [11] - xxxx ... Transformation matrix
+	// [12] - xxxx ... Transformation matrix
+	// [13] - xxxx ... Transformation matrix
+	// [14] - xxxx ... Transformation matrix
+	// [15] - xxxx ... Transformation matrix
+	////////////*/
 
 	hng64_state *state = machine.driver_data<hng64_state>();
 	UINT32 size[4];
 	UINT32 address[4];
 	UINT32 megaOffset;
-	float eyeCoords[4];		// ObjectCoords transformed by the modelViewMatrix
+	float eyeCoords[4];     // ObjectCoords transformed by the modelViewMatrix
 //  float clipCoords[4];    // EyeCoords transformed by the projectionMatrix
-	float ndCoords[4];		// Normalized device coordinates/clipCoordinates (x/w, y/w, z/w)
-	float windowCoords[4];	// Mapped ndCoordinates to screen space
+	float ndCoords[4];      // Normalized device coordinates/clipCoordinates (x/w, y/w, z/w)
+	float windowCoords[4];  // Mapped ndCoordinates to screen space
 	float cullRay[4];
 
 	float objectMatrix[16];
@@ -2039,36 +2027,36 @@ static void recoverPolygonBlock(running_machine& machine, const UINT16* packet, 
 	// EXTRACT DATA FROM THE ADDRESS POINTED TO IN THE FILE //
 	//////////////////////////////////////////////////////////
 	/*//////////////////////////////////////////////
-    // DIRECTLY-POINTED-TO FORMAT (7 words x 3 ROMs)
-    // [0]  - lower word of sub-address 1
-    // [1]  - lower word of sub-address 2
-    // [2]  - upper word of all sub-addresses
-    // [3]  - lower word of sub-address 3
-    // [4]  - lower word of sub-address 4
-    // [5]  - ???? always 0 ????
-    // [6]  - number of chunks in sub-address 1 block
-    // [7]  - number of chunks in sub-address 2 block
-    // [8]  - ???? always 0 ????
-    // [9]  - number of chunks in sub-address 3 block
-    // [10] - number of chunks in sub-address 4 block
-    // [11] - ? definitely used.
-    // [12] - ? definitely used.
-    // [13] - ? definitely used.
-    // [14] - ? definitely used.
-    // [15] - ???? always 0 ????
-    // [16] - ???? always 0 ????
-    // [17] - ???? always 0 ????
-    // [18] - ???? always 0 ????
-    // [19] - ???? always 0 ????
-    // [20] - ???? always 0 ????
-    //////////////////////////////////////////////*/
+	// DIRECTLY-POINTED-TO FORMAT (7 words x 3 ROMs)
+	// [0]  - lower word of sub-address 1
+	// [1]  - lower word of sub-address 2
+	// [2]  - upper word of all sub-addresses
+	// [3]  - lower word of sub-address 3
+	// [4]  - lower word of sub-address 4
+	// [5]  - ???? always 0 ????
+	// [6]  - number of chunks in sub-address 1 block
+	// [7]  - number of chunks in sub-address 2 block
+	// [8]  - ???? always 0 ????
+	// [9]  - number of chunks in sub-address 3 block
+	// [10] - number of chunks in sub-address 4 block
+	// [11] - ? definitely used.
+	// [12] - ? definitely used.
+	// [13] - ? definitely used.
+	// [14] - ? definitely used.
+	// [15] - ???? always 0 ????
+	// [16] - ???? always 0 ????
+	// [17] - ???? always 0 ????
+	// [18] - ???? always 0 ????
+	// [19] - ???? always 0 ????
+	// [20] - ???? always 0 ????
+	//////////////////////////////////////////////*/
 
 	// 3d ROM Offset
-	UINT16* threeDRoms = (UINT16*)(machine.region("verts")->base());
+	UINT16* threeDRoms = (UINT16*)(machine.root_device().memregion("verts")->base());
 	UINT32  threeDOffset = (((UINT32)packet[2]) << 16) | ((UINT32)packet[3]);
 	UINT16* threeDPointer = &threeDRoms[threeDOffset * 3];
 
-	if (threeDOffset >= machine.region("verts")->bytes())
+	if (threeDOffset >= machine.root_device().memregion("verts")->bytes())
 	{
 		printf("Strange geometry packet: (ignoring)\n");
 		printPacket(packet, 1);
@@ -2177,9 +2165,9 @@ static void recoverPolygonBlock(running_machine& machine, const UINT16* packet, 
 			// TEXTURE
 			/* There may be more than just high & low res texture types, so I'm keeping texType as a UINT8. */
 			if (chunkOffset[1] & 0x1000) polys[*numPolys].texType = 0x1;
-			else						 polys[*numPolys].texType = 0x0;
+			else                         polys[*numPolys].texType = 0x0;
 
-			polys[*numPolys].texPageSmall       = (chunkOffset[2] & 0x8000) >> 15;	// Just a guess.
+			polys[*numPolys].texPageSmall       = (chunkOffset[2] & 0x8000) >> 15;  // Just a guess.
 			polys[*numPolys].texPageHorizOffset = (chunkOffset[2] & 0x3000) >> 12;
 			polys[*numPolys].texPageVertOffset  = (chunkOffset[2] & 0x0060) >> 5;
 
@@ -2191,8 +2179,8 @@ static void recoverPolygonBlock(running_machine& machine, const UINT16* packet, 
 			polys[*numPolys].palPageSize = 0x100;
 
 			/* FIXME: This isn't correct.
-                      Buriki & Xrally need this line.  Roads Edge needs it removed.
-                      So instead we're looking for a bit that is on for XRally & Buriki, but noone else. */
+			          Buriki & Xrally need this line.  Roads Edge needs it removed.
+			          So instead we're looking for a bit that is on for XRally & Buriki, but noone else. */
 			if (state->m_3dregs[0x00/4] & 0x2000)
 			{
 				if (strcmp(machine.basename(), "roadedge"))
@@ -2221,20 +2209,20 @@ static void recoverPolygonBlock(running_machine& machine, const UINT16* packet, 
 			switch(chunkType)
 			{
 			/*/////////////////////////
-            // CHUNK TYPE BITS - These are very likely incorrect.
-            // x--- ---- - 1 = Has only 1 vertex (part of a triangle fan/strip)
-            // -x-- ---- -
-            // --x- ---- -
-            // ---x ---- -
-            // ---- x--- -
-            // ---- -x-- - 1 = Has per-vert UVs
-            // ---- --x- -
-            // ---- ---x - 1 = Has per-vert normals
-            /////////////////////////*/
+			// CHUNK TYPE BITS - These are very likely incorrect.
+			// x--- ---- - 1 = Has only 1 vertex (part of a triangle fan/strip)
+			// -x-- ---- -
+			// --x- ---- -
+			// ---x ---- -
+			// ---- x--- -
+			// ---- -x-- - 1 = Has per-vert UVs
+			// ---- --x- -
+			// ---- ---x - 1 = Has per-vert normals
+			/////////////////////////*/
 
 			// 33 word chunk, 3 vertices, per-vertex UVs & normals, per-face normal
-			case 0x05:	// 0000 0101
-			case 0x0f:	// 0000 1111
+			case 0x05:  // 0000 0101
+			case 0x0f:  // 0000 1111
 				for (int m = 0; m < 3; m++)
 				{
 					polys[*numPolys].vert[m].worldCoords[0] = uToF(chunkOffset[3 + (9*m)]);
@@ -2266,10 +2254,10 @@ static void recoverPolygonBlock(running_machine& machine, const UINT16* packet, 
 
 
 			// 24 word chunk, 3 vertices, per-vertex UVs
-			case 0x04:	// 0000 0100
-			case 0x0e:	// 0000 1110
-			case 0x24:	// 0010 0100
-			case 0x2e:	// 0010 1110
+			case 0x04:  // 0000 0100
+			case 0x0e:  // 0000 1110
+			case 0x24:  // 0010 0100
+			case 0x2e:  // 0010 1110
 				for (int m = 0; m < 3; m++)
 				{
 					polys[*numPolys].vert[m].worldCoords[0] = uToF(chunkOffset[3 + (6*m)]);
@@ -2301,10 +2289,10 @@ static void recoverPolygonBlock(running_machine& machine, const UINT16* packet, 
 
 
 			// 15 word chunk, 1 vertex, per-vertex UVs & normals, face normal
-			case 0x87:	// 1000 0111
-			case 0x97:	// 1001 0111
-			case 0xd7:	// 1101 0111
-			case 0xc7:	// 1100 0111
+			case 0x87:  // 1000 0111
+			case 0x97:  // 1001 0111
+			case 0xd7:  // 1101 0111
+			case 0xc7:  // 1100 0111
 				// Copy over the proper vertices from the previous triangle...
 				memcpy(&polys[*numPolys].vert[1], &lastPoly.vert[0], sizeof(struct polyVert));
 				memcpy(&polys[*numPolys].vert[2], &lastPoly.vert[2], sizeof(struct polyVert));
@@ -2337,11 +2325,11 @@ static void recoverPolygonBlock(running_machine& machine, const UINT16* packet, 
 
 
 			// 12 word chunk, 1 vertex, per-vertex UVs
-			case 0x86:	// 1000 0110
-			case 0x96:	// 1001 0110
-			case 0xb6:	// 1011 0110
-			case 0xc6:	// 1100 0110
-			case 0xd6:	// 1101 0110
+			case 0x86:  // 1000 0110
+			case 0x96:  // 1001 0110
+			case 0xb6:  // 1011 0110
+			case 0xc6:  // 1100 0110
+			case 0xd6:  // 1101 0110
 				// Copy over the proper vertices from the previous triangle...
 				memcpy(&polys[*numPolys].vert[1], &lastPoly.vert[0], sizeof(struct polyVert));
 				memcpy(&polys[*numPolys].vert[2], &lastPoly.vert[2], sizeof(struct polyVert));
@@ -2471,7 +2459,7 @@ static void recoverPolygonBlock(running_machine& machine, const UINT16* packet, 
 
 			// BEHIND-THE-CAMERA CULL //
 			vecmatmul4(cullRay, state->m_modelViewMatrix, polys[*numPolys].vert[0].worldCoords);
-			if (cullRay[2] > 0.0f)				// Camera is pointing down -Z
+			if (cullRay[2] > 0.0f)              // Camera is pointing down -Z
 			{
 				polys[*numPolys].visible = 0;
 			}
@@ -2505,7 +2493,7 @@ static void recoverPolygonBlock(running_machine& machine, const UINT16* packet, 
 						windowCoords[1] = (ndCoords[1]+1.0f) * ((float)(visarea.max_y) / 2.0f) + 0.0f;
 						windowCoords[2] = (ndCoords[2]+1.0f) * 0.5f;
 
-						windowCoords[1] = (float)visarea.max_y - windowCoords[1];		// Flip Y
+						windowCoords[1] = (float)visarea.max_y - windowCoords[1];       // Flip Y
 
 						// Store the points in a list for later use...
 						polys[*numPolys].vert[m].clipCoords[0] = windowCoords[0];
@@ -2535,30 +2523,30 @@ void hng64_command3d(running_machine& machine, const UINT16* packet)
 	//printf("packet type : %04x\n", packet[0]);
 	switch (packet[0])
 	{
-	case 0x0000:	// Appears to be a NOP.
+	case 0x0000:    // Appears to be a NOP.
 		break;
 
-	case 0x0001:	// Camera transformation.
+	case 0x0001:    // Camera transformation.
 		setCameraTransformation(state, packet);
 		break;
 
-	case 0x0010:	// Lighting information.
+	case 0x0010:    // Lighting information.
 		//if (packet[9]) printPacket(packet, 1);
 		setLighting(state, packet);
 		break;
 
-	case 0x0011:	// Palette / Model flags?
+	case 0x0011:    // Palette / Model flags?
 		//printPacket(packet, 1); printf("\n");
 		set3dFlags(state, packet);
 		break;
 
-	case 0x0012:	// Projection Matrix
+	case 0x0012:    // Projection Matrix
 		//printPacket(packet, 1);
 		setCameraProjectionMatrix(state, packet);
 		break;
 
 	case 0x0100:
-	case 0x0101:	// Geometry with full transformations
+	case 0x0101:    // Geometry with full transformations
 		// HACK.  Masks out a piece of geo bbust2's drawShaded() crashes on.
 		if (packet[2] == 0x0003 && packet[3] == 0x8f37 && state->m_mcu_type == SHOOT_MCU)
 			break;
@@ -2566,7 +2554,7 @@ void hng64_command3d(running_machine& machine, const UINT16* packet)
 		recoverPolygonBlock(machine, packet, polys, &numPolys);
 		break;
 
-	case 0x0102:	// Geometry with only translation
+	case 0x0102:    // Geometry with only translation
 		// HACK.  Give up on strange calls to 0102.
 		if (packet[8] != 0x0102)
 		{
@@ -2593,11 +2581,11 @@ void hng64_command3d(running_machine& machine, const UINT16* packet)
 		recoverPolygonBlock(machine, miniPacket, polys, &numPolys);
 		break;
 
-	case 0x1000:	// Unknown: Some sort of global flags?
+	case 0x1000:    // Unknown: Some sort of global flags?
 		//printPacket(packet, 1); printf("\n");
 		break;
 
-	case 0x1001:	// Unknown: Some sort of global flags (a group of 4, actually)?
+	case 0x1001:    // Unknown: Some sort of global flags (a group of 4, actually)?
 		//printPacket(packet, 1);
 		break;
 
@@ -2863,19 +2851,19 @@ static void performFrustumClip(struct polygon *p)
 
 			tv = &temp.vert[temp.n];
 
-			if (Inside(v0, j) && Inside(v1, j))							// Edge is completely inside the volume...
+			if (Inside(v0, j) && Inside(v1, j))                         // Edge is completely inside the volume...
 			{
 				memcpy(tv, v1, sizeof(struct polyVert));
 				temp.n++;
 			}
 
-			else if (Inside(v0, j) && !Inside(v1, j))					// Edge goes from in to out...
+			else if (Inside(v0, j) && !Inside(v1, j))                   // Edge goes from in to out...
 			{
 				Intersect(v0, v1, tv, j);
 				temp.n++;
 			}
 
-			else if (!Inside(v0, j) && Inside(v1, j))					// Edge goes from out to in...
+			else if (!Inside(v0, j) && Inside(v1, j))                   // Edge goes from out to in...
 			{
 				Intersect(v0, v1, tv, j);
 				memcpy(&temp.vert[temp.n+1], v1, sizeof(struct polyVert));
@@ -2917,13 +2905,13 @@ static void drawline2d(running_machine &machine, INT32 x0, INT32 y0, INT32 x1, I
 	INT32 e;
 
 	/*
-    * inline swap. On some architectures, the XOR trick may be faster
-    */
+	* inline swap. On some architectures, the XOR trick may be faster
+	*/
 	INT32 tmpswap;
 
 	/*
-    * optimize for vertical and horizontal lines here
-    */
+	* optimize for vertical and horizontal lines here
+	*/
 
 	dx = abs(x1 - x0);
 	sx = ((x1 - x0) > 0) ? 1 : -1;
@@ -3011,11 +2999,11 @@ struct polygonRasterOptions
 /**     Output: none                                                **/
 /*********************************************************************/
 INLINE void FillSmoothTexPCHorizontalLine(running_machine &machine,
-										  const polygonRasterOptions& prOptions,
-										  int x_start, int x_end, int y, float z_start, float z_delta,
-										  float w_start, float w_delta, float r_start, float r_delta,
-										  float g_start, float g_delta, float b_start, float b_delta,
-										  float s_start, float s_delta, float t_start, float t_delta)
+											const polygonRasterOptions& prOptions,
+											int x_start, int x_end, int y, float z_start, float z_delta,
+											float w_start, float w_delta, float r_start, float r_delta,
+											float g_start, float g_delta, float b_start, float b_delta,
+											float s_start, float s_delta, float t_start, float t_delta)
 {
 	hng64_state *state = machine.driver_data<hng64_state>();
 	float*  db = &(state->m_depthBuffer3d[(y * machine.primary_screen->visible_area().max_x) + x_start]);
@@ -3023,7 +3011,7 @@ INLINE void FillSmoothTexPCHorizontalLine(running_machine &machine,
 
 	UINT8 paletteEntry = 0;
 	float t_coord, s_coord;
-	const UINT8 *gfx = machine.region("textures")->base();
+	const UINT8 *gfx = state->memregion("textures")->base();
 	const UINT8 *textureOffset = &gfx[prOptions.texIndex * 1024 * 1024];
 
 	for (; x_start <= x_end; x_start++)
@@ -3478,6 +3466,3 @@ static void drawShaded(running_machine &machine, struct polygon *p)
 										prOptions);
 	}
 }
-
-
-

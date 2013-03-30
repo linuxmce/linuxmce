@@ -7,13 +7,15 @@
 class jackal_state : public driver_device
 {
 public:
-	jackal_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	jackal_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoctrl(*this, "videoctrl"),
+		m_paletteram(*this, "paletteram"){ }
 
 	/* memory pointers */
-	UINT8 *  m_videoctrl;
+	required_shared_ptr<UINT8> m_videoctrl;
 	UINT8 *  m_scrollram;
-	UINT8 *  m_paletteram;
+	required_shared_ptr<UINT8> m_paletteram;
 
 	/* video-related */
 	tilemap_t  *m_bg_tilemap;
@@ -24,15 +26,25 @@ public:
 	UINT8    *m_spritebank;
 
 	/* devices */
-	device_t *m_mastercpu;
-	device_t *m_slavecpu;
+	cpu_device *m_mastercpu;
+	cpu_device *m_slavecpu;
+	DECLARE_READ8_MEMBER(topgunbl_rotary_r);
+	DECLARE_WRITE8_MEMBER(jackal_flipscreen_w);
+	DECLARE_READ8_MEMBER(jackal_zram_r);
+	DECLARE_READ8_MEMBER(jackal_voram_r);
+	DECLARE_READ8_MEMBER(jackal_spriteram_r);
+	DECLARE_WRITE8_MEMBER(jackal_rambank_w);
+	DECLARE_WRITE8_MEMBER(jackal_zram_w);
+	DECLARE_WRITE8_MEMBER(jackal_voram_w);
+	DECLARE_WRITE8_MEMBER(jackal_spriteram_w);
+	TILE_GET_INFO_MEMBER(get_bg_tile_info);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_jackal(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(jackal_interrupt);
 };
 
-
 /*----------- defined in video/jackal.c -----------*/
-
 void jackal_mark_tile_dirty(running_machine &machine, int offset);
-
-PALETTE_INIT( jackal );
-VIDEO_START( jackal );
-SCREEN_UPDATE( jackal );

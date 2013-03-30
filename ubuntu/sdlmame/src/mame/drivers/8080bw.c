@@ -1,26 +1,22 @@
-/****************************************************************************/
-/*                                                                          */
-/*  8080bw.c                                                                */
-/*                                                                          */
-/*  Michael Strutts, Nicola Salmoria, Tormod Tjaberg, Mirko Buffoni         */
-/*  Lee Taylor, Valerio Verrando, Marco Cassili, Zsolt Vasvari and others   */
-/*                                                                          */
-/*                                                                          */
-/*  Notes:                                                                  */
-/*  -----                                                                   */
-/*                                                                          */
-/*  - Space Invaders Deluxe still says Space Invaders Part II,              */
-/*    because according to KLOV, Midway was only allowed to make minor      */
-/*    modifications of the Taito code.                                      */
-/*                                                                          */
-/*  - DIP Locations verified from manual for:                               */
-/*      -sitv                                                               */
-/*      -sicv                                                               */
-/*      -invadpt2                                                           */
-/*      -lrescue                                                            */
-/*      -invasion                                                           */
-/*                                                                          */
-/*  - The Taito Space invaders hardware comes on at least five board types;
+/*****************************************************************************
+
+    8080bw.c
+
+    Michael Strutts, Nicola Salmoria, Tormod Tjaberg, Mirko Buffoni
+    Lee Taylor, Valerio Verrando, Marco Cassili, Zsolt Vasvari and others
+
+
+    Notes:
+    -----
+
+    - Space Invaders Deluxe still says Space Invaders Part II,
+      because according to KLOV, Midway was only allowed to make minor
+      modifications of the Taito code.
+
+    - DIP settings/locations verified from manual for:
+      sitv, sicv, invadpt2, lrescue, invasion, invrvnge
+
+    - The Taito Space invaders hardware comes on at least five board types;
       The Taito manufactured ones are:
       * The "L-shaped" PCB set, Upright, B&W only
       * Three pcbs in a stack, often called the '3 layer pcb set' (most common)
@@ -60,7 +56,7 @@
             - has the main B&W video generation logic on it
             - has the larger connection to the PSU, and B&W composite output "T" connector
         * 2 layer pcb set details:
-          * This pcb set came in one version: PVN, and is entirely exchangable
+          * This pcb set came in one version: PVN, and is entirely exchangeable
             with the 3 layer PVN pcb set.
           * Top pcb is same as 3 layer pcb set
           * Bottom pcb combines the function of the Middle and Bottom pcbs
@@ -104,92 +100,92 @@
          UV1, UV2, UV3, UV4, UV5, UV6, UV7, UV8, UV9, UV10 w/proms - undumped (probably same as pvxx set just split differently)
          PV01, PV02, PV03, PV04, PV05 w/proms - invadpt2
 
-      - Midway PCB sets: (cursory descripton)
-         NOTE: The discrete components, particularly for the shot sound, differ between Taito and Midway audio daughterboards.
-         TODO: figure out the difference between the Taito and Midway discrete boards and emulate them both properly. Figure out what the current discrete setup is trying to emulate.
-         * All Midway Space Invaders games ([Space Invader Upright], [Space Invader Cocktail], [Deluxe Space Invaders Upright], [Deluxe Space Invaders Cocktail], and [Space Invaders II]) use the same 8080 mainboard, with no emulation-relevant differences between revisions.
-         * [Space Invaders II] from Midway (only produced as a cocktail) uses an extra sound board for the simultaneous 2 player head-to-head sounds.
-         TODO: remove Space Invader 'invaders' set from mw8080bw.c, it does not belong there at all
+    - Midway PCB sets: (cursory descripton)
+      * All Midway Space Invaders games ([Space Invader Upright], [Space Invader Cocktail],
+        [Deluxe Space Invaders Upright], [Deluxe Space Invaders Cocktail], and [Space Invaders II])
+        use the same 8080 mainboard, with no emulation-relevant differences between revisions.
+      * [Space Invaders II] from Midway (only produced as a cocktail) uses
+        an extra sound board for the simultaneous 2 player head-to-head sounds.
 
-      - Taito-USA-made 'trimline' PCBS do not match the taito pcbs either.
-*/
-/*  To Do:                                                                  */
-/*  -----                                                                   */
-/*                                                                          */
-/*  - Space Chaser (schaser)                                                */
-/*    1. The "missile" sound is incorrect. This is how it should be:        */
-/*       It should be a constant "klunkity-klunk", and should only be       */
-/*       heard while missiles are seen to be moving.  When the red          */
-/*       missiles speed up, there should be more "klunks per second"        */
-/*       with the pitch staying constant.                                   */
-/*      8/8/8 D.R. - Who says?  According to the schematic the sounds are   */
-/*       correct.  Make a video showing otherwise or trace SX0 & SX1 on     */
-/*       a real PCB to find the difference.                                 */
-/*       Currently it beeps every time a player eats a dot.  Seems right.   */
-/*    2. If "Hard" mode is selected, numerous bugs appear which             */
-/*       could be either an emulation fault or a bad rom. Some              */
-/*       bugs are:                                                          */
-/*       a. Graphic error halfway up the left side                          */
-/*       b. Score adds or subtracts random amounts                          */
-/*       c. Score not cleared when starting a new game                      */
-/*       d. Game begins on the wrong level                                  */
-/*                                                                          */
-/*  - Space War (Sanritsu)                                                  */
-/*                                                                          */
-/*    1. I seem to recall that the flashing ufo had its own sample          */
-/*       sound, a sort of rattling noise. Unable to find evidence           */
-/*       of this (so far).                                                  */
-/*                                                                          */
-/*                                                                          */
-/* Change Log:                                                              */
-/* ----------                                                               */
-/*                                                                          */
-/* 24 Dec 1998 - added sitv [LT]                                            */
-/*                                                                          */
-/* 21 Nov 1999 - added spacewar3 [LT]                                       */
-/*                                                                          */
-/* 26 May 2001 - added galxwars                                             */
-/*                     galxwar2 (galxwars2)                                 */
-/*                     jspectr2 (jspecter2)                                 */
-/*                     ozmawar2 (ozmawars2)                                 */
-/*                     spaceatt                                             */
-/*                     sstrangr                                             */
-/*                                                                          */
-/* 26 May 2001 - changed galxwars input port so the new sets work           */
-/*                                                                          */
-/* 30 Jul 2001 - added sstrngr2                                             */
-/*                                                                          */
-/* 17 Jul 2006 - schaser - connect up prom - fix dipswitches                */
-/*               schasrcv (schasercv) - allow bottom line to show on screen */
-/*                                                                          */
-/*                                                                          */
-/* 10 Sep 2006 - invadpt2 - add name reset button                           */
-/*               spcewars - add bitstream circuit, fix dipswitches          */
-/*                                                                          */
-/*                                                                          */
-/* 13 Dec 2006 - add PRELIMINARY sound support and documentation to:        */
-/*               rollingc, spcenctr, gunfight, m4, gmissile,                */
-/*               schasrcv (schasercv), 280zzzap, lagunar, lupin3, phantom2, */
-/*       blueshrk, desertgu, ballbomb, yosakdon/yosakdoa (yosakdona)*/
-/*               shuttlei, invrvnge/invrvnga (invrvngea).                   */
-/*               Documented indianbt sound. Removed NO_SOUND flag from      */
-/*               cosmo and dogpatch as the sound was already working.       */
-/*               [Robert]                                                   */
-/*                                                                          */
-/* 02 May 2007 - Major clean-up of driver and video system                  */
-/*                                                                          */
-/****************************************************************************/
+    - Taito-USA-made 'trimline' PCBS do not match the taito pcbs either.
+
+
+    To Do:
+    -----
+
+    - Midway PCB sets
+      * The discrete components, particularly for the shot sound, differ
+        between Taito and Midway audio daughterboards.
+        + Figure out the difference between the Taito and Midway discrete
+          boards and emulate them both properly.
+        + Figure out what the current discrete setup is trying to emulate.
+      * Remove Space Invaders 'invaders' set from mw8080bw.c, it does not belong
+        there at all
+
+    - Space Chaser (schaser)
+      1. Schematic has SX2 & 4 swapped by mistake.
+
+      2. Dipswitch 4 we have listed as "Easy/Hard", however the manual says
+         it should not be used. The Hard position displays many bugs.
+
+      3. Confirmation of these on a real machine (schaserb set) have been
+         received from the owner of the PCB.
+        "Hi Rob,
+         I seem to get the same bugs as you with Dip4 set to off.  Score starts at 9000,
+         2 missiles on first level etc..  It makes no mention of dip4 adjusting the hardness
+         in the manual, are you guys sure that's what it was intended for "in the factory"?
+         However you were correct in thinking the schematics were wrong.  My multimeter found
+         the following:
+         15k resistor - pin 7
+         39k - pin 10
+         82k - pin 12
+         It looks like they have Sx2 and Sx4 the wrong way round on a latter page of the schematics."
+           Thanks to Andy Raven for getting this information.
+
+      4. The "Hard" mode bug can be fixed with a single byte patch: ROM_FILL( 0x47e5, 1, 0xc3)
+
+      5. I have seen real machines with Hard mode set, that worked properly, thus there
+         must be yet another romset still waiting to be found.
+
+      6. Strange bug; sometimes the missile sound continues into and past the
+         music/explosion. This didn't happen on the real machines I played.
+
+    - Space Chaser (schasercv)
+         These cheats exist in this game:
+         1. Hold down 2P DOWN (the F key) while it says INSERT COIN. Then
+            insert a coin and play. You will have 2 extra ships.
+         2. In the Hard difficulty setting, you normally start at level 4.
+            Hold down the 1P START (the 1 key) while it says INSERT COIN.
+            Then insert a coin and play. You will start at level 5.
+
+    - Space War (Sanritsu)
+      * I seem to recall that the flashing ufo had its own sample
+        sound, a sort of rattling noise. Unable to find evidence
+        of this (so far).
+
+    - Steel Worker, Space Combat
+        Holding down the coin button causes the credits to rapidly increase.
+
+    - Solfight
+        On the stage with rolling balls, lots of random dashes appear.
+
+
+*****************************************************************************/
 
 #include "emu.h"
 #include "cpu/m6800/m6800.h"
 #include "cpu/i8085/i8085.h"
 #include "machine/mb14241.h"
+#include "machine/eeprom.h"
+#include "sound/ay8910.h"
 #include "sound/speaker.h"
-#include "deprecat.h"
 #include "includes/8080bw.h"
 
-#include "invrvnge.lh"
+#include "cosmicm.lh"
+#include "galactic.lh"
 #include "shuttlei.lh"
+#include "spacecom.lh"
+
 
 /*******************************************************/
 /*                                                     */
@@ -197,11 +193,11 @@
 /*                                                     */
 /*******************************************************/
 
-static MACHINE_START( extra_8080bw )
+MACHINE_START_MEMBER(_8080bw_state,extra_8080bw)
 {
-	MACHINE_START_CALL(extra_8080bw_sh);
-	MACHINE_START_CALL(extra_8080bw_vh);
-	MACHINE_START_CALL(mw8080bw);
+	MACHINE_START_CALL_MEMBER(extra_8080bw_sh);
+	MACHINE_START_CALL_MEMBER(extra_8080bw_vh);
+	MACHINE_START_CALL_MEMBER(mw8080bw);
 }
 
 /*******************************************************/
@@ -226,23 +222,23 @@ static INPUT_PORTS_START( sicv )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_START2 )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_START1 )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	PORT_BIT( 0x70, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(invaders_in1_control_r, NULL)
+	PORT_BIT( 0x70, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, mw8080bw_state,invaders_in1_control_r, NULL)
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 
 	PORT_START("IN2")
-	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Lives ) )		PORT_DIPLOCATION("SW1:1,2")
+	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW1:1,2")
 	PORT_DIPSETTING(    0x00, "3" )
 	PORT_DIPSETTING(    0x01, "4" )
 	PORT_DIPSETTING(    0x02, "5" )
 	PORT_DIPSETTING(    0x03, "6" )
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_TILT )			PORT_DIPLOCATION("SW1:3")
-	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Bonus_Life ) )	PORT_DIPLOCATION("SW1:4")
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_TILT )          PORT_DIPLOCATION("SW1:3")
+	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION("SW1:4")
 	PORT_DIPSETTING(    0x08, "1000" )
 	PORT_DIPSETTING(    0x00, "1500" )
 	/* SW1:5,6,7: In OFF, PL2 can have no control of joystick, going auto left/right and other problems like no laser gun.
-    Be sure these are always ON */
-	PORT_BIT( 0x70, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(invaders_in2_control_r, NULL) PORT_DIPLOCATION("SW1:5,6,7") /* Labeled as "FACTORY" */
-	PORT_DIPNAME( 0x80, 0x00, "Coin Info" )				PORT_DIPLOCATION("SW1:8")
+	Be sure these are always ON */
+	PORT_BIT( 0x70, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, mw8080bw_state,invaders_in2_control_r, NULL) PORT_DIPLOCATION("SW1:5,6,7") /* Labeled as "FACTORY" */
+	PORT_DIPNAME( 0x80, 0x00, "Coin Info" )             PORT_DIPLOCATION("SW1:8")
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
@@ -256,6 +252,8 @@ static INPUT_PORTS_START( sicv )
 	INVADERS_CAB_TYPE_PORT
 INPUT_PORTS_END
 
+
+
 /*******************************************************/
 /*                                                     */
 /* Space Invaders TV Version (Taito)                   */
@@ -263,7 +261,6 @@ INPUT_PORTS_END
 /*******************************************************/
 
 /* same as the CV version with a test mode switch */
-
 static INPUT_PORTS_START( sitv )
 	PORT_INCLUDE( sicv )
 
@@ -273,6 +270,8 @@ static INPUT_PORTS_START( sitv )
 	PORT_MODIFY("IN1")
 	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 INPUT_PORTS_END
+
+
 
 /*******************************************************/
 /*                                                     */
@@ -296,30 +295,34 @@ static INPUT_PORTS_START( alieninv )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_START2 )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_START1 )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 )
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY
+	PORT_BIT( 0x70, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, mw8080bw_state,invaders_in1_control_r, NULL)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 
 	PORT_START("IN2")
-	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Lives ) )		PORT_DIPLOCATION("SW1:1")
+	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW1:1")
 	PORT_DIPSETTING(    0x00, "2" )
 	PORT_DIPSETTING(    0x01, "3" )
-	PORT_DIPNAME( 0x02, 0x02, "Pence Coinage" )		PORT_DIPLOCATION("SW1:2")
+	PORT_DIPNAME( 0x02, 0x02, "Pence Coinage" )     PORT_DIPLOCATION("SW1:2")
 	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_COIN2 )		PORT_DIPLOCATION("SW1:3") /* Pence Coin */
-	PORT_DIPUNKNOWN_DIPLOC( 0x08, 0x08, "SW1:4" )	/* Not bonus */
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(2)			PORT_DIPLOCATION("SW1:5")
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_PLAYER(2)	PORT_DIPLOCATION("SW1:6")
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_PLAYER(2)	PORT_DIPLOCATION("SW1:7")
-	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Coinage ) )					PORT_DIPLOCATION("SW1:8")
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_COIN2 )     PORT_DIPLOCATION("SW1:3") /* Pence Coin */
+	PORT_DIPUNKNOWN_DIPLOC( 0x08, 0x08, "SW1:4" )   /* Not bonus */
+	PORT_BIT( 0x70, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, mw8080bw_state,invaders_in2_control_r, NULL) PORT_DIPLOCATION("SW1:5,6,7")
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Coinage ) )                  PORT_DIPLOCATION("SW1:8")
 	PORT_DIPSETTING(    0x00, "2C/1C 50p/3C (+ Bonus Life)" )
 	PORT_DIPSETTING(    0x80, "1C/1C 50p/5C" )
+
+	/* Dummy controls port, P1 */
+	INVADERS_CONTROL_PORT_P1
+
+	/* Dummy controls port, P2 */
+	INVADERS_CONTROL_PORT_P2
 
 	/* Dummy port for cocktail mode */
 	INVADERS_CAB_TYPE_PORT
 INPUT_PORTS_END
+
+
 
 /*******************************************************/
 /*                                                     */
@@ -336,18 +339,20 @@ static INPUT_PORTS_START( invadrmr )
 	PORT_DIPSETTING(    0x08, "3000" ) /* This is different to invaders */
 INPUT_PORTS_END
 
+
+
 /*******************************************************/
 /*                                                     */
 /* Midway "Space Invaders Part II"                     */
 /*                                                     */
 /*******************************************************/
 
-static ADDRESS_MAP_START( invadpt2_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( invadpt2_io_map, AS_IO, 8, _8080bw_state )
 	AM_RANGE(0x00, 0x00) AM_READ_PORT("IN0")
 	AM_RANGE(0x01, 0x01) AM_READ_PORT("IN1")
-	AM_RANGE(0x02, 0x02) AM_READ_PORT("IN2") AM_DEVWRITE("mb14241", mb14241_shift_count_w)
-	AM_RANGE(0x03, 0x03) AM_DEVREAD("mb14241", mb14241_shift_result_r) AM_WRITE(invadpt2_sh_port_1_w)
-	AM_RANGE(0x04, 0x04) AM_DEVWRITE("mb14241", mb14241_shift_data_w)
+	AM_RANGE(0x02, 0x02) AM_READ_PORT("IN2") AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_count_w)
+	AM_RANGE(0x03, 0x03) AM_DEVREAD_LEGACY("mb14241", mb14241_shift_result_r) AM_WRITE(invadpt2_sh_port_1_w)
+	AM_RANGE(0x04, 0x04) AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_data_w)
 	AM_RANGE(0x05, 0x05) AM_WRITE(invadpt2_sh_port_2_w)
 	AM_RANGE(0x06, 0x06) AM_WRITE(watchdog_reset_w)
 ADDRESS_MAP_END
@@ -378,13 +383,12 @@ INPUT_PORTS_END
 
 
 /* same as regular invaders, but with a color board added */
-
 static MACHINE_CONFIG_DERIVED_CLASS( invadpt2, mw8080bw_root, _8080bw_state )
 
 	/* basic machine hardware */
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_IO_MAP(invadpt2_io_map)
-	MCFG_MACHINE_START(extra_8080bw)
+	MCFG_MACHINE_START_OVERRIDE(_8080bw_state,extra_8080bw)
 
 	/* 60 Hz signal clocks two LS161. Ripple carry will */
 	/* reset circuit, if LS161 not cleared before.      */
@@ -395,12 +399,38 @@ static MACHINE_CONFIG_DERIVED_CLASS( invadpt2, mw8080bw_root, _8080bw_state )
 
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
-	MCFG_SCREEN_UPDATE(invadpt2)
+	MCFG_SCREEN_UPDATE_DRIVER(_8080bw_state, screen_update_invadpt2)
 
 	/* sound hardware */
 	MCFG_FRAGMENT_ADD(invaders_samples_audio)
-
 MACHINE_CONFIG_END
+
+
+
+/*******************************************************/
+/*                                                     */
+/* Space Ranger                                        */
+/*                                                     */
+/*******************************************************/
+
+static ADDRESS_MAP_START( spacerng_io_map, AS_IO, 8, _8080bw_state )
+	AM_RANGE(0x00, 0x00) AM_READ_PORT("IN0")
+	AM_RANGE(0x01, 0x01) AM_READ_PORT("IN1")
+	AM_RANGE(0x02, 0x02) AM_READ_PORT("IN2") AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_count_w)
+	AM_RANGE(0x03, 0x03) AM_DEVREAD_LEGACY("mb14241", mb14241_shift_result_r) AM_WRITE(invadpt2_sh_port_1_w)
+	AM_RANGE(0x04, 0x04) AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_data_w)
+	AM_RANGE(0x05, 0x05) AM_WRITE(spacerng_sh_port_2_w)
+	AM_RANGE(0x06, 0x06) AM_WRITE(watchdog_reset_w)
+ADDRESS_MAP_END
+
+static MACHINE_CONFIG_DERIVED_CLASS( spacerng, invadpt2, _8080bw_state )
+
+	/* basic machine hardware */
+	MCFG_CPU_MODIFY("maincpu")
+	MCFG_CPU_IO_MAP(spacerng_io_map)
+MACHINE_CONFIG_END
+
+
 
 /*******************************************************/
 /*                                                     */
@@ -408,12 +438,12 @@ MACHINE_CONFIG_END
 /*                                                     */
 /*******************************************************/
 
-static ADDRESS_MAP_START( spcewars_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( spcewars_io_map, AS_IO, 8, _8080bw_state )
 	AM_RANGE(0x00, 0x00) AM_READ_PORT("IN0")
 	AM_RANGE(0x01, 0x01) AM_READ_PORT("IN1")
-	AM_RANGE(0x02, 0x02) AM_READ_PORT("IN2") AM_DEVWRITE("mb14241", mb14241_shift_count_w)
-	AM_RANGE(0x03, 0x03) AM_DEVREAD("mb14241", mb14241_shift_result_r) AM_WRITE(spcewars_sh_port_w)
-	AM_RANGE(0x04, 0x04) AM_DEVWRITE("mb14241", mb14241_shift_data_w)
+	AM_RANGE(0x02, 0x02) AM_READ_PORT("IN2") AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_count_w)
+	AM_RANGE(0x03, 0x03) AM_DEVREAD_LEGACY("mb14241", mb14241_shift_result_r) AM_WRITE(spcewars_sh_port_w)
+	AM_RANGE(0x04, 0x04) AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_data_w)
 	AM_RANGE(0x05, 0x05) AM_WRITE(invadpt2_sh_port_2_w)
 ADDRESS_MAP_END
 
@@ -425,17 +455,13 @@ static INPUT_PORTS_START( spcewars )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 
 	PORT_MODIFY("IN2")
-	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Lives ) )		PORT_DIPLOCATION("SW1:1")
+	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW1:1")
 	PORT_DIPSETTING(    0x00, "3" )
 	PORT_DIPSETTING(    0x01, "4" )
 	PORT_DIPUNKNOWN_DIPLOC( 0x02, 0x00, "SW1:2" )
-	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Bonus_Life ) )	PORT_DIPLOCATION("SW1:4")
+	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION("SW1:4")
 	PORT_DIPSETTING(    0x00, "1500" )
 	PORT_DIPSETTING(    0x08, "2000" )
-
-	/* Dummy port for cocktail mode (not used) */
-	PORT_MODIFY(INVADERS_CAB_TYPE_PORT_TAG)
-	PORT_BIT( 0xff, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 INPUT_PORTS_END
 
 static MACHINE_CONFIG_DERIVED_CLASS( spcewars, mw8080bw_root, _8080bw_state )
@@ -443,7 +469,7 @@ static MACHINE_CONFIG_DERIVED_CLASS( spcewars, mw8080bw_root, _8080bw_state )
 	/* basic machine hardware */
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_IO_MAP(spcewars_io_map)
-	MCFG_MACHINE_START(extra_8080bw)
+	MCFG_MACHINE_START_OVERRIDE(_8080bw_state,extra_8080bw)
 
 	/* add shifter */
 	MCFG_MB14241_ADD("mb14241")
@@ -455,7 +481,12 @@ static MACHINE_CONFIG_DERIVED_CLASS( spcewars, mw8080bw_root, _8080bw_state )
 	MCFG_SOUND_ADD("speaker", SPEAKER_SOUND, 0)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.25)
 
+	/* video hardware */
+	MCFG_SCREEN_MODIFY("screen")
+	MCFG_SCREEN_UPDATE_DRIVER(_8080bw_state, screen_update_invaders)
 MACHINE_CONFIG_END
+
+
 
 /*******************************************************/
 /*                                                     */
@@ -463,14 +494,14 @@ MACHINE_CONFIG_END
 /*                                                     */
 /*******************************************************/
 
-static ADDRESS_MAP_START( astropal_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( astropal_io_map, AS_IO, 8, _8080bw_state )
 	ADDRESS_MAP_GLOBAL_MASK(0x7)
 	AM_RANGE(0x00, 0x00) AM_MIRROR(0x04) AM_READ_PORT("IN0")
 	AM_RANGE(0x01, 0x01) AM_MIRROR(0x04) AM_READ_PORT("IN1")
 	AM_RANGE(0x03, 0x03) AM_MIRROR(0x04) AM_READ_PORT("IN3")
 
-	AM_RANGE(0x03, 0x03) AM_DEVWRITE("discrete", invaders_audio_1_w)
-	AM_RANGE(0x05, 0x05) AM_DEVWRITE("discrete", invaders_audio_2_w)
+	AM_RANGE(0x03, 0x03) AM_WRITE(invaders_audio_1_w)
+	AM_RANGE(0x05, 0x05) AM_WRITE(invaders_audio_2_w)
 	AM_RANGE(0x06, 0x06) AM_WRITE(watchdog_reset_w)
 ADDRESS_MAP_END
 
@@ -481,7 +512,7 @@ static INPUT_PORTS_START( astropal )
 	PORT_DIPSETTING(    0x01, "3" )
 	PORT_DIPSETTING(    0x02, "4" )
 	PORT_DIPSETTING(    0x03, "5" )
-	PORT_BIT( 0xfc, IP_ACTIVE_LOW,  IPT_UNUSED )		/* never read */
+	PORT_BIT( 0xfc, IP_ACTIVE_LOW,  IPT_UNUSED )        /* never read */
 
 	PORT_START("IN1")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_COIN1 )
@@ -506,19 +537,18 @@ static INPUT_PORTS_START( astropal )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON3 )
 
 	/* Dummy port for cocktail mode (not used) */
-	INVADERS_CAB_TYPE_PORT
-	PORT_MODIFY(INVADERS_CAB_TYPE_PORT_TAG)
+	PORT_START(INVADERS_CAB_TYPE_PORT_TAG)
 	PORT_BIT( 0xff, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-
 INPUT_PORTS_END
 
-static MACHINE_CONFIG_DERIVED( astropal, invaders )
+static MACHINE_CONFIG_DERIVED_CLASS( astropal, invaders, _8080bw_state )
 
 	/* basic machine hardware */
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_IO_MAP(astropal_io_map)
-
 MACHINE_CONFIG_END
+
+
 
 /*******************************************************/
 /*                                                     */
@@ -526,15 +556,15 @@ MACHINE_CONFIG_END
 /*                                                     */
 /*******************************************************/
 
-static ADDRESS_MAP_START( cosmo_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( cosmo_map, AS_PROGRAM, 8, _8080bw_state )
 	AM_RANGE(0x0000, 0x1fff) AM_ROM
-	AM_RANGE(0x2000, 0x3fff) AM_RAM AM_BASE_SIZE_MEMBER(_8080bw_state, m_main_ram, m_main_ram_size)
+	AM_RANGE(0x2000, 0x3fff) AM_RAM AM_SHARE("main_ram")
 	AM_RANGE(0x4000, 0x57ff) AM_ROM
-	AM_RANGE(0x5c00, 0x5fff) AM_RAM AM_BASE_MEMBER(_8080bw_state, m_colorram)
+	AM_RANGE(0x5c00, 0x5fff) AM_RAM AM_SHARE("colorram")
 ADDRESS_MAP_END
 
 /* at least one of these MWA8_NOPs must be sound related */
-static ADDRESS_MAP_START( cosmo_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( cosmo_io_map, AS_IO, 8, _8080bw_state )
 	AM_RANGE(0x00, 0x00) AM_READ_PORT("IN0") AM_WRITENOP
 	AM_RANGE(0x01, 0x01) AM_READ_PORT("IN1") AM_WRITENOP
 	AM_RANGE(0x02, 0x02) AM_READ_PORT("IN2") AM_WRITENOP
@@ -552,7 +582,7 @@ static INPUT_PORTS_START( cosmo )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 
 	PORT_MODIFY("IN2")
-	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Lives ) )	PORT_DIPLOCATION("SW1:1")
+	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Lives ) )    PORT_DIPLOCATION("SW1:1")
 	PORT_DIPSETTING(    0x00, "3" )
 	PORT_DIPSETTING(    0x01, "5" )
 	PORT_DIPUNKNOWN_DIPLOC( 0x02, 0x00, "SW1:2" )
@@ -567,20 +597,21 @@ static MACHINE_CONFIG_DERIVED_CLASS( cosmo, mw8080bw_root, _8080bw_state )
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_PROGRAM_MAP(cosmo_map)
 	MCFG_CPU_IO_MAP(cosmo_io_map)
-	MCFG_MACHINE_START(extra_8080bw)
+	MCFG_MACHINE_START_OVERRIDE(_8080bw_state,extra_8080bw)
 
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
-	MCFG_SCREEN_UPDATE(cosmo)
+	MCFG_SCREEN_UPDATE_DRIVER(_8080bw_state, screen_update_cosmo)
 
 	/* sound hardware */
 	MCFG_FRAGMENT_ADD(invaders_samples_audio)
-
 MACHINE_CONFIG_END
+
+
 
 /*******************************************************/
 /*                                                     */
-/* ?????? "Super Earth Invasion"                       */
+/* bootleg "Super Earth Invasion"                      */
 /*                                                     */
 /*******************************************************/
 
@@ -591,34 +622,50 @@ static INPUT_PORTS_START( searthin )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 
 	PORT_MODIFY("IN2")
-	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Lives ) )	PORT_DIPLOCATION("SW1:1")
+	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Lives ) )    PORT_DIPLOCATION("SW1:1")
 	PORT_DIPSETTING(    0x00, "2" )
 	PORT_DIPSETTING(    0x01, "3" )
-	PORT_DIPNAME( 0x02, 0x02, "Pence Coinage" )		PORT_DIPLOCATION("SW1:2")
+	PORT_DIPNAME( 0x02, 0x02, "Pence Coinage" )     PORT_DIPLOCATION("SW1:2")
 	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_COIN2 )		PORT_DIPLOCATION("SW1:3") /* Pence Coin */
-	PORT_DIPUNKNOWN_DIPLOC( 0x08, 0x08, "SW1:4" )	/* Not bonus */
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Coinage ) )	PORT_DIPLOCATION("SW1:8")
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_COIN2 )     PORT_DIPLOCATION("SW1:3") /* Pence Coin */
+	PORT_DIPUNKNOWN_DIPLOC( 0x08, 0x08, "SW1:4" )   /* Not bonus */
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Coinage ) )  PORT_DIPLOCATION("SW1:8")
 	PORT_DIPSETTING(    0x00, "2C/1C 50p/3C (+ Bonus Life)" )
 	PORT_DIPSETTING(    0x80, "1C/1C 50p/5C" )
 INPUT_PORTS_END
 
 
+
 /*******************************************************/
 /*                                                     */
-/* ?????? "Space Attack II"                            */
+/* bootleg "Super Invaders (Zenitone-Microsec)"        */
 /*                                                     */
 /*******************************************************/
 
-static INPUT_PORTS_START( spaceatt )
+static INPUT_PORTS_START( sinvzen )
+	PORT_INCLUDE( sicv )
+
+	PORT_MODIFY("IN2")
+	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Coinage ) )  PORT_DIPLOCATION("SW1:8")
+	PORT_DIPSETTING(    0x80, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
+INPUT_PORTS_END
+
+/*******************************************************/
+/*                                                     */
+/* bootleg "Space Attack II"                           */
+/*                                                     */
+/*******************************************************/
+
+static INPUT_PORTS_START( spaceat2 )
 	PORT_INCLUDE( sicv )
 
 	PORT_MODIFY("IN2")
 	PORT_DIPUNKNOWN_DIPLOC( 0x10, 0x00, "SW1:5" )
 	PORT_DIPUNKNOWN_DIPLOC( 0x20, 0x00, "SW1:6" )
 	PORT_DIPUNKNOWN_DIPLOC( 0x40, 0x00, "SW1:7" )
-	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Coinage ) )	PORT_DIPLOCATION("SW1:8")
+	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Coinage ) )  PORT_DIPLOCATION("SW1:8")
 	PORT_DIPSETTING(    0x80, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
 
@@ -628,31 +675,153 @@ static INPUT_PORTS_START( spaceatt )
 INPUT_PORTS_END
 
 
+
+/*******************************************************/
+/*                                                     */
+/* bootleg "Space Combat", 1979                        */
+/*  8080A + 18MHz XTAL, SN76477, 10MHz XTAL            */
+/*  8*8116 2KB RAM(!), 8*1KB ROM, maybe some PROMs     */
+/*                                                     */
+/*  Preliminary emulation. PCB was working fine, but   */
+/*  it's not certain that this is a good dump          */
+/*                                                     */
+/* TODO:                                               */
+/*  - dip settings/locs need confirming                */
+/*  - it doesn't have a mb14241 video shifter?         */
+/*  - using space invaders audio as placeholder until  */
+/*    more is known about the sound hw                 */
+/*  - always in cocktail mode but flipscreen not found */
+/*                                                     */
+/*******************************************************/
+
+static INPUT_PORTS_START( spacecom )
+	PORT_START("IN0") // 5-pos dipsw at ic79 (row F)
+	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Lives ) )
+	PORT_DIPSETTING(    0x00, "3" )
+	PORT_DIPSETTING(    0x04, "5" )
+	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Bonus_Life ) )
+	PORT_DIPSETTING(    0x00, "2500" ) // not confirmed
+	PORT_DIPSETTING(    0x08, "1500" )
+	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(2)
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_PLAYER(2)
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_PLAYER(2)
+
+	PORT_START("IN1")
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 )
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_START2 )
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_START1 )
+	PORT_SERVICE( 0x08, IP_ACTIVE_HIGH )
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON1 )
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY
+
+	PORT_START("IN2")
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
+	PORT_BIT( 0xfe, IP_ACTIVE_HIGH, IPT_UNKNOWN ) // unused?
+
+	PORT_START(CABINET_PORT_TAG)        /* Dummy port for cocktail mode */
+	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )
+INPUT_PORTS_END
+
+
+static ADDRESS_MAP_START( spacecom_map, AS_PROGRAM, 8, _8080bw_state )
+	AM_RANGE(0x0000, 0x1fff) AM_ROM
+	AM_RANGE(0x2000, 0x3fff) AM_RAM AM_SHARE("main_ram") // other RAM not hooked up?
+ADDRESS_MAP_END
+
+static ADDRESS_MAP_START( spacecom_io_map, AS_IO, 8, _8080bw_state )
+	AM_RANGE(0x41, 0x41) AM_READ_PORT("IN0")
+	AM_RANGE(0x42, 0x42) AM_READ_PORT("IN1") AM_WRITE(invaders_audio_1_w)
+	AM_RANGE(0x44, 0x44) AM_READ_PORT("IN2") AM_WRITE(invaders_audio_2_w)
+ADDRESS_MAP_END
+
+MACHINE_CONFIG_START( spacecom, _8080bw_state )
+
+	/* basic machine hardware */
+	MCFG_CPU_ADD("maincpu", I8080A, XTAL_18MHz / 10) // divider guessed
+	// TODO: move irq handling away from mw8080.c, this game runs on custom hardware
+	MCFG_CPU_PROGRAM_MAP(spacecom_map)
+	MCFG_CPU_IO_MAP(spacecom_io_map)
+
+	MCFG_MACHINE_START_OVERRIDE(mw8080bw_state, mw8080bw)
+	MCFG_MACHINE_RESET_OVERRIDE(mw8080bw_state, mw8080bw)
+
+	/* video hardware */
+	MCFG_SCREEN_ADD("screen", RASTER)
+	MCFG_SCREEN_REFRESH_RATE(60)
+	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500))
+	MCFG_SCREEN_SIZE(32*8, 32*8)
+	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 0*8, 28*8-1)
+	MCFG_SCREEN_UPDATE_DRIVER(_8080bw_state, screen_update_spacecom)
+
+	/* sound hardware */
+	MCFG_FRAGMENT_ADD(invaders_audio)
+MACHINE_CONFIG_END
+
+DRIVER_INIT_MEMBER(_8080bw_state, spacecom)
+{
+	UINT8 *ROM = machine().root_device().memregion("maincpu")->base();
+
+	// bad byte: should be push a at RST 10h
+	ROM[0x10] = 0xf5;
+}
+
+
+
 /*******************************************************/
 /*                                                     */
 /* Zenitone Microsec "Invaders Revenge"                */
 /*                                                     */
 /*******************************************************/
 
-static ADDRESS_MAP_START( invrvnge_io_map, AS_IO, 8 )
+READ8_MEMBER(_8080bw_state::invrvnge_02_r)
+{
+	UINT8 data = ioport("IN2")->read();
+	if (m_flip_screen) return data;
+	return (data & 0x8f) | (ioport("IN1")->read() & 0x70);
+}
+
+static ADDRESS_MAP_START( invrvnge_io_map, AS_IO, 8, _8080bw_state )
 	AM_RANGE(0x00, 0x00) AM_READ_PORT("IN0")
 	AM_RANGE(0x01, 0x01) AM_READ_PORT("IN1")
-	AM_RANGE(0x02, 0x02) AM_READ_PORT("IN2") AM_DEVWRITE("mb14241", mb14241_shift_count_w)
-	AM_RANGE(0x03, 0x03) AM_DEVREAD("mb14241", mb14241_shift_result_r) AM_WRITE(invrvnge_sh_port_w)
-	AM_RANGE(0x04, 0x04) AM_DEVWRITE("mb14241", mb14241_shift_data_w)
+	AM_RANGE(0x02, 0x02) AM_READ(invrvnge_02_r) AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_count_w)
+	AM_RANGE(0x03, 0x03) AM_DEVREAD_LEGACY("mb14241", mb14241_shift_result_r) AM_WRITE(invrvnge_sh_port_1_w)
+	AM_RANGE(0x04, 0x04) AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_data_w)
+	AM_RANGE(0x05, 0x05) AM_WRITE(invrvnge_sh_port_2_w)
+	AM_RANGE(0x06, 0x06) AM_WRITE(watchdog_reset_w)
+ADDRESS_MAP_END
+
+static ADDRESS_MAP_START( invrvnge_sound_map, AS_PROGRAM, 8, _8080bw_state )
+	ADDRESS_MAP_UNMAP_HIGH
+	AM_RANGE(0x0000, 0xffff) AM_ROM // dummy prg map, TODO: decrypt ROM
 ADDRESS_MAP_END
 
 
 static INPUT_PORTS_START( invrvnge )
 	PORT_START("IN0")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNUSED )
+	PORT_DIPNAME( 0x06, 0x06, DEF_STR( Difficulty ) )       PORT_DIPLOCATION("SW1:5,6")
+	PORT_DIPSETTING(    0x00, DEF_STR( Easy ) )
+	PORT_DIPSETTING(    0x02, DEF_STR( Hard ) )
+	PORT_DIPSETTING(    0x04, DEF_STR( Harder ) )
+	PORT_DIPSETTING(    0x06, DEF_STR( Hardest ) )
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN ) // must be low or game won't boot [code: 0x1a9-1af]
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNUSED )
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNUSED )
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNUSED )
+	PORT_DIPNAME( 0x80, 0x80, "Fuel Destroyed by Comet" )   PORT_DIPLOCATION("SW1:7")
+	PORT_DIPSETTING(    0x00, "3" )
+	PORT_DIPSETTING(    0x80, "6" )
 
 	PORT_START("IN1")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_COIN1 )
@@ -660,24 +829,26 @@ static INPUT_PORTS_START( invrvnge )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_START1 )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 )
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  ) PORT_2WAY
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY
 	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 
 	PORT_START("IN2")
-	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Lives ) )									PORT_DIPLOCATION("SW1:1,2")
+	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Lives ) )            PORT_DIPLOCATION("SW1:1,2")
 	PORT_DIPSETTING(    0x00, "3" )
 	PORT_DIPSETTING(    0x01, "4" )
 	PORT_DIPSETTING(    0x02, "5" )
 	PORT_DIPSETTING(    0x03, "6" )
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_TILT )										PORT_DIPLOCATION("SW1:3")
-	PORT_DIPUNKNOWN_DIPLOC( 0x08, 0x00, "SW1:4" )
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(2)					PORT_DIPLOCATION("SW1:5")
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_PLAYER(2)	PORT_DIPLOCATION("SW1:6")
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_PLAYER(2)	PORT_DIPLOCATION("SW1:7")
-	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Coinage ) )									PORT_DIPLOCATION("SW1:8")
-	PORT_DIPSETTING(    0x80, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_TILT )
+	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Bonus_Life ) )       PORT_DIPLOCATION("SW1:4")
+	PORT_DIPSETTING(    0x00, "1500" )
+	PORT_DIPSETTING(    0x08, "2000" )
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(2)
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  ) PORT_2WAY PORT_PLAYER(2)
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_PLAYER(2)
+	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Coinage ) )          PORT_DIPLOCATION("SW1:8")
+	PORT_DIPSETTING(    0x80, DEF_STR( 2C_1C ) ) // 1 play 10p, 2 play 20p, 6 play 50p
+	PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) ) // 1 play 20p, 2 play 40p, 3 play 50p
 
 	/* Dummy port for cocktail mode */
 	INVADERS_CAB_TYPE_PORT
@@ -690,13 +861,25 @@ static MACHINE_CONFIG_DERIVED_CLASS( invrvnge, mw8080bw_root, _8080bw_state )
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_IO_MAP(invrvnge_io_map)
 
+	MCFG_CPU_ADD("audiocpu", M6808, XTAL_4MHz/2) // MC6808P
+	MCFG_CPU_PROGRAM_MAP(invrvnge_sound_map)
+
 	/* add shifter */
 	MCFG_MB14241_ADD("mb14241")
 
-	/* sound hardware */
-	MCFG_FRAGMENT_ADD(invaders_samples_audio)
+	MCFG_MACHINE_START_OVERRIDE(_8080bw_state,extra_8080bw)
 
+	/* video hardware */
+	MCFG_SCREEN_MODIFY("screen")
+	MCFG_SCREEN_UPDATE_DRIVER(_8080bw_state, screen_update_invadpt2)
+
+	/* sound hardware */
+	MCFG_SPEAKER_STANDARD_MONO("mono")
+
+	MCFG_SOUND_ADD("ay1", AY8910, XTAL_4MHz/2)
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.5)
 MACHINE_CONFIG_END
+
 
 
 /*******************************************************/
@@ -706,28 +889,64 @@ MACHINE_CONFIG_END
 /*******************************************************/
 
 static INPUT_PORTS_START( spclaser )
-	PORT_INCLUDE( invrvnge )
-
-	PORT_MODIFY("IN1")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 )
-	//PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_START2) /* This is not 2 Player ??? */
+	PORT_START("IN0")
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 
-//  PORT_START("IN2")   /* referenced by invaders_io_map, used in several drivers; this is fairly hacky */
-//  PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
+	PORT_START("IN1")
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 )
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_START2 ) /* This is not 2 Player ??? */
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_START1 )
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 )
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 
-	PORT_MODIFY("IN2")
+	// TODO: figure out where dipswitch is read, it's not IN0 or IN2 in the current implementation.
+	// ROM disassembly doesn't show any dipswitch reads on portmapped I/O, maybe the manual is for a different ROM set? (that we don't have the dump for)
+#if 0
+	// these are the settings according to Gameplan Intruder manual
+	PORT_DIPNAME( 0x03, 0x02, DEF_STR( Lives ) )            PORT_DIPLOCATION("SW1:1,2")
+	PORT_DIPSETTING(    0x00, "3" )
+	PORT_DIPSETTING(    0x01, "4" )
+	PORT_DIPSETTING(    0x02, "5" )
+	PORT_DIPSETTING(    0x03, "6" )
+	PORT_SERVICE_DIPLOC( 0x04, IP_ACTIVE_LOW, "SW1:3" )
+	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Bonus_Life ) )       PORT_DIPLOCATION("SW1:4")
+	PORT_DIPSETTING(    0x08, "1000" )
+	PORT_DIPSETTING(    0x00, "1500" )
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_DIPNAME( 0x80, 0x80, "Display Coinage" )           PORT_DIPLOCATION("SW:8")
+	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+#endif
+
+	PORT_START("IN2")
 	PORT_DIPUNKNOWN_DIPLOC( 0x01, 0x00, "SW1:1" )
 	PORT_DIPUNKNOWN_DIPLOC( 0x02, 0x00, "SW1:2" )
 	PORT_DIPUNKNOWN_DIPLOC( 0x04, 0x00, "SW1:3" )
-	PORT_DIPNAME( 0x80, 0x00, DEF_STR(Coinage) )		PORT_DIPLOCATION("SW1:8")
+	PORT_DIPUNKNOWN_DIPLOC( 0x08, 0x00, "SW1:4" )
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(2)
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_PLAYER(2)
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_PLAYER(2)
+	PORT_DIPNAME( 0x80, 0x00, DEF_STR(Coinage) )        PORT_DIPLOCATION("SW1:8")
 	PORT_DIPSETTING(    0x00, "1 Coin/1 Or 2 Players" )
 	PORT_DIPSETTING(    0x80, "1 Coin/1 Player  2 Coins/2 Players" )   /* Irrelevant, causes bugs */
 
 	/* Dummy port for cocktail mode (not used) */
-	PORT_MODIFY(CABINET_PORT_TAG)
+	PORT_START(CABINET_PORT_TAG)
 	PORT_BIT( 0xff, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 INPUT_PORTS_END
+
 
 
 /*******************************************************/
@@ -746,20 +965,34 @@ static INPUT_PORTS_START( galxwars )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 
 	PORT_MODIFY("IN2")
-	PORT_DIPNAME( 0x03, 0x01, DEF_STR( Lives ) )		PORT_DIPLOCATION("SW1:1,2")
+	PORT_DIPNAME( 0x03, 0x01, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW1:1,2")
 	PORT_DIPSETTING(    0x00, "2" )
 	PORT_DIPSETTING(    0x01, "3" )
 	PORT_DIPSETTING(    0x02, "4" )
 	PORT_DIPSETTING(    0x03, "5" )
 	PORT_DIPUNKNOWN_DIPLOC( 0x04, 0x00, "SW1:3" )
-	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Bonus_Life ) )	PORT_DIPLOCATION("SW1:4")
+	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION("SW1:4")
 	PORT_DIPSETTING(    0x00, "3000" )
 	PORT_DIPSETTING(    0x08, "5000" )
-	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Coinage ) )		PORT_DIPLOCATION("SW1:8")
-	PORT_DIPSETTING(    0x80, DEF_STR( 2C_1C ) )
+	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Coinage ) )      PORT_DIPLOCATION("SW1:8")
+	PORT_DIPSETTING(    0x80, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
 INPUT_PORTS_END
 
+static ADDRESS_MAP_START( starw1_io_map, AS_IO, 8, _8080bw_state )
+	AM_RANGE(0x01, 0x01) AM_READ_PORT("IN1")
+	AM_RANGE(0x02, 0x02) AM_READ_PORT("IN2")
+	AM_RANGE(0x03, 0x03) AM_WRITENOP    /* writes 9B at boot */
+	AM_RANGE(0x04, 0x04) AM_WRITE(invadpt2_sh_port_1_w)
+	AM_RANGE(0x05, 0x05) AM_WRITE(invadpt2_sh_port_2_w)
+	AM_RANGE(0x06, 0x06) AM_WRITE(watchdog_reset_w)
+	AM_RANGE(0x07, 0x07) AM_WRITENOP    /* writes 89 at boot */
+ADDRESS_MAP_END
+
+static MACHINE_CONFIG_DERIVED_CLASS( starw1, invadpt2, _8080bw_state )
+	MCFG_CPU_MODIFY("maincpu")
+	MCFG_CPU_IO_MAP(starw1_io_map)
+MACHINE_CONFIG_END
 
 /*******************************************************/
 /*                                                     */
@@ -767,12 +1000,12 @@ INPUT_PORTS_END
 /*                                                     */
 /*******************************************************/
 
-static ADDRESS_MAP_START( lrescue_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( lrescue_io_map, AS_IO, 8, _8080bw_state )
 	AM_RANGE(0x00, 0x00) AM_READ_PORT("IN0")
 	AM_RANGE(0x01, 0x01) AM_READ_PORT("IN1")
-	AM_RANGE(0x02, 0x02) AM_READ_PORT("IN2") AM_DEVWRITE("mb14241", mb14241_shift_count_w)
-	AM_RANGE(0x03, 0x03) AM_DEVREAD("mb14241", mb14241_shift_result_r) AM_WRITE(lrescue_sh_port_1_w)
-	AM_RANGE(0x04, 0x04) AM_DEVWRITE("mb14241", mb14241_shift_data_w)
+	AM_RANGE(0x02, 0x02) AM_READ_PORT("IN2") AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_count_w)
+	AM_RANGE(0x03, 0x03) AM_DEVREAD_LEGACY("mb14241", mb14241_shift_result_r) AM_WRITE(lrescue_sh_port_1_w)
+	AM_RANGE(0x04, 0x04) AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_data_w)
 	AM_RANGE(0x05, 0x05) AM_WRITE(lrescue_sh_port_2_w)
 ADDRESS_MAP_END
 
@@ -794,32 +1027,37 @@ static MACHINE_CONFIG_DERIVED_CLASS( lrescue, mw8080bw_root, _8080bw_state )
 	/* basic machine hardware */
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_IO_MAP(lrescue_io_map)
-	MCFG_MACHINE_START(extra_8080bw)
+	MCFG_MACHINE_START_OVERRIDE(_8080bw_state,extra_8080bw)
 
 	/* add shifter */
 	MCFG_MB14241_ADD("mb14241")
 
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
-	MCFG_SCREEN_UPDATE(invadpt2)
+	MCFG_SCREEN_UPDATE_DRIVER(_8080bw_state, screen_update_invadpt2)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("samples", SAMPLES, 0)
-	MCFG_SOUND_CONFIG(lrescue_samples_interface)
+	MCFG_SAMPLES_ADD("samples", lrescue_samples_interface)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.75)
 
 	/* extra audio channel */
 	MCFG_SOUND_ADD("speaker", SPEAKER_SOUND, 0)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.25)
-
 MACHINE_CONFIG_END
+
 
 
 /*******************************************************/
 /*                                                     */
 /* Universal "Cosmic Monsters"                         */
+/*  The dipswitches are as stated in the manual, but   */
+/*  some of them are incorrect.                        */
+/*  - You need at the very least 3000 points to get    */
+/*    a bonus life.                                    */
+/*  - The cabinet switch does nothing in the cpu, it   */
+/*    is all done by wires.                            */
 /*                                                     */
 /*******************************************************/
 
@@ -830,17 +1068,69 @@ static INPUT_PORTS_START( cosmicmo )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 
 	PORT_MODIFY("IN2")
-	PORT_DIPNAME( 0x03, 0x01, DEF_STR( Lives ) )		PORT_DIPLOCATION("SW1:1,2")
+	PORT_DIPNAME( 0x03, 0x01, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW1:1,2")
 	PORT_DIPSETTING(    0x00, "2" )
 	PORT_DIPSETTING(    0x01, "3" )
 	PORT_DIPSETTING(    0x02, "4" )
 	PORT_DIPSETTING(    0x03, "5" )
-	PORT_DIPUNKNOWN_DIPLOC( 0x04, 0x00, "SW1:3" )
-	PORT_DIPUNKNOWN_DIPLOC( 0x08, 0x00, "SW1:4" )
-	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Coinage ) )		PORT_DIPLOCATION("SW1:8")
+	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Cabinet ) )      PORT_DIPLOCATION("SW1:3")
+	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
+	PORT_DIPSETTING(    0x04, DEF_STR( Cocktail ) )
+	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION("SW1:4")
+	PORT_DIPSETTING(    0x00, "1500" )
+	PORT_DIPSETTING(    0x08, "2500" )
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(2)
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_PLAYER(2)
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_PLAYER(2)
+	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Coinage ) )      PORT_DIPLOCATION("SW1:8")
 	PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( 1C_2C ) )
+
+	PORT_MODIFY(CABINET_PORT_TAG)
+	PORT_BIT( 0xff, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 INPUT_PORTS_END
+
+WRITE8_MEMBER(_8080bw_state::cosmicmo_05_w)
+{
+	invaders_audio_2_w(space, offset, data);
+	m_flip_screen = BIT(data, 5) & BIT(ioport("IN2")->read(), 2);
+}
+
+static ADDRESS_MAP_START( cosmicmo_io_map, AS_IO, 8, _8080bw_state )
+	ADDRESS_MAP_GLOBAL_MASK(0x7)
+	AM_RANGE(0x00, 0x00) AM_MIRROR(0x04) AM_READ_PORT("IN0")
+	AM_RANGE(0x01, 0x01) AM_MIRROR(0x04) AM_READ_PORT("IN1")
+	AM_RANGE(0x02, 0x02) AM_MIRROR(0x04) AM_READ(invrvnge_02_r)
+	AM_RANGE(0x03, 0x03) AM_MIRROR(0x04) AM_DEVREAD_LEGACY("mb14241", mb14241_shift_result_r)
+
+	AM_RANGE(0x02, 0x02) AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_count_w)
+	AM_RANGE(0x03, 0x03) AM_WRITE(invaders_audio_1_w)
+	AM_RANGE(0x04, 0x04) AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_data_w)
+	AM_RANGE(0x05, 0x05) AM_WRITE(cosmicmo_05_w)
+	AM_RANGE(0x06, 0x06) AM_WRITE(watchdog_reset_w)
+ADDRESS_MAP_END
+
+static MACHINE_CONFIG_DERIVED_CLASS( cosmicmo, mw8080bw_root, _8080bw_state )
+
+	/* basic machine hardware */
+	MCFG_CPU_MODIFY("maincpu")
+	MCFG_CPU_IO_MAP(cosmicmo_io_map)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", _8080bw_state,  irq0_line_hold)
+
+	MCFG_MACHINE_START_OVERRIDE(_8080bw_state,extra_8080bw)
+
+	MCFG_WATCHDOG_VBLANK_INIT(255)
+
+	/* add shifter */
+	MCFG_MB14241_ADD("mb14241")
+
+	/* sound hardware */
+	MCFG_FRAGMENT_ADD(invaders_audio)
+
+	/* video hardware */
+	MCFG_SCREEN_MODIFY("screen")
+	MCFG_SCREEN_UPDATE_DRIVER(_8080bw_state, screen_update_invaders)
+MACHINE_CONFIG_END
 
 
 /*******************************************************/
@@ -853,24 +1143,26 @@ static INPUT_PORTS_START( invasion )
 	PORT_INCLUDE( sicv )
 
 	PORT_MODIFY("IN1")
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN2 )
 
 	PORT_MODIFY("IN2")
 	/* SW1:5-8 Unused according to manual. */
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Lives ) )		PORT_DIPLOCATION("SW1:4,3") /* Default is OFF, OFF (6) */
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW1:4,3") /* Default is OFF, OFF (6) */
 	PORT_DIPSETTING(    0x00, "3" )
 	PORT_DIPSETTING(    0x01, "4" )
 	PORT_DIPSETTING(    0x02, "5" )
 	PORT_DIPSETTING(    0x03, "6" )
-	PORT_DIPUNUSED_DIPLOC( 0x04, 0x04, "SW1:8" )		/* Default OFF */
-	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Bonus_Life ) )	PORT_DIPLOCATION("SW1:2") /* Default is ON (2500) */
+	PORT_DIPUNUSED_DIPLOC( 0x04, 0x04, "SW1:8" )        /* Default OFF */
+	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION("SW1:2") /* Default is ON (2500) */
 	PORT_DIPSETTING(    0x08, "1500" )
 	PORT_DIPSETTING(    0x00, "2500" )
 	/* SW1:5,6,7 Default ON */
-	PORT_DIPNAME( 0x80, 0x80, "Laser Bonus Info" )		PORT_DIPLOCATION("SW1:1") /* Default is OFF (Info on) */
+	PORT_DIPNAME( 0x80, 0x80, "Laser Bonus Info" )      PORT_DIPLOCATION("SW1:1") /* Default is OFF (Info on) */
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( On ) )
 INPUT_PORTS_END
+
 
 
 /*******************************************************/
@@ -888,34 +1180,37 @@ static INPUT_PORTS_START( superinv )
 
 	PORT_MODIFY("IN2")
 	PORT_DIPUNKNOWN_DIPLOC( 0x04, 0x00, "SW1:3" )
-	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Bonus_Life ) )	PORT_DIPLOCATION("SW1:4")
+	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION("SW1:4")
 	PORT_DIPSETTING(    0x08, "1500" )
 	PORT_DIPSETTING(    0x00, "2500" )
 	PORT_DIPUNKNOWN_DIPLOC( 0x80, 0x00, "SW1:8" )
 INPUT_PORTS_END
 
 
+
 /*******************************************************/
 /*                                                     */
 /* Nichibutsu "Rolling Crash"                          */
+/* Press left-arrow to play "Moon Base"                */
 /*                                                     */
 /*******************************************************/
 
-static ADDRESS_MAP_START( rollingc_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( rollingc_map, AS_PROGRAM, 8, _8080bw_state )
 	AM_RANGE(0x0000, 0x1fff) AM_ROM
-	AM_RANGE(0x2000, 0x3fff) AM_RAM AM_BASE_SIZE_MEMBER(_8080bw_state, m_main_ram, m_main_ram_size)
+	AM_RANGE(0x2000, 0x3fff) AM_RAM AM_SHARE("main_ram")
 	AM_RANGE(0x4000, 0x5fff) AM_ROM
-	AM_RANGE(0xa000, 0xbfff) AM_MIRROR(0x00e0) AM_RAM AM_BASE_MEMBER(_8080bw_state, m_colorram)
+	AM_RANGE(0xa000, 0xbfff) AM_MIRROR(0x00e0) AM_RAM AM_SHARE("colorram")
 	AM_RANGE(0xe400, 0xffff) AM_RAM
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( rollingc_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( rollingc_io_map, AS_IO, 8, _8080bw_state )
 	AM_RANGE(0x00, 0x00) AM_READ_PORT("IN0") AM_WRITE(rollingc_sh_port_w)
 	AM_RANGE(0x01, 0x01) AM_READ_PORT("IN1")
-	AM_RANGE(0x02, 0x02) AM_READ_PORT("IN2") AM_DEVWRITE("mb14241", mb14241_shift_count_w)
-	AM_RANGE(0x03, 0x03) AM_DEVREAD("mb14241", mb14241_shift_result_r)
-	AM_RANGE(0x04, 0x04) AM_DEVWRITE("mb14241", mb14241_shift_data_w)
+	AM_RANGE(0x02, 0x02) AM_READ_PORT("IN2") AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_count_w)
+	AM_RANGE(0x03, 0x03) AM_DEVREAD_LEGACY("mb14241", mb14241_shift_result_r) AM_WRITE(invadpt2_sh_port_1_w)
+	AM_RANGE(0x04, 0x04) AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_data_w)
+	AM_RANGE(0x05, 0x05) AM_WRITE(invadpt2_sh_port_2_w)
 ADDRESS_MAP_END
 
 
@@ -923,7 +1218,7 @@ static INPUT_PORTS_START( rollingc )
 	PORT_INCLUDE( sicv )
 
 	PORT_MODIFY("IN0")
-        /* Duplicate control required (both must be mapped to same key for input to work for game select and in-game) */
+	/* Duplicate control required (both must be mapped to same key for input to work for game select and in-game) */
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) /* Game Select */
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) /* Game Select */
 
@@ -932,10 +1227,6 @@ static INPUT_PORTS_START( rollingc )
 
 	PORT_MODIFY("IN2")
 	PORT_DIPUNKNOWN_DIPLOC( 0x08, 0x00, "SW1:4" )
-
-	/* Dummy port for cocktail mode (not used) */
-	PORT_MODIFY(CABINET_PORT_TAG)
-	PORT_BIT( 0xff, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 INPUT_PORTS_END
 
 static MACHINE_CONFIG_DERIVED_CLASS( rollingc, mw8080bw_root, _8080bw_state )
@@ -950,11 +1241,10 @@ static MACHINE_CONFIG_DERIVED_CLASS( rollingc, mw8080bw_root, _8080bw_state )
 
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
-	MCFG_SCREEN_UPDATE(rollingc)
+	MCFG_SCREEN_UPDATE_DRIVER(_8080bw_state, screen_update_rollingc)
 
 	/* sound hardware */
 	MCFG_FRAGMENT_ADD(invaders_samples_audio)
-
 MACHINE_CONFIG_END
 
 
@@ -965,20 +1255,20 @@ MACHINE_CONFIG_END
 /*                                                     */
 /*******************************************************/
 
-static ADDRESS_MAP_START( schaser_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( schaser_map, AS_PROGRAM, 8, _8080bw_state )
 	AM_RANGE(0x0000, 0x1fff) AM_ROM
-	AM_RANGE(0x2000, 0x3fff) AM_RAM AM_BASE_SIZE_MEMBER(_8080bw_state, m_main_ram, m_main_ram_size)
+	AM_RANGE(0x2000, 0x3fff) AM_RAM AM_SHARE("main_ram")
 	AM_RANGE(0x4000, 0x5fff) AM_ROM
-	AM_RANGE(0xc000, 0xdfff) AM_MIRROR(0x0060) AM_RAM AM_BASE_MEMBER(_8080bw_state, m_colorram)
+	AM_RANGE(0xc000, 0xdfff) AM_MIRROR(0x0060) AM_RAM AM_SHARE("colorram")
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( schaser_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( schaser_io_map, AS_IO, 8, _8080bw_state )
 	AM_RANGE(0x00, 0x00) AM_READ_PORT("IN0")
 	AM_RANGE(0x01, 0x01) AM_READ_PORT("IN1")
-	AM_RANGE(0x02, 0x02) AM_READ_PORT("IN2") AM_DEVWRITE("mb14241", mb14241_shift_count_w)
-	AM_RANGE(0x03, 0x03) AM_DEVREAD("mb14241", mb14241_shift_result_r) AM_WRITE(schaser_sh_port_1_w)
-	AM_RANGE(0x04, 0x04) AM_DEVWRITE("mb14241", mb14241_shift_data_w)
+	AM_RANGE(0x02, 0x02) AM_READ_PORT("IN2") AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_count_w)
+	AM_RANGE(0x03, 0x03) AM_DEVREAD_LEGACY("mb14241", mb14241_shift_result_r) AM_WRITE(schaser_sh_port_1_w)
+	AM_RANGE(0x04, 0x04) AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_data_w)
 	AM_RANGE(0x05, 0x05) AM_WRITE(schaser_sh_port_2_w)
 	AM_RANGE(0x06, 0x06) AM_WRITE(watchdog_reset_w)
 ADDRESS_MAP_END
@@ -991,8 +1281,11 @@ static INPUT_PORTS_START( schaser )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_4WAY PORT_PLAYER(2)
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_4WAY PORT_PLAYER(2)
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(2)
-	PORT_DIPUNKNOWN_DIPLOC( 0x20, 0x00, "SW1:5" )
-	PORT_DIPUNKNOWN_DIPLOC( 0x40, 0x00, "SW1:7" )
+	PORT_DIPNAME( 0x60, 0x00, "Hard Starting Level" )   PORT_DIPLOCATION("SW1:5,7")
+	PORT_DIPSETTING(    0x00, "3" )
+	PORT_DIPSETTING(    0x20, "4" )
+	PORT_DIPSETTING(    0x40, "5" )
+	PORT_DIPSETTING(    0x60, "6" )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNUSED )
 
 	PORT_START("IN1")
@@ -1005,30 +1298,23 @@ static INPUT_PORTS_START( schaser )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_START1 )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN1 )
 
-	PORT_START("IN2")	// port 2
-	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Lives ) )		PORT_DIPLOCATION("SW1:1,2")
+	PORT_START("IN2")   // port 2
+	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW1:1,2")
 	PORT_DIPSETTING(    0x00, "3" )
 	PORT_DIPSETTING(    0x01, "4" )
 	PORT_DIPSETTING(    0x02, "5" )
 	PORT_DIPSETTING(    0x03, "6" )
 	PORT_DIPUNKNOWN_DIPLOC( 0x04, 0x00, "SW1:3" )
-	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Difficulty ) )	PORT_DIPLOCATION("SW1:4")
+	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("SW1:4")
 	PORT_DIPSETTING(    0x00, DEF_STR( Easy ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( Hard ) )
 	// Name Reset - if name of high scorer was rude, owner can press this button
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_OTHER ) PORT_NAME("Name Reset") PORT_CODE(KEYCODE_F1)
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_TILT )
-	PORT_DIPNAME( 0x40, 0x00, "Number Of Controllers" )	PORT_DIPLOCATION("SW1:6")
-	PORT_DIPSETTING(    0x00, "1" )
-	PORT_DIPSETTING(    0x40, "2" )
+	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Cabinet ) )      PORT_DIPLOCATION("SW1:6")
+	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( Cocktail ) )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNUSED )
-
-	// port 3 (all 8 bits) connected to custom chip MB14241 driven by out port 2 and 4
-	// To get cocktail mode, turn this on, and choose 2 controllers.
-	PORT_START(CABINET_PORT_TAG)		/* Dummy port for cocktail mode */
-	PORT_CONFNAME( 0x01, 0x00, DEF_STR( Cabinet ) )
-	PORT_CONFSETTING(    0x00, DEF_STR( Upright ) )
-	PORT_CONFSETTING(    0x01, DEF_STR( Cocktail ) )
 
 	PORT_START("VR1")
 	PORT_ADJUSTER( 70, "VR1 - Music Volume" )
@@ -1040,35 +1326,37 @@ static INPUT_PORTS_START( schaser )
 	PORT_ADJUSTER( 70, "VR3 - Dot Volume" )
 INPUT_PORTS_END
 
-static MACHINE_START( schaser )
+MACHINE_START_MEMBER(_8080bw_state,schaser)
 {
-	MACHINE_START_CALL(schaser_sh);
-	MACHINE_START_CALL(extra_8080bw_vh);
-	MACHINE_START_CALL(mw8080bw);
+	MACHINE_START_CALL_MEMBER(schaser_sh);
+	MACHINE_START_CALL_MEMBER(extra_8080bw_vh);
+	MACHINE_START_CALL_MEMBER(mw8080bw);
 }
 
-static MACHINE_RESET( schaser )
+MACHINE_RESET_MEMBER(_8080bw_state,schaser)
 {
-	MACHINE_RESET_CALL(schaser_sh);
-	MACHINE_RESET_CALL(mw8080bw);
+	MACHINE_RESET_CALL_MEMBER(schaser_sh);
+	MACHINE_RESET_CALL_MEMBER(mw8080bw);
 }
 
 static MACHINE_CONFIG_DERIVED_CLASS( schaser, mw8080bw_root, _8080bw_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_REPLACE("maincpu",I8080,1996800)   	/* 19.968MHz / 10 */
+	MCFG_CPU_REPLACE("maincpu",I8080,1996800)       /* 19.968MHz / 10 */
 	MCFG_CPU_PROGRAM_MAP(schaser_map)
 	MCFG_CPU_IO_MAP(schaser_io_map)
 	MCFG_WATCHDOG_VBLANK_INIT(255)
-	MCFG_MACHINE_START(schaser)
-	MCFG_MACHINE_RESET(schaser)
+	MCFG_MACHINE_START_OVERRIDE(_8080bw_state,schaser)
+	MCFG_MACHINE_RESET_OVERRIDE(_8080bw_state,schaser)
+
+	MCFG_TIMER_DRIVER_ADD("schaser_sh_555", _8080bw_state, schaser_effect_555_cb)
 
 	/* add shifter */
 	MCFG_MB14241_ADD("mb14241")
 
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
-	MCFG_SCREEN_UPDATE(schaser)
+	MCFG_SCREEN_UPDATE_DRIVER(_8080bw_state, screen_update_schaser)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -1080,8 +1368,8 @@ static MACHINE_CONFIG_DERIVED_CLASS( schaser, mw8080bw_root, _8080bw_state )
 	MCFG_SOUND_ADD("discrete", DISCRETE, 0)
 	MCFG_SOUND_CONFIG_DISCRETE(schaser)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
-
 MACHINE_CONFIG_END
+
 
 
 /*******************************************************/
@@ -1090,38 +1378,62 @@ MACHINE_CONFIG_END
 /*                                                     */
 /*******************************************************/
 
-static ADDRESS_MAP_START( schasercv_io_map, AS_IO, 8 )
+
+READ8_MEMBER(_8080bw_state::schasercv_02_r)
+{
+	UINT8 data = ioport("IN2")->read();
+	if (m_flip_screen) return data;
+	UINT8 in1 = ioport("IN1")->read();
+	return (data & 0x89) | (in1 & 0x70) | (BIT(in1, 3) << 1) | (BIT(in1, 7) << 2);
+}
+
+static ADDRESS_MAP_START( schasercv_io_map, AS_IO, 8, _8080bw_state )
 	AM_RANGE(0x00, 0x00) AM_READ_PORT("IN0")
 	AM_RANGE(0x01, 0x01) AM_READ_PORT("IN1")
-	AM_RANGE(0x02, 0x02) AM_READ_PORT("IN2") AM_DEVWRITE("mb14241", mb14241_shift_count_w)
-	AM_RANGE(0x03, 0x03) AM_DEVREAD("mb14241", mb14241_shift_result_r) AM_WRITE(schasercv_sh_port_1_w)
-	AM_RANGE(0x04, 0x04) AM_DEVWRITE("mb14241", mb14241_shift_data_w)
+	AM_RANGE(0x02, 0x02) AM_READ(schasercv_02_r) AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_count_w)
+	AM_RANGE(0x03, 0x03) AM_DEVREAD_LEGACY("mb14241", mb14241_shift_result_r) AM_WRITE(schasercv_sh_port_1_w)
+	AM_RANGE(0x04, 0x04) AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_data_w)
 	AM_RANGE(0x05, 0x05) AM_WRITE(schasercv_sh_port_2_w)
 ADDRESS_MAP_END
 
 
 static INPUT_PORTS_START( schasercv )
-	PORT_INCLUDE( invrvnge )
+	PORT_START("IN0")
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 
-	PORT_MODIFY("IN1")
+	PORT_START("IN1")
+	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_COIN1 )
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_START2 )
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_START1 )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_4WAY
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_4WAY
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_4WAY
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_4WAY
 
-	PORT_MODIFY("IN2")
-	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Lives ) )									PORT_DIPLOCATION("SW1:1")
+	PORT_START("IN2")
+	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Lives ) )                                    PORT_DIPLOCATION("SW1:1")
 	PORT_DIPSETTING(    0x00, "3" )
 	PORT_DIPSETTING(    0x01, "4" )
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_4WAY PORT_PLAYER(2)	PORT_DIPLOCATION("SW1:2")
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_4WAY PORT_PLAYER(2)		PORT_DIPLOCATION("SW1:3")
-	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Difficulty ) )								PORT_DIPLOCATION("SW1:4")
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_4WAY PORT_PLAYER(2)    PORT_DIPLOCATION("SW1:2")
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_4WAY PORT_PLAYER(2)      PORT_DIPLOCATION("SW1:3")
+	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Difficulty ) )                               PORT_DIPLOCATION("SW1:4")
 	PORT_DIPSETTING(    0x00, DEF_STR( Easy ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( Hard ) )
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(2)					PORT_DIPLOCATION("SW1:5")
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_4WAY PORT_PLAYER(2)	PORT_DIPLOCATION("SW1:6")
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_4WAY PORT_PLAYER(2)	PORT_DIPLOCATION("SW1:7")
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(2)                    PORT_DIPLOCATION("SW1:5")
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_4WAY PORT_PLAYER(2)    PORT_DIPLOCATION("SW1:6")
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_4WAY PORT_PLAYER(2)   PORT_DIPLOCATION("SW1:7")
 	PORT_DIPUNKNOWN_DIPLOC( 0x80, 0x00, "SW1:8" )
+
+	/* Dummy port for cocktail mode */
+	INVADERS_CAB_TYPE_PORT
 INPUT_PORTS_END
 
 static MACHINE_CONFIG_DERIVED_CLASS( schasercv, mw8080bw_root, _8080bw_state )
@@ -1130,22 +1442,22 @@ static MACHINE_CONFIG_DERIVED_CLASS( schasercv, mw8080bw_root, _8080bw_state )
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_PROGRAM_MAP(schaser_map)
 	MCFG_CPU_IO_MAP(schasercv_io_map)
-	MCFG_MACHINE_START(extra_8080bw)
+	MCFG_MACHINE_START_OVERRIDE(_8080bw_state,extra_8080bw)
 
 	/* add shifter */
 	MCFG_MB14241_ADD("mb14241")
 
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
-	MCFG_SCREEN_UPDATE(schasercv)
+	MCFG_SCREEN_UPDATE_DRIVER(_8080bw_state, screen_update_schasercv)
 
 	/* sound hardware */
 	MCFG_FRAGMENT_ADD(invaders_samples_audio)
 
 	MCFG_SOUND_ADD("speaker", SPEAKER_SOUND, 0)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.25)
-
 MACHINE_CONFIG_END
+
 
 
 /*******************************************************/
@@ -1154,24 +1466,24 @@ MACHINE_CONFIG_END
 /*                                                     */
 /*******************************************************/
 
-static CUSTOM_INPUT( sflush_80_r )
+CUSTOM_INPUT_MEMBER(_8080bw_state::sflush_80_r)
 {
-	return (field->port->machine().primary_screen->vpos() & 0x80) ? 1 : 0;
+	return (machine().primary_screen->vpos() & 0x80) ? 1 : 0;
 }
 
-static ADDRESS_MAP_START( sflush_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sflush_map, AS_PROGRAM, 8, _8080bw_state )
 	AM_RANGE(0x0000, 0x1fff) AM_RAM
-	AM_RANGE(0x4000, 0x5fff) AM_RAM AM_BASE_SIZE_MEMBER(_8080bw_state, m_main_ram, m_main_ram_size)
+	AM_RANGE(0x4000, 0x5fff) AM_RAM AM_SHARE("main_ram")
 	AM_RANGE(0x8008, 0x8008) AM_READ_PORT("PADDLE")
-	AM_RANGE(0x8009, 0x8009) AM_DEVREAD("mb14241", mb14241_shift_result_r)
+	AM_RANGE(0x8009, 0x8009) AM_DEVREAD_LEGACY("mb14241", mb14241_shift_result_r)
 	AM_RANGE(0x800a, 0x800a) AM_READ_PORT("IN2")
 	AM_RANGE(0x800b, 0x800b) AM_READ_PORT("IN0")
-	AM_RANGE(0x8018, 0x8018) AM_DEVWRITE("mb14241", mb14241_shift_data_w)
-	AM_RANGE(0x8019, 0x8019) AM_DEVWRITE("mb14241", mb14241_shift_count_w)
+	AM_RANGE(0x8018, 0x8018) AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_data_w)
+	AM_RANGE(0x8019, 0x8019) AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_count_w)
 	AM_RANGE(0x801a, 0x801a) AM_WRITENOP
 	AM_RANGE(0x801c, 0x801c) AM_WRITENOP
 	AM_RANGE(0x801d, 0x801d) AM_WRITENOP
-	AM_RANGE(0xa000, 0xbfff) AM_MIRROR(0x0060) AM_RAM AM_BASE_MEMBER(_8080bw_state, m_colorram)
+	AM_RANGE(0xa000, 0xbfff) AM_MIRROR(0x0060) AM_RAM AM_SHARE("colorram")
 	AM_RANGE(0xd800, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
@@ -1198,7 +1510,7 @@ static INPUT_PORTS_START( sflush )
 	PORT_DIPNAME( 0x40, 0x00, "Coinage Display" )
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( On ) )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(sflush_80_r, NULL) // 128V?
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, _8080bw_state,sflush_80_r, NULL) // 128V?
 
 	PORT_START("PADDLE")
 	PORT_BIT( 0xff, 0x6a, IPT_PADDLE ) PORT_MINMAX(0x16,0xbf) PORT_SENSITIVITY(30) PORT_KEYDELTA(30) PORT_CENTERDELTA(0)
@@ -1210,41 +1522,51 @@ static MACHINE_CONFIG_DERIVED_CLASS( sflush, mw8080bw_root, _8080bw_state )
 	/* basic machine hardware */
 	MCFG_CPU_REPLACE("maincpu",M6800,1500000) // ?
 	MCFG_CPU_PROGRAM_MAP(sflush_map)
-	MCFG_CPU_VBLANK_INT_HACK(irq0_line_pulse,2)
-	MCFG_MACHINE_START(mw8080bw)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", _8080bw_state, irq0_line_hold)
+	MCFG_MACHINE_START_OVERRIDE(_8080bw_state,mw8080bw)
 
 	/* add shifter */
 	MCFG_MB14241_ADD("mb14241")
 
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
-	MCFG_SCREEN_UPDATE(sflush)
-
+	MCFG_SCREEN_UPDATE_DRIVER(_8080bw_state, screen_update_sflush)
 MACHINE_CONFIG_END
 
 
-/*******************************************************/
-/*                                                     */
-/* Taito "Lupin III"                                   */
-/*                                                     */
-/*******************************************************/
 
-static ADDRESS_MAP_START( lupin3_io_map, AS_IO, 8 )
-	AM_RANGE(0x00, 0x00) AM_READ_PORT("IN0")
+/*******************************************************************************************/
+/*                                                                                         */
+/* Taito "Lupin III"                                                                       */
+/*                                                                                         */
+/*  The rom at 5000 is optional. It contains code for colour ram, and all tunes except     */
+/*  when the moneybag has been stolen. If you remove this rom, bits 0 and 1 of port 0      */
+/*  must be set High. The colour will then be determined by the 2 proms instead. Bit 6     */
+/*  of port 5 will select which prom to use.                                               */
+/*                                                                                         */
+/*  Differences between the 2 sets:                                                        */
+/*  - Set 2 has a language selection switch. In the Japanese position, it looks            */
+/*    the same as set 1. Set 1 is always in Japanese.                                      */
+/*  - Set 1, bit 6 of port 3 activates when the wife is kicking the man.                   */
+/*  - The dogs and policemen are yellow in set 1, and different colours in set 2.          */
+/*                                                                                         */
+/*******************************************************************************************/
+
+static ADDRESS_MAP_START( lupin3_io_map, AS_IO, 8, _8080bw_state )
+	AM_RANGE(0x00, 0x00) AM_READ_PORT("IN0") AM_WRITE(lupin3_00_w)
 	AM_RANGE(0x01, 0x01) AM_READ_PORT("IN1")
-	AM_RANGE(0x02, 0x02) AM_READ_PORT("IN2") AM_DEVWRITE("mb14241", mb14241_shift_count_w)
-	AM_RANGE(0x03, 0x03) AM_DEVREAD("mb14241", mb14241_shift_result_r) AM_WRITE(lupin3_sh_port_1_w)
-	AM_RANGE(0x04, 0x04) AM_DEVWRITE("mb14241", mb14241_shift_data_w)
+	AM_RANGE(0x02, 0x02) AM_READ_PORT("IN2") AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_count_w)
+	AM_RANGE(0x03, 0x03) AM_DEVREAD_LEGACY("mb14241", mb14241_shift_result_r) AM_WRITE(lupin3_sh_port_1_w)
+	AM_RANGE(0x04, 0x04) AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_data_w)
 	AM_RANGE(0x05, 0x05) AM_WRITE(lupin3_sh_port_2_w)
 	AM_RANGE(0x06, 0x06) AM_WRITE(watchdog_reset_w)
 ADDRESS_MAP_END
 
 
 static INPUT_PORTS_START( lupin3 )
-	PORT_INCLUDE( invrvnge )
-
-	PORT_MODIFY("IN0")
-	PORT_BIT( 0x03, IP_ACTIVE_LOW,  IPT_UNKNOWN )
+	PORT_START("IN0")
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_TILT )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_BUTTON1) PORT_COCKTAIL
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_4WAY PORT_COCKTAIL
@@ -1252,19 +1574,26 @@ static INPUT_PORTS_START( lupin3 )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_4WAY PORT_COCKTAIL
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_4WAY PORT_COCKTAIL
 
-	PORT_MODIFY("IN1")
+	PORT_START("IN1")
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 )
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_START2 )
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_START1 )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_BUTTON1 )
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_4WAY
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_4WAY
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_4WAY
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_4WAY
 
-	PORT_MODIFY("IN2")
-	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Cabinet ) )		PORT_DIPLOCATION("SW1:3")
+	PORT_START("IN2")
+	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW1:1,2")
+	PORT_DIPSETTING(    0x00, "3" )
+	PORT_DIPSETTING(    0x01, "4" )
+	PORT_DIPSETTING(    0x02, "5" )
+	PORT_DIPSETTING(    0x03, "6" )
+	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Cabinet ) )      PORT_DIPLOCATION("SW1:3")
 	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( Cocktail ) )
-	PORT_DIPNAME( 0x08, 0x00, "Bags To Collect" )		PORT_DIPLOCATION("SW1:4")
+	PORT_DIPNAME( 0x08, 0x00, "Bags To Collect" )       PORT_DIPLOCATION("SW1:4")
 	PORT_DIPSETTING(    0x08, "2" )
 	PORT_DIPSETTING(    0x00, "8" )
 	PORT_DIPUNUSED_DIPLOC( 0x10, 0x00, "SW1:5" )
@@ -1276,41 +1605,16 @@ static INPUT_PORTS_START( lupin3 )
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( lupin3a )
-	PORT_INCLUDE( invrvnge )
+	PORT_INCLUDE( lupin3 )
 
 	PORT_MODIFY("IN0")
-	//PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNKNOWN ) /* selects color mode (dynamic vs. static) */
-	//PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN ) /* something has to do with sound */
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_TILT )
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_BUTTON1) PORT_COCKTAIL
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_4WAY PORT_COCKTAIL
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_4WAY PORT_COCKTAIL
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_4WAY PORT_COCKTAIL
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_4WAY PORT_COCKTAIL
-
-	PORT_MODIFY("IN1")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 )
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_BUTTON1 )
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_4WAY
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_4WAY
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_4WAY
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_4WAY
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNKNOWN ) /* selects color mode (dynamic vs. static) */
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN ) /* something has to do with sound */
 
 	PORT_MODIFY("IN2")
-	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Cabinet ) )		PORT_DIPLOCATION("SW1:3")
-	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
-	PORT_DIPSETTING(    0x04, DEF_STR( Cocktail ) )
-	PORT_DIPNAME( 0x08, 0x00, "Bags To Collect" )		PORT_DIPLOCATION("SW1:4")
-	PORT_DIPSETTING(    0x08, "2" )
-	PORT_DIPSETTING(    0x00, "8" )
-	PORT_DIPNAME( 0x10, 0x00, DEF_STR( Language ) )		PORT_DIPLOCATION("SW1:5")
+	PORT_DIPNAME( 0x10, 0x00, DEF_STR( Language ) )     PORT_DIPLOCATION("SW1:5")
 	PORT_DIPSETTING(    0x00, DEF_STR( English ) )
 	PORT_DIPSETTING(    0x10, DEF_STR( Japanese ) )
-	PORT_DIPUNUSED_DIPLOC( 0x20, 0x00, "SW1:6" )
-	PORT_DIPUNUSED_DIPLOC( 0x40, 0x00, "SW1:7" )
-	PORT_DIPNAME(0x80,  0x00, "Invulnerability (Cheat)") PORT_DIPLOCATION("SW1:8")
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x80, DEF_STR( On ) )
 INPUT_PORTS_END
 
 static MACHINE_CONFIG_DERIVED_CLASS( lupin3, mw8080bw_root, _8080bw_state )
@@ -1318,18 +1622,28 @@ static MACHINE_CONFIG_DERIVED_CLASS( lupin3, mw8080bw_root, _8080bw_state )
 	/* basic machine hardware */
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_IO_MAP(lupin3_io_map)
-	MCFG_MACHINE_START(extra_8080bw)
+	MCFG_MACHINE_START_OVERRIDE(_8080bw_state,extra_8080bw)
 
 	/* add shifter */
 	MCFG_MB14241_ADD("mb14241")
 
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
-	MCFG_SCREEN_UPDATE(indianbt)
+	MCFG_SCREEN_UPDATE_DRIVER(_8080bw_state, screen_update_indianbt)
 
 	/* sound hardware */
-	MCFG_FRAGMENT_ADD(invaders_samples_audio)
+	MCFG_SPEAKER_STANDARD_MONO("mono")
 
+	MCFG_SOUND_ADD("snsnd", SN76477, 0)
+	MCFG_SOUND_CONFIG(lupin3_sn76477_interface)
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.5)
+
+	MCFG_SAMPLES_ADD("samples", lupin3_samples_interface)
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
+
+	MCFG_SOUND_ADD("discrete", DISCRETE, 0)
+	MCFG_SOUND_CONFIG_DISCRETE(indianbt)
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 MACHINE_CONFIG_END
 
 static MACHINE_CONFIG_DERIVED_CLASS( lupin3a, mw8080bw_root, _8080bw_state )
@@ -1338,19 +1652,30 @@ static MACHINE_CONFIG_DERIVED_CLASS( lupin3a, mw8080bw_root, _8080bw_state )
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_PROGRAM_MAP(schaser_map)
 	MCFG_CPU_IO_MAP(lupin3_io_map)
-	MCFG_MACHINE_START(extra_8080bw)
+	MCFG_MACHINE_START_OVERRIDE(_8080bw_state,extra_8080bw)
 
 	/* add shifter */
 	MCFG_MB14241_ADD("mb14241")
 
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
-	MCFG_SCREEN_UPDATE(lupin3)
+	MCFG_SCREEN_UPDATE_DRIVER(_8080bw_state, screen_update_lupin3)
 
 	/* sound hardware */
-	MCFG_FRAGMENT_ADD(invaders_samples_audio)
+	MCFG_SPEAKER_STANDARD_MONO("mono")
 
+	MCFG_SOUND_ADD("snsnd", SN76477, 0)
+	MCFG_SOUND_CONFIG(lupin3_sn76477_interface)
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.5)
+
+	MCFG_SAMPLES_ADD("samples", lupin3_samples_interface)
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
+
+	MCFG_SOUND_ADD("discrete", DISCRETE, 0)
+	MCFG_SOUND_CONFIG_DISCRETE(indianbt)
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 MACHINE_CONFIG_END
+
 
 
 /*******************************************************/
@@ -1359,25 +1684,30 @@ MACHINE_CONFIG_END
 /*                                                     */
 /*******************************************************/
 
-static INTERRUPT_GEN( polaris_interrupt )
+INTERRUPT_GEN_MEMBER(_8080bw_state::polaris_interrupt)
 {
-	_8080bw_state *state = device->machine().driver_data<_8080bw_state>();
-	state->m_polaris_cloud_speed++;
+	m_polaris_cloud_speed++;
 
-	if (state->m_polaris_cloud_speed >= 4)	/* every 4 frames - this was verified against real machine */
+	if (m_polaris_cloud_speed >= 4) /* every 4 frames - this was verified against real machine */
 	{
-		state->m_polaris_cloud_speed = 0;
-		state->m_polaris_cloud_pos++;
+		m_polaris_cloud_speed = 0;
+		m_polaris_cloud_pos++;
 	}
 }
 
-static MACHINE_START( polaris )
+MACHINE_START_MEMBER(_8080bw_state,polaris)
 {
-	_8080bw_state *state = machine.driver_data<_8080bw_state>();
-	state->save_item(NAME(state->m_polaris_cloud_speed));
-	state->save_item(NAME(state->m_polaris_cloud_pos));
+	save_item(NAME(m_polaris_cloud_speed));
+	save_item(NAME(m_polaris_cloud_pos));
 
-	MACHINE_START_CALL(mw8080bw);
+	MACHINE_START_CALL_MEMBER(mw8080bw);
+}
+
+READ8_MEMBER(_8080bw_state::polaris_port00_r)
+{
+	UINT8 data = ioport("IN0")->read();
+	if (m_flip_screen) return data;
+	return (data & 7) | (ioport("IN1")->read() & 0xf8);
 }
 
 // Port 5 is used to reset the watchdog timer.
@@ -1386,21 +1716,19 @@ static MACHINE_START( polaris )
 // you will get a nice sound that accurately follows the plane.
 // It sounds better then the actual circuit used.
 // Probably an unfinished feature.
-static ADDRESS_MAP_START( polaris_io_map, AS_IO, 8 )
-	AM_RANGE(0x00, 0x00) AM_READ_PORT("IN0") AM_DEVWRITE("mb14241", mb14241_shift_count_w)
+static ADDRESS_MAP_START( polaris_io_map, AS_IO, 8, _8080bw_state )
+	AM_RANGE(0x00, 0x00) AM_READ(polaris_port00_r) AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_count_w)
 	AM_RANGE(0x01, 0x01) AM_READ_PORT("IN1")
-	AM_RANGE(0x02, 0x02) AM_READ_PORT("IN2") AM_DEVWRITE("discrete", polaris_sh_port_1_w)
-	AM_RANGE(0x03, 0x03) AM_DEVREADWRITE("mb14241", mb14241_shift_result_r, mb14241_shift_data_w)
-	AM_RANGE(0x04, 0x04) AM_DEVWRITE("discrete", polaris_sh_port_2_w)
+	AM_RANGE(0x02, 0x02) AM_READ_PORT("IN2") AM_WRITE(polaris_sh_port_1_w)
+	AM_RANGE(0x03, 0x03) AM_DEVREADWRITE_LEGACY("mb14241", mb14241_shift_result_r, mb14241_shift_data_w)
+	AM_RANGE(0x04, 0x04) AM_WRITE(polaris_sh_port_2_w)
 	AM_RANGE(0x05, 0x05) AM_WRITE(watchdog_reset_w)
-	AM_RANGE(0x06, 0x06) AM_DEVWRITE("discrete", polaris_sh_port_3_w)
+	AM_RANGE(0x06, 0x06) AM_WRITE(polaris_sh_port_3_w)
 ADDRESS_MAP_END
 
 
 static INPUT_PORTS_START( polaris )
-	PORT_INCLUDE( schaser )
-
-	PORT_MODIFY("IN0")
+	PORT_START("IN0")
 	PORT_DIPUNUSED_DIPLOC( 0x01, 0x00, "SW?:1" )
 	PORT_DIPUNUSED_DIPLOC( 0x02, 0x00, "SW?:2" )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_TILT )
@@ -1410,7 +1738,7 @@ static INPUT_PORTS_START( polaris )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(2)
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(2)
 
-	PORT_MODIFY("IN1")
+	PORT_START("IN1")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_START2 )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_START1 )
@@ -1420,19 +1748,21 @@ static INPUT_PORTS_START( polaris )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(1)
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(1)
 
-	PORT_MODIFY("IN2")
-	/* 0x04 should be Cabinet - Upright/Cocktail,
-       but until the cocktail hack is changed,
-       this will have to do. */
-	PORT_DIPNAME( 0x04, 0x00, "Number Of Controls" )	PORT_DIPLOCATION("SW1:3")
-	PORT_DIPSETTING(    0x00, "1" )
-	PORT_DIPSETTING(    0x04, "2" )
-	PORT_DIPNAME( 0x08, 0x00, "Invincible Test" )		PORT_DIPLOCATION("SW1:4")
+	PORT_START("IN2")
+	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW1:1,2")
+	PORT_DIPSETTING(    0x00, "3" )
+	PORT_DIPSETTING(    0x01, "4" )
+	PORT_DIPSETTING(    0x02, "5" )
+	PORT_DIPSETTING(    0x03, "6" )
+	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Cabinet ) )      PORT_DIPLOCATION("SW1:3")
+	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
+	PORT_DIPSETTING(    0x04, DEF_STR( Cocktail ) )
+	PORT_DIPNAME( 0x08, 0x00, "Invincible Test" )       PORT_DIPLOCATION("SW1:4")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( On ) )
 	/* The Demo Sounds dip switch does function.
-       It allows the sonar sounds to play in demo mode. */
-	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Demo_Sounds ) )	PORT_DIPLOCATION("SW1:5")
+	   It allows the sonar sounds to play in demo mode. */
+	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW1:5")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x10, DEF_STR( On ) )
 	PORT_DIPUNUSED_DIPLOC( 0x20, 0x00, "SW1:6" )
@@ -1441,32 +1771,32 @@ static INPUT_PORTS_START( polaris )
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( On ) )
 
-	PORT_MODIFY("VR1")
+	PORT_START("VR1")
 	PORT_ADJUSTER( 80, "Sub Volume VR1" )
 
-	PORT_MODIFY("VR2")
+	PORT_START("VR2")
 	PORT_ADJUSTER( 70, "Sub Volume VR2" )
 
-	PORT_MODIFY("VR3")
+	PORT_START("VR3")
 	PORT_ADJUSTER( 90, "Sub Volume VR3" )
 INPUT_PORTS_END
 
 static MACHINE_CONFIG_DERIVED_CLASS( polaris, mw8080bw_root, _8080bw_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_REPLACE("maincpu",I8080,1996800)   	/* 19.968MHz / 10 */
+	MCFG_CPU_REPLACE("maincpu",I8080,1996800)       /* 19.968MHz / 10 */
 	MCFG_CPU_PROGRAM_MAP(schaser_map)
 	MCFG_CPU_IO_MAP(polaris_io_map)
 	MCFG_WATCHDOG_VBLANK_INIT(255)
-	MCFG_CPU_VBLANK_INT("screen", polaris_interrupt)
-	MCFG_MACHINE_START(polaris)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", _8080bw_state,  polaris_interrupt)
+	MCFG_MACHINE_START_OVERRIDE(_8080bw_state,polaris)
 
 	/* add shifter */
 	MCFG_MB14241_ADD("mb14241")
 
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
-	MCFG_SCREEN_UPDATE(polaris)
+	MCFG_SCREEN_UPDATE_DRIVER(_8080bw_state, screen_update_polaris)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -1474,8 +1804,8 @@ static MACHINE_CONFIG_DERIVED_CLASS( polaris, mw8080bw_root, _8080bw_state )
 	MCFG_SOUND_ADD("discrete", DISCRETE, 0)
 	MCFG_SOUND_CONFIG_DISCRETE(polaris)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
-
 MACHINE_CONFIG_END
+
 
 
 /*******************************************************/
@@ -1491,16 +1821,16 @@ static INPUT_PORTS_START( ozmawars )
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 )
 
 	PORT_MODIFY("IN2")
-	PORT_DIPNAME( 0x03, 0x00, "Energy" )			PORT_DIPLOCATION("SW1:1,2")
+	PORT_DIPNAME( 0x03, 0x00, "Energy" )            PORT_DIPLOCATION("SW1:1,2")
 	PORT_DIPSETTING(    0x00, "15000" )
 	PORT_DIPSETTING(    0x01, "20000" )
 	PORT_DIPSETTING(    0x02, "25000" )
 	PORT_DIPSETTING(    0x03, "35000" )
 	PORT_DIPUNKNOWN_DIPLOC( 0x04, 0x00, "SW1:3" )
-	PORT_DIPNAME( 0x08, 0x00, "Bonus Energy" )		PORT_DIPLOCATION("SW1:4")
+	PORT_DIPNAME( 0x08, 0x00, "Bonus Energy" )      PORT_DIPLOCATION("SW1:4")
 	PORT_DIPSETTING(    0x00, "15000" )
 	PORT_DIPSETTING(    0x08, "10000" )
-	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Coinage ) )	PORT_DIPLOCATION("SW1:8")
+	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Coinage ) )  PORT_DIPLOCATION("SW1:8")
 	PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( 1C_2C ) )
 INPUT_PORTS_END
@@ -1529,7 +1859,7 @@ static INPUT_PORTS_START( sinvemag )
 
 	PORT_MODIFY("IN2")
 	PORT_DIPUNKNOWN_DIPLOC( 0x04, 0x00, "SW1:3" )
-	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Bonus_Life ) )	PORT_DIPLOCATION("SW1:4")
+	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION("SW1:4")
 	PORT_DIPSETTING(    0x08, "2000" )
 	PORT_DIPSETTING(    0x00, "3000" )
 INPUT_PORTS_END
@@ -1550,18 +1880,19 @@ static INPUT_PORTS_START( jspecter )
 INPUT_PORTS_END
 
 
+
 /*******************************************************/
 /*                                                     */
 /* Taito "Balloon Bomber"                              */
 /*                                                     */
 /*******************************************************/
 
-static ADDRESS_MAP_START( ballbomb_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( ballbomb_io_map, AS_IO, 8, _8080bw_state )
 	AM_RANGE(0x00, 0x00) AM_READ_PORT("IN0")
-	AM_RANGE(0x01, 0x01) AM_READ_PORT("IN1")
-	AM_RANGE(0x02, 0x02) AM_READ_PORT("IN2") AM_DEVWRITE("mb14241", mb14241_shift_count_w)
-	AM_RANGE(0x03, 0x03) AM_DEVREAD("mb14241", mb14241_shift_result_r) AM_WRITE(ballbomb_sh_port_1_w)
-	AM_RANGE(0x04, 0x04) AM_DEVWRITE("mb14241", mb14241_shift_data_w)
+	AM_RANGE(0x01, 0x01) AM_READ_PORT("IN1") AM_WRITE(ballbomb_01_w)
+	AM_RANGE(0x02, 0x02) AM_READ_PORT("IN2") AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_count_w)
+	AM_RANGE(0x03, 0x03) AM_DEVREAD_LEGACY("mb14241", mb14241_shift_result_r) AM_WRITE(ballbomb_sh_port_1_w)
+	AM_RANGE(0x04, 0x04) AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_data_w)
 	AM_RANGE(0x05, 0x05) AM_WRITE(ballbomb_sh_port_2_w)
 ADDRESS_MAP_END
 
@@ -1582,19 +1913,23 @@ static MACHINE_CONFIG_DERIVED_CLASS( ballbomb, mw8080bw_root, _8080bw_state )
 	/* basic machine hardware */
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_IO_MAP(ballbomb_io_map)
-	MCFG_MACHINE_START(extra_8080bw)
+	MCFG_MACHINE_START_OVERRIDE(_8080bw_state,extra_8080bw)
 
 	/* add shifter */
 	MCFG_MB14241_ADD("mb14241")
 
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
-	MCFG_SCREEN_UPDATE(ballbomb)
+	MCFG_SCREEN_UPDATE_DRIVER(_8080bw_state, screen_update_ballbomb)
 
 	/* sound hardware */
 	MCFG_FRAGMENT_ADD(invaders_samples_audio)
 
+	MCFG_SOUND_ADD("discrete", DISCRETE, 0)
+	MCFG_SOUND_CONFIG_DISCRETE(ballbomb)
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 MACHINE_CONFIG_END
+
 
 
 /*******************************************************/
@@ -1603,13 +1938,13 @@ MACHINE_CONFIG_END
 /*                                                     */
 /*******************************************************/
 
-static ADDRESS_MAP_START( yosakdon_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( yosakdon_map, AS_PROGRAM, 8, _8080bw_state )
 	AM_RANGE(0x0000, 0x1fff) AM_ROM
-	AM_RANGE(0x2000, 0x3fff) AM_RAM AM_BASE_SIZE_MEMBER(_8080bw_state, m_main_ram, m_main_ram_size)
+	AM_RANGE(0x2000, 0x3fff) AM_RAM AM_SHARE("main_ram")
 	AM_RANGE(0x4000, 0x43ff) AM_WRITEONLY /* what's this? */
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( yosakdon_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( yosakdon_io_map, AS_IO, 8, _8080bw_state )
 	AM_RANGE(0x01, 0x01) AM_READ_PORT("IN0")
 	AM_RANGE(0x02, 0x02) AM_READ_PORT("IN1")
 	AM_RANGE(0x03, 0x03) AM_WRITE(yosakdon_sh_port_1_w)
@@ -1624,7 +1959,7 @@ static INPUT_PORTS_START( yosakdon )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_START2 )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_START1 )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	//PORT_BIT( 0x70, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(invaders_in1_control_r, NULL)
+	PORT_BIT( 0x70, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, mw8080bw_state,invaders_in1_control_r, NULL)
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNUSED )
 
 	PORT_START("IN1")
@@ -1639,18 +1974,15 @@ static INPUT_PORTS_START( yosakdon )
 	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_BIT( 0x70, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(invaders_in2_control_r, NULL)
+	PORT_BIT( 0x70, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, mw8080bw_state,invaders_in2_control_r, NULL)
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNUSED )
 
 	/* Dummy controls port, P1 */
 	INVADERS_CONTROL_PORT_P1
-
-	/* Dummy controls port, P2 */
 	INVADERS_CONTROL_PORT_P2
 
 	/* Dummy port for cocktail mode (not used) */
-	PORT_START(CABINET_PORT_TAG)
-	PORT_BIT( 0xff, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	INVADERS_CAB_TYPE_PORT
 INPUT_PORTS_END
 
 
@@ -1660,12 +1992,16 @@ static MACHINE_CONFIG_DERIVED_CLASS( yosakdon, mw8080bw_root, _8080bw_state )
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_PROGRAM_MAP(yosakdon_map)
 	MCFG_CPU_IO_MAP(yosakdon_io_map)
-	MCFG_MACHINE_START(extra_8080bw)
+	MCFG_MACHINE_START_OVERRIDE(_8080bw_state,extra_8080bw)
 
 	/* sound hardware */
 	MCFG_FRAGMENT_ADD(invaders_samples_audio)
 
+	/* video hardware */
+	MCFG_SCREEN_MODIFY("screen")
+	MCFG_SCREEN_UPDATE_DRIVER(_8080bw_state, screen_update_invaders)
 MACHINE_CONFIG_END
+
 
 
 /*******************************************************/
@@ -1675,7 +2011,7 @@ MACHINE_CONFIG_END
 /*******************************************************/
 
 static INPUT_PORTS_START( indianbt )
-	PORT_START("IN0")
+	PORT_START("IN1")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_START2 )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_START1 )
@@ -1702,8 +2038,8 @@ static INPUT_PORTS_START( indianbt )
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( On ) )
 
-	PORT_START(CABINET_PORT_TAG)		/* Dummy port for cocktail mode */
-	PORT_BIT( 0xff, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	/* Dummy port for cocktail mode */
+	INVADERS_CAB_TYPE_PORT
 INPUT_PORTS_END
 
 
@@ -1728,26 +2064,26 @@ INPUT_PORTS_END
 
 */
 
-static READ8_HANDLER(indianbt_r)
+READ8_MEMBER(_8080bw_state::indianbt_r)
 {
-	switch(cpu_get_pc(&space->device()))
+	switch(space.device().safe_pc())
 	{
-		case 0x5fed:	return 0x10;
-		case 0x5ffc:	return 0;
+		case 0x5fed:    return 0x10;
+		case 0x5ffc:    return 0;
 	}
-	logerror("unknown port 0 read @ %x\n",cpu_get_pc(&space->device()));
-	return space->machine().rand();
+	logerror("unknown port 0 read @ %x\n",space.device().safe_pc());
+	return machine().rand();
 }
 
-static ADDRESS_MAP_START( indianbt_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( indianbt_io_map, AS_IO, 8, _8080bw_state )
 	AM_RANGE(0x00, 0x00) AM_READ(indianbt_r)
-	AM_RANGE(0x01, 0x01) AM_READ_PORT("IN0")
-	AM_RANGE(0x02, 0x02) AM_READ_PORT("IN2") AM_DEVWRITE("mb14241", mb14241_shift_count_w)
-	AM_RANGE(0x03, 0x03) AM_DEVREAD("mb14241", mb14241_shift_result_r) AM_WRITE(indianbt_sh_port_1_w)
-	AM_RANGE(0x04, 0x04) AM_DEVWRITE("mb14241", mb14241_shift_data_w)
+	AM_RANGE(0x01, 0x01) AM_READ_PORT("IN1")
+	AM_RANGE(0x02, 0x02) AM_READ(invrvnge_02_r) AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_count_w)
+	AM_RANGE(0x03, 0x03) AM_DEVREAD_LEGACY("mb14241", mb14241_shift_result_r) AM_WRITE(indianbt_sh_port_1_w)
+	AM_RANGE(0x04, 0x04) AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_data_w)
 	AM_RANGE(0x05, 0x05) AM_WRITE(indianbt_sh_port_2_w)
 	AM_RANGE(0x06, 0x06) AM_WRITENOP /* sound ? */
-	AM_RANGE(0x07, 0x07) AM_DEVWRITE("discrete", indianbt_sh_port_3_w)
+	AM_RANGE(0x07, 0x07) AM_WRITE(indianbt_sh_port_3_w)
 ADDRESS_MAP_END
 
 
@@ -1756,14 +2092,14 @@ static MACHINE_CONFIG_DERIVED_CLASS( indianbt, mw8080bw_root, _8080bw_state )
 	/* basic machine hardware */
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_IO_MAP(indianbt_io_map)
-	MCFG_MACHINE_START(extra_8080bw)
+	MCFG_MACHINE_START_OVERRIDE(_8080bw_state,extra_8080bw)
 
 	/* add shifter */
 	MCFG_MB14241_ADD("mb14241")
 
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
-	MCFG_SCREEN_UPDATE(indianbt)
+	MCFG_SCREEN_UPDATE_DRIVER(_8080bw_state, screen_update_indianbt)
 
 	/* sound hardware */
 	MCFG_FRAGMENT_ADD(invaders_samples_audio)
@@ -1771,8 +2107,9 @@ static MACHINE_CONFIG_DERIVED_CLASS( indianbt, mw8080bw_root, _8080bw_state )
 	MCFG_SOUND_ADD("discrete", DISCRETE, 0)
 	MCFG_SOUND_CONFIG_DISCRETE(indianbt)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.25)
-
 MACHINE_CONFIG_END
+
+
 
 /*******************************************************/
 /*                                                     */
@@ -1780,16 +2117,16 @@ MACHINE_CONFIG_END
 /*                                                     */
 /*******************************************************/
 
-static WRITE8_HANDLER( steelwkr_sh_port_3_w )
+WRITE8_MEMBER(_8080bw_state::steelwkr_sh_port_3_w)
 {
-	coin_lockout_global_w(space->machine(), !(~data & 0x03));		/* possibly */
+	coin_lockout_global_w(machine(), !(~data & 0x03));      /* possibly */
 }
 
-static ADDRESS_MAP_START( steelwkr_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( steelwkr_io_map, AS_IO, 8, _8080bw_state )
 	AM_RANGE(0x01, 0x01) AM_READ_PORT("IN1")
-	AM_RANGE(0x02, 0x02) AM_READ_PORT("IN2") AM_DEVWRITE("mb14241", mb14241_shift_count_w)
-	AM_RANGE(0x03, 0x03) AM_DEVREAD("mb14241", mb14241_shift_result_r) AM_WRITE(invadpt2_sh_port_1_w)
-	AM_RANGE(0x04, 0x04) AM_DEVWRITE("mb14241", mb14241_shift_data_w)
+	AM_RANGE(0x02, 0x02) AM_READ(invrvnge_02_r) AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_count_w)
+	AM_RANGE(0x03, 0x03) AM_DEVREAD_LEGACY("mb14241", mb14241_shift_result_r) AM_WRITE(invadpt2_sh_port_1_w)
+	AM_RANGE(0x04, 0x04) AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_data_w)
 	AM_RANGE(0x05, 0x05) AM_WRITE(invadpt2_sh_port_2_w)
 	AM_RANGE(0x06, 0x06) AM_WRITE(steelwkr_sh_port_3_w)
 ADDRESS_MAP_END
@@ -1808,12 +2145,12 @@ static INPUT_PORTS_START( steelwkr )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_BUTTON2 )
 
 	PORT_START("IN2")
-	PORT_DIPNAME( 0x03, 0x02, DEF_STR( Lives ) )		PORT_DIPLOCATION("SW1:1,2")
+	PORT_DIPNAME( 0x03, 0x02, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW1:1,2")
 	PORT_DIPSETTING(    0x00, "1" )
 	PORT_DIPSETTING(    0x01, "2" )
 	PORT_DIPSETTING(    0x02, "3" )
 	PORT_DIPSETTING(    0x03, "4" )
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_TILT )			PORT_DIPLOCATION("SW1:3")
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_TILT )          PORT_DIPLOCATION("SW1:3")
 	PORT_DIPUNKNOWN_DIPLOC( 0x08, 0x00, "SW1:4" )
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_PLAYER(2)
@@ -1830,19 +2167,20 @@ static MACHINE_CONFIG_DERIVED_CLASS( steelwkr, mw8080bw_root, _8080bw_state )
 	/* basic machine hardware */
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_IO_MAP(steelwkr_io_map)
-	MCFG_MACHINE_START(extra_8080bw)
+	MCFG_MACHINE_START_OVERRIDE(_8080bw_state,extra_8080bw)
 
 	/* add shifter */
 	MCFG_MB14241_ADD("mb14241")
 
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
-	MCFG_SCREEN_UPDATE(invadpt2)
+	MCFG_SCREEN_UPDATE_DRIVER(_8080bw_state, screen_update_invadpt2)
 
 	/* sound hardware */
 	MCFG_FRAGMENT_ADD(invaders_samples_audio)
-
 MACHINE_CONFIG_END
+
+
 
 /*****************************************************
 
@@ -1896,13 +2234,21 @@ static INPUT_PORTS_START( shuttlei )
 	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_VBLANK )
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_BUTTON1 )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_COIN1 )
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_START1 )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_START2 )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_PLAYER(1)
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_PLAYER(1)
+
+	PORT_START("P2")
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(2)
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_PLAYER(2)
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_PLAYER(2)
+
+	/* Dummy port for cocktail mode */
+	INVADERS_CAB_TYPE_PORT
 INPUT_PORTS_END
 
 // 'no 1' which is displayed before each player plays actually refers to the wave number, not the player number!
@@ -1936,47 +2282,77 @@ static INPUT_PORTS_START( skylove )
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) ) // must be off to boot
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_COIN1 )
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_START1 )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_START2 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_PLAYER(1)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_PLAYER(1)
+
+	PORT_START("P2")
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_PLAYER(2)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_PLAYER(2)
+
+	/* Dummy port for cocktail mode */
+	INVADERS_CAB_TYPE_PORT
 INPUT_PORTS_END
 
-static ADDRESS_MAP_START( shuttlei_map, AS_PROGRAM, 8 )
+READ8_MEMBER(_8080bw_state::shuttlei_ff_r)
+{
+	UINT8 data = ioport("INPUTS")->read();
+	if (!m_flip_screen) return data;
+	return (data & 0x3b) | ioport("P2")->read();
+}
+
+WRITE8_MEMBER(_8080bw_state::shuttlei_ff_w)
+{
+		/* bit 0 goes high when first coin inserted
+		   bit 1 also goes high when subsequent coins are inserted
+		      These may be for indicator lamps under the start buttons.
+		   bit 2 goes high while player 2 is playing     */
+
+	m_flip_screen = BIT(data, 2) & BIT(ioport(CABINET_PORT_TAG)->read(), 0);
+}
+
+static ADDRESS_MAP_START( shuttlei_map, AS_PROGRAM, 8, _8080bw_state )
 	AM_RANGE(0x0000, 0x1fff) AM_ROM
-	AM_RANGE(0x2000, 0x3fff) AM_RAM AM_BASE_SIZE_MEMBER(_8080bw_state, m_main_ram, m_main_ram_size)
+	AM_RANGE(0x2000, 0x37ff) AM_RAM AM_SHARE("main_ram")
+	AM_RANGE(0x3800, 0x3fff) AM_RAM
 	AM_RANGE(0x4000, 0x43ff) AM_RAM AM_SHARE("share1") // shuttlei
 	AM_RANGE(0x6000, 0x63ff) AM_RAM AM_SHARE("share1") // skylove (is it mirrored, or different PCB hookup?)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( shuttlei_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( shuttlei_io_map, AS_IO, 8, _8080bw_state )
 	AM_RANGE(0xfc, 0xfc) AM_WRITENOP /* game writes 0xAA every so often (perhaps when base hit?) */
 	AM_RANGE(0xfd, 0xfd) AM_WRITE(shuttlei_sh_port_1_w)
 	AM_RANGE(0xfe, 0xfe) AM_READ_PORT("DSW") AM_WRITE(shuttlei_sh_port_2_w)
-	AM_RANGE(0xff, 0xff) AM_READ_PORT("INPUTS")
-//         port fd (write) is for sound
+	AM_RANGE(0xff, 0xff) AM_READWRITE(shuttlei_ff_r,shuttlei_ff_w)
 ADDRESS_MAP_END
 
 
-static MACHINE_CONFIG_DERIVED_CLASS( shuttlei, mw8080bw_root, _8080bw_state )
+MACHINE_CONFIG_START( shuttlei, _8080bw_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_MODIFY("maincpu")
+	MCFG_CPU_ADD("maincpu", I8080, XTAL_18MHz / 10) // divider guessed
+	// TODO: move irq handling away from mw8080.c, this game runs on custom hardware
 	MCFG_CPU_PROGRAM_MAP(shuttlei_map)
 	MCFG_CPU_IO_MAP(shuttlei_io_map)
-	MCFG_MACHINE_START(extra_8080bw)
+
+	MCFG_MACHINE_START_OVERRIDE(_8080bw_state, extra_8080bw)
+	MCFG_MACHINE_RESET_OVERRIDE(_8080bw_state, mw8080bw)
 
 	/* video hardware */
-	MCFG_SCREEN_MODIFY("screen")
+	MCFG_SCREEN_ADD("screen", RASTER)
+	MCFG_SCREEN_REFRESH_RATE(60)
+	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500))
+	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 0*8, 24*8-1)
-	MCFG_SCREEN_UPDATE(shuttlei)
+	MCFG_SCREEN_UPDATE_DRIVER(_8080bw_state, screen_update_shuttlei)
 
 	/* sound hardware */
 	MCFG_FRAGMENT_ADD(invaders_samples_audio)
-
 MACHINE_CONFIG_END
 
 
@@ -2004,30 +2380,40 @@ Another (same checksums) dump came from board labeled SI-7811M-2
 
 */
 
+MACHINE_START_MEMBER(_8080bw_state,darthvdr)
+{
+	/* do nothing for now - different interrupt system */
+	m_fleet_step = 3;
+	m_samples = machine().device<samples_device>("samples");
+	m_sn = machine().device("snsnd");
+}
 
 
-static MACHINE_START( darthvdr )
+MACHINE_RESET_MEMBER(_8080bw_state,darthvdr)
 {
 	/* do nothing for now - different interrupt system */
 }
 
-
-static MACHINE_RESET( darthvdr )
+READ8_MEMBER(_8080bw_state::darthvdr_01_r)
 {
-	/* do nothing for now - different interrupt system */
+	UINT8 data = ioport("P2")->read();
+	if (m_flip_screen) return data;
+	return (data & 0xe1) | (ioport("P1")->read() & 0x0e);
 }
 
-
-static ADDRESS_MAP_START( darthvdr_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( darthvdr_map, AS_PROGRAM, 8, _8080bw_state )
 	AM_RANGE(0x0000, 0x17ff) AM_ROM
 	AM_RANGE(0x1800, 0x1fff) AM_RAM
-	AM_RANGE(0x4000, 0x5fff) AM_RAM AM_BASE_SIZE_MEMBER(_8080bw_state, m_main_ram, m_main_ram_size)
+	AM_RANGE(0x4000, 0x5fff) AM_RAM AM_SHARE("main_ram")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( darthvdr_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( darthvdr_io_map, AS_IO, 8, _8080bw_state )
 	AM_RANGE(0x00, 0x00) AM_READ_PORT("P1")
-	AM_RANGE(0x01, 0x01) AM_READ_PORT("P2")
-	AM_RANGE(0x00, 0x0f) AM_WRITENOP
+	AM_RANGE(0x01, 0x01) AM_READ(darthvdr_01_r)
+
+	AM_RANGE(0x00, 0x00) AM_WRITE(darthvdr_00_w) // flipscreen
+	AM_RANGE(0x04, 0x04) AM_WRITENOP
+	AM_RANGE(0x08, 0x08) AM_WRITE(darthvdr_08_w) // sound
 ADDRESS_MAP_END
 
 
@@ -2038,9 +2424,9 @@ static INPUT_PORTS_START( darthvdr )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_2WAY
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_2WAY
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_COIN1 )
-	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Bonus_Life ) )
+	PORT_DIPSETTING(    0x00, "1000" )
+	PORT_DIPSETTING(    0x20, "3000" )
 	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -2053,7 +2439,7 @@ static INPUT_PORTS_START( darthvdr )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_PLAYER(2)
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_PLAYER(2)
-	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )
+	PORT_DIPNAME( 0x10, 0x10, "One less life" )
 	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )
@@ -2076,12 +2462,20 @@ static MACHINE_CONFIG_DERIVED_CLASS( darthvdr, mw8080bw_root, _8080bw_state )
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_PROGRAM_MAP(darthvdr_map)
 	MCFG_CPU_IO_MAP(darthvdr_io_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", _8080bw_state,  irq0_line_hold)
 
-	MCFG_MACHINE_START(darthvdr)
-	MCFG_MACHINE_RESET(darthvdr)
+	MCFG_MACHINE_START_OVERRIDE(_8080bw_state,darthvdr)
+	MCFG_MACHINE_RESET_OVERRIDE(_8080bw_state,darthvdr)
 
+	/* sound hardware */
+	MCFG_FRAGMENT_ADD(invaders_samples_audio)
+
+	/* video hardware */
+	MCFG_SCREEN_MODIFY("screen")
+	MCFG_SCREEN_UPDATE_DRIVER(_8080bw_state, screen_update_invaders)
 MACHINE_CONFIG_END
+
+
 
 /*************************************
  *
@@ -2091,20 +2485,22 @@ MACHINE_CONFIG_END
  * see below for decryption function (A0, A3, A9 invert)
  * It uses its own I/O function since A9 is inverted (and A9 mirrors A1 for I/O)
  *
+ * Hold down fire button to activate thrust.
+ *
  *************************************/
 
-static ADDRESS_MAP_START( vortex_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( vortex_io_map, AS_IO, 8, _8080bw_state )
 	// I/O map is same as invaders but with A9 (used as A1 for I/O) inverted
 	ADDRESS_MAP_GLOBAL_MASK(0xFF)
 	AM_RANGE(0x02, 0x02) AM_MIRROR(0x04) AM_READ_PORT("IN0")
 	AM_RANGE(0x03, 0x03) AM_MIRROR(0x04) AM_READ_PORT("IN1")
 	AM_RANGE(0x00, 0x00) AM_MIRROR(0x04) AM_READ_PORT("IN2")
-	AM_RANGE(0x01, 0x01) AM_MIRROR(0x04) AM_DEVREAD("mb14241", mb14241_shift_result_r)
+	AM_RANGE(0x01, 0x01) AM_MIRROR(0x04) AM_DEVREAD_LEGACY("mb14241", mb14241_shift_result_r)
 
-	AM_RANGE(0x00, 0x00) AM_DEVWRITE("mb14241", mb14241_shift_count_w)
-	AM_RANGE(0x01, 0x01) AM_DEVWRITE("discrete", invaders_audio_1_w)
-	AM_RANGE(0x06, 0x06) AM_DEVWRITE("mb14241", mb14241_shift_data_w)
-	AM_RANGE(0x07, 0x07) AM_DEVWRITE("discrete", invaders_audio_2_w)
+	AM_RANGE(0x00, 0x00) AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_count_w)
+	AM_RANGE(0x01, 0x01) AM_WRITE(invaders_audio_1_w)
+	AM_RANGE(0x06, 0x06) AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_data_w)
+	AM_RANGE(0x07, 0x07) AM_WRITE(invaders_audio_2_w)
 	AM_RANGE(0x04, 0x04) AM_WRITE(watchdog_reset_w)
 ADDRESS_MAP_END
 
@@ -2116,28 +2512,19 @@ static INPUT_PORTS_START( vortex )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 
 	PORT_MODIFY("IN2")
-	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )		PORT_DIPLOCATION("SW1:1")
+	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW1:1")
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unknown ) )		PORT_DIPLOCATION("SW1:2")
+	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW1:2")
 	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )		PORT_DIPLOCATION("SW1:3")
+	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW1:3")
 	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )		PORT_DIPLOCATION("SW1:4")
+	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW1:4")
 	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )		PORT_DIPLOCATION("SW1:5")
-	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )		PORT_DIPLOCATION("SW1:6")
-	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )		PORT_DIPLOCATION("SW1:7")
-	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Coinage ) )		PORT_DIPLOCATION("SW1:8")
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Coinage ) )      PORT_DIPLOCATION("SW1:8")
 	PORT_DIPSETTING(    0x00, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( 1C_1C ) )
 INPUT_PORTS_END
@@ -2147,43 +2534,42 @@ MACHINE_CONFIG_DERIVED_CLASS( vortex, mw8080bw_root, _8080bw_state )
 	/* basic machine hardware */
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_IO_MAP(vortex_io_map)
-	MCFG_MACHINE_START(extra_8080bw)
+	MCFG_MACHINE_START_OVERRIDE(_8080bw_state,extra_8080bw)
 	MCFG_WATCHDOG_TIME_INIT(attotime::from_usec(255000000 / (MW8080BW_PIXEL_CLOCK / MW8080BW_HTOTAL / MW8080BW_VTOTAL)))
 
 	/* video hardware */
 	// TODO: replace with modified invaders color renderer code allowing midscanline color writes
 	MCFG_SCREEN_MODIFY("screen")
-	MCFG_SCREEN_UPDATE(invaders)
+	MCFG_SCREEN_UPDATE_DRIVER(_8080bw_state, screen_update_invaders)
 
 	/* add shifter */
 	MCFG_MB14241_ADD("mb14241")
 
 	/* audio hardware */
 	MCFG_FRAGMENT_ADD(invaders_audio)
-
 MACHINE_CONFIG_END
 
 /* decrypt function for vortex */
-static DRIVER_INIT( vortex )
+DRIVER_INIT_MEMBER(_8080bw_state,vortex)
 {
-	UINT8 *rom = machine.region("maincpu")->base();
-	int length = machine.region("maincpu")->bytes();
-	UINT8 *buf1 = auto_alloc_array(machine, UINT8, length);
+	UINT8 *rom = machine().root_device().memregion("maincpu")->base();
+	int length = machine().root_device().memregion("maincpu")->bytes();
+	UINT8 *buf1 = auto_alloc_array(machine(), UINT8, length);
 	UINT32 x;
 	for (x = 0; x < length; x++)
 	{
 		UINT32 addr = x;
 		/*
-        A15 A14 A13     A0  A3  A9
-        0   0   0       I   I   I
-        0   0   1       I   I   I
-        0   1   0       N   N   N
-        0   1   1       N   I   I
-        1   0   0       N   I   I
-        1   0   1       N   I   I
-        1   1   0       N   I   I
-        1   1   1       N   I   I
-        */
+		A15 A14 A13     A0  A3  A9
+		0   0   0       I   I   I
+		0   0   1       I   I   I
+		0   1   0       N   N   N
+		0   1   1       N   I   I
+		1   0   0       N   I   I
+		1   0   1       N   I   I
+		1   1   0       N   I   I
+		1   1   1       N   I   I
+		*/
 		switch (x&0xE000) // inputs are A13 A14 A15
 		{
 			case 0x0000: case 0x2000: // A0 A3 A9
@@ -2196,24 +2582,26 @@ static DRIVER_INIT( vortex )
 				addr ^= 0x0208;
 				break;
 		/*
-            case 0x0000: case 0x2000: // A0 A3 A9
-                addr ^= 0x0001;
-                break;
-            case 0x4000:
-                addr ^= 0x0208;
-                break;
-            case 0x6000: case 0x8000: case 0xa000: case 0xc000: case 0xe000:
-                break;*/
+		    case 0x0000: case 0x2000: // A0 A3 A9
+		        addr ^= 0x0001;
+		        break;
+		    case 0x4000:
+		        addr ^= 0x0208;
+		        break;
+		    case 0x6000: case 0x8000: case 0xa000: case 0xc000: case 0xe000:
+		        break;*/
 		}
 		buf1[addr] = rom[x];
 	}
 
 	memcpy(rom, buf1, length);
 
-	auto_free(machine, buf1);
+	auto_free(machine(), buf1);
 }
 
-/* unknown gun game by Model Racing, possibly Gun Champ?
+
+
+/* unlabeled gun game by Model Racing, verified to be Gun Champ
 
 BOARD 1:
  _________________________________________________________________________________________________________________________________
@@ -2268,7 +2656,7 @@ BOARD 1:
 |  _|     |             |                                          |_______|    |_______|    |_______|    |_______|               |
 |___|     |         2708|                                                                                                         |
 |         |_____________|                                                                                            Model Racing |
-|                                                                                                                    CS235 A      |
+|                                                                                                                    CS 235A      |
 |               A               B            C            D            E            F            G            H                   |
 |_________________________________________________________________________________________________________________________________|
 
@@ -2333,60 +2721,195 @@ BOARD 2:
 |                               P           R           S            T             U         V            W          X            |
 |_________________________________________________________________________________________________________________________________|
 
+
+Claybuster is on the same hardware, PCB labels CS 235A and CS 238A as well
+
 */
 
+TIMER_DEVICE_CALLBACK_MEMBER(_8080bw_state::claybust_gun_callback)
+{
+	// reset gun latch
+	m_claybust_gun_pos = 0;
+}
 
-// the invaders shifter stuff doesn't seem correct for this, if i hook up the count_w the gfx are corrupt, otherwise they're incorrectly offset?
-// might need custom implementation
+CUSTOM_INPUT_MEMBER(_8080bw_state::claybust_gun_on_r)
+{
+	return (m_claybust_gun_pos != 0) ? 1 : 0;
+}
 
-static ADDRESS_MAP_START( modelr_io_map, AS_IO, 8 )
-//  AM_RANGE(0x00, 0x00) AM_DEVWRITE("mb14241", mb14241_shift_count_w)
-//  AM_RANGE(0x01, 0x01) AM_DEVREAD("mb14241", mb14241_shift_result_r)
-	AM_RANGE(0x02, 0x02) AM_DEVWRITE("mb14241", mb14241_shift_data_w)
-	AM_RANGE(0x03, 0x03) AM_DEVREAD("mb14241", mb14241_shift_result_r)
-//  AM_RANGE(0x04, 0x04) AM_DEVWRITE("mb14241", mb14241_shift_count_w)
-	AM_RANGE(0x05, 0x05) AM_WRITE(watchdog_reset_w)
+INPUT_CHANGED_MEMBER(_8080bw_state::claybust_gun_trigger)
+{
+	if (newval)
+	{
+		/*
+		    The game registers a valid shot after the gun trigger is pressed, and IN1 d0 is high.
+		    It latches the gun position and then compares it with VRAM contents: 1 byte/8 pixels, 0 means miss.
+		    IN1 d0 probably indicates if the latch is ready or not (glitches happen otherwise)
+
+		    in   $06
+		    cpi  $04
+		    rc
+		    mov  h,a
+		    in   $02
+		    mov  l,a
+		    lxi  d,$1ffe  <-- this is where the +2 comes from
+		    dad  d
+		    out  $00
+		    mov  a,m
+		    ana  a
+		    rz
+		*/
+		UINT8 gunx = ioport("GUNX")->read_safe(0x00);
+		UINT8 guny = ioport("GUNY")->read_safe(0x20);
+		m_claybust_gun_pos = ((gunx >> 3) | (guny << 5)) + 2;
+		m_claybust_gun_on->adjust(attotime::from_msec(250)); // timing is a guess
+	}
+}
+
+READ8_MEMBER(_8080bw_state::claybust_gun_lo_r)
+{
+	return m_claybust_gun_pos & 0xff;
+}
+
+READ8_MEMBER(_8080bw_state::claybust_gun_hi_r)
+{
+	return m_claybust_gun_pos >> 8;
+}
+
+static ADDRESS_MAP_START( claybust_io_map, AS_IO, 8, _8080bw_state )
+	//AM_RANGE(0x00, 0x00) AM_WRITENOP // ?
+	AM_RANGE(0x01, 0x01) AM_READ_PORT("IN1") AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_count_w)
+	AM_RANGE(0x02, 0x02) AM_READ(claybust_gun_lo_r) AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_data_w)
+	AM_RANGE(0x03, 0x03) AM_DEVREAD_LEGACY("mb14241", mb14241_shift_result_r) //AM_WRITENOP // port3 write looks sound-related
+	AM_RANGE(0x04, 0x04) AM_WRITE(watchdog_reset_w)
+	//AM_RANGE(0x05, 0x05) AM_WRITENOP // ?
+	AM_RANGE(0x06, 0x06) AM_READ(claybust_gun_hi_r)
 ADDRESS_MAP_END
 
-MACHINE_CONFIG_DERIVED_CLASS( modelr, invaders, _8080bw_state )
+
+static INPUT_PORTS_START( claybust )
+	PORT_START("IN1")
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, _8080bw_state, claybust_gun_on_r, NULL)
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_IMPULSE(2) PORT_CHANGED_MEMBER(DEVICE_SELF, _8080bw_state, claybust_gun_trigger, NULL)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_COIN1 )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_START1 )
+
+	// switch is 6-pos, but DNS06:5 and DNS06:6 are not connected
+	PORT_DIPNAME( 0x10, 0x10, "Shots" )             PORT_DIPLOCATION("DNS06:1")
+	PORT_DIPSETTING(    0x10, "4" )
+	PORT_DIPSETTING(    0x00, "2" )
+	PORT_DIPUNKNOWN_DIPLOC( 0x20, 0x20, "DNS06:2" )
+	PORT_DIPUNKNOWN_DIPLOC( 0x40, 0x40, "DNS06:3" )
+	PORT_DIPUNKNOWN_DIPLOC( 0x80, 0x80, "DNS06:4" )
+
+	PORT_START( "GUNX" )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_X ) PORT_MINMAX(0x00, 0xff) PORT_CROSSHAIR(X, 1.0 - (MW8080BW_HPIXCOUNT-256)/256.0, (MW8080BW_HPIXCOUNT-256)/256.0, 0) PORT_SENSITIVITY(56) PORT_KEYDELTA(5)
+	PORT_START( "GUNY" )
+	PORT_BIT( 0xff, 0xa0, IPT_LIGHTGUN_Y ) PORT_MINMAX(0x20, 0xff) PORT_CROSSHAIR(Y, 1.0, 0.0, 0) PORT_SENSITIVITY(64) PORT_KEYDELTA(5)
+INPUT_PORTS_END
+
+static INPUT_PORTS_START( gunchamp )
+	PORT_INCLUDE( claybust )
+
+	PORT_MODIFY("IN1")
+
+	// switch is 6-pos, but DNS06:5 and DNS06:6 are not connected
+	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )  PORT_DIPLOCATION("DNS06:1")
+	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0xe0, 0x40, DEF_STR( Coinage ) )  PORT_DIPLOCATION("DNS06:2,3,4")
+	PORT_DIPSETTING(    0xa0, DEF_STR( 4C_1C ) )
+	PORT_DIPSETTING(    0xc0, DEF_STR( 3C_1C ) )
+	PORT_DIPSETTING(    0xe0, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 2C_3C ) )
+	PORT_DIPSETTING(    0x60, DEF_STR( 1C_3C ) )
+	PORT_DIPSETTING(    0x80, DEF_STR( 1C_4C ) )
+INPUT_PORTS_END
+
+
+MACHINE_START_MEMBER(_8080bw_state, claybust)
+{
+	m_claybust_gun_pos = 0;
+	save_item(NAME(m_claybust_gun_pos));
+
+	MACHINE_START_CALL_MEMBER(mw8080bw);
+}
+
+MACHINE_CONFIG_DERIVED_CLASS( claybust, invaders, _8080bw_state )
 
 	/* basic machine hardware */
 	MCFG_CPU_MODIFY("maincpu")
-	MCFG_CPU_IO_MAP(modelr_io_map)
+	MCFG_CPU_IO_MAP(claybust_io_map)
 
+	MCFG_TIMER_DRIVER_ADD("claybust_gun", _8080bw_state, claybust_gun_callback)
+
+	MCFG_MACHINE_START_OVERRIDE(_8080bw_state, claybust)
+
+	/* sound hardware */
+	// TODO: discrete sound
 MACHINE_CONFIG_END
 
-/* Taito Galactica / Space Missile
+
+
+/**************************************************************************************
+
+Taito Galactica / Space Missile
+
 This game was officially only distributed in Brazil.
-Not much information is avaliable. It is speculated that the original is "Space Missile", whose manufacturer was sued by Taito in Japan.
-Release date is unknown, maybe even before Galaxian?!
+Regarding release data, not much information is available online.
 
-ROM dump came from a collection of old 5 1/4 disks (Apple II) that used to be in the posession of an arcade operator in the early 80s.
+ROM dump came from a collection of old 5 1/4 disks (Apple II) that used to be in the
+ possession of an arcade operator in the early 80s.
 
-TODO sound (currently same as invaders):
-- sound mutes when a few aliens are left?
-- port 7 write is used too
-*/
+TODO sound to be verified.
+
+***************************************************************************************/
+
+static ADDRESS_MAP_START( galactic_io_map, AS_IO, 8, _8080bw_state )
+	AM_RANGE(0x00, 0x00) AM_READ_PORT("IN0")
+	AM_RANGE(0x01, 0x01) AM_READ_PORT("IN1")
+	AM_RANGE(0x02, 0x02) AM_READ_PORT("IN2") AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_count_w)
+	AM_RANGE(0x03, 0x03) AM_DEVREAD_LEGACY("mb14241", mb14241_shift_result_r) AM_WRITE(galactic_sh_port_1_w)
+	AM_RANGE(0x04, 0x04) AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_data_w)
+	AM_RANGE(0x05, 0x05) AM_WRITE(galactic_sh_port_2_w)
+	AM_RANGE(0x06, 0x06) AM_WRITE(watchdog_reset_w)
+	AM_RANGE(0x07, 0x07) AM_WRITE(galactic_07_w)
+ADDRESS_MAP_END
+
+
+static MACHINE_CONFIG_DERIVED_CLASS( galactic, mw8080bw_root, _8080bw_state )
+
+	/* basic machine hardware */
+	MCFG_CPU_MODIFY("maincpu")
+	MCFG_CPU_IO_MAP(galactic_io_map)
+	MCFG_MACHINE_START_OVERRIDE(_8080bw_state,extra_8080bw)
+
+	/* add shifter */
+	MCFG_MB14241_ADD("mb14241")
+
+	/* sound hardware */
+	MCFG_FRAGMENT_ADD(invaders_samples_audio)
+	MCFG_DISCRETE_ADD("discrete", 0, galactic)
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
+
+	/* video hardware */
+	MCFG_SCREEN_MODIFY("screen")
+	MCFG_SCREEN_UPDATE_DRIVER(_8080bw_state, screen_update_invaders)
+MACHINE_CONFIG_END
+
 
 static INPUT_PORTS_START( galactic )
 	PORT_START("IN0")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN ) // tilt?
+	PORT_BIT( 0xff, IP_ACTIVE_HIGH, IPT_UNKNOWN ) // gets read into memory (0x2012) then never used
 
 	PORT_START("IN1")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_START2 )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_START1 )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 )
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY
+	PORT_BIT( 0x70, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, mw8080bw_state,invaders_in1_control_r, NULL)
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 
 	PORT_START("IN2")
@@ -2401,15 +2924,165 @@ static INPUT_PORTS_START( galactic )
 	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Lives ) )
 	PORT_DIPSETTING(    0x00, "3" )
 	PORT_DIPSETTING(    0x08, "6" )
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(2)
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_PLAYER(2)
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_PLAYER(2)
+	PORT_BIT( 0x70, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, mw8080bw_state,invaders_in2_control_r, NULL)
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 
-	PORT_START(CABINET_PORT_TAG)		/* Dummy port for cocktail mode */
-	PORT_BIT( 0xff, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	/* Dummy controls port, P1 */
+	INVADERS_CONTROL_PORT_P1
+
+	/* Dummy controls port, P2 */
+	INVADERS_CONTROL_PORT_P2
+
+	/* Dummy port for cocktail mode */
+	INVADERS_CAB_TYPE_PORT
 INPUT_PORTS_END
 
+
+
+/*****************************************************
+
+ Space Invaders Multigame kit, Braze Technologies,
+ produced from 2002(version 1A) to 2006(version 3D).
+ This is an 8-in-1 hack on a daughterboard, containing:
+
+ - 8080 CPU taken from main PCB
+ - SST 29EE010 or AM27C010 (or other similar) 128KB EEPROM
+   (EEPROM functionality not used)
+ - 93C46P E2PROM for saving highscore/settings
+ - PALCE22V10H-25PC/4
+
+ The kit is compatible with the original Midway boardset
+
+******************************************************/
+
+static INPUT_PORTS_START( invmulti )
+	/* same as Midway Space Invaders, except that SW is unused */
+	PORT_START("IN0")
+	PORT_DIPUNUSED_DIPLOC( 0x01, 0x00, "SW:8" )
+	PORT_BIT( 0x06, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, mw8080bw_state,invaders_sw6_sw7_r, NULL)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_UNUSED )
+	PORT_BIT( 0x70, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, mw8080bw_state,invaders_in0_control_r, NULL)
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, mw8080bw_state,invaders_sw5_r, NULL)
+
+	PORT_START("IN1")
+	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, mw8080bw_state,invaders_coin_input_r, NULL)
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_START2 )
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_START1 )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_UNUSED )
+	PORT_BIT( 0x70, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, mw8080bw_state,invaders_in1_control_r, NULL)
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNUSED )
+
+	PORT_START("IN2")
+	PORT_DIPUNUSED_DIPLOC( 0x01, 0x00, "SW:3" )
+	PORT_DIPUNUSED_DIPLOC( 0x02, 0x00, "SW:4" )
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_UNUSED )
+	PORT_DIPUNUSED_DIPLOC( 0x08, 0x00, "SW:2" )
+	PORT_BIT( 0x70, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, mw8080bw_state,invaders_in2_control_r, NULL)
+	PORT_DIPUNUSED_DIPLOC( 0x80, 0x00, "SW:1" )
+
+	/* fake port for reading the coin input */
+	PORT_START(INVADERS_COIN_INPUT_PORT_TAG)
+	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_COIN1 )
+	PORT_BIT( 0xfe, IP_ACTIVE_HIGH, IPT_UNUSED )
+
+	/* fake port for cabinet type */
+	PORT_START(INVADERS_CAB_TYPE_PORT_TAG)
+	PORT_CONFNAME( 0x01, 0x00, DEF_STR( Cabinet ) )
+	PORT_CONFSETTING(    0x00, DEF_STR( Upright ) )
+	PORT_CONFSETTING(    0x01, DEF_STR( Cocktail ) )
+	PORT_BIT( 0xfe, IP_ACTIVE_HIGH, IPT_UNUSED )
+
+	/* fake ports for handling the various input ports based on cabinet type */
+	PORT_START(INVADERS_SW6_SW7_PORT_TAG)
+	PORT_DIPUNUSED_DIPLOC( 0x01, 0x00, "SW:7" )
+	PORT_DIPUNUSED_DIPLOC( 0x02, 0x00, "SW:6" )
+	PORT_BIT( 0xfc, IP_ACTIVE_HIGH, IPT_UNUSED )
+
+	PORT_START(INVADERS_SW5_PORT_TAG)
+	PORT_DIPUNUSED_DIPLOC( 0x01, 0x00, "SW:5" )
+	PORT_BIT( 0xfe, IP_ACTIVE_HIGH, IPT_UNUSED )
+
+	PORT_START(INVADERS_P1_CONTROL_PORT_TAG)
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(1)
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_PLAYER(1)
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_PLAYER(1)
+	PORT_BIT( 0xf8, IP_ACTIVE_HIGH, IPT_UNUSED )
+
+	PORT_START(INVADERS_P2_CONTROL_PORT_TAG)
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(2)
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_PLAYER(2)
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_PLAYER(2)
+	PORT_BIT( 0xf8, IP_ACTIVE_HIGH, IPT_UNUSED )
+INPUT_PORTS_END
+
+static ADDRESS_MAP_START( invmulti_map, AS_PROGRAM, 8, _8080bw_state )
+	AM_RANGE(0x0000, 0x1fff) AM_MIRROR(0x8000) AM_ROMBANK("bank1")
+	AM_RANGE(0x2000, 0x3fff) AM_MIRROR(0x8000) AM_RAM AM_SHARE("main_ram")
+	AM_RANGE(0x4000, 0x5fff) AM_MIRROR(0x8000) AM_ROMBANK("bank2")
+	AM_RANGE(0x6000, 0x6000) AM_MIRROR(0x1fff) AM_READWRITE(invmulti_eeprom_r, invmulti_eeprom_w)
+	AM_RANGE(0xe000, 0xe000) AM_MIRROR(0x1fff) AM_WRITE(invmulti_bank_w)
+ADDRESS_MAP_END
+
+READ8_MEMBER(_8080bw_state::invmulti_eeprom_r)
+{
+	eeprom_device *eeprom = machine().device<eeprom_device>("eeprom");
+	return eeprom->read_bit();
+}
+
+WRITE8_MEMBER(_8080bw_state::invmulti_eeprom_w)
+{
+	eeprom_device *eeprom = machine().device<eeprom_device>("eeprom");
+
+	// d0: latch bit
+	eeprom->write_bit(data & 1);
+
+	// d6: reset
+	eeprom->set_cs_line((data & 0x40) ? CLEAR_LINE : ASSERT_LINE);
+
+	// d4: write latch or select next bit to read
+	eeprom->set_clock_line((data & 0x10) ? ASSERT_LINE : CLEAR_LINE);
+}
+
+WRITE8_MEMBER(_8080bw_state::invmulti_bank_w)
+{
+	// d0, d4, d6: bank
+	int bank = (data & 1) | (data >> 3 & 2) | (data >> 4 & 4);
+	membank("bank1")->set_base(memregion("maincpu")->base() + bank * 0x4000 + 0x0000);
+	membank("bank2")->set_base(memregion("maincpu")->base() + bank * 0x4000 + 0x2000);
+}
+
+MACHINE_RESET_MEMBER(_8080bw_state,invmulti)
+{
+	invmulti_bank_w(m_maincpu->space(AS_PROGRAM), 0, 0);
+
+	MACHINE_RESET_CALL_MEMBER(mw8080bw);
+}
+
+MACHINE_CONFIG_DERIVED_CLASS( invmulti, invaders, _8080bw_state )
+
+	/* basic machine hardware */
+	MCFG_CPU_MODIFY("maincpu")
+	MCFG_CPU_PROGRAM_MAP(invmulti_map)
+
+	MCFG_EEPROM_93C46_8BIT_ADD("eeprom")
+
+	MCFG_MACHINE_RESET_OVERRIDE(_8080bw_state,invmulti)
+MACHINE_CONFIG_END
+
+DRIVER_INIT_MEMBER(_8080bw_state,invmulti)
+{
+	UINT8 *src = machine().root_device().memregion("user1")->base();
+	int len = machine().root_device().memregion("user1")->bytes();
+	UINT8 *dest = machine().root_device().memregion("maincpu")->base();
+
+	// decrypt rom
+	for (int i = 0; i < len; i++)
+		dest[i] = BITSWAP8(src[(i & 0x100ff) | (BITSWAP8(i >> 8 & 0xff, 7,3,4,5,0,6,1,2) << 8)],0,6,5,7,4,3,1,2);
+}
+
+
+
+/**************************************************************************************************************/
 
 ROM_START( searthin )
 	ROM_REGION( 0x10000, "maincpu", 0 )
@@ -2431,6 +3104,14 @@ ROM_START( searthina )
 	ROM_LOAD( "unka.a1",   0x1c00, 0x0400, CRC(4b65bd7c) SHA1(3931f9f5b0e3339ab484eee14473d3a474935fd9) )
 ROM_END
 
+ROM_START( searthie )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "searthie.h",   0x0000, 0x0800, CRC(92b08b91) SHA1(4cebb70735e5231717619c7b8e5d3080694338b7) )
+	ROM_LOAD( "searthie.g",   0x0800, 0x0800, CRC(23e24bcc) SHA1(a62e8422554f7db34796d4fb1c01e8ddebc7e978) )
+	ROM_LOAD( "searthie.f",   0x1000, 0x0800, CRC(8700286a) SHA1(e0a3c099bc60e70bc9a6c0325944454d9d26428f) )
+	ROM_LOAD( "searthie.e",   0x1800, 0x0800, CRC(baf949b0) SHA1(bfda97a3ef59fcdf87814afc6918507190c3e315) )
+ROM_END
+
 
 ROM_START( invadrmr )
 	ROM_REGION( 0x10000, "maincpu", 0 )
@@ -2445,16 +3126,28 @@ ROM_START( invadrmr )
 	ROM_LOAD( "sv06.1g",     0x1c00, 0x0400, CRC(2c68e0b4) SHA1(a5e5357120102ad32792bf3ef6362f45b7ba7070) )
 ROM_END
 
-ROM_START( modelr )
+
+ROM_START( claybust )
 	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD( "251.bin",       0x0000, 0x0400, CRC(f27a8c1e) SHA1(510debd1ac2c0986f99c217e3078208a39d7837c) )
-	ROM_LOAD( "252.bin",       0x0400, 0x0400, CRC(d53b8f91) SHA1(56919f4c88fb3b5c23b5365f0866698bfceb2762) )
-	ROM_LOAD( "253.bin",       0x0800, 0x0400, CRC(9ef35c6c) SHA1(95bda3e2cdd50f7ac989c581481bad5f1ef2992f) )
-	ROM_LOAD( "254.bin",       0x0c00, 0x0400, CRC(ba5b562d) SHA1(47819d7e5ef3700e700a5f2faa9537bc2199561c) )
-	ROM_LOAD( "255.bin",       0x1000, 0x0400, CRC(00ea8293) SHA1(9c921fa4bafc36fc16a3f5f8588887342936d433) )
-	ROM_LOAD( "256.bin",       0x1400, 0x0400, CRC(e271150c) SHA1(36d0c0c1335036b4a994e8a38904adcf74161c59) )
-	ROM_LOAD( "257.bin",       0x1800, 0x0400, CRC(0da5d9ad) SHA1(c87c6ab248bfd2b75f070343a8f7fcbaed13f4e3) )
-	ROM_LOAD( "258.bin",       0x1c00, 0x0400, CRC(471d4052) SHA1(c8ccda2eba44c2ab49f5fc2874fe70c2bdae35d3) )
+	ROM_LOAD( "0.a1",         0x0000, 0x0400, CRC(90810582) SHA1(a5c3655bae6f92a3cd0eae3a5a3c25e414d4fdf0) )
+	ROM_LOAD( "1.a2",         0x0400, 0x0400, CRC(5ce6fb0e) SHA1(19fa3fbc0dd7e0fa4fffc005ded5a814c3b48f2d) )
+	ROM_LOAD( "2.a4",         0x0800, 0x0400, CRC(d4c1d523) SHA1(1a4785095caa8200d7e1d8d53a93c8e298f52c65) )
+	ROM_LOAD( "3.a5",         0x0c00, 0x0400, CRC(1ca00825) SHA1(74633a4903a51f1eebdd09679597dbe86db2e001) )
+	ROM_LOAD( "4.a6",         0x1000, 0x0400, CRC(09a21120) SHA1(e976d2c173c649e51b032bc5dad54f006864155c) )
+	ROM_LOAD( "5.a8",         0x1400, 0x0400, CRC(92cd4da8) SHA1(217e00012a52c479bf0b0cf37ce556387755740d) )
+ROM_END
+
+
+ROM_START( gunchamp )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "251.a1",       0x0000, 0x0400, CRC(f27a8c1e) SHA1(510debd1ac2c0986f99c217e3078208a39d7837c) )
+	ROM_LOAD( "252.a2",       0x0400, 0x0400, CRC(d53b8f91) SHA1(56919f4c88fb3b5c23b5365f0866698bfceb2762) )
+	ROM_LOAD( "253.a4",       0x0800, 0x0400, CRC(9ef35c6c) SHA1(95bda3e2cdd50f7ac989c581481bad5f1ef2992f) )
+	ROM_LOAD( "254.a5",       0x0c00, 0x0400, CRC(ba5b562d) SHA1(47819d7e5ef3700e700a5f2faa9537bc2199561c) )
+	ROM_LOAD( "255.a6",       0x1000, 0x0400, CRC(00ea8293) SHA1(9c921fa4bafc36fc16a3f5f8588887342936d433) )
+	ROM_LOAD( "256.a8",       0x1400, 0x0400, CRC(e271150c) SHA1(36d0c0c1335036b4a994e8a38904adcf74161c59) )
+	ROM_LOAD( "257.a9",       0x1800, 0x0400, CRC(0da5d9ad) SHA1(c87c6ab248bfd2b75f070343a8f7fcbaed13f4e3) )
+	ROM_LOAD( "258.a10",      0x1c00, 0x0400, CRC(471d4052) SHA1(c8ccda2eba44c2ab49f5fc2874fe70c2bdae35d3) )
 ROM_END
 
 
@@ -2474,6 +3167,18 @@ ROM_START( spaceat2 )
 	ROM_LOAD( "spaceatt.g",   0x0800, 0x0800, CRC(f41241f7) SHA1(d93cead75922510075433849c4f7099279eafc18) )
 	ROM_LOAD( "spaceatt.f",   0x1000, 0x0800, CRC(4c060223) SHA1(957e75a978aa600627399061cae0a6525e92ad11) )
 	ROM_LOAD( "spaceatt.e",   0x1800, 0x0800, CRC(7cf6f604) SHA1(469557de15178c4b2d686e5724e1006f7c20d7a4) )
+ROM_END
+
+ROM_START( spacecom )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "1f.ic67",      0x0000, 0x0400, BAD_DUMP CRC(703f2cbe) SHA1(b183f9fbedd8658399555c0ba21ecab6370e86cb) )
+	ROM_LOAD( "2g.ic82",      0x0400, 0x0400, CRC(7269b719) SHA1(6fd5879a6f2a5b1d38c7f00996037418df9491d3) )
+	ROM_LOAD( "3f.ic68",      0x0800, 0x0400, CRC(6badac4f) SHA1(7b998d8fb21d143f26d605fe2a7dbbe1cf65210f) )
+	ROM_LOAD( "4g.ic83",      0x0c00, 0x0400, CRC(75b59ea7) SHA1(e00eb4a9cf662c84e18fc9efc29cedebf0c5af67) )
+	ROM_LOAD( "5f.ic69",      0x1000, 0x0400, CRC(84b61117) SHA1(3e41ff74ad02a7da4bbc22f3b84917eec067bbca) )
+	ROM_LOAD( "6g.ic84",      0x1400, 0x0400, CRC(de383625) SHA1(7ec0d7171e771c4b43e026f3f50a88d8ab2236bb) )
+	ROM_LOAD( "7f.ic70",      0x1800, 0x0400, CRC(5a23dbc8) SHA1(4d193bb7b38fb7ccd57d2c72463a3fe123dbca58) )
+	ROM_LOAD( "8g.ic85",      0x1c00, 0x0400, CRC(a5a467e3) SHA1(ef591059e55d21f14baa8af1f1324a9bc2ada8c4) )
 ROM_END
 
 ROM_START( sinvzen )
@@ -2537,7 +3242,7 @@ ROM_START( sicv )
 	ROM_LOAD( "cv19.34",     0x1000, 0x0800, CRC(d202b41c) SHA1(868fe938ef768655c894ec95b7d9a81bf21f69ca) )
 	ROM_LOAD( "cv20.33",     0x1800, 0x0800, CRC(c74ee7b6) SHA1(4f52db274a2d4433ab67c099ee805e8eb8516c0f) )
 
-	ROM_REGION( 0x0800, "proms", 0 )		/* color maps player 1/player 2 */
+	ROM_REGION( 0x0800, "proms", 0 )        /* color maps player 1/player 2 */
 	ROM_LOAD( "cv01.1",      0x0000, 0x0400, CRC(037e16ac) SHA1(d585030aaff428330c91ae94d7cd5c96ebdd67dd) )
 	ROM_LOAD( "cv02.2",      0x0400, 0x0400, CRC(8263da38) SHA1(2e7c769d129e6f8a1a31eba1e02777bb94ac32b2) )
 ROM_END
@@ -2551,9 +3256,9 @@ ROM_START( sisv )
 	ROM_LOAD( "sv09.42",     0x1800, 0x0400, CRC(cd80b13f) SHA1(0f4b9537b99fe3cdeebe525efb1869a1be0bc704) )
 	ROM_LOAD( "sv06.41",     0x1c00, 0x0400, CRC(2c68e0b4) SHA1(a5e5357120102ad32792bf3ef6362f45b7ba7070) )
 
-	ROM_REGION( 0x0800, "proms", 0 )		/* color maps player 1/player 2 */
-	ROM_LOAD( "cv01.1",      0x0000, 0x0400, CRC(aac24f34) SHA1(ad110e776547fb48baac568bb50d61854537ca34) )
-	ROM_LOAD( "cv02.2",      0x0400, 0x0400, CRC(2bdf83a0) SHA1(01ffbd43964c41987e7d44816271308f9a70802b) )
+	ROM_REGION( 0x0800, "proms", 0 )        /* color maps player 1/player 2 */
+	ROM_LOAD( "cv01(__sisv).1",      0x0000, 0x0400, CRC(aac24f34) SHA1(ad110e776547fb48baac568bb50d61854537ca34) )
+	ROM_LOAD( "cv02(__sisv).2",      0x0400, 0x0400, CRC(2bdf83a0) SHA1(01ffbd43964c41987e7d44816271308f9a70802b) )
 ROM_END
 
 ROM_START( sisv2 )
@@ -2565,9 +3270,22 @@ ROM_START( sisv2 )
 	ROM_LOAD( "sv13.42",     0x1800, 0x0400, CRC(a9011634) SHA1(1f1369ecb02078042cfdf17a497b8dda6dd23793) )
 	ROM_LOAD( "sv14.41",     0x1c00, 0x0400, CRC(58730370) SHA1(13dc806bcecd2d6089a85dd710ac2869413f7475) )
 
-	ROM_REGION( 0x0800, "proms", 0 )		/* color maps player 1/player 2 */
-	ROM_LOAD( "cv01.1",      0x0000, 0x0400, CRC(aac24f34) SHA1(ad110e776547fb48baac568bb50d61854537ca34) )
-	ROM_LOAD( "cv02.2",      0x0400, 0x0400, CRC(2bdf83a0) SHA1(01ffbd43964c41987e7d44816271308f9a70802b) )
+	ROM_REGION( 0x0800, "proms", 0 )        /* color maps player 1/player 2 */
+	ROM_LOAD( "cv01(__sisv).1",      0x0000, 0x0400, CRC(aac24f34) SHA1(ad110e776547fb48baac568bb50d61854537ca34) )
+	ROM_LOAD( "cv02(__sisv).2",      0x0400, 0x0400, CRC(2bdf83a0) SHA1(01ffbd43964c41987e7d44816271308f9a70802b) )
+ROM_END
+
+ROM_START( spacerng )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "sr1.u36",    0x0000, 0x0800, CRC(b984f52d) SHA1(fdc8b249c0b65339977f91b674bdcb435aa99474) )
+	ROM_LOAD( "sr2.u35",    0x0800, 0x0800, CRC(4b4f07e6) SHA1(408dcdae3e80a09584d8ebd6491bc90c4def1fcf) )
+	ROM_LOAD( "sr3.u34",    0x1000, 0x0800, CRC(edc28ba9) SHA1(c96668f709d3fa0b97a6b118614e9c139f8f54cc) )
+	ROM_LOAD( "sr4.u33",    0x1800, 0x0800, CRC(a95f559f) SHA1(f597c7af96a9d039fd8e54d976d68a065f6bf0c8) )
+
+	ROM_REGION( 0x0800, "proms", 0 )        /* color maps player 1/player 2 */
+	/* !! not dumped yet, these were taken from sisv */
+	ROM_LOAD( "cv01(__sisv).1",      0x0000, 0x0400, BAD_DUMP CRC(aac24f34) SHA1(ad110e776547fb48baac568bb50d61854537ca34) )
+	ROM_LOAD( "cv02(__sisv).2",      0x0400, 0x0400, BAD_DUMP CRC(2bdf83a0) SHA1(01ffbd43964c41987e7d44816271308f9a70802b) )
 ROM_END
 
 ROM_START( spceking )
@@ -2638,7 +3356,36 @@ ROM_START( invadpt2 )
 	ROM_LOAD( "pv04",        0x1800, 0x0800, CRC(8f0e62e0) SHA1(a967b155f15f8432222fcc78b23121b00c405c5c) )
 	ROM_LOAD( "pv05",        0x4000, 0x0800, CRC(19b505e9) SHA1(6a31a37586782ce421a7d2cffd8f958c00b7b415) )
 
-	ROM_REGION( 0x0800, "proms", 0 )		/* color maps player 1/player 2 */
+	ROM_REGION( 0x0800, "proms", 0 )        /* color maps player 1/player 2 */
+	ROM_LOAD( "pv06.1",   0x0000, 0x0400, CRC(a732810b) SHA1(a5fabffa73ca740909e23b9530936f9274dff356) )
+	ROM_LOAD( "pv07.2",   0x0400, 0x0400, CRC(2c5b91cb) SHA1(7fa4d4aef85473b1b4f18734230c164e72be44e7) )
+ROM_END
+
+ROM_START( invadpt2br )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "pv01",        0x0000, 0x0800, CRC(7288a511) SHA1(ff617872784c28ed03591aefa9f0519e5651701f) )
+	/* pv01 had weird encryption applied to it, very likely to have been done post-dump. */
+//  for (offs = 0x4fc; offs < 0x5fc; offs++)
+//      rom[offs] ^= 0x6c;
+
+	// 0x4fc + 1 * 0x56
+//  for (offs = 0x54e; offs < 0x552; offs++)
+//      rom[offs] ^= 0x03;
+
+	// 0x4fc + 2 * 0x56
+//  for (offs = 0x5a4; offs < 0x5a8; offs++)
+//      rom[offs] ^= 0x01;
+
+	// 0x4fc + 3 * 0x56
+//  for (offs = 0x5fa; offs < 0x5fc; offs++)
+//      rom[offs] ^= 0x02;
+
+	ROM_LOAD( "br_pv02",     0x0800, 0x0800, CRC(420c7c35) SHA1(b51265f4d9e5a8cf9d53099a97cadd25ea0b34ce) )
+	ROM_LOAD( "br_pv03",     0x1000, 0x0800, CRC(dffd04b9) SHA1(d51a0f27e90b0a49cf2d57ec82a863dcae9f3ea4) )
+	ROM_LOAD( "br_pv04",     0x1800, 0x0800, CRC(b0626aff) SHA1(b7de6c21030732bd0479228f057ca4c87b913b0a) )
+	ROM_LOAD( "br_pv05",     0x4000, 0x0800, CRC(84c70bb8) SHA1(75fef3ee6da3e7e01a257629016bc10a23691d62) )
+
+	ROM_REGION( 0x0800, "proms", 0 )        /* color maps player 1/player 2 (taken from parent set) */
 	ROM_LOAD( "pv06.1",   0x0000, 0x0400, CRC(a732810b) SHA1(a5fabffa73ca740909e23b9530936f9274dff356) )
 	ROM_LOAD( "pv07.2",   0x0400, 0x0400, CRC(2c5b91cb) SHA1(7fa4d4aef85473b1b4f18734230c164e72be44e7) )
 ROM_END
@@ -2677,7 +3424,7 @@ ROM_START( moonbase )
 	ROM_LOAD( "ze3-9.e5",     0x4000, 0x0400, CRC(2dd5adfa) SHA1(62cb98cad1e48de0e0cbf30392d35834b38dadbd) )
 	ROM_LOAD( "ze3-10.f5",    0x4400, 0x0400, CRC(1e7c22a4) SHA1(b34173375494ffbf5400dd4014a683a9807f4f08) )
 
-	ROM_REGION( 0x0800, "proms", 0 )		/* color maps player 1/player 2 */
+	ROM_REGION( 0x0800, "proms", 0 )        /* color maps player 1/player 2 */
 	ROM_LOAD( "cv02.h7",      0x0000, 0x0400, CRC(2bdf83a0) SHA1(01ffbd43964c41987e7d44816271308f9a70802b) ) /* NEC B406 or compatible BPROM, like the 82S137 */
 	ROM_LOAD( "cv01.g7",      0x0400, 0x0400, CRC(aac24f34) SHA1(ad110e776547fb48baac568bb50d61854537ca34) ) /* NEC B406 or compatible BPROM, like the 82S137 */
 ROM_END
@@ -2695,34 +3442,99 @@ ROM_START( moonbasea )
 	ROM_LOAD( "ze3-9.e5",     0x4000, 0x0400, CRC(2dd5adfa) SHA1(62cb98cad1e48de0e0cbf30392d35834b38dadbd) )
 	ROM_LOAD( "ze3-10.f5",    0x4400, 0x0400, CRC(1e7c22a4) SHA1(b34173375494ffbf5400dd4014a683a9807f4f08) )
 
-	ROM_REGION( 0x0800, "proms", 0 )		/* color maps player 1/player 2 */
+	ROM_REGION( 0x0800, "proms", 0 )        /* color maps player 1/player 2 */
 	ROM_LOAD( "cv02.h7",      0x0000, 0x0400, CRC(2bdf83a0) SHA1(01ffbd43964c41987e7d44816271308f9a70802b) ) /* NEC B406 or compatible BPROM, like the 82S137 */
 	ROM_LOAD( "cv01.g7",      0x0400, 0x0400, CRC(aac24f34) SHA1(ad110e776547fb48baac568bb50d61854537ca34) ) /* NEC B406 or compatible BPROM, like the 82S137 */
 ROM_END
 
 
-ROM_START( invrvnge )
+ROM_START( invrvnge ) // Space Invaders hw + sound daughterboard
 	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD( "invrvnge.h",   0x0000, 0x0800, CRC(aca41bbb) SHA1(ca71f792abd6d9a44d15b19d2ccf678e82ccba4f) )
-	ROM_LOAD( "invrvnge.g",   0x0800, 0x0800, CRC(cfe89dad) SHA1(218b6a0b636c49c4cdc3667e8b1387ef0e257115) )
-	ROM_LOAD( "invrvnge.f",   0x1000, 0x0800, CRC(e350de2c) SHA1(e845565e2f96f9dec3242ec5ab75910a515428c9) )
-	ROM_LOAD( "invrvnge.e",   0x1800, 0x0800, CRC(1ec8dfc8) SHA1(fc8fbe1161958f57c9f4ccbcab8a769184b1c562) )
+	ROM_LOAD( "h.ic36",      0x0000, 0x0800, CRC(0e229b9f) SHA1(617197bf94e9700cbbb2f32487dc47b318d4f2af) )
+	ROM_LOAD( "g.ic35",      0x0800, 0x0800, CRC(26b38aa4) SHA1(f281c7ec47ce6ab61bfda2e7aa6a5b8a01f2c11e) )
+	ROM_LOAD( "f.ic34",      0x1000, 0x0800, CRC(b3b2749e) SHA1(4f854f981396e2d6a959dd48cff12234074fb69b) )
+	ROM_LOAD( "e.ic33",      0x1800, 0x0800, CRC(d8e75102) SHA1(86d5618944265947e3ce60fdf048d8fff4a55744) )
+
+	ROM_REGION( 0x10000, "audiocpu", 0 ) // encrypted
+	ROM_LOAD( "snd.2c",      0xf000, 0x0800, CRC(135f3b16) SHA1(d472a6ca32c4a16cc1faf09f4a4876d75cd4ba24) )
+	ROM_LOAD( "snd.1c",      0xf800, 0x0800, CRC(152fc85e) SHA1(df207d6e690287a56e4e330deaa5ee40a179f1fc) )
+
+	ROM_REGION( 0x0800, "proms", 0 )
+	ROM_LOAD( "colour.bin",  0x0000, 0x0800, CRC(7de74988) SHA1(0b8c94b2bfdbc3921d60aad765df8af611f3fdd7) )
 ROM_END
 
-ROM_START( invrvngea )
+ROM_START( invrvngea ) // Space Invaders hw + sound daughterboard
 	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD( "5m.bin",       0x0000, 0x0800, CRC(b145cb71) SHA1(127eb11de7ab9835f06510fb12838c0b728c0d42) )
-	ROM_LOAD( "5n.bin",       0x0800, 0x0800, CRC(660e8af3) SHA1(bd52eadf4ee3d717fd5bd7206e1e87d729250c92) )
-	ROM_LOAD( "5p.bin",       0x1000, 0x0800, CRC(6ec5a9ad) SHA1(d1e84d2d60c6128c092f2cd20a2b87216df3034b) )
-	ROM_LOAD( "5r.bin",       0x1800, 0x0800, CRC(74516811) SHA1(0f595c7b0fae5f3f83fdd1ffed5a408ee77c9438) )
+	ROM_LOAD( "h.ic36",      0x0000, 0x0800, CRC(0914b279) SHA1(91e465f56ed0dc8c68e109e33ec9d2bda2616a21) )
+	ROM_LOAD( "g.ic35",      0x0800, 0x0800, CRC(84d9497c) SHA1(fb1b5fc49365fbf89e5418789e64efd186cdeecf) )
+	ROM_LOAD( "f.ic34",      0x1000, 0x0800, CRC(78d34d97) SHA1(a50c19df12e75c644b014d74a463094e249db207) )
+	ROM_LOAD( "e.ic33",      0x1800, 0x0800, CRC(30c71887) SHA1(17c9e905eb327435d52b6d51842f7f42a5e6ab7d) )
+
+	ROM_REGION( 0x10000, "audiocpu", 0 ) // encrypted
+	ROM_LOAD( "snd.2c",      0xf000, 0x0800, CRC(135f3b16) SHA1(d472a6ca32c4a16cc1faf09f4a4876d75cd4ba24) )
+	ROM_LOAD( "snd.1c",      0xf800, 0x0800, CRC(152fc85e) SHA1(df207d6e690287a56e4e330deaa5ee40a179f1fc) )
+
+	ROM_REGION( 0x0800, "proms", 0 )
+	ROM_LOAD( "colour.bin",  0x0000, 0x0800, CRC(7de74988) SHA1(0b8c94b2bfdbc3921d60aad765df8af611f3fdd7) )
 ROM_END
+
+ROM_START( invrvngeb ) // source unknown
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "invrvnge.h",  0x0000, 0x0800, CRC(aca41bbb) SHA1(ca71f792abd6d9a44d15b19d2ccf678e82ccba4f) )
+	ROM_LOAD( "invrvnge.g",  0x0800, 0x0800, CRC(cfe89dad) SHA1(218b6a0b636c49c4cdc3667e8b1387ef0e257115) )
+	ROM_LOAD( "invrvnge.f",  0x1000, 0x0800, CRC(e350de2c) SHA1(e845565e2f96f9dec3242ec5ab75910a515428c9) )
+	ROM_LOAD( "invrvnge.e",  0x1800, 0x0800, CRC(1ec8dfc8) SHA1(fc8fbe1161958f57c9f4ccbcab8a769184b1c562) )
+
+	ROM_REGION( 0x10000, "audiocpu", 0 ) // encrypted
+	ROM_LOAD( "snd.2c",      0xf000, 0x0800, BAD_DUMP CRC(135f3b16) SHA1(d472a6ca32c4a16cc1faf09f4a4876d75cd4ba24) ) // not dumped, taken from parent
+	ROM_LOAD( "snd.1c",      0xf800, 0x0800, BAD_DUMP CRC(152fc85e) SHA1(df207d6e690287a56e4e330deaa5ee40a179f1fc) ) // not dumped, taken from parent
+
+	ROM_REGION( 0x0800, "proms", 0 )
+	ROM_LOAD( "colour.bin",  0x0000, 0x0800, BAD_DUMP CRC(7de74988) SHA1(0b8c94b2bfdbc3921d60aad765df8af611f3fdd7) ) // not dumped, taken from parent
+ROM_END
+
+ROM_START( invrvngedu ) // single PCB
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "ir.5m",       0x0000, 0x0800, CRC(b145cb71) SHA1(127eb11de7ab9835f06510fb12838c0b728c0d42) )
+	ROM_LOAD( "ir.5n",       0x0800, 0x0800, CRC(660e8af3) SHA1(bd52eadf4ee3d717fd5bd7206e1e87d729250c92) )
+	ROM_LOAD( "ir.5p",       0x1000, 0x0800, CRC(6ec5a9ad) SHA1(d1e84d2d60c6128c092f2cd20a2b87216df3034b) )
+	ROM_LOAD( "ir.5r",       0x1800, 0x0800, CRC(74516811) SHA1(0f595c7b0fae5f3f83fdd1ffed5a408ee77c9438) )
+
+	ROM_REGION( 0x10000, "audiocpu", 0 ) // encrypted
+	ROM_LOAD( "ir.1t",       0xf000, 0x0800, BAD_DUMP CRC(135f3b16) SHA1(d472a6ca32c4a16cc1faf09f4a4876d75cd4ba24) ) // not dumped, taken from parent
+	ROM_LOAD( "ir.1u",       0xf800, 0x0800, BAD_DUMP CRC(152fc85e) SHA1(df207d6e690287a56e4e330deaa5ee40a179f1fc) ) // not dumped, taken from parent
+
+	ROM_REGION( 0x0800, "proms", 0 )
+	ROM_LOAD( "ir.3r",       0x0000, 0x0800, CRC(57da51a9) SHA1(a8cb0b45c52eef353b83fe75b61e4990e27eb124) )
+ROM_END
+
+ROM_START( invrvngegw ) // single PCB
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "ir.5m",       0x0000, 0x0800, CRC(4fe35d1f) SHA1(469d563f88229cf163f8b21dce9e68f75d3d214e) )
+	ROM_LOAD( "ir.5n",       0x0800, 0x0800, CRC(92d0442c) SHA1(1d104fbb225ce1a3a72e47af396a641030d990c2) )
+	ROM_LOAD( "ir.5p",       0x1000, 0x0800, CRC(18d2372d) SHA1(d19b7bd315226ef0a565b296964b221fa4714413) )
+	ROM_LOAD( "ir.5r",       0x1800, 0x0800, CRC(657ddf27) SHA1(957c6bbdb2133d4697d3302b2358979d1451b6d5) )
+
+	ROM_REGION( 0x10000, "audiocpu", 0 ) // encrypted
+	ROM_LOAD( "ir.1t",       0xf000, 0x0800, CRC(64e9e81e) SHA1(3390f8bab219cf134b33ae21c473da0873e01929) ) // bad?
+	ROM_LOAD( "ir.1u",       0xf800, 0x0800, CRC(152fc85e) SHA1(df207d6e690287a56e4e330deaa5ee40a179f1fc) )
+
+	ROM_REGION( 0x0800, "proms", 0 )
+	ROM_LOAD( "ir.3r",       0x0000, 0x0800, CRC(6ce639bf) SHA1(73752f5886dcf8729d9853ddc258770f5c724ca3) )
+ROM_END
+
 
 ROM_START( spclaser )
 	ROM_REGION( 0x10000, "maincpu", 0 )
 	ROM_LOAD( "la01",         0x0000, 0x0800, CRC(bedc0078) SHA1(a5bb0cbbb8e3f27d03beb8101b2be1111d73689d) )
-	ROM_LOAD( "spcewarl.2",   0x0800, 0x0800, CRC(43bc65c5) SHA1(5f9827c02c2d221e1607359c840374ff7fb92fbf) )
+	ROM_LOAD( "la02",         0x0800, 0x0800, CRC(43bc65c5) SHA1(5f9827c02c2d221e1607359c840374ff7fb92fbf) )
 	ROM_LOAD( "la03",         0x1000, 0x0800, CRC(1083e9cc) SHA1(7ad45c6230c9e02fcf51e3414c15e2237eebbd7a) )
 	ROM_LOAD( "la04",         0x1800, 0x0800, CRC(5116b234) SHA1(b165b2574cbcb26a5bb43f91df5f8be5f111f486) )
+
+	ROM_REGION( 0x0800, "proms", 0 )        /* color maps player 1/player 2 */
+	/* !! not dumped yet, these were taken from sisv/intruder */
+	ROM_LOAD( "01.1",         0x0000, 0x0400, BAD_DUMP CRC(aac24f34) SHA1(ad110e776547fb48baac568bb50d61854537ca34) )
+	ROM_LOAD( "02.2",         0x0400, 0x0400, BAD_DUMP CRC(2bdf83a0) SHA1(01ffbd43964c41987e7d44816271308f9a70802b) )
 ROM_END
 
 ROM_START( intruder )
@@ -2732,9 +3544,9 @@ ROM_START( intruder )
 	ROM_LOAD( "la03-1.34",    0x1000, 0x0800, CRC(278ef9cf) SHA1(74a9c1d3500ea28e50d07363a547c381999c84fa) )
 	ROM_LOAD( "la04-1.33",    0x1800, 0x0800, CRC(5116b234) SHA1(b165b2574cbcb26a5bb43f91df5f8be5f111f486) )
 
-	ROM_REGION( 0x0800, "proms", 0 )		/* color maps player 1/player 2 */
-	ROM_LOAD( "01.bin",       0x0000, 0x0400, CRC(aac24f34) SHA1(ad110e776547fb48baac568bb50d61854537ca34) )
-	ROM_LOAD( "02.bin",       0x0400, 0x0400, CRC(2bdf83a0) SHA1(01ffbd43964c41987e7d44816271308f9a70802b) )
+	ROM_REGION( 0x0800, "proms", 0 )        /* color maps player 1/player 2 */
+	ROM_LOAD( "01.1",         0x0000, 0x0400, CRC(aac24f34) SHA1(ad110e776547fb48baac568bb50d61854537ca34) )
+	ROM_LOAD( "02.2",         0x0400, 0x0400, CRC(2bdf83a0) SHA1(01ffbd43964c41987e7d44816271308f9a70802b) )
 ROM_END
 
 ROM_START( laser )
@@ -2743,6 +3555,11 @@ ROM_START( laser )
 	ROM_LOAD( "2.u35",        0x0800, 0x0800, CRC(9876f331) SHA1(14e36b26d186d9a195492834ef989ed5664d7b65) )
 	ROM_LOAD( "3.u34",        0x1000, 0x0800, CRC(ed79000b) SHA1(bfe0407e833ce61aa909f5f1f93c3fc1d46605e9) )
 	ROM_LOAD( "4.u33",        0x1800, 0x0800, CRC(10a160a1) SHA1(e2d4208af11b65fc42d2856e57ee3c196f89d360) )
+
+	ROM_REGION( 0x0800, "proms", 0 )        /* color maps player 1/player 2 */
+	/* !! not dumped yet, these were taken from intruder */
+	ROM_LOAD( "01.1",         0x0000, 0x0400, BAD_DUMP CRC(aac24f34) SHA1(ad110e776547fb48baac568bb50d61854537ca34) )
+	ROM_LOAD( "02.2",         0x0400, 0x0400, BAD_DUMP CRC(2bdf83a0) SHA1(01ffbd43964c41987e7d44816271308f9a70802b) )
 ROM_END
 
 ROM_START( spcewarl )
@@ -2751,6 +3568,11 @@ ROM_START( spcewarl )
 	ROM_LOAD( "spcewarl.2",   0x0800, 0x0800, CRC(43bc65c5) SHA1(5f9827c02c2d221e1607359c840374ff7fb92fbf) )
 	ROM_LOAD( "spcewarl.3",   0x1000, 0x0800, CRC(7820df3a) SHA1(53315857f4282c68624b338b068d80ee6828af4c) )
 	ROM_LOAD( "spcewarl.4",   0x1800, 0x0800, CRC(adc05b8d) SHA1(c4acf75537c0662a4785d5d6a90643239a54bf43) )
+
+	ROM_REGION( 0x0800, "proms", 0 )        /* color maps player 1/player 2 */
+	/* !! not dumped yet, these were taken from intruder */
+	ROM_LOAD( "01.1",         0x0000, 0x0400, BAD_DUMP CRC(aac24f34) SHA1(ad110e776547fb48baac568bb50d61854537ca34) )
+	ROM_LOAD( "02.2",         0x0400, 0x0400, BAD_DUMP CRC(2bdf83a0) SHA1(01ffbd43964c41987e7d44816271308f9a70802b) )
 ROM_END
 
 ROM_START( galxwars )
@@ -2762,11 +3584,11 @@ ROM_START( galxwars )
 	ROM_LOAD( "univgw1.4",    0x4000, 0x0400, CRC(0871156e) SHA1(3726d0bfe153a0afc62ea56737662074986064b0) )
 	ROM_LOAD( "univgw2.5",    0x4400, 0x0400, CRC(6036d7bf) SHA1(36c2ad2ffdb47bbecc40fd67ced6ab51a5cd2f3e) )
 
-	ROM_REGION( 0x0800, "proms", 0 )		/* color maps player 1/player 2 */
+	ROM_REGION( 0x0800, "proms", 0 )        /* color maps player 1/player 2 */
 	/* !! not dumped yet, these were taken from sisv/intruder */
 	/* Or are colormaps generated by a group of TTLs, similar to dai3wksi? */
-	ROM_LOAD( "01.bin",       0x0000, 0x0400, BAD_DUMP CRC(aac24f34) SHA1(ad110e776547fb48baac568bb50d61854537ca34) )
-	ROM_LOAD( "02.bin",       0x0400, 0x0400, BAD_DUMP CRC(2bdf83a0) SHA1(01ffbd43964c41987e7d44816271308f9a70802b) )
+	ROM_LOAD( "01.1",         0x0000, 0x0400, BAD_DUMP CRC(aac24f34) SHA1(ad110e776547fb48baac568bb50d61854537ca34) )
+	ROM_LOAD( "02.2",         0x0400, 0x0400, BAD_DUMP CRC(2bdf83a0) SHA1(01ffbd43964c41987e7d44816271308f9a70802b) )
 ROM_END
 
 ROM_START( galxwars2 )
@@ -2774,11 +3596,11 @@ ROM_START( galxwars2 )
 	ROM_LOAD( "3192.h6",      0x0000, 0x1000, CRC(bde6860b) SHA1(e04b8add32d8f7ea588fae6d6a387f1d40495f1b) )
 	ROM_LOAD( "3193.h7",      0x4000, 0x1000, CRC(a17cd507) SHA1(554ab0e8bdc0e7af4a30b0ddc8aa053c8e70255c) ) /* 2nd half unused */
 
-	ROM_REGION( 0x0800, "proms", 0 )		/* color maps player 1/player 2 */
+	ROM_REGION( 0x0800, "proms", 0 )        /* color maps player 1/player 2 */
 	/* !! not dumped yet, these were taken from sisv/intruder */
 	/* Or are colormaps generated by a group of TTLs, similar to dai3wksi? */
-	ROM_LOAD( "01.bin",       0x0000, 0x0400, BAD_DUMP CRC(aac24f34) SHA1(ad110e776547fb48baac568bb50d61854537ca34) )
-	ROM_LOAD( "02.bin",       0x0400, 0x0400, BAD_DUMP CRC(2bdf83a0) SHA1(01ffbd43964c41987e7d44816271308f9a70802b) )
+	ROM_LOAD( "01.1",         0x0000, 0x0400, BAD_DUMP CRC(aac24f34) SHA1(ad110e776547fb48baac568bb50d61854537ca34) )
+	ROM_LOAD( "02.2",         0x0400, 0x0400, BAD_DUMP CRC(2bdf83a0) SHA1(01ffbd43964c41987e7d44816271308f9a70802b) )
 ROM_END
 
 ROM_START( galxwarst )
@@ -2790,11 +3612,11 @@ ROM_START( galxwarst )
 	ROM_LOAD( "galxwars.4",   0x4000, 0x0400, CRC(ae4fe8fb) SHA1(494f44167dc84e4515b769c12f6e24419461dce4) )
 	ROM_LOAD( "galxwars.5",   0x4400, 0x0400, CRC(37708a35) SHA1(df6fd521ddfa146ef93e390e47741bdbfda1e7ba) )
 
-	ROM_REGION( 0x0800, "proms", 0 )		/* color maps player 1/player 2 */
+	ROM_REGION( 0x0800, "proms", 0 )        /* color maps player 1/player 2 */
 	/* !! not dumped yet, these were taken from sisv/intruder */
 	/* Or are colormaps generated by a group of TTLs, similar to dai3wksi? */
-	ROM_LOAD( "01.bin",       0x0000, 0x0400, BAD_DUMP CRC(aac24f34) SHA1(ad110e776547fb48baac568bb50d61854537ca34) )
-	ROM_LOAD( "02.bin",       0x0400, 0x0400, BAD_DUMP CRC(2bdf83a0) SHA1(01ffbd43964c41987e7d44816271308f9a70802b) )
+	ROM_LOAD( "01.1",         0x0000, 0x0400, BAD_DUMP CRC(aac24f34) SHA1(ad110e776547fb48baac568bb50d61854537ca34) )
+	ROM_LOAD( "02.2",         0x0400, 0x0400, BAD_DUMP CRC(2bdf83a0) SHA1(01ffbd43964c41987e7d44816271308f9a70802b) )
 ROM_END
 
 ROM_START( starw )
@@ -2807,6 +3629,22 @@ ROM_START( starw )
 	ROM_LOAD( "romf",         0x1c00, 0x0400, CRC(c8e42d3d) SHA1(841b27af251b9c3a964972e864fb7c88acc742e0) )
 ROM_END
 
+ROM_START( starw1 )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "gc.75",        0x0000, 0x0400, CRC(ad10c128) SHA1(c30ff9ff5cf8dedf7654c8e2799a4bb79a30104a) )
+	ROM_LOAD( "gc.77",        0x0400, 0x0400, CRC(ab77c474) SHA1(eb07dcad1f265834b93a8108298d4441d6a74b2e) )
+	ROM_LOAD( "gc.76",        0x0800, 0x0400, CRC(3638aed4) SHA1(1426c9270f248fd2ab134dc35526599c02051ccd) )
+	ROM_LOAD( "gc.80",        0x1400, 0x0400, CRC(4c67957b) SHA1(dda7bbd54e7395dea80d224e487318fb4429f027) )
+	ROM_LOAD( "gc.81",        0x1800, 0x0400, CRC(246621ef) SHA1(bddc5253f735fa81266d725a24b1c14faabe0c6a) )
+	ROM_LOAD( "gc.82",        0x1c00, 0x0400, CRC(19bd32ee) SHA1(a1718a6a6300c3d7df469793cb0d590c4a966aff) )
+
+	ROM_REGION( 0x0800, "proms", 0 )        /* color maps player 1/player 2 */
+	ROM_LOAD( "cv01",         0x0000, 0x0400, CRC(8d892ef3) SHA1(c471dd6197a3c779d89c33fcb425cf3bbdf4fc15) )
+	ROM_IGNORE( 0x0400 )
+	ROM_LOAD( "cv02",         0x0400, 0x0400, CRC(b44ddde8) SHA1(8793f370526c072e645d8d0b9794b1b64a7701ef) )
+	ROM_IGNORE( 0x0400 )
+ROM_END
+
 ROM_START( lrescue )
 	ROM_REGION( 0x10000, "maincpu", 0 )
 	ROM_LOAD( "lrescue.1",    0x0000, 0x0800, CRC(2bbc4778) SHA1(0167f1ac1501ab0b4c4e555023fa5efed59d56ae) )
@@ -2816,9 +3654,9 @@ ROM_START( lrescue )
 	ROM_LOAD( "lrescue.5",    0x4000, 0x0800, CRC(58fde8bc) SHA1(663665ac5254204c1eba18357d9867034eae55eb) )
 	ROM_LOAD( "lrescue.6",    0x4800, 0x0800, CRC(bfb0f65d) SHA1(ea0943d764a16094b6e2289f62ef117c9f838c98) )
 
-	ROM_REGION( 0x0800, "proms", 0 )		/* color map */
+	ROM_REGION( 0x0800, "proms", 0 )        /* color map */
 	ROM_LOAD( "7643-1.cpu",   0x0000, 0x0400, CRC(8b2e38de) SHA1(d6a757be31c3a179d31bd3709e71f9e38ec632e9) )
-	ROM_RELOAD( 			  0x0400, 0x0400 )
+	ROM_RELOAD(               0x0400, 0x0400 )
 ROM_END
 
 /*
@@ -2902,6 +3740,10 @@ ROM_START( mlander )
 	ROM_LOAD( "ml4.u33",    0x1800, 0x0800, CRC(c9a74571) SHA1(b1671d19eff17f7adb274013c8f11eb044ebdd28) )
 	ROM_LOAD( "ml5.u32",    0x4000, 0x0800, CRC(88291fa2) SHA1(40c4eb51f75b5ca81a62121231d22b9f48d0f628) )
 	ROM_LOAD( "ml6.u31",    0x4800, 0x0800, CRC(bfb0f65d) SHA1(ea0943d764a16094b6e2289f62ef117c9f838c98) )
+
+	ROM_REGION( 0x0800, "proms", 0 )        /* color map */
+	ROM_LOAD( "01.bin",     0x0000, 0x0400, CRC(aac24f34) SHA1(ad110e776547fb48baac568bb50d61854537ca34) )
+	ROM_LOAD( "02.bin",     0x0400, 0x0400, CRC(2bdf83a0) SHA1(01ffbd43964c41987e7d44816271308f9a70802b) )
 ROM_END
 
 ROM_START( grescue )
@@ -2913,9 +3755,9 @@ ROM_START( grescue )
 	ROM_LOAD( "grescue.5",    0x4000, 0x0800, CRC(a419a4d6) SHA1(8eeeb31cbebffc98d2c6c5b964f9b320fcf303d2) )
 	ROM_LOAD( "lrescue.6",    0x4800, 0x0800, CRC(bfb0f65d) SHA1(ea0943d764a16094b6e2289f62ef117c9f838c98) )
 
-	ROM_REGION( 0x0800, "proms", 0 )		/* color map */
+	ROM_REGION( 0x0800, "proms", 0 )        /* color map */
 	ROM_LOAD( "7643-1.cpu",   0x0000, 0x0400, CRC(8b2e38de) SHA1(d6a757be31c3a179d31bd3709e71f9e38ec632e9) )
-	ROM_RELOAD( 			  0x0400, 0x0400 )
+	ROM_RELOAD(               0x0400, 0x0400 )
 ROM_END
 
 ROM_START( desterth )
@@ -2928,9 +3770,9 @@ ROM_START( desterth )
 	ROM_LOAD( "31_c.bin",     0x4800, 0x0800, CRC(ab019c30) SHA1(33931510a722168bcf7c30d22eac9345576b6631) )
 	ROM_LOAD( "42_b.bin",     0x5000, 0x0800, CRC(ed9dbac6) SHA1(4553f445ac32ebb1be490b02df4924f76557e8f9) )
 
-	ROM_REGION( 0x0800, "proms", 0 )		/* color map */
+	ROM_REGION( 0x0800, "proms", 0 )        /* color map */
 	ROM_LOAD( "7643-1.cpu",   0x0000, 0x0400, CRC(8b2e38de) SHA1(d6a757be31c3a179d31bd3709e71f9e38ec632e9) )
-	ROM_RELOAD( 			  0x0400, 0x0400 )
+	ROM_RELOAD(               0x0400, 0x0400 )
 ROM_END
 
 ROM_START( lrescuem )
@@ -2948,7 +3790,7 @@ ROM_START( lrescuem )
 	ROM_LOAD( "58.ic38",    0x4800, 0x0400, CRC(1b7a5644) SHA1(d26530ea11ada86f7c99b11d6faf4416a8f5a9eb) )
 	ROM_LOAD( "59.ic37",    0x4c00, 0x0400, CRC(c342b907) SHA1(327da029420c4eedabc2a0534199a008a3f341b8) )
 
-	ROM_REGION( 0x0800, "proms", 0 )		/* color maps player 1/player 2 - these don't really fit this game, but were on the PCB */
+	ROM_REGION( 0x0800, "proms", 0 )        /* color maps player 1/player 2 - these don't really fit this game, but were on the PCB */
 	ROM_LOAD( "cv01-7643.2c",   0x0000, 0x0400, CRC(aac24f34) SHA1(ad110e776547fb48baac568bb50d61854537ca34) )
 	ROM_LOAD( "cv02-7643.1c",   0x0400, 0x0400, CRC(2bdf83a0) SHA1(01ffbd43964c41987e7d44816271308f9a70802b) )
 ROM_END
@@ -2980,7 +3822,7 @@ ROM_START( cosmo )
 	ROM_LOAD( "6.31",         0x4800, 0x0800, CRC(b037f6c4) SHA1(b9a42948052b8cda8d2e4575e59909589f4e7a8d) )
 	ROM_LOAD( "7.42",         0x5000, 0x0800, CRC(c3831ea2) SHA1(8c67ef0312656ef0eeff34b8463376c736bd8ea1) )
 
-	ROM_REGION( 0x1000, "proms", 0 )		/* color map */
+	ROM_REGION( 0x1000, "proms", 0 )        /* color map */
 	ROM_LOAD( "n-1.7d",       0x0800, 0x0800, CRC(bd8576f1) SHA1(aa5fe0a4d024f21a3bca7a6b3f5022779af6f3f4) )
 	ROM_LOAD( "n-2.6e",       0x0000, 0x0800, CRC(48f1ade5) SHA1(a1b45f82f3649cde8ae6a2ef494a3a6cdb5e65d0) )
 ROM_END
@@ -2994,6 +3836,9 @@ ROM_START( cosmicmo )
 	ROM_LOAD( "cosmicmo.5",   0x4000, 0x0400, CRC(b13f228e) SHA1(a0de05aa36435e72c77f5333f3ad964ec448a8f0) )
 	ROM_LOAD( "cosmicmo.6",   0x4400, 0x0400, CRC(4ae1b9c4) SHA1(8eed87eebe68caa775fa679363b0fe3728d98c34) )
 	ROM_LOAD( "cosmicmo.7",   0x4800, 0x0400, CRC(6a13b15b) SHA1(dc03a6c3e938cfd08d16bd1660899f951ba72ea2) )
+
+	/* The manual says it uses a color tv, which could mean that color proms need dumping */
+	/* There is no visible proof of color proms on the schematics though */
 ROM_END
 
 ROM_START( cosmicm2 )
@@ -3064,6 +3909,87 @@ ROM_START( invasionrza )
 	ROM_LOAD( "rz7-7.2k",   0x1c00, 0x0400, CRC(27dbea48) SHA1(f0bf5d31424dc72ac2e6fa01c528365efff838d2) )
 ROM_END
 
+ROM_START( ultrainv )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "in-01.bin",   0x0000, 0x0400, CRC(db9de599) SHA1(ccee1116ca924b520a126b63088a76d2ce8c396f) )
+	ROM_LOAD( "in-02.bin",   0x0400, 0x0400, CRC(febe6d1a) SHA1(e1c3a24b4fa5862107ada1f9d7249466e8c3f06a) )
+	ROM_LOAD( "in-03.bin",   0x0800, 0x0400, CRC(3d5c9820) SHA1(f3c83c660edf56a04148e2aa1c8e00427b86ca07) )
+	ROM_LOAD( "in-04.bin",   0x1400, 0x0400, CRC(1293b826) SHA1(165cd5d08a19eadbe954145b12807f10df9e691a) )
+	ROM_LOAD( "in-05.bin",   0x1800, 0x0400, CRC(e315a8c4) SHA1(dffec9e8bd7014fa34500b4bdac7feadac090482) )
+	ROM_LOAD( "in-06.bin",   0x1c00, 0x0400, CRC(d958478c) SHA1(9df38c400c500b45d306d52fe74cd4d5ca92c0f0) )
+ROM_END
+
+
+ROM_START( invmulti )
+	ROM_REGION( 0x20000, "maincpu", ROMREGION_ERASE00 ) // decrypted rom goes here
+
+	ROM_REGION( 0x20000, "user1", 0 )
+	ROM_LOAD("m803d.bin", 0x00000, 0x20000, CRC(6a62cb3c) SHA1(eb7b567098ad596859f417dd5c59c2cf1ebf1154) )
+ROM_END
+
+ROM_START( invmultim3a )
+	ROM_REGION( 0x20000, "maincpu", ROMREGION_ERASE00 )
+
+	ROM_REGION( 0x20000, "user1", 0 )
+	ROM_LOAD("m803a.bin", 0x00000, 0x20000, CRC(6d538828) SHA1(9a80c67abd32c4c8cd04320501a2aa4e2a308fc9) )
+ROM_END
+
+ROM_START( invmultim2c )
+	ROM_REGION( 0x20000, "maincpu", ROMREGION_ERASE00 )
+
+	ROM_REGION( 0x20000, "user1", 0 )
+	ROM_LOAD("m802c.bin", 0x00000, 0x20000, CRC(5b537de5) SHA1(4d8a6b622b818e88383d011c25f8f34b7372db6d) )
+ROM_END
+
+ROM_START( invmultim2a )
+	ROM_REGION( 0x20000, "maincpu", ROMREGION_ERASE00 )
+
+	ROM_REGION( 0x20000, "user1", 0 )
+	ROM_LOAD("m802a.bin", 0x00000, 0x20000, CRC(8079b1d0) SHA1(b13d910f314550eef468ee819b92788d2a002d82) )
+ROM_END
+
+ROM_START( invmultim1a )
+	ROM_REGION( 0x20000, "maincpu", ROMREGION_ERASE00 )
+
+	ROM_REGION( 0x20000, "user1", 0 )
+	ROM_LOAD("m801a.bin", 0x00000, 0x20000, CRC(f28536d2) SHA1(08ef3ea3fac38c7a478f094bfa7c369ac39515c4) )
+ROM_END
+
+ROM_START( invmultit3d )
+	ROM_REGION( 0x20000, "maincpu", ROMREGION_ERASE00 )
+
+	ROM_REGION( 0x20000, "user1", 0 )
+	ROM_LOAD("t803d.bin", 0x00000, 0x20000, CRC(4d53173c) SHA1(a9caf7fd8e2fea86ca1cf7edc104bdacf09203f8) )
+ROM_END
+
+ROM_START( invmultis3a )
+	ROM_REGION( 0x20000, "maincpu", ROMREGION_ERASE00 )
+
+	ROM_REGION( 0x20000, "user1", 0 )
+	ROM_LOAD("s083a.bin", 0x00000, 0x20000, CRC(f426d43b) SHA1(a299472f1d65f356ec01ca7cc8d3039abac20019) )
+ROM_END
+
+ROM_START( invmultis2a )
+	ROM_REGION( 0x20000, "maincpu", ROMREGION_ERASE00 )
+
+	ROM_REGION( 0x20000, "user1", 0 )
+	ROM_LOAD("s082a.bin", 0x00000, 0x20000, CRC(25f0f17e) SHA1(a3ccf823399e23dd9fdb38fd58c0acfe80b57fe3) )
+ROM_END
+
+ROM_START( invmultis1a )
+	ROM_REGION( 0x20000, "maincpu", ROMREGION_ERASE00 )
+
+	ROM_REGION( 0x20000, "user1", 0 )
+	ROM_LOAD("s081a.bin", 0x00000, 0x20000, CRC(daa77345) SHA1(0fdc9c2a6d9c0aa3233c5d31433adb1ea4e5b250) )
+ROM_END
+
+ROM_START( invmultip )
+	ROM_REGION( 0x20000, "maincpu", ROMREGION_ERASE00 )
+
+	ROM_REGION( 0x20000, "user1", 0 )
+	ROM_LOAD("s10.bin",  0x00000, 0x20000, CRC(1b43e4d3) SHA1(c50decd9caaec7f2d8b3ba74f718372d31bc1c3b) )
+ROM_END
+
 
 ROM_START( rollingc )
 	ROM_REGION( 0x10000, "maincpu", 0 )
@@ -3095,7 +4021,31 @@ ROM_START( schaser )
 	ROM_LOAD( "rt21.bin",     0x4000, 0x0400, CRC(b368ac98) SHA1(6860efe0496955db67611183be0efecda92c9c98) )
 	ROM_LOAD( "rt22.bin",     0x4400, 0x0400, CRC(6e060dfb) SHA1(614e2ecf676c3ea2f9ea869125cfffef2f713684) )
 
-	ROM_REGION( 0x0400, "proms", 0 )		/* background color map */
+	ROM_REGION( 0x0400, "proms", 0 )        /* background color map */
+	ROM_LOAD( "rt06.ic2",     0x0000, 0x0400, CRC(950cf973) SHA1(d22df09b325835a0057ccd0d54f827b374254ac6) )
+ROM_END
+
+ROM_START( schasera )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "rt13.bin",     0x0000, 0x0800, CRC(7b0bfeed) SHA1(832fe90430653d03cd0e7ea1b046524a2ca292ea) )
+	ROM_LOAD( "rt15.bin",     0x0800, 0x0800, CRC(825fc8ac) SHA1(176ff0f4d0cd55be30efb184bd5bef62b92d0333) )
+	ROM_LOAD( "rt17.bin",     0x1000, 0x0800, CRC(de9d3f85) SHA1(13a71fdd889023cfc65ed2c0a65236884b79b1f0) )
+	ROM_LOAD( "rt19.bin",     0x1800, 0x0800, CRC(c0adab87) SHA1(4bb8e4ccfb5eaa052584555bfa03fecf19ab8a29) )
+	ROM_LOAD( "rt21.bin",     0x4000, 0x0800, CRC(a3b31070) SHA1(af0108e1446a2be66cfc00d0b837fa91ab882441) )
+
+	ROM_REGION( 0x0400, "proms", 0 )        /* background color map */
+	ROM_LOAD( "rt06.ic2",     0x0000, 0x0400, CRC(950cf973) SHA1(d22df09b325835a0057ccd0d54f827b374254ac6) )
+ROM_END
+
+ROM_START( schaserb )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "rt33.bin",     0x0000, 0x0800, CRC(eec6b032) SHA1(da14fcd862d6b80531cd3b858034bc5a120ed8ae) )
+	ROM_LOAD( "rt34.bin",     0x0800, 0x0800, CRC(13a73701) SHA1(48ddbc10dec458070274c9fabbb0c420e2a07c96) )
+	ROM_LOAD( "rt35.bin",     0x1000, 0x0800, CRC(de9d3f85) SHA1(13a71fdd889023cfc65ed2c0a65236884b79b1f0) )
+	ROM_LOAD( "rt36.bin",     0x1800, 0x0800, CRC(521ec25e) SHA1(ce53e882c11a4c36f3edc3b389d3f5ad0e0ec151) )
+	ROM_LOAD( "rt37.bin",     0x4000, 0x0800, CRC(44f65f19) SHA1(ee97d7987f54c9c26f5a20c72bdae04c46f94dc4) )
+
+	ROM_REGION( 0x0400, "proms", 0 )        /* background color map */
 	ROM_LOAD( "rt06.ic2",     0x0000, 0x0400, CRC(950cf973) SHA1(d22df09b325835a0057ccd0d54f827b374254ac6) )
 ROM_END
 
@@ -3110,18 +4060,18 @@ ROM_END
 
 ROM_START( schasercv )
 	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD( "1",  		  0x0000, 0x0400, CRC(bec2b16b) SHA1(c62210ecb64d7c38e5b63481d7fe04eb59bb1068) )
-	ROM_LOAD( "2",  		  0x0400, 0x0400, CRC(9d25e608) SHA1(4cc52a93a3ab96a0ec1d07593e17832fa59b30a1) )
-	ROM_LOAD( "3",  		  0x0800, 0x0400, CRC(113d0635) SHA1(ab5e98d0b5fc37d7d69bb5c541681a0f66460440) )
-	ROM_LOAD( "4",  		  0x0c00, 0x0400, CRC(f3a43c8d) SHA1(29a7a8b7d1de763a255cfec79157fd95e7bff551) )
-	ROM_LOAD( "5",  		  0x1000, 0x0400, CRC(47c84f23) SHA1(61b475fa92b8335f8edd3a128d8ac8561658e464) )
-	ROM_LOAD( "6",  		  0x1400, 0x0400, CRC(02ff2199) SHA1(e12c235b2064cb4bb426145172e523256e3c6358) )
-	ROM_LOAD( "7",  		  0x1800, 0x0400, CRC(87d06b88) SHA1(2d743161f85e47cb8ee2a600cbee790b1ad7ad99) )
-	ROM_LOAD( "8",  		  0x1c00, 0x0400, CRC(6dfaad08) SHA1(2184c4e2f4b6bffdc4fe13e178134331fcd43253) )
-	ROM_LOAD( "9",  		  0x4000, 0x0400, CRC(3d1a2ae3) SHA1(672ad6590aebdfebc2748455fa638107f3934c41) )
-	ROM_LOAD( "10", 		  0x4400, 0x0400, CRC(037edb99) SHA1(f2fc5e61f962666e7f6bb81753ac24ea0b97e581) )
+	ROM_LOAD( "1",            0x0000, 0x0400, CRC(bec2b16b) SHA1(c62210ecb64d7c38e5b63481d7fe04eb59bb1068) )
+	ROM_LOAD( "2",            0x0400, 0x0400, CRC(9d25e608) SHA1(4cc52a93a3ab96a0ec1d07593e17832fa59b30a1) )
+	ROM_LOAD( "3",            0x0800, 0x0400, CRC(113d0635) SHA1(ab5e98d0b5fc37d7d69bb5c541681a0f66460440) )
+	ROM_LOAD( "4",            0x0c00, 0x0400, CRC(f3a43c8d) SHA1(29a7a8b7d1de763a255cfec79157fd95e7bff551) )
+	ROM_LOAD( "5",            0x1000, 0x0400, CRC(47c84f23) SHA1(61b475fa92b8335f8edd3a128d8ac8561658e464) )
+	ROM_LOAD( "6",            0x1400, 0x0400, CRC(02ff2199) SHA1(e12c235b2064cb4bb426145172e523256e3c6358) )
+	ROM_LOAD( "7",            0x1800, 0x0400, CRC(87d06b88) SHA1(2d743161f85e47cb8ee2a600cbee790b1ad7ad99) )
+	ROM_LOAD( "8",            0x1c00, 0x0400, CRC(6dfaad08) SHA1(2184c4e2f4b6bffdc4fe13e178134331fcd43253) )
+	ROM_LOAD( "9",            0x4000, 0x0400, CRC(3d1a2ae3) SHA1(672ad6590aebdfebc2748455fa638107f3934c41) )
+	ROM_LOAD( "10",           0x4400, 0x0400, CRC(037edb99) SHA1(f2fc5e61f962666e7f6bb81753ac24ea0b97e581) )
 
-	ROM_REGION( 0x0800, "proms", 0 )		/* color maps player 1/player 2 (not used, but they were on the board) */
+	ROM_REGION( 0x0800, "proms", 0 )        /* color maps player 1/player 2 (not used, but they were on the board) */
 	ROM_LOAD( "cv01",         0x0000, 0x0400, CRC(037e16ac) SHA1(d585030aaff428330c91ae94d7cd5c96ebdd67dd) )
 	ROM_LOAD( "cv02",         0x0400, 0x0400, CRC(8263da38) SHA1(2e7c769d129e6f8a1a31eba1e02777bb94ac32b2) )
 ROM_END
@@ -3135,7 +4085,7 @@ ROM_START( lupin3 )
 	ROM_LOAD( "lp05.32",      0x4000, 0x0800, CRC(f5c2faf4) SHA1(8d056f8c630e4659c02dd5da759dd497e4734292) )
 	ROM_LOAD( "lp06.31",      0x4800, 0x0800, CRC(66289ab2) SHA1(fc9b4a7b7a08d43f34beaf1a8e68ed0ff6148534) )
 
-	ROM_REGION( 0x0800, "proms", 0 )		/* color map */
+	ROM_REGION( 0x0800, "proms", 0 )        /* color map */
 	ROM_LOAD( "lp08.1",       0x0000, 0x0400, CRC(33dbd03a) SHA1(1e0ae1cad1e9a90642886ae2ef726d3f383dd6cf) )
 	ROM_LOAD( "lp09.2",       0x0400, 0x0400, CRC(9eaee652) SHA1(a4d2d8282ba825f3a8c0cc9bca16e1d36a0d0796) )
 ROM_END
@@ -3161,10 +4111,10 @@ ROM_START( polaris )
 	ROM_LOAD( "ps10.38",     0x4800, 0x0800, CRC(3df77bac) SHA1(b3275c34b8d42df83df2c404c5b7d220aae651fa) )
 	ROM_LOAD( "ps26",        0x5000, 0x0800, CRC(9d5c3d50) SHA1(a6acf9ca6e807625156cb1759269014d5830a44f) )
 
-	ROM_REGION( 0x0400, "proms", 0 )		/* background color map */
+	ROM_REGION( 0x0400, "proms", 0 )        /* background color map */
 	ROM_LOAD( "ps08.1b", 0x0000, 0x0400, CRC(164aa05d) SHA1(41c699ce45c76a60c71294f25d8df6c6e6c1280a) ) /* NEC B406 or compatible BPROM (82S137) */
 
-	ROM_REGION( 0x0100, "user1", 0 )		/* cloud graphics */
+	ROM_REGION( 0x0100, "user1", 0 )        /* cloud graphics */
 	ROM_LOAD( "ps07.2c", 0x0000, 0x0100, CRC(2953253b) SHA1(2fb851bc9652ca4e51d473b484ede6dab05f1b51) ) /* MB7052 or compatible BPROM (82S129) */
 ROM_END
 
@@ -3177,12 +4127,13 @@ ROM_START( polarisa )
 	ROM_LOAD( "ps05.32",     0x4000, 0x0800, CRC(772e31f3) SHA1(fa0b866b6df1a9217e286ca880b3bb3fb0644bf3) )
 	ROM_LOAD( "ps10.38",     0x4800, 0x0800, CRC(3df77bac) SHA1(b3275c34b8d42df83df2c404c5b7d220aae651fa) )
 
-	ROM_REGION( 0x0400, "proms", 0 )		/* background color map */
+	ROM_REGION( 0x0400, "proms", 0 )        /* background color map */
 	ROM_LOAD( "ps08.1b", 0x0000, 0x0400, CRC(164aa05d) SHA1(41c699ce45c76a60c71294f25d8df6c6e6c1280a) ) /* NEC B406 or compatible BPROM (82S137) */
 
-	ROM_REGION( 0x0100, "user1", 0 )		/* cloud graphics */
+	ROM_REGION( 0x0100, "user1", 0 )        /* cloud graphics */
 	ROM_LOAD( "ps07.2c", 0x0000, 0x0100, CRC(2953253b) SHA1(2fb851bc9652ca4e51d473b484ede6dab05f1b51) ) /* MB7052 or compatible BPROM (82S129) */
 ROM_END
+
 
 ROM_START( polariso )
 	ROM_REGION( 0x10000, "maincpu", 0 )
@@ -3193,10 +4144,27 @@ ROM_START( polariso )
 	ROM_LOAD( "ps05.32",     0x4000, 0x0800, CRC(772e31f3) SHA1(fa0b866b6df1a9217e286ca880b3bb3fb0644bf3) )
 	ROM_LOAD( "ps06.38",     0x4800, 0x0800, CRC(f577cb72) SHA1(7a931b5ebaf0d6941191f21afb9ed670d0251e07) )
 
-	ROM_REGION( 0x0400, "proms", 0 )		/* background color map */
+	ROM_REGION( 0x0400, "proms", 0 )        /* background color map */
 	ROM_LOAD( "ps08.1b", 0x0000, 0x0400, CRC(164aa05d) SHA1(41c699ce45c76a60c71294f25d8df6c6e6c1280a) ) /* NEC B406 or compatible BPROM (82S137) */
 
-	ROM_REGION( 0x0100, "user1", 0 )		/* cloud graphics */
+	ROM_REGION( 0x0100, "user1", 0 )        /* cloud graphics */
+	ROM_LOAD( "ps07.2c", 0x0000, 0x0100, CRC(2953253b) SHA1(2fb851bc9652ca4e51d473b484ede6dab05f1b51) ) /* MB7052 or compatible BPROM (82S129) */
+ROM_END
+
+ROM_START( polarisbr ) /* aka Polaris II on flyers? */
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "1",   0x0000, 0x0800, CRC(17015f52) SHA1(8beb4d927c08420f9990fac787a81d4bd6dd419c) )
+	ROM_LOAD( "2",   0x0800, 0x0800, CRC(9a5c8cb2) SHA1(7a8c5d74f8b431072d9476d3ef65a3fe1d639813) )
+	ROM_LOAD( "3",   0x1000, 0x0800, CRC(60118368) SHA1(e1189fd88b943fcf77a5c41c519cccdb8196910c) )
+	ROM_LOAD( "4",   0x1800, 0x0800, CRC(65694948) SHA1(de92a7f3e3ef732b573254baa60df60f8e068a5d) )
+	ROM_LOAD( "5",   0x4000, 0x0800, CRC(6cb21b31) SHA1(f9d435a3aa905f124cb87c139b047e1585d0997b) )
+	ROM_LOAD( "6",   0x4800, 0x0800, CRC(3df77bac) SHA1(b3275c34b8d42df83df2c404c5b7d220aae651fa) )
+	ROM_LOAD( "7",   0x5000, 0x0800, CRC(0d811b92) SHA1(09af62997e1e0da0525ab4f6ced775d3673d8f35) )
+
+	ROM_REGION( 0x0400, "proms", 0 )        /* background color map */
+	ROM_LOAD( "ps08.1b", 0x0000, 0x0400, CRC(164aa05d) SHA1(41c699ce45c76a60c71294f25d8df6c6e6c1280a) ) /* NEC B406 or compatible BPROM (82S137) */
+
+	ROM_REGION( 0x0100, "user1", 0 )        /* cloud graphics */
 	ROM_LOAD( "ps07.2c", 0x0000, 0x0100, CRC(2953253b) SHA1(2fb851bc9652ca4e51d473b484ede6dab05f1b51) ) /* MB7052 or compatible BPROM (82S129) */
 ROM_END
 
@@ -3233,7 +4201,7 @@ ROM_START( solfight )
 	ROM_LOAD( "solfight.t",   0x4800, 0x0800, CRC(3b6fb206) SHA1(db631f4a0bd5344d130ff8d723d949e9914b6f92) )
 ROM_END
 
-ROM_START( spaceph )
+ROM_START( spaceph ) /* Also seen in a 6-rom version which matches contents exactly (sv01+sv02, sv03+sv04, etc)*/
 	ROM_REGION( 0x10000, "maincpu", 0 )
 	ROM_LOAD( "sv01.bin",     0x0000, 0x0400, CRC(de84771d) SHA1(13a7e5eedb826cca4d59634d38db9fcf5e65b732) )
 	ROM_LOAD( "sv02.bin",     0x0400, 0x0400, CRC(957fc661) SHA1(ac0edc901d8033619f62967f8eaf53a02947e109) )
@@ -3257,29 +4225,29 @@ ROM_START( ballbomb )
 	ROM_LOAD( "tn04",         0x1800, 0x0800, CRC(d0689a22) SHA1(1f6b258431b7eb878853ff979e4d97a05fb6b797) )
 	ROM_LOAD( "tn05-1",       0x4000, 0x0800, CRC(5d5e94f1) SHA1(b9f8ba38161ef4f0940c274e9d93fed4bb7db017) )
 
-	ROM_REGION( 0x0800, "proms", 0 )		/* color maps player 1/player 2 */
+	ROM_REGION( 0x0800, "proms", 0 )        /* color maps player 1/player 2 */
 	ROM_LOAD( "tn06",         0x0000, 0x0400, CRC(7ec554c4) SHA1(b638605ba2043fdca4c5e18755fa5fa81ed3db07) )
 	ROM_LOAD( "tn07",         0x0400, 0x0400, CRC(deb0ac82) SHA1(839581c4e58cb7b0c2c14cf4f239220017cc26eb) )
 
-	ROM_REGION( 0x0100, "user1", 0 )		/* cloud graphics (missing) */
+	ROM_REGION( 0x0100, "user1", 0 )        /* cloud graphics (missing) */
 	ROM_LOAD( "mb7052.2c",    0x0000, 0x0100, NO_DUMP )
 ROM_END
 
 ROM_START( yosakdon )
 	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD( "yd1.bin",	  0x0000, 0x0400, CRC(607899c9) SHA1(219c0c99894715818606fba49cc75517f6f43e0c) )
-	ROM_LOAD( "yd2.bin",	  0x0400, 0x0400, CRC(78336df4) SHA1(b0b6254568d191d2d0b9c9280a3ccf2417ef3f38) )
-	ROM_LOAD( "yd3.bin",	  0x0800, 0x0400, CRC(c5af6d52) SHA1(c40af79fe060562c64fc316881b7d0348e11ee3f) )
-	ROM_LOAD( "yd4.bin",	  0x0c00, 0x0400, CRC(dca8064f) SHA1(77a58137cc7f0b5fbe0e9e8deb9c5be88b1ebbcf) )
-	ROM_LOAD( "yd5.bin",	  0x1400, 0x0400, CRC(38804ff1) SHA1(9b7527b9d2b106355f0c8df46666b1e3f286b2e3) )
-	ROM_LOAD( "yd6.bin",	  0x1800, 0x0400, CRC(988d2362) SHA1(deaf864b4e287cbc2585c2a11343b1ae82e15463) )
-	ROM_LOAD( "yd7.bin",	  0x1c00, 0x0400, CRC(2744e68b) SHA1(5ad5a7a615d36f57b6d560425e035c15e25e9005) )
+	ROM_LOAD( "yd1.bin",      0x0000, 0x0400, CRC(607899c9) SHA1(219c0c99894715818606fba49cc75517f6f43e0c) )
+	ROM_LOAD( "yd2.bin",      0x0400, 0x0400, CRC(78336df4) SHA1(b0b6254568d191d2d0b9c9280a3ccf2417ef3f38) )
+	ROM_LOAD( "yd3.bin",      0x0800, 0x0400, CRC(c5af6d52) SHA1(c40af79fe060562c64fc316881b7d0348e11ee3f) )
+	ROM_LOAD( "yd4.bin",      0x0c00, 0x0400, CRC(dca8064f) SHA1(77a58137cc7f0b5fbe0e9e8deb9c5be88b1ebbcf) )
+	ROM_LOAD( "yd5.bin",      0x1400, 0x0400, CRC(38804ff1) SHA1(9b7527b9d2b106355f0c8df46666b1e3f286b2e3) )
+	ROM_LOAD( "yd6.bin",      0x1800, 0x0400, CRC(988d2362) SHA1(deaf864b4e287cbc2585c2a11343b1ae82e15463) )
+	ROM_LOAD( "yd7.bin",      0x1c00, 0x0400, CRC(2744e68b) SHA1(5ad5a7a615d36f57b6d560425e035c15e25e9005) )
 ROM_END
 
 ROM_START( yosakdona )
 	ROM_REGION( 0x10000, "maincpu", 0 )
 	ROM_LOAD( "yosaku1",      0x0000, 0x0400, CRC(d132f4f0) SHA1(373c7ea1bd6debcb3dad5881793b8c31dc7a01e6) )
-	ROM_LOAD( "yd2.bin",	  0x0400, 0x0400, CRC(78336df4) SHA1(b0b6254568d191d2d0b9c9280a3ccf2417ef3f38) )
+	ROM_LOAD( "yd2.bin",      0x0400, 0x0400, CRC(78336df4) SHA1(b0b6254568d191d2d0b9c9280a3ccf2417ef3f38) )
 	ROM_LOAD( "yosaku3",      0x0800, 0x0400, CRC(b1a0b3eb) SHA1(4eb80668920b45dc6216424f8ca53d753a35f4f1) )
 	ROM_LOAD( "yosaku4",      0x0c00, 0x0400, CRC(c06c225e) SHA1(2699e3c13b09b6de16bd3ca3ca2e9d7a91b7e268) )
 	ROM_LOAD( "yosaku5",      0x1400, 0x0400, CRC(ae422a43) SHA1(5219680f9d6c5d984b29167f85106fa375856121) )
@@ -3298,20 +4266,22 @@ ROM_START( indianbt )
 	ROM_LOAD( "7.42",       0x5000, 0x0800, CRC(7060ba0b) SHA1(366ce02b7b0a3391afef23b8b41cd98a91034830) )
 	ROM_LOAD( "8.41",       0x5800, 0x0800, CRC(eaccfc0a) SHA1(c6c2d702243bdd1d2ad5fbaaceadb5a5798577bc) )
 
-	ROM_REGION( 0x0800, "proms", 0 )		/* color maps player 1/player 2 */
+	ROM_REGION( 0x0800, "proms", 0 )        /* color maps player 1/player 2 */
 	ROM_LOAD( "mb7054.1",   0x0000, 0x0400, CRC(4acf4db3) SHA1(842a6c9f91806b424b7cc437670b4fe0bd57dff1) )
 	ROM_LOAD( "mb7054.2",   0x0400, 0x0400, CRC(62cb3419) SHA1(3df65062945589f1df37359dbd3e30ae4b23f469) )
 ROM_END
 
 ROM_START( shuttlei )
 	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD( "1.13c",   0x0000, 0x0400, CRC(b6d4f0cd) SHA1(f855a793e78ff6283288c815b59e6942513ab4f8) )
-	ROM_LOAD( "2.11c",   0x0400, 0x0400, CRC(168d6138) SHA1(e0e5ba58eb5a3a00802504c48a96d63522f9865f) )
-	ROM_LOAD( "3.13d",   0x0800, 0x0400, CRC(804bd7fb) SHA1(f019bcc2894f9b819a14c069de8f1a7d228b79eb) )
-	ROM_LOAD( "4.11d",   0x0c00, 0x0400, CRC(8205b369) SHA1(685dd244881f5762d0f53cbfa935da2b857e3fba) )
-	ROM_LOAD( "5.13e",   0x1000, 0x0400, CRC(b50df820) SHA1(27a846ac3da4c0890a80f60483ed5750cb0b2476) )
+	ROM_LOAD( "1.13c",      0x0000, 0x0400, CRC(b6d4f0cd) SHA1(f855a793e78ff6283288c815b59e6942513ab4f8) )
+	ROM_LOAD( "2.11c",      0x0400, 0x0400, CRC(168d6138) SHA1(e0e5ba58eb5a3a00802504c48a96d63522f9865f) )
+	ROM_LOAD( "3.13d",      0x0800, 0x0400, CRC(804bd7fb) SHA1(f019bcc2894f9b819a14c069de8f1a7d228b79eb) )
+	ROM_LOAD( "4.11d",      0x0c00, 0x0400, CRC(8205b369) SHA1(685dd244881f5762d0f53cbfa935da2b857e3fba) )
+	ROM_LOAD( "5.13e",      0x1000, 0x0400, CRC(b50df820) SHA1(27a846ac3da4c0890a80f60483ed5750cb0b2476) )
+	ROM_LOAD( "8.11f",      0x1c00, 0x0400, CRC(4978552b) SHA1(5a6b6e39f57a353580ed9281d7da24950f058426) )
 
-	ROM_LOAD( "8.11f",   0x1c00, 0x0400, CRC(4978552b) SHA1(5a6b6e39f57a353580ed9281d7da24950f058426) )
+	ROM_REGION( 0x0100, "proms", 0 )
+	ROM_LOAD( "82s129.2b",  0x0000, 0x0100, CRC(f108d00d) SHA1(de0cb9d18e4c9920495011f962c4497a789f651f) )
 ROM_END
 
 ROM_START( skylove )
@@ -3351,23 +4321,23 @@ ROM_END
 
 ROM_START( steelwkr )
 	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD( "1.36",   		  0x0000, 0x0400, CRC(5d78873a) SHA1(293cbc067937668148181453877239cb5ed57600) )
-	ROM_LOAD( "2.35",   		  0x0400, 0x0400, CRC(99cd70c6) SHA1(a08bf4db6b39d22dfcf052cc6603aab041db0208) )
-	ROM_LOAD( "3.34",   		  0x0800, 0x0400, CRC(18103b67) SHA1(45929ea56ab15769fc68873570aab3d403e8e913) )
-	ROM_LOAD( "4.33",   		  0x0c00, 0x0400, CRC(c413ae82) SHA1(302b933b45b2aaa515434b5268fd74aec4160e3f) )
-	ROM_LOAD( "5.32",   		  0x1000, 0x0400, CRC(ca7b07b5) SHA1(cbea221c4daf84825f99bbef6d731fc2ef88feeb) )
-	ROM_LOAD( "6.31",   		  0x1400, 0x0400, CRC(f8181fa0) SHA1(a907611529a1500a2ae118e834c2d4b6d11974f1) )
-	ROM_LOAD( "7.42",   		  0x1800, 0x0400, CRC(a35f113e) SHA1(53073037db55c14055810c0bee7b85eb75bbaa72) )
-	ROM_LOAD( "8.41",   		  0x1c00, 0x0400, CRC(af208370) SHA1(ccbd002accda26cc0a02987d9801a47e5f49921a) )
+	ROM_LOAD( "1.36",             0x0000, 0x0400, CRC(5d78873a) SHA1(293cbc067937668148181453877239cb5ed57600) )
+	ROM_LOAD( "2.35",             0x0400, 0x0400, CRC(99cd70c6) SHA1(a08bf4db6b39d22dfcf052cc6603aab041db0208) )
+	ROM_LOAD( "3.34",             0x0800, 0x0400, CRC(18103b67) SHA1(45929ea56ab15769fc68873570aab3d403e8e913) )
+	ROM_LOAD( "4.33",             0x0c00, 0x0400, CRC(c413ae82) SHA1(302b933b45b2aaa515434b5268fd74aec4160e3f) )
+	ROM_LOAD( "5.32",             0x1000, 0x0400, CRC(ca7b07b5) SHA1(cbea221c4daf84825f99bbef6d731fc2ef88feeb) )
+	ROM_LOAD( "6.31",             0x1400, 0x0400, CRC(f8181fa0) SHA1(a907611529a1500a2ae118e834c2d4b6d11974f1) )
+	ROM_LOAD( "7.42",             0x1800, 0x0400, CRC(a35f113e) SHA1(53073037db55c14055810c0bee7b85eb75bbaa72) )
+	ROM_LOAD( "8.41",             0x1c00, 0x0400, CRC(af208370) SHA1(ccbd002accda26cc0a02987d9801a47e5f49921a) )
 
-	ROM_REGION( 0x0800, "proms", 0 )		/* color maps player 1/player 2 (not used, but they were on the board) */
+	ROM_REGION( 0x0800, "proms", 0 )        /* color maps player 1/player 2 (not used, but they were on the board) */
 	ROM_LOAD( "la05.1",         0x0000, 0x0400, CRC(98f31392) SHA1(ccdd1bd2ddd24bd6b1f8255a87e138f937eaf5b4) )
 	ROM_LOAD( "la06.2",         0x0400, 0x0400, CRC(98f31392) SHA1(ccdd1bd2ddd24bd6b1f8255a87e138f937eaf5b4) )
 ROM_END
 
 ROM_START( galactic )
 	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD( "1",       0x0000, 0x0800, CRC(b5098f1e) SHA1(9d1d045d8abeafd4716d3052fe93e52c6b347049) )
+	ROM_LOAD( "1(__galactic)",   0x0000, 0x0800, CRC(b5098f1e) SHA1(9d1d045d8abeafd4716d3052fe93e52c6b347049) )
 	ROM_LOAD( "2",       0x0800, 0x0800, CRC(f97410ee) SHA1(47f1f296c905fa13f6c521edc12c10f1f0e42400) )
 	ROM_LOAD( "3",       0x1000, 0x0800, CRC(c1175feb) SHA1(83bf955ed3a52e1ce8c688d89725d8dee1bcc866) )
 	ROM_LOAD( "4",       0x1800, 0x0800, CRC(b4451d7c) SHA1(62a18e8e927ef00a7f6cb933cdc5aeae9f074dc0) )
@@ -3378,7 +4348,7 @@ ROM_END
 
 ROM_START( spacmiss )
 	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD( "1",       0x0000, 0x0800, CRC(e212dc88) SHA1(bc56052bf43d18081f777b936b2be792e91ba842) )
+	ROM_LOAD( "1_(__spacmiss)",    0x0000, 0x0800, CRC(e212dc88) SHA1(bc56052bf43d18081f777b936b2be792e91ba842) )
 	ROM_LOAD( "2",       0x0800, 0x0800, CRC(f97410ee) SHA1(47f1f296c905fa13f6c521edc12c10f1f0e42400) )
 	ROM_LOAD( "3",       0x1000, 0x0800, CRC(c1175feb) SHA1(83bf955ed3a52e1ce8c688d89725d8dee1bcc866) )
 	ROM_LOAD( "4",       0x1800, 0x0800, CRC(b4451d7c) SHA1(62a18e8e927ef00a7f6cb933cdc5aeae9f074dc0) )
@@ -3390,84 +4360,109 @@ ROM_START( spacmiss )
 	ROM_LOAD( "8",       0x0000, 0x0800, CRC(942e5261) SHA1(e8af51d644eab4e7b31c14dc66bb036ad8940c42) ) // ?
 ROM_END
 
-/* board #  rom       parent    machine   inp */
+/* board #  rom         parent    machine    inp        init              monitor, .. */
 
-/* Taito games */
-GAMEL(1978, sitv,     invaders, invaders, sitv,     0, ROT270, "Taito", "Space Invaders (TV Version)", GAME_SUPPORTS_SAVE, layout_invaders )
-GAME( 1979, sicv,     invaders, invadpt2, sicv,     0, ROT270, "Taito", "Space Invaders (CV Version)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1978, sisv,     invaders, invadpt2, sicv,     0, ROT270, "Taito", "Space Invaders (SV Version)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1978, sisv2,    invaders, invadpt2, sicv,     0, ROT270, "Taito", "Space Invaders (SV Version 2)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1979, galxwars, 0,        invadpt2, galxwars, 0, ROT270, "Universal", "Galaxy Wars (Universal set 1)", GAME_WRONG_COLORS | GAME_SUPPORTS_SAVE )
-GAME( 1979, galxwars2,galxwars, invadpt2, galxwars, 0, ROT270, "Universal", "Galaxy Wars (Universal set 2)", GAME_WRONG_COLORS | GAME_SUPPORTS_SAVE )
-GAME( 1979, galxwarst,galxwars, invadpt2, galxwars, 0, ROT270, "Universal (Taito license?)", "Galaxy Wars (Taito?)" , GAME_WRONG_COLORS | GAME_SUPPORTS_SAVE ) /* Copyright Not Displayed */
-GAME( 1979, starw,    galxwars, invaders, galxwars, 0, ROT270, "bootleg", "Star Wars", GAME_SUPPORTS_SAVE )
-GAME( 1979, lrescue,  0,        lrescue,  lrescue,  0, ROT270, "Taito", "Lunar Rescue", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND )
-GAME( 1980, mlander,  lrescue,  invaders, lrescue,  0, ROT270, "bootleg (Leisure Time Electronics)", "Moon Lander (bootleg of Lunar Rescue)", GAME_SUPPORTS_SAVE )
-GAME( 1978, lrescuem, lrescue,  lrescue,  lrescue,  0, ROT270, "bootleg (Model Racing)", "Lunar Rescue (Model Racing bootleg)", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND )
-GAME( 1979, grescue,  lrescue,  lrescue,  lrescue,  0, ROT270, "Taito (Universal license?)", "Galaxy Rescue", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND )
-GAME( 1979, desterth, lrescue,  lrescue,  invrvnge, 0, ROT270, "bootleg", "Destination Earth", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND )
-GAME( 1979, invadpt2, 0,        invadpt2, invadpt2, 0, ROT270, "Taito", "Space Invaders Part II (Taito)", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND )
-GAME( 1980, invaddlx, invadpt2, invaders, invadpt2, 0, ROT270, "Taito (Midway license)", "Space Invaders Deluxe", GAME_SUPPORTS_SAVE )
-GAME( 1980, vortex,   0,        vortex,   vortex, vortex, ROT270, "Zilec Electronics", "Vortex", GAME_IMPERFECT_COLORS | GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND ) /* Encrypted 8080/IO */
-GAME( 1979, cosmo,    0,        cosmo,    cosmo,    0, ROT90,  "TDS & Mints", "Cosmo", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND )
-GAME( 1979, schaser,  0,        schaser,  schaser,  0, ROT270, "Taito", "Space Chaser", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_COLORS )
-GAME( 1979, schasercv,schaser,  schasercv,schasercv,0, ROT270, "Taito", "Space Chaser (CV version)", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND | GAME_IMPERFECT_COLORS )
-GAME( 1979, sflush,   0,        sflush,   sflush,   0, ROT270, "Taito", "Straight Flush",GAME_SUPPORTS_SAVE | GAME_NO_SOUND | GAME_IMPERFECT_COLORS | GAME_NO_COCKTAIL)
-GAME( 1980, lupin3,   0,        lupin3,   lupin3,   0, ROT270, "Taito", "Lupin III (set 1)", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND )
-GAME( 1980, lupin3a,  lupin3,   lupin3a,  lupin3a,  0, ROT270, "Taito", "Lupin III (set 2)", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND )
-GAME( 1980, polaris,  0,        polaris,  polaris,  0, ROT270, "Taito", "Polaris (Latest version)", GAME_SUPPORTS_SAVE )
-GAME( 1980, polarisa, polaris,  polaris,  polaris,  0, ROT270, "Taito", "Polaris (First revision)", GAME_SUPPORTS_SAVE )
-GAME( 1980, polariso, polaris,  polaris,  polaris,  0, ROT270, "Taito", "Polaris (Original version)", GAME_SUPPORTS_SAVE )
-GAME( 1980, ballbomb, 0,        ballbomb, ballbomb, 0, ROT270, "Taito", "Balloon Bomber", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND | GAME_IMPERFECT_GRAPHICS )	/* missing clouds */
-GAME( 1980, indianbt, 0,        indianbt, indianbt, 0, ROT270, "Taito", "Indian Battle", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND )
-GAME( 1980, steelwkr, 0,        steelwkr, steelwkr, 0, ROT0  , "Taito", "Steel Worker", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND )
-GAME( 19??, galactic, 0,        invaders, galactic, 0, ROT270, "Taito do Brasil", "Galactica - Batalha Espacial", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND ) // 19?? = 79/80/81, copyright not displayed
-GAME( 19??, spacmiss, galactic, invaders, galactic, 0, ROT270, "bootleg?", "Space Missile - Space Fighting Game", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND )
+// Taito games (+clones), starting with Space Invaders
+GAMEL(1978, sitv,       invaders, invaders,  sitv,      driver_device, 0, ROT270, "Taito", "Space Invaders (TV Version)", GAME_SUPPORTS_SAVE, layout_invaders )
+GAME( 1979, sicv,       invaders, invadpt2,  sicv,      driver_device, 0, ROT270, "Taito", "Space Invaders (CV Version)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1978, sisv,       invaders, invadpt2,  sicv,      driver_device, 0, ROT270, "Taito", "Space Invaders (SV Version)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1978, sisv2,      invaders, invadpt2,  sicv,      driver_device, 0, ROT270, "Taito", "Space Invaders (SV Version 2)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAMEL(1978, invadrmr,   invaders, invaders,  invadrmr,  driver_device, 0, ROT270, "Taito / Model Racing", "Space Invaders (Model Racing)", GAME_SUPPORTS_SAVE, layout_invaders ) // unclassified, licensed or bootleg?
+GAMEL(1978, invaderl,   invaders, invaders,  sicv,      driver_device, 0, ROT270, "Taito / Logitec", "Space Invaders (Logitec)", GAME_SUPPORTS_SAVE, layout_invaders ) // unclassified, licensed or bootleg?
+GAMEL(1978, spcewars,   invaders, spcewars,  spcewars,  driver_device, 0, ROT270, "Taito / Sanritsu", "Space War (Sanritsu)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_invaders ) // unclassified, licensed or bootleg?
+GAMEL(1978, spceking,   invaders, invaders,  sicv,      driver_device, 0, ROT270, "Taito / Leijac Corporation", "Space King", GAME_SUPPORTS_SAVE, layout_invaders ) // unclassified, licensed or bootleg?
+GAMEL(1979, cosmicmo,   invaders, cosmicmo,  cosmicmo,  driver_device, 0, ROT270, "Taito / Universal", "Cosmic Monsters", GAME_SUPPORTS_SAVE, layout_cosmicm ) // unclassified, licensed or bootleg?
+GAMEL(1979, cosmicm2,   invaders, cosmicmo,  cosmicmo,  driver_device, 0, ROT270, "Taito / Universal", "Cosmic Monsters 2", GAME_SUPPORTS_SAVE, layout_cosmicm ) // unclassified, licensed or bootleg?
+GAMEL(1980?,sinvzen,    invaders, invaders,  sinvzen,   driver_device, 0, ROT270, "Taito / Zenitone-Microsec Ltd.", "Super Invaders (Zenitone-Microsec)", GAME_SUPPORTS_SAVE, layout_invaders ) // unclassified, licensed or bootleg?
+GAMEL(1980, ultrainv,   invaders, invaders,  sicv,      driver_device, 0, ROT270, "Taito / Konami", "Ultra Invaders", GAME_SUPPORTS_SAVE, layout_invaders ) // unclassified, licensed or bootleg?
+GAMEL(1978, spaceatt,   invaders, invaders,  sicv,      driver_device, 0, ROT270, "bootleg (Video Games GmbH)", "Space Attack (bootleg of Space Invaders)", GAME_SUPPORTS_SAVE, layout_invaders )
+GAMEL(1980, spaceat2,   invaders, invaders,  spaceat2,  driver_device, 0, ROT270, "bootleg (Video Games UK)", "Space Attack II (bootleg of Super Invaders)", GAME_SUPPORTS_SAVE, layout_invaders ) // bootleg of Zenitone-Microsec Super Invaders
+GAMEL(1979, spacecom,   invaders, spacecom,  spacecom,  _8080bw_state, spacecom, ROT270, "bootleg", "Space Combat (bootleg of Space Invaders)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_spacecom )
+GAME( 1978, spacerng,   invaders, spacerng,  sitv,      driver_device, 0, ROT90,  "bootleg (Leisure Time Electronics)", "Space Ranger (bootleg of Space Invaders)", GAME_WRONG_COLORS | GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND ) // many modifications
+GAMEL(19??, invasion,   invaders, invaders,  invasion,  driver_device, 0, ROT270, "bootleg (Sidam)", "Invasion (Sidam)", GAME_SUPPORTS_SAVE, layout_invaders )
+GAMEL(19??, invasiona,  invaders, invaders,  invasion,  driver_device, 0, ROT270, "bootleg", "Invasion (bootleg set 1, normal graphics)", GAME_SUPPORTS_SAVE, layout_invaders ) // has Sidam replaced with 'Ufo Monster Attack' and standard GFX
+GAMEL(19??, invasionb,  invaders, invaders,  invasion,  driver_device, 0, ROT270, "bootleg", "Invasion (bootleg set 2, no copyright)", GAME_SUPPORTS_SAVE, layout_invaders )
+GAMEL(19??, invasionrz, invaders, invaders,  invasion,  driver_device, 0, ROT270, "bootleg (R Z SRL Bologna)", "Invasion (bootleg set 3, R Z SRL Bologna)", GAME_SUPPORTS_SAVE | GAME_NOT_WORKING, layout_invaders )
+GAMEL(19??, invasionrza,invaders, invaders,  invasion,  driver_device, 0, ROT270, "bootleg (R Z SRL Bologna)", "Invasion (bootleg set 4, R Z SRL Bologna)", GAME_SUPPORTS_SAVE | GAME_NOT_WORKING, layout_invaders )
+GAMEL(1978, superinv,   invaders, invaders,  superinv,  driver_device, 0, ROT270, "bootleg", "Super Invaders (bootleg set 1)", GAME_SUPPORTS_SAVE, layout_invaders ) // not related to Zenitone-Microsec version
+GAMEL(1978, sinvemag,   invaders, invaders,  sinvemag,  driver_device, 0, ROT270, "bootleg (Emag)", "Super Invaders (bootleg set 2)", GAME_SUPPORTS_SAVE, layout_invaders ) // not related to Zenitone-Microsec version
+GAMEL(1980, searthin,   invaders, invaders,  searthin,  driver_device, 0, ROT270, "bootleg (Competitive Video)", "Super Earth Invasion (set 1)", GAME_SUPPORTS_SAVE, layout_invaders )
+GAMEL(1980, searthina,  invaders, invaders,  searthin,  driver_device, 0, ROT270, "bootleg (Competitive Video)", "Super Earth Invasion (set 2)", GAME_SUPPORTS_SAVE, layout_invaders )
+GAMEL(1980, searthie,   invaders, invaders,  searthin,  driver_device, 0, ROT270, "bootleg (Electrocoin)", "Super Earth Invasion (set 3)", GAME_SUPPORTS_SAVE, layout_invaders )
+GAMEL(19??, alieninv,   invaders, invaders,  alieninv,  driver_device, 0, ROT270, "bootleg (Margamatics)", "Alien Invasion", GAME_SUPPORTS_SAVE, layout_invaders )
+GAMEL(19??, alieninvp2, invaders, invaders,  searthin,  driver_device, 0, ROT270, "bootleg", "Alien Invasion Part II", GAME_SUPPORTS_SAVE, layout_invaders )
+GAMEL(1979, jspecter,   invaders, invaders,  jspecter,  driver_device, 0, ROT270, "bootleg (Jatre)", "Jatre Specter (set 1)", GAME_SUPPORTS_SAVE, layout_invaders )
+GAMEL(1979, jspecter2,  invaders, invaders,  jspecter,  driver_device, 0, ROT270, "bootleg (Jatre)", "Jatre Specter (set 2)", GAME_SUPPORTS_SAVE, layout_invaders )
+GAMEL(1978, spacewr3,   invaders, spcewars,  sicv,      driver_device, 0, ROT270, "bootleg", "Space War Part 3", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_invaders ) // unrelated to Sanritsu's version?
+GAMEL(1978, invader4,   invaders, invaders,  sicv,      driver_device, 0, ROT270, "bootleg", "Space Invaders Part Four", GAME_SUPPORTS_SAVE, layout_invaders )
+GAME( 1978, darthvdr,   invaders, darthvdr,  darthvdr,  driver_device, 0, ROT270, "bootleg", "Darth Vader (bootleg of Space Invaders)", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND )
+GAMEL(19??, tst_invd,   invaders, invaders,  sicv,      driver_device, 0, ROT0,   "<unknown>", "Space Invaders Test ROM", GAME_SUPPORTS_SAVE, layout_invaders )
 
-/* Misc. manufacturers */
+// other Taito
+GAME( 1979, invadpt2,   0,        invadpt2,  invadpt2,  driver_device, 0, ROT270, "Taito", "Space Invaders Part II (Taito)", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND )
+GAME( 1979, invadpt2br, invadpt2, invadpt2,  invadpt2,  driver_device, 0, ROT270, "Taito do Brasil", "Space Invaders Part II (Brazil)", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND )
+GAME( 1980, invaddlx,   invadpt2, invaders,  invadpt2,  driver_device, 0, ROT270, "Taito (Midway license)", "Space Invaders Deluxe", GAME_SUPPORTS_SAVE )
+GAME( 1979, moonbase,   invadpt2, invadpt2,  invadpt2,  driver_device, 0, ROT270, "Taito / Nichibutsu", "Moon Base (set 1)", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND ) // this has a 'Taito Corp' string hidden away in the rom - how do you get it to display?
+GAME( 1979, moonbasea,  invadpt2, invadpt2,  invadpt2,  driver_device, 0, ROT270, "Taito / Nichibutsu", "Moon Base (set 2)", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND ) // this has the same string replaced with Nichibutsu, no other differences
+GAME( 1980, spclaser,   0,        invadpt2,  spclaser,  driver_device, 0, ROT270, "Taito", "Space Laser", GAME_WRONG_COLORS | GAME_SUPPORTS_SAVE )
+GAME( 1980, intruder,   spclaser, invadpt2,  spclaser,  driver_device, 0, ROT270, "Taito (Game Plan license)", "Intruder", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND )
+GAME( 1980, laser,      spclaser, invadpt2,  spclaser,  driver_device, 0, ROT270, "bootleg (Leisure Time Electronics Inc.)", "Astro Laser (bootleg of Space Laser)", GAME_WRONG_COLORS | GAME_SUPPORTS_SAVE )
+GAME( 1979, spcewarl,   spclaser, invadpt2,  spclaser,  driver_device, 0, ROT270, "Leijac Corporation", "Space War (Leijac Corporation)", GAME_WRONG_COLORS | GAME_SUPPORTS_SAVE ) // Taito's version is actually a spin-off of this?
+GAME( 1979, lrescue,    0,        lrescue,   lrescue,   driver_device, 0, ROT270, "Taito", "Lunar Rescue", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND )
+GAME( 1979, grescue,    lrescue,  lrescue,   lrescue,   driver_device, 0, ROT270, "Taito (Universal license?)", "Galaxy Rescue", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND )
+GAME( 1980, mlander,    lrescue,  lrescue,   lrescue,   driver_device, 0, ROT270, "bootleg (Leisure Time Electronics)", "Moon Lander (bootleg of Lunar Rescue)", GAME_SUPPORTS_SAVE )
+GAME( 1978, lrescuem,   lrescue,  lrescue,   lrescue,   driver_device, 0, ROT270, "bootleg (Model Racing)", "Lunar Rescue (Model Racing bootleg)", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND )
+GAME( 1979, desterth,   lrescue,  lrescue,   lrescue,   driver_device, 0, ROT270, "bootleg", "Destination Earth (bootleg of Lunar Rescue)", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND )
+GAME( 1979, schaser,    0,        schaser,   schaser,   driver_device, 0, ROT270, "Taito", "Space Chaser (set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1979, schasera,   schaser,  schaser,   schaser,   driver_device, 0, ROT270, "Taito", "Space Chaser (set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1979, schaserb,   schaser,  schaser,   schaser,   driver_device, 0, ROT270, "Taito", "Space Chaser (set 3)", GAME_SUPPORTS_SAVE )
+GAME( 1979, schasercv,  schaser,  schasercv, schasercv, driver_device, 0, ROT270, "Taito", "Space Chaser (CV version)", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND | GAME_IMPERFECT_COLORS )
+GAME( 1979, sflush,     0,        sflush,    sflush,    driver_device, 0, ROT270, "Taito", "Straight Flush", GAME_SUPPORTS_SAVE | GAME_NO_SOUND | GAME_IMPERFECT_COLORS | GAME_NO_COCKTAIL)
+GAME( 1980, lupin3,     0,        lupin3,    lupin3,    driver_device, 0, ROT270, "Taito", "Lupin III (set 1)", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND )
+GAME( 1980, lupin3a,    lupin3,   lupin3a,   lupin3a,   driver_device, 0, ROT270, "Taito", "Lupin III (set 2)", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND )
+GAME( 1980, polaris,    0,        polaris,   polaris,   driver_device, 0, ROT270, "Taito", "Polaris (Latest version)", GAME_SUPPORTS_SAVE )
+GAME( 1980, polarisa,   polaris,  polaris,   polaris,   driver_device, 0, ROT270, "Taito", "Polaris (First revision)", GAME_SUPPORTS_SAVE )
+GAME( 1980, polariso,   polaris,  polaris,   polaris,   driver_device, 0, ROT270, "Taito", "Polaris (Original version)", GAME_SUPPORTS_SAVE )
+GAME( 1981, polarisbr,  polaris,  polaris,   polaris,   driver_device, 0, ROT270, "Taito do Brasil", "Polaris (Brazil)", GAME_SUPPORTS_SAVE )
+GAME( 1980, ballbomb,   0,        ballbomb,  ballbomb,  driver_device, 0, ROT270, "Taito", "Balloon Bomber", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND | GAME_IMPERFECT_GRAPHICS )  /* missing clouds */
+GAME( 1980, indianbt,   0,        indianbt,  indianbt,  driver_device, 0, ROT270, "Taito", "Indian Battle", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND )
+GAME( 1980, steelwkr,   0,        steelwkr,  steelwkr,  driver_device, 0, ROT0  , "Taito", "Steel Worker", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND )
+GAMEL(1980?,galactic,   0,        galactic,  galactic,  driver_device, 0, ROT270, "Taito do Brasil", "Galactica - Batalha Espacial", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND, layout_galactic )
+GAMEL(1980?,spacmiss,   galactic, galactic,  galactic,  driver_device, 0, ROT270, "bootleg?", "Space Missile - Space Fighting Game", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND, layout_galactic )
 
-GAMEL(1980, searthin, invaders, invaders, searthin, 0, ROT270, "bootleg", "Super Earth Invasion (set 1)", GAME_SUPPORTS_SAVE, layout_invaders )
-GAMEL(1980, searthina,invaders, invaders, searthin, 0, ROT270, "bootleg", "Super Earth Invasion (set 2)", GAME_SUPPORTS_SAVE, layout_invaders )
-GAMEL(1978, invadrmr, invaders, invaders, invadrmr, 0, ROT270, "bootleg? (Model Racing)", "Space Invaders (Model Racing)", GAME_SUPPORTS_SAVE, layout_invaders )
-GAMEL(1978, spaceatt, invaders, invaders, sicv,     0, ROT270, "bootleg (Video Games GmbH)", "Space Attack", GAME_SUPPORTS_SAVE, layout_invaders )
-GAMEL(1980, spaceat2, invaders, invaders, spaceatt, 0, ROT270, "bootleg (Video Games UK)", "Space Attack II", GAME_SUPPORTS_SAVE, layout_invaders ) // bootleg of super invaders
-GAMEL(19??, sinvzen,  invaders, invaders, spaceatt, 0, ROT270, "Zenitone-Microsec Ltd", "Super Invaders (Zenitone-Microsec)", GAME_SUPPORTS_SAVE, layout_invaders )
-GAMEL(19??, sinvemag, invaders, invaders, sinvemag, 0, ROT270, "bootleg (Emag)", "Super Invaders (Emag)", GAME_SUPPORTS_SAVE, layout_invaders )
-GAMEL(19??, tst_invd, invaders, invaders, sicv,     0, ROT0,   "<unknown>", "Space Invaders Test ROM", GAME_SUPPORTS_SAVE, layout_invaders )
-GAMEL(19??, alieninv, invaders, invaders, alieninv, 0, ROT270, "bootleg (Margamatics)", "Alien Invasion", GAME_SUPPORTS_SAVE, layout_invaders )
-GAMEL(19??, alieninvp2,invaders,invaders, searthin, 0, ROT270, "bootleg", "Alien Invasion Part II", GAME_SUPPORTS_SAVE, layout_invaders )
-GAMEL(1978, spceking, invaders, invaders, sicv,     0, ROT270, "Leijac Corporation","Space King", GAME_SUPPORTS_SAVE, layout_invaders )
-GAMEL(1978, spcewars, invaders, spcewars, spcewars, 0, ROT270, "bootleg? (Sanritsu)", "Space War (Sanritsu)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_invaders )
-GAME (19??, astropal, 0,        astropal, astropal, 0, ROT0,   "Sidam?", "Astropal", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND )
-GAMEL(1978, spacewr3, invaders, spcewars, sicv,     0, ROT270, "bootleg", "Space War Part 3", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE, layout_invaders )
-GAMEL(1978, invaderl, invaders, invaders, sicv,     0, ROT270, "bootleg? (Logitec)", "Space Invaders (Logitec)", GAME_SUPPORTS_SAVE, layout_invaders )
-GAMEL(1978, invader4, invaders, invaders, sicv,     0, ROT270, "bootleg", "Space Invaders Part Four", GAME_SUPPORTS_SAVE, layout_invaders )
-GAMEL(1979, jspecter, invaders, invaders, jspecter, 0, ROT270, "bootleg (Jatre)", "Jatre Specter (set 1)", GAME_SUPPORTS_SAVE, layout_invaders )
-GAMEL(1979, jspecter2,invaders, invaders, jspecter, 0, ROT270, "bootleg (Jatre)", "Jatre Specter (set 2)", GAME_SUPPORTS_SAVE, layout_invaders )
-GAMEL(1979, cosmicmo, invaders, invaders, cosmicmo, 0, ROT270, "Universal", "Cosmic Monsters", GAME_SUPPORTS_SAVE, layout_invaders )
-GAMEL(1979, cosmicm2, invaders, invaders, cosmicmo, 0, ROT270, "Universal", "Cosmic Monsters 2", GAME_SUPPORTS_SAVE, layout_invaders )
-GAMEL(19??, superinv, invaders, invaders, superinv, 0, ROT270, "bootleg", "Super Invaders", GAME_SUPPORTS_SAVE, layout_invaders )
-GAMEL(19??, invasion, invaders, invaders, invasion, 0, ROT270, "Sidam",   "Invasion (Sidam)", GAME_SUPPORTS_SAVE, layout_invaders )
-GAMEL(19??, invasiona,invaders, invaders, invasion, 0, ROT270, "bootleg", "Invasion (bootleg, set 1, normal graphics)", GAME_SUPPORTS_SAVE, layout_invaders ) // has Sidam replaced with 'Ufo Monster Attack' and standard GFX
-GAMEL(19??, invasionb,invaders, invaders, invasion, 0, ROT270, "bootleg", "Invasion (bootleg, set 2, no copyright)", GAME_SUPPORTS_SAVE, layout_invaders )
-GAMEL(19??, invasionrz,invaders,invaders, invasion, 0, ROT270, "bootleg (R Z SRL Bologna)", "Invasion (bootleg, set 3, R Z SRL Bologna)", GAME_SUPPORTS_SAVE | GAME_NOT_WORKING, layout_invaders )
-GAMEL(19??, invasionrza,invaders,invaders,invasion, 0, ROT270, "bootleg (R Z SRL Bologna)", "Invasion (bootleg, set 4, R Z SRL Bologna)", GAME_SUPPORTS_SAVE | GAME_NOT_WORKING, layout_invaders )
-GAME( 19??, darthvdr, invaders, darthvdr, darthvdr, 0, ROT270, "bootleg", "Darth Vader", GAME_SUPPORTS_SAVE | GAME_NO_SOUND )
-GAME( 1979, moonbase, invadpt2, invadpt2, invadpt2, 0, ROT270, "Nichibutsu (Taito license?)", "Moon Base (set 1)", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND ) // this has a 'Taito Corp' string hidden away in the rom - how do you get it to display?
-GAME( 1979, moonbasea,invadpt2, invadpt2, invadpt2, 0, ROT270, "Nichibutsu", "Moon Base (set 2)", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND )                  // this has the same string replaced with Nichibutsu, no other differences
-GAMEL(19??, invrvnge, 0,        invrvnge, invrvnge, 0, ROT270, "Zenitone-Microsec Ltd.", "Invader's Revenge",  GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND, layout_invrvnge )
-GAMEL(19??, invrvngea,invrvnge, invrvnge, invrvnge, 0, ROT270, "Zenitone-Microsec Ltd. (Dutchford license)", "Invader's Revenge (Dutchford)", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND, layout_invrvnge )
-GAME( 1980, spclaser, 0,        invaders, spclaser, 0, ROT270, "Game Plan (Taito license)", "Space Laser", GAME_SUPPORTS_SAVE )
-GAME( 1980, intruder, spclaser, invadpt2, spclaser, 0, ROT270, "Game Plan (Taito license)", "Intruder", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND )
-GAME( 1980, laser,    spclaser, invaders, spclaser, 0, ROT270, "bootleg (Leisure Time Electronics Inc.)", "Astro Laser", GAME_SUPPORTS_SAVE )
-GAME( 1979, spcewarl, spclaser, invaders, spclaser, 0, ROT270, "Leijac Corporation","Space War (Leijac Corporation)", GAME_SUPPORTS_SAVE )
-GAME( 1979, rollingc, 0,        rollingc, rollingc, 0, ROT270, "Nichibutsu", "Rolling Crash / Moon Base", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1979, ozmawars, 0,        invaders, ozmawars, 0, ROT270, "SNK", "Ozma Wars (set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1979, ozmawars2,ozmawars, invaders, ozmawars, 0, ROT270, "SNK", "Ozma Wars (set 2)", GAME_SUPPORTS_SAVE ) /* Uses Taito's three board color version of Space Invaders PCB */
-GAME( 1979, solfight, ozmawars, invaders, ozmawars, 0, ROT270, "bootleg", "Solar Fight", GAME_SUPPORTS_SAVE )
-GAME( 1979, spaceph,  ozmawars, invaders, spaceph,  0, ROT270, "SNK (Zilec Games license?)", "Space Phantoms", GAME_SUPPORTS_SAVE ) // or bootleg?
-GAME( 1979, yosakdon, 0,        yosakdon, yosakdon, 0, ROT270, "Wing", "Yosaku To Donbei (set 1)", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND ) /* bootleg? */
-GAME( 1979, yosakdona,yosakdon, yosakdon, yosakdon, 0, ROT270, "Wing", "Yosaku To Donbei (set 2)", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND ) /* bootleg? */
-GAMEL(1979, shuttlei, 0,        shuttlei, shuttlei, 0, ROT270, "Omori Electric Co., Ltd.", "Shuttle Invader", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND | GAME_NO_COCKTAIL, layout_shuttlei )
-GAMEL(1979, skylove,  0,        shuttlei, skylove,  0, ROT270, "Omori Electric Co., Ltd.", "Sky Love", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND | GAME_NO_COCKTAIL, layout_shuttlei )
-GAME (19??, modelr,   0,        modelr,   invadrmr, 0, ROT0,   "Model Racing", "unknown Model Racing gun game", GAME_NOT_WORKING | GAME_SUPPORTS_SAVE ) // no titlescreen
+// Misc. manufacturers
+GAME( 1979, galxwars,   0,        invadpt2,  galxwars,  driver_device, 0, ROT270, "Universal", "Galaxy Wars (Universal set 1)", GAME_WRONG_COLORS | GAME_SUPPORTS_SAVE )
+GAME( 1979, galxwars2,  galxwars, invadpt2,  galxwars,  driver_device, 0, ROT270, "Universal", "Galaxy Wars (Universal set 2)", GAME_WRONG_COLORS | GAME_SUPPORTS_SAVE )
+GAME( 1979, galxwarst,  galxwars, invadpt2,  galxwars,  driver_device, 0, ROT270, "Universal (Taito license?)", "Galaxy Wars (Taito?)" , GAME_WRONG_COLORS | GAME_SUPPORTS_SAVE ) // Copyright not displayed
+GAME( 1979, starw,      galxwars, invaders,  galxwars,  driver_device, 0, ROT270, "bootleg", "Star Wars (bootleg of Galaxy Wars, set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1979, starw1,     galxwars, starw1,    galxwars,  driver_device, 0, ROT270, "bootleg (Yamashita)", "Star Wars (bootleg of Galaxy Wars, set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1979, cosmo,      0,        cosmo,     cosmo,     driver_device, 0, ROT90,  "TDS & MINTS", "Cosmo", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND )
+GAME( 1980?,invrvnge,   0,        invrvnge,  invrvnge,  driver_device, 0, ROT270, "Zenitone-Microsec Ltd.", "Invader's Revenge (set 1)", GAME_SUPPORTS_SAVE | GAME_NO_SOUND ) // copyright is either late-1980, or early-1981
+GAME( 1980?,invrvngea,  invrvnge, invrvnge,  invrvnge,  driver_device, 0, ROT270, "Zenitone-Microsec Ltd.", "Invader's Revenge (set 2)", GAME_SUPPORTS_SAVE | GAME_NO_SOUND )
+GAME( 1980?,invrvngeb,  invrvnge, invrvnge,  invrvnge,  driver_device, 0, ROT270, "Zenitone-Microsec Ltd.", "Invader's Revenge (set 3)", GAME_SUPPORTS_SAVE | GAME_NO_SOUND )
+GAME( 1980?,invrvngedu, invrvnge, invrvnge,  invrvnge,  driver_device, 0, ROT270, "Zenitone-Microsec Ltd. (Dutchford license)", "Invader's Revenge (Dutchford, single PCB)", GAME_SUPPORTS_SAVE | GAME_NO_SOUND )
+GAME( 1980?,invrvngegw, invrvnge, invrvnge,  invrvnge,  driver_device, 0, ROT270, "Zenitone-Microsec Ltd. (Game World license)", "Invader's Revenge (Game World, single PCB)", GAME_SUPPORTS_SAVE | GAME_NO_SOUND )
+GAME( 1980, vortex,     0,        vortex,    vortex,    _8080bw_state, vortex, ROT270, "Zilec Electronics", "Vortex", GAME_IMPERFECT_COLORS | GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND ) /* Encrypted 8080/IO */
+GAME( 1979, rollingc,   0,        rollingc,  rollingc,  driver_device, 0, ROT270, "Nichibutsu", "Rolling Crash / Moon Base", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1979, ozmawars,   0,        invaders,  ozmawars,  driver_device, 0, ROT270, "SNK", "Ozma Wars (set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1979, ozmawars2,  ozmawars, invaders,  ozmawars,  driver_device, 0, ROT270, "SNK", "Ozma Wars (set 2)", GAME_SUPPORTS_SAVE ) /* Uses Taito's three board color version of Space Invaders PCB */
+GAME( 1979, spaceph,    ozmawars, invaders,  spaceph,   driver_device, 0, ROT270, "bootleg? (Zilec Games)", "Space Phantoms (bootleg of Ozma Wars)", GAME_SUPPORTS_SAVE )
+GAME( 1979, solfight,   ozmawars, invaders,  ozmawars,  driver_device, 0, ROT270, "bootleg", "Solar Fight (bootleg of Ozma Wars)", GAME_SUPPORTS_SAVE )
+GAME( 1979, yosakdon,   0,        yosakdon,  yosakdon,  driver_device, 0, ROT270, "Wing", "Yosaku To Donbei (set 1)", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND )
+GAME( 1979, yosakdona,  yosakdon, yosakdon,  yosakdon,  driver_device, 0, ROT270, "Wing", "Yosaku To Donbei (set 2)", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND )
+GAMEL(1979, shuttlei,   0,        shuttlei,  shuttlei,  driver_device, 0, ROT270, "Omori Electric Co., Ltd.", "Shuttle Invader", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND, layout_shuttlei )
+GAMEL(1979, skylove,    0,        shuttlei,  skylove,   driver_device, 0, ROT270, "Omori Electric Co., Ltd.", "Sky Love", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND, layout_shuttlei )
+GAME (1978, claybust,   0,        claybust,  claybust,  driver_device, 0, ROT0,   "Model Racing", "Claybuster", GAME_SUPPORTS_SAVE | GAME_NO_SOUND ) // no titlescreen, Claybuster according to flyers
+GAME (1980, gunchamp,   0,        claybust,  gunchamp,  driver_device, 0, ROT0,   "Model Racing", "Gun Champ", GAME_SUPPORTS_SAVE | GAME_NO_SOUND ) // no titlescreen, Gun Champ according to original cab
+GAME( 19??, astropal,   0,        astropal,  astropal,  driver_device, 0, ROT0,   "Sidam?", "Astropal", GAME_SUPPORTS_SAVE | GAME_IMPERFECT_SOUND )
+
+GAME( 2002, invmulti,   0,        invmulti,  invmulti,  _8080bw_state, invmulti, ROT270, "hack (Braze Technologies)", "Space Invaders Multigame (M8.03D)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 2002, invmultim3a,invmulti, invmulti,  invmulti,  _8080bw_state, invmulti, ROT270, "hack (Braze Technologies)", "Space Invaders Multigame (M8.03A)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 2002, invmultim2c,invmulti, invmulti,  invmulti,  _8080bw_state, invmulti, ROT270, "hack (Braze Technologies)", "Space Invaders Multigame (M8.02C)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 2002, invmultim2a,invmulti, invmulti,  invmulti,  _8080bw_state, invmulti, ROT270, "hack (Braze Technologies)", "Space Invaders Multigame (M8.02A)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 2002, invmultim1a,invmulti, invmulti,  invmulti,  _8080bw_state, invmulti, ROT270, "hack (Braze Technologies)", "Space Invaders Multigame (M8.01A)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 2002, invmultit3d,invmulti, invmulti,  invmulti,  _8080bw_state, invmulti, ROT270, "hack (Braze Technologies)", "Space Invaders Multigame (T8.03D)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 2002, invmultis3a,invmulti, invmulti,  invmulti,  _8080bw_state, invmulti, ROT270, "hack (Braze Technologies)", "Space Invaders Multigame (S0.83A)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 2002, invmultis2a,invmulti, invmulti,  invmulti,  _8080bw_state, invmulti, ROT270, "hack (Braze Technologies)", "Space Invaders Multigame (S0.82A)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 2002, invmultis1a,invmulti, invmulti,  invmulti,  _8080bw_state, invmulti, ROT270, "hack (Braze Technologies)", "Space Invaders Multigame (S0.81A)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 2002, invmultip,  invmulti, invmulti,  invmulti,  _8080bw_state, invmulti, ROT270, "hack (Braze Technologies)", "Space Invaders Multigame (prototype)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )

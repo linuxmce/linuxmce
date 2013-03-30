@@ -11,8 +11,8 @@
 #define EXERION_PIXEL_CLOCK       (EXERION_MASTER_CLOCK / 3)
 #define EXERION_HCOUNT_START      (0x58)
 #define EXERION_HTOTAL            (512-EXERION_HCOUNT_START)
-#define EXERION_HBEND             (12*8)	/* ?? */
-#define EXERION_HBSTART           (52*8)	/* ?? */
+#define EXERION_HBEND             (12*8)    /* ?? */
+#define EXERION_HBSTART           (52*8)    /* ?? */
 #define EXERION_VTOTAL            (256)
 #define EXERION_VBEND             (16)
 #define EXERION_VBSTART           (240)
@@ -21,15 +21,16 @@
 class exerion_state : public driver_device
 {
 public:
-	exerion_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	exerion_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_main_ram(*this, "main_ram"),
+		m_videoram(*this, "videoram"),
+		m_spriteram(*this, "spriteram"){ }
 
 	/* memory pointers */
-	UINT8 *  m_main_ram;
-	UINT8 *  m_videoram;
-	UINT8 *  m_spriteram;
-	size_t   m_videoram_size;
-	size_t   m_spriteram_size;
+	required_shared_ptr<UINT8> m_main_ram;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_spriteram;
 
 	/* video-related */
 	UINT8    m_cocktail_flip;
@@ -45,17 +46,20 @@ public:
 	UINT8 m_portb;
 
 	/* devices */
-	device_t *m_maincpu;
+	cpu_device *m_maincpu;
+	DECLARE_READ8_MEMBER(exerion_protection_r);
+	DECLARE_WRITE8_MEMBER(exerion_videoreg_w);
+	DECLARE_WRITE8_MEMBER(exerion_video_latch_w);
+	DECLARE_READ8_MEMBER(exerion_video_timing_r);
+	DECLARE_CUSTOM_INPUT_MEMBER(exerion_controls_r);
+	DECLARE_INPUT_CHANGED_MEMBER(coin_inserted);
+	DECLARE_READ8_MEMBER(exerion_porta_r);
+	DECLARE_WRITE8_MEMBER(exerion_portb_w);
+	DECLARE_DRIVER_INIT(exerion);
+	DECLARE_DRIVER_INIT(exerionb);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_exerion(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
-
-
-
-/*----------- defined in video/exerion.c -----------*/
-
-PALETTE_INIT( exerion );
-VIDEO_START( exerion );
-SCREEN_UPDATE( exerion );
-
-WRITE8_HANDLER( exerion_videoreg_w );
-WRITE8_HANDLER( exerion_video_latch_w );
-READ8_HANDLER( exerion_video_timing_r );

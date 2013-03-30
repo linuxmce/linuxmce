@@ -18,27 +18,25 @@
 
 ***************************************************************************/
 
-static TILE_GET_INFO( pb_get_bg_tile_info )
+TILE_GET_INFO_MEMBER(superqix_state::pb_get_bg_tile_info)
 {
-	superqix_state *state = machine.driver_data<superqix_state>();
-	int attr = state->m_videoram[tile_index + 0x400];
-	int code = state->m_videoram[tile_index] + 256 * (attr & 0x7);
+	int attr = m_videoram[tile_index + 0x400];
+	int code = m_videoram[tile_index] + 256 * (attr & 0x7);
 	int color = (attr & 0xf0) >> 4;
-	SET_TILE_INFO(0, code, color, 0);
+	SET_TILE_INFO_MEMBER(0, code, color, 0);
 }
 
-static TILE_GET_INFO( sqix_get_bg_tile_info )
+TILE_GET_INFO_MEMBER(superqix_state::sqix_get_bg_tile_info)
 {
-	superqix_state *state = machine.driver_data<superqix_state>();
-	int attr = state->m_videoram[tile_index + 0x400];
+	int attr = m_videoram[tile_index + 0x400];
 	int bank = (attr & 0x04) ? 0 : 1;
-	int code = state->m_videoram[tile_index] + 256 * (attr & 0x03);
+	int code = m_videoram[tile_index] + 256 * (attr & 0x03);
 	int color = (attr & 0xf0) >> 4;
 
-	if (bank) code += 1024 * state->m_gfxbank;
+	if (bank) code += 1024 * m_gfxbank;
 
-	SET_TILE_INFO(bank, code, color, 0);
-	tileinfo->group = (attr & 0x08) >> 3;
+	SET_TILE_INFO_MEMBER(bank, code, color, 0);
+	tileinfo.group = (attr & 0x08) >> 3;
 }
 
 
@@ -49,31 +47,24 @@ static TILE_GET_INFO( sqix_get_bg_tile_info )
 
 ***************************************************************************/
 
-VIDEO_START( pbillian )
+VIDEO_START_MEMBER(superqix_state,pbillian)
 {
-	superqix_state *state = machine.driver_data<superqix_state>();
-	state->m_bg_tilemap = tilemap_create(machine, pb_get_bg_tile_info, tilemap_scan_rows,  8, 8,32,32);
-
-	/* Need to do save state here */
-	state->save_item(NAME(state->m_last_power[0]));
-	state->save_item(NAME(state->m_last_power[1]));
-	state->save_item(NAME(state->m_pbillian_show_power));
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(superqix_state::pb_get_bg_tile_info),this), TILEMAP_SCAN_ROWS,  8, 8,32,32);
 }
 
-VIDEO_START( superqix )
+VIDEO_START_MEMBER(superqix_state,superqix)
 {
-	superqix_state *state = machine.driver_data<superqix_state>();
-	state->m_fg_bitmap[0] = auto_bitmap_alloc(machine, 256, 256, machine.primary_screen->format());
-	state->m_fg_bitmap[1] = auto_bitmap_alloc(machine, 256, 256, machine.primary_screen->format());
-	state->m_bg_tilemap = tilemap_create(machine, sqix_get_bg_tile_info, tilemap_scan_rows,  8, 8, 32, 32);
+	m_fg_bitmap[0] = auto_bitmap_ind16_alloc(machine(), 256, 256);
+	m_fg_bitmap[1] = auto_bitmap_ind16_alloc(machine(), 256, 256);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(superqix_state::sqix_get_bg_tile_info),this), TILEMAP_SCAN_ROWS,  8, 8, 32, 32);
 
-	tilemap_set_transmask(state->m_bg_tilemap,0,0xffff,0x0000); /* split type 0 is totally transparent in front half */
-	tilemap_set_transmask(state->m_bg_tilemap,1,0x0001,0xfffe); /* split type 1 has pen 0 transparent in front half */
+	m_bg_tilemap->set_transmask(0,0xffff,0x0000); /* split type 0 is totally transparent in front half */
+	m_bg_tilemap->set_transmask(1,0x0001,0xfffe); /* split type 1 has pen 0 transparent in front half */
 
-	state->save_item(NAME(state->m_gfxbank));
-	state->save_item(NAME(state->m_show_bitmap));
-	state->save_item(NAME(*state->m_fg_bitmap[0]));
-	state->save_item(NAME(*state->m_fg_bitmap[1]));
+	save_item(NAME(m_gfxbank));
+	save_item(NAME(m_show_bitmap));
+	save_item(NAME(*m_fg_bitmap[0]));
+	save_item(NAME(*m_fg_bitmap[1]));
 }
 
 
@@ -84,81 +75,77 @@ VIDEO_START( superqix )
 
 ***************************************************************************/
 
-WRITE8_HANDLER( superqix_videoram_w )
+WRITE8_MEMBER(superqix_state::superqix_videoram_w)
 {
-	superqix_state *state = space->machine().driver_data<superqix_state>();
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset & 0x3ff);
+	m_videoram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset & 0x3ff);
 }
 
-WRITE8_HANDLER( superqix_bitmapram_w )
+WRITE8_MEMBER(superqix_state::superqix_bitmapram_w)
 {
-	superqix_state *state = space->machine().driver_data<superqix_state>();
-	if (state->m_bitmapram[offset] != data)
+	if (m_bitmapram[offset] != data)
 	{
 		int x = 2 * (offset % 128);
 		int y = offset / 128 + 16;
 
-		state->m_bitmapram[offset] = data;
+		m_bitmapram[offset] = data;
 
-		*BITMAP_ADDR16(state->m_fg_bitmap[0], y, x)     = data >> 4;
-		*BITMAP_ADDR16(state->m_fg_bitmap[0], y, x + 1) = data & 0x0f;
+		m_fg_bitmap[0]->pix16(y, x)     = data >> 4;
+		m_fg_bitmap[0]->pix16(y, x + 1) = data & 0x0f;
 	}
 }
 
-WRITE8_HANDLER( superqix_bitmapram2_w )
+WRITE8_MEMBER(superqix_state::superqix_bitmapram2_w)
 {
-	superqix_state *state = space->machine().driver_data<superqix_state>();
-	if (data != state->m_bitmapram2[offset])
+	if (data != m_bitmapram2[offset])
 	{
 		int x = 2 * (offset % 128);
 		int y = offset / 128 + 16;
 
-		state->m_bitmapram2[offset] = data;
+		m_bitmapram2[offset] = data;
 
-		*BITMAP_ADDR16(state->m_fg_bitmap[1], y, x)     = data >> 4;
-		*BITMAP_ADDR16(state->m_fg_bitmap[1], y, x + 1) = data & 0x0f;
+		m_fg_bitmap[1]->pix16(y, x)     = data >> 4;
+		m_fg_bitmap[1]->pix16(y, x + 1) = data & 0x0f;
 	}
 }
 
-WRITE8_HANDLER( pbillian_0410_w )
+WRITE8_MEMBER(superqix_state::pbillian_0410_w)
 {
 	/*
-     -------0  ? [not used]
-     ------1-  coin counter 1
-     -----2--  coin counter 2
-     ----3---  rom 2 HI (reserved for ROM banking , not used)
-     ---4----  nmi enable/disable
-     --5-----  flip screen
-    */
+	 -------0  ? [not used]
+	 ------1-  coin counter 1
+	 -----2--  coin counter 2
+	 ----3---  rom 2 HI (reserved for ROM banking , not used)
+	 ---4----  nmi enable/disable
+	 --5-----  flip screen
+	*/
 
-	coin_counter_w(space->machine(), 0,data & 0x02);
-	coin_counter_w(space->machine(), 1,data & 0x04);
+	coin_counter_w(machine(), 0,data & 0x02);
+	coin_counter_w(machine(), 1,data & 0x04);
 
-	memory_set_bank(space->machine(), "bank1", (data & 0x08) >> 3);
+	membank("bank1")->set_entry((data & 0x08) >> 3);
 
-	interrupt_enable_w(space,0,data & 0x10);
-	flip_screen_set(space->machine(), data & 0x20);
+	m_nmi_mask = data & 0x10;
+	flip_screen_set(data & 0x20);
 }
 
-WRITE8_HANDLER( superqix_0410_w )
+WRITE8_MEMBER(superqix_state::superqix_0410_w)
 {
-	superqix_state *state = space->machine().driver_data<superqix_state>();
 	/* bits 0-1 select the tile bank */
-	if (state->m_gfxbank != (data & 0x03))
+	if (m_gfxbank != (data & 0x03))
 	{
-		state->m_gfxbank = data & 0x03;
-		tilemap_mark_all_tiles_dirty(state->m_bg_tilemap);
+		m_gfxbank = data & 0x03;
+		m_bg_tilemap->mark_all_dirty();
 	}
 
 	/* bit 2 selects which of the two bitmaps to display (for 2 players game) */
-	state->m_show_bitmap = (data & 0x04) >> 2;
+	m_show_bitmap = (data & 0x04) >> 2;
 
 	/* bit 3 enables NMI */
-	interrupt_enable_w(space,offset,data & 0x08);
+	m_nmi_mask = data & 0x08;
 
 	/* bits 4-5 control ROM bank */
-	memory_set_bank(space->machine(), "bank1", (data & 0x30) >> 4);
+	membank("bank1")->set_entry((data & 0x30) >> 4);
 }
 
 
@@ -169,13 +156,13 @@ WRITE8_HANDLER( superqix_0410_w )
 
 ***************************************************************************/
 
-static void pbillian_draw_sprites(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void pbillian_draw_sprites(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	superqix_state *state = machine.driver_data<superqix_state>();
 	UINT8 *spriteram = state->m_spriteram;
 	int offs;
 
-	for (offs = 0; offs < state->m_spriteram_size; offs += 4)
+	for (offs = 0; offs < state->m_spriteram.bytes(); offs += 4)
 	{
 		int attr = spriteram[offs + 3];
 		int code = ((spriteram[offs] & 0xfc) >> 2) + 64 * (attr & 0x0f);
@@ -183,7 +170,7 @@ static void pbillian_draw_sprites(running_machine &machine, bitmap_t *bitmap, co
 		int sx = spriteram[offs + 1] + 256 * (spriteram[offs] & 0x01);
 		int sy = spriteram[offs + 2];
 
-		if (flip_screen_get(machine))
+		if (state->flip_screen())
 		{
 			sx = 240 - sx;
 			sy = 240 - sy;
@@ -192,18 +179,18 @@ static void pbillian_draw_sprites(running_machine &machine, bitmap_t *bitmap, co
 		drawgfx_transpen(bitmap,cliprect, machine.gfx[1],
 				code,
 				color,
-				flip_screen_get(machine), flip_screen_get(machine),
+				state->flip_screen(), state->flip_screen(),
 				sx, sy, 0);
 	}
 }
 
-static void superqix_draw_sprites(running_machine &machine, bitmap_t *bitmap,const rectangle *cliprect)
+static void superqix_draw_sprites(running_machine &machine, bitmap_ind16 &bitmap,const rectangle &cliprect)
 {
 	superqix_state *state = machine.driver_data<superqix_state>();
 	UINT8 *spriteram = state->m_spriteram;
 	int offs;
 
-	for (offs = 0; offs < state->m_spriteram_size; offs += 4)
+	for (offs = 0; offs < state->m_spriteram.bytes(); offs += 4)
 	{
 		int attr = spriteram[offs + 3];
 		int code = spriteram[offs] + 256 * (attr & 0x01);
@@ -213,7 +200,7 @@ static void superqix_draw_sprites(running_machine &machine, bitmap_t *bitmap,con
 		int sx = spriteram[offs + 1];
 		int sy = spriteram[offs + 2];
 
-		if (flip_screen_get(machine))
+		if (state->flip_screen())
 		{
 			sx = 240 - sx;
 			sy = 240 - sy;
@@ -229,39 +216,19 @@ static void superqix_draw_sprites(running_machine &machine, bitmap_t *bitmap,con
 	}
 }
 
-SCREEN_UPDATE( pbillian )
+UINT32 superqix_state::screen_update_pbillian(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	superqix_state *state = screen->machine().driver_data<superqix_state>();
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
-	pbillian_draw_sprites(screen->machine(), bitmap,cliprect);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
+	pbillian_draw_sprites(machine(), bitmap,cliprect);
 
-	if (state->m_pbillian_show_power)
-	{
-		int curr_power;
-
-		curr_power = ((input_port_read(screen->machine(), "PADDLE1") & 0x3f) * 100) / 0x3f;
-		if (state->m_last_power[0] != curr_power)
-		{
-			popmessage	("Power %d%%", curr_power);
-			state->m_last_power[0] = curr_power;
-		}
-
-		curr_power = ((input_port_read(screen->machine(), "PADDLE2") & 0x3f) * 100) / 0x3f;
-		if (state->m_last_power[1] != curr_power)
-		{
-			popmessage	("Power %d%%", curr_power);
-			state->m_last_power[1] = curr_power;
-		}
-	}
 	return 0;
 }
 
-SCREEN_UPDATE( superqix )
+UINT32 superqix_state::screen_update_superqix(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	superqix_state *state = screen->machine().driver_data<superqix_state>();
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, TILEMAP_DRAW_LAYER1, 0);
-	copybitmap_trans(bitmap,state->m_fg_bitmap[state->m_show_bitmap],flip_screen_get(screen->machine()),flip_screen_get(screen->machine()),0,0,cliprect,0);
-	superqix_draw_sprites(screen->machine(), bitmap,cliprect);
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, TILEMAP_DRAW_LAYER0, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, TILEMAP_DRAW_LAYER1, 0);
+	copybitmap_trans(bitmap,*m_fg_bitmap[m_show_bitmap],flip_screen(),flip_screen(),0,0,cliprect,0);
+	superqix_draw_sprites(machine(), bitmap,cliprect);
+	m_bg_tilemap->draw(bitmap, cliprect, TILEMAP_DRAW_LAYER0, 0);
 	return 0;
 }

@@ -133,9 +133,9 @@
 #include "sound/pokey.h"
 
 
-#define MASTER_CLOCK		XTAL_20MHz
-#define SOUND_CLOCK			XTAL_14_31818MHz
-#define VIDEO_CLOCK			XTAL_32MHz
+#define MASTER_CLOCK        XTAL_20MHz
+#define SOUND_CLOCK         XTAL_14_31818MHz
+#define VIDEO_CLOCK         XTAL_32MHz
 
 
 
@@ -145,7 +145,7 @@
  *
  *************************************/
 
-static STATE_POSTLOAD( bankselect_postload );
+static void bankselect_postload(running_machine &machine);
 
 
 
@@ -155,29 +155,27 @@ static STATE_POSTLOAD( bankselect_postload );
  *
  *************************************/
 
-static void update_interrupts(running_machine &machine)
+void atarisy2_state::update_interrupts()
 {
-	atarisy2_state *state = machine.driver_data<atarisy2_state>();
-
-	if (state->m_video_int_state)
-		cputag_set_input_line(machine, "maincpu", 3, ASSERT_LINE);
+	if (m_video_int_state)
+		machine().device("maincpu")->execute().set_input_line(3, ASSERT_LINE);
 	else
-		cputag_set_input_line(machine, "maincpu", 3, CLEAR_LINE);
+		machine().device("maincpu")->execute().set_input_line(3, CLEAR_LINE);
 
-	if (state->m_scanline_int_state)
-		cputag_set_input_line(machine, "maincpu", 2, ASSERT_LINE);
+	if (m_scanline_int_state)
+		machine().device("maincpu")->execute().set_input_line(2, ASSERT_LINE);
 	else
-		cputag_set_input_line(machine, "maincpu", 2, CLEAR_LINE);
+		machine().device("maincpu")->execute().set_input_line(2, CLEAR_LINE);
 
-	if (state->m_p2portwr_state)
-		cputag_set_input_line(machine, "maincpu", 1, ASSERT_LINE);
+	if (m_p2portwr_state)
+		machine().device("maincpu")->execute().set_input_line(1, ASSERT_LINE);
 	else
-		cputag_set_input_line(machine, "maincpu", 1, CLEAR_LINE);
+		machine().device("maincpu")->execute().set_input_line(1, CLEAR_LINE);
 
-	if (state->m_p2portrd_state)
-		cputag_set_input_line(machine, "maincpu", 0, ASSERT_LINE);
+	if (m_p2portrd_state)
+		machine().device("maincpu")->execute().set_input_line(0, ASSERT_LINE);
 	else
-		cputag_set_input_line(machine, "maincpu", 0, CLEAR_LINE);
+		machine().device("maincpu")->execute().set_input_line(0, CLEAR_LINE);
 }
 
 
@@ -188,15 +186,14 @@ static void update_interrupts(running_machine &machine)
  *
  *************************************/
 
-static void scanline_update(screen_device &screen, int scanline)
+void atarisy2_state::scanline_update(screen_device &screen, int scanline)
 {
-	atarisy2_state *state = screen.machine().driver_data<atarisy2_state>();
 	if (scanline <= screen.height())
 	{
 		/* generate the 32V interrupt (IRQ 2) */
 		if ((scanline % 64) == 0)
-			if (state->m_interrupt_enable & 4)
-				atarigen_scanline_int_gen(screen.machine().device("maincpu"));
+			if (m_interrupt_enable & 4)
+				scanline_int_gen(*subdevice("maincpu"));
 	}
 }
 
@@ -208,50 +205,44 @@ static void scanline_update(screen_device &screen, int scanline)
  *
  *************************************/
 
-DIRECT_UPDATE_HANDLER( atarisy2_direct_handler )
+DIRECT_UPDATE_MEMBER( atarisy2_state::atarisy2_direct_handler )
 {
 	/* make sure slapstic area looks like ROM */
 	if (address >= 0x8000 && address < 0x8200)
 	{
-		atarisy2_state *state = machine->driver_data<atarisy2_state>();
-		direct.explicit_configure(0x8000, 0x81ff, 0x1ff, (UINT8 *)state->m_slapstic_base);
+		direct.explicit_configure(0x8000, 0x81ff, 0x1ff, reinterpret_cast<UINT8 *>(m_slapstic_base.target()));
 		return ~0;
 	}
 	return address;
 }
 
 
-static MACHINE_START( atarisy2 )
+MACHINE_START_MEMBER(atarisy2_state,atarisy2)
 {
-	atarisy2_state *state = machine.driver_data<atarisy2_state>();
-	atarigen_init(machine);
+	atarigen_state::machine_start();
 
-	state->save_item(NAME(state->m_interrupt_enable));
-	state->save_item(NAME(state->m_which_adc));
-	state->save_item(NAME(state->m_p2portwr_state));
-	state->save_item(NAME(state->m_p2portrd_state));
-	machine.state().register_postload(bankselect_postload, NULL);
-	state->save_item(NAME(state->m_sound_reset_state));
+	save_item(NAME(m_interrupt_enable));
+	save_item(NAME(m_which_adc));
+	save_item(NAME(m_p2portwr_state));
+	save_item(NAME(m_p2portrd_state));
+	machine().save().register_postload(save_prepost_delegate(FUNC(bankselect_postload), &machine()));
+	save_item(NAME(m_sound_reset_state));
 }
 
 
-static MACHINE_RESET( atarisy2 )
+MACHINE_RESET_MEMBER(atarisy2_state,atarisy2)
 {
-	atarisy2_state *state = machine.driver_data<atarisy2_state>();
-
-	atarigen_eeprom_reset(state);
+	atarigen_state::machine_reset();
 	slapstic_reset();
-	atarigen_interrupt_reset(state, update_interrupts);
-	atarigen_sound_io_reset(machine.device("soundcpu"));
-	atarigen_scanline_timer_reset(*machine.primary_screen, scanline_update, 64);
+	scanline_timer_reset(*machine().primary_screen, 64);
 
-	address_space *main = machine.device<t11_device>("maincpu")->space(AS_PROGRAM);
-	main->set_direct_update_handler(direct_update_delegate_create_static(atarisy2_direct_handler, machine));
+	address_space &main = machine().device<t11_device>("maincpu")->space(AS_PROGRAM);
+	main.set_direct_update_handler(direct_update_delegate(FUNC(atarisy2_state::atarisy2_direct_handler), this));
 
-	state->m_p2portwr_state = 0;
-	state->m_p2portrd_state = 0;
+	m_p2portwr_state = 0;
+	m_p2portrd_state = 0;
 
-	state->m_which_adc = 0;
+	m_which_adc = 0;
 }
 
 
@@ -262,44 +253,40 @@ static MACHINE_RESET( atarisy2 )
  *
  *************************************/
 
-static INTERRUPT_GEN( vblank_int )
+INTERRUPT_GEN_MEMBER(atarisy2_state::vblank_int)
 {
-	atarisy2_state *state = device->machine().driver_data<atarisy2_state>();
-
 	/* clock the VBLANK through */
-	if (state->m_interrupt_enable & 8)
-		atarigen_video_int_gen(device);
+	if (m_interrupt_enable & 8)
+		video_int_gen(device);
 }
 
 
-static WRITE16_HANDLER( int0_ack_w )
+WRITE16_MEMBER(atarisy2_state::int0_ack_w)
 {
 	/* reset sound IRQ */
-	atarisy2_state *state = space->machine().driver_data<atarisy2_state>();
-	state->m_p2portrd_state = 0;
-	atarigen_update_interrupts(space->machine());
+	m_p2portrd_state = 0;
+	update_interrupts();
 }
 
 
-static WRITE16_HANDLER( int1_ack_w )
+WRITE16_MEMBER(atarisy2_state::int1_ack_w)
 {
 	/* reset sound CPU */
 	if (ACCESSING_BITS_0_7)
-		cputag_set_input_line(space->machine(), "soundcpu", INPUT_LINE_RESET, (data & 1) ? ASSERT_LINE : CLEAR_LINE);
+		machine().device("audiocpu")->execute().set_input_line(INPUT_LINE_RESET, (data & 1) ? ASSERT_LINE : CLEAR_LINE);
 }
 
 
-static TIMER_CALLBACK( delayed_int_enable_w )
+TIMER_CALLBACK_MEMBER(atarisy2_state::delayed_int_enable_w)
 {
-	atarisy2_state *state = machine.driver_data<atarisy2_state>();
-	state->m_interrupt_enable = param;
+	m_interrupt_enable = param;
 }
 
 
-static WRITE16_HANDLER( int_enable_w )
+WRITE16_MEMBER(atarisy2_state::int_enable_w)
 {
 	if (offset == 0 && ACCESSING_BITS_0_7)
-		space->machine().scheduler().synchronize(FUNC(delayed_int_enable_w), data);
+		machine().scheduler().synchronize(timer_expired_delegate(FUNC(atarisy2_state::delayed_int_enable_w),this), data);
 }
 
 
@@ -310,7 +297,7 @@ static WRITE16_HANDLER( int_enable_w )
  *
  *************************************/
 
-static WRITE16_HANDLER( bankselect_w )
+WRITE16_MEMBER(atarisy2_state::bankselect_w)
 {
 	static const int bankoffset[64] =
 	{
@@ -332,25 +319,24 @@ static WRITE16_HANDLER( bankselect_w )
 		0x8e000, 0x86000, 0x7e000, 0x76000
 	};
 
-	atarisy2_state *state = space->machine().driver_data<atarisy2_state>();
-	int newword = state->m_bankselect[offset];
+	int newword = m_bankselect[offset];
 	UINT8 *base;
 
 	COMBINE_DATA(&newword);
-	state->m_bankselect[offset] = newword;
+	m_bankselect[offset] = newword;
 
-	base = &space->machine().region("maincpu")->base()[bankoffset[(newword >> 10) & 0x3f]];
-	memcpy(offset ? state->m_rombank2 : state->m_rombank1, base, 0x2000);
+	base = &machine().root_device().memregion("maincpu")->base()[bankoffset[(newword >> 10) & 0x3f]];
+	memcpy(offset ? m_rombank2 : m_rombank1, base, 0x2000);
 }
 
 
-static STATE_POSTLOAD( bankselect_postload )
+static void bankselect_postload(running_machine &machine)
 {
-	address_space *space = machine.device("maincpu")->memory().space(AS_PROGRAM);
+	address_space &space = machine.device("maincpu")->memory().space(AS_PROGRAM);
 	atarisy2_state *state = machine.driver_data<atarisy2_state>();
 
-	bankselect_w(space, 0, state->m_bankselect[0], 0xffff);
-	bankselect_w(space, 1, state->m_bankselect[1], 0xffff);
+	state->bankselect_w(space, 0, state->m_bankselect[0], 0xffff);
+	state->bankselect_w(space, 1, state->m_bankselect[1], 0xffff);
 }
 
 
@@ -361,41 +347,38 @@ static STATE_POSTLOAD( bankselect_postload )
  *
  *************************************/
 
-static READ16_HANDLER( switch_r )
+READ16_MEMBER(atarisy2_state::switch_r)
 {
-	atarisy2_state *state = space->machine().driver_data<atarisy2_state>();
-	int result = input_port_read(space->machine(), "1800") | (input_port_read(space->machine(), "1801") << 8);
+	int result = ioport("1800")->read() | (ioport("1801")->read() << 8);
 
-	if (state->m_cpu_to_sound_ready) result ^= 0x20;
-	if (state->m_sound_to_cpu_ready) result ^= 0x10;
+	if (m_cpu_to_sound_ready) result ^= 0x20;
+	if (m_sound_to_cpu_ready) result ^= 0x10;
 
 	return result;
 }
 
 
-static READ8_HANDLER( switch_6502_r )
+READ8_MEMBER(atarisy2_state::switch_6502_r)
 {
-	atarisy2_state *state = space->machine().driver_data<atarisy2_state>();
-	int result = input_port_read(space->machine(), "1840");
+	int result = ioport("1840")->read();
 
-	if (state->m_cpu_to_sound_ready) result |= 0x01;
-	if (state->m_sound_to_cpu_ready) result |= 0x02;
-	if ((state->m_has_tms5220) && (tms5220_readyq_r(space->machine().device("tms")) == 0))
+	if (m_cpu_to_sound_ready) result |= 0x01;
+	if (m_sound_to_cpu_ready) result |= 0x02;
+	if ((m_has_tms5220) && (tms5220_readyq_r(machine().device("tms")) == 0))
 		result &= ~0x04;
-	if (!(input_port_read(space->machine(), "1801") & 0x80)) result |= 0x10;
+	if (!(ioport("1801")->read() & 0x80)) result |= 0x10;
 
 	return result;
 }
 
 
-static WRITE8_HANDLER( switch_6502_w )
+WRITE8_MEMBER(atarisy2_state::switch_6502_w)
 {
-	atarisy2_state *state = space->machine().driver_data<atarisy2_state>();
 
-	if (state->m_has_tms5220)
+	if (m_has_tms5220)
 	{
 		data = 12 | ((data >> 5) & 1);
-		tms5220_set_frequency(space->machine().device("tms"), MASTER_CLOCK/4 / (16 - data) / 2);
+		tms5220_set_frequency(machine().device("tms"), MASTER_CLOCK/4 / (16 - data) / 2);
 	}
 }
 
@@ -407,59 +390,56 @@ static WRITE8_HANDLER( switch_6502_w )
  *
  *************************************/
 
-static WRITE16_HANDLER( adc_strobe_w )
+WRITE16_MEMBER(atarisy2_state::adc_strobe_w)
 {
-	atarisy2_state *state = space->machine().driver_data<atarisy2_state>();
-	state->m_which_adc = offset & 3;
+	m_which_adc = offset & 3;
 }
 
 
-static READ16_HANDLER( adc_r )
+READ16_MEMBER(atarisy2_state::adc_r)
 {
 	static const char *const adcnames[] = { "ADC0", "ADC1", "ADC2", "ADC3" };
-	atarisy2_state *state = space->machine().driver_data<atarisy2_state>();
 
-	if (state->m_which_adc < state->m_pedal_count)
-		return ~input_port_read(space->machine(), adcnames[state->m_which_adc]);
+	if (m_which_adc < m_pedal_count)
+		return ~ioport(adcnames[m_which_adc])->read();
 
-	return input_port_read(space->machine(), adcnames[state->m_which_adc]) | 0xff00;
+	return ioport(adcnames[m_which_adc])->read() | 0xff00;
 }
 
 
-static READ8_HANDLER( leta_r )
+READ8_MEMBER(atarisy2_state::leta_r)
 {
 	static const char *const letanames[] = { "LETA0", "LETA1", "LETA2", "LETA3" };
-	atarisy2_state *state = space->machine().driver_data<atarisy2_state>();
 
-    if (offset <= 1 && state->m_pedal_count == -1)   /* 720 */
+	if (offset <= 1 && m_pedal_count == -1)   /* 720 */
 	{
-		switch (input_port_read(space->machine(), "SELECT"))
+		switch (ioport("SELECT")->read())
 		{
-			case 0:	/* Real */
+			case 0: /* Real */
 				break;
 
-			case 1:	/* Fake Joystick */
+			case 1: /* Fake Joystick */
 			/* special thanks to MAME Analog+ for the mapping code */
 			{
-				int analogx = input_port_read(space->machine(), "FAKE_JOY_X") - 128;
-				int analogy = input_port_read(space->machine(), "FAKE_JOY_Y") - 128;
+				int analogx = ioport("FAKE_JOY_X")->read() - 128;
+				int analogy = ioport("FAKE_JOY_Y")->read() - 128;
 				double angle;
 
 				/* if the joystick is centered, leave the rest of this alone */
-				angle = state->m_joy_last_angle;
+				angle = m_joy_last_angle;
 				if (analogx < -32 || analogx > 32 || analogy < -32 || analogy > 32)
 					angle = atan2((double)analogx, (double)analogy) * 360 / (2 * M_PI);
 
 				/* detect when we pass the 0 point in either direction */
-				if (state->m_joy_last_angle < -90 && angle > 90)
-					state->m_joy_rotations--;
-				else if (state->m_joy_last_angle > 90 && angle < -90)
-					state->m_joy_rotations++;
-				state->m_joy_last_angle = angle;
+				if (m_joy_last_angle < -90 && angle > 90)
+					m_joy_rotations--;
+				else if (m_joy_last_angle > 90 && angle < -90)
+					m_joy_rotations++;
+				m_joy_last_angle = angle;
 
 				/* make offset 0 return 0xff when the controller blocks one of two gaps */
 				/* this is not accurate, as a counter should count up/down 2 counts as it passes through each gap */
-				/* this is close enough to pass the service mode controller test the first couple of trys. */
+				/* this is close enough to pass the service mode controller test the first couple of tries. */
 				if (offset == 0)
 				{
 					/* original controller had two gaps 10 degrees apart, each 2.5 degrees wide */
@@ -473,39 +453,39 @@ static READ8_HANDLER( leta_r )
 				else
 				{
 					/* take the rotations * 144 plus the current angle */
-					return (state->m_joy_rotations * 144 + (int)(angle * 144.0 / 360.0)) & 0xff;
+					return (m_joy_rotations * 144 + (int)(angle * 144.0 / 360.0)) & 0xff;
 				}
 			}
 
-			case 2:	/* Fake Spinner */
+			case 2: /* Fake Spinner */
 			{
 				INT32  diff;
 				UINT32 temp;
-				UINT32 rotate_count = input_port_read(space->machine(), "FAKE_SPINNER") & 0xffff;
+				UINT32 rotate_count = ioport("FAKE_SPINNER")->read() & 0xffff;
 				/* rotate_count behaves the same as the real LEAT1 Rotate encoder
-                 * we use it to generate the LETA0 Center encoder count
-                 */
+				 * we use it to generate the LETA0 Center encoder count
+				 */
 
-				if (rotate_count != state->m_spin_last_rotate_count)
+				if (rotate_count != m_spin_last_rotate_count)
 				{
 					/* see if count rolled between 0xffff and 0x0000 */
-					if ((state->m_spin_last_rotate_count > 0xc000) && (rotate_count < 0x03ff))
+					if ((m_spin_last_rotate_count > 0xc000) && (rotate_count < 0x03ff))
 					{
-						temp = 0xffff - state->m_spin_last_rotate_count;
+						temp = 0xffff - m_spin_last_rotate_count;
 						diff = rotate_count + temp + 1;
 					}
-					else if ((rotate_count > 0xc000) && (state->m_spin_last_rotate_count < 0x03ff))
+					else if ((rotate_count > 0xc000) && (m_spin_last_rotate_count < 0x03ff))
 					{
 						temp = 0xffff - rotate_count;
-						diff = state->m_spin_last_rotate_count - temp - 1;
+						diff = m_spin_last_rotate_count - temp - 1;
 					}
 					else
 					{
-						temp = rotate_count - state->m_spin_last_rotate_count;
+						temp = rotate_count - m_spin_last_rotate_count;
 						diff = temp;
 					}
 
-					state->m_spin_last_rotate_count = rotate_count;
+					m_spin_last_rotate_count = rotate_count;
 
 					/* you may not like this, but it is the easiest way to accurately fake the center count */
 					/* diff is never a big number anyways */
@@ -513,17 +493,17 @@ static READ8_HANDLER( leta_r )
 					{
 						for (int i = 0; i > diff; i--)
 						{
-							state->m_spin_pos--;
-							if (state->m_spin_pos < 0)
-								state->m_spin_pos = 143;
+							m_spin_pos--;
+							if (m_spin_pos < 0)
+								m_spin_pos = 143;
 							else
-								switch (state->m_spin_pos)
+								switch (m_spin_pos)
 								{
 									case 2:
 									case 3:
 									case 141:
 									case 142:
-										state->m_spin_center_count--;
+										m_spin_center_count--;
 								}
 						}
 					}
@@ -531,24 +511,24 @@ static READ8_HANDLER( leta_r )
 					{
 						for (int i = 0; i < diff; i++)
 						{
-							state->m_spin_pos++;
-							if (state->m_spin_pos > 143)
-								state->m_spin_pos = 0;
+							m_spin_pos++;
+							if (m_spin_pos > 143)
+								m_spin_pos = 0;
 							else
-								switch (state->m_spin_pos)
+								switch (m_spin_pos)
 								{
 									case 2:
 									case 3:
 									case 141:
 									case 142:
-										state->m_spin_center_count++;
+										m_spin_center_count++;
 								}
 						}
 					}
 				}
 
 				if (offset == 0)
-					return state->m_spin_center_count & 0xff;
+					return m_spin_center_count & 0xff;
 				else
 					/* offset == 1 */
 					return rotate_count & 0xff;
@@ -559,7 +539,7 @@ static READ8_HANDLER( leta_r )
 				return 0xff;
 		}
 	}
-	return input_port_read(space->machine(), letanames[offset]);
+	return ioport(letanames[offset])->read();
 }
 
 
@@ -656,11 +636,26 @@ static READ8_HANDLER( leta_r )
     important.  So it would be nice to add it in properly.
 */
 
-static WRITE8_HANDLER( mixer_w )
+WRITE8_MEMBER(atarisy2_state::mixer_w)
 {
 	double rbott, rtop, gain;
 
 	/* these gains are cheesed up, but give an approximate effect */
+
+	/*
+	 * Before the volume adjustment, all channels pass through
+	 * a high-pass filter which removes DC components. The
+	 * filter frequency does also depend on the settings on
+	 * the resistors.
+	 *
+	 * The op-amp after the pokey feeds mixes the op-amp output voltage
+	 * with a low impedance back to the input. The internal resistance of the
+	 * pokey now is the ground pole of a three pole resistor mixer: ground,
+	 * 15V and op-amp output voltage.
+	 *
+	 * ==> DISCRETE candidate
+	 *
+	 */
 
 	/* bits 0-2 control the volume of the YM2151, using 22k, 47k, and 100k resistors */
 	rtop = 1.0/(1.0/100 + 1.0/100);
@@ -669,7 +664,7 @@ static WRITE8_HANDLER( mixer_w )
 	if (!(data & 0x02)) rbott += 1.0/47;
 	if (!(data & 0x04)) rbott += 1.0/22;
 	gain = (rbott == 0) ? 1.0 : ((1.0/rbott) / (rtop + (1.0/rbott)));
-	atarigen_set_ym2151_vol(space->machine(), gain * 100);
+	set_ym2151_volume(gain * 100);
 
 	/* bits 3-4 control the volume of the POKEYs, using 47k and 100k resistors */
 	rtop = 1.0/(1.0/100 + 1.0/100);
@@ -677,7 +672,7 @@ static WRITE8_HANDLER( mixer_w )
 	if (!(data & 0x08)) rbott += 1.0/47;
 	if (!(data & 0x10)) rbott += 1.0/22;
 	gain = (rbott == 0) ? 1.0 : ((1.0/rbott) / (rtop + (1.0/rbott)));
-	atarigen_set_pokey_vol(space->machine(), gain * 100);
+	set_pokey_volume(gain * 100);
 
 	/* bits 5-7 control the volume of the TMS5220, using 22k, 47k, and 100k resistors */
 	rtop = 1.0/(1.0/100 + 1.0/100);
@@ -686,70 +681,63 @@ static WRITE8_HANDLER( mixer_w )
 	if (!(data & 0x40)) rbott += 1.0/47;
 	if (!(data & 0x80)) rbott += 1.0/22;
 	gain = (rbott == 0) ? 1.0 : ((1.0/rbott) / (rtop + (1.0/rbott)));
-	atarigen_set_tms5220_vol(space->machine(), gain * 100);
+	set_tms5220_volume(gain * 100);
 }
 
 
-static WRITE8_HANDLER( sound_reset_w )
+WRITE8_MEMBER(atarisy2_state::sound_reset_w)
 {
-	atarisy2_state *state = space->machine().driver_data<atarisy2_state>();
 
 	/* if no change, do nothing */
-	if ((data & 1) == state->m_sound_reset_state)
+	if ((data & 1) == m_sound_reset_state)
 		return;
-	state->m_sound_reset_state = data & 1;
+	m_sound_reset_state = data & 1;
 
 	/* only track the 0 -> 1 transition */
-	if (state->m_sound_reset_state == 0)
+	if (m_sound_reset_state == 0)
 		return;
 
 	/* a large number of signals are reset when this happens */
-	atarigen_sound_io_reset(space->machine().device("soundcpu"));
-	devtag_reset(space->machine(), "ymsnd");
-	if (state->m_has_tms5220)
+	sound_io_reset();
+	machine().device("ymsnd")->reset();
+	if (m_has_tms5220)
 	{
-		devtag_reset(space->machine(), "tms"); // technically what happens is the tms5220 gets a long stream of 0xFF written to it when sound_reset_state is 0 which halts the chip after a few frames, but this works just as well, even if it isn't exactly true to hardware... The hardware may not have worked either, the resistors to pull input to 0xFF are fighting against the ls263 gate holding the latched value to be sent to the chip.
+		machine().device("tms")->reset(); // technically what happens is the tms5220 gets a long stream of 0xFF written to it when sound_reset_state is 0 which halts the chip after a few frames, but this works just as well, even if it isn't exactly true to hardware... The hardware may not have worked either, the resistors to pull input to 0xFF are fighting against the ls263 gate holding the latched value to be sent to the chip.
 	}
 	mixer_w(space, 0, 0);
 }
 
 
-static READ16_HANDLER( sound_r )
+READ16_MEMBER(atarisy2_state::sound_r)
 {
-	atarisy2_state *state = space->machine().driver_data<atarisy2_state>();
-
 	/* clear the p2portwr state on a p1portrd */
-	state->m_p2portwr_state = 0;
-	atarigen_update_interrupts(space->machine());
+	m_p2portwr_state = 0;
+	update_interrupts();
 
 	/* handle it normally otherwise */
-	return atarigen_sound_r(space,offset,0xffff);
+	return atarigen_state::sound_r(space,offset) | 0xff00;
 }
 
 
-static WRITE8_HANDLER( sound_6502_w )
+WRITE8_MEMBER(atarisy2_state::sound_6502_w)
 {
-	atarisy2_state *state = space->machine().driver_data<atarisy2_state>();
-
 	/* clock the state through */
-	state->m_p2portwr_state = (state->m_interrupt_enable & 2) != 0;
-	atarigen_update_interrupts(space->machine());
+	m_p2portwr_state = (m_interrupt_enable & 2) != 0;
+	update_interrupts();
 
 	/* handle it normally otherwise */
-	atarigen_6502_sound_w(space, offset, data);
+	m6502_sound_w(space, offset, data);
 }
 
 
-static READ8_HANDLER( sound_6502_r )
+READ8_MEMBER(atarisy2_state::sound_6502_r)
 {
-	atarisy2_state *state = space->machine().driver_data<atarisy2_state>();
-
 	/* clock the state through */
-	state->m_p2portrd_state = (state->m_interrupt_enable & 1) != 0;
-	atarigen_update_interrupts(space->machine());
+	m_p2portrd_state = (m_interrupt_enable & 1) != 0;
+	update_interrupts();
 
 	/* handle it normally otherwise */
-	return atarigen_6502_sound_r(space, offset);
+	return m6502_sound_r(space, offset);
 }
 
 
@@ -760,21 +748,19 @@ static READ8_HANDLER( sound_6502_r )
  *
  *************************************/
 
-static WRITE8_HANDLER( tms5220_w )
+WRITE8_MEMBER(atarisy2_state::tms5220_w)
 {
-	atarisy2_state *state = space->machine().driver_data<atarisy2_state>();
-	if (state->m_has_tms5220)
+	if (m_has_tms5220)
 	{
-		tms5220_data_w(space->machine().device("tms"), 0, data);
+		tms5220_data_w(machine().device("tms"), space, 0, data);
 	}
 }
 
-static WRITE8_HANDLER( tms5220_strobe_w )
+WRITE8_MEMBER(atarisy2_state::tms5220_strobe_w)
 {
-	atarisy2_state *state = space->machine().driver_data<atarisy2_state>();
-	if (state->m_has_tms5220)
+	if (m_has_tms5220)
 	{
-		tms5220_wsq_w(space->machine().device("tms"), 1-(offset & 1));
+		tms5220_wsq_w(machine().device("tms"), 1-(offset & 1));
 	}
 }
 
@@ -784,10 +770,10 @@ static WRITE8_HANDLER( tms5220_strobe_w )
  *
  *************************************/
 
-static WRITE8_HANDLER( coincount_w )
+WRITE8_MEMBER(atarisy2_state::coincount_w)
 {
-	coin_counter_w(space->machine(), 0, (data >> 0) & 1);
-	coin_counter_w(space->machine(), 1, (data >> 1) & 1);
+	coin_counter_w(machine(), 0, (data >> 0) & 1);
+	coin_counter_w(machine(), 1, (data >> 1) & 1);
 }
 
 
@@ -799,25 +785,25 @@ static WRITE8_HANDLER( coincount_w )
  *************************************/
 
 /* full memory map derived from schematics */
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16, atarisy2_state )
 	AM_RANGE(0x0000, 0x0fff) AM_RAM
-	AM_RANGE(0x1000, 0x11ff) AM_MIRROR(0x0200) AM_RAM_WRITE(atarisy2_paletteram_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0x1400, 0x1403) AM_MIRROR(0x007c) AM_READWRITE(adc_r, bankselect_w) AM_BASE_MEMBER(atarisy2_state, m_bankselect)
+	AM_RANGE(0x1000, 0x11ff) AM_MIRROR(0x0200) AM_RAM_WRITE_LEGACY(atarisy2_paletteram_w) AM_SHARE("paletteram")
+	AM_RANGE(0x1400, 0x1403) AM_MIRROR(0x007c) AM_READWRITE(adc_r, bankselect_w) AM_SHARE("bankselect")
 	AM_RANGE(0x1480, 0x1487) AM_MIRROR(0x0078) AM_WRITE(adc_strobe_w)
 	AM_RANGE(0x1580, 0x1581) AM_MIRROR(0x001e) AM_WRITE(int0_ack_w)
 	AM_RANGE(0x15a0, 0x15a1) AM_MIRROR(0x001e) AM_WRITE(int1_ack_w)
-	AM_RANGE(0x15c0, 0x15c1) AM_MIRROR(0x001e) AM_WRITE(atarigen_scanline_int_ack_w)
-	AM_RANGE(0x15e0, 0x15e1) AM_MIRROR(0x001e) AM_WRITE(atarigen_video_int_ack_w)
+	AM_RANGE(0x15c0, 0x15c1) AM_MIRROR(0x001e) AM_WRITE(scanline_int_ack_w)
+	AM_RANGE(0x15e0, 0x15e1) AM_MIRROR(0x001e) AM_WRITE(video_int_ack_w)
 	AM_RANGE(0x1600, 0x1601) AM_MIRROR(0x007e) AM_WRITE(int_enable_w)
-	AM_RANGE(0x1680, 0x1681) AM_MIRROR(0x007e) AM_WRITE(atarigen_sound_w)
-	AM_RANGE(0x1700, 0x1701) AM_MIRROR(0x007e) AM_WRITE(atarisy2_xscroll_w) AM_BASE_MEMBER(atarisy2_state, m_xscroll)
-	AM_RANGE(0x1780, 0x1781) AM_MIRROR(0x007e) AM_WRITE(atarisy2_yscroll_w) AM_BASE_MEMBER(atarisy2_state, m_yscroll)
-	AM_RANGE(0x1800, 0x1801) AM_MIRROR(0x03fe) AM_READWRITE(switch_r, watchdog_reset16_w)
+	AM_RANGE(0x1680, 0x1681) AM_MIRROR(0x007e) AM_WRITE8(sound_w, 0x00ff)
+	AM_RANGE(0x1700, 0x1701) AM_MIRROR(0x007e) AM_WRITE_LEGACY(atarisy2_xscroll_w) AM_SHARE("xscroll")
+	AM_RANGE(0x1780, 0x1781) AM_MIRROR(0x007e) AM_WRITE_LEGACY(atarisy2_yscroll_w) AM_SHARE("yscroll")
+	AM_RANGE(0x1800, 0x1801) AM_MIRROR(0x03fe) AM_READ(switch_r) AM_WRITE(watchdog_reset16_w)
 	AM_RANGE(0x1c00, 0x1c01) AM_MIRROR(0x03fe) AM_READ(sound_r)
-	AM_RANGE(0x2000, 0x3fff) AM_READWRITE(atarisy2_videoram_r, atarisy2_videoram_w)
-	AM_RANGE(0x4000, 0x5fff) AM_ROM AM_BASE_MEMBER(atarisy2_state, m_rombank1)
-	AM_RANGE(0x6000, 0x7fff) AM_ROM AM_BASE_MEMBER(atarisy2_state, m_rombank2)
-	AM_RANGE(0x8000, 0x81ff) AM_READWRITE(atarisy2_slapstic_r, atarisy2_slapstic_w) AM_BASE_MEMBER(atarisy2_state, m_slapstic_base)
+	AM_RANGE(0x2000, 0x3fff) AM_READWRITE_LEGACY(atarisy2_videoram_r, atarisy2_videoram_w)
+	AM_RANGE(0x4000, 0x5fff) AM_ROM AM_SHARE("rombank1")
+	AM_RANGE(0x6000, 0x7fff) AM_ROM AM_SHARE("rombank2")
+	AM_RANGE(0x8000, 0x81ff) AM_READWRITE_LEGACY(atarisy2_slapstic_r, atarisy2_slapstic_w) AM_SHARE("slapstic_base")
 	AM_RANGE(0x8000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
@@ -830,20 +816,20 @@ ADDRESS_MAP_END
  *************************************/
 
 /* full memory map derived from schematics */
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, atarisy2_state )
 	AM_RANGE(0x0000, 0x0fff) AM_MIRROR(0x2000) AM_RAM
 	AM_RANGE(0x1000, 0x17ff) AM_MIRROR(0x2000) AM_RAM AM_SHARE("eeprom")
-	AM_RANGE(0x1800, 0x180f) AM_MIRROR(0x2780) AM_DEVREADWRITE("pokey1", pokey_r, pokey_w)
+	AM_RANGE(0x1800, 0x180f) AM_MIRROR(0x2780) AM_DEVREADWRITE("pokey1", pokey_device, read, write)
 	AM_RANGE(0x1810, 0x1813) AM_MIRROR(0x278c) AM_READ(leta_r)
-	AM_RANGE(0x1830, 0x183f) AM_MIRROR(0x2780) AM_DEVREADWRITE("pokey2", pokey_r, pokey_w)
+	AM_RANGE(0x1830, 0x183f) AM_MIRROR(0x2780) AM_DEVREADWRITE("pokey2", pokey_device, read, write)
 	AM_RANGE(0x1840, 0x1840) AM_MIRROR(0x278f) AM_READ(switch_6502_r)
-	AM_RANGE(0x1850, 0x1851) AM_MIRROR(0x278e) AM_DEVREADWRITE("ymsnd", ym2151_r, ym2151_w)
+	AM_RANGE(0x1850, 0x1851) AM_MIRROR(0x278e) AM_DEVREADWRITE("ymsnd", ym2151_device, read, write)
 	AM_RANGE(0x1860, 0x1860) AM_MIRROR(0x278f) AM_READ(sound_6502_r)
 	AM_RANGE(0x1870, 0x1870) AM_MIRROR(0x2781) AM_WRITE(tms5220_w)
 	AM_RANGE(0x1872, 0x1873) AM_MIRROR(0x2780) AM_WRITE(tms5220_strobe_w)
 	AM_RANGE(0x1874, 0x1874) AM_MIRROR(0x2781) AM_WRITE(sound_6502_w)
 	AM_RANGE(0x1876, 0x1876) AM_MIRROR(0x2781) AM_WRITE(coincount_w)
-	AM_RANGE(0x1878, 0x1878) AM_MIRROR(0x2781) AM_WRITE(atarigen_6502_irq_ack_w)
+	AM_RANGE(0x1878, 0x1878) AM_MIRROR(0x2781) AM_WRITE(m6502_irq_ack_w)
 	AM_RANGE(0x187a, 0x187a) AM_MIRROR(0x2781) AM_WRITE(mixer_w)
 	AM_RANGE(0x187c, 0x187c) AM_MIRROR(0x2781) AM_WRITE(switch_6502_w)
 	AM_RANGE(0x187e, 0x187e) AM_MIRROR(0x2781) AM_WRITE(sound_reset_w)
@@ -859,7 +845,7 @@ ADDRESS_MAP_END
  *************************************/
 
 static INPUT_PORTS_START( paperboy )
-	PORT_START("1840")	/*(sound) */
+	PORT_START("1840")  /*(sound) */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_SPECIAL )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SPECIAL )
@@ -908,47 +894,47 @@ static INPUT_PORTS_START( paperboy )
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("DSW0")
-	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Coinage ) )		PORT_DIPLOCATION("6/7A:!8,!7")
+	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Coinage ) )      PORT_DIPLOCATION("6/7A:!8,!7")
 	PORT_DIPSETTING(    0x03, DEF_STR( 4C_1C ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
-	PORT_DIPNAME( 0x0c, 0x00, "Right Coin" )			PORT_DIPLOCATION("6/7A:!6,!5")
+	PORT_DIPNAME( 0x0c, 0x00, "Right Coin" )            PORT_DIPLOCATION("6/7A:!6,!5")
 	PORT_DIPSETTING(    0x00, "*1" )
 	PORT_DIPSETTING(    0x04, "*4" )
 	PORT_DIPSETTING(    0x08, "*5" )
 	PORT_DIPSETTING(    0x0c, "*6" )
-	PORT_DIPNAME( 0x10, 0x00, "Left Coin" )				PORT_DIPLOCATION("6/7A:!4")
+	PORT_DIPNAME( 0x10, 0x00, "Left Coin" )             PORT_DIPLOCATION("6/7A:!4")
 	PORT_DIPSETTING(    0x00, "*1" )
 	PORT_DIPSETTING(    0x10, "*2" )
-	PORT_DIPNAME( 0xe0, 0x00, "Bonus Coins" )			PORT_DIPLOCATION("6/7A:!3,!2,!1")
+	PORT_DIPNAME( 0xe0, 0x00, "Bonus Coins" )           PORT_DIPLOCATION("6/7A:!3,!2,!1")
 	PORT_DIPSETTING(    0x00, DEF_STR( None ) )
 	PORT_DIPSETTING(    0x80, "1 Each 5" )
 	PORT_DIPSETTING(    0x40, "1 Each 4" )
 	PORT_DIPSETTING(    0xa0, "1 Each 3" )
 	PORT_DIPSETTING(    0x60, "2 Each 4" )
 	PORT_DIPSETTING(    0x20, "1 Each 2" )
-	PORT_DIPSETTING(    0xc0, "1 Each ?" )				/* Not Documented */
+	PORT_DIPSETTING(    0xc0, "1 Each ?" )              /* Not Documented */
 	PORT_DIPSETTING(    0xe0, DEF_STR( Free_Play ) )
 
 	PORT_START("DSW1")
-	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Difficulty ) )	PORT_DIPLOCATION("5/6A:!8,!7")
+	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("5/6A:!8,!7")
 	PORT_DIPSETTING(    0x01, DEF_STR( Easy ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( Medium ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Medium_Hard ) )
 	PORT_DIPSETTING(    0x03, DEF_STR( Hard ) )
-	PORT_DIPNAME( 0x0c, 0x00, DEF_STR( Bonus_Life ) )	PORT_DIPLOCATION("5/6A:!6,!5")
+	PORT_DIPNAME( 0x0c, 0x00, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION("5/6A:!6,!5")
 	PORT_DIPSETTING(    0x08, "10000" )
 	PORT_DIPSETTING(    0x00, "15000" )
 	PORT_DIPSETTING(    0x0c, "20000" )
 	PORT_DIPSETTING(    0x04, DEF_STR( None ) )
-	PORT_DIPNAME( 0x30, 0x00, DEF_STR( Lives ) )		PORT_DIPLOCATION("5/6A:!4,!3")
+	PORT_DIPNAME( 0x30, 0x00, DEF_STR( Lives ) )        PORT_DIPLOCATION("5/6A:!4,!3")
 	PORT_DIPSETTING(    0x20, "3" )
 	PORT_DIPSETTING(    0x00, "4" )
 	PORT_DIPSETTING(    0x30, "5" )
 	PORT_DIPSETTING(    0x10, "Infinite (Cheat)")
-	PORT_DIPUNUSED_DIPLOC( 0x40, 0x40, "5/6A:!2" )		/* Listed as "Unused" */
-	PORT_DIPUNUSED_DIPLOC( 0x80, 0x80, "5/6A:!1" )		/* Listed as "Unused" */
+	PORT_DIPUNUSED_DIPLOC( 0x40, 0x40, "5/6A:!2" )      /* Listed as "Unused" */
+	PORT_DIPUNUSED_DIPLOC( 0x80, 0x80, "5/6A:!1" )      /* Listed as "Unused" */
 INPUT_PORTS_END
 
 
@@ -962,64 +948,64 @@ static INPUT_PORTS_START( 720 )
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	/* 720 uses a special controller to control the player rotation.
-     * It uses 1 disc with 72 teeth for the rotation and another disc
-     * with 2 teeth for the alignment of the joystick to the top position.
-     * The following graph shows how the Center and Rotate disc align.
-     * The numbers show how the optical count varies from center.
-     *
-     *   _____2  1________1  2_____
-     *        |__|        |__|          Center disc - 2 teeth.  Shown lined up with Rotate disc
-     *      __    __    __    __
-     *   __|  |__|  |__|  |__|  |__     Rotate disc - 72 teeth (144 positions)
-     *     4  3  2  1  1  2  3  4
-     */
+	 * It uses 1 disc with 72 teeth for the rotation and another disc
+	 * with 2 teeth for the alignment of the joystick to the top position.
+	 * The following graph shows how the Center and Rotate disc align.
+	 * The numbers show how the optical count varies from center.
+	 *
+	 *   _____2  1________1  2_____
+	 *        |__|        |__|          Center disc - 2 teeth.  Shown lined up with Rotate disc
+	 *      __    __    __    __
+	 *   __|  |__|  |__|  |__|  |__     Rotate disc - 72 teeth (144 positions)
+	 *     4  3  2  1  1  2  3  4
+	 */
 
 	/* Center disc */
 	/* X1, X2 LETA inputs */
-	PORT_MODIFY("LETA0")	/* not direct mapped */
-	PORT_BIT( 0xff, 0x00, IPT_DIAL_V ) PORT_SENSITIVITY(50) PORT_KEYDELTA(10) PORT_NAME("Center") PORT_CONDITION("SELECT",0x03,PORTCOND_EQUALS,0x00)
+	PORT_MODIFY("LETA0")    /* not direct mapped */
+	PORT_BIT( 0xff, 0x00, IPT_DIAL_V ) PORT_SENSITIVITY(50) PORT_KEYDELTA(10) PORT_NAME("Center") PORT_CONDITION("SELECT",0x03,EQUALS,0x00)
 
 	/* Rotate disc */
 	/* Y1, Y2 LETA inputs */
 	/* The disc has 72 teeth which are read by the hardware at 2x */
 	/* Computer hardware reads at 4x, so we set the sensitivity to 50% */
-	PORT_MODIFY("LETA1")	/* not direct mapped */
-	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_SENSITIVITY(50) PORT_KEYDELTA(10) PORT_FULL_TURN_COUNT(144) PORT_NAME("Rotate") PORT_CONDITION("SELECT",0x03,PORTCOND_EQUALS,0x00)
+	PORT_MODIFY("LETA1")    /* not direct mapped */
+	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_SENSITIVITY(50) PORT_KEYDELTA(10) PORT_FULL_TURN_COUNT(144) PORT_NAME("Rotate") PORT_CONDITION("SELECT",0x03,EQUALS,0x00)
 
-	PORT_START("FAKE_JOY_X")	/* not direct mapped */
-	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_X ) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_CONDITION("SELECT",0x03,PORTCOND_EQUALS,0x01)
+	PORT_START("FAKE_JOY_X")    /* not direct mapped */
+	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_X ) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_CONDITION("SELECT",0x03,EQUALS,0x01)
 
-	PORT_START("FAKE_JOY_Y")	/* not direct mapped */
-	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_Y ) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_REVERSE PORT_CONDITION("SELECT",0x03,PORTCOND_EQUALS,0x01)
+	PORT_START("FAKE_JOY_Y")    /* not direct mapped */
+	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_Y ) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_REVERSE PORT_CONDITION("SELECT",0x03,EQUALS,0x01)
 
 	/* Let's assume we are using a 1200 count spinner.  We scale to get a 144 count.
-     * 144/1200 = 0.12 = 12% */
-	PORT_START("FAKE_SPINNER")	/* not direct mapped */
-	PORT_BIT( 0xffff, 0x00, IPT_DIAL ) PORT_SENSITIVITY(12) PORT_KEYDELTA(10) PORT_CONDITION("SELECT",0x03,PORTCOND_EQUALS,0x02)
+	 * 144/1200 = 0.12 = 12% */
+	PORT_START("FAKE_SPINNER")  /* not direct mapped */
+	PORT_BIT( 0xffff, 0x00, IPT_DIAL ) PORT_SENSITIVITY(12) PORT_KEYDELTA(10) PORT_CONDITION("SELECT",0x03,EQUALS,0x02)
 
 	PORT_START("SELECT")
-    PORT_CONFNAME( 0x03, 0x02, "Controller Type" )
-    PORT_CONFSETTING(    0x00, "Real" )
-    PORT_CONFSETTING(    0x01, "Joystick" )
-    PORT_CONFSETTING(    0x02, "Spinner" )
+	PORT_CONFNAME( 0x03, 0x02, "Controller Type" )
+	PORT_CONFSETTING(    0x00, "Real" )
+	PORT_CONFSETTING(    0x01, "Joystick" )
+	PORT_CONFSETTING(    0x02, "Spinner" )
 
 	PORT_MODIFY("DSW1")
-	PORT_DIPNAME( 0x03, 0x01, DEF_STR( Bonus_Life ) )		PORT_DIPLOCATION("5/6A:!8,!7")
+	PORT_DIPNAME( 0x03, 0x01, DEF_STR( Bonus_Life ) )       PORT_DIPLOCATION("5/6A:!8,!7")
 	PORT_DIPSETTING(    0x01, "3000" )
 	PORT_DIPSETTING(    0x00, "5000" )
 	PORT_DIPSETTING(    0x02, "8000" )
 	PORT_DIPSETTING(    0x03, "12000" )
-	PORT_DIPNAME( 0x0c, 0x04, DEF_STR( Difficulty ) )		PORT_DIPLOCATION("5/6A:!6,!5")
+	PORT_DIPNAME( 0x0c, 0x04, DEF_STR( Difficulty ) )       PORT_DIPLOCATION("5/6A:!6,!5")
 	PORT_DIPSETTING(    0x04, DEF_STR( Easy ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Medium ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( Hard ) )
 	PORT_DIPSETTING(    0x0c, DEF_STR( Hardest ) )
-	PORT_DIPNAME( 0x30, 0x10, "Maximum Add. A. Coins" )		PORT_DIPLOCATION("5/6A:!4,!3")
+	PORT_DIPNAME( 0x30, 0x10, "Maximum Add. A. Coins" )     PORT_DIPLOCATION("5/6A:!4,!3")
 	PORT_DIPSETTING(    0x10, "0" )
 	PORT_DIPSETTING(    0x20, "1" )
 	PORT_DIPSETTING(    0x00, "2" )
 	PORT_DIPSETTING(    0x30, "3" )
-	PORT_DIPNAME( 0xc0, 0x40, "Coins Required" )			PORT_DIPLOCATION("5/6A:!2,!1")
+	PORT_DIPNAME( 0xc0, 0x40, "Coins Required" )            PORT_DIPLOCATION("5/6A:!2,!1")
 	PORT_DIPSETTING(    0x80, "3 To Start, 2 To Continue" )
 	PORT_DIPSETTING(    0xc0, "3 To Start, 1 To Continue" )
 	PORT_DIPSETTING(    0x00, "2 To Start, 1 To Continue" )
@@ -1060,7 +1046,7 @@ static INPUT_PORTS_START( ssprint )
 	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_SENSITIVITY(25) PORT_KEYDELTA(10) PORT_PLAYER(3)
 
 	PORT_MODIFY("DSW0")
-	PORT_DIPNAME( 0x1c, 0x00, "Coin Multiplier" )		PORT_DIPLOCATION("6/7A:!6,!5,!4")
+	PORT_DIPNAME( 0x1c, 0x00, "Coin Multiplier" )       PORT_DIPLOCATION("6/7A:!6,!5,!4")
 	PORT_DIPSETTING(    0x00, "*1" )
 	PORT_DIPSETTING(    0x04, "*2" )
 	PORT_DIPSETTING(    0x08, "*3" )
@@ -1071,17 +1057,17 @@ static INPUT_PORTS_START( ssprint )
 	PORT_DIPSETTING(    0x1c, "*8" )
 
 	PORT_MODIFY("DSW1")
-	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Difficulty ) )	PORT_DIPLOCATION("5/6A:!8,!7")
+	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("5/6A:!8,!7")
 	PORT_DIPSETTING(    0x01, DEF_STR( Easy ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Medium ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( Medium_Hard ) )
 	PORT_DIPSETTING(    0x03, DEF_STR( Hard ) )
-	PORT_DIPNAME( 0x0c, 0x00, "Obstacles" )				PORT_DIPLOCATION("5/6A:!6,!5")
+	PORT_DIPNAME( 0x0c, 0x00, "Obstacles" )             PORT_DIPLOCATION("5/6A:!6,!5")
 	PORT_DIPSETTING(    0x04, DEF_STR( Easy ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Medium ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( Medium_Hard ) )
 	PORT_DIPSETTING(    0x0c, DEF_STR( Hard ) )
-	PORT_DIPNAME( 0x30, 0x00, "Wrenches" )				PORT_DIPLOCATION("5/6A:!4,!3")
+	PORT_DIPNAME( 0x30, 0x00, "Wrenches" )              PORT_DIPLOCATION("5/6A:!4,!3")
 	PORT_DIPSETTING(    0x10, "2" )
 	PORT_DIPSETTING(    0x00, "3" )
 	PORT_DIPSETTING(    0x20, "4" )
@@ -1110,7 +1096,7 @@ static INPUT_PORTS_START( csprint )
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_MODIFY("DSW1")
-	PORT_DIPNAME( 0x80, 0x00, "Auto High Score Reset" )		PORT_DIPLOCATION("5/6A:!1") /* "After 2000 Plays." */
+	PORT_DIPNAME( 0x80, 0x00, "Auto High Score Reset" )     PORT_DIPLOCATION("5/6A:!1") /* "After 2000 Plays." */
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 INPUT_PORTS_END
@@ -1139,9 +1125,9 @@ static INPUT_PORTS_START( apb )
 	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_SENSITIVITY(25) PORT_KEYDELTA(10) PORT_PLAYER(1)
 
 	PORT_MODIFY("DSW0")
-	PORT_DIPNAME( 0xe0, 0x00, "Bonus Coins" )			PORT_DIPLOCATION("6/7A:!3,!2,!1")
+	PORT_DIPNAME( 0xe0, 0x00, "Bonus Coins" )           PORT_DIPLOCATION("6/7A:!3,!2,!1")
 	PORT_DIPSETTING(    0x00, DEF_STR( None ) )
-	PORT_DIPSETTING(    0xc0, "1 Each 6" )				/* Not documented */
+	PORT_DIPSETTING(    0xc0, "1 Each 6" )              /* Not documented */
 	PORT_DIPSETTING(    0xa0, "1 Each 5" )
 	PORT_DIPSETTING(    0x80, "1 Each 4" )
 	PORT_DIPSETTING(    0x60, "1 Each 3" )
@@ -1150,24 +1136,24 @@ static INPUT_PORTS_START( apb )
 	PORT_DIPSETTING(    0xe0, DEF_STR( Free_Play ) )
 
 	PORT_MODIFY("DSW1")
-	PORT_DIPNAME( 0x01, 0x00, "Attract Lights" )		PORT_DIPLOCATION("5/6A:!8") /* Listed As Unused. */
+	PORT_DIPNAME( 0x01, 0x00, "Attract Lights" )        PORT_DIPLOCATION("5/6A:!8") /* Listed As Unused. */
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x06, 0x00, "Max Continues" )			PORT_DIPLOCATION("5/6A:!7,!6")
+	PORT_DIPNAME( 0x06, 0x00, "Max Continues" )         PORT_DIPLOCATION("5/6A:!7,!6")
 	PORT_DIPSETTING(    0x02, "3" )
 	PORT_DIPSETTING(    0x04, "10" )
 	PORT_DIPSETTING(    0x00, "25" )
 	PORT_DIPSETTING(    0x06, "199" )
-	PORT_DIPNAME( 0x38, 0x00, DEF_STR( Difficulty ) )	PORT_DIPLOCATION("5/6A:!5,!4,!3")	/* No. Of Demerits Allowed  Bonus Inc. Every x Pts  Perfect Day Bonus   */
-	PORT_DIPSETTING(    0x38, DEF_STR( Easiest ) )											/* 11                       5000                    Yes                 */
-	PORT_DIPSETTING(    0x30, DEF_STR( Very_Easy ) )										/* 10                       6000                    Yes                 */
-	PORT_DIPSETTING(    0x28, DEF_STR( Easy ) )												/* 9                        8000                    Yes                 */
-	PORT_DIPSETTING(    0x00, DEF_STR( Medium_Easy ) )												/* 8                        10000                   Yes                 */
-	PORT_DIPSETTING(    0x20, DEF_STR( Medium_Hard ) )												/* 7                        11000                   Yes                 */
-	PORT_DIPSETTING(    0x10, DEF_STR( Hard ) )												/* 6                        13000                   Yes                 */
-	PORT_DIPSETTING(    0x08, DEF_STR( Very_Hard ) )										/* 5                        15000                   No                  */
-	PORT_DIPSETTING(    0x18, DEF_STR( Hardest ) )											/* 4                        18000                   No                  */
-	PORT_DIPNAME( 0xc0, 0x00, "Coins Required" )		PORT_DIPLOCATION("5/6A:!2,!1")
+	PORT_DIPNAME( 0x38, 0x00, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("5/6A:!5,!4,!3")   /* No. Of Demerits Allowed  Bonus Inc. Every x Pts  Perfect Day Bonus   */
+	PORT_DIPSETTING(    0x38, DEF_STR( Easiest ) )                                          /* 11                       5000                    Yes                 */
+	PORT_DIPSETTING(    0x30, DEF_STR( Very_Easy ) )                                        /* 10                       6000                    Yes                 */
+	PORT_DIPSETTING(    0x28, DEF_STR( Easy ) )                                             /* 9                        8000                    Yes                 */
+	PORT_DIPSETTING(    0x00, DEF_STR( Medium_Easy ) )                                              /* 8                        10000                   Yes                 */
+	PORT_DIPSETTING(    0x20, DEF_STR( Medium_Hard ) )                                              /* 7                        11000                   Yes                 */
+	PORT_DIPSETTING(    0x10, DEF_STR( Hard ) )                                             /* 6                        13000                   Yes                 */
+	PORT_DIPSETTING(    0x08, DEF_STR( Very_Hard ) )                                        /* 5                        15000                   No                  */
+	PORT_DIPSETTING(    0x18, DEF_STR( Hardest ) )                                          /* 4                        18000                   No                  */
+	PORT_DIPNAME( 0xc0, 0x00, "Coins Required" )        PORT_DIPLOCATION("5/6A:!2,!1")
 	PORT_DIPSETTING(    0x80, "3 To Start, 2 To Continue" )
 	PORT_DIPSETTING(    0xc0, "3 To Start, 1 To Continue" )
 	PORT_DIPSETTING(    0x00, "2 To Start, 1 To Continue" )
@@ -1254,7 +1240,7 @@ static const pokey_interface pokey_interface_2 =
 
 static const struct t11_setup t11_data =
 {
-	0x36ff			/* initial mode word has DAL15,14,11,8 pulled low */
+	0x36ff          /* initial mode word has DAL15,14,11,8 pulled low */
 };
 
 
@@ -1264,14 +1250,14 @@ static MACHINE_CONFIG_START( atarisy2, atarisy2_state )
 	MCFG_CPU_ADD("maincpu", T11, MASTER_CLOCK/2)
 	MCFG_CPU_CONFIG(t11_data)
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT("screen", vblank_int)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", atarisy2_state,  vblank_int)
 
-	MCFG_CPU_ADD("soundcpu", M6502, SOUND_CLOCK/8)
+	MCFG_CPU_ADD("audiocpu", M6502, SOUND_CLOCK/8)
 	MCFG_CPU_PROGRAM_MAP(sound_map)
-	MCFG_CPU_PERIODIC_INT(atarigen_6502_irq_gen, (double)MASTER_CLOCK/2/16/16/16/10)
+	MCFG_CPU_PERIODIC_INT_DRIVER(atarigen_state, m6502_irq_gen, (double)MASTER_CLOCK/2/16/16/16/10)
 
-	MCFG_MACHINE_START(atarisy2)
-	MCFG_MACHINE_RESET(atarisy2)
+	MCFG_MACHINE_START_OVERRIDE(atarisy2_state,atarisy2)
+	MCFG_MACHINE_RESET_OVERRIDE(atarisy2_state,atarisy2)
 	MCFG_NVRAM_ADD_1FILL("eeprom")
 
 	/* video hardware */
@@ -1281,23 +1267,22 @@ static MACHINE_CONFIG_START( atarisy2, atarisy2_state )
 
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_RAW_PARAMS(VIDEO_CLOCK/2, 640, 0, 512, 416, 0, 384)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
-	MCFG_SCREEN_UPDATE(atarisy2)
+	MCFG_SCREEN_UPDATE_DRIVER(atarisy2_state, screen_update_atarisy2)
 
-	MCFG_VIDEO_START(atarisy2)
+	MCFG_VIDEO_START_OVERRIDE(atarisy2_state,atarisy2)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
-	MCFG_SOUND_ADD("ymsnd", YM2151, SOUND_CLOCK/4)
+	MCFG_YM2151_ADD("ymsnd", SOUND_CLOCK/4)
 	MCFG_SOUND_ROUTE(0, "lspeaker", 0.60)
 	MCFG_SOUND_ROUTE(1, "rspeaker", 0.60)
 
-	MCFG_SOUND_ADD("pokey1", POKEY, SOUND_CLOCK/8)
-	MCFG_SOUND_CONFIG(pokey_interface_1)
+	MCFG_POKEY_ADD("pokey1", SOUND_CLOCK/8)
+	MCFG_POKEY_CONFIG(pokey_interface_1)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "lspeaker", 1.35)
 
-	MCFG_SOUND_ADD("pokey2", POKEY, SOUND_CLOCK/8)
-	MCFG_SOUND_CONFIG(pokey_interface_2)
+	MCFG_POKEY_ADD("pokey2", SOUND_CLOCK/8)
+	MCFG_POKEY_CONFIG(pokey_interface_2)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "rspeaker", 1.35)
 
 	MCFG_SOUND_ADD("tms", TMS5220C, MASTER_CLOCK/4/4/2)
@@ -1323,7 +1308,7 @@ MACHINE_CONFIG_END
  *************************************/
 
 ROM_START( paperboy )
-	ROM_REGION( 0x90000, "maincpu", 0 )	/* 9*64k for T11 code */
+	ROM_REGION( 0x90000, "maincpu", 0 ) /* 9*64k for T11 code */
 	ROM_LOAD16_BYTE( "cpu_l07.rv3", 0x008000, 0x004000, CRC(4024bb9b) SHA1(9030ce5a6a1a3d769c699a92b32a55013f9766aa) )
 	ROM_LOAD16_BYTE( "cpu_n07.rv3", 0x008001, 0x004000, CRC(0260901a) SHA1(39d786f5c440ca1fd529ee73e2a4d2406cd1db8f) )
 	ROM_LOAD16_BYTE( "cpu_f06.rv2", 0x010000, 0x004000, CRC(3fea86ac) SHA1(90722bfd0426efbfb69714151f8644b56075b4c1) )
@@ -1335,7 +1320,7 @@ ROM_START( paperboy )
 	ROM_LOAD16_BYTE( "cpu_l06.rv2", 0x070000, 0x004000, CRC(8a754466) SHA1(2c4c6ca797c7f4349c2893d8c0ba7e2658fdca99) )
 	ROM_LOAD16_BYTE( "cpu_s06.rv2", 0x070001, 0x004000, CRC(224209f9) SHA1(c41269bfadb8fff1c8ff0f6ea0b8e8b34feb49d6) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )	/* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for 6502 code */
 	ROM_LOAD( "cpu_a02.rv3", 0x004000, 0x004000, CRC(ba251bc4) SHA1(768e42608263205e412e651082ffa2a083b04644) )
 	ROM_LOAD( "cpu_b02.rv2", 0x008000, 0x004000, CRC(e4e7a8b9) SHA1(f11a0cf40d5c51ff180f0fa1cf676f95090a1010) )
 	ROM_LOAD( "cpu_c02.rv2", 0x00c000, 0x004000, CRC(d44c2aa2) SHA1(f1b00e36d87f6d77746cf003198c7f19aa2f4fab) )
@@ -1365,7 +1350,7 @@ ROM_END
 
 
 ROM_START( paperboyr2 )
-	ROM_REGION( 0x90000, "maincpu", 0 )	/* 9*64k for T11 code */
+	ROM_REGION( 0x90000, "maincpu", 0 ) /* 9*64k for T11 code */
 	ROM_LOAD16_BYTE( "cpu_l07.rv2", 0x008000, 0x004000, CRC(39d0a625) SHA1(c4f62cecbc8a122f58f98312517feccf9429f28b) )
 	ROM_LOAD16_BYTE( "cpu_n07.rv2", 0x008001, 0x004000, CRC(3c5de588) SHA1(faad02fee1528cd52af1fac315096a46a9eb9a85) )
 	ROM_LOAD16_BYTE( "cpu_f06.rv2", 0x010000, 0x004000, CRC(3fea86ac) SHA1(90722bfd0426efbfb69714151f8644b56075b4c1) )
@@ -1377,7 +1362,7 @@ ROM_START( paperboyr2 )
 	ROM_LOAD16_BYTE( "cpu_l06.rv2", 0x070000, 0x004000, CRC(8a754466) SHA1(2c4c6ca797c7f4349c2893d8c0ba7e2658fdca99) )
 	ROM_LOAD16_BYTE( "cpu_s06.rv2", 0x070001, 0x004000, CRC(224209f9) SHA1(c41269bfadb8fff1c8ff0f6ea0b8e8b34feb49d6) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )	/* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for 6502 code */
 	ROM_LOAD( "cpu_a02.rv2", 0x004000, 0x004000, CRC(4a759092) SHA1(26909df77f53ac19e205411b90558488badc82bd) )
 	ROM_LOAD( "cpu_b02.rv2", 0x008000, 0x004000, CRC(e4e7a8b9) SHA1(f11a0cf40d5c51ff180f0fa1cf676f95090a1010) )
 	ROM_LOAD( "cpu_c02.rv2", 0x00c000, 0x004000, CRC(d44c2aa2) SHA1(f1b00e36d87f6d77746cf003198c7f19aa2f4fab) )
@@ -1407,7 +1392,7 @@ ROM_END
 
 
 ROM_START( paperboyr1 )
-	ROM_REGION( 0x90000, "maincpu", 0 )	/* 9*64k for T11 code */
+	ROM_REGION( 0x90000, "maincpu", 0 ) /* 9*64k for T11 code */
 	ROM_LOAD16_BYTE( "cpu_l07.rv1", 0x008000, 0x004000, CRC(fd87a8ee) SHA1(f42fe59f62928bb36c00b6814e1af173d713fb2e) )
 	ROM_LOAD16_BYTE( "cpu_n07.rv1", 0x008001, 0x004000, CRC(a997e217) SHA1(85d97e62bb225f6302cdad18bf1299d364614ce4) )
 	ROM_LOAD16_BYTE( "cpu_f06.rv1", 0x010000, 0x004000, CRC(e871248d) SHA1(c660e21e47a958ee72857ca41e6a299ce4328076) )
@@ -1419,7 +1404,7 @@ ROM_START( paperboyr1 )
 	ROM_LOAD16_BYTE( "cpu_l06.rv1", 0x070000, 0x004000, CRC(ccbc58a6) SHA1(dd66317146c295524f83b8d40c20164e873752b5) )
 	ROM_LOAD16_BYTE( "cpu_s06.rv1", 0x070001, 0x004000, CRC(a7f14643) SHA1(d73c8ec2493617fce2e6822e8a6cde16a2de5965) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )	/* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for 6502 code */
 	ROM_LOAD( "cpu_a02.rv1", 0x004000, 0x004000, CRC(5479a788) SHA1(4cc5145e75ac6370f54eea33531f1f96160ee82b) )
 	ROM_LOAD( "cpu_b02.rv1", 0x008000, 0x004000, CRC(de4147c6) SHA1(c997510b2018291924abddfe604a8f738fd8035c) )
 	ROM_LOAD( "cpu_c02.rv1", 0x00c000, 0x004000, CRC(b71505fc) SHA1(15fd156038861cb715fce10f1c56f3ded851be39) )
@@ -1459,7 +1444,7 @@ ROM_START( 720 )
 	ROM_LOAD16_BYTE( "136047-1130.6k",  0x050000, 0x010000, CRC(93fba845) SHA1(4de5867272af63be696855f2a4dff99476b213ad) )
 	ROM_LOAD16_BYTE( "136047-1133.6r",  0x050001, 0x010000, CRC(53c177be) SHA1(a60c81899944e0dda9886e6697edc4d9309ca8f4) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )     /* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )     /* 64k for 6502 code */
 	ROM_LOAD( "136047-2134.2a",  0x004000, 0x004000, CRC(0db4ca28) SHA1(71c2e0eee0eee418bdd2f806bd6ce5ae1c72bf69) )
 	ROM_LOAD( "136047-1135.2b",  0x008000, 0x004000, CRC(b1f157d0) SHA1(26355324d49baa02acb777940d7f49d074a75fe5) )
 	ROM_LOAD( "136047-2136.2cd", 0x00c000, 0x004000, CRC(00b06bec) SHA1(cd771eea329e0f6ab5bff1035f931800cc5da545) )
@@ -1527,7 +1512,7 @@ ROM_START( 720r3 )
 	ROM_LOAD16_BYTE( "136047-1130.6k",  0x050000, 0x010000, CRC(93fba845) SHA1(4de5867272af63be696855f2a4dff99476b213ad) )
 	ROM_LOAD16_BYTE( "136047-1133.6r",  0x050001, 0x010000, CRC(53c177be) SHA1(a60c81899944e0dda9886e6697edc4d9309ca8f4) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )     /* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )     /* 64k for 6502 code */
 	ROM_LOAD( "136047-1134.2a",  0x004000, 0x004000, CRC(09a418c2) SHA1(017491bbcd0def695a23ab17b1e4fbd1fdf4d5d1) )
 	ROM_LOAD( "136047-1135.2b",  0x008000, 0x004000, CRC(b1f157d0) SHA1(26355324d49baa02acb777940d7f49d074a75fe5) )
 	ROM_LOAD( "136047-1136.2cd", 0x00c000, 0x004000, CRC(dad40e6d) SHA1(a94bc1b5f0a5218e9e44cd32f2ca6268b48072c2) )
@@ -1595,7 +1580,7 @@ ROM_START( 720r2 )
 	ROM_LOAD16_BYTE( "136047-1130.6k",  0x050000, 0x010000, CRC(93fba845) SHA1(4de5867272af63be696855f2a4dff99476b213ad) )
 	ROM_LOAD16_BYTE( "136047-1133.6r",  0x050001, 0x010000, CRC(53c177be) SHA1(a60c81899944e0dda9886e6697edc4d9309ca8f4) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )     /* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )     /* 64k for 6502 code */
 	ROM_LOAD( "136047-1134.2a",  0x004000, 0x004000, CRC(09a418c2) SHA1(017491bbcd0def695a23ab17b1e4fbd1fdf4d5d1) )
 	ROM_LOAD( "136047-1135.2b",  0x008000, 0x004000, CRC(b1f157d0) SHA1(26355324d49baa02acb777940d7f49d074a75fe5) )
 	ROM_LOAD( "136047-1136.2cd", 0x00c000, 0x004000, CRC(dad40e6d) SHA1(a94bc1b5f0a5218e9e44cd32f2ca6268b48072c2) )
@@ -1663,7 +1648,7 @@ ROM_START( 720r1 )
 	ROM_LOAD16_BYTE( "136047-1130.6k",  0x050000, 0x010000, CRC(93fba845) SHA1(4de5867272af63be696855f2a4dff99476b213ad) )
 	ROM_LOAD16_BYTE( "136047-1133.6r",  0x050001, 0x010000, CRC(53c177be) SHA1(a60c81899944e0dda9886e6697edc4d9309ca8f4) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )     /* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )     /* 64k for 6502 code */
 	ROM_LOAD( "136047-1134.2a",  0x004000, 0x004000, CRC(09a418c2) SHA1(017491bbcd0def695a23ab17b1e4fbd1fdf4d5d1) )
 	ROM_LOAD( "136047-1135.2b",  0x008000, 0x004000, CRC(b1f157d0) SHA1(26355324d49baa02acb777940d7f49d074a75fe5) )
 	ROM_LOAD( "136047-1136.2cd", 0x00c000, 0x004000, CRC(dad40e6d) SHA1(a94bc1b5f0a5218e9e44cd32f2ca6268b48072c2) )
@@ -1731,7 +1716,7 @@ ROM_START( 720g )
 	ROM_LOAD16_BYTE( "136047-1130.6k",  0x050000, 0x010000, CRC(93fba845) SHA1(4de5867272af63be696855f2a4dff99476b213ad) )
 	ROM_LOAD16_BYTE( "136047-1133.6r",  0x050001, 0x010000, CRC(53c177be) SHA1(a60c81899944e0dda9886e6697edc4d9309ca8f4) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )     /* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )     /* 64k for 6502 code */
 	ROM_LOAD( "136047-2134.2a",  0x004000, 0x004000, CRC(0db4ca28) SHA1(71c2e0eee0eee418bdd2f806bd6ce5ae1c72bf69) )
 	ROM_LOAD( "136047-1135.2b",  0x008000, 0x004000, CRC(b1f157d0) SHA1(26355324d49baa02acb777940d7f49d074a75fe5) )
 	ROM_LOAD( "136047-2136.2cd", 0x00c000, 0x004000, CRC(00b06bec) SHA1(cd771eea329e0f6ab5bff1035f931800cc5da545) )
@@ -1799,7 +1784,7 @@ ROM_START( 720gr1 )
 	ROM_LOAD16_BYTE( "136047-1130.6k",  0x050000, 0x010000, CRC(93fba845) SHA1(4de5867272af63be696855f2a4dff99476b213ad) )
 	ROM_LOAD16_BYTE( "136047-1133.6r",  0x050001, 0x010000, CRC(53c177be) SHA1(a60c81899944e0dda9886e6697edc4d9309ca8f4) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )     /* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )     /* 64k for 6502 code */
 	ROM_LOAD( "136047-1134.2a",  0x004000, 0x004000, CRC(09a418c2) SHA1(017491bbcd0def695a23ab17b1e4fbd1fdf4d5d1) )
 	ROM_LOAD( "136047-1135.2b",  0x008000, 0x004000, CRC(b1f157d0) SHA1(26355324d49baa02acb777940d7f49d074a75fe5) )
 	ROM_LOAD( "136047-1136.2cd", 0x00c000, 0x004000, CRC(dad40e6d) SHA1(a94bc1b5f0a5218e9e44cd32f2ca6268b48072c2) )
@@ -1858,7 +1843,7 @@ ROM_END
 
 
 ROM_START( ssprint )
-	ROM_REGION( 0x90000, "maincpu", 0 )	/* 9*64k for T11 code */
+	ROM_REGION( 0x90000, "maincpu", 0 ) /* 9*64k for T11 code */
 	ROM_LOAD16_BYTE( "136042-330.7l",   0x008000, 0x004000, CRC(ee312027) SHA1(7caeaf6220022ffffc7d1feefec24163bed70275) )
 	ROM_LOAD16_BYTE( "136042-331.7n",   0x008001, 0x004000, CRC(2ef15354) SHA1(c8044bd2e435bdd423877b78f375f13588d1dfd1) )
 	ROM_LOAD16_BYTE( "136042-329.6f",   0x010000, 0x008000, CRC(ed1d6205) SHA1(7b2b2fd5eb12b1b6266d2becb96c8cf23cdaed26) )
@@ -1868,7 +1853,7 @@ ROM_START( ssprint )
 	ROM_LOAD16_BYTE( "136042-126.6l",   0x070000, 0x008000, CRC(92f5392c) SHA1(064ccf24a68440caa565c0467ba4bf4246133698) )
 	ROM_LOAD16_BYTE( "136042-122.6s",   0x070001, 0x008000, CRC(0381f362) SHA1(e33b6d4949cdee33f27cedf00ef20f1ce5011e24) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )	/* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for 6502 code */
 	ROM_LOAD( "136042-419.2bc",  0x008000, 0x004000, CRC(b277915a) SHA1(e0e8cd713950f45352b7c1de986b5b0b5c1703b3) )
 	ROM_LOAD( "136042-420.2d",   0x00c000, 0x004000, CRC(170b2c53) SHA1(c6d5657da29cf637cea940406fcff9a7328964f8) )
 
@@ -1905,7 +1890,7 @@ ROM_END
 
 
 ROM_START( ssprints )
-	ROM_REGION( 0x90000, "maincpu", 0 )	/* 9*64k for T11 code */
+	ROM_REGION( 0x90000, "maincpu", 0 ) /* 9*64k for T11 code */
 	ROM_LOAD16_BYTE( "136042-138.7l",   0x008000, 0x004000, CRC(234a7c65) SHA1(2686cb83f339e20b7168ebf22f97d11511815859) )
 	ROM_LOAD16_BYTE( "136042-139.7n",   0x008001, 0x004000, CRC(7652a461) SHA1(9afe5b1d8ad16906b9927e8ca7e1ce81f86352d2) )
 	ROM_LOAD16_BYTE( "136042-137.6f",   0x010000, 0x008000, CRC(fa4c7e9d) SHA1(88eedd7c24da591f75525d0229ff91fac8c2d4ad) )
@@ -1915,7 +1900,7 @@ ROM_START( ssprints )
 	ROM_LOAD16_BYTE( "136042-126.6l",   0x070000, 0x008000, CRC(92f5392c) SHA1(064ccf24a68440caa565c0467ba4bf4246133698) )
 	ROM_LOAD16_BYTE( "136042-122.6s",   0x070001, 0x008000, CRC(0381f362) SHA1(e33b6d4949cdee33f27cedf00ef20f1ce5011e24) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )	/* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for 6502 code */
 	ROM_LOAD( "136042-119.2bc",  0x008000, 0x004000, CRC(0c810231) SHA1(a5a637e12df7eae234fdc2d3957d122c196c65cd) )
 	ROM_LOAD( "136042-120.2d",   0x00c000, 0x004000, CRC(647b7481) SHA1(51b1b09919eee3d98e65d48e3a2af8321ccf8a02) )
 
@@ -1952,7 +1937,7 @@ ROM_END
 
 
 ROM_START( ssprintf )
-	ROM_REGION( 0x90000, "maincpu", 0 )	/* 9*64k for T11 code */
+	ROM_REGION( 0x90000, "maincpu", 0 ) /* 9*64k for T11 code */
 	ROM_LOAD16_BYTE( "136042-134.7l",   0x008000, 0x004000, CRC(b7757b44) SHA1(4d38addb68cb272e5cb9cfbfeb7c3a5aeb21ad26) )
 	ROM_LOAD16_BYTE( "136042-135.7n",   0x008001, 0x004000, CRC(4fc132ba) SHA1(6724c59d4942bb9196918f1f83bac7bb07099076) )
 	ROM_LOAD16_BYTE( "136042-133.6f",   0x010000, 0x008000, CRC(0b9f89da) SHA1(025650687af247f4bb7d070d69073cf7afbf9a27) )
@@ -1962,7 +1947,7 @@ ROM_START( ssprintf )
 	ROM_LOAD16_BYTE( "136042-126.6l",   0x070000, 0x008000, CRC(92f5392c) SHA1(064ccf24a68440caa565c0467ba4bf4246133698) )
 	ROM_LOAD16_BYTE( "136042-122.6s",   0x070001, 0x008000, CRC(0381f362) SHA1(e33b6d4949cdee33f27cedf00ef20f1ce5011e24) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )	/* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for 6502 code */
 	ROM_LOAD( "136042-119.2bc",  0x008000, 0x004000, CRC(0c810231) SHA1(a5a637e12df7eae234fdc2d3957d122c196c65cd) )
 	ROM_LOAD( "136042-120.2d",   0x00c000, 0x004000, CRC(647b7481) SHA1(51b1b09919eee3d98e65d48e3a2af8321ccf8a02) )
 
@@ -1999,7 +1984,7 @@ ROM_END
 
 
 ROM_START( ssprintg )
-	ROM_REGION( 0x90000, "maincpu", 0 )	/* 9*64k for T11 code */
+	ROM_REGION( 0x90000, "maincpu", 0 ) /* 9*64k for T11 code */
 	ROM_LOAD16_BYTE( "136042-430.7l",   0x008000, 0x004000, CRC(c21df5f5) SHA1(0b79cfa0a6f3c1c59d09ff6a741abc71dc3da240) )
 	ROM_LOAD16_BYTE( "136042-431.7n",   0x008001, 0x004000, CRC(5880fc58) SHA1(c4e6c48d99b903f80408f0ee81672ff259f131ae) )
 	ROM_LOAD16_BYTE( "136042-429.6f",   0x010000, 0x008000, CRC(2060f68a) SHA1(b435a6de3e5ea5c1b5ba14f755660f747d972c38) )
@@ -2009,7 +1994,7 @@ ROM_START( ssprintg )
 	ROM_LOAD16_BYTE( "136042-126.6l",   0x070000, 0x008000, CRC(92f5392c) SHA1(064ccf24a68440caa565c0467ba4bf4246133698) )
 	ROM_LOAD16_BYTE( "136042-122.6s",   0x070001, 0x008000, CRC(0381f362) SHA1(e33b6d4949cdee33f27cedf00ef20f1ce5011e24) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )	/* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for 6502 code */
 	ROM_LOAD( "136042-119.2bc",  0x008000, 0x004000, CRC(0c810231) SHA1(a5a637e12df7eae234fdc2d3957d122c196c65cd) )
 	ROM_LOAD( "136042-120.2d",   0x00c000, 0x004000, CRC(647b7481) SHA1(51b1b09919eee3d98e65d48e3a2af8321ccf8a02) )
 
@@ -2046,7 +2031,7 @@ ROM_END
 
 
 ROM_START( ssprint3 )
-	ROM_REGION( 0x90000, "maincpu", 0 )	/* 9*64k for T11 code */
+	ROM_REGION( 0x90000, "maincpu", 0 ) /* 9*64k for T11 code */
 	ROM_LOAD16_BYTE( "136042-330.7l",   0x008000, 0x004000, CRC(ee312027) SHA1(7caeaf6220022ffffc7d1feefec24163bed70275) )
 	ROM_LOAD16_BYTE( "136042-331.7n",   0x008001, 0x004000, CRC(2ef15354) SHA1(c8044bd2e435bdd423877b78f375f13588d1dfd1) )
 	ROM_LOAD16_BYTE( "136042-329.6f",   0x010000, 0x008000, CRC(ed1d6205) SHA1(7b2b2fd5eb12b1b6266d2becb96c8cf23cdaed26) )
@@ -2056,7 +2041,7 @@ ROM_START( ssprint3 )
 	ROM_LOAD16_BYTE( "136042-126.6l",   0x070000, 0x008000, CRC(92f5392c) SHA1(064ccf24a68440caa565c0467ba4bf4246133698) )
 	ROM_LOAD16_BYTE( "136042-122.6s",   0x070001, 0x008000, CRC(0381f362) SHA1(e33b6d4949cdee33f27cedf00ef20f1ce5011e24) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )	/* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for 6502 code */
 	ROM_LOAD( "136042-319.2bc",  0x008000, 0x004000, CRC(c7f31c16) SHA1(cfacf22405da5e3cf95059ea6b9677a5a8471496) )
 	ROM_LOAD( "136042-320.2d",   0x00c000, 0x004000, CRC(9815ece9) SHA1(95239e15fe3e3f9a66e0f4dae365f763656cb70b) )
 
@@ -2093,7 +2078,7 @@ ROM_END
 
 
 ROM_START( ssprintg1 )
-	ROM_REGION( 0x90000, "maincpu", 0 )	/* 9*64k for T11 code */
+	ROM_REGION( 0x90000, "maincpu", 0 ) /* 9*64k for T11 code */
 	ROM_LOAD16_BYTE( "136042-230.7l",   0x008000, 0x004000, CRC(e5b2da29) SHA1(99150184a3f065e934ed6f60731fe534a75ba991) )
 	ROM_LOAD16_BYTE( "136042-231.7n",   0x008001, 0x004000, CRC(fac14b00) SHA1(6e5bf1e80f3d04f670b8290195609c0ac0cacea2) )
 	ROM_LOAD16_BYTE( "136042-229.6f",   0x010000, 0x008000, CRC(78b01070) SHA1(ccfa6bd1068e7bd3524a7da93a901633256f0524) )
@@ -2103,7 +2088,7 @@ ROM_START( ssprintg1 )
 	ROM_LOAD16_BYTE( "136042-126.6l",   0x070000, 0x008000, CRC(92f5392c) SHA1(064ccf24a68440caa565c0467ba4bf4246133698) )
 	ROM_LOAD16_BYTE( "136042-122.6s",   0x070001, 0x008000, CRC(0381f362) SHA1(e33b6d4949cdee33f27cedf00ef20f1ce5011e24) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )	/* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for 6502 code */
 	ROM_LOAD( "136042-119.2bc",  0x008000, 0x004000, CRC(0c810231) SHA1(a5a637e12df7eae234fdc2d3957d122c196c65cd) )
 	ROM_LOAD( "136042-120.2d",   0x00c000, 0x004000, CRC(647b7481) SHA1(51b1b09919eee3d98e65d48e3a2af8321ccf8a02) )
 
@@ -2140,7 +2125,7 @@ ROM_END
 
 
 ROM_START( ssprint1 )
-	ROM_REGION( 0x90000, "maincpu", 0 )	/* 9*64k for T11 code */
+	ROM_REGION( 0x90000, "maincpu", 0 ) /* 9*64k for T11 code */
 	ROM_LOAD16_BYTE( "136042-130.7l",   0x008000, 0x004000, CRC(b1edc688) SHA1(2b5c4a20e54fda43b49e5f811ed144675f8e019b) )
 	ROM_LOAD16_BYTE( "136042-131.7n",   0x008001, 0x004000, CRC(df49dc5a) SHA1(7cdd54cbfd0dc0428394047a057892e7f7d17b50) )
 	ROM_LOAD16_BYTE( "136042-129.6f",   0x010000, 0x008000, CRC(8be22fca) SHA1(d663ef2e71bafbda5351d73e0b9a86bbfa66e225) )
@@ -2150,7 +2135,7 @@ ROM_START( ssprint1 )
 	ROM_LOAD16_BYTE( "136042-126.6l",   0x070000, 0x008000, CRC(92f5392c) SHA1(064ccf24a68440caa565c0467ba4bf4246133698) )
 	ROM_LOAD16_BYTE( "136042-122.6s",   0x070001, 0x008000, CRC(0381f362) SHA1(e33b6d4949cdee33f27cedf00ef20f1ce5011e24) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )	/* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for 6502 code */
 	ROM_LOAD( "136042-119.2bc",  0x008000, 0x004000, CRC(0c810231) SHA1(a5a637e12df7eae234fdc2d3957d122c196c65cd) )
 	ROM_LOAD( "136042-120.2d",   0x00c000, 0x004000, CRC(647b7481) SHA1(51b1b09919eee3d98e65d48e3a2af8321ccf8a02) )
 
@@ -2187,7 +2172,7 @@ ROM_END
 
 
 ROM_START( csprints )
-	ROM_REGION( 0x90000, "maincpu", 0 )	/* 9*64k for T11 code */
+	ROM_REGION( 0x90000, "maincpu", 0 ) /* 9*64k for T11 code */
 	ROM_LOAD16_BYTE( "136045-2326.7l",  0x008000, 0x004000, CRC(fd4ed0d3) SHA1(22d7a290c56975b8af82054b5fd8c9298f17f99a) )
 	ROM_LOAD16_BYTE( "136045-2327.7n",  0x008001, 0x004000, CRC(5ef2a65a) SHA1(3ead2b91abca5ff95bffcd1fd40d3ff635d7801f) )
 	ROM_LOAD16_BYTE( "136045-2325.6f",  0x010000, 0x008000, CRC(57253376) SHA1(100901de38f8561fc29d5b135b76b24755a4b1b2) )
@@ -2197,7 +2182,7 @@ ROM_START( csprints )
 	ROM_LOAD16_BYTE( "136045-1123.6l",  0x070000, 0x008000, CRC(0a4d216a) SHA1(53a4af7673c9dae1f6f2f13dce3c38a31ee12ee2) )
 	ROM_LOAD16_BYTE( "136045-1120.6s",  0x070001, 0x008000, CRC(103f3fde) SHA1(9a0e82c3294369858b7a6c978143d8145a8df5a2) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )	/* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for 6502 code */
 	ROM_LOAD( "136045-1118.2bc", 0x008000, 0x004000, CRC(eba41b2f) SHA1(a0d6e9f4609f2587b0fad6845e75653c10bf4249) )
 	ROM_LOAD( "136045-1119.2d",  0x00c000, 0x004000, CRC(9e49043a) SHA1(ec467fe1cd59c51e43c3acd83d300f5b3309a47a) )
 
@@ -2232,7 +2217,7 @@ ROM_END
 
 
 ROM_START( csprint )
-	ROM_REGION( 0x90000, "maincpu", 0 )	/* 9*64k for T11 code */
+	ROM_REGION( 0x90000, "maincpu", 0 ) /* 9*64k for T11 code */
 	ROM_LOAD16_BYTE( "136045-3126.7l",  0x008000, 0x004000, CRC(1dcf8b98) SHA1(6d83ea725a8448cd1fc31cdce2e24662db6b9bcf) )
 	ROM_LOAD16_BYTE( "136045-2127.7n",  0x008001, 0x004000, CRC(bdcbe42c) SHA1(6dce564ce53f7171f8c713185cbf8b99a421ca41) )
 	ROM_LOAD16_BYTE( "136045-2125.6f",  0x010000, 0x008000, CRC(76cc68b9) SHA1(651dbe8862afe2b7985a0a1cd1dabdbb1accc163) )
@@ -2242,7 +2227,7 @@ ROM_START( csprint )
 	ROM_LOAD16_BYTE( "136045-1123.6l",  0x070000, 0x008000, CRC(0a4d216a) SHA1(53a4af7673c9dae1f6f2f13dce3c38a31ee12ee2) )
 	ROM_LOAD16_BYTE( "136045-1120.6s",  0x070001, 0x008000, CRC(103f3fde) SHA1(9a0e82c3294369858b7a6c978143d8145a8df5a2) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )	/* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for 6502 code */
 	ROM_LOAD( "136045-1118.2bc", 0x008000, 0x004000, CRC(eba41b2f) SHA1(a0d6e9f4609f2587b0fad6845e75653c10bf4249) )
 	ROM_LOAD( "136045-1119.2d",  0x00c000, 0x004000, CRC(9e49043a) SHA1(ec467fe1cd59c51e43c3acd83d300f5b3309a47a) )
 
@@ -2277,7 +2262,7 @@ ROM_END
 
 
 ROM_START( csprints1 )
-	ROM_REGION( 0x90000, "maincpu", 0 )	/* 9*64k for T11 code */
+	ROM_REGION( 0x90000, "maincpu", 0 ) /* 9*64k for T11 code */
 	ROM_LOAD16_BYTE( "136045-1326.7l",  0x008000, 0x004000, CRC(cfa673a6) SHA1(db630ce26b6b2cf9215a7810ab6b93a5485bd5ae) )
 	ROM_LOAD16_BYTE( "136045-1327.7n",  0x008001, 0x004000, CRC(16c1dcab) SHA1(deb3eaff35e7b3810133c7ce74a528d3a58babb2) )
 	ROM_LOAD16_BYTE( "136045-1325.6f",  0x010000, 0x008000, CRC(8661f17b) SHA1(a9271fca78eba39484b1f806f675a69e33007633) )
@@ -2287,7 +2272,7 @@ ROM_START( csprints1 )
 	ROM_LOAD16_BYTE( "136045-1123.6l",  0x070000, 0x008000, CRC(0a4d216a) SHA1(53a4af7673c9dae1f6f2f13dce3c38a31ee12ee2) )
 	ROM_LOAD16_BYTE( "136045-1120.6s",  0x070001, 0x008000, CRC(103f3fde) SHA1(9a0e82c3294369858b7a6c978143d8145a8df5a2) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )	/* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for 6502 code */
 	ROM_LOAD( "136045-1118.2bc", 0x008000, 0x004000, CRC(eba41b2f) SHA1(a0d6e9f4609f2587b0fad6845e75653c10bf4249) )
 	ROM_LOAD( "136045-1119.2d",  0x00c000, 0x004000, CRC(9e49043a) SHA1(ec467fe1cd59c51e43c3acd83d300f5b3309a47a) )
 
@@ -2322,7 +2307,7 @@ ROM_END
 
 
 ROM_START( csprintf )
-	ROM_REGION( 0x90000, "maincpu", 0 )	/* 9*64k for T11 code */
+	ROM_REGION( 0x90000, "maincpu", 0 ) /* 9*64k for T11 code */
 	ROM_LOAD16_BYTE( "136045-1626.7l",  0x008000, 0x004000, CRC(f9d4fbd3) SHA1(df8bea5190203be6157b0825af107c31404bbdf8) )
 	ROM_LOAD16_BYTE( "136045-1627.7n",  0x008001, 0x004000, CRC(637f0afa) SHA1(ef89300b3d8fd8c2ddba76c0cdd2589f5ae16c81) )
 	ROM_LOAD16_BYTE( "136045-1625.6f",  0x010000, 0x008000, CRC(1edc6462) SHA1(6e1653b71240fdc865dca7ea7916e8468245ea2f) )
@@ -2332,7 +2317,7 @@ ROM_START( csprintf )
 	ROM_LOAD16_BYTE( "136045-1123.6l",  0x070000, 0x008000, CRC(0a4d216a) SHA1(53a4af7673c9dae1f6f2f13dce3c38a31ee12ee2) )
 	ROM_LOAD16_BYTE( "136045-1120.6s",  0x070001, 0x008000, CRC(103f3fde) SHA1(9a0e82c3294369858b7a6c978143d8145a8df5a2) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )	/* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for 6502 code */
 	ROM_LOAD( "136045-1118.2bc", 0x008000, 0x004000, CRC(eba41b2f) SHA1(a0d6e9f4609f2587b0fad6845e75653c10bf4249) )
 	ROM_LOAD( "136045-1119.2d",  0x00c000, 0x004000, CRC(9e49043a) SHA1(ec467fe1cd59c51e43c3acd83d300f5b3309a47a) )
 
@@ -2367,7 +2352,7 @@ ROM_END
 
 
 ROM_START( csprintg )
-	ROM_REGION( 0x90000, "maincpu", 0 )	/* 9*64k for T11 code */
+	ROM_REGION( 0x90000, "maincpu", 0 ) /* 9*64k for T11 code */
 	ROM_LOAD16_BYTE( "136045-2226.7l",  0x008000, 0x004000, CRC(1f437a3f) SHA1(f976a023124d002e922669585eb22334720c15e5) )
 	ROM_LOAD16_BYTE( "136045-1227.7n",  0x008001, 0x004000, CRC(d1dce1cc) SHA1(2de07c4730e1b5e4b11466220bb350f3263d43e7) )
 	ROM_LOAD16_BYTE( "136045-1225.6f",  0x010000, 0x008000, CRC(e787da64) SHA1(8a5a9731b39808525a69522006801322d27d1e6b) )
@@ -2377,7 +2362,7 @@ ROM_START( csprintg )
 	ROM_LOAD16_BYTE( "136045-1123.6l",  0x070000, 0x008000, CRC(0a4d216a) SHA1(53a4af7673c9dae1f6f2f13dce3c38a31ee12ee2) )
 	ROM_LOAD16_BYTE( "136045-1120.6s",  0x070001, 0x008000, CRC(103f3fde) SHA1(9a0e82c3294369858b7a6c978143d8145a8df5a2) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )	/* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for 6502 code */
 	ROM_LOAD( "136045-1118.2bc", 0x008000, 0x004000, CRC(eba41b2f) SHA1(a0d6e9f4609f2587b0fad6845e75653c10bf4249) )
 	ROM_LOAD( "136045-1119.2d",  0x00c000, 0x004000, CRC(9e49043a) SHA1(ec467fe1cd59c51e43c3acd83d300f5b3309a47a) )
 
@@ -2412,7 +2397,7 @@ ROM_END
 
 
 ROM_START( csprint2 )
-	ROM_REGION( 0x90000, "maincpu", 0 )	/* 9*64k for T11 code */
+	ROM_REGION( 0x90000, "maincpu", 0 ) /* 9*64k for T11 code */
 	ROM_LOAD16_BYTE( "136045-2126.7l",  0x008000, 0x004000, CRC(0ff83de8) SHA1(23f90b8f3ebd3d3bbd7a68aaecae5f45f1b477c0) )
 	ROM_LOAD16_BYTE( "136045-1127.7n",  0x008001, 0x004000, CRC(e3e37258) SHA1(64f48c1acbb02cc8f6b76232d142382007485fb2) )
 	ROM_LOAD16_BYTE( "136045-1125.6f",  0x010000, 0x008000, CRC(650623d2) SHA1(036cb441aba64d08f3b50f72cb22fed3b4766341) )
@@ -2422,7 +2407,7 @@ ROM_START( csprint2 )
 	ROM_LOAD16_BYTE( "136045-1123.6l",  0x070000, 0x008000, CRC(0a4d216a) SHA1(53a4af7673c9dae1f6f2f13dce3c38a31ee12ee2) )
 	ROM_LOAD16_BYTE( "136045-1120.6s",  0x070001, 0x008000, CRC(103f3fde) SHA1(9a0e82c3294369858b7a6c978143d8145a8df5a2) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )	/* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for 6502 code */
 	ROM_LOAD( "136045-1118.2bc", 0x008000, 0x004000, CRC(eba41b2f) SHA1(a0d6e9f4609f2587b0fad6845e75653c10bf4249) )
 	ROM_LOAD( "136045-1119.2d",  0x00c000, 0x004000, CRC(9e49043a) SHA1(ec467fe1cd59c51e43c3acd83d300f5b3309a47a) )
 
@@ -2457,7 +2442,7 @@ ROM_END
 
 
 ROM_START( csprintg1 )
-	ROM_REGION( 0x90000, "maincpu", 0 )	/* 9*64k for T11 code */
+	ROM_REGION( 0x90000, "maincpu", 0 ) /* 9*64k for T11 code */
 	ROM_LOAD16_BYTE( "136045-1226.7l",  0x008000, 0x004000, CRC(becfc276) SHA1(cc3a6ef91fb3a47426a347ba4f6df41582e6deba) )
 	ROM_LOAD16_BYTE( "136045-1227.7n",  0x008001, 0x004000, CRC(d1dce1cc) SHA1(2de07c4730e1b5e4b11466220bb350f3263d43e7) )
 	ROM_LOAD16_BYTE( "136045-1225.6f",  0x010000, 0x008000, CRC(e787da64) SHA1(8a5a9731b39808525a69522006801322d27d1e6b) )
@@ -2467,7 +2452,7 @@ ROM_START( csprintg1 )
 	ROM_LOAD16_BYTE( "136045-1123.6l",  0x070000, 0x008000, CRC(0a4d216a) SHA1(53a4af7673c9dae1f6f2f13dce3c38a31ee12ee2) )
 	ROM_LOAD16_BYTE( "136045-1120.6s",  0x070001, 0x008000, CRC(103f3fde) SHA1(9a0e82c3294369858b7a6c978143d8145a8df5a2) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )	/* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for 6502 code */
 	ROM_LOAD( "136045-1118.2bc", 0x008000, 0x004000, CRC(eba41b2f) SHA1(a0d6e9f4609f2587b0fad6845e75653c10bf4249) )
 	ROM_LOAD( "136045-1119.2d",  0x00c000, 0x004000, CRC(9e49043a) SHA1(ec467fe1cd59c51e43c3acd83d300f5b3309a47a) )
 
@@ -2502,7 +2487,7 @@ ROM_END
 
 
 ROM_START( csprint1 )
-	ROM_REGION( 0x90000, "maincpu", 0 )	/* 9*64k for T11 code */
+	ROM_REGION( 0x90000, "maincpu", 0 ) /* 9*64k for T11 code */
 	ROM_LOAD16_BYTE( "136045-1126.7l",  0x008000, 0x004000, CRC(a04ecbac) SHA1(56a77c9fd8cdd963616cf25838ade2a87a87947b) )
 	ROM_LOAD16_BYTE( "136045-1127.7n",  0x008001, 0x004000, CRC(e3e37258) SHA1(64f48c1acbb02cc8f6b76232d142382007485fb2) )
 	ROM_LOAD16_BYTE( "136045-1125.6f",  0x010000, 0x008000, CRC(650623d2) SHA1(036cb441aba64d08f3b50f72cb22fed3b4766341) )
@@ -2512,7 +2497,7 @@ ROM_START( csprint1 )
 	ROM_LOAD16_BYTE( "136045-1123.6l",  0x070000, 0x008000, CRC(0a4d216a) SHA1(53a4af7673c9dae1f6f2f13dce3c38a31ee12ee2) )
 	ROM_LOAD16_BYTE( "136045-1120.6s",  0x070001, 0x008000, CRC(103f3fde) SHA1(9a0e82c3294369858b7a6c978143d8145a8df5a2) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )	/* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for 6502 code */
 	ROM_LOAD( "136045-1118.2bc", 0x008000, 0x004000, CRC(eba41b2f) SHA1(a0d6e9f4609f2587b0fad6845e75653c10bf4249) )
 	ROM_LOAD( "136045-1119.2d",  0x00c000, 0x004000, CRC(9e49043a) SHA1(ec467fe1cd59c51e43c3acd83d300f5b3309a47a) )
 
@@ -2557,7 +2542,7 @@ ROM_START( apb )
 	ROM_LOAD16_BYTE( "136051-1132.6l",  0x070000, 0x010000, CRC(6d0e7a4e) SHA1(75aae74571c50d36639d0ae69b0614e5aedeb6e3) )
 	ROM_LOAD16_BYTE( "136051-1133.6s",  0x070001, 0x010000, CRC(af88d429) SHA1(432720afd4179d3df871226e0eb576d2ffde44c1) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )     /* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )     /* 64k for 6502 code */
 	ROM_LOAD( "136051-5134.2a",  0x004000, 0x004000, CRC(1c8bdeed) SHA1(bbdbbb9a4903f98842d9a697410a2e3a2069284c) )
 	ROM_LOAD( "136051-5135.2bc", 0x008000, 0x004000, CRC(ed6adb91) SHA1(b1f1f0d1bda445a53de798fb6847c605afe53e3c) )
 	ROM_LOAD( "136051-5136.2d",  0x00c000, 0x004000, CRC(341f8486) SHA1(4cea39c0d8551ce7193e51de341f7297a94b8d9b) )
@@ -2628,7 +2613,7 @@ ROM_START( apb6 )
 	ROM_LOAD16_BYTE( "136051-1132.6l",  0x070000, 0x010000, CRC(6d0e7a4e) SHA1(75aae74571c50d36639d0ae69b0614e5aedeb6e3) )
 	ROM_LOAD16_BYTE( "136051-1133.6s",  0x070001, 0x010000, CRC(af88d429) SHA1(432720afd4179d3df871226e0eb576d2ffde44c1) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )     /* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )     /* 64k for 6502 code */
 	ROM_LOAD( "136051-5134.2a",  0x004000, 0x004000, CRC(1c8bdeed) SHA1(bbdbbb9a4903f98842d9a697410a2e3a2069284c) )
 	ROM_LOAD( "136051-5135.2bc", 0x008000, 0x004000, CRC(ed6adb91) SHA1(b1f1f0d1bda445a53de798fb6847c605afe53e3c) )
 	ROM_LOAD( "136051-5136.2d",  0x00c000, 0x004000, CRC(341f8486) SHA1(4cea39c0d8551ce7193e51de341f7297a94b8d9b) )
@@ -2699,7 +2684,7 @@ ROM_START( apb5 )
 	ROM_LOAD16_BYTE( "136051-1132.6l",  0x070000, 0x010000, CRC(6d0e7a4e) SHA1(75aae74571c50d36639d0ae69b0614e5aedeb6e3) )
 	ROM_LOAD16_BYTE( "136051-1133.6s",  0x070001, 0x010000, CRC(af88d429) SHA1(432720afd4179d3df871226e0eb576d2ffde44c1) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )     /* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )     /* 64k for 6502 code */
 	ROM_LOAD( "136051-5134.2a",  0x004000, 0x004000, CRC(1c8bdeed) SHA1(bbdbbb9a4903f98842d9a697410a2e3a2069284c) )
 	ROM_LOAD( "136051-5135.2bc", 0x008000, 0x004000, CRC(ed6adb91) SHA1(b1f1f0d1bda445a53de798fb6847c605afe53e3c) )
 	ROM_LOAD( "136051-5136.2d",  0x00c000, 0x004000, CRC(341f8486) SHA1(4cea39c0d8551ce7193e51de341f7297a94b8d9b) )
@@ -2770,7 +2755,7 @@ ROM_START( apb4 )
 	ROM_LOAD16_BYTE( "136051-1132.6l",  0x070000, 0x010000, CRC(6d0e7a4e) SHA1(75aae74571c50d36639d0ae69b0614e5aedeb6e3) )
 	ROM_LOAD16_BYTE( "136051-1133.6s",  0x070001, 0x010000, CRC(af88d429) SHA1(432720afd4179d3df871226e0eb576d2ffde44c1) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )     /* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )     /* 64k for 6502 code */
 	ROM_LOAD( "136051-5134.2a",  0x004000, 0x004000, CRC(1c8bdeed) SHA1(bbdbbb9a4903f98842d9a697410a2e3a2069284c) )
 	ROM_LOAD( "136051-5135.2bc", 0x008000, 0x004000, CRC(ed6adb91) SHA1(b1f1f0d1bda445a53de798fb6847c605afe53e3c) )
 	ROM_LOAD( "136051-5136.2d",  0x00c000, 0x004000, CRC(341f8486) SHA1(4cea39c0d8551ce7193e51de341f7297a94b8d9b) )
@@ -2841,7 +2826,7 @@ ROM_START( apb3 )
 	ROM_LOAD16_BYTE( "136051-1132.6l",  0x070000, 0x010000, CRC(6d0e7a4e) SHA1(75aae74571c50d36639d0ae69b0614e5aedeb6e3) )
 	ROM_LOAD16_BYTE( "136051-1133.6s",  0x070001, 0x010000, CRC(af88d429) SHA1(432720afd4179d3df871226e0eb576d2ffde44c1) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )     /* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )     /* 64k for 6502 code */
 	ROM_LOAD( "136051-1134.2a",  0x004000, 0x004000, CRC(a65748b9) SHA1(20d51300382543f09e47bee7273b9074e5a4618a) )
 	ROM_LOAD( "136051-1135.2bc", 0x008000, 0x004000, CRC(e9692cea) SHA1(2b2d9638e012d326777e2e730e28cbacea6d9a72) )
 	ROM_LOAD( "136051-1136.2d",  0x00c000, 0x004000, CRC(92fc7657) SHA1(cfda3a191a5f7ee4157f9d226bcf3dd601cabee1) )
@@ -2912,7 +2897,7 @@ ROM_START( apb2 )
 	ROM_LOAD16_BYTE( "136051-1132.6l",  0x070000, 0x010000, CRC(6d0e7a4e) SHA1(75aae74571c50d36639d0ae69b0614e5aedeb6e3) )
 	ROM_LOAD16_BYTE( "136051-1133.6s",  0x070001, 0x010000, CRC(af88d429) SHA1(432720afd4179d3df871226e0eb576d2ffde44c1) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )     /* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )     /* 64k for 6502 code */
 	ROM_LOAD( "136051-1134.2a",  0x004000, 0x004000, CRC(a65748b9) SHA1(20d51300382543f09e47bee7273b9074e5a4618a) )
 	ROM_LOAD( "136051-1135.2bc", 0x008000, 0x004000, CRC(e9692cea) SHA1(2b2d9638e012d326777e2e730e28cbacea6d9a72) )
 	ROM_LOAD( "136051-1136.2d",  0x00c000, 0x004000, CRC(92fc7657) SHA1(cfda3a191a5f7ee4157f9d226bcf3dd601cabee1) )
@@ -2983,7 +2968,7 @@ ROM_START( apb1 )
 	ROM_LOAD16_BYTE( "136051-1132.6l",  0x070000, 0x010000, CRC(6d0e7a4e) SHA1(75aae74571c50d36639d0ae69b0614e5aedeb6e3) )
 	ROM_LOAD16_BYTE( "136051-1133.6s",  0x070001, 0x010000, CRC(af88d429) SHA1(432720afd4179d3df871226e0eb576d2ffde44c1) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )     /* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )     /* 64k for 6502 code */
 	ROM_LOAD( "136051-1134.2a",  0x004000, 0x004000, CRC(a65748b9) SHA1(20d51300382543f09e47bee7273b9074e5a4618a) )
 	ROM_LOAD( "136051-1135.2bc", 0x008000, 0x004000, CRC(e9692cea) SHA1(2b2d9638e012d326777e2e730e28cbacea6d9a72) )
 	ROM_LOAD( "136051-1136.2d",  0x00c000, 0x004000, CRC(92fc7657) SHA1(cfda3a191a5f7ee4157f9d226bcf3dd601cabee1) )
@@ -3054,7 +3039,7 @@ ROM_START( apbg )
 	ROM_LOAD16_BYTE( "136051-1132.6l",  0x070000, 0x010000, CRC(6d0e7a4e) SHA1(75aae74571c50d36639d0ae69b0614e5aedeb6e3) )
 	ROM_LOAD16_BYTE( "136051-1133.6s",  0x070001, 0x010000, CRC(af88d429) SHA1(432720afd4179d3df871226e0eb576d2ffde44c1) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )     /* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )     /* 64k for 6502 code */
 	ROM_LOAD( "136051-4134.2a",  0x004000, 0x004000, CRC(45e03b0e) SHA1(d58f5e1095fd6a7c0253fcc9f0e55812c1677387) )
 	ROM_LOAD( "136051-4135.2bc", 0x008000, 0x004000, CRC(b4ca24b2) SHA1(86461da310b334f6b32c0e079de6852792284cc6) )
 	ROM_LOAD( "136051-4136.2d",  0x00c000, 0x004000, CRC(11efaabf) SHA1(76446b09bf7cacd713ab88d58793460c9d1a8b9b) )
@@ -3125,7 +3110,7 @@ ROM_START( apbf )
 	ROM_LOAD16_BYTE( "136051-1132.6l",  0x070000, 0x010000, CRC(6d0e7a4e) SHA1(75aae74571c50d36639d0ae69b0614e5aedeb6e3) )
 	ROM_LOAD16_BYTE( "136051-1133.6s",  0x070001, 0x010000, CRC(af88d429) SHA1(432720afd4179d3df871226e0eb576d2ffde44c1) )
 
-	ROM_REGION( 0x10000, "soundcpu", 0 )     /* 64k for 6502 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )     /* 64k for 6502 code */
 	ROM_LOAD( "136051-5134.2a",  0x004000, 0x004000, CRC(1c8bdeed) SHA1(bbdbbb9a4903f98842d9a697410a2e3a2069284c) )
 	ROM_LOAD( "136051-5135.2bc", 0x008000, 0x004000, CRC(ed6adb91) SHA1(b1f1f0d1bda445a53de798fb6847c605afe53e3c) )
 	ROM_LOAD( "136051-5136.2d",  0x00c000, 0x004000, CRC(341f8486) SHA1(4cea39c0d8551ce7193e51de341f7297a94b8d9b) )
@@ -3192,13 +3177,12 @@ ROM_END
  *
  *************************************/
 
-static DRIVER_INIT( paperboy )
+DRIVER_INIT_MEMBER(atarisy2_state,paperboy)
 {
 	int i;
-	atarisy2_state *state = machine.driver_data<atarisy2_state>();
-	UINT8 *cpu1 = machine.region("maincpu")->base();
+	UINT8 *cpu1 = memregion("maincpu")->base();
 
-	slapstic_init(machine, 105);
+	slapstic_init(machine(), 105);
 
 	/* expand the 16k program ROMs into full 64k chunks */
 	for (i = 0x10000; i < 0x90000; i += 0x20000)
@@ -3208,69 +3192,65 @@ static DRIVER_INIT( paperboy )
 		memcpy(&cpu1[i + 0x18000], &cpu1[i], 0x8000);
 	}
 
-	state->m_pedal_count = 0;
-	state->m_has_tms5220 = 1;
-	tms5220_rsq_w(machine.device("tms"),  1); // /RS is tied high on sys2 hw
+	m_pedal_count = 0;
+	m_has_tms5220 = 1;
+	tms5220_rsq_w(machine().device("tms"),  1); // /RS is tied high on sys2 hw
 }
 
 
-static DRIVER_INIT( 720 )
+DRIVER_INIT_MEMBER(atarisy2_state,720)
 {
 	/* without the default EEPROM, 720 hangs at startup due to communication
-       issues with the sound CPU; temporarily increasing the sound CPU frequency
-       to ~2.2MHz "fixes" the problem */
-	atarisy2_state *state = machine.driver_data<atarisy2_state>();
-	slapstic_init(machine, 107);
+	   issues with the sound CPU; temporarily increasing the sound CPU frequency
+	   to ~2.2MHz "fixes" the problem */
+	slapstic_init(machine(), 107);
 
-	state->m_pedal_count = -1;
-	state->m_has_tms5220 = 1;
-	tms5220_rsq_w(machine.device("tms"),  1); // /RS is tied high on sys2 hw
+	m_pedal_count = -1;
+	m_has_tms5220 = 1;
+	tms5220_rsq_w(machine().device("tms"),  1); // /RS is tied high on sys2 hw
 }
 
 
-static DRIVER_INIT( ssprint )
+DRIVER_INIT_MEMBER(atarisy2_state,ssprint)
 {
-	atarisy2_state *state = machine.driver_data<atarisy2_state>();
 	int i;
-	UINT8 *cpu1 = machine.region("maincpu")->base();
+	UINT8 *cpu1 = memregion("maincpu")->base();
 
-	slapstic_init(machine, 108);
+	slapstic_init(machine(), 108);
 
 	/* expand the 32k program ROMs into full 64k chunks */
 	for (i = 0x10000; i < 0x90000; i += 0x20000)
 		memcpy(&cpu1[i + 0x10000], &cpu1[i], 0x10000);
 
-	state->m_pedal_count = 3;
-	state->m_has_tms5220 = 0;
+	m_pedal_count = 3;
+	m_has_tms5220 = 0;
 }
 
 
-static DRIVER_INIT( csprint )
+DRIVER_INIT_MEMBER(atarisy2_state,csprint)
 {
 	int i;
-	atarisy2_state *state = machine.driver_data<atarisy2_state>();
-	UINT8 *cpu1 = machine.region("maincpu")->base();
+	UINT8 *cpu1 = memregion("maincpu")->base();
 
-	slapstic_init(machine, 109);
+	slapstic_init(machine(), 109);
 
 	/* expand the 32k program ROMs into full 64k chunks */
 	for (i = 0x10000; i < 0x90000; i += 0x20000)
 		memcpy(&cpu1[i + 0x10000], &cpu1[i], 0x10000);
 
-	state->m_pedal_count = 2;
-	state->m_has_tms5220 = 0;
+	m_pedal_count = 2;
+	m_has_tms5220 = 0;
 }
 
 
-static DRIVER_INIT( apb )
+DRIVER_INIT_MEMBER(atarisy2_state,apb)
 {
-	atarisy2_state *state = machine.driver_data<atarisy2_state>();
 
-	slapstic_init(machine, 110);
+	slapstic_init(machine(), 110);
 
-	state->m_pedal_count = 2;
-	state->m_has_tms5220 = 1;
-	tms5220_rsq_w(machine.device("tms"),  1); // /RS is tied high on sys2 hw
+	m_pedal_count = 2;
+	m_has_tms5220 = 1;
+	tms5220_rsq_w(machine().device("tms"),  1); // /RS is tied high on sys2 hw
 }
 
 
@@ -3281,40 +3261,40 @@ static DRIVER_INIT( apb )
  *
  *************************************/
 
-GAME( 1984, paperboy, 0,         atarisy2, paperboy, paperboy, ROT0,   "Atari Games", "Paperboy (rev 3)", GAME_SUPPORTS_SAVE )
-GAME( 1984, paperboyr2,paperboy, atarisy2, paperboy, paperboy, ROT0,   "Atari Games", "Paperboy (rev 2)", GAME_SUPPORTS_SAVE )
-GAME( 1984, paperboyr1,paperboy, atarisy2, paperboy, paperboy, ROT0,   "Atari Games", "Paperboy (rev 1)", GAME_SUPPORTS_SAVE )
+GAME( 1984, paperboy, 0,         atarisy2, paperboy, atarisy2_state, paperboy, ROT0,   "Atari Games", "Paperboy (rev 3)", GAME_SUPPORTS_SAVE )
+GAME( 1984, paperboyr2,paperboy, atarisy2, paperboy, atarisy2_state, paperboy, ROT0,   "Atari Games", "Paperboy (rev 2)", GAME_SUPPORTS_SAVE )
+GAME( 1984, paperboyr1,paperboy, atarisy2, paperboy, atarisy2_state, paperboy, ROT0,   "Atari Games", "Paperboy (rev 1)", GAME_SUPPORTS_SAVE )
 
-GAME( 1986, 720,      0,        atarisy2, 720,      720,      ROT0,   "Atari Games", "720 Degrees (rev 4)", GAME_SUPPORTS_SAVE )
-GAME( 1986, 720r3,    720,      atarisy2, 720,      720,      ROT0,   "Atari Games", "720 Degrees (rev 3)", GAME_SUPPORTS_SAVE )
-GAME( 1986, 720r2,    720,      atarisy2, 720,      720,      ROT0,   "Atari Games", "720 Degrees (rev 2)", GAME_SUPPORTS_SAVE )
-GAME( 1986, 720r1,    720,      atarisy2, 720,      720,      ROT0,   "Atari Games", "720 Degrees (rev 1)", GAME_SUPPORTS_SAVE )
-GAME( 1986, 720g,     720,      atarisy2, 720,      720,      ROT0,   "Atari Games", "720 Degrees (German, rev 2)", GAME_SUPPORTS_SAVE )
-GAME( 1986, 720gr1,   720,      atarisy2, 720,      720,      ROT0,   "Atari Games", "720 Degrees (German, rev 1)", GAME_SUPPORTS_SAVE )
+GAME( 1986, 720,      0,        atarisy2, 720, atarisy2_state,      720,      ROT0,   "Atari Games", "720 Degrees (rev 4)", GAME_SUPPORTS_SAVE )
+GAME( 1986, 720r3,    720,      atarisy2, 720, atarisy2_state,      720,      ROT0,   "Atari Games", "720 Degrees (rev 3)", GAME_SUPPORTS_SAVE )
+GAME( 1986, 720r2,    720,      atarisy2, 720, atarisy2_state,      720,      ROT0,   "Atari Games", "720 Degrees (rev 2)", GAME_SUPPORTS_SAVE )
+GAME( 1986, 720r1,    720,      atarisy2, 720, atarisy2_state,      720,      ROT0,   "Atari Games", "720 Degrees (rev 1)", GAME_SUPPORTS_SAVE )
+GAME( 1986, 720g,     720,      atarisy2, 720, atarisy2_state,      720,      ROT0,   "Atari Games", "720 Degrees (German, rev 2)", GAME_SUPPORTS_SAVE )
+GAME( 1986, 720gr1,   720,      atarisy2, 720, atarisy2_state,      720,      ROT0,   "Atari Games", "720 Degrees (German, rev 1)", GAME_SUPPORTS_SAVE )
 
-GAME( 1986, ssprint,  0,        sprint,   ssprint,  ssprint,  ROT0,   "Atari Games", "Super Sprint (rev 4)", GAME_SUPPORTS_SAVE )
-GAME( 1986, ssprint3, ssprint,  sprint,   ssprint,  ssprint,  ROT0,   "Atari Games", "Super Sprint (rev 3)", GAME_SUPPORTS_SAVE )
-GAME( 1986, ssprint1, ssprint,  sprint,   ssprint,  ssprint,  ROT0,   "Atari Games", "Super Sprint (rev 1)", GAME_SUPPORTS_SAVE )
-GAME( 1986, ssprintg, ssprint,  sprint,   ssprint,  ssprint,  ROT0,   "Atari Games", "Super Sprint (German, rev 2)", GAME_SUPPORTS_SAVE )
-GAME( 1986, ssprintg1,ssprint,  sprint,   ssprint,  ssprint,  ROT0,   "Atari Games", "Super Sprint (German, rev 1)", GAME_SUPPORTS_SAVE )
-GAME( 1986, ssprintf, ssprint,  sprint,   ssprint,  ssprint,  ROT0,   "Atari Games", "Super Sprint (French)", GAME_SUPPORTS_SAVE )
-GAME( 1986, ssprints, ssprint,  sprint,   ssprint,  ssprint,  ROT0,   "Atari Games", "Super Sprint (Spanish)", GAME_SUPPORTS_SAVE )
+GAME( 1986, ssprint,  0,        sprint,   ssprint, atarisy2_state,  ssprint,  ROT0,   "Atari Games", "Super Sprint (rev 4)", GAME_SUPPORTS_SAVE )
+GAME( 1986, ssprint3, ssprint,  sprint,   ssprint, atarisy2_state,  ssprint,  ROT0,   "Atari Games", "Super Sprint (rev 3)", GAME_SUPPORTS_SAVE )
+GAME( 1986, ssprint1, ssprint,  sprint,   ssprint, atarisy2_state,  ssprint,  ROT0,   "Atari Games", "Super Sprint (rev 1)", GAME_SUPPORTS_SAVE )
+GAME( 1986, ssprintg, ssprint,  sprint,   ssprint, atarisy2_state,  ssprint,  ROT0,   "Atari Games", "Super Sprint (German, rev 2)", GAME_SUPPORTS_SAVE )
+GAME( 1986, ssprintg1,ssprint,  sprint,   ssprint, atarisy2_state,  ssprint,  ROT0,   "Atari Games", "Super Sprint (German, rev 1)", GAME_SUPPORTS_SAVE )
+GAME( 1986, ssprintf, ssprint,  sprint,   ssprint, atarisy2_state,  ssprint,  ROT0,   "Atari Games", "Super Sprint (French)", GAME_SUPPORTS_SAVE )
+GAME( 1986, ssprints, ssprint,  sprint,   ssprint, atarisy2_state,  ssprint,  ROT0,   "Atari Games", "Super Sprint (Spanish)", GAME_SUPPORTS_SAVE )
 
-GAME( 1986, csprint,  0,        sprint,   csprint,  csprint,  ROT0,   "Atari Games", "Championship Sprint (rev 3)", GAME_SUPPORTS_SAVE )
-GAME( 1986, csprint2, csprint,  sprint,   csprint,  csprint,  ROT0,   "Atari Games", "Championship Sprint (rev 2)", GAME_SUPPORTS_SAVE )
-GAME( 1986, csprint1, csprint,  sprint,   csprint,  csprint,  ROT0,   "Atari Games", "Championship Sprint (rev 1)", GAME_SUPPORTS_SAVE )
-GAME( 1986, csprintg, csprint,  sprint,   csprint,  csprint,  ROT0,   "Atari Games", "Championship Sprint (German, rev 2)", GAME_SUPPORTS_SAVE )
-GAME( 1986, csprintg1,csprint,  sprint,   csprint,  csprint,  ROT0,   "Atari Games", "Championship Sprint (German, rev 1)", GAME_SUPPORTS_SAVE )
-GAME( 1986, csprintf, csprint,  sprint,   csprint,  csprint,  ROT0,   "Atari Games", "Championship Sprint (French)", GAME_SUPPORTS_SAVE )
-GAME( 1986, csprints, csprint,  sprint,   csprint,  csprint,  ROT0,   "Atari Games", "Championship Sprint (Spanish, rev 2)", GAME_SUPPORTS_SAVE )
-GAME( 1986, csprints1,csprint,  sprint,   csprint,  csprint,  ROT0,   "Atari Games", "Championship Sprint (Spanish, rev 1)", GAME_SUPPORTS_SAVE )
+GAME( 1986, csprint,  0,        sprint,   csprint, atarisy2_state,  csprint,  ROT0,   "Atari Games", "Championship Sprint (rev 3)", GAME_SUPPORTS_SAVE )
+GAME( 1986, csprint2, csprint,  sprint,   csprint, atarisy2_state,  csprint,  ROT0,   "Atari Games", "Championship Sprint (rev 2)", GAME_SUPPORTS_SAVE )
+GAME( 1986, csprint1, csprint,  sprint,   csprint, atarisy2_state,  csprint,  ROT0,   "Atari Games", "Championship Sprint (rev 1)", GAME_SUPPORTS_SAVE )
+GAME( 1986, csprintg, csprint,  sprint,   csprint, atarisy2_state,  csprint,  ROT0,   "Atari Games", "Championship Sprint (German, rev 2)", GAME_SUPPORTS_SAVE )
+GAME( 1986, csprintg1,csprint,  sprint,   csprint, atarisy2_state,  csprint,  ROT0,   "Atari Games", "Championship Sprint (German, rev 1)", GAME_SUPPORTS_SAVE )
+GAME( 1986, csprintf, csprint,  sprint,   csprint, atarisy2_state,  csprint,  ROT0,   "Atari Games", "Championship Sprint (French)", GAME_SUPPORTS_SAVE )
+GAME( 1986, csprints, csprint,  sprint,   csprint, atarisy2_state,  csprint,  ROT0,   "Atari Games", "Championship Sprint (Spanish, rev 2)", GAME_SUPPORTS_SAVE )
+GAME( 1986, csprints1,csprint,  sprint,   csprint, atarisy2_state,  csprint,  ROT0,   "Atari Games", "Championship Sprint (Spanish, rev 1)", GAME_SUPPORTS_SAVE )
 
-GAME( 1987, apb,      0,        atarisy2, apb,      apb,      ROT270, "Atari Games", "APB - All Points Bulletin (rev 7)", GAME_SUPPORTS_SAVE )
-GAME( 1987, apb6,     apb,      atarisy2, apb,      apb,      ROT270, "Atari Games", "APB - All Points Bulletin (rev 6)", GAME_SUPPORTS_SAVE )
-GAME( 1987, apb5,     apb,      atarisy2, apb,      apb,      ROT270, "Atari Games", "APB - All Points Bulletin (rev 5)", GAME_SUPPORTS_SAVE )
-GAME( 1987, apb4,     apb,      atarisy2, apb,      apb,      ROT270, "Atari Games", "APB - All Points Bulletin (rev 4)", GAME_SUPPORTS_SAVE )
-GAME( 1987, apb3,     apb,      atarisy2, apb,      apb,      ROT270, "Atari Games", "APB - All Points Bulletin (rev 3)", GAME_SUPPORTS_SAVE )
-GAME( 1987, apb2,     apb,      atarisy2, apb,      apb,      ROT270, "Atari Games", "APB - All Points Bulletin (rev 2)", GAME_SUPPORTS_SAVE )
-GAME( 1987, apb1,     apb,      atarisy2, apb,      apb,      ROT270, "Atari Games", "APB - All Points Bulletin (rev 1)", GAME_SUPPORTS_SAVE )
-GAME( 1987, apbg,     apb,      atarisy2, apb,      apb,      ROT270, "Atari Games", "APB - All Points Bulletin (German)", GAME_SUPPORTS_SAVE )
-GAME( 1987, apbf,     apb,      atarisy2, apb,      apb,      ROT270, "Atari Games", "APB - All Points Bulletin (French)", GAME_SUPPORTS_SAVE )
+GAME( 1987, apb,      0,        atarisy2, apb, atarisy2_state,      apb,      ROT270, "Atari Games", "APB - All Points Bulletin (rev 7)", GAME_SUPPORTS_SAVE )
+GAME( 1987, apb6,     apb,      atarisy2, apb, atarisy2_state,      apb,      ROT270, "Atari Games", "APB - All Points Bulletin (rev 6)", GAME_SUPPORTS_SAVE )
+GAME( 1987, apb5,     apb,      atarisy2, apb, atarisy2_state,      apb,      ROT270, "Atari Games", "APB - All Points Bulletin (rev 5)", GAME_SUPPORTS_SAVE )
+GAME( 1987, apb4,     apb,      atarisy2, apb, atarisy2_state,      apb,      ROT270, "Atari Games", "APB - All Points Bulletin (rev 4)", GAME_SUPPORTS_SAVE )
+GAME( 1987, apb3,     apb,      atarisy2, apb, atarisy2_state,      apb,      ROT270, "Atari Games", "APB - All Points Bulletin (rev 3)", GAME_SUPPORTS_SAVE )
+GAME( 1987, apb2,     apb,      atarisy2, apb, atarisy2_state,      apb,      ROT270, "Atari Games", "APB - All Points Bulletin (rev 2)", GAME_SUPPORTS_SAVE )
+GAME( 1987, apb1,     apb,      atarisy2, apb, atarisy2_state,      apb,      ROT270, "Atari Games", "APB - All Points Bulletin (rev 1)", GAME_SUPPORTS_SAVE )
+GAME( 1987, apbg,     apb,      atarisy2, apb, atarisy2_state,      apb,      ROT270, "Atari Games", "APB - All Points Bulletin (German)", GAME_SUPPORTS_SAVE )
+GAME( 1987, apbf,     apb,      atarisy2, apb, atarisy2_state,      apb,      ROT270, "Atari Games", "APB - All Points Bulletin (French)", GAME_SUPPORTS_SAVE )

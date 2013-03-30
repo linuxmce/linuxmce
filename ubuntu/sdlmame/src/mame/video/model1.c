@@ -5,12 +5,12 @@
 
 #define LOG_TGP_VIDEO 0
 
-#define LOG_TGP(x)	do { if (LOG_TGP_VIDEO) logerror x; } while (0)
+#define LOG_TGP(x)  do { if (LOG_TGP_VIDEO) logerror x; } while (0)
 
 
 // Model 1 geometrizer TGP and rasterizer simulation
 enum { FRAC_SHIFT = 16 };
-enum { MOIRE = 0x00010000 };
+enum { MOIRE = 0x01000000 };
 
 
 
@@ -135,18 +135,18 @@ static void project_point_direct(struct view *view, struct point *p)
 }
 
 
-static void draw_hline(bitmap_t *bitmap, int x1, int x2, int y, int color)
+static void draw_hline(bitmap_rgb32 &bitmap, int x1, int x2, int y, int color)
 {
-	UINT16 *base = BITMAP_ADDR16(bitmap, y, 0);
+	UINT32 *base = &bitmap.pix32(y);
 	while(x1 <= x2) {
 		base[x1] = color;
 		x1++;
 	}
 }
 
-static void draw_hline_moired(bitmap_t *bitmap, int x1, int x2, int y, int color)
+static void draw_hline_moired(bitmap_rgb32 &bitmap, int x1, int x2, int y, int color)
 {
-	UINT16 *base = BITMAP_ADDR16(bitmap, y, 0);
+	UINT32 *base = &bitmap.pix32(y);
 	while(x1 <= x2) {
 		if((x1^y)&1)
 			base[x1] = color;
@@ -154,7 +154,7 @@ static void draw_hline_moired(bitmap_t *bitmap, int x1, int x2, int y, int color
 	}
 }
 
-static void fill_slope(bitmap_t *bitmap, struct view *view, int color, INT32 x1, INT32 x2, INT32 sl1, INT32 sl2, INT32 y1, INT32 y2, INT32 *nx1, INT32 *nx2)
+static void fill_slope(bitmap_rgb32 &bitmap, struct view *view, int color, INT32 x1, INT32 x2, INT32 sl1, INT32 sl2, INT32 y1, INT32 y2, INT32 *nx1, INT32 *nx2)
 {
 	if(y1 > view->y2)
 		return;
@@ -214,7 +214,7 @@ static void fill_slope(bitmap_t *bitmap, struct view *view, int color, INT32 x1,
 	*nx2 = x2;
 }
 
-static void fill_line(bitmap_t *bitmap, struct view *view, int color, INT32 y, INT32 x1, INT32 x2)
+static void fill_line(bitmap_rgb32 &bitmap, struct view *view, int color, INT32 y, INT32 x1, INT32 x2)
 {
 	int xx1 = x1>>FRAC_SHIFT;
 	int xx2 = x2>>FRAC_SHIFT;
@@ -235,7 +235,7 @@ static void fill_line(bitmap_t *bitmap, struct view *view, int color, INT32 y, I
 	}
 }
 
-static void fill_quad(bitmap_t *bitmap, struct view *view, const struct quad_m1 *q)
+static void fill_quad(bitmap_rgb32 &bitmap, struct view *view, const struct quad_m1 *q)
 {
 	INT32 sl1, sl2, cury, limy, x1, x2;
 	int pmin, pmax, i, ps1, ps2;
@@ -245,10 +245,10 @@ static void fill_quad(bitmap_t *bitmap, struct view *view, const struct quad_m1 
 	if(color < 0) {
 		color = -1-color;
 		LOG_TGP(("VIDEOD: Q (%d, %d)-(%d, %d)-(%d, %d)-(%d, %d)\n",
-				 q->p[0]->s.x, q->p[0]->s.y,
-				 q->p[1]->s.x, q->p[1]->s.y,
-				 q->p[2]->s.x, q->p[2]->s.y,
-				 q->p[3]->s.x, q->p[3]->s.y));
+					q->p[0]->s.x, q->p[0]->s.y,
+					q->p[1]->s.x, q->p[1]->s.y,
+					q->p[2]->s.x, q->p[2]->s.y,
+					q->p[3]->s.x, q->p[3]->s.y));
 	}
 
 	for(i=0; i<4; i++) {
@@ -336,7 +336,7 @@ static void fill_quad(bitmap_t *bitmap, struct view *view, const struct quad_m1 
 		fill_line(bitmap, view, color, cury, x1, x2);
 }
 #if 0
-static void draw_line(bitmap_t *bitmap, struct view *view, int color, int x1, int y1, int x2, int y2)
+static void draw_line(bitmap_rgb32 &bitmap, struct view *view, int color, int x1, int y1, int x2, int y2)
 {
 	int s1x, s1y, s2x, s2y;
 	int d1, d2;
@@ -344,9 +344,9 @@ static void draw_line(bitmap_t *bitmap, struct view *view, int color, int x1, in
 	int x, y;
 
 	if((x1 < view->x1 && x2 < view->x1) ||
-	   (x1 > view->x2 && x2 > view->x2) ||
-	   (y1 < view->y1 && y2 < view->y1) ||
-	   (y1 > view->y2 && y2 > view->y2))
+		(x1 > view->x2 && x2 > view->x2) ||
+		(y1 < view->y1 && y2 < view->y1) ||
+		(y1 > view->y2 && y2 > view->y2))
 		return;
 
 	x = x1;
@@ -385,7 +385,7 @@ static void draw_line(bitmap_t *bitmap, struct view *view, int color, int x1, in
 	cur = 0;
 	while(x != x2 || y != y2) {
 		if(x>=view->x1 && x<=view->x2 && y>=view->y1 && y<=view->y2)
-			*BITMAP_ADDR16(bitmap, y, x) = color;
+			bitmap.pix32(y, x) = color;
 		x += s1x;
 		y += s1y;
 		cur += d2;
@@ -396,7 +396,7 @@ static void draw_line(bitmap_t *bitmap, struct view *view, int color, int x1, in
 		}
 	}
 	if(x>=view->x1 && x<=view->x2 && y>=view->y1 && y<=view->y2)
-		*BITMAP_ADDR16(bitmap, y, x) = color;
+		bitmap.pix16(y, x) = color;
 }
 #endif
 static int comp_quads(const void *q1, const void *q2)
@@ -433,7 +433,7 @@ static void unsort_quads(model1_state *state)
 }
 
 
-static void draw_quads(model1_state *state, bitmap_t *bitmap, const rectangle *cliprect)
+static void draw_quads(model1_state *state, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
 	struct view *view = state->m_view;
 	int count = state->m_quadpt - state->m_quaddb;
@@ -444,20 +444,20 @@ static void draw_quads(model1_state *state, bitmap_t *bitmap, const rectangle *c
 	int save_x2 = view->x2;
 	int save_y1 = view->y1;
 	int save_y2 = view->y2;
-	view->x1 = MAX(view->x1, cliprect->min_x);
-	view->x2 = MIN(view->x2, cliprect->max_x);
-	view->y1 = MAX(view->y1, cliprect->min_y);
-	view->y2 = MIN(view->y2, cliprect->max_y);
+	view->x1 = MAX(view->x1, cliprect.min_x);
+	view->x2 = MIN(view->x2, cliprect.max_x);
+	view->y1 = MAX(view->y1, cliprect.min_y);
+	view->y2 = MIN(view->y2, cliprect.max_y);
 
 	for(i=0; i<count; i++) {
 		struct quad_m1 *q = state->m_quadind[i];
 
 		fill_quad(bitmap, view, q);
 #if 0
-		draw_line(bitmap, get_black_pen(screen->machine()), q->p[0]->s.x, q->p[0]->s.y, q->p[1]->s.x, q->p[1]->s.y);
-		draw_line(bitmap, get_black_pen(screen->machine()), q->p[1]->s.x, q->p[1]->s.y, q->p[2]->s.x, q->p[2]->s.y);
-		draw_line(bitmap, get_black_pen(screen->machine()), q->p[2]->s.x, q->p[2]->s.y, q->p[3]->s.x, q->p[3]->s.y);
-		draw_line(bitmap, get_black_pen(screen->machine()), q->p[3]->s.x, q->p[3]->s.y, q->p[0]->s.x, q->p[0]->s.y);
+		draw_line(bitmap, get_black_pen(screen.machine()), q->p[0]->s.x, q->p[0]->s.y, q->p[1]->s.x, q->p[1]->s.y);
+		draw_line(bitmap, get_black_pen(screen.machine()), q->p[1]->s.x, q->p[1]->s.y, q->p[2]->s.x, q->p[2]->s.y);
+		draw_line(bitmap, get_black_pen(screen.machine()), q->p[2]->s.x, q->p[2]->s.y, q->p[3]->s.x, q->p[3]->s.y);
+		draw_line(bitmap, get_black_pen(screen.machine()), q->p[3]->s.x, q->p[3]->s.y, q->p[0]->s.x, q->p[0]->s.y);
 #endif
 	}
 
@@ -569,7 +569,7 @@ static const struct {
 static void fclip_push_quad(model1_state *state, int level, struct quad_m1 *q);
 
 static void fclip_push_quad_next(model1_state *state, int level, struct quad_m1 *q,
-								 struct point *p1, struct point *p2, struct point *p3, struct point *p4)
+									struct point *p1, struct point *p2, struct point *p3, struct point *p4)
 {
 	struct quad_m1 q2;
 	q2.col = q->col;
@@ -800,10 +800,10 @@ static void push_object(running_machine &machine, UINT32 tex_adr, UINT32 poly_ad
 	for(i=0; i<size; i++) {
 #if 0
 		LOG_TGP(("VIDEO:     %08x (%f, %f, %f) (%f, %f, %f) (%f, %f, %f)\n",
-				 *(UINT32 *)(poly_data+poly_adr) & ~(0x01800303),
-				 poly_data[poly_adr+1], poly_data[poly_adr+2], poly_data[poly_adr+3],
-				 poly_data[poly_adr+4], poly_data[poly_adr+5], poly_data[poly_adr+6],
-				 poly_data[poly_adr+7], poly_data[poly_adr+8], poly_data[poly_adr+9]));
+					*(UINT32 *)(poly_data+poly_adr) & ~(0x01800303),
+					poly_data[poly_adr+1], poly_data[poly_adr+2], poly_data[poly_adr+3],
+					poly_data[poly_adr+4], poly_data[poly_adr+5], poly_data[poly_adr+6],
+					poly_data[poly_adr+7], poly_data[poly_adr+8], poly_data[poly_adr+9]));
 #endif
 		flags = *(UINT32 *)(poly_data+poly_adr);
 
@@ -846,20 +846,20 @@ static void push_object(running_machine &machine, UINT32 tex_adr, UINT32 poly_ad
 #if 0
 		if(dump)
 			LOG_TGP(("VIDEO:     %08x (%f, %f, %f) (%f, %f, %f)\n",
-					 *(UINT32 *)(poly_data+poly_adr),
-					 p0->x, p0->y, p0->z,
-					 p1->x, p1->y, p1->z));
+						*(UINT32 *)(poly_data+poly_adr),
+						p0->x, p0->y, p0->z,
+						p1->x, p1->y, p1->z));
 #endif
 
 
 #if 0
 		if(1 || dump) {
 			LOG_TGP(("VIDEO:     %08x (%d, %d) (%d, %d) (%d, %d) (%d, %d)\n",
-					 *(UINT32 *)(poly_data+poly_adr),
-					 old_p0->s.x, old_p0->s.y,
-					 old_p1->s.x, old_p1->s.y,
-					 p0->s.x, p0->s.y,
-					 p1->s.x, p1->s.y));
+						*(UINT32 *)(poly_data+poly_adr),
+						old_p0->s.x, old_p0->s.y,
+						old_p1->s.x, old_p1->s.y,
+						p0->s.x, p0->s.y,
+						p1->s.x, p1->s.y));
 		}
 #endif
 
@@ -907,13 +907,13 @@ static void push_object(running_machine &machine, UINT32 tex_adr, UINT32 poly_ad
 			int r=(color>>0x0)&0x1f;
 			int g=(color>>0x5)&0x1f;
 			int b=(color>>0xA)&0x1f;
-			lumval>>=2;	//there must be a luma translation table somewhere
+			lumval>>=2; //there must be a luma translation table somewhere
 			if(lumval>0x3f) lumval=0x3f;
 			else if(lumval<0) lumval=0;
 			r=(state->m_color_xlat[(r<<8)|lumval|0x0]>>3)&0x1f;
 			g=(state->m_color_xlat[(g<<8)|lumval|0x2000]>>3)&0x1f;
 			b=(state->m_color_xlat[(b<<8)|lumval|0x4000]>>3)&0x1f;
-			cquad.col=(r<<10)|(g<<5)|(b<<0);
+			cquad.col=(pal5bit(r)<<16)|(pal5bit(g)<<8)|(pal5bit(b)<<0);
 		}
 
 		if(flags & 0x00002000)
@@ -943,15 +943,15 @@ static UINT16 *push_direct(model1_state *state, UINT16 *list)
 {
 	struct view *view = state->m_view;
 	UINT32 flags;
-	UINT32 tex_adr, lum, v1, v2;
+	UINT32 tex_adr, lum; //, v1, v2;
 	struct point *old_p0, *old_p1, *p0, *p1;
 	int link, type;
 	float z;
 	struct quad_m1 cquad;
 
 	tex_adr = readi(list);
-	v1      = readi(list+2);
-	v2      = readi(list+10);
+//  v1      = readi(list+2);
+//  v2      = readi(list+10);
 
 	old_p0 = state->m_pointpt++;
 	old_p1 = state->m_pointpt++;
@@ -965,8 +965,8 @@ static UINT16 *push_direct(model1_state *state, UINT16 *list)
 
 	LOG_TGP(("VIDEOD start direct\n"));
 	LOG_TGP(("VIDEOD (%f, %f, %f) (%f, %f, %f)\n",
-			 old_p0->x, old_p0->y, old_p0->z,
-			 old_p1->x, old_p1->y, old_p1->z));
+				old_p0->x, old_p0->y, old_p0->z,
+				old_p1->x, old_p1->y, old_p1->z));
 
 	//transform_point(view, old_p0);
 	//transform_point(view, old_p1);
@@ -999,7 +999,7 @@ static UINT16 *push_direct(model1_state *state, UINT16 *list)
 		p1 = state->m_pointpt++;
 
 		lum   = readi(list+2);
-		v1    = readi(list+4);
+//      v1    = readi(list+4);
 
 		if(type == 2) {
 			p0->x = readf(list+6);
@@ -1007,8 +1007,8 @@ static UINT16 *push_direct(model1_state *state, UINT16 *list)
 			p0->z = readf(list+10);
 			z = p0->z;
 			LOG_TGP(("VIDEOD %08x %08x (%f, %f, %f)\n",
-					 flags, lum,
-					 p0->x, p0->y, p0->z));
+						flags, lum,
+						p0->x, p0->y, p0->z));
 			*p1 = *p0;
 			list += 12;
 		} else {
@@ -1020,9 +1020,9 @@ static UINT16 *push_direct(model1_state *state, UINT16 *list)
 			p1->z = readf(list+18);
 			z     = readf(list+12);
 			LOG_TGP(("VIDEOD %08x %08x (%f, %f, %f) (%f, %f, %f)\n",
-					 flags, lum,
-					 p0->x, p0->y, p0->z,
-					 p1->x, p1->y, p1->z));
+						flags, lum,
+						p0->x, p0->y, p0->z,
+						p1->x, p1->y, p1->z));
 			list += 20;
 		}
 
@@ -1038,16 +1038,16 @@ static UINT16 *push_direct(model1_state *state, UINT16 *list)
 #if 1
 		if(old_p0 && old_p1)
 			LOG_TGP(("VIDEOD:     %08x (%d, %d) (%d, %d) (%d, %d) (%d, %d)\n",
-					 flags,
-					 old_p0->s.x, old_p0->s.y,
-					 old_p1->s.x, old_p1->s.y,
-					 p0->s.x, p0->s.y,
-					 p1->s.x, p1->s.y));
+						flags,
+						old_p0->s.x, old_p0->s.y,
+						old_p1->s.x, old_p1->s.y,
+						p0->s.x, p0->s.y,
+						p1->s.x, p1->s.y));
 		else
 			LOG_TGP(("VIDEOD:     %08x (%d, %d) (%d, %d)\n",
-					 flags,
-					 p0->s.x, p0->s.y,
-					 p1->s.x, p1->s.y));
+						flags,
+						p0->s.x, p0->s.y,
+						p1->s.x, p1->s.y));
 
 #endif
 
@@ -1065,13 +1065,13 @@ static UINT16 *push_direct(model1_state *state, UINT16 *list)
 			int r=(color>>0x0)&0x1f;
 			int g=(color>>0x5)&0x1f;
 			int b=(color>>0xA)&0x1f;
-			lumval>>=2;	//there must be a luma translation table somewhere
+			lumval>>=2; //there must be a luma translation table somewhere
 			if(lumval>0x3f) lumval=0x3f;
 			else if(lumval<0) lumval=0;
 			r=(state->m_color_xlat[(r<<8)|lumval|0x0]>>3)&0x1f;
 			g=(state->m_color_xlat[(g<<8)|lumval|0x2000]>>3)&0x1f;
 			b=(state->m_color_xlat[(b<<8)|lumval|0x4000]>>3)&0x1f;
-			cquad.col=(r<<10)|(g<<5)|(b<<0);
+			cquad.col=(pal5bit(r)<<16)|(pal5bit(g)<<8)|(pal5bit(b)<<0);
 		}
 		//cquad.col  = scale_color(machine.pens[0x1000|(state->m_tgp_ram[tex_adr-0x40000] & 0x3ff)],((float) (lum>>24)) / 128.0);
 		if(flags & 0x00002000)
@@ -1119,7 +1119,7 @@ static UINT16 *skip_direct(UINT16 *list)
 	return list+2;
 }
 
-static void draw_objects(model1_state *state, bitmap_t *bitmap, const rectangle *cliprect)
+static void draw_objects(model1_state *state, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
 	if(state->m_quadpt != state->m_quaddb) {
 		LOG_TGP(("VIDEO: sort&draw\n"));
@@ -1131,7 +1131,7 @@ static void draw_objects(model1_state *state, bitmap_t *bitmap, const rectangle 
 	state->m_pointpt = state->m_pointdb;
 }
 
-static UINT16 *draw_direct(model1_state *state, bitmap_t *bitmap, const rectangle *cliprect, UINT16 *list)
+static UINT16 *draw_direct(model1_state *state, bitmap_rgb32 &bitmap, const rectangle &cliprect, UINT16 *list)
 {
 	UINT16 *res;
 
@@ -1168,23 +1168,21 @@ static void end_frame(running_machine &machine)
 		state->m_listctl[0] ^= 0x40;
 }
 
-READ16_HANDLER( model1_listctl_r )
+READ16_MEMBER(model1_state::model1_listctl_r)
 {
-	model1_state *state = space->machine().driver_data<model1_state>();
 	if(!offset)
-		return state->m_listctl[0] | 0x30;
+		return m_listctl[0] | 0x30;
 	else
-		return state->m_listctl[1];
+		return m_listctl[1];
 }
 
-WRITE16_HANDLER( model1_listctl_w )
+WRITE16_MEMBER(model1_state::model1_listctl_w)
 {
-	model1_state *state = space->machine().driver_data<model1_state>();
-	COMBINE_DATA(state->m_listctl+offset);
-	LOG_TGP(("VIDEO: control=%08x\n", (state->m_listctl[1]<<16)|state->m_listctl[0]));
+	COMBINE_DATA(m_listctl+offset);
+	LOG_TGP(("VIDEO: control=%08x\n", (m_listctl[1]<<16)|m_listctl[0]));
 }
 
-static void tgp_render(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect)
+static void tgp_render(running_machine &machine, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
 	model1_state *state = machine.driver_data<model1_state>();
 	struct view *view = state->m_view;
@@ -1223,9 +1221,9 @@ static void tgp_render(running_machine &machine, bitmap_t *bitmap, const rectang
 				break;
 			case 3:
 				LOG_TGP(("VIDEO:   viewport (%d, %d, %d, %d, %d, %d, %d)\n",
-						 readi(list+2),
-						 readi16(list+4), readi16(list+6), readi16(list+8),
-						 readi16(list+10), readi16(list+12), readi16(list+14)));
+							readi(list+2),
+							readi16(list+4), readi16(list+6), readi16(list+8),
+							readi16(list+10), readi16(list+12), readi16(list+14)));
 
 				draw_objects(state, bitmap, cliprect);
 
@@ -1307,10 +1305,10 @@ static void tgp_render(running_machine &machine, bitmap_t *bitmap, const rectang
 			case 0xb: {
 				int i;
 				LOG_TGP(("VIDEO:   matrix (%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f)\n",
-						 readf(list+2), readf(list+4), readf(list+6),
-						 readf(list+8), readf(list+10), readf(list+12),
-						 readf(list+14), readf(list+16), readf(list+18),
-						 readf(list+20), readf(list+22), readf(list+24)));
+							readf(list+2), readf(list+4), readf(list+6),
+							readf(list+8), readf(list+10), readf(list+12),
+							readf(list+14), readf(list+16), readf(list+18),
+							readf(list+20), readf(list+22), readf(list+24)));
 				for(i=0; i<12; i++)
 					view->trans_mat[i] = readf(list+2+2*i);
 				list += 26;
@@ -1326,7 +1324,7 @@ static void tgp_render(running_machine &machine, bitmap_t *bitmap, const rectang
 				list += 6;
 				break;
 			case 0xf:
-			case -1:
+			//case -1:
 				goto end;
 			default:
 				LOG_TGP(("VIDEO:   unknown type %d\n", type));
@@ -1343,17 +1341,17 @@ static void tgp_scan(running_machine &machine)
 	model1_state *state = machine.driver_data<model1_state>();
 	struct view *view = state->m_view;
 #if 0
-	if (input_code_pressed_once(machine, KEYCODE_F))
-        {
+	if (machine.input().code_pressed_once(KEYCODE_F))
+		{
 		FILE *fp;
 		fp=fopen("tgp-ram.bin", "w+b");
 		if (fp)
-                {
+				{
 			fwrite(state->m_tgp_ram, (0x100000-0x40000)*2, 1, fp);
 			fclose(fp);
-                }
+				}
 		exit(0);
-        }
+		}
 #endif
 	if(!state->m_render_done && (state->m_listctl[1] & 0x1f) == 0x1f) {
 		UINT16 *list = get_list(state);
@@ -1445,70 +1443,66 @@ static void tgp_scan(running_machine &machine)
 	state->m_render_done = 0;
 }
 
-VIDEO_START(model1)
+VIDEO_START_MEMBER(model1_state,model1)
 {
-	model1_state *state = machine.driver_data<model1_state>();
-	state->m_paletteram16 = machine.generic.paletteram.u16;
+	m_paletteram16 = m_generic_paletteram_16;
 
-	state->m_view = auto_alloc_clear(machine, struct view);
+	m_view = auto_alloc_clear(machine(), struct view);
 
-	sys24_tile_vh_start(machine, 0x3fff);
+	m_poly_rom = (UINT32 *)memregion("user1")->base();
+	m_poly_ram = auto_alloc_array_clear(machine(), UINT32, 0x400000);
+	m_tgp_ram = auto_alloc_array_clear(machine(), UINT16, 0x100000-0x40000);
+	m_pointdb = auto_alloc_array_clear(machine(), struct point, 1000000*2);
+	m_quaddb  = auto_alloc_array_clear(machine(), struct quad_m1, 1000000);
+	m_quadind = auto_alloc_array_clear(machine(), struct quad_m1 *, 1000000);
 
-	state->m_poly_rom = (UINT32 *)machine.region("user1")->base();
-	state->m_poly_ram = auto_alloc_array_clear(machine, UINT32, 0x400000);
-	state->m_tgp_ram = auto_alloc_array_clear(machine, UINT16, 0x100000-0x40000);
-	state->m_pointdb = auto_alloc_array_clear(machine, struct point, 1000000*2);
-	state->m_quaddb  = auto_alloc_array_clear(machine, struct quad_m1, 1000000);
-	state->m_quadind = auto_alloc_array_clear(machine, struct quad_m1 *, 1000000);
+	m_pointpt = m_pointdb;
+	m_quadpt = m_quaddb;
+	m_listctl[0] = m_listctl[1] = 0;
 
-	state->m_pointpt = state->m_pointdb;
-	state->m_quadpt = state->m_quaddb;
-	state->m_listctl[0] = state->m_listctl[1] = 0;
-
-	state_save_register_global_pointer(machine, state->m_tgp_ram, 0x100000-0x40000);
-	state_save_register_global_pointer(machine, state->m_poly_ram, 0x40000);
-	state_save_register_global_array(machine, state->m_listctl);
+	state_save_register_global_pointer(machine(), m_tgp_ram, 0x100000-0x40000);
+	state_save_register_global_pointer(machine(), m_poly_ram, 0x40000);
+	state_save_register_global_array(machine(), m_listctl);
 }
 
-SCREEN_UPDATE(model1)
+UINT32 model1_state::screen_update_model1(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	model1_state *state = screen->machine().driver_data<model1_state>();
-	struct view *view = state->m_view;
+	struct view *view = m_view;
 #if 0
 	{
 		int mod = 0;
 		double delta;
 		delta = 1;
 
-		if(input_code_pressed(screen->machine(), KEYCODE_F)) {
+		if(machine().input().code_pressed(KEYCODE_F)) {
 			mod = 1;
 			view->vxx -= delta;
 		}
-		if(input_code_pressed(screen->machine(), KEYCODE_G)) {
+		if(machine().input().code_pressed(KEYCODE_G)) {
 			mod = 1;
 			view->vxx += delta;
 		}
-		if(input_code_pressed(screen->machine(), KEYCODE_H)) {
+		if(machine().input().code_pressed(KEYCODE_H)) {
 			mod = 1;
 			view->vyy -= delta;
 		}
-		if(input_code_pressed(screen->machine(), KEYCODE_J)) {
+		if(machine().input().code_pressed(KEYCODE_J)) {
 			mod = 1;
 			view->vyy += delta;
 		}
-		if(input_code_pressed(screen->machine(), KEYCODE_K)) {
+		if(machine().input().code_pressed(KEYCODE_K)) {
 			mod = 1;
 			view->vzz -= delta;
 		}
-		if(input_code_pressed(screen->machine(), KEYCODE_L)) {
+		if(machine().input().code_pressed(KEYCODE_L)) {
 			mod = 1;
 			view->vzz += delta;
 		}
-		if(input_code_pressed(screen->machine(), KEYCODE_U)) {
+		if(machine().input().code_pressed(KEYCODE_U)) {
 			mod = 1;
 			view->ayy -= 0.05;
 		}
-		if(input_code_pressed(screen->machine(), KEYCODE_I)) {
+		if(machine().input().code_pressed(KEYCODE_I)) {
 			mod = 1;
 			view->ayy += 0.05;
 		}
@@ -1520,27 +1514,32 @@ SCREEN_UPDATE(model1)
 	view->ayyc = cos(view->ayy);
 	view->ayys = sin(view->ayy);
 
-	bitmap_fill(screen->machine().priority_bitmap, NULL, 0);
-	bitmap_fill(bitmap, cliprect, screen->machine().pens[0]);
+	machine().priority_bitmap.fill(0);
+	bitmap.fill(machine().pens[0], cliprect);
 
-	sys24_tile_draw(screen->machine(), bitmap, cliprect, 6, 0, 0);
-	sys24_tile_draw(screen->machine(), bitmap, cliprect, 4, 0, 0);
-	sys24_tile_draw(screen->machine(), bitmap, cliprect, 2, 0, 0);
-	sys24_tile_draw(screen->machine(), bitmap, cliprect, 0, 0, 0);
+	segas24_tile *tile = machine().device<segas24_tile>("tile");
+	tile->draw(bitmap, cliprect, 6, 0, 0);
+	tile->draw(bitmap, cliprect, 4, 0, 0);
+	tile->draw(bitmap, cliprect, 2, 0, 0);
+	tile->draw(bitmap, cliprect, 0, 0, 0);
 
-	tgp_render(screen->machine(), bitmap, cliprect);
+	tgp_render(machine(), bitmap, cliprect);
 
-	sys24_tile_draw(screen->machine(), bitmap, cliprect, 7, 0, 0);
-	sys24_tile_draw(screen->machine(), bitmap, cliprect, 5, 0, 0);
-	sys24_tile_draw(screen->machine(), bitmap, cliprect, 3, 0, 0);
-	sys24_tile_draw(screen->machine(), bitmap, cliprect, 1, 0, 0);
+	tile->draw(bitmap, cliprect, 7, 0, 0);
+	tile->draw(bitmap, cliprect, 5, 0, 0);
+	tile->draw(bitmap, cliprect, 3, 0, 0);
+	tile->draw(bitmap, cliprect, 1, 0, 0);
 
 	return 0;
 }
 
-SCREEN_EOF(model1)
+void model1_state::screen_eof_model1(screen_device &screen, bool state)
 {
-	tgp_scan(machine);
-	end_frame(machine);
-	LOG_TGP(("TGP: vsync\n"));
+	// on rising edge
+	if (state)
+	{
+		tgp_scan(machine());
+		end_frame(machine());
+		LOG_TGP(("TGP: vsync\n"));
+	}
 }

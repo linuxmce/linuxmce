@@ -31,7 +31,7 @@ needs more color combination to render its graphics.
 #include "video/resnet.h"
 #include "includes/rallyx.h"
 
-#define STARS_COLOR_BASE	(0x104)
+#define STARS_COLOR_BASE    (0x104)
 
 
 /***************************************************************************
@@ -55,21 +55,22 @@ needs more color combination to render its graphics.
 
 ***************************************************************************/
 
-PALETTE_INIT( rallyx )
+PALETTE_INIT_MEMBER(rallyx_state,rallyx)
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	static const int resistances_rg[3] = { 1000, 470, 220 };
 	static const int resistances_b [2] = { 470, 220 };
 	double rweights[3], gweights[3], bweights[2];
 	int i;
 
 	/* compute the color output resistor weights */
-	compute_resistor_weights(0,	255, -1.0,
+	compute_resistor_weights(0, 255, -1.0,
 			3, &resistances_rg[0], rweights,    0, 0,
 			3, &resistances_rg[0], gweights,    0, 0,
 			2, &resistances_b[0],  bweights, 1000, 0);
 
 	/* allocate the colortable */
-	machine.colortable = colortable_alloc(machine, 0x20);
+	machine().colortable = colortable_alloc(machine(), 0x20);
 
 	/* create a lookup table for the palette */
 	for (i = 0; i < 0x20; i++)
@@ -94,7 +95,7 @@ PALETTE_INIT( rallyx )
 		bit1 = (color_prom[i] >> 7) & 0x01;
 		b = combine_2_weights(bweights, bit0, bit1);
 
-		colortable_palette_set_color(machine.colortable, i, MAKE_RGB(r, g, b));
+		colortable_palette_set_color(machine().colortable, i, MAKE_RGB(r, g, b));
 	}
 
 	/* color_prom now points to the beginning of the lookup table */
@@ -104,17 +105,18 @@ PALETTE_INIT( rallyx )
 	for (i = 0x000; i < 0x100; i++)
 	{
 		UINT8 ctabentry = color_prom[i] & 0x0f;
-		colortable_entry_set_value(machine.colortable, i, ctabentry);
+		colortable_entry_set_value(machine().colortable, i, ctabentry);
 	}
 
 	/* bullets use colors 0x10-0x13 */
 	for (i = 0x100; i < 0x104; i++)
-		colortable_entry_set_value(machine.colortable, i, (i - 0x100) | 0x10);
+		colortable_entry_set_value(machine().colortable, i, (i - 0x100) | 0x10);
 }
 
 
-PALETTE_INIT( jungler )
+PALETTE_INIT_MEMBER(rallyx_state,jungler)
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	static const int resistances_rg[3]   = { 1000, 470, 220 };
 	static const int resistances_b [2]   = { 470, 220 };
 	static const int resistances_star[3] = { 150, 100 };
@@ -123,18 +125,18 @@ PALETTE_INIT( jungler )
 	int i;
 
 	/* compute the color output resistor weights */
-	double scale = compute_resistor_weights(0,	255, -1.0,
+	double scale = compute_resistor_weights(0,  255, -1.0,
 						2, resistances_star, rweights_star, 0, 0,
 						2, resistances_star, gweights_star, 0, 0,
 						2, resistances_star, bweights_star, 0, 0);
 
-				   compute_resistor_weights(0,	255, scale,
+					compute_resistor_weights(0, 255, scale,
 						3, resistances_rg, rweights, 1000, 0,
 						3, resistances_rg, gweights, 1000, 0,
 						2, resistances_b,  bweights, 1000, 0);
 
 	/* allocate the colortable */
-	machine.colortable = colortable_alloc(machine, 0x60);
+	machine().colortable = colortable_alloc(machine(), 0x60);
 
 	/* create a lookup table for the palette */
 	for (i = 0; i < 0x20; i++)
@@ -159,7 +161,7 @@ PALETTE_INIT( jungler )
 		bit1 = (color_prom[i] >> 7) & 0x01;
 		b = combine_2_weights(bweights, bit0, bit1);
 
-		colortable_palette_set_color(machine.colortable, i, MAKE_RGB(r, g, b));
+		colortable_palette_set_color(machine().colortable, i, MAKE_RGB(r, g, b));
 	}
 
 	/* star pens */
@@ -183,7 +185,7 @@ PALETTE_INIT( jungler )
 		bit1 = ((i - 0x20) >> 5) & 0x01;
 		b = combine_2_weights(bweights_star, bit0, bit1);
 
-		colortable_palette_set_color(machine.colortable, i, MAKE_RGB(r, g, b));
+		colortable_palette_set_color(machine().colortable, i, MAKE_RGB(r, g, b));
 	}
 
 	/* color_prom now points to the beginning of the lookup table */
@@ -193,16 +195,16 @@ PALETTE_INIT( jungler )
 	for (i = 0x000; i < 0x100; i++)
 	{
 		UINT8 ctabentry = color_prom[i] & 0x0f;
-		colortable_entry_set_value(machine.colortable, i, ctabentry);
+		colortable_entry_set_value(machine().colortable, i, ctabentry);
 	}
 
 	/* bullets use colors 0x10-0x13 */
 	for (i = 0x100; i < 0x104; i++)
-		colortable_entry_set_value(machine.colortable, i, (i - 0x100) | 0x10);
+		colortable_entry_set_value(machine().colortable, i, (i - 0x100) | 0x10);
 
 	/* stars */
 	for (i = 0x104; i < 0x144; i++)
-		colortable_entry_set_value(machine.colortable, i, (i - 0x104) + 0x20);
+		colortable_entry_set_value(machine().colortable, i, (i - 0x104) + 0x20);
 }
 
 
@@ -214,17 +216,17 @@ PALETTE_INIT( jungler )
 ***************************************************************************/
 
 /* the video RAM has space for 32x32 tiles and is only partially used for the radar */
-static TILEMAP_MAPPER( fg_tilemap_scan )
+TILEMAP_MAPPER_MEMBER(rallyx_state::fg_tilemap_scan)
 {
 	return col + (row << 5);
 }
 
 
-INLINE void rallyx_get_tile_info( running_machine &machine, tile_data *tileinfo, int tile_index, int ram_offs)
+INLINE void rallyx_get_tile_info( running_machine &machine, tile_data &tileinfo, int tile_index, int ram_offs)
 {
 	rallyx_state *state = machine.driver_data<rallyx_state>();
 	UINT8 attr = state->m_videoram[ram_offs + tile_index + 0x800];
-	tileinfo->category = (attr & 0x20) >> 5;
+	tileinfo.category = (attr & 0x20) >> 5;
 	SET_TILE_INFO(
 			0,
 			state->m_videoram[ram_offs + tile_index],
@@ -232,24 +234,24 @@ INLINE void rallyx_get_tile_info( running_machine &machine, tile_data *tileinfo,
 			TILE_FLIPYX(attr >> 6) ^ TILE_FLIPX);
 }
 
-static TILE_GET_INFO( rallyx_bg_get_tile_info )
+TILE_GET_INFO_MEMBER(rallyx_state::rallyx_bg_get_tile_info)
 {
-	rallyx_get_tile_info(machine, tileinfo, tile_index, 0x400);
+	rallyx_get_tile_info(machine(), tileinfo, tile_index, 0x400);
 }
 
-static TILE_GET_INFO( rallyx_fg_get_tile_info )
+TILE_GET_INFO_MEMBER(rallyx_state::rallyx_fg_get_tile_info)
 {
-	rallyx_get_tile_info(machine, tileinfo, tile_index, 0x000);
+	rallyx_get_tile_info(machine(), tileinfo, tile_index, 0x000);
 }
 
 
-INLINE void locomotn_get_tile_info(running_machine &machine,tile_data *tileinfo,int tile_index,int ram_offs)
+INLINE void locomotn_get_tile_info(running_machine &machine,tile_data &tileinfo,int tile_index,int ram_offs)
 {
 	rallyx_state *state = machine.driver_data<rallyx_state>();
 	UINT8 attr = state->m_videoram[ram_offs + tile_index + 0x800];
 	int code = state->m_videoram[ram_offs + tile_index];
 	code = (code & 0x7f) + 2 * (attr & 0x40) + 2 * (code & 0x80);
-	tileinfo->category = (attr & 0x20) >> 5;
+	tileinfo.category = (attr & 0x20) >> 5;
 	SET_TILE_INFO(
 			0,
 			code,
@@ -257,14 +259,14 @@ INLINE void locomotn_get_tile_info(running_machine &machine,tile_data *tileinfo,
 			(attr & 0x80) ? (TILE_FLIPX | TILE_FLIPY) : 0);
 }
 
-static TILE_GET_INFO( locomotn_bg_get_tile_info )
+TILE_GET_INFO_MEMBER(rallyx_state::locomotn_bg_get_tile_info)
 {
-	locomotn_get_tile_info(machine, tileinfo, tile_index, 0x400);
+	locomotn_get_tile_info(machine(), tileinfo, tile_index, 0x400);
 }
 
-static TILE_GET_INFO( locomotn_fg_get_tile_info )
+TILE_GET_INFO_MEMBER(rallyx_state::locomotn_fg_get_tile_info)
 {
-	locomotn_get_tile_info(machine, tileinfo, tile_index, 0x000);
+	locomotn_get_tile_info(machine(), tileinfo, tile_index, 0x000);
 }
 
 
@@ -337,76 +339,72 @@ static void rallyx_video_start_common( running_machine &machine )
 	state->m_drawmode_table[3] = DRAWMODE_NONE;
 }
 
-VIDEO_START( rallyx )
+VIDEO_START_MEMBER(rallyx_state,rallyx)
 {
-	rallyx_state *state = machine.driver_data<rallyx_state>();
 
-	state->m_bg_tilemap = tilemap_create(machine, rallyx_bg_get_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
-	state->m_fg_tilemap = tilemap_create(machine, rallyx_fg_get_tile_info, fg_tilemap_scan, 8, 8, 8, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(rallyx_state::rallyx_bg_get_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(rallyx_state::rallyx_fg_get_tile_info),this), tilemap_mapper_delegate(FUNC(rallyx_state::fg_tilemap_scan),this), 8, 8, 8, 32);
 
 	/* the scrolling tilemap is slightly misplaced in Rally X */
-	tilemap_set_scrolldx(state->m_bg_tilemap, 3, 3);
+	m_bg_tilemap->set_scrolldx(3, 3);
 
-	state->m_spriteram_base = 0x14;
+	m_spriteram_base = 0x14;
 
-	rallyx_video_start_common(machine);
+	rallyx_video_start_common(machine());
 }
 
 
-VIDEO_START( jungler )
+VIDEO_START_MEMBER(rallyx_state,jungler)
 {
-	rallyx_state *state = machine.driver_data<rallyx_state>();
 
-	state->m_bg_tilemap = tilemap_create(machine, rallyx_bg_get_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
-	state->m_fg_tilemap = tilemap_create(machine, rallyx_fg_get_tile_info, fg_tilemap_scan, 8, 8, 8, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(rallyx_state::rallyx_bg_get_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(rallyx_state::rallyx_fg_get_tile_info),this), tilemap_mapper_delegate(FUNC(rallyx_state::fg_tilemap_scan),this), 8, 8, 8, 32);
 
-	state->m_spriteram_base = 0x14;
+	m_spriteram_base = 0x14;
 
-	rallyx_video_start_common(machine);
-	calculate_star_field(machine);
+	rallyx_video_start_common(machine());
+	calculate_star_field(machine());
 }
 
 
-VIDEO_START( locomotn )
+VIDEO_START_MEMBER(rallyx_state,locomotn)
 {
-	rallyx_state *state = machine.driver_data<rallyx_state>();
 
-	state->m_bg_tilemap = tilemap_create(machine, locomotn_bg_get_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
-	state->m_fg_tilemap = tilemap_create(machine, locomotn_fg_get_tile_info, fg_tilemap_scan, 8, 8, 8, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(rallyx_state::locomotn_bg_get_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(rallyx_state::locomotn_fg_get_tile_info),this), tilemap_mapper_delegate(FUNC(rallyx_state::fg_tilemap_scan),this), 8, 8, 8, 32);
 
 	/* handle reduced visible area in some games */
-	if (machine.primary_screen->visible_area().max_x == 32 * 8 - 1)
+	if (machine().primary_screen->visible_area().max_x == 32 * 8 - 1)
 	{
-		tilemap_set_scrolldx(state->m_bg_tilemap, 0, 32);
-		tilemap_set_scrolldx(state->m_fg_tilemap, 0, 32);
+		m_bg_tilemap->set_scrolldx(0, 32);
+		m_fg_tilemap->set_scrolldx(0, 32);
 	}
 
-	state->m_spriteram_base = 0x14;
+	m_spriteram_base = 0x14;
 
-	rallyx_video_start_common(machine);
-	calculate_star_field(machine);
+	rallyx_video_start_common(machine());
+	calculate_star_field(machine());
 }
 
 
-VIDEO_START( commsega )
+VIDEO_START_MEMBER(rallyx_state,commsega)
 {
-	rallyx_state *state = machine.driver_data<rallyx_state>();
 
-	state->m_bg_tilemap = tilemap_create(machine, locomotn_bg_get_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
-	state->m_fg_tilemap = tilemap_create(machine, locomotn_fg_get_tile_info, fg_tilemap_scan, 8, 8, 8, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(rallyx_state::locomotn_bg_get_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(rallyx_state::locomotn_fg_get_tile_info),this), tilemap_mapper_delegate(FUNC(rallyx_state::fg_tilemap_scan),this), 8, 8, 8, 32);
 
 	/* handle reduced visible area in some games */
-	if (machine.primary_screen->visible_area().max_x == 32 * 8 - 1)
+	if (machine().primary_screen->visible_area().max_x == 32 * 8 - 1)
 	{
-		tilemap_set_scrolldx(state->m_bg_tilemap, 0, 32);
-		tilemap_set_scrolldx(state->m_fg_tilemap, 0, 32);
+		m_bg_tilemap->set_scrolldx(0, 32);
+		m_fg_tilemap->set_scrolldx(0, 32);
 	}
 
 	/* commsega has more sprites and bullets than the other games */
-	state->m_spriteram_base = 0x00;
+	m_spriteram_base = 0x00;
 
-	rallyx_video_start_common(machine);
-	calculate_star_field(machine);
+	rallyx_video_start_common(machine());
+	calculate_star_field(machine());
 }
 
 
@@ -416,53 +414,49 @@ VIDEO_START( commsega )
 
 ***************************************************************************/
 
-WRITE8_HANDLER( rallyx_videoram_w )
+WRITE8_MEMBER(rallyx_state::rallyx_videoram_w)
 {
-	rallyx_state *state = space->machine().driver_data<rallyx_state>();
 
-	state->m_videoram[offset] = data;
+	m_videoram[offset] = data;
 	if (offset & 0x400)
-		tilemap_mark_tile_dirty(state->m_bg_tilemap, offset & 0x3ff);
+		m_bg_tilemap->mark_tile_dirty(offset & 0x3ff);
 	else
-		tilemap_mark_tile_dirty(state->m_fg_tilemap, offset & 0x3ff);
+		m_fg_tilemap->mark_tile_dirty(offset & 0x3ff);
 }
 
-WRITE8_HANDLER( rallyx_scrollx_w )
+WRITE8_MEMBER(rallyx_state::rallyx_scrollx_w)
 {
-	rallyx_state *state = space->machine().driver_data<rallyx_state>();
-	tilemap_set_scrollx(state->m_bg_tilemap, 0, data);
+	m_bg_tilemap->set_scrollx(0, data);
 }
 
-WRITE8_HANDLER( rallyx_scrolly_w )
+WRITE8_MEMBER(rallyx_state::rallyx_scrolly_w)
 {
-	rallyx_state *state = space->machine().driver_data<rallyx_state>();
-	tilemap_set_scrolly(state->m_bg_tilemap, 0, data);
+	m_bg_tilemap->set_scrolly(0, data);
 }
 
-WRITE8_HANDLER( tactcian_starson_w )
+WRITE8_MEMBER(rallyx_state::tactcian_starson_w)
 {
-	rallyx_state *state = space->machine().driver_data<rallyx_state>();
-	state->m_stars_enable = data & 1;
+	m_stars_enable = data & 1;
 }
 
 
-static void plot_star( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, int x, int y, int color )
+static void plot_star( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, int x, int y, int color )
 {
-	if (y < cliprect->min_y || y > cliprect->max_y ||
-		x < cliprect->min_x || x > cliprect->max_x)
+	if (!cliprect.contains(x, y))
 		return;
 
-	if (flip_screen_x_get(machine))
+	rallyx_state *state = machine.driver_data<rallyx_state>();
+	if (state->flip_screen_x())
 		x = 255 - x;
 
-	if (flip_screen_y_get(machine))
+	if (state->flip_screen_y())
 		y = 255 - y;
 
-	if (colortable_entry_get_value(machine.colortable, *BITMAP_ADDR16(bitmap, y, x) % 0x144) == 0)
-		*BITMAP_ADDR16(bitmap, y, x) = STARS_COLOR_BASE + color;
+	if (colortable_entry_get_value(machine.colortable, bitmap.pix16(y, x) % 0x144) == 0)
+		bitmap.pix16(y, x) = STARS_COLOR_BASE + color;
 }
 
-static void draw_stars( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_stars( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	rallyx_state *state = machine.driver_data<rallyx_state>();
 	int offs;
@@ -478,7 +472,7 @@ static void draw_stars( running_machine &machine, bitmap_t *bitmap, const rectan
 }
 
 
-static void rallyx_draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, int displacement )
+static void rallyx_draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, int displacement )
 {
 	rallyx_state *state = machine.driver_data<rallyx_state>();
 	UINT8 *spriteram = state->m_spriteram;
@@ -492,7 +486,7 @@ static void rallyx_draw_sprites( running_machine &machine, bitmap_t *bitmap, con
 		int color = spriteram_2[offs + 1] & 0x3f;
 		int flipx = spriteram[offs] & 1;
 		int flipy = spriteram[offs] & 2;
-		if (flip_screen_get(machine))
+		if (state->flip_screen())
 			sx -= 2 * displacement;
 
 		pdrawgfx_transmask(bitmap,cliprect,machine.gfx[1],
@@ -505,7 +499,7 @@ static void rallyx_draw_sprites( running_machine &machine, bitmap_t *bitmap, con
 	}
 }
 
-static void locomotn_draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, int displacement )
+static void locomotn_draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, int displacement )
 {
 	rallyx_state *state = machine.driver_data<rallyx_state>();
 	UINT8 *spriteram = state->m_spriteram;
@@ -529,7 +523,7 @@ static void locomotn_draw_sprites( running_machine &machine, bitmap_t *bitmap, c
 	}
 }
 
-static void rallyx_draw_bullets( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, int transpen )
+static void rallyx_draw_bullets( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, int transpen )
 {
 	rallyx_state *state = machine.driver_data<rallyx_state>();
 	int offs;
@@ -540,7 +534,7 @@ static void rallyx_draw_bullets( running_machine &machine, bitmap_t *bitmap, con
 
 		x = state->m_radarx[offs] + ((~state->m_radarattr[offs & 0x0f] & 0x01) << 8);
 		y = 253 - state->m_radary[offs];
-		if (flip_screen_get(machine))
+		if (state->flip_screen())
 			x -= 3;
 
 		if (transpen)
@@ -560,7 +554,7 @@ static void rallyx_draw_bullets( running_machine &machine, bitmap_t *bitmap, con
 	}
 }
 
-static void jungler_draw_bullets( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, int transpen )
+static void jungler_draw_bullets( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, int transpen )
 {
 	rallyx_state *state = machine.driver_data<rallyx_state>();
 	int offs;
@@ -589,7 +583,7 @@ static void jungler_draw_bullets( running_machine &machine, bitmap_t *bitmap, co
 	}
 }
 
-static void locomotn_draw_bullets( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, int transpen )
+static void locomotn_draw_bullets( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, int transpen )
 {
 	rallyx_state *state = machine.driver_data<rallyx_state>();
 	int offs;
@@ -600,11 +594,11 @@ static void locomotn_draw_bullets( running_machine &machine, bitmap_t *bitmap, c
 
 
 		/* it looks like in commsega the addresses used are
-           a000-a003  a004-a00f
-           8020-8023  8034-803f
-           8820-8823  8834-883f
-           so 8024-8033 and 8824-8833 are not used
-        */
+		   a000-a003  a004-a00f
+		   8020-8023  8034-803f
+		   8820-8823  8834-883f
+		   so 8024-8033 and 8824-8833 are not used
+		*/
 
 		x = state->m_radarx[offs] + ((~state->m_radarattr[offs & 0x0f] & 0x08) << 5);
 		y = 252 - state->m_radary[offs];
@@ -627,15 +621,14 @@ static void locomotn_draw_bullets( running_machine &machine, bitmap_t *bitmap, c
 }
 
 
-SCREEN_UPDATE( rallyx )
+UINT32 rallyx_state::screen_update_rallyx(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	rallyx_state *state = screen->machine().driver_data<rallyx_state>();
 	/* the radar tilemap is just 8x32. We rely on the tilemap code to repeat it across
-       the screen, and clip it to only the position where it is supposed to be shown */
-	rectangle fg_clip = *cliprect;
-	rectangle bg_clip = *cliprect;
+	   the screen, and clip it to only the position where it is supposed to be shown */
+	rectangle fg_clip = cliprect;
+	rectangle bg_clip = cliprect;
 
-	if (flip_screen_get(screen->machine()))
+	if (flip_screen())
 	{
 		bg_clip.min_x = 8 * 8;
 		fg_clip.max_x = 8 * 8 - 1;
@@ -646,30 +639,29 @@ SCREEN_UPDATE( rallyx )
 		fg_clip.min_x = 28 * 8;
 	}
 
-	bitmap_fill(screen->machine().priority_bitmap, cliprect, 0);
+	machine().priority_bitmap.fill(0, cliprect);
 
-	tilemap_draw(bitmap, &bg_clip, state->m_bg_tilemap, 0, 0);
-	tilemap_draw(bitmap, &fg_clip, state->m_fg_tilemap, 0, 0);
-	tilemap_draw(bitmap, &bg_clip, state->m_bg_tilemap, 1, 1);
-	tilemap_draw(bitmap, &fg_clip, state->m_fg_tilemap, 1, 1);
+	m_bg_tilemap->draw(bitmap, bg_clip, 0, 0);
+	m_fg_tilemap->draw(bitmap, fg_clip, 0, 0);
+	m_bg_tilemap->draw(bitmap, bg_clip, 1, 1);
+	m_fg_tilemap->draw(bitmap, fg_clip, 1, 1);
 
-	rallyx_draw_bullets(screen->machine(), bitmap, cliprect, TRUE);
-	rallyx_draw_sprites(screen->machine(), bitmap, cliprect, 1);
-	rallyx_draw_bullets(screen->machine(), bitmap, cliprect, FALSE);
+	rallyx_draw_bullets(machine(), bitmap, cliprect, TRUE);
+	rallyx_draw_sprites(machine(), bitmap, cliprect, 1);
+	rallyx_draw_bullets(machine(), bitmap, cliprect, FALSE);
 
 	return 0;
 }
 
 
-SCREEN_UPDATE( jungler )
+UINT32 rallyx_state::screen_update_jungler(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	rallyx_state *state = screen->machine().driver_data<rallyx_state>();
 	/* the radar tilemap is just 8x32. We rely on the tilemap code to repeat it across
-       the screen, and clip it to only the position where it is supposed to be shown */
-	rectangle fg_clip = *cliprect;
-	rectangle bg_clip = *cliprect;
+	   the screen, and clip it to only the position where it is supposed to be shown */
+	rectangle fg_clip = cliprect;
+	rectangle bg_clip = cliprect;
 
-	if (flip_screen_get(screen->machine()))
+	if (flip_screen())
 	{
 		bg_clip.min_x = 8 * 8;
 		fg_clip.max_x = 8 * 8 - 1;
@@ -680,37 +672,36 @@ SCREEN_UPDATE( jungler )
 		fg_clip.min_x = 28 * 8;
 	}
 
-	bitmap_fill(screen->machine().priority_bitmap, cliprect, 0);
+	machine().priority_bitmap.fill(0, cliprect);
 
 	/* tile priority doesn't seem to be supported in Jungler */
-	tilemap_draw(bitmap,&bg_clip, state->m_bg_tilemap, 0, 0);
-	tilemap_draw(bitmap,&fg_clip, state->m_fg_tilemap, 0, 0);
-	tilemap_draw(bitmap,&bg_clip, state->m_bg_tilemap, 1, 0);
-	tilemap_draw(bitmap,&fg_clip, state->m_fg_tilemap, 1, 0);
+	m_bg_tilemap->draw(bitmap, bg_clip, 0, 0);
+	m_fg_tilemap->draw(bitmap, fg_clip, 0, 0);
+	m_bg_tilemap->draw(bitmap, bg_clip, 1, 0);
+	m_fg_tilemap->draw(bitmap, fg_clip, 1, 0);
 
-	jungler_draw_bullets(screen->machine(), bitmap, cliprect, TRUE);
-	rallyx_draw_sprites(screen->machine(), bitmap, cliprect, 0);
-	jungler_draw_bullets(screen->machine(), bitmap, cliprect, FALSE);
+	jungler_draw_bullets(machine(), bitmap, cliprect, TRUE);
+	rallyx_draw_sprites(machine(), bitmap, cliprect, 0);
+	jungler_draw_bullets(machine(), bitmap, cliprect, FALSE);
 
-	if (state->m_stars_enable)
-		draw_stars(screen->machine(), bitmap, cliprect);
+	if (m_stars_enable)
+		draw_stars(machine(), bitmap, cliprect);
 
 	return 0;
 }
 
 
-SCREEN_UPDATE( locomotn )
+UINT32 rallyx_state::screen_update_locomotn(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	rallyx_state *state = screen->machine().driver_data<rallyx_state>();
 	/* the radar tilemap is just 8x32. We rely on the tilemap code to repeat it across
-       the screen, and clip it to only the position where it is supposed to be shown */
-	rectangle fg_clip = *cliprect;
-	rectangle bg_clip = *cliprect;
+	   the screen, and clip it to only the position where it is supposed to be shown */
+	rectangle fg_clip = cliprect;
+	rectangle bg_clip = cliprect;
 
-	if (flip_screen_get(screen->machine()))
+	if (flip_screen())
 	{
 		/* handle reduced visible area in some games */
-		if (screen->visible_area().max_x == 32 * 8 - 1)
+		if (screen.visible_area().max_x == 32 * 8 - 1)
 		{
 			bg_clip.min_x = 4 * 8;
 			fg_clip.max_x = 4 * 8 - 1;
@@ -727,19 +718,19 @@ SCREEN_UPDATE( locomotn )
 		fg_clip.min_x = 28 * 8;
 	}
 
-	bitmap_fill(screen->machine().priority_bitmap, cliprect, 0);
+	machine().priority_bitmap.fill(0, cliprect);
 
-	tilemap_draw(bitmap, &bg_clip, state->m_bg_tilemap, 0, 0);
-	tilemap_draw(bitmap, &fg_clip, state->m_fg_tilemap, 0, 0);
-	tilemap_draw(bitmap, &bg_clip, state->m_bg_tilemap, 1, 1);
-	tilemap_draw(bitmap, &fg_clip, state->m_fg_tilemap, 1, 1);
+	m_bg_tilemap->draw(bitmap, bg_clip, 0, 0);
+	m_fg_tilemap->draw(bitmap, fg_clip, 0, 0);
+	m_bg_tilemap->draw(bitmap, bg_clip, 1, 1);
+	m_fg_tilemap->draw(bitmap, fg_clip, 1, 1);
 
-	locomotn_draw_bullets(screen->machine(), bitmap, cliprect, TRUE);
-	locomotn_draw_sprites(screen->machine(), bitmap, cliprect, 0);
-	locomotn_draw_bullets(screen->machine(), bitmap, cliprect, FALSE);
+	locomotn_draw_bullets(machine(), bitmap, cliprect, TRUE);
+	locomotn_draw_sprites(machine(), bitmap, cliprect, 0);
+	locomotn_draw_bullets(machine(), bitmap, cliprect, FALSE);
 
-	if (state->m_stars_enable)
-		draw_stars(screen->machine(), bitmap, cliprect);
+	if (m_stars_enable)
+		draw_stars(machine(), bitmap, cliprect);
 
 	return 0;
 }

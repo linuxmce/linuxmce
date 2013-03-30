@@ -38,77 +38,69 @@ Notes:
 #include "machine/nvram.h"
 
 
-#define SIGNED_DAC	0		// 0:unsigned DAC, 1:signed DAC
-#if SIGNED_DAC
-#define DAC_WRITE	dac_signed_w
-#else
-#define DAC_WRITE	dac_w
-#endif
-
-
-static WRITE8_HANDLER( nbmj8991_soundbank_w )
+WRITE8_MEMBER(nbmj8991_state::nbmj8991_soundbank_w)
 {
-	if (!(data & 0x80)) soundlatch_clear_w(space, 0, 0);
-	memory_set_bank(space->machine(), "bank1", data & 0x03);
+	if (!(data & 0x80)) soundlatch_clear_byte_w(space, 0, 0);
+	membank("bank1")->set_entry(data & 0x03);
 }
 
-static WRITE8_HANDLER( nbmj8991_sound_w )
+WRITE8_MEMBER(nbmj8991_state::nbmj8991_sound_w)
 {
-	soundlatch_w(space, 0, data);
+	soundlatch_byte_w(space, 0, data);
 }
 
-static READ8_HANDLER( nbmj8991_sound_r )
+READ8_MEMBER(nbmj8991_state::nbmj8991_sound_r)
 {
 	int data;
 
-	data = soundlatch_r(space,0);
+	data = soundlatch_byte_r(space,0);
 	return data;
 }
 
-static MACHINE_RESET( nbmj8991 )
+void nbmj8991_state::machine_reset()
 {
-	device_t *audiocpu = machine.device("audiocpu");
+	device_t *audiocpu = machine().device("audiocpu");
 	if (audiocpu != NULL && audiocpu->type() == Z80)
 	{
-		memory_configure_bank(machine, "bank1", 0, 4, machine.region("audiocpu")->base() + 0x8000, 0x8000);
-		memory_set_bank(machine, "bank1", 0);
+		machine().root_device().membank("bank1")->configure_entries(0, 4, machine().root_device().memregion("audiocpu")->base() + 0x8000, 0x8000);
+		machine().root_device().membank("bank1")->set_entry(0);
 	}
-	MACHINE_RESET_CALL(nb1413m3);
+	MACHINE_RESET_CALL_LEGACY(nb1413m3);
 }
 
-static DRIVER_INIT( pstadium )
+DRIVER_INIT_MEMBER(nbmj8991_state,pstadium)
 {
 	nb1413m3_type = NB1413M3_PSTADIUM;
 }
 
-static DRIVER_INIT( triplew1 )
+DRIVER_INIT_MEMBER(nbmj8991_state,triplew1)
 {
 	nb1413m3_type = NB1413M3_TRIPLEW1;
 }
 
-static DRIVER_INIT( triplew2 )
+DRIVER_INIT_MEMBER(nbmj8991_state,triplew2)
 {
 	nb1413m3_type = NB1413M3_TRIPLEW2;
 }
 
-static DRIVER_INIT( ntopstar )
+DRIVER_INIT_MEMBER(nbmj8991_state,ntopstar)
 {
 	nb1413m3_type = NB1413M3_NTOPSTAR;
 }
 
-static DRIVER_INIT( mjlstory )
+DRIVER_INIT_MEMBER(nbmj8991_state,mjlstory)
 {
 	nb1413m3_type = NB1413M3_MJLSTORY;
 }
 
-static DRIVER_INIT( vanilla )
+DRIVER_INIT_MEMBER(nbmj8991_state,vanilla)
 {
 	nb1413m3_type = NB1413M3_VANILLA;
 }
 
-static DRIVER_INIT( finalbny )
+DRIVER_INIT_MEMBER(nbmj8991_state,finalbny)
 {
-	UINT8 *ROM = machine.region("maincpu")->base();
+	UINT8 *ROM = machine().root_device().memregion("maincpu")->base();
 	int i;
 
 	for (i = 0xf800; i < 0x10000; i++) ROM[i] = 0x00;
@@ -116,25 +108,25 @@ static DRIVER_INIT( finalbny )
 	nb1413m3_type = NB1413M3_FINALBNY;
 }
 
-static DRIVER_INIT( qmhayaku )
+DRIVER_INIT_MEMBER(nbmj8991_state,qmhayaku)
 {
 	nb1413m3_type = NB1413M3_QMHAYAKU;
 }
 
-static DRIVER_INIT( galkoku )
+DRIVER_INIT_MEMBER(nbmj8991_state,galkoku)
 {
 	nb1413m3_type = NB1413M3_GALKOKU;
 }
 
-static DRIVER_INIT( hyouban )
+DRIVER_INIT_MEMBER(nbmj8991_state,hyouban)
 {
 	nb1413m3_type = NB1413M3_HYOUBAN;
 }
 
-static DRIVER_INIT( galkaika )
+DRIVER_INIT_MEMBER(nbmj8991_state,galkaika)
 {
 #if 1
-	UINT8 *ROM = machine.region("maincpu")->base();
+	UINT8 *ROM = machine().root_device().memregion("maincpu")->base();
 
 	// Patch to IM2 -> IM1
 	ROM[0x0002] = 0x56;
@@ -142,10 +134,10 @@ static DRIVER_INIT( galkaika )
 	nb1413m3_type = NB1413M3_GALKAIKA;
 }
 
-static DRIVER_INIT( tokyogal )
+DRIVER_INIT_MEMBER(nbmj8991_state,tokyogal)
 {
 #if 1
-	UINT8 *ROM = machine.region("maincpu")->base();
+	UINT8 *ROM = machine().root_device().memregion("maincpu")->base();
 
 	// Patch to IM2 -> IM1
 	ROM[0x0002] = 0x56;
@@ -153,10 +145,10 @@ static DRIVER_INIT( tokyogal )
 	nb1413m3_type = NB1413M3_TOKYOGAL;
 }
 
-static DRIVER_INIT( tokimbsj )
+DRIVER_INIT_MEMBER(nbmj8991_state,tokimbsj)
 {
 #if 1
-	UINT8 *ROM = machine.region("maincpu")->base();
+	UINT8 *ROM = machine().root_device().memregion("maincpu")->base();
 
 	// Patch to IM2 -> IM1
 	ROM[0x0002] = 0x56;
@@ -164,165 +156,165 @@ static DRIVER_INIT( tokimbsj )
 	nb1413m3_type = NB1413M3_TOKIMBSJ;
 }
 
-static DRIVER_INIT( mcontest )
+DRIVER_INIT_MEMBER(nbmj8991_state,mcontest)
 {
 	nb1413m3_type = NB1413M3_MCONTEST;
 }
 
-static DRIVER_INIT( uchuuai )
+DRIVER_INIT_MEMBER(nbmj8991_state,uchuuai)
 {
 	nb1413m3_type = NB1413M3_UCHUUAI;
 }
 
-static DRIVER_INIT( mjgottub )
+DRIVER_INIT_MEMBER(nbmj8991_state,mjgottub)
 {
 	nb1413m3_type = NB1413M3_MJGOTTUB;
 }
 
-static DRIVER_INIT( av2mj1bb )
+DRIVER_INIT_MEMBER(nbmj8991_state,av2mj1bb)
 {
 	nb1413m3_type = NB1413M3_AV2MJ1BB;
 }
 
-static DRIVER_INIT( av2mj2rg )
+DRIVER_INIT_MEMBER(nbmj8991_state,av2mj2rg)
 {
 	nb1413m3_type = NB1413M3_AV2MJ2RG;
 }
 
 
-static ADDRESS_MAP_START( pstadium_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( pstadium_map, AS_PROGRAM, 8, nbmj8991_state )
 	AM_RANGE(0x0000, 0xefff) AM_ROM
 	AM_RANGE(0xf000, 0xf00f) AM_READWRITE(nbmj8991_clut_r,nbmj8991_clut_w)
-	AM_RANGE(0xf200, 0xf3ff) AM_RAM_WRITE(nbmj8991_palette_type3_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0xf800, 0xffff) AM_RAM AM_SHARE("nvram")	// finalbny
+	AM_RANGE(0xf200, 0xf3ff) AM_RAM_WRITE(nbmj8991_palette_type3_w) AM_SHARE("paletteram")
+	AM_RANGE(0xf800, 0xffff) AM_RAM AM_SHARE("nvram")   // finalbny
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( triplew1_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( triplew1_map, AS_PROGRAM, 8, nbmj8991_state )
 	AM_RANGE(0x0000, 0xefff) AM_ROM
-	AM_RANGE(0xf000, 0xf1ff) AM_RAM_WRITE(nbmj8991_palette_type3_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0xf000, 0xf1ff) AM_RAM_WRITE(nbmj8991_palette_type3_w) AM_SHARE("paletteram")
 	AM_RANGE(0xf200, 0xf20f) AM_READWRITE(nbmj8991_clut_r,nbmj8991_clut_w)
-	AM_RANGE(0xf800, 0xffff) AM_RAM AM_SHARE("nvram")	// mjgottub
+	AM_RANGE(0xf800, 0xffff) AM_RAM AM_SHARE("nvram")   // mjgottub
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( triplew2_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( triplew2_map, AS_PROGRAM, 8, nbmj8991_state )
 	AM_RANGE(0x0000, 0xefff) AM_ROM
-	AM_RANGE(0xf000, 0xf1ff) AM_RAM_WRITE(nbmj8991_palette_type3_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0xf000, 0xf1ff) AM_RAM_WRITE(nbmj8991_palette_type3_w) AM_SHARE("paletteram")
 	AM_RANGE(0xf400, 0xf40f) AM_READWRITE(nbmj8991_clut_r,nbmj8991_clut_w)
 	AM_RANGE(0xf800, 0xffff) AM_RAM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( mjlstory_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( mjlstory_map, AS_PROGRAM, 8, nbmj8991_state )
 	AM_RANGE(0x0000, 0xefff) AM_ROM
-	AM_RANGE(0xf200, 0xf3ff) AM_RAM_WRITE(nbmj8991_palette_type3_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0xf200, 0xf3ff) AM_RAM_WRITE(nbmj8991_palette_type3_w) AM_SHARE("paletteram")
 	AM_RANGE(0xf700, 0xf70f) AM_READWRITE(nbmj8991_clut_r,nbmj8991_clut_w)
 	AM_RANGE(0xf800, 0xffff) AM_RAM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( galkoku_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( galkoku_map, AS_PROGRAM, 8, nbmj8991_state )
 	AM_RANGE(0x0000, 0xefff) AM_ROM
 	AM_RANGE(0xf000, 0xf00f) AM_READWRITE(nbmj8991_clut_r,nbmj8991_clut_w)
-	AM_RANGE(0xf400, 0xf5ff) AM_RAM_WRITE(nbmj8991_palette_type1_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0xf800, 0xffff) AM_RAM AM_SHARE("nvram")	// hyouban
+	AM_RANGE(0xf400, 0xf5ff) AM_RAM_WRITE(nbmj8991_palette_type1_w) AM_SHARE("paletteram")
+	AM_RANGE(0xf800, 0xffff) AM_RAM AM_SHARE("nvram")   // hyouban
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( galkaika_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( galkaika_map, AS_PROGRAM, 8, nbmj8991_state )
 	AM_RANGE(0x0000, 0xefff) AM_ROM
 	AM_RANGE(0xf000, 0xf00f) AM_READWRITE(nbmj8991_clut_r,nbmj8991_clut_w)
-	AM_RANGE(0xf400, 0xf5ff) AM_RAM_WRITE(nbmj8991_palette_type2_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0xf800, 0xffff) AM_RAM AM_SHARE("nvram")	// tokimbsj
+	AM_RANGE(0xf400, 0xf5ff) AM_RAM_WRITE(nbmj8991_palette_type2_w) AM_SHARE("paletteram")
+	AM_RANGE(0xf800, 0xffff) AM_RAM AM_SHARE("nvram")   // tokimbsj
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( tokyogal_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( tokyogal_map, AS_PROGRAM, 8, nbmj8991_state )
 	AM_RANGE(0x0000, 0xefff) AM_ROM
-	AM_RANGE(0xf000, 0xf1ff) AM_RAM_WRITE(nbmj8991_palette_type2_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0xf000, 0xf1ff) AM_RAM_WRITE(nbmj8991_palette_type2_w) AM_SHARE("paletteram")
 	AM_RANGE(0xf400, 0xf40f) AM_READWRITE(nbmj8991_clut_r,nbmj8991_clut_w)
 	AM_RANGE(0xf800, 0xffff) AM_RAM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( av2mj1bb_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( av2mj1bb_map, AS_PROGRAM, 8, nbmj8991_state )
 	AM_RANGE(0x0000, 0xefff) AM_ROM
-	AM_RANGE(0xf000, 0xf1ff) AM_RAM_WRITE(nbmj8991_palette_type3_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0xf000, 0xf1ff) AM_RAM_WRITE(nbmj8991_palette_type3_w) AM_SHARE("paletteram")
 	AM_RANGE(0xf500, 0xf50f) AM_READWRITE(nbmj8991_clut_r,nbmj8991_clut_w)
 	AM_RANGE(0xf800, 0xffff) AM_RAM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( av2mj2rg_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( av2mj2rg_map, AS_PROGRAM, 8, nbmj8991_state )
 	AM_RANGE(0x0000, 0xefff) AM_ROM
 	AM_RANGE(0xf000, 0xf00f) AM_READWRITE(nbmj8991_clut_r,nbmj8991_clut_w)
-	AM_RANGE(0xf200, 0xf3ff) AM_RAM_WRITE(nbmj8991_palette_type3_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0xf200, 0xf3ff) AM_RAM_WRITE(nbmj8991_palette_type3_w) AM_SHARE("paletteram")
 	AM_RANGE(0xf800, 0xffff) AM_RAM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( galkoku_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( galkoku_io_map, AS_IO, 8, nbmj8991_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x7f) AM_READWRITE(nb1413m3_sndrom_r,nbmj8991_blitter_w)
-	AM_RANGE(0x80, 0x81) AM_DEVWRITE("fmsnd", ym3812_w)
-	AM_RANGE(0x90, 0x90) AM_READ(nb1413m3_inputport0_r)
-	AM_RANGE(0xa0, 0xa0) AM_READWRITE(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
-	AM_RANGE(0xb0, 0xb0) AM_READWRITE(nb1413m3_inputport2_r,nb1413m3_sndrombank1_w)
-	AM_RANGE(0xc0, 0xc0) AM_READWRITE(nb1413m3_inputport3_r,nb1413m3_nmi_clock_w)
-	AM_RANGE(0xd0, 0xd0) AM_DEVWRITE("dac", DAC_WRITE)
+	AM_RANGE(0x00, 0x7f) AM_READ_LEGACY(nb1413m3_sndrom_r) AM_WRITE(nbmj8991_blitter_w)
+	AM_RANGE(0x80, 0x81) AM_DEVWRITE_LEGACY("fmsnd", ym3812_w)
+	AM_RANGE(0x90, 0x90) AM_READ_LEGACY(nb1413m3_inputport0_r)
+	AM_RANGE(0xa0, 0xa0) AM_READWRITE_LEGACY(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
+	AM_RANGE(0xb0, 0xb0) AM_READWRITE_LEGACY(nb1413m3_inputport2_r,nb1413m3_sndrombank1_w)
+	AM_RANGE(0xc0, 0xc0) AM_READWRITE_LEGACY(nb1413m3_inputport3_r,nb1413m3_nmi_clock_w)
+	AM_RANGE(0xd0, 0xd0) AM_DEVWRITE("dac", dac_device, write_unsigned8)
 //  AM_RANGE(0xe0, 0xe0) AM_WRITENOP
-	AM_RANGE(0xf0, 0xf0) AM_READWRITE(nb1413m3_dipsw1_r,nb1413m3_outcoin_w)
-	AM_RANGE(0xf1, 0xf1) AM_READ(nb1413m3_dipsw2_r)
+	AM_RANGE(0xf0, 0xf0) AM_READWRITE_LEGACY(nb1413m3_dipsw1_r,nb1413m3_outcoin_w)
+	AM_RANGE(0xf1, 0xf1) AM_READ_LEGACY(nb1413m3_dipsw2_r)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( hyouban_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( hyouban_io_map, AS_IO, 8, nbmj8991_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x7f) AM_READWRITE(nb1413m3_sndrom_r,nbmj8991_blitter_w)
-	AM_RANGE(0x81, 0x81) AM_DEVREAD("fmsnd", ay8910_r)
-	AM_RANGE(0x82, 0x83) AM_DEVWRITE("fmsnd", ay8910_data_address_w)
-	AM_RANGE(0x90, 0x90) AM_READ(nb1413m3_inputport0_r)
-	AM_RANGE(0xa0, 0xa0) AM_READWRITE(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
-	AM_RANGE(0xb0, 0xb0) AM_READWRITE(nb1413m3_inputport2_r,nb1413m3_sndrombank1_w)
-	AM_RANGE(0xc0, 0xc0) AM_READWRITE(nb1413m3_inputport3_r,nb1413m3_nmi_clock_w)
-	AM_RANGE(0xd0, 0xd0) AM_DEVWRITE("dac", DAC_WRITE)
+	AM_RANGE(0x00, 0x7f) AM_READ_LEGACY(nb1413m3_sndrom_r) AM_WRITE(nbmj8991_blitter_w)
+	AM_RANGE(0x81, 0x81) AM_DEVREAD_LEGACY("fmsnd", ay8910_r)
+	AM_RANGE(0x82, 0x83) AM_DEVWRITE_LEGACY("fmsnd", ay8910_data_address_w)
+	AM_RANGE(0x90, 0x90) AM_READ_LEGACY(nb1413m3_inputport0_r)
+	AM_RANGE(0xa0, 0xa0) AM_READWRITE_LEGACY(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
+	AM_RANGE(0xb0, 0xb0) AM_READWRITE_LEGACY(nb1413m3_inputport2_r,nb1413m3_sndrombank1_w)
+	AM_RANGE(0xc0, 0xc0) AM_READWRITE_LEGACY(nb1413m3_inputport3_r,nb1413m3_nmi_clock_w)
+	AM_RANGE(0xd0, 0xd0) AM_DEVWRITE("dac", dac_device, write_unsigned8)
 //  AM_RANGE(0xe0, 0xe0) AM_WRITENOP
-	AM_RANGE(0xf0, 0xf0) AM_READWRITE(nb1413m3_dipsw1_r,nb1413m3_outcoin_w)
-	AM_RANGE(0xf1, 0xf1) AM_READ(nb1413m3_dipsw2_r)
+	AM_RANGE(0xf0, 0xf0) AM_READWRITE_LEGACY(nb1413m3_dipsw1_r,nb1413m3_outcoin_w)
+	AM_RANGE(0xf1, 0xf1) AM_READ_LEGACY(nb1413m3_dipsw2_r)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( pstadium_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( pstadium_io_map, AS_IO, 8, nbmj8991_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0x7f) AM_WRITE(nbmj8991_blitter_w)
 	AM_RANGE(0x80, 0x80) AM_WRITE(nbmj8991_sound_w)
-	AM_RANGE(0x90, 0x90) AM_READ(nb1413m3_inputport0_r)
-	AM_RANGE(0xa0, 0xa0) AM_READWRITE(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
-	AM_RANGE(0xb0, 0xb0) AM_READ(nb1413m3_inputport2_r) //AM_WRITENOP
-	AM_RANGE(0xc0, 0xc0) AM_READ(nb1413m3_inputport3_r)
+	AM_RANGE(0x90, 0x90) AM_READ_LEGACY(nb1413m3_inputport0_r)
+	AM_RANGE(0xa0, 0xa0) AM_READWRITE_LEGACY(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
+	AM_RANGE(0xb0, 0xb0) AM_READ_LEGACY(nb1413m3_inputport2_r) //AM_WRITENOP
+	AM_RANGE(0xc0, 0xc0) AM_READ_LEGACY(nb1413m3_inputport3_r)
 //  AM_RANGE(0xd0, 0xd0) AM_WRITENOP
-	AM_RANGE(0xf0, 0xf0) AM_READWRITE(nb1413m3_dipsw1_r,nb1413m3_outcoin_w)
-	AM_RANGE(0xf8, 0xf8) AM_READ(nb1413m3_dipsw2_r)
+	AM_RANGE(0xf0, 0xf0) AM_READWRITE_LEGACY(nb1413m3_dipsw1_r,nb1413m3_outcoin_w)
+	AM_RANGE(0xf8, 0xf8) AM_READ_LEGACY(nb1413m3_dipsw2_r)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( av2mj1bb_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( av2mj1bb_io_map, AS_IO, 8, nbmj8991_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0x7f) AM_WRITE(nbmj8991_blitter_w)
 	AM_RANGE(0x80, 0x80) AM_WRITE(nbmj8991_sound_w)
-	AM_RANGE(0x90, 0x90) AM_READ(nb1413m3_inputport0_r)
-	AM_RANGE(0xa0, 0xa0) AM_READWRITE(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
-	AM_RANGE(0xb0, 0xb0) AM_READWRITE(nb1413m3_inputport2_r,nb1413m3_vcrctrl_w)
-	AM_RANGE(0xc0, 0xc0) AM_READ(nb1413m3_inputport3_r)
+	AM_RANGE(0x90, 0x90) AM_READ_LEGACY(nb1413m3_inputport0_r)
+	AM_RANGE(0xa0, 0xa0) AM_READWRITE_LEGACY(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
+	AM_RANGE(0xb0, 0xb0) AM_READWRITE_LEGACY(nb1413m3_inputport2_r,nb1413m3_vcrctrl_w)
+	AM_RANGE(0xc0, 0xc0) AM_READ_LEGACY(nb1413m3_inputport3_r)
 //  AM_RANGE(0xd0, 0xd0) AM_WRITENOP
-	AM_RANGE(0xf0, 0xf0) AM_READ(nb1413m3_dipsw1_r)
+	AM_RANGE(0xf0, 0xf0) AM_READ_LEGACY(nb1413m3_dipsw1_r)
 //  AM_RANGE(0xf0, 0xf0) AM_WRITENOP
-	AM_RANGE(0xf8, 0xf8) AM_READ(nb1413m3_dipsw2_r)
+	AM_RANGE(0xf8, 0xf8) AM_READ_LEGACY(nb1413m3_dipsw2_r)
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( nbmj8991_sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( nbmj8991_sound_map, AS_PROGRAM, 8, nbmj8991_state )
 	AM_RANGE(0x0000, 0x77ff) AM_ROM
 	AM_RANGE(0x7800, 0x7fff) AM_RAM
 	AM_RANGE(0x8000, 0xffff) AM_ROMBANK("bank1")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( nbmj8991_sound_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( nbmj8991_sound_io_map, AS_IO, 8, nbmj8991_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x00) AM_READ(nbmj8991_sound_r) AM_DEVWRITE("dac1", DAC_WRITE)
-	AM_RANGE(0x02, 0x02) AM_DEVWRITE("dac2", DAC_WRITE)
+	AM_RANGE(0x00, 0x00) AM_READ(nbmj8991_sound_r) AM_DEVWRITE("dac1", dac_device, write_unsigned8)
+	AM_RANGE(0x02, 0x02) AM_DEVWRITE("dac2", dac_device, write_unsigned8)
 	AM_RANGE(0x04, 0x04) AM_WRITE(nbmj8991_soundbank_w)
 	AM_RANGE(0x06, 0x06) AM_WRITENOP
-	AM_RANGE(0x80, 0x81) AM_DEVWRITE("fmsnd", ym3812_w)
+	AM_RANGE(0x80, 0x81) AM_DEVWRITE_LEGACY("fmsnd", ym3812_w)
 ADDRESS_MAP_END
 
 
@@ -379,14 +371,14 @@ static INPUT_PORTS_START( pstadium )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )		// SERVICE
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )       // SERVICE
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -444,14 +436,14 @@ static INPUT_PORTS_START( triplew1 )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )		// SERVICE
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )       // SERVICE
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -509,14 +501,14 @@ static INPUT_PORTS_START( ntopstar )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )		// SERVICE
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )       // SERVICE
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -574,14 +566,14 @@ static INPUT_PORTS_START( mjlstory )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )		// SERVICE
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )       // SERVICE
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -639,14 +631,14 @@ static INPUT_PORTS_START( vanilla )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )		// SERVICE
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )       // SERVICE
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -706,14 +698,14 @@ static INPUT_PORTS_START( finalbny )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )		// SERVICE
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )       // SERVICE
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -771,14 +763,14 @@ static INPUT_PORTS_START( qmhayaku )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )		// SERVICE
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )       // SERVICE
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -837,14 +829,14 @@ static INPUT_PORTS_START( galkoku )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )		// SERVICE
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )       // SERVICE
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -906,14 +898,14 @@ static INPUT_PORTS_START( hyouban )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )		// SERVICE
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )       // SERVICE
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -975,14 +967,14 @@ static INPUT_PORTS_START( galkaika )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )		// SERVICE
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )       // SERVICE
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -1044,14 +1036,14 @@ static INPUT_PORTS_START( tokyogal )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )		// SERVICE
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )       // SERVICE
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -1113,14 +1105,14 @@ static INPUT_PORTS_START( tokimbsj )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )		// SERVICE
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )       // SERVICE
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -1182,14 +1174,14 @@ static INPUT_PORTS_START( mcontest )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )		// SERVICE
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )       // SERVICE
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -1251,14 +1243,14 @@ static INPUT_PORTS_START( uchuuai )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )		// SERVICE
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )       // SERVICE
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -1320,14 +1312,14 @@ static INPUT_PORTS_START( mjgottub )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )		// SERVICE
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )       // SERVICE
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -1384,14 +1376,14 @@ static INPUT_PORTS_START( av2mj1bb )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )			// COIN2
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )          // COIN2
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -1451,14 +1443,14 @@ static INPUT_PORTS_START( av2mj2rg )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )			// COIN2
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )          // COIN2
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -1475,66 +1467,56 @@ static const ay8910_interface ay8910_config =
 };
 
 
-static MACHINE_CONFIG_START( nbmjdrv1, nbmj8991_state )	// galkoku
+static MACHINE_CONFIG_START( nbmjdrv1, nbmj8991_state ) // galkoku
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, 25000000/5)		/* 5.00 MHz ? */
+	MCFG_CPU_ADD("maincpu", Z80, 25000000/5)        /* 5.00 MHz ? */
 	MCFG_CPU_PROGRAM_MAP(galkoku_map)
 	MCFG_CPU_IO_MAP(galkoku_io_map)
 	MCFG_CPU_VBLANK_INT("screen", nb1413m3_interrupt)
-
-	MCFG_MACHINE_RESET(nbmj8991)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(1024, 512)
 	MCFG_SCREEN_VISIBLE_AREA(0, 640-1, 0, 240-1)
-	MCFG_SCREEN_UPDATE(nbmj8991_type1)
+	MCFG_SCREEN_UPDATE_DRIVER(nbmj8991_state, screen_update_nbmj8991_type1)
 
 	MCFG_PALETTE_LENGTH(256)
-
-	MCFG_VIDEO_START(nbmj8991)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 	MCFG_SOUND_ADD("fmsnd", YM3812, 25000000/10)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.70)
 
-	MCFG_SOUND_ADD("dac", DAC, 0)
+	MCFG_DAC_ADD("dac")
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 MACHINE_CONFIG_END
 
 
-static MACHINE_CONFIG_START( nbmjdrv2, nbmj8991_state )	// pstadium
+static MACHINE_CONFIG_START( nbmjdrv2, nbmj8991_state ) // pstadium
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, 6000000/2)	/* 3.00 MHz */
+	MCFG_CPU_ADD("maincpu", Z80, 6000000/2) /* 3.00 MHz */
 	MCFG_CPU_PROGRAM_MAP(pstadium_map)
 	MCFG_CPU_IO_MAP(pstadium_io_map)
 	MCFG_CPU_VBLANK_INT("screen", nb1413m3_interrupt)
 
-	MCFG_CPU_ADD("audiocpu", Z80, 4000000)					/* 4.00 MHz */
+	MCFG_CPU_ADD("audiocpu", Z80, 4000000)                  /* 4.00 MHz */
 	MCFG_CPU_PROGRAM_MAP(nbmj8991_sound_map)
 	MCFG_CPU_IO_MAP(nbmj8991_sound_io_map)
-	MCFG_CPU_PERIODIC_INT(irq0_line_hold, 128*60) // ?
-
-	MCFG_MACHINE_RESET(nbmj8991)
+	MCFG_CPU_PERIODIC_INT_DRIVER(nbmj8991_state, irq0_line_hold, 128*60) // ?
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(1024, 512)
 	MCFG_SCREEN_VISIBLE_AREA(0, 640-1, 0, 240-1)
-	MCFG_SCREEN_UPDATE(nbmj8991_type2)
+	MCFG_SCREEN_UPDATE_DRIVER(nbmj8991_state, screen_update_nbmj8991_type2)
 
 	MCFG_PALETTE_LENGTH(256)
-
-	MCFG_VIDEO_START(nbmj8991)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -1542,10 +1524,10 @@ static MACHINE_CONFIG_START( nbmjdrv2, nbmj8991_state )	// pstadium
 	MCFG_SOUND_ADD("fmsnd", YM3812, 25000000/6.25)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.70)
 
-	MCFG_SOUND_ADD("dac1", DAC, 0)
+	MCFG_DAC_ADD("dac1")
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 
-	MCFG_SOUND_ADD("dac2", DAC, 0)
+	MCFG_DAC_ADD("dac2")
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 MACHINE_CONFIG_END
 
@@ -2194,21 +2176,21 @@ ROM_START( av2mj2rg )
 ROM_END
 
 
-GAME( 1989, galkoku,  0,        galkoku,  galkoku,  galkoku,  ROT180, "Nichibutsu / T.R.Tec", "Mahjong Gal no Kokuhaku (Japan)", 0 )
-GAME( 1989, hyouban,  galkoku,  hyouban,  hyouban,  hyouban,  ROT180, "Nichibutsu / T.R.Tec", "Mahjong Hyouban Musume [BET] (Japan)", 0 )
-GAME( 1989, galkaika, 0,        galkaika, galkaika, galkaika, ROT180, "Nichibutsu / T.R.Tec", "Mahjong Gal no Kaika (Japan)", 0 )
-GAME( 1989, tokyogal, 0,        tokyogal, tokyogal, tokyogal, ROT180, "Nichibutsu", "Tokyo Gal Zukan (Japan)", 0 )
-GAME( 1989, tokimbsj, tokyogal, tokimbsj, tokimbsj, tokimbsj, ROT180, "Nichibutsu", "Tokimeki Bishoujo [BET] (Japan)", 0 )
-GAME( 1989, mcontest, 0,        mcontest, mcontest, mcontest, ROT180, "Nichibutsu", "Miss Mahjong Contest (Japan)", 0 )
-GAME( 1989, uchuuai,  0,        uchuuai,  uchuuai,  uchuuai,  ROT180, "Nichibutsu", "Mahjong Uchuu yori Ai wo komete (Japan)", 0 )
-GAME( 1989, triplew1, 0,        triplew1, triplew1, triplew1, ROT180, "Nichibutsu", "Mahjong Triple Wars (Japan)", 0 )
-GAME( 1990, pstadium, 0,        pstadium, pstadium, pstadium, ROT180, "Nichibutsu", "Mahjong Panic Stadium (Japan)", 0 )
-GAME( 1990, triplew2, 0,        triplew2, triplew1, triplew2, ROT180, "Nichibutsu", "Mahjong Triple Wars 2 (Japan)", 0 )
-GAME( 1990, ntopstar, 0,        ntopstar, ntopstar, ntopstar, ROT180, "Nichibutsu", "Mahjong Nerae! Top Star (Japan)", 0 )
-GAME( 1991, mjlstory, 0,        mjlstory, mjlstory, mjlstory, ROT180, "Nichibutsu", "Mahjong Jikken Love Story (Japan)", 0 )
-GAME( 1991, vanilla,  0,        vanilla,  vanilla,  vanilla,  ROT180, "Nichibutsu", "Mahjong Vanilla Syndrome (Japan)", 0 )
-GAME( 1991, finalbny, vanilla,  finalbny, finalbny, finalbny, ROT180, "Nichibutsu", "Mahjong Final Bunny [BET] (Japan)", 0 )
-GAME( 1991, qmhayaku, 0,        qmhayaku, qmhayaku, qmhayaku, ROT180, "Nichibutsu", "Quiz-Mahjong Hayaku Yatteyo! (Japan)", 0 )
-GAME( 1991, mjgottub, 0,        mjgottub, mjgottub, mjgottub, ROT180, "Nichibutsu", "Medal Mahjong Gottsu ee-kanji [BET] (Japan)", 0 )
-GAME( 1991, av2mj1bb, 0,        av2mj1bb, av2mj1bb, av2mj1bb, ROT0,   "Miki Syouji / AV Japan", "AV2Mahjong No.1 Bay Bridge no Seijo (Japan)", GAME_NOT_WORKING )
-GAME( 1991, av2mj2rg, 0,        av2mj2rg, av2mj2rg, av2mj2rg, ROT0,   "Miki Syouji / AV Japan", "AV2Mahjong No.2 Rouge no Kaori (Japan)", GAME_NOT_WORKING )
+GAME( 1989, galkoku,  0,        galkoku,  galkoku, nbmj8991_state,  galkoku,  ROT180, "Nichibutsu / T.R.Tec", "Mahjong Gal no Kokuhaku (Japan)", 0 )
+GAME( 1989, hyouban,  galkoku,  hyouban,  hyouban, nbmj8991_state,  hyouban,  ROT180, "Nichibutsu / T.R.Tec", "Mahjong Hyouban Musume [BET] (Japan)", 0 )
+GAME( 1989, galkaika, 0,        galkaika, galkaika, nbmj8991_state, galkaika, ROT180, "Nichibutsu / T.R.Tec", "Mahjong Gal no Kaika (Japan)", 0 )
+GAME( 1989, tokyogal, 0,        tokyogal, tokyogal, nbmj8991_state, tokyogal, ROT180, "Nichibutsu", "Tokyo Gal Zukan (Japan)", 0 )
+GAME( 1989, tokimbsj, tokyogal, tokimbsj, tokimbsj, nbmj8991_state, tokimbsj, ROT180, "Nichibutsu", "Tokimeki Bishoujo [BET] (Japan)", 0 )
+GAME( 1989, mcontest, 0,        mcontest, mcontest, nbmj8991_state, mcontest, ROT180, "Nichibutsu", "Miss Mahjong Contest (Japan)", 0 )
+GAME( 1989, uchuuai,  0,        uchuuai,  uchuuai, nbmj8991_state,  uchuuai,  ROT180, "Nichibutsu", "Mahjong Uchuu yori Ai wo komete (Japan)", 0 )
+GAME( 1989, triplew1, 0,        triplew1, triplew1, nbmj8991_state, triplew1, ROT180, "Nichibutsu", "Mahjong Triple Wars (Japan)", 0 )
+GAME( 1990, pstadium, 0,        pstadium, pstadium, nbmj8991_state, pstadium, ROT180, "Nichibutsu", "Mahjong Panic Stadium (Japan)", 0 )
+GAME( 1990, triplew2, 0,        triplew2, triplew1, nbmj8991_state, triplew2, ROT180, "Nichibutsu", "Mahjong Triple Wars 2 (Japan)", 0 )
+GAME( 1990, ntopstar, 0,        ntopstar, ntopstar, nbmj8991_state, ntopstar, ROT180, "Nichibutsu", "Mahjong Nerae! Top Star (Japan)", 0 )
+GAME( 1991, mjlstory, 0,        mjlstory, mjlstory, nbmj8991_state, mjlstory, ROT180, "Nichibutsu", "Mahjong Jikken Love Story (Japan)", 0 )
+GAME( 1991, vanilla,  0,        vanilla,  vanilla, nbmj8991_state,  vanilla,  ROT180, "Nichibutsu", "Mahjong Vanilla Syndrome (Japan)", 0 )
+GAME( 1991, finalbny, vanilla,  finalbny, finalbny, nbmj8991_state, finalbny, ROT180, "Nichibutsu", "Mahjong Final Bunny [BET] (Japan)", 0 )
+GAME( 1991, qmhayaku, 0,        qmhayaku, qmhayaku, nbmj8991_state, qmhayaku, ROT180, "Nichibutsu", "Quiz-Mahjong Hayaku Yatteyo! (Japan)", 0 )
+GAME( 1991, mjgottub, 0,        mjgottub, mjgottub, nbmj8991_state, mjgottub, ROT180, "Nichibutsu", "Medal Mahjong Gottsu ee-kanji [BET] (Japan)", 0 )
+GAME( 1991, av2mj1bb, 0,        av2mj1bb, av2mj1bb, nbmj8991_state, av2mj1bb, ROT0,   "Miki Syouji / AV Japan", "AV2Mahjong No.1 Bay Bridge no Seijo (Japan)", GAME_NOT_WORKING )
+GAME( 1991, av2mj2rg, 0,        av2mj2rg, av2mj2rg, nbmj8991_state, av2mj2rg, ROT0,   "Miki Syouji / AV Japan", "AV2Mahjong No.2 Rouge no Kaori (Japan)", GAME_NOT_WORKING )

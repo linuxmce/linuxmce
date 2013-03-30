@@ -44,7 +44,7 @@ TODO:
 
 */
 
-#define MASTER_CLOCK	XTAL_22_1184MHz
+#define MASTER_CLOCK    XTAL_22_1184MHz
 
 #include "emu.h"
 #include "cpu/z80/z80.h"
@@ -55,22 +55,26 @@ TODO:
 class carrera_state : public driver_device
 {
 public:
-	carrera_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	carrera_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_tileram(*this, "tileram"){ }
 
-	UINT8* m_tileram;
+	required_shared_ptr<UINT8> m_tileram;
+	DECLARE_READ8_MEMBER(unknown_r);
+	virtual void palette_init();
+	UINT32 screen_update_carrera(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
-static ADDRESS_MAP_START( carrera_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( carrera_map, AS_PROGRAM, 8, carrera_state )
 	AM_RANGE(0x0000, 0x4fff) AM_ROM
 	AM_RANGE(0xe000, 0xe7ff) AM_RAM
-	AM_RANGE(0xe800, 0xe800) AM_DEVWRITE("crtc", mc6845_address_w)
-	AM_RANGE(0xe801, 0xe801) AM_DEVWRITE("crtc", mc6845_register_w)
-	AM_RANGE(0xf000, 0xffff) AM_RAM AM_BASE_MEMBER(carrera_state, m_tileram)
+	AM_RANGE(0xe800, 0xe800) AM_DEVWRITE("crtc", mc6845_device, address_w)
+	AM_RANGE(0xe801, 0xe801) AM_DEVWRITE("crtc", mc6845_device, register_w)
+	AM_RANGE(0xf000, 0xffff) AM_RAM AM_SHARE("tileram")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( io_map, AS_IO, 8, carrera_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0x00) AM_READ_PORT("IN0")
 	AM_RANGE(0x01, 0x01) AM_READ_PORT("IN1")
@@ -79,11 +83,11 @@ static ADDRESS_MAP_START( io_map, AS_IO, 8 )
 	AM_RANGE(0x04, 0x04) AM_READ_PORT("IN4")
 	AM_RANGE(0x05, 0x05) AM_READ_PORT("IN5")
 	AM_RANGE(0x06, 0x06) AM_WRITENOP // ?
-	AM_RANGE(0x08, 0x09) AM_DEVWRITE("aysnd", ay8910_address_data_w)
+	AM_RANGE(0x08, 0x09) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_data_w)
 ADDRESS_MAP_END
 
 static INPUT_PORTS_START( carrera )
-	PORT_START("IN0")	/* Port 0 */
+	PORT_START("IN0")   /* Port 0 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_JOYSTICK_UP )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_JOYSTICK_DOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_JOYSTICK_LEFT  )
@@ -100,7 +104,7 @@ static INPUT_PORTS_START( carrera )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-	PORT_START("IN1")	/* Port 1 */
+	PORT_START("IN1")   /* Port 1 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
 	/* unused / unknown inputs, not dips */
@@ -124,7 +128,7 @@ static INPUT_PORTS_START( carrera )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	/* I suspect the 4 below are the 4xDSWs */
-	PORT_START("IN2")	/* Port 2 */
+	PORT_START("IN2")   /* Port 2 */
 	PORT_DIPNAME( 0x01, 0x01, "2" )
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -150,7 +154,7 @@ static INPUT_PORTS_START( carrera )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-	PORT_START("IN3")	/* Port 3 */
+	PORT_START("IN3")   /* Port 3 */
 	PORT_DIPNAME( 0x01, 0x01, "3" )
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -176,7 +180,7 @@ static INPUT_PORTS_START( carrera )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-	PORT_START("IN4")	/* Port 4 */
+	PORT_START("IN4")   /* Port 4 */
 	PORT_DIPNAME( 0x01, 0x01, "4" )
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -202,7 +206,7 @@ static INPUT_PORTS_START( carrera )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-	PORT_START("IN5")	/* Port 5 */
+	PORT_START("IN5")   /* Port 5 */
 	PORT_DIPNAME( 0x01, 0x01, "5" )
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -244,9 +248,8 @@ static GFXDECODE_START( carrera )
 	GFXDECODE_ENTRY( "gfx1", 0, tiles8x8_layout, 0, 1 )
 GFXDECODE_END
 
-static SCREEN_UPDATE(carrera)
+UINT32 carrera_state::screen_update_carrera(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	carrera_state *state = screen->machine().driver_data<carrera_state>();
 
 	int x,y;
 	int count = 0;
@@ -255,18 +258,18 @@ static SCREEN_UPDATE(carrera)
 	{
 		for (x=0;x<64;x++)
 		{
-			int tile = state->m_tileram[count&0x7ff] | state->m_tileram[(count&0x7ff)+0x800]<<8;
+			int tile = m_tileram[count&0x7ff] | m_tileram[(count&0x7ff)+0x800]<<8;
 
-			drawgfx_opaque(bitmap,cliprect,screen->machine().gfx[0],tile,0,0,0,x*8,y*8);
+			drawgfx_opaque(bitmap,cliprect,machine().gfx[0],tile,0,0,0,x*8,y*8);
 			count++;
 		}
 	}
 	return 0;
 }
 
-static READ8_DEVICE_HANDLER( unknown_r )
+READ8_MEMBER(carrera_state::unknown_r)
 {
-	return device->machine().rand();
+	return machine().rand();
 }
 
 /* these are set as input, but I have no idea which input port it uses is for the AY */
@@ -274,18 +277,19 @@ static const ay8910_interface ay8910_config =
 {
 	AY8910_LEGACY_OUTPUT,
 	AY8910_DEFAULT_LOADS,
-	DEVCB_HANDLER(unknown_r),
-	DEVCB_HANDLER(unknown_r),
+	DEVCB_DRIVER_MEMBER(carrera_state,unknown_r),
+	DEVCB_DRIVER_MEMBER(carrera_state,unknown_r),
 	DEVCB_NULL,
 	DEVCB_NULL
 };
 
-static PALETTE_INIT(carrera)
+void carrera_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int br_bit0, br_bit1, bit0, bit1, r, g, b;
-	int	i;
+	int i;
 
-	for (i = 0; i < 0x40; ++i)
+	for (i = 0; i < 0x20; ++i)
 	{
 		br_bit0 = (color_prom[0] >> 6) & 0x01;
 		br_bit1 = (color_prom[0] >> 7) & 0x01;
@@ -300,7 +304,7 @@ static PALETTE_INIT(carrera)
 		bit1 = (color_prom[0] >> 5) & 0x01;
 		r = 0x0e * br_bit0 + 0x1f * br_bit1 + 0x43 * bit0 + 0x8f * bit1;
 
-		palette_set_color(machine, i, MAKE_RGB(r, g, b));
+		palette_set_color(machine(), i, MAKE_RGB(r, g, b));
 		color_prom++;
 	}
 }
@@ -308,16 +312,16 @@ static PALETTE_INIT(carrera)
 
 static const mc6845_interface mc6845_intf =
 {
-	"screen",	/* screen we are acting on */
-	8,			/* number of pixels per video memory address */
-	NULL,		/* before pixel update callback */
-	NULL,		/* row update callback */
-	NULL,		/* after pixel update callback */
-	DEVCB_NULL,	/* callback for display state changes */
-	DEVCB_NULL,	/* callback for cursor state changes */
-	DEVCB_NULL,	/* HSYNC callback */
-	DEVCB_NULL,	/* VSYNC callback */
-	NULL		/* update address callback */
+	"screen",   /* screen we are acting on */
+	8,          /* number of pixels per video memory address */
+	NULL,       /* before pixel update callback */
+	NULL,       /* row update callback */
+	NULL,       /* after pixel update callback */
+	DEVCB_NULL, /* callback for display state changes */
+	DEVCB_NULL, /* callback for cursor state changes */
+	DEVCB_NULL, /* HSYNC callback */
+	DEVCB_NULL, /* VSYNC callback */
+	NULL        /* update address callback */
 };
 
 
@@ -326,22 +330,20 @@ static MACHINE_CONFIG_START( carrera, carrera_state )
 	MCFG_CPU_ADD("maincpu", Z80, MASTER_CLOCK / 6)
 	MCFG_CPU_PROGRAM_MAP(carrera_map)
 	MCFG_CPU_IO_MAP(io_map)
-	MCFG_CPU_VBLANK_INT("screen", nmi_line_pulse)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", carrera_state,  nmi_line_pulse)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(512, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 512-1, 0, 256-1)
-	MCFG_SCREEN_UPDATE(carrera)
+	MCFG_SCREEN_UPDATE_DRIVER(carrera_state, screen_update_carrera)
 
 	MCFG_MC6845_ADD("crtc", MC6845, MASTER_CLOCK / 16, mc6845_intf)
 
 	MCFG_GFXDECODE(carrera)
 	MCFG_PALETTE_LENGTH(32)
-	MCFG_PALETTE_INIT(carrera)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -368,5 +370,4 @@ ROM_START( carrera )
 ROM_END
 
 
-GAME( 19??, carrera, 0, carrera, carrera,0, ROT0, "BS Electronics", "Carrera (Version 6.7)", 0 )
-
+GAME( 19??, carrera, 0, carrera, carrera, driver_device,0, ROT0, "BS Electronics", "Carrera (Version 6.7)", 0 )

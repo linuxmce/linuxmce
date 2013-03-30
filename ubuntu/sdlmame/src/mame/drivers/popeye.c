@@ -21,101 +21,99 @@ Notes:
 #include "sound/ay8910.h"
 #include "includes/popeye.h"
 
-static INTERRUPT_GEN( popeye_interrupt )
+INTERRUPT_GEN_MEMBER(popeye_state::popeye_interrupt)
 {
 	/* NMIs are enabled by the I register?? How can that be? */
-	if (cpu_get_reg(device, Z80_I) & 1)	/* skyskipr: 0/1, popeye: 2/3 but also 0/1 */
-		device_set_input_line(device, INPUT_LINE_NMI, PULSE_LINE);
+	if (device.state().state_int(Z80_I) & 1)    /* skyskipr: 0/1, popeye: 2/3 but also 0/1 */
+		device.execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 }
 
 
 /* the protection device simply returns the last two values written shifted left */
 /* by a variable amount. */
 
-static READ8_HANDLER( protection_r )
+READ8_MEMBER(popeye_state::protection_r)
 {
-	popeye_state *state = space->machine().driver_data<popeye_state>();
 	if (offset == 0)
 	{
-		return ((state->m_prot1 << state->m_prot_shift) | (state->m_prot0 >> (8-state->m_prot_shift))) & 0xff;
+		return ((m_prot1 << m_prot_shift) | (m_prot0 >> (8-m_prot_shift))) & 0xff;
 	}
-	else	/* offset == 1 */
+	else    /* offset == 1 */
 	{
 		/* the game just checks if bit 2 is clear. Returning 0 seems to be enough. */
 		return 0;
 	}
 }
 
-static WRITE8_HANDLER( protection_w )
+WRITE8_MEMBER(popeye_state::protection_w)
 {
-	popeye_state *state = space->machine().driver_data<popeye_state>();
 	if (offset == 0)
 	{
 		/* this is the same as the level number (1-3) */
-		state->m_prot_shift = data & 0x07;
+		m_prot_shift = data & 0x07;
 	}
-	else	/* offset == 1 */
+	else    /* offset == 1 */
 	{
-		state->m_prot0 = state->m_prot1;
-		state->m_prot1 = data;
+		m_prot0 = m_prot1;
+		m_prot1 = data;
 	}
 }
 
 
 
 
-static ADDRESS_MAP_START( skyskipr_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( skyskipr_map, AS_PROGRAM, 8, popeye_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x87ff) AM_RAM
-	AM_RANGE(0x8c00, 0x8c02) AM_RAM AM_BASE_MEMBER(popeye_state, m_background_pos)
-	AM_RANGE(0x8c03, 0x8c03) AM_RAM AM_BASE_MEMBER(popeye_state, m_palettebank)
-	AM_RANGE(0x8c04, 0x8e7f) AM_RAM AM_BASE_SIZE_MEMBER(popeye_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0x8c00, 0x8c02) AM_RAM AM_SHARE("background_pos")
+	AM_RANGE(0x8c03, 0x8c03) AM_RAM AM_SHARE("palettebank")
+	AM_RANGE(0x8c04, 0x8e7f) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0x8e80, 0x8fff) AM_RAM
-	AM_RANGE(0xa000, 0xa3ff) AM_WRITE(popeye_videoram_w) AM_BASE_MEMBER(popeye_state, m_videoram)
-	AM_RANGE(0xa400, 0xa7ff) AM_WRITE(popeye_colorram_w) AM_BASE_MEMBER(popeye_state, m_colorram)
+	AM_RANGE(0xa000, 0xa3ff) AM_WRITE(popeye_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0xa400, 0xa7ff) AM_WRITE(popeye_colorram_w) AM_SHARE("colorram")
 	AM_RANGE(0xc000, 0xcfff) AM_WRITE(skyskipr_bitmap_w)
 	AM_RANGE(0xe000, 0xe001) AM_READWRITE(protection_r,protection_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( popeye_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( popeye_map, AS_PROGRAM, 8, popeye_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x87ff) AM_RAM
 	AM_RANGE(0x8800, 0x8bff) AM_RAM
-	AM_RANGE(0x8c00, 0x8c02) AM_RAM AM_BASE_MEMBER(popeye_state, m_background_pos)
-	AM_RANGE(0x8c03, 0x8c03) AM_RAM AM_BASE_MEMBER(popeye_state, m_palettebank)
-	AM_RANGE(0x8c04, 0x8e7f) AM_RAM AM_BASE_SIZE_MEMBER(popeye_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0x8c00, 0x8c02) AM_RAM AM_SHARE("background_pos")
+	AM_RANGE(0x8c03, 0x8c03) AM_RAM AM_SHARE("palettebank")
+	AM_RANGE(0x8c04, 0x8e7f) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0x8e80, 0x8fff) AM_RAM
-	AM_RANGE(0xa000, 0xa3ff) AM_WRITE(popeye_videoram_w) AM_BASE_MEMBER(popeye_state, m_videoram)
-	AM_RANGE(0xa400, 0xa7ff) AM_WRITE(popeye_colorram_w) AM_BASE_MEMBER(popeye_state, m_colorram)
+	AM_RANGE(0xa000, 0xa3ff) AM_WRITE(popeye_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0xa400, 0xa7ff) AM_WRITE(popeye_colorram_w) AM_SHARE("colorram")
 	AM_RANGE(0xc000, 0xdfff) AM_WRITE(popeye_bitmap_w)
 	AM_RANGE(0xe000, 0xe001) AM_READWRITE(protection_r,protection_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( popeyebl_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( popeyebl_map, AS_PROGRAM, 8, popeye_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x87ff) AM_RAM
-	AM_RANGE(0x8c00, 0x8c02) AM_RAM AM_BASE_MEMBER(popeye_state, m_background_pos)
-	AM_RANGE(0x8c03, 0x8c03) AM_RAM AM_BASE_MEMBER(popeye_state, m_palettebank)
-	AM_RANGE(0x8c04, 0x8e7f) AM_RAM AM_BASE_SIZE_MEMBER(popeye_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0x8c00, 0x8c02) AM_RAM AM_SHARE("background_pos")
+	AM_RANGE(0x8c03, 0x8c03) AM_RAM AM_SHARE("palettebank")
+	AM_RANGE(0x8c04, 0x8e7f) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0x8e80, 0x8fff) AM_RAM
-	AM_RANGE(0xa000, 0xa3ff) AM_WRITE(popeye_videoram_w) AM_BASE_MEMBER(popeye_state, m_videoram)
-	AM_RANGE(0xa400, 0xa7ff) AM_WRITE(popeye_colorram_w) AM_BASE_MEMBER(popeye_state, m_colorram)
+	AM_RANGE(0xa000, 0xa3ff) AM_WRITE(popeye_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0xa400, 0xa7ff) AM_WRITE(popeye_colorram_w) AM_SHARE("colorram")
 	AM_RANGE(0xc000, 0xcfff) AM_WRITE(skyskipr_bitmap_w)
 	AM_RANGE(0xe000, 0xe01f) AM_ROM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( popeye_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( popeye_io_map, AS_IO, 8, popeye_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x01) AM_DEVWRITE("aysnd", ay8910_address_data_w)
+	AM_RANGE(0x00, 0x01) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_data_w)
 	AM_RANGE(0x00, 0x00) AM_READ_PORT("P1")
 	AM_RANGE(0x01, 0x01) AM_READ_PORT("P2")
 	AM_RANGE(0x02, 0x02) AM_READ_PORT("IN0")
-	AM_RANGE(0x03, 0x03) AM_DEVREAD("aysnd", ay8910_r)
+	AM_RANGE(0x03, 0x03) AM_DEVREAD_LEGACY("aysnd", ay8910_r)
 ADDRESS_MAP_END
 
 
 static INPUT_PORTS_START( skyskipr )
-	PORT_START("P1")	/* IN0 */
+	PORT_START("P1")    /* IN0 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_8WAY
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_8WAY
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_8WAY
@@ -125,7 +123,7 @@ static INPUT_PORTS_START( skyskipr )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON2 )
 
-	PORT_START("P2")	/* IN1 */
+	PORT_START("P2")    /* IN1 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_COCKTAIL
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_COCKTAIL
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_8WAY PORT_COCKTAIL
@@ -135,7 +133,7 @@ static INPUT_PORTS_START( skyskipr )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_COCKTAIL
 
-	PORT_START("IN0")	/* IN2 */
+	PORT_START("IN0")   /* IN2 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_START1 )
@@ -145,7 +143,7 @@ static INPUT_PORTS_START( skyskipr )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_SERVICE1 )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN1 )
 
-	PORT_START("DSW0")	/* DSW0 */
+	PORT_START("DSW0")  /* DSW0 */
 	PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( Coinage ) )
 	PORT_DIPSETTING(    0x03, "A 3/1 B 1/2" )
 	PORT_DIPSETTING(    0x0e, DEF_STR( 2C_1C ) )
@@ -172,9 +170,9 @@ static INPUT_PORTS_START( skyskipr )
 	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* scans DSW1 one bit at a time */
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL )   /* scans DSW1 one bit at a time */
 
-	PORT_START("DSW1")	/* DSW1 (FAKE - appears as bit 7 of DSW0, see code below) */
+	PORT_START("DSW1")  /* DSW1 (FAKE - appears as bit 7 of DSW0, see code below) */
 	PORT_DIPNAME( 0x03, 0x01, DEF_STR( Lives ) )
 	PORT_DIPSETTING(    0x03, "1" )
 	PORT_DIPSETTING(    0x02, "2" )
@@ -200,7 +198,7 @@ INPUT_PORTS_END
 
 
 static INPUT_PORTS_START( popeye )
-	PORT_START("P1")	/* IN0 */
+	PORT_START("P1")    /* IN0 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_4WAY
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_4WAY
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_4WAY
@@ -210,7 +208,7 @@ static INPUT_PORTS_START( popeye )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN ) /* probably unused */
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN ) /* probably unused */
 
-	PORT_START("P2")	/* IN1 */
+	PORT_START("P2")    /* IN1 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_4WAY PORT_COCKTAIL
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_4WAY PORT_COCKTAIL
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_4WAY PORT_COCKTAIL
@@ -220,7 +218,7 @@ static INPUT_PORTS_START( popeye )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN ) /* probably unused */
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN ) /* probably unused */
 
-	PORT_START("IN0")	/* IN2 */
+	PORT_START("IN0")   /* IN2 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNKNOWN ) /* probably unused */
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN ) /* probably unused */
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_START1 )
@@ -230,7 +228,7 @@ static INPUT_PORTS_START( popeye )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_SERVICE1 )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN1 )
 
-	PORT_START("DSW0")	/* DSW0 */
+	PORT_START("DSW0")  /* DSW0 */
 	PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( Coinage ) )    PORT_DIPLOCATION("SW1:1,2,3,4")
 	PORT_DIPSETTING(    0x08, DEF_STR( 6C_1C ) )
 	PORT_DIPSETTING(    0x05, DEF_STR( 5C_1C ) )
@@ -249,9 +247,9 @@ static INPUT_PORTS_START( popeye )
 	PORT_DIPSETTING(    0x20, "Nintendo Co.,Ltd" )
 	PORT_DIPSETTING(    0x60, "Nintendo of America" )
 //  PORT_DIPSETTING(    0x00, "Nintendo of America" )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* scans DSW1 one bit at a time */
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL )   /* scans DSW1 one bit at a time */
 
-	PORT_START("DSW1")	/* DSW1 (FAKE - appears as bit 7 of DSW0, see code below) */
+	PORT_START("DSW1")  /* DSW1 (FAKE - appears as bit 7 of DSW0, see code below) */
 	PORT_DIPNAME( 0x03, 0x01, DEF_STR( Lives ) )       PORT_DIPLOCATION("SW2:1,2")
 	PORT_DIPSETTING(    0x03, "1" )
 	PORT_DIPSETTING(    0x02, "2" )
@@ -277,7 +275,7 @@ INPUT_PORTS_END
 
 
 static INPUT_PORTS_START( popeyef )
-	PORT_START("P1")	/* IN0 */
+	PORT_START("P1")    /* IN0 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_4WAY
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_4WAY
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_4WAY
@@ -287,7 +285,7 @@ static INPUT_PORTS_START( popeyef )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN ) /* probably unused */
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN ) /* probably unused */
 
-	PORT_START("P2")	/* IN1 */
+	PORT_START("P2")    /* IN1 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_4WAY PORT_COCKTAIL
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_4WAY PORT_COCKTAIL
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_4WAY PORT_COCKTAIL
@@ -297,7 +295,7 @@ static INPUT_PORTS_START( popeyef )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN ) /* probably unused */
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN ) /* probably unused */
 
-	PORT_START("IN0")	/* IN2 */
+	PORT_START("IN0")   /* IN2 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNKNOWN ) /* probably unused */
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN ) /* probably unused */
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_START1 )
@@ -307,7 +305,7 @@ static INPUT_PORTS_START( popeyef )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_SERVICE1 )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN1 )
 
-	PORT_START("DSW0")	/* DSW0 */
+	PORT_START("DSW0")  /* DSW0 */
 	PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( Coinage ) )
 	PORT_DIPSETTING(    0x03, "A 3/1 B 1/2" )
 	PORT_DIPSETTING(    0x0e, DEF_STR( 2C_1C ) )
@@ -333,9 +331,9 @@ static INPUT_PORTS_START( popeyef )
 	PORT_DIPSETTING(    0x20, "Nintendo Co.,Ltd" )
 	PORT_DIPSETTING(    0x60, "Nintendo of America" )
 //  PORT_DIPSETTING(    0x00, "Nintendo of America" )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* scans DSW1 one bit at a time */
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL )   /* scans DSW1 one bit at a time */
 
-	PORT_START("DSW1")	/* DSW1 (FAKE - appears as bit 7 of DSW0, see code below) */
+	PORT_START("DSW1")  /* DSW1 (FAKE - appears as bit 7 of DSW0, see code below) */
 	PORT_DIPNAME( 0x03, 0x01, DEF_STR( Lives ) )
 	PORT_DIPSETTING(    0x03, "1" )
 	PORT_DIPSETTING(    0x02, "2" )
@@ -362,7 +360,7 @@ INPUT_PORTS_END
 
 static const gfx_layout charlayout =
 {
-	16,16,	/* 16*16 characters (8*8 doubled) */
+	16,16,  /* 16*16 characters (8*8 doubled) */
 	RGN_FRAC(1,1),
 	1,
 	{ 0 },
@@ -378,39 +376,37 @@ static const gfx_layout spritelayout =
 	2,
 	{ 0, RGN_FRAC(1,2) },
 	{RGN_FRAC(1,4)+7,RGN_FRAC(1,4)+6,RGN_FRAC(1,4)+5,RGN_FRAC(1,4)+4,
-	 RGN_FRAC(1,4)+3,RGN_FRAC(1,4)+2,RGN_FRAC(1,4)+1,RGN_FRAC(1,4)+0,
-	 7,6,5,4,3,2,1,0 },
+		RGN_FRAC(1,4)+3,RGN_FRAC(1,4)+2,RGN_FRAC(1,4)+1,RGN_FRAC(1,4)+0,
+		7,6,5,4,3,2,1,0 },
 	{ 15*8, 14*8, 13*8, 12*8, 11*8, 10*8, 9*8, 8*8,
-	  7*8, 6*8, 5*8, 4*8, 3*8, 2*8, 1*8, 0*8 },
+		7*8, 6*8, 5*8, 4*8, 3*8, 2*8, 1*8, 0*8 },
 	16*8
 };
 
 static GFXDECODE_START( popeye )
-	GFXDECODE_ENTRY( "gfx1", 0, charlayout,        16, 16 )	/* chars */
-	GFXDECODE_ENTRY( "gfx2", 0, spritelayout, 16+16*2, 64 )	/* sprites */
+	GFXDECODE_ENTRY( "gfx1", 0, charlayout,        16, 16 ) /* chars */
+	GFXDECODE_ENTRY( "gfx2", 0, spritelayout, 16+16*2, 64 ) /* sprites */
 GFXDECODE_END
 
 
 
 
-static WRITE8_DEVICE_HANDLER( popeye_portB_w )
+WRITE8_MEMBER(popeye_state::popeye_portB_w)
 {
-	popeye_state *state = device->machine().driver_data<popeye_state>();
 	/* bit 0 flips screen */
-	flip_screen_set(device->machine(), data & 1);
+	flip_screen_set(data & 1);
 
 	/* bits 1-3 select DSW1 bit to read */
-	state->m_dswbit = (data & 0x0e) >> 1;
+	m_dswbit = (data & 0x0e) >> 1;
 }
 
-static READ8_DEVICE_HANDLER( popeye_portA_r )
+READ8_MEMBER(popeye_state::popeye_portA_r)
 {
-	popeye_state *state = device->machine().driver_data<popeye_state>();
 	int res;
 
 
-	res = input_port_read(device->machine(), "DSW0");
-	res |= (input_port_read(device->machine(), "DSW1") << (7-state->m_dswbit)) & 0x80;
+	res = ioport("DSW0")->read();
+	res |= (ioport("DSW1")->read() << (7-m_dswbit)) & 0x80;
 
 	return res;
 }
@@ -419,35 +415,32 @@ static const ay8910_interface ay8910_config =
 {
 	AY8910_LEGACY_OUTPUT,
 	AY8910_DEFAULT_LOADS,
-	DEVCB_HANDLER(popeye_portA_r),
+	DEVCB_DRIVER_MEMBER(popeye_state,popeye_portA_r),
 	DEVCB_NULL,
 	DEVCB_NULL,
-	DEVCB_HANDLER(popeye_portB_w)
+	DEVCB_DRIVER_MEMBER(popeye_state,popeye_portB_w)
 };
 
 
 
 static MACHINE_CONFIG_START( skyskipr, popeye_state )
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, XTAL_8MHz/2)	/* 4 MHz */
+	MCFG_CPU_ADD("maincpu", Z80, XTAL_8MHz/2)   /* 4 MHz */
 	MCFG_CPU_PROGRAM_MAP(skyskipr_map)
 	MCFG_CPU_IO_MAP(popeye_io_map)
-	MCFG_CPU_VBLANK_INT("screen", popeye_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", popeye_state,  popeye_interrupt)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*16, 32*16)
 	MCFG_SCREEN_VISIBLE_AREA(0*16, 32*16-1, 2*16, 30*16-1)
-	MCFG_SCREEN_UPDATE(popeye)
+	MCFG_SCREEN_UPDATE_DRIVER(popeye_state, screen_update_popeye)
 
 	MCFG_GFXDECODE(popeye)
 	MCFG_PALETTE_LENGTH(16+16*2+64*4)
 
-	MCFG_PALETTE_INIT(popeye)
-	MCFG_VIDEO_START(skyskipr)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -462,7 +455,7 @@ static MACHINE_CONFIG_DERIVED( popeye, skyskipr )
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_PROGRAM_MAP(popeye_map)
 
-	MCFG_VIDEO_START(popeye)
+	MCFG_VIDEO_START_OVERRIDE(popeye_state,popeye)
 MACHINE_CONFIG_END
 
 
@@ -470,8 +463,8 @@ static MACHINE_CONFIG_DERIVED( popeyebl, skyskipr )
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_PROGRAM_MAP(popeyebl_map)
 
-	MCFG_PALETTE_INIT(popeyebl)
-	MCFG_VIDEO_START(popeye)
+	MCFG_PALETTE_INIT_OVERRIDE(popeye_state,popeyebl)
+	MCFG_VIDEO_START_OVERRIDE(popeye_state,popeye)
 MACHINE_CONFIG_END
 
 
@@ -525,7 +518,7 @@ ROM_START( popeye )
 	ROM_LOAD( "tpp2-c.7e", 0x6000, 0x2000, CRC(ef8649ca) SHA1(a0157f91600e56e2a953dadbd76da4330652e5c8) )
 
 	ROM_REGION( 0x0800, "gfx1", 0 )
-	ROM_LOAD( "tpp2-v.5n", 0x0000, 0x0800, CRC(cca61ddd) SHA1(239f87947c3cc8c6693c295ebf5ea0b7638b781c) )	/* first half is empty */
+	ROM_LOAD( "tpp2-v.5n", 0x0000, 0x0800, CRC(cca61ddd) SHA1(239f87947c3cc8c6693c295ebf5ea0b7638b781c) )   /* first half is empty */
 	ROM_CONTINUE(          0x0000, 0x0800 )
 
 	ROM_REGION( 0x8000, "gfx2", 0 )
@@ -550,7 +543,7 @@ ROM_START( popeyeu )
 	ROM_LOAD( "7e",        0x6000, 0x2000, CRC(b64aa314) SHA1(b5367f518350223e191d94434dc535873efb4c74) )
 
 	ROM_REGION( 0x0800, "gfx1", 0 )
-	ROM_LOAD( "tpp2-v.5n", 0x0000, 0x0800, CRC(cca61ddd) SHA1(239f87947c3cc8c6693c295ebf5ea0b7638b781c) )	/* first half is empty */
+	ROM_LOAD( "tpp2-v.5n", 0x0000, 0x0800, CRC(cca61ddd) SHA1(239f87947c3cc8c6693c295ebf5ea0b7638b781c) )   /* first half is empty */
 	ROM_CONTINUE(          0x0000, 0x0800 )
 
 	ROM_REGION( 0x8000, "gfx2", 0 )
@@ -575,7 +568,7 @@ ROM_START( popeyef )
 	ROM_LOAD( "tpp2-c_f.7e", 0x6000, 0x2000, CRC(f31e7916) SHA1(0f54ea7b1691b7789067fe880ffc56fac1d9523a) )
 
 	ROM_REGION( 0x0800, "gfx1", 0 )
-	ROM_LOAD( "tpp2-v.5n",   0x0000, 0x0800, CRC(cca61ddd) SHA1(239f87947c3cc8c6693c295ebf5ea0b7638b781c) )	/* first half is empty */
+	ROM_LOAD( "tpp2-v.5n",   0x0000, 0x0800, CRC(cca61ddd) SHA1(239f87947c3cc8c6693c295ebf5ea0b7638b781c) ) /* first half is empty */
 	ROM_CONTINUE(            0x0000, 0x0800 )
 
 	ROM_REGION( 0x8000, "gfx2", 0 )
@@ -598,10 +591,10 @@ ROM_START( popeyebl )
 	ROM_LOAD( "po2",          0x2000, 0x2000, CRC(995475ff) SHA1(5cd5ac23a73722e32c80cd6ffc435584750a46c9) )
 	ROM_LOAD( "po3",          0x4000, 0x2000, CRC(99d6a04a) SHA1(b683a5bb1ac4f6bec7478760c8ad0ff7c00bc652) )
 	ROM_LOAD( "po4",          0x6000, 0x2000, CRC(548a6514) SHA1(006e076781a3e5c3afa084c723247365358e3187) )
-	ROM_LOAD( "po_d1-e1.bin", 0xe000, 0x0020, CRC(8de22998) SHA1(e3a232ff85fb207afbe23049a65e828420589342) )	/* protection PROM */
+	ROM_LOAD( "po_d1-e1.bin", 0xe000, 0x0020, CRC(8de22998) SHA1(e3a232ff85fb207afbe23049a65e828420589342) )    /* protection PROM */
 
 	ROM_REGION( 0x0800, "gfx1", 0 )
-	ROM_LOAD( "v-5n",         0x0000, 0x0800, CRC(cca61ddd) SHA1(239f87947c3cc8c6693c295ebf5ea0b7638b781c) )	/* first half is empty */
+	ROM_LOAD( "v-5n",         0x0000, 0x0800, CRC(cca61ddd) SHA1(239f87947c3cc8c6693c295ebf5ea0b7638b781c) )    /* first half is empty */
 	ROM_CONTINUE(             0x0000, 0x0800 )
 
 	ROM_REGION( 0x8000, "gfx2", 0 )
@@ -619,53 +612,51 @@ ROM_END
 
 
 
-static DRIVER_INIT( skyskipr )
+DRIVER_INIT_MEMBER(popeye_state,skyskipr)
 {
-	popeye_state *state = machine.driver_data<popeye_state>();
 	UINT8 *buffer;
-	UINT8 *rom = machine.region("maincpu")->base();
+	UINT8 *rom = memregion("maincpu")->base();
 	int len = 0x10000;
 
 	/* decrypt the program ROMs */
-	buffer = auto_alloc_array(machine, UINT8, len);
+	buffer = auto_alloc_array(machine(), UINT8, len);
 	{
 		int i;
 		for (i = 0;i < len; i++)
 			buffer[i] = BITSWAP8(rom[BITSWAP16(i,15,14,13,12,11,10,8,7,0,1,2,4,5,9,3,6) ^ 0xfc],3,4,2,5,1,6,0,7);
 		memcpy(rom,buffer,len);
-		auto_free(machine, buffer);
+		auto_free(machine(), buffer);
 	}
 
-    state_save_register_global(machine, state->m_prot0);
-    state_save_register_global(machine, state->m_prot1);
-    state_save_register_global(machine, state->m_prot_shift);
+	state_save_register_global(machine(), m_prot0);
+	state_save_register_global(machine(), m_prot1);
+	state_save_register_global(machine(), m_prot_shift);
 }
 
-static DRIVER_INIT( popeye )
+DRIVER_INIT_MEMBER(popeye_state,popeye)
 {
-	popeye_state *state = machine.driver_data<popeye_state>();
 	UINT8 *buffer;
-	UINT8 *rom = machine.region("maincpu")->base();
+	UINT8 *rom = memregion("maincpu")->base();
 	int len = 0x10000;
 
 	/* decrypt the program ROMs */
-	buffer = auto_alloc_array(machine, UINT8, len);
+	buffer = auto_alloc_array(machine(), UINT8, len);
 	{
 		int i;
 		for (i = 0;i < len; i++)
 			buffer[i] = BITSWAP8(rom[BITSWAP16(i,15,14,13,12,11,10,8,7,6,3,9,5,4,2,1,0) ^ 0x3f],3,4,2,5,1,6,0,7);
 		memcpy(rom,buffer,len);
-		auto_free(machine, buffer);
+		auto_free(machine(), buffer);
 	}
 
-    state_save_register_global(machine, state->m_prot0);
-    state_save_register_global(machine, state->m_prot1);
-    state_save_register_global(machine, state->m_prot_shift);
+	state_save_register_global(machine(), m_prot0);
+	state_save_register_global(machine(), m_prot1);
+	state_save_register_global(machine(), m_prot_shift);
 }
 
 
-GAME( 1981, skyskipr, 0,      skyskipr, skyskipr, skyskipr, ROT0, "Nintendo", "Sky Skipper", GAME_SUPPORTS_SAVE )
-GAME( 1982, popeye,   0,      popeye,   popeye,   popeye,   ROT0, "Nintendo", "Popeye (revision D)", GAME_SUPPORTS_SAVE )
-GAME( 1982, popeyeu,  popeye, popeye,   popeye,   popeye,   ROT0, "Nintendo", "Popeye (revision D not protected)", GAME_SUPPORTS_SAVE )
-GAME( 1982, popeyef,  popeye, popeye,   popeyef,  popeye,   ROT0, "Nintendo", "Popeye (revision F)", GAME_SUPPORTS_SAVE )
-GAME( 1982, popeyebl, popeye, popeyebl, popeye,   0,        ROT0, "bootleg",  "Popeye (bootleg)", GAME_SUPPORTS_SAVE )
+GAME( 1981, skyskipr, 0,      skyskipr, skyskipr, popeye_state, skyskipr, ROT0, "Nintendo", "Sky Skipper", GAME_SUPPORTS_SAVE )
+GAME( 1982, popeye,   0,      popeye,   popeye, popeye_state,   popeye,   ROT0, "Nintendo", "Popeye (revision D)", GAME_SUPPORTS_SAVE )
+GAME( 1982, popeyeu,  popeye, popeye,   popeye, popeye_state,   popeye,   ROT0, "Nintendo", "Popeye (revision D not protected)", GAME_SUPPORTS_SAVE )
+GAME( 1982, popeyef,  popeye, popeye,   popeyef, popeye_state,  popeye,   ROT0, "Nintendo", "Popeye (revision F)", GAME_SUPPORTS_SAVE )
+GAME( 1982, popeyebl, popeye, popeyebl, popeye, driver_device,   0,        ROT0, "bootleg",  "Popeye (bootleg)", GAME_SUPPORTS_SAVE )

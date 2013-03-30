@@ -49,6 +49,9 @@
 #ifndef __EMU_H__
 #define __EMU_H__
 
+// turn off legacy bitmap addressing macros
+#define BITMAP_DISABLE_LEGACY_MACROS
+
 // core emulator headers -- must be first
 #include "emucore.h"
 #include "emutempl.h"
@@ -56,7 +59,6 @@
 #include "profiler.h"
 
 // commonly-referenecd utilities imported from lib/util
-#include "chd.h"
 #include "palette.h"
 #include "unicode.h"
 
@@ -64,8 +66,8 @@
 #include "attotime.h"
 #include "hash.h"
 #include "fileio.h" // remove me once NVRAM is implemented as device
-#include "tokenize.h"
 #include "delegate.h"
+#include "devdelegate.h"
 
 // memory and address spaces
 #include "memory.h"
@@ -73,47 +75,55 @@
 
 // machine-wide utilities
 #include "romload.h"
-#include "state.h"
+#include "save.h"
 
 // define machine_config_constructor here due to circular dependency
 // between devices and the machine config
 class machine_config;
-class device_config;
-typedef device_config * (*machine_config_constructor)(machine_config &config, device_config *owner);
+typedef device_t * (*machine_config_constructor)(machine_config &config, device_t *owner);
+
+// I/O
+#include "input.h"
+#include "ioport.h"
+#include "output.h"
+
+// diimage requires uimenu
+#include "uimenu.h"
 
 // devices and callbacks
-#include "devintrf.h"
+#include "device.h"
 #include "distate.h"
 #include "dimemory.h"
 #include "diexec.h"
 #include "opresolv.h"
 #include "diimage.h"
+#include "diserial.h"
+#include "dislot.h"
 #include "disound.h"
 #include "dinvram.h"
+#include "dirtc.h"
 #include "didisasm.h"
 #include "schedule.h"
 #include "timer.h"
-
-// I/O
-#include "input.h"
-#include "inputseq.h"
-#include "inptport.h"
-#include "output.h"
+#include "dinetwork.h"
 
 // timers, CPU and scheduling
 #include "devcpu.h"
-#include "watchdog.h"
 
 // machine and driver configuration
 #include "mconfig.h"
-#include "driver.h"
+#include "gamedrv.h"
 
 // image-related
 #include "softlist.h"
 #include "image.h"
 
+// networking
+#include "network.h"
+
 // the running machine
 #include "machine.h"
+#include "driver.h"
 #include "mame.h"
 
 // video-related
@@ -129,9 +139,9 @@ typedef device_config * (*machine_config_constructor)(machine_config &config, de
 
 // generic helpers
 #include "devcb.h"
+#include "devcb2.h"
 #include "drivers/xtal.h"
-#include "audio/generic.h"
 #include "machine/generic.h"
 #include "video/generic.h"
 
-#endif	/* __EMU_H__ */
+#endif  /* __EMU_H__ */

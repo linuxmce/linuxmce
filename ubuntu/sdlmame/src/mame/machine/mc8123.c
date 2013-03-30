@@ -56,7 +56,7 @@ The known games that use this CPU are:
 
 CPU #    Game                      Notes              Seed   Upper Limit
 -------- ------------------------- ------------------ ------ -----
-317-0014 DakkoChan Jansoh                             206850  1C00
+317-5014 DakkoChan Jansoh          NEC MC-8123B       206850  1C00
 317-0029 Block Gal                 NEC MC-8123B 651   091755  1800?
 317-0030 Perfect Billiard                             9451EC  1C00
 317-0042 Opa Opa                                      B31FD0  1C00
@@ -231,7 +231,7 @@ static int decrypt_type2b(int val,int param,int swap)
 	val ^= (1<<7)|(1<<3)|(1<<2)|(1<<1);
 
 	if (BIT(param,3)) val ^= (1<<6)|(1<<3)|(1<<1);
-	if (BIT(param,2)) val ^= (1<<7)|(1<<6)|(1<<5)|(1<<3)|(1<<2)|(1<<1);	// same as the other three combined
+	if (BIT(param,2)) val ^= (1<<7)|(1<<6)|(1<<5)|(1<<3)|(1<<2)|(1<<1); // same as the other three combined
 	if (BIT(param,1)) val ^= (1<<7);
 	if (BIT(param,0)) val ^= (1<<5)|(1<<2);
 
@@ -377,15 +377,15 @@ static UINT8 mc8123_decrypt(offs_t addr,UINT8 val,const UINT8 *key,int opcode)
 
 void mc8123_decrypt_rom(running_machine &machine, const char *cpu, const char *keyrgn, const char *bankname, int numbanks)
 {
-	address_space *space = machine.device(cpu)->memory().space(AS_PROGRAM);
+	address_space &space = machine.device(cpu)->memory().space(AS_PROGRAM);
 	int fixed_length = numbanks == 1 ? 0xc000 : 0x8000;
 	UINT8 *decrypted1 = auto_alloc_array(machine, UINT8, fixed_length);
 	UINT8 *decrypted2 = numbanks > 1 ? auto_alloc_array(machine, UINT8, 0x4000 * numbanks) : 0;
-	UINT8 *rom = machine.region(cpu)->base();
-	UINT8 *key = machine.region(keyrgn)->base();
+	UINT8 *rom = machine.root_device().memregion(cpu)->base();
+	UINT8 *key = machine.root_device().memregion(keyrgn)->base();
 	int A, bank;
 
-	space->set_decrypted_region(0x0000, fixed_length-1, decrypted1);
+	space.set_decrypted_region(0x0000, fixed_length-1, decrypted1);
 
 	for (A = 0x0000;A < fixed_length;A++)
 	{
@@ -400,7 +400,7 @@ void mc8123_decrypt_rom(running_machine &machine, const char *cpu, const char *k
 
 	if (bankname != NULL)
 	{
-		memory_configure_bank_decrypted(machine, bankname, 0, numbanks, decrypted2, 0x4000);
+		machine.root_device().membank(bankname)->configure_decrypted_entries(0, numbanks, decrypted2, 0x4000);
 
 		for (bank = 0; bank < numbanks; ++bank)
 		{

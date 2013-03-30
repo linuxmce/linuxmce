@@ -2,7 +2,7 @@
 #include "includes/usgames.h"
 
 
-PALETTE_INIT(usgames)
+void usgames_state::palette_init()
 {
 	int j;
 
@@ -25,49 +25,44 @@ PALETTE_INIT(usgames)
 		g = 0x7f * g * (i + 1);
 		b = 0x7f * b * (i + 1);
 
-		palette_set_color(machine,j,MAKE_RGB(r, g, b));
+		palette_set_color(machine(),j,MAKE_RGB(r, g, b));
 	}
 }
 
 
 
-static TILE_GET_INFO( get_usgames_tile_info )
+TILE_GET_INFO_MEMBER(usgames_state::get_usgames_tile_info)
 {
-	usgames_state *state = machine.driver_data<usgames_state>();
 	int tileno, colour;
 
-	tileno = state->m_videoram[tile_index*2];
-	colour = state->m_videoram[tile_index*2+1];
+	tileno = m_videoram[tile_index*2];
+	colour = m_videoram[tile_index*2+1];
 
-	SET_TILE_INFO(0,tileno,colour,0);
+	SET_TILE_INFO_MEMBER(0,tileno,colour,0);
 }
 
-VIDEO_START(usgames)
+void usgames_state::video_start()
 {
-	usgames_state *state = machine.driver_data<usgames_state>();
-	state->m_tilemap = tilemap_create(machine, get_usgames_tile_info,tilemap_scan_rows, 8, 8,64,32);
-	gfx_element_set_source(machine.gfx[0], state->m_charram);
-}
-
-
-WRITE8_HANDLER( usgames_videoram_w )
-{
-	usgames_state *state = space->machine().driver_data<usgames_state>();
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_tilemap,offset/2);
-}
-
-WRITE8_HANDLER( usgames_charram_w )
-{
-	usgames_state *state = space->machine().driver_data<usgames_state>();
-	state->m_charram[offset] = data;
-	gfx_element_mark_dirty(space->machine().gfx[0], offset/8);
+	m_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(usgames_state::get_usgames_tile_info),this),TILEMAP_SCAN_ROWS, 8, 8,64,32);
+	machine().gfx[0]->set_source(m_charram);
 }
 
 
-SCREEN_UPDATE(usgames)
+WRITE8_MEMBER(usgames_state::usgames_videoram_w)
 {
-	usgames_state *state = screen->machine().driver_data<usgames_state>();
-	tilemap_draw(bitmap,cliprect,state->m_tilemap,0,0);
+	m_videoram[offset] = data;
+	m_tilemap->mark_tile_dirty(offset/2);
+}
+
+WRITE8_MEMBER(usgames_state::usgames_charram_w)
+{
+	m_charram[offset] = data;
+	machine().gfx[0]->mark_dirty(offset/8);
+}
+
+
+UINT32 usgames_state::screen_update_usgames(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
+{
+	m_tilemap->draw(bitmap, cliprect, 0,0);
 	return 0;
 }

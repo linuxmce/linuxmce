@@ -82,23 +82,26 @@
 #define TYPE_68020 8
 #define TYPE_68030 16
 #define TYPE_68040 32
+#define TYPE_68340 64   // (CPU32)
+#define TYPE_COLDFIRE 128
 
-#define M68000_ONLY		(TYPE_68000 | TYPE_68008)
+#define M68000_ONLY     (TYPE_68000 | TYPE_68008)
 
-#define M68010_ONLY		TYPE_68010
-#define M68010_LESS		(TYPE_68000 | TYPE_68008 | TYPE_68010)
-#define M68010_PLUS		(TYPE_68010 | TYPE_68020 | TYPE_68030 | TYPE_68040)
+#define M68010_ONLY     TYPE_68010
+#define M68010_LESS     (TYPE_68000 | TYPE_68008 | TYPE_68010)
+#define M68010_PLUS     (TYPE_68010 | TYPE_68020 | TYPE_68030 | TYPE_68040 | TYPE_68340 | TYPE_COLDFIRE)
 
-#define M68020_ONLY 	TYPE_68020
-#define M68020_LESS 	(TYPE_68010 | TYPE_68020)
-#define M68020_PLUS		(TYPE_68020 | TYPE_68030 | TYPE_68040)
+#define M68020_ONLY     (TYPE_68020 | TYPE_68340)
+#define M68020_LESS     (TYPE_68010 | TYPE_68020 | TYPE_68340)
+#define M68020_PLUS     (TYPE_68020 | TYPE_68030 | TYPE_68040 | TYPE_68340 | TYPE_COLDFIRE)
 
-#define M68030_ONLY 	TYPE_68030
-#define M68030_LESS 	(TYPE_68010 | TYPE_68020 | TYPE_68030)
-#define M68030_PLUS		(TYPE_68030 | TYPE_68040)
+#define M68030_ONLY     TYPE_68030
+#define M68030_LESS     (TYPE_68010 | TYPE_68020 | TYPE_68030 | TYPE_68340 )
+#define M68030_PLUS     (TYPE_68030 | TYPE_68040)
 
-#define M68040_PLUS		TYPE_68040
+#define M68040_PLUS     TYPE_68040
 
+#define COLDFIRE        TYPE_COLDFIRE
 
 /* Extension word formats */
 #define EXT_8BIT_DISPLACEMENT(A)          ((A)&0xff)
@@ -122,7 +125,7 @@
 
 
 /* Opcode flags */
-#define SET_OPCODE_FLAGS(x)	g_opcode_type = x;
+#define SET_OPCODE_FLAGS(x) g_opcode_type = x;
 #define COMBINE_OPCODE_FLAGS(x) ((x) | g_opcode_type | DASMFLAG_SUPPORTED)
 
 
@@ -171,13 +174,13 @@ static int   valid_ea(UINT32 opcode, UINT32 mask);
 static int DECL_SPEC compare_nof_true_bits(const void *aptr, const void *bptr);
 
 /* used to build opcode handler jump table */
-typedef struct
+struct opcode_struct
 {
 	void (*opcode_handler)(void); /* handler function */
 	UINT32 mask;                    /* mask on opcode */
 	UINT32 match;                   /* what to match after masking */
 	UINT32 ea_mask;                 /* what ea modes are allowed */
-} opcode_struct;
+};
 
 
 
@@ -213,14 +216,14 @@ static const char *const g_cc[16] =
 
 static const char *const g_cpcc[64] =
 {/* 000    001    010    011    100    101    110    111 */
-	  "f",  "eq", "ogt", "oge", "olt", "ole", "ogl",  "or", /* 000 */
-	 "un", "ueq", "ugt", "uge", "ult", "ule",  "ne",   "t", /* 001 */
-	 "sf", "seq",  "gt",  "ge",  "lt",  "le",  "gl"  "gle", /* 010 */
-  "ngle", "ngl", "nle", "nlt", "nge", "ngt", "sne",  "st", /* 011 */
-	  "?",   "?",   "?",   "?",   "?",   "?",   "?",   "?", /* 100 */
-	  "?",   "?",   "?",   "?",   "?",   "?",   "?",   "?", /* 101 */
-	  "?",   "?",   "?",   "?",   "?",   "?",   "?",   "?", /* 110 */
-	  "?",   "?",   "?",   "?",   "?",   "?",   "?",   "?"  /* 111 */
+		"f",  "eq", "ogt", "oge", "olt", "ole", "ogl",  "or", /* 000 */
+		"un", "ueq", "ugt", "uge", "ult", "ule",  "ne",   "t", /* 001 */
+		"sf", "seq",  "gt",  "ge",  "lt",  "le",  "gl"  "gle", /* 010 */
+	"ngle", "ngl", "nle", "nlt", "nge", "ngt", "sne",  "st", /* 011 */
+		"?",   "?",   "?",   "?",   "?",   "?",   "?",   "?", /* 100 */
+		"?",   "?",   "?",   "?",   "?",   "?",   "?",   "?", /* 101 */
+		"?",   "?",   "?",   "?",   "?",   "?",   "?",   "?", /* 110 */
+		"?",   "?",   "?",   "?",   "?",   "?",   "?",   "?"  /* 111 */
 };
 
 static const char *const g_mmuregs[8] =
@@ -238,13 +241,13 @@ static const char *const g_mmucond[16] =
 /* =========================== UTILITY FUNCTIONS ========================== */
 /* ======================================================================== */
 
-#define LIMIT_CPU_TYPES(ALLOWED_CPU_TYPES)	\
-	if(!(g_cpu_type & ALLOWED_CPU_TYPES))	\
-	{										\
-		if((g_cpu_ir & 0xf000) == 0xf000)	\
-			d68000_1111();					\
-		else d68000_illegal();				\
-		return;								\
+#define LIMIT_CPU_TYPES(ALLOWED_CPU_TYPES)  \
+	if(!(g_cpu_type & ALLOWED_CPU_TYPES))   \
+	{                                       \
+		if((g_cpu_ir & 0xf000) == 0xf000)   \
+			d68000_1111();                  \
+		else d68000_illegal();              \
+		return;                             \
 	}
 
 static UINT32 dasm_read_imm_8(UINT32 advance)
@@ -259,7 +262,7 @@ static UINT32 dasm_read_imm_16(UINT32 advance)
 {
 	UINT32 result;
 	result = (g_rawop[g_cpu_pc + 0 - g_rawbasepc] << 8) |
-	          g_rawop[g_cpu_pc + 1 - g_rawbasepc];
+				g_rawop[g_cpu_pc + 1 - g_rawbasepc];
 	g_cpu_pc += advance;
 	return result;
 }
@@ -268,9 +271,9 @@ static UINT32 dasm_read_imm_32(UINT32 advance)
 {
 	UINT32 result;
 	result = (g_rawop[g_cpu_pc + 0 - g_rawbasepc] << 24) |
-	         (g_rawop[g_cpu_pc + 1 - g_rawbasepc] << 16) |
-	         (g_rawop[g_cpu_pc + 2 - g_rawbasepc] << 8) |
-	          g_rawop[g_cpu_pc + 3 - g_rawbasepc];
+				(g_rawop[g_cpu_pc + 1 - g_rawbasepc] << 16) |
+				(g_rawop[g_cpu_pc + 2 - g_rawbasepc] << 8) |
+				g_rawop[g_cpu_pc + 3 - g_rawbasepc];
 	g_cpu_pc += advance;
 	return result;
 }
@@ -1334,19 +1337,22 @@ static void d68020_chk2_cmp2_32(void)
 static void d68040_cinv(void)
 {
 	LIMIT_CPU_TYPES(M68040_PLUS);
+
+	static const char *cachetype[4] = { "nop", "data", "inst", "both" };
+
 	switch((g_cpu_ir>>3)&3)
 	{
 		case 0:
 			sprintf(g_dasm_str, "cinv (illegal scope); (4)");
 			break;
 		case 1:
-			sprintf(g_dasm_str, "cinvl   %d, (A%d); (4)", (g_cpu_ir>>6)&3, g_cpu_ir&7);
+			sprintf(g_dasm_str, "cinvl   %s, (A%d); (4)", cachetype[(g_cpu_ir>>6)&3], g_cpu_ir&7);
 			break;
 		case 2:
-			sprintf(g_dasm_str, "cinvp   %d, (A%d); (4)", (g_cpu_ir>>6)&3, g_cpu_ir&7);
+			sprintf(g_dasm_str, "cinvp   %s, (A%d); (4)", cachetype[(g_cpu_ir>>6)&3], g_cpu_ir&7);
 			break;
 		case 3:
-			sprintf(g_dasm_str, "cinva   %d; (4)", (g_cpu_ir>>6)&3);
+			sprintf(g_dasm_str, "cinva   %s; (4)", cachetype[(g_cpu_ir>>6)&3]);
 			break;
 	}
 }
@@ -1580,6 +1586,8 @@ static void d68020_cptrapcc_32(void)
 
 static void d68040_cpush(void)
 {
+	static const char *cachetype[4] = { "nop", "data", "inst", "both" };
+
 	LIMIT_CPU_TYPES(M68040_PLUS);
 	switch((g_cpu_ir>>3)&3)
 	{
@@ -1587,13 +1595,13 @@ static void d68040_cpush(void)
 			sprintf(g_dasm_str, "cpush (illegal scope); (4)");
 			break;
 		case 1:
-			sprintf(g_dasm_str, "cpushl  %d, (A%d); (4)", (g_cpu_ir>>6)&3, g_cpu_ir&7);
+			sprintf(g_dasm_str, "cpushl  %s, (A%d); (4)", cachetype[(g_cpu_ir>>6)&3], g_cpu_ir&7);
 			break;
 		case 2:
-			sprintf(g_dasm_str, "cpushp  %d, (A%d); (4)", (g_cpu_ir>>6)&3, g_cpu_ir&7);
+			sprintf(g_dasm_str, "cpushp  %s, (A%d); (4)", cachetype[(g_cpu_ir>>6)&3], g_cpu_ir&7);
 			break;
 		case 3:
-			sprintf(g_dasm_str, "cpusha  %d; (4)", (g_cpu_ir>>6)&3);
+			sprintf(g_dasm_str, "cpusha  %s; (4)", cachetype[(g_cpu_ir>>6)&3]);
 			break;
 	}
 }
@@ -1739,61 +1747,61 @@ static void d68040_fpu(void)
 		{
 			switch(w2 & 0x7f)
 			{
-				case 0x00:	sprintf(mnemonic, "fmove"); break;
-				case 0x01:	sprintf(mnemonic, "fint"); break;
-				case 0x02:	sprintf(mnemonic, "fsinh"); break;
-				case 0x03:	sprintf(mnemonic, "fintrz"); break;
-				case 0x04:	sprintf(mnemonic, "fsqrt"); break;
-				case 0x06:	sprintf(mnemonic, "flognp1"); break;
-				case 0x08:	sprintf(mnemonic, "fetoxm1"); break;
-				case 0x09:	sprintf(mnemonic, "ftanh1"); break;
-				case 0x0a:	sprintf(mnemonic, "fatan"); break;
-				case 0x0c:	sprintf(mnemonic, "fasin"); break;
-				case 0x0d:	sprintf(mnemonic, "fatanh"); break;
-				case 0x0e:	sprintf(mnemonic, "fsin"); break;
-				case 0x0f:	sprintf(mnemonic, "ftan"); break;
-				case 0x10:	sprintf(mnemonic, "fetox"); break;
-				case 0x11:	sprintf(mnemonic, "ftwotox"); break;
-				case 0x12:	sprintf(mnemonic, "ftentox"); break;
-				case 0x14:	sprintf(mnemonic, "flogn"); break;
-				case 0x15:	sprintf(mnemonic, "flog10"); break;
-				case 0x16:	sprintf(mnemonic, "flog2"); break;
-				case 0x18:	sprintf(mnemonic, "fabs"); break;
-				case 0x19:	sprintf(mnemonic, "fcosh"); break;
-				case 0x1a:	sprintf(mnemonic, "fneg"); break;
-				case 0x1c:	sprintf(mnemonic, "facos"); break;
-				case 0x1d:	sprintf(mnemonic, "fcos"); break;
-				case 0x1e:	sprintf(mnemonic, "fgetexp"); break;
-				case 0x1f:	sprintf(mnemonic, "fgetman"); break;
-				case 0x20:	sprintf(mnemonic, "fdiv"); break;
-				case 0x21:	sprintf(mnemonic, "fmod"); break;
-				case 0x22:	sprintf(mnemonic, "fadd"); break;
-				case 0x23:	sprintf(mnemonic, "fmul"); break;
-				case 0x24:	sprintf(mnemonic, "fsgldiv"); break;
-				case 0x25:	sprintf(mnemonic, "frem"); break;
-				case 0x26:	sprintf(mnemonic, "fscale"); break;
-				case 0x27:	sprintf(mnemonic, "fsglmul"); break;
-				case 0x28:	sprintf(mnemonic, "fsub"); break;
+				case 0x00:  sprintf(mnemonic, "fmove"); break;
+				case 0x01:  sprintf(mnemonic, "fint"); break;
+				case 0x02:  sprintf(mnemonic, "fsinh"); break;
+				case 0x03:  sprintf(mnemonic, "fintrz"); break;
+				case 0x04:  sprintf(mnemonic, "fsqrt"); break;
+				case 0x06:  sprintf(mnemonic, "flognp1"); break;
+				case 0x08:  sprintf(mnemonic, "fetoxm1"); break;
+				case 0x09:  sprintf(mnemonic, "ftanh1"); break;
+				case 0x0a:  sprintf(mnemonic, "fatan"); break;
+				case 0x0c:  sprintf(mnemonic, "fasin"); break;
+				case 0x0d:  sprintf(mnemonic, "fatanh"); break;
+				case 0x0e:  sprintf(mnemonic, "fsin"); break;
+				case 0x0f:  sprintf(mnemonic, "ftan"); break;
+				case 0x10:  sprintf(mnemonic, "fetox"); break;
+				case 0x11:  sprintf(mnemonic, "ftwotox"); break;
+				case 0x12:  sprintf(mnemonic, "ftentox"); break;
+				case 0x14:  sprintf(mnemonic, "flogn"); break;
+				case 0x15:  sprintf(mnemonic, "flog10"); break;
+				case 0x16:  sprintf(mnemonic, "flog2"); break;
+				case 0x18:  sprintf(mnemonic, "fabs"); break;
+				case 0x19:  sprintf(mnemonic, "fcosh"); break;
+				case 0x1a:  sprintf(mnemonic, "fneg"); break;
+				case 0x1c:  sprintf(mnemonic, "facos"); break;
+				case 0x1d:  sprintf(mnemonic, "fcos"); break;
+				case 0x1e:  sprintf(mnemonic, "fgetexp"); break;
+				case 0x1f:  sprintf(mnemonic, "fgetman"); break;
+				case 0x20:  sprintf(mnemonic, "fdiv"); break;
+				case 0x21:  sprintf(mnemonic, "fmod"); break;
+				case 0x22:  sprintf(mnemonic, "fadd"); break;
+				case 0x23:  sprintf(mnemonic, "fmul"); break;
+				case 0x24:  sprintf(mnemonic, "fsgldiv"); break;
+				case 0x25:  sprintf(mnemonic, "frem"); break;
+				case 0x26:  sprintf(mnemonic, "fscale"); break;
+				case 0x27:  sprintf(mnemonic, "fsglmul"); break;
+				case 0x28:  sprintf(mnemonic, "fsub"); break;
 				case 0x30: case 0x31: case 0x32: case 0x33: case 0x34: case 0x35: case 0x36: case 0x37:
 							sprintf(mnemonic, "fsincos"); break;
-				case 0x38:	sprintf(mnemonic, "fcmp"); break;
-				case 0x3a:	sprintf(mnemonic, "ftst"); break;
-				case 0x41:	sprintf(mnemonic, "fssqrt"); break;
-				case 0x45:	sprintf(mnemonic, "fdsqrt"); break;
-				case 0x58:	sprintf(mnemonic, "fsabs"); break;
-				case 0x5a:	sprintf(mnemonic, "fsneg"); break;
-				case 0x5c:	sprintf(mnemonic, "fdabs"); break;
-				case 0x5e:	sprintf(mnemonic, "fdneg"); break;
-				case 0x60:	sprintf(mnemonic, "fsdiv"); break;
-				case 0x62:	sprintf(mnemonic, "fsadd"); break;
-				case 0x63:	sprintf(mnemonic, "fsmul"); break;
-				case 0x64:	sprintf(mnemonic, "fddiv"); break;
-				case 0x66:	sprintf(mnemonic, "fdadd"); break;
-				case 0x67:	sprintf(mnemonic, "fdmul"); break;
-				case 0x68:	sprintf(mnemonic, "fssub"); break;
-				case 0x6c:	sprintf(mnemonic, "fdsub"); break;
+				case 0x38:  sprintf(mnemonic, "fcmp"); break;
+				case 0x3a:  sprintf(mnemonic, "ftst"); break;
+				case 0x41:  sprintf(mnemonic, "fssqrt"); break;
+				case 0x45:  sprintf(mnemonic, "fdsqrt"); break;
+				case 0x58:  sprintf(mnemonic, "fsabs"); break;
+				case 0x5a:  sprintf(mnemonic, "fsneg"); break;
+				case 0x5c:  sprintf(mnemonic, "fdabs"); break;
+				case 0x5e:  sprintf(mnemonic, "fdneg"); break;
+				case 0x60:  sprintf(mnemonic, "fsdiv"); break;
+				case 0x62:  sprintf(mnemonic, "fsadd"); break;
+				case 0x63:  sprintf(mnemonic, "fsmul"); break;
+				case 0x64:  sprintf(mnemonic, "fddiv"); break;
+				case 0x66:  sprintf(mnemonic, "fdadd"); break;
+				case 0x67:  sprintf(mnemonic, "fdmul"); break;
+				case 0x68:  sprintf(mnemonic, "fssub"); break;
+				case 0x6c:  sprintf(mnemonic, "fdsub"); break;
 
-				default:	sprintf(mnemonic, "FPU (?)"); break;
+				default:    sprintf(mnemonic, "FPU (?)"); break;
 			}
 
 			if (w2 & 0x4000)
@@ -1811,11 +1819,11 @@ static void d68040_fpu(void)
 		{
 			switch ((w2>>10)&7)
 			{
-				case 3:		// packed decimal w/fixed k-factor
+				case 3:     // packed decimal w/fixed k-factor
 					sprintf(g_dasm_str, "fmove%s   FP%d, %s {#%d}", float_data_format[(w2>>10)&7], dst_reg, get_ea_mode_str_32(g_cpu_ir), sext_7bit_int(w2&0x7f));
 					break;
 
-				case 7:		// packed decimal w/dynamic k-factor (register)
+				case 7:     // packed decimal w/dynamic k-factor (register)
 					sprintf(g_dasm_str, "fmove%s   FP%d, %s {D%d}", float_data_format[(w2>>10)&7], dst_reg, get_ea_mode_str_32(g_cpu_ir), (w2>>4)&7);
 					break;
 
@@ -1826,7 +1834,7 @@ static void d68040_fpu(void)
 			break;
 		}
 
-		case 0x4:	// ea to control
+		case 0x4:   // ea to control
 		{
 			sprintf(g_dasm_str, "fmovem.l   %s, ", get_ea_mode_str_32(g_cpu_ir));
 			if (w2 & 0x1000) strcat(g_dasm_str, "fpcr");
@@ -1835,7 +1843,7 @@ static void d68040_fpu(void)
 			break;
 		}
 
-		case 0x5:	// control to ea
+		case 0x5:   // control to ea
 		{
 
 			strcpy(g_dasm_str, "fmovem.l   ");
@@ -1847,15 +1855,15 @@ static void d68040_fpu(void)
 			break;
 		}
 
-		case 0x6:	// memory to FPU, list
+		case 0x6:   // memory to FPU, list
 		{
 			char temp[32];
 
-			if ((w2>>11) & 1)	// dynamic register list
+			if ((w2>>11) & 1)   // dynamic register list
 			{
 				sprintf(g_dasm_str, "fmovem.x   %s, D%d", get_ea_mode_str_32(g_cpu_ir), (w2>>4)&7);
 			}
-			else	// static register list
+			else    // static register list
 			{
 				int i;
 
@@ -1865,11 +1873,11 @@ static void d68040_fpu(void)
 				{
 					if (w2 & (1<<i))
 					{
-						if ((w2>>12) & 1)	// postincrement or control
+						if ((w2>>12) & 1)   // postincrement or control
 						{
 							sprintf(temp, "FP%d ", 7-i);
 						}
-						else			// predecrement
+						else            // predecrement
 						{
 							sprintf(temp, "FP%d ", i);
 						}
@@ -1880,15 +1888,15 @@ static void d68040_fpu(void)
 			break;
 		}
 
-		case 0x7:	// FPU to memory, list
+		case 0x7:   // FPU to memory, list
 		{
 			char temp[32];
 
-			if ((w2>>11) & 1)	// dynamic register list
+			if ((w2>>11) & 1)   // dynamic register list
 			{
 				sprintf(g_dasm_str, "fmovem.x   D%d, %s", (w2>>4)&7, get_ea_mode_str_32(g_cpu_ir));
 			}
-			else	// static register list
+			else    // static register list
 			{
 				int i;
 
@@ -1898,11 +1906,11 @@ static void d68040_fpu(void)
 				{
 					if (w2 & (1<<i))
 					{
-						if ((w2>>12) & 1)	// postincrement or control
+						if ((w2>>12) & 1)   // postincrement or control
 						{
 							sprintf(temp, "FP%d ", 7-i);
 						}
-						else			// predecrement
+						else            // predecrement
 						{
 							sprintf(temp, "FP%d ", i);
 						}
@@ -2127,20 +2135,52 @@ static void d68010_movec(void)
 			processor = "4+";
 			break;
 		case 0x004:
-			reg_name = "ITT0";
-			processor = "4+";
+			if(g_cpu_type & COLDFIRE)
+			{
+				reg_name = "ACR0";
+				processor = "CF";
+			}
+			else
+			{
+				reg_name = "ITT0";
+				processor = "4+";
+			}
 			break;
 		case 0x005:
-			reg_name = "ITT1";
-			processor = "4+";
+			if(g_cpu_type & COLDFIRE)
+			{
+				reg_name = "ACR1";
+				processor = "CF";
+			}
+			else
+			{
+				reg_name = "ITT1";
+				processor = "4+";
+			}
 			break;
 		case 0x006:
-			reg_name = "DTT0";
-			processor = "4+";
+			if(g_cpu_type & COLDFIRE)
+			{
+				reg_name = "ACR2";
+				processor = "CF";
+			}
+			else
+			{
+				reg_name = "DTT0";
+				processor = "4+";
+			}
 			break;
 		case 0x007:
-			reg_name = "DTT1";
-			processor = "4+";
+			if(g_cpu_type & COLDFIRE)
+			{
+				reg_name = "ACR3";
+				processor = "CF";
+			}
+			else
+			{
+				reg_name = "DTT1";
+				processor = "4+";
+			}
 			break;
 		case 0x805:
 			reg_name = "MMUSR";
@@ -2153,6 +2193,38 @@ static void d68010_movec(void)
 		case 0x807:
 			reg_name = "SRP";
 			processor = "4+";
+			break;
+		case 0xc00:
+			reg_name = "ROMBAR0";
+			processor = "CF";
+			break;
+		case 0xc01:
+			reg_name = "ROMBAR1";
+			processor = "CF";
+			break;
+		case 0xc04:
+			reg_name = "RAMBAR0";
+			processor = "CF";
+			break;
+		case 0xc05:
+			reg_name = "RAMBAR1";
+			processor = "CF";
+			break;
+		case 0xc0c:
+			reg_name = "MPCR";
+			processor = "CF";
+			break;
+		case 0xc0d:
+			reg_name = "EDRAMBAR";
+			processor = "CF";
+			break;
+		case 0xc0e:
+			reg_name = "SECMBAR";
+			processor = "CF";
+			break;
+		case 0xc0f:
+			reg_name = "MBAR";
+			processor = "CF";
 			break;
 		default:
 			reg_name = make_signed_hex_str_16(extension & 0xfff);
@@ -3167,7 +3239,7 @@ static void d68851_p000(void)
 	// do this after fetching the second PMOVE word so we properly get the 3rd if necessary
 	str = get_ea_mode_str_32(g_cpu_ir);
 
-	if ((modes & 0xfde0) == 0x2000)	// PLOAD
+	if ((modes & 0xfde0) == 0x2000) // PLOAD
 	{
 		if (modes & 0x0200)
 		{
@@ -3180,30 +3252,30 @@ static void d68851_p000(void)
 		return;
 	}
 
-	if ((modes & 0xe200) == 0x2000)	// PFLUSH
+	if ((modes & 0xe200) == 0x2000) // PFLUSH
 	{
 		sprintf(g_dasm_str, "pflushr %x, %x, %s", modes & 0x1f, (modes>>5)&0xf, str);
 		return;
 	}
 
-	if (modes == 0xa000)	// PFLUSHR
+	if (modes == 0xa000)    // PFLUSHR
 	{
 		sprintf(g_dasm_str, "pflushr %s", str);
 	}
 
-	if (modes == 0x2800)	// PVALID (FORMAT 1)
+	if (modes == 0x2800)    // PVALID (FORMAT 1)
 	{
 		sprintf(g_dasm_str, "pvalid VAL, %s", str);
 		return;
 	}
 
-	if ((modes & 0xfff8) == 0x2c00)	// PVALID (FORMAT 2)
+	if ((modes & 0xfff8) == 0x2c00) // PVALID (FORMAT 2)
 	{
 		sprintf(g_dasm_str, "pvalid A%d, %s", modes & 0xf, str);
 		return;
 	}
 
-	if ((modes & 0xe000) == 0x8000)	// PTEST
+	if ((modes & 0xe000) == 0x8000) // PTEST
 	{
 		sprintf(g_dasm_str, "ptest #%d, %s", modes & 0x1f, str);
 		return;
@@ -3211,8 +3283,8 @@ static void d68851_p000(void)
 
 	switch ((modes>>13) & 0x7)
 	{
-		case 0:	// MC68030/040 form with FD bit
-		case 2:	// MC68881 form, FD never set
+		case 0: // MC68030/040 form with FD bit
+		case 2: // MC68881 form, FD never set
 			if (modes & 0x0100)
 			{
 				if (modes & 0x0200)
@@ -3237,7 +3309,7 @@ static void d68851_p000(void)
 			}
 			break;
 
-		case 3:	// MC68030 to/from status reg
+		case 3: // MC68030 to/from status reg
 			if (modes & 0x0200)
 			{
 				sprintf(g_dasm_str, "pmove  mmusr, %s", str);
@@ -3698,9 +3770,9 @@ static void build_opcode_table(void)
 			{
 				/* Handle destination ea for move instructions */
 				if((ostruct->opcode_handler == d68000_move_8 ||
-					 ostruct->opcode_handler == d68000_move_16 ||
-					 ostruct->opcode_handler == d68000_move_32) &&
-					 !valid_ea(((opcode>>9)&7) | ((opcode>>3)&0x38), 0xbf8))
+						ostruct->opcode_handler == d68000_move_16 ||
+						ostruct->opcode_handler == d68000_move_32) &&
+						!valid_ea(((opcode>>9)&7) | ((opcode>>3)&0x38), 0xbf8))
 						continue;
 				if(valid_ea(opcode, ostruct->ea_mask))
 				{
@@ -3749,6 +3821,12 @@ static unsigned int m68k_disassemble(char* str_buff, unsigned int pc, unsigned i
 		case M68K_CPU_TYPE_68EC040:
 		case M68K_CPU_TYPE_68LC040:
 			g_cpu_type = TYPE_68040;
+			break;
+		case M68K_CPU_TYPE_68340:
+			g_cpu_type = TYPE_68340;
+			break;
+		case M68K_CPU_TYPE_COLDFIRE:
+			g_cpu_type = TYPE_COLDFIRE;
 			break;
 		default:
 			return 0;
@@ -3941,6 +4019,8 @@ unsigned int m68k_is_valid_instruction(unsigned int instruction, unsigned int cp
 		case M68K_CPU_TYPE_68020:
 		case M68K_CPU_TYPE_68030:
 		case M68K_CPU_TYPE_68EC030:
+		case M68K_CPU_TYPE_68340:
+		case M68K_CPU_TYPE_COLDFIRE:
 			if(g_instruction_table[instruction] == d68040_cinv)
 				return 0;
 			if(g_instruction_table[instruction] == d68040_cpush)
@@ -3982,8 +4062,8 @@ unsigned int m68k_is_valid_instruction(unsigned int instruction, unsigned int cp
 				return 0;
 	}
 	if(cpu_type != M68K_CPU_TYPE_68020 && cpu_type != M68K_CPU_TYPE_68EC020 &&
-	  (g_instruction_table[instruction] == d68020_callm ||
-	  g_instruction_table[instruction] == d68020_rtm))
+		(g_instruction_table[instruction] == d68020_callm ||
+		g_instruction_table[instruction] == d68020_rtm))
 		return 0;
 
 	return 1;
@@ -4020,7 +4100,15 @@ CPU_DISASSEMBLE( m68040 )
 	return m68k_disassemble_raw(buffer, pc, oprom, opram, M68K_CPU_TYPE_68040);
 }
 
-// f028 2215 0008
+CPU_DISASSEMBLE( m68340 )
+{
+	return m68k_disassemble_raw(buffer, pc, oprom, opram, M68K_CPU_TYPE_68340);
+}
+
+CPU_DISASSEMBLE( coldfire )
+{
+	return m68k_disassemble_raw(buffer, pc, oprom, opram, M68K_CPU_TYPE_COLDFIRE);
+}
 
 /* ======================================================================== */
 /* ============================== END OF FILE ============================= */

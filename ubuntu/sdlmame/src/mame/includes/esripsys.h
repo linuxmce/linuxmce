@@ -4,17 +4,24 @@
 
 *************************************************************************/
 
-/* TODO */
-#define ESRIPSYS_PIXEL_CLOCK	(XTAL_25MHz / 2)
-#define ESRIPSYS_HTOTAL			(512 + 141 + 2)
-#define ESRIPSYS_HBLANK_START	(512)
-#define ESRIPSYS_HBLANK_END		(0)
-#define ESRIPSYS_VTOTAL			(384 + 20)
-#define ESRIPSYS_VBLANK_START	(384)
-#define ESRIPSYS_VBLANK_END		(0)
+#ifndef _ESRIPSYS_H_
+#define _ESRIPSYS_H_
 
-#define CMOS_RAM_SIZE			(2048)
-#define FDT_RAM_SIZE			(2048 * sizeof(UINT16))
+#pragma once
+
+#include "cpu/esrip/esrip.h"
+
+/* TODO */
+#define ESRIPSYS_PIXEL_CLOCK    (XTAL_25MHz / 2)
+#define ESRIPSYS_HTOTAL         (512 + 141 + 2)
+#define ESRIPSYS_HBLANK_START   (512)
+#define ESRIPSYS_HBLANK_END     (0)
+#define ESRIPSYS_VTOTAL         (384 + 20)
+#define ESRIPSYS_VBLANK_START   (384)
+#define ESRIPSYS_VBLANK_END     (0)
+
+#define CMOS_RAM_SIZE           (2048)
+#define FDT_RAM_SIZE            (2048 * sizeof(UINT16))
 
 struct line_buffer_t
 {
@@ -26,8 +33,12 @@ struct line_buffer_t
 class esripsys_state : public driver_device
 {
 public:
-	esripsys_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	esripsys_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+			m_videocpu(*this, "video_cpu"),
+			m_pal_ram(*this, "pal_ram") { }
+
+	required_device<esrip_device> m_videocpu;
 
 	UINT8 m_g_iodata;
 	UINT8 m_g_ioaddr;
@@ -54,7 +65,7 @@ public:
 	int m_fasel;
 	int m_fbsel;
 	int m_hblank;
-	UINT8 *m_pal_ram;
+	required_shared_ptr<UINT8> m_pal_ram;
 	int m_frame_vbl;
 	int m_12sel;
 	int m_video_firq_en;
@@ -64,15 +75,42 @@ public:
 	UINT8 *m_scale_table;
 	int m_video_firq;
 	UINT8 m_bg_intensity;
+	DECLARE_WRITE8_MEMBER(uart_w);
+	DECLARE_READ8_MEMBER(uart_r);
+	DECLARE_READ8_MEMBER(g_status_r);
+	DECLARE_WRITE8_MEMBER(g_status_w);
+	DECLARE_READ8_MEMBER(f_status_r);
+	DECLARE_WRITE8_MEMBER(f_status_w);
+	DECLARE_WRITE8_MEMBER(frame_w);
+	DECLARE_READ8_MEMBER(fdt_r);
+	DECLARE_WRITE8_MEMBER(fdt_w);
+	DECLARE_WRITE8_MEMBER(g_iobus_w);
+	DECLARE_READ8_MEMBER(g_iobus_r);
+	DECLARE_WRITE8_MEMBER(g_ioadd_w);
+	DECLARE_READ8_MEMBER(s_200e_r);
+	DECLARE_WRITE8_MEMBER(s_200e_w);
+	DECLARE_WRITE8_MEMBER(s_200f_w);
+	DECLARE_READ8_MEMBER(s_200f_r);
+	DECLARE_READ8_MEMBER(tms5220_r);
+	DECLARE_WRITE8_MEMBER(tms5220_w);
+	DECLARE_WRITE8_MEMBER(control_w);
+	DECLARE_WRITE8_MEMBER(volume_dac_w);
+	DECLARE_WRITE8_MEMBER(esripsys_bg_intensity_w);
+	DECLARE_INPUT_CHANGED_MEMBER(keypad_interrupt);
+	DECLARE_INPUT_CHANGED_MEMBER(coin_interrupt);
+	DECLARE_WRITE_LINE_MEMBER(ptm_irq);
+	DECLARE_WRITE8_MEMBER(esripsys_dac_w);
+	DECLARE_DRIVER_INIT(esripsys);
+	virtual void video_start();
+	UINT32 screen_update_esripsys(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(esripsys_vblank_irq);
+	TIMER_CALLBACK_MEMBER(delayed_bank_swap);
+	TIMER_CALLBACK_MEMBER(hblank_start_callback);
+	TIMER_CALLBACK_MEMBER(hblank_end_callback);
 };
 
 
 /*----------- defined in video/esripsys.c -----------*/
-
-VIDEO_START( esripsys );
-SCREEN_UPDATE( esripsys );
-
-WRITE8_HANDLER( esripsys_bg_intensity_w );
-INTERRUPT_GEN( esripsys_vblank_irq );
-
 int esripsys_draw(running_machine &machine, int l, int r, int fig, int attr, int addr, int col, int x_scale, int bank);
+
+#endif // _ESRIPSYS_H_

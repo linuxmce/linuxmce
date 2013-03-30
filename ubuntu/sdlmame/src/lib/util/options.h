@@ -51,24 +51,24 @@
 //**************************************************************************
 
 // option types
-const UINT32 OPTION_TYPE_MASK		= 0x0007;		// up to 8 different types
+const UINT32 OPTION_TYPE_MASK       = 0x0007;       // up to 8 different types
 enum
 {
-	OPTION_INVALID,			// invalid
-	OPTION_HEADER,			// a header item
-	OPTION_COMMAND,			// a command
-	OPTION_BOOLEAN,			// boolean option
-	OPTION_INTEGER,			// integer option
-	OPTION_FLOAT,			// floating-point option
-	OPTION_STRING			// string option
+	OPTION_INVALID,         // invalid
+	OPTION_HEADER,          // a header item
+	OPTION_COMMAND,         // a command
+	OPTION_BOOLEAN,         // boolean option
+	OPTION_INTEGER,         // integer option
+	OPTION_FLOAT,           // floating-point option
+	OPTION_STRING           // string option
 };
 
 // option priorities
-const int OPTION_PRIORITY_DEFAULT	= 0;			// defaults are at 0 priority
-const int OPTION_PRIORITY_LOW		= 50;			// low priority
-const int OPTION_PRIORITY_NORMAL	= 100;			// normal priority
-const int OPTION_PRIORITY_HIGH		= 150;			// high priority
-const int OPTION_PRIORITY_MAXIMUM	= 255;			// maximum priority
+const int OPTION_PRIORITY_DEFAULT   = 0;            // defaults are at 0 priority
+const int OPTION_PRIORITY_LOW       = 50;           // low priority
+const int OPTION_PRIORITY_NORMAL    = 100;          // normal priority
+const int OPTION_PRIORITY_HIGH      = 150;          // high priority
+const int OPTION_PRIORITY_MAXIMUM   = 255;          // maximum priority
 
 
 
@@ -79,10 +79,10 @@ const int OPTION_PRIORITY_MAXIMUM	= 255;			// maximum priority
 // static structure describing a single option with its description and default value
 struct options_entry
 {
-	const char *		name;				// name on the command line
-	const char *		defvalue;			// default value of this argument
-	UINT32				flags;				// flags to describe the option
-	const char *		description;		// description for -showusage
+	const char *        name;               // name on the command line
+	const char *        defvalue;           // default value of this argument
+	UINT32              flags;              // flags to describe the option
+	const char *        description;        // description for -showusage
 };
 
 
@@ -115,6 +115,7 @@ public:
 		bool is_header() const { return type() == OPTION_HEADER; }
 		bool is_command() const { return type() == OPTION_COMMAND; }
 		bool has_range() const { return (m_minimum && m_maximum); }
+		int priority() const { return m_priority; }
 
 		// setters
 		void set_value(const char *newvalue, int priority);
@@ -123,17 +124,17 @@ public:
 
 	private:
 		// internal state
-		entry *					m_next;				// link to the next data
-		UINT32					m_flags;			// flags from the entry
-		UINT32					m_seqid;			// sequence ID; bumped on each change
-		bool					m_error_reported;	// have we reported an error on this option yet?
-		int						m_priority;			// priority of the data set
-		const char *			m_description;		// description for this item
-		astring					m_name[4];			// up to 4 names for the item
-		astring					m_data;				// data for this item
-		astring					m_defdata;			// default data for this item
-		astring					m_minimum;			// minimum value
-		astring					m_maximum;			// maximum value
+		entry *                 m_next;             // link to the next data
+		UINT32                  m_flags;            // flags from the entry
+		UINT32                  m_seqid;            // sequence ID; bumped on each change
+		bool                    m_error_reported;   // have we reported an error on this option yet?
+		int                     m_priority;         // priority of the data set
+		const char *            m_description;      // description for this item
+		astring                 m_name[4];          // up to 4 names for the item
+		astring                 m_data;             // data for this item
+		astring                 m_defdata;          // default data for this item
+		astring                 m_minimum;          // minimum value
+		astring                 m_maximum;          // maximum value
 	};
 
 	// construction/destruction
@@ -171,10 +172,12 @@ public:
 
 	// reading
 	const char *value(const char *option) const;
+	int priority(const char *option) const;
 	bool bool_value(const char *name) const { return (atoi(value(name)) != 0); }
 	int int_value(const char *name) const { return atoi(value(name)); }
 	float float_value(const char *name) const { return atof(value(name)); }
 	UINT32 seqid(const char *name) const;
+	bool exists(const char *name) const;
 
 	// setting
 	void set_command(const char *command);
@@ -184,7 +187,7 @@ public:
 
 	// misc
 	static const char *unadorned(int x = 0) { return s_option_unadorned[MIN(x, MAX_UNADORNED_OPTIONS)]; }
-
+	int options_count();
 private:
 	// internal helpers
 	void reset();
@@ -193,11 +196,11 @@ private:
 	bool validate_and_set_data(entry &curentry, const char *newdata, int priority, astring &error_string);
 
 	// internal state
-	entry *					m_entrylist;			// head of list of entries
-	entry **				m_entrylist_tailptr;	// pointer to tail of entry list
-	tagmap_t<entry *>		m_entrymap;				// map for fast lookup
-	astring					m_command;				// command found
-	static const char *const s_option_unadorned[];	// array of unadorned option "names"
+	entry *                 m_entrylist;            // head of list of entries
+	entry **                m_entrylist_tailptr;    // pointer to tail of entry list
+	tagmap_t<entry *>       m_entrymap;             // map for fast lookup
+	astring                 m_command;              // command found
+	static const char *const s_option_unadorned[];  // array of unadorned option "names"
 };
 
 

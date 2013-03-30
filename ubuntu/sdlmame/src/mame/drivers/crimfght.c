@@ -23,66 +23,68 @@
 /* prototypes */
 static KONAMI_SETLINES_CALLBACK( crimfght_banking );
 
-
-static WRITE8_HANDLER( crimfght_coin_w )
+INTERRUPT_GEN_MEMBER(crimfght_state::crimfght_interrupt)
 {
-	coin_counter_w(space->machine(), 0, data & 1);
-	coin_counter_w(space->machine(), 1, data & 2);
+
+	if (k051960_is_irq_enabled(m_k051960))
+		device.execute().set_input_line(KONAMI_IRQ_LINE, HOLD_LINE);
 }
 
-static WRITE8_HANDLER( crimfght_sh_irqtrigger_w )
+WRITE8_MEMBER(crimfght_state::crimfght_coin_w)
 {
-	crimfght_state *state = space->machine().driver_data<crimfght_state>();
-	soundlatch_w(space, offset, data);
-	device_set_input_line_and_vector(state->m_audiocpu, 0, HOLD_LINE, 0xff);
+	coin_counter_w(machine(), 0, data & 1);
+	coin_counter_w(machine(), 1, data & 2);
 }
 
-static WRITE8_DEVICE_HANDLER( crimfght_snd_bankswitch_w )
+WRITE8_MEMBER(crimfght_state::crimfght_sh_irqtrigger_w)
+{
+	soundlatch_byte_w(space, offset, data);
+	m_audiocpu->set_input_line(0, HOLD_LINE);
+}
+
+WRITE8_MEMBER(crimfght_state::crimfght_snd_bankswitch_w)
 {
 	/* b1: bank for channel A */
 	/* b0: bank for channel B */
 
-	crimfght_state *state = device->machine().driver_data<crimfght_state>();
 	int bank_A = BIT(data, 1);
 	int bank_B = BIT(data, 0);
 
-	k007232_set_bank(state->m_k007232, bank_A, bank_B );
+	k007232_set_bank(m_k007232, bank_A, bank_B );
 }
 
-static READ8_HANDLER( k052109_051960_r )
+READ8_MEMBER(crimfght_state::k052109_051960_r)
 {
-	crimfght_state *state = space->machine().driver_data<crimfght_state>();
 
-	if (k052109_get_rmrd_line(state->m_k052109) == CLEAR_LINE)
+	if (k052109_get_rmrd_line(m_k052109) == CLEAR_LINE)
 	{
 		if (offset >= 0x3800 && offset < 0x3808)
-			return k051937_r(state->m_k051960, offset - 0x3800);
+			return k051937_r(m_k051960, space, offset - 0x3800);
 		else if (offset < 0x3c00)
-			return k052109_r(state->m_k052109, offset);
+			return k052109_r(m_k052109, space, offset);
 		else
-			return k051960_r(state->m_k051960, offset - 0x3c00);
+			return k051960_r(m_k051960, space, offset - 0x3c00);
 	}
 	else
-		return k052109_r(state->m_k052109, offset);
+		return k052109_r(m_k052109, space, offset);
 }
 
-static WRITE8_HANDLER( k052109_051960_w )
+WRITE8_MEMBER(crimfght_state::k052109_051960_w)
 {
-	crimfght_state *state = space->machine().driver_data<crimfght_state>();
 
 	if (offset >= 0x3800 && offset < 0x3808)
-		k051937_w(state->m_k051960, offset - 0x3800, data);
+		k051937_w(m_k051960, space, offset - 0x3800, data);
 	else if (offset < 0x3c00)
-		k052109_w(state->m_k052109, offset, data);
+		k052109_w(m_k052109, space, offset, data);
 	else
-		k051960_w(state->m_k051960, offset - 0x3c00, data);
+		k051960_w(m_k051960, space, offset - 0x3c00, data);
 }
 
 /********************************************/
 
-static ADDRESS_MAP_START( crimfght_map, AS_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0x03ff) AM_RAMBANK("bank1")					/* banked RAM */
-	AM_RANGE(0x0400, 0x1fff) AM_RAM												/* RAM */
+static ADDRESS_MAP_START( crimfght_map, AS_PROGRAM, 8, crimfght_state )
+	AM_RANGE(0x0000, 0x03ff) AM_RAMBANK("bank1")                        /* banked RAM */
+	AM_RANGE(0x0400, 0x1fff) AM_RAM                             /* RAM */
 	AM_RANGE(0x3f80, 0x3f80) AM_READ_PORT("SYSTEM")
 	AM_RANGE(0x3f81, 0x3f81) AM_READ_PORT("P1")
 	AM_RANGE(0x3f82, 0x3f82) AM_READ_PORT("P2")
@@ -91,19 +93,19 @@ static ADDRESS_MAP_START( crimfght_map, AS_PROGRAM, 8 )
 	AM_RANGE(0x3f85, 0x3f85) AM_READ_PORT("P3")
 	AM_RANGE(0x3f86, 0x3f86) AM_READ_PORT("P4")
 	AM_RANGE(0x3f87, 0x3f87) AM_READ_PORT("DSW1")
-	AM_RANGE(0x3f88, 0x3f88) AM_READWRITE(watchdog_reset_r, crimfght_coin_w)	/* watchdog reset */
-	AM_RANGE(0x3f8c, 0x3f8c) AM_WRITE(crimfght_sh_irqtrigger_w)	/* cause interrupt on audio CPU? */
-	AM_RANGE(0x2000, 0x5fff) AM_READWRITE(k052109_051960_r, k052109_051960_w)	/* video RAM + sprite RAM */
-	AM_RANGE(0x6000, 0x7fff) AM_ROMBANK("bank2")						/* banked ROM */
-	AM_RANGE(0x8000, 0xffff) AM_ROM												/* ROM */
+	AM_RANGE(0x3f88, 0x3f88) AM_READ(watchdog_reset_r) AM_WRITE(crimfght_coin_w)    /* watchdog reset */
+	AM_RANGE(0x3f8c, 0x3f8c) AM_WRITE(crimfght_sh_irqtrigger_w)             /* cause interrupt on audio CPU? */
+	AM_RANGE(0x2000, 0x5fff) AM_READWRITE(k052109_051960_r, k052109_051960_w)   /* video RAM + sprite RAM */
+	AM_RANGE(0x6000, 0x7fff) AM_ROMBANK("bank2")                        /* banked ROM */
+	AM_RANGE(0x8000, 0xffff) AM_ROM                             /* ROM */
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( crimfght_sound_map, AS_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0x7fff) AM_ROM												/* ROM 821l01.h4 */
-	AM_RANGE(0x8000, 0x87ff) AM_RAM												/* RAM */
-	AM_RANGE(0xa000, 0xa001) AM_DEVREADWRITE("ymsnd", ym2151_r, ym2151_w)			/* YM2151 */
-	AM_RANGE(0xc000, 0xc000) AM_READ(soundlatch_r)								/* soundlatch_r */
-	AM_RANGE(0xe000, 0xe00d) AM_DEVREADWRITE("k007232", k007232_r, k007232_w)	/* 007232 registers */
+static ADDRESS_MAP_START( crimfght_sound_map, AS_PROGRAM, 8, crimfght_state )
+	AM_RANGE(0x0000, 0x7fff) AM_ROM                                 /* ROM 821l01.h4 */
+	AM_RANGE(0x8000, 0x87ff) AM_RAM                                 /* RAM */
+	AM_RANGE(0xa000, 0xa001) AM_DEVREADWRITE("ymsnd", ym2151_device, read, write)       /* YM2151 */
+	AM_RANGE(0xc000, 0xc000) AM_READ(soundlatch_byte_r)                     /* soundlatch_byte_r */
+	AM_RANGE(0xe000, 0xe00d) AM_DEVREADWRITE_LEGACY("k007232", k007232_r, k007232_w)    /* 007232 registers */
 ADDRESS_MAP_END
 
 /***************************************************************************
@@ -221,12 +223,6 @@ INPUT_PORTS_END
 
 ***************************************************************************/
 
-static const ym2151_interface ym2151_config =
-{
-	0,
-	crimfght_snd_bankswitch_w
-};
-
 static void volume_callback( device_t *device, int v )
 {
 	k007232_set_volume(device, 0, (v & 0x0f) * 0x11, 0);
@@ -235,7 +231,7 @@ static void volume_callback( device_t *device, int v )
 
 static const k007232_interface k007232_config =
 {
-	volume_callback	/* external port callback */
+	volume_callback /* external port callback */
 };
 
 
@@ -255,53 +251,48 @@ static const k051960_interface crimfght_k051960_intf =
 	crimfght_sprite_callback
 };
 
-static MACHINE_START( crimfght )
+void crimfght_state::machine_start()
 {
-	crimfght_state *state = machine.driver_data<crimfght_state>();
-	UINT8 *ROM = machine.region("maincpu")->base();
+	UINT8 *ROM = memregion("maincpu")->base();
 
-	memory_configure_bank(machine, "bank2", 0, 12, &ROM[0x10000], 0x2000);
-	memory_set_bank(machine, "bank2", 0);
+	membank("bank2")->configure_entries(0, 12, &ROM[0x10000], 0x2000);
+	membank("bank2")->set_entry(0);
 
-	state->m_maincpu = machine.device("maincpu");
-	state->m_audiocpu = machine.device("audiocpu");
-	state->m_k052109 = machine.device("k052109");
-	state->m_k051960 = machine.device("k051960");
-	state->m_k007232 = machine.device("k007232");
+	m_maincpu = machine().device<cpu_device>("maincpu");
+	m_audiocpu = machine().device<cpu_device>("audiocpu");
+	m_k052109 = machine().device("k052109");
+	m_k051960 = machine().device("k051960");
+	m_k007232 = machine().device("k007232");
 }
 
-static MACHINE_RESET( crimfght )
+void crimfght_state::machine_reset()
 {
-	konami_configure_set_lines(machine.device("maincpu"), crimfght_banking);
+	konami_configure_set_lines(machine().device("maincpu"), crimfght_banking);
 }
 
 static MACHINE_CONFIG_START( crimfght, crimfght_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", KONAMI, 3000000)		/* ? */
+	MCFG_CPU_ADD("maincpu", KONAMI, XTAL_24MHz/8)       /* 052001 (verified on pcb) */
 	MCFG_CPU_PROGRAM_MAP(crimfght_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", crimfght_state,  crimfght_interrupt)
 
-	MCFG_CPU_ADD("audiocpu", Z80, 3579545)	/* verified with PCB */
+	MCFG_CPU_ADD("audiocpu", Z80, XTAL_3_579545MHz)     /* verified on pcb */
 	MCFG_CPU_PROGRAM_MAP(crimfght_sound_map)
 
-	MCFG_MACHINE_START(crimfght)
-	MCFG_MACHINE_RESET(crimfght)
 
 	/* video hardware */
 	MCFG_VIDEO_ATTRIBUTES(VIDEO_HAS_SHADOWS)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_REFRESH_RATE(54)	/* adjusted - compared with PCB speed */
+	MCFG_SCREEN_REFRESH_RATE(59.17)             /* verified on pcb */
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(13*8, (64-13)*8-1, 2*8, 30*8-1 )
-	MCFG_SCREEN_UPDATE(crimfght)
+	MCFG_SCREEN_UPDATE_DRIVER(crimfght_state, screen_update_crimfght)
 
 	MCFG_PALETTE_LENGTH(512)
 
-	MCFG_VIDEO_START(crimfght)
 
 	MCFG_K052109_ADD("k052109", crimfght_k052109_intf)
 	MCFG_K051960_ADD("k051960", crimfght_k051960_intf)
@@ -309,12 +300,12 @@ static MACHINE_CONFIG_START( crimfght, crimfght_state )
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
 
-	MCFG_SOUND_ADD("ymsnd", YM2151, 3579545)	/* verified with PCB */
-	MCFG_SOUND_CONFIG(ym2151_config)
+	MCFG_YM2151_ADD("ymsnd", XTAL_3_579545MHz)  /* verified on pcb */
+	MCFG_YM2151_PORT_WRITE_HANDLER(WRITE8(crimfght_state,crimfght_snd_bankswitch_w))
 	MCFG_SOUND_ROUTE(0, "lspeaker", 1.0)
 	MCFG_SOUND_ROUTE(1, "rspeaker", 1.0)
 
-	MCFG_SOUND_ADD("k007232", K007232, 3579545)
+	MCFG_SOUND_ADD("k007232", K007232, XTAL_3_579545MHz)    /* verified on pcb */
 	MCFG_SOUND_CONFIG(k007232_config)
 	MCFG_SOUND_ROUTE(0, "lspeaker", 0.20)
 	MCFG_SOUND_ROUTE(0, "rspeaker", 0.20)
@@ -337,63 +328,63 @@ ROM_START( crimfght )
 	ROM_LOAD( "821l01.h4",  0x0000, 0x8000, CRC(0faca89e) SHA1(21c9c6d736b398a29e8709e1187c5bf3cacdc99d) )
 
 	ROM_REGION( 0x080000, "gfx1", 0 ) /* graphics ( don't dispose as the program can read them, 0 ) */
-	ROM_LOAD( "821k06.k13", 0x000000, 0x040000, CRC(a1eadb24) SHA1(ca305b904b34e03918ad07281fda86ad63caa44f) )	/* characters */
+	ROM_LOAD( "821k06.k13", 0x000000, 0x040000, CRC(a1eadb24) SHA1(ca305b904b34e03918ad07281fda86ad63caa44f) )  /* characters */
 	ROM_LOAD( "821k07.k19", 0x040000, 0x040000, CRC(060019fa) SHA1(c3bca007aaa5f1c534d2a75fe4f96d01a740dd58) )
 
 	ROM_REGION( 0x100000, "gfx2", 0 ) /* graphics ( don't dispose as the program can read them, 0 ) */
-	ROM_LOAD( "821k04.k2",  0x000000, 0x080000, CRC(00e0291b) SHA1(39d5db6cf36826e47cdf5308eff9bfa8afc82050) )	/* sprites */
+	ROM_LOAD( "821k04.k2",  0x000000, 0x080000, CRC(00e0291b) SHA1(39d5db6cf36826e47cdf5308eff9bfa8afc82050) )  /* sprites */
 	ROM_LOAD( "821k05.k8",  0x080000, 0x080000, CRC(e09ea05d) SHA1(50ac9a2117ce63fe774c48d769ec445a83f1269e) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "821a08.i15", 0x0000, 0x0100, CRC(7da55800) SHA1(3826f73569c8ae0431510a355bdfa082152b74a5) )	/* priority encoder (not used) */
+	ROM_LOAD( "821a08.i15", 0x0000, 0x0100, CRC(7da55800) SHA1(3826f73569c8ae0431510a355bdfa082152b74a5) )  /* priority encoder (not used) */
 
-	ROM_REGION( 0x40000, "k007232", 0 )	/* data for the 007232 */
+	ROM_REGION( 0x40000, "k007232", 0 ) /* data for the 007232 */
 	ROM_LOAD( "821k03.e5",  0x00000, 0x40000, CRC(fef8505a) SHA1(5c5121609f69001838963e961cb227d6b64e4f5f) )
 ROM_END
 
 ROM_START( crimfghtj )
 	ROM_REGION( 0x28000, "maincpu", 0 ) /* code + banked roms */
-	ROM_LOAD( "821p02.bin", 0x10000, 0x18000, CRC(f33fa2e1) SHA1(00fc9e8250fa51386f3af2fca0f137bec9e1c220) )
+	ROM_LOAD( "821p02.f24", 0x10000, 0x18000, CRC(f33fa2e1) SHA1(00fc9e8250fa51386f3af2fca0f137bec9e1c220) )
 	ROM_CONTINUE(           0x08000, 0x08000 )
 
 	ROM_REGION( 0x10000, "audiocpu", 0 ) /* 64k for the sound CPU */
 	ROM_LOAD( "821l01.h4",  0x0000, 0x8000, CRC(0faca89e) SHA1(21c9c6d736b398a29e8709e1187c5bf3cacdc99d) )
 
 	ROM_REGION( 0x080000, "gfx1", 0 ) /* graphics ( don't dispose as the program can read them, 0 ) */
-	ROM_LOAD( "821k06.k13", 0x000000, 0x040000, CRC(a1eadb24) SHA1(ca305b904b34e03918ad07281fda86ad63caa44f) )	/* characters */
+	ROM_LOAD( "821k06.k13", 0x000000, 0x040000, CRC(a1eadb24) SHA1(ca305b904b34e03918ad07281fda86ad63caa44f) )  /* characters */
 	ROM_LOAD( "821k07.k19", 0x040000, 0x040000, CRC(060019fa) SHA1(c3bca007aaa5f1c534d2a75fe4f96d01a740dd58) )
 
 	ROM_REGION( 0x100000, "gfx2", 0 ) /* graphics ( don't dispose as the program can read them, 0 ) */
-	ROM_LOAD( "821k04.k2",  0x000000, 0x080000, CRC(00e0291b) SHA1(39d5db6cf36826e47cdf5308eff9bfa8afc82050) )	/* sprites */
+	ROM_LOAD( "821k04.k2",  0x000000, 0x080000, CRC(00e0291b) SHA1(39d5db6cf36826e47cdf5308eff9bfa8afc82050) )  /* sprites */
 	ROM_LOAD( "821k05.k8",  0x080000, 0x080000, CRC(e09ea05d) SHA1(50ac9a2117ce63fe774c48d769ec445a83f1269e) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "821a08.i15", 0x0000, 0x0100, CRC(7da55800) SHA1(3826f73569c8ae0431510a355bdfa082152b74a5) )	/* priority encoder (not used) */
+	ROM_LOAD( "821a08.i15", 0x0000, 0x0100, CRC(7da55800) SHA1(3826f73569c8ae0431510a355bdfa082152b74a5) )  /* priority encoder (not used) */
 
-	ROM_REGION( 0x40000, "k007232", 0 )	/* data for the 007232 */
+	ROM_REGION( 0x40000, "k007232", 0 ) /* data for the 007232 */
 	ROM_LOAD( "821k03.e5",  0x00000, 0x40000, CRC(fef8505a) SHA1(5c5121609f69001838963e961cb227d6b64e4f5f) )
 ROM_END
 
 ROM_START( crimfght2 )
 ROM_REGION( 0x28000, "maincpu", 0 ) /* code + banked roms */
-	ROM_LOAD( "crimefb.r02", 0x10000, 0x18000, CRC(4ecdd923) SHA1(78e5260c4bb9b18d7818fb6300d7e1d3a577fb63) )
+	ROM_LOAD( "821r02.f24", 0x10000, 0x18000, CRC(4ecdd923) SHA1(78e5260c4bb9b18d7818fb6300d7e1d3a577fb63) )
 	ROM_CONTINUE(           0x08000, 0x08000 )
 
 	ROM_REGION( 0x10000, "audiocpu", 0 ) /* 64k for the sound CPU */
 	ROM_LOAD( "821l01.h4",  0x0000, 0x8000, CRC(0faca89e) SHA1(21c9c6d736b398a29e8709e1187c5bf3cacdc99d) )
 
 	ROM_REGION( 0x080000, "gfx1", 0 ) /* graphics ( don't dispose as the program can read them, 0 ) */
-	ROM_LOAD( "821k06.k13", 0x000000, 0x040000, CRC(a1eadb24) SHA1(ca305b904b34e03918ad07281fda86ad63caa44f) )	/* characters */
+	ROM_LOAD( "821k06.k13", 0x000000, 0x040000, CRC(a1eadb24) SHA1(ca305b904b34e03918ad07281fda86ad63caa44f) )  /* characters */
 	ROM_LOAD( "821k07.k19", 0x040000, 0x040000, CRC(060019fa) SHA1(c3bca007aaa5f1c534d2a75fe4f96d01a740dd58) )
 
 	ROM_REGION( 0x100000, "gfx2", 0 ) /* graphics ( don't dispose as the program can read them, 0 ) */
-	ROM_LOAD( "821k04.k2",  0x000000, 0x080000, CRC(00e0291b) SHA1(39d5db6cf36826e47cdf5308eff9bfa8afc82050) )	/* sprites */
+	ROM_LOAD( "821k04.k2",  0x000000, 0x080000, CRC(00e0291b) SHA1(39d5db6cf36826e47cdf5308eff9bfa8afc82050) )  /* sprites */
 	ROM_LOAD( "821k05.k8",  0x080000, 0x080000, CRC(e09ea05d) SHA1(50ac9a2117ce63fe774c48d769ec445a83f1269e) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "821a08.i15", 0x0000, 0x0100, CRC(7da55800) SHA1(3826f73569c8ae0431510a355bdfa082152b74a5) )	/* priority encoder (not used) */
+	ROM_LOAD( "821a08.i15", 0x0000, 0x0100, CRC(7da55800) SHA1(3826f73569c8ae0431510a355bdfa082152b74a5) )  /* priority encoder (not used) */
 
-	ROM_REGION( 0x40000, "k007232", 0 )	/* data for the 007232 */
+	ROM_REGION( 0x40000, "k007232", 0 ) /* data for the 007232 */
 	ROM_LOAD( "821k03.e5",  0x00000, 0x40000, CRC(fef8505a) SHA1(5c5121609f69001838963e961cb227d6b64e4f5f) )
 ROM_END
 
@@ -410,19 +401,19 @@ static KONAMI_SETLINES_CALLBACK( crimfght_banking )
 	/* bit 5 = select work RAM or palette */
 	if (lines & 0x20)
 	{
-		device->memory().space(AS_PROGRAM)->install_read_bank(0x0000, 0x03ff, "bank3");
-		device->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x0000, 0x03ff, FUNC(paletteram_xBBBBBGGGGGRRRRR_be_w));
-		memory_set_bankptr(device->machine(), "bank3", device->machine().generic.paletteram.v);
+		device->memory().space(AS_PROGRAM).install_read_bank(0x0000, 0x03ff, "bank3");
+		device->memory().space(AS_PROGRAM).install_write_handler(0x0000, 0x03ff, write8_delegate(FUNC(crimfght_state::paletteram_xBBBBBGGGGGRRRRR_byte_be_w), state));
+		state->membank("bank3")->set_base(state->m_generic_paletteram_8);
 	}
 	else
-		device->memory().space(AS_PROGRAM)->install_readwrite_bank(0x0000, 0x03ff, "bank1");								/* RAM */
+		device->memory().space(AS_PROGRAM).install_readwrite_bank(0x0000, 0x03ff, "bank1");                             /* RAM */
 
 	/* bit 6 = enable char ROM reading through the video RAM */
 	k052109_set_rmrd_line(state->m_k052109, (lines & 0x40) ? ASSERT_LINE : CLEAR_LINE);
 
-	memory_set_bank(device->machine(), "bank2", lines & 0x0f);
+	state->membank("bank2")->set_entry(lines & 0x0f);
 }
 
-GAME( 1989, crimfght,  0,        crimfght, crimfght, 0, ROT0, "Konami", "Crime Fighters (US 4 players)", GAME_SUPPORTS_SAVE )
-GAME( 1989, crimfght2, crimfght, crimfght, crimfghtj,0, ROT0, "Konami", "Crime Fighters (World 2 Players)", GAME_SUPPORTS_SAVE )
-GAME( 1989, crimfghtj, crimfght, crimfght, crimfghtj,0, ROT0, "Konami", "Crime Fighters (Japan 2 Players)", GAME_SUPPORTS_SAVE )
+GAME( 1989, crimfght,  0,        crimfght, crimfght, driver_device, 0, ROT0, "Konami", "Crime Fighters (US 4 players)", GAME_SUPPORTS_SAVE )
+GAME( 1989, crimfght2, crimfght, crimfght, crimfghtj, driver_device,0, ROT0, "Konami", "Crime Fighters (World 2 Players)", GAME_SUPPORTS_SAVE )
+GAME( 1989, crimfghtj, crimfght, crimfght, crimfghtj, driver_device,0, ROT0, "Konami", "Crime Fighters (Japan 2 Players)", GAME_SUPPORTS_SAVE )

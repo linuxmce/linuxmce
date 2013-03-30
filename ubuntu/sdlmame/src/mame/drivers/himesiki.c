@@ -87,35 +87,34 @@ A                                                   12.000MHz
 #include "sound/2203intf.h"
 #include "includes/himesiki.h"
 
-#define MCLK	XTAL_12MHz
+#define MCLK    XTAL_12MHz
 
-static WRITE8_HANDLER( himesiki_rombank_w )
+WRITE8_MEMBER(himesiki_state::himesiki_rombank_w)
 {
-	memory_set_bank(space->machine(), "bank1", ((data & 0x08) >> 3));
+	membank("bank1")->set_entry(((data & 0x08) >> 3));
 
 	if (data & 0xf7)
 		logerror("p06_w %02x\n", data);
 }
 
-static WRITE8_HANDLER( himesiki_sound_w )
+WRITE8_MEMBER(himesiki_state::himesiki_sound_w)
 {
-	himesiki_state *state = space->machine().driver_data<himesiki_state>();
-	soundlatch_w(space, offset, data);
-	device_set_input_line(state->m_subcpu, INPUT_LINE_NMI, PULSE_LINE);
+	soundlatch_byte_w(space, offset, data);
+	m_subcpu->set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 }
 
 /****************************************************************************/
 
-static ADDRESS_MAP_START( himesiki_prm0, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( himesiki_prm0, AS_PROGRAM, 8, himesiki_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x9fff) AM_RAM
-	AM_RANGE(0xa000, 0xa7ff) AM_RAM AM_BASE_MEMBER(himesiki_state, m_spriteram)
-	AM_RANGE(0xa800, 0xafff) AM_RAM_WRITE(paletteram_xRRRRRGGGGGBBBBB_le_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0xb000, 0xbfff) AM_RAM_WRITE(himesiki_bg_ram_w) AM_BASE_MEMBER(himesiki_state, m_bg_ram)
+	AM_RANGE(0xa000, 0xa7ff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0xa800, 0xafff) AM_RAM_WRITE(paletteram_xRRRRRGGGGGBBBBB_byte_le_w) AM_SHARE("paletteram")
+	AM_RANGE(0xb000, 0xbfff) AM_RAM_WRITE(himesiki_bg_ram_w) AM_SHARE("bg_ram")
 	AM_RANGE(0xc000, 0xffff) AM_ROMBANK("bank1")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( himesiki_iom0, AS_IO, 8 )
+static ADDRESS_MAP_START( himesiki_iom0, AS_IO, 8, himesiki_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0x00) AM_READ_PORT("1P")
 	AM_RANGE(0x01, 0x01) AM_READ_PORT("2P")
@@ -130,67 +129,67 @@ static ADDRESS_MAP_START( himesiki_iom0, AS_IO, 8 )
 	AM_RANGE(0x0b, 0x0b) AM_WRITE(himesiki_sound_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( himesiki_prm1, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( himesiki_prm1, AS_PROGRAM, 8, himesiki_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0xf800, 0xffff) AM_RAM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( himesiki_iom1, AS_IO, 8 )
+static ADDRESS_MAP_START( himesiki_iom1, AS_IO, 8, himesiki_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x01) AM_DEVREADWRITE("ym2203", ym2203_r, ym2203_w)
-	AM_RANGE(0x04, 0x04) AM_READ(soundlatch_r)
+	AM_RANGE(0x00, 0x01) AM_DEVREADWRITE_LEGACY("ym2203", ym2203_r, ym2203_w)
+	AM_RANGE(0x04, 0x04) AM_READ(soundlatch_byte_r)
 ADDRESS_MAP_END
 
 /****************************************************************************/
 
 static INPUT_PORTS_START( himesiki )
 	PORT_START("DSW1")
-	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Demo_Sounds ) )	PORT_DIPLOCATION("SW1:1")
+	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW1:1")
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x02, 0x02, "1-2" )					PORT_DIPLOCATION("SW1:2")
+	PORT_DIPNAME( 0x02, 0x02, "1-2" )                   PORT_DIPLOCATION("SW1:2")
 	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x04, 0x04, "1-3" )					PORT_DIPLOCATION("SW1:3")
+	PORT_DIPNAME( 0x04, 0x04, "1-3" )                   PORT_DIPLOCATION("SW1:3")
 	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Cabinet ) )		PORT_DIPLOCATION("SW1:4")
+	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Cabinet ) )      PORT_DIPLOCATION("SW1:4")
 	PORT_DIPSETTING(    0x08, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Cocktail ) )
-	PORT_DIPNAME( 0x10, 0x10, "1-5" )					PORT_DIPLOCATION("SW1:5")
+	PORT_DIPNAME( 0x10, 0x10, "1-5" )                   PORT_DIPLOCATION("SW1:5")
 	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x20, 0x20, "1-6" )					PORT_DIPLOCATION("SW1:6")
+	PORT_DIPNAME( 0x20, 0x20, "1-6" )                   PORT_DIPLOCATION("SW1:6")
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Flip_Screen ) )	PORT_DIPLOCATION("SW1:7")
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Flip_Screen ) )  PORT_DIPLOCATION("SW1:7")
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_SERVICE_DIPLOC(0x80, IP_ACTIVE_LOW, "SW1:8" )
 
 	PORT_START("DSW2")
-	PORT_DIPNAME( 0x01, 0x01, "2-1" )					PORT_DIPLOCATION("SW2:1")
+	PORT_DIPNAME( 0x01, 0x01, "2-1" )                   PORT_DIPLOCATION("SW2:1")
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x02, 0x02, "2-2" )					PORT_DIPLOCATION("SW2:2")
+	PORT_DIPNAME( 0x02, 0x02, "2-2" )                   PORT_DIPLOCATION("SW2:2")
 	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x04, 0x04, "2-3" )					PORT_DIPLOCATION("SW2:3")
+	PORT_DIPNAME( 0x04, 0x04, "2-3" )                   PORT_DIPLOCATION("SW2:3")
 	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x08, 0x08, "2-4" )					PORT_DIPLOCATION("SW2:4")
+	PORT_DIPNAME( 0x08, 0x08, "2-4" )                   PORT_DIPLOCATION("SW2:4")
 	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x10, 0x10, "2-5" )					PORT_DIPLOCATION("SW2:5")
+	PORT_DIPNAME( 0x10, 0x10, "2-5" )                   PORT_DIPLOCATION("SW2:5")
 	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x20, 0x20, "2-6" )					PORT_DIPLOCATION("SW2:6")
+	PORT_DIPNAME( 0x20, 0x20, "2-6" )                   PORT_DIPLOCATION("SW2:6")
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x40, 0x40, "2-7" )					PORT_DIPLOCATION("SW2:7")
+	PORT_DIPNAME( 0x40, 0x40, "2-7" )                   PORT_DIPLOCATION("SW2:7")
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, "2-8" )					PORT_DIPLOCATION("SW2:8")
+	PORT_DIPNAME( 0x80, 0x80, "2-8" )                   PORT_DIPLOCATION("SW2:8")
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
@@ -205,13 +204,13 @@ static INPUT_PORTS_START( himesiki )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START("2P")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP )	PORT_PLAYER(2)
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN )	PORT_PLAYER(2)
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT )	PORT_PLAYER(2)
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP )    PORT_PLAYER(2)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN )  PORT_PLAYER(2)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT )  PORT_PLAYER(2)
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(2)
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )		PORT_PLAYER(2)
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )		PORT_PLAYER(2)
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 )		PORT_PLAYER(2)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )        PORT_PLAYER(2)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )        PORT_PLAYER(2)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 )        PORT_PLAYER(2)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START("OTHERS")
@@ -267,26 +266,24 @@ static GFXDECODE_START( himesiki )
 GFXDECODE_END
 
 
-static MACHINE_START( himesiki )
+void himesiki_state::machine_start()
 {
-	himesiki_state *state = machine.driver_data<himesiki_state>();
-	UINT8 *ROM = machine.region("maincpu")->base();
+	UINT8 *ROM = memregion("maincpu")->base();
 
-	memory_configure_bank(machine, "bank1", 0, 2, &ROM[0x10000], 0x4000);
+	membank("bank1")->configure_entries(0, 2, &ROM[0x10000], 0x4000);
 
-	state->m_subcpu = machine.device("sub");
+	m_subcpu = machine().device<cpu_device>("sub");
 
-	state->save_item(NAME(state->m_scrollx));
-	state->save_item(NAME(state->m_flipscreen));
+	save_item(NAME(m_scrollx));
+	save_item(NAME(m_flipscreen));
 }
 
-static MACHINE_RESET( himesiki )
+void himesiki_state::machine_reset()
 {
-	himesiki_state *state = machine.driver_data<himesiki_state>();
 
-	state->m_scrollx[0] = 0;
-	state->m_scrollx[1] = 0;
-	state->m_flipscreen = 0;
+	m_scrollx[0] = 0;
+	m_scrollx[1] = 0;
+	m_flipscreen = 0;
 }
 
 static MACHINE_CONFIG_START( himesiki, himesiki_state )
@@ -295,28 +292,24 @@ static MACHINE_CONFIG_START( himesiki, himesiki_state )
 	MCFG_CPU_ADD("maincpu", Z80, MCLK/2) /* 6.000 MHz */
 	MCFG_CPU_PROGRAM_MAP(himesiki_prm0)
 	MCFG_CPU_IO_MAP(himesiki_iom0)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", himesiki_state,  irq0_line_hold)
 
 	MCFG_CPU_ADD("sub", Z80, MCLK/3) /* 4.000 MHz */
 	MCFG_CPU_PROGRAM_MAP(himesiki_prm1)
 	MCFG_CPU_IO_MAP(himesiki_iom1)
 
-	MCFG_MACHINE_START(himesiki)
-	MCFG_MACHINE_RESET(himesiki)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 0*8, 24*8-1)
-	MCFG_SCREEN_UPDATE(himesiki)
+	MCFG_SCREEN_UPDATE_DRIVER(himesiki_state, screen_update_himesiki)
 
 	MCFG_GFXDECODE(himesiki)
 	MCFG_PALETTE_LENGTH(1024)
 
-	MCFG_VIDEO_START(himesiki)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -357,4 +350,4 @@ ROM_START( himesiki )
 	ROM_LOAD16_BYTE( "14.8c", 0x020001,  0x010000, CRC(8103a207) SHA1(0dde8a0aaf2618d9c1589f35841db210439d0388) )
 ROM_END
 
-GAME( 1989, himesiki, 0, himesiki, himesiki, 0, ROT90, "Hi-Soft", "Himeshikibu (Japan)", GAME_SUPPORTS_SAVE )
+GAME( 1989, himesiki, 0, himesiki, himesiki, driver_device, 0, ROT90, "Hi-Soft", "Himeshikibu (Japan)", GAME_SUPPORTS_SAVE )

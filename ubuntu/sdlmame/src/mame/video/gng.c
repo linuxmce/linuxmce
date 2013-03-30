@@ -16,27 +16,25 @@
 
 ***************************************************************************/
 
-static TILE_GET_INFO( get_fg_tile_info )
+TILE_GET_INFO_MEMBER(gng_state::get_fg_tile_info)
 {
-	gng_state *state = machine.driver_data<gng_state>();
-	UINT8 attr = state->m_fgvideoram[tile_index + 0x400];
-	SET_TILE_INFO(
+	UINT8 attr = m_fgvideoram[tile_index + 0x400];
+	SET_TILE_INFO_MEMBER(
 			0,
-			state->m_fgvideoram[tile_index] + ((attr & 0xc0) << 2),
+			m_fgvideoram[tile_index] + ((attr & 0xc0) << 2),
 			attr & 0x0f,
 			TILE_FLIPYX((attr & 0x30) >> 4));
 }
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(gng_state::get_bg_tile_info)
 {
-	gng_state *state = machine.driver_data<gng_state>();
-	UINT8 attr = state->m_bgvideoram[tile_index + 0x400];
-	SET_TILE_INFO(
+	UINT8 attr = m_bgvideoram[tile_index + 0x400];
+	SET_TILE_INFO_MEMBER(
 			1,
-			state->m_bgvideoram[tile_index] + ((attr & 0xc0) << 2),
+			m_bgvideoram[tile_index] + ((attr & 0xc0) << 2),
 			attr & 0x07,
 			TILE_FLIPYX((attr & 0x30) >> 4));
-	tileinfo->group = (attr & 0x08) >> 3;
+	tileinfo.group = (attr & 0x08) >> 3;
 }
 
 
@@ -47,15 +45,14 @@ static TILE_GET_INFO( get_bg_tile_info )
 
 ***************************************************************************/
 
-VIDEO_START( gng )
+void gng_state::video_start()
 {
-	gng_state *state = machine.driver_data<gng_state>();
-	state->m_fg_tilemap = tilemap_create(machine, get_fg_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_cols, 16, 16, 32, 32);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(gng_state::get_fg_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(gng_state::get_bg_tile_info),this), TILEMAP_SCAN_COLS, 16, 16, 32, 32);
 
-	tilemap_set_transparent_pen(state->m_fg_tilemap, 3);
-	tilemap_set_transmask(state->m_bg_tilemap, 0, 0xff, 0x00); /* split type 0 is totally transparent in front half */
-	tilemap_set_transmask(state->m_bg_tilemap, 1, 0x41, 0xbe); /* split type 1 has pens 0 and 6 transparent in front half */
+	m_fg_tilemap->set_transparent_pen(3);
+	m_bg_tilemap->set_transmask(0, 0xff, 0x00); /* split type 0 is totally transparent in front half */
+	m_bg_tilemap->set_transmask(1, 0x41, 0xbe); /* split type 1 has pens 0 and 6 transparent in front half */
 }
 
 
@@ -65,39 +62,35 @@ VIDEO_START( gng )
 
 ***************************************************************************/
 
-WRITE8_HANDLER( gng_fgvideoram_w )
+WRITE8_MEMBER(gng_state::gng_fgvideoram_w)
 {
-	gng_state *state = space->machine().driver_data<gng_state>();
-	state->m_fgvideoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_fg_tilemap, offset & 0x3ff);
+	m_fgvideoram[offset] = data;
+	m_fg_tilemap->mark_tile_dirty(offset & 0x3ff);
 }
 
-WRITE8_HANDLER( gng_bgvideoram_w )
+WRITE8_MEMBER(gng_state::gng_bgvideoram_w)
 {
-	gng_state *state = space->machine().driver_data<gng_state>();
-	state->m_bgvideoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset & 0x3ff);
-}
-
-
-WRITE8_HANDLER( gng_bgscrollx_w )
-{
-	gng_state *state = space->machine().driver_data<gng_state>();
-	state->m_scrollx[offset] = data;
-	tilemap_set_scrollx(state->m_bg_tilemap, 0, state->m_scrollx[0] + 256 * state->m_scrollx[1]);
-}
-
-WRITE8_HANDLER( gng_bgscrolly_w )
-{
-	gng_state *state = space->machine().driver_data<gng_state>();
-	state->m_scrolly[offset] = data;
-	tilemap_set_scrolly(state->m_bg_tilemap, 0, state->m_scrolly[0] + 256 * state->m_scrolly[1]);
+	m_bgvideoram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset & 0x3ff);
 }
 
 
-WRITE8_HANDLER( gng_flipscreen_w )
+WRITE8_MEMBER(gng_state::gng_bgscrollx_w)
 {
-	flip_screen_set(space->machine(), ~data & 1);
+	m_scrollx[offset] = data;
+	m_bg_tilemap->set_scrollx(0, m_scrollx[0] + 256 * m_scrollx[1]);
+}
+
+WRITE8_MEMBER(gng_state::gng_bgscrolly_w)
+{
+	m_scrolly[offset] = data;
+	m_bg_tilemap->set_scrolly(0, m_scrolly[0] + 256 * m_scrolly[1]);
+}
+
+
+WRITE8_MEMBER(gng_state::gng_flipscreen_w)
+{
+	flip_screen_set(~data & 1);
 }
 
 
@@ -108,14 +101,15 @@ WRITE8_HANDLER( gng_flipscreen_w )
 
 ***************************************************************************/
 
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
-	UINT8 *buffered_spriteram = machine.generic.buffered_spriteram.u8;
-	const gfx_element *gfx = machine.gfx[2];
+	gng_state *state = machine.driver_data<gng_state>();
+	UINT8 *buffered_spriteram = state->m_spriteram->buffer();
+	gfx_element *gfx = machine.gfx[2];
 	int offs;
 
 
-	for (offs = machine.generic.spriteram_size - 4; offs >= 0; offs -= 4)
+	for (offs = state->m_spriteram->bytes() - 4; offs >= 0; offs -= 4)
 	{
 		UINT8 attributes = buffered_spriteram[offs + 1];
 		int sx = buffered_spriteram[offs + 3] - 0x100 * (attributes & 0x01);
@@ -123,7 +117,7 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 		int flipx = attributes & 0x04;
 		int flipy = attributes & 0x08;
 
-		if (flip_screen_get(machine))
+		if (state->flip_screen())
 		{
 			sx = 240 - sx;
 			sy = 240 - sy;
@@ -139,20 +133,12 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 	}
 }
 
-SCREEN_UPDATE( gng )
+UINT32 gng_state::screen_update_gng(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	gng_state *state = screen->machine().driver_data<gng_state>();
 
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, TILEMAP_DRAW_LAYER1, 0);
-	draw_sprites(screen->machine(), bitmap, cliprect);
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, TILEMAP_DRAW_LAYER0, 0);
-	tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, 0, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, TILEMAP_DRAW_LAYER1, 0);
+	draw_sprites(machine(), bitmap, cliprect);
+	m_bg_tilemap->draw(bitmap, cliprect, TILEMAP_DRAW_LAYER0, 0);
+	m_fg_tilemap->draw(bitmap, cliprect, 0, 0);
 	return 0;
-}
-
-SCREEN_EOF( gng )
-{
-	address_space *space = machine.device("maincpu")->memory().space(AS_PROGRAM);
-
-	buffer_spriteram_w(space, 0, 0);
 }

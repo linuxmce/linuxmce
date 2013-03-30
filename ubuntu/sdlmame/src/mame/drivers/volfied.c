@@ -44,8 +44,8 @@ Stephh's notes (based on the game M68000 code and some tests) :
 
 /* Define clocks based on actual OSC on the PCB */
 
-#define CPU_CLOCK           (XTAL_32MHz / 4)		/* 8 MHz clock for 68000 */
-#define SOUND_CPU_CLOCK     (XTAL_32MHz / 8)		/* 4 MHz clock for Z80 sound CPU */
+#define CPU_CLOCK           (XTAL_32MHz / 4)        /* 8 MHz clock for 68000 */
+#define SOUND_CPU_CLOCK     (XTAL_32MHz / 8)        /* 4 MHz clock for Z80 sound CPU */
 
 #include "emu.h"
 #include "cpu/z80/z80.h"
@@ -61,29 +61,29 @@ Stephh's notes (based on the game M68000 code and some tests) :
                 MEMORY STRUCTURES
 ***********************************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16 )
-	AM_RANGE(0x000000, 0x03ffff) AM_ROM		/* program */
-	AM_RANGE(0x080000, 0x0fffff) AM_ROM		/* tiles   */
-	AM_RANGE(0x100000, 0x103fff) AM_RAM		/* main    */
-	AM_RANGE(0x200000, 0x203fff) AM_DEVREADWRITE("pc090oj", pc090oj_word_r, pc090oj_word_w)
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16, volfied_state )
+	AM_RANGE(0x000000, 0x03ffff) AM_ROM     /* program */
+	AM_RANGE(0x080000, 0x0fffff) AM_ROM     /* tiles   */
+	AM_RANGE(0x100000, 0x103fff) AM_RAM     /* main    */
+	AM_RANGE(0x200000, 0x203fff) AM_DEVREADWRITE_LEGACY("pc090oj", pc090oj_word_r, pc090oj_word_w)
 	AM_RANGE(0x400000, 0x47ffff) AM_READWRITE(volfied_video_ram_r, volfied_video_ram_w)
-	AM_RANGE(0x500000, 0x503fff) AM_RAM_WRITE(paletteram16_xBBBBBGGGGGRRRRR_word_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x500000, 0x503fff) AM_RAM_WRITE(paletteram_xBBBBBGGGGGRRRRR_word_w) AM_SHARE("paletteram")
 	AM_RANGE(0x600000, 0x600001) AM_WRITE(volfied_video_mask_w)
 	AM_RANGE(0x700000, 0x700001) AM_WRITE(volfied_sprite_ctrl_w)
 	AM_RANGE(0xd00000, 0xd00001) AM_READWRITE(volfied_video_ctrl_r, volfied_video_ctrl_w)
-	AM_RANGE(0xe00000, 0xe00001) AM_DEVWRITE8("tc0140syt", tc0140syt_port_w, 0x00ff)
-	AM_RANGE(0xe00002, 0xe00003) AM_DEVREADWRITE8("tc0140syt", tc0140syt_comm_r, tc0140syt_comm_w, 0x00ff)
+	AM_RANGE(0xe00000, 0xe00001) AM_DEVWRITE8_LEGACY("tc0140syt", tc0140syt_port_w, 0x00ff)
+	AM_RANGE(0xe00002, 0xe00003) AM_DEVREADWRITE8_LEGACY("tc0140syt", tc0140syt_comm_r, tc0140syt_comm_w, 0x00ff)
 	AM_RANGE(0xf00000, 0xf007ff) AM_READWRITE(volfied_cchip_ram_r, volfied_cchip_ram_w)
 	AM_RANGE(0xf00802, 0xf00803) AM_READWRITE(volfied_cchip_ctrl_r, volfied_cchip_ctrl_w)
 	AM_RANGE(0xf00c00, 0xf00c01) AM_WRITE(volfied_cchip_bank_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( z80_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( z80_map, AS_PROGRAM, 8, volfied_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x87ff) AM_RAM
-	AM_RANGE(0x8800, 0x8800) AM_DEVWRITE("tc0140syt", tc0140syt_slave_port_w)
-	AM_RANGE(0x8801, 0x8801) AM_DEVREADWRITE("tc0140syt", tc0140syt_slave_comm_r, tc0140syt_slave_comm_w)
-	AM_RANGE(0x9000, 0x9001) AM_DEVREADWRITE("ymsnd", ym2203_r, ym2203_w)
+	AM_RANGE(0x8800, 0x8800) AM_DEVWRITE_LEGACY("tc0140syt", tc0140syt_slave_port_w)
+	AM_RANGE(0x8801, 0x8801) AM_DEVREADWRITE_LEGACY("tc0140syt", tc0140syt_slave_comm_r, tc0140syt_slave_comm_w)
+	AM_RANGE(0x9000, 0x9001) AM_DEVREADWRITE_LEGACY("ymsnd", ym2203_r, ym2203_w)
 	AM_RANGE(0x9800, 0x9800) AM_WRITENOP    /* ? */
 ADDRESS_MAP_END
 
@@ -210,7 +210,7 @@ GFXDECODE_END
 static void irqhandler( device_t *device, int irq )
 {
 	volfied_state *state = device->machine().driver_data<volfied_state>();
-	device_set_input_line(state->m_audiocpu, 0, irq ? ASSERT_LINE : CLEAR_LINE);
+	state->m_audiocpu->set_input_line(0, irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static const ym2203_interface ym2203_config =
@@ -223,7 +223,7 @@ static const ym2203_interface ym2203_config =
 		DEVCB_NULL,
 		DEVCB_NULL,
 	},
-	irqhandler
+	DEVCB_LINE(irqhandler)
 };
 
 
@@ -231,20 +231,19 @@ static const ym2203_interface ym2203_config =
                 MACHINE DRIVERS
 ***********************************************************/
 
-static MACHINE_START( volfied )
+void volfied_state::machine_start()
 {
-	volfied_state *state = machine.driver_data<volfied_state>();
 
-	volfied_cchip_init(machine);
+	volfied_cchip_init(machine());
 
-	state->m_maincpu = machine.device("maincpu");
-	state->m_audiocpu = machine.device("audiocpu");
-	state->m_pc090oj = machine.device("pc090oj");
+	m_maincpu = machine().device<cpu_device>("maincpu");
+	m_audiocpu = machine().device<cpu_device>("audiocpu");
+	m_pc090oj = machine().device("pc090oj");
 }
 
-static MACHINE_RESET( volfied )
+void volfied_state::machine_reset()
 {
-	volfied_cchip_reset(machine);
+	volfied_cchip_reset(machine());
 }
 
 static const pc090oj_interface volfied_pc090oj_intf =
@@ -262,29 +261,25 @@ static MACHINE_CONFIG_START( volfied, volfied_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, CPU_CLOCK)   /* 8MHz */
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT("screen", irq4_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", volfied_state,  irq4_line_hold)
 
 	MCFG_CPU_ADD("audiocpu", Z80, SOUND_CPU_CLOCK)   /* 4MHz sound CPU, required to run the game */
 	MCFG_CPU_PROGRAM_MAP(z80_map)
 
 	MCFG_QUANTUM_TIME(attotime::from_hz(1200))
 
-	MCFG_MACHINE_START(volfied)
-	MCFG_MACHINE_RESET(volfied)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(320, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 319, 8, 247)
-	MCFG_SCREEN_UPDATE(volfied)
+	MCFG_SCREEN_UPDATE_DRIVER(volfied_state, screen_update_volfied)
 
 	MCFG_GFXDECODE(volfied)
 	MCFG_PALETTE_LENGTH(8192)
 
-	MCFG_VIDEO_START(volfied)
 
 	MCFG_PC090OJ_ADD("pc090oj", volfied_pc090oj_intf)
 
@@ -317,7 +312,7 @@ ROM_START( volfied )
 	ROM_LOAD16_BYTE( "c04-19.6",    0xc0000, 0x20000, CRC(231493ae) SHA1(2658e6556fd0e75ddd0f0b8628cfa5237c187a06) )
 	ROM_LOAD16_BYTE( "c04-21.8",    0xc0001, 0x20000, CRC(8598d38e) SHA1(4ec1b819586b50e2f6aff2aaa5e3b06704b9bec2) )
 
-	ROM_REGION( 0xc0000, "gfx1", 0 )	/* sprites 16x16 */
+	ROM_REGION( 0xc0000, "gfx1", 0 )    /* sprites 16x16 */
 	ROM_LOAD16_BYTE( "c04-16.2",   0x00000, 0x20000, CRC(8c2476ef) SHA1(972ddc8e47a669f1aeca67d02b4a0bed867ddb7d) )
 	ROM_LOAD16_BYTE( "c04-18.4",   0x00001, 0x20000, CRC(7665212c) SHA1(b816ac2a95ee273aaf90991f53766d7f0d5d9238) )
 	ROM_LOAD16_BYTE( "c04-15.1",   0x40000, 0x20000, CRC(7c50b978) SHA1(aa9cad5f09f5d9dceaf4e06bcd347f1d5d02d292) )
@@ -330,7 +325,7 @@ ROM_START( volfied )
 	ROM_REGION( 0x10000, "audiocpu", 0 )     /* sound cpu */
 	ROM_LOAD( "c04-06.71", 0x0000, 0x8000, CRC(b70106b2) SHA1(d71062f9d9b11492e13fc93982b95883f564f902) )
 
-	ROM_REGION( 0x00400, "proms", 0 )	/* unused PROMs */
+	ROM_REGION( 0x00400, "proms", 0 )   /* unused PROMs */
 	ROM_LOAD( "c04-4-1.3", 0x00000, 0x00200, CRC(ab9fae65) SHA1(e2b29606aa63e42e041d3c47216551f62846bd99) ) /* PROM type is a MB7116H or compatible */
 	ROM_LOAD( "c04-5.75",  0x00200, 0x00200, CRC(2763ec89) SHA1(1e8339e21ee35b526d8604a21cfed9a1ac6455e8) ) /* PROM type is a MB7124E or compatible */
 ROM_END
@@ -346,7 +341,7 @@ ROM_START( volfiedu )
 	ROM_LOAD16_BYTE( "c04-19.6",    0xc0000, 0x20000, CRC(231493ae) SHA1(2658e6556fd0e75ddd0f0b8628cfa5237c187a06) )
 	ROM_LOAD16_BYTE( "c04-21.8",    0xc0001, 0x20000, CRC(8598d38e) SHA1(4ec1b819586b50e2f6aff2aaa5e3b06704b9bec2) )
 
-	ROM_REGION( 0xc0000, "gfx1", 0 )	/* sprites 16x16 */
+	ROM_REGION( 0xc0000, "gfx1", 0 )    /* sprites 16x16 */
 	ROM_LOAD16_BYTE( "c04-16.2",   0x00000, 0x20000, CRC(8c2476ef) SHA1(972ddc8e47a669f1aeca67d02b4a0bed867ddb7d) )
 	ROM_LOAD16_BYTE( "c04-18.4",   0x00001, 0x20000, CRC(7665212c) SHA1(b816ac2a95ee273aaf90991f53766d7f0d5d9238) )
 	ROM_LOAD16_BYTE( "c04-15.1",   0x40000, 0x20000, CRC(7c50b978) SHA1(aa9cad5f09f5d9dceaf4e06bcd347f1d5d02d292) )
@@ -359,7 +354,7 @@ ROM_START( volfiedu )
 	ROM_REGION( 0x10000, "audiocpu", 0 )     /* sound cpu */
 	ROM_LOAD( "c04-06.71", 0x0000, 0x8000, CRC(b70106b2) SHA1(d71062f9d9b11492e13fc93982b95883f564f902) )
 
-	ROM_REGION( 0x00400, "proms", 0 )	/* unused PROMs */
+	ROM_REGION( 0x00400, "proms", 0 )   /* unused PROMs */
 	ROM_LOAD( "c04-4-1.3", 0x00000, 0x00200, CRC(ab9fae65) SHA1(e2b29606aa63e42e041d3c47216551f62846bd99) ) /* PROM type is a MB7116H or compatible */
 	ROM_LOAD( "c04-5.75",  0x00200, 0x00200, CRC(2763ec89) SHA1(1e8339e21ee35b526d8604a21cfed9a1ac6455e8) ) /* PROM type is a MB7124E or compatible */
 ROM_END
@@ -375,7 +370,7 @@ ROM_START( volfiedj )
 	ROM_LOAD16_BYTE( "c04-19.6",    0xc0000, 0x20000, CRC(231493ae) SHA1(2658e6556fd0e75ddd0f0b8628cfa5237c187a06) )
 	ROM_LOAD16_BYTE( "c04-21.8",    0xc0001, 0x20000, CRC(8598d38e) SHA1(4ec1b819586b50e2f6aff2aaa5e3b06704b9bec2) )
 
-	ROM_REGION( 0xc0000, "gfx1", 0 )	/* sprites 16x16 */
+	ROM_REGION( 0xc0000, "gfx1", 0 )    /* sprites 16x16 */
 	ROM_LOAD16_BYTE( "c04-16.2",   0x00000, 0x20000, CRC(8c2476ef) SHA1(972ddc8e47a669f1aeca67d02b4a0bed867ddb7d) )
 	ROM_LOAD16_BYTE( "c04-18.4",   0x00001, 0x20000, CRC(7665212c) SHA1(b816ac2a95ee273aaf90991f53766d7f0d5d9238) )
 	ROM_LOAD16_BYTE( "c04-15.1",   0x40000, 0x20000, CRC(7c50b978) SHA1(aa9cad5f09f5d9dceaf4e06bcd347f1d5d02d292) )
@@ -388,7 +383,7 @@ ROM_START( volfiedj )
 	ROM_REGION( 0x10000, "audiocpu", 0 )     /* sound cpu */
 	ROM_LOAD( "c04-06.71", 0x0000, 0x8000, CRC(b70106b2) SHA1(d71062f9d9b11492e13fc93982b95883f564f902) )
 
-	ROM_REGION( 0x00400, "proms", 0 )	/* unused PROMs */
+	ROM_REGION( 0x00400, "proms", 0 )   /* unused PROMs */
 	ROM_LOAD( "c04-4-1.3", 0x00000, 0x00200, CRC(ab9fae65) SHA1(e2b29606aa63e42e041d3c47216551f62846bd99) ) /* PROM type is a MB7116H or compatible */
 	ROM_LOAD( "c04-5.75",  0x00200, 0x00200, CRC(2763ec89) SHA1(1e8339e21ee35b526d8604a21cfed9a1ac6455e8) ) /* PROM type is a MB7124E or compatible */
 ROM_END
@@ -404,7 +399,7 @@ ROM_START( volfiedjo )
 	ROM_LOAD16_BYTE( "c04-19.6",  0xc0000, 0x20000, CRC(231493ae) SHA1(2658e6556fd0e75ddd0f0b8628cfa5237c187a06) )
 	ROM_LOAD16_BYTE( "c04-21.8",  0xc0001, 0x20000, CRC(8598d38e) SHA1(4ec1b819586b50e2f6aff2aaa5e3b06704b9bec2) )
 
-	ROM_REGION( 0xc0000, "gfx1", 0 )	/* sprites 16x16 */
+	ROM_REGION( 0xc0000, "gfx1", 0 )    /* sprites 16x16 */
 	ROM_LOAD16_BYTE( "c04-16.2",  0x00000, 0x20000, CRC(8c2476ef) SHA1(972ddc8e47a669f1aeca67d02b4a0bed867ddb7d) )
 	ROM_LOAD16_BYTE( "c04-18.4",  0x00001, 0x20000, CRC(7665212c) SHA1(b816ac2a95ee273aaf90991f53766d7f0d5d9238) )
 	ROM_LOAD16_BYTE( "c04-15.1",  0x40000, 0x20000, CRC(7c50b978) SHA1(aa9cad5f09f5d9dceaf4e06bcd347f1d5d02d292) )
@@ -417,13 +412,13 @@ ROM_START( volfiedjo )
 	ROM_REGION( 0x10000, "audiocpu", 0 )     /* sound cpu */
 	ROM_LOAD( "c04-06.71", 0x0000, 0x8000, CRC(b70106b2) SHA1(d71062f9d9b11492e13fc93982b95883f564f902) )
 
-	ROM_REGION( 0x00400, "proms", 0 )	/* unused PROMs */
+	ROM_REGION( 0x00400, "proms", 0 )   /* unused PROMs */
 	ROM_LOAD( "c04-4-1.3", 0x00000, 0x00200, CRC(ab9fae65) SHA1(e2b29606aa63e42e041d3c47216551f62846bd99) ) /* PROM type is a MB7116H or compatible */
 	ROM_LOAD( "c04-5.75",  0x00200, 0x00200, CRC(2763ec89) SHA1(1e8339e21ee35b526d8604a21cfed9a1ac6455e8) ) /* PROM type is a MB7124E or compatible */
 ROM_END
 
 
-GAME( 1989, volfied,   0,       volfied, volfied,  0, ROT270, "Taito Corporation Japan",   "Volfied (World, revision 1)", GAME_SUPPORTS_SAVE )
-GAME( 1989, volfiedu,  volfied, volfied, volfiedu, 0, ROT270, "Taito America Corporation", "Volfied (US, revision 1)", GAME_SUPPORTS_SAVE )
-GAME( 1989, volfiedj,  volfied, volfied, volfiedj, 0, ROT270, "Taito Corporation",         "Volfied (Japan, revision 1)", GAME_SUPPORTS_SAVE )
-GAME( 1989, volfiedjo, volfied, volfied, volfiedj, 0, ROT270, "Taito Corporation",         "Volfied (Japan)", GAME_SUPPORTS_SAVE )
+GAME( 1989, volfied,   0,       volfied, volfied, driver_device,  0, ROT270, "Taito Corporation Japan",   "Volfied (World, revision 1)", GAME_SUPPORTS_SAVE )
+GAME( 1989, volfiedu,  volfied, volfied, volfiedu, driver_device, 0, ROT270, "Taito America Corporation", "Volfied (US, revision 1)", GAME_SUPPORTS_SAVE )
+GAME( 1989, volfiedj,  volfied, volfied, volfiedj, driver_device, 0, ROT270, "Taito Corporation",         "Volfied (Japan, revision 1)", GAME_SUPPORTS_SAVE )
+GAME( 1989, volfiedjo, volfied, volfied, volfiedj, driver_device, 0, ROT270, "Taito Corporation",         "Volfied (Japan)", GAME_SUPPORTS_SAVE )

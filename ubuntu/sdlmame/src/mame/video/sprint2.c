@@ -8,93 +8,86 @@
 #include "includes/sprint2.h"
 
 
-PALETTE_INIT( sprint2 )
+void sprint2_state::palette_init()
 {
 	/* allocate the colortable */
-	machine.colortable = colortable_alloc(machine, 4);
+	machine().colortable = colortable_alloc(machine(), 4);
 
-	colortable_palette_set_color(machine.colortable, 0, MAKE_RGB(0x00, 0x00, 0x00));
-	colortable_palette_set_color(machine.colortable, 1, MAKE_RGB(0x5b, 0x5b, 0x5b));
-	colortable_palette_set_color(machine.colortable, 2, MAKE_RGB(0xa4, 0xa4, 0xa4));
-	colortable_palette_set_color(machine.colortable, 3, MAKE_RGB(0xff, 0xff, 0xff));
+	colortable_palette_set_color(machine().colortable, 0, MAKE_RGB(0x00, 0x00, 0x00));
+	colortable_palette_set_color(machine().colortable, 1, MAKE_RGB(0x5b, 0x5b, 0x5b));
+	colortable_palette_set_color(machine().colortable, 2, MAKE_RGB(0xa4, 0xa4, 0xa4));
+	colortable_palette_set_color(machine().colortable, 3, MAKE_RGB(0xff, 0xff, 0xff));
 
-	colortable_entry_set_value(machine.colortable, 0x0, 1);	/* black playfield */
-	colortable_entry_set_value(machine.colortable, 0x1, 0);
-	colortable_entry_set_value(machine.colortable, 0x2, 1);	/* white playfield */
-	colortable_entry_set_value(machine.colortable, 0x3, 3);
+	colortable_entry_set_value(machine().colortable, 0x0, 1);   /* black playfield */
+	colortable_entry_set_value(machine().colortable, 0x1, 0);
+	colortable_entry_set_value(machine().colortable, 0x2, 1);   /* white playfield */
+	colortable_entry_set_value(machine().colortable, 0x3, 3);
 
-	colortable_entry_set_value(machine.colortable, 0x4, 1);	/* car #1 */
-	colortable_entry_set_value(machine.colortable, 0x5, 3);
-	colortable_entry_set_value(machine.colortable, 0x6, 1);	/* car #2 */
-	colortable_entry_set_value(machine.colortable, 0x7, 0);
-	colortable_entry_set_value(machine.colortable, 0x8, 1);	/* car #3 */
-	colortable_entry_set_value(machine.colortable, 0x9, 2);
-	colortable_entry_set_value(machine.colortable, 0xa, 1);	/* car #4 */
-	colortable_entry_set_value(machine.colortable, 0xb, 2);
+	colortable_entry_set_value(machine().colortable, 0x4, 1);   /* car #1 */
+	colortable_entry_set_value(machine().colortable, 0x5, 3);
+	colortable_entry_set_value(machine().colortable, 0x6, 1);   /* car #2 */
+	colortable_entry_set_value(machine().colortable, 0x7, 0);
+	colortable_entry_set_value(machine().colortable, 0x8, 1);   /* car #3 */
+	colortable_entry_set_value(machine().colortable, 0x9, 2);
+	colortable_entry_set_value(machine().colortable, 0xa, 1);   /* car #4 */
+	colortable_entry_set_value(machine().colortable, 0xb, 2);
 }
 
 
-static TILE_GET_INFO( get_tile_info )
+TILE_GET_INFO_MEMBER(sprint2_state::get_tile_info)
 {
-	sprint2_state *state = machine.driver_data<sprint2_state>();
-	UINT8 code = state->m_video_ram[tile_index];
+	UINT8 code = m_video_ram[tile_index];
 
-	SET_TILE_INFO(0, code & 0x3f, code >> 7, 0);
+	SET_TILE_INFO_MEMBER(0, code & 0x3f, code >> 7, 0);
 }
 
 
-VIDEO_START( sprint2 )
+void sprint2_state::video_start()
 {
-	sprint2_state *state = machine.driver_data<sprint2_state>();
-	state->m_helper = machine.primary_screen->alloc_compatible_bitmap();
+	machine().primary_screen->register_screen_bitmap(m_helper);
 
-	state->m_bg_tilemap = tilemap_create(machine, get_tile_info, tilemap_scan_rows, 16, 8, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(sprint2_state::get_tile_info),this), TILEMAP_SCAN_ROWS, 16, 8, 32, 32);
 }
 
 
-READ8_HANDLER( sprint2_collision1_r )
+READ8_MEMBER(sprint2_state::sprint2_collision1_r)
 {
-	sprint2_state *state = space->machine().driver_data<sprint2_state>();
-	return state->m_collision[0];
+	return m_collision[0];
 }
-READ8_HANDLER( sprint2_collision2_r )
+READ8_MEMBER(sprint2_state::sprint2_collision2_r)
 {
-	sprint2_state *state = space->machine().driver_data<sprint2_state>();
-	return state->m_collision[1];
+	return m_collision[1];
 }
 
 
-WRITE8_HANDLER( sprint2_collision_reset1_w )
+WRITE8_MEMBER(sprint2_state::sprint2_collision_reset1_w)
 {
-	sprint2_state *state = space->machine().driver_data<sprint2_state>();
-	state->m_collision[0] = 0;
+	m_collision[0] = 0;
 }
-WRITE8_HANDLER( sprint2_collision_reset2_w )
+WRITE8_MEMBER(sprint2_state::sprint2_collision_reset2_w)
 {
-	sprint2_state *state = space->machine().driver_data<sprint2_state>();
-	state->m_collision[1] = 0;
+	m_collision[1] = 0;
 }
 
 
-WRITE8_HANDLER( sprint2_video_ram_w )
+WRITE8_MEMBER(sprint2_state::sprint2_video_ram_w)
 {
-	sprint2_state *state = space->machine().driver_data<sprint2_state>();
-	state->m_video_ram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_video_ram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
 
-static UINT8 collision_check(sprint2_state *state, colortable_t *colortable, rectangle* rect)
+static UINT8 collision_check(sprint2_state *state, colortable_t *colortable, rectangle& rect)
 {
 	UINT8 data = 0;
 
 	int x;
 	int y;
 
-	for (y = rect->min_y; y <= rect->max_y; y++)
-		for (x = rect->min_x; x <= rect->max_x; x++)
+	for (y = rect.min_y; y <= rect.max_y; y++)
+		for (x = rect.min_x; x <= rect.max_x; x++)
 		{
-			UINT16 a = colortable_entry_get_value(colortable, *BITMAP_ADDR16(state->m_helper, y, x));
+			UINT16 a = colortable_entry_get_value(colortable, state->m_helper.pix16(y, x));
 
 			if (a == 0)
 				data |= 0x40;
@@ -121,19 +114,18 @@ INLINE int get_sprite_y(UINT8 *video_ram, int n)
 }
 
 
-SCREEN_UPDATE( sprint2 )
+UINT32 sprint2_state::screen_update_sprint2(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	sprint2_state *state = screen->machine().driver_data<sprint2_state>();
-	UINT8 *video_ram = state->m_video_ram;
+	UINT8 *video_ram = m_video_ram;
 	int i;
 
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
 
 	/* draw the sprites */
 
 	for (i = 0; i < 4; i++)
 	{
-		drawgfx_transpen(bitmap, cliprect, screen->machine().gfx[1],
+		drawgfx_transpen(bitmap, cliprect, machine().gfx[1],
 			get_sprite_code(video_ram, i),
 			i,
 			0, 0,
@@ -144,73 +136,69 @@ SCREEN_UPDATE( sprint2 )
 }
 
 
-SCREEN_EOF( sprint2 )
+void sprint2_state::screen_eof_sprint2(screen_device &screen, bool state)
 {
-	sprint2_state *state = machine.driver_data<sprint2_state>();
-	UINT8 *video_ram = state->m_video_ram;
-	int i;
-	int j;
-	const rectangle &visarea = machine.primary_screen->visible_area();
-
-	/*
-     * Collisions are detected for both player cars:
-     *
-     * D7 => state->m_collision w/ white playfield
-     * D6 => state->m_collision w/ black playfield or another car
-     *
-     */
-
-	for (i = 0; i < 2; i++)
+	// rising edge
+	if (state)
 	{
-		rectangle rect;
+		UINT8 *video_ram = m_video_ram;
+		int i;
+		int j;
+		const rectangle &visarea = machine().primary_screen->visible_area();
 
-		rect.min_x = get_sprite_x(video_ram, i);
-		rect.min_y = get_sprite_y(video_ram, i);
-		rect.max_x = get_sprite_x(video_ram, i) + machine.gfx[1]->width - 1;
-		rect.max_y = get_sprite_y(video_ram, i) + machine.gfx[1]->height - 1;
+		/*
+		 * Collisions are detected for both player cars:
+		 *
+		 * D7 => m_collision w/ white playfield
+		 * D6 => m_collision w/ black playfield or another car
+		 *
+		 */
 
-		if (rect.min_x < visarea.min_x)
-			rect.min_x = visarea.min_x;
-		if (rect.min_y < visarea.min_y)
-			rect.min_y = visarea.min_y;
-		if (rect.max_x > visarea.max_x)
-			rect.max_x = visarea.max_x;
-		if (rect.max_y > visarea.max_y)
-			rect.max_y = visarea.max_y;
+		for (i = 0; i < 2; i++)
+		{
+			rectangle rect;
 
-		/* check for sprite-tilemap collisions */
+			rect.min_x = get_sprite_x(video_ram, i);
+			rect.min_y = get_sprite_y(video_ram, i);
+			rect.max_x = get_sprite_x(video_ram, i) + machine().gfx[1]->width() - 1;
+			rect.max_y = get_sprite_y(video_ram, i) + machine().gfx[1]->height() - 1;
 
-		tilemap_draw(state->m_helper, &rect, state->m_bg_tilemap, 0, 0);
+			rect &= visarea;
 
-		drawgfx_transpen(state->m_helper, &rect, machine.gfx[1],
-			get_sprite_code(video_ram, i),
-			0,
-			0, 0,
-			get_sprite_x(video_ram, i),
-			get_sprite_y(video_ram, i), 1);
+			/* check for sprite-tilemap collisions */
 
-		state->m_collision[i] |= collision_check(state, machine.colortable, &rect);
+			m_bg_tilemap->draw(m_helper, rect, 0, 0);
 
-		/* check for sprite-sprite collisions */
+			drawgfx_transpen(m_helper, rect, machine().gfx[1],
+				get_sprite_code(video_ram, i),
+				0,
+				0, 0,
+				get_sprite_x(video_ram, i),
+				get_sprite_y(video_ram, i), 1);
 
-		for (j = 0; j < 4; j++)
-			if (j != i)
-			{
-				drawgfx_transpen(state->m_helper, &rect, machine.gfx[1],
-					get_sprite_code(video_ram, j),
-					1,
-					0, 0,
-					get_sprite_x(video_ram, j),
-					get_sprite_y(video_ram, j), 0);
-			}
+			m_collision[i] |= collision_check(this, machine().colortable, rect);
 
-		drawgfx_transpen(state->m_helper, &rect, machine.gfx[1],
-			get_sprite_code(video_ram, i),
-			0,
-			0, 0,
-			get_sprite_x(video_ram, i),
-			get_sprite_y(video_ram, i), 1);
+			/* check for sprite-sprite collisions */
 
-		state->m_collision[i] |= collision_check(state, machine.colortable, &rect);
+			for (j = 0; j < 4; j++)
+				if (j != i)
+				{
+					drawgfx_transpen(m_helper, rect, machine().gfx[1],
+						get_sprite_code(video_ram, j),
+						1,
+						0, 0,
+						get_sprite_x(video_ram, j),
+						get_sprite_y(video_ram, j), 0);
+				}
+
+			drawgfx_transpen(m_helper, rect, machine().gfx[1],
+				get_sprite_code(video_ram, i),
+				0,
+				0, 0,
+				get_sprite_x(video_ram, i),
+				get_sprite_y(video_ram, i), 1);
+
+			m_collision[i] |= collision_check(this, machine().colortable, rect);
+		}
 	}
 }

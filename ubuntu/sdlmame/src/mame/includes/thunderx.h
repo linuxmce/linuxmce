@@ -7,11 +7,12 @@
 class thunderx_state : public driver_device
 {
 public:
-	thunderx_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	thunderx_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_ram(*this, "ram"){ }
 
 	/* memory pointers */
-	UINT8 *    m_ram;
+	required_shared_ptr<UINT8> m_ram;
 	UINT8      m_pmcram[0x800];
 //  UINT8 *    m_paletteram;    // currently this uses generic palette handling
 
@@ -27,11 +28,31 @@ public:
 	int        m_pmcbank;
 
 	/* devices */
-	device_t *m_maincpu;
-	device_t *m_audiocpu;
+	cpu_device *m_maincpu;
+	cpu_device *m_audiocpu;
 	device_t *m_k007232;
 	device_t *m_k052109;
 	device_t *m_k051960;
+	DECLARE_READ8_MEMBER(scontra_bankedram_r);
+	DECLARE_WRITE8_MEMBER(scontra_bankedram_w);
+	DECLARE_READ8_MEMBER(thunderx_bankedram_r);
+	DECLARE_WRITE8_MEMBER(thunderx_bankedram_w);
+	DECLARE_READ8_MEMBER(thunderx_1f98_r);
+	DECLARE_WRITE8_MEMBER(thunderx_1f98_w);
+	DECLARE_WRITE8_MEMBER(scontra_bankswitch_w);
+	DECLARE_WRITE8_MEMBER(thunderx_videobank_w);
+	DECLARE_WRITE8_MEMBER(thunderx_sh_irqtrigger_w);
+	DECLARE_READ8_MEMBER(k052109_051960_r);
+	DECLARE_WRITE8_MEMBER(k052109_051960_w);
+	DECLARE_WRITE8_MEMBER(scontra_snd_bankswitch_w);
+	virtual void video_start();
+	DECLARE_MACHINE_START(scontra);
+	DECLARE_MACHINE_RESET(scontra);
+	DECLARE_MACHINE_START(thunderx);
+	DECLARE_MACHINE_RESET(thunderx);
+	UINT32 screen_update_scontra(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(scontra_interrupt);
+	TIMER_CALLBACK_MEMBER(thunderx_firq_callback);
 };
 
 
@@ -39,6 +60,3 @@ public:
 
 extern void thunderx_tile_callback(running_machine &machine, int layer,int bank,int *code,int *color,int *flags,int *priority);
 extern void thunderx_sprite_callback(running_machine &machine, int *code,int *color,int *priority_mask,int *shadow);
-
-VIDEO_START( scontra );
-SCREEN_UPDATE( scontra );

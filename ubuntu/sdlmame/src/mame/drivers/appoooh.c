@@ -177,7 +177,7 @@ static void appoooh_adpcm_int(device_t *device)
 	{
 		if (state->m_adpcm_data == 0xffffffff)
 		{
-			UINT8 *RAM = device->machine().region("adpcm")->base();
+			UINT8 *RAM = state->memregion("adpcm")->base();
 
 			state->m_adpcm_data = RAM[state->m_adpcm_address++];
 			msm5205_data_w(device, state->m_adpcm_data >> 4);
@@ -197,13 +197,12 @@ static void appoooh_adpcm_int(device_t *device)
 }
 
 /* adpcm address write */
-static WRITE8_HANDLER( appoooh_adpcm_w )
+WRITE8_MEMBER(appoooh_state::appoooh_adpcm_w)
 {
-	appoooh_state *state = space->machine().driver_data<appoooh_state>();
 
-	state->m_adpcm_address = data << 8;
-	msm5205_reset_w(state->m_adpcm, 0);
-	state->m_adpcm_data = 0xffffffff;
+	m_adpcm_address = data << 8;
+	msm5205_reset_w(m_adpcm, 0);
+	m_adpcm_data = 0xffffffff;
 }
 
 
@@ -213,27 +212,27 @@ static WRITE8_HANDLER( appoooh_adpcm_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, appoooh_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x9fff) AM_ROM
 	AM_RANGE(0xa000, 0xdfff) AM_ROMBANK("bank1")
 	AM_RANGE(0xe000, 0xe7ff) AM_RAM
 	AM_RANGE(0xe800, 0xefff) AM_RAM /* RAM ? */
 
-	AM_RANGE(0xf000, 0xf01f) AM_BASE_MEMBER(appoooh_state, m_spriteram)
-	AM_RANGE(0xf020, 0xf3ff) AM_WRITE(appoooh_fg_videoram_w) AM_BASE_MEMBER(appoooh_state, m_fg_videoram)
-	AM_RANGE(0xf420, 0xf7ff) AM_WRITE(appoooh_fg_colorram_w) AM_BASE_MEMBER(appoooh_state, m_fg_colorram)
-	AM_RANGE(0xf800, 0xf81f) AM_BASE_MEMBER(appoooh_state, m_spriteram_2)
-	AM_RANGE(0xf820, 0xfbff) AM_WRITE(appoooh_bg_videoram_w) AM_BASE_MEMBER(appoooh_state, m_bg_videoram)
-	AM_RANGE(0xfc20, 0xffff) AM_WRITE(appoooh_bg_colorram_w) AM_BASE_MEMBER(appoooh_state, m_bg_colorram)
+	AM_RANGE(0xf000, 0xf01f) AM_SHARE("spriteram")
+	AM_RANGE(0xf020, 0xf3ff) AM_WRITE(appoooh_fg_videoram_w) AM_SHARE("fg_videoram")
+	AM_RANGE(0xf420, 0xf7ff) AM_WRITE(appoooh_fg_colorram_w) AM_SHARE("fg_colorram")
+	AM_RANGE(0xf800, 0xf81f) AM_SHARE("spriteram_2")
+	AM_RANGE(0xf820, 0xfbff) AM_WRITE(appoooh_bg_videoram_w) AM_SHARE("bg_videoram")
+	AM_RANGE(0xfc20, 0xffff) AM_WRITE(appoooh_bg_colorram_w) AM_SHARE("bg_colorram")
 	AM_RANGE(0xf000, 0xffff) AM_RAM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( main_portmap, AS_IO, 8 )
+static ADDRESS_MAP_START( main_portmap, AS_IO, 8, appoooh_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x00) AM_READ_PORT("P1") AM_DEVWRITE("sn1", sn76496_w)
-	AM_RANGE(0x01, 0x01) AM_READ_PORT("P2") AM_DEVWRITE("sn2", sn76496_w)
-	AM_RANGE(0x02, 0x02) AM_DEVWRITE("sn3", sn76496_w)
+	AM_RANGE(0x00, 0x00) AM_READ_PORT("P1") AM_DEVWRITE("sn1", sn76489_device, write)
+	AM_RANGE(0x01, 0x01) AM_READ_PORT("P2") AM_DEVWRITE("sn2", sn76489_device, write)
+	AM_RANGE(0x02, 0x02) AM_DEVWRITE("sn3", sn76489_device, write)
 	AM_RANGE(0x03, 0x03) AM_READ_PORT("DSW1") AM_WRITE(appoooh_adpcm_w)
 	AM_RANGE(0x04, 0x04) AM_READ_PORT("BUTTON3") AM_WRITE(appoooh_out_w)
 	AM_RANGE(0x05, 0x05) AM_WRITE(appoooh_scroll_w) /* unknown */
@@ -271,10 +270,10 @@ static INPUT_PORTS_START( appoooh )
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON3 )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON3 ) PORT_COCKTAIL
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_COIN3 )
-	PORT_BIT( 0xf8, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* probably unused */
+	PORT_BIT( 0xf8, IP_ACTIVE_HIGH, IPT_UNKNOWN )   /* probably unused */
 
 	PORT_START("DSW1")
-	PORT_DIPNAME( 0x07, 0x00, DEF_STR( Coin_A ) )		PORT_DIPLOCATION("SW1:1,2,3")
+	PORT_DIPNAME( 0x07, 0x00, DEF_STR( Coin_A ) )       PORT_DIPLOCATION("SW1:1,2,3")
 	PORT_DIPSETTING(    0x03, DEF_STR( 4C_1C ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( 2C_1C ) )
@@ -283,18 +282,18 @@ static INPUT_PORTS_START( appoooh )
 	PORT_DIPSETTING(    0x04, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(    0x05, DEF_STR( 1C_3C ) )
 	PORT_DIPSETTING(    0x06, DEF_STR( 1C_4C ) )
-	PORT_DIPNAME( 0x18, 0x00, DEF_STR( Coin_B ) )		PORT_DIPLOCATION("SW1:4,5")
+	PORT_DIPNAME( 0x18, 0x00, DEF_STR( Coin_B ) )       PORT_DIPLOCATION("SW1:4,5")
 	PORT_DIPSETTING(    0x18, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(    0x10, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( 1C_2C ) )
-	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Demo_Sounds ) )	PORT_DIPLOCATION("SW1:6")
+	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW1:6")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( On ) )
-	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Cabinet ) )		PORT_DIPLOCATION("SW1:7")
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Cabinet ) )      PORT_DIPLOCATION("SW1:7")
 	PORT_DIPSETTING(    0x40, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Cocktail ) )
-	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Difficulty ) )	PORT_DIPLOCATION("SW1:8")
+	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("SW1:8")
 	PORT_DIPSETTING(    0x00, DEF_STR( Easy ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( Hard ) )
 INPUT_PORTS_END
@@ -303,8 +302,8 @@ static INPUT_PORTS_START( robowres )
 	PORT_INCLUDE( appoooh )
 
 	PORT_MODIFY("DSW1")
-	PORT_DIPUNUSED_DIPLOC(0x40,0x40, "SW1:7" )			/* Listed as "Unused" */
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Language ) )		PORT_DIPLOCATION("SW1:8")
+	PORT_DIPUNUSED_DIPLOC(0x40,0x40, "SW1:7" )          /* Listed as "Unused" */
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Language ) )     PORT_DIPLOCATION("SW1:8")
 	PORT_DIPSETTING(    0x00, DEF_STR( Japanese ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( English ) )
 INPUT_PORTS_END
@@ -318,26 +317,26 @@ INPUT_PORTS_END
 
 static const gfx_layout charlayout =
 {
-	8,8,	/* 8*8 characters */
-	2048,	/* 2048 characters */
-	3,	/* 3 bits per pixel */
-	{ 2*2048*8*8, 1*2048*8*8, 0*2048*8*8 },	/* the bitplanes are separated */
+	8,8,    /* 8*8 characters */
+	2048,   /* 2048 characters */
+	3,  /* 3 bits per pixel */
+	{ 2*2048*8*8, 1*2048*8*8, 0*2048*8*8 }, /* the bitplanes are separated */
 	{ 7, 6, 5, 4, 3, 2, 1, 0 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
-	8*8	/* every char takes 8 consecutive bytes */
+	8*8 /* every char takes 8 consecutive bytes */
 };
 
 static const gfx_layout spritelayout =
 {
-	16,16,	/* 8*8 characters */
-	512,	/* 512 characters */
-	3,	/* 3 bits per pixel */
-	{ 2*2048*8*8, 1*2048*8*8, 0*2048*8*8 },	/* the bitplanes are separated */
+	16,16,  /* 8*8 characters */
+	512,    /* 512 characters */
+	3,  /* 3 bits per pixel */
+	{ 2*2048*8*8, 1*2048*8*8, 0*2048*8*8 }, /* the bitplanes are separated */
 	{ 7, 6, 5, 4, 3, 2, 1, 0 ,
-	  8*8+7,8*8+6,8*8+5,8*8+4,8*8+3,8*8+2,8*8+1,8*8+0},
+		8*8+7,8*8+6,8*8+5,8*8+4,8*8+3,8*8+2,8*8+1,8*8+0},
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-	  16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8 },
-	32*8	/* every char takes 8 consecutive bytes */
+		16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8 },
+	32*8    /* every char takes 8 consecutive bytes */
 };
 
 static GFXDECODE_START( appoooh )
@@ -366,18 +365,18 @@ static const gfx_layout robowres_spritelayout =
 	3,
 	{ RGN_FRAC(2,3),RGN_FRAC(1,3),RGN_FRAC(0,3) },
 	{ 7, 6, 5, 4, 3, 2, 1, 0 ,
-	  8*8+7,8*8+6,8*8+5,8*8+4,8*8+3,8*8+2,8*8+1,8*8+0},
+		8*8+7,8*8+6,8*8+5,8*8+4,8*8+3,8*8+2,8*8+1,8*8+0},
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-	  16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8 },
-	32*8	/* every char takes 8 consecutive bytes */
+		16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8 },
+	32*8    /* every char takes 8 consecutive bytes */
 };
 
 
 static GFXDECODE_START( robowres )
 	GFXDECODE_ENTRY( "gfx1", 0, robowres_charlayout,        0, 32 )
-	GFXDECODE_ENTRY( "gfx2", 0, robowres_charlayout,    	 0, 32 )
+	GFXDECODE_ENTRY( "gfx2", 0, robowres_charlayout,         0, 32 )
 	GFXDECODE_ENTRY( "gfx1", 0, robowres_spritelayout,      0, 32 )
-	GFXDECODE_ENTRY( "gfx2", 0, robowres_spritelayout,  	 0, 32 )
+	GFXDECODE_ENTRY( "gfx2", 0, robowres_spritelayout,       0, 32 )
 GFXDECODE_END
 
 
@@ -390,8 +389,19 @@ GFXDECODE_END
 static const msm5205_interface msm5205_config =
 {
 	appoooh_adpcm_int,/* interrupt function */
-	MSM5205_S64_4B	/* 6KHz               */
+	MSM5205_S64_4B  /* 6KHz               */
 };
+
+
+//-------------------------------------------------
+//  sn76496_config psg_intf
+//-------------------------------------------------
+
+static const sn76496_config psg_intf =
+{
+	DEVCB_NULL
+};
+
 
 
 /*************************************
@@ -400,49 +410,55 @@ static const msm5205_interface msm5205_config =
  *
  *************************************/
 
-static MACHINE_START( appoooh )
+void appoooh_state::machine_start()
 {
-	appoooh_state *state = machine.driver_data<appoooh_state>();
 
-	state->m_adpcm = machine.device("msm");
+	m_adpcm = machine().device("msm");
 
-	state->save_item(NAME(state->m_adpcm_data));
-	state->save_item(NAME(state->m_adpcm_address));
+	save_item(NAME(m_adpcm_data));
+	save_item(NAME(m_adpcm_address));
 }
 
 
-static MACHINE_RESET( appoooh )
+void appoooh_state::machine_reset()
 {
-	appoooh_state *state = machine.driver_data<appoooh_state>();
 
-	state->m_adpcm_address = 0xffffffff;
-	state->m_adpcm_data = 0;
-	state->m_scroll_x = 0;
-	state->m_priority = 0;
+	m_adpcm_address = 0xffffffff;
+	m_adpcm_data = 0;
+	m_scroll_x = 0;
+	m_priority = 0;
+}
+
+INTERRUPT_GEN_MEMBER(appoooh_state::vblank_irq)
+{
+
+	if(m_nmi_mask)
+		device.execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 }
 
 static MACHINE_CONFIG_START( appoooh_common, appoooh_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80,18432000/6)	/* ??? the main xtal is 18.432 MHz */
+	MCFG_CPU_ADD("maincpu", Z80,18432000/6) /* ??? the main xtal is 18.432 MHz */
 	MCFG_CPU_PROGRAM_MAP(main_map)
 	MCFG_CPU_IO_MAP(main_portmap)
-	MCFG_CPU_VBLANK_INT("screen", nmi_line_pulse)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", appoooh_state,  vblank_irq)
 
-	MCFG_MACHINE_START(appoooh)
-	MCFG_MACHINE_RESET(appoooh)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
 	MCFG_SOUND_ADD("sn1", SN76489, 18432000/6)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.30)
+	MCFG_SOUND_CONFIG(psg_intf)
 
 	MCFG_SOUND_ADD("sn2", SN76489, 18432000/6)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.30)
+	MCFG_SOUND_CONFIG(psg_intf)
 
 	MCFG_SOUND_ADD("sn3", SN76489, 18432000/6)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.30)
+	MCFG_SOUND_CONFIG(psg_intf)
 
 	MCFG_SOUND_ADD("msm", MSM5205, 384000)
 	MCFG_SOUND_CONFIG(msm5205_config)
@@ -456,16 +472,15 @@ static MACHINE_CONFIG_DERIVED( appoooh, appoooh_common )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(appoooh)
+	MCFG_SCREEN_UPDATE_DRIVER(appoooh_state, screen_update_appoooh)
 
 	MCFG_GFXDECODE(appoooh)
 	MCFG_PALETTE_LENGTH(32*8+32*8)
 
-	MCFG_PALETTE_INIT(appoooh)
-	MCFG_VIDEO_START(appoooh)
+	MCFG_PALETTE_INIT_OVERRIDE(appoooh_state,appoooh)
+	MCFG_VIDEO_START_OVERRIDE(appoooh_state,appoooh)
 MACHINE_CONFIG_END
 
 
@@ -475,16 +490,15 @@ static MACHINE_CONFIG_DERIVED( robowres, appoooh_common )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(robowres)
+	MCFG_SCREEN_UPDATE_DRIVER(appoooh_state, screen_update_robowres)
 
 	MCFG_GFXDECODE(robowres)
 	MCFG_PALETTE_LENGTH(32*8+32*8)
 
-	MCFG_PALETTE_INIT(robowres)
-	MCFG_VIDEO_START(appoooh)
+	MCFG_PALETTE_INIT_OVERRIDE(appoooh_state,robowres)
+	MCFG_VIDEO_START_OVERRIDE(appoooh_state,appoooh)
 MACHINE_CONFIG_END
 
 /*************************************
@@ -494,7 +508,7 @@ MACHINE_CONFIG_END
  *************************************/
 
 ROM_START( appoooh )
-	ROM_REGION( 0x14000, "maincpu", 0 )	/* 64k for code + 16k bank */
+	ROM_REGION( 0x14000, "maincpu", 0 ) /* 64k for code + 16k bank */
 	ROM_LOAD( "epr-5906.bin", 0x00000, 0x2000, CRC(fffae7fe) SHA1(b4bb60eb6331e503759bd963eafefa69331d6b86) )
 	ROM_LOAD( "epr-5907.bin", 0x02000, 0x2000, CRC(57696cd6) SHA1(74a005d18d55fed9ece9b579d2e7e6619a47538b) )
 	ROM_LOAD( "epr-5908.bin", 0x04000, 0x2000, CRC(4537cddc) SHA1(ecb71cab7b9269d713399987cbc45ff54735019f) )
@@ -506,21 +520,21 @@ ROM_START( appoooh )
 	ROM_LOAD( "epr-5914.bin", 0x12000, 0x2000, CRC(58792d4a) SHA1(8acdb0ebee5faadadd64bd64db1fdf881ee70333) ) /* a000-dfff */
 
 	ROM_REGION( 0x0c000, "gfx1", 0 )
-	ROM_LOAD( "epr-5895.bin", 0x00000, 0x4000, CRC(4b0d4294) SHA1(f9f4d928c76b32cbcbaf7bfd0ebec2d4dfc37566) )	/* playfield #1 chars */
+	ROM_LOAD( "epr-5895.bin", 0x00000, 0x4000, CRC(4b0d4294) SHA1(f9f4d928c76b32cbcbaf7bfd0ebec2d4dfc37566) )   /* playfield #1 chars */
 	ROM_LOAD( "epr-5896.bin", 0x04000, 0x4000, CRC(7bc84d75) SHA1(36e98eaac1ba23ab842080205bdb5b76b888ddc2) )
 	ROM_LOAD( "epr-5897.bin", 0x08000, 0x4000, CRC(745f3ffa) SHA1(03f5d1d567e786e7835defc6995d1b39aee2c28d) )
 
 	ROM_REGION( 0x0c000, "gfx2", 0 )
-	ROM_LOAD( "epr-5898.bin", 0x00000, 0x4000, CRC(cf01644d) SHA1(0cc1b7f7a3b33b0edf4e277e320467b19dfc5bc8) )	/* playfield #2 chars */
+	ROM_LOAD( "epr-5898.bin", 0x00000, 0x4000, CRC(cf01644d) SHA1(0cc1b7f7a3b33b0edf4e277e320467b19dfc5bc8) )   /* playfield #2 chars */
 	ROM_LOAD( "epr-5899.bin", 0x04000, 0x4000, CRC(885ad636) SHA1(d040948f7cf030e4ab0f0509df23cb855e9c920c) )
 	ROM_LOAD( "epr-5900.bin", 0x08000, 0x4000, CRC(a8ed13f3) SHA1(31c4a52fea8f26b4a79564c7e8443a88d43aee12) )
 
 	ROM_REGION( 0x0220, "proms", 0 )
-	ROM_LOAD( "pr5921.prm",   0x0000, 0x020, CRC(f2437229) SHA1(8fb4240142f4c77f820d7c153c22ff82f66aa7b1) ) 	/* palette */
-	ROM_LOAD( "pr5922.prm",   0x0020, 0x100, CRC(85c542bf) SHA1(371d92fca2ae609a47d3a2ea349f14f30b846da8) ) 	/* charset #1 lookup table */
-	ROM_LOAD( "pr5923.prm",   0x0120, 0x100, CRC(16acbd53) SHA1(e5791646730c6232efa2c0327b484472c47baf21) ) 	/* charset #2 lookup table */
+	ROM_LOAD( "pr5921.prm",   0x0000, 0x020, CRC(f2437229) SHA1(8fb4240142f4c77f820d7c153c22ff82f66aa7b1) )     /* palette */
+	ROM_LOAD( "pr5922.prm",   0x0020, 0x100, CRC(85c542bf) SHA1(371d92fca2ae609a47d3a2ea349f14f30b846da8) )     /* charset #1 lookup table */
+	ROM_LOAD( "pr5923.prm",   0x0120, 0x100, CRC(16acbd53) SHA1(e5791646730c6232efa2c0327b484472c47baf21) )     /* charset #2 lookup table */
 
-	ROM_REGION( 0xa000, "adpcm", 0 )	/* adpcm voice data */
+	ROM_REGION( 0xa000, "adpcm", 0 )    /* adpcm voice data */
 	ROM_LOAD( "epr-5901.bin", 0x0000, 0x2000, CRC(170a10a4) SHA1(7b0c8427c69525cbcbe9f88b22b12aafb6949bfd) )
 	ROM_LOAD( "epr-5902.bin", 0x2000, 0x2000, CRC(f6981640) SHA1(1a93913ecb64d1c459e5bbcc28c4ca3ea90f21e1) )
 	ROM_LOAD( "epr-5903.bin", 0x4000, 0x2000, CRC(0439df50) SHA1(1f981c1867366fa57de25ff8f421c121d82d7321) )
@@ -529,7 +543,7 @@ ROM_START( appoooh )
 ROM_END
 
 ROM_START( robowres )
-	ROM_REGION( 0x1c000, "maincpu", 0 )	/* 64k for code + 16k bank */
+	ROM_REGION( 0x1c000, "maincpu", 0 ) /* 64k for code + 16k bank */
 	ROM_LOAD( "epr-7540.13d", 0x00000, 0x8000, CRC(a2a54237) SHA1(06c80fe6725582d19aa957728977e871e79e79e1) )
 	ROM_LOAD( "epr-7541.14d", 0x08000, 0x6000, CRC(cbf7d1a8) SHA1(5eb6d2130d4e5401a332df6db5cad07f3131e8e4) )
 	ROM_CONTINUE(             0x10000, 0x2000 )
@@ -551,12 +565,12 @@ ROM_START( robowres )
 	ROM_LOAD( "pr7572.7f",   0x00020, 0x0100, CRC(2b083d0c) SHA1(5b39bd4297bec788caac9e9de5128d43932a24e2) )
 	ROM_LOAD( "pr7573.7g",   0x00120, 0x0100, CRC(2b083d0c) SHA1(5b39bd4297bec788caac9e9de5128d43932a24e2) )
 
-	ROM_REGION( 0x8000, "adpcm", 0 )	/* adpcm voice data */
+	ROM_REGION( 0x8000, "adpcm", 0 )    /* adpcm voice data */
 	ROM_LOAD( "epr-7543.12b", 0x00000, 0x8000, CRC(4d108c49) SHA1(a7c3c5a5ad36917ea7f6d917377c2392fa9beea3) )
 ROM_END
 
 ROM_START( robowresb )
-	ROM_REGION( 0x1c000+0x8000, "maincpu", 0 )	/* 64k for code + 16k bank */
+	ROM_REGION( 0x1c000+0x8000, "maincpu", 0 )  /* 64k for code + 16k bank */
 	ROM_LOAD( "dg4.e13",      0x00000, 0x8000, CRC(f7585d4f) SHA1(718879f8262681b6b66968eb49a0fb04fda5160b) )
 	ROM_LOAD( "epr-7541.14d", 0x08000, 0x6000, CRC(cbf7d1a8) SHA1(5eb6d2130d4e5401a332df6db5cad07f3131e8e4) )
 	ROM_CONTINUE(             0x10000, 0x2000 )
@@ -579,7 +593,7 @@ ROM_START( robowresb )
 	ROM_LOAD( "pr7572.7f",   0x00020, 0x0100, CRC(2b083d0c) SHA1(5b39bd4297bec788caac9e9de5128d43932a24e2) )
 	ROM_LOAD( "pr7573.7g",   0x00120, 0x0100, CRC(2b083d0c) SHA1(5b39bd4297bec788caac9e9de5128d43932a24e2) )
 
-	ROM_REGION( 0x8000, "adpcm", 0 )	/* adpcm voice data */
+	ROM_REGION( 0x8000, "adpcm", 0 )    /* adpcm voice data */
 	ROM_LOAD( "epr-7543.12b", 0x00000, 0x8000, CRC(4d108c49) SHA1(a7c3c5a5ad36917ea7f6d917377c2392fa9beea3) )
 ROM_END
 
@@ -591,15 +605,15 @@ ROM_END
  *
  *************************************/
 
-static DRIVER_INIT(robowres)
+DRIVER_INIT_MEMBER(appoooh_state,robowres)
 {
-	sega_315_5179_decode(machine, "maincpu");
+	sega_315_5179_decode(machine(), "maincpu");
 }
 
-static DRIVER_INIT(robowresb)
+DRIVER_INIT_MEMBER(appoooh_state,robowresb)
 {
-	address_space *space = machine.device("maincpu")->memory().space(AS_PROGRAM);
-	space->set_decrypted_region(0x0000, 0x7fff, machine.region("maincpu")->base() + 0x1c000);
+	address_space &space = machine().device("maincpu")->memory().space(AS_PROGRAM);
+	space.set_decrypted_region(0x0000, 0x7fff, machine().root_device().memregion("maincpu")->base() + 0x1c000);
 }
 
 
@@ -609,6 +623,6 @@ static DRIVER_INIT(robowresb)
  *
  *************************************/
 
-GAME( 1984, appoooh,   0,        appoooh,  appoooh,  0,        ROT0, "Sanritsu / Sega", "Appoooh", GAME_SUPPORTS_SAVE )
-GAME( 1986, robowres,  0,        robowres, robowres, robowres, ROT0, "Sanritsu / Sega", "Robo Wres 2001", GAME_SUPPORTS_SAVE )
-GAME( 1986, robowresb, robowres, robowres, robowres, robowresb,ROT0, "bootleg",         "Robo Wres 2001 (bootleg)", GAME_SUPPORTS_SAVE )
+GAME( 1984, appoooh,   0,        appoooh,  appoooh, driver_device,  0,        ROT0, "Sanritsu / Sega", "Appoooh", GAME_SUPPORTS_SAVE )
+GAME( 1986, robowres,  0,        robowres, robowres, appoooh_state, robowres, ROT0, "Sanritsu / Sega", "Robo Wres 2001", GAME_SUPPORTS_SAVE )
+GAME( 1986, robowresb, robowres, robowres, robowres, appoooh_state, robowresb,ROT0, "bootleg",         "Robo Wres 2001 (bootleg)", GAME_SUPPORTS_SAVE )

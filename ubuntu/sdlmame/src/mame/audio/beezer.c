@@ -16,13 +16,14 @@
      a silence waveform for 55516, alternating zeroes and ones.
     * The channel mixing is done additively at the moment rather than
      emulating the original multiplexer, which is actually not that hard to do
+     but adds a bit of complexity to the render loop.
     * The 'FM OR AM' output of the audio via (pb1) appears to control some sort
      of suppression or filtering change of the post-DAC amplifier when enabled,
      only during the TIMER1 OUT time-slot of the multiplexer, see page 1B 3-3
      of schematics. This will be a MESS to emulate since theres a lot of analog
      crap involved.
     * The /INT line and related logic of the 6840 is not emulated, and should
-     be hooked to the audio 6809
+     be hooked to the audio 6809.
     * Convert this to a modern device instead of a deprecated old style device
 
 
@@ -31,6 +32,8 @@
      of 74ls670 4x4 register files wired up as four 8-bit words;
      The four words are used as the volumes for four 1-bit channels by inversion
      of the MSB of the 8 bit value.
+    NOISE is the output of an MM5837 whitenoise generator, a self-clocked (at
+     around 100khz) LFSR with taps on bits (base-0) 16 and 13.
     The four channels are:
     CNT1 CNT0
     0    0    6522 pin 7 output (squarewave); 'FM or AM' affects this slot only
@@ -59,9 +62,9 @@
  *
  *************************************/
 
-#define CRYSTAL_OSC				(XTAL_12MHz)
-#define SH6840_CLOCK			(CRYSTAL_OSC / 12)
-#define MULTIPLEX_FREQ			(SH6840_CLOCK / 16)
+#define CRYSTAL_OSC             (XTAL_12MHz)
+#define SH6840_CLOCK            (CRYSTAL_OSC / 12)
+#define MULTIPLEX_FREQ          (SH6840_CLOCK / 16)
 
 /*************************************
  *
@@ -72,12 +75,12 @@
 /* 6840 variables */
 struct sh6840_timer_channel
 {
-	UINT8	cr;
-	UINT8	state;
-	UINT8	leftovers;
-	UINT16	timer;
-	UINT32	clocks;
-	UINT8	int_flag;
+	UINT8   cr;
+	UINT8   state;
+	UINT8   leftovers;
+	UINT16  timer;
+	UINT32  clocks;
+	UINT8   int_flag;
 	union
 	{
 #ifdef LSB_FIRST
@@ -89,10 +92,9 @@ struct sh6840_timer_channel
 	} counter;
 };
 
-typedef struct _beezer_sound_state beezer_sound_state;
-struct _beezer_sound_state
+struct beezer_sound_state
 {
-	device_t *m_maincpu;
+	cpu_device *m_maincpu;
 
 	/* IRQ variable */
 	UINT8 m_ptm_irq_state;
@@ -123,7 +125,7 @@ INLINE beezer_sound_state *get_safe_token(device_t *device)
 	assert(device != NULL);
 	assert(device->type() == BEEZER);
 
-	return (beezer_sound_state *)downcast<legacy_device_base *>(device)->token();
+	return (beezer_sound_state *)downcast<beezer_sound_device *>(device)->token();
 }
 
 /*************************************
@@ -135,7 +137,7 @@ INLINE beezer_sound_state *get_safe_token(device_t *device)
 /*static WRITE_LINE_DEVICE_HANDLER( update_irq_state )
 {
     beezer_sound_state *sndstate = get_safe_token(device);
-    cputag_set_input_line(device->machine(), "audiocpu", M6809_IRQ_LINE, (sndstate->ptm_irq_state) ? ASSERT_LINE : CLEAR_LINE);
+    device->machine().device("audiocpu")->execute().set_input_line(M6809_IRQ_LINE, (sndstate->ptm_irq_state) ? ASSERT_LINE : CLEAR_LINE);
 }*/
 
 
@@ -211,11 +213,11 @@ INLINE int sh6840_update_noise(beezer_sound_state *state, int clocks)
 	for (i = 0; i < clocks; i++)
 	{
 		state->m_sh6840_LFSR_clocks++;
-		if (state->m_sh6840_LFSR_clocks >= 10) // about 10 clocks per 6840 clock
+		if (state->m_sh6840_LFSR_clocks >= 10) // about 10 clocks per 6840 clock, as MM5837 runs at around 100kHz, while clock is 1MHz
 		{
 			state->m_sh6840_LFSR_clocks = 0;
 			/* shift the LFSR. finally or in the result and see if we've
-            * had a 0->1 transition */
+			* had a 0->1 transition */
 			newxor = (((state->m_sh6840_LFSR&0x10000)?1:0) ^ ((state->m_sh6840_LFSR&0x2000)?1:0))?1:0;
 			state->m_sh6840_LFSR <<= 1;
 			state->m_sh6840_LFSR |= newxor;
@@ -307,12 +309,12 @@ static STREAM_UPDATE( beezer_stream_update )
 		/* skip if nothing enabled */
 		if ((sh6840_timer[0].cr & 0x01) == 0) // if we're not in reset...
 		{
-			int noise_clocks_this_sample = 0;
+//          int noise_clocks_this_sample = 0;
 			UINT32 chan1_clocks;
 
 			/* generate noise if configured to do so */
 			if (noisy != 0)
-				noise_clocks_this_sample = sh6840_update_noise(state, clocks_this_sample);
+				sh6840_update_noise(state, clocks_this_sample);
 
 			/* handle timer 0 if enabled */
 			t = &sh6840_timer[0];
@@ -330,7 +332,7 @@ static STREAM_UPDATE( beezer_stream_update )
 			/* generate channel 1-clocked noise if configured to do so */
 			if (noisy != 0)
 			{
-				noise_clocks_this_sample = sh6840_update_noise(state, t->clocks - chan1_clocks);
+				sh6840_update_noise(state, t->clocks - chan1_clocks);
 				if (clocks) state->m_sh6840_noiselatch3 = (state->m_sh6840_LFSR&0x1);
 			}
 
@@ -351,16 +353,16 @@ static STREAM_UPDATE( beezer_stream_update )
 
 		/* stash */
 		/* each sample feeds an xor bit on the sign bit of a sign-magnitude (NOT 2'S COMPLEMENT)
-         * DAC. This requires some rather convoluted processing:
-         * samplex*0x80 brings the sample to the sign bit
-         * state->m_sh6840_volume[x]&0x80 pulls the sign bit from the dac sample
-         * state->m_sh6840_volume[x]&0x7F pulls the magnitude from the dac sample
-         */
+		 * DAC. This requires some rather convoluted processing:
+		 * samplex*0x80 brings the sample to the sign bit
+		 * state->m_sh6840_volume[x]&0x80 pulls the sign bit from the dac sample
+		 * state->m_sh6840_volume[x]&0x7F pulls the magnitude from the dac sample
+		 */
 		sample += (((sample0*0x80)^(state->m_sh6840_volume[0]&0x80))?-1:1)*(state->m_sh6840_volume[0]&0x7F);
 		sample += (((sample1*0x80)^(state->m_sh6840_volume[1]&0x80))?-1:1)*(state->m_sh6840_volume[1]&0x7F);
 		sample += (((sample2*0x80)^(state->m_sh6840_volume[2]&0x80))?-1:1)*(state->m_sh6840_volume[2]&0x7F);
 		sample += (((sample3*0x80)^(state->m_sh6840_volume[3]&0x80))?-1:1)*(state->m_sh6840_volume[3]&0x7F);
-		*buffer++ = sample*64; // adding 3 numbers ranging from -128 to 127 yields a range of -512 to 508; to scale that to '-32768 to 32767' we multiply by 64
+		*buffer++ = sample*64; // adding 4 numbers ranging from -128 to 127 yields a range of -512 to 508; to scale that to '-32768 to 32767' we multiply by 64
 	}
 }
 
@@ -381,7 +383,7 @@ static DEVICE_START( common_sh_start )
 
 	/* allocate the stream */
 	state->m_stream = device->machine().sound().stream_alloc(*device, 0, 1, sample_rate, NULL, beezer_stream_update);
-	state->m_maincpu = device->machine().device("maincpu");
+	state->m_maincpu = device->machine().device<cpu_device>("maincpu");
 
 	sh6840_register_state_globals(device);
 }
@@ -392,7 +394,54 @@ static DEVICE_START( beezer_sound )
 	DEVICE_START_CALL(common_sh_start);
 }
 
-DEFINE_LEGACY_SOUND_DEVICE(BEEZER, beezer_sound);
+const device_type BEEZER = &device_creator<beezer_sound_device>;
+
+beezer_sound_device::beezer_sound_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, BEEZER, "beezer SFX", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
+{
+	m_token = global_alloc_clear(beezer_sound_state);
+}
+
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
+
+void beezer_sound_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void beezer_sound_device::device_start()
+{
+	DEVICE_START_NAME( beezer_sound )(this);
+}
+
+//-------------------------------------------------
+//  device_reset - device-specific reset
+//-------------------------------------------------
+static DEVICE_RESET( beezer_sound );
+void beezer_sound_device::device_reset()
+{
+	DEVICE_RESET_NAME( beezer_sound )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void beezer_sound_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}
+
+
 
 /*************************************
  *
@@ -429,23 +478,6 @@ static DEVICE_RESET( beezer_sound )
 }
 
 
-DEVICE_GET_INFO( beezer_sound )
-{
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(beezer_sound_state);			break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME(beezer_sound);	break;
-		case DEVINFO_FCT_RESET:							info->reset = DEVICE_RESET_NAME(beezer_sound);	break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "beezer SFX");					break;
-		case DEVINFO_STR_SOURCE_FILE:						strcpy(info->s, __FILE__);						break;
-	}
-}
-
 /*************************************
  *
  *  6840 timer handlers
@@ -466,7 +498,7 @@ READ8_DEVICE_HANDLER( beezer_sh6840_r )
 		return 0;
 		/* offset 1 reads the status register: bits 2 1 0 correspond to ints on channels 2,1,0, and bit 7 is an 'OR' of bits 2,1,0 */
 		case 1:
-		logerror("%04X:beezer_sh6840_r - unexpected read, status register is TODO!\n", cpu_get_pc(state->m_maincpu));
+		logerror("%04X:beezer_sh6840_r - unexpected read, status register is TODO!\n", state->m_maincpu->pc());
 		return 0;
 		/* offsets 2,4,6 read channel 0,1,2 MSBs and latch the LSB*/
 		case 2: case 4: case 6:
@@ -570,4 +602,3 @@ WRITE8_DEVICE_HANDLER( beezer_sfxctrl_w )
 	state->m_stream->update();
 	state->m_sh6840_volume[offset] = data;
 }
-

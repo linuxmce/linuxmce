@@ -45,6 +45,7 @@
 
 // MAME headers
 #include "emu.h"
+#include "rendersw.c"
 
 // MAMEOS headers
 #include "window.h"
@@ -56,13 +57,12 @@
 //============================================================
 
 /* gdi_info is the information for the current screen */
-typedef struct _gdi_info gdi_info;
-struct _gdi_info
+struct gdi_info
 {
-	BITMAPINFO				bminfo;
-	RGBQUAD					colors[256];
-	UINT8 *					bmdata;
-	size_t					bmsize;
+	BITMAPINFO              bminfo;
+	RGBQUAD                 colors[256];
+	UINT8 *                 bmdata;
+	size_t                  bmsize;
 };
 
 
@@ -78,9 +78,6 @@ static void drawgdi_window_destroy(win_window_info *window);
 static render_primitive_list *drawgdi_window_get_primitives(win_window_info *window);
 static int drawgdi_window_draw(win_window_info *window, HDC dc, int update);
 
-// rendering
-static void drawgdi_rgb888_draw_primitives(const render_primitive_list &primlist, void *dstdata, UINT32 width, UINT32 height, UINT32 pitch);
-
 
 
 //============================================================
@@ -94,6 +91,8 @@ int drawgdi_init(running_machine &machine, win_draw_callbacks *callbacks)
 	callbacks->window_init = drawgdi_window_init;
 	callbacks->window_get_primitives = drawgdi_window_get_primitives;
 	callbacks->window_draw = drawgdi_window_draw;
+	callbacks->window_save = NULL;
+	callbacks->window_record = NULL;
 	callbacks->window_destroy = drawgdi_window_destroy;
 	return 0;
 }
@@ -124,22 +123,22 @@ static int drawgdi_window_init(win_window_info *window)
 	window->drawdata = gdi;
 
 	// fill in the bitmap info header
-	gdi->bminfo.bmiHeader.biSize			= sizeof(gdi->bminfo.bmiHeader);
-	gdi->bminfo.bmiHeader.biPlanes			= 1;
-	gdi->bminfo.bmiHeader.biCompression		= BI_RGB;
-	gdi->bminfo.bmiHeader.biSizeImage		= 0;
-	gdi->bminfo.bmiHeader.biXPelsPerMeter	= 0;
-	gdi->bminfo.bmiHeader.biYPelsPerMeter	= 0;
-	gdi->bminfo.bmiHeader.biClrUsed			= 0;
-	gdi->bminfo.bmiHeader.biClrImportant	= 0;
+	gdi->bminfo.bmiHeader.biSize            = sizeof(gdi->bminfo.bmiHeader);
+	gdi->bminfo.bmiHeader.biPlanes          = 1;
+	gdi->bminfo.bmiHeader.biCompression     = BI_RGB;
+	gdi->bminfo.bmiHeader.biSizeImage       = 0;
+	gdi->bminfo.bmiHeader.biXPelsPerMeter   = 0;
+	gdi->bminfo.bmiHeader.biYPelsPerMeter   = 0;
+	gdi->bminfo.bmiHeader.biClrUsed         = 0;
+	gdi->bminfo.bmiHeader.biClrImportant    = 0;
 
 	// initialize the palette to a gray ramp
 	for (i = 0; i < 256; i++)
 	{
-		gdi->bminfo.bmiColors[i].rgbRed			= i;
-		gdi->bminfo.bmiColors[i].rgbGreen		= i;
-		gdi->bminfo.bmiColors[i].rgbBlue		= i;
-		gdi->bminfo.bmiColors[i].rgbReserved	= i;
+		gdi->bminfo.bmiColors[i].rgbRed         = i;
+		gdi->bminfo.bmiColors[i].rgbGreen       = i;
+		gdi->bminfo.bmiColors[i].rgbBlue        = i;
+		gdi->bminfo.bmiColors[i].rgbReserved    = i;
 	}
 
 	return 0;
@@ -214,7 +213,7 @@ static int drawgdi_window_draw(win_window_info *window, HDC dc, int update)
 
 	// draw the primitives to the bitmap
 	window->primlist->acquire_lock();
-	drawgdi_rgb888_draw_primitives(*window->primlist, gdi->bmdata, width, height, pitch);
+	software_renderer<UINT32, 0,0,0, 16,8,0>::draw_primitives(*window->primlist, gdi->bmdata, width, height, pitch);
 	window->primlist->release_lock();
 
 	// fill in bitmap-specific info
@@ -228,20 +227,3 @@ static int drawgdi_window_draw(win_window_info *window, HDC dc, int update)
 				gdi->bmdata, &gdi->bminfo, DIB_RGB_COLORS, SRCCOPY);
 	return 0;
 }
-
-
-
-//============================================================
-//  SOFTWARE RENDERING
-//============================================================
-
-#define FUNC_PREFIX(x)		drawgdi_rgb888_##x
-#define PIXEL_TYPE			UINT32
-#define SRCSHIFT_R			0
-#define SRCSHIFT_G			0
-#define SRCSHIFT_B			0
-#define DSTSHIFT_R			16
-#define DSTSHIFT_G			8
-#define DSTSHIFT_B			0
-
-#include "rendersw.c"

@@ -67,93 +67,91 @@ zooming might be wrong
 #include "cpu/z80/z80.h"
 #include "cpu/m68000/m68000.h"
 #include "sound/2610intf.h"
+#include "video/vsystem_spr.h"
 #include "includes/taotaido.h"
 
-#define TAOTAIDO_SHOW_ALL_INPUTS	0
+#define TAOTAIDO_SHOW_ALL_INPUTS    0
 
 
-static READ16_HANDLER( pending_command_r )
+READ16_MEMBER(taotaido_state::pending_command_r)
 {
-	taotaido_state *state = space->machine().driver_data<taotaido_state>();
 	/* Only bit 0 is tested */
-	return state->m_pending_command;
+	return m_pending_command;
 }
 
-static WRITE16_HANDLER( sound_command_w )
+WRITE16_MEMBER(taotaido_state::sound_command_w)
 {
-	taotaido_state *state = space->machine().driver_data<taotaido_state>();
 	if (ACCESSING_BITS_0_7)
 	{
-		state->m_pending_command = 1;
-		soundlatch_w(space, offset, data & 0xff);
-		cputag_set_input_line(space->machine(), "audiocpu", INPUT_LINE_NMI, PULSE_LINE);
+		m_pending_command = 1;
+		soundlatch_byte_w(space, offset, data & 0xff);
+		machine().device("audiocpu")->execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 	}
 }
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16, taotaido_state )
 	AM_RANGE(0x000000, 0x0fffff) AM_ROM
-	AM_RANGE(0x800000, 0x803fff) AM_RAM_WRITE(taotaido_bgvideoram_w) AM_BASE_MEMBER(taotaido_state, m_bgram)	// bg ram?
-	AM_RANGE(0xa00000, 0xa01fff) AM_RAM AM_BASE_MEMBER(taotaido_state, m_spriteram)		// sprite ram
-	AM_RANGE(0xc00000, 0xc0ffff) AM_RAM AM_BASE_MEMBER(taotaido_state, m_spriteram2)		// sprite tile lookup ram
-	AM_RANGE(0xfe0000, 0xfeffff) AM_RAM										// main ram
-	AM_RANGE(0xffc000, 0xffcfff) AM_RAM_WRITE(paletteram16_xRRRRRGGGGGBBBBB_word_w) AM_BASE_GENERIC(paletteram)	// palette ram
-	AM_RANGE(0xffe000, 0xffe3ff) AM_RAM AM_BASE_MEMBER(taotaido_state, m_scrollram)		// rowscroll / rowselect / scroll ram
+	AM_RANGE(0x800000, 0x803fff) AM_RAM_WRITE(taotaido_bgvideoram_w) AM_SHARE("bgram")  // bg ram?
+	AM_RANGE(0xa00000, 0xa01fff) AM_RAM AM_SHARE("spriteram")       // sprite ram
+	AM_RANGE(0xc00000, 0xc0ffff) AM_RAM AM_SHARE("spriteram2")      // sprite tile lookup ram
+	AM_RANGE(0xfe0000, 0xfeffff) AM_RAM                                     // main ram
+	AM_RANGE(0xffc000, 0xffcfff) AM_RAM_WRITE(paletteram_xRRRRRGGGGGBBBBB_word_w) AM_SHARE("paletteram")    // palette ram
+	AM_RANGE(0xffe000, 0xffe3ff) AM_RAM AM_SHARE("scrollram")       // rowscroll / rowselect / scroll ram
 	AM_RANGE(0xffff80, 0xffff81) AM_READ_PORT("P1")
 	AM_RANGE(0xffff82, 0xffff83) AM_READ_PORT("P2")
 	AM_RANGE(0xffff84, 0xffff85) AM_READ_PORT("SYSTEM")
 	AM_RANGE(0xffff86, 0xffff87) AM_READ_PORT("DSW1")
 	AM_RANGE(0xffff88, 0xffff89) AM_READ_PORT("DSW2")
 	AM_RANGE(0xffff8a, 0xffff8b) AM_READ_PORT("DSW3")
-	AM_RANGE(0xffff8c, 0xffff8d) AM_READONLY						// unknown
+	AM_RANGE(0xffff8c, 0xffff8d) AM_READONLY                        // unknown
 	AM_RANGE(0xffff8e, 0xffff8f) AM_READ_PORT("JP")
-	AM_RANGE(0xffffa0, 0xffffa1) AM_READ_PORT("P3")						// used only by taotaida
-	AM_RANGE(0xffffa2, 0xffffa3) AM_READ_PORT("P4")						// used only by taotaida
+	AM_RANGE(0xffffa0, 0xffffa1) AM_READ_PORT("P3")                     // used only by taotaida
+	AM_RANGE(0xffffa2, 0xffffa3) AM_READ_PORT("P4")                     // used only by taotaida
 	AM_RANGE(0xffff00, 0xffff0f) AM_WRITE(taotaido_tileregs_w)
-	AM_RANGE(0xffff10, 0xffff11) AM_WRITENOP						// unknown
-	AM_RANGE(0xffff20, 0xffff21) AM_WRITENOP						// unknown - flip screen related
+	AM_RANGE(0xffff10, 0xffff11) AM_WRITENOP                        // unknown
+	AM_RANGE(0xffff20, 0xffff21) AM_WRITENOP                        // unknown - flip screen related
 	AM_RANGE(0xffff40, 0xffff47) AM_WRITE(taotaido_sprite_character_bank_select_w)
-	AM_RANGE(0xffffc0, 0xffffc1) AM_WRITE(sound_command_w)				// seems right
-	AM_RANGE(0xffffe0, 0xffffe1) AM_READ(pending_command_r)	// guess - seems to be needed for all the sounds to work
+	AM_RANGE(0xffffc0, 0xffffc1) AM_WRITE(sound_command_w)              // seems right
+	AM_RANGE(0xffffe0, 0xffffe1) AM_READ(pending_command_r) // guess - seems to be needed for all the sounds to work
 ADDRESS_MAP_END
 
 /* sound cpu - same as aerofgt */
 
 
-static WRITE8_HANDLER( pending_command_clear_w )
+WRITE8_MEMBER(taotaido_state::pending_command_clear_w)
 {
-	taotaido_state *state = space->machine().driver_data<taotaido_state>();
-	state->m_pending_command = 0;
+	m_pending_command = 0;
 }
 
-static WRITE8_HANDLER( taotaido_sh_bankswitch_w )
+WRITE8_MEMBER(taotaido_state::taotaido_sh_bankswitch_w)
 {
-	UINT8 *rom = space->machine().region("audiocpu")->base() + 0x10000;
+	UINT8 *rom = memregion("audiocpu")->base() + 0x10000;
 
-	memory_set_bankptr(space->machine(), "bank1",rom + (data & 0x03) * 0x8000);
+	membank("bank1")->set_base(rom + (data & 0x03) * 0x8000);
 }
 
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, taotaido_state )
 	AM_RANGE(0x0000, 0x77ff) AM_ROM
 	AM_RANGE(0x7800, 0x7fff) AM_RAM
 	AM_RANGE(0x8000, 0xffff) AM_ROMBANK("bank1")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sound_port_map, AS_IO, 8 )
+static ADDRESS_MAP_START( sound_port_map, AS_IO, 8, taotaido_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x03) AM_DEVREADWRITE("ymsnd", ym2610_r, ym2610_w)
+	AM_RANGE(0x00, 0x03) AM_DEVREADWRITE_LEGACY("ymsnd", ym2610_r, ym2610_w)
 	AM_RANGE(0x04, 0x04) AM_WRITE(taotaido_sh_bankswitch_w)
 	AM_RANGE(0x08, 0x08) AM_WRITE(pending_command_clear_w)
-	AM_RANGE(0x0c, 0x0c) AM_READ(soundlatch_r)
+	AM_RANGE(0x0c, 0x0c) AM_READ(soundlatch_byte_r)
 ADDRESS_MAP_END
 
 
 static INPUT_PORTS_START( taotaido )
-	PORT_START("P1")	/* 0xffff81.b */
+	PORT_START("P1")    /* 0xffff81.b */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(1)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(1)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(1)
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(1)
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)	// "Punch"
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)	// "Kick"
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1) // "Punch"
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1) // "Kick"
 #if TAOTAIDO_SHOW_ALL_INPUTS
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(1)
 #else
@@ -161,13 +159,13 @@ static INPUT_PORTS_START( taotaido )
 #endif
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("P2")	/* 0xffff83.b */
+	PORT_START("P2")    /* 0xffff83.b */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(2)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(2)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(2)
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(2)
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)	// "Punch"
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)	// "Kick"
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2) // "Punch"
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2) // "Kick"
 #if TAOTAIDO_SHOW_ALL_INPUTS
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
 #else
@@ -176,7 +174,7 @@ static INPUT_PORTS_START( taotaido )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	/* These inputs are only to fit the test mode - leftover from another game ? */
-	PORT_START("P3")	/* 0xffffa1.b */
+	PORT_START("P3")    /* 0xffffa1.b */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )
 #if TAOTAIDO_SHOW_ALL_INPUTS
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(3)
@@ -189,7 +187,7 @@ static INPUT_PORTS_START( taotaido )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 #endif
 
-	PORT_START("P4")	/* 0xffffa3.b */
+	PORT_START("P4")    /* 0xffffa3.b */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )
 #if TAOTAIDO_SHOW_ALL_INPUTS
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(4)
@@ -202,21 +200,21 @@ static INPUT_PORTS_START( taotaido )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 #endif
 
-	PORT_START("SYSTEM")	/* 0xffff85.b */
+	PORT_START("SYSTEM")    /* 0xffff85.b */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )	// see notes
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )  // see notes
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START2 )
 #if TAOTAIDO_SHOW_ALL_INPUTS
 	PORT_BIT(0x10, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME(DEF_STR( Test )) PORT_CODE(KEYCODE_F1)
 #else
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE )	// "Test" in "test mode"
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE )    // "Test" in "test mode"
 #endif
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_TILT )		// not working ?
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE1 )	// see notes - SERVICE in "test mode"
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )	// VBLANK ? The game freezes when ON
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_TILT )       // not working ?
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE1 )   // see notes - SERVICE in "test mode"
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )    // VBLANK ? The game freezes when ON
 
-	PORT_START("DSW1")	/* 0xffff87.b -> !0xfe2f6c.w or !0xfe30d0 */
+	PORT_START("DSW1")  /* 0xffff87.b -> !0xfe2f6c.w or !0xfe30d0 */
 	PORT_DIPNAME( 0x01, 0x01, "Coin Slot" )
 	PORT_DIPSETTING(    0x01, "Same" )
 	PORT_DIPSETTING(    0x00, "Individual" )
@@ -236,8 +234,8 @@ static INPUT_PORTS_START( taotaido )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-	PORT_START("DSW2")	/* 0xffff89.b -> !0xfe73c2.w or !0xfe751c.w */
-	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Flip_Screen ) )	// check code at 0x0963e2 or 0x845e2
+	PORT_START("DSW2")  /* 0xffff89.b -> !0xfe73c2.w or !0xfe751c.w */
+	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Flip_Screen ) )  // check code at 0x0963e2 or 0x845e2
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPUNUSED( 0x02, IP_ACTIVE_LOW )
@@ -253,11 +251,11 @@ static INPUT_PORTS_START( taotaido )
 	PORT_DIPUNUSED( 0x40, IP_ACTIVE_LOW )
 	PORT_DIPUNUSED( 0x80, IP_ACTIVE_LOW )
 
-	PORT_START("DSW3")	/* 0xffff8b.b -> !0xfe2f94.w or !0xfe30f8.w */
-	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )	// doesn't seem to be demo sounds
+	PORT_START("DSW3")  /* 0xffff8b.b -> !0xfe2f94.w or !0xfe30f8.w */
+	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )  // doesn't seem to be demo sounds
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( On ) )
-	PORT_DIPNAME( 0x02, 0x02, "Buy In" )			// see notes
+	PORT_DIPNAME( 0x02, 0x02, "Buy In" )            // see notes
 	PORT_DIPSETTING(    0x00, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( Yes ) )
 	PORT_DIPUNUSED( 0x04, IP_ACTIVE_LOW )
@@ -267,13 +265,13 @@ static INPUT_PORTS_START( taotaido )
 	PORT_DIPUNUSED( 0x40, IP_ACTIVE_LOW )
 	PORT_DIPUNUSED( 0x80, IP_ACTIVE_LOW )
 
-	PORT_START("JP")	/* Jumpers (0xffff8f.b) */
-	PORT_DIPNAME( 0x0f, 0x08, "Country" )
-	PORT_DIPSETTING(    0x00, "US" )				// also (c) Mc O'River Inc
+	PORT_START("JP")    /* Jumpers (0xffff8f.b) */
+	PORT_DIPNAME( 0x0f, 0x08, DEF_STR( Region ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( USA ) )              // also (c) Mc O'River Inc
 	PORT_DIPSETTING(    0x01, DEF_STR( Japan ) )
-	PORT_DIPSETTING(    0x02, "Hong-Kong/Taiwan" )
+	PORT_DIPSETTING(    0x02, "Hong Kong/Taiwan" )
 //  PORT_DIPSETTING(    0x03, DEF_STR( Japan ) )
-	PORT_DIPSETTING(    0x04, "Korea" )
+	PORT_DIPSETTING(    0x04, DEF_STR( Korea ) )
 //  PORT_DIPSETTING(    0x05, DEF_STR( Japan ) )
 //  PORT_DIPSETTING(    0x06, DEF_STR( Japan ) )
 //  PORT_DIPSETTING(    0x07, DEF_STR( Japan ) )
@@ -324,7 +322,7 @@ GFXDECODE_END
 
 static void irqhandler(device_t *device, int irq)
 {
-	cputag_set_input_line(device->machine(), "audiocpu", 0, irq ? ASSERT_LINE : CLEAR_LINE);
+	device->machine().device("audiocpu")->execute().set_input_line(0, irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static const ym2610_interface ym2610_config =
@@ -332,10 +330,12 @@ static const ym2610_interface ym2610_config =
 	irqhandler
 };
 
+
+
 static MACHINE_CONFIG_START( taotaido, taotaido_state )
 	MCFG_CPU_ADD("maincpu", M68000, 32000000/2)
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT("screen", irq1_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", taotaido_state,  irq1_line_hold)
 
 	MCFG_CPU_ADD("audiocpu", Z80,20000000/4) // ??
 	MCFG_CPU_PROGRAM_MAP(sound_map)
@@ -347,15 +347,16 @@ static MACHINE_CONFIG_START( taotaido, taotaido_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(40*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 40*8-1, 0*8, 28*8-1)
-	MCFG_SCREEN_UPDATE(taotaido)
-	MCFG_SCREEN_EOF( taotaido )
+	MCFG_SCREEN_UPDATE_DRIVER(taotaido_state, screen_update_taotaido)
+	MCFG_SCREEN_VBLANK_DRIVER(taotaido_state, screen_eof_taotaido)
 
 	MCFG_PALETTE_LENGTH(0x800)
 
-	MCFG_VIDEO_START(taotaido)
+	MCFG_DEVICE_ADD("vsystem_spr", VSYSTEM_SPR, 0)
+	MCFG_VSYSTEM_SPR_SET_TILE_INDIRECT( taotaido_state, taotaido_tile_callback )
+	MCFG_VSYSTEM_SPR_SET_GFXREGION(0)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
@@ -417,5 +418,5 @@ ROM_START( taotaidoa )
 	ROM_LOAD( "u15.bin", 0x000000, 0x200000, CRC(e95823e9) SHA1(362583944ad4fdde4f9e29928cf34376c7ad931f) )
 ROM_END
 
-GAME( 1993, taotaido, 0,        taotaido, taotaido, 0, ROT0, "Video System Co.", "Tao Taido (set 1)", GAME_NO_COCKTAIL )
-GAME( 1993, taotaidoa,taotaido, taotaido, taotaida, 0, ROT0, "Video System Co.", "Tao Taido (set 2)", GAME_NO_COCKTAIL )
+GAME( 1993, taotaido, 0,        taotaido, taotaido, driver_device, 0, ROT0, "Video System Co.", "Tao Taido (set 1)", GAME_NO_COCKTAIL )
+GAME( 1993, taotaidoa,taotaido, taotaido, taotaida, driver_device, 0, ROT0, "Video System Co.", "Tao Taido (set 2)", GAME_NO_COCKTAIL )

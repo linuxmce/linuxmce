@@ -7,8 +7,8 @@
 class ultraman_state : public driver_device
 {
 public:
-	ultraman_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	ultraman_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) { }
 
 	/* memory pointers */
 //  UINT16 *   m_paletteram;    // currently this uses generic palette handling
@@ -21,24 +21,23 @@ public:
 	int        m_bank2;
 
 	/* devices */
-	device_t *m_maincpu;
-	device_t *m_audiocpu;
+	cpu_device *m_maincpu;
+	cpu_device *m_audiocpu;
 	device_t *m_k051316_1;
 	device_t *m_k051316_2;
 	device_t *m_k051316_3;
 	device_t *m_k051960;
+	DECLARE_WRITE16_MEMBER(sound_cmd_w);
+	DECLARE_WRITE16_MEMBER(sound_irq_trigger_w);
+	DECLARE_WRITE16_MEMBER(ultraman_gfxctrl_w);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	UINT32 screen_update_ultraman(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
-
-
 /*----------- defined in video/ultraman.c -----------*/
-
 extern void ultraman_sprite_callback(running_machine &machine, int *code,int *color,int *priority,int *shadow);
 extern void ultraman_zoom_callback_0(running_machine &machine, int *code,int *color,int *flags);
 extern void ultraman_zoom_callback_1(running_machine &machine, int *code,int *color,int *flags);
 extern void ultraman_zoom_callback_2(running_machine &machine, int *code,int *color,int *flags);
-
-WRITE16_HANDLER( ultraman_gfxctrl_w );
-
-VIDEO_START( ultraman );
-SCREEN_UPDATE( ultraman );

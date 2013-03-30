@@ -7,22 +7,23 @@
 class ambush_state : public driver_device
 {
 public:
-	ambush_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	ambush_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"),
+		m_spriteram(*this, "spriteram"),
+		m_colorram(*this, "colorram"),
+		m_scrollram(*this, "scrollram"),
+		m_colorbank(*this, "colorbank"){ }
 
 	/* memory pointers */
-	UINT8 *    m_videoram;
-	UINT8 *    m_spriteram;
-	UINT8 *    m_colorram;
-	UINT8 *    m_scrollram;
-	UINT8 *    m_colorbank;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_spriteram;
+	required_shared_ptr<UINT8> m_colorram;
+	required_shared_ptr<UINT8> m_scrollram;
+	required_shared_ptr<UINT8> m_colorbank;
 
-	size_t     m_videoram_size;
-	size_t     m_spriteram_size;
+	DECLARE_WRITE8_MEMBER(ambush_coin_counter_w);
+	DECLARE_WRITE8_MEMBER(flip_screen_w);
+	virtual void palette_init();
+	UINT32 screen_update_ambush(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
-
-
-/*----------- defined in video/ambush.c -----------*/
-
-PALETTE_INIT( ambush );
-SCREEN_UPDATE( ambush );

@@ -36,60 +36,65 @@ cha3    $10d8
 #include "cpu/z80/z80.h"
 #include "includes/tnzs.h"
 #include "sound/ay8910.h"
-
+#include "video/seta001.h"
 
 class cchance_state : public tnzs_state
 {
 public:
-	cchance_state(running_machine &machine, const driver_device_config_base &config)
-		: tnzs_state(machine, config) { }
+	cchance_state(const machine_config &mconfig, device_type type, const char *tag)
+		: tnzs_state(mconfig, type, tag) { }
 
 	UINT8 m_hop_io;
 	UINT8 m_bell_io;
+	DECLARE_WRITE8_MEMBER(output_0_w);
+	DECLARE_READ8_MEMBER(input_1_r);
+	DECLARE_WRITE8_MEMBER(output_1_w);
+	DECLARE_MACHINE_START(cchance);
+	DECLARE_MACHINE_RESET(cchance);
 };
 
 
-static WRITE8_HANDLER( output_0_w )
+WRITE8_MEMBER(cchance_state::output_0_w)
 {
 
 	//---- --x- divider?
-	coin_lockout_w(space->machine(), 0, ~data & 1);
+	coin_lockout_w(machine(), 0, ~data & 1);
 
-//  coin_counter_w(space->machine(), 0, ~data & 1);
+//  coin_counter_w(machine(), 0, ~data & 1);
 }
 
 
-static READ8_HANDLER( input_1_r )
+READ8_MEMBER(cchance_state::input_1_r)
 {
-	cchance_state *state = space->machine().driver_data<cchance_state>();
-	return (state->m_hop_io) | (state->m_bell_io) | (input_port_read(space->machine(), "SP") & 0xff);
+
+	return (m_hop_io) | (m_bell_io) | (ioport("SP")->read() & 0xff);
 }
 
-static WRITE8_HANDLER( output_1_w )
+WRITE8_MEMBER(cchance_state::output_1_w)
 {
-	cchance_state *state = space->machine().driver_data<cchance_state>();
 
-	state->m_hop_io = (data & 0x40)>>4;
-	state->m_bell_io = (data & 0x80)>>4;
+
+	m_hop_io = (data & 0x40)>>4;
+	m_bell_io = (data & 0x80)>>4;
 }
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, cchance_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 
-	AM_RANGE(0xa000, 0xbfff) AM_RAM AM_BASE_MEMBER(cchance_state, m_objram)
+	AM_RANGE(0xa000, 0xafff) AM_RAM AM_DEVREADWRITE_LEGACY("spritegen", spritecodelow_r8, spritecodelow_w8)
+	AM_RANGE(0xb000, 0xbfff) AM_RAM AM_DEVREADWRITE_LEGACY("spritegen", spritecodehigh_r8, spritecodehigh_w8)
 
 	AM_RANGE(0xc000, 0xdfff) AM_RAM
 
-	AM_RANGE(0xe000, 0xe1ff) AM_RAM AM_BASE_MEMBER(cchance_state, m_vdcram)
-	AM_RANGE(0xe200, 0xe2ff) AM_RAM AM_BASE_MEMBER(cchance_state, m_scrollram) /* scrolling info */
-	AM_RANGE(0xe300, 0xe303) AM_RAM AM_MIRROR(0xfc) AM_BASE_MEMBER(cchance_state, m_objctrl) /* control registers (0x80 mirror used by Arkanoid 2) */
-	AM_RANGE(0xe800, 0xe800) AM_WRITEONLY AM_BASE_MEMBER(cchance_state, m_bg_flag)	/* enable / disable background transparency */
+	AM_RANGE(0xe000, 0xe2ff) AM_RAM AM_DEVREADWRITE_LEGACY("spritegen", spriteylow_r8, spriteylow_w8)
+	AM_RANGE(0xe300, 0xe303) AM_RAM AM_MIRROR(0xfc) AM_DEVWRITE_LEGACY("spritegen", spritectrl_w8)  /* control registers (0x80 mirror used by Arkanoid 2) */
+	AM_RANGE(0xe800, 0xe800) AM_DEVWRITE_LEGACY("spritegen", spritebgflag_w8)   /* enable / disable background transparency */
 
 	AM_RANGE(0xf000, 0xf000) AM_READNOP AM_WRITENOP //???
 	AM_RANGE(0xf001, 0xf001) AM_READ(input_1_r) AM_WRITE(output_0_w)
 	AM_RANGE(0xf002, 0xf002) AM_READ_PORT("IN0") AM_WRITE(output_1_w)
-	AM_RANGE(0xf800, 0xf801) AM_DEVWRITE("aysnd", ay8910_address_data_w)
-	AM_RANGE(0xf801, 0xf801) AM_DEVREAD("aysnd", ay8910_r)
+	AM_RANGE(0xf800, 0xf801) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_data_w)
+	AM_RANGE(0xf801, 0xf801) AM_DEVREAD_LEGACY("aysnd", ay8910_r)
 ADDRESS_MAP_END
 
 
@@ -193,50 +198,49 @@ static const ay8910_interface ay8910_config =
 	DEVCB_NULL
 };
 
-static MACHINE_START( cchance )
+MACHINE_START_MEMBER(cchance_state,cchance)
 {
-	cchance_state *state = machine.driver_data<cchance_state>();
-	state->m_mcu = NULL;
+	m_mcu = NULL;
 
-	state->save_item(NAME(state->m_screenflip));
-	state->save_item(NAME(state->m_hop_io));
-	state->save_item(NAME(state->m_bell_io));
+	save_item(NAME(m_screenflip));
+	save_item(NAME(m_hop_io));
+	save_item(NAME(m_bell_io));
 }
 
-static MACHINE_RESET( cchance )
+MACHINE_RESET_MEMBER(cchance_state,cchance)
 {
-	cchance_state *state = machine.driver_data<cchance_state>();
 
-	state->m_screenflip = 0;
-	state->m_mcu_type = -1;
-	state->m_hop_io = 0;
-	state->m_bell_io = 0;
+	m_screenflip = 0;
+	m_mcu_type = -1;
+	m_hop_io = 0;
+	m_bell_io = 0;
 
 }
 
 static MACHINE_CONFIG_START( cchance, cchance_state )
 
-	MCFG_CPU_ADD("maincpu", Z80,4000000)		 /* ? MHz */
+	MCFG_CPU_ADD("maincpu", Z80,4000000)         /* ? MHz */
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", cchance_state,  irq0_line_hold)
 
-	MCFG_MACHINE_START(cchance)
-	MCFG_MACHINE_RESET(cchance)
+	MCFG_MACHINE_START_OVERRIDE(cchance_state,cchance)
+	MCFG_MACHINE_RESET_OVERRIDE(cchance_state,cchance)
 
 	MCFG_GFXDECODE(cchance)
+
+	MCFG_DEVICE_ADD("spritegen", SETA001_SPRITE, 0)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(57.5)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(tnzs)
-	MCFG_SCREEN_EOF(tnzs)
+	MCFG_SCREEN_UPDATE_DRIVER(cchance_state, screen_update_tnzs)
+	MCFG_SCREEN_VBLANK_DRIVER(cchance_state, screen_eof_tnzs)
 
 	MCFG_PALETTE_LENGTH(512)
-	MCFG_PALETTE_INIT(arknoid2)
+	MCFG_PALETTE_INIT_OVERRIDE(cchance_state,arknoid2)
 
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
@@ -255,9 +259,9 @@ ROM_START( cchance )
 	ROM_LOAD("chance-cccha2.bin", 0x10000, 0x10000, CRC(fa5ccf5b) SHA1(21957a6a7b88c315d1fbb82e98a924a637a28397) )
 	ROM_LOAD("chance-cccha3.bin", 0x00000, 0x10000, CRC(2a2979c9) SHA1(5036313e219ec561fa6753f0db6bb28c6fc97963) )
 
-	ROM_REGION( 0x0400, "proms", 0 )		/* color proms */
+	ROM_REGION( 0x0400, "proms", 0 )        /* color proms */
 	ROM_LOAD( "prom1", 0x0000, 0x0200, NO_DUMP )
 	ROM_LOAD( "prom2", 0x0200, 0x0200, NO_DUMP )
 ROM_END
 
-GAME( 1987?, cchance,  0,    cchance, cchance,  0, ROT0, "<unknown>", "Cherry Chance", GAME_NOT_WORKING | GAME_WRONG_COLORS | GAME_SUPPORTS_SAVE )
+GAME( 1987?, cchance,  0,    cchance, cchance, driver_device,  0, ROT0, "<unknown>", "Cherry Chance", GAME_NOT_WORKING | GAME_WRONG_COLORS | GAME_SUPPORTS_SAVE )

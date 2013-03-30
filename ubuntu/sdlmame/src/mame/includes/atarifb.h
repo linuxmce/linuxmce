@@ -8,26 +8,30 @@
 
 
 /* Discrete Sound Input Nodes */
-#define ATARIFB_WHISTLE_EN		NODE_01
-#define ATARIFB_CROWD_DATA		NODE_02
-#define ATARIFB_ATTRACT_EN		NODE_03
-#define ATARIFB_NOISE_EN		NODE_04
-#define ATARIFB_HIT_EN			NODE_05
+#define ATARIFB_WHISTLE_EN      NODE_01
+#define ATARIFB_CROWD_DATA      NODE_02
+#define ATARIFB_ATTRACT_EN      NODE_03
+#define ATARIFB_NOISE_EN        NODE_04
+#define ATARIFB_HIT_EN          NODE_05
 
 
 class atarifb_state : public driver_device
 {
 public:
-	atarifb_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	atarifb_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_alphap1_videoram(*this, "p1_videoram"),
+		m_alphap2_videoram(*this, "p2_videoram"),
+		m_field_videoram(*this, "field_videoram"),
+		m_spriteram(*this, "spriteram"),
+		m_scroll_register(*this, "scroll_register"){ }
 
 	/* video-related */
-	UINT8 *  m_alphap1_videoram;
-	UINT8 *  m_alphap2_videoram;
-	UINT8 *  m_field_videoram;
-	UINT8 *  m_spriteram;
-	UINT8 *  m_scroll_register;
-	size_t   m_spriteram_size;
+	required_shared_ptr<UINT8> m_alphap1_videoram;
+	required_shared_ptr<UINT8> m_alphap2_videoram;
+	required_shared_ptr<UINT8> m_field_videoram;
+	required_shared_ptr<UINT8> m_spriteram;
+	required_shared_ptr<UINT8> m_scroll_register;
 
 	tilemap_t  *m_alpha1_tilemap;
 	tilemap_t  *m_alpha2_tilemap;
@@ -53,41 +57,33 @@ public:
 	int m_counter_y_in2b;
 
 	/* devices */
-	device_t *m_maincpu;
+	cpu_device *m_maincpu;
+	DECLARE_WRITE8_MEMBER(atarifb_out1_w);
+	DECLARE_WRITE8_MEMBER(atarifb4_out1_w);
+	DECLARE_WRITE8_MEMBER(abaseb_out1_w);
+	DECLARE_WRITE8_MEMBER(soccer_out1_w);
+	DECLARE_WRITE8_MEMBER(atarifb_out2_w);
+	DECLARE_WRITE8_MEMBER(soccer_out2_w);
+	DECLARE_WRITE8_MEMBER(atarifb_out3_w);
+	DECLARE_READ8_MEMBER(atarifb_in0_r);
+	DECLARE_READ8_MEMBER(atarifb_in2_r);
+	DECLARE_READ8_MEMBER(atarifb4_in0_r);
+	DECLARE_READ8_MEMBER(atarifb4_in2_r);
+	DECLARE_WRITE8_MEMBER(atarifb_alpha1_videoram_w);
+	DECLARE_WRITE8_MEMBER(atarifb_alpha2_videoram_w);
+	DECLARE_WRITE8_MEMBER(atarifb_field_videoram_w);
+	TILE_GET_INFO_MEMBER(alpha1_get_tile_info);
+	TILE_GET_INFO_MEMBER(alpha2_get_tile_info);
+	TILE_GET_INFO_MEMBER(field_get_tile_info);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_atarifb(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_abaseb(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_soccer(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
-
-/*----------- defined in machine/atarifb.c -----------*/
-
-WRITE8_HANDLER( atarifb_out1_w );
-WRITE8_HANDLER( atarifb4_out1_w );
-WRITE8_HANDLER( abaseb_out1_w );
-WRITE8_HANDLER( soccer_out1_w );
-
-WRITE8_HANDLER( atarifb_out2_w );
-WRITE8_HANDLER( soccer_out2_w );
-
-WRITE8_HANDLER( atarifb_out3_w );
-
-READ8_HANDLER( atarifb_in0_r );
-READ8_HANDLER( atarifb_in2_r );
-READ8_HANDLER( atarifb4_in0_r );
-READ8_HANDLER( atarifb4_in2_r );
-
-
 /*----------- defined in audio/atarifb.c -----------*/
-
 DISCRETE_SOUND_EXTERN( atarifb );
 DISCRETE_SOUND_EXTERN( abaseb );
-
-
-/*----------- defined in video/atarifb.c -----------*/
-
-VIDEO_START( atarifb );
-SCREEN_UPDATE( atarifb );
-SCREEN_UPDATE( abaseb );
-SCREEN_UPDATE( soccer );
-
-WRITE8_HANDLER( atarifb_alpha1_videoram_w );
-WRITE8_HANDLER( atarifb_alpha2_videoram_w );
-WRITE8_HANDLER( atarifb_field_videoram_w );

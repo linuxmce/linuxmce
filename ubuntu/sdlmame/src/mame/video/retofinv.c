@@ -10,12 +10,13 @@
 #include "includes/retofinv.h"
 
 
-PALETTE_INIT( retofinv )
+void retofinv_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 
 	/* allocate the colortable */
-	machine.colortable = colortable_alloc(machine, 0x100);
+	machine().colortable = colortable_alloc(machine(), 0x100);
 
 	/* create a lookup table for the palette */
 	for (i = 0; i < 0x100; i++)
@@ -24,7 +25,7 @@ PALETTE_INIT( retofinv )
 		int g = pal4bit(color_prom[i + 0x100]);
 		int b = pal4bit(color_prom[i + 0x200]);
 
-		colortable_palette_set_color(machine.colortable, i, MAKE_RGB(r, g, b));
+		colortable_palette_set_color(machine().colortable, i, MAKE_RGB(r, g, b));
 	}
 
 	/* color_prom now points to the beginning of the lookup table */
@@ -41,14 +42,14 @@ PALETTE_INIT( retofinv )
 		else
 			ctabentry = 0;
 
-		colortable_entry_set_value(machine.colortable, i, ctabentry);
+		colortable_entry_set_value(machine().colortable, i, ctabentry);
 	}
 
 	/* sprites and bg tiles */
 	for (i = 0; i < 0x800; i++)
 	{
 		UINT8 ctabentry = BITSWAP8(color_prom[i],4,5,6,7,3,2,1,0);
-		colortable_entry_set_value(machine.colortable, i + 0x200, ctabentry);
+		colortable_entry_set_value(machine().colortable, i + 0x200, ctabentry);
 	}
 }
 
@@ -61,7 +62,7 @@ PALETTE_INIT( retofinv )
 ***************************************************************************/
 
 /* convert from 32x32 to 36x28 */
-static TILEMAP_MAPPER( tilemap_scan )
+TILEMAP_MAPPER_MEMBER(retofinv_state::tilemap_scan)
 {
 	row += 2;
 	col -= 2;
@@ -71,26 +72,24 @@ static TILEMAP_MAPPER( tilemap_scan )
 		return (row << 5) + col;
 }
 
-static TILE_GET_INFO( bg_get_tile_info )
+TILE_GET_INFO_MEMBER(retofinv_state::bg_get_tile_info)
 {
-	retofinv_state *state = machine.driver_data<retofinv_state>();
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			2,
-			state->m_bg_videoram[tile_index] + 256 * state->m_bg_bank,
-			state->m_bg_videoram[0x400 + tile_index] & 0x3f,
+			m_bg_videoram[tile_index] + 256 * m_bg_bank,
+			m_bg_videoram[0x400 + tile_index] & 0x3f,
 			0);
 }
 
-static TILE_GET_INFO( fg_get_tile_info )
+TILE_GET_INFO_MEMBER(retofinv_state::fg_get_tile_info)
 {
-	retofinv_state *state = machine.driver_data<retofinv_state>();
-	int color = state->m_fg_videoram[0x400 + tile_index];
+	int color = m_fg_videoram[0x400 + tile_index];
 
-	tileinfo->group = color;
+	tileinfo.group = color;
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			0,
-			state->m_fg_videoram[tile_index] + 256 * state->m_fg_bank,
+			m_fg_videoram[tile_index] + 256 * m_fg_bank,
 			color,
 			0);
 }
@@ -103,13 +102,12 @@ static TILE_GET_INFO( fg_get_tile_info )
 
 ***************************************************************************/
 
-VIDEO_START( retofinv )
+void retofinv_state::video_start()
 {
-	retofinv_state *state = machine.driver_data<retofinv_state>();
-	state->m_bg_tilemap = tilemap_create(machine, bg_get_tile_info,tilemap_scan,8,8,36,28);
-	state->m_fg_tilemap = tilemap_create(machine, fg_get_tile_info,tilemap_scan,8,8,36,28);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(retofinv_state::bg_get_tile_info),this),tilemap_mapper_delegate(FUNC(retofinv_state::tilemap_scan),this),8,8,36,28);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(retofinv_state::fg_get_tile_info),this),tilemap_mapper_delegate(FUNC(retofinv_state::tilemap_scan),this),8,8,36,28);
 
-	colortable_configure_tilemap_groups(machine.colortable, state->m_fg_tilemap, machine.gfx[0], 0);
+	colortable_configure_tilemap_groups(machine().colortable, m_fg_tilemap, machine().gfx[0], 0);
 }
 
 
@@ -120,42 +118,39 @@ VIDEO_START( retofinv )
 
 ***************************************************************************/
 
-WRITE8_HANDLER( retofinv_bg_videoram_w )
+WRITE8_MEMBER(retofinv_state::retofinv_bg_videoram_w)
 {
-	retofinv_state *state = space->machine().driver_data<retofinv_state>();
-	state->m_bg_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap,offset & 0x3ff);
+	m_bg_videoram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset & 0x3ff);
 }
 
-WRITE8_HANDLER( retofinv_fg_videoram_w )
+WRITE8_MEMBER(retofinv_state::retofinv_fg_videoram_w)
 {
-	retofinv_state *state = space->machine().driver_data<retofinv_state>();
-	state->m_fg_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_fg_tilemap,offset & 0x3ff);
+	m_fg_videoram[offset] = data;
+	m_fg_tilemap->mark_tile_dirty(offset & 0x3ff);
 }
 
-WRITE8_HANDLER( retofinv_gfx_ctrl_w )
+WRITE8_MEMBER(retofinv_state::retofinv_gfx_ctrl_w)
 {
-	retofinv_state *state = space->machine().driver_data<retofinv_state>();
 	switch (offset)
 	{
 		case 0:
-			flip_screen_set(space->machine(), data & 1);
+			flip_screen_set(data & 1);
 			break;
 
 		case 1:
-			if (state->m_fg_bank != (data & 1))
+			if (m_fg_bank != (data & 1))
 			{
-				state->m_fg_bank = data & 1;
-				tilemap_mark_all_tiles_dirty(state->m_fg_tilemap);
+				m_fg_bank = data & 1;
+				m_fg_tilemap->mark_all_dirty();
 			}
 			break;
 
 		case 2:
-			if (state->m_bg_bank != (data & 1))
+			if (m_bg_bank != (data & 1))
 			{
-				state->m_bg_bank = data & 1;
-				tilemap_mark_all_tiles_dirty(state->m_bg_tilemap);
+				m_bg_bank = data & 1;
+				m_bg_tilemap->mark_all_dirty();
 			}
 			break;
 	}
@@ -169,18 +164,14 @@ WRITE8_HANDLER( retofinv_gfx_ctrl_w )
 
 ***************************************************************************/
 
-static void draw_sprites(running_machine &machine, bitmap_t *bitmap)
+static void draw_sprites(running_machine &machine, bitmap_ind16 &bitmap)
 {
 	retofinv_state *state = machine.driver_data<retofinv_state>();
 	UINT8 *spriteram = state->m_sharedram + 0x0780;
 	UINT8 *spriteram_2 = state->m_sharedram + 0x0f80;
 	UINT8 *spriteram_3 = state->m_sharedram + 0x1780;
 	int offs;
-	static const rectangle spritevisiblearea =
-	{
-		2*8, 34*8-1,
-		0*8, 28*8-1
-	};
+	const rectangle spritevisiblearea(2*8, 34*8-1, 0*8, 28*8-1);
 
 	for (offs = 0;offs < 0x80;offs += 2)
 	{
@@ -203,20 +194,20 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap)
 		sprite &= ~sizex;
 		sprite &= ~(sizey << 1);
 
-		if (flip_screen_get(machine))
+		if (state->flip_screen())
 		{
 			flipx ^= 1;
 			flipy ^= 1;
 		}
 
 		sy -= 16 * sizey;
-		sy = (sy & 0xff) - 32;	// fix wraparound
+		sy = (sy & 0xff) - 32;  // fix wraparound
 
 		for (y = 0;y <= sizey;y++)
 		{
 			for (x = 0;x <= sizex;x++)
 			{
-				drawgfx_transmask(bitmap,&spritevisiblearea,machine.gfx[1],
+				drawgfx_transmask(bitmap,spritevisiblearea,machine.gfx[1],
 					sprite + gfx_offs[y ^ (sizey * flipy)][x ^ (sizex * flipx)],
 					color,
 					flipx,flipy,
@@ -229,11 +220,10 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap)
 
 
 
-SCREEN_UPDATE( retofinv )
+UINT32 retofinv_state::screen_update_retofinv(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	retofinv_state *state = screen->machine().driver_data<retofinv_state>();
-	tilemap_draw(bitmap,cliprect,state->m_bg_tilemap,0,0);
-	draw_sprites(screen->machine(), bitmap);
-	tilemap_draw(bitmap,cliprect,state->m_fg_tilemap,0,0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0,0);
+	draw_sprites(machine(), bitmap);
+	m_fg_tilemap->draw(bitmap, cliprect, 0,0);
 	return 0;
 }

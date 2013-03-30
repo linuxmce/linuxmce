@@ -70,17 +70,18 @@ public:
 private:
 	// helpers
 	void output_parameter(drcbec_instruction **dstptr, void **immedptr, int size, const uml::parameter &param);
-	static void fixup_label(void *parameter, drccodeptr labelcodeptr);
+	void fixup_label(void *parameter, drccodeptr labelcodeptr);
 	int dmulu(UINT64 &dstlo, UINT64 &dsthi, UINT64 src1, UINT64 src2, int flags);
 	int dmuls(UINT64 &dstlo, UINT64 &dsthi, INT64 src1, INT64 src2, int flags);
 
 	// internal state
-	drc_hash_table			m_hash;					// hash table state
-	drc_map_variables		m_map;					// code map
-	drc_label_list			m_labels;				// label list
+	drc_hash_table          m_hash;                 // hash table state
+	drc_map_variables       m_map;                  // code map
+	drc_label_list          m_labels;               // label list
+	drc_label_fixup_delegate m_fixup_delegate;      // precomputed delegate
 
-	static const UINT32		s_condition_map[32];
-	static UINT64			s_immediate_zero;
+	static const UINT32     s_condition_map[32];
+	static UINT64           s_immediate_zero;
 };
 
 

@@ -139,54 +139,62 @@ Dip locations added based on the notes above.
 class ppmast93_state : public driver_device
 {
 public:
-	ppmast93_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	ppmast93_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_bgram(*this, "bgram"),
+		m_fgram(*this, "fgram"){ }
 
 	tilemap_t *m_fg_tilemap;
 	tilemap_t *m_bg_tilemap;
-	UINT8 *m_fgram;
-	UINT8 *m_bgram;
+	required_shared_ptr<UINT8> m_bgram;
+	required_shared_ptr<UINT8> m_fgram;
+	DECLARE_WRITE8_MEMBER(ppmast93_fgram_w);
+	DECLARE_WRITE8_MEMBER(ppmast93_bgram_w);
+	DECLARE_WRITE8_MEMBER(ppmast93_port4_w);
+	DECLARE_WRITE8_MEMBER(ppmast_sound_w);
+	TILE_GET_INFO_MEMBER(get_ppmast93_bg_tile_info);
+	TILE_GET_INFO_MEMBER(get_ppmast93_fg_tile_info);
+	virtual void video_start();
+	UINT32 screen_update_ppmast93(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
 
 
-static WRITE8_HANDLER( ppmast93_fgram_w )
+WRITE8_MEMBER(ppmast93_state::ppmast93_fgram_w)
 {
-	ppmast93_state *state = space->machine().driver_data<ppmast93_state>();
-	state->m_fgram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_fg_tilemap,offset/2);
+	m_fgram[offset] = data;
+	m_fg_tilemap->mark_tile_dirty(offset/2);
 }
 
-static WRITE8_HANDLER( ppmast93_bgram_w )
+WRITE8_MEMBER(ppmast93_state::ppmast93_bgram_w)
 {
-	ppmast93_state *state = space->machine().driver_data<ppmast93_state>();
-	state->m_bgram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap,offset/2);
+	m_bgram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset/2);
 }
 
-static WRITE8_HANDLER( ppmast93_port4_w )
+WRITE8_MEMBER(ppmast93_state::ppmast93_port4_w)
 {
-	UINT8 *rom = space->machine().region("maincpu")->base();
+	UINT8 *rom = memregion("maincpu")->base();
 	int bank;
 
-	coin_counter_w(space->machine(), 0, data & 0x08);
-	coin_counter_w(space->machine(), 1, data & 0x10);
+	coin_counter_w(machine(), 0, data & 0x08);
+	coin_counter_w(machine(), 1, data & 0x10);
 
 	bank = data & 0x07;
-	memory_set_bankptr(space->machine(), "bank1",&rom[0x10000+(bank*0x4000)]);
+	membank("bank1")->set_base(&rom[0x10000+(bank*0x4000)]);
 }
 
-static ADDRESS_MAP_START( ppmast93_cpu1_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( ppmast93_cpu1_map, AS_PROGRAM, 8, ppmast93_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM AM_WRITENOP AM_REGION("maincpu", 0x10000)
 	AM_RANGE(0x8000, 0xbfff) AM_ROMBANK("bank1")
-	AM_RANGE(0xd000, 0xd7ff) AM_RAM_WRITE(ppmast93_bgram_w) AM_BASE_MEMBER(ppmast93_state, m_bgram) AM_SHARE("share1")
+	AM_RANGE(0xd000, 0xd7ff) AM_RAM_WRITE(ppmast93_bgram_w) AM_SHARE("bgram")
 	AM_RANGE(0xd800, 0xdfff) AM_WRITENOP
-	AM_RANGE(0xf000, 0xf7ff) AM_RAM_WRITE(ppmast93_fgram_w) AM_BASE_MEMBER(ppmast93_state, m_fgram) AM_SHARE("share2")
+	AM_RANGE(0xf000, 0xf7ff) AM_RAM_WRITE(ppmast93_fgram_w) AM_SHARE("fgram")
 	AM_RANGE(0xf800, 0xffff) AM_RAM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( ppmast93_cpu1_io, AS_IO, 8 )
+static ADDRESS_MAP_START( ppmast93_cpu1_io, AS_IO, 8, ppmast93_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0x00) AM_READ_PORT("P1")
 	AM_RANGE(0x02, 0x02) AM_READ_PORT("P2")
@@ -194,30 +202,30 @@ static ADDRESS_MAP_START( ppmast93_cpu1_io, AS_IO, 8 )
 	AM_RANGE(0x06, 0x06) AM_READ_PORT("DSW1")
 	AM_RANGE(0x08, 0x08) AM_READ_PORT("DSW2")
 
-	AM_RANGE(0x00, 0x00) AM_WRITE(soundlatch_w)
+	AM_RANGE(0x00, 0x00) AM_WRITE(soundlatch_byte_w)
 	AM_RANGE(0x04, 0x04) AM_WRITE(ppmast93_port4_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( ppmast93_cpu2_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( ppmast93_cpu2_map, AS_PROGRAM, 8, ppmast93_state )
 	AM_RANGE(0x0000, 0xfbff) AM_ROM AM_REGION("sub", 0x10000)
-	AM_RANGE(0xfc00, 0xfc00) AM_READ(soundlatch_r)
+	AM_RANGE(0xfc00, 0xfc00) AM_READ(soundlatch_byte_r)
 	AM_RANGE(0xfd00, 0xffff) AM_RAM
 ADDRESS_MAP_END
 
 
-static WRITE8_HANDLER(ppmast_sound_w)
+WRITE8_MEMBER(ppmast93_state::ppmast_sound_w)
 {
 	switch(offset&0xff)
 	{
 		case 0:
-		case 1: ym2413_w(space->machine().device("ymsnd"),offset,data); break;
-		case 2: dac_data_w(space->machine().device("dac"),data);break;
-		default: logerror("%x %x - %x\n",offset,data,cpu_get_previouspc(&space->device()));
+		case 1: ym2413_w(machine().device("ymsnd"),space,offset,data); break;
+		case 2: machine().device<dac_device>("dac")->write_unsigned8(data);break;
+		default: logerror("%x %x - %x\n",offset,data,space.device().safe_pcbase());
 	}
 }
 
-static ADDRESS_MAP_START( ppmast93_cpu2_io, AS_IO, 8 )
-	  AM_RANGE(0x0000, 0xffff) AM_ROM AM_WRITE(ppmast_sound_w) AM_REGION("sub", 0x20000)
+static ADDRESS_MAP_START( ppmast93_cpu2_io, AS_IO, 8, ppmast93_state )
+		AM_RANGE(0x0000, 0xffff) AM_ROM AM_WRITE(ppmast_sound_w) AM_REGION("sub", 0x20000)
 ADDRESS_MAP_END
 
 static INPUT_PORTS_START( ppmast93 )
@@ -318,79 +326,73 @@ static GFXDECODE_START( ppmast93 )
 	GFXDECODE_ENTRY( "gfx1", 0, tiles8x8_layout, 0, 16 )
 GFXDECODE_END
 
-static TILE_GET_INFO( get_ppmast93_bg_tile_info )
+TILE_GET_INFO_MEMBER(ppmast93_state::get_ppmast93_bg_tile_info)
 {
-	ppmast93_state *state = machine.driver_data<ppmast93_state>();
-	int code = (state->m_bgram[tile_index*2+1] << 8) | state->m_bgram[tile_index*2];
-	SET_TILE_INFO(
+	int code = (m_bgram[tile_index*2+1] << 8) | m_bgram[tile_index*2];
+	SET_TILE_INFO_MEMBER(
 			0,
 			code & 0x0fff,
 			(code & 0xf000) >> 12,
 			0);
 }
 
-static TILE_GET_INFO( get_ppmast93_fg_tile_info )
+TILE_GET_INFO_MEMBER(ppmast93_state::get_ppmast93_fg_tile_info)
 {
-	ppmast93_state *state = machine.driver_data<ppmast93_state>();
-	int code = (state->m_fgram[tile_index*2+1] << 8) | state->m_fgram[tile_index*2];
-	SET_TILE_INFO(
+	int code = (m_fgram[tile_index*2+1] << 8) | m_fgram[tile_index*2];
+	SET_TILE_INFO_MEMBER(
 			0,
 			(code & 0x0fff)+0x1000,
 			(code & 0xf000) >> 12,
 			0);
 }
 
-static VIDEO_START( ppmast93 )
+void ppmast93_state::video_start()
 {
-	ppmast93_state *state = machine.driver_data<ppmast93_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_ppmast93_bg_tile_info,tilemap_scan_rows,8,8,32, 32);
-	state->m_fg_tilemap = tilemap_create(machine, get_ppmast93_fg_tile_info,tilemap_scan_rows,8,8,32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(ppmast93_state::get_ppmast93_bg_tile_info),this),TILEMAP_SCAN_ROWS,8,8,32, 32);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(ppmast93_state::get_ppmast93_fg_tile_info),this),TILEMAP_SCAN_ROWS,8,8,32, 32);
 
-	tilemap_set_transparent_pen(state->m_fg_tilemap,0);
+	m_fg_tilemap->set_transparent_pen(0);
 }
 
-static SCREEN_UPDATE( ppmast93 )
+UINT32 ppmast93_state::screen_update_ppmast93(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	ppmast93_state *state = screen->machine().driver_data<ppmast93_state>();
-	tilemap_draw(bitmap,cliprect,state->m_bg_tilemap,0,0);
-	tilemap_draw(bitmap,cliprect,state->m_fg_tilemap,0,0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0,0);
+	m_fg_tilemap->draw(bitmap, cliprect, 0,0);
 	return 0;
 }
 
 static MACHINE_CONFIG_START( ppmast93, ppmast93_state )
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80,5000000)		 /* 5 MHz */
+	MCFG_CPU_ADD("maincpu", Z80,5000000)         /* 5 MHz */
 	MCFG_CPU_PROGRAM_MAP(ppmast93_cpu1_map)
 	MCFG_CPU_IO_MAP(ppmast93_cpu1_io)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", ppmast93_state,  irq0_line_hold)
 
-	MCFG_CPU_ADD("sub", Z80,5000000)		 /* 5 MHz */
+	MCFG_CPU_ADD("sub", Z80,5000000)         /* 5 MHz */
 	MCFG_CPU_PROGRAM_MAP(ppmast93_cpu2_map)
 	MCFG_CPU_IO_MAP(ppmast93_cpu2_io)
-	MCFG_CPU_PERIODIC_INT(irq0_line_hold,8000)
+	MCFG_CPU_PERIODIC_INT_DRIVER(ppmast93_state, irq0_line_hold, 8000)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(55)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(256, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 256-1, 0, 256-1)
-	MCFG_SCREEN_UPDATE(ppmast93)
+	MCFG_SCREEN_UPDATE_DRIVER(ppmast93_state, screen_update_ppmast93)
 
 	MCFG_GFXDECODE(ppmast93)
 
 	MCFG_PALETTE_INIT(RRRR_GGGG_BBBB)
 	MCFG_PALETTE_LENGTH(0x100)
 
-	MCFG_VIDEO_START(ppmast93)
 
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
 	MCFG_SOUND_ADD("ymsnd", YM2413, 5000000/2)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.00)
 
-	MCFG_SOUND_ADD("dac", DAC, 0)
+	MCFG_DAC_ADD("dac")
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.60)
 
 MACHINE_CONFIG_END
@@ -412,4 +414,4 @@ ROM_START( ppmast93 )
 	ROM_LOAD( "prom1.ug26", 0x200, 0x100, CRC(d979c64e) SHA1(172c9579013d58e35a5b4f732e360811ac36295e) )
 ROM_END
 
-GAME( 1993, ppmast93, 0, ppmast93, ppmast93, 0, ROT0, "Electronic Devices S.R.L.", "Ping Pong Masters '93", GAME_IMPERFECT_SOUND )
+GAME( 1993, ppmast93, 0, ppmast93, ppmast93, driver_device, 0, ROT0, "Electronic Devices S.R.L.", "Ping Pong Masters '93", GAME_IMPERFECT_SOUND )

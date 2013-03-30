@@ -13,9 +13,16 @@
 //============================================================
 
 // standard sdl header
-#include <SDL/SDL.h>
+#include "sdlinc.h"
 #include <ctype.h>
 #include <stddef.h>
+
+#if USE_XINPUT
+// for xinput
+#include <X11/Xlib.h>
+#include <X11/extensions/XInput.h>
+#include <X11/Xutil.h>
+#endif
 
 // MAME headers
 #include "emu.h"
@@ -46,12 +53,24 @@ enum
 	POVDIR_DOWN
 };
 
-#define MAX_KEYS			256
-#define MAX_AXES			32
-#define MAX_BUTTONS			32
-#define MAX_HATS			8
-#define MAX_POV				4
-#define MAX_DEVMAP_ENTRIES	16
+#define MAX_KEYS            256
+#define MAX_AXES            32
+#define MAX_BUTTONS         32
+#define MAX_HATS            8
+#define MAX_POV             4
+#define MAX_DEVMAP_ENTRIES  16
+
+#if (USE_XINPUT)
+//For xinput
+#define INVALID_EVENT_TYPE     -1
+static int motion_type         = INVALID_EVENT_TYPE;
+static int button_press_type   = INVALID_EVENT_TYPE;
+static int button_release_type = INVALID_EVENT_TYPE;
+static int key_press_type      = INVALID_EVENT_TYPE;
+static int key_release_type    = INVALID_EVENT_TYPE;
+static int proximity_in_type   = INVALID_EVENT_TYPE;
+static int proximity_out_type  = INVALID_EVENT_TYPE;
+#endif
 
 //============================================================
 //  MACROS
@@ -60,7 +79,7 @@ enum
 // introduced in 1.3
 
 #ifndef SDLK_INDEX
-#define SDLK_INDEX(x)		(x)
+#define SDLK_INDEX(x)       (x)
 #endif
 
 
@@ -69,18 +88,16 @@ enum
 //============================================================
 
 // state information for a keyboard
-typedef struct _keyboard_state keyboard_state;
-struct _keyboard_state
+struct keyboard_state
 {
-	INT32	state[0x3ff];                               	// must be INT32!
-	INT8	oldkey[MAX_KEYS];
-	INT8	currkey[MAX_KEYS];
+	INT32   state[0x3ff];                                   // must be INT32!
+	INT8    oldkey[MAX_KEYS];
+	INT8    currkey[MAX_KEYS];
 };
 
 
 // state information for a mouse
-typedef struct _mouse_state mouse_state;
-struct _mouse_state
+struct mouse_state
 {
 	INT32 lX, lY;
 	INT32 buttons[MAX_BUTTONS];
@@ -88,33 +105,47 @@ struct _mouse_state
 
 
 // state information for a joystick; DirectInput state must be first element
-typedef struct _joystick_state joystick_state;
-struct _joystick_state
+struct joystick_state
 {
 	SDL_Joystick *device;
 	INT32 axes[MAX_AXES];
 	INT32 buttons[MAX_BUTTONS];
 	INT32 hatsU[MAX_HATS], hatsD[MAX_HATS], hatsL[MAX_HATS], hatsR[MAX_HATS];
+	INT32 balls[MAX_AXES];
 };
 
+#if (USE_XINPUT)
+// state information for a lightgun
+struct lightgun_state
+{
+	INT32 lX, lY;
+	INT32 buttons[MAX_BUTTONS];
+	XID deviceid; //Xinput device id
+	INT32 maxx,maxy;
+	INT32 minx,miny;
+};
+#endif
+
 // generic device information
-typedef struct _device_info device_info;
-struct _device_info
+struct device_info
 {
 	// device information
-	device_info **			head;
-	device_info *			next;
-	char	*			name;
+	device_info **          head;
+	device_info *           next;
+	char    *           name;
 
 	// MAME information
-	input_device *			device;
+	input_device *          device;
 
 	// device state
 	union
 	{
-		keyboard_state		keyboard;
-		mouse_state		mouse;
-		joystick_state		joystick;
+		keyboard_state      keyboard;
+		mouse_state     mouse;
+		joystick_state      joystick;
+#if (USE_XINPUT)
+		lightgun_state      lightgun;
+#endif
 	};
 };
 
@@ -124,47 +155,50 @@ struct _device_info
 //============================================================
 
 // global states
-static osd_lock *			input_lock;
-static UINT8				input_paused;
+static osd_lock *           input_lock;
+static UINT8                input_paused;
 
-static sdl_window_info *	focus_window = NULL;
+static sdl_window_info *    focus_window = NULL;
 
 // input buffer - only for SDLMAME_EVENTS_IN_WORKER_THREAD
-#define MAX_BUF_EVENTS		(500)		/* 100 not enough for SDL 1.3 */
-static SDL_Event			event_buf[MAX_BUF_EVENTS];
-static int					event_buf_count;
+#define MAX_BUF_EVENTS      (500)       /* 100 not enough for SDL 1.3 */
+static SDL_Event            event_buf[MAX_BUF_EVENTS];
+static int                  event_buf_count;
 
 // keyboard states
-static device_info *		keyboard_list;
+static device_info *        keyboard_list;
 
 // mouse states
-static UINT8				app_has_mouse_focus;
-static UINT8				mouse_enabled;
-static device_info *		mouse_list;
+static UINT8                app_has_mouse_focus;
+static UINT8                mouse_enabled;
+static device_info *        mouse_list;
 
 // lightgun states
-static UINT8				lightgun_enabled;
-static device_info *		lightgun_list;
+static UINT8                lightgun_enabled;
+static device_info *        lightgun_list;
 
 // joystick states
-static device_info *		joystick_list;
+static device_info *        joystick_list;
 
 // joystick mapper
 
-typedef struct _device_map_t device_map_t;
-struct _device_map_t
+struct device_map_t
 {
 	struct {
-		char	*name;
-		int		physical;
+		char    *name;
+		int     physical;
 	} map[MAX_DEVMAP_ENTRIES];
-	int 	logical[MAX_DEVMAP_ENTRIES];
+	int     logical[MAX_DEVMAP_ENTRIES];
 	int     initialized;
 };
 
 static device_map_t joy_map;
 static device_map_t mouse_map;
 static device_map_t keyboard_map;
+#if (USE_XINPUT)
+static device_map_t lightgun_map;
+Display *XDisplay;
+#endif
 
 static int sixaxis_mode;
 
@@ -196,17 +230,16 @@ static device_info *generic_device_find_index(device_info *devlist_head, int ind
 //============================================================
 
 // master keyboard translation table
-typedef struct _kt_table kt_table;
-struct _kt_table {
-	INT32			mame_key;
-	INT32			sdl_key;
+struct kt_table {
+	input_item_id   mame_key;
+	INT32           sdl_key;
 	//const char *  vkey;
 	//const char *  ascii;
-	const char	*	mame_key_name;
-	char		*	ui_name;
+	const char  *   mame_key_name;
+	char        *   ui_name;
 };
 
-#if (SDL_VERSION_ATLEAST(1,3,0))
+#if (SDLMAME_SDL2)
 
 #define OSD_SDL_INDEX(x) (x)
 #define OSD_SDL_INDEX_KEYSYM(keysym) ((keysym)->scancode)
@@ -227,114 +260,114 @@ struct _kt_table {
 static kt_table sdl_key_trans_table[] =
 {
 	// MAME key         SDL key         vkey    ascii
-	KTT_ENTRY0(  ESC,			ESCAPE,			0x1b,	0x1b,		"ESC"  ),   		 // 0
-	KTT_ENTRY1(  1,				1 ),                                                     // 1
-	KTT_ENTRY1(  2,				2 ),                                                     // 2
-	KTT_ENTRY1(  3,				3 ),                                                     // 3
-	KTT_ENTRY1(  4,				4 ),                                                     // 4
-	KTT_ENTRY1(  5,				5 ),                                                     // 5
-	KTT_ENTRY1(  6,				6 ),                                                     // 6
-	KTT_ENTRY1(  7,				7 ),                                                     // 7
-	KTT_ENTRY1(  8,				8 ),                                                     // 8
-	KTT_ENTRY1(  9,				9 ),                                                     // 9
-	KTT_ENTRY1(  0,				0 ),                                                     // 10
-	KTT_ENTRY0(  MINUS,			MINUS,			0xbd,	'-',	"MINUS" ),               // 11
-	KTT_ENTRY0(  EQUALS,		EQUALS,			0xbb,	'=',	"EQUALS" ),              // 12
-	KTT_ENTRY0(  BACKSPACE,		BACKSPACE,		0x08,	0x08,	"BACKSPACE" ),           // 13
-	KTT_ENTRY0(  TAB,			TAB,			0x09,	0x09,	"TAB" ),                 // 14
-	KTT_ENTRY1(  Q,				Q ),                                                     // 15
-	KTT_ENTRY1(  W,				W ),                                                     // 16
-	KTT_ENTRY1(  E,				E ),                                                     // 17
-	KTT_ENTRY1(  R,				R ),                                                     // 18
-	KTT_ENTRY1(  T,				T ),                                                     // 19
-	KTT_ENTRY1(  Y,				Y ),                                                     // 20
-	KTT_ENTRY1(  U,				U ),                                                     // 21
-	KTT_ENTRY1(  I,				I ),                                                     // 22
-	KTT_ENTRY1(  O,				O ),                                                     // 23
-	KTT_ENTRY1(  P,				P ),                                                     // 24
-	KTT_ENTRY0(  OPENBRACE,	LEFTBRACKET,		0xdb,	'[',	"OPENBRACE" ),           // 25
-	KTT_ENTRY0(  CLOSEBRACE,RIGHTBRACKET,		0xdd,	']',	"CLOSEBRACE" ),          // 26
-	KTT_ENTRY0(  ENTER,		RETURN, 			0x0d,	0x0d,	"RETURN" ),              // 27
-	KTT_ENTRY2(  LCONTROL,	LCTRL ),                                                     // 28
-	KTT_ENTRY1(  A,				A ),                                                     // 29
-	KTT_ENTRY1(  S, 			S ),                                                     // 30
-	KTT_ENTRY1(  D, 			D ),                                                     // 31
-	KTT_ENTRY1(  F, 			F ),                                                     // 32
-	KTT_ENTRY1(  G, 			G ),                                                     // 33
-	KTT_ENTRY1(  H, 			H ),                                                     // 34
-	KTT_ENTRY1(  J, 			J ),                                                     // 35
-	KTT_ENTRY1(  K, 			K ),                                                     // 36
-	KTT_ENTRY1(  L, 			L ),                                                     // 37
-	KTT_ENTRY0(  COLON, 		SEMICOLON,		0xba,	';',	"COLON" ),               // 38
-	KTT_ENTRY0(  QUOTE, 		APOSTROPHE,			0xde,	'\'',	"QUOTE" ),           // 39
-	KTT_ENTRY2(  LSHIFT,		LSHIFT ),                                                // 40
-	KTT_ENTRY0(  BACKSLASH,		BACKSLASH,		0xdc,	'\\',	"BACKSLASH" ),           // 41
-	KTT_ENTRY1(  Z, 			Z ),                                                     // 42
-	KTT_ENTRY1(  X, 			X ),                                                     // 43
-	KTT_ENTRY1(  C, 			C ),                                                     // 44
-	KTT_ENTRY1(  V, 			V ),                                                     // 45
-	KTT_ENTRY1(  B, 			B ),                                                     // 46
-	KTT_ENTRY1(  N, 			N ),                                                     // 47
-	KTT_ENTRY1(  M, 			M ),                                                     // 48
-	KTT_ENTRY0(  COMMA, 		COMMA,	    	0xbc,	',',	"COMMA" ),               // 49
-	KTT_ENTRY0(  STOP,			PERIOD, 		0xbe,	'.',	"STOP"  ),               // 50
-	KTT_ENTRY0(  SLASH, 		SLASH,	    	0xbf,	'/',	"SLASH" ),               // 51
-	KTT_ENTRY2(  RSHIFT,		RSHIFT ),                                                // 52
-	KTT_ENTRY0(  ASTERISK,		KP_MULTIPLY,    '*',	'*',	"ASTERIX" ),             // 53
-	KTT_ENTRY2(  LALT,			LALT ),                                                  // 54
-	KTT_ENTRY0(  SPACE, 		SPACE,			' ',	' ',	"SPACE" ),               // 55
-	KTT_ENTRY2(  CAPSLOCK,		CAPSLOCK ),                                              // 56
-	KTT_ENTRY2(  F1,			F1 ),                                                    // 57
-	KTT_ENTRY2(  F2,			F2 ),                                                    // 58
-	KTT_ENTRY2(  F3,			F3 ),                                                    // 59
-	KTT_ENTRY2(  F4,			F4 ),                                                    // 60
-	KTT_ENTRY2(  F5,			F5 ),                                                    // 61
-	KTT_ENTRY2(  F6,			F6 ),                                                    // 62
-	KTT_ENTRY2(  F7,			F7 ),                                                    // 63
-	KTT_ENTRY2(  F8,			F8 ),                                                    // 64
-	KTT_ENTRY2(  F9,			F9 ),                                                    // 65
-	KTT_ENTRY2(  F10,			F10 ),                                                   // 66
-	KTT_ENTRY2(  NUMLOCK,		NUMLOCKCLEAR ),                                          // 67
-	KTT_ENTRY2(  SCRLOCK,		SCROLLLOCK ),                                            // 68
-	KTT_ENTRY2(  7_PAD, 		KP_7 ),                                                  // 69
-	KTT_ENTRY2(  8_PAD, 		KP_8 ),
-	KTT_ENTRY2(  9_PAD, 		KP_9 ),
-	KTT_ENTRY2(  MINUS_PAD,		KP_MINUS ),
-	KTT_ENTRY2(  4_PAD, 		KP_4 ),
-	KTT_ENTRY2(  5_PAD, 		KP_5 ),
-	KTT_ENTRY2(  6_PAD, 		KP_6 ),
-	KTT_ENTRY2(  PLUS_PAD,		KP_PLUS ),
-	KTT_ENTRY2(  1_PAD, 		KP_1 ),
-	KTT_ENTRY2(  2_PAD, 		KP_2 ),
-	KTT_ENTRY2(  3_PAD, 		KP_3 ),
-	KTT_ENTRY2(  0_PAD, 		KP_0 ),
-	KTT_ENTRY2(  DEL_PAD,		KP_PERIOD ),
-	KTT_ENTRY2(  F11,			F11 ),
-	KTT_ENTRY2(  F12,			F12 ),
-	KTT_ENTRY2(  F13,			F13 ),
-	KTT_ENTRY2(  F14,			F14 ),
-	KTT_ENTRY2(  F15,			F15 ),
-	KTT_ENTRY2(  ENTER_PAD,		KP_ENTER  ),
-	KTT_ENTRY2(  RCONTROL,		RCTRL ),
-	KTT_ENTRY2(  SLASH_PAD,		KP_DIVIDE ),
-	KTT_ENTRY2(  PRTSCR,		PRINTSCREEN ),
-	KTT_ENTRY2(  RALT,			RALT ),
-	KTT_ENTRY2(  HOME,			HOME ),
-	KTT_ENTRY2(  UP,			UP ),
-	KTT_ENTRY2(  PGUP,			PAGEUP ),
-	KTT_ENTRY2(  LEFT,			LEFT ),
-	KTT_ENTRY2(  RIGHT, 		RIGHT ),
-	KTT_ENTRY2(  END,			END ),
-	KTT_ENTRY2(  DOWN,			DOWN ),
-	KTT_ENTRY2(  PGDN,			PAGEDOWN ),
-	KTT_ENTRY2(  INSERT,		INSERT ),
+	KTT_ENTRY0(  ESC,           ESCAPE,         0x1b,   0x1b,       "ESC"  ),            // 0
+	KTT_ENTRY1(  1,             1 ),                                                     // 1
+	KTT_ENTRY1(  2,             2 ),                                                     // 2
+	KTT_ENTRY1(  3,             3 ),                                                     // 3
+	KTT_ENTRY1(  4,             4 ),                                                     // 4
+	KTT_ENTRY1(  5,             5 ),                                                     // 5
+	KTT_ENTRY1(  6,             6 ),                                                     // 6
+	KTT_ENTRY1(  7,             7 ),                                                     // 7
+	KTT_ENTRY1(  8,             8 ),                                                     // 8
+	KTT_ENTRY1(  9,             9 ),                                                     // 9
+	KTT_ENTRY1(  0,             0 ),                                                     // 10
+	KTT_ENTRY0(  MINUS,         MINUS,          0xbd,   '-',    "MINUS" ),               // 11
+	KTT_ENTRY0(  EQUALS,        EQUALS,         0xbb,   '=',    "EQUALS" ),              // 12
+	KTT_ENTRY0(  BACKSPACE,     BACKSPACE,      0x08,   0x08,   "BACKSPACE" ),           // 13
+	KTT_ENTRY0(  TAB,           TAB,            0x09,   0x09,   "TAB" ),                 // 14
+	KTT_ENTRY1(  Q,             Q ),                                                     // 15
+	KTT_ENTRY1(  W,             W ),                                                     // 16
+	KTT_ENTRY1(  E,             E ),                                                     // 17
+	KTT_ENTRY1(  R,             R ),                                                     // 18
+	KTT_ENTRY1(  T,             T ),                                                     // 19
+	KTT_ENTRY1(  Y,             Y ),                                                     // 20
+	KTT_ENTRY1(  U,             U ),                                                     // 21
+	KTT_ENTRY1(  I,             I ),                                                     // 22
+	KTT_ENTRY1(  O,             O ),                                                     // 23
+	KTT_ENTRY1(  P,             P ),                                                     // 24
+	KTT_ENTRY0(  OPENBRACE, LEFTBRACKET,        0xdb,   '[',    "OPENBRACE" ),           // 25
+	KTT_ENTRY0(  CLOSEBRACE,RIGHTBRACKET,       0xdd,   ']',    "CLOSEBRACE" ),          // 26
+	KTT_ENTRY0(  ENTER,     RETURN,             0x0d,   0x0d,   "RETURN" ),              // 27
+	KTT_ENTRY2(  LCONTROL,  LCTRL ),                                                     // 28
+	KTT_ENTRY1(  A,             A ),                                                     // 29
+	KTT_ENTRY1(  S,             S ),                                                     // 30
+	KTT_ENTRY1(  D,             D ),                                                     // 31
+	KTT_ENTRY1(  F,             F ),                                                     // 32
+	KTT_ENTRY1(  G,             G ),                                                     // 33
+	KTT_ENTRY1(  H,             H ),                                                     // 34
+	KTT_ENTRY1(  J,             J ),                                                     // 35
+	KTT_ENTRY1(  K,             K ),                                                     // 36
+	KTT_ENTRY1(  L,             L ),                                                     // 37
+	KTT_ENTRY0(  COLON,         SEMICOLON,      0xba,   ';',    "COLON" ),               // 38
+	KTT_ENTRY0(  QUOTE,         APOSTROPHE,         0xde,   '\'',   "QUOTE" ),           // 39
+	KTT_ENTRY2(  LSHIFT,        LSHIFT ),                                                // 40
+	KTT_ENTRY0(  BACKSLASH,     BACKSLASH,      0xdc,   '\\',   "BACKSLASH" ),           // 41
+	KTT_ENTRY1(  Z,             Z ),                                                     // 42
+	KTT_ENTRY1(  X,             X ),                                                     // 43
+	KTT_ENTRY1(  C,             C ),                                                     // 44
+	KTT_ENTRY1(  V,             V ),                                                     // 45
+	KTT_ENTRY1(  B,             B ),                                                     // 46
+	KTT_ENTRY1(  N,             N ),                                                     // 47
+	KTT_ENTRY1(  M,             M ),                                                     // 48
+	KTT_ENTRY0(  COMMA,         COMMA,          0xbc,   ',',    "COMMA" ),               // 49
+	KTT_ENTRY0(  STOP,          PERIOD,         0xbe,   '.',    "STOP"  ),               // 50
+	KTT_ENTRY0(  SLASH,         SLASH,          0xbf,   '/',    "SLASH" ),               // 51
+	KTT_ENTRY2(  RSHIFT,        RSHIFT ),                                                // 52
+	KTT_ENTRY0(  ASTERISK,      KP_MULTIPLY,    '*',    '*',    "ASTERIX" ),             // 53
+	KTT_ENTRY2(  LALT,          LALT ),                                                  // 54
+	KTT_ENTRY0(  SPACE,         SPACE,          ' ',    ' ',    "SPACE" ),               // 55
+	KTT_ENTRY2(  CAPSLOCK,      CAPSLOCK ),                                              // 56
+	KTT_ENTRY2(  F1,            F1 ),                                                    // 57
+	KTT_ENTRY2(  F2,            F2 ),                                                    // 58
+	KTT_ENTRY2(  F3,            F3 ),                                                    // 59
+	KTT_ENTRY2(  F4,            F4 ),                                                    // 60
+	KTT_ENTRY2(  F5,            F5 ),                                                    // 61
+	KTT_ENTRY2(  F6,            F6 ),                                                    // 62
+	KTT_ENTRY2(  F7,            F7 ),                                                    // 63
+	KTT_ENTRY2(  F8,            F8 ),                                                    // 64
+	KTT_ENTRY2(  F9,            F9 ),                                                    // 65
+	KTT_ENTRY2(  F10,           F10 ),                                                   // 66
+	KTT_ENTRY2(  NUMLOCK,       NUMLOCKCLEAR ),                                          // 67
+	KTT_ENTRY2(  SCRLOCK,       SCROLLLOCK ),                                            // 68
+	KTT_ENTRY2(  7_PAD,         KP_7 ),                                                  // 69
+	KTT_ENTRY2(  8_PAD,         KP_8 ),
+	KTT_ENTRY2(  9_PAD,         KP_9 ),
+	KTT_ENTRY2(  MINUS_PAD,     KP_MINUS ),
+	KTT_ENTRY2(  4_PAD,         KP_4 ),
+	KTT_ENTRY2(  5_PAD,         KP_5 ),
+	KTT_ENTRY2(  6_PAD,         KP_6 ),
+	KTT_ENTRY2(  PLUS_PAD,      KP_PLUS ),
+	KTT_ENTRY2(  1_PAD,         KP_1 ),
+	KTT_ENTRY2(  2_PAD,         KP_2 ),
+	KTT_ENTRY2(  3_PAD,         KP_3 ),
+	KTT_ENTRY2(  0_PAD,         KP_0 ),
+	KTT_ENTRY2(  DEL_PAD,       KP_PERIOD ),
+	KTT_ENTRY2(  F11,           F11 ),
+	KTT_ENTRY2(  F12,           F12 ),
+	KTT_ENTRY2(  F13,           F13 ),
+	KTT_ENTRY2(  F14,           F14 ),
+	KTT_ENTRY2(  F15,           F15 ),
+	KTT_ENTRY2(  ENTER_PAD,     KP_ENTER  ),
+	KTT_ENTRY2(  RCONTROL,      RCTRL ),
+	KTT_ENTRY2(  SLASH_PAD,     KP_DIVIDE ),
+	KTT_ENTRY2(  PRTSCR,        PRINTSCREEN ),
+	KTT_ENTRY2(  RALT,          RALT ),
+	KTT_ENTRY2(  HOME,          HOME ),
+	KTT_ENTRY2(  UP,            UP ),
+	KTT_ENTRY2(  PGUP,          PAGEUP ),
+	KTT_ENTRY2(  LEFT,          LEFT ),
+	KTT_ENTRY2(  RIGHT,         RIGHT ),
+	KTT_ENTRY2(  END,           END ),
+	KTT_ENTRY2(  DOWN,          DOWN ),
+	KTT_ENTRY2(  PGDN,          PAGEDOWN ),
+	KTT_ENTRY2(  INSERT,        INSERT ),
 	{ ITEM_ID_DEL, SDL_SCANCODE_DELETE,  "ITEM_ID_DEL", (char *)"DELETE" },
-	KTT_ENTRY2(  LWIN,			LGUI ),
-	KTT_ENTRY2(  RWIN,			RGUI ),
-	KTT_ENTRY2(  MENU,			MENU ),
-	KTT_ENTRY0(  TILDE, 		GRAVE,  	0xc0,	'`',	"TILDE" ),
-	KTT_ENTRY0(  BACKSLASH2,	NONUSBACKSLASH,     0xdc,   '\\', "BACKSLASH2" ),
-	{ -1 }
+	KTT_ENTRY2(  LWIN,          LGUI ),
+	KTT_ENTRY2(  RWIN,          RGUI ),
+	KTT_ENTRY2(  MENU,          MENU ),
+	KTT_ENTRY0(  TILDE,         GRAVE,      0xc0,   '`',    "TILDE" ),
+	KTT_ENTRY0(  BACKSLASH2,    NONUSBACKSLASH,     0xdc,   '\\', "BACKSLASH2" ),
+	{ ITEM_ID_INVALID }
 };
 #else
 
@@ -352,125 +385,124 @@ static kt_table sdl_key_trans_table[] =
 static kt_table sdl_key_trans_table[] =
 {
 	// MAME key         SDL key         vkey    ascii
-	KTT_ENTRY0(  ESC,			ESCAPE,			0x1b,	0x1b,		"ESC"  ),
-	KTT_ENTRY1(  1,				1 ),
-	KTT_ENTRY1(  2,				2 ),
-	KTT_ENTRY1(  3,				3 ),
-	KTT_ENTRY1(  4,				4 ),
-	KTT_ENTRY1(  5,				5 ),
-	KTT_ENTRY1(  6,				6 ),
-	KTT_ENTRY1(  7,				7 ),
-	KTT_ENTRY1(  8,				8 ),
-	KTT_ENTRY1(  9,				9 ),
-	KTT_ENTRY1(  0,				0 ),
-	KTT_ENTRY0(  MINUS,			MINUS,			0xbd,	'-',	"MINUS" ),
-	KTT_ENTRY0(  EQUALS,		EQUALS,			0xbb,	'=',	"EQUALS" ),
-	KTT_ENTRY0(  BACKSPACE,		BACKSPACE,		0x08,	0x08,	"BACKSPACE" ),
-	KTT_ENTRY0(  TAB,			TAB,			0x09,	0x09,	"TAB" ),
-	KTT_ENTRY1(  Q,				q ),
-	KTT_ENTRY1(  W,				w ),
-	KTT_ENTRY1(  E,				e ),
-	KTT_ENTRY1(  R,				r ),
-	KTT_ENTRY1(  T,				t ),
-	KTT_ENTRY1(  Y,				y ),
-	KTT_ENTRY1(  U,				u ),
-	KTT_ENTRY1(  I,				i ),
-	KTT_ENTRY1(  O,				o ),
-	KTT_ENTRY1(  P,				p ),
-	KTT_ENTRY0(  OPENBRACE,	LEFTBRACKET,		0xdb,	'[',	"OPENBRACE" ),
-	KTT_ENTRY0(  CLOSEBRACE,RIGHTBRACKET,		0xdd,	']',	"CLOSEBRACE" ),
-	KTT_ENTRY0(  ENTER,		RETURN, 			0x0d,	0x0d,	"RETURN" ),
-	KTT_ENTRY2(  LCONTROL,	LCTRL ),
-	KTT_ENTRY1(  A,				a ),
-	KTT_ENTRY1(  S, 			s ),
-	KTT_ENTRY1(  D, 			d ),
-	KTT_ENTRY1(  F, 			f ),
-	KTT_ENTRY1(  G, 			g ),
-	KTT_ENTRY1(  H, 			h ),
-	KTT_ENTRY1(  J, 			j ),
-	KTT_ENTRY1(  K, 			k ),
-	KTT_ENTRY1(  L, 			l ),
-	KTT_ENTRY0(  COLON, 		SEMICOLON,		0xba,	';',	"COLON" ),
-	KTT_ENTRY0(  QUOTE, 		QUOTE,			0xde,	'\'',	"QUOTE" ),
-	KTT_ENTRY2(  LSHIFT,		LSHIFT ),
-	KTT_ENTRY0(  BACKSLASH,		BACKSLASH,		0xdc,	'\\',	"BACKSLASH" ),
-	KTT_ENTRY1(  Z, 			z ),
-	KTT_ENTRY1(  X, 			x ),
-	KTT_ENTRY1(  C, 			c ),
-	KTT_ENTRY1(  V, 			v ),
-	KTT_ENTRY1(  B, 			b ),
-	KTT_ENTRY1(  N, 			n ),
-	KTT_ENTRY1(  M, 			m ),
-	KTT_ENTRY0(  COMMA, 		COMMA,	    	0xbc,	',',	"COMMA" ),
-	KTT_ENTRY0(  STOP,			PERIOD, 		0xbe,	'.',	"STOP"  ),
-	KTT_ENTRY0(  SLASH, 		SLASH,	    	0xbf,	'/',	"SLASH" ),
-	KTT_ENTRY2(  RSHIFT,		RSHIFT ),
-	KTT_ENTRY0(  ASTERISK,		KP_MULTIPLY,    '*',	'*',	"ASTERIX" ),
-	KTT_ENTRY2(  LALT,			LALT ),
-	KTT_ENTRY0(  SPACE, 		SPACE,			' ',	' ',	"SPACE" ),
-	KTT_ENTRY2(  CAPSLOCK,		CAPSLOCK ),
-	KTT_ENTRY2(  F1,			F1 ),
-	KTT_ENTRY2(  F2,			F2 ),
-	KTT_ENTRY2(  F3,			F3 ),
-	KTT_ENTRY2(  F4,			F4 ),
-	KTT_ENTRY2(  F5,			F5 ),
-	KTT_ENTRY2(  F6,			F6 ),
-	KTT_ENTRY2(  F7,			F7 ),
-	KTT_ENTRY2(  F8,			F8 ),
-	KTT_ENTRY2(  F9,			F9 ),
-	KTT_ENTRY2(  F10,			F10 ),
-	KTT_ENTRY2(  NUMLOCK,		NUMLOCK ),
-	KTT_ENTRY2(  SCRLOCK,		SCROLLOCK ),
-	KTT_ENTRY2(  7_PAD, 		KP7 ),
-	KTT_ENTRY2(  8_PAD, 		KP8 ),
-	KTT_ENTRY2(  9_PAD, 		KP9 ),
-	KTT_ENTRY2(  MINUS_PAD,		KP_MINUS ),
-	KTT_ENTRY2(  4_PAD, 		KP4 ),
-	KTT_ENTRY2(  5_PAD, 		KP5 ),
-	KTT_ENTRY2(  6_PAD, 		KP6 ),
-	KTT_ENTRY2(  PLUS_PAD,		KP_PLUS ),
-	KTT_ENTRY2(  1_PAD, 		KP1 ),
-	KTT_ENTRY2(  2_PAD, 		KP2 ),
-	KTT_ENTRY2(  3_PAD, 		KP3 ),
-	KTT_ENTRY2(  0_PAD, 		KP0 ),
-	KTT_ENTRY2(  DEL_PAD,		KP_PERIOD ),
-	KTT_ENTRY2(  F11,			F11 ),
-	KTT_ENTRY2(  F12,			F12 ),
-	KTT_ENTRY2(  F13,			F13 ),
-	KTT_ENTRY2(  F14,			F14 ),
-	KTT_ENTRY2(  F15,			F15 ),
-	KTT_ENTRY2(  ENTER_PAD,		KP_ENTER  ),
-	KTT_ENTRY2(  RCONTROL,		RCTRL ),
-	KTT_ENTRY2(  SLASH_PAD,		KP_DIVIDE ),
-	KTT_ENTRY2(  PRTSCR,		PRINT ),
-	KTT_ENTRY2(  RALT,			RALT ),
-	KTT_ENTRY2(  HOME,			HOME ),
-	KTT_ENTRY2(  UP,			UP ),
-	KTT_ENTRY2(  PGUP,			PAGEUP ),
-	KTT_ENTRY2(  LEFT,			LEFT ),
-	KTT_ENTRY2(  RIGHT, 		RIGHT ),
-	KTT_ENTRY2(  END,			END ),
-	KTT_ENTRY2(  DOWN,			DOWN ),
-	KTT_ENTRY2(  PGDN,			PAGEDOWN ),
-	KTT_ENTRY2(  INSERT,		INSERT ),
+	KTT_ENTRY0(  ESC,           ESCAPE,         0x1b,   0x1b,       "ESC"  ),
+	KTT_ENTRY1(  1,             1 ),
+	KTT_ENTRY1(  2,             2 ),
+	KTT_ENTRY1(  3,             3 ),
+	KTT_ENTRY1(  4,             4 ),
+	KTT_ENTRY1(  5,             5 ),
+	KTT_ENTRY1(  6,             6 ),
+	KTT_ENTRY1(  7,             7 ),
+	KTT_ENTRY1(  8,             8 ),
+	KTT_ENTRY1(  9,             9 ),
+	KTT_ENTRY1(  0,             0 ),
+	KTT_ENTRY0(  MINUS,         MINUS,          0xbd,   '-',    "MINUS" ),
+	KTT_ENTRY0(  EQUALS,        EQUALS,         0xbb,   '=',    "EQUALS" ),
+	KTT_ENTRY0(  BACKSPACE,     BACKSPACE,      0x08,   0x08,   "BACKSPACE" ),
+	KTT_ENTRY0(  TAB,           TAB,            0x09,   0x09,   "TAB" ),
+	KTT_ENTRY1(  Q,             q ),
+	KTT_ENTRY1(  W,             w ),
+	KTT_ENTRY1(  E,             e ),
+	KTT_ENTRY1(  R,             r ),
+	KTT_ENTRY1(  T,             t ),
+	KTT_ENTRY1(  Y,             y ),
+	KTT_ENTRY1(  U,             u ),
+	KTT_ENTRY1(  I,             i ),
+	KTT_ENTRY1(  O,             o ),
+	KTT_ENTRY1(  P,             p ),
+	KTT_ENTRY0(  OPENBRACE, LEFTBRACKET,        0xdb,   '[',    "OPENBRACE" ),
+	KTT_ENTRY0(  CLOSEBRACE,RIGHTBRACKET,       0xdd,   ']',    "CLOSEBRACE" ),
+	KTT_ENTRY0(  ENTER,     RETURN,             0x0d,   0x0d,   "RETURN" ),
+	KTT_ENTRY2(  LCONTROL,  LCTRL ),
+	KTT_ENTRY1(  A,             a ),
+	KTT_ENTRY1(  S,             s ),
+	KTT_ENTRY1(  D,             d ),
+	KTT_ENTRY1(  F,             f ),
+	KTT_ENTRY1(  G,             g ),
+	KTT_ENTRY1(  H,             h ),
+	KTT_ENTRY1(  J,             j ),
+	KTT_ENTRY1(  K,             k ),
+	KTT_ENTRY1(  L,             l ),
+	KTT_ENTRY0(  COLON,         SEMICOLON,      0xba,   ';',    "COLON" ),
+	KTT_ENTRY0(  QUOTE,         QUOTE,          0xde,   '\'',   "QUOTE" ),
+	KTT_ENTRY2(  LSHIFT,        LSHIFT ),
+	KTT_ENTRY0(  BACKSLASH,     BACKSLASH,      0xdc,   '\\',   "BACKSLASH" ),
+	KTT_ENTRY1(  Z,             z ),
+	KTT_ENTRY1(  X,             x ),
+	KTT_ENTRY1(  C,             c ),
+	KTT_ENTRY1(  V,             v ),
+	KTT_ENTRY1(  B,             b ),
+	KTT_ENTRY1(  N,             n ),
+	KTT_ENTRY1(  M,             m ),
+	KTT_ENTRY0(  COMMA,         COMMA,          0xbc,   ',',    "COMMA" ),
+	KTT_ENTRY0(  STOP,          PERIOD,         0xbe,   '.',    "STOP"  ),
+	KTT_ENTRY0(  SLASH,         SLASH,          0xbf,   '/',    "SLASH" ),
+	KTT_ENTRY2(  RSHIFT,        RSHIFT ),
+	KTT_ENTRY0(  ASTERISK,      KP_MULTIPLY,    '*',    '*',    "ASTERIX" ),
+	KTT_ENTRY2(  LALT,          LALT ),
+	KTT_ENTRY0(  SPACE,         SPACE,          ' ',    ' ',    "SPACE" ),
+	KTT_ENTRY2(  CAPSLOCK,      CAPSLOCK ),
+	KTT_ENTRY2(  F1,            F1 ),
+	KTT_ENTRY2(  F2,            F2 ),
+	KTT_ENTRY2(  F3,            F3 ),
+	KTT_ENTRY2(  F4,            F4 ),
+	KTT_ENTRY2(  F5,            F5 ),
+	KTT_ENTRY2(  F6,            F6 ),
+	KTT_ENTRY2(  F7,            F7 ),
+	KTT_ENTRY2(  F8,            F8 ),
+	KTT_ENTRY2(  F9,            F9 ),
+	KTT_ENTRY2(  F10,           F10 ),
+	KTT_ENTRY2(  NUMLOCK,       NUMLOCK ),
+	KTT_ENTRY2(  SCRLOCK,       SCROLLOCK ),
+	KTT_ENTRY2(  7_PAD,         KP7 ),
+	KTT_ENTRY2(  8_PAD,         KP8 ),
+	KTT_ENTRY2(  9_PAD,         KP9 ),
+	KTT_ENTRY2(  MINUS_PAD,     KP_MINUS ),
+	KTT_ENTRY2(  4_PAD,         KP4 ),
+	KTT_ENTRY2(  5_PAD,         KP5 ),
+	KTT_ENTRY2(  6_PAD,         KP6 ),
+	KTT_ENTRY2(  PLUS_PAD,      KP_PLUS ),
+	KTT_ENTRY2(  1_PAD,         KP1 ),
+	KTT_ENTRY2(  2_PAD,         KP2 ),
+	KTT_ENTRY2(  3_PAD,         KP3 ),
+	KTT_ENTRY2(  0_PAD,         KP0 ),
+	KTT_ENTRY2(  DEL_PAD,       KP_PERIOD ),
+	KTT_ENTRY2(  F11,           F11 ),
+	KTT_ENTRY2(  F12,           F12 ),
+	KTT_ENTRY2(  F13,           F13 ),
+	KTT_ENTRY2(  F14,           F14 ),
+	KTT_ENTRY2(  F15,           F15 ),
+	KTT_ENTRY2(  ENTER_PAD,     KP_ENTER  ),
+	KTT_ENTRY2(  RCONTROL,      RCTRL ),
+	KTT_ENTRY2(  SLASH_PAD,     KP_DIVIDE ),
+	KTT_ENTRY2(  PRTSCR,        PRINT ),
+	KTT_ENTRY2(  RALT,          RALT ),
+	KTT_ENTRY2(  HOME,          HOME ),
+	KTT_ENTRY2(  UP,            UP ),
+	KTT_ENTRY2(  PGUP,          PAGEUP ),
+	KTT_ENTRY2(  LEFT,          LEFT ),
+	KTT_ENTRY2(  RIGHT,         RIGHT ),
+	KTT_ENTRY2(  END,           END ),
+	KTT_ENTRY2(  DOWN,          DOWN ),
+	KTT_ENTRY2(  PGDN,          PAGEDOWN ),
+	KTT_ENTRY2(  INSERT,        INSERT ),
 	{ ITEM_ID_DEL, SDLK_DELETE,  "ITEM_ID_DEL", (char *)"DELETE" },
-	KTT_ENTRY2(  LWIN,			LSUPER ),
-	KTT_ENTRY2(  RWIN,			RSUPER ),
-	KTT_ENTRY2(  MENU,			MENU ),
-	KTT_ENTRY0(  TILDE, 		BACKQUOTE,  	0xc0,	'`',	"TILDE" ),
-	KTT_ENTRY0(  BACKSLASH2,	HASH,     0xdc,   '\\', "BACKSLASH2" ),
-	{ -1 }
+	KTT_ENTRY2(  LWIN,          LSUPER ),
+	KTT_ENTRY2(  RWIN,          RSUPER ),
+	KTT_ENTRY2(  MENU,          MENU ),
+	KTT_ENTRY0(  TILDE,         BACKQUOTE,      0xc0,   '`',    "TILDE" ),
+	KTT_ENTRY0(  BACKSLASH2,    HASH,     0xdc,   '\\', "BACKSLASH2" ),
+	{ ITEM_ID_INVALID }
 };
 #endif
 
-typedef struct _key_lookup_table key_lookup_table;
-struct _key_lookup_table
+struct key_lookup_table
 {
 	int code;
 	const char *name;
 };
 
-#if (SDL_VERSION_ATLEAST(1,3,0))
+#if (SDLMAME_SDL2)
 #define KE(x) { SDL_SCANCODE_ ## x, "SDL_SCANCODE_" #x },
 #define KE8(A, B, C, D, E, F, G, H) KE(A) KE(B) KE(C) KE(D) KE(E) KE(F) KE(G) KE(H)
 #define KE7(A, B, C, D, E, F, G) KE(A) KE(B) KE(C) KE(D) KE(E) KE(F) KE(G)
@@ -479,24 +511,23 @@ struct _key_lookup_table
 
 static key_lookup_table sdl_lookup_table[] =
 {
-	KE7(UNKNOWN,	BACKSPACE,	TAB,		CLEAR,		RETURN,		PAUSE,		ESCAPE		)
+	KE7(UNKNOWN,    BACKSPACE,  TAB,        CLEAR,      RETURN,     PAUSE,      ESCAPE      )
 	KE(SPACE)
-	KE5(COMMA,		MINUS,		PERIOD,		SLASH,		0			)
-	KE8(1,			2,			3,				4,			5,			6,			7,			8			)
-	KE3(9,			SEMICOLON,		EQUALS)
-	KE5(LEFTBRACKET,BACKSLASH,	RIGHTBRACKET,	A,			B			)
-	KE8(C,			D,			E,				F,			G,			H,			I,			J			)
-	KE8(K,			L,			M,				N,			O,			P,			Q,			R			)
-	KE8(S,			T,			U,				V,			W,			X,			Y,			Z			)
-	KE8(DELETE,		KP_0,		KP_1,			KP_2,		KP_3,		KP_4,		KP_5,		KP_6		)
-	KE8(KP_7,		KP_8,		KP_9,			KP_PERIOD,	KP_DIVIDE,	KP_MULTIPLY,KP_MINUS,	KP_PLUS		)
-	KE8(KP_ENTER,	KP_EQUALS,	UP,				DOWN,		RIGHT,		LEFT,		INSERT,		HOME		)
-	KE8(END,		PAGEUP,		PAGEDOWN,		F1,			F2,			F3,			F4,			F5			)
-	KE8(F6,			F7,			F8,				F9,			F10,		F11,		F12,		F13			)
-	KE8(F14,		F15,		NUMLOCKCLEAR,	CAPSLOCK,	SCROLLLOCK,	RSHIFT,		LSHIFT,		RCTRL		)
-	KE5(LCTRL,		RALT,		LALT,			LGUI,		RGUI)
-	KE(PRINTSCREEN)
-	KE(MENU)
+	KE5(COMMA,      MINUS,      PERIOD,     SLASH,      0           )
+	KE8(1,          2,          3,              4,          5,          6,          7,          8           )
+	KE3(9,          SEMICOLON,      EQUALS)
+	KE5(LEFTBRACKET,BACKSLASH,  RIGHTBRACKET,   A,          B           )
+	KE8(C,          D,          E,              F,          G,          H,          I,          J           )
+	KE8(K,          L,          M,              N,          O,          P,          Q,          R           )
+	KE8(S,          T,          U,              V,          W,          X,          Y,          Z           )
+	KE8(DELETE,     KP_0,       KP_1,           KP_2,       KP_3,       KP_4,       KP_5,       KP_6        )
+	KE8(KP_7,       KP_8,       KP_9,           KP_PERIOD,  KP_DIVIDE,  KP_MULTIPLY,KP_MINUS,   KP_PLUS     )
+	KE8(KP_ENTER,   KP_EQUALS,  UP,             DOWN,       RIGHT,      LEFT,       INSERT,     HOME        )
+	KE8(END,        PAGEUP,     PAGEDOWN,       F1,         F2,         F3,         F4,         F5          )
+	KE8(F6,         F7,         F8,             F9,         F10,        F11,        F12,        F13         )
+	KE8(F14,        F15,        NUMLOCKCLEAR,   CAPSLOCK,   SCROLLLOCK, RSHIFT,     LSHIFT,     RCTRL       )
+	KE5(LCTRL,      RALT,       LALT,           LGUI,       RGUI)
+	KE8(GRAVE,      LEFTBRACKET,RIGHTBRACKET,   SEMICOLON,  APOSTROPHE, BACKSLASH,  PRINTSCREEN,MENU        )
 	KE(UNDO)
 	{-1, ""}
 };
@@ -506,41 +537,40 @@ static key_lookup_table sdl_lookup_table[] =
 
 static key_lookup_table sdl_lookup_table[] =
 {
-	KE8(UNKNOWN,	FIRST,		BACKSPACE,		TAB,		CLEAR,		RETURN,		PAUSE,		ESCAPE		)
-	KE8(SPACE,		EXCLAIM,	QUOTEDBL,		HASH,		DOLLAR,		AMPERSAND,	QUOTE,		LEFTPAREN	)
-	KE8(RIGHTPAREN,	ASTERISK,	PLUS,			COMMA,		MINUS,		PERIOD,		SLASH,		0			)
-	KE8(1,			2,			3,				4,			5,			6,			7,			8			)
-	KE8(9,			COLON,		SEMICOLON,		LESS,		EQUALS,		GREATER,	QUESTION,	AT			)
-	KE8(LEFTBRACKET,BACKSLASH,	RIGHTBRACKET,	CARET,		UNDERSCORE,	BACKQUOTE,	a,			b			)
-	KE8(c,			d,			e,				f,			g,			h,			i,			j			)
-	KE8(k,			l,			m,				n,			o,			p,			q,			r			)
-	KE8(s,			t,			u,				v,			w,			x,			y,			z			)
-	KE8(DELETE,		WORLD_0,	WORLD_1,		WORLD_2,	WORLD_3,	WORLD_4,	WORLD_5,	WORLD_6		)
-	KE8(WORLD_7,	WORLD_8,	WORLD_9,		WORLD_10,	WORLD_11,	WORLD_12,	WORLD_13,	WORLD_14	)
-	KE8(WORLD_15,	WORLD_16,	WORLD_17,		WORLD_18,	WORLD_19,	WORLD_20,	WORLD_21,	WORLD_22	)
-	KE8(WORLD_23,	WORLD_24,	WORLD_25,		WORLD_26,	WORLD_27,	WORLD_28,	WORLD_29,	WORLD_30	)
-	KE8(WORLD_31,	WORLD_32,	WORLD_33,		WORLD_34,	WORLD_35,	WORLD_36,	WORLD_37,	WORLD_38	)
-	KE8(WORLD_39,	WORLD_40,	WORLD_41,		WORLD_42,	WORLD_43,	WORLD_44,	WORLD_45,	WORLD_46	)
-	KE8(WORLD_47,	WORLD_48,	WORLD_49,		WORLD_50,	WORLD_51,	WORLD_52,	WORLD_53,	WORLD_54	)
-	KE8(WORLD_55,	WORLD_56,	WORLD_57,		WORLD_58,	WORLD_59,	WORLD_60,	WORLD_61,	WORLD_62	)
-	KE8(WORLD_63,	WORLD_64,	WORLD_65,		WORLD_66,	WORLD_67,	WORLD_68,	WORLD_69,	WORLD_70	)
-	KE8(WORLD_71,	WORLD_72,	WORLD_73,		WORLD_74,	WORLD_75,	WORLD_76,	WORLD_77,	WORLD_78	)
-	KE8(WORLD_79,	WORLD_80,	WORLD_81,		WORLD_82,	WORLD_83,	WORLD_84,	WORLD_85,	WORLD_86	)
-	KE8(WORLD_87,	WORLD_88,	WORLD_89,		WORLD_90,	WORLD_91,	WORLD_92,	WORLD_93,	WORLD_94	)
-	KE8(WORLD_95,	KP0,		KP1,			KP2,		KP3,		KP4,		KP5,		KP6			)
-	KE8(KP7,		KP8,		KP9,			KP_PERIOD,	KP_DIVIDE,	KP_MULTIPLY,KP_MINUS,	KP_PLUS		)
-	KE8(KP_ENTER,	KP_EQUALS,	UP,				DOWN,		RIGHT,		LEFT,		INSERT,		HOME		)
-	KE8(END,		PAGEUP,		PAGEDOWN,		F1,			F2,			F3,			F4,			F5			)
-	KE8(F6,			F7,			F8,				F9,			F10,		F11,		F12,		F13			)
-	KE8(F14,		F15,		NUMLOCK,		CAPSLOCK,	SCROLLOCK,	RSHIFT,		LSHIFT,		RCTRL		)
-	KE8(LCTRL,		RALT,		LALT,			RMETA,		LMETA,		LSUPER,		RSUPER,		MODE		)
-	KE8(COMPOSE,	HELP,		PRINT,			SYSREQ,		BREAK,		MENU,		POWER,		EURO		)
+	KE8(UNKNOWN,    FIRST,      BACKSPACE,      TAB,        CLEAR,      RETURN,     PAUSE,      ESCAPE      )
+	KE8(SPACE,      EXCLAIM,    QUOTEDBL,       HASH,       DOLLAR,     AMPERSAND,  QUOTE,      LEFTPAREN   )
+	KE8(RIGHTPAREN, ASTERISK,   PLUS,           COMMA,      MINUS,      PERIOD,     SLASH,      0           )
+	KE8(1,          2,          3,              4,          5,          6,          7,          8           )
+	KE8(9,          COLON,      SEMICOLON,      LESS,       EQUALS,     GREATER,    QUESTION,   AT          )
+	KE8(LEFTBRACKET,BACKSLASH,  RIGHTBRACKET,   CARET,      UNDERSCORE, BACKQUOTE,  a,          b           )
+	KE8(c,          d,          e,              f,          g,          h,          i,          j           )
+	KE8(k,          l,          m,              n,          o,          p,          q,          r           )
+	KE8(s,          t,          u,              v,          w,          x,          y,          z           )
+	KE8(DELETE,     WORLD_0,    WORLD_1,        WORLD_2,    WORLD_3,    WORLD_4,    WORLD_5,    WORLD_6     )
+	KE8(WORLD_7,    WORLD_8,    WORLD_9,        WORLD_10,   WORLD_11,   WORLD_12,   WORLD_13,   WORLD_14    )
+	KE8(WORLD_15,   WORLD_16,   WORLD_17,       WORLD_18,   WORLD_19,   WORLD_20,   WORLD_21,   WORLD_22    )
+	KE8(WORLD_23,   WORLD_24,   WORLD_25,       WORLD_26,   WORLD_27,   WORLD_28,   WORLD_29,   WORLD_30    )
+	KE8(WORLD_31,   WORLD_32,   WORLD_33,       WORLD_34,   WORLD_35,   WORLD_36,   WORLD_37,   WORLD_38    )
+	KE8(WORLD_39,   WORLD_40,   WORLD_41,       WORLD_42,   WORLD_43,   WORLD_44,   WORLD_45,   WORLD_46    )
+	KE8(WORLD_47,   WORLD_48,   WORLD_49,       WORLD_50,   WORLD_51,   WORLD_52,   WORLD_53,   WORLD_54    )
+	KE8(WORLD_55,   WORLD_56,   WORLD_57,       WORLD_58,   WORLD_59,   WORLD_60,   WORLD_61,   WORLD_62    )
+	KE8(WORLD_63,   WORLD_64,   WORLD_65,       WORLD_66,   WORLD_67,   WORLD_68,   WORLD_69,   WORLD_70    )
+	KE8(WORLD_71,   WORLD_72,   WORLD_73,       WORLD_74,   WORLD_75,   WORLD_76,   WORLD_77,   WORLD_78    )
+	KE8(WORLD_79,   WORLD_80,   WORLD_81,       WORLD_82,   WORLD_83,   WORLD_84,   WORLD_85,   WORLD_86    )
+	KE8(WORLD_87,   WORLD_88,   WORLD_89,       WORLD_90,   WORLD_91,   WORLD_92,   WORLD_93,   WORLD_94    )
+	KE8(WORLD_95,   KP0,        KP1,            KP2,        KP3,        KP4,        KP5,        KP6         )
+	KE8(KP7,        KP8,        KP9,            KP_PERIOD,  KP_DIVIDE,  KP_MULTIPLY,KP_MINUS,   KP_PLUS     )
+	KE8(KP_ENTER,   KP_EQUALS,  UP,             DOWN,       RIGHT,      LEFT,       INSERT,     HOME        )
+	KE8(END,        PAGEUP,     PAGEDOWN,       F1,         F2,         F3,         F4,         F5          )
+	KE8(F6,         F7,         F8,             F9,         F10,        F11,        F12,        F13         )
+	KE8(F14,        F15,        NUMLOCK,        CAPSLOCK,   SCROLLOCK,  RSHIFT,     LSHIFT,     RCTRL       )
+	KE8(LCTRL,      RALT,       LALT,           RMETA,      LMETA,      LSUPER,     RSUPER,     MODE        )
+	KE8(COMPOSE,    HELP,       PRINT,          SYSREQ,     BREAK,      MENU,       POWER,      EURO        )
 	KE(UNDO)
 	KE(LAST)
 	{-1, ""}
 };
 #endif
-
 
 //============================================================
 //  INLINE FUNCTIONS
@@ -661,14 +691,14 @@ static device_info *devmap_class_register(running_machine &machine, device_map_t
 		{
 			sprintf(tempname, "NC%d", index);
 			devinfo = generic_device_alloc(devlist, tempname);
-			devinfo->device = input_device_add(machine, devclass, devinfo->name, devinfo);
+			devinfo->device = machine.input().device_class(devclass).add_device(devinfo->name, devinfo);
 		}
 		return NULL;
 	}
 	else
 	{
 		devinfo = generic_device_alloc(devlist, devmap->map[index].name);
-		devinfo->device = input_device_add(machine, devclass, devinfo->name, devinfo);
+		devinfo->device = machine.input().device_class(devclass).add_device(devinfo->name, devinfo);
 	}
 	return devinfo;
 }
@@ -681,7 +711,7 @@ static device_info *devmap_class_register(running_machine &machine, device_map_t
 static void sdlinput_register_joysticks(running_machine &machine)
 {
 	device_info *devinfo;
-	int physical_stick, axis, button, hat, stick;
+	int physical_stick, axis, button, hat, stick, ball;
 	char tempname[512];
 	SDL_Joystick *joy;
 
@@ -709,7 +739,7 @@ static void sdlinput_register_joysticks(running_machine &machine)
 		devinfo->joystick.device = joy;
 
 		mame_printf_verbose("Joystick: %s\n", devinfo->name);
-		mame_printf_verbose("Joystick:   ...  %d axes, %d buttons %d hats\n", SDL_JoystickNumAxes(joy), SDL_JoystickNumButtons(joy), SDL_JoystickNumHats(joy));
+		mame_printf_verbose("Joystick:   ...  %d axes, %d buttons %d hats %d balls\n", SDL_JoystickNumAxes(joy), SDL_JoystickNumButtons(joy), SDL_JoystickNumHats(joy), SDL_JoystickNumBalls(joy));
 		mame_printf_verbose("Joystick:   ...  Physical id %d mapped to logical id %d\n", physical_stick, stick);
 
 		// loop over all axes
@@ -725,7 +755,7 @@ static void sdlinput_register_joysticks(running_machine &machine)
 				itemid = ITEM_ID_OTHER_AXIS_ABSOLUTE;
 
 			sprintf(tempname, "A%d %s", axis, devinfo->name);
-			input_device_item_add(devinfo->device, tempname, &devinfo->joystick.axes[axis], itemid, generic_axis_get_state);
+			devinfo->device->add_item(tempname, itemid, generic_axis_get_state, &devinfo->joystick.axes[axis]);
 		}
 
 		// loop over all buttons
@@ -743,7 +773,7 @@ static void sdlinput_register_joysticks(running_machine &machine)
 				itemid = ITEM_ID_OTHER_SWITCH;
 
 			sprintf(tempname, "button %d", button);
-			input_device_item_add(devinfo->device, tempname, &devinfo->joystick.buttons[button], itemid, generic_button_get_state);
+			devinfo->device->add_item(tempname, itemid, generic_button_get_state, &devinfo->joystick.buttons[button]);
 		}
 
 		// loop over all hats
@@ -753,16 +783,32 @@ static void sdlinput_register_joysticks(running_machine &machine)
 
 			sprintf(tempname, "hat %d Up", hat);
 			itemid = (input_item_id) ((hat < INPUT_MAX_HATS) ? ITEM_ID_HAT1UP + 4 * hat : ITEM_ID_OTHER_SWITCH);
-			input_device_item_add(devinfo->device, tempname, &devinfo->joystick.hatsU[hat], itemid, generic_button_get_state);
+			devinfo->device->add_item(tempname, itemid, generic_button_get_state, &devinfo->joystick.hatsU[hat]);
 			sprintf(tempname, "hat %d Down", hat);
 			itemid = (input_item_id) ((hat < INPUT_MAX_HATS) ? ITEM_ID_HAT1DOWN + 4 * hat : ITEM_ID_OTHER_SWITCH);
-			input_device_item_add(devinfo->device, tempname, &devinfo->joystick.hatsD[hat], itemid, generic_button_get_state);
+			devinfo->device->add_item(tempname, itemid, generic_button_get_state, &devinfo->joystick.hatsD[hat]);
 			sprintf(tempname, "hat %d Left", hat);
 			itemid = (input_item_id) ((hat < INPUT_MAX_HATS) ? ITEM_ID_HAT1LEFT + 4 * hat : ITEM_ID_OTHER_SWITCH);
-			input_device_item_add(devinfo->device, tempname, &devinfo->joystick.hatsL[hat], itemid, generic_button_get_state);
+			devinfo->device->add_item(tempname, itemid, generic_button_get_state, &devinfo->joystick.hatsL[hat]);
 			sprintf(tempname, "hat %d Right", hat);
 			itemid = (input_item_id) ((hat < INPUT_MAX_HATS) ? ITEM_ID_HAT1RIGHT + 4 * hat : ITEM_ID_OTHER_SWITCH);
-	    	input_device_item_add(devinfo->device, tempname, &devinfo->joystick.hatsR[hat], itemid, generic_button_get_state);
+			devinfo->device->add_item(tempname, itemid, generic_button_get_state, &devinfo->joystick.hatsR[hat]);
+		}
+
+		// loop over all (track)balls
+		for (ball = 0; ball < SDL_JoystickNumBalls(joy); ball++)
+		{
+			int itemid;
+
+			if (ball * 2 < INPUT_MAX_ADD_RELATIVE)
+				itemid = ITEM_ID_ADD_RELATIVE1 + ball * 2;
+			else
+				itemid = ITEM_ID_OTHER_AXIS_RELATIVE;
+
+			sprintf(tempname, "R%d %s", ball * 2, devinfo->name);
+			devinfo->device->add_item(tempname, (input_item_id) itemid, generic_axis_get_state, &devinfo->joystick.balls[ball * 2]);
+			sprintf(tempname, "R%d %s", ball * 2 + 1, devinfo->name);
+			devinfo->device->add_item(tempname, (input_item_id) (itemid + 1), generic_axis_get_state, &devinfo->joystick.balls[ball * 2 + 1]);
 		}
 	}
 	mame_printf_verbose("Joystick: End initialization\n");
@@ -790,7 +836,7 @@ static void sdlinput_deregister_joysticks(running_machine &machine)
 //  sdlinput_register_mice
 //============================================================
 
-#if (!SDL13_POST_HG4464 && SDL_VERSION_ATLEAST(1,3,0))
+#if defined(SDL2_MULTIAPI) && 0
 static void sdlinput_register_mice(running_machine &machine)
 {
 	int index, physical_mouse;
@@ -820,9 +866,9 @@ static void sdlinput_register_mice(running_machine &machine)
 
 		// add the axes
 		sprintf(defname, "X %s", devinfo->name);
-		input_device_item_add(devinfo->device, defname, &devinfo->mouse.lX, ITEM_ID_XAXIS, generic_axis_get_state);
+		devinfo->device->add_item(defname, ITEM_ID_XAXIS, generic_axis_get_state, &devinfo->mouse.lX);
 		sprintf(defname, "Y %s", devinfo->name);
-		input_device_item_add(devinfo->device, defname, &devinfo->mouse.lY, ITEM_ID_YAXIS, generic_axis_get_state);
+		devinfo->device->add_item(defname, ITEM_ID_YAXIS, generic_axis_get_state, &devinfo->mouse.lY);
 
 		for (button = 0; button < 4; button++)
 		{
@@ -831,7 +877,7 @@ static void sdlinput_register_mice(running_machine &machine)
 			sprintf(defname, "B%d", button + 1);
 			itemid = (input_item_id) (ITEM_ID_BUTTON1+button);
 
-			input_device_item_add(devinfo->device, defname, &devinfo->mouse.buttons[button], itemid, generic_button_get_state);
+			devinfo->device->add_item(defname, itemid, generic_button_get_state, &devinfo->mouse.buttons[button]);
 		}
 
 		if (0 && mouse_enabled)
@@ -853,20 +899,20 @@ static void sdlinput_register_mice(running_machine &machine)
 
 	// SDL 1.2 has only 1 mouse - 1.3+ will also change that, so revisit this then
 	devinfo = generic_device_alloc(&mouse_list, "System mouse");
-	devinfo->device = input_device_add(machine, DEVICE_CLASS_MOUSE, devinfo->name, devinfo);
+	devinfo->device = machine.input().device_class(DEVICE_CLASS_MOUSE).add_device(devinfo->name, devinfo);
 
 	mouse_enabled = machine.options().mouse();
 
 	// add the axes
-	input_device_item_add(devinfo->device, "X", &devinfo->mouse.lX, ITEM_ID_XAXIS, generic_axis_get_state);
-	input_device_item_add(devinfo->device, "Y", &devinfo->mouse.lY, ITEM_ID_YAXIS, generic_axis_get_state);
+	devinfo->device->add_item("X", ITEM_ID_XAXIS, generic_axis_get_state, &devinfo->mouse.lX);
+	devinfo->device->add_item("Y", ITEM_ID_YAXIS, generic_axis_get_state, &devinfo->mouse.lY);
 
 	for (button = 0; button < 4; button++)
 	{
 		input_item_id itemid = (input_item_id) (ITEM_ID_BUTTON1+button);
 		sprintf(defname, "B%d", button + 1);
 
-		input_device_item_add(devinfo->device, defname, &devinfo->mouse.buttons[button], itemid, generic_button_get_state);
+		devinfo->device->add_item(defname, itemid, generic_button_get_state, &devinfo->mouse.buttons[button]);
 	}
 
 	mame_printf_verbose("Mouse: Registered %s\n", devinfo->name);
@@ -874,6 +920,225 @@ static void sdlinput_register_mice(running_machine &machine)
 }
 #endif
 
+#if (USE_XINPUT)
+//============================================================
+//  lightgun helpers: copy-past from xinfo
+//============================================================
+
+XDeviceInfo*
+find_device_info(Display    *display,
+			char       *name,
+			Bool       only_extended)
+{
+	XDeviceInfo *devices;
+	XDeviceInfo *found = NULL;
+	int     loop;
+	int     num_devices;
+	int     len = strlen(name);
+	Bool    is_id = True;
+	XID     id = (XID)-1;
+
+	for(loop=0; loop<len; loop++) {
+	if (!isdigit(name[loop])) {
+		is_id = False;
+		break;
+	}
+	}
+
+	if (is_id) {
+	id = atoi(name);
+	}
+
+	devices = XListInputDevices(display, &num_devices);
+
+	for(loop=0; loop<num_devices; loop++) {
+	if ((!only_extended || (devices[loop].use >= IsXExtensionDevice)) &&
+		((!is_id && strcmp(devices[loop].name, name) == 0) ||
+			(is_id && devices[loop].id == id))) {
+		if (found) {
+			fprintf(stderr,
+					"Warning: There are multiple devices named \"%s\".\n"
+					"To ensure the correct one is selected, please use "
+					"the device ID instead.\n\n", name);
+		} else {
+		found = &devices[loop];
+		}
+	}
+	}
+	return found;
+}
+
+//Copypasted from xinfo
+static int
+register_events(Display     *dpy,
+		XDeviceInfo *info,
+		char        *dev_name,
+		Bool        handle_proximity)
+{
+	int         number = 0; /* number of events registered */
+	XEventClass     event_list[7];
+	int         i;
+	XDevice     *device;
+	Window      root_win;
+	unsigned long   screen;
+	XInputClassInfo *ip;
+
+	screen = DefaultScreen(dpy);
+	root_win = RootWindow(dpy, screen);
+
+	device = XOpenDevice(dpy, info->id);
+
+	if (!device) {
+	fprintf(stderr, "unable to open device %s\n", dev_name);
+	return 0;
+	}
+
+	if (device->num_classes > 0) {
+	for (ip = device->classes, i=0; i<info->num_classes; ip++, i++) {
+		switch (ip->input_class) {
+		case KeyClass:
+		DeviceKeyPress(device, key_press_type, event_list[number]); number++;
+		DeviceKeyRelease(device, key_release_type, event_list[number]); number++;
+		break;
+
+		case ButtonClass:
+		DeviceButtonPress(device, button_press_type, event_list[number]); number++;
+		DeviceButtonRelease(device, button_release_type, event_list[number]); number++;
+		break;
+
+		case ValuatorClass:
+		DeviceMotionNotify(device, motion_type, event_list[number]); number++;
+		fprintf(stderr, "Motion = %i\n",motion_type);
+		if (handle_proximity) {
+			ProximityIn(device, proximity_in_type, event_list[number]); number++;
+			ProximityOut(device, proximity_out_type, event_list[number]); number++;
+		}
+		break;
+
+		default:
+		fprintf(stderr, "unknown class\n");
+		break;
+		}
+	}
+
+	if (XSelectExtensionEvent(dpy, root_win, event_list, number)) {
+		fprintf(stderr, "error selecting extended events\n");
+		return 0;
+	}
+	}
+	return number;
+}
+
+//============================================================
+//  sdlinput_register_lightguns
+//============================================================
+
+static void sdlinput_register_lightguns(running_machine &machine)
+{
+	int index;
+	XExtensionVersion   *version;
+
+	lightgun_enabled = machine.options().lightgun();
+	devmap_init(machine, &lightgun_map, SDLOPTION_LIGHTGUNINDEX, 8, "Lightgun mapping");
+
+	XDisplay = XOpenDisplay(NULL);
+
+	if (XDisplay == NULL) {
+		fprintf(stderr, "Unable to connect to X server\n");
+		return;
+	}
+
+	version = XGetExtensionVersion(XDisplay, INAME);
+
+	if (!version || (version == (XExtensionVersion*) NoSuchExtension)) {
+		fprintf(stderr, "xinput extension not available!\n");
+		return;
+	}
+
+
+	for (index=0; index<8; index++) {
+		XDeviceInfo *info;
+		if (strlen(lightgun_map.map[index].name)!=0) {
+		device_info *devinfo;
+		char *name=lightgun_map.map[index].name;
+		char defname[512];
+		devinfo = devmap_class_register(machine, &lightgun_map, index, &lightgun_list, DEVICE_CLASS_LIGHTGUN);
+		fprintf(stderr, "%i: %s\n",index, name);
+		info=find_device_info(XDisplay, name, 0);
+		if (!info) continue;
+
+		//Grab device info and translate to stuff mame can use
+		if (info->num_classes > 0) {
+			XAnyClassPtr any = (XAnyClassPtr) (info->inputclassinfo);
+			int i;
+			for (i=0; i<info->num_classes; i++) {
+			int button;
+			XValuatorInfoPtr v;
+			XAxisInfoPtr a;
+			int j;
+			XButtonInfoPtr b;
+#if defined(__cplusplus) || defined(c_plusplus)
+						switch (any->c_class) {
+#else
+						switch (any->class) {
+#endif
+			case ButtonClass:
+				b = (XButtonInfoPtr) any;
+				for (button = 0; button < b->num_buttons; button++)
+				{
+				input_item_id itemid;
+				itemid = (input_item_id) (ITEM_ID_BUTTON1 + button);
+				sprintf(defname, "B%d", button + 1);
+				devinfo->device->add_item(defname, itemid, generic_button_get_state, &devinfo->lightgun.buttons[button]);
+				}
+				break;
+			case ValuatorClass:
+				v = (XValuatorInfoPtr) any;
+				a = (XAxisInfoPtr) ((char *) v + sizeof (XValuatorInfo));
+				for (j=0; j<v->num_axes; j++, a++) {
+				if (j==0) {
+#if (USE_XINPUT_DEBUG)
+					fprintf(stderr, "For index %d: Set minx=%d, maxx=%d\n",
+							index,
+							a->min_value, a->max_value);
+#endif
+					devinfo->lightgun.maxx=a->max_value;
+					devinfo->lightgun.minx=a->min_value;
+				}
+				if (j==1) {
+#if (USE_XINPUT_DEBUG)
+					fprintf(stderr, "For index %d: Set miny=%d, maxy=%d\n",
+							index,
+							a->min_value, a->max_value);
+#endif
+					devinfo->lightgun.maxy=a->max_value;
+					devinfo->lightgun.miny=a->min_value;
+				}
+				}
+				break;
+			}
+			any = (XAnyClassPtr) ((char *) any + any->length);
+			}
+		}
+
+
+		sprintf(defname, "X %s", devinfo->name);
+		devinfo->device->add_item(defname, ITEM_ID_XAXIS, generic_axis_get_state, &devinfo->lightgun.lX);
+		sprintf(defname, "Y %s", devinfo->name);
+		devinfo->device->add_item(defname, ITEM_ID_YAXIS, generic_axis_get_state, &devinfo->lightgun.lY);
+
+
+		devinfo->lightgun.deviceid=info->id;
+		if (!info) {
+			fprintf(stderr, "Can't find device %s!\n", lightgun_map.map[index].name);
+		} else {
+			fprintf(stderr, "Device %i: Registered %i events.\n",(int)info->id, register_events(XDisplay, info, lightgun_map.map[index].name, 0));
+		}
+		}
+	}
+	mame_printf_verbose("Lightgun: End initialization\n");
+}
+#endif
 
 //============================================================
 //  lookup_sdl_code
@@ -903,7 +1168,7 @@ static int lookup_mame_index(const char *scode)
 
 	index=-1;
 	i=0;
-	while (sdl_key_trans_table[i].mame_key >= 0)
+	while (sdl_key_trans_table[i].mame_key != ITEM_ID_INVALID)
 	{
 		if (!strcmp(scode, sdl_key_trans_table[i].mame_key_name))
 		{
@@ -915,14 +1180,14 @@ static int lookup_mame_index(const char *scode)
 	return index;
 }
 
-static int lookup_mame_code(const char *scode)
+static input_item_id lookup_mame_code(const char *scode)
 {
 	int index;
 	index = lookup_mame_index(scode);
 	if (index >= 0)
 		return sdl_key_trans_table[index].mame_key;
 	else
-		return -1;
+		return ITEM_ID_INVALID;
 }
 
 
@@ -938,9 +1203,10 @@ static kt_table * sdlinput_read_keymap(running_machine &machine)
 	int line = 1;
 	int index,i, sk, vk, ak;
 	char buf[256];
-	char mks[21];
-	char sks[21];
-	char kns[21];
+	char mks[41];
+	char sks[41];
+	char kns[41];
+	int  sdl2section=0;
 
 	if (!machine.options().bool_value(SDLOPTION_KEYMAP))
 		return sdl_key_trans_table;
@@ -960,34 +1226,41 @@ static kt_table * sdlinput_read_keymap(running_machine &machine)
 
 	while (!feof(keymap_file))
 	{
-		fgets(buf, 255, keymap_file);
-		if (*buf && buf[0] && buf[0] != '#')
+		char *ret = fgets(buf, 255, keymap_file);
+		if (ret && buf[0] != '\n' && buf[0] != '#')
 		{
 			buf[255]=0;
 			i=strlen(buf);
 			if (i && buf[i-1] == '\n')
 				buf[i-1] = 0;
-			mks[0]=0;
-			sks[0]=0;
-			memset(kns, 0, ARRAY_LENGTH(kns));
-			sscanf(buf, "%20s %20s %x %x %20c\n",
-					mks, sks, &vk, &ak, kns);
-
-			index=lookup_mame_index(mks);
-			sk = lookup_sdl_code(sks);
-
-			if ( sk >= 0 && index >=0)
+			if (strncmp(buf,"[SDL2]",6) == 0)
 			{
-				key_trans_table[index].sdl_key = sk;
-				// vk and ak are not really needed
-				//key_trans_table[index][VIRTUAL_KEY] = vk;
-				//key_trans_table[index][ASCII_KEY] = ak;
-				key_trans_table[index].ui_name = auto_alloc_array(machine, char, strlen(kns)+1);
-				strcpy(key_trans_table[index].ui_name, kns);
-				mame_printf_verbose("Keymap: Mapped <%s> to <%s> with ui-text <%s>\n", sks, mks, kns);
+				sdl2section = 1;
 			}
-			else
-				mame_printf_warning("Keymap: Error on line %d - %s key not found: %s\n", line, (sk<0) ? "sdl" : "mame", buf);
+			else if (((SDLMAME_SDL2) ^ sdl2section) == 0)
+			{
+				mks[0]=0;
+				sks[0]=0;
+				memset(kns, 0, ARRAY_LENGTH(kns));
+				sscanf(buf, "%40s %40s %x %x %40c\n",
+						mks, sks, &vk, &ak, kns);
+
+				index=lookup_mame_index(mks);
+				sk = lookup_sdl_code(sks);
+
+				if ( sk >= 0 && index >=0)
+				{
+					key_trans_table[index].sdl_key = sk;
+					// vk and ak are not really needed
+					//key_trans_table[index][VIRTUAL_KEY] = vk;
+					//key_trans_table[index][ASCII_KEY] = ak;
+					key_trans_table[index].ui_name = auto_alloc_array(machine, char, strlen(kns)+1);
+					strcpy(key_trans_table[index].ui_name, kns);
+					mame_printf_verbose("Keymap: Mapped <%s> to <%s> with ui-text <%s>\n", sks, mks, kns);
+				}
+				else
+					mame_printf_warning("Keymap: Error on line %d - %s key not found: %s\n", line, (sk<0) ? "sdl" : "mame", buf);
+			}
 		}
 		line++;
 	}
@@ -1002,7 +1275,7 @@ static kt_table * sdlinput_read_keymap(running_machine &machine)
 //  sdlinput_register_keyboards
 //============================================================
 
-#if ((1 ||!SDL13_POST_HG4464) && SDL_VERSION_ATLEAST(1,3,0))
+#ifdef SDL2_MULTIAPI
 static void sdlinput_register_keyboards(running_machine &machine)
 {
 	int physical_keyboard;
@@ -1035,17 +1308,17 @@ static void sdlinput_register_keyboards(running_machine &machine)
 			continue;
 
 		// populate it
-		for (keynum = 0; sdl_key_trans_table[keynum].mame_key >= 0; keynum++)
+		for (keynum = 0; sdl_key_trans_table[keynum].mame_key!= ITEM_ID_INVALID; keynum++)
 		{
 			input_item_id itemid;
 
-			itemid = (input_item_id) key_trans_table[keynum].mame_key;
+			itemid = key_trans_table[keynum].mame_key;
 
 			// generate the default / modified name
 			snprintf(defname, sizeof(defname)-1, "%s", key_trans_table[keynum].ui_name);
 
 			// add the item to the device
-			input_device_item_add(devinfo->device, defname, &devinfo->keyboard.state[OSD_SDL_INDEX(key_trans_table[keynum].sdl_key)], itemid, generic_button_get_state);
+			devinfo->device->add_item(defname, itemid, generic_button_get_state, &devinfo->keyboard.state[OSD_SDL_INDEX(key_trans_table[keynum].sdl_key)]);
 		}
 
 		mame_printf_verbose("Keyboard: Registered %s\n", devinfo->name);
@@ -1069,21 +1342,21 @@ static void sdlinput_register_keyboards(running_machine &machine)
 	// SDL 1.2 only has 1 keyboard (1.3+ will have multiple, this must be revisited then)
 	// add it now
 	devinfo = generic_device_alloc(&keyboard_list, "System keyboard");
-	devinfo->device = input_device_add(machine, DEVICE_CLASS_KEYBOARD, devinfo->name, devinfo);
+	devinfo->device = machine.input().device_class(DEVICE_CLASS_KEYBOARD).add_device(devinfo->name, devinfo);
 
 	// populate it
-	for (keynum = 0; sdl_key_trans_table[keynum].mame_key >= 0; keynum++)
+	for (keynum = 0; sdl_key_trans_table[keynum].mame_key != ITEM_ID_INVALID; keynum++)
 	{
 		input_item_id itemid;
 
-		itemid = (input_item_id) key_trans_table[keynum].mame_key;
+		itemid = key_trans_table[keynum].mame_key;
 
 		// generate the default / modified name
 		snprintf(defname, sizeof(defname)-1, "%s", key_trans_table[keynum].ui_name);
 
 		// add the item to the device
 //      printf("Keynum %d => sdl key %d\n", keynum, OSD_SDL_INDEX(key_trans_table[keynum].sdl_key));
-		input_device_item_add(devinfo->device, defname, &devinfo->keyboard.state[OSD_SDL_INDEX(key_trans_table[keynum].sdl_key)], itemid, generic_button_get_state);
+		devinfo->device->add_item(defname, itemid, generic_button_get_state, &devinfo->keyboard.state[OSD_SDL_INDEX(key_trans_table[keynum].sdl_key)]);
 	}
 
 	mame_printf_verbose("Keyboard: Registered %s\n", devinfo->name);
@@ -1105,9 +1378,9 @@ void sdlinput_init(running_machine &machine)
 	app_has_mouse_focus = 1;
 
 	// we need pause and exit callbacks
-	machine.add_notifier(MACHINE_NOTIFY_PAUSE, sdlinput_pause);
-	machine.add_notifier(MACHINE_NOTIFY_RESUME, sdlinput_resume);
-	machine.add_notifier(MACHINE_NOTIFY_EXIT, sdlinput_exit);
+	machine.add_notifier(MACHINE_NOTIFY_PAUSE, machine_notify_delegate(FUNC(sdlinput_pause), &machine));
+	machine.add_notifier(MACHINE_NOTIFY_RESUME, machine_notify_delegate(FUNC(sdlinput_resume), &machine));
+	machine.add_notifier(MACHINE_NOTIFY_EXIT, machine_notify_delegate(FUNC(sdlinput_exit), &machine));
 
 	// allocate a lock for input synchronizations
 	input_lock = osd_lock_alloc();
@@ -1118,6 +1391,11 @@ void sdlinput_init(running_machine &machine)
 
 	// register the mice
 	sdlinput_register_mice(machine);
+
+#if (USE_XINPUT)
+	// register the lightguns
+	sdlinput_register_lightguns(machine);
+#endif
 
 	if (machine.debug_flags & DEBUG_FLAG_OSD_ENABLED)
 	{
@@ -1135,7 +1413,9 @@ void sdlinput_init(running_machine &machine)
 	device_list_reset_devices(keyboard_list);
 	device_list_reset_devices(mouse_list);
 	device_list_reset_devices(joystick_list);
-
+#if (USE_XINPUT)
+	device_list_reset_devices(lightgun_list);
+#endif
 }
 
 
@@ -1188,12 +1468,64 @@ sdl_window_info *sdlinput_get_focus_window(running_machine &machine)
 		return sdl_window_list;
 }
 
+#if (USE_XINPUT)
+device_info *get_lightgun_info_for_deviceid(XID deviceid) {
+	device_info *devinfo;
+	int index;
+	//Find lightgun according to device id
+	for (index=0; ; index++) {
+		devinfo = generic_device_find_index(lightgun_list, index);
+		if (devinfo==NULL) break;
+		if (devinfo->lightgun.deviceid==deviceid) break;
+	}
+	return devinfo;
+}
+
+INT32 normalize_absolute_axis(INT32 raw, INT32 rawmin, INT32 rawmax)
+{
+	INT32 rv;
+
+	INT32 center = ((INT64)rawmax + (INT64)rawmin) / 2;
+
+	// make sure we have valid data
+	if (rawmin >= rawmax)
+	{
+		rv = raw;
+		goto out;
+	}
+
+	// above center
+	if (raw >= center)
+	{
+		INT32 result = (INT64)(raw - center) * (INT64)INPUT_ABSOLUTE_MAX / (INT64)(rawmax - center);
+		rv = MIN(result, INPUT_ABSOLUTE_MAX);
+		goto out;
+	}
+
+	// below center
+	else
+	{
+		INT32 result = -((INT64)(center - raw) * (INT64)-INPUT_ABSOLUTE_MIN / (INT64)(center - rawmin));
+		rv = MAX(result, INPUT_ABSOLUTE_MIN);
+		goto out;
+	}
+
+	out:
+
+#if (USE_XINPUT_DEBUG)
+	fprintf(stderr, "raw: %d, rawmin: %d, rawmax: %d, center: %d, rv: %d, ABS_MIN: %d, ABS_MAX: %d\n",
+			raw, rawmin, rawmax, center, rv, INPUT_ABSOLUTE_MIN, INPUT_ABSOLUTE_MAX);
+#endif
+
+	return rv;
+}
+#endif
 
 //============================================================
 //  sdlinput_poll
 //============================================================
 
-#if (SDL_VERSION_ATLEAST(1,3,0))
+#if (SDLMAME_SDL2)
 INLINE sdl_window_info * window_from_id(Uint32 windowID)
 {
 	sdl_window_info *w;
@@ -1238,7 +1570,7 @@ void sdlinput_process_events_buf(running_machine &machine)
 	if (SDLMAME_EVENTS_IN_WORKER_THREAD)
 	{
 		osd_lock_acquire(input_lock);
-	#if (SDL_VERSION_ATLEAST(1,3,0))
+	#if (SDLMAME_SDL2)
 		/* Make sure we get all pending events */
 		SDL_PumpEvents();
 	#endif
@@ -1261,9 +1593,13 @@ void sdlinput_poll(running_machine &machine)
 	int index;
 
 	// only for SDLMAME_EVENTS_IN_WORKER_THREAD
-	SDL_Event			loc_event_buf[MAX_BUF_EVENTS];
-	int					loc_event_buf_count;
+	SDL_Event           loc_event_buf[MAX_BUF_EVENTS];
+	int                 loc_event_buf_count;
 	int bufp;
+
+#if (USE_XINPUT)
+	XEvent xevent;
+#endif
 
 	for (index=0; ;index++)
 	{
@@ -1273,6 +1609,102 @@ void sdlinput_poll(running_machine &machine)
 		devinfo->mouse.lX = 0;
 		devinfo->mouse.lY = 0;
 	}
+
+#if (USE_XINPUT)
+	//Get XInput events
+	while (XPending(XDisplay)!=0)
+	{
+		XNextEvent(XDisplay, &xevent);
+		if (xevent.type==motion_type)
+		{
+			XDeviceMotionEvent *motion = (XDeviceMotionEvent *) &xevent;
+
+#if (USE_XINPUT_DEBUG)
+			/*
+			 * print a lot of debug informations of the motion event(s).
+			 */
+			fprintf(stderr,
+					"XDeviceMotionEvent:\n"
+					"  type: %d\n"
+					"  serial: %lu\n"
+					"  send_event: %d\n"
+					"  display: %p\n"
+					"  window: --\n"
+					"  deviceid: %lu\n"
+					"  root: --\n"
+					"  subwindow: --\n"
+					"  time: --\n"
+					"  x: %d, y: %d\n"
+					"  x_root: %d, y_root: %d\n"
+					"  state: %u\n"
+					"  is_hint: %2.2X\n"
+					"  same_screen: %d\n"
+					"  device_state: %u\n"
+					"  axes_count: %2.2X\n"
+					"  first_axis: %2.2X\n"
+					"  axis_data[6]: {%d,%d,%d,%d,%d,%d}\n",
+					motion->type,
+					motion->serial,
+					motion->send_event,
+					motion->display,
+					/* motion->window, */
+					motion->deviceid,
+					/* motion->root */
+					/* motion->subwindow */
+					/* motion->time, */
+					motion->x, motion->y,
+					motion->x_root, motion->y_root,
+					motion->state,
+					motion->is_hint,
+					motion->same_screen,
+					motion->device_state,
+					motion->axes_count,
+					motion->first_axis,
+					motion->axis_data[0], motion->axis_data[1], motion->axis_data[2], motion->axis_data[3], motion->axis_data[4], motion->axis_data[5]
+					);
+#endif
+
+			devinfo=get_lightgun_info_for_deviceid(motion->deviceid);
+
+			/*
+			 * We have to check with axis will start on array index 0.
+			 * We have also to check the number of axes that are stored in the array.
+			 */
+			switch (motion->first_axis)
+			{
+				/*
+				 * Starting with x, check number of axis, if there is also the y axis stored.
+				 */
+				case 0:
+					if (motion->axes_count >= 1)
+					{
+						devinfo->lightgun.lX=normalize_absolute_axis(motion->axis_data[0], devinfo->lightgun.minx, devinfo->lightgun.maxx);
+						if (motion->axes_count >= 2)
+						{
+							devinfo->lightgun.lY=normalize_absolute_axis(motion->axis_data[1], devinfo->lightgun.miny, devinfo->lightgun.maxy);
+						}
+					}
+					break;
+
+				/*
+				 * Starting with y, ...
+				 */
+				case 1:
+					if (motion->axes_count >= 1)
+					{
+							devinfo->lightgun.lY=normalize_absolute_axis(motion->axis_data[0], devinfo->lightgun.miny, devinfo->lightgun.maxy);
+					}
+					break;
+			}
+		}
+		else if (xevent.type==button_press_type || xevent.type==button_release_type)
+		{
+			XDeviceButtonEvent *button = (XDeviceButtonEvent *) &xevent;
+			devinfo=get_lightgun_info_for_deviceid(button->deviceid);
+			devinfo->lightgun.buttons[button->button]=(xevent.type==button_press_type)?0x80:0;
+		}
+	}
+#endif
 
 	if (SDLMAME_EVENTS_IN_WORKER_THREAD)
 	{
@@ -1299,22 +1731,31 @@ void sdlinput_poll(running_machine &machine)
 		}
 
 		if (event.type == SDL_KEYUP &&
-		    event.key.keysym.sym == SDLK_CAPSLOCK)
+			event.key.keysym.sym == SDLK_CAPSLOCK)
 		{
 			/* more caps-lock hack */
 			event.type = SDL_KEYDOWN;
 		}
 		switch(event.type) {
 		case SDL_KEYDOWN:
+#ifdef SDL2_MULTIAPI
 			devinfo = generic_device_find_index( keyboard_list, keyboard_map.logical[event.key.which]);
 			//printf("Key down %d %d %s => %d %s (scrlock keycode is %d)\n", event.key.which, event.key.keysym.scancode, devinfo->name, OSD_SDL_INDEX_KEYSYM(&event.key.keysym), sdl_key_trans_table[event.key.keysym.scancode].mame_key_name, KEYCODE_SCRLOCK);
+#else
+			devinfo = generic_device_find_index( keyboard_list, keyboard_map.logical[0]);
+#endif
 			devinfo->keyboard.state[OSD_SDL_INDEX_KEYSYM(&event.key.keysym)] = 0x80;
-#if (!SDL_VERSION_ATLEAST(1,3,0))
+#if (!SDLMAME_SDL2)
 			ui_input_push_char_event(machine, sdl_window_list->target, (unicode_char) event.key.keysym.unicode);
 #endif
 			break;
 		case SDL_KEYUP:
+#ifdef SDL2_MULTIAPI
 			devinfo = generic_device_find_index( keyboard_list, keyboard_map.logical[event.key.which]);
+			//printf("Key up: %d %d\n", OSD_SDL_INDEX_KEYSYM(&event.key.keysym), event.key.which);
+#else
+			devinfo = generic_device_find_index( keyboard_list, keyboard_map.logical[0]);
+#endif
 			devinfo->keyboard.state[OSD_SDL_INDEX_KEYSYM(&event.key.keysym)] = 0x00;
 			break;
 		case SDL_JOYAXISMOTION:
@@ -1389,7 +1830,11 @@ void sdlinput_poll(running_machine &machine)
 			}
 			break;
 		case SDL_MOUSEBUTTONDOWN:
+#ifdef SDL2_MULTIAPI
 			devinfo = generic_device_find_index(mouse_list, mouse_map.logical[event.button.which]);
+#else
+			devinfo = generic_device_find_index(mouse_list, mouse_map.logical[0]);
+#endif
 			devinfo->mouse.buttons[event.button.button-1] = 0x80;
 			//printf("But down %d %d %d %d %s\n", event.button.which, event.button.button, event.button.x, event.button.y, devinfo->name);
 			if (event.button.button == 1)
@@ -1422,7 +1867,11 @@ void sdlinput_poll(running_machine &machine)
 			}
 			break;
 		case SDL_MOUSEBUTTONUP:
+#ifdef SDL2_MULTIAPI
 			devinfo = generic_device_find_index(mouse_list, mouse_map.logical[event.button.which]);
+#else
+			devinfo = generic_device_find_index(mouse_list, mouse_map.logical[0]);
+#endif
 			devinfo->mouse.buttons[event.button.button-1] = 0;
 			//printf("But up %d %d %d %d\n", event.button.which, event.button.button, event.button.x, event.button.y);
 
@@ -1438,8 +1887,12 @@ void sdlinput_poll(running_machine &machine)
 			}
 			break;
 		case SDL_MOUSEMOTION:
+#ifdef SDL2_MULTIAPI
 			devinfo = generic_device_find_index(mouse_list, mouse_map.logical[event.motion.which]);
-#if (SDL_VERSION_ATLEAST(1,3,0))
+#else
+			devinfo = generic_device_find_index(mouse_list, mouse_map.logical[0]);
+#endif
+#if (SDLMAME_SDL2)
 			// FIXME: may apply to 1.2 as well ...
 			//printf("Motion %d %d %d %s\n", event.motion.which, event.motion.x, event.motion.y, devinfo->name);
 			devinfo->mouse.lX += event.motion.xrel * INPUT_RELATIVE_PER_PIXEL;
@@ -1456,7 +1909,13 @@ void sdlinput_poll(running_machine &machine)
 					ui_input_push_mouse_move_event(machine, window->target, cx, cy);
 			}
 			break;
-#if (!SDL_VERSION_ATLEAST(1,3,0))
+		case SDL_JOYBALLMOTION:
+			devinfo = generic_device_find_index(joystick_list, joy_map.logical[event.jball.which]);
+			//printf("Ball %d %d\n", event.jball.xrel, event.jball.yrel);
+			devinfo->joystick.balls[event.jball.ball * 2] = event.jball.xrel * INPUT_RELATIVE_PER_PIXEL;
+			devinfo->joystick.balls[event.jball.ball * 2 + 1] = event.jball.yrel * INPUT_RELATIVE_PER_PIXEL;
+			break;
+#if (!SDLMAME_SDL2)
 		case SDL_APPMOUSEFOCUS:
 			app_has_mouse_focus = event.active.gain;
 			if (!event.active.gain)
@@ -1533,7 +1992,7 @@ void sdlinput_poll(running_machine &machine)
 #endif
 		}
 	}
-#if (SDL_VERSION_ATLEAST(1,3,0))
+#if (SDLMAME_SDL2)
 	resize_all_windows();
 #endif
 }
@@ -1549,7 +2008,7 @@ void  sdlinput_release_keys(running_machine &machine)
 	// FIXME: SDL >= 1.3 will nuke the window event buffer when
 	// a window is closed. This will leave keys in a pressed
 	// state when a window is destroyed and recreated.
-#if (SDL_VERSION_ATLEAST(1,3,0))
+#if (SDLMAME_SDL2)
 	device_info *devinfo;
 	int index;
 
@@ -1590,17 +2049,18 @@ int sdlinput_should_hide_mouse(running_machine &machine)
 //  customize_input_type_list
 //============================================================
 
-void sdl_osd_interface::customize_input_type_list(input_type_desc *typelist)
+void sdl_osd_interface::customize_input_type_list(simple_list<input_type_entry> &typelist)
 {
-	int mameid_code ,ui_code;
-	input_type_desc *typedesc;
+	input_item_id mameid_code;
+	input_code ui_code;
+	input_type_entry *entry;
 	const char*  uimode;
 	char fullmode[64];
 
 	// loop over the defaults
-	for (typedesc = typelist; typedesc != NULL; typedesc = typedesc->next)
+	for (entry = typelist.first(); entry != NULL; entry = entry->next())
 	{
-		switch (typedesc->type)
+		switch (entry->type())
 		{
 			// configurable UI mode switch
 			case IPT_UI_TOGGLE_UI:
@@ -1618,27 +2078,24 @@ void sdl_osd_interface::customize_input_type_list(input_type_desc *typelist)
 					snprintf(fullmode, 63, "ITEM_ID_%s", uimode);
 					mameid_code = lookup_mame_code(fullmode);
 				}
-				ui_code = INPUT_CODE(DEVICE_CLASS_KEYBOARD, 0, ITEM_CLASS_SWITCH, ITEM_MODIFIER_NONE, mameid_code);
-				input_seq_set_1(&typedesc->seq[SEQ_TYPE_STANDARD], ui_code);
+				ui_code = input_code(DEVICE_CLASS_KEYBOARD, 0, ITEM_CLASS_SWITCH, ITEM_MODIFIER_NONE, input_item_id(mameid_code));
+				entry->defseq(SEQ_TYPE_STANDARD).set(ui_code);
 				break;
 			// alt-enter for fullscreen
 			case IPT_OSD_1:
-				typedesc->token = "TOGGLE_FULLSCREEN";
-				typedesc->name = "Toggle Fullscreen";
-				input_seq_set_2(&typedesc->seq[SEQ_TYPE_STANDARD], KEYCODE_ENTER, KEYCODE_LALT);
+				entry->configure_osd("TOGGLE_FULLSCREEN", "Toggle Fullscreen");
+				entry->defseq(SEQ_TYPE_STANDARD).set(KEYCODE_ENTER, KEYCODE_LALT);
 				break;
 
 			// disable UI_SELECT when LALT is down, this stops selecting
 			// things in the menu when toggling fullscreen with LALT+ENTER
 /*          case IPT_UI_SELECT:
-                input_seq_set_3(&typedesc->seq[SEQ_TYPE_STANDARD], KEYCODE_ENTER, SEQCODE_NOT, KEYCODE_LALT);
+                entry->defseq(SEQ_TYPE_STANDARD).set(KEYCODE_ENTER, input_seq::not_code, KEYCODE_LALT);
                 break;*/
 
 			// page down for fastforward (must be OSD_3 as per src/emu/ui.c)
 			case IPT_UI_FAST_FORWARD:
-				typedesc->token = "FAST_FORWARD";
-				typedesc->name = "Fast Forward";
-				input_seq_set_1(&typedesc->seq[SEQ_TYPE_STANDARD], KEYCODE_PGDN);
+				entry->defseq(SEQ_TYPE_STANDARD).set(KEYCODE_PGDN);
 				break;
 
 			// OSD hotkeys use LCTRL and start at F3, they start at
@@ -1648,68 +2105,67 @@ void sdl_osd_interface::customize_input_type_list(input_type_desc *typelist)
 
 			// LCTRL-F3 to toggle fullstretch
 			case IPT_OSD_2:
-				typedesc->token = "TOGGLE_FULLSTRETCH";
-				typedesc->name = "Toggle Uneven stretch";
-				input_seq_set_2(&typedesc->seq[SEQ_TYPE_STANDARD], KEYCODE_F3, KEYCODE_LCONTROL);
+				entry->configure_osd("TOGGLE_FULLSTRETCH", "Toggle Uneven stretch");
+				entry->defseq(SEQ_TYPE_STANDARD).set(KEYCODE_F3, KEYCODE_LCONTROL);
 				break;
 			// add a Not lcrtl condition to the reset key
 			case IPT_UI_SOFT_RESET:
-				input_seq_set_5(&typedesc->seq[SEQ_TYPE_STANDARD], KEYCODE_F3, SEQCODE_NOT, KEYCODE_LCONTROL, SEQCODE_NOT, KEYCODE_LSHIFT);
+				entry->defseq(SEQ_TYPE_STANDARD).set(KEYCODE_F3, input_seq::not_code, KEYCODE_LCONTROL, input_seq::not_code, KEYCODE_LSHIFT);
 				break;
 
 			// LCTRL-F4 to toggle keep aspect
 			case IPT_OSD_4:
-				typedesc->token = "TOGGLE_KEEP_ASPECT";
-				typedesc->name = "Toggle Keepaspect";
-				input_seq_set_2(&typedesc->seq[SEQ_TYPE_STANDARD], KEYCODE_F4, KEYCODE_LCONTROL);
+				entry->configure_osd("TOGGLE_KEEP_ASPECT", "Toggle Keepaspect");
+				entry->defseq(SEQ_TYPE_STANDARD).set(KEYCODE_F4, KEYCODE_LCONTROL);
 				break;
 			// add a Not lcrtl condition to the show gfx key
 			case IPT_UI_SHOW_GFX:
-				input_seq_set_3(&typedesc->seq[SEQ_TYPE_STANDARD], KEYCODE_F4, SEQCODE_NOT, KEYCODE_LCONTROL);
+				entry->defseq(SEQ_TYPE_STANDARD).set(KEYCODE_F4, input_seq::not_code, KEYCODE_LCONTROL);
 				break;
 
 			// LCTRL-F5 to toggle OpenGL filtering
 			case IPT_OSD_5:
-				typedesc->token = "TOGGLE_FILTER";
-				typedesc->name = "Toggle Filter";
-				input_seq_set_2(&typedesc->seq[SEQ_TYPE_STANDARD], KEYCODE_F5, KEYCODE_LCONTROL);
+				entry->configure_osd("TOGGLE_FILTER", "Toggle Filter");
+				entry->defseq(SEQ_TYPE_STANDARD).set(KEYCODE_F5, KEYCODE_LCONTROL);
 				break;
 			// add a Not lcrtl condition to the toggle debug key
 			case IPT_UI_TOGGLE_DEBUG:
-				input_seq_set_3(&typedesc->seq[SEQ_TYPE_STANDARD], KEYCODE_F5, SEQCODE_NOT, KEYCODE_LCONTROL);
+				entry->defseq(SEQ_TYPE_STANDARD).set(KEYCODE_F5, input_seq::not_code, KEYCODE_LCONTROL);
 				break;
 
 			// LCTRL-F6 to decrease OpenGL prescaling
 			case IPT_OSD_6:
-				typedesc->token = "DECREASE_PRESCALE";
-				typedesc->name = "Decrease Prescaling";
-				input_seq_set_2(&typedesc->seq[SEQ_TYPE_STANDARD], KEYCODE_F6, KEYCODE_LCONTROL);
+				entry->configure_osd("DECREASE_PRESCALE", "Decrease Prescaling");
+				entry->defseq(SEQ_TYPE_STANDARD).set(KEYCODE_F6, KEYCODE_LCONTROL);
 				break;
 			// add a Not lcrtl condition to the toggle cheat key
 			case IPT_UI_TOGGLE_CHEAT:
-				input_seq_set_3(&typedesc->seq[SEQ_TYPE_STANDARD], KEYCODE_F6, SEQCODE_NOT, KEYCODE_LCONTROL);
+				entry->defseq(SEQ_TYPE_STANDARD).set(KEYCODE_F6, input_seq::not_code, KEYCODE_LCONTROL);
 				break;
 
 			// LCTRL-F7 to increase OpenGL prescaling
 			case IPT_OSD_7:
-				typedesc->token = "INCREASE_PRESCALE";
-				typedesc->name = "Increase Prescaling";
-				input_seq_set_2(&typedesc->seq[SEQ_TYPE_STANDARD], KEYCODE_F7, KEYCODE_LCONTROL);
+				entry->configure_osd("INCREASE_PRESCALE", "Increase Prescaling");
+				entry->defseq(SEQ_TYPE_STANDARD).set(KEYCODE_F7, KEYCODE_LCONTROL);
 				break;
 			// add a Not lcrtl condition to the load state key
 			case IPT_UI_LOAD_STATE:
-				input_seq_set_5(&typedesc->seq[SEQ_TYPE_STANDARD], KEYCODE_F7, SEQCODE_NOT, KEYCODE_LCONTROL, SEQCODE_NOT, KEYCODE_LSHIFT);
+				entry->defseq(SEQ_TYPE_STANDARD).set(KEYCODE_F7, input_seq::not_code, KEYCODE_LCONTROL, input_seq::not_code, KEYCODE_LSHIFT);
 				break;
 
 			// add a Not lcrtl condition to the throttle key
 			case IPT_UI_THROTTLE:
-				input_seq_set_3(&typedesc->seq[SEQ_TYPE_STANDARD], KEYCODE_F10, SEQCODE_NOT, KEYCODE_LCONTROL);
+				entry->defseq(SEQ_TYPE_STANDARD).set(KEYCODE_F10, input_seq::not_code, KEYCODE_LCONTROL);
 				break;
 
 			// disable the config menu if the ALT key is down
 			// (allows ALT-TAB to switch between apps)
 			case IPT_UI_CONFIGURE:
-				input_seq_set_5(&typedesc->seq[SEQ_TYPE_STANDARD], KEYCODE_TAB, SEQCODE_NOT, KEYCODE_LALT, SEQCODE_NOT, KEYCODE_RALT);
+				entry->defseq(SEQ_TYPE_STANDARD).set(KEYCODE_TAB, input_seq::not_code, KEYCODE_LALT, input_seq::not_code, KEYCODE_RALT);
+				break;
+
+			// leave everything else alone
+			default:
 				break;
 		}
 	}

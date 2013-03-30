@@ -38,83 +38,85 @@ voice.rom - VOICE ROM
 class good_state : public driver_device
 {
 public:
-	good_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	good_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_fg_tilemapram(*this, "fg_tilemapram"),
+		m_bg_tilemapram(*this, "bg_tilemapram"){ }
 
 	/* memory pointers */
-	UINT16 *  m_bg_tilemapram;
-	UINT16 *  m_fg_tilemapram;
+	required_shared_ptr<UINT16> m_fg_tilemapram;
+	required_shared_ptr<UINT16> m_bg_tilemapram;
 	UINT16 *  m_sprites;
 //  UINT16 *  m_paletteram;   // currently this uses generic palette handling
 
 	/* video-related */
 	tilemap_t  *m_bg_tilemap;
 	tilemap_t  *m_fg_tilemap;
+	DECLARE_WRITE16_MEMBER(fg_tilemapram_w);
+	DECLARE_WRITE16_MEMBER(bg_tilemapram_w);
+	TILE_GET_INFO_MEMBER(get_fg_tile_info);
+	TILE_GET_INFO_MEMBER(get_bg_tile_info);
+	virtual void video_start();
+	UINT32 screen_update_good(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
-static WRITE16_HANDLER( fg_tilemapram_w )
+WRITE16_MEMBER(good_state::fg_tilemapram_w)
 {
-	good_state *state = space->machine().driver_data<good_state>();
-	COMBINE_DATA(&state->m_fg_tilemapram[offset]);
-	tilemap_mark_tile_dirty(state->m_fg_tilemap, offset / 2);
+	COMBINE_DATA(&m_fg_tilemapram[offset]);
+	m_fg_tilemap->mark_tile_dirty(offset / 2);
 }
 
-static TILE_GET_INFO( get_fg_tile_info )
+TILE_GET_INFO_MEMBER(good_state::get_fg_tile_info)
 {
-	good_state *state = machine.driver_data<good_state>();
-	int tileno = state->m_fg_tilemapram[tile_index * 2];
-	int attr = state->m_fg_tilemapram[tile_index * 2 + 1] & 0xf;
-	SET_TILE_INFO(0, tileno, attr, 0);
+	int tileno = m_fg_tilemapram[tile_index * 2];
+	int attr = m_fg_tilemapram[tile_index * 2 + 1] & 0xf;
+	SET_TILE_INFO_MEMBER(0, tileno, attr, 0);
 }
 
-static WRITE16_HANDLER( bg_tilemapram_w )
+WRITE16_MEMBER(good_state::bg_tilemapram_w)
 {
-	good_state *state = space->machine().driver_data<good_state>();
-	COMBINE_DATA(&state->m_bg_tilemapram[offset]);
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset / 2);
+	COMBINE_DATA(&m_bg_tilemapram[offset]);
+	m_bg_tilemap->mark_tile_dirty(offset / 2);
 }
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(good_state::get_bg_tile_info)
 {
-	good_state *state = machine.driver_data<good_state>();
-	int tileno = state->m_bg_tilemapram[tile_index * 2];
-	int attr = state->m_bg_tilemapram[tile_index * 2 + 1] & 0xf;
-	SET_TILE_INFO(1, tileno, attr, 0);
+	int tileno = m_bg_tilemapram[tile_index * 2];
+	int attr = m_bg_tilemapram[tile_index * 2 + 1] & 0xf;
+	SET_TILE_INFO_MEMBER(1, tileno, attr, 0);
 }
 
 
 
-static VIDEO_START( good )
+void good_state::video_start()
 {
-	good_state *state = machine.driver_data<good_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_rows, 16, 16, 32, 32);
-	state->m_fg_tilemap = tilemap_create(machine, get_fg_tile_info, tilemap_scan_rows, 16, 16, 32, 32);
-	tilemap_set_transparent_pen(state->m_fg_tilemap, 0xf);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(good_state::get_bg_tile_info),this), TILEMAP_SCAN_ROWS, 16, 16, 32, 32);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(good_state::get_fg_tile_info),this), TILEMAP_SCAN_ROWS, 16, 16, 32, 32);
+	m_fg_tilemap->set_transparent_pen(0xf);
 }
 
-static SCREEN_UPDATE( good )
+UINT32 good_state::screen_update_good(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	good_state *state = screen->machine().driver_data<good_state>();
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
-	tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, 0, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
+	m_fg_tilemap->draw(bitmap, cliprect, 0, 0);
 	return 0;
 }
 
-static ADDRESS_MAP_START( good_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( good_map, AS_PROGRAM, 16, good_state )
 	AM_RANGE(0x000000, 0x01ffff) AM_ROM
 
 	//AM_RANGE(0x270000, 0x270007) AM_RAM // scroll?
-	AM_RANGE(0x270000, 0x270001) AM_DEVREADWRITE8_MODERN("oki", okim6295_device, read, write, 0x00ff)
+	AM_RANGE(0x270000, 0x270001) AM_DEVREADWRITE8("oki", okim6295_device, read, write, 0x00ff)
 
 	AM_RANGE(0x280000, 0x280001) AM_READ_PORT("IN0")
 	AM_RANGE(0x280002, 0x280003) AM_READ_PORT("IN1")
 	AM_RANGE(0x280004, 0x280005) AM_READ_PORT("IN2")
 
-	AM_RANGE(0x800000, 0x8007ff) AM_RAM_WRITE(paletteram16_xRRRRRGGGGGBBBBB_word_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x800000, 0x8007ff) AM_RAM_WRITE(paletteram_xRRRRRGGGGGBBBBB_word_w) AM_SHARE("paletteram")
 
-	AM_RANGE(0x820000, 0x820fff) AM_RAM_WRITE(fg_tilemapram_w) AM_BASE_MEMBER(good_state, m_fg_tilemapram)
-	AM_RANGE(0x822000, 0x822fff) AM_RAM_WRITE(bg_tilemapram_w) AM_BASE_MEMBER(good_state, m_bg_tilemapram)
+	AM_RANGE(0x820000, 0x820fff) AM_RAM_WRITE(fg_tilemapram_w) AM_SHARE("fg_tilemapram")
+	AM_RANGE(0x822000, 0x822fff) AM_RAM_WRITE(bg_tilemapram_w) AM_SHARE("bg_tilemapram")
 
 	AM_RANGE(0xff0000, 0xffefff) AM_RAM
 ADDRESS_MAP_END
@@ -277,21 +279,19 @@ static MACHINE_CONFIG_START( good, good_state )
 
 	MCFG_CPU_ADD("maincpu", M68000, 16000000 /2)
 	MCFG_CPU_PROGRAM_MAP(good_map)
-	MCFG_CPU_VBLANK_INT("screen", irq2_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", good_state,  irq2_line_hold)
 
 	MCFG_GFXDECODE(good)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*16, 32*16)
 	MCFG_SCREEN_VISIBLE_AREA(1*16, 23*16-1, 0*16, 14*16-1)
-	MCFG_SCREEN_UPDATE(good)
+	MCFG_SCREEN_UPDATE_DRIVER(good_state, screen_update_good)
 
 	MCFG_PALETTE_LENGTH(0x400)
 
-	MCFG_VIDEO_START(good)
 
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
 
@@ -316,4 +316,4 @@ ROM_START( good )
 	ROM_LOAD16_BYTE( "grp-04", 0x40001, 0x20000, CRC(83dbbb52) SHA1(e597f3cbb54b5cdf2230ea6318f970319061e31b) )
 ROM_END
 
-GAME( 1998, good,   0,   good,   good,   0,  ROT0,  "<unknown>", "Good (Korea)", GAME_SUPPORTS_SAVE )
+GAME( 1998, good,   0,   good,   good, driver_device,   0,  ROT0,  "<unknown>", "Good (Korea)", GAME_SUPPORTS_SAVE )

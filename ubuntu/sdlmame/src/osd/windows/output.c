@@ -44,8 +44,8 @@
 #include <windows.h>
 
 // MAME headers
-#include "osdepend.h"
 #include "emu.h"
+#include "osdepend.h"
 
 // MAMEOS headers
 #include "output.h"
@@ -57,8 +57,8 @@
 //============================================================
 
 // window styles
-#define WINDOW_STYLE		WS_OVERLAPPEDWINDOW
-#define WINDOW_STYLE_EX		0
+#define WINDOW_STYLE        WS_OVERLAPPEDWINDOW
+#define WINDOW_STYLE_EX     0
 
 
 
@@ -66,12 +66,11 @@
 //  TYPEDEFS
 //============================================================
 
-typedef struct _registered_client registered_client;
-struct _registered_client
+struct registered_client
 {
-	registered_client *	next;		// next client in the list
-	LPARAM				id;			// client-specified ID
-	HWND				hwnd;		// client HWND
+	registered_client * next;       // next client in the list
+	LPARAM              id;         // client-specified ID
+	HWND                hwnd;       // client HWND
 };
 
 
@@ -81,18 +80,18 @@ struct _registered_client
 //============================================================
 
 // our HWND
-static HWND					output_hwnd;
+static HWND                 output_hwnd;
 
 // client list
-static registered_client *	clientlist;
+static registered_client *  clientlist;
 
 // message IDs
-static UINT					om_mame_start;
-static UINT					om_mame_stop;
-static UINT					om_mame_update_state;
-static UINT					om_mame_register_client;
-static UINT					om_mame_unregister_client;
-static UINT					om_mame_get_id_string;
+static UINT                 om_mame_start;
+static UINT                 om_mame_stop;
+static UINT                 om_mame_update_state;
+static UINT                 om_mame_register_client;
+static UINT                 om_mame_unregister_client;
+static UINT                 om_mame_get_id_string;
 
 
 
@@ -119,7 +118,7 @@ void winoutput_init(running_machine &machine)
 	int result;
 
 	// ensure we get cleaned up
-	machine.add_notifier(MACHINE_NOTIFY_EXIT, winoutput_exit);
+	machine.add_notifier(MACHINE_NOTIFY_EXIT, machine_notify_delegate(FUNC(winoutput_exit), &machine));
 
 	// reset globals
 	clientlist = NULL;
@@ -127,6 +126,7 @@ void winoutput_init(running_machine &machine)
 	// create our window class
 	result = create_window_class();
 	assert(result == 0);
+	(void)result; // to silence gcc 4.6
 
 	// create a window
 	output_hwnd = CreateWindowEx(
@@ -201,9 +201,9 @@ static int create_window_class(void)
 		WNDCLASS wc = { 0 };
 
 		// initialize the description of the window class
-		wc.lpszClassName	= OUTPUT_WINDOW_CLASS;
-		wc.hInstance		= GetModuleHandle(NULL);
-		wc.lpfnWndProc		= output_window_proc;
+		wc.lpszClassName    = OUTPUT_WINDOW_CLASS;
+		wc.hInstance        = GetModuleHandle(NULL);
+		wc.lpfnWndProc      = output_window_proc;
 
 		// register the class; fail if we can't
 		if (!RegisterClass(&wc))

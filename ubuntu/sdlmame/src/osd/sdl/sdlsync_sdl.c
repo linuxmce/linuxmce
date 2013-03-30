@@ -9,7 +9,7 @@
 //
 //============================================================
 
-#include "SDL/SDL.h"
+#include "sdlinc.h"
 
 // standard C headers
 #include <unistd.h>
@@ -21,40 +21,39 @@
 
 #include "eminline.h"
 
-#define	VERBOSE		(0)
+#define VERBOSE     (0)
 
 #if VERBOSE
 #define LOG( x ) do { printf x; printf("\n"); } while (0)
 #else
 #define LOG( x )
 #endif
-typedef struct _hidden_mutex_t hidden_mutex_t;
-struct _hidden_mutex_t {
-	SDL_mutex *			id;
-	volatile INT32		locked;
-	volatile INT32		threadid;
+struct hidden_mutex_t {
+	SDL_mutex *         id;
+	volatile INT32      locked;
+	volatile INT32      threadid;
 };
 
-struct _osd_event {
-	SDL_mutex *			mutex;
-	SDL_cond *			cond;
-	volatile INT32		autoreset;
-	volatile INT32		signalled;
+struct osd_event {
+	SDL_mutex *         mutex;
+	SDL_cond *          cond;
+	volatile INT32      autoreset;
+	volatile INT32      signalled;
 };
 
 //============================================================
 //  TYPE DEFINITIONS
 //============================================================
 
-struct _osd_thread {
-	SDL_Thread *		thread;
+struct osd_thread {
+	SDL_Thread *        thread;
 	osd_thread_callback callback;
 	void *param;
 };
 
-struct _osd_scalable_lock
+struct osd_scalable_lock
 {
-	SDL_mutex *			mutex;
+	SDL_mutex *         mutex;
 };
 
 //============================================================
@@ -351,4 +350,3 @@ void osd_thread_wait_free(osd_thread *thread)
 	SDL_WaitThread(thread->thread, &status);
 	free(thread);
 }
-

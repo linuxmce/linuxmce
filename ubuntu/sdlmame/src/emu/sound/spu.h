@@ -9,38 +9,14 @@
 //  INTERFACE CONFIGURATION MACROS
 //**************************************************************************
 
-#define MCFG_SPU_ADD(_tag, _clock, _irqf) \
+#define MCFG_SPU_IRQ_HANDLER(_devcb) \
+	devcb = &spu_device::set_irq_handler(*device, DEVCB2_##_devcb);
+
+#define MCFG_SPU_ADD(_tag, _clock) \
 	MCFG_DEVICE_ADD(_tag, SPU, _clock) \
-	MCFG_IRQ_FUNC(_irqf)
-
-#define MCFG_SPU_REPLACE(_tag, _clock, _irqf) \
-	MCFG_DEVICE_REPLACE(_tag, SPU, _clock) \
-	MCFG_IRQ_FUNC(_irqf)
-
-#define MCFG_IRQ_FUNC(_irqf) \
-	spu_device_config::static_set_irqf(device, _irqf); \
-
-// ======================> spu_device_config
-
-class spu_device_config :	public device_config, public device_config_sound_interface
-{
-	friend class spu_device;
-
-	// construction/destruction
-	spu_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock);
-
-public:
-	// allocators
-	static device_config *static_alloc_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock);
-	virtual device_t *alloc_device(running_machine &machine) const;
-
-	// inline configuration helpers
-	static void static_set_irqf(device_config *device, void (*irqf)(device_t *device, UINT32 state));
-
-protected:
-	// inline data
-	void (*m_irq_func)(device_t *device, UINT32 state);
-};
+	MCFG_SPU_IRQ_HANDLER(DEVWRITELINE("maincpu:irq", psxirq_device, intin9)) \
+	MCFG_PSX_DMA_CHANNEL_READ( "maincpu", 4, psx_dma_read_delegate( FUNC( spu_device::dma_read ), (spu_device *) device ) ) \
+	MCFG_PSX_DMA_CHANNEL_WRITE( "maincpu", 4, psx_dma_write_delegate( FUNC( spu_device::dma_write ), (spu_device *) device ) )
 
 // ======================> spu_device
 
@@ -50,8 +26,6 @@ class stream_buffer;
 
 class spu_device : public device_t, public device_sound_interface
 {
-	friend class spu_device_config;
-
 	struct sample_cache;
 	struct sample_loop_cache;
 	struct cache_pointer;
@@ -75,9 +49,7 @@ protected:
 	virtual void sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples);
 
 	// internal state
-	const spu_device_config &m_config;
-
-	void (*m_irq_cb)(device_t *device, UINT32 state);
+	devcb2_write_line m_irq_handler;
 
 	unsigned char *spu_ram;
 	reverb *rev;
@@ -85,18 +57,18 @@ protected:
 
 	stream_buffer *xa_buffer, *cdda_buffer;
 	unsigned int xa_cnt,cdda_cnt,
-				 xa_freq,cdda_freq,
-				 xa_channels,
-				 xa_spf,
-				 xa_out_ptr,
-				 cur_frame_sample,
-				 cur_generate_sample,
-				 dirty_flags;
+					xa_freq,cdda_freq,
+					xa_channels,
+					xa_spf,
+					xa_out_ptr,
+					cur_frame_sample,
+					cur_generate_sample,
+					dirty_flags;
 
 	signed short xa_last[4];
 	bool status_enabled,
-			 xa_playing,
-			 cdda_playing;
+				xa_playing,
+				cdda_playing;
 	int xa_voll,xa_volr,
 			changed_xa_vol;
 	voiceinfo *voice;
@@ -108,9 +80,9 @@ protected:
 
 	unsigned char *output_buf[4];
 	unsigned int output_head,
-							 output_tail,
-							 output_size,
-							 cur_qsz;
+								output_tail,
+								output_size,
+								cur_qsz;
 
 	unsigned int noise_t;
 	signed short noise_cur;
@@ -120,14 +92,14 @@ protected:
 
 	struct voicereg
 	{
-		unsigned short vol_l,	// 0
-									 vol_r, // 2
-									 pitch, // 4
-									 addr,  // 6
-									 adsl,  // 8
-									 srrr,  // a
-									 curvol,	// c
-									 repaddr; // e
+		unsigned short vol_l,   // 0
+										vol_r, // 2
+										pitch, // 4
+										addr,  // 6
+										adsl,  // 8
+										srrr,  // a
+										curvol, // c
+										repaddr; // e
 	};
 
 	union
@@ -137,22 +109,22 @@ protected:
 		{
 			voicereg voice[24];
 			unsigned short mvol_l,mvol_r,
-										 rvol_l,rvol_r;
+											rvol_l,rvol_r;
 			unsigned int keyon,
-									 keyoff,
-									 fm,
-									 noise,
-									 reverb,
-									 chon;
+										keyoff,
+										fm,
+										noise,
+										reverb,
+										chon;
 			unsigned short _unknown,
-										 reverb_addr,
-										 irq_addr,
-										 trans_addr,
-										 data,
-										 ctrl;
+											reverb_addr,
+											irq_addr,
+											trans_addr,
+											data,
+											ctrl;
 			unsigned int status;
 			signed short cdvol_l,cdvol_r,
-									 exvol_l,exvol_r;
+										exvol_l,exvol_r;
 		} spureg;
 	};
 
@@ -181,11 +153,11 @@ protected:
 											const unsigned int sz);
 	void generate_noise(void *ptr, const unsigned int num);
 	bool process_voice(const unsigned int v,
-										 const unsigned int sz,
-										 void *ptr,
-										 void *fmnoise_ptr,
-										 void *outxptr,
-										 unsigned int *tleft);
+											const unsigned int sz,
+											void *ptr,
+											void *fmnoise_ptr,
+											void *outxptr,
+											unsigned int *tleft);
 	void process();
 	void process_until(const unsigned int tsample);
 	void update_voice_loop(const unsigned int v);
@@ -205,8 +177,8 @@ protected:
 	bool translate_sample_addr(const unsigned int addr, cache_pointer *cp);
 	sample_cache *get_sample_cache(const unsigned int addr);
 	void flush_cache(sample_cache *sc,
-									 const unsigned int istart,
-									 const unsigned int iend);
+										const unsigned int istart,
+										const unsigned int iend);
 	void invalidate_cache(const unsigned int st, const unsigned int en);
 
 	void set_xa_format(const float freq, const int channels);
@@ -219,13 +191,13 @@ protected:
 	void flush_output_buffer();
 
 	sample_loop_cache *get_loop_cache(sample_cache *cache,
-																	  const unsigned int lpen,
+																		const unsigned int lpen,
 																		sample_cache *lpcache,
-																	  const unsigned int lpst);
+																		const unsigned int lpst);
 #if 0
 	void write_cache_pointer(outfile *fout,
-													 cache_pointer *cp,
-													 sample_loop_cache *lc=NULL);
+														cache_pointer *cp,
+														sample_loop_cache *lc=NULL);
 	void read_cache_pointer(infile *fin,
 													cache_pointer *cp,
 													sample_loop_cache **lc=NULL);
@@ -243,7 +215,13 @@ protected:
 	static reverb_preset *find_reverb_preset(const unsigned short *param);
 
 public:
-	spu_device(running_machine &_machine, const spu_device_config &config);
+	spu_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock);
+
+	// static configuration helpers
+	template<class _Object> static devcb2_base &set_irq_handler(device_t &device, _Object object) { return downcast<spu_device &>(device).m_irq_handler.set_callback(object); }
+
+	void dma_read( UINT32 *ram, UINT32 n_address, INT32 n_size );
+	void dma_write( UINT32 *ram, UINT32 n_address, INT32 n_size );
 
 	void reinit_sound();
 	void kill_sound();
@@ -261,7 +239,6 @@ public:
 	void write_byte(const unsigned int addr, const unsigned char byte);
 	void write_word(const unsigned int addr, const unsigned short word);
 
-	bool installed_dma_hooks;
 	sound_stream *m_stream;
 };
 
@@ -271,7 +248,7 @@ extern reverb_params *spu_reverb_cfg;
 extern const device_type SPU;
 
 // MAME old-style interface
-READ16_HANDLER( spu_r );
-WRITE16_HANDLER( spu_w );
+DECLARE_READ16_HANDLER( spu_r );
+DECLARE_WRITE16_HANDLER( spu_w );
 
 #endif

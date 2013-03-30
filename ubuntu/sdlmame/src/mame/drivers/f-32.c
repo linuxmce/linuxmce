@@ -20,19 +20,21 @@
 class mosaicf2_state : public driver_device
 {
 public:
-	mosaicf2_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config),
-		  m_maincpu(*this, "maincpu") { }
+	mosaicf2_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+			m_maincpu(*this, "maincpu") ,
+		m_videoram(*this, "videoram"){ }
 
 	/* memory pointers */
-	required_device<e132xn_device>	m_maincpu;
-	UINT32 *  m_videoram;
+	required_device<e132xn_device>  m_maincpu;
+	required_shared_ptr<UINT32> m_videoram;
+	DECLARE_READ32_MEMBER(f32_input_port_1_r);
+	UINT32 screen_update_mosaicf2(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
-static SCREEN_UPDATE( mosaicf2 )
+UINT32 mosaicf2_state::screen_update_mosaicf2(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	mosaicf2_state *state = screen->machine().driver_data<mosaicf2_state>();
 	offs_t offs;
 
 	for (offs = 0; offs < 0x10000; offs++)
@@ -42,8 +44,8 @@ static SCREEN_UPDATE( mosaicf2 )
 
 		if ((x < 0xa0) && (y < 0xe0))
 		{
-			*BITMAP_ADDR16(bitmap, y, (x * 2) + 0) = (state->m_videoram[offs] >> 16) & 0x7fff;
-			*BITMAP_ADDR16(bitmap, y, (x * 2) + 1) = (state->m_videoram[offs] >>  0) & 0x7fff;
+			bitmap.pix16(y, (x * 2) + 0) = (m_videoram[offs] >> 16) & 0x7fff;
+			bitmap.pix16(y, (x * 2) + 1) = (m_videoram[offs] >>  0) & 0x7fff;
 		}
 	}
 
@@ -52,34 +54,34 @@ static SCREEN_UPDATE( mosaicf2 )
 
 
 
-static ADDRESS_MAP_START( common_map, AS_PROGRAM, 32 )
+static ADDRESS_MAP_START( common_map, AS_PROGRAM, 32, mosaicf2_state )
 	AM_RANGE(0x00000000, 0x001fffff) AM_RAM
-	AM_RANGE(0x40000000, 0x4003ffff) AM_RAM AM_BASE_MEMBER(mosaicf2_state, m_videoram)
+	AM_RANGE(0x40000000, 0x4003ffff) AM_RAM AM_SHARE("videoram")
 	AM_RANGE(0x80000000, 0x80ffffff) AM_ROM AM_REGION("user2",0)
 	AM_RANGE(0xfff00000, 0xffffffff) AM_ROM AM_REGION("user1",0)
 ADDRESS_MAP_END
 
-static READ32_HANDLER( f32_input_port_1_r )
+READ32_MEMBER(mosaicf2_state::f32_input_port_1_r)
 {
 	/* burn a bunch of cycles because this is polled frequently during busy loops */
-	mosaicf2_state *state = space->machine().driver_data<mosaicf2_state>();
-	offs_t pc = state->m_maincpu->pc();
+
+	offs_t pc = m_maincpu->pc();
 	if ((pc == 0x000379de) || (pc == 0x000379cc) )
-		state->m_maincpu->eat_cycles(100);
+		m_maincpu->eat_cycles(100);
 	//else printf("PC %08x\n", pc );
-	return input_port_read(space->machine(), "SYSTEM_P2");
+	return ioport("SYSTEM_P2")->read();
 }
 
 
-static ADDRESS_MAP_START( mosaicf2_io, AS_IO, 32 )
-	AM_RANGE(0x4000, 0x4003) AM_DEVREAD8_MODERN("oki", okim6295_device, read, 0x000000ff)
-	AM_RANGE(0x4810, 0x4813) AM_DEVREAD8("ymsnd", ym2151_status_port_r, 0x000000ff)
+static ADDRESS_MAP_START( mosaicf2_io, AS_IO, 32, mosaicf2_state )
+	AM_RANGE(0x4000, 0x4003) AM_DEVREAD8("oki", okim6295_device, read, 0x000000ff)
+	AM_RANGE(0x4810, 0x4813) AM_DEVREAD8("ymsnd", ym2151_device, status_r, 0x000000ff)
 	AM_RANGE(0x5000, 0x5003) AM_READ_PORT("P1")
 	AM_RANGE(0x5200, 0x5203) AM_READ(f32_input_port_1_r)
 	AM_RANGE(0x5400, 0x5403) AM_READ_PORT("EEPROMIN")
-	AM_RANGE(0x6000, 0x6003) AM_DEVWRITE8_MODERN("oki", okim6295_device, write, 0x000000ff)
-	AM_RANGE(0x6800, 0x6803) AM_DEVWRITE8("ymsnd", ym2151_data_port_w, 0x000000ff)
-	AM_RANGE(0x6810, 0x6813) AM_DEVWRITE8("ymsnd", ym2151_register_port_w, 0x000000ff)
+	AM_RANGE(0x6000, 0x6003) AM_DEVWRITE8("oki", okim6295_device, write, 0x000000ff)
+	AM_RANGE(0x6800, 0x6803) AM_DEVWRITE8("ymsnd", ym2151_device, data_w, 0x000000ff)
+	AM_RANGE(0x6810, 0x6813) AM_DEVWRITE8("ymsnd", ym2151_device, register_w, 0x000000ff)
 	AM_RANGE(0x7000, 0x7003) AM_WRITE_PORT("EEPROMCLK")
 	AM_RANGE(0x7200, 0x7203) AM_WRITE_PORT("EEPROMCS")
 	AM_RANGE(0x7400, 0x7403) AM_WRITE_PORT("EEPROMOUT")
@@ -105,7 +107,7 @@ static INPUT_PORTS_START( mosaicf2 )
 	PORT_BIT( 0x00000200, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_SERVICE_NO_TOGGLE( 0x00000400, IP_ACTIVE_LOW )
 	PORT_BIT( 0x00007800, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x00008000, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x00008000, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_BIT( 0x00010000, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(2)
 	PORT_BIT( 0x00020000, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(2)
 	PORT_BIT( 0x00040000, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(2)
@@ -117,25 +119,25 @@ static INPUT_PORTS_START( mosaicf2 )
 	PORT_BIT( 0xff000000, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START( "EEPROMIN" )
-	PORT_BIT( 0x00000001, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE("eeprom", eeprom_read_bit)
+	PORT_BIT( 0x00000001, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE_MEMBER("eeprom", eeprom_device, read_bit)
 
 	PORT_START( "EEPROMOUT" )
-	PORT_BIT( 0x00000001, IP_ACTIVE_HIGH, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE("eeprom", eeprom_write_bit)
+	PORT_BIT( 0x00000001, IP_ACTIVE_HIGH, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE_MEMBER("eeprom", eeprom_device, write_bit)
 
 	PORT_START( "EEPROMCLK" )
-	PORT_BIT( 0x00000001, IP_ACTIVE_HIGH, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE("eeprom", eeprom_set_clock_line)
+	PORT_BIT( 0x00000001, IP_ACTIVE_HIGH, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE_MEMBER("eeprom", eeprom_device, set_clock_line)
 
 	PORT_START( "EEPROMCS" )
-	PORT_BIT( 0x00000001, IP_ACTIVE_LOW, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE("eeprom", eeprom_set_cs_line)
+	PORT_BIT( 0x00000001, IP_ACTIVE_LOW, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE_MEMBER("eeprom", eeprom_device, set_cs_line)
 INPUT_PORTS_END
 
 static MACHINE_CONFIG_START( mosaicf2, mosaicf2_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", E132XN, 20000000*4)	/* 4x internal multiplier */
+	MCFG_CPU_ADD("maincpu", E132XN, 20000000*4) /* 4x internal multiplier */
 	MCFG_CPU_PROGRAM_MAP(common_map)
 	MCFG_CPU_IO_MAP(mosaicf2_io)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", mosaicf2_state,  irq0_line_hold)
 
 	MCFG_EEPROM_93C46_ADD("eeprom")
 
@@ -143,10 +145,9 @@ static MACHINE_CONFIG_START( mosaicf2, mosaicf2_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(512, 512)
 	MCFG_SCREEN_VISIBLE_AREA(0, 319, 0, 223)
-	MCFG_SCREEN_UPDATE(mosaicf2)
+	MCFG_SCREEN_UPDATE_DRIVER(mosaicf2_state, screen_update_mosaicf2)
 
 	MCFG_PALETTE_INIT(RRRRR_GGGGG_BBBBB)
 	MCFG_PALETTE_LENGTH(32768)
@@ -154,7 +155,7 @@ static MACHINE_CONFIG_START( mosaicf2, mosaicf2_state )
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
 
-	MCFG_SOUND_ADD("ymsnd", YM2151, 14318180/4)
+	MCFG_YM2151_ADD("ymsnd", 14318180/4)
 	MCFG_SOUND_ROUTE(0, "lspeaker", 1.0)
 	MCFG_SOUND_ROUTE(1, "rspeaker", 1.0)
 
@@ -238,4 +239,4 @@ ROM_START( mosaicf2 )
 	ROM_LOAD( "snd.bin",             0x000000, 0x040000, CRC(4584589c) SHA1(5f9824724f840767c3dc1dc04b203ddf3d78b84c) )
 ROM_END
 
-GAME( 1999, mosaicf2, 0, mosaicf2, mosaicf2, 0,        ROT0, "F2 System", "Mosaic (F2 System)", GAME_SUPPORTS_SAVE )
+GAME( 1999, mosaicf2, 0, mosaicf2, mosaicf2, driver_device, 0,        ROT0, "F2 System", "Mosaic (F2 System)", GAME_SUPPORTS_SAVE )

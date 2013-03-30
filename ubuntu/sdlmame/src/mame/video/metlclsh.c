@@ -22,30 +22,28 @@
 #include "includes/metlclsh.h"
 
 
-WRITE8_HANDLER( metlclsh_rambank_w )
+WRITE8_MEMBER(metlclsh_state::metlclsh_rambank_w)
 {
-	metlclsh_state *state = space->machine().driver_data<metlclsh_state>();
 
 	if (data & 1)
 	{
-		state->m_write_mask = 0;
-		memory_set_bankptr(space->machine(), "bank1", state->m_bgram);
+		m_write_mask = 0;
+		membank("bank1")->set_base(m_bgram);
 	}
 	else
 	{
-		state->m_write_mask = 1 << (data >> 1);
-		memory_set_bankptr(space->machine(), "bank1", state->m_otherram);
+		m_write_mask = 1 << (data >> 1);
+		membank("bank1")->set_base(m_otherram);
 	}
 }
 
-WRITE8_HANDLER( metlclsh_gfxbank_w )
+WRITE8_MEMBER(metlclsh_state::metlclsh_gfxbank_w)
 {
-	metlclsh_state *state = space->machine().driver_data<metlclsh_state>();
 
-	if (!(data & 4) && (state->m_gfxbank != data))
+	if (!(data & 4) && (m_gfxbank != data))
 	{
-		tilemap_mark_all_tiles_dirty(state->m_bg_tilemap);
-		state->m_gfxbank = data & 3;
+		m_bg_tilemap->mark_all_dirty();
+		m_gfxbank = data & 3;
 	}
 }
 
@@ -66,24 +64,22 @@ WRITE8_HANDLER( metlclsh_gfxbank_w )
 
 ***************************************************************************/
 
-static TILEMAP_MAPPER( metlclsh_bgtilemap_scan )
+TILEMAP_MAPPER_MEMBER(metlclsh_state::metlclsh_bgtilemap_scan)
 {
-	return	(row & 7) + ((row & ~7) << 4) + ((col & 0xf) << 3) + ((col & ~0xf) << 4);
+	return  (row & 7) + ((row & ~7) << 4) + ((col & 0xf) << 3) + ((col & ~0xf) << 4);
 }
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(metlclsh_state::get_bg_tile_info)
 {
-	metlclsh_state *state = machine.driver_data<metlclsh_state>();
-	SET_TILE_INFO(1, state->m_bgram[tile_index] + (state->m_gfxbank << 7), 0, 0);
+	SET_TILE_INFO_MEMBER(1, m_bgram[tile_index] + (m_gfxbank << 7), 0, 0);
 }
 
-WRITE8_HANDLER( metlclsh_bgram_w )
+WRITE8_MEMBER(metlclsh_state::metlclsh_bgram_w)
 {
-	metlclsh_state *state = space->machine().driver_data<metlclsh_state>();
 
 	/*  This ram is banked: it's either the tilemap (e401 = 1)
-        or bit n of another area (e401 = n << 1)? (that I don't understand) */
-	if (state->m_write_mask)
+	    or bit n of another area (e401 = n << 1)? (that I don't understand) */
+	if (m_write_mask)
 	{
 		/* unknown area - the following is almost surely wrong */
 // 405b (e401 = e c a 8 6 4 2 0) writes d400++
@@ -91,14 +87,14 @@ WRITE8_HANDLER( metlclsh_bgram_w )
 // 4085 (e401 = e a 6 2) writes d000++
 // 405b (e401 = e a 6 2) writes d000++
 
-//      state->m_otherram[offset] |= (data & state->m_write_mask);
-		state->m_otherram[offset] = (state->m_otherram[offset] & ~state->m_write_mask) | (data & state->m_write_mask);
+//      m_otherram[offset] |= (data & m_write_mask);
+		m_otherram[offset] = (m_otherram[offset] & ~m_write_mask) | (data & m_write_mask);
 	}
 	else
 	{
 		/* tilemap */
-		state->m_bgram[offset] = data;
-		tilemap_mark_tile_dirty(state->m_bg_tilemap,offset & 0x1ff);
+		m_bgram[offset] = data;
+		m_bg_tilemap->mark_tile_dirty(offset & 0x1ff);
 	}
 }
 
@@ -115,20 +111,18 @@ WRITE8_HANDLER( metlclsh_bgram_w )
 
 ***************************************************************************/
 
-static TILE_GET_INFO( get_fg_tile_info )
+TILE_GET_INFO_MEMBER(metlclsh_state::get_fg_tile_info)
 {
-	metlclsh_state *state = machine.driver_data<metlclsh_state>();
-	UINT8 code = state->m_fgram[tile_index + 0x000];
-	UINT8 attr = state->m_fgram[tile_index + 0x400];
-	SET_TILE_INFO(2, code + ((attr & 0x03) << 8), (attr >> 5) & 3, 0);
-	tileinfo->category = ((attr & 0x80) ? 1 : 2);
+	UINT8 code = m_fgram[tile_index + 0x000];
+	UINT8 attr = m_fgram[tile_index + 0x400];
+	SET_TILE_INFO_MEMBER(2, code + ((attr & 0x03) << 8), (attr >> 5) & 3, 0);
+	tileinfo.category = ((attr & 0x80) ? 1 : 2);
 }
 
-WRITE8_HANDLER( metlclsh_fgram_w )
+WRITE8_MEMBER(metlclsh_state::metlclsh_fgram_w)
 {
-	metlclsh_state *state = space->machine().driver_data<metlclsh_state>();
-	state->m_fgram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_fg_tilemap, offset & 0x3ff);
+	m_fgram[offset] = data;
+	m_fg_tilemap->mark_tile_dirty(offset & 0x3ff);
 }
 
 
@@ -138,19 +132,18 @@ WRITE8_HANDLER( metlclsh_fgram_w )
 
 ***************************************************************************/
 
-VIDEO_START( metlclsh )
+void metlclsh_state::video_start()
 {
-	metlclsh_state *state = machine.driver_data<metlclsh_state>();
 
-	state->m_otherram = auto_alloc_array(machine, UINT8, 0x800);	// banked ram
+	m_otherram = auto_alloc_array(machine(), UINT8, 0x800); // banked ram
 
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, metlclsh_bgtilemap_scan, 16, 16, 32, 16);
-	state->m_fg_tilemap = tilemap_create(machine, get_fg_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(metlclsh_state::get_bg_tile_info),this), tilemap_mapper_delegate(FUNC(metlclsh_state::metlclsh_bgtilemap_scan),this), 16, 16, 32, 16);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(metlclsh_state::get_fg_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
 
-	tilemap_set_transparent_pen(state->m_bg_tilemap, 0);
-	tilemap_set_transparent_pen(state->m_fg_tilemap, 0);
+	m_bg_tilemap->set_transparent_pen(0);
+	m_fg_tilemap->set_transparent_pen(0);
 
-	state->save_pointer(NAME(state->m_otherram), 0x800);
+	save_pointer(NAME(m_otherram), 0x800);
 }
 
 
@@ -174,25 +167,25 @@ VIDEO_START( metlclsh )
 
 ***************************************************************************/
 
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	metlclsh_state *state = machine.driver_data<metlclsh_state>();
 	UINT8 *spriteram = state->m_spriteram;
 	gfx_element *gfx = machine.gfx[0];
 	int offs;
 
-	for (offs = 0; offs < state->m_spriteram_size; offs += 4)
+	for (offs = 0; offs < state->m_spriteram.bytes(); offs += 4)
 	{
 		int attr, code, color, sx, sy, flipx, flipy, wrapy, sizey;
 
 		attr = spriteram[offs];
 		if (!(attr & 0x01))
-			continue;	// enable
+			continue;   // enable
 
 		flipy = (attr & 0x02);
 		flipx = (attr & 0x04);
 		color = (attr & 0x08) >> 3;
-		sizey = (attr & 0x10);	// double height
+		sizey = (attr & 0x10);  // double height
 		code = ((attr & 0x60) << 3) + spriteram[offs + 1];
 
 		sx = 240 - spriteram[offs + 3];
@@ -201,11 +194,11 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 
 		sy = 240 - spriteram[offs + 2];
 
-		if (flip_screen_get(machine))
+		if (state->flip_screen())
 		{
-			sx = 240 - sx;	flipx = !flipx;
-			sy = 240 - sy;	flipy = !flipy;		if (sizey)	sy += 16;
-			if (sy > 240)	sy -= 256;
+			sx = 240 - sx;  flipx = !flipx;
+			sy = 240 - sy;  flipy = !flipy;     if (sizey)  sy += 16;
+			if (sy > 240)   sy -= 256;
 		}
 
 		/* Draw twice, at sy and sy + 256 (wrap around) */
@@ -242,25 +235,23 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 
 ***************************************************************************/
 
-SCREEN_UPDATE( metlclsh )
+UINT32 metlclsh_state::screen_update_metlclsh(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	metlclsh_state *state = screen->machine().driver_data<metlclsh_state>();
 
-	bitmap_fill(bitmap, cliprect, 0x10);
+	bitmap.fill(0x10, cliprect);
 
-	tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, 1, 0);	// low priority tiles of foreground
+	m_fg_tilemap->draw(bitmap, cliprect, 1, 0); // low priority tiles of foreground
 
-	if (state->m_scrollx[0] & 0x08)					// background (if enabled)
+	if (m_scrollx[0] & 0x08)                    // background (if enabled)
 	{
 		/* The background seems to be always flipped along x */
-		tilemap_set_flip(state->m_bg_tilemap, (flip_screen_get(screen->machine()) ? (TILEMAP_FLIPX | TILEMAP_FLIPY) : 0) ^ TILEMAP_FLIPX);
-		tilemap_set_scrollx(state->m_bg_tilemap, 0, state->m_scrollx[1] + ((state->m_scrollx[0] & 0x02) << 7) );
-		tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
+		m_bg_tilemap->set_flip((flip_screen() ? (TILEMAP_FLIPX | TILEMAP_FLIPY) : 0) ^ TILEMAP_FLIPX);
+		m_bg_tilemap->set_scrollx(0, m_scrollx[1] + ((m_scrollx[0] & 0x02) << 7) );
+		m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
 	}
-	draw_sprites(screen->machine(), bitmap, cliprect);			// sprites
-	tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, 2, 0);	// high priority tiles of foreground
+	draw_sprites(machine(), bitmap, cliprect);          // sprites
+	m_fg_tilemap->draw(bitmap, cliprect, 2, 0); // high priority tiles of foreground
 
-//  popmessage("%02X", state->m_scrollx[0]);
+//  popmessage("%02X", m_scrollx[0]);
 	return 0;
 }
-

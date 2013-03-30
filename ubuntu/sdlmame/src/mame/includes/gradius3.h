@@ -7,11 +7,12 @@
 class gradius3_state : public driver_device
 {
 public:
-	gradius3_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	gradius3_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_gfxram(*this, "gfxram"){ }
 
 	/* memory pointers */
-	UINT16 *    m_gfxram;
+	required_shared_ptr<UINT16> m_gfxram;
 //  UINT16 *    m_paletteram;    // currently this uses generic palette handling
 
 	/* video-related */
@@ -24,21 +25,34 @@ public:
 	int         m_irqBmask;
 
 	/* devices */
-	device_t *m_maincpu;
-	device_t *m_audiocpu;
-	device_t *m_subcpu;
+	cpu_device *m_maincpu;
+	cpu_device *m_audiocpu;
+	cpu_device *m_subcpu;
 	device_t *m_k007232;
 	device_t *m_k052109;
 	device_t *m_k051960;
+	DECLARE_READ16_MEMBER(k052109_halfword_r);
+	DECLARE_WRITE16_MEMBER(k052109_halfword_w);
+	DECLARE_READ16_MEMBER(k051937_halfword_r);
+	DECLARE_WRITE16_MEMBER(k051937_halfword_w);
+	DECLARE_READ16_MEMBER(k051960_halfword_r);
+	DECLARE_WRITE16_MEMBER(k051960_halfword_w);
+	DECLARE_WRITE16_MEMBER(cpuA_ctrl_w);
+	DECLARE_WRITE16_MEMBER(cpuB_irqenable_w);
+	DECLARE_WRITE16_MEMBER(cpuB_irqtrigger_w);
+	DECLARE_WRITE16_MEMBER(sound_command_w);
+	DECLARE_WRITE16_MEMBER(sound_irq_w);
+	DECLARE_READ16_MEMBER(gradius3_gfxrom_r);
+	DECLARE_WRITE16_MEMBER(gradius3_gfxram_w);
+	DECLARE_WRITE8_MEMBER(sound_bank_w);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	UINT32 screen_update_gradius3(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(cpuA_interrupt);
+	TIMER_DEVICE_CALLBACK_MEMBER(gradius3_sub_scanline);
 };
 
 /*----------- defined in video/gradius3.c -----------*/
-
 extern void gradius3_sprite_callback(running_machine &machine, int *code,int *color,int *priority_mask,int *shadow);
 extern void gradius3_tile_callback(running_machine &machine, int layer,int bank,int *code,int *color,int *flags,int *priority);
-
-READ16_HANDLER( gradius3_gfxrom_r );
-WRITE16_HANDLER( gradius3_gfxram_w );
-
-VIDEO_START( gradius3 );
-SCREEN_UPDATE( gradius3 );

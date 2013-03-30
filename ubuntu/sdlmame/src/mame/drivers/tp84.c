@@ -74,122 +74,127 @@ C004      76489 #4 trigger
 
 
 
-static MACHINE_START( tp84 )
+void tp84_state::machine_start()
 {
-	tp84_state *state = machine.driver_data<tp84_state>();
-	state->m_audiocpu = machine.device<cpu_device>("audiocpu");
+	m_audiocpu = machine().device<cpu_device>("audiocpu");
 }
 
 
-static READ8_HANDLER( tp84_sh_timer_r )
+READ8_MEMBER(tp84_state::tp84_sh_timer_r)
 {
-	tp84_state *state = space->machine().driver_data<tp84_state>();
 	/* main xtal 14.318MHz, divided by 4 to get the CPU clock, further */
 	/* divided by 2048 to get this timer */
 	/* (divide by (2048/2), and not 1024, because the CPU cycle counter is */
 	/* incremented every other state change of the clock) */
-	return (state->m_audiocpu->total_cycles() / (2048/2)) & 0x0f;
+	return (m_audiocpu->total_cycles() / (2048/2)) & 0x0f;
 }
 
 
-static WRITE8_HANDLER( tp84_filter_w )
+WRITE8_MEMBER(tp84_state::tp84_filter_w)
 {
 	int C;
 
 	/* 76489 #0 */
 	C = 0;
-	if (offset & 0x008) C +=  47000;	/*  47000pF = 0.047uF */
-	if (offset & 0x010) C += 470000;	/* 470000pF = 0.47uF */
-	filter_rc_set_RC(space->machine().device("filter1"),FLT_RC_LOWPASS,1000,2200,1000,CAP_P(C));
+	if (offset & 0x008) C +=  47000;    /*  47000pF = 0.047uF */
+	if (offset & 0x010) C += 470000;    /* 470000pF = 0.47uF */
+	filter_rc_set_RC(machine().device("filter1"),FLT_RC_LOWPASS,1000,2200,1000,CAP_P(C));
 
 	/* 76489 #1 (optional) */
 	C = 0;
-	if (offset & 0x020) C +=  47000;	/*  47000pF = 0.047uF */
-	if (offset & 0x040) C += 470000;	/* 470000pF = 0.47uF */
-//  filter_rc_set_RC(space->machine().device("filter2"),1000,2200,1000,C);
+	if (offset & 0x020) C +=  47000;    /*  47000pF = 0.047uF */
+	if (offset & 0x040) C += 470000;    /* 470000pF = 0.47uF */
+//  filter_rc_set_RC(machine().device("filter2"),1000,2200,1000,C);
 
 	/* 76489 #2 */
 	C = 0;
-	if (offset & 0x080) C += 470000;	/* 470000pF = 0.47uF */
-	filter_rc_set_RC(space->machine().device("filter2"),FLT_RC_LOWPASS,1000,2200,1000,CAP_P(C));
+	if (offset & 0x080) C += 470000;    /* 470000pF = 0.47uF */
+	filter_rc_set_RC(machine().device("filter2"),FLT_RC_LOWPASS,1000,2200,1000,CAP_P(C));
 
 	/* 76489 #3 */
 	C = 0;
-	if (offset & 0x100) C += 470000;	/* 470000pF = 0.47uF */
-	filter_rc_set_RC(space->machine().device("filter3"),FLT_RC_LOWPASS,1000,2200,1000,CAP_P(C));
+	if (offset & 0x100) C += 470000;    /* 470000pF = 0.47uF */
+	filter_rc_set_RC(machine().device("filter3"),FLT_RC_LOWPASS,1000,2200,1000,CAP_P(C));
 }
 
-static WRITE8_HANDLER( tp84_sh_irqtrigger_w )
+WRITE8_MEMBER(tp84_state::tp84_sh_irqtrigger_w)
 {
-	cputag_set_input_line_and_vector(space->machine(), "audiocpu",0,HOLD_LINE,0xff);
+	machine().device("audiocpu")->execute().set_input_line_and_vector(0,HOLD_LINE,0xff);
 }
 
 
 
-static ADDRESS_MAP_START( tp84_cpu1_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( tp84_cpu1_map, AS_PROGRAM, 8, tp84_state )
 	AM_RANGE(0x2000, 0x2000) AM_WRITE(watchdog_reset_w)
-	AM_RANGE(0x2800, 0x2800) AM_READ_PORT("SYSTEM") AM_WRITEONLY AM_BASE_MEMBER(tp84_state, m_palette_bank)
+	AM_RANGE(0x2800, 0x2800) AM_READ_PORT("SYSTEM") AM_WRITEONLY AM_SHARE("palette_bank")
 	AM_RANGE(0x2820, 0x2820) AM_READ_PORT("P1")
 	AM_RANGE(0x2840, 0x2840) AM_READ_PORT("P2")
 	AM_RANGE(0x2860, 0x2860) AM_READ_PORT("DSW1")
 	AM_RANGE(0x3000, 0x3000) AM_READ_PORT("DSW2") AM_WRITEONLY
-	AM_RANGE(0x3004, 0x3004) AM_WRITEONLY AM_BASE_MEMBER(tp84_state, m_flipscreen_x)
-	AM_RANGE(0x3005, 0x3005) AM_WRITEONLY AM_BASE_MEMBER(tp84_state, m_flipscreen_y)
+	AM_RANGE(0x3004, 0x3004) AM_WRITEONLY AM_SHARE("flipscreen_x")
+	AM_RANGE(0x3005, 0x3005) AM_WRITEONLY AM_SHARE("flipscreen_y")
 	AM_RANGE(0x3800, 0x3800) AM_WRITE(tp84_sh_irqtrigger_w)
-	AM_RANGE(0x3a00, 0x3a00) AM_WRITE(soundlatch_w)
-	AM_RANGE(0x3c00, 0x3c00) AM_WRITEONLY AM_BASE_MEMBER(tp84_state, m_scroll_x)
-	AM_RANGE(0x3e00, 0x3e00) AM_WRITEONLY AM_BASE_MEMBER(tp84_state, m_scroll_y)
-	AM_RANGE(0x4000, 0x43ff) AM_RAM AM_BASE_MEMBER(tp84_state, m_bg_videoram)
-	AM_RANGE(0x4400, 0x47ff) AM_RAM AM_BASE_MEMBER(tp84_state, m_fg_videoram)
-	AM_RANGE(0x4800, 0x4bff) AM_RAM AM_BASE_MEMBER(tp84_state, m_bg_colorram)
-	AM_RANGE(0x4c00, 0x4fff) AM_RAM AM_BASE_MEMBER(tp84_state, m_fg_colorram)
+	AM_RANGE(0x3a00, 0x3a00) AM_WRITE(soundlatch_byte_w)
+	AM_RANGE(0x3c00, 0x3c00) AM_WRITEONLY AM_SHARE("scroll_x")
+	AM_RANGE(0x3e00, 0x3e00) AM_WRITEONLY AM_SHARE("scroll_y")
+	AM_RANGE(0x4000, 0x43ff) AM_RAM AM_SHARE("bg_videoram")
+	AM_RANGE(0x4400, 0x47ff) AM_RAM AM_SHARE("fg_videoram")
+	AM_RANGE(0x4800, 0x4bff) AM_RAM AM_SHARE("bg_colorram")
+	AM_RANGE(0x4c00, 0x4fff) AM_RAM AM_SHARE("fg_colorram")
 	AM_RANGE(0x5000, 0x57ff) AM_RAM AM_SHARE("share1")
 	AM_RANGE(0x8000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( tp84b_cpu1_map, AS_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0x03ff) AM_RAM AM_BASE_MEMBER(tp84_state, m_bg_videoram)
-	AM_RANGE(0x0400, 0x07ff) AM_RAM AM_BASE_MEMBER(tp84_state, m_fg_videoram)
-	AM_RANGE(0x0800, 0x0bff) AM_RAM AM_BASE_MEMBER(tp84_state, m_bg_colorram)
-	AM_RANGE(0x0c00, 0x0fff) AM_RAM AM_BASE_MEMBER(tp84_state, m_fg_colorram)
+static ADDRESS_MAP_START( tp84b_cpu1_map, AS_PROGRAM, 8, tp84_state )
+	AM_RANGE(0x0000, 0x03ff) AM_RAM AM_SHARE("bg_videoram")
+	AM_RANGE(0x0400, 0x07ff) AM_RAM AM_SHARE("fg_videoram")
+	AM_RANGE(0x0800, 0x0bff) AM_RAM AM_SHARE("bg_colorram")
+	AM_RANGE(0x0c00, 0x0fff) AM_RAM AM_SHARE("fg_colorram")
 	AM_RANGE(0x1000, 0x17ff) AM_RAM AM_SHARE("share1")
 	AM_RANGE(0x1800, 0x1800) AM_WRITE(watchdog_reset_w)
-	AM_RANGE(0x1a00, 0x1a00) AM_READ_PORT("SYSTEM") AM_WRITEONLY AM_BASE_MEMBER(tp84_state, m_palette_bank)
+	AM_RANGE(0x1a00, 0x1a00) AM_READ_PORT("SYSTEM") AM_WRITEONLY AM_SHARE("palette_bank")
 	AM_RANGE(0x1a20, 0x1a20) AM_READ_PORT("P1")
 	AM_RANGE(0x1a40, 0x1a40) AM_READ_PORT("P2")
 	AM_RANGE(0x1a60, 0x1a60) AM_READ_PORT("DSW1")
 	AM_RANGE(0x1c00, 0x1c00) AM_READ_PORT("DSW2") AM_WRITENOP
-	AM_RANGE(0x1c04, 0x1c04) AM_WRITEONLY AM_BASE_MEMBER(tp84_state, m_flipscreen_x)
-	AM_RANGE(0x1c05, 0x1c05) AM_WRITEONLY AM_BASE_MEMBER(tp84_state, m_flipscreen_y)
+	AM_RANGE(0x1c04, 0x1c04) AM_WRITEONLY AM_SHARE("flipscreen_x")
+	AM_RANGE(0x1c05, 0x1c05) AM_WRITEONLY AM_SHARE("flipscreen_y")
 	AM_RANGE(0x1e00, 0x1e00) AM_WRITE(tp84_sh_irqtrigger_w)
-	AM_RANGE(0x1e80, 0x1e80) AM_WRITE(soundlatch_w)
-	AM_RANGE(0x1f00, 0x1f00) AM_WRITEONLY AM_BASE_MEMBER(tp84_state, m_scroll_x)
-	AM_RANGE(0x1f80, 0x1f80) AM_WRITEONLY AM_BASE_MEMBER(tp84_state, m_scroll_y)
+	AM_RANGE(0x1e80, 0x1e80) AM_WRITE(soundlatch_byte_w)
+	AM_RANGE(0x1f00, 0x1f00) AM_WRITEONLY AM_SHARE("scroll_x")
+	AM_RANGE(0x1f80, 0x1f80) AM_WRITEONLY AM_SHARE("scroll_y")
 	AM_RANGE(0x8000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( cpu2_map, AS_PROGRAM, 8 )
+WRITE8_MEMBER(tp84_state::sub_irq_mask_w)
+{
+
+	m_sub_irq_mask = data & 1;
+}
+
+
+static ADDRESS_MAP_START( cpu2_map, AS_PROGRAM, 8, tp84_state )
 //  AM_RANGE(0x0000, 0x0000) AM_RAM /* Watch dog ?*/
 	AM_RANGE(0x2000, 0x2000) AM_READ(tp84_scanline_r) /* beam position */
-	AM_RANGE(0x4000, 0x4000) AM_WRITE(interrupt_enable_w)
+	AM_RANGE(0x4000, 0x4000) AM_WRITE(sub_irq_mask_w)
 	AM_RANGE(0x6000, 0x679f) AM_RAM
-	AM_RANGE(0x67a0, 0x67ff) AM_RAM_WRITE(tp84_spriteram_w) AM_BASE_MEMBER(tp84_state, m_spriteram)
+	AM_RANGE(0x67a0, 0x67ff) AM_RAM_WRITE(tp84_spriteram_w) AM_SHARE("spriteram")
 	AM_RANGE(0x8000, 0x87ff) AM_RAM AM_SHARE("share1")
 	AM_RANGE(0xe000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( audio_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( audio_map, AS_PROGRAM, 8, tp84_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
 	AM_RANGE(0x4000, 0x43ff) AM_RAM
-	AM_RANGE(0x6000, 0x6000) AM_READ(soundlatch_r)
+	AM_RANGE(0x6000, 0x6000) AM_READ(soundlatch_byte_r)
 	AM_RANGE(0x8000, 0x8000) AM_READ(tp84_sh_timer_r)
 	AM_RANGE(0xa000, 0xa1ff) AM_WRITE(tp84_filter_w)
 	AM_RANGE(0xc000, 0xc000) AM_WRITENOP
-	AM_RANGE(0xc001, 0xc001) AM_DEVWRITE("sn1", sn76496_w)
-	AM_RANGE(0xc003, 0xc003) AM_DEVWRITE("sn2", sn76496_w)
-	AM_RANGE(0xc004, 0xc004) AM_DEVWRITE("sn3", sn76496_w)
+	AM_RANGE(0xc001, 0xc001) AM_DEVWRITE("y2404_1", y2404_device, write)
+	AM_RANGE(0xc003, 0xc003) AM_DEVWRITE("y2404_2", y2404_device, write)
+	AM_RANGE(0xc004, 0xc004) AM_DEVWRITE("y2404_3", y2404_device, write)
 ADDRESS_MAP_END
 
 
@@ -205,29 +210,29 @@ static INPUT_PORTS_START( tp84 )
 	KONAMI8_COCKTAIL_B12_UNK
 
 	PORT_START("DSW1")
-	KONAMI_COINAGE(DEF_STR( Free_Play ), "Invalid")
+	KONAMI_COINAGE_LOC(DEF_STR( Free_Play ), "Invalid", SW1)
 	/* "Invalid" = both coin slots disabled */
 
 	PORT_START("DSW2")
-	PORT_DIPNAME( 0x03, 0x02, DEF_STR( Lives ) )
+	PORT_DIPNAME( 0x03, 0x02, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW2:1,2")
 	PORT_DIPSETTING(    0x03, "2" )
 	PORT_DIPSETTING(    0x02, "3" )
 	PORT_DIPSETTING(    0x01, "5" )
 	PORT_DIPSETTING(    0x00, "7" )
-	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Cabinet ) )
+	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Cabinet ) )      PORT_DIPLOCATION("SW2:3")
 	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( Cocktail ) )
-	PORT_DIPNAME( 0x18, 0x10, DEF_STR( Bonus_Life ) )
+	PORT_DIPNAME( 0x18, 0x10, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION("SW2:4,5")
 	PORT_DIPSETTING(    0x18, "10000 and every 50000" )
 	PORT_DIPSETTING(    0x10, "20000 and every 60000" )
 	PORT_DIPSETTING(    0x08, "30000 and every 70000" )
 	PORT_DIPSETTING(    0x00, "40000 and every 80000" )
-	PORT_DIPNAME( 0x60, 0x20, DEF_STR( Difficulty ) )
+	PORT_DIPNAME( 0x60, 0x20, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("SW2:6,7")
 	PORT_DIPSETTING(    0x60, DEF_STR( Easy ) )
-	PORT_DIPSETTING(    0x40, DEF_STR( Normal ) )
-	PORT_DIPSETTING(    0x20, DEF_STR( Hard ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( Normal ) ) // JP default
+	PORT_DIPSETTING(    0x20, DEF_STR( Hard ) )   // US default
 	PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) )
-	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Demo_Sounds ) )
+	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW2:8")
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 INPUT_PORTS_END
@@ -236,7 +241,7 @@ static INPUT_PORTS_START( tp84a )
 	PORT_INCLUDE( tp84 )
 
 	PORT_MODIFY("DSW2")
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Lives ) )
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW2:1,2")
 	PORT_DIPSETTING(    0x03, "3" )
 	PORT_DIPSETTING(    0x02, "4" )
 	PORT_DIPSETTING(    0x01, "5" )
@@ -273,6 +278,29 @@ static GFXDECODE_START( tp84 )
 	GFXDECODE_ENTRY( "gfx2", 0, spritelayout, 64*4*8, 16*8 )
 GFXDECODE_END
 
+INTERRUPT_GEN_MEMBER(tp84_state::sub_vblank_irq)
+{
+
+	if(m_sub_irq_mask)
+		device.execute().set_input_line(0, HOLD_LINE);
+}
+
+
+/*************************************
+ *
+ *  Sound interface
+ *
+ *************************************/
+
+
+//-------------------------------------------------
+//  sn76496_config psg_intf
+//-------------------------------------------------
+
+static const sn76496_config psg_intf =
+{
+	DEVCB_NULL
+};
 
 
 static MACHINE_CONFIG_START( tp84, tp84_state )
@@ -280,46 +308,45 @@ static MACHINE_CONFIG_START( tp84, tp84_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("cpu1",M6809, XTAL_18_432MHz/12) /* verified on pcb */
 	MCFG_CPU_PROGRAM_MAP(tp84_cpu1_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", tp84_state,  irq0_line_hold)
 
-	MCFG_CPU_ADD("sub", M6809, XTAL_18_432MHz/12)	/* verified on pcb */
+	MCFG_CPU_ADD("sub", M6809, XTAL_18_432MHz/12)   /* verified on pcb */
 	MCFG_CPU_PROGRAM_MAP(cpu2_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", tp84_state,  sub_vblank_irq)
 
 	MCFG_CPU_ADD("audiocpu", Z80,XTAL_14_31818MHz/4) /* verified on pcb */
 	MCFG_CPU_PROGRAM_MAP(audio_map)
 
-	MCFG_QUANTUM_TIME(attotime::from_hz(6000))	/* 100 CPU slices per frame - an high value to ensure proper */
+	MCFG_QUANTUM_TIME(attotime::from_hz(6000))  /* 100 CPU slices per frame - an high value to ensure proper */
 							/* synchronization of the CPUs */
 
-	MCFG_MACHINE_START(tp84)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(tp84)
+	MCFG_SCREEN_UPDATE_DRIVER(tp84_state, screen_update_tp84)
 
 	MCFG_GFXDECODE(tp84)
 	MCFG_PALETTE_LENGTH(4096)
 
-	MCFG_PALETTE_INIT(tp84)
-	MCFG_VIDEO_START(tp84)
 
 	/* audio hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("sn1", SN76489A, XTAL_14_31818MHz/8) /* verified on pcb */
+	MCFG_SOUND_ADD("y2404_1", Y2404, XTAL_14_31818MHz/8) /* verified on pcb */
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "filter1", 0.75)
+	MCFG_SOUND_CONFIG(psg_intf)
 
-	MCFG_SOUND_ADD("sn2", SN76489A, XTAL_14_31818MHz/8) /* verified on pcb */
+	MCFG_SOUND_ADD("y2404_2", Y2404, XTAL_14_31818MHz/8) /* verified on pcb */
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "filter2", 0.75)
+	MCFG_SOUND_CONFIG(psg_intf)
 
-	MCFG_SOUND_ADD("sn3", SN76489A, XTAL_14_31818MHz/8) /* verified on pcb */
+	MCFG_SOUND_ADD("y2404_3", Y2404, XTAL_14_31818MHz/8) /* verified on pcb */
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "filter3", 0.75)
+	MCFG_SOUND_CONFIG(psg_intf)
 
 	MCFG_SOUND_ADD("filter1", FILTER_RC, 0)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
@@ -347,10 +374,10 @@ ROM_START( tp84 )
 	ROM_LOAD( "388_f06.9j",  0xc000, 0x2000, CRC(dbd5333b) SHA1(65dee1fd4c940a5423d57cb55a7f2ad89c59c5c6) )
 	ROM_LOAD( "388_07.10j",  0xe000, 0x2000, CRC(a45237c4) SHA1(896e31c59aedf1c7e73e6f30fbe78cc020b457ab) )
 
-	ROM_REGION( 0x10000, "sub", 0 )	/* 64k for the second CPU */
+	ROM_REGION( 0x10000, "sub", 0 ) /* 64k for the second CPU */
 	ROM_LOAD( "388_f08.10d", 0xe000, 0x2000, CRC(36462ff1) SHA1(118a1b46ee01a583e6cf39af59b073321c76dbff) ) /* E08? */
 
-	ROM_REGION( 0x10000, "audiocpu", 0 )	/* 64k for code of sound cpu Z80 */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for code of sound cpu Z80 */
 	ROM_LOAD( "388j13.6a",   0x0000, 0x2000, CRC(c44414da) SHA1(981289f5bdf7dc1348f4ca547ac933ef503b6588) )
 
 	ROM_REGION( 0x4000, "gfx1", 0 )
@@ -378,10 +405,10 @@ ROM_START( tp84a )
 	ROM_LOAD( "388_f06.9j",  0xc000, 0x2000, CRC(dbd5333b) SHA1(65dee1fd4c940a5423d57cb55a7f2ad89c59c5c6) )
 	ROM_LOAD( "388_f07.10j", 0xe000, 0x2000, CRC(8fbdb4ef) SHA1(e615c4d9964ab00f6776147c54925b4b6100b360) )
 
-	ROM_REGION( 0x10000, "sub", 0 )	/* 64k for the second CPU */
+	ROM_REGION( 0x10000, "sub", 0 ) /* 64k for the second CPU */
 	ROM_LOAD( "388_f08.10d", 0xe000, 0x2000, CRC(36462ff1) SHA1(118a1b46ee01a583e6cf39af59b073321c76dbff) ) /* E08? */
 
-	ROM_REGION( 0x10000, "audiocpu", 0 )	/* 64k for code of sound cpu Z80 */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for code of sound cpu Z80 */
 	ROM_LOAD( "388j13.6a",   0x0000, 0x2000, CRC(c44414da) SHA1(981289f5bdf7dc1348f4ca547ac933ef503b6588) )
 
 	ROM_REGION( 0x4000, "gfx1", 0 )
@@ -408,10 +435,10 @@ ROM_START( tp84b )
 	ROM_LOAD( "388j05.8j",   0x8000, 0x4000, CRC(a59e2fda) SHA1(7d776d5d3fcfbe81d42580cfe93614dc4618a440) )
 	ROM_LOAD( "388j07.10j",  0xc000, 0x4000, CRC(d25d18e6) SHA1(043f515cc66f6af004be81d6a6b5a92b553107ff) )
 
-	ROM_REGION( 0x10000, "sub", 0 )	/* 64k for the second CPU */
+	ROM_REGION( 0x10000, "sub", 0 ) /* 64k for the second CPU */
 	ROM_LOAD( "388j08.10d", 0xe000, 0x2000, CRC(2aea6b42) SHA1(58c3b4852f22a766f440b98904b73c00a31eae01) )
 
-	ROM_REGION( 0x10000, "audiocpu", 0 )	/* 64k for code of sound cpu Z80 */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for code of sound cpu Z80 */
 	ROM_LOAD( "388j13.6a", 0x0000, 0x2000, CRC(c44414da) SHA1(981289f5bdf7dc1348f4ca547ac933ef503b6588) )
 
 	ROM_REGION( 0x4000, "gfx1", 0 )
@@ -430,6 +457,6 @@ ROM_START( tp84b )
 ROM_END
 
 
-GAME( 1984, tp84,  0,    tp84,  tp84, 0, ROT90, "Konami", "Time Pilot '84 (set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1984, tp84a, tp84, tp84,  tp84a,0, ROT90, "Konami", "Time Pilot '84 (set 2)", GAME_SUPPORTS_SAVE )
-GAME( 1984, tp84b, tp84, tp84b, tp84, 0, ROT90, "Konami", "Time Pilot '84 (set 3)", GAME_SUPPORTS_SAVE )
+GAME( 1984, tp84,  0,    tp84,  tp84, driver_device, 0, ROT90, "Konami", "Time Pilot '84 (set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1984, tp84a, tp84, tp84,  tp84a, driver_device,0, ROT90, "Konami", "Time Pilot '84 (set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1984, tp84b, tp84, tp84b, tp84, driver_device, 0, ROT90, "Konami", "Time Pilot '84 (set 3)", GAME_SUPPORTS_SAVE )

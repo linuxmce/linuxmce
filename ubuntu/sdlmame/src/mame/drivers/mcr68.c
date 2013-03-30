@@ -7,7 +7,7 @@
     Games supported:
         * Zwackery (Chip Squeak Deluxe)
         * Xenopohobe (Sounds Good)
-        * Spy Hunter 2 (Sounds Good/Turbo Chip Squeak)
+        * Spy Hunter II (Sounds Good/Turbo Chip Squeak)
         * Blasted (Sounds Good)
         * Arch Rivals
         * Tri-Sports
@@ -55,9 +55,8 @@
 
 #include "emu.h"
 #include "cpu/m68000/m68000.h"
-#include "audio/mcr.h"
-#include "audio/williams.h"
 #include "machine/nvram.h"
+#include "includes/mcr.h"
 #include "includes/mcr68.h"
 
 
@@ -68,16 +67,16 @@
  *
  *************************************/
 
-READ8_DEVICE_HANDLER( zwackery_port_2_r )
+READ8_MEMBER(mcr68_state::zwackery_port_2_r)
 {
-	int result = input_port_read(device->machine(), "IN2");
-	int wheel = input_port_read(device->machine(), "IN5");
+	int result = machine().root_device().ioport("IN2")->read();
+	int wheel = machine().root_device().ioport("IN5")->read();
 
 	return result | ((wheel >> 2) & 0x3e);
 }
 
 
-static READ16_HANDLER( zwackery_6840_r )
+READ16_MEMBER(mcr68_state::zwackery_6840_r)
 {
 	/* Zwackery does a timer test:                          */
 	/* It loads $1388 into one of the timers clocked by E   */
@@ -87,7 +86,7 @@ static READ16_HANDLER( zwackery_6840_r )
 	/* It expects D1 to end up between 0 and 5; in order to */
 	/* make this happen, we must assume that reads from the */
 	/* 6840 take 14 additional cycles                       */
-	device_adjust_icount(&space->device(), -14);
+	space.device().execute().adjust_icount(-14);
 	return mcr68_6840_upper_r(space,offset,0xffff);
 }
 
@@ -99,12 +98,11 @@ static READ16_HANDLER( zwackery_6840_r )
  *
  *************************************/
 
-static WRITE16_HANDLER( xenophobe_control_w )
+WRITE16_MEMBER(mcr68_state::xenophobe_control_w)
 {
-	mcr68_state *state = space->machine().driver_data<mcr68_state>();
-	COMBINE_DATA(&state->m_control_word);
-/*  soundsgood_reset_w(~state->m_control_word & 0x0020);*/
-	soundsgood_data_w(space, offset, ((state->m_control_word & 0x000f) << 1) | ((state->m_control_word & 0x0010) >> 4));
+	COMBINE_DATA(&m_control_word);
+/*  m_sounds_good->reset_write(~m_control_word & 0x0020);*/
+	m_sounds_good->write(space, offset, ((m_control_word & 0x000f) << 1) | ((m_control_word & 0x0010) >> 4));
 }
 
 
@@ -115,51 +113,48 @@ static WRITE16_HANDLER( xenophobe_control_w )
  *
  *************************************/
 
-static WRITE16_HANDLER( blasted_control_w )
+WRITE16_MEMBER(mcr68_state::blasted_control_w)
 {
-	mcr68_state *state = space->machine().driver_data<mcr68_state>();
-	COMBINE_DATA(&state->m_control_word);
-/*  soundsgood_reset_w(~state->m_control_word & 0x0020);*/
-	soundsgood_data_w(space, offset, (state->m_control_word >> 8) & 0x1f);
+	COMBINE_DATA(&m_control_word);
+/*  m_sounds_good->reset_write(~m_control_word & 0x0020);*/
+	m_sounds_good->write(space, offset, (m_control_word >> 8) & 0x1f);
 }
 
 
 
 /*************************************
  *
- *  Spy Hunter 2-specific handlers
+ *  Spy Hunter II-specific handlers
  *
  *************************************/
 
-static READ16_HANDLER( spyhunt2_port_0_r )
+READ16_MEMBER(mcr68_state::spyhunt2_port_0_r)
 {
-	mcr68_state *state = space->machine().driver_data<mcr68_state>();
 	static const char *const portnames[] = { "AN1", "AN2", "AN3", "AN4" };
-	int result = input_port_read(space->machine(), "IN0");
-	int which = (state->m_control_word >> 3) & 3;
-	int analog = input_port_read(space->machine(), portnames[which]);
+	int result = ioport("IN0")->read();
+	int which = (m_control_word >> 3) & 3;
+	int analog = ioport(portnames[which])->read();
 
-	return result | ((soundsgood_status_r(space, 0) & 1) << 5) | (analog << 8);
+	return result | ((m_sounds_good->read(space, 0) & 1) << 5) | (analog << 8);
 }
 
 
-static READ16_HANDLER( spyhunt2_port_1_r )
+READ16_MEMBER(mcr68_state::spyhunt2_port_1_r)
 {
-	int result = input_port_read(space->machine(), "IN1");
-	return result | ((turbocs_status_r(space, 0) & 1) << 7);
+	int result = ioport("IN1")->read();
+	return result | ((m_turbo_chip_squeak->read(space, 0) & 1) << 7);
 }
 
 
-static WRITE16_HANDLER( spyhunt2_control_w )
+WRITE16_MEMBER(mcr68_state::spyhunt2_control_w)
 {
-	mcr68_state *state = space->machine().driver_data<mcr68_state>();
-	COMBINE_DATA(&state->m_control_word);
+	COMBINE_DATA(&m_control_word);
 
-/*  turbocs_reset_w(~state->m_control_word & 0x0080);*/
-	turbocs_data_w(space, offset, (state->m_control_word >> 8) & 0x001f);
+/*  m_turbo_chip_squeak->reset_write(~m_control_word & 0x0080);*/
+	m_turbo_chip_squeak->write(space, offset, (m_control_word >> 8) & 0x001f);
 
-	soundsgood_reset_w(space->machine(), ~state->m_control_word & 0x2000);
-	soundsgood_data_w(space, offset, (state->m_control_word >> 8) & 0x001f);
+	m_sounds_good->reset_write(~m_control_word & 0x2000);
+	m_sounds_good->write(space, offset, (m_control_word >> 8) & 0x001f);
 }
 
 
@@ -197,21 +192,20 @@ static WRITE16_HANDLER( spyhunt2_control_w )
 
 static const UINT8 translate49[7] = { 0x7, 0x3, 0x1, 0x0, 0xc, 0xe, 0xf };
 
-static READ16_HANDLER( archrivl_port_1_r )
+READ16_MEMBER(mcr68_state::archrivl_port_1_r)
 {
-	return (translate49[input_port_read(space->machine(), "49WAYY2") >> 4] << 12) |
-			(translate49[input_port_read(space->machine(), "49WAYX2") >> 4] << 8) |
-			(translate49[input_port_read(space->machine(), "49WAYY1") >> 4] << 4) |
-			(translate49[input_port_read(space->machine(), "49WAYX1") >> 4] << 0);
+	return (translate49[ioport("49WAYY2")->read() >> 4] << 12) |
+			(translate49[ioport("49WAYX2")->read() >> 4] << 8) |
+			(translate49[ioport("49WAYY1")->read() >> 4] << 4) |
+			(translate49[ioport("49WAYX1")->read() >> 4] << 0);
 }
 
 
-static WRITE16_HANDLER( archrivl_control_w )
+WRITE16_MEMBER(mcr68_state::archrivl_control_w)
 {
-	mcr68_state *state = space->machine().driver_data<mcr68_state>();
-	COMBINE_DATA(&state->m_control_word);
-	williams_cvsd_reset_w(~state->m_control_word & 0x0400);
-	williams_cvsd_data_w(space->machine(), state->m_control_word & 0x3ff);
+	COMBINE_DATA(&m_control_word);
+	m_cvsd_sound->reset_write(~m_control_word & 0x0400);
+	m_cvsd_sound->write(space, 0, m_control_word & 0x3ff);
 }
 
 
@@ -222,60 +216,58 @@ static WRITE16_HANDLER( archrivl_control_w )
  *
  *************************************/
 
-static WRITE16_HANDLER( pigskin_protection_w )
+WRITE16_MEMBER(mcr68_state::pigskin_protection_w)
 {
-	mcr68_state *state = space->machine().driver_data<mcr68_state>();
 	/* ignore upper-byte only */
 	if (ACCESSING_BITS_0_7)
 	{
 		/* track the last 5 bytes */
-		state->m_protection_data[0] = state->m_protection_data[1];
-		state->m_protection_data[1] = state->m_protection_data[2];
-		state->m_protection_data[2] = state->m_protection_data[3];
-		state->m_protection_data[3] = state->m_protection_data[4];
-		state->m_protection_data[4] = data & 0xff;
+		m_protection_data[0] = m_protection_data[1];
+		m_protection_data[1] = m_protection_data[2];
+		m_protection_data[2] = m_protection_data[3];
+		m_protection_data[3] = m_protection_data[4];
+		m_protection_data[4] = data & 0xff;
 
-		logerror("%06X:protection_w=%02X\n", cpu_get_previouspc(&space->device()), data & 0xff);
+		logerror("%06X:protection_w=%02X\n", space.device().safe_pcbase(), data & 0xff);
 	}
 }
 
 
-static READ16_HANDLER( pigskin_protection_r )
+READ16_MEMBER(mcr68_state::pigskin_protection_r)
 {
-	mcr68_state *state = space->machine().driver_data<mcr68_state>();
 	/* based on the last 5 bytes return a value */
-	if (state->m_protection_data[4] == 0xe3 && state->m_protection_data[3] == 0x94)
-		return 0x00;	/* must be <= 1 */
-	if (state->m_protection_data[4] == 0xc7 && state->m_protection_data[3] == 0x7b && state->m_protection_data[2] == 0x36)
-		return 0x00;	/* must be <= 1 */
-	if (state->m_protection_data[4] == 0xc7 && state->m_protection_data[3] == 0x7b)
-		return 0x07;	/* must be > 5 */
-	if (state->m_protection_data[4] == 0xc7 && state->m_protection_data[3] == 0x1f && state->m_protection_data[2] == 0x03 &&
-		state->m_protection_data[1] == 0x25 && state->m_protection_data[0] == 0x36)
-		return 0x00;	/* must be < 3 */
+	if (m_protection_data[4] == 0xe3 && m_protection_data[3] == 0x94)
+		return 0x00;    /* must be <= 1 */
+	if (m_protection_data[4] == 0xc7 && m_protection_data[3] == 0x7b && m_protection_data[2] == 0x36)
+		return 0x00;    /* must be <= 1 */
+	if (m_protection_data[4] == 0xc7 && m_protection_data[3] == 0x7b)
+		return 0x07;    /* must be > 5 */
+	if (m_protection_data[4] == 0xc7 && m_protection_data[3] == 0x1f && m_protection_data[2] == 0x03 &&
+		m_protection_data[1] == 0x25 && m_protection_data[0] == 0x36)
+		return 0x00;    /* must be < 3 */
 
 	logerror("Protection read after unrecognized sequence: %02X %02X %02X %02X %02X\n",
-			state->m_protection_data[0], state->m_protection_data[1], state->m_protection_data[2], state->m_protection_data[3], state->m_protection_data[4]);
+			m_protection_data[0], m_protection_data[1], m_protection_data[2], m_protection_data[3], m_protection_data[4]);
 
 	return 0x00;
 }
 
 
-static READ16_HANDLER( pigskin_port_1_r )
+READ16_MEMBER(mcr68_state::pigskin_port_1_r)
 {
 	/* see archrivl_port_1_r for 49-way joystick description */
-	return input_port_read(space->machine(), "IN1") |
-			(translate49[input_port_read(space->machine(), "49WAYX1") >> 4] << 12) |
-			(translate49[input_port_read(space->machine(), "49WAYY1") >> 4] << 8);
+	return ioport("IN1")->read() |
+			(translate49[ioport("49WAYX1")->read() >> 4] << 12) |
+			(translate49[ioport("49WAYY1")->read() >> 4] << 8);
 }
 
 
-static READ16_HANDLER( pigskin_port_2_r )
+READ16_MEMBER(mcr68_state::pigskin_port_2_r)
 {
 	/* see archrivl_port_1_r for 49-way joystick description */
-	return input_port_read(space->machine(), "DSW") |
-			(translate49[input_port_read(space->machine(), "49WAYX2") >> 4] << 12) |
-			(translate49[input_port_read(space->machine(), "49WAYY2") >> 4] << 8);
+	return ioport("DSW")->read() |
+			(translate49[ioport("49WAYX2")->read() >> 4] << 12) |
+			(translate49[ioport("49WAYY2")->read() >> 4] << 8);
 }
 
 
@@ -286,11 +278,11 @@ static READ16_HANDLER( pigskin_port_2_r )
  *
  *************************************/
 
-static READ16_HANDLER( trisport_port_1_r )
+READ16_MEMBER(mcr68_state::trisport_port_1_r)
 {
-	int xaxis = (INT8)input_port_read(space->machine(), "AN1");
-	int yaxis = (INT8)input_port_read(space->machine(), "AN2");
-	int result = input_port_read(space->machine(), "IN1");
+	int xaxis = (INT8)ioport("AN1")->read();
+	int yaxis = (INT8)ioport("AN2")->read();
+	int result = ioport("IN1")->read();
 
 	result |= (xaxis & 0x3c) << 6;
 	result |= (yaxis & 0x3c) << 10;
@@ -306,15 +298,15 @@ static READ16_HANDLER( trisport_port_1_r )
  *
  *************************************/
 
-static ADDRESS_MAP_START( mcr68_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( mcr68_map, AS_PROGRAM, 16, mcr68_state )
 	ADDRESS_MAP_UNMAP_HIGH
 	ADDRESS_MAP_GLOBAL_MASK(0x1fffff)
 	AM_RANGE(0x000000, 0x03ffff) AM_ROM
 	AM_RANGE(0x060000, 0x063fff) AM_RAM
-	AM_RANGE(0x070000, 0x070fff) AM_RAM_WRITE(mcr68_videoram_w) AM_BASE_MEMBER(mcr68_state, m_videoram)
+	AM_RANGE(0x070000, 0x070fff) AM_RAM_WRITE(mcr68_videoram_w) AM_SHARE("videoram")
 	AM_RANGE(0x071000, 0x071fff) AM_RAM
-	AM_RANGE(0x080000, 0x080fff) AM_RAM AM_BASE_SIZE_MEMBER(mcr68_state, m_spriteram, m_spriteram_size)
-	AM_RANGE(0x090000, 0x09007f) AM_WRITE(mcr68_paletteram_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x080000, 0x080fff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0x090000, 0x09007f) AM_WRITE(mcr68_paletteram_w) AM_SHARE("paletteram")
 	AM_RANGE(0x0a0000, 0x0a000f) AM_READWRITE(mcr68_6840_upper_r, mcr68_6840_upper_w)
 	AM_RANGE(0x0b0000, 0x0bffff) AM_WRITE(watchdog_reset16_w)
 	AM_RANGE(0x0d0000, 0x0dffff) AM_READ_PORT("IN0")
@@ -330,18 +322,18 @@ ADDRESS_MAP_END
  *
  *************************************/
 
-static ADDRESS_MAP_START( zwackery_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( zwackery_map, AS_PROGRAM, 16, mcr68_state )
 	ADDRESS_MAP_UNMAP_HIGH
 	AM_RANGE(0x000000, 0x037fff) AM_ROM
 	AM_RANGE(0x080000, 0x080fff) AM_RAM
 	AM_RANGE(0x084000, 0x084fff) AM_RAM
-	AM_RANGE(0x100000, 0x10000f) AM_READWRITE(zwackery_6840_r, mcr68_6840_upper_w)
-	AM_RANGE(0x104000, 0x104007) AM_DEVREADWRITE8("pia0", pia6821_r, pia6821_w, 0xff00)
-	AM_RANGE(0x108000, 0x108007) AM_DEVREADWRITE8("pia1", pia6821_r, pia6821_w, 0x00ff)
-	AM_RANGE(0x10c000, 0x10c007) AM_DEVREADWRITE8("pia2", pia6821_r, pia6821_w, 0x00ff)
-	AM_RANGE(0x800000, 0x800fff) AM_RAM_WRITE(zwackery_videoram_w) AM_BASE_MEMBER(mcr68_state, m_videoram)
-	AM_RANGE(0x802000, 0x803fff) AM_RAM_WRITE(zwackery_paletteram_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0xc00000, 0xc00fff) AM_RAM_WRITE(zwackery_spriteram_w) AM_BASE_SIZE_MEMBER(mcr68_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0x100000, 0x10000f) AM_READ(zwackery_6840_r) AM_WRITE(mcr68_6840_upper_w)
+	AM_RANGE(0x104000, 0x104007) AM_DEVREADWRITE8("pia0", pia6821_device, read, write, 0xff00)
+	AM_RANGE(0x108000, 0x108007) AM_DEVREADWRITE8("pia1", pia6821_device, read, write, 0x00ff)
+	AM_RANGE(0x10c000, 0x10c007) AM_DEVREADWRITE8("pia2", pia6821_device, read, write, 0x00ff)
+	AM_RANGE(0x800000, 0x800fff) AM_RAM_WRITE(zwackery_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0x802000, 0x803fff) AM_RAM_WRITE(zwackery_paletteram_w) AM_SHARE("paletteram")
+	AM_RANGE(0xc00000, 0xc00fff) AM_RAM_WRITE(zwackery_spriteram_w) AM_SHARE("spriteram")
 ADDRESS_MAP_END
 
 
@@ -352,18 +344,18 @@ ADDRESS_MAP_END
  *
  *************************************/
 
-static ADDRESS_MAP_START( pigskin_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( pigskin_map, AS_PROGRAM, 16, mcr68_state )
 	ADDRESS_MAP_UNMAP_HIGH
 	ADDRESS_MAP_GLOBAL_MASK(0x1fffff)
 	AM_RANGE(0x000000, 0x03ffff) AM_ROM
 	AM_RANGE(0x080000, 0x08ffff) AM_READ(pigskin_port_1_r)
 	AM_RANGE(0x0a0000, 0x0affff) AM_READ(pigskin_port_2_r)
-	AM_RANGE(0x0c0000, 0x0c007f) AM_WRITE(mcr68_paletteram_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x0c0000, 0x0c007f) AM_WRITE(mcr68_paletteram_w) AM_SHARE("paletteram")
 	AM_RANGE(0x0e0000, 0x0effff) AM_WRITE(watchdog_reset16_w)
-	AM_RANGE(0x100000, 0x100fff) AM_RAM_WRITE(mcr68_videoram_w) AM_BASE_MEMBER(mcr68_state, m_videoram)
+	AM_RANGE(0x100000, 0x100fff) AM_RAM_WRITE(mcr68_videoram_w) AM_SHARE("videoram")
 	AM_RANGE(0x120000, 0x120001) AM_READWRITE(pigskin_protection_r, pigskin_protection_w)
 	AM_RANGE(0x140000, 0x143fff) AM_RAM
-	AM_RANGE(0x160000, 0x1607ff) AM_RAM AM_BASE_SIZE_MEMBER(mcr68_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0x160000, 0x1607ff) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0x180000, 0x18000f) AM_READWRITE(mcr68_6840_upper_r, mcr68_6840_upper_w)
 	AM_RANGE(0x1a0000, 0x1affff) AM_WRITE(archrivl_control_w)
 	AM_RANGE(0x1e0000, 0x1effff) AM_READ_PORT("IN0")
@@ -377,16 +369,16 @@ ADDRESS_MAP_END
  *
  *************************************/
 
-static ADDRESS_MAP_START( trisport_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( trisport_map, AS_PROGRAM, 16, mcr68_state )
 	ADDRESS_MAP_UNMAP_HIGH
 	ADDRESS_MAP_GLOBAL_MASK(0x1fffff)
 	AM_RANGE(0x000000, 0x03ffff) AM_ROM
 	AM_RANGE(0x080000, 0x08ffff) AM_READ(trisport_port_1_r)
 	AM_RANGE(0x0a0000, 0x0affff) AM_READ_PORT("DSW")
 	AM_RANGE(0x100000, 0x103fff) AM_RAM AM_SHARE("nvram")
-	AM_RANGE(0x120000, 0x12007f) AM_WRITE(mcr68_paletteram_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0x140000, 0x1407ff) AM_RAM AM_BASE_SIZE_MEMBER(mcr68_state, m_spriteram, m_spriteram_size)
-	AM_RANGE(0x160000, 0x160fff) AM_RAM_WRITE(mcr68_videoram_w) AM_BASE_MEMBER(mcr68_state, m_videoram)
+	AM_RANGE(0x120000, 0x12007f) AM_WRITE(mcr68_paletteram_w) AM_SHARE("paletteram")
+	AM_RANGE(0x140000, 0x1407ff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0x160000, 0x160fff) AM_RAM_WRITE(mcr68_videoram_w) AM_SHARE("videoram")
 	AM_RANGE(0x180000, 0x18000f) AM_READWRITE(mcr68_6840_upper_r, mcr68_6840_upper_w)
 	AM_RANGE(0x1a0000, 0x1affff) AM_WRITE(archrivl_control_w)
 	AM_RANGE(0x1c0000, 0x1cffff) AM_WRITE(watchdog_reset16_w)
@@ -410,26 +402,26 @@ static INPUT_PORTS_START( zwackery )
 	PORT_SERVICE( 0x0010, IP_ACTIVE_LOW )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_TILT )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 )	/* sword */
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 )    /* sword */
 
 	PORT_START("IN1")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY
-	PORT_BIT( 0xf0, IP_ACTIVE_LOW, IPT_SPECIAL )	/* sound communications */
+	PORT_BIT( 0xf0, IP_ACTIVE_LOW, IPT_SPECIAL )    /* sound communications */
 
 	PORT_START("IN2")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON3 )	/* spell up */
-	PORT_BIT( 0x3e, IP_ACTIVE_HIGH, IPT_UNUSED )	/* encoder wheel */
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 )	/* shield */
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON4 )	/* spell down */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON3 )    /* spell up */
+	PORT_BIT( 0x3e, IP_ACTIVE_HIGH, IPT_UNUSED )    /* encoder wheel */
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 )    /* shield */
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON4 )    /* spell down */
 
 	PORT_START("IN3")
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("DSW")
-	PORT_DIPNAME( 0x07, 0x00, DEF_STR( Coinage ) )
+	PORT_DIPNAME( 0x07, 0x00, DEF_STR( Coinage ) )      PORT_DIPLOCATION("SW1:1,2,3")
 	PORT_DIPSETTING(    0x05, DEF_STR( 6C_1C ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( 5C_1C ) )
 	PORT_DIPSETTING(    0x03, DEF_STR( 4C_1C ) )
@@ -438,7 +430,7 @@ static INPUT_PORTS_START( zwackery )
 	PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(    0x06, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(    0x07, DEF_STR( Free_Play ) )
-	PORT_DIPNAME( 0x38, 0x00, "Buy-in" )
+	PORT_DIPNAME( 0x38, 0x00, "Buy-in" )            PORT_DIPLOCATION("SW1:4,5,6")
 	PORT_DIPSETTING(    0x00, "1 coin" )
 	PORT_DIPSETTING(    0x08, "2 coins" )
 	PORT_DIPSETTING(    0x10, "3 coins" )
@@ -447,7 +439,7 @@ static INPUT_PORTS_START( zwackery )
 	PORT_DIPSETTING(    0x28, "6 coins" )
 	PORT_DIPSETTING(    0x30, "7 coins" )
 	PORT_DIPSETTING(    0x38, DEF_STR( None ) )
-	PORT_DIPNAME( 0xc0, 0x00, DEF_STR( Difficulty ) )
+	PORT_DIPNAME( 0xc0, 0x00, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("SW1:7,8")
 	PORT_DIPSETTING(    0xc0, DEF_STR( Easier ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Normal ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( Harder ) )
@@ -494,21 +486,22 @@ static INPUT_PORTS_START( xenophob )
 	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(3)
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("DSW")
-	PORT_BIT( 0x0003, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_DIPNAME( 0x0004, 0x0004, DEF_STR( Free_Play ) )
+	PORT_START("DSW")   /* There are actually 10 switches, but where do 9 & 10 map to?? (10=Freeze Screen) */
+	PORT_DIPUNUSED_DIPLOC( 0x0001, IP_ACTIVE_LOW, "SW1:1" )
+	PORT_DIPUNUSED_DIPLOC( 0x0002, IP_ACTIVE_LOW, "SW1:2" )
+	PORT_DIPNAME( 0x0004, 0x0004, DEF_STR( Free_Play ) )    PORT_DIPLOCATION("SW1:3")
 	PORT_DIPSETTING(      0x0004, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0008, 0x0008, "Coins per Life Unit" )
+	PORT_DIPNAME( 0x0008, 0x0008, "Coins per Life Unit" )   PORT_DIPLOCATION("SW1:4")
 	PORT_DIPSETTING(      0x0008, "1" )
 	PORT_DIPSETTING(      0x0000, "2" )
-	PORT_DIPNAME( 0x0010, 0x0010, "Life Unit" )
+	PORT_DIPNAME( 0x0010, 0x0010, "Life Unit" )     PORT_DIPLOCATION("SW1:5")
 	PORT_DIPSETTING(      0x0010, "1000" )
 	PORT_DIPSETTING(      0x0000, "2000" )
-	PORT_DIPNAME( 0x0020, 0x0020, DEF_STR( Demo_Sounds ) )
+	PORT_DIPNAME( 0x0020, 0x0020, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW1:6")
 	PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0020, DEF_STR( On ) )
-	PORT_DIPNAME( 0x00c0, 0x0000, DEF_STR( Difficulty ) )
+	PORT_DIPNAME( 0x00c0, 0x0000, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("SW1:7,8")
 	PORT_DIPSETTING(      0x0040, DEF_STR( Easy ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( Medium ) )
 	PORT_DIPSETTING(      0x0080, DEF_STR( Hard ) )
@@ -547,31 +540,31 @@ static INPUT_PORTS_START( spyhunt2 )
 	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1) PORT_NAME ("P1 R Trigger")/* Right Trigger */
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(1) PORT_NAME ("P1 R Button")/* Right Button */
 
-	PORT_START("DSW")	/* dipswitches */
-	PORT_DIPNAME( 0x0003, 0x0003, DEF_STR( Coinage ) )
+	PORT_START("DSW")   /* dipswitches */
+	PORT_DIPNAME( 0x0003, 0x0003, DEF_STR( Coinage ) )  PORT_DIPLOCATION("SW1:1,2")
 	PORT_DIPSETTING(      0x0002, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(      0x0003, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(      0x0001, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(      0x0000, "1C/2C (duplicate)" )
-	PORT_DIPNAME( 0x0004, 0x0004, DEF_STR( Free_Play ) )
+	PORT_DIPNAME( 0x0004, 0x0004, DEF_STR( Free_Play ) )    PORT_DIPLOCATION("SW1:3")
 	PORT_DIPSETTING(      0x0004, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0018, 0x0008, "Point Threshholds" )
+	PORT_DIPNAME( 0x0018, 0x0008, "Point Threshholds" ) PORT_DIPLOCATION("SW1:4,5")
 	PORT_DIPSETTING(      0x0008, DEF_STR( Easy ) )
 	PORT_DIPSETTING(      0x0018, DEF_STR( Medium ) )
 	PORT_DIPSETTING(      0x0010, DEF_STR( Hard ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( Hardest ) )
-	PORT_DIPNAME( 0x0060, 0x0060, "Free Timer After" )
+	PORT_DIPNAME( 0x0060, 0x0060, "Free Timer After" )  PORT_DIPLOCATION("SW1:6,7")
 	PORT_DIPSETTING(      0x0000, "30 sec" )
 	PORT_DIPSETTING(      0x0040, "45 sec" )
 	PORT_DIPSETTING(      0x0060, "60 sec" )
 	PORT_DIPSETTING(      0x0020, "90 sec" )
-	PORT_DIPNAME( 0x0080, 0x0080, "Rack Advance (Cheat)" ) PORT_CODE(KEYCODE_F1)
+	PORT_DIPNAME( 0x0080, 0x0080, "Rack Advance (Cheat)" ) PORT_CODE(KEYCODE_F1)    PORT_DIPLOCATION("SW1:8")
 	PORT_DIPSETTING(      0x0080, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("AN1")	/* analog ports for steering and pedals */
+	PORT_START("AN1")   /* analog ports for steering and pedals */
 	PORT_BIT( 0xff, 0x30, IPT_PEDAL ) PORT_MINMAX(0x30,0xff) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_REVERSE PORT_PLAYER(2)
 
 	PORT_START("AN2")
@@ -613,23 +606,24 @@ static INPUT_PORTS_START( blasted )
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("DSW")
-	PORT_DIPNAME( 0x0003, 0x0003, DEF_STR( Coinage ) )
+	PORT_DIPNAME( 0x0003, 0x0003, DEF_STR( Coinage ) )  PORT_DIPLOCATION("SW1:1,2")
 	PORT_DIPSETTING(      0x0002, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(      0x0003, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(      0x0001, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(      0x0000, "1C/2C (duplicate)" )
-	PORT_DIPNAME( 0x000c, 0x0000, DEF_STR( Difficulty ) )
+	PORT_DIPNAME( 0x000c, 0x0000, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("SW1:3,4")
 	PORT_DIPSETTING(      0x0008, DEF_STR( Easy ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( Medium ) )
 	PORT_DIPSETTING(      0x0004, DEF_STR( Hard ) )
 	PORT_DIPSETTING(      0x000c, "Medium (duplicate)" )
-	PORT_DIPNAME( 0x0020, 0x0020, "Dollar Receptor" )
+	PORT_DIPUNUSED_DIPLOC( 0x0010, IP_ACTIVE_LOW, "SW1:5" )
+	PORT_DIPNAME( 0x0020, 0x0020, "Dollar Receptor" )   PORT_DIPLOCATION("SW1:6")
 	PORT_DIPSETTING(      0x0020, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0040, 0x0040, DEF_STR( Demo_Sounds ) )
+	PORT_DIPNAME( 0x0040, 0x0040, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW1:7")
 	PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0040, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0080, 0x0080, "Rack Advance (Cheat)" ) PORT_CODE(KEYCODE_F1)
+	PORT_DIPNAME( 0x0080, 0x0080, "Rack Advance (Cheat)" ) PORT_CODE(KEYCODE_F1)    PORT_DIPLOCATION("SW1:8")
 	PORT_DIPSETTING(      0x0080, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -670,30 +664,19 @@ static INPUT_PORTS_START( intlaser )
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(4)
 
 	PORT_START("DSW")
-    PORT_DIPNAME( 0x0001, 0x0001, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x0001, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x0002, 0x0002, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x0002, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x0004, 0x0004, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x0004, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x0008, 0x0008, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x0008, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x0010, 0x0010, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x0010, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x0020, 0x0020, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x0020, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x0040, 0x0040, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x0040, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x0080, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x0003, 0x0003, DEF_STR( Coinage ) )  PORT_DIPLOCATION("SW1:1,2")
+	PORT_DIPSETTING(      0x0002, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(      0x0003, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(      0x0001, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(      0x0000, "1C/1C (duplicate)" )
+	PORT_DIPUNUSED_DIPLOC( 0x0004, IP_ACTIVE_LOW, "SW1:3" )
+	PORT_DIPUNUSED_DIPLOC( 0x0008, IP_ACTIVE_LOW, "SW1:4" )
+	PORT_DIPUNUSED_DIPLOC( 0x0010, IP_ACTIVE_LOW, "SW1:5" )
+	PORT_DIPUNUSED_DIPLOC( 0x0020, IP_ACTIVE_LOW, "SW1:6" )
+	PORT_DIPUNUSED_DIPLOC( 0x0040, IP_ACTIVE_LOW, "SW1:7" )
+	PORT_DIPNAME( 0x0080, 0x0080, "Rack Advance (Cheat)" ) PORT_CODE(KEYCODE_F1)    PORT_DIPLOCATION("SW1:8")
+	PORT_DIPSETTING(      0x0080, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 INPUT_PORTS_END
 
@@ -716,15 +699,15 @@ static INPUT_PORTS_START( archrivl )
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
 
 	PORT_START("IN1")
-	PORT_BIT( 0xffff, IP_ACTIVE_HIGH, IPT_UNUSED )	/* player 1/2 joysticks go here */
+	PORT_BIT( 0xffff, IP_ACTIVE_HIGH, IPT_UNUSED )  /* player 1/2 joysticks go here */
 
-	PORT_START("DSW")
-	PORT_DIPNAME( 0x0003, 0x0003, DEF_STR( Game_Time ) )
+	PORT_START("DSW")   /* There are actually 10 switches, but where do 9 & 10 map to?? (10=Freeze Screen) */
+	PORT_DIPNAME( 0x0003, 0x0003, DEF_STR( Game_Time ) )    PORT_DIPLOCATION("SW1:1,2")
 	PORT_DIPSETTING(      0x0003, "Preset Time" )
 	PORT_DIPSETTING(      0x0002, "Preset + 10sec" )
 	PORT_DIPSETTING(      0x0001, "Preset + 20sec" )
 	PORT_DIPSETTING(      0x0000, "Preset + 30sec" )
-	PORT_DIPNAME( 0x001c, 0x001c, DEF_STR( Coinage ) )
+	PORT_DIPNAME( 0x001c, 0x001c, DEF_STR( Coinage ) )  PORT_DIPLOCATION("SW1:3,4,5")
 	PORT_DIPSETTING(      0x0014, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(      0x0018, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(      0x001c, DEF_STR( 1C_1C ) )
@@ -733,27 +716,27 @@ static INPUT_PORTS_START( archrivl )
 	PORT_DIPSETTING(      0x0008, DEF_STR( 1C_3C ) )
 	PORT_DIPSETTING(      0x0004, DEF_STR( 1C_5C ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( 1C_6C ) )
-	PORT_DIPNAME( 0x0020, 0x0020, "Team Names" )
+	PORT_DIPNAME( 0x0020, 0x0020, "Team Names" )        PORT_DIPLOCATION("SW1:6")
 	PORT_DIPSETTING(      0x0020, "Default" )
 	PORT_DIPSETTING(      0x0000, "Hometown Heroes" )
-	PORT_DIPNAME( 0x0040, 0x0040, DEF_STR( Demo_Sounds ) )
+	PORT_DIPNAME( 0x0040, 0x0040, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW1:7")
 	PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0040, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( Free_Play ) )
+	PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( Free_Play ) )    PORT_DIPLOCATION("SW1:8")
 	PORT_DIPSETTING(      0x0080, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("49WAYX1")	/* converted to standard 49-way inputs */
+	PORT_START("49WAYX1")   /* converted to standard 49-way inputs */
 	PORT_BIT( 0xff, 0x38, IPT_AD_STICK_X ) PORT_PLAYER(1) PORT_MINMAX(0x00,0x6f) PORT_SENSITIVITY(100) PORT_KEYDELTA(10)
 
-	PORT_START("49WAYY1")	/* converted to standard 49-way inputs */
+	PORT_START("49WAYY1")   /* converted to standard 49-way inputs */
 	PORT_BIT( 0xff, 0x38, IPT_AD_STICK_Y ) PORT_PLAYER(1) PORT_MINMAX(0x00,0x6f) PORT_SENSITIVITY(100) PORT_KEYDELTA(10)
 
-	PORT_START("49WAYX2")	/* converted to standard 49-way inputs */
+	PORT_START("49WAYX2")   /* converted to standard 49-way inputs */
 	PORT_BIT( 0xff, 0x38, IPT_AD_STICK_X ) PORT_PLAYER(2) PORT_MINMAX(0x00,0x6f) PORT_SENSITIVITY(100) PORT_KEYDELTA(10)
 
-	PORT_START("49WAYY2")	/* converted to standard 49-way inputs */
+	PORT_START("49WAYY2")   /* converted to standard 49-way inputs */
 	PORT_BIT( 0xff, 0x38, IPT_AD_STICK_Y ) PORT_PLAYER(2) PORT_MINMAX(0x00,0x6f) PORT_SENSITIVITY(100) PORT_KEYDELTA(10)
 INPUT_PORTS_END
 
@@ -783,43 +766,43 @@ static INPUT_PORTS_START( pigskin )
 	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0xff00, IP_ACTIVE_HIGH, IPT_UNUSED )	/* player 1 joystick goes here */
+	PORT_BIT( 0xff00, IP_ACTIVE_HIGH, IPT_UNUSED )  /* player 1 joystick goes here */
 
-	PORT_START("DSW")
-	PORT_DIPNAME( 0x0003, 0x0003, DEF_STR( Game_Time ) )
+	PORT_START("DSW")   /* There are actually 10 switches, but where do 9 & 10 map to?? (10=Freeze Screen) */
+	PORT_DIPNAME( 0x0003, 0x0003, DEF_STR( Game_Time ) )    PORT_DIPLOCATION("SW1:1,2")
 	PORT_DIPSETTING(      0x0000, "Shortest" )
 	PORT_DIPSETTING(      0x0002, "Short" )
 	PORT_DIPSETTING(      0x0003, DEF_STR( Medium ) )
 	PORT_DIPSETTING(      0x0001, "Long" )
-	PORT_DIPNAME( 0x000c, 0x000c, DEF_STR( Coinage ) )
+	PORT_DIPNAME( 0x000c, 0x000c, DEF_STR( Coinage ) )  PORT_DIPLOCATION("SW1:1,2")
 	PORT_DIPSETTING(      0x0008, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(      0x000c, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(      0x0000, DEF_STR( Free_Play ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( Free_Play ) )    PORT_DIPLOCATION("SW1:3,4")
 	PORT_DIPSETTING(      0x0004, "Set Your Own" )
-	PORT_DIPNAME( 0x0010, 0x0010, DEF_STR( Demo_Sounds ) )
+	PORT_DIPNAME( 0x0010, 0x0010, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW1:5")
 	PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0010, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0020, 0x0020, "Test Switch" )
+	PORT_DIPNAME( 0x0020, 0x0020, "Test Switch" )       PORT_DIPLOCATION("SW1:6")
 	PORT_DIPSETTING(      0x0020, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0040, 0x0040, "Coin Chutes" )
+	PORT_DIPNAME( 0x0040, 0x0040, "Coin Chutes" )       PORT_DIPLOCATION("SW1:7")
 	PORT_DIPSETTING(      0x0000, "Individual" )
 	PORT_DIPSETTING(      0x0040, "Common" )
-	PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( Joystick ) )
+	PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( Joystick ) ) PORT_DIPLOCATION("SW1:8")
 	PORT_DIPSETTING(      0x0080, DEF_STR( Standard ) )
 	PORT_DIPSETTING(      0x0000, "Rotated" )
-	PORT_BIT( 0xff00, IP_ACTIVE_HIGH, IPT_UNUSED )	/* player 2 joystick goes here */
+	PORT_BIT( 0xff00, IP_ACTIVE_HIGH, IPT_UNUSED )  /* player 2 joystick goes here */
 
-	PORT_START("49WAYX1")	/* converted to standard 49-way inputs */
+	PORT_START("49WAYX1")   /* converted to standard 49-way inputs */
 	PORT_BIT( 0xff, 0x38, IPT_AD_STICK_X ) PORT_PLAYER(1) PORT_MINMAX(0x00,0x6f) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_REVERSE
 
-	PORT_START("49WAYY1")	/* converted to standard 49-way inputs */
+	PORT_START("49WAYY1")   /* converted to standard 49-way inputs */
 	PORT_BIT( 0xff, 0x38, IPT_AD_STICK_Y ) PORT_PLAYER(1) PORT_MINMAX(0x00,0x6f) PORT_SENSITIVITY(100) PORT_KEYDELTA(10)
 
-	PORT_START("49WAYX2")	/* converted to standard 49-way inputs */
+	PORT_START("49WAYX2")   /* converted to standard 49-way inputs */
 	PORT_BIT( 0xff, 0x38, IPT_AD_STICK_X ) PORT_PLAYER(2) PORT_MINMAX(0x00,0x6f) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_REVERSE
 
-	PORT_START("49WAYY2")	/* converted to standard 49-way inputs */
+	PORT_START("49WAYY2")   /* converted to standard 49-way inputs */
 	PORT_BIT( 0xff, 0x38, IPT_AD_STICK_Y ) PORT_PLAYER(2) PORT_MINMAX(0x00,0x6f) PORT_SENSITIVITY(100) PORT_KEYDELTA(10)
 INPUT_PORTS_END
 
@@ -840,10 +823,10 @@ static INPUT_PORTS_START( trisport )
 
 	PORT_START("IN1")
 	PORT_BIT( 0x00ff, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0xff00, IP_ACTIVE_HIGH, IPT_UNUSED )	/* analog controls go here */
+	PORT_BIT( 0xff00, IP_ACTIVE_HIGH, IPT_UNUSED )  /* analog controls go here */
 
-	PORT_START("DSW")
-	PORT_DIPNAME( 0x0007, 0x0007, DEF_STR( Coinage ) )
+	PORT_START("DSW")   /* There are actually 10 switches, but where do 9 & 10 map to?? (10=Freeze Screen) */
+	PORT_DIPNAME( 0x0007, 0x0007, DEF_STR( Coinage ) )  PORT_DIPLOCATION("SW1:1,2,3")
 	PORT_DIPSETTING(      0x0002, DEF_STR( 4C_1C ) )
 	PORT_DIPSETTING(      0x0003, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(      0x0006, DEF_STR( 2C_1C ) )
@@ -852,27 +835,27 @@ static INPUT_PORTS_START( trisport )
 	PORT_DIPSETTING(      0x0004, DEF_STR( 1C_3C ) )
 	PORT_DIPSETTING(      0x0001, DEF_STR( Free_Play ) )
 	PORT_DIPSETTING(      0x0000, "Battery Options" )
-	PORT_DIPNAME( 0x0018, 0x0018, "Pool Turns" )
+	PORT_DIPNAME( 0x0018, 0x0018, "Pool Turns" )        PORT_DIPLOCATION("SW1:4,5")
 	PORT_DIPSETTING(      0x0010, "5" )
 	PORT_DIPSETTING(      0x0008, "6" )
 	PORT_DIPSETTING(      0x0018, "7" )
 	PORT_DIPSETTING(      0x0000, "8" )
-	PORT_DIPNAME( 0x0020, 0x0020, "Bowling Difficulty" )
+	PORT_DIPNAME( 0x0020, 0x0020, "Bowling Difficulty" )    PORT_DIPLOCATION("SW1:6")
 	PORT_DIPSETTING(      0x0020, DEF_STR( Standard ) )
 	PORT_DIPSETTING(      0x0000, "Advanced" )
-	PORT_DIPNAME( 0x0040, 0x0040, "Shot Timer" )
+	PORT_DIPNAME( 0x0040, 0x0040, "Shot Timer" )        PORT_DIPLOCATION("SW1:7")
 	PORT_DIPSETTING(      0x0000, "Slower" )
 	PORT_DIPSETTING(      0x0040, DEF_STR( Standard ) )
-	PORT_DIPNAME( 0x0080, 0x0080, "Golf Holes" )
+	PORT_DIPNAME( 0x0080, 0x0080, "Golf Holes" )        PORT_DIPLOCATION("SW1:8")
 	PORT_DIPSETTING(      0x0080, "3" )
 	PORT_DIPSETTING(      0x0000, "4" )
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("AN1")
-    PORT_BIT( 0xff, 0, IPT_TRACKBALL_X ) PORT_SENSITIVITY(100) PORT_KEYDELTA(20) PORT_PLAYER(1)
+	PORT_BIT( 0xff, 0, IPT_TRACKBALL_X ) PORT_SENSITIVITY(100) PORT_KEYDELTA(20) PORT_PLAYER(1)
 
 	PORT_START("AN2")
-    PORT_BIT( 0xff, 0, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(100) PORT_KEYDELTA(20) PORT_REVERSE PORT_PLAYER(1)
+	PORT_BIT( 0xff, 0, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(100) PORT_KEYDELTA(20) PORT_REVERSE PORT_PLAYER(1)
 INPUT_PORTS_END
 
 
@@ -902,9 +885,9 @@ static const gfx_layout mcr68_sprite_layout =
 	4,
 	{ STEP4(0,1) },
 	{ STEP2(RGN_FRAC(0,4)+0,4), STEP2(RGN_FRAC(1,4)+0,4), STEP2(RGN_FRAC(2,4)+0,4), STEP2(RGN_FRAC(3,4)+0,4),
-	  STEP2(RGN_FRAC(0,4)+8,4), STEP2(RGN_FRAC(1,4)+8,4), STEP2(RGN_FRAC(2,4)+8,4), STEP2(RGN_FRAC(3,4)+8,4),
-	  STEP2(RGN_FRAC(0,4)+16,4), STEP2(RGN_FRAC(1,4)+16,4), STEP2(RGN_FRAC(2,4)+16,4), STEP2(RGN_FRAC(3,4)+16,4),
-	  STEP2(RGN_FRAC(0,4)+24,4), STEP2(RGN_FRAC(1,4)+24,4), STEP2(RGN_FRAC(2,4)+24,4), STEP2(RGN_FRAC(3,4)+24,4) },
+		STEP2(RGN_FRAC(0,4)+8,4), STEP2(RGN_FRAC(1,4)+8,4), STEP2(RGN_FRAC(2,4)+8,4), STEP2(RGN_FRAC(3,4)+8,4),
+		STEP2(RGN_FRAC(0,4)+16,4), STEP2(RGN_FRAC(1,4)+16,4), STEP2(RGN_FRAC(2,4)+16,4), STEP2(RGN_FRAC(3,4)+16,4),
+		STEP2(RGN_FRAC(0,4)+24,4), STEP2(RGN_FRAC(1,4)+24,4), STEP2(RGN_FRAC(2,4)+24,4), STEP2(RGN_FRAC(3,4)+24,4) },
 	{ STEP32(0,32) },
 	32*32
 };
@@ -917,7 +900,7 @@ static const gfx_layout zwackery_layout =
 	{ 0, 0, 0, 0, 0, 0, 0, 0 },
 	{ STEP4(3,-1), STEP4(11,-1), STEP4(19,-1), STEP4(27,-1) },
 	{ 4, RGN_FRAC(1,2)+4, 0, RGN_FRAC(1,2)+0, 36, RGN_FRAC(1,2)+36, 32, RGN_FRAC(1,2)+32,
-	  68, RGN_FRAC(1,2)+68, 64, RGN_FRAC(1,2)+64, 100, RGN_FRAC(1,2)+100, 96, RGN_FRAC(1,2)+96 },
+		68, RGN_FRAC(1,2)+68, 64, RGN_FRAC(1,2)+64, 100, RGN_FRAC(1,2)+100, 96, RGN_FRAC(1,2)+96 },
 	128
 };
 
@@ -929,7 +912,7 @@ GFXDECODE_END
 static GFXDECODE_START( zwackery )
 	GFXDECODE_ENTRY( "gfx1", 0, zwackery_layout,       0, 16 )
 	GFXDECODE_ENTRY( "gfx2", 0, mcr68_sprite_layout, 0x800, 32 )
-	GFXDECODE_ENTRY( "gfx1", 0, zwackery_layout,       0, 16 )	/* yes, an extra copy */
+	GFXDECODE_ENTRY( "gfx1", 0, zwackery_layout,       0, 16 )  /* yes, an extra copy */
 GFXDECODE_END
 
 
@@ -957,7 +940,7 @@ GFXDECODE_END
 
         Zwackery:     7652400
         Xenophobe:    7723800
-        Spy Hunter 2: 7723800
+        Spy Hunter II:7723800
         Blasted:      7798800
         Arch Rivals:  7799100
         Pigskin:      9211200
@@ -971,13 +954,13 @@ GFXDECODE_END
 static MACHINE_CONFIG_START( zwackery, mcr68_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M68000, 7652400)	/* should be XTAL_16MHz/2 */
+	MCFG_CPU_ADD("maincpu", M68000, 7652400)    /* should be XTAL_16MHz/2 */
 	MCFG_CPU_PROGRAM_MAP(zwackery_map)
-	MCFG_CPU_VBLANK_INT("screen", mcr68_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", mcr68_state,  mcr68_interrupt)
 
 //  MCFG_WATCHDOG_VBLANK_INIT(8)
-	MCFG_MACHINE_START(zwackery)
-	MCFG_MACHINE_RESET(zwackery)
+	MCFG_MACHINE_START_OVERRIDE(mcr68_state,zwackery)
+	MCFG_MACHINE_RESET_OVERRIDE(mcr68_state,zwackery)
 
 	MCFG_PIA6821_ADD("pia0", zwackery_pia0_intf)
 	MCFG_PIA6821_ADD("pia1", zwackery_pia1_intf)
@@ -987,18 +970,19 @@ static MACHINE_CONFIG_START( zwackery, mcr68_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(30)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*16, 30*16)
 	MCFG_SCREEN_VISIBLE_AREA(0, 32*16-1, 0, 30*16-1)
-	MCFG_SCREEN_UPDATE(zwackery)
+	MCFG_SCREEN_UPDATE_DRIVER(mcr68_state, screen_update_zwackery)
 
 	MCFG_GFXDECODE(zwackery)
 	MCFG_PALETTE_LENGTH(4096)
 
-	MCFG_VIDEO_START(zwackery)
+	MCFG_VIDEO_START_OVERRIDE(mcr68_state,zwackery)
 
 	/* sound hardware */
-	MCFG_FRAGMENT_ADD(chip_squeak_deluxe)
+	MCFG_SPEAKER_STANDARD_MONO("mono")
+	MCFG_MIDWAY_CHIP_SQUEAK_DELUXE_ADD("csd")
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 MACHINE_CONFIG_END
 
 
@@ -1007,40 +991,42 @@ static MACHINE_CONFIG_START( mcr68, mcr68_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, 7723800)
 	MCFG_CPU_PROGRAM_MAP(mcr68_map)
-	MCFG_CPU_VBLANK_INT("screen", mcr68_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", mcr68_state,  mcr68_interrupt)
 
 	MCFG_WATCHDOG_VBLANK_INIT(8)
-	MCFG_MACHINE_START(mcr68)
-	MCFG_MACHINE_RESET(mcr68)
+	MCFG_MACHINE_START_OVERRIDE(mcr68_state,mcr68)
+	MCFG_MACHINE_RESET_OVERRIDE(mcr68_state,mcr68)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(30)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*16, 30*16)
 	MCFG_SCREEN_VISIBLE_AREA(0, 32*16-1, 0, 30*16-1)
-	MCFG_SCREEN_UPDATE(mcr68)
+	MCFG_SCREEN_UPDATE_DRIVER(mcr68_state, screen_update_mcr68)
 
 	MCFG_GFXDECODE(mcr68)
 	MCFG_PALETTE_LENGTH(64)
 
-	MCFG_VIDEO_START(mcr68)
+	MCFG_VIDEO_START_OVERRIDE(mcr68_state,mcr68)
 
 	/* sound hardware -- determined by specific machine */
+	MCFG_SPEAKER_STANDARD_MONO("mono")
 MACHINE_CONFIG_END
 
 
 static MACHINE_CONFIG_DERIVED( xenophob, mcr68 )
 
 	/* basic machine hardware */
-	MCFG_FRAGMENT_ADD(sounds_good)
+	MCFG_MIDWAY_SOUNDS_GOOD_ADD("sg")
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 MACHINE_CONFIG_END
 
 static MACHINE_CONFIG_DERIVED( intlaser, mcr68 )
 
 	/* basic machine hardware */
-	MCFG_FRAGMENT_ADD(sounds_good)
+	MCFG_MIDWAY_SOUNDS_GOOD_ADD("sg")
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 
 	MCFG_WATCHDOG_VBLANK_INIT(800)
 MACHINE_CONFIG_END
@@ -1049,23 +1035,26 @@ MACHINE_CONFIG_END
 static MACHINE_CONFIG_DERIVED( spyhunt2, mcr68 )
 
 	/* basic machine hardware */
-	MCFG_FRAGMENT_ADD(sounds_good)
-	MCFG_DEVICE_REMOVE("mono")
-	MCFG_FRAGMENT_ADD(turbo_chip_squeak)
+	MCFG_MIDWAY_SOUNDS_GOOD_ADD("sg")
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
+	MCFG_MIDWAY_TURBO_CHIP_SQUEAK_ADD("tcs")
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 MACHINE_CONFIG_END
 
 
 static MACHINE_CONFIG_DERIVED( archrivl, mcr68 )
 
 	/* basic machine hardware */
-	MCFG_FRAGMENT_ADD(williams_cvsd_sound)
+	MCFG_WILLIAMS_CVSD_SOUND_ADD("cvsd")
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 MACHINE_CONFIG_END
 
 
 static MACHINE_CONFIG_DERIVED( pigskin, mcr68 )
 
 	/* basic machine hardware */
-	MCFG_FRAGMENT_ADD(williams_cvsd_sound)
+	MCFG_WILLIAMS_CVSD_SOUND_ADD("cvsd")
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_PROGRAM_MAP(pigskin_map)
@@ -1075,7 +1064,8 @@ MACHINE_CONFIG_END
 static MACHINE_CONFIG_DERIVED( trisport, mcr68 )
 
 	/* basic machine hardware */
-	MCFG_FRAGMENT_ADD(williams_cvsd_sound)
+	MCFG_WILLIAMS_CVSD_SOUND_ADD("cvsd")
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_PROGRAM_MAP(trisport_map)
@@ -1108,7 +1098,7 @@ ROM_START( zwackery )
 	ROM_LOAD16_BYTE( "pro12.bin",  0x30000, 0x4000, CRC(e2d25e1f) SHA1(5d8ff303441eccf431422b453a173983a4513630) )
 	ROM_LOAD16_BYTE( "pro13.bin",  0x30001, 0x4000, CRC(e131f9b8) SHA1(08b131f2acc84d4c2c931bfd24e7de3d92a8a817) )
 
-	ROM_REGION( 0x20000, "csdcpu", 0 )
+	ROM_REGION( 0x20000, "csd:cpu", 0 )
 	ROM_LOAD16_BYTE( "csd7.bin",  0x00000, 0x2000, CRC(5501f54b) SHA1(84c0851fb868e81400cfe3ebfd7b91fe98a47bac) )
 	ROM_LOAD16_BYTE( "csd17.bin", 0x00001, 0x2000, CRC(2e482580) SHA1(92bd3e64ff580800ee16579d97bcb8b3bd9f755c) )
 	ROM_LOAD16_BYTE( "csd8.bin",  0x04000, 0x2000, CRC(13366575) SHA1(bcf25a7d4c6b2ccd7cd9978edafc66ef0cadfe72) )
@@ -1128,7 +1118,7 @@ ROM_START( zwackery )
 	ROM_LOAD( "spr10j.bin",   0x18000, 0x4000, CRC(4dd04376) SHA1(069b64397e7a961c1fc246671472f759bd9f6c03) )
 	ROM_LOAD( "spr11j.bin",   0x1c000, 0x4000, CRC(e8c6a880) SHA1(dd3d52ddbc36e244b96cfb87e6a80adb94626407) )
 
-	ROM_REGION( 0x8000, "gfx3", 0 )	/* bg color maps */
+	ROM_REGION( 0x8000, "gfx3", 0 ) /* bg color maps */
 	ROM_LOAD16_BYTE( "tilef.bin",  0x0000, 0x4000, CRC(a0dfcd7e) SHA1(0fc6723eddef2a96de9bf1f48006dd067c148540) )
 	ROM_LOAD16_BYTE( "tilee.bin",  0x0001, 0x4000, CRC(ab504dc8) SHA1(4ebdcd42624e94c29ccdb8247bfff2d8e936ddd7) )
 
@@ -1166,7 +1156,7 @@ ROM_START( xenophob ) /* Service mode shows "VERSION CO" */
 	ROM_LOAD16_BYTE( "xeno_pro.2c",  0x20000, 0x10000, CRC(e45bf669) SHA1(52b0ffd2311e4d300410de57fbddacab4b9857a1) )
 	ROM_LOAD16_BYTE( "xeno_pro.2b",  0x20001, 0x10000, CRC(da5d39d5) SHA1(f61b239eb3108faec2f3dbb8139c8d01b0e29873) )
 
-	ROM_REGION( 0x40000, "sgcpu", 0 )  /* Sounds Good board */
+	ROM_REGION( 0x40000, "sg:cpu", 0 )  /* Sounds Good board */
 	ROM_LOAD16_BYTE( "xeno_snd.u7",  0x00000, 0x10000, CRC(77561d15) SHA1(8c23a9270d54be6380f2d23939b6c6d8c31e334b) )
 	ROM_LOAD16_BYTE( "xeno_snd.u17", 0x00001, 0x10000, CRC(837a1a71) SHA1(d7d60ef1fd11e5e84dd1ffb9a077686bd2fb452e) )
 	ROM_LOAD16_BYTE( "xeno_snd.u8",  0x20000, 0x10000, CRC(6e2915c7) SHA1(df1f35f6b743afbab0a3a29adce3639a8c9dc66f) )
@@ -1198,8 +1188,8 @@ ROM_START( xenophob ) /* Service mode shows "VERSION CO" */
 	ROM_LOAD( "0066-313bx-xxqx.bin", 0x0000B, 0x00001, NO_DUMP ) /* 24 Pin PLD? at 15F */
 
 	/* PLD located on the "Sounds Good" board */
-	ROM_REGION( 0x0001, "snd_pld", 0 )
-	ROM_LOAD( "e36a31axnax00.bin",   0x00000, 0x00001, NO_DUMP ) /* PAL20L10 at U15 */
+	ROM_REGION( 0x00100, "snd_pld", 0 )
+	ROM_LOAD( "e36a31axnaxad.bin",   0x00000, 0x000cc, CRC(33e62608) SHA1(ab89ce32a5a351914a80e0e11830299425a22874) ) /* PAL20L10 at U15 */
 ROM_END
 
 
@@ -1210,11 +1200,11 @@ ROM_START( spyhunt2 )
 	ROM_LOAD16_BYTE( "sh22c.bin",  0x20000, 0x10000, CRC(8ee65009) SHA1(6adb00888f739b59e3ace1a6eaf1c58c4583d7fd) )
 	ROM_LOAD16_BYTE( "sh22b.bin",  0x20001, 0x10000, CRC(850c21ad) SHA1(3b944545cb469e2c53166a91eb2834c5f3891ddf) )
 
-	ROM_REGION( 0x10000, "tcscpu", 0 )  /* 64k for the Turbo Cheap Squeak */
+	ROM_REGION( 0x10000, "tcs:cpu", 0 )  /* 64k for the Turbo Cheap Squeak */
 	ROM_LOAD( "turbo-cs.u5", 0x08000, 0x4000, CRC(4b1d8a66) SHA1(a1a2f9fe3fc42b668ec97ad6c6ea6032f1dc0695) )
 	ROM_LOAD( "turbo-cs.u4", 0x0c000, 0x4000, CRC(3722ce48) SHA1(ae064be590c067bda66ca7a72c212ad47f3eb1c5) )
 
-	ROM_REGION( 0x40000, "sgcpu", 0 )  /* Sounds Good board */
+	ROM_REGION( 0x40000, "sg:cpu", 0 )  /* Sounds Good board */
 	ROM_LOAD16_BYTE( "sh2u7.bin",  0x00000, 0x10000, CRC(02362ea4) SHA1(2d37f06c9156554b8140ed565f6fdd1ef67bb54f) )
 	ROM_LOAD16_BYTE( "sh2u17.bin", 0x00001, 0x10000, CRC(e29a2c37) SHA1(e0d4df90b533d3325c905d42ddc6876667f32c82) )
 
@@ -1247,11 +1237,11 @@ ROM_START( spyhunt2a )
 	ROM_LOAD16_BYTE( "2c",  0x20000, 0x10000, CRC(bc834f3f) SHA1(05f6ab508ce2ebe55665e97114070e9d81db48c8) )
 	ROM_LOAD16_BYTE( "2b",  0x20001, 0x10000, CRC(8a9f7ef3) SHA1(353ebb0a3782c183cc9be800584903e23ca507d9) )
 
-	ROM_REGION( 0x10000, "tcscpu", 0 )  /* 64k for the Turbo Cheap Squeak */
+	ROM_REGION( 0x10000, "tcs:cpu", 0 )  /* 64k for the Turbo Cheap Squeak */
 	ROM_LOAD( "turbo-cs.u5", 0x08000, 0x4000, CRC(4b1d8a66) SHA1(a1a2f9fe3fc42b668ec97ad6c6ea6032f1dc0695) )
 	ROM_LOAD( "turbo-cs.u4", 0x0c000, 0x4000, CRC(3722ce48) SHA1(ae064be590c067bda66ca7a72c212ad47f3eb1c5) )
 
-	ROM_REGION( 0x40000, "sgcpu", 0 )  /* Sounds Good board */
+	ROM_REGION( 0x40000, "sg:cpu", 0 )  /* Sounds Good board */
 	ROM_LOAD16_BYTE( "sh2u7.bin",  0x00000, 0x10000, CRC(02362ea4) SHA1(2d37f06c9156554b8140ed565f6fdd1ef67bb54f) )
 	ROM_LOAD16_BYTE( "sh2u17.bin", 0x00001, 0x10000, CRC(e29a2c37) SHA1(e0d4df90b533d3325c905d42ddc6876667f32c82) )
 
@@ -1284,7 +1274,7 @@ ROM_START( blasted ) /* Service mode shows "prod. code v.1" and the date 4/27/88
 	ROM_LOAD16_BYTE( "2c",  0x20000, 0x10000, CRC(026f30bf) SHA1(de327ab5bd4dc9456fa5a91f3ccd293b3ab8c5c2) )
 	ROM_LOAD16_BYTE( "2b",  0x20001, 0x10000, CRC(8e0e91a9) SHA1(2dc2927a1fd552ead446606a902a2ba0c4595798) )
 
-	ROM_REGION( 0x40000, "sgcpu", 0 )  /* Sounds Good board */
+	ROM_REGION( 0x40000, "sg:cpu", 0 )  /* Sounds Good board */
 	ROM_LOAD16_BYTE( "blasted.u7",  0x00000, 0x10000, CRC(8d7c8ef6) SHA1(a414e91c20202f800f3e01e4c430e3f99e3df5bb) )
 	ROM_LOAD16_BYTE( "blasted.u17", 0x00001, 0x10000, CRC(c79040b9) SHA1(e6fa173ff5fb681ddfef831f1ef237a7c4303f32) )
 	ROM_LOAD16_BYTE( "blasted.u8",  0x20000, 0x10000, CRC(c53094c0) SHA1(8c54cefe8030bf18b9585008a4a6cf8a7dc23f71) )
@@ -1318,7 +1308,7 @@ ROM_START( intlaser ) /* Service mode shows "TOP SECRET PROJ. #F01" and the date
 	ROM_LOAD16_BYTE( "2c.bin",  0x20000, 0x10000, CRC(d2cca853) SHA1(69e4ee8203c6dda7b4ec97c247fbcdc9fdc9ff8d) )
 	ROM_LOAD16_BYTE( "2b.bin",  0x20001, 0x10000, CRC(3802cfe2) SHA1(d10c802500bae14acc3230ca34c2d1806b68ce4a) )
 
-	ROM_REGION( 0x40000, "sgcpu", 0 )  /* Sounds Good board */
+	ROM_REGION( 0x40000, "sg:cpu", 0 )  /* Sounds Good board */
 	ROM_LOAD16_BYTE( "u7.bin",  0x00000, 0x10000, CRC(19ad1e45) SHA1(838ad7304248690d3fdf9e4edf3856936bf36d42) )
 	ROM_LOAD16_BYTE( "u17.bin", 0x00001, 0x10000, CRC(d6118949) SHA1(9e059f28d9eb8dee10301662a65588cffaf6fd16) )
 	ROM_LOAD16_BYTE( "u8.bin",  0x20000, 0x10000, CRC(d6cc99aa) SHA1(b970d6e87778959cf7322158b8df26c5028e3f45) )
@@ -1353,7 +1343,7 @@ ROM_START( archrivl )
 	ROM_LOAD16_BYTE( "2c-rev2",  0x20000, 0x10000, CRC(cc2893f7) SHA1(44931299cb98e27ac2f11b3922da76895fbfe0a7) )
 	ROM_LOAD16_BYTE( "2b-rev2",  0x20001, 0x10000, CRC(fa977050) SHA1(67c66995da755401162f7e668b97eb42ac769ec0) )
 
-	ROM_REGION( 0x90000, "cvsdcpu", 0 )  /* Audio System board */
+	ROM_REGION( 0x90000, "cvsd:cpu", 0 )  /* Audio System board */
 	ROM_LOAD( "u4.snd",  0x10000, 0x08000, CRC(96b3c652) SHA1(1bb576d0bf6b6b8df24e7b9352a33e97dd8ebdcb) )
 	ROM_RELOAD(          0x18000, 0x08000 )
 	ROM_RELOAD(          0x20000, 0x08000 )
@@ -1400,7 +1390,7 @@ ROM_START( archrivl2 )
 	ROM_LOAD16_BYTE( "archrivl.3",  0x20000, 0x10000, CRC(d6d08ff7) SHA1(bbbd4b5c3218c9bb461b17e536191d40ab39f67c) )
 	ROM_LOAD16_BYTE( "archrivl.1",  0x20001, 0x10000, CRC(92f3a43d) SHA1(45fdcbacd65f5898d54cc2ac95639b7ee2c097e6) )
 
-	ROM_REGION( 0x90000, "cvsdcpu", 0 )  /* Audio System board */
+	ROM_REGION( 0x90000, "cvsd:cpu", 0 )  /* Audio System board */
 	ROM_LOAD( "u4.snd",  0x10000, 0x08000, CRC(96b3c652) SHA1(1bb576d0bf6b6b8df24e7b9352a33e97dd8ebdcb) )
 	ROM_RELOAD(          0x18000, 0x08000 )
 	ROM_RELOAD(          0x20000, 0x08000 )
@@ -1447,7 +1437,7 @@ ROM_START( pigskin ) /* Initial boot screen reports KIT CODE REV 1.1K 8/01/90 */
 	ROM_LOAD16_BYTE( "pigskin-k_la1.a6",  0x20000, 0x10000, CRC(4d8b7e50) SHA1(9e5d0edf1603e11f22d3129a2b8865ebcb5e27f9) )
 	ROM_LOAD16_BYTE( "pigskin-k_la1.b6",  0x20001, 0x10000, CRC(1194f187) SHA1(e7cebe5322a5c8e382b6773939be5bc88492f289) )
 
-	ROM_REGION( 0x90000, "cvsdcpu", 0 )  /* Audio System board */
+	ROM_REGION( 0x90000, "cvsd:cpu", 0 )  /* Audio System board */
 	ROM_LOAD( "pigskin_sl1.u4",  0x10000, 0x10000, CRC(6daf2d37) SHA1(4c8098520fe44e36b01389bcfcfe3ad1d027cbde) )
 	ROM_RELOAD(                  0x20000, 0x10000 )
 	ROM_LOAD( "pigskin_sl1.u19", 0x30000, 0x10000, CRC(56fd16a3) SHA1(b91aabdbd3185355f2b7177fc4d3a86fa110f51d) )
@@ -1474,7 +1464,7 @@ ROM_START( pigskina ) /* Initial boot screen reports REV 2.0 7/06/90 */
 	ROM_LOAD16_BYTE( "pigskin_la2.a6",  0x20000, 0x10000, CRC(2fc91002) SHA1(64d270b78c69d3f4fb36d1233a1632d6ba3d87a5) )
 	ROM_LOAD16_BYTE( "pigskin_la2.b6",  0x20001, 0x10000, CRC(0b93dc66) SHA1(f3b516a1d1e4abd7b0d56243949e9cd7ac79178b) )
 
-	ROM_REGION( 0x90000, "cvsdcpu", 0 )  /* Audio System board */
+	ROM_REGION( 0x90000, "cvsd:cpu", 0 )  /* Audio System board */
 	ROM_LOAD( "pigskin_sl1.u4",  0x10000, 0x10000, CRC(6daf2d37) SHA1(4c8098520fe44e36b01389bcfcfe3ad1d027cbde) )
 	ROM_RELOAD(                  0x20000, 0x10000 )
 	ROM_LOAD( "pigskin_sl1.u19", 0x30000, 0x10000, CRC(56fd16a3) SHA1(b91aabdbd3185355f2b7177fc4d3a86fa110f51d) )
@@ -1501,7 +1491,7 @@ ROM_START( trisport )
 	ROM_LOAD16_BYTE( "la3.a6",  0x20000, 0x10000, CRC(9c6a1398) SHA1(ee115d9207f3a9034b7c9eccd2ff151d9c923c9a) )
 	ROM_LOAD16_BYTE( "la3.b6",  0x20001, 0x10000, CRC(597b564c) SHA1(090da3ec0c86035cc41a9caea182b8a5419c3be9) )
 
-	ROM_REGION( 0x90000, "cvsdcpu", 0 )  /* Audio System board */
+	ROM_REGION( 0x90000, "cvsd:cpu", 0 )  /* Audio System board */
 	ROM_LOAD( "sl1-snd.u4",  0x10000, 0x10000, CRC(0ed8c904) SHA1(21292a001c4c44f87b8782c706e5c346b767cd6b) )
 	ROM_RELOAD(              0x20000, 0x10000 )
 	ROM_LOAD( "sl1-snd.u19", 0x30000, 0x10000, CRC(b57d7d7e) SHA1(483f718f1cc4549baf5696935532d30803254a19) )
@@ -1544,10 +1534,9 @@ ROM_END
  *
  *************************************/
 
-static void mcr68_common_init(running_machine &machine, int sound_board, int clip, int xoffset)
+static void mcr68_common_init(running_machine &machine, int clip, int xoffset)
 {
 	mcr68_state *state = machine.driver_data<mcr68_state>();
-	mcr_sound_init(machine, sound_board);
 
 	state->m_sprite_clip = clip;
 	state->m_sprite_xoffset = xoffset;
@@ -1556,116 +1545,108 @@ static void mcr68_common_init(running_machine &machine, int sound_board, int cli
 }
 
 
-static DRIVER_INIT( zwackery )
+DRIVER_INIT_MEMBER(mcr68_state,zwackery)
 {
-	mcr68_state *state = machine.driver_data<mcr68_state>();
-	mcr68_common_init(machine, MCR_CHIP_SQUEAK_DELUXE, 0, 0);
+	mcr68_common_init(machine(), 0, 0);
 
 	/* Zwackery doesn't care too much about this value; currently taken from Blasted */
-	state->m_timing_factor = attotime::from_hz(machine.device("maincpu")->unscaled_clock() / 10) * (256 + 16);
+	m_timing_factor = attotime::from_hz(machine().device("maincpu")->unscaled_clock() / 10) * (256 + 16);
 }
 
 
-static DRIVER_INIT( xenophob )
+DRIVER_INIT_MEMBER(mcr68_state,xenophob)
 {
-	mcr68_state *state = machine.driver_data<mcr68_state>();
-	mcr68_common_init(machine, MCR_SOUNDS_GOOD, 0, -4);
+	mcr68_common_init(machine(), 0, -4);
 
 	/* Xenophobe doesn't care too much about this value; currently taken from Blasted */
-	state->m_timing_factor = attotime::from_hz(machine.device("maincpu")->unscaled_clock() / 10) * (256 + 16);
+	m_timing_factor = attotime::from_hz(machine().device("maincpu")->unscaled_clock() / 10) * (256 + 16);
 
 	/* install control port handler */
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x0c0000, 0x0cffff, FUNC(xenophobe_control_w));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0x0c0000, 0x0cffff, write16_delegate(FUNC(mcr68_state::xenophobe_control_w),this));
 }
 
 
-static DRIVER_INIT( spyhunt2 )
+DRIVER_INIT_MEMBER(mcr68_state,spyhunt2)
 {
-	mcr68_state *state = machine.driver_data<mcr68_state>();
-	mcr68_common_init(machine, MCR_TURBO_CHIP_SQUEAK | MCR_SOUNDS_GOOD, 0, -6);
+	mcr68_common_init(machine(), 0, -6);
 
-	/* Spy Hunter 2 doesn't care too much about this value; currently taken from Blasted */
-	state->m_timing_factor = attotime::from_hz(machine.device("maincpu")->unscaled_clock() / 10) * (256 + 16);
+	/* Spy Hunter II doesn't care too much about this value; currently taken from Blasted */
+	m_timing_factor = attotime::from_hz(machine().device("maincpu")->unscaled_clock() / 10) * (256 + 16);
 
 	/* analog port handling is a bit tricky */
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x0c0000, 0x0cffff, FUNC(spyhunt2_control_w));
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x0d0000, 0x0dffff, FUNC(spyhunt2_port_0_r));
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x0e0000, 0x0effff, FUNC(spyhunt2_port_1_r));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0x0c0000, 0x0cffff, write16_delegate(FUNC(mcr68_state::spyhunt2_control_w),this));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(0x0d0000, 0x0dffff, read16_delegate(FUNC(mcr68_state::spyhunt2_port_0_r),this));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(0x0e0000, 0x0effff, read16_delegate(FUNC(mcr68_state::spyhunt2_port_1_r),this));
 }
 
 
-static DRIVER_INIT( blasted )
+DRIVER_INIT_MEMBER(mcr68_state,blasted)
 {
-	mcr68_state *state = machine.driver_data<mcr68_state>();
-	mcr68_common_init(machine, MCR_SOUNDS_GOOD, 0, 0);
+	mcr68_common_init(machine(), 0, 0);
 
 	/* Blasted checks the timing of VBLANK relative to the 493 interrupt */
 	/* VBLANK is required to come within 220-256 E clocks (i.e., 2200-2560 CPU clocks) */
 	/* after the 493; we also allow 16 E clocks for latency  */
-	state->m_timing_factor = attotime::from_hz(machine.device("maincpu")->unscaled_clock() / 10) * (256 + 16);
+	m_timing_factor = attotime::from_hz(machine().device("maincpu")->unscaled_clock() / 10) * (256 + 16);
 
 	/* handle control writes */
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x0c0000, 0x0cffff, FUNC(blasted_control_w));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0x0c0000, 0x0cffff, write16_delegate(FUNC(mcr68_state::blasted_control_w),this));
 
 	/* 6840 is mapped to the lower 8 bits */
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_readwrite_handler(0x0a0000, 0x0a000f, FUNC(mcr68_6840_lower_r), FUNC(mcr68_6840_lower_w));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_readwrite_handler(0x0a0000, 0x0a000f, read16_delegate(FUNC(mcr68_state::mcr68_6840_lower_r),this), write16_delegate(FUNC(mcr68_state::mcr68_6840_lower_w),this));
 }
 
-static DRIVER_INIT( intlaser )
+DRIVER_INIT_MEMBER(mcr68_state,intlaser)
 {
-	mcr68_state *state = machine.driver_data<mcr68_state>();
-	mcr68_common_init(machine, MCR_SOUNDS_GOOD, 0, 0);
+	mcr68_common_init(machine(), 0, 0);
 
 	/* Copied from Blasted */
-	state->m_timing_factor = attotime::from_hz(machine.device("maincpu")->unscaled_clock() / 10) * (256 + 16);
+	m_timing_factor = attotime::from_hz(machine().device("maincpu")->unscaled_clock() / 10) * (256 + 16);
 
 	/* handle control writes */
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x0c0000, 0x0cffff, FUNC(blasted_control_w));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0x0c0000, 0x0cffff, write16_delegate(FUNC(mcr68_state::blasted_control_w),this));
 
 }
 
 
 
-static DRIVER_INIT( archrivl )
+DRIVER_INIT_MEMBER(mcr68_state,archrivl)
 {
-	mcr68_state *state = machine.driver_data<mcr68_state>();
-	mcr68_common_init(machine, MCR_WILLIAMS_SOUND, 16, 0);
+	mcr68_common_init(machine(), 16, 0);
 
 	/* Arch Rivals doesn't care too much about this value; currently taken from Blasted */
-	state->m_timing_factor = attotime::from_hz(machine.device("maincpu")->unscaled_clock() / 10) * (256 + 16);
+	m_timing_factor = attotime::from_hz(machine().device("maincpu")->unscaled_clock() / 10) * (256 + 16);
 
 	/* handle control writes */
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x0c0000, 0x0cffff, FUNC(archrivl_control_w));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0x0c0000, 0x0cffff, write16_delegate(FUNC(mcr68_state::archrivl_control_w),this));
 
 	/* 49-way joystick handling is a bit tricky */
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x0e0000, 0x0effff, FUNC(archrivl_port_1_r));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(0x0e0000, 0x0effff, read16_delegate(FUNC(mcr68_state::archrivl_port_1_r),this));
 
 	/* 6840 is mapped to the lower 8 bits */
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_readwrite_handler(0x0a0000, 0x0a000f, FUNC(mcr68_6840_lower_r), FUNC(mcr68_6840_lower_w));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_readwrite_handler(0x0a0000, 0x0a000f, read16_delegate(FUNC(mcr68_state::mcr68_6840_lower_r),this), write16_delegate(FUNC(mcr68_state::mcr68_6840_lower_w),this));
 }
 
 
-static DRIVER_INIT( pigskin )
+DRIVER_INIT_MEMBER(mcr68_state,pigskin)
 {
-	mcr68_state *state = machine.driver_data<mcr68_state>();
-	mcr68_common_init(machine, MCR_WILLIAMS_SOUND, 16, 0);
+	mcr68_common_init(machine(), 16, 0);
 
 	/* Pigskin doesn't care too much about this value; currently taken from Tri-Sports */
-	state->m_timing_factor = attotime::from_hz(machine.device("maincpu")->unscaled_clock() / 10) * 115;
+	m_timing_factor = attotime::from_hz(machine().device("maincpu")->unscaled_clock() / 10) * 115;
 
-	state_save_register_global_array(machine, state->m_protection_data);
+	state_save_register_global_array(machine(), m_protection_data);
 }
 
 
-static DRIVER_INIT( trisport )
+DRIVER_INIT_MEMBER(mcr68_state,trisport)
 {
-	mcr68_state *state = machine.driver_data<mcr68_state>();
-	mcr68_common_init(machine, MCR_WILLIAMS_SOUND, 0, 0);
+	mcr68_common_init(machine(), 0, 0);
 
 	/* Tri-Sports checks the timing of VBLANK relative to the 493 interrupt */
 	/* VBLANK is required to come within 87-119 E clocks (i.e., 870-1190 CPU clocks) */
 	/* after the 493 */
-	state->m_timing_factor = attotime::from_hz(machine.device("maincpu")->unscaled_clock() / 10) * 115;
+	m_timing_factor = attotime::from_hz(machine().device("maincpu")->unscaled_clock() / 10) * 115;
 }
 
 
@@ -1676,14 +1657,14 @@ static DRIVER_INIT( trisport )
  *
  *************************************/
 
-GAME( 1984, zwackery, 0,        zwackery, zwackery, zwackery, ROT0,   "Bally Midway", "Zwackery", GAME_SUPPORTS_SAVE )
-GAME( 1987, xenophob, 0,        xenophob, xenophob, xenophob, ROT0,   "Bally Midway", "Xenophobe", GAME_SUPPORTS_SAVE )
-GAME( 1987, spyhunt2, 0,        spyhunt2, spyhunt2, spyhunt2, ROT0,   "Bally Midway", "Spy Hunter 2 (rev 2)", GAME_SUPPORTS_SAVE )
-GAME( 1987, spyhunt2a,spyhunt2, spyhunt2, spyhunt2, spyhunt2, ROT0,   "Bally Midway", "Spy Hunter 2 (rev 1)", GAME_SUPPORTS_SAVE )
-GAME( 1988, blasted,  0,        xenophob, blasted,  blasted,  ROT0,   "Bally Midway", "Blasted", GAME_SUPPORTS_SAVE )
-GAME( 1987, intlaser, blasted,  intlaser, intlaser, intlaser, ROT0,   "Bally Midway", "International Team Laser (prototype)", GAME_SUPPORTS_SAVE )
-GAME( 1989, archrivl, 0,        archrivl, archrivl, archrivl, ROT0,   "Bally Midway", "Arch Rivals (rev 4.0 6/29/89)", GAME_SUPPORTS_SAVE )
-GAME( 1989, archrivl2,archrivl, archrivl, archrivl, archrivl, ROT0,   "Bally Midway", "Arch Rivals (rev 2.0 5/03/89)", GAME_SUPPORTS_SAVE )
-GAME( 1989, trisport, 0,        trisport, trisport, trisport, ROT270, "Bally Midway", "Tri-Sports", GAME_SUPPORTS_SAVE )
-GAME( 1990, pigskin,  0,        pigskin,  pigskin,  pigskin,  ROT0,   "Midway", "Pigskin 621AD (rev 1.1K 8/01/90)", GAME_SUPPORTS_SAVE )
-GAME( 1990, pigskina, pigskin,  pigskin,  pigskin,  pigskin,  ROT0,   "Midway", "Pigskin 621AD (rev 2.0 7/06/90)", GAME_SUPPORTS_SAVE )
+GAME( 1984, zwackery, 0,        zwackery, zwackery, mcr68_state, zwackery, ROT0,   "Bally Midway", "Zwackery", GAME_SUPPORTS_SAVE )
+GAME( 1987, xenophob, 0,        xenophob, xenophob, mcr68_state, xenophob, ROT0,   "Bally Midway", "Xenophobe", GAME_SUPPORTS_SAVE )
+GAME( 1987, spyhunt2, 0,        spyhunt2, spyhunt2, mcr68_state, spyhunt2, ROT0,   "Bally Midway", "Spy Hunter II (rev 2)", GAME_SUPPORTS_SAVE )
+GAME( 1987, spyhunt2a,spyhunt2, spyhunt2, spyhunt2, mcr68_state, spyhunt2, ROT0,   "Bally Midway", "Spy Hunter II (rev 1)", GAME_SUPPORTS_SAVE )
+GAME( 1988, blasted,  0,        xenophob, blasted, mcr68_state,  blasted,  ROT0,   "Bally Midway", "Blasted", GAME_SUPPORTS_SAVE )
+GAME( 1987, intlaser, blasted,  intlaser, intlaser, mcr68_state, intlaser, ROT0,   "Bally Midway", "International Team Laser (prototype)", GAME_SUPPORTS_SAVE )
+GAME( 1989, archrivl, 0,        archrivl, archrivl, mcr68_state, archrivl, ROT0,   "Bally Midway", "Arch Rivals (rev 4.0 6/29/89)", GAME_SUPPORTS_SAVE )
+GAME( 1989, archrivl2,archrivl, archrivl, archrivl, mcr68_state, archrivl, ROT0,   "Bally Midway", "Arch Rivals (rev 2.0 5/03/89)", GAME_SUPPORTS_SAVE )
+GAME( 1989, trisport, 0,        trisport, trisport, mcr68_state, trisport, ROT270, "Bally Midway", "Tri-Sports", GAME_SUPPORTS_SAVE )
+GAME( 1990, pigskin,  0,        pigskin,  pigskin, mcr68_state,  pigskin,  ROT0,   "Midway", "Pigskin 621AD (rev 1.1K 8/01/90)", GAME_SUPPORTS_SAVE )
+GAME( 1990, pigskina, pigskin,  pigskin,  pigskin, mcr68_state,  pigskin,  ROT0,   "Midway", "Pigskin 621AD (rev 2.0 7/06/90)", GAME_SUPPORTS_SAVE )

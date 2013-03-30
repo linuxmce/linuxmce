@@ -8,31 +8,29 @@ driver by Allard Van Der Bas
 
 #include "emu.h"
 #include "cpu/m6809/m6809.h"
-#include "deprecat.h"
 #include "sound/sn76496.h"
 #include "includes/shaolins.h"
 
 #define MASTER_CLOCK XTAL_18_432MHz
 
-static INTERRUPT_GEN( shaolins_interrupt )
+TIMER_DEVICE_CALLBACK_MEMBER(shaolins_state::shaolins_interrupt)
 {
-	shaolins_state *state = device->machine().driver_data<shaolins_state>();
+	int scanline = param;
 
-	if (cpu_getiloops(device) == 0) device_set_input_line(device, 0, HOLD_LINE);
-	else if (cpu_getiloops(device) % 2)
-	{
-		if (state->m_nmi_enable & 0x02) device_set_input_line(device, INPUT_LINE_NMI, PULSE_LINE);
-	}
+	if(scanline == 240)
+			m_maincpu->set_input_line(0, HOLD_LINE);
+	else if((scanline % 32) == 0)
+		if (m_nmi_enable & 0x02) m_maincpu->set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 }
 
 
 
-static ADDRESS_MAP_START( shaolins_map, AS_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0x0000) AM_WRITE(shaolins_nmi_w)	/* bit 0 = flip screen, bit 1 = nmi enable, bit 2 = ? */
+static ADDRESS_MAP_START( shaolins_map, AS_PROGRAM, 8, shaolins_state )
+	AM_RANGE(0x0000, 0x0000) AM_WRITE(shaolins_nmi_w)   /* bit 0 = flip screen, bit 1 = nmi enable, bit 2 = ? */
 														/* bit 3, bit 4 = coin counters */
 	AM_RANGE(0x0100, 0x0100) AM_WRITE(watchdog_reset_w)
-	AM_RANGE(0x0300, 0x0300) AM_DEVWRITE("sn1", sn76496_w)	/* trigger chip to read from latch. The program always */
-	AM_RANGE(0x0400, 0x0400) AM_DEVWRITE("sn2", sn76496_w)	/* writes the same number as the latch, so we don't */
+	AM_RANGE(0x0300, 0x0300) AM_DEVWRITE("sn1", sn76489a_device, write) /* trigger chip to read from latch. The program always */
+	AM_RANGE(0x0400, 0x0400) AM_DEVWRITE("sn2", sn76489a_device, write) /* writes the same number as the latch, so we don't */
 															/* bother emulating them. */
 	AM_RANGE(0x0500, 0x0500) AM_READ_PORT("DSW1")
 	AM_RANGE(0x0600, 0x0600) AM_READ_PORT("DSW2")
@@ -40,16 +38,16 @@ static ADDRESS_MAP_START( shaolins_map, AS_PROGRAM, 8 )
 	AM_RANGE(0x0701, 0x0701) AM_READ_PORT("P1")
 	AM_RANGE(0x0702, 0x0702) AM_READ_PORT("P2")
 	AM_RANGE(0x0703, 0x0703) AM_READ_PORT("DSW3")
-	AM_RANGE(0x0800, 0x0800) AM_WRITENOP					/* latch for 76496 #0 */
-	AM_RANGE(0x1000, 0x1000) AM_WRITENOP					/* latch for 76496 #1 */
+	AM_RANGE(0x0800, 0x0800) AM_WRITENOP                    /* latch for 76496 #0 */
+	AM_RANGE(0x1000, 0x1000) AM_WRITENOP                    /* latch for 76496 #1 */
 	AM_RANGE(0x1800, 0x1800) AM_WRITE(shaolins_palettebank_w)
 	AM_RANGE(0x2000, 0x2000) AM_WRITE(shaolins_scroll_w)
-	AM_RANGE(0x2800, 0x2bff) AM_RAM							/* RAM BANK 2 */
-	AM_RANGE(0x3000, 0x30ff) AM_RAM							/* RAM BANK 1 */
-	AM_RANGE(0x3100, 0x33ff) AM_RAM AM_BASE_SIZE_MEMBER(shaolins_state, m_spriteram, m_spriteram_size)
-	AM_RANGE(0x3800, 0x3bff) AM_RAM_WRITE(shaolins_colorram_w) AM_BASE_MEMBER(shaolins_state, m_colorram)
-	AM_RANGE(0x3c00, 0x3fff) AM_RAM_WRITE(shaolins_videoram_w) AM_BASE_MEMBER(shaolins_state, m_videoram)
-	AM_RANGE(0x4000, 0x5fff) AM_ROM 						/* Machine checks for extra rom */
+	AM_RANGE(0x2800, 0x2bff) AM_RAM                         /* RAM BANK 2 */
+	AM_RANGE(0x3000, 0x30ff) AM_RAM                         /* RAM BANK 1 */
+	AM_RANGE(0x3100, 0x33ff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0x3800, 0x3bff) AM_RAM_WRITE(shaolins_colorram_w) AM_SHARE("colorram")
+	AM_RANGE(0x3c00, 0x3fff) AM_RAM_WRITE(shaolins_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0x4000, 0x5fff) AM_ROM                         /* Machine checks for extra rom */
 	AM_RANGE(0x6000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
@@ -108,14 +106,14 @@ static INPUT_PORTS_START( shaolins )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-      /* This bank only have four switches */
+		/* This bank only have four switches */
 	PORT_START("DSW2")
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Flip_Screen ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x02, 0x02, "Upright Controls" )
-	PORT_DIPSETTING(	0x02, DEF_STR( Single ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Dual ) )
+	PORT_DIPSETTING(    0x02, DEF_STR( Single ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Dual ) )
 	PORT_SERVICE( 0x04, IP_ACTIVE_LOW )
 	PORT_BIT ( 0x08, IP_ACTIVE_LOW, IPT_UNUSED )
 
@@ -159,26 +157,26 @@ INPUT_PORTS_END
 
 static const gfx_layout shaolins_charlayout =
 {
-	8,8,	/* 8*8 chars */
-	512,	/* 512 characters */
-	4,	/* 4 bits per pixel */
+	8,8,    /* 8*8 chars */
+	512,    /* 512 characters */
+	4,  /* 4 bits per pixel */
 	{ 512*16*8+4, 512*16*8+0, 4, 0 },
 	{ 0, 1, 2, 3, 8*8+0, 8*8+1, 8*8+2, 8*8+3 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
-	16*8	/* every char takes 16 consecutive bytes */
+	16*8    /* every char takes 16 consecutive bytes */
 };
 
 static const gfx_layout shaolins_spritelayout =
 {
-	16,16,	/* 16*16 sprites */
-	256,	/* 256 sprites */
-	4,	/* 4 bits per pixel */
+	16,16,  /* 16*16 sprites */
+	256,    /* 256 sprites */
+	4,  /* 4 bits per pixel */
 	{ 256*64*8+4, 256*64*8+0, 4, 0 },
 	{ 0, 1, 2, 3, 8*8+0, 8*8+1, 8*8+2, 8*8+3,
 			16*8+0, 16*8+1, 16*8+2, 16*8+3, 24*8+0, 24*8+1, 24*8+2, 24*8+3 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8 },
-	64*8	/* every sprite takes 64 consecutive bytes */
+	64*8    /* every sprite takes 64 consecutive bytes */
 };
 
 static GFXDECODE_START( shaolins )
@@ -187,37 +185,51 @@ static GFXDECODE_START( shaolins )
 GFXDECODE_END
 
 
+/*************************************
+ *
+ *  Sound interface
+ *
+ *************************************/
+
+//-------------------------------------------------
+//  sn76496_config psg_intf
+//-------------------------------------------------
+
+static const sn76496_config psg_intf =
+{
+	DEVCB_NULL
+};
+
 
 static MACHINE_CONFIG_START( shaolins, shaolins_state )
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6809, MASTER_CLOCK/12)        /* verified on pcb */
 	MCFG_CPU_PROGRAM_MAP(shaolins_map)
-	MCFG_CPU_VBLANK_INT_HACK(shaolins_interrupt,16)	/* 1 IRQ + 8 NMI */
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("scantimer", shaolins_state, shaolins_interrupt, "screen", 0, 1)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(shaolins)
+	MCFG_SCREEN_UPDATE_DRIVER(shaolins_state, screen_update_shaolins)
 
 	MCFG_GFXDECODE(shaolins)
 	MCFG_PALETTE_LENGTH(16*8*16+16*8*16)
 
-	MCFG_PALETTE_INIT(shaolins)
-	MCFG_VIDEO_START(shaolins)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
 	MCFG_SOUND_ADD("sn1", SN76489A, MASTER_CLOCK/12)        /* verified on pcb */
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
+	MCFG_SOUND_CONFIG(psg_intf)
 
 	MCFG_SOUND_ADD("sn2", SN76489A, MASTER_CLOCK/6)        /* verified on pcb */
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
+	MCFG_SOUND_CONFIG(psg_intf)
 MACHINE_CONFIG_END
 
 #if 0 // a bootleg board was found with downgraded sound hardware, but is otherwise the same
@@ -225,9 +237,11 @@ static MACHINE_CONFIG_DERIVED( shaolinb, shaolins )
 
 	MCFG_SOUND_REPLACE("sn1", SN76489, MASTER_CLOCK/12) /* only type verified on pcb */
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
+	MCFG_SOUND_CONFIG(psg_intf)
 
 	MCFG_SOUND_REPLACE("sn2", SN76489, MASTER_CLOCK/6)  /* only type verified on pcb */
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
+	MCFG_SOUND_CONFIG(psg_intf)
 MACHINE_CONFIG_END
 #endif
 
@@ -339,6 +353,6 @@ ROM_END
 
 
 /*    YEAR, NAME,     PARENT, MACHINE,  INPUT,    INIT, MONITOR, COMPANY,  FULLNAME,                  FLAGS */
-GAME( 1985, kicker,   0,      shaolins, shaolins, 0,    ROT90,  "Konami",  "Kicker",                  0 )
-GAME( 1985, shaolins, kicker, shaolins, shaolins, 0,    ROT90,  "Konami",  "Shao-lin's Road (set 1)", 0 )
-GAME( 1985, shaolinb, kicker, shaolins, shaolins, 0,    ROT90,  "Konami",  "Shao-lin's Road (set 2)", 0 )
+GAME( 1985, kicker,   0,      shaolins, shaolins, driver_device, 0,    ROT90,  "Konami",  "Kicker",                  0 )
+GAME( 1985, shaolins, kicker, shaolins, shaolins, driver_device, 0,    ROT90,  "Konami",  "Shao-lin's Road (set 1)", 0 )
+GAME( 1985, shaolinb, kicker, shaolins, shaolins, driver_device, 0,    ROT90,  "Konami",  "Shao-lin's Road (set 2)", 0 )

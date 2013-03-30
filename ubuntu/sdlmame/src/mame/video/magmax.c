@@ -24,12 +24,13 @@ Additional tweaking by Jarek Burczynski
   bit 0 -- 2.2kohm resistor  -- RED/GREEN/BLUE
 
 ***************************************************************************/
-PALETTE_INIT( magmax )
+void magmax_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 
 	/* allocate the colortable */
-	machine.colortable = colortable_alloc(machine, 0x100);
+	machine().colortable = colortable_alloc(machine(), 0x100);
 
 	/* create a lookup table for the palette */
 	for (i = 0; i < 0x100; i++)
@@ -38,7 +39,7 @@ PALETTE_INIT( magmax )
 		int g = pal4bit(color_prom[i + 0x100]);
 		int b = pal4bit(color_prom[i + 0x200]);
 
-		colortable_palette_set_color(machine.colortable, i, MAKE_RGB(r, g, b));
+		colortable_palette_set_color(machine().colortable, i, MAKE_RGB(r, g, b));
 	}
 
 	/* color_prom now points to the beginning of the lookup table */
@@ -46,66 +47,64 @@ PALETTE_INIT( magmax )
 
 	/* characters use colors 0-0x0f */
 	for (i = 0; i < 0x10; i++)
-		colortable_entry_set_value(machine.colortable, i, i);
+		colortable_entry_set_value(machine().colortable, i, i);
 
 	/*sprites use colors 0x10-0x1f, color 0x1f being transparent*/
 	for (i = 0x10; i < 0x110; i++)
 	{
 		UINT8 ctabentry = (color_prom[i - 0x10] & 0x0f) | 0x10;
-		colortable_entry_set_value(machine.colortable, i, ctabentry);
+		colortable_entry_set_value(machine().colortable, i, ctabentry);
 	}
 
 	/* background uses all colors (no lookup table) */
 	for (i = 0x110; i < 0x210; i++)
-		colortable_entry_set_value(machine.colortable, i, i - 0x110);
+		colortable_entry_set_value(machine().colortable, i, i - 0x110);
 
 }
 
-VIDEO_START( magmax )
+void magmax_state::video_start()
 {
-	magmax_state *state = machine.driver_data<magmax_state>();
 	int i,v;
-	UINT8 * prom14D = machine.region("user2")->base();
+	UINT8 * prom14D = memregion("user2")->base();
 
 	/* Set up save state */
-	state_save_register_global(machine, state->m_flipscreen);
+	state_save_register_global(machine(), m_flipscreen);
 
-	state->m_prom_tab = auto_alloc_array(machine, UINT32, 256);
+	m_prom_tab = auto_alloc_array(machine(), UINT32, 256);
+
+	machine().primary_screen->register_screen_bitmap(m_bitmap);
 
 	/* Allocate temporary bitmap */
-	machine.generic.tmpbitmap = machine.primary_screen->alloc_compatible_bitmap();
-
 	for (i=0; i<256; i++)
 	{
 		v = (prom14D[i] << 4) + prom14D[i + 0x100];
-		state->m_prom_tab[i] = ((v&0x1f)<<8) | ((v&0x10)<<10) | ((v&0xe0)>>1); /*convert data into more useful format*/
+		m_prom_tab[i] = ((v&0x1f)<<8) | ((v&0x10)<<10) | ((v&0xe0)>>1); /*convert data into more useful format*/
 	}
 }
 
 
 
-SCREEN_UPDATE( magmax )
+UINT32 magmax_state::screen_update_magmax(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	magmax_state *state = screen->machine().driver_data<magmax_state>();
-	UINT16 *videoram = state->m_videoram;
-	UINT16 *spriteram16 = state->m_spriteram;
+	UINT16 *videoram = m_videoram;
+	UINT16 *spriteram16 = m_spriteram;
 	int offs;
 
 	/* bit 2 flip screen */
-	state->m_flipscreen = *state->m_vreg & 0x04;
+	m_flipscreen = *m_vreg & 0x04;
 
 	/* copy the background graphics */
-	if (*state->m_vreg & 0x40)		/* background disable */
-		bitmap_fill(bitmap, cliprect, 0);
+	if (*m_vreg & 0x40)     /* background disable */
+		bitmap.fill(0, cliprect);
 	else
 	{
 		int v;
-		UINT8 * rom18B = screen->machine().region("user1")->base();
-		UINT32 scroll_h = (*state->m_scroll_x) & 0x3fff;
-		UINT32 scroll_v = (*state->m_scroll_y) & 0xff;
+		UINT8 * rom18B = memregion("user1")->base();
+		UINT32 scroll_h = (*m_scroll_x) & 0x3fff;
+		UINT32 scroll_v = (*m_scroll_y) & 0xff;
 
 		/*clear background-over-sprites bitmap*/
-		bitmap_fill(screen->machine().generic.tmpbitmap, NULL, 0);
+		m_bitmap.fill(0);
 
 		for (v = 2*8; v < 30*8; v++) /*only for visible area*/
 		{
@@ -126,17 +125,17 @@ SCREEN_UPDATE( magmax )
 				UINT32 LS283;
 				UINT32 prom_data;
 
-				LS283 =	scroll_h + h;
+				LS283 = scroll_h + h;
 
 				if (!map_v_scr_100)
 				{
 					if (h & 0x80)
-						LS283 =	LS283 + (rom18B[ map_v_scr_1fe_6 + (h ^ 0xff) ] ^ 0xff);
+						LS283 = LS283 + (rom18B[ map_v_scr_1fe_6 + (h ^ 0xff) ] ^ 0xff);
 					else
-						LS283 =	LS283 + rom18B[ map_v_scr_1fe_6 + h ] + 0xff01;
+						LS283 = LS283 + rom18B[ map_v_scr_1fe_6 + h ] + 0xff01;
 				}
 
-				prom_data = state->m_prom_tab[ (LS283 >> 6) & 0xff ];
+				prom_data = m_prom_tab[ (LS283 >> 6) & 0xff ];
 
 				rom18D_addr &= 0x20f8;
 				rom18D_addr += (prom_data & 0x1f00) + ((LS283 & 0x38) >>3);
@@ -156,10 +155,10 @@ SCREEN_UPDATE( magmax )
 
 				/*priority: background over sprites*/
 				if (map_v_scr_100 && ((graph_data & 0x0c)==0x0c))
-					*BITMAP_ADDR16(screen->machine().generic.tmpbitmap, v, h) = line_data[h];
+					m_bitmap.pix16(v, h) = line_data[h];
 			}
 
-			if (state->m_flipscreen)
+			if (m_flipscreen)
 			{
 				int i;
 				UINT16 line_data_flip_x[256];
@@ -173,7 +172,7 @@ SCREEN_UPDATE( magmax )
 	}
 
 	/* draw the sprites */
-	for (offs = 0; offs < state->m_spriteram_size/2; offs += 4)
+	for (offs = 0; offs < m_spriteram.bytes()/2; offs += 4)
 	{
 		int sx, sy;
 
@@ -190,7 +189,7 @@ SCREEN_UPDATE( magmax )
 			sx = (spriteram16[offs + 3] & 0xff) - 0x80 + 0x100 * (attr & 0x01);
 			sy = 239 - sy;
 
-			if (state->m_flipscreen)
+			if (m_flipscreen)
 			{
 				sx = 255-16 - sx;
 				sy = 239 - sy;
@@ -198,25 +197,25 @@ SCREEN_UPDATE( magmax )
 				flipy = !flipy;
 			}
 
-			if (code & 0x80)	/* sprite bankswitch */
-				code += (*state->m_vreg & 0x30) * 0x8;
+			if (code & 0x80)    /* sprite bankswitch */
+				code += (*m_vreg & 0x30) * 0x8;
 
-			drawgfx_transmask(bitmap, cliprect, screen->machine().gfx[1],
+			drawgfx_transmask(bitmap, cliprect, machine().gfx[1],
 					code,
 					color,
 					flipx, flipy,
 					sx, sy,
-					colortable_get_transpen_mask(screen->machine().colortable, screen->machine().gfx[1], color, 0x1f));
+					colortable_get_transpen_mask(machine().colortable, machine().gfx[1], color, 0x1f));
 		}
 	}
 
-	if (!(*state->m_vreg & 0x40))		/* background disable */
-		copybitmap_trans(bitmap, screen->machine().generic.tmpbitmap, state->m_flipscreen,state->m_flipscreen,0,0, cliprect, 0);
+	if (!(*m_vreg & 0x40))      /* background disable */
+		copybitmap_trans(bitmap, m_bitmap, m_flipscreen,m_flipscreen,0,0, cliprect, 0);
 
 	/* draw the foreground characters */
 	for (offs = 32*32-1; offs >= 0; offs -= 1)
 	{
-		//int page = (*state->m_vreg>>3) & 0x1;
+		//int page = (*m_vreg>>3) & 0x1;
 		int code;
 
 		code = videoram[offs /*+ page*/] & 0xff;
@@ -225,16 +224,16 @@ SCREEN_UPDATE( magmax )
 			int sx = (offs % 32);
 			int sy = (offs / 32);
 
-			if (state->m_flipscreen)
+			if (m_flipscreen)
 			{
 				sx = 31 - sx;
 				sy = 31 - sy;
 			}
 
-			drawgfx_transpen(bitmap, cliprect, screen->machine().gfx[0],
+			drawgfx_transpen(bitmap, cliprect, machine().gfx[0],
 					code,
 					0,
-					state->m_flipscreen, state->m_flipscreen,
+					m_flipscreen, m_flipscreen,
 					8 * sx, 8 * sy, 0x0f);
 		}
 	}

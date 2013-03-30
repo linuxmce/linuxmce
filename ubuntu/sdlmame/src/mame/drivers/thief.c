@@ -29,17 +29,17 @@ Credits:
 #include "video/tms9927.h"
 #include "includes/thief.h"
 
-#define MASTER_CLOCK	XTAL_20MHz
+#define MASTER_CLOCK    XTAL_20MHz
 
 
 
-static INTERRUPT_GEN( thief_interrupt )
+INTERRUPT_GEN_MEMBER(thief_state::thief_interrupt)
 {
 	/* SLAM switch causes an NMI if it's pressed */
-	if( (input_port_read(device->machine(), "P2") & 0x10) == 0 )
-		device_set_input_line(device, INPUT_LINE_NMI, PULSE_LINE);
+	if( (machine().root_device().ioport("P2")->read() & 0x10) == 0 )
+		device.execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 	else
-		device_set_input_line(device, 0, HOLD_LINE);
+		device.execute().set_input_line(0, HOLD_LINE);
 }
 
 /**********************************************************/
@@ -59,48 +59,48 @@ enum
 	kTalkTrack, kCrashTrack
 };
 
-static void tape_set_audio( device_t *samples, int track, int bOn )
+static void tape_set_audio( samples_device *samples, int track, int bOn )
 {
-	sample_set_volume(samples, track, bOn ? 1.0 : 0.0 );
+	samples->set_volume(track, bOn ? 1.0 : 0.0 );
 }
 
-static void tape_set_motor( device_t *samples, int bOn )
+static void tape_set_motor( samples_device *samples, int bOn )
 {
 	if( bOn )
 	{
 		/* If talk track is not playing, start it. */
-		if (! sample_playing(samples,  kTalkTrack ))
-			sample_start( samples, 0, kTalkTrack, 1 );
+		if (! samples->playing( kTalkTrack ))
+			samples->start( 0, kTalkTrack, true );
 
 		/* Resume playback of talk track. */
-		sample_set_pause( samples, kTalkTrack, 0);
+		samples->pause( kTalkTrack, false);
 
 
 		/* If crash track is not playing, start it. */
-		if (! sample_playing(samples,  kCrashTrack ))
-			sample_start( samples, 1, kCrashTrack, 1 );
+		if (! samples->playing( kCrashTrack ))
+			samples->start( 1, kCrashTrack, true );
 
 		/* Resume playback of crash track. */
-		sample_set_pause( samples, kCrashTrack, 0);
+		samples->pause( kCrashTrack, false);
 	}
 	else
 	{
 		/* Pause both the talk and crash tracks. */
-		sample_set_pause( samples, kTalkTrack, 1 );
-		sample_set_pause( samples, kCrashTrack, 1 );
+		samples->pause( kTalkTrack, true );
+		samples->pause( kCrashTrack, true );
 	}
 }
 
 /***********************************************************/
 
-static WRITE8_HANDLER( thief_input_select_w )
+WRITE8_MEMBER(thief_state::thief_input_select_w)
 {
-	thief_state *state = space->machine().driver_data<thief_state>();
-	state->m_input_select = data;
+	m_input_select = data;
 }
 
-static WRITE8_DEVICE_HANDLER( tape_control_w )
+WRITE8_MEMBER(thief_state::tape_control_w)
 {
+	device_t *device = machine().device("samples");
 	switch( data )
 	{
 	case 0x02: /* coin meter on */
@@ -113,56 +113,55 @@ static WRITE8_DEVICE_HANDLER( tape_control_w )
 		break;
 
 	case 0x08: /* talk track on */
-		tape_set_audio( device, kTalkTrack, 1 );
+		tape_set_audio( downcast<samples_device *>(device), kTalkTrack, 1 );
 		break;
 
 	case 0x09: /* talk track off */
-		tape_set_audio( device, kTalkTrack, 0 );
+		tape_set_audio( downcast<samples_device *>(device), kTalkTrack, 0 );
 		break;
 
 	case 0x0a: /* motor on */
-		tape_set_motor( device, 1 );
+		tape_set_motor( downcast<samples_device *>(device), 1 );
 		break;
 
 	case 0x0b: /* motor off */
-		tape_set_motor( device, 0 );
+		tape_set_motor( downcast<samples_device *>(device), 0 );
 		break;
 
 	case 0x0c: /* crash track on */
-		tape_set_audio( device, kCrashTrack, 1 );
+		tape_set_audio( downcast<samples_device *>(device), kCrashTrack, 1 );
 		break;
 
 	case 0x0d: /* crash track off */
-		tape_set_audio( device, kCrashTrack, 0 );
+		tape_set_audio( downcast<samples_device *>(device), kCrashTrack, 0 );
 		break;
 	}
 }
 
-static READ8_HANDLER( thief_io_r )
+READ8_MEMBER(thief_state::thief_io_r)
 {
-	thief_state *state = space->machine().driver_data<thief_state>();
-	switch( state->m_input_select )
+	switch( m_input_select )
 	{
-		case 0x01: return input_port_read(space->machine(), "DSW1");
-		case 0x02: return input_port_read(space->machine(), "DSW2");
-		case 0x04: return input_port_read(space->machine(), "P1");
-		case 0x08: return input_port_read(space->machine(), "P2");
+		case 0x01: return ioport("DSW1")->read();
+		case 0x02: return ioport("DSW2")->read();
+		case 0x04: return ioport("P1")->read();
+		case 0x08: return ioport("P2")->read();
 	}
 	return 0x00;
 }
 
-static ADDRESS_MAP_START( sharkatt_main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sharkatt_main_map, AS_PROGRAM, 8, thief_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
-	AM_RANGE(0x8000, 0x8fff) AM_RAM		/* 2114 */
-	AM_RANGE(0xc000, 0xdfff) AM_READWRITE(thief_videoram_r, thief_videoram_w)	/* 4116 */
+	AM_RANGE(0x8000, 0x8fff) AM_RAM     /* 2114 */
+	AM_RANGE(0xc000, 0xdfff) AM_READWRITE(thief_videoram_r, thief_videoram_w)   /* 4116 */
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( thief_main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( thief_main_map, AS_PROGRAM, 8, thief_state )
 	AM_RANGE(0x0000, 0x0000) AM_WRITE(thief_blit_w)
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
-	AM_RANGE(0x8000, 0x8fff) AM_RAM		/* 2114 */
-	AM_RANGE(0xa000, 0xafff) AM_ROM		/* NATO Defense diagnostic ROM */
-	AM_RANGE(0xc000, 0xdfff) AM_READWRITE(thief_videoram_r, thief_videoram_w)	/* 4116 */
+	AM_RANGE(0x8000, 0x8fff) AM_RAM     /* 2114 */
+	AM_RANGE(0xa000, 0xafff) AM_ROM     /* NATO Defense diagnostic ROM */
+	AM_RANGE(0xc000, 0xdfff) AM_READWRITE(thief_videoram_r, thief_videoram_w)   /* 4116 */
 	AM_RANGE(0xe000, 0xe008) AM_READWRITE(thief_coprocessor_r, thief_coprocessor_w)
 	AM_RANGE(0xe010, 0xe02f) AM_ROM
 	AM_RANGE(0xe080, 0xe0bf) AM_READWRITE(thief_context_ram_r, thief_context_ram_w)
@@ -170,19 +169,19 @@ static ADDRESS_MAP_START( thief_main_map, AS_PROGRAM, 8 )
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( io_map, AS_IO, 8, thief_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0x00) AM_WRITENOP /* watchdog */
 	AM_RANGE(0x10, 0x10) AM_WRITE(thief_video_control_w)
 	AM_RANGE(0x30, 0x30) AM_WRITE(thief_input_select_w) /* 8255 */
-	AM_RANGE(0x31, 0x31) AM_READ(thief_io_r)	/* 8255 */
-	AM_RANGE(0x33, 0x33) AM_DEVWRITE("samples", tape_control_w)
-	AM_RANGE(0x40, 0x41) AM_DEVWRITE("ay1", ay8910_address_data_w)
-	AM_RANGE(0x41, 0x41) AM_DEVREAD("ay1", ay8910_r)
-	AM_RANGE(0x42, 0x43) AM_DEVWRITE("ay2", ay8910_address_data_w)
-	AM_RANGE(0x43, 0x43) AM_DEVREAD("ay2", ay8910_r)
+	AM_RANGE(0x31, 0x31) AM_READ(thief_io_r)    /* 8255 */
+	AM_RANGE(0x33, 0x33) AM_WRITE(tape_control_w)
+	AM_RANGE(0x40, 0x41) AM_DEVWRITE_LEGACY("ay1", ay8910_address_data_w)
+	AM_RANGE(0x41, 0x41) AM_DEVREAD_LEGACY("ay1", ay8910_r)
+	AM_RANGE(0x42, 0x43) AM_DEVWRITE_LEGACY("ay2", ay8910_address_data_w)
+	AM_RANGE(0x43, 0x43) AM_DEVREAD_LEGACY("ay2", ay8910_r)
 	AM_RANGE(0x50, 0x50) AM_WRITE(thief_color_plane_w)
-	AM_RANGE(0x60, 0x6f) AM_DEVREADWRITE("tms", tms9927_r, tms9927_w)
+	AM_RANGE(0x60, 0x6f) AM_DEVREADWRITE_LEGACY("tms", tms9927_r, tms9927_w)
 	AM_RANGE(0x70, 0x7f) AM_WRITE(thief_color_map_w)
 ADDRESS_MAP_END
 
@@ -190,38 +189,38 @@ ADDRESS_MAP_END
 /**********************************************************/
 
 static INPUT_PORTS_START( sharkatt )
-	PORT_START("DSW1")	/* IN0 */
+	PORT_START("DSW1")  /* IN0 */
 	PORT_DIPNAME( 0x7f, 0x7f, DEF_STR( Coinage ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x7f, DEF_STR( 1C_1C ) ) // if any are set
 	PORT_SERVICE( 0x80, IP_ACTIVE_HIGH )
 
-	PORT_START("DSW2")	/* IN1 */
+	PORT_START("DSW2")  /* IN1 */
 	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Lives ) )
-	PORT_DIPSETTING(	0x00, "3" )
-	PORT_DIPSETTING(	0x01, "4" )
-	PORT_DIPSETTING(	0x02, "5" )
+	PORT_DIPSETTING(    0x00, "3" )
+	PORT_DIPSETTING(    0x01, "4" )
+	PORT_DIPSETTING(    0x02, "5" )
 //  PORT_DIPSETTING(    0x03, "5" )
 	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( No ) )
-	PORT_DIPSETTING(	0x04, DEF_STR( Yes ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( No ) )
+	PORT_DIPSETTING(    0x04, DEF_STR( Yes ) )
 	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( No ) )
-	PORT_DIPSETTING(	0x08, DEF_STR( Yes ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( No ) )
+	PORT_DIPSETTING(    0x08, DEF_STR( Yes ) )
 	PORT_DIPNAME( 0x10, 0x00, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( No ) )
-	PORT_DIPSETTING(	0x10, DEF_STR( Yes ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( No ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( Yes ) )
 	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( No ) )
-	PORT_DIPSETTING(	0x20, DEF_STR( Yes ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( No ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( Yes ) )
 	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( No ) )
-	PORT_DIPSETTING(	0x40, DEF_STR( Yes ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( No ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( Yes ) )
 	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( No ) )
-	PORT_DIPSETTING(	0x80, DEF_STR( Yes ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( No ) )
+	PORT_DIPSETTING(    0x80, DEF_STR( Yes ) )
 
-	PORT_START("P1")	/* IN2 */
+	PORT_START("P1")    /* IN2 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
@@ -231,7 +230,7 @@ static INPUT_PORTS_START( sharkatt )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON2 )
 
-	PORT_START("P2")	/* IN3 */
+	PORT_START("P2")    /* IN3 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_COCKTAIL
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_COCKTAIL
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_COCKTAIL
@@ -384,14 +383,14 @@ INPUT_PORTS_END
 static const char *const sharkatt_sample_names[] =
 {
 	"*sharkatt",
-	"talk.wav",
-	"crash.wav",
-	0	/* end of array */
+	"talk",
+	"crash",
+	0   /* end of array */
 };
 
 static const samples_interface sharkatt_samples_interface =
 {
-	2,	/* number of channels */
+	2,  /* number of channels */
 	sharkatt_sample_names
 };
 
@@ -400,14 +399,14 @@ static const samples_interface sharkatt_samples_interface =
 static const char *const thief_sample_names[] =
 {
 	"*thief",
-	"talk.wav",
-	"crash.wav",
-	0	/* end of array */
+	"talk",
+	"crash",
+	0   /* end of array */
 };
 
 static const samples_interface thief_samples_interface =
 {
-	2,	/* number of channels */
+	2,  /* number of channels */
 	thief_sample_names
 };
 
@@ -416,14 +415,14 @@ static const samples_interface thief_samples_interface =
 static const char *const natodef_sample_names[] =
 {
 	"*natodef",
-	"talk.wav",
-	"crash.wav",
-	0	/* end of array */
+	"talk",
+	"crash",
+	0   /* end of array */
 };
 
 static const samples_interface natodef_samples_interface =
 {
-	2,	/* number of channels */
+	2,  /* number of channels */
 	natodef_sample_names
 };
 
@@ -440,22 +439,20 @@ static MACHINE_CONFIG_START( sharkatt, thief_state )
 	MCFG_CPU_ADD("maincpu", Z80, 4000000)        /* 4 MHz? */
 	MCFG_CPU_PROGRAM_MAP(sharkatt_main_map)
 	MCFG_CPU_IO_MAP(io_map)
-	MCFG_CPU_VBLANK_INT("screen", thief_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", thief_state,  thief_interrupt)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 0*8, 24*8-1)
-	MCFG_SCREEN_UPDATE(thief)
+	MCFG_SCREEN_UPDATE_DRIVER(thief_state, screen_update_thief)
 
 	MCFG_TMS9927_ADD("tms", MASTER_CLOCK/4, tms9927_intf)
 
 	MCFG_PALETTE_LENGTH(16)
 
-	MCFG_VIDEO_START(thief)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -466,8 +463,7 @@ static MACHINE_CONFIG_START( sharkatt, thief_state )
 	MCFG_SOUND_ADD("ay2", AY8910, 4000000/4)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 
-	MCFG_SOUND_ADD("samples", SAMPLES, 0)
-	MCFG_SOUND_CONFIG(sharkatt_samples_interface)
+	MCFG_SAMPLES_ADD("samples", sharkatt_samples_interface)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 MACHINE_CONFIG_END
 
@@ -478,22 +474,20 @@ static MACHINE_CONFIG_START( thief, thief_state )
 	MCFG_CPU_ADD("maincpu", Z80, 4000000) /* 4 MHz? */
 	MCFG_CPU_PROGRAM_MAP(thief_main_map)
 	MCFG_CPU_IO_MAP(io_map)
-	MCFG_CPU_VBLANK_INT("screen", thief_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", thief_state,  thief_interrupt)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 0*8, 32*8-1)
-	MCFG_SCREEN_UPDATE(thief)
+	MCFG_SCREEN_UPDATE_DRIVER(thief_state, screen_update_thief)
 
 	MCFG_TMS9927_ADD("tms", MASTER_CLOCK/4, tms9927_intf)
 
 	MCFG_PALETTE_LENGTH(16)
 
-	MCFG_VIDEO_START(thief)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -504,8 +498,7 @@ static MACHINE_CONFIG_START( thief, thief_state )
 	MCFG_SOUND_ADD("ay2", AY8910, 4000000/4)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 
-	MCFG_SOUND_ADD("samples", SAMPLES, 0)
-	MCFG_SOUND_CONFIG(thief_samples_interface)
+	MCFG_SAMPLES_ADD("samples", thief_samples_interface)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 MACHINE_CONFIG_END
 
@@ -516,22 +509,20 @@ static MACHINE_CONFIG_START( natodef, thief_state )
 	MCFG_CPU_ADD("maincpu", Z80, 4000000) /* 4 MHz? */
 	MCFG_CPU_PROGRAM_MAP(thief_main_map)
 	MCFG_CPU_IO_MAP(io_map)
-	MCFG_CPU_VBLANK_INT("screen", thief_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", thief_state,  thief_interrupt)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 0*8, 32*8-1)
-	MCFG_SCREEN_UPDATE(thief)
+	MCFG_SCREEN_UPDATE_DRIVER(thief_state, screen_update_thief)
 
 	MCFG_TMS9927_ADD("tms", MASTER_CLOCK/4, tms9927_intf)
 
 	MCFG_PALETTE_LENGTH(16)
 
-	MCFG_VIDEO_START(thief)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -542,8 +533,7 @@ static MACHINE_CONFIG_START( natodef, thief_state )
 	MCFG_SOUND_ADD("ay2", AY8910, 4000000/4)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 
-	MCFG_SOUND_ADD("samples", SAMPLES, 0)
-	MCFG_SOUND_CONFIG(natodef_samples_interface)
+	MCFG_SAMPLES_ADD("samples", natodef_samples_interface)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 MACHINE_CONFIG_END
 
@@ -568,19 +558,19 @@ ROM_END
 
 ROM_START( thief )
 	ROM_REGION( 0x10000, "maincpu", 0 ) /* Z80 code */
-	ROM_LOAD( "t8a0ah0a",	0x0000, 0x1000, CRC(edbbf71c) SHA1(9f13841c54fbe5449280c24954a45517014a834e) )
-	ROM_LOAD( "t2662h2",	0x1000, 0x1000, CRC(85b4f6ff) SHA1(8e007bfff2f27809e7a9881bc3b2587bf35cff6d) )
-	ROM_LOAD( "tc162h4",	0x2000, 0x1000, CRC(70478a82) SHA1(547bad88a44c63657bf8f65f2877ab1323515521) )
-	ROM_LOAD( "t0cb4h6",	0x3000, 0x1000, CRC(29de0425) SHA1(6614f3ee314ebf2a6469481e8c69c32a93fa8eb5) )
-	ROM_LOAD( "tc707h8",	0x4000, 0x1000, CRC(ea8dd847) SHA1(eab24621abe3735902f03463ee536a0cbfeb7407) )
-	ROM_LOAD( "t857bh10",	0x5000, 0x1000, CRC(403c33b7) SHA1(d1422e74c9ecdadbc238b155f853294f6bb83992) )
-	ROM_LOAD( "t606bh12",	0x6000, 0x1000, CRC(4ca2748b) SHA1(07df2fac63471d716923f859105421e22e5e970e) )
-	ROM_LOAD( "tae4bh14",	0x7000, 0x1000, CRC(22e7dcc3) SHA1(fd4302688905bbd47dfdc1d7cdb55212a5e99f81) ) /* diagnostics ROM */
+	ROM_LOAD( "t8a0ah0a",   0x0000, 0x1000, CRC(edbbf71c) SHA1(9f13841c54fbe5449280c24954a45517014a834e) )
+	ROM_LOAD( "t2662h2",    0x1000, 0x1000, CRC(85b4f6ff) SHA1(8e007bfff2f27809e7a9881bc3b2587bf35cff6d) )
+	ROM_LOAD( "tc162h4",    0x2000, 0x1000, CRC(70478a82) SHA1(547bad88a44c63657bf8f65f2877ab1323515521) )
+	ROM_LOAD( "t0cb4h6",    0x3000, 0x1000, CRC(29de0425) SHA1(6614f3ee314ebf2a6469481e8c69c32a93fa8eb5) )
+	ROM_LOAD( "tc707h8",    0x4000, 0x1000, CRC(ea8dd847) SHA1(eab24621abe3735902f03463ee536a0cbfeb7407) )
+	ROM_LOAD( "t857bh10",   0x5000, 0x1000, CRC(403c33b7) SHA1(d1422e74c9ecdadbc238b155f853294f6bb83992) )
+	ROM_LOAD( "t606bh12",   0x6000, 0x1000, CRC(4ca2748b) SHA1(07df2fac63471d716923f859105421e22e5e970e) )
+	ROM_LOAD( "tae4bh14",   0x7000, 0x1000, CRC(22e7dcc3) SHA1(fd4302688905bbd47dfdc1d7cdb55212a5e99f81) ) /* diagnostics ROM */
 
 	ROM_REGION( 0x400, "cpu1", 0 ) /* coprocessor */
-	ROM_LOAD( "b8",			0x000, 0x0200, CRC(fe865b2a) SHA1(b29144b05cb2846ea9c868ebf843d74d94c7bcc6) )
+	ROM_LOAD( "b8",         0x000, 0x0200, CRC(fe865b2a) SHA1(b29144b05cb2846ea9c868ebf843d74d94c7bcc6) )
 	/* B8 is a function dispatch table for the coprocessor (unused) */
-	ROM_LOAD( "c8", 		0x200, 0x0200, CRC(7ed5c923) SHA1(35757d50bfa9ea3cf916576a148064a0f9be8732) )
+	ROM_LOAD( "c8",         0x200, 0x0200, CRC(7ed5c923) SHA1(35757d50bfa9ea3cf916576a148064a0f9be8732) )
 	/* C8 is mapped (banked) in CPU1's address space; it contains Z80 code */
 
 	ROM_REGION( 0x6000, "gfx1", 0 ) /* image ROMs for coprocessor */
@@ -591,68 +581,68 @@ ROM_END
 
 ROM_START( natodef )
 	ROM_REGION( 0x10000, "maincpu", 0 ) /* Z80 code */
-	ROM_LOAD( "natodef.cp0",	0x0000, 0x1000, CRC(8397c787) SHA1(5957613f1ace7dc4612f28f6fba3a7374be905ac) )
-	ROM_LOAD( "natodef.cp2",	0x1000, 0x1000, CRC(8cfbf26f) SHA1(a15f0d5d82cd96b80ee91dc91858b660c5895f34) )
-	ROM_LOAD( "natodef.cp4",	0x2000, 0x1000, CRC(b4c90fb2) SHA1(3ff4691415433863bfe74d51b9f3aa428f3bf88f) )
-	ROM_LOAD( "natodef.cp6",	0x3000, 0x1000, CRC(c6d0d35e) SHA1(d4f34b4930be6dc67d77af691d14ee3b797ec29d) )
-	ROM_LOAD( "natodef.cp8",	0x4000, 0x1000, CRC(e4b6c21e) SHA1(cfdae66494bc2cc9ee414b9adcf8257b7c69bb40) )
-	ROM_LOAD( "natodef.cpa",	0x5000, 0x1000, CRC(888ecd42) SHA1(5af638d7e299046d5803d2764bf42ea44a80374c) )
-	ROM_LOAD( "natodef.cpc",	0x6000, 0x1000, CRC(cf713bc9) SHA1(0687755a6cfd76a920c210bf11530ef4c59d92b0) )
-	ROM_LOAD( "natodef.cpe",	0x7000, 0x1000, CRC(4eef6bf4) SHA1(ab094198ea4d2267194ace5d382abb78d568983a) )
-	ROM_LOAD( "natodef.cp5",	0xa000, 0x1000, CRC(65c3601b) SHA1(c7bf31e6cb781405b3665b3aa93644ed57616256) )	/* diagnostics ROM */
+	ROM_LOAD( "natodef.cp0",    0x0000, 0x1000, CRC(8397c787) SHA1(5957613f1ace7dc4612f28f6fba3a7374be905ac) )
+	ROM_LOAD( "natodef.cp2",    0x1000, 0x1000, CRC(8cfbf26f) SHA1(a15f0d5d82cd96b80ee91dc91858b660c5895f34) )
+	ROM_LOAD( "natodef.cp4",    0x2000, 0x1000, CRC(b4c90fb2) SHA1(3ff4691415433863bfe74d51b9f3aa428f3bf88f) )
+	ROM_LOAD( "natodef.cp6",    0x3000, 0x1000, CRC(c6d0d35e) SHA1(d4f34b4930be6dc67d77af691d14ee3b797ec29d) )
+	ROM_LOAD( "natodef.cp8",    0x4000, 0x1000, CRC(e4b6c21e) SHA1(cfdae66494bc2cc9ee414b9adcf8257b7c69bb40) )
+	ROM_LOAD( "natodef.cpa",    0x5000, 0x1000, CRC(888ecd42) SHA1(5af638d7e299046d5803d2764bf42ea44a80374c) )
+	ROM_LOAD( "natodef.cpc",    0x6000, 0x1000, CRC(cf713bc9) SHA1(0687755a6cfd76a920c210bf11530ef4c59d92b0) )
+	ROM_LOAD( "natodef.cpe",    0x7000, 0x1000, CRC(4eef6bf4) SHA1(ab094198ea4d2267194ace5d382abb78d568983a) )
+	ROM_LOAD( "natodef.cp5",    0xa000, 0x1000, CRC(65c3601b) SHA1(c7bf31e6cb781405b3665b3aa93644ed57616256) )  /* diagnostics ROM */
 
 	ROM_REGION( 0x400, "cpu1", 0 ) /* coprocessor */
-	ROM_LOAD( "b8",			0x000, 0x0200, CRC(fe865b2a) SHA1(b29144b05cb2846ea9c868ebf843d74d94c7bcc6) )
-	ROM_LOAD( "c8", 		0x200, 0x0200, CRC(7ed5c923) SHA1(35757d50bfa9ea3cf916576a148064a0f9be8732) )
+	ROM_LOAD( "b8",         0x000, 0x0200, CRC(fe865b2a) SHA1(b29144b05cb2846ea9c868ebf843d74d94c7bcc6) )
+	ROM_LOAD( "c8",         0x200, 0x0200, CRC(7ed5c923) SHA1(35757d50bfa9ea3cf916576a148064a0f9be8732) )
 	/* C8 is mapped (banked) in CPU1's address space; it contains Z80 code */
 
 	ROM_REGION( 0x6000, "gfx1", 0 ) /* image ROMs for coprocessor */
-	ROM_LOAD16_BYTE( "natodef.o4",	0x0001, 0x1000, CRC(39a868f8) SHA1(870795f18cd8f831b714b809a380e30b5d323a5f) )
-	ROM_LOAD16_BYTE( "natodef.e1",	0x0000, 0x1000, CRC(b6d1623d) SHA1(0aa15db0e1459a6cc7d2a5bc8e588fd514b71d85) )
-	ROM_LOAD16_BYTE( "natodef.o2",	0x2001, 0x1000, CRC(77cc9cfd) SHA1(1bbed3cb834b844fb2d9d48a3a142edaeb33ccc6) )
-	ROM_LOAD16_BYTE( "natodef.e3",	0x2000, 0x1000, CRC(5302410d) SHA1(e166c151d948f474c134802e3f891982bf370596) )
-	ROM_LOAD16_BYTE( "natodef.o3",	0x4001, 0x1000, CRC(b217909a) SHA1(a26eb5bf2c92d79a75376deb6278710426b34cc5) )
-	ROM_LOAD16_BYTE( "natodef.e2",	0x4000, 0x1000, CRC(886c3f05) SHA1(306c8621455d2d6b7b2f545500b27e56a7159a1b) )
+	ROM_LOAD16_BYTE( "natodef.o4",  0x0001, 0x1000, CRC(39a868f8) SHA1(870795f18cd8f831b714b809a380e30b5d323a5f) )
+	ROM_LOAD16_BYTE( "natodef.e1",  0x0000, 0x1000, CRC(b6d1623d) SHA1(0aa15db0e1459a6cc7d2a5bc8e588fd514b71d85) )
+	ROM_LOAD16_BYTE( "natodef.o2",  0x2001, 0x1000, CRC(77cc9cfd) SHA1(1bbed3cb834b844fb2d9d48a3a142edaeb33ccc6) )
+	ROM_LOAD16_BYTE( "natodef.e3",  0x2000, 0x1000, CRC(5302410d) SHA1(e166c151d948f474c134802e3f891982bf370596) )
+	ROM_LOAD16_BYTE( "natodef.o3",  0x4001, 0x1000, CRC(b217909a) SHA1(a26eb5bf2c92d79a75376deb6278710426b34cc5) )
+	ROM_LOAD16_BYTE( "natodef.e2",  0x4000, 0x1000, CRC(886c3f05) SHA1(306c8621455d2d6b7b2f545500b27e56a7159a1b) )
 ROM_END
 
 ROM_START( natodefa )
 	ROM_REGION( 0x10000, "maincpu", 0 ) /* Z80 code */
-	ROM_LOAD( "natodef.cp0",	0x0000, 0x1000, CRC(8397c787) SHA1(5957613f1ace7dc4612f28f6fba3a7374be905ac) )
-	ROM_LOAD( "natodef.cp2",	0x1000, 0x1000, CRC(8cfbf26f) SHA1(a15f0d5d82cd96b80ee91dc91858b660c5895f34) )
-	ROM_LOAD( "natodef.cp4",	0x2000, 0x1000, CRC(b4c90fb2) SHA1(3ff4691415433863bfe74d51b9f3aa428f3bf88f) )
-	ROM_LOAD( "natodef.cp6",	0x3000, 0x1000, CRC(c6d0d35e) SHA1(d4f34b4930be6dc67d77af691d14ee3b797ec29d) )
-	ROM_LOAD( "natodef.cp8",	0x4000, 0x1000, CRC(e4b6c21e) SHA1(cfdae66494bc2cc9ee414b9adcf8257b7c69bb40) )
-	ROM_LOAD( "natodef.cpa",	0x5000, 0x1000, CRC(888ecd42) SHA1(5af638d7e299046d5803d2764bf42ea44a80374c) )
-	ROM_LOAD( "natodef.cpc",	0x6000, 0x1000, CRC(cf713bc9) SHA1(0687755a6cfd76a920c210bf11530ef4c59d92b0) )
-	ROM_LOAD( "natodef.cpe",	0x7000, 0x1000, CRC(4eef6bf4) SHA1(ab094198ea4d2267194ace5d382abb78d568983a) )
-	ROM_LOAD( "natodef.cp5",	0xa000, 0x1000, CRC(65c3601b) SHA1(c7bf31e6cb781405b3665b3aa93644ed57616256) )	/* diagnostics ROM */
+	ROM_LOAD( "natodef.cp0",    0x0000, 0x1000, CRC(8397c787) SHA1(5957613f1ace7dc4612f28f6fba3a7374be905ac) )
+	ROM_LOAD( "natodef.cp2",    0x1000, 0x1000, CRC(8cfbf26f) SHA1(a15f0d5d82cd96b80ee91dc91858b660c5895f34) )
+	ROM_LOAD( "natodef.cp4",    0x2000, 0x1000, CRC(b4c90fb2) SHA1(3ff4691415433863bfe74d51b9f3aa428f3bf88f) )
+	ROM_LOAD( "natodef.cp6",    0x3000, 0x1000, CRC(c6d0d35e) SHA1(d4f34b4930be6dc67d77af691d14ee3b797ec29d) )
+	ROM_LOAD( "natodef.cp8",    0x4000, 0x1000, CRC(e4b6c21e) SHA1(cfdae66494bc2cc9ee414b9adcf8257b7c69bb40) )
+	ROM_LOAD( "natodef.cpa",    0x5000, 0x1000, CRC(888ecd42) SHA1(5af638d7e299046d5803d2764bf42ea44a80374c) )
+	ROM_LOAD( "natodef.cpc",    0x6000, 0x1000, CRC(cf713bc9) SHA1(0687755a6cfd76a920c210bf11530ef4c59d92b0) )
+	ROM_LOAD( "natodef.cpe",    0x7000, 0x1000, CRC(4eef6bf4) SHA1(ab094198ea4d2267194ace5d382abb78d568983a) )
+	ROM_LOAD( "natodef.cp5",    0xa000, 0x1000, CRC(65c3601b) SHA1(c7bf31e6cb781405b3665b3aa93644ed57616256) )  /* diagnostics ROM */
 
 	ROM_REGION( 0x400, "cpu1", 0 ) /* coprocessor */
-	ROM_LOAD( "b8",			0x000, 0x0200, CRC(fe865b2a) SHA1(b29144b05cb2846ea9c868ebf843d74d94c7bcc6) )
-	ROM_LOAD( "c8", 		0x200, 0x0200, CRC(7ed5c923) SHA1(35757d50bfa9ea3cf916576a148064a0f9be8732) )
+	ROM_LOAD( "b8",         0x000, 0x0200, CRC(fe865b2a) SHA1(b29144b05cb2846ea9c868ebf843d74d94c7bcc6) )
+	ROM_LOAD( "c8",         0x200, 0x0200, CRC(7ed5c923) SHA1(35757d50bfa9ea3cf916576a148064a0f9be8732) )
 	/* C8 is mapped (banked) in CPU1's address space; it contains Z80 code */
 
 	ROM_REGION( 0x6000, "gfx1", 0 ) /* image ROMs for coprocessor */
-	ROM_LOAD16_BYTE( "natodef.o4",	0x0001, 0x1000, CRC(39a868f8) SHA1(870795f18cd8f831b714b809a380e30b5d323a5f) )
-	ROM_LOAD16_BYTE( "natodef.e1",	0x0000, 0x1000, CRC(b6d1623d) SHA1(0aa15db0e1459a6cc7d2a5bc8e588fd514b71d85) )
-	ROM_LOAD16_BYTE( "natodef.o3",	0x2001, 0x1000, CRC(b217909a) SHA1(a26eb5bf2c92d79a75376deb6278710426b34cc5) ) /* same ROMs as natodef, */
-	ROM_LOAD16_BYTE( "natodef.e2",	0x2000, 0x1000, CRC(886c3f05) SHA1(306c8621455d2d6b7b2f545500b27e56a7159a1b) ) /* but in a different */
-	ROM_LOAD16_BYTE( "natodef.o2",	0x4001, 0x1000, CRC(77cc9cfd) SHA1(1bbed3cb834b844fb2d9d48a3a142edaeb33ccc6) ) /* order to give */
-	ROM_LOAD16_BYTE( "natodef.e3",	0x4000, 0x1000, CRC(5302410d) SHA1(e166c151d948f474c134802e3f891982bf370596) ) /* different mazes */
+	ROM_LOAD16_BYTE( "natodef.o4",  0x0001, 0x1000, CRC(39a868f8) SHA1(870795f18cd8f831b714b809a380e30b5d323a5f) )
+	ROM_LOAD16_BYTE( "natodef.e1",  0x0000, 0x1000, CRC(b6d1623d) SHA1(0aa15db0e1459a6cc7d2a5bc8e588fd514b71d85) )
+	ROM_LOAD16_BYTE( "natodef.o3",  0x2001, 0x1000, CRC(b217909a) SHA1(a26eb5bf2c92d79a75376deb6278710426b34cc5) ) /* same ROMs as natodef, */
+	ROM_LOAD16_BYTE( "natodef.e2",  0x2000, 0x1000, CRC(886c3f05) SHA1(306c8621455d2d6b7b2f545500b27e56a7159a1b) ) /* but in a different */
+	ROM_LOAD16_BYTE( "natodef.o2",  0x4001, 0x1000, CRC(77cc9cfd) SHA1(1bbed3cb834b844fb2d9d48a3a142edaeb33ccc6) ) /* order to give */
+	ROM_LOAD16_BYTE( "natodef.e3",  0x4000, 0x1000, CRC(5302410d) SHA1(e166c151d948f474c134802e3f891982bf370596) ) /* different mazes */
 ROM_END
 
 
-static DRIVER_INIT( thief )
+DRIVER_INIT_MEMBER(thief_state,thief)
 {
-	UINT8 *dest = machine.region( "maincpu" )->base();
-	const UINT8 *source = machine.region( "cpu1" )->base();
+	UINT8 *dest = machine().root_device().memregion( "maincpu" )->base();
+	const UINT8 *source = machine().root_device().memregion( "cpu1" )->base();
 
 	/* C8 is mapped (banked) in CPU1's address space; it contains Z80 code */
 	memcpy( &dest[0xe010], &source[0x290], 0x20 );
 }
 
 
-GAME( 1980, sharkatt, 0,       sharkatt, sharkatt, 0,     ROT0, "Pacific Novelty", "Shark Attack", 0 )
-GAME( 1981, thief,    0,       thief,    thief,    thief, ROT0, "Pacific Novelty", "Thief", 0 )
-GAME( 1982, natodef,  0,       natodef,  natodef,  thief, ROT0, "Pacific Novelty", "NATO Defense" , 0 )
-GAME( 1982, natodefa, natodef, natodef,  natodef,  thief, ROT0, "Pacific Novelty", "NATO Defense (alternate mazes)" , 0 )
+GAME( 1980, sharkatt, 0,       sharkatt, sharkatt, driver_device, 0,     ROT0, "Pacific Novelty", "Shark Attack", 0 )
+GAME( 1981, thief,    0,       thief,    thief, thief_state,    thief, ROT0, "Pacific Novelty", "Thief", 0 )
+GAME( 1982, natodef,  0,       natodef,  natodef, thief_state,  thief, ROT0, "Pacific Novelty", "NATO Defense" , 0 )
+GAME( 1982, natodefa, natodef, natodef,  natodef, thief_state,  thief, ROT0, "Pacific Novelty", "NATO Defense (alternate mazes)" , 0 )

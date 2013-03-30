@@ -11,48 +11,43 @@
 
 
 
-static TILEMAP_MAPPER( get_memory_offset )
+TILEMAP_MAPPER_MEMBER(videopin_state::get_memory_offset)
 {
 	return num_rows * ((col + 16) % 48) + row;
 }
 
 
-static TILE_GET_INFO( get_tile_info )
+TILE_GET_INFO_MEMBER(videopin_state::get_tile_info)
 {
-	videopin_state *state = machine.driver_data<videopin_state>();
-	UINT8 code = state->m_video_ram[tile_index];
+	UINT8 code = m_video_ram[tile_index];
 
-	SET_TILE_INFO(0, code, 0, (code & 0x40) ? TILE_FLIPY : 0);
+	SET_TILE_INFO_MEMBER(0, code, 0, (code & 0x40) ? TILE_FLIPY : 0);
 }
 
 
-VIDEO_START( videopin )
+void videopin_state::video_start()
 {
-	videopin_state *state = machine.driver_data<videopin_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_tile_info, get_memory_offset,  8, 8, 48, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(videopin_state::get_tile_info),this), tilemap_mapper_delegate(FUNC(videopin_state::get_memory_offset),this),  8, 8, 48, 32);
 }
 
 
-SCREEN_UPDATE( videopin )
+UINT32 videopin_state::screen_update_videopin(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	videopin_state *state = screen->machine().driver_data<videopin_state>();
 	int col;
 	int row;
 
-	tilemap_set_scrollx(state->m_bg_tilemap, 0, -8);   /* account for delayed loading of shift reg C6 */
+	m_bg_tilemap->set_scrollx(0, -8);   /* account for delayed loading of shift reg C6 */
 
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
 
 	for (row = 0; row < 32; row++)
 	{
 		for (col = 0; col < 48; col++)
 		{
-			UINT32 offset = get_memory_offset(col, row, 48, 32);
+			UINT32 offset = m_bg_tilemap->memory_index(col, row);
 
-			if (state->m_video_ram[offset] & 0x80)   /* ball bit found */
+			if (m_video_ram[offset] & 0x80)   /* ball bit found */
 			{
-				rectangle rect;
-
 				int x = 8 * col;
 				int y = 8 * row;
 
@@ -61,22 +56,11 @@ SCREEN_UPDATE( videopin )
 
 				x += 4;   /* account for delayed loading of flip-flop C4 */
 
-				rect.min_x = x;
-				rect.min_y = y;
-				rect.max_x = x + 15;
-				rect.max_y = y + 15;
+				rectangle rect(x, x + 15, y, y + 15);
+				rect &= cliprect;
 
-				if (rect.min_x < cliprect->min_x)
-					rect.min_x = cliprect->min_x;
-				if (rect.min_y < cliprect->min_y)
-					rect.min_y = cliprect->min_y;
-				if (rect.max_x > cliprect->max_x)
-					rect.max_x = cliprect->max_x;
-				if (rect.max_y > cliprect->max_y)
-					rect.max_y = cliprect->max_y;
-
-				x -= state->m_ball_x;
-				y -= state->m_ball_y;
+				x -= m_ball_x;
+				y -= m_ball_y;
 
 				/* ball placement is still 0.5 pixels off but don't tell anyone */
 
@@ -84,7 +68,7 @@ SCREEN_UPDATE( videopin )
 				{
 					for (j = 0; j < 2; j++)
 					{
-						drawgfx_transpen(bitmap, &rect, screen->machine().gfx[1],
+						drawgfx_transpen(bitmap, rect, machine().gfx[1],
 							0, 0,
 							0, 0,
 							x + 16 * i,
@@ -100,17 +84,15 @@ SCREEN_UPDATE( videopin )
 }
 
 
-WRITE8_HANDLER( videopin_ball_w )
+WRITE8_MEMBER(videopin_state::videopin_ball_w)
 {
-	videopin_state *state = space->machine().driver_data<videopin_state>();
-	state->m_ball_x = data & 15;
-	state->m_ball_y = data >> 4;
+	m_ball_x = data & 15;
+	m_ball_y = data >> 4;
 }
 
 
-WRITE8_HANDLER( videopin_video_ram_w )
+WRITE8_MEMBER(videopin_state::videopin_video_ram_w)
 {
-	videopin_state *state = space->machine().driver_data<videopin_state>();
-	state->m_video_ram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_video_ram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }

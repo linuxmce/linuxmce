@@ -8,40 +8,39 @@
 #include "includes/n8080.h"
 
 
-WRITE8_HANDLER( n8080_video_control_w )
+WRITE8_MEMBER(n8080_state::n8080_video_control_w)
 {
-	n8080_state *state = space->machine().driver_data<n8080_state>();
 
-	state->m_sheriff_color_mode = (data >> 3) & 3;
-	state->m_sheriff_color_data = (data >> 0) & 7;
-	flip_screen_set_no_update(space->machine(), data & 0x20);
+	m_sheriff_color_mode = (data >> 3) & 3;
+	m_sheriff_color_data = (data >> 0) & 7;
+	flip_screen_set_no_update(data & 0x20);
 }
 
 
-PALETTE_INIT( n8080 )
+PALETTE_INIT_MEMBER(n8080_state,n8080)
 {
 	int i;
 
 	for (i = 0; i < 8; i++)
-		palette_set_color_rgb(machine, i, pal1bit(i >> 0), pal1bit(i >> 1), pal1bit(i >> 2));
+		palette_set_color_rgb(machine(), i, pal1bit(i >> 0), pal1bit(i >> 1), pal1bit(i >> 2));
 }
 
 
-PALETTE_INIT( helifire )
+PALETTE_INIT_MEMBER(n8080_state,helifire)
 {
 	int i;
 
-	PALETTE_INIT_CALL(n8080);
+	PALETTE_INIT_CALL_MEMBER(n8080);
 
 	for (i = 0; i < 0x100; i++)
 	{
 		int level = 0xff * exp(-3 * i / 255.); /* capacitor discharge */
 
-		palette_set_color(machine, 0x000 + 8 + i, MAKE_RGB(0x00, 0x00, level));   /* shades of blue */
-		palette_set_color(machine, 0x100 + 8 + i, MAKE_RGB(0x00, 0xC0, level));   /* shades of blue w/ green star */
+		palette_set_color(machine(), 0x000 + 8 + i, MAKE_RGB(0x00, 0x00, level));   /* shades of blue */
+		palette_set_color(machine(), 0x100 + 8 + i, MAKE_RGB(0x00, 0xC0, level));   /* shades of blue w/ green star */
 
-		palette_set_color(machine, 0x200 + 8 + i, MAKE_RGB(level, 0x00, 0x00));   /* shades of red */
-		palette_set_color(machine, 0x300 + 8 + i, MAKE_RGB(level, 0xC0, 0x00));   /* shades of red w/ green star */
+		palette_set_color(machine(), 0x200 + 8 + i, MAKE_RGB(level, 0x00, 0x00));   /* shades of red */
+		palette_set_color(machine(), 0x300 + 8 + i, MAKE_RGB(level, 0xC0, 0x00));   /* shades of red w/ green star */
 	}
 }
 
@@ -55,12 +54,11 @@ void spacefev_start_red_cannon( running_machine &machine )
 }
 
 
-static TIMER_CALLBACK( spacefev_stop_red_cannon )
+TIMER_CALLBACK_MEMBER(n8080_state::spacefev_stop_red_cannon)
 {
-	n8080_state *state = machine.driver_data<n8080_state>();
 
-	state->m_spacefev_red_cannon = 0;
-	state->m_cannon_timer->adjust(attotime::never);
+	m_spacefev_red_cannon = 0;
+	m_cannon_timer->adjust(attotime::never);
 }
 
 
@@ -76,7 +74,7 @@ static void helifire_next_line( running_machine &machine )
 	}
 	else
 	{
-		if (flip_screen_get(machine))
+		if (state->flip_screen())
 			state->m_helifire_mv %= 255;
 		else
 			state->m_helifire_mv %= 257;
@@ -89,40 +87,37 @@ static void helifire_next_line( running_machine &machine )
 }
 
 
-VIDEO_START( spacefev )
+VIDEO_START_MEMBER(n8080_state,spacefev)
 {
-	n8080_state *state = machine.driver_data<n8080_state>();
 
-	state->m_cannon_timer = machine.scheduler().timer_alloc(FUNC(spacefev_stop_red_cannon));
+	m_cannon_timer = machine().scheduler().timer_alloc(timer_expired_delegate(FUNC(n8080_state::spacefev_stop_red_cannon),this));
 
-	flip_screen_set_no_update(machine, 0);
+	flip_screen_set_no_update(0);
 
-	state->save_item(NAME(state->m_spacefev_red_screen));
-	state->save_item(NAME(state->m_spacefev_red_cannon));
+	save_item(NAME(m_spacefev_red_screen));
+	save_item(NAME(m_spacefev_red_cannon));
 }
 
 
-VIDEO_START( sheriff )
+VIDEO_START_MEMBER(n8080_state,sheriff)
 {
-	n8080_state *state = machine.driver_data<n8080_state>();
 
-	flip_screen_set_no_update(machine, 0);
+	flip_screen_set_no_update(0);
 
-	state->save_item(NAME(state->m_sheriff_color_mode));
-	state->save_item(NAME(state->m_sheriff_color_data));
+	save_item(NAME(m_sheriff_color_mode));
+	save_item(NAME(m_sheriff_color_data));
 }
 
 
-VIDEO_START( helifire )
+VIDEO_START_MEMBER(n8080_state,helifire)
 {
-	n8080_state *state = machine.driver_data<n8080_state>();
 	UINT8 data = 0;
 	int i;
 
-	state->save_item(NAME(state->m_helifire_mv));
-	state->save_item(NAME(state->m_helifire_sc));
-	state->save_item(NAME(state->m_helifire_flash));
-	state->save_item(NAME(state->m_helifire_LSFR));
+	save_item(NAME(m_helifire_mv));
+	save_item(NAME(m_helifire_sc));
+	save_item(NAME(m_helifire_flash));
+	save_item(NAME(m_helifire_LSFR));
 
 	for (i = 0; i < 63; i++)
 	{
@@ -132,27 +127,26 @@ VIDEO_START( helifire )
 
 		data = (data << 1) | (bit & 1);
 
-		state->m_helifire_LSFR[i] = data;
+		m_helifire_LSFR[i] = data;
 	}
 
-	flip_screen_set_no_update(machine, 0);
+	flip_screen_set_no_update(0);
 }
 
 
-SCREEN_UPDATE( spacefev )
+UINT32 n8080_state::screen_update_spacefev(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	n8080_state *state = screen->machine().driver_data<n8080_state>();
-	UINT8 mask = flip_screen_get(screen->machine()) ? 0xff : 0x00;
+	UINT8 mask = flip_screen() ? 0xff : 0x00;
 
 	int x;
 	int y;
 
-	const UINT8* pRAM = state->m_videoram;
-	const UINT8* pPROM = screen->machine().region("proms")->base();
+	const UINT8* pRAM = m_videoram;
+	const UINT8* pPROM = memregion("proms")->base();
 
 	for (y = 0; y < 256; y++)
 	{
-		UINT16* pLine = BITMAP_ADDR16(bitmap, y ^ mask, 0);
+		UINT16* pLine = &bitmap.pix16(y ^ mask);
 
 		for (x = 0; x < 256; x += 8)
 		{
@@ -160,7 +154,7 @@ SCREEN_UPDATE( spacefev )
 
 			UINT8 color = 0;
 
-			if (state->m_spacefev_red_screen)
+			if (m_spacefev_red_screen)
 				color = 1;
 			else
 			{
@@ -168,7 +162,7 @@ SCREEN_UPDATE( spacefev )
 
 				if ((x >> 3) == 0x06)
 				{
-					color = state->m_spacefev_red_cannon ? 1 : 7;
+					color = m_spacefev_red_cannon ? 1 : 7;
 				}
 
 				if ((x >> 3) == 0x1b)
@@ -183,7 +177,7 @@ SCREEN_UPDATE( spacefev )
 						6, /* cyan    */
 					};
 
-					int cycle = screen->frame_number() / 32;
+					int cycle = screen.frame_number() / 32;
 
 					color = ufo_color[cycle % 6];
 				}
@@ -209,21 +203,20 @@ SCREEN_UPDATE( spacefev )
 }
 
 
-SCREEN_UPDATE( sheriff )
+UINT32 n8080_state::screen_update_sheriff(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	n8080_state *state = screen->machine().driver_data<n8080_state>();
-	UINT8 mask = flip_screen_get(screen->machine()) ? 0xff : 0x00;
+	UINT8 mask = flip_screen() ? 0xff : 0x00;
 
-	const UINT8* pPROM = screen->machine().region("proms")->base();
+	const UINT8* pPROM = memregion("proms")->base();
 
 	int x;
 	int y;
 
-	const UINT8* pRAM = state->m_videoram;
+	const UINT8* pRAM = m_videoram;
 
 	for (y = 0; y < 256; y++)
 	{
-		UINT16* pLine = BITMAP_ADDR16(bitmap, y ^ mask, 0);
+		UINT16* pLine = &bitmap.pix16(y ^ mask);
 
 		for (x = 0; x < 256; x += 8)
 		{
@@ -231,13 +224,13 @@ SCREEN_UPDATE( sheriff )
 
 			UINT8 color = pPROM[32 * (y >> 3) + (x >> 3)];
 
-			if (state->m_sheriff_color_mode == 1 && !(color & 8))
-				color = state->m_sheriff_color_data ^ 7;
+			if (m_sheriff_color_mode == 1 && !(color & 8))
+				color = m_sheriff_color_data ^ 7;
 
-			if (state->m_sheriff_color_mode == 2)
-				color = state->m_sheriff_color_data ^ 7;
+			if (m_sheriff_color_mode == 2)
+				color = m_sheriff_color_data ^ 7;
 
-			if (state->m_sheriff_color_mode == 3)
+			if (m_sheriff_color_mode == 3)
 				color = 7;
 
 			for (n = 0; n < 8; n++)
@@ -252,25 +245,24 @@ SCREEN_UPDATE( sheriff )
 }
 
 
-SCREEN_UPDATE( helifire )
+UINT32 n8080_state::screen_update_helifire(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	n8080_state *state = screen->machine().driver_data<n8080_state>();
-	int SUN_BRIGHTNESS = input_port_read(screen->machine(), "POT0");
-	int SEA_BRIGHTNESS = input_port_read(screen->machine(), "POT1");
+	int SUN_BRIGHTNESS = machine().root_device().ioport("POT0")->read();
+	int SEA_BRIGHTNESS = machine().root_device().ioport("POT1")->read();
 
 	static const int wave[8] = { 0, 1, 2, 2, 2, 1, 0, 0 };
 
-	unsigned saved_mv = state->m_helifire_mv;
-	unsigned saved_sc = state->m_helifire_sc;
+	unsigned saved_mv = m_helifire_mv;
+	unsigned saved_sc = m_helifire_sc;
 
 	int x;
 	int y;
 
 	for (y = 0; y < 256; y++)
 	{
-		UINT16* pLine = BITMAP_ADDR16(bitmap, y, 0);
+		UINT16* pLine = &bitmap.pix16(y);
 
-		int level = 120 + wave[state->m_helifire_mv & 7];
+		int level = 120 + wave[m_helifire_mv & 7];
 
 		/* draw sky */
 
@@ -281,28 +273,28 @@ SCREEN_UPDATE( helifire )
 
 		/* draw stars */
 
-		if (state->m_helifire_mv % 8 == 4) /* upper half */
+		if (m_helifire_mv % 8 == 4) /* upper half */
 		{
-			int step = (320 * (state->m_helifire_mv - 0)) % sizeof state->m_helifire_LSFR;
+			int step = (320 * (m_helifire_mv - 0)) % sizeof m_helifire_LSFR;
 
 			int data =
-				((state->m_helifire_LSFR[step] & 1) << 6) |
-				((state->m_helifire_LSFR[step] & 2) << 4) |
-				((state->m_helifire_LSFR[step] & 4) << 2) |
-				((state->m_helifire_LSFR[step] & 8) << 0);
+				((m_helifire_LSFR[step] & 1) << 6) |
+				((m_helifire_LSFR[step] & 2) << 4) |
+				((m_helifire_LSFR[step] & 4) << 2) |
+				((m_helifire_LSFR[step] & 8) << 0);
 
 			pLine[0x80 + data] |= 0x100;
 		}
 
-		if (state->m_helifire_mv % 8 == 5) /* lower half */
+		if (m_helifire_mv % 8 == 5) /* lower half */
 		{
-			int step = (320 * (state->m_helifire_mv - 1)) % sizeof state->m_helifire_LSFR;
+			int step = (320 * (m_helifire_mv - 1)) % sizeof m_helifire_LSFR;
 
 			int data =
-				((state->m_helifire_LSFR[step] & 1) << 6) |
-				((state->m_helifire_LSFR[step] & 2) << 4) |
-				((state->m_helifire_LSFR[step] & 4) << 2) |
-				((state->m_helifire_LSFR[step] & 8) << 0);
+				((m_helifire_LSFR[step] & 1) << 6) |
+				((m_helifire_LSFR[step] & 2) << 4) |
+				((m_helifire_LSFR[step] & 4) << 2) |
+				((m_helifire_LSFR[step] & 8) << 0);
 
 			pLine[0x00 + data] |= 0x100;
 		}
@@ -324,18 +316,18 @@ SCREEN_UPDATE( helifire )
 
 			for (n = 0; n < 8; n++)
 			{
-				if (flip_screen_get(screen->machine()))
+				if (flip_screen())
 				{
-					if ((state->m_videoram[offset ^ 0x1fff] << n) & 0x80)
+					if ((m_videoram[offset ^ 0x1fff] << n) & 0x80)
 					{
-						pLine[x + n] = state->m_colorram[offset ^ 0x1fff] & 7;
+						pLine[x + n] = m_colorram[offset ^ 0x1fff] & 7;
 					}
 				}
 				else
 				{
-					if ((state->m_videoram[offset] >> n) & 1)
+					if ((m_videoram[offset] >> n) & 1)
 					{
-						pLine[x + n] = state->m_colorram[offset] & 7;
+						pLine[x + n] = m_colorram[offset] & 7;
 					}
 				}
 			}
@@ -343,49 +335,52 @@ SCREEN_UPDATE( helifire )
 
 		/* next line */
 
-		helifire_next_line(screen->machine());
+		helifire_next_line(machine());
 	}
 
-	state->m_helifire_mv = saved_mv;
-	state->m_helifire_sc = saved_sc;
+	m_helifire_mv = saved_mv;
+	m_helifire_sc = saved_sc;
 	return 0;
 }
 
 
-SCREEN_EOF( helifire )
+void n8080_state::screen_eof_helifire(screen_device &screen, bool state)
 {
-	n8080_state *state = machine.driver_data<n8080_state>();
-	int n = (machine.primary_screen->frame_number() >> 1) % sizeof state->m_helifire_LSFR;
-
-	int i;
-
-	for (i = 0; i < 8; i++)
+	// falling edge
+	if (!state)
 	{
-		int R = (i & 1);
-		int G = (i & 2);
-		int B = (i & 4);
+		int n = (machine().primary_screen->frame_number() >> 1) % sizeof m_helifire_LSFR;
 
-		if (state->m_helifire_flash)
+		int i;
+
+		for (i = 0; i < 8; i++)
 		{
-			if (state->m_helifire_LSFR[n] & 0x20)
+			int R = (i & 1);
+			int G = (i & 2);
+			int B = (i & 4);
+
+			if (m_helifire_flash)
 			{
-				G |= B;
+				if (m_helifire_LSFR[n] & 0x20)
+				{
+					G |= B;
+				}
+
+				if (machine().primary_screen->frame_number() & 0x04)
+				{
+					R |= G;
+				}
 			}
 
-			if (machine.primary_screen->frame_number() & 0x04)
-			{
-				R |= G;
-			}
+			palette_set_color_rgb(machine(),i,
+				R ? 255 : 0,
+				G ? 255 : 0,
+				B ? 255 : 0);
 		}
 
-		palette_set_color_rgb(machine,i,
-			R ? 255 : 0,
-			G ? 255 : 0,
-			B ? 255 : 0);
-	}
-
-	for (i = 0; i < 256; i++)
-	{
-		helifire_next_line(machine);
+		for (i = 0; i < 256; i++)
+		{
+			helifire_next_line(machine());
+		}
 	}
 }

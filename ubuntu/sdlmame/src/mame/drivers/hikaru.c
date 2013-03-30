@@ -7,7 +7,7 @@ Sega Hikaru Hardware Overview (last updated 5th August 2009 at 3:45pm)
 
 Note! This document will be updated from time to time when more dumps are available.
 
-This document covers all the known Sega Hikaru games. The graphics are quite breath-taking
+This document covers all the known Sega Hikaru games. The graphics are quite breathtaking
 and this system is said to be one of the most expensive arcade boards developed by Sega.
 The games on this system include....
 Air Trix                     (C) Sega, 2001
@@ -319,20 +319,90 @@ Notes:
 
 */
 
+/*
+    New hardware notes from Stefano Teso:
+
+  - The master SH-4 port A: the bit layout for this thing is (MSB left)
+
+    xxxx xxii iiee eexM
+
+    x = unused
+    i = IRQ causes (active low)
+    e = Mainboard EEPROM (active low)
+    M = connected to the slave SH-4 NMI pin; writing a specific bit
+    pattern here (3 ones, 3 zeros, 7 ones) sends an NMI to the slave
+
+    Bit 1 of the slave port A is used for master-slave communication as
+    well, but I have yet to figure out how. It doesn't seem to be needed
+    for emulation at this point though. Master-slave communication seems
+    to work okay after emulating the M bit here.
+
+  - There's an additional indirect-DMA-like device on the GPU at
+    150000(0C,10,14). The table indicating where the data is, how long it
+    is, and how to operate on it, is located at the bottom of GPU command
+    RAM (14xxxxxx), defaulting at 143FC000 (whose bus address, specified
+    by 1500000C is 483FC000.) It is used for (my guess) on-the-fly texture
+    format conversion. Upon termination, it raises a GPU IRQ. It looks
+    like airtrix first uploads the data to be converted somewhere using
+    the memory controller's DMA, then instructs the GPU indirect DMA thing
+    to read it and perform the conversion.
+
+  - GPU IRQs: it looks like the GPU IRQs are as follows:
+
+    15000088:
+
+    bit 0: the GPU indirect-DMA-like device is done
+    bit 1: vblank (or hblank)
+    bit 2: the GPU at 15xxxxxx is done and needs feeding (means that
+    commands are uploaded to CMDRAM and registers fiddled with, see bit 2
+    below.)
+    bit 8: any bit of 1A000018 is set
+
+    1A000018:
+
+    bit 1: vblank (or hblank)
+    bit 2: GPU at 1Axxxxxx is done and needs feeding (same as bit 2
+    above; note that both IRQs must be raised -- not necessarily at the
+    same time -- for the whole "let's upload data to the GPU" routine to
+    be performed.)
+
+    My gut feeling tells me that there are two different GPUs: one
+    processes the command stream and does the rendering on even frames,
+    the other does the same for odd frames. Registers 1500007x may specify
+    where the command stream start is (the initial GPU PC) and possibly
+    the location of two distinct stack pointers (the GPU supports
+    subroutines, after all.)
+
+  - the serial device at 0080000(A|C) is not an EEPROM; it's likely some
+    weird device that is used to query the heirarchy of the attached
+    input/output devices. Probably the naomi has something similar, I
+    haven't looked into it yet.
+
+*/
+
 #include "emu.h"
 #include "cpu/sh4/sh4.h"
 
 #define CPU_CLOCK (200000000)
-                                 /* MD2 MD1 MD0 MD6 MD4 MD3 MD5 MD7 MD8 */
+									/* MD2 MD1 MD0 MD6 MD4 MD3 MD5 MD7 MD8 */
 //static const struct sh4_config sh4cpu_config = {  1,  0,  1,  0,  0,  0,  1,  1,  0, CPU_CLOCK };
 
+class hikaru_state : public driver_device
+{
+public:
+	hikaru_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag)
+	{ }
+	virtual void video_start();
+	UINT32 screen_update_hikaru(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
+};
 
-static VIDEO_START(hikaru)
+void hikaru_state::video_start()
 {
 
 }
 
-static SCREEN_UPDATE(hikaru)
+UINT32 hikaru_state::screen_update_hikaru(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
 	return 0;
 }
@@ -341,28 +411,66 @@ static INPUT_PORTS_START( hikaru )
 	PORT_START("IN0")
 INPUT_PORTS_END
 
-static ADDRESS_MAP_START( hikaru_map, AS_PROGRAM, 64 )
-	AM_RANGE(0x00000000, 0x001FFFFF) AM_ROM AM_SHARE("share1")
-	AM_RANGE(0x00400000, 0x004000FF) AM_NOP // unknown
-	AM_RANGE(0x00800000, 0x008000FF) AM_NOP // unknown
-	AM_RANGE(0x00830000, 0x00831FFF) AM_NOP // unknown
-	AM_RANGE(0x00838000, 0x008380ff) AM_NOP // unknown
-	AM_RANGE(0x0082F000, 0x0082F0ff) AM_NOP // unknown
-	AM_RANGE(0x00C00000, 0x00C002FF) AM_RAM // unknown nvram?
-	AM_RANGE(0x01000000, 0x010001FF) AM_NOP // unknown
-	AM_RANGE(0x02000000, 0x020000FF) AM_NOP // unknown
-	AM_RANGE(0x02710000, 0x027100FF) AM_NOP // unknown
-	AM_RANGE(0x03000000, 0x030000FF) AM_NOP // unknown
-	AM_RANGE(0x04000000, 0x040000FF) AM_NOP // unknown
-	AM_RANGE(0x0C000000, 0x0DFFFFFF) AM_RAM
-	AM_RANGE(0x14000000, 0x140000FF) AM_NOP // unknown
-	AM_RANGE(0x14004000, 0x140041FF) AM_RAM // unknown
-	AM_RANGE(0x15000000, 0x150000FF) AM_NOP // unknown
-	AM_RANGE(0x16001000, 0x160010FF) AM_RAM // unknown
-	AM_RANGE(0x1A000000, 0x1A0000FF) AM_NOP // unknown
+/*
+ Area 0
+  00000000-00200000    boot ROM
+  00400000-00400003    ?
+  00800000-0083ffff    MIE + Service/Test switches and more
+  00c00000-00c0ffff    backup RAM
+  01000000-01000003    ?
+  01000100-01000103    ?
+  02000000-02ffffff    banked area (ROMBD+AICA+COMM+other devices)
+  03000000-03ffffff    banked area (ROMBD+EEPROM+COMM+other devices)
+ Area 1
+  04000000-0400003f    Memory controller (Master)
+ Area 3
+  0c000000-0dffffff    RAM
+ Area 5
+  14000000-140000ff    Master/Slave COMM
+  14000100-143fffff    GPU command RAM
+  15000000-150000ff    GPU Regs
+  16000000-163fffff x2 ? \ these two overlap [selected by 040000xx = 0x04,0x06,0x40]
+  16010000-17ffffff    Slave RAM /
+ Area 6
+  18001000-1800101f    ?
+  1a000000-1a000103    GPU Regs
+  1a000180-150001bf    GPU Texture Regs A
+  1a000200-1500023f    GPU Texture Regs B
+  1a040000-1a04000f    GPU Texture fIfO (?)
+  1b000000-1b7fffff    GPU Texture RAM and framebuffer (a 2048x2048x16-bit sheet?)
+
+*/
+
+static ADDRESS_MAP_START( hikaru_map, AS_PROGRAM, 64, hikaru_state )
+//  Area 0
+	AM_RANGE(0x00000000, 0x001fffff) AM_ROM AM_SHARE("share1")  // boot ROM
+	AM_RANGE(0x00400000, 0x00400007) AM_NOP // unknown
+	AM_RANGE(0x00800000, 0x0083ffff) AM_NOP // MIE + Service/Test switches and more
+	AM_RANGE(0x00c00000, 0x00c0ffff) AM_RAM // backup RAM
+	AM_RANGE(0x01000000, 0x01000007) AM_NOP // unknown
+	AM_RANGE(0x01000100, 0x01000107) AM_NOP // unknown
+	AM_RANGE(0x02000000, 0x02ffffff) AM_NOP // banked area (ROMBD + AICA + COMM + other devices)
+	AM_RANGE(0x03000000, 0x03ffffff) AM_NOP // banked area (ROMBD + EEPROM + COMM + other devices)
+//  Area 1
+	AM_RANGE(0x04000000, 0x0400003f) AM_NOP // memory controller (Master)
+//  Area 3
+	AM_RANGE(0x0c000000, 0x0dffffff) AM_RAM // main Work RAM
+//  Area 5
+	AM_RANGE(0x14000000, 0x140000ff) AM_NOP // Master/Slave COMM
+	AM_RANGE(0x14000100, 0x143fffff) AM_RAM // GPU command RAM
+	AM_RANGE(0x15000000, 0x150000ff) AM_NOP // GPU Regs
+	AM_RANGE(0x16001000, 0x163fffff) AM_RAM // ? \ these two overlap [selected by 040000xx = 0x04,0x06,0x40]
+	AM_RANGE(0x16010000, 0x17ffffff) AM_RAM // Slave Work RAM
+//  Area 6
+	AM_RANGE(0x18001000, 0x1800101f) AM_NOP // unknown
+	AM_RANGE(0x1a000000, 0x1a000107) AM_NOP // GPU Regs
+	AM_RANGE(0x1a000180, 0x1a0001bf) AM_NOP // GPU Texture Regs A
+	AM_RANGE(0x1a000200, 0x1a00023f) AM_NOP // GPU Texture Regs B
+	AM_RANGE(0x1a040000, 0x1a04000f) AM_NOP // GPU Texture FIFO (?)
+	AM_RANGE(0x1b000000, 0x1b7fffff) AM_NOP // GPU Texture RAM and framebuffer (a 2048x2048x16-bit sheet?)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( hikaru_map_slave, AS_PROGRAM, 64 )
+static ADDRESS_MAP_START( hikaru_map_slave, AS_PROGRAM, 64, hikaru_state )
 	ADDRESS_MAP_UNMAP_HIGH
 	AM_RANGE(0x00000000, 0x001FFFFF) AM_ROM AM_SHARE("share1")
 	AM_RANGE(0x0C000000, 0x0DFFFFFF) AM_RAM
@@ -372,18 +480,18 @@ static ADDRESS_MAP_START( hikaru_map_slave, AS_PROGRAM, 64 )
 ADDRESS_MAP_END
 
 
-static MACHINE_CONFIG_START( hikaru, driver_device )
+static MACHINE_CONFIG_START( hikaru, hikaru_state )
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", SH4, CPU_CLOCK)
+	MCFG_CPU_ADD("maincpu", SH4LE, CPU_CLOCK)
 //  MCFG_CPU_CONFIG(sh4cpu_config)
 	MCFG_CPU_PROGRAM_MAP(hikaru_map)
 //  MCFG_CPU_IO_MAP(hikaru_port)
 //  MCFG_CPU_VBLANK_INT("screen", hikaru,vblank)
-	MCFG_CPU_ADD("slave", SH4, CPU_CLOCK)
+	MCFG_CPU_ADD("slave", SH4LE, CPU_CLOCK)
 	MCFG_CPU_PROGRAM_MAP(hikaru_map_slave)
 
-//  MCFG_MACHINE_START( hikaru )
-//  MCFG_MACHINE_RESET( hikaru )
+//  MCFG_MACHINE_START_OVERRIDE(hikaru_state, hikaru )
+//  MCFG_MACHINE_RESET_OVERRIDE(hikaru_state, hikaru )
 
 //  MCFG_NVRAM_HANDLER(hikaru_eeproms)
 
@@ -391,14 +499,12 @@ static MACHINE_CONFIG_START( hikaru, driver_device )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
 	MCFG_SCREEN_SIZE(640, 480)
 	MCFG_SCREEN_VISIBLE_AREA(0, 640-1, 0, 480-1)
-	MCFG_SCREEN_UPDATE(hikaru)
+	MCFG_SCREEN_UPDATE_DRIVER(hikaru_state, screen_update_hikaru)
 
 	MCFG_PALETTE_LENGTH(0x1000)
 
-	MCFG_VIDEO_START(hikaru)
 
 //  MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
 //  MCFG_SOUND_ADD("aica", AICA, 0)
@@ -417,9 +523,12 @@ MACHINE_CONFIG_END
 	ROM_LOAD16_WORD_SWAP_BIOS( 0, "epr23400a.ic94",   0x000000, 0x200000, CRC(2aa906a7) SHA1(098c9909b123ed6c338ac874f2ee90e3b2da4c02) ) \
 	ROM_SYSTEM_BIOS( 1, "bios1", "epr23400" ) \
 	ROM_LOAD16_WORD_SWAP_BIOS( 1, "epr-23400.ic94",   0x000000, 0x200000, CRC(3d557104) SHA1(d39879f5a1acbd54ad8ee4fbd412f870c9ff4aa5) ) \
+	ROM_SYSTEM_BIOS( 2, "bios2", "epr21904" ) \
+	ROM_LOAD16_WORD_SWAP_BIOS( 1, "epr-21904.ic94",   0x000000, 0x200000, CRC(d96298b6) SHA1(d10d837bc7d68eb7125c34beffe21a91305627b0) ) \
 
 // bios 0 is SAMURAI boot rom 0.96 / 2000/8/10
 // bios 1 is SAMURAI boot rom 0.92 / 1999/7/2
+// bios 2 is SAMURAI boot rom 0.84 / 1999/7/22
 
 
 ROM_START( hikaru )
@@ -481,22 +590,22 @@ ROM_START( pharrier )
 
 	/* ROM board using 128M TSOP48 MASKROMs */
 	ROM_REGION( 0x10000000, "user2", 0)
-        ROM_LOAD( "mpr-23549.ic37", 0x0000000, 0x1000000, CRC(ed764200) SHA1(ad840a40347345f72a443f284b1bb0ae2b37f7ac) )
-        ROM_LOAD( "mpr-23553.ic38", 0x1000000, 0x1000000, CRC(5e70ae78) SHA1(2ae6bdb5aa1434bb60b2b9bca7af12d6476cd35f) )
-        ROM_LOAD( "mpr-23550.ic41", 0x2000000, 0x1000000, CRC(841b4d3b) SHA1(d442078b6b4926e6e32b911d88a4408d20a8f0df) )
-        ROM_LOAD( "mpr-23554.ic42", 0x3000000, 0x1000000, CRC(5cce99de) SHA1(c39330e4bcfb4cec8b0b59ab184fad5093188765) )
-        ROM_LOAD( "mpr-23551.ic45", 0x4000000, 0x1000000, CRC(71f61d04) SHA1(6f24f82ddc5aaf9bbb41b8baddbcb855f1d37a16) )
-        ROM_LOAD( "mpr-23555.ic46", 0x5000000, 0x1000000, CRC(582e5453) SHA1(cf9fb8b52a169446b98630d67cdce745de917edc) )
-        ROM_LOAD( "mpr-23552.ic49", 0x6000000, 0x1000000, CRC(32487181) SHA1(a885747428c280f77dd861bf802d953da133ef59) )
-        ROM_LOAD( "mpr-23556.ic50", 0x7000000, 0x1000000, CRC(45002955) SHA1(85a27c86692ca79fc4e51a64af63a5e970b86cfa) )
-        ROM_LOAD( "mpr-23557.ic53", 0x8000000, 0x1000000, CRC(c20dff1b) SHA1(d90d3d85f4fddf39c109502c8f9e9f25a7fc43d1) )
-        ROM_LOAD( "mpr-23561.ic54", 0x9000000, 0x1000000, CRC(01237844) SHA1(7a8c6bfdea1d4db5e9f6850fdf1a03d703df3958) )
-        ROM_LOAD( "mpr-23558.ic57", 0xa000000, 0x1000000, CRC(e93cc8d7) SHA1(05fc23b8382daaca7ccd1ca80e7c5e93cbf2b6b1) )
-        ROM_LOAD( "mpr-23562.ic58", 0xb000000, 0x1000000, CRC(85e0816c) SHA1(28106404d1eef4c85dd425d3535a53c5d71e47a0) )
-        ROM_LOAD( "mpr-23559.ic61", 0xc000000, 0x1000000, CRC(1a7f2ba0) SHA1(e2a20138f21297f5313f5368ef9992da8fa23937) )
-        ROM_LOAD( "mpr-23563.ic62", 0xd000000, 0x1000000, CRC(e3dc328b) SHA1(d04ccc4025442c98b96f84c1b300671f3687ec6c) )
-        ROM_LOAD( "mpr-23560.ic65", 0xe000000, 0x1000000, CRC(24bb7072) SHA1(dad5135c89d292e4a1f96bd0ad28be6a17154be0) )
-        ROM_LOAD( "mpr-23564.ic66", 0xf000000, 0x1000000, CRC(255724b6) SHA1(1b382fad165831de3f2e39352c031146759dfc69) )
+		ROM_LOAD( "mpr-23549.ic37", 0x0000000, 0x1000000, CRC(ed764200) SHA1(ad840a40347345f72a443f284b1bb0ae2b37f7ac) )
+		ROM_LOAD( "mpr-23553.ic38", 0x1000000, 0x1000000, CRC(5e70ae78) SHA1(2ae6bdb5aa1434bb60b2b9bca7af12d6476cd35f) )
+		ROM_LOAD( "mpr-23550.ic41", 0x2000000, 0x1000000, CRC(841b4d3b) SHA1(d442078b6b4926e6e32b911d88a4408d20a8f0df) )
+		ROM_LOAD( "mpr-23554.ic42", 0x3000000, 0x1000000, CRC(5cce99de) SHA1(c39330e4bcfb4cec8b0b59ab184fad5093188765) )
+		ROM_LOAD( "mpr-23551.ic45", 0x4000000, 0x1000000, CRC(71f61d04) SHA1(6f24f82ddc5aaf9bbb41b8baddbcb855f1d37a16) )
+		ROM_LOAD( "mpr-23555.ic46", 0x5000000, 0x1000000, CRC(582e5453) SHA1(cf9fb8b52a169446b98630d67cdce745de917edc) )
+		ROM_LOAD( "mpr-23552.ic49", 0x6000000, 0x1000000, CRC(32487181) SHA1(a885747428c280f77dd861bf802d953da133ef59) )
+		ROM_LOAD( "mpr-23556.ic50", 0x7000000, 0x1000000, CRC(45002955) SHA1(85a27c86692ca79fc4e51a64af63a5e970b86cfa) )
+		ROM_LOAD( "mpr-23557.ic53", 0x8000000, 0x1000000, CRC(c20dff1b) SHA1(d90d3d85f4fddf39c109502c8f9e9f25a7fc43d1) )
+		ROM_LOAD( "mpr-23561.ic54", 0x9000000, 0x1000000, CRC(01237844) SHA1(7a8c6bfdea1d4db5e9f6850fdf1a03d703df3958) )
+		ROM_LOAD( "mpr-23558.ic57", 0xa000000, 0x1000000, CRC(e93cc8d7) SHA1(05fc23b8382daaca7ccd1ca80e7c5e93cbf2b6b1) )
+		ROM_LOAD( "mpr-23562.ic58", 0xb000000, 0x1000000, CRC(85e0816c) SHA1(28106404d1eef4c85dd425d3535a53c5d71e47a0) )
+		ROM_LOAD( "mpr-23559.ic61", 0xc000000, 0x1000000, CRC(1a7f2ba0) SHA1(e2a20138f21297f5313f5368ef9992da8fa23937) )
+		ROM_LOAD( "mpr-23563.ic62", 0xd000000, 0x1000000, CRC(e3dc328b) SHA1(d04ccc4025442c98b96f84c1b300671f3687ec6c) )
+		ROM_LOAD( "mpr-23560.ic65", 0xe000000, 0x1000000, CRC(24bb7072) SHA1(dad5135c89d292e4a1f96bd0ad28be6a17154be0) )
+		ROM_LOAD( "mpr-23564.ic66", 0xf000000, 0x1000000, CRC(255724b6) SHA1(1b382fad165831de3f2e39352c031146759dfc69) )
 ROM_END
 
 ROM_START( podrace )
@@ -595,9 +704,9 @@ ROM_START( sgnascar )
 	ROM_LOAD( "mpr-23484.ic34", 0xf000000, 0x1000000, CRC(2ebe1aa1) SHA1(16b39f7422da1a334dde27169c2949e1d95bddb3) )
 ROM_END
 
-GAME( 2000, hikaru,   0,        hikaru,   hikaru,   0, ROT0, "Sega",            "Hikaru Bios", GAME_NO_SOUND|GAME_NOT_WORKING|GAME_IS_BIOS_ROOT )
-GAME( 1999, braveff,  hikaru,   hikaru,   hikaru,   0, ROT0, "Sega",            "Brave Fire Fighters", GAME_NO_SOUND|GAME_NOT_WORKING|GAME_IS_BIOS_ROOT )
-GAME( 2000, airtrix,  hikaru,   hikaru,   hikaru,   0, ROT0, "Sega",            "Air Trix", GAME_NO_SOUND|GAME_NOT_WORKING )
-GAME( 2000, sgnascar, hikaru,   hikaru,   hikaru,   0, ROT0, "Sega / Electronic Arts", "NASCAR Racing", GAME_NO_SOUND|GAME_NOT_WORKING )
-GAME( 2001, pharrier, hikaru,   hikaru,   hikaru,   0, ROT0, "Sega",            "Planet Harriers", GAME_NO_SOUND|GAME_NOT_WORKING )
-GAME( 2001, podrace,  hikaru,   hikaru,   hikaru,   0, ROT0, "Sega",            "Star Wars Pod Racer", GAME_NO_SOUND|GAME_NOT_WORKING )
+GAME( 2000, hikaru,   0,        hikaru,   hikaru, driver_device,   0, ROT0, "Sega",            "Hikaru Bios", GAME_NO_SOUND|GAME_NOT_WORKING|GAME_IS_BIOS_ROOT )
+GAME( 1999, braveff,  hikaru,   hikaru,   hikaru, driver_device,   0, ROT0, "Sega",            "Brave Fire Fighters", GAME_NO_SOUND|GAME_NOT_WORKING )
+GAME( 2000, airtrix,  hikaru,   hikaru,   hikaru, driver_device,   0, ROT0, "Sega",            "Air Trix", GAME_NO_SOUND|GAME_NOT_WORKING )
+GAME( 2000, sgnascar, hikaru,   hikaru,   hikaru, driver_device,   0, ROT0, "Sega / Electronic Arts", "NASCAR Racing", GAME_NO_SOUND|GAME_NOT_WORKING )
+GAME( 2001, pharrier, hikaru,   hikaru,   hikaru, driver_device,   0, ROT0, "Sega",            "Planet Harriers", GAME_NO_SOUND|GAME_NOT_WORKING )
+GAME( 2001, podrace,  hikaru,   hikaru,   hikaru, driver_device,   0, ROT0, "Sega",            "Star Wars Pod Racer", GAME_NO_SOUND|GAME_NOT_WORKING )

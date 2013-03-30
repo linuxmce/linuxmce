@@ -27,7 +27,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #ifndef __USE_BSD
-#define __USE_BSD	// to get DT_xxx on Linux
+#define __USE_BSD   // to get DT_xxx on Linux
 #endif
 #undef _POSIX_C_SOURCE  // to get DT_xxx on OS X
 #include <dirent.h>
@@ -43,7 +43,7 @@
 #define INVPATHSEPCH '\\'
 #endif
 
-#if defined(SDLMAME_DARWIN) || defined(SDLMAME_WIN32) || defined(SDLMAME_NO64BITIO) || defined(SDLMAME_BSD) || defined(SDLMAME_OS2)
+#if defined(SDLMAME_DARWIN) || defined(SDLMAME_WIN32) || defined(SDLMAME_NO64BITIO) || defined(SDLMAME_BSD) || defined(SDLMAME_OS2) || defined(SDLMAME_HAIKU)
 typedef struct dirent sdl_dirent;
 typedef struct stat sdl_stat;
 #define sdl_readdir readdir
@@ -57,7 +57,7 @@ typedef struct stat64 sdl_stat;
 
 #define HAS_DT_XXX defined(SDLMAME_LINUX) || defined(SDLMAME_BSD) || defined(SDLMAME_DARWIN)
 
-struct _osd_directory
+struct osd_directory
 {
 	osd_directory_entry ent;
 	sdl_dirent *data;
@@ -67,7 +67,7 @@ struct _osd_directory
 
 static char *build_full_path(const char *path, const char *file)
 {
-	char *ret = (char *) osd_malloc(strlen(path)+strlen(file)+2);
+	char *ret = (char *) osd_malloc_array(strlen(path)+strlen(file)+2);
 	char *p = ret;
 
 	strcpy(p, path);
@@ -126,13 +126,13 @@ osd_directory *osd_opendir(const char *dirname)
 		dir->fd = NULL;
 	}
 
-	tmpstr = (char *) osd_malloc(strlen(dirname)+1);
+	tmpstr = (char *) osd_malloc_array(strlen(dirname)+1);
 	strcpy(tmpstr, dirname);
 
 	if (tmpstr[0] == '$')
 	{
 		char *envval;
-		envstr = (char *) osd_malloc(strlen(tmpstr)+1);
+		envstr = (char *) osd_malloc_array(strlen(tmpstr)+1);
 
 		strcpy(envstr, tmpstr);
 
@@ -149,7 +149,7 @@ osd_directory *osd_opendir(const char *dirname)
 		{
 			j = strlen(envval) + strlen(tmpstr) + 1;
 			osd_free(tmpstr);
-			tmpstr = (char *) osd_malloc(j);
+			tmpstr = (char *) osd_malloc_array(j);
 
 			// start with the value of $HOME
 			strcpy(tmpstr, envval);
@@ -213,4 +213,3 @@ void osd_closedir(osd_directory *dir)
 	osd_free(dir->path);
 	osd_free(dir);
 }
-

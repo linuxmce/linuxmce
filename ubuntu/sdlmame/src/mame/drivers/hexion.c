@@ -80,42 +80,51 @@ Notes:
 
 #include "emu.h"
 #include "cpu/z80/z80.h"
-#include "deprecat.h"
 #include "sound/okim6295.h"
 #include "sound/k051649.h"
 #include "includes/konamipt.h"
 #include "includes/hexion.h"
+#include "machine/k053252.h"
 
 
-static WRITE8_HANDLER( coincntr_w )
+WRITE8_MEMBER(hexion_state::coincntr_w)
 {
-//logerror("%04x: coincntr_w %02x\n",cpu_get_pc(&space->device()),data);
+//logerror("%04x: coincntr_w %02x\n",space.device().safe_pc(),data);
 
 	/* bits 0/1 = coin counters */
-	coin_counter_w(space->machine(), 0,data & 0x01);
-	coin_counter_w(space->machine(), 1,data & 0x02);
+	coin_counter_w(machine(), 0,data & 0x01);
+	coin_counter_w(machine(), 1,data & 0x02);
 
 	/* bit 5 = flip screen */
-	flip_screen_set(space->machine(), data & 0x20);
+	flip_screen_set(data & 0x20);
 
 	/* other bit unknown */
 if ((data & 0xdc) != 0x10) popmessage("coincntr %02x",data);
 }
 
+WRITE_LINE_MEMBER(hexion_state::hexion_irq_ack_w)
+{
+	machine().device("maincpu")->execute().set_input_line(0, CLEAR_LINE);
+}
 
+WRITE_LINE_MEMBER(hexion_state::hexion_nmi_ack_w)
+{
+	machine().device("maincpu")->execute().set_input_line(INPUT_LINE_NMI, CLEAR_LINE);
+}
 
-static ADDRESS_MAP_START( hexion_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( hexion_map, AS_PROGRAM, 8, hexion_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x9fff) AM_ROMBANK("bank1")
 	AM_RANGE(0xa000, 0xbfff) AM_RAM
 	AM_RANGE(0xc000, 0xdffe) AM_READWRITE(hexion_bankedram_r, hexion_bankedram_w)
 	AM_RANGE(0xdfff, 0xdfff) AM_WRITE(hexion_bankctrl_w)
-	AM_RANGE(0xe800, 0xe87f) AM_DEVWRITE("konami", k051649_waveform_w)
-	AM_RANGE(0xe880, 0xe889) AM_DEVWRITE("konami", k051649_frequency_w)
-	AM_RANGE(0xe88a, 0xe88e) AM_DEVWRITE("konami", k051649_volume_w)
-	AM_RANGE(0xe88f, 0xe88f) AM_DEVWRITE("konami", k051649_keyonoff_w)
-	AM_RANGE(0xf000, 0xf00f) AM_WRITENOP	/* 053252? f00e = IRQ ack, f00f = NMI ack */
-	AM_RANGE(0xf200, 0xf200) AM_DEVWRITE_MODERN("oki", okim6295_device, write)
+	AM_RANGE(0xe800, 0xe87f) AM_DEVREADWRITE_LEGACY("konami", k051649_waveform_r, k051649_waveform_w)
+	AM_RANGE(0xe880, 0xe889) AM_DEVWRITE_LEGACY("konami", k051649_frequency_w)
+	AM_RANGE(0xe88a, 0xe88e) AM_DEVWRITE_LEGACY("konami", k051649_volume_w)
+	AM_RANGE(0xe88f, 0xe88f) AM_DEVWRITE_LEGACY("konami", k051649_keyonoff_w)
+	AM_RANGE(0xe8e0, 0xe8ff) AM_DEVREADWRITE_LEGACY("konami", k051649_test_r, k051649_test_w)
+	AM_RANGE(0xf000, 0xf00f) AM_DEVREADWRITE_LEGACY("k053252",k053252_r,k053252_w)
+	AM_RANGE(0xf200, 0xf200) AM_DEVWRITE("oki", okim6295_device, write)
 	AM_RANGE(0xf400, 0xf400) AM_READ_PORT("DSW1")
 	AM_RANGE(0xf401, 0xf401) AM_READ_PORT("DSW2")
 	AM_RANGE(0xf402, 0xf402) AM_READ_PORT("P1")
@@ -132,46 +141,29 @@ ADDRESS_MAP_END
 
 static INPUT_PORTS_START( hexion )
 	PORT_START("DSW1")
-	KONAMI_COINAGE(DEF_STR( Free_Play ), DEF_STR( Free_Play ))
+	KONAMI_COINAGE_LOC(DEF_STR( Free_Play ), DEF_STR( Free_Play ), SW1)
 
 	PORT_START("DSW2")
-	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x70, 0x70, DEF_STR( Difficulty ) )
-	PORT_DIPSETTING(    0x70, DEF_STR( Easiest ) )
-	PORT_DIPSETTING(    0x60, DEF_STR( Very_Easy) )
-	PORT_DIPSETTING(    0x50, DEF_STR( Easy ) )
-	PORT_DIPSETTING(    0x40, DEF_STR( Medium ) )
-	PORT_DIPSETTING(    0x30, DEF_STR( Medium_Hard ) )
-	PORT_DIPSETTING(    0x20, DEF_STR( Hard ) )
-	PORT_DIPSETTING(    0x10, DEF_STR( Very_Hard ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) )
-	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Demo_Sounds ) )
+	PORT_BIT( 0x0f, IP_ACTIVE_LOW, IPT_UNUSED )
+	PORT_DIPNAME( 0x70, 0x40, DEF_STR( Difficulty ) )       PORT_DIPLOCATION("SW2:5,6,7")
+	PORT_DIPSETTING(    0x70, DEF_STR( Easiest ) )          // "1"
+	PORT_DIPSETTING(    0x60, DEF_STR( Very_Easy) )         // "2"
+	PORT_DIPSETTING(    0x50, DEF_STR( Easy ) )             // "3"
+	PORT_DIPSETTING(    0x40, DEF_STR( Medium ) )           // "4"
+	PORT_DIPSETTING(    0x30, DEF_STR( Medium_Hard ) )      // "5"
+	PORT_DIPSETTING(    0x20, DEF_STR( Hard ) )             // "6"
+	PORT_DIPSETTING(    0x10, DEF_STR( Very_Hard ) )        // "7"
+	PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) )          // "8"
+	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Demo_Sounds ) )      PORT_DIPLOCATION("SW2:8")
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("DSW3")
-	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Flip_Screen ) )
-	PORT_DIPSETTING(	0x01, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
+	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Flip_Screen ) )      PORT_DIPLOCATION("SW3:1")
+	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_SERVICE( 0x04, IP_ACTIVE_LOW )
-	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_BIT( 0xf0, IP_ACTIVE_LOW, IPT_UNUSED )
+	PORT_BIT( 0xfa, IP_ACTIVE_LOW, IPT_UNUSED )
+	PORT_SERVICE_DIPLOC( 0x04, IP_ACTIVE_LOW, "SW3:3" )
 
 	PORT_START("P1")
 	KONAMI8_B12_START(1)
@@ -183,7 +175,7 @@ static INPUT_PORTS_START( hexion )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE1 )
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* 052591? game waits for it to be 0 */
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_SPECIAL )   /* 052591? game waits for it to be 0 */
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -207,47 +199,56 @@ static GFXDECODE_START( hexion )
 	GFXDECODE_ENTRY( "gfx1", 0, charlayout, 0, 16 )
 GFXDECODE_END
 
-
-
-static INTERRUPT_GEN( hexion_interrupt )
+TIMER_DEVICE_CALLBACK_MEMBER(hexion_state::hexion_scanline)
 {
-	/* NMI handles start and coin inputs, origin unknown */
-	if (cpu_getiloops(device))
-		device_set_input_line(device, INPUT_LINE_NMI, PULSE_LINE);
-	else
-		device_set_input_line(device, 0, HOLD_LINE);
+	int scanline = param;
+
+	if(scanline == 256)
+		machine().device("maincpu")->execute().set_input_line(0, ASSERT_LINE);
+	else if ((scanline == 85) || (scanline == 170)) //TODO
+		machine().device("maincpu")->execute().set_input_line(INPUT_LINE_NMI, ASSERT_LINE);
 }
+
+static const k053252_interface hexion_k053252_intf =
+{
+	"screen",
+	DEVCB_NULL,
+	DEVCB_NULL,
+	DEVCB_DRIVER_LINE_MEMBER(hexion_state,hexion_irq_ack_w),
+	DEVCB_DRIVER_LINE_MEMBER(hexion_state,hexion_nmi_ack_w),
+	0, 0
+};
 
 static MACHINE_CONFIG_START( hexion, hexion_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80,24000000/4)	/* Z80B 6 MHz */
+	MCFG_CPU_ADD("maincpu", Z80,24000000/4) /* Z80B 6 MHz */
 	MCFG_CPU_PROGRAM_MAP(hexion_map)
-	MCFG_CPU_VBLANK_INT_HACK(hexion_interrupt,3)	/* both IRQ and NMI are used */
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("scantimer", hexion_state, hexion_scanline, "screen", 0, 1)
+
+	MCFG_K053252_ADD("k053252", 24000000/2, hexion_k053252_intf)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
-	MCFG_SCREEN_SIZE(64*8, 32*8)
+	MCFG_SCREEN_SIZE(64*8, 36*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 64*8-1, 0*8, 32*8-1)
-	MCFG_SCREEN_UPDATE(hexion)
+	MCFG_SCREEN_UPDATE_DRIVER(hexion_state, screen_update_hexion)
 
 	MCFG_GFXDECODE(hexion)
 	MCFG_PALETTE_LENGTH(256)
 
 	MCFG_PALETTE_INIT(RRRR_GGGG_BBBB)
-	MCFG_VIDEO_START(hexion)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
 	MCFG_OKIM6295_ADD("oki", 1056000, OKIM6295_PIN7_HIGH) // clock frequency & pin 7 not verified
-	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.5)
 
 	MCFG_SOUND_ADD("konami", K051649, 24000000/16)
-	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.5)
 MACHINE_CONFIG_END
 
 
@@ -259,15 +260,15 @@ MACHINE_CONFIG_END
 ***************************************************************************/
 
 ROM_START( hexion )
-	ROM_REGION( 0x34800, "maincpu", 0 )	/* ROMs + space for additional RAM */
+	ROM_REGION( 0x34800, "maincpu", 0 ) /* ROMs + space for additional RAM */
 	ROM_LOAD( "122jab01.bin", 0x00000, 0x20000, CRC(eabc6dd1) SHA1(e74c1f1f2fcf8973f0741a2d544f25c8639448bf) )
-	ROM_RELOAD(               0x10000, 0x20000 )	/* banked at 8000-9fff */
+	ROM_RELOAD(               0x10000, 0x20000 )    /* banked at 8000-9fff */
 
-	ROM_REGION( 0x80000, "gfx1", 0 )	/* addressable by the main CPU */
+	ROM_REGION( 0x80000, "gfx1", 0 )    /* addressable by the main CPU */
 	ROM_LOAD( "122a07.bin",   0x00000, 0x40000, CRC(22ae55e3) SHA1(41bdc990f69416b639542e2186a3610c16389063) )
 	ROM_LOAD( "122a06.bin",   0x40000, 0x40000, CRC(438f4388) SHA1(9e23805c9642a237daeaf106187d1e1e0692434d) )
 
-	ROM_REGION( 0x40000, "oki", 0 )	/* OKIM6295 samples */
+	ROM_REGION( 0x40000, "oki", 0 ) /* OKIM6295 samples */
 	ROM_LOAD( "122a05.bin",   0x0000, 0x40000, CRC(bcc831bf) SHA1(c3382065dd0069a4dc0bde2d9931ec85b0bffc73) )
 
 	ROM_REGION( 0x0300, "proms", 0 )
@@ -277,4 +278,4 @@ ROM_START( hexion )
 ROM_END
 
 
-GAME( 1992, hexion, 0, hexion, hexion, 0, ROT0, "Konami", "Hexion (Japan)", 0 )
+GAME( 1992, hexion, 0, hexion, hexion, driver_device, 0, ROT0, "Konami", "Hexion (Japan ver JAB)", 0 )

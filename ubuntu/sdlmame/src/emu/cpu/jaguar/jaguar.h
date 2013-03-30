@@ -17,8 +17,8 @@
     GLOBAL CONSTANTS
 ***************************************************************************/
 
-#define JAGUAR_VARIANT_GPU		0
-#define JAGUAR_VARIANT_DSP		1
+#define JAGUAR_VARIANT_GPU      0
+#define JAGUAR_VARIANT_DSP      1
 
 
 
@@ -74,10 +74,9 @@ enum
 typedef void (*jaguar_int_func)(device_t *device);
 
 
-typedef struct _jaguar_cpu_config jaguar_cpu_config;
-struct _jaguar_cpu_config
+struct jaguar_cpu_config
 {
-	jaguar_int_func		cpu_int_callback;
+	jaguar_int_func     cpu_int_callback;
 };
 
 
@@ -86,12 +85,12 @@ struct _jaguar_cpu_config
     INTERRUPT CONSTANTS
 ***************************************************************************/
 
-#define JAGUAR_IRQ0		0		/* IRQ0 */
-#define JAGUAR_IRQ1		1		/* IRQ1 */
-#define JAGUAR_IRQ2		2		/* IRQ2 */
-#define JAGUAR_IRQ3		3		/* IRQ3 */
-#define JAGUAR_IRQ4		4		/* IRQ4 */
-#define JAGUAR_IRQ5		5		/* IRQ5 */
+#define JAGUAR_IRQ0     0       /* IRQ0 */
+#define JAGUAR_IRQ1     1       /* IRQ1 */
+#define JAGUAR_IRQ2     2       /* IRQ2 */
+#define JAGUAR_IRQ3     3       /* IRQ3 */
+#define JAGUAR_IRQ4     4       /* IRQ4 */
+#define JAGUAR_IRQ5     5       /* IRQ5 */
 
 
 

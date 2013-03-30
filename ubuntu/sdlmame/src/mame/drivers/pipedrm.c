@@ -175,29 +175,30 @@ Added Multiple Coin Feature:
 
 static WRITE8_HANDLER( pipedrm_bankswitch_w )
 {
+	fromance_state *state = space.machine().driver_data<fromance_state>();
 	/*
-        Bit layout:
+	    Bit layout:
 
-        D7 = unknown
-        D6 = flip screen
-        D5 = background 2 X scroll MSB
-        D4 = background 1 X scroll MSB
-        D3 = background videoram select
-        D2-D0 = program ROM bank select
-    */
+	    D7 = unknown
+	    D6 = flip screen
+	    D5 = background 2 X scroll MSB
+	    D4 = background 1 X scroll MSB
+	    D3 = background videoram select
+	    D2-D0 = program ROM bank select
+	*/
 
 	/* set the memory bank on the Z80 using the low 3 bits */
-	memory_set_bank(space->machine(), "bank1", data & 0x7);
+	state->membank("bank1")->set_entry(data & 0x7);
 
 	/* map to the fromance gfx register */
-	fromance_gfxreg_w(space, offset, ((data >> 6) & 0x01) | 	/* flipscreen */
-							  ((~data >> 2) & 0x02));	/* videoram select */
+	state->fromance_gfxreg_w(space, offset, ((data >> 6) & 0x01) |  /* flipscreen */
+								((~data >> 2) & 0x02)); /* videoram select */
 }
 
 
 static WRITE8_HANDLER( sound_bankswitch_w )
 {
-	memory_set_bank(space->machine(), "bank2", data & 0x01);
+	space.machine().root_device().membank("bank2")->set_entry(data & 0x01);
 }
 
 
@@ -208,7 +209,7 @@ static WRITE8_HANDLER( sound_bankswitch_w )
  *
  *************************************/
 
-static TIMER_CALLBACK( delayed_command_w	)
+static TIMER_CALLBACK( delayed_command_w    )
 {
 	fromance_state *state = machine.driver_data<fromance_state>();
 	state->m_sound_command = param & 0xff;
@@ -218,40 +219,40 @@ static TIMER_CALLBACK( delayed_command_w	)
 	/* sound commands. It's possible the NMI isn't really hooked up on the YM2608 */
 	/* sound board. */
 	if (param & 0x100)
-		device_set_input_line(state->m_subcpu, INPUT_LINE_NMI, ASSERT_LINE);
+		state->m_subcpu->set_input_line(INPUT_LINE_NMI, ASSERT_LINE);
 }
 
 
 static WRITE8_HANDLER( sound_command_w )
 {
-	space->machine().scheduler().synchronize(FUNC(delayed_command_w), data | 0x100);
+	space.machine().scheduler().synchronize(FUNC(delayed_command_w), data | 0x100);
 }
 
 
 static WRITE8_HANDLER( sound_command_nonmi_w )
 {
-	space->machine().scheduler().synchronize(FUNC(delayed_command_w), data);
+	space.machine().scheduler().synchronize(FUNC(delayed_command_w), data);
 }
 
 
 static WRITE8_HANDLER( pending_command_clear_w )
 {
-	fromance_state *state = space->machine().driver_data<fromance_state>();
+	fromance_state *state = space.machine().driver_data<fromance_state>();
 	state->m_pending_command = 0;
-	device_set_input_line(state->m_subcpu, INPUT_LINE_NMI, CLEAR_LINE);
+	state->m_subcpu->set_input_line(INPUT_LINE_NMI, CLEAR_LINE);
 }
 
 
 static READ8_HANDLER( pending_command_r )
 {
-	fromance_state *state = space->machine().driver_data<fromance_state>();
+	fromance_state *state = space.machine().driver_data<fromance_state>();
 	return state->m_pending_command;
 }
 
 
 static READ8_HANDLER( sound_command_r )
 {
-	fromance_state *state = space->machine().driver_data<fromance_state>();
+	fromance_state *state = space.machine().driver_data<fromance_state>();
 	return state->m_sound_command;
 }
 
@@ -263,26 +264,26 @@ static READ8_HANDLER( sound_command_r )
  *
  *************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, fromance_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x9fff) AM_RAM
 	AM_RANGE(0xa000, 0xbfff) AM_ROMBANK("bank1")
-	AM_RANGE(0xc000, 0xcfff) AM_RAM_WRITE(paletteram_xRRRRRGGGGGBBBBB_le_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0xd000, 0xffff) AM_READWRITE(fromance_videoram_r, fromance_videoram_w) AM_BASE_SIZE_MEMBER(fromance_state, m_videoram, m_videoram_size)
+	AM_RANGE(0xc000, 0xcfff) AM_RAM_WRITE(paletteram_xRRRRRGGGGGBBBBB_byte_le_w) AM_SHARE("paletteram")
+	AM_RANGE(0xd000, 0xffff) AM_READWRITE(fromance_videoram_r, fromance_videoram_w) AM_SHARE("videoram")
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( main_portmap, AS_IO, 8 )
+static ADDRESS_MAP_START( main_portmap, AS_IO, 8, fromance_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x10, 0x10) AM_WRITE(fromance_crtc_data_w)
 	AM_RANGE(0x11, 0x11) AM_WRITE(fromance_crtc_register_w)
-	AM_RANGE(0x20, 0x20) AM_READ_PORT("P1") AM_WRITE(sound_command_w)
-	AM_RANGE(0x21, 0x21) AM_READ_PORT("P2") AM_WRITE(pipedrm_bankswitch_w)
+	AM_RANGE(0x20, 0x20) AM_READ_PORT("P1") AM_WRITE_LEGACY(sound_command_w)
+	AM_RANGE(0x21, 0x21) AM_READ_PORT("P2") AM_WRITE_LEGACY(pipedrm_bankswitch_w)
 	AM_RANGE(0x22, 0x25) AM_WRITE(fromance_scroll_w)
 	AM_RANGE(0x22, 0x22) AM_READ_PORT("DSW1")
 	AM_RANGE(0x23, 0x23) AM_READ_PORT("DSW2")
 	AM_RANGE(0x24, 0x24) AM_READ_PORT("SYSTEM")
-	AM_RANGE(0x25, 0x25) AM_READ(pending_command_r)
+	AM_RANGE(0x25, 0x25) AM_READ_LEGACY(pending_command_r)
 ADDRESS_MAP_END
 
 
@@ -293,27 +294,27 @@ ADDRESS_MAP_END
  *
  *************************************/
 
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, fromance_state )
 	AM_RANGE(0x0000, 0x77ff) AM_ROM
 	AM_RANGE(0x7800, 0x7fff) AM_RAM
 	AM_RANGE(0x8000, 0xffff) AM_ROMBANK("bank2")
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( sound_portmap, AS_IO, 8 )
+static ADDRESS_MAP_START( sound_portmap, AS_IO, 8, fromance_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x04, 0x04) AM_WRITE(sound_bankswitch_w)
-	AM_RANGE(0x16, 0x16) AM_READ(sound_command_r)
-	AM_RANGE(0x17, 0x17) AM_WRITE(pending_command_clear_w)
-	AM_RANGE(0x18, 0x1b) AM_DEVREADWRITE("ymsnd", ym2610_r, ym2610_w)
+	AM_RANGE(0x04, 0x04) AM_WRITE_LEGACY(sound_bankswitch_w)
+	AM_RANGE(0x16, 0x16) AM_READ_LEGACY(sound_command_r)
+	AM_RANGE(0x17, 0x17) AM_WRITE_LEGACY(pending_command_clear_w)
+	AM_RANGE(0x18, 0x1b) AM_DEVREADWRITE_LEGACY("ymsnd", ym2610_r, ym2610_w)
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( hatris_sound_portmap, AS_IO, 8 )
+static ADDRESS_MAP_START( hatris_sound_portmap, AS_IO, 8, fromance_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x03) AM_MIRROR(0x08) AM_DEVREADWRITE("ymsnd", ym2608_r, ym2608_w)
-	AM_RANGE(0x04, 0x04) AM_READ(sound_command_r)
-	AM_RANGE(0x05, 0x05) AM_READWRITE(pending_command_r, pending_command_clear_w)
+	AM_RANGE(0x00, 0x03) AM_MIRROR(0x08) AM_DEVREADWRITE_LEGACY("ymsnd", ym2608_r, ym2608_w)
+	AM_RANGE(0x04, 0x04) AM_READ_LEGACY(sound_command_r)
+	AM_RANGE(0x05, 0x05) AM_READWRITE_LEGACY(pending_command_r, pending_command_clear_w)
 ADDRESS_MAP_END
 
 
@@ -325,7 +326,7 @@ ADDRESS_MAP_END
  *************************************/
 
 static INPUT_PORTS_START( pipedrm )
-	PORT_START("P1")	/* $20 */
+	PORT_START("P1")    /* $20 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(1)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(1)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(1)
@@ -335,7 +336,7 @@ static INPUT_PORTS_START( pipedrm )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("P2")	/* $21 */
+	PORT_START("P2")    /* $21 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(2)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(2)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(2)
@@ -345,7 +346,7 @@ static INPUT_PORTS_START( pipedrm )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("SYSTEM")	/* $24 */
+	PORT_START("SYSTEM")    /* $24 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 )
@@ -355,8 +356,8 @@ static INPUT_PORTS_START( pipedrm )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("DSW1")	/* $22 */
-	PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( Coin_A ) )	PORT_DIPLOCATION("SW1:1,2,3,4")
+	PORT_START("DSW1")  /* $22 */
+	PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( Coin_A ) )   PORT_DIPLOCATION("SW1:1,2,3,4")
 	PORT_DIPSETTING(    0x06, DEF_STR( 5C_1C ) )
 	PORT_DIPSETTING(    0x07, DEF_STR( 4C_1C ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( 3C_1C ) )
@@ -373,7 +374,7 @@ static INPUT_PORTS_START( pipedrm )
 	PORT_DIPSETTING(    0x0c, DEF_STR( 1C_4C ) )
 	PORT_DIPSETTING(    0x0b, DEF_STR( 1C_5C ) )
 	PORT_DIPSETTING(    0x0a, DEF_STR( 1C_6C ) )
-	PORT_DIPNAME( 0xf0, 0xf0, DEF_STR( Coin_B ) )	PORT_DIPLOCATION("SW1:5,6,7,8")
+	PORT_DIPNAME( 0xf0, 0xf0, DEF_STR( Coin_B ) )   PORT_DIPLOCATION("SW1:5,6,7,8")
 	PORT_DIPSETTING(    0x60, DEF_STR( 5C_1C ) )
 	PORT_DIPSETTING(    0x70, DEF_STR( 4C_1C ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( 3C_1C ) )
@@ -391,24 +392,24 @@ static INPUT_PORTS_START( pipedrm )
 	PORT_DIPSETTING(    0xb0, DEF_STR( 1C_5C ) )
 	PORT_DIPSETTING(    0xa0, DEF_STR( 1C_6C ) )
 
-	PORT_START("DSW2")	/* $23 */
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Difficulty ) )	PORT_DIPLOCATION("SW2:1,2")
+	PORT_START("DSW2")  /* $23 */
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("SW2:1,2")
 	PORT_DIPSETTING(    0x02, DEF_STR( Easy ) )
 	PORT_DIPSETTING(    0x03, DEF_STR( Normal ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Hard ) )
 	PORT_DIPSETTING(    0x00, "Super" )
-	PORT_DIPNAME( 0x0c, 0x04, DEF_STR( Lives ) )	PORT_DIPLOCATION("SW2:3,4")
+	PORT_DIPNAME( 0x0c, 0x04, DEF_STR( Lives ) )    PORT_DIPLOCATION("SW2:3,4")
 	PORT_DIPSETTING(    0x0c, "1" )
 	PORT_DIPSETTING(    0x08, "2" )
 	PORT_DIPSETTING(    0x04, "3" )
 	PORT_DIPSETTING(    0x00, "4" )
-	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Demo_Sounds ) )	PORT_DIPLOCATION("SW2:5")
+	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW2:5")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x10, DEF_STR( On ) )
-	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Flip_Screen ) )	PORT_DIPLOCATION("SW2:6")
+	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Flip_Screen ) )  PORT_DIPLOCATION("SW2:6")
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x40, 0x40, "Training Mode" )	PORT_DIPLOCATION("SW2:7")
+	PORT_DIPNAME( 0x40, 0x40, "Training Mode" ) PORT_DIPLOCATION("SW2:7")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( On ) )
 	PORT_SERVICE_DIPLOC(  0x0080, IP_ACTIVE_LOW, "SW2:8" )
@@ -416,7 +417,7 @@ INPUT_PORTS_END
 
 
 static INPUT_PORTS_START( hatris )
-	PORT_START("P1")	/* $20 */
+	PORT_START("P1")    /* $20 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(1)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(1)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(1)
@@ -426,7 +427,7 @@ static INPUT_PORTS_START( hatris )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(1)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("P2")	/* $21 */
+	PORT_START("P2")    /* $21 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(2)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(2)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(2)
@@ -436,7 +437,7 @@ static INPUT_PORTS_START( hatris )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("SYSTEM")	/* $24 */
+	PORT_START("SYSTEM")    /* $24 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 )
@@ -446,8 +447,8 @@ static INPUT_PORTS_START( hatris )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("DSW1")	/* $22 */
-	PORT_DIPNAME( 0x0f, 0x00, DEF_STR( Coin_A ) )	PORT_DIPLOCATION("SW1:1,2,3,4")
+	PORT_START("DSW1")  /* $22 */
+	PORT_DIPNAME( 0x0f, 0x00, DEF_STR( Coin_A ) )   PORT_DIPLOCATION("SW1:1,2,3,4")
 	PORT_DIPSETTING(    0x09, DEF_STR( 5C_1C ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( 4C_1C ) )
 	PORT_DIPSETTING(    0x07, DEF_STR( 3C_1C ) )
@@ -464,7 +465,7 @@ static INPUT_PORTS_START( hatris )
 	PORT_DIPSETTING(    0x03, DEF_STR( 1C_4C ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( 1C_5C ) )
 	PORT_DIPSETTING(    0x05, DEF_STR( 1C_6C ) )
-	PORT_DIPNAME( 0xf0, 0x00, DEF_STR( Coin_B ) )	PORT_DIPLOCATION("SW1:5,6,7,8")
+	PORT_DIPNAME( 0xf0, 0x00, DEF_STR( Coin_B ) )   PORT_DIPLOCATION("SW1:5,6,7,8")
 	PORT_DIPSETTING(    0x90, DEF_STR( 5C_1C ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( 4C_1C ) )
 	PORT_DIPSETTING(    0x70, DEF_STR( 3C_1C ) )
@@ -482,22 +483,22 @@ static INPUT_PORTS_START( hatris )
 	PORT_DIPSETTING(    0x40, DEF_STR( 1C_5C ) )
 	PORT_DIPSETTING(    0x50, DEF_STR( 1C_6C ) )
 
-	PORT_START("DSW2")	/* $23 */
-	PORT_DIPNAME( 0x03, 0x00, "Hat Fall Velocity" )	PORT_DIPLOCATION("SW2:1,2")
+	PORT_START("DSW2")  /* $23 */
+	PORT_DIPNAME( 0x03, 0x00, "Hat Fall Velocity" ) PORT_DIPLOCATION("SW2:1,2")
 	PORT_DIPSETTING(    0x01, DEF_STR( Easy ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Normal ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( Hard ) )
 	PORT_DIPSETTING(    0x03, "Super" )
-	PORT_DIPNAME( 0x0c, 0x00, "End Line Position" )	PORT_DIPLOCATION("SW2:3,4")
+	PORT_DIPNAME( 0x0c, 0x00, "End Line Position" ) PORT_DIPLOCATION("SW2:3,4")
 	PORT_DIPSETTING(    0x04, DEF_STR( Easy ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Normal ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( Hard ) )
 	PORT_DIPSETTING(    0x0c, "Super" )
 	PORT_SERVICE_DIPLOC(  0x0010, IP_ACTIVE_HIGH, "SW2:5" )
-	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Flip_Screen ) )	PORT_DIPLOCATION("SW2:6")
+	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Flip_Screen ) )  PORT_DIPLOCATION("SW2:6")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( On ) )
-	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Demo_Sounds ) )	PORT_DIPLOCATION("SW2:7")
+	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW2:7")
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPUNUSED_DIPLOC( 0x0080, 0x0080, "SW2:8" ) /* Listed as "N.C." */
@@ -559,7 +560,7 @@ GFXDECODE_END
 static void irqhandler( device_t *device, int irq )
 {
 	fromance_state *state = device->machine().driver_data<fromance_state>();
-	device_set_input_line(state->m_subcpu, 0, irq ? ASSERT_LINE : CLEAR_LINE);
+	state->m_subcpu->set_input_line(0, irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 
@@ -587,50 +588,48 @@ static const ym2610_interface ym2610_config =
  *
  *************************************/
 
-static MACHINE_START( pipedrm )
+MACHINE_START_MEMBER(fromance_state,pipedrm)
 {
-	fromance_state *state = machine.driver_data<fromance_state>();
 
-	state->m_subcpu = machine.device("sub");
+	m_subcpu = machine().device<cpu_device>("sub");
 
 	/* initialize main Z80 bank */
-	memory_configure_bank(machine, "bank1", 0, 8, machine.region("maincpu")->base() + 0x10000, 0x2000);
-	memory_set_bank(machine, "bank1", 0);
+	membank("bank1")->configure_entries(0, 8, memregion("maincpu")->base() + 0x10000, 0x2000);
+	membank("bank1")->set_entry(0);
 
 	/* initialize sound bank */
-	memory_configure_bank(machine, "bank2", 0, 2, machine.region("sub")->base() + 0x10000, 0x8000);
-	memory_set_bank(machine, "bank2", 0);
+	membank("bank2")->configure_entries(0, 2, memregion("sub")->base() + 0x10000, 0x8000);
+	membank("bank2")->set_entry(0);
 
 	/* state save */
-	state->save_item(NAME(state->m_pending_command));
-	state->save_item(NAME(state->m_sound_command));
+	save_item(NAME(m_pending_command));
+	save_item(NAME(m_sound_command));
 
 	/* video-related elements are saved in VIDEO_START */
 }
 
-static MACHINE_RESET( pipedrm )
+MACHINE_RESET_MEMBER(fromance_state,pipedrm)
 {
-	fromance_state *state = machine.driver_data<fromance_state>();
 	int i;
 
-	state->m_pending_command = 0;
-	state->m_sound_command = 0;
+	m_pending_command = 0;
+	m_sound_command = 0;
 
-	state->m_flipscreen_old = -1;
-	state->m_scrollx_ofs = 0x159;
-	state->m_scrolly_ofs = 0x10;
+	m_flipscreen_old = -1;
+	m_scrollx_ofs = 0x159;
+	m_scrolly_ofs = 0x10;
 
-	state->m_selected_videoram = state->m_selected_paletteram = 0;
-	state->m_scrollx[0] = 0;
-	state->m_scrollx[1] = 0;
-	state->m_scrolly[0] = 0;
-	state->m_scrolly[1] = 0;
-	state->m_gfxreg = 0;
-	state->m_flipscreen = 0;
-	state->m_crtc_register = 0;
+	m_selected_videoram = m_selected_paletteram = 0;
+	m_scrollx[0] = 0;
+	m_scrollx[1] = 0;
+	m_scrolly[0] = 0;
+	m_scrolly[1] = 0;
+	m_gfxreg = 0;
+	m_flipscreen = 0;
+	m_crtc_register = 0;
 
 	for (i = 0; i < 0x10; i++)
-		state->m_crtc_data[i] = 0;
+		m_crtc_data[i] = 0;
 }
 
 static MACHINE_CONFIG_START( pipedrm, fromance_state )
@@ -639,28 +638,32 @@ static MACHINE_CONFIG_START( pipedrm, fromance_state )
 	MCFG_CPU_ADD("maincpu", Z80,12000000/2)
 	MCFG_CPU_PROGRAM_MAP(main_map)
 	MCFG_CPU_IO_MAP(main_portmap)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", fromance_state, irq0_line_hold)
 
 	MCFG_CPU_ADD("sub", Z80,14318000/4)
 	MCFG_CPU_PROGRAM_MAP(sound_map)
 	MCFG_CPU_IO_MAP(sound_portmap)
 
-	MCFG_MACHINE_START(pipedrm)
-	MCFG_MACHINE_RESET(pipedrm)
+	MCFG_MACHINE_START_OVERRIDE(fromance_state,pipedrm)
+	MCFG_MACHINE_RESET_OVERRIDE(fromance_state,pipedrm)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(44*8, 30*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 44*8-1, 0*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(pipedrm)
+	MCFG_SCREEN_UPDATE_DRIVER(fromance_state, screen_update_pipedrm)
 
 	MCFG_GFXDECODE(pipedrm)
 	MCFG_PALETTE_LENGTH(2048)
 
-	MCFG_VIDEO_START(pipedrm)
+	MCFG_DEVICE_ADD("vsystem_spr_old", VSYSTEM_SPR2, 0)
+	MCFG_VSYSTEM_SPR2_SET_GFXREGION(2)
+	MCFG_VSYSTEM_SPR2_SET_OFFSETS(-13, -6)
+	MCFG_VSYSTEM_SPR2_SET_PRITYPE(3)
+
+	MCFG_VIDEO_START_OVERRIDE(fromance_state,pipedrm)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -679,28 +682,27 @@ static MACHINE_CONFIG_START( hatris, fromance_state )
 	MCFG_CPU_ADD("maincpu", Z80,12000000/2)
 	MCFG_CPU_PROGRAM_MAP(main_map)
 	MCFG_CPU_IO_MAP(main_portmap)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", fromance_state, irq0_line_hold)
 
 	MCFG_CPU_ADD("sub", Z80,14318000/4)
 	MCFG_CPU_PROGRAM_MAP(sound_map)
 	MCFG_CPU_IO_MAP(hatris_sound_portmap)
 
-	MCFG_MACHINE_START(pipedrm)
-	MCFG_MACHINE_RESET(pipedrm)
+	MCFG_MACHINE_START_OVERRIDE(fromance_state,pipedrm)
+	MCFG_MACHINE_RESET_OVERRIDE(fromance_state,pipedrm)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(44*8, 30*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 44*8-1, 0*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(fromance)
+	MCFG_SCREEN_UPDATE_DRIVER(fromance_state, screen_update_fromance)
 
 	MCFG_GFXDECODE(hatris)
 	MCFG_PALETTE_LENGTH(2048)
 
-	MCFG_VIDEO_START(hatris)
+	MCFG_VIDEO_START_OVERRIDE(fromance_state,hatris)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -726,7 +728,7 @@ ROM_START( pipedrm )
 	ROM_LOAD( "yb.u110", 0x10000, 0x10000, CRC(7416554a) SHA1(612aff94da3ec282e200c07eae9af26a28e071bd) )
 
 	ROM_REGION( 0x20000, "sub", 0 )
-	ROM_LOAD( "u4,u86", 0x00000, 0x08000, CRC(497fad4c) SHA1(f151543a0c4a1d6d5d2de5e1dc12fd59dabcf1a8) )
+	ROM_LOAD( "u4.u86", 0x00000, 0x08000, CRC(497fad4c) SHA1(f151543a0c4a1d6d5d2de5e1dc12fd59dabcf1a8) )
 	ROM_LOAD( "u3.u99", 0x10000, 0x10000, CRC(4800322a) SHA1(a616c497ac18351b68b8307050a2a62c717a7873) )
 
 	ROM_REGION( 0x100000, "gfx1", 0 )
@@ -760,7 +762,7 @@ ROM_START( pipedrmu )
 	ROM_LOAD( "02.u110", 0x10000, 0x10000, CRC(c8209b67) SHA1(cca7356d75e8091b07e3328aef523ff452abbcd8) )
 
 	ROM_REGION( 0x20000, "sub", 0 )
-	ROM_LOAD( "u4,u86", 0x00000, 0x08000, CRC(497fad4c) SHA1(f151543a0c4a1d6d5d2de5e1dc12fd59dabcf1a8) )
+	ROM_LOAD( "u4.u86", 0x00000, 0x08000, CRC(497fad4c) SHA1(f151543a0c4a1d6d5d2de5e1dc12fd59dabcf1a8) )
 	ROM_LOAD( "u3.u99", 0x10000, 0x10000, CRC(4800322a) SHA1(a616c497ac18351b68b8307050a2a62c717a7873) )
 
 	ROM_REGION( 0x100000, "gfx1", 0 )
@@ -795,7 +797,7 @@ ROM_START( pipedrmj )
 	ROM_LOAD( "2.u110", 0x10000, 0x10000, CRC(b7adb99a) SHA1(fdab2b99e86aa0b6b17ec95556222e5211ba55e9) )
 
 	ROM_REGION( 0x20000, "sub", 0 )
-	ROM_LOAD( "u4,u86", 0x00000, 0x08000, CRC(497fad4c) SHA1(f151543a0c4a1d6d5d2de5e1dc12fd59dabcf1a8) )
+	ROM_LOAD( "u4.u86", 0x00000, 0x08000, CRC(497fad4c) SHA1(f151543a0c4a1d6d5d2de5e1dc12fd59dabcf1a8) )
 	ROM_LOAD( "u3.u99", 0x10000, 0x10000, CRC(4800322a) SHA1(a616c497ac18351b68b8307050a2a62c717a7873) )
 
 	ROM_REGION( 0x100000, "gfx1", 0 )
@@ -826,10 +828,10 @@ ROM_END
 
 ROM_START( hatris )
 	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD( "2.ic79",	0x00000, 0x08000, CRC(4ab50b54) SHA1(0eaab164a88c127bdf05c72f36d95be7fa3bb7de) )
+	ROM_LOAD( "2.ic79", 0x00000, 0x08000, CRC(4ab50b54) SHA1(0eaab164a88c127bdf05c72f36d95be7fa3bb7de) )
 
 	ROM_REGION( 0x10000, "sub", 0 )
-	ROM_LOAD( "1-ic81.bin",	0x00000, 0x08000, CRC(db25e166) SHA1(3538963d092967311d0a216b1e33ea39389b0d87) )
+	ROM_LOAD( "1-ic81.bin", 0x00000, 0x08000, CRC(db25e166) SHA1(3538963d092967311d0a216b1e33ea39389b0d87) )
 
 	ROM_REGION( 0x80000, "gfx1", 0 )
 	ROM_LOAD( "b0-ic56.bin", 0x00000, 0x20000, CRC(34f337a4) SHA1(ad74bb3fbfd16c9e92daa1cf5c5e522d11ba7dfb) )
@@ -848,10 +850,10 @@ ROM_END
 
 ROM_START( hatrisj )
 	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD( "2-ic79.bin",	0x00000, 0x08000, CRC(bbcaddbf) SHA1(7f01493dadfed87112644a8ef77ae58fa273980d) )
+	ROM_LOAD( "2-ic79.bin", 0x00000, 0x08000, CRC(bbcaddbf) SHA1(7f01493dadfed87112644a8ef77ae58fa273980d) )
 
 	ROM_REGION( 0x10000, "sub", 0 )
-	ROM_LOAD( "1-ic81.bin",	0x00000, 0x08000, CRC(db25e166) SHA1(3538963d092967311d0a216b1e33ea39389b0d87) )
+	ROM_LOAD( "1-ic81.bin", 0x00000, 0x08000, CRC(db25e166) SHA1(3538963d092967311d0a216b1e33ea39389b0d87) )
 
 	ROM_REGION( 0x80000, "gfx1", 0 )
 	ROM_LOAD( "b0-ic56.bin", 0x00000, 0x20000, CRC(34f337a4) SHA1(ad74bb3fbfd16c9e92daa1cf5c5e522d11ba7dfb) )
@@ -875,21 +877,19 @@ ROM_END
  *
  *************************************/
 
-static DRIVER_INIT( pipedrm )
+DRIVER_INIT_MEMBER(fromance_state,pipedrm)
 {
-	fromance_state *state = machine.driver_data<fromance_state>();
 
 	/* sprite RAM lives at the end of palette RAM */
-	state->m_spriteram = &machine.generic.paletteram.u8[0xc00];
-	state->m_spriteram_size = 0x400;
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_ram(0xcc00, 0xcfff, state->m_spriteram);
+	m_spriteram.set_target(&m_generic_paletteram_8[0xc00], 0x400);
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_ram(0xcc00, 0xcfff, m_spriteram);
 }
 
 
-static DRIVER_INIT( hatris )
+DRIVER_INIT_MEMBER(fromance_state,hatris)
 {
-	machine.device("maincpu")->memory().space(AS_IO)->install_legacy_write_handler(0x20, 0x20, FUNC(sound_command_nonmi_w));
-	machine.device("maincpu")->memory().space(AS_IO)->install_legacy_write_handler(0x21, 0x21, FUNC(fromance_gfxreg_w));
+	machine().device("maincpu")->memory().space(AS_IO).install_legacy_write_handler(0x20, 0x20, FUNC(sound_command_nonmi_w));
+	machine().device("maincpu")->memory().space(AS_IO).install_write_handler(0x21, 0x21, write8_delegate(FUNC(fromance_state::fromance_gfxreg_w),this));
 }
 
 
@@ -900,8 +900,8 @@ static DRIVER_INIT( hatris )
  *
  *************************************/
 
-GAME( 1990, pipedrm,  0,       pipedrm, pipedrm, pipedrm, ROT0, "Video System Co.", "Pipe Dream (World)", GAME_SUPPORTS_SAVE )
-GAME( 1990, pipedrmu, pipedrm, pipedrm, pipedrm, pipedrm, ROT0, "Video System Co.", "Pipe Dream (US)", GAME_SUPPORTS_SAVE )
-GAME( 1990, pipedrmj, pipedrm, pipedrm, pipedrm, pipedrm, ROT0, "Video System Co.", "Pipe Dream (Japan)", GAME_SUPPORTS_SAVE )
-GAME( 1990, hatris,   0,       hatris,  hatris,  hatris,  ROT0, "Video System Co.", "Hatris (US)", GAME_SUPPORTS_SAVE )
-GAME( 1990, hatrisj,  hatris,  hatris,  hatris,  hatris,  ROT0, "Video System Co.", "Hatris (Japan)", GAME_SUPPORTS_SAVE )
+GAME( 1990, pipedrm,  0,       pipedrm, pipedrm, fromance_state, pipedrm, ROT0, "Video System Co.", "Pipe Dream (World)", GAME_SUPPORTS_SAVE )
+GAME( 1990, pipedrmu, pipedrm, pipedrm, pipedrm, fromance_state, pipedrm, ROT0, "Video System Co.", "Pipe Dream (US)", GAME_SUPPORTS_SAVE )
+GAME( 1990, pipedrmj, pipedrm, pipedrm, pipedrm, fromance_state, pipedrm, ROT0, "Video System Co.", "Pipe Dream (Japan)", GAME_SUPPORTS_SAVE )
+GAME( 1990, hatris,   0,       hatris,  hatris, fromance_state,  hatris,  ROT0, "Video System Co.", "Hatris (US)", GAME_SUPPORTS_SAVE )
+GAME( 1990, hatrisj,  hatris,  hatris,  hatris, fromance_state,  hatris,  ROT0, "Video System Co.", "Hatris (Japan)", GAME_SUPPORTS_SAVE )

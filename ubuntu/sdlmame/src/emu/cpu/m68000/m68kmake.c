@@ -3,11 +3,10 @@
 /* ======================================================================== */
 /*
  *                                  MUSASHI
- *                                Version 4.70
+ *                                Version 4.90
  *
  * A portable Motorola M680x0 processor emulation engine.
  * Copyright Karl Stenerud.  All rights reserved.
- * FPU and MMU by R. Belmont.
  *
  * This code may be freely used for non-commercial purposes as long as this
  * copyright notice remains unaltered in the source code and any binary files
@@ -21,11 +20,10 @@
  */
 
 /*
- * Modified For OpenVMS By:  Robert Alan Byer
- *                           byer@mail.ourservers.net
- *
  * 68030 and PMMU by R. Belmont and Hans Ostermeyer
  * 68040 and FPU by Ville Linde, R. Belmont, and Hans Ostermeyer
+ * CPU32 by David Haywood.  ColdFire by R. Belmont.
+ *
  */
 
 
@@ -56,7 +54,7 @@
  */
 
 
-static const char g_version[] = "4.70";
+static const char g_version[] = "4.90";
 
 /* ======================================================================== */
 /* =============================== INCLUDES =============================== */
@@ -77,16 +75,16 @@ static const char g_version[] = "4.70";
 #define M68K_MAX_PATH 1024
 #define M68K_MAX_DIR  1024
 
-#define MAX_LINE_LENGTH                 200	/* length of 1 line */
-#define MAX_BODY_LENGTH                 300	/* Number of lines in 1 function */
-#define MAX_REPLACE_LENGTH               30	/* Max number of replace strings */
-#define MAX_INSERT_LENGTH              5000	/* Max size of insert piece */
-#define MAX_NAME_LENGTH                  30	/* Max length of ophandler name */
-#define MAX_SPEC_PROC_LENGTH              4	/* Max length of special processing str */
-#define MAX_SPEC_EA_LENGTH                5	/* Max length of specified EA str */
-#define EA_ALLOWED_LENGTH                11	/* Max length of ea allowed str */
-#define MAX_OPCODE_INPUT_TABLE_LENGTH  1000	/* Max length of opcode handler tbl */
-#define MAX_OPCODE_OUTPUT_TABLE_LENGTH 3000	/* Max length of opcode handler tbl */
+#define MAX_LINE_LENGTH                 200 /* length of 1 line */
+#define MAX_BODY_LENGTH                 300 /* Number of lines in 1 function */
+#define MAX_REPLACE_LENGTH               30 /* Max number of replace strings */
+#define MAX_INSERT_LENGTH              5000 /* Max size of insert piece */
+#define MAX_NAME_LENGTH                  96 /* Max length of ophandler name */
+#define MAX_SPEC_PROC_LENGTH              4 /* Max length of special processing str */
+#define MAX_SPEC_EA_LENGTH                5 /* Max length of specified EA str */
+#define EA_ALLOWED_LENGTH                11 /* Max length of ea allowed str */
+#define MAX_OPCODE_INPUT_TABLE_LENGTH  1000 /* Max length of opcode handler tbl */
+#define MAX_OPCODE_OUTPUT_TABLE_LENGTH 3000 /* Max length of opcode handler tbl */
 
 /* Default filenames */
 #define FILENAME_INPUT      "m68k_in.c"
@@ -133,11 +131,13 @@ static const char g_version[] = "4.70";
 
 enum
 {
-	CPU_TYPE_000 = 0,
-	CPU_TYPE_010,
-	CPU_TYPE_020,
-	CPU_TYPE_030,
-	CPU_TYPE_040,
+	CPU_TYPE_000 = 0,   // 0
+	CPU_TYPE_010,       // 1
+	CPU_TYPE_020,       // 2
+	CPU_TYPE_030,       // 3
+	CPU_TYPE_040,       // 4
+	CPU_TYPE_68340,     // 5
+	CPU_TYPE_COLDFIRE,  // 6
 	NUM_CPUS
 };
 
@@ -158,24 +158,24 @@ enum
 
 enum
 {
-	EA_MODE_NONE,	/* No special addressing mode */
-	EA_MODE_AI,		/* Address register indirect */
-	EA_MODE_PI,		/* Address register indirect with postincrement */
-	EA_MODE_PI7,	/* Address register 7 indirect with postincrement */
-	EA_MODE_PD,		/* Address register indirect with predecrement */
-	EA_MODE_PD7,	/* Address register 7 indirect with predecrement */
-	EA_MODE_DI,		/* Address register indirect with displacement */
-	EA_MODE_IX,		/* Address register indirect with index */
-	EA_MODE_AW,		/* Absolute word */
-	EA_MODE_AL,		/* Absolute long */
-	EA_MODE_PCDI,	/* Program counter indirect with displacement */
-	EA_MODE_PCIX,	/* Program counter indirect with index */
-	EA_MODE_I		/* Immediate */
+	EA_MODE_NONE,   /* No special addressing mode */
+	EA_MODE_AI,     /* Address register indirect */
+	EA_MODE_PI,     /* Address register indirect with postincrement */
+	EA_MODE_PI7,    /* Address register 7 indirect with postincrement */
+	EA_MODE_PD,     /* Address register indirect with predecrement */
+	EA_MODE_PD7,    /* Address register 7 indirect with predecrement */
+	EA_MODE_DI,     /* Address register indirect with displacement */
+	EA_MODE_IX,     /* Address register indirect with index */
+	EA_MODE_AW,     /* Absolute word */
+	EA_MODE_AL,     /* Absolute long */
+	EA_MODE_PCDI,   /* Program counter indirect with displacement */
+	EA_MODE_PCIX,   /* Program counter indirect with index */
+	EA_MODE_I       /* Immediate */
 };
 
 
 /* Everything we need to know about an opcode */
-typedef struct
+struct opcode_struct
 {
 	char name[MAX_NAME_LENGTH];           /* opcode handler name */
 	unsigned char size;                   /* Size of operation */
@@ -188,33 +188,33 @@ typedef struct
 	char cpu_mode[NUM_CPUS];              /* User or supervisor mode */
 	char cpus[NUM_CPUS+1];                /* Allowed CPUs */
 	unsigned char cycles[NUM_CPUS];       /* cycles for 000, 010, 020, 030, 040 */
-} opcode_struct;
+};
 
 
 /* All modifications necessary for a specific EA mode of an instruction */
-typedef struct
+struct ea_info_struct
 {
 	const char* fname_add;
 	const char* ea_add;
 	unsigned int mask_add;
 	unsigned int match_add;
-} ea_info_struct;
+};
 
 
 /* Holds the body of a function */
-typedef struct
+struct body_struct
 {
 	char body[MAX_BODY_LENGTH][MAX_LINE_LENGTH+1];
 	int length;
-} body_struct;
+};
 
 
 /* Holds a sequence of search / replace strings */
-typedef struct
+struct replace_struct
 {
 	char replace[MAX_REPLACE_LENGTH][2][MAX_LINE_LENGTH+1];
 	int length;
-} replace_struct;
+};
 
 
 /* Function Prototypes */
@@ -311,119 +311,119 @@ static const char *const g_cc_table[16][2] =
 /* size to index translator (0 -> 0, 8 and 16 -> 1, 32 -> 2) */
 static const int g_size_select_table[33] =
 {
-	0,												/* unsized */
-	0, 0, 0, 0, 0, 0, 0, 1,							/*    8    */
-	0, 0, 0, 0, 0, 0, 0, 1,							/*   16    */
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2	/*   32    */
+	0,                                              /* unsized */
+	0, 0, 0, 0, 0, 0, 0, 1,                         /*    8    */
+	0, 0, 0, 0, 0, 0, 0, 1,                         /*   16    */
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2  /*   32    */
 };
 
 /* Extra cycles required for certain EA modes */
 /* TODO: correct timings for 030, 040 */
 static const int g_ea_cycle_table[13][NUM_CPUS][3] =
-{/*       000           010           020           030           040  */
-	{{ 0,  0,  0}, { 0,  0,  0}, { 0,  0,  0}, { 0,  0,  0}, { 0,  0,  0}}, /* EA_MODE_NONE */
-	{{ 0,  4,  8}, { 0,  4,  8}, { 0,  4,  4}, { 0,  4,  4}, { 0,  4,  4}}, /* EA_MODE_AI   */
-	{{ 0,  4,  8}, { 0,  4,  8}, { 0,  4,  4}, { 0,  4,  4}, { 0,  4,  4}}, /* EA_MODE_PI   */
-	{{ 0,  4,  8}, { 0,  4,  8}, { 0,  4,  4}, { 0,  4,  4}, { 0,  4,  4}}, /* EA_MODE_PI7  */
-	{{ 0,  6, 10}, { 0,  6, 10}, { 0,  5,  5}, { 0,  5,  5}, { 0,  5,  5}}, /* EA_MODE_PD   */
-	{{ 0,  6, 10}, { 0,  6, 10}, { 0,  5,  5}, { 0,  5,  5}, { 0,  5,  5}}, /* EA_MODE_PD7  */
-	{{ 0,  8, 12}, { 0,  8, 12}, { 0,  5,  5}, { 0,  5,  5}, { 0,  5,  5}}, /* EA_MODE_DI   */
-	{{ 0, 10, 14}, { 0, 10, 14}, { 0,  7,  7}, { 0,  7,  7}, { 0,  7,  7}}, /* EA_MODE_IX   */
-	{{ 0,  8, 12}, { 0,  8, 12}, { 0,  4,  4}, { 0,  4,  4}, { 0,  4,  4}}, /* EA_MODE_AW   */
-	{{ 0, 12, 16}, { 0, 12, 16}, { 0,  4,  4}, { 0,  4,  4}, { 0,  4,  4}}, /* EA_MODE_AL   */
-	{{ 0,  8, 12}, { 0,  8, 12}, { 0,  5,  5}, { 0,  5,  5}, { 0,  5,  5}}, /* EA_MODE_PCDI */
-	{{ 0, 10, 14}, { 0, 10, 14}, { 0,  7,  7}, { 0,  7,  7}, { 0,  7,  7}}, /* EA_MODE_PCIX */
-	{{ 0,  4,  8}, { 0,  4,  8}, { 0,  2,  4}, { 0,  2,  4}, { 0,  2,  4}}, /* EA_MODE_I    */
+{/*       000           010           020           030           040        CPU*/
+	{{ 0,  0,  0}, { 0,  0,  0}, { 0,  0,  0}, { 0,  0,  0}, { 0,  0,  0}, { 0,  0,  0}}, /* EA_MODE_NONE */
+	{{ 0,  4,  8}, { 0,  4,  8}, { 0,  4,  4}, { 0,  4,  4}, { 0,  4,  4}, { 0,  4,  4}}, /* EA_MODE_AI   */
+	{{ 0,  4,  8}, { 0,  4,  8}, { 0,  4,  4}, { 0,  4,  4}, { 0,  4,  4}, { 0,  4,  4}}, /* EA_MODE_PI   */
+	{{ 0,  4,  8}, { 0,  4,  8}, { 0,  4,  4}, { 0,  4,  4}, { 0,  4,  4}, { 0,  4,  4}}, /* EA_MODE_PI7  */
+	{{ 0,  6, 10}, { 0,  6, 10}, { 0,  5,  5}, { 0,  5,  5}, { 0,  5,  5}, { 0,  5,  5}}, /* EA_MODE_PD   */
+	{{ 0,  6, 10}, { 0,  6, 10}, { 0,  5,  5}, { 0,  5,  5}, { 0,  5,  5}, { 0,  5,  5}}, /* EA_MODE_PD7  */
+	{{ 0,  8, 12}, { 0,  8, 12}, { 0,  5,  5}, { 0,  5,  5}, { 0,  5,  5}, { 0,  5,  5}}, /* EA_MODE_DI   */
+	{{ 0, 10, 14}, { 0, 10, 14}, { 0,  7,  7}, { 0,  7,  7}, { 0,  7,  7}, { 0,  7,  7}}, /* EA_MODE_IX   */
+	{{ 0,  8, 12}, { 0,  8, 12}, { 0,  4,  4}, { 0,  4,  4}, { 0,  4,  4}, { 0,  4,  4}}, /* EA_MODE_AW   */
+	{{ 0, 12, 16}, { 0, 12, 16}, { 0,  4,  4}, { 0,  4,  4}, { 0,  4,  4}, { 0,  4,  4}}, /* EA_MODE_AL   */
+	{{ 0,  8, 12}, { 0,  8, 12}, { 0,  5,  5}, { 0,  5,  5}, { 0,  5,  5}, { 0,  5,  5}}, /* EA_MODE_PCDI */
+	{{ 0, 10, 14}, { 0, 10, 14}, { 0,  7,  7}, { 0,  7,  7}, { 0,  7,  7}, { 0,  7,  7}}, /* EA_MODE_PCIX */
+	{{ 0,  4,  8}, { 0,  4,  8}, { 0,  2,  4}, { 0,  2,  4}, { 0,  2,  4}, { 0,  2,  4}}, /* EA_MODE_I    */
 };
 
 /* Extra cycles for JMP instruction (000, 010) */
 static const int g_jmp_cycle_table[13] =
 {
-	 0, /* EA_MODE_NONE */
-	 4, /* EA_MODE_AI   */
-	 0, /* EA_MODE_PI   */
-	 0, /* EA_MODE_PI7  */
-	 0, /* EA_MODE_PD   */
-	 0, /* EA_MODE_PD7  */
-	 6, /* EA_MODE_DI   */
+		0, /* EA_MODE_NONE */
+		4, /* EA_MODE_AI   */
+		0, /* EA_MODE_PI   */
+		0, /* EA_MODE_PI7  */
+		0, /* EA_MODE_PD   */
+		0, /* EA_MODE_PD7  */
+		6, /* EA_MODE_DI   */
 	10, /* EA_MODE_IX   */
-	 6, /* EA_MODE_AW   */
-	 8, /* EA_MODE_AL   */
-	 6, /* EA_MODE_PCDI */
+		6, /* EA_MODE_AW   */
+		8, /* EA_MODE_AL   */
+		6, /* EA_MODE_PCDI */
 	10, /* EA_MODE_PCIX */
-	 0, /* EA_MODE_I    */
+		0, /* EA_MODE_I    */
 };
 
 /* Extra cycles for JSR instruction (000, 010) */
 static const int g_jsr_cycle_table[13] =
 {
-	 0, /* EA_MODE_NONE */
-	 4, /* EA_MODE_AI   */
-	 0, /* EA_MODE_PI   */
-	 0, /* EA_MODE_PI7  */
-	 0, /* EA_MODE_PD   */
-	 0, /* EA_MODE_PD7  */
-	 6, /* EA_MODE_DI   */
+		0, /* EA_MODE_NONE */
+		4, /* EA_MODE_AI   */
+		0, /* EA_MODE_PI   */
+		0, /* EA_MODE_PI7  */
+		0, /* EA_MODE_PD   */
+		0, /* EA_MODE_PD7  */
+		6, /* EA_MODE_DI   */
 	10, /* EA_MODE_IX   */
-	 6, /* EA_MODE_AW   */
-	 8, /* EA_MODE_AL   */
-	 6, /* EA_MODE_PCDI */
+		6, /* EA_MODE_AW   */
+		8, /* EA_MODE_AL   */
+		6, /* EA_MODE_PCDI */
 	10, /* EA_MODE_PCIX */
-	 0, /* EA_MODE_I    */
+		0, /* EA_MODE_I    */
 };
 
 /* Extra cycles for LEA instruction (000, 010) */
 static const int g_lea_cycle_table[13] =
 {
-	 0, /* EA_MODE_NONE */
-	 4, /* EA_MODE_AI   */
-	 0, /* EA_MODE_PI   */
-	 0, /* EA_MODE_PI7  */
-	 0, /* EA_MODE_PD   */
-	 0, /* EA_MODE_PD7  */
-	 8, /* EA_MODE_DI   */
+		0, /* EA_MODE_NONE */
+		4, /* EA_MODE_AI   */
+		0, /* EA_MODE_PI   */
+		0, /* EA_MODE_PI7  */
+		0, /* EA_MODE_PD   */
+		0, /* EA_MODE_PD7  */
+		8, /* EA_MODE_DI   */
 	12, /* EA_MODE_IX   */
-	 8, /* EA_MODE_AW   */
+		8, /* EA_MODE_AW   */
 	12, /* EA_MODE_AL   */
-	 8, /* EA_MODE_PCDI */
+		8, /* EA_MODE_PCDI */
 	12, /* EA_MODE_PCIX */
-	 0, /* EA_MODE_I    */
+		0, /* EA_MODE_I    */
 };
 
 /* Extra cycles for PEA instruction (000, 010) */
 static const int g_pea_cycle_table[13] =
 {
-	 0, /* EA_MODE_NONE */
-	 6, /* EA_MODE_AI   */
-	 0, /* EA_MODE_PI   */
-	 0, /* EA_MODE_PI7  */
-	 0, /* EA_MODE_PD   */
-	 0, /* EA_MODE_PD7  */
+		0, /* EA_MODE_NONE */
+		6, /* EA_MODE_AI   */
+		0, /* EA_MODE_PI   */
+		0, /* EA_MODE_PI7  */
+		0, /* EA_MODE_PD   */
+		0, /* EA_MODE_PD7  */
 	10, /* EA_MODE_DI   */
 	14, /* EA_MODE_IX   */
 	10, /* EA_MODE_AW   */
 	14, /* EA_MODE_AL   */
 	10, /* EA_MODE_PCDI */
 	14, /* EA_MODE_PCIX */
-	 0, /* EA_MODE_I    */
+		0, /* EA_MODE_I    */
 };
 
 /* Extra cycles for MOVEM instruction (000, 010) */
 static const int g_movem_cycle_table[13] =
 {
-	 0, /* EA_MODE_NONE */
-	 0, /* EA_MODE_AI   */
-	 0, /* EA_MODE_PI   */
-	 0, /* EA_MODE_PI7  */
-	 0, /* EA_MODE_PD   */
-	 0, /* EA_MODE_PD7  */
-	 4, /* EA_MODE_DI   */
-	 6, /* EA_MODE_IX   */
-	 4, /* EA_MODE_AW   */
-	 8, /* EA_MODE_AL   */
-	 0, /* EA_MODE_PCDI */
-	 0, /* EA_MODE_PCIX */
-	 0, /* EA_MODE_I    */
+		0, /* EA_MODE_NONE */
+		0, /* EA_MODE_AI   */
+		0, /* EA_MODE_PI   */
+		0, /* EA_MODE_PI7  */
+		0, /* EA_MODE_PD   */
+		0, /* EA_MODE_PD7  */
+		4, /* EA_MODE_DI   */
+		6, /* EA_MODE_IX   */
+		4, /* EA_MODE_AW   */
+		8, /* EA_MODE_AL   */
+		0, /* EA_MODE_PCDI */
+		0, /* EA_MODE_PCIX */
+		0, /* EA_MODE_I    */
 };
 
 /* Extra cycles for MOVES instruction (010) */
@@ -560,10 +560,10 @@ static int skip_spaces(char* str)
 /* Count the number of set bits in a value */
 static int num_bits(int value)
 {
-    value = ((value & 0xaaaa) >> 1) + (value & 0x5555);
-    value = ((value & 0xcccc) >> 2) + (value & 0x3333);
-    value = ((value & 0xf0f0) >> 4) + (value & 0x0f0f);
-    value = ((value & 0xff00) >> 8) + (value & 0x00ff);
+	value = ((value & 0xaaaa) >> 1) + (value & 0x5555);
+	value = ((value & 0xcccc) >> 2) + (value & 0x3333);
+	value = ((value & 0xf0f0) >> 4) + (value & 0x0f0f);
+	value = ((value & 0xff00) >> 8) + (value & 0x00ff);
 	return value;
 }
 
@@ -622,7 +622,7 @@ static int get_oper_cycles(opcode_struct* op, int ea_mode, int cpu_type)
 	int size = g_size_select_table[op->size];
 
 	if(op->cpus[cpu_type] == '.')
-		return 0;
+		return 255;
 
 	if(cpu_type < CPU_TYPE_020)
 	{
@@ -637,7 +637,7 @@ static int get_oper_cycles(opcode_struct* op, int ea_mode, int cpu_type)
 		/* ASG: added these cases -- immediate modes take 2 extra cycles here */
 		/* SV: but only when operating on long, and also on register direct mode */
 		if(cpu_type == CPU_TYPE_000 && (ea_mode == EA_MODE_I || ea_mode == EA_MODE_NONE) && op->size == 32 &&
-		   ((strcmp(op->name, "add") == 0 && strcmp(op->spec_proc, "er") == 0) ||
+			((strcmp(op->name, "add") == 0 && strcmp(op->spec_proc, "er") == 0) ||
 			strcmp(op->name, "adda")   == 0                                    ||
 			(strcmp(op->name, "and") == 0 && strcmp(op->spec_proc, "er") == 0) ||
 			(strcmp(op->name, "or") == 0 && strcmp(op->spec_proc, "er") == 0)  ||
@@ -667,7 +667,7 @@ static opcode_struct* find_opcode(char* name, int size, char* spec_proc, char* s
 
 	for(op = g_opcode_input_table;op->name != NULL;op++)
 	{
-		if(	strcmp(name, op->name) == 0 &&
+		if( strcmp(name, op->name) == 0 &&
 			(size == op->size) &&
 			strcmp(spec_proc, op->spec_proc) == 0 &&
 			strcmp(spec_ea, op->spec_ea) == 0)
@@ -709,7 +709,7 @@ static int extract_opcode_info(char* src, char* name, int* size, char* spec_proc
 	*size = atoi(ptr);
 	ptr = strstr(ptr, ",");
 	if(ptr == NULL) return 0;
-    ptr++;
+	ptr++;
 	ptr += skip_spaces(ptr);
 
 	ptr += check_strcncpy(spec_proc, ptr, ',', MAX_SPEC_PROC_LENGTH);
@@ -790,7 +790,8 @@ static void get_base_name(char* base_name, opcode_struct* op)
 /* Write the name of an opcode handler function */
 static void write_function_name(FILE* filep, char* base_name)
 {
-	fprintf(filep, "static void %s(m68ki_cpu_core *m68k)\n", base_name);
+	fprintf(filep, "void _m68ki_cpu_core::%s(_m68ki_cpu_core* mc68kcpu)\n", base_name);
+	fprintf(g_prototype_file, "static void %s(_m68ki_cpu_core* mc68kcpu);\n", base_name);
 }
 
 static void add_opcode_output_table_entry(opcode_struct* op, char* name)
@@ -802,7 +803,8 @@ static void add_opcode_output_table_entry(opcode_struct* op, char* name)
 	ptr = g_opcode_output_table + g_opcode_output_table_length++;
 
 	*ptr = *op;
-	strcpy(ptr->name, name);
+
+	sprintf( ptr->name, "_m68ki_cpu_core::%s", name);
 	ptr->bits = num_bits(ptr->op_mask);
 }
 
@@ -879,17 +881,17 @@ static void generate_opcode_handler(FILE* filep, body_struct* body, replace_stru
 	/* Add any replace strings needed */
 	if(ea_mode != EA_MODE_NONE)
 	{
-		sprintf(str, "EA_%s_8(m68k)", g_ea_info_table[ea_mode].ea_add);
+		sprintf(str, "EA_%s_8(mc68kcpu)", g_ea_info_table[ea_mode].ea_add);
 		add_replace_string(replace, ID_OPHANDLER_EA_AY_8, str);
-		sprintf(str, "EA_%s_16(m68k)", g_ea_info_table[ea_mode].ea_add);
+		sprintf(str, "EA_%s_16(mc68kcpu)", g_ea_info_table[ea_mode].ea_add);
 		add_replace_string(replace, ID_OPHANDLER_EA_AY_16, str);
-		sprintf(str, "EA_%s_32(m68k)", g_ea_info_table[ea_mode].ea_add);
+		sprintf(str, "EA_%s_32(mc68kcpu)", g_ea_info_table[ea_mode].ea_add);
 		add_replace_string(replace, ID_OPHANDLER_EA_AY_32, str);
-		sprintf(str, "OPER_%s_8(m68k)", g_ea_info_table[ea_mode].ea_add);
+		sprintf(str, "OPER_%s_8(mc68kcpu)", g_ea_info_table[ea_mode].ea_add);
 		add_replace_string(replace, ID_OPHANDLER_OPER_AY_8, str);
-		sprintf(str, "OPER_%s_16(m68k)", g_ea_info_table[ea_mode].ea_add);
+		sprintf(str, "OPER_%s_16(mc68kcpu)", g_ea_info_table[ea_mode].ea_add);
 		add_replace_string(replace, ID_OPHANDLER_OPER_AY_16, str);
-		sprintf(str, "OPER_%s_32(m68k)", g_ea_info_table[ea_mode].ea_add);
+		sprintf(str, "OPER_%s_32(mc68kcpu)", g_ea_info_table[ea_mode].ea_add);
 		add_replace_string(replace, ID_OPHANDLER_OPER_AY_32, str);
 	}
 
@@ -957,8 +959,8 @@ static void generate_opcode_ea_variants(FILE* filep, body_struct* body, replace_
 /* Generate variants of condition code opcodes */
 static void generate_opcode_cc_variants(FILE* filep, body_struct* body, replace_struct* replace, opcode_struct* op_in, int offset)
 {
-	char repl[20];
-	char replnot[20];
+	char repl[32];
+	char replnot[32];
 	int i;
 	int old_length = replace->length;
 	opcode_struct* op = (opcode_struct *)malloc(sizeof(opcode_struct));
@@ -971,8 +973,8 @@ static void generate_opcode_cc_variants(FILE* filep, body_struct* body, replace_
 	for(i=2;i<16;i++)
 	{
 		/* Add replace strings for this condition code */
-		sprintf(repl, "COND_%s(m68k)", g_cc_table[i][1]);
-		sprintf(replnot, "COND_NOT_%s(m68k)", g_cc_table[i][1]);
+		sprintf(repl, "COND_%s(mc68kcpu)", g_cc_table[i][1]);
+		sprintf(replnot, "COND_NOT_%s(mc68kcpu)", g_cc_table[i][1]);
 
 		add_replace_string(replace, ID_OPHANDLER_CC, repl);
 		add_replace_string(replace, ID_OPHANDLER_NOT_CC, replnot);
@@ -1076,9 +1078,11 @@ static void populate_table(void)
 	buff[0] = 0;
 
 	/* Find the start of the table */
-	while(strcmp(buff, ID_TABLE_START) != 0)
+	while (strncmp(buff, ID_TABLE_START, strlen(ID_TABLE_START)) != 0)
+	{
 		if(fgetline(buff, MAX_LINE_LENGTH, g_input_file) < 0)
 			error_exit("(table_start) Premature EOF while reading table");
+	}
 
 	/* Process the entire table */
 	for(op = g_opcode_input_table;;op++)
@@ -1093,6 +1097,7 @@ static void populate_table(void)
 
 		/* Extract the info from the table */
 		ptr = buff;
+
 
 		/* Name */
 		ptr += skip_spaces(ptr);
@@ -1242,8 +1247,8 @@ int main(int argc, char *argv[])
 	int table_body_read = 0;
 	int ophandler_body_read = 0;
 
-	printf("\n\tMusashi v%s 68000, 68008, 68010, 68EC020, 68020, 68EC030, 68030, 68EC040, 68040 emulator\n", g_version);
-	printf("\tCopyright Karl Stenerud\n\n");
+	printf("\n\tMusashi v%s 680x0, CPU32, and ColdFire emulator\n", g_version);
+	printf("\tCopyright Karl Stenerud and the MAME team.\n\n");
 
 	/* Check if output path and source for the input file are given */
 	if(argc > 1)
@@ -1253,45 +1258,22 @@ int main(int argc, char *argv[])
 
 		for(ptr = strchr(output_path, '\\'); ptr; ptr = strchr(ptr, '\\'))
 			*ptr = '/';
-
-#if !(defined(__DECC) && defined(VMS))
-		if(output_path[strlen(output_path)-1] != '/')
-			strcat(output_path, "/");
-#endif
 	}
 
 	strcpy(g_input_filename, (argc > 2) ? argv[2] : FILENAME_INPUT);
 
-#if defined(__DECC) && defined(VMS)
-
 	/* Open the files we need */
-	sprintf(filename, "%s%s", output_path, FILENAME_PROTOTYPE);
-	if((g_prototype_file = fopen(filename, "w")) == NULL)
-		perror_exit("Unable to create prototype file (%s)\n", filename);
-
-	sprintf(filename, "%s%s", output_path, FILENAME_TABLE);
-	if((g_table_file = fopen(filename, "w")) == NULL)
-		perror_exit("Unable to create table file (%s)\n", filename);
-
-	if((g_input_file=fopen(g_input_filename, "r")) == NULL)
-		perror_exit("can't open %s for input", g_input_filename);
-
-#else
-
-
-	/* Open the files we need */
-	sprintf(filename, "%s%s", output_path, FILENAME_PROTOTYPE);
+	sprintf(filename, "%s/%s", output_path, FILENAME_PROTOTYPE);
 	if((g_prototype_file = fopen(filename, "wt")) == NULL)
 		perror_exit("Unable to create prototype file (%s)\n", filename);
 
-	sprintf(filename, "%s%s", output_path, FILENAME_TABLE);
+	sprintf(filename, "%s/%s", output_path, FILENAME_TABLE);
 	if((g_table_file = fopen(filename, "wt")) == NULL)
 		perror_exit("Unable to create table file (%s)\n", filename);
 
 	if((g_input_file=fopen(g_input_filename, "rt")) == NULL)
 		perror_exit("can't open %s for input", g_input_filename);
 
-#endif
 
 	/* Get to the first section of the input file */
 	section_id[0] = 0;
@@ -1377,7 +1359,9 @@ int main(int argc, char *argv[])
 				error_exit("Duplicate opcode handler section");
 
 			fprintf(g_table_file, "%s\n\n", ophandler_header_insert);
+			fprintf(g_prototype_file, "#ifdef OPCODE_PROTOTYPES\n\n");
 			process_opcode_handlers(g_table_file);
+			fprintf(g_prototype_file, "#else\n");
 			fprintf(g_table_file, "%s\n\n", ophandler_footer_insert);
 
 			ophandler_body_read = 1;
@@ -1407,6 +1391,7 @@ int main(int argc, char *argv[])
 			fprintf(g_table_file, "%s\n\n", table_footer_insert);
 
 			fprintf(g_prototype_file, "%s\n\n", prototype_footer_insert);
+			fprintf(g_prototype_file, "#endif\n");
 
 			break;
 		}

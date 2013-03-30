@@ -92,31 +92,59 @@ MC6845 registers:
 reg (hex):  00  01  02  03  04  05  06  07  08  09  0A  0B  0C  0D  0E  0F  10  11
 val (hex):  27  20  22  04  26  00  20  20  00  07  00  00  80  00  00  00  ns  ns
 
+- Added Muroge Monaco (set 3). This game has only 1 coin slot.
+
+- Figured out the sound. It's a Delta-Sigma DAC (driven by bit3 of the output port
+  at $7000.
+
+- Fixed the GFX decode of Las Vegas.
+
+- The real game title is unknown. Could be "Muroge Monaco", "Las Vegas, Nevada", but
+  I strongly think that the original name is different.
+
 */
 
 #include "emu.h"
 #include "cpu/m6800/m6800.h"
 #include "video/mc6845.h"
+#include "sound/dac.h"
 
 
 class murogem_state : public driver_device
 {
 public:
-	murogem_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	murogem_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"){ }
 
-	UINT8 *m_videoram;
+	required_shared_ptr<UINT8> m_videoram;
+	DECLARE_WRITE8_MEMBER(outport_w);
+	virtual void palette_init();
+	UINT32 screen_update_murogem(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
-static ADDRESS_MAP_START( murogem_map, AS_PROGRAM, 8 )
+WRITE8_MEMBER(murogem_state::outport_w)
+{
+/*
+   It's a Delta-Sigma DAC (1-bit/Bitstream)
+
+    - bits -
+    7654 3210
+    ---- x---   Sound DAC.
+*/
+	machine().device<dac_device>("dac")->write_unsigned8(data & 0x08);
+}
+
+
+static ADDRESS_MAP_START( murogem_map, AS_PROGRAM, 8, murogem_state )
 	AM_RANGE(0x0000, 0x007f) AM_RAM
-	AM_RANGE(0x4000, 0x4000) AM_DEVWRITE("crtc", mc6845_address_w)
-	AM_RANGE(0x4001, 0x4001) AM_DEVWRITE("crtc", mc6845_register_w)
+	AM_RANGE(0x4000, 0x4000) AM_DEVWRITE("crtc", mc6845_device, address_w)
+	AM_RANGE(0x4001, 0x4001) AM_DEVWRITE("crtc", mc6845_device, register_w)
 	AM_RANGE(0x5000, 0x5000) AM_READ_PORT("IN0")
 	AM_RANGE(0x5800, 0x5800) AM_READ_PORT("IN1")
-	AM_RANGE(0x7000, 0x7000) AM_WRITENOP // sound? payout?
-	AM_RANGE(0x8000, 0x87ff) AM_RAM AM_BASE_MEMBER(murogem_state, m_videoram)
+	AM_RANGE(0x7000, 0x7000) AM_WRITE(outport_w)    /* output port */
+	AM_RANGE(0x8000, 0x87ff) AM_RAM AM_SHARE("videoram")
 	AM_RANGE(0xf000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
@@ -133,7 +161,7 @@ static INPUT_PORTS_START( murogem )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_POKER_HOLD1 ) PORT_NAME("Select Card 1")
 
 	PORT_START("IN1")
-	PORT_DIPNAME( 0x01, 0x01, "Reset" )	// reduces credits to 0 and resets game??
+	PORT_DIPNAME( 0x01, 0x01, "Reset" ) // reduces credits to 0 and resets game??
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
@@ -172,25 +200,24 @@ static GFXDECODE_START( murogem )
 GFXDECODE_END
 
 
-static PALETTE_INIT(murogem)
+void murogem_state::palette_init()
 {}
 
-static SCREEN_UPDATE(murogem)
+UINT32 murogem_state::screen_update_murogem(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	murogem_state *state = screen->machine().driver_data<murogem_state>();
 	int xx,yy,count;
 	count = 0x000;
 
-	bitmap_fill(bitmap, cliprect, 0);
+	bitmap.fill(0, cliprect);
 
 	for (yy=0;yy<32;yy++)
 	{
 		for(xx=0;xx<32;xx++)
 		{
-			int tileno = state->m_videoram[count]&0x3f;
-			int attr = state->m_videoram[count+0x400]&0x0f;
+			int tileno = m_videoram[count]&0x3f;
+			int attr = m_videoram[count+0x400]&0x0f;
 
-			drawgfx_transpen(bitmap,cliprect,screen->machine().gfx[0],tileno,attr,0,0,xx*8,yy*8,0);
+			drawgfx_transpen(bitmap,cliprect,machine().gfx[0],tileno,attr,0,0,xx*8,yy*8,0);
 
 			count++;
 
@@ -203,40 +230,43 @@ static SCREEN_UPDATE(murogem)
 
 static const mc6845_interface mc6845_intf =
 {
-	"screen",	/* screen we are acting on */
-	8,			/* number of pixels per video memory address */
-	NULL,		/* before pixel update callback */
-	NULL,		/* row update callback */
-	NULL,		/* after pixel update callback */
-	DEVCB_NULL,	/* callback for display state changes */
-	DEVCB_NULL,	/* callback for cursor state changes */
-	DEVCB_NULL,	/* HSYNC callback */
-	DEVCB_NULL,	/* VSYNC callback */
-	NULL		/* update address callback */
+	"screen",   /* screen we are acting on */
+	8,          /* number of pixels per video memory address */
+	NULL,       /* before pixel update callback */
+	NULL,       /* row update callback */
+	NULL,       /* after pixel update callback */
+	DEVCB_NULL, /* callback for display state changes */
+	DEVCB_NULL, /* callback for cursor state changes */
+	DEVCB_NULL, /* HSYNC callback */
+	DEVCB_NULL, /* VSYNC callback */
+	NULL        /* update address callback */
 };
 
 
 static MACHINE_CONFIG_START( murogem, murogem_state )
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M6802,8000000)		 /* ? MHz */
+	MCFG_CPU_ADD("maincpu", M6802, 8000000)      /* ? MHz */
 	MCFG_CPU_PROGRAM_MAP(murogem_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", murogem_state,  irq0_line_hold)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
-	MCFG_SCREEN_SIZE((39+1)*8, (38+1)*8)           // Taken from MC6845 init, registers 00 & 04. Normally programmed with (value-1).
-	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 0*8, 32*8-1)    // Taken from MC6845 init, registers 01 & 06.
-	MCFG_SCREEN_UPDATE(murogem)
+	MCFG_SCREEN_SIZE((39+1)*8, (38+1)*8)
+	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 0*8, 32*8-1)
+	MCFG_SCREEN_UPDATE_DRIVER(murogem_state, screen_update_murogem)
 
 	MCFG_GFXDECODE(murogem)
 	MCFG_PALETTE_LENGTH(0x100)
 
-	MCFG_PALETTE_INIT(murogem)
 
 	MCFG_MC6845_ADD("crtc", MC6845, 750000, mc6845_intf) /* ? MHz */
+
+	/* sound hardware */
+	MCFG_SPEAKER_STANDARD_MONO("mono")
+	MCFG_DAC_ADD("dac")
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 12.00)
 MACHINE_CONFIG_END
 
 
@@ -249,7 +279,7 @@ ROM_START( murogem )
 	ROM_LOAD( "a2.6e", 0x0000, 0x0400, CRC(86e053da) SHA1(b7cdddca273204513c818384860883bf54cf9434)  )
 
 	ROM_REGION( 0x0020, "proms", 0 )
-	ROM_LOAD( "a3.1b", 0x0000, 0x0020, CRC(abddfb6b) SHA1(ed78b93701b5a3bf2053d2584e9a354fb6cec203) )	/* 74s288 at 1B */
+	ROM_LOAD( "a3.1b", 0x0000, 0x0020, CRC(abddfb6b) SHA1(ed78b93701b5a3bf2053d2584e9a354fb6cec203) )   /* 74s288 at 1B */
 
 ROM_END
 
@@ -262,7 +292,24 @@ ROM_START( murogema )
 	ROM_LOAD( "poker.01", 0x0000, 0x0400, CRC(164d7443) SHA1(1421a3d32d1296a2544da16b51ade94a58e8ba03)  )
 
 	ROM_REGION( 0x0020, "proms", 0 )
-	ROM_LOAD( "a3.1b", 0x0000, 0x0020, CRC(abddfb6b) SHA1(ed78b93701b5a3bf2053d2584e9a354fb6cec203) )	/* 74s288 at 1B. Originally named 6336.pkr */
+	ROM_LOAD( "a3.1b", 0x0000, 0x0020, CRC(abddfb6b) SHA1(ed78b93701b5a3bf2053d2584e9a354fb6cec203) )   /* 74s288 at 1B. Originally named 6336.pkr */
+
+ROM_END
+
+/*  Set 802 from EMMA Italian Dumping Team.
+    Slightly different. Only one coin in slot.
+*/
+ROM_START( murogemb )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "a1.8e", 0xf000, 0x0400, CRC(5b59417a) SHA1(2a2a92b3f8e703ee723ff47d133214e61af8e87d)  )
+	ROM_FILL(          0xf400, 0x0400, 0xff ) /* filling the hole */
+	ROM_LOAD( "a0.9e", 0xf800, 0x0800, CRC(14ef74fb) SHA1(09ae8156fc76c132cb456aefc1c07a4136d935b8)  )
+
+	ROM_REGION( 0x0400, "gfx1", 0 )
+	ROM_LOAD( "a2.6e", 0x0000, 0x0400, CRC(86e053da) SHA1(b7cdddca273204513c818384860883bf54cf9434)  )
+
+	ROM_REGION( 0x0020, "proms", 0 )
+	ROM_LOAD( "dm74s288.1b", 0x0000, 0x0020, CRC(abddfb6b) SHA1(ed78b93701b5a3bf2053d2584e9a354fb6cec203) )
 
 ROM_END
 
@@ -271,14 +318,15 @@ ROM_START( lasvegas )
 	ROM_LOAD( "pk8.8e", 0xf000, 0x0800, CRC(995bd527) SHA1(af96bd0118511b13a755925e3bf5138be61c09d8)  )
 	ROM_LOAD( "pk9.9e", 0xf800, 0x0800, CRC(2ab1556e) SHA1(cd7bd377b6a3f6c0f8df61b0da83e55468d599d6)  )
 
-	ROM_REGION( 0x0800, "gfx1", 0 )	// the second half is filled of 0xff.
-	ROM_LOAD( "pk6.6e", 0x0000, 0x0800, CRC(78a3593a) SHA1(96ba470f5b0dd6d490eadd09b4b6894e044c66b4)  )
+	ROM_REGION( 0x0400, "gfx1", 0 ) // the second half is filled of 0xff.
+	ROM_LOAD( "pk6.6e", 0x0000, 0x0400, CRC(78a3593a) SHA1(96ba470f5b0dd6d490eadd09b4b6894e044c66b4)  )
+	ROM_IGNORE(                 0x0400)
 
 	ROM_REGION( 0x0020, "proms", 0 )
-	ROM_LOAD( "a3.1b", 0x0000, 0x0020, CRC(abddfb6b) SHA1(ed78b93701b5a3bf2053d2584e9a354fb6cec203) )	/* 74s288 at 1B */
-
+	ROM_LOAD( "a3.1b", 0x0000, 0x0020, CRC(abddfb6b) SHA1(ed78b93701b5a3bf2053d2584e9a354fb6cec203) )   /* 74s288 at 1B */
 ROM_END
 
-GAME( 198?, murogem,  0,       murogem, murogem, 0, ROT0, "<unknown>", "Muroge Monaco (set 1)", GAME_NO_SOUND|GAME_WRONG_COLORS )
-GAME( 198?, murogema, murogem, murogem, murogem, 0, ROT0, "<unknown>", "Muroge Monaco (set 2)", GAME_NO_SOUND|GAME_WRONG_COLORS )
-GAME( 198?, lasvegas, murogem, murogem, murogem, 0, ROT0, "hack",      "Las Vegas, Nevada", GAME_NO_SOUND|GAME_WRONG_COLORS )
+GAME( 198?, murogem,  0,       murogem, murogem, driver_device, 0, ROT0, "<unknown>", "Muroge Monaco (set 1)", GAME_WRONG_COLORS )
+GAME( 198?, murogema, murogem, murogem, murogem, driver_device, 0, ROT0, "<unknown>", "Muroge Monaco (set 2)", GAME_WRONG_COLORS )
+GAME( 198?, murogemb, murogem, murogem, murogem, driver_device, 0, ROT0, "<unknown>", "Muroge Monaco (set 3)", GAME_WRONG_COLORS )
+GAME( 198?, lasvegas, murogem, murogem, murogem, driver_device, 0, ROT0, "hack",      "Las Vegas, Nevada",     GAME_WRONG_COLORS )

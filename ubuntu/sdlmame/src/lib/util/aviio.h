@@ -48,7 +48,7 @@
     CONSTANTS
 ***************************************************************************/
 
-enum _avi_error
+enum avi_error
 {
 	AVIERR_NONE = 0,
 	AVIERR_END,
@@ -68,10 +68,9 @@ enum _avi_error
 	AVIERR_UNSUPPORTED_AUDIO_FORMAT,
 	AVIERR_EXCEEDED_SOUND_BUFFER
 };
-typedef enum _avi_error avi_error;
 
 
-enum _avi_datatype
+enum avi_datatype
 {
 	AVIDATA_VIDEO,
 	AVIDATA_AUDIO_CHAN0,
@@ -83,7 +82,6 @@ enum _avi_datatype
 	AVIDATA_AUDIO_CHAN6,
 	AVIDATA_AUDIO_CHAN7
 };
-typedef enum _avi_datatype avi_datatype;
 
 
 
@@ -91,12 +89,12 @@ typedef enum _avi_datatype avi_datatype;
     MACROS
 ***************************************************************************/
 
-#define AVI_FOURCC(a,b,c,d)		((a) | ((b) << 8) | ((c) << 16) | ((d) << 24))
+#define AVI_FOURCC(a,b,c,d)     ((a) | ((b) << 8) | ((c) << 16) | ((d) << 24))
 
-#define FORMAT_UYVY				AVI_FOURCC('U','Y','V','Y')
-#define FORMAT_VYUY				AVI_FOURCC('V','Y','U','Y')
-#define FORMAT_YUY2				AVI_FOURCC('Y','U','Y','2')
-#define FORMAT_HFYU				AVI_FOURCC('H','F','Y','U')
+#define FORMAT_UYVY             AVI_FOURCC('U','Y','V','Y')
+#define FORMAT_VYUY             AVI_FOURCC('V','Y','U','Y')
+#define FORMAT_YUY2             AVI_FOURCC('Y','U','Y','2')
+#define FORMAT_HFYU             AVI_FOURCC('H','F','Y','U')
 
 
 
@@ -104,27 +102,26 @@ typedef enum _avi_datatype avi_datatype;
     TYPE DEFINITIONS
 ***************************************************************************/
 
-typedef struct _avi_file avi_file;
+struct avi_file;
 
 
-typedef struct _avi_movie_info avi_movie_info;
-struct _avi_movie_info
+struct avi_movie_info
 {
-	UINT32			video_format;				/* format of video data */
-	UINT32			video_timescale;			/* timescale for video data */
-	UINT32			video_sampletime;			/* duration of a single video sample (frame) */
-	UINT32			video_numsamples;			/* total number of video samples */
-	UINT32			video_width;				/* width of the video */
-	UINT32			video_height;				/* height of the video */
-	UINT32			video_depth;				/* depth of the video */
+	UINT32          video_format;               /* format of video data */
+	UINT32          video_timescale;            /* timescale for video data */
+	UINT32          video_sampletime;           /* duration of a single video sample (frame) */
+	UINT32          video_numsamples;           /* total number of video samples */
+	UINT32          video_width;                /* width of the video */
+	UINT32          video_height;               /* height of the video */
+	UINT32          video_depth;                /* depth of the video */
 
-	UINT32			audio_format;				/* format of audio data */
-	UINT32			audio_timescale;			/* timescale for audio data */
-	UINT32			audio_sampletime;			/* duration of a single audio sample */
-	UINT32			audio_numsamples;			/* total number of audio samples */
-	UINT32			audio_channels;				/* number of audio channels */
-	UINT32			audio_samplebits;			/* number of bits per channel */
-	UINT32			audio_samplerate;			/* sample rate of audio */
+	UINT32          audio_format;               /* format of audio data */
+	UINT32          audio_timescale;            /* timescale for audio data */
+	UINT32          audio_sampletime;           /* duration of a single audio sample */
+	UINT32          audio_numsamples;           /* total number of audio samples */
+	UINT32          audio_channels;             /* number of audio channels */
+	UINT32          audio_samplebits;           /* number of bits per channel */
+	UINT32          audio_samplerate;           /* sample rate of audio */
 };
 
 
@@ -143,11 +140,11 @@ const char *avi_error_string(avi_error err);
 const avi_movie_info *avi_get_movie_info(avi_file *file);
 UINT32 avi_first_sample_in_frame(avi_file *file, UINT32 framenum);
 
-avi_error avi_read_video_frame_yuy16(avi_file *file, UINT32 framenum, bitmap_t *bitmap);
+avi_error avi_read_video_frame(avi_file *file, UINT32 framenum, bitmap_yuy16 &bitmap);
 avi_error avi_read_sound_samples(avi_file *file, int channel, UINT32 firstsample, UINT32 numsamples, INT16 *output);
 
-avi_error avi_append_video_frame_yuy16(avi_file *file, const bitmap_t *bitmap);
-avi_error avi_append_video_frame_rgb32(avi_file *file, const bitmap_t *bitmap);
+avi_error avi_append_video_frame(avi_file *file, bitmap_yuy16 &bitmap);
+avi_error avi_append_video_frame(avi_file *file, bitmap_rgb32 &bitmap);
 avi_error avi_append_sound_samples(avi_file *file, int channel, const INT16 *samples, UINT32 numsamples, UINT32 sampleskip);
 
 #endif

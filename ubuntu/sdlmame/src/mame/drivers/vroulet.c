@@ -36,7 +36,7 @@ Tomasz Slanina 20050225
 
 #include "emu.h"
 #include "cpu/z80/z80.h"
-#include "machine/8255ppi.h"
+#include "machine/i8255.h"
 #include "sound/ay8910.h"
 #include "machine/nvram.h"
 
@@ -44,98 +44,105 @@ Tomasz Slanina 20050225
 class vroulet_state : public driver_device
 {
 public:
-	vroulet_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	vroulet_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"),
+		m_colorram(*this, "colorram"),
+		m_ball(*this, "ball"){ }
 
-	UINT8 *m_ball;
-	UINT8 *m_videoram;
-	UINT8 *m_colorram;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_colorram;
+	required_shared_ptr<UINT8> m_ball;
 	tilemap_t *m_bg_tilemap;
+	DECLARE_WRITE8_MEMBER(vroulet_paletteram_w);
+	DECLARE_WRITE8_MEMBER(vroulet_videoram_w);
+	DECLARE_WRITE8_MEMBER(vroulet_colorram_w);
+	DECLARE_WRITE8_MEMBER(ppi8255_a_w);
+	DECLARE_WRITE8_MEMBER(ppi8255_b_w);
+	DECLARE_WRITE8_MEMBER(ppi8255_c_w);
+	TILE_GET_INFO_MEMBER(get_bg_tile_info);
+	virtual void video_start();
+	UINT32 screen_update_vroulet(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
 /* video */
 
 
-static WRITE8_HANDLER(vroulet_paletteram_w)
+WRITE8_MEMBER(vroulet_state::vroulet_paletteram_w)
 {
 	/*
-     paletteram_xxxxBBBBGGGGRRRR_be_w
-     but... each palette has 8 colors only, not 16 as expected...
-    */
+	 paletteram_xxxxBBBBGGGGRRRR_byte_be_w
+	 but... each palette has 8 colors only, not 16 as expected...
+	*/
 
 	int i,j,a,b;
-	space->machine().generic.paletteram.u8[offset]=data;
+	m_generic_paletteram_8[offset]=data;
 	for(i=0;i<32;i++)
 	{
 		for(j=0;j<16;j++)
 		{
-			a=space->machine().generic.paletteram.u8[((i*8+j)*2)&0xff ];
-			b=space->machine().generic.paletteram.u8[((i*8+j)*2+1)&0xff ];
-			palette_set_color_rgb(space->machine(),i*16+j,pal4bit(b),pal4bit(b>>4),pal4bit(a));
+			a=m_generic_paletteram_8[((i*8+j)*2)&0xff ];
+			b=m_generic_paletteram_8[((i*8+j)*2+1)&0xff ];
+			palette_set_color_rgb(machine(),i*16+j,pal4bit(b),pal4bit(b>>4),pal4bit(a));
 		}
 	}
 }
 
-static WRITE8_HANDLER( vroulet_videoram_w )
+WRITE8_MEMBER(vroulet_state::vroulet_videoram_w)
 {
-	vroulet_state *state = space->machine().driver_data<vroulet_state>();
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_videoram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-static WRITE8_HANDLER( vroulet_colorram_w )
+WRITE8_MEMBER(vroulet_state::vroulet_colorram_w)
 {
-	vroulet_state *state = space->machine().driver_data<vroulet_state>();
-	state->m_colorram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_colorram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(vroulet_state::get_bg_tile_info)
 {
-	vroulet_state *state = machine.driver_data<vroulet_state>();
-	int attr = state->m_colorram[tile_index];
-	int code = state->m_videoram[tile_index] + ((attr & 0xc0) << 2);
+	int attr = m_colorram[tile_index];
+	int code = m_videoram[tile_index] + ((attr & 0xc0) << 2);
 	int color = attr & 0x1f;
 
-	SET_TILE_INFO(0, code, color, 0);
+	SET_TILE_INFO_MEMBER(0, code, color, 0);
 }
 
-static VIDEO_START(vroulet)
+void vroulet_state::video_start()
 {
-	vroulet_state *state = machine.driver_data<vroulet_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_rows,
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(vroulet_state::get_bg_tile_info),this), TILEMAP_SCAN_ROWS,
 		8, 8, 32, 32);
 }
 
-static SCREEN_UPDATE(vroulet)
+UINT32 vroulet_state::screen_update_vroulet(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	vroulet_state *state = screen->machine().driver_data<vroulet_state>();
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
-	drawgfx_transpen(bitmap, cliprect, screen->machine().gfx[0], 0x320, 1, 0, 0,
-		state->m_ball[1], state->m_ball[0] - 12, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
+	drawgfx_transpen(bitmap, cliprect, machine().gfx[0], 0x320, 1, 0, 0,
+		m_ball[1], m_ball[0] - 12, 0);
 	return 0;
 }
 
 /* Memory Maps */
 
-static ADDRESS_MAP_START( vroulet_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( vroulet_map, AS_PROGRAM, 8, vroulet_state )
 	AM_RANGE(0x0000, 0x5fff) AM_ROM
 	AM_RANGE(0x6000, 0x67ff) AM_RAM AM_SHARE("nvram")
 	AM_RANGE(0x8000, 0x8000) AM_NOP
-	AM_RANGE(0x9000, 0x93ff) AM_RAM_WRITE(vroulet_videoram_w) AM_BASE_MEMBER(vroulet_state, m_videoram)
-	AM_RANGE(0x9400, 0x97ff) AM_RAM_WRITE(vroulet_colorram_w) AM_BASE_MEMBER(vroulet_state, m_colorram)
-	AM_RANGE(0xa000, 0xa001) AM_RAM AM_BASE_MEMBER(vroulet_state, m_ball)
-	AM_RANGE(0xb000, 0xb0ff) AM_WRITE(vroulet_paletteram_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x9000, 0x93ff) AM_RAM_WRITE(vroulet_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0x9400, 0x97ff) AM_RAM_WRITE(vroulet_colorram_w) AM_SHARE("colorram")
+	AM_RANGE(0xa000, 0xa001) AM_RAM AM_SHARE("ball")
+	AM_RANGE(0xb000, 0xb0ff) AM_WRITE(vroulet_paletteram_w) AM_SHARE("paletteram")
 	AM_RANGE(0xc000, 0xc000) AM_NOP
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( vroulet_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( vroulet_io_map, AS_IO, 8, vroulet_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x00) AM_DEVREAD("aysnd", ay8910_r)
-	AM_RANGE(0x00, 0x01) AM_DEVWRITE("aysnd", ay8910_data_address_w)
-	AM_RANGE(0x10, 0x13) AM_DEVREADWRITE("ppi8255_0", ppi8255_r, ppi8255_w)
-	AM_RANGE(0x80, 0x83) AM_DEVREADWRITE("ppi8255_1", ppi8255_r, ppi8255_w)
+	AM_RANGE(0x00, 0x00) AM_DEVREAD_LEGACY("aysnd", ay8910_r)
+	AM_RANGE(0x00, 0x01) AM_DEVWRITE_LEGACY("aysnd", ay8910_data_address_w)
+	AM_RANGE(0x10, 0x13) AM_DEVREADWRITE("ppi8255_0", i8255_device, read, write)
+	AM_RANGE(0x80, 0x83) AM_DEVREADWRITE("ppi8255_1", i8255_device, read, write)
 ADDRESS_MAP_END
 
 /* Input Ports */
@@ -232,7 +239,7 @@ static const gfx_layout charlayout =
 /* Graphics Decode Information */
 
 static GFXDECODE_START( vroulet )
-	GFXDECODE_ENTRY( "gfx1", 0x0000, charlayout,	0, 32 )
+	GFXDECODE_ENTRY( "gfx1", 0x0000, charlayout,    0, 32 )
 GFXDECODE_END
 
 /* Sound Interface */
@@ -249,58 +256,57 @@ static const ay8910_interface ay8910_config =
 
 /* PPI8255 Interface */
 
-static WRITE8_DEVICE_HANDLER( ppi8255_a_w ){}// watchdog ?
-static WRITE8_DEVICE_HANDLER( ppi8255_b_w ){}// lamps ?
-static WRITE8_DEVICE_HANDLER( ppi8255_c_w ){}
+WRITE8_MEMBER(vroulet_state::ppi8255_a_w){}// watchdog ?
+WRITE8_MEMBER(vroulet_state::ppi8255_b_w){}// lamps ?
+WRITE8_MEMBER(vroulet_state::ppi8255_c_w){}
 
-static const ppi8255_interface ppi8255_intf[2] =
+static I8255A_INTERFACE( ppi8255_0_intf )
 {
-	{
-		DEVCB_INPUT_PORT("IN0"),    // Port A read
-		DEVCB_INPUT_PORT("IN1"),	// Port B read
-		DEVCB_INPUT_PORT("IN2"),	// Port C read
-		DEVCB_NULL,					// Port A write
-		DEVCB_NULL,					// Port B write
-		DEVCB_NULL					// Port C write
-	},
-	{
-		DEVCB_NULL,					// Port A read
-		DEVCB_NULL,					// Port B read
-		DEVCB_NULL,					// Port C read
-		DEVCB_HANDLER(ppi8255_a_w),	// Port A write
-		DEVCB_HANDLER(ppi8255_b_w),	// Port B write
-		DEVCB_HANDLER(ppi8255_c_w)	// Port C write
-	}
+	DEVCB_INPUT_PORT("IN0"),            /* Port A read */
+	DEVCB_NULL,                         /* Port A write */
+	DEVCB_INPUT_PORT("IN1"),            /* Port B read */
+	DEVCB_NULL,                         /* Port B write */
+	DEVCB_INPUT_PORT("IN2"),            /* Port C read */
+	DEVCB_NULL                          /* Port C write */
 };
+
+static I8255A_INTERFACE( ppi8255_1_intf )
+{
+	DEVCB_NULL,                         /* Port A read */
+	DEVCB_DRIVER_MEMBER(vroulet_state,ppi8255_a_w),         /* Port A write */
+	DEVCB_NULL,                         /* Port B read */
+	DEVCB_DRIVER_MEMBER(vroulet_state,ppi8255_b_w),         /* Port B write */
+	DEVCB_NULL,                         /* Port C read */
+	DEVCB_DRIVER_MEMBER(vroulet_state,ppi8255_c_w)          /* Port C write */
+};
+
 
 /* Machine Driver */
 
 static MACHINE_CONFIG_START( vroulet, vroulet_state )
 	// basic machine hardware
-	MCFG_CPU_ADD("maincpu", Z80, 4000000)	//???
+	MCFG_CPU_ADD("maincpu", Z80, 4000000)   //???
 	MCFG_CPU_PROGRAM_MAP(vroulet_map)
 	MCFG_CPU_IO_MAP(vroulet_io_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", vroulet_state,  irq0_line_hold)
 
 	MCFG_NVRAM_ADD_1FILL("nvram")
 
-	MCFG_PPI8255_ADD( "ppi8255_0", ppi8255_intf[0] )
-	MCFG_PPI8255_ADD( "ppi8255_1", ppi8255_intf[1] )
+	MCFG_I8255A_ADD( "ppi8255_0", ppi8255_0_intf )
+	MCFG_I8255A_ADD( "ppi8255_1", ppi8255_1_intf )
 
 	// video hardware
 
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(vroulet)
+	MCFG_SCREEN_UPDATE_DRIVER(vroulet_state, screen_update_vroulet)
 
 	MCFG_GFXDECODE(vroulet)
 	MCFG_PALETTE_LENGTH(128*4)
 
-	MCFG_VIDEO_START(vroulet)
 
 	// sound hardware
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -325,4 +331,4 @@ ROM_END
 
 /* Game Driver */
 
-GAME( 1989, vroulet, 0, vroulet, vroulet, 0, ROT90, "World Game", "Vegas Roulette", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_COLORS )
+GAME( 1989, vroulet, 0, vroulet, vroulet, driver_device, 0, ROT90, "World Game", "Vegas Roulette", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_COLORS )

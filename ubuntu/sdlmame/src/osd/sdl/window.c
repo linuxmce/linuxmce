@@ -10,9 +10,13 @@
 //============================================================
 
 // standard SDL headers
-#include <SDL/SDL.h>
-#include <SDL/SDL_syswm.h>
+#include "sdlinc.h"
+
+#if (SDLMAME_SDL2)
+#include <SDL2/SDL_thread.h>
+#else
 #include <SDL/SDL_thread.h>
+#endif
 
 // standard C headers
 #include <math.h>
@@ -36,35 +40,35 @@
 //============================================================
 
 // these are arbitrary values since AFAIK there's no way to make X/SDL tell you
-#define WINDOW_DECORATION_WIDTH	(8)	// should be more than plenty
-#define WINDOW_DECORATION_HEIGHT (48)	// title bar + bottom drag region
+#define WINDOW_DECORATION_WIDTH (8) // should be more than plenty
+#define WINDOW_DECORATION_HEIGHT (48)   // title bar + bottom drag region
 
 #ifdef MAME_DEBUG
 //#define ASSERT_USE(x) do { printf("%x %x\n", (int) SDL_ThreadID(), x); assert_always(SDL_ThreadID() == x, "Wrong Thread"); } while (0)
-#define ASSERT_USE(x)	do { SDL_threadID _thid = SDL_ThreadID(); assert_always( _thid == x, "Wrong Thread"); } while (0)
+#define ASSERT_USE(x)   do { SDL_threadID _thid = SDL_ThreadID(); assert_always( _thid == x, "Wrong Thread"); } while (0)
 #else
-#define ASSERT_USE(x)	do {} while (0)
+#define ASSERT_USE(x)   do {} while (0)
 //#define ASSERT_USE(x) assert(SDL_ThreadID() == x)
 #endif
 
-#define ASSERT_REDRAW_THREAD()	ASSERT_USE(window_threadid)
-#define ASSERT_WINDOW_THREAD()	ASSERT_USE(window_threadid)
-#define ASSERT_MAIN_THREAD()	ASSERT_USE(main_threadid)
+#define ASSERT_REDRAW_THREAD()  ASSERT_USE(window_threadid)
+#define ASSERT_WINDOW_THREAD()  ASSERT_USE(window_threadid)
+#define ASSERT_MAIN_THREAD()    ASSERT_USE(main_threadid)
 
-#define OSDWORK_CALLBACK(name)	void *name(void *param, ATTR_UNUSED int threadid)
+#define OSDWORK_CALLBACK(name)  void *name(void *param, ATTR_UNUSED int threadid)
 
 // minimum window dimension
-#define MIN_WINDOW_DIM					200
+#define MIN_WINDOW_DIM                  200
 
 #ifndef SDLMAME_WIN32
-#define WMSZ_TOP		(0)
-#define WMSZ_BOTTOM		(1)
-#define WMSZ_BOTTOMLEFT		(2)
-#define WMSZ_BOTTOMRIGHT	(3)
-#define WMSZ_LEFT		(4)
-#define WMSZ_TOPLEFT		(5)
-#define WMSZ_TOPRIGHT		(6)
-#define WMSZ_RIGHT		(7)
+#define WMSZ_TOP        (0)
+#define WMSZ_BOTTOM     (1)
+#define WMSZ_BOTTOMLEFT     (2)
+#define WMSZ_BOTTOMRIGHT    (3)
+#define WMSZ_LEFT       (4)
+#define WMSZ_TOPLEFT        (5)
+#define WMSZ_TOPRIGHT       (6)
+#define WMSZ_RIGHT      (7)
 #endif
 
 //============================================================
@@ -84,7 +88,7 @@ static sdl_window_info **last_window_ptr;
 static int multithreading_enabled;
 static osd_work_queue *work_queue;
 
-#if !(SDL_VERSION_ATLEAST(1,3,0))
+#if !(SDLMAME_SDL2)
 typedef int SDL_threadID;
 #endif
 
@@ -96,8 +100,7 @@ static SDL_threadID window_threadid;
 
 static sdl_draw_info draw;
 
-typedef struct _worker_param worker_param;
-struct _worker_param {
+struct worker_param {
 	running_machine &machine() const { assert(m_machine != NULL); return *m_machine; }
 	sdl_window_info *window;
 	render_primitive_list *list;
@@ -184,7 +187,7 @@ static OSDWORK_CALLBACK(sdlwindow_thread_id)
 
 	if (SDLMAME_INIT_IN_WORKER_THREAD)
 	{
-#if (SDL_VERSION_ATLEAST(1,3,0))
+#if (SDLMAME_SDL2)
 		if (SDL_InitSubSystem(SDL_INIT_TIMER|SDL_INIT_AUDIO| SDL_INIT_VIDEO| SDL_INIT_JOYSTICK|SDL_INIT_NOPARACHUTE))
 #else
 		if (SDL_Init(SDL_INIT_TIMER|SDL_INIT_AUDIO| SDL_INIT_VIDEO| SDL_INIT_JOYSTICK|SDL_INIT_NOPARACHUTE))
@@ -213,7 +216,7 @@ int sdlwindow_init(running_machine &machine)
 	main_threadid = SDL_ThreadID();
 
 	// ensure we get called on the way out
-	machine.add_notifier(MACHINE_NOTIFY_EXIT, sdlwindow_exit);
+	machine.add_notifier(MACHINE_NOTIFY_EXIT, machine_notify_delegate(FUNC(sdlwindow_exit), &machine));
 
 	// if multithreading, create a thread to run the windows
 	if (multithreading_enabled)
@@ -239,7 +242,7 @@ int sdlwindow_init(running_machine &machine)
 			video_config.mode = VIDEO_MODE_SOFT;
 	}
 #endif
-#if	SDL_VERSION_ATLEAST(1,3,0)
+#if SDLMAME_SDL2
 	if (video_config.mode == VIDEO_MODE_SDL13)
 	{
 		if (draw13_init(machine, &draw))
@@ -359,8 +362,8 @@ void sdlwindow_blit_surface_size(sdl_window_info *window, int window_width, int 
 		desired_aspect = (float)target_width / (float)target_height;
 	}
 
-    // non-integer scaling - often gives more pleasing results in full screen
-    if (!video_config.fullstretch)
+	// non-integer scaling - often gives more pleasing results in full screen
+	if (!video_config.fullstretch)
 	{
 		// compute maximum integral scaling to fit the window
 		xscale = (target_width + 2) / newwidth;
@@ -406,9 +409,9 @@ void sdlwindow_blit_surface_size(sdl_window_info *window, int window_width, int 
 		newheight = target_height;
 	}
 
-    //FIXME: really necessary to distinguish for yuv_modes ?
+	//FIXME: really necessary to distinguish for yuv_modes ?
 	if (window->target->zoom_to_screen()
-		&& (window->scale_mode == VIDEO_SCALE_MODE_NONE ))
+		&& (video_config.scale_mode == VIDEO_SCALE_MODE_NONE ))
 		newwidth = window_width;
 
 	if ((window->blitwidth != newwidth) || (window->blitheight != newheight))
@@ -426,8 +429,8 @@ void sdlwindow_blit_surface_size(sdl_window_info *window, int window_width, int 
 
 static OSDWORK_CALLBACK( sdlwindow_resize_wt )
 {
-	worker_param *		wp = (worker_param *) param;
-	sdl_window_info *	window = wp->window;
+	worker_param *      wp = (worker_param *) param;
+	sdl_window_info *   window = wp->window;
 
 	ASSERT_WINDOW_THREAD();
 
@@ -595,7 +598,17 @@ void sdlwindow_modify_prescale(running_machine &machine, sdl_window_info *window
 
 static void sdlwindow_update_cursor_state(running_machine &machine, sdl_window_info *window)
 {
-#if (SDL_VERSION_ATLEAST(1,3,0))
+#if (USE_XINPUT)
+	// Hack for wii-lightguns:
+	// they stop working with a grabbed mouse;
+	// even a ShowCursor(SDL_DISABLE) already does this.
+	// To make the cursor disappear, we'll just set an empty cursor image.
+	unsigned char data[]={0,0,0,0,0,0,0,0};
+	SDL_Cursor *c;
+	c=SDL_CreateCursor(data, data, 8, 8, 0, 0);
+	SDL_SetCursor(c);
+#else
+#if (SDLMAME_SDL2)
 	// do not do mouse capture if the debugger's enabled to avoid
 	// the possibility of losing control
 	if (!(machine.debug_flags & DEBUG_FLAG_OSD_ENABLED))
@@ -641,6 +654,7 @@ static void sdlwindow_update_cursor_state(running_machine &machine, sdl_window_i
 		}
 	}
 #endif
+#endif
 }
 
 
@@ -672,7 +686,6 @@ int sdlwindow_video_window_create(running_machine &machine, int index, sdl_monit
 	//FIXME: these should be per_window in config-> or even better a bit set
 	window->fullscreen = !video_config.windowed;
 	window->prescale = video_config.prescale;
-	window->scale_mode = video_config.scale_mode;
 
 	// set the initial maximized state
 	// FIXME: Does not belong here
@@ -703,9 +716,9 @@ int sdlwindow_video_window_create(running_machine &machine, int index, sdl_monit
 
 	// make the window title
 	if (video_config.numscreens == 1)
-		sprintf(window->title, APPNAME ": %s [%s]", machine.system().description, machine.system().name);
+		sprintf(window->title, "%s: %s [%s]", emulator_info::get_appname(), machine.system().description, machine.system().name);
 	else
-		sprintf(window->title, APPNAME ": %s [%s] - Screen %d", machine.system().description, machine.system().name, index);
+		sprintf(window->title, "%s: %s [%s] - Screen %d", emulator_info::get_appname(), machine.system().description, machine.system().name, index);
 
 	wp->window = window;
 
@@ -740,8 +753,8 @@ error:
 
 static OSDWORK_CALLBACK( sdlwindow_video_window_destroy_wt )
 {
-	worker_param *		wp = (worker_param *) param;
-	sdl_window_info *	window = wp->window;
+	worker_param *      wp = (worker_param *) param;
+	sdl_window_info *   window = wp->window;
 
 	ASSERT_WINDOW_THREAD();
 
@@ -798,7 +811,7 @@ static void sdlwindow_video_window_destroy(running_machine &machine, sdl_window_
 //  pick_best_mode
 //============================================================
 
-#if SDL_VERSION_ATLEAST(1,3,0)
+#if SDLMAME_SDL2
 static void pick_best_mode(sdl_window_info *window, int *fswidth, int *fsheight)
 {
 	int minimum_width, minimum_height, target_width, target_height;
@@ -888,10 +901,10 @@ static void pick_best_mode(sdl_window_info *window, int *fswidth, int *fsheight)
 
 #if 1 // defined(SDLMAME_WIN32)
 	/*
-     *  We need to do this here. If SDL_ListModes is
-     * called in init_monitors, the call will crash
-     * on win32
-     */
+	 *  We need to do this here. If SDL_ListModes is
+	 * called in init_monitors, the call will crash
+	 * on win32
+	 */
 	modes = SDL_ListModes(NULL, SDL_FULLSCREEN | SDL_DOUBLEBUF);
 #else
 	modes = window->monitor->modes;
@@ -902,7 +915,7 @@ static void pick_best_mode(sdl_window_info *window, int *fswidth, int *fsheight)
 		mame_printf_error("SDL: No modes available?!\n");
 		exit(-1);
 	}
-	else if (modes == (SDL_Rect **)-1)	// all modes are possible
+	else if (modes == (SDL_Rect **)-1)  // all modes are possible
 	{
 		*fswidth = window->maxwidth;
 		*fsheight = window->maxheight;
@@ -949,7 +962,7 @@ static void pick_best_mode(sdl_window_info *window, int *fswidth, int *fsheight)
 void sdlwindow_video_window_update(running_machine &machine, sdl_window_info *window)
 {
 
-	osd_ticks_t		event_wait_ticks;
+	osd_ticks_t     event_wait_ticks;
 	ASSERT_MAIN_THREAD();
 
 	// adjust the cursor state
@@ -1036,8 +1049,8 @@ static void set_starting_view(running_machine &machine, int index, sdl_window_in
 
 static OSDWORK_CALLBACK( complete_create_wt )
 {
-	worker_param *		wp = (worker_param *) param;
-	sdl_window_info *	window = wp->window;
+	worker_param *      wp = (worker_param *) param;
+	sdl_window_info *   window = wp->window;
 
 	int tempwidth, tempheight;
 	static int result[2] = {0,1};
@@ -1071,9 +1084,9 @@ static OSDWORK_CALLBACK( complete_create_wt )
 		else
 		{
 			/* Create the window directly with the correct aspect
-               instead of letting sdlwindow_blit_surface_size() resize it
-               this stops the window from "flashing" from the wrong aspect
-               size to the right one at startup. */
+			   instead of letting sdlwindow_blit_surface_size() resize it
+			   this stops the window from "flashing" from the wrong aspect
+			   size to the right one at startup. */
 			tempwidth = (window->maxwidth != 0) ? window->maxwidth : 640;
 			tempheight = (window->maxheight != 0) ? window->maxheight : 480;
 
@@ -1125,16 +1138,16 @@ static void measure_fps(sdl_window_info *window, UINT32 dc, int update)
 	{
 		dt = (double) (currentTime-startTime) / tps; // in decimale sec.
 		mame_printf_info("%6.2lfs, %4lu F, "
-	          "avrg game: %5.2lf FPS %.2lf ms/f, "
-	          "avrg video: %5.2lf FPS %.2lf ms/f, "
-	          "last video: %5.2lf FPS %.2lf ms/f\n",
-		  dt, frames-frames_skip4fps,
-		  (double)(frames-frames_skip4fps)/dt,                             // avrg game fps
-		  ( (currentTime-startTime) / ((frames-frames_skip4fps)) ) * 1000.0 / osd_ticks_per_second(),
-		  (double)(frames-frames_skip4fps)/((double)(sumdt) / tps), // avrg vid fps
-		  ( sumdt / ((frames-frames_skip4fps)) ) * 1000.0 / tps,
-		  1.0/((currentTime-t0) / osd_ticks_per_second()), // this vid fps
-		  (currentTime-t0) * 1000.0 / tps
+				"avrg game: %5.2lf FPS %.2lf ms/f, "
+				"avrg video: %5.2lf FPS %.2lf ms/f, "
+				"last video: %5.2lf FPS %.2lf ms/f\n",
+			dt, frames-frames_skip4fps,
+			(double)(frames-frames_skip4fps)/dt,                             // avrg game fps
+			( (currentTime-startTime) / ((frames-frames_skip4fps)) ) * 1000.0 / osd_ticks_per_second(),
+			(double)(frames-frames_skip4fps)/((double)(sumdt) / tps), // avrg vid fps
+			( sumdt / ((frames-frames_skip4fps)) ) * 1000.0 / tps,
+			1.0/((currentTime-t0) / osd_ticks_per_second()), // this vid fps
+			(currentTime-t0) * 1000.0 / tps
 		);
 		lastTime = currentTime;
 	}
@@ -1142,8 +1155,8 @@ static void measure_fps(sdl_window_info *window, UINT32 dc, int update)
 
 static OSDWORK_CALLBACK( draw_video_contents_wt )
 {
-	UINT32	dc =		0;
-	int 	update =	1;
+	UINT32  dc =        0;
+	int     update =    1;
 	worker_param *wp = (worker_param *) param;
 	sdl_window_info *window = wp->window;
 
@@ -1348,4 +1361,3 @@ static void get_max_bounds(sdl_window_info *window, int *window_width, int *wind
 		*window_height = maxheight;
 	}
 }
-

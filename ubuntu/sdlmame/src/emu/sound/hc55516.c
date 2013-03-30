@@ -11,36 +11,35 @@
 
 
 /* 4x oversampling */
-#define SAMPLE_RATE 			(48000 * 4)
+#define SAMPLE_RATE             (48000 * 4)
 
-#define	INTEGRATOR_LEAK_TC		0.001
-#define	FILTER_DECAY_TC			0.004
-#define	FILTER_CHARGE_TC		0.004
-#define	FILTER_MIN				0.0416
-#define	FILTER_MAX				1.0954
-#define	SAMPLE_GAIN				10000.0
+#define INTEGRATOR_LEAK_TC      0.001
+#define FILTER_DECAY_TC         0.004
+#define FILTER_CHARGE_TC        0.004
+#define FILTER_MIN              0.0416
+#define FILTER_MAX              1.0954
+#define SAMPLE_GAIN             10000.0
 
 
-typedef struct _hc55516_state hc55516_state;
-struct _hc55516_state
+struct hc55516_state
 {
 	sound_stream *channel;
-	int		clock;		/* 0 = software driven, non-0 = oscillator */
-	int		active_clock_hi;
+	int     clock;      /* 0 = software driven, non-0 = oscillator */
+	int     active_clock_hi;
 	UINT8   shiftreg_mask;
 
-	UINT8	last_clock_state;
-	UINT8	digit;
-	UINT8	new_digit;
-	UINT8	shiftreg;
+	UINT8   last_clock_state;
+	UINT8   digit;
+	UINT8   new_digit;
+	UINT8   shiftreg;
 
-	INT16	curr_sample;
-	INT16	next_sample;
+	INT16   curr_sample;
+	INT16   next_sample;
 
-	UINT32	update_count;
+	UINT32  update_count;
 
-	double	filter;
-	double	integrator;
+	double  filter;
+	double  integrator;
 };
 
 
@@ -55,9 +54,9 @@ INLINE hc55516_state *get_safe_token(device_t *device)
 {
 	assert(device != NULL);
 	assert(device->type() == HC55516 ||
-		   device->type() == MC3417 ||
-		   device->type() == MC3418);
-	return (hc55516_state *)downcast<legacy_device_base *>(device)->token();
+			device->type() == MC3417 ||
+			device->type() == MC3418);
+	return (hc55516_state *)downcast<hc55516_device *>(device)->token();
 }
 
 
@@ -294,56 +293,109 @@ int hc55516_clock_state_r(device_t *device)
 }
 
 
+const device_type HC55516 = &device_creator<hc55516_device>;
 
-/**************************************************************************
- * Generic get_info
- **************************************************************************/
-
-DEVICE_GET_INFO( hc55516 )
+hc55516_device::hc55516_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, HC55516, "HC-55516", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
 {
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(hc55516_state);			break;
+	m_token = global_alloc_clear(hc55516_state);
+}
+hc55516_device::hc55516_device(const machine_config &mconfig, device_type type, const char *name, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, type, name, tag, owner, clock),
+		device_sound_interface(mconfig, *this)
+{
+	m_token = global_alloc_clear(hc55516_state);
+}
 
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME( hc55516 );	break;
-		case DEVINFO_FCT_RESET:							info->reset = DEVICE_RESET_NAME( hc55516 );	break;
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
 
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "HC-55516");				break;
-		case DEVINFO_STR_FAMILY:					strcpy(info->s, "CVSD");					break;
-		case DEVINFO_STR_VERSION:					strcpy(info->s, "2.1");						break;
-		case DEVINFO_STR_SOURCE_FILE:						strcpy(info->s, __FILE__);					break;
-		case DEVINFO_STR_CREDITS:					strcpy(info->s, "Copyright Nicola Salmoria and the MAME Team"); break;
-	}
+void hc55516_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void hc55516_device::device_start()
+{
+	DEVICE_START_NAME( hc55516 )(this);
+}
+
+//-------------------------------------------------
+//  device_reset - device-specific reset
+//-------------------------------------------------
+
+void hc55516_device::device_reset()
+{
+	DEVICE_RESET_NAME( hc55516 )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void hc55516_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
 }
 
 
-DEVICE_GET_INFO( mc3417 )
+const device_type MC3417 = &device_creator<mc3417_device>;
+
+mc3417_device::mc3417_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: hc55516_device(mconfig, MC3417, "MC3417", tag, owner, clock)
 {
-	switch (state)
-	{
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME( mc3417 );		break;
-		case DEVINFO_FCT_RESET:							/* chip has no reset pin */					break;
-		case DEVINFO_STR_NAME:							strcpy(info->s, "MC3417");					break;
-		default:										DEVICE_GET_INFO_CALL(hc55516);					break;
-	}
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void mc3417_device::device_start()
+{
+	DEVICE_START_NAME( mc3417 )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void mc3417_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
 }
 
 
-DEVICE_GET_INFO( mc3418 )
+const device_type MC3418 = &device_creator<mc3418_device>;
+
+mc3418_device::mc3418_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: hc55516_device(mconfig, MC3418, "MC3418", tag, owner, clock)
 {
-	switch (state)
-	{
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME( mc3418 );		break;
-		case DEVINFO_FCT_RESET:							/* chip has no reset pin */					break;
-		case DEVINFO_STR_NAME:							strcpy(info->s, "MC3418");					break;
-		default:										DEVICE_GET_INFO_CALL(hc55516);					break;
-	}
 }
 
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
 
-DEFINE_LEGACY_SOUND_DEVICE(HC55516, hc55516);
-DEFINE_LEGACY_SOUND_DEVICE(MC3417, mc3417);
-DEFINE_LEGACY_SOUND_DEVICE(MC3418, mc3418);
+void mc3418_device::device_start()
+{
+	DEVICE_START_NAME( mc3418 )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void mc3418_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}

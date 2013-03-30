@@ -87,54 +87,55 @@ Stephh's notes :
 #include "sound/okim6295.h"
 #include "includes/fitfight.h"
 
-
-static READ16_HANDLER(fitfight_700000_r)
+READ16_MEMBER( fitfight_state::hotmindff_unk_r )
 {
-	fitfight_state *state = space->machine().driver_data<fitfight_state>();
-	UINT16 data = state->m_fof_700000_data;
+	// won't boot unless things in here change, this is p1/p2 inputs in fitfight
+	return space.machine().rand();
+}
+
+READ16_MEMBER(fitfight_state::fitfight_700000_r)
+{
+	UINT16 data = m_fof_700000_data;
 	return (data << 2);
 }
 
-static READ16_HANDLER(histryma_700000_r)
+READ16_MEMBER(fitfight_state::histryma_700000_r)
 {
-	fitfight_state *state = space->machine().driver_data<fitfight_state>();
-	UINT16 data = (state->m_fof_700000_data & 0x00AA);
-	data |= ((state->m_fof_700000_data & 0x0055) >> 2);
+	UINT16 data = (m_fof_700000_data & 0x00AA);
+	data |= ((m_fof_700000_data & 0x0055) >> 2);
 	return (data);
 }
 
-static READ16_HANDLER(bbprot_700000_r)
+READ16_MEMBER(fitfight_state::bbprot_700000_r)
 {
-	fitfight_state *state = space->machine().driver_data<fitfight_state>();
 	UINT16 data = 0;
-	data  =  (state->m_fof_700000_data & 0x000b);
-	data |= ((state->m_fof_700000_data & 0x01d0) >> 2);
-	data |= ((state->m_fof_700000_data & 0x0004) << 6);
-	data |= ((state->m_fof_700000_data & 0x0020) << 2);
+	data  =  (m_fof_700000_data & 0x000b);
+	data |= ((m_fof_700000_data & 0x01d0) >> 2);
+	data |= ((m_fof_700000_data & 0x0004) << 6);
+	data |= ((m_fof_700000_data & 0x0020) << 2);
 	return (data);
 }
 
-static WRITE16_HANDLER(fitfight_700000_w)
+WRITE16_MEMBER(fitfight_state::fitfight_700000_w)
 {
-	fitfight_state *state = space->machine().driver_data<fitfight_state>();
-	COMBINE_DATA(&state->m_fof_700000[offset]);		// needed for scrolling
+	COMBINE_DATA(&m_fof_700000[offset]);        // needed for scrolling
 
-	if (data < 0x0200)				// to avoid considering writes of 0x0200
-		state->m_fof_700000_data = data;
+	if (data < 0x0200)              // to avoid considering writes of 0x0200
+		m_fof_700000_data = data;
 }
 
-static ADDRESS_MAP_START( fitfight_main_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( fitfight_main_map, AS_PROGRAM, 16, fitfight_state )
 	AM_RANGE(0x000000, 0x0fffff) AM_ROM
 
-	AM_RANGE(0x100000, 0x100001) AM_WRITEONLY AM_BASE_MEMBER(fitfight_state, m_fof_100000)
+	AM_RANGE(0x100000, 0x100001) AM_WRITEONLY AM_SHARE("fof_100000")
 	//written at scanline 5, allways 1. Used by histryma/fitfight @0x0000ec2c/@0x0000f076
 
 	AM_RANGE(0x200000, 0x200001) AM_READ_PORT("P1_P2")
-	AM_RANGE(0x300000, 0x300001) AM_READ_PORT("EXTRA")	// for 'histryma' only
+	AM_RANGE(0x300000, 0x300001) AM_READ_PORT("EXTRA")  // for 'histryma' only
 	AM_RANGE(0x400000, 0x400001) AM_READ_PORT("SYSTEM_DSW2")
 	AM_RANGE(0x500000, 0x500001) AM_READ_PORT("DSW3_DSW1")
 
-	AM_RANGE(0x600000, 0x600001) AM_WRITEONLY AM_BASE_MEMBER(fitfight_state, m_fof_600000)
+	AM_RANGE(0x600000, 0x600001) AM_WRITEONLY AM_SHARE("fof_600000")
 	//  Is 0x600000 controlling the slave audio CPU? data is 0x1111000zzzzzzzzz (9 sign. bits)
 	//  Used by histryma/fitfight:
 	//      @0x000031ae/0x00002b3a: 0xF000, once, during POST
@@ -144,64 +145,65 @@ static ADDRESS_MAP_START( fitfight_main_map, AS_PROGRAM, 16 )
 	//      @0x000036bc/?: 0xF0FD when inserting coin
 	//      @0x000037a6/0x000030e6: 0x??dd byte from 0xe08c05, 0xF101 then 0xF001/0xF157 then 0xF057
 
-//  AM_RANGE(0x700000, 0x700001) AM_READ(xxxx) /* see init */
-	AM_RANGE(0x700000, 0x700001) AM_WRITE(fitfight_700000_w) AM_BASE_MEMBER(fitfight_state, m_fof_700000)
+//  AM_RANGE(0x700000, 0x700001) AM_READ_LEGACY(xxxx) /* see init */
+	AM_RANGE(0x700000, 0x700001) AM_WRITE(fitfight_700000_w) AM_SHARE("fof_700000")
 	//  kept at 0xe07900/0xe04c56
 
-	AM_RANGE(0x800000, 0x800001) AM_WRITEONLY AM_BASE_MEMBER(fitfight_state, m_fof_800000)
+	AM_RANGE(0x800000, 0x800001) AM_RAM AM_SHARE("fof_800000")
 	//written at scanline 1, allways 0. Used by histryma/fitfight @0x00001d76/@0x00000f6a
 
-	AM_RANGE(0x900000, 0x900001) AM_WRITEONLY AM_BASE_MEMBER(fitfight_state, m_fof_900000) //mid tilemap scroll
+	AM_RANGE(0x900000, 0x900001) AM_RAM AM_SHARE("fof_900000") //mid tilemap scroll
 	//  fitfigth: @0x00002b42,@0x00000f76
 	//  histryma: @0x000031b6,@0x00001d82
 
-	AM_RANGE(0xa00000, 0xa00001) AM_WRITEONLY AM_BASE_MEMBER(fitfight_state, m_fof_a00000) //bak tilemap scroll
+	AM_RANGE(0xa00000, 0xa00001) AM_RAM AM_SHARE("fof_a00000") //bak tilemap scroll
 	//  fitfight: @0x00002b4a,@0x00000f82
 	//  histryma: @0x000031be,@0x00001d8e
 
-	AM_RANGE(0xb00000, 0xb03fff) AM_WRITENOP /* unused layer? */
-	AM_RANGE(0xb04000, 0xb07fff) AM_RAM_WRITE(fof_bak_tileram_w) AM_BASE_MEMBER(fitfight_state, m_fof_bak_tileram)
-	AM_RANGE(0xb08000, 0xb0bfff) AM_RAM_WRITE(fof_mid_tileram_w) AM_BASE_MEMBER(fitfight_state, m_fof_mid_tileram)
-	AM_RANGE(0xb0c000, 0xb0ffff) AM_RAM_WRITE(fof_txt_tileram_w) AM_BASE_MEMBER(fitfight_state, m_fof_txt_tileram)
+	AM_RANGE(0xb00000, 0xb03fff) AM_RAM /* unused layer? */
+	AM_RANGE(0xb04000, 0xb07fff) AM_RAM_WRITE(fof_bak_tileram_w) AM_SHARE("fof_bak_tileram")
+	AM_RANGE(0xb08000, 0xb0bfff) AM_RAM_WRITE(fof_mid_tileram_w) AM_SHARE("fof_mid_tileram")
+	AM_RANGE(0xb0c000, 0xb0ffff) AM_RAM_WRITE(fof_txt_tileram_w) AM_SHARE("fof_txt_tileram")
 
-	AM_RANGE(0xb10000, 0xb13fff) AM_WRITENOP //used by histryma @0x0000b25a
-	AM_RANGE(0xb14000, 0xb17fff) AM_WRITENOP //used by histryma @0x0000b25a,b270
-	AM_RANGE(0xb18000, 0xb1bfff) AM_WRITENOP //used by histryma @0x0000b25a,b270,b286
+	AM_RANGE(0xb10000, 0xb13fff) AM_RAM //used by histryma @0x0000b25a
+	AM_RANGE(0xb14000, 0xb17fff) AM_RAM //used by histryma @0x0000b25a,b270
+	AM_RANGE(0xb18000, 0xb1bfff) AM_RAM //used by histryma @0x0000b25a,b270,b286
 
-	AM_RANGE(0xc00000, 0xc00fff) AM_RAM_WRITE(paletteram16_xRRRRRGGGGGBBBBB_word_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0xc00000, 0xc00fff) AM_RAM_WRITE(paletteram_xRRRRRGGGGGBBBBB_word_w) AM_SHARE("paletteram")
 
-	AM_RANGE(0xd00000, 0xd007ff) AM_RAM AM_BASE_MEMBER(fitfight_state, m_spriteram)
+	AM_RANGE(0xd00000, 0xd007ff) AM_RAM AM_SHARE("spriteram")
 
 	AM_RANGE(0xe00000, 0xe0ffff) AM_RAM
+	AM_RANGE(0xff0000, 0xffffff) AM_RAM // hot mind uses RAM here (mirror?)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( bbprot_main_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( bbprot_main_map, AS_PROGRAM, 16, fitfight_state )
 	AM_RANGE(0x000000, 0x0fffff) AM_ROM
 
-	AM_RANGE(0x100000, 0x100001) AM_WRITEONLY AM_BASE_MEMBER(fitfight_state, m_fof_100000)
+	AM_RANGE(0x100000, 0x100001) AM_WRITEONLY AM_SHARE("fof_100000")
 
 	AM_RANGE(0x300000, 0x300001) AM_READ_PORT("P1_P2")
 	AM_RANGE(0x380000, 0x380001) AM_READ_PORT("EXTRA")
 	AM_RANGE(0x400000, 0x400001) AM_READ_PORT("SYSTEM_DSW2")
 	AM_RANGE(0x480000, 0x480001) AM_READ_PORT("DSW3_DSW1")
 
-	AM_RANGE(0x600000, 0x600001) AM_WRITEONLY AM_BASE_MEMBER(fitfight_state, m_fof_600000)
+	AM_RANGE(0x600000, 0x600001) AM_WRITEONLY AM_SHARE("fof_600000")
 
-	AM_RANGE(0x700000, 0x700001) AM_READWRITE(bbprot_700000_r, fitfight_700000_w) AM_BASE_MEMBER(fitfight_state, m_fof_700000)
+	AM_RANGE(0x700000, 0x700001) AM_READWRITE(bbprot_700000_r, fitfight_700000_w) AM_SHARE("fof_700000")
 
-	AM_RANGE(0x800000, 0x800001) AM_WRITEONLY AM_BASE_MEMBER(fitfight_state, m_fof_800000)
-	AM_RANGE(0x900000, 0x900001) AM_WRITEONLY AM_BASE_MEMBER(fitfight_state, m_fof_900000)
-	AM_RANGE(0xa00000, 0xa00001) AM_WRITEONLY AM_BASE_MEMBER(fitfight_state, m_fof_a00000)
+	AM_RANGE(0x800000, 0x800001) AM_WRITEONLY AM_SHARE("fof_800000")
+	AM_RANGE(0x900000, 0x900001) AM_WRITEONLY AM_SHARE("fof_900000")
+	AM_RANGE(0xa00000, 0xa00001) AM_WRITEONLY AM_SHARE("fof_a00000")
 
 	AM_RANGE(0xb00000, 0xb03fff) AM_WRITENOP /* unused layer? */
-	AM_RANGE(0xb04000, 0xb07fff) AM_RAM_WRITE(fof_bak_tileram_w) AM_BASE_MEMBER(fitfight_state, m_fof_bak_tileram)
-	AM_RANGE(0xb08000, 0xb0bfff) AM_RAM_WRITE(fof_mid_tileram_w) AM_BASE_MEMBER(fitfight_state, m_fof_mid_tileram)
-	AM_RANGE(0xb0c000, 0xb0ffff) AM_RAM_WRITE(fof_txt_tileram_w) AM_BASE_MEMBER(fitfight_state, m_fof_txt_tileram)
+	AM_RANGE(0xb04000, 0xb07fff) AM_RAM_WRITE(fof_bak_tileram_w) AM_SHARE("fof_bak_tileram")
+	AM_RANGE(0xb08000, 0xb0bfff) AM_RAM_WRITE(fof_mid_tileram_w) AM_SHARE("fof_mid_tileram")
+	AM_RANGE(0xb0c000, 0xb0ffff) AM_RAM_WRITE(fof_txt_tileram_w) AM_SHARE("fof_txt_tileram")
 
 	AM_RANGE(0xc00000, 0xc00fff) AM_READONLY
-	AM_RANGE(0xc00000, 0xc03fff) AM_WRITE(paletteram16_xRRRRRGGGGGBBBBB_word_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0xc00000, 0xc03fff) AM_WRITE(paletteram_xRRRRRGGGGGBBBBB_word_w) AM_SHARE("paletteram")
 
-	AM_RANGE(0xd00000, 0xd007ff) AM_RAM AM_BASE_MEMBER(fitfight_state, m_spriteram)
+	AM_RANGE(0xd00000, 0xd007ff) AM_RAM AM_SHARE("spriteram")
 
 	AM_RANGE(0xe00000, 0xe0ffff) AM_RAM
 ADDRESS_MAP_END
@@ -209,61 +211,61 @@ ADDRESS_MAP_END
 
 /* 7810 (?) sound cpu */
 
-static ADDRESS_MAP_START( snd_mem, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( snd_mem, AS_PROGRAM, 8, fitfight_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
-	AM_RANGE(0x4000, 0x7fff) AM_ROMBANK("bank1")	/* ??? External ROM */
+	AM_RANGE(0x4000, 0x7fff) AM_ROMBANK("bank1")    /* ??? External ROM */
 	AM_RANGE(0x8000, 0x87ff) AM_RAM
 	AM_RANGE(0xff00, 0xffff) AM_RAM
 ADDRESS_MAP_END
 
-static READ8_HANDLER(snd_porta_r)
+READ8_MEMBER(fitfight_state::snd_porta_r)
 {
-	//mame_printf_debug("PA R @%x\n",cpu_get_pc(&space->device()));
-	return space->machine().rand();
+	//mame_printf_debug("PA R @%x\n",space.device().safe_pc());
+	return machine().rand();
 }
 
-static READ8_HANDLER(snd_portb_r)
+READ8_MEMBER(fitfight_state::snd_portb_r)
 {
-	//mame_printf_debug("PB R @%x\n",cpu_get_pc(&space->device()));
-	return space->machine().rand();
+	//mame_printf_debug("PB R @%x\n",space.device().safe_pc());
+	return machine().rand();
 }
 
-static READ8_HANDLER(snd_portc_r)
+READ8_MEMBER(fitfight_state::snd_portc_r)
 {
-	//mame_printf_debug("PC R @%x\n",cpu_get_pc(&space->device()));
-	return space->machine().rand();
+	//mame_printf_debug("PC R @%x\n",space.device().safe_pc());
+	return machine().rand();
 }
 
-static WRITE8_HANDLER(snd_porta_w)
+WRITE8_MEMBER(fitfight_state::snd_porta_w)
 {
-	//mame_printf_debug("PA W %x @%x\n",data,cpu_get_pc(&space->device()));
+	//mame_printf_debug("PA W %x @%x\n",data,space.device().safe_pc());
 }
 
-static WRITE8_HANDLER(snd_portb_w)
+WRITE8_MEMBER(fitfight_state::snd_portb_w)
 {
-	//mame_printf_debug("PB W %x @%x\n",data,cpu_get_pc(&space->device()));
+	//mame_printf_debug("PB W %x @%x\n",data,space.device().safe_pc());
 }
 
-static WRITE8_HANDLER(snd_portc_w)
+WRITE8_MEMBER(fitfight_state::snd_portc_w)
 {
-	//mame_printf_debug("PC W %x @%x\n",data,cpu_get_pc(&space->device()));
+	//mame_printf_debug("PC W %x @%x\n",data,space.device().safe_pc());
 }
 
-static ADDRESS_MAP_START( snd_io, AS_IO, 8 )
+static ADDRESS_MAP_START( snd_io, AS_IO, 8, fitfight_state )
 		AM_RANGE(UPD7810_PORTA, UPD7810_PORTA) AM_READ(snd_porta_r) AM_WRITE(snd_porta_w)
 		AM_RANGE(UPD7810_PORTB, UPD7810_PORTB) AM_READ(snd_portb_r) AM_WRITE(snd_portb_w)
 		AM_RANGE(UPD7810_PORTC, UPD7810_PORTC) AM_READ(snd_portc_r) AM_WRITE(snd_portc_w)
 ADDRESS_MAP_END
 
-static INTERRUPT_GEN( snd_irq )
+INTERRUPT_GEN_MEMBER(fitfight_state::snd_irq)
 {
-	device_set_input_line(device, UPD7810_INTF2, HOLD_LINE);
+	device.execute().set_input_line(UPD7810_INTF2, HOLD_LINE);
 }
 
 static const UPD7810_CONFIG sound_cpu_config =
 {
-    TYPE_7810,
-    0
+	TYPE_7810,
+	0
 };
 
 
@@ -272,7 +274,7 @@ static const UPD7810_CONFIG sound_cpu_config =
 /* I've put the inputs the same way they can be read in the "test mode" */
 
 static INPUT_PORTS_START( fitfight )
-	PORT_START("P1_P2")	// 0x200000.w
+	PORT_START("P1_P2") // 0x200000.w
 	/* players inputs -> 0xe022cc.w */
 	PORT_BIT(  0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(1)
 	PORT_BIT(  0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(1)
@@ -291,18 +293,18 @@ static INPUT_PORTS_START( fitfight )
 	PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
 	PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_START2 )
 
-	PORT_START("EXTRA")	// 0x300000.w (unused)
+	PORT_START("EXTRA") // 0x300000.w (unused)
 	PORT_BIT(  0xffff, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("SYSTEM_DSW2")	// 0x400000.w
+	PORT_START("SYSTEM_DSW2")   // 0x400000.w
 	/* LSB : system inputs -> 0xe022cf.b */
 	PORT_BIT(  0x0001, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT(  0x0002, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT(  0x0004, IP_ACTIVE_LOW, IPT_COIN3 )
 	PORT_BIT(  0x0008, IP_ACTIVE_LOW, IPT_COIN4 )
-	PORT_BIT(  0x0010, IP_ACTIVE_LOW, IPT_UNKNOWN )			// "Test"
+	PORT_BIT(  0x0010, IP_ACTIVE_LOW, IPT_UNKNOWN )         // "Test"
 	PORT_BIT(  0x0020, IP_ACTIVE_LOW, IPT_SERVICE1 )
-	PORT_BIT(  0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN )			// "Fault" (= "Tilt" ?)
+	PORT_BIT(  0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN )         // "Fault" (= "Tilt" ?)
 	PORT_BIT(  0x0080, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	/* MSB : SW2 -> 0xe04c26.b (cpl) */
 	PORT_DIPNAME( 0xf800, 0xf800, "Time" ) PORT_DIPLOCATION("SW2:5,4,3,2,1")
@@ -348,7 +350,7 @@ static INPUT_PORTS_START( fitfight )
 	PORT_DIPSETTING(      0x0600, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(      0x0700, DEF_STR( 1C_1C ) )
 
-	PORT_START("DSW3_DSW1")	// 0x500000.w
+	PORT_START("DSW3_DSW1") // 0x500000.w
 	/* MSB : SW3 -> 0xe04c24.b (cpl) */
 	PORT_DIPNAME( 0xe000, 0xe000, "Next Credit" ) PORT_DIPLOCATION("SW3:3,2,1")
 	PORT_DIPSETTING(      0x0000, DEF_STR( 4C_1C ) )
@@ -373,10 +375,10 @@ static INPUT_PORTS_START( fitfight )
 	PORT_DIPSETTING(      0x0200, DEF_STR( On ) )
 	PORT_SERVICE( 0x0100, IP_ACTIVE_LOW )
 	/* LSB : SW1 -> 0xe04c25.b (cpl) */
-	PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( Demo_Sounds ) ) PORT_DIPLOCATION("SW1:1")	// To be confirmed
+	PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( Demo_Sounds ) ) PORT_DIPLOCATION("SW1:1")    // To be confirmed
 	PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0080, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0070, 0x0060, "Needed Points/Maximum Rounds" ) PORT_DIPLOCATION("SW1:4,3,2")	// see notes
+	PORT_DIPNAME( 0x0070, 0x0060, "Needed Points/Maximum Rounds" ) PORT_DIPLOCATION("SW1:4,3,2")    // see notes
 	PORT_DIPSETTING(      0x0070, "Endless" )
 	PORT_DIPSETTING(      0x0060, "1/2" )
 	PORT_DIPSETTING(      0x0050, "2/3" )
@@ -385,16 +387,16 @@ static INPUT_PORTS_START( fitfight )
 	PORT_DIPSETTING(      0x0020, "3/6" )
 	PORT_DIPSETTING(      0x0010, "4/7" )
 	PORT_DIPSETTING(      0x0000, "4/8" )
-	PORT_DIPNAME( 0x0008, 0x0000, "Select All Players" ) PORT_DIPLOCATION("SW1:5")		// in a 1 player game
-	PORT_DIPSETTING(      0x0008, DEF_STR( No ) )			// only Ryo and Robert available
+	PORT_DIPNAME( 0x0008, 0x0000, "Select All Players" ) PORT_DIPLOCATION("SW1:5")      // in a 1 player game
+	PORT_DIPSETTING(      0x0008, DEF_STR( No ) )           // only Ryo and Robert available
 	PORT_DIPSETTING(      0x0000, DEF_STR( Yes ) )
 	PORT_DIPUNKNOWN_DIPLOC( 0x0004, 0x0004, "SW1:6" )
-	PORT_DIPUNKNOWN_DIPLOC( 0x0002, 0x0002, "SW1:7" )		// must be Off during P.O.S.T. !
+	PORT_DIPUNKNOWN_DIPLOC( 0x0002, 0x0002, "SW1:7" )       // must be Off during P.O.S.T. !
 	PORT_DIPUNKNOWN_DIPLOC( 0x0001, 0x0001, "SW1:8" )
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( histryma )
-	PORT_START("P1_P2")	// 0x200000.w
+	PORT_START("P1_P2") // 0x200000.w
 	/* players inputs -> 0xe02cf2.w and 0xe02cf8.w */
 	PORT_BIT(  0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(1)
 	PORT_BIT(  0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(1)
@@ -413,7 +415,7 @@ static INPUT_PORTS_START( histryma )
 	PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
 	PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_START2 )
 
-	PORT_START("EXTRA")	// 0x300000.w
+	PORT_START("EXTRA") // 0x300000.w
 	/* LSB : players extra inputs -> 0xe02cf5.b and 0xe02cfb.b */
 	PORT_BIT(  0x0001, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT(  0x0002, IP_ACTIVE_LOW, IPT_BUTTON6 ) PORT_PLAYER(1)
@@ -426,22 +428,22 @@ static INPUT_PORTS_START( histryma )
 	/* MSB : unused */
 	PORT_BIT(  0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("SYSTEM_DSW2")	// 0x400000.w
+	PORT_START("SYSTEM_DSW2")   // 0x400000.w
 	/* LSB : system inputs -> 0xe02cf7.b and 0xe02cfd.b */
 	PORT_BIT(  0x0001, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT(  0x0002, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT(  0x0004, IP_ACTIVE_LOW, IPT_BUTTON6 ) PORT_PLAYER(2)
 	PORT_BIT(  0x0008, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT(  0x0010, IP_ACTIVE_LOW, IPT_UNKNOWN )			// "Test"
+	PORT_BIT(  0x0010, IP_ACTIVE_LOW, IPT_UNKNOWN )         // "Test"
 	PORT_BIT(  0x0020, IP_ACTIVE_LOW, IPT_SERVICE1 )
-	PORT_BIT(  0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN )			// "Fault" (= "Tilt" ?)
-	PORT_BIT(  0x0080, IP_ACTIVE_LOW, IPT_UNKNOWN )			// "Test" (duplicated)
+	PORT_BIT(  0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN )         // "Fault" (= "Tilt" ?)
+	PORT_BIT(  0x0080, IP_ACTIVE_LOW, IPT_UNKNOWN )         // "Test" (duplicated)
 	/* MSB : SW2 -> 0xe05874.b (cpl) */
 	PORT_DIPNAME( 0xf800, 0x0000, "Time" ) PORT_DIPLOCATION("SW2:5,4,3,2,1")
 	#ifndef PRIORITY_EASINESS_TO_PLAY
-	  PORT_DIPSETTING(      0xf800, "15" )                // duplicated setting
-	  PORT_DIPSETTING(      0xf000, "15" )                // duplicated setting
-	  PORT_DIPSETTING(      0xe800, "15" )                // duplicated setting
+		PORT_DIPSETTING(      0xf800, "15" )                // duplicated setting
+		PORT_DIPSETTING(      0xf000, "15" )                // duplicated setting
+		PORT_DIPSETTING(      0xe800, "15" )                // duplicated setting
 	#endif
 	PORT_DIPSETTING(      0xe000, "15" )
 	PORT_DIPSETTING(      0xd800, "18" )
@@ -482,7 +484,7 @@ static INPUT_PORTS_START( histryma )
 	PORT_DIPSETTING(      0x0000, DEF_STR( 4C_3C ) )
 	PORT_DIPSETTING(      0x0700, DEF_STR( 1C_1C ) )
 
-	PORT_START("DSW3_DSW1")	// 0x500000.w
+	PORT_START("DSW3_DSW1") // 0x500000.w
 	/* MSB : SW3 -> 0xe05872.b (cpl) */
 	PORT_DIPNAME( 0xe000, 0xe000, DEF_STR( Coin_B ) ) PORT_DIPLOCATION("SW3:3,2,1")
 	PORT_DIPSETTING(      0xe000, DEF_STR( 1C_1C ) )
@@ -507,10 +509,10 @@ static INPUT_PORTS_START( histryma )
 	PORT_DIPSETTING(      0x0200, DEF_STR( On ) )
 	PORT_SERVICE_DIPLOC( 0x0100, IP_ACTIVE_LOW, "SW3:8" )
 	/* LSB : SW1 -> 0xe05873.b (cpl) */
-	PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( Demo_Sounds ) ) PORT_DIPLOCATION("SW1:1")	// To be confirmed
+	PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( Demo_Sounds ) ) PORT_DIPLOCATION("SW1:1")    // To be confirmed
 	PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0080, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0070, 0x0060, "Needed Points/Maximum Points" ) PORT_DIPLOCATION("SW1:4,3,2")	// see notes
+	PORT_DIPNAME( 0x0070, 0x0060, "Needed Points/Maximum Points" ) PORT_DIPLOCATION("SW1:4,3,2")    // see notes
 	PORT_DIPSETTING(      0x0070, "Endless" )               // ends on a draw
 	PORT_DIPSETTING(      0x0060, "1/2" )
 	PORT_DIPSETTING(      0x0050, "2/3" )
@@ -519,11 +521,11 @@ static INPUT_PORTS_START( histryma )
 	PORT_DIPSETTING(      0x0020, "3/6" )
 	PORT_DIPSETTING(      0x0010, "4/7" )
 	PORT_DIPSETTING(      0x0000, "4/8" )
-	PORT_DIPNAME( 0x0008, 0x0000, "Buttons" ) PORT_DIPLOCATION("SW1:5")	// 3 or 6 buttons as default ?
+	PORT_DIPNAME( 0x0008, 0x0000, "Buttons" ) PORT_DIPLOCATION("SW1:5") // 3 or 6 buttons as default ?
 	PORT_DIPSETTING(      0x0008, "3" )
 	PORT_DIPSETTING(      0x0000, "6" )
 	PORT_DIPUNKNOWN_DIPLOC( 0x0004, 0x0004, "SW1:6" )
-	PORT_DIPUNKNOWN_DIPLOC( 0x0002, 0x0002, "SW1:7" )		// must be Off during P.O.S.T. !
+	PORT_DIPUNKNOWN_DIPLOC( 0x0002, 0x0002, "SW1:7" )       // must be Off during P.O.S.T. !
 	PORT_DIPUNKNOWN_DIPLOC( 0x0001, 0x0001, "SW1:8" )
 INPUT_PORTS_END
 
@@ -532,7 +534,7 @@ INPUT_PORTS_END
    (the only difference being that there is no "Needed Points/Maximum Points"
    Dip Switch, the value always being set to "2/3") */
 static INPUT_PORTS_START( bbprot )
-	PORT_START("P1_P2")	// 0x300000.w
+	PORT_START("P1_P2") // 0x300000.w
 	/* players inputs -> 0xe0545e.w and 0xe05464.w */
 	PORT_BIT(  0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(1)
 	PORT_BIT(  0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(1)
@@ -551,7 +553,7 @@ static INPUT_PORTS_START( bbprot )
 	PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
 	PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_START2 )
 
-	PORT_START("EXTRA")	// 0x380000.w
+	PORT_START("EXTRA") // 0x380000.w
 	/* LSB : players extra inputs -> 0xe05461.b and 0xe05467.b */
 	PORT_BIT(  0x0001, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT(  0x0002, IP_ACTIVE_LOW, IPT_BUTTON6 ) PORT_PLAYER(1)
@@ -564,22 +566,22 @@ static INPUT_PORTS_START( bbprot )
 	/* MSB : unused */
 	PORT_BIT(  0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("SYSTEM_DSW2")	// 0x400000.w
+	PORT_START("SYSTEM_DSW2")   // 0x400000.w
 	/* LSB : system inputs -> 0xe05463.b and 0xe05469.b */
 	PORT_BIT(  0x0001, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT(  0x0002, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT(  0x0004, IP_ACTIVE_LOW, IPT_BUTTON6 ) PORT_PLAYER(2)
 	PORT_BIT(  0x0008, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT(  0x0010, IP_ACTIVE_LOW, IPT_UNKNOWN )			// "Test"
+	PORT_BIT(  0x0010, IP_ACTIVE_LOW, IPT_UNKNOWN )         // "Test"
 	PORT_BIT(  0x0020, IP_ACTIVE_LOW, IPT_SERVICE1 )
-	PORT_BIT(  0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN )			// "Fault" (= "Tilt" ?)
-	PORT_BIT(  0x0080, IP_ACTIVE_LOW, IPT_UNKNOWN )			// "Test" (duplicated)
+	PORT_BIT(  0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN )         // "Fault" (= "Tilt" ?)
+	PORT_BIT(  0x0080, IP_ACTIVE_LOW, IPT_UNKNOWN )         // "Test" (duplicated)
 	/* MSB : SW2 -> 0xe07e84.b (cpl) */
 	PORT_DIPNAME( 0xf800, 0x0000, "Time" ) PORT_DIPLOCATION("SW2:5,4,3,2,1")
 	#ifndef PRIORITY_EASINESS_TO_PLAY
-	  PORT_DIPSETTING(      0xf800, "15" )                // duplicated setting
-	  PORT_DIPSETTING(      0xf000, "15" )                // duplicated setting
-	  PORT_DIPSETTING(      0xe800, "15" )                // duplicated setting
+		PORT_DIPSETTING(      0xf800, "15" )                // duplicated setting
+		PORT_DIPSETTING(      0xf000, "15" )                // duplicated setting
+		PORT_DIPSETTING(      0xe800, "15" )                // duplicated setting
 	#endif
 	PORT_DIPSETTING(      0xe000, "15" )
 	PORT_DIPSETTING(      0xd800, "18" )
@@ -620,7 +622,7 @@ static INPUT_PORTS_START( bbprot )
 	PORT_DIPSETTING(      0x0000, DEF_STR( 4C_3C ) )
 	PORT_DIPSETTING(      0x0700, DEF_STR( 1C_1C ) )
 
-	PORT_START("DSW3_DSW1")	// 0x480000.w
+	PORT_START("DSW3_DSW1") // 0x480000.w
 	/* MSB : SW3 -> 0xe07e82.b (cpl) */
 	PORT_DIPNAME( 0xe000, 0xe000, DEF_STR( Coin_B ) ) PORT_DIPLOCATION("SW3:3,2,1")
 	PORT_DIPSETTING(      0xe000, DEF_STR( 1C_1C ) )
@@ -645,17 +647,17 @@ static INPUT_PORTS_START( bbprot )
 	PORT_DIPSETTING(      0x0200, DEF_STR( On ) )
 	PORT_SERVICE_DIPLOC( 0x0100, IP_ACTIVE_LOW, "SW3:8" )
 	/* LSB : SW1 -> 0xe07e83.b (cpl) */
-	PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( Demo_Sounds ) ) PORT_DIPLOCATION("SW1:1")	// To be confirmed
+	PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( Demo_Sounds ) ) PORT_DIPLOCATION("SW1:1")    // To be confirmed
 	PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0080, DEF_STR( On ) )
 	PORT_DIPUNKNOWN_DIPLOC( 0x0040, 0x0040, "SW1:2" )
 	PORT_DIPUNKNOWN_DIPLOC( 0x0020, 0x0020, "SW1:3" )
 	PORT_DIPUNKNOWN_DIPLOC( 0x0010, 0x0010, "SW1:4" )
-	PORT_DIPNAME( 0x0008, 0x0000, "Buttons" ) PORT_DIPLOCATION("SW1:5")	// 3 or 6 buttons as default ?
+	PORT_DIPNAME( 0x0008, 0x0000, "Buttons" ) PORT_DIPLOCATION("SW1:5") // 3 or 6 buttons as default ?
 	PORT_DIPSETTING(      0x0008, "3" )
 	PORT_DIPSETTING(      0x0000, "6" )
 	PORT_DIPUNKNOWN_DIPLOC( 0x0004, 0x0004, "SW1:6" )
-	PORT_DIPUNKNOWN_DIPLOC( 0x0002, 0x0002, "SW1:7" )		// must be Off during P.O.S.T. !
+	PORT_DIPUNKNOWN_DIPLOC( 0x0002, 0x0002, "SW1:7" )       // must be Off during P.O.S.T. !
 	PORT_DIPUNKNOWN_DIPLOC( 0x0001, 0x0001, "SW1:8" )
 INPUT_PORTS_END
 
@@ -717,48 +719,42 @@ static GFXDECODE_START( prot )
 GFXDECODE_END
 
 
-static MACHINE_START( fitfight )
+void fitfight_state::machine_start()
 {
-	fitfight_state *state = machine.driver_data<fitfight_state>();
 
-	state->save_item(NAME(state->m_fof_700000_data));
+	save_item(NAME(m_fof_700000_data));
 }
 
-static MACHINE_RESET( fitfight )
+void fitfight_state::machine_reset()
 {
-	fitfight_state *state = machine.driver_data<fitfight_state>();
 
-	state->m_fof_700000_data = 0;
+	m_fof_700000_data = 0;
 }
 
 static MACHINE_CONFIG_START( fitfight, fitfight_state )
 
 	MCFG_CPU_ADD("maincpu",M68000, 12000000)
 	MCFG_CPU_PROGRAM_MAP(fitfight_main_map)
-	MCFG_CPU_VBLANK_INT("screen", irq2_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", fitfight_state,  irq2_line_hold)
 
 	MCFG_CPU_ADD("audiocpu", UPD7810, 12000000)
 	MCFG_CPU_CONFIG(sound_cpu_config)
 	MCFG_CPU_PROGRAM_MAP(snd_mem)
 	MCFG_CPU_IO_MAP(snd_io)
-	MCFG_CPU_VBLANK_INT("screen", snd_irq)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", fitfight_state,  snd_irq)
 
-	MCFG_MACHINE_START(fitfight)
-	MCFG_MACHINE_RESET(fitfight)
 
 	MCFG_GFXDECODE(fitfight)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(40*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(2*8, 39*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(fitfight)
+	MCFG_SCREEN_UPDATE_DRIVER(fitfight_state, screen_update_fitfight)
 
 	MCFG_PALETTE_LENGTH(0x800)
 
-	MCFG_VIDEO_START(fitfight)
 
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
@@ -770,24 +766,20 @@ static MACHINE_CONFIG_START( bbprot, fitfight_state )
 
 	MCFG_CPU_ADD("maincpu",M68000, 12000000)
 	MCFG_CPU_PROGRAM_MAP(bbprot_main_map)
-	MCFG_CPU_VBLANK_INT("screen", irq2_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", fitfight_state,  irq2_line_hold)
 
-	MCFG_MACHINE_START(fitfight)
-	MCFG_MACHINE_RESET(fitfight)
 
 	MCFG_GFXDECODE(prot)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(40*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(2*8, 39*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(fitfight)
+	MCFG_SCREEN_UPDATE_DRIVER(fitfight_state, screen_update_fitfight)
 
 	MCFG_PALETTE_LENGTH(0x2000)
 
-	MCFG_VIDEO_START(fitfight)
 
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
@@ -971,34 +963,66 @@ ROM_START( bbprot )
 	ROM_LOAD( "s16_h_mc.bin",  0x080000, 0x080000, CRC(3b9091de) SHA1(b426dab6361f5d48519dc9de146e1b2270af6c8b) )
 ROM_END
 
+ROM_START( hotmindff )
+	ROM_REGION( 0x100000, "maincpu", 0 ) /* 68000 Code */
+	ROM_LOAD16_BYTE( "21.u138", 0x000001, 0x020000, CRC(00d9ba73) SHA1(5f33f7e9b9446cdc380e6236381d86c46f55ede7) )
+	ROM_LOAD16_BYTE( "20.u125", 0x000000, 0x020000, CRC(8a7b2cc2) SHA1(031255cff4764dd61f5418be8090310193aa2e59) )
+
+	ROM_REGION( 0x01c000, "audiocpu", 0 ) /* Sound Program */
+	ROM_LOAD( "22.u23",  0x000000, 0x004000, CRC(ca0327a2) SHA1(b725f625860dae4723e0ed4a6c7c29a2b1a3d15f) )
+	ROM_CONTINUE(          0x010000, 0x00c000 )
+
+	ROM_REGION( 0x100000, "oki", 0 ) /* OKI Samples? */
+	ROM_LOAD( "19.u18",  0x000000, 0x040000, CRC(296d71da) SHA1(49735012691a9e65c4da6132428f7a9149504fd3) )
+
+	ROM_REGION( 0x100000, "gfx1", 0 ) /* GFX */
+	ROM_LOAD( "29.bin",  0x000000, 0x020000, CRC(cd4cab01) SHA1(90165f57adbfd7d85eaccfe794d347ed795dfba1) )
+	ROM_LOAD( "30.bin",  0x040000, 0x020000, CRC(33f991b5) SHA1(8fddb5a3c78e73eb2a741aa970ff2c650a847317) )
+	ROM_LOAD( "25.bin",  0x080000, 0x020000, CRC(21e7c729) SHA1(bf2a89ab54ef362bfee9fdcb7623d0f092559793) )
+	ROM_LOAD( "26.bin",  0x0c0000, 0x020000, CRC(5802e7d0) SHA1(6a6661c753b31492295813952fc559e5189aae9f) )
+
+	ROM_REGION( 0x400000, "gfx2", 0 ) /* Sprites */
+	ROM_LOAD( "23.bin",  0x000000, 0x020000, CRC(4d2c79ed) SHA1(df7004b11f5bcd51f7629fa1cc907976d9b8c8dc) )
+	ROM_LOAD( "24.bin",  0x100000, 0x020000, CRC(f43618d0) SHA1(7c383582ebcab713f2d8e6b4c73fc0415465d62d) )
+	ROM_LOAD( "27.bin",  0x200000, 0x020000, CRC(9cee7e50) SHA1(3e131b4acf35b58d511f7313425d002e939a7ff9) )
+	ROM_LOAD( "28.bin",  0x300000, 0x020000, CRC(059c7bcf) SHA1(b9d8b1e1482baeede750a54749834c68c2d0cfef) )
+ROM_END
+
+
+
 /* INIT */
 
-static DRIVER_INIT( fitfight )
+DRIVER_INIT_MEMBER(fitfight_state,fitfight)
 {
-//  UINT16 *mem16 = (UINT16 *)machine.region("maincpu")->base();
+//  UINT16 *mem16 = (UINT16 *)machine().root_device().memregion("maincpu")->base();
 //  mem16[0x0165B2/2] = 0x4e71; // for now so it boots
-	fitfight_state *state = machine.driver_data<fitfight_state>();
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x700000, 0x700001, FUNC(fitfight_700000_r));
-	state->m_bbprot_kludge = 0;
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(0x700000, 0x700001, read16_delegate(FUNC(fitfight_state::fitfight_700000_r),this));
+	m_bbprot_kludge = 0;
 }
 
-static DRIVER_INIT( histryma )
+DRIVER_INIT_MEMBER(fitfight_state,histryma)
 {
-//  UINT16 *mem16 = (UINT16 *)machine.region("maincpu")->base();
+//  UINT16 *mem16 = (UINT16 *)machine().root_device().memregion("maincpu")->base();
 //  mem16[0x017FDC/2] = 0x4e71; // for now so it boots
-	fitfight_state *state = machine.driver_data<fitfight_state>();
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x700000, 0x700001, FUNC(histryma_700000_r));
-	state->m_bbprot_kludge = 0;
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(0x700000, 0x700001, read16_delegate(FUNC(fitfight_state::histryma_700000_r),this));
+	m_bbprot_kludge = 0;
 }
 
-static DRIVER_INIT( bbprot )
+DRIVER_INIT_MEMBER(fitfight_state,bbprot)
 {
-	fitfight_state *state = machine.driver_data<fitfight_state>();
-	state->m_bbprot_kludge = 1;
+	m_bbprot_kludge = 1;
 }
+
+DRIVER_INIT_MEMBER(fitfight_state,hotmindff)
+{
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(0x200000, 0x200001, 0, 0, read16_delegate(FUNC(fitfight_state::hotmindff_unk_r),this));
+	DRIVER_INIT_CALL(fitfight);
+}
+
 
 /* GAME */
 
-GAME( 199?, fitfight, 0, fitfight, fitfight, fitfight, ROT0, "bootleg", "Fit of Fighting", GAME_IMPERFECT_GRAPHICS | GAME_NO_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 199?, histryma, 0, fitfight, histryma, histryma, ROT0, "bootleg", "The History of Martial Arts", GAME_IMPERFECT_GRAPHICS | GAME_NO_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 199?, bbprot,   0, bbprot,   bbprot,   bbprot,   ROT0, "<unknown>", "unknown fighting game 'BB' (prototype)", GAME_IMPERFECT_GRAPHICS | GAME_NO_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 199?, fitfight, 0, fitfight, fitfight, fitfight_state, fitfight, ROT0, "bootleg", "Fit of Fighting", GAME_IMPERFECT_GRAPHICS | GAME_NO_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 199?, histryma, 0, fitfight, histryma, fitfight_state, histryma, ROT0, "bootleg", "The History of Martial Arts", GAME_IMPERFECT_GRAPHICS | GAME_NO_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 199?, bbprot,   0, bbprot,   bbprot, fitfight_state,   bbprot,   ROT0, "<unknown>", "unknown fighting game 'BB' (prototype)", GAME_IMPERFECT_GRAPHICS | GAME_NO_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 199?, hotmindff,  hotmind, fitfight,   fitfight, fitfight_state,   hotmindff,   ROT0, "Playmark", "Hot Mind (Fit of Fighting hardware)", GAME_NOT_WORKING | GAME_NO_SOUND ) // need to fix scroll offsets + inputs

@@ -29,102 +29,99 @@ Memo:
 #include "machine/nvram.h"
 
 
-#define SIGNED_DAC	0		// 0:unsigned DAC, 1:signed DAC
+#define SIGNED_DAC  0       // 0:unsigned DAC, 1:signed DAC
 #if SIGNED_DAC
-#define DAC_WRITE	dac_signed_w
+#define DAC_WRITE   write_signed8
 #else
-#define DAC_WRITE	dac_w
+#define DAC_WRITE   write_unsigned8
 #endif
 
 
 
-static DRIVER_INIT( pastelg )
+DRIVER_INIT_MEMBER(pastelg_state,pastelg)
 {
 	nb1413m3_type = NB1413M3_PASTELG;
 }
 
-static READ8_HANDLER( pastelg_sndrom_r )
+READ8_MEMBER(pastelg_state::pastelg_sndrom_r)
 {
-	UINT8 *ROM = space->machine().region("voice")->base();
+	UINT8 *ROM = memregion("voice")->base();
 
 	return ROM[pastelg_blitter_src_addr_r(space) & 0x7fff];
 }
 
-static ADDRESS_MAP_START( pastelg_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( pastelg_map, AS_PROGRAM, 8, pastelg_state )
 	AM_RANGE(0x0000, 0xbfff) AM_ROM
 	AM_RANGE(0xe000, 0xe7ff) AM_RAM AM_SHARE("nvram")
 ADDRESS_MAP_END
 
-static READ8_HANDLER( pastelg_irq_ack_r )
+READ8_MEMBER(pastelg_state::pastelg_irq_ack_r)
 {
-	device_set_input_line(&space->device(), 0, CLEAR_LINE);
+	space.device().execute().set_input_line(0, CLEAR_LINE);
 	return 0;
 }
 
-static ADDRESS_MAP_START( pastelg_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( pastelg_io_map, AS_IO, 8, pastelg_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 //  AM_RANGE(0x00, 0x00) AM_WRITENOP
-	AM_RANGE(0x00, 0x7f) AM_READ(nb1413m3_sndrom_r)
-	AM_RANGE(0x81, 0x81) AM_DEVREAD("aysnd", ay8910_r)
-	AM_RANGE(0x82, 0x83) AM_DEVWRITE("aysnd", ay8910_data_address_w)
+	AM_RANGE(0x00, 0x7f) AM_READ_LEGACY(nb1413m3_sndrom_r)
+	AM_RANGE(0x81, 0x81) AM_DEVREAD_LEGACY("aysnd", ay8910_r)
+	AM_RANGE(0x82, 0x83) AM_DEVWRITE_LEGACY("aysnd", ay8910_data_address_w)
 	AM_RANGE(0x90, 0x90) AM_READ_PORT("SYSTEM")
 	AM_RANGE(0x90, 0x96) AM_WRITE(pastelg_blitter_w)
-	AM_RANGE(0xa0, 0xa0) AM_READWRITE(nb1413m3_inputport1_r, nb1413m3_inputportsel_w)
-	AM_RANGE(0xb0, 0xb0) AM_READWRITE(nb1413m3_inputport2_r, pastelg_romsel_w)
+	AM_RANGE(0xa0, 0xa0) AM_READWRITE_LEGACY(nb1413m3_inputport1_r, nb1413m3_inputportsel_w)
+	AM_RANGE(0xb0, 0xb0) AM_READ_LEGACY(nb1413m3_inputport2_r) AM_WRITE(pastelg_romsel_w)
 	AM_RANGE(0xc0, 0xc0) AM_READ(pastelg_sndrom_r)
 	AM_RANGE(0xc0, 0xcf) AM_WRITE(pastelg_clut_w)
-	AM_RANGE(0xd0, 0xd0) AM_READ(pastelg_irq_ack_r) AM_DEVWRITE("dac", DAC_WRITE)
+	AM_RANGE(0xd0, 0xd0) AM_READ(pastelg_irq_ack_r) AM_DEVWRITE("dac", dac_device, write_unsigned8)
 	AM_RANGE(0xe0, 0xe0) AM_READ_PORT("DSWC")
 ADDRESS_MAP_END
 
 
-static READ8_HANDLER( threeds_inputport1_r )
+READ8_MEMBER(pastelg_state::threeds_inputport1_r)
 {
-	pastelg_state *state = space->machine().driver_data<pastelg_state>();
-	switch(state->m_mux_data)
+	switch(m_mux_data)
 	{
-		case 0x01: return input_port_read(space->machine(),"KEY0_PL1");
-		case 0x02: return input_port_read(space->machine(),"KEY1_PL1");
-		case 0x04: return input_port_read(space->machine(),"KEY2_PL1");
-		case 0x08: return input_port_read(space->machine(),"KEY3_PL1");
-		case 0x10: return input_port_read(space->machine(),"KEY4_PL1");
+		case 0x01: return ioport("KEY0_PL1")->read();
+		case 0x02: return ioport("KEY1_PL1")->read();
+		case 0x04: return ioport("KEY2_PL1")->read();
+		case 0x08: return ioport("KEY3_PL1")->read();
+		case 0x10: return ioport("KEY4_PL1")->read();
 	}
 
 	return 0xff;
 }
 
-static READ8_HANDLER( threeds_inputport2_r )
+READ8_MEMBER(pastelg_state::threeds_inputport2_r)
 {
-	pastelg_state *state = space->machine().driver_data<pastelg_state>();
-	switch(state->m_mux_data)
+	switch(m_mux_data)
 	{
-		case 0x01: return input_port_read(space->machine(),"KEY0_PL2");
-		case 0x02: return input_port_read(space->machine(),"KEY1_PL2");
-		case 0x04: return input_port_read(space->machine(),"KEY2_PL2");
-		case 0x08: return input_port_read(space->machine(),"KEY3_PL2");
-		case 0x10: return input_port_read(space->machine(),"KEY4_PL2");
+		case 0x01: return ioport("KEY0_PL2")->read();
+		case 0x02: return ioport("KEY1_PL2")->read();
+		case 0x04: return ioport("KEY2_PL2")->read();
+		case 0x08: return ioport("KEY3_PL2")->read();
+		case 0x10: return ioport("KEY4_PL2")->read();
 	}
 
 	return 0xff;
 }
 
-static WRITE8_HANDLER( threeds_inputportsel_w )
+WRITE8_MEMBER(pastelg_state::threeds_inputportsel_w)
 {
-	pastelg_state *state = space->machine().driver_data<pastelg_state>();
-	state->m_mux_data = ~data;
+	m_mux_data = ~data;
 }
 
-static ADDRESS_MAP_START( threeds_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( threeds_io_map, AS_IO, 8, pastelg_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x81, 0x81) AM_DEVREAD("aysnd", ay8910_r)
-	AM_RANGE(0x82, 0x83) AM_DEVWRITE("aysnd", ay8910_data_address_w)
-	AM_RANGE(0x90, 0x90) AM_READ_PORT("SYSTEM") AM_WRITE( threeds_romsel_w )
+	AM_RANGE(0x81, 0x81) AM_DEVREAD_LEGACY("aysnd", ay8910_r)
+	AM_RANGE(0x82, 0x83) AM_DEVWRITE_LEGACY("aysnd", ay8910_data_address_w)
+	AM_RANGE(0x90, 0x90) AM_READ_PORT("SYSTEM") AM_WRITE(threeds_romsel_w )
 	AM_RANGE(0xf0, 0xf6) AM_WRITE(pastelg_blitter_w)
 	AM_RANGE(0xa0, 0xa0) AM_READWRITE(threeds_inputport1_r, threeds_inputportsel_w)
 	AM_RANGE(0xb0, 0xb0) AM_READ(threeds_inputport2_r) AM_WRITE(threeds_output_w)//writes: bit 3 is coin lockout, bit 1 is coin counter
 	AM_RANGE(0xc0, 0xcf) AM_WRITE(pastelg_clut_w)
 	AM_RANGE(0xc0, 0xc0) AM_READ(threeds_rom_readback_r)
-	AM_RANGE(0xd0, 0xd0) AM_READ(pastelg_irq_ack_r) AM_DEVWRITE("dac", DAC_WRITE)
+	AM_RANGE(0xd0, 0xd0) AM_READ(pastelg_irq_ack_r) AM_DEVWRITE("dac", dac_device, write_unsigned8)
 ADDRESS_MAP_END
 
 static INPUT_PORTS_START( pastelg )
@@ -202,111 +199,111 @@ static INPUT_PORTS_START( pastelg )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE4 )		// CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )		// SERVICE
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE4 )       // CREDIT CLEAR
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )       // SERVICE
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
 
 // stops the game hanging..
-static CUSTOM_INPUT( nb1413m3_hackbusyflag_r )
+CUSTOM_INPUT_MEMBER(pastelg_state::nb1413m3_hackbusyflag_r)
 {
-	return field->port->machine().rand() & 3;
+	return machine().rand() & 3;
 }
 
 static INPUT_PORTS_START( threeds )
 	PORT_START("DSWA")
-    PORT_DIPNAME( 0x01,   0x01, "0" )
-    PORT_DIPSETTING(      0x01, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x02,   0x02, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x02, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x04,   0x04, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x04, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x08,   0x08, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x08, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x10,   0x10, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x10, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x20,   0x20, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x20, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x40,   0x40, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x40, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x80,   0x80, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x80, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x01,   0x01, "0" )
+	PORT_DIPSETTING(      0x01, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x02,   0x02, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x02, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x04,   0x04, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x04, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x08,   0x08, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x08, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x10,   0x10, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x10, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x20,   0x20, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x20, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x40,   0x40, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x40, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x80,   0x80, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x80, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x00, DEF_STR( On ) )
 
 	PORT_START("DSWB")
-    PORT_DIPNAME( 0x01,   0x01, "1" )
-    PORT_DIPSETTING(      0x01, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x02,   0x02, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x02, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x04,   0x04, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x04, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x08,   0x08, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x08, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x10,   0x10, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x10, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x20,   0x20, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x20, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x40,   0x40, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x40, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x80,   0x80, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x80, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x01,   0x01, "1" )
+	PORT_DIPSETTING(      0x01, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x02,   0x02, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x02, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x04,   0x04, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x04, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x08,   0x08, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x08, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x10,   0x10, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x10, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x20,   0x20, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x20, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x40,   0x40, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x40, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x80,   0x80, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x80, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x00, DEF_STR( On ) )
 
 	PORT_START("DSWC")
-    PORT_DIPNAME( 0x01,   0x01, "2" )
-    PORT_DIPSETTING(      0x01, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x02,   0x02, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x02, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x04,   0x04, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x04, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x08,   0x08, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x08, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x10,   0x10, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x10, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x20,   0x20, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x20, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x40,   0x40, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x40, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x80,   0x80, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x80, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x01,   0x01, "2" )
+	PORT_DIPSETTING(      0x01, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x02,   0x02, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x02, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x04,   0x04, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x04, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x08,   0x08, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x08, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x10,   0x10, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x10, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x20,   0x20, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x20, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x40,   0x40, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x40, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x80,   0x80, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x80, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x00, DEF_STR( On ) )
 
 	PORT_START("KEY0_PL1")
 	PORT_BIT( 0x03, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 ) PORT_NAME("1P Start / Deal")
 	PORT_BIT( 0x38, IP_ACTIVE_LOW, IPT_UNUSED )
-    PORT_DIPNAME( 0x40,   0x40, "1P-Side Character Test Mode" ) //only combined with the service mode
-    PORT_DIPSETTING(      0x40, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x00, DEF_STR( On ) )
-    PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
+	PORT_DIPNAME( 0x40,   0x40, "1P-Side Character Test Mode" ) //only combined with the service mode
+	PORT_DIPSETTING(      0x40, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x00, DEF_STR( On ) )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("KEY1_PL1")
 	PORT_BIT( 0x03, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -339,10 +336,10 @@ static INPUT_PORTS_START( threeds )
 	PORT_BIT( 0x03, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START2 ) PORT_NAME("2P Start / Deal")
 	PORT_BIT( 0x38, IP_ACTIVE_LOW, IPT_UNUSED )
-    PORT_DIPNAME( 0x40,   0x40, "2P-Side Character Test Mode" ) //only combined with the service mode
-    PORT_DIPSETTING(      0x40, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x00, DEF_STR( On ) )
-    PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
+	PORT_DIPNAME( 0x40,   0x40, "2P-Side Character Test Mode" ) //only combined with the service mode
+	PORT_DIPSETTING(      0x40, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x00, DEF_STR( On ) )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("KEY1_PL2")
 	PORT_BIT( 0x03, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -372,13 +369,13 @@ static INPUT_PORTS_START( threeds )
 	PORT_BIT( 0xe0, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x03, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_hackbusyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE4 )		// CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )		// SERVICE
+	PORT_BIT( 0x03, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, pastelg_state,nb1413m3_hackbusyflag_r, NULL)  // DRAW BUSY
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE4 )       // CREDIT CLEAR
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )       // SERVICE
 INPUT_PORTS_END
 
 
@@ -388,12 +385,12 @@ static INPUT_PORTS_START( galds )
 
 	PORT_MODIFY("SYSTEM")
 	// this increases the tip? (has this feature been ripped out of the parent set? there is strange corruption of the line under the 'tip' display)
-    PORT_DIPNAME( 0x01,   0x01, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x01, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x02,   0x02, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x02, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x01,   0x01, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x01, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x02,   0x02, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x02, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x00, DEF_STR( On ) )
 INPUT_PORTS_END
 
 static const ay8910_interface ay8910_config =
@@ -410,12 +407,12 @@ static const ay8910_interface ay8910_config =
 static MACHINE_CONFIG_START( pastelg, pastelg_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, 19968000/4)	/* unknown divider, galds definitely relies on this for correct voice pitch */
+	MCFG_CPU_ADD("maincpu", Z80, 19968000/4)    /* unknown divider, galds definitely relies on this for correct voice pitch */
 	MCFG_CPU_PROGRAM_MAP(pastelg_map)
 	MCFG_CPU_IO_MAP(pastelg_io_map)
-//  MCFG_CPU_VBLANK_INT_HACK(nb1413m3_interrupt,96)  // nmiclock not written, chip is 1411M1 instead of 1413M3
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_assert)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", pastelg_state,  irq0_line_assert) // nmiclock not written, chip is 1411M1 instead of 1413M3
 
+	MCFG_MACHINE_START(nb1413m3)
 	MCFG_MACHINE_RESET(nb1413m3)
 	MCFG_NVRAM_ADD_0FILL("nvram")
 
@@ -423,15 +420,12 @@ static MACHINE_CONFIG_START( pastelg, pastelg_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(256, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 256-1, 16, 240-1)
-	MCFG_SCREEN_UPDATE(pastelg)
+	MCFG_SCREEN_UPDATE_DRIVER(pastelg_state, screen_update_pastelg)
 
 	MCFG_PALETTE_LENGTH(32)
 
-	MCFG_PALETTE_INIT(pastelg)
-	MCFG_VIDEO_START(pastelg)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -440,7 +434,7 @@ static MACHINE_CONFIG_START( pastelg, pastelg_state )
 	MCFG_SOUND_CONFIG(ay8910_config)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.35)
 
-	MCFG_SOUND_ADD("dac", DAC, 0)
+	MCFG_DAC_ADD("dac")
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 MACHINE_CONFIG_END
 
@@ -470,11 +464,12 @@ Note
 static MACHINE_CONFIG_START( threeds, pastelg_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, 19968000/4)	/* unknown divider, galds definitely relies on this for correct voice pitch */
+	MCFG_CPU_ADD("maincpu", Z80, 19968000/4)    /* unknown divider, galds definitely relies on this for correct voice pitch */
 	MCFG_CPU_PROGRAM_MAP(pastelg_map)
 	MCFG_CPU_IO_MAP(threeds_io_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_assert)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", pastelg_state,  irq0_line_assert)
 
+	MCFG_MACHINE_START(nb1413m3)
 	MCFG_MACHINE_RESET(nb1413m3)
 	MCFG_NVRAM_ADD_0FILL("nvram")
 
@@ -482,15 +477,12 @@ static MACHINE_CONFIG_START( threeds, pastelg_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(256, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 256-1, 16, 240-1)
-	MCFG_SCREEN_UPDATE(pastelg)
+	MCFG_SCREEN_UPDATE_DRIVER(pastelg_state, screen_update_pastelg)
 
 	MCFG_PALETTE_LENGTH(32)
 
-	MCFG_PALETTE_INIT(pastelg)
-	MCFG_VIDEO_START(pastelg)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -499,7 +491,7 @@ static MACHINE_CONFIG_START( threeds, pastelg_state )
 	MCFG_SOUND_CONFIG(ay8910_config)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.35)
 
-	MCFG_SOUND_ADD("dac", DAC, 0)
+	MCFG_DAC_ADD("dac")
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 MACHINE_CONFIG_END
 
@@ -574,6 +566,6 @@ ROM_END
 
 
 
-GAME( 1985, pastelg, 0,   pastelg, pastelg, pastelg, ROT0, "Nichibutsu", "Pastel Gal (Japan 851224)", 0 )
-GAME( 1985, 3ds,     0,   threeds, threeds, pastelg, ROT0, "Nichibutsu", "Three Ds - Three Dealers Casino House", 0 )
-GAME( 1985, galds,   3ds, threeds, galds,   pastelg, ROT0, "Nihon System Corp.", "Gals Ds - Three Dealers Casino House (bootleg?)", 0 )
+GAME( 1985, pastelg, 0,   pastelg, pastelg, pastelg_state, pastelg, ROT0, "Nichibutsu", "Pastel Gal (Japan 851224)", 0 )
+GAME( 1985, 3ds,     0,   threeds, threeds, pastelg_state, pastelg, ROT0, "Nichibutsu", "Three Ds - Three Dealers Casino House", 0 )
+GAME( 1985, galds,   3ds, threeds, galds, pastelg_state,   pastelg, ROT0, "Nihon System Corp.", "Gals Ds - Three Dealers Casino House (bootleg?)", 0 )

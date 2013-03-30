@@ -46,9 +46,9 @@ Stephh's notes (based on the games M6809 code and some tests) :
 
 #define MIKIE_TIMER_RATE 512
 
-#define XTAL	14318180
-#define OSC		18432000
-#define CLK		XTAL/4
+#define XTAL    14318180
+#define OSC     18432000
+#define CLK     XTAL/4
 
 
 /*************************************
@@ -57,30 +57,34 @@ Stephh's notes (based on the games M6809 code and some tests) :
  *
  *************************************/
 
-static READ8_HANDLER( mikie_sh_timer_r )
+READ8_MEMBER(mikie_state::mikie_sh_timer_r)
 {
-	mikie_state *state = space->machine().driver_data<mikie_state>();
-	int clock = state->m_audiocpu->total_cycles() / MIKIE_TIMER_RATE;
+	int clock = m_audiocpu->total_cycles() / MIKIE_TIMER_RATE;
 
 	return clock;
 }
 
-static WRITE8_HANDLER( mikie_sh_irqtrigger_w )
+WRITE8_MEMBER(mikie_state::mikie_sh_irqtrigger_w)
 {
-	mikie_state *state = space->machine().driver_data<mikie_state>();
 
-	if (state->m_last_irq == 0 && data == 1)
+	if (m_last_irq == 0 && data == 1)
 	{
 		// setting bit 0 low then high triggers IRQ on the sound CPU
-		device_set_input_line_and_vector(state->m_audiocpu, 0, HOLD_LINE, 0xff);
+		m_audiocpu->set_input_line_and_vector(0, HOLD_LINE, 0xff);
 	}
 
-	state->m_last_irq = data;
+	m_last_irq = data;
 }
 
-static WRITE8_HANDLER( mikie_coin_counter_w )
+WRITE8_MEMBER(mikie_state::mikie_coin_counter_w)
 {
-	coin_counter_w(space->machine(), offset, data);
+	coin_counter_w(machine(), offset, data);
+}
+
+WRITE8_MEMBER(mikie_state::irq_mask_w)
+{
+
+	m_irq_mask = data & 1;
 }
 
 /*************************************
@@ -89,40 +93,40 @@ static WRITE8_HANDLER( mikie_coin_counter_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( mikie_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( mikie_map, AS_PROGRAM, 8, mikie_state )
 	AM_RANGE(0x0000, 0x00ff) AM_RAM
 	AM_RANGE(0x2000, 0x2001) AM_WRITE(mikie_coin_counter_w)
 	AM_RANGE(0x2002, 0x2002) AM_WRITE(mikie_sh_irqtrigger_w)
 	AM_RANGE(0x2006, 0x2006) AM_WRITE(mikie_flipscreen_w)
-	AM_RANGE(0x2007, 0x2007) AM_WRITE(interrupt_enable_w)
+	AM_RANGE(0x2007, 0x2007) AM_WRITE(irq_mask_w)
 	AM_RANGE(0x2100, 0x2100) AM_WRITE(watchdog_reset_w)
 	AM_RANGE(0x2200, 0x2200) AM_WRITE(mikie_palettebank_w)
-	AM_RANGE(0x2300, 0x2300) AM_WRITENOP	// ???
-	AM_RANGE(0x2400, 0x2400) AM_READ_PORT("SYSTEM") AM_WRITE(soundlatch_w)
+	AM_RANGE(0x2300, 0x2300) AM_WRITENOP    // ???
+	AM_RANGE(0x2400, 0x2400) AM_READ_PORT("SYSTEM") AM_WRITE(soundlatch_byte_w)
 	AM_RANGE(0x2401, 0x2401) AM_READ_PORT("P1")
 	AM_RANGE(0x2402, 0x2402) AM_READ_PORT("P2")
 	AM_RANGE(0x2403, 0x2403) AM_READ_PORT("DSW3")
 	AM_RANGE(0x2500, 0x2500) AM_READ_PORT("DSW1")
 	AM_RANGE(0x2501, 0x2501) AM_READ_PORT("DSW2")
-	AM_RANGE(0x2800, 0x288f) AM_RAM AM_BASE_SIZE_MEMBER(mikie_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0x2800, 0x288f) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0x2890, 0x37ff) AM_RAM
-	AM_RANGE(0x3800, 0x3bff) AM_RAM_WRITE(mikie_colorram_w) AM_BASE_MEMBER(mikie_state, m_colorram)
-	AM_RANGE(0x3c00, 0x3fff) AM_RAM_WRITE(mikie_videoram_w) AM_BASE_MEMBER(mikie_state, m_videoram)
-	AM_RANGE(0x4000, 0x5fff) AM_ROM	// Machine checks for extra rom
+	AM_RANGE(0x3800, 0x3bff) AM_RAM_WRITE(mikie_colorram_w) AM_SHARE("colorram")
+	AM_RANGE(0x3c00, 0x3fff) AM_RAM_WRITE(mikie_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0x4000, 0x5fff) AM_ROM // Machine checks for extra rom
 	AM_RANGE(0x6000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, mikie_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
 	AM_RANGE(0x4000, 0x43ff) AM_RAM
-	AM_RANGE(0x8000, 0x8000) AM_WRITENOP	// sound command latch
-	AM_RANGE(0x8001, 0x8001) AM_WRITENOP	// ???
-	AM_RANGE(0x8002, 0x8002) AM_DEVWRITE("sn1", sn76496_w)	// trigger read of latch
-	AM_RANGE(0x8003, 0x8003) AM_READ(soundlatch_r)
-	AM_RANGE(0x8004, 0x8004) AM_DEVWRITE("sn2", sn76496_w)	// trigger read of latch
+	AM_RANGE(0x8000, 0x8000) AM_WRITENOP    // sound command latch
+	AM_RANGE(0x8001, 0x8001) AM_WRITENOP    // ???
+	AM_RANGE(0x8002, 0x8002) AM_DEVWRITE("sn1", sn76489a_device, write) // trigger read of latch
+	AM_RANGE(0x8003, 0x8003) AM_READ(soundlatch_byte_r)
+	AM_RANGE(0x8004, 0x8004) AM_DEVWRITE("sn2", sn76489a_device, write) // trigger read of latch
 	AM_RANGE(0x8005, 0x8005) AM_READ(mikie_sh_timer_r)
-	AM_RANGE(0x8079, 0x8079) AM_WRITENOP	// ???
-	AM_RANGE(0xa003, 0xa003) AM_WRITENOP	// ???
+	AM_RANGE(0x8079, 0x8079) AM_WRITENOP    // ???
+	AM_RANGE(0xa003, 0xa003) AM_WRITENOP    // ???
 ADDRESS_MAP_END
 
 /*************************************
@@ -143,32 +147,33 @@ static INPUT_PORTS_START( mikie )
 	KONAMI8_COCKTAIL_4WAY_B12_UNK
 
 	PORT_START("DSW1")
-	KONAMI_COINAGE(DEF_STR( Free_Play ), "No Coin B")
+	KONAMI_COINAGE_LOC(DEF_STR( Free_Play ), "No Coin B", SW1)
 	/* "No Coin B" = coins produce sound, but no effect on coin counter */
 
 	PORT_START("DSW2")
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Lives ) )
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Lives ) )            PORT_DIPLOCATION("SW2:1,2")
 	PORT_DIPSETTING(    0x03, "3" )
 	PORT_DIPSETTING(    0x02, "4" )
 	PORT_DIPSETTING(    0x01, "5" )
 	PORT_DIPSETTING(    0x00, "7" )
-	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Cabinet ) )
+	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Cabinet ) )          PORT_DIPLOCATION("SW2:3")
 	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( Cocktail ) )
-	PORT_DIPNAME( 0x18, 0x18, DEF_STR( Bonus_Life ) )
+	PORT_DIPNAME( 0x18, 0x18, DEF_STR( Bonus_Life ) )       PORT_DIPLOCATION("SW2:4,5")
 	PORT_DIPSETTING(    0x18, "20k 70k 50k+" )
 	PORT_DIPSETTING(    0x10, "30K 90k 60k+" )
 	PORT_DIPSETTING(    0x08, "30k only" )
 	PORT_DIPSETTING(    0x00, "40K only" )
-	PORT_DIPNAME( 0x60, 0x60, DEF_STR( Difficulty ) )
-	PORT_DIPSETTING(	0x60, DEF_STR( Easy ) )             /* 1 */
-	PORT_DIPSETTING(	0x40, DEF_STR( Medium ) )           /* 2 */
-	PORT_DIPSETTING(	0x20, DEF_STR( Hard ) )             /* 3 */
-	PORT_DIPSETTING(	0x00, DEF_STR( Hardest ) )          /* 4 */
-	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Demo_Sounds ) )
+	PORT_DIPNAME( 0x60, 0x60, DEF_STR( Difficulty ) )       PORT_DIPLOCATION("SW2:6,7")
+	PORT_DIPSETTING(    0x60, DEF_STR( Easy ) )             /* 1 */
+	PORT_DIPSETTING(    0x40, DEF_STR( Medium ) )           /* 2 */
+	PORT_DIPSETTING(    0x20, DEF_STR( Hard ) )             /* 3 */
+	PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) )          /* 4 */
+	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Demo_Sounds ) )      PORT_DIPLOCATION("SW2:8")
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
+	/* DSW3 is not mounted on PCB nor listed in manual */
 	PORT_START("DSW3")
 	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Flip_Screen ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
@@ -201,15 +206,15 @@ static const gfx_layout charlayout =
 
 static const gfx_layout spritelayout =
 {
-	16,16,	     /* 16*16 sprites */
-	256,	        /* 256 sprites */
-	4,	           /* 4 bits per pixel */
+	16,16,       /* 16*16 sprites */
+	256,            /* 256 sprites */
+	4,             /* 4 bits per pixel */
 	{ 0, 4, 256*128*8+0, 256*128*8+4 },
 	{ 32*8+0, 32*8+1, 32*8+2, 32*8+3, 16*8+0, 16*8+1, 16*8+2, 16*8+3,
 			0, 1, 2, 3, 48*8+0, 48*8+1, 48*8+2, 48*8+3 },
 	{ 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
 			32*16, 33*16, 34*16, 35*16, 36*16, 37*16, 38*16, 39*16 },
-	128*8	/* every sprite takes 64 bytes */
+	128*8   /* every sprite takes 64 bytes */
 };
 
 static GFXDECODE_START( mikie )
@@ -221,27 +226,49 @@ GFXDECODE_END
 
 /*************************************
  *
+ *  Sound interface
+ *
+ *************************************/
+
+
+//-------------------------------------------------
+//  sn76496_config psg_intf
+//-------------------------------------------------
+
+static const sn76496_config psg_intf =
+{
+	DEVCB_NULL
+};
+
+
+/*************************************
+ *
  *  Machine driver
  *
  *************************************/
 
-static MACHINE_START( mikie )
+void mikie_state::machine_start()
 {
-	mikie_state *state = machine.driver_data<mikie_state>();
 
-	state->m_maincpu = machine.device<cpu_device>("maincpu");
-	state->m_audiocpu = machine.device<cpu_device>("audiocpu");
+	m_maincpu = machine().device<cpu_device>("maincpu");
+	m_audiocpu = machine().device<cpu_device>("audiocpu");
 
-	state->save_item(NAME(state->m_palettebank));
-	state->save_item(NAME(state->m_last_irq));
+	save_item(NAME(m_palettebank));
+	save_item(NAME(m_last_irq));
 }
 
-static MACHINE_RESET( mikie )
+void mikie_state::machine_reset()
 {
-	mikie_state *state = machine.driver_data<mikie_state>();
 
-	state->m_palettebank = 0;
-	state->m_last_irq = 0;
+	m_palettebank = 0;
+	m_last_irq = 0;
+}
+
+INTERRUPT_GEN_MEMBER(mikie_state::vblank_irq)
+{
+
+	if(m_irq_mask)
+		device.execute().set_input_line(0, HOLD_LINE);
 }
 
 static MACHINE_CONFIG_START( mikie, mikie_state )
@@ -249,37 +276,34 @@ static MACHINE_CONFIG_START( mikie, mikie_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6809, OSC/12)
 	MCFG_CPU_PROGRAM_MAP(mikie_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", mikie_state,  vblank_irq)
 
 	MCFG_CPU_ADD("audiocpu", Z80, CLK)
 	MCFG_CPU_PROGRAM_MAP(sound_map)
 
-	MCFG_MACHINE_START(mikie)
-	MCFG_MACHINE_RESET(mikie)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60.59)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(mikie)
+	MCFG_SCREEN_UPDATE_DRIVER(mikie_state, screen_update_mikie)
 
 	MCFG_GFXDECODE(mikie)
 	MCFG_PALETTE_LENGTH(16*8*16+16*8*16)
 
-	MCFG_PALETTE_INIT(mikie)
-	MCFG_VIDEO_START(mikie)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
 	MCFG_SOUND_ADD("sn1", SN76489A, XTAL/8)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.60)
+	MCFG_SOUND_CONFIG(psg_intf)
 
 	MCFG_SOUND_ADD("sn2", SN76489A, CLK)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.60)
+	MCFG_SOUND_CONFIG(psg_intf)
 MACHINE_CONFIG_END
 
 /*************************************
@@ -307,11 +331,11 @@ ROM_START( mikie )
 	ROM_LOAD( "007.h3",  0xc000, 0x4000, CRC(31afc153) SHA1(31ca33f585fddb86131ef61de73e3563fa027455) )
 
 	ROM_REGION( 0x500, "proms", 0 )
-	ROM_LOAD( "d19.1i",  0x0000, 0x0100, CRC(8b83e7cf) SHA1(4fce779947f9f318023c7c54a71a4751f6bb8eb1) )	// red component
-	ROM_LOAD( "d21.3i",  0x0100, 0x0100, CRC(3556304a) SHA1(6f4fc3ef6b1b44278e7c8c1034ee4fbef90cf85a) )	// green component
-	ROM_LOAD( "d20.2i",  0x0200, 0x0100, CRC(676a0669) SHA1(14236a831204d52cdf8c2ef318a565d6c5587ce0) )	// blue component
-	ROM_LOAD( "d22.12h", 0x0300, 0x0100, CRC(872be05c) SHA1(1525303589d7ed909bc6e2827fbaa2c16ad4030b) )	// character lookup table
-	ROM_LOAD( "d18.f9",  0x0400, 0x0100, CRC(7396b374) SHA1(fedcc421a61d6623dc9c41b0a3e164efeb50ec7c) )	// sprite lookup table
+	ROM_LOAD( "d19.1i",  0x0000, 0x0100, CRC(8b83e7cf) SHA1(4fce779947f9f318023c7c54a71a4751f6bb8eb1) ) // red component
+	ROM_LOAD( "d21.3i",  0x0100, 0x0100, CRC(3556304a) SHA1(6f4fc3ef6b1b44278e7c8c1034ee4fbef90cf85a) ) // green component
+	ROM_LOAD( "d20.2i",  0x0200, 0x0100, CRC(676a0669) SHA1(14236a831204d52cdf8c2ef318a565d6c5587ce0) ) // blue component
+	ROM_LOAD( "d22.12h", 0x0300, 0x0100, CRC(872be05c) SHA1(1525303589d7ed909bc6e2827fbaa2c16ad4030b) ) // character lookup table
+	ROM_LOAD( "d18.f9",  0x0400, 0x0100, CRC(7396b374) SHA1(fedcc421a61d6623dc9c41b0a3e164efeb50ec7c) ) // sprite lookup table
 ROM_END
 
 ROM_START( mikiej )
@@ -333,11 +357,11 @@ ROM_START( mikiej )
 	ROM_LOAD( "q07.h3",  0xc000, 0x4000, CRC(15dc093b) SHA1(0b5a5aea25283b8edb7f534fc84b13f5176e26d6) )
 
 	ROM_REGION( 0x500, "proms", 0 )
-	ROM_LOAD( "d19.1i",  0x0000, 0x0100, CRC(8b83e7cf) SHA1(4fce779947f9f318023c7c54a71a4751f6bb8eb1) )	// red component
-	ROM_LOAD( "d21.3i",  0x0100, 0x0100, CRC(3556304a) SHA1(6f4fc3ef6b1b44278e7c8c1034ee4fbef90cf85a) )	// green component
-	ROM_LOAD( "d20.2i",  0x0200, 0x0100, CRC(676a0669) SHA1(14236a831204d52cdf8c2ef318a565d6c5587ce0) )	// blue component
-	ROM_LOAD( "d22.12h", 0x0300, 0x0100, CRC(872be05c) SHA1(1525303589d7ed909bc6e2827fbaa2c16ad4030b) )	// character lookup table
-	ROM_LOAD( "d18.f9",  0x0400, 0x0100, CRC(7396b374) SHA1(fedcc421a61d6623dc9c41b0a3e164efeb50ec7c) )	// sprite lookup table
+	ROM_LOAD( "d19.1i",  0x0000, 0x0100, CRC(8b83e7cf) SHA1(4fce779947f9f318023c7c54a71a4751f6bb8eb1) ) // red component
+	ROM_LOAD( "d21.3i",  0x0100, 0x0100, CRC(3556304a) SHA1(6f4fc3ef6b1b44278e7c8c1034ee4fbef90cf85a) ) // green component
+	ROM_LOAD( "d20.2i",  0x0200, 0x0100, CRC(676a0669) SHA1(14236a831204d52cdf8c2ef318a565d6c5587ce0) ) // blue component
+	ROM_LOAD( "d22.12h", 0x0300, 0x0100, CRC(872be05c) SHA1(1525303589d7ed909bc6e2827fbaa2c16ad4030b) ) // character lookup table
+	ROM_LOAD( "d18.f9",  0x0400, 0x0100, CRC(7396b374) SHA1(fedcc421a61d6623dc9c41b0a3e164efeb50ec7c) ) // sprite lookup table
 ROM_END
 
 ROM_START( mikiehs )
@@ -359,11 +383,11 @@ ROM_START( mikiehs )
 	ROM_LOAD( "i07.h3",  0xc000, 0x4000, CRC(ceeba6ac) SHA1(ca5f715dece88540d9ed0e0146cff09f6868d09f) )
 
 	ROM_REGION( 0x500, "proms", 0 )
-	ROM_LOAD( "d19.1i",  0x0000, 0x0100, CRC(8b83e7cf) SHA1(4fce779947f9f318023c7c54a71a4751f6bb8eb1) )	// red component
-	ROM_LOAD( "d21.3i",  0x0100, 0x0100, CRC(3556304a) SHA1(6f4fc3ef6b1b44278e7c8c1034ee4fbef90cf85a) )	// green component
-	ROM_LOAD( "d20.2i",  0x0200, 0x0100, CRC(676a0669) SHA1(14236a831204d52cdf8c2ef318a565d6c5587ce0) )	// blue component
-	ROM_LOAD( "d22.12h", 0x0300, 0x0100, CRC(872be05c) SHA1(1525303589d7ed909bc6e2827fbaa2c16ad4030b) )	// character lookup table
-	ROM_LOAD( "d18.f9",  0x0400, 0x0100, CRC(7396b374) SHA1(fedcc421a61d6623dc9c41b0a3e164efeb50ec7c) )	// sprite lookup table
+	ROM_LOAD( "d19.1i",  0x0000, 0x0100, CRC(8b83e7cf) SHA1(4fce779947f9f318023c7c54a71a4751f6bb8eb1) ) // red component
+	ROM_LOAD( "d21.3i",  0x0100, 0x0100, CRC(3556304a) SHA1(6f4fc3ef6b1b44278e7c8c1034ee4fbef90cf85a) ) // green component
+	ROM_LOAD( "d20.2i",  0x0200, 0x0100, CRC(676a0669) SHA1(14236a831204d52cdf8c2ef318a565d6c5587ce0) ) // blue component
+	ROM_LOAD( "d22.12h", 0x0300, 0x0100, CRC(872be05c) SHA1(1525303589d7ed909bc6e2827fbaa2c16ad4030b) ) // character lookup table
+	ROM_LOAD( "d18.f9",  0x0400, 0x0100, CRC(7396b374) SHA1(fedcc421a61d6623dc9c41b0a3e164efeb50ec7c) ) // sprite lookup table
 ROM_END
 
 /*************************************
@@ -372,6 +396,6 @@ ROM_END
  *
  *************************************/
 
-GAME( 1984, mikie,   0,     mikie, mikie, 0, ROT270, "Konami", "Mikie", GAME_SUPPORTS_SAVE )
-GAME( 1984, mikiej,  mikie, mikie, mikie, 0, ROT270, "Konami", "Shinnyuushain Tooru-kun", GAME_SUPPORTS_SAVE )
-GAME( 1984, mikiehs, mikie, mikie, mikie, 0, ROT270, "Konami", "Mikie (High School Graffiti)", GAME_SUPPORTS_SAVE )
+GAME( 1984, mikie,   0,     mikie, mikie, driver_device, 0, ROT270, "Konami", "Mikie", GAME_SUPPORTS_SAVE )
+GAME( 1984, mikiej,  mikie, mikie, mikie, driver_device, 0, ROT270, "Konami", "Shinnyuushain Tooru-kun", GAME_SUPPORTS_SAVE )
+GAME( 1984, mikiehs, mikie, mikie, mikie, driver_device, 0, ROT270, "Konami", "Mikie (High School Graffiti)", GAME_SUPPORTS_SAVE )

@@ -1,16 +1,22 @@
 class liberate_state : public driver_device
 {
 public:
-	liberate_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	liberate_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_paletteram(*this, "paletteram"),
+		m_bg_vram(*this, "bg_vram"),
+		m_colorram(*this, "colorram"),
+		m_videoram(*this, "videoram"),
+		m_spriteram(*this, "spriteram"),
+		m_scratchram(*this, "scratchram"){ }
 
-	UINT8 *m_videoram;
-	UINT8 *m_colorram;
-	UINT8 *m_paletteram;
-	UINT8 *m_spriteram;
-	UINT8 *m_scratchram;
-	UINT8 *m_charram;	/* prosoccr */
-	UINT8 *m_bg_vram; /* prosport */
+	optional_shared_ptr<UINT8> m_paletteram;
+	optional_shared_ptr<UINT8> m_bg_vram; /* prosport */
+	required_shared_ptr<UINT8> m_colorram;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_spriteram;
+	optional_shared_ptr<UINT8> m_scratchram;
+	UINT8 *m_charram;   /* prosoccr */
 
 	UINT8 m_io_ram[16];
 
@@ -23,28 +29,44 @@ public:
 	tilemap_t *m_back_tilemap;
 	tilemap_t *m_fix_tilemap;
 
-	device_t *m_maincpu;
-	device_t *m_audiocpu;
+	cpu_device *m_maincpu;
+	cpu_device *m_audiocpu;
+	DECLARE_READ8_MEMBER(deco16_bank_r);
+	DECLARE_READ8_MEMBER(deco16_io_r);
+	DECLARE_WRITE8_MEMBER(deco16_bank_w);
+	DECLARE_READ8_MEMBER(prosoccr_bank_r);
+	DECLARE_READ8_MEMBER(prosoccr_charram_r);
+	DECLARE_WRITE8_MEMBER(prosoccr_charram_w);
+	DECLARE_WRITE8_MEMBER(prosoccr_char_bank_w);
+	DECLARE_WRITE8_MEMBER(prosoccr_io_bank_w);
+	DECLARE_READ8_MEMBER(prosport_charram_r);
+	DECLARE_WRITE8_MEMBER(prosport_charram_w);
+	DECLARE_WRITE8_MEMBER(deco16_io_w);
+	DECLARE_WRITE8_MEMBER(prosoccr_io_w);
+	DECLARE_WRITE8_MEMBER(prosport_io_w);
+	DECLARE_WRITE8_MEMBER(liberate_videoram_w);
+	DECLARE_WRITE8_MEMBER(liberate_colorram_w);
+	DECLARE_WRITE8_MEMBER(prosport_bg_vram_w);
+	DECLARE_WRITE8_MEMBER(prosport_paletteram_w);
+	DECLARE_DRIVER_INIT(yellowcb);
+	DECLARE_DRIVER_INIT(liberate);
+	DECLARE_DRIVER_INIT(prosport);
+	TILEMAP_MAPPER_MEMBER(back_scan);
+	TILEMAP_MAPPER_MEMBER(fix_scan);
+	TILE_GET_INFO_MEMBER(get_back_tile_info);
+	TILE_GET_INFO_MEMBER(get_fix_tile_info);
+	TILE_GET_INFO_MEMBER(prosport_get_back_tile_info);
+	DECLARE_MACHINE_START(liberate);
+	DECLARE_MACHINE_RESET(liberate);
+	DECLARE_VIDEO_START(liberate);
+	DECLARE_PALETTE_INIT(liberate);
+	DECLARE_VIDEO_START(prosport);
+	DECLARE_VIDEO_START(boomrang);
+	DECLARE_VIDEO_START(prosoccr);
+	UINT32 screen_update_liberate(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_prosport(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_boomrang(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_prosoccr(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(deco16_interrupt);
+	INTERRUPT_GEN_MEMBER(prosport_interrupt);
 };
-
-
-/*----------- defined in video/liberate.c -----------*/
-
-PALETTE_INIT( liberate );
-SCREEN_UPDATE( prosoccr );
-SCREEN_UPDATE( prosport );
-SCREEN_UPDATE( liberate );
-SCREEN_UPDATE( boomrang );
-VIDEO_START( prosoccr );
-VIDEO_START( prosport );
-VIDEO_START( boomrang );
-VIDEO_START( liberate );
-
-WRITE8_HANDLER( deco16_io_w );
-WRITE8_HANDLER( prosoccr_io_w );
-WRITE8_HANDLER( prosport_io_w );
-WRITE8_HANDLER( prosport_paletteram_w );
-WRITE8_HANDLER( prosport_bg_vram_w );
-WRITE8_HANDLER( liberate_videoram_w );
-WRITE8_HANDLER( liberate_colorram_w );
-

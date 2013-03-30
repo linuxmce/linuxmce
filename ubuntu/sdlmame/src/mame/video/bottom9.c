@@ -54,15 +54,14 @@ void bottom9_zoom_callback( running_machine &machine, int *code, int *color, int
 
 ***************************************************************************/
 
-VIDEO_START( bottom9 )
+void bottom9_state::video_start()
 {
-	bottom9_state *state = machine.driver_data<bottom9_state>();
 
-	state->m_layer_colorbase[0] = 0;	/* not used */
-	state->m_layer_colorbase[1] = 0;
-	state->m_layer_colorbase[2] = 16;
-	state->m_sprite_colorbase = 32;
-	state->m_zoom_colorbase = 48;
+	m_layer_colorbase[0] = 0;   /* not used */
+	m_layer_colorbase[1] = 0;
+	m_layer_colorbase[2] = 16;
+	m_sprite_colorbase = 32;
+	m_zoom_colorbase = 48;
 }
 
 
@@ -73,24 +72,23 @@ VIDEO_START( bottom9 )
 
 ***************************************************************************/
 
-SCREEN_UPDATE( bottom9 )
+UINT32 bottom9_state::screen_update_bottom9(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	bottom9_state *state = screen->machine().driver_data<bottom9_state>();
 
-	k052109_tilemap_update(state->m_k052109);
+	k052109_tilemap_update(m_k052109);
 
 	/* note: FIX layer is not used */
-	bitmap_fill(bitmap, cliprect, state->m_layer_colorbase[1]);
-//  if (state->m_video_enable)
+	bitmap.fill(m_layer_colorbase[1], cliprect);
+//  if (m_video_enable)
 	{
-		k051960_sprites_draw(state->m_k051960, bitmap, cliprect, 1, 1);
-		k051316_zoom_draw(state->m_k051316, bitmap, cliprect, 0, 0);
-		k051960_sprites_draw(state->m_k051960, bitmap, cliprect, 0, 0);
-		k052109_tilemap_draw(state->m_k052109, bitmap, cliprect, 2, 0, 0);
+		k051960_sprites_draw(m_k051960, bitmap, cliprect, 1, 1);
+		k051316_zoom_draw(m_k051316, bitmap, cliprect, 0, 0);
+		k051960_sprites_draw(m_k051960, bitmap, cliprect, 0, 0);
+		k052109_tilemap_draw(m_k052109, bitmap, cliprect, 2, 0, 0);
 		/* note that priority 3 is opposite to the basic layer priority! */
 		/* (it IS used, but hopefully has no effect) */
-		k051960_sprites_draw(state->m_k051960, bitmap, cliprect, 2, 3);
-		k052109_tilemap_draw(state->m_k052109, bitmap, cliprect, 1, 0, 0);
+		k051960_sprites_draw(m_k051960, bitmap, cliprect, 2, 3);
+		k052109_tilemap_draw(m_k052109, bitmap, cliprect, 1, 0, 0);
 	}
 	return 0;
 }

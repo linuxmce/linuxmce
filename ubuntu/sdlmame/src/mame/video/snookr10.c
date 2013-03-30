@@ -42,23 +42,22 @@
 #include "includes/snookr10.h"
 
 
-WRITE8_HANDLER( snookr10_videoram_w )
+WRITE8_MEMBER(snookr10_state::snookr10_videoram_w)
 {
-	snookr10_state *state = space->machine().driver_data<snookr10_state>();
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_videoram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( snookr10_colorram_w )
+WRITE8_MEMBER(snookr10_state::snookr10_colorram_w)
 {
-	snookr10_state *state = space->machine().driver_data<snookr10_state>();
-	state->m_colorram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_colorram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
 
-PALETTE_INIT( snookr10 )
+void snookr10_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	/* GGBBBRRR */
 
 	int i;
@@ -66,13 +65,13 @@ PALETTE_INIT( snookr10 )
 	static const int resistances_g [2] = { 470, 220 };
 	double weights_r[3], weights_b[3], weights_g[2];
 
-	compute_resistor_weights(0,	255,	-1.0,
-			3,	resistances_rb,	weights_r,	100,	0,
-			3,	resistances_rb,	weights_b,	100,	0,
-			2,	resistances_g,	weights_g,	100,	0);
+	compute_resistor_weights(0, 255,    -1.0,
+			3,  resistances_rb, weights_r,  100,    0,
+			3,  resistances_rb, weights_b,  100,    0,
+			2,  resistances_g,  weights_g,  100,    0);
 
 
-	for (i = 0; i < machine.total_colors(); i++)
+	for (i = 0; i < machine().total_colors(); i++)
 	{
 		int bit0, bit1, bit2, r, g, b;
 
@@ -91,24 +90,23 @@ PALETTE_INIT( snookr10 )
 		bit1 = (color_prom[i] >> 7) & 0x01;
 		g = combine_2_weights(weights_g, bit0, bit1);
 
-		palette_set_color(machine, i, MAKE_RGB(r,g,b));
+		palette_set_color(machine(), i, MAKE_RGB(r,g,b));
 	}
 }
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(snookr10_state::get_bg_tile_info)
 {
-	snookr10_state *state = machine.driver_data<snookr10_state>();
 /*  - bits -
     7654 3210
     xxxx ----   tiles color.
     ---- xxxx   seems unused.
 */
 	int offs = tile_index;
-	int attr = state->m_videoram[offs] + (state->m_colorram[offs] << 8);
+	int attr = m_videoram[offs] + (m_colorram[offs] << 8);
 	int code = attr & 0xfff;
-	int color = state->m_colorram[offs] >> 4;
+	int color = m_colorram[offs] >> 4;
 
-	SET_TILE_INFO(0, code, color, 0);
+	SET_TILE_INFO_MEMBER(0, code, color, 0);
 }
 
 
@@ -117,8 +115,9 @@ static TILE_GET_INFO( get_bg_tile_info )
 *     For more information, see the driver notes.         *
 **********************************************************/
 
-PALETTE_INIT( apple10 )
+PALETTE_INIT_MEMBER(snookr10_state,apple10)
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	/* GGBBBRRR */
 
 	int i, cn;
@@ -126,13 +125,13 @@ PALETTE_INIT( apple10 )
 	static const int resistances_g [2] = { 470, 220 };
 	double weights_r[3], weights_b[3], weights_g[2];
 
-	compute_resistor_weights(0,	255,	-1.0,
-			3,	resistances_rb,	weights_r,	100,	0,
-			3,	resistances_rb,	weights_b,	100,	0,
-			2,	resistances_g,	weights_g,	100,	0);
+	compute_resistor_weights(0, 255,    -1.0,
+			3,  resistances_rb, weights_r,  100,    0,
+			3,  resistances_rb, weights_b,  100,    0,
+			2,  resistances_g,  weights_g,  100,    0);
 
 
-	for (i = 0; i < machine.total_colors(); i++)
+	for (i = 0; i < machine().total_colors(); i++)
 	{
 		int bit0, bit1, bit2, r, g, b;
 
@@ -154,42 +153,38 @@ PALETTE_INIT( apple10 )
 		/* encrypted color matrix */
 		cn = BITSWAP8(i,4,5,6,7,2,3,0,1);
 
-		palette_set_color(machine, cn, MAKE_RGB(r,g,b));
+		palette_set_color(machine(), cn, MAKE_RGB(r,g,b));
 	}
 }
 
-static TILE_GET_INFO( apple10_get_bg_tile_info )
+TILE_GET_INFO_MEMBER(snookr10_state::apple10_get_bg_tile_info)
 {
-	snookr10_state *state = machine.driver_data<snookr10_state>();
 /*  - bits -
     7654 3210
     xxxx ----   tiles color.
     ---- xxxx   seems unused.
 */
 	int offs = tile_index;
-	int attr = state->m_videoram[offs] + (state->m_colorram[offs] << 8);
-	int code = BITSWAP16((attr & 0xfff),15,14,13,12,8,9,10,11,0,1,2,3,4,5,6,7);	/* encrypted tile matrix */
-	int color = state->m_colorram[offs] >> 4;
+	int attr = m_videoram[offs] + (m_colorram[offs] << 8);
+	int code = BITSWAP16((attr & 0xfff),15,14,13,12,8,9,10,11,0,1,2,3,4,5,6,7); /* encrypted tile matrix */
+	int color = m_colorram[offs] >> 4;
 
-	SET_TILE_INFO(0, code, color, 0);
+	SET_TILE_INFO_MEMBER(0, code, color, 0);
 }
 
 
-VIDEO_START( snookr10 )
+void snookr10_state::video_start()
 {
-	snookr10_state *state = machine.driver_data<snookr10_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_rows, 4, 8, 128, 30);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(snookr10_state::get_bg_tile_info),this), TILEMAP_SCAN_ROWS, 4, 8, 128, 30);
 }
 
-VIDEO_START( apple10 )
+VIDEO_START_MEMBER(snookr10_state,apple10)
 {
-	snookr10_state *state = machine.driver_data<snookr10_state>();
-	state->m_bg_tilemap = tilemap_create(machine, apple10_get_bg_tile_info, tilemap_scan_rows, 4, 8, 128, 30);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(snookr10_state::apple10_get_bg_tile_info),this), TILEMAP_SCAN_ROWS, 4, 8, 128, 30);
 }
 
-SCREEN_UPDATE( snookr10 )
+UINT32 snookr10_state::screen_update_snookr10(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	snookr10_state *state = screen->machine().driver_data<snookr10_state>();
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
 	return 0;
 }

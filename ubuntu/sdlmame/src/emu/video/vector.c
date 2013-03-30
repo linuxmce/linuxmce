@@ -37,10 +37,10 @@
 
 
 
-#define VECTOR_WIDTH_DENOM			512
+#define VECTOR_WIDTH_DENOM          512
 
 
-#define MAX_POINTS	10000
+#define MAX_POINTS  10000
 
 #define VECTOR_TEAM \
 	"-* Vector Heads *-\n" \
@@ -57,20 +57,19 @@
 
 #if 0
 
-#define TEXTURE_LENGTH_BUCKETS		32
-#define TEXTURE_INTENSITY_BUCKETS	4
-#define TEXTURE_WIDTH				16
+#define TEXTURE_LENGTH_BUCKETS      32
+#define TEXTURE_INTENSITY_BUCKETS   4
+#define TEXTURE_WIDTH               16
 
-#define MAX_INTENSITY				2
-#define VECTOR_BLEED				(0.25f)
-#define VECTOR_INT_SCALE			(255.0f * 1.5f)
+#define MAX_INTENSITY               2
+#define VECTOR_BLEED                (0.25f)
+#define VECTOR_INT_SCALE            (255.0f * 1.5f)
 
 
-typedef struct _vector_texture vector_texture;
-struct _vector_texture
+struct vector_texture
 {
-	render_texture *	texture;
-	bitmap_t *			bitmap;
+	render_texture *    texture;
+	bitmap_argb32 *     bitmap;
 };
 
 static vector_texture *vectortex[TEXTURE_INTENSITY_BUCKETS][TEXTURE_LENGTH_BUCKETS];
@@ -95,8 +94,8 @@ static render_texture *get_vector_texture(float dx, float dy, float intensity)
 		return tex->texture;
 
 	height = lbucket * VECTOR_WIDTH_DENOM / TEXTURE_LENGTH_BUCKETS;
-	tex->bitmap = global_alloc(bitmap_t(TEXTURE_WIDTH, height, BITMAP_FORMAT_ARGB32));
-	bitmap_fill(tex->bitmap, NULL, MAKE_ARGB(0xff,0xff,0xff,0xff));
+	tex->bitmap = global_alloc(bitmap_argb32(TEXTURE_WIDTH, height));
+	tex->bitmap.fill(MAKE_ARGB(0xff,0xff,0xff,0xff));
 
 	totalint = 1.0f;
 	for (x = TEXTURE_WIDTH / 2 - 1; x >= 0; x--)
@@ -109,10 +108,10 @@ static render_texture *get_vector_texture(float dx, float dy, float intensity)
 		{
 			UINT32 *pix;
 
-			pix = (UINT32 *)bitmap->base + y * bitmap->rowpixels + x;
+			pix = (UINT32 *)bitmap.base + y * bitmap.rowpixels + x;
 			*pix = MAKE_ARGB((RGB_ALPHA(*pix) * intensity) >> 8,0xff,0xff,0xff);
 
-			pix = (UINT32 *)bitmap->base + y * bitmap->rowpixels + (TEXTURE_WIDTH - 1 - x);
+			pix = (UINT32 *)bitmap.base + y * bitmap.rowpixels + (TEXTURE_WIDTH - 1 - x);
 			*pix = MAKE_ARGB((RGB_ALPHA(*pix) * intensity) >> 8,0xff,0xff,0xff);
 		}
 	}
@@ -128,14 +127,14 @@ static render_texture *get_vector_texture(float dx, float dy, float intensity)
 #define VCLIP   2
 
 /* The vertices are buffered here */
-typedef struct
+struct point
 {
 	int x; int y;
 	rgb_t col;
 	int intensity;
 	int arg1; int arg2; /* start/end in pixel array or clipping info */
 	int status;         /* for dirty and clipping handling */
-} point;
+};
 
 
 
@@ -254,12 +253,12 @@ void vector_clear_list (void)
 }
 
 
-SCREEN_UPDATE( vector )
+SCREEN_UPDATE_RGB32( vector )
 {
-	UINT32 flags = PRIMFLAG_ANTIALIAS(screen->machine().options().antialias() ? 1 : 0) | PRIMFLAG_BLENDMODE(BLENDMODE_ADD);
-	const rectangle &visarea = screen->visible_area();
-	float xscale = 1.0f / (65536 * (visarea.max_x - visarea.min_x));
-	float yscale = 1.0f / (65536 * (visarea.max_y - visarea.min_y));
+	UINT32 flags = PRIMFLAG_ANTIALIAS(screen.machine().options().antialias() ? 1 : 0) | PRIMFLAG_BLENDMODE(BLENDMODE_ADD) | PRIMFLAG_VECTOR(1);
+	const rectangle &visarea = screen.visible_area();
+	float xscale = 1.0f / (65536 * visarea.width());
+	float yscale = 1.0f / (65536 * visarea.height());
 	float xoffs = (float)visarea.min_x;
 	float yoffs = (float)visarea.min_y;
 	point *curpoint;
@@ -269,8 +268,8 @@ SCREEN_UPDATE( vector )
 
 	curpoint = vector_list;
 
-	screen->container().empty();
-	screen->container().add_rect(0.0f, 0.0f, 1.0f, 1.0f, MAKE_ARGB(0xff,0x00,0x00,0x00), PRIMFLAG_BLENDMODE(BLENDMODE_ALPHA));
+	screen.container().empty();
+	screen.container().add_rect(0.0f, 0.0f, 1.0f, 1.0f, MAKE_ARGB(0xff,0x00,0x00,0x00), PRIMFLAG_BLENDMODE(BLENDMODE_ALPHA) | PRIMFLAG_VECTORBUF(1));
 
 	clip.x0 = clip.y0 = 0.0f;
 	clip.x1 = clip.y1 = 1.0f;
@@ -300,7 +299,7 @@ SCREEN_UPDATE( vector )
 
 			if (curpoint->intensity != 0)
 				if (!render_clip_line(&coords, &clip))
-					screen->container().add_line(coords.x0, coords.y0, coords.x1, coords.y1,
+					screen.container().add_line(coords.x0, coords.y0, coords.x1, coords.y1,
 							beam_width * (1.0f / (float)VECTOR_WIDTH_DENOM),
 							(curpoint->intensity << 24) | (curpoint->col & 0xffffff),
 							flags);

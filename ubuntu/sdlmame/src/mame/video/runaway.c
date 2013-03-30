@@ -8,7 +8,7 @@
 #include "includes/runaway.h"
 
 
-WRITE8_HANDLER( runaway_paletteram_w )
+WRITE8_MEMBER(runaway_state::runaway_paletteram_w)
 {
 	int R =
 		0x21 * ((~data >> 2) & 1) +
@@ -25,96 +25,89 @@ WRITE8_HANDLER( runaway_paletteram_w )
 		0x47 * ((~data >> 0) & 1) +
 		0x97 * ((~data >> 1) & 1);
 
-	palette_set_color(space->machine(), offset, MAKE_RGB(R, G, B));
+	palette_set_color(machine(), offset, MAKE_RGB(R, G, B));
 }
 
 
 
-WRITE8_HANDLER( runaway_video_ram_w )
+WRITE8_MEMBER(runaway_state::runaway_video_ram_w)
 {
-	runaway_state *state = space->machine().driver_data<runaway_state>();
-	state->m_video_ram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_video_ram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
 
 
-WRITE8_HANDLER( runaway_tile_bank_w )
+WRITE8_MEMBER(runaway_state::runaway_tile_bank_w)
 {
-	runaway_state *state = space->machine().driver_data<runaway_state>();
-	if ((data & 1) != state->m_tile_bank)
+	if ((data & 1) != m_tile_bank)
 	{
-		tilemap_mark_all_tiles_dirty(state->m_bg_tilemap);
+		m_bg_tilemap->mark_all_dirty();
 	}
 
-	state->m_tile_bank = data & 1;
+	m_tile_bank = data & 1;
 }
 
 
-static TILE_GET_INFO( runaway_get_tile_info )
+TILE_GET_INFO_MEMBER(runaway_state::runaway_get_tile_info)
 {
-	runaway_state *state = machine.driver_data<runaway_state>();
-	UINT8 code = state->m_video_ram[tile_index];
+	UINT8 code = m_video_ram[tile_index];
 
-	SET_TILE_INFO(0, ((code & 0x3f) << 1) | ((code & 0x40) >> 6) | (state->m_tile_bank << 7), 0, (code & 0x80) ? TILE_FLIPY : 0);
+	SET_TILE_INFO_MEMBER(0, ((code & 0x3f) << 1) | ((code & 0x40) >> 6) | (m_tile_bank << 7), 0, (code & 0x80) ? TILE_FLIPY : 0);
 }
 
 
-static TILE_GET_INFO( qwak_get_tile_info )
+TILE_GET_INFO_MEMBER(runaway_state::qwak_get_tile_info)
 {
-	runaway_state *state = machine.driver_data<runaway_state>();
-	UINT8 code = state->m_video_ram[tile_index];
+	UINT8 code = m_video_ram[tile_index];
 
-	SET_TILE_INFO(0, ((code & 0x7f) << 1) | ((code & 0x80) >> 7), 0, 0);
-}
-
-
-
-VIDEO_START( runaway )
-{
-	runaway_state *state = machine.driver_data<runaway_state>();
-	state->m_bg_tilemap = tilemap_create(machine, runaway_get_tile_info, tilemap_scan_rows,  8, 8, 32, 30);
-
-	state->save_item(NAME(state->m_tile_bank));
-}
-
-
-VIDEO_START( qwak )
-{
-	runaway_state *state = machine.driver_data<runaway_state>();
-	state->m_bg_tilemap = tilemap_create(machine, qwak_get_tile_info, tilemap_scan_rows,  8, 8, 32, 30);
-
-	state->save_item(NAME(state->m_tile_bank));
+	SET_TILE_INFO_MEMBER(0, ((code & 0x7f) << 1) | ((code & 0x80) >> 7), 0, 0);
 }
 
 
 
-SCREEN_UPDATE( runaway )
+void runaway_state::video_start()
 {
-	runaway_state *state = screen->machine().driver_data<runaway_state>();
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(runaway_state::runaway_get_tile_info),this), TILEMAP_SCAN_ROWS,  8, 8, 32, 30);
+
+	save_item(NAME(m_tile_bank));
+}
+
+
+VIDEO_START_MEMBER(runaway_state,qwak)
+{
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(runaway_state::qwak_get_tile_info),this), TILEMAP_SCAN_ROWS,  8, 8, 32, 30);
+
+	save_item(NAME(m_tile_bank));
+}
+
+
+
+UINT32 runaway_state::screen_update_runaway(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
+{
 	int i;
 
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
 
 	for (i = 0; i < 16; i++)
 	{
-		unsigned code = state->m_sprite_ram[i] & 0x3f;
+		unsigned code = m_sprite_ram[i] & 0x3f;
 
-		int x = state->m_sprite_ram[i + 0x20];
-		int y = state->m_sprite_ram[i + 0x10];
+		int x = m_sprite_ram[i + 0x20];
+		int y = m_sprite_ram[i + 0x10];
 
-		int flipx = state->m_sprite_ram[i] & 0x40;
-		int flipy = state->m_sprite_ram[i] & 0x80;
+		int flipx = m_sprite_ram[i] & 0x40;
+		int flipy = m_sprite_ram[i] & 0x80;
 
-		code |= (state->m_sprite_ram[i + 0x30] << 2) & 0x1c0;
+		code |= (m_sprite_ram[i + 0x30] << 2) & 0x1c0;
 
-		drawgfx_transpen(bitmap, cliprect, screen->machine().gfx[1],
+		drawgfx_transpen(bitmap, cliprect, machine().gfx[1],
 			code,
 			0,
 			flipx, flipy,
 			x, 240 - y, 0);
 
-		drawgfx_transpen(bitmap, cliprect, screen->machine().gfx[1],
+		drawgfx_transpen(bitmap, cliprect, machine().gfx[1],
 			code,
 			0,
 			flipx, flipy,
@@ -124,32 +117,31 @@ SCREEN_UPDATE( runaway )
 }
 
 
-SCREEN_UPDATE( qwak )
+UINT32 runaway_state::screen_update_qwak(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	runaway_state *state = screen->machine().driver_data<runaway_state>();
 	int i;
 
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
 
 	for (i = 0; i < 16; i++)
 	{
-		unsigned code = state->m_sprite_ram[i] & 0x7f;
+		unsigned code = m_sprite_ram[i] & 0x7f;
 
-		int x = state->m_sprite_ram[i + 0x20];
-		int y = state->m_sprite_ram[i + 0x10];
+		int x = m_sprite_ram[i + 0x20];
+		int y = m_sprite_ram[i + 0x10];
 
 		int flipx = 0;
-		int flipy = state->m_sprite_ram[i] & 0x80;
+		int flipy = m_sprite_ram[i] & 0x80;
 
-		code |= (state->m_sprite_ram[i + 0x30] << 2) & 0x1c0;
+		code |= (m_sprite_ram[i + 0x30] << 2) & 0x1c0;
 
-		drawgfx_transpen(bitmap, cliprect, screen->machine().gfx[1],
+		drawgfx_transpen(bitmap, cliprect, machine().gfx[1],
 			code,
 			0,
 			flipx, flipy,
 			x, 240 - y, 0);
 
-		drawgfx_transpen(bitmap, cliprect, screen->machine().gfx[1],
+		drawgfx_transpen(bitmap, cliprect, machine().gfx[1],
 			code,
 			0,
 			flipx, flipy,

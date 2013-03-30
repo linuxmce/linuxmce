@@ -304,55 +304,51 @@ Notes:
 
 /*** VARIOUS READ / WRITE HANDLERS *******************************************/
 
-static WRITE32_HANDLER( paletteram32_macrossp_w )
+WRITE32_MEMBER(macrossp_state::paletteram32_macrossp_w)
 {
-	macrossp_state *state = space->machine().driver_data<macrossp_state>();
 	int r,g,b;
-	COMBINE_DATA(&state->m_paletteram[offset]);
+	COMBINE_DATA(&m_paletteram[offset]);
 
-	b = ((state->m_paletteram[offset] & 0x0000ff00) >>8);
-	g = ((state->m_paletteram[offset] & 0x00ff0000) >>16);
-	r = ((state->m_paletteram[offset] & 0xff000000) >>24);
+	b = ((m_paletteram[offset] & 0x0000ff00) >>8);
+	g = ((m_paletteram[offset] & 0x00ff0000) >>16);
+	r = ((m_paletteram[offset] & 0xff000000) >>24);
 
-	palette_set_color(space->machine(), offset, MAKE_RGB(r,g,b));
+	palette_set_color(machine(), offset, MAKE_RGB(r,g,b));
 }
 
 
-static READ32_HANDLER ( macrossp_soundstatus_r )
+READ32_MEMBER(macrossp_state::macrossp_soundstatus_r)
 {
-	macrossp_state *state = space->machine().driver_data<macrossp_state>();
 
-	//  logerror("%08x read soundstatus\n", cpu_get_pc(&space->device()));
+	//  logerror("%08x read soundstatus\n", space.device().safe_pc());
 
 	/* bit 1 is sound status */
 	/* bit 0 unknown - it is expected to toggle, vblank? */
 
-	state->m_snd_toggle ^= 1;
+	m_snd_toggle ^= 1;
 
-	return (state->m_sndpending << 1) | state->m_snd_toggle;
+	return (m_sndpending << 1) | m_snd_toggle;
 }
 
-static WRITE32_HANDLER( macrossp_soundcmd_w )
+WRITE32_MEMBER(macrossp_state::macrossp_soundcmd_w)
 {
-	macrossp_state *state = space->machine().driver_data<macrossp_state>();
 
 	if (ACCESSING_BITS_16_31)
 	{
-		//logerror("%08x write soundcmd %08x (%08x)\n",cpu_get_pc(&space->device()),data,mem_mask);
+		//logerror("%08x write soundcmd %08x (%08x)\n",space.device().safe_pc(),data,mem_mask);
 		soundlatch_word_w(space, 0, data >> 16, 0xffff);
-		state->m_sndpending = 1;
-		device_set_input_line(state->m_audiocpu, 2, HOLD_LINE);
+		m_sndpending = 1;
+		m_audiocpu->set_input_line(2, HOLD_LINE);
 		/* spin for a while to let the sound CPU read the command */
-		device_spin_until_time(&space->device(), attotime::from_usec(50));
+		space.device().execute().spin_until_time(attotime::from_usec(50));
 	}
 }
 
-static READ16_HANDLER( macrossp_soundcmd_r )
+READ16_MEMBER(macrossp_state::macrossp_soundcmd_r)
 {
-	macrossp_state *state = space->machine().driver_data<macrossp_state>();
 
-	//  logerror("%06x read soundcmd\n",cpu_get_pc(&space->device()));
-	state->m_sndpending = 0;
+	//  logerror("%06x read soundcmd\n",space.device().safe_pc());
+	m_sndpending = 0;
 	return soundlatch_word_r(space, offset, mem_mask);
 }
 
@@ -386,61 +382,60 @@ static void update_colors( running_machine &machine )
 	}
 }
 
-static WRITE32_HANDLER( macrossp_palette_fade_w )
+WRITE32_MEMBER(macrossp_state::macrossp_palette_fade_w)
 {
-	macrossp_state *state = space->machine().driver_data<macrossp_state>();
 
-	state->m_fade_effect = ((data & 0xff00) >> 8) - 0x28; //it writes two times, first with a -0x28 then with the proper data
+	m_fade_effect = ((data & 0xff00) >> 8) - 0x28; //it writes two times, first with a -0x28 then with the proper data
 	//  popmessage("%02x",fade_effect);
 
-	if (state->m_old_fade != state->m_fade_effect)
+	if (m_old_fade != m_fade_effect)
 	{
-		state->m_old_fade = state->m_fade_effect;
-		update_colors(space->machine());
+		m_old_fade = m_fade_effect;
+		update_colors(machine());
 	}
 }
 
 /*** MEMORY MAPS *************************************************************/
 
-static ADDRESS_MAP_START( macrossp_map, AS_PROGRAM, 32 )
+static ADDRESS_MAP_START( macrossp_map, AS_PROGRAM, 32, macrossp_state )
 	AM_RANGE(0x000000, 0x3fffff) AM_ROM
-	AM_RANGE(0x800000, 0x802fff) AM_RAM AM_BASE_SIZE_MEMBER(macrossp_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0x800000, 0x802fff) AM_RAM AM_SHARE("spriteram")
 	/* SCR A Layer */
-	AM_RANGE(0x900000, 0x903fff) AM_RAM_WRITE(macrossp_scra_videoram_w) AM_BASE_MEMBER(macrossp_state, m_scra_videoram)
+	AM_RANGE(0x900000, 0x903fff) AM_RAM_WRITE(macrossp_scra_videoram_w) AM_SHARE("scra_videoram")
 	AM_RANGE(0x904200, 0x9043ff) AM_WRITEONLY /* W/O? */
-	AM_RANGE(0x905000, 0x90500b) AM_WRITEONLY AM_BASE_MEMBER(macrossp_state, m_scra_videoregs) /* W/O? */
+	AM_RANGE(0x905000, 0x90500b) AM_WRITEONLY AM_SHARE("scra_videoregs") /* W/O? */
 	/* SCR B Layer */
-	AM_RANGE(0x908000, 0x90bfff) AM_RAM_WRITE(macrossp_scrb_videoram_w) AM_BASE_MEMBER(macrossp_state, m_scrb_videoram)
+	AM_RANGE(0x908000, 0x90bfff) AM_RAM_WRITE(macrossp_scrb_videoram_w) AM_SHARE("scrb_videoram")
 	AM_RANGE(0x90c200, 0x90c3ff) AM_WRITEONLY /* W/O? */
-	AM_RANGE(0x90d000, 0x90d00b) AM_WRITEONLY AM_BASE_MEMBER(macrossp_state, m_scrb_videoregs) /* W/O? */
+	AM_RANGE(0x90d000, 0x90d00b) AM_WRITEONLY AM_SHARE("scrb_videoregs") /* W/O? */
 	/* SCR C Layer */
-	AM_RANGE(0x910000, 0x913fff) AM_RAM_WRITE(macrossp_scrc_videoram_w) AM_BASE_MEMBER(macrossp_state, m_scrc_videoram)
+	AM_RANGE(0x910000, 0x913fff) AM_RAM_WRITE(macrossp_scrc_videoram_w) AM_SHARE("scrc_videoram")
 	AM_RANGE(0x914200, 0x9143ff) AM_WRITEONLY /* W/O? */
-	AM_RANGE(0x915000, 0x91500b) AM_WRITEONLY AM_BASE_MEMBER(macrossp_state, m_scrc_videoregs) /* W/O? */
+	AM_RANGE(0x915000, 0x91500b) AM_WRITEONLY AM_SHARE("scrc_videoregs") /* W/O? */
 	/* Text Layer */
-	AM_RANGE(0x918000, 0x91bfff) AM_RAM_WRITE(macrossp_text_videoram_w) AM_BASE_MEMBER(macrossp_state, m_text_videoram)
+	AM_RANGE(0x918000, 0x91bfff) AM_RAM_WRITE(macrossp_text_videoram_w) AM_SHARE("text_videoram")
 	AM_RANGE(0x91c200, 0x91c3ff) AM_WRITEONLY /* W/O? */
-	AM_RANGE(0x91d000, 0x91d00b) AM_WRITEONLY AM_BASE_MEMBER(macrossp_state, m_text_videoregs) /* W/O? */
+	AM_RANGE(0x91d000, 0x91d00b) AM_WRITEONLY AM_SHARE("text_videoregs") /* W/O? */
 
-	AM_RANGE(0xa00000, 0xa03fff) AM_RAM_WRITE(paletteram32_macrossp_w) AM_BASE_MEMBER(macrossp_state, m_paletteram)
+	AM_RANGE(0xa00000, 0xa03fff) AM_RAM_WRITE(paletteram32_macrossp_w) AM_SHARE("paletteram")
 
 	AM_RANGE(0xb00000, 0xb00003) AM_READ_PORT("INPUTS")
 	AM_RANGE(0xb00004, 0xb00007) AM_READ(macrossp_soundstatus_r) AM_WRITENOP // irq related?
-	AM_RANGE(0xb00008, 0xb0000b) AM_WRITENOP	// irq related?
+	AM_RANGE(0xb00008, 0xb0000b) AM_WRITENOP    // irq related?
 	AM_RANGE(0xb0000c, 0xb0000f) AM_READ_PORT("DSW") AM_WRITENOP
-	AM_RANGE(0xb00010, 0xb00013) AM_WRITE(macrossp_palette_fade_w)	// macrossp palette fade
+	AM_RANGE(0xb00010, 0xb00013) AM_WRITE(macrossp_palette_fade_w)  // macrossp palette fade
 	AM_RANGE(0xb00020, 0xb00023) AM_WRITENOP
 
 	AM_RANGE(0xc00000, 0xc00003) AM_WRITE(macrossp_soundcmd_w)
 
-	AM_RANGE(0xf00000, 0xf1ffff) AM_RAM AM_BASE_MEMBER(macrossp_state, m_mainram) /* Main Ram */
+	AM_RANGE(0xf00000, 0xf1ffff) AM_RAM AM_SHARE("mainram") /* Main Ram */
 //  AM_RANGE(0xfe0000, 0xfe0003) AM_NOP
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( macrossp_sound_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( macrossp_sound_map, AS_PROGRAM, 16, macrossp_state )
 	AM_RANGE(0x000000, 0x0fffff) AM_ROM
 	AM_RANGE(0x200000, 0x207fff) AM_RAM
-	AM_RANGE(0x400000, 0x40007f) AM_DEVREADWRITE8("ensoniq", es5506_r, es5506_w, 0x00ff)
+	AM_RANGE(0x400000, 0x40007f) AM_DEVREADWRITE8_LEGACY("ensoniq", es5506_r, es5506_w, 0x00ff)
 	AM_RANGE(0x600000, 0x600001) AM_READ(macrossp_soundcmd_r)
 ADDRESS_MAP_END
 
@@ -556,7 +551,7 @@ static const gfx_layout macrossp_char16x16x4layout =
 	{ 0,1,2,3 },
 	{ 0, 4, 8, 12, 16, 20, 24, 28, 32+0,32+4,32+8,32+12,32+16,32+20,32+24,32+28 },
 	{ 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64,
-	  8*64, 9*64, 10*64,11*64,12*64,13*64,14*64,15*64},
+		8*64, 9*64, 10*64,11*64,12*64,13*64,14*64,15*64},
 	16*64
 };
 
@@ -568,15 +563,15 @@ static const gfx_layout macrossp_char16x16x8layout =
 	{ 0,1,2,3,4,5,6,7 },
 	{ 0, 8, 16, 24, 32, 40, 48, 56, 64+0,64+8,64+16,64+24,64+32,64+40,64+48,64+56 },
 	{ 0*128, 1*128, 2*128, 3*128, 4*128, 5*128, 6*128, 7*128,
-	  8*128, 9*128, 10*128,11*128,12*128,13*128,14*128,15*128},
+		8*128, 9*128, 10*128,11*128,12*128,13*128,14*128,15*128},
 	16*128
 };
 
 static GFXDECODE_START( macrossp )
-	GFXDECODE_ENTRY( "gfx1", 0, macrossp_char16x16x8layout,   0x000, 0x20 )	/* 8bpp but 6bpp granularity */
-	GFXDECODE_ENTRY( "gfx2", 0, macrossp_char16x16x8layout,   0x800, 0x20 )	/* 8bpp but 6bpp granularity */
-	GFXDECODE_ENTRY( "gfx3", 0, macrossp_char16x16x8layout,   0x800, 0x20 )	/* 8bpp but 6bpp granularity */
-	GFXDECODE_ENTRY( "gfx4", 0, macrossp_char16x16x8layout,   0x800, 0x20 )	/* 8bpp but 6bpp granularity */
+	GFXDECODE_ENTRY( "gfx1", 0, macrossp_char16x16x8layout,   0x000, 0x20 ) /* 8bpp but 6bpp granularity */
+	GFXDECODE_ENTRY( "gfx2", 0, macrossp_char16x16x8layout,   0x800, 0x20 ) /* 8bpp but 6bpp granularity */
+	GFXDECODE_ENTRY( "gfx3", 0, macrossp_char16x16x8layout,   0x800, 0x20 ) /* 8bpp but 6bpp granularity */
+	GFXDECODE_ENTRY( "gfx4", 0, macrossp_char16x16x8layout,   0x800, 0x20 ) /* 8bpp but 6bpp granularity */
 	GFXDECODE_ENTRY( "gfx5", 0, macrossp_char16x16x4layout,   0x800, 0x80 )
 GFXDECODE_END
 
@@ -584,12 +579,12 @@ GFXDECODE_END
 
 static void irqhandler(device_t *device, int irq)
 {
-	// macrossp_state *state = space->machine().driver_data<macrossp_state>();
+	// macrossp_state *state = space.machine().driver_data<macrossp_state>();
 	logerror("ES5506 irq %d\n", irq);
 
 	/* IRQ lines 1 & 4 on the sound 68000 are definitely triggered by the ES5506,
-    but I haven't noticed the ES5506 ever assert the line - maybe only used when developing the game? */
-	//  device_set_input_line(state->m_audiocpu, 1, irq ? ASSERT_LINE : CLEAR_LINE);
+	but I haven't noticed the ES5506 ever assert the line - maybe only used when developing the game? */
+	//  state->m_audiocpu->set_input_line(1, irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static const es5506_interface es5506_config =
@@ -602,56 +597,50 @@ static const es5506_interface es5506_config =
 };
 
 
-static MACHINE_START( macrossp )
+void macrossp_state::machine_start()
 {
-	macrossp_state *state = machine.driver_data<macrossp_state>();
 
-	state->m_maincpu = machine.device("maincpu");
-	state->m_audiocpu = machine.device("audiocpu");
+	m_maincpu = machine().device<cpu_device>("maincpu");
+	m_audiocpu = machine().device<cpu_device>("audiocpu");
 
-	state->save_item(NAME(state->m_sndpending));
-	state->save_item(NAME(state->m_snd_toggle));
-	state->save_item(NAME(state->m_fade_effect));
-	state->save_item(NAME(state->m_old_fade));
+	save_item(NAME(m_sndpending));
+	save_item(NAME(m_snd_toggle));
+	save_item(NAME(m_fade_effect));
+	save_item(NAME(m_old_fade));
 }
 
-static MACHINE_RESET( macrossp )
+void macrossp_state::machine_reset()
 {
-	macrossp_state *state = machine.driver_data<macrossp_state>();
 
-	state->m_sndpending = 0;
-	state->m_snd_toggle = 0;
-	state->m_fade_effect = 0;
-	state->m_old_fade = 0;
+	m_sndpending = 0;
+	m_snd_toggle = 0;
+	m_fade_effect = 0;
+	m_old_fade = 0;
 }
 
 static MACHINE_CONFIG_START( macrossp, macrossp_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M68EC020, 50000000/2)	/* 25 MHz */
+	MCFG_CPU_ADD("maincpu", M68EC020, 50000000/2)   /* 25 MHz */
 	MCFG_CPU_PROGRAM_MAP(macrossp_map)
-	MCFG_CPU_VBLANK_INT("screen", irq3_line_hold) // there are others ...
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", macrossp_state,  irq3_line_hold) // there are others ...
 
-	MCFG_CPU_ADD("audiocpu", M68000, 32000000/2)	/* 16 MHz */
+	MCFG_CPU_ADD("audiocpu", M68000, 32000000/2)    /* 16 MHz */
 	MCFG_CPU_PROGRAM_MAP(macrossp_sound_map)
 
-	MCFG_MACHINE_START(macrossp)
-	MCFG_MACHINE_RESET(macrossp)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
 	MCFG_SCREEN_SIZE(32*16, 16*16)
 	MCFG_SCREEN_VISIBLE_AREA(0*16, 24*16-1, 0*16, 15*16-1)
-	MCFG_SCREEN_UPDATE(macrossp)
-	MCFG_SCREEN_EOF(macrossp)
+	MCFG_SCREEN_UPDATE_DRIVER(macrossp_state, screen_update_macrossp)
+	MCFG_SCREEN_VBLANK_DRIVER(macrossp_state, screen_eof_macrossp)
 
 	MCFG_GFXDECODE(macrossp)
 	MCFG_PALETTE_LENGTH(0x1000)
 
-	MCFG_VIDEO_START(macrossp)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
@@ -767,40 +756,38 @@ ROM_END
 
 
 
-static WRITE32_HANDLER( macrossp_speedup_w )
+WRITE32_MEMBER(macrossp_state::macrossp_speedup_w)
 {
 /*
 PC :00018104 018104: addq.w  #1, $f1015a.l
 PC :0001810A 01810A: cmp.w   $f10140.l, D0
 PC :00018110 018110: beq     18104
 */
-	macrossp_state *state = space->machine().driver_data<macrossp_state>();
 
-	COMBINE_DATA(&state->m_mainram[0x10158 / 4]);
-	if (cpu_get_pc(&space->device()) == 0x001810A) device_spin_until_interrupt(&space->device());
+	COMBINE_DATA(&m_mainram[0x10158 / 4]);
+	if (space.device().safe_pc() == 0x001810A) space.device().execute().spin_until_interrupt();
 }
 
 #ifdef UNUSED_FUNCTION
-static WRITE32_HANDLER( quizmoon_speedup_w )
+WRITE32_MEMBER(macrossp_state::quizmoon_speedup_w)
 {
-	macrossp_state *state = space->machine().driver_data<macrossp_state>();
 
-	COMBINE_DATA(&state->m_mainram[0x00020 / 4]);
-	if (cpu_get_pc(&space->device()) == 0x1cc) device_spin_until_interrupt(&space->device());
+	COMBINE_DATA(&m_mainram[0x00020 / 4]);
+	if (space.device().safe_pc() == 0x1cc) space.device().execute().spin_until_interrupt();
 }
 #endif
 
-static DRIVER_INIT( macrossp )
+DRIVER_INIT_MEMBER(macrossp_state,macrossp)
 {
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0xf10158, 0xf1015b, FUNC(macrossp_speedup_w) );
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0xf10158, 0xf1015b, write32_delegate(FUNC(macrossp_state::macrossp_speedup_w),this));
 }
 
-static DRIVER_INIT( quizmoon )
+DRIVER_INIT_MEMBER(macrossp_state,quizmoon)
 {
 #ifdef UNUSED_FUNCTION
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0xf00020, 0xf00023, FUNC(quizmoon_speedup_w) );
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0xf00020, 0xf00023, write32_delegate(FUNC(macrossp_state::quizmoon_speedup_w),this));
 #endif
 }
 
-GAME( 1996, macrossp, 0, macrossp, macrossp, macrossp, ROT270, "Banpresto", "Macross Plus", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
-GAME( 1997, quizmoon, 0, quizmoon, quizmoon, quizmoon, ROT0,   "Banpresto", "Quiz Bisyoujo Senshi Sailor Moon - Chiryoku Tairyoku Toki no Un", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
+GAME( 1996, macrossp, 0, macrossp, macrossp, macrossp_state, macrossp, ROT270, "Banpresto", "Macross Plus", GAME_IMPERFECT_GRAPHICS | GAME_NO_COCKTAIL | GAME_SUPPORTS_SAVE )
+GAME( 1997, quizmoon, 0, quizmoon, quizmoon, macrossp_state, quizmoon, ROT0,   "Banpresto", "Quiz Bisyoujo Senshi Sailor Moon - Chiryoku Tairyoku Toki no Un", GAME_IMPERFECT_GRAPHICS | GAME_NO_COCKTAIL | GAME_SUPPORTS_SAVE )

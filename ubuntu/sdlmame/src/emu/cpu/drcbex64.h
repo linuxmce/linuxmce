@@ -79,12 +79,12 @@ private:
 		// parameter types
 		enum be_parameter_type
 		{
-			PTYPE_NONE = 0,						// invalid
-			PTYPE_IMMEDIATE,					// immediate; value = sign-extended to 64 bits
-			PTYPE_INT_REGISTER,					// integer register; value = 0-REG_MAX
-			PTYPE_FLOAT_REGISTER,				// floating point register; value = 0-REG_MAX
-			PTYPE_VECTOR_REGISTER,				// vector register; value = 0-REG_MAX
-			PTYPE_MEMORY,						// memory; value = pointer to memory
+			PTYPE_NONE = 0,                     // invalid
+			PTYPE_IMMEDIATE,                    // immediate; value = sign-extended to 64 bits
+			PTYPE_INT_REGISTER,                 // integer register; value = 0-REG_MAX
+			PTYPE_FLOAT_REGISTER,               // floating point register; value = 0-REG_MAX
+			PTYPE_VECTOR_REGISTER,              // vector register; value = 0-REG_MAX
+			PTYPE_MEMORY,                       // memory; value = pointer to memory
 			PTYPE_MAX
 		};
 
@@ -111,9 +111,9 @@ private:
 		// getters
 		be_parameter_type type() const { return m_type; }
 		UINT64 immediate() const { assert(m_type == PTYPE_IMMEDIATE); return m_value; }
-		int ireg() const { assert(m_type == PTYPE_INT_REGISTER); assert(m_value >= 0 && m_value < x64emit::REG_MAX); return m_value; }
-		int freg() const { assert(m_type == PTYPE_FLOAT_REGISTER); assert(m_value >= 0 && m_value < x64emit::REG_MAX); return m_value; }
-		int vreg() const { assert(m_type == PTYPE_VECTOR_REGISTER); assert(m_value >= 0 && m_value < x64emit::REG_MAX); return m_value; }
+		int ireg() const { assert(m_type == PTYPE_INT_REGISTER); assert(m_value < x64emit::REG_MAX); return m_value; }
+		int freg() const { assert(m_type == PTYPE_FLOAT_REGISTER); assert(m_value < x64emit::REG_MAX); return m_value; }
+		int vreg() const { assert(m_type == PTYPE_VECTOR_REGISTER); assert(m_value < x64emit::REG_MAX); return m_value; }
 		void *memory() const { assert(m_type == PTYPE_MEMORY); return reinterpret_cast<void *>(m_value); }
 
 		// type queries
@@ -136,8 +136,8 @@ private:
 		be_parameter(be_parameter_type type, be_parameter_value value) : m_type(type), m_value(value) { }
 
 		// internals
-		be_parameter_type	m_type;				// parameter type
-		be_parameter_value	m_value;			// parameter value
+		be_parameter_type   m_type;             // parameter type
+		be_parameter_value  m_value;            // parameter value
 	};
 
 	// helpers
@@ -149,7 +149,7 @@ private:
 	void emit_smart_call_r64(x86code *&dst, x86code *target, UINT8 reg);
 	void emit_smart_call_m64(x86code *&dst, x86code **target);
 
-	static void fixup_label(void *parameter, drccodeptr labelcodeptr);
+	void fixup_label(void *parameter, drccodeptr labelcodeptr);
 	void fixup_exception(drccodeptr *codeptr, void *param1, void *param2);
 
 	static void debug_log_hashjmp(offs_t pc, int mode);
@@ -319,48 +319,51 @@ private:
 	void emit_movsd_p64_r128(x86code *&dst, const be_parameter &param, UINT8 reg);
 
 	// internal state
-	drc_hash_table			m_hash;					// hash table state
-	drc_map_variables		m_map;					// code map
-	drc_label_list			m_labels;				// label list
-	x86log_context *		m_log;					// logging
-	bool					m_sse41;				// do we have SSE4.1 support?
+	drc_hash_table          m_hash;                 // hash table state
+	drc_map_variables       m_map;                  // code map
+	drc_label_list          m_labels;               // label list
+	x86log_context *        m_log;                  // logging
+	bool                    m_sse41;                // do we have SSE4.1 support?
 
-	UINT32 *				m_absmask32;			// absolute value mask (32-bit)
-	UINT64 *				m_absmask64;			// absolute value mask (32-bit)
-	UINT8 *					m_rbpvalue;				// value of RBP
+	UINT32 *                m_absmask32;            // absolute value mask (32-bit)
+	UINT64 *                m_absmask64;            // absolute value mask (32-bit)
+	UINT8 *                 m_rbpvalue;             // value of RBP
 
-	x86_entry_point_func	m_entry;				// entry point
-	x86code *				m_exit;					// exit point
-	x86code *				m_nocode;				// nocode handler
+	x86_entry_point_func    m_entry;                // entry point
+	x86code *               m_exit;                 // exit point
+	x86code *               m_nocode;               // nocode handler
+
+	drc_label_fixup_delegate m_fixup_label;         // precomputed delegate for fixups
+	drc_oob_delegate        m_fixup_exception;      // precomputed delegate for exception fixups
 
 	// state to live in the near cache
 	struct near_state
 	{
-		x86code *			debug_cpu_instruction_hook;// debugger callback
-		x86code *			debug_log_hashjmp;		// hashjmp debugging
-		x86code *			debug_log_hashjmp_fail;	// hashjmp debugging
-		x86code *			drcmap_get_value;		// map lookup helper
+		x86code *           debug_cpu_instruction_hook;// debugger callback
+		x86code *           debug_log_hashjmp;      // hashjmp debugging
+		x86code *           debug_log_hashjmp_fail; // hashjmp debugging
+		x86code *           drcmap_get_value;       // map lookup helper
 
-		UINT32				ssemode;				// saved SSE mode
-		UINT32				ssemodesave;			// temporary location for saving
-		UINT32				ssecontrol[4];			// copy of the sse_control array
-		float				single1;				// 1.0 is single-precision
-		double				double1;				// 1.0 in double-precision
+		UINT32              ssemode;                // saved SSE mode
+		UINT32              ssemodesave;            // temporary location for saving
+		UINT32              ssecontrol[4];          // copy of the sse_control array
+		float               single1;                // 1.0 is single-precision
+		double              double1;                // 1.0 in double-precision
 
-		void *				stacksave;				// saved stack pointer
-		void *				hashstacksave;			// saved stack pointer for hashjmp
+		void *              stacksave;              // saved stack pointer
+		void *              hashstacksave;          // saved stack pointer for hashjmp
 
-		UINT8				flagsmap[0x1000];		// flags map
-		UINT64				flagsunmap[0x20];		// flags unmapper
+		UINT8               flagsmap[0x1000];       // flags map
+		UINT64              flagsunmap[0x20];       // flags unmapper
 	};
-	near_state &			m_near;
+	near_state &            m_near;
 
 	// globals
 	typedef void (drcbe_x64::*opcode_generate_func)(x86code *&dst, const uml::instruction &inst);
 	struct opcode_table_entry
 	{
-		uml::opcode_t			opcode;				// opcode in question
-		opcode_generate_func	func;				// function pointer to the work
+		uml::opcode_t           opcode;             // opcode in question
+		opcode_generate_func    func;               // function pointer to the work
 	};
 	static const opcode_table_entry s_opcode_table_source[];
 	static opcode_generate_func s_opcode_table[uml::OP_MAX];

@@ -446,23 +446,29 @@
 class bingor_state : public driver_device
 {
 public:
-	bingor_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	bingor_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_blit_ram(*this, "blit_ram"){ }
 
-	UINT16 *m_blit_ram;
+	required_shared_ptr<UINT16> m_blit_ram;
+	DECLARE_READ16_MEMBER(test_r);
+	DECLARE_READ8_MEMBER(test8_r);
+	virtual void video_start();
+	UINT32 screen_update_bingor(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(vblank_irq);
+	INTERRUPT_GEN_MEMBER(unk_irq);
 };
 
 
-static VIDEO_START(bingor)
+void bingor_state::video_start()
 {
 }
 
-static SCREEN_UPDATE(bingor)
+UINT32 bingor_state::screen_update_bingor(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	bingor_state *state = screen->machine().driver_data<bingor_state>();
 	int x,y,count;
 
-	bitmap_fill(bitmap,cliprect,get_black_pen(screen->machine()));
+	bitmap.fill(get_black_pen(machine()), cliprect);
 
 	count = (0x2000/2);
 
@@ -472,25 +478,25 @@ static SCREEN_UPDATE(bingor)
 		{
 			UINT32 color;
 
-			color = (state->m_blit_ram[count] & 0xf000)>>12;
+			color = (m_blit_ram[count] & 0xf000)>>12;
 
-			if((x+3)<screen->visible_area().max_x && ((y)+0)<screen->visible_area().max_y)
-				*BITMAP_ADDR32(bitmap, y, x+3) = screen->machine().pens[color];
+			if(cliprect.contains(x+3, y))
+				bitmap.pix32(y, x+3) = machine().pens[color];
 
-			color = (state->m_blit_ram[count] & 0x0f00)>>8;
+			color = (m_blit_ram[count] & 0x0f00)>>8;
 
-			if((x+2)<screen->visible_area().max_x && ((y)+0)<screen->visible_area().max_y)
-				*BITMAP_ADDR32(bitmap, y, x+2) = screen->machine().pens[color];
+			if(cliprect.contains(x+2, y))
+				bitmap.pix32(y, x+2) = machine().pens[color];
 
-			color = (state->m_blit_ram[count] & 0x00f0)>>4;
+			color = (m_blit_ram[count] & 0x00f0)>>4;
 
-			if((x+1)<screen->visible_area().max_x && ((y)+0)<screen->visible_area().max_y)
-				*BITMAP_ADDR32(bitmap, y, x+1) = screen->machine().pens[color];
+			if(cliprect.contains(x+1, y))
+				bitmap.pix32(y, x+1) = machine().pens[color];
 
-			color = (state->m_blit_ram[count] & 0x000f)>>0;
+			color = (m_blit_ram[count] & 0x000f)>>0;
 
-			if((x+0)<screen->visible_area().max_x && ((y)+0)<screen->visible_area().max_y)
-				*BITMAP_ADDR32(bitmap, y, x+0) = screen->machine().pens[color];
+			if(cliprect.contains(x+0, y))
+				bitmap.pix32(y, x+0) = machine().pens[color];
 
 			count++;
 		}
@@ -500,33 +506,34 @@ static SCREEN_UPDATE(bingor)
 }
 
 #if 0
-static READ16_HANDLER( test_r )
+READ16_MEMBER(bingor_state::test_r)
 {
-	return space->machine().rand();
+	return machine().rand();
 }
 #endif
 
-static ADDRESS_MAP_START( bingor_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( bingor_map, AS_PROGRAM, 16, bingor_state )
 	AM_RANGE(0x00000, 0x0ffff) AM_RAM
 	AM_RANGE(0x90000, 0x9ffff) AM_ROM AM_REGION("gfx", 0)
-	AM_RANGE(0xa0300, 0xa031f) AM_RAM_WRITE(paletteram16_RRRRGGGGBBBBIIII_word_w) AM_BASE_GENERIC(paletteram) //wrong
-	AM_RANGE(0xa0000, 0xaffff) AM_RAM AM_BASE_MEMBER(bingor_state, m_blit_ram)
+	AM_RANGE(0xa0300, 0xa031f) AM_RAM_WRITE(paletteram_RRRRGGGGBBBBIIII_word_w) AM_SHARE("paletteram") //wrong
+	AM_RANGE(0xa0000, 0xaffff) AM_RAM AM_SHARE("blit_ram")
 	AM_RANGE(0xe0000, 0xfffff) AM_ROM AM_REGION("boot_prg",0)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( bingor_io, AS_IO, 16 )
-//  AM_RANGE(0x0000, 0x00ff) AM_READ( test_r )
-	AM_RANGE(0x0100, 0x0101) AM_DEVWRITE8("saa", saa1099_data_w, 0x00ff)
-	AM_RANGE(0x0102, 0x0103) AM_DEVWRITE8("saa", saa1099_control_w, 0x00ff)
-//  AM_RANGE(0x0200, 0x0201) AM_READ( test_r )
+static ADDRESS_MAP_START( bingor_io, AS_IO, 16, bingor_state )
+//  AM_RANGE(0x0000, 0x00ff) AM_READ(test_r )
+	AM_RANGE(0x0100, 0x0101) AM_DEVWRITE8_LEGACY("saa", saa1099_data_w, 0x00ff)
+	AM_RANGE(0x0102, 0x0103) AM_DEVWRITE8_LEGACY("saa", saa1099_control_w, 0x00ff)
+//  AM_RANGE(0x0200, 0x0201) AM_READ(test_r )
 ADDRESS_MAP_END
 
-static READ8_HANDLER( test8_r )
+READ8_MEMBER(bingor_state::test8_r)
 {
-	return space->machine().rand();
+	return machine().rand();
 }
 
-static ADDRESS_MAP_START( pic_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( pic_io_map, AS_IO, 8, bingor_state )
+	AM_RANGE(0x00, 0x00) AM_WRITENOP
 	AM_RANGE(0x02, 0x02) AM_READ(test8_r)
 	AM_RANGE(0x10, 0x10) AM_READNOP
 ADDRESS_MAP_END
@@ -583,15 +590,15 @@ static INPUT_PORTS_START( bingor )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 INPUT_PORTS_END
 
-static INTERRUPT_GEN( vblank_irq )
+INTERRUPT_GEN_MEMBER(bingor_state::vblank_irq)
 {
-//  device_set_input_line_and_vector(device,0,HOLD_LINE,0x08/4); // reads i/o 0x200 and puts the result in ram, pic irq?
-	device_set_input_line_and_vector(device,0,HOLD_LINE,0x4c/4); // ?
+//  device.execute().set_input_line_and_vector(0,HOLD_LINE,0x08/4); // reads i/o 0x200 and puts the result in ram, pic irq?
+	device.execute().set_input_line_and_vector(0,HOLD_LINE,0x4c/4); // ?
 }
 
-static INTERRUPT_GEN( unk_irq )
+INTERRUPT_GEN_MEMBER(bingor_state::unk_irq)
 {
-	device_set_input_line_and_vector(device,0,HOLD_LINE,0x48/4); // ?
+	device.execute().set_input_line_and_vector(0,HOLD_LINE,0x48/4); // ?
 }
 
 
@@ -615,9 +622,9 @@ static MACHINE_CONFIG_START( bingor, bingor_state )
 	MCFG_CPU_ADD("maincpu", I80186, 14000000 ) //?? Mhz
 	MCFG_CPU_PROGRAM_MAP(bingor_map)
 	MCFG_CPU_IO_MAP(bingor_io)
-	MCFG_CPU_VBLANK_INT("screen", vblank_irq)
-	MCFG_CPU_PERIODIC_INT(nmi_line_pulse, 30)
-	MCFG_CPU_PERIODIC_INT(unk_irq, 30)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", bingor_state,  vblank_irq)
+	MCFG_CPU_PERIODIC_INT_DRIVER(bingor_state, nmi_line_pulse,  30)
+	MCFG_CPU_PERIODIC_INT_DRIVER(bingor_state, unk_irq,  30)
 
 	MCFG_CPU_ADD("pic", PIC16C57, 12000000) //?? Mhz
 	MCFG_CPU_IO_MAP(pic_io_map)
@@ -629,14 +636,12 @@ static MACHINE_CONFIG_START( bingor, bingor_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
 	MCFG_SCREEN_SIZE(400, 300)
 	MCFG_SCREEN_VISIBLE_AREA(0, 400-1, 0, 300-1)
-	MCFG_SCREEN_UPDATE(bingor)
+	MCFG_SCREEN_UPDATE_DRIVER(bingor_state, screen_update_bingor)
 
 	MCFG_PALETTE_LENGTH(0x100)
 
-	MCFG_VIDEO_START(bingor)
 
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 	MCFG_SOUND_ADD("saa", SAA1099, 6000000 )
@@ -719,7 +724,7 @@ ROM_END
 
 */
 
-ROM_START( bingor5 )	/* BellStar V3 */
+ROM_START( bingor5 )    /* BellStar V3 */
 	ROM_REGION( 0x20000, "boot_prg", ROMREGION_ERASE00 ) /* i186 code */
 	ROM_LOAD16_BYTE( "bellstar_v3_v.3.6.02_l.bin", 0x010000, 0x08000, CRC(56b84a5d) SHA1(1bda4fb972b4f0f0575089b545bf15dfea859948) )
 	ROM_LOAD16_BYTE( "bellstar_v3_v.3.6.02_h.bin", 0x010001, 0x08000, CRC(d6945bb8) SHA1(b620f1b547be03c4609bff8d06111d0ea425bae8) )
@@ -737,8 +742,8 @@ ROM_END
 
 
 
-GAME( 2002, bingor1,    0,      bingor,   bingor,   0,       ROT0,  "<unknown>", "Bingo Roll / Bell Star? (set 1)",     GAME_NOT_WORKING | GAME_NO_SOUND )
-GAME( 2002, bingor2,    0,      bingor,   bingor,   0,       ROT0,  "<unknown>", "Bingo Roll / Bell Star? (set 2)",     GAME_NOT_WORKING | GAME_NO_SOUND )
-GAME( 2002, bingor3,    0,      bingor,   bingor,   0,       ROT0,  "<unknown>", "Bingo Roll / Bell Star? (set 3)",     GAME_NOT_WORKING | GAME_NO_SOUND )
-GAME( 2002, bingor4,    0,      bingor,   bingor,   0,       ROT0,  "<unknown>", "Bingo Roll / Bell Star? (set 4)",     GAME_NOT_WORKING | GAME_NO_SOUND )
-GAME( 2002, bingor5,    0,      bingor,   bingor,   0,       ROT0,  "<unknown>", "Bingo Roll / Bell Star V3? (set 5)",  GAME_NOT_WORKING | GAME_NO_SOUND )
+GAME( 2002, bingor1,    0,      bingor,   bingor, driver_device,   0,       ROT0,  "<unknown>", "Bingo Roll / Bell Star? (set 1)",     GAME_NOT_WORKING | GAME_NO_SOUND )
+GAME( 2002, bingor2,    0,      bingor,   bingor, driver_device,   0,       ROT0,  "<unknown>", "Bingo Roll / Bell Star? (set 2)",     GAME_NOT_WORKING | GAME_NO_SOUND )
+GAME( 2002, bingor3,    0,      bingor,   bingor, driver_device,   0,       ROT0,  "<unknown>", "Bingo Roll / Bell Star? (set 3)",     GAME_NOT_WORKING | GAME_NO_SOUND )
+GAME( 2002, bingor4,    0,      bingor,   bingor, driver_device,   0,       ROT0,  "<unknown>", "Bingo Roll / Bell Star? (set 4)",     GAME_NOT_WORKING | GAME_NO_SOUND )
+GAME( 2002, bingor5,    0,      bingor,   bingor, driver_device,   0,       ROT0,  "<unknown>", "Bingo Roll / Bell Star V3? (set 5)",  GAME_NOT_WORKING | GAME_NO_SOUND )

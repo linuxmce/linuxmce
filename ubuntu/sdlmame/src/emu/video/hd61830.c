@@ -40,12 +40,12 @@ static const int CYCLES[] =
 	4, 4, 4, 4, 4, -1, -1, -1, 4, 4, 4, 4, 6, 6, 36, 36
 };
 
-const int MODE_EXTERNAL_CG		= 0x01;
-const int MODE_GRAPHIC			= 0x02;
-const int MODE_CURSOR			= 0x04;
-const int MODE_BLINK			= 0x08;
-const int MODE_MASTER			= 0x10;
-const int MODE_DISPLAY_ON		= 0x20;
+const int MODE_EXTERNAL_CG      = 0x01;
+const int MODE_GRAPHIC          = 0x02;
+const int MODE_CURSOR           = 0x04;
+const int MODE_BLINK            = 0x08;
+const int MODE_MASTER           = 0x10;
+const int MODE_DISPLAY_ON       = 0x20;
 
 
 
@@ -53,102 +53,22 @@ const int MODE_DISPLAY_ON		= 0x20;
 //  GLOBAL VARIABLES
 //**************************************************************************
 
-// devices
-const device_type HD61830 = hd61830_device_config::static_alloc_device_config;
+// device type definition
+const device_type HD61830 = &device_creator<hd61830_device>;
 
 
 // default address map
-static ADDRESS_MAP_START( hd61830, AS_0, 8 )
+static ADDRESS_MAP_START( hd61830, AS_0, 8, hd61830_device )
 	AM_RANGE(0x0000, 0xffff) AM_RAM
 ADDRESS_MAP_END
 
 
 // internal character generator ROM
 ROM_START( hd61830 )
-	ROM_REGION( 0x5c0, "hd61830", ROMREGION_LOADBYNAME ) // internal 7360-bit chargen ROM
+	ROM_REGION( 0x5c0, "hd61830", 0 ) // internal 7360-bit chargen ROM
 	ROM_LOAD( "hd61830.bin", 0x000, 0x5c0, BAD_DUMP CRC(06a934da) SHA1(bf3f074db5dc92e6f530cb18d6c013563099a87d) ) // typed in from manual
 ROM_END
 
-
-
-//**************************************************************************
-//  DEVICE CONFIGURATION
-//**************************************************************************
-
-//-------------------------------------------------
-//  hd61830_device_config - constructor
-//-------------------------------------------------
-
-hd61830_device_config::hd61830_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock)
-	: device_config(mconfig, static_alloc_device_config, "Hitachi HD61830", tag, owner, clock),
-	  device_config_memory_interface(mconfig, *this),
-	  m_space_config("videoram", ENDIANNESS_LITTLE, 8, 16, 0, NULL, *ADDRESS_MAP_NAME(hd61830))
-{
-	m_shortname = "hd61830";
-}
-
-
-//-------------------------------------------------
-//  static_alloc_device_config - allocate a new
-//  configuration object
-//-------------------------------------------------
-
-device_config *hd61830_device_config::static_alloc_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock)
-{
-	return global_alloc(hd61830_device_config(mconfig, tag, owner, clock));
-}
-
-
-//-------------------------------------------------
-//  alloc_device - allocate a new device object
-//-------------------------------------------------
-
-device_t *hd61830_device_config::alloc_device(running_machine &machine) const
-{
-	return auto_alloc(machine, hd61830_device(machine, *this));
-}
-
-
-//-------------------------------------------------
-//  memory_space_config - return a description of
-//  any address spaces owned by this device
-//-------------------------------------------------
-
-const address_space_config *hd61830_device_config::memory_space_config(address_spacenum spacenum) const
-{
-	return (spacenum == AS_0) ? &m_space_config : NULL;
-}
-
-
-//-------------------------------------------------
-//  rom_region - device-specific ROM region
-//-------------------------------------------------
-
-const rom_entry *hd61830_device_config::device_rom_region() const
-{
-	return ROM_NAME(hd61830);
-}
-
-
-//-------------------------------------------------
-//  device_config_complete - perform any
-//  operations now that the configuration is
-//  complete
-//-------------------------------------------------
-
-void hd61830_device_config::device_config_complete()
-{
-	// inherit a copy of the static data
-	const hd61830_interface *intf = reinterpret_cast<const hd61830_interface *>(static_config());
-	if (intf != NULL)
-		*static_cast<hd61830_interface *>(this) = *intf;
-
-	// or initialize to defaults if none provided
-	else
-	{
-		memset(&m_in_rd_func, 0, sizeof(m_in_rd_func));
-	}
-}
 
 
 
@@ -162,7 +82,7 @@ void hd61830_device_config::device_config_complete()
 
 inline UINT8 hd61830_device::readbyte(offs_t address)
 {
-	return space()->read_byte(address);
+	return space().read_byte(address);
 }
 
 
@@ -172,7 +92,7 @@ inline UINT8 hd61830_device::readbyte(offs_t address)
 
 inline void hd61830_device::writebyte(offs_t address, UINT8 data)
 {
-	space()->write_byte(address, data);
+	space().write_byte(address, data);
 }
 
 
@@ -185,14 +105,45 @@ inline void hd61830_device::writebyte(offs_t address, UINT8 data)
 //  hd61830_device - constructor
 //-------------------------------------------------
 
-hd61830_device::hd61830_device(running_machine &_machine, const hd61830_device_config &config)
-    : device_t(_machine, config),
-	  device_memory_interface(_machine, config, *this),
-	  m_bf(false),
-	  m_blink(0),
-      m_config(config)
+hd61830_device::hd61830_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, HD61830, "Hitachi HD61830", tag, owner, clock),
+		device_memory_interface(mconfig, *this),
+		m_bf(false),
+		m_blink(0),
+		m_space_config("videoram", ENDIANNESS_LITTLE, 8, 16, 0, NULL, *ADDRESS_MAP_NAME(hd61830))
 {
+	m_shortname = "hd61830";
+}
 
+
+//-------------------------------------------------
+//  device_rom_region - device-specific ROM region
+//-------------------------------------------------
+
+const rom_entry *hd61830_device::device_rom_region() const
+{
+	return ROM_NAME(hd61830);
+}
+
+
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
+
+void hd61830_device::device_config_complete()
+{
+	// inherit a copy of the static data
+	const hd61830_interface *intf = reinterpret_cast<const hd61830_interface *>(static_config());
+	if (intf != NULL)
+		*static_cast<hd61830_interface *>(this) = *intf;
+
+	// or initialize to defaults if none provided
+	else
+	{
+		memset(&m_in_rd_cb, 0, sizeof(m_in_rd_cb));
+	}
 }
 
 
@@ -206,9 +157,9 @@ void hd61830_device::device_start()
 	m_busy_timer = timer_alloc();
 
 	// resolve callbacks
-    devcb_resolve_read8(&m_in_rd_func, &m_config.m_in_rd_func, this);
+	m_in_rd_func.resolve(m_in_rd_cb, *this);
 
-	m_screen = m_machine.device<screen_device>(m_config.screen_tag);
+	m_screen = machine().device<screen_device>(screen_tag);
 
 	// register for state saving
 	save_item(NAME(m_bf));
@@ -249,6 +200,17 @@ void hd61830_device::device_timer(emu_timer &timer, device_timer_id id, int para
 {
 	// clear busy flag
 	m_bf = false;
+}
+
+
+//-------------------------------------------------
+//  memory_space_config - return a description of
+//  any address spaces owned by this device
+//-------------------------------------------------
+
+const address_space_config *hd61830_device::memory_space_config(address_spacenum spacenum) const
+{
+	return (spacenum == AS_0) ? &m_space_config : NULL;
 }
 
 
@@ -444,7 +406,7 @@ WRITE8_MEMBER( hd61830_device::data_w )
 //  draw_scanline - draw one graphics scanline
 //-------------------------------------------------
 
-void hd61830_device::draw_scanline(bitmap_t *bitmap, const rectangle *cliprect, int y, UINT16 ra)
+void hd61830_device::draw_scanline(bitmap_ind16 &bitmap, const rectangle &cliprect, int y, UINT16 ra)
 {
 	for (int sx = 0; sx < m_hn; sx++)
 	{
@@ -452,7 +414,7 @@ void hd61830_device::draw_scanline(bitmap_t *bitmap, const rectangle *cliprect, 
 
 		for (int x = 0; x < m_hp; x++)
 		{
-			*BITMAP_ADDR16(bitmap, y, (sx * m_hp) + x) = BIT(data, x);
+			bitmap.pix16(y, (sx * m_hp) + x) = BIT(data, x);
 		}
 	}
 }
@@ -462,7 +424,7 @@ void hd61830_device::draw_scanline(bitmap_t *bitmap, const rectangle *cliprect, 
 //  update_graphics - draw graphics mode screen
 //-------------------------------------------------
 
-void hd61830_device::update_graphics(bitmap_t *bitmap, const rectangle *cliprect)
+void hd61830_device::update_graphics(bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	for (int y = 0; y < m_nx; y++)
 	{
@@ -482,7 +444,7 @@ void hd61830_device::update_graphics(bitmap_t *bitmap, const rectangle *cliprect
 //  draw_char - draw a char
 //-------------------------------------------------
 
-void hd61830_device::draw_char(bitmap_t *bitmap, const rectangle *cliprect, UINT16 ma, int x, int y, UINT8 md)
+void hd61830_device::draw_char(bitmap_ind16 &bitmap, const rectangle &cliprect, UINT16 ma, int x, int y, UINT8 md)
 {
 	for (int cl = 0; cl < m_vp; cl++)
 	{
@@ -494,7 +456,7 @@ void hd61830_device::draw_char(bitmap_t *bitmap, const rectangle *cliprect, UINT
 
 			if (m_mcr & MODE_EXTERNAL_CG)
 			{
-				data = devcb_call_read8(&m_in_rd_func, (cl << 12) | md);
+				data = m_in_rd_func((cl << 12) | md);
 			}
 			else
 			{
@@ -516,7 +478,7 @@ void hd61830_device::draw_char(bitmap_t *bitmap, const rectangle *cliprect, UINT
 					addr = 160*7 + (md - 0xe0) * 11 + cl;
 				}
 
-				data = subregion("hd61830")->u8(addr);
+				data = memregion("hd61830")->u8(addr);
 			}
 
 			int cursor = m_mcr & MODE_CURSOR;
@@ -543,7 +505,7 @@ void hd61830_device::draw_char(bitmap_t *bitmap, const rectangle *cliprect, UINT
 			}
 
 			if (sy < m_screen->height() && sx < m_screen->width())
-				*BITMAP_ADDR16(bitmap, sy, sx) = pixel;
+				bitmap.pix16(sy, sx) = pixel;
 		}
 	}
 }
@@ -553,7 +515,7 @@ void hd61830_device::draw_char(bitmap_t *bitmap, const rectangle *cliprect, UINT
 //  update_text - draw text mode screen
 //-------------------------------------------------
 
-void hd61830_device::update_text(bitmap_t *bitmap, const rectangle *cliprect)
+void hd61830_device::update_text(bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	for (int y = 0; y < (m_nx / m_vp); y++)
 	{
@@ -572,7 +534,7 @@ void hd61830_device::update_text(bitmap_t *bitmap, const rectangle *cliprect)
 //  update_screen - update screen
 //-------------------------------------------------
 
-void hd61830_device::update_screen(bitmap_t *bitmap, const rectangle *cliprect)
+UINT32 hd61830_device::screen_update(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	if (m_mcr & MODE_DISPLAY_ON)
 	{
@@ -587,7 +549,7 @@ void hd61830_device::update_screen(bitmap_t *bitmap, const rectangle *cliprect)
 	}
 	else
 	{
-		bitmap_fill(bitmap, cliprect, 0);
+		bitmap.fill(0, cliprect);
 	}
 
 	m_blink++;
@@ -597,4 +559,5 @@ void hd61830_device::update_screen(bitmap_t *bitmap, const rectangle *cliprect)
 		m_blink = 0;
 		m_cursor = !m_cursor;
 	}
+	return 0;
 }

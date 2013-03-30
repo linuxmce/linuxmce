@@ -100,16 +100,17 @@ p2 ink doesn't always light up in test mode
 class marinedt_state : public driver_device
 {
 public:
-	marinedt_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	marinedt_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_tx_tileram(*this, "tx_tileram"){ }
 
 	/* memory pointers */
-	UINT8 *     m_tx_tileram;
+	required_shared_ptr<UINT8> m_tx_tileram;
 
 	/* video-related */
-	bitmap_t *m_tile;
-	bitmap_t *m_obj1;
-	bitmap_t *m_obj2;
+	bitmap_ind16 *m_tile;
+	bitmap_ind16 *m_obj1;
+	bitmap_ind16 *m_obj2;
 	tilemap_t *m_tx_tilemap;
 
 	UINT8 m_obj1_a;
@@ -130,28 +131,48 @@ public:
 	UINT8 m_cxh;
 	UINT8 m_cyrh;
 	UINT8 m_cyqh;
+	DECLARE_WRITE8_MEMBER(tx_tileram_w);
+	DECLARE_READ8_MEMBER(marinedt_port1_r);
+	DECLARE_READ8_MEMBER(marinedt_coll_r);
+	DECLARE_READ8_MEMBER(marinedt_obj1_x_r);
+	DECLARE_READ8_MEMBER(marinedt_obj1_yr_r);
+	DECLARE_READ8_MEMBER(marinedt_obj1_yq_r);
+	DECLARE_WRITE8_MEMBER(marinedt_obj1_a_w);
+	DECLARE_WRITE8_MEMBER(marinedt_obj1_x_w);
+	DECLARE_WRITE8_MEMBER(marinedt_obj1_y_w);
+	DECLARE_WRITE8_MEMBER(marinedt_obj2_a_w);
+	DECLARE_WRITE8_MEMBER(marinedt_obj2_x_w);
+	DECLARE_WRITE8_MEMBER(marinedt_obj2_y_w);
+	DECLARE_WRITE8_MEMBER(marinedt_music_w);
+	DECLARE_WRITE8_MEMBER(marinedt_sound_w);
+	DECLARE_WRITE8_MEMBER(marinedt_pd_w);
+	DECLARE_WRITE8_MEMBER(marinedt_pf_w);
+	TILE_GET_INFO_MEMBER(get_tile_info);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_marinedt(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
-static WRITE8_HANDLER( tx_tileram_w )
+WRITE8_MEMBER(marinedt_state::tx_tileram_w)
 {
-	marinedt_state *state = space->machine().driver_data<marinedt_state>();
 
-	state->m_tx_tileram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_tx_tilemap, offset);
+	m_tx_tileram[offset] = data;
+	m_tx_tilemap->mark_tile_dirty(offset);
 }
 
-static READ8_HANDLER( marinedt_port1_r )
+READ8_MEMBER(marinedt_state::marinedt_port1_r)
 {
-	marinedt_state *state = space->machine().driver_data<marinedt_state>();
 
 	//might need to be reversed for cocktail stuff
 
 	/* x/y multiplexed */
-	return input_port_read(space->machine(), ((state->m_pf & 0x08) >> 3) ? "TRACKY" : "TRACKX");
+	return ioport(((m_pf & 0x08) >> 3) ? "TRACKY" : "TRACKX")->read();
 }
 
-static READ8_HANDLER( marinedt_coll_r )
+READ8_MEMBER(marinedt_state::marinedt_coll_r)
 {
 	//76543210
 	//x------- obj1 to obj2 collision
@@ -159,48 +180,45 @@ static READ8_HANDLER( marinedt_coll_r )
 	//----x--- obj1 to playfield collision
 	//-----xxx unused
 
-	marinedt_state *state = space->machine().driver_data<marinedt_state>();
-	return state->m_coll | state->m_collh;
+	return m_coll | m_collh;
 }
 
 //are these returning only during a collision?
 //id imagine they are returning the pf char where the collission took place?
 //what about where there is lots of colls?
 //maybe the first on a scanline basis
-static READ8_HANDLER( marinedt_obj1_x_r )
+READ8_MEMBER(marinedt_state::marinedt_obj1_x_r)
 {
 	//76543210
 	//xxxx---- unknown
 	//----xxxx x pos in tile ram
 
-	marinedt_state *state = space->machine().driver_data<marinedt_state>();
-	UINT8 *RAM = space->machine().region("maincpu")->base();
+	UINT8 *RAM = memregion("maincpu")->base();
 
 	if (RAM[0x430e])
-		--state->m_cx;
+		--m_cx;
 	else
-		++state->m_cx;
+		++m_cx;
 
 	//figure out why inc/dec based on 430e?
-	return state->m_cx | (state->m_cxh << 4);
+	return m_cx | (m_cxh << 4);
 }
 
-static READ8_HANDLER( marinedt_obj1_yr_r )
+READ8_MEMBER(marinedt_state::marinedt_obj1_yr_r)
 {
 	//76543210
 	//xxxx---- unknown
 	//----xxxx row in current screen quarter
 
-	marinedt_state *state = space->machine().driver_data<marinedt_state>();
 
 	//has to be +1 if cx went over?
-	if (state->m_cx == 0x10)
-		state->m_cyr++;
+	if (m_cx == 0x10)
+		m_cyr++;
 
-	return state->m_cyr | (state->m_cyrh << 4);
+	return m_cyr | (m_cyrh << 4);
 }
 
-static READ8_HANDLER( marinedt_obj1_yq_r )
+READ8_MEMBER(marinedt_state::marinedt_obj1_yq_r)
 {
 	//76543210
 	//xx------ unknown
@@ -208,20 +226,19 @@ static READ8_HANDLER( marinedt_obj1_yq_r )
 	//----xx-- unknown
 	//------xx screen quarter
 
-	marinedt_state *state = space->machine().driver_data<marinedt_state>();
-	return state->m_cyq | (state->m_cyqh << 4);
+	return m_cyq | (m_cyqh << 4);
 }
 
-static WRITE8_HANDLER( marinedt_obj1_a_w ) { marinedt_state *state = space->machine().driver_data<marinedt_state>();    state->m_obj1_a = data; }
-static WRITE8_HANDLER( marinedt_obj1_x_w ) { marinedt_state *state = space->machine().driver_data<marinedt_state>();    state->m_obj1_x = data; }
-static WRITE8_HANDLER( marinedt_obj1_y_w ) { marinedt_state *state = space->machine().driver_data<marinedt_state>();    state->m_obj1_y = data; }
-static WRITE8_HANDLER( marinedt_obj2_a_w ) { marinedt_state *state = space->machine().driver_data<marinedt_state>();    state->m_obj2_a = data; }
-static WRITE8_HANDLER( marinedt_obj2_x_w ) { marinedt_state *state = space->machine().driver_data<marinedt_state>();    state->m_obj2_x = data; }
-static WRITE8_HANDLER( marinedt_obj2_y_w ) { marinedt_state *state = space->machine().driver_data<marinedt_state>();    state->m_obj2_y = data; }
+WRITE8_MEMBER(marinedt_state::marinedt_obj1_a_w){ m_obj1_a = data; }
+WRITE8_MEMBER(marinedt_state::marinedt_obj1_x_w){ m_obj1_x = data; }
+WRITE8_MEMBER(marinedt_state::marinedt_obj1_y_w){ m_obj1_y = data; }
+WRITE8_MEMBER(marinedt_state::marinedt_obj2_a_w){ m_obj2_a = data; }
+WRITE8_MEMBER(marinedt_state::marinedt_obj2_x_w){ m_obj2_x = data; }
+WRITE8_MEMBER(marinedt_state::marinedt_obj2_y_w){ m_obj2_y = data; }
 
-static WRITE8_HANDLER( marinedt_music_w ){ marinedt_state *state = space->machine().driver_data<marinedt_state>();    state->m_music = data; }
+WRITE8_MEMBER(marinedt_state::marinedt_music_w){ m_music = data; }
 
-static WRITE8_HANDLER( marinedt_sound_w )
+WRITE8_MEMBER(marinedt_state::marinedt_sound_w)
 {
 	//76543210
 	//xx------ ??
@@ -232,11 +249,10 @@ static WRITE8_HANDLER( marinedt_sound_w )
 	//------x- dots hit
 	//-------x ??
 
-	marinedt_state *state = space->machine().driver_data<marinedt_state>();
-	state->m_sound = data;
+	m_sound = data;
 }
 
-static WRITE8_HANDLER( marinedt_pd_w )
+WRITE8_MEMBER(marinedt_state::marinedt_pd_w)
 {
 	//76543210
 	//xxx----- ?? unused
@@ -246,8 +262,7 @@ static WRITE8_HANDLER( marinedt_pd_w )
 	//------x- obj2 enable
 	//-------x obj1 enable
 
-	marinedt_state *state = space->machine().driver_data<marinedt_state>();
-	state->m_pd = data;
+	m_pd = data;
 }
 
 /*
@@ -265,7 +280,7 @@ marinedt_pf_w: 05   // flip sprite?
 marinedt_pf_w: 07   // cocktail
 marinedt_pf_w: 03   // non-flip sprite?
 */
-static WRITE8_HANDLER( marinedt_pf_w )
+WRITE8_MEMBER(marinedt_state::marinedt_pf_w)
 {
 	//76543210
 	//xxxx---- ?? unused (will need to understand table of written values)
@@ -274,12 +289,11 @@ static WRITE8_HANDLER( marinedt_pf_w )
 	//------x- ?? upright/cocktail
 	//-------x ?? service mode (coin lockout??)
 
-	marinedt_state *state = space->machine().driver_data<marinedt_state>();
 
-	//if ((state->m_pf & 0x07) != (data & 0x07))
+	//if ((m_pf & 0x07) != (data & 0x07))
 	//  mame_printf_debug("marinedt_pf_w: %02x\n", data & 0x07);
 
-	if ((state->m_pf & 0x02) != (data & 0x02))
+	if ((m_pf & 0x02) != (data & 0x02))
 	{
 		if (data & 0x02)
 			mame_printf_debug("tile flip\n");
@@ -287,31 +301,31 @@ static WRITE8_HANDLER( marinedt_pf_w )
 			mame_printf_debug("tile non-flip\n");
 
 		if (data & 0x02)
-			tilemap_set_flip(state->m_tx_tilemap, TILEMAP_FLIPX | TILEMAP_FLIPY);
+			m_tx_tilemap->set_flip(TILEMAP_FLIPX | TILEMAP_FLIPY);
 		else
-			tilemap_set_flip(state->m_tx_tilemap, 0);
+			m_tx_tilemap->set_flip(0);
 	}
 
-	state->m_pf = data;
+	m_pf = data;
 
 	//if (data & 0xf0)
-	//    logerror("pf:%02x %d\n", state->m_pf);
-	//logerror("pd:%02x %d\n", state->m_pd, space->machine().primary_screen->frame_number());
+	//    logerror("pf:%02x %d\n", m_pf);
+	//logerror("pd:%02x %d\n", m_pd, machine().primary_screen->frame_number());
 
 }
 
-static ADDRESS_MAP_START( marinedt_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( marinedt_map, AS_PROGRAM, 8, marinedt_state )
 	AM_RANGE(0x0000, 0x37ff) AM_ROM
 	AM_RANGE(0x4000, 0x43ff) AM_RAM
-	AM_RANGE(0x4400, 0x47ff) AM_RAM				//unused, vram mirror?
-	AM_RANGE(0x4800, 0x4bff) AM_RAM_WRITE(tx_tileram_w) AM_BASE_MEMBER(marinedt_state, m_tx_tileram)
-	AM_RANGE(0x4c00, 0x4c00) AM_WRITENOP	//?? maybe off by one error
+	AM_RANGE(0x4400, 0x47ff) AM_RAM             //unused, vram mirror?
+	AM_RANGE(0x4800, 0x4bff) AM_RAM_WRITE(tx_tileram_w) AM_SHARE("tx_tileram")
+	AM_RANGE(0x4c00, 0x4c00) AM_WRITENOP    //?? maybe off by one error
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( marinedt_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( marinedt_io_map, AS_IO, 8, marinedt_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x00) AM_READ_PORT("DSW0")		//dips coinage
-	AM_RANGE(0x01, 0x01) AM_READ(marinedt_port1_r)	//trackball xy muxed
+	AM_RANGE(0x00, 0x00) AM_READ_PORT("DSW0")       //dips coinage
+	AM_RANGE(0x01, 0x01) AM_READ(marinedt_port1_r)  //trackball xy muxed
 	AM_RANGE(0x02, 0x02) AM_READWRITE(marinedt_obj1_x_r, marinedt_obj1_a_w)
 	AM_RANGE(0x03, 0x03) AM_READ_PORT("IN0") AM_WRITE(marinedt_obj1_x_w)
 	AM_RANGE(0x04, 0x04) AM_READ_PORT("DSW1") AM_WRITE(marinedt_obj1_y_w)
@@ -378,7 +392,7 @@ static INPUT_PORTS_START( marinedt )
 	PORT_DIPSETTING(    0x01, "5000" )
 	PORT_DIPSETTING(    0x00, "10000" )
 //cheat?
-	PORT_DIPNAME( 0x02, 0x00, "ignore internal bounce?" )	//maybe die/bounce of rocks/coral?
+	PORT_DIPNAME( 0x02, 0x00, "ignore internal bounce?" )   //maybe die/bounce of rocks/coral?
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( On ) )
 //freezes the game before the reset
@@ -399,11 +413,11 @@ static INPUT_PORTS_START( marinedt )
 	PORT_DIPSETTING(    0x80, "5" )
 	PORT_DIPSETTING(    0xc0, "6" )
 
-	PORT_START("TRACKX")	/* FAKE MUXED */
+	PORT_START("TRACKX")    /* FAKE MUXED */
 //check all bits are used
 	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_X ) PORT_SENSITIVITY(25) PORT_KEYDELTA(10) PORT_REVERSE
 
-	PORT_START("TRACKY")	/* FAKE MUXED */
+	PORT_START("TRACKY")    /* FAKE MUXED */
 	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(25) PORT_KEYDELTA(10)
 INPUT_PORTS_END
 
@@ -412,7 +426,7 @@ static const gfx_layout marinedt_charlayout =
 	8,8,
 	RGN_FRAC(1,3),
 	3,
-	{ RGN_FRAC(2,3), RGN_FRAC(1,3), RGN_FRAC(0,3) },	//maybe 120
+	{ RGN_FRAC(2,3), RGN_FRAC(1,3), RGN_FRAC(0,3) },    //maybe 120
 	{ STEP8(0,1) },
 	{ STEP8(0,8) },
 	8*8
@@ -430,16 +444,17 @@ static const gfx_layout marinedt_objlayout =
 };
 
 static GFXDECODE_START( marinedt )
-	GFXDECODE_ENTRY( "gfx1", 0, marinedt_charlayout, 0,  4 )	//really only 1 colour set?
+	GFXDECODE_ENTRY( "gfx1", 0, marinedt_charlayout, 0,  4 )    //really only 1 colour set?
 	GFXDECODE_ENTRY( "gfx2", 0, marinedt_objlayout,  48, 4 )
 	GFXDECODE_ENTRY( "gfx3", 0, marinedt_objlayout,  32, 4 )
 GFXDECODE_END
 
-static PALETTE_INIT( marinedt )
+void marinedt_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i,r,b,g;
 
-	for (i = 0; i < machine.total_colors(); i++)
+	for (i = 0; i < machine().total_colors(); i++)
 	{
 		int bit0, bit1, bit2;
 
@@ -463,33 +478,31 @@ bit0 = 0;
 //      *(palette++) = 0x92 * bit0 + 0x46 * bit1 + 0x27 * bit2;
 		b = 0x27 * bit0 + 0x46 * bit1 + 0x92 * bit2;
 
-		palette_set_color(machine, i, MAKE_RGB(r, g, b));
+		palette_set_color(machine(), i, MAKE_RGB(r, g, b));
 	}
 }
 
 
-static TILE_GET_INFO( get_tile_info )
+TILE_GET_INFO_MEMBER(marinedt_state::get_tile_info)
 {
-	marinedt_state *state = machine.driver_data<marinedt_state>();
-	int code = state->m_tx_tileram[tile_index];
+	int code = m_tx_tileram[tile_index];
 	int color = 0;
 	int flags = TILE_FLIPX;
 
-	SET_TILE_INFO(0, code, color, flags);
+	SET_TILE_INFO_MEMBER(0, code, color, flags);
 }
 
-static VIDEO_START( marinedt )
+void marinedt_state::video_start()
 {
-	marinedt_state *state = machine.driver_data<marinedt_state>();
-	state->m_tx_tilemap = tilemap_create(machine, get_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
+	m_tx_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(marinedt_state::get_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
 
-	tilemap_set_transparent_pen(state->m_tx_tilemap, 0);
-	tilemap_set_scrolldx(state->m_tx_tilemap, 0, 4*8);
-	tilemap_set_scrolldy(state->m_tx_tilemap, 0, -4*8);
+	m_tx_tilemap->set_transparent_pen(0);
+	m_tx_tilemap->set_scrolldx(0, 4*8);
+	m_tx_tilemap->set_scrolldy(0, -4*8);
 
-	state->m_tile = auto_bitmap_alloc(machine, 32 * 8, 32 * 8, machine.primary_screen->format());
-	state->m_obj1 = auto_bitmap_alloc(machine, 32, 32, machine.primary_screen->format());
-	state->m_obj2 = auto_bitmap_alloc(machine, 32, 32, machine.primary_screen->format());
+	m_tile = auto_bitmap_ind16_alloc(machine(), 32 * 8, 32 * 8);
+	m_obj1 = auto_bitmap_ind16_alloc(machine(), 32, 32);
+	m_obj2 = auto_bitmap_ind16_alloc(machine(), 32, 32);
 }
 
 
@@ -499,108 +512,107 @@ static VIDEO_START( marinedt )
 // -----x-- bank
 // ------xx colour
 
-#define OBJ_CODE(a)	((((a) & 0x04) << 1) + (((a) & 0x38) >> 3))
-#define OBJ_COLOR(a)	((a) & 0x03)
-#define OBJ_X(x)	(256 - 32 - (x))
-#define OBJ_Y(y)	(256 - 1 - (y))
-#define OBJ_FLIPX(a)	((state->m_pf & 0x02) == 0)
-#define OBJ_FLIPY(a)	((a) & 0x80)
+#define OBJ_CODE(a) ((((a) & 0x04) << 1) + (((a) & 0x38) >> 3))
+#define OBJ_COLOR(a)    ((a) & 0x03)
+#define OBJ_X(x)    (256 - 32 - (x))
+#define OBJ_Y(y)    (256 - 1 - (y))
+#define OBJ_FLIPX(a)    ((m_pf & 0x02) == 0)
+#define OBJ_FLIPY(a)    ((a) & 0x80)
 
-static SCREEN_UPDATE( marinedt )
+UINT32 marinedt_state::screen_update_marinedt(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	marinedt_state *state = screen->machine().driver_data<marinedt_state>();
 	int sx, sy;
 
-	bitmap_fill(state->m_tile, NULL, 0);
-	tilemap_draw(state->m_tile, cliprect, state->m_tx_tilemap, 0, 0);
+	m_tile->fill(0);
+	m_tx_tilemap->draw(*m_tile, cliprect, 0, 0);
 
-	bitmap_fill(state->m_obj1, NULL, 0);
-	drawgfx_transpen(state->m_obj1, NULL, screen->machine().gfx[1],
-			OBJ_CODE(state->m_obj1_a),
-			OBJ_COLOR(state->m_obj1_a),
-			OBJ_FLIPX(state->m_obj1_a), OBJ_FLIPY(state->m_obj1_a),
+	m_obj1->fill(0);
+	drawgfx_transpen(*m_obj1, m_obj1->cliprect(), machine().gfx[1],
+			OBJ_CODE(m_obj1_a),
+			OBJ_COLOR(m_obj1_a),
+			OBJ_FLIPX(m_obj1_a), OBJ_FLIPY(m_obj1_a),
 			0, 0, 0);
 
-	bitmap_fill(state->m_obj2, NULL, 0);
-	drawgfx_transpen(state->m_obj2, NULL, screen->machine().gfx[2],
-			OBJ_CODE(state->m_obj2_a),
-			OBJ_COLOR(state->m_obj2_a),
-			OBJ_FLIPX(state->m_obj2_a), OBJ_FLIPY(state->m_obj2_a),
+	m_obj2->fill(0);
+	drawgfx_transpen(*m_obj2, m_obj2->cliprect(), machine().gfx[2],
+			OBJ_CODE(m_obj2_a),
+			OBJ_COLOR(m_obj2_a),
+			OBJ_FLIPX(m_obj2_a), OBJ_FLIPY(m_obj2_a),
 			0, 0, 0);
 
-	bitmap_fill(bitmap, NULL, 0);
+	bitmap.fill(0);
 
-	if (state->m_pd & 0x02)
-		copybitmap_trans(bitmap, state->m_obj2, 0, 0, OBJ_X(state->m_obj2_x), OBJ_Y(state->m_obj2_y), cliprect, 0);
+	if (m_pd & 0x02)
+		copybitmap_trans(bitmap, *m_obj2, 0, 0, OBJ_X(m_obj2_x), OBJ_Y(m_obj2_y), cliprect, 0);
 
-	if (state->m_pd & 0x01)
-		copybitmap_trans(bitmap, state->m_obj1, 0, 0, OBJ_X(state->m_obj1_x), OBJ_Y(state->m_obj1_y), cliprect, 0);
+	if (m_pd & 0x01)
+		copybitmap_trans(bitmap, *m_obj1, 0, 0, OBJ_X(m_obj1_x), OBJ_Y(m_obj1_y), cliprect, 0);
 
-	copybitmap_trans(bitmap, state->m_tile, 0, 0, 0, 0, cliprect, 0);
+	copybitmap_trans(bitmap, *m_tile, 0, 0, 0, 0, cliprect, 0);
 
-	state->m_coll = state->m_cx = state->m_cyr = state->m_cyq = 0;
-	if (state->m_pd & 0x01)
+	m_coll = m_cx = m_cyr = m_cyq = 0;
+	if (m_pd & 0x01)
 	{
 		for (sx = 0; sx < 32; sx++)
 			for (sy = 0; sy < 32; sy++)
 			{
-				int x = OBJ_X(state->m_obj1_x) + sx;
-				int y = OBJ_Y(state->m_obj1_y) + sy;
+				int x = OBJ_X(m_obj1_x) + sx;
+				int y = OBJ_Y(m_obj1_y) + sy;
 
-				if (x < cliprect->min_x || x > cliprect->max_x || y < cliprect->min_y || y > cliprect->max_y)
+				if (!cliprect.contains(x, y))
 					continue;
 
-				if (*BITMAP_ADDR16(state->m_obj1, sy, sx) == 0)
+				if (m_obj1->pix16(sy, sx) == 0)
 					continue;
 
-				if (*BITMAP_ADDR16(state->m_tile, y, x) != 0)
+				if (m_tile->pix16(y, x) != 0)
 				{
-					state->m_coll = 0x08;
+					m_coll = 0x08;
 
-					state->m_cx = (x % 128) / 8;
-					state->m_cx &= 0x0f;
+					m_cx = (x % 128) / 8;
+					m_cx &= 0x0f;
 
-					state->m_cyr = ((y % 64) / 8) * 2 + (x > 127 ? 1 : 0);
-					state->m_cyr &= 0x0f;
+					m_cyr = ((y % 64) / 8) * 2 + (x > 127 ? 1 : 0);
+					m_cyr &= 0x0f;
 
-					state->m_cyq = y / 64;
-					state->m_cyq &= 0x0f;
+					m_cyq = y / 64;
+					m_cyq &= 0x0f;
 
 					break;
 				}
 			}
 	}
 
-	state->m_collh = state->m_cxh = state->m_cyrh = state->m_cyqh = 0;
-	if ((state->m_pd & 0x03) == 0x03)
+	m_collh = m_cxh = m_cyrh = m_cyqh = 0;
+	if ((m_pd & 0x03) == 0x03)
 	{
 		for (sx = 0; sx < 32; sx++)
 			for (sy = 0; sy < 32; sy++)
 			{
-				int x = OBJ_X(state->m_obj1_x + sx);
-				int y = OBJ_Y(state->m_obj1_y + sy);
+				int x = OBJ_X(m_obj1_x + sx);
+				int y = OBJ_Y(m_obj1_y + sy);
 
-				int xx = OBJ_X(state->m_obj2_x) - x;
-				int yy = OBJ_Y(state->m_obj2_y) - y;
+				int xx = OBJ_X(m_obj2_x) - x;
+				int yy = OBJ_Y(m_obj2_y) - y;
 
 				if (xx < 0 || xx >= 32 || yy < 0 || yy >= 32)
 					continue;
 
-				if (*BITMAP_ADDR16(state->m_obj1, sy, sx) == 0)
+				if (m_obj1->pix16(sy, sx) == 0)
 					continue;
 
-				if (*BITMAP_ADDR16(state->m_obj2, yy, xx) != 0)
+				if (m_obj2->pix16(yy, xx) != 0)
 				{
-					state->m_collh = 0x80;
+					m_collh = 0x80;
 
-					state->m_cxh = (x % 128) / 8;
-					state->m_cxh &= 0x0f;
+					m_cxh = (x % 128) / 8;
+					m_cxh &= 0x0f;
 
-					state->m_cyrh = ((y % 64) / 8) * 2 + (x > 127 ? 1 : 0);
-					state->m_cyrh &= 0x0f;
+					m_cyrh = ((y % 64) / 8) * 2 + (x > 127 ? 1 : 0);
+					m_cyrh &= 0x0f;
 
-					state->m_cyqh= y / 64;
-					state->m_cyqh &= 0x0f;
+					m_cyqh= y / 64;
+					m_cyqh &= 0x0f;
 
 					break;
 				}
@@ -609,52 +621,50 @@ static SCREEN_UPDATE( marinedt )
 	return 0;
 }
 
-static MACHINE_START( marinedt )
+void marinedt_state::machine_start()
 {
-	marinedt_state *state = machine.driver_data<marinedt_state>();
 
-	state->save_item(NAME(state->m_obj1_a));
-	state->save_item(NAME(state->m_obj1_x));
-	state->save_item(NAME(state->m_obj1_y));
-	state->save_item(NAME(state->m_obj2_a));
-	state->save_item(NAME(state->m_obj2_x));
-	state->save_item(NAME(state->m_obj2_y));
-	state->save_item(NAME(state->m_pd));
-	state->save_item(NAME(state->m_pf));
-	state->save_item(NAME(state->m_music));
-	state->save_item(NAME(state->m_sound));
-	state->save_item(NAME(state->m_coll));
-	state->save_item(NAME(state->m_cx));
-	state->save_item(NAME(state->m_cyr));
-	state->save_item(NAME(state->m_cyq));
-	state->save_item(NAME(state->m_collh));
-	state->save_item(NAME(state->m_cxh));
-	state->save_item(NAME(state->m_cyrh));
-	state->save_item(NAME(state->m_cyqh));
+	save_item(NAME(m_obj1_a));
+	save_item(NAME(m_obj1_x));
+	save_item(NAME(m_obj1_y));
+	save_item(NAME(m_obj2_a));
+	save_item(NAME(m_obj2_x));
+	save_item(NAME(m_obj2_y));
+	save_item(NAME(m_pd));
+	save_item(NAME(m_pf));
+	save_item(NAME(m_music));
+	save_item(NAME(m_sound));
+	save_item(NAME(m_coll));
+	save_item(NAME(m_cx));
+	save_item(NAME(m_cyr));
+	save_item(NAME(m_cyq));
+	save_item(NAME(m_collh));
+	save_item(NAME(m_cxh));
+	save_item(NAME(m_cyrh));
+	save_item(NAME(m_cyqh));
 }
 
-static MACHINE_RESET( marinedt )
+void marinedt_state::machine_reset()
 {
-	marinedt_state *state = machine.driver_data<marinedt_state>();
 
-	state->m_obj1_a = 0;
-	state->m_obj1_x = 0;
-	state->m_obj1_y = 0;
-	state->m_obj2_a = 0;
-	state->m_obj2_x = 0;
-	state->m_obj2_y = 0;
-	state->m_pd = 0;
-	state->m_pf = 0;
-	state->m_music = 0;
-	state->m_sound = 0;
-	state->m_coll = 0;
-	state->m_cx = 0;
-	state->m_cyr = 0;
-	state->m_cyq = 0;
-	state->m_collh = 0;
-	state->m_cxh = 0;
-	state->m_cyrh = 0;
-	state->m_cyqh = 0;
+	m_obj1_a = 0;
+	m_obj1_x = 0;
+	m_obj1_y = 0;
+	m_obj2_a = 0;
+	m_obj2_x = 0;
+	m_obj2_y = 0;
+	m_pd = 0;
+	m_pf = 0;
+	m_music = 0;
+	m_sound = 0;
+	m_coll = 0;
+	m_cx = 0;
+	m_cyr = 0;
+	m_cyq = 0;
+	m_collh = 0;
+	m_cxh = 0;
+	m_cyrh = 0;
+	m_cyqh = 0;
 }
 
 static MACHINE_CONFIG_START( marinedt, marinedt_state )
@@ -663,25 +673,20 @@ static MACHINE_CONFIG_START( marinedt, marinedt_state )
 	MCFG_CPU_ADD("maincpu", Z80,10000000/4)
 	MCFG_CPU_PROGRAM_MAP(marinedt_map)
 	MCFG_CPU_IO_MAP(marinedt_io_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", marinedt_state,  irq0_line_hold)
 
-	MCFG_MACHINE_START(marinedt)
-	MCFG_MACHINE_RESET(marinedt)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(4*8+32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 4*8, 32*8-1)
-	MCFG_SCREEN_UPDATE(marinedt)
+	MCFG_SCREEN_UPDATE_DRIVER(marinedt_state, screen_update_marinedt)
 
 	MCFG_GFXDECODE(marinedt)
 	MCFG_PALETTE_LENGTH(64)
 
-	MCFG_PALETTE_INIT(marinedt)
-	MCFG_VIDEO_START(marinedt)
 
 	/* sound hardware */
 	//discrete sound
@@ -716,10 +721,10 @@ ROM_START( marinedt )
 	ROM_LOAD( "mg13",     0x0000, 0x1000, CRC(17817044) SHA1(8c9b96620e3c414952e6d85c6e81b0df85c88e7a) )
 
 	ROM_REGION( 0x0080, "proms", 0 )
-	ROM_LOAD( "mg14.bpr", 0x0000, 0x0020, CRC(f75f4e3a) SHA1(36e665987f475c57435fa8c224a2a3ce0c5e672b) )	//char clr
-	ROM_LOAD( "mg15.bpr", 0x0020, 0x0020, CRC(cd3ab489) SHA1(a77478fb94d0cf8f4317f89cc9579def7c294b4f) )	//obj clr
-	ROM_LOAD( "mg16.bpr", 0x0040, 0x0020, CRC(92c868bc) SHA1(483ae6f47845ddacb701528e82bd388d7d66a0fb) )	//?? collisions
-	ROM_LOAD( "mg17.bpr", 0x0060, 0x0020, CRC(13261a02) SHA1(050edd18e4f79d19d5206f55f329340432fd4099) )	//?? table of increasing values
+	ROM_LOAD( "mg14.bpr", 0x0000, 0x0020, CRC(f75f4e3a) SHA1(36e665987f475c57435fa8c224a2a3ce0c5e672b) )    //char clr
+	ROM_LOAD( "mg15.bpr", 0x0020, 0x0020, CRC(cd3ab489) SHA1(a77478fb94d0cf8f4317f89cc9579def7c294b4f) )    //obj clr
+	ROM_LOAD( "mg16.bpr", 0x0040, 0x0020, CRC(92c868bc) SHA1(483ae6f47845ddacb701528e82bd388d7d66a0fb) )    //?? collisions
+	ROM_LOAD( "mg17.bpr", 0x0060, 0x0020, CRC(13261a02) SHA1(050edd18e4f79d19d5206f55f329340432fd4099) )    //?? table of increasing values
 ROM_END
 
-GAME( 1981, marinedt, 0, marinedt, marinedt, 0, ROT270, "Taito", "Marine Date", GAME_NO_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1981, marinedt, 0, marinedt, marinedt, driver_device, 0, ROT270, "Taito", "Marine Date", GAME_NO_SOUND | GAME_SUPPORTS_SAVE )

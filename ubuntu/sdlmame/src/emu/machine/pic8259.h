@@ -28,7 +28,38 @@
 #include "devlegcy.h"
 #include "devcb.h"
 
-DECLARE_LEGACY_DEVICE(PIC8259, pic8259);
+class pic8259_device : public device_t
+{
+public:
+	pic8259_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock);
+	~pic8259_device() { global_free(m_token); }
+
+	DECLARE_READ8_MEMBER( read );
+	DECLARE_WRITE8_MEMBER( write );
+
+	DECLARE_WRITE_LINE_MEMBER( ir0_w );
+	DECLARE_WRITE_LINE_MEMBER( ir1_w );
+	DECLARE_WRITE_LINE_MEMBER( ir2_w );
+	DECLARE_WRITE_LINE_MEMBER( ir3_w );
+	DECLARE_WRITE_LINE_MEMBER( ir4_w );
+	DECLARE_WRITE_LINE_MEMBER( ir5_w );
+	DECLARE_WRITE_LINE_MEMBER( ir6_w );
+	DECLARE_WRITE_LINE_MEMBER( ir7_w );
+
+	// access to legacy token
+	void *token() const { assert(m_token != NULL); return m_token; }
+protected:
+	// device-level overrides
+	virtual void device_config_complete();
+	virtual void device_start();
+	virtual void device_reset();
+private:
+	// internal state
+	void *m_token;
+};
+
+extern const device_type PIC8259;
+
 
 /***************************************************************************
     TYPE DEFINITIONS
@@ -38,6 +69,10 @@ struct pic8259_interface
 {
 	/* Called when int line changes */
 	devcb_write_line out_int_func;
+	/* 1 - when master, 0 - when slave */
+	devcb_read_line sp_en_func;
+	/* Called when on master slave irq is trigered*/
+	devcb_read8 read_slave_ack_func;
 };
 
 
@@ -51,8 +86,8 @@ struct pic8259_interface
 
 
 /* device interface */
-READ8_DEVICE_HANDLER( pic8259_r );
-WRITE8_DEVICE_HANDLER( pic8259_w );
+DECLARE_READ8_DEVICE_HANDLER( pic8259_r );
+DECLARE_WRITE8_DEVICE_HANDLER( pic8259_w );
 int pic8259_acknowledge(device_t *device);
 
 /* interrupt requests */

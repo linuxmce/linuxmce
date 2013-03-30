@@ -28,78 +28,83 @@ driver by Zsolt Vasvari
 a000-a3ff   R/W X/Y scroll position of each character (can be scrolled up
                 to 7 pixels in each direction)
 
+TODO:
+- fix cliprect for sprites that goes out of screen if possible
 
 ***************************************************************************/
 
 #include "emu.h"
 #include "cpu/i8085/i8085.h"
 #include "cpu/mcs48/mcs48.h"
-#include "sound/sn76496.h"
 #include "includes/spcforce.h"
 
 
-static WRITE8_HANDLER( spcforce_SN76496_latch_w )
+WRITE8_MEMBER(spcforce_state::spcforce_SN76496_latch_w)
 {
-	spcforce_state *state = space->machine().driver_data<spcforce_state>();
 
-	state->m_sn76496_latch = data;
+	m_sn76496_latch = data;
 }
 
-static READ8_HANDLER( spcforce_SN76496_select_r )
+READ8_MEMBER(spcforce_state::spcforce_SN76496_select_r)
 {
-	spcforce_state *state = space->machine().driver_data<spcforce_state>();
 
-	if (~state->m_sn76496_select & 0x40) return sn76496_ready_r(space->machine().device("sn1"));
-	if (~state->m_sn76496_select & 0x20) return sn76496_ready_r(space->machine().device("sn2"));
-	if (~state->m_sn76496_select & 0x10) return sn76496_ready_r(space->machine().device("sn3"));
+		if (~m_sn76496_select & 0x40) return m_sn1->ready_r();
+		if (~m_sn76496_select & 0x20) return m_sn2->ready_r();
+		if (~m_sn76496_select & 0x10) return m_sn3->ready_r();
+
 
 	return 0;
 }
 
-static WRITE8_HANDLER( spcforce_SN76496_select_w )
+WRITE8_MEMBER(spcforce_state::spcforce_SN76496_select_w)
 {
-	spcforce_state *state = space->machine().driver_data<spcforce_state>();
 
-	state->m_sn76496_select = data;
+	m_sn76496_select = data;
 
-	if (~data & 0x40) sn76496_w(space->machine().device("sn1"), 0, state->m_sn76496_latch);
-	if (~data & 0x20) sn76496_w(space->machine().device("sn2"), 0, state->m_sn76496_latch);
-	if (~data & 0x10) sn76496_w(space->machine().device("sn3"), 0, state->m_sn76496_latch);
+	if (~data & 0x40) m_sn1->write(space, 0, m_sn76496_latch);
+	if (~data & 0x20) m_sn2->write(space, 0, m_sn76496_latch);
+	if (~data & 0x10) m_sn3->write(space, 0, m_sn76496_latch);
+
 }
 
-static READ8_HANDLER( spcforce_t0_r )
+READ8_MEMBER(spcforce_state::spcforce_t0_r)
 {
 	/* SN76496 status according to Al - not supported by MAME?? */
-	return space->machine().rand() & 1;
+	return machine().rand() & 1;
 }
 
 
-static WRITE8_HANDLER( spcforce_soundtrigger_w )
+WRITE8_MEMBER(spcforce_state::spcforce_soundtrigger_w)
 {
-	cputag_set_input_line(space->machine(), "audiocpu", 0, (~data & 0x08) ? ASSERT_LINE : CLEAR_LINE);
+	machine().device("audiocpu")->execute().set_input_line(0, (~data & 0x08) ? ASSERT_LINE : CLEAR_LINE);
 }
 
+WRITE8_MEMBER(spcforce_state::irq_mask_w)
+{
 
-static ADDRESS_MAP_START( spcforce_map, AS_PROGRAM, 8 )
+	m_irq_mask = data & 1;
+}
+
+static ADDRESS_MAP_START( spcforce_map, AS_PROGRAM, 8, spcforce_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
 	AM_RANGE(0x4000, 0x43ff) AM_RAM
-	AM_RANGE(0x7000, 0x7000) AM_READ_PORT("DSW") AM_WRITE(soundlatch_w)
+	AM_RANGE(0x7000, 0x7000) AM_READ_PORT("DSW") AM_WRITE(soundlatch_byte_w)
 	AM_RANGE(0x7001, 0x7001) AM_READ_PORT("P1") AM_WRITE(spcforce_soundtrigger_w)
 	AM_RANGE(0x7002, 0x7002) AM_READ_PORT("P2")
 	AM_RANGE(0x700b, 0x700b) AM_WRITE(spcforce_flip_screen_w)
-	AM_RANGE(0x700e, 0x700e) AM_WRITE(interrupt_enable_w)
+	AM_RANGE(0x700e, 0x700e) AM_WRITE(irq_mask_w)
 	AM_RANGE(0x700f, 0x700f) AM_WRITENOP
-	AM_RANGE(0x8000, 0x83ff) AM_RAM AM_BASE_MEMBER(spcforce_state, m_videoram)
-	AM_RANGE(0x9000, 0x93ff) AM_RAM AM_BASE_MEMBER(spcforce_state, m_colorram)
-	AM_RANGE(0xa000, 0xa3ff) AM_RAM AM_BASE_MEMBER(spcforce_state, m_scrollram)
+	AM_RANGE(0x8000, 0x83ff) AM_RAM AM_SHARE("videoram")
+	AM_RANGE(0x9000, 0x93ff) AM_RAM AM_SHARE("colorram")
+	AM_RANGE(0xa000, 0xa3ff) AM_RAM AM_SHARE("scrollram")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( spcforce_sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( spcforce_sound_map, AS_PROGRAM, 8, spcforce_state )
 	AM_RANGE(0x0000, 0x07ff) AM_ROM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( spcforce_sound_io_map, AS_IO, 8 )
-	AM_RANGE(MCS48_PORT_BUS, MCS48_PORT_BUS) AM_READ(soundlatch_r)
+static ADDRESS_MAP_START( spcforce_sound_io_map, AS_IO, 8, spcforce_state )
+	AM_RANGE(MCS48_PORT_BUS, MCS48_PORT_BUS) AM_READ(soundlatch_byte_r)
 	AM_RANGE(MCS48_PORT_P1, MCS48_PORT_P1) AM_WRITE(spcforce_SN76496_latch_w)
 	AM_RANGE(MCS48_PORT_P2, MCS48_PORT_P2) AM_READWRITE(spcforce_SN76496_select_r, spcforce_SN76496_select_w)
 	AM_RANGE(MCS48_PORT_T0, MCS48_PORT_T0) AM_READ(spcforce_t0_r)
@@ -124,7 +129,7 @@ static INPUT_PORTS_START( spcforce )
 	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Bonus_Life ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( On ) )
-	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Unknown ) )	/* probably unused */
+	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Unknown ) )  /* probably unused */
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( On ) )
 	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Cabinet ) )
@@ -148,7 +153,7 @@ static INPUT_PORTS_START( spcforce )
 	PORT_SERVICE_NO_TOGGLE( 0x08, IP_ACTIVE_LOW )
 	PORT_BIT ( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL
 	PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT ( 0x40, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT ( 0x40, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_BIT ( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_COCKTAIL
 INPUT_PORTS_END
 
@@ -171,7 +176,7 @@ static INPUT_PORTS_START( spcforc2 )
 	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Bonus_Life ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( On ) )
-	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Unknown ) )	/* probably unused */
+	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Unknown ) )  /* probably unused */
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( On ) )
 	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Unknown ) )  /* probably unused */
@@ -190,7 +195,7 @@ static INPUT_PORTS_START( spcforc2 )
 
 	PORT_START("P2")
 	PORT_SERVICE_NO_TOGGLE( 0x08, IP_ACTIVE_LOW )
-	PORT_BIT ( 0x40, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT ( 0x40, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 INPUT_PORTS_END
 
 
@@ -199,7 +204,7 @@ static const gfx_layout charlayout =
 	8,8,    /* 8*8 chars */
 	512,    /* 512 characters */
 	3,      /* 3 bits per pixel */
-	{ 2*512*8*8, 512*8*8, 0 },  /* The bitplanes are seperate */
+	{ 2*512*8*8, 512*8*8, 0 },  /* The bitplanes are separate */
 	{ 0, 1, 2, 3, 4, 5, 6, 7},
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8},
 	8*8     /* every char takes 8 consecutive bytes */
@@ -215,7 +220,7 @@ GFXDECODE_END
 static const int colortable_source[] =
 {
 	0, 1, 2, 3, 4, 5, 6, 7,
-	0, 0, 1, 2, 3, 4, 5, 6,	 /* not sure about these, but they are only used */
+	0, 0, 1, 2, 3, 4, 5, 6,  /* not sure about these, but they are only used */
 	0, 7, 0, 1, 2, 3, 4, 5,  /* to change the text color. During the game,   */
 	0, 6, 7, 0, 1, 2, 3, 4,  /* only color 0 is used, which is correct.      */
 	0, 5, 6, 7, 0, 1, 2, 3,
@@ -224,7 +229,7 @@ static const int colortable_source[] =
 	0, 2, 3, 4, 5, 6, 7, 0
 };
 
-static PALETTE_INIT( spcforce )
+void spcforce_state::palette_init()
 {
 	int i;
 
@@ -233,10 +238,27 @@ static PALETTE_INIT( spcforce )
 		int data = colortable_source[i];
 		rgb_t color = MAKE_RGB(pal1bit(data >> 0), pal1bit(data >> 1), pal1bit(data >> 2));
 
-		palette_set_color(machine, i, color);
+		palette_set_color(machine(), i, color);
 	}
 }
 
+
+//-------------------------------------------------
+//  sn76496_config psg_intf
+//-------------------------------------------------
+
+static const sn76496_config psg_intf =
+{
+	DEVCB_NULL
+};
+
+
+INTERRUPT_GEN_MEMBER(spcforce_state::vblank_irq)
+{
+
+	if(m_irq_mask)
+		device.execute().set_input_line(3, HOLD_LINE);
+}
 
 static MACHINE_CONFIG_START( spcforce, spcforce_state )
 
@@ -244,9 +266,9 @@ static MACHINE_CONFIG_START( spcforce, spcforce_state )
 	/* FIXME: The 8085A had a max clock of 6MHz, internally divided by 2! */
 	MCFG_CPU_ADD("maincpu", I8085A, 8000000 * 2)        /* 4.00 MHz??? */
 	MCFG_CPU_PROGRAM_MAP(spcforce_map)
-	MCFG_CPU_VBLANK_INT("screen", irq3_line_pulse)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", spcforce_state,  vblank_irq)
 
-	MCFG_CPU_ADD("audiocpu", I8035, 6144000)		/* divisor ??? */
+	MCFG_CPU_ADD("audiocpu", I8035, 6144000)        /* divisor ??? */
 	MCFG_CPU_PROGRAM_MAP(spcforce_sound_map)
 	MCFG_CPU_IO_MAP(spcforce_sound_io_map)
 
@@ -254,27 +276,28 @@ static MACHINE_CONFIG_START( spcforce, spcforce_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 0*8, 28*8-1)
-	MCFG_SCREEN_UPDATE(spcforce)
+	MCFG_SCREEN_UPDATE_DRIVER(spcforce_state, screen_update_spcforce)
 
 	MCFG_GFXDECODE(spcforce)
 	MCFG_PALETTE_LENGTH(sizeof(colortable_source) / sizeof(colortable_source[0]))
 
-	MCFG_PALETTE_INIT(spcforce)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
 	MCFG_SOUND_ADD("sn1", SN76496, 2000000)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
+	MCFG_SOUND_CONFIG(psg_intf)
 
 	MCFG_SOUND_ADD("sn2", SN76496, 2000000)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
+	MCFG_SOUND_CONFIG(psg_intf)
 
 	MCFG_SOUND_ADD("sn3", SN76496, 2000000)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
+	MCFG_SOUND_CONFIG(psg_intf)
 MACHINE_CONFIG_END
 
 
@@ -285,16 +308,16 @@ MACHINE_CONFIG_END
 ***************************************************************************/
 ROM_START( spcforce )
 	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD( "m1v4f.1a",	  0x0000, 0x0800, CRC(7da0d1ed) SHA1(2ee145f590da557be057f181b4861014627872e7) )
-	ROM_LOAD( "m2v4f.1c",	  0x0800, 0x0800, CRC(25605bff) SHA1(afda2884a00fdbc000191dd548fd8e34df3e2f49) )
-	ROM_LOAD( "m3v5f.2a",	  0x1000, 0x0800, CRC(6f879366) SHA1(ef624619dbaad1f2adf4fab82e04bac117dbfac6) )
-	ROM_LOAD( "m4v5f.2c",	  0x1800, 0x0800, CRC(7fbfabfa) SHA1(0d6bbdcc80e251aa0ebd12e66549afaf6d8ccb0e) )
+	ROM_LOAD( "m1v4f.1a",     0x0000, 0x0800, CRC(7da0d1ed) SHA1(2ee145f590da557be057f181b4861014627872e7) )
+	ROM_LOAD( "m2v4f.1c",     0x0800, 0x0800, CRC(25605bff) SHA1(afda2884a00fdbc000191dd548fd8e34df3e2f49) )
+	ROM_LOAD( "m3v5f.2a",     0x1000, 0x0800, CRC(6f879366) SHA1(ef624619dbaad1f2adf4fab82e04bac117dbfac6) )
+	ROM_LOAD( "m4v5f.2c",     0x1800, 0x0800, CRC(7fbfabfa) SHA1(0d6bbdcc80e251aa0ebd12e66549afaf6d8ccb0e) )
 							/*0x2000 empty */
-	ROM_LOAD( "m6v4f.3c",	  0x2800, 0x0800, CRC(12128e9e) SHA1(b2a113b419e11ca094f56ae93870df11690b119a) )
-	ROM_LOAD( "m7v4f.4a",	  0x3000, 0x0800, CRC(978ad452) SHA1(fa84dcc6587403dd939da719a747d8c7332ed038) )
-	ROM_LOAD( "m8v4f.4c",	  0x3800, 0x0800, CRC(f805c3cd) SHA1(78eb13b99aae895742b34ed56bee9313d3643de1) )
+	ROM_LOAD( "m6v4f.3c",     0x2800, 0x0800, CRC(12128e9e) SHA1(b2a113b419e11ca094f56ae93870df11690b119a) )
+	ROM_LOAD( "m7v4f.4a",     0x3000, 0x0800, CRC(978ad452) SHA1(fa84dcc6587403dd939da719a747d8c7332ed038) )
+	ROM_LOAD( "m8v4f.4c",     0x3800, 0x0800, CRC(f805c3cd) SHA1(78eb13b99aae895742b34ed56bee9313d3643de1) )
 
-	ROM_REGION( 0x1000, "audiocpu", 0 )		/* sound MCU */
+	ROM_REGION( 0x1000, "audiocpu", 0 )     /* sound MCU */
 	ROM_LOAD( "vm5.k10",      0x0000, 0x0800, CRC(8820913c) SHA1(90002cafdf5f32f916e5457e013ebe53405d5ca8) )
 
 	ROM_REGION( 0x3000, "gfx1", 0 )
@@ -311,13 +334,13 @@ ROM_START( spcforc2 )
 	ROM_LOAD( "spacefor.1a",  0x0000, 0x0800, CRC(ef6fdccb) SHA1(2fff28437597958b39a821f93ac30f32c24f50aa) )
 	ROM_LOAD( "spacefor.1c",  0x0800, 0x0800, CRC(44bd1cdd) SHA1(6dd5ae7a64079c61b63667f06e0d34dec48eac7c) )
 	ROM_LOAD( "spacefor.2a",  0x1000, 0x0800, CRC(fcbc7df7) SHA1(b6e89dbfc80d5d9dcf889f618a8278c182773a14) )
-	ROM_LOAD( "vm4",	      0x1800, 0x0800, CRC(c5b073b9) SHA1(93b77c77488aa954c35880439be6c7629448a3ea) )
+	ROM_LOAD( "vm4",          0x1800, 0x0800, CRC(c5b073b9) SHA1(93b77c77488aa954c35880439be6c7629448a3ea) )
 							/*0x2000 empty */
 	ROM_LOAD( "spacefor.3c",  0x2800, 0x0800, CRC(9fd52301) SHA1(1ea5d5b888dd2f7ac6aab227c78b86c2f2f320da) )
 	ROM_LOAD( "spacefor.4a",  0x3000, 0x0800, CRC(89aefc0a) SHA1(0b56efa613bce972af4bbf145853bfc0cda60ef9) )
-	ROM_LOAD( "m8v4f.4c",	  0x3800, 0x0800, CRC(f805c3cd) SHA1(78eb13b99aae895742b34ed56bee9313d3643de1) )
+	ROM_LOAD( "m8v4f.4c",     0x3800, 0x0800, CRC(f805c3cd) SHA1(78eb13b99aae895742b34ed56bee9313d3643de1) )
 
-	ROM_REGION( 0x1000, "audiocpu", 0 )		/* sound MCU */
+	ROM_REGION( 0x1000, "audiocpu", 0 )     /* sound MCU */
 	ROM_LOAD( "vm5.k10",      0x0000, 0x0800, CRC(8820913c) SHA1(90002cafdf5f32f916e5457e013ebe53405d5ca8) )
 
 	ROM_REGION( 0x3000, "gfx1", 0 )
@@ -331,17 +354,17 @@ ROM_END
 
 ROM_START( meteor )
 	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD( "vm1",	      0x0000, 0x0800, CRC(894fe9b1) SHA1(617e05523392e2ba2608ca13aa24d6601289fe87) )
-	ROM_LOAD( "vm2",	      0x0800, 0x0800, CRC(28685a68) SHA1(f911a3ccb8d63cf82a6dc8f069f3f498e9081656) )
-	ROM_LOAD( "vm3",	      0x1000, 0x0800, CRC(c88fb12a) SHA1(1eeb26caf7a1421ec2d570f71b8c4675ad7ea172) )
-	ROM_LOAD( "vm4",	      0x1800, 0x0800, CRC(c5b073b9) SHA1(93b77c77488aa954c35880439be6c7629448a3ea) )
+	ROM_LOAD( "vm1",          0x0000, 0x0800, CRC(894fe9b1) SHA1(617e05523392e2ba2608ca13aa24d6601289fe87) )
+	ROM_LOAD( "vm2",          0x0800, 0x0800, CRC(28685a68) SHA1(f911a3ccb8d63cf82a6dc8f069f3f498e9081656) )
+	ROM_LOAD( "vm3",          0x1000, 0x0800, CRC(c88fb12a) SHA1(1eeb26caf7a1421ec2d570f71b8c4675ad7ea172) )
+	ROM_LOAD( "vm4",          0x1800, 0x0800, CRC(c5b073b9) SHA1(93b77c77488aa954c35880439be6c7629448a3ea) )
 							/*0x2000 empty */
-	ROM_LOAD( "vm6",	      0x2800, 0x0800, CRC(9969ec43) SHA1(3ce067c34b84e9559f195e7ef9939a78070693b1) )
-	ROM_LOAD( "vm7",	      0x3000, 0x0800, CRC(39f43ac2) SHA1(b45275759f4003a22a32dc04227a98908bd140a9) )
-	ROM_LOAD( "vm8",	      0x3800, 0x0800, CRC(a0508de3) SHA1(75666a4e46b6c433f1c1f8e76c30fd087354097b) )
+	ROM_LOAD( "vm6",          0x2800, 0x0800, CRC(9969ec43) SHA1(3ce067c34b84e9559f195e7ef9939a78070693b1) )
+	ROM_LOAD( "vm7",          0x3000, 0x0800, CRC(39f43ac2) SHA1(b45275759f4003a22a32dc04227a98908bd140a9) )
+	ROM_LOAD( "vm8",          0x3800, 0x0800, CRC(a0508de3) SHA1(75666a4e46b6c433f1c1f8e76c30fd087354097b) )
 
-	ROM_REGION( 0x1000, "audiocpu", 0 )		/* sound MCU */
-	ROM_LOAD( "vm5",	      0x0000, 0x0800, CRC(b14ccd57) SHA1(0349ec5d0ca7f98ffdd96d7bf01cf096fe547f7a) )
+	ROM_REGION( 0x1000, "audiocpu", 0 )     /* sound MCU */
+	ROM_LOAD( "vm5",          0x0000, 0x0800, CRC(b14ccd57) SHA1(0349ec5d0ca7f98ffdd96d7bf01cf096fe547f7a) )
 
 	ROM_REGION( 0x3000, "gfx1", 0 )
 	ROM_LOAD( "rm1v",         0x0000, 0x0800, CRC(d621fe96) SHA1(29b75333ea8103095a4d452636eea4a1055845e5) )
@@ -353,6 +376,6 @@ ROM_START( meteor )
 ROM_END
 
 
-GAME( 1980, spcforce, 0,        spcforce, spcforce, 0, ROT270, "Venture Line", "Space Force (set 1)", GAME_IMPERFECT_COLORS )
-GAME( 19??, spcforc2, spcforce, spcforce, spcforc2, 0, ROT270, "bootleg? (Elcon)", "Space Force (set 2)", GAME_IMPERFECT_COLORS )
-GAME( 1981, meteor,   spcforce, spcforce, spcforc2, 0, ROT270, "Venture Line", "Meteoroids", GAME_IMPERFECT_COLORS )
+GAME( 1980, spcforce, 0,        spcforce, spcforce, driver_device, 0, ROT270, "Venture Line", "Space Force (set 1)", GAME_IMPERFECT_COLORS )
+GAME( 19??, spcforc2, spcforce, spcforce, spcforc2, driver_device, 0, ROT270, "bootleg? (Elcon)", "Space Force (set 2)", GAME_IMPERFECT_COLORS )
+GAME( 1981, meteor,   spcforce, spcforce, spcforc2, driver_device, 0, ROT270, "Venture Line", "Meteoroids", GAME_IMPERFECT_COLORS )

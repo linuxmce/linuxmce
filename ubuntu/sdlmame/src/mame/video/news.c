@@ -8,28 +8,26 @@
 
 ***************************************************************************/
 
-static TILE_GET_INFO( get_fg_tile_info )
+TILE_GET_INFO_MEMBER(news_state::get_fg_tile_info)
 {
-	news_state *state = machine.driver_data<news_state>();
-	int code = (state->m_fgram[tile_index * 2] << 8) | state->m_fgram[tile_index * 2 + 1];
-	SET_TILE_INFO(
+	int code = (m_fgram[tile_index * 2] << 8) | m_fgram[tile_index * 2 + 1];
+	SET_TILE_INFO_MEMBER(
 			0,
 			code & 0x0fff,
 			(code & 0xf000) >> 12,
 			0);
 }
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(news_state::get_bg_tile_info)
 {
-	news_state *state = machine.driver_data<news_state>();
-	int code = (state->m_bgram[tile_index * 2] << 8) | state->m_bgram[tile_index * 2 + 1];
+	int code = (m_bgram[tile_index * 2] << 8) | m_bgram[tile_index * 2 + 1];
 	int color = (code & 0xf000) >> 12;
 
 	code &= 0x0fff;
 	if ((code & 0x0e00) == 0x0e00)
-		code = (code & 0x1ff) | (state->m_bgpic << 9);
+		code = (code & 0x1ff) | (m_bgpic << 9);
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			0,
 			code,
 			color,
@@ -44,14 +42,13 @@ static TILE_GET_INFO( get_bg_tile_info )
 
 ***************************************************************************/
 
-VIDEO_START( news )
+void news_state::video_start()
 {
-	news_state *state = machine.driver_data<news_state>();
 
-	state->m_fg_tilemap = tilemap_create(machine, get_fg_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
-	tilemap_set_transparent_pen(state->m_fg_tilemap, 0);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(news_state::get_fg_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
+	m_fg_tilemap->set_transparent_pen(0);
 
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(news_state::get_bg_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
 }
 
 
@@ -62,30 +59,27 @@ VIDEO_START( news )
 
 ***************************************************************************/
 
-WRITE8_HANDLER( news_fgram_w )
+WRITE8_MEMBER(news_state::news_fgram_w)
 {
-	news_state *state = space->machine().driver_data<news_state>();
 
-	state->m_fgram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_fg_tilemap, offset / 2);
+	m_fgram[offset] = data;
+	m_fg_tilemap->mark_tile_dirty(offset / 2);
 }
 
-WRITE8_HANDLER( news_bgram_w )
+WRITE8_MEMBER(news_state::news_bgram_w)
 {
-	news_state *state = space->machine().driver_data<news_state>();
 
-	state->m_bgram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset / 2);
+	m_bgram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset / 2);
 }
 
-WRITE8_HANDLER( news_bgpic_w )
+WRITE8_MEMBER(news_state::news_bgpic_w)
 {
-	news_state *state = space->machine().driver_data<news_state>();
 
-	if (state->m_bgpic != data)
+	if (m_bgpic != data)
 	{
-		state->m_bgpic = data;
-		tilemap_mark_all_tiles_dirty(state->m_bg_tilemap);
+		m_bgpic = data;
+		m_bg_tilemap->mark_all_dirty();
 	}
 }
 
@@ -97,10 +91,9 @@ WRITE8_HANDLER( news_bgpic_w )
 
 ***************************************************************************/
 
-SCREEN_UPDATE( news )
+UINT32 news_state::screen_update_news(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	news_state *state = screen->machine().driver_data<news_state>();
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
-	tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, 0, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
+	m_fg_tilemap->draw(bitmap, cliprect, 0, 0);
 	return 0;
 }

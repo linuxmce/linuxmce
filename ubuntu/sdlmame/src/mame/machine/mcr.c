@@ -5,8 +5,7 @@
 ***************************************************************************/
 
 #include "emu.h"
-#include "deprecat.h"
-#include "audio/mcr.h"
+#include "audio/midway.h"
 #include "includes/mcr.h"
 
 #define VERBOSE 0
@@ -34,18 +33,6 @@ UINT32 mcr_sprite_board;
 
 static emu_timer *ipu_watchdog_timer;
 
-
-/*************************************
- *
- *  Function prototypes
- *
- *************************************/
-
-static TIMER_CALLBACK( ipu_watchdog_reset );
-static WRITE8_DEVICE_HANDLER( ipu_break_changed );
-
-
-
 /*************************************
  *
  *  Graphics declarations
@@ -71,9 +58,9 @@ const gfx_layout mcr_sprite_layout =
 	4,
 	{ STEP4(0,1) },
 	{ STEP2(RGN_FRAC(0,4)+0,4), STEP2(RGN_FRAC(1,4)+0,4), STEP2(RGN_FRAC(2,4)+0,4), STEP2(RGN_FRAC(3,4)+0,4),
-	  STEP2(RGN_FRAC(0,4)+8,4), STEP2(RGN_FRAC(1,4)+8,4), STEP2(RGN_FRAC(2,4)+8,4), STEP2(RGN_FRAC(3,4)+8,4),
-	  STEP2(RGN_FRAC(0,4)+16,4), STEP2(RGN_FRAC(1,4)+16,4), STEP2(RGN_FRAC(2,4)+16,4), STEP2(RGN_FRAC(3,4)+16,4),
-	  STEP2(RGN_FRAC(0,4)+24,4), STEP2(RGN_FRAC(1,4)+24,4), STEP2(RGN_FRAC(2,4)+24,4), STEP2(RGN_FRAC(3,4)+24,4) },
+		STEP2(RGN_FRAC(0,4)+8,4), STEP2(RGN_FRAC(1,4)+8,4), STEP2(RGN_FRAC(2,4)+8,4), STEP2(RGN_FRAC(3,4)+8,4),
+		STEP2(RGN_FRAC(0,4)+16,4), STEP2(RGN_FRAC(1,4)+16,4), STEP2(RGN_FRAC(2,4)+16,4), STEP2(RGN_FRAC(3,4)+16,4),
+		STEP2(RGN_FRAC(0,4)+24,4), STEP2(RGN_FRAC(1,4)+24,4), STEP2(RGN_FRAC(2,4)+24,4), STEP2(RGN_FRAC(3,4)+24,4) },
 	{ STEP32(0,32) },
 	32*32
 };
@@ -105,21 +92,19 @@ const z80_daisy_config mcr_ipu_daisy_chain[] =
 
 Z80CTC_INTERFACE( mcr_ctc_intf )
 {
-	0,              			/* timer disables */
-	DEVCB_CPU_INPUT_LINE("maincpu", INPUT_LINE_IRQ0),	/* interrupt handler */
-	DEVCB_LINE(z80ctc_trg1_w),	/* ZC/TO0 callback */
-	DEVCB_NULL,             	/* ZC/TO1 callback */
-	DEVCB_NULL              	/* ZC/TO2 callback */
+	DEVCB_CPU_INPUT_LINE("maincpu", INPUT_LINE_IRQ0),   /* interrupt handler */
+	DEVCB_DEVICE_LINE_MEMBER("ctc", z80ctc_device, trg1),   /* ZC/TO0 callback */
+	DEVCB_NULL,                 /* ZC/TO1 callback */
+	DEVCB_NULL                  /* ZC/TO2 callback */
 };
 
 
 Z80CTC_INTERFACE( nflfoot_ctc_intf )
 {
-	0,                  /* timer disables */
 	DEVCB_CPU_INPUT_LINE("ipu", INPUT_LINE_IRQ0),  /* interrupt handler */
-	DEVCB_NULL,			/* ZC/TO0 callback */
-	DEVCB_NULL,			/* ZC/TO1 callback */
-	DEVCB_NULL      	/* ZC/TO2 callback */
+	DEVCB_NULL,         /* ZC/TO0 callback */
+	DEVCB_NULL,         /* ZC/TO1 callback */
+	DEVCB_NULL          /* ZC/TO2 callback */
 };
 
 
@@ -135,19 +120,19 @@ Z80PIO_INTERFACE( nflfoot_pio_intf )
 };
 
 
-static WRITE_LINE_DEVICE_HANDLER( ipu_ctc_interrupt )
+WRITE_LINE_MEMBER(mcr_state::ipu_ctc_interrupt)
 {
-	cputag_set_input_line(device->machine(), "ipu", 0, state);
+	machine().device("ipu")->execute().set_input_line(0, state);
 }
 
 
 const z80sio_interface nflfoot_sio_intf =
 {
-	ipu_ctc_interrupt,	/* interrupt handler */
-	0,					/* DTR changed handler */
-	0,					/* RTS changed handler */
-	ipu_break_changed,	/* BREAK changed handler */
-	mcr_ipu_sio_transmit/* transmit handler */
+	DEVCB_DRIVER_LINE_MEMBER(mcr_state,ipu_ctc_interrupt),  /* interrupt handler */
+	DEVCB_NULL,                 /* DTR changed handler */
+	DEVCB_NULL,                 /* RTS changed handler */
+	DEVCB_DRIVER_MEMBER(mcr_state,ipu_break_changed),   /* BREAK changed handler */
+	DEVCB_DRIVER_MEMBER16(mcr_state,mcr_ipu_sio_transmit)/* transmit handler */
 };
 
 
@@ -158,26 +143,23 @@ const z80sio_interface nflfoot_sio_intf =
  *
  *************************************/
 
-MACHINE_START( mcr )
+MACHINE_START_MEMBER(mcr_state,mcr)
 {
-	state_save_register_global(machine, mcr_cocktail_flip);
+	state_save_register_global(machine(), mcr_cocktail_flip);
 }
 
 
-MACHINE_START( nflfoot )
+MACHINE_START_MEMBER(mcr_state,nflfoot)
 {
 	/* allocate a timer for the IPU watchdog */
-	ipu_watchdog_timer = machine.scheduler().timer_alloc(FUNC(ipu_watchdog_reset));
+	ipu_watchdog_timer = machine().scheduler().timer_alloc(timer_expired_delegate(FUNC(mcr_state::ipu_watchdog_reset),this));
 }
 
 
-MACHINE_RESET( mcr )
+MACHINE_RESET_MEMBER(mcr_state,mcr)
 {
 	/* reset cocktail flip */
 	mcr_cocktail_flip = 0;
-
-	/* initialize the sound */
-	mcr_sound_reset(machine);
 }
 
 
@@ -188,63 +170,40 @@ MACHINE_RESET( mcr )
  *
  *************************************/
 
-INTERRUPT_GEN( mcr_interrupt )
+TIMER_DEVICE_CALLBACK_MEMBER(mcr_state::mcr_interrupt)
 {
-	device_t *ctc = device->machine().device("ctc");
+	z80ctc_device *ctc = machine().device<z80ctc_device>("ctc");
+	int scanline = param;
 
 	/* CTC line 2 is connected to VBLANK, which is once every 1/2 frame */
 	/* for the 30Hz interlaced display */
-	z80ctc_trg2_w(ctc, 1);
-	z80ctc_trg2_w(ctc, 0);
+	if(scanline == 0 || scanline == 240)
+	{
+		ctc->trg2(1);
+		ctc->trg2(0);
+	}
 
 	/* CTC line 3 is connected to 493, which is signalled once every */
 	/* frame at 30Hz */
-	if (cpu_getiloops(device) == 0)
+	if (scanline == 0)
 	{
-		z80ctc_trg3_w(ctc, 1);
-		z80ctc_trg3_w(ctc, 0);
+		ctc->trg3(1);
+		ctc->trg3(0);
 	}
 }
 
-
-INTERRUPT_GEN( mcr_ipu_interrupt )
+TIMER_DEVICE_CALLBACK_MEMBER(mcr_state::mcr_ipu_interrupt)
 {
-	device_t *ctc = device->machine().device("ipu_ctc");
+	z80ctc_device *ctc = machine().device<z80ctc_device>("ctc");
+	int scanline = param;
 
 	/* CTC line 3 is connected to 493, which is signalled once every */
 	/* frame at 30Hz */
-	if (cpu_getiloops(device) == 0)
+	if (scanline == 0)
 	{
-		z80ctc_trg3_w(ctc, 1);
-		z80ctc_trg3_w(ctc, 0);
+		ctc->trg3(1);
+		ctc->trg3(0);
 	}
-}
-
-
-/*************************************
- *
- *  Generic MCR port write handlers
- *
- *************************************/
-
-WRITE8_HANDLER( mcr_control_port_w )
-{
-	/*
-        Bit layout is as follows:
-            D7 = n/c
-            D6 = cocktail flip
-            D5 = red LED
-            D4 = green LED
-            D3 = n/c
-            D2 = coin meter 3
-            D1 = coin meter 2
-            D0 = coin meter 1
-    */
-
-	coin_counter_w(space->machine(), 0, (data >> 0) & 1);
-	coin_counter_w(space->machine(), 1, (data >> 1) & 1);
-	coin_counter_w(space->machine(), 2, (data >> 2) & 1);
-	mcr_cocktail_flip = (data >> 6) & 1;
 }
 
 
@@ -254,41 +213,41 @@ WRITE8_HANDLER( mcr_control_port_w )
  *
  *************************************/
 
-static WRITE8_DEVICE_HANDLER( ipu_break_changed )
+WRITE8_MEMBER(mcr_state::ipu_break_changed)
 {
 	/* channel B is connected to the CED player */
 	if (offset == 1)
 	{
 		logerror("DTR changed -> %d\n", data);
 		if (data == 1)
-			z80sio_receive_data(device, 1, 0);
+			downcast<z80sio_device *>(machine().device("ipu_sio"))->receive_data(1, 0);
 	}
 }
 
 
-WRITE8_HANDLER( mcr_ipu_laserdisk_w )
+WRITE8_MEMBER(mcr_state::mcr_ipu_laserdisk_w)
 {
 	/* bit 3 enables (1) LD video regardless of PIX SW */
 	/* bit 2 enables (1) LD right channel audio */
 	/* bit 1 enables (1) LD left channel audio */
 	/* bit 0 enables (1) LD video if PIX SW == 1 */
 	if (data != 0)
-		logerror("%04X:mcr_ipu_laserdisk_w(%d) = %02X\n", cpu_get_pc(&space->device()), offset, data);
+		logerror("%04X:mcr_ipu_laserdisk_w(%d) = %02X\n", space.device().safe_pc(), offset, data);
 }
 
 
-static TIMER_CALLBACK( ipu_watchdog_reset )
+TIMER_CALLBACK_MEMBER(mcr_state::ipu_watchdog_reset)
 {
 	logerror("ipu_watchdog_reset\n");
-	cputag_set_input_line(machine, "ipu", INPUT_LINE_RESET, PULSE_LINE);
-	devtag_reset(machine, "ipu_ctc");
-	devtag_reset(machine, "ipu_pio0");
-	devtag_reset(machine, "ipu_pio1");
-	devtag_reset(machine, "ipu_sio");
+	machine().device("ipu")->execute().set_input_line(INPUT_LINE_RESET, PULSE_LINE);
+	machine().device("ipu_ctc")->reset();
+	machine().device("ipu_pio0")->reset();
+	machine().device("ipu_pio1")->reset();
+	machine().device("ipu_sio")->reset();
 }
 
 
-READ8_HANDLER( mcr_ipu_watchdog_r )
+READ8_MEMBER(mcr_state::mcr_ipu_watchdog_r)
 {
 	/* watchdog counter is clocked by 7.3728MHz crystal / 16 */
 	/* watchdog is tripped when 14-bit counter overflows => / 32768 = 14.0625Hz*/
@@ -297,7 +256,7 @@ READ8_HANDLER( mcr_ipu_watchdog_r )
 }
 
 
-WRITE8_HANDLER( mcr_ipu_watchdog_w )
+WRITE8_MEMBER(mcr_state::mcr_ipu_watchdog_w)
 {
 	mcr_ipu_watchdog_r(space,0);
 }

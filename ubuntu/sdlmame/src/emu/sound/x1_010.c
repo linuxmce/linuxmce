@@ -62,34 +62,33 @@ Registers:
 
 #define SETA_NUM_CHANNELS 16
 
-#define FREQ_BASE_BITS		  8					// Frequency fixed decimal shift bits
-#define ENV_BASE_BITS		 16					// wave form envelope fixed decimal shift bits
-#define	VOL_BASE	(2*32*256/30)					// Volume base
+#define FREQ_BASE_BITS        8                 // Frequency fixed decimal shift bits
+#define ENV_BASE_BITS        16                 // wave form envelope fixed decimal shift bits
+#define VOL_BASE    (2*32*256/30)                   // Volume base
 
 /* this structure defines the parameters for a channel */
-typedef struct {
-	unsigned char	status;
-	unsigned char	volume;						//        volume / wave form no.
-	unsigned char	frequency;					//     frequency / pitch lo
-	unsigned char	pitch_hi;					//      reserved / pitch hi
-	unsigned char	start;						// start address / envelope time
-	unsigned char	end;						//   end address / envelope no.
-	unsigned char	reserve[2];
-} X1_010_CHANNEL;
+struct X1_010_CHANNEL {
+	unsigned char   status;
+	unsigned char   volume;                     //        volume / wave form no.
+	unsigned char   frequency;                  //     frequency / pitch lo
+	unsigned char   pitch_hi;                   //      reserved / pitch hi
+	unsigned char   start;                      // start address / envelope time
+	unsigned char   end;                        //   end address / envelope no.
+	unsigned char   reserve[2];
+};
 
-typedef struct _x1_010_state x1_010_state;
-struct _x1_010_state
+struct x1_010_state
 {
 	/* Variables only used here */
-	int	rate;								// Output sampling rate (Hz)
-	sound_stream *	stream;					// Stream handle
-	int	address;							// address eor data
-	const UINT8 *region;					// region name
-	int	sound_enable;						// sound output enable/disable
-	UINT8	reg[0x2000];				// X1-010 Register & wave form area
-	UINT8	HI_WORD_BUF[0x2000];			// X1-010 16bit access ram check avoidance work
-	UINT32	smp_offset[SETA_NUM_CHANNELS];
-	UINT32	env_offset[SETA_NUM_CHANNELS];
+	int rate;                               // Output sampling rate (Hz)
+	sound_stream *  stream;                 // Stream handle
+	int address;                            // address eor data
+	const UINT8 *region;                    // region name
+	int sound_enable;                       // sound output enable/disable
+	UINT8   reg[0x2000];                // X1-010 Register & wave form area
+	UINT8   HI_WORD_BUF[0x2000];            // X1-010 16bit access ram check avoidance work
+	UINT32  smp_offset[SETA_NUM_CHANNELS];
+	UINT32  env_offset[SETA_NUM_CHANNELS];
 
 	UINT32 base_clock;
 };
@@ -101,7 +100,7 @@ INLINE x1_010_state *get_safe_token(device_t *device)
 {
 	assert(device != NULL);
 	assert(device->type() == X1_010);
-	return (x1_010_state *)downcast<legacy_device_base *>(device)->token();
+	return (x1_010_state *)downcast<x1_010_device *>(device)->token();
 }
 
 
@@ -111,11 +110,11 @@ INLINE x1_010_state *get_safe_token(device_t *device)
 static STREAM_UPDATE( seta_update )
 {
 	x1_010_state *info = (x1_010_state *)param;
-	X1_010_CHANNEL	*reg;
-	int		ch, i, volL, volR, freq;
-	register INT8	*start, *end, data;
-	register UINT8	*env;
-	register UINT32	smp_offs, smp_step, env_offs, env_step, delta;
+	X1_010_CHANNEL  *reg;
+	int     ch, i, volL, volR, freq;
+	register INT8   *start, *end, data;
+	register UINT8  *env;
+	register UINT32 smp_offs, smp_step, env_offs, env_step, delta;
 	const UINT8 *snd1 = info->region;
 
 	// mixer buffer zero clear
@@ -126,10 +125,10 @@ static STREAM_UPDATE( seta_update )
 
 	for( ch = 0; ch < SETA_NUM_CHANNELS; ch++ ) {
 		reg = (X1_010_CHANNEL *)&(info->reg[ch*sizeof(X1_010_CHANNEL)]);
-		if( (reg->status&1) != 0 ) {							// Key On
+		if( (reg->status&1) != 0 ) {                            // Key On
 			stream_sample_t *bufL = outputs[0];
 			stream_sample_t *bufR = outputs[1];
-			if( (reg->status&2) == 0 ) {						// PCM sampling
+			if( (reg->status&2) == 0 ) {                        // PCM sampling
 				start    = (INT8 *)(reg->start      *0x1000+snd1);
 				end      = (INT8 *)((0x100-reg->end)*0x1000+snd1);
 				volL     = ((reg->volume>>4)&0xf)*VOL_BASE;
@@ -148,7 +147,7 @@ static STREAM_UPDATE( seta_update )
 					delta = smp_offs>>FREQ_BASE_BITS;
 					// sample ended?
 					if( start+delta >= end ) {
-						reg->status &= 0xfe;					// Key off
+						reg->status &= 0xfe;                    // Key off
 						break;
 					}
 					data = *(start+delta);
@@ -157,7 +156,7 @@ static STREAM_UPDATE( seta_update )
 					smp_offs += smp_step;
 				}
 				info->smp_offset[ch] = smp_offs;
-			} else {											// Wave form
+			} else {                                            // Wave form
 				start    = (INT8 *)&(info->reg[reg->volume*128+0x1000]);
 				smp_offs = info->smp_offset[ch];
 				freq     = (reg->pitch_hi<<8)+reg->frequency;
@@ -176,7 +175,7 @@ static STREAM_UPDATE( seta_update )
 					delta = env_offs>>ENV_BASE_BITS;
 					// Envelope one shot mode
 					if( (reg->status&4) != 0 && delta >= 0x80 ) {
-						reg->status &= 0xfe;					// Key off
+						reg->status &= 0xfe;                    // Key off
 						break;
 					}
 					vol = *(env+(delta&0x7f));
@@ -200,13 +199,13 @@ static STREAM_UPDATE( seta_update )
 static DEVICE_START( x1_010 )
 {
 	int i;
-	const x1_010_interface *intf = (const x1_010_interface *)device->baseconfig().static_config();
+	const x1_010_interface *intf = (const x1_010_interface *)device->static_config();
 	x1_010_state *info = get_safe_token(device);
 
-	info->region		= *device->region();
-	info->base_clock	= device->clock();
-	info->rate			= device->clock() / 1024;
-	info->address		= intf->adr;
+	info->region        = *device->region();
+	info->base_clock    = device->clock();
+	info->rate          = device->clock() / 1024;
+	info->address       = intf->adr;
 
 	for( i = 0; i < SETA_NUM_CHANNELS; i++ ) {
 		info->smp_offset[i] = 0;
@@ -247,11 +246,11 @@ WRITE8_DEVICE_HANDLER( seta_sound_w )
 	int channel, reg;
 	offset ^= info->address;
 
-	channel	= offset/sizeof(X1_010_CHANNEL);
-	reg		= offset%sizeof(X1_010_CHANNEL);
+	channel = offset/sizeof(X1_010_CHANNEL);
+	reg     = offset%sizeof(X1_010_CHANNEL);
 
 	if( channel < SETA_NUM_CHANNELS && reg == 0
-	 && (info->reg[offset]&1) == 0 && (data&1) != 0 ) {
+		&& (info->reg[offset]&1) == 0 && (data&1) != 0 ) {
 		info->smp_offset[channel] = 0;
 		info->env_offset[channel] = 0;
 	}
@@ -267,10 +266,10 @@ WRITE8_DEVICE_HANDLER( seta_sound_w )
 READ16_DEVICE_HANDLER( seta_sound_word_r )
 {
 	x1_010_state *info = get_safe_token(device);
-	UINT16	ret;
+	UINT16  ret;
 
 	ret = info->HI_WORD_BUF[offset]<<8;
-	ret += (seta_sound_r( device, offset )&0xff);
+	ret += (seta_sound_r( device, space, offset )&0xff);
 	LOG_REGISTER_READ(( "%s: Read X1-010 Offset:%04X Data:%04X\n", device->machine().describe_context(), offset, ret ));
 	return ret;
 }
@@ -279,36 +278,45 @@ WRITE16_DEVICE_HANDLER( seta_sound_word_w )
 {
 	x1_010_state *info = get_safe_token(device);
 	info->HI_WORD_BUF[offset] = (data>>8)&0xff;
-	seta_sound_w( device, offset, data&0xff );
+	seta_sound_w( device, space, offset, data&0xff );
 	LOG_REGISTER_WRITE(( "%s: Write X1-010 Offset:%04X Data:%04X\n", device->machine().describe_context(), offset, data ));
 }
 
 
+const device_type X1_010 = &device_creator<x1_010_device>;
 
-/**************************************************************************
- * Generic get_info
- **************************************************************************/
-
-DEVICE_GET_INFO( x1_010 )
+x1_010_device::x1_010_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, X1_010, "X1-010", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
 {
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(x1_010_state); 			break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME( x1_010 );			break;
-		case DEVINFO_FCT_STOP:							/* Nothing */									break;
-		case DEVINFO_FCT_RESET:							/* Nothing */									break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "X1-010");						break;
-		case DEVINFO_STR_FAMILY:					strcpy(info->s, "Seta custom");					break;
-		case DEVINFO_STR_VERSION:					strcpy(info->s, "1.0");							break;
-		case DEVINFO_STR_SOURCE_FILE:						strcpy(info->s, __FILE__);						break;
-		case DEVINFO_STR_CREDITS:					strcpy(info->s, "Copyright Nicola Salmoria and the MAME Team"); break;
-	}
+	m_token = global_alloc_clear(x1_010_state);
 }
 
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
 
-DEFINE_LEGACY_SOUND_DEVICE(X1_010, x1_010);
+void x1_010_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void x1_010_device::device_start()
+{
+	DEVICE_START_NAME( x1_010 )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void x1_010_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}

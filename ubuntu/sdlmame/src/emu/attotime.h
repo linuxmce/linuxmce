@@ -94,18 +94,18 @@ const seconds_t ATTOTIME_MAX_SECONDS = 1000000000;
 //**************************************************************************
 
 // convert between a double and attoseconds
-#define ATTOSECONDS_TO_DOUBLE(x)		((double)(x) * 1e-18)
-#define DOUBLE_TO_ATTOSECONDS(x)		((attoseconds_t)((x) * 1e18))
+#define ATTOSECONDS_TO_DOUBLE(x)        ((double)(x) * 1e-18)
+#define DOUBLE_TO_ATTOSECONDS(x)        ((attoseconds_t)((x) * 1e18))
 
 // convert between hertz (as a double) and attoseconds
-#define ATTOSECONDS_TO_HZ(x)			((double)ATTOSECONDS_PER_SECOND / (double)(x))
-#define HZ_TO_ATTOSECONDS(x)			((attoseconds_t)(ATTOSECONDS_PER_SECOND / (x)))
+#define ATTOSECONDS_TO_HZ(x)            ((double)ATTOSECONDS_PER_SECOND / (double)(x))
+#define HZ_TO_ATTOSECONDS(x)            ((attoseconds_t)(ATTOSECONDS_PER_SECOND / (x)))
 
 // macros for converting other seconds types to attoseconds
-#define ATTOSECONDS_IN_SEC(x)			((attoseconds_t)(x) * ATTOSECONDS_PER_SECOND)
-#define ATTOSECONDS_IN_MSEC(x)			((attoseconds_t)(x) * ATTOSECONDS_PER_MILLISECOND)
-#define ATTOSECONDS_IN_USEC(x)			((attoseconds_t)(x) * ATTOSECONDS_PER_MICROSECOND)
-#define ATTOSECONDS_IN_NSEC(x)			((attoseconds_t)(x) * ATTOSECONDS_PER_NANOSECOND)
+#define ATTOSECONDS_IN_SEC(x)           ((attoseconds_t)(x) * ATTOSECONDS_PER_SECOND)
+#define ATTOSECONDS_IN_MSEC(x)          ((attoseconds_t)(x) * ATTOSECONDS_PER_MILLISECOND)
+#define ATTOSECONDS_IN_USEC(x)          ((attoseconds_t)(x) * ATTOSECONDS_PER_MICROSECOND)
+#define ATTOSECONDS_IN_NSEC(x)          ((attoseconds_t)(x) * ATTOSECONDS_PER_NANOSECOND)
 
 
 
@@ -120,11 +120,11 @@ public:
 	// construction/destruction
 	attotime()
 		: seconds(0),
-		  attoseconds(0) { }
+			attoseconds(0) { }
 
 	attotime(seconds_t secs, attoseconds_t attos)
 		: seconds(secs),
-		  attoseconds(attos) { }
+			attoseconds(attos) { }
 
 	// queries
 	bool is_zero() const { return (seconds == 0 && attoseconds == 0); }
@@ -143,7 +143,7 @@ public:
 	static attotime from_msec(INT64 msec) { return attotime(msec / 1000, (msec % 1000) * (ATTOSECONDS_PER_SECOND / 1000)); }
 	static attotime from_usec(INT64 usec) { return attotime(usec / 1000000, (usec % 1000000) * (ATTOSECONDS_PER_SECOND / 1000000)); }
 	static attotime from_nsec(INT64 nsec) { return attotime(nsec / 1000000000, (nsec % 1000000000) * (ATTOSECONDS_PER_SECOND / 1000000000)); }
-	static attotime from_hz(double frequency) { return attotime(0, double(ATTOSECONDS_PER_SECOND) / frequency); }
+	static attotime from_hz(double frequency) { assert(frequency > 0); double d = 1 / frequency; return attotime(floor(d), modf(d, &d) * ATTOSECONDS_PER_SECOND); }
 
 	// math
 	attotime &operator+=(const attotime &right);
@@ -152,8 +152,8 @@ public:
 	attotime &operator/=(UINT32 factor);
 
 	// members
-	seconds_t		seconds;
-	attoseconds_t	attoseconds;
+	seconds_t       seconds;
+	attoseconds_t   attoseconds;
 
 	// constants
 	static const attotime never;
@@ -431,4 +431,4 @@ inline attotime attotime::from_double(double _time)
 }
 
 
-#endif	// __ATTOTIME_H__
+#endif  // __ATTOTIME_H__

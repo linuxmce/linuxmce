@@ -7,11 +7,13 @@
 class cloak_state : public driver_device
 {
 public:
-	cloak_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	cloak_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"),
+		m_spriteram(*this, "spriteram"){ }
 
-	UINT8 *m_videoram;
-	UINT8 *m_spriteram;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_spriteram;
 	int m_nvram_enabled;
 	UINT8 m_bitmap_videoram_selected;
 	UINT8 m_bitmap_videoram_address_x;
@@ -22,18 +24,21 @@ public:
 	UINT8 *m_current_bitmap_videoram_displayed;
 	UINT16 *m_palette_ram;
 	tilemap_t *m_bg_tilemap;
+	DECLARE_WRITE8_MEMBER(cloak_led_w);
+	DECLARE_WRITE8_MEMBER(cloak_coin_counter_w);
+	DECLARE_WRITE8_MEMBER(cloak_custom_w);
+	DECLARE_WRITE8_MEMBER(cloak_irq_reset_0_w);
+	DECLARE_WRITE8_MEMBER(cloak_irq_reset_1_w);
+	DECLARE_WRITE8_MEMBER(cloak_nvram_enable_w);
+	DECLARE_WRITE8_MEMBER(cloak_paletteram_w);
+	DECLARE_WRITE8_MEMBER(cloak_clearbmp_w);
+	DECLARE_READ8_MEMBER(graph_processor_r);
+	DECLARE_WRITE8_MEMBER(graph_processor_w);
+	DECLARE_WRITE8_MEMBER(cloak_videoram_w);
+	DECLARE_WRITE8_MEMBER(cloak_flipscreen_w);
+	void set_current_bitmap_videoram_pointer();
+	void adjust_xy(int offset);
+	TILE_GET_INFO_MEMBER(get_bg_tile_info);
+	virtual void video_start();
+	UINT32 screen_update_cloak(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
-
-
-/*----------- defined in video/cloak.c -----------*/
-
-WRITE8_HANDLER( cloak_videoram_w );
-WRITE8_HANDLER( cloak_flipscreen_w );
-
-WRITE8_HANDLER( cloak_paletteram_w );
-READ8_HANDLER( graph_processor_r );
-WRITE8_HANDLER( graph_processor_w );
-WRITE8_HANDLER( cloak_clearbmp_w );
-
-VIDEO_START( cloak );
-SCREEN_UPDATE( cloak );

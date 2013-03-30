@@ -20,6 +20,7 @@
 #include "emu.h"
 #include "cpu/m68000/m68000.h"
 #include "audio/atarijsa.h"
+#include "video/atarimo.h"
 #include "includes/batman.h"
 
 
@@ -30,33 +31,28 @@
  *
  *************************************/
 
-static void update_interrupts(running_machine &machine)
+void batman_state::update_interrupts()
 {
-	batman_state *state = machine.driver_data<batman_state>();
-	cputag_set_input_line(machine, "maincpu", 4, state->m_scanline_int_state ? ASSERT_LINE : CLEAR_LINE);
-	cputag_set_input_line(machine, "maincpu", 6, state->m_sound_int_state ? ASSERT_LINE : CLEAR_LINE);
+	subdevice("maincpu")->execute().set_input_line(4, m_scanline_int_state ? ASSERT_LINE : CLEAR_LINE);
+	subdevice("maincpu")->execute().set_input_line(6, m_sound_int_state ? ASSERT_LINE : CLEAR_LINE);
 }
 
 
-static MACHINE_START( batman )
+MACHINE_START_MEMBER(batman_state,batman)
 {
-	batman_state *state = machine.driver_data<batman_state>();
-	atarigen_init(machine);
+	atarigen_state::machine_start();
 
-	state->save_item(NAME(state->m_latch_data));
-	state->save_item(NAME(state->m_alpha_tile_bank));
+	save_item(NAME(m_latch_data));
+	save_item(NAME(m_alpha_tile_bank));
 }
 
 
-static MACHINE_RESET( batman )
+MACHINE_RESET_MEMBER(batman_state,batman)
 {
-	batman_state *state = machine.driver_data<batman_state>();
-
-	atarigen_eeprom_reset(state);
-	atarigen_interrupt_reset(state, update_interrupts);
-	atarivc_reset(*machine.primary_screen, state->m_atarivc_eof_data, 2);
-	atarigen_scanline_timer_reset(*machine.primary_screen, batman_scanline_update, 8);
-	atarijsa_reset();
+	atarigen_state::machine_reset();
+	atarivc_reset(*machine().primary_screen, m_atarivc_eof_data, 2);
+	scanline_timer_reset(*machine().primary_screen, 8);
+	atarijsa_reset(machine());
 }
 
 
@@ -67,15 +63,15 @@ static MACHINE_RESET( batman )
  *
  *************************************/
 
-static READ16_HANDLER( batman_atarivc_r )
+READ16_MEMBER(batman_state::batman_atarivc_r)
 {
-	return atarivc_r(*space->machine().primary_screen, offset);
+	return atarivc_r(*machine().primary_screen, offset);
 }
 
 
-static WRITE16_HANDLER( batman_atarivc_w )
+WRITE16_MEMBER(batman_state::batman_atarivc_w)
 {
-	atarivc_w(*space->machine().primary_screen, offset, data, mem_mask);
+	atarivc_w(*machine().primary_screen, offset, data, mem_mask);
 }
 
 
@@ -86,34 +82,32 @@ static WRITE16_HANDLER( batman_atarivc_w )
  *
  *************************************/
 
-static READ16_HANDLER( special_port2_r )
+READ16_MEMBER(batman_state::special_port2_r)
 {
-	batman_state *state = space->machine().driver_data<batman_state>();
-	int result = input_port_read(space->machine(), "260010");
-	if (state->m_sound_to_cpu_ready) result ^= 0x0010;
-	if (state->m_cpu_to_sound_ready) result ^= 0x0020;
+	int result = ioport("260010")->read();
+	if (m_sound_to_cpu_ready) result ^= 0x0010;
+	if (m_cpu_to_sound_ready) result ^= 0x0020;
 	return result;
 }
 
 
-static WRITE16_HANDLER( latch_w )
+WRITE16_MEMBER(batman_state::latch_w)
 {
-	batman_state *state = space->machine().driver_data<batman_state>();
-	int oldword = state->m_latch_data;
-	COMBINE_DATA(&state->m_latch_data);
+	int oldword = m_latch_data;
+	COMBINE_DATA(&m_latch_data);
 
 	/* bit 4 is connected to the /RESET pin on the 6502 */
-	if (state->m_latch_data & 0x0010)
-		cputag_set_input_line(space->machine(), "jsa", INPUT_LINE_RESET, CLEAR_LINE);
+	if (m_latch_data & 0x0010)
+		machine().device("jsa")->execute().set_input_line(INPUT_LINE_RESET, CLEAR_LINE);
 	else
-		cputag_set_input_line(space->machine(), "jsa", INPUT_LINE_RESET, ASSERT_LINE);
+		machine().device("jsa")->execute().set_input_line(INPUT_LINE_RESET, ASSERT_LINE);
 
 	/* alpha bank is selected by the upper 4 bits */
-	if ((oldword ^ state->m_latch_data) & 0x7000)
+	if ((oldword ^ m_latch_data) & 0x7000)
 	{
-		space->machine().primary_screen->update_partial(space->machine().primary_screen->vpos());
-		tilemap_mark_all_tiles_dirty(state->m_alpha_tilemap);
-		state->m_alpha_tile_bank = (state->m_latch_data >> 12) & 7;
+		machine().primary_screen->update_partial(machine().primary_screen->vpos());
+		m_alpha_tilemap->mark_all_dirty();
+		m_alpha_tile_bank = (m_latch_data >> 12) & 7;
 	}
 }
 
@@ -128,29 +122,29 @@ static WRITE16_HANDLER( latch_w )
 /* full map verified from schematics and GALs */
 /* addresses in the 1xxxxx region map to /WAIT */
 /* addresses in the 2xxxxx region map to /WAIT2 */
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16, batman_state )
 	ADDRESS_MAP_UNMAP_HIGH
 	ADDRESS_MAP_GLOBAL_MASK(0x3fffff)
 	AM_RANGE(0x000000, 0x0bffff) AM_ROM
 	AM_RANGE(0x100000, 0x10ffff) AM_MIRROR(0x010000) AM_RAM
-	AM_RANGE(0x120000, 0x120fff) AM_MIRROR(0x01f000) AM_READWRITE(atarigen_eeprom_r, atarigen_eeprom_w) AM_SHARE("eeprom")
+	AM_RANGE(0x120000, 0x120fff) AM_MIRROR(0x01f000) AM_READWRITE(eeprom_r, eeprom_w) AM_SHARE("eeprom")
 	AM_RANGE(0x260000, 0x260001) AM_MIRROR(0x11ff8c) AM_READ_PORT("260000")
 	AM_RANGE(0x260002, 0x260003) AM_MIRROR(0x11ff8c) AM_READ_PORT("260002")
 	AM_RANGE(0x260010, 0x260011) AM_MIRROR(0x11ff8e) AM_READ(special_port2_r)
-	AM_RANGE(0x260030, 0x260031) AM_MIRROR(0x11ff8e) AM_READ(atarigen_sound_r)
-	AM_RANGE(0x260040, 0x260041) AM_MIRROR(0x11ff8e) AM_WRITE(atarigen_sound_w)
+	AM_RANGE(0x260030, 0x260031) AM_MIRROR(0x11ff8e) AM_READ8(sound_r, 0x00ff)
+	AM_RANGE(0x260040, 0x260041) AM_MIRROR(0x11ff8e) AM_WRITE8(sound_w, 0x00ff)
 	AM_RANGE(0x260050, 0x260051) AM_MIRROR(0x11ff8e) AM_WRITE(latch_w)
-	AM_RANGE(0x260060, 0x260061) AM_MIRROR(0x11ff8e) AM_WRITE(atarigen_eeprom_enable_w)
+	AM_RANGE(0x260060, 0x260061) AM_MIRROR(0x11ff8e) AM_WRITE(eeprom_enable_w)
 	AM_RANGE(0x2a0000, 0x2a0001) AM_MIRROR(0x11fffe) AM_WRITE(watchdog_reset16_w)
-	AM_RANGE(0x3e0000, 0x3e0fff) AM_MIRROR(0x100000) AM_RAM_WRITE(atarigen_666_paletteram_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0x3effc0, 0x3effff) AM_MIRROR(0x100000) AM_READWRITE(batman_atarivc_r, batman_atarivc_w) AM_BASE_MEMBER(batman_state, m_atarivc_data)
-	AM_RANGE(0x3f0000, 0x3f1fff) AM_MIRROR(0x100000) AM_WRITE(atarigen_playfield2_latched_msb_w) AM_BASE_MEMBER(batman_state, m_playfield2)
-	AM_RANGE(0x3f2000, 0x3f3fff) AM_MIRROR(0x100000) AM_WRITE(atarigen_playfield_latched_lsb_w) AM_BASE_MEMBER(batman_state, m_playfield)
-	AM_RANGE(0x3f4000, 0x3f5fff) AM_MIRROR(0x100000) AM_WRITE(atarigen_playfield_dual_upper_w) AM_BASE_MEMBER(batman_state, m_playfield_upper)
-	AM_RANGE(0x3f6000, 0x3f7fff) AM_MIRROR(0x100000) AM_WRITE(atarimo_0_spriteram_w) AM_BASE(&atarimo_0_spriteram)
-	AM_RANGE(0x3f8000, 0x3f8fef) AM_MIRROR(0x100000) AM_WRITE(atarigen_alpha_w) AM_BASE_MEMBER(batman_state, m_alpha)
-	AM_RANGE(0x3f8f00, 0x3f8f7f) AM_MIRROR(0x100000) AM_BASE_MEMBER(batman_state, m_atarivc_eof_data)
-	AM_RANGE(0x3f8f80, 0x3f8fff) AM_MIRROR(0x100000) AM_WRITE(atarimo_0_slipram_w) AM_BASE(&atarimo_0_slipram)
+	AM_RANGE(0x3e0000, 0x3e0fff) AM_MIRROR(0x100000) AM_RAM_WRITE(paletteram_666_w) AM_SHARE("paletteram")
+	AM_RANGE(0x3effc0, 0x3effff) AM_MIRROR(0x100000) AM_READWRITE(batman_atarivc_r, batman_atarivc_w) AM_SHARE("atarivc_data")
+	AM_RANGE(0x3f0000, 0x3f1fff) AM_MIRROR(0x100000) AM_WRITE(playfield2_latched_msb_w) AM_SHARE("playfield2")
+	AM_RANGE(0x3f2000, 0x3f3fff) AM_MIRROR(0x100000) AM_WRITE(playfield_latched_lsb_w) AM_SHARE("playfield")
+	AM_RANGE(0x3f4000, 0x3f5fff) AM_MIRROR(0x100000) AM_WRITE(playfield_dual_upper_w) AM_SHARE("playfield_up")
+	AM_RANGE(0x3f6000, 0x3f7fff) AM_MIRROR(0x100000) AM_READWRITE_LEGACY(atarimo_0_spriteram_r, atarimo_0_spriteram_w)
+	AM_RANGE(0x3f8000, 0x3f8eff) AM_MIRROR(0x100000) AM_WRITE(alpha_w) AM_SHARE("alpha")
+	AM_RANGE(0x3f8f00, 0x3f8f7f) AM_MIRROR(0x100000) AM_SHARE("atarivc_eof")
+	AM_RANGE(0x3f8f80, 0x3f8fff) AM_MIRROR(0x100000) AM_READWRITE_LEGACY(atarimo_0_slipram_r, atarimo_0_slipram_w)
 	AM_RANGE(0x3f0000, 0x3fffff) AM_MIRROR(0x100000) AM_RAM
 ADDRESS_MAP_END
 
@@ -163,7 +157,7 @@ ADDRESS_MAP_END
  *************************************/
 
 static INPUT_PORTS_START( batman )
-	PORT_START("260000")		/* 260000 */
+	PORT_START("260000")        /* 260000 */
 	PORT_BIT( 0x01ff, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
 	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
@@ -173,17 +167,17 @@ static INPUT_PORTS_START( batman )
 	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(1)
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(1)
 
-	PORT_START("260002")		/* 260002 */
+	PORT_START("260002")        /* 260002 */
 	PORT_BIT( 0xffff, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("260010")		/* 260010 */
+	PORT_START("260010")        /* 260010 */
 	PORT_BIT( 0x000f, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_UNUSED )	/* Input buffer full (@260030) */
-	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_UNUSED )	/* Output buffer full (@260040) */
+	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_UNUSED )   /* Input buffer full (@260030) */
+	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_UNUSED )   /* Output buffer full (@260040) */
 	PORT_SERVICE( 0x0040, IP_ACTIVE_LOW )
-	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 
-	PORT_INCLUDE( atarijsa_iii )		/* audio board port */
+	PORT_INCLUDE( atarijsa_iii )        /* audio board port */
 INPUT_PORTS_END
 
 
@@ -219,9 +213,9 @@ static const gfx_layout pfmolayout =
 
 
 static GFXDECODE_START( batman )
-	GFXDECODE_ENTRY( "gfx3", 0, pfmolayout,  512, 64 )		/* sprites & playfield */
-	GFXDECODE_ENTRY( "gfx2", 0, pfmolayout,  256, 64 )		/* sprites & playfield */
-	GFXDECODE_ENTRY( "gfx1", 0, anlayout,      0, 64 )		/* characters 8x8 */
+	GFXDECODE_ENTRY( "gfx3", 0, pfmolayout,  512, 64 )      /* sprites & playfield */
+	GFXDECODE_ENTRY( "gfx2", 0, pfmolayout,  256, 64 )      /* sprites & playfield */
+	GFXDECODE_ENTRY( "gfx1", 0, anlayout,      0, 64 )      /* characters 8x8 */
 GFXDECODE_END
 
 
@@ -238,8 +232,8 @@ static MACHINE_CONFIG_START( batman, batman_state )
 	MCFG_CPU_ADD("maincpu", M68000, ATARI_CLOCK_14MHz)
 	MCFG_CPU_PROGRAM_MAP(main_map)
 
-	MCFG_MACHINE_START(batman)
-	MCFG_MACHINE_RESET(batman)
+	MCFG_MACHINE_START_OVERRIDE(batman_state,batman)
+	MCFG_MACHINE_RESET_OVERRIDE(batman_state,batman)
 	MCFG_NVRAM_ADD_1FILL("eeprom")
 
 	/* video hardware */
@@ -248,13 +242,12 @@ static MACHINE_CONFIG_START( batman, batman_state )
 	MCFG_PALETTE_LENGTH(2048)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	/* note: these parameters are from published specs, not derived */
 	/* the board uses a VAD chip to generate video signals */
 	MCFG_SCREEN_RAW_PARAMS(ATARI_CLOCK_14MHz/2, 456, 0, 336, 262, 0, 240)
-	MCFG_SCREEN_UPDATE(batman)
+	MCFG_SCREEN_UPDATE_DRIVER(batman_state, screen_update_batman)
 
-	MCFG_VIDEO_START(batman)
+	MCFG_VIDEO_START_OVERRIDE(batman_state,batman)
 
 	/* sound hardware */
 	MCFG_FRAGMENT_ADD(jsa_iii_mono)
@@ -269,7 +262,7 @@ MACHINE_CONFIG_END
  *************************************/
 
 ROM_START( batman )
-	ROM_REGION( 0xc0000, "maincpu", 0 )	/* 6*128k for 68000 code */
+	ROM_REGION( 0xc0000, "maincpu", 0 ) /* 6*128k for 68000 code */
 	ROM_LOAD16_BYTE( "136085-2030.10r",  0x00000, 0x20000, CRC(7cf4e5bf) SHA1(d6068a65fb524d839a34e596a272fac1ce90981c) )
 	ROM_LOAD16_BYTE( "136085-2031.7r",   0x00001, 0x20000, CRC(7d7f3fc4) SHA1(8ee3e9ad3464006a26c36155b6099433110e2a6e) )
 	ROM_LOAD16_BYTE( "136085-2032.91r",  0x40000, 0x20000, CRC(d80afb20) SHA1(5696627f6fa713dba4d12443c945f3e1cb6452a3) )
@@ -277,21 +270,21 @@ ROM_START( batman )
 	ROM_LOAD16_BYTE( "136085-2034.9r",   0x80000, 0x20000, CRC(05388c62) SHA1(de037203d94e72e2922c89256da080ae023ca0e7) )
 	ROM_LOAD16_BYTE( "136085-2035.5r",   0x80001, 0x20000, CRC(e77c92dd) SHA1(6d475092f7628114960d26b8ec1c5eae5e61ce25) )
 
-	ROM_REGION( 0x14000, "jsa", 0 )	/* 64k + 16k for 6502 code */
+	ROM_REGION( 0x14000, "jsa", 0 ) /* 64k + 16k for 6502 code */
 	ROM_LOAD( "136085-1040.12c",  0x10000, 0x4000, CRC(080db83c) SHA1(ec084b7c1dc5878acd6d081e2e8b8d1e8b3d8a45) )
 	ROM_CONTINUE(                 0x04000, 0xc000 )
 
 	ROM_REGION( 0x20000, "gfx1", 0 )
-	ROM_LOAD( "136085-2009.10m",  0x00000, 0x20000, CRC(a82d4923) SHA1(38e03eebd95347a383f3d7357462252961bd3c7f) )	/* alphanumerics */
+	ROM_LOAD( "136085-2009.10m",  0x00000, 0x20000, CRC(a82d4923) SHA1(38e03eebd95347a383f3d7357462252961bd3c7f) )  /* alphanumerics */
 
 	ROM_REGION( 0x100000, "gfx2", ROMREGION_INVERT )
-	ROM_LOAD( "136085-1010.13r",  0x000000, 0x20000, CRC(466e1365) SHA1(318530e8a97c1b6ee3e671e677fc7684df5cc3a8) )	/* graphics, plane 0 */
+	ROM_LOAD( "136085-1010.13r",  0x000000, 0x20000, CRC(466e1365) SHA1(318530e8a97c1b6ee3e671e677fc7684df5cc3a8) ) /* graphics, plane 0 */
 	ROM_LOAD( "136085-1014.14r",  0x020000, 0x20000, CRC(ef53475a) SHA1(9bfc66bb8dd02757e4a79a75928b260f4518a94b) )
-	ROM_LOAD( "136085-1011.13m",  0x040000, 0x20000, CRC(8cda5efc) SHA1(b0410f9bf1f38f5f1e9add15079b03d7f19b4c8f) )	/* graphics, plane 1 */
+	ROM_LOAD( "136085-1011.13m",  0x040000, 0x20000, CRC(8cda5efc) SHA1(b0410f9bf1f38f5f1e9add15079b03d7f19b4c8f) ) /* graphics, plane 1 */
 	ROM_LOAD( "136085-1015.14m",  0x060000, 0x20000, CRC(043e7f8b) SHA1(a3b2c539c1fa9b1e8d3dc8163b9a7c6e22408122) )
-	ROM_LOAD( "136085-1012.13f",  0x080000, 0x20000, CRC(b017f2c3) SHA1(12846f0ae33e808dfb0795ea4138115b0eb36c4e) )	/* graphics, plane 2 */
+	ROM_LOAD( "136085-1012.13f",  0x080000, 0x20000, CRC(b017f2c3) SHA1(12846f0ae33e808dfb0795ea4138115b0eb36c4e) ) /* graphics, plane 2 */
 	ROM_LOAD( "136085-1016.14f",  0x0a0000, 0x20000, CRC(70aa2360) SHA1(5b944b533be40b859b7fae64559286034409ac6c) )
-	ROM_LOAD( "136085-1013.13c",  0x0c0000, 0x20000, CRC(68b64975) SHA1(f3fb45dd74fc21dd2eece87e739c734963962f93) )	/* graphics, plane 3 */
+	ROM_LOAD( "136085-1013.13c",  0x0c0000, 0x20000, CRC(68b64975) SHA1(f3fb45dd74fc21dd2eece87e739c734963962f93) ) /* graphics, plane 3 */
 	ROM_LOAD( "136085-1017.14c",  0x0e0000, 0x20000, CRC(e4af157b) SHA1(ddf9eff84c882a096f7e435a6227b32d31029f9e) )
 
 	ROM_REGION( 0x100000, "gfx3", ROMREGION_INVERT )
@@ -304,7 +297,7 @@ ROM_START( batman )
 	ROM_LOAD( "136085-1021.15c",  0x0c0000, 0x20000, CRC(9c8ef9ba) SHA1(c2540adfc227a654a3f91e2cfdcd98b3a04ae4fb) )
 	ROM_LOAD( "136085-1025.16c",  0x0e0000, 0x20000, CRC(5d30bcd1) SHA1(817e225511ab98e7575ee512d659c51fcb7716dc) )
 
-	ROM_REGION( 0x80000, "adpcm", 0 )	/* 1MB for ADPCM */
+	ROM_REGION( 0x80000, "adpcm", 0 )   /* 1MB for ADPCM */
 	ROM_LOAD( "136085-1041.19e",  0x00000, 0x20000, CRC(d97d5dbb) SHA1(7609841c773e3d1ae5a21da81e3387260fd8da41) )
 	ROM_LOAD( "136085-1042.17e",  0x20000, 0x20000, CRC(8c496986) SHA1(07c84c68885e2ab3e81ee92942d6a0f29e4dffa8) )
 	ROM_LOAD( "136085-1043.15e",  0x40000, 0x20000, CRC(51812d3b) SHA1(6748fecef753179a9257c0da5a7b7c9648437208) )
@@ -332,9 +325,9 @@ ROM_END
  *
  *************************************/
 
-static DRIVER_INIT( batman )
+DRIVER_INIT_MEMBER(batman_state,batman)
 {
-	atarijsa_init(machine, "260010", 0x0040);
+	atarijsa_init(machine(), "260010", 0x0040);
 }
 
 
@@ -345,4 +338,4 @@ static DRIVER_INIT( batman )
  *
  *************************************/
 
-GAME( 1991, batman, 0, batman, batman, batman, ROT0, "Atari Games", "Batman", GAME_SUPPORTS_SAVE )
+GAME( 1991, batman, 0, batman, batman, batman_state, batman, ROT0, "Atari Games", "Batman", GAME_SUPPORTS_SAVE )

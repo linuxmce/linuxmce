@@ -30,22 +30,21 @@
 #include "sound/ay8910.h"
 #include "includes/hanaawas.h"
 
-static READ8_HANDLER( hanaawas_input_port_0_r )
+READ8_MEMBER(hanaawas_state::hanaawas_input_port_0_r)
 {
-	hanaawas_state *state = space->machine().driver_data<hanaawas_state>();
 	int i, ordinal = 0;
 	UINT16 buttons = 0;
 
-	switch (state->m_mux)
+	switch (m_mux)
 	{
 	case 1: /* start buttons */
-		buttons = input_port_read(space->machine(), "START");
+		buttons = ioport("START")->read();
 		break;
 	case 2: /* player 1 buttons */
-		buttons = input_port_read(space->machine(), "P1");
+		buttons = ioport("P1")->read();
 		break;
 	case 4: /* player 2 buttons */
-		buttons = input_port_read(space->machine(), "P2");
+		buttons = ioport("P2")->read();
 		break;
 	}
 
@@ -61,31 +60,30 @@ static READ8_HANDLER( hanaawas_input_port_0_r )
 		}
 	}
 
-	return (input_port_read(space->machine(), "IN0") & 0xf0) | ordinal;
+	return (ioport("IN0")->read() & 0xf0) | ordinal;
 }
 
-static WRITE8_HANDLER( hanaawas_inputs_mux_w )
+WRITE8_MEMBER(hanaawas_state::hanaawas_inputs_mux_w)
 {
-	hanaawas_state *state = space->machine().driver_data<hanaawas_state>();
-	state->m_mux = data;
+	m_mux = data;
 }
 
-static ADDRESS_MAP_START( hanaawas_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( hanaawas_map, AS_PROGRAM, 8, hanaawas_state )
 	AM_RANGE(0x0000, 0x2fff) AM_ROM
 	AM_RANGE(0x4000, 0x4fff) AM_ROM
 	AM_RANGE(0x6000, 0x6fff) AM_ROM
-	AM_RANGE(0x8000, 0x83ff) AM_RAM_WRITE(hanaawas_videoram_w) AM_BASE_MEMBER(hanaawas_state, m_videoram)
-	AM_RANGE(0x8400, 0x87ff) AM_RAM_WRITE(hanaawas_colorram_w) AM_BASE_MEMBER(hanaawas_state, m_colorram)
+	AM_RANGE(0x8000, 0x83ff) AM_RAM_WRITE(hanaawas_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0x8400, 0x87ff) AM_RAM_WRITE(hanaawas_colorram_w) AM_SHARE("colorram")
 	AM_RANGE(0x8800, 0x8bff) AM_RAM
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( io_map, AS_IO, 8, hanaawas_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0x00) AM_READWRITE(hanaawas_input_port_0_r, hanaawas_inputs_mux_w)
 	AM_RANGE(0x01, 0x01) AM_READNOP /* it must return 0 */
-	AM_RANGE(0x10, 0x10) AM_DEVREAD("aysnd", ay8910_r)
-	AM_RANGE(0x10, 0x11) AM_DEVWRITE("aysnd", ay8910_address_data_w)
+	AM_RANGE(0x10, 0x10) AM_DEVREAD_LEGACY("aysnd", ay8910_r)
+	AM_RANGE(0x10, 0x11) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_data_w)
 ADDRESS_MAP_END
 
 static INPUT_PORTS_START( hanaawas )
@@ -152,16 +150,16 @@ static INPUT_PORTS_START( hanaawas )
 INPUT_PORTS_END
 
 
-#define GFX(name, offs1, offs2, offs3)				\
-static const gfx_layout name =						\
-{													\
-	8,8,    /* 8*8 chars */							\
-	512,    /* 512 characters */					\
-	3,      /* 3 bits per pixel */					\
-	{ offs1, offs2, offs3 },  /* bitplanes */		\
-	{ 8*8+0, 8*8+1, 8*8+2, 8*8+3, 0, 1, 2, 3 },		\
-	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },		\
-	8*16     /* every char takes 16 consecutive bytes */	\
+#define GFX(name, offs1, offs2, offs3)              \
+static const gfx_layout name =                      \
+{                                                   \
+	8,8,    /* 8*8 chars */                         \
+	512,    /* 512 characters */                    \
+	3,      /* 3 bits per pixel */                  \
+	{ offs1, offs2, offs3 },  /* bitplanes */       \
+	{ 8*8+0, 8*8+1, 8*8+2, 8*8+3, 0, 1, 2, 3 },     \
+	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },     \
+	8*16     /* every char takes 16 consecutive bytes */    \
 };
 
 GFX( charlayout_1bpp, 0x2000*8+4, 0x2000*8+4, 0x2000*8+4 )
@@ -180,49 +178,42 @@ static const ay8910_interface ay8910_config =
 	DEVCB_INPUT_PORT("DSW"),
 	DEVCB_NULL,
 	DEVCB_NULL,
-	DEVCB_HANDLER(hanaawas_portB_w)
+	DEVCB_DRIVER_MEMBER(hanaawas_state, hanaawas_portB_w)
 };
 
 
-static MACHINE_START( hanaawas )
+void hanaawas_state::machine_start()
 {
-	hanaawas_state *state = machine.driver_data<hanaawas_state>();
 
-	state->save_item(NAME(state->m_mux));
+	save_item(NAME(m_mux));
 }
 
-static MACHINE_RESET( hanaawas )
+void hanaawas_state::machine_reset()
 {
-	hanaawas_state *state = machine.driver_data<hanaawas_state>();
 
-	state->m_mux = 0;
+	m_mux = 0;
 }
 
 static MACHINE_CONFIG_START( hanaawas, hanaawas_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80,18432000/6)	/* 3.072 MHz ??? */
+	MCFG_CPU_ADD("maincpu", Z80,18432000/6) /* 3.072 MHz ??? */
 	MCFG_CPU_PROGRAM_MAP(hanaawas_map)
 	MCFG_CPU_IO_MAP(io_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", hanaawas_state,  irq0_line_hold)
 
-	MCFG_MACHINE_START(hanaawas)
-	MCFG_MACHINE_RESET(hanaawas)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 0*8, 32*8-1)
-	MCFG_SCREEN_UPDATE(hanaawas)
+	MCFG_SCREEN_UPDATE_DRIVER(hanaawas_state, screen_update_hanaawas)
 
 	MCFG_GFXDECODE(hanaawas)
 	MCFG_PALETTE_LENGTH(32*8)
 
-	MCFG_PALETTE_INIT(hanaawas)
-	MCFG_VIDEO_START(hanaawas)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -241,22 +232,22 @@ MACHINE_CONFIG_END
 
 ROM_START( hanaawas )
 	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD( "1.1e",   	0x0000, 0x2000, CRC(618dc1e3) SHA1(31817f256512352db0d27322998d9dcf95a993cf) )
-	ROM_LOAD( "2.3e",   	0x2000, 0x1000, CRC(5091b67f) SHA1(5a66740b8829b9b4d3aea274f9ff36e0b9e8c151) )
-	ROM_LOAD( "3.4e",   	0x4000, 0x1000, CRC(dcb65067) SHA1(37964ff4016bd927b9f13b4358b831bb667f993b) )
-	ROM_LOAD( "4.6e",   	0x6000, 0x1000, CRC(24bee0dc) SHA1(a4237ad3611c923b563923462e79b0b3f66cc721) )
+	ROM_LOAD( "1.1e",       0x0000, 0x2000, CRC(618dc1e3) SHA1(31817f256512352db0d27322998d9dcf95a993cf) )
+	ROM_LOAD( "2.3e",       0x2000, 0x1000, CRC(5091b67f) SHA1(5a66740b8829b9b4d3aea274f9ff36e0b9e8c151) )
+	ROM_LOAD( "3.4e",       0x4000, 0x1000, CRC(dcb65067) SHA1(37964ff4016bd927b9f13b4358b831bb667f993b) )
+	ROM_LOAD( "4.6e",       0x6000, 0x1000, CRC(24bee0dc) SHA1(a4237ad3611c923b563923462e79b0b3f66cc721) )
 
 	ROM_REGION( 0x4000, "gfx1", 0 )
-	ROM_LOAD( "5.9a",		0x0000, 0x1000, CRC(304ae219) SHA1(c1eac4973a6aec9fd8e848c206870667a8bb0922) )
-	ROM_LOAD( "6.10a",		0x1000, 0x1000, CRC(765a4e5f) SHA1(b2f148c60cffb75d1a841be8b924a874bff22ce4) )
-	ROM_LOAD( "7.12a",		0x2000, 0x1000, CRC(5245af2d) SHA1(a1262fa5828a52de28cc953ab465cbc719c56c32) )
-	ROM_LOAD( "8.13a",		0x3000, 0x1000, CRC(3356ddce) SHA1(68818d0692fca548a49a74209bd0ef6f16484eba) )
+	ROM_LOAD( "5.9a",       0x0000, 0x1000, CRC(304ae219) SHA1(c1eac4973a6aec9fd8e848c206870667a8bb0922) )
+	ROM_LOAD( "6.10a",      0x1000, 0x1000, CRC(765a4e5f) SHA1(b2f148c60cffb75d1a841be8b924a874bff22ce4) )
+	ROM_LOAD( "7.12a",      0x2000, 0x1000, CRC(5245af2d) SHA1(a1262fa5828a52de28cc953ab465cbc719c56c32) )
+	ROM_LOAD( "8.13a",      0x3000, 0x1000, CRC(3356ddce) SHA1(68818d0692fca548a49a74209bd0ef6f16484eba) )
 
 	ROM_REGION( 0x0220, "proms", 0 )
-	ROM_LOAD( "13j.bpr",	0x0000, 0x0020, CRC(99300d85) SHA1(dd383db1f3c8c6d784121d32f20ffed3d83e2278) )	/* color PROM */
-	ROM_LOAD( "2a.bpr",		0x0020, 0x0100, CRC(e26f21a2) SHA1(d0df06f833e0f97872d9d2ffeb7feef94aaaa02a) )	/* lookup table */
-	ROM_LOAD( "6g.bpr",		0x0120, 0x0100, CRC(4d94fed5) SHA1(3ea8e6fb95d5677991dc90fe7435f91e5320bb16) )	/* I don't know what this is */
+	ROM_LOAD( "13j.bpr",    0x0000, 0x0020, CRC(99300d85) SHA1(dd383db1f3c8c6d784121d32f20ffed3d83e2278) )  /* color PROM */
+	ROM_LOAD( "2a.bpr",     0x0020, 0x0100, CRC(e26f21a2) SHA1(d0df06f833e0f97872d9d2ffeb7feef94aaaa02a) )  /* lookup table */
+	ROM_LOAD( "6g.bpr",     0x0120, 0x0100, CRC(4d94fed5) SHA1(3ea8e6fb95d5677991dc90fe7435f91e5320bb16) )  /* I don't know what this is */
 ROM_END
 
 
-GAME( 1982, hanaawas, 0, hanaawas, hanaawas, 0, ROT0, "Seta Kikaku, Ltd.", "Hana Awase", GAME_SUPPORTS_SAVE )
+GAME( 1982, hanaawas, 0, hanaawas, hanaawas, driver_device, 0, ROT0, "Seta Kikaku, Ltd.", "Hana Awase", GAME_SUPPORTS_SAVE )

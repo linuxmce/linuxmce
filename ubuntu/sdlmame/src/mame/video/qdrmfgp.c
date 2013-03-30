@@ -27,9 +27,9 @@ void qdrmfgp2_tile_callback(running_machine &machine, int layer, int *code, int 
 
 ***************************************************************************/
 
-VIDEO_START( qdrmfgp )
+VIDEO_START_MEMBER(qdrmfgp_state,qdrmfgp)
 {
-	device_t *k056832 = machine.device("k056832");
+	device_t *k056832 = machine().device("k056832");
 
 	k056832_set_layer_association(k056832, 0);
 
@@ -39,9 +39,9 @@ VIDEO_START( qdrmfgp )
 	k056832_set_layer_offs(k056832, 3, 8, 0);
 }
 
-VIDEO_START( qdrmfgp2 )
+VIDEO_START_MEMBER(qdrmfgp_state,qdrmfgp2)
 {
-	device_t *k056832 = machine.device("k056832");
+	device_t *k056832 = machine().device("k056832");
 
 	k056832_set_layer_association(k056832, 0);
 
@@ -57,10 +57,10 @@ VIDEO_START( qdrmfgp2 )
 
 ***************************************************************************/
 
-SCREEN_UPDATE( qdrmfgp )
+UINT32 qdrmfgp_state::screen_update_qdrmfgp(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	device_t *k056832 = screen->machine().device("k056832");
-	bitmap_fill(bitmap, cliprect, get_black_pen(screen->machine()));
+	device_t *k056832 = machine().device("k056832");
+	bitmap.fill(get_black_pen(machine()), cliprect);
 
 	k056832_tilemap_draw(k056832, bitmap, cliprect, 3, 0, 1);
 	k056832_tilemap_draw(k056832, bitmap, cliprect, 2, 0, 2);

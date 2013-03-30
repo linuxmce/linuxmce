@@ -8,11 +8,11 @@
 #include "video/vector.h"
 #include "includes/segag80v.h"
 
-#define VECTOR_CLOCK		15468480			/* master clock */
-#define U34_CLOCK			(VECTOR_CLOCK/3)	/* clock for interrupt chain */
-#define VCL_CLOCK			(U34_CLOCK/2)		/* clock for vector generator */
-#define U51_CLOCK			(VCL_CLOCK/16)		/* clock for phase generator */
-#define IRQ_CLOCK			(U34_CLOCK/0x1f788)	/* 40Hz interrupt */
+#define VECTOR_CLOCK        15468480            /* master clock */
+#define U34_CLOCK           (VECTOR_CLOCK/3)    /* clock for interrupt chain */
+#define VCL_CLOCK           (U34_CLOCK/2)       /* clock for vector generator */
+#define U51_CLOCK           (VCL_CLOCK/16)      /* clock for phase generator */
+#define IRQ_CLOCK           (U34_CLOCK/0x1f788) /* 40Hz interrupt */
 
 
 
@@ -110,7 +110,7 @@ INLINE int adjust_xy(segag80v_state *state, int rawx, int rawy, int *outx, int *
 static void sega_generate_vector_list(running_machine &machine)
 {
 	segag80v_state *state = machine.driver_data<segag80v_state>();
-	UINT8 *sintable = machine.region("proms")->base();
+	UINT8 *sintable = state->memregion("proms")->base();
 	double total_time = 1.0 / (double)IRQ_CLOCK;
 	UINT16 symaddr = 0;
 	UINT8 *vectorram = state->m_vectorram;
@@ -323,21 +323,20 @@ static void sega_generate_vector_list(running_machine &machine)
 
 ***************************************************************************/
 
-VIDEO_START( segag80v )
+void segag80v_state::video_start()
 {
-	segag80v_state *state = machine.driver_data<segag80v_state>();
-	assert_always(state->m_vectorram_size != 0, "vectorram==0");
+	assert_always(m_vectorram.bytes() != 0, "vectorram==0");
 
-	state->m_min_x =machine.primary_screen->visible_area().min_x;
-	state->m_min_y =machine.primary_screen->visible_area().min_y;
+	m_min_x =machine().primary_screen->visible_area().min_x;
+	m_min_y =machine().primary_screen->visible_area().min_y;
 
-	VIDEO_START_CALL(vector);
+	VIDEO_START_CALL_LEGACY(vector);
 }
 
 
-SCREEN_UPDATE( segag80v )
+UINT32 segag80v_state::screen_update_segag80v(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	sega_generate_vector_list(screen->machine());
-	SCREEN_UPDATE_CALL(vector);
+	sega_generate_vector_list(machine());
+	SCREEN_UPDATE32_CALL(vector);
 	return 0;
 }

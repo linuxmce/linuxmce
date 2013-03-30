@@ -48,15 +48,14 @@ void thunderx_sprite_callback( running_machine &machine, int *code,int *color, i
 
 ***************************************************************************/
 
-VIDEO_START( scontra )
+void thunderx_state::video_start()
 {
-	thunderx_state *state = machine.driver_data<thunderx_state>();
-	state->m_layer_colorbase[0] = 48;
-	state->m_layer_colorbase[1] = 0;
-	state->m_layer_colorbase[2] = 16;
-	state->m_sprite_colorbase = 32;
+	m_layer_colorbase[0] = 48;
+	m_layer_colorbase[1] = 0;
+	m_layer_colorbase[2] = 16;
+	m_sprite_colorbase = 32;
 
-	palette_set_shadow_factor(machine,7.0/8.0);
+	palette_set_shadow_factor(machine(),7.0/8.0);
 }
 
 
@@ -66,28 +65,27 @@ VIDEO_START( scontra )
 
 ***************************************************************************/
 
-SCREEN_UPDATE( scontra )
+UINT32 thunderx_state::screen_update_scontra(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	thunderx_state *state = screen->machine().driver_data<thunderx_state>();
 
-	k052109_tilemap_update(state->m_k052109);
+	k052109_tilemap_update(m_k052109);
 
-	bitmap_fill(screen->machine().priority_bitmap, cliprect, 0);
+	machine().priority_bitmap.fill(0, cliprect);
 
 	/* The background color is always from layer 1 - but it's always black anyway */
-//  bitmap_fill(bitmap,cliprect,16 * state->m_layer_colorbase[1]);
-	if (state->m_priority)
+//  bitmap.fill(16 * m_layer_colorbase[1], cliprect);
+	if (m_priority)
 	{
-		k052109_tilemap_draw(state->m_k052109, bitmap, cliprect, 2, TILEMAP_DRAW_OPAQUE, 1);
-		k052109_tilemap_draw(state->m_k052109, bitmap, cliprect, 1, 0, 2);
+		k052109_tilemap_draw(m_k052109, bitmap, cliprect, 2, TILEMAP_DRAW_OPAQUE, 1);
+		k052109_tilemap_draw(m_k052109, bitmap, cliprect, 1, 0, 2);
 	}
 	else
 	{
-		k052109_tilemap_draw(state->m_k052109, bitmap, cliprect, 1, TILEMAP_DRAW_OPAQUE, 1);
-		k052109_tilemap_draw(state->m_k052109, bitmap, cliprect, 2, 0, 2);
+		k052109_tilemap_draw(m_k052109, bitmap, cliprect, 1, TILEMAP_DRAW_OPAQUE, 1);
+		k052109_tilemap_draw(m_k052109, bitmap, cliprect, 2, 0, 2);
 	}
-	k052109_tilemap_draw(state->m_k052109, bitmap, cliprect, 0, 0, 4);
+	k052109_tilemap_draw(m_k052109, bitmap, cliprect, 0, 0, 4);
 
-	k051960_sprites_draw(state->m_k051960, bitmap, cliprect, -1, -1);
+	k051960_sprites_draw(m_k051960, bitmap, cliprect, -1, -1);
 	return 0;
 }

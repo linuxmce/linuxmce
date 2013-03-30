@@ -31,24 +31,30 @@ Xtals 8MHz, 21.47727MHz
 class quizo_state : public driver_device
 {
 public:
-	quizo_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	quizo_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) { }
 
 	UINT8 *m_videoram;
+	UINT8 m_port60;
+	UINT8 m_port70;
+	DECLARE_WRITE8_MEMBER(vram_w);
+	DECLARE_WRITE8_MEMBER(port70_w);
+	DECLARE_WRITE8_MEMBER(port60_w);
+	DECLARE_DRIVER_INIT(quizo);
+	virtual void palette_init();
+	UINT32 screen_update_quizo(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
-#define XTAL1	 8000000
-#define XTAL2	21477270
+#define XTAL1    8000000
+#define XTAL2   21477270
 
-
-static UINT8 port60;
-static UINT8 port70;
 
 static const UINT8 rombankLookup[]={ 2, 3, 4, 4, 4, 4, 4, 5, 0, 1};
 
-static PALETTE_INIT(quizo)
+void quizo_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 	for (i = 0;i < 16;i++)
 	{
@@ -69,15 +75,14 @@ static PALETTE_INIT(quizo)
 		bit2 = (*color_prom >> 7) & 0x01;
 		r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 
-		palette_set_color(machine,i,MAKE_RGB(r,g,b));
+		palette_set_color(machine(),i,MAKE_RGB(r,g,b));
 		color_prom++;
 	}
 }
 
-static SCREEN_UPDATE( quizo )
+UINT32 quizo_state::screen_update_quizo(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	quizo_state *state = screen->machine().driver_data<quizo_state>();
-	UINT8 *videoram = state->m_videoram;
+	UINT8 *videoram = m_videoram;
 	int x,y;
 	for(y=0;y<200;y++)
 	{
@@ -88,49 +93,48 @@ static SCREEN_UPDATE( quizo )
 			int pix;
 
 			pix=(data&1)|(((data>>4)&1)<<1)|((data1&1)<<2)|(((data1>>4)&1)<<3);
-			*BITMAP_ADDR16(bitmap, y, x*4+3) = pix;
+			bitmap.pix16(y, x*4+3) = pix;
 			data>>=1;
 			data1>>=1;
 			pix=(data&1)|(((data>>4)&1)<<1)|((data1&1)<<2)|(((data1>>4)&1)<<3);
-			*BITMAP_ADDR16(bitmap, y, x*4+2) = pix;
+			bitmap.pix16(y, x*4+2) = pix;
 			data>>=1;
 			data1>>=1;
 			pix=(data&1)|(((data>>4)&1)<<1)|((data1&1)<<2)|(((data1>>4)&1)<<3);
-			*BITMAP_ADDR16(bitmap, y, x*4+1) = pix;
+			bitmap.pix16(y, x*4+1) = pix;
 			data>>=1;
 			data1>>=1;
 			pix=(data&1)|(((data>>4)&1)<<1)|((data1&1)<<2)|(((data1>>4)&1)<<3);
-			*BITMAP_ADDR16(bitmap, y, x*4+0) = pix;
+			bitmap.pix16(y, x*4+0) = pix;
 		}
 	}
 	return 0;
 }
 
-static WRITE8_HANDLER(vram_w)
+WRITE8_MEMBER(quizo_state::vram_w)
 {
-	quizo_state *state = space->machine().driver_data<quizo_state>();
-	UINT8 *videoram = state->m_videoram;
-	int bank=(port70&8)?1:0;
+	UINT8 *videoram = m_videoram;
+	int bank=(m_port70&8)?1:0;
 	videoram[offset+bank*0x4000]=data;
 }
 
-static WRITE8_HANDLER(port70_w)
+WRITE8_MEMBER(quizo_state::port70_w)
 {
-	port70=data;
+	m_port70=data;
 }
 
-static WRITE8_HANDLER(port60_w)
+WRITE8_MEMBER(quizo_state::port60_w)
 {
 	if(data>9)
 	{
-		logerror("ROMBANK %x @ %x\n", data, cpu_get_pc(&space->device()));
+		logerror("ROMBANK %x @ %x\n", data, space.device().safe_pc());
 		data=0;
 	}
-	port60=data;
-	memory_set_bankptr(space->machine(),  "bank1", &space->machine().region("user1")->base()[rombankLookup[data]*0x4000] );
+	m_port60=data;
+	membank("bank1")->set_base(&machine().root_device().memregion("user1")->base()[rombankLookup[data]*0x4000] );
 }
 
-static ADDRESS_MAP_START( memmap, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( memmap, AS_PROGRAM, 8, quizo_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
 	AM_RANGE(0x4000, 0x47ff) AM_RAM
 	AM_RANGE(0x8000, 0xbfff) AM_ROMBANK("bank1")
@@ -138,12 +142,12 @@ static ADDRESS_MAP_START( memmap, AS_PROGRAM, 8 )
 
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( portmap, AS_IO, 8 )
+static ADDRESS_MAP_START( portmap, AS_IO, 8, quizo_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0x00) AM_READ_PORT("IN0")
 	AM_RANGE(0x10, 0x10) AM_READ_PORT("IN1")
 	AM_RANGE(0x40, 0x40) AM_READ_PORT("IN2")
-	AM_RANGE(0x50, 0x51) AM_DEVWRITE("aysnd", ay8910_address_data_w)
+	AM_RANGE(0x50, 0x51) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_data_w)
 	AM_RANGE(0x60, 0x60) AM_WRITE(port60_w)
 	AM_RANGE(0x70, 0x70) AM_WRITE(port70_w)
 ADDRESS_MAP_END
@@ -204,19 +208,17 @@ static MACHINE_CONFIG_START( quizo, quizo_state )
 	MCFG_CPU_PROGRAM_MAP(memmap)
 	MCFG_CPU_IO_MAP(portmap)
 
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", quizo_state,  irq0_line_hold)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(320, 200)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 320-1, 0*8, 200-1)
-	MCFG_SCREEN_UPDATE(quizo)
+	MCFG_SCREEN_UPDATE_DRIVER(quizo_state, screen_update_quizo)
 
 	MCFG_PALETTE_LENGTH(16)
-	MCFG_PALETTE_INIT(quizo)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -256,11 +258,10 @@ ROM_START( quizoa )
 ROM_END
 
 
-static DRIVER_INIT(quizo)
+DRIVER_INIT_MEMBER(quizo_state,quizo)
 {
-	quizo_state *state = machine.driver_data<quizo_state>();
-	state->m_videoram=auto_alloc_array(machine, UINT8, 0x4000*2);
+	m_videoram=auto_alloc_array(machine(), UINT8, 0x4000*2);
 }
 
-GAME( 1985, quizo,  0,       quizo,  quizo,  quizo, ROT0, "Seoul Coin Corp.", "Quiz Olympic (set 1)", 0 )
-GAME( 1985, quizoa, quizo,   quizo,  quizo,  quizo, ROT0, "Seoul Coin Corp.", "Quiz Olympic (set 2)", 0 )
+GAME( 1985, quizo,  0,       quizo,  quizo, quizo_state,  quizo, ROT0, "Seoul Coin Corp.", "Quiz Olympic (set 1)", 0 )
+GAME( 1985, quizoa, quizo,   quizo,  quizo, quizo_state,  quizo, ROT0, "Seoul Coin Corp.", "Quiz Olympic (set 2)", 0 )

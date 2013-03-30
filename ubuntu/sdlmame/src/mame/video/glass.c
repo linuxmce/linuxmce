@@ -31,25 +31,23 @@
       1  | xxxxxxxx -------- | not used
 */
 
-static TILE_GET_INFO( get_tile_info_glass_screen0 )
+TILE_GET_INFO_MEMBER(glass_state::get_tile_info_glass_screen0)
 {
-	glass_state *state = machine.driver_data<glass_state>();
-	int data = state->m_videoram[tile_index << 1];
-	int data2 = state->m_videoram[(tile_index << 1) + 1];
+	int data = m_videoram[tile_index << 1];
+	int data2 = m_videoram[(tile_index << 1) + 1];
 	int code = ((data & 0x03) << 14) | ((data & 0x0fffc) >> 2);
 
-	SET_TILE_INFO(0, code, 0x20 + (data2 & 0x1f), TILE_FLIPYX((data2 & 0xc0) >> 6));
+	SET_TILE_INFO_MEMBER(0, code, 0x20 + (data2 & 0x1f), TILE_FLIPYX((data2 & 0xc0) >> 6));
 }
 
 
-static TILE_GET_INFO( get_tile_info_glass_screen1 )
+TILE_GET_INFO_MEMBER(glass_state::get_tile_info_glass_screen1)
 {
-	glass_state *state = machine.driver_data<glass_state>();
-	int data = state->m_videoram[(0x1000 / 2) + (tile_index << 1)];
-	int data2 = state->m_videoram[(0x1000 / 2) + (tile_index << 1) + 1];
+	int data = m_videoram[(0x1000 / 2) + (tile_index << 1)];
+	int data2 = m_videoram[(0x1000 / 2) + (tile_index << 1) + 1];
 	int code = ((data & 0x03) << 14) | ((data & 0x0fffc) >> 2);
 
-	SET_TILE_INFO(0, code, 0x20 + (data2 & 0x1f), TILE_FLIPYX((data2 & 0xc0) >> 6));
+	SET_TILE_INFO_MEMBER(0, code, 0x20 + (data2 & 0x1f), TILE_FLIPYX((data2 & 0xc0) >> 6));
 }
 
 /***************************************************************************
@@ -59,7 +57,7 @@ static TILE_GET_INFO( get_tile_info_glass_screen1 )
 ***************************************************************************/
 
 /*
-    The blitter is accessed writting 5 consecutive bits. The stream is: P0 P1 B2 B1 B0
+    The blitter is accessed writing 5 consecutive bits. The stream is: P0 P1 B2 B1 B0
 
     if P0 is set, the hardware selects the first half of ROM H9 (girls)
     if P1 is set, the hardware selects the second half of ROM H9 (boys)
@@ -67,29 +65,28 @@ static TILE_GET_INFO( get_tile_info_glass_screen1 )
     B2B1B0 selects the picture (there are 8 pictures in each half of the ROM)
 */
 
-WRITE16_HANDLER( glass_blitter_w )
+WRITE16_MEMBER(glass_state::glass_blitter_w)
 {
-	glass_state *state = space->machine().driver_data<glass_state>();
-	state->m_blitter_serial_buffer[state->m_current_bit] = data & 0x01;
-	state->m_current_bit++;
+	m_blitter_serial_buffer[m_current_bit] = data & 0x01;
+	m_current_bit++;
 
-	if (state->m_current_bit == 5)
+	if (m_current_bit == 5)
 	{
-		state->m_current_command = (state->m_blitter_serial_buffer[0] << 4) |
-							(state->m_blitter_serial_buffer[1] << 3) |
-							(state->m_blitter_serial_buffer[2] << 2) |
-							(state->m_blitter_serial_buffer[3] << 1) |
-							(state->m_blitter_serial_buffer[4] << 0);
-		state->m_current_bit = 0;
+		m_current_command = (m_blitter_serial_buffer[0] << 4) |
+							(m_blitter_serial_buffer[1] << 3) |
+							(m_blitter_serial_buffer[2] << 2) |
+							(m_blitter_serial_buffer[3] << 1) |
+							(m_blitter_serial_buffer[4] << 0);
+		m_current_bit = 0;
 
 		/* fill the screen bitmap with the current picture */
 		{
 			int i, j;
-			UINT8 *gfx = (UINT8 *)space->machine().region("gfx3")->base();
+			UINT8 *gfx = (UINT8 *)machine().root_device().memregion("gfx3")->base();
 
-			gfx = gfx + (state->m_current_command & 0x07) * 0x10000 + (state->m_current_command & 0x08) * 0x10000 + 0x140;
+			gfx = gfx + (m_current_command & 0x07) * 0x10000 + (m_current_command & 0x08) * 0x10000 + 0x140;
 
-			if ((state->m_current_command & 0x18) != 0)
+			if ((m_current_command & 0x18) != 0)
 			{
 				for (j = 0; j < 200; j++)
 				{
@@ -97,12 +94,12 @@ WRITE16_HANDLER( glass_blitter_w )
 					{
 						int color = *gfx;
 						gfx++;
-						*BITMAP_ADDR16(state->m_screen_bitmap, j, i) = color & 0xff;
+						m_screen_bitmap->pix16(j, i) = color & 0xff;
 					}
 				}
 			}
 			else
-				bitmap_fill(state->m_screen_bitmap, 0, 0);
+				m_screen_bitmap->fill(0);
 		}
 	}
 }
@@ -113,11 +110,10 @@ WRITE16_HANDLER( glass_blitter_w )
 
 ***************************************************************************/
 
-WRITE16_HANDLER( glass_vram_w )
+WRITE16_MEMBER(glass_state::glass_vram_w)
 {
-	glass_state *state = space->machine().driver_data<glass_state>();
-	COMBINE_DATA(&state->m_videoram[offset]);
-	tilemap_mark_tile_dirty(state->m_pant[offset >> 11], ((offset << 1) & 0x0fff) >> 2);
+	COMBINE_DATA(&m_videoram[offset]);
+	m_pant[offset >> 11]->mark_tile_dirty(((offset << 1) & 0x0fff) >> 2);
 }
 
 
@@ -127,17 +123,16 @@ WRITE16_HANDLER( glass_vram_w )
 
 ***************************************************************************/
 
-VIDEO_START( glass )
+void glass_state::video_start()
 {
-	glass_state *state = machine.driver_data<glass_state>();
-	state->m_pant[0] = tilemap_create(machine, get_tile_info_glass_screen0, tilemap_scan_rows, 16, 16, 32, 32);
-	state->m_pant[1] = tilemap_create(machine, get_tile_info_glass_screen1, tilemap_scan_rows, 16, 16, 32, 32);
-	state->m_screen_bitmap = auto_bitmap_alloc (machine, 320, 200, machine.primary_screen->format());
+	m_pant[0] = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(glass_state::get_tile_info_glass_screen0),this), TILEMAP_SCAN_ROWS, 16, 16, 32, 32);
+	m_pant[1] = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(glass_state::get_tile_info_glass_screen1),this), TILEMAP_SCAN_ROWS, 16, 16, 32, 32);
+	m_screen_bitmap = auto_bitmap_ind16_alloc (machine(), 320, 200);
 
-	state->save_item(NAME(*state->m_screen_bitmap));
+	save_item(NAME(*m_screen_bitmap));
 
-	tilemap_set_transparent_pen(state->m_pant[0], 0);
-	tilemap_set_transparent_pen(state->m_pant[1], 0);
+	m_pant[0]->set_transparent_pen(0);
+	m_pant[1]->set_transparent_pen(0);
 }
 
 
@@ -164,11 +159,11 @@ VIDEO_START( glass )
       3  | xxxxxxxx xxxxxxxx | sprite code
 */
 
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	glass_state *state = machine.driver_data<glass_state>();
 	int i;
-	const gfx_element *gfx = machine.gfx[0];
+	gfx_element *gfx = machine.gfx[0];
 
 	for (i = 3; i < (0x1000 - 6) / 2; i += 4)
 	{
@@ -195,20 +190,19 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 
 ****************************************************************************/
 
-SCREEN_UPDATE( glass )
+UINT32 glass_state::screen_update_glass(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	glass_state *state = screen->machine().driver_data<glass_state>();
 	/* set scroll registers */
-	tilemap_set_scrolly(state->m_pant[0], 0, state->m_vregs[0]);
-	tilemap_set_scrollx(state->m_pant[0], 0, state->m_vregs[1] + 0x04);
-	tilemap_set_scrolly(state->m_pant[1], 0, state->m_vregs[2]);
-	tilemap_set_scrollx(state->m_pant[1], 0, state->m_vregs[3]);
+	m_pant[0]->set_scrolly(0, m_vregs[0]);
+	m_pant[0]->set_scrollx(0, m_vregs[1] + 0x04);
+	m_pant[1]->set_scrolly(0, m_vregs[2]);
+	m_pant[1]->set_scrollx(0, m_vregs[3]);
 
 	/* draw layers + sprites */
-	bitmap_fill(bitmap, cliprect, get_black_pen(screen->machine()));
-	copybitmap(bitmap, state->m_screen_bitmap, 0, 0, 0x18, 0x24, cliprect);
-	tilemap_draw(bitmap, cliprect, state->m_pant[1], 0, 0);
-	tilemap_draw(bitmap, cliprect, state->m_pant[0], 0, 0);
-	draw_sprites(screen->machine(), bitmap, cliprect);
+	bitmap.fill(get_black_pen(machine()), cliprect);
+	copybitmap(bitmap, *m_screen_bitmap, 0, 0, 0x18, 0x24, cliprect);
+	m_pant[1]->draw(bitmap, cliprect, 0, 0);
+	m_pant[0]->draw(bitmap, cliprect, 0, 0);
+	draw_sprites(machine(), bitmap, cliprect);
 	return 0;
 }

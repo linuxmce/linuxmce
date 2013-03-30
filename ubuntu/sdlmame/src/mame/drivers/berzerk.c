@@ -20,12 +20,13 @@
 class berzerk_state : public driver_device
 {
 public:
-	berzerk_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	berzerk_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"),
+		m_colorram(*this, "colorram"){ }
 
-	UINT8 *m_videoram;
-	size_t m_videoram_size;
-	UINT8 *m_colorram;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_colorram;
 	UINT8 m_magicram_control;
 	UINT8 m_last_shift_data;
 	UINT8 m_intercept;
@@ -37,25 +38,48 @@ public:
 	int m_p1_direction;
 	int m_p2_counter_74ls161;
 	int m_p2_direction;
+	DECLARE_READ8_MEMBER(led_on_r);
+	DECLARE_WRITE8_MEMBER(led_on_w);
+	DECLARE_READ8_MEMBER(led_off_r);
+	DECLARE_WRITE8_MEMBER(led_off_w);
+	DECLARE_WRITE8_MEMBER(irq_enable_w);
+	DECLARE_WRITE8_MEMBER(nmi_enable_w);
+	DECLARE_WRITE8_MEMBER(nmi_disable_w);
+	DECLARE_READ8_MEMBER(nmi_enable_r);
+	DECLARE_READ8_MEMBER(nmi_disable_r);
+	DECLARE_WRITE8_MEMBER(magicram_w);
+	DECLARE_WRITE8_MEMBER(magicram_control_w);
+	DECLARE_READ8_MEMBER(intercept_v256_r);
+	DECLARE_WRITE8_MEMBER(berzerk_audio_w);
+	DECLARE_READ8_MEMBER(berzerk_audio_r);
+	DECLARE_READ8_MEMBER(moonwarp_p1_r);
+	DECLARE_READ8_MEMBER(moonwarp_p2_r);
+	DECLARE_DRIVER_INIT(moonwarp);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	UINT32 screen_update_berzerk(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
+	TIMER_CALLBACK_MEMBER(irq_callback);
+	TIMER_CALLBACK_MEMBER(nmi_callback);
 };
 
 
 #define MONITOR_TYPE_PORT_TAG ("MONITOR_TYPE")
 
-#define MASTER_CLOCK				(XTAL_10MHz)
-#define MAIN_CPU_CLOCK  			(MASTER_CLOCK / 4)
-#define PIXEL_CLOCK 				(MASTER_CLOCK / 2)
-#define S14001_CLOCK				(MASTER_CLOCK / 4)
-#define HTOTAL						(0x140)
-#define HBEND						(0x000)
-#define HBSTART						(0x100)
-#define VTOTAL						(0x106)
-#define VBEND						(0x020)
-#define VBSTART						(0x100)
-#define VCOUNTER_START_NO_VBLANK	(0x020)
-#define VCOUNTER_START_VBLANK		(0x0da)
-#define IRQS_PER_FRAME				(2)
-#define NMIS_PER_FRAME				(8)
+#define MASTER_CLOCK                (XTAL_10MHz)
+#define MAIN_CPU_CLOCK              (MASTER_CLOCK / 4)
+#define PIXEL_CLOCK                 (MASTER_CLOCK / 2)
+#define S14001_CLOCK                (MASTER_CLOCK / 4)
+#define HTOTAL                      (0x140)
+#define HBEND                       (0x000)
+#define HBSTART                     (0x100)
+#define VTOTAL                      (0x106)
+#define VBEND                       (0x020)
+#define VBSTART                     (0x100)
+#define VCOUNTER_START_NO_VBLANK    (0x020)
+#define VCOUNTER_START_VBLANK       (0x0da)
+#define IRQS_PER_FRAME              (2)
+#define NMIS_PER_FRAME              (8)
 
 static const UINT8 irq_trigger_counts[IRQS_PER_FRAME] = { 0x80, 0xda };
 static const UINT8 irq_trigger_v256s [IRQS_PER_FRAME] = { 0x00, 0x01 };
@@ -70,31 +94,31 @@ static const UINT8 nmi_trigger_v256s [NMIS_PER_FRAME] = { 0x00, 0x00, 0x00, 0x00
  *
  *************************************/
 
-static READ8_HANDLER( led_on_r )
+READ8_MEMBER(berzerk_state::led_on_r)
 {
-	set_led_status(space->machine(), 0, 1);
+	set_led_status(machine(), 0, 1);
 
 	return 0;
 }
 
 
-static WRITE8_HANDLER( led_on_w )
+WRITE8_MEMBER(berzerk_state::led_on_w)
 {
-	set_led_status(space->machine(), 0, 1);
+	set_led_status(machine(), 0, 1);
 }
 
 
-static READ8_HANDLER( led_off_r )
+READ8_MEMBER(berzerk_state::led_off_r)
 {
-	set_led_status(space->machine(), 0, 0);
+	set_led_status(machine(), 0, 0);
 
 	return 0;
 }
 
 
-static WRITE8_HANDLER( led_off_w )
+WRITE8_MEMBER(berzerk_state::led_off_w)
 {
-	set_led_status(space->machine(), 0, 0);
+	set_led_status(machine(), 0, 0);
 }
 
 
@@ -153,16 +177,14 @@ static int vsync_chain_counter_to_vpos(UINT8 counter, UINT8 v256)
  *
  *************************************/
 
-static WRITE8_HANDLER( irq_enable_w )
+WRITE8_MEMBER(berzerk_state::irq_enable_w)
 {
-	berzerk_state *state = space->machine().driver_data<berzerk_state>();
-	state->m_irq_enabled = data & 0x01;
+	m_irq_enabled = data & 0x01;
 }
 
 
-static TIMER_CALLBACK( irq_callback )
+TIMER_CALLBACK_MEMBER(berzerk_state::irq_callback)
 {
-	berzerk_state *state = machine.driver_data<berzerk_state>();
 	int irq_number = param;
 	UINT8 next_counter;
 	UINT8 next_v256;
@@ -170,8 +192,8 @@ static TIMER_CALLBACK( irq_callback )
 	int next_irq_number;
 
 	/* set the IRQ line if enabled */
-	if (state->m_irq_enabled)
-		cputag_set_input_line_and_vector(machine, "maincpu", 0, HOLD_LINE, 0xfc);
+	if (m_irq_enabled)
+		machine().device("maincpu")->execute().set_input_line_and_vector(0, HOLD_LINE, 0xfc);
 
 	/* set up for next interrupt */
 	next_irq_number = (irq_number + 1) % IRQS_PER_FRAME;
@@ -179,14 +201,14 @@ static TIMER_CALLBACK( irq_callback )
 	next_v256 = irq_trigger_v256s[next_irq_number];
 
 	next_vpos = vsync_chain_counter_to_vpos(next_counter, next_v256);
-	state->m_irq_timer->adjust(machine.primary_screen->time_until_pos(next_vpos), next_irq_number);
+	m_irq_timer->adjust(machine().primary_screen->time_until_pos(next_vpos), next_irq_number);
 }
 
 
 static void create_irq_timer(running_machine &machine)
 {
 	berzerk_state *state = machine.driver_data<berzerk_state>();
-	state->m_irq_timer = machine.scheduler().timer_alloc(FUNC(irq_callback));
+	state->m_irq_timer = machine.scheduler().timer_alloc(timer_expired_delegate(FUNC(berzerk_state::irq_callback),state));
 }
 
 
@@ -212,41 +234,36 @@ static void start_irq_timer(running_machine &machine)
  *
  *************************************/
 
-static WRITE8_HANDLER( nmi_enable_w )
+WRITE8_MEMBER(berzerk_state::nmi_enable_w)
 {
-	berzerk_state *state = space->machine().driver_data<berzerk_state>();
-	state->m_nmi_enabled = 1;
+	m_nmi_enabled = 1;
 }
 
 
-static WRITE8_HANDLER( nmi_disable_w )
+WRITE8_MEMBER(berzerk_state::nmi_disable_w)
 {
-	berzerk_state *state = space->machine().driver_data<berzerk_state>();
-	state->m_nmi_enabled = 0;
+	m_nmi_enabled = 0;
 }
 
 
-static READ8_HANDLER( nmi_enable_r )
+READ8_MEMBER(berzerk_state::nmi_enable_r)
 {
-	berzerk_state *state = space->machine().driver_data<berzerk_state>();
-	state->m_nmi_enabled = 1;
+	m_nmi_enabled = 1;
 
 	return 0;
 }
 
 
-static READ8_HANDLER( nmi_disable_r )
+READ8_MEMBER(berzerk_state::nmi_disable_r)
 {
-	berzerk_state *state = space->machine().driver_data<berzerk_state>();
-	state->m_nmi_enabled = 0;
+	m_nmi_enabled = 0;
 
 	return 0;
 }
 
 
-static TIMER_CALLBACK( nmi_callback )
+TIMER_CALLBACK_MEMBER(berzerk_state::nmi_callback)
 {
-	berzerk_state *state = machine.driver_data<berzerk_state>();
 	int nmi_number = param;
 	UINT8 next_counter;
 	UINT8 next_v256;
@@ -254,8 +271,8 @@ static TIMER_CALLBACK( nmi_callback )
 	int next_nmi_number;
 
 	/* pulse the NMI line if enabled */
-	if (state->m_nmi_enabled)
-		cputag_set_input_line(machine, "maincpu", INPUT_LINE_NMI, PULSE_LINE);
+	if (m_nmi_enabled)
+		machine().device("maincpu")->execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 
 	/* set up for next interrupt */
 	next_nmi_number = (nmi_number + 1) % NMIS_PER_FRAME;
@@ -263,14 +280,14 @@ static TIMER_CALLBACK( nmi_callback )
 	next_v256 = nmi_trigger_v256s[next_nmi_number];
 
 	next_vpos = vsync_chain_counter_to_vpos(next_counter, next_v256);
-	state->m_nmi_timer->adjust(machine.primary_screen->time_until_pos(next_vpos), next_nmi_number);
+	m_nmi_timer->adjust(machine().primary_screen->time_until_pos(next_vpos), next_nmi_number);
 }
 
 
 static void create_nmi_timer(running_machine &machine)
 {
 	berzerk_state *state = machine.driver_data<berzerk_state>();
-	state->m_nmi_timer = machine.scheduler().timer_alloc(FUNC(nmi_callback));
+	state->m_nmi_timer = machine.scheduler().timer_alloc(timer_expired_delegate(FUNC(berzerk_state::nmi_callback),state));
 }
 
 
@@ -289,18 +306,17 @@ static void start_nmi_timer(running_machine &machine)
  *
  *************************************/
 
-static MACHINE_START( berzerk )
+void berzerk_state::machine_start()
 {
-	berzerk_state *state = machine.driver_data<berzerk_state>();
-	create_irq_timer(machine);
-	create_nmi_timer(machine);
+	create_irq_timer(machine());
+	create_nmi_timer(machine());
 
 	/* register for state saving */
-	state_save_register_global(machine, state->m_magicram_control);
-	state_save_register_global(machine, state->m_last_shift_data);
-	state_save_register_global(machine, state->m_intercept);
-	state_save_register_global(machine, state->m_irq_enabled);
-	state_save_register_global(machine, state->m_nmi_enabled);
+	state_save_register_global(machine(), m_magicram_control);
+	state_save_register_global(machine(), m_last_shift_data);
+	state_save_register_global(machine(), m_intercept);
+	state_save_register_global(machine(), m_irq_enabled);
+	state_save_register_global(machine(), m_nmi_enabled);
 }
 
 
@@ -311,16 +327,15 @@ static MACHINE_START( berzerk )
  *
  *************************************/
 
-static MACHINE_RESET( berzerk )
+void berzerk_state::machine_reset()
 {
-	berzerk_state *state = machine.driver_data<berzerk_state>();
-	state->m_irq_enabled = 0;
-	state->m_nmi_enabled = 0;
-	set_led_status(machine, 0, 0);
-	state->m_magicram_control = 0;
+	m_irq_enabled = 0;
+	m_nmi_enabled = 0;
+	set_led_status(machine(), 0, 0);
+	m_magicram_control = 0;
 
-	start_irq_timer(machine);
-	start_nmi_timer(machine);
+	start_irq_timer(machine());
+	start_nmi_timer(machine());
 }
 
 
@@ -331,81 +346,78 @@ static MACHINE_RESET( berzerk )
  *
  *************************************/
 
-#define NUM_PENS	(0x10)
+#define NUM_PENS    (0x10)
 
-#define LS181_12C	(0)
-#define LS181_10C	(1)
+#define LS181_12C   (0)
+#define LS181_10C   (1)
 
 
-static VIDEO_START( berzerk )
+void berzerk_state::video_start()
 {
-	TTL74181_config(machine, LS181_12C, 0);
+	TTL74181_config(machine(), LS181_12C, 0);
 	TTL74181_write(LS181_12C, TTL74181_INPUT_M, 1, 1);
 
-	TTL74181_config(machine, LS181_10C, 0);
+	TTL74181_config(machine(), LS181_10C, 0);
 	TTL74181_write(LS181_10C, TTL74181_INPUT_M, 1, 1);
 }
 
 
-static WRITE8_HANDLER( magicram_w )
+WRITE8_MEMBER(berzerk_state::magicram_w)
 {
-	berzerk_state *state = space->machine().driver_data<berzerk_state>();
 	UINT8 alu_output;
 
-	UINT8 current_video_data = state->m_videoram[offset];
+	UINT8 current_video_data = m_videoram[offset];
 
 	/* shift data towards LSB.  MSB bits are filled by data from last_shift_data.
-       The shifter consists of 5 74153 devices @ 7A, 8A, 9A, 10A and 11A,
-       followed by 4 more 153's at 11B, 10B, 9B and 8B, which optionally
-       reverse the order of the resulting bits */
-	UINT8 shift_flop_output = (((UINT16)state->m_last_shift_data << 8) | data) >> (state->m_magicram_control & 0x07);
+	   The shifter consists of 5 74153 devices @ 7A, 8A, 9A, 10A and 11A,
+	   followed by 4 more 153's at 11B, 10B, 9B and 8B, which optionally
+	   reverse the order of the resulting bits */
+	UINT8 shift_flop_output = (((UINT16)m_last_shift_data << 8) | data) >> (m_magicram_control & 0x07);
 
-	if (state->m_magicram_control & 0x08)
+	if (m_magicram_control & 0x08)
 		shift_flop_output = BITSWAP8(shift_flop_output, 0, 1, 2, 3, 4, 5, 6, 7);
 
 	/* collision detection - AND gate output goes to the K pin of the flip-flop,
-       while J is LO, therefore, it only resets, never sets */
+	   while J is LO, therefore, it only resets, never sets */
 	if (shift_flop_output & current_video_data)
-		state->m_intercept = 0;
+		m_intercept = 0;
 
 	/* perform ALU step */
 	TTL74181_write(LS181_12C, TTL74181_INPUT_A0, 4, shift_flop_output & 0x0f);
 	TTL74181_write(LS181_10C, TTL74181_INPUT_A0, 4, shift_flop_output >> 4);
 	TTL74181_write(LS181_12C, TTL74181_INPUT_B0, 4, current_video_data & 0x0f);
 	TTL74181_write(LS181_10C, TTL74181_INPUT_B0, 4, current_video_data >> 4);
-	TTL74181_write(LS181_12C, TTL74181_INPUT_S0, 4, state->m_magicram_control >> 4);
-	TTL74181_write(LS181_10C, TTL74181_INPUT_S0, 4, state->m_magicram_control >> 4);
+	TTL74181_write(LS181_12C, TTL74181_INPUT_S0, 4, m_magicram_control >> 4);
+	TTL74181_write(LS181_10C, TTL74181_INPUT_S0, 4, m_magicram_control >> 4);
 
 	alu_output = (TTL74181_read(LS181_10C, TTL74181_OUTPUT_F0, 4) << 4) |
-				 (TTL74181_read(LS181_12C, TTL74181_OUTPUT_F0, 4) << 0);
+					(TTL74181_read(LS181_12C, TTL74181_OUTPUT_F0, 4) << 0);
 
-	state->m_videoram[offset] = alu_output ^ 0xff;
+	m_videoram[offset] = alu_output ^ 0xff;
 
 	/* save data for next time */
-	state->m_last_shift_data = data & 0x7f;
+	m_last_shift_data = data & 0x7f;
 }
 
 
-static WRITE8_HANDLER( magicram_control_w )
+WRITE8_MEMBER(berzerk_state::magicram_control_w)
 {
-	berzerk_state *state = space->machine().driver_data<berzerk_state>();
 	/* save the control byte, clear the shift data latch,
-       and set the intercept flip-flop */
-	state->m_magicram_control = data;
-	state->m_last_shift_data = 0;
-	state->m_intercept = 1;
+	   and set the intercept flip-flop */
+	m_magicram_control = data;
+	m_last_shift_data = 0;
+	m_intercept = 1;
 }
 
 
-static READ8_HANDLER( intercept_v256_r )
+READ8_MEMBER(berzerk_state::intercept_v256_r)
 {
-	berzerk_state *state = space->machine().driver_data<berzerk_state>();
 	UINT8 counter;
 	UINT8 v256;
 
-	vpos_to_vsync_chain_counter(space->machine().primary_screen->vpos(), &counter, &v256);
+	vpos_to_vsync_chain_counter(machine().primary_screen->vpos(), &counter, &v256);
 
-	return (!state->m_intercept << 7) | v256;
+	return (!m_intercept << 7) | v256;
 }
 
 
@@ -417,16 +429,16 @@ static void get_pens(running_machine &machine, pen_t *pens)
 	int color;
 	double color_weights[2];
 
-	if (input_port_read(machine, MONITOR_TYPE_PORT_TAG) == 0)
+	if (machine.root_device().ioport(MONITOR_TYPE_PORT_TAG)->read() == 0)
 		compute_resistor_weights(0, 0xff, -1.0,
-								 2, resistances_wg, color_weights, 0, 270,
-								 2, resistances_wg, color_weights, 0, 270,
-								 2, resistances_wg, color_weights, 0, 270);
+									2, resistances_wg, color_weights, 0, 270,
+									2, resistances_wg, color_weights, 0, 270,
+									2, resistances_wg, color_weights, 0, 270);
 	else
 		compute_resistor_weights(0, 0xff, -1.0,
-								 2, resistances_el, color_weights, 0, 270,
-								 2, resistances_el, color_weights, 0, 270,
-								 2, resistances_el, color_weights, 0, 270);
+									2, resistances_el, color_weights, 0, 270,
+									2, resistances_el, color_weights, 0, 270,
+									2, resistances_el, color_weights, 0, 270);
 
 	for (color = 0; color < NUM_PENS; color++)
 	{
@@ -444,20 +456,19 @@ static void get_pens(running_machine &machine, pen_t *pens)
 }
 
 
-static SCREEN_UPDATE( berzerk )
+UINT32 berzerk_state::screen_update_berzerk(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	berzerk_state *state = screen->machine().driver_data<berzerk_state>();
 	pen_t pens[NUM_PENS];
 	offs_t offs;
 
-	get_pens(screen->machine(), pens);
+	get_pens(machine(), pens);
 
-	for (offs = 0; offs < state->m_videoram_size; offs++)
+	for (offs = 0; offs < m_videoram.bytes(); offs++)
 	{
 		int i;
 
-		UINT8 data = state->m_videoram[offs];
-		UINT8 color = state->m_colorram[((offs >> 2) & 0x07e0) | (offs & 0x001f)];
+		UINT8 data = m_videoram[offs];
+		UINT8 color = m_colorram[((offs >> 2) & 0x07e0) | (offs & 0x001f)];
 
 		UINT8 y = offs >> 5;
 		UINT8 x = offs << 3;
@@ -465,7 +476,7 @@ static SCREEN_UPDATE( berzerk )
 		for (i = 0; i < 4; i++)
 		{
 			pen_t pen = (data & 0x80) ? pens[color >> 4] : RGB_BLACK;
-			*BITMAP_ADDR32(bitmap, y, x) = pen;
+			bitmap.pix32(y, x) = pen;
 
 			x = x + 1;
 			data = data << 1;
@@ -474,7 +485,7 @@ static SCREEN_UPDATE( berzerk )
 		for (; i < 8; i++)
 		{
 			pen_t pen = (data & 0x80) ? pens[color & 0x0f] : RGB_BLACK;
-			*BITMAP_ADDR32(bitmap, y, x) = pen;
+			bitmap.pix32(y, x) = pen;
 
 			x = x + 1;
 			data = data << 1;
@@ -492,7 +503,7 @@ static SCREEN_UPDATE( berzerk )
  *
  *************************************/
 
-static WRITE8_HANDLER( berzerk_audio_w )
+WRITE8_MEMBER(berzerk_state::berzerk_audio_w)
 {
 	device_t *device;
 	int clock_divisor;
@@ -501,7 +512,7 @@ static WRITE8_HANDLER( berzerk_audio_w )
 	{
 	/* offset 4 writes to the S14001A */
 	case 4:
-		device = space->machine().device("speech");
+		device = machine().device("speech");
 		switch (data >> 6)
 		{
 		/* write data to the S14001 */
@@ -519,12 +530,12 @@ static WRITE8_HANDLER( berzerk_audio_w )
 			break;
 
 		case 1:
-			device = space->machine().device("speech");
+			device = machine().device("speech");
 			/* volume */
 			s14001a_set_volume(device, ((data & 0x38) >> 3) + 1);
 
 			/* clock control - the first LS161 divides the clock by 9 to 16, the 2nd by 8,
-               giving a final clock from 19.5kHz to 34.7kHz */
+			   giving a final clock from 19.5kHz to 34.7kHz */
 			clock_divisor = 16 - (data & 0x07);
 
 			s14001a_set_clock(device, S14001_CLOCK / clock_divisor / 8);
@@ -537,21 +548,21 @@ static WRITE8_HANDLER( berzerk_audio_w )
 
 	/* offset 6 writes to the sfxcontrol latch */
 	case 6:
-		exidy_sfxctrl_w(space->machine().device("exidy"), data >> 6, data);
+		exidy_sfxctrl_w(machine().device("exidy"), space, data >> 6, data);
 		break;
 
 	/* everything else writes to the 6840 */
 	default:
-		exidy_sh6840_w(space->machine().device("exidy"), offset, data);
+		exidy_sh6840_w(machine().device("exidy"), space, offset, data);
 		break;
 
 	}
 }
 
 
-static READ8_HANDLER( berzerk_audio_r )
+READ8_MEMBER(berzerk_state::berzerk_audio_r)
 {
-	device_t *device = space->machine().device("speech");
+	device_t *device = machine().device("speech");
 	switch (offset)
 	{
 	/* offset 4 reads from the S14001A */
@@ -563,7 +574,7 @@ static READ8_HANDLER( berzerk_audio_r )
 		return 0;
 	/* everything else reads from the 6840 */
 	default:
-		return exidy_sh6840_r(space->machine().device("exidy"), offset);
+		return exidy_sh6840_r(machine().device("exidy"), space, offset);
 	}
 }
 
@@ -571,9 +582,10 @@ static READ8_HANDLER( berzerk_audio_r )
 
 static SOUND_RESET(berzerk)
 {
-	address_space *space = machine.device("maincpu")->memory().space(AS_IO);
+	address_space &space = machine.device("maincpu")->memory().space(AS_IO);
+	berzerk_state *state = machine.driver_data<berzerk_state>();
 	/* clears the flip-flop controlling the volume and freq on the speech chip */
-	berzerk_audio_w(space, 4, 0x40);
+	state->berzerk_audio_w(space, 4, 0x40);
 }
 
 
@@ -584,22 +596,22 @@ static SOUND_RESET(berzerk)
  *
  *************************************/
 
-static ADDRESS_MAP_START( berzerk_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( berzerk_map, AS_PROGRAM, 8, berzerk_state )
 	AM_RANGE(0x0000, 0x07ff) AM_ROM
 	AM_RANGE(0x0800, 0x0bff) AM_MIRROR(0x0400) AM_RAM AM_SHARE("nvram")
 	AM_RANGE(0x1000, 0x3fff) AM_ROM
-	AM_RANGE(0x4000, 0x5fff) AM_RAM AM_BASE_MEMBER(berzerk_state, m_videoram) AM_SIZE_MEMBER(berzerk_state, m_videoram_size) AM_SHARE("share1")
-	AM_RANGE(0x6000, 0x7fff) AM_RAM_WRITE(magicram_w) AM_SHARE("share1")
-	AM_RANGE(0x8000, 0x87ff) AM_MIRROR(0x3800) AM_RAM AM_BASE_MEMBER(berzerk_state, m_colorram)
+	AM_RANGE(0x4000, 0x5fff) AM_RAM AM_SHARE("videoram")
+	AM_RANGE(0x6000, 0x7fff) AM_RAM_WRITE(magicram_w) AM_SHARE("videoram")
+	AM_RANGE(0x8000, 0x87ff) AM_MIRROR(0x3800) AM_RAM AM_SHARE("colorram")
 	AM_RANGE(0xc000, 0xffff) AM_NOP
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( frenzy_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( frenzy_map, AS_PROGRAM, 8, berzerk_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
-	AM_RANGE(0x4000, 0x5fff) AM_RAM AM_BASE_MEMBER(berzerk_state, m_videoram) AM_SIZE_MEMBER(berzerk_state, m_videoram_size) AM_SHARE("share1")
-	AM_RANGE(0x6000, 0x7fff) AM_RAM_WRITE(magicram_w) AM_SHARE("share1")
-	AM_RANGE(0x8000, 0x87ff) AM_MIRROR(0x3800) AM_RAM AM_BASE_MEMBER(berzerk_state, m_colorram)
+	AM_RANGE(0x4000, 0x5fff) AM_RAM AM_SHARE("videoram")
+	AM_RANGE(0x6000, 0x7fff) AM_RAM_WRITE(magicram_w) AM_SHARE("videoram")
+	AM_RANGE(0x8000, 0x87ff) AM_MIRROR(0x3800) AM_RAM AM_SHARE("colorram")
 	AM_RANGE(0xc000, 0xcfff) AM_ROM
 	AM_RANGE(0xf800, 0xfbff) AM_MIRROR(0x0400) AM_RAM AM_SHARE("nvram")
 ADDRESS_MAP_END
@@ -612,7 +624,7 @@ ADDRESS_MAP_END
  *
  *************************************/
 
-static ADDRESS_MAP_START( berzerk_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( berzerk_io_map, AS_IO, 8, berzerk_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0x3f) AM_NOP
 	AM_RANGE(0x40, 0x47) AM_READWRITE(berzerk_audio_r, berzerk_audio_w)
@@ -704,16 +716,16 @@ static INPUT_PORTS_START( common ) // used on all games
 
 	PORT_START("SW2")
 	/* port for the 'bookkeeping reset' and 'bookkeeping' buttons;
-     * The 'bookkeeping reset' button is an actual button on the zpu-1000 and
-     * zpu-1001 pcbs, labeled 'S2' or 'SW2'. It is wired to bit 0.
-     * * pressing it while high scores are displayed will give a free game
-     *   without adding any coin info to the bookkeeping info in nvram.
-     * The 'bookkeeping' button is wired to the control panel, usually hidden
-     * underneath or only accessible through the coin door. Wired to bit 7.
-     * * It displays various bookkeeping statistics when pressed sequentially.
-     *   Pressing P1 fire (according to the manual) when stats are displayed
-     *   will clear the stat shown on screen.
-     */
+	 * The 'bookkeeping reset' button is an actual button on the zpu-1000 and
+	 * zpu-1001 pcbs, labeled 'S2' or 'SW2'. It is wired to bit 0.
+	 * * pressing it while high scores are displayed will give a free game
+	 *   without adding any coin info to the bookkeeping info in nvram.
+	 * The 'bookkeeping' button is wired to the control panel, usually hidden
+	 * underneath or only accessible through the coin door. Wired to bit 7.
+	 * * It displays various bookkeeping statistics when pressed sequentially.
+	 *   Pressing P1 fire (according to the manual) when stats are displayed
+	 *   will clear the stat shown on screen.
+	 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SERVICE1 ) PORT_NAME("Free Game (not logged in bookkeeping)")
 	PORT_BIT( 0x7e, IP_ACTIVE_LOW,  IPT_UNUSED )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SERVICE2 ) PORT_NAME("Bookkeeping") PORT_CODE(KEYCODE_F1)
@@ -782,8 +794,8 @@ static INPUT_PORTS_START( frenzy )
 
 	PORT_START("F2")
 	/* Bit 0 does some more hardware tests. According to the manual, both bit 0 & 1 must be:
-       - ON for Signature Analysis (S.A.)
-       - OFF for game operation     */
+	   - ON for Signature Analysis (S.A.)
+	   - OFF for game operation     */
 	//PORT_BIT( 0x03, IP_ACTIVE_HIGH, IPT_UNUSED )  // F2:1,2
 	PORT_DIPNAME( 0x03, 0x00, "Hardware Tests" ) PORT_DIPLOCATION("F2:1,2")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
@@ -885,40 +897,38 @@ static INPUT_PORTS_START( frenzy )
 	PORT_DIPSETTING(    0xff, "255" )
 INPUT_PORTS_END
 
-static READ8_HANDLER( moonwarp_p1_r )
+READ8_MEMBER(berzerk_state::moonwarp_p1_r)
 {
-	berzerk_state *state = space->machine().driver_data<berzerk_state>();
 	// This seems to be the same type of dial as the later 'moon war 2' set uses
 	// see http://www.cityofberwyn.com/schematics/stern/MoonWar_opto.tiff for schematic
 	// I.e. a 74ls161 counts from 0 to 15 which is the absolute number of bars passed on the quadrature
 	// one difference is it lacks the strobe input (does it?), which if not active causes
 	// the dial input to go open bus. This is used in moon war 2 to switch between player 1
 	// and player 2 dials, which share a single port. moonwarp uses separate ports for the dials.
-	signed char dialread = input_port_read(space->machine(),"P1_DIAL");
+	signed char dialread = ioport("P1_DIAL")->read();
 	UINT8 ret;
-	UINT8 buttons = (input_port_read(space->machine(),"P1")&0xe0);
-	if (dialread < 0) state->m_p1_direction = 0;
-	else if (dialread > 0) state->m_p1_direction = 0x10;
-	state->m_p1_counter_74ls161 += abs(dialread);
-	state->m_p1_counter_74ls161 &= 0xf;
-	ret = state->m_p1_counter_74ls161 | state->m_p1_direction | buttons;
-	//fprintf(stderr, "dialread1: %02x, p1_counter_74ls161: %02x, spinner ret is %02x\n", dialread, state->m_p1_counter_74ls161, ret);
+	UINT8 buttons = (ioport("P1")->read()&0xe0);
+	if (dialread < 0) m_p1_direction = 0;
+	else if (dialread > 0) m_p1_direction = 0x10;
+	m_p1_counter_74ls161 += abs(dialread);
+	m_p1_counter_74ls161 &= 0xf;
+	ret = m_p1_counter_74ls161 | m_p1_direction | buttons;
+	//fprintf(stderr, "dialread1: %02x, p1_counter_74ls161: %02x, spinner ret is %02x\n", dialread, m_p1_counter_74ls161, ret);
 	return ret;
 }
 
-static READ8_HANDLER( moonwarp_p2_r )
+READ8_MEMBER(berzerk_state::moonwarp_p2_r)
 {
-	berzerk_state *state = space->machine().driver_data<berzerk_state>();
 	// same as above, but for player 2 in cocktail mode
-	signed char dialread = input_port_read(space->machine(),"P2_DIAL");
+	signed char dialread = ioport("P2_DIAL")->read();
 	UINT8 ret;
-	UINT8 buttons = (input_port_read(space->machine(),"P2")&0xe0);
-	if (dialread < 0) state->m_p2_direction = 0;
-	else if (dialread > 0) state->m_p2_direction = 0x10;
-	state->m_p2_counter_74ls161 += abs(dialread);
-	state->m_p2_counter_74ls161 &= 0xf;
-	ret = state->m_p2_counter_74ls161 | state->m_p2_direction | buttons;
-	//fprintf(stderr, "dialread2: %02x, p2_counter_74ls161: %02x, spinner ret is %02x\n", dialread, state->m_p2_counter_74ls161, ret);
+	UINT8 buttons = (ioport("P2")->read()&0xe0);
+	if (dialread < 0) m_p2_direction = 0;
+	else if (dialread > 0) m_p2_direction = 0x10;
+	m_p2_counter_74ls161 += abs(dialread);
+	m_p2_counter_74ls161 &= 0xf;
+	ret = m_p2_counter_74ls161 | m_p2_direction | buttons;
+	//fprintf(stderr, "dialread2: %02x, p2_counter_74ls161: %02x, spinner ret is %02x\n", dialread, m_p2_counter_74ls161, ret);
 	return ret;
 }
 
@@ -936,7 +946,7 @@ static INPUT_PORTS_START( moonwarp )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 )
 
 	PORT_START("P1_DIAL")
-    PORT_BIT( 0xff, 0x0, IPT_DIAL ) PORT_SENSITIVITY(25) PORT_KEYDELTA(4) PORT_RESET
+	PORT_BIT( 0xff, 0x0, IPT_DIAL ) PORT_SENSITIVITY(25) PORT_KEYDELTA(4) PORT_RESET
 
 	PORT_START("P2")
 	//PORT_BIT( 0x1f, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_COCKTAIL // spinner/dial
@@ -945,7 +955,7 @@ static INPUT_PORTS_START( moonwarp )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
 
 	PORT_START("P2_DIAL")
-    PORT_BIT( 0xff, 0x0, IPT_DIAL ) PORT_SENSITIVITY(25) PORT_KEYDELTA(4) PORT_COCKTAIL PORT_RESET
+	PORT_BIT( 0xff, 0x0, IPT_DIAL ) PORT_SENSITIVITY(25) PORT_KEYDELTA(4) PORT_COCKTAIL PORT_RESET
 
 	PORT_START("F2")
 	PORT_DIPNAME( 0x03, 0x00, "Hardware Tests" ) PORT_DIPLOCATION("F2:1,2")
@@ -1075,25 +1085,21 @@ static MACHINE_CONFIG_START( berzerk, berzerk_state )
 	MCFG_CPU_PROGRAM_MAP(berzerk_map)
 	MCFG_CPU_IO_MAP(berzerk_io_map)
 
-	MCFG_MACHINE_START(berzerk)
-	MCFG_MACHINE_RESET(berzerk)
 
 	MCFG_NVRAM_ADD_0FILL("nvram")
 
 	/* video hardware */
-	MCFG_VIDEO_START(berzerk)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
 	MCFG_SCREEN_RAW_PARAMS(PIXEL_CLOCK, HTOTAL, HBEND, HBSTART, VTOTAL, VBEND, VBSTART)
-	MCFG_SCREEN_UPDATE(berzerk)
+	MCFG_SCREEN_UPDATE_DRIVER(berzerk_state, screen_update_berzerk)
 
 	/* audio hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
 	MCFG_SOUND_RESET(berzerk)
 
-	MCFG_SOUND_ADD("speech", S14001A, 0)	/* placeholder - the clock is software controllable */
+	MCFG_SOUND_ADD("speech", S14001A, 0)    /* placeholder - the clock is software controllable */
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 
 	MCFG_SOUND_ADD("exidy", EXIDY, 0)
@@ -1116,51 +1122,70 @@ MACHINE_CONFIG_END
  *
  *************************************/
 
+/*
+
+Sound roms for Berzerk / Frenzy have been found labeled as:
+
+BERZERK        BERZERK
+R VO 1C        R VO 2C
+1980  STERN    1980  STERN
+
+as well as
+
+E169-1CVO      E169-2CVO
+RVO 1C (-9)    RVO 2C (-9)
+1982  STERN    1982  STERN
+
+Both sets of roms contain the same data.
+
+We need to have actual verfied rom labels for all the sets below (other then voice roms :-)
+
+*/
+
 ROM_START( berzerk )
 	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD( "1c-0",         0x0000, 0x0800, CRC(ca566dbc) SHA1(fae2647f12f1cd82826db61b53b116a5e0c9f995) )
-	ROM_LOAD( "1d-1",         0x1000, 0x0800, CRC(7ba69fde) SHA1(69af170c4a39a3494dcd180737e5c87b455f9203) )
-	ROM_LOAD( "3d-2",         0x1800, 0x0800, CRC(a1d5248b) SHA1(a0b7842f6a5f86c16d80d78e7012c78b3ea11d1d) )
-	ROM_LOAD( "5d-3",         0x2000, 0x0800, CRC(fcaefa95) SHA1(07f849aa39f1e3db938187ffde4a46a588156ddc) )
-	ROM_LOAD( "6d-4",         0x2800, 0x0800, CRC(1e35b9a0) SHA1(5a5e549ec0e4803ab2d1eac6b3e7171aedf28244) )
-	ROM_LOAD( "5c-5",         0x3000, 0x0800, CRC(c8c665e5) SHA1(e9eca4b119549e0061384abf52327c14b0d56624) )
-	ROM_FILL( 0x3800, 0x0800, 0xff )
+	ROM_LOAD( "1c-0", 0x0000, 0x0800, CRC(ca566dbc) SHA1(fae2647f12f1cd82826db61b53b116a5e0c9f995) )
+	ROM_LOAD( "1d-1", 0x1000, 0x0800, CRC(7ba69fde) SHA1(69af170c4a39a3494dcd180737e5c87b455f9203) )
+	ROM_LOAD( "3d-2", 0x1800, 0x0800, CRC(a1d5248b) SHA1(a0b7842f6a5f86c16d80d78e7012c78b3ea11d1d) )
+	ROM_LOAD( "5d-3", 0x2000, 0x0800, CRC(fcaefa95) SHA1(07f849aa39f1e3db938187ffde4a46a588156ddc) )
+	ROM_LOAD( "6d-4", 0x2800, 0x0800, CRC(1e35b9a0) SHA1(5a5e549ec0e4803ab2d1eac6b3e7171aedf28244) )
+	ROM_LOAD( "5c-5", 0x3000, 0x0800, CRC(c8c665e5) SHA1(e9eca4b119549e0061384abf52327c14b0d56624) )
+	ROM_FILL(         0x3800, 0x0800, 0xff )
 
 	ROM_REGION( 0x01000, "speech", 0 ) /* voice data */
-	ROM_LOAD( "1c",           0x0000, 0x0800, CRC(2cfe825d) SHA1(f12fed8712f20fa8213f606c4049a8144bfea42e) )	/* VSU-1000 board */
-	ROM_LOAD( "2c",           0x0800, 0x0800, CRC(d2b6324e) SHA1(20a6611ad6ec19409ac138bdae7bdfaeab6c47cf) )
+	ROM_LOAD( "berzerk_r_vo_1c.1c", 0x0000, 0x0800, CRC(2cfe825d) SHA1(f12fed8712f20fa8213f606c4049a8144bfea42e) )  /* VSU-1000 board */
+	ROM_LOAD( "berzerk_r_vo_2c.2c", 0x0800, 0x0800, CRC(d2b6324e) SHA1(20a6611ad6ec19409ac138bdae7bdfaeab6c47cf) )  /* ditto */
 ROM_END
 
 ROM_START( berzerk1 )
 	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD( "rom0.1c",      0x0000, 0x0800, CRC(5b7eb77d) SHA1(8de488e279036fe40d6fb4c0dde16075309342fd) )
-	ROM_LOAD( "rom1.1d",      0x1000, 0x0800, CRC(e58c8678) SHA1(a11f08448b457d690b270512c9f02fcf1e41d9e0) )
-	ROM_LOAD( "rom2.3d",      0x1800, 0x0800, CRC(705bb339) SHA1(845191df90cd7d80f8fed3d2b69305301d921549) )
-	ROM_LOAD( "rom3.5d",      0x2000, 0x0800, CRC(6a1936b4) SHA1(f1635e9d2f25514c35559d2a247c3bc4b4034c19) )
-	ROM_LOAD( "rom4.6d",      0x2800, 0x0800, CRC(fa5dce40) SHA1(b3a3ee52bf65bbb3a20f905d3e4ebdf6871dcb5d) )
-	ROM_LOAD( "rom5.5c",      0x3000, 0x0800, CRC(2579b9f4) SHA1(890f0237afbb194166eae88c98de81989f408548) )
-	ROM_FILL( 0x3800, 0x0800, 0xff )
+	ROM_LOAD( "rom0.1c", 0x0000, 0x0800, CRC(5b7eb77d) SHA1(8de488e279036fe40d6fb4c0dde16075309342fd) )
+	ROM_LOAD( "rom1.1d", 0x1000, 0x0800, CRC(e58c8678) SHA1(a11f08448b457d690b270512c9f02fcf1e41d9e0) )
+	ROM_LOAD( "rom2.3d", 0x1800, 0x0800, CRC(705bb339) SHA1(845191df90cd7d80f8fed3d2b69305301d921549) )
+	ROM_LOAD( "rom3.5d", 0x2000, 0x0800, CRC(6a1936b4) SHA1(f1635e9d2f25514c35559d2a247c3bc4b4034c19) )
+	ROM_LOAD( "rom4.6d", 0x2800, 0x0800, CRC(fa5dce40) SHA1(b3a3ee52bf65bbb3a20f905d3e4ebdf6871dcb5d) )
+	ROM_LOAD( "rom5.5c", 0x3000, 0x0800, CRC(2579b9f4) SHA1(890f0237afbb194166eae88c98de81989f408548) )
+	ROM_FILL(            0x3800, 0x0800, 0xff )
 
 	ROM_REGION( 0x01000, "speech", 0 ) /* voice data */
-	ROM_LOAD( "1c",           0x0000, 0x0800, CRC(2cfe825d) SHA1(f12fed8712f20fa8213f606c4049a8144bfea42e) )	/* VSU-1000 board */
-	ROM_LOAD( "2c",           0x0800, 0x0800, CRC(d2b6324e) SHA1(20a6611ad6ec19409ac138bdae7bdfaeab6c47cf) )
+	ROM_LOAD( "berzerk_r_vo_1c.1c", 0x0000, 0x0800, CRC(2cfe825d) SHA1(f12fed8712f20fa8213f606c4049a8144bfea42e) )  /* VSU-1000 board */
+	ROM_LOAD( "berzerk_r_vo_2c.2c", 0x0800, 0x0800, CRC(d2b6324e) SHA1(20a6611ad6ec19409ac138bdae7bdfaeab6c47cf) )  /* ditto */
 ROM_END
 
 ROM_START( berzerkg )
 	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD( "cpu rom 00.bin",      0x0000, 0x0800, CRC(77923a9e) SHA1(3760800b7aa1245f2141897b2406f0f5af5a8d71) )
-	ROM_LOAD( "cpu rom 01.bin",      0x1000, 0x0800, CRC(19bb3aac) SHA1(11341521fd880d55ea01bceb4a321ec571f0b759) )
-	ROM_LOAD( "cpu rom 02.bin",      0x1800, 0x0800, CRC(b0888ff7) SHA1(ac76400482fe37b6c8e309cd9b10855dac86ed24) )
-	ROM_LOAD( "cpu rom 03.bin",      0x2000, 0x0800, CRC(e23239a9) SHA1(a0505efdee4cb1962243638c641e94983673f70f) )
-	ROM_LOAD( "cpu rom 04.bin",      0x2800, 0x0800, CRC(651b31b7) SHA1(890f424a5a73a95af642435c1b0cca78a9413aae) )
-	ROM_LOAD( "cpu rom 05.bin",      0x3000, 0x0800, CRC(8a403bba) SHA1(686a9b58a245df6c947d14991a2e4cbaf511e2ca) )
-	ROM_FILL( 0x3800, 0x0800, 0xff )
+	ROM_LOAD( "cpu rom 00.1c", 0x0000, 0x0800, CRC(77923a9e) SHA1(3760800b7aa1245f2141897b2406f0f5af5a8d71) )
+	ROM_LOAD( "cpu rom 01.1d", 0x1000, 0x0800, CRC(19bb3aac) SHA1(11341521fd880d55ea01bceb4a321ec571f0b759) )
+	ROM_LOAD( "cpu rom 02.3d", 0x1800, 0x0800, CRC(b0888ff7) SHA1(ac76400482fe37b6c8e309cd9b10855dac86ed24) )
+	ROM_LOAD( "cpu rom 03.5d", 0x2000, 0x0800, CRC(e23239a9) SHA1(a0505efdee4cb1962243638c641e94983673f70f) )
+	ROM_LOAD( "cpu rom 04.6d", 0x2800, 0x0800, CRC(651b31b7) SHA1(890f424a5a73a95af642435c1b0cca78a9413aae) )
+	ROM_LOAD( "cpu rom 05.5c", 0x3000, 0x0800, CRC(8a403bba) SHA1(686a9b58a245df6c947d14991a2e4cbaf511e2ca) )
+	ROM_FILL(                  0x3800, 0x0800, 0xff )
 
 	ROM_REGION( 0x01000, "speech", 0 ) /* voice data */
-	ROM_LOAD( "snd rom 1c.bin",           0x0000, 0x0800, CRC(fc1da15f) SHA1(f759a017d9e95acf0e1d35b16d8820acee7d7e3d) )	/* VSU-1000 board */
-	ROM_LOAD( "snd rom 2c.bin",           0x0800, 0x0800, CRC(7f6808fb) SHA1(8a9c43597f924221f68d1b31e033f1dc492cddc5) )
+	ROM_LOAD( "berzerk_german_1c.1c", 0x0000, 0x0800, CRC(fc1da15f) SHA1(f759a017d9e95acf0e1d35b16d8820acee7d7e3d) )    /* VSU-1000 board */
+	ROM_LOAD( "berzerk_german_2c.2c", 0x0800, 0x0800, CRC(7f6808fb) SHA1(8a9c43597f924221f68d1b31e033f1dc492cddc5) )    /* ditto */
 ROM_END
-
 
 
 ROM_START( frenzy )
@@ -1172,8 +1197,8 @@ ROM_START( frenzy )
 	ROM_LOAD( "6d-4",         0xc000, 0x1000, CRC(5581a7b1) SHA1(1f633c1c29d3b64f701c601feba26da66a6c6f23) )
 
 	ROM_REGION( 0x01000, "speech", 0 ) /* voice data */
-	ROM_LOAD( "1c",           0x0000, 0x0800, CRC(2cfe825d) SHA1(f12fed8712f20fa8213f606c4049a8144bfea42e) )	/* VSU-1000 board */
-	ROM_LOAD( "2c",           0x0800, 0x0800, CRC(d2b6324e) SHA1(20a6611ad6ec19409ac138bdae7bdfaeab6c47cf) )        /* ditto */
+	ROM_LOAD( "e169-1cvo.1c", 0x0000, 0x0800, CRC(2cfe825d) SHA1(f12fed8712f20fa8213f606c4049a8144bfea42e) )    /* VSU-1000 board */
+	ROM_LOAD( "e169-2cvo.2c", 0x0800, 0x0800, CRC(d2b6324e) SHA1(20a6611ad6ec19409ac138bdae7bdfaeab6c47cf) )    /* ditto */
 
 	ROM_REGION( 0x0020, "proms", 0 )
 	ROM_LOAD( "prom.6e",      0x0000, 0x0020, CRC(4471ca5d) SHA1(ba8dca2ec076818f8ad8c17b15c77965e36fa05e) ) /* address decoder/rom select prom (N82S123N) */
@@ -1199,7 +1224,7 @@ ROM_START( moonwarp )
 	ROM_LOAD( "5c.bin",      0xc000, 0x1000, CRC(a3d551ab) SHA1(a32352727b5475a6ec6c495c55f01ccd6e024f98) )
 
 	ROM_REGION( 0x01000, "speech", 0 ) /* voice data */
-	ROM_LOAD( "moonwar.1c.bin",           0x0000, 0x0800, CRC(9e9a653f) SHA1(cf49a38ef343ace271ba1e5dde38bd8b9c0bd876) )	/* VSU-1000 board */
+	ROM_LOAD( "moonwar.1c.bin",           0x0000, 0x0800, CRC(9e9a653f) SHA1(cf49a38ef343ace271ba1e5dde38bd8b9c0bd876) )    /* VSU-1000 board */
 	ROM_LOAD( "moonwar.2c.bin",           0x0800, 0x0800, CRC(73fd988d) SHA1(08a2aeb4d87eee58e38e4e3f749a95f2308aceb0) )    /* ditto */
 
 	ROM_REGION( 0x0020, "proms", 0 )
@@ -1207,11 +1232,11 @@ ROM_START( moonwarp )
 	ROM_LOAD( "prom.6e",        0x0000, 0x0020, CRC(56bffba3) SHA1(c8e24f6361c50bcb4c9d3f39cdaf4172c2a2b318) ) /* address decoder/rom select prom - from the sound rom only set, is it bad? */
 ROM_END
 
-static DRIVER_INIT( moonwarp )
+DRIVER_INIT_MEMBER(berzerk_state,moonwarp)
 {
-	address_space *io = machine.device("maincpu")->memory().space(AS_IO);
-	io->install_legacy_read_handler (0x48, 0x48, FUNC(moonwarp_p1_r));
-	io->install_legacy_read_handler (0x4a, 0x4a, FUNC(moonwarp_p2_r));
+	address_space &io = machine().device("maincpu")->memory().space(AS_IO);
+	io.install_read_handler (0x48, 0x48, read8_delegate(FUNC(berzerk_state::moonwarp_p1_r), this));
+	io.install_read_handler (0x4a, 0x4a, read8_delegate(FUNC(berzerk_state::moonwarp_p2_r), this));
 }
 
 /*************************************
@@ -1220,8 +1245,8 @@ static DRIVER_INIT( moonwarp )
  *
  *************************************/
 
-GAME( 1980, berzerk,  0,       berzerk, berzerk, 0, ROT0, "Stern Electronics", "Berzerk (set 1)", 0 )
-GAME( 1980, berzerk1, berzerk, berzerk, berzerk, 0, ROT0, "Stern Electronics", "Berzerk (set 2)", 0 )
-GAME( 1980, berzerkg, berzerk, berzerk, berzerkg,0, ROT0, "Stern Electronics", "Berzerk (German Speech)", 0 )
-GAME( 1981, frenzy,   0,       frenzy,  frenzy,  0, ROT0, "Stern Electronics", "Frenzy", 0 )
-GAME( 1981, moonwarp, 0,       frenzy,  moonwarp,moonwarp, ROT0, "Stern Electronics", "Moon War (prototype on Frenzy hardware)", 0)
+GAME( 1980, berzerk,  0,       berzerk, berzerk, driver_device, 0, ROT0, "Stern Electronics", "Berzerk (set 1)", 0 )
+GAME( 1980, berzerk1, berzerk, berzerk, berzerk, driver_device, 0, ROT0, "Stern Electronics", "Berzerk (set 2)", 0 )
+GAME( 1980, berzerkg, berzerk, berzerk, berzerkg, driver_device,0, ROT0, "Stern Electronics", "Berzerk (German Speech)", 0 )
+GAME( 1981, frenzy,   0,       frenzy,  frenzy, driver_device,  0, ROT0, "Stern Electronics", "Frenzy", 0 )
+GAME( 1981, moonwarp, 0,       frenzy,  moonwarp, berzerk_state,moonwarp, ROT0, "Stern Electronics", "Moon War (prototype on Frenzy hardware)", 0)

@@ -16,122 +16,116 @@
  for writes to Video Ram
 *******************************************************************************/
 
-WRITE16_HANDLER( wwfwfest_fg0_videoram_w )
+WRITE16_MEMBER(wwfwfest_state::wwfwfest_fg0_videoram_w)
 {
-	wwfwfest_state *state = space->machine().driver_data<wwfwfest_state>();
 	/* Videoram is 8 bit, upper & lower byte writes end up in the same place */
 	if (ACCESSING_BITS_8_15 && ACCESSING_BITS_0_7) {
-		COMBINE_DATA(&state->m_fg0_videoram[offset]);
+		COMBINE_DATA(&m_fg0_videoram[offset]);
 	} else if (ACCESSING_BITS_8_15) {
-		state->m_fg0_videoram[offset]=(data>>8)&0xff;
+		m_fg0_videoram[offset]=(data>>8)&0xff;
 	} else {
-		state->m_fg0_videoram[offset]=data&0xff;
+		m_fg0_videoram[offset]=data&0xff;
 	}
 
-	tilemap_mark_tile_dirty(state->m_fg0_tilemap,offset/2);
+	m_fg0_tilemap->mark_tile_dirty(offset/2);
 }
 
-WRITE16_HANDLER( wwfwfest_bg0_videoram_w )
+WRITE16_MEMBER(wwfwfest_state::wwfwfest_bg0_videoram_w)
 {
-	wwfwfest_state *state = space->machine().driver_data<wwfwfest_state>();
-	COMBINE_DATA(&state->m_bg0_videoram[offset]);
-	tilemap_mark_tile_dirty(state->m_bg0_tilemap,offset/2);
+	COMBINE_DATA(&m_bg0_videoram[offset]);
+	m_bg0_tilemap->mark_tile_dirty(offset/2);
 }
 
-WRITE16_HANDLER( wwfwfest_bg1_videoram_w )
+WRITE16_MEMBER(wwfwfest_state::wwfwfest_bg1_videoram_w)
 {
-	wwfwfest_state *state = space->machine().driver_data<wwfwfest_state>();
-	COMBINE_DATA(&state->m_bg1_videoram[offset]);
-	tilemap_mark_tile_dirty(state->m_bg1_tilemap,offset);
+	COMBINE_DATA(&m_bg1_videoram[offset]);
+	m_bg1_tilemap->mark_tile_dirty(offset);
 }
 
 /*******************************************************************************
  Tilemap Related Functions
 *******************************************************************************/
-static TILE_GET_INFO( get_fg0_tile_info )
+TILE_GET_INFO_MEMBER(wwfwfest_state::get_fg0_tile_info)
 {
-	wwfwfest_state *state = machine.driver_data<wwfwfest_state>();
 	/*- FG0 RAM Format -**
 
-      4 bytes per tile
+	  4 bytes per tile
 
-      ---- ----  tttt tttt  ---- ----  ???? TTTT
+	  ---- ----  tttt tttt  ---- ----  ???? TTTT
 
-      C = Colour Bank (0-15)
-      T = Tile Number (0 - 4095)
+	  C = Colour Bank (0-15)
+	  T = Tile Number (0 - 4095)
 
-      other bits unknown / unused
+	  other bits unknown / unused
 
-      basically the same as WWF Superstar's FG0 Ram but
-      more of it and the used bytes the other way around
+	  basically the same as WWF Superstar's FG0 Ram but
+	  more of it and the used bytes the other way around
 
-    **- End of Comments -*/
+	**- End of Comments -*/
 
 	UINT16 *tilebase;
 	int tileno;
 	int colbank;
-	tilebase =  &state->m_fg0_videoram[tile_index*2];
+	tilebase =  &m_fg0_videoram[tile_index*2];
 	tileno =  (tilebase[0] & 0x00ff) | ((tilebase[1] & 0x000f) << 8);
 	colbank = (tilebase[1] & 0x00f0) >> 4;
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			0,
 			tileno,
 			colbank,
 			0);
 }
 
-static TILE_GET_INFO( get_bg0_tile_info )
+TILE_GET_INFO_MEMBER(wwfwfest_state::get_bg0_tile_info)
 {
-	wwfwfest_state *state = machine.driver_data<wwfwfest_state>();
 	/*- BG0 RAM Format -**
 
-      4 bytes per tile
+	  4 bytes per tile
 
-      ---- ----  fF-- CCCC  ---- TTTT tttt tttt
+	  ---- ----  fF-- CCCC  ---- TTTT tttt tttt
 
-      C = Colour Bank (0-15)
-      T = Tile Number (0 - 4095)
-      f = Flip Y
-      F = Flip X
+	  C = Colour Bank (0-15)
+	  T = Tile Number (0 - 4095)
+	  f = Flip Y
+	  F = Flip X
 
-      other bits unknown / unused
+	  other bits unknown / unused
 
-    **- End of Comments -*/
+	**- End of Comments -*/
 
 	UINT16 *tilebase;
 	int tileno,colbank;
 
-	tilebase =  &state->m_bg0_videoram[tile_index*2];
+	tilebase =  &m_bg0_videoram[tile_index*2];
 	tileno =  (tilebase[1] & 0x0fff);
 	colbank = (tilebase[0] & 0x000f);
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			2,
 			tileno,
 			colbank,
 			TILE_FLIPYX((tilebase[0] & 0x00c0) >> 6));
 }
 
-static TILE_GET_INFO( get_bg1_tile_info )
+TILE_GET_INFO_MEMBER(wwfwfest_state::get_bg1_tile_info)
 {
-	wwfwfest_state *state = machine.driver_data<wwfwfest_state>();
 	/*- BG1 RAM Format -**
 
-      2 bytes per tile
+	  2 bytes per tile
 
-      CCCC TTTT tttt tttt
+	  CCCC TTTT tttt tttt
 
-      C = Colour Bank (0-15)
-      T = Tile Number (0 - 4095)
+	  C = Colour Bank (0-15)
+	  T = Tile Number (0 - 4095)
 
-    **- End of Comments -*/
+	**- End of Comments -*/
 
 	UINT16 *tilebase;
 	int tileno;
 	int colbank;
-	tilebase =  &state->m_bg1_videoram[tile_index];
+	tilebase =  &m_bg1_videoram[tile_index];
 	tileno =  (tilebase[0] & 0x0fff);
 	colbank = (tilebase[0] & 0xf000) >> 12;
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			3,
 			tileno,
 			colbank,
@@ -144,31 +138,31 @@ static TILE_GET_INFO( get_bg1_tile_info )
  sprite drawing could probably be improved a bit
 *******************************************************************************/
 
-static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_sprites(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	wwfwfest_state *state = machine.driver_data<wwfwfest_state>();
 	/*- SPR RAM Format -**
 
-      16 bytes per sprite
+	  16 bytes per sprite
 
-      ---- ----  yyyy yyyy  ---- ----  lllF fXYE  ---- ----  nnnn nnnn  ---- ----  NNNN NNNN
-      ---- ----  ---- CCCC  ---- ----  xxxx xxxx  ---- ----  ---- ----  ---- ----  ---- ----
+	  ---- ----  yyyy yyyy  ---- ----  lllF fXYE  ---- ----  nnnn nnnn  ---- ----  NNNN NNNN
+	  ---- ----  ---- CCCC  ---- ----  xxxx xxxx  ---- ----  ---- ----  ---- ----  ---- ----
 
-      Yy = sprite Y Position
-      Xx = sprite X Position
-      C  = colour bank
-      f  = flip Y
-      F  = flip X
-      l  = chain sprite
-      E  = sprite enable
-      Nn = Sprite Number
+	  Yy = sprite Y Position
+	  Xx = sprite X Position
+	  C  = colour bank
+	  f  = flip Y
+	  F  = flip X
+	  l  = chain sprite
+	  E  = sprite enable
+	  Nn = Sprite Number
 
-      other bits unused
+	  other bits unused
 
-    **- End of Comments -*/
+	**- End of Comments -*/
 
-	UINT16 *buffered_spriteram16 = machine.generic.buffered_spriteram.u16;
-	const gfx_element *gfx = machine.gfx[1];
+	UINT16 *buffered_spriteram16 = state->m_spriteram->buffer();
+	gfx_element *gfx = machine.gfx[1];
 	UINT16 *source = buffered_spriteram16;
 	UINT16 *finish = source + 0x2000/2;
 
@@ -178,7 +172,7 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 
 		enable = (source[1] & 0x0001);
 
-		if (enable)	{
+		if (enable) {
 			xpos = +(source[5] & 0x00ff) | (source[1] & 0x0004) << 6;
 			if (xpos>512-16) xpos -=512;
 			xpos += state->m_sprite_xoff;
@@ -192,7 +186,7 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 			number = (source[2] & 0x00ff) | (source[3] & 0x00ff) << 8;
 			colourbank = (source[4] & 0x000f);
 
-			if (flip_screen_get(machine)) {
+			if (state->flip_screen()) {
 				if (flipy) flipy=0; else flipy=1;
 				if (flipx) flipx=0; else flipx=1;
 				ypos=240-ypos-state->m_sprite_xoff;
@@ -200,7 +194,7 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 			}
 
 			for (count=0;count<chain;count++) {
-				if (flip_screen_get(machine)) {
+				if (state->flip_screen()) {
 					if (!flipy) {
 						drawgfx_transpen(bitmap,cliprect,gfx,number+count,colourbank,flipx,flipy,xpos,ypos+(16*(chain-1))-(16*count),0);
 					} else {
@@ -225,72 +219,69 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
  Draw Order / Priority seems to affect where the scroll values are used also.
 *******************************************************************************/
 
-VIDEO_START( wwfwfest )
+void wwfwfest_state::video_start()
 {
-	wwfwfest_state *state = machine.driver_data<wwfwfest_state>();
-    state_save_register_global(machine, state->m_pri);
-    state_save_register_global(machine, state->m_bg0_scrollx);
-    state_save_register_global(machine, state->m_bg0_scrolly);
-    state_save_register_global(machine, state->m_bg1_scrollx);
-    state_save_register_global(machine, state->m_bg1_scrolly);
+	state_save_register_global(machine(), m_pri);
+	state_save_register_global(machine(), m_bg0_scrollx);
+	state_save_register_global(machine(), m_bg0_scrolly);
+	state_save_register_global(machine(), m_bg1_scrollx);
+	state_save_register_global(machine(), m_bg1_scrolly);
 
-	state->m_fg0_tilemap = tilemap_create(machine, get_fg0_tile_info,tilemap_scan_rows, 8, 8,64,32);
-	state->m_bg1_tilemap = tilemap_create(machine, get_bg1_tile_info,tilemap_scan_rows, 16, 16,32,32);
-	state->m_bg0_tilemap = tilemap_create(machine, get_bg0_tile_info,tilemap_scan_rows, 16, 16,32,32);
+	m_fg0_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(wwfwfest_state::get_fg0_tile_info),this),TILEMAP_SCAN_ROWS, 8, 8,64,32);
+	m_bg1_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(wwfwfest_state::get_bg1_tile_info),this),TILEMAP_SCAN_ROWS, 16, 16,32,32);
+	m_bg0_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(wwfwfest_state::get_bg0_tile_info),this),TILEMAP_SCAN_ROWS, 16, 16,32,32);
 
-	tilemap_set_transparent_pen(state->m_fg0_tilemap,0);
-	tilemap_set_transparent_pen(state->m_bg1_tilemap,0);
-	tilemap_set_transparent_pen(state->m_bg0_tilemap,0);
+	m_fg0_tilemap->set_transparent_pen(0);
+	m_bg1_tilemap->set_transparent_pen(0);
+	m_bg0_tilemap->set_transparent_pen(0);
 
-	state->m_sprite_xoff = state->m_bg0_dx = state->m_bg1_dx[0] = state->m_bg1_dx[1] = 0;
+	m_sprite_xoff = m_bg0_dx = m_bg1_dx[0] = m_bg1_dx[1] = 0;
 }
 
-VIDEO_START( wwfwfstb )
+VIDEO_START_MEMBER(wwfwfest_state,wwfwfstb)
 {
-	wwfwfest_state *state = machine.driver_data<wwfwfest_state>();
-	VIDEO_START_CALL(wwfwfest);
+	wwfwfest_state::video_start();
 
-	state->m_sprite_xoff = 2;
-	state->m_bg0_dx = state->m_bg1_dx[0] = -4;
-	state->m_bg1_dx[1] = -2;
+	m_sprite_xoff = 2;
+	m_bg0_dx = m_bg1_dx[0] = -4;
+	m_bg1_dx[1] = -2;
 }
 
-SCREEN_UPDATE( wwfwfest )
+UINT32 wwfwfest_state::screen_update_wwfwfest(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	wwfwfest_state *state = screen->machine().driver_data<wwfwfest_state>();
-	if (state->m_pri == 0x0078) {
-		tilemap_set_scrolly( state->m_bg0_tilemap, 0, state->m_bg0_scrolly  );
-		tilemap_set_scrollx( state->m_bg0_tilemap, 0, state->m_bg0_scrollx  + state->m_bg0_dx);
-		tilemap_set_scrolly( state->m_bg1_tilemap, 0, state->m_bg1_scrolly  );
-		tilemap_set_scrollx( state->m_bg1_tilemap, 0, state->m_bg1_scrollx  + state->m_bg1_dx[0]);
+	if (m_pri == 0x0078) {
+		m_bg0_tilemap->set_scrolly(0, m_bg0_scrolly  );
+		m_bg0_tilemap->set_scrollx(0, m_bg0_scrollx  + m_bg0_dx);
+		m_bg1_tilemap->set_scrolly(0, m_bg1_scrolly  );
+		m_bg1_tilemap->set_scrollx(0, m_bg1_scrollx  + m_bg1_dx[0]);
 	} else {
-		tilemap_set_scrolly( state->m_bg1_tilemap, 0, state->m_bg0_scrolly  );
-		tilemap_set_scrollx( state->m_bg1_tilemap, 0, state->m_bg0_scrollx  + state->m_bg1_dx[1]);
-		tilemap_set_scrolly( state->m_bg0_tilemap, 0, state->m_bg1_scrolly  );
-		tilemap_set_scrollx( state->m_bg0_tilemap, 0, state->m_bg1_scrollx  + state->m_bg0_dx);
+		m_bg1_tilemap->set_scrolly(0, m_bg0_scrolly  );
+		m_bg1_tilemap->set_scrollx(0, m_bg0_scrollx  + m_bg1_dx[1]);
+		m_bg0_tilemap->set_scrolly(0, m_bg1_scrolly  );
+		m_bg0_tilemap->set_scrollx(0, m_bg1_scrollx  + m_bg0_dx);
 	}
 
 	/* todo : which bits of pri are significant to the order */
 
-	if (state->m_pri == 0x007b) {
-		tilemap_draw(bitmap,cliprect,state->m_bg0_tilemap,TILEMAP_DRAW_OPAQUE,0);
-		tilemap_draw(bitmap,cliprect,state->m_bg1_tilemap,0,0);
-		draw_sprites(screen->machine(), bitmap,cliprect);
-		tilemap_draw(bitmap,cliprect,state->m_fg0_tilemap,0,0);
+	if (m_pri == 0x007b) {
+		m_bg0_tilemap->draw(bitmap, cliprect, TILEMAP_DRAW_OPAQUE,0);
+		m_bg1_tilemap->draw(bitmap, cliprect, 0,0);
+		draw_sprites(machine(), bitmap,cliprect);
+		m_fg0_tilemap->draw(bitmap, cliprect, 0,0);
 	}
 
-	if (state->m_pri == 0x007c) {
-		tilemap_draw(bitmap,cliprect,state->m_bg0_tilemap,TILEMAP_DRAW_OPAQUE,0);
-		draw_sprites(screen->machine(), bitmap,cliprect);
-		tilemap_draw(bitmap,cliprect,state->m_bg1_tilemap,0,0);
-		tilemap_draw(bitmap,cliprect,state->m_fg0_tilemap,0,0);
+	if (m_pri == 0x007c) {
+		m_bg0_tilemap->draw(bitmap, cliprect, TILEMAP_DRAW_OPAQUE,0);
+		draw_sprites(machine(), bitmap,cliprect);
+		m_bg1_tilemap->draw(bitmap, cliprect, 0,0);
+		m_fg0_tilemap->draw(bitmap, cliprect, 0,0);
 	}
 
-	if (state->m_pri == 0x0078) {
-		tilemap_draw(bitmap,cliprect,state->m_bg1_tilemap,TILEMAP_DRAW_OPAQUE,0);
-		tilemap_draw(bitmap,cliprect,state->m_bg0_tilemap,0,0);
-		draw_sprites(screen->machine(), bitmap,cliprect);
-		tilemap_draw(bitmap,cliprect,state->m_fg0_tilemap,0,0);
+	if (m_pri == 0x0078) {
+		m_bg1_tilemap->draw(bitmap, cliprect, TILEMAP_DRAW_OPAQUE,0);
+		m_bg0_tilemap->draw(bitmap, cliprect, 0,0);
+		draw_sprites(machine(), bitmap,cliprect);
+		m_fg0_tilemap->draw(bitmap, cliprect, 0,0);
 	}
 	return 0;
 }

@@ -1,42 +1,66 @@
 /*
     Playmatic MPU 2
 */
+
+
 #include "emu.h"
 #include "cpu/cosmac/cosmac.h"
-
-extern const char layout_pinball[];
 
 class play_2_state : public driver_device
 {
 public:
-	play_2_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	play_2_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+			m_maincpu(*this, "maincpu")
+	{ }
+
+protected:
+
+	// devices
+	required_device<cosmac_device> m_maincpu;
+
+	// driver_device overrides
+	virtual void machine_reset();
+public:
+	DECLARE_DRIVER_INIT(play_2);
 };
 
-static ADDRESS_MAP_START( play_2_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( play_2_map, AS_PROGRAM, 8, play_2_state )
 	AM_RANGE(0x0000, 0xffff) AM_NOP
 ADDRESS_MAP_END
 
 static INPUT_PORTS_START( play_2 )
 INPUT_PORTS_END
 
-static MACHINE_RESET( play_2 )
+void play_2_state::machine_reset()
 {
 }
 
-static DRIVER_INIT( play_2 )
+DRIVER_INIT_MEMBER(play_2_state,play_2)
 {
 }
+
+static COSMAC_INTERFACE( cdp1802_config )
+{
+	DEVCB_NULL,
+	DEVCB_NULL,
+	DEVCB_NULL,
+	DEVCB_NULL,
+	DEVCB_NULL,
+	DEVCB_NULL,
+	DEVCB_NULL,
+	DEVCB_NULL,
+	DEVCB_NULL,
+	NULL,
+	DEVCB_NULL,
+	DEVCB_NULL
+};
 
 static MACHINE_CONFIG_START( play_2, play_2_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", COSMAC, 2950000)
 	MCFG_CPU_PROGRAM_MAP(play_2_map)
-
-	MCFG_MACHINE_RESET( play_2 )
-
-	/* video hardware */
-	MCFG_DEFAULT_LAYOUT(layout_pinball)
+	MCFG_CPU_CONFIG(cdp1802_config)
 MACHINE_CONFIG_END
 
 /*-------------------------------------------------------------------
@@ -107,7 +131,7 @@ ROM_START(evlfight)
 ROM_END
 
 /*-------------------------------------------------------------------
-/ Mad Race (1982)
+/ Mad Race (??/85?)
 /-------------------------------------------------------------------*/
 ROM_START(madrace)
 	ROM_REGION(0x10000, "maincpu", 0)
@@ -220,11 +244,10 @@ ROM_END
 // ??/87 Skill Flight
 
 
-GAME(1979,	antar,		0,	play_2,	play_2,	play_2,	ROT0,	"Playmatic",	"Antar",		GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1979,	antar2,		antar,	play_2,	play_2,	play_2,	ROT0,	"Playmatic",	"Antar (alternate set)",		GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1980,	evlfight,	0,	play_2,	play_2,	play_2,	ROT0,	"Playmatic",	"Evil Fight",	GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1980,	attack,		0,	play_2,	play_2,	play_2,	ROT0,	"Playmatic",	"Attack",	GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1980,	blkfever,	0,	play_2,	play_2,	play_2,	ROT0,	"Playmatic",	"Black Fever",	GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1982,	cerberup,	0,	play_2,	play_2,	play_2,	ROT0,	"Playmatic",	"Cerberus (Pinball)",	GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1982,	madrace,	0,	play_2,	play_2,	play_2,	ROT0,	"Playmatic",	"Mad Race",		GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-
+GAME(1979,  antar,     0,      play_2,  play_2, play_2_state,  play_2,  ROT0,  "Playmatic",    "Antar (set 1)",      GAME_IS_SKELETON_MECHANICAL)
+GAME(1979,  antar2,    antar,  play_2,  play_2, play_2_state,  play_2,  ROT0,  "Playmatic",    "Antar (set 2)",      GAME_IS_SKELETON_MECHANICAL)
+GAME(1980,  evlfight,  0,      play_2,  play_2, play_2_state,  play_2,  ROT0,  "Playmatic",    "Evil Fight",         GAME_IS_SKELETON_MECHANICAL)
+GAME(1980,  attack,    0,      play_2,  play_2, play_2_state,  play_2,  ROT0,  "Playmatic",    "Attack",             GAME_IS_SKELETON_MECHANICAL)
+GAME(1980,  blkfever,  0,      play_2,  play_2, play_2_state,  play_2,  ROT0,  "Playmatic",    "Black Fever",        GAME_IS_SKELETON_MECHANICAL)
+GAME(1982,  cerberup,  0,      play_2,  play_2, play_2_state,  play_2,  ROT0,  "Playmatic",    "Cerberus (Pinball)", GAME_IS_SKELETON_MECHANICAL)
+GAME(1985,  madrace,   0,      play_2,  play_2, play_2_state,  play_2,  ROT0,  "Playmatic",    "Mad Race",           GAME_IS_SKELETON_MECHANICAL)

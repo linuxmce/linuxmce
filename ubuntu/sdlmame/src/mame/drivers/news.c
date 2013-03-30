@@ -19,14 +19,14 @@ driver by David Haywood
 #include "sound/okim6295.h"
 
 
-static ADDRESS_MAP_START( news_map, AS_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0x7fff) AM_ROM 	/* 4000-7fff is written to during startup, probably leftover code */
-	AM_RANGE(0x8000, 0x87ff) AM_RAM_WRITE(news_fgram_w) AM_BASE_MEMBER(news_state, m_fgram)
-	AM_RANGE(0x8800, 0x8fff) AM_RAM_WRITE(news_bgram_w) AM_BASE_MEMBER(news_state, m_bgram)
-	AM_RANGE(0x9000, 0x91ff) AM_RAM_WRITE(paletteram_xxxxRRRRGGGGBBBB_be_w) AM_BASE_GENERIC(paletteram)
+static ADDRESS_MAP_START( news_map, AS_PROGRAM, 8, news_state )
+	AM_RANGE(0x0000, 0x7fff) AM_ROM     /* 4000-7fff is written to during startup, probably leftover code */
+	AM_RANGE(0x8000, 0x87ff) AM_RAM_WRITE(news_fgram_w) AM_SHARE("fgram")
+	AM_RANGE(0x8800, 0x8fff) AM_RAM_WRITE(news_bgram_w) AM_SHARE("bgram")
+	AM_RANGE(0x9000, 0x91ff) AM_RAM_WRITE(paletteram_xxxxRRRRGGGGBBBB_byte_be_w) AM_SHARE("paletteram")
 	AM_RANGE(0xc000, 0xc000) AM_READ_PORT("DSW")
 	AM_RANGE(0xc001, 0xc001) AM_READ_PORT("INPUTS")
-	AM_RANGE(0xc002, 0xc002) AM_DEVREADWRITE_MODERN("oki", okim6295_device, read, write)
+	AM_RANGE(0xc002, 0xc002) AM_DEVREADWRITE("oki", okim6295_device, read, write)
 	AM_RANGE(0xc003, 0xc003) AM_WRITE(news_bgpic_w)
 	AM_RANGE(0xe000, 0xffff) AM_RAM
 ADDRESS_MAP_END
@@ -113,43 +113,37 @@ GFXDECODE_END
 
 
 
-static MACHINE_START( news )
+void news_state::machine_start()
 {
-	news_state *state = machine.driver_data<news_state>();
 
-	state->save_item(NAME(state->m_bgpic));
+	save_item(NAME(m_bgpic));
 }
 
-static MACHINE_RESET( news )
+void news_state::machine_reset()
 {
-	news_state *state = machine.driver_data<news_state>();
 
-	state->m_bgpic = 0;
+	m_bgpic = 0;
 }
 
 static MACHINE_CONFIG_START( news, news_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80,8000000)		 /* ? MHz */
+	MCFG_CPU_ADD("maincpu", Z80,8000000)         /* ? MHz */
 	MCFG_CPU_PROGRAM_MAP(news_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", news_state,  irq0_line_hold)
 
-	MCFG_MACHINE_START(news)
-	MCFG_MACHINE_RESET(news)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(256, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 256-1, 16, 256-16-1)
-	MCFG_SCREEN_UPDATE(news)
+	MCFG_SCREEN_UPDATE_DRIVER(news_state, screen_update_news)
 
 	MCFG_GFXDECODE(news)
 	MCFG_PALETTE_LENGTH(0x100)
 
-	MCFG_VIDEO_START(news)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -184,5 +178,5 @@ ROM_START( newsa )
 	ROM_LOAD( "virus.1", 0x00000, 0x40000, CRC(41f5935a) SHA1(1566d243f165019660cd4dd69df9f049e0130f15) )
 ROM_END
 
-GAME( 1993, news,  0,    news, news,  0, ROT0, "Poby / Virus", "News (set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1993, newsa, news, news, newsa, 0, ROT0, "Poby",         "News (set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1993, news,  0,    news, news, driver_device,  0, ROT0, "Poby / Virus", "News (set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1993, newsa, news, news, newsa, driver_device, 0, ROT0, "Poby",         "News (set 2)", GAME_SUPPORTS_SAVE )

@@ -74,17 +74,22 @@
 #include "sound/sn76496.h"
 #include "sound/2612intf.h"
 #include "sound/upd7759.h"
+#include "includes/segaipt.h"
 
 #include "includes/megadriv.h"
 
-#define XL1_CLOCK			XTAL_640kHz
-#define XL2_CLOCK			XTAL_53_693175MHz
+#include "machine/megavdp.h"
+
+#define XL1_CLOCK           XTAL_640kHz
+#define XL2_CLOCK           XTAL_53_693175MHz
 
 
-#define LOG_PROTECTION		1
-#define LOG_PALETTE			0
-#define LOG_IOCHIP			0
+#define LOG_PROTECTION      1
+#define LOG_PALETTE         0
+#define LOG_IOCHIP          0
 
+int segac2_bg_pal_lookup[4];
+int segac2_sp_pal_lookup[4];
 
 static void recompute_palette_tables( running_machine &machine );
 
@@ -97,39 +102,49 @@ static void recompute_palette_tables( running_machine &machine );
 
 ******************************************************************************/
 
-static MACHINE_START( segac2 )
+MACHINE_START_MEMBER(segac2_state,segac2)
 {
-	segac2_state *state = machine.driver_data<segac2_state>();
 
-	state_save_register_global_array(machine, state->m_misc_io_data);
-	state_save_register_global(machine, state->m_prot_write_buf);
-	state_save_register_global(machine, state->m_prot_read_buf);
+	state_save_register_global_array(machine(), m_misc_io_data);
+	state_save_register_global(machine(), m_prot_write_buf);
+	state_save_register_global(machine(), m_prot_read_buf);
 }
 
 
-static MACHINE_RESET( segac2 )
+MACHINE_RESET_MEMBER(segac2_state,segac2)
 {
-	segac2_state *state = machine.driver_data<segac2_state>();
-	megadrive_ram = reinterpret_cast<UINT16 *>(memory_get_shared(machine, "nvram"));
+//  megadriv_framerate = 60;
 
-	/* set up interrupts and such */
-	MACHINE_RESET_CALL(megadriv);
+
+//  megadriv_scanline_timer = machine().device<timer_device>("md_scan_timer");
+//  megadriv_scanline_timer->adjust(attotime::zero);
+	segac2_bg_pal_lookup[0] = 0x00;
+	segac2_bg_pal_lookup[1] = 0x10;
+	segac2_bg_pal_lookup[2] = 0x20;
+	segac2_bg_pal_lookup[3] = 0x30;
+
+	segac2_sp_pal_lookup[0] = 0x00;
+	segac2_sp_pal_lookup[1] = 0x10;
+	segac2_sp_pal_lookup[2] = 0x20;
+	segac2_sp_pal_lookup[3] = 0x30;
+
+	megadriv_reset_vdp(machine());
 
 	/* determine how many sound banks */
-	state->m_sound_banks = 0;
-	if (machine.region("upd")->base())
-		state->m_sound_banks = machine.region("upd")->bytes() / 0x20000;
+	m_sound_banks = 0;
+	if (memregion("upd")->base())
+		m_sound_banks = memregion("upd")->bytes() / 0x20000;
 
 	/* reset the protection */
-	state->m_prot_write_buf = 0;
-	state->m_prot_read_buf = 0;
-	state->m_segac2_alt_palette_mode = 0;
+	m_prot_write_buf = 0;
+	m_prot_read_buf = 0;
+	m_segac2_alt_palette_mode = 0;
 
-	state->m_palbank = 0;
-	state->m_bg_palbase = 0;
-	state->m_sp_palbase = 0;
+	m_palbank = 0;
+	m_bg_palbase = 0;
+	m_sp_palbase = 0;
 
-	recompute_palette_tables(machine);
+	recompute_palette_tables(machine());
 
 }
 
@@ -150,7 +165,7 @@ static MACHINE_RESET( segac2 )
 /* handle writes to the UPD7759 */
 static WRITE16_DEVICE_HANDLER( segac2_upd7759_w )
 {
-	segac2_state *state = device->machine().driver_data<segac2_state>();
+	segac2_state *state = space.machine().driver_data<segac2_state>();
 
 	/* make sure we have a UPD chip */
 	if (!state->m_sound_banks)
@@ -159,7 +174,7 @@ static WRITE16_DEVICE_HANDLER( segac2_upd7759_w )
 	/* only works if we're accessing the low byte */
 	if (ACCESSING_BITS_0_7)
 	{
-		upd7759_port_w(device, 0, data & 0xff);
+		upd7759_port_w(device, space, 0, data & 0xff);
 		upd7759_start_w(device, 0);
 		upd7759_start_w(device, 1);
 	}
@@ -186,7 +201,7 @@ static WRITE16_DEVICE_HANDLER( segac2_upd7759_w )
 /* handle reads from the paletteram */
 static READ16_HANDLER( palette_r )
 {
-	segac2_state *state = space->machine().driver_data<segac2_state>();
+	segac2_state *state = space.machine().driver_data<segac2_state>();
 	offset &= 0x1ff;
 	if (state->m_segac2_alt_palette_mode)
 		offset = ((offset << 1) & 0x100) | ((offset << 2) & 0x80) | ((~offset >> 2) & 0x40) | ((offset >> 1) & 0x20) | (offset & 0x1f);
@@ -197,7 +212,7 @@ static READ16_HANDLER( palette_r )
 /* handle writes to the paletteram */
 static WRITE16_HANDLER( palette_w )
 {
-	segac2_state *state = space->machine().driver_data<segac2_state>();
+	segac2_state *state = space.machine().driver_data<segac2_state>();
 	int r, g, b, newword;
 	int tmpr, tmpg, tmpb;
 
@@ -217,21 +232,21 @@ static WRITE16_HANDLER( palette_w )
 	b = ((newword >> 7) & 0x1e) | ((newword >> 14) & 0x01);
 
 	/* set the color */
-	palette_set_color_rgb(space->machine(), offset, pal5bit(r), pal5bit(g), pal5bit(b));
+	palette_set_color_rgb(space.machine(), offset, pal5bit(r), pal5bit(g), pal5bit(b));
 
-	megadrive_vdp_palette_lookup[offset] = (b) | (g << 5) | (r << 10);
-	megadrive_vdp_palette_lookup_sprite[offset] = (b) | (g << 5) | (r << 10);
+//  megadrive_vdp_palette_lookup[offset] = (b) | (g << 5) | (r << 10);
+//  megadrive_vdp_palette_lookup_sprite[offset] = (b) | (g << 5) | (r << 10);
 
 	tmpr = r >> 1;
 	tmpg = g >> 1;
 	tmpb = b >> 1;
-	megadrive_vdp_palette_lookup_shadow[offset] = (tmpb) | (tmpg << 5) | (tmpr << 10);
+	palette_set_color_rgb(space.machine(), offset + 0x800, pal5bit(tmpr), pal5bit(tmpg), pal5bit(tmpb));
 
 	// how is it calculated on c2?
 	tmpr = tmpr | 0x10;
 	tmpg = tmpg | 0x10;
 	tmpb = tmpb | 0x10;
-	megadrive_vdp_palette_lookup_highlight[offset] = (tmpb) | (tmpg << 5) | (tmpr << 10);
+	palette_set_color_rgb(space.machine(), offset + 0x1000, pal5bit(tmpr), pal5bit(tmpg), pal5bit(tmpb));
 }
 
 
@@ -304,7 +319,7 @@ static void recompute_palette_tables( running_machine &machine )
 
 static READ16_HANDLER( io_chip_r )
 {
-	segac2_state *state = space->machine().driver_data<segac2_state>();
+	segac2_state *state = space.machine().driver_data<segac2_state>();
 	static const char *const portnames[] = { "P1", "P2", "PORTC", "PORTD", "SERVICE", "COINAGE", "DSW", "PORTH" };
 	offset &= 0x1f/2;
 
@@ -325,8 +340,8 @@ static READ16_HANDLER( io_chip_r )
 
 			/* otherwise, return an input port */
 			if (offset == 0x04/2 && state->m_sound_banks)
-				return (input_port_read(space->machine(), portnames[offset]) & 0xbf) | (upd7759_busy_r(space->machine().device("upd")) << 6);
-			return input_port_read(space->machine(), portnames[offset]);
+				return (space.machine().root_device().ioport(portnames[offset])->read() & 0xbf) | (upd7759_busy_r(space.machine().device("upd")) << 6);
+			return space.machine().root_device().ioport(portnames[offset])->read();
 
 		/* 'SEGA' protection */
 		case 0x10/2:
@@ -354,13 +369,13 @@ static READ16_HANDLER( io_chip_r )
 
 static WRITE16_HANDLER( io_chip_w )
 {
-	segac2_state *state = space->machine().driver_data<segac2_state>();
+	segac2_state *state = space.machine().driver_data<segac2_state>();
 	UINT8 newbank;
-	UINT8 old;
+//  UINT8 old;
 
 	/* generic implementation */
 	offset &= 0x1f/2;
-	old = state->m_misc_io_data[offset];
+//  old = state->m_misc_io_data[offset];
 	state->m_misc_io_data[offset] = data;
 
 	switch (offset)
@@ -377,43 +392,43 @@ static WRITE16_HANDLER( io_chip_w )
 		/* miscellaneous output */
 		case 0x06/2:
 			/*
-             D7 : To pin 3 of JP15. (Watchdog clock control)
-             D6 : To MUTE input pin on TDA1518BQ amplifier.
-             D5 : To CN2 pin 10. (Unknown purpose)
-             D4 : To CN2 pin 11. (Unknown purpose)
-             D3 : To CN1 pin K. (Coin lockout 2)
-             D2 : To CN1 pin 9. (Coin lockout 1)
-             D1 : To CN1 pin J. (Coin meter 2)
-             D0 : To CN1 pin 8. (Coin meter 1)
-            */
-/*          coin_lockout_w(space->machine(), 1, data & 0x08);
-            coin_lockout_w(space->machine(), 0, data & 0x04); */
-			coin_counter_w(space->machine(), 1, data & 0x02);
-			coin_counter_w(space->machine(), 0, data & 0x01);
+			 D7 : To pin 3 of JP15. (Watchdog clock control)
+			 D6 : To MUTE input pin on TDA1518BQ amplifier.
+			 D5 : To CN2 pin 10. (Unknown purpose)
+			 D4 : To CN2 pin 11. (Unknown purpose)
+			 D3 : To CN1 pin K. (Coin lockout 2)
+			 D2 : To CN1 pin 9. (Coin lockout 1)
+			 D1 : To CN1 pin J. (Coin meter 2)
+			 D0 : To CN1 pin 8. (Coin meter 1)
+			*/
+/*          coin_lockout_w(space.machine(), 1, data & 0x08);
+            coin_lockout_w(space.machine(), 0, data & 0x04); */
+			coin_counter_w(space.machine(), 1, data & 0x02);
+			coin_counter_w(space.machine(), 0, data & 0x01);
 			break;
 
 		/* banking */
 		case 0x0e/2:
 			/*
-             D7 : To pin A19 of CN4
-             D6 : To pin B19 of CN4
-             D5 : ?
-             D4 : ?
-             D3 : To pin 31 of uPD7759 sample ROM (A18 on a 27C040)
-             D2 : To pin 30 of uPD7759 sample ROM (A17 on a 27C040)
-             D1 : To A10 of color RAM
-             D0 : To A9 of color RAM
-            */
+			 D7 : To pin A19 of CN4
+			 D6 : To pin B19 of CN4
+			 D5 : ?
+			 D4 : ?
+			 D3 : To pin 31 of uPD7759 sample ROM (A18 on a 27C040)
+			 D2 : To pin 30 of uPD7759 sample ROM (A17 on a 27C040)
+			 D1 : To A10 of color RAM
+			 D0 : To A9 of color RAM
+			*/
 			newbank = data & 3;
 			if (newbank != state->m_palbank)
 			{
-				//space->machine().primary_screen->update_partial(space->machine().primary_screen->vpos() + 1);
+				//space.machine().primary_screen->update_partial(space.machine().primary_screen->vpos() + 1);
 				state->m_palbank = newbank;
-				recompute_palette_tables(space->machine());
+				recompute_palette_tables(space.machine());
 			}
 			if (state->m_sound_banks > 1)
 			{
-				device_t *upd = space->machine().device("upd");
+				device_t *upd = space.machine().device("upd");
 				newbank = (data >> 2) & (state->m_sound_banks - 1);
 				upd7759_set_bank_base(upd, newbank * 0x20000);
 			}
@@ -423,7 +438,7 @@ static WRITE16_HANDLER( io_chip_w )
 		case 0x1c/2:
 			if (state->m_sound_banks > 1)
 			{
-				device_t *upd = space->machine().device("upd");
+				device_t *upd = space.machine().device("upd");
 				upd7759_reset_w(upd, (data >> 1) & 1);
 			}
 			break;
@@ -443,14 +458,14 @@ static WRITE16_HANDLER( io_chip_w )
 
 static WRITE16_HANDLER( control_w )
 {
-	segac2_state *state = space->machine().driver_data<segac2_state>();
+	segac2_state *state = space.machine().driver_data<segac2_state>();
 	/* skip if not LSB */
 	if (!ACCESSING_BITS_0_7)
 		return;
 	data &= 0x0f;
 
 	/* bit 0 controls display enable */
-	//segac2_enable_display(space->machine(), ~data & 1);
+	//segac2_enable_display(space.machine(), ~data & 1);
 	state->m_segac2_enable_display = ~data & 1;
 
 	/* bit 1 resets the protection */
@@ -459,7 +474,7 @@ static WRITE16_HANDLER( control_w )
 
 	/* bit 2 controls palette shuffling; only ribbit and twinsqua use this feature */
 	state->m_segac2_alt_palette_mode = ((~data & 4) >> 2);
-	recompute_palette_tables(space->machine());
+	recompute_palette_tables(space.machine());
 }
 
 
@@ -479,8 +494,8 @@ static WRITE16_HANDLER( control_w )
 /* protection chip reads */
 static READ16_HANDLER( prot_r )
 {
-	segac2_state *state = space->machine().driver_data<segac2_state>();
-	if (LOG_PROTECTION) logerror("%06X:protection r=%02X\n", cpu_get_previouspc(&space->device()), state->m_prot_func ? state->m_prot_read_buf : 0xff);
+	segac2_state *state = space.machine().driver_data<segac2_state>();
+	if (LOG_PROTECTION) logerror("%06X:protection r=%02X\n", space.device().safe_pcbase(), state->m_prot_func ? state->m_prot_read_buf : 0xff);
 	return state->m_prot_read_buf | 0xf0;
 }
 
@@ -488,7 +503,7 @@ static READ16_HANDLER( prot_r )
 /* protection chip writes */
 static WRITE16_HANDLER( prot_w )
 {
-	segac2_state *state = space->machine().driver_data<segac2_state>();
+	segac2_state *state = space.machine().driver_data<segac2_state>();
 	int new_sp_palbase = (data >> 2) & 3;
 	int new_bg_palbase = data & 3;
 	int table_index;
@@ -506,16 +521,16 @@ static WRITE16_HANDLER( prot_w )
 	/* determine the value to return, should a read occur */
 	if (state->m_prot_func)
 		state->m_prot_read_buf = state->m_prot_func(table_index);
-	if (LOG_PROTECTION) logerror("%06X:protection w=%02X, new result=%02X\n", cpu_get_previouspc(&space->device()), data & 0x0f, state->m_prot_read_buf);
+	if (LOG_PROTECTION) logerror("%06X:protection w=%02X, new result=%02X\n", space.device().safe_pcbase(), data & 0x0f, state->m_prot_read_buf);
 
 	/* if the palette changed, force an update */
 	if (new_sp_palbase != state->m_sp_palbase || new_bg_palbase != state->m_bg_palbase)
 	{
-		//space->machine().primary_screen->update_partial(space->machine().primary_screen->vpos() + 1);
+		//space.machine().primary_screen->update_partial(space.machine().primary_screen->vpos() + 1);
 		state->m_sp_palbase = new_sp_palbase;
 		state->m_bg_palbase = new_bg_palbase;
-		recompute_palette_tables(space->machine());
-		if (LOG_PALETTE) logerror("Set palbank: %d/%d (scan=%d)\n", state->m_bg_palbase, state->m_sp_palbase, space->machine().primary_screen->vpos());
+		recompute_palette_tables(space.machine());
+		if (LOG_PALETTE) logerror("Set palbank: %d/%d (scan=%d)\n", state->m_bg_palbase, state->m_sp_palbase, space.machine().primary_screen->vpos());
 	}
 }
 
@@ -539,32 +554,32 @@ static WRITE16_HANDLER( counter_timer_w )
 		/*int value = data & 1;*/
 		switch (data & 0x1e)
 		{
-			case 0x00:	/* player 1 start/stop */
-			case 0x02:	/* player 2 start/stop */
-			case 0x04:	/* ??? */
-			case 0x06:	/* ??? */
-			case 0x08:	/* player 1 game timer? */
-			case 0x0a:	/* player 2 game timer? */
-			case 0x0c:	/* ??? */
-			case 0x0e:	/* ??? */
+			case 0x00:  /* player 1 start/stop */
+			case 0x02:  /* player 2 start/stop */
+			case 0x04:  /* ??? */
+			case 0x06:  /* ??? */
+			case 0x08:  /* player 1 game timer? */
+			case 0x0a:  /* player 2 game timer? */
+			case 0x0c:  /* ??? */
+			case 0x0e:  /* ??? */
 				break;
 
-			case 0x10:	/* coin counter */
-//              coin_counter_w(space->machine(), 0,1);
-//              coin_counter_w(space->machine(), 0,0);
+			case 0x10:  /* coin counter */
+//              coin_counter_w(space.machine(), 0,1);
+//              coin_counter_w(space.machine(), 0,0);
 				break;
 
-			case 0x12:	/* set coinage info -- followed by two 4-bit values */
+			case 0x12:  /* set coinage info -- followed by two 4-bit values */
 				break;
 
-			case 0x14:	/* game timer? (see Tant-R) */
-			case 0x16:	/* intro timer? (see Tant-R) */
-			case 0x18:	/* ??? */
-			case 0x1a:	/* ??? */
-			case 0x1c:	/* ??? */
+			case 0x14:  /* game timer? (see Tant-R) */
+			case 0x16:  /* intro timer? (see Tant-R) */
+			case 0x18:  /* ??? */
+			case 0x1a:  /* ??? */
+			case 0x1c:  /* ??? */
 				break;
 
-			case 0x1e:	/* reset */
+			case 0x1e:  /* reset */
 				break;
 		}
 	}
@@ -581,13 +596,13 @@ static WRITE16_HANDLER( counter_timer_w )
 
 static READ16_HANDLER( printer_r )
 {
-	segac2_state *state = space->machine().driver_data<segac2_state>();
+	segac2_state *state = space.machine().driver_data<segac2_state>();
 	return state->m_cam_data;
 }
 
 static WRITE16_HANDLER( print_club_camera_w )
 {
-	segac2_state *state = space->machine().driver_data<segac2_state>();
+	segac2_state *state = space.machine().driver_data<segac2_state>();
 	state->m_cam_data = data;
 }
 
@@ -602,15 +617,15 @@ static WRITE16_HANDLER( print_club_camera_w )
 
 ******************************************************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16, segac2_state )
 	AM_RANGE(0x000000, 0x1fffff) AM_ROM
-	AM_RANGE(0x800000, 0x800001) AM_MIRROR(0x13fdfe) AM_READWRITE(prot_r, prot_w)
-	AM_RANGE(0x800200, 0x800201) AM_MIRROR(0x13fdfe) AM_WRITE(control_w)
-	AM_RANGE(0x840000, 0x84001f) AM_MIRROR(0x13fee0) AM_READWRITE(io_chip_r, io_chip_w)
-	AM_RANGE(0x840100, 0x840107) AM_MIRROR(0x13fef8) AM_DEVREADWRITE8("ymsnd", ym3438_r, ym3438_w, 0x00ff)
-	AM_RANGE(0x880100, 0x880101) AM_MIRROR(0x13fefe) AM_WRITE(counter_timer_w)
-	AM_RANGE(0x8c0000, 0x8c0fff) AM_MIRROR(0x13f000) AM_READWRITE(palette_r, palette_w) AM_BASE_MEMBER(segac2_state, m_paletteram)
-	AM_RANGE(0xc00000, 0xc0001f) AM_MIRROR(0x18ff00) AM_READWRITE(megadriv_vdp_r, megadriv_vdp_w)
+	AM_RANGE(0x800000, 0x800001) AM_MIRROR(0x13fdfe) AM_READWRITE_LEGACY(prot_r, prot_w)
+	AM_RANGE(0x800200, 0x800201) AM_MIRROR(0x13fdfe) AM_WRITE_LEGACY(control_w)
+	AM_RANGE(0x840000, 0x84001f) AM_MIRROR(0x13fee0) AM_READWRITE_LEGACY(io_chip_r, io_chip_w)
+	AM_RANGE(0x840100, 0x840107) AM_MIRROR(0x13fef8) AM_DEVREADWRITE8_LEGACY("ymsnd", ym3438_r, ym3438_w, 0x00ff)
+	AM_RANGE(0x880100, 0x880101) AM_MIRROR(0x13fefe) AM_WRITE_LEGACY(counter_timer_w)
+	AM_RANGE(0x8c0000, 0x8c0fff) AM_MIRROR(0x13f000) AM_READWRITE_LEGACY(palette_r, palette_w) AM_SHARE("paletteram")
+	AM_RANGE(0xc00000, 0xc0001f) AM_MIRROR(0x18ff00) AM_DEVREADWRITE("gen_vdp", sega_genesis_vdp_device, megadriv_vdp_r,megadriv_vdp_w)
 	AM_RANGE(0xe00000, 0xe0ffff) AM_MIRROR(0x1f0000) AM_RAM AM_SHARE("nvram")
 ADDRESS_MAP_END
 
@@ -631,105 +646,56 @@ ADDRESS_MAP_END
 ******************************************************************************/
 
 static INPUT_PORTS_START( systemc_generic )
-    PORT_START("P1")
-    PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
-    PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
-    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(1)
+	PORT_START("P1")
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(1)
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-    PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(1)
-    PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(1)
-    PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(1)
-    PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(1)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(1)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(1)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(1)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(1)
 
-    PORT_START("P2")
-    PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
-    PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
-    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
+	PORT_START("P2")
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-    PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(2)
-    PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(2)
-    PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(2)
-    PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(2)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(2)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(2)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(2)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(2)
 
 	PORT_START("PORTC")
 	PORT_BIT( 0x3f, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SPECIAL )	/* From uPD7759 pin 18. (/BUSY output) */
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SPECIAL )	/* From MB3773P pin 1. (/RESET output) */
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SPECIAL )    /* From uPD7759 pin 18. (/BUSY output) */
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SPECIAL )    /* From MB3773P pin 1. (/RESET output) */
 
 	PORT_START("PORTD")
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("SERVICE")
-    PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
-    PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_SERVICE_NO_TOGGLE( 0x04, IP_ACTIVE_LOW )
-    PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE1 )
-    PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_START1 )
-    PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_START2 )
-    PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-    PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE1 )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_START1 )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_START2 )
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START("COINAGE")
-	PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( Coin_A ) )
-	PORT_DIPSETTING(    0x07, DEF_STR( 4C_1C ) )
-	PORT_DIPSETTING(    0x08, DEF_STR( 3C_1C ) )
-	PORT_DIPSETTING(    0x09, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(    0x05, "2 Coins/1 Credit 5/3 6/4" )
-	PORT_DIPSETTING(    0x04, "2 Coins/1 Credit 4/3" )
-	PORT_DIPSETTING(    0x0f, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(    0x01, "1 Coin/1 Credit 2/3" )
-	PORT_DIPSETTING(    0x02, "1 Coin/1 Credit 4/5" )
-	PORT_DIPSETTING(    0x03, "1 Coin/1 Credit 5/6" )
-	PORT_DIPSETTING(    0x06, DEF_STR( 2C_3C ) )
-	PORT_DIPSETTING(    0x0e, DEF_STR( 1C_2C ) )
-	PORT_DIPSETTING(    0x0d, DEF_STR( 1C_3C ) )
-	PORT_DIPSETTING(    0x0c, DEF_STR( 1C_4C ) )
-	PORT_DIPSETTING(    0x0b, DEF_STR( 1C_5C ) )
-	PORT_DIPSETTING(    0x0a, DEF_STR( 1C_6C ) )
-	PORT_DIPSETTING(    0x00, "Free Play (if Coin B too) or 1/1" )
-	PORT_DIPNAME( 0xf0, 0xf0, DEF_STR( Coin_B ) )
-	PORT_DIPSETTING(    0x70, DEF_STR( 4C_1C ) )
-	PORT_DIPSETTING(    0x80, DEF_STR( 3C_1C ) )
-	PORT_DIPSETTING(    0x90, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(    0x50, "2 Coins/1 Credit 5/3 6/4" )
-	PORT_DIPSETTING(    0x40, "2 Coins/1 Credit 4/3" )
-	PORT_DIPSETTING(    0xf0, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(    0x10, "1 Coin/1 Credit 2/3" )
-	PORT_DIPSETTING(    0x20, "1 Coin/1 Credit 4/5" )
-	PORT_DIPSETTING(    0x30, "1 Coin/1 Credit 5/6" )
-	PORT_DIPSETTING(    0x60, DEF_STR( 2C_3C ) )
-	PORT_DIPSETTING(    0xe0, DEF_STR( 1C_2C ) )
-	PORT_DIPSETTING(    0xd0, DEF_STR( 1C_3C ) )
-	PORT_DIPSETTING(    0xc0, DEF_STR( 1C_4C ) )
-	PORT_DIPSETTING(    0xb0, DEF_STR( 1C_5C ) )
-	PORT_DIPSETTING(    0xa0, DEF_STR( 1C_6C ) )
-	PORT_DIPSETTING(    0x00, "Free Play (if Coin A too) or 1/1" )
+	SEGA_COINAGE_LOC(SW1)
 
 	PORT_START("DSW")
-	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPUNUSED_DIPLOC( 0x01, IP_ACTIVE_LOW, "SW2:1" )
+	PORT_DIPUNUSED_DIPLOC( 0x02, IP_ACTIVE_LOW, "SW2:2" )
+	PORT_DIPUNUSED_DIPLOC( 0x04, IP_ACTIVE_LOW, "SW2:3" )
+	PORT_DIPUNUSED_DIPLOC( 0x08, IP_ACTIVE_LOW, "SW2:4" )
+	PORT_DIPUNUSED_DIPLOC( 0x10, IP_ACTIVE_LOW, "SW2:5" )
+	PORT_DIPUNUSED_DIPLOC( 0x20, IP_ACTIVE_LOW, "SW2:6" )
+	PORT_DIPUNUSED_DIPLOC( 0x40, IP_ACTIVE_LOW, "SW2:7" )
+	PORT_DIPUNUSED_DIPLOC( 0x80, IP_ACTIVE_LOW, "SW2:8" )
 
 	PORT_START("PORTH")
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -740,84 +706,94 @@ static INPUT_PORTS_START( columns )
 	PORT_INCLUDE( systemc_generic )
 
 	PORT_MODIFY("P1")
-    PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 2 Unused */
-    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 3 Unused */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 2 Unused */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 3 Unused */
 
 	PORT_MODIFY("P2")
-    PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 2 Unused */
-    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 3 Unused */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 2 Unused */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 3 Unused */
 
 	PORT_MODIFY("DSW")
-	PORT_DIPNAME( 0x02, 0x00, DEF_STR( Demo_Sounds ) )
+	//"SW2:1" unused
+	PORT_DIPNAME( 0x02, 0x00, DEF_STR( Demo_Sounds ) ) PORT_DIPLOCATION("SW2:2")
 	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-    /* The first level increase (from 0 to 1) is always after destroying
-       35 jewels. Then, the level gets 1 level more every : */
-    PORT_DIPNAME( 0x30, 0x30, DEF_STR( Difficulty ) )
-    PORT_DIPSETTING(    0x00, DEF_STR( Easiest ) )  // 50 jewels
-    PORT_DIPSETTING(    0x10, DEF_STR( Easy ) )     // 40 jewels
-    PORT_DIPSETTING(    0x30, DEF_STR( Normal ) )   // 35 jewels
-    PORT_DIPSETTING(    0x20, DEF_STR( Hard ) )     // 25 jewels
+	//"SW2:3" unused
+	//"SW2:4" unused
+	/* The first level increase (from 0 to 1) is always after destroying
+	   35 jewels. Then, the level gets 1 level more every : */
+	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Difficulty ) ) PORT_DIPLOCATION("SW2:5,6")
+	PORT_DIPSETTING(    0x00, DEF_STR( Easiest ) )  // 50 jewels
+	PORT_DIPSETTING(    0x10, DEF_STR( Easy ) )     // 40 jewels
+	PORT_DIPSETTING(    0x30, DEF_STR( Normal ) )   // 35 jewels
+	PORT_DIPSETTING(    0x20, DEF_STR( Hard ) )     // 25 jewels
+	//"SW2:7" unused
+	//"SW2:8" unused
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( columnsu )
 	PORT_INCLUDE( systemc_generic )
 
 	PORT_MODIFY("P1")
-    PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 2 Unused */
-    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 3 Unused */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 2 Unused */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 3 Unused */
 
 	PORT_MODIFY("P2")
-    PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 2 Unused */
-    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 3 Unused */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 2 Unused */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 3 Unused */
 
 	PORT_MODIFY("DSW")
-	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Cabinet ) )
+	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Cabinet ) ) PORT_DIPLOCATION("SW2:1")
 	PORT_DIPSETTING(    0x01, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Cocktail ) )
-	PORT_DIPNAME( 0x02, 0x00, DEF_STR( Demo_Sounds ) )
+	PORT_DIPNAME( 0x02, 0x00, DEF_STR( Demo_Sounds ) ) PORT_DIPLOCATION("SW2:2")
 	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x04, 0x00, "Background Music" )	/* listed in the manual, ON by default */
+	//"SW2:3" unused
+	PORT_DIPNAME( 0x04, 0x00, "Background Music" ) PORT_DIPLOCATION("SW2:3") /* listed in the manual, ON by default */
 	PORT_DIPSETTING(    0x04, "BGM #1" )
 	PORT_DIPSETTING(    0x00, "BGM #2" )
-    /* The first level increase (from 0 to 1) is always after destroying
-       35 jewels. Then, the level gets 1 level more every : */
-    PORT_DIPNAME( 0x30, 0x30, DEF_STR( Difficulty ) )
-    PORT_DIPSETTING(    0x00, DEF_STR( Easiest ) )  // 50 jewels
-    PORT_DIPSETTING(    0x10, DEF_STR( Easy ) )     // 40 jewels
-    PORT_DIPSETTING(    0x30, DEF_STR( Normal ) )   // 35 jewels
-    PORT_DIPSETTING(    0x20, DEF_STR( Hard ) )     // 25 jewels
+	/* The first level increase (from 0 to 1) is always after destroying
+	   35 jewels. Then, the level gets 1 level more every : */
+	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Difficulty ) ) PORT_DIPLOCATION("SW2:5,6")
+	PORT_DIPSETTING(    0x00, DEF_STR( Easiest ) )  // 50 jewels
+	PORT_DIPSETTING(    0x10, DEF_STR( Easy ) )     // 40 jewels
+	PORT_DIPSETTING(    0x30, DEF_STR( Normal ) )   // 35 jewels
+	PORT_DIPSETTING(    0x20, DEF_STR( Hard ) )     // 25 jewels
+	//"SW2:7" unused
+	//"SW2:8" unused
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( columns2 )
 	PORT_INCLUDE( systemc_generic )
 
 	PORT_MODIFY("P1")
-    PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 2 Unused */
-    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 3 Unused */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 2 Unused */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 3 Unused */
 
 	PORT_MODIFY("P2")
-    PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 2 Unused */
-    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 3 Unused */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 2 Unused */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 3 Unused */
 
 	PORT_MODIFY("DSW")
-	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Cabinet ) )
+	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Cabinet ) ) PORT_DIPLOCATION("SW2:1")
 	PORT_DIPSETTING(    0x01, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Cocktail ) )
-    PORT_DIPNAME( 0x02, 0x00, DEF_STR( Demo_Sounds ) )
+	PORT_DIPNAME( 0x02, 0x00, DEF_STR( Demo_Sounds ) ) PORT_DIPLOCATION("SW2:2")
 	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0c, 0x0c, "VS. Mode Credits/Match" )
+	PORT_DIPNAME( 0x0c, 0x0c, "VS. Mode Credits/Match" ) PORT_DIPLOCATION("SW2:3,4")
 	PORT_DIPSETTING(    0x0c, "1" )
 	PORT_DIPSETTING(    0x08, "2" )
 	PORT_DIPSETTING(    0x04, "3" )
 	PORT_DIPSETTING(    0x00, "4" )
-	PORT_DIPNAME( 0x30, 0x30, "Flash Mode Difficulty" )
-	PORT_DIPSETTING(    0x20, DEF_STR( Easy ) )
-    PORT_DIPSETTING(    0x30, DEF_STR( Medium ) )
-	PORT_DIPSETTING(    0x10, DEF_STR( Hard ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) )
+	PORT_DIPNAME( 0x30, 0x30, "Flash Mode Difficulty" ) PORT_DIPLOCATION("SW2:5,6") // rising up height per a skull
+	PORT_DIPSETTING(    0x20, DEF_STR( Easy ) )    // 1
+	PORT_DIPSETTING(    0x30, DEF_STR( Normal ) )  // 2
+	PORT_DIPSETTING(    0x10, DEF_STR( Hard ) )    // 3
+	PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) ) // 4
+	//"SW2:7" unused
+	//"SW2:8" unused
 INPUT_PORTS_END
 
 
@@ -825,31 +801,31 @@ static INPUT_PORTS_START( borench )
 	PORT_INCLUDE( systemc_generic )
 
 	PORT_MODIFY("P1")
-    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 3 Unused */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 3 Unused */
 
 	PORT_MODIFY("P2")
-    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 3 Unused */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 3 Unused */
 
 	PORT_MODIFY("DSW")
-	PORT_DIPNAME( 0x01, 0x01, "Credits to Start" )
+	PORT_DIPNAME( 0x01, 0x01, "Credits to Start" ) PORT_DIPLOCATION("SW2:1")
 	PORT_DIPSETTING(    0x01, "1" )
 	PORT_DIPSETTING(    0x00, "2" )
-    PORT_DIPNAME( 0x02, 0x00, DEF_STR( Demo_Sounds ) )
+	PORT_DIPNAME( 0x02, 0x00, DEF_STR( Demo_Sounds ) ) PORT_DIPLOCATION("SW2:2")
 	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x0c, 0x0c, "Lives 1P Mode" )
+	PORT_DIPNAME( 0x0c, 0x0c, "Lives 1P Mode" ) PORT_DIPLOCATION("SW2:3,4")
 	PORT_DIPSETTING(    0x00, "1" )
 	PORT_DIPSETTING(    0x0c, "2" )
 	PORT_DIPSETTING(    0x08, "3" )
 	PORT_DIPSETTING(    0x04, "4" )
-    PORT_DIPNAME( 0x30, 0x30, "Lives 2P Mode" )
+	PORT_DIPNAME( 0x30, 0x30, "Lives 2P Mode" ) PORT_DIPLOCATION("SW2:5,6")
 	PORT_DIPSETTING(    0x00, "2" )
 	PORT_DIPSETTING(    0x30, "3" )
 	PORT_DIPSETTING(    0x20, "4" )
 	PORT_DIPSETTING(    0x10, "5" )
-	PORT_DIPNAME( 0xc0, 0xc0, DEF_STR( Difficulty ) )
+	PORT_DIPNAME( 0xc0, 0xc0, DEF_STR( Difficulty ) ) PORT_DIPLOCATION("SW2:7,8")
 	PORT_DIPSETTING(    0x80, DEF_STR( Easy ) )
-    PORT_DIPSETTING(    0xc0, DEF_STR( Medium ) )
+	PORT_DIPSETTING(    0xc0, DEF_STR( Medium ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( Hard ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) )
 INPUT_PORTS_END
@@ -859,25 +835,25 @@ static INPUT_PORTS_START( tfrceac )
 	PORT_INCLUDE( systemc_generic )
 
 	PORT_MODIFY("DSW")
-	PORT_DIPNAME( 0x01, 0x01, "Credits to Start" )
+	PORT_DIPNAME( 0x01, 0x01, "Credits to Start" ) PORT_DIPLOCATION("SW2:1")
 	PORT_DIPSETTING(    0x01, "1" )
 	PORT_DIPSETTING(    0x00, "2" )
-    PORT_DIPNAME( 0x02, 0x00, DEF_STR( Demo_Sounds ) )
+	PORT_DIPNAME( 0x02, 0x00, DEF_STR( Demo_Sounds ) ) PORT_DIPLOCATION("SW2:2")
 	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Lives ) )
+	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Lives ) ) PORT_DIPLOCATION("SW2:3,4")
 	PORT_DIPSETTING(    0x00, "2" )
 	PORT_DIPSETTING(    0x0c, "3" )
 	PORT_DIPSETTING(    0x08, "4" )
 	PORT_DIPSETTING(    0x04, "5" )
-	PORT_DIPNAME( 0x30, 0x30,  DEF_STR( Bonus_Life ) )
-    PORT_DIPSETTING(    0x10, "10k, 70k, 150k" )
-    PORT_DIPSETTING(    0x30, "20k, 100k, 200k" )
-    PORT_DIPSETTING(    0x20, "40k, 150k, 300k" )
-    PORT_DIPSETTING(    0x00, DEF_STR( None ) )
-	PORT_DIPNAME( 0xc0, 0xc0, DEF_STR( Difficulty ) )
+	PORT_DIPNAME( 0x30, 0x30,  DEF_STR( Bonus_Life ) ) PORT_DIPLOCATION("SW2:5,6")
+	PORT_DIPSETTING(    0x10, "10k, 70k, 150k" )
+	PORT_DIPSETTING(    0x30, "20k, 100k, 200k" )
+	PORT_DIPSETTING(    0x20, "40k, 150k, 300k" )
+	PORT_DIPSETTING(    0x00, DEF_STR( None ) )
+	PORT_DIPNAME( 0xc0, 0xc0, DEF_STR( Difficulty ) ) PORT_DIPLOCATION("SW2:7,8")
 	PORT_DIPSETTING(    0x80, DEF_STR( Easy ) )
-    PORT_DIPSETTING(    0xc0, DEF_STR( Medium ) )
+	PORT_DIPSETTING(    0xc0, DEF_STR( Medium ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( Hard ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) )
 INPUT_PORTS_END
@@ -897,23 +873,25 @@ static INPUT_PORTS_START( twinsqua )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 
 	PORT_MODIFY("DSW")
-	PORT_DIPNAME( 0x01, 0x01, "Credits to Start" )
+	PORT_DIPNAME( 0x01, 0x01, "Credits to Start" ) PORT_DIPLOCATION("SW2:1")
 	PORT_DIPSETTING(    0x01, "1" )
 	PORT_DIPSETTING(    0x00, "2" )
-    PORT_DIPNAME( 0x02, 0x00, DEF_STR( Demo_Sounds ) )
+	PORT_DIPNAME( 0x02, 0x00, DEF_STR( Demo_Sounds ) ) PORT_DIPLOCATION("SW2:2")
 	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x04, 0x04, "Buy In" )
+	PORT_DIPNAME( 0x04, 0x04, "Buy In" ) PORT_DIPLOCATION("SW2:3")
 	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x18, 0x18, DEF_STR( Difficulty ) )
+	PORT_DIPNAME( 0x18, 0x18, DEF_STR( Difficulty ) ) PORT_DIPLOCATION("SW2:4,5")
 	PORT_DIPSETTING(    0x10, DEF_STR( Easy ) )
-    PORT_DIPSETTING(    0x18, DEF_STR( Medium ) )
+	PORT_DIPSETTING(    0x18, DEF_STR( Medium ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( Hard ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) )
-    PORT_DIPNAME( 0x20, 0x20, "Seat Type" )
+	PORT_DIPNAME( 0x20, 0x20, "Seat Type" ) PORT_DIPLOCATION("SW2:6") // Sega cabinet "MEGALO 50" has "MOVING SEAT"
 	PORT_DIPSETTING(    0x20, DEF_STR( Normal ) )
 	PORT_DIPSETTING(    0x00, "Moving" )
+	//"SW2:7" unused
+	//"SW2:8" unused
 INPUT_PORTS_END
 
 
@@ -921,32 +899,34 @@ static INPUT_PORTS_START( ribbit )
 	PORT_INCLUDE( systemc_generic )
 
 	PORT_MODIFY("P1")
-    PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 1 Unused */
-    PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 2 Unused */
-    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 3 Unused */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 1 Unused */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 2 Unused */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 3 Unused */
 
 	PORT_MODIFY("P2")
-    PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 1 Unused */
-    PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 2 Unused */
-    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 3 Unused */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 1 Unused */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 2 Unused */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 3 Unused */
 
 	PORT_MODIFY("DSW")
-	PORT_DIPNAME( 0x01, 0x01, "Credits to Start" )
+	PORT_DIPNAME( 0x01, 0x01, "Credits to Start" ) PORT_DIPLOCATION("SW2:1")
 	PORT_DIPSETTING(    0x01, "1" )
 	PORT_DIPSETTING(    0x00, "2" )
-    PORT_DIPNAME( 0x02, 0x00, DEF_STR( Demo_Sounds ) )
+	PORT_DIPNAME( 0x02, 0x00, DEF_STR( Demo_Sounds ) ) PORT_DIPLOCATION("SW2:2")
 	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x0c, 0x04, DEF_STR( Lives ) )
+	PORT_DIPNAME( 0x0c, 0x04, DEF_STR( Lives ) ) PORT_DIPLOCATION("SW2:3,4")
 	PORT_DIPSETTING(    0x08, "1" )
 	PORT_DIPSETTING(    0x0c, "2" )
 	PORT_DIPSETTING(    0x04, "3" )
 	PORT_DIPSETTING(    0x00, "5" )
-	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Difficulty ) )
-    PORT_DIPSETTING(    0x20, DEF_STR( Easy ) )
-    PORT_DIPSETTING(    0x30, DEF_STR( Normal ) )
-    PORT_DIPSETTING(    0x10, DEF_STR( Hard ) )
-    PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) )
+	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Difficulty ) ) PORT_DIPLOCATION("SW2:5,6")
+	PORT_DIPSETTING(    0x20, DEF_STR( Easy ) )
+	PORT_DIPSETTING(    0x30, DEF_STR( Normal ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( Hard ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) )
+	//"SW2:7" unused
+	//"SW2:8" unused
 INPUT_PORTS_END
 
 
@@ -954,26 +934,29 @@ static INPUT_PORTS_START( puyo )
 	PORT_INCLUDE( systemc_generic )
 
 	PORT_MODIFY("P1")
-    PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 2 Unused */
-    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 3 Unused */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 2 Unused */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 3 Unused */
 
 	PORT_MODIFY("P2")
-    PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 2 Unused */
-    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 3 Unused */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 2 Unused */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 3 Unused */
 
 	PORT_MODIFY("DSW")
-    PORT_DIPNAME( 0x02, 0x00, DEF_STR( Demo_Sounds ) )
+	//"SW2:1" unused
+	PORT_DIPNAME( 0x02, 0x00, DEF_STR( Demo_Sounds ) ) PORT_DIPLOCATION("SW2:2")
 	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x04, 0x04, "VS. Mode Credits/Match" )
+	PORT_DIPNAME( 0x04, 0x04, "VS. Mode Credits/Match" ) PORT_DIPLOCATION("SW2:3")
 	PORT_DIPSETTING(    0x04, "1" )
 	PORT_DIPSETTING(    0x00, "3" )
-	PORT_DIPNAME( 0x18, 0x18, "1P Mode Difficulty" )
+	PORT_DIPNAME( 0x18, 0x18, "1P Mode Difficulty" ) PORT_DIPLOCATION("SW2:4,5")
 	PORT_DIPSETTING(    0x10, DEF_STR( Easy ) )
-    PORT_DIPSETTING(    0x18, DEF_STR( Medium ) )
+	PORT_DIPSETTING(    0x18, DEF_STR( Medium ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( Hard ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) )
-	PORT_DIPNAME( 0x80, 0x80, "Moving Seat" )
+	//"SW2:6" unused
+	//"SW2:7" unused
+	PORT_DIPNAME( 0x80, 0x80, "Moving Seat" ) PORT_DIPLOCATION("SW2:8") // Sega cabinet "MEGALO 50" has "MOVING SEAT"
 	PORT_DIPSETTING(    0x80, "No Use" )
 	PORT_DIPSETTING(    0x00, "In Use" )
 INPUT_PORTS_END
@@ -983,23 +966,27 @@ static INPUT_PORTS_START( stkclmns )
 	PORT_INCLUDE( systemc_generic )
 
 	PORT_MODIFY("P1")
-    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 3 Unused */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 3 Unused */
 
 	PORT_MODIFY("P2")
-    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 3 Unused */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 3 Unused */
 
 	PORT_MODIFY("DSW")
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Difficulty ) )
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Difficulty ) ) PORT_DIPLOCATION("SW2:1,2")
 	PORT_DIPSETTING(    0x02, DEF_STR( Easy ) )
-    PORT_DIPSETTING(    0x03, DEF_STR( Medium ) )
+	PORT_DIPSETTING(    0x03, DEF_STR( Medium ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Hard ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) )
-    PORT_DIPNAME( 0x04, 0x00, DEF_STR( Demo_Sounds ) )
+	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Demo_Sounds ) ) PORT_DIPLOCATION("SW2:3")
 	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x08, 0x08, "Match Mode Price" )
+	PORT_DIPNAME( 0x08, 0x08, "Match Mode Price" ) PORT_DIPLOCATION("SW2:4")
 	PORT_DIPSETTING(    0x08, "1" )
 	PORT_DIPSETTING(    0x00, "2" )
+	//"SW2:5" unused
+	//"SW2:6" unused
+	//"SW2:7" unused
+	//"SW2:8" unused
 INPUT_PORTS_END
 
 
@@ -1007,35 +994,35 @@ static INPUT_PORTS_START( potopoto )
 	PORT_INCLUDE( systemc_generic )
 
 	PORT_MODIFY("P1")
-    PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 2 Unused */
-    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 3 Unused */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 2 Unused */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 3 Unused */
 
 	PORT_MODIFY("P2")
-    PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 2 Unused */
-    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 3 Unused */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 2 Unused */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 3 Unused */
 
 	PORT_MODIFY("DSW")
-	PORT_DIPNAME( 0x01, 0x01, "Credits to Start" )
+	PORT_DIPNAME( 0x01, 0x01, "Credits to Start" ) PORT_DIPLOCATION("SW2:1")
 	PORT_DIPSETTING(    0x01, "1" )
 	PORT_DIPSETTING(    0x00, "2" )
-    PORT_DIPNAME( 0x02, 0x00, DEF_STR( Demo_Sounds ) )
+	PORT_DIPNAME( 0x02, 0x00, DEF_STR( Demo_Sounds ) ) PORT_DIPLOCATION("SW2:2")
 	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x04, 0x04, "Coin Chute Type" )
+	PORT_DIPNAME( 0x04, 0x04, "Coin Chute Type" ) PORT_DIPLOCATION("SW2:3")
 	PORT_DIPSETTING(    0x04, "Common" )
 	PORT_DIPSETTING(    0x00, "Individual" )
-	PORT_DIPNAME( 0x08, 0x08, "Credits to Continue" )
+	PORT_DIPNAME( 0x08, 0x08, "Credits to Continue" ) PORT_DIPLOCATION("SW2:4")
 	PORT_DIPSETTING(    0x08, "1" )
 	PORT_DIPSETTING(    0x00, "2" )
-	PORT_DIPNAME( 0x10, 0x10, "Buy-In" )
+	PORT_DIPNAME( 0x10, 0x10, "Buy-In" ) PORT_DIPLOCATION("SW2:5")
 	PORT_DIPSETTING(    0x10, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
-	PORT_DIPNAME( 0x60, 0x60, DEF_STR( Difficulty ) )
+	PORT_DIPNAME( 0x60, 0x60, DEF_STR( Difficulty ) ) PORT_DIPLOCATION("SW2:6,7")
 	PORT_DIPSETTING(    0x40, DEF_STR( Easy ) )
-    PORT_DIPSETTING(    0x60, DEF_STR( Medium ) )
+	PORT_DIPSETTING(    0x60, DEF_STR( Medium ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( Hard ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) )
-	PORT_DIPNAME( 0x80, 0x80, "Moving Seat" )
+	PORT_DIPNAME( 0x80, 0x80, "Moving Seat" ) PORT_DIPLOCATION("SW2:8") // Sega cabinet "MEGALO 50" has "MOVING SEAT"
 	PORT_DIPSETTING(    0x80, "No Use" )
 	PORT_DIPSETTING(    0x00, "In Use" )
 INPUT_PORTS_END
@@ -1045,26 +1032,29 @@ static INPUT_PORTS_START( zunkyou )
 	PORT_INCLUDE( systemc_generic )
 
 	PORT_MODIFY("P1")
-    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 3 Unused */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 3 Unused */
 
 	PORT_MODIFY("P2")
-    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 3 Unused */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 3 Unused */
 
 	PORT_MODIFY("DSW")
-	PORT_DIPNAME( 0x01, 0x01, "Game Difficulty 1" )
-    PORT_DIPSETTING(    0x01, DEF_STR( Medium ) )
+	PORT_DIPNAME( 0x01, 0x01, "Game Difficulty 1" ) PORT_DIPLOCATION("SW2:1")
+	PORT_DIPSETTING(    0x01, DEF_STR( Medium ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Hard ) )
-	PORT_DIPNAME( 0x02, 0x02, "Game Difficulty 2" )
-    PORT_DIPSETTING(    0x02, DEF_STR( Medium ) )
+	PORT_DIPNAME( 0x02, 0x02, "Game Difficulty 2" ) PORT_DIPLOCATION("SW2:2")
+	PORT_DIPSETTING(    0x02, DEF_STR( Medium ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Hard ) )
-    PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Lives ) )
+	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Lives ) ) PORT_DIPLOCATION("SW2:3,4")
 	PORT_DIPSETTING(    0x08, "1" )
 	PORT_DIPSETTING(    0x04, "2" )
 	PORT_DIPSETTING(    0x0c, "3" )
 	PORT_DIPSETTING(    0x00, "5" )
-    PORT_DIPNAME( 0x10, 0x00, DEF_STR( Demo_Sounds ) )
+	PORT_DIPNAME( 0x10, 0x00, DEF_STR( Demo_Sounds ) ) PORT_DIPLOCATION("SW2:5")
 	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	//"SW2:6" unused
+	//"SW2:7" unused
+	//"SW2:8" unused
 INPUT_PORTS_END
 
 
@@ -1072,22 +1062,27 @@ static INPUT_PORTS_START( ichir )
 	PORT_INCLUDE( systemc_generic )
 
 	PORT_MODIFY("P1")
-    PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 2 Unused */
-    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 3 Unused */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 2 Unused */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 3 Unused */
 
 	PORT_MODIFY("P2")
-    PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 2 Unused */
-    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 3 Unused */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 2 Unused */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 3 Unused */
 
 	PORT_MODIFY("DSW")
-    PORT_DIPNAME( 0x01, 0x00, DEF_STR( Demo_Sounds ) )
-    PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
+	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Demo_Sounds ) ) PORT_DIPLOCATION("SW2:1")
+	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x06, 0x06, DEF_STR( Difficulty ) )
-    PORT_DIPSETTING(    0x04, DEF_STR( Easy ) )
-    PORT_DIPSETTING(    0x06, DEF_STR( Medium ) )
-    PORT_DIPSETTING(    0x02, DEF_STR( Hard ) )
+	PORT_DIPNAME( 0x06, 0x06, DEF_STR( Difficulty ) ) PORT_DIPLOCATION("SW2:2,3")
+	PORT_DIPSETTING(    0x04, DEF_STR( Easy ) )
+	PORT_DIPSETTING(    0x06, DEF_STR( Medium ) )
+	PORT_DIPSETTING(    0x02, DEF_STR( Hard ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) )
+	//"SW2:4" unused
+	//"SW2:5" unused
+	//"SW2:6" unused
+	//"SW2:7" unused
+	//"SW2:8" unused
 INPUT_PORTS_END
 
 
@@ -1095,23 +1090,28 @@ static INPUT_PORTS_START( bloxeedc )
 	PORT_INCLUDE( systemc_generic )
 
 	PORT_MODIFY("P1")
-    PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 2 Unused */
-    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 3 Unused */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 2 Unused */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 3 Unused */
 
 	PORT_MODIFY("P2")
-    PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 2 Unused */
-    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 3 Unused */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 2 Unused */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 3 Unused */
 
 	PORT_MODIFY("DSW")
-    PORT_DIPNAME( 0x01, 0x01, "VS Mode Price" )
-    PORT_DIPSETTING(    0x00, "Same as Ordinary" )
-    PORT_DIPSETTING(    0x01, "Double as Ordinary" )
-    PORT_DIPNAME( 0x02, 0x02, "Credits to Start" )
-    PORT_DIPSETTING(    0x02, "1" )
+	PORT_DIPNAME( 0x01, 0x01, "VS Mode Price" ) PORT_DIPLOCATION("SW2:1")
+	PORT_DIPSETTING(    0x00, "Same as Ordinary" )
+	PORT_DIPSETTING(    0x01, "Double as Ordinary" )
+	PORT_DIPNAME( 0x02, 0x02, "Credits to Start" ) PORT_DIPLOCATION("SW2:2")
+	PORT_DIPSETTING(    0x02, "1" )
 	PORT_DIPSETTING(    0x00, "2" )
-    PORT_DIPNAME( 0x08, 0x00, DEF_STR( Demo_Sounds ) )
-    PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
+	//"SW2:3" unused
+	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Demo_Sounds ) ) PORT_DIPLOCATION("SW2:4")
+	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	//"SW2:5" unused
+	//"SW2:6" unused
+	//"SW2:7" unused
+	//"SW2:8" unused
 INPUT_PORTS_END
 
 
@@ -1119,34 +1119,34 @@ static INPUT_PORTS_START( puyopuy2 )
 	PORT_INCLUDE( systemc_generic )
 
 	PORT_MODIFY("P1")
-    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 3 Unused */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 3 Unused */
 
 	PORT_MODIFY("P2")
-    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )		/* Button 3 Unused */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )     /* Button 3 Unused */
 
 	PORT_MODIFY("DSW")
-    PORT_DIPNAME( 0x01, 0x01, "Rannyu Off Button" )
-    PORT_DIPSETTING(    0x01, "Use" )
-    PORT_DIPSETTING(    0x00, "No Use" )
-    PORT_DIPNAME( 0x02, 0x00, DEF_STR( Demo_Sounds ) )
-    PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
+	PORT_DIPNAME( 0x01, 0x01, "Rannyu Off Button" ) PORT_DIPLOCATION("SW2:1")
+	PORT_DIPSETTING(    0x01, "Use" )
+	PORT_DIPSETTING(    0x00, "No Use" )
+	PORT_DIPNAME( 0x02, 0x00, DEF_STR( Demo_Sounds ) ) PORT_DIPLOCATION("SW2:2")
+	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x04, 0x04, "Turn Direction" )
-    PORT_DIPSETTING(    0x04, "1:Right  2:Left" )
-    PORT_DIPSETTING(    0x00, "1:Left  2:Right")
-    PORT_DIPNAME( 0x18, 0x18, DEF_STR( Difficulty ) )
-    PORT_DIPSETTING(    0x10, DEF_STR( Easy ) )
-    PORT_DIPSETTING(    0x18, DEF_STR( Medium ) )
-    PORT_DIPSETTING(    0x08, DEF_STR( Hard ) )
+	PORT_DIPNAME( 0x04, 0x04, "Turn Direction" ) PORT_DIPLOCATION("SW2:3")
+	PORT_DIPSETTING(    0x04, "1:Right  2:Left" )
+	PORT_DIPSETTING(    0x00, "1:Left  2:Right")
+	PORT_DIPNAME( 0x18, 0x18, DEF_STR( Difficulty ) ) PORT_DIPLOCATION("SW2:4,5")
+	PORT_DIPSETTING(    0x10, DEF_STR( Easy ) )
+	PORT_DIPSETTING(    0x18, DEF_STR( Medium ) )
+	PORT_DIPSETTING(    0x08, DEF_STR( Hard ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) )
-    PORT_DIPNAME( 0x60, 0x60, "VS Mode Match/1 Play" )
-    PORT_DIPSETTING(    0x60, "1" )
-    PORT_DIPSETTING(    0x40, "2" )
-    PORT_DIPSETTING(    0x20, "3" )
-    PORT_DIPSETTING(    0x00, "4" )
-    PORT_DIPNAME( 0x80, 0x80, "Battle Start credit" )
-    PORT_DIPSETTING(    0x00, "1" )
-    PORT_DIPSETTING(    0x80, "2" )
+	PORT_DIPNAME( 0x60, 0x60, "VS Mode Match/1 Play" ) PORT_DIPLOCATION("SW2:6,7")
+	PORT_DIPSETTING(    0x60, "1" )
+	PORT_DIPSETTING(    0x40, "2" )
+	PORT_DIPSETTING(    0x20, "3" )
+	PORT_DIPSETTING(    0x00, "4" )
+	PORT_DIPNAME( 0x80, 0x80, "Battle Start credit" ) PORT_DIPLOCATION("SW2:8")
+	PORT_DIPSETTING(    0x00, "1" )
+	PORT_DIPSETTING(    0x80, "2" )
 INPUT_PORTS_END
 
 
@@ -1154,69 +1154,45 @@ static INPUT_PORTS_START( pclub )
 	PORT_INCLUDE( systemc_generic )
 
 	PORT_MODIFY("P1")
-	PORT_BIT( 0x0f, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* Probably Unused */
-    PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_NAME("Ok")
-    PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_NAME("Cancel")
-    PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_2WAY
-    PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_2WAY
+	PORT_BIT( 0x0f, IP_ACTIVE_LOW, IPT_UNKNOWN )    /* Probably Unused */
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_NAME("Ok")
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_NAME("Cancel")
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_2WAY
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_2WAY
 
 	PORT_MODIFY("P2")
-	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* Probably Unused */
+	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )    /* Probably Unused */
 
 	PORT_MODIFY("SERVICE")
-	PORT_BIT( 0xf0, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* Probably Unused */
+	PORT_BIT( 0xf0, IP_ACTIVE_LOW, IPT_UNKNOWN )    /* Probably Unused */
 
 	PORT_MODIFY("COINAGE")
-	PORT_DIPNAME( 0x07, 0x07, DEF_STR( Coinage ) )
+	PORT_DIPNAME( 0x07, 0x07, DEF_STR( Coinage ) ) PORT_DIPLOCATION("SW4:1,2,3")
 	PORT_DIPSETTING(    0x00, DEF_STR( 7C_1C ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( 6C_1C ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( 5C_1C ) )
 	PORT_DIPSETTING(    0x03, DEF_STR( 4C_1C ) )
-    PORT_DIPSETTING(    0x07, DEF_STR( 3C_1C ) )
+	PORT_DIPSETTING(    0x07, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x05, DEF_STR( 1C_1C ) )
-    PORT_DIPSETTING(    0x06, DEF_STR( Free_Play ) )
-    PORT_DIPNAME( 0x08, 0x08, "Unknown 4-4" )
-    PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x10, 0x10, "Unknown 4-5" )
-    PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x20, 0x20, "Unknown 4-6" )
-    PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x40, 0x40, "Unknown 4-7" )
-    PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x80, 0x80, "Unknown 4-8" )
-    PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x06, DEF_STR( Free_Play ) )
+	PORT_DIPUNUSED_DIPLOC( 0x08, IP_ACTIVE_LOW, "SW4:4" )
+	PORT_DIPUNUSED_DIPLOC( 0x10, IP_ACTIVE_LOW, "SW4:5" )
+	PORT_DIPUNUSED_DIPLOC( 0x20, IP_ACTIVE_LOW, "SW4:6" )
+	PORT_DIPUNUSED_DIPLOC( 0x40, IP_ACTIVE_LOW, "SW4:7" )
+	PORT_DIPUNUSED_DIPLOC( 0x80, IP_ACTIVE_LOW, "SW4:8" )
 
 	PORT_MODIFY("DSW")
-    PORT_DIPNAME( 0x01, 0x01, "Unknown 5-1" )
-    PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
-    PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x02, 0x02, "Unknown 5-2" )
-    PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x04, 0x04, "Unknown 5-3" )
-    PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x08, 0x08, "Unknown 5-4" )
-    PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x10, 0x10, "Unknown 5-5" )
-    PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x20, 0x20, DEF_STR( Demo_Sounds ))
-    PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
+	PORT_DIPUNUSED_DIPLOC( 0x01, IP_ACTIVE_LOW, "SW5:1" )
+	PORT_DIPUNUSED_DIPLOC( 0x02, IP_ACTIVE_LOW, "SW5:2" )
+	PORT_DIPUNUSED_DIPLOC( 0x04, IP_ACTIVE_LOW, "SW5:3" )
+	PORT_DIPUNUSED_DIPLOC( 0x08, IP_ACTIVE_LOW, "SW5:4" )
+	PORT_DIPUNUSED_DIPLOC( 0x10, IP_ACTIVE_LOW, "SW5:5" )
+	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Demo_Sounds )) PORT_DIPLOCATION("SW5:6")
+	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( On ) )
-    PORT_DIPNAME( 0x40, 0x40, "Unknown 5-7" )
-    PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x80, 0x80, "Unknown 5-8" )
-    PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPUNUSED_DIPLOC( 0x40, IP_ACTIVE_LOW, "SW5:7" )
+	PORT_DIPUNUSED_DIPLOC( 0x80, IP_ACTIVE_LOW, "SW5:8" )
 INPUT_PORTS_END
 
 
@@ -1224,69 +1200,43 @@ static INPUT_PORTS_START( pclubjv2 )
 	PORT_INCLUDE( systemc_generic )
 
 	PORT_MODIFY("P1")
-	PORT_BIT( 0x0f, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* Probably Unused */
-    PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_NAME("Ok")
-    PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_NAME("Cancel")
-    PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_2WAY
-    PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_2WAY
+	PORT_BIT( 0x0f, IP_ACTIVE_LOW, IPT_UNKNOWN )    /* Probably Unused */
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_NAME("Ok")
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_NAME("Cancel")
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_2WAY
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_2WAY
 
 	PORT_MODIFY("P2")
-	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* Probably Unused */
+	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )    /* Probably Unused */
 
 	PORT_MODIFY("SERVICE")
-	PORT_BIT( 0xf0, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* Probably Unused */
+	PORT_BIT( 0xf0, IP_ACTIVE_LOW, IPT_UNKNOWN )    /* Probably Unused */
 
 	PORT_MODIFY("COINAGE")
-	PORT_DIPNAME( 0x07, 0x07, "Coins per Credit (Normal / Alternate)" )
+	PORT_DIPNAME( 0x07, 0x07, "Coins per Credit (Normal / Alternate)" ) PORT_DIPLOCATION("SW4:1,2,3")
 	PORT_DIPSETTING(    0x00, "25 / 30" ) //7C1C
 	PORT_DIPSETTING(    0x01, "6 / 7" ) //6C1C
 	PORT_DIPSETTING(    0x02, "10 / 12" ) //5C1C
 	PORT_DIPSETTING(    0x03, "1 / 2" ) //4C1C
-    PORT_DIPSETTING(    0x07, "3 / Free Play" ) //3C1C
+	PORT_DIPSETTING(    0x07, "3 / Free Play" ) //3C1C
 	PORT_DIPSETTING(    0x04, "15 / 20" ) //2C1C
 	PORT_DIPSETTING(    0x05, "4 / 5" ) //1C1C
-    PORT_DIPSETTING(    0x06, "8 / 9" ) //FP
-    PORT_DIPNAME( 0x08, 0x08, "Alternate Coinage" )
-    PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x10, 0x10, "Unknown 4-5" )
-    PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x20, 0x20, "Unknown 4-6" )
-    PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x40, 0x40, "Unknown 4-7" )
-    PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x80, 0x80, "Unknown 4-8" )
-    PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x06, "8 / 9" ) //FP
+	PORT_DIPNAME( 0x08, 0x08, "Alternate Coinage" ) PORT_DIPLOCATION("SW4:4")
+	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_MODIFY("DSW")
-    PORT_DIPNAME( 0x01, 0x01, "Unknown 5-1" )
-    PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
-    PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x02, 0x02, "Unknown 5-2" )
-    PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x04, 0x04, "Unknown 5-3" )
-    PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x08, 0x08, "Unknown 5-4" )
-    PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x10, 0x10, "Unknown 5-5" )
-    PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x20, 0x20, DEF_STR( Demo_Sounds ))
-    PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
+	PORT_DIPUNUSED_DIPLOC( 0x01, IP_ACTIVE_LOW, "SW5:1" )
+	PORT_DIPUNUSED_DIPLOC( 0x02, IP_ACTIVE_LOW, "SW5:2" )
+	PORT_DIPUNUSED_DIPLOC( 0x04, IP_ACTIVE_LOW, "SW5:3" )
+	PORT_DIPUNUSED_DIPLOC( 0x08, IP_ACTIVE_LOW, "SW5:4" )
+	PORT_DIPUNUSED_DIPLOC( 0x10, IP_ACTIVE_LOW, "SW5:5" )
+	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Demo_Sounds )) PORT_DIPLOCATION("SW5:6")
+	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( On ) )
-    PORT_DIPNAME( 0x40, 0x40, "Unknown 5-7" )
-    PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-    PORT_DIPNAME( 0x80, 0x80, "Unknown 5-8" )
-    PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPUNUSED_DIPLOC( 0x40, IP_ACTIVE_LOW, "SW5:7" )
+	PORT_DIPUNUSED_DIPLOC( 0x80, IP_ACTIVE_LOW, "SW5:8" )
 INPUT_PORTS_END
 
 /******************************************************************************
@@ -1296,11 +1246,11 @@ INPUT_PORTS_END
 static void  segac2_irq2_interrupt(device_t *device, int state)
 {
 	//printf("sound irq %d\n", state);
-	cputag_set_input_line(device->machine(), "maincpu", 2, state ? ASSERT_LINE : CLEAR_LINE);
+	device->machine().device("maincpu")->execute().set_input_line(2, state ? ASSERT_LINE : CLEAR_LINE);
 }
 static const ym3438_interface ym3438_intf =
 {
-	segac2_irq2_interrupt,		/* IRQ handler */
+	segac2_irq2_interrupt,      /* IRQ handler */
 };
 
 
@@ -1316,29 +1266,110 @@ static const ym3438_interface ym3438_intf =
 
 ******************************************************************************/
 
-static VIDEO_START(segac2_new)
+VIDEO_START_MEMBER(segac2_state,segac2_new)
 {
-	VIDEO_START_CALL(megadriv);
-
-	megadrive_vdp_palette_lookup = auto_alloc_array(machine, UINT16, 0x1000/2);
-	megadrive_vdp_palette_lookup_sprite = auto_alloc_array(machine, UINT16, 0x1000/2);
-	megadrive_vdp_palette_lookup_shadow = auto_alloc_array(machine, UINT16, 0x1000/2);
-	megadrive_vdp_palette_lookup_highlight = auto_alloc_array(machine, UINT16, 0x1000/2);
+	VIDEO_START_CALL_LEGACY(megadriv);
 }
 
-static SCREEN_UPDATE(segac2_new)
+// C2 doesn't use the internal VDP CRAM, instead it uses the digital output of the chip
+//  and applies it's own external colour circuity
+UINT32 segac2_state::screen_update_segac2_new(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	segac2_state *state = screen->machine().driver_data<segac2_state>();
-	if (!state->m_segac2_enable_display)
+	const pen_t *paldata = machine().pens;
+	if (!m_segac2_enable_display)
 	{
-		bitmap_fill(bitmap, NULL, get_black_pen(screen->machine()));
+		bitmap.fill(get_black_pen(machine()), cliprect);
 		return 0;
 	}
 
-	SCREEN_UPDATE_CALL(megadriv);
+	sega_genesis_vdp_device *vdp = m_vdp;
+
+	/* Copy our screen buffer here */
+	for (int y = cliprect.min_y; y <= cliprect.max_y; y++)
+	{
+		UINT32* desty = &bitmap.pix32(y, 0);
+		UINT16* srcy;
+
+		srcy = vdp->m_render_line_raw;
+
+		for (int x = cliprect.min_x; x <= cliprect.max_x; x++)
+		{
+			UINT16 src = srcy[x];
+			switch (src & 0x1c0)
+			{
+				case 0x000:
+					desty[x] = paldata[(src&0x0f) | segac2_bg_pal_lookup[(src & 0x30)>>4] | 0x800];
+					break;
+				case 0x040:
+					desty[x] = paldata[(src&0x0f) | segac2_bg_pal_lookup[(src & 0x30)>>4]];
+					break;
+				case 0x080:
+					desty[x] = paldata[(src&0x0f) | segac2_sp_pal_lookup[(src & 0x30)>>4]];
+					break;
+				case 0x0c0:
+					// bg pen
+					desty[x] = paldata[(src&0x0f) | segac2_bg_pal_lookup[(src & 0x30)>>4] | 0x1000];
+					break;
+				case 0x100:
+					// shadow
+					desty[x] = paldata[(src&0x0f) | segac2_bg_pal_lookup[(src & 0x30)>>4] | 0x800];
+					break;
+				case 0x140:
+					// normal
+					desty[x] = paldata[(src&0x0f) | segac2_bg_pal_lookup[(src & 0x30)>>4]];
+					break;
+				case 0x180:
+					// sprite
+					desty[x] = paldata[(src&0x0f) | segac2_sp_pal_lookup[(src & 0x30)>>4]];
+					break;
+				case 0x1c0:
+					// highlight
+					desty[x] = paldata[(src&0x0f) | segac2_bg_pal_lookup[(src & 0x30)>>4] | 0x1000];
+					break;
+			}
+		}
+	}
+
 	return 0;
 }
 
+
+
+
+// the main interrupt on C2 comes from the vdp line used to drive the z80 interrupt on a regular genesis(!)
+void genesis_vdp_sndirqline_callback_segac2(running_machine &machine, bool state)
+{
+	if (state==true)
+		machine.device("maincpu")->execute().set_input_line(6, HOLD_LINE);
+}
+
+// the line usually used to drive irq6 is not connected
+void genesis_vdp_lv6irqline_callback_segac2(running_machine &machine, bool state)
+{
+	//
+}
+
+// the scanline interrupt seems connected as usual
+void genesis_vdp_lv4irqline_callback_segac2(running_machine &machine, bool state)
+{
+	if (state==true)
+		machine.device("maincpu")->execute().set_input_line(4, HOLD_LINE);
+	else
+		machine.device("maincpu")->execute().set_input_line(4, CLEAR_LINE);
+}
+
+static const sega315_5124_interface sms_vdp_ntsc_intf =
+{
+	false,
+	"megadriv",
+	DEVCB_NULL,
+	DEVCB_NULL,
+};
+
+static const sn76496_config psg_intf =
+{
+	DEVCB_NULL
+};
 
 static MACHINE_CONFIG_START( segac, segac2_state )
 
@@ -1346,27 +1377,33 @@ static MACHINE_CONFIG_START( segac, segac2_state )
 	MCFG_CPU_ADD("maincpu", M68000, XL2_CLOCK/6)
 	MCFG_CPU_PROGRAM_MAP(main_map)
 
-	MCFG_MACHINE_START(segac2)
-	MCFG_MACHINE_RESET(segac2)
+	MCFG_MACHINE_START_OVERRIDE(segac2_state,segac2)
+	MCFG_MACHINE_RESET_OVERRIDE(segac2_state,segac2)
 	MCFG_NVRAM_ADD_RANDOM_FILL("nvram")
 
-	MCFG_FRAGMENT_ADD(megadriv_timers)
+//  MCFG_FRAGMENT_ADD(megadriv_timers)
 
-	/* video hardware */
-	//MCFG_VIDEO_ATTRIBUTES(VIDEO_HAS_SHADOWS | VIDEO_HAS_HIGHLIGHTS)
+	MCFG_DEVICE_ADD("gen_vdp", SEGA_GEN_VDP, 0)
+	MCFG_DEVICE_CONFIG( sms_vdp_ntsc_intf )
+	sega_genesis_vdp_device::set_genesis_vdp_sndirqline_callback(*device, genesis_vdp_sndirqline_callback_segac2);
+	sega_genesis_vdp_device::set_genesis_vdp_lv6irqline_callback(*device, genesis_vdp_lv6irqline_callback_segac2);
+	sega_genesis_vdp_device::set_genesis_vdp_lv4irqline_callback(*device, genesis_vdp_lv4irqline_callback_segac2);
+	sega_genesis_vdp_device::set_genesis_vdp_alt_timing(*device, 1);
+
+	MCFG_TIMER_ADD_SCANLINE("scantimer", megadriv_scanline_timer_callback_alt_timing, "megadriv", 0, 1)
+
 
 	MCFG_SCREEN_ADD("megadriv", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB15)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0)) // Vblank handled manually.
 	MCFG_SCREEN_SIZE(64*8, 64*8)
 	MCFG_SCREEN_VISIBLE_AREA(0, 32*8-1, 0, 28*8-1)
-	MCFG_SCREEN_UPDATE(segac2_new)
-	MCFG_SCREEN_EOF( megadriv )
+	MCFG_SCREEN_UPDATE_DRIVER(segac2_state, screen_update_segac2_new)
+	MCFG_SCREEN_VBLANK_STATIC( megadriv )
 
-	MCFG_PALETTE_LENGTH(2048)
+	MCFG_PALETTE_LENGTH(2048*3)
 
-	MCFG_VIDEO_START(segac2_new)
+	MCFG_VIDEO_START_OVERRIDE(segac2_state,segac2_new)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -1377,6 +1414,7 @@ static MACHINE_CONFIG_START( segac, segac2_state )
 	/* right channel not connected */
 
 	MCFG_SOUND_ADD("snsnd", SN76496, XL2_CLOCK/15)
+	MCFG_SOUND_CONFIG(psg_intf)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 MACHINE_CONFIG_END
 
@@ -1497,8 +1535,8 @@ ROM_END
 
 ROM_START( tfrceac ) /* ThunderForce AC  (c)1990 Technosoft / Sega */
 	ROM_REGION( 0x200000, "maincpu", 0 )
-	ROM_LOAD16_BYTE( "ic32.bin", 0x000000, 0x040000, CRC(95ecf202) SHA1(92b0f351f2bee7d59873a4991615f14f1afe4da7) )
-	ROM_LOAD16_BYTE( "ic31.bin", 0x000001, 0x040000, CRC(e63d7f1a) SHA1(a40d0a5a96f379a467048dc8fddd8aaaeb94da1d) )
+	ROM_LOAD16_BYTE( "epr-13675.ic32", 0x000000, 0x040000, CRC(95ecf202) SHA1(92b0f351f2bee7d59873a4991615f14f1afe4da7) )
+	ROM_LOAD16_BYTE( "epr-13674.ic31", 0x000001, 0x040000, CRC(e63d7f1a) SHA1(a40d0a5a96f379a467048dc8fddd8aaaeb94da1d) )
 	/* 0x080000 - 0x100000 Empty */
 	ROM_LOAD16_BYTE( "epr-13659.ic34", 0x100000, 0x040000, CRC(29f23461) SHA1(032a7125fef5a660b85654d595aafc46812cdde6) )
 	ROM_LOAD16_BYTE( "epr-13658.ic33", 0x100001, 0x040000, CRC(9e23734f) SHA1(64d27dc53f0ffc3513345a26ed077751b25d15f1) )
@@ -1816,21 +1854,19 @@ it should be, otherwise I don't see how the formula could be computed.
 
 ******************************************************************************/
 
-static void segac2_common_init(running_machine& machine, int (*func)(int in))
+void segac2_state::segac2_common_init(running_machine& machine, int (*func)(int in))
 {
 	segac2_state *state = machine.driver_data<segac2_state>();
 	device_t *upd = machine.device("upd");
 
-	DRIVER_INIT_CALL( megadriv_c2 );
+	DRIVER_INIT_CALL(megadriv_c2);
 
 	state->m_prot_func = func;
 
 	genvdp_use_cram = 0;
-	genesis_always_irq6 = 1;
-	genesis_other_hacks = 0;
 
 	if (upd != NULL)
-		machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(*upd, 0x880000, 0x880001, 0, 0x13fefe, FUNC(segac2_upd7759_w));
+		machine.device("maincpu")->memory().space(AS_PROGRAM).install_legacy_write_handler(*upd, 0x880000, 0x880001, 0, 0x13fefe, FUNC(segac2_upd7759_w));
 }
 
 
@@ -1841,7 +1877,7 @@ static int prot_func_columns(int in)
 	int const b0 = BIT( in,2) ^ ((BIT(~in,0) && BIT( in,7)) || (BIT( in,4) && BIT( in,6)));
 	int const b1 = BIT(~in,0) ^ (BIT( in,2) || (BIT( in,5) && BIT(~in,6) && BIT( in,7)));
 	int const b2 = BIT( in,3) ^ ((BIT( in,0) && BIT( in,1)) || (BIT( in,4) && BIT( in,6)));
-	int const b3 = BIT( in,1) ^ ((BIT( in,0) && BIT( in,1)) || (BIT( in,4) && BIT( in,5)) || (BIT(~in,6) && BIT( in,7)));	// 1 repeated
+	int const b3 = BIT( in,1) ^ ((BIT( in,0) && BIT( in,1)) || (BIT( in,4) && BIT( in,5)) || (BIT(~in,6) && BIT( in,7)));   // 1 repeated
 
 	return (b3 << 3) | (b2 << 2) | (b1 << 1) | b0;
 }
@@ -1851,8 +1887,8 @@ static int prot_func_columns2(int in)
 {
 	int const b0 =  BIT( in,2) ^ (BIT( in,1) || (BIT( in,4) && BIT( in,5)));
 	int const b1 = (BIT( in,0) && BIT( in,3) && BIT( in,4)) ^ (BIT( in,6) || (BIT( in,5) && BIT( in,7)));
-	int const b2 = (BIT( in,3) && BIT(~in,2) && BIT( in,4)) ^ (BIT( in,5) || (BIT( in,0) && BIT( in,1)) || (BIT( in,4) && BIT( in,6)));	// 4 repeated
-	int const b3 = (BIT( in,1) && BIT( in,0) && BIT( in,2)) ^ ((BIT( in,4) && BIT(~in,6)) || (BIT( in,6) && BIT( in,7)));	// 6 repeated
+	int const b2 = (BIT( in,3) && BIT(~in,2) && BIT( in,4)) ^ (BIT( in,5) || (BIT( in,0) && BIT( in,1)) || (BIT( in,4) && BIT( in,6))); // 4 repeated
+	int const b3 = (BIT( in,1) && BIT( in,0) && BIT( in,2)) ^ ((BIT( in,4) && BIT(~in,6)) || (BIT( in,6) && BIT( in,7)));   // 6 repeated
 
 	return (b3 << 3) | (b2 << 2) | (b1 << 1) | b0;
 }
@@ -1861,9 +1897,9 @@ static int prot_func_columns2(int in)
 static int prot_func_tfrceac(int in)
 {
 	int const b0 = BIT(~in,2) ^ ((BIT( in,0) && BIT(~in,7)) || (BIT( in,3) && BIT( in,4)));
-	int const b1 = (BIT( in,4) && BIT(~in,5) && BIT( in,7)) ^ ((BIT(~in,0) || BIT(~in,3)) && (BIT(~in,6) || BIT(~in,7)));	// not in the form x1 XOR (x2 OR x3 OR x4)
+	int const b1 = (BIT( in,4) && BIT(~in,5) && BIT( in,7)) ^ ((BIT(~in,0) || BIT(~in,3)) && (BIT(~in,6) || BIT(~in,7)));   // not in the form x1 XOR (x2 OR x3 OR x4)
 	int const b2 = BIT( in,2) ^ ((BIT( in,4) && BIT(~in,5) && BIT( in,7)) || (BIT(~in,1) && BIT( in,6)));
-	int const b3 = BIT( in,0) ^ ((BIT( in,1) && BIT( in,4) && BIT( in,6)) || (BIT( in,1) && BIT( in,4) && BIT( in,7)));	// 1,4 repeated
+	int const b3 = BIT( in,0) ^ ((BIT( in,1) && BIT( in,4) && BIT( in,6)) || (BIT( in,1) && BIT( in,4) && BIT( in,7))); // 1,4 repeated
 
 	return (b3 << 3) | (b2 << 2) | (b1 << 1) | b0;
 }
@@ -1874,7 +1910,7 @@ static int prot_func_borench(int in)
 	int const b0 = (BIT( in,1) && BIT( in,2) && BIT( in,3) && BIT( in,7))   ^ (BIT( in,5) || (BIT(~in,0) && BIT(~in,4)));
 	int const b1 = (BIT(~in,2) && BIT( in,3) && BIT( in,5))                 ^ (BIT( in,1) || (BIT( in,0) && BIT(~in,4)));
 	int const b2 = (BIT( in,1) && BIT(~in,4) && BIT(~in,6))                 ^ (BIT( in,2) || BIT( in,3) || (BIT( in,5) && BIT( in,7)));
-	int const b3 = (BIT(~in,0) && BIT( in,5) && (BIT( in,6) || BIT( in,7))) ^ (BIT( in,1) || (BIT( in,3) && BIT( in,4)));	// not in the form x1 XOR (x2 OR x3 OR x4)
+	int const b3 = (BIT(~in,0) && BIT( in,5) && (BIT( in,6) || BIT( in,7))) ^ (BIT( in,1) || (BIT( in,3) && BIT( in,4)));   // not in the form x1 XOR (x2 OR x3 OR x4)
 
 	return (b3 << 3) | (b2 << 2) | (b1 << 1) | b0;
 }
@@ -1894,9 +1930,9 @@ static int prot_func_ribbit(int in)
 static int prot_func_twinsqua(int in)
 {
 	int const b0 = (BIT( in,2) && BIT(~in,5)) ^ (BIT( in,3) || BIT(~in,4));
-	int const b1 = (BIT( in,0) && BIT(~in,2) && BIT( in,4)) ^ (BIT(~in,0) || BIT(~in,4) || BIT(~in,6));	// 0,4 repeated
+	int const b1 = (BIT( in,0) && BIT(~in,2) && BIT( in,4)) ^ (BIT(~in,0) || BIT(~in,4) || BIT(~in,6)); // 0,4 repeated
 	int const b2 = (BIT( in,3) && BIT(~in,5)) ^ (BIT( in,4) && BIT( in,7));
-	int const b3 =  BIT( in,1) ^ ((BIT(~in,3) && BIT(~in,6)) || (BIT( in,4) && BIT(~in,6)) || (BIT(~in,1) && BIT( in,3) && BIT(~in,4)));	// 1,3,4,6 repeated
+	int const b3 =  BIT( in,1) ^ ((BIT(~in,3) && BIT(~in,6)) || (BIT( in,4) && BIT(~in,6)) || (BIT(~in,1) && BIT( in,3) && BIT(~in,4)));    // 1,3,4,6 repeated
 
 	return (b3 << 3) | (b2 << 2) | (b1 << 1) | b0;
 }
@@ -1904,7 +1940,7 @@ static int prot_func_twinsqua(int in)
 /* 317-0203 */
 static int prot_func_puyo(int in)
 {
-	int const b0 = (BIT(~in,3) && BIT( in,7)) ^ ((BIT(~in,0) && BIT(~in,1)) || (BIT(~in,1) && BIT(~in,4)));	// 1 repeated
+	int const b0 = (BIT(~in,3) && BIT( in,7)) ^ ((BIT(~in,0) && BIT(~in,1)) || (BIT(~in,1) && BIT(~in,4))); // 1 repeated
 	int const b1 = (BIT( in,3) && BIT( in,5)) ^ (BIT(~in,2) || BIT( in,4) || BIT( in,6));
 	int const b2 = (BIT(~in,2) && BIT(~in,5)) ^ (BIT( in,1) || BIT(~in,3) || BIT(~in,6));
 	int const b3 =  BIT( in,1)                ^ ((BIT( in,0) && BIT( in,3) && BIT( in,7)) || BIT( in,4));
@@ -2030,7 +2066,7 @@ static int prot_func_pclubjv2(int in)
 {
 	int const b0 = (BIT( in,3) && BIT(~in,4)) ^ ((BIT(~in,1) && BIT(~in,7)) || BIT( in,6));
 	int const b1 = (BIT( in,0) && BIT( in,5)) ^  (BIT( in,2) && BIT(~in,6));
-	int const b2 = (BIT(~in,1) && BIT( in,6)) ^  (BIT( in,3) || BIT(~in,5)  || BIT(~in,1));	// 1 repeated
+	int const b2 = (BIT(~in,1) && BIT( in,6)) ^  (BIT( in,3) || BIT(~in,5)  || BIT(~in,1)); // 1 repeated
 	int const b3 = (BIT(~in,2) && BIT(~in,7)) ^  (BIT(~in,0) || BIT(~in,4));
 
 	return (b3 << 3) | (b2 << 2) | (b1 << 1) | b0;
@@ -2041,7 +2077,7 @@ static int prot_func_pclubjv4(int in)
 	int const b0 = (BIT(~in,2) && BIT( in,4)) ^ (BIT( in,1) && BIT(~in,6) && BIT(~in,3));
 	int const b1 = (BIT(~in,3) && BIT(~in,4)) ^ (BIT( in,0) && BIT( in,5) && BIT(~in,6));
 	int const b2 =  BIT(~in,0)                ^ (BIT( in,3) && BIT( in,4));
-	int const b3 = (BIT(~in,1) && BIT( in,7)) ^ (BIT( in,5) && BIT(~in,7));	// 7 repeated
+	int const b3 = (BIT(~in,1) && BIT( in,7)) ^ (BIT( in,5) && BIT(~in,7)); // 7 repeated
 
 	return (b3 << 3) | (b2 << 2) | (b1 << 1) | b0;
 }
@@ -2058,152 +2094,155 @@ static int prot_func_pclubjv5(int in)
 
 
 
-static DRIVER_INIT( c2boot )
+DRIVER_INIT_MEMBER(segac2_state,c2boot)
 {
-	segac2_common_init(machine, NULL);
+	segac2_common_init(machine(), NULL);
 }
 
-static DRIVER_INIT( bloxeedc )
+DRIVER_INIT_MEMBER(segac2_state,bloxeedc)
 {
-	segac2_common_init(machine, NULL);
+	segac2_common_init(machine(), NULL);
 }
 
-static DRIVER_INIT( columns )
+DRIVER_INIT_MEMBER(segac2_state,columns)
 {
-	segac2_common_init(machine, prot_func_columns);
+	segac2_common_init(machine(), prot_func_columns);
 }
 
-static DRIVER_INIT( columns2 )
+DRIVER_INIT_MEMBER(segac2_state,columns2)
 {
-	segac2_common_init(machine, prot_func_columns2);
+	segac2_common_init(machine(), prot_func_columns2);
 }
 
-static DRIVER_INIT( tfrceac )
+DRIVER_INIT_MEMBER(segac2_state,tfrceac)
 {
-	segac2_common_init(machine, prot_func_tfrceac);
+	segac2_common_init(machine(), prot_func_tfrceac);
 }
 
-static DRIVER_INIT( tfrceacb )
+DRIVER_INIT_MEMBER(segac2_state,tfrceacb)
 {
 	/* disable the palette bank switching from the protection chip */
-	segac2_common_init(machine, NULL);
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->nop_write(0x800000, 0x800001);
+	segac2_common_init(machine(), NULL);
+	machine().device("maincpu")->memory().space(AS_PROGRAM).nop_write(0x800000, 0x800001);
 }
 
-static DRIVER_INIT( borench )
+DRIVER_INIT_MEMBER(segac2_state,borench)
 {
-	segac2_common_init(machine, prot_func_borench);
+	segac2_common_init(machine(), prot_func_borench);
 }
 
-static DRIVER_INIT( twinsqua )
+DRIVER_INIT_MEMBER(segac2_state,twinsqua)
 {
-	segac2_common_init(machine, prot_func_twinsqua);
+	segac2_common_init(machine(), prot_func_twinsqua);
 }
 
-static DRIVER_INIT( ribbit )
+DRIVER_INIT_MEMBER(segac2_state,ribbit)
 {
-	segac2_common_init(machine, prot_func_ribbit);
+	segac2_common_init(machine(), prot_func_ribbit);
 }
 
-static DRIVER_INIT( puyo )
+DRIVER_INIT_MEMBER(segac2_state,puyo)
 {
-	segac2_common_init(machine, prot_func_puyo);
+	segac2_common_init(machine(), prot_func_puyo);
 }
 
-static DRIVER_INIT( tantr )
+DRIVER_INIT_MEMBER(segac2_state,tantr)
 {
-	segac2_common_init(machine, prot_func_tantr);
+	segac2_common_init(machine(), prot_func_tantr);
 }
 
-static DRIVER_INIT( tantrkor )
+DRIVER_INIT_MEMBER(segac2_state,tantrkor)
 {
-	segac2_common_init(machine, prot_func_tantrkor);
+	segac2_common_init(machine(), prot_func_tantrkor);
 }
 
-static DRIVER_INIT( potopoto )
+DRIVER_INIT_MEMBER(segac2_state,potopoto)
 {
-	segac2_common_init(machine, prot_func_potopoto);
+	segac2_common_init(machine(), prot_func_potopoto);
 }
 
-static DRIVER_INIT( stkclmns )
+DRIVER_INIT_MEMBER(segac2_state,stkclmns)
 {
-	segac2_common_init(machine, prot_func_stkclmns);
+	segac2_common_init(machine(), prot_func_stkclmns);
 }
 
-static DRIVER_INIT( stkclmnj )
+DRIVER_INIT_MEMBER(segac2_state,stkclmnj)
 {
-	segac2_common_init(machine, prot_func_stkclmnj);
+	segac2_common_init(machine(), prot_func_stkclmnj);
 }
 
-static DRIVER_INIT( ichir )
+DRIVER_INIT_MEMBER(segac2_state,ichir)
 {
-	segac2_common_init(machine, prot_func_ichir);
+	segac2_common_init(machine(), prot_func_ichir);
 }
 
-static DRIVER_INIT( ichirk )
+DRIVER_INIT_MEMBER(segac2_state,ichirk)
 {
-	segac2_common_init(machine, prot_func_ichirk);
+	segac2_common_init(machine(), prot_func_ichirk);
 }
 
-static DRIVER_INIT( ichirj )
+DRIVER_INIT_MEMBER(segac2_state,ichirj)
 {
-	segac2_common_init(machine, prot_func_ichirj);
+	segac2_common_init(machine(), prot_func_ichirj);
 }
 
-static DRIVER_INIT( ichirjbl )
+static READ16_HANDLER( ichirjbl_prot_r )
 {
-	/* when did this actually work? - the protection is patched but the new check fails? */
-	UINT16 *rom = (UINT16 *)machine.region("maincpu")->base();
-	rom[0x390/2] = 0x6600;
-
-	segac2_common_init(machine, NULL);
+	return 0x00f5;
 }
 
-static DRIVER_INIT( puyopuy2 )
+DRIVER_INIT_MEMBER(segac2_state,ichirjbl)
 {
-	segac2_common_init(machine, prot_func_puyopuy2);
+	segac2_common_init(machine(), NULL);
+
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_legacy_read_handler(0x840108, 0x840109, FUNC(ichirjbl_prot_r) );
 }
 
-static DRIVER_INIT( zunkyou )
+DRIVER_INIT_MEMBER(segac2_state,puyopuy2)
 {
-	segac2_common_init(machine, prot_func_zunkyou);
+	segac2_common_init(machine(), prot_func_puyopuy2);
+}
+
+DRIVER_INIT_MEMBER(segac2_state,zunkyou)
+{
+	segac2_common_init(machine(), prot_func_zunkyou);
 }
 
 
-static DRIVER_INIT( pclub )
+DRIVER_INIT_MEMBER(segac2_state,pclub)
 {
-	segac2_common_init(machine, prot_func_pclub);
+	segac2_common_init(machine(), prot_func_pclub);
 
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x880120, 0x880121, FUNC(printer_r) );/*Print Club Vol.1*/
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x880124, 0x880125, FUNC(printer_r) );/*Print Club Vol.2*/
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x880124, 0x880125, FUNC(print_club_camera_w));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_legacy_read_handler(0x880120, 0x880121, FUNC(printer_r) );/*Print Club Vol.1*/
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_legacy_read_handler(0x880124, 0x880125, FUNC(printer_r) );/*Print Club Vol.2*/
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_legacy_write_handler(0x880124, 0x880125, FUNC(print_club_camera_w));
 }
 
-static DRIVER_INIT( pclubjv2 )
+DRIVER_INIT_MEMBER(segac2_state,pclubjv2)
 {
-	segac2_common_init(machine, prot_func_pclubjv2);
+	segac2_common_init(machine(), prot_func_pclubjv2);
 
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x880120, 0x880121, FUNC(printer_r) );/*Print Club Vol.1*/
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x880124, 0x880125, FUNC(printer_r) );/*Print Club Vol.2*/
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x880124, 0x880125, FUNC(print_club_camera_w));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_legacy_read_handler(0x880120, 0x880121, FUNC(printer_r) );/*Print Club Vol.1*/
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_legacy_read_handler(0x880124, 0x880125, FUNC(printer_r) );/*Print Club Vol.2*/
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_legacy_write_handler(0x880124, 0x880125, FUNC(print_club_camera_w));
 }
 
-static DRIVER_INIT( pclubjv4 )
+DRIVER_INIT_MEMBER(segac2_state,pclubjv4)
 {
-	segac2_common_init(machine, prot_func_pclubjv4);
+	segac2_common_init(machine(), prot_func_pclubjv4);
 
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x880120, 0x880121, FUNC(printer_r) );/*Print Club Vol.1*/
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x880124, 0x880125, FUNC(printer_r) );/*Print Club Vol.2*/
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x880124, 0x880125, FUNC(print_club_camera_w));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_legacy_read_handler(0x880120, 0x880121, FUNC(printer_r) );/*Print Club Vol.1*/
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_legacy_read_handler(0x880124, 0x880125, FUNC(printer_r) );/*Print Club Vol.2*/
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_legacy_write_handler(0x880124, 0x880125, FUNC(print_club_camera_w));
 }
 
-static DRIVER_INIT( pclubjv5 )
+DRIVER_INIT_MEMBER(segac2_state,pclubjv5)
 {
-	segac2_common_init(machine, prot_func_pclubjv5);
+	segac2_common_init(machine(), prot_func_pclubjv5);
 
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x880120, 0x880121, FUNC(printer_r) );/*Print Club Vol.1*/
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x880124, 0x880125, FUNC(printer_r) );/*Print Club Vol.2*/
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x880124, 0x880125, FUNC(print_club_camera_w));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_legacy_read_handler(0x880120, 0x880121, FUNC(printer_r) );/*Print Club Vol.1*/
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_legacy_read_handler(0x880124, 0x880125, FUNC(printer_r) );/*Print Club Vol.2*/
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_legacy_write_handler(0x880124, 0x880125, FUNC(print_club_camera_w));
 }
 
 
@@ -2216,7 +2255,7 @@ static DRIVER_INIT( pclubjv5 )
 
     Dates are all verified correct from Ingame display, some of the Titles
     such as Ichidant-R, Tant-R might be slightly incorrect as I've seen the
-    games refered to by other names such as Ichident-R, Tanto-R, Tanto Arle
+    games referred to by other names such as Ichident-R, Tanto-R, Tanto Arle
     etc.
 
     bloxeedc is set as as clone of bloxeed as it is the same game but running
@@ -2225,43 +2264,44 @@ static DRIVER_INIT( pclubjv5 )
 
 ******************************************************************************/
 
+//    YEAR, NAME,      PARENT,   MACHINE,INPUT,    INIT,     MONITOR,COMPANY,FULLNAME,FLAGS
 /* System C Games */
-GAME( 1989, bloxeedc, bloxeed,  segac,    bloxeedc, bloxeedc, ROT0, "Sega / Elorg",           "Bloxeed (World, C System)", 0 )
-GAME( 1989, bloxeedu, bloxeed,  segac,    bloxeedc, bloxeedc, ROT0, "Sega / Elorg",           "Bloxeed (US, C System)", 0 )
-GAME( 1990, columns,  0,        segac,    columns,  columns,  ROT0, "Sega",                   "Columns (World)", 0 )
-GAME( 1990, columnsu, columns,  segac,    columnsu, columns,  ROT0, "Sega",                   "Columns (US, cocktail)", 0 ) // has cocktail mode dsw
-GAME( 1990, columnsj, columns,  segac,    columns,  columns,  ROT0, "Sega",                   "Columns (Japan)", 0 )
-GAME( 1990, columns2, 0,        segac,    columns2, columns2, ROT0, "Sega",                   "Columns II: The Voyage Through Time (World)", 0 )
-GAME( 1990, column2j, columns2, segac,    columns2, columns2, ROT0, "Sega",                   "Columns II: The Voyage Through Time (Japan)", 0 )
+GAME( 1989, bloxeedc,  bloxeed,  segac,  bloxeedc, segac2_state, bloxeedc, ROT0,   "Sega / Elorg", "Bloxeed (World, C System)", 0 )
+GAME( 1989, bloxeedu,  bloxeed,  segac,  bloxeedc, segac2_state, bloxeedc, ROT0,   "Sega / Elorg", "Bloxeed (US, C System)", 0 )
+GAME( 1990, columns,   0,        segac,  columns, segac2_state,  columns,  ROT0,   "Sega", "Columns (World)", 0 )
+GAME( 1990, columnsu,  columns,  segac,  columnsu, segac2_state, columns,  ROT0,   "Sega", "Columns (US, cocktail)", 0 ) // has cocktail mode dsw
+GAME( 1990, columnsj,  columns,  segac,  columns, segac2_state,  columns,  ROT0,   "Sega", "Columns (Japan)", 0 )
+GAME( 1990, columns2,  0,        segac,  columns2, segac2_state, columns2, ROT0,   "Sega", "Columns II: The Voyage Through Time (World)", 0 )
+GAME( 1990, column2j,  columns2, segac,  columns2, segac2_state, columns2, ROT0,   "Sega", "Columns II: The Voyage Through Time (Japan)", 0 )
 
 /* System C-2 Games */
-GAME( 1990, tfrceac,  0,        segac2,   tfrceac,  tfrceac,  ROT0, "Sega / Technosoft",      "ThunderForce AC", 0 )
-GAME( 1990, tfrceacj, tfrceac,  segac2,   tfrceac,  tfrceac,  ROT0, "Sega / Technosoft",      "ThunderForce AC (Japan)", 0 )
-GAME( 1990, tfrceacb, tfrceac,  segac2,   tfrceac,  tfrceacb, ROT0, "bootleg",                "ThunderForce AC (bootleg)", 0 )
-GAME( 1990, borench,  0,        segac2,   borench,  borench,  ROT0, "Sega",                   "Borench", 0 )
-GAME( 1991, twinsqua, 0,        segac2,   twinsqua, twinsqua, ROT0, "Sega",                   "Twin Squash", 0 )
-GAME( 1991, ribbit,   0,        segac2,   ribbit,   ribbit,   ROT0, "Sega",                   "Ribbit!", 0 )
-GAME( 1992, puyo,     0,        segac2,   puyo,     puyo,     ROT0, "Sega / Compile",         "Puyo Puyo (World)", 0 )
-GAME( 1992, puyobl,   puyo,     segac2,   puyo,     puyo,     ROT0, "bootleg",                "Puyo Puyo (World, bootleg)", 0 )
-GAME( 1992, puyoj,    puyo,     segac2,   puyo,     puyo,     ROT0, "Sega / Compile",         "Puyo Puyo (Japan, Rev B)", 0 )
-GAME( 1992, puyoja,   puyo,     segac2,   puyo,     puyo,     ROT0, "Sega / Compile",         "Puyo Puyo (Japan, Rev A)", 0 )
-GAME( 1992, tantr,    0,        segac2,   ichir,    tantr,    ROT0, "Sega",                   "Puzzle & Action: Tant-R (Japan)", 0 )
-GAME( 1993, tantrkor, tantr,    segac2,   ichir,    tantrkor, ROT0, "Sega",                   "Puzzle & Action: Tant-R (Korea)", 0 )
-GAME( 1992, tantrbl,  tantr,    segac2,   ichir,    c2boot,   ROT0, "bootleg",                "Puzzle & Action: Tant-R (Japan) (bootleg set 1)", 0 )
-GAME( 1994, tantrbl2, tantr,    segac,    ichir,    tantr,    ROT0, "bootleg",                "Puzzle & Action: Tant-R (Japan) (bootleg set 2)", 0 ) // Common bootleg in Europe, C board, no samples
-GAME( 1994, tantrbl3, tantr,    segac,    ichir,    tantr,    ROT0, "bootleg",                "Puzzle & Action: Tant-R (Japan) (bootleg set 3)", 0 ) // Common bootleg in Europe, C board, no samples
-GAME( 1994, potopoto, 0,        segac2,   potopoto, potopoto, ROT0, "Sega",                   "Poto Poto (Japan)", 0 )
-GAME( 1994, stkclmns, 0,        segac2,   stkclmns, stkclmns, ROT0, "Sega",                   "Stack Columns (World)", 0 )
-GAME( 1994, stkclmnsj,stkclmns, segac2,   stkclmns, stkclmnj, ROT0, "Sega",                   "Stack Columns (Japan)", 0 )
-GAME( 1994, ichir,    0,        segac2,   ichir,    ichir,    ROT0, "Sega",                   "Puzzle & Action: Ichidant-R (World)", 0 )
-GAME( 1994, ichirk,   ichir,    segac2,   ichir,    ichirk,   ROT0, "Sega",                   "Puzzle & Action: Ichidant-R (Korea)", 0 )
-GAME( 1994, ichirj,   ichir,    segac2,   ichir,    ichirj,   ROT0, "Sega",                   "Puzzle & Action: Ichidant-R (Japan)", 0 )
-GAME( 1994, ichirjbl, ichir,    segac,    ichir,    ichirjbl, ROT0, "bootleg",                "Puzzle & Action: Ichidant-R (Japan) (bootleg)", 0 ) // C board, no samples
-GAME( 1994, puyopuy2, 0,        segac2,   puyopuy2, puyopuy2, ROT0, "Compile (Sega license)", "Puyo Puyo 2 (Japan)", 0 )
-GAME( 1994, zunkyou,  0,        segac2,   zunkyou,  zunkyou,  ROT0, "Sega",                   "Zunzunkyou No Yabou (Japan)", 0 )
+GAME( 1990, tfrceac,   0,        segac2, tfrceac, segac2_state,  tfrceac,  ROT0,   "Sega / Technosoft", "ThunderForce AC", 0 )
+GAME( 1990, tfrceacj,  tfrceac,  segac2, tfrceac, segac2_state,  tfrceac,  ROT0,   "Sega / Technosoft", "ThunderForce AC (Japan)", 0 )
+GAME( 1990, tfrceacb,  tfrceac,  segac2, tfrceac, segac2_state,  tfrceacb, ROT0,   "bootleg", "ThunderForce AC (bootleg)", 0 )
+GAME( 1990, borench,   0,        segac2, borench, segac2_state,  borench,  ROT0,   "Sega", "Borench", 0 )
+GAME( 1991, twinsqua,  0,        segac2, twinsqua, segac2_state, twinsqua, ROT0,   "Sega", "Twin Squash", 0 )
+GAME( 1991, ribbit,    0,        segac2, ribbit, segac2_state,   ribbit,   ROT0,   "Sega", "Ribbit!", 0 )
+GAME( 1992, puyo,      0,        segac2, puyo, segac2_state,     puyo,     ROT0,   "Sega / Compile", "Puyo Puyo (World)", 0 )
+GAME( 1992, puyobl,    puyo,     segac2, puyo, segac2_state,     puyo,     ROT0,   "bootleg", "Puyo Puyo (World, bootleg)", 0 )
+GAME( 1992, puyoj,     puyo,     segac2, puyo, segac2_state,     puyo,     ROT0,   "Sega / Compile", "Puyo Puyo (Japan, Rev B)", 0 )
+GAME( 1992, puyoja,    puyo,     segac2, puyo, segac2_state,     puyo,     ROT0,   "Sega / Compile", "Puyo Puyo (Japan, Rev A)", 0 )
+GAME( 1992, tantr,     0,        segac2, ichir, segac2_state,    tantr,    ROT0,   "Sega", "Puzzle & Action: Tant-R (Japan)", 0 )
+GAME( 1993, tantrkor,  tantr,    segac2, ichir, segac2_state,    tantrkor, ROT0,   "Sega", "Puzzle & Action: Tant-R (Korea)", 0 )
+GAME( 1992, tantrbl,   tantr,    segac2, ichir, segac2_state,    c2boot,   ROT0,   "bootleg", "Puzzle & Action: Tant-R (Japan) (bootleg set 1)", 0 )
+GAME( 1994, tantrbl2,  tantr,    segac,  ichir, segac2_state,    tantr,    ROT0,   "bootleg", "Puzzle & Action: Tant-R (Japan) (bootleg set 2)", 0 ) // Common bootleg in Europe, C board, no samples
+GAME( 1994, tantrbl3,  tantr,    segac,  ichir, segac2_state,    tantr,    ROT0,   "bootleg", "Puzzle & Action: Tant-R (Japan) (bootleg set 3)", 0 ) // Common bootleg in Europe, C board, no samples
+GAME( 1994, potopoto,  0,        segac2, potopoto, segac2_state, potopoto, ROT0,   "Sega", "Poto Poto (Japan)", 0 )
+GAME( 1994, stkclmns,  0,        segac2, stkclmns, segac2_state, stkclmns, ROT0,   "Sega", "Stack Columns (World)", 0 )
+GAME( 1994, stkclmnsj, stkclmns, segac2, stkclmns, segac2_state, stkclmnj, ROT0,   "Sega", "Stack Columns (Japan)", 0 )
+GAME( 1994, ichir,     0,        segac2, ichir, segac2_state,    ichir,    ROT0,   "Sega", "Puzzle & Action: Ichidant-R (World)", 0 )
+GAME( 1994, ichirk,    ichir,    segac2, ichir, segac2_state,    ichirk,   ROT0,   "Sega", "Puzzle & Action: Ichidant-R (Korea)", 0 )
+GAME( 1994, ichirj,    ichir,    segac2, ichir, segac2_state,    ichirj,   ROT0,   "Sega", "Puzzle & Action: Ichidant-R (Japan)", 0 )
+GAME( 1994, ichirjbl,  ichir,    segac,  ichir, segac2_state,    ichirjbl, ROT0,   "bootleg", "Puzzle & Action: Ichidant-R (Japan) (bootleg)", 0 ) // C board, no samples
+GAME( 1994, puyopuy2,  0,        segac2, puyopuy2, segac2_state, puyopuy2, ROT0,   "Compile (Sega license)", "Puyo Puyo 2 (Japan)", 0 )
+GAME( 1994, zunkyou,   0,        segac2, zunkyou, segac2_state,  zunkyou,  ROT0,   "Sega", "Zunzunkyou No Yabou (Japan)", 0 )
 
 /* Atlus Print Club 'Games' (C-2 Hardware, might not be possible to support them because they use camera + printer, really just put here for reference) */
-GAME( 1995, pclubj,   0,        segac2,   pclub,    pclub,    ROT0, "Atlus",                  "Print Club (Japan Vol.1)", GAME_NOT_WORKING )
-GAME( 1995, pclubjv2, pclubj,   segac2,   pclubjv2, pclubjv2, ROT0, "Atlus",                  "Print Club (Japan Vol.2)", GAME_NOT_WORKING )
-GAME( 1996, pclubjv4, pclubj,   segac2,   pclubjv2, pclubjv4, ROT0, "Atlus",                  "Print Club (Japan Vol.4)", GAME_NOT_WORKING )
-GAME( 1996, pclubjv5, pclubj,   segac2,   pclubjv2, pclubjv5, ROT0, "Atlus",                  "Print Club (Japan Vol.5)", GAME_NOT_WORKING )
+GAME( 1995, pclubj,    0,        segac2, pclub, segac2_state,    pclub,    ROT0,   "Atlus", "Print Club (Japan Vol.1)", GAME_NOT_WORKING )
+GAME( 1995, pclubjv2,  pclubj,   segac2, pclubjv2, segac2_state, pclubjv2, ROT0,   "Atlus", "Print Club (Japan Vol.2)", GAME_NOT_WORKING )
+GAME( 1996, pclubjv4,  pclubj,   segac2, pclubjv2, segac2_state, pclubjv4, ROT0,   "Atlus", "Print Club (Japan Vol.4)", GAME_NOT_WORKING )
+GAME( 1996, pclubjv5,  pclubj,   segac2, pclubjv2, segac2_state, pclubjv5, ROT0,   "Atlus", "Print Club (Japan Vol.5)", GAME_NOT_WORKING )

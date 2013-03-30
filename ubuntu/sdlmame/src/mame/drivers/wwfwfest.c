@@ -18,7 +18,7 @@
 
  Sound Chips : YM2151, M6295
 
- 4 Layers from now on if mentioned will be refered to as
+ 4 Layers from now on if mentioned will be referred to as
 
  BG0 - Background Layer 0
  BG1 - Background Layer 1
@@ -44,19 +44,17 @@
 #include "sound/2151intf.h"
 #include "sound/okim6295.h"
 
-#define MASTER_CLOCK		XTAL_24MHz
-#define CPU_CLOCK			MASTER_CLOCK / 2
-#define PIXEL_CLOCK		MASTER_CLOCK / 4
+#define MASTER_CLOCK        XTAL_24MHz
+#define CPU_CLOCK           MASTER_CLOCK / 2
+#define PIXEL_CLOCK     MASTER_CLOCK / 4
 
 /*- in this file -*/
-static READ16_HANDLER( wwfwfest_paletteram16_xxxxBBBBGGGGRRRR_word_r );
-static WRITE16_HANDLER( wwfwfest_paletteram16_xxxxBBBBGGGGRRRR_word_w );
-static WRITE16_HANDLER( wwfwfest_1410_write ); /* priority write */
-static WRITE16_HANDLER( wwfwfest_scroll_write ); /* scrolling write */
-static WRITE8_DEVICE_HANDLER( oki_bankswitch_w );
-static WRITE16_HANDLER ( wwfwfest_soundwrite );
-static WRITE16_HANDLER ( wwfwfest_flipscreen_w );
-static WRITE16_HANDLER ( wwfwfest_irq_ack_w );
+
+
+
+
+
+
 
 /*******************************************************************************
  Memory Maps
@@ -66,12 +64,12 @@ static WRITE16_HANDLER ( wwfwfest_irq_ack_w );
  still some unknown writes however, sound cpu memory map is the same as dd3
 *******************************************************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16, wwfwfest_state )
 	AM_RANGE(0x000000, 0x07ffff) AM_ROM
-	AM_RANGE(0x0c0000, 0x0c1fff) AM_RAM_WRITE(wwfwfest_fg0_videoram_w) AM_BASE_MEMBER(wwfwfest_state, m_fg0_videoram)	/* FG0 Ram - 4 bytes per tile */
-	AM_RANGE(0x0c2000, 0x0c3fff) AM_RAM AM_BASE_SIZE_GENERIC(spriteram)						/* SPR Ram */
-	AM_RANGE(0x080000, 0x080fff) AM_RAM_WRITE(wwfwfest_bg0_videoram_w) AM_BASE_MEMBER(wwfwfest_state, m_bg0_videoram)	/* BG0 Ram - 4 bytes per tile */
-	AM_RANGE(0x082000, 0x082fff) AM_RAM_WRITE(wwfwfest_bg1_videoram_w) AM_BASE_MEMBER(wwfwfest_state, m_bg1_videoram)	/* BG1 Ram - 2 bytes per tile */
+	AM_RANGE(0x0c0000, 0x0c1fff) AM_RAM_WRITE(wwfwfest_fg0_videoram_w) AM_SHARE("fg0_videoram") /* FG0 Ram - 4 bytes per tile */
+	AM_RANGE(0x0c2000, 0x0c3fff) AM_RAM AM_SHARE("spriteram")                       /* SPR Ram */
+	AM_RANGE(0x080000, 0x080fff) AM_RAM_WRITE(wwfwfest_bg0_videoram_w) AM_SHARE("bg0_videoram") /* BG0 Ram - 4 bytes per tile */
+	AM_RANGE(0x082000, 0x082fff) AM_RAM_WRITE(wwfwfest_bg1_videoram_w) AM_SHARE("bg1_videoram") /* BG1 Ram - 2 bytes per tile */
 	AM_RANGE(0x100000, 0x100007) AM_WRITE(wwfwfest_scroll_write)
 	AM_RANGE(0x10000a, 0x10000b) AM_WRITE(wwfwfest_flipscreen_w)
 	AM_RANGE(0x140000, 0x140003) AM_WRITE(wwfwfest_irq_ack_w)
@@ -81,17 +79,17 @@ static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16 )
 	AM_RANGE(0x140022, 0x140023) AM_READ_PORT("P2")
 	AM_RANGE(0x140024, 0x140025) AM_READ_PORT("P3")
 	AM_RANGE(0x140026, 0x140027) AM_READ_PORT("P4")
-	AM_RANGE(0x180000, 0x18ffff) AM_READWRITE(wwfwfest_paletteram16_xxxxBBBBGGGGRRRR_word_r,wwfwfest_paletteram16_xxxxBBBBGGGGRRRR_word_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x180000, 0x18ffff) AM_READWRITE(wwfwfest_paletteram16_xxxxBBBBGGGGRRRR_word_r,wwfwfest_paletteram16_xxxxBBBBGGGGRRRR_word_w) AM_SHARE("paletteram")
 	AM_RANGE(0x1c0000, 0x1c3fff) AM_RAM /* Work Ram */
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, wwfwfest_state )
 	AM_RANGE(0x0000, 0xbfff) AM_ROM
 	AM_RANGE(0xc000, 0xc7ff) AM_RAM
-	AM_RANGE(0xc800, 0xc801) AM_DEVREADWRITE("ymsnd", ym2151_r, ym2151_w)
-	AM_RANGE(0xd800, 0xd800) AM_DEVREADWRITE_MODERN("oki", okim6295_device, read, write)
-	AM_RANGE(0xe000, 0xe000) AM_READ(soundlatch_r)
-	AM_RANGE(0xe800, 0xe800) AM_DEVWRITE("oki", oki_bankswitch_w)
+	AM_RANGE(0xc800, 0xc801) AM_DEVREADWRITE("ymsnd", ym2151_device, read, write)
+	AM_RANGE(0xd800, 0xd800) AM_DEVREADWRITE("oki", okim6295_device, read, write)
+	AM_RANGE(0xe000, 0xe000) AM_READ(soundlatch_byte_r)
+	AM_RANGE(0xe800, 0xe800) AM_WRITE(oki_bankswitch_w)
 ADDRESS_MAP_END
 
 /*******************************************************************************
@@ -100,75 +98,74 @@ ADDRESS_MAP_END
  as used by the above memory map
 *******************************************************************************/
 
-static WRITE16_HANDLER( wwfwfest_irq_ack_w )
+WRITE16_MEMBER(wwfwfest_state::wwfwfest_irq_ack_w)
 {
 	if (offset == 0)
-		cputag_set_input_line(space->machine(), "maincpu", 3, CLEAR_LINE);
+		machine().device("maincpu")->execute().set_input_line(3, CLEAR_LINE);
 
 	else
-		cputag_set_input_line(space->machine(), "maincpu", 2, CLEAR_LINE);
+		machine().device("maincpu")->execute().set_input_line(2, CLEAR_LINE);
 }
 
-static WRITE16_HANDLER( wwfwfest_flipscreen_w )
+WRITE16_MEMBER(wwfwfest_state::wwfwfest_flipscreen_w)
 {
-	flip_screen_set(space->machine(), data&1);
+	flip_screen_set(data&1);
 }
 
 /*- Palette Reads/Writes -*/
 
-static READ16_HANDLER( wwfwfest_paletteram16_xxxxBBBBGGGGRRRR_word_r )
+READ16_MEMBER(wwfwfest_state::wwfwfest_paletteram16_xxxxBBBBGGGGRRRR_word_r)
 {
 	offset = (offset & 0x000f) | (offset & 0x7fc0) >> 2;
-	return space->machine().generic.paletteram.u16[offset];
+	return m_generic_paletteram_16[offset];
 }
 
-static WRITE16_HANDLER( wwfwfest_paletteram16_xxxxBBBBGGGGRRRR_word_w )
+WRITE16_MEMBER(wwfwfest_state::wwfwfest_paletteram16_xxxxBBBBGGGGRRRR_word_w)
 {
 	offset = (offset & 0x000f) | (offset & 0x7fc0) >> 2;
-	paletteram16_xxxxBBBBGGGGRRRR_word_w (space, offset, data, mem_mask);
+	paletteram_xxxxBBBBGGGGRRRR_word_w (space, offset, data, mem_mask);
 }
 
 /*- Priority Control -*/
 
 
-static WRITE16_HANDLER( wwfwfest_1410_write )
+WRITE16_MEMBER(wwfwfest_state::wwfwfest_1410_write)
 {
-	wwfwfest_state *state = space->machine().driver_data<wwfwfest_state>();
-	state->m_pri = data;
+	m_pri = data;
 }
 
 /*- Scroll Control -*/
 
-static WRITE16_HANDLER( wwfwfest_scroll_write )
+WRITE16_MEMBER(wwfwfest_state::wwfwfest_scroll_write)
 {
-	wwfwfest_state *state = space->machine().driver_data<wwfwfest_state>();
 	switch (offset) {
 		case 0x00:
-			state->m_bg0_scrollx = data;
+			m_bg0_scrollx = data;
 			break;
 		case 0x01:
-			state->m_bg0_scrolly = data;
+			m_bg0_scrolly = data;
 			break;
 		case 0x02:
-			state->m_bg1_scrollx = data;
+			m_bg1_scrollx = data;
 			break;
 		case 0x03:
-			state->m_bg1_scrolly = data;
+			m_bg1_scrolly = data;
 			break;
 	}
 }
 
 /*- Sound Related (from dd3) -*/
 
-static WRITE8_DEVICE_HANDLER( oki_bankswitch_w )
+WRITE8_MEMBER(wwfwfest_state::oki_bankswitch_w)
 {
+	device_t *device = machine().device("oki");
 	downcast<okim6295_device *>(device)->set_bank_base((data & 1) * 0x40000);
 }
 
-static WRITE16_HANDLER ( wwfwfest_soundwrite )
+WRITE16_MEMBER(wwfwfest_state::wwfwfest_soundwrite)
 {
-	soundlatch_w(space,1,data & 0xff);
-	cputag_set_input_line(space->machine(), "audiocpu", INPUT_LINE_NMI, PULSE_LINE );
+	soundlatch_byte_w(space,1,data & 0xff);
+	machine().device("audiocpu")->execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE );
 }
 
 /*******************************************************************************
@@ -177,17 +174,17 @@ static WRITE16_HANDLER ( wwfwfest_soundwrite )
  There are 4 players, 2 sets of dipswitches and 2 misc
 *******************************************************************************/
 
-/* DIPs are spread accross the other input ports */
-static CUSTOM_INPUT( dsw_3f_r )
+/* DIPs are spread across the other input ports */
+CUSTOM_INPUT_MEMBER(wwfwfest_state::dsw_3f_r)
 {
 	const char *tag = (const char *)param;
-	return input_port_read(field->port->machine(), tag) & 0x3f;
+	return ioport(tag)->read() & 0x3f;
 }
 
-static CUSTOM_INPUT( dsw_c0_r )
+CUSTOM_INPUT_MEMBER(wwfwfest_state::dsw_c0_r)
 {
 	const char *tag = (const char *)param;
-	return (input_port_read(field->port->machine(), tag) & 0xc0) >> 6;
+	return (ioport(tag)->read() & 0xc0) >> 6;
 }
 
 
@@ -205,7 +202,7 @@ static INPUT_PORTS_START( wwfwfest )
 	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x3000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(dsw_c0_r, "DSW2")
+	PORT_BIT( 0x3000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, wwfwfest_state,dsw_c0_r, "DSW2")
 	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
@@ -218,7 +215,7 @@ static INPUT_PORTS_START( wwfwfest )
 	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_START2 )
-	PORT_BIT( 0x3f00, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(dsw_3f_r, "DSW2")
+	PORT_BIT( 0x3f00, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, wwfwfest_state,dsw_3f_r, "DSW2")
 
 	PORT_START("P3")
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(3)
@@ -229,7 +226,7 @@ static INPUT_PORTS_START( wwfwfest )
 	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(3)
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_START3 )
-	PORT_BIT( 0x3f00, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(dsw_3f_r, "DSW1")
+	PORT_BIT( 0x3f00, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, wwfwfest_state,dsw_3f_r, "DSW1")
 
 	PORT_START("P4")
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(4)
@@ -240,8 +237,8 @@ static INPUT_PORTS_START( wwfwfest )
 	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(4)
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_START4 )
-	PORT_BIT( 0x0300, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(dsw_c0_r, "DSW1")
-	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x0300, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, wwfwfest_state,dsw_c0_r, "DSW1")
+	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -311,27 +308,27 @@ static const gfx_layout tiles8x8_layout =
 
 static const gfx_layout tile_layout =
 {
-	16,16,	/* 16*16 tiles */
-	4096,	/* 8192 tiles */
-	4,	/* 4 bits per pixel */
-	{ 8, 0, 0x40000*8+8 , 0x40000*8+0 },	/* the bitplanes are separated */
+	16,16,  /* 16*16 tiles */
+	4096,   /* 8192 tiles */
+	4,  /* 4 bits per pixel */
+	{ 8, 0, 0x40000*8+8 , 0x40000*8+0 },    /* the bitplanes are separated */
 	{ 0, 1, 2, 3, 4, 5, 6, 7,
 			32*8+0, 32*8+1, 32*8+2, 32*8+3, 32*8+4, 32*8+5, 32*8+6, 32*8+7 },
 	{ 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
 			16*8, 16*9, 16*10, 16*11, 16*12, 16*13, 16*14, 16*15 },
-	64*8	/* every tile takes 64 consecutive bytes */
+	64*8    /* every tile takes 64 consecutive bytes */
 };
 
 static const gfx_layout sprite_layout = {
-	16,16,	/* 16*16 tiles */
+	16,16,  /* 16*16 tiles */
 	RGN_FRAC(1,4),
-	4,	/* 4 bits per pixel */
+	4,  /* 4 bits per pixel */
 	{ 0, 0x200000*8, 2*0x200000*8 , 3*0x200000*8 }, /* the bitplanes are separated */
 	{ 0, 1, 2, 3, 4, 5, 6, 7,
 		16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 		8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8 },
-	32*8	/* every tile takes 32 consecutive bytes */
+	32*8    /* every tile takes 32 consecutive bytes */
 };
 
 static GFXDECODE_START( wwfwfest )
@@ -345,7 +342,7 @@ GFXDECODE_END
  Interrupt Function
 *******************************************************************************/
 
-static TIMER_DEVICE_CALLBACK( wwfwfest_scanline )
+TIMER_DEVICE_CALLBACK_MEMBER(wwfwfest_state::wwfwfest_scanline)
 {
 	int scanline = param;
 
@@ -353,39 +350,16 @@ static TIMER_DEVICE_CALLBACK( wwfwfest_scanline )
 	if (scanline % 16 == 0)
 	{
 		if (scanline > 0)
-			timer.machine().primary_screen->update_partial(scanline - 1);
-		cputag_set_input_line(timer.machine(), "maincpu", 2, ASSERT_LINE);
+			machine().primary_screen->update_partial(scanline - 1);
+		machine().device("maincpu")->execute().set_input_line(2, ASSERT_LINE);
 	}
 
 	/* Vblank is raised on scanline 248 */
 	if (scanline == 248)
 	{
-		timer.machine().primary_screen->update_partial(scanline - 1);
-		cputag_set_input_line(timer.machine(), "maincpu", 3, ASSERT_LINE);
+		machine().primary_screen->update_partial(scanline - 1);
+		machine().device("maincpu")->execute().set_input_line(3, ASSERT_LINE);
 	}
-}
-
-/*******************************************************************************
- Sound Stuff..
-********************************************************************************
- Straight from Ddragon 3 with some adjusted volumes
-*******************************************************************************/
-
-static void dd3_ymirq_handler(device_t *device, int irq)
-{
-	cputag_set_input_line(device->machine(), "audiocpu", 0 , irq ? ASSERT_LINE : CLEAR_LINE );
-}
-
-static const ym2151_interface ym2151_config =
-{
-	dd3_ymirq_handler
-};
-
-static SCREEN_EOF( wwfwfest )
-{
-	address_space *space = machine.device("maincpu")->memory().space(AS_PROGRAM);
-
-	buffer_spriteram16_w(space,0,0,0xffff);
 }
 
 /*******************************************************************************
@@ -395,32 +369,30 @@ static SCREEN_EOF( wwfwfest )
 static MACHINE_CONFIG_START( wwfwfest, wwfwfest_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M68000, CPU_CLOCK)	/* 24 crystal, 12 rated chip */
+	MCFG_CPU_ADD("maincpu", M68000, CPU_CLOCK)  /* 24 crystal, 12 rated chip */
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_TIMER_ADD_SCANLINE("scantimer", wwfwfest_scanline, "screen", 0, 1)
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("scantimer", wwfwfest_state, wwfwfest_scanline, "screen", 0, 1)
 
 	MCFG_CPU_ADD("audiocpu", Z80, XTAL_3_579545MHz)
 	MCFG_CPU_PROGRAM_MAP(sound_map)
 
 	/* video hardware */
-	MCFG_VIDEO_ATTRIBUTES(VIDEO_BUFFERS_SPRITERAM)
+	MCFG_BUFFERED_SPRITERAM16_ADD("spriteram")
 
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
-	MCFG_SCREEN_RAW_PARAMS(PIXEL_CLOCK, 384, 0, 320, 272, 8, 248)	/* HTOTAL and VTOTAL are guessed */
-	MCFG_SCREEN_UPDATE(wwfwfest)
-	MCFG_SCREEN_EOF(wwfwfest)
+	MCFG_SCREEN_RAW_PARAMS(PIXEL_CLOCK, 384, 0, 320, 272, 8, 248)   /* HTOTAL and VTOTAL are guessed */
+	MCFG_SCREEN_UPDATE_DRIVER(wwfwfest_state, screen_update_wwfwfest)
+	MCFG_SCREEN_VBLANK_DEVICE("spriteram", buffered_spriteram16_device, vblank_copy_rising)
 
 	MCFG_GFXDECODE(wwfwfest)
 	MCFG_PALETTE_LENGTH(8192)
 
-	MCFG_VIDEO_START(wwfwfest)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("ymsnd", YM2151, XTAL_3_579545MHz)
-	MCFG_SOUND_CONFIG(ym2151_config)
+	MCFG_YM2151_ADD("ymsnd", XTAL_3_579545MHz)
+	MCFG_YM2151_IRQ_HANDLER(INPUTLINE("audiocpu", 0))
 	MCFG_SOUND_ROUTE(0, "mono", 0.45)
 	MCFG_SOUND_ROUTE(1, "mono", 0.45)
 
@@ -429,7 +401,7 @@ static MACHINE_CONFIG_START( wwfwfest, wwfwfest_state )
 MACHINE_CONFIG_END
 
 static MACHINE_CONFIG_DERIVED( wwfwfstb, wwfwfest )
-	MCFG_VIDEO_START(wwfwfstb)
+	MCFG_VIDEO_START_OVERRIDE(wwfwfest_state,wwfwfstb)
 MACHINE_CONFIG_END
 
 /*******************************************************************************
@@ -488,7 +460,7 @@ ROM_START( wwfwfest )
 	ROM_REGION( 0x10000, "audiocpu", 0 ) /* Sound CPU (Z80)  */
 	ROM_LOAD( "31a11-2.ic42", 0x00000, 0x10000, CRC(5ddebfea) SHA1(30073963e965250d94f0dc3bd261a054850adf95) )
 
-	ROM_REGION( 0x80000, "oki", 0 )	/* ADPCM samples */
+	ROM_REGION( 0x80000, "oki", 0 ) /* ADPCM samples */
 	ROM_LOAD( "31j10.ic73",   0x00000, 0x80000, CRC(6c522edb) SHA1(8005d59c94160638ba2ea7caf4e991fff03003d5) )
 
 	ROM_REGION( 0x20000, "gfx1", 0 ) /* FG0 Tiles (8x8) */
@@ -517,7 +489,7 @@ ROM_START( wwfwfesta )
 	ROM_REGION( 0x10000, "audiocpu", 0 ) /* Sound CPU (Z80)  */
 	ROM_LOAD( "31a11-2.ic42", 0x00000, 0x10000, CRC(5ddebfea) SHA1(30073963e965250d94f0dc3bd261a054850adf95) )
 
-	ROM_REGION( 0x80000, "oki", 0 )	/* ADPCM samples */
+	ROM_REGION( 0x80000, "oki", 0 ) /* ADPCM samples */
 	ROM_LOAD( "31j10.ic73",   0x00000, 0x80000, CRC(6c522edb) SHA1(8005d59c94160638ba2ea7caf4e991fff03003d5) )
 
 	ROM_REGION( 0x20000, "gfx1", 0 ) /* FG0 Tiles (8x8) */
@@ -546,7 +518,7 @@ ROM_START( wwfwfestb )
 	ROM_REGION( 0x10000, "audiocpu", 0 ) /* Sound CPU (Z80)  */
 	ROM_LOAD( "1",             0x00000, 0x10000, CRC(d9e8cda2) SHA1(754c73cd341d51ffd35cdb62155a3f061416c9ba) )
 
-	ROM_REGION( 0x80000, "oki", 0 )	/* ADPCM samples */
+	ROM_REGION( 0x80000, "oki", 0 ) /* ADPCM samples */
 	ROM_LOAD( "wf_73a.rom",    0x00000, 0x80000, CRC(6c522edb) SHA1(8005d59c94160638ba2ea7caf4e991fff03003d5) )
 
 	ROM_REGION( 0x20000, "gfx1", 0 ) /* FG0 Tiles (8x8) */
@@ -577,7 +549,7 @@ ROM_START( wwfwfestj )
 	ROM_REGION( 0x10000, "audiocpu", 0 ) /* Sound CPU (Z80)  */
 	ROM_LOAD( "31a11-2.ic42", 0x00000, 0x10000, CRC(5ddebfea) SHA1(30073963e965250d94f0dc3bd261a054850adf95) )
 
-	ROM_REGION( 0x80000, "oki", 0 )	/* ADPCM samples */
+	ROM_REGION( 0x80000, "oki", 0 ) /* ADPCM samples */
 	ROM_LOAD( "31j10.ic73",   0x00000, 0x80000, CRC(6c522edb) SHA1(8005d59c94160638ba2ea7caf4e991fff03003d5) )
 
 	ROM_REGION( 0x20000, "gfx1", 0 ) /* FG0 Tiles (8x8) */
@@ -598,7 +570,7 @@ ROM_START( wwfwfestj )
 	ROM_LOAD( "31j1.ic2",     0x00000, 0x40000, CRC(82ed7155) SHA1(b338e1150ffe3277c11d4d6e801a7d3bd7c58492) ) /* 2,3 */
 ROM_END
 
-GAME( 1991, wwfwfest,  0,        wwfwfest, wwfwfest, 0, ROT0, "Technos Japan",                 "WWF WrestleFest (US set 1)",   GAME_SUPPORTS_SAVE )
-GAME( 1991, wwfwfesta, wwfwfest, wwfwfest, wwfwfest, 0, ROT0, "Technos Japan (Tecmo license)", "WWF WrestleFest (US Tecmo)",   GAME_SUPPORTS_SAVE )
-GAME( 1991, wwfwfestb, wwfwfest, wwfwfstb, wwfwfest, 0, ROT0, "bootleg",                       "WWF WrestleFest (US bootleg)", GAME_SUPPORTS_SAVE )
-GAME( 1991, wwfwfestj, wwfwfest, wwfwfest, wwfwfest, 0, ROT0, "Technos Japan",                 "WWF WrestleFest (Japan)",      GAME_SUPPORTS_SAVE )
+GAME( 1991, wwfwfest,  0,        wwfwfest, wwfwfest, driver_device, 0, ROT0, "Technos Japan",                 "WWF WrestleFest (US set 1)",   GAME_SUPPORTS_SAVE )
+GAME( 1991, wwfwfesta, wwfwfest, wwfwfest, wwfwfest, driver_device, 0, ROT0, "Technos Japan (Tecmo license)", "WWF WrestleFest (US Tecmo)",   GAME_SUPPORTS_SAVE )
+GAME( 1991, wwfwfestb, wwfwfest, wwfwfstb, wwfwfest, driver_device, 0, ROT0, "bootleg",                       "WWF WrestleFest (US bootleg)", GAME_SUPPORTS_SAVE )
+GAME( 1991, wwfwfestj, wwfwfest, wwfwfest, wwfwfest, driver_device, 0, ROT0, "Technos Japan",                 "WWF WrestleFest (Japan)",      GAME_SUPPORTS_SAVE )

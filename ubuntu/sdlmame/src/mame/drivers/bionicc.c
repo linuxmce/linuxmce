@@ -57,7 +57,6 @@
 #include "emu.h"
 #include "cpu/z80/z80.h"
 #include "cpu/m68000/m68000.h"
-#include "deprecat.h"
 #include "sound/2151intf.h"
 #include "includes/bionicc.h"
 
@@ -71,50 +70,45 @@
  *
  *************************************/
 
-static WRITE16_HANDLER( hacked_controls_w )
+WRITE16_MEMBER(bionicc_state::hacked_controls_w)
 {
-	bionicc_state *state = space->machine().driver_data<bionicc_state>();
 
-	logerror("%06x: hacked_controls_w %04x %02x\n", cpu_get_pc(&space->device()), offset, data);
-	COMBINE_DATA(&state->m_inp[offset]);
+	logerror("%06x: hacked_controls_w %04x %02x\n", space.device().safe_pc(), offset, data);
+	COMBINE_DATA(&m_inp[offset]);
 }
 
-static READ16_HANDLER( hacked_controls_r )
+READ16_MEMBER(bionicc_state::hacked_controls_r)
 {
-	bionicc_state *state = space->machine().driver_data<bionicc_state>();
 
-	logerror("%06x: hacked_controls_r %04x %04x\n", cpu_get_pc(&space->device()), offset, state->m_inp[offset]);
-	return state->m_inp[offset];
+	logerror("%06x: hacked_controls_r %04x %04x\n", space.device().safe_pc(), offset, m_inp[offset]);
+	return m_inp[offset];
 }
 
-static WRITE16_HANDLER( bionicc_mpu_trigger_w )
+WRITE16_MEMBER(bionicc_state::bionicc_mpu_trigger_w)
 {
-	bionicc_state *state = space->machine().driver_data<bionicc_state>();
 
-	data = input_port_read(space->machine(), "SYSTEM") >> 12;
-	state->m_inp[0] = data ^ 0x0f;
+	data = ioport("SYSTEM")->read() >> 12;
+	m_inp[0] = data ^ 0x0f;
 
-	data = input_port_read(space->machine(), "P2");
-	state->m_inp[1] = data ^ 0xff;
+	data = ioport("P2")->read();
+	m_inp[1] = data ^ 0xff;
 
-	data = input_port_read(space->machine(), "P1");
-	state->m_inp[2] = data ^ 0xff;
+	data = ioport("P1")->read();
+	m_inp[2] = data ^ 0xff;
 }
 
 
-static WRITE16_HANDLER( hacked_soundcommand_w )
+WRITE16_MEMBER(bionicc_state::hacked_soundcommand_w)
 {
-	bionicc_state *state = space->machine().driver_data<bionicc_state>();
 
-	COMBINE_DATA(&state->m_soundcommand);
-	soundlatch_w(space, 0, state->m_soundcommand & 0xff);
+	COMBINE_DATA(&m_soundcommand);
+	soundlatch_byte_w(space, 0, m_soundcommand & 0xff);
 }
 
-static READ16_HANDLER( hacked_soundcommand_r )
+READ16_MEMBER(bionicc_state::hacked_soundcommand_r)
 {
-	bionicc_state *state = space->machine().driver_data<bionicc_state>();
 
-	return state->m_soundcommand;
+	return m_soundcommand;
 }
 
 
@@ -127,18 +121,19 @@ static READ16_HANDLER( hacked_soundcommand_r )
   IRQ 2 drives the game
   IRQ 4 processes the input ports
 
-  The game is very picky about timing. The following is the only
-  way I have found it to work.
-
 ********************************************************************/
 
-static INTERRUPT_GEN( bionicc_interrupt )
+TIMER_DEVICE_CALLBACK_MEMBER(bionicc_state::bionicc_scanline)
 {
-	if (cpu_getiloops(device) == 0)
-		device_set_input_line(device, 2, HOLD_LINE);
-	else
-		device_set_input_line(device, 4, HOLD_LINE);
+	int scanline = param;
+
+	if(scanline == 240) // vblank-out irq
+		machine().device("maincpu")->execute().set_input_line(2, HOLD_LINE);
+
+	if(scanline == 0) // vblank-in or i8751 related irq
+		machine().device("maincpu")->execute().set_input_line(4, HOLD_LINE);
 }
+
 
 /*************************************
  *
@@ -146,30 +141,30 @@ static INTERRUPT_GEN( bionicc_interrupt )
  *
  *************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16, bionicc_state )
 	AM_RANGE(0x000000, 0x03ffff) AM_ROM
-	AM_RANGE(0xfe0000, 0xfe07ff) AM_RAM	/* RAM? */
-	AM_RANGE(0xfe0800, 0xfe0cff) AM_RAM AM_BASE_SIZE_GENERIC(spriteram)
+	AM_RANGE(0xfe0000, 0xfe07ff) AM_RAM /* RAM? */
+	AM_RANGE(0xfe0800, 0xfe0cff) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0xfe0d00, 0xfe3fff) AM_RAM              /* RAM? */
-	AM_RANGE(0xfe4000, 0xfe4001) AM_WRITE(bionicc_gfxctrl_w)	/* + coin counters */
+	AM_RANGE(0xfe4000, 0xfe4001) AM_WRITE(bionicc_gfxctrl_w)    /* + coin counters */
 	AM_RANGE(0xfe4000, 0xfe4001) AM_READ_PORT("SYSTEM")
 	AM_RANGE(0xfe4002, 0xfe4003) AM_READ_PORT("DSW")
 	AM_RANGE(0xfe8010, 0xfe8017) AM_WRITE(bionicc_scroll_w)
-	AM_RANGE(0xfe801a, 0xfe801b) AM_WRITE(bionicc_mpu_trigger_w)	/* ??? not sure, but looks like it */
-	AM_RANGE(0xfec000, 0xfecfff) AM_RAM_WRITE(bionicc_txvideoram_w) AM_BASE_MEMBER(bionicc_state, m_txvideoram)
-	AM_RANGE(0xff0000, 0xff3fff) AM_RAM_WRITE(bionicc_fgvideoram_w) AM_BASE_MEMBER(bionicc_state, m_fgvideoram)
-	AM_RANGE(0xff4000, 0xff7fff) AM_RAM_WRITE(bionicc_bgvideoram_w) AM_BASE_MEMBER(bionicc_state, m_bgvideoram)
-	AM_RANGE(0xff8000, 0xff87ff) AM_RAM_WRITE(bionicc_paletteram_w) AM_BASE_MEMBER(bionicc_state, m_paletteram)
-	AM_RANGE(0xffc000, 0xfffff7) AM_RAM	/* working RAM */
+	AM_RANGE(0xfe801a, 0xfe801b) AM_WRITE(bionicc_mpu_trigger_w)    /* ??? not sure, but looks like it */
+	AM_RANGE(0xfec000, 0xfecfff) AM_RAM_WRITE(bionicc_txvideoram_w) AM_SHARE("txvideoram")
+	AM_RANGE(0xff0000, 0xff3fff) AM_RAM_WRITE(bionicc_fgvideoram_w) AM_SHARE("fgvideoram")
+	AM_RANGE(0xff4000, 0xff7fff) AM_RAM_WRITE(bionicc_bgvideoram_w) AM_SHARE("bgvideoram")
+	AM_RANGE(0xff8000, 0xff87ff) AM_RAM_WRITE(bionicc_paletteram_w) AM_SHARE("paletteram")
+	AM_RANGE(0xffc000, 0xfffff7) AM_RAM /* working RAM */
 	AM_RANGE(0xfffff8, 0xfffff9) AM_READWRITE(hacked_soundcommand_r, hacked_soundcommand_w)      /* hack */
-	AM_RANGE(0xfffffa, 0xffffff) AM_READWRITE(hacked_controls_r, hacked_controls_w)	/* hack */
+	AM_RANGE(0xfffffa, 0xffffff) AM_READWRITE(hacked_controls_r, hacked_controls_w) /* hack */
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, bionicc_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
-	AM_RANGE(0x8000, 0x8001) AM_DEVREADWRITE("ymsnd", ym2151_r, ym2151_w)
-	AM_RANGE(0xa000, 0xa000) AM_READ(soundlatch_r)
+	AM_RANGE(0x8000, 0x8001) AM_DEVREADWRITE("ymsnd", ym2151_device, read, write)
+	AM_RANGE(0xa000, 0xa000) AM_READ(soundlatch_byte_r)
 	AM_RANGE(0xc000, 0xc7ff) AM_RAM
 ADDRESS_MAP_END
 
@@ -189,7 +184,7 @@ static INPUT_PORTS_START( bionicc )
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_COIN1 )
 
 	PORT_START("DSW")
-	PORT_DIPNAME( 0x0007, 0x0007, DEF_STR( Coin_A ) )		PORT_DIPLOCATION("SWB:1,2,3")
+	PORT_DIPNAME( 0x0007, 0x0007, DEF_STR( Coin_A ) )       PORT_DIPLOCATION("SWB:1,2,3")
 	PORT_DIPSETTING(      0x0000, DEF_STR( 4C_1C ) )
 	PORT_DIPSETTING(      0x0001, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(      0x0002, DEF_STR( 2C_1C ) )
@@ -198,7 +193,7 @@ static INPUT_PORTS_START( bionicc )
 	PORT_DIPSETTING(      0x0005, DEF_STR( 1C_3C ) )
 	PORT_DIPSETTING(      0x0004, DEF_STR( 1C_4C ) )
 	PORT_DIPSETTING(      0x0003, DEF_STR( 1C_6C ) )
-	PORT_DIPNAME( 0x0038, 0x0038, DEF_STR( Coin_B ) )		PORT_DIPLOCATION("SWB:4,5,6")
+	PORT_DIPNAME( 0x0038, 0x0038, DEF_STR( Coin_B ) )       PORT_DIPLOCATION("SWB:4,5,6")
 	PORT_DIPSETTING(      0x0000, DEF_STR( 4C_1C ) )
 	PORT_DIPSETTING(      0x0008, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(      0x0010, DEF_STR( 2C_1C ) )
@@ -208,28 +203,28 @@ static INPUT_PORTS_START( bionicc )
 	PORT_DIPSETTING(      0x0020, DEF_STR( 1C_4C ) )
 	PORT_DIPSETTING(      0x0018, DEF_STR( 1C_6C ) )
 	PORT_SERVICE_DIPLOC(  0x0040, IP_ACTIVE_LOW, "SWB:7" )
-	PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( Flip_Screen ) )	PORT_DIPLOCATION("SWB:8")
+	PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( Flip_Screen ) )  PORT_DIPLOCATION("SWB:8")
 	PORT_DIPSETTING(      0x0080, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0300, 0x0300, DEF_STR( Lives ) )		PORT_DIPLOCATION("SWA:1,2")
+	PORT_DIPNAME( 0x0300, 0x0300, DEF_STR( Lives ) )        PORT_DIPLOCATION("SWA:1,2")
 	PORT_DIPSETTING(      0x0300, "3" )
 	PORT_DIPSETTING(      0x0200, "4" )
 	PORT_DIPSETTING(      0x0100, "5" )
 	PORT_DIPSETTING(      0x0000, "7" )
-	PORT_DIPNAME( 0x0400, 0x0400, DEF_STR( Cabinet ) )		PORT_DIPLOCATION("SWA:3")
+	PORT_DIPNAME( 0x0400, 0x0400, DEF_STR( Cabinet ) )      PORT_DIPLOCATION("SWA:3")
 	PORT_DIPSETTING(      0x0400, DEF_STR( Upright ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( Cocktail ) )
-	PORT_DIPNAME( 0x1800, 0x1800, DEF_STR( Bonus_Life ) )	PORT_DIPLOCATION("SWA:4,5")   /* table at 0x00483a */
+	PORT_DIPNAME( 0x1800, 0x1800, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION("SWA:4,5")   /* table at 0x00483a */
 	PORT_DIPSETTING(      0x1800, "20k 40k 100k 60k+" )
 	PORT_DIPSETTING(      0x1000, "30k 50k 120k 70k+" )
 	PORT_DIPSETTING(      0x0800, "20k 60k")
 	PORT_DIPSETTING(      0x0000, "30k 70k" )
-	PORT_DIPNAME( 0x6000, 0x4000, DEF_STR( Difficulty ) )	PORT_DIPLOCATION("SWA:6,7")
+	PORT_DIPNAME( 0x6000, 0x4000, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("SWA:6,7")
 	PORT_DIPSETTING(      0x4000, DEF_STR( Easy ) )
 	PORT_DIPSETTING(      0x6000, DEF_STR( Medium ) )
 	PORT_DIPSETTING(      0x2000, DEF_STR( Hard ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( Hardest ) )
-	PORT_DIPNAME( 0x8000, 0x8000, "Freeze" )				PORT_DIPLOCATION("SWA:8")     /* Listed as "Unused" */
+	PORT_DIPNAME( 0x8000, 0x8000, "Freeze" )                PORT_DIPLOCATION("SWA:8")     /* Listed as "Unused" */
 	PORT_DIPSETTING(      0x8000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 
@@ -320,10 +315,10 @@ static const gfx_layout scroll1layout_bionicc=
 };
 
 static GFXDECODE_START( bionicc )
-	GFXDECODE_ENTRY( "gfx1", 0, vramlayout_bionicc,    768, 64 )	/* colors 768-1023 */
-	GFXDECODE_ENTRY( "gfx2", 0, scroll2layout_bionicc,   0,  4 )	/* colors   0-  63 */
-	GFXDECODE_ENTRY( "gfx3", 0, scroll1layout_bionicc, 256,  4 )	/* colors 256- 319 */
-	GFXDECODE_ENTRY( "gfx4", 0, spritelayout_bionicc,  512, 16 )	/* colors 512- 767 */
+	GFXDECODE_ENTRY( "gfx1", 0, vramlayout_bionicc,    768, 64 )    /* colors 768-1023 */
+	GFXDECODE_ENTRY( "gfx2", 0, scroll2layout_bionicc,   0,  4 )    /* colors   0-  63 */
+	GFXDECODE_ENTRY( "gfx3", 0, scroll1layout_bionicc, 256,  4 )    /* colors 256- 319 */
+	GFXDECODE_ENTRY( "gfx4", 0, spritelayout_bionicc,  512, 16 )    /* colors 512- 767 */
 GFXDECODE_END
 
 
@@ -333,27 +328,25 @@ GFXDECODE_END
  *
  *************************************/
 
-static MACHINE_START( bionicc )
+void bionicc_state::machine_start()
 {
-	bionicc_state *state = machine.driver_data<bionicc_state>();
 
-	state->save_item(NAME(state->m_soundcommand));
-	state->save_item(NAME(state->m_inp));
-	state->save_item(NAME(state->m_scroll));
+	save_item(NAME(m_soundcommand));
+	save_item(NAME(m_inp));
+	save_item(NAME(m_scroll));
 }
 
-static MACHINE_RESET( bionicc )
+void bionicc_state::machine_reset()
 {
-	bionicc_state *state = machine.driver_data<bionicc_state>();
 
-	state->m_inp[0] = 0;
-	state->m_inp[1] = 0;
-	state->m_inp[2] = 0;
-	state->m_scroll[0] = 0;
-	state->m_scroll[1] = 0;
-	state->m_scroll[2] = 0;
-	state->m_scroll[3] = 0;
-	state->m_soundcommand = 0;
+	m_inp[0] = 0;
+	m_inp[1] = 0;
+	m_inp[2] = 0;
+	m_scroll[0] = 0;
+	m_scroll[1] = 0;
+	m_scroll[2] = 0;
+	m_scroll[3] = 0;
+	m_soundcommand = 0;
 }
 
 static MACHINE_CONFIG_START( bionicc, bionicc_state )
@@ -361,39 +354,35 @@ static MACHINE_CONFIG_START( bionicc, bionicc_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, MASTER_CLOCK / 2) /* 12 MHz - verified in schematics */
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT_HACK(bionicc_interrupt,8)
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("scantimer", bionicc_state, bionicc_scanline, "screen", 0, 1)
 
 	MCFG_CPU_ADD("audiocpu", Z80, EXO3_F0_CLK / 4)   /* EXO3 C,B=GND, A=5V ==> Divisor 2^2 */
 	MCFG_CPU_PROGRAM_MAP(sound_map)
 	/* FIXME: interrupt timing
-     * schematics indicate that nmi_line is set on  M680000 access with AB1=1
-     * and IOCS=0 (active low), see pages A-1/10, A-4/10 in schematics
-     */
-	MCFG_CPU_VBLANK_INT_HACK(nmi_line_pulse,4)
+	 * schematics indicate that nmi_line is set on  M680000 access with AB1=1
+	 * and IOCS=0 (active low), see pages A-1/10, A-4/10 in schematics
+	 */
+	MCFG_CPU_PERIODIC_INT_DRIVER(bionicc_state, nmi_line_pulse, 4*60)
 
-	MCFG_MACHINE_START(bionicc)
-	MCFG_MACHINE_RESET(bionicc)
 
 	/* video hardware */
-	MCFG_VIDEO_ATTRIBUTES(VIDEO_BUFFERS_SPRITERAM)
-
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(bionicc)
-	MCFG_SCREEN_EOF(bionicc)
+	MCFG_SCREEN_UPDATE_DRIVER(bionicc_state, screen_update_bionicc)
+	MCFG_SCREEN_VBLANK_DEVICE("spriteram", buffered_spriteram16_device, vblank_copy_rising)
 
 	MCFG_GFXDECODE(bionicc)
 	MCFG_PALETTE_LENGTH(1024)
 
-	MCFG_VIDEO_START(bionicc)
+
+	MCFG_BUFFERED_SPRITERAM16_ADD("spriteram")
 
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("ymsnd", YM2151, 3579545)
+	MCFG_YM2151_ADD("ymsnd", 3579545)
 	MCFG_SOUND_ROUTE(0, "mono", 0.60)
 	MCFG_SOUND_ROUTE(1, "mono", 0.60)
 MACHINE_CONFIG_END
@@ -416,18 +405,18 @@ ROM_START( bionicc ) /* "Not for use in Japan" */
 	ROM_REGION( 0x10000, "audiocpu", 0 )
 	ROM_LOAD( "ts_01b.4e",  0x00000, 0x8000, CRC(a9a6cafa) SHA1(55e0a0e6ca11e8e73339d5b4604e130031211291) )
 
-	ROM_REGION( 0x1000, "mcu", 0 )	/* i8751 microcontroller */
+	ROM_REGION( 0x1000, "mcu", 0 )  /* i8751 microcontroller */
 	ROM_LOAD( "c8751h-88",     0x0000, 0x1000, NO_DUMP )
 
 	ROM_REGION( 0x08000, "gfx1", 0 )
-	ROM_LOAD( "tsu_08.8l",   0x00000, 0x8000, CRC(9bf0b7a2) SHA1(1361335c3c2c8a9c6a7d99566048d8aac99e7c8f) )	/* VIDEORAM (text layer) tiles */
+	ROM_LOAD( "tsu_08.8l",   0x00000, 0x8000, CRC(9bf0b7a2) SHA1(1361335c3c2c8a9c6a7d99566048d8aac99e7c8f) )    /* VIDEORAM (text layer) tiles */
 
 	ROM_REGION( 0x10000, "gfx2", 0 )
-	ROM_LOAD( "tsu_07.5l",   0x00000, 0x8000, CRC(9469efa4) SHA1(53c70361e8d9e54825f61b87a10df42438aaf5b0) )	/* SCROLL2 Layer Tiles */
+	ROM_LOAD( "tsu_07.5l",   0x00000, 0x8000, CRC(9469efa4) SHA1(53c70361e8d9e54825f61b87a10df42438aaf5b0) )    /* SCROLL2 Layer Tiles */
 	ROM_LOAD( "tsu_06.4l",   0x08000, 0x8000, CRC(40bf0eb4) SHA1(fcb186c31747e2c9872de01e34b3e713dc74df82) )
 
 	ROM_REGION( 0x40000, "gfx3", 0 )
-	ROM_LOAD( "ts_12.17f",    0x00000, 0x8000, CRC(e4b4619e) SHA1(3bec8399ffb28fd50ce6ae88d90b091eadf8bda1) )	/* SCROLL1 Layer Tiles */
+	ROM_LOAD( "ts_12.17f",    0x00000, 0x8000, CRC(e4b4619e) SHA1(3bec8399ffb28fd50ce6ae88d90b091eadf8bda1) )   /* SCROLL1 Layer Tiles */
 	ROM_LOAD( "ts_11.15f",    0x08000, 0x8000, CRC(ab30237a) SHA1(ea6c07df992ba48f9eca7daa4ea775faa94358d2) )
 	ROM_LOAD( "ts_17.17g",    0x10000, 0x8000, CRC(deb657e4) SHA1(b36b468f9bbb7a4937286230d3f6caa14c61d4dd) )
 	ROM_LOAD( "ts_16.15g",    0x18000, 0x8000, CRC(d363b5f9) SHA1(1dd3991d99db2d6bcbdb12879ba50a01fef95004) )
@@ -437,7 +426,7 @@ ROM_START( bionicc ) /* "Not for use in Japan" */
 	ROM_LOAD( "ts_24.18k",    0x38000, 0x8000, CRC(f156e564) SHA1(a6cad05bcc6d9ded6294f9b5aa856d05641aed02) )
 
 	ROM_REGION( 0x40000, "gfx4", 0 )
-	ROM_LOAD( "tse_10.13f",   0x00000, 0x8000, CRC(d28eeacc) SHA1(8b4a655a48da276b07f3464c65743b13cec52bcb) )	/* Sprites */
+	ROM_LOAD( "tse_10.13f",   0x00000, 0x8000, CRC(d28eeacc) SHA1(8b4a655a48da276b07f3464c65743b13cec52bcb) )   /* Sprites */
 	ROM_LOAD( "tsu_09.11f",   0x08000, 0x8000, CRC(6a049292) SHA1(525c862061f426d679b539b6926af4c9f14b47b5) )
 	ROM_LOAD( "tse_15.13g",   0x10000, 0x8000, CRC(9b5593c0) SHA1(73c0acbb01fe69c2bd29dea11b6a223c8efb54a0) )
 	ROM_LOAD( "tsu_14.11g",   0x18000, 0x8000, CRC(46b2ad83) SHA1(21ebd5691a544323fdfcf330b9a37bbe0428e3e3) )
@@ -447,7 +436,7 @@ ROM_START( bionicc ) /* "Not for use in Japan" */
 	ROM_LOAD( "tsu_21.15j",   0x38000, 0x8000, CRC(98777006) SHA1(bcc2058b639e9b71d16af05f63df298bcce91fdc) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "63s141.18f",   0x0000, 0x0100, CRC(b58d0023) SHA1(e8a4a2e2951bf73b3d9eed6957e9ee1e61c9c58a) )	/* priority (not used), Labeled "TSB" */
+	ROM_LOAD( "63s141.18f",   0x0000, 0x0100, CRC(b58d0023) SHA1(e8a4a2e2951bf73b3d9eed6957e9ee1e61c9c58a) )    /* priority (not used), Labeled "TSB" */
 ROM_END
 
 ROM_START( bionicc1 ) /* "Not for use outside of USA or Canada" revision B */
@@ -460,18 +449,18 @@ ROM_START( bionicc1 ) /* "Not for use outside of USA or Canada" revision B */
 	ROM_REGION( 0x10000, "audiocpu", 0 )
 	ROM_LOAD( "ts_01b.4e",  0x00000, 0x8000, CRC(a9a6cafa) SHA1(55e0a0e6ca11e8e73339d5b4604e130031211291) )
 
-	ROM_REGION( 0x1000, "mcu", 0 )	/* i8751 microcontroller */
+	ROM_REGION( 0x1000, "mcu", 0 )  /* i8751 microcontroller */
 	ROM_LOAD( "c8751h-88",     0x0000, 0x1000, NO_DUMP )
 
 	ROM_REGION( 0x08000, "gfx1", 0 )
-	ROM_LOAD( "tsu_08.8l",   0x00000, 0x8000, CRC(9bf0b7a2) SHA1(1361335c3c2c8a9c6a7d99566048d8aac99e7c8f) )	/* VIDEORAM (text layer) tiles */
+	ROM_LOAD( "tsu_08.8l",   0x00000, 0x8000, CRC(9bf0b7a2) SHA1(1361335c3c2c8a9c6a7d99566048d8aac99e7c8f) )    /* VIDEORAM (text layer) tiles */
 
 	ROM_REGION( 0x10000, "gfx2", 0 )
-	ROM_LOAD( "tsu_07.5l",   0x00000, 0x8000, CRC(9469efa4) SHA1(53c70361e8d9e54825f61b87a10df42438aaf5b0) )	/* SCROLL2 Layer Tiles */
+	ROM_LOAD( "tsu_07.5l",   0x00000, 0x8000, CRC(9469efa4) SHA1(53c70361e8d9e54825f61b87a10df42438aaf5b0) )    /* SCROLL2 Layer Tiles */
 	ROM_LOAD( "tsu_06.4l",   0x08000, 0x8000, CRC(40bf0eb4) SHA1(fcb186c31747e2c9872de01e34b3e713dc74df82) )
 
 	ROM_REGION( 0x40000, "gfx3", 0 )
-	ROM_LOAD( "ts_12.17f",    0x00000, 0x8000, CRC(e4b4619e) SHA1(3bec8399ffb28fd50ce6ae88d90b091eadf8bda1) )	/* SCROLL1 Layer Tiles */
+	ROM_LOAD( "ts_12.17f",    0x00000, 0x8000, CRC(e4b4619e) SHA1(3bec8399ffb28fd50ce6ae88d90b091eadf8bda1) )   /* SCROLL1 Layer Tiles */
 	ROM_LOAD( "ts_11.15f",    0x08000, 0x8000, CRC(ab30237a) SHA1(ea6c07df992ba48f9eca7daa4ea775faa94358d2) )
 	ROM_LOAD( "ts_17.17g",    0x10000, 0x8000, CRC(deb657e4) SHA1(b36b468f9bbb7a4937286230d3f6caa14c61d4dd) )
 	ROM_LOAD( "ts_16.15g",    0x18000, 0x8000, CRC(d363b5f9) SHA1(1dd3991d99db2d6bcbdb12879ba50a01fef95004) )
@@ -481,7 +470,7 @@ ROM_START( bionicc1 ) /* "Not for use outside of USA or Canada" revision B */
 	ROM_LOAD( "ts_24.18k",    0x38000, 0x8000, CRC(f156e564) SHA1(a6cad05bcc6d9ded6294f9b5aa856d05641aed02) )
 
 	ROM_REGION( 0x40000, "gfx4", 0 )
-	ROM_LOAD( "tsu_10.13f",   0x00000, 0x8000, CRC(f1180d02) SHA1(312626af48235a1f726ab596f296ef4739785ca0) )	/* Sprites */
+	ROM_LOAD( "tsu_10.13f",   0x00000, 0x8000, CRC(f1180d02) SHA1(312626af48235a1f726ab596f296ef4739785ca0) )   /* Sprites */
 	ROM_LOAD( "tsu_09.11f",   0x08000, 0x8000, CRC(6a049292) SHA1(525c862061f426d679b539b6926af4c9f14b47b5) )
 	ROM_LOAD( "tsu_15.13g",   0x10000, 0x8000, CRC(ea912701) SHA1(106336c63a1c8a0b13236268bc533a8263285cad) )
 	ROM_LOAD( "tsu_14.11g",   0x18000, 0x8000, CRC(46b2ad83) SHA1(21ebd5691a544323fdfcf330b9a37bbe0428e3e3) )
@@ -491,7 +480,7 @@ ROM_START( bionicc1 ) /* "Not for use outside of USA or Canada" revision B */
 	ROM_LOAD( "tsu_21.15j",   0x38000, 0x8000, CRC(98777006) SHA1(bcc2058b639e9b71d16af05f63df298bcce91fdc) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "63s141.18f",   0x0000, 0x0100, CRC(b58d0023) SHA1(e8a4a2e2951bf73b3d9eed6957e9ee1e61c9c58a) )	/* priority (not used), Labeled "TSB" */
+	ROM_LOAD( "63s141.18f",   0x0000, 0x0100, CRC(b58d0023) SHA1(e8a4a2e2951bf73b3d9eed6957e9ee1e61c9c58a) )    /* priority (not used), Labeled "TSB" */
 ROM_END
 
 ROM_START( bionicc2 ) /* "Not for use outside of USA or Canada" 1st release */
@@ -504,18 +493,18 @@ ROM_START( bionicc2 ) /* "Not for use outside of USA or Canada" 1st release */
 	ROM_REGION( 0x10000, "audiocpu", 0 )
 	ROM_LOAD( "ts_01b.4e",  0x00000, 0x8000, CRC(a9a6cafa) SHA1(55e0a0e6ca11e8e73339d5b4604e130031211291) )
 
-	ROM_REGION( 0x1000, "mcu", 0 )	/* i8751 microcontroller */
+	ROM_REGION( 0x1000, "mcu", 0 )  /* i8751 microcontroller */
 	ROM_LOAD( "c8751h-88",     0x0000, 0x1000, NO_DUMP )
 
 	ROM_REGION( 0x08000, "gfx1", 0 )
-	ROM_LOAD( "tsu_08.8l",   0x00000, 0x8000, CRC(9bf0b7a2) SHA1(1361335c3c2c8a9c6a7d99566048d8aac99e7c8f) )	/* VIDEORAM (text layer) tiles */
+	ROM_LOAD( "tsu_08.8l",   0x00000, 0x8000, CRC(9bf0b7a2) SHA1(1361335c3c2c8a9c6a7d99566048d8aac99e7c8f) )    /* VIDEORAM (text layer) tiles */
 
 	ROM_REGION( 0x10000, "gfx2", 0 )
-	ROM_LOAD( "tsu_07.5l",   0x00000, 0x8000, CRC(9469efa4) SHA1(53c70361e8d9e54825f61b87a10df42438aaf5b0) )	/* SCROLL2 Layer Tiles */
+	ROM_LOAD( "tsu_07.5l",   0x00000, 0x8000, CRC(9469efa4) SHA1(53c70361e8d9e54825f61b87a10df42438aaf5b0) )    /* SCROLL2 Layer Tiles */
 	ROM_LOAD( "tsu_06.4l",   0x08000, 0x8000, CRC(40bf0eb4) SHA1(fcb186c31747e2c9872de01e34b3e713dc74df82) )
 
 	ROM_REGION( 0x40000, "gfx3", 0 )
-	ROM_LOAD( "ts_12.17f",    0x00000, 0x8000, CRC(e4b4619e) SHA1(3bec8399ffb28fd50ce6ae88d90b091eadf8bda1) )	/* SCROLL1 Layer Tiles */
+	ROM_LOAD( "ts_12.17f",    0x00000, 0x8000, CRC(e4b4619e) SHA1(3bec8399ffb28fd50ce6ae88d90b091eadf8bda1) )   /* SCROLL1 Layer Tiles */
 	ROM_LOAD( "ts_11.15f",    0x08000, 0x8000, CRC(ab30237a) SHA1(ea6c07df992ba48f9eca7daa4ea775faa94358d2) )
 	ROM_LOAD( "ts_17.17g",    0x10000, 0x8000, CRC(deb657e4) SHA1(b36b468f9bbb7a4937286230d3f6caa14c61d4dd) )
 	ROM_LOAD( "ts_16.15g",    0x18000, 0x8000, CRC(d363b5f9) SHA1(1dd3991d99db2d6bcbdb12879ba50a01fef95004) )
@@ -525,7 +514,7 @@ ROM_START( bionicc2 ) /* "Not for use outside of USA or Canada" 1st release */
 	ROM_LOAD( "ts_24.18k",    0x38000, 0x8000, CRC(f156e564) SHA1(a6cad05bcc6d9ded6294f9b5aa856d05641aed02) )
 
 	ROM_REGION( 0x40000, "gfx4", 0 )
-	ROM_LOAD( "tsu_10.13f",   0x00000, 0x8000, CRC(f1180d02) SHA1(312626af48235a1f726ab596f296ef4739785ca0) )	/* Sprites */
+	ROM_LOAD( "tsu_10.13f",   0x00000, 0x8000, CRC(f1180d02) SHA1(312626af48235a1f726ab596f296ef4739785ca0) )   /* Sprites */
 	ROM_LOAD( "tsu_09.11f",   0x08000, 0x8000, CRC(6a049292) SHA1(525c862061f426d679b539b6926af4c9f14b47b5) )
 	ROM_LOAD( "tsu_15.13g",   0x10000, 0x8000, CRC(ea912701) SHA1(106336c63a1c8a0b13236268bc533a8263285cad) )
 	ROM_LOAD( "tsu_14.11g",   0x18000, 0x8000, CRC(46b2ad83) SHA1(21ebd5691a544323fdfcf330b9a37bbe0428e3e3) )
@@ -535,7 +524,7 @@ ROM_START( bionicc2 ) /* "Not for use outside of USA or Canada" 1st release */
 	ROM_LOAD( "tsu_21.15j",   0x38000, 0x8000, CRC(98777006) SHA1(bcc2058b639e9b71d16af05f63df298bcce91fdc) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "63s141.18f",   0x0000, 0x0100, CRC(b58d0023) SHA1(e8a4a2e2951bf73b3d9eed6957e9ee1e61c9c58a) )	/* priority (not used), Labeled "TSB" */
+	ROM_LOAD( "63s141.18f",   0x0000, 0x0100, CRC(b58d0023) SHA1(e8a4a2e2951bf73b3d9eed6957e9ee1e61c9c58a) )    /* priority (not used), Labeled "TSB" */
 ROM_END
 
 ROM_START( topsecrt ) /* "Not for use in any other country but Japan" */
@@ -548,18 +537,18 @@ ROM_START( topsecrt ) /* "Not for use in any other country but Japan" */
 	ROM_REGION( 0x10000, "audiocpu", 0 )
 	ROM_LOAD( "ts_01.4e",    0x00000, 0x8000, CRC(8ea07917) SHA1(e9ace70d89482fc3669860450a41aacacbee9083) )
 
-	ROM_REGION( 0x1000, "mcu", 0 )	/* i8751 microcontroller */
+	ROM_REGION( 0x1000, "mcu", 0 )  /* i8751 microcontroller */
 	ROM_LOAD( "c8751h-88",     0x0000, 0x1000, NO_DUMP )
 
 	ROM_REGION( 0x08000, "gfx1", 0 )
-	ROM_LOAD( "ts_08.8l",    0x00000, 0x8000, CRC(96ad379e) SHA1(accd3a560b259c186bc28cdc004ed8de0b12f9d5) )	/* VIDEORAM (text layer) tiles */
+	ROM_LOAD( "ts_08.8l",    0x00000, 0x8000, CRC(96ad379e) SHA1(accd3a560b259c186bc28cdc004ed8de0b12f9d5) )    /* VIDEORAM (text layer) tiles */
 
 	ROM_REGION( 0x10000, "gfx2", 0 )
-	ROM_LOAD( "ts_07.5l",    0x00000, 0x8000, CRC(25cdf8b2) SHA1(316f6acc46878682dabeab12722e6a64504d23bd) )	/* SCROLL2 Layer Tiles */
+	ROM_LOAD( "ts_07.5l",    0x00000, 0x8000, CRC(25cdf8b2) SHA1(316f6acc46878682dabeab12722e6a64504d23bd) )    /* SCROLL2 Layer Tiles */
 	ROM_LOAD( "ts_06.4l",    0x08000, 0x8000, CRC(314fb12d) SHA1(dab0519a49b64fe7a837b3c6383f6147e1ab6ffd) )
 
 	ROM_REGION( 0x40000, "gfx3", 0 )
-	ROM_LOAD( "ts_12.17f",    0x00000, 0x8000, CRC(e4b4619e) SHA1(3bec8399ffb28fd50ce6ae88d90b091eadf8bda1) )	/* SCROLL1 Layer Tiles */
+	ROM_LOAD( "ts_12.17f",    0x00000, 0x8000, CRC(e4b4619e) SHA1(3bec8399ffb28fd50ce6ae88d90b091eadf8bda1) )   /* SCROLL1 Layer Tiles */
 	ROM_LOAD( "ts_11.15f",    0x08000, 0x8000, CRC(ab30237a) SHA1(ea6c07df992ba48f9eca7daa4ea775faa94358d2) )
 	ROM_LOAD( "ts_17.17g",    0x10000, 0x8000, CRC(deb657e4) SHA1(b36b468f9bbb7a4937286230d3f6caa14c61d4dd) )
 	ROM_LOAD( "ts_16.15g",    0x18000, 0x8000, CRC(d363b5f9) SHA1(1dd3991d99db2d6bcbdb12879ba50a01fef95004) )
@@ -569,7 +558,7 @@ ROM_START( topsecrt ) /* "Not for use in any other country but Japan" */
 	ROM_LOAD( "ts_24.18k",    0x38000, 0x8000, CRC(f156e564) SHA1(a6cad05bcc6d9ded6294f9b5aa856d05641aed02) )
 
 	ROM_REGION( 0x40000, "gfx4", 0 )
-	ROM_LOAD( "ts_10.13f",    0x00000, 0x8000, CRC(c3587d05) SHA1(ad0898a5d4cf110783ef092bf8e65b6ef31a8ae0) )	/* Sprites */
+	ROM_LOAD( "ts_10.13f",    0x00000, 0x8000, CRC(c3587d05) SHA1(ad0898a5d4cf110783ef092bf8e65b6ef31a8ae0) )   /* Sprites */
 	ROM_LOAD( "ts_09.11f",    0x08000, 0x8000, CRC(6b63eef2) SHA1(5d1580db7f49c5994c2a08a36c2d05f3e246930d) )
 	ROM_LOAD( "ts_15.13g",    0x10000, 0x8000, CRC(db8cebb0) SHA1(1cc9eac14851cde95fb2d69d6f5ffb08bc9c0d93) )
 	ROM_LOAD( "ts_14.11g",    0x18000, 0x8000, CRC(e2e41abf) SHA1(d002d0d8fdbb9ec3e2eac218f6338f733953ca82) )
@@ -579,7 +568,7 @@ ROM_START( topsecrt ) /* "Not for use in any other country but Japan" */
 	ROM_LOAD( "ts_21.15j",    0x38000, 0x8000, CRC(27a9bb7c) SHA1(bb60332c0ecde4d7797960dec39c1079498175c3) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "63s141.18f",   0x0000, 0x0100, CRC(b58d0023) SHA1(e8a4a2e2951bf73b3d9eed6957e9ee1e61c9c58a) )	/* priority (not used), Labeled "TSB" */
+	ROM_LOAD( "63s141.18f",   0x0000, 0x0100, CRC(b58d0023) SHA1(e8a4a2e2951bf73b3d9eed6957e9ee1e61c9c58a) )    /* priority (not used), Labeled "TSB" */
 ROM_END
 
 
@@ -589,8 +578,8 @@ ROM_END
  *
  *************************************/
 
-GAME( 1987, bionicc,  0,       bionicc, bionicc, 0, ROT0, "Capcom", "Bionic Commando (Euro)", GAME_SUPPORTS_SAVE )
-GAME( 1987, bionicc1, bionicc, bionicc, bionicc, 0, ROT0, "Capcom", "Bionic Commando (US set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1987, bionicc2, bionicc, bionicc, bionicc, 0, ROT0, "Capcom", "Bionic Commando (US set 2)", GAME_SUPPORTS_SAVE )
-GAME( 1987, topsecrt, bionicc, bionicc, bionicc, 0, ROT0, "Capcom", "Top Secret (Japan, old revision)", GAME_SUPPORTS_SAVE )
+GAME( 1987, bionicc,  0,       bionicc, bionicc, driver_device, 0, ROT0, "Capcom", "Bionic Commando (Euro)", GAME_SUPPORTS_SAVE )
+GAME( 1987, bionicc1, bionicc, bionicc, bionicc, driver_device, 0, ROT0, "Capcom", "Bionic Commando (US set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1987, bionicc2, bionicc, bionicc, bionicc, driver_device, 0, ROT0, "Capcom", "Bionic Commando (US set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1987, topsecrt, bionicc, bionicc, bionicc, driver_device, 0, ROT0, "Capcom", "Top Secret (Japan, old revision)", GAME_SUPPORTS_SAVE )
 // there's also an undumped JP new revision on which there are no extra lives after 1 million points, plus other bug-fixes / changes

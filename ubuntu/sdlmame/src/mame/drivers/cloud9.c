@@ -122,29 +122,27 @@ INLINE void schedule_next_irq(running_machine &machine, int curscanline)
 }
 
 
-static TIMER_CALLBACK( clock_irq )
+TIMER_CALLBACK_MEMBER(cloud9_state::clock_irq)
 {
-	cloud9_state *state = machine.driver_data<cloud9_state>();
 	/* assert the IRQ if not already asserted */
-	if (!state->m_irq_state)
+	if (!m_irq_state)
 	{
-		device_set_input_line(state->m_maincpu, 0, ASSERT_LINE);
-		state->m_irq_state = 1;
+		m_maincpu->set_input_line(0, ASSERT_LINE);
+		m_irq_state = 1;
 	}
 
 	/* force an update now */
-	machine.primary_screen->update_partial(machine.primary_screen->vpos());
+	machine().primary_screen->update_partial(machine().primary_screen->vpos());
 
 	/* find the next edge */
-	schedule_next_irq(machine, param);
+	schedule_next_irq(machine(), param);
 }
 
 
-static CUSTOM_INPUT( get_vblank )
+CUSTOM_INPUT_MEMBER(cloud9_state::get_vblank)
 {
-	cloud9_state *state = field->port->machine().driver_data<cloud9_state>();
-	int scanline = field->port->machine().primary_screen->vpos();
-	return (~state->m_syncprom[scanline & 0xff] >> 1) & 1;
+	int scanline = machine().primary_screen->vpos();
+	return (~m_syncprom[scanline & 0xff] >> 1) & 1;
 }
 
 
@@ -155,51 +153,46 @@ static CUSTOM_INPUT( get_vblank )
  *
  *************************************/
 
-static MACHINE_START( cloud9 )
+void cloud9_state::machine_start()
 {
-	cloud9_state *state = machine.driver_data<cloud9_state>();
 	rectangle visarea;
 
 	/* initialize globals */
-	state->m_syncprom = machine.region("proms")->base() + 0x000;
+	m_syncprom = memregion("proms")->base() + 0x000;
 
 	/* find the start of VBLANK in the SYNC PROM */
-	for (state->m_vblank_start = 0; state->m_vblank_start < 256; state->m_vblank_start++)
-		if ((state->m_syncprom[(state->m_vblank_start - 1) & 0xff] & 2) != 0 && (state->m_syncprom[state->m_vblank_start] & 2) == 0)
+	for (m_vblank_start = 0; m_vblank_start < 256; m_vblank_start++)
+		if ((m_syncprom[(m_vblank_start - 1) & 0xff] & 2) != 0 && (m_syncprom[m_vblank_start] & 2) == 0)
 			break;
-	if (state->m_vblank_start == 0)
-		state->m_vblank_start = 256;
+	if (m_vblank_start == 0)
+		m_vblank_start = 256;
 
 	/* find the end of VBLANK in the SYNC PROM */
-	for (state->m_vblank_end = 0; state->m_vblank_end < 256; state->m_vblank_end++)
-		if ((state->m_syncprom[(state->m_vblank_end - 1) & 0xff] & 2) == 0 && (state->m_syncprom[state->m_vblank_end] & 2) != 0)
+	for (m_vblank_end = 0; m_vblank_end < 256; m_vblank_end++)
+		if ((m_syncprom[(m_vblank_end - 1) & 0xff] & 2) == 0 && (m_syncprom[m_vblank_end] & 2) != 0)
 			break;
 
 	/* can't handle the wrapping case */
-	assert(state->m_vblank_end < state->m_vblank_start);
+	assert(m_vblank_end < m_vblank_start);
 
 	/* reconfigure the visible area to match */
-	visarea.min_x = 0;
-	visarea.max_x = 255;
-	visarea.min_y = state->m_vblank_end + 1;
-	visarea.max_y = state->m_vblank_start;
-	machine.primary_screen->configure(320, 256, visarea, HZ_TO_ATTOSECONDS(PIXEL_CLOCK) * VTOTAL * HTOTAL);
+	visarea.set(0, 255, m_vblank_end + 1, m_vblank_start);
+	machine().primary_screen->configure(320, 256, visarea, HZ_TO_ATTOSECONDS(PIXEL_CLOCK) * VTOTAL * HTOTAL);
 
 	/* create a timer for IRQs and set up the first callback */
-	state->m_irq_timer = machine.scheduler().timer_alloc(FUNC(clock_irq));
-	state->m_irq_state = 0;
-	schedule_next_irq(machine, 0-64);
+	m_irq_timer = machine().scheduler().timer_alloc(timer_expired_delegate(FUNC(cloud9_state::clock_irq),this));
+	m_irq_state = 0;
+	schedule_next_irq(machine(), 0-64);
 
 	/* setup for save states */
-	state->save_item(NAME(state->m_irq_state));
+	save_item(NAME(m_irq_state));
 }
 
 
-static MACHINE_RESET( cloud9 )
+void cloud9_state::machine_reset()
 {
-	cloud9_state *state = machine.driver_data<cloud9_state>();
-	cputag_set_input_line(machine, "maincpu", 0, CLEAR_LINE);
-	state->m_irq_state = 0;
+	machine().device("maincpu")->execute().set_input_line(0, CLEAR_LINE);
+	m_irq_state = 0;
 }
 
 
@@ -210,32 +203,31 @@ static MACHINE_RESET( cloud9 )
  *
  *************************************/
 
-static WRITE8_HANDLER( irq_ack_w )
+WRITE8_MEMBER(cloud9_state::irq_ack_w)
 {
-	cloud9_state *state = space->machine().driver_data<cloud9_state>();
-	if (state->m_irq_state)
+	if (m_irq_state)
 	{
-		device_set_input_line(state->m_maincpu, 0, CLEAR_LINE);
-		state->m_irq_state = 0;
+		m_maincpu->set_input_line(0, CLEAR_LINE);
+		m_irq_state = 0;
 	}
 }
 
 
-static WRITE8_HANDLER( cloud9_led_w )
+WRITE8_MEMBER(cloud9_state::cloud9_led_w)
 {
-	set_led_status(space->machine(), offset, ~data & 0x80);
+	set_led_status(machine(), offset, ~data & 0x80);
 }
 
 
-static WRITE8_HANDLER( cloud9_coin_counter_w )
+WRITE8_MEMBER(cloud9_state::cloud9_coin_counter_w)
 {
-	coin_counter_w(space->machine(), offset, data & 0x80);
+	coin_counter_w(machine(), offset, data & 0x80);
 }
 
 
-static READ8_HANDLER( leta_r )
+READ8_MEMBER(cloud9_state::leta_r)
 {
-	return input_port_read(space->machine(), offset ? "TRACKX" : "TRACKY");
+	return ioport(offset ? "TRACKX" : "TRACKY")->read();
 }
 
 
@@ -246,21 +238,19 @@ static READ8_HANDLER( leta_r )
  *
  *************************************/
 
-static WRITE8_HANDLER( nvram_recall_w )
+WRITE8_MEMBER(cloud9_state::nvram_recall_w)
 {
-	cloud9_state *state = space->machine().driver_data<cloud9_state>();
-	state->m_nvram->recall(0);
-	state->m_nvram->recall(1);
-	state->m_nvram->recall(0);
+	m_nvram->recall(0);
+	m_nvram->recall(1);
+	m_nvram->recall(0);
 }
 
 
-static WRITE8_HANDLER( nvram_store_w )
+WRITE8_MEMBER(cloud9_state::nvram_store_w)
 {
-	cloud9_state *state = space->machine().driver_data<cloud9_state>();
-	state->m_nvram->store(0);
-	state->m_nvram->store(1);
-	state->m_nvram->store(0);
+	m_nvram->store(0);
+	m_nvram->store(1);
+	m_nvram->store(0);
 }
 
 
@@ -271,14 +261,14 @@ static WRITE8_HANDLER( nvram_store_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( cloud9_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( cloud9_map, AS_PROGRAM, 8, cloud9_state )
 	AM_RANGE(0x0000, 0x0001) AM_WRITE(cloud9_bitmode_addr_w)
 	AM_RANGE(0x0002, 0x0002) AM_READWRITE(cloud9_bitmode_r, cloud9_bitmode_w)
 	AM_RANGE(0x0000, 0x4fff) AM_ROMBANK("bank1") AM_WRITE(cloud9_videoram_w)
-	AM_RANGE(0x5000, 0x53ff) AM_RAM AM_BASE_MEMBER(cloud9_state, m_spriteram)
+	AM_RANGE(0x5000, 0x53ff) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0x5400, 0x547f) AM_WRITE(watchdog_reset_w)
 	AM_RANGE(0x5480, 0x54ff) AM_WRITE(irq_ack_w)
-	AM_RANGE(0x5500, 0x557f) AM_RAM_WRITE(cloud9_paletteram_w) AM_BASE_MEMBER(cloud9_state, m_paletteram)
+	AM_RANGE(0x5500, 0x557f) AM_RAM_WRITE(cloud9_paletteram_w) AM_SHARE("paletteram")
 	AM_RANGE(0x5580, 0x5587) AM_MIRROR(0x0078) AM_WRITE(cloud9_video_control_w)
 	AM_RANGE(0x5600, 0x5601) AM_MIRROR(0x0078) AM_WRITE(cloud9_coin_counter_w)
 	AM_RANGE(0x5602, 0x5603) AM_MIRROR(0x0078) AM_WRITE(cloud9_led_w)
@@ -287,9 +277,9 @@ static ADDRESS_MAP_START( cloud9_map, AS_PROGRAM, 8 )
 	AM_RANGE(0x5800, 0x5800) AM_MIRROR(0x007e) AM_READ_PORT("IN0")
 	AM_RANGE(0x5801, 0x5801) AM_MIRROR(0x007e) AM_READ_PORT("IN1")
 	AM_RANGE(0x5900, 0x5903) AM_MIRROR(0x007c) AM_READ(leta_r)
-	AM_RANGE(0x5a00, 0x5a0f) AM_MIRROR(0x00f0) AM_DEVREADWRITE("pokey1", pokey_r, pokey_w)
-	AM_RANGE(0x5b00, 0x5b0f) AM_MIRROR(0x00f0) AM_DEVREADWRITE("pokey2", pokey_r, pokey_w)
-	AM_RANGE(0x5c00, 0x5cff) AM_MIRROR(0x0300) AM_DEVREADWRITE_MODERN("nvram", x2212_device, read, write)
+	AM_RANGE(0x5a00, 0x5a0f) AM_MIRROR(0x00f0) AM_DEVREADWRITE("pokey1", pokey_device, read, write)
+	AM_RANGE(0x5b00, 0x5b0f) AM_MIRROR(0x00f0) AM_DEVREADWRITE("pokey2", pokey_device, read, write)
+	AM_RANGE(0x5c00, 0x5cff) AM_MIRROR(0x0300) AM_DEVREADWRITE("nvram", x2212_device, read, write)
 	AM_RANGE(0x6000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
@@ -308,7 +298,7 @@ static INPUT_PORTS_START( cloud9 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN2 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SPECIAL ) PORT_CUSTOM(get_vblank, NULL)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, cloud9_state,get_vblank, NULL)
 
 	PORT_START("IN1")
 	PORT_BIT( 0x0f, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -319,20 +309,20 @@ static INPUT_PORTS_START( cloud9 )
 
 	PORT_START("DSW")
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(	0x01, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0xfe, 0x04, DEF_STR( Coinage ) )
-	PORT_DIPSETTING(	0x22, DEF_STR( 9C_1C ) )
-	PORT_DIPSETTING(	0x1e, DEF_STR( 8C_1C ) )
-	PORT_DIPSETTING(	0x1a, DEF_STR( 7C_1C ) )
-	PORT_DIPSETTING(	0x16, DEF_STR( 6C_1C ) )
-	PORT_DIPSETTING(	0x12, DEF_STR( 5C_1C ) )
-	PORT_DIPSETTING(	0x0e, DEF_STR( 4C_1C ) )
-	PORT_DIPSETTING(	0x0a, DEF_STR( 3C_1C ) )
-	PORT_DIPSETTING(	0x06, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0x04, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0x02, DEF_STR( 1C_2C ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Free_Play ) )
+	PORT_DIPSETTING(    0x22, DEF_STR( 9C_1C ) )
+	PORT_DIPSETTING(    0x1e, DEF_STR( 8C_1C ) )
+	PORT_DIPSETTING(    0x1a, DEF_STR( 7C_1C ) )
+	PORT_DIPSETTING(    0x16, DEF_STR( 6C_1C ) )
+	PORT_DIPSETTING(    0x12, DEF_STR( 5C_1C ) )
+	PORT_DIPSETTING(    0x0e, DEF_STR( 4C_1C ) )
+	PORT_DIPSETTING(    0x0a, DEF_STR( 3C_1C ) )
+	PORT_DIPSETTING(    0x06, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x04, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x02, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
 
 	PORT_START("TRACKY")
 	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(30) PORT_KEYDELTA(30) PORT_REVERSE
@@ -349,7 +339,7 @@ static INPUT_PORTS_START( firebeas )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN2 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SPECIAL ) PORT_CUSTOM(get_vblank, NULL)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, cloud9_state,get_vblank, NULL)
 
 	PORT_START("IN1")
 	PORT_BIT( 0x07, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -361,29 +351,29 @@ static INPUT_PORTS_START( firebeas )
 
 	PORT_START("DSW")
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(	0x01, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(	0x02, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(	0x04, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(	0x08, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(	0x10, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(	0x20, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(	0x40, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(	0x80, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("TRACKY")
 	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(30) PORT_KEYDELTA(30) PORT_REVERSE
@@ -432,8 +422,6 @@ static MACHINE_CONFIG_START( cloud9, cloud9_state )
 	MCFG_CPU_ADD("maincpu", M6502, MASTER_CLOCK/8)
 	MCFG_CPU_PROGRAM_MAP(cloud9_map)
 
-	MCFG_MACHINE_START(cloud9)
-	MCFG_MACHINE_RESET(cloud9)
 	MCFG_WATCHDOG_VBLANK_INIT(8)
 
 	MCFG_X2212_ADD_AUTOSAVE("nvram")
@@ -443,23 +431,21 @@ static MACHINE_CONFIG_START( cloud9, cloud9_state )
 	MCFG_PALETTE_LENGTH(64)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_REFRESH_RATE((float)PIXEL_CLOCK / (float)VTOTAL / (float)HTOTAL)
 	MCFG_SCREEN_SIZE(HTOTAL, VTOTAL)
-	MCFG_SCREEN_VBLANK_TIME(0)			/* VBLANK is handled manually */
+	MCFG_SCREEN_VBLANK_TIME(0)          /* VBLANK is handled manually */
 	MCFG_SCREEN_VISIBLE_AREA(0, 255, 0, 231)
-	MCFG_SCREEN_UPDATE(cloud9)
+	MCFG_SCREEN_UPDATE_DRIVER(cloud9_state, screen_update_cloud9)
 
-	MCFG_VIDEO_START(cloud9)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("pokey1", POKEY, MASTER_CLOCK/8)
+	MCFG_POKEY_ADD("pokey1", MASTER_CLOCK/8)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 
-	MCFG_SOUND_ADD("pokey2", POKEY, MASTER_CLOCK/8)
-	MCFG_SOUND_CONFIG(pokey_config)
+	MCFG_POKEY_ADD("pokey2", MASTER_CLOCK/8)
+	MCFG_POKEY_CONFIG(pokey_config)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 MACHINE_CONFIG_END
 
@@ -486,10 +472,10 @@ ROM_START( cloud9 )
 	ROM_LOAD( "c9_gfx3.bin", 0x3000, 0x1000, CRC(27e9b88d) SHA1(a1d27e62eea9cdff662a3c160f650bbdb32b7f47) )
 
 	ROM_REGION( 0x400, "proms", 0 )
-	ROM_LOAD( "63s141.e10",  0x0000, 0x0100, BAD_DUMP CRC(8e98083f) SHA1(ed29c7ed2226613ed5d09ecef4e645e3b53f7f8d) )	/* Sync PROM */
-	ROM_LOAD( "63s141.m10",  0x0100, 0x0100, BAD_DUMP CRC(b0b039c0) SHA1(724fa88f3f3c62b3c9345cdb13e114a10b7bbdb0) )	/* ??? PROM */
-	ROM_LOAD( "82s129.p3",   0x0200, 0x0100, BAD_DUMP CRC(615d784d) SHA1(e7e6397ae45d6ae8b3670b457ede79c42d18d71f) )	/* VRAM Write Protect PROM */
-	ROM_LOAD( "63s141.m8",   0x0300, 0x0100, BAD_DUMP CRC(6d7479ec) SHA1(7a7c30f5846b98afaaca2af9aab82416ebafe4cc) )	/* ??? PROM */
+	ROM_LOAD( "63s141.e10",  0x0000, 0x0100, BAD_DUMP CRC(8e98083f) SHA1(ed29c7ed2226613ed5d09ecef4e645e3b53f7f8d) )    /* Sync PROM */
+	ROM_LOAD( "63s141.m10",  0x0100, 0x0100, BAD_DUMP CRC(b0b039c0) SHA1(724fa88f3f3c62b3c9345cdb13e114a10b7bbdb0) )    /* ??? PROM */
+	ROM_LOAD( "82s129.p3",   0x0200, 0x0100, BAD_DUMP CRC(615d784d) SHA1(e7e6397ae45d6ae8b3670b457ede79c42d18d71f) )    /* VRAM Write Protect PROM */
+	ROM_LOAD( "63s141.m8",   0x0300, 0x0100, BAD_DUMP CRC(6d7479ec) SHA1(7a7c30f5846b98afaaca2af9aab82416ebafe4cc) )    /* ??? PROM */
 ROM_END
 
 
@@ -509,10 +495,10 @@ ROM_START( firebeas )
 	ROM_LOAD( "mo6000.m12", 0x6000, 0x2000, CRC(b722997f) SHA1(65a2618ecd8b4923f30f59c1fb95124cf0391964) )
 
 	ROM_REGION( 0x400, "proms", 0 )
-	ROM_LOAD( "63s141.e10", 0x0000, 0x0100, CRC(8e98083f) SHA1(ed29c7ed2226613ed5d09ecef4e645e3b53f7f8d) )	/* Sync PROM */
-	ROM_LOAD( "63s141.m10", 0x0100, 0x0100, CRC(b0b039c0) SHA1(724fa88f3f3c62b3c9345cdb13e114a10b7bbdb0) )	/* ??? PROM */
-	ROM_LOAD( "82s129.p3",  0x0200, 0x0100, CRC(615d784d) SHA1(e7e6397ae45d6ae8b3670b457ede79c42d18d71f) )	/* VRAM Write Protect PROM */
-	ROM_LOAD( "63s141.m8",  0x0300, 0x0100, CRC(6d7479ec) SHA1(7a7c30f5846b98afaaca2af9aab82416ebafe4cc) )	/* ??? PROM */
+	ROM_LOAD( "63s141.e10", 0x0000, 0x0100, CRC(8e98083f) SHA1(ed29c7ed2226613ed5d09ecef4e645e3b53f7f8d) )  /* Sync PROM */
+	ROM_LOAD( "63s141.m10", 0x0100, 0x0100, CRC(b0b039c0) SHA1(724fa88f3f3c62b3c9345cdb13e114a10b7bbdb0) )  /* ??? PROM */
+	ROM_LOAD( "82s129.p3",  0x0200, 0x0100, CRC(615d784d) SHA1(e7e6397ae45d6ae8b3670b457ede79c42d18d71f) )  /* VRAM Write Protect PROM */
+	ROM_LOAD( "63s141.m8",  0x0300, 0x0100, CRC(6d7479ec) SHA1(7a7c30f5846b98afaaca2af9aab82416ebafe4cc) )  /* ??? PROM */
 ROM_END
 
 
@@ -523,5 +509,5 @@ ROM_END
  *
  *************************************/
 
-GAME( 1983, cloud9,   0, cloud9, cloud9,   0, ROT0, "Atari", "Cloud 9 (prototype)", GAME_SUPPORTS_SAVE )
-GAME( 1983, firebeas, 0, cloud9, firebeas, 0, ROT0, "Atari", "Firebeast (prototype)", GAME_SUPPORTS_SAVE )
+GAME( 1983, cloud9,   0, cloud9, cloud9, driver_device,   0, ROT0, "Atari", "Cloud 9 (prototype)", GAME_SUPPORTS_SAVE )
+GAME( 1983, firebeas, 0, cloud9, firebeas, driver_device, 0, ROT0, "Atari", "Firebeast (prototype)", GAME_SUPPORTS_SAVE )

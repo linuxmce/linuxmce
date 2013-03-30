@@ -474,7 +474,7 @@
  *                           DISC_CLK_IS_FREQ   - internally clock at this frequency.
  *
  *               x_time options: you can also | these x_time features to the basic
- *                               types above if needed, or use seperately with 7492.
+ *                               types above if needed, or use separately with 7492.
  *                           DISC_OUT_IS_ENERGY - This will uses the x_time to
  *                                                anti-alias the count.  Might be
  *                                                usefull if not connected to other
@@ -2141,8 +2141,8 @@
  ***********************************************************************
  *
  * DISCRETE_OP_AMP_TRIG_VCA - Triggered Norton op amp voltage controlled amplifier.
- *                            This means the cap is rapidly charged thru r5 when F2=1.
- *                            Then it discharges thru r6+r7 when F2=0.
+ *                            This means the cap is rapidly charged through r5 when F2=1.
+ *                            Then it discharges through r6+r7 when F2=0.
  *                            This voltage controls the amplitude.
  *                            While the diagram looks complex, usually only parts of it are used.
  *
@@ -2260,7 +2260,7 @@
  ***********************************************************************
  *
  * DISCRETE_CRFILTER - Simple single pole CR filter network (vRef = 0)
- * DISCRETE_CRFILTER_VREF - Same but refrenced to vRef not 0V
+ * DISCRETE_CRFILTER_VREF - Same but referenced to vRef not 0V
  *
  *                        .------------.
  *                        |            |
@@ -2815,7 +2815,7 @@
  ***********************************************************************
  *
  * DISCRETE_RCFILTER - Simple single pole RC filter network (vRef = 0)
- * DISCRETE_RCFILTER_VREF - Same but refrenced to vRef not 0V
+ * DISCRETE_RCFILTER_VREF - Same but referenced to vRef not 0V
  *
  *                        .------------.
  *                        |            |
@@ -3475,18 +3475,18 @@
  *************************************/
 
 /* calculate charge exponent using discrete sample time */
-#define RC_CHARGE_EXP(rc)						(1.0 - exp(-this->sample_time() / (rc)))
+#define RC_CHARGE_EXP(rc)                       (1.0 - exp(-this->sample_time() / (rc)))
 /* calculate charge exponent using given sample time */
-#define RC_CHARGE_EXP_DT(rc, dt)				(1.0 - exp(-(dt) / (rc)))
-#define RC_CHARGE_NEG_EXP_DT(rc, dt)			(1.0 - exp((dt) / (rc)))
+#define RC_CHARGE_EXP_DT(rc, dt)                (1.0 - exp(-(dt) / (rc)))
+#define RC_CHARGE_NEG_EXP_DT(rc, dt)            (1.0 - exp((dt) / (rc)))
 
 /* calculate discharge exponent using discrete sample time */
-#define RC_DISCHARGE_EXP(rc)					(exp(-this->sample_time() / (rc)))
+#define RC_DISCHARGE_EXP(rc)                    (exp(-this->sample_time() / (rc)))
 /* calculate discharge exponent using given sample time */
-#define RC_DISCHARGE_EXP_DT(rc, dt)				(exp(-(dt) / (rc)))
-#define RC_DISCHARGE_NEG_EXP_DT(rc, dt)			(exp((dt) / (rc)))
+#define RC_DISCHARGE_EXP_DT(rc, dt)             (exp(-(dt) / (rc)))
+#define RC_DISCHARGE_NEG_EXP_DT(rc, dt)         (exp((dt) / (rc)))
 
-#define FREQ_OF_555(_r1, _r2, _c)	(1.49 / ((_r1 + 2 * _r2) * _c))
+#define FREQ_OF_555(_r1, _r2, _c)   (1.49 / ((_r1 + 2 * _r2) * _c))
 
 /*************************************
  *
@@ -3494,16 +3494,16 @@
  *
  *************************************/
 
-#define DISCRETE_CLASS_FUNC(_class, _func)		DISCRETE_CLASS_NAME(_class) :: _func
+#define DISCRETE_CLASS_FUNC(_class, _func)      DISCRETE_CLASS_NAME(_class) :: _func
 
-#define DISCRETE_STEP(_class)					void DISCRETE_CLASS_FUNC(_class, step)(void)
-#define DISCRETE_RESET(_class)					void DISCRETE_CLASS_FUNC(_class, reset)(void)
-#define DISCRETE_START(_class)					void DISCRETE_CLASS_FUNC(_class, start)(void)
-#define DISCRETE_STOP(_class)					void DISCRETE_CLASS_FUNC(_class, stop)(void)
-#define DISCRETE_DECLARE_INFO(_name)			const _name *info = (const  _name *)this->custom_data();
+#define DISCRETE_STEP(_class)                   void DISCRETE_CLASS_FUNC(_class, step)(void)
+#define DISCRETE_RESET(_class)                  void DISCRETE_CLASS_FUNC(_class, reset)(void)
+#define DISCRETE_START(_class)                  void DISCRETE_CLASS_FUNC(_class, start)(void)
+#define DISCRETE_STOP(_class)                   void DISCRETE_CLASS_FUNC(_class, stop)(void)
+#define DISCRETE_DECLARE_INFO(_name)            const _name *info = (const  _name *)this->custom_data();
 
 //#define DISCRETE_INPUT(_num)                  (*(this->m_input[_num]))
-#define DISCRETE_INPUT(_num)					(input(_num))
+#define DISCRETE_INPUT(_num)                    (input(_num))
 
 /*************************************
  *
@@ -3511,11 +3511,11 @@
  *
  *************************************/
 
-#define DISCRETE_MAX_NODES					300
-#define DISCRETE_MAX_INPUTS					10
-#define DISCRETE_MAX_OUTPUTS				8
+#define DISCRETE_MAX_NODES                  300
+#define DISCRETE_MAX_INPUTS                 10
+#define DISCRETE_MAX_OUTPUTS                8
 
-#define DISCRETE_MAX_TASK_GROUPS			10
+#define DISCRETE_MAX_TASK_GROUPS            10
 
 
 /*************************************
@@ -3524,79 +3524,79 @@
  *
  *************************************/
 
-#define DEFAULT_TTL_V_LOGIC_1				3.4
+#define DEFAULT_TTL_V_LOGIC_1               3.4
 
-#define DISC_LOGADJ							1.0
-#define DISC_LINADJ							0.0
+#define DISC_LOGADJ                         1.0
+#define DISC_LINADJ                         0.0
 
 /* DISCRETE_COMP_ADDER types */
-#define DISC_COMP_P_CAPACITOR				0x00
-#define DISC_COMP_P_RESISTOR				0x01
+#define DISC_COMP_P_CAPACITOR               0x00
+#define DISC_COMP_P_RESISTOR                0x01
 
 /* clk types */
-#define DISC_CLK_MASK						0x03
-#define DISC_CLK_ON_F_EDGE					0x00
-#define DISC_CLK_ON_R_EDGE					0x01
-#define DISC_CLK_BY_COUNT					0x02
-#define DISC_CLK_IS_FREQ					0x03
+#define DISC_CLK_MASK                       0x03
+#define DISC_CLK_ON_F_EDGE                  0x00
+#define DISC_CLK_ON_R_EDGE                  0x01
+#define DISC_CLK_BY_COUNT                   0x02
+#define DISC_CLK_IS_FREQ                    0x03
 
-#define DISC_COUNT_DOWN						0
-#define DISC_COUNT_UP						1
+#define DISC_COUNT_DOWN                     0
+#define DISC_COUNT_UP                       1
 
-#define DISC_COUNTER_IS_7492				0x08
+#define DISC_COUNTER_IS_7492                0x08
 
-#define DISC_OUT_MASK						0x30
-#define DISC_OUT_DEFAULT					0x00
-#define DISC_OUT_IS_ENERGY					0x10
-#define DISC_OUT_HAS_XTIME					0x20
+#define DISC_OUT_MASK                       0x30
+#define DISC_OUT_DEFAULT                    0x00
+#define DISC_OUT_IS_ENERGY                  0x10
+#define DISC_OUT_HAS_XTIME                  0x20
 
 /* Function possibilities for the LFSR feedback nodes */
 /* 2 inputs, one output                               */
-#define DISC_LFSR_XOR						0
-#define DISC_LFSR_OR						1
-#define DISC_LFSR_AND						2
-#define DISC_LFSR_XNOR						3
-#define DISC_LFSR_NOR						4
-#define DISC_LFSR_NAND						5
-#define DISC_LFSR_IN0						6
-#define DISC_LFSR_IN1						7
-#define DISC_LFSR_NOT_IN0					8
-#define DISC_LFSR_NOT_IN1					9
-#define DISC_LFSR_REPLACE					10
-#define DISC_LFSR_XOR_INV_IN0           	11
-#define DISC_LFSR_XOR_INV_IN1           	12
+#define DISC_LFSR_XOR                       0
+#define DISC_LFSR_OR                        1
+#define DISC_LFSR_AND                       2
+#define DISC_LFSR_XNOR                      3
+#define DISC_LFSR_NOR                       4
+#define DISC_LFSR_NAND                      5
+#define DISC_LFSR_IN0                       6
+#define DISC_LFSR_IN1                       7
+#define DISC_LFSR_NOT_IN0                   8
+#define DISC_LFSR_NOT_IN1                   9
+#define DISC_LFSR_REPLACE                   10
+#define DISC_LFSR_XOR_INV_IN0               11
+#define DISC_LFSR_XOR_INV_IN1               12
 
 /* LFSR Flag Bits */
-#define DISC_LFSR_FLAG_OUT_INVERT			0x01
-#define DISC_LFSR_FLAG_RESET_TYPE_L			0x00
-#define DISC_LFSR_FLAG_RESET_TYPE_H			0x02
-#define DISC_LFSR_FLAG_OUTPUT_F0			0x04
-#define DISC_LFSR_FLAG_OUTPUT_SR_SN1		0x08
+#define DISC_LFSR_FLAG_OUT_INVERT           0x01
+#define DISC_LFSR_FLAG_RESET_TYPE_L         0x00
+#define DISC_LFSR_FLAG_RESET_TYPE_H         0x02
+#define DISC_LFSR_FLAG_OUTPUT_F0            0x04
+#define DISC_LFSR_FLAG_OUTPUT_SR_SN1        0x08
 
 /* Sample & Hold supported clock types */
-#define DISC_SAMPHOLD_REDGE					0
-#define DISC_SAMPHOLD_FEDGE					1
-#define DISC_SAMPHOLD_HLATCH				2
-#define DISC_SAMPHOLD_LLATCH				3
+#define DISC_SAMPHOLD_REDGE                 0
+#define DISC_SAMPHOLD_FEDGE                 1
+#define DISC_SAMPHOLD_HLATCH                2
+#define DISC_SAMPHOLD_LLATCH                3
 
 /* Shift options */
-#define DISC_LOGIC_SHIFT__RESET_L			0x00
-#define DISC_LOGIC_SHIFT__RESET_H			0x10
-#define DISC_LOGIC_SHIFT__LEFT				0x00
-#define DISC_LOGIC_SHIFT__RIGHT				0x20
+#define DISC_LOGIC_SHIFT__RESET_L           0x00
+#define DISC_LOGIC_SHIFT__RESET_H           0x10
+#define DISC_LOGIC_SHIFT__LEFT              0x00
+#define DISC_LOGIC_SHIFT__RIGHT             0x20
 
 /* Maximum number of resistors in ladder chain */
-#define DISC_LADDER_MAXRES					8
+#define DISC_LADDER_MAXRES                  8
 
 /* Filter types */
-#define DISC_FILTER_LOWPASS					0
-#define DISC_FILTER_HIGHPASS				1
-#define DISC_FILTER_BANDPASS				2
+#define DISC_FILTER_LOWPASS                 0
+#define DISC_FILTER_HIGHPASS                1
+#define DISC_FILTER_BANDPASS                2
 
 /* Mixer types */
-#define DISC_MIXER_IS_RESISTOR				0
-#define DISC_MIXER_IS_OP_AMP				1
-#define DISC_MIXER_IS_OP_AMP_WITH_RI		2	/* Used only internally.  Use DISC_MIXER_IS_OP_AMP */
+#define DISC_MIXER_IS_RESISTOR              0
+#define DISC_MIXER_IS_OP_AMP                1
+#define DISC_MIXER_IS_OP_AMP_WITH_RI        2   /* Used only internally.  Use DISC_MIXER_IS_OP_AMP */
 
 /* Triggered Op Amp Functions */
 enum
@@ -3614,129 +3614,129 @@ enum
 
 
 /* Common Op Amp Flags and values */
-#define DISC_OP_AMP_IS_NORTON				0x100
-#define OP_AMP_NORTON_VBE					0.5		// This is the norton junction voltage. Used only internally.
-#define OP_AMP_VP_RAIL_OFFSET				1.5		// This is how close an op-amp can get to the vP rail. Used only internally.
+#define DISC_OP_AMP_IS_NORTON               0x100
+#define OP_AMP_NORTON_VBE                   0.5     // This is the norton junction voltage. Used only internally.
+#define OP_AMP_VP_RAIL_OFFSET               1.5     // This is how close an op-amp can get to the vP rail. Used only internally.
 
 /* Integrate options */
-#define DISC_INTEGRATE_OP_AMP_1				0x00
-#define DISC_INTEGRATE_OP_AMP_2				0x10
+#define DISC_INTEGRATE_OP_AMP_1             0x00
+#define DISC_INTEGRATE_OP_AMP_2             0x10
 
 /* op amp 1 shot types */
-#define DISC_OP_AMP_1SHT_1					0x00
+#define DISC_OP_AMP_1SHT_1                  0x00
 
 /* Op Amp Filter Options */
-#define DISC_OP_AMP_FILTER_IS_LOW_PASS_1	0x00
-#define DISC_OP_AMP_FILTER_IS_HIGH_PASS_1	0x10
-#define DISC_OP_AMP_FILTER_IS_BAND_PASS_1	0x20
-#define DISC_OP_AMP_FILTER_IS_BAND_PASS_1M	0x30
-#define DISC_OP_AMP_FILTER_IS_HIGH_PASS_0	0x40
-#define DISC_OP_AMP_FILTER_IS_BAND_PASS_0	0x50
-#define DISC_OP_AMP_FILTER_IS_LOW_PASS_1_A	0x60
+#define DISC_OP_AMP_FILTER_IS_LOW_PASS_1    0x00
+#define DISC_OP_AMP_FILTER_IS_HIGH_PASS_1   0x10
+#define DISC_OP_AMP_FILTER_IS_BAND_PASS_1   0x20
+#define DISC_OP_AMP_FILTER_IS_BAND_PASS_1M  0x30
+#define DISC_OP_AMP_FILTER_IS_HIGH_PASS_0   0x40
+#define DISC_OP_AMP_FILTER_IS_BAND_PASS_0   0x50
+#define DISC_OP_AMP_FILTER_IS_LOW_PASS_1_A  0x60
 
-#define DISC_OP_AMP_FILTER_TYPE_MASK		(0xf0 | DISC_OP_AMP_IS_NORTON)	// Used only internally.
+#define DISC_OP_AMP_FILTER_TYPE_MASK        (0xf0 | DISC_OP_AMP_IS_NORTON)  // Used only internally.
 
 /* Sallen-Key filter Opions */
-#define DISC_SALLEN_KEY_LOW_PASS			0x01
-#define DISC_SALLEN_KEY_HIGH_PASS			0x02
+#define DISC_SALLEN_KEY_LOW_PASS            0x01
+#define DISC_SALLEN_KEY_HIGH_PASS           0x02
 
 
 /* Op Amp Oscillator Flags */
-#define DISC_OP_AMP_OSCILLATOR_TYPE_MASK	(0xf0 | DISC_OP_AMP_IS_NORTON)	// Used only internally.
-#define DISC_OP_AMP_OSCILLATOR_1			0x00
-#define DISC_OP_AMP_OSCILLATOR_2			0x10
-#define DISC_OP_AMP_OSCILLATOR_VCO_1		0x20
-#define DISC_OP_AMP_OSCILLATOR_VCO_2		0x30
-#define DISC_OP_AMP_OSCILLATOR_VCO_3		0x40
+#define DISC_OP_AMP_OSCILLATOR_TYPE_MASK    (0xf0 | DISC_OP_AMP_IS_NORTON)  // Used only internally.
+#define DISC_OP_AMP_OSCILLATOR_1            0x00
+#define DISC_OP_AMP_OSCILLATOR_2            0x10
+#define DISC_OP_AMP_OSCILLATOR_VCO_1        0x20
+#define DISC_OP_AMP_OSCILLATOR_VCO_2        0x30
+#define DISC_OP_AMP_OSCILLATOR_VCO_3        0x40
 
-#define DISC_OP_AMP_OSCILLATOR_OUT_MASK			0x07
-#define DISC_OP_AMP_OSCILLATOR_OUT_CAP			0x00
-#define DISC_OP_AMP_OSCILLATOR_OUT_SQW			0x01
-#define DISC_OP_AMP_OSCILLATOR_OUT_ENERGY		0x02
-#define DISC_OP_AMP_OSCILLATOR_OUT_LOGIC_X		0x03
-#define DISC_OP_AMP_OSCILLATOR_OUT_COUNT_F_X	0x04
-#define DISC_OP_AMP_OSCILLATOR_OUT_COUNT_R_X	0x05
+#define DISC_OP_AMP_OSCILLATOR_OUT_MASK         0x07
+#define DISC_OP_AMP_OSCILLATOR_OUT_CAP          0x00
+#define DISC_OP_AMP_OSCILLATOR_OUT_SQW          0x01
+#define DISC_OP_AMP_OSCILLATOR_OUT_ENERGY       0x02
+#define DISC_OP_AMP_OSCILLATOR_OUT_LOGIC_X      0x03
+#define DISC_OP_AMP_OSCILLATOR_OUT_COUNT_F_X    0x04
+#define DISC_OP_AMP_OSCILLATOR_OUT_COUNT_R_X    0x05
 
 /* Schmitt Oscillator Options */
-#define DISC_SCHMITT_OSC_IN_IS_LOGIC		0x00
-#define DISC_SCHMITT_OSC_IN_IS_VOLTAGE		0x01
+#define DISC_SCHMITT_OSC_IN_IS_LOGIC        0x00
+#define DISC_SCHMITT_OSC_IN_IS_VOLTAGE      0x01
 
-#define DISC_SCHMITT_OSC_ENAB_IS_AND		0x00
-#define DISC_SCHMITT_OSC_ENAB_IS_NAND		0x02
-#define DISC_SCHMITT_OSC_ENAB_IS_OR			0x04
-#define DISC_SCHMITT_OSC_ENAB_IS_NOR		0x06
+#define DISC_SCHMITT_OSC_ENAB_IS_AND        0x00
+#define DISC_SCHMITT_OSC_ENAB_IS_NAND       0x02
+#define DISC_SCHMITT_OSC_ENAB_IS_OR         0x04
+#define DISC_SCHMITT_OSC_ENAB_IS_NOR        0x06
 
-#define DISC_SCHMITT_OSC_ENAB_MASK			0x06	/* Bits that define output enable type.
+#define DISC_SCHMITT_OSC_ENAB_MASK          0x06    /* Bits that define output enable type.
                                                      * Used only internally in module. */
 
 /* 555 Common output flags */
-#define DISC_555_OUT_DC						0x00
-#define DISC_555_OUT_AC						0x10
+#define DISC_555_OUT_DC                     0x00
+#define DISC_555_OUT_AC                     0x10
 
-#define DISC_555_TRIGGER_IS_LOGIC			0x00
-#define DISC_555_TRIGGER_IS_VOLTAGE			0x20
-#define DISC_555_TRIGGER_IS_COUNT			0x40
-#define DSD_555_TRIGGER_TYPE_MASK			0x60
-#define DISC_555_TRIGGER_DISCHARGES_CAP		0x80
+#define DISC_555_TRIGGER_IS_LOGIC           0x00
+#define DISC_555_TRIGGER_IS_VOLTAGE         0x20
+#define DISC_555_TRIGGER_IS_COUNT           0x40
+#define DSD_555_TRIGGER_TYPE_MASK           0x60
+#define DISC_555_TRIGGER_DISCHARGES_CAP     0x80
 
-#define DISC_555_OUT_SQW					0x00	/* Squarewave */
-#define DISC_555_OUT_CAP					0x01	/* Cap charge waveform */
-#define DISC_555_OUT_COUNT_F				0x02	/* Falling count */
-#define DISC_555_OUT_COUNT_R				0x03	/* Rising count */
-#define DISC_555_OUT_ENERGY					0x04
-#define DISC_555_OUT_LOGIC_X				0x05
-#define DISC_555_OUT_COUNT_F_X				0x06
-#define DISC_555_OUT_COUNT_R_X				0x07
+#define DISC_555_OUT_SQW                    0x00    /* Squarewave */
+#define DISC_555_OUT_CAP                    0x01    /* Cap charge waveform */
+#define DISC_555_OUT_COUNT_F                0x02    /* Falling count */
+#define DISC_555_OUT_COUNT_R                0x03    /* Rising count */
+#define DISC_555_OUT_ENERGY                 0x04
+#define DISC_555_OUT_LOGIC_X                0x05
+#define DISC_555_OUT_COUNT_F_X              0x06
+#define DISC_555_OUT_COUNT_R_X              0x07
 
-#define DISC_555_OUT_MASK					0x07	/* Bits that define output type.
+#define DISC_555_OUT_MASK                   0x07    /* Bits that define output type.
                                                  * Used only internally in module. */
 
-#define DISC_555_ASTABLE_HAS_FAST_CHARGE_DIODE		0x80
-#define DISCRETE_555_CC_TO_DISCHARGE_PIN			0x00
-#define DISCRETE_555_CC_TO_CAP						0x80
+#define DISC_555_ASTABLE_HAS_FAST_CHARGE_DIODE      0x80
+#define DISCRETE_555_CC_TO_DISCHARGE_PIN            0x00
+#define DISCRETE_555_CC_TO_CAP                      0x80
 
 /* 566 output flags */
-#define DISC_566_OUT_DC						0x00
-#define DISC_566_OUT_AC						0x10
+#define DISC_566_OUT_DC                     0x00
+#define DISC_566_OUT_AC                     0x10
 
-#define DISC_566_OUT_SQUARE					0x00	/* Squarewave */
-#define DISC_566_OUT_ENERGY					0x01	/* anti-alaised Squarewave */
-#define DISC_566_OUT_TRIANGLE				0x02	/* Triangle waveform */
-#define DISC_566_OUT_LOGIC					0x03	/* 0/1 logic output */
-#define DISC_566_OUT_COUNT_F				0x04
-#define DISC_566_OUT_COUNT_R				0x05
-#define DISC_566_OUT_COUNT_F_X				0x06
-#define DISC_566_OUT_COUNT_R_X				0x07
-#define DISC_566_OUT_MASK					0x07	/* Bits that define output type.
+#define DISC_566_OUT_SQUARE                 0x00    /* Squarewave */
+#define DISC_566_OUT_ENERGY                 0x01    /* anti-alaised Squarewave */
+#define DISC_566_OUT_TRIANGLE               0x02    /* Triangle waveform */
+#define DISC_566_OUT_LOGIC                  0x03    /* 0/1 logic output */
+#define DISC_566_OUT_COUNT_F                0x04
+#define DISC_566_OUT_COUNT_R                0x05
+#define DISC_566_OUT_COUNT_F_X              0x06
+#define DISC_566_OUT_COUNT_R_X              0x07
+#define DISC_566_OUT_MASK                   0x07    /* Bits that define output type.
                                                      * Used only internally in module. */
 
 /* LS624 output flags */
-#define DISC_LS624_OUT_SQUARE				0x01
-#define DISC_LS624_OUT_ENERGY				0x02
-#define DISC_LS624_OUT_LOGIC				0x03
-#define DISC_LS624_OUT_LOGIC_X				0x04
-#define DISC_LS624_OUT_COUNT_F				0x05
-#define DISC_LS624_OUT_COUNT_R				0x06
-#define DISC_LS624_OUT_COUNT_F_X			0x07
-#define DISC_LS624_OUT_COUNT_R_X			0x08
+#define DISC_LS624_OUT_SQUARE               0x01
+#define DISC_LS624_OUT_ENERGY               0x02
+#define DISC_LS624_OUT_LOGIC                0x03
+#define DISC_LS624_OUT_LOGIC_X              0x04
+#define DISC_LS624_OUT_COUNT_F              0x05
+#define DISC_LS624_OUT_COUNT_R              0x06
+#define DISC_LS624_OUT_COUNT_F_X            0x07
+#define DISC_LS624_OUT_COUNT_R_X            0x08
 
 /* Oneshot types */
-#define DISC_ONESHOT_FEDGE					0x00
-#define DISC_ONESHOT_REDGE					0x01
+#define DISC_ONESHOT_FEDGE                  0x00
+#define DISC_ONESHOT_REDGE                  0x01
 
-#define DISC_ONESHOT_NORETRIG				0x00
-#define DISC_ONESHOT_RETRIG					0x02
+#define DISC_ONESHOT_NORETRIG               0x00
+#define DISC_ONESHOT_RETRIG                 0x02
 
-#define DISC_OUT_ACTIVE_LOW					0x04
-#define DISC_OUT_ACTIVE_HIGH				0x00
+#define DISC_OUT_ACTIVE_LOW                 0x04
+#define DISC_OUT_ACTIVE_HIGH                0x00
 
-#define DISC_CD4066_THRESHOLD           	2.75
+#define DISC_CD4066_THRESHOLD               2.75
 
 /* Integrate */
 
-#define DISC_RC_INTEGRATE_TYPE1				0x00
-#define DISC_RC_INTEGRATE_TYPE2				0x01
-#define DISC_RC_INTEGRATE_TYPE3				0x02
+#define DISC_RC_INTEGRATE_TYPE1             0x00
+#define DISC_RC_INTEGRATE_TYPE2             0x01
+#define DISC_RC_INTEGRATE_TYPE3             0x02
 
 /*************************************
  *
@@ -3751,23 +3751,23 @@ enum
  * add and delete may be slow - the focus is on access!
  */
 
-template<class T> struct dynamic_array_t
+template<class _ElementType> struct dynamic_array_t
 {
 public:
 	dynamic_array_t(int initial) {
 		m_count = 0;
 		m_allocated = initial;
-		m_arr = global_alloc_array_clear(T, m_allocated);
+		m_arr = global_alloc_array_clear(_ElementType, m_allocated);
 	}
 	dynamic_array_t()  {
 		m_count = 0;
 		m_allocated = 16;
-		m_arr = global_alloc_array_clear(T, m_allocated);
+		m_arr = global_alloc_array_clear(_ElementType, m_allocated);
 	}
 	~dynamic_array_t() {
 		global_free(m_arr);
 	}
-	T& operator [] (unsigned int index) const // get array item
+	_ElementType& operator [] (unsigned int index) const // get array item
 	{
 		return m_arr[index];
 	}
@@ -3778,29 +3778,29 @@ public:
 		if (m_allocated < 16)
 			m_allocated = 16;
 		m_count = a.count();
-		m_arr = global_alloc_array_clear(T, m_allocated);
+		m_arr = global_alloc_array_clear(_ElementType, m_allocated);
 		for (int i=0; i < m_count; i++)
 			m_arr[i] = a[i];
 	}
 	dynamic_array_t& operator = (const dynamic_array_t &a) // assignment operator
 	{
-	    if (this == &a) return *this;
+		if (this == &a) return *this;
 		m_allocated = a.count();
 		if (m_allocated < 16)
 			m_allocated = 16;
 		m_count = a.count();
-		m_arr = global_alloc_array_clear(T, m_allocated);
+		m_arr = global_alloc_array_clear(_ElementType, m_allocated);
 		for (int i=0; i < m_count; i++)
 			m_arr[i] = a[i];
-	    return *this;
+		return *this;
 	}
 
-	inline T* add(T object)
+	inline _ElementType* add(_ElementType object)
 	{
 		if (m_count >= m_allocated)
 		{
 			m_allocated *= 2;
-			T *newarr = global_alloc_array_clear(T, m_allocated);
+			_ElementType *newarr = global_alloc_array_clear(_ElementType, m_allocated);
 			for (int i=0; i < m_count; i++)
 				newarr[i] = m_arr[i];
 			global_free(m_arr);
@@ -3810,19 +3810,19 @@ public:
 		m_count++;
 		return &m_arr[m_count-1];
 	}
-	inline void delete(int index)
+	inline void remove(int index)
 	{
 		for (int i=index+1; i < m_count; i++)
 			m_arr[i-1] = m_arr[i];
 		m_count--;
 	}
-	inline void clear(void) { m_count = 0;	}
+	inline void clear(void) { m_count = 0;  }
 	inline int count(void) const { return m_count; }
-	inline T *begin_ptr(void) const { return m_arr; }
-	inline T *end_ptr(void) const { return m_arr + (m_count - 1); }
+	inline _ElementType *begin_ptr(void) const { return m_arr; }
+	inline _ElementType *end_ptr(void) const { return m_arr + (m_count - 1); }
 private:
-	T	*m_arr;
-	int	m_count;
+	_ElementType    *m_arr;
+	int m_count;
 	int m_allocated;
 };
 
@@ -3832,8 +3832,7 @@ private:
  *
  *************************************/
 
-typedef struct _discrete_lfsr_desc discrete_lfsr_desc;
-struct _discrete_lfsr_desc
+struct discrete_lfsr_desc
 {
 	int clock_type;
 	int bitlength;
@@ -3854,212 +3853,198 @@ struct _discrete_lfsr_desc
 };
 
 
-typedef struct _discrete_op_amp_osc_info discrete_op_amp_osc_info;
-struct _discrete_op_amp_osc_info
+struct discrete_op_amp_osc_info
 {
-	UINT32	type;
-	double	r1;
-	double	r2;
-	double	r3;
-	double	r4;
-	double	r5;
-	double	r6;
-	double	r7;
-	double	r8;
-	double	c;
-	double	vP;		// Op amp B+
+	UINT32  type;
+	double  r1;
+	double  r2;
+	double  r3;
+	double  r4;
+	double  r5;
+	double  r6;
+	double  r7;
+	double  r8;
+	double  c;
+	double  vP;     // Op amp B+
 };
 
 
-#define DEFAULT_7414_VALUES 	1.7, 0.9, 3.4
+#define DEFAULT_7414_VALUES     1.7, 0.9, 3.4
 
-#define DEFAULT_74LS14_VALUES	1.6, 0.8, 3.4
+#define DEFAULT_74LS14_VALUES   1.6, 0.8, 3.4
 
-typedef struct _discrete_schmitt_osc_desc discrete_schmitt_osc_desc;
-struct _discrete_schmitt_osc_desc
+struct discrete_schmitt_osc_desc
 {
-	double	rIn;
-	double	rFeedback;
-	double	c;
-	double	trshRise;	// voltage that triggers the gate input to go high (vGate) on rise
-	double	trshFall;	// voltage that triggers the gate input to go low (0V) on fall
-	double	vGate;		// the output high voltage of the gate that gets fedback through rFeedback
-	int		options;	// bitmaped options
+	double  rIn;
+	double  rFeedback;
+	double  c;
+	double  trshRise;   // voltage that triggers the gate input to go high (vGate) on rise
+	double  trshFall;   // voltage that triggers the gate input to go low (0V) on fall
+	double  vGate;      // the output high voltage of the gate that gets fedback through rFeedback
+	int     options;    // bitmaped options
 };
 
 
-typedef struct _discrete_comp_adder_table discrete_comp_adder_table;
-struct _discrete_comp_adder_table
+struct discrete_comp_adder_table
 {
-	int		type;
-	double	cDefault;				// Default componet.  0 if not used.
-	int		length;
-	double	c[DISC_LADDER_MAXRES];	// Componet table
+	int     type;
+	double  cDefault;               // Default componet.  0 if not used.
+	int     length;
+	double  c[DISC_LADDER_MAXRES];  // Componet table
 };
 
 
-typedef struct _discrete_dac_r1_ladder discrete_dac_r1_ladder;
-struct _discrete_dac_r1_ladder
+struct discrete_dac_r1_ladder
 {
-	int		ladderLength;		// 2 to DISC_LADDER_MAXRES.  1 would be useless.
-	double	r[DISC_LADDER_MAXRES];	// Don't use 0 for valid resistors.  That is a short.
-	double	vBias;			// Voltage Bias resistor is tied to (0 = not used)
-	double	rBias;			// Additional resistor tied to vBias (0 = not used)
-	double	rGnd;			// Resistor tied to ground (0 = not used)
-	double	cFilter;		// Filtering cap (0 = not used)
+	int     ladderLength;       // 2 to DISC_LADDER_MAXRES.  1 would be useless.
+	double  r[DISC_LADDER_MAXRES];  // Don't use 0 for valid resistors.  That is a short.
+	double  vBias;          // Voltage Bias resistor is tied to (0 = not used)
+	double  rBias;          // Additional resistor tied to vBias (0 = not used)
+	double  rGnd;           // Resistor tied to ground (0 = not used)
+	double  cFilter;        // Filtering cap (0 = not used)
 };
 
 
-typedef struct _discrete_integrate_info discrete_integrate_info;
-struct _discrete_integrate_info
+struct discrete_integrate_info
 {
-	UINT32	type;
-	double	r1;		// r1a + r1b
-	double	r2;		// r2a + r2b
-	double	r3;		// r3a + r3b
-	double	c;
-	double	v1;
-	double	vP;
-	double	f0;
-	double	f1;
-	double	f2;
+	UINT32  type;
+	double  r1;     // r1a + r1b
+	double  r2;     // r2a + r2b
+	double  r3;     // r3a + r3b
+	double  c;
+	double  v1;
+	double  vP;
+	double  f0;
+	double  f1;
+	double  f2;
 };
 
 
-#define DISC_MAX_MIXER_INPUTS	8
-typedef struct _discrete_mixer_desc discrete_mixer_desc;
-struct _discrete_mixer_desc
+#define DISC_MAX_MIXER_INPUTS   8
+struct discrete_mixer_desc
 {
-	int		type;
-	double	r[DISC_MAX_MIXER_INPUTS];		/* static input resistance values.  These are in series with rNode, if used. */
-	int		r_node[DISC_MAX_MIXER_INPUTS];	/* variable resistance nodes, if needed.  0 if not used. */
-	double	c[DISC_MAX_MIXER_INPUTS];
-	double	rI;
-	double	rF;
-	double	cF;
-	double	cAmp;
-	double	vRef;
-	double	gain;				/* Scale value to get output close to +/- 32767 */
+	int     type;
+	double  r[DISC_MAX_MIXER_INPUTS];       /* static input resistance values.  These are in series with rNode, if used. */
+	int     r_node[DISC_MAX_MIXER_INPUTS];  /* variable resistance nodes, if needed.  0 if not used. */
+	double  c[DISC_MAX_MIXER_INPUTS];
+	double  rI;
+	double  rF;
+	double  cF;
+	double  cAmp;
+	double  vRef;
+	double  gain;               /* Scale value to get output close to +/- 32767 */
 };
 
 
-typedef struct _discrete_op_amp_info discrete_op_amp_info;
-struct _discrete_op_amp_info
+struct discrete_op_amp_info
 {
-	UINT32	type;
-	double	r1;
-	double	r2;
-	double	r3;
-	double	r4;
-	double	c;
-	double	vN;		// Op amp B-
-	double	vP;		// Op amp B+
+	UINT32  type;
+	double  r1;
+	double  r2;
+	double  r3;
+	double  r4;
+	double  c;
+	double  vN;     // Op amp B-
+	double  vP;     // Op amp B+
 };
 
 
-typedef struct _discrete_op_amp_1sht_info discrete_op_amp_1sht_info;
-struct _discrete_op_amp_1sht_info
+struct discrete_op_amp_1sht_info
 {
-	UINT32	type;
-	double	r1;
-	double	r2;
-	double	r3;
-	double	r4;
-	double	r5;
-	double	c1;
-	double	c2;
-	double	vN;		// Op amp B-
-	double	vP;		// Op amp B+
+	UINT32  type;
+	double  r1;
+	double  r2;
+	double  r3;
+	double  r4;
+	double  r5;
+	double  c1;
+	double  c2;
+	double  vN;     // Op amp B-
+	double  vP;     // Op amp B+
 };
 
 
-typedef struct _discrete_op_amp_tvca_info discrete_op_amp_tvca_info;
-struct _discrete_op_amp_tvca_info
+struct discrete_op_amp_tvca_info
 {
-	double	r1;
-	double	r2;		// r2a + r2b
-	double	r3;		// r3a + r3b
-	double	r4;
-	double	r5;
-	double	r6;
-	double	r7;
-	double	r8;
-	double	r9;
-	double	r10;
-	double	r11;
-	double	c1;
-	double	c2;
-	double	c3;
-	double	c4;
-	double	v1;
-	double	v2;
-	double	v3;
-	double	vP;
-	int		f0;
-	int		f1;
-	int		f2;
-	int		f3;
-	int		f4;
-	int		f5;
+	double  r1;
+	double  r2;     // r2a + r2b
+	double  r3;     // r3a + r3b
+	double  r4;
+	double  r5;
+	double  r6;
+	double  r7;
+	double  r8;
+	double  r9;
+	double  r10;
+	double  r11;
+	double  c1;
+	double  c2;
+	double  c3;
+	double  c4;
+	double  v1;
+	double  v2;
+	double  v3;
+	double  vP;
+	int     f0;
+	int     f1;
+	int     f2;
+	int     f3;
+	int     f4;
+	int     f5;
 };
 
 
-typedef struct _discrete_op_amp_filt_info discrete_op_amp_filt_info;
-struct _discrete_op_amp_filt_info
+struct discrete_op_amp_filt_info
 {
-	double	r1;
-	double	r2;
-	double	r3;
-	double	r4;
-	double	rF;
-	double	c1;
-	double	c2;
-	double	c3;
-	double	vRef;
-	double	vP;
-	double	vN;
+	double  r1;
+	double  r2;
+	double  r3;
+	double  r4;
+	double  rF;
+	double  c1;
+	double  c2;
+	double  c3;
+	double  vRef;
+	double  vP;
+	double  vN;
 };
 
 
-#define DEFAULT_555_CHARGE		-1
-#define DEFAULT_555_HIGH		-1
-#define DEFAULT_555_VALUES		DEFAULT_555_CHARGE, DEFAULT_555_HIGH
+#define DEFAULT_555_CHARGE      -1
+#define DEFAULT_555_HIGH        -1
+#define DEFAULT_555_VALUES      DEFAULT_555_CHARGE, DEFAULT_555_HIGH
 
-typedef struct _discrete_555_desc discrete_555_desc;
-struct _discrete_555_desc
+struct discrete_555_desc
 {
-	int		options;	/* bit mapped options */
-	double	v_pos;		/* B+ voltage of 555 */
-	double  v_charge;	/* voltage to charge circuit  (Defaults to v_pos) */
-	double	v_out_high;	/* High output voltage of 555 (Defaults to v_pos - 1.2V) */
+	int     options;    /* bit mapped options */
+	double  v_pos;      /* B+ voltage of 555 */
+	double  v_charge;   /* voltage to charge circuit  (Defaults to v_pos) */
+	double  v_out_high; /* High output voltage of 555 (Defaults to v_pos - 1.2V) */
 };
 
-#define DEFAULT_555_CC_SOURCE	DEFAULT_555_CHARGE
+#define DEFAULT_555_CC_SOURCE   DEFAULT_555_CHARGE
 
-typedef struct _discrete_555_cc_desc discrete_555_cc_desc;
-struct _discrete_555_cc_desc
+struct discrete_555_cc_desc
 {
-	int		options;		/* bit mapped options */
-	double	v_pos;			/* B+ voltage of 555 */
-	double	v_cc_source;	/* Voltage of the Constant Current source */
-	double	v_out_high;		/* High output voltage of 555 (Defaults to v_pos - 1.2V) */
-	double	v_cc_junction;	/* The voltage drop of the Constant Current source transitor (0 if Op Amp) */
+	int     options;        /* bit mapped options */
+	double  v_pos;          /* B+ voltage of 555 */
+	double  v_cc_source;    /* Voltage of the Constant Current source */
+	double  v_out_high;     /* High output voltage of 555 (Defaults to v_pos - 1.2V) */
+	double  v_cc_junction;  /* The voltage drop of the Constant Current source transitor (0 if Op Amp) */
 };
 
 
-typedef struct _discrete_555_vco1_desc discrete_555_vco1_desc;
-struct _discrete_555_vco1_desc
+struct discrete_555_vco1_desc
 {
-	int    options;				/* bit mapped options */
+	int    options;             /* bit mapped options */
 	double r1, r2, r3, r4, c;
-	double v_pos;				/* B+ voltage of 555 */
-	double v_charge;			/* (ignored) */
-	double v_out_high;			/* High output voltage of 555 (Defaults to v_pos - 1.2V) */
+	double v_pos;               /* B+ voltage of 555 */
+	double v_charge;            /* (ignored) */
+	double v_out_high;          /* High output voltage of 555 (Defaults to v_pos - 1.2V) */
 };
 
 
-typedef struct _discrete_adsr discrete_adsr;
-struct _discrete_adsr
+struct discrete_adsr
 {
 	double attack_time;  /* All times are in seconds */
 	double attack_value;
@@ -4120,13 +4105,13 @@ enum {
 
 /* Some Pre-defined nodes for convenience */
 
-#define NODE(_x)	(NODE_00 + (_x) * DISCRETE_MAX_OUTPUTS)
+#define NODE(_x)    (NODE_00 + (_x) * DISCRETE_MAX_OUTPUTS)
 #define NODE_SUB(_x, _y) ((_x) + (_y))
 
 #if DISCRETE_MAX_OUTPUTS == 8
-#define NODE_CHILD_NODE_NUM(_x)		((int)(_x) & 7)
-#define NODE_DEFAULT_NODE(_x)		((int)(_x) & ~7)
-#define NODE_INDEX(_x)				(((int)(_x) - NODE_START)>>3)
+#define NODE_CHILD_NODE_NUM(_x)     ((int)(_x) & 7)
+#define NODE_DEFAULT_NODE(_x)       ((int)(_x) & ~7)
+#define NODE_INDEX(_x)              (((int)(_x) - NODE_START)>>3)
 #else
 #error "DISCRETE_MAX_OUTPUTS != 8"
 #endif
@@ -4136,10 +4121,10 @@ enum {
 #define NODE_NC  NODE_00
 #define NODE_SPECIAL  NODE(DISCRETE_MAX_NODES)
 
-#define NODE_START	NODE_00
-#define NODE_END	NODE_SPECIAL
+#define NODE_START  NODE_00
+#define NODE_END    NODE_SPECIAL
 
-#define IS_VALUE_A_NODE(val)	(((val) > NODE_START) && ((val) <= NODE_END))
+#define IS_VALUE_A_NODE(val)    (((val) > NODE_START) && ((val) <= NODE_END))
 
 
 /*************************************
@@ -4154,37 +4139,37 @@ enum {
  *
  *************************************/
 
-typedef enum
+enum discrete_node_type
 {
-	DSS_NULL,			/* Nothing, nill, zippo, only to be used as terminating node */
-	DSS_NOP,			/* just do nothing, placeholder for potential DISCRETE_REPLACE in parent block */
+	DSS_NULL,           /* Nothing, nill, zippo, only to be used as terminating node */
+	DSS_NOP,            /* just do nothing, placeholder for potential DISCRETE_REPLACE in parent block */
 
 	/* standard node */
 
-	DSS_NODE,			/* a standard node */
+	DSS_NODE,           /* a standard node */
 
 	/* Custom */
-	DST_CUSTOM,			/* whatever you want */
+	DST_CUSTOM,         /* whatever you want */
 
 	/* Debugging */
-	DSO_CSVLOG,			/* Dump nodes as csv file */
-	DSO_WAVLOG,		/* Dump nodes as wav file */
+	DSO_CSVLOG,         /* Dump nodes as csv file */
+	DSO_WAVLOG,     /* Dump nodes as wav file */
 
 	/* Parallel execution */
-	DSO_TASK_START,	/* start of parallel task */
-	DSO_TASK_END,	/* end of parallel task */
+	DSO_TASK_START, /* start of parallel task */
+	DSO_TASK_END,   /* end of parallel task */
 
 	/* Output Node -- this must be the last entry in this enum! */
-	DSO_OUTPUT,			/* The final output node */
+	DSO_OUTPUT,         /* The final output node */
 
 	/* Import another blocklist */
-	DSO_IMPORT,			/* import from another discrete block */
-	DSO_REPLACE,		/* replace next node */
-	DSO_DELETE,			/* delete nodes */
+	DSO_IMPORT,         /* import from another discrete block */
+	DSO_REPLACE,        /* replace next node */
+	DSO_DELETE,         /* delete nodes */
 
 	/* Marks end of this enum -- must be last entry ! */
 	DSO_LAST
-} discrete_node_type;
+};
 
 /*************************************
  *
@@ -4192,7 +4177,7 @@ typedef enum
  *
  *************************************/
 
-typedef struct _discrete_sound_block discrete_block;
+struct discrete_block;
 class discrete_node_base_factory;
 class discrete_task;
 class discrete_base_node;
@@ -4217,17 +4202,17 @@ typedef dynamic_array_t<discrete_task *> task_list_t;
  *
  *************************************/
 
-struct _discrete_sound_block
+struct discrete_block
 {
-	int				node;							/* Output node number */
-	discrete_node_base_factory	*factory;
-	int				type;							/* see defines below */
-	int				active_inputs;					/* Number of active inputs on this node type */
-	int				input_node[DISCRETE_MAX_INPUTS];/* input/control nodes */
-	double			initial[DISCRETE_MAX_INPUTS];	/* Initial values */
-	const void *	custom;							/* Custom function specific initialisation data */
-	const char *	name;							/* Node Name */
-	const char *    mod_name;						/* Module / class name */
+	int             node;                           /* Output node number */
+	discrete_node_base_factory  *factory;
+	int             type;                           /* see defines below */
+	int             active_inputs;                  /* Number of active inputs on this node type */
+	int             input_node[DISCRETE_MAX_INPUTS];/* input/control nodes */
+	double          initial[DISCRETE_MAX_INPUTS];   /* Initial values */
+	const void *    custom;                         /* Custom function specific initialisation data */
+	const char *    name;                           /* Node Name */
+	const char *    mod_name;                       /* Module / class name */
 };
 typedef dynamic_array_t<const discrete_block *> sound_block_list_t;
 
@@ -4243,8 +4228,8 @@ public:
 	virtual ~discrete_step_interface() { }
 
 	virtual void step(void) = 0;
-	osd_ticks_t			run_time;
-	discrete_base_node *	self;
+	osd_ticks_t         run_time;
+	discrete_base_node *    self;
 };
 typedef dynamic_array_t<discrete_step_interface *> node_step_list_t;
 
@@ -4271,8 +4256,8 @@ public:
  *
  *************************************/
 
-WRITE8_DEVICE_HANDLER( discrete_sound_w );
-READ8_DEVICE_HANDLER( discrete_sound_r );
+DECLARE_WRITE8_DEVICE_HANDLER( discrete_sound_w );
+DECLARE_READ8_DEVICE_HANDLER( discrete_sound_r );
 
 //**************************************************************************
 //  INTERFACE CONFIGURATION MACROS
@@ -4287,37 +4272,13 @@ READ8_DEVICE_HANDLER( discrete_sound_r );
 	MCFG_DISCRETE_INTF(_intf)
 
 #define MCFG_DISCRETE_INTF(_intf) \
-	discrete_device_config::static_set_intf(device, (const discrete_block *)&(_intf##_discrete_interface)); \
+	discrete_device::static_set_intf(*device, (const discrete_block *)&(_intf##_discrete_interface)); \
 
 #define MCFG_SOUND_CONFIG_DISCRETE(name) MCFG_SOUND_CONFIG(name##_discrete_interface)
 
 //**************************************************************************
 //  TYPE DEFINITIONS
 //**************************************************************************
-
-// ======================> discrete_device_config
-
-class discrete_device_config :	public device_config
-{
-	friend class discrete_device;
-
-protected:
-	// construction/destruction
-	discrete_device_config(const machine_config &mconfig, device_type type, const char *name, const char *tag, const device_config *owner, UINT32 clock);
-
-public:
-	// allocators
-	static device_config *static_alloc_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock);
-
-	virtual device_t *alloc_device(running_machine &machine) const;
-
-	// inline configuration helpers
-	static void static_set_intf(device_config *device, const discrete_block *intf);
-
-protected:
-	const discrete_block *m_intf;
-	// inline data
-};
 
 class discrete_sound_output_interface;
 typedef dynamic_array_t<discrete_sound_output_interface *> node_output_list_t;
@@ -4327,14 +4288,16 @@ typedef dynamic_array_t<discrete_sound_output_interface *> node_output_list_t;
 
 class discrete_device : public device_t
 {
-	friend class discrete_device_config;
 	//friend class discrete_base_node;
 
 protected:
 	// construction/destruction
-	discrete_device(running_machine &_machine, const discrete_device_config &config);
+	discrete_device(const machine_config &mconfig, device_type type, const char *name, const char *tag, device_t *owner, UINT32 clock);
 
 public:
+	// inline configuration helpers
+	static void static_set_intf(device_t &device, const discrete_block *intf);
+
 	DECLARE_READ8_MEMBER(read);
 	DECLARE_WRITE8_MEMBER(write);
 	virtual ~discrete_device(void);
@@ -4370,19 +4333,22 @@ protected:
 	// device-level overrides
 	virtual void device_start();
 	virtual void device_reset();
+	virtual void device_stop();
+
+	// configuration state
+	const discrete_block *m_intf;
 
 	// internal state
-	const discrete_device_config &m_config;
 
 	/* --------------------------------- */
 
 	/* emulation info */
-	int					m_sample_rate;
-	double				m_sample_time;
-	double				m_neg_sample_time;
+	int                 m_sample_rate;
+	double              m_sample_time;
+	double              m_neg_sample_time;
 
 	/* list of all nodes */
-	node_list_t				m_node_list;		/* node_description * */
+	node_list_t             m_node_list;        /* node_description * */
 
 private:
 	void discrete_build_list(const discrete_block *intf, sound_block_list_t &block_list);
@@ -4391,50 +4357,31 @@ private:
 	void init_nodes(const sound_block_list_t &block_list);
 
 	/* internal node tracking */
-	discrete_base_node **	m_indexed_node;
+	discrete_base_node **   m_indexed_node;
 
 	/* tasks */
-	task_list_t				task_list;		/* discrete_task_context * */
+	task_list_t             task_list;      /* discrete_task_context * */
 
 	/* debugging statistics */
-	FILE *					m_disclogfile;
+	FILE *                  m_disclogfile;
 
 	/* parallel tasks */
-	osd_work_queue *		m_queue;
+	osd_work_queue *        m_queue;
 
 	/* profiling */
-	int 					m_profiling;
-	UINT64					m_total_samples;
-	UINT64					m_total_stream_updates;
-};
-
-// ======================> discrete_sound_device_config
-
-class discrete_sound_device_config :	public discrete_device_config,
-										public device_config_sound_interface
-{
-	friend class discrete_sound_device;
-	// construction/destruction
-	discrete_sound_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock);
-
-public:
-	// allocators
-	static device_config *static_alloc_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock);
-	virtual device_t *alloc_device(running_machine &machine) const;
-
+	int                     m_profiling;
+	UINT64                  m_total_samples;
+	UINT64                  m_total_stream_updates;
 };
 
 // ======================> discrete_sound_device
 
-class discrete_sound_device :	public discrete_device,
+class discrete_sound_device :   public discrete_device,
 								public device_sound_interface
 {
-	friend class discrete_sound_device_config;
-
-	// construction/destruction
-	discrete_sound_device(running_machine &_machine, const discrete_sound_device_config &config);
-
 public:
+	// construction/destruction
+	discrete_sound_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock);
 	virtual ~discrete_sound_device(void) { };
 
 	/* --------------------------------- */
@@ -4448,20 +4395,17 @@ protected:
 	virtual void device_start();
 	virtual void device_reset();
 
-	// sound interface overrides
+	// device_sound_interface overrides
 	virtual void sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples);
-
-	// internal state
-	//const discrete_device_config &m_config;
 
 private:
 	/* the output stream */
-	sound_stream		*m_stream;
+	sound_stream        *m_stream;
 
 	/* the input streams */
-	istream_node_list_t		m_input_stream_list;
+	istream_node_list_t     m_input_stream_list;
 	/* output node tracking */
-	node_output_list_t		m_output_list;
+	node_output_list_t      m_output_list;
 };
 
 // device type definition
@@ -4510,15 +4454,15 @@ public:
 	inline int input_node(int inputnum) { return m_block->input_node[inputnum]; }
 
 	/* Number of active inputs on this node type */
-	inline int			active_inputs(void) { return m_active_inputs; }
+	inline int          active_inputs(void) { return m_active_inputs; }
 	/* Bit Flags.  1 in bit location means input_is_node */
-	inline int			input_is_node(void) { return m_input_is_node; }
+	inline int          input_is_node(void) { return m_input_is_node; }
 
-	inline double		sample_time(void) { return m_device->sample_time(); }
-	inline int			sample_rate(void) { return m_device->sample_rate(); }
+	inline double       sample_time(void) { return m_device->sample_time(); }
+	inline int          sample_rate(void) { return m_device->sample_rate(); }
 
-	const char *		module_name(void) { return m_block->mod_name; }
-	inline int			module_type(void) const { return m_block->type; }
+	const char *        module_name(void) { return m_block->mod_name; }
+	inline int          module_type(void) const { return m_block->type; }
 
 protected:
 
@@ -4530,28 +4474,28 @@ protected:
 
 	void resolve_input_nodes(void);
 
-	double							m_output[DISCRETE_MAX_OUTPUTS];		/* The node's last output value */
-	const double *					m_input[DISCRETE_MAX_INPUTS];		/* Addresses of Input values */
-	discrete_device *				m_device;							/* Points to the parent */
+	double                          m_output[DISCRETE_MAX_OUTPUTS];     /* The node's last output value */
+	const double *                  m_input[DISCRETE_MAX_INPUTS];       /* Addresses of Input values */
+	discrete_device *               m_device;                           /* Points to the parent */
 
 private:
 
-	const discrete_block *	m_block;							/* Points to the node's setup block. */
-	int								m_active_inputs;					/* Number of active inputs on this node type */
+	const discrete_block *  m_block;                            /* Points to the node's setup block. */
+	int                             m_active_inputs;                    /* Number of active inputs on this node type */
 
-	const void *					m_custom;							/* Custom function specific initialisation data */
-	int								m_input_is_node;
+	const void *                    m_custom;                           /* Custom function specific initialisation data */
+	int                             m_input_is_node;
 
-	discrete_step_interface *		m_step_intf;
-	discrete_input_interface *		m_input_intf;
-	discrete_sound_output_interface *		m_output_intf;
+	discrete_step_interface *       m_step_intf;
+	discrete_input_interface *      m_input_intf;
+	discrete_sound_output_interface *       m_output_intf;
 };
 
 class discrete_node_base_factory
 {
 public:
-    virtual discrete_base_node *Create(discrete_device * pdev, const discrete_block *block) = 0;
-    virtual ~discrete_node_base_factory() {}
+	virtual discrete_base_node *Create(discrete_device * pdev, const discrete_block *block) = 0;
+	virtual ~discrete_node_base_factory() {}
 };
 
 template <class C>
@@ -4596,7 +4540,7 @@ discrete_base_node * discrete_node_factory<C>::Create(discrete_device * pdev, co
 /*      Module Name                                                       out,  enum value,      #in,   {variable inputs},              {static inputs},    data pointer,   "name" */
 
 /* from disc_inp.c */
-#define DISCRETE_ADJUSTMENT(NODE,MIN,MAX,LOGLIN,TAG)	                DSC_SND_ENTRY( NODE, dss_adjustment  , DSS_NODE        , 7, DSE( NODE_NC,NODE_NC,NODE_NC,NODE_NC,NODE_NC,NODE_NC ), DSE( MIN,MAX,LOGLIN,0   ,0   ,100  ), TAG   , "DISCRETE_ADJUSTMENT" ),
+#define DISCRETE_ADJUSTMENT(NODE,MIN,MAX,LOGLIN,TAG)                    DSC_SND_ENTRY( NODE, dss_adjustment  , DSS_NODE        , 7, DSE( NODE_NC,NODE_NC,NODE_NC,NODE_NC,NODE_NC,NODE_NC ), DSE( MIN,MAX,LOGLIN,0   ,0   ,100  ), TAG   , "DISCRETE_ADJUSTMENT" ),
 #define DISCRETE_ADJUSTMENTX(NODE,MIN,MAX,LOGLIN,TAG,PMIN,PMAX)         DSC_SND_ENTRY( NODE, dss_adjustment  , DSS_NODE        , 7, DSE( NODE_NC,NODE_NC,NODE_NC,NODE_NC,NODE_NC,NODE_NC ), DSE( MIN,MAX,LOGLIN,0   ,PMIN,PMAX ), TAG   , "DISCRETE_ADJUSTMENTX"  ),
 #define DISCRETE_CONSTANT(NODE,CONST)                                   DSC_SND_ENTRY( NODE, dss_constant    , DSS_NODE        , 1, DSE( NODE_NC ), DSE( CONST ) ,NULL  ,"DISCRETE_CONSTANT" ),
 #define DISCRETE_INPUT_DATA(NODE)                                       DSC_SND_ENTRY( NODE, dss_input_data  , DSS_NODE        , 3, DSE( NODE_NC,NODE_NC,NODE_NC ), DSE( 1,0,0 ), NULL, "DISCRETE_INPUT_DATA" ),
@@ -4610,7 +4554,7 @@ discrete_base_node * discrete_node_factory<C>::Create(discrete_device * pdev, co
 #define DISCRETE_INPUT_STREAM(NODE, NUM)                                DSC_SND_ENTRY( NODE, dss_input_stream, DSS_NODE        , 3, DSE( NUM,NODE_NC,NODE_NC ), DSE( NUM,1,0 ), NULL, "DISCRETE_INPUT_STREAM" ),
 #define DISCRETE_INPUTX_STREAM(NODE, NUM, GAIN,OFFSET)                  DSC_SND_ENTRY( NODE, dss_input_stream, DSS_NODE        , 3, DSE( NUM,NODE_NC,NODE_NC ), DSE( NUM,GAIN,OFFSET ), NULL, "DISCRETE_INPUTX_STREAM" ),
 
-#define DISCRETE_INPUT_BUFFER(NODE, NUM)	                            DSC_SND_ENTRY( NODE, dss_input_buffer, DSS_NODE        , 3, DSE( NUM,NODE_NC,NODE_NC ), DSE( NUM,1,0 ), NULL, "DISCRETE_INPUT_BUFFER" ),
+#define DISCRETE_INPUT_BUFFER(NODE, NUM)                                DSC_SND_ENTRY( NODE, dss_input_buffer, DSS_NODE        , 3, DSE( NUM,NODE_NC,NODE_NC ), DSE( NUM,1,0 ), NULL, "DISCRETE_INPUT_BUFFER" ),
 
 /* from disc_wav.c */
 /* generic modules */
@@ -4724,7 +4668,7 @@ discrete_base_node * discrete_node_factory<C>::Create(discrete_device * pdev, co
 #define DISCRETE_RCDISC3(NODE,ENAB,INP0,RVAL0,RVAL1,CVAL,DJV)           DSC_SND_ENTRY( NODE, dst_rcdisc3     , DSS_NODE        , 6, DSE( ENAB,INP0,NODE_NC,NODE_NC,NODE_NC,NODE_NC ), DSE( ENAB,INP0,RVAL0,RVAL1,CVAL,DJV ), NULL, "DISCRETE_RCDISC3" ),
 #define DISCRETE_RCDISC4(NODE,ENAB,INP0,RVAL0,RVAL1,RVAL2,CVAL,VP,TYPE) DSC_SND_ENTRY( NODE, dst_rcdisc4     , DSS_NODE        , 8, DSE( ENAB,INP0,NODE_NC,NODE_NC,NODE_NC,NODE_NC,NODE_NC,NODE_NC ), DSE( ENAB,INP0,RVAL0,RVAL1,RVAL2,CVAL,VP,TYPE ), NULL, "DISCRETE_RCDISC4" ),
 #define DISCRETE_RCDISC5(NODE,ENAB,INP0,RVAL,CVAL)                      DSC_SND_ENTRY( NODE, dst_rcdisc5     , DSS_NODE        , 4, DSE( ENAB,INP0,NODE_NC,NODE_NC ), DSE( ENAB,INP0,RVAL,CVAL ), NULL, "DISCRETE_RCDISC5" ),
-#define DISCRETE_RCDISC_MODULATED(NODE,INP0,INP1,RVAL0,RVAL1,RVAL2,RVAL3,CVAL,VP)	DSC_SND_ENTRY( NODE, dst_rcdisc_mod, DSS_NODE        , 8, DSE( INP0,INP1,NODE_NC,NODE_NC,NODE_NC,NODE_NC,NODE_NC,NODE_NC ), DSE( INP0,INP1,RVAL0,RVAL1,RVAL2,RVAL3,CVAL,VP ), NULL, "DISCRETE_RCDISC_MODULATED" ),
+#define DISCRETE_RCDISC_MODULATED(NODE,INP0,INP1,RVAL0,RVAL1,RVAL2,RVAL3,CVAL,VP)   DSC_SND_ENTRY( NODE, dst_rcdisc_mod, DSS_NODE        , 8, DSE( INP0,INP1,NODE_NC,NODE_NC,NODE_NC,NODE_NC,NODE_NC,NODE_NC ), DSE( INP0,INP1,RVAL0,RVAL1,RVAL2,RVAL3,CVAL,VP ), NULL, "DISCRETE_RCDISC_MODULATED" ),
 #define DISCRETE_RCFILTER(NODE,INP0,RVAL,CVAL)                          DSC_SND_ENTRY( NODE, dst_rcfilter    , DSS_NODE        , 3, DSE( INP0,RVAL,CVAL ), DSE( INP0,RVAL,CVAL ), NULL, "DISCRETE_RCFILTER" ),
 #define DISCRETE_RCFILTER_VREF(NODE,INP0,RVAL,CVAL,VREF)                DSC_SND_ENTRY( NODE, dst_rcfilter    , DSS_NODE        , 4, DSE( INP0,RVAL,CVAL,VREF ), DSE( INP0,RVAL,CVAL,VREF ), NULL, "DISCRETE_RCFILTER_VREF" ),
 #define DISCRETE_RCFILTER_SW(NODE,ENAB,INP0,SW,RVAL,CVAL1,CVAL2,CVAL3,CVAL4) DSC_SND_ENTRY( NODE, dst_rcfilter_sw, DSS_NODE        , 8, DSE( ENAB,INP0,SW,NODE_NC,NODE_NC,NODE_NC,NODE_NC,NODE_NC ), DSE( ENAB,INP0,SW,RVAL,CVAL1,CVAL2,CVAL3,CVAL4 ), NULL, "DISCRETE_RCFILTER_SW" ),
@@ -4771,7 +4715,7 @@ discrete_base_node * discrete_node_factory<C>::Create(discrete_device * pdev, co
 /* import */
 #define DISCRETE_IMPORT(INFO)                                           DSC_SND_ENTRY( NODE_SPECIAL, special     , DSO_IMPORT  , 0, DSE( 0 ), DSE( 0 ), &(INFO##_discrete_interface), "DISCRETE_IMPORT" ),
 #define DISCRETE_DELETE(NODE_FROM, NODE_TO)                             DSC_SND_ENTRY( NODE_SPECIAL, special     , DSO_DELETE  , 2, DSE( NODE_FROM, NODE_TO ), DSE( NODE_FROM, NODE_TO ), NULL, "DISCRETE_DELETE" ),
-#define DISCRETE_REPLACE					                            DSC_SND_ENTRY( NODE_SPECIAL, special     , DSO_REPLACE , 0, DSE( 0 ), DSE( 0 ), NULL, "DISCRETE_REPLACE" ),
+#define DISCRETE_REPLACE                                                DSC_SND_ENTRY( NODE_SPECIAL, special     , DSO_REPLACE , 0, DSE( 0 ), DSE( 0 ), NULL, "DISCRETE_REPLACE" ),
 
 /* parallel tasks */
 
@@ -4780,7 +4724,7 @@ discrete_base_node * discrete_node_factory<C>::Create(discrete_device * pdev, co
 //#define DISCRETE_TASK_SYNC()                                          DSC_SND_ENTRY( NODE_SPECIAL, DSO_TASK_SYNC, 0, DSE( 0 ), DSE( 0 ), NULL, "DISCRETE_TASK_SYNC" ),
 
 /* output */
-#define DISCRETE_OUTPUT(OPNODE,GAIN)            	                   DSC_SND_ENTRY( NODE_SPECIAL, dso_output   , DSO_OUTPUT   ,2, DSE( OPNODE,NODE_NC ), DSE( 0,GAIN ), NULL, "DISCRETE_OUTPUT" ),
+#define DISCRETE_OUTPUT(OPNODE,GAIN)                                   DSC_SND_ENTRY( NODE_SPECIAL, dso_output   , DSO_OUTPUT   ,2, DSE( OPNODE,NODE_NC ), DSE( 0,GAIN ), NULL, "DISCRETE_OUTPUT" ),
 
 
 

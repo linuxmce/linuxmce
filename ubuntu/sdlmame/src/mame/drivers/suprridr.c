@@ -17,6 +17,8 @@
         * what are the writes to $08DB and $08E8 for?
           (guess: a discrete sound effect)
 
+    ** driver should probably be merged with timelimt.c
+
 ****************************************************************************
 
     PCB Layout
@@ -91,18 +93,16 @@
  *
  *************************************/
 
-static WRITE8_HANDLER( nmi_enable_w )
+WRITE8_MEMBER(suprridr_state::nmi_enable_w)
 {
-	suprridr_state *state = space->machine().driver_data<suprridr_state>();
-	state->m_nmi_enable = data;
+	m_nmi_enable = data;
 }
 
 
-static INTERRUPT_GEN( main_nmi_gen )
+INTERRUPT_GEN_MEMBER(suprridr_state::main_nmi_gen)
 {
-	suprridr_state *state = device->machine().driver_data<suprridr_state>();
-	if (state->m_nmi_enable)
-		device_set_input_line(device, INPUT_LINE_NMI, PULSE_LINE);
+	if (m_nmi_enable)
+		device.execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 }
 
 
@@ -113,30 +113,28 @@ static INTERRUPT_GEN( main_nmi_gen )
  *
  *************************************/
 
-static TIMER_CALLBACK( delayed_sound_w )
+TIMER_CALLBACK_MEMBER(suprridr_state::delayed_sound_w)
 {
-	suprridr_state *state = machine.driver_data<suprridr_state>();
-	state->m_sound_data = param;
-	cputag_set_input_line(machine, "audiocpu", 0, ASSERT_LINE);
+	m_sound_data = param;
+	machine().device("audiocpu")->execute().set_input_line(0, ASSERT_LINE);
 }
 
 
-static WRITE8_HANDLER( sound_data_w )
+WRITE8_MEMBER(suprridr_state::sound_data_w)
 {
-	space->machine().scheduler().synchronize(FUNC(delayed_sound_w), data);
+	machine().scheduler().synchronize(timer_expired_delegate(FUNC(suprridr_state::delayed_sound_w),this), data);
 }
 
 
-static READ8_DEVICE_HANDLER( sound_data_r )
+READ8_MEMBER(suprridr_state::sound_data_r)
 {
-	suprridr_state *state = device->machine().driver_data<suprridr_state>();
-	return state->m_sound_data;
+	return m_sound_data;
 }
 
 
-static WRITE8_HANDLER( sound_irq_ack_w )
+WRITE8_MEMBER(suprridr_state::sound_irq_ack_w)
 {
-	cputag_set_input_line(space->machine(), "audiocpu", 0, CLEAR_LINE);
+	machine().device("audiocpu")->execute().set_input_line(0, CLEAR_LINE);
 }
 
 
@@ -147,10 +145,10 @@ static WRITE8_HANDLER( sound_irq_ack_w )
  *
  *************************************/
 
-static WRITE8_HANDLER( coin_lock_w )
+WRITE8_MEMBER(suprridr_state::coin_lock_w)
 {
 	/* cleared when 9 credits are hit, but never reset! */
-/*  coin_lockout_global_w(space->machine(), ~data & 1); */
+/*  coin_lockout_global_w(machine(), ~data & 1); */
 }
 
 
@@ -161,13 +159,13 @@ static WRITE8_HANDLER( coin_lock_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, suprridr_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x87ff) AM_RAM
-	AM_RANGE(0x8800, 0x8bff) AM_RAM_WRITE(suprridr_bgram_w) AM_BASE_MEMBER(suprridr_state, m_bgram)
-	AM_RANGE(0x9000, 0x97ff) AM_RAM_WRITE(suprridr_fgram_w) AM_BASE_MEMBER(suprridr_state, m_fgram)
+	AM_RANGE(0x8800, 0x8bff) AM_RAM_WRITE(suprridr_bgram_w) AM_SHARE("bgram")
+	AM_RANGE(0x9000, 0x97ff) AM_RAM_WRITE(suprridr_fgram_w) AM_SHARE("fgram")
 	AM_RANGE(0x9800, 0x983f) AM_RAM
-	AM_RANGE(0x9840, 0x987f) AM_RAM AM_BASE_MEMBER(suprridr_state, m_spriteram)
+	AM_RANGE(0x9840, 0x987f) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0x9880, 0x9bff) AM_RAM
 	AM_RANGE(0xa000, 0xa000) AM_READ_PORT("INPUTS")
 	AM_RANGE(0xa800, 0xa800) AM_READ_PORT("SYSTEM")
@@ -183,7 +181,7 @@ static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( main_portmap, AS_IO, 8 )
+static ADDRESS_MAP_START( main_portmap, AS_IO, 8, suprridr_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0x00) AM_READ(watchdog_reset_r)
 ADDRESS_MAP_END
@@ -196,19 +194,19 @@ ADDRESS_MAP_END
  *
  *************************************/
 
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, suprridr_state )
 	AM_RANGE(0x0000, 0x0fff) AM_ROM
 	AM_RANGE(0x3800, 0x3bff) AM_RAM
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( sound_portmap, AS_IO, 8 )
+static ADDRESS_MAP_START( sound_portmap, AS_IO, 8, suprridr_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0x00) AM_WRITE(sound_irq_ack_w)
-	AM_RANGE(0x8c, 0x8d) AM_DEVWRITE("ay1", ay8910_address_data_w)
-	AM_RANGE(0x8d, 0x8d) AM_DEVREAD("ay1", ay8910_r)
-	AM_RANGE(0x8e, 0x8f) AM_DEVWRITE("ay2", ay8910_address_data_w)
-	AM_RANGE(0x8f, 0x8f) AM_DEVREAD("ay2", ay8910_r)
+	AM_RANGE(0x8c, 0x8d) AM_DEVWRITE_LEGACY("ay1", ay8910_address_data_w)
+	AM_RANGE(0x8d, 0x8d) AM_DEVREAD_LEGACY("ay1", ay8910_r)
+	AM_RANGE(0x8e, 0x8f) AM_DEVWRITE_LEGACY("ay2", ay8910_address_data_w)
+	AM_RANGE(0x8f, 0x8f) AM_DEVREAD_LEGACY("ay2", ay8910_r)
 ADDRESS_MAP_END
 
 
@@ -220,18 +218,18 @@ ADDRESS_MAP_END
  *
  *************************************/
 
-#define SUPRRIDR_P1_CONTROL_PORT_TAG	("CONTP1")
-#define SUPRRIDR_P2_CONTROL_PORT_TAG	("CONTP2")
+#define SUPRRIDR_P1_CONTROL_PORT_TAG    ("CONTP1")
+#define SUPRRIDR_P2_CONTROL_PORT_TAG    ("CONTP2")
 
-static CUSTOM_INPUT( suprridr_control_r )
+CUSTOM_INPUT_MEMBER(suprridr_state::suprridr_control_r)
 {
 	UINT32 ret;
 
 	/* screen flip multiplexes controls */
-	if (suprridr_is_screen_flipped(field->port->machine()))
-		ret = input_port_read(field->port->machine(), SUPRRIDR_P2_CONTROL_PORT_TAG);
+	if (suprridr_is_screen_flipped(machine()))
+		ret = ioport(SUPRRIDR_P2_CONTROL_PORT_TAG)->read();
 	else
-		ret = input_port_read(field->port->machine(), SUPRRIDR_P1_CONTROL_PORT_TAG);
+		ret = ioport(SUPRRIDR_P1_CONTROL_PORT_TAG)->read();
 
 	return ret;
 }
@@ -239,7 +237,7 @@ static CUSTOM_INPUT( suprridr_control_r )
 
 static INPUT_PORTS_START( suprridr )
 	PORT_START("INPUTS")
-	PORT_BIT( 0xff, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(suprridr_control_r, NULL)
+	PORT_BIT( 0xff, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, suprridr_state,suprridr_control_r, NULL)
 
 	PORT_START("SYSTEM")
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 )
@@ -259,19 +257,19 @@ static INPUT_PORTS_START( suprridr )
 	PORT_DIPSETTING(    0x06, DEF_STR( 1C_6C ) )
 	PORT_DIPSETTING(    0x07, DEF_STR( 1C_7C ) )
 	PORT_DIPNAME( 0x18, 0x00, "Timer Speed" )
-	PORT_DIPSETTING(	0x18, "Slow" )
-	PORT_DIPSETTING(	0x10, DEF_STR( Medium ) )
-	PORT_DIPSETTING(	0x08, "Fast" )
-	PORT_DIPSETTING(	0x00, "Fastest" )
+	PORT_DIPSETTING(    0x18, "Slow" )
+	PORT_DIPSETTING(    0x10, DEF_STR( Medium ) )
+	PORT_DIPSETTING(    0x08, "Fast" )
+	PORT_DIPSETTING(    0x00, "Fastest" )
 	PORT_DIPNAME( 0x20, 0x00, "Bonus" )
-	PORT_DIPSETTING(	0x00, "200k" )
-	PORT_DIPSETTING(	0x20, "400k" )
+	PORT_DIPSETTING(    0x00, "200k" )
+	PORT_DIPSETTING(    0x20, "400k" )
 	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Cabinet ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Upright ) )
-	PORT_DIPSETTING(	0x40, DEF_STR( Cocktail ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( Cocktail ) )
 	PORT_DIPNAME( 0x80, 0x00, "Invulnerability?" )
-	PORT_DIPSETTING(	0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x80, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x80, DEF_STR( On ) )
 
 	PORT_START(SUPRRIDR_P1_CONTROL_PORT_TAG)
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY
@@ -340,7 +338,7 @@ static const ay8910_interface ay8910_config =
 {
 	AY8910_LEGACY_OUTPUT,
 	AY8910_DEFAULT_LOADS,
-	DEVCB_HANDLER(sound_data_r),
+	DEVCB_DRIVER_MEMBER(suprridr_state,sound_data_r),
 	DEVCB_NULL,
 	DEVCB_NULL,
 	DEVCB_NULL
@@ -357,12 +355,12 @@ static const ay8910_interface ay8910_config =
 static MACHINE_CONFIG_START( suprridr, suprridr_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, XTAL_49_152MHz/16)		/* 3 MHz */
+	MCFG_CPU_ADD("maincpu", Z80, XTAL_49_152MHz/16)     /* 3 MHz */
 	MCFG_CPU_PROGRAM_MAP(main_map)
 	MCFG_CPU_IO_MAP(main_portmap)
-	MCFG_CPU_VBLANK_INT("screen", main_nmi_gen)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", suprridr_state,  main_nmi_gen)
 
-	MCFG_CPU_ADD("audiocpu", Z80, 10000000/4)		/* 2.5 MHz */
+	MCFG_CPU_ADD("audiocpu", Z80, 10000000/4)       /* 2.5 MHz */
 	MCFG_CPU_PROGRAM_MAP(sound_map)
 	MCFG_CPU_IO_MAP(sound_portmap)
 
@@ -370,16 +368,13 @@ static MACHINE_CONFIG_START( suprridr, suprridr_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(suprridr)
+	MCFG_SCREEN_UPDATE_DRIVER(suprridr_state, screen_update_suprridr)
 
 	MCFG_GFXDECODE(suprridr)
 	MCFG_PALETTE_LENGTH(96)
 
-	MCFG_PALETTE_INIT(suprridr)
-	MCFG_VIDEO_START(suprridr)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -444,4 +439,4 @@ ROM_END
  *
  *************************************/
 
-GAME( 1983, suprridr, 0, suprridr, suprridr, 0, ROT90, "Venture Line (Taito Corporation license)", "Super Rider", GAME_IMPERFECT_SOUND )
+GAME( 1983, suprridr, 0, suprridr, suprridr, driver_device, 0, ROT90, "Taito Corporation (Venture Line license)", "Super Rider", GAME_IMPERFECT_SOUND )

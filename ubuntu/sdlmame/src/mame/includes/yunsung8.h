@@ -7,8 +7,8 @@
 class yunsung8_state : public driver_device
 {
 public:
-	yunsung8_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	yunsung8_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) { }
 
 	/* video-related */
 	tilemap_t     *m_tilemap_0;
@@ -23,19 +23,21 @@ public:
 	int         m_toggle;
 
 	/* devices */
-	device_t *m_audiocpu;
+	cpu_device *m_audiocpu;
 
 	/* memory */
 	UINT8      m_videoram[0x4000];
+	DECLARE_WRITE8_MEMBER(yunsung8_bankswitch_w);
+	DECLARE_WRITE8_MEMBER(yunsung8_adpcm_w);
+	DECLARE_WRITE8_MEMBER(yunsung8_videobank_w);
+	DECLARE_READ8_MEMBER(yunsung8_videoram_r);
+	DECLARE_WRITE8_MEMBER(yunsung8_videoram_w);
+	DECLARE_WRITE8_MEMBER(yunsung8_flipscreen_w);
+	DECLARE_WRITE8_MEMBER(yunsung8_sound_bankswitch_w);
+	TILE_GET_INFO_MEMBER(get_tile_info_0);
+	TILE_GET_INFO_MEMBER(get_tile_info_1);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	UINT32 screen_update_yunsung8(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
-
-
-/*----------- defined in video/yunsung8.c -----------*/
-
-WRITE8_HANDLER( yunsung8_videobank_w );
-READ8_HANDLER ( yunsung8_videoram_r );
-WRITE8_HANDLER( yunsung8_videoram_w );
-WRITE8_HANDLER( yunsung8_flipscreen_w );
-
-VIDEO_START( yunsung8 );
-SCREEN_UPDATE( yunsung8 );

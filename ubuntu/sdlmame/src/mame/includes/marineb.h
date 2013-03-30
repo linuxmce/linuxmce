@@ -1,12 +1,15 @@
 class marineb_state : public driver_device
 {
 public:
-	marineb_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	marineb_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"),
+		m_spriteram(*this, "spriteram"),
+		m_colorram(*this, "colorram"){ }
 
-	UINT8 *   m_videoram;
-	UINT8 *   m_colorram;
-	UINT8 *   m_spriteram;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_spriteram;
+	required_shared_ptr<UINT8> m_colorram;
 
 	/* video-related */
 	tilemap_t   *m_bg_tilemap;
@@ -18,25 +21,29 @@ public:
 	UINT8     m_marineb_active_low_flipscreen;
 
 	/* devices */
-	device_t *m_maincpu;
-	device_t *m_audiocpu;
+	cpu_device *m_maincpu;
+	cpu_device *m_audiocpu;
+
+	UINT8     m_irq_mask;
+	DECLARE_WRITE8_MEMBER(irq_mask_w);
+	DECLARE_WRITE8_MEMBER(marineb_videoram_w);
+	DECLARE_WRITE8_MEMBER(marineb_colorram_w);
+	DECLARE_WRITE8_MEMBER(marineb_column_scroll_w);
+	DECLARE_WRITE8_MEMBER(marineb_palette_bank_0_w);
+	DECLARE_WRITE8_MEMBER(marineb_palette_bank_1_w);
+	DECLARE_WRITE8_MEMBER(marineb_flipscreen_x_w);
+	DECLARE_WRITE8_MEMBER(marineb_flipscreen_y_w);
+	TILE_GET_INFO_MEMBER(get_tile_info);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	virtual void palette_init();
+	DECLARE_MACHINE_RESET(springer);
+	UINT32 screen_update_marineb(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_changes(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_springer(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_hoccer(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_hopprobo(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(marineb_vblank_irq);
+	INTERRUPT_GEN_MEMBER(wanted_vblank_irq);
 };
-
-
-/*----------- defined in video/marineb.c -----------*/
-
-WRITE8_HANDLER( marineb_videoram_w );
-WRITE8_HANDLER( marineb_colorram_w );
-WRITE8_HANDLER( marineb_column_scroll_w );
-WRITE8_HANDLER( marineb_palette_bank_0_w );
-WRITE8_HANDLER( marineb_palette_bank_1_w );
-WRITE8_HANDLER( marineb_flipscreen_x_w );
-WRITE8_HANDLER( marineb_flipscreen_y_w );
-
-PALETTE_INIT( marineb );
-VIDEO_START( marineb );
-SCREEN_UPDATE( marineb );
-SCREEN_UPDATE( changes );
-SCREEN_UPDATE( springer );
-SCREEN_UPDATE( hoccer );
-SCREEN_UPDATE( hopprobo );

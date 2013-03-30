@@ -9,26 +9,25 @@ todo - convert to tilemap
 #include "includes/funybubl.h"
 
 
-WRITE8_HANDLER ( funybubl_paldatawrite )
+WRITE8_MEMBER(funybubl_state::funybubl_paldatawrite)
 {
-	funybubl_state *state = space->machine().driver_data<funybubl_state>();
 	int colchanged ;
 	UINT32 coldat;
 
-	state->m_paletteram[offset] = data;
+	m_paletteram[offset] = data;
 	colchanged = offset >> 2;
-	coldat = state->m_paletteram[colchanged * 4] | (state->m_paletteram[colchanged * 4 + 1] << 8) |
-			(state->m_paletteram[colchanged * 4 + 2] << 16) | (state->m_paletteram[colchanged * 4 + 3] << 24);
+	coldat = m_paletteram[colchanged * 4] | (m_paletteram[colchanged * 4 + 1] << 8) |
+			(m_paletteram[colchanged * 4 + 2] << 16) | (m_paletteram[colchanged * 4 + 3] << 24);
 
-	palette_set_color_rgb(space->machine(), colchanged, pal6bit(coldat >> 12), pal6bit(coldat >> 0), pal6bit(coldat >> 6));
+	palette_set_color_rgb(machine(), colchanged, pal6bit(coldat >> 12), pal6bit(coldat >> 0), pal6bit(coldat >> 6));
 }
 
 
-VIDEO_START(funybubl)
+void funybubl_state::video_start()
 {
 }
 
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	funybubl_state *state = machine.driver_data<funybubl_state>();
 	UINT8 *source = &state->m_banked_vram[0x2000 - 0x20];
@@ -39,11 +38,11 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 		int xpos, ypos, tile;
 
 		/* the sprites are in the sprite list twice
-         the first format (in comments) appears to be a buffer, if you use
-         this list you get garbage sprites in 2 player mode
-         the second format (used) seems correct
+		 the first format (in comments) appears to be a buffer, if you use
+		 this list you get garbage sprites in 2 player mode
+		 the second format (used) seems correct
 
-         */
+		 */
 /*
         ypos = 0xff - source[1 + 0x10];
         xpos = source[2 + 0x10];
@@ -73,13 +72,12 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 }
 
 
-SCREEN_UPDATE(funybubl)
+UINT32 funybubl_state::screen_update_funybubl(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	funybubl_state *state = screen->machine().driver_data<funybubl_state>();
 	int x, y, offs;
 	offs = 0;
 
-	bitmap_fill(bitmap, cliprect, get_black_pen(screen->machine()));
+	bitmap.fill(get_black_pen(machine()), cliprect);
 
 	/* tilemap .. convert it .. banking makes it slightly more annoying but still easy */
 	for (y = 0; y < 32; y++)
@@ -88,23 +86,23 @@ SCREEN_UPDATE(funybubl)
 		{
 			int data;
 
-			data = state->m_banked_vram[offs] | (state->m_banked_vram[offs + 1] << 8);
-			drawgfx_transpen(bitmap, cliprect, screen->machine().gfx[0], data & 0x7fff, (data & 0x8000) ? 2 : 1, 0, 0, x*8, y*8, 0);
+			data = m_banked_vram[offs] | (m_banked_vram[offs + 1] << 8);
+			drawgfx_transpen(bitmap, cliprect, machine().gfx[0], data & 0x7fff, (data & 0x8000) ? 2 : 1, 0, 0, x*8, y*8, 0);
 			offs += 2;
 		}
 	}
 
-	draw_sprites(screen->machine(), bitmap, cliprect);
+	draw_sprites(machine(), bitmap, cliprect);
 
 #if 0
-	if ( input_code_pressed_once(screen->machine(), KEYCODE_W) )
+	if ( machine().input().code_pressed_once(KEYCODE_W) )
 	{
 		FILE *fp;
 
 		fp = fopen("funnybubsprites", "w+b");
 		if (fp)
 		{
-			fwrite(&state->m_banked_vram[0x1000], 0x1000, 1, fp);
+			fwrite(&m_banked_vram[0x1000], 0x1000, 1, fp);
 			fclose(fp);
 		}
 	}

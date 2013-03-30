@@ -34,28 +34,26 @@
       1  | xxx----- -------- | not used?
 */
 
-static TILE_GET_INFO( get_tile_info_wrally_screen0 )
+TILE_GET_INFO_MEMBER(wrally_state::get_tile_info_wrally_screen0)
 {
-	wrally_state *state = machine.driver_data<wrally_state>();
-	int data = state->m_videoram[tile_index << 1];
-	int data2 = state->m_videoram[(tile_index << 1) + 1];
+	int data = m_videoram[tile_index << 1];
+	int data2 = m_videoram[(tile_index << 1) + 1];
 	int code = data & 0x3fff;
 
-	tileinfo->category = (data2 >> 5) & 0x01;
+	tileinfo.category = (data2 >> 5) & 0x01;
 
-	SET_TILE_INFO(0, code, data2 & 0x1f, TILE_FLIPYX((data2 >> 6) & 0x03));
+	SET_TILE_INFO_MEMBER(0, code, data2 & 0x1f, TILE_FLIPYX((data2 >> 6) & 0x03));
 }
 
-static TILE_GET_INFO( get_tile_info_wrally_screen1 )
+TILE_GET_INFO_MEMBER(wrally_state::get_tile_info_wrally_screen1)
 {
-	wrally_state *state = machine.driver_data<wrally_state>();
-	int data = state->m_videoram[(0x2000/2) + (tile_index << 1)];
-	int data2 = state->m_videoram[(0x2000/2) + (tile_index << 1) + 1];
+	int data = m_videoram[(0x2000/2) + (tile_index << 1)];
+	int data2 = m_videoram[(0x2000/2) + (tile_index << 1) + 1];
 	int code = data & 0x3fff;
 
-	tileinfo->category = (data2 >> 5) & 0x01;
+	tileinfo.category = (data2 >> 5) & 0x01;
 
-	SET_TILE_INFO(0, code, data2 & 0x1f, TILE_FLIPYX((data2 >> 6) & 0x03));
+	SET_TILE_INFO_MEMBER(0, code, data2 & 0x1f, TILE_FLIPYX((data2 >> 6) & 0x03));
 }
 
 /***************************************************************************
@@ -64,14 +62,13 @@ static TILE_GET_INFO( get_tile_info_wrally_screen1 )
 
 ***************************************************************************/
 
-VIDEO_START( wrally )
+void wrally_state::video_start()
 {
-	wrally_state *state = machine.driver_data<wrally_state>();
-	state->m_pant[0] = tilemap_create(machine, get_tile_info_wrally_screen0,tilemap_scan_rows,16,16,64,32);
-	state->m_pant[1] = tilemap_create(machine, get_tile_info_wrally_screen1,tilemap_scan_rows,16,16,64,32);
+	m_pant[0] = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(wrally_state::get_tile_info_wrally_screen0),this),TILEMAP_SCAN_ROWS,16,16,64,32);
+	m_pant[1] = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(wrally_state::get_tile_info_wrally_screen1),this),TILEMAP_SCAN_ROWS,16,16,64,32);
 
-	tilemap_set_transmask(state->m_pant[0],0,0xff01,0x00ff); /* this layer is split in two (pens 1..7, pens 8-15) */
-	tilemap_set_transparent_pen(state->m_pant[1],0);
+	m_pant[0]->set_transmask(0,0xff01,0x00ff); /* this layer is split in two (pens 1..7, pens 8-15) */
+	m_pant[1]->set_transparent_pen(0);
 }
 
 
@@ -104,11 +101,11 @@ VIDEO_START( wrally )
     in the range 0x8-0xf are used.
 */
 
-static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, int priority)
+static void draw_sprites(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, int priority)
 {
 	wrally_state *state = machine.driver_data<wrally_state>();
 	int i, px, py;
-	const gfx_element *gfx = machine.gfx[0];
+	gfx_element *gfx = machine.gfx[0];
 
 	for (i = 6/2; i < (0x1000 - 6)/2; i += 4) {
 		int sx = state->m_spriteram[i+2] & 0x03ff;
@@ -125,7 +122,7 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 
 		if (high_priority != priority) continue;
 
-		if (flip_screen_get(machine)) {
+		if (state->flip_screen()) {
 			sy = sy + 248;
 		}
 
@@ -135,32 +132,32 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 					sx - 0x0f,sy,0);
 		} else {
 			/* get a pointer to the current sprite's gfx data */
-			const UINT8 *gfx_src = gfx_element_get_data(gfx, number % gfx->total_elements);
+			const UINT8 *gfx_src = gfx->get_data(number % gfx->elements());
 
-			for (py = 0; py < gfx->height; py++){
+			for (py = 0; py < gfx->height(); py++){
 				/* get a pointer to the current line in the screen bitmap */
 				int ypos = ((sy + py) & 0x1ff);
-				UINT16 *srcy = BITMAP_ADDR16(bitmap, ypos, 0);
+				UINT16 *srcy = &bitmap.pix16(ypos);
 
-				int gfx_py = yflip ? (gfx->height - 1 - py) : py;
+				int gfx_py = yflip ? (gfx->height() - 1 - py) : py;
 
-				if ((ypos < cliprect->min_y) || (ypos > cliprect->max_y)) continue;
+				if ((ypos < cliprect.min_y) || (ypos > cliprect.max_y)) continue;
 
-				for (px = 0; px < gfx->width; px++){
+				for (px = 0; px < gfx->width(); px++){
 					/* get current pixel */
 					int xpos = (((sx + px) & 0x3ff) - 0x0f) & 0x3ff;
 					UINT16 *pixel = srcy + xpos;
 					int src_color = *pixel;
 
-					int gfx_px = xflip ? (gfx->width - 1 - px) : px;
+					int gfx_px = xflip ? (gfx->width() - 1 - px) : px;
 
 					/* get asociated pen for the current sprite pixel */
-					int gfx_pen = gfx_src[gfx->line_modulo*gfx_py + gfx_px];
+					int gfx_pen = gfx_src[gfx->rowbytes()*gfx_py + gfx_px];
 
 					/* pens 8..15 are used to select a palette */
 					if ((gfx_pen < 8) || (gfx_pen >= 16)) continue;
 
-					if ((xpos < cliprect->min_x) || (xpos > cliprect->max_x)) continue;
+					if ((xpos < cliprect.min_x) || (xpos > cliprect.max_x)) continue;
 
 					/* modify the color of the tile */
 					*pixel = src_color + (gfx_pen-8)*1024;
@@ -176,35 +173,34 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 
 ***************************************************************************/
 
-SCREEN_UPDATE( wrally )
+UINT32 wrally_state::screen_update_wrally(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	wrally_state *state = screen->machine().driver_data<wrally_state>();
 	/* set scroll registers */
-	if (!flip_screen_get(screen->machine())) {
-		tilemap_set_scrolly(state->m_pant[0], 0, state->m_vregs[0]);
-		tilemap_set_scrollx(state->m_pant[0], 0, state->m_vregs[1]+4);
-		tilemap_set_scrolly(state->m_pant[1], 0, state->m_vregs[2]);
-		tilemap_set_scrollx(state->m_pant[1], 0, state->m_vregs[3]);
+	if (!flip_screen()) {
+		m_pant[0]->set_scrolly(0, m_vregs[0]);
+		m_pant[0]->set_scrollx(0, m_vregs[1]+4);
+		m_pant[1]->set_scrolly(0, m_vregs[2]);
+		m_pant[1]->set_scrollx(0, m_vregs[3]);
 	} else {
-		tilemap_set_scrolly(state->m_pant[0], 0, 248 - state->m_vregs[0]);
-		tilemap_set_scrollx(state->m_pant[0], 0, 1024 - state->m_vregs[1] - 4);
-		tilemap_set_scrolly(state->m_pant[1], 0, 248 - state->m_vregs[2]);
-		tilemap_set_scrollx(state->m_pant[1], 0, 1024 - state->m_vregs[3]);
+		m_pant[0]->set_scrolly(0, 248 - m_vregs[0]);
+		m_pant[0]->set_scrollx(0, 1024 - m_vregs[1] - 4);
+		m_pant[1]->set_scrolly(0, 248 - m_vregs[2]);
+		m_pant[1]->set_scrollx(0, 1024 - m_vregs[3]);
 	}
 
 	/* draw tilemaps + sprites */
-	tilemap_draw(bitmap,cliprect,state->m_pant[1],TILEMAP_DRAW_OPAQUE,0);
-	tilemap_draw(bitmap,cliprect,state->m_pant[0],TILEMAP_DRAW_CATEGORY(0) | TILEMAP_DRAW_LAYER0,0);
-	tilemap_draw(bitmap,cliprect,state->m_pant[0],TILEMAP_DRAW_CATEGORY(0) | TILEMAP_DRAW_LAYER1,0);
+	m_pant[1]->draw(bitmap, cliprect, TILEMAP_DRAW_OPAQUE,0);
+	m_pant[0]->draw(bitmap, cliprect, TILEMAP_DRAW_CATEGORY(0) | TILEMAP_DRAW_LAYER0,0);
+	m_pant[0]->draw(bitmap, cliprect, TILEMAP_DRAW_CATEGORY(0) | TILEMAP_DRAW_LAYER1,0);
 
-	tilemap_draw(bitmap,cliprect,state->m_pant[1],TILEMAP_DRAW_CATEGORY(1),0);
-	tilemap_draw(bitmap,cliprect,state->m_pant[0],TILEMAP_DRAW_CATEGORY(1) | TILEMAP_DRAW_LAYER0,0);
+	m_pant[1]->draw(bitmap, cliprect, TILEMAP_DRAW_CATEGORY(1),0);
+	m_pant[0]->draw(bitmap, cliprect, TILEMAP_DRAW_CATEGORY(1) | TILEMAP_DRAW_LAYER0,0);
 
-	draw_sprites(screen->machine(),bitmap,cliprect,0);
+	draw_sprites(machine(),bitmap,cliprect,0);
 
-	tilemap_draw(bitmap,cliprect,state->m_pant[0],TILEMAP_DRAW_CATEGORY(1) | TILEMAP_DRAW_LAYER1,0);
+	m_pant[0]->draw(bitmap, cliprect, TILEMAP_DRAW_CATEGORY(1) | TILEMAP_DRAW_LAYER1,0);
 
-	draw_sprites(screen->machine(),bitmap,cliprect,1);
+	draw_sprites(machine(),bitmap,cliprect,1);
 
 	return 0;
 }

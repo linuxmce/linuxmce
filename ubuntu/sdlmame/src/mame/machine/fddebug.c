@@ -1,11 +1,48 @@
+#include "emu.h"
+#include "machine/fddebug.h"
+
+void fd1094_init_debugging(running_machine &machine, const char *cpureg, const char *keyreg, const char *statreg, void (*changed)(running_machine &))
+{
+}
+
+#if 0
+
 /***************************************************************************
 
     fddebug.c
 
     FD1094 decryption helper routines.
 
-    Copyright Nicola Salmoria and the MAME Team.
-    Visit http://mamedev.org for licensing and usage restrictions.
+****************************************************************************
+
+    Copyright Aaron Giles
+    All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions are
+    met:
+
+        * Redistributions of source code must retain the above copyright
+          notice, this list of conditions and the following disclaimer.
+        * Redistributions in binary form must reproduce the above copyright
+          notice, this list of conditions and the following disclaimer in
+          the documentation and/or other materials provided with the
+          distribution.
+        * Neither the name 'MAME' nor the names of its contributors may be
+          used to endorse or promote products derived from this software
+          without specific prior written permission.
+
+    THIS SOFTWARE IS PROVIDED BY AARON GILES ''AS IS'' AND ANY EXPRESS OR
+    IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+    WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+    DISCLAIMED. IN NO EVENT SHALL AARON GILES BE LIABLE FOR ANY DIRECT,
+    INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+    (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+    SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+    STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+    IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+    POSSIBILITY OF SUCH DAMAGE.
 
 ****************************************************************************
 
@@ -107,7 +144,7 @@
 
 #include "emu.h"
 #include "machine/fd1094.h"
-#include "cpu/m68000/m68kcpu.h"
+#include "cpu/m68000/m68000.h"
 
 #include "debug/debugcmd.h"
 #include "debug/debugcon.h"
@@ -121,60 +158,60 @@
     CONSTANTS
 ***************************************************************************/
 
-#define KEY_SIZE			8192
-#define MAX_CONSTRAINTS		100
-#define MAX_SEARCH_DEPTH	10000
+#define KEY_SIZE            8192
+#define MAX_CONSTRAINTS     100
+#define MAX_SEARCH_DEPTH    10000
 
 /* status byte breakdown */
-#define STATE_MASK			0xff00
-#define HIBITS_MASK			0x00c0
-#define SEARCH_MASK			0x0020
-#define STATUS_MASK			0x001f
+#define STATE_MASK          0xff00
+#define HIBITS_MASK         0x00c0
+#define SEARCH_MASK         0x0020
+#define STATUS_MASK         0x001f
 
 /* possible status values */
-#define STATUS_UNVISITED	0x00
-#define STATUS_LOCKED		0x01
-#define STATUS_NOCHANGE		0x02
-#define STATUS_GUESS		0x03
+#define STATUS_UNVISITED    0x00
+#define STATUS_LOCKED       0x01
+#define STATUS_NOCHANGE     0x02
+#define STATUS_GUESS        0x03
 
 /* sizes for the opcode table */
-#define SIZE_BYTE			1		/* single byte */
-#define SIZE_WORD			2		/* single word */
-#define SIZE_LONG			3		/* single long */
-#define SIZE_BIT			4		/* single byte, limited to bit sizes (0-7) */
-#define SIZE_MASK			7
+#define SIZE_BYTE           1       /* single byte */
+#define SIZE_WORD           2       /* single word */
+#define SIZE_LONG           3       /* single long */
+#define SIZE_BIT            4       /* single byte, limited to bit sizes (0-7) */
+#define SIZE_MASK           7
 
 /* operand sizes */
-#define OF_SIZEMASK			(SIZE_MASK << 0)
-#define OF_BYTE				(SIZE_BYTE << 0)	/* byte size operation */
-#define OF_WORD				(SIZE_WORD << 0)	/* word size operation */
-#define OF_LONG				(SIZE_LONG << 0)	/* long size operation */
+#define OF_SIZEMASK         (SIZE_MASK << 0)
+#define OF_BYTE             (SIZE_BYTE << 0)    /* byte size operation */
+#define OF_WORD             (SIZE_WORD << 0)    /* word size operation */
+#define OF_LONG             (SIZE_LONG << 0)    /* long size operation */
 
 /* immediate sizes */
-#define OF_ISIZEMASK		(SIZE_MASK << 3)
-#define OF_IMMB				(SIZE_BYTE << 3)	/* immediate byte follows */
-#define OF_IMMW				(SIZE_WORD << 3)	/* immediate word follows */
-#define OF_IMML				(SIZE_LONG << 3)	/* immediate long follows */
-#define OF_IMMBIT			(SIZE_BIT << 3)		/* immediate byte follows */
+#define OF_ISIZEMASK        (SIZE_MASK << 3)
+#define OF_IMMB             (SIZE_BYTE << 3)    /* immediate byte follows */
+#define OF_IMMW             (SIZE_WORD << 3)    /* immediate word follows */
+#define OF_IMML             (SIZE_LONG << 3)    /* immediate long follows */
+#define OF_IMMBIT           (SIZE_BIT << 3)     /* immediate byte follows */
 
 /* other opcode flags */
-#define OF_EASRC			0x00000040			/* standard EA is source */
-#define OF_EADST			0x00000080			/* standard EA is destination */
-#define OF_EADREG			0x00000100			/* EA with data register is allowed */
-#define OF_EAAREG			0x00000200			/* EA with address register is allowed */
-#define OF_EAA				0x00000400			/* EA with (An) is allowed */
-#define OF_EAPLUS			0x00000800			/* EA with (An)+ is allowed */
-#define OF_EAMINUS			0x00001000			/* EA with -(An) is allowed */
-#define OF_EADISP			0x00002000			/* EA with (D,An) displacement is allowed */
-#define OF_EAABS			0x00004000			/* EA with absolute (both word and long) is allowed */
-#define OF_EAIMM			0x00008000			/* EA with immediate is allowed */
-#define OF_EAPCR			0x00010000			/* EA with PC-relative addressing is allowed */
-#define OF_RARE				0x00080000			/* opcode is not commonly used */
-#define OF_BRANCH			0x00100000			/* opcode represents a branch */
-#define OF_JMP				0x00200000			/* opcode represents a jmp/jsr */
-#define OF_MOVE				0x00400000			/* opcode has MOVE semantics */
-#define OF_LENMASK			0xf0000000			/* opcode length mask */
-#define OF_INVALID			0xffffffff			/* invalid opcode */
+#define OF_EASRC            0x00000040          /* standard EA is source */
+#define OF_EADST            0x00000080          /* standard EA is destination */
+#define OF_EADREG           0x00000100          /* EA with data register is allowed */
+#define OF_EAAREG           0x00000200          /* EA with address register is allowed */
+#define OF_EAA              0x00000400          /* EA with (An) is allowed */
+#define OF_EAPLUS           0x00000800          /* EA with (An)+ is allowed */
+#define OF_EAMINUS          0x00001000          /* EA with -(An) is allowed */
+#define OF_EADISP           0x00002000          /* EA with (D,An) displacement is allowed */
+#define OF_EAABS            0x00004000          /* EA with absolute (both word and long) is allowed */
+#define OF_EAIMM            0x00008000          /* EA with immediate is allowed */
+#define OF_EAPCR            0x00010000          /* EA with PC-relative addressing is allowed */
+#define OF_RARE             0x00080000          /* opcode is not commonly used */
+#define OF_BRANCH           0x00100000          /* opcode represents a branch */
+#define OF_JMP              0x00200000          /* opcode represents a jmp/jsr */
+#define OF_MOVE             0x00400000          /* opcode has MOVE semantics */
+#define OF_LENMASK          0xf0000000          /* opcode length mask */
+#define OF_INVALID          0xffffffff          /* invalid opcode */
 
 
 
@@ -183,23 +220,21 @@
 ***************************************************************************/
 
 /* a single possible instruction decoding */
-typedef struct _fd1094_possibility fd1094_possibility;
-struct _fd1094_possibility
+struct fd1094_possibility
 {
-	offs_t		basepc;				/* starting PC of the possibility */
-	int			length;				/* number of words */
-	UINT8		instrbuffer[10];	/* instruction data for disassembler */
-	UINT8		keybuffer[10];		/* array of key values to produce the instruction data */
-	UINT8		iffy;				/* is this an iffy possibility? */
-	char		dasm[256];			/* disassembly */
+	offs_t      basepc;             /* starting PC of the possibility */
+	int         length;             /* number of words */
+	UINT8       instrbuffer[10];    /* instruction data for disassembler */
+	UINT8       keybuffer[10];      /* array of key values to produce the instruction data */
+	UINT8       iffy;               /* is this an iffy possibility? */
+	char        dasm[256];          /* disassembly */
 };
 
 /* an entry in the opcode table */
-typedef struct _optable_entry optable_entry;
-struct _optable_entry
+struct optable_entry
 {
-	UINT32			flags;			/* per-opcode flags */
-	const char *	string;			/* identifying string */
+	UINT32          flags;          /* per-opcode flags */
+	const char *    string;         /* identifying string */
 };
 
 
@@ -209,44 +244,44 @@ struct _optable_entry
 ***************************************************************************/
 
 /* array of PCs not to stop at */
-static UINT8 *				ignorepc;
-static UINT8				ignore_all;
+static UINT8 *              ignorepc;
+static UINT8                ignore_all;
 
 /* array of information about each opcode */
-static optable_entry *		optable;
+static optable_entry *      optable;
 
 /* buffer for undoing operations */
-static UINT8 *				undobuff;
+static UINT8 *              undobuff;
 
 /* array of possible instruction decodings */
-static fd1094_possibility	posslist[4*4*4*4*4];
-static int					posscount;
+static fd1094_possibility   posslist[4*4*4*4*4];
+static int                  posscount;
 
 /* array of possible seeds */
-static UINT32 *				possible_seed;
+static UINT32 *             possible_seed;
 
 /* array of constraints */
-static fd1094_constraint	constraints[MAX_CONSTRAINTS];
-static int					constcount;
+static fd1094_constraint    constraints[MAX_CONSTRAINTS];
+static int                  constcount;
 
 /* stack of search addresses */
-static UINT32				searchstack[MAX_SEARCH_DEPTH];
-static int					searchsp;
+static UINT32               searchstack[MAX_SEARCH_DEPTH];
+static int                  searchsp;
 
 /* current key generation parameters */
-static UINT32				fd1094_global;
-static UINT32				fd1094_seed;
-static UINT8				keydirty;
+static UINT32               fd1094_global;
+static UINT32               fd1094_seed;
+static UINT8                keydirty;
 
 /* pointers to our data */
-static UINT16 *				coderegion;
-static UINT32				coderegion_words;
-static UINT8 *				keyregion;
-static UINT16 *				keystatus;
-static UINT32				keystatus_words;
+static UINT16 *             coderegion;
+static UINT32               coderegion_words;
+static UINT8 *              keyregion;
+static UINT16 *             keystatus;
+static UINT32               keystatus_words;
 
 /* key changed callback */
-static void					(*key_changed)(running_machine &);
+static void                 (*key_changed)(running_machine &);
 
 
 
@@ -277,7 +312,7 @@ static void execute_fdcset(running_machine &machine, int ref, int params, const 
 static void execute_fdclist(running_machine &machine, int ref, int params, const char **param);
 static void execute_fdcsearch(running_machine &machine, int ref, int params, const char **param);
 
-static fd1094_possibility *try_all_possibilities(address_space *space, int basepc, int offset, int length, UINT8 *instrbuffer, UINT8 *keybuffer, fd1094_possibility *possdata);
+static fd1094_possibility *try_all_possibilities(address_space &space, int basepc, int offset, int length, UINT8 *instrbuffer, UINT8 *keybuffer, fd1094_possibility *possdata);
 static void tag_possibility(running_machine &machine, fd1094_possibility *possdata, UINT8 status);
 
 static void perform_constrained_search(running_machine &machine);
@@ -287,8 +322,8 @@ static int does_key_work_for_constraints(const UINT16 *base, UINT8 *key);
 static UINT32 reconstruct_base_seed(int keybaseaddr, UINT32 startseed);
 
 static void build_optable(running_machine &machine);
-static int validate_ea(address_space *space, UINT32 pc, UINT8 modereg, const UINT8 *parambase, UINT32 flags);
-static int validate_opcode(address_space *space, UINT32 pc, const UINT8 *opdata, int maxwords);
+static int validate_ea(address_space &space, UINT32 pc, UINT8 modereg, const UINT8 *parambase, UINT32 flags);
+static int validate_opcode(address_space &space, UINT32 pc, const UINT8 *opdata, int maxwords);
 
 
 
@@ -379,8 +414,8 @@ INLINE void generate_key_bytes(UINT8 *dest, UINT32 keyoffs, UINT32 count, UINT32
 
 		/* advance the seed first, then store the derived value */
 		seed = advance_seed(seed, 1);
-        dest[keyaddr] = key_value_from_seed(seed, mask);
-    }
+		dest[keyaddr] = key_value_from_seed(seed, mask);
+	}
 }
 
 
@@ -429,14 +464,14 @@ INLINE void print_possibilities(running_machine &machine)
     0=no, 1=yes, 2=unlikely
 -----------------------------------------------*/
 
-INLINE int pc_is_valid(address_space *space, UINT32 pc, UINT32 flags)
+INLINE int pc_is_valid(address_space &space, UINT32 pc, UINT32 flags)
 {
 	/* if we're odd or out of range, fail */
 	if ((pc & 1) == 1)
 		return 0;
 	if (pc & 0xff000000)
 		return 0;
-	if (space->direct().read_decrypted_ptr(pc) == NULL)
+	if (space.direct().read_decrypted_ptr(pc) == NULL)
 		return 0;
 	return 1;
 }
@@ -447,7 +482,7 @@ INLINE int pc_is_valid(address_space *space, UINT32 pc, UINT32 flags)
     valid? 0=no, 1=yes, 2=unlikely
 -----------------------------------------------*/
 
-INLINE int addr_is_valid(address_space *space, UINT32 addr, UINT32 flags)
+INLINE int addr_is_valid(address_space &space, UINT32 addr, UINT32 flags)
 {
 	/* if this a JMP, the address is a PC */
 	if (flags & OF_JMP)
@@ -460,7 +495,7 @@ INLINE int addr_is_valid(address_space *space, UINT32 addr, UINT32 flags)
 		return 0;
 
 	/* if we're invalid, fail */
-	if (strcmp(const_cast<address_space *>(space)->get_handler_string(ROW_READ, addr), "segaic16_memory_mapper_lsb_r") == 0)
+	if (strcmp(const_cast<address_space &>(space)->get_handler_string(ROW_READ, addr), "segaic16_memory_mapper_lsb_r") == 0)
 		return 2;
 
 	return 1;
@@ -482,11 +517,11 @@ void fd1094_init_debugging(running_machine &machine, const char *cpureg, const c
 	key_changed = changed;
 
 	/* set up the regions */
-	coderegion = (UINT16 *)machine.region(cpureg)->base();
-	coderegion_words = machine.region(cpureg)->bytes() / 2;
-	keyregion = (UINT8 *)machine.region(keyreg)->base();
-	keystatus = (UINT16 *)machine.region(statreg)->base();
-	keystatus_words = machine.region(statreg)->bytes() / 2;
+	coderegion = (UINT16 *)machine.root_device().memregion(cpureg)->base();
+	coderegion_words = machine.root_device().memregion(cpureg)->bytes() / 2;
+	keyregion = (UINT8 *)machine.root_device().memregion(keyreg)->base();
+	keystatus = (UINT16 *)machine.root_device().memregion(statreg)->base();
+	keystatus_words = machine.root_device().memregion(statreg)->bytes() / 2;
 	assert(coderegion_words == keystatus_words);
 
 	/* allocate memory for the ignore table */
@@ -552,9 +587,9 @@ static void set_default_key_params(running_machine &machine)
 {
 	static const struct
 	{
-		const char *	gamename;
-		UINT32			global;
-		UINT32			seed;
+		const char *    gamename;
+		UINT32          global;
+		UINT32          seed;
 	} default_keys[] =
 	{
 		{ "altbeastj1", 0xFCAFF9F9, 0x177AC6 },
@@ -882,7 +917,7 @@ static void execute_fdunlock(running_machine &machine, int ref, int params, cons
 
 	/* support 0 or 1 parameters */
 	if (params != 1 || !debug_command_parameter_number(machine, param[0], &offset))
-		offset = cpu_get_pc(cpu);
+		offset = cpu->safe_pc();
 	keyaddr = addr_to_keyaddr(offset / 2);
 
 	/* toggle the ignore PC status */
@@ -924,7 +959,7 @@ static void execute_fdignore(running_machine &machine, int ref, int params, cons
 		return;
 	}
 	if (params != 1 || !debug_command_parameter_number(machine, param[0], &offset))
-		offset = cpu_get_pc(cpu);
+		offset = cpu->safe_pc();
 	offset /= 2;
 
 	/* toggle the ignore PC status */
@@ -1023,10 +1058,10 @@ static void execute_fdpc(running_machine &machine, int ref, int params, const ch
 
 	/* support 0 or 1 parameters */
 	if (!debug_command_parameter_number(machine, param[0], &newpc))
-		newpc = cpu_get_pc(cpu);
+		newpc = cpu->safe_pc();
 
 	/* set the new PC */
-	cpu_set_reg(cpu, STATE_GENPC, newpc);
+	cpu->state().set_pc(newpc);
 
 	/* recompute around that */
 	instruction_hook(*cpu, newpc);
@@ -1040,8 +1075,8 @@ static void execute_fdpc(running_machine &machine, int ref, int params, const ch
 
 static void execute_fdsearch(running_machine &machine, int ref, int params, const char **param)
 {
-	address_space *space = debug_cpu_get_visible_cpu(machine)->memory().space(AS_PROGRAM);
-	int pc = cpu_get_pc(&space->device());
+	address_space &space = debug_cpu_get_visible_cpu(machine)->memory().space(AS_PROGRAM);
+	int pc = space.device().safe_pc();
 	int length, first = TRUE;
 	UINT8 instrdata[2];
 	UINT16 decoded;
@@ -1079,8 +1114,8 @@ static void execute_fdsearch(running_machine &machine, int ref, int params, cons
 			}
 
 			/* set this as our current PC and run the instruction hook */
-			cpu_set_reg(&space->device(), STATE_GENPC, pc);
-			if (instruction_hook(space->device(), pc))
+			space.device().state().set_pc(pc);
+			if (instruction_hook(space.device(), pc))
 				break;
 		}
 		keystatus[pc/2] |= SEARCH_MASK;
@@ -1166,7 +1201,7 @@ static void execute_fdsearch(running_machine &machine, int ref, int params, cons
 
 static void execute_fddasm(running_machine &machine, int ref, int params, const char **param)
 {
-	address_space *space = debug_cpu_get_visible_cpu(machine)->memory().space(AS_PROGRAM);
+	address_space &space = debug_cpu_get_visible_cpu(machine)->memory().space(AS_PROGRAM);
 	int origstate = fd1094_set_state(keyregion, -1);
 	const char *filename;
 	int skipped = FALSE;
@@ -1371,7 +1406,7 @@ static void execute_fdcsearch(running_machine &machine, int ref, int params, con
     length
 -----------------------------------------------*/
 
-static fd1094_possibility *try_all_possibilities(address_space *space, int basepc, int offset, int length, UINT8 *instrbuffer, UINT8 *keybuffer, fd1094_possibility *possdata)
+static fd1094_possibility *try_all_possibilities(address_space &space, int basepc, int offset, int length, UINT8 *instrbuffer, UINT8 *keybuffer, fd1094_possibility *possdata)
 {
 	UINT8 keymask, keystat;
 	UINT16 possvalue[4];
@@ -1863,21 +1898,21 @@ static UINT32 reconstruct_base_seed(int keybaseaddr, UINT32 startseed)
 	/* that we generate at least one full window's worth of data */
 	do
 	{
-        seed = seed * 0x29;
-        seed += seed << 16;
-        window[index++ % ARRAY_LENGTH(window)] = seed;
-    } while (((startseed ^ seed) & 0x3fffff) != 0 || index < ARRAY_LENGTH(window));
+		seed = seed * 0x29;
+		seed += seed << 16;
+		window[index++ % ARRAY_LENGTH(window)] = seed;
+	} while (((startseed ^ seed) & 0x3fffff) != 0 || index < ARRAY_LENGTH(window));
 
-    /* when we break, we have overshot */
-    index--;
+	/* when we break, we have overshot */
+	index--;
 
-    /* back up to where we would have been at address 3 */
-    index -= keybaseaddr - 3;
-    if (index < 0)
-    	index += ARRAY_LENGTH(window);
+	/* back up to where we would have been at address 3 */
+	index -= keybaseaddr - 3;
+	if (index < 0)
+		index += ARRAY_LENGTH(window);
 
-    /* return the value from the window at that location */
-    return window[index % ARRAY_LENGTH(window)] & 0x3fffff;
+	/* return the value from the window at that location */
+	return window[index % ARRAY_LENGTH(window)] & 0x3fffff;
 }
 
 
@@ -1885,14 +1920,14 @@ static UINT32 reconstruct_base_seed(int keybaseaddr, UINT32 startseed)
     Table of opcode parameters
 -----------------------------------------------*/
 
-#define ENTRY(a,b,c,d)		{ #a, #b, c, d },
+#define ENTRY(a,b,c,d)      { #a, #b, c, d },
 
 static const struct
 {
-	const char *	bitstring;
-	const char *	eastring;
-	UINT32			flags;
-	const char *	instring;
+	const char *    bitstring;
+	const char *    eastring;
+	UINT32          flags;
+	const char *    instring;
 } instr_table[] =
 {
 	ENTRY(1100...100000..., ........., OF_BYTE | OF_RARE, "ABCD Dn,Dm")
@@ -2189,6 +2224,7 @@ static void build_optable(running_machine &machine)
 									length += ((flags & OF_SIZEMASK) == OF_LONG) ? 2 : 1;
 
 								/* make sure we match the disassembler */
+								#ifdef DEBUG
 								{
 									char dummybuffer[40];
 									UINT8 instrbuffer[10];
@@ -2197,6 +2233,7 @@ static void build_optable(running_machine &machine)
 									dummybuffer[0] = 0;
 									assert(length == (m68k_disassemble_raw(dummybuffer, 0, instrbuffer, instrbuffer, M68K_CPU_TYPE_68000) & 0xff) / 2);
 								}
+								#endif
 
 								/* set the value of the entry in the table */
 								optable[opnum | eabits].flags = flags | (length << 28);
@@ -2212,7 +2249,7 @@ static void build_optable(running_machine &machine)
     valid or not, and return the length
 -----------------------------------------------*/
 
-static int validate_ea(address_space *space, UINT32 pc, UINT8 modereg, const UINT8 *parambase, UINT32 flags)
+static int validate_ea(address_space &space, UINT32 pc, UINT8 modereg, const UINT8 *parambase, UINT32 flags)
 {
 	UINT32 addr;
 	int valid;
@@ -2220,19 +2257,19 @@ static int validate_ea(address_space *space, UINT32 pc, UINT8 modereg, const UIN
 	/* switch off of the mode */
 	switch ((modereg >> 3) & 7)
 	{
-		case 0:		/* Dn -- always good */
-		case 1:		/* An -- always good */
-		case 2:		/* (An) -- always good */
-		case 3:		/* (An)+ -- always good */
-		case 4:		/* -(An) -- always good */
+		case 0:     /* Dn -- always good */
+		case 1:     /* An -- always good */
+		case 2:     /* (An) -- always good */
+		case 3:     /* (An)+ -- always good */
+		case 4:     /* -(An) -- always good */
 			return 0;
 
-		case 5:		/* (d16,An) -- always good, but odd displacements are a warning for word/long */
+		case 5:     /* (d16,An) -- always good, but odd displacements are a warning for word/long */
 			if ((flags & OF_SIZEMASK) != OF_BYTE && (parambase[1] & 1) == 1)
 				return -1;
 			return 1;
 
-		case 6:		/* (d8,An,Xn)  -- always good, but odd displacements are a warning for word/long */
+		case 6:     /* (d8,An,Xn)  -- always good, but odd displacements are a warning for word/long */
 			/* also look for invalid extension words */
 			if ((parambase[0] & 7) != 0)
 				return 1000;
@@ -2243,27 +2280,27 @@ static int validate_ea(address_space *space, UINT32 pc, UINT8 modereg, const UIN
 		case 7:
 			switch (modereg & 7)
 			{
-				case 0:	/* (xxx).W -- make sure it is not odd for word/long */
+				case 0: /* (xxx).W -- make sure it is not odd for word/long */
 					addr = (INT16)((parambase[0] << 8) | parambase[1]);
 					valid = addr_is_valid(space, addr & 0xffffff, flags);
 					return (valid == 0) ? 1000 : (valid == 2) ? -1 : 1;
 
-				case 1:	/* (xxx).L -- make sure it is not odd for word/long, and make sure upper byte of addr is 0 */
+				case 1: /* (xxx).L -- make sure it is not odd for word/long, and make sure upper byte of addr is 0 */
 					valid = addr_is_valid(space, (parambase[0] << 24) | (parambase[1] << 16) | (parambase[2] << 8) | parambase[3], flags);
 					return (valid == 0) ? 1000 : (valid == 2) ? -2 : 2;
 
-				case 2:	/* (d16,PC) -- make sure it is not odd for word/long */
+				case 2: /* (d16,PC) -- make sure it is not odd for word/long */
 					valid = addr_is_valid(space, pc + (INT16)((parambase[0] << 8) | parambase[1]), flags);
 					return (valid == 0) ? 1000 : (valid == 2) ? -1 : 1;
 
-				case 3:	/* (d8,PC,Xn) -- odd displacements are a warning for word/long */
+				case 3: /* (d8,PC,Xn) -- odd displacements are a warning for word/long */
 					if ((parambase[0] & 7) != 0)
 						return 1000;
 					if ((flags & OF_SIZEMASK) != OF_BYTE && (parambase[1] & 1) == 1)
 						return -1;
 					return 1;
 
-				case 4:	/* immediate -- check high byte if byte-sized */
+				case 4: /* immediate -- check high byte if byte-sized */
 					if ((flags & OF_SIZEMASK) == OF_BYTE && parambase[0] != 0)
 						return 1000;
 					return ((flags & OF_SIZEMASK) == SIZE_LONG) ? 2 : 1;
@@ -2282,7 +2319,7 @@ static int validate_ea(address_space *space, UINT32 pc, UINT8 modereg, const UIN
     the length specified
 -----------------------------------------------*/
 
-static int validate_opcode(address_space *space, UINT32 pc, const UINT8 *opdata, int maxwords)
+static int validate_opcode(address_space &space, UINT32 pc, const UINT8 *opdata, int maxwords)
 {
 	UINT32 immvalue = 0;
 	int iffy = FALSE;
@@ -2412,3 +2449,5 @@ static int validate_opcode(address_space *space, UINT32 pc, const UINT8 *opdata,
 	assert(offset == oplength);
 	return iffy ? -oplength : oplength;
 }
+
+#endif

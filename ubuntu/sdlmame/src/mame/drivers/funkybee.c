@@ -77,36 +77,36 @@ Stephh's notes (based on the games Z80 code and some tests) :
 #include "includes/funkybee.h"
 
 
-static READ8_HANDLER( funkybee_input_port_0_r )
+READ8_MEMBER(funkybee_state::funkybee_input_port_0_r)
 {
 	watchdog_reset_r(space, 0);
-	return input_port_read(space->machine(), "IN0");
+	return ioport("IN0")->read();
 }
 
-static WRITE8_HANDLER( funkybee_coin_counter_w )
+WRITE8_MEMBER(funkybee_state::funkybee_coin_counter_w)
 {
-	coin_counter_w(space->machine(), offset, data);
+	coin_counter_w(machine(), offset, data);
 }
 
-static ADDRESS_MAP_START( funkybee_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( funkybee_map, AS_PROGRAM, 8, funkybee_state )
 	AM_RANGE(0x0000, 0x4fff) AM_ROM
 	AM_RANGE(0x8000, 0x87ff) AM_RAM
-	AM_RANGE(0xa000, 0xbfff) AM_RAM_WRITE(funkybee_videoram_w) AM_BASE_MEMBER(funkybee_state, m_videoram)
-	AM_RANGE(0xc000, 0xdfff) AM_RAM_WRITE(funkybee_colorram_w) AM_BASE_MEMBER(funkybee_state, m_colorram)
+	AM_RANGE(0xa000, 0xbfff) AM_RAM_WRITE(funkybee_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0xc000, 0xdfff) AM_RAM_WRITE(funkybee_colorram_w) AM_SHARE("colorram")
 	AM_RANGE(0xe000, 0xe000) AM_WRITE(funkybee_scroll_w)
 	AM_RANGE(0xe800, 0xe800) AM_WRITE(funkybee_flipscreen_w)
 	AM_RANGE(0xe802, 0xe803) AM_WRITE(funkybee_coin_counter_w)
 	AM_RANGE(0xe805, 0xe805) AM_WRITE(funkybee_gfx_bank_w)
-	AM_RANGE(0xf000, 0xf000) AM_READNOP	/* IRQ Ack */
+	AM_RANGE(0xf000, 0xf000) AM_READNOP /* IRQ Ack */
 	AM_RANGE(0xf800, 0xf800) AM_READWRITE(funkybee_input_port_0_r, watchdog_reset_w)
 	AM_RANGE(0xf801, 0xf801) AM_READ_PORT("IN1")
 	AM_RANGE(0xf802, 0xf802) AM_READ_PORT("IN2")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( io_map, AS_IO, 8, funkybee_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x01) AM_DEVWRITE("aysnd", ay8910_address_data_w)
-	AM_RANGE(0x02, 0x02) AM_DEVREAD("aysnd", ay8910_r)
+	AM_RANGE(0x00, 0x01) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_data_w)
+	AM_RANGE(0x02, 0x02) AM_DEVREAD_LEGACY("aysnd", ay8910_r)
 ADDRESS_MAP_END
 
 
@@ -117,8 +117,8 @@ static INPUT_PORTS_START( funkybee )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_START1 )
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_START2 )
 	PORT_DIPNAME( 0x20, 0x20, "Freeze" )
-	PORT_DIPSETTING(	0x20, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("IN1")
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_8WAY
@@ -137,38 +137,38 @@ static INPUT_PORTS_START( funkybee )
 	PORT_BIT( 0xe0, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 
 	PORT_START("DSW")
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coin_A ) )
-	PORT_DIPSETTING(	0x03, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0x02, DEF_STR( 1C_2C ) )
-	PORT_DIPSETTING(	0x01, DEF_STR( 1C_3C ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( 1C_4C ) )
-	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Coin_B ) )
-	PORT_DIPSETTING(	0x08, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0x0c, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0x04, DEF_STR( 2C_3C ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( 1C_6C ) )
-	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Lives ) )
-	PORT_DIPSETTING(	0x30, "3" )
-	PORT_DIPSETTING(	0x20, "4" )
-	PORT_DIPSETTING(	0x10, "5" )
-	PORT_DIPSETTING(	0x00, "6" )
-	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Bonus_Life ) )
-	PORT_DIPSETTING(	0x40, "20000" )
-	PORT_DIPSETTING(	0x00, DEF_STR( None ) )
-	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Cabinet ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Upright ) )
-	PORT_DIPSETTING(	0x80, DEF_STR( Cocktail ) )
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coin_A ) )       PORT_DIPLOCATION("SW1:8,7")
+	PORT_DIPSETTING(    0x03, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x02, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(    0x01, DEF_STR( 1C_3C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 1C_4C ) )
+	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Coin_B ) )       PORT_DIPLOCATION("SW1:6,5")
+	PORT_DIPSETTING(    0x08, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x0c, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x04, DEF_STR( 2C_3C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 1C_6C ) )
+	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW1:4,3")
+	PORT_DIPSETTING(    0x30, "3" )
+	PORT_DIPSETTING(    0x20, "4" )
+	PORT_DIPSETTING(    0x10, "5" )
+	PORT_DIPSETTING(    0x00, "6" )
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION("SW1:2")
+	PORT_DIPSETTING(    0x40, "20000" )
+	PORT_DIPSETTING(    0x00, DEF_STR( None ) )
+	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Cabinet ) )      PORT_DIPLOCATION("SW1:1")
+	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
+	PORT_DIPSETTING(    0x80, DEF_STR( Cocktail ) )
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( funkybeeb )
 	PORT_INCLUDE(funkybee)
 
 	PORT_MODIFY("DSW")
-	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Lives ) )
-	PORT_DIPSETTING(	0x30, "1" )
-	PORT_DIPSETTING(	0x20, "2" )
-	PORT_DIPSETTING(	0x10, "3" )
-	PORT_DIPSETTING(	0x00, "4" )
+	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW1:4,3")
+	PORT_DIPSETTING(    0x30, "1" )
+	PORT_DIPSETTING(    0x20, "2" )
+	PORT_DIPSETTING(    0x10, "3" )
+	PORT_DIPSETTING(    0x00, "4" )
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( skylancr )
@@ -178,8 +178,8 @@ static INPUT_PORTS_START( skylancr )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_START1 )
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_START2 )
 	PORT_DIPNAME( 0x20, 0x20, "Freeze" )
-	PORT_DIPSETTING(	0x20, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("IN1")
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_8WAY
@@ -198,39 +198,39 @@ static INPUT_PORTS_START( skylancr )
 	PORT_BIT( 0xe0, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 
 	PORT_START("DSW")
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coin_A ) )
-	PORT_DIPSETTING(	0x03, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0x02, DEF_STR( 1C_2C ) )
-	PORT_DIPSETTING(	0x01, DEF_STR( 1C_3C ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( 1C_6C ) )
-	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Coin_B ) )
-	PORT_DIPSETTING(	0x08, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0x0c, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0x04, DEF_STR( 2C_3C ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( 1C_6C ) )
-	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Lives ) )        /* Also affects bonus life */
-	PORT_DIPSETTING(	0x30, "1" )                     /* Bonus life at 20000 and 50000 */
-	PORT_DIPSETTING(	0x20, "2" )                     /* Bonus life at 20000 and 50000 */
-	PORT_DIPSETTING(	0x10, "3" )                     /* Bonus life at 40000 and 70000 */
-	PORT_DIPSETTING(	0x00, "4" )                     /* Bonus life at 40000 and 70000 */
-	PORT_DIPUNUSED( 0x40, IP_ACTIVE_LOW )
-	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Cabinet ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Upright ) )
-	PORT_DIPSETTING(	0x80, DEF_STR( Cocktail ) )
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coin_A ) )       PORT_DIPLOCATION("SW1:8,7")
+	PORT_DIPSETTING(    0x03, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x02, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(    0x01, DEF_STR( 1C_3C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 1C_6C ) )
+	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Coin_B ) )       PORT_DIPLOCATION("SW1:6,5")
+	PORT_DIPSETTING(    0x08, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x0c, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x04, DEF_STR( 2C_3C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 1C_6C ) )
+	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW1:4,3") /* Also affects bonus life */
+	PORT_DIPSETTING(    0x30, "1" )             /* Bonus life at 20000 and 50000 */
+	PORT_DIPSETTING(    0x20, "2" )             /* Bonus life at 20000 and 50000 */
+	PORT_DIPSETTING(    0x10, "3" )             /* Bonus life at 40000 and 70000 */
+	PORT_DIPSETTING(    0x00, "4" )             /* Bonus life at 40000 and 70000 */
+	PORT_DIPUNUSED_DIPLOC( 0x40, IP_ACTIVE_LOW, "SW1:2" )
+	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Cabinet ) )      PORT_DIPLOCATION("SW1:1")
+	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
+	PORT_DIPSETTING(    0x80, DEF_STR( Cocktail ) )
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( skylancre )
 	PORT_INCLUDE(skylancr)
 
 	PORT_MODIFY("DSW")
-	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Lives ) )
-	PORT_DIPSETTING(	0x30, "3" )
-	PORT_DIPSETTING(	0x20, "4" )
-	PORT_DIPSETTING(	0x10, "5" )
-	PORT_DIPSETTING(	0x00, "6" )
-	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Bonus_Life ) )
-	PORT_DIPSETTING(	0x40, "20000 50000" )
-	PORT_DIPSETTING(	0x00, "40000 70000" )
+	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW1:4,3") /* Also affects bonus life */
+	PORT_DIPSETTING(    0x30, "3" )
+	PORT_DIPSETTING(    0x20, "4" )
+	PORT_DIPSETTING(    0x10, "5" )
+	PORT_DIPSETTING(    0x00, "6" )
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION("SW1:2") /* Manual calls this "Excent Play" (Excellent or extended?) */
+	PORT_DIPSETTING(    0x40, "20000 50000" )       /* Manual calls this "Normal Level" */
+	PORT_DIPSETTING(    0x00, "40000 70000" )       /* Manual calls this "High Level" */
 INPUT_PORTS_END
 
 
@@ -253,15 +253,15 @@ static const gfx_layout spritelayout =
 	{ 0, 4 },
 	{ 0, 1, 2, 3, 8*8+0, 8*8+1, 8*8+2, 8*8+3 },
 	{  0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-	  16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8,
-	  32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8,
-	  48*8, 49*8, 50*8, 51*8, 52*8, 53*8, 54*8, 55*8 },
+		16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8,
+		32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8,
+		48*8, 49*8, 50*8, 51*8, 52*8, 53*8, 54*8, 55*8 },
 	4*16*8
 };
 
 static GFXDECODE_START( funkybee )
-	GFXDECODE_ENTRY( "gfx1", 0, charlayout,	  0, 8 )
-	GFXDECODE_ENTRY( "gfx2", 0, charlayout,	  0, 8 )
+	GFXDECODE_ENTRY( "gfx1", 0, charlayout,   0, 8 )
+	GFXDECODE_ENTRY( "gfx2", 0, charlayout,   0, 8 )
 	GFXDECODE_ENTRY( "gfx1", 0, spritelayout, 16, 4 )
 	GFXDECODE_ENTRY( "gfx2", 0, spritelayout, 16, 4 )
 GFXDECODE_END
@@ -278,45 +278,38 @@ static const ay8910_interface ay8910_config =
 };
 
 
-static MACHINE_START( funkybee )
+void funkybee_state::machine_start()
 {
-	funkybee_state *state = machine.driver_data<funkybee_state>();
 
-	state->save_item(NAME(state->m_gfx_bank));
+	save_item(NAME(m_gfx_bank));
 }
 
-static MACHINE_RESET( funkybee )
+void funkybee_state::machine_reset()
 {
-	funkybee_state *state = machine.driver_data<funkybee_state>();
 
-	state->m_gfx_bank = 0;
+	m_gfx_bank = 0;
 }
 
 static MACHINE_CONFIG_START( funkybee, funkybee_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, 3072000)	/* 3.072 MHz */
+	MCFG_CPU_ADD("maincpu", Z80, 3072000)   /* 3.072 MHz */
 	MCFG_CPU_PROGRAM_MAP(funkybee_map)
 	MCFG_CPU_IO_MAP(io_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", funkybee_state,  irq0_line_hold)
 
-	MCFG_MACHINE_START(funkybee)
-	MCFG_MACHINE_RESET(funkybee)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(12, 32*8-8-1, 0*8, 28*8-1)
-	MCFG_SCREEN_UPDATE(funkybee)
+	MCFG_SCREEN_UPDATE_DRIVER(funkybee_state, screen_update_funkybee)
 
 	MCFG_GFXDECODE(funkybee)
 	MCFG_PALETTE_LENGTH(32)
 
-	MCFG_PALETTE_INIT(funkybee)
-	MCFG_VIDEO_START(funkybee)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -432,7 +425,7 @@ ROM_START( skylancre )
 	ROM_LOAD( "18s030.1a",     0x0000, 0x0020, CRC(e645bacb) SHA1(5f4c299c4cf165fd229731c0e5799a34892bf28e) )
 ROM_END
 
-GAME( 1982, funkybee,  0,        funkybee, funkybee, 0, ROT90, "Orca",                           "Funky Bee",                            GAME_SUPPORTS_SAVE )
-GAME( 1982, funkybeeb, funkybee, funkybee, funkybeeb,0, ROT90, "bootleg",                        "Funky Bee (bootleg, harder)",          GAME_SUPPORTS_SAVE )
-GAME( 1983, skylancr,  0,        funkybee, skylancr, 0, ROT90, "Orca",                           "Sky Lancer",                           GAME_SUPPORTS_SAVE )
-GAME( 1983, skylancre, skylancr, funkybee, skylancre,0, ROT90, "Orca (Esco Trading Co license)", "Sky Lancer (Esco Trading Co license)", GAME_SUPPORTS_SAVE )
+GAME( 1982, funkybee,  0,        funkybee, funkybee, driver_device, 0, ROT90, "Orca",                           "Funky Bee",                            GAME_SUPPORTS_SAVE )
+GAME( 1982, funkybeeb, funkybee, funkybee, funkybeeb, driver_device,0, ROT90, "bootleg",                        "Funky Bee (bootleg, harder)",          GAME_SUPPORTS_SAVE )
+GAME( 1983, skylancr,  0,        funkybee, skylancr, driver_device, 0, ROT90, "Orca",                           "Sky Lancer",                           GAME_SUPPORTS_SAVE )
+GAME( 1983, skylancre, skylancr, funkybee, skylancre, driver_device,0, ROT90, "Orca (Esco Trading Co license)", "Sky Lancer (Esco Trading Co license)", GAME_SUPPORTS_SAVE )

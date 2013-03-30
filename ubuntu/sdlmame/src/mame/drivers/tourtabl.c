@@ -16,88 +16,85 @@
 class tourtabl_state : public driver_device
 {
 public:
-	tourtabl_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	tourtabl_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) { }
 
+	DECLARE_WRITE8_MEMBER(tourtabl_led_w);
+	DECLARE_READ16_MEMBER(tourtabl_read_input_port);
+	DECLARE_READ8_MEMBER(tourtabl_get_databus_contents);
+	DECLARE_WRITE8_MEMBER(watchdog_w);
 };
 
 
-#define MASTER_CLOCK	XTAL_3_579545MHz
+#define MASTER_CLOCK    XTAL_3_579545MHz
 
 
-static WRITE8_DEVICE_HANDLER( tourtabl_led_w )
+WRITE8_MEMBER(tourtabl_state::tourtabl_led_w)
 {
-	set_led_status(device->machine(), 0, data & 0x40); /* start 1 */
-	set_led_status(device->machine(), 1, data & 0x20); /* start 2 */
-	set_led_status(device->machine(), 2, data & 0x10); /* start 4 */
-	set_led_status(device->machine(), 3, data & 0x80); /* select game */
+	set_led_status(machine(), 0, data & 0x40); /* start 1 */
+	set_led_status(machine(), 1, data & 0x20); /* start 2 */
+	set_led_status(machine(), 2, data & 0x10); /* start 4 */
+	set_led_status(machine(), 3, data & 0x80); /* select game */
 
-	coin_lockout_global_w(device->machine(), !(data & 0x80));
+	coin_lockout_global_w(machine(), !(data & 0x80));
 }
 
 
-static READ16_HANDLER( tourtabl_read_input_port )
+READ16_MEMBER(tourtabl_state::tourtabl_read_input_port)
 {
 	static const char *const tianames[] = { "PADDLE4", "PADDLE3", "PADDLE2", "PADDLE1", "TIA_IN4", "TIA_IN5" };
 
-	return input_port_read(space->machine(), tianames[offset]);
+	return machine().root_device().ioport(tianames[offset])->read();
 }
 
-static READ8_HANDLER( tourtabl_get_databus_contents )
+READ8_MEMBER(tourtabl_state::tourtabl_get_databus_contents)
 {
 	return offset;
 }
 
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0x007f) AM_MIRROR(0x0100) AM_READWRITE(tia_r, tia_w)
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, tourtabl_state )
+	AM_RANGE(0x0000, 0x007f) AM_MIRROR(0x0100) AM_DEVREADWRITE("tia_video", tia_video_device, read, write)
 	AM_RANGE(0x0080, 0x00ff) AM_MIRROR(0x0100) AM_RAM
-	AM_RANGE(0x0280, 0x029f) AM_DEVREADWRITE("riot1", riot6532_r, riot6532_w)
+	AM_RANGE(0x0280, 0x029f) AM_DEVREADWRITE_LEGACY("riot1", riot6532_r, riot6532_w)
 	AM_RANGE(0x0400, 0x047f) AM_RAM
-	AM_RANGE(0x0500, 0x051f) AM_DEVREADWRITE("riot2", riot6532_r, riot6532_w)
+	AM_RANGE(0x0500, 0x051f) AM_DEVREADWRITE_LEGACY("riot2", riot6532_r, riot6532_w)
 	AM_RANGE(0x0800, 0x1fff) AM_ROM
 	AM_RANGE(0xe800, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
 
-static WRITE8_DEVICE_HANDLER( watchdog_w )
+WRITE8_MEMBER(tourtabl_state::watchdog_w)
 {
-	watchdog_reset(device->machine());
+	machine().watchdog_reset();
 }
 
 static const riot6532_interface r6532_interface_0 =
 {
-	DEVCB_INPUT_PORT("RIOT0_SWA"),	/* Port 6 */
-	DEVCB_INPUT_PORT("RIOT0_SWB"),	/* Port 7 */
+	DEVCB_INPUT_PORT("RIOT0_SWA"),  /* Port 6 */
+	DEVCB_INPUT_PORT("RIOT0_SWB"),  /* Port 7 */
 	DEVCB_NULL,
-	DEVCB_HANDLER(watchdog_w),
+	DEVCB_DRIVER_MEMBER(tourtabl_state,watchdog_w),
 	DEVCB_NULL
 };
 
 
 static const riot6532_interface r6532_interface_1 =
 {
-	DEVCB_INPUT_PORT("RIOT1_SWA"),	/* Port 8 */
-	DEVCB_INPUT_PORT("RIOT1_SWB"),	/* Port 9 */
+	DEVCB_INPUT_PORT("RIOT1_SWA"),  /* Port 8 */
+	DEVCB_INPUT_PORT("RIOT1_SWB"),  /* Port 9 */
 	DEVCB_NULL,
-	DEVCB_HANDLER(tourtabl_led_w),
+	DEVCB_DRIVER_MEMBER(tourtabl_state,tourtabl_led_w),
 	DEVCB_NULL
 };
 
 
 static const struct tia_interface tourtabl_tia_interface =
 {
-	tourtabl_read_input_port,
-	tourtabl_get_databus_contents,
-	NULL
+	DEVCB_DRIVER_MEMBER16(tourtabl_state,tourtabl_read_input_port),
+	DEVCB_DRIVER_MEMBER(tourtabl_state,tourtabl_get_databus_contents),
+	DEVCB_NULL
 };
-
-
-static MACHINE_START( tourtabl )
-{
-	tia_init( machine, &tourtabl_tia_interface );
-}
-
 
 static INPUT_PORTS_START( tourtabl )
 
@@ -113,17 +110,17 @@ static INPUT_PORTS_START( tourtabl )
 	PORT_START("PADDLE1")
 	PORT_BIT( 0xff, 0x80, IPT_PADDLE ) PORT_SENSITIVITY(40) PORT_KEYDELTA(10) PORT_CENTERDELTA(0) PORT_REVERSE PORT_PLAYER(1)
 
-	PORT_START("TIA_IN4")	/* TIA INPT4 */
+	PORT_START("TIA_IN4")   /* TIA INPT4 */
 	PORT_DIPNAME( 0x80, 0x80, "Breakout Replay" )
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ))
 	PORT_DIPSETTING(    0x80, DEF_STR( On ))
 
-	PORT_START("TIA_IN5")	/* TIA INPT5 */
+	PORT_START("TIA_IN5")   /* TIA INPT5 */
 	PORT_DIPNAME( 0x80, 0x80, "Game Length" )
 	PORT_DIPSETTING(    0x00, "11 points (3 balls)" )
 	PORT_DIPSETTING(    0x80, "15 points (5 balls)" )
 
-	PORT_START("RIOT0_SWA")	/* RIOT #0 SWCHA */
+	PORT_START("RIOT0_SWA") /* RIOT #0 SWCHA */
 	PORT_DIPNAME( 0x0F, 0x0E, "Replay Level" )
 	PORT_DIPSETTING(    0x0B, "200 points" )
 	PORT_DIPSETTING(    0x0C, "250 points" )
@@ -135,7 +132,7 @@ static INPUT_PORTS_START( tourtabl )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
 
-	PORT_START("RIOT0_SWB")	/* RIOT #0 SWCHB */
+	PORT_START("RIOT0_SWB") /* RIOT #0 SWCHB */
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME("Game Select") PORT_CODE(KEYCODE_SPACE)
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_TILT )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )
@@ -166,7 +163,7 @@ static INPUT_PORTS_START( tourtabl )
 	PORT_SERVICE( 0x40, IP_ACTIVE_HIGH )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )
 
-	PORT_START("RIOT1_SWB")	/* RIOT #1 SWCHB */
+	PORT_START("RIOT1_SWB") /* RIOT #1 SWCHB */
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START4 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START1 )
@@ -176,24 +173,20 @@ INPUT_PORTS_END
 
 static MACHINE_CONFIG_START( tourtabl, tourtabl_state )
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M6502, MASTER_CLOCK / 3)	/* actually M6507 */
+	MCFG_CPU_ADD("maincpu", M6502, MASTER_CLOCK / 3)    /* actually M6507 */
 	MCFG_CPU_PROGRAM_MAP(main_map)
-
-	MCFG_MACHINE_START(tourtabl)
 
 	MCFG_RIOT6532_ADD("riot1", MASTER_CLOCK / 3, r6532_interface_0)
 	MCFG_RIOT6532_ADD("riot2", MASTER_CLOCK / 3, r6532_interface_1)
 
+	MCFG_TIA_VIDEO_ADD("tia_video", tourtabl_tia_interface)
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_RAW_PARAMS( MASTER_CLOCK, 228, 34, 34 + 160, 262, 46, 46 + 200 )
-	MCFG_SCREEN_UPDATE(tia)
+	MCFG_SCREEN_UPDATE_DEVICE("tia_video", tia_video_device, screen_update)
 
 	MCFG_PALETTE_LENGTH(TIA_PALETTE_LENGTH)
 	MCFG_PALETTE_INIT(tia_NTSC)
-
-	MCFG_VIDEO_START(tia)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -225,5 +218,5 @@ ROM_START( tourtab2 )
 ROM_END
 
 
-GAME( 1978, tourtabl, 0,        tourtabl, tourtabl, 0, ROT0, "Atari", "Tournament Table (set 1)", 0 )
-GAME( 1978, tourtab2, tourtabl, tourtabl, tourtabl, 0, ROT0, "Atari", "Tournament Table (set 2)", 0 )
+GAME( 1978, tourtabl, 0,        tourtabl, tourtabl, driver_device, 0, ROT0, "Atari", "Tournament Table (set 1)", 0 )
+GAME( 1978, tourtab2, tourtabl, tourtabl, tourtabl, driver_device, 0, ROT0, "Atari", "Tournament Table (set 2)", 0 )

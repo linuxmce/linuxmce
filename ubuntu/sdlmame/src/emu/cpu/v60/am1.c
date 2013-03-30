@@ -105,7 +105,7 @@ static UINT32 bam1Autoincrement(v60_state *cpustate)
 		cpustate->reg[cpustate->modval & 0x1F] +=4;
 		break;
 	default:
-		fatalerror("CPU - BAM1 - 7");
+		fatalerror("CPU - BAM1 - 7\n");
 		break;
 	}
 	return 1;
@@ -144,7 +144,7 @@ static UINT32 bam1Autodecrement(v60_state *cpustate)
 		cpustate->reg[cpustate->modval & 0x1F]-=4;
 		break;
 	default:
-		fatalerror("CPU - BAM1 - 7");
+		fatalerror("CPU - BAM1 - 7\n");
 		break;
 	}
 	cpustate->amout = cpustate->program->read_dword_unaligned(cpustate->reg[cpustate->modval & 0x1F]);
@@ -1087,69 +1087,69 @@ static UINT32 am1ImmediateQuick(v60_state *cpustate)
 
 static UINT32 am1Error1(v60_state *cpustate)
 {
-	fatalerror("CPU - AM1 - 1 (cpustate->PC=%06x)", cpustate->PC);
+	fatalerror("CPU - AM1 - 1 (cpustate->PC=%06x)\n", cpustate->PC);
 	return 0; /* never reached, fatalerror won't return */
 }
 
 static UINT32 bam1Error1(v60_state *cpustate)
 {
-	fatalerror("CPU - BAM1 - 1 (cpustate->PC=%06x)", cpustate->PC);
+	fatalerror("CPU - BAM1 - 1 (cpustate->PC=%06x)\n", cpustate->PC);
 	return 0; /* never reached, fatalerror won't return */
 }
 
 static UINT32 am1Error2(v60_state *cpustate)
 {
-	fatalerror("CPU - AM1 - 2 (cpustate->PC=%06x)", cpustate->PC);
+	fatalerror("CPU - AM1 - 2 (cpustate->PC=%06x)\n", cpustate->PC);
 	return 0; /* never reached, fatalerror won't return */
 }
 
 static UINT32 bam1Error2(v60_state *cpustate)
 {
-	fatalerror("CPU - BAM1 - 2 (cpustate->PC=%06x)", cpustate->PC);
+	fatalerror("CPU - BAM1 - 2 (cpustate->PC=%06x)\n", cpustate->PC);
 	return 0; /* never reached, fatalerror won't return */
 }
 
 #ifdef UNUSED_FUNCTION
 static UINT32 am1Error3(v60_state *cpustate)
 {
-	fatalerror("CPU - AM1 - 3 (cpustate->PC=%06x)", cpustate->PC);
+	fatalerror("CPU - AM1 - 3 (cpustate->PC=%06x)\n", cpustate->PC);
 	return 0; /* never reached, fatalerror won't return */
 }
 
 static UINT32 bam1Error3(v60_state *cpustate)
 {
-	fatalerror("CPU - BAM1 - 3 (cpustate->PC=%06x)", cpustate->PC);
+	fatalerror("CPU - BAM1 - 3 (cpustate->PC=%06x)\n", cpustate->PC);
 	return 0; /* never reached, fatalerror won't return */
 }
 #endif
 
 static UINT32 am1Error4(v60_state *cpustate)
 {
-	fatalerror("CPU - AM1 - 4 (cpustate->PC=%06x)", cpustate->PC);
+	fatalerror("CPU - AM1 - 4 (cpustate->PC=%06x)\n", cpustate->PC);
 	return 0; /* never reached, fatalerror won't return */
 }
 
 static UINT32 bam1Error4(v60_state *cpustate)
 {
-	fatalerror("CPU - BAM1 - 4 (cpustate->PC=%06x)", cpustate->PC);
+	fatalerror("CPU - BAM1 - 4 (cpustate->PC=%06x)\n", cpustate->PC);
 	return 0; /* never reached, fatalerror won't return */
 }
 
 static UINT32 am1Error5(v60_state *cpustate)
 {
-	fatalerror("CPU - AM1 - 5 (cpustate->PC=%06x)", cpustate->PC);
+	fatalerror("CPU - AM1 - 5 (cpustate->PC=%06x)\n", cpustate->PC);
 	return 0; /* never reached, fatalerror won't return */
 }
 
 static UINT32 bam1Error5(v60_state *cpustate)
 {
-	fatalerror("CPU - BAM1 - 5 (cpustate->PC=%06x)", cpustate->PC);
+	fatalerror("CPU - BAM1 - 5 (cpustate->PC=%06x)\n", cpustate->PC);
 	return 0; /* never reached, fatalerror won't return */
 }
 
 static UINT32 bam1Error6(v60_state *cpustate)
 {
-	fatalerror("CPU - BAM1 - 6 (cpustate->PC=%06x)", cpustate->PC);
+	fatalerror("CPU - BAM1 - 6 (cpustate->PC=%06x)\n", cpustate->PC);
 	return 0; /* never reached, fatalerror won't return */
 }
 
@@ -1231,19 +1231,19 @@ static UINT32 (*const AMTable1_G7[32])(v60_state *) =
 	am1PCDisplacement8,
 	am1PCDisplacement16,
 	am1PCDisplacement32,
-  am1DirectAddress,
+	am1DirectAddress,
 	am1Immediate,
 	am1Error2,
 	am1Error2,
 	am1Error2,
-  am1PCDisplacementIndirect8,
-  am1PCDisplacementIndirect16,
-  am1PCDisplacementIndirect32,
+	am1PCDisplacementIndirect8,
+	am1PCDisplacementIndirect16,
+	am1PCDisplacementIndirect32,
 	am1DirectAddressDeferred,
 	am1PCDoubleDisplacement8,
 	am1PCDoubleDisplacement16,
 	am1PCDoubleDisplacement32,
-  am1Error2
+	am1Error2
 };
 
 static UINT32 (*const BAMTable1_G7[32])(v60_state *) =
@@ -1267,19 +1267,19 @@ static UINT32 (*const BAMTable1_G7[32])(v60_state *) =
 	bam1PCDisplacement8,
 	bam1PCDisplacement16,
 	bam1PCDisplacement32,
-  bam1DirectAddress,
+	bam1DirectAddress,
 	bam1Error6,
 	bam1Error2,
 	bam1Error2,
 	bam1Error2,
-  bam1PCDisplacementIndirect8,
-  bam1PCDisplacementIndirect16,
-  bam1PCDisplacementIndirect32,
+	bam1PCDisplacementIndirect8,
+	bam1PCDisplacementIndirect16,
+	bam1PCDisplacementIndirect32,
 	bam1DirectAddressDeferred,
 	bam1PCDoubleDisplacement8,
 	bam1PCDoubleDisplacement16,
 	bam1PCDoubleDisplacement32,
-  bam1Error2
+	bam1Error2
 };
 
 
@@ -1382,7 +1382,3 @@ static UINT32 (*const BAMTable1[2][8])(v60_state *) =
 		bam1Error1
 	}
 };
-
-
-
-

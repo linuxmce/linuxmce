@@ -7,27 +7,29 @@
 class hanaawas_state : public driver_device
 {
 public:
-	hanaawas_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	hanaawas_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"),
+		m_colorram(*this, "colorram"){ }
 
 	/* memory pointers */
-	UINT8 *    m_videoram;
-	UINT8 *    m_colorram;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_colorram;
 
 	/* video-related */
 	tilemap_t    *m_bg_tilemap;
 
 	/* misc */
 	int        m_mux;
+	DECLARE_READ8_MEMBER(hanaawas_input_port_0_r);
+	DECLARE_WRITE8_MEMBER(hanaawas_inputs_mux_w);
+	DECLARE_WRITE8_MEMBER(hanaawas_videoram_w);
+	DECLARE_WRITE8_MEMBER(hanaawas_colorram_w);
+	TILE_GET_INFO_MEMBER(get_bg_tile_info);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_hanaawas(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	DECLARE_WRITE8_MEMBER(hanaawas_portB_w);
 };
-
-
-/*----------- defined in video/hanaawas.c -----------*/
-
-WRITE8_HANDLER( hanaawas_videoram_w );
-WRITE8_HANDLER( hanaawas_colorram_w );
-WRITE8_DEVICE_HANDLER( hanaawas_portB_w );
-
-PALETTE_INIT( hanaawas );
-VIDEO_START( hanaawas );
-SCREEN_UPDATE( hanaawas );

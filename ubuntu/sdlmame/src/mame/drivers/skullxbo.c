@@ -20,6 +20,7 @@
 #include "emu.h"
 #include "cpu/m68000/m68000.h"
 #include "audio/atarijsa.h"
+#include "video/atarimo.h"
 #include "includes/skullxbo.h"
 
 
@@ -30,60 +31,49 @@
  *
  *************************************/
 
-static void update_interrupts(running_machine &machine)
+void skullxbo_state::update_interrupts()
 {
-	skullxbo_state *state = machine.driver_data<skullxbo_state>();
-	cputag_set_input_line(machine, "maincpu", 1, state->m_scanline_int_state ? ASSERT_LINE : CLEAR_LINE);
-	cputag_set_input_line(machine, "maincpu", 2, state->m_video_int_state ? ASSERT_LINE : CLEAR_LINE);
-	cputag_set_input_line(machine, "maincpu", 4, state->m_sound_int_state ? ASSERT_LINE : CLEAR_LINE);
+	subdevice("maincpu")->execute().set_input_line(1, m_scanline_int_state ? ASSERT_LINE : CLEAR_LINE);
+	subdevice("maincpu")->execute().set_input_line(2, m_video_int_state ? ASSERT_LINE : CLEAR_LINE);
+	subdevice("maincpu")->execute().set_input_line(4, m_sound_int_state ? ASSERT_LINE : CLEAR_LINE);
 }
 
 
-static TIMER_CALLBACK( irq_gen )
+TIMER_CALLBACK_MEMBER(skullxbo_state::irq_gen)
 {
-	atarigen_scanline_int_gen(machine.device("maincpu"));
+	scanline_int_gen(*subdevice("maincpu"));
 }
 
 
-static void alpha_row_update(screen_device &screen, int scanline)
+void skullxbo_state::scanline_update(screen_device &screen, int scanline)
 {
-	skullxbo_state *state = screen.machine().driver_data<skullxbo_state>();
-	UINT16 *check = &state->m_alpha[(scanline / 8) * 64 + 42];
+	UINT16 *check = &m_alpha[(scanline / 8) * 64 + 42];
 
 	/* check for interrupts in the alpha ram */
 	/* the interrupt occurs on the HBLANK of the 6th scanline following */
-	if (check < &state->m_alpha[0x7c0] && (*check & 0x8000))
+	if (check < &m_alpha[0x7c0] && (*check & 0x8000))
 	{
-		int	width = screen.width();
+		int width = screen.width();
 		attotime period = screen.time_until_pos(screen.vpos() + 6, width * 0.9);
-		screen.machine().scheduler().timer_set(period, FUNC(irq_gen));
+		machine().scheduler().timer_set(period, timer_expired_delegate(FUNC(skullxbo_state::irq_gen), this));
 	}
 
 	/* update the playfield and motion objects */
-	skullxbo_scanline_update(screen.machine(), scanline);
+	skullxbo_scanline_update(machine(), scanline);
 }
 
 
-static WRITE16_HANDLER( skullxbo_halt_until_hblank_0_w )
+WRITE16_MEMBER(skullxbo_state::skullxbo_halt_until_hblank_0_w)
 {
-	atarigen_halt_until_hblank_0(*space->machine().primary_screen);
+	halt_until_hblank_0(space.device(), *machine().primary_screen);
 }
 
 
-static MACHINE_START( skullxbo )
+MACHINE_RESET_MEMBER(skullxbo_state,skullxbo)
 {
-	atarigen_init(machine);
-}
-
-
-static MACHINE_RESET( skullxbo )
-{
-	skullxbo_state *state = machine.driver_data<skullxbo_state>();
-
-	atarigen_eeprom_reset(state);
-	atarigen_interrupt_reset(state, update_interrupts);
-	atarigen_scanline_timer_reset(*machine.primary_screen, alpha_row_update, 8);
-	atarijsa_reset();
+	atarigen_state::machine_reset();
+	scanline_timer_reset(*machine().primary_screen, 8);
+	atarijsa_reset(machine());
 }
 
 
@@ -94,12 +84,11 @@ static MACHINE_RESET( skullxbo )
  *
  *************************************/
 
-static READ16_HANDLER( special_port1_r )
+READ16_MEMBER(skullxbo_state::special_port1_r)
 {
-	skullxbo_state *state = space->machine().driver_data<skullxbo_state>();
-	int temp = input_port_read(space->machine(), "FF5802");
-	if (state->m_cpu_to_sound_ready) temp ^= 0x0040;
-	if (atarigen_get_hblank(*space->machine().primary_screen)) temp ^= 0x0010;
+	int temp = ioport("FF5802")->read();
+	if (m_cpu_to_sound_ready) temp ^= 0x0040;
+	if (get_hblank(*machine().primary_screen)) temp ^= 0x0010;
 	return temp;
 }
 
@@ -111,7 +100,7 @@ static READ16_HANDLER( special_port1_r )
  *
  *************************************/
 
-static WRITE16_HANDLER( skullxbo_mobwr_w )
+WRITE16_MEMBER(skullxbo_state::skullxbo_mobwr_w)
 {
 	logerror("MOBWR[%02X] = %04X\n", offset, data);
 }
@@ -124,35 +113,35 @@ static WRITE16_HANDLER( skullxbo_mobwr_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16, skullxbo_state )
 	AM_RANGE(0x000000, 0x07ffff) AM_ROM
-	AM_RANGE(0xff0000, 0xff07ff) AM_WRITE(skullxbo_mobmsb_w)
+	AM_RANGE(0xff0000, 0xff07ff) AM_WRITE_LEGACY(skullxbo_mobmsb_w)
 	AM_RANGE(0xff0800, 0xff0bff) AM_WRITE(skullxbo_halt_until_hblank_0_w)
-	AM_RANGE(0xff0c00, 0xff0fff) AM_WRITE(atarigen_eeprom_enable_w)
-	AM_RANGE(0xff1000, 0xff13ff) AM_WRITE(atarigen_video_int_ack_w)
-	AM_RANGE(0xff1400, 0xff17ff) AM_WRITE(atarigen_sound_w)
-	AM_RANGE(0xff1800, 0xff1bff) AM_WRITE(atarigen_sound_reset_w)
-	AM_RANGE(0xff1c00, 0xff1c7f) AM_WRITE(skullxbo_playfieldlatch_w)
-	AM_RANGE(0xff1c80, 0xff1cff) AM_WRITE(skullxbo_xscroll_w) AM_BASE_MEMBER(skullxbo_state, m_xscroll)
-	AM_RANGE(0xff1d00, 0xff1d7f) AM_WRITE(atarigen_scanline_int_ack_w)
+	AM_RANGE(0xff0c00, 0xff0fff) AM_WRITE(eeprom_enable_w)
+	AM_RANGE(0xff1000, 0xff13ff) AM_WRITE(video_int_ack_w)
+	AM_RANGE(0xff1400, 0xff17ff) AM_WRITE8(sound_w, 0x00ff)
+	AM_RANGE(0xff1800, 0xff1bff) AM_WRITE(sound_reset_w)
+	AM_RANGE(0xff1c00, 0xff1c7f) AM_WRITE_LEGACY(skullxbo_playfieldlatch_w)
+	AM_RANGE(0xff1c80, 0xff1cff) AM_WRITE_LEGACY(skullxbo_xscroll_w) AM_SHARE("xscroll")
+	AM_RANGE(0xff1d00, 0xff1d7f) AM_WRITE(scanline_int_ack_w)
 	AM_RANGE(0xff1d80, 0xff1dff) AM_WRITE(watchdog_reset16_w)
-	AM_RANGE(0xff1e00, 0xff1e7f) AM_WRITE(skullxbo_playfieldlatch_w)
-	AM_RANGE(0xff1e80, 0xff1eff) AM_WRITE(skullxbo_xscroll_w)
-	AM_RANGE(0xff1f00, 0xff1f7f) AM_WRITE(atarigen_scanline_int_ack_w)
+	AM_RANGE(0xff1e00, 0xff1e7f) AM_WRITE_LEGACY(skullxbo_playfieldlatch_w)
+	AM_RANGE(0xff1e80, 0xff1eff) AM_WRITE_LEGACY(skullxbo_xscroll_w)
+	AM_RANGE(0xff1f00, 0xff1f7f) AM_WRITE(scanline_int_ack_w)
 	AM_RANGE(0xff1f80, 0xff1fff) AM_WRITE(watchdog_reset16_w)
-	AM_RANGE(0xff2000, 0xff2fff) AM_RAM_WRITE(atarigen_666_paletteram_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0xff4000, 0xff47ff) AM_WRITE(skullxbo_yscroll_w) AM_BASE_MEMBER(skullxbo_state, m_yscroll)
+	AM_RANGE(0xff2000, 0xff2fff) AM_RAM_WRITE(paletteram_666_w) AM_SHARE("paletteram")
+	AM_RANGE(0xff4000, 0xff47ff) AM_WRITE_LEGACY(skullxbo_yscroll_w) AM_SHARE("yscroll")
 	AM_RANGE(0xff4800, 0xff4fff) AM_WRITE(skullxbo_mobwr_w)
-	AM_RANGE(0xff6000, 0xff6fff) AM_WRITE(atarigen_eeprom_w) AM_SHARE("eeprom")
-	AM_RANGE(0xff5000, 0xff5001) AM_READ(atarigen_sound_r)
+	AM_RANGE(0xff6000, 0xff6fff) AM_WRITE(eeprom_w) AM_SHARE("eeprom")
+	AM_RANGE(0xff5000, 0xff5001) AM_READ8(sound_r, 0x00ff)
 	AM_RANGE(0xff5800, 0xff5801) AM_READ_PORT("FF5800")
 	AM_RANGE(0xff5802, 0xff5803) AM_READ(special_port1_r)
-	AM_RANGE(0xff6000, 0xff6fff) AM_READ(atarigen_eeprom_r)
-	AM_RANGE(0xff8000, 0xff9fff) AM_RAM_WRITE(atarigen_playfield_latched_lsb_w) AM_BASE_MEMBER(skullxbo_state, m_playfield)
-	AM_RANGE(0xffa000, 0xffbfff) AM_RAM_WRITE(atarigen_playfield_upper_w) AM_BASE_MEMBER(skullxbo_state, m_playfield_upper)
-	AM_RANGE(0xffc000, 0xffcf7f) AM_RAM_WRITE(atarigen_alpha_w) AM_BASE_MEMBER(skullxbo_state, m_alpha)
-	AM_RANGE(0xffcf80, 0xffcfff) AM_RAM_WRITE(atarimo_0_slipram_w) AM_BASE(&atarimo_0_slipram)
-	AM_RANGE(0xffd000, 0xffdfff) AM_RAM_WRITE(atarimo_0_spriteram_w) AM_BASE(&atarimo_0_spriteram)
+	AM_RANGE(0xff6000, 0xff6fff) AM_READ(eeprom_r)
+	AM_RANGE(0xff8000, 0xff9fff) AM_RAM_WRITE(playfield_latched_lsb_w) AM_SHARE("playfield")
+	AM_RANGE(0xffa000, 0xffbfff) AM_RAM_WRITE(playfield_upper_w) AM_SHARE("playfield_up")
+	AM_RANGE(0xffc000, 0xffcf7f) AM_RAM_WRITE(alpha_w) AM_SHARE("alpha")
+	AM_RANGE(0xffcf80, 0xffcfff) AM_READWRITE_LEGACY(atarimo_0_slipram_r, atarimo_0_slipram_w)
+	AM_RANGE(0xffd000, 0xffdfff) AM_READWRITE_LEGACY(atarimo_0_spriteram_r, atarimo_0_spriteram_w)
 	AM_RANGE(0xffe000, 0xffffff) AM_RAM
 ADDRESS_MAP_END
 
@@ -178,9 +167,9 @@ static INPUT_PORTS_START( skullxbo )
 
 	PORT_START("FF5802")
 	PORT_BIT( 0x000f, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x0010, IP_ACTIVE_HIGH, IPT_UNUSED )	/* HBLANK */
-	PORT_BIT( 0x0020, IP_ACTIVE_HIGH, IPT_VBLANK )
-	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNUSED )	/* /AUDBUSY */
+	PORT_BIT( 0x0010, IP_ACTIVE_HIGH, IPT_UNUSED )  /* HBLANK */
+	PORT_BIT( 0x0020, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
+	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNUSED )   /* /AUDBUSY */
 	PORT_SERVICE( 0x0080, IP_ACTIVE_LOW )
 	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
@@ -191,7 +180,7 @@ static INPUT_PORTS_START( skullxbo )
 	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(2)
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(2)
 
-	PORT_INCLUDE( atarijsa_ii )		/* audio board port */
+	PORT_INCLUDE( atarijsa_ii )     /* audio board port */
 INPUT_PORTS_END
 
 
@@ -209,7 +198,7 @@ static const gfx_layout pflayout =
 	4,
 	{ 0, 1, 2, 3 },
 	{ RGN_FRAC(1,2)+0,RGN_FRAC(1,2)+0, RGN_FRAC(1,2)+4,RGN_FRAC(1,2)+4, 0,0, 4,4,
-	  RGN_FRAC(1,2)+8,RGN_FRAC(1,2)+8, RGN_FRAC(1,2)+12,RGN_FRAC(1,2)+12, 8,8, 12,12 },
+		RGN_FRAC(1,2)+8,RGN_FRAC(1,2)+8, RGN_FRAC(1,2)+12,RGN_FRAC(1,2)+12, 8,8, 12,12 },
 	{ 0*8, 2*8, 4*8, 6*8, 8*8, 10*8, 12*8, 14*8 },
 	16*8
 };
@@ -258,10 +247,9 @@ static MACHINE_CONFIG_START( skullxbo, skullxbo_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, ATARI_CLOCK_14MHz/2)
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT("screen", atarigen_video_int_gen)
+	MCFG_DEVICE_VBLANK_INT_DRIVER("screen", atarigen_state, video_int_gen)
 
-	MCFG_MACHINE_START(skullxbo)
-	MCFG_MACHINE_RESET(skullxbo)
+	MCFG_MACHINE_RESET_OVERRIDE(skullxbo_state,skullxbo)
 	MCFG_NVRAM_ADD_1FILL("eeprom")
 
 	/* video hardware */
@@ -270,13 +258,12 @@ static MACHINE_CONFIG_START( skullxbo, skullxbo_state )
 	MCFG_PALETTE_LENGTH(2048)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	/* note: these parameters are from published specs, not derived */
 	/* the board uses an SOS-2 chip to generate video signals */
 	MCFG_SCREEN_RAW_PARAMS(ATARI_CLOCK_14MHz, 456*2, 0, 336*2, 262, 0, 240)
-	MCFG_SCREEN_UPDATE(skullxbo)
+	MCFG_SCREEN_UPDATE_DRIVER(skullxbo_state, screen_update_skullxbo)
 
-	MCFG_VIDEO_START(skullxbo)
+	MCFG_VIDEO_START_OVERRIDE(skullxbo_state,skullxbo)
 
 	/* sound hardware */
 	MCFG_FRAGMENT_ADD(jsa_ii_mono)
@@ -291,7 +278,7 @@ MACHINE_CONFIG_END
  *************************************/
 
 ROM_START( skullxbo )
-	ROM_REGION( 0x80000, "maincpu", 0 )	/* 8*64k for 68000 code */
+	ROM_REGION( 0x80000, "maincpu", 0 ) /* 8*64k for 68000 code */
 	ROM_LOAD16_BYTE( "136072-5150.228a", 0x000000, 0x010000, CRC(9546d88b) SHA1(4b02c1c8a57377e651a719a0fe2a3532594f3e71) )
 	ROM_LOAD16_BYTE( "136072-5151.228c", 0x000001, 0x010000, CRC(b9ed8bd4) SHA1(784a2fc8f5901d9e462966e3f7226ce3c6db980a) )
 	ROM_LOAD16_BYTE( "136072-5152.213a", 0x020000, 0x010000, CRC(c07e44fc) SHA1(0aacb77be59c398c9eb5f01108957bbb17c9e5cd) )
@@ -301,7 +288,7 @@ ROM_START( skullxbo )
 	ROM_LOAD16_BYTE( "136072-1156.185a", 0x070000, 0x008000, CRC(cde16b55) SHA1(bf5059f0f73a8819551fb3ded3cb6a3123841481) )
 	ROM_LOAD16_BYTE( "136072-1157.185c", 0x070001, 0x008000, CRC(31c77376) SHA1(19eb54d73edb25fda6803df896e182d05c5bad7e) )
 
-	ROM_REGION( 0x14000, "jsa", 0 )	/* 64k for 6502 code */
+	ROM_REGION( 0x14000, "jsa", 0 ) /* 64k for 6502 code */
 	ROM_LOAD( "136072-1149.1b",  0x010000, 0x004000, CRC(8d730e7a) SHA1(b89fb9cadcf813ea5cba55f1efcdcdd2517944c7) )
 	ROM_CONTINUE(                0x004000, 0x00c000 )
 
@@ -346,7 +333,7 @@ ROM_START( skullxbo )
 	ROM_REGION( 0x008000, "gfx3", 0 )
 	ROM_LOAD( "136072-2141.250k", 0x000000, 0x008000, CRC(60d6d6df) SHA1(a8d56092f014a0a93742c701effaec86c75772e1) )
 
-	ROM_REGION( 0x40000, "adpcm", 0 )	/* 256k for ADPCM samples */
+	ROM_REGION( 0x40000, "adpcm", 0 )   /* 256k for ADPCM samples */
 	ROM_LOAD( "136072-1145.7k",  0x000000, 0x010000, CRC(d9475d58) SHA1(5a4a0094c83f5d0e26f0c35feb0b1f15a5f5c3f9) )
 	ROM_LOAD( "136072-1146.7j",  0x010000, 0x010000, CRC(133e6aef) SHA1(e393d0b246889779029443a19e3859d45cb900db) )
 	ROM_LOAD( "136072-1147.7e",  0x020000, 0x010000, CRC(ba4d556e) SHA1(af4364f2c456abc20f1742c945a3acfeb5e192c4) )
@@ -355,7 +342,7 @@ ROM_END
 
 
 ROM_START( skullxbo4 )
-	ROM_REGION( 0x80000, "maincpu", 0 )	/* 8*64k for 68000 code */
+	ROM_REGION( 0x80000, "maincpu", 0 ) /* 8*64k for 68000 code */
 	ROM_LOAD16_BYTE( "136072-4150.228a", 0x000000, 0x010000, CRC(607fc73b) SHA1(e6ebaf1a7570df1d12becae217becdd0a60d6aca) )
 	ROM_LOAD16_BYTE( "136072-4151.228c", 0x000001, 0x010000, CRC(76bbf619) SHA1(2cbd61f414684587c0e634c223c758b0a28aafc0) )
 	ROM_LOAD16_BYTE( "136072-4152.213a", 0x020000, 0x010000, CRC(095206f5) SHA1(c468b908b7a6cb83a4a91e3999494531511eee2b) )
@@ -365,7 +352,7 @@ ROM_START( skullxbo4 )
 	ROM_LOAD16_BYTE( "136072-1156.185a", 0x070000, 0x008000, CRC(cde16b55) SHA1(bf5059f0f73a8819551fb3ded3cb6a3123841481) )
 	ROM_LOAD16_BYTE( "136072-1157.185c", 0x070001, 0x008000, CRC(31c77376) SHA1(19eb54d73edb25fda6803df896e182d05c5bad7e) )
 
-	ROM_REGION( 0x14000, "jsa", 0 )	/* 64k for 6502 code */
+	ROM_REGION( 0x14000, "jsa", 0 ) /* 64k for 6502 code */
 	ROM_LOAD( "136072-1149.1b",  0x010000, 0x004000, CRC(8d730e7a) SHA1(b89fb9cadcf813ea5cba55f1efcdcdd2517944c7) )
 	ROM_CONTINUE(                0x004000, 0x00c000 )
 
@@ -410,7 +397,7 @@ ROM_START( skullxbo4 )
 	ROM_REGION( 0x008000, "gfx3", 0 )
 	ROM_LOAD( "136072-2141.250k", 0x000000, 0x008000, CRC(60d6d6df) SHA1(a8d56092f014a0a93742c701effaec86c75772e1) )
 
-	ROM_REGION( 0x40000, "adpcm", 0 )	/* 256k for ADPCM samples */
+	ROM_REGION( 0x40000, "adpcm", 0 )   /* 256k for ADPCM samples */
 	ROM_LOAD( "136072-1145.7k",  0x000000, 0x010000, CRC(d9475d58) SHA1(5a4a0094c83f5d0e26f0c35feb0b1f15a5f5c3f9) )
 	ROM_LOAD( "136072-1146.7j",  0x010000, 0x010000, CRC(133e6aef) SHA1(e393d0b246889779029443a19e3859d45cb900db) )
 	ROM_LOAD( "136072-1147.7e",  0x020000, 0x010000, CRC(ba4d556e) SHA1(af4364f2c456abc20f1742c945a3acfeb5e192c4) )
@@ -419,7 +406,7 @@ ROM_END
 
 
 ROM_START( skullxbo3 )
-	ROM_REGION( 0x80000, "maincpu", 0 )	/* 8*64k for 68000 code */
+	ROM_REGION( 0x80000, "maincpu", 0 ) /* 8*64k for 68000 code */
 	ROM_LOAD16_BYTE( "136072-3150.228a", 0x000000, 0x010000, CRC(47083d59) SHA1(a713231c22a3c2de09af65aa2bae17ea41f10cf0) )
 	ROM_LOAD16_BYTE( "136072-3151.228c", 0x000001, 0x010000, CRC(2c03feaf) SHA1(e7ad1568e3008386f520ed3ba90aefbfc9417a64) )
 	ROM_LOAD16_BYTE( "136072-3152.213a", 0x020000, 0x010000, CRC(aa0471de) SHA1(c0bf12304b9d64595f2fc40c2fb67f6ccb9d3b8f) )
@@ -429,7 +416,7 @@ ROM_START( skullxbo3 )
 	ROM_LOAD16_BYTE( "136072-1156.185a", 0x070000, 0x008000, CRC(cde16b55) SHA1(bf5059f0f73a8819551fb3ded3cb6a3123841481) )
 	ROM_LOAD16_BYTE( "136072-1157.185c", 0x070001, 0x008000, CRC(31c77376) SHA1(19eb54d73edb25fda6803df896e182d05c5bad7e) )
 
-	ROM_REGION( 0x14000, "jsa", 0 )	/* 64k for 6502 code */
+	ROM_REGION( 0x14000, "jsa", 0 ) /* 64k for 6502 code */
 	ROM_LOAD( "136072-1149.1b",  0x010000, 0x004000, CRC(8d730e7a) SHA1(b89fb9cadcf813ea5cba55f1efcdcdd2517944c7) )
 	ROM_CONTINUE(                0x004000, 0x00c000 )
 
@@ -474,7 +461,7 @@ ROM_START( skullxbo3 )
 	ROM_REGION( 0x008000, "gfx3", 0 )
 	ROM_LOAD( "136072-2141.250k", 0x000000, 0x008000, CRC(60d6d6df) SHA1(a8d56092f014a0a93742c701effaec86c75772e1) )
 
-	ROM_REGION( 0x40000, "adpcm", 0 )	/* 256k for ADPCM samples */
+	ROM_REGION( 0x40000, "adpcm", 0 )   /* 256k for ADPCM samples */
 	ROM_LOAD( "136072-1145.7k",  0x000000, 0x010000, CRC(d9475d58) SHA1(5a4a0094c83f5d0e26f0c35feb0b1f15a5f5c3f9) )
 	ROM_LOAD( "136072-1146.7j",  0x010000, 0x010000, CRC(133e6aef) SHA1(e393d0b246889779029443a19e3859d45cb900db) )
 	ROM_LOAD( "136072-1147.7e",  0x020000, 0x010000, CRC(ba4d556e) SHA1(af4364f2c456abc20f1742c945a3acfeb5e192c4) )
@@ -483,7 +470,7 @@ ROM_END
 
 
 ROM_START( skullxbo2 )
-	ROM_REGION( 0x80000, "maincpu", 0 )	/* 8*64k for 68000 code */
+	ROM_REGION( 0x80000, "maincpu", 0 ) /* 8*64k for 68000 code */
 	ROM_LOAD16_BYTE( "136072-2150.228a", 0x000000, 0x010000, CRC(8614f9ef) SHA1(981ba6fad7aa7002c3a5aa0d4dd859e664ca0fdb) )
 	ROM_LOAD16_BYTE( "136072-2151.228c", 0x000001, 0x010000, CRC(47090acb) SHA1(12c47d6112bec88aaf25d10ba2d5335b6b474fb7) )
 	ROM_LOAD16_BYTE( "136072-2152.213a", 0x020000, 0x010000, CRC(02f6a944) SHA1(24c2326c8b175fd03c5cf44f091365a860dbb9c9) )
@@ -493,7 +480,7 @@ ROM_START( skullxbo2 )
 	ROM_LOAD16_BYTE( "136072-1156.185a", 0x070000, 0x008000, CRC(cde16b55) SHA1(bf5059f0f73a8819551fb3ded3cb6a3123841481) )
 	ROM_LOAD16_BYTE( "136072-1157.185c", 0x070001, 0x008000, CRC(31c77376) SHA1(19eb54d73edb25fda6803df896e182d05c5bad7e) )
 
-	ROM_REGION( 0x14000, "jsa", 0 )	/* 64k for 6502 code */
+	ROM_REGION( 0x14000, "jsa", 0 ) /* 64k for 6502 code */
 	ROM_LOAD( "136072-1149.1b",  0x010000, 0x004000, CRC(8d730e7a) SHA1(b89fb9cadcf813ea5cba55f1efcdcdd2517944c7) )
 	ROM_CONTINUE(                0x004000, 0x00c000 )
 
@@ -538,7 +525,7 @@ ROM_START( skullxbo2 )
 	ROM_REGION( 0x008000, "gfx3", 0 )
 	ROM_LOAD( "136072-2141.250k", 0x000000, 0x008000, CRC(60d6d6df) SHA1(a8d56092f014a0a93742c701effaec86c75772e1) )
 
-	ROM_REGION( 0x40000, "adpcm", 0 )	/* 256k for ADPCM samples */
+	ROM_REGION( 0x40000, "adpcm", 0 )   /* 256k for ADPCM samples */
 	ROM_LOAD( "136072-1145.7k",  0x000000, 0x010000, CRC(d9475d58) SHA1(5a4a0094c83f5d0e26f0c35feb0b1f15a5f5c3f9) )
 	ROM_LOAD( "136072-1146.7j",  0x010000, 0x010000, CRC(133e6aef) SHA1(e393d0b246889779029443a19e3859d45cb900db) )
 	ROM_LOAD( "136072-1147.7e",  0x020000, 0x010000, CRC(ba4d556e) SHA1(af4364f2c456abc20f1742c945a3acfeb5e192c4) )
@@ -547,7 +534,7 @@ ROM_END
 
 
 ROM_START( skullxbo1 )
-	ROM_REGION( 0x80000, "maincpu", 0 )	/* 8*64k for 68000 code */
+	ROM_REGION( 0x80000, "maincpu", 0 ) /* 8*64k for 68000 code */
 	ROM_LOAD16_BYTE( "136072-1150.228a", 0x000000, 0x010000, CRC(376bb0c7) SHA1(195c8411f3ea9681e9ba6661a55418c194324339) )
 	ROM_LOAD16_BYTE( "136072-1151.228c", 0x000001, 0x010000, CRC(858382f7) SHA1(6e18183962c36bf2599cf04b7dc824e840a94343) )
 	ROM_LOAD16_BYTE( "136072-1152.213a", 0x020000, 0x010000, CRC(dc5b2008) SHA1(03a343d3cfd7c86b778ea9d568babc72dee23e1f) )
@@ -557,7 +544,7 @@ ROM_START( skullxbo1 )
 	ROM_LOAD16_BYTE( "136072-1156.185a", 0x070000, 0x008000, CRC(cde16b55) SHA1(bf5059f0f73a8819551fb3ded3cb6a3123841481) )
 	ROM_LOAD16_BYTE( "136072-1157.185c", 0x070001, 0x008000, CRC(31c77376) SHA1(19eb54d73edb25fda6803df896e182d05c5bad7e) )
 
-	ROM_REGION( 0x14000, "jsa", 0 )	/* 64k for 6502 code */
+	ROM_REGION( 0x14000, "jsa", 0 ) /* 64k for 6502 code */
 	ROM_LOAD( "136072-1149.1b",  0x010000, 0x004000, CRC(8d730e7a) SHA1(b89fb9cadcf813ea5cba55f1efcdcdd2517944c7) )
 	ROM_CONTINUE(                0x004000, 0x00c000 )
 
@@ -602,7 +589,7 @@ ROM_START( skullxbo1 )
 	ROM_REGION( 0x008000, "gfx3", 0 )
 	ROM_LOAD( "136072-2141.250k", 0x000000, 0x008000, CRC(60d6d6df) SHA1(a8d56092f014a0a93742c701effaec86c75772e1) )
 
-	ROM_REGION( 0x40000, "adpcm", 0 )	/* 256k for ADPCM samples */
+	ROM_REGION( 0x40000, "adpcm", 0 )   /* 256k for ADPCM samples */
 	ROM_LOAD( "136072-1145.7k",  0x000000, 0x010000, CRC(d9475d58) SHA1(5a4a0094c83f5d0e26f0c35feb0b1f15a5f5c3f9) )
 	ROM_LOAD( "136072-1146.7j",  0x010000, 0x010000, CRC(133e6aef) SHA1(e393d0b246889779029443a19e3859d45cb900db) )
 	ROM_LOAD( "136072-1147.7e",  0x020000, 0x010000, CRC(ba4d556e) SHA1(af4364f2c456abc20f1742c945a3acfeb5e192c4) )
@@ -617,10 +604,10 @@ ROM_END
  *
  *************************************/
 
-static DRIVER_INIT( skullxbo )
+DRIVER_INIT_MEMBER(skullxbo_state,skullxbo)
 {
-	atarijsa_init(machine, "FF5802", 0x0080);
-	memset(machine.region("gfx1")->base() + 0x170000, 0, 0x20000);
+	atarijsa_init(machine(), "FF5802", 0x0080);
+	memset(machine().root_device().memregion("gfx1")->base() + 0x170000, 0, 0x20000);
 }
 
 
@@ -631,8 +618,8 @@ static DRIVER_INIT( skullxbo )
  *
  *************************************/
 
-GAME( 1989, skullxbo,  0,        skullxbo, skullxbo, skullxbo, ROT0, "Atari Games", "Skull & Crossbones (rev 5)", 0 )
-GAME( 1989, skullxbo4, skullxbo, skullxbo, skullxbo, skullxbo, ROT0, "Atari Games", "Skull & Crossbones (rev 4)", 0 )
-GAME( 1989, skullxbo3, skullxbo, skullxbo, skullxbo, skullxbo, ROT0, "Atari Games", "Skull & Crossbones (rev 3)", 0 )
-GAME( 1989, skullxbo2, skullxbo, skullxbo, skullxbo, skullxbo, ROT0, "Atari Games", "Skull & Crossbones (rev 2)", 0 )
-GAME( 1989, skullxbo1, skullxbo, skullxbo, skullxbo, skullxbo, ROT0, "Atari Games", "Skull & Crossbones (rev 1)", 0 )
+GAME( 1989, skullxbo,  0,        skullxbo, skullxbo, skullxbo_state, skullxbo, ROT0, "Atari Games", "Skull & Crossbones (rev 5)", 0 )
+GAME( 1989, skullxbo4, skullxbo, skullxbo, skullxbo, skullxbo_state, skullxbo, ROT0, "Atari Games", "Skull & Crossbones (rev 4)", 0 )
+GAME( 1989, skullxbo3, skullxbo, skullxbo, skullxbo, skullxbo_state, skullxbo, ROT0, "Atari Games", "Skull & Crossbones (rev 3)", 0 )
+GAME( 1989, skullxbo2, skullxbo, skullxbo, skullxbo, skullxbo_state, skullxbo, ROT0, "Atari Games", "Skull & Crossbones (rev 2)", 0 )
+GAME( 1989, skullxbo1, skullxbo, skullxbo, skullxbo, skullxbo_state, skullxbo, ROT0, "Atari Games", "Skull & Crossbones (rev 1)", 0 )

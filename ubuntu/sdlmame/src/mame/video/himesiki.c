@@ -10,47 +10,42 @@ Video hardware
 #include "emu.h"
 #include "includes/himesiki.h"
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(himesiki_state::get_bg_tile_info)
 {
-	himesiki_state *state = machine.driver_data<himesiki_state>();
-	int code = state->m_bg_ram[tile_index * 2] + state->m_bg_ram[tile_index * 2 + 1] * 0x100 ;
+	int code = m_bg_ram[tile_index * 2] + m_bg_ram[tile_index * 2 + 1] * 0x100 ;
 	int col = code >> 12;
 
 	code &= 0xfff;
 
-	SET_TILE_INFO(0, code, col, 0);
+	SET_TILE_INFO_MEMBER(0, code, col, 0);
 }
 
-VIDEO_START( himesiki )
+void himesiki_state::video_start()
 {
-	himesiki_state *state = machine.driver_data<himesiki_state>();
-	state->m_bg_tilemap = tilemap_create( machine, get_bg_tile_info, tilemap_scan_rows, 8, 8, 64, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(himesiki_state::get_bg_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 64, 32);
 }
 
-WRITE8_HANDLER( himesiki_bg_ram_w )
+WRITE8_MEMBER(himesiki_state::himesiki_bg_ram_w)
 {
-	himesiki_state *state = space->machine().driver_data<himesiki_state>();
-	state->m_bg_ram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset / 2);
+	m_bg_ram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset / 2);
 }
 
-WRITE8_HANDLER( himesiki_scrollx_w )
+WRITE8_MEMBER(himesiki_state::himesiki_scrollx_w)
 {
-	himesiki_state *state = space->machine().driver_data<himesiki_state>();
-	state->m_scrollx[offset] = data;
+	m_scrollx[offset] = data;
 }
 
-WRITE8_HANDLER( himesiki_flip_w )
+WRITE8_MEMBER(himesiki_state::himesiki_flip_w)
 {
-	himesiki_state *state = space->machine().driver_data<himesiki_state>();
-	state->m_flipscreen = data & 0xc0;
-	flip_screen_set(space->machine(), state->m_flipscreen);
+	m_flipscreen = data & 0xc0;
+	flip_screen_set(m_flipscreen);
 
 	if (data & 0x3f)
 		logerror("p08_w %02x\n",data);
 }
 
-static void himesiki_draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void himesiki_draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	himesiki_state *state = machine.driver_data<himesiki_state>();
 	UINT8 *spriteram = state->m_spriteram;
@@ -117,14 +112,13 @@ static void himesiki_draw_sprites( running_machine &machine, bitmap_t *bitmap, c
 	}
 }
 
-SCREEN_UPDATE( himesiki )
+UINT32 himesiki_state::screen_update_himesiki(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	himesiki_state *state = screen->machine().driver_data<himesiki_state>();
-	int x = -(state->m_scrollx[0] << 8 | state->m_scrollx[1]) & 0x1ff;
-	tilemap_set_scrolldx(state->m_bg_tilemap, x, x);
+	int x = -(m_scrollx[0] << 8 | m_scrollx[1]) & 0x1ff;
+	m_bg_tilemap->set_scrolldx(x, x);
 
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, TILEMAP_DRAW_OPAQUE, 0);
-	himesiki_draw_sprites(screen->machine(), bitmap, cliprect);
+	m_bg_tilemap->draw(bitmap, cliprect, TILEMAP_DRAW_OPAQUE, 0);
+	himesiki_draw_sprites(machine(), bitmap, cliprect);
 
 	return 0;
 }

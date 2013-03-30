@@ -7,27 +7,27 @@
 /* macro to convert 4-bit unsigned samples to 16-bit signed samples */
 #define SAMPLE_CONV4(a) (0x1111*((a&0x0f))-0x8000)
 
-#define SND_CLOCK 3072000	/* 3.072 MHz */
+#define SND_CLOCK 3072000   /* 3.072 MHz */
 
 
-static INT16 *samplebuf;	/* buffer to decode samples at run time */
+static INT16 *samplebuf;    /* buffer to decode samples at run time */
 
 
 static SAMPLES_START( cclimber_sh_start )
 {
-	running_machine &machine = device->machine();
+	running_machine &machine = device.machine();
 	samplebuf = 0;
-	if (machine.region("samples")->base())
-		samplebuf = auto_alloc_array(machine, INT16, 2 * machine.region("samples")->bytes());
+	if (machine.root_device().memregion("samples")->base())
+		samplebuf = auto_alloc_array(machine, INT16, 2 * machine.root_device().memregion("samples")->bytes());
 }
 
 
 static void cclimber_play_sample(running_machine &machine, int start,int freq,int volume)
 {
 	int len;
-	int romlen = machine.region("samples")->bytes();
-	const UINT8 *rom = machine.region("samples")->base();
-	device_t *samples = machine.device("samples");
+	int romlen = machine.root_device().memregion("samples")->bytes();
+	const UINT8 *rom = machine.root_device().memregion("samples")->base();
+	samples_device *samples = machine.device<samples_device>("samples");
 
 
 	if (!rom) return;
@@ -47,7 +47,7 @@ static void cclimber_play_sample(running_machine &machine, int start,int freq,in
 		len++;
 	}
 
-	sample_start_raw(samples,0,samplebuf,2 * len,freq,0);
+	samples->start_raw(0,samplebuf,2 * len,freq);
 }
 
 
@@ -66,7 +66,7 @@ WRITE8_HANDLER( cclimber_sample_rate_w )
 
 WRITE8_HANDLER( cclimber_sample_volume_w )
 {
-	sample_volume = data & 0x1f;	/* range 0-31 */
+	sample_volume = data & 0x1f;    /* range 0-31 */
 }
 
 WRITE8_HANDLER( cclimber_sample_trigger_w )
@@ -74,7 +74,7 @@ WRITE8_HANDLER( cclimber_sample_trigger_w )
 	if (data == 0)
 		return;
 
-	cclimber_play_sample(space->machine(), 32 * sample_num,sample_freq,sample_volume);
+	cclimber_play_sample(space.machine(), 32 * sample_num,sample_freq,sample_volume);
 }
 
 

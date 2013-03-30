@@ -4,16 +4,16 @@
 
 *************************************************************************/
 
-class rainbow_state : public driver_device
+class rbisland_state : public driver_device
 {
 public:
-	rainbow_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	rbisland_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_spriteram(*this, "spriteram"){ }
 
 	/* memory pointers */
-	UINT16 *    m_spriteram;
+	optional_shared_ptr<UINT16> m_spriteram;
 //  UINT16 *    paletteram;    // currently this uses generic palette handling
-	size_t      m_spriteram_size;
 
 	/* video-related */
 	UINT16      m_sprite_ctrl;
@@ -28,28 +28,29 @@ public:
 	UINT8       m_current_bank;
 
 	/* devices */
-	device_t *m_maincpu;
-	device_t *m_audiocpu;
+	cpu_device *m_maincpu;
+	cpu_device *m_audiocpu;
 	device_t *m_pc080sn;
 	device_t *m_pc090oj;
+	DECLARE_WRITE16_MEMBER(jumping_sound_w);
+	DECLARE_READ8_MEMBER(jumping_latch_r);
+	DECLARE_WRITE16_MEMBER(rbisland_cchip_ctrl_w);
+	DECLARE_WRITE16_MEMBER(rbisland_cchip_bank_w);
+	DECLARE_WRITE16_MEMBER(rbisland_cchip_ram_w);
+	DECLARE_READ16_MEMBER(rbisland_cchip_ctrl_r);
+	DECLARE_READ16_MEMBER(rbisland_cchip_ram_r);
+	DECLARE_WRITE16_MEMBER(rbisland_spritectrl_w);
+	DECLARE_WRITE16_MEMBER(jumping_spritectrl_w);
+	DECLARE_WRITE8_MEMBER(bankswitch_w);
+	DECLARE_DRIVER_INIT(jumping);
+	DECLARE_DRIVER_INIT(rbislande);
+	DECLARE_DRIVER_INIT(rbisland);
+	virtual void machine_start();
+	DECLARE_VIDEO_START(jumping);
+	UINT32 screen_update_rainbow(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_jumping(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	TIMER_CALLBACK_MEMBER(cchip_timer);
 };
 
-
 /*----------- defined in machine/rainbow.c -----------*/
-
-void rainbow_cchip_init(running_machine &machine, int version);
-READ16_HANDLER( rainbow_cchip_ctrl_r );
-READ16_HANDLER( rainbow_cchip_ram_r );
-WRITE16_HANDLER( rainbow_cchip_ctrl_w );
-WRITE16_HANDLER( rainbow_cchip_bank_w );
-WRITE16_HANDLER( rainbow_cchip_ram_w );
-
-
-/*----------- defined in video/rainbow.c -----------*/
-
-SCREEN_UPDATE( rainbow );
-VIDEO_START( jumping );
-SCREEN_UPDATE( jumping );
-
-WRITE16_HANDLER( jumping_spritectrl_w );
-WRITE16_HANDLER( rainbow_spritectrl_w );
+void rbisland_cchip_init(running_machine &machine, int version);

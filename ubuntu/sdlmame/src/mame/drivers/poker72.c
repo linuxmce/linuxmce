@@ -18,22 +18,31 @@
 class poker72_state : public driver_device
 {
 public:
-	poker72_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	poker72_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_vram(*this, "vram"),
+		m_pal(*this, "pal"){ }
 
-	UINT8 *m_vram;
-	UINT8 *m_pal;
+	required_shared_ptr<UINT8> m_vram;
+	required_shared_ptr<UINT8> m_pal;
 	UINT8 m_tile_bank;
+	DECLARE_WRITE8_MEMBER(poker72_paletteram_w);
+	DECLARE_WRITE8_MEMBER(output_w);
+	DECLARE_WRITE8_MEMBER(tile_bank_w);
+	DECLARE_DRIVER_INIT(poker72);
+	virtual void machine_reset();
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_poker72(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
-static VIDEO_START(poker72)
+void poker72_state::video_start()
 {
 }
 
-static SCREEN_UPDATE(poker72)
+UINT32 poker72_state::screen_update_poker72(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	poker72_state *state = screen->machine().driver_data<poker72_state>();
 	int x,y,count;
 
 	count = 0;
@@ -42,14 +51,14 @@ static SCREEN_UPDATE(poker72)
 	{
 		for (x=0;x<64;x++)
 		{
-			int tile = ((state->m_vram[count+1] & 0x0f) << 8 ) | (state->m_vram[count+0] & 0xff); //TODO: tile bank
-			int fx = (state->m_vram[count+1] & 0x10);
-			int fy = (state->m_vram[count+1] & 0x20);
-			int color = (state->m_vram[count+1] & 0xc0) >> 6;
+			int tile = ((m_vram[count+1] & 0x0f) << 8 ) | (m_vram[count+0] & 0xff); //TODO: tile bank
+			int fx = (m_vram[count+1] & 0x10);
+			int fy = (m_vram[count+1] & 0x20);
+			int color = (m_vram[count+1] & 0xc0) >> 6;
 
-			tile|= state->m_tile_bank << 12;
+			tile|= m_tile_bank << 12;
 
-			drawgfx_opaque(bitmap,cliprect,screen->machine().gfx[0],tile,color,fx,fy,x*8,y*8);
+			drawgfx_opaque(bitmap,cliprect,machine().gfx[0],tile,color,fx,fy,x*8,y*8);
 
 			count+=2;
 		}
@@ -58,45 +67,43 @@ static SCREEN_UPDATE(poker72)
 	return 0;
 }
 
-static WRITE8_HANDLER( poker72_paletteram_w )
+WRITE8_MEMBER(poker72_state::poker72_paletteram_w)
 {
-	poker72_state *state = space->machine().driver_data<poker72_state>();
 	int r,g,b;
-	state->m_pal[offset] = data;
+	m_pal[offset] = data;
 
-	r = state->m_pal[(offset & 0x3ff)+0x000] & 0x3f;
-	g = state->m_pal[(offset & 0x3ff)+0x400] & 0x3f;
-	b = state->m_pal[(offset & 0x3ff)+0x800] & 0x3f;
+	r = m_pal[(offset & 0x3ff)+0x000] & 0x3f;
+	g = m_pal[(offset & 0x3ff)+0x400] & 0x3f;
+	b = m_pal[(offset & 0x3ff)+0x800] & 0x3f;
 
-	palette_set_color_rgb( space->machine(), offset & 0x3ff, pal6bit(r), pal6bit(g), pal6bit(b));
+	palette_set_color_rgb( machine(), offset & 0x3ff, pal6bit(r), pal6bit(g), pal6bit(b));
 }
 
-static WRITE8_HANDLER( output_w )
+WRITE8_MEMBER(poker72_state::output_w)
 {
-	UINT8 *ROM = space->machine().region("maincpu")->base();
+	UINT8 *ROM = memregion("maincpu")->base();
 
 	printf("%02x\n",data);
 
 /*  if((data & 0xc) == 0xc)
-        memory_set_bankptr(space->machine(), "bank1", &ROM[0x10000]);
+        membank("bank1")->set_base(&ROM[0x10000]);
     else*/
 	if(data & 8)
-		memory_set_bankptr(space->machine(), "bank1", &ROM[0x08000]);
+		membank("bank1")->set_base(&ROM[0x08000]);
 	else
-		memory_set_bankptr(space->machine(), "bank1", &ROM[0x00000]);
+		membank("bank1")->set_base(&ROM[0x00000]);
 }
 
-static WRITE8_HANDLER( tile_bank_w )
+WRITE8_MEMBER(poker72_state::tile_bank_w)
 {
-	poker72_state *state = space->machine().driver_data<poker72_state>();
-	state->m_tile_bank = (data & 4) >> 2;
+	m_tile_bank = (data & 4) >> 2;
 }
 
-static ADDRESS_MAP_START( poker72_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( poker72_map, AS_PROGRAM, 8, poker72_state )
 	AM_RANGE(0x0000, 0xbfff) AM_ROMBANK("bank1")
 	AM_RANGE(0xc000, 0xdfff) AM_RAM //work ram
-	AM_RANGE(0xe000, 0xefff) AM_RAM AM_BASE_MEMBER(poker72_state, m_vram)
-	AM_RANGE(0xf000, 0xfbff) AM_RAM_WRITE(poker72_paletteram_w) AM_BASE_MEMBER(poker72_state, m_pal)
+	AM_RANGE(0xe000, 0xefff) AM_RAM AM_SHARE("vram")
+	AM_RANGE(0xf000, 0xfbff) AM_RAM_WRITE(poker72_paletteram_w) AM_SHARE("pal")
 	AM_RANGE(0xfc00, 0xfdff) AM_RAM //???
 	AM_RANGE(0xfe08, 0xfe08) AM_READ_PORT("IN0")
 	AM_RANGE(0xfe09, 0xfe09) AM_READ_PORT("IN1")
@@ -108,8 +115,8 @@ static ADDRESS_MAP_START( poker72_map, AS_PROGRAM, 8 )
 	AM_RANGE(0xfe17, 0xfe17) AM_READNOP //irq ack
 	AM_RANGE(0xfe20, 0xfe20) AM_WRITE(output_w) //output, irq enable?
 	AM_RANGE(0xfe22, 0xfe22) AM_WRITE(tile_bank_w)
-	AM_RANGE(0xfe40, 0xfe40) AM_DEVREADWRITE("ay", ay8910_r, ay8910_data_w)
-	AM_RANGE(0xfe60, 0xfe60) AM_DEVWRITE("ay", ay8910_address_w)
+	AM_RANGE(0xfe40, 0xfe40) AM_DEVREADWRITE_LEGACY("ay", ay8910_r, ay8910_data_w)
+	AM_RANGE(0xfe60, 0xfe60) AM_DEVWRITE_LEGACY("ay", ay8910_address_w)
 ADDRESS_MAP_END
 
 
@@ -311,7 +318,7 @@ static GFXDECODE_START( poker72 )
 GFXDECODE_END
 
 /* default 444 palette for debug purpose */
-static PALETTE_INIT( poker72 )
+void poker72_state::palette_init()
 {
 	int x,r,g,b;
 
@@ -320,7 +327,7 @@ static PALETTE_INIT( poker72 )
 		r = (x & 0xf)*0x10;
 		g = ((x & 0x3c)>>2)*0x10;
 		b = ((x & 0xf0)>>4)*0x10;
-		palette_set_color(machine,x,MAKE_RGB(r,g,b));
+		palette_set_color(machine(),x,MAKE_RGB(r,g,b));
 	}
 }
 
@@ -334,37 +341,33 @@ static const ay8910_interface ay8910_config =
 	DEVCB_NULL
 };
 
-static MACHINE_RESET( poker72 )
+void poker72_state::machine_reset()
 {
-	UINT8 *ROM = machine.region("maincpu")->base();
+	UINT8 *ROM = machine().root_device().memregion("maincpu")->base();
 
-	memory_set_bankptr(machine, "bank1", &ROM[0]);
+	machine().root_device().membank("bank1")->set_base(&ROM[0]);
 }
 
 static MACHINE_CONFIG_START( poker72, poker72_state )
 
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80,8000000)		 /* ? MHz */
+	MCFG_CPU_ADD("maincpu", Z80,8000000)         /* ? MHz */
 	MCFG_CPU_PROGRAM_MAP(poker72_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", poker72_state,  irq0_line_hold)
 
-	MCFG_MACHINE_RESET(poker72)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0, 64*8-1, 0, 32*8-1)
-	MCFG_SCREEN_UPDATE(poker72)
+	MCFG_SCREEN_UPDATE_DRIVER(poker72_state, screen_update_poker72)
 
 	MCFG_GFXDECODE(poker72)
 	MCFG_PALETTE_LENGTH(0xe00)
-	MCFG_PALETTE_INIT(poker72)
 
-	MCFG_VIDEO_START(poker72)
 
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
@@ -389,11 +392,11 @@ ROM_START( poker72 )
 	ROM_LOAD( "270138.bin", 0x60000, 0x20000, CRC(d689313d) SHA1(8b9661b3af0e2ced7fe9fa487641e445ce7835b8) )
 ROM_END
 
-static DRIVER_INIT( poker72 )
+DRIVER_INIT_MEMBER(poker72_state,poker72)
 {
-	UINT8 *rom = machine.region("maincpu")->base();
+	UINT8 *rom = machine().root_device().memregion("maincpu")->base();
 
 	rom[0x4a9] = 0x28;
 }
 
-GAME( 1995, poker72,  0,    poker72, poker72,  poker72, ROT0, "Extrema Systems International Ltd.", "Poker Monarch (v2.50)", GAME_NOT_WORKING ) // actually unknown, was marked 'slot 72 poker'  Manufacturers logo and 'Lucky Boy' gfx in rom..
+GAME( 1995, poker72,  0,    poker72, poker72, poker72_state,  poker72, ROT0, "Extrema Systems International Ltd.", "Poker Monarch (v2.50)", GAME_NOT_WORKING ) // actually unknown, was marked 'slot 72 poker'  Manufacturers logo and 'Lucky Boy' gfx in rom..

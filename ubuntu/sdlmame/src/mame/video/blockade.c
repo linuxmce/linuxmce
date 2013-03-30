@@ -1,37 +1,33 @@
 #include "emu.h"
 #include "includes/blockade.h"
 
-WRITE8_HANDLER( blockade_videoram_w )
+WRITE8_MEMBER(blockade_state::blockade_videoram_w)
 {
-	blockade_state *state = space->machine().driver_data<blockade_state>();
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_videoram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 
-	if (input_port_read(space->machine(), "IN3") & 0x80)
+	if (ioport("IN3")->read() & 0x80)
 	{
-		logerror("blockade_videoram_w: scanline %d\n", space->machine().primary_screen->vpos());
-		device_spin_until_interrupt(&space->device());
+		logerror("blockade_videoram_w: scanline %d\n", machine().primary_screen->vpos());
+		space.device().execute().spin_until_interrupt();
 	}
 }
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(blockade_state::get_bg_tile_info)
 {
-	blockade_state *state = machine.driver_data<blockade_state>();
-	int code = state->m_videoram[tile_index];
+	int code = m_videoram[tile_index];
 
-	SET_TILE_INFO(0, code, 0, 0);
+	SET_TILE_INFO_MEMBER(0, code, 0, 0);
 }
 
-VIDEO_START( blockade )
+void blockade_state::video_start()
 {
-	blockade_state *state = machine.driver_data<blockade_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(blockade_state::get_bg_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
 }
 
-SCREEN_UPDATE( blockade )
+UINT32 blockade_state::screen_update_blockade(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	blockade_state *state = screen->machine().driver_data<blockade_state>();
 
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
 	return 0;
 }

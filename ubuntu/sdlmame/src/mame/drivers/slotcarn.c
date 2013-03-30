@@ -17,30 +17,38 @@
 #include "emu.h"
 #include "cpu/z80/z80.h"
 #include "sound/ay8910.h"
-#include "machine/8255ppi.h"
+#include "machine/i8255.h"
 #include "video/mc6845.h"
 
-#define MASTER_CLOCK			(XTAL_10MHz)
-#define CPU_CLOCK				(MASTER_CLOCK / 4)
-#define PIXEL_CLOCK				(MASTER_CLOCK / 1)
-#define CRTC_CLOCK				(MASTER_CLOCK / 8)
-#define SND_CLOCK				(MASTER_CLOCK / 8)
+#define MASTER_CLOCK            (XTAL_10MHz)
+#define CPU_CLOCK               (MASTER_CLOCK / 4)
+#define PIXEL_CLOCK             (MASTER_CLOCK / 1)
+#define CRTC_CLOCK              (MASTER_CLOCK / 8)
+#define SND_CLOCK               (MASTER_CLOCK / 8)
 
-#define NUM_PENS				(16)
-#define RAM_PALETTE_SIZE		(1024)
+#define NUM_PENS                (16)
+#define RAM_PALETTE_SIZE        (1024)
 
 
 class slotcarn_state : public driver_device
 {
 public:
-	slotcarn_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	slotcarn_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_backup_ram(*this, "backup_ram"),
+		m_ram_attr(*this, "raattr"),
+		m_ram_video(*this, "ravideo"){ }
 
 	pen_t m_pens[NUM_PENS];
-	UINT8 *m_ram_attr;
-	UINT8 *m_ram_video;
+	required_shared_ptr<UINT8> m_backup_ram;
+	required_shared_ptr<UINT8> m_ram_attr;
+	required_shared_ptr<UINT8> m_ram_video;
 	UINT8 *m_ram_palette;
-	UINT8 *m_backup_ram;
+	DECLARE_READ8_MEMBER(palette_r);
+	DECLARE_WRITE8_MEMBER(palette_w);
+	DECLARE_WRITE_LINE_MEMBER(hsync_changed);
+	DECLARE_WRITE_LINE_MEMBER(vsync_changed);
+	virtual void machine_start();
 };
 
 
@@ -54,25 +62,23 @@ public:
 
 */
 
-static READ8_HANDLER( palette_r )
+READ8_MEMBER(slotcarn_state::palette_r)
 {
-	slotcarn_state *state = space->machine().driver_data<slotcarn_state>();
 	int co;
 
-	co = ((state->m_ram_attr[offset] & 0x7F) << 3) | (offset & 0x07);
-	return state->m_ram_palette[co];
+	co = ((m_ram_attr[offset] & 0x7F) << 3) | (offset & 0x07);
+	return m_ram_palette[co];
 }
 
-static WRITE8_HANDLER( palette_w )
+WRITE8_MEMBER(slotcarn_state::palette_w)
 {
-	slotcarn_state *state = space->machine().driver_data<slotcarn_state>();
 	int co;
 
-	space->machine().primary_screen->update_now();
+	machine().primary_screen->update_now();
 	data &= 0x0f;
 
-	co = ((state->m_ram_attr[offset] & 0x7F) << 3) | (offset & 0x07);
-	state->m_ram_palette[co] = data;
+	co = ((m_ram_attr[offset] & 0x7F) << 3) | (offset & 0x07);
+	m_ram_palette[co] = data;
 
 }
 
@@ -109,9 +115,9 @@ static MC6845_UPDATE_ROW( update_row )
 	UINT16 x = 0;
 	int rlen;
 
-	gfx[0] = device->machine().region("gfx1")->base();
-	gfx[1] = device->machine().region("gfx2")->base();
-	rlen = device->machine().region("gfx2")->bytes();
+	gfx[0] = state->memregion("gfx1")->base();
+	gfx[1] = state->memregion("gfx2")->base();
+	rlen = state->memregion("gfx2")->bytes();
 
 	//ma = ma ^ 0x7ff;
 	for (cx = 0; cx < x_count; cx++)
@@ -121,7 +127,7 @@ static MC6845_UPDATE_ROW( update_row )
 		int region = (attr & 0x40) >> 6;
 		int addr = ((state->m_ram_video[ma & 0x7ff] | ((attr & 0x80) << 1) | (extra_video_bank_bit)) << 4) | (ra & 0x0f);
 		int colour = (attr & 0x7f) << 3;
-		UINT8	*data;
+		UINT8   *data;
 
 		addr &= (rlen-1);
 		data = gfx[region];
@@ -140,7 +146,7 @@ static MC6845_UPDATE_ROW( update_row )
 				col |= 0x03;
 
 			col = state->m_ram_palette[col & 0x3ff];
-			*BITMAP_ADDR32(bitmap, y, x) = pens[col ? col : (lscnblk ? 8 : 0)];
+			bitmap.pix32(y, x) = pens[col ? col : (lscnblk ? 8 : 0)];
 
 			x++;
 		}
@@ -149,29 +155,29 @@ static MC6845_UPDATE_ROW( update_row )
 }
 
 
-static WRITE_LINE_DEVICE_HANDLER(hsync_changed)
+WRITE_LINE_MEMBER(slotcarn_state::hsync_changed)
 {
 	/* update any video up to the current scanline */
-	device->machine().primary_screen->update_now();
+	machine().primary_screen->update_now();
 }
 
-static WRITE_LINE_DEVICE_HANDLER(vsync_changed)
+WRITE_LINE_MEMBER(slotcarn_state::vsync_changed)
 {
-	cputag_set_input_line(device->machine(), "maincpu", 0, state ? ASSERT_LINE : CLEAR_LINE);
+	machine().device("maincpu")->execute().set_input_line(0, state ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static const mc6845_interface mc6845_intf =
 {
-	"screen",					/* screen we are acting on */
-	8,							/* number of pixels per video memory address */
-	begin_update,				/* before pixel update callback */
-	update_row,					/* row update callback */
-	NULL,						/* after pixel update callback */
-	DEVCB_NULL,					/* callback for display state changes */
-	DEVCB_NULL,					/* callback for cursor state changes */
-	DEVCB_LINE(hsync_changed),	/* HSYNC callback */
-	DEVCB_LINE(vsync_changed),	/* VSYNC callback */
-	NULL						/* update address callback */
+	"screen",                   /* screen we are acting on */
+	8,                          /* number of pixels per video memory address */
+	begin_update,               /* before pixel update callback */
+	update_row,                 /* row update callback */
+	NULL,                       /* after pixel update callback */
+	DEVCB_NULL,                 /* callback for display state changes */
+	DEVCB_NULL,                 /* callback for cursor state changes */
+	DEVCB_DRIVER_LINE_MEMBER(slotcarn_state,hsync_changed), /* HSYNC callback */
+	DEVCB_DRIVER_LINE_MEMBER(slotcarn_state,vsync_changed), /* VSYNC callback */
+	NULL                        /* update address callback */
 };
 
 
@@ -179,37 +185,37 @@ static const mc6845_interface mc6845_intf =
 *          Memory Map          *
 *******************************/
 
-static ADDRESS_MAP_START( slotcarn_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( slotcarn_map, AS_PROGRAM, 8, slotcarn_state )
 	AM_RANGE(0x0000, 0x5fff) AM_ROM
-	AM_RANGE(0x6000, 0x67ff) AM_RAM AM_BASE_MEMBER(slotcarn_state, m_backup_ram)
+	AM_RANGE(0x6000, 0x67ff) AM_RAM AM_SHARE("backup_ram")
 	AM_RANGE(0x6800, 0x6fff) AM_RAM // spielbud
 	AM_RANGE(0x7000, 0xafff) AM_ROM // spielbud
 
 
-	AM_RANGE(0xb000, 0xb000) AM_DEVWRITE("aysnd", ay8910_address_w)
-	AM_RANGE(0xb100, 0xb100) AM_DEVREADWRITE("aysnd", ay8910_r, ay8910_data_w)
+	AM_RANGE(0xb000, 0xb000) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_w)
+	AM_RANGE(0xb100, 0xb100) AM_DEVREADWRITE_LEGACY("aysnd", ay8910_r, ay8910_data_w)
 
-	AM_RANGE(0xb800, 0xb803) AM_DEVREADWRITE("ppi8255_0", ppi8255_r, ppi8255_w)	/* Input Ports */
-	AM_RANGE(0xba00, 0xba03) AM_DEVREADWRITE("ppi8255_1", ppi8255_r, ppi8255_w)	/* Input Ports */
-	AM_RANGE(0xbc00, 0xbc03) AM_DEVREADWRITE("ppi8255_2", ppi8255_r, ppi8255_w)	/* Input/Output Ports */
+	AM_RANGE(0xb800, 0xb803) AM_DEVREADWRITE("ppi8255_0", i8255_device, read, write)    /* Input Ports */
+	AM_RANGE(0xba00, 0xba03) AM_DEVREADWRITE("ppi8255_1", i8255_device, read, write)    /* Input Ports */
+	AM_RANGE(0xbc00, 0xbc03) AM_DEVREADWRITE("ppi8255_2", i8255_device, read, write)    /* Input/Output Ports */
 
 	AM_RANGE(0xc000, 0xc000) AM_READ_PORT("DSW3")
 	AM_RANGE(0xc400, 0xc400) AM_READ_PORT("DSW4")
 
 	AM_RANGE(0xd800, 0xd81f) AM_RAM // column scroll for reels?
 
-	AM_RANGE(0xe000, 0xe000) AM_DEVWRITE("crtc", mc6845_address_w)
-	AM_RANGE(0xe001, 0xe001) AM_DEVWRITE("crtc", mc6845_register_w)
+	AM_RANGE(0xe000, 0xe000) AM_DEVWRITE("crtc", mc6845_device, address_w)
+	AM_RANGE(0xe001, 0xe001) AM_DEVWRITE("crtc", mc6845_device, register_w)
 
-	AM_RANGE(0xe800, 0xefff) AM_RAM AM_BASE_MEMBER(slotcarn_state, m_ram_attr)
-	AM_RANGE(0xf000, 0xf7ff) AM_RAM AM_BASE_MEMBER(slotcarn_state, m_ram_video)
+	AM_RANGE(0xe800, 0xefff) AM_RAM AM_SHARE("raattr")
+	AM_RANGE(0xf000, 0xf7ff) AM_RAM AM_SHARE("ravideo")
 	AM_RANGE(0xf800, 0xfbff) AM_READWRITE(palette_r, palette_w)
 ADDRESS_MAP_END
 
 // spielbud - is the ay mirrored, or are there now 2?
-static ADDRESS_MAP_START( spielbud_io_map, AS_IO, 8 )
-	AM_RANGE(0xb000, 0xb000) AM_DEVWRITE("aysnd", ay8910_address_w)
-	AM_RANGE(0xb100, 0xb100) AM_DEVWRITE("aysnd", ay8910_data_w)
+static ADDRESS_MAP_START( spielbud_io_map, AS_IO, 8, slotcarn_state )
+	AM_RANGE(0xb000, 0xb000) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_w)
+	AM_RANGE(0xb100, 0xb100) AM_DEVWRITE_LEGACY("aysnd", ay8910_data_w)
 ADDRESS_MAP_END
 
 /********************************
@@ -217,7 +223,7 @@ ADDRESS_MAP_END
 ********************************/
 
 static INPUT_PORTS_START( slotcarn )
-	PORT_START("IN0")	/* b800 (ppi8255) */
+	PORT_START("IN0")   /* b800 (ppi8255) */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -227,7 +233,7 @@ static INPUT_PORTS_START( slotcarn )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON6 ) PORT_CODE(KEYCODE_M) PORT_NAME("Cancel")
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_CODE(KEYCODE_B) PORT_NAME("Select")
 
-	PORT_START("IN1")	/* b801 (ppi8255) */
+	PORT_START("IN1")   /* b801 (ppi8255) */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1)    PORT_IMPULSE(2)       /* Coin A */
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2)    PORT_IMPULSE(2)       /* Coin B */
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_CODE(KEYCODE_0) PORT_NAME("Stats")
@@ -237,10 +243,10 @@ static INPUT_PORTS_START( slotcarn )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN4)    PORT_IMPULSE(2)       /* Coin D */
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("IN2")	/* b802 (ppi8255) */
+	PORT_START("IN2")   /* b802 (ppi8255) */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("IN3")	/* bc00 (ppi8255) */
+	PORT_START("IN3")   /* bc00 (ppi8255) */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -250,61 +256,61 @@ static INPUT_PORTS_START( slotcarn )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_CODE(KEYCODE_W) PORT_NAME("Payout")
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_CODE(KEYCODE_H) PORT_NAME("Empty Hopper")
 
-	PORT_START("IN4")	/* bc01 (ppi8255) */
+	PORT_START("IN4")   /* bc01 (ppi8255) */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("DSW1")	/* ba00 (ppi8255) */
-	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )	PORT_DIPLOCATION("DSW1:8")
+	PORT_START("DSW1")  /* ba00 (ppi8255) */
+	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )  PORT_DIPLOCATION("DSW1:8")
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unknown ) )	PORT_DIPLOCATION("DSW1:7")
+	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unknown ) )  PORT_DIPLOCATION("DSW1:7")
 	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )	PORT_DIPLOCATION("DSW1:6")
+	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )  PORT_DIPLOCATION("DSW1:6")
 	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )	PORT_DIPLOCATION("DSW1:5")
+	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )  PORT_DIPLOCATION("DSW1:5")
 	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )	PORT_DIPLOCATION("DSW1:4")
+	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )  PORT_DIPLOCATION("DSW1:4")
 	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )	PORT_DIPLOCATION("DSW1:3")
+	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )  PORT_DIPLOCATION("DSW1:3")
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0xc0, 0xc0, "D-UP Pay Rate" )		PORT_DIPLOCATION("DSW1:1,2")
+	PORT_DIPNAME( 0xc0, 0xc0, "D-UP Pay Rate" )     PORT_DIPLOCATION("DSW1:1,2")
 	PORT_DIPSETTING(    0xc0, "80%" )
 	PORT_DIPSETTING(    0x80, "85%" )
 	PORT_DIPSETTING(    0x40, "90%" )
 	PORT_DIPSETTING(    0x00, "95%" )
 
-	PORT_START("DSW2")	/* ay8910, port B */
-	PORT_DIPNAME( 0x01, 0x01, "FIVE LINE Pay Rate" )	PORT_DIPLOCATION("DSW2:8")
+	PORT_START("DSW2")  /* ay8910, port B */
+	PORT_DIPNAME( 0x01, 0x01, "FIVE LINE Pay Rate" )    PORT_DIPLOCATION("DSW2:8")
 	PORT_DIPSETTING(    0x01, "75%" )
 	PORT_DIPSETTING(    0x00, "85%" )
-	PORT_DIPNAME( 0x02, 0x02, "SUPER CONTI Pay Rate" )	PORT_DIPLOCATION("DSW2:7")
+	PORT_DIPNAME( 0x02, 0x02, "SUPER CONTI Pay Rate" )  PORT_DIPLOCATION("DSW2:7")
 	PORT_DIPSETTING(    0x02, "75%" )
 	PORT_DIPSETTING(    0x00, "85%" )
-	PORT_DIPNAME( 0x04, 0x04, "LUCKY BAR Pay Rate" )	PORT_DIPLOCATION("DSW2:6")
+	PORT_DIPNAME( 0x04, 0x04, "LUCKY BAR Pay Rate" )    PORT_DIPLOCATION("DSW2:6")
 	PORT_DIPSETTING(    0x04, "75%" )
 	PORT_DIPSETTING(    0x00, "85%" )
-	PORT_DIPNAME( 0x08, 0x08, "BONUS LINE Pay Rate" )	PORT_DIPLOCATION("DSW2:5")
+	PORT_DIPNAME( 0x08, 0x08, "BONUS LINE Pay Rate" )   PORT_DIPLOCATION("DSW2:5")
 	PORT_DIPSETTING(    0x08, "75%" )
 	PORT_DIPSETTING(    0x00, "85%" )
-	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )	PORT_DIPLOCATION("DSW2:4")
+	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )  PORT_DIPLOCATION("DSW2:4")
 	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )	PORT_DIPLOCATION("DSW2:3")
+	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )  PORT_DIPLOCATION("DSW2:3")
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )	PORT_DIPLOCATION("DSW2:2")
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )  PORT_DIPLOCATION("DSW2:2")
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )	PORT_DIPLOCATION("DSW2:1")
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )  PORT_DIPLOCATION("DSW2:1")
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-	PORT_START("DSW3")	/* c000 direct */
+	PORT_START("DSW3")  /* c000 direct */
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -330,7 +336,7 @@ static INPUT_PORTS_START( slotcarn )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-	PORT_START("DSW4")	/* c400 direct */
+	PORT_START("DSW4")  /* c400 direct */
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -358,7 +364,7 @@ static INPUT_PORTS_START( slotcarn )
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( spielbud )
-	PORT_START("IN0")	/* b800 (ppi8255) */
+	PORT_START("IN0")   /* b800 (ppi8255) */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_POKER_HOLD1 ) PORT_NAME("Discard 1 / Deal (BJ)")
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_POKER_HOLD2 ) PORT_NAME("Discard 2")
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_POKER_HOLD3 ) PORT_NAME("Discard 3 / Bet 1 / Split (BJ)")
@@ -368,20 +374,20 @@ static INPUT_PORTS_START( spielbud )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_POKER_CANCEL ) PORT_NAME("Cancel / Select")
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("IN1")	/* b801 (ppi8255) */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1) PORT_IMPULSE(2)	/* Coin A */
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2) PORT_IMPULSE(2)	/* Coin B */
+	PORT_START("IN1")   /* b801 (ppi8255) */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1) PORT_IMPULSE(2)   /* Coin A */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2) PORT_IMPULSE(2)   /* Coin B */
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_GAMBLE_BOOK ) PORT_NAME("Stats")
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_GAMBLE_SERVICE ) PORT_NAME("Settings")
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN3) PORT_IMPULSE(2)	/* Coin C */
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN4) PORT_IMPULSE(2)	/* Coin D */
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN3) PORT_IMPULSE(2)   /* Coin C */
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN4) PORT_IMPULSE(2)   /* Coin D */
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("IN2")	/* b802 (ppi8255) */
+	PORT_START("IN2")   /* b802 (ppi8255) */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("IN3")	/* bc00 (ppi8255) */
+	PORT_START("IN3")   /* bc00 (ppi8255) */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_GAMBLE_LOW ) PORT_NAME("Tief (Low)")
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_GAMBLE_HIGH ) PORT_NAME("Hoch (High)")
@@ -391,10 +397,10 @@ static INPUT_PORTS_START( spielbud )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_GAMBLE_PAYOUT )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("IN4")	/* bc01 (ppi8255) */
+	PORT_START("IN4")   /* bc01 (ppi8255) */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("DSW1")	/* ba00 (ppi8255) */
+	PORT_START("DSW1")  /* ba00 (ppi8255) */
 	PORT_DIPNAME( 0x01, 0x01, "Game STRATEGIE" )
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( On ) )
@@ -419,7 +425,7 @@ static INPUT_PORTS_START( spielbud )
 	PORT_DIPSETTING(    0x40, "Play 1 bet by hand" )
 	PORT_DIPSETTING(    0x00, "Play 1 to 50 bets" )
 
-	PORT_START("DSW2")	/* ay8910, port B */
+	PORT_START("DSW2")  /* ay8910, port B */
 	PORT_DIPNAME( 0x07, 0x07, "Main Game rate" )
 	PORT_DIPSETTING(    0x06, "75%" )
 	PORT_DIPSETTING(    0x05, "80%" )
@@ -441,7 +447,7 @@ static INPUT_PORTS_START( spielbud )
 	PORT_DIPSETTING(    0x00, "Hold" )
 	PORT_DIPSETTING(    0x80, "Discard" )
 
-	PORT_START("DSW3")	/* c000 direct */
+	PORT_START("DSW3")  /* c000 direct */
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -467,7 +473,7 @@ static INPUT_PORTS_START( spielbud )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-	PORT_START("DSW4")	/* c400 direct */
+	PORT_START("DSW4")  /* c400 direct */
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -535,20 +541,10 @@ GFXDECODE_END
 
 
 
-static SCREEN_UPDATE( slotcarn )
+void slotcarn_state::machine_start()
 {
-	device_t *mc6845 = screen->machine().device("crtc");
-	mc6845_update(mc6845, bitmap, cliprect);
-
-	return 0;
-}
-
-
-static MACHINE_START(merit)
-{
-	slotcarn_state *state = machine.driver_data<slotcarn_state>();
-	state->m_ram_palette = auto_alloc_array(machine, UINT8, RAM_PALETTE_SIZE);
-	state_save_register_global_pointer(machine, state->m_ram_palette, RAM_PALETTE_SIZE);
+	m_ram_palette = auto_alloc_array(machine(), UINT8, RAM_PALETTE_SIZE);
+	state_save_register_global_pointer(machine(), m_ram_palette, RAM_PALETTE_SIZE);
 }
 
 
@@ -556,32 +552,34 @@ static MACHINE_START(merit)
 *       PPI 8255 (x3) Interfaces       *
 ***************************************/
 
-static const ppi8255_interface scarn_ppi8255_intf[3] =
+static I8255A_INTERFACE( ppi8255_0_intf )
 {
-	{	/* A, B & C set as input */
-		DEVCB_INPUT_PORT("IN0"),	/* Port A read */
-		DEVCB_INPUT_PORT("IN1"),	/* Port B read */
-		DEVCB_INPUT_PORT("IN2"),	/* Port C read */
-		DEVCB_NULL,					/* Port A write */
-		DEVCB_NULL,					/* Port B write */
-		DEVCB_NULL					/* Port C write */
-	},
-	{	/* A set as input */
-		DEVCB_INPUT_PORT("DSW1"),	/* Port A read */
-		DEVCB_NULL,					/* Port B read */
-		DEVCB_NULL,					/* Port C read */
-		DEVCB_NULL,					/* Port A write */
-		DEVCB_NULL,					/* Port B write */
-		DEVCB_NULL					/* Port C write */
-	},
-	{	/* A & B set as input */
-		DEVCB_INPUT_PORT("IN3"),	/* Port A read */
-		DEVCB_INPUT_PORT("IN4"),	/* Port B read */
-		DEVCB_NULL,					/* Port C read */
-		DEVCB_NULL,					/* Port A write */
-		DEVCB_NULL,					/* Port B write */
-		DEVCB_NULL					/* Port C write */
-	}
+	DEVCB_INPUT_PORT("IN0"),            /* Port A read */
+	DEVCB_NULL,                         /* Port A write */
+	DEVCB_INPUT_PORT("IN1"),            /* Port B read */
+	DEVCB_NULL,                         /* Port B write */
+	DEVCB_INPUT_PORT("IN2"),            /* Port C read */
+	DEVCB_NULL                          /* Port C write */
+};
+
+static I8255A_INTERFACE( ppi8255_1_intf )
+{
+	DEVCB_INPUT_PORT("DSW1"),           /* Port A read */
+	DEVCB_NULL,                         /* Port A write */
+	DEVCB_NULL,                         /* Port B read */
+	DEVCB_NULL,                         /* Port B write */
+	DEVCB_NULL,                         /* Port C read */
+	DEVCB_NULL                          /* Port C write */
+};
+
+static I8255A_INTERFACE( ppi8255_2_intf )
+{
+	DEVCB_INPUT_PORT("IN3"),            /* Port A read */
+	DEVCB_NULL,                         /* Port A write */
+	DEVCB_INPUT_PORT("IN4"),            /* Port B read */
+	DEVCB_NULL,                         /* Port B write */
+	DEVCB_NULL,                         /* Port C read */
+	DEVCB_NULL                          /* Port C write */
 };
 
 
@@ -612,17 +610,15 @@ static MACHINE_CONFIG_START( slotcarn, slotcarn_state )
 	MCFG_CPU_IO_MAP(spielbud_io_map)
 
 	/* 3x 8255 */
-	MCFG_PPI8255_ADD( "ppi8255_0", scarn_ppi8255_intf[0] )
-	MCFG_PPI8255_ADD( "ppi8255_1", scarn_ppi8255_intf[1] )
-	MCFG_PPI8255_ADD( "ppi8255_2", scarn_ppi8255_intf[2] )
+	MCFG_I8255A_ADD( "ppi8255_0", ppi8255_0_intf )
+	MCFG_I8255A_ADD( "ppi8255_1", ppi8255_1_intf )
+	MCFG_I8255A_ADD( "ppi8255_2", ppi8255_2_intf )
 
-	MCFG_MACHINE_START(merit)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
-	MCFG_SCREEN_RAW_PARAMS(PIXEL_CLOCK, 512, 0, 512, 256, 0, 256)	/* temporary, CRTC will configure screen */
-	MCFG_SCREEN_UPDATE(slotcarn)
+	MCFG_SCREEN_RAW_PARAMS(PIXEL_CLOCK, 512, 0, 512, 256, 0, 256)   /* temporary, CRTC will configure screen */
+	MCFG_SCREEN_UPDATE_DEVICE("crtc", mc6845_device, screen_update)
 
 	MCFG_MC6845_ADD("crtc", MC6845, CRTC_CLOCK, mc6845_intf)
 
@@ -761,5 +757,5 @@ ROM_END
 **********************************************
 
       YEAR  NAME      PARENT   MACHINE   INPUT     INIT   ROT    COMPANY           FULLNAME               FLAGS  */
-GAME( 1985, slotcarn, 0,       slotcarn, slotcarn, 0,     ROT0, "Wing Co., Ltd.", "Slot Carnival",        GAME_NOT_WORKING )
-GAME( 1985, spielbud, 0,       slotcarn, spielbud, 0,     ROT0, "ADP",            "Spiel Bude (German)",  GAME_NOT_WORKING )
+GAME( 1985, slotcarn, 0,       slotcarn, slotcarn, driver_device, 0,     ROT0, "Wing Co., Ltd.", "Slot Carnival",        GAME_NOT_WORKING )
+GAME( 1985, spielbud, 0,       slotcarn, spielbud, driver_device, 0,     ROT0, "ADP",            "Spiel Bude (German)",  GAME_NOT_WORKING )

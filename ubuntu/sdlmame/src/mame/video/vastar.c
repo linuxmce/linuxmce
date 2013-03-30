@@ -16,49 +16,49 @@
 
 ***************************************************************************/
 
-static TILE_GET_INFO( get_fg_tile_info )
+TILE_GET_INFO_MEMBER(vastar_state::get_fg_tile_info)
 {
-	vastar_state *state = machine.driver_data<vastar_state>();
-	UINT8 *videoram = state->m_fgvideoram;
-	int code, color;
+	UINT8 *videoram = m_fgvideoram;
+	int code, color, fxy;
 
 	code = videoram[tile_index + 0x800] | (videoram[tile_index + 0x400] << 8);
 	color = videoram[tile_index];
-	SET_TILE_INFO(
+	fxy = (code & 0xc00) >> 10; // maybe, based on the other layers
+	SET_TILE_INFO_MEMBER(
 			0,
 			code,
 			color & 0x3f,
-			0);
+			TILE_FLIPXY(fxy));
 }
 
-static TILE_GET_INFO( get_bg1_tile_info )
+TILE_GET_INFO_MEMBER(vastar_state::get_bg1_tile_info)
 {
-	vastar_state *state = machine.driver_data<vastar_state>();
-	UINT8 *videoram = state->m_bg1videoram;
-	int code, color;
+	UINT8 *videoram = m_bg1videoram;
+	int code, color, fxy;
 
 	code = videoram[tile_index + 0x800] | (videoram[tile_index] << 8);
 	color = videoram[tile_index + 0xc00];
-	SET_TILE_INFO(
+	fxy = (code & 0xc00) >> 10;
+	SET_TILE_INFO_MEMBER(
 			4,
 			code,
 			color & 0x3f,
-			0);
+			TILE_FLIPXY(fxy));
 }
 
-static TILE_GET_INFO( get_bg2_tile_info )
+TILE_GET_INFO_MEMBER(vastar_state::get_bg2_tile_info)
 {
-	vastar_state *state = machine.driver_data<vastar_state>();
-	UINT8 *videoram = state->m_bg2videoram;
-	int code, color;
+	UINT8 *videoram = m_bg2videoram;
+	int code, color, fxy;
 
 	code = videoram[tile_index + 0x800] | (videoram[tile_index] << 8);
 	color = videoram[tile_index + 0xc00];
-	SET_TILE_INFO(
+	fxy = (code & 0xc00) >> 10;
+	SET_TILE_INFO_MEMBER(
 			3,
 			code,
 			color & 0x3f,
-			0);
+			TILE_FLIPXY(fxy));
 }
 
 
@@ -68,20 +68,18 @@ static TILE_GET_INFO( get_bg2_tile_info )
 
 ***************************************************************************/
 
-VIDEO_START( vastar )
+void vastar_state::video_start()
 {
-	vastar_state *state = machine.driver_data<vastar_state>();
+	m_fg_tilemap  = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(vastar_state::get_fg_tile_info),this), TILEMAP_SCAN_ROWS,8,8,32,32);
+	m_bg1_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(vastar_state::get_bg1_tile_info),this),TILEMAP_SCAN_ROWS,8,8,32,32);
+	m_bg2_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(vastar_state::get_bg2_tile_info),this),TILEMAP_SCAN_ROWS,8,8,32,32);
 
-	state->m_fg_tilemap  = tilemap_create(machine, get_fg_tile_info, tilemap_scan_rows,8,8,32,32);
-	state->m_bg1_tilemap = tilemap_create(machine, get_bg1_tile_info,tilemap_scan_rows,8,8,32,32);
-	state->m_bg2_tilemap = tilemap_create(machine, get_bg2_tile_info,tilemap_scan_rows,8,8,32,32);
+	m_fg_tilemap->set_transparent_pen(0);
+	m_bg1_tilemap->set_transparent_pen(0);
+	m_bg2_tilemap->set_transparent_pen(0);
 
-	tilemap_set_transparent_pen(state->m_fg_tilemap,0);
-	tilemap_set_transparent_pen(state->m_bg1_tilemap,0);
-	tilemap_set_transparent_pen(state->m_bg2_tilemap,0);
-
-	tilemap_set_scroll_cols(state->m_bg1_tilemap, 32);
-	tilemap_set_scroll_cols(state->m_bg2_tilemap, 32);
+	m_bg1_tilemap->set_scroll_cols(32);
+	m_bg2_tilemap->set_scroll_cols(32);
 }
 
 
@@ -91,44 +89,25 @@ VIDEO_START( vastar )
 
 ***************************************************************************/
 
-WRITE8_HANDLER( vastar_fgvideoram_w )
+WRITE8_MEMBER(vastar_state::vastar_fgvideoram_w)
 {
-	vastar_state *state = space->machine().driver_data<vastar_state>();
-
-	state->m_fgvideoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_fg_tilemap,offset & 0x3ff);
+	m_fgvideoram[offset] = data;
+	m_fg_tilemap->mark_tile_dirty(offset & 0x3ff);
 }
 
-WRITE8_HANDLER( vastar_bg1videoram_w )
+WRITE8_MEMBER(vastar_state::vastar_bg1videoram_w)
 {
-	vastar_state *state = space->machine().driver_data<vastar_state>();
-
-	state->m_bg1videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg1_tilemap,offset & 0x3ff);
+	m_bg1videoram[offset] = data;
+	m_bg1_tilemap->mark_tile_dirty(offset & 0x3ff);
 }
 
-WRITE8_HANDLER( vastar_bg2videoram_w )
+WRITE8_MEMBER(vastar_state::vastar_bg2videoram_w)
 {
-	vastar_state *state = space->machine().driver_data<vastar_state>();
-
-	state->m_bg2videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg2_tilemap,offset & 0x3ff);
+	m_bg2videoram[offset] = data;
+	m_bg2_tilemap->mark_tile_dirty(offset & 0x3ff);
 }
 
 
-READ8_HANDLER( vastar_bg1videoram_r )
-{
-	vastar_state *state = space->machine().driver_data<vastar_state>();
-
-	return state->m_bg1videoram[offset];
-}
-
-READ8_HANDLER( vastar_bg2videoram_r )
-{
-	vastar_state *state = space->machine().driver_data<vastar_state>();
-
-	return state->m_bg2videoram[offset];
-}
 
 
 /***************************************************************************
@@ -137,7 +116,13 @@ READ8_HANDLER( vastar_bg2videoram_r )
 
 ***************************************************************************/
 
-static void draw_sprites(running_machine &machine, bitmap_t *bitmap,const rectangle *cliprect)
+// I wouldn't rule out the possibility of there being 2 sprite chips due to
+// "offs & 0x20" being used to select the tile bank.
+//
+// for Planet Probe more cases appear correct if we draw the list in reverse
+// order, but it's also possible we should be drawing 2 swapped lists in
+// forward order instead
+static void draw_sprites(running_machine &machine, bitmap_ind16 &bitmap,const rectangle &cliprect)
 {
 	vastar_state *state = machine.driver_data<vastar_state>();
 	UINT8 *spriteram = state->m_spriteram1;
@@ -145,7 +130,8 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap,const rectan
 	UINT8 *spriteram_3 = state->m_spriteram3;
 	int offs;
 
-	for (offs = 0; offs < 0x40; offs += 2)
+//  for (offs = 0; offs < 0x40; offs += 2)
+	for (offs = 0x40-2; offs >=0; offs -= 2)
 	{
 		int code, sx, sy, color, flipx, flipy;
 
@@ -159,15 +145,15 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap,const rectan
 		flipx = spriteram_3[offs] & 0x02;
 		flipy = spriteram_3[offs] & 0x01;
 
-		if (flip_screen_get(machine))
+		if (state->flip_screen())
 		{
 			flipx = !flipx;
 			flipy = !flipy;
 		}
 
-		if (spriteram_2[offs] & 0x08)	/* double width */
+		if (spriteram_2[offs] & 0x08)   /* double width */
 		{
-			if (!flip_screen_get(machine))
+			if (!state->flip_screen())
 				sy = 224 - sy;
 
 			drawgfx_transpen(bitmap,cliprect,machine.gfx[2],
@@ -184,7 +170,7 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap,const rectan
 		}
 		else
 		{
-			if (!flip_screen_get(machine))
+			if (!state->flip_screen())
 				sy = 240 - sy;
 
 			drawgfx_transpen(bitmap,cliprect,machine.gfx[1],
@@ -196,44 +182,49 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap,const rectan
 	}
 }
 
-SCREEN_UPDATE( vastar )
+UINT32 vastar_state::screen_update_vastar(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	vastar_state *state = screen->machine().driver_data<vastar_state>();
 	int i;
-
 
 	for (i = 0;i < 32;i++)
 	{
-		tilemap_set_scrolly(state->m_bg1_tilemap,i,state->m_bg1_scroll[i]);
-		tilemap_set_scrolly(state->m_bg2_tilemap,i,state->m_bg2_scroll[i]);
+		m_bg1_tilemap->set_scrolly(i,m_bg1_scroll[i]);
+		m_bg2_tilemap->set_scrolly(i,m_bg2_scroll[i]);
 	}
 
-	switch (*state->m_sprite_priority)
+	switch (*m_sprite_priority)
 	{
 	case 0:
-		tilemap_draw(bitmap,cliprect, state->m_bg1_tilemap, TILEMAP_DRAW_OPAQUE,0);
-		draw_sprites(screen->machine(), bitmap,cliprect);
-		tilemap_draw(bitmap,cliprect, state->m_bg2_tilemap, 0,0);
-		tilemap_draw(bitmap,cliprect, state->m_fg_tilemap, 0,0);
+		m_bg1_tilemap->draw(bitmap, cliprect, TILEMAP_DRAW_OPAQUE,0);
+		draw_sprites(machine(), bitmap,cliprect);
+		m_bg2_tilemap->draw(bitmap, cliprect, 0,0);
+		m_fg_tilemap->draw(bitmap, cliprect, 0,0);
+		break;
+
+	case 1: // ?? planet probe
+		m_bg1_tilemap->draw(bitmap, cliprect, TILEMAP_DRAW_OPAQUE,0);
+		m_bg2_tilemap->draw(bitmap, cliprect, 0,0);
+		draw_sprites(machine(), bitmap,cliprect);
+		m_fg_tilemap->draw(bitmap, cliprect, 0,0);
 		break;
 
 	case 2:
-		tilemap_draw(bitmap,cliprect, state->m_bg1_tilemap, TILEMAP_DRAW_OPAQUE,0);
-		draw_sprites(screen->machine(), bitmap,cliprect);
-		tilemap_draw(bitmap,cliprect, state->m_bg1_tilemap, 0,0);
-		tilemap_draw(bitmap,cliprect, state->m_bg2_tilemap, 0,0);
-		tilemap_draw(bitmap,cliprect, state->m_fg_tilemap, 0,0);
+		m_bg1_tilemap->draw(bitmap, cliprect, TILEMAP_DRAW_OPAQUE,0);
+		draw_sprites(machine(), bitmap,cliprect);
+		m_bg1_tilemap->draw(bitmap, cliprect, 0,0);
+		m_bg2_tilemap->draw(bitmap, cliprect, 0,0);
+		m_fg_tilemap->draw(bitmap, cliprect, 0,0);
 		break;
 
 	case 3:
-		tilemap_draw(bitmap,cliprect, state->m_bg1_tilemap, TILEMAP_DRAW_OPAQUE,0);
-		tilemap_draw(bitmap,cliprect, state->m_bg2_tilemap, 0,0);
-		tilemap_draw(bitmap,cliprect, state->m_fg_tilemap, 0,0);
-		draw_sprites(screen->machine(), bitmap,cliprect);
+		m_bg1_tilemap->draw(bitmap, cliprect, TILEMAP_DRAW_OPAQUE,0);
+		m_bg2_tilemap->draw(bitmap, cliprect, 0,0);
+		m_fg_tilemap->draw(bitmap, cliprect, 0,0);
+		draw_sprites(machine(), bitmap,cliprect);
 		break;
 
 	default:
-		logerror("Unimplemented priority %X\n", *state->m_sprite_priority);
+		logerror("Unimplemented priority %X\n", *m_sprite_priority);
 		break;
 	}
 	return 0;

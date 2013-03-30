@@ -5,7 +5,7 @@
     - Space Fever
     - Space Fever High Splitter
     - Space Launcher
-    - Sheriff / Bandido
+    - Sheriff / Bandido / Western Gun 2
     - Helifire
 
 ***************************************************************************/
@@ -14,41 +14,38 @@
 #include "cpu/i8085/i8085.h"
 #include "includes/n8080.h"
 
-#define MASTER_CLOCK	XTAL_20_16MHz
+#define MASTER_CLOCK    XTAL_20_16MHz
 
 
-static WRITE8_HANDLER( n8080_shift_bits_w )
+WRITE8_MEMBER(n8080_state::n8080_shift_bits_w)
 {
-	n8080_state *state = space->machine().driver_data<n8080_state>();
-	state->m_shift_bits = data & 7;
+	m_shift_bits = data & 7;
 }
-static WRITE8_HANDLER( n8080_shift_data_w )
+WRITE8_MEMBER(n8080_state::n8080_shift_data_w)
 {
-	n8080_state *state = space->machine().driver_data<n8080_state>();
-	state->m_shift_data = (state->m_shift_data >> 8) | (data << 8);
+	m_shift_data = (m_shift_data >> 8) | (data << 8);
 }
 
 
-static READ8_HANDLER( n8080_shift_r )
+READ8_MEMBER(n8080_state::n8080_shift_r)
 {
-	n8080_state *state = space->machine().driver_data<n8080_state>();
-	return state->m_shift_data >> (8 - state->m_shift_bits);
+	return m_shift_data >> (8 - m_shift_bits);
 }
 
-static ADDRESS_MAP_START( main_cpu_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_cpu_map, AS_PROGRAM, 8, n8080_state )
 	ADDRESS_MAP_GLOBAL_MASK(0x7fff)
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
-	AM_RANGE(0x4000, 0x7fff) AM_RAM AM_BASE_MEMBER(n8080_state, m_videoram)
+	AM_RANGE(0x4000, 0x7fff) AM_RAM AM_SHARE("videoram")
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( helifire_main_cpu_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( helifire_main_cpu_map, AS_PROGRAM, 8, n8080_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
-	AM_RANGE(0x4000, 0x7fff) AM_RAM AM_BASE_MEMBER(n8080_state, m_videoram)
-	AM_RANGE(0xc000, 0xdfff) AM_RAM AM_BASE_MEMBER(n8080_state, m_colorram)
+	AM_RANGE(0x4000, 0x7fff) AM_RAM AM_SHARE("videoram")
+	AM_RANGE(0xc000, 0xdfff) AM_RAM AM_SHARE("colorram")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( main_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( main_io_map, AS_IO, 8, n8080_state )
 	ADDRESS_MAP_GLOBAL_MASK(0x7)
 	AM_RANGE(0x00, 0x00) AM_READ_PORT("IN0")
 	AM_RANGE(0x01, 0x01) AM_READ_PORT("IN1")
@@ -249,17 +246,17 @@ static INPUT_PORTS_START( sheriff )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN1 )
 
 	PORT_START("IN3")
-	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Lives ))	PORT_DIPLOCATION("SW1:1,2")
+	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Lives )) PORT_DIPLOCATION("SW1:1,2")
 	PORT_DIPSETTING(    0x00, "3" )
 	PORT_DIPSETTING(    0x01, "4" )
 	PORT_DIPSETTING(    0x02, "5" )
 	PORT_DIPSETTING(    0x03, "6" )
-	PORT_DIPUNUSED_DIPLOC( 0x04, 0x04, "SW1:3" )	// Switches 3-7 are UNUSED
+	PORT_DIPUNUSED_DIPLOC( 0x04, 0x04, "SW1:3" )    // Switches 3-7 are UNUSED
 	PORT_DIPUNUSED_DIPLOC( 0x08, 0x08, "SW1:4" )
 	PORT_DIPUNUSED_DIPLOC( 0x10, 0x10, "SW1:5" )
 	PORT_DIPUNUSED_DIPLOC( 0x20, 0x20, "SW1:6" )
 	PORT_DIPUNUSED_DIPLOC( 0x40, 0x40, "SW1:7" )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Cabinet ))	PORT_DIPLOCATION("SW1:8")
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Cabinet ))   PORT_DIPLOCATION("SW1:8")
 	PORT_DIPSETTING(    0x80, DEF_STR( Upright ))
 	PORT_DIPSETTING(    0x00, DEF_STR( Cocktail ))
 INPUT_PORTS_END
@@ -312,6 +309,46 @@ static INPUT_PORTS_START( bandido )
 	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Unknown )) /* don't know if this is used */
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ))
 	PORT_DIPSETTING(    0x00, DEF_STR( On ))
+INPUT_PORTS_END
+
+
+static INPUT_PORTS_START( westgun2 )
+	PORT_START("IN0")
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICKLEFT_RIGHT )
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICKLEFT_LEFT )
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICKLEFT_UP )
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICKLEFT_DOWN )
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_JOYSTICKRIGHT_RIGHT )
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICKRIGHT_LEFT )
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICKRIGHT_UP )
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICKRIGHT_DOWN )
+
+	PORT_START("IN1")
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICKLEFT_RIGHT ) PORT_COCKTAIL
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICKLEFT_LEFT ) PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICKLEFT_UP ) PORT_COCKTAIL
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICKLEFT_DOWN ) PORT_COCKTAIL
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_JOYSTICKRIGHT_RIGHT ) PORT_COCKTAIL
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICKRIGHT_LEFT ) PORT_COCKTAIL
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICKRIGHT_UP ) PORT_COCKTAIL
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICKRIGHT_DOWN ) PORT_COCKTAIL
+
+	PORT_START("IN2")
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1 )
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_START1 )
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_START2 )
+	PORT_DIPNAME( 0x10, 0x00, DEF_STR( Lives ))
+	PORT_DIPSETTING(    0x00, "3" )
+	PORT_DIPSETTING(    0x10, "4" )
+	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Cabinet ))
+	PORT_DIPSETTING(    0x20, DEF_STR( Upright ))
+	PORT_DIPSETTING(    0x00, DEF_STR( Cocktail ))
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED ) /* enables diagnostic ROM at $2400 */
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN1 )
+
+	PORT_START("IN3")
+
 INPUT_PORTS_END
 
 
@@ -391,118 +428,111 @@ INPUT_PORTS_END
 
 /* Interrupts */
 
-static TIMER_DEVICE_CALLBACK( rst1_tick )
+TIMER_DEVICE_CALLBACK_MEMBER(n8080_state::rst1_tick)
 {
-	n8080_state *n8080 = timer.machine().driver_data<n8080_state>();
-	int state = n8080->m_inte ? ASSERT_LINE : CLEAR_LINE;
+	int state = m_inte ? ASSERT_LINE : CLEAR_LINE;
 
 	/* V7 = 1, V6 = 0 */
-	device_set_input_line_and_vector(n8080->m_maincpu, INPUT_LINE_IRQ0, state, 0xcf);
+	m_maincpu->set_input_line_and_vector(INPUT_LINE_IRQ0, state, 0xcf);
 }
 
-static TIMER_DEVICE_CALLBACK( rst2_tick )
+TIMER_DEVICE_CALLBACK_MEMBER(n8080_state::rst2_tick)
 {
-	n8080_state *n8080 = timer.machine().driver_data<n8080_state>();
-	int state = n8080->m_inte ? ASSERT_LINE : CLEAR_LINE;
+	int state = m_inte ? ASSERT_LINE : CLEAR_LINE;
 
 	/* vblank */
-	device_set_input_line_and_vector(n8080->m_maincpu, INPUT_LINE_IRQ0, state, 0xd7);
+	m_maincpu->set_input_line_and_vector(INPUT_LINE_IRQ0, state, 0xd7);
 }
 
-static WRITE_LINE_DEVICE_HANDLER( n8080_inte_callback )
+WRITE_LINE_MEMBER(n8080_state::n8080_inte_callback)
 {
-	n8080_state *n8080 = device->machine().driver_data<n8080_state>();
-	n8080->m_inte = state;
+	m_inte = state;
 }
 
-static WRITE8_DEVICE_HANDLER( n8080_status_callback )
+WRITE8_MEMBER(n8080_state::n8080_status_callback)
 {
+	device_t *device = machine().device("maincpu");
 	if (data & I8085_STATUS_INTA)
 	{
 		/* interrupt acknowledge */
-		device_set_input_line(device, INPUT_LINE_IRQ0, CLEAR_LINE);
+		device->execute().set_input_line(INPUT_LINE_IRQ0, CLEAR_LINE);
 	}
 }
 
 static I8085_CONFIG( n8080_cpu_config )
 {
-	DEVCB_HANDLER(n8080_status_callback),	/* STATUS changed callback */
-	DEVCB_LINE(n8080_inte_callback),		/* INTE changed callback */
-	DEVCB_NULL,								/* SID changed callback (8085A only) */
-	DEVCB_NULL								/* SOD changed callback (8085A only) */
+	DEVCB_DRIVER_MEMBER(n8080_state,n8080_status_callback), /* STATUS changed callback */
+	DEVCB_DRIVER_LINE_MEMBER(n8080_state,n8080_inte_callback),      /* INTE changed callback */
+	DEVCB_NULL,                             /* SID changed callback (8085A only) */
+	DEVCB_NULL                              /* SOD changed callback (8085A only) */
 };
 
-static MACHINE_START( n8080 )
+MACHINE_START_MEMBER(n8080_state,n8080)
 {
-	n8080_state *state = machine.driver_data<n8080_state>();
 
-	state->m_maincpu = machine.device("maincpu");
+	m_maincpu = machine().device<cpu_device>("maincpu");
 
-	state->save_item(NAME(state->m_shift_data));
-	state->save_item(NAME(state->m_shift_bits));
-	state->save_item(NAME(state->m_inte));
+	save_item(NAME(m_shift_data));
+	save_item(NAME(m_shift_bits));
+	save_item(NAME(m_inte));
 }
 
-static MACHINE_START( spacefev )
+MACHINE_START_MEMBER(n8080_state,spacefev)
 {
-	MACHINE_START_CALL(n8080);
-	MACHINE_START_CALL(spacefev_sound);
+	MACHINE_START_CALL_MEMBER(n8080);
+	MACHINE_START_CALL_MEMBER(spacefev_sound);
 }
 
-static MACHINE_START( sheriff )
+MACHINE_START_MEMBER(n8080_state,sheriff)
 {
-	MACHINE_START_CALL(n8080);
-	MACHINE_START_CALL(sheriff_sound);
+	MACHINE_START_CALL_MEMBER(n8080);
+	MACHINE_START_CALL_MEMBER(sheriff_sound);
 }
 
-static MACHINE_START( helifire )
+MACHINE_START_MEMBER(n8080_state,helifire)
 {
-	MACHINE_START_CALL(n8080);
-	MACHINE_START_CALL(helifire_sound);
+	MACHINE_START_CALL_MEMBER(n8080);
+	MACHINE_START_CALL_MEMBER(helifire_sound);
 }
 
 
-static MACHINE_RESET( n8080 )
+MACHINE_RESET_MEMBER(n8080_state,n8080)
 {
-	n8080_state *state = machine.driver_data<n8080_state>();
 
-	state->m_shift_data = 0;
-	state->m_shift_bits = 0;
-	state->m_inte = 0;
+	m_shift_data = 0;
+	m_shift_bits = 0;
+	m_inte = 0;
 }
 
-static MACHINE_RESET( spacefev )
+MACHINE_RESET_MEMBER(n8080_state,spacefev)
 {
-	n8080_state *state = machine.driver_data<n8080_state>();
 
-	MACHINE_RESET_CALL(n8080);
-	MACHINE_RESET_CALL(spacefev_sound);
+	MACHINE_RESET_CALL_MEMBER(n8080);
+	MACHINE_RESET_CALL_MEMBER(spacefev_sound);
 
-	state->m_spacefev_red_screen = 0;
-	state->m_spacefev_red_cannon = 0;
+	m_spacefev_red_screen = 0;
+	m_spacefev_red_cannon = 0;
 }
 
-static MACHINE_RESET( sheriff )
+MACHINE_RESET_MEMBER(n8080_state,sheriff)
 {
-	n8080_state *state = machine.driver_data<n8080_state>();
 
-	MACHINE_RESET_CALL(n8080);
-	MACHINE_RESET_CALL(sheriff_sound);
+	MACHINE_RESET_CALL_MEMBER(n8080);
+	MACHINE_RESET_CALL_MEMBER(sheriff_sound);
 
-	state->m_sheriff_color_mode = 0;
-	state->m_sheriff_color_data = 0;
+	m_sheriff_color_mode = 0;
+	m_sheriff_color_data = 0;
 }
 
-static MACHINE_RESET( helifire )
+MACHINE_RESET_MEMBER(n8080_state,helifire)
 {
-	n8080_state *state = machine.driver_data<n8080_state>();
 
-	MACHINE_RESET_CALL(n8080);
-	MACHINE_RESET_CALL(helifire_sound);
+	MACHINE_RESET_CALL_MEMBER(n8080);
+	MACHINE_RESET_CALL_MEMBER(helifire_sound);
 
-	state->m_helifire_mv = 0;
-	state->m_helifire_sc = 0;
-	state->m_helifire_flash = 0;
+	m_helifire_mv = 0;
+	m_helifire_sc = 0;
+	m_helifire_flash = 0;
 }
 
 
@@ -514,23 +544,22 @@ static MACHINE_CONFIG_START( spacefev, n8080_state )
 	MCFG_CPU_PROGRAM_MAP(main_cpu_map)
 	MCFG_CPU_IO_MAP(main_io_map)
 
-	MCFG_MACHINE_START(spacefev)
-	MCFG_MACHINE_RESET(spacefev)
+	MCFG_MACHINE_START_OVERRIDE(n8080_state,spacefev)
+	MCFG_MACHINE_RESET_OVERRIDE(n8080_state,spacefev)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(256, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 255, 16, 239)
-	MCFG_SCREEN_UPDATE(spacefev)
+	MCFG_SCREEN_UPDATE_DRIVER(n8080_state, screen_update_spacefev)
 
 	MCFG_PALETTE_LENGTH(8)
-	MCFG_PALETTE_INIT(n8080)
-	MCFG_VIDEO_START(spacefev)
+	MCFG_PALETTE_INIT_OVERRIDE(n8080_state,n8080)
+	MCFG_VIDEO_START_OVERRIDE(n8080_state,spacefev)
 
-	MCFG_TIMER_ADD_SCANLINE("rst1", rst1_tick, "screen", 128, 256)
-	MCFG_TIMER_ADD_SCANLINE("rst2", rst2_tick, "screen", 240, 256)
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("rst1", n8080_state, rst1_tick, "screen", 128, 256)
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("rst2", n8080_state, rst2_tick, "screen", 240, 256)
 
 	/* sound hardware */
 	MCFG_FRAGMENT_ADD( spacefev_sound )
@@ -545,26 +574,36 @@ static MACHINE_CONFIG_START( sheriff, n8080_state )
 	MCFG_CPU_PROGRAM_MAP(main_cpu_map)
 	MCFG_CPU_IO_MAP(main_io_map)
 
-	MCFG_MACHINE_START(sheriff)
-	MCFG_MACHINE_RESET(sheriff)
+	MCFG_MACHINE_START_OVERRIDE(n8080_state,sheriff)
+	MCFG_MACHINE_RESET_OVERRIDE(n8080_state,sheriff)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(256, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 255, 16, 239)
-	MCFG_SCREEN_UPDATE(sheriff)
+	MCFG_SCREEN_UPDATE_DRIVER(n8080_state, screen_update_sheriff)
 
 	MCFG_PALETTE_LENGTH(8)
-	MCFG_PALETTE_INIT(n8080)
-	MCFG_VIDEO_START(sheriff)
+	MCFG_PALETTE_INIT_OVERRIDE(n8080_state,n8080)
+	MCFG_VIDEO_START_OVERRIDE(n8080_state,sheriff)
 
-	MCFG_TIMER_ADD_SCANLINE("rst1", rst1_tick, "screen", 128, 256)
-	MCFG_TIMER_ADD_SCANLINE("rst2", rst2_tick, "screen", 240, 256)
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("rst1", n8080_state, rst1_tick, "screen", 128, 256)
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("rst2", n8080_state, rst2_tick, "screen", 240, 256)
 
 	/* sound hardware */
 	MCFG_FRAGMENT_ADD( sheriff_sound )
+MACHINE_CONFIG_END
+
+
+static MACHINE_CONFIG_DERIVED( westgun2, sheriff )
+
+	/* basic machine hardware */
+	MCFG_CPU_REPLACE("maincpu", I8080, XTAL_19_968MHz / 10)
+	MCFG_CPU_CONFIG(n8080_cpu_config)
+	MCFG_CPU_PROGRAM_MAP(main_cpu_map)
+	MCFG_CPU_IO_MAP(main_io_map)
+
 MACHINE_CONFIG_END
 
 
@@ -576,24 +615,23 @@ static MACHINE_CONFIG_START( helifire, n8080_state )
 	MCFG_CPU_PROGRAM_MAP(helifire_main_cpu_map)
 	MCFG_CPU_IO_MAP(main_io_map)
 
-	MCFG_MACHINE_START(helifire)
-	MCFG_MACHINE_RESET(helifire)
+	MCFG_MACHINE_START_OVERRIDE(n8080_state,helifire)
+	MCFG_MACHINE_RESET_OVERRIDE(n8080_state,helifire)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(256, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 255, 16, 239)
-	MCFG_SCREEN_UPDATE(helifire)
-	MCFG_SCREEN_EOF(helifire)
+	MCFG_SCREEN_UPDATE_DRIVER(n8080_state, screen_update_helifire)
+	MCFG_SCREEN_VBLANK_DRIVER(n8080_state, screen_eof_helifire)
 
 	MCFG_PALETTE_LENGTH(8 + 0x400)
-	MCFG_PALETTE_INIT(helifire)
-	MCFG_VIDEO_START(helifire)
+	MCFG_PALETTE_INIT_OVERRIDE(n8080_state,helifire)
+	MCFG_VIDEO_START_OVERRIDE(n8080_state,helifire)
 
-	MCFG_TIMER_ADD_SCANLINE("rst1", rst1_tick, "screen", 128, 256)
-	MCFG_TIMER_ADD_SCANLINE("rst2", rst2_tick, "screen", 240, 256)
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("rst1", n8080_state, rst1_tick, "screen", 128, 256)
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("rst2", n8080_state, rst2_tick, "screen", 240, 256)
 
 	/* sound hardware */
 	MCFG_FRAGMENT_ADD( helifire_sound )
@@ -876,6 +914,21 @@ ROM_START( bandido )
 	ROM_LOAD( "82s137.3l", 0x0000, 0x0400, CRC(820f8cdd) SHA1(197eeb008c140558e7c1ab2b2bd0f6a27096877c) )
 ROM_END
 
+ROM_START( westgun2 )
+	ROM_REGION( 0x8000, "maincpu", 0 )
+	ROM_LOAD( "rf01.ic36",    0x0000, 0x0800, CRC(7eabc538) SHA1(8f0540a5cb391b83aafc0365b44686628eae5c77) )
+	ROM_LOAD( "rf02.ic35",    0x0800, 0x0800, CRC(3344d6a5) SHA1(ea2a8413401b53c9d1b9c653ac3a98855a35cce6) )
+	ROM_LOAD( "rf03.ic34",    0x1000, 0x0800, CRC(d4bb08fd) SHA1(92c0821f259037b193658997289b6b41c6f67215) )
+	ROM_LOAD( "rf04.ic33",    0x1800, 0x0800, CRC(60b71f0d) SHA1(10650426972afb0ccb964548a52879ed3f0b316a) )
+	ROM_LOAD( "rf05.ic32",    0x2000, 0x0800, CRC(81e650fb) SHA1(e600567125294d1411fcad3a015edb98cee36ff8) )
+
+	ROM_REGION( 0x0800, "audiocpu", 0 )
+	ROM_LOAD( "rf06.ic35",   0x0000, 0x0800, CRC(4eafe957) SHA1(78e03402219c0ad814f63ae507eadc636d95f755) )
+
+	ROM_REGION( 0x0400, "proms", 0 )
+	ROM_LOAD( "82s137.3l", 0x0000, 0x0400, CRC(820f8cdd) SHA1(197eeb008c140558e7c1ab2b2bd0f6a27096877c) ) // rf07 not dumped, taken from parent
+ROM_END
+
 ROM_START( helifire )
 	ROM_REGION( 0x8000, "maincpu", 0 )
 	ROM_LOAD( "hf.f1",    0x0000, 0x0400, CRC(032f89ca) SHA1(63b0310875ed78a6385e44eea781ddcc4a63557c) )
@@ -911,14 +964,15 @@ ROM_START( helifirea )
 ROM_END
 
 
-GAME( 1979, spacefev,   0,        spacefev, spacefev, 0, ROT270, "Nintendo", "Space Fever (New Ver.)", GAME_SUPPORTS_SAVE )
-GAME( 1979, spacefevo,  spacefev, spacefev, spacefev, 0, ROT270, "Nintendo", "Space Fever (Old Ver.)", GAME_SUPPORTS_SAVE )
-GAME( 1979, spacefevo2, spacefev, spacefev, spacefev, 0, ROT270, "Nintendo", "Space Fever (Older Ver.)", GAME_SUPPORTS_SAVE )
-GAME( 1979, highsplt,   0,        spacefev, highsplt, 0, ROT270, "Nintendo", "Space Fever High Splitter (set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1979, highsplta,  highsplt, spacefev, highsplt, 0, ROT270, "Nintendo", "Space Fever High Splitter (set 2)", GAME_SUPPORTS_SAVE )
-GAME( 1979, highspltb,  highsplt, spacefev, highsplt, 0, ROT270, "Nintendo", "Space Fever High Splitter (alt Sound)", GAME_SUPPORTS_SAVE )
-GAME( 1979, spacelnc,   0,        spacefev, spacelnc, 0, ROT270, "Nintendo", "Space Launcher", GAME_SUPPORTS_SAVE )
-GAME( 1979, sheriff,    0,        sheriff,  sheriff,  0, ROT270, "Nintendo", "Sheriff", GAME_SUPPORTS_SAVE )
-GAME( 1980, bandido,    sheriff,  sheriff,  bandido,  0, ROT270, "Nintendo (Exidy license)", "Bandido", GAME_SUPPORTS_SAVE )
-GAME( 1980, helifire,   0,        helifire, helifire, 0, ROT270, "Nintendo", "HeliFire (set 1)", GAME_IMPERFECT_SOUND | GAME_IMPERFECT_GRAPHICS | GAME_NO_COCKTAIL | GAME_SUPPORTS_SAVE )
-GAME( 1980, helifirea,  helifire, helifire, helifire, 0, ROT270, "Nintendo", "HeliFire (set 2)", GAME_IMPERFECT_SOUND | GAME_IMPERFECT_GRAPHICS | GAME_NO_COCKTAIL | GAME_SUPPORTS_SAVE )
+GAME( 1979, spacefev,   0,        spacefev, spacefev, driver_device, 0, ROT270, "Nintendo", "Space Fever (New Ver.)", GAME_SUPPORTS_SAVE )
+GAME( 1979, spacefevo,  spacefev, spacefev, spacefev, driver_device, 0, ROT270, "Nintendo", "Space Fever (Old Ver.)", GAME_SUPPORTS_SAVE )
+GAME( 1979, spacefevo2, spacefev, spacefev, spacefev, driver_device, 0, ROT270, "Nintendo", "Space Fever (Older Ver.)", GAME_SUPPORTS_SAVE )
+GAME( 1979, highsplt,   0,        spacefev, highsplt, driver_device, 0, ROT270, "Nintendo", "Space Fever High Splitter (set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1979, highsplta,  highsplt, spacefev, highsplt, driver_device, 0, ROT270, "Nintendo", "Space Fever High Splitter (set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1979, highspltb,  highsplt, spacefev, highsplt, driver_device, 0, ROT270, "Nintendo", "Space Fever High Splitter (alt Sound)", GAME_SUPPORTS_SAVE )
+GAME( 1979, spacelnc,   0,        spacefev, spacelnc, driver_device, 0, ROT270, "Nintendo", "Space Launcher", GAME_SUPPORTS_SAVE )
+GAME( 1979, sheriff,    0,        sheriff,  sheriff, driver_device,  0, ROT270, "Nintendo", "Sheriff", GAME_SUPPORTS_SAVE )
+GAME( 1980, bandido,    sheriff,  sheriff,  bandido, driver_device,  0, ROT270, "Nintendo (Exidy license)", "Bandido", GAME_SUPPORTS_SAVE )
+GAME( 1980, westgun2,   sheriff,  westgun2, westgun2, driver_device, 0, ROT270, "Nintendo (Taito Corporation license)", "Western Gun Part II", GAME_SUPPORTS_SAVE ) // official Taito PCBs, but title/copyright not shown
+GAME( 1980, helifire,   0,        helifire, helifire, driver_device, 0, ROT270, "Nintendo", "HeliFire (set 1)", GAME_IMPERFECT_SOUND | GAME_IMPERFECT_GRAPHICS | GAME_NO_COCKTAIL | GAME_SUPPORTS_SAVE )
+GAME( 1980, helifirea,  helifire, helifire, helifire, driver_device, 0, ROT270, "Nintendo", "HeliFire (set 2)", GAME_IMPERFECT_SOUND | GAME_IMPERFECT_GRAPHICS | GAME_NO_COCKTAIL | GAME_SUPPORTS_SAVE )

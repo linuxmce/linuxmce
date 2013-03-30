@@ -1,20 +1,26 @@
 #include "sound/okim6295.h"
+#include "machine/eeprom.h"
 
 class playmark_state : public driver_device
 {
 public:
-	playmark_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	playmark_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_bgvideoram(*this, "bgvideoram"),
+		m_videoram1(*this, "videoram1"),
+		m_videoram2(*this, "videoram2"),
+		m_videoram3(*this, "videoram3"),
+		m_spriteram(*this, "spriteram"),
+		m_rowscroll(*this, "rowscroll"){ }
 
 	/* memory pointers */
-	UINT16 *     m_bgvideoram;
-	UINT16 *     m_videoram1;
-	UINT16 *     m_videoram2;
-	UINT16 *     m_videoram3;
-	UINT16 *     m_rowscroll;
-	UINT16 *     m_spriteram;
+	optional_shared_ptr<UINT16> m_bgvideoram;
+	required_shared_ptr<UINT16> m_videoram1;
+	optional_shared_ptr<UINT16> m_videoram2;
+	optional_shared_ptr<UINT16> m_videoram3;
+	required_shared_ptr<UINT16> m_spriteram;
+	optional_shared_ptr<UINT16> m_rowscroll;
 //      UINT16 *     m_paletteram;    // currently this uses generic palette handling
-	size_t       m_spriteram_size;
 
 	/* video-related */
 	tilemap_t   *m_tx_tilemap;
@@ -46,32 +52,57 @@ public:
 
 	/* devices */
 	okim6295_device *m_oki;
-	device_t *m_eeprom;
+	eeprom_device *m_eeprom;
+	DECLARE_WRITE16_MEMBER(coinctrl_w);
+	DECLARE_WRITE16_MEMBER(wbeachvl_coin_eeprom_w);
+	DECLARE_WRITE16_MEMBER(hotmind_coin_eeprom_w);
+	DECLARE_WRITE16_MEMBER(hrdtimes_coin_w);
+	DECLARE_WRITE16_MEMBER(playmark_snd_command_w);
+	DECLARE_READ8_MEMBER(playmark_snd_command_r);
+	DECLARE_READ8_MEMBER(playmark_snd_flag_r);
+	DECLARE_WRITE8_MEMBER(playmark_oki_w);
+	DECLARE_WRITE8_MEMBER(playmark_snd_control_w);
+	DECLARE_READ8_MEMBER(PIC16C5X_T0_clk_r);
+	DECLARE_WRITE16_MEMBER(wbeachvl_txvideoram_w);
+	DECLARE_WRITE16_MEMBER(wbeachvl_fgvideoram_w);
+	DECLARE_WRITE16_MEMBER(wbeachvl_bgvideoram_w);
+	DECLARE_WRITE16_MEMBER(hrdtimes_txvideoram_w);
+	DECLARE_WRITE16_MEMBER(hrdtimes_fgvideoram_w);
+	DECLARE_WRITE16_MEMBER(hrdtimes_bgvideoram_w);
+	DECLARE_WRITE16_MEMBER(bigtwin_paletteram_w);
+	DECLARE_WRITE16_MEMBER(bigtwin_scroll_w);
+	DECLARE_WRITE16_MEMBER(wbeachvl_scroll_w);
+	DECLARE_WRITE16_MEMBER(excelsr_scroll_w);
+	DECLARE_WRITE16_MEMBER(hrdtimes_scroll_w);
+	DECLARE_WRITE8_MEMBER(playmark_oki_banking_w);
+	DECLARE_DRIVER_INIT(bigtwin);
+	DECLARE_DRIVER_INIT(powerbal);
+	DECLARE_DRIVER_INIT(magicstk);
+	TILE_GET_INFO_MEMBER(bigtwin_get_tx_tile_info);
+	TILE_GET_INFO_MEMBER(bigtwin_get_fg_tile_info);
+	TILE_GET_INFO_MEMBER(wbeachvl_get_tx_tile_info);
+	TILE_GET_INFO_MEMBER(wbeachvl_get_fg_tile_info);
+	TILE_GET_INFO_MEMBER(wbeachvl_get_bg_tile_info);
+	TILE_GET_INFO_MEMBER(hrdtimes_get_tx_tile_info);
+	TILE_GET_INFO_MEMBER(bigtwinb_get_tx_tile_info);
+	TILE_GET_INFO_MEMBER(hrdtimes_get_fg_tile_info);
+	TILE_GET_INFO_MEMBER(hrdtimes_get_bg_tile_info);
+	TILE_GET_INFO_MEMBER(powerbal_get_bg_tile_info);
+	DECLARE_MACHINE_START(playmark);
+	DECLARE_MACHINE_RESET(playmark);
+	DECLARE_VIDEO_START(bigtwin);
+	DECLARE_VIDEO_START(bigtwinb);
+	DECLARE_VIDEO_START(wbeachvl);
+	DECLARE_VIDEO_START(excelsr);
+	DECLARE_VIDEO_START(hotmind);
+	DECLARE_VIDEO_START(hrdtimes);
+	DECLARE_MACHINE_START(powerbal);
+	DECLARE_MACHINE_RESET(powerbal);
+	DECLARE_VIDEO_START(powerbal);
+	UINT32 screen_update_bigtwin(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_bigtwinb(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_wbeachvl(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_excelsr(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_hrdtimes(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_powerbal(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
-
-/*----------- defined in video/playmark.c -----------*/
-
-WRITE16_HANDLER( wbeachvl_txvideoram_w );
-WRITE16_HANDLER( wbeachvl_fgvideoram_w );
-WRITE16_HANDLER( wbeachvl_bgvideoram_w );
-WRITE16_HANDLER( hrdtimes_txvideoram_w );
-WRITE16_HANDLER( hrdtimes_fgvideoram_w );
-WRITE16_HANDLER( hrdtimes_bgvideoram_w );
-WRITE16_HANDLER( bigtwin_paletteram_w );
-WRITE16_HANDLER( bigtwin_scroll_w );
-WRITE16_HANDLER( wbeachvl_scroll_w );
-WRITE16_HANDLER( excelsr_scroll_w );
-WRITE16_HANDLER( hrdtimes_scroll_w );
-
-VIDEO_START( bigtwin );
-VIDEO_START( bigtwinb );
-VIDEO_START( wbeachvl );
-VIDEO_START( excelsr );
-VIDEO_START( hotmind );
-VIDEO_START( hrdtimes );
-
-SCREEN_UPDATE( bigtwin );
-SCREEN_UPDATE( bigtwinb );
-SCREEN_UPDATE( wbeachvl );
-SCREEN_UPDATE( excelsr );
-SCREEN_UPDATE( hrdtimes );

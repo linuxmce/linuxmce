@@ -16,8 +16,8 @@
     Known issues:
         * Games are running too smoothly!
         * F-15 controls need tweaking
-        * botssa will hit a divide-by-zero error if the throttle is
-          not calibrated first in service mode.
+        * botss will hit a divide-by-zero error if the throttle is
+          not calibrated first in service mode. (clone is ok)
 
 ****************************************************************************/
 
@@ -68,8 +68,8 @@ static INPUT_PORTS_START( micro3d )
 
 	PORT_START("VGB_SW")
 	PORT_DIPNAME( 0x0008, 0x0008, "VGB Monitor Mode")
-	PORT_DIPSETTING(	0x0008, DEF_STR(Off) )
-	PORT_DIPSETTING(	0x0000, DEF_STR(On) )
+	PORT_DIPSETTING(    0x0008, DEF_STR(Off) )
+	PORT_DIPSETTING(    0x0000, DEF_STR(On) )
 
 	PORT_START("SOUND_SW")
 	PORT_BIT(0x80, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME("Sound PCB Test SW") PORT_CODE(KEYCODE_F1)
@@ -110,31 +110,9 @@ static INPUT_PORTS_START( botss )
 	PORT_INCLUDE( micro3d )
 
 	PORT_MODIFY("INPUTS_A_B")
+	PORT_BIT( 0x0080, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, micro3d_state, botss_hwchk_r, NULL)
 	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_START1 )
-	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON3 )	PORT_NAME("Shield")
-	PORT_SERVICE( 0x0400, IP_ACTIVE_LOW )
-	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(1)
-	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(1)
-	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(1)
-	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(1)
-
-	PORT_START("INPUTS_C_D")
-	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_NAME("Throttle up")
-	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_NAME("Throttle down")
-	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_COIN2 )
-	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_COIN1 )
-	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_NAME("Trigger")
-	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_NAME("Blaster")
-	PORT_BIT( 0xccf5, IP_ACTIVE_LOW, IPT_UNUSED )
-INPUT_PORTS_END
-
-static INPUT_PORTS_START( botssa )
-	PORT_INCLUDE( micro3d )
-
-	PORT_MODIFY("INPUTS_A_B")
-	PORT_BIT( 0x0080, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(botssa_hwchk_r, NULL)
-	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_START1 )
-	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON3 )	PORT_NAME("Shield")
+	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON3 )  PORT_NAME("Shield")
 	PORT_SERVICE( 0x0400, IP_ACTIVE_LOW )
 	PORT_BIT( 0x7800, IP_ACTIVE_LOW, IPT_UNUSED )
 
@@ -153,6 +131,28 @@ static INPUT_PORTS_START( botssa )
 
 	PORT_START("THROTTLE")
 	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_Z ) PORT_MINMAX(0x01,0xff) PORT_SENSITIVITY(100) PORT_KEYDELTA(25) PORT_CENTERDELTA(0) PORT_NAME("Throttle")
+INPUT_PORTS_END
+
+static INPUT_PORTS_START( botss11 )
+	PORT_INCLUDE( micro3d )
+
+	PORT_MODIFY("INPUTS_A_B")
+	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_START1 )
+	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON3 )  PORT_NAME("Shield")
+	PORT_SERVICE( 0x0400, IP_ACTIVE_LOW )
+	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(1)
+	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(1)
+	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(1)
+	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(1)
+
+	PORT_START("INPUTS_C_D")
+	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_NAME("Throttle up")
+	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_NAME("Throttle down")
+	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_COIN2 )
+	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_COIN1 )
+	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_NAME("Trigger")
+	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_NAME("Blaster")
+	PORT_BIT( 0xccf5, IP_ACTIVE_LOW, IPT_UNUSED )
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( tankbatl )
@@ -196,19 +196,19 @@ INPUT_PORTS_END
  *
  *************************************/
 
-static ADDRESS_MAP_START( hostmem, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( hostmem, AS_PROGRAM, 16, micro3d_state )
 	AM_RANGE(0x000000, 0x143fff) AM_ROM
 	AM_RANGE(0x200000, 0x20ffff) AM_RAM AM_SHARE("nvram")
-	AM_RANGE(0x800000, 0x83ffff) AM_RAM AM_BASE_MEMBER(micro3d_state, m_shared_ram)
+	AM_RANGE(0x800000, 0x83ffff) AM_RAM AM_SHARE("shared_ram")
 	AM_RANGE(0x900000, 0x900001) AM_WRITE(host_drmath_int_w)
 	AM_RANGE(0x920000, 0x920001) AM_READ_PORT("INPUTS_C_D")
 	AM_RANGE(0x940000, 0x940001) AM_READ_PORT("INPUTS_A_B")
 	AM_RANGE(0x960000, 0x960001) AM_WRITE(micro3d_reset_w)
 	AM_RANGE(0x980000, 0x980001) AM_READWRITE(micro3d_adc_r, micro3d_adc_w)
 	AM_RANGE(0x9a0000, 0x9a0007) AM_READWRITE(micro3d_tms_host_r, micro3d_tms_host_w)
-	AM_RANGE(0x9c0000, 0x9c0001) AM_NOP					/* Lamps */
-	AM_RANGE(0x9e0000, 0x9e002f) AM_DEVREADWRITE8_MODERN("mc68901", mc68901_device, read, write, 0xff00)
-	AM_RANGE(0xa00000, 0xa0003f) AM_DEVREADWRITE8("duart68681", duart68681_r, duart68681_w, 0xff00)
+	AM_RANGE(0x9c0000, 0x9c0001) AM_NOP                 /* Lamps */
+	AM_RANGE(0x9e0000, 0x9e002f) AM_DEVREADWRITE8("mc68901", mc68901_device, read, write, 0xff00)
+	AM_RANGE(0xa00000, 0xa0003f) AM_DEVREADWRITE8_LEGACY("duart68681", duart68681_r, duart68681_w, 0xff00)
 	AM_RANGE(0xa20000, 0xa20001) AM_READ(micro3d_encoder_h_r)
 	AM_RANGE(0xa40002, 0xa40003) AM_READ(micro3d_encoder_l_r)
 ADDRESS_MAP_END
@@ -220,18 +220,18 @@ ADDRESS_MAP_END
  *
  *************************************/
 
-static ADDRESS_MAP_START( vgbmem, AS_PROGRAM, 16 )
-	AM_RANGE(0x00000000, 0x007fffff) AM_RAM AM_BASE_MEMBER(micro3d_state, m_micro3d_sprite_vram)
+static ADDRESS_MAP_START( vgbmem, AS_PROGRAM, 16, micro3d_state )
+	AM_RANGE(0x00000000, 0x007fffff) AM_RAM AM_SHARE("sprite_vram")
 	AM_RANGE(0x00800000, 0x00bfffff) AM_RAM
 	AM_RANGE(0x00c00000, 0x00c0000f) AM_READ_PORT("VGB_SW")
 	AM_RANGE(0x00e00000, 0x00e0000f) AM_WRITE(micro3d_xfer3dk_w)
-	AM_RANGE(0x02000000, 0x0200ffff) AM_RAM_WRITE(micro3d_clut_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x02000000, 0x0200ffff) AM_RAM_WRITE(micro3d_clut_w) AM_SHARE("paletteram")
 	AM_RANGE(0x02600000, 0x0260000f) AM_WRITE(micro3d_creg_w)
 	AM_RANGE(0x02c00000, 0x02c0003f) AM_READ(micro3d_ti_uart_r)
 	AM_RANGE(0x02e00000, 0x02e0003f) AM_WRITE(micro3d_ti_uart_w)
 	AM_RANGE(0x03800000, 0x03dfffff) AM_ROM AM_REGION("tms_gfx", 0)
 	AM_RANGE(0x03e00000, 0x03ffffff) AM_ROM AM_REGION("tms34010", 0)
-	AM_RANGE(0xc0000000, 0xc00001ff) AM_READWRITE(tms34010_io_register_r, tms34010_io_register_w)
+	AM_RANGE(0xc0000000, 0xc00001ff) AM_READWRITE_LEGACY(tms34010_io_register_r, tms34010_io_register_w)
 	AM_RANGE(0xffe00000, 0xffffffff) AM_ROM AM_REGION("tms34010", 0)
 ADDRESS_MAP_END
 
@@ -242,11 +242,11 @@ ADDRESS_MAP_END
  *
  *************************************/
 
-static ADDRESS_MAP_START( drmath_prg, AS_PROGRAM, 32 )
+static ADDRESS_MAP_START( drmath_prg, AS_PROGRAM, 32, micro3d_state )
 	AM_RANGE(0x00000000, 0x000fffff) AM_ROM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( drmath_data, AS_DATA, 32 )
+static ADDRESS_MAP_START( drmath_data, AS_DATA, 32, micro3d_state )
 	AM_RANGE(0x00000000, 0x000fffff) AM_ROM AM_REGION("drmath", 0)
 	AM_RANGE(0x00800000, 0x0083ffff) AM_READWRITE(micro3d_shared_r, micro3d_shared_w)
 	AM_RANGE(0x00400000, 0x004fffff) AM_RAM
@@ -254,7 +254,7 @@ static ADDRESS_MAP_START( drmath_data, AS_DATA, 32 )
 	AM_RANGE(0x00a00000, 0x00a00003) AM_WRITE(drmath_int_w)
 	AM_RANGE(0x01000000, 0x01000003) AM_WRITE(micro3d_mac1_w)
 	AM_RANGE(0x01000004, 0x01000007) AM_READWRITE(micro3d_mac2_r, micro3d_mac2_w)
-	AM_RANGE(0x01200000, 0x01203fff) AM_RAM AM_BASE_MEMBER(micro3d_state, m_mac_sram)
+	AM_RANGE(0x01200000, 0x01203fff) AM_RAM AM_SHARE("mac_sram")
 	AM_RANGE(0x01400000, 0x01400003) AM_READWRITE(micro3d_pipe_r, micro3d_fifo_w)
 	AM_RANGE(0x01600000, 0x01600003) AM_WRITE(drmath_intr2_ack)
 	AM_RANGE(0x01800000, 0x01800003) AM_WRITE(micro3d_alt_fifo_w)
@@ -267,14 +267,14 @@ ADDRESS_MAP_END
  *
  *************************************/
 
-static ADDRESS_MAP_START( soundmem_prg, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( soundmem_prg, AS_PROGRAM, 8, micro3d_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( soundmem_io, AS_IO, 8 )
+static ADDRESS_MAP_START( soundmem_io, AS_IO, 8, micro3d_state )
 	AM_RANGE(0x0000, 0x07ff) AM_RAM
-	AM_RANGE(0xfd00, 0xfd01) AM_DEVREADWRITE("ym2151", ym2151_r, ym2151_w)
-	AM_RANGE(0xfe00, 0xfe00) AM_DEVWRITE("upd7759", micro3d_upd7759_w)
+	AM_RANGE(0xfd00, 0xfd01) AM_DEVREADWRITE("ym2151", ym2151_device, read, write)
+	AM_RANGE(0xfe00, 0xfe00) AM_WRITE(micro3d_upd7759_w)
 	AM_RANGE(0xff00, 0xff00) AM_WRITE(micro3d_snd_dac_a)
 	AM_RANGE(0xff01, 0xff01) AM_WRITE(micro3d_snd_dac_b)
 	AM_RANGE(MCS51_PORT_P0, MCS51_PORT_P3) AM_READWRITE(micro3d_sound_io_r, micro3d_sound_io_w)
@@ -289,12 +289,13 @@ ADDRESS_MAP_END
 
 static const tms34010_config vgb_config =
 {
-	FALSE,							/* halt on reset */
-	"screen",						/* the screen operated on */
-	XTAL_40MHz / 8,					/* pixel clock */
-	4,								/* pixels per clock */
-	micro3d_scanline_update,		/* scanline updater */
-	micro3d_tms_interrupt,			/* Generate interrupt */
+	FALSE,                          /* halt on reset */
+	"screen",                       /* the screen operated on */
+	XTAL_40MHz / 8,                 /* pixel clock */
+	4,                              /* pixels per clock */
+	micro3d_scanline_update,        /* scanline updater (indexed16) */
+	NULL,                           /* scanline updater (rgb32) */
+	micro3d_tms_interrupt,          /* Generate interrupt */
 	NULL,
 	NULL
 };
@@ -309,18 +310,18 @@ static const duart68681_config micro3d_duart68681_config =
 
 static MC68901_INTERFACE( mfp_intf )
 {
-	4000000,											/* timer clock */
-	0,													/* receive clock */
-	0,													/* transmit clock */
-	DEVCB_CPU_INPUT_LINE("maincpu", M68K_IRQ_4),		/* interrupt */
-	DEVCB_NULL,											/* GPIO read */
-	DEVCB_NULL,											/* GPIO write */
-	DEVCB_NULL,											/* TAO */
-	DEVCB_NULL,											/* TBO */
-	DEVCB_NULL,											/* TCO */
-	DEVCB_NULL,											/* TDO */
-	DEVCB_NULL,											/* serial input */
-	DEVCB_NULL											/* serial output */
+	4000000,                                            /* timer clock */
+	0,                                                  /* receive clock */
+	0,                                                  /* transmit clock */
+	DEVCB_CPU_INPUT_LINE("maincpu", M68K_IRQ_4),        /* interrupt */
+	DEVCB_NULL,                                         /* GPIO read */
+	DEVCB_NULL,                                         /* GPIO write */
+	DEVCB_NULL,                                         /* TAO */
+	DEVCB_NULL,                                         /* TBO */
+	DEVCB_NULL,                                         /* TCO */
+	DEVCB_NULL,                                         /* TDO */
+	DEVCB_NULL,                                         /* serial input */
+	DEVCB_NULL                                          /* serial output */
 };
 
 
@@ -334,7 +335,7 @@ static MACHINE_CONFIG_START( micro3d, micro3d_state )
 
 	MCFG_CPU_ADD("maincpu", M68000, XTAL_32MHz / 2)
 	MCFG_CPU_PROGRAM_MAP(hostmem)
-	MCFG_CPU_VBLANK_INT("screen", micro3d_vblank)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", micro3d_state,  micro3d_vblank)
 
 	MCFG_CPU_ADD("vgb", TMS34010, XTAL_40MHz)
 	MCFG_CPU_CONFIG(vgb_config)
@@ -351,19 +352,15 @@ static MACHINE_CONFIG_START( micro3d, micro3d_state )
 	MCFG_DUART68681_ADD("duart68681", XTAL_3_6864MHz, micro3d_duart68681_config)
 	MCFG_MC68901_ADD("mc68901", 4000000, mfp_intf)
 
-	MCFG_MACHINE_RESET(micro3d)
 	MCFG_NVRAM_ADD_0FILL("nvram")
 	MCFG_QUANTUM_TIME(attotime::from_hz(3000))
 
 	MCFG_PALETTE_LENGTH(4096)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_RAW_PARAMS(XTAL_40MHz/8*4, 192*4, 0, 144*4, 434, 0, 400)
-	MCFG_SCREEN_UPDATE(tms340x0)
+	MCFG_SCREEN_UPDATE_STATIC(tms340x0_ind16)
 
-	MCFG_VIDEO_START(micro3d)
-	MCFG_VIDEO_RESET(micro3d)
 
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
 
@@ -371,7 +368,7 @@ static MACHINE_CONFIG_START( micro3d, micro3d_state )
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "lspeaker", 0.35)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "rspeaker", 0.35)
 
-	MCFG_SOUND_ADD("ym2151", YM2151, XTAL_3_579545MHz)
+	MCFG_YM2151_ADD("ym2151", XTAL_3_579545MHz)
 	MCFG_SOUND_ROUTE(0, "lspeaker", 0.35)
 	MCFG_SOUND_ROUTE(1, "rspeaker", 0.35)
 
@@ -500,59 +497,6 @@ ROM_START( f15se21 )
 ROM_END
 
 ROM_START( botss )
-	/* Host PCB (MPG DW-00011C-0011-02) */
-	ROM_REGION( 0x180000, "maincpu", 0 )
-	ROM_LOAD16_BYTE( "110-00013-300.u67", 0x000001, 0x20000, CRC(7f74362a) SHA1(41611ba8e6eb5d6b3dfe88e1cede7d9fb5472e40) )
-	ROM_LOAD16_BYTE( "110-00013-301.u91", 0x000000, 0x20000, CRC(a8100d1e) SHA1(69d3cac6f67563c0796560f7b874d7660720027d) )
-	ROM_LOAD16_BYTE( "110-00013-302.u68", 0x040001, 0x20000, CRC(af865ee4) SHA1(f00bce49401431bc749208399329d9f92457186b) )
-	ROM_LOAD16_BYTE( "110-00013-303.u92", 0x040000, 0x20000, CRC(15182619) SHA1(e95dcce11c0651c8e85fc0c658029f48eea35fb8) )
-	ROM_LOAD16_BYTE( "110-00013-104.u69", 0x080001, 0x20000, CRC(72a607ca) SHA1(1afc85380be12c429808c48f1502736a4c8b98e5) )
-	ROM_LOAD16_BYTE( "110-00013-105.u93", 0x080000, 0x20000, CRC(f37680ae) SHA1(51f1ee805b7d1b2b078c612c572e12846de623b9) )
-	ROM_LOAD16_BYTE( "110-00013-106.u70", 0x0c0001, 0x20000, CRC(57a1c728) SHA1(2bdc831be739ada0f4f4adec7974da453878db0e) )
-	ROM_LOAD16_BYTE( "110-00013-107.u94", 0x0c0000, 0x20000, CRC(4c9e16af) SHA1(1f8acc9bb85fe1bf459b4358b9bf9cf9847e6a36) )
-	ROM_LOAD16_BYTE( "110-00013-108.u71", 0x100001, 0x20000, CRC(cfc0333e) SHA1(9f290769129a61189870faef45c3f061eb7b5c07) )
-	ROM_LOAD16_BYTE( "110-00013-109.u95", 0x100000, 0x20000, CRC(6c595d1e) SHA1(89fdc30166ba1e9706798547195bdf6875a02e96) )
-	ROM_FILL(                     0x140000, 0x40000, 0xff )
-
-	/* Dr Math PCB (MPG 010-00002-001) */
-	ROM_REGION32_BE( 0x100000, "drmath", 0 )
-	ROMX_LOAD( "110-00013-122.u134", 0x000000, 0x08000, CRC(bf60c487) SHA1(5ce80e89d9a24b627b0e97bf36a4e71c2eff4324), ROM_SKIP(7) )
-	ROMX_LOAD( "110-00013-125.u126", 0x000001, 0x08000, CRC(b0dccf4a) SHA1(e8bfd622c006985b724cdbd3ad14c33e9ed27c6c), ROM_SKIP(7) )
-	ROMX_LOAD( "110-00013-123.u114", 0x000002, 0x08000, CRC(04ba6ed1) SHA1(012be71c6b955beda2bd0ff376dcaab51b226723), ROM_SKIP(7) )
-	ROMX_LOAD( "110-00013-124.u107", 0x000003, 0x08000, CRC(220db5d3) SHA1(3bfbe0eb97282c4ce449fd44e8e141de74f08eb0), ROM_SKIP(7) )
-	ROMX_LOAD( "110-00013-018.u135", 0x000004, 0x08000, CRC(2903e682) SHA1(027ed6524e9d4490632f10aeb22150c2fbc4eec2), ROM_SKIP(7) )
-	ROMX_LOAD( "110-00013-121.u127", 0x000005, 0x08000, CRC(198a636b) SHA1(356b8948aafb98cb5e6ee7b5ad6ea9e5998265e5), ROM_SKIP(7) )
-	ROMX_LOAD( "110-00013-119.u115", 0x000006, 0x08000, CRC(9c9dbac1) SHA1(4c66971884190598e128684ece2e15a1c80b94ed), ROM_SKIP(7) )
-	ROMX_LOAD( "110-00013-120.u108", 0x000007, 0x08000, CRC(dafa173a) SHA1(a19980b92a5e74ebe395be36313701fdb527a46a), ROM_SKIP(7) )
-
-	ROM_REGION16_BE( 0x80000, "vertex", 0 )
-	ROM_LOAD16_BYTE( "110-00013-014.u153", 0x00001, 0x20000, CRC(0eee0557) SHA1(8abe52cad31e59cf814fd9f64f4e42ddb4aa8c93) )
-	ROM_LOAD16_BYTE( "110-00013-015.u154", 0x00000, 0x20000, CRC(68564122) SHA1(410d2db74e574774b2eadd7fdf891feef5d8a93f) )
-	ROM_LOAD16_BYTE( "110-00013-016.u167", 0x40001, 0x20000, CRC(60c6cb26) SHA1(0e2bf65793715e12d8fd7f87fd3336a9d00ee7e6) )
-	ROM_LOAD16_BYTE( "110-00013-017.u160", 0x40000, 0x20000, CRC(d8b89379) SHA1(aa08e111c1505a4ad55b14659f8e21fd39cfcb16) )
-
-	ROM_REGION16_LE( 0x40000, "tms34010", 0 )
-	ROM_LOAD16_BYTE( "110-00023-101.u101", 0x000000, 0x20000, CRC(6aada23d) SHA1(85dbf9b20e4f17cb21922637763654d6cae80dfd) )
-	ROM_LOAD16_BYTE( "110-00023-104.u97",  0x000001, 0x20000, CRC(715cac9d) SHA1(2aa0c563dc1fe4d02fa1ecbaed16f720f899fdc4) )
-
-	/* Video Graphics PCB (MPG DW-010-00002-002) */
-	ROM_REGION16_LE( 0xc0000, "tms_gfx", 0 )
-	ROM_LOAD16_BYTE( "110-00023-105.u124", 0x000000, 0x20000, CRC(5482e0c4) SHA1(492afac1862f2899cd734d1e57ca978ed6a906d5) )
-	ROM_LOAD16_BYTE( "110-00023-106.u121", 0x000001, 0x20000, CRC(a55e5d19) SHA1(86fbcb425103ae9fff381357339af349848fc3f2) )
-	ROM_LOAD16_BYTE( "110-00023-107.u130", 0x040000, 0x20000, CRC(006487b6) SHA1(f8bc6abad13df099da1708bd22f239703e407b21) )
-	ROM_LOAD16_BYTE( "110-00023-108.u133", 0x040001, 0x20000, CRC(e4587ba1) SHA1(1323b4be5a526ae182ee38e96fccd263a4cecc37) )
-	ROM_LOAD16_BYTE( "110-00023-103.u114", 0x080000, 0x20000, CRC(4e486e70) SHA1(04ee16cfadd43dbe9ed5bd8330c21a718d63a8f4) )
-	ROM_LOAD16_BYTE( "110-00023-102.u108", 0x080001, 0x20000, CRC(441e8490) SHA1(6cfe30cea3fa297b71e881fbddad6d65a96e4386) )
-
-	/* Sound PCB (MPG 010-00018-002) */
-	ROM_REGION( 0x10000, "audiocpu", 0 )
-	ROM_LOAD( "110-00014-001.u2", 0x000000, 0x08000, CRC(307fcb6d) SHA1(0cf63a39ac8920be6532974311804529d7218545) )
-
-	ROM_REGION( 0x40000, "upd7759", 0 )
-	ROM_LOAD( "110-00013-001.u17", 0x000000, 0x40000, CRC(015a0b17) SHA1(f229c9aa59f0e6b25b818f9513997a8685e33982) )
-ROM_END
-
-ROM_START( botssa )
 	/* Host PCB (MPG DW-00011C-0011-01) */
 	ROM_REGION( 0x180000, "maincpu", 0 )
 	ROM_LOAD16_BYTE( "110-00153-100.u67", 0x000001, 0x20000, CRC(338aa9c3) SHA1(3d10329a5df80ab1761fd3953eb3872a72f26bef) )
@@ -613,6 +557,59 @@ ROM_START( botssa )
 	ROM_LOAD( "mac2_u166_a.bin", 0x000000, 0x014c7, CRC(c85c4c66) SHA1(fab07ad0611de7d2c2af9b6fa262d574e238bd9f) ) /* EPS448 */
 ROM_END
 
+ROM_START( botss11 )
+	/* Host PCB (MPG DW-00011C-0011-02) */
+	ROM_REGION( 0x180000, "maincpu", 0 )
+	ROM_LOAD16_BYTE( "110-00013-300.u67", 0x000001, 0x20000, CRC(7f74362a) SHA1(41611ba8e6eb5d6b3dfe88e1cede7d9fb5472e40) )
+	ROM_LOAD16_BYTE( "110-00013-301.u91", 0x000000, 0x20000, CRC(a8100d1e) SHA1(69d3cac6f67563c0796560f7b874d7660720027d) )
+	ROM_LOAD16_BYTE( "110-00013-302.u68", 0x040001, 0x20000, CRC(af865ee4) SHA1(f00bce49401431bc749208399329d9f92457186b) )
+	ROM_LOAD16_BYTE( "110-00013-303.u92", 0x040000, 0x20000, CRC(15182619) SHA1(e95dcce11c0651c8e85fc0c658029f48eea35fb8) )
+	ROM_LOAD16_BYTE( "110-00013-104.u69", 0x080001, 0x20000, CRC(72a607ca) SHA1(1afc85380be12c429808c48f1502736a4c8b98e5) )
+	ROM_LOAD16_BYTE( "110-00013-105.u93", 0x080000, 0x20000, CRC(f37680ae) SHA1(51f1ee805b7d1b2b078c612c572e12846de623b9) )
+	ROM_LOAD16_BYTE( "110-00013-106.u70", 0x0c0001, 0x20000, CRC(57a1c728) SHA1(2bdc831be739ada0f4f4adec7974da453878db0e) )
+	ROM_LOAD16_BYTE( "110-00013-107.u94", 0x0c0000, 0x20000, CRC(4c9e16af) SHA1(1f8acc9bb85fe1bf459b4358b9bf9cf9847e6a36) )
+	ROM_LOAD16_BYTE( "110-00013-108.u71", 0x100001, 0x20000, CRC(cfc0333e) SHA1(9f290769129a61189870faef45c3f061eb7b5c07) )
+	ROM_LOAD16_BYTE( "110-00013-109.u95", 0x100000, 0x20000, CRC(6c595d1e) SHA1(89fdc30166ba1e9706798547195bdf6875a02e96) )
+	ROM_FILL(                     0x140000, 0x40000, 0xff )
+
+	/* Dr Math PCB (MPG 010-00002-001) */
+	ROM_REGION32_BE( 0x100000, "drmath", 0 )
+	ROMX_LOAD( "110-00013-122.u134", 0x000000, 0x08000, CRC(bf60c487) SHA1(5ce80e89d9a24b627b0e97bf36a4e71c2eff4324), ROM_SKIP(7) )
+	ROMX_LOAD( "110-00013-125.u126", 0x000001, 0x08000, CRC(b0dccf4a) SHA1(e8bfd622c006985b724cdbd3ad14c33e9ed27c6c), ROM_SKIP(7) )
+	ROMX_LOAD( "110-00013-123.u114", 0x000002, 0x08000, CRC(04ba6ed1) SHA1(012be71c6b955beda2bd0ff376dcaab51b226723), ROM_SKIP(7) )
+	ROMX_LOAD( "110-00013-124.u107", 0x000003, 0x08000, CRC(220db5d3) SHA1(3bfbe0eb97282c4ce449fd44e8e141de74f08eb0), ROM_SKIP(7) )
+	ROMX_LOAD( "110-00013-018.u135", 0x000004, 0x08000, CRC(2903e682) SHA1(027ed6524e9d4490632f10aeb22150c2fbc4eec2), ROM_SKIP(7) )
+	ROMX_LOAD( "110-00013-121.u127", 0x000005, 0x08000, CRC(198a636b) SHA1(356b8948aafb98cb5e6ee7b5ad6ea9e5998265e5), ROM_SKIP(7) )
+	ROMX_LOAD( "110-00013-119.u115", 0x000006, 0x08000, CRC(9c9dbac1) SHA1(4c66971884190598e128684ece2e15a1c80b94ed), ROM_SKIP(7) )
+	ROMX_LOAD( "110-00013-120.u108", 0x000007, 0x08000, CRC(dafa173a) SHA1(a19980b92a5e74ebe395be36313701fdb527a46a), ROM_SKIP(7) )
+
+	ROM_REGION16_BE( 0x80000, "vertex", 0 )
+	ROM_LOAD16_BYTE( "110-00013-014.u153", 0x00001, 0x20000, CRC(0eee0557) SHA1(8abe52cad31e59cf814fd9f64f4e42ddb4aa8c93) )
+	ROM_LOAD16_BYTE( "110-00013-015.u154", 0x00000, 0x20000, CRC(68564122) SHA1(410d2db74e574774b2eadd7fdf891feef5d8a93f) )
+	ROM_LOAD16_BYTE( "110-00013-016.u167", 0x40001, 0x20000, CRC(60c6cb26) SHA1(0e2bf65793715e12d8fd7f87fd3336a9d00ee7e6) )
+	ROM_LOAD16_BYTE( "110-00013-017.u160", 0x40000, 0x20000, CRC(d8b89379) SHA1(aa08e111c1505a4ad55b14659f8e21fd39cfcb16) )
+
+	ROM_REGION16_LE( 0x40000, "tms34010", 0 )
+	ROM_LOAD16_BYTE( "110-00023-101.u101", 0x000000, 0x20000, CRC(6aada23d) SHA1(85dbf9b20e4f17cb21922637763654d6cae80dfd) )
+	ROM_LOAD16_BYTE( "110-00023-104.u97",  0x000001, 0x20000, CRC(715cac9d) SHA1(2aa0c563dc1fe4d02fa1ecbaed16f720f899fdc4) )
+
+	/* Video Graphics PCB (MPG DW-010-00002-002) */
+	ROM_REGION16_LE( 0xc0000, "tms_gfx", 0 )
+	ROM_LOAD16_BYTE( "110-00023-105.u124", 0x000000, 0x20000, CRC(5482e0c4) SHA1(492afac1862f2899cd734d1e57ca978ed6a906d5) )
+	ROM_LOAD16_BYTE( "110-00023-106.u121", 0x000001, 0x20000, CRC(a55e5d19) SHA1(86fbcb425103ae9fff381357339af349848fc3f2) )
+	ROM_LOAD16_BYTE( "110-00023-107.u130", 0x040000, 0x20000, CRC(006487b6) SHA1(f8bc6abad13df099da1708bd22f239703e407b21) )
+	ROM_LOAD16_BYTE( "110-00023-108.u133", 0x040001, 0x20000, CRC(e4587ba1) SHA1(1323b4be5a526ae182ee38e96fccd263a4cecc37) )
+	ROM_LOAD16_BYTE( "110-00023-103.u114", 0x080000, 0x20000, CRC(4e486e70) SHA1(04ee16cfadd43dbe9ed5bd8330c21a718d63a8f4) )
+	ROM_LOAD16_BYTE( "110-00023-102.u108", 0x080001, 0x20000, CRC(441e8490) SHA1(6cfe30cea3fa297b71e881fbddad6d65a96e4386) )
+
+	/* Sound PCB (MPG 010-00018-002) */
+	ROM_REGION( 0x10000, "audiocpu", 0 )
+	ROM_LOAD( "110-00014-001.u2", 0x000000, 0x08000, CRC(307fcb6d) SHA1(0cf63a39ac8920be6532974311804529d7218545) )
+
+	ROM_REGION( 0x40000, "upd7759", 0 )
+	ROM_LOAD( "110-00013-001.u17", 0x000000, 0x40000, CRC(015a0b17) SHA1(f229c9aa59f0e6b25b818f9513997a8685e33982) )
+ROM_END
+
 ROM_START( tankbatl )
 	ROM_REGION( 0x180000, "maincpu", 0 )
 	ROM_LOAD16_BYTE( "lo_u67",    0x000001, 0x20000, CRC(97aabac0) SHA1(12a0719d3332a63e912161200b0a942c27c1f5da) )
@@ -669,8 +666,8 @@ ROM_END
  *
  *************************************/
 
-GAME( 1991, f15se,    0,     micro3d, f15se,    micro3d, ROT0, "Microprose Games Inc.", "F-15 Strike Eagle (rev. 2.2 02/25/91)", GAME_IMPERFECT_SOUND )
-GAME( 1991, f15se21 , f15se, micro3d, f15se,    micro3d, ROT0, "Microprose Games Inc.", "F-15 Strike Eagle (rev. 2.1 02/04/91)", GAME_IMPERFECT_SOUND )
-GAME( 1992, botss,    0,     micro3d, botss,    micro3d, ROT0, "Microprose Games Inc.", "Battle of the Solar System (rev. 1.1 3/24/92)", GAME_IMPERFECT_SOUND )
-GAME( 1992, botssa,   botss, micro3d, botssa,   botssa,  ROT0, "Microprose Games Inc.", "Battle of the Solar System (rev. 1.1a 7/23/92)", GAME_IMPERFECT_SOUND )
-GAME( 1992, tankbatl, 0,     micro3d, tankbatl, micro3d, ROT0, "Microprose Games Inc.", "Tank Battle (prototype rev. 4/21/92)",  GAME_IMPERFECT_SOUND )
+GAME( 1991, f15se,    0,     micro3d, f15se, micro3d_state,    micro3d, ROT0, "Microprose Games Inc.", "F-15 Strike Eagle (rev. 2.2 02/25/91)", GAME_IMPERFECT_SOUND )
+GAME( 1991, f15se21,  f15se, micro3d, f15se, micro3d_state,    micro3d, ROT0, "Microprose Games Inc.", "F-15 Strike Eagle (rev. 2.1 02/04/91)", GAME_IMPERFECT_SOUND )
+GAME( 1992, botss,    0,     micro3d, botss, micro3d_state,    botss,   ROT0, "Microprose Games Inc.", "Battle of the Solar System (rev. 1.1a 7/23/92)", GAME_IMPERFECT_SOUND )
+GAME( 1992, botss11,  botss, micro3d, botss11, micro3d_state,  micro3d, ROT0, "Microprose Games Inc.", "Battle of the Solar System (rev. 1.1 3/24/92)", GAME_IMPERFECT_SOUND )
+GAME( 1992, tankbatl, 0,     micro3d, tankbatl, micro3d_state, micro3d, ROT0, "Microprose Games Inc.", "Tank Battle (prototype rev. 4/21/92)",  GAME_IMPERFECT_SOUND )

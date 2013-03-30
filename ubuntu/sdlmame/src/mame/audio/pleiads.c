@@ -10,8 +10,8 @@
 #include "sound/tms36xx.h"
 #include "audio/pleiads.h"
 
-#define VMIN	0
-#define VMAX	32767
+#define VMIN    0
+#define VMAX    32767
 
 /* fixed 8kHz clock */
 #define TONE1_CLOCK  8000
@@ -38,15 +38,14 @@ struct n_state
 	int freq;
 };
 
-typedef struct _pleiads_sound_state pleiads_sound_state;
-struct _pleiads_sound_state
+struct pleiads_sound_state
 {
 	device_t *m_tms;
 	sound_stream *m_channel;
 
 	int m_sound_latch_a;
 	int m_sound_latch_b;
-	int m_sound_latch_c;	/* part of the videoreg_w latch */
+	int m_sound_latch_c;    /* part of the videoreg_w latch */
 
 	UINT32 *m_poly18;
 	int m_polybit;
@@ -75,7 +74,7 @@ INLINE pleiads_sound_state *get_safe_token(device_t *device)
 	assert(device != NULL);
 	assert(device->type() == PLEIADS || device->type() == POPFLAME || device->type() == NAUGHTYB);
 
-	return (pleiads_sound_state *)downcast<legacy_device_base *>(device)->token();
+	return (pleiads_sound_state *)downcast<pleiads_sound_device *>(device)->token();
 }
 
 
@@ -293,9 +292,9 @@ INLINE int tone4(pleiads_sound_state *state, int samplerate)
 	int sum;
 
 	/* Two resistors divide the output voltage of the op-amp between
-     * polybit = 0: 0V and level: x * opamp_resistor / (opamp_resistor + polybit_resistor)
-     * polybit = 1: level and 5V: x * polybit_resistor / (opamp_resistor + polybit_resistor)
-     */
+	 * polybit = 0: 0V and level: x * opamp_resistor / (opamp_resistor + polybit_resistor)
+	 * polybit = 1: level and 5V: x * polybit_resistor / (opamp_resistor + polybit_resistor)
+	 */
 	if (state->m_polybit)
 		level = level + (VMAX - level) * state->m_opamp_resistor / (state->m_opamp_resistor + state->m_polybit_resistor);
 	else
@@ -311,7 +310,7 @@ INLINE int tone4(pleiads_sound_state *state, int samplerate)
 
 	/* mix the two signals */
 	sum = vpc5 * state->m_pa5_resistor / (state->m_pa5_resistor + state->m_pc5_resistor) +
-		  vpa5 * state->m_pc5_resistor / (state->m_pa5_resistor + state->m_pc5_resistor);
+			vpa5 * state->m_pc5_resistor / (state->m_pa5_resistor + state->m_pc5_resistor);
 
 	return (state->m_tone4.output) ? sum : -sum;
 }
@@ -365,9 +364,9 @@ INLINE int noise(pleiads_sound_state *state, int samplerate)
 	int sum = 0;
 
 	/*
-     * bit 4 of latch A: noise counter rate modulation?
-     * CV2 input of lower 556 is connected via 2k resistor
-     */
+	 * bit 4 of latch A: noise counter rate modulation?
+	 * CV2 input of lower 556 is connected via 2k resistor
+	 */
 	if ( state->m_sound_latch_a & 0x10 )
 		state->m_noise.counter -= state->m_noise.freq * 2 / 3; /* ????? */
 	else
@@ -382,12 +381,12 @@ INLINE int noise(pleiads_sound_state *state, int samplerate)
 	}
 
 	/* The polynome output bit is used to gate bits 6 + 7 of
-     * sound latch A through the upper half of a 4066 chip.
-     * Bit 6 is sweeping a capacitor between 0V and 4.7V
-     * while bit 7 is connected directly to the 4066.
-     * Both outputs are then filtered, bit 7 even twice,
-     * but it's beyond me what the filters there are doing...
-     */
+	 * sound latch A through the upper half of a 4066 chip.
+	 * Bit 6 is sweeping a capacitor between 0V and 4.7V
+	 * while bit 7 is connected directly to the 4066.
+	 * Both outputs are then filtered, bit 7 even twice,
+	 * but it's beyond me what the filters there are doing...
+	 */
 	if (state->m_polybit)
 	{
 		sum += c_pa6_level;
@@ -437,10 +436,10 @@ WRITE8_DEVICE_HANDLER( pleiads_sound_control_b_w )
 	pleiads_sound_state *state = get_safe_token(device);
 
 	/*
-     * pitch selects one of 4 possible clock inputs
-     * (actually 3, because IC2 and IC3 are tied together)
-     * write note value to TMS3615; voice b1 & b2
-     */
+	 * pitch selects one of 4 possible clock inputs
+	 * (actually 3, because IC2 and IC3 are tied together)
+	 * write note value to TMS3615; voice b1 & b2
+	 */
 	int note = data & 15;
 	int pitch = (data >> 6) & 3;
 
@@ -450,7 +449,7 @@ WRITE8_DEVICE_HANDLER( pleiads_sound_control_b_w )
 	logerror("pleiads_sound_control_b_w $%02x\n", data);
 
 	if (pitch == 3)
-		pitch = 2;	/* 2 and 3 are the same */
+		pitch = 2;  /* 2 and 3 are the same */
 
 	tms36xx_note_w(state->m_tms, pitch, note);
 
@@ -504,8 +503,8 @@ static DEVICE_START( pleiads_sound )
 	pleiads_sound_state *state = get_safe_token(device);
 
 	/* The real values are _unknown_!
-     * I took the ones from Naughty Boy / Pop Flamer
-     */
+	 * I took the ones from Naughty Boy / Pop Flamer
+	 */
 
 	/* charge 10u?? (C??) through 330K?? (R??) -> 3.3s */
 	state->m_pa5.charge_time = 3.3;
@@ -519,16 +518,16 @@ static DEVICE_START( pleiads_sound )
 	/* discharge 2.2uF?? through 10k?? -> 0.22s */
 	state->m_pa6.discharge_time = 0.022;
 
-    /* 10k and 10uF */
+	/* 10k and 10uF */
 	state->m_pb4.charge_time = 0.1;
 	state->m_pb4.discharge_time = 0.1;
 
 	/* charge C49 (22u?) via R47 (2k?) and R48 (1k)
-     * time constant (1000+2000) * 22e-6 = 0.066s */
+	 * time constant (1000+2000) * 22e-6 = 0.066s */
 	state->m_pc4.charge_time = 0.066;
 
 	/* discharge C49 (22u?) via R48 (1k) and diode D1
-     * time constant 1000 * 22e-6 = 0.022s */
+	 * time constant 1000 * 22e-6 = 0.022s */
 	state->m_pc4.discharge_time = 0.022;
 
 	/* charge 10u?? through 330 -> 0.0033s */
@@ -548,7 +547,7 @@ static DEVICE_START( pleiads_sound )
 	state->m_tone3.max_freq = 582;
 
 	/* lower 556 upper half: Ra=33k??, Rb=100k??, C=0.0047uF??
-       freq = 1.44 / ((33000+2*100000) * 0.0047e-6) = approx. 1315 Hz */
+	   freq = 1.44 / ((33000+2*100000) * 0.0047e-6) = approx. 1315 Hz */
 	state->m_tone4.max_freq = 1315;
 
 	/* how to divide the V/C voltage for tone #4 */
@@ -556,28 +555,11 @@ static DEVICE_START( pleiads_sound )
 	state->m_opamp_resistor = 20;
 
 	/* lower 556 lower half: Ra=100k??, Rb=1k??, C=0.01uF??
-      freq = 1.44 / ((100000+2*1000) * 0.01e-6) = approx. 1412 Hz */
-	state->m_noise.freq = 1412;	/* higher noise rate than popflame/naughtyb??? */
+	  freq = 1.44 / ((100000+2*1000) * 0.01e-6) = approx. 1412 Hz */
+	state->m_noise.freq = 1412; /* higher noise rate than popflame/naughtyb??? */
 
 	DEVICE_START_CALL(common_sh_start);
 }
-
-DEVICE_GET_INFO( pleiads_sound )
-{
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(pleiads_sound_state);			break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME(pleiads_sound);	break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "Pleiads Custom");				break;
-		case DEVINFO_STR_SOURCE_FILE:						strcpy(info->s, __FILE__);						break;
-	}
-}
-
 
 static DEVICE_START( naughtyb_sound )
 {
@@ -600,11 +582,11 @@ static DEVICE_START( naughtyb_sound )
 	state->m_pb4.discharge_time = 0.1;
 
 	/* charge 10uF? (C??) via 3k?? (R??) and 2k?? (R28?)
-     * time constant (3000+2000) * 10e-6 = 0.05s */
+	 * time constant (3000+2000) * 10e-6 = 0.05s */
 	state->m_pc4.charge_time = 0.05 * 10;
 
 	/* discharge 10uF? (C??) via 2k?? R28??  and diode D?
-     * time constant 2000 * 10e-6 = 0.02s */
+	 * time constant 2000 * 10e-6 = 0.02s */
 	state->m_pc4.discharge_time = 0.02 * 10;
 
 	/* charge 10u through 330 -> 0.0033s */
@@ -624,7 +606,7 @@ static DEVICE_START( naughtyb_sound )
 	state->m_tone3.max_freq = 322;
 
 	/* lower 556 upper half: Ra=33k, Rb=100k, C=0.0047uF
-       freq = 1.44 / ((33000+2*100000) * 0.0047e-6) = approx. 1315 Hz */
+	   freq = 1.44 / ((33000+2*100000) * 0.0047e-6) = approx. 1315 Hz */
 	state->m_tone4.max_freq = 1315;
 
 	/* how to divide the V/C voltage for tone #4 */
@@ -632,28 +614,11 @@ static DEVICE_START( naughtyb_sound )
 	state->m_opamp_resistor = 20;
 
 	/* lower 556 lower half: Ra=200k, Rb=1k, C=0.01uF
-      freq = 1.44 / ((200000+2*1000) * 0.01e-6) = approx. 713 Hz */
+	  freq = 1.44 / ((200000+2*1000) * 0.01e-6) = approx. 713 Hz */
 	state->m_noise.freq = 713;
 
 	DEVICE_START_CALL(common_sh_start);
 }
-
-DEVICE_GET_INFO( naughtyb_sound )
-{
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(pleiads_sound_state);			break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME(naughtyb_sound);break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "Naughty Boy Custom");			break;
-		case DEVINFO_STR_SOURCE_FILE:						strcpy(info->s, __FILE__);						break;
-	}
-}
-
 
 static DEVICE_START( popflame_sound )
 {
@@ -671,16 +636,16 @@ static DEVICE_START( popflame_sound )
 	/* discharge 2.2uF through 10K -> 0.022s */
 	state->m_pa6.discharge_time = 0.022;
 
-    /* 2k and 10uF */
+	/* 2k and 10uF */
 	state->m_pb4.charge_time = 0.02;
 	state->m_pb4.discharge_time = 0.02;
 
 	/* charge 2.2uF (C49?) via R47 (100) and R48 (1k)
-     * time constant (100+1000) * 2.2e-6 = 0.00242 */
+	 * time constant (100+1000) * 2.2e-6 = 0.00242 */
 	state->m_pc4.charge_time = 0.000242;
 
 	/* discharge 2.2uF (C49?) via R48 (1k) and diode D1
-     * time constant 1000 * 22e-6 = 0.0022s */
+	 * time constant 1000 * 22e-6 = 0.0022s */
 	state->m_pc4.discharge_time = 0.00022;
 
 	/* charge 22u (C52 in Pop Flamer) through 10k -> 0.22s */
@@ -700,7 +665,7 @@ static DEVICE_START( popflame_sound )
 	state->m_tone3.max_freq = 1108;
 
 	/* lower 556 upper half: Ra=33k, Rb=100k, C=0.0047uF
-       freq = 1.44 / ((33000+2*100000) * 0.0047e-6) = approx. 1315 Hz */
+	   freq = 1.44 / ((33000+2*100000) * 0.0047e-6) = approx. 1315 Hz */
 	state->m_tone4.max_freq = 1315;
 
 	/* how to divide the V/C voltage for tone #4 */
@@ -708,29 +673,127 @@ static DEVICE_START( popflame_sound )
 	state->m_opamp_resistor = 20;
 
 	/* lower 556 lower half: Ra=200k, Rb=1k, C=0.01uF
-      freq = 1.44 / ((200000+2*1000) * 0.01e-6) = approx. 713 Hz */
+	  freq = 1.44 / ((200000+2*1000) * 0.01e-6) = approx. 713 Hz */
 	state->m_noise.freq = 713;
 
 	DEVICE_START_CALL(common_sh_start);
 }
 
-DEVICE_GET_INFO( popflame_sound )
+const device_type PLEIADS = &device_creator<pleiads_sound_device>;
+
+pleiads_sound_device::pleiads_sound_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, PLEIADS, "Pleiads Custom", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
 {
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(pleiads_sound_state);			break;
+	m_token = global_alloc_clear(pleiads_sound_state);
+}
 
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME(popflame_sound);	break;
+pleiads_sound_device::pleiads_sound_device(const machine_config &mconfig, device_type type, const char *name, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, type, name, tag, owner, clock),
+		device_sound_interface(mconfig, *this)
+{
+	m_token = global_alloc_clear(pleiads_sound_state);
+}
 
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "Pop Flamer Custom");				break;
-		case DEVINFO_STR_SOURCE_FILE:						strcpy(info->s, __FILE__);						break;
-	}
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
+
+void pleiads_sound_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void pleiads_sound_device::device_start()
+{
+	DEVICE_START_NAME( pleiads_sound )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void pleiads_sound_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
 }
 
 
-DEFINE_LEGACY_SOUND_DEVICE(PLEIADS, pleiads_sound);
-DEFINE_LEGACY_SOUND_DEVICE(NAUGHTYB, naughtyb_sound);
-DEFINE_LEGACY_SOUND_DEVICE(POPFLAME, popflame_sound);
+const device_type NAUGHTYB = &device_creator<naughtyb_sound_device>;
+
+naughtyb_sound_device::naughtyb_sound_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: pleiads_sound_device(mconfig, NAUGHTYB, "Naughty Boy Custom", tag, owner, clock)
+{
+}
+
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
+
+void naughtyb_sound_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void naughtyb_sound_device::device_start()
+{
+	DEVICE_START_NAME( naughtyb_sound )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void naughtyb_sound_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}
+
+
+const device_type POPFLAME = &device_creator<popflame_sound_device>;
+
+popflame_sound_device::popflame_sound_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: pleiads_sound_device(mconfig, POPFLAME, "Pop Flamer Custom", tag, owner, clock)
+{
+}
+
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
+
+void popflame_sound_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void popflame_sound_device::device_start()
+{
+	DEVICE_START_NAME( popflame_sound )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void popflame_sound_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}

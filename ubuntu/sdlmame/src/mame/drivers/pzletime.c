@@ -22,16 +22,22 @@
 class pzletime_state : public driver_device
 {
 public:
-	pzletime_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	pzletime_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_video_regs(*this, "video_regs"),
+		m_tilemap_regs(*this, "tilemap_regs"),
+		m_bg_videoram(*this, "bg_videoram"),
+		m_mid_videoram(*this, "mid_videoram"),
+		m_txt_videoram(*this, "txt_videoram"),
+		m_spriteram(*this, "spriteram"){ }
 
 	/* memory pointers */
-	UINT16 *       m_bg_videoram;
-	UINT16 *       m_mid_videoram;
-	UINT16 *       m_txt_videoram;
-	UINT16 *       m_tilemap_regs;
-	UINT16 *       m_video_regs;
-	UINT16 *       m_spriteram;
+	required_shared_ptr<UINT16> m_video_regs;
+	required_shared_ptr<UINT16> m_tilemap_regs;
+	required_shared_ptr<UINT16> m_bg_videoram;
+	required_shared_ptr<UINT16> m_mid_videoram;
+	required_shared_ptr<UINT16> m_txt_videoram;
+	required_shared_ptr<UINT16> m_spriteram;
 //  UINT16 *       m_paletteram;    // currently this uses generic palette handling
 
 	/* video-related */
@@ -40,56 +46,66 @@ public:
 
 	/* misc */
 	int            m_ticket;
+	DECLARE_WRITE16_MEMBER(mid_videoram_w);
+	DECLARE_WRITE16_MEMBER(txt_videoram_w);
+	DECLARE_WRITE16_MEMBER(ticket_w);
+	DECLARE_WRITE16_MEMBER(video_regs_w);
+	DECLARE_CUSTOM_INPUT_MEMBER(ticket_status_r);
+	DECLARE_WRITE16_MEMBER(eeprom_w);
+	DECLARE_WRITE16_MEMBER(oki_bank_w);
+	TILE_GET_INFO_MEMBER(get_mid_tile_info);
+	TILE_GET_INFO_MEMBER(get_txt_tile_info);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_pzletime(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
-static TILE_GET_INFO( get_mid_tile_info )
+TILE_GET_INFO_MEMBER(pzletime_state::get_mid_tile_info)
 {
-	pzletime_state *state = machine.driver_data<pzletime_state>();
-	int tileno = state->m_mid_videoram[tile_index] & 0x0fff;
-	int colour = state->m_mid_videoram[tile_index] & 0xf000;
+	int tileno = m_mid_videoram[tile_index] & 0x0fff;
+	int colour = m_mid_videoram[tile_index] & 0xf000;
 	colour = colour >> 12;
-	SET_TILE_INFO(2, tileno, colour, 0);
+	SET_TILE_INFO_MEMBER(2, tileno, colour, 0);
 }
 
-static TILE_GET_INFO( get_txt_tile_info )
+TILE_GET_INFO_MEMBER(pzletime_state::get_txt_tile_info)
 {
-	pzletime_state *state = machine.driver_data<pzletime_state>();
-	int tileno = state->m_txt_videoram[tile_index] & 0x0fff;
-	int colour = state->m_txt_videoram[tile_index] & 0xf000;
+	int tileno = m_txt_videoram[tile_index] & 0x0fff;
+	int colour = m_txt_videoram[tile_index] & 0xf000;
 	colour = colour >> 12;
 
-	SET_TILE_INFO(0, tileno, colour, 0);
+	SET_TILE_INFO_MEMBER(0, tileno, colour, 0);
 
-	tileinfo->category = BIT(colour, 3);
+	tileinfo.category = BIT(colour, 3);
 }
 
-static VIDEO_START( pzletime )
+void pzletime_state::video_start()
 {
-	pzletime_state *state = machine.driver_data<pzletime_state>();
 
-	state->m_mid_tilemap = tilemap_create(machine, get_mid_tile_info, tilemap_scan_cols, 16, 16, 64, 16);
-	state->m_txt_tilemap = tilemap_create(machine, get_txt_tile_info, tilemap_scan_rows,  8, 8, 64, 32);
+	m_mid_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(pzletime_state::get_mid_tile_info),this), TILEMAP_SCAN_COLS, 16, 16, 64, 16);
+	m_txt_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(pzletime_state::get_txt_tile_info),this), TILEMAP_SCAN_ROWS,  8, 8, 64, 32);
 
-	tilemap_set_transparent_pen(state->m_mid_tilemap, 0);
-	tilemap_set_transparent_pen(state->m_txt_tilemap, 0);
+	m_mid_tilemap->set_transparent_pen(0);
+	m_txt_tilemap->set_transparent_pen(0);
 }
 
-static SCREEN_UPDATE( pzletime )
+UINT32 pzletime_state::screen_update_pzletime(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	pzletime_state *state = screen->machine().driver_data<pzletime_state>();
 	int count;
 	int y, x;
 
-	bitmap_fill(bitmap, cliprect, screen->machine().pens[0]); //bg pen
+	bitmap.fill(machine().pens[0], cliprect); //bg pen
 
-	tilemap_set_scrolly(state->m_txt_tilemap, 0, state->m_tilemap_regs[0] - 3);
-	tilemap_set_scrollx(state->m_txt_tilemap, 0, state->m_tilemap_regs[1]);
+	m_txt_tilemap->set_scrolly(0, m_tilemap_regs[0] - 3);
+	m_txt_tilemap->set_scrollx(0, m_tilemap_regs[1]);
 
-	tilemap_set_scrolly(state->m_mid_tilemap, 0, state->m_tilemap_regs[2] - 3);
-	tilemap_set_scrollx(state->m_mid_tilemap, 0, state->m_tilemap_regs[3] - 7);
+	m_mid_tilemap->set_scrolly(0, m_tilemap_regs[2] - 3);
+	m_mid_tilemap->set_scrollx(0, m_tilemap_regs[3] - 7);
 
-	if (state->m_video_regs[2] & 1)
+	if (m_video_regs[2] & 1)
 	{
 		count = 0;
 
@@ -97,18 +113,18 @@ static SCREEN_UPDATE( pzletime )
 		{
 			for (x = 0; x < 512; x++)
 			{
-				if (state->m_bg_videoram[count] & 0x8000)
-					*BITMAP_ADDR16(bitmap, (y - 18) & 0xff, (x - 32) & 0x1ff) = 0x300 + (state->m_bg_videoram[count] & 0x7fff);
+				if (m_bg_videoram[count] & 0x8000)
+					bitmap.pix16((y - 18) & 0xff, (x - 32) & 0x1ff) = 0x300 + (m_bg_videoram[count] & 0x7fff);
 
 				count++;
 			}
 		}
 	}
 
-	tilemap_draw(bitmap, cliprect, state->m_mid_tilemap, 0, 0);
+	m_mid_tilemap->draw(bitmap, cliprect, 0, 0);
 
 	{
-		UINT16 *spriteram = state->m_spriteram;
+		UINT16 *spriteram = m_spriteram;
 		int offs, spr_offs, colour, sx, sy;
 
 		for(offs = 0; offs < 0x2000 / 2; offs += 4)
@@ -123,102 +139,100 @@ static SCREEN_UPDATE( pzletime )
 
 			// is spriteram[offs + 0] & 0x200 flipy? it's always set
 
-			drawgfx_transpen(bitmap, cliprect, screen->machine().gfx[1], spr_offs, colour, 0, 1, sx, sy, 0);
+			drawgfx_transpen(bitmap, cliprect, machine().gfx[1], spr_offs, colour, 0, 1, sx, sy, 0);
 		}
 	}
 
-	tilemap_draw(bitmap, cliprect, state->m_txt_tilemap, 0, 0);
-	if ((screen->frame_number() % 16) != 0)
-		tilemap_draw(bitmap, cliprect, state->m_txt_tilemap, 1, 0);
+	m_txt_tilemap->draw(bitmap, cliprect, 0, 0);
+	if ((screen.frame_number() % 16) != 0)
+		m_txt_tilemap->draw(bitmap, cliprect, 1, 0);
 
 	return 0;
 }
 
-static WRITE16_HANDLER( mid_videoram_w )
+WRITE16_MEMBER(pzletime_state::mid_videoram_w)
 {
-	pzletime_state *state = space->machine().driver_data<pzletime_state>();
-	COMBINE_DATA(&state->m_mid_videoram[offset]);
-	tilemap_mark_tile_dirty(state->m_mid_tilemap, offset);
+	COMBINE_DATA(&m_mid_videoram[offset]);
+	m_mid_tilemap->mark_tile_dirty(offset);
 }
 
-static WRITE16_HANDLER( txt_videoram_w )
+WRITE16_MEMBER(pzletime_state::txt_videoram_w)
 {
-	pzletime_state *state = space->machine().driver_data<pzletime_state>();
-	COMBINE_DATA(&state->m_txt_videoram[offset]);
-	tilemap_mark_tile_dirty(state->m_txt_tilemap, offset);
+	COMBINE_DATA(&m_txt_videoram[offset]);
+	m_txt_tilemap->mark_tile_dirty(offset);
 }
 
-static WRITE16_DEVICE_HANDLER( eeprom_w )
+WRITE16_MEMBER(pzletime_state::eeprom_w)
 {
+	device_t *device = machine().device("eeprom");
 	if (ACCESSING_BITS_0_7)
 	{
-		eeprom_write_bit(device, data & 0x01);
-		eeprom_set_cs_line(device, (data & 0x02) ? CLEAR_LINE : ASSERT_LINE );
-		eeprom_set_clock_line(device, (data & 0x04) ? ASSERT_LINE : CLEAR_LINE );
+		eeprom_device *eeprom = downcast<eeprom_device *>(device);
+		eeprom->write_bit(data & 0x01);
+		eeprom->set_cs_line((data & 0x02) ? CLEAR_LINE : ASSERT_LINE );
+		eeprom->set_clock_line((data & 0x04) ? ASSERT_LINE : CLEAR_LINE );
 	}
 }
 
-static WRITE16_HANDLER( ticket_w )
+WRITE16_MEMBER(pzletime_state::ticket_w)
 {
-	pzletime_state *state = space->machine().driver_data<pzletime_state>();
 
 	if (ACCESSING_BITS_0_7)
-		state->m_ticket = data & 1;
+		m_ticket = data & 1;
 }
 
-static WRITE16_HANDLER( video_regs_w )
+WRITE16_MEMBER(pzletime_state::video_regs_w)
 {
-	pzletime_state *state = space->machine().driver_data<pzletime_state>();
 	int i;
 
-	COMBINE_DATA(&state->m_video_regs[offset]);
+	COMBINE_DATA(&m_video_regs[offset]);
 
 	if (offset == 0)
 	{
-		if (state->m_video_regs[0] > 0)
+		if (m_video_regs[0] > 0)
 		{
 			for (i = 0; i < 0x300; i++)
 			{
-				palette_set_pen_contrast(space->machine(), i, (double)0x8000/(double)state->m_video_regs[0]);
+				palette_set_pen_contrast(machine(), i, (double)0x8000/(double)m_video_regs[0]);
 			}
 		}
 	}
 	else if (offset == 1)
 	{
-		if (state->m_video_regs[1] > 0)
+		if (m_video_regs[1] > 0)
 		{
 			for (i = 0x300; i < 32768 + 0x300; i++)
 			{
-				palette_set_pen_contrast(space->machine(), i, (double)0x8000/(double)state->m_video_regs[1]);
+				palette_set_pen_contrast(machine(), i, (double)0x8000/(double)m_video_regs[1]);
 			}
 		}
 	}
 }
 
-static WRITE16_DEVICE_HANDLER( oki_bank_w )
+WRITE16_MEMBER(pzletime_state::oki_bank_w)
 {
+	device_t *device = machine().device("oki");
 	downcast<okim6295_device *>(device)->set_bank_base(0x40000 * (data & 0x3));
 }
 
-static CUSTOM_INPUT( ticket_status_r )
+CUSTOM_INPUT_MEMBER(pzletime_state::ticket_status_r)
 {
-	pzletime_state *state = field->port->machine().driver_data<pzletime_state>();
-	return (state->m_ticket && !(field->port->machine().primary_screen->frame_number() % 128));
+	return (m_ticket && !(machine().primary_screen->frame_number() % 128));
 }
 
-static ADDRESS_MAP_START( pzletime_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( pzletime_map, AS_PROGRAM, 16, pzletime_state )
 	AM_RANGE(0x000000, 0x3fffff) AM_ROM
-	AM_RANGE(0x700000, 0x700005) AM_RAM_WRITE(video_regs_w) AM_BASE_MEMBER(pzletime_state, m_video_regs)
-	AM_RANGE(0x800000, 0x800001) AM_DEVREADWRITE8_MODERN("oki", okim6295_device, read, write, 0x00ff)
-	AM_RANGE(0x900000, 0x9005ff) AM_RAM_WRITE(paletteram16_xRRRRRGGGGGBBBBB_word_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0xa00000, 0xa00007) AM_RAM AM_BASE_MEMBER(pzletime_state, m_tilemap_regs)
-	AM_RANGE(0xb00000, 0xb3ffff) AM_RAM AM_BASE_MEMBER(pzletime_state, m_bg_videoram)
-	AM_RANGE(0xc00000, 0xc00fff) AM_RAM_WRITE(mid_videoram_w) AM_BASE_MEMBER(pzletime_state, m_mid_videoram)
-	AM_RANGE(0xc01000, 0xc01fff) AM_RAM_WRITE(txt_videoram_w) AM_BASE_MEMBER(pzletime_state, m_txt_videoram)
-	AM_RANGE(0xd00000, 0xd01fff) AM_RAM AM_BASE_MEMBER(pzletime_state, m_spriteram)
-	AM_RANGE(0xe00000, 0xe00001) AM_READ_PORT("INPUT") AM_DEVWRITE("eeprom", eeprom_w)
+	AM_RANGE(0x700000, 0x700005) AM_RAM_WRITE(video_regs_w) AM_SHARE("video_regs")
+	AM_RANGE(0x800000, 0x800001) AM_DEVREADWRITE8("oki", okim6295_device, read, write, 0x00ff)
+	AM_RANGE(0x900000, 0x9005ff) AM_RAM_WRITE(paletteram_xRRRRRGGGGGBBBBB_word_w) AM_SHARE("paletteram")
+	AM_RANGE(0xa00000, 0xa00007) AM_RAM AM_SHARE("tilemap_regs")
+	AM_RANGE(0xb00000, 0xb3ffff) AM_RAM AM_SHARE("bg_videoram")
+	AM_RANGE(0xc00000, 0xc00fff) AM_RAM_WRITE(mid_videoram_w) AM_SHARE("mid_videoram")
+	AM_RANGE(0xc01000, 0xc01fff) AM_RAM_WRITE(txt_videoram_w) AM_SHARE("txt_videoram")
+	AM_RANGE(0xd00000, 0xd01fff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0xe00000, 0xe00001) AM_READ_PORT("INPUT") AM_WRITE(eeprom_w)
 	AM_RANGE(0xe00002, 0xe00003) AM_READ_PORT("SYSTEM") AM_WRITE(ticket_w)
-	AM_RANGE(0xe00004, 0xe00005) AM_DEVWRITE("oki", oki_bank_w)
+	AM_RANGE(0xe00004, 0xe00005) AM_WRITE(oki_bank_w)
 	AM_RANGE(0xf00000, 0xf0ffff) AM_RAM
 ADDRESS_MAP_END
 
@@ -228,11 +242,11 @@ static INPUT_PORTS_START( pzletime )
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_SERVICE_NO_TOGGLE( 0x0004, IP_ACTIVE_LOW )
-	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x0040, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE("eeprom", eeprom_read_bit) /* eeprom */
-	PORT_BIT( 0x0080, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(ticket_status_r, NULL) /* ticket dispenser */
+	PORT_BIT( 0x0040, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE_MEMBER("eeprom", eeprom_device, read_bit) /* eeprom */
+	PORT_BIT( 0x0080, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, pzletime_state,ticket_status_r, NULL) /* ticket dispenser */
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START("INPUT")
@@ -282,7 +296,7 @@ static GFXDECODE_START( pzletime )
 	GFXDECODE_ENTRY( "gfx3", 0, layout16x16, 0x000, 0x10 )
 GFXDECODE_END
 
-static PALETTE_INIT( pzletime )
+void pzletime_state::palette_init()
 {
 	int i;
 
@@ -290,21 +304,19 @@ static PALETTE_INIT( pzletime )
 
 	/* initialize 555 RGB lookup */
 	for (i = 0; i < 32768; i++)
-		palette_set_color_rgb(machine, i + 0x300, pal5bit(i >> 10), pal5bit(i >> 5), pal5bit(i >> 0));
+		palette_set_color_rgb(machine(), i + 0x300, pal5bit(i >> 10), pal5bit(i >> 5), pal5bit(i >> 0));
 }
 
-static MACHINE_START( pzletime )
+void pzletime_state::machine_start()
 {
-	pzletime_state *state = machine.driver_data<pzletime_state>();
 
-	state->save_item(NAME(state->m_ticket));
+	save_item(NAME(m_ticket));
 }
 
-static MACHINE_RESET( pzletime )
+void pzletime_state::machine_reset()
 {
-	pzletime_state *state = machine.driver_data<pzletime_state>();
 
-	state->m_ticket = 0;
+	m_ticket = 0;
 }
 
 static MACHINE_CONFIG_START( pzletime, pzletime_state )
@@ -312,25 +324,20 @@ static MACHINE_CONFIG_START( pzletime, pzletime_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu",M68000,10000000)
 	MCFG_CPU_PROGRAM_MAP(pzletime_map)
-	MCFG_CPU_VBLANK_INT("screen",irq4_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", pzletime_state, irq4_line_hold)
 
-	MCFG_MACHINE_START(pzletime)
-	MCFG_MACHINE_RESET(pzletime)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 48*8-1, 0*8, 28*8-1)
-	MCFG_SCREEN_UPDATE(pzletime)
+	MCFG_SCREEN_UPDATE_DRIVER(pzletime_state, screen_update_pzletime)
 	MCFG_GFXDECODE(pzletime)
 	MCFG_PALETTE_LENGTH(0x300 + 32768)
 	MCFG_EEPROM_93C46_ADD("eeprom")
 
-	MCFG_PALETTE_INIT(pzletime)
-	MCFG_VIDEO_START(pzletime)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -381,4 +388,4 @@ ROM_START( pzletime )
 	ROM_LOAD( "pzletime.nv", 0x0000, 0x0080, CRC(e5ed3d40) SHA1(8c163a6e5839e5c82d52f046d3268202fdf9f4d1) )
 ROM_END
 
-GAME( 199?, pzletime, 0, pzletime,  pzletime,  0, ROT0, "Elettronica Video-Games S.R.L.", "Puzzle Time (prototype)", GAME_SUPPORTS_SAVE )
+GAME( 199?, pzletime, 0, pzletime,  pzletime, driver_device,  0, ROT0, "Elettronica Video-Games S.R.L.", "Puzzle Time (prototype)", GAME_SUPPORTS_SAVE )

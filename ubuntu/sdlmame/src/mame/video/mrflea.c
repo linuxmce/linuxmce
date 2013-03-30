@@ -8,45 +8,42 @@ Mr. F. Lea
 #include "emu.h"
 #include "includes/mrflea.h"
 
-WRITE8_HANDLER( mrflea_gfx_bank_w )
+WRITE8_MEMBER(mrflea_state::mrflea_gfx_bank_w)
 {
-	mrflea_state *state = space->machine().driver_data<mrflea_state>();
-	state->m_gfx_bank = data;
+	m_gfx_bank = data;
 
 	if (data & ~0x14)
 		logerror("unknown gfx bank: 0x%02x\n", data);
 }
 
-WRITE8_HANDLER( mrflea_videoram_w )
+WRITE8_MEMBER(mrflea_state::mrflea_videoram_w)
 {
-	mrflea_state *state = space->machine().driver_data<mrflea_state>();
 	int bank = offset / 0x400;
 
 	offset &= 0x3ff;
-	state->m_videoram[offset] = data;
-	state->m_videoram[offset + 0x400] = bank;
+	m_videoram[offset] = data;
+	m_videoram[offset + 0x400] = bank;
 	/* the address range that tile data is written to sets one bit of
-      the bank select.  The remaining bits are from a video register. */
+	  the bank select.  The remaining bits are from a video register. */
 }
 
-WRITE8_HANDLER( mrflea_spriteram_w )
+WRITE8_MEMBER(mrflea_state::mrflea_spriteram_w)
 {
-	mrflea_state *state = space->machine().driver_data<mrflea_state>();
 
 	if (offset & 2)
 	{
 		/* tile_number */
-		state->m_spriteram[offset | 1] = offset & 1;
+		m_spriteram[offset | 1] = offset & 1;
 		offset &= ~1;
 	}
 
-	state->m_spriteram[offset] = data;
+	m_spriteram[offset] = data;
 }
 
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	mrflea_state *state = machine.driver_data<mrflea_state>();
-	const gfx_element *gfx = machine.gfx[0];
+	gfx_element *gfx = machine.gfx[0];
 	const UINT8 *source = state->m_spriteram;
 	const UINT8 *finish = source + 0x100;
 	rectangle clip = machine.primary_screen->visible_area();
@@ -60,12 +57,12 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 		int ypos = source[0] - 16 + 3;
 		int tile_number = source[2] + source[3] * 0x100;
 
-		drawgfx_transpen( bitmap, &clip,gfx,
+		drawgfx_transpen( bitmap, clip,gfx,
 			tile_number,
 			0, /* color */
 			0,0, /* no flip */
 			xpos,ypos,0 );
-		drawgfx_transpen( bitmap, &clip,gfx,
+		drawgfx_transpen( bitmap, clip,gfx,
 			tile_number,
 			0, /* color */
 			0,0, /* no flip */
@@ -74,11 +71,11 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 	}
 }
 
-static void draw_background( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_background( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	mrflea_state *state = machine.driver_data<mrflea_state>();
 	const UINT8 *source = state->m_videoram;
-	const gfx_element *gfx = machine.gfx[1];
+	gfx_element *gfx = machine.gfx[1];
 	int sx, sy;
 	int base = 0;
 
@@ -104,9 +101,9 @@ static void draw_background( running_machine &machine, bitmap_t *bitmap, const r
 	}
 }
 
-SCREEN_UPDATE( mrflea )
+UINT32 mrflea_state::screen_update_mrflea(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	draw_background(screen->machine(), bitmap, cliprect);
-	draw_sprites(screen->machine(), bitmap, cliprect);
+	draw_background(machine(), bitmap, cliprect);
+	draw_sprites(machine(), bitmap, cliprect);
 	return 0;
 }

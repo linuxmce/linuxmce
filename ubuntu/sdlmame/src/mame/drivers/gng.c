@@ -22,38 +22,37 @@ Notes:
 
 #include "emu.h"
 #include "cpu/z80/z80.h"
-#include "deprecat.h"
 #include "cpu/m6809/m6809.h"
 #include "sound/2203intf.h"
 #include "includes/gng.h"
 
 
-static WRITE8_HANDLER( gng_bankswitch_w )
+WRITE8_MEMBER(gng_state::gng_bankswitch_w)
 {
 	if (data == 4)
-		memory_set_bank(space->machine(), "bank1", 4);
+		membank("bank1")->set_entry(4);
 	else
-		memory_set_bank(space->machine(), "bank1", (data & 0x03));
+		membank("bank1")->set_entry((data & 0x03));
 }
 
-static WRITE8_HANDLER( gng_coin_counter_w )
+WRITE8_MEMBER(gng_state::gng_coin_counter_w)
 {
-	coin_counter_w(space->machine(), offset, data);
+	coin_counter_w(machine(), offset, data);
 }
 
-static ADDRESS_MAP_START( gng_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( gng_map, AS_PROGRAM, 8, gng_state )
 	AM_RANGE(0x0000, 0x1dff) AM_RAM
-	AM_RANGE(0x1e00, 0x1fff) AM_RAM AM_BASE_SIZE_GENERIC(spriteram)
-	AM_RANGE(0x2000, 0x27ff) AM_RAM_WRITE(gng_fgvideoram_w) AM_BASE_MEMBER(gng_state, m_fgvideoram)
-	AM_RANGE(0x2800, 0x2fff) AM_RAM_WRITE(gng_bgvideoram_w) AM_BASE_MEMBER(gng_state, m_bgvideoram)
+	AM_RANGE(0x1e00, 0x1fff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0x2000, 0x27ff) AM_RAM_WRITE(gng_fgvideoram_w) AM_SHARE("fgvideoram")
+	AM_RANGE(0x2800, 0x2fff) AM_RAM_WRITE(gng_bgvideoram_w) AM_SHARE("bgvideoram")
 	AM_RANGE(0x3000, 0x3000) AM_READ_PORT("SYSTEM")
 	AM_RANGE(0x3001, 0x3001) AM_READ_PORT("P1")
 	AM_RANGE(0x3002, 0x3002) AM_READ_PORT("P2")
 	AM_RANGE(0x3003, 0x3003) AM_READ_PORT("DSW1")
 	AM_RANGE(0x3004, 0x3004) AM_READ_PORT("DSW2")
-	AM_RANGE(0x3800, 0x38ff) AM_WRITE(paletteram_RRRRGGGGBBBBxxxx_split2_w) AM_BASE_GENERIC(paletteram2)
-	AM_RANGE(0x3900, 0x39ff) AM_WRITE(paletteram_RRRRGGGGBBBBxxxx_split1_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0x3a00, 0x3a00) AM_WRITE(soundlatch_w)
+	AM_RANGE(0x3800, 0x38ff) AM_WRITE(paletteram_RRRRGGGGBBBBxxxx_byte_split_hi_w) AM_SHARE("paletteram2")
+	AM_RANGE(0x3900, 0x39ff) AM_WRITE(paletteram_RRRRGGGGBBBBxxxx_byte_split_lo_w) AM_SHARE("paletteram")
+	AM_RANGE(0x3a00, 0x3a00) AM_WRITE(soundlatch_byte_w)
 	AM_RANGE(0x3b08, 0x3b09) AM_WRITE(gng_bgscrollx_w)
 	AM_RANGE(0x3b0a, 0x3b0b) AM_WRITE(gng_bgscrolly_w)
 	AM_RANGE(0x3c00, 0x3c00) AM_NOP /* watchdog? */
@@ -67,12 +66,12 @@ ADDRESS_MAP_END
 
 
 
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, gng_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0xc000, 0xc7ff) AM_RAM
-	AM_RANGE(0xc800, 0xc800) AM_READ(soundlatch_r)
-	AM_RANGE(0xe000, 0xe001) AM_DEVWRITE("ym1", ym2203_w)
-	AM_RANGE(0xe002, 0xe003) AM_DEVWRITE("ym2", ym2203_w)
+	AM_RANGE(0xc800, 0xc800) AM_READ(soundlatch_byte_r)
+	AM_RANGE(0xe000, 0xe001) AM_DEVWRITE_LEGACY("ym1", ym2203_w)
+	AM_RANGE(0xe002, 0xe003) AM_DEVWRITE_LEGACY("ym2", ym2203_w)
 ADDRESS_MAP_END
 
 
@@ -108,7 +107,7 @@ static INPUT_PORTS_START( gng )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START("DSW1")
-	PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( Coinage ) )		PORT_DIPLOCATION("SW1:8,7,6,5")
+	PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( Coinage ) )      PORT_DIPLOCATION("SW1:8,7,6,5")
 	PORT_DIPSETTING( 0x02, DEF_STR( 4C_1C ) )
 	PORT_DIPSETTING( 0x05, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING( 0x08, DEF_STR( 2C_1C ) )
@@ -125,37 +124,37 @@ static INPUT_PORTS_START( gng )
 	PORT_DIPSETTING( 0x0a, DEF_STR( 1C_6C ) )
 	PORT_DIPSETTING( 0x09, DEF_STR( 1C_7C ) )
 	PORT_DIPSETTING( 0x00, DEF_STR( Free_Play ) )
-	PORT_DIPNAME( 0x10, 0x10, "Coinage affects" )		PORT_DIPLOCATION("SW1:4")
+	PORT_DIPNAME( 0x10, 0x10, "Coinage affects" )       PORT_DIPLOCATION("SW1:4")
 	PORT_DIPSETTING( 0x10, DEF_STR( Coin_A ) )
 	PORT_DIPSETTING( 0x00, DEF_STR( Coin_B ) )
-	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Demo_Sounds ) )	PORT_DIPLOCATION("SW1:3")
+	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW1:3")
 	PORT_DIPSETTING( 0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(  0x00, DEF_STR( On ) )
 	PORT_SERVICE_DIPLOC(  0x40, IP_ACTIVE_LOW, "SW1:2" )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Flip_Screen ) )	PORT_DIPLOCATION("SW1:1")
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Flip_Screen ) )  PORT_DIPLOCATION("SW1:1")
 	PORT_DIPSETTING( 0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING( 0x00, DEF_STR( On ) )
 
 	PORT_START("DSW2")
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Lives ) )		PORT_DIPLOCATION("SW2:8,7")
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW2:8,7")
 	PORT_DIPSETTING( 0x03, "3" )
 	PORT_DIPSETTING( 0x02, "4" )
 	PORT_DIPSETTING( 0x01, "5" )
 	PORT_DIPSETTING( 0x00, "7" )
-	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Cabinet ) )		PORT_DIPLOCATION("SW2:6")
+	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Cabinet ) )      PORT_DIPLOCATION("SW2:6")
 	PORT_DIPSETTING( 0x00, DEF_STR( Upright ) )
 	PORT_DIPSETTING( 0x04, DEF_STR( Cocktail ) )
-	PORT_DIPNAME( 0x18, 0x18, DEF_STR( Bonus_Life ) )	PORT_DIPLOCATION("SW2:5,4")
+	PORT_DIPNAME( 0x18, 0x18, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION("SW2:5,4")
 	PORT_DIPSETTING( 0x18, "20K 70K Every 70K" )
 	PORT_DIPSETTING( 0x10, "30K 80K Every 80K" )
 	PORT_DIPSETTING( 0x08, "20K and 80K Only" )
 	PORT_DIPSETTING( 0x00, "30K and 80K Only" )
-	PORT_DIPNAME( 0x60, 0x60, DEF_STR( Difficulty ) )	PORT_DIPLOCATION("SW2:3,2")
+	PORT_DIPNAME( 0x60, 0x60, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("SW2:3,2")
 	PORT_DIPSETTING( 0x40, DEF_STR( Easy ) )
 	PORT_DIPSETTING( 0x60, DEF_STR( Normal ) )
 	PORT_DIPSETTING( 0x20, DEF_STR( Difficult ) )
 	PORT_DIPSETTING( 0x00, DEF_STR( Very_Difficult ) )
-	PORT_DIPUNUSED_DIPLOC( 0x80, 0x80, "SW2:1" )		/* Listed as "Unused" */
+	PORT_DIPUNUSED_DIPLOC( 0x80, 0x80, "SW2:1" )        /* Listed as "Unused" */
 INPUT_PORTS_END
 
 /* identical to gng, but the "unknown" dip switch is Invulnerability */
@@ -163,9 +162,9 @@ static INPUT_PORTS_START( makaimur )
 	PORT_INCLUDE( gng )
 
 	PORT_MODIFY("DSW2")
-	PORT_DIPNAME( 0x80, 0x80, "Invulnerability (Cheat)")	PORT_DIPLOCATION("SW2:1")
-	PORT_DIPSETTING(	0x80, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x80, 0x80, "Invulnerability (Cheat)")    PORT_DIPLOCATION("SW2:1")
+	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( diamond )
@@ -201,56 +200,56 @@ static INPUT_PORTS_START( diamond )
 
 	PORT_START("DSW1")
 	PORT_DIPNAME( 0x03, 0x01, DEF_STR( Lives ) )
-	PORT_DIPSETTING(	0x00, "2" )
-	PORT_DIPSETTING(	0x01, "3" )
-	PORT_DIPSETTING(	0x02, "4" )
-	PORT_DIPSETTING(	0x03, "5" )
+	PORT_DIPSETTING(    0x00, "2" )
+	PORT_DIPSETTING(    0x01, "3" )
+	PORT_DIPSETTING(    0x02, "4" )
+	PORT_DIPSETTING(    0x03, "5" )
 	PORT_DIPNAME( 0x0c, 0x00, DEF_STR( Coin_A ) )
-	PORT_DIPSETTING(	0x00, "*1" )
-	PORT_DIPSETTING(	0x04, "*2" )
-	PORT_DIPSETTING(	0x08, "*3" )
-	PORT_DIPSETTING(	0x0c, "*4" )
+	PORT_DIPSETTING(    0x00, "*1" )
+	PORT_DIPSETTING(    0x04, "*2" )
+	PORT_DIPSETTING(    0x08, "*3" )
+	PORT_DIPSETTING(    0x0c, "*4" )
 	PORT_DIPNAME( 0x30, 0x00, DEF_STR( Coinage ) )
-	PORT_DIPSETTING(	0x30, DEF_STR( 4C_1C ))
-	PORT_DIPSETTING(	0x20, DEF_STR( 3C_1C ) )
-	PORT_DIPSETTING(	0x10, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x30, DEF_STR( 4C_1C ))
+	PORT_DIPSETTING(    0x20, DEF_STR( 3C_1C ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
 	PORT_DIPNAME( 0x40, 0x00, "Unknown DSW1 7" )
-	PORT_DIPSETTING(	0x40, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Flip_Screen ) )
-	PORT_DIPSETTING(	0x80, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("DSW2")
 	PORT_DIPNAME( 0x0f, 0x07, "Energy Loss" )
-	PORT_DIPSETTING(	0x00, "Slowest" )
-	PORT_DIPSETTING(	0x01, "-6 Slower" )
-	PORT_DIPSETTING(	0x02, "-5 Slower" )
-	PORT_DIPSETTING(	0x03, "-4 Slower" )
-	PORT_DIPSETTING(	0x04, "-3 Slower" )
-	PORT_DIPSETTING(	0x05, "-2 Slower" )
-	PORT_DIPSETTING(	0x06, "-1 Slower" )
-	PORT_DIPSETTING(	0x07, DEF_STR( Normal ) )
-	PORT_DIPSETTING(	0x08, "+1 Faster" )
-	PORT_DIPSETTING(	0x09, "+2 Faster" )
-	PORT_DIPSETTING(	0x0a, "+3 Faster" )
-	PORT_DIPSETTING(	0x0b, "+4 Faster" )
-	PORT_DIPSETTING(	0x0c, "+5 Faster" )
-	PORT_DIPSETTING(	0x0d, "+6 Faster" )
-	PORT_DIPSETTING(	0x0e, "+7 Faster" )
-	PORT_DIPSETTING(	0x0f, "Fastest" )
+	PORT_DIPSETTING(    0x00, "Slowest" )
+	PORT_DIPSETTING(    0x01, "-6 Slower" )
+	PORT_DIPSETTING(    0x02, "-5 Slower" )
+	PORT_DIPSETTING(    0x03, "-4 Slower" )
+	PORT_DIPSETTING(    0x04, "-3 Slower" )
+	PORT_DIPSETTING(    0x05, "-2 Slower" )
+	PORT_DIPSETTING(    0x06, "-1 Slower" )
+	PORT_DIPSETTING(    0x07, DEF_STR( Normal ) )
+	PORT_DIPSETTING(    0x08, "+1 Faster" )
+	PORT_DIPSETTING(    0x09, "+2 Faster" )
+	PORT_DIPSETTING(    0x0a, "+3 Faster" )
+	PORT_DIPSETTING(    0x0b, "+4 Faster" )
+	PORT_DIPSETTING(    0x0c, "+5 Faster" )
+	PORT_DIPSETTING(    0x0d, "+6 Faster" )
+	PORT_DIPSETTING(    0x0e, "+7 Faster" )
+	PORT_DIPSETTING(    0x0f, "Fastest" )
 	PORT_DIPNAME( 0x30, 0x00, DEF_STR( Coin_B ) )
-	PORT_DIPSETTING(	0x00, "*1" )
-	PORT_DIPSETTING(	0x10, "*2" )
-	PORT_DIPSETTING(	0x20, "*3" )
-	PORT_DIPSETTING(	0x30, "*4" )
+	PORT_DIPSETTING(    0x00, "*1" )
+	PORT_DIPSETTING(    0x10, "*2" )
+	PORT_DIPSETTING(    0x20, "*3" )
+	PORT_DIPSETTING(    0x30, "*4" )
 	PORT_DIPNAME( 0x40, 0x00, "Unknown DSW2 7" )
-	PORT_DIPSETTING(	0x40, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x80, 0x00, "Unknown DSW2 8" )
-	PORT_DIPSETTING(	0x80, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 INPUT_PORTS_END
 
 
@@ -293,77 +292,89 @@ static const gfx_layout spritelayout =
 
 
 static GFXDECODE_START( gng )
-	GFXDECODE_ENTRY( "gfx1", 0, charlayout,	 0x80, 16 )	/* colors 0x80-0xbf */
-	GFXDECODE_ENTRY( "gfx2", 0, tilelayout,	 0x00,	8 )	/* colors 0x00-0x3f */
-	GFXDECODE_ENTRY( "gfx3", 0, spritelayout, 0x40,	4 )	/* colors 0x40-0x7f */
+	GFXDECODE_ENTRY( "gfx1", 0, charlayout,  0x80, 16 ) /* colors 0x80-0xbf */
+	GFXDECODE_ENTRY( "gfx2", 0, tilelayout,  0x00,  8 ) /* colors 0x00-0x3f */
+	GFXDECODE_ENTRY( "gfx3", 0, spritelayout, 0x40, 4 ) /* colors 0x40-0x7f */
 GFXDECODE_END
 
 
 
 
-static MACHINE_START( gng )
+void gng_state::machine_start()
 {
-	gng_state *state = machine.driver_data<gng_state>();
 
-	UINT8 *rombase = machine.region("maincpu")->base();
-	memory_configure_bank(machine, "bank1", 0, 4, &rombase[0x10000], 0x2000);
-	memory_configure_bank(machine, "bank1", 4, 1, &rombase[0x4000], 0x2000);
+	UINT8 *rombase = memregion("maincpu")->base();
+	membank("bank1")->configure_entries(0, 4, &rombase[0x10000], 0x2000);
+	membank("bank1")->configure_entry(4, &rombase[0x4000]);
 
-	state->save_item(NAME(state->m_scrollx));
-	state->save_item(NAME(state->m_scrolly));
+	save_item(NAME(m_scrollx));
+	save_item(NAME(m_scrolly));
 }
 
-static MACHINE_RESET( gng )
+void gng_state::machine_reset()
 {
-	gng_state *state = machine.driver_data<gng_state>();
 
-	state->m_scrollx[0] = 0;
-	state->m_scrollx[1] = 0;
-	state->m_scrolly[0] = 0;
-	state->m_scrolly[1] = 0;
+	m_scrollx[0] = 0;
+	m_scrollx[1] = 0;
+	m_scrolly[0] = 0;
+	m_scrolly[1] = 0;
+
+	{
+		int i;
+
+		/* TODO: PCB reference clearly shows that the POST has random/filled data on the paletteram.
+		         For now let's fill everything with white colors until we have better info about it */
+		for(i=0;i<0x100;i+=4)
+		{
+			m_generic_paletteram_8[i] = m_generic_paletteram2_8[i] = 0x00;
+			m_generic_paletteram_8[i+1] = m_generic_paletteram2_8[i+1] = 0x55;
+			m_generic_paletteram_8[i+2] = m_generic_paletteram2_8[i+2] = 0xaa;
+			m_generic_paletteram_8[i+3] = m_generic_paletteram2_8[i+3] = 0xff;
+			palette_set_color_rgb(machine(),i+0,0x00,0x00,0x00);
+			palette_set_color_rgb(machine(),i+1,0x55,0x55,0x55);
+			palette_set_color_rgb(machine(),i+2,0xaa,0xaa,0xaa);
+			palette_set_color_rgb(machine(),i+3,0xff,0xff,0xff);
+		}
+	}
 }
 
 static MACHINE_CONFIG_START( gng, gng_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M6809, XTAL_12MHz/8)		/* verified on pcb */
+	MCFG_CPU_ADD("maincpu", M6809, XTAL_12MHz/8)        /* verified on pcb */
 	MCFG_CPU_PROGRAM_MAP(gng_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", gng_state,  irq0_line_hold)
 
-	MCFG_CPU_ADD("audiocpu", Z80, XTAL_12MHz/4)		/* verified on pcb */
+	MCFG_CPU_ADD("audiocpu", Z80, XTAL_12MHz/4)     /* verified on pcb */
 	MCFG_CPU_PROGRAM_MAP(sound_map)
-	MCFG_CPU_VBLANK_INT_HACK(irq0_line_hold,4)
+	MCFG_CPU_PERIODIC_INT_DRIVER(gng_state, irq0_line_hold, 4*60)
 
-	MCFG_MACHINE_START(gng)
-	MCFG_MACHINE_RESET(gng)
 
 	/* video hardware */
-	MCFG_VIDEO_ATTRIBUTES(VIDEO_BUFFERS_SPRITERAM)
+	MCFG_BUFFERED_SPRITERAM8_ADD("spriteram")
 
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(59.59)    /* verified on pcb */
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(gng)
-	MCFG_SCREEN_EOF(gng)
+	MCFG_SCREEN_UPDATE_DRIVER(gng_state, screen_update_gng)
+	MCFG_SCREEN_VBLANK_DEVICE("spriteram", buffered_spriteram8_device, vblank_copy_rising)
 
 	MCFG_GFXDECODE(gng)
 	MCFG_PALETTE_LENGTH(256)
 
-	MCFG_VIDEO_START(gng)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("ym1", YM2203, XTAL_12MHz/8)		/* verified on pcb */
+	MCFG_SOUND_ADD("ym1", YM2203, XTAL_12MHz/8)     /* verified on pcb */
 	MCFG_SOUND_ROUTE(0, "mono", 0.40)
 	MCFG_SOUND_ROUTE(1, "mono", 0.40)
 	MCFG_SOUND_ROUTE(2, "mono", 0.40)
 	MCFG_SOUND_ROUTE(3, "mono", 0.20)
 
-	MCFG_SOUND_ADD("ym2", YM2203, XTAL_12MHz/8)		/* verified on pcb */
+	MCFG_SOUND_ADD("ym2", YM2203, XTAL_12MHz/8)     /* verified on pcb */
 	MCFG_SOUND_ROUTE(0, "mono", 0.40)
 	MCFG_SOUND_ROUTE(1, "mono", 0.40)
 	MCFG_SOUND_ROUTE(2, "mono", 0.40)
@@ -479,6 +490,38 @@ ROM_START( gngbl )
 	ROM_LOAD( "15.84490.3l",     0x14000, 0x4000, CRC(e80c3fca) SHA1(cb641c25bb04b970b2cbeca41adb792bbe142fb5) ) /* sprites 1 Plane 3-4 */
 	ROM_LOAD( "14.84490.1l",     0x18000, 0x4000, CRC(7780a925) SHA1(3f129ca6d695548b659955fe538584bd9ac2ff17) ) /* sprites 2 Plane 3-4 */
 ROM_END
+
+ROM_START( gngprot )
+	ROM_REGION( 0x18000, "maincpu", 0 )
+	ROM_LOAD( "gg10n.bin",      0x04000, 0x4000, CRC(5d2a2c90) SHA1(39db20ebf95deb61d887bd88e3cb66c7bbd11f15) )
+	ROM_LOAD( "gg9n.bin",       0x08000, 0x4000, CRC(30eb183d) SHA1(8df3d73c9d190edfa0b435cdf994b9f30def2ce0) )
+	ROM_LOAD( "gg8n.bin",       0x0c000, 0x4000, CRC(4b5e2145) SHA1(99f269d52ab817fee456b157ce7931859711102a) )
+	ROM_LOAD( "gg13n.bin",      0x10000, 0x4000, CRC(2664aae6) SHA1(d2dd3951d115da8a28096d4bad709b1d6f80fc50) )
+	ROM_LOAD( "gg12n.bin",      0x14000, 0x4000, CRC(c7ef4ae8) SHA1(ffa34bad487b3a5b249bc8d1bbe614e34d1dc2c6) )
+
+	ROM_REGION( 0x10000, "audiocpu", 0 )
+	ROM_LOAD( "gg14h.bin",      0x0000, 0x8000, CRC(55cfb196) SHA1(df9cdbb24c26bca226d7274225725d62ea854c7a) )
+
+	ROM_REGION( 0x04000, "gfx1", 0 )
+	ROM_LOAD( "1.84490.11e",      0x00000, 0x4000, BAD_DUMP CRC(ecfccf07) SHA1(0a1518e19a2e0a4cc3dde4b9568202ea911b5ece) ) /* characters */ // MISSING FROM THIS SET! (was on PCB, why wasn't it dumped?)
+
+	ROM_REGION( 0x18000, "gfx2", 0 )
+	ROM_LOAD( "gg3e.bin",      0x00000, 0x4000, CRC(68db22c8) SHA1(ada859bfa60d9563a8a86b1b6526f626b932981c) ) /* tiles 0-1 Plane 1*/
+	ROM_LOAD( "gg1e.bin",      0x04000, 0x4000, CRC(dad8dd2f) SHA1(30a6dd2f6b26acaab0a003f5099a2fcb46644d45) ) /* tiles 2-3 Plane 1*/
+	ROM_LOAD( "gg3c.bin",      0x08000, 0x4000, CRC(7a158323) SHA1(183f33f214b4c04e9130cbe2c24e08b5303bb2de) ) /* tiles 0-1 Plane 2*/
+	ROM_LOAD( "gg1c.bin",      0x0c000, 0x4000, CRC(7314d095) SHA1(1288eaf0d82ac65a1bb94e68114b4b2f84910901) ) /* tiles 2-3 Plane 2*/
+	ROM_LOAD( "gg3b.bin",      0x10000, 0x4000, CRC(03a96d9b) SHA1(5d74e156b0cd1b54d7bd61e1664834f768d5b9f8) ) /* tiles 0-1 Plane 3*/
+	ROM_LOAD( "gg1b.bin",      0x14000, 0x4000, CRC(7b9899bc) SHA1(be9b7b18542f38c8fb8b075760995acecace79ad) ) /* tiles 2-3 Plane 3*/
+
+	ROM_REGION( 0x20000, "gfx3", ROMREGION_ERASEFF )
+	ROM_LOAD( "gg4l.bin",     0x00000, 0x4000, CRC(49cf81b4) SHA1(b87aba71446884f9926ced28716876ad701b183f) ) /* sprites 0 Plane 1-2 */
+	ROM_LOAD( "gg3l.bin",     0x04000, 0x4000, CRC(e61437b1) SHA1(7043ac80ee40057839bf7ee7af62961d9ff3d50b) ) /* sprites 1 Plane 1-2 */
+	ROM_LOAD( "gg1l.bin",     0x08000, 0x4000, CRC(bc1fe02d) SHA1(e3a1421d465b87148ffa94f5673b2307f0246afe) ) /* sprites 2 Plane 1-2 */
+	ROM_LOAD( "gg4n.bin",     0x10000, 0x4000, CRC(d5aff5a7) SHA1(b75b271c7d38ed9689bff7a3bc9a67a0aae9ed8b) ) /* sprites 0 Plane 3-4 */
+	ROM_LOAD( "gg3n.bin",     0x14000, 0x4000, CRC(d589caeb) SHA1(f787557dc083f765aec3d64896ef6cdf5e8d54cc) ) /* sprites 1 Plane 3-4 */
+	ROM_LOAD( "gg1n.bin",     0x18000, 0x4000, CRC(7780a925) SHA1(3f129ca6d695548b659955fe538584bd9ac2ff17) ) /* sprites 2 Plane 3-4 */
+ROM_END
+
 
 ROM_START( gngblita )
 	ROM_REGION( 0x18000, "maincpu", 0 )
@@ -714,25 +757,26 @@ ROM_END
 
 
 
-static READ8_HANDLER( diamond_hack_r )
+READ8_MEMBER(gng_state::diamond_hack_r)
 {
 	return 0;
 }
 
-static DRIVER_INIT( diamond )
+DRIVER_INIT_MEMBER(gng_state,diamond)
 {
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x6000, 0x6000, FUNC(diamond_hack_r));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(0x6000, 0x6000, read8_delegate(FUNC(gng_state::diamond_hack_r),this));
 }
 
 
 
-GAME( 1985, gng,       0,   gng, gng,      0,       ROT0, "Capcom", "Ghosts'n Goblins (World? set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1985, gnga,      gng, gng, gng,      0,       ROT0, "Capcom", "Ghosts'n Goblins (World? set 2)", GAME_SUPPORTS_SAVE )
-GAME( 1985, gngbl,     gng, gng, gng,      0,       ROT0, "bootleg", "Ghosts'n Goblins (bootleg with Cross)", GAME_SUPPORTS_SAVE )
-GAME( 1985, gngblita,  gng, gng, gng,      0,       ROT0, "bootleg", "Ghosts'n Goblins (Italian bootleg, harder)", GAME_SUPPORTS_SAVE )
-GAME( 1985, gngc,      gng, gng, gng,      0,       ROT0, "Capcom", "Ghosts'n Goblins (World? set 3)", GAME_SUPPORTS_SAVE ) // rev c?
-GAME( 1985, gngt,      gng, gng, gng,      0,       ROT0, "Capcom (Taito America license)", "Ghosts'n Goblins (US)", GAME_SUPPORTS_SAVE )
-GAME( 1985, makaimur,  gng, gng, makaimur, 0,       ROT0, "Capcom", "Makai-Mura (Japan)", GAME_SUPPORTS_SAVE )
-GAME( 1985, makaimurc, gng, gng, makaimur, 0,       ROT0, "Capcom", "Makai-Mura (Japan Revision C)", GAME_SUPPORTS_SAVE )
-GAME( 1985, makaimurg, gng, gng, makaimur, 0,       ROT0, "Capcom", "Makai-Mura (Japan Revision G)", GAME_SUPPORTS_SAVE )
-GAME( 1989, diamond,   0,   gng, diamond,  diamond, ROT0, "KH Video", "Diamond Run", GAME_SUPPORTS_SAVE )
+GAME( 1985, gng,       0,   gng, gng, driver_device,      0,       ROT0, "Capcom", "Ghosts'n Goblins (World? set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1985, gnga,      gng, gng, gng, driver_device,      0,       ROT0, "Capcom", "Ghosts'n Goblins (World? set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1985, gngbl,     gng, gng, gng, driver_device,      0,       ROT0, "bootleg", "Ghosts'n Goblins (bootleg with Cross)", GAME_SUPPORTS_SAVE )
+GAME( 1985, gngprot,   gng, gng, gng, driver_device,      0,       ROT0, "Capcom", "Ghosts'n Goblins (prototype)", GAME_SUPPORTS_SAVE )
+GAME( 1985, gngblita,  gng, gng, gng, driver_device,      0,       ROT0, "bootleg", "Ghosts'n Goblins (Italian bootleg, harder)", GAME_SUPPORTS_SAVE )
+GAME( 1985, gngc,      gng, gng, gng, driver_device,      0,       ROT0, "Capcom", "Ghosts'n Goblins (World? set 3)", GAME_SUPPORTS_SAVE ) // rev c?
+GAME( 1985, gngt,      gng, gng, gng, driver_device,      0,       ROT0, "Capcom (Taito America license)", "Ghosts'n Goblins (US)", GAME_SUPPORTS_SAVE )
+GAME( 1985, makaimur,  gng, gng, makaimur, driver_device, 0,       ROT0, "Capcom", "Makai-Mura (Japan)", GAME_SUPPORTS_SAVE )
+GAME( 1985, makaimurc, gng, gng, makaimur, driver_device, 0,       ROT0, "Capcom", "Makai-Mura (Japan Revision C)", GAME_SUPPORTS_SAVE )
+GAME( 1985, makaimurg, gng, gng, makaimur, driver_device, 0,       ROT0, "Capcom", "Makai-Mura (Japan Revision G)", GAME_SUPPORTS_SAVE )
+GAME( 1989, diamond,   0,   gng, diamond, gng_state,  diamond, ROT0, "KH Video", "Diamond Run", GAME_SUPPORTS_SAVE )

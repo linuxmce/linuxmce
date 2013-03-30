@@ -38,76 +38,78 @@
 #include "cpu/m6502/m6502.h"
 #include "sound/2203intf.h"
 #include "includes/shootout.h"
+#include "machine/deco222.h"
 
 /*******************************************************************************/
 
-static WRITE8_HANDLER( shootout_bankswitch_w )
+WRITE8_MEMBER(shootout_state::shootout_bankswitch_w)
 {
-	memory_set_bank(space->machine(), "bank1", data & 0x0f);
+	membank("bank1")->set_entry(data & 0x0f);
 }
 
-static WRITE8_HANDLER( sound_cpu_command_w )
+WRITE8_MEMBER(shootout_state::sound_cpu_command_w)
 {
-	soundlatch_w( space, offset, data );
-	cputag_set_input_line(space->machine(), "audiocpu", INPUT_LINE_NMI, PULSE_LINE );
+	soundlatch_byte_w( space, offset, data );
+	machine().device("audiocpu")->execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE );
 }
 
-static WRITE8_HANDLER( shootout_flipscreen_w )
+WRITE8_MEMBER(shootout_state::shootout_flipscreen_w)
 {
-	flip_screen_set(space->machine(), data & 0x01);
+	flip_screen_set(data & 0x01);
 }
 
-static WRITE8_HANDLER( shootout_coin_counter_w )
+WRITE8_MEMBER(shootout_state::shootout_coin_counter_w)
 {
-	coin_counter_w(space->machine(), 0, data);
+	coin_counter_w(machine(), 0, data);
 }
 
 /*******************************************************************************/
 
-static ADDRESS_MAP_START( shootout_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( shootout_map, AS_PROGRAM, 8, shootout_state )
 	AM_RANGE(0x0000, 0x0fff) AM_RAM
 	AM_RANGE(0x1000, 0x1000) AM_READ_PORT("DSW1") AM_WRITE(shootout_bankswitch_w)
 	AM_RANGE(0x1001, 0x1001) AM_READ_PORT("P1") AM_WRITE(shootout_flipscreen_w)
 	AM_RANGE(0x1002, 0x1002) AM_READ_PORT("P2") AM_WRITE(shootout_coin_counter_w)
 	AM_RANGE(0x1003, 0x1003) AM_READ_PORT("DSW2") AM_WRITE(sound_cpu_command_w)
 	AM_RANGE(0x1004, 0x17ff) AM_RAM
-	AM_RANGE(0x1800, 0x19ff) AM_RAM AM_BASE_MEMBER(shootout_state,m_spriteram)
-	AM_RANGE(0x2000, 0x27ff) AM_RAM_WRITE(shootout_textram_w) AM_BASE_MEMBER(shootout_state,m_textram)
-	AM_RANGE(0x2800, 0x2fff) AM_RAM_WRITE(shootout_videoram_w) AM_BASE_MEMBER(shootout_state,m_videoram)
+	AM_RANGE(0x1800, 0x19ff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0x2000, 0x27ff) AM_RAM_WRITE(shootout_textram_w) AM_SHARE("textram")
+	AM_RANGE(0x2800, 0x2fff) AM_RAM_WRITE(shootout_videoram_w) AM_SHARE("videoram")
 	AM_RANGE(0x4000, 0x7fff) AM_ROMBANK("bank1")
 	AM_RANGE(0x8000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( shootouj_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( shootouj_map, AS_PROGRAM, 8, shootout_state )
 	AM_RANGE(0x0000, 0x0fff) AM_RAM
 	AM_RANGE(0x1000, 0x1000) AM_READ_PORT("DSW1")
 	AM_RANGE(0x1001, 0x1001) AM_READ_PORT("P1")
 	AM_RANGE(0x1002, 0x1002) AM_READ_PORT("P2")
 	AM_RANGE(0x1003, 0x1003) AM_READ_PORT("DSW2")
 	AM_RANGE(0x1800, 0x1800) AM_WRITE(shootout_coin_counter_w)
-	AM_RANGE(0x2000, 0x21ff) AM_RAM AM_BASE_MEMBER(shootout_state,m_spriteram)
-	AM_RANGE(0x2800, 0x2801) AM_DEVREADWRITE("ymsnd", ym2203_r,ym2203_w)
-	AM_RANGE(0x3000, 0x37ff) AM_RAM_WRITE(shootout_textram_w) AM_BASE_MEMBER(shootout_state,m_textram)
-	AM_RANGE(0x3800, 0x3fff) AM_RAM_WRITE(shootout_videoram_w) AM_BASE_MEMBER(shootout_state,m_videoram)
+	AM_RANGE(0x2000, 0x21ff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0x2800, 0x2801) AM_DEVREADWRITE_LEGACY("ymsnd", ym2203_r,ym2203_w)
+	AM_RANGE(0x3000, 0x37ff) AM_RAM_WRITE(shootout_textram_w) AM_SHARE("textram")
+	AM_RANGE(0x3800, 0x3fff) AM_RAM_WRITE(shootout_videoram_w) AM_SHARE("videoram")
 	AM_RANGE(0x4000, 0x7fff) AM_ROMBANK("bank1")
 	AM_RANGE(0x8000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
 /*******************************************************************************/
 
-static ADDRESS_MAP_START( shootout_sound_map, AS_PROGRAM, 8 )
+/* same as Tryout */
+static ADDRESS_MAP_START( shootout_sound_map, AS_PROGRAM, 8, shootout_state )
 	AM_RANGE(0x0000, 0x07ff) AM_RAM
-	AM_RANGE(0x4000, 0x4001) AM_DEVREADWRITE("ymsnd", ym2203_r,ym2203_w)
-	AM_RANGE(0xa000, 0xa000) AM_READ(soundlatch_r)
+	AM_RANGE(0x4000, 0x4001) AM_DEVREADWRITE_LEGACY("ymsnd", ym2203_r,ym2203_w)
+	AM_RANGE(0xa000, 0xa000) AM_READ(soundlatch_byte_r)
 	AM_RANGE(0xc000, 0xffff) AM_ROM
-	AM_RANGE(0xd000, 0xd000) AM_WRITE(interrupt_enable_w)
+	AM_RANGE(0xd000, 0xd000) AM_WRITENOP // unknown, NOT irq/nmi mask
 ADDRESS_MAP_END
 
 /*******************************************************************************/
 
-static INPUT_CHANGED( coin_inserted )
+INPUT_CHANGED_MEMBER(shootout_state::coin_inserted)
 {
-	cputag_set_input_line(field->port->machine(), "maincpu", INPUT_LINE_NMI, newval ? ASSERT_LINE : CLEAR_LINE);
+	machine().device("maincpu")->execute().set_input_line(INPUT_LINE_NMI, newval ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static INPUT_PORTS_START( shootout )
@@ -128,94 +130,94 @@ static INPUT_PORTS_START( shootout )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_COCKTAIL
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_COIN2 ) PORT_CHANGED(coin_inserted, 0)
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_CHANGED(coin_inserted, 0)
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_COIN2 ) PORT_CHANGED_MEMBER(DEVICE_SELF, shootout_state,coin_inserted, 0)
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_CHANGED_MEMBER(DEVICE_SELF, shootout_state,coin_inserted, 0)
 
 	PORT_START("DSW1")
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coin_A ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0x03, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0x02, DEF_STR( 1C_2C ) )
-	PORT_DIPSETTING(	0x01, DEF_STR( 1C_3C ) )
-	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Coin_B ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0x0c, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0x08, DEF_STR( 1C_2C ) )
-	PORT_DIPSETTING(	0x04, DEF_STR( 1C_3C ) )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Demo_Sounds ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x20, DEF_STR( On ) )
-	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Cabinet ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Upright ) )
-	PORT_DIPSETTING(	0x40, DEF_STR( Cocktail ) )
-	PORT_DIPNAME( 0x80, 0x80, "Freeze" )
-	PORT_DIPSETTING(	0x80, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coin_A ) )       PORT_DIPLOCATION( "DSW1:1,2" )
+	PORT_DIPSETTING(    0x00, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x03, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x02, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(    0x01, DEF_STR( 1C_3C ) )
+	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Coin_B ) )       PORT_DIPLOCATION( "DSW1:3,4" )
+	PORT_DIPSETTING(    0x00, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x0c, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x08, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(    0x04, DEF_STR( 1C_3C ) )
+	PORT_DIPUNUSED_DIPLOC( 0x10, IP_ACTIVE_LOW, "DSW1:5" )  /* Manual lists this dip as "Unused" */
+	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION( "DSW1:6" )
+	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( On ) )
+	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Cabinet ) )      PORT_DIPLOCATION( "DSW1:7" )
+	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( Cocktail ) )
+	PORT_DIPNAME( 0x80, 0x80, "Freeze" )            PORT_DIPLOCATION( "DSW1:8" )    /* Manual lists this dip as "Unused" */
+	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("DSW2")
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Lives ) )
-	PORT_DIPSETTING(	0x01, "1" )
-	PORT_DIPSETTING(	0x03, "3" )
-	PORT_DIPSETTING(	0x02, "5" )
-	PORT_DIPSETTING(	0x00, DEF_STR( Infinite ) )
-	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Bonus_Life ) )
-	PORT_DIPSETTING(	0x0c, "20.000 Every 70.000" )
-	PORT_DIPSETTING(	0x08, "30.000 Every 80.000" )
-	PORT_DIPSETTING(	0x04, "40.000 Every 90.000" )
-	PORT_DIPSETTING(	0x00, "70.000" )
-	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Difficulty ) )
-	PORT_DIPSETTING(	0x30, DEF_STR( Easy ) )
-	PORT_DIPSETTING(	0x20, DEF_STR( Normal ) )
-	PORT_DIPSETTING(	0x10, DEF_STR( Hard ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Very_Hard ) )
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Lives ) )        PORT_DIPLOCATION( "DSW2:1,2" )
+	PORT_DIPSETTING(    0x01, "1" )
+	PORT_DIPSETTING(    0x03, "3" )
+	PORT_DIPSETTING(    0x02, "5" )
+	PORT_DIPSETTING(    0x00, DEF_STR( Infinite ) )
+	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION( "DSW2:3,4" )
+	PORT_DIPSETTING(    0x0c, "20,000 Every 70,000" )
+	PORT_DIPSETTING(    0x08, "30,000 Every 80,000" )
+	PORT_DIPSETTING(    0x04, "40,000 Every 90,000" )
+	PORT_DIPSETTING(    0x00, "70,000" )
+	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Difficulty ) )   PORT_DIPLOCATION( "DSW2:5,6" )
+	PORT_DIPSETTING(    0x30, DEF_STR( Easy ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( Normal ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( Hard ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Very_Hard ) )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SPECIAL ) /* this is set when either coin is inserted */
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_VBLANK )
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( shootouj )
 	PORT_INCLUDE(shootout)
 
 	PORT_MODIFY("DSW1")
-	PORT_DIPNAME( 0x20, 0x20, "Company Copyright" )
-	PORT_DIPSETTING(	0x20, "Data East Corp" )
-	PORT_DIPSETTING(	0x00, "Data East USA Inc" )
+	PORT_DIPNAME( 0x20, 0x20, "Company Copyright" )     PORT_DIPLOCATION( "DSW1:6" )
+	PORT_DIPSETTING(    0x20, "Data East Corp" )
+	PORT_DIPSETTING(    0x00, "Data East USA Inc" )
 
 	PORT_MODIFY("DSW2")
-	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Bonus_Life ) )
-	PORT_DIPSETTING(	0x0c, "20K 50K" )
-	PORT_DIPSETTING(	0x08, "30K 60K" )
-	PORT_DIPSETTING(	0x04, "50K 70K" )
-	PORT_DIPSETTING(	0x00, "70K" )
+	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION( "DSW2:3,4" )
+	PORT_DIPSETTING(    0x0c, "20,000 Every 50,000" )
+	PORT_DIPSETTING(    0x08, "30,000 Every 60,000" )
+	PORT_DIPSETTING(    0x04, "50,000 Every 70,000" )
+	PORT_DIPSETTING(    0x00, "70,000" )
 INPUT_PORTS_END
 
 
 static const gfx_layout char_layout =
 {
-	8,8,	/* 8*8 characters */
-	0x400,	/* 1024 characters */
-	2,	/* 2 bits per pixel */
-	{ 0,4 },	/* the bitplanes are packed in the same byte */
+	8,8,    /* 8*8 characters */
+	0x400,  /* 1024 characters */
+	2,  /* 2 bits per pixel */
+	{ 0,4 },    /* the bitplanes are packed in the same byte */
 	{ (0x2000*8)+0, (0x2000*8)+1, (0x2000*8)+2, (0x2000*8)+3, 0, 1, 2, 3 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
 	8*8 /* every char takes 8 consecutive bytes */
 };
 static const gfx_layout sprite_layout =
 {
-	16,16,	/* 16*16 sprites */
-	0x800,	/* 2048 sprites */
-	3,	/* 3 bits per pixel */
-	{ 0*0x10000*8, 1*0x10000*8, 2*0x10000*8 },	/* the bitplanes are separated */
+	16,16,  /* 16*16 sprites */
+	0x800,  /* 2048 sprites */
+	3,  /* 3 bits per pixel */
+	{ 0*0x10000*8, 1*0x10000*8, 2*0x10000*8 },  /* the bitplanes are separated */
 	{ 128+0, 128+1, 128+2, 128+3, 128+4, 128+5, 128+6, 128+7, 0, 1, 2, 3, 4, 5, 6, 7 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8, 8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8 },
-	32*8	/* every char takes 32 consecutive bytes */
+	32*8    /* every char takes 32 consecutive bytes */
 };
 static const gfx_layout tile_layout =
 {
-	8,8,	/* 8*8 characters */
-	0x800,	/* 2048 characters */
-	2,	/* 2 bits per pixel */
-	{ 0,4 },	/* the bitplanes are packed in the same byte */
+	8,8,    /* 8*8 characters */
+	0x800,  /* 2048 characters */
+	2,  /* 2 bits per pixel */
+	{ 0,4 },    /* the bitplanes are packed in the same byte */
 	{ (0x4000*8)+0, (0x4000*8)+1, (0x4000*8)+2, (0x4000*8)+3, 0, 1, 2, 3 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
 	8*8 /* every char takes 8 consecutive bytes */
@@ -229,12 +231,12 @@ GFXDECODE_END
 
 static void shootout_snd_irq(device_t *device, int linestate)
 {
-	cputag_set_input_line(device->machine(), "audiocpu", 0, linestate);
+	device->machine().device("audiocpu")->execute().set_input_line(0, linestate);
 }
 
 static void shootout_snd2_irq(device_t *device, int linestate)
 {
-	cputag_set_input_line(device->machine(), "maincpu", 0, linestate);
+	device->machine().device("maincpu")->execute().set_input_line(0, linestate);
 }
 
 static const ym2203_interface ym2203_config =
@@ -244,7 +246,7 @@ static const ym2203_interface ym2203_config =
 		AY8910_DEFAULT_LOADS,
 		DEVCB_NULL, DEVCB_NULL, DEVCB_NULL, DEVCB_NULL
 	},
-	shootout_snd_irq
+	DEVCB_LINE(shootout_snd_irq)
 };
 
 static const ym2203_interface ym2203_interface2 =
@@ -254,16 +256,16 @@ static const ym2203_interface ym2203_interface2 =
 		AY8910_DEFAULT_LOADS,
 		DEVCB_NULL,
 		DEVCB_NULL,
-		DEVCB_MEMORY_HANDLER("maincpu", PROGRAM, shootout_bankswitch_w),
-		DEVCB_MEMORY_HANDLER("maincpu", PROGRAM, shootout_flipscreen_w)
+		DEVCB_DRIVER_MEMBER(shootout_state, shootout_bankswitch_w),
+		DEVCB_DRIVER_MEMBER(shootout_state, shootout_flipscreen_w)
 	},
-	shootout_snd2_irq
+	DEVCB_LINE(shootout_snd2_irq)
 };
 
 static MACHINE_CONFIG_START( shootout, shootout_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M6502, 2000000)	/* 2 MHz? */
+	MCFG_CPU_ADD("maincpu", DECO_222, 2000000)  /* 2 MHz? */
 	MCFG_CPU_PROGRAM_MAP(shootout_map)
 
 	MCFG_CPU_ADD("audiocpu", M6502, 1500000)
@@ -273,16 +275,13 @@ static MACHINE_CONFIG_START( shootout, shootout_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 1*8, 31*8-1)
-	MCFG_SCREEN_UPDATE(shootout)
+	MCFG_SCREEN_UPDATE_DRIVER(shootout_state, screen_update_shootout)
 
 	MCFG_GFXDECODE(shootout)
 	MCFG_PALETTE_LENGTH(256)
 
-	MCFG_PALETTE_INIT(shootout)
-	MCFG_VIDEO_START(shootout)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -296,23 +295,20 @@ MACHINE_CONFIG_END
 static MACHINE_CONFIG_START( shootouj, shootout_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M6502, 2000000)	/* 2 MHz? */
+	MCFG_CPU_ADD("maincpu", M6502, 2000000) /* 2 MHz? */
 	MCFG_CPU_PROGRAM_MAP(shootouj_map)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 1*8, 31*8-1)
-	MCFG_SCREEN_UPDATE(shootouj)
+	MCFG_SCREEN_UPDATE_DRIVER(shootout_state, screen_update_shootouj)
 
 	MCFG_GFXDECODE(shootout)
 	MCFG_PALETTE_LENGTH(256)
 
-	MCFG_PALETTE_INIT(shootout)
-	MCFG_VIDEO_START(shootout)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -322,9 +318,17 @@ static MACHINE_CONFIG_START( shootouj, shootout_state )
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 MACHINE_CONFIG_END
 
+static MACHINE_CONFIG_DERIVED( shootouk, shootouj )
+	/* the Korean 'bootleg' has the usual DECO222 style encryption */
+	MCFG_DEVICE_REMOVE("maincpu")
+	MCFG_CPU_ADD("maincpu", DECO_222, 2000000)  /* 2 MHz? */
+	MCFG_CPU_PROGRAM_MAP(shootouj_map)
+MACHINE_CONFIG_END
+
+
 
 ROM_START( shootout )
-	ROM_REGION( 2*0x20000, "maincpu", 0 )	/* 128k for code + 128k for decrypted opcodes */
+	ROM_REGION( 2*0x20000, "maincpu", 0 )   /* 128k for code + 128k for decrypted opcodes */
 	ROM_LOAD( "cu00.b1",        0x08000, 0x8000, CRC(090edeb6) SHA1(ab849d123dacf3947b1ebd29b70a20e066911a60) ) /* opcodes encrypted */
 	/* banked at 0x4000-0x8000 */
 	ROM_LOAD( "cu02.c3",        0x10000, 0x8000, CRC(2a913730) SHA1(584488278d58c4d34a2eebeaf39518f87cf5eecd) ) /* opcodes encrypted */
@@ -346,17 +350,17 @@ ROM_START( shootout )
 
 	ROM_REGION( 0x08000, "gfx3", 0 )
 	ROM_LOAD( "cu10.h17",       0x00000, 0x2000, CRC(3854c877) SHA1(2c8fe4591553ce798c907849e3dbd410e4fe424c) ) /* background tiles */
-	ROM_CONTINUE(				0x04000, 0x2000 )
-	ROM_CONTINUE(				0x02000, 0x2000 )
-	ROM_CONTINUE(				0x06000, 0x2000 )
+	ROM_CONTINUE(               0x04000, 0x2000 )
+	ROM_CONTINUE(               0x02000, 0x2000 )
+	ROM_CONTINUE(               0x06000, 0x2000 )
 
 	ROM_REGION( 0x0200, "proms", 0 )
 	ROM_LOAD( "gb08.k10",       0x0000, 0x0100, CRC(509c65b6) SHA1(4cec37065a799ced4e7b6552f267aacc7f54ffe3) )
-	ROM_LOAD( "gb09.k6",        0x0100, 0x0100, CRC(aa090565) SHA1(e289e77ec3402e86d93b873c0fa064f3e6277a62) )	/* priority encoder? (not used) */
+	ROM_LOAD( "gb09.k6",        0x0100, 0x0100, CRC(aa090565) SHA1(e289e77ec3402e86d93b873c0fa064f3e6277a62) )  /* priority encoder? (not used) */
 ROM_END
 
 ROM_START( shootoutj )
-	ROM_REGION( 0x20000, "maincpu", 0 )	/* 128k for code  */
+	ROM_REGION( 0x20000, "maincpu", 0 ) /* 128k for code  */
 	ROM_LOAD( "cg02.bin",    0x08000, 0x8000, CRC(8fc5d632) SHA1(809ac4eba09972229fe741c96fa8036d7139b6a8) )
 	ROM_LOAD( "cg00.bin",    0x10000, 0x8000, CRC(ef6ced1e) SHA1(feea508c7a60fc6cde1efee52cba628accd26028) )
 	ROM_LOAD( "cg01.bin",    0x18000, 0x4000, CRC(74cf11ca) SHA1(59edbc4633cd560e7b928b33e4c42d0125332a1b) )
@@ -371,17 +375,17 @@ ROM_START( shootoutj )
 
 	ROM_REGION( 0x08000, "gfx3", 0 )
 	ROM_LOAD( "cu10.h17",       0x00000, 0x2000, CRC(3854c877) SHA1(2c8fe4591553ce798c907849e3dbd410e4fe424c) ) /* background tiles */
-	ROM_CONTINUE(				0x04000, 0x2000 )
-	ROM_CONTINUE(				0x02000, 0x2000 )
-	ROM_CONTINUE(				0x06000, 0x2000 )
+	ROM_CONTINUE(               0x04000, 0x2000 )
+	ROM_CONTINUE(               0x02000, 0x2000 )
+	ROM_CONTINUE(               0x06000, 0x2000 )
 
 	ROM_REGION( 0x0200, "proms", 0 )
 	ROM_LOAD( "gb08.k10",       0x0000, 0x0100, CRC(509c65b6) SHA1(4cec37065a799ced4e7b6552f267aacc7f54ffe3) )
-	ROM_LOAD( "gb09.k6",        0x0100, 0x0100, CRC(aa090565) SHA1(e289e77ec3402e86d93b873c0fa064f3e6277a62) )	/* priority encoder? (not used) */
+	ROM_LOAD( "gb09.k6",        0x0100, 0x0100, CRC(aa090565) SHA1(e289e77ec3402e86d93b873c0fa064f3e6277a62) )  /* priority encoder? (not used) */
 ROM_END
 
 ROM_START( shootoutb )
-	ROM_REGION( 2*0x20000, "maincpu", 0 )	/* 128k for code + 128k for decrypted opcodes */
+	ROM_REGION( 2*0x20000, "maincpu", 0 )   /* 128k for code + 128k for decrypted opcodes */
 	ROM_LOAD( "shootout.006", 0x08000, 0x8000, CRC(2c054888) SHA1(cb0de2f7d743506789626304e6bcbbc292fbe8bc) )
 	ROM_LOAD( "shootout.008", 0x10000, 0x8000, CRC(9651b656) SHA1(e90eddf2833ef36fa73b7b8d81d28443d2f60220) )
 	ROM_LOAD( "cg01.bin",     0x18000, 0x4000, CRC(74cf11ca) SHA1(59edbc4633cd560e7b928b33e4c42d0125332a1b) )
@@ -396,40 +400,23 @@ ROM_START( shootoutb )
 
 	ROM_REGION( 0x08000, "gfx3", 0 )
 	ROM_LOAD( "cu10.h17",       0x00000, 0x2000, CRC(3854c877) SHA1(2c8fe4591553ce798c907849e3dbd410e4fe424c) ) /* background tiles */
-	ROM_CONTINUE(				0x04000, 0x2000 )
-	ROM_CONTINUE(				0x02000, 0x2000 )
-	ROM_CONTINUE(				0x06000, 0x2000 )
+	ROM_CONTINUE(               0x04000, 0x2000 )
+	ROM_CONTINUE(               0x02000, 0x2000 )
+	ROM_CONTINUE(               0x06000, 0x2000 )
 
 	ROM_REGION( 0x0220, "proms", 0 )
 	ROM_LOAD( "gb08.k10",       0x0000, 0x0100, CRC(509c65b6) SHA1(4cec37065a799ced4e7b6552f267aacc7f54ffe3) )
-	ROM_LOAD( "gb09.k6",        0x0100, 0x0100, CRC(aa090565) SHA1(e289e77ec3402e86d93b873c0fa064f3e6277a62) )	/* priority encoder? (not used) */
-	ROM_LOAD( "shootclr.003",   0x0200, 0x0020, CRC(6b0c2942) SHA1(7d25acc753923b265792fc78f8fc70175c0e0ec2) )	/* opcode decrypt table (bootleg only) */
+	ROM_LOAD( "gb09.k6",        0x0100, 0x0100, CRC(aa090565) SHA1(e289e77ec3402e86d93b873c0fa064f3e6277a62) )  /* priority encoder? (not used) */
+	ROM_LOAD( "shootclr.003",   0x0200, 0x0020, CRC(6b0c2942) SHA1(7d25acc753923b265792fc78f8fc70175c0e0ec2) )  /* opcode decrypt table (bootleg only) */
 ROM_END
 
 
-static DRIVER_INIT( shootout )
+DRIVER_INIT_MEMBER(shootout_state,shootout)
 {
-	address_space *space = machine.device("maincpu")->memory().space(AS_PROGRAM);
-	int length = machine.region("maincpu")->bytes();
-	UINT8 *decrypt = auto_alloc_array(machine, UINT8, length - 0x8000);
-	UINT8 *rom = machine.region("maincpu")->base();
-	int A;
-
-	space->set_decrypted_region(0x8000, 0xffff, decrypt);
-
-	for (A = 0x8000;A < length;A++)
-		decrypt[A-0x8000] = (rom[A] & 0x9f) | ((rom[A] & 0x40) >> 1) | ((rom[A] & 0x20) << 1);
-
-	memory_configure_bank(machine, "bank1", 0, 16, machine.region("maincpu")->base() + 0x10000, 0x4000);
-	memory_configure_bank_decrypted(machine, "bank1", 0, 16, decrypt + 0x8000, 0x4000);
-}
-
-static DRIVER_INIT( shootouj )
-{
-	memory_configure_bank(machine, "bank1", 0, 16, machine.region("maincpu")->base() + 0x10000, 0x4000);
+	machine().root_device().membank("bank1")->configure_entries(0, 16, machine().root_device().memregion("maincpu")->base() + 0x10000, 0x4000);
 }
 
 
-GAME( 1985, shootout, 0,        shootout, shootout, shootout, ROT0, "Data East USA", "Shoot Out (US)", 0)
-GAME( 1985, shootoutj, shootout, shootouj, shootouj, shootouj, ROT0, "Data East Corporation", "Shoot Out (Japan)", 0 )
-GAME( 1985, shootoutb, shootout, shootouj, shootout, shootout, ROT0, "bootleg", "Shoot Out (Korean Bootleg)", 0 )
+GAME( 1985, shootout,  0,        shootout, shootout, shootout_state, shootout, ROT0, "Data East USA", "Shoot Out (US)", 0)
+GAME( 1985, shootoutj, shootout, shootouj, shootouj, shootout_state, shootout, ROT0, "Data East Corporation", "Shoot Out (Japan)", 0 )
+GAME( 1985, shootoutb, shootout, shootouk, shootout, shootout_state, shootout, ROT0, "bootleg", "Shoot Out (Korean Bootleg)", 0 )

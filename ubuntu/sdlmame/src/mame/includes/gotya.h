@@ -1,16 +1,22 @@
+#include "sound/samples.h"
 
 class gotya_state : public driver_device
 {
 public:
-	gotya_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	gotya_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_scroll(*this, "scroll"),
+		m_videoram(*this, "videoram"),
+		m_colorram(*this, "colorram"),
+		m_videoram2(*this, "videoram2"),
+		m_spriteram(*this, "spriteram"){ }
 
 	/* memory pointers */
-	UINT8 *  m_videoram;
-	UINT8 *  m_videoram2;
-	UINT8 *  m_colorram;
-	UINT8 *  m_spriteram;
-	UINT8 *  m_scroll;
+	required_shared_ptr<UINT8> m_scroll;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_colorram;
+	required_shared_ptr<UINT8> m_videoram2;
+	required_shared_ptr<UINT8> m_spriteram;
 
 	/* video-related */
 	tilemap_t  *m_bg_tilemap;
@@ -20,21 +26,16 @@ public:
 	int      m_theme_playing;
 
 	/* devices */
-	device_t *m_samples;
+	samples_device *m_samples;
+	DECLARE_WRITE8_MEMBER(gotya_videoram_w);
+	DECLARE_WRITE8_MEMBER(gotya_colorram_w);
+	DECLARE_WRITE8_MEMBER(gotya_video_control_w);
+	DECLARE_WRITE8_MEMBER(gotya_soundlatch_w);
+	TILE_GET_INFO_MEMBER(get_bg_tile_info);
+	TILEMAP_MAPPER_MEMBER(tilemap_scan_rows_thehand);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_gotya(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
-
-
-/*----------- defined in audio/gotya.c -----------*/
-
-WRITE8_HANDLER( gotya_soundlatch_w );
-
-
-/*----------- defined in video/gotya.c -----------*/
-
-WRITE8_HANDLER( gotya_videoram_w );
-WRITE8_HANDLER( gotya_colorram_w );
-WRITE8_HANDLER( gotya_video_control_w );
-
-PALETTE_INIT( gotya );
-VIDEO_START( gotya );
-SCREEN_UPDATE( gotya );

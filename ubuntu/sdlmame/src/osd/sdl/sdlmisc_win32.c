@@ -10,7 +10,7 @@
 //============================================================
 
 // standard sdl header
-#include <SDL/SDL.h>
+#include "sdlinc.h"
 
 
 #define WIN32_LEAN_AND_MEAN
@@ -54,4 +54,3 @@ void osd_break_into_debugger(const char *message)
 		DebugBreak();
 	}
 }
-

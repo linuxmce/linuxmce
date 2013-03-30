@@ -7,11 +7,12 @@
 class opwolf_state : public driver_device
 {
 public:
-	opwolf_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	opwolf_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_cchip_ram(*this, "cchip_ram"){ }
 
 	/* memory pointers */
-	UINT8 *      m_cchip_ram;
+	optional_shared_ptr<UINT8> m_cchip_ram;
 
 	/* video-related */
 	UINT16       m_sprite_ctrl;
@@ -49,22 +50,32 @@ public:
 	device_t *m_pc090oj;
 	device_t *m_msm1;
 	device_t *m_msm2;
+	DECLARE_READ16_MEMBER(cchip_r);
+	DECLARE_WRITE16_MEMBER(cchip_w);
+	DECLARE_READ16_MEMBER(opwolf_in_r);
+	DECLARE_READ16_MEMBER(opwolf_dsw_r);
+	DECLARE_READ16_MEMBER(opwolf_lightgun_r);
+	DECLARE_READ8_MEMBER(z80_input1_r);
+	DECLARE_READ8_MEMBER(z80_input2_r);
+	DECLARE_WRITE8_MEMBER(opwolf_adpcm_d_w);
+	DECLARE_WRITE8_MEMBER(opwolf_adpcm_e_w);
+	DECLARE_WRITE16_MEMBER(opwolf_cchip_status_w);
+	DECLARE_WRITE16_MEMBER(opwolf_cchip_bank_w);
+	DECLARE_WRITE16_MEMBER(opwolf_cchip_data_w);
+	DECLARE_READ16_MEMBER(opwolf_cchip_status_r);
+	DECLARE_READ16_MEMBER(opwolf_cchip_data_r);
+	DECLARE_WRITE16_MEMBER(opwolf_spritectrl_w);
+	DECLARE_WRITE8_MEMBER(sound_bankswitch_w);
+	DECLARE_WRITE8_MEMBER(opwolf_adpcm_b_w);
+	DECLARE_WRITE8_MEMBER(opwolf_adpcm_c_w);
+	DECLARE_DRIVER_INIT(opwolf);
+	DECLARE_DRIVER_INIT(opwolfb);
+	virtual void machine_start();
+	DECLARE_MACHINE_RESET(opwolf);
+	UINT32 screen_update_opwolf(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	TIMER_CALLBACK_MEMBER(opwolf_timer_callback);
+	TIMER_CALLBACK_MEMBER(cchip_timer);
 };
 
-
 /*----------- defined in machine/opwolf.c -----------*/
-
 void opwolf_cchip_init(running_machine &machine);
-
-READ16_HANDLER( opwolf_cchip_status_r );
-READ16_HANDLER( opwolf_cchip_data_r );
-WRITE16_HANDLER( opwolf_cchip_status_w );
-WRITE16_HANDLER( opwolf_cchip_data_w );
-WRITE16_HANDLER( opwolf_cchip_bank_w );
-
-
-/*----------- defined in video/opwolf.c -----------*/
-
-WRITE16_HANDLER( opwolf_spritectrl_w );
-
-SCREEN_UPDATE( opwolf );

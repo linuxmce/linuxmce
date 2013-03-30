@@ -5,63 +5,60 @@
 
 /******************************************************************************/
 
-WRITE32_HANDLER( deco32_pri_w )
+WRITE32_MEMBER(deco32_state::deco32_pri_w)
 {
-	deco32_state *state = space->machine().driver_data<deco32_state>();
-	state->m_pri=data;
+	m_pri=data;
 }
 
-WRITE32_HANDLER( dragngun_sprite_control_w )
+WRITE32_MEMBER(dragngun_state::dragngun_sprite_control_w)
 {
-	dragngun_state *state = space->machine().driver_data<dragngun_state>();
-	state->m_dragngun_sprite_ctrl=data;
+	m_dragngun_sprite_ctrl=data;
 }
 
-WRITE32_HANDLER( dragngun_spriteram_dma_w )
+WRITE32_MEMBER(dragngun_state::dragngun_spriteram_dma_w)
 {
 	/* DMA spriteram to private sprite chip area, and clear cpu ram */
-	memcpy(space->machine().generic.buffered_spriteram.u32,space->machine().generic.spriteram.u32,space->machine().generic.spriteram_size);
-	memset(space->machine().generic.spriteram.u32,0,0x2000);
+	m_spriteram->copy();
+	memset(m_spriteram->live(),0,0x2000);
 }
 
-WRITE32_HANDLER( deco32_ace_ram_w )
+WRITE32_MEMBER(deco32_state::deco32_ace_ram_w)
 {
-	deco32_state *state = space->machine().driver_data<deco32_state>();
 	/* Some notes pieced together from Tattoo Assassins info:
 
-        Bytes 0 to 0x58 - object alpha control?
-        Bytes 0x5c to 0x7c - tilemap alpha control
+	    Bytes 0 to 0x58 - object alpha control?
+	    Bytes 0x5c to 0x7c - tilemap alpha control
 
-        0 = opaque, 0x10 = 50% transparent, 0x20 = fully transparent
+	    0 = opaque, 0x10 = 50% transparent, 0x20 = fully transparent
 
-        Byte 0x00: ACEO000P0
-                            P8
-                            1P0
-                            1P8
-                            O010C1
-                            o010C8
-                            ??
+	    Byte 0x00: ACEO000P0
+	                        P8
+	                        1P0
+	                        1P8
+	                        O010C1
+	                        o010C8
+	                        ??
 
-        Hardware fade registers:
+	    Hardware fade registers:
 
-        Byte 0x80: fadeptred
-        Byte 0x84: fadeptgreen
-        Byte 0x88: fadeptblue
-        Byte 0x8c: fadestred
-        Byte 0x90: fadestgreen
-        Byte 0x94: fadestblue
-        Byte 0x98: fadetype
+	    Byte 0x80: fadeptred
+	    Byte 0x84: fadeptgreen
+	    Byte 0x88: fadeptblue
+	    Byte 0x8c: fadestred
+	    Byte 0x90: fadestgreen
+	    Byte 0x94: fadestblue
+	    Byte 0x98: fadetype
 
-        The 'ST' value lerps between the 'PT' value and the palette entries.  So, if PT==0,
-        then ST ranging from 0 to 255 will cause a fade to black (when ST==255 the palette
-        becomes zero).
+	    The 'ST' value lerps between the 'PT' value and the palette entries.  So, if PT==0,
+	    then ST ranging from 0 to 255 will cause a fade to black (when ST==255 the palette
+	    becomes zero).
 
-        'fadetype' - 1100 for multiplicative fade, 1000 for additive
-    */
-	if (offset>=(0x80/4) && (data!=state->m_ace_ram[offset]))
-		state->m_ace_ram_dirty=1;
+	    'fadetype' - 1100 for multiplicative fade, 1000 for additive
+	*/
+	if (offset>=(0x80/4) && (data!=m_ace_ram[offset]))
+		m_ace_ram_dirty=1;
 
-	COMBINE_DATA(&state->m_ace_ram[offset]);
+	COMBINE_DATA(&m_ace_ram[offset]);
 }
 
 static void updateAceRam(running_machine& machine)
@@ -81,9 +78,9 @@ static void updateAceRam(running_machine& machine)
 	for (i=0; i<2048; i++)
 	{
 		/* Lerp palette entry to 'fadept' according to 'fadeps' */
-		b = (machine.generic.paletteram.u32[i] >>16) & 0xff;
-		g = (machine.generic.paletteram.u32[i] >> 8) & 0xff;
-		r = (machine.generic.paletteram.u32[i] >> 0) & 0xff;
+		b = (state->m_generic_paletteram_32[i] >>16) & 0xff;
+		g = (state->m_generic_paletteram_32[i] >> 8) & 0xff;
+		r = (state->m_generic_paletteram_32[i] >> 0) & 0xff;
 
 		if (i>255) /* Screenshots seem to suggest ACE fades do not affect playfield 1 palette (0-255) */
 		{
@@ -102,47 +99,45 @@ static void updateAceRam(running_machine& machine)
 /* Later games have double buffered paletteram - the real palette ram is
 only updated on a DMA call */
 
-WRITE32_HANDLER( deco32_nonbuffered_palette_w )
+WRITE32_MEMBER(deco32_state::deco32_nonbuffered_palette_w)
 {
 	int r,g,b;
 
-	COMBINE_DATA(&space->machine().generic.paletteram.u32[offset]);
+	COMBINE_DATA(&m_generic_paletteram_32[offset]);
 
-	b = (space->machine().generic.paletteram.u32[offset] >>16) & 0xff;
-	g = (space->machine().generic.paletteram.u32[offset] >> 8) & 0xff;
-	r = (space->machine().generic.paletteram.u32[offset] >> 0) & 0xff;
+	b = (m_generic_paletteram_32[offset] >>16) & 0xff;
+	g = (m_generic_paletteram_32[offset] >> 8) & 0xff;
+	r = (m_generic_paletteram_32[offset] >> 0) & 0xff;
 
-	palette_set_color(space->machine(),offset,MAKE_RGB(r,g,b));
+	palette_set_color(machine(),offset,MAKE_RGB(r,g,b));
 }
 
-WRITE32_HANDLER( deco32_buffered_palette_w )
+WRITE32_MEMBER(deco32_state::deco32_buffered_palette_w)
 {
-	deco32_state *state = space->machine().driver_data<deco32_state>();
-	COMBINE_DATA(&space->machine().generic.paletteram.u32[offset]);
-	state->m_dirty_palette[offset]=1;
+	COMBINE_DATA(&m_generic_paletteram_32[offset]);
+	m_dirty_palette[offset]=1;
 }
 
-WRITE32_HANDLER( deco32_palette_dma_w )
+WRITE32_MEMBER(deco32_state::deco32_palette_dma_w)
 {
-	deco32_state *state = space->machine().driver_data<deco32_state>();
-	const int m=space->machine().total_colors();
+	const int m=machine().total_colors();
 	int r,g,b,i;
 
 	for (i=0; i<m; i++) {
-		if (state->m_dirty_palette[i]) {
-			state->m_dirty_palette[i]=0;
+		if (m_dirty_palette[i]) {
+			m_dirty_palette[i]=0;
 
-			if (state->m_has_ace_ram)
+			if (m_has_ace_ram)
 			{
-				state->m_ace_ram_dirty=1;
+				m_ace_ram_dirty=1;
 			}
 			else
 			{
-				b = (space->machine().generic.paletteram.u32[i] >>16) & 0xff;
-				g = (space->machine().generic.paletteram.u32[i] >> 8) & 0xff;
-				r = (space->machine().generic.paletteram.u32[i] >> 0) & 0xff;
+				b = (m_generic_paletteram_32[i] >>16) & 0xff;
+				g = (m_generic_paletteram_32[i] >> 8) & 0xff;
+				r = (m_generic_paletteram_32[i] >> 0) & 0xff;
 
-				palette_set_color(space->machine(),i,MAKE_RGB(r,g,b));
+				palette_set_color(machine(),i,MAKE_RGB(r,g,b));
 			}
 		}
 	}
@@ -152,49 +147,37 @@ WRITE32_HANDLER( deco32_palette_dma_w )
 
 
 INLINE void dragngun_drawgfxzoom(
-		bitmap_t *dest_bmp,const rectangle *clip,const gfx_element *gfx,
+		bitmap_rgb32 &dest_bmp,const rectangle &clip,gfx_element *gfx,
 		UINT32 code,UINT32 color,int flipx,int flipy,int sx,int sy,
 		int transparent_color,
-		int scalex, int scaley,bitmap_t *pri_buffer,UINT32 pri_mask, int sprite_screen_width, int  sprite_screen_height, UINT8 alpha )
+		int scalex, int scaley,bitmap_ind8 *pri_buffer,UINT32 pri_mask, int sprite_screen_width, int  sprite_screen_height, UINT8 alpha )
 {
 	rectangle myclip;
 
 	if (!scalex || !scaley) return;
 
 	/*
-    scalex and scaley are 16.16 fixed point numbers
-    1<<15 : shrink to 50%
-    1<<16 : uniform scale
-    1<<17 : double to 200%
-    */
+	scalex and scaley are 16.16 fixed point numbers
+	1<<15 : shrink to 50%
+	1<<16 : uniform scale
+	1<<17 : double to 200%
+	*/
 
 	/* KW 991012 -- Added code to force clip to bitmap boundary */
-	if(clip)
-	{
-		myclip.min_x = clip->min_x;
-		myclip.max_x = clip->max_x;
-		myclip.min_y = clip->min_y;
-		myclip.max_y = clip->max_y;
-
-		if (myclip.min_x < 0) myclip.min_x = 0;
-		if (myclip.max_x >= dest_bmp->width) myclip.max_x = dest_bmp->width-1;
-		if (myclip.min_y < 0) myclip.min_y = 0;
-		if (myclip.max_y >= dest_bmp->height) myclip.max_y = dest_bmp->height-1;
-
-		clip=&myclip;
-	}
+	myclip = clip;
+	myclip &= dest_bmp.cliprect();
 
 	{
 		if( gfx )
 		{
-			const pen_t *pal = &gfx->machine().pens[gfx->color_base + gfx->color_granularity * (color % gfx->total_colors)];
-			const UINT8 *code_base = gfx_element_get_data(gfx, code % gfx->total_elements);
+			const pen_t *pal = &gfx->machine().pens[gfx->colorbase() + gfx->granularity() * (color % gfx->colors())];
+			const UINT8 *code_base = gfx->get_data(code % gfx->elements());
 
 			if (sprite_screen_width && sprite_screen_height)
 			{
 				/* compute sprite increment per screen pixel */
-				int dx = (gfx->width<<16)/sprite_screen_width;
-				int dy = (gfx->height<<16)/sprite_screen_height;
+				int dx = (gfx->width()<<16)/sprite_screen_width;
+				int dy = (gfx->height()<<16)/sprite_screen_height;
 
 				int ex = sx+sprite_screen_width;
 				int ey = sy+sprite_screen_height;
@@ -222,31 +205,28 @@ INLINE void dragngun_drawgfxzoom(
 					y_index = 0;
 				}
 
-				if( clip )
-				{
-					if( sx < clip->min_x)
-					{ /* clip left */
-						int pixels = clip->min_x-sx;
-						sx += pixels;
-						x_index_base += pixels*dx;
-					}
-					if( sy < clip->min_y )
-					{ /* clip top */
-						int pixels = clip->min_y-sy;
-						sy += pixels;
-						y_index += pixels*dy;
-					}
-					/* NS 980211 - fixed incorrect clipping */
-					if( ex > clip->max_x+1 )
-					{ /* clip right */
-						int pixels = ex-clip->max_x-1;
-						ex -= pixels;
-					}
-					if( ey > clip->max_y+1 )
-					{ /* clip bottom */
-						int pixels = ey-clip->max_y-1;
-						ey -= pixels;
-					}
+				if( sx < clip.min_x)
+				{ /* clip left */
+					int pixels = clip.min_x-sx;
+					sx += pixels;
+					x_index_base += pixels*dx;
+				}
+				if( sy < clip.min_y )
+				{ /* clip top */
+					int pixels = clip.min_y-sy;
+					sy += pixels;
+					y_index += pixels*dy;
+				}
+				/* NS 980211 - fixed incorrect clipping */
+				if( ex > clip.max_x+1 )
+				{ /* clip right */
+					int pixels = ex-clip.max_x-1;
+					ex -= pixels;
+				}
+				if( ey > clip.max_y+1 )
+				{ /* clip bottom */
+					int pixels = ey-clip.max_y-1;
+					ey -= pixels;
 				}
 
 				if( ex>sx )
@@ -260,9 +240,9 @@ INLINE void dragngun_drawgfxzoom(
 						{
 							for( y=sy; y<ey; y++ )
 							{
-								const UINT8 *source = code_base + (y_index>>16) * gfx->line_modulo;
-								UINT32 *dest = BITMAP_ADDR32(dest_bmp, y, 0);
-								UINT8 *pri = BITMAP_ADDR8(pri_buffer, y, 0);
+								const UINT8 *source = code_base + (y_index>>16) * gfx->rowbytes();
+								UINT32 *dest = &dest_bmp.pix32(y);
+								UINT8 *pri = &pri_buffer->pix8(y);
 
 								int x, x_index = x_index_base;
 								for( x=sx; x<ex; x++ )
@@ -284,8 +264,8 @@ INLINE void dragngun_drawgfxzoom(
 						{
 							for( y=sy; y<ey; y++ )
 							{
-								const UINT8 *source = code_base + (y_index>>16) * gfx->line_modulo;
-								UINT32 *dest = BITMAP_ADDR32(dest_bmp, y, 0);
+								const UINT8 *source = code_base + (y_index>>16) * gfx->rowbytes();
+								UINT32 *dest = &dest_bmp.pix32(y);
 
 								int x, x_index = x_index_base;
 								for( x=sx; x<ex; x++ )
@@ -307,9 +287,9 @@ INLINE void dragngun_drawgfxzoom(
 						{
 							for( y=sy; y<ey; y++ )
 							{
-								const UINT8 *source = code_base + (y_index>>16) * gfx->line_modulo;
-								UINT32 *dest = BITMAP_ADDR32(dest_bmp, y, 0);
-								UINT8 *pri = BITMAP_ADDR8(pri_buffer, y, 0);
+								const UINT8 *source = code_base + (y_index>>16) * gfx->rowbytes();
+								UINT32 *dest = &dest_bmp.pix32(y);
+								UINT8 *pri = &pri_buffer->pix8(y);
 
 								int x, x_index = x_index_base;
 								for( x=sx; x<ex; x++ )
@@ -331,8 +311,8 @@ INLINE void dragngun_drawgfxzoom(
 						{
 							for( y=sy; y<ey; y++ )
 							{
-								const UINT8 *source = code_base + (y_index>>16) * gfx->line_modulo;
-								UINT32 *dest = BITMAP_ADDR32(dest_bmp, y, 0);
+								const UINT8 *source = code_base + (y_index>>16) * gfx->rowbytes();
+								UINT32 *dest = &dest_bmp.pix32(y);
 
 								int x, x_index = x_index_base;
 								for( x=sx; x<ex; x++ )
@@ -352,7 +332,7 @@ INLINE void dragngun_drawgfxzoom(
 	}
 }
 
-static void dragngun_draw_sprites(running_machine& machine, bitmap_t *bitmap, const rectangle *cliprect, const UINT32 *spritedata)
+static void dragngun_draw_sprites(running_machine& machine, bitmap_rgb32 &bitmap, const rectangle &cliprect, const UINT32 *spritedata)
 {
 	dragngun_state *state = machine.driver_data<dragngun_state>();
 	const UINT32 *layout_ram;
@@ -360,49 +340,49 @@ static void dragngun_draw_sprites(running_machine& machine, bitmap_t *bitmap, co
 	int offs;
 
 	/*
-        Sprites are built from main control ram, which references tile
-        layout ram, which finally references tile lookup ram which holds
-        the actual tile indices to draw and index into the banking
-        control.  Tile lookup and tile layout ram are double buffered.
+	    Sprites are built from main control ram, which references tile
+	    layout ram, which finally references tile lookup ram which holds
+	    the actual tile indices to draw and index into the banking
+	    control.  Tile lookup and tile layout ram are double buffered.
 
 
-        Main sprite control ram, 8 * 32 bit words per sprite, so
+	    Main sprite control ram, 8 * 32 bit words per sprite, so
 
-        Word 0:
-            0x0400 - Banking control for tile layout RAM + tile lookup ram
-            0x0200 - ?
-            0x01ff - Index into tile layout RAM
-        Word 1 :
-        Word 2 : X base position
-        Word 3 : Y base position
-        Word 4 :
-            0x8000: X flip
-            0x03ff: X size of block in pixels (for scaling)
-        Word 5 :
-            0x8000: Y flip
-            0x03ff: Y size of block in pixels (for scaling)
-        Word 6 :
-            0x1f - colour.
-            0x20 - ?  Used for background at 'frog' boss and title screen dragon.
-            0x40 - ?  priority?
-            0x80 - Alpha blending enable
-        Word 7 :
+	    Word 0:
+	        0x0400 - Banking control for tile layout RAM + tile lookup ram
+	        0x0200 - ?
+	        0x01ff - Index into tile layout RAM
+	    Word 1 :
+	    Word 2 : X base position
+	    Word 3 : Y base position
+	    Word 4 :
+	        0x8000: X flip
+	        0x03ff: X size of block in pixels (for scaling)
+	    Word 5 :
+	        0x8000: Y flip
+	        0x03ff: Y size of block in pixels (for scaling)
+	    Word 6 :
+	        0x1f - colour.
+	        0x20 - ?  Used for background at 'frog' boss and title screen dragon.
+	        0x40 - ?  priority?
+	        0x80 - Alpha blending enable
+	    Word 7 :
 
 
-        Tile layout ram, 4 * 32 bit words per sprite, so
+	    Tile layout ram, 4 * 32 bit words per sprite, so
 
-        Word 0:
-            0x2000 - Selector for tile lookup bank!?!?!?!?!?!?
-            0x1fff - Index into tile lookup ram (16 bit word based, NOT 32)
-        Word 1:
-            0xff00 - ?
-            0x00f0 - Width
-            0x000f - Height
-        Word 2:
-            0x01ff - X block offset
-        Word 3:
-            0x01ff - Y block offset
-    */
+	    Word 0:
+	        0x2000 - Selector for tile lookup bank!?!?!?!?!?!?
+	        0x1fff - Index into tile lookup ram (16 bit word based, NOT 32)
+	    Word 1:
+	        0xff00 - ?
+	        0x00f0 - Width
+	        0x000f - Height
+	    Word 2:
+	        0x01ff - X block offset
+	    Word 3:
+	        0x01ff - Y block offset
+	*/
 
 	/* Sprite global disable bit */
 	if (state->m_dragngun_sprite_ctrl&0x40000000)
@@ -482,7 +462,7 @@ static void dragngun_draw_sprites(running_machine& machine, bitmap_t *bitmap, co
 				}
 
 				/* Because of the unusual interleaved rom layout, we have to mangle the bank bits
-                even further to suit our gfx decode */
+				even further to suit our gfx decode */
 				switch (sprite&0xf000) {
 				case 0x0000: sprite=0xc000 | (sprite&0xfff); break;
 				case 0x1000: sprite=0xd000 | (sprite&0xfff); break;
@@ -530,65 +510,60 @@ static void dragngun_draw_sprites(running_machine& machine, bitmap_t *bitmap, co
 
 /******************************************************************************/
 
-VIDEO_START( captaven )
+VIDEO_START_MEMBER(deco32_state,captaven)
 {
-	deco32_state *state = machine.driver_data<deco32_state>();
-	state->m_has_ace_ram=0;
+	m_has_ace_ram=0;
 }
 
-VIDEO_START( fghthist )
+VIDEO_START_MEMBER(deco32_state,fghthist)
 {
-	deco32_state *state = machine.driver_data<deco32_state>();
-	state->m_dirty_palette = auto_alloc_array(machine, UINT8, 4096);
-	machine.device<decospr_device>("spritegen")->alloc_sprite_bitmap(machine);
-	state->m_has_ace_ram=0;
+	m_dirty_palette = auto_alloc_array(machine(), UINT8, 4096);
+	machine().device<decospr_device>("spritegen")->alloc_sprite_bitmap();
+	m_has_ace_ram=0;
 }
 
-VIDEO_START( dragngun )
+VIDEO_START_MEMBER(dragngun_state,dragngun)
 {
-	dragngun_state *state = machine.driver_data<dragngun_state>();
-	state->m_dirty_palette = auto_alloc_array(machine, UINT8, 4096);
+	m_dirty_palette = auto_alloc_array(machine(), UINT8, 4096);
 
-	memset(state->m_dirty_palette,0,4096);
+	memset(m_dirty_palette,0,4096);
 
-	state_save_register_global(machine, state->m_dragngun_sprite_ctrl);
-	state->m_has_ace_ram=0;
+	state_save_register_global(machine(), m_dragngun_sprite_ctrl);
+	m_has_ace_ram=0;
 }
 
-VIDEO_START( lockload )
+VIDEO_START_MEMBER(dragngun_state,lockload)
 {
-	dragngun_state *state = machine.driver_data<dragngun_state>();
-	state->m_dirty_palette = auto_alloc_array(machine, UINT8, 4096);
+	m_dirty_palette = auto_alloc_array(machine(), UINT8, 4096);
 
-	memset(state->m_dirty_palette,0,4096);
+	memset(m_dirty_palette,0,4096);
 
-	state_save_register_global(machine, state->m_dragngun_sprite_ctrl);
-	state->m_has_ace_ram=0;
+	state_save_register_global(machine(), m_dragngun_sprite_ctrl);
+	m_has_ace_ram=0;
 }
 
-VIDEO_START( nslasher )
+VIDEO_START_MEMBER(deco32_state,nslasher)
 {
-	deco32_state *state = machine.driver_data<deco32_state>();
 	int width, height;
-	state->m_dirty_palette = auto_alloc_array(machine, UINT8, 4096);
-	width = machine.primary_screen->width();
-	height = machine.primary_screen->height();
-	state->m_tilemap_alpha_bitmap=auto_bitmap_alloc(machine, width, height, BITMAP_FORMAT_INDEXED16 );
-	machine.device<decospr_device>("spritegen1")->alloc_sprite_bitmap(machine);
-	machine.device<decospr_device>("spritegen2")->alloc_sprite_bitmap(machine);
-	memset(state->m_dirty_palette,0,4096);
-	state_save_register_global(machine, state->m_pri);
-	state->m_has_ace_ram=1;
+	m_dirty_palette = auto_alloc_array(machine(), UINT8, 4096);
+	width = machine().primary_screen->width();
+	height = machine().primary_screen->height();
+	m_tilemap_alpha_bitmap=auto_bitmap_ind16_alloc(machine(), width, height );
+	machine().device<decospr_device>("spritegen1")->alloc_sprite_bitmap();
+	machine().device<decospr_device>("spritegen2")->alloc_sprite_bitmap();
+	memset(m_dirty_palette,0,4096);
+	state_save_register_global(machine(), m_pri);
+	m_has_ace_ram=1;
 }
 
 /******************************************************************************/
 
-SCREEN_EOF( captaven )
+void deco32_state::screen_eof_captaven(screen_device &screen, bool state)
 {
 
 }
 
-SCREEN_EOF( dragngun )
+void dragngun_state::screen_eof_dragngun(screen_device &screen, bool state)
 {
 
 }
@@ -596,59 +571,57 @@ SCREEN_EOF( dragngun )
 
 /******************************************************************************/
 
-SCREEN_UPDATE( captaven )
+UINT32 deco32_state::screen_update_captaven(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	deco32_state *state = screen->machine().driver_data<deco32_state>();
-	state->m_deco_tilegen1 = screen->machine().device("tilegen1");
-	state->m_deco_tilegen2 = screen->machine().device("tilegen2");
+	m_deco_tilegen1 = machine().device("tilegen1");
+	m_deco_tilegen2 = machine().device("tilegen2");
 
-	tilemap_set_flip_all(screen->machine(),flip_screen_get(screen->machine()) ? (TILEMAP_FLIPY | TILEMAP_FLIPX) : 0);
+	machine().tilemap().set_flip_all(flip_screen() ? (TILEMAP_FLIPY | TILEMAP_FLIPX) : 0);
 
-	bitmap_fill(screen->machine().priority_bitmap,cliprect,0);
-	bitmap_fill(bitmap,cliprect,screen->machine().pens[0x000]); // Palette index not confirmed
+	machine().priority_bitmap.fill(0, cliprect);
+	bitmap.fill(machine().pens[0x000], cliprect); // Palette index not confirmed
 
-	deco16ic_set_pf1_8bpp_mode(state->m_deco_tilegen2, 1);
+	deco16ic_set_pf1_8bpp_mode(m_deco_tilegen2, 1);
 
-	deco16ic_pf_update(state->m_deco_tilegen1, state->m_pf1_rowscroll, state->m_pf2_rowscroll);
-	deco16ic_pf_update(state->m_deco_tilegen2, state->m_pf3_rowscroll, state->m_pf4_rowscroll);
+	deco16ic_pf_update(m_deco_tilegen1, m_pf1_rowscroll, m_pf2_rowscroll);
+	deco16ic_pf_update(m_deco_tilegen2, m_pf3_rowscroll, m_pf4_rowscroll);
 
 	// pf4 not used (because pf3 is in 8bpp mode)
 
-	if ((state->m_pri&1)==0)
+	if ((m_pri&1)==0)
 	{
-		deco16ic_tilemap_1_draw(state->m_deco_tilegen2, bitmap, cliprect, 0, 1);
-		deco16ic_tilemap_2_draw(state->m_deco_tilegen1, bitmap, cliprect, 0, 2);
+		deco16ic_tilemap_1_draw(m_deco_tilegen2, bitmap, cliprect, 0, 1);
+		deco16ic_tilemap_2_draw(m_deco_tilegen1, bitmap, cliprect, 0, 2);
 	}
 	else
 	{
-		deco16ic_tilemap_2_draw(state->m_deco_tilegen1, bitmap, cliprect, 0, 1);
-		deco16ic_tilemap_1_draw(state->m_deco_tilegen2, bitmap, cliprect, 0, 2);
+		deco16ic_tilemap_2_draw(m_deco_tilegen1, bitmap, cliprect, 0, 1);
+		deco16ic_tilemap_1_draw(m_deco_tilegen2, bitmap, cliprect, 0, 2);
 	}
 
-	deco16ic_tilemap_1_draw(state->m_deco_tilegen1, bitmap, cliprect, 0, 4);
+	deco16ic_tilemap_1_draw(m_deco_tilegen1, bitmap, cliprect, 0, 4);
 
-	screen->machine().device<decospr_device>("spritegen")->set_alt_format(true);
-	screen->machine().device<decospr_device>("spritegen")->draw_sprites(screen->machine(), bitmap, cliprect, state->m_spriteram16_buffered, 0x400);
+	machine().device<decospr_device>("spritegen")->set_alt_format(true);
+	machine().device<decospr_device>("spritegen")->draw_sprites(bitmap, cliprect, m_spriteram16_buffered, 0x400);
 
 	return 0;
 }
 
-SCREEN_UPDATE( dragngun )
+UINT32 dragngun_state::screen_update_dragngun(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	deco32_state *state = screen->machine().driver_data<deco32_state>();
-	state->m_deco_tilegen1 = screen->machine().device("tilegen1");
-	state->m_deco_tilegen2 = screen->machine().device("tilegen2");
+	m_deco_tilegen1 = machine().device("tilegen1");
+	m_deco_tilegen2 = machine().device("tilegen2");
 
-	bitmap_fill(bitmap,cliprect,get_black_pen(screen->machine()));
+	bitmap.fill(get_black_pen(machine()), cliprect);
 
-	deco16ic_pf_update(state->m_deco_tilegen1, state->m_pf1_rowscroll, state->m_pf2_rowscroll);
-	deco16ic_pf_update(state->m_deco_tilegen2, state->m_pf3_rowscroll, state->m_pf4_rowscroll);
+	deco16ic_pf_update(m_deco_tilegen1, m_pf1_rowscroll, m_pf2_rowscroll);
+	deco16ic_pf_update(m_deco_tilegen2, m_pf3_rowscroll, m_pf4_rowscroll);
 
-	//deco16ic_set_pf3_8bpp_mode(state->m_deco_tilegen1, 1); // despite being 8bpp this doesn't require the same shifting as captaven, why not?
+	//deco16ic_set_pf3_8bpp_mode(m_deco_tilegen1, 1); // despite being 8bpp this doesn't require the same shifting as captaven, why not?
 
-	deco16ic_tilemap_2_draw(state->m_deco_tilegen2, bitmap, cliprect, 0, 0); // it uses pf3 in 8bpp mode instead, like captaven
-	deco16ic_tilemap_1_draw(state->m_deco_tilegen2, bitmap, cliprect, 0, 0);
-	deco16ic_tilemap_2_draw(state->m_deco_tilegen1, bitmap, cliprect, 0, 0);
+	deco16ic_tilemap_2_draw(m_deco_tilegen2, bitmap, cliprect, 0, 0); // it uses pf3 in 8bpp mode instead, like captaven
+	deco16ic_tilemap_1_draw(m_deco_tilegen2, bitmap, cliprect, 0, 0);
+	deco16ic_tilemap_2_draw(m_deco_tilegen1, bitmap, cliprect, 0, 0);
 
 	// zooming sprite draw is very slow, and sprites are buffered.. however, one of the levels attempts to use
 	// partial updates for every line, which causes things to be very slow... the sprites appear to support
@@ -660,16 +633,12 @@ SCREEN_UPDATE( dragngun )
 	// with the concept of generic tilemap code.
 	//
 	// for now we only draw these 2 layers on the last update call
-	if (cliprect->max_y == 247)
+	if (cliprect.max_y == 247)
 	{
-		rectangle clip;
-		clip.min_x = cliprect->min_x;
-		clip.max_x = cliprect->max_x;
-		clip.min_y = 8;
-		clip.max_y = 247;
+		rectangle clip(cliprect.min_x, cliprect.max_x, 8, 247);
 
-		dragngun_draw_sprites(screen->machine(),bitmap,&clip,screen->machine().generic.buffered_spriteram.u32);
-		deco16ic_tilemap_1_draw(state->m_deco_tilegen1, bitmap, &clip, 0, 0);
+		dragngun_draw_sprites(machine(),bitmap,clip,m_spriteram->buffer());
+		deco16ic_tilemap_1_draw(m_deco_tilegen1, bitmap, clip, 0, 0);
 
 	}
 
@@ -677,39 +646,38 @@ SCREEN_UPDATE( dragngun )
 }
 
 
-SCREEN_UPDATE( fghthist )
+UINT32 deco32_state::screen_update_fghthist(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	deco32_state *state = screen->machine().driver_data<deco32_state>();
-	state->m_deco_tilegen1 = screen->machine().device("tilegen1");
-	state->m_deco_tilegen2 = screen->machine().device("tilegen2");
+	m_deco_tilegen1 = machine().device("tilegen1");
+	m_deco_tilegen2 = machine().device("tilegen2");
 
-	bitmap_fill(screen->machine().priority_bitmap,cliprect,0);
-	bitmap_fill(bitmap,cliprect,screen->machine().pens[0x000]); // Palette index not confirmed
+	machine().priority_bitmap.fill(0, cliprect);
+	bitmap.fill(machine().pens[0x000], cliprect); // Palette index not confirmed
 
-	deco16ic_pf_update(state->m_deco_tilegen1, state->m_pf1_rowscroll, state->m_pf2_rowscroll);
-	deco16ic_pf_update(state->m_deco_tilegen2, state->m_pf3_rowscroll, state->m_pf4_rowscroll);
+	deco16ic_pf_update(m_deco_tilegen1, m_pf1_rowscroll, m_pf2_rowscroll);
+	deco16ic_pf_update(m_deco_tilegen2, m_pf3_rowscroll, m_pf4_rowscroll);
 
-	screen->machine().device<decospr_device>("spritegen")->draw_sprites(screen->machine(), bitmap, cliprect, state->m_spriteram16_buffered, 0x800, true);
+	machine().device<decospr_device>("spritegen")->draw_sprites(bitmap, cliprect, m_spriteram16_buffered, 0x800, true);
 
 	/* Draw screen */
-	deco16ic_tilemap_2_draw(state->m_deco_tilegen2, bitmap, cliprect, 0, 1);
+	deco16ic_tilemap_2_draw(m_deco_tilegen2, bitmap, cliprect, 0, 1);
 
-	if(state->m_pri&1)
+	if(m_pri&1)
 	{
-		deco16ic_tilemap_2_draw(state->m_deco_tilegen1, bitmap, cliprect, 0, 2);
-		screen->machine().device<decospr_device>("spritegen")->inefficient_copy_sprite_bitmap(screen->machine(), bitmap, cliprect, 0x0800, 0x0800, 1024, 0x1ff);
-		deco16ic_tilemap_1_draw(state->m_deco_tilegen2, bitmap, cliprect, 0, 4);
+		deco16ic_tilemap_2_draw(m_deco_tilegen1, bitmap, cliprect, 0, 2);
+		machine().device<decospr_device>("spritegen")->inefficient_copy_sprite_bitmap(bitmap, cliprect, 0x0800, 0x0800, 1024, 0x1ff);
+		deco16ic_tilemap_1_draw(m_deco_tilegen2, bitmap, cliprect, 0, 4);
 	}
 	else
 	{
-		deco16ic_tilemap_1_draw(state->m_deco_tilegen2, bitmap, cliprect, 0, 2);
-		screen->machine().device<decospr_device>("spritegen")->inefficient_copy_sprite_bitmap(screen->machine(), bitmap, cliprect, 0x0800, 0x0800, 1024, 0x1ff);
-		deco16ic_tilemap_2_draw(state->m_deco_tilegen1, bitmap, cliprect, 0, 4);
+		deco16ic_tilemap_1_draw(m_deco_tilegen2, bitmap, cliprect, 0, 2);
+		machine().device<decospr_device>("spritegen")->inefficient_copy_sprite_bitmap(bitmap, cliprect, 0x0800, 0x0800, 1024, 0x1ff);
+		deco16ic_tilemap_2_draw(m_deco_tilegen1, bitmap, cliprect, 0, 4);
 	}
 
-	screen->machine().device<decospr_device>("spritegen")->inefficient_copy_sprite_bitmap(screen->machine(), bitmap, cliprect, 0x0000, 0x0800, 1024, 0x1ff);
+	machine().device<decospr_device>("spritegen")->inefficient_copy_sprite_bitmap(bitmap, cliprect, 0x0000, 0x0800, 1024, 0x1ff);
 
-	deco16ic_tilemap_1_draw(state->m_deco_tilegen1, bitmap, cliprect, 0, 0);
+	deco16ic_tilemap_1_draw(m_deco_tilegen1, bitmap, cliprect, 0, 0);
 	return 0;
 }
 
@@ -721,60 +689,60 @@ SCREEN_UPDATE( fghthist )
     blending support - it can't be done in-place on the final framebuffer
     without a lot of support bitmaps.
 */
-static void mixDualAlphaSprites(bitmap_t *bitmap, const rectangle *cliprect, const gfx_element *gfx0, const gfx_element *gfx1, int mixAlphaTilemap)
+static void mixDualAlphaSprites(bitmap_rgb32 &bitmap, const rectangle &cliprect, gfx_element *gfx0, gfx_element *gfx1, int mixAlphaTilemap)
 {
 	deco32_state *state = gfx0->machine().driver_data<deco32_state>();
 	running_machine &machine = gfx0->machine();
 	const pen_t *pens = machine.pens;
-	const pen_t *pal0 = &pens[gfx0->color_base];
-	const pen_t *pal1 = &pens[gfx1->color_base];
-	const pen_t *pal2 = &pens[machine.gfx[(state->m_pri&1) ? 1 : 2]->color_base];
+	const pen_t *pal0 = &pens[gfx0->colorbase()];
+	const pen_t *pal1 = &pens[gfx1->colorbase()];
+	const pen_t *pal2 = &pens[machine.gfx[(state->m_pri&1) ? 1 : 2]->colorbase()];
 	int x,y;
-	bitmap_t* sprite0_mix_bitmap = machine.device<decospr_device>("spritegen1")->get_sprite_temp_bitmap();
-	bitmap_t* sprite1_mix_bitmap = machine.device<decospr_device>("spritegen2")->get_sprite_temp_bitmap();
+	bitmap_ind16& sprite0_mix_bitmap = machine.device<decospr_device>("spritegen1")->get_sprite_temp_bitmap();
+	bitmap_ind16& sprite1_mix_bitmap = machine.device<decospr_device>("spritegen2")->get_sprite_temp_bitmap();
 
 
 	/* Mix sprites into main bitmap, based on priority & alpha */
 	for (y=8; y<248; y++) {
-		UINT8* tilemapPri=BITMAP_ADDR8(machine.priority_bitmap, y, 0);
-		UINT16* sprite0=BITMAP_ADDR16(sprite0_mix_bitmap, y, 0);
-		UINT16* sprite1=BITMAP_ADDR16(sprite1_mix_bitmap, y, 0);
-		UINT32* destLine=BITMAP_ADDR32(bitmap, y, 0);
-		UINT16* alphaTilemap=BITMAP_ADDR16(state->m_tilemap_alpha_bitmap, y, 0);
+		UINT8* tilemapPri=&machine.priority_bitmap.pix8(y);
+		UINT16* sprite0=&sprite0_mix_bitmap.pix16(y);
+		UINT16* sprite1=&sprite1_mix_bitmap.pix16(y);
+		UINT32* destLine=&bitmap.pix32(y);
+		UINT16* alphaTilemap=&state->m_tilemap_alpha_bitmap->pix16(y);
 
 		for (x=0; x<320; x++) {
 			UINT16 priColAlphaPal0=sprite0[x];
 			UINT16 priColAlphaPal1=sprite1[x];
 			UINT16 pri0=(priColAlphaPal0&0x6000)>>13;
 			UINT16 pri1=(priColAlphaPal1&0x6000)>>13;
-			UINT16 col0=((priColAlphaPal0&0x1f00)>>8) % gfx0->total_colors;
-			UINT16 col1=((priColAlphaPal1&0x0f00)>>8) % gfx1->total_colors;
+			UINT16 col0=((priColAlphaPal0&0x1f00)>>8) % gfx0->colors();
+			UINT16 col1=((priColAlphaPal1&0x0f00)>>8) % gfx1->colors();
 			UINT16 alpha1=priColAlphaPal1&0x8000;
 
 			// Apply sprite bitmap 0 according to priority rules
 			if ((priColAlphaPal0&0xff)!=0)
 			{
 				/*
-                    Sprite 0 priority rules:
+				    Sprite 0 priority rules:
 
-                    0 = Sprite above all layers
-                    1 = Sprite under top playfield
-                    2 = Sprite under top two playfields
-                    3 = Sprite under all playfields
-                */
+				    0 = Sprite above all layers
+				    1 = Sprite under top playfield
+				    2 = Sprite under top two playfields
+				    3 = Sprite under all playfields
+				*/
 				if ((pri0&0x3)==0 || (pri0&0x3)==1 || ((pri0&0x3)==2 && mixAlphaTilemap)) // Spri0 on top of everything, or under alpha playfield
 				{
-					destLine[x]=pal0[(priColAlphaPal0&0xff) + (gfx0->color_granularity * col0)];
+					destLine[x]=pal0[(priColAlphaPal0&0xff) + (gfx0->granularity() * col0)];
 				}
 				else if ((pri0&0x3)==2) // Spri0 under top playfield
 				{
 					if (tilemapPri[x]<4)
-						destLine[x]=pal0[(priColAlphaPal0&0xff) + (gfx0->color_granularity * col0)];
+						destLine[x]=pal0[(priColAlphaPal0&0xff) + (gfx0->granularity() * col0)];
 				}
 				else // Spri0 under top & middle playfields
 				{
 					if (tilemapPri[x]<2)
-						destLine[x]=pal0[(priColAlphaPal0&0xff) + (gfx0->color_granularity * col0)];
+						destLine[x]=pal0[(priColAlphaPal0&0xff) + (gfx0->granularity() * col0)];
 				}
 			}
 
@@ -785,13 +753,13 @@ static void mixDualAlphaSprites(bitmap_t *bitmap, const rectangle *cliprect, con
 				if (alpha1)
 				{
 					/*
-                        Alpha rules:
+					    Alpha rules:
 
-                        Pri 0 - Over all tilemaps, but under sprite 0 pri 0, pri 1, pri 2
-                        Pri 1 -
-                        Pri 2 -
-                        Pri 3 -
-                    */
+					    Pri 0 - Over all tilemaps, but under sprite 0 pri 0, pri 1, pri 2
+					    Pri 1 -
+					    Pri 2 -
+					    Pri 3 -
+					*/
 
 					/* Alpha values are tied to ACE ram... */
 					//int alpha=((state->m_ace_ram[0x0 + (((priColAlphaPal1&0xf0)>>4)/2)]) * 8)-1;
@@ -799,35 +767,35 @@ static void mixDualAlphaSprites(bitmap_t *bitmap, const rectangle *cliprect, con
 					//  alpha=0;
 
 					/* I don't really understand how object ACE ram is really hooked up,
-                        the only obvious place in Night Slashers is the stagecoach in level 2 */
+					    the only obvious place in Night Slashers is the stagecoach in level 2 */
 
 					if (pri1==0 && (((priColAlphaPal0&0xff)==0 || ((pri0&0x3)!=0 && (pri0&0x3)!=1 && (pri0&0x3)!=2))))
 					{
 						if ((state->m_pri&1)==0 || ((state->m_pri&1)==1 && tilemapPri[x]<4) || ((state->m_pri&1)==1 && mixAlphaTilemap))
-							destLine[x]=alpha_blend_r32(destLine[x], pal1[(priColAlphaPal1&0xff) + (gfx1->color_granularity * col1)], 0x80);
+							destLine[x]=alpha_blend_r32(destLine[x], pal1[(priColAlphaPal1&0xff) + (gfx1->granularity() * col1)], 0x80);
 					}
 					else if (pri1==1 && ((priColAlphaPal0&0xff)==0 || ((pri0&0x3)!=0 && (pri0&0x3)!=1 && (pri0&0x3)!=2)))
-						destLine[x]=alpha_blend_r32(destLine[x], pal1[(priColAlphaPal1&0xff) + (gfx1->color_granularity * col1)], 0x80);
+						destLine[x]=alpha_blend_r32(destLine[x], pal1[(priColAlphaPal1&0xff) + (gfx1->granularity() * col1)], 0x80);
 					else if (pri1==2)// TOdo
-						destLine[x]=alpha_blend_r32(destLine[x], pal1[(priColAlphaPal1&0xff) + (gfx1->color_granularity * col1)], 0x80);
+						destLine[x]=alpha_blend_r32(destLine[x], pal1[(priColAlphaPal1&0xff) + (gfx1->granularity() * col1)], 0x80);
 					else if (pri1==3)// TOdo
-						destLine[x]=alpha_blend_r32(destLine[x], pal1[(priColAlphaPal1&0xff) + (gfx1->color_granularity * col1)], 0x80);
+						destLine[x]=alpha_blend_r32(destLine[x], pal1[(priColAlphaPal1&0xff) + (gfx1->granularity() * col1)], 0x80);
 				}
 				else
 				{
 					/*
-                        Non alpha rules:
+					    Non alpha rules:
 
-                        Pri 0 - Under sprite 0 pri 0, over all tilemaps
-                    */
+					    Pri 0 - Under sprite 0 pri 0, over all tilemaps
+					*/
 					if (pri1==0 && ((priColAlphaPal0&0xff)==0 || ((pri0&0x3)!=0)))
-						destLine[x]=pal1[(priColAlphaPal1&0xff) + (gfx1->color_granularity * col1)];
+						destLine[x]=pal1[(priColAlphaPal1&0xff) + (gfx1->granularity() * col1)];
 					else if (pri1==1) // todo
-						destLine[x]=pal1[(priColAlphaPal1&0xff) + (gfx1->color_granularity * col1)];
+						destLine[x]=pal1[(priColAlphaPal1&0xff) + (gfx1->granularity() * col1)];
 					else if (pri1==2) // todo
-						destLine[x]=pal1[(priColAlphaPal1&0xff) + (gfx1->color_granularity * col1)];
+						destLine[x]=pal1[(priColAlphaPal1&0xff) + (gfx1->granularity() * col1)];
 					else if (pri1==3) // todo
-						destLine[x]=pal1[(priColAlphaPal1&0xff) + (gfx1->color_granularity * col1)];
+						destLine[x]=pal1[(priColAlphaPal1&0xff) + (gfx1->granularity() * col1)];
 				}
 			}
 
@@ -854,67 +822,66 @@ static void mixDualAlphaSprites(bitmap_t *bitmap, const rectangle *cliprect, con
 	}
 }
 
-SCREEN_UPDATE( nslasher )
+UINT32 deco32_state::screen_update_nslasher(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	deco32_state *state = screen->machine().driver_data<deco32_state>();
 	int alphaTilemap=0;
-	state->m_deco_tilegen1 = screen->machine().device("tilegen1");
-	state->m_deco_tilegen2 = screen->machine().device("tilegen2");
+	m_deco_tilegen1 = machine().device("tilegen1");
+	m_deco_tilegen2 = machine().device("tilegen2");
 
-	deco16ic_pf_update(state->m_deco_tilegen1, state->m_pf1_rowscroll, state->m_pf2_rowscroll);
-	deco16ic_pf_update(state->m_deco_tilegen2, state->m_pf3_rowscroll, state->m_pf4_rowscroll);
+	deco16ic_pf_update(m_deco_tilegen1, m_pf1_rowscroll, m_pf2_rowscroll);
+	deco16ic_pf_update(m_deco_tilegen2, m_pf3_rowscroll, m_pf4_rowscroll);
 
 	/* This is not a conclusive test for deciding if tilemap needs alpha blending */
-	if (state->m_ace_ram[0x17]!=0x0 && state->m_pri)
+	if (m_ace_ram[0x17]!=0x0 && m_pri)
 		alphaTilemap=1;
 
-	if (state->m_ace_ram_dirty)
-		updateAceRam(screen->machine());
+	if (m_ace_ram_dirty)
+		updateAceRam(machine());
 
-	bitmap_fill(screen->machine().priority_bitmap,cliprect,0);
+	machine().priority_bitmap.fill(0, cliprect);
 
-	bitmap_fill(bitmap,cliprect,screen->machine().pens[0x200]);
+	bitmap.fill(machine().pens[0x200], cliprect);
 
 	/* Draw sprites to temporary bitmaps, saving alpha & priority info for later mixing */
-	screen->machine().device<decospr_device>("spritegen1")->set_pix_raw_shift(8);
-	screen->machine().device<decospr_device>("spritegen2")->set_pix_raw_shift(8);
+	machine().device<decospr_device>("spritegen1")->set_pix_raw_shift(8);
+	machine().device<decospr_device>("spritegen2")->set_pix_raw_shift(8);
 
-	screen->machine().device<decospr_device>("spritegen1")->draw_sprites(screen->machine(), bitmap, cliprect, state->m_spriteram16_buffered, 0x800, true);
-	screen->machine().device<decospr_device>("spritegen2")->draw_sprites(screen->machine(), bitmap, cliprect, state->m_spriteram16_2_buffered, 0x800, true);
+	machine().device<decospr_device>("spritegen1")->draw_sprites(bitmap, cliprect, m_spriteram16_buffered, 0x800, true);
+	machine().device<decospr_device>("spritegen2")->draw_sprites(bitmap, cliprect, m_spriteram16_2_buffered, 0x800, true);
 
 
-	/* Render alpha-blended tilemap to seperate buffer for proper mixing */
-	bitmap_fill(state->m_tilemap_alpha_bitmap,cliprect,0);
+	/* Render alpha-blended tilemap to separate buffer for proper mixing */
+	m_tilemap_alpha_bitmap->fill(0, cliprect);
 
 	/* Draw playfields & sprites */
-	if (state->m_pri&2)
+	if (m_pri&2)
 	{
-		deco16ic_tilemap_12_combine_draw(state->m_deco_tilegen2, bitmap, cliprect, 0, 1, 1);
-		deco16ic_tilemap_2_draw(state->m_deco_tilegen1, bitmap, cliprect, 0, 4);
+		deco16ic_tilemap_12_combine_draw(m_deco_tilegen2, bitmap, cliprect, 0, 1, 1);
+		deco16ic_tilemap_2_draw(m_deco_tilegen1, bitmap, cliprect, 0, 4);
 	}
 	else
 	{
-		deco16ic_tilemap_2_draw(state->m_deco_tilegen2, bitmap, cliprect, 0, 1);
-		if (state->m_pri&1)
+		deco16ic_tilemap_2_draw(m_deco_tilegen2, bitmap, cliprect, 0, 1);
+		if (m_pri&1)
 		{
-			deco16ic_tilemap_2_draw(state->m_deco_tilegen1, bitmap, cliprect, 0, 2);
+			deco16ic_tilemap_2_draw(m_deco_tilegen1, bitmap, cliprect, 0, 2);
 			if (alphaTilemap)
-				deco16ic_tilemap_1_draw(state->m_deco_tilegen2, state->m_tilemap_alpha_bitmap, cliprect, 0, 4);
+				deco16ic_tilemap_1_draw(m_deco_tilegen2, *m_tilemap_alpha_bitmap, cliprect, 0, 4);
 			else
-				deco16ic_tilemap_1_draw(state->m_deco_tilegen2, bitmap, cliprect, 0, 4);
+				deco16ic_tilemap_1_draw(m_deco_tilegen2, bitmap, cliprect, 0, 4);
 		}
 		else
 		{
-			deco16ic_tilemap_1_draw(state->m_deco_tilegen2, bitmap, cliprect, 0, 2);
+			deco16ic_tilemap_1_draw(m_deco_tilegen2, bitmap, cliprect, 0, 2);
 			if (alphaTilemap)
-				deco16ic_tilemap_2_draw(state->m_deco_tilegen1, state->m_tilemap_alpha_bitmap, cliprect, 0, 4);
+				deco16ic_tilemap_2_draw(m_deco_tilegen1, *m_tilemap_alpha_bitmap, cliprect, 0, 4);
 			else
-				deco16ic_tilemap_2_draw(state->m_deco_tilegen1, bitmap, cliprect, 0, 4);
+				deco16ic_tilemap_2_draw(m_deco_tilegen1, bitmap, cliprect, 0, 4);
 		}
 	}
 
-	mixDualAlphaSprites(bitmap, cliprect, screen->machine().gfx[3], screen->machine().gfx[4], alphaTilemap);
+	mixDualAlphaSprites(bitmap, cliprect, machine().gfx[3], machine().gfx[4], alphaTilemap);
 
-	deco16ic_tilemap_1_draw(state->m_deco_tilegen1, bitmap, cliprect, 0, 0);
+	deco16ic_tilemap_1_draw(m_deco_tilegen1, bitmap, cliprect, 0, 0);
 	return 0;
 }

@@ -118,35 +118,32 @@ enum
 
 typedef void (*cubeqst_dac_w_func)(device_t *, UINT16);
 
-typedef struct _cubeqst_snd_config cubeqst_snd_config;
-struct _cubeqst_snd_config
+struct cubeqst_snd_config
 {
-	cubeqst_dac_w_func	dac_w;
-	const char *		sound_data_region;
+	cubeqst_dac_w_func  dac_w;
+	const char *        sound_data_region;
 
 };
 
-typedef struct _cubeqst_lin_config cubeqst_lin_config;
-struct _cubeqst_lin_config
+struct cubeqst_lin_config
 {
-	const char *		rot_cpu_tag;
+	const char *        rot_cpu_tag;
 };
 
-typedef struct _cubeqst_rot_config cubeqst_rot_config;
-struct _cubeqst_rot_config
+struct cubeqst_rot_config
 {
-	const char *		lin_cpu_tag;
+	const char *        lin_cpu_tag;
 };
 
 /***************************************************************************
     PUBLIC FUNCTIONS
 ***************************************************************************/
 
-extern READ16_DEVICE_HANDLER( cubeqcpu_sndram_r );
-extern WRITE16_DEVICE_HANDLER( cubeqcpu_sndram_w );
+extern DECLARE_READ16_DEVICE_HANDLER( cubeqcpu_sndram_r );
+extern DECLARE_WRITE16_DEVICE_HANDLER( cubeqcpu_sndram_w );
 
-extern READ16_DEVICE_HANDLER( cubeqcpu_rotram_r );
-extern WRITE16_DEVICE_HANDLER( cubeqcpu_rotram_w );
+extern DECLARE_READ16_DEVICE_HANDLER( cubeqcpu_rotram_r );
+extern DECLARE_WRITE16_DEVICE_HANDLER( cubeqcpu_rotram_w );
 
 void cubeqcpu_swap_line_banks(device_t *device);
 

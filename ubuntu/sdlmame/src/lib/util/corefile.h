@@ -45,6 +45,7 @@
 #include <stdarg.h>
 #include "osdcore.h"
 #include "astring.h"
+#include "coretmpl.h"
 
 
 
@@ -52,12 +53,12 @@
     ADDITIONAL OPEN FLAGS
 ***************************************************************************/
 
-#define OPEN_FLAG_NO_BOM		0x0100		/* don't output BOM */
+#define OPEN_FLAG_NO_BOM        0x0100      /* don't output BOM */
 
-#define FCOMPRESS_NONE			0			/* no compression */
-#define FCOMPRESS_MIN			1			/* minimal compression */
-#define FCOMPRESS_MEDIUM		6			/* standard compression */
-#define FCOMPRESS_MAX			9			/* maximum compression */
+#define FCOMPRESS_NONE          0           /* no compression */
+#define FCOMPRESS_MIN           1           /* minimal compression */
+#define FCOMPRESS_MEDIUM        6           /* standard compression */
+#define FCOMPRESS_MAX           9           /* maximum compression */
 
 
 
@@ -65,7 +66,7 @@
     TYPE DEFINITIONS
 ***************************************************************************/
 
-typedef struct _core_file core_file;
+struct core_file;
 
 
 
@@ -129,6 +130,7 @@ const void *core_fbuffer(core_file *file);
 
 /* open a file with the specified filename, read it into memory, and return a pointer */
 file_error core_fload(const char *filename, void **data, UINT32 *length);
+file_error core_fload(const char *filename, dynamic_buffer &data);
 
 
 
@@ -149,10 +151,10 @@ int CLIB_DECL core_fprintf(core_file *f, const char *fmt, ...) ATTR_PRINTF(2,3);
 /* ----- filename utilities ----- */
 
 /* extract the base part of a filename (remove extensions and paths) */
-astring *core_filename_extract_base(astring *result, const char *name, int strip_extension);
+astring &core_filename_extract_base(astring &result, const char *name, bool strip_extension = false);
 
 /* true if the given filename ends with a particular extension */
 int core_filename_ends_with(const char *filename, const char *extension);
 
 
-#endif	/* __COREFILE_H__ */
+#endif  /* __COREFILE_H__ */

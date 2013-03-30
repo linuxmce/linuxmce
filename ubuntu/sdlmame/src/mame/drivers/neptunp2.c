@@ -6,6 +6,7 @@
 
 ***************************************************************************/
 
+
 #include "emu.h"
 #include "cpu/i86/i86.h"
 
@@ -13,28 +14,41 @@
 class neptunp2_state : public driver_device
 {
 public:
-	neptunp2_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	neptunp2_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+			m_maincpu(*this, "maincpu")
+	{ }
 
+	DECLARE_READ8_MEMBER(test_r);
+
+	UINT32 screen_update(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+
+protected:
+
+	// devices
+	required_device<cpu_device> m_maincpu;
+
+	// driver_device overrides
+	virtual void video_start();
 };
 
 
-static VIDEO_START( neptunp2 )
+void neptunp2_state::video_start()
 {
 
 }
 
-static SCREEN_UPDATE( neptunp2 )
+UINT32 neptunp2_state::screen_update(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	return 0;
 }
 
-static READ8_HANDLER( test_r )
+READ8_MEMBER( neptunp2_state::test_r )
 {
-	return space->machine().rand();
+	return machine().rand();
 }
 
-static ADDRESS_MAP_START( neptunp2_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( neptunp2_map, AS_PROGRAM, 8, neptunp2_state )
 	AM_RANGE(0x00000, 0xbffff) AM_ROM
 	AM_RANGE(0xe0000, 0xeffff) AM_RAM
 
@@ -51,24 +65,23 @@ static ADDRESS_MAP_START( neptunp2_map, AS_PROGRAM, 8 )
 	AM_RANGE(0xffff0, 0xfffff) AM_ROM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( neptunp2_io, AS_IO, 8 )
+static ADDRESS_MAP_START( neptunp2_io, AS_IO, 8, neptunp2_state )
 ADDRESS_MAP_END
 
 
 static INPUT_PORTS_START( neptunp2 )
-
 INPUT_PORTS_END
 
 #if 0
 static const gfx_layout charlayout =
 {
-	8,8,	/* 8*8 characters */
-	RGN_FRAC(1,3),	/* 1024 characters */
-	3,	/* 3 bits per pixel */
-	{ RGN_FRAC(1,3), RGN_FRAC(2,3), RGN_FRAC(0,3) },	/* the bitplanes are separated */
+	8,8,    /* 8*8 characters */
+	RGN_FRAC(1,3),  /* 1024 characters */
+	3,  /* 3 bits per pixel */
+	{ RGN_FRAC(1,3), RGN_FRAC(2,3), RGN_FRAC(0,3) },    /* the bitplanes are separated */
 	{ 0, 1, 2, 3, 4, 5, 6, 7 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
-	8*8	/* every char takes 8 consecutive bytes */
+	8*8 /* every char takes 8 consecutive bytes */
 };
 #endif
 
@@ -82,20 +95,17 @@ static MACHINE_CONFIG_START( neptunp2, neptunp2_state )
 	MCFG_CPU_ADD("maincpu",I80188,20000000) // N80C188-20 AMD
 	MCFG_CPU_PROGRAM_MAP(neptunp2_map)
 	MCFG_CPU_IO_MAP(neptunp2_io)
-//  MCFG_CPU_VBLANK_INT("screen",irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", neptunp2_state, irq0_line_hold)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
+	MCFG_SCREEN_UPDATE_DRIVER(neptunp2_state, screen_update)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(neptunp2)
 	MCFG_GFXDECODE(neptunp2)
 	MCFG_PALETTE_LENGTH(512)
-
-	MCFG_VIDEO_START(neptunp2)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -123,4 +133,5 @@ ROM_START( neptunp2 )
 	ROM_LOAD( "flash_roms", 0x00000, 0x10000, NO_DUMP )
 ROM_END
 
-GAME( 199?, neptunp2,  0,   neptunp2, neptunp2,  0, ROT0, "Unidesa?", "Neptune's Pearls 2", GAME_NOT_WORKING | GAME_NO_SOUND )
+
+GAME( 199?, neptunp2,  0,   neptunp2, neptunp2, driver_device,  0, ROT0, "Unidesa?", "Neptune's Pearls 2", GAME_NOT_WORKING | GAME_NO_SOUND )

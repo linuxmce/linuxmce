@@ -37,17 +37,16 @@
    64 kb external ram (first 8kbyte not seen for program execution?) */
 
 
-typedef struct _sc61860_cpu_core sc61860_cpu_core;
-struct _sc61860_cpu_core
+struct sc61860_cpu_core
 {
-    int (*reset)(device_t *device);
-    int (*brk)(device_t *device);
-    int (*x)(device_t *device);
-    int (*ina)(device_t *device);
-    void (*outa)(device_t *device, int);
-    int (*inb)(device_t *device);
-    void (*outb)(device_t *device, int);
-    void (*outc)(device_t *device, int);
+	int (*reset)(device_t *device);
+	int (*brk)(device_t *device);
+	int (*x)(device_t *device);
+	int (*ina)(device_t *device);
+	void (*outa)(device_t *device, int);
+	int (*inb)(device_t *device);
+	void (*outb)(device_t *device, int);
+	void (*outc)(device_t *device, int);
 };
 
 CPU_DISASSEMBLE( sc61860 );

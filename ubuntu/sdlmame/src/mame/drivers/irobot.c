@@ -83,8 +83,8 @@
 #include "machine/nvram.h"
 #include "includes/irobot.h"
 
-#define MAIN_CLOCK		XTAL_12_096MHz
-#define VIDEO_CLOCK		XTAL_20MHz
+#define MAIN_CLOCK      XTAL_12_096MHz
+#define VIDEO_CLOCK     XTAL_20MHz
 
 /*************************************
  *
@@ -92,10 +92,9 @@
  *
  *************************************/
 
-static WRITE8_HANDLER( irobot_nvram_w )
+WRITE8_MEMBER(irobot_state::irobot_nvram_w)
 {
-	irobot_state *state = space->machine().driver_data<irobot_state>();
-	state->m_nvram[offset] = data & 0x0f;
+	m_nvram[offset] = data & 0x0f;
 }
 
 
@@ -106,17 +105,39 @@ static WRITE8_HANDLER( irobot_nvram_w )
  *
  *************************************/
 
-static WRITE8_HANDLER( irobot_clearirq_w )
+WRITE8_MEMBER(irobot_state::irobot_clearirq_w)
 {
-    cputag_set_input_line(space->machine(), "maincpu", M6809_IRQ_LINE ,CLEAR_LINE);
+	machine().device("maincpu")->execute().set_input_line(M6809_IRQ_LINE ,CLEAR_LINE);
 }
 
 
-static WRITE8_HANDLER( irobot_clearfirq_w )
+WRITE8_MEMBER(irobot_state::irobot_clearfirq_w)
 {
-    cputag_set_input_line(space->machine(), "maincpu", M6809_FIRQ_LINE ,CLEAR_LINE);
+	machine().device("maincpu")->execute().set_input_line(M6809_FIRQ_LINE ,CLEAR_LINE);
 }
 
+
+READ8_MEMBER(irobot_state::quad_pokeyn_r)
+{
+	static const char *const devname[4] = { "pokey1", "pokey2", "pokey3", "pokey4" };
+	int pokey_num = (offset >> 3) & ~0x04;
+	int control = (offset & 0x20) >> 2;
+	int pokey_reg = (offset % 8) | control;
+	pokey_device *pokey = machine().device<pokey_device>(devname[pokey_num]);
+
+	return pokey->read(pokey_reg);
+}
+
+WRITE8_MEMBER(irobot_state::quad_pokeyn_w)
+{
+	static const char *const devname[4] = { "pokey1", "pokey2", "pokey3", "pokey4" };
+	int pokey_num = (offset >> 3) & ~0x04;
+	int control = (offset & 0x20) >> 2;
+	int pokey_reg = (offset % 8) | control;
+	pokey_device *pokey = machine().device<pokey_device>(devname[pokey_num]);
+
+	pokey->write(pokey_reg, data);
+}
 
 
 /*************************************
@@ -125,28 +146,28 @@ static WRITE8_HANDLER( irobot_clearfirq_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( irobot_map, AS_PROGRAM, 8 )
-    AM_RANGE(0x0000, 0x07ff) AM_RAM
-    AM_RANGE(0x0800, 0x0fff) AM_RAMBANK("bank2")
-    AM_RANGE(0x1000, 0x103f) AM_READ_PORT("IN0")
-    AM_RANGE(0x1040, 0x1040) AM_READ_PORT("IN1")
-    AM_RANGE(0x1080, 0x1080) AM_READ(irobot_status_r)
-    AM_RANGE(0x10c0, 0x10c0) AM_READ_PORT("DSW1")
-    AM_RANGE(0x1100, 0x1100) AM_WRITE(irobot_clearirq_w)
-    AM_RANGE(0x1140, 0x1140) AM_WRITE(irobot_statwr_w)
-    AM_RANGE(0x1180, 0x1180) AM_WRITE(irobot_out0_w)
-    AM_RANGE(0x11c0, 0x11c0) AM_WRITE(irobot_rom_banksel_w)
-    AM_RANGE(0x1200, 0x12ff) AM_RAM_WRITE(irobot_nvram_w) AM_SHARE("nvram")
-    AM_RANGE(0x1300, 0x13ff) AM_READ(irobot_control_r)
-    AM_RANGE(0x1400, 0x143f) AM_READWRITE(quad_pokey_r, quad_pokey_w)
-    AM_RANGE(0x1800, 0x18ff) AM_WRITE(irobot_paletteram_w)
-    AM_RANGE(0x1900, 0x19ff) AM_WRITEONLY            /* Watchdog reset */
-    AM_RANGE(0x1a00, 0x1a00) AM_WRITE(irobot_clearfirq_w)
-    AM_RANGE(0x1b00, 0x1bff) AM_WRITE(irobot_control_w)
-    AM_RANGE(0x1c00, 0x1fff) AM_RAM AM_BASE_MEMBER(irobot_state, m_videoram)
-    AM_RANGE(0x2000, 0x3fff) AM_READWRITE(irobot_sharedmem_r, irobot_sharedmem_w)
-    AM_RANGE(0x4000, 0x5fff) AM_ROMBANK("bank1")
-    AM_RANGE(0x6000, 0xffff) AM_ROM
+static ADDRESS_MAP_START( irobot_map, AS_PROGRAM, 8, irobot_state )
+	AM_RANGE(0x0000, 0x07ff) AM_RAM
+	AM_RANGE(0x0800, 0x0fff) AM_RAMBANK("bank2")
+	AM_RANGE(0x1000, 0x103f) AM_READ_PORT("IN0")
+	AM_RANGE(0x1040, 0x1040) AM_READ_PORT("IN1")
+	AM_RANGE(0x1080, 0x1080) AM_READ(irobot_status_r)
+	AM_RANGE(0x10c0, 0x10c0) AM_READ_PORT("DSW1")
+	AM_RANGE(0x1100, 0x1100) AM_WRITE(irobot_clearirq_w)
+	AM_RANGE(0x1140, 0x1140) AM_WRITE(irobot_statwr_w)
+	AM_RANGE(0x1180, 0x1180) AM_WRITE(irobot_out0_w)
+	AM_RANGE(0x11c0, 0x11c0) AM_WRITE(irobot_rom_banksel_w)
+	AM_RANGE(0x1200, 0x12ff) AM_RAM_WRITE(irobot_nvram_w) AM_SHARE("nvram")
+	AM_RANGE(0x1300, 0x13ff) AM_READ(irobot_control_r)
+	AM_RANGE(0x1400, 0x143f) AM_READWRITE(quad_pokeyn_r, quad_pokeyn_w)
+	AM_RANGE(0x1800, 0x18ff) AM_WRITE(irobot_paletteram_w)
+	AM_RANGE(0x1900, 0x19ff) AM_WRITEONLY            /* Watchdog reset */
+	AM_RANGE(0x1a00, 0x1a00) AM_WRITE(irobot_clearfirq_w)
+	AM_RANGE(0x1b00, 0x1bff) AM_WRITE(irobot_control_w)
+	AM_RANGE(0x1c00, 0x1fff) AM_RAM AM_SHARE("videoram")
+	AM_RANGE(0x2000, 0x3fff) AM_READWRITE(irobot_sharedmem_r, irobot_sharedmem_w)
+	AM_RANGE(0x4000, 0x5fff) AM_ROMBANK("bank1")
+	AM_RANGE(0x6000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
 
@@ -158,7 +179,7 @@ ADDRESS_MAP_END
  *************************************/
 
 static INPUT_PORTS_START( irobot )
-	PORT_START("IN0")	/* IN0 */
+	PORT_START("IN0")   /* IN0 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -168,7 +189,7 @@ static INPUT_PORTS_START( irobot )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )
 
-	PORT_START("IN1")	/* IN1 */
+	PORT_START("IN1")   /* IN1 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -178,7 +199,7 @@ static INPUT_PORTS_START( irobot )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START1 )
 
-	PORT_START("IN2")	/* IN2 */
+	PORT_START("IN2")   /* IN2 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -186,32 +207,32 @@ static INPUT_PORTS_START( irobot )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN ) /* MB DONE */
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN ) /* EXT DONE */
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_VBLANK )
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 
 	PORT_START("DSW2") /* DSW2 - 5E*/
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Language ) )  PORT_DIPLOCATION("SW5E:1")
-	PORT_DIPSETTING(	0x01, DEF_STR( English ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( German ) )
+	PORT_DIPSETTING(    0x01, DEF_STR( English ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( German ) )
 //  Printed Manual States Dip (0x01) adjusts Doodle City playtime:  ON=2M10S / OFF=3M5S
 	PORT_DIPNAME( 0x02, 0x02, "Minimum Game Time" )  PORT_DIPLOCATION("SW5E:2")
-	PORT_DIPSETTING(	0x00, "90 Seconds on Level 1" )
-	PORT_DIPSETTING(	0x02, DEF_STR( None ) )
+	PORT_DIPSETTING(    0x00, "90 Seconds on Level 1" )
+	PORT_DIPSETTING(    0x02, DEF_STR( None ) )
 	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Bonus_Life ) )  PORT_DIPLOCATION("SW5E:3,4")
-	PORT_DIPSETTING(	0x08, DEF_STR( None ) )
-	PORT_DIPSETTING(	0x0c, "20000" )
-	PORT_DIPSETTING(	0x00, "30000" )
-	PORT_DIPSETTING(	0x04, "50000" )
+	PORT_DIPSETTING(    0x08, DEF_STR( None ) )
+	PORT_DIPSETTING(    0x0c, "20000" )
+	PORT_DIPSETTING(    0x00, "30000" )
+	PORT_DIPSETTING(    0x04, "50000" )
 	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Lives ) )  PORT_DIPLOCATION("SW5E:5,6")
-	PORT_DIPSETTING(	0x20, "2" )
-	PORT_DIPSETTING(	0x30, "3" )
-	PORT_DIPSETTING(	0x00, "4" )
-	PORT_DIPSETTING(	0x10, "5" )
+	PORT_DIPSETTING(    0x20, "2" )
+	PORT_DIPSETTING(    0x30, "3" )
+	PORT_DIPSETTING(    0x00, "4" )
+	PORT_DIPSETTING(    0x10, "5" )
 	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Difficulty ) )  PORT_DIPLOCATION("SW5E:7")
-	PORT_DIPSETTING(	0x00, DEF_STR( Easy ) )
-	PORT_DIPSETTING(	0x40, DEF_STR( Medium ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Easy ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( Medium ) )
 	PORT_DIPNAME( 0x80, 0x80, "Demo Mode" )  PORT_DIPLOCATION("SW5E:8")
-	PORT_DIPSETTING(	0x80, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("DSW1") /* DSW1 - 3J */
 	PORT_DIPNAME(    0x03, 0x00, "Coins Per Credit" )  PORT_DIPLOCATION("SW3J:!1,!2")
@@ -236,10 +257,10 @@ static INPUT_PORTS_START( irobot )
 	PORT_DIPSETTING( 0x60, "2 Credits for 4 Coin Units" )
 	PORT_DIPSETTING( 0xe0, DEF_STR( Free_Play ) )
 
-	PORT_START("AN0")	/* IN4 */
+	PORT_START("AN0")   /* IN4 */
 	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_Y ) PORT_MINMAX(96,163) PORT_SENSITIVITY(70) PORT_KEYDELTA(50)
 
-	PORT_START("AN1")	/* IN5 */
+	PORT_START("AN1")   /* IN5 */
 	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_X ) PORT_MINMAX(96,159) PORT_SENSITIVITY(50) PORT_KEYDELTA(50) PORT_REVERSE
 INPUT_PORTS_END
 
@@ -254,17 +275,17 @@ INPUT_PORTS_END
 static const gfx_layout charlayout =
 {
 	8,8,
-    64,
-    1,
-    { 0 },
-    { 4, 5, 6, 7, 12, 13, 14, 15},
-    { 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16},
-    16*8
+	64,
+	1,
+	{ 0 },
+	{ 4, 5, 6, 7, 12, 13, 14, 15},
+	{ 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16},
+	16*8
 };
 
 
 static GFXDECODE_START( irobot )
-    GFXDECODE_ENTRY( "gfx1", 0, charlayout, 64, 16 )
+	GFXDECODE_ENTRY( "gfx1", 0, charlayout, 64, 16 )
 GFXDECODE_END
 
 
@@ -295,41 +316,40 @@ static MACHINE_CONFIG_START( irobot, irobot_state )
 	MCFG_CPU_ADD("maincpu", M6809, MAIN_CLOCK/8)
 	MCFG_CPU_PROGRAM_MAP(irobot_map)
 
-	MCFG_MACHINE_RESET(irobot)
 	MCFG_NVRAM_ADD_0FILL("nvram")
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 0*8, 29*8-1)
-	MCFG_SCREEN_UPDATE(irobot)
+	MCFG_SCREEN_UPDATE_DRIVER(irobot_state, screen_update_irobot)
 
 	MCFG_GFXDECODE(irobot)
-	MCFG_PALETTE_LENGTH(64 + 32)	/* 64 for polygons, 32 for text */
+	MCFG_PALETTE_LENGTH(64 + 32)    /* 64 for polygons, 32 for text */
 
-	MCFG_PALETTE_INIT(irobot)
-	MCFG_VIDEO_START(irobot)
 
-	MCFG_TIMER_ADD("irvg_timer", irobot_irvg_done_callback)
-	MCFG_TIMER_ADD("irmb_timer", irobot_irmb_done_callback)
+	MCFG_TIMER_DRIVER_ADD("irvg_timer", irobot_state, irobot_irvg_done_callback)
+	MCFG_TIMER_DRIVER_ADD("irmb_timer", irobot_state, irobot_irmb_done_callback)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("pokey1", POKEY, MAIN_CLOCK/8)
-	MCFG_SOUND_CONFIG(pokey_config)
+	/* FIXME: I-Robot has all channels of the quad-pokey tied together
+	 *        This needs to be taken into account in the design.
+	 */
+	MCFG_POKEY_ADD("pokey1", MAIN_CLOCK/8)
+	MCFG_POKEY_CONFIG(pokey_config)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.25)
 
-	MCFG_SOUND_ADD("pokey2", POKEY, MAIN_CLOCK/8)
+	MCFG_POKEY_ADD("pokey2", MAIN_CLOCK/8)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.25)
 
-	MCFG_SOUND_ADD("pokey3", POKEY, MAIN_CLOCK/8)
+	MCFG_POKEY_ADD("pokey3", MAIN_CLOCK/8)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.25)
 
-	MCFG_SOUND_ADD("pokey4", POKEY, MAIN_CLOCK/8)
+	MCFG_POKEY_ADD("pokey4", MAIN_CLOCK/8)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.25)
 MACHINE_CONFIG_END
 
@@ -352,7 +372,7 @@ ROM_START( irobot )
 
 	ROM_REGION16_BE( 0x10000, "mathbox", 0 )  /* mathbox region */
 	ROM_LOAD16_BYTE( "136029-104.bin", 0x0000,  0x2000, CRC(0a6cdcca) SHA1(b9fd76eae8ca24fa3abc30c46bbf30d89943d97d) )
-	ROM_LOAD16_BYTE( "136029-103.bin", 0x0001,  0x2000, CRC(0c83296d) SHA1(c1f4041a58f395e24855254849604dfe3b8b0d71) )	/* ROM data from 0000-bfff */
+	ROM_LOAD16_BYTE( "136029-103.bin", 0x0001,  0x2000, CRC(0c83296d) SHA1(c1f4041a58f395e24855254849604dfe3b8b0d71) )  /* ROM data from 0000-bfff */
 	ROM_LOAD16_BYTE( "136029-102.bin", 0x4000,  0x4000, CRC(9d588f22) SHA1(787ec3e642e1dc3417477348afa88c764e1f2a88) )
 	ROM_LOAD16_BYTE( "136029-101.bin", 0x4001,  0x4000, CRC(62a38c08) SHA1(868bb3fe5657a4ce45c3dd04ba26a7fb5a5ded42) )
 	/* RAM data from c000-dfff */
@@ -363,7 +383,7 @@ ROM_START( irobot )
 
 	ROM_REGION( 0x3420, "proms", 0 )
 	ROM_LOAD( "136029-125.bin",      0x0000,  0x0020, CRC(446335ba) SHA1(5b42cc065bfac467028ae883844c8f94465c3666) )
-	ROM_LOAD( "136029-111.bin",      0x0020,  0x0400, CRC(9fbc9bf3) SHA1(33dee2382e1e3899ffbaea859a67af7334270b4a) )	/* program ROMs from c000-f3ff */
+	ROM_LOAD( "136029-111.bin",      0x0020,  0x0400, CRC(9fbc9bf3) SHA1(33dee2382e1e3899ffbaea859a67af7334270b4a) )    /* program ROMs from c000-f3ff */
 	ROM_LOAD( "136029-112.bin",      0x0420,  0x0400, CRC(b2713214) SHA1(4e1ea039e7a3e341796097b0c6943a4805b89f56) )
 	ROM_LOAD( "136029-113.bin",      0x0820,  0x0400, CRC(7875930a) SHA1(63a3818450a76d230a75f038b140c3934659313e) )
 	ROM_LOAD( "136029-114.bin",      0x0c20,  0x0400, CRC(51d29666) SHA1(34887df0f1ac064b4cf4252a225406e8b30872c6) )
@@ -389,4 +409,4 @@ ROM_END
  *
  *************************************/
 
-GAME( 1983, irobot, 0, irobot, irobot, irobot, ROT0, "Atari", "I, Robot", 0 )
+GAME( 1983, irobot, 0, irobot, irobot, irobot_state, irobot, ROT0, "Atari", "I, Robot", 0 )

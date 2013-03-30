@@ -18,12 +18,13 @@
 
 ******************************************************************************/
 
-PALETTE_INIT( gomoku )
+void gomoku_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 	int bit0, bit1, bit2, r, g, b;
 
-	for (i = 0; i < machine.total_colors(); i++)
+	for (i = 0; i < machine().total_colors(); i++)
 	{
 		/* red component */
 		bit0 = (*color_prom >> 0) & 0x01;
@@ -41,7 +42,7 @@ PALETTE_INIT( gomoku )
 		bit2 = (*color_prom >> 7) & 0x01;
 		b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 
-		palette_set_color(machine,i, MAKE_RGB(r, g, b));
+		palette_set_color(machine(),i, MAKE_RGB(r, g, b));
 		color_prom++;
 	}
 }
@@ -53,51 +54,45 @@ PALETTE_INIT( gomoku )
 
 ******************************************************************************/
 
-static TILE_GET_INFO( get_fg_tile_info )
+TILE_GET_INFO_MEMBER(gomoku_state::get_fg_tile_info)
 {
-	gomoku_state *state = machine.driver_data<gomoku_state>();
-	int code = (state->m_videoram[tile_index]);
-	int attr = (state->m_colorram[tile_index]);
+	int code = (m_videoram[tile_index]);
+	int attr = (m_colorram[tile_index]);
 	int color = (attr& 0x0f);
 	int flipyx = (attr & 0xc0) >> 6;
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			0,
 			code,
 			color,
 			TILE_FLIPYX(flipyx));
 }
 
-WRITE8_HANDLER( gomoku_videoram_w )
+WRITE8_MEMBER(gomoku_state::gomoku_videoram_w)
 {
-	gomoku_state *state = space->machine().driver_data<gomoku_state>();
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_fg_tilemap,offset);
+	m_videoram[offset] = data;
+	m_fg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( gomoku_colorram_w )
+WRITE8_MEMBER(gomoku_state::gomoku_colorram_w)
 {
-	gomoku_state *state = space->machine().driver_data<gomoku_state>();
-	state->m_colorram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_fg_tilemap,offset);
+	m_colorram[offset] = data;
+	m_fg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( gomoku_bgram_w )
+WRITE8_MEMBER(gomoku_state::gomoku_bgram_w)
 {
-	gomoku_state *state = space->machine().driver_data<gomoku_state>();
-	state->m_bgram[offset] = data;
+	m_bgram[offset] = data;
 }
 
-WRITE8_HANDLER( gomoku_flipscreen_w )
+WRITE8_MEMBER(gomoku_state::gomoku_flipscreen_w)
 {
-	gomoku_state *state = space->machine().driver_data<gomoku_state>();
-	state->m_flipscreen = (data & 0x02) ? 0 : 1;
+	m_flipscreen = (data & 0x02) ? 0 : 1;
 }
 
-WRITE8_HANDLER( gomoku_bg_dispsw_w )
+WRITE8_MEMBER(gomoku_state::gomoku_bg_dispsw_w)
 {
-	gomoku_state *state = space->machine().driver_data<gomoku_state>();
-	state->m_bg_dispsw = (data & 0x02) ? 0 : 1;
+	m_bg_dispsw = (data & 0x02) ? 0 : 1;
 }
 
 
@@ -107,24 +102,23 @@ WRITE8_HANDLER( gomoku_bg_dispsw_w )
 
 ******************************************************************************/
 
-VIDEO_START( gomoku )
+void gomoku_state::video_start()
 {
-	gomoku_state *state = machine.driver_data<gomoku_state>();
-	UINT8 *GOMOKU_BG_X = machine.region( "user1" )->base();
-	UINT8 *GOMOKU_BG_Y = machine.region( "user2" )->base();
-	UINT8 *GOMOKU_BG_D = machine.region( "user3" )->base();
+	UINT8 *GOMOKU_BG_X = memregion( "user1" )->base();
+	UINT8 *GOMOKU_BG_Y = memregion( "user2" )->base();
+	UINT8 *GOMOKU_BG_D = memregion( "user3" )->base();
 	int x, y;
 	int bgdata;
 	int color;
 
-	state->m_bg_bitmap = machine.primary_screen->alloc_compatible_bitmap();
+	machine().primary_screen->register_screen_bitmap(m_bg_bitmap);
 
-	state->m_fg_tilemap = tilemap_create(machine, get_fg_tile_info,tilemap_scan_rows,8,8,32, 32);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(gomoku_state::get_fg_tile_info),this),TILEMAP_SCAN_ROWS,8,8,32, 32);
 
-	tilemap_set_transparent_pen(state->m_fg_tilemap,0);
+	m_fg_tilemap->set_transparent_pen(0);
 
 	/* make background bitmap */
-	bitmap_fill(state->m_bg_bitmap, 0, 0x20);
+	m_bg_bitmap.fill(0x20);
 
 	// board
 	for (y = 0; y < 256; y++)
@@ -133,12 +127,12 @@ VIDEO_START( gomoku )
 		{
 			bgdata = GOMOKU_BG_D[ GOMOKU_BG_X[x] + (GOMOKU_BG_Y[y] << 4) ];
 
-			color = 0x20;						// outside frame (black)
+			color = 0x20;                       // outside frame (black)
 
-			if (bgdata & 0x01) color = 0x21;	// board (brown)
-			if (bgdata & 0x02) color = 0x20;	// frame line (while)
+			if (bgdata & 0x01) color = 0x21;    // board (brown)
+			if (bgdata & 0x02) color = 0x20;    // frame line (while)
 
-			*BITMAP_ADDR16(state->m_bg_bitmap, (255 - y - 1) & 0xff, (255 - x + 7) & 0xff) = color;
+			m_bg_bitmap.pix16((255 - y - 1) & 0xff, (255 - x + 7) & 0xff) = color;
 		}
 	}
 }
@@ -150,12 +144,11 @@ VIDEO_START( gomoku )
 
 ******************************************************************************/
 
-SCREEN_UPDATE( gomoku )
+UINT32 gomoku_state::screen_update_gomoku(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	gomoku_state *state = screen->machine().driver_data<gomoku_state>();
-	UINT8 *GOMOKU_BG_X = screen->machine().region( "user1" )->base();
-	UINT8 *GOMOKU_BG_Y = screen->machine().region( "user2" )->base();
-	UINT8 *GOMOKU_BG_D = screen->machine().region( "user3" )->base();
+	UINT8 *GOMOKU_BG_X = machine().root_device().memregion( "user1" )->base();
+	UINT8 *GOMOKU_BG_Y = machine().root_device().memregion( "user2" )->base();
+	UINT8 *GOMOKU_BG_D = memregion( "user3" )->base();
 	int x, y;
 	int bgram;
 	int bgoffs;
@@ -163,10 +156,10 @@ SCREEN_UPDATE( gomoku )
 	int color;
 
 	/* draw background layer */
-	if (state->m_bg_dispsw)
+	if (m_bg_dispsw)
 	{
 		/* copy bg bitmap */
-		copybitmap(bitmap, state->m_bg_bitmap, 0, 0, 0, 0, cliprect);
+		copybitmap(bitmap, m_bg_bitmap, 0, 0, 0, 0, cliprect);
 
 		// stone
 		for (y = 0; y < 256; y++)
@@ -176,23 +169,23 @@ SCREEN_UPDATE( gomoku )
 				bgoffs = ((((255 - x - 2) / 14) | (((255 - y - 10) / 14) << 4)) & 0xff);
 
 				bgdata = GOMOKU_BG_D[ GOMOKU_BG_X[x] + (GOMOKU_BG_Y[y] << 4) ];
-				bgram = state->m_bgram[bgoffs];
+				bgram = m_bgram[bgoffs];
 
 				if (bgdata & 0x04)
 				{
 					if (bgram & 0x01)
 					{
-						color = 0x2f;	// stone (black)
+						color = 0x2f;   // stone (black)
 					}
 					else if (bgram & 0x02)
 					{
-						color = 0x22;	// stone (white)
+						color = 0x22;   // stone (white)
 					}
 					else continue;
 				}
 				else continue;
 
-				*BITMAP_ADDR16(bitmap, (255 - y - 1) & 0xff, (255 - x + 7) & 0xff) = color;
+				bitmap.pix16((255 - y - 1) & 0xff, (255 - x + 7) & 0xff) = color;
 			}
 		}
 
@@ -204,31 +197,31 @@ SCREEN_UPDATE( gomoku )
 				bgoffs = ((((255 - x - 2) / 14) | (((255 - y - 10) / 14) << 4)) & 0xff);
 
 				bgdata = GOMOKU_BG_D[ GOMOKU_BG_X[x] + (GOMOKU_BG_Y[y] << 4) ];
-				bgram = state->m_bgram[bgoffs];
+				bgram = m_bgram[bgoffs];
 
 				if (bgdata & 0x08)
 				{
 					if (bgram & 0x04)
 					{
-							color = 0x2f;	// cursor (black)
+							color = 0x2f;   // cursor (black)
 					}
 					else if (bgram & 0x08)
 					{
-						color = 0x22;		// cursor (white)
+						color = 0x22;       // cursor (white)
 					}
 					else continue;
 				}
 				else continue;
 
-				*BITMAP_ADDR16(bitmap, (255 - y - 1) & 0xff, (255 - x + 7) & 0xff) = color;
+				bitmap.pix16((255 - y - 1) & 0xff, (255 - x + 7) & 0xff) = color;
 			}
 		}
 	}
 	else
 	{
-		bitmap_fill(bitmap, 0, 0x20);
+		bitmap.fill(0x20);
 	}
 
-	tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, 0, 0);
+	m_fg_tilemap->draw(bitmap, cliprect, 0, 0);
 	return 0;
 }

@@ -112,38 +112,35 @@ cc_p14.j2 8192 0xedc6a1eb M5L2764k
 #include "sound/ay8910.h"
 #include "includes/mainsnk.h"
 
-static WRITE8_HANDLER( sound_command_w )
+WRITE8_MEMBER(mainsnk_state::sound_command_w)
 {
-	mainsnk_state *state = space->machine().driver_data<mainsnk_state>();
 
-	state->m_sound_cpu_busy = 1;
-	soundlatch_w(space, 0, data);
-	cputag_set_input_line(space->machine(), "audiocpu", INPUT_LINE_NMI, PULSE_LINE);
+	m_sound_cpu_busy = 1;
+	soundlatch_byte_w(space, 0, data);
+	machine().device("audiocpu")->execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 }
 
-static READ8_HANDLER( sound_command_r )
+READ8_MEMBER(mainsnk_state::sound_command_r)
 {
-	return soundlatch_r(space, 0);
+	return soundlatch_byte_r(space, 0);
 }
 
-static READ8_HANDLER( sound_ack_r )
+READ8_MEMBER(mainsnk_state::sound_ack_r)
 {
-	mainsnk_state *state = space->machine().driver_data<mainsnk_state>();
 
-	state->m_sound_cpu_busy = 0;
+	m_sound_cpu_busy = 0;
 	return 0xff;
 }
 
-static CUSTOM_INPUT( mainsnk_sound_r )
+CUSTOM_INPUT_MEMBER(mainsnk_state::mainsnk_sound_r)
 {
-	mainsnk_state *state = field->port->machine().driver_data<mainsnk_state>();
 
-	return (state->m_sound_cpu_busy) ? 0x01 : 0x00;
+	return (m_sound_cpu_busy) ? 0x01 : 0x00;
 }
 
 
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, mainsnk_state )
 	AM_RANGE(0x0000, 0xbfff) AM_ROM
 	AM_RANGE(0xc000, 0xc000) AM_READ_PORT("IN0")
 	AM_RANGE(0xc100, 0xc100) AM_READ_PORT("IN1")
@@ -153,23 +150,23 @@ static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
 	AM_RANGE(0xc500, 0xc500) AM_READ_PORT("DSW2")
 	AM_RANGE(0xc600, 0xc600) AM_WRITE(mainsnk_c600_w)
 	AM_RANGE(0xc700, 0xc700) AM_WRITE(sound_command_w)
-	AM_RANGE(0xd800, 0xdbff) AM_RAM_WRITE(mainsnk_bgram_w) AM_BASE_MEMBER(mainsnk_state, m_bgram)
+	AM_RANGE(0xd800, 0xdbff) AM_RAM_WRITE(mainsnk_bgram_w) AM_SHARE("bgram")
 	AM_RANGE(0xdc00, 0xe7ff) AM_RAM
-	AM_RANGE(0xe800, 0xefff) AM_RAM AM_BASE_MEMBER(mainsnk_state, m_spriteram)
-	AM_RANGE(0xf000, 0xf7ff) AM_RAM_WRITE(mainsnk_fgram_w) AM_BASE_MEMBER(mainsnk_state, m_fgram)	// + work RAM
+	AM_RANGE(0xe800, 0xefff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0xf000, 0xf7ff) AM_RAM_WRITE(mainsnk_fgram_w) AM_SHARE("fgram")    // + work RAM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, mainsnk_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x87ff) AM_RAM
 	AM_RANGE(0xa000, 0xa000) AM_READ(sound_command_r)
 	AM_RANGE(0xc000, 0xc000) AM_READ(sound_ack_r)
-	AM_RANGE(0xe000, 0xe001) AM_DEVWRITE("ay1", ay8910_address_data_w)
-	AM_RANGE(0xe002, 0xe003) AM_WRITENOP	// ? always FFFF, snkwave leftover?
-	AM_RANGE(0xe008, 0xe009) AM_DEVWRITE("ay2", ay8910_address_data_w)
+	AM_RANGE(0xe000, 0xe001) AM_DEVWRITE_LEGACY("ay1", ay8910_address_data_w)
+	AM_RANGE(0xe002, 0xe003) AM_WRITENOP    // ? always FFFF, snkwave leftover?
+	AM_RANGE(0xe008, 0xe009) AM_DEVWRITE_LEGACY("ay2", ay8910_address_data_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sound_portmap, AS_IO, 8 )
+static ADDRESS_MAP_START( sound_portmap, AS_IO, 8, mainsnk_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0x00) AM_READNOP
 ADDRESS_MAP_END
@@ -183,7 +180,7 @@ static INPUT_PORTS_START( mainsnk )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_SERVICE1 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_START1 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_START2 )
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(mainsnk_sound_r, NULL)	/* sound CPU status */
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, mainsnk_state,mainsnk_sound_r, NULL)  /* sound CPU status */
 	PORT_BIT( 0x40, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_SERVICE )
 
@@ -208,10 +205,10 @@ static INPUT_PORTS_START( mainsnk )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_RIGHT ) PORT_PLAYER(2)
 
 	PORT_START("IN3")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 )	// button on top of left stick
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 )	// button on top of right stick
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON3 )	// left button
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON4 )	// right button
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 )    // button on top of left stick
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 )    // button on top of right stick
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON3 )    // left button
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON4 )    // right button
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
@@ -277,7 +274,7 @@ static INPUT_PORTS_START( canvas )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_SERVICE1 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_START1 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_START2 )
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(mainsnk_sound_r, NULL)	/* sound CPU status */
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, mainsnk_state,mainsnk_sound_r, NULL)  /* sound CPU status */
 	PORT_BIT( 0x40, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_SERVICE )
 
@@ -323,21 +320,21 @@ static INPUT_PORTS_START( canvas )
 	PORT_DIPSETTING(    0x30, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(    0x28, DEF_STR( 1C_3C ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
-	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) ) PORT_DIPLOCATION("DSW1:7")	// bonus life?
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) ) PORT_DIPLOCATION("DSW1:7")   // bonus life?
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) ) PORT_DIPLOCATION("DSW1:8")	// bonus life?
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) ) PORT_DIPLOCATION("DSW1:8")   // bonus life?
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("DSW2")
-	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) ) PORT_DIPLOCATION("DSW2:1")	// bonus life?
+	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) ) PORT_DIPLOCATION("DSW2:1")   // bonus life?
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unknown ) ) PORT_DIPLOCATION("DSW2:2")	// difficulty?
+	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unknown ) ) PORT_DIPLOCATION("DSW2:2")   // difficulty?
 	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) ) PORT_DIPLOCATION("DSW2:3")	// difficulty?
+	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) ) PORT_DIPLOCATION("DSW2:3")   // difficulty?
 	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x18, 0x10, "Game mode" ) PORT_DIPLOCATION("DSW2:4,5")
@@ -353,7 +350,7 @@ static INPUT_PORTS_START( canvas )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x80, 0x00, "Must Be On" ) PORT_DIPLOCATION("DSW2:8")
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )	// needs to be on otherwise pictures in later levels are wrong
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )   // needs to be on otherwise pictures in later levels are wrong
 INPUT_PORTS_END
 
 
@@ -393,28 +390,25 @@ static MACHINE_CONFIG_START( mainsnk, mainsnk_state )
 
 	MCFG_CPU_ADD("maincpu", Z80, 3360000)
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", mainsnk_state,  irq0_line_hold)
 
 	MCFG_CPU_ADD("audiocpu", Z80,4000000)
 	MCFG_CPU_PROGRAM_MAP(sound_map)
 	MCFG_CPU_IO_MAP(sound_portmap)
-	MCFG_CPU_PERIODIC_INT(irq0_line_hold, 244)
+	MCFG_CPU_PERIODIC_INT_DRIVER(mainsnk_state, irq0_line_hold,  244)
 
 	/* video hardware */
 	MCFG_VIDEO_ATTRIBUTES(VIDEO_HAS_SHADOWS)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(36*8, 28*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 36*8-1, 1*8, 28*8-1)
-	MCFG_SCREEN_UPDATE(mainsnk)
+	MCFG_SCREEN_UPDATE_DRIVER(mainsnk_state, screen_update_mainsnk)
 
 	MCFG_GFXDECODE(mainsnk)
 	MCFG_PALETTE_LENGTH(0x400)
 
-	MCFG_PALETTE_INIT(mainsnk)
-	MCFG_VIDEO_START(mainsnk)
 
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
@@ -436,7 +430,7 @@ ROM_START( mainsnk)
 	ROM_LOAD( "snk.p06",      0xa000, 0x2000, CRC(5f8a60a2) SHA1(88a051e13d6b3bbd3606a4c4cc0395da07e0f109) )
 
 	ROM_REGION( 0x10000, "audiocpu", 0 )
-	ROM_LOAD( "snk.p07",	     0x0000, 0x4000, CRC(4208391e) SHA1(d110ca4ff9d21fe7813f04ec43c2c23471c6517f) )
+	ROM_LOAD( "snk.p07",         0x0000, 0x4000, CRC(4208391e) SHA1(d110ca4ff9d21fe7813f04ec43c2c23471c6517f) )
 
 	ROM_REGION( 0x08000, "gfx1", 0 )
 	ROM_LOAD( "snk.p12",      0x0000, 0x2000, CRC(ecf87eb7) SHA1(83b8d19070d5930b306a0309ebba05b04c2abebf) )
@@ -455,7 +449,7 @@ ROM_START( mainsnk)
 	ROM_LOAD( "snk.p18",      0x0e000, 0x2000, CRC(838b12a3) SHA1(a3444f9b2aeef70caa93e5f642cb6c3b75e88ea4) )
 	ROM_LOAD( "snk.p21",      0x10000, 0x2000, CRC(8961a51e) SHA1(4f9d8358bc76118c4fab631ae73a02ab5aa0c036) )
 
-	ROM_REGION( 0x1000, "proms", 0 )	// overdumps? 2nd half is empty
+	ROM_REGION( 0x1000, "proms", 0 )    // overdumps? 2nd half is empty
 	ROM_LOAD( "main3.bin",    0x0000, 0x0800, CRC(78b29dde) SHA1(c2f93cde6fd8bc175e9e0d38af41b7710d7f1c82) )
 	ROM_LOAD( "main2.bin",    0x0400, 0x0800, CRC(7c314c93) SHA1(c6bd2a0eaf617448ef65dcbadced313b0d69ab88) )
 	ROM_LOAD( "main1.bin",    0x0800, 0x0800, CRC(deb895c4) SHA1(f1281dcb3471d9627565706ff09ba72f09dc62a4) )
@@ -471,14 +465,14 @@ ROM_START( canvas )
 	ROM_LOAD( "cc_p6.a8",      0xa000, 0x2000, CRC(7b1dd7fc) SHA1(1287ab261885d5e9ba957024d7a00c7a0d31235b) )
 
 	ROM_REGION( 0x10000, "audiocpu", 0 )
-	ROM_LOAD( "cc_p7.h2",	   0x0000, 0x4000, CRC(029b5ea0) SHA1(88f84b4dd01656ded8d983396ded404c9d8186f1) )
-	ROM_LOAD( "cc_p8.f2",	   0x4000, 0x2000, CRC(0f0368ce) SHA1(a02f066ea024285a931b85709822a50a4099e0b0) )
+	ROM_LOAD( "cc_p7.h2",      0x0000, 0x4000, CRC(029b5ea0) SHA1(88f84b4dd01656ded8d983396ded404c9d8186f1) )
+	ROM_LOAD( "cc_p8.f2",      0x4000, 0x2000, CRC(0f0368ce) SHA1(a02f066ea024285a931b85709822a50a4099e0b0) )
 
 	ROM_REGION( 0x10000, "gfx1", 0 )
-	ROM_FILL(                  0x0000, 0x4000, 0xff )	// empty, causes tx layer to be fully transparent
-	ROM_LOAD( "cc_p11.c2",     0x4000, 0x4000, CRC(4c8c2156) SHA1(7f1d9a1e1c6cab91f24c7fc75d0c7ec2702137af) )	// banks = 18&58
-	ROM_LOAD( "cc_p10.b2",     0x8000, 0x4000, CRC(3c0a4eeb) SHA1(53742a5bef16e71bebefb0e43a175341f5bf0aa6) )	// banks = 28&68
-	ROM_LOAD( "cc_p9.a2",      0xc000, 0x4000, CRC(b58c5f24) SHA1(7026b3d4f8060fd6607eb6d356d6b61cc9cb75c3) )	// banks = 30&70
+	ROM_FILL(                  0x0000, 0x4000, 0xff )   // empty, causes tx layer to be fully transparent
+	ROM_LOAD( "cc_p11.c2",     0x4000, 0x4000, CRC(4c8c2156) SHA1(7f1d9a1e1c6cab91f24c7fc75d0c7ec2702137af) )   // banks = 18&58
+	ROM_LOAD( "cc_p10.b2",     0x8000, 0x4000, CRC(3c0a4eeb) SHA1(53742a5bef16e71bebefb0e43a175341f5bf0aa6) )   // banks = 28&68
+	ROM_LOAD( "cc_p9.a2",      0xc000, 0x4000, CRC(b58c5f24) SHA1(7026b3d4f8060fd6607eb6d356d6b61cc9cb75c3) )   // banks = 30&70
 
 	ROM_REGION( 0x6000, "gfx2", 0 )
 	ROM_LOAD( "cc_p12.j8",     0x0000, 0x2000, CRC(9003a979) SHA1(f63959a9dc9ee67622865e783d2e501c640a4bed) )
@@ -492,5 +486,5 @@ ROM_START( canvas )
 ROM_END
 
 
-GAME( 1984, mainsnk,   0,   mainsnk, mainsnk, 0,   ROT0, "SNK", "Main Event (1984)", 0)
-GAME( 1985, canvas,    0,   mainsnk, canvas,  0,   ROT0, "SNK", "Canvas Croquis", 0)
+GAME( 1984, mainsnk,   0,   mainsnk, mainsnk, driver_device, 0,   ROT0, "SNK", "Main Event (1984)", 0)
+GAME( 1985, canvas,    0,   mainsnk, canvas, driver_device,  0,   ROT0, "SNK", "Canvas Croquis", 0)

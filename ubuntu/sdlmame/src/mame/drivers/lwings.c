@@ -60,73 +60,78 @@ Notes:
  * a code reflecting the direction (8 angles) from one point to the other.
  */
 
-static WRITE8_HANDLER( avengers_adpcm_w )
+WRITE8_MEMBER(lwings_state::avengers_adpcm_w)
 {
-	lwings_state *state = space->machine().driver_data<lwings_state>();
-	state->m_adpcm = data;
+	m_adpcm = data;
 }
 
-static READ8_HANDLER( avengers_adpcm_r )
+READ8_MEMBER(lwings_state::avengers_adpcm_r)
 {
-	lwings_state *state = space->machine().driver_data<lwings_state>();
-	return state->m_adpcm;
+	return m_adpcm;
 }
 
-static WRITE8_HANDLER( lwings_bankswitch_w )
+WRITE8_MEMBER(lwings_state::lwings_bankswitch_w)
 {
+
 	/* bit 0 is flip screen */
-	flip_screen_set(space->machine(), ~data & 0x01);
+	flip_screen_set(~data & 0x01);
 
 	/* bits 1 and 2 select ROM bank */
-	memory_set_bank(space->machine(), "bank1", (data & 0x06) >> 1);
+	membank("bank1")->set_entry((data & 0x06) >> 1);
 
 	/* bit 3 enables NMI */
-	interrupt_enable_w(space, 0, data & 0x08);
+	m_nmi_mask = data & 8;
 
 	/* bits 6 and 7 are coin counters */
-	coin_counter_w(space->machine(), 1, data & 0x40);
-	coin_counter_w(space->machine(), 0, data & 0x80);
+	coin_counter_w(machine(), 1, data & 0x40);
+	coin_counter_w(machine(), 0, data & 0x80);
 }
 
-static INTERRUPT_GEN( lwings_interrupt )
+INTERRUPT_GEN_MEMBER(lwings_state::lwings_interrupt)
 {
-	if (interrupt_enable_r(device->memory().space(AS_PROGRAM), 0))
-		device_set_input_line_and_vector(device, 0, HOLD_LINE, 0xd7); /* RST 10h */
+
+	if(m_nmi_mask)
+		device.execute().set_input_line_and_vector(0, HOLD_LINE, 0xd7); /* RST 10h */
+}
+
+INTERRUPT_GEN_MEMBER(lwings_state::avengers_interrupt)
+{
+
+	if(m_nmi_mask)
+		device.execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 }
 
 
-static WRITE8_HANDLER( avengers_protection_w )
+WRITE8_MEMBER(lwings_state::avengers_protection_w)
 {
-	lwings_state *state = space->machine().driver_data<lwings_state>();
-	int pc = cpu_get_pc(&space->device());
+	int pc = space.device().safe_pc();
 
 	if (pc == 0x2eeb)
 	{
-		state->m_param[0] = data;
+		m_param[0] = data;
 	}
 	else if (pc == 0x2f09)
 	{
-		state->m_param[1] = data;
+		m_param[1] = data;
 	}
 	else if(pc == 0x2f26)
 	{
-		state->m_param[2] = data;
+		m_param[2] = data;
 	}
 	else if (pc == 0x2f43)
 	{
-		state->m_param[3] = data;
+		m_param[3] = data;
 	}
 	else if (pc == 0x0445)
 	{
-		state->m_soundstate = 0x80;
-		soundlatch_w(space, 0, data);
+		m_soundstate = 0x80;
+		soundlatch_byte_w(space, 0, data);
 	}
 }
 
-static WRITE8_HANDLER( avengers_prot_bank_w )
+WRITE8_MEMBER(lwings_state::avengers_prot_bank_w)
 {
-	lwings_state *state = space->machine().driver_data<lwings_state>();
-	state->m_palette_pen = data * 64;
+	m_palette_pen = data * 64;
 }
 
 static int avengers_fetch_paldata( running_machine &machine )
@@ -196,10 +201,10 @@ static int avengers_fetch_paldata( running_machine &machine )
 
 	int bank = state->m_palette_pen / 64;
 	int offs = state->m_palette_pen % 64;
-	int page = bank / 4;					/* 0..7 */
-	int base = (3 - (bank & 3));			/* 0..3 */
-	int row = offs & 0xf;					/* 0..15 */
-	int col = offs / 16 + base * 4;			/* 0..15 */
+	int page = bank / 4;                    /* 0..7 */
+	int base = (3 - (bank & 3));            /* 0..3 */
+	int row = offs & 0xf;                   /* 0..15 */
+	int col = offs / 16 + base * 4;         /* 0..15 */
 	int digit0 = pal_data[page * 256 * 2 + (31 - row * 2) * 16 + col];
 	int digit1 = pal_data[page * 256 * 2 + (30 - row * 2) * 16 + col];
 	int result;
@@ -222,9 +227,8 @@ static int avengers_fetch_paldata( running_machine &machine )
 	return result;
 }
 
-static READ8_HANDLER( avengers_protection_r )
+READ8_MEMBER(lwings_state::avengers_protection_r)
 {
-	lwings_state *state = space->machine().driver_data<lwings_state>();
 	static const int xpos[8] = { 10, 7,  0, -7, -10, -7,   0,  7 };
 	static const int ypos[8] = {  0, 7, 10,  7,   0, -7, -10, -7 };
 	int best_dist = 0;
@@ -232,19 +236,19 @@ static READ8_HANDLER( avengers_protection_r )
 	int x, y;
 	int dx, dy, dist, dir;
 
-	if (cpu_get_pc(&space->device()) == 0x7c7)
+	if (space.device().safe_pc() == 0x7c7)
 	{
 		/* palette data */
-		return avengers_fetch_paldata(space->machine());
+		return avengers_fetch_paldata(machine());
 	}
 
 	/*  Point to Angle Function
 
-        Input: two cartesian points
-        Output: direction code (north,northeast,east,...)
-     */
-	x = state->m_param[0] - state->m_param[2];
-	y = state->m_param[1] - state->m_param[3];
+	    Input: two cartesian points
+	    Output: direction code (north,northeast,east,...)
+	 */
+	x = m_param[0] - m_param[2];
+	y = m_param[1] - m_param[3];
 	for (dir = 0; dir < 8; dir++)
 	{
 		dx = xpos[dir] - x;
@@ -259,32 +263,32 @@ static READ8_HANDLER( avengers_protection_r )
 	return best_dir << 5;
 }
 
-static READ8_HANDLER( avengers_soundlatch2_r )
+READ8_MEMBER(lwings_state::avengers_soundlatch2_r)
 {
-	lwings_state *state = space->machine().driver_data<lwings_state>();
-	UINT8 data = *state->m_soundlatch2 | state->m_soundstate;
-	state->m_soundstate = 0;
+	UINT8 data = *m_soundlatch2 | m_soundstate;
+	m_soundstate = 0;
 	return(data);
 }
 
-static WRITE8_DEVICE_HANDLER( msm5205_w )
+WRITE8_MEMBER(lwings_state::msm5205_w)
 {
+	device_t *device = machine().device("5205");
 	msm5205_reset_w(device, (data >> 7) & 1);
 	msm5205_data_w(device, data);
 	msm5205_vclk_w(device, 1);
 	msm5205_vclk_w(device, 0);
 }
 
-static ADDRESS_MAP_START( avengers_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( avengers_map, AS_PROGRAM, 8, lwings_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0xbfff) AM_ROMBANK("bank1")
 	AM_RANGE(0xc000, 0xddff) AM_RAM
-	AM_RANGE(0xde00, 0xdf7f) AM_RAM AM_BASE_SIZE_GENERIC(spriteram)
+	AM_RANGE(0xde00, 0xdf7f) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0xdf80, 0xdfff) AM_RAM
-	AM_RANGE(0xe000, 0xe7ff) AM_RAM_WRITE(lwings_fgvideoram_w) AM_BASE_MEMBER(lwings_state, m_fgvideoram)
-	AM_RANGE(0xe800, 0xefff) AM_RAM_WRITE(lwings_bg1videoram_w) AM_BASE_MEMBER(lwings_state, m_bg1videoram)
-	AM_RANGE(0xf000, 0xf3ff) AM_RAM_WRITE(paletteram_RRRRGGGGBBBBxxxx_split2_w) AM_BASE_GENERIC(paletteram2)
-	AM_RANGE(0xf400, 0xf7ff) AM_RAM_WRITE(paletteram_RRRRGGGGBBBBxxxx_split1_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0xe000, 0xe7ff) AM_RAM_WRITE(lwings_fgvideoram_w) AM_SHARE("fgvideoram")
+	AM_RANGE(0xe800, 0xefff) AM_RAM_WRITE(lwings_bg1videoram_w) AM_SHARE("bg1videoram")
+	AM_RANGE(0xf000, 0xf3ff) AM_RAM_WRITE(paletteram_RRRRGGGGBBBBxxxx_byte_split_hi_w) AM_SHARE("paletteram2")
+	AM_RANGE(0xf400, 0xf7ff) AM_RAM_WRITE(paletteram_RRRRGGGGBBBBxxxx_byte_split_lo_w) AM_SHARE("paletteram")
 	AM_RANGE(0xf800, 0xf801) AM_WRITE(lwings_bg1_scrollx_w)
 	AM_RANGE(0xf802, 0xf803) AM_WRITE(lwings_bg1_scrolly_w)
 	AM_RANGE(0xf804, 0xf804) AM_WRITE(trojan_bg2_scrollx_w)
@@ -299,15 +303,15 @@ static ADDRESS_MAP_START( avengers_map, AS_PROGRAM, 8 )
 	AM_RANGE(0xf80e, 0xf80e) AM_WRITE(lwings_bankswitch_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( lwings_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( lwings_map, AS_PROGRAM, 8, lwings_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0xbfff) AM_ROMBANK("bank1")
 	AM_RANGE(0xc000, 0xddff) AM_RAM
-	AM_RANGE(0xde00, 0xdfff) AM_RAM AM_BASE_SIZE_GENERIC(spriteram)
-	AM_RANGE(0xe000, 0xe7ff) AM_RAM_WRITE(lwings_fgvideoram_w) AM_BASE_MEMBER(lwings_state, m_fgvideoram)
-	AM_RANGE(0xe800, 0xefff) AM_RAM_WRITE(lwings_bg1videoram_w) AM_BASE_MEMBER(lwings_state, m_bg1videoram)
-	AM_RANGE(0xf000, 0xf3ff) AM_RAM_WRITE(paletteram_RRRRGGGGBBBBxxxx_split2_w) AM_BASE_GENERIC(paletteram2)
-	AM_RANGE(0xf400, 0xf7ff) AM_RAM_WRITE(paletteram_RRRRGGGGBBBBxxxx_split1_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0xde00, 0xdfff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0xe000, 0xe7ff) AM_RAM_WRITE(lwings_fgvideoram_w) AM_SHARE("fgvideoram")
+	AM_RANGE(0xe800, 0xefff) AM_RAM_WRITE(lwings_bg1videoram_w) AM_SHARE("bg1videoram")
+	AM_RANGE(0xf000, 0xf3ff) AM_RAM_WRITE(paletteram_RRRRGGGGBBBBxxxx_byte_split_hi_w) AM_SHARE("paletteram2")
+	AM_RANGE(0xf400, 0xf7ff) AM_RAM_WRITE(paletteram_RRRRGGGGBBBBxxxx_byte_split_lo_w) AM_SHARE("paletteram")
 
 	AM_RANGE(0xf808, 0xf808) AM_READ_PORT("SERVICE")
 	AM_RANGE(0xf809, 0xf809) AM_READ_PORT("P1")
@@ -315,21 +319,21 @@ static ADDRESS_MAP_START( lwings_map, AS_PROGRAM, 8 )
 	AM_RANGE(0xf80a, 0xf80a) AM_READ_PORT("P2")
 	AM_RANGE(0xf80b, 0xf80b) AM_READ_PORT("DSWA")
 	AM_RANGE(0xf80a, 0xf80b) AM_WRITE(lwings_bg1_scrolly_w)
-	AM_RANGE(0xf80c, 0xf80c) AM_READ_PORT("DSWB") AM_WRITE(soundlatch_w)
+	AM_RANGE(0xf80c, 0xf80c) AM_READ_PORT("DSWB") AM_WRITE(soundlatch_byte_w)
 	AM_RANGE(0xf80d, 0xf80d) AM_WRITE(watchdog_reset_w)
 	AM_RANGE(0xf80e, 0xf80e) AM_WRITE(lwings_bankswitch_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( trojan_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( trojan_map, AS_PROGRAM, 8, lwings_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0xbfff) AM_ROMBANK("bank1")
 	AM_RANGE(0xc000, 0xddff) AM_RAM
-	AM_RANGE(0xde00, 0xdf7f) AM_RAM AM_BASE_SIZE_GENERIC(spriteram)
+	AM_RANGE(0xde00, 0xdf7f) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0xdf80, 0xdfff) AM_RAM
-	AM_RANGE(0xe000, 0xe7ff) AM_RAM_WRITE(lwings_fgvideoram_w) AM_BASE_MEMBER(lwings_state, m_fgvideoram)
-	AM_RANGE(0xe800, 0xefff) AM_RAM_WRITE(lwings_bg1videoram_w) AM_BASE_MEMBER(lwings_state, m_bg1videoram)
-	AM_RANGE(0xf000, 0xf3ff) AM_RAM_WRITE(paletteram_RRRRGGGGBBBBxxxx_split2_w) AM_BASE_GENERIC(paletteram2)
-	AM_RANGE(0xf400, 0xf7ff) AM_RAM_WRITE(paletteram_RRRRGGGGBBBBxxxx_split1_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0xe000, 0xe7ff) AM_RAM_WRITE(lwings_fgvideoram_w) AM_SHARE("fgvideoram")
+	AM_RANGE(0xe800, 0xefff) AM_RAM_WRITE(lwings_bg1videoram_w) AM_SHARE("bg1videoram")
+	AM_RANGE(0xf000, 0xf3ff) AM_RAM_WRITE(paletteram_RRRRGGGGBBBBxxxx_byte_split_hi_w) AM_SHARE("paletteram2")
+	AM_RANGE(0xf400, 0xf7ff) AM_RAM_WRITE(paletteram_RRRRGGGGBBBBxxxx_byte_split_lo_w) AM_SHARE("paletteram")
 
 	AM_RANGE(0xf800, 0xf801) AM_WRITE(lwings_bg1_scrollx_w)
 	AM_RANGE(0xf802, 0xf803) AM_WRITE(lwings_bg1_scrolly_w)
@@ -339,36 +343,36 @@ static ADDRESS_MAP_START( trojan_map, AS_PROGRAM, 8 )
 	AM_RANGE(0xf809, 0xf809) AM_READ_PORT("P1")
 	AM_RANGE(0xf80a, 0xf80a) AM_READ_PORT("P2")
 	AM_RANGE(0xf80b, 0xf80b) AM_READ_PORT("DSWA")
-	AM_RANGE(0xf80c, 0xf80c) AM_READ_PORT("DSWB") AM_WRITE(soundlatch_w)
-	AM_RANGE(0xf80d, 0xf80d) AM_WRITE(soundlatch2_w)
+	AM_RANGE(0xf80c, 0xf80c) AM_READ_PORT("DSWB") AM_WRITE(soundlatch_byte_w)
+	AM_RANGE(0xf80d, 0xf80d) AM_WRITE(soundlatch2_byte_w)
 	AM_RANGE(0xf80e, 0xf80e) AM_WRITE(lwings_bankswitch_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( lwings_sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( lwings_sound_map, AS_PROGRAM, 8, lwings_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0xc000, 0xc7ff) AM_RAM
-	AM_RANGE(0xc800, 0xc800) AM_READ(soundlatch_r)
-	AM_RANGE(0xe000, 0xe001) AM_DEVWRITE("2203a", ym2203_w)
-	AM_RANGE(0xe002, 0xe003) AM_DEVWRITE("2203b", ym2203_w)
+	AM_RANGE(0xc800, 0xc800) AM_READ(soundlatch_byte_r)
+	AM_RANGE(0xe000, 0xe001) AM_DEVWRITE_LEGACY("2203a", ym2203_w)
+	AM_RANGE(0xe002, 0xe003) AM_DEVWRITE_LEGACY("2203b", ym2203_w)
 	AM_RANGE(0xe006, 0xe006) AM_READ(avengers_soundlatch2_r) //AT: (avengers061gre)
-	AM_RANGE(0xe006, 0xe006) AM_WRITEONLY AM_BASE_MEMBER(lwings_state, m_soundlatch2)
+	AM_RANGE(0xe006, 0xe006) AM_WRITEONLY AM_SHARE("soundlatch2")
 ADDRESS_MAP_END
 
 /* Yes, _no_ ram */
-static ADDRESS_MAP_START( trojan_adpcm_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( trojan_adpcm_map, AS_PROGRAM, 8, lwings_state )
 	AM_RANGE(0x0000, 0xffff) AM_ROM AM_WRITENOP
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( avengers_adpcm_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( avengers_adpcm_io_map, AS_IO, 8, lwings_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0x00) AM_READ(avengers_adpcm_r)
-	AM_RANGE(0x01, 0x01) AM_DEVWRITE("5205", msm5205_w)
+	AM_RANGE(0x01, 0x01) AM_WRITE(msm5205_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( trojan_adpcm_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( trojan_adpcm_io_map, AS_IO, 8, lwings_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x00) AM_READ(soundlatch2_r)
-	AM_RANGE(0x01, 0x01) AM_DEVWRITE("5205", msm5205_w)
+	AM_RANGE(0x00, 0x00) AM_READ(soundlatch2_byte_r)
+	AM_RANGE(0x01, 0x01) AM_WRITE(msm5205_w)
 ADDRESS_MAP_END
 
 /*************************************
@@ -730,8 +734,8 @@ GFXDECODE_END
 
 static const msm5205_interface msm5205_config =
 {
-	0,				/* interrupt function */
-	MSM5205_SEX_4B	/* slave mode */
+	0,              /* interrupt function */
+	MSM5205_SEX_4B  /* slave mode */
 };
 
 /*************************************
@@ -740,81 +744,75 @@ static const msm5205_interface msm5205_config =
  *
  *************************************/
 
-static MACHINE_START( lwings )
+void lwings_state::machine_start()
 {
-	lwings_state *state = machine.driver_data<lwings_state>();
-	UINT8 *ROM = machine.region("maincpu")->base();
+	UINT8 *ROM = memregion("maincpu")->base();
 
-	memory_configure_bank(machine, "bank1", 0, 4, &ROM[0x10000], 0x4000);
+	membank("bank1")->configure_entries(0, 4, &ROM[0x10000], 0x4000);
 
-	state->save_item(NAME(state->m_bg2_image));
-	state->save_item(NAME(state->m_scroll_x));
-	state->save_item(NAME(state->m_scroll_y));
-	state->save_item(NAME(state->m_param));
-	state->save_item(NAME(state->m_palette_pen));
-	state->save_item(NAME(state->m_soundstate));
-	state->save_item(NAME(state->m_adpcm));
+	save_item(NAME(m_bg2_image));
+	save_item(NAME(m_scroll_x));
+	save_item(NAME(m_scroll_y));
+	save_item(NAME(m_param));
+	save_item(NAME(m_palette_pen));
+	save_item(NAME(m_soundstate));
+	save_item(NAME(m_adpcm));
 }
 
-static MACHINE_RESET( lwings )
+void lwings_state::machine_reset()
 {
-	lwings_state *state = machine.driver_data<lwings_state>();
 
-	state->m_bg2_image = 0;
-	state->m_scroll_x[0] = 0;
-	state->m_scroll_x[1] = 0;
-	state->m_scroll_y[0] = 0;
-	state->m_scroll_y[1] = 0;
-	state->m_param[0] = 0;
-	state->m_param[1] = 0;
-	state->m_param[2] = 0;
-	state->m_param[3] = 0;
-	state->m_palette_pen = 0;
-	state->m_soundstate = 0;
-	state->m_adpcm = 0;
+	m_bg2_image = 0;
+	m_scroll_x[0] = 0;
+	m_scroll_x[1] = 0;
+	m_scroll_y[0] = 0;
+	m_scroll_y[1] = 0;
+	m_param[0] = 0;
+	m_param[1] = 0;
+	m_param[2] = 0;
+	m_param[3] = 0;
+	m_palette_pen = 0;
+	m_soundstate = 0;
+	m_adpcm = 0;
 }
 
 static MACHINE_CONFIG_START( lwings, lwings_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, XTAL_12MHz/2)	/* verified on PCB */
+	MCFG_CPU_ADD("maincpu", Z80, XTAL_12MHz/2)  /* verified on PCB */
 	MCFG_CPU_PROGRAM_MAP(lwings_map)
-	MCFG_CPU_VBLANK_INT("screen", lwings_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", lwings_state,  lwings_interrupt)
 
-	MCFG_CPU_ADD("soundcpu", Z80, XTAL_12MHz/4)	/* verified on PCB */
+	MCFG_CPU_ADD("soundcpu", Z80, XTAL_12MHz/4) /* verified on PCB */
 	MCFG_CPU_PROGRAM_MAP(lwings_sound_map)
-	MCFG_CPU_PERIODIC_INT(irq0_line_hold,4*60)	/* ??? */
+	MCFG_CPU_PERIODIC_INT_DRIVER(lwings_state, irq0_line_hold, 4*60)    /* ??? */
 
-	MCFG_MACHINE_START(lwings)
-	MCFG_MACHINE_RESET(lwings)
 
 	/* video hardware */
-	MCFG_VIDEO_ATTRIBUTES(VIDEO_BUFFERS_SPRITERAM)
+	MCFG_BUFFERED_SPRITERAM8_ADD("spriteram")
 
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 1*8, 31*8-1)
-	MCFG_SCREEN_UPDATE(lwings)
-	MCFG_SCREEN_EOF(lwings)
+	MCFG_SCREEN_UPDATE_DRIVER(lwings_state, screen_update_lwings)
+	MCFG_SCREEN_VBLANK_DEVICE("spriteram", buffered_spriteram8_device, vblank_copy_rising)
 
 	MCFG_GFXDECODE(lwings)
 	MCFG_PALETTE_LENGTH(1024)
 
-	MCFG_VIDEO_START(lwings)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("2203a", YM2203, XTAL_12MHz/8)	/* verified on PCB */
+	MCFG_SOUND_ADD("2203a", YM2203, XTAL_12MHz/8)   /* verified on PCB */
 	MCFG_SOUND_ROUTE(0, "mono", 0.20)
 	MCFG_SOUND_ROUTE(1, "mono", 0.20)
 	MCFG_SOUND_ROUTE(2, "mono", 0.20)
 	MCFG_SOUND_ROUTE(3, "mono", 0.10)
 
-	MCFG_SOUND_ADD("2203b", YM2203, XTAL_12MHz/8)	/* verified on PCB */
+	MCFG_SOUND_ADD("2203b", YM2203, XTAL_12MHz/8)   /* verified on PCB */
 	MCFG_SOUND_ROUTE(0, "mono", 0.20)
 	MCFG_SOUND_ROUTE(1, "mono", 0.20)
 	MCFG_SOUND_ROUTE(2, "mono", 0.20)
@@ -824,27 +822,27 @@ MACHINE_CONFIG_END
 static MACHINE_CONFIG_DERIVED( trojan, lwings )
 
 	MCFG_CPU_MODIFY("maincpu")
-	MCFG_CPU_CLOCK(XTAL_12MHz/4)			/* verified on PCB */
+	MCFG_CPU_CLOCK(XTAL_12MHz/4)            /* verified on PCB */
 
 	MCFG_CPU_PROGRAM_MAP(trojan_map)
 
 	MCFG_CPU_MODIFY("soundcpu")
-	MCFG_CPU_CLOCK(XTAL_12MHz/4)			/* verified on PCB */
+	MCFG_CPU_CLOCK(XTAL_12MHz/4)            /* verified on PCB */
 
-	MCFG_CPU_ADD("adpcm", Z80, XTAL_12MHz/4)	/* verified on PCB */
+	MCFG_CPU_ADD("adpcm", Z80, XTAL_12MHz/4)    /* verified on PCB */
 	MCFG_CPU_PROGRAM_MAP(trojan_adpcm_map)
 	MCFG_CPU_IO_MAP(trojan_adpcm_io_map)
-	MCFG_CPU_PERIODIC_INT(irq0_line_hold, 4000)
+	MCFG_CPU_PERIODIC_INT_DRIVER(lwings_state, irq0_line_hold,  4000)
 
 	/* video hardware */
 	MCFG_GFXDECODE(trojan)
 
-	MCFG_VIDEO_START(trojan)
+	MCFG_VIDEO_START_OVERRIDE(lwings_state,trojan)
 	MCFG_SCREEN_MODIFY("screen")
-	MCFG_SCREEN_UPDATE(trojan)
+	MCFG_SCREEN_UPDATE_DRIVER(lwings_state, screen_update_trojan)
 
 	/* sound hardware */
-	MCFG_SOUND_ADD("5205", MSM5205, XTAL_455kHz)	/* verified on PCB */
+	MCFG_SOUND_ADD("5205", MSM5205, XTAL_384kHz)    /* verified on PCB */
 	MCFG_SOUND_CONFIG(msm5205_config)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 MACHINE_CONFIG_END
@@ -853,13 +851,13 @@ static MACHINE_CONFIG_DERIVED( avengers, trojan )
 
 	MCFG_CPU_MODIFY("maincpu") //AT: (avengers37b16gre)
 	MCFG_CPU_PROGRAM_MAP(avengers_map)
-	MCFG_CPU_VBLANK_INT("screen", nmi_line_pulse) // RST 38h triggered by software
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", lwings_state,  avengers_interrupt) // RST 38h triggered by software
 
 	MCFG_CPU_MODIFY("adpcm")
 	MCFG_CPU_IO_MAP(avengers_adpcm_io_map)
 
 	/* video hardware */
-	MCFG_VIDEO_START(avengers)
+	MCFG_VIDEO_START_OVERRIDE(lwings_state,avengers)
 MACHINE_CONFIG_END
 
 /*************************************
@@ -897,7 +895,7 @@ ROM_START( lwings )
 	ROM_LOAD( "1h_lw10.bin",  0x18000, 0x8000, CRC(b693f5a5) SHA1(134e255e670848f8aec82fcd848d1a4f1aefa636) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "63s141.15g",   0x0000, 0x0100, CRC(d96bcc98) SHA1(99e69a624d5586e5eedacd2083fa68b36e7b5e40) )	/* timing (not used) */
+	ROM_LOAD( "63s141.15g",   0x0000, 0x0100, CRC(d96bcc98) SHA1(99e69a624d5586e5eedacd2083fa68b36e7b5e40) )    /* timing (not used) */
 ROM_END
 
 ROM_START( lwings2 )
@@ -929,7 +927,7 @@ ROM_START( lwings2 )
 	ROM_LOAD( "b_01h.rom",    0x18000, 0x8000, CRC(3e396eda) SHA1(a736f108e0ed5fab6177f0d8a21feab8b686ee85) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "63s141.15g",   0x0000, 0x0100, CRC(d96bcc98) SHA1(99e69a624d5586e5eedacd2083fa68b36e7b5e40) )	/* timing (not used) */
+	ROM_LOAD( "63s141.15g",   0x0000, 0x0100, CRC(d96bcc98) SHA1(99e69a624d5586e5eedacd2083fa68b36e7b5e40) )    /* timing (not used) */
 ROM_END
 
 ROM_START( lwingsj )
@@ -961,7 +959,7 @@ ROM_START( lwingsj )
 	ROM_LOAD( "b_01h.rom",    0x18000, 0x8000, CRC(3e396eda) SHA1(a736f108e0ed5fab6177f0d8a21feab8b686ee85) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "63s141.15g",   0x0000, 0x0100, CRC(d96bcc98) SHA1(99e69a624d5586e5eedacd2083fa68b36e7b5e40) )	/* timing (not used) */
+	ROM_LOAD( "63s141.15g",   0x0000, 0x0100, CRC(d96bcc98) SHA1(99e69a624d5586e5eedacd2083fa68b36e7b5e40) )    /* timing (not used) */
 ROM_END
 
 ROM_START( lwingsb )
@@ -993,7 +991,7 @@ ROM_START( lwingsb )
 	ROM_LOAD( "ic86.bin",  0x18000, 0x8000, CRC(3e396eda) SHA1(a736f108e0ed5fab6177f0d8a21feab8b686ee85) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "63s141.15g",   0x0000, 0x0100, CRC(d96bcc98) SHA1(99e69a624d5586e5eedacd2083fa68b36e7b5e40) )	/* timing (not used) */
+	ROM_LOAD( "63s141.15g",   0x0000, 0x0100, CRC(d96bcc98) SHA1(99e69a624d5586e5eedacd2083fa68b36e7b5e40) )    /* timing (not used) */
 ROM_END
 
 ROM_START( sectionz )
@@ -1025,7 +1023,7 @@ ROM_START( sectionz )
 	ROM_LOAD( "1h_sz10.bin",  0x18000, 0x8000, CRC(00b3d244) SHA1(ed923bd5371f4665744344b94df3547c5db5058c) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "mb7114e.15g",  0x0000, 0x0100, CRC(d96bcc98) SHA1(99e69a624d5586e5eedacd2083fa68b36e7b5e40) )	/* timing (not used) */
+	ROM_LOAD( "mb7114e.15g",  0x0000, 0x0100, CRC(d96bcc98) SHA1(99e69a624d5586e5eedacd2083fa68b36e7b5e40) )    /* timing (not used) */
 ROM_END
 
 ROM_START( sectionza )
@@ -1057,148 +1055,195 @@ ROM_START( sectionza )
 	ROM_LOAD( "1h_sz10.bin",  0x18000, 0x8000, CRC(00b3d244) SHA1(ed923bd5371f4665744344b94df3547c5db5058c) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "mb7114e.15g",  0x0000, 0x0100, CRC(d96bcc98) SHA1(99e69a624d5586e5eedacd2083fa68b36e7b5e40) )	/* timing (not used) */
+	ROM_LOAD( "mb7114e.15g",  0x0000, 0x0100, CRC(d96bcc98) SHA1(99e69a624d5586e5eedacd2083fa68b36e7b5e40) )    /* timing (not used) */
 ROM_END
 
 ROM_START( trojan )
 	ROM_REGION( 0x20000, "maincpu", 0 )     /* 64k for code + 3*16k for the banked ROMs images */
-	ROM_LOAD( "t4",           0x00000, 0x8000, CRC(c1bbeb4e) SHA1(248ae4184d25b642b282ef44ac729c0f7952834d) )
-	ROM_LOAD( "t6",           0x10000, 0x8000, CRC(d49592ef) SHA1(b538bac3c73f35474cc6745a4e4dc3ab6217eaac) )
-	ROM_LOAD( "tb05.bin",     0x18000, 0x8000, CRC(9273b264) SHA1(ab23b16bf53b5baf106ea0cac50754aa967300cf) )
+	ROM_LOAD( "t4.10n",   0x00000, 0x8000, CRC(c1bbeb4e) SHA1(248ae4184d25b642b282ef44ac729c0f7952834d) )
+	ROM_LOAD( "t6.13n",   0x10000, 0x8000, CRC(d49592ef) SHA1(b538bac3c73f35474cc6745a4e4dc3ab6217eaac) )
+	ROM_LOAD( "tb05.12n", 0x18000, 0x8000, CRC(9273b264) SHA1(ab23b16bf53b5baf106ea0cac50754aa967300cf) )
 
 	ROM_REGION( 0x10000, "soundcpu", 0 )
-	ROM_LOAD( "tb02.bin",     0x0000, 0x8000, CRC(21154797) SHA1(e1a3006746cc2d692ecd4369cc0a77c596abd60b) )
+	ROM_LOAD( "tb02.15h", 0x0000, 0x8000, CRC(21154797) SHA1(e1a3006746cc2d692ecd4369cc0a77c596abd60b) )
 
-	ROM_REGION( 0x10000, "adpcm", 0 )     /* 64k for ADPCM CPU (CPU not emulated) */
-	ROM_LOAD( "tb01.bin",     0x0000, 0x4000, CRC(1c0f91b2) SHA1(163bf6aa1936994659661653eabdc368199b0070) )
+	ROM_REGION( 0x10000, "adpcm", 0 ) /* 64k for ADPCM CPU (CPU not emulated) */
+	ROM_LOAD( "tb01.6d", 0x0000, 0x4000, CRC(1c0f91b2) SHA1(163bf6aa1936994659661653eabdc368199b0070) )
 
 	ROM_REGION( 0x04000, "gfx1", 0 )
-	ROM_LOAD( "tb03.bin",     0x00000, 0x4000, CRC(581a2b4c) SHA1(705b499da5d01a946f06234a4bab72a291c79034) )     /* characters */
+	ROM_LOAD( "tb03.8k", 0x00000, 0x4000, CRC(581a2b4c) SHA1(705b499da5d01a946f06234a4bab72a291c79034) )     /* characters */
 
 	ROM_REGION( 0x40000, "gfx2", 0 )
-	ROM_LOAD( "tb13.bin",     0x00000, 0x8000, CRC(285a052b) SHA1(8ce055c7ac9ce1560552fc7f857f60e7a5af0779) )     /* tiles */
-	ROM_LOAD( "tb09.bin",     0x08000, 0x8000, CRC(aeb693f7) SHA1(a811ea67abdd4adfc68224257973802e2a36fc36) )
-	ROM_LOAD( "tb12.bin",     0x10000, 0x8000, CRC(dfb0fe5c) SHA1(82542692ab71b9126e6c301ed0803db58734273c) )
-	ROM_LOAD( "tb08.bin",     0x18000, 0x8000, CRC(d3a4c9d1) SHA1(3d787f6a4583b80f2d254947890f676cda17b242) )
-	ROM_LOAD( "tb11.bin",     0x20000, 0x8000, CRC(00f0f4fd) SHA1(3a862360a26ae1c3a945949d6d47f88aa4b728a4) )
-	ROM_LOAD( "tb07.bin",     0x28000, 0x8000, CRC(dff2ee02) SHA1(4877c52f2a0e24a95bcda1d8636ea993c2c3c240) )
-	ROM_LOAD( "tb14.bin",     0x30000, 0x8000, CRC(14bfac18) SHA1(84266140e9679912dbbb185fd3b9b497297dcb16) )
-	ROM_LOAD( "tb10.bin",     0x38000, 0x8000, CRC(71ba8a6d) SHA1(53ff6850f9f8a19c57c19ef56fd45975f0ec133e) )
+	ROM_LOAD( "tb13.6b", 0x00000, 0x8000, CRC(285a052b) SHA1(8ce055c7ac9ce1560552fc7f857f60e7a5af0779) )     /* tiles */
+	ROM_LOAD( "tb09.6a", 0x08000, 0x8000, CRC(aeb693f7) SHA1(a811ea67abdd4adfc68224257973802e2a36fc36) )
+	ROM_LOAD( "tb12.4b", 0x10000, 0x8000, CRC(dfb0fe5c) SHA1(82542692ab71b9126e6c301ed0803db58734273c) )
+	ROM_LOAD( "tb08.4a", 0x18000, 0x8000, CRC(d3a4c9d1) SHA1(3d787f6a4583b80f2d254947890f676cda17b242) )
+	ROM_LOAD( "tb11.3b", 0x20000, 0x8000, CRC(00f0f4fd) SHA1(3a862360a26ae1c3a945949d6d47f88aa4b728a4) )
+	ROM_LOAD( "tb07.3a", 0x28000, 0x8000, CRC(dff2ee02) SHA1(4877c52f2a0e24a95bcda1d8636ea993c2c3c240) )
+	ROM_LOAD( "tb14.8b", 0x30000, 0x8000, CRC(14bfac18) SHA1(84266140e9679912dbbb185fd3b9b497297dcb16) )
+	ROM_LOAD( "tb10.8a", 0x38000, 0x8000, CRC(71ba8a6d) SHA1(53ff6850f9f8a19c57c19ef56fd45975f0ec133e) )
 
 	ROM_REGION( 0x40000, "gfx3", 0 )
-	ROM_LOAD( "tb18.bin",     0x00000, 0x8000, CRC(862c4713) SHA1(a3707d950f4f5de5208e64207016ef2256eb8c5b) )     /* sprites */
-	ROM_LOAD( "tb16.bin",     0x08000, 0x8000, CRC(d86f8cbd) SHA1(8a16130632e20ad3cae8e817da7b661c3ac60f30) )
-	ROM_LOAD( "tb17.bin",     0x10000, 0x8000, CRC(12a73b3f) SHA1(6bb54d4fdf01fd2cdd76a0b47be4d8cae8a1e19b) )
-	ROM_LOAD( "tb15.bin",     0x18000, 0x8000, CRC(bb1a2769) SHA1(9884dceb00e6d88908a1c107b83cc1711b0cf1f7) )
-	ROM_LOAD( "tb22.bin",     0x20000, 0x8000, CRC(39daafd4) SHA1(1e49a273f51cccec3141d540032fd9a3041a3cbd) )
-	ROM_LOAD( "tb20.bin",     0x28000, 0x8000, CRC(94615d2a) SHA1(112a299ff1bb878cf7e24c2ad337440c3df0a6d5) )
-	ROM_LOAD( "tb21.bin",     0x30000, 0x8000, CRC(66c642bd) SHA1(b57f0f8d8e21c9f94ffc0e9f9304b5ab5d4ed3fc) )
-	ROM_LOAD( "tb19.bin",     0x38000, 0x8000, CRC(81d5ab36) SHA1(31103759676a8d1badaf7bde79e7f28d69486106) )
+	ROM_LOAD( "tb18.7l", 0x00000, 0x8000, CRC(862c4713) SHA1(a3707d950f4f5de5208e64207016ef2256eb8c5b) )     /* sprites */
+	ROM_LOAD( "tb16.3l", 0x08000, 0x8000, CRC(d86f8cbd) SHA1(8a16130632e20ad3cae8e817da7b661c3ac60f30) )
+	ROM_LOAD( "tb17.5l", 0x10000, 0x8000, CRC(12a73b3f) SHA1(6bb54d4fdf01fd2cdd76a0b47be4d8cae8a1e19b) )
+	ROM_LOAD( "tb15.2l", 0x18000, 0x8000, CRC(bb1a2769) SHA1(9884dceb00e6d88908a1c107b83cc1711b0cf1f7) )
+	ROM_LOAD( "tb22.7n", 0x20000, 0x8000, CRC(39daafd4) SHA1(1e49a273f51cccec3141d540032fd9a3041a3cbd) )
+	ROM_LOAD( "tb20.3n", 0x28000, 0x8000, CRC(94615d2a) SHA1(112a299ff1bb878cf7e24c2ad337440c3df0a6d5) )
+	ROM_LOAD( "tb21.5n", 0x30000, 0x8000, CRC(66c642bd) SHA1(b57f0f8d8e21c9f94ffc0e9f9304b5ab5d4ed3fc) )
+	ROM_LOAD( "tb19.2n", 0x38000, 0x8000, CRC(81d5ab36) SHA1(31103759676a8d1badaf7bde79e7f28d69486106) )
 
 	ROM_REGION( 0x10000, "gfx4", 0 )
-	ROM_LOAD( "tb25.bin",     0x00000, 0x8000, CRC(6e38c6fa) SHA1(c51228d5d063dcf4361c76fa49dbe18db80c50a0) )     /* Bk Tiles */
-	ROM_LOAD( "tb24.bin",     0x08000, 0x8000, CRC(14fc6cf2) SHA1(080a2d845cb36c637f76d8e062725bd13dd1aed0) )
+	ROM_LOAD( "tb25.15n", 0x00000, 0x8000, CRC(6e38c6fa) SHA1(c51228d5d063dcf4361c76fa49dbe18db80c50a0) )     /* Bk Tiles */
+	ROM_LOAD( "tb24.13n", 0x08000, 0x8000, CRC(14fc6cf2) SHA1(080a2d845cb36c637f76d8e062725bd13dd1aed0) )
 
 	ROM_REGION( 0x08000, "gfx5", 0 )
-	ROM_LOAD( "tb23.bin",     0x00000, 0x08000, CRC(eda13c0e) SHA1(806f0819af8b25c2b46de3d1fd95bc9c0e883bd9) )  /* Tile Map */
+	ROM_LOAD( "tb23.9n", 0x00000, 0x08000, CRC(eda13c0e) SHA1(806f0819af8b25c2b46de3d1fd95bc9c0e883bd9) )   /* Tile Map (had a RED strip across label) */
 
 	ROM_REGION( 0x0200, "proms", 0 )
-	ROM_LOAD( "tbp24s10.7j",  0x0000, 0x0100, CRC(d96bcc98) SHA1(99e69a624d5586e5eedacd2083fa68b36e7b5e40) )	/* timing (not used) */
-	ROM_LOAD( "mb7114e.1e",   0x0100, 0x0100, CRC(5052fa9d) SHA1(8cd240f4795a7ae76499573c09069dba37182be2) )	/* priority (not used) */
+	ROM_LOAD( "tbp24s10.7j", 0x0000, 0x0100, CRC(d96bcc98) SHA1(99e69a624d5586e5eedacd2083fa68b36e7b5e40) ) /* timing (not used) */
+	ROM_LOAD( "mb7114e.1e",  0x0100, 0x0100, CRC(5052fa9d) SHA1(8cd240f4795a7ae76499573c09069dba37182be2) ) /* priority (not used) */
+ROM_END
+
+ROM_START( trojana )
+	ROM_REGION( 0x20000, "maincpu", 0 )     /* 64k for code + 3*16k for the banked ROMs images */
+	ROM_LOAD( "tb4.10n",  0x00000, 0x8000, CRC(0113a551) SHA1(933ebaf73fb70772fc2cf2b9143bf00757505772) )
+	ROM_LOAD( "tb6.13n",  0x10000, 0x8000, CRC(aa127a5b) SHA1(0b7115c2ffe8456ef463e22d68e03a2e396abf92) )
+	ROM_LOAD( "tb05.12n", 0x18000, 0x8000, CRC(9273b264) SHA1(ab23b16bf53b5baf106ea0cac50754aa967300cf) )
+
+	ROM_REGION( 0x10000, "soundcpu", 0 )
+	ROM_LOAD( "tb02.15h", 0x0000, 0x8000, CRC(21154797) SHA1(e1a3006746cc2d692ecd4369cc0a77c596abd60b) )
+
+	ROM_REGION( 0x10000, "adpcm", 0 ) /* 64k for ADPCM CPU (CPU not emulated) */
+	ROM_LOAD( "tb01.6d", 0x0000, 0x4000, CRC(1c0f91b2) SHA1(163bf6aa1936994659661653eabdc368199b0070) )
+
+	ROM_REGION( 0x04000, "gfx1", 0 )
+	ROM_LOAD( "tb03.8k", 0x00000, 0x4000, CRC(581a2b4c) SHA1(705b499da5d01a946f06234a4bab72a291c79034) )     /* characters */
+
+	ROM_REGION( 0x40000, "gfx2", 0 )
+	ROM_LOAD( "tb13.6b", 0x00000, 0x8000, CRC(285a052b) SHA1(8ce055c7ac9ce1560552fc7f857f60e7a5af0779) )     /* tiles */
+	ROM_LOAD( "tb09.6a", 0x08000, 0x8000, CRC(aeb693f7) SHA1(a811ea67abdd4adfc68224257973802e2a36fc36) )
+	ROM_LOAD( "tb12.4b", 0x10000, 0x8000, CRC(dfb0fe5c) SHA1(82542692ab71b9126e6c301ed0803db58734273c) )
+	ROM_LOAD( "tb08.4a", 0x18000, 0x8000, CRC(d3a4c9d1) SHA1(3d787f6a4583b80f2d254947890f676cda17b242) )
+	ROM_LOAD( "tb11.3b", 0x20000, 0x8000, CRC(00f0f4fd) SHA1(3a862360a26ae1c3a945949d6d47f88aa4b728a4) )
+	ROM_LOAD( "tb07.3a", 0x28000, 0x8000, CRC(dff2ee02) SHA1(4877c52f2a0e24a95bcda1d8636ea993c2c3c240) )
+	ROM_LOAD( "tb14.8b", 0x30000, 0x8000, CRC(14bfac18) SHA1(84266140e9679912dbbb185fd3b9b497297dcb16) )
+	ROM_LOAD( "tb10.8a", 0x38000, 0x8000, CRC(71ba8a6d) SHA1(53ff6850f9f8a19c57c19ef56fd45975f0ec133e) )
+
+	ROM_REGION( 0x40000, "gfx3", 0 )
+	ROM_LOAD( "tb18.7l", 0x00000, 0x8000, CRC(862c4713) SHA1(a3707d950f4f5de5208e64207016ef2256eb8c5b) )     /* sprites */
+	ROM_LOAD( "tb16.3l", 0x08000, 0x8000, CRC(d86f8cbd) SHA1(8a16130632e20ad3cae8e817da7b661c3ac60f30) )
+	ROM_LOAD( "tb17.5l", 0x10000, 0x8000, CRC(12a73b3f) SHA1(6bb54d4fdf01fd2cdd76a0b47be4d8cae8a1e19b) )
+	ROM_LOAD( "tb15.2l", 0x18000, 0x8000, CRC(bb1a2769) SHA1(9884dceb00e6d88908a1c107b83cc1711b0cf1f7) )
+	ROM_LOAD( "tb22.7n", 0x20000, 0x8000, CRC(39daafd4) SHA1(1e49a273f51cccec3141d540032fd9a3041a3cbd) )
+	ROM_LOAD( "tb20.3n", 0x28000, 0x8000, CRC(94615d2a) SHA1(112a299ff1bb878cf7e24c2ad337440c3df0a6d5) )
+	ROM_LOAD( "tb21.5n", 0x30000, 0x8000, CRC(66c642bd) SHA1(b57f0f8d8e21c9f94ffc0e9f9304b5ab5d4ed3fc) )
+	ROM_LOAD( "tb19.2n", 0x38000, 0x8000, CRC(81d5ab36) SHA1(31103759676a8d1badaf7bde79e7f28d69486106) )
+
+	ROM_REGION( 0x10000, "gfx4", 0 )
+	ROM_LOAD( "tb25.15n", 0x00000, 0x8000, CRC(6e38c6fa) SHA1(c51228d5d063dcf4361c76fa49dbe18db80c50a0) )     /* Bk Tiles */
+	ROM_LOAD( "tb24.13n", 0x08000, 0x8000, CRC(14fc6cf2) SHA1(080a2d845cb36c637f76d8e062725bd13dd1aed0) )
+
+	ROM_REGION( 0x08000, "gfx5", 0 )
+	ROM_LOAD( "tb23.9n", 0x00000, 0x08000, CRC(eda13c0e) SHA1(806f0819af8b25c2b46de3d1fd95bc9c0e883bd9) )   /* Tile Map (had a RED strip across label) */
+
+	ROM_REGION( 0x0200, "proms", 0 )
+	ROM_LOAD( "tbp24s10.7j", 0x0000, 0x0100, CRC(d96bcc98) SHA1(99e69a624d5586e5eedacd2083fa68b36e7b5e40) ) /* timing (not used) */
+	ROM_LOAD( "mb7114e.1e",  0x0100, 0x0100, CRC(5052fa9d) SHA1(8cd240f4795a7ae76499573c09069dba37182be2) ) /* priority (not used) */
 ROM_END
 
 ROM_START( trojanr )
 	ROM_REGION( 0x20000, "maincpu", 0 )     /* 64k for code + 3*16k for the banked ROMs images */
-	ROM_LOAD( "tb04.bin",     0x00000, 0x8000, CRC(92670f27) SHA1(d2cb35a9fade971770db1a58e961bc03cc3de6ff) )
-	ROM_LOAD( "tb06.bin",     0x10000, 0x8000, CRC(a4951173) SHA1(2d3db0ee3a1680f2cce21cf15f8bd434325d8648) )
-	ROM_LOAD( "tb05.bin",     0x18000, 0x8000, CRC(9273b264) SHA1(ab23b16bf53b5baf106ea0cac50754aa967300cf) )
+	ROM_LOAD( "tb04.10n", 0x00000, 0x8000, CRC(92670f27) SHA1(d2cb35a9fade971770db1a58e961bc03cc3de6ff) )
+	ROM_LOAD( "tb06.13n", 0x10000, 0x8000, CRC(a4951173) SHA1(2d3db0ee3a1680f2cce21cf15f8bd434325d8648) )
+	ROM_LOAD( "tb05.12n", 0x18000, 0x8000, CRC(9273b264) SHA1(ab23b16bf53b5baf106ea0cac50754aa967300cf) )
 
 	ROM_REGION( 0x10000, "soundcpu", 0 )
-	ROM_LOAD( "tb02.bin",     0x0000, 0x8000, CRC(21154797) SHA1(e1a3006746cc2d692ecd4369cc0a77c596abd60b) )
+	ROM_LOAD( "tb02.15h", 0x0000, 0x8000, CRC(21154797) SHA1(e1a3006746cc2d692ecd4369cc0a77c596abd60b) )
 
 	ROM_REGION( 0x10000, "adpcm", 0 ) /* 64k for ADPCM CPU (CPU not emulated) */
-	ROM_LOAD( "tb01.bin",     0x0000, 0x4000, CRC(1c0f91b2) SHA1(163bf6aa1936994659661653eabdc368199b0070) )
+	ROM_LOAD( "tb01.6d", 0x0000, 0x4000, CRC(1c0f91b2) SHA1(163bf6aa1936994659661653eabdc368199b0070) )
 
 	ROM_REGION( 0x04000, "gfx1", 0 )
-	ROM_LOAD( "tb03.bin",     0x00000, 0x4000, CRC(581a2b4c) SHA1(705b499da5d01a946f06234a4bab72a291c79034) )     /* characters */
+	ROM_LOAD( "tb03.8k", 0x00000, 0x4000, CRC(581a2b4c) SHA1(705b499da5d01a946f06234a4bab72a291c79034) )     /* characters */
 
 	ROM_REGION( 0x40000, "gfx2", 0 )
-	ROM_LOAD( "tb13.bin",     0x00000, 0x8000, CRC(285a052b) SHA1(8ce055c7ac9ce1560552fc7f857f60e7a5af0779) )     /* tiles */
-	ROM_LOAD( "tb09.bin",     0x08000, 0x8000, CRC(aeb693f7) SHA1(a811ea67abdd4adfc68224257973802e2a36fc36) )
-	ROM_LOAD( "tb12.bin",     0x10000, 0x8000, CRC(dfb0fe5c) SHA1(82542692ab71b9126e6c301ed0803db58734273c) )
-	ROM_LOAD( "tb08.bin",     0x18000, 0x8000, CRC(d3a4c9d1) SHA1(3d787f6a4583b80f2d254947890f676cda17b242) )
-	ROM_LOAD( "tb11.bin",     0x20000, 0x8000, CRC(00f0f4fd) SHA1(3a862360a26ae1c3a945949d6d47f88aa4b728a4) )
-	ROM_LOAD( "tb07.bin",     0x28000, 0x8000, CRC(dff2ee02) SHA1(4877c52f2a0e24a95bcda1d8636ea993c2c3c240) )
-	ROM_LOAD( "tb14.bin",     0x30000, 0x8000, CRC(14bfac18) SHA1(84266140e9679912dbbb185fd3b9b497297dcb16) )
-	ROM_LOAD( "tb10.bin",     0x38000, 0x8000, CRC(71ba8a6d) SHA1(53ff6850f9f8a19c57c19ef56fd45975f0ec133e) )
+	ROM_LOAD( "tb13.6b", 0x00000, 0x8000, CRC(285a052b) SHA1(8ce055c7ac9ce1560552fc7f857f60e7a5af0779) )     /* tiles */
+	ROM_LOAD( "tb09.6a", 0x08000, 0x8000, CRC(aeb693f7) SHA1(a811ea67abdd4adfc68224257973802e2a36fc36) )
+	ROM_LOAD( "tb12.4b", 0x10000, 0x8000, CRC(dfb0fe5c) SHA1(82542692ab71b9126e6c301ed0803db58734273c) )
+	ROM_LOAD( "tb08.4a", 0x18000, 0x8000, CRC(d3a4c9d1) SHA1(3d787f6a4583b80f2d254947890f676cda17b242) )
+	ROM_LOAD( "tb11.3b", 0x20000, 0x8000, CRC(00f0f4fd) SHA1(3a862360a26ae1c3a945949d6d47f88aa4b728a4) )
+	ROM_LOAD( "tb07.3a", 0x28000, 0x8000, CRC(dff2ee02) SHA1(4877c52f2a0e24a95bcda1d8636ea993c2c3c240) )
+	ROM_LOAD( "tb14.8b", 0x30000, 0x8000, CRC(14bfac18) SHA1(84266140e9679912dbbb185fd3b9b497297dcb16) )
+	ROM_LOAD( "tb10.8a", 0x38000, 0x8000, CRC(71ba8a6d) SHA1(53ff6850f9f8a19c57c19ef56fd45975f0ec133e) )
 
 	ROM_REGION( 0x40000, "gfx3", 0 )
-	ROM_LOAD( "tb18.bin",     0x00000, 0x8000, CRC(862c4713) SHA1(a3707d950f4f5de5208e64207016ef2256eb8c5b) )     /* sprites */
-	ROM_LOAD( "tb16.bin",     0x08000, 0x8000, CRC(d86f8cbd) SHA1(8a16130632e20ad3cae8e817da7b661c3ac60f30) )
-	ROM_LOAD( "tb17.bin",     0x10000, 0x8000, CRC(12a73b3f) SHA1(6bb54d4fdf01fd2cdd76a0b47be4d8cae8a1e19b) )
-	ROM_LOAD( "tb15.bin",     0x18000, 0x8000, CRC(bb1a2769) SHA1(9884dceb00e6d88908a1c107b83cc1711b0cf1f7) )
-	ROM_LOAD( "tb22.bin",     0x20000, 0x8000, CRC(39daafd4) SHA1(1e49a273f51cccec3141d540032fd9a3041a3cbd) )
-	ROM_LOAD( "tb20.bin",     0x28000, 0x8000, CRC(94615d2a) SHA1(112a299ff1bb878cf7e24c2ad337440c3df0a6d5) )
-	ROM_LOAD( "tb21.bin",     0x30000, 0x8000, CRC(66c642bd) SHA1(b57f0f8d8e21c9f94ffc0e9f9304b5ab5d4ed3fc) )
-	ROM_LOAD( "tb19.bin",     0x38000, 0x8000, CRC(81d5ab36) SHA1(31103759676a8d1badaf7bde79e7f28d69486106) )
+	ROM_LOAD( "tb18.7l", 0x00000, 0x8000, CRC(862c4713) SHA1(a3707d950f4f5de5208e64207016ef2256eb8c5b) )     /* sprites */
+	ROM_LOAD( "tb16.3l", 0x08000, 0x8000, CRC(d86f8cbd) SHA1(8a16130632e20ad3cae8e817da7b661c3ac60f30) )
+	ROM_LOAD( "tb17.5l", 0x10000, 0x8000, CRC(12a73b3f) SHA1(6bb54d4fdf01fd2cdd76a0b47be4d8cae8a1e19b) )
+	ROM_LOAD( "tb15.2l", 0x18000, 0x8000, CRC(bb1a2769) SHA1(9884dceb00e6d88908a1c107b83cc1711b0cf1f7) )
+	ROM_LOAD( "tb22.7n", 0x20000, 0x8000, CRC(39daafd4) SHA1(1e49a273f51cccec3141d540032fd9a3041a3cbd) )
+	ROM_LOAD( "tb20.3n", 0x28000, 0x8000, CRC(94615d2a) SHA1(112a299ff1bb878cf7e24c2ad337440c3df0a6d5) )
+	ROM_LOAD( "tb21.5n", 0x30000, 0x8000, CRC(66c642bd) SHA1(b57f0f8d8e21c9f94ffc0e9f9304b5ab5d4ed3fc) )
+	ROM_LOAD( "tb19.2n", 0x38000, 0x8000, CRC(81d5ab36) SHA1(31103759676a8d1badaf7bde79e7f28d69486106) )
 
 	ROM_REGION( 0x10000, "gfx4", 0 )
-	ROM_LOAD( "tb25.bin",     0x00000, 0x8000, CRC(6e38c6fa) SHA1(c51228d5d063dcf4361c76fa49dbe18db80c50a0) )     /* Bk Tiles */
-	ROM_LOAD( "tb24.bin",     0x08000, 0x8000, CRC(14fc6cf2) SHA1(080a2d845cb36c637f76d8e062725bd13dd1aed0) )
+	ROM_LOAD( "tb25.15n", 0x00000, 0x8000, CRC(6e38c6fa) SHA1(c51228d5d063dcf4361c76fa49dbe18db80c50a0) )     /* Bk Tiles */
+	ROM_LOAD( "tb24.13n", 0x08000, 0x8000, CRC(14fc6cf2) SHA1(080a2d845cb36c637f76d8e062725bd13dd1aed0) )
 
 	ROM_REGION( 0x08000, "gfx5", 0 )
-	ROM_LOAD( "tb23.bin",     0x0000,  0x8000, CRC(eda13c0e) SHA1(806f0819af8b25c2b46de3d1fd95bc9c0e883bd9) )  /* Tile Map */
+	ROM_LOAD( "tb23.9n", 0x00000, 0x08000, CRC(eda13c0e) SHA1(806f0819af8b25c2b46de3d1fd95bc9c0e883bd9) )   /* Tile Map (had a RED strip across label) */
 
 	ROM_REGION( 0x0200, "proms", 0 )
-	ROM_LOAD( "tbp24s10.7j",  0x0000,  0x0100, CRC(d96bcc98) SHA1(99e69a624d5586e5eedacd2083fa68b36e7b5e40) )	/* timing (not used) */
-	ROM_LOAD( "mb7114e.1e",   0x0100,  0x0100, CRC(5052fa9d) SHA1(8cd240f4795a7ae76499573c09069dba37182be2) )	/* priority (not used) */
+	ROM_LOAD( "tbp24s10.7j", 0x0000, 0x0100, CRC(d96bcc98) SHA1(99e69a624d5586e5eedacd2083fa68b36e7b5e40) ) /* timing (not used) */
+	ROM_LOAD( "mb7114e.1e",  0x0100, 0x0100, CRC(5052fa9d) SHA1(8cd240f4795a7ae76499573c09069dba37182be2) ) /* priority (not used) */
 ROM_END
 
 ROM_START( trojanj )
 	ROM_REGION( 0x20000, "maincpu", 0 )     /* 64k for code + 3*16k for the banked ROMs images */
-	ROM_LOAD( "troj-04.rom",  0x00000, 0x8000, CRC(0b5a7f49) SHA1(eebdfaf905a2b7ac8a0f0f9a7ae4a0daf130a5ea) )
-	ROM_LOAD( "troj-06.rom",  0x10000, 0x8000, CRC(dee6ed92) SHA1(80aa16f2ae23581d00f4d58a2075993e7171ed0c) )
-	ROM_LOAD( "tb05.bin",     0x18000, 0x8000, CRC(9273b264) SHA1(ab23b16bf53b5baf106ea0cac50754aa967300cf) )
+	ROM_LOAD( "troj-04.10n", 0x00000, 0x8000, CRC(0b5a7f49) SHA1(eebdfaf905a2b7ac8a0f0f9a7ae4a0daf130a5ea) )
+	ROM_LOAD( "troj-06.13n", 0x10000, 0x8000, CRC(dee6ed92) SHA1(80aa16f2ae23581d00f4d58a2075993e7171ed0c) )
+	ROM_LOAD( "tb05.12n",    0x18000, 0x8000, CRC(9273b264) SHA1(ab23b16bf53b5baf106ea0cac50754aa967300cf) )
 
 	ROM_REGION( 0x10000, "soundcpu", 0 )
-	ROM_LOAD( "tb02.bin",     0x0000, 0x8000, CRC(21154797) SHA1(e1a3006746cc2d692ecd4369cc0a77c596abd60b) )
+	ROM_LOAD( "tb02.15h", 0x0000, 0x8000, CRC(21154797) SHA1(e1a3006746cc2d692ecd4369cc0a77c596abd60b) )
 
-	ROM_REGION( 0x10000, "adpcm", 0 )     /* 64k for ADPCM CPU (CPU not emulated) */
-	ROM_LOAD( "tb01.bin",     0x0000, 0x4000, CRC(1c0f91b2) SHA1(163bf6aa1936994659661653eabdc368199b0070) )
+	ROM_REGION( 0x10000, "adpcm", 0 ) /* 64k for ADPCM CPU (CPU not emulated) */
+	ROM_LOAD( "tb01.6d", 0x0000, 0x4000, CRC(1c0f91b2) SHA1(163bf6aa1936994659661653eabdc368199b0070) )
 
 	ROM_REGION( 0x04000, "gfx1", 0 )
-	ROM_LOAD( "tb03.bin",     0x00000, 0x4000, CRC(581a2b4c) SHA1(705b499da5d01a946f06234a4bab72a291c79034) )     /* characters */
+	ROM_LOAD( "tb03.8k", 0x00000, 0x4000, CRC(581a2b4c) SHA1(705b499da5d01a946f06234a4bab72a291c79034) )     /* characters */
 
 	ROM_REGION( 0x40000, "gfx2", 0 )
-	ROM_LOAD( "tb13.bin",     0x00000, 0x8000, CRC(285a052b) SHA1(8ce055c7ac9ce1560552fc7f857f60e7a5af0779) )     /* tiles */
-	ROM_LOAD( "tb09.bin",     0x08000, 0x8000, CRC(aeb693f7) SHA1(a811ea67abdd4adfc68224257973802e2a36fc36) )
-	ROM_LOAD( "tb12.bin",     0x10000, 0x8000, CRC(dfb0fe5c) SHA1(82542692ab71b9126e6c301ed0803db58734273c) )
-	ROM_LOAD( "tb08.bin",     0x18000, 0x8000, CRC(d3a4c9d1) SHA1(3d787f6a4583b80f2d254947890f676cda17b242) )
-	ROM_LOAD( "tb11.bin",     0x20000, 0x8000, CRC(00f0f4fd) SHA1(3a862360a26ae1c3a945949d6d47f88aa4b728a4) )
-	ROM_LOAD( "tb07.bin",     0x28000, 0x8000, CRC(dff2ee02) SHA1(4877c52f2a0e24a95bcda1d8636ea993c2c3c240) )
-	ROM_LOAD( "tb14.bin",     0x30000, 0x8000, CRC(14bfac18) SHA1(84266140e9679912dbbb185fd3b9b497297dcb16) )
-	ROM_LOAD( "tb10.bin",     0x38000, 0x8000, CRC(71ba8a6d) SHA1(53ff6850f9f8a19c57c19ef56fd45975f0ec133e) )
+	ROM_LOAD( "tb13.6b", 0x00000, 0x8000, CRC(285a052b) SHA1(8ce055c7ac9ce1560552fc7f857f60e7a5af0779) )     /* tiles */
+	ROM_LOAD( "tb09.6a", 0x08000, 0x8000, CRC(aeb693f7) SHA1(a811ea67abdd4adfc68224257973802e2a36fc36) )
+	ROM_LOAD( "tb12.4b", 0x10000, 0x8000, CRC(dfb0fe5c) SHA1(82542692ab71b9126e6c301ed0803db58734273c) )
+	ROM_LOAD( "tb08.4a", 0x18000, 0x8000, CRC(d3a4c9d1) SHA1(3d787f6a4583b80f2d254947890f676cda17b242) )
+	ROM_LOAD( "tb11.3b", 0x20000, 0x8000, CRC(00f0f4fd) SHA1(3a862360a26ae1c3a945949d6d47f88aa4b728a4) )
+	ROM_LOAD( "tb07.3a", 0x28000, 0x8000, CRC(dff2ee02) SHA1(4877c52f2a0e24a95bcda1d8636ea993c2c3c240) )
+	ROM_LOAD( "tb14.8b", 0x30000, 0x8000, CRC(14bfac18) SHA1(84266140e9679912dbbb185fd3b9b497297dcb16) )
+	ROM_LOAD( "tb10.8a", 0x38000, 0x8000, CRC(71ba8a6d) SHA1(53ff6850f9f8a19c57c19ef56fd45975f0ec133e) )
 
 	ROM_REGION( 0x40000, "gfx3", 0 )
-	ROM_LOAD( "tb18.bin",     0x00000, 0x8000, CRC(862c4713) SHA1(a3707d950f4f5de5208e64207016ef2256eb8c5b) )     /* sprites */
-	ROM_LOAD( "tb16.bin",     0x08000, 0x8000, CRC(d86f8cbd) SHA1(8a16130632e20ad3cae8e817da7b661c3ac60f30) )
-	ROM_LOAD( "tb17.bin",     0x10000, 0x8000, CRC(12a73b3f) SHA1(6bb54d4fdf01fd2cdd76a0b47be4d8cae8a1e19b) )
-	ROM_LOAD( "tb15.bin",     0x18000, 0x8000, CRC(bb1a2769) SHA1(9884dceb00e6d88908a1c107b83cc1711b0cf1f7) )
-	ROM_LOAD( "tb22.bin",     0x20000, 0x8000, CRC(39daafd4) SHA1(1e49a273f51cccec3141d540032fd9a3041a3cbd) )
-	ROM_LOAD( "tb20.bin",     0x28000, 0x8000, CRC(94615d2a) SHA1(112a299ff1bb878cf7e24c2ad337440c3df0a6d5) )
-	ROM_LOAD( "tb21.bin",     0x30000, 0x8000, CRC(66c642bd) SHA1(b57f0f8d8e21c9f94ffc0e9f9304b5ab5d4ed3fc) )
-	ROM_LOAD( "tb19.bin",     0x38000, 0x8000, CRC(81d5ab36) SHA1(31103759676a8d1badaf7bde79e7f28d69486106) )
+	ROM_LOAD( "tb18.7l", 0x00000, 0x8000, CRC(862c4713) SHA1(a3707d950f4f5de5208e64207016ef2256eb8c5b) )     /* sprites */
+	ROM_LOAD( "tb16.3l", 0x08000, 0x8000, CRC(d86f8cbd) SHA1(8a16130632e20ad3cae8e817da7b661c3ac60f30) )
+	ROM_LOAD( "tb17.5l", 0x10000, 0x8000, CRC(12a73b3f) SHA1(6bb54d4fdf01fd2cdd76a0b47be4d8cae8a1e19b) )
+	ROM_LOAD( "tb15.2l", 0x18000, 0x8000, CRC(bb1a2769) SHA1(9884dceb00e6d88908a1c107b83cc1711b0cf1f7) )
+	ROM_LOAD( "tb22.7n", 0x20000, 0x8000, CRC(39daafd4) SHA1(1e49a273f51cccec3141d540032fd9a3041a3cbd) )
+	ROM_LOAD( "tb20.3n", 0x28000, 0x8000, CRC(94615d2a) SHA1(112a299ff1bb878cf7e24c2ad337440c3df0a6d5) )
+	ROM_LOAD( "tb21.5n", 0x30000, 0x8000, CRC(66c642bd) SHA1(b57f0f8d8e21c9f94ffc0e9f9304b5ab5d4ed3fc) )
+	ROM_LOAD( "tb19.2n", 0x38000, 0x8000, CRC(81d5ab36) SHA1(31103759676a8d1badaf7bde79e7f28d69486106) )
 
 	ROM_REGION( 0x10000, "gfx4", 0 )
-	ROM_LOAD( "tb25.bin",     0x00000, 0x8000, CRC(6e38c6fa) SHA1(c51228d5d063dcf4361c76fa49dbe18db80c50a0) )     /* Bk Tiles */
-	ROM_LOAD( "tb24.bin",     0x08000, 0x8000, CRC(14fc6cf2) SHA1(080a2d845cb36c637f76d8e062725bd13dd1aed0) )
+	ROM_LOAD( "tb25.15n", 0x00000, 0x8000, CRC(6e38c6fa) SHA1(c51228d5d063dcf4361c76fa49dbe18db80c50a0) )     /* Bk Tiles */
+	ROM_LOAD( "tb24.13n", 0x08000, 0x8000, CRC(14fc6cf2) SHA1(080a2d845cb36c637f76d8e062725bd13dd1aed0) )
 
 	ROM_REGION( 0x08000, "gfx5", 0 )
-	ROM_LOAD( "tb23.bin",     0x0000,  0x8000, CRC(eda13c0e) SHA1(806f0819af8b25c2b46de3d1fd95bc9c0e883bd9) )  /* Tile Map */
+	ROM_LOAD( "tb23.9n", 0x00000, 0x08000, CRC(eda13c0e) SHA1(806f0819af8b25c2b46de3d1fd95bc9c0e883bd9) )   /* Tile Map */
 
 	ROM_REGION( 0x0200, "proms", 0 )
-	ROM_LOAD( "tbp24s10.7j",  0x0000,  0x0100, CRC(d96bcc98) SHA1(99e69a624d5586e5eedacd2083fa68b36e7b5e40) )	/* timing (not used) */
-	ROM_LOAD( "mb7114e.1e",   0x0100,  0x0100, CRC(5052fa9d) SHA1(8cd240f4795a7ae76499573c09069dba37182be2) )	/* priority (not used) */
+	ROM_LOAD( "tbp24s10.7j", 0x0000, 0x0100, CRC(d96bcc98) SHA1(99e69a624d5586e5eedacd2083fa68b36e7b5e40) ) /* timing (not used) */
+	ROM_LOAD( "mb7114e.1e",  0x0100, 0x0100, CRC(5052fa9d) SHA1(8cd240f4795a7ae76499573c09069dba37182be2) ) /* priority (not used) */
 ROM_END
 
 ROM_START( avengers )
@@ -1244,8 +1289,8 @@ ROM_START( avengers )
 	ROM_LOAD( "23.9n",        0x0000,  0x8000, CRC(c0a93ef6) SHA1(2dc9cd4eb142d74aea8d151904cb60a0767c6393) )  /* Tile Map */
 
 	ROM_REGION( 0x0200, "proms", 0 )
-	ROM_LOAD( "tbb_2bpr.7j",  0x0000,  0x0100, CRC(d96bcc98) SHA1(99e69a624d5586e5eedacd2083fa68b36e7b5e40) )	/* timing (not used) */
-	ROM_LOAD( "tbb_1bpr.1e",  0x0100,  0x0100, CRC(5052fa9d) SHA1(8cd240f4795a7ae76499573c09069dba37182be2) )	/* priority (not used) */
+	ROM_LOAD( "tbb_2bpr.7j",  0x0000,  0x0100, CRC(d96bcc98) SHA1(99e69a624d5586e5eedacd2083fa68b36e7b5e40) )   /* timing (not used) */
+	ROM_LOAD( "tbb_1bpr.1e",  0x0100,  0x0100, CRC(5052fa9d) SHA1(8cd240f4795a7ae76499573c09069dba37182be2) )   /* priority (not used) */
 ROM_END
 
 ROM_START( avengers2 )
@@ -1291,8 +1336,8 @@ ROM_START( avengers2 )
 	ROM_LOAD( "23.9n",        0x0000,  0x8000, CRC(c0a93ef6) SHA1(2dc9cd4eb142d74aea8d151904cb60a0767c6393) )  /* Tile Map */
 
 	ROM_REGION( 0x0200, "proms", 0 )
-	ROM_LOAD( "tbb_2bpr.7j",  0x0000,  0x0100, CRC(d96bcc98) SHA1(99e69a624d5586e5eedacd2083fa68b36e7b5e40) )	/* timing (not used) */
-	ROM_LOAD( "tbb_1bpr.1e",  0x0100,  0x0100, CRC(5052fa9d) SHA1(8cd240f4795a7ae76499573c09069dba37182be2) )	/* priority (not used) */
+	ROM_LOAD( "tbb_2bpr.7j",  0x0000,  0x0100, CRC(d96bcc98) SHA1(99e69a624d5586e5eedacd2083fa68b36e7b5e40) )   /* timing (not used) */
+	ROM_LOAD( "tbb_1bpr.1e",  0x0100,  0x0100, CRC(5052fa9d) SHA1(8cd240f4795a7ae76499573c09069dba37182be2) )   /* priority (not used) */
 ROM_END
 
 ROM_START( buraiken )
@@ -1338,8 +1383,8 @@ ROM_START( buraiken )
 	ROM_LOAD( "23.9n",        0x0000,  0x8000, CRC(c0a93ef6) SHA1(2dc9cd4eb142d74aea8d151904cb60a0767c6393) )  /* Tile Map */
 
 	ROM_REGION( 0x0200, "proms", 0 )
-	ROM_LOAD( "tbb_2bpr.7j",  0x0000,  0x0100, CRC(d96bcc98) SHA1(99e69a624d5586e5eedacd2083fa68b36e7b5e40) )	/* timing (not used) */
-	ROM_LOAD( "tbb_1bpr.1e",  0x0100,  0x0100, CRC(5052fa9d) SHA1(8cd240f4795a7ae76499573c09069dba37182be2) )	/* priority (not used) */
+	ROM_LOAD( "tbb_2bpr.7j",  0x0000,  0x0100, CRC(d96bcc98) SHA1(99e69a624d5586e5eedacd2083fa68b36e7b5e40) )   /* timing (not used) */
+	ROM_LOAD( "tbb_1bpr.1e",  0x0100,  0x0100, CRC(5052fa9d) SHA1(8cd240f4795a7ae76499573c09069dba37182be2) )   /* priority (not used) */
 ROM_END
 
 /*************************************
@@ -1348,15 +1393,16 @@ ROM_END
  *
  *************************************/
 
-GAME( 1985, sectionz,  0,        lwings,   sectionz, 0, ROT0,  "Capcom",     "Section Z (set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1985, sectionza, sectionz, lwings,   sectionz, 0, ROT0,  "Capcom",     "Section Z (set 2)", GAME_SUPPORTS_SAVE )
-GAME( 1986, lwings,    0,        lwings,   lwings,   0, ROT90, "Capcom",     "Legendary Wings (US set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1986, lwings2,   lwings,   lwings,   lwings,   0, ROT90, "Capcom",     "Legendary Wings (US set 2)", GAME_SUPPORTS_SAVE )
-GAME( 1986, lwingsj,   lwings,   lwings,   lwings,   0, ROT90, "Capcom",     "Ares no Tsubasa (Japan)", GAME_SUPPORTS_SAVE )
-GAME( 1986, lwingsb,   lwings,   lwings,   lwingsb,  0, ROT90, "bootleg",    "Legendary Wings (bootleg)", GAME_SUPPORTS_SAVE )
-GAME( 1986, trojan,    0,        trojan,   trojanls, 0, ROT0,  "Capcom",     "Trojan (US)", GAME_SUPPORTS_SAVE )
-GAME( 1986, trojanr,   trojan,   trojan,   trojan,   0, ROT0,  "Capcom (Romstar license)", "Trojan (Romstar)", GAME_SUPPORTS_SAVE )
-GAME( 1986, trojanj,   trojan,   trojan,   trojan,   0, ROT0,  "Capcom",     "Tatakai no Banka (Japan)", GAME_SUPPORTS_SAVE )
-GAME( 1987, avengers,  0,        avengers, avengers, 0, ROT90, "Capcom",     "Avengers (US set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1987, avengers2, avengers, avengers, avengers, 0, ROT90, "Capcom",     "Avengers (US set 2)", GAME_SUPPORTS_SAVE )
-GAME( 1987, buraiken,  avengers, avengers, avengers, 0, ROT90, "Capcom",     "Hissatsu Buraiken (Japan)", GAME_SUPPORTS_SAVE )
+GAME( 1985, sectionz,  0,        lwings,   sectionz, driver_device, 0, ROT0,  "Capcom",     "Section Z (set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1985, sectionza, sectionz, lwings,   sectionz, driver_device, 0, ROT0,  "Capcom",     "Section Z (set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1986, lwings,    0,        lwings,   lwings,   driver_device, 0, ROT90, "Capcom",     "Legendary Wings (US set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1986, lwings2,   lwings,   lwings,   lwings,   driver_device, 0, ROT90, "Capcom",     "Legendary Wings (US set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1986, lwingsj,   lwings,   lwings,   lwings,   driver_device, 0, ROT90, "Capcom",     "Ares no Tsubasa (Japan)", GAME_SUPPORTS_SAVE )
+GAME( 1986, lwingsb,   lwings,   lwings,   lwingsb,  driver_device, 0, ROT90, "bootleg",    "Legendary Wings (bootleg)", GAME_SUPPORTS_SAVE )
+GAME( 1986, trojan,    0,        trojan,   trojanls, driver_device, 0, ROT0,  "Capcom",     "Trojan (US set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1986, trojana,   trojan,   trojan,   trojanls, driver_device, 0, ROT0,  "Capcom",     "Trojan (US set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1986, trojanr,   trojan,   trojan,   trojan,   driver_device, 0, ROT0,  "Capcom (Romstar license)", "Trojan (Romstar)", GAME_SUPPORTS_SAVE )
+GAME( 1986, trojanj,   trojan,   trojan,   trojan,   driver_device, 0, ROT0,  "Capcom",     "Tatakai no Banka (Japan)", GAME_SUPPORTS_SAVE )
+GAME( 1987, avengers,  0,        avengers, avengers, driver_device, 0, ROT90, "Capcom",     "Avengers (US set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1987, avengers2, avengers, avengers, avengers, driver_device, 0, ROT90, "Capcom",     "Avengers (US set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1987, buraiken,  avengers, avengers, avengers, driver_device, 0, ROT90, "Capcom",     "Hissatsu Buraiken (Japan)", GAME_SUPPORTS_SAVE )

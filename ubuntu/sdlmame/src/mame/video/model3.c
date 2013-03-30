@@ -5,14 +5,14 @@
 
 
 #define pz  p[0]
-#define pu	p[1]
-#define pv	p[2]
+#define pu  p[1]
+#define pv  p[2]
 
 
 
 
 
-typedef struct
+struct TRIANGLE
 {
 	poly_vertex v[3];
 	UINT8 texture_x, texture_y;
@@ -21,36 +21,35 @@ typedef struct
 	UINT8 texture_format, param;
 	int intensity;
 	UINT32 color;
-} TRIANGLE;
-
-struct _cached_texture
-{
-	cached_texture *next;
-	UINT8		width;
-	UINT8		height;
-	UINT8		format;
-	UINT8		alpha;
-	rgb_t		data[1];
 };
 
-typedef struct _poly_extra_data poly_extra_data;
-struct _poly_extra_data
+struct cached_texture
+{
+	cached_texture *next;
+	UINT8       width;
+	UINT8       height;
+	UINT8       format;
+	UINT8       alpha;
+	rgb_t       data[1];
+};
+
+struct poly_extra_data
 {
 	cached_texture *texture;
-	bitmap_t *zbuffer;
+	bitmap_ind32 *zbuffer;
 	UINT32 color;
 	UINT8 texture_param;
 	int polygon_transparency;
 	int polygon_intensity;
 };
 
-#define TRI_PARAM_TEXTURE_PAGE			0x1
-#define TRI_PARAM_TEXTURE_MIRROR_U		0x2
-#define TRI_PARAM_TEXTURE_MIRROR_V		0x4
-#define TRI_PARAM_TEXTURE_ENABLE		0x8
-#define TRI_PARAM_ALPHA_TEST			0x10
+#define TRI_PARAM_TEXTURE_PAGE          0x1
+#define TRI_PARAM_TEXTURE_MIRROR_U      0x2
+#define TRI_PARAM_TEXTURE_MIRROR_V      0x4
+#define TRI_PARAM_TEXTURE_ENABLE        0x8
+#define TRI_PARAM_ALPHA_TEST            0x10
 
-#define MAX_TRIANGLES		131072
+#define MAX_TRIANGLES       131072
 
 
 /* forward declarations */
@@ -87,7 +86,7 @@ static void invalidate_texture(running_machine &machine, int page, int texx, int
 
 
 /* matrix stack */
-#define MATRIX_STACK_SIZE	256
+#define MATRIX_STACK_SIZE   256
 
 
 #ifdef UNUSED_DEFINITION
@@ -98,12 +97,12 @@ static const int num_bits[16] = { 0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4
 
 
 
-#define BYTE_REVERSE32(x)		(((x >> 24) & 0xff) | \
+#define BYTE_REVERSE32(x)       (((x >> 24) & 0xff) | \
 								((x >> 8) & 0xff00) | \
 								((x << 8) & 0xff0000) | \
 								((x << 24) & 0xff000000))
 
-#define BYTE_REVERSE16(x)		(((x >> 8) & 0xff) | ((x << 8) & 0xff00))
+#define BYTE_REVERSE16(x)       (((x >> 8) & 0xff) | ((x << 8) & 0xff00))
 
 
 static void model3_exit(running_machine &machine)
@@ -114,51 +113,47 @@ static void model3_exit(running_machine &machine)
 	poly_free(state->m_poly);
 }
 
-VIDEO_START( model3 )
+void model3_state::video_start()
 {
-	model3_state *state = machine.driver_data<model3_state>();
-	int width, height;
 
-	state->m_poly = poly_alloc(machine, 4000, sizeof(poly_extra_data), 0);
-	machine.add_notifier(MACHINE_NOTIFY_EXIT, model3_exit);
+	m_poly = poly_alloc(machine(), 4000, sizeof(poly_extra_data), 0);
+	machine().add_notifier(MACHINE_NOTIFY_EXIT, machine_notify_delegate(FUNC(model3_exit), &machine()));
 
-	width = machine.primary_screen->width();
-	height = machine.primary_screen->height();
-	state->m_bitmap3d = machine.primary_screen->alloc_compatible_bitmap();
-	state->m_zbuffer = auto_bitmap_alloc(machine, width, height, BITMAP_FORMAT_INDEXED32);
+	machine().primary_screen->register_screen_bitmap(m_bitmap3d);
+	machine().primary_screen->register_screen_bitmap(m_zbuffer);
 
-	state->m_m3_char_ram = auto_alloc_array_clear(machine, UINT64, 0x100000/8);
-	state->m_m3_tile_ram = auto_alloc_array_clear(machine, UINT64, 0x8000/8);
+	m_m3_char_ram = auto_alloc_array_clear(machine(), UINT64, 0x100000/8);
+	m_m3_tile_ram = auto_alloc_array_clear(machine(), UINT64, 0x8000/8);
 
-	state->m_pal_lookup = auto_alloc_array_clear(machine, UINT16, 65536);
+	m_pal_lookup = auto_alloc_array_clear(machine(), UINT16, 65536);
 
-	state->m_texture_fifo = auto_alloc_array_clear(machine, UINT32, 0x100000/4);
+	m_texture_fifo = auto_alloc_array_clear(machine(), UINT32, 0x100000/4);
 
 	/* 2x 4MB texture sheets */
-	state->m_texture_ram[0] = auto_alloc_array(machine, UINT16, 0x400000/2);
-	state->m_texture_ram[1] = auto_alloc_array(machine, UINT16, 0x400000/2);
+	m_texture_ram[0] = auto_alloc_array(machine(), UINT16, 0x400000/2);
+	m_texture_ram[1] = auto_alloc_array(machine(), UINT16, 0x400000/2);
 
 	/* 1MB Display List RAM */
-	state->m_display_list_ram = auto_alloc_array_clear(machine, UINT32, 0x100000/4);
+	m_display_list_ram = auto_alloc_array_clear(machine(), UINT32, 0x100000/4);
 	/* 4MB for nodes (< Step 2.0 have only 2MB) */
-	state->m_culling_ram = auto_alloc_array_clear(machine, UINT32, 0x400000/4);
+	m_culling_ram = auto_alloc_array_clear(machine(), UINT32, 0x400000/4);
 	/* 4MB Polygon RAM */
-	state->m_polygon_ram = auto_alloc_array_clear(machine, UINT32, 0x400000/4);
+	m_polygon_ram = auto_alloc_array_clear(machine(), UINT32, 0x400000/4);
 
-	state->m_tick = 0;
-	state->m_debug_layer_disable = 0;
-	state->m_vid_reg0 = 0;
+	m_tick = 0;
+	m_debug_layer_disable = 0;
+	m_vid_reg0 = 0;
 
-	state->m_viewport_focal_length = 300.;
-	state->m_viewport_region_x = 0;
-	state->m_viewport_region_y = 0;
-	state->m_viewport_region_width = 496;
-	state->m_viewport_region_height = 384;
+	m_viewport_focal_length = 300.;
+	m_viewport_region_x = 0;
+	m_viewport_region_y = 0;
+	m_viewport_region_width = 496;
+	m_viewport_region_height = 384;
 
-	init_matrix_stack(machine);
+	init_matrix_stack(machine());
 }
 
-static void draw_tile_4bit(running_machine &machine, bitmap_t *bitmap, int tx, int ty, int tilenum)
+static void draw_tile_4bit(running_machine &machine, bitmap_ind16 &bitmap, int tx, int ty, int tilenum)
 {
 	model3_state *state = machine.driver_data<model3_state>();
 	int x, y;
@@ -173,7 +168,7 @@ static void draw_tile_4bit(running_machine &machine, bitmap_t *bitmap, int tx, i
 	tile = &tile_base[tile_index];
 
 	for(y = ty; y < ty+8; y++) {
-		UINT16 *d = BITMAP_ADDR16(bitmap, y^1, 0);
+		UINT16 *d = &bitmap.pix16(y^1);
 		for(x = tx; x < tx+8; x+=2) {
 			UINT8 tile0, tile1;
 			UINT16 pix0, pix1;
@@ -194,7 +189,7 @@ static void draw_tile_4bit(running_machine &machine, bitmap_t *bitmap, int tx, i
 	}
 }
 
-static void draw_tile_8bit(running_machine &machine, bitmap_t *bitmap, int tx, int ty, int tilenum)
+static void draw_tile_8bit(running_machine &machine, bitmap_ind16 &bitmap, int tx, int ty, int tilenum)
 {
 	model3_state *state = machine.driver_data<model3_state>();
 	int x, y;
@@ -209,7 +204,7 @@ static void draw_tile_8bit(running_machine &machine, bitmap_t *bitmap, int tx, i
 	tile = &tile_base[tile_index];
 
 	for(y = ty; y < ty+8; y++) {
-		UINT16 *d = BITMAP_ADDR16(bitmap, y, 0);
+		UINT16 *d = &bitmap.pix16(y);
 		int xx = 0;
 		for(x = tx; x < tx+8; x++) {
 			UINT8 tile0;
@@ -226,15 +221,15 @@ static void draw_tile_8bit(running_machine &machine, bitmap_t *bitmap, int tx, i
 	}
 }
 #ifdef UNUSED_FUNCTION
-static void draw_texture_sheet(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect)
+static void draw_texture_sheet(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	model3_state *state = machine.driver_data<model3_state>();
 	int x,y;
-	for(y = cliprect->min_y; y <= cliprect->max_y; y++)
+	for(y = cliprect.min_y; y <= cliprect.max_y; y++)
 	{
-		UINT16 *d = BITMAP_ADDR16(bitmap, y, 0);
+		UINT16 *d = &bitmap.pix16(y);
 		int index = (y*2)*2048;
-		for(x = cliprect->min_x; x <= cliprect->max_x; x++) {
+		for(x = cliprect.min_x; x <= cliprect.max_x; x++) {
 			UINT16 pix = state->m_texture_ram[0][index];
 			index+=4;
 			if(pix != 0) {
@@ -245,7 +240,7 @@ static void draw_texture_sheet(running_machine &machine, bitmap_t *bitmap, const
 }
 #endif
 
-static void draw_layer(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, int layer, int bitdepth)
+static void draw_layer(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, int layer, int bitdepth)
 {
 	model3_state *state = machine.driver_data<model3_state>();
 	int x, y;
@@ -294,24 +289,24 @@ static void draw_layer(running_machine &machine, bitmap_t *bitmap, const rectang
 		}
 	}
 
-	if(bitdepth)		/* 4-bit */
+	if(bitdepth)        /* 4-bit */
 	{
-		for(y = cliprect->min_y; y <= cliprect->max_y; y+=8)
+		for(y = cliprect.min_y; y <= cliprect.max_y; y+=8)
 		{
 			tile_index = ((y/8) * 64);
-			for (x = cliprect->min_x; x <= cliprect->max_x; x+=8) {
+			for (x = cliprect.min_x; x <= cliprect.max_x; x+=8) {
 				UINT16 tile = tiles[tile_index ^ 0x2];
 				draw_tile_4bit(machine, bitmap, x, y, tile);
 				++tile_index;
 			}
 		}
 	}
-	else				/* 8-bit */
+	else                /* 8-bit */
 	{
-		for(y = cliprect->min_y; y <= cliprect->max_y; y+=8)
+		for(y = cliprect.min_y; y <= cliprect.max_y; y+=8)
 		{
 			tile_index = ((y/8) * 64);
-			for (x = cliprect->min_x; x <= cliprect->max_x; x+=8) {
+			for (x = cliprect.min_x; x <= cliprect.max_x; x+=8) {
 				UINT16 tile = tiles[tile_index ^ 0x2];
 				draw_tile_8bit(machine, bitmap, x, y, tile);
 				++tile_index;
@@ -321,14 +316,14 @@ static void draw_layer(running_machine &machine, bitmap_t *bitmap, const rectang
 }
 
 #ifdef UNUSED_FUNCTION
-static void copy_screen(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect)
+static void copy_screen(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	model3_state *state = machine.driver_data<model3_state>();
 	int x,y;
-	for(y=cliprect->min_y; y <= cliprect->max_y; y++) {
-		UINT16 *d = BITMAP_ADDR16(bitmap, y, 0);
-		UINT16 *s = BITMAP_ADDR16(state->m_bitmap3d, y, 0);
-		for(x=cliprect->min_x; x <= cliprect->max_x; x++) {
+	for(y=cliprect.min_y; y <= cliprect.max_y; y++) {
+		UINT16 *d = &bitmap.pix16(y);
+		UINT16 *s = &state->m_bitmap3d.pix16(y);
+		for(x=cliprect.min_x; x <= cliprect.max_x; x++) {
 			UINT16 pix = s[x];
 			if(!(pix & 0x8000)) {
 				d[x] = pix;
@@ -338,17 +333,16 @@ static void copy_screen(running_machine &machine, bitmap_t *bitmap, const rectan
 }
 #endif
 
-SCREEN_UPDATE( model3 )
+UINT32 model3_state::screen_update_model3(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	model3_state *state = screen->machine().driver_data<model3_state>();
 #if 0
 	int layer_scroll_x[4], layer_scroll_y[4];
 	UINT32 layer_data[4];
 
-	layer_data[0] = BYTE_REVERSE32((UINT32)(state->m_layer_scroll[0] >> 32));
-	layer_data[1] = BYTE_REVERSE32((UINT32)(state->m_layer_scroll[0] >> 0));
-	layer_data[2] = BYTE_REVERSE32((UINT32)(state->m_layer_scroll[1] >> 32));
-	layer_data[3] = BYTE_REVERSE32((UINT32)(state->m_layer_scroll[1] >> 0));
+	layer_data[0] = BYTE_REVERSE32((UINT32)(m_layer_scroll[0] >> 32));
+	layer_data[1] = BYTE_REVERSE32((UINT32)(m_layer_scroll[0] >> 0));
+	layer_data[2] = BYTE_REVERSE32((UINT32)(m_layer_scroll[1] >> 32));
+	layer_data[3] = BYTE_REVERSE32((UINT32)(m_layer_scroll[1] >> 0));
 	layer_scroll_x[0] = (layer_data[0] & 0x8000) ? (layer_data[0] & 0x1ff) : -(layer_data[0] & 0x1ff);
 	layer_scroll_y[0] = (layer_data[0] & 0x8000) ? (layer_data[0] & 0x1ff) : -(layer_data[0] & 0x1ff);
 	layer_scroll_x[1] = (layer_data[1] & 0x8000) ? (layer_data[1] & 0x1ff) : -(layer_data[1] & 0x1ff);
@@ -358,133 +352,123 @@ SCREEN_UPDATE( model3 )
 	layer_scroll_x[3] = (layer_data[3] & 0x8000) ? (layer_data[3] & 0x1ff) : -(layer_data[3] & 0x1ff);
 	layer_scroll_y[3] = (layer_data[3] & 0x8000) ? (layer_data[3] & 0x1ff) : -(layer_data[3] & 0x1ff);
 #endif
-	state->m_screen_clip = (rectangle*)cliprect;
+	m_screen_clip = (rectangle*)&cliprect;
 
-	state->m_clip3d.min_x = cliprect->min_x;
-	state->m_clip3d.max_x = cliprect->max_x;
-	state->m_clip3d.min_y = cliprect->min_y;
-	state->m_clip3d.max_y = cliprect->max_y;
+	m_clip3d = cliprect;
 
 	/* layer disable debug keys */
-	state->m_tick++;
-	if( state->m_tick >= 5 ) {
-		state->m_tick = 0;
+	m_tick++;
+	if( m_tick >= 5 ) {
+		m_tick = 0;
 
-		if( input_code_pressed(screen->machine(), KEYCODE_Y) )
-			state->m_debug_layer_disable ^= 0x1;
-		if( input_code_pressed(screen->machine(), KEYCODE_U) )
-			state->m_debug_layer_disable ^= 0x2;
-		if( input_code_pressed(screen->machine(), KEYCODE_I) )
-			state->m_debug_layer_disable ^= 0x4;
-		if( input_code_pressed(screen->machine(), KEYCODE_O) )
-			state->m_debug_layer_disable ^= 0x8;
-		if( input_code_pressed(screen->machine(), KEYCODE_T) )
-			state->m_debug_layer_disable ^= 0x10;
+		if( machine().input().code_pressed(KEYCODE_Y) )
+			m_debug_layer_disable ^= 0x1;
+		if( machine().input().code_pressed(KEYCODE_U) )
+			m_debug_layer_disable ^= 0x2;
+		if( machine().input().code_pressed(KEYCODE_I) )
+			m_debug_layer_disable ^= 0x4;
+		if( machine().input().code_pressed(KEYCODE_O) )
+			m_debug_layer_disable ^= 0x8;
+		if( machine().input().code_pressed(KEYCODE_T) )
+			m_debug_layer_disable ^= 0x10;
 	}
 
-	bitmap_fill(bitmap, cliprect, 0);
+	bitmap.fill(0, cliprect);
 
-	if (!(state->m_debug_layer_disable & 0x8))
-		draw_layer(screen->machine(), bitmap, cliprect, 3, (state->m_layer_enable >> 3) & 0x1);
+	if (!(m_debug_layer_disable & 0x8))
+		draw_layer(machine(), bitmap, cliprect, 3, (m_layer_enable >> 3) & 0x1);
 
-	if (!(state->m_debug_layer_disable & 0x4))
-		draw_layer(screen->machine(), bitmap, cliprect, 2, (state->m_layer_enable >> 2) & 0x1);
+	if (!(m_debug_layer_disable & 0x4))
+		draw_layer(machine(), bitmap, cliprect, 2, (m_layer_enable >> 2) & 0x1);
 
-	if( !(state->m_debug_layer_disable & 0x10) )
+	if( !(m_debug_layer_disable & 0x10) )
 	{
 #if 0
-		if(state->m_real3d_display_list) {
-			bitmap_fill(state->m_zbuffer, cliprect, 0);
-			bitmap_fill(state->m_bitmap3d, cliprect, 0x8000);
-			real3d_traverse_display_list(screen->machine());
+		if(m_real3d_display_list) {
+			m_zbuffer.fill(0, cliprect);
+			m_bitmap3d.fill(0x8000, cliprect);
+			real3d_traverse_display_list(machine());
 		}
 #endif
-		copybitmap_trans(bitmap, state->m_bitmap3d, 0, 0, 0, 0, cliprect, 0x8000);
+		copybitmap_trans(bitmap, m_bitmap3d, 0, 0, 0, 0, cliprect, 0x8000);
 	}
 
-	if (!(state->m_debug_layer_disable & 0x2))
-		draw_layer(screen->machine(), bitmap, cliprect, 1, (state->m_layer_enable >> 1) & 0x1);
+	if (!(m_debug_layer_disable & 0x2))
+		draw_layer(machine(), bitmap, cliprect, 1, (m_layer_enable >> 1) & 0x1);
 
-	if (!(state->m_debug_layer_disable & 0x1))
-		draw_layer(screen->machine(), bitmap, cliprect, 0, (state->m_layer_enable >> 0) & 0x1);
+	if (!(m_debug_layer_disable & 0x1))
+		draw_layer(machine(), bitmap, cliprect, 0, (m_layer_enable >> 0) & 0x1);
 
 	//copy_screen(bitmap, cliprect);
 
 	//draw_texture_sheet(bitmap, cliprect);
 
-	state->m_real3d_display_list = 0;
+	m_real3d_display_list = 0;
 	return 0;
 }
 
 
 
-READ64_HANDLER(model3_char_r)
+READ64_MEMBER(model3_state::model3_char_r)
 {
-	model3_state *state = space->machine().driver_data<model3_state>();
-	return state->m_m3_char_ram[offset];
+	return m_m3_char_ram[offset];
 }
 
-WRITE64_HANDLER(model3_char_w)
+WRITE64_MEMBER(model3_state::model3_char_w)
 {
-	model3_state *state = space->machine().driver_data<model3_state>();
-	COMBINE_DATA(&state->m_m3_char_ram[offset]);
+	COMBINE_DATA(&m_m3_char_ram[offset]);
 }
 
-READ64_HANDLER(model3_tile_r)
+READ64_MEMBER(model3_state::model3_tile_r)
 {
-	model3_state *state = space->machine().driver_data<model3_state>();
-	return state->m_m3_tile_ram[offset];
+	return m_m3_tile_ram[offset];
 }
 
-WRITE64_HANDLER(model3_tile_w)
+WRITE64_MEMBER(model3_state::model3_tile_w)
 {
-	model3_state *state = space->machine().driver_data<model3_state>();
-	COMBINE_DATA(&state->m_m3_tile_ram[offset]);
+	COMBINE_DATA(&m_m3_tile_ram[offset]);
 }
 
-READ64_HANDLER(model3_vid_reg_r)
+READ64_MEMBER(model3_state::model3_vid_reg_r)
 {
-	model3_state *state = space->machine().driver_data<model3_state>();
 	switch(offset)
 	{
-		case 0x00/8:	return state->m_vid_reg0;
-		case 0x08/8:	return U64(0xffffffffffffffff);		/* ??? */
-		case 0x20/8:	return (UINT64)state->m_layer_enable << 52;
-		case 0x40/8:	return ((UINT64)state->m_layer_modulate1 << 32) | (UINT64)state->m_layer_modulate2;
-		default:		logerror("read reg %02X\n", offset);break;
+		case 0x00/8:    return m_vid_reg0;
+		case 0x08/8:    return U64(0xffffffffffffffff);     /* ??? */
+		case 0x20/8:    return (UINT64)m_layer_enable << 52;
+		case 0x40/8:    return ((UINT64)m_layer_modulate1 << 32) | (UINT64)m_layer_modulate2;
+		default:        logerror("read reg %02X\n", offset);break;
 	}
 	return 0;
 }
 
-WRITE64_HANDLER(model3_vid_reg_w)
+WRITE64_MEMBER(model3_state::model3_vid_reg_w)
 {
-	model3_state *state = space->machine().driver_data<model3_state>();
 	switch(offset)
 	{
-		case 0x00/8:	logerror("vid_reg0: %08X%08X\n", (UINT32)(data>>32),(UINT32)(data)); state->m_vid_reg0 = data; break;
-		case 0x08/8:	break;		/* ??? */
-		case 0x10/8:	model3_set_irq_line(space->machine(), (data >> 56) & 0x0f, CLEAR_LINE); break;		/* VBL IRQ Ack */
+		case 0x00/8:    logerror("vid_reg0: %08X%08X\n", (UINT32)(data>>32),(UINT32)(data)); m_vid_reg0 = data; break;
+		case 0x08/8:    break;      /* ??? */
+		case 0x10/8:    model3_set_irq_line(machine(), (data >> 56) & 0x0f, CLEAR_LINE); break;     /* VBL IRQ Ack */
 
-		case 0x20/8:	state->m_layer_enable = (data >> 52);	break;
+		case 0x20/8:    m_layer_enable = (data >> 52);  break;
 
-		case 0x40/8:	state->m_layer_modulate1 = (UINT32)(data >> 32);
-						state->m_layer_modulate2 = (UINT32)(data);
+		case 0x40/8:    m_layer_modulate1 = (UINT32)(data >> 32);
+						m_layer_modulate2 = (UINT32)(data);
 						break;
-		case 0x60/8:	COMBINE_DATA(&state->m_layer_scroll[0]); break;
-		case 0x68/8:	COMBINE_DATA(&state->m_layer_scroll[1]); break;
-		default:		logerror("model3_vid_reg_w: %02X, %08X%08X\n", offset, (UINT32)(data >> 32), (UINT32)(data)); break;
+		case 0x60/8:    COMBINE_DATA(&m_layer_scroll[0]); break;
+		case 0x68/8:    COMBINE_DATA(&m_layer_scroll[1]); break;
+		default:        logerror("model3_vid_reg_w: %02X, %08X%08X\n", offset, (UINT32)(data >> 32), (UINT32)(data)); break;
 	}
 }
 
-WRITE64_HANDLER( model3_palette_w )
+WRITE64_MEMBER(model3_state::model3_palette_w)
 {
-	model3_state *state = space->machine().driver_data<model3_state>();
 	int r1,g1,b1,r2,g2,b2;
 	UINT32 data1,data2;
 
-	COMBINE_DATA(&state->m_paletteram64[offset]);
-	data1 = BYTE_REVERSE32((UINT32)(state->m_paletteram64[offset] >> 32));
-	data2 = BYTE_REVERSE32((UINT32)(state->m_paletteram64[offset] >> 0));
+	COMBINE_DATA(&m_paletteram64[offset]);
+	data1 = BYTE_REVERSE32((UINT32)(m_paletteram64[offset] >> 32));
+	data2 = BYTE_REVERSE32((UINT32)(m_paletteram64[offset] >> 0));
 
 	r1 = ((data1 >> 0) & 0x1f);
 	g1 = ((data1 >> 5) & 0x1f);
@@ -493,14 +477,13 @@ WRITE64_HANDLER( model3_palette_w )
 	g2 = ((data2 >> 5) & 0x1f);
 	b2 = ((data2 >> 10) & 0x1f);
 
-	state->m_pal_lookup[(offset*2)+0] = (data1 & 0x8000) | (r1 << 10) | (g1 << 5) | b1;
-	state->m_pal_lookup[(offset*2)+1] = (data2 & 0x8000) | (r2 << 10) | (g2 << 5) | b2;
+	m_pal_lookup[(offset*2)+0] = (data1 & 0x8000) | (r1 << 10) | (g1 << 5) | b1;
+	m_pal_lookup[(offset*2)+1] = (data2 & 0x8000) | (r2 << 10) | (g2 << 5) | b2;
 }
 
-READ64_HANDLER( model3_palette_r )
+READ64_MEMBER(model3_state::model3_palette_r)
 {
-	model3_state *state = space->machine().driver_data<model3_state>();
-	return state->m_paletteram64[offset];
+	return m_paletteram64[offset];
 }
 
 
@@ -563,7 +546,7 @@ static cached_texture *get_texture(running_machine &machine, int page, int texx,
 
 		switch (format)
 		{
-			case 0:		/* 1-5-5-5 ARGB */
+			case 0:     /* 1-5-5-5 ARGB */
 				for (x = 0; x < pixwidth; x++)
 				{
 					UINT16 pixdata = texsrc[x];
@@ -571,7 +554,7 @@ static cached_texture *get_texture(running_machine &machine, int page, int texx,
 				}
 				break;
 
-			case 1:		/* 4-bit grayscale in low nibble */
+			case 1:     /* 4-bit grayscale in low nibble */
 				for (x = 0; x < pixwidth; x++)
 				{
 					UINT8 grayvalue = pal4bit(texsrc[x] >> 0);
@@ -579,7 +562,7 @@ static cached_texture *get_texture(running_machine &machine, int page, int texx,
 				}
 				break;
 
-			case 2:		/* 4-bit grayscale in 2nd nibble */
+			case 2:     /* 4-bit grayscale in 2nd nibble */
 				for (x = 0; x < pixwidth; x++)
 				{
 					UINT8 grayvalue = pal4bit(texsrc[x] >> 4);
@@ -587,7 +570,7 @@ static cached_texture *get_texture(running_machine &machine, int page, int texx,
 				}
 				break;
 
-			case 3:		/* 4-bit grayscale in 3rd nibble */
+			case 3:     /* 4-bit grayscale in 3rd nibble */
 				for (x = 0; x < pixwidth; x++)
 				{
 					UINT8 grayvalue = pal4bit(texsrc[x] >> 8);
@@ -595,7 +578,7 @@ static cached_texture *get_texture(running_machine &machine, int page, int texx,
 				}
 				break;
 
-			case 4:		/* 8-bit A4L4 */
+			case 4:     /* 8-bit A4L4 */
 				for (x = 0; x < pixwidth; x++)
 				{
 					UINT8 pixdata = texsrc[x / 2] >> ((~x & 1) * 8);
@@ -603,7 +586,7 @@ static cached_texture *get_texture(running_machine &machine, int page, int texx,
 				}
 				break;
 
-			case 5:		/* 8-bit grayscale */
+			case 5:     /* 8-bit grayscale */
 				for (x = 0; x < pixwidth; x++)
 				{
 					UINT8 grayvalue = texsrc[x / 2] >> ((~x & 1) * 8);
@@ -611,7 +594,7 @@ static cached_texture *get_texture(running_machine &machine, int page, int texx,
 				}
 				break;
 
-			case 6:		/* 4-bit grayscale in high nibble */
+			case 6:     /* 4-bit grayscale in high nibble */
 				for (x = 0; x < pixwidth; x++)
 				{
 					UINT8 grayvalue = pal4bit(texsrc[x] >> 12);
@@ -619,7 +602,7 @@ static cached_texture *get_texture(running_machine &machine, int page, int texx,
 				}
 				break;
 
-			case 7:		/* 4-4-4-4 ARGB */
+			case 7:     /* 4-4-4-4 ARGB */
 				for (x = 0; x < pixwidth; x++)
 				{
 					UINT16 pixdata = texsrc[x];
@@ -647,32 +630,30 @@ static cached_texture *get_texture(running_machine &machine, int page, int texx,
 /*****************************************************************************/
 /* Real3D Graphics stuff */
 
-WRITE64_HANDLER( real3d_display_list_w )
+WRITE64_MEMBER(model3_state::real3d_display_list_w)
 {
-	model3_state *state = space->machine().driver_data<model3_state>();
 	if(ACCESSING_BITS_32_63) {
-		state->m_display_list_ram[offset*2] = BYTE_REVERSE32((UINT32)(data >> 32));
+		m_display_list_ram[offset*2] = BYTE_REVERSE32((UINT32)(data >> 32));
 	}
 	if(ACCESSING_BITS_0_31) {
-		state->m_display_list_ram[(offset*2)+1] = BYTE_REVERSE32((UINT32)(data));
+		m_display_list_ram[(offset*2)+1] = BYTE_REVERSE32((UINT32)(data));
 	}
 }
 
-WRITE64_HANDLER( real3d_polygon_ram_w )
+WRITE64_MEMBER(model3_state::real3d_polygon_ram_w)
 {
-	model3_state *state = space->machine().driver_data<model3_state>();
 	if(ACCESSING_BITS_32_63) {
-		state->m_polygon_ram[offset*2] = BYTE_REVERSE32((UINT32)(data >> 32));
+		m_polygon_ram[offset*2] = BYTE_REVERSE32((UINT32)(data >> 32));
 	}
 	if(ACCESSING_BITS_0_31) {
-		state->m_polygon_ram[(offset*2)+1] = BYTE_REVERSE32((UINT32)(data));
+		m_polygon_ram[(offset*2)+1] = BYTE_REVERSE32((UINT32)(data));
 	}
 }
 
 static const UINT8 texture_decode[64] =
 {
-	 0,  1,  4,  5,  8,  9, 12, 13,
-	 2,  3,  6,  7, 10, 11, 14, 15,
+		0,  1,  4,  5,  8,  9, 12, 13,
+		2,  3,  6,  7, 10, 11, 14, 15,
 	16, 17, 20, 21, 24, 25, 28, 29,
 	18, 19, 22, 23, 26, 27, 30, 31,
 	32, 33, 36, 37, 40, 41, 44, 45,
@@ -729,16 +710,16 @@ INLINE void write_texture8(model3_state *state, int xpos, int ypos, int width, i
 static void real3d_upload_texture(running_machine &machine, UINT32 header, UINT32 *data)
 {
 	model3_state *state = machine.driver_data<model3_state>();
-	int width	= 32 << ((header >> 14) & 0x7);
-	int height	= 32 << ((header >> 17) & 0x7);
-	int xpos	= (header & 0x3f) * 32;
-	int ypos	= ((header >> 7) & 0x1f) * 32;
-	int page	= (header >> 20) & 0x1;
+	int width   = 32 << ((header >> 14) & 0x7);
+	int height  = 32 << ((header >> 17) & 0x7);
+	int xpos    = (header & 0x3f) * 32;
+	int ypos    = ((header >> 7) & 0x1f) * 32;
+	int page    = (header >> 20) & 0x1;
 	//int bitdepth = (header >> 23) & 0x1;
 
 	switch(header >> 24)
 	{
-		case 0x00:		/* Texture with mipmaps */
+		case 0x00:      /* Texture with mipmaps */
 			//if(bitdepth) {
 				write_texture16(state, xpos, ypos, width, height, page, (UINT16*)data);
 				invalidate_texture(machine, page, header & 0x3f, (header >> 7) & 0x1f, (header >> 14) & 0x7, (header >> 17) & 0x7);
@@ -748,7 +729,7 @@ static void real3d_upload_texture(running_machine &machine, UINT32 header, UINT3
 				//write_texture8(xpos, ypos, width, height, page, (UINT16*)data);
 			//}
 			break;
-		case 0x01:		/* Texture without mipmaps */
+		case 0x01:      /* Texture without mipmaps */
 			//if(bitdepth) {
 				write_texture16(state, xpos, ypos, width, height, page, (UINT16*)data);
 				invalidate_texture(machine, page, header & 0x3f, (header >> 7) & 0x1f, (header >> 14) & 0x7, (header >> 17) & 0x7);
@@ -758,12 +739,12 @@ static void real3d_upload_texture(running_machine &machine, UINT32 header, UINT3
 				//write_texture8(xpos, ypos, width, height, page, (UINT16*)data);
 			//}
 			break;
-		case 0x02:		/* Only mipmaps */
+		case 0x02:      /* Only mipmaps */
 			break;
-		case 0x80:		/* Gamma-table ? */
+		case 0x80:      /* Gamma-table ? */
 			break;
 		default:
-			fatalerror("Unknown texture type: %02X: ", header >> 24);
+			fatalerror("Unknown texture type: %02X\n", header >> 24);
 			break;
 	}
 }
@@ -784,74 +765,74 @@ void real3d_display_list_end(running_machine &machine)
 		};
 	}
 	state->m_texture_fifo_pos = 0;
-	bitmap_fill(state->m_zbuffer, NULL, 0);
-	bitmap_fill(state->m_bitmap3d, NULL, 0x8000);
+	state->m_zbuffer.fill(0);
+	state->m_bitmap3d.fill(0x8000);
 	real3d_traverse_display_list(machine);
 	//state->m_real3d_display_list = 1;
 }
 
-void real3d_display_list1_dma(address_space *space, UINT32 src, UINT32 dst, int length, int byteswap)
+void real3d_display_list1_dma(address_space &space, UINT32 src, UINT32 dst, int length, int byteswap)
 {
-	model3_state *state = space->machine().driver_data<model3_state>();
+	model3_state *state = space.machine().driver_data<model3_state>();
 	int i;
 	int d = (dst & 0xffffff) / 4;
 	for(i=0; i < length; i+=4) {
 		UINT32 w;
 		if (byteswap) {
-			w = BYTE_REVERSE32(space->read_dword(src));
+			w = BYTE_REVERSE32(space.read_dword(src));
 		} else {
-			w = space->read_dword(src);
+			w = space.read_dword(src);
 		}
 		state->m_display_list_ram[d++] = w;
 		src += 4;
 	}
 }
 
-void real3d_display_list2_dma(address_space *space, UINT32 src, UINT32 dst, int length, int byteswap)
+void real3d_display_list2_dma(address_space &space, UINT32 src, UINT32 dst, int length, int byteswap)
 {
-	model3_state *state = space->machine().driver_data<model3_state>();
+	model3_state *state = space.machine().driver_data<model3_state>();
 	int i;
 	int d = (dst & 0xffffff) / 4;
 	for(i=0; i < length; i+=4) {
 		UINT32 w;
 		if (byteswap) {
-			w = BYTE_REVERSE32(space->read_dword(src));
+			w = BYTE_REVERSE32(space.read_dword(src));
 		} else {
-			w = space->read_dword(src);
+			w = space.read_dword(src);
 		}
 		state->m_culling_ram[d++] = w;
 		src += 4;
 	}
 }
 
-void real3d_vrom_texture_dma(address_space *space, UINT32 src, UINT32 dst, int length, int byteswap)
+void real3d_vrom_texture_dma(address_space &space, UINT32 src, UINT32 dst, int length, int byteswap)
 {
-	model3_state *state = space->machine().driver_data<model3_state>();
+	model3_state *state = space.machine().driver_data<model3_state>();
 	if((dst & 0xff) == 0) {
 
 		UINT32 address, header;
 
 		if (byteswap) {
-			address = BYTE_REVERSE32(space->read_dword((src+0)));
-			header = BYTE_REVERSE32(space->read_dword((src+4)));
+			address = BYTE_REVERSE32(space.read_dword((src+0)));
+			header = BYTE_REVERSE32(space.read_dword((src+4)));
 		} else {
-			address = space->read_dword((src+0));
-			header = space->read_dword((src+4));
+			address = space.read_dword((src+0));
+			header = space.read_dword((src+4));
 		}
-		real3d_upload_texture(space->machine(), header, (UINT32*)&state->m_vrom[address]);
+		real3d_upload_texture(space.machine(), header, (UINT32*)&state->m_vrom[address]);
 	}
 }
 
-void real3d_texture_fifo_dma(address_space *space, UINT32 src, int length, int byteswap)
+void real3d_texture_fifo_dma(address_space &space, UINT32 src, int length, int byteswap)
 {
-	model3_state *state = space->machine().driver_data<model3_state>();
+	model3_state *state = space.machine().driver_data<model3_state>();
 	int i;
 	for(i=0; i < length; i+=4) {
 		UINT32 w;
 		if (byteswap) {
-			w = BYTE_REVERSE32(space->read_dword(src));
+			w = BYTE_REVERSE32(space.read_dword(src));
 		} else {
-			w = space->read_dword(src);
+			w = space.read_dword(src);
 		}
 		state->m_texture_fifo[state->m_texture_fifo_pos] = w;
 		state->m_texture_fifo_pos++;
@@ -859,26 +840,26 @@ void real3d_texture_fifo_dma(address_space *space, UINT32 src, int length, int b
 	}
 }
 
-void real3d_polygon_ram_dma(address_space *space, UINT32 src, UINT32 dst, int length, int byteswap)
+void real3d_polygon_ram_dma(address_space &space, UINT32 src, UINT32 dst, int length, int byteswap)
 {
-	model3_state *state = space->machine().driver_data<model3_state>();
+	model3_state *state = space.machine().driver_data<model3_state>();
 	int i;
 	int d = (dst & 0xffffff) / 4;
 	for(i=0; i < length; i+=4) {
 		UINT32 w;
 		if (byteswap) {
-			w = BYTE_REVERSE32(space->read_dword(src));
+			w = BYTE_REVERSE32(space.read_dword(src));
 		} else {
-			w = space->read_dword(src);
+			w = space.read_dword(src);
 		}
 		state->m_polygon_ram[d++] = w;
 		src += 4;
 	}
 }
 
-WRITE64_HANDLER( real3d_cmd_w )
+WRITE64_MEMBER(model3_state::real3d_cmd_w)
 {
-	real3d_display_list_end(space->machine());
+	real3d_display_list_end(machine());
 }
 
 
@@ -956,7 +937,7 @@ static void push_matrix_stack(model3_state *state)
 {
 	state->m_matrix_stack_ptr++;
 	if (state->m_matrix_stack_ptr >= MATRIX_STACK_SIZE)
-		fatalerror("push_matrix_stack: matrix stack overflow");
+		fatalerror("push_matrix_stack: matrix stack overflow\n");
 
 	memcpy( &state->m_matrix_stack[state->m_matrix_stack_ptr], &state->m_matrix_stack[state->m_matrix_stack_ptr-1], sizeof(MATRIX));
 }
@@ -965,7 +946,7 @@ static void pop_matrix_stack(model3_state *state)
 {
 	state->m_matrix_stack_ptr--;
 	if (state->m_matrix_stack_ptr < 0)
-		fatalerror("pop_matrix_stack: matrix stack underflow");
+		fatalerror("pop_matrix_stack: matrix stack underflow\n");
 }
 
 static void multiply_matrix_stack(model3_state *state, MATRIX matrix)
@@ -977,10 +958,10 @@ static void translate_matrix_stack(model3_state *state, float x, float y, float 
 {
 	MATRIX tm;
 
-	tm[0][0] = 1.0f;	tm[0][1] = 0.0f;	tm[0][2] = 0.0f;	tm[0][3] = 0.0f;
-	tm[1][0] = 0.0f;	tm[1][1] = 1.0f;	tm[1][2] = 0.0f;	tm[1][3] = 0.0f;
-	tm[2][0] = 0.0f;	tm[2][1] = 0.0f;	tm[2][2] = 1.0f;	tm[2][3] = 0.0f;
-	tm[3][0] = x;		tm[3][1] = y;		tm[3][2] = z;		tm[3][3] = 1.0f;
+	tm[0][0] = 1.0f;    tm[0][1] = 0.0f;    tm[0][2] = 0.0f;    tm[0][3] = 0.0f;
+	tm[1][0] = 0.0f;    tm[1][1] = 1.0f;    tm[1][2] = 0.0f;    tm[1][3] = 0.0f;
+	tm[2][0] = 0.0f;    tm[2][1] = 0.0f;    tm[2][2] = 1.0f;    tm[2][3] = 0.0f;
+	tm[3][0] = x;       tm[3][1] = y;       tm[3][2] = z;       tm[3][3] = 1.0f;
 
 	matrix_multiply(tm, state->m_matrix_stack[state->m_matrix_stack_ptr], &state->m_matrix_stack[state->m_matrix_stack_ptr]);
 }
@@ -1022,12 +1003,12 @@ static int clip_polygon(const poly_vertex *v, int num_vertices, PLANE cp, poly_v
 		int v1_in = is_point_inside(v[i].x, v[i].y, v[i].pz, cp);
 		int v2_in = is_point_inside(v[previ].x, v[previ].y, v[previ].pz, cp);
 
-		if (v1_in && v2_in)			/* edge is completely inside the volume */
+		if (v1_in && v2_in)         /* edge is completely inside the volume */
 		{
 			clipv[clip_verts] = v[i];
 			++clip_verts;
 		}
-		else if (!v1_in && v2_in)	/* edge is entering the volume */
+		else if (!v1_in && v2_in)   /* edge is entering the volume */
 		{
 			/* insert vertex at intersection point */
 			t = line_plane_intersection(&v[i], &v[previ], cp);
@@ -1038,7 +1019,7 @@ static int clip_polygon(const poly_vertex *v, int num_vertices, PLANE cp, poly_v
 			clipv[clip_verts].pv = v[i].pv + ((v[previ].pv - v[i].pv) * t);
 			++clip_verts;
 		}
-		else if (v1_in && !v2_in)	/* edge is leaving the volume */
+		else if (v1_in && !v2_in)   /* edge is leaving the volume */
 		{
 			/* insert vertex at intersection point */
 			t = line_plane_intersection(&v[i], &v[previ], cp);
@@ -1070,7 +1051,7 @@ static void render_one(running_machine &machine, TRIANGLE *tri)
 	tri->v[1].pz = 1.0f / tri->v[1].pz;
 	tri->v[2].pz = 1.0f / tri->v[2].pz;
 
-	extra->zbuffer = state->m_zbuffer;
+	extra->zbuffer = &state->m_zbuffer;
 	if (tri->param & TRI_PARAM_TEXTURE_ENABLE)
 	{
 		tri->v[0].pu = tri->v[0].pu * tri->v[0].pz * 256.0f;
@@ -1081,9 +1062,9 @@ static void render_one(running_machine &machine, TRIANGLE *tri)
 		tri->v[2].pv = tri->v[2].pv * tri->v[2].pz * 256.0f;
 
 		extra->texture = get_texture(machine, (tri->param & TRI_PARAM_TEXTURE_PAGE) ? 1 : 0, tri->texture_x, tri->texture_y, tri->texture_width, tri->texture_height, tri->texture_format);
-		extra->texture_param		= tri->param;
+		extra->texture_param        = tri->param;
 		extra->polygon_transparency = tri->transparency;
-		extra->polygon_intensity	= tri->intensity;
+		extra->polygon_intensity    = tri->intensity;
 
 		if (tri->param & TRI_PARAM_ALPHA_TEST)
 			callback = draw_scanline_alpha_test;
@@ -1091,15 +1072,15 @@ static void render_one(running_machine &machine, TRIANGLE *tri)
 			callback = (tri->transparency >= 32) ? draw_scanline_normal : draw_scanline_trans;
 		else
 			callback = draw_scanline_alpha;
-		poly_render_triangle(state->m_poly, state->m_bitmap3d, &state->m_clip3d, callback, 3, &tri->v[0], &tri->v[1], &tri->v[2]);
+		poly_render_triangle(state->m_poly, &state->m_bitmap3d, state->m_clip3d, callback, 3, &tri->v[0], &tri->v[1], &tri->v[2]);
 	}
 	else
 	{
 		extra->polygon_transparency = tri->transparency;
-		extra->polygon_intensity	= tri->intensity;
+		extra->polygon_intensity    = tri->intensity;
 		extra->color                = tri->color;
 
-		poly_render_triangle(state->m_poly, state->m_bitmap3d, &state->m_clip3d, draw_scanline_color, 1, &tri->v[0], &tri->v[1], &tri->v[2]);
+		poly_render_triangle(state->m_poly, &state->m_bitmap3d, state->m_clip3d, draw_scanline_color, 1, &tri->v[0], &tri->v[1], &tri->v[2]);
 	}
 }
 
@@ -1120,9 +1101,9 @@ static void draw_model(running_machine &machine, UINT32 addr)
 	MATRIX transform_matrix;
 	float center_x, center_y;
 
-	if(state->m_step < 0x15) {	/* position coordinates are 17.15 fixed-point in Step 1.0 */
+	if(state->m_step < 0x15) {  /* position coordinates are 17.15 fixed-point in Step 1.0 */
 		fixed_point_fraction = 1.0f / 32768.0f;
-	} else {					/* 13.19 fixed-point in other Steps */
+	} else {                    /* 13.19 fixed-point in other Steps */
 		fixed_point_fraction = 1.0f / 524288.0f;
 	}
 
@@ -1281,16 +1262,16 @@ static void draw_model(running_machine &machine, UINT32 addr)
 		num_vertices = clip_polygon(clip_vert, num_vertices, state->m_clip_plane[4], clip_vert);
 
 		/* backface culling */
-		if( (header[6] & 0x800000) && (!(header[1] & 0x0010)) )	{
+		if( (header[6] & 0x800000) && (!(header[1] & 0x0010)) ) {
 			if(sn[0]*clip_vert[0].x + sn[1]*clip_vert[0].y + sn[2]*clip_vert[0].pz >0)
 				back_face = 1;
 			else
 				back_face = 0;
 		}
 		else
-			back_face = 0;	//no culling for transparent or two-sided polygons
+			back_face = 0;  //no culling for transparent or two-sided polygons
 
-		if(!back_face)	{
+		if(!back_face)  {
 			/* homogeneous Z-divide, screen-space transformation */
 			for(i=0; i < num_vertices; i++) {
 				float ooz = 1.0f / clip_vert[i].pz;
@@ -1323,20 +1304,20 @@ static void draw_model(running_machine &machine, UINT32 addr)
 				memcpy(&tri.v[0], &clip_vert[0], sizeof(poly_vertex));
 				memcpy(&tri.v[1], &clip_vert[i-1], sizeof(poly_vertex));
 				memcpy(&tri.v[2], &clip_vert[i], sizeof(poly_vertex));
-				tri.texture_x				= ((header[4] & 0x1f) << 1) | ((header[5] >> 7) & 0x1);
-				tri.texture_y				= (header[5] & 0x1f);
-				tri.texture_width			= ((header[3] >> 3) & 0x7);
-				tri.texture_height			= (header[3] & 0x7);
-				tri.texture_format			= (header[6] >> 7) & 0x7;
-				tri.transparency			= polygon_transparency;
-				tri.intensity				= intensity;
-				tri.color					= color;
+				tri.texture_x               = ((header[4] & 0x1f) << 1) | ((header[5] >> 7) & 0x1);
+				tri.texture_y               = (header[5] & 0x1f);
+				tri.texture_width           = ((header[3] >> 3) & 0x7);
+				tri.texture_height          = (header[3] & 0x7);
+				tri.texture_format          = (header[6] >> 7) & 0x7;
+				tri.transparency            = polygon_transparency;
+				tri.intensity               = intensity;
+				tri.color                   = color;
 
-				tri.param	= 0;
-				tri.param	|= (header[4] & 0x40) ? TRI_PARAM_TEXTURE_PAGE : 0;
-				tri.param	|= (header[6] & 0x4000000) ? TRI_PARAM_TEXTURE_ENABLE : 0;
-				tri.param	|= (header[2] & 0x2) ? TRI_PARAM_TEXTURE_MIRROR_U : 0;
-				tri.param	|= (header[2] & 0x1) ? TRI_PARAM_TEXTURE_MIRROR_V : 0;
+				tri.param   = 0;
+				tri.param   |= (header[4] & 0x40) ? TRI_PARAM_TEXTURE_PAGE : 0;
+				tri.param   |= (header[6] & 0x4000000) ? TRI_PARAM_TEXTURE_ENABLE : 0;
+				tri.param   |= (header[2] & 0x2) ? TRI_PARAM_TEXTURE_MIRROR_U : 0;
+				tri.param   |= (header[2] & 0x1) ? TRI_PARAM_TEXTURE_MIRROR_V : 0;
 				tri.param   |= (header[6] & 0x80000000) ? TRI_PARAM_ALPHA_TEST : 0;
 
 				render_one(machine, &tri);
@@ -1354,14 +1335,14 @@ static UINT32 *get_memory_pointer(model3_state *state, UINT32 address)
 	if (address & 0x800000)
 	{
 		if (address >= 0x840000) {
-			fatalerror("get_memory_pointer: invalid display list memory address %08X", address);
+			fatalerror("get_memory_pointer: invalid display list memory address %08X\n", address);
 		}
 		return &state->m_display_list_ram[address & 0x7fffff];
 	}
 	else
 	{
 		if (address >= 0x100000) {
-			fatalerror("get_memory_pointer: invalid node ram address %08X", address);
+			fatalerror("get_memory_pointer: invalid node ram address %08X\n", address);
 		}
 		return &state->m_culling_ram[address];
 	}
@@ -1371,10 +1352,10 @@ static void load_matrix(model3_state *state, int matrix_num, MATRIX *out)
 {
 	float *matrix = (float *)get_memory_pointer(state, state->m_matrix_base_address + matrix_num * 12);
 
-	(*out)[0][0] = matrix[3];	(*out)[0][1] = matrix[6];	(*out)[0][2] = matrix[9];	(*out)[0][3] = 0.0f;
-	(*out)[1][0] = matrix[4];	(*out)[1][1] = matrix[7];	(*out)[1][2] = matrix[10];	(*out)[1][3] = 0.0f;
-	(*out)[2][0] = matrix[5];	(*out)[2][1] = matrix[8];	(*out)[2][2] = matrix[11];	(*out)[2][3] = 0.0f;
-	(*out)[3][0] = matrix[0];	(*out)[3][1] = matrix[1];	(*out)[3][2] = matrix[2];	(*out)[3][3] = 1.0f;
+	(*out)[0][0] = matrix[3];   (*out)[0][1] = matrix[6];   (*out)[0][2] = matrix[9];   (*out)[0][3] = 0.0f;
+	(*out)[1][0] = matrix[4];   (*out)[1][1] = matrix[7];   (*out)[1][2] = matrix[10];  (*out)[1][3] = 0.0f;
+	(*out)[2][0] = matrix[5];   (*out)[2][1] = matrix[8];   (*out)[2][2] = matrix[11];  (*out)[2][3] = 0.0f;
+	(*out)[3][0] = matrix[0];   (*out)[3][1] = matrix[1];   (*out)[3][2] = matrix[2];   (*out)[3][3] = 1.0f;
 }
 
 static void traverse_list4(running_machine &machine, int lod_num, UINT32 address)
@@ -1430,16 +1411,16 @@ INLINE void process_link(running_machine &machine, UINT32 address, UINT32 link)
 	{
 		switch (link >> 24)
 		{
-			case 0x00:		/* link to another node */
+			case 0x00:      /* link to another node */
 				draw_block(machine, link & 0xffffff);
 				break;
 
 			case 0x01:
-			case 0x03:		/* both of these link to models, is there any difference ? */
+			case 0x03:      /* both of these link to models, is there any difference ? */
 				draw_model(machine, link & 0xffffff);
 				break;
 
-			case 0x04:		/* list of links */
+			case 0x04:      /* list of links */
 				traverse_list(machine, link & 0xffffff);
 				break;
 
@@ -1514,23 +1495,23 @@ static void draw_viewport(running_machine &machine, int pri, UINT32 address)
 		return;
 
 	/* set viewport parameters */
-	state->m_viewport_region_x		= (node[26] & 0xffff) >> 4;			/* 12.4 fixed point */
-	state->m_viewport_region_y		= ((node[26] >> 16) & 0xffff) >> 4;
-	state->m_viewport_region_width	= (node[20] & 0xffff) >> 2;			/* 14.2 fixed point */
-	state->m_viewport_region_height	= ((node[20] >> 16) & 0xffff) >> 2;
+	state->m_viewport_region_x      = (node[26] & 0xffff) >> 4;         /* 12.4 fixed point */
+	state->m_viewport_region_y      = ((node[26] >> 16) & 0xffff) >> 4;
+	state->m_viewport_region_width  = (node[20] & 0xffff) >> 2;         /* 14.2 fixed point */
+	state->m_viewport_region_height = ((node[20] >> 16) & 0xffff) >> 2;
 
 	/* frustum plane angles */
 	//viewport_left         = RADIAN_TO_DEGREE(asin(*(float *)&node[12]));
 	//viewport_right            = RADIAN_TO_DEGREE(asin(*(float *)&node[16]));
-	viewport_top			= RADIAN_TO_DEGREE(asin(*(float *)&node[14]));
-	viewport_bottom			= RADIAN_TO_DEGREE(asin(*(float *)&node[18]));
+	viewport_top            = RADIAN_TO_DEGREE(asin(*(float *)&node[14]));
+	viewport_bottom         = RADIAN_TO_DEGREE(asin(*(float *)&node[18]));
 
 	/* build clipping planes */
-	state->m_clip_plane[0].x = *(float *)&node[13];	state->m_clip_plane[0].y = 0.0f;		state->m_clip_plane[0].z = *(float *)&node[12];	state->m_clip_plane[0].d = 0.0f;
-	state->m_clip_plane[1].x = *(float *)&node[17];	state->m_clip_plane[1].y = 0.0f;		state->m_clip_plane[1].z = *(float *)&node[16];	state->m_clip_plane[1].d = 0.0f;
-	state->m_clip_plane[2].x = 0.0f;		state->m_clip_plane[2].y = *(float *)&node[15];	state->m_clip_plane[2].z = *(float *)&node[14];	state->m_clip_plane[2].d = 0.0f;
-	state->m_clip_plane[3].x = 0.0f;		state->m_clip_plane[3].y = *(float *)&node[19];	state->m_clip_plane[3].z = *(float *)&node[18];	state->m_clip_plane[3].d = 0.0f;
-	state->m_clip_plane[4].x = 0.0f;		state->m_clip_plane[4].y = 0.0f;		state->m_clip_plane[4].z = 1.0f;		state->m_clip_plane[4].d = 1.0f;
+	state->m_clip_plane[0].x = *(float *)&node[13]; state->m_clip_plane[0].y = 0.0f;        state->m_clip_plane[0].z = *(float *)&node[12]; state->m_clip_plane[0].d = 0.0f;
+	state->m_clip_plane[1].x = *(float *)&node[17]; state->m_clip_plane[1].y = 0.0f;        state->m_clip_plane[1].z = *(float *)&node[16]; state->m_clip_plane[1].d = 0.0f;
+	state->m_clip_plane[2].x = 0.0f;        state->m_clip_plane[2].y = *(float *)&node[15]; state->m_clip_plane[2].z = *(float *)&node[14]; state->m_clip_plane[2].d = 0.0f;
+	state->m_clip_plane[3].x = 0.0f;        state->m_clip_plane[3].y = *(float *)&node[19]; state->m_clip_plane[3].z = *(float *)&node[18]; state->m_clip_plane[3].d = 0.0f;
+	state->m_clip_plane[4].x = 0.0f;        state->m_clip_plane[4].y = 0.0f;        state->m_clip_plane[4].z = 1.0f;        state->m_clip_plane[4].d = 1.0f;
 
 	/* compute field of view */
 	//fov_x = viewport_left + viewport_right;
@@ -1567,4 +1548,3 @@ static void real3d_traverse_display_list(running_machine &machine)
 
 	poly_wait(state->m_poly, "real3d_traverse_display_list");
 }
-

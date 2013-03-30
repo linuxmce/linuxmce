@@ -16,43 +16,43 @@ Quiz Gekiretsu Scramble (Gakuen Paradise 2) (c) 1993 Face
 
 #define MCLK 16000000
 
-static WRITE8_HANDLER( quizdna_rombank_w )
+WRITE8_MEMBER(quizdna_state::quizdna_rombank_w)
 {
-	UINT8 *ROM = space->machine().region("maincpu")->base();
-	memory_set_bankptr(space->machine(), "bank1",&ROM[0x10000+0x4000*(data & 0x3f)]);
+	UINT8 *ROM = memregion("maincpu")->base();
+	membank("bank1")->set_base(&ROM[0x10000+0x4000*(data & 0x3f)]);
 }
 
-static WRITE8_HANDLER( gekiretu_rombank_w )
+WRITE8_MEMBER(quizdna_state::gekiretu_rombank_w)
 {
-	UINT8 *ROM = space->machine().region("maincpu")->base();
-	memory_set_bankptr(space->machine(), "bank1",&ROM[0x10000+0x4000*((data & 0x3f) ^ 0x0a)]);
+	UINT8 *ROM = memregion("maincpu")->base();
+	membank("bank1")->set_base(&ROM[0x10000+0x4000*((data & 0x3f) ^ 0x0a)]);
 }
 
 /****************************************************************************/
 
-static ADDRESS_MAP_START( quizdna_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( quizdna_map, AS_PROGRAM, 8, quizdna_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0xbfff) AM_ROMBANK("bank1")
 	AM_RANGE(0x8000, 0x9fff) AM_WRITE(quizdna_fg_ram_w)
 	AM_RANGE(0xa000, 0xbfff) AM_WRITE(quizdna_bg_ram_w)
 	AM_RANGE(0xc000, 0xdfff) AM_RAM
-	AM_RANGE(0xe000, 0xe1ff) AM_RAM AM_BASE_SIZE_MEMBER(quizdna_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0xe000, 0xe1ff) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0xe200, 0xefff) AM_RAM
-	AM_RANGE(0xf000, 0xffff) AM_RAM_WRITE(paletteram_xBGR_RRRR_GGGG_BBBB_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0xf000, 0xffff) AM_RAM_WRITE(paletteram_xBGR_RRRR_GGGG_BBBB_w) AM_SHARE("paletteram")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( gekiretu_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( gekiretu_map, AS_PROGRAM, 8, quizdna_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0xbfff) AM_ROMBANK("bank1")
 	AM_RANGE(0x8000, 0x9fff) AM_WRITE(quizdna_fg_ram_w)
 	AM_RANGE(0xa000, 0xbfff) AM_WRITE(quizdna_bg_ram_w)
 	AM_RANGE(0xc000, 0xdfff) AM_RAM
-	AM_RANGE(0xe000, 0xefff) AM_RAM_WRITE(paletteram_xBGR_RRRR_GGGG_BBBB_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0xf000, 0xf1ff) AM_RAM AM_BASE_SIZE_MEMBER(quizdna_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0xe000, 0xefff) AM_RAM_WRITE(paletteram_xBGR_RRRR_GGGG_BBBB_w) AM_SHARE("paletteram")
+	AM_RANGE(0xf000, 0xf1ff) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0xf200, 0xffff) AM_RAM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( quizdna_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( quizdna_io_map, AS_IO, 8, quizdna_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x02, 0x03) AM_WRITE(quizdna_bg_xscroll_w)
 	AM_RANGE(0x04, 0x04) AM_WRITE(quizdna_bg_yscroll_w)
@@ -63,11 +63,11 @@ static ADDRESS_MAP_START( quizdna_io_map, AS_IO, 8 )
 	AM_RANGE(0x91, 0x91) AM_READ_PORT("SERVICE")
 	AM_RANGE(0xc0, 0xc0) AM_WRITE(quizdna_rombank_w)
 	AM_RANGE(0xd0, 0xd0) AM_WRITE(quizdna_screen_ctrl_w)
-	AM_RANGE(0xe0, 0xe1) AM_DEVREADWRITE("ymsnd", ym2203_r, ym2203_w)
-	AM_RANGE(0xf0, 0xf0) AM_DEVREADWRITE_MODERN("oki", okim6295_device, read, write)
+	AM_RANGE(0xe0, 0xe1) AM_DEVREADWRITE_LEGACY("ymsnd", ym2203_r, ym2203_w)
+	AM_RANGE(0xf0, 0xf0) AM_DEVREADWRITE("oki", okim6295_device, read, write)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( gakupara_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( gakupara_io_map, AS_IO, 8, quizdna_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0x01) AM_WRITE(quizdna_bg_xscroll_w)
 	AM_RANGE(0x02, 0x02) AM_WRITE(quizdna_bg_yscroll_w)
@@ -78,11 +78,11 @@ static ADDRESS_MAP_START( gakupara_io_map, AS_IO, 8 )
 	AM_RANGE(0x91, 0x91) AM_READ_PORT("SERVICE")
 	AM_RANGE(0xc0, 0xc0) AM_WRITE(quizdna_rombank_w)
 	AM_RANGE(0xd0, 0xd0) AM_WRITE(quizdna_screen_ctrl_w)
-	AM_RANGE(0xe0, 0xe1) AM_DEVREADWRITE("ymsnd", ym2203_r, ym2203_w)
-	AM_RANGE(0xf0, 0xf0) AM_DEVREADWRITE_MODERN("oki", okim6295_device, read, write)
+	AM_RANGE(0xe0, 0xe1) AM_DEVREADWRITE_LEGACY("ymsnd", ym2203_r, ym2203_w)
+	AM_RANGE(0xf0, 0xf0) AM_DEVREADWRITE("oki", okim6295_device, read, write)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( gekiretu_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( gekiretu_io_map, AS_IO, 8, quizdna_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x02, 0x03) AM_WRITE(quizdna_bg_xscroll_w)
 	AM_RANGE(0x04, 0x04) AM_WRITE(quizdna_bg_yscroll_w)
@@ -93,8 +93,8 @@ static ADDRESS_MAP_START( gekiretu_io_map, AS_IO, 8 )
 	AM_RANGE(0x91, 0x91) AM_READ_PORT("SERVICE")
 	AM_RANGE(0xc0, 0xc0) AM_WRITE(gekiretu_rombank_w)
 	AM_RANGE(0xd0, 0xd0) AM_WRITE(quizdna_screen_ctrl_w)
-	AM_RANGE(0xe0, 0xe1) AM_DEVREADWRITE("ymsnd", ym2203_r, ym2203_w)
-	AM_RANGE(0xf0, 0xf0) AM_DEVREADWRITE_MODERN("oki", okim6295_device, read, write)
+	AM_RANGE(0xe0, 0xe1) AM_DEVREADWRITE_LEGACY("ymsnd", ym2203_r, ym2203_w)
+	AM_RANGE(0xf0, 0xf0) AM_DEVREADWRITE("oki", okim6295_device, read, write)
 ADDRESS_MAP_END
 
 
@@ -195,7 +195,7 @@ static INPUT_PORTS_START( quizdna )
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( gakupara )
-    PORT_START("DSW2")
+	PORT_START("DSW2")
 	PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( Coinage ) )
 	PORT_DIPSETTING(    0x00, "10 Coins/1 Credit" )
 	PORT_DIPSETTING(    0x01, DEF_STR( 9C_1C ) )
@@ -437,7 +437,7 @@ static const ym2203_interface ym2203_config =
 		DEVCB_NULL,
 		DEVCB_NULL
 	},
-	NULL
+	DEVCB_NULL
 };
 
 
@@ -447,21 +447,19 @@ static MACHINE_CONFIG_START( quizdna, quizdna_state )
 	MCFG_CPU_ADD("maincpu", Z80, MCLK/2) /* 8.000 MHz */
 	MCFG_CPU_PROGRAM_MAP(quizdna_map)
 	MCFG_CPU_IO_MAP(quizdna_io_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", quizdna_state,  irq0_line_hold)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(8*8, 56*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(quizdna)
+	MCFG_SCREEN_UPDATE_DRIVER(quizdna_state, screen_update_quizdna)
 
 	MCFG_GFXDECODE(quizdna)
 	MCFG_PALETTE_LENGTH(2048)
 
-	MCFG_VIDEO_START(quizdna)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -574,6 +572,6 @@ ROM_START( gekiretu )
 	ROM_LOAD( "quiz3.148",    0x000000,  0x000020, CRC(91267e8a) SHA1(ae5bd8efea5322c4d9986d06680a781392f9a642) )
 ROM_END
 
-GAME( 1991, gakupara, 0, gakupara, gakupara, 0, ROT0, "NMK",  "Quiz Gakuen Paradise (Japan)", 0 )
-GAME( 1992, quizdna,  0, quizdna,  quizdna,  0, ROT0, "Face", "Quiz DNA no Hanran (Japan)", 0 )
-GAME( 1992, gekiretu, 0, gekiretu, gekiretu, 0, ROT0, "Face", "Quiz Gekiretsu Scramble (Japan)", 0 )
+GAME( 1991, gakupara, 0, gakupara, gakupara, driver_device, 0, ROT0, "NMK",  "Quiz Gakuen Paradise (Japan)", 0 )
+GAME( 1992, quizdna,  0, quizdna,  quizdna, driver_device,  0, ROT0, "Face", "Quiz DNA no Hanran (Japan)", 0 )
+GAME( 1992, gekiretu, 0, gekiretu, gekiretu, driver_device, 0, ROT0, "Face", "Quiz Gekiretsu Scramble (Japan)", 0 )

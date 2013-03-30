@@ -1,27 +1,28 @@
 class travrusa_state : public driver_device
 {
 public:
-	travrusa_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	travrusa_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"),
+		m_spriteram(*this, "spriteram"){ }
 
 	/* memory pointers */
-	UINT8 *              m_videoram;
-	UINT8 *              m_spriteram;
-	size_t               m_spriteram_size;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_spriteram;
 
 	/* video-related */
 	tilemap_t*             m_bg_tilemap;
 	int                  m_scrollx[2];
+	DECLARE_WRITE8_MEMBER(travrusa_videoram_w);
+	DECLARE_WRITE8_MEMBER(travrusa_scroll_x_low_w);
+	DECLARE_WRITE8_MEMBER(travrusa_scroll_x_high_w);
+	DECLARE_WRITE8_MEMBER(travrusa_flipscreen_w);
+	DECLARE_DRIVER_INIT(shtridra);
+	DECLARE_DRIVER_INIT(motorace);
+	TILE_GET_INFO_MEMBER(get_tile_info);
+	virtual void machine_reset();
+	virtual void video_start();
+	virtual void palette_init();
+	DECLARE_PALETTE_INIT(shtrider);
+	UINT32 screen_update_travrusa(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
-
-/*----------- defined in video/travrusa.c -----------*/
-
-WRITE8_HANDLER( travrusa_videoram_w );
-WRITE8_HANDLER( travrusa_scroll_x_low_w );
-WRITE8_HANDLER( travrusa_scroll_x_high_w );
-WRITE8_HANDLER( travrusa_flipscreen_w );
-
-PALETTE_INIT( travrusa );
-PALETTE_INIT( shtrider );
-VIDEO_START( travrusa );
-SCREEN_UPDATE( travrusa );

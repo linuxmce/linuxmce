@@ -10,45 +10,42 @@ Atari Poolshark video emulation
 
 
 
-static TILE_GET_INFO( get_tile_info )
+TILE_GET_INFO_MEMBER(poolshrk_state::get_tile_info)
 {
-	poolshrk_state *state = machine.driver_data<poolshrk_state>();
-	SET_TILE_INFO(1, state->m_playfield_ram[tile_index] & 0x3f, 0, 0);
+	SET_TILE_INFO_MEMBER(1, m_playfield_ram[tile_index] & 0x3f, 0, 0);
 }
 
 
-VIDEO_START( poolshrk )
+void poolshrk_state::video_start()
 {
-	poolshrk_state *state = machine.driver_data<poolshrk_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_tile_info, tilemap_scan_rows,
-		 8, 8, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(poolshrk_state::get_tile_info),this), TILEMAP_SCAN_ROWS,
+			8, 8, 32, 32);
 
-	tilemap_set_transparent_pen(state->m_bg_tilemap, 0);
+	m_bg_tilemap->set_transparent_pen(0);
 }
 
 
-SCREEN_UPDATE( poolshrk )
+UINT32 poolshrk_state::screen_update_poolshrk(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	poolshrk_state *state = screen->machine().driver_data<poolshrk_state>();
 	int i;
 
-	tilemap_mark_all_tiles_dirty(state->m_bg_tilemap);
+	m_bg_tilemap->mark_all_dirty();
 
-	bitmap_fill(bitmap, cliprect, 0);
+	bitmap.fill(0, cliprect);
 
 	/* draw sprites */
 
 	for (i = 0; i < 16; i++)
 	{
-		int hpos = state->m_hpos_ram[i];
-		int vpos = state->m_vpos_ram[i];
+		int hpos = m_hpos_ram[i];
+		int vpos = m_vpos_ram[i];
 
-		drawgfx_transpen(bitmap, cliprect, screen->machine().gfx[0], i, (i == 0) ? 0 : 1, 0, 0,
+		drawgfx_transpen(bitmap, cliprect, machine().gfx[0], i, (i == 0) ? 0 : 1, 0, 0,
 			248 - hpos, vpos - 15, 0);
 	}
 
 	/* draw playfield */
 
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
 	return 0;
 }

@@ -9,13 +9,13 @@
 #include "emu.h"
 #include "includes/truco.h"
 
-PALETTE_INIT( truco )
+void truco_state::palette_init()
 {
 	int i;
 
-	for (i = 0;i < machine.total_colors();i++)
+	for (i = 0;i < machine().total_colors();i++)
 	{
-		int	r = ( i & 0x8 ) ? 0xff : 0x00;
+		int r = ( i & 0x8 ) ? 0xff : 0x00;
 		int g = ( i & 0x4 ) ? 0xff : 0x00;
 		int b = ( i & 0x2 ) ? 0xff : 0x00;
 
@@ -27,29 +27,28 @@ PALETTE_INIT( truco )
 			b >>= 1;
 		}
 
-		palette_set_color(machine,i,MAKE_RGB(r,g,b));
+		palette_set_color(machine(),i,MAKE_RGB(r,g,b));
 	}
 }
 
-SCREEN_UPDATE( truco )
+UINT32 truco_state::screen_update_truco(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	truco_state *state = screen->machine().driver_data<truco_state>();
-	UINT8 *videoram = state->m_videoram;
-	UINT8		*vid = videoram;
+	UINT8 *videoram = m_videoram;
+	UINT8       *vid = videoram;
 	int x, y;
 
 	for( y = 0; y < 192; y++ )
 	{
 		for( x = 0; x < 256; x++ )
 		{
-			int		pixel;
+			int     pixel;
 
 			if ( x & 1 )
 				pixel = vid[x>>1] & 0x0f;
 			else
 				pixel = ( vid[x>>1] >> 4 ) & 0x0f;
 
-			*BITMAP_ADDR16(bitmap, y, x) = pixel;
+			bitmap.pix16(y, x) = pixel;
 		}
 
 		vid += 0x80;

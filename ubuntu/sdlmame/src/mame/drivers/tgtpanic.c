@@ -16,11 +16,14 @@
 class tgtpanic_state : public driver_device
 {
 public:
-	tgtpanic_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	tgtpanic_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_ram(*this, "ram"){ }
 
-	UINT8 *m_ram;
+	required_shared_ptr<UINT8> m_ram;
 	UINT8 m_color;
+	DECLARE_WRITE8_MEMBER(color_w);
+	UINT32 screen_update_tgtpanic(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
 };
 
 
@@ -30,47 +33,45 @@ public:
  *
  *************************************/
 
-static SCREEN_UPDATE( tgtpanic )
+UINT32 tgtpanic_state::screen_update_tgtpanic(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	tgtpanic_state *state = screen->machine().driver_data<tgtpanic_state>();
 	UINT32 colors[4];
 	UINT32 offs;
 	UINT32 x, y;
 
 	colors[0] = 0;
 	colors[1] = 0xffffffff;
-	colors[2] = MAKE_RGB(pal1bit(state->m_color >> 2), pal1bit(state->m_color >> 1), pal1bit(state->m_color >> 0));
-	colors[3] = MAKE_RGB(pal1bit(state->m_color >> 6), pal1bit(state->m_color >> 5), pal1bit(state->m_color >> 4));
+	colors[2] = MAKE_RGB(pal1bit(m_color >> 2), pal1bit(m_color >> 1), pal1bit(m_color >> 0));
+	colors[3] = MAKE_RGB(pal1bit(m_color >> 6), pal1bit(m_color >> 5), pal1bit(m_color >> 4));
 
 	for (offs = 0; offs < 0x2000; ++offs)
 	{
-		UINT8 val = state->m_ram[offs];
+		UINT8 val = m_ram[offs];
 
 		y = (offs & 0x7f) << 1;
 		x = (offs >> 7) << 2;
 
 		/* I'm guessing the hardware doubles lines */
-		*BITMAP_ADDR32(bitmap, y + 0, x + 0) = colors[val & 3];
-		*BITMAP_ADDR32(bitmap, y + 1, x + 0) = colors[val & 3];
+		bitmap.pix32(y + 0, x + 0) = colors[val & 3];
+		bitmap.pix32(y + 1, x + 0) = colors[val & 3];
 		val >>= 2;
-		*BITMAP_ADDR32(bitmap, y + 0, x + 1) = colors[val & 3];
-		*BITMAP_ADDR32(bitmap, y + 1, x + 1) = colors[val & 3];
+		bitmap.pix32(y + 0, x + 1) = colors[val & 3];
+		bitmap.pix32(y + 1, x + 1) = colors[val & 3];
 		val >>= 2;
-		*BITMAP_ADDR32(bitmap, y + 0, x + 2) = colors[val & 3];
-		*BITMAP_ADDR32(bitmap, y + 1, x + 2) = colors[val & 3];
+		bitmap.pix32(y + 0, x + 2) = colors[val & 3];
+		bitmap.pix32(y + 1, x + 2) = colors[val & 3];
 		val >>= 2;
-		*BITMAP_ADDR32(bitmap, y + 0, x + 3) = colors[val & 3];
-		*BITMAP_ADDR32(bitmap, y + 1, x + 3) = colors[val & 3];
+		bitmap.pix32(y + 0, x + 3) = colors[val & 3];
+		bitmap.pix32(y + 1, x + 3) = colors[val & 3];
 	}
 
 	return 0;
 }
 
-static WRITE8_HANDLER( color_w )
+WRITE8_MEMBER(tgtpanic_state::color_w)
 {
-	tgtpanic_state *state = space->machine().driver_data<tgtpanic_state>();
-	space->machine().primary_screen->update_partial(space->machine().primary_screen->vpos());
-	state->m_color = data;
+	machine().primary_screen->update_partial(machine().primary_screen->vpos());
+	m_color = data;
 }
 
 
@@ -80,12 +81,12 @@ static WRITE8_HANDLER( color_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( prg_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( prg_map, AS_PROGRAM, 8, tgtpanic_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
-	AM_RANGE(0x8000, 0xbfff) AM_RAM AM_BASE_MEMBER(tgtpanic_state, m_ram)
+	AM_RANGE(0x8000, 0xbfff) AM_RAM AM_SHARE("ram")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( io_map, AS_IO, 8, tgtpanic_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0x00) AM_READ_PORT("IN0") AM_WRITE(color_w)
 	AM_RANGE(0x01, 0x01) AM_READ_PORT("IN1")
@@ -133,24 +134,23 @@ static MACHINE_CONFIG_START( tgtpanic, tgtpanic_state )
 	MCFG_CPU_ADD("maincpu", Z80, XTAL_4MHz)
 	MCFG_CPU_PROGRAM_MAP(prg_map)
 	MCFG_CPU_IO_MAP(io_map)
-	MCFG_CPU_PERIODIC_INT(irq0_line_hold, 20) /* Unverified */
+	MCFG_CPU_PERIODIC_INT_DRIVER(tgtpanic_state, irq0_line_hold,  20) /* Unverified */
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60) /* Unverified */
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500)) /* Unverified */
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
 	MCFG_SCREEN_SIZE(256, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 192 - 1, 0, 192 - 1)
-	MCFG_SCREEN_UPDATE(tgtpanic)
+	MCFG_SCREEN_UPDATE_DRIVER(tgtpanic_state, screen_update_tgtpanic)
 MACHINE_CONFIG_END
 
 
- /*************************************
- *
- *  ROM definition
- *
- *************************************/
+	/*************************************
+	*
+	*  ROM definition
+	*
+	*************************************/
 
 ROM_START( tgtpanic )
 	ROM_REGION( 0x10000, "maincpu", 0 )
@@ -164,4 +164,4 @@ ROM_END
  *
  *************************************/
 
-GAME( 1996, tgtpanic, 0, tgtpanic, tgtpanic, 0, ROT0, "Konami", "Target Panic", GAME_NO_SOUND_HW )
+GAME( 1996, tgtpanic, 0, tgtpanic, tgtpanic, driver_device, 0, ROT0, "Konami", "Target Panic", GAME_NO_SOUND_HW )

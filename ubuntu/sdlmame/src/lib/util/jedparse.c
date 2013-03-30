@@ -57,7 +57,7 @@
     DEBUGGING
 ***************************************************************************/
 
-#define LOG_PARSE		0
+#define LOG_PARSE       0
 
 
 
@@ -65,11 +65,10 @@
     TYPE DEFINITIONS
 ***************************************************************************/
 
-typedef struct _parse_info parse_info;
-struct _parse_info
+struct parse_info
 {
-	UINT16		checksum;				/* checksum value */
-	UINT32		explicit_numfuses;		/* explicitly specified number of fuses */
+	UINT16      checksum;               /* checksum value */
+	UINT32      explicit_numfuses;      /* explicitly specified number of fuses */
 };
 
 
@@ -182,14 +181,14 @@ static void process_field(jed_data *data, const UINT8 *cursrc, const UINT8 *srce
 			/* read the fuse number */
 			cursrc++;
 			curfuse = suck_number(&cursrc);
-			if (LOG_PARSE) printf("L%d\n", curfuse);
+			if (LOG_PARSE) printf("L%u\n", curfuse);
 
 			/* read digits, skipping delimiters */
 			for ( ; cursrc < srcend; cursrc++)
 				if (*cursrc == '0' || *cursrc == '1')
 				{
 					jed_set_fuse(data, curfuse, *cursrc - '0');
-					if (LOG_PARSE) printf("  fuse %d = %d\n", curfuse, 0);
+					if (LOG_PARSE) printf("  fuse %u = %d\n", curfuse, 0);
 					if (curfuse >= data->numfuses)
 						data->numfuses = curfuse + 1;
 					curfuse++;
@@ -460,4 +459,3 @@ size_t jedbin_output(const jed_data *data, void *result, size_t length)
 	/* return the final size */
 	return 4 + (data->numfuses + 7) / 8;
 }
-

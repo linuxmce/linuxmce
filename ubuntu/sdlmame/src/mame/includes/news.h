@@ -2,26 +2,27 @@
 class news_state : public driver_device
 {
 public:
-	news_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	news_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_bgram(*this, "bgram"),
+		m_fgram(*this, "fgram"){ }
 
 	/* memory pointers */
-	UINT8 *  m_bgram;
-	UINT8 *  m_fgram;
+	required_shared_ptr<UINT8> m_bgram;
+	required_shared_ptr<UINT8> m_fgram;
 //  UINT8 *  m_paletteram;    // currently this uses generic palette handling
 
 	/* video-related */
 	tilemap_t *m_fg_tilemap;
 	tilemap_t *m_bg_tilemap;
 	int      m_bgpic;
+	DECLARE_WRITE8_MEMBER(news_fgram_w);
+	DECLARE_WRITE8_MEMBER(news_bgram_w);
+	DECLARE_WRITE8_MEMBER(news_bgpic_w);
+	TILE_GET_INFO_MEMBER(get_fg_tile_info);
+	TILE_GET_INFO_MEMBER(get_bg_tile_info);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	UINT32 screen_update_news(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
-
-
-/*----------- defined in video/news.c -----------*/
-
-WRITE8_HANDLER( news_fgram_w );
-WRITE8_HANDLER( news_bgram_w );
-WRITE8_HANDLER( news_bgpic_w );
-
-VIDEO_START( news );
-SCREEN_UPDATE( news );

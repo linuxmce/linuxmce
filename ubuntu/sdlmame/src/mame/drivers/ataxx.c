@@ -34,8 +34,8 @@
 #include "sound/2151intf.h"
 
 
-#define MASTER_CLOCK		XTAL_28_63636MHz
-#define MCU_CLOCK			XTAL_16MHz
+#define MASTER_CLOCK        XTAL_28_63636MHz
+#define MCU_CLOCK           XTAL_16MHz
 
 
 
@@ -45,22 +45,22 @@
  *
  *************************************/
 
-static ADDRESS_MAP_START( master_map_program, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( master_map_program, AS_PROGRAM, 8, leland_state )
 	AM_RANGE(0x0000, 0x1fff) AM_ROM
 	AM_RANGE(0x2000, 0x9fff) AM_ROMBANK("bank1")
 	AM_RANGE(0xa000, 0xdfff) AM_ROMBANK("bank2") AM_WRITE(ataxx_battery_ram_w) AM_SHARE("battery")
 	AM_RANGE(0xe000, 0xf7ff) AM_RAM
-	AM_RANGE(0xf800, 0xffff) AM_READWRITE(ataxx_paletteram_and_misc_r, ataxx_paletteram_and_misc_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0xf800, 0xffff) AM_READWRITE(ataxx_paletteram_and_misc_r, ataxx_paletteram_and_misc_w) AM_SHARE("paletteram")
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( master_map_io, AS_IO, 8 )
+static ADDRESS_MAP_START( master_map_io, AS_IO, 8, leland_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x04, 0x04) AM_DEVREAD("custom", leland_80186_response_r)
-	AM_RANGE(0x05, 0x05) AM_DEVWRITE("custom", leland_80186_command_hi_w)
-	AM_RANGE(0x06, 0x06) AM_DEVWRITE("custom", leland_80186_command_lo_w)
-	AM_RANGE(0x0c, 0x0c) AM_DEVWRITE("custom", ataxx_80186_control_w)
-	AM_RANGE(0x20, 0x20) AM_DEVREADWRITE("eeprom", ataxx_eeprom_r, ataxx_eeprom_w)
+	AM_RANGE(0x04, 0x04) AM_DEVREAD_LEGACY("custom", leland_80186_response_r)
+	AM_RANGE(0x05, 0x05) AM_DEVWRITE_LEGACY("custom", leland_80186_command_hi_w)
+	AM_RANGE(0x06, 0x06) AM_DEVWRITE_LEGACY("custom", leland_80186_command_lo_w)
+	AM_RANGE(0x0c, 0x0c) AM_DEVWRITE_LEGACY("custom", ataxx_80186_control_w)
+	AM_RANGE(0x20, 0x20) AM_READWRITE(ataxx_eeprom_r, ataxx_eeprom_w)
 	AM_RANGE(0xd0, 0xef) AM_READWRITE(ataxx_mvram_port_r, ataxx_mvram_port_w)
 	AM_RANGE(0xf0, 0xff) AM_READWRITE(ataxx_master_input_r, ataxx_master_output_w)
 ADDRESS_MAP_END
@@ -74,7 +74,7 @@ ADDRESS_MAP_END
  *
  *************************************/
 
-static ADDRESS_MAP_START( slave_map_program, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( slave_map_program, AS_PROGRAM, 8, leland_state )
 	AM_RANGE(0x0000, 0x1fff) AM_ROM
 	AM_RANGE(0x2000, 0x9fff) AM_ROMBANK("bank3")
 	AM_RANGE(0xa000, 0xdfff) AM_ROM
@@ -85,7 +85,7 @@ static ADDRESS_MAP_START( slave_map_program, AS_PROGRAM, 8 )
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( slave_map_io, AS_IO, 8 )
+static ADDRESS_MAP_START( slave_map_io, AS_IO, 8, leland_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x60, 0x7f) AM_READWRITE(ataxx_svram_port_r, ataxx_svram_port_w)
 ADDRESS_MAP_END
@@ -99,42 +99,42 @@ ADDRESS_MAP_END
  *************************************/
 
 /* Helps document the input ports. */
-#define IPT_SLAVEHALT	IPT_SPECIAL
+#define IPT_SLAVEHALT   IPT_SPECIAL
 
 
 static INPUT_PORTS_START( ataxx )
-	PORT_START("IN0")		/* 0xF6 */
+	PORT_START("IN0")       /* 0xF6 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* huh? affects trackball movement */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )    /* huh? affects trackball movement */
 	PORT_SERVICE_NO_TOGGLE( 0x08, IP_ACTIVE_LOW )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 
-	PORT_START("IN1")		/* 0xF7 */
+	PORT_START("IN1")       /* 0xF7 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SLAVEHALT )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_BIT( 0xfc, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("IN2")		/* 0x20 */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE("eeprom", eeprom_read_bit)
+	PORT_START("IN2")       /* 0x20 */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE_MEMBER("eeprom", eeprom_device, read_bit)
 	PORT_BIT( 0xfe, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("AN0")		/* 0x00 - analog X */
+	PORT_START("AN0")       /* 0x00 - analog X */
 	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_X ) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_PLAYER(1)
-	PORT_START("AN1")		/* 0x01 - analog Y */
+	PORT_START("AN1")       /* 0x01 - analog Y */
 	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_PLAYER(1)
-	PORT_START("AN2")		/* 0x02 - analog X */
+	PORT_START("AN2")       /* 0x02 - analog X */
 	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_X ) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_PLAYER(2)
-	PORT_START("AN3")		/* 0x03 - analog Y */
+	PORT_START("AN3")       /* 0x03 - analog Y */
 	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_PLAYER(2)
 INPUT_PORTS_END
 
 
 static INPUT_PORTS_START( wsf )
-	PORT_START("IN0")		/* 0xF6 */
+	PORT_START("IN0")       /* 0xF6 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN3 )
@@ -144,18 +144,18 @@ static INPUT_PORTS_START( wsf )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(3)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(4)
 
-	PORT_START("IN1")		/* 0xF7 */
+	PORT_START("IN1")       /* 0xF7 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SLAVEHALT )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_BIT( 0xfc, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("IN2")		/* 0x20 */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE("eeprom", eeprom_read_bit)
+	PORT_START("IN2")       /* 0x20 */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE_MEMBER("eeprom", eeprom_device, read_bit)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_SERVICE_NO_TOGGLE( 0x04, IP_ACTIVE_LOW )
 	PORT_BIT( 0xf8, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("P1_P2")		/* 0x0D */
+	PORT_START("P1_P2")     /* 0x0D */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(2)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(2)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(2)
@@ -165,7 +165,7 @@ static INPUT_PORTS_START( wsf )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(1)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(1)
 
-	PORT_START("P3_P4")		/* 0x0E */
+	PORT_START("P3_P4")     /* 0x0E */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(4)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(4)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(4)
@@ -175,7 +175,7 @@ static INPUT_PORTS_START( wsf )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(3)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(3)
 
-	PORT_START("BUTTONS")	/* 0x0F */
+	PORT_START("BUTTONS")   /* 0x0F */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
@@ -188,7 +188,7 @@ INPUT_PORTS_END
 
 
 static INPUT_PORTS_START( indyheat )
-	PORT_START("IN0")		/* 0xF6 */
+	PORT_START("IN0")       /* 0xF6 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_IMPULSE(1)
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_COIN2 ) PORT_IMPULSE(1)
@@ -196,37 +196,37 @@ static INPUT_PORTS_START( indyheat )
 	PORT_BIT( 0x70, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
 
-	PORT_START("IN1")		/* 0xF7 */
+	PORT_START("IN1")       /* 0xF7 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SLAVEHALT )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_BIT( 0xfc, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("IN2")		/* 0x20 */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE("eeprom", eeprom_read_bit)
+	PORT_START("IN2")       /* 0x20 */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE_MEMBER("eeprom", eeprom_device, read_bit)
 	PORT_BIT( 0xfe, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("AN0")		/* Analog wheel 1 */
+	PORT_START("AN0")       /* Analog wheel 1 */
 	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_PLAYER(1)
-	PORT_START("AN1")		/* Analog wheel 2 */
+	PORT_START("AN1")       /* Analog wheel 2 */
 	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_PLAYER(2)
-	PORT_START("AN2")		/* Analog wheel 3 */
+	PORT_START("AN2")       /* Analog wheel 3 */
 	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_PLAYER(3)
-	PORT_START("AN3")		/* Analog pedal 1 */
+	PORT_START("AN3")       /* Analog pedal 1 */
 	PORT_BIT( 0xff, 0x00, IPT_PEDAL ) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_PLAYER(1)
-	PORT_START("AN4")		/* Analog pedal 2 */
+	PORT_START("AN4")       /* Analog pedal 2 */
 	PORT_BIT( 0xff, 0x00, IPT_PEDAL ) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_PLAYER(2)
-	PORT_START("AN5")		/* Analog pedal 3 */
+	PORT_START("AN5")       /* Analog pedal 3 */
 	PORT_BIT( 0xff, 0x00, IPT_PEDAL ) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_PLAYER(3)
 
-	PORT_START("P1")		/* 0x0D */
+	PORT_START("P1")        /* 0x0D */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
 	PORT_BIT( 0xfe, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("P2")		/* 0x0E */
+	PORT_START("P2")        /* 0x0E */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT( 0xfe, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("P3")		/* 0x0F */
+	PORT_START("P3")        /* 0x0F */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(3)
 	PORT_BIT( 0x7e, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_SERVICE_NO_TOGGLE( 0x80, IP_ACTIVE_LOW )
@@ -234,7 +234,7 @@ INPUT_PORTS_END
 
 
 static INPUT_PORTS_START( brutforc )
-	PORT_START("IN0")		/* 0xF6 */
+	PORT_START("IN0")       /* 0xF6 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_COIN2 ) PORT_IMPULSE(1)
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_IMPULSE(1)
@@ -242,16 +242,16 @@ static INPUT_PORTS_START( brutforc )
 	PORT_BIT( 0x70, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_SERVICE_NO_TOGGLE( 0x80, IP_ACTIVE_LOW )
 
-	PORT_START("IN1")		/* 0xF7 */
+	PORT_START("IN1")       /* 0xF7 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SLAVEHALT )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_BIT( 0xfc, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("IN2")		/* 0x20 */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE("eeprom", eeprom_read_bit)
+	PORT_START("IN2")       /* 0x20 */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE_MEMBER("eeprom", eeprom_device, read_bit)
 	PORT_BIT( 0xfe, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("P1")		/* 0x0E */
+	PORT_START("P1")        /* 0x0E */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(1)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(1)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(1)
@@ -261,7 +261,7 @@ static INPUT_PORTS_START( brutforc )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("P2")		/* 0x0D */
+	PORT_START("P2")        /* 0x0D */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(2)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(2)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(2)
@@ -271,7 +271,7 @@ static INPUT_PORTS_START( brutforc )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("P3")		/* 0x0F */
+	PORT_START("P3")        /* 0x0F */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(3)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(3)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(3)
@@ -325,8 +325,8 @@ static MACHINE_CONFIG_START( ataxx, leland_state )
 	MCFG_CPU_PROGRAM_MAP(leland_80186_map_program)
 	MCFG_CPU_IO_MAP(ataxx_80186_map_io)
 
-	MCFG_MACHINE_START(ataxx)
-	MCFG_MACHINE_RESET(ataxx)
+	MCFG_MACHINE_START_OVERRIDE(leland_state,ataxx)
+	MCFG_MACHINE_RESET_OVERRIDE(leland_state,ataxx)
 
 	MCFG_EEPROM_ADD("eeprom", eeprom_intf)
 	MCFG_NVRAM_ADD_0FILL("battery")
@@ -347,7 +347,7 @@ static MACHINE_CONFIG_DERIVED( wsf, ataxx )
 	/* basic machine hardware */
 
 	/* sound hardware */
-	MCFG_SOUND_ADD("ymsnd", YM2151, 4000000)
+	MCFG_YM2151_ADD("ymsnd", 4000000)
 	MCFG_SOUND_ROUTE(0, "mono", 0.40)
 	MCFG_SOUND_ROUTE(1, "mono", 0.40)
 MACHINE_CONFIG_END
@@ -363,7 +363,7 @@ MACHINE_CONFIG_END
 ROM_START( ataxx )
 	ROM_REGION( 0x30000, "master", 0 )
 	ROM_LOAD( "e-302-31005-04.u38",   0x00000, 0x20000, CRC(e1cf6236) SHA1(fabf423a006b1db22273c6fffa03edc148d7d957) )
-	ROM_RELOAD(              0x10000, 0x20000 )
+	ROM_RELOAD(                       0x10000, 0x20000 )
 
 	ROM_REGION( 0x60000, "slave", 0 )
 	ROM_LOAD( "e-302-31012-01.u111",  0x00000, 0x20000, CRC(9a3297cc) SHA1(1dfa0bacd2f2b18d44bfc2d55c40291c1b142f8f) )
@@ -371,23 +371,23 @@ ROM_START( ataxx )
 	ROM_LOAD( "e-302-31014-01.u113",  0x40000, 0x20000, CRC(8cf3e101) SHA1(672a3a0ca0f5334cf614bc49cbc1ae5ccea54cbe) )
 
 	ROM_REGION( 0x100000, "audiocpu", 0 )
-	ROM_LOAD16_BYTE( "e-302-31003-01.u15",  0x20001, 0x20000, CRC(8bb3233b) SHA1(5131ad78bdf904cde36534e99efa5576fcea25c0) )
+	ROM_LOAD16_BYTE( "e-302-31003-01.u15", 0x20001, 0x20000, CRC(8bb3233b) SHA1(5131ad78bdf904cde36534e99efa5576fcea25c0) )
 	ROM_LOAD16_BYTE( "e-302-31001-01.u1",  0x20000, 0x20000, CRC(728d75f2) SHA1(d9e8e742cc2d536bd62370c1e474c7036e4392bb) )
-	ROM_LOAD16_BYTE( "e-302-31004-01.u16",  0x60001, 0x20000, CRC(f2bdff48) SHA1(f34eb16ea180effffd81d637acc3d96bffaf81c9) )
-	ROM_RELOAD(                    0xc0001, 0x20000 )
+	ROM_LOAD16_BYTE( "e-302-31004-01.u16", 0x60001, 0x20000, CRC(f2bdff48) SHA1(f34eb16ea180effffd81d637acc3d96bffaf81c9) )
+	ROM_RELOAD(                            0xc0001, 0x20000 )
 	ROM_LOAD16_BYTE( "e-302-31002-01.u2",  0x60000, 0x20000, CRC(ca06a394) SHA1(0858908bd150dd7354536e10b2a386b45f17ac9f) )
-	ROM_RELOAD(                    0xc0000, 0x20000 )
+	ROM_RELOAD(                            0xc0000, 0x20000 )
 
 	ROM_REGION( 0xc0000, "gfx1", 0 )
-	ROM_LOAD( "e-302-31006-01.u98",  0x00000, 0x20000, CRC(59d0f2ae) SHA1(8da5dc006e192af98458227e79421b6a07ac1cdc) )
-	ROM_LOAD( "e-302-31007-01.u99",  0x20000, 0x20000, CRC(6ab7db25) SHA1(25c2fa23b99ac4bab5a9b851c2087de44512a5c2) )
+	ROM_LOAD( "e-302-31006-01.u98",   0x00000, 0x20000, CRC(59d0f2ae) SHA1(8da5dc006e192af98458227e79421b6a07ac1cdc) )
+	ROM_LOAD( "e-302-31007-01.u99",   0x20000, 0x20000, CRC(6ab7db25) SHA1(25c2fa23b99ac4bab5a9b851c2087de44512a5c2) )
 	ROM_LOAD( "e-302-31008-01.u100",  0x40000, 0x20000, CRC(2352849e) SHA1(f49394b6efb6a87d86516ec0a5ddd582f96f7e5d) )
 	ROM_LOAD( "e-302-31009-01.u101",  0x60000, 0x20000, CRC(4c31e02b) SHA1(2d8dd97a2a737bafb44dced7ce3eef22d7d14cbe) )
 	ROM_LOAD( "e-302-31010-01.u102",  0x80000, 0x20000, CRC(a951228c) SHA1(7ec5cf4d0aa3702be9236d155bea373a06c0be03) )
 	ROM_LOAD( "e-302-31011-01.u103",  0xa0000, 0x20000, CRC(ed326164) SHA1(8706192f525ece200587cee7e7beb4a1975bf63e) )
 
 	ROM_REGION( 0x00001, "user1", ROMREGION_ERASEFF ) /* X-ROM (data used by main processor) */
-    /* Empty / not used */
+	/* Empty / not used */
 
 	ROM_REGION16_BE( 0x100, "eeprom", 0 )
 	ROM_LOAD16_WORD( "eeprom-ataxx.bin", 0x0000, 0x0100, CRC(989cdb8c) SHA1(13b30a328e71a195960e98e50d1657a8b6860dcf) )
@@ -397,7 +397,7 @@ ROM_END
 ROM_START( ataxxa )
 	ROM_REGION( 0x30000, "master", 0 )
 	ROM_LOAD( "u38.u38",   0x00000, 0x20000, CRC(3378937d) SHA1(3c62da7e11b2860c7fe3a35c077cadcf4d0272ca) )
-	ROM_RELOAD(        0x10000, 0x20000 )
+	ROM_RELOAD(            0x10000, 0x20000 )
 
 	ROM_REGION( 0x60000, "slave", 0 )
 	ROM_LOAD( "e-302-31012-01.u111",  0x00000, 0x20000, CRC(9a3297cc) SHA1(1dfa0bacd2f2b18d44bfc2d55c40291c1b142f8f) )
@@ -405,23 +405,23 @@ ROM_START( ataxxa )
 	ROM_LOAD( "e-302-31014-01.u113",  0x40000, 0x20000, CRC(8cf3e101) SHA1(672a3a0ca0f5334cf614bc49cbc1ae5ccea54cbe) )
 
 	ROM_REGION( 0x100000, "audiocpu", 0 )
-	ROM_LOAD16_BYTE( "e-302-31003-01.u15",  0x20001, 0x20000, CRC(8bb3233b) SHA1(5131ad78bdf904cde36534e99efa5576fcea25c0) )
+	ROM_LOAD16_BYTE( "e-302-31003-01.u15", 0x20001, 0x20000, CRC(8bb3233b) SHA1(5131ad78bdf904cde36534e99efa5576fcea25c0) )
 	ROM_LOAD16_BYTE( "e-302-31001-01.u1",  0x20000, 0x20000, CRC(728d75f2) SHA1(d9e8e742cc2d536bd62370c1e474c7036e4392bb) )
-	ROM_LOAD16_BYTE( "e-302-31004-01.u16",  0x60001, 0x20000, CRC(f2bdff48) SHA1(f34eb16ea180effffd81d637acc3d96bffaf81c9) )
-	ROM_RELOAD(                    0xc0001, 0x20000 )
+	ROM_LOAD16_BYTE( "e-302-31004-01.u16", 0x60001, 0x20000, CRC(f2bdff48) SHA1(f34eb16ea180effffd81d637acc3d96bffaf81c9) )
+	ROM_RELOAD(                            0xc0001, 0x20000 )
 	ROM_LOAD16_BYTE( "e-302-31002-01.u2",  0x60000, 0x20000, CRC(ca06a394) SHA1(0858908bd150dd7354536e10b2a386b45f17ac9f) )
-	ROM_RELOAD(                    0xc0000, 0x20000 )
+	ROM_RELOAD(                            0xc0000, 0x20000 )
 
 	ROM_REGION( 0xc0000, "gfx1", 0 )
-	ROM_LOAD( "e-302-31006-01.u98",  0x00000, 0x20000, CRC(59d0f2ae) SHA1(8da5dc006e192af98458227e79421b6a07ac1cdc) )
-	ROM_LOAD( "e-302-31007-01.u99",  0x20000, 0x20000, CRC(6ab7db25) SHA1(25c2fa23b99ac4bab5a9b851c2087de44512a5c2) )
+	ROM_LOAD( "e-302-31006-01.u98",   0x00000, 0x20000, CRC(59d0f2ae) SHA1(8da5dc006e192af98458227e79421b6a07ac1cdc) )
+	ROM_LOAD( "e-302-31007-01.u99",   0x20000, 0x20000, CRC(6ab7db25) SHA1(25c2fa23b99ac4bab5a9b851c2087de44512a5c2) )
 	ROM_LOAD( "e-302-31008-01.u100",  0x40000, 0x20000, CRC(2352849e) SHA1(f49394b6efb6a87d86516ec0a5ddd582f96f7e5d) )
 	ROM_LOAD( "e-302-31009-01.u101",  0x60000, 0x20000, CRC(4c31e02b) SHA1(2d8dd97a2a737bafb44dced7ce3eef22d7d14cbe) )
 	ROM_LOAD( "e-302-31010-01.u102",  0x80000, 0x20000, CRC(a951228c) SHA1(7ec5cf4d0aa3702be9236d155bea373a06c0be03) )
 	ROM_LOAD( "e-302-31011-01.u103",  0xa0000, 0x20000, CRC(ed326164) SHA1(8706192f525ece200587cee7e7beb4a1975bf63e) )
 
 	ROM_REGION( 0x00001, "user1", ROMREGION_ERASEFF ) /* X-ROM (data used by main processor) */
-    /* Empty / not used */
+	/* Empty / not used */
 
 	ROM_REGION16_BE( 0x100, "eeprom", 0 )
 	ROM_LOAD16_WORD( "eeprom-ataxx.bin", 0x0000, 0x0100, CRC(989cdb8c) SHA1(13b30a328e71a195960e98e50d1657a8b6860dcf) )
@@ -430,7 +430,7 @@ ROM_END
 ROM_START( ataxxe )
 	ROM_REGION( 0x30000, "master", 0 )
 	ROM_LOAD( "euro_ataxx_u38_3079.bin", 0x00000, 0x20000, CRC(16aef3b7) SHA1(b2de1e3fd032ab8cc5ed995522f528f0b3283d8a) )
-	ROM_RELOAD(             0x10000, 0x20000 )
+	ROM_RELOAD(                          0x10000, 0x20000 )
 
 	ROM_REGION( 0x60000, "slave", 0 )
 	ROM_LOAD( "e-302-31012-01.u111",  0x00000, 0x20000, CRC(9a3297cc) SHA1(1dfa0bacd2f2b18d44bfc2d55c40291c1b142f8f) )
@@ -441,20 +441,20 @@ ROM_START( ataxxe )
 	ROM_LOAD16_BYTE( "302-38003-01.u15", 0x20001, 0x20000, CRC(db266d3f) SHA1(31c9baf4548b23e1e1939069620a937ee98a7b09) )
 	ROM_LOAD16_BYTE( "302-38001-01.u1",  0x20000, 0x20000, CRC(d6db2724) SHA1(d3c7b45b165eb7c9a6369863b273ecac5c31ca65) )
 	ROM_LOAD16_BYTE( "302-38004-01.u16", 0x60001, 0x20000, CRC(2b127f56) SHA1(909fed387ad6bb1d83f9cee271e6dc851ac50525) )
-	ROM_RELOAD(                    0xc0001, 0x20000 )
+	ROM_RELOAD(                          0xc0001, 0x20000 )
 	ROM_LOAD16_BYTE( "302-38002-01.u2",  0x60000, 0x20000, CRC(1b63b882) SHA1(cb04e641fc173f787a0f48c98f5198db265c26d8) )
-	ROM_RELOAD(                    0xc0000, 0x20000 )
+	ROM_RELOAD(                          0xc0000, 0x20000 )
 
 	ROM_REGION( 0xc0000, "gfx1", 0 )
-	ROM_LOAD( "e-302-31006-01.u98",  0x00000, 0x20000, CRC(59d0f2ae) SHA1(8da5dc006e192af98458227e79421b6a07ac1cdc) )
-	ROM_LOAD( "e-302-31007-01.u99",  0x20000, 0x20000, CRC(6ab7db25) SHA1(25c2fa23b99ac4bab5a9b851c2087de44512a5c2) )
+	ROM_LOAD( "e-302-31006-01.u98",   0x00000, 0x20000, CRC(59d0f2ae) SHA1(8da5dc006e192af98458227e79421b6a07ac1cdc) )
+	ROM_LOAD( "e-302-31007-01.u99",   0x20000, 0x20000, CRC(6ab7db25) SHA1(25c2fa23b99ac4bab5a9b851c2087de44512a5c2) )
 	ROM_LOAD( "e-302-31008-01.u100",  0x40000, 0x20000, CRC(2352849e) SHA1(f49394b6efb6a87d86516ec0a5ddd582f96f7e5d) )
 	ROM_LOAD( "e-302-31009-01.u101",  0x60000, 0x20000, CRC(4c31e02b) SHA1(2d8dd97a2a737bafb44dced7ce3eef22d7d14cbe) )
 	ROM_LOAD( "e-302-31010-01.u102",  0x80000, 0x20000, CRC(a951228c) SHA1(7ec5cf4d0aa3702be9236d155bea373a06c0be03) )
 	ROM_LOAD( "e-302-31011-01.u103",  0xa0000, 0x20000, CRC(ed326164) SHA1(8706192f525ece200587cee7e7beb4a1975bf63e) )
 
 	ROM_REGION( 0x00001, "user1", ROMREGION_ERASEFF ) /* X-ROM (data used by main processor) */
-    /* Empty / not used */
+	/* Empty / not used */
 
 	ROM_REGION16_BE( 0x100, "eeprom", 0 )
 	ROM_LOAD16_WORD( "eeprom-ataxxe.bin", 0x0000, 0x0100, CRC(8df1dee1) SHA1(876c5d5d506c31fdf4c3e611a1869b50ceadc6fd) )
@@ -475,20 +475,20 @@ ROM_START( ataxxj )
 	ROM_LOAD16_BYTE( "302-38003-01.u15", 0x20001, 0x20000, CRC(db266d3f) SHA1(31c9baf4548b23e1e1939069620a937ee98a7b09) )
 	ROM_LOAD16_BYTE( "302-38001-01.u1",  0x20000, 0x20000, CRC(d6db2724) SHA1(d3c7b45b165eb7c9a6369863b273ecac5c31ca65) )
 	ROM_LOAD16_BYTE( "302-38004-01.u16", 0x60001, 0x20000, CRC(2b127f56) SHA1(909fed387ad6bb1d83f9cee271e6dc851ac50525) )
-	ROM_RELOAD(                    0xc0001, 0x20000 )
+	ROM_RELOAD(                          0xc0001, 0x20000 )
 	ROM_LOAD16_BYTE( "302-38002-01.u2",  0x60000, 0x20000, CRC(1b63b882) SHA1(cb04e641fc173f787a0f48c98f5198db265c26d8) )
-	ROM_RELOAD(                    0xc0000, 0x20000 )
+	ROM_RELOAD(                          0xc0000, 0x20000 )
 
 	ROM_REGION( 0xc0000, "gfx1", 0 )
-	ROM_LOAD( "e-302-31006-01.u98",  0x00000, 0x20000, CRC(59d0f2ae) SHA1(8da5dc006e192af98458227e79421b6a07ac1cdc) )
-	ROM_LOAD( "e-302-31007-01.u99",  0x20000, 0x20000, CRC(6ab7db25) SHA1(25c2fa23b99ac4bab5a9b851c2087de44512a5c2) )
+	ROM_LOAD( "e-302-31006-01.u98",   0x00000, 0x20000, CRC(59d0f2ae) SHA1(8da5dc006e192af98458227e79421b6a07ac1cdc) )
+	ROM_LOAD( "e-302-31007-01.u99",   0x20000, 0x20000, CRC(6ab7db25) SHA1(25c2fa23b99ac4bab5a9b851c2087de44512a5c2) )
 	ROM_LOAD( "e-302-31008-01.u100",  0x40000, 0x20000, CRC(2352849e) SHA1(f49394b6efb6a87d86516ec0a5ddd582f96f7e5d) )
 	ROM_LOAD( "e-302-31009-01.u101",  0x60000, 0x20000, CRC(4c31e02b) SHA1(2d8dd97a2a737bafb44dced7ce3eef22d7d14cbe) )
 	ROM_LOAD( "e-302-31010-01.u102",  0x80000, 0x20000, CRC(a951228c) SHA1(7ec5cf4d0aa3702be9236d155bea373a06c0be03) )
 	ROM_LOAD( "e-302-31011-01.u103",  0xa0000, 0x20000, CRC(ed326164) SHA1(8706192f525ece200587cee7e7beb4a1975bf63e) )
 
 	ROM_REGION( 0x00001, "user1", ROMREGION_ERASEFF ) /* X-ROM (data used by main processor) */
-    /* Empty / not used */
+	/* Empty / not used */
 
 	ROM_REGION16_BE( 0x100, "eeprom", 0 )
 	ROM_LOAD16_WORD( "eeprom-ataxxj.bin", 0x0000, 0x0100, CRC(8df1dee1) SHA1(876c5d5d506c31fdf4c3e611a1869b50ceadc6fd) )
@@ -669,9 +669,9 @@ ROM_START( asylum )
 	ROM_LOAD16_BYTE( "asy-65.3",  0x20001, 0x20000, CRC(709bdc78) SHA1(ca235c2ab26fbb153ffe775a1a44b31695902d3f) )
 	ROM_LOAD16_BYTE( "asy-65.6",  0x20000, 0x20000, CRC(d019fb2e) SHA1(9d16b0399f03067e7bf79043904a1045119937c6) )
 	ROM_LOAD16_BYTE( "asy-65.4",  0x60001, 0x20000, CRC(1882c3b2) SHA1(71af49d1f59e257e5f8a0fc590d0533dda5bf82b) )
-	ROM_RELOAD(             0xc0001, 0x20000 )
+	ROM_RELOAD(                   0xc0001, 0x20000 )
 	ROM_LOAD16_BYTE( "asy-65.5",  0x60000, 0x20000, CRC(5814b307) SHA1(6db97804d58941a5543424d8c4658cb3edab1e43) )
-	ROM_RELOAD(             0xc0000, 0x20000 )
+	ROM_RELOAD(                   0xc0000, 0x20000 )
 
 	ROM_REGION( 0x180000, "gfx1", 0 )
 	ROM_LOAD( "asy-chr0.145",  0x000000, 0x40000, CRC(4dbcae49) SHA1(0aa54daa099d6590a41df4a24a27bf6463b3e116) )
@@ -705,79 +705,79 @@ ROM_END
  *
  *************************************/
 
-static DRIVER_INIT( ataxx )
+DRIVER_INIT_MEMBER(leland_state,ataxx)
 {
-	leland_rotate_memory(machine, "master");
-	leland_rotate_memory(machine, "slave");
+	leland_rotate_memory(machine(), "master");
+	leland_rotate_memory(machine(), "slave");
 
 	/* set up additional input ports */
-	machine.device("master")->memory().space(AS_IO)->install_legacy_read_handler(0x00, 0x03, FUNC(ataxx_trackball_r));
+	machine().device("master")->memory().space(AS_IO).install_read_handler(0x00, 0x03, read8_delegate(FUNC(leland_state::ataxx_trackball_r),this));
 }
 
 
-static DRIVER_INIT( ataxxj )
+DRIVER_INIT_MEMBER(leland_state,ataxxj)
 {
-	leland_rotate_memory(machine, "master");
-	leland_rotate_memory(machine, "slave");
+	leland_rotate_memory(machine(), "master");
+	leland_rotate_memory(machine(), "slave");
 
 	/* set up additional input ports */
-	machine.device("master")->memory().space(AS_IO)->install_legacy_read_handler(0x00, 0x03, FUNC(ataxx_trackball_r));
+	machine().device("master")->memory().space(AS_IO).install_read_handler(0x00, 0x03, read8_delegate(FUNC(leland_state::ataxx_trackball_r),this));
 }
 
 
-static DRIVER_INIT( wsf )
+DRIVER_INIT_MEMBER(leland_state,wsf)
 {
-	leland_rotate_memory(machine, "master");
-	leland_rotate_memory(machine, "slave");
+	leland_rotate_memory(machine(), "master");
+	leland_rotate_memory(machine(), "slave");
 
 	/* set up additional input ports */
-	machine.device("master")->memory().space(AS_IO)->install_read_port(0x0d, 0x0d, "P1_P2");
-	machine.device("master")->memory().space(AS_IO)->install_read_port(0x0e, 0x0e, "P3_P4");
-	machine.device("master")->memory().space(AS_IO)->install_read_port(0x0f, 0x0f, "BUTTONS");
+	machine().device("master")->memory().space(AS_IO).install_read_port(0x0d, 0x0d, "P1_P2");
+	machine().device("master")->memory().space(AS_IO).install_read_port(0x0e, 0x0e, "P3_P4");
+	machine().device("master")->memory().space(AS_IO).install_read_port(0x0f, 0x0f, "BUTTONS");
 }
 
 
-static DRIVER_INIT( indyheat )
+DRIVER_INIT_MEMBER(leland_state,indyheat)
 {
-	leland_rotate_memory(machine, "master");
-	leland_rotate_memory(machine, "slave");
+	leland_rotate_memory(machine(), "master");
+	leland_rotate_memory(machine(), "slave");
 
 	/* set up additional input ports */
-	machine.device("master")->memory().space(AS_IO)->install_legacy_read_handler(0x00, 0x02, FUNC(indyheat_wheel_r));
-	machine.device("master")->memory().space(AS_IO)->install_legacy_read_handler(0x08, 0x0b, FUNC(indyheat_analog_r));
-	machine.device("master")->memory().space(AS_IO)->install_read_port(0x0d, 0x0d, "P1");
-	machine.device("master")->memory().space(AS_IO)->install_read_port(0x0e, 0x0e, "P2");
-	machine.device("master")->memory().space(AS_IO)->install_read_port(0x0f, 0x0f, "P3");
+	machine().device("master")->memory().space(AS_IO).install_read_handler(0x00, 0x02, read8_delegate(FUNC(leland_state::indyheat_wheel_r),this));
+	machine().device("master")->memory().space(AS_IO).install_read_handler(0x08, 0x0b, read8_delegate(FUNC(leland_state::indyheat_analog_r),this));
+	machine().device("master")->memory().space(AS_IO).install_read_port(0x0d, 0x0d, "P1");
+	machine().device("master")->memory().space(AS_IO).install_read_port(0x0e, 0x0e, "P2");
+	machine().device("master")->memory().space(AS_IO).install_read_port(0x0f, 0x0f, "P3");
 
 	/* set up additional output ports */
-	machine.device("master")->memory().space(AS_IO)->install_legacy_write_handler(0x08, 0x0b, FUNC(indyheat_analog_w));
+	machine().device("master")->memory().space(AS_IO).install_write_handler(0x08, 0x0b, write8_delegate(FUNC(leland_state::indyheat_analog_w),this));
 }
 
 
-static DRIVER_INIT( brutforc )
+DRIVER_INIT_MEMBER(leland_state,brutforc)
 {
-	leland_rotate_memory(machine, "master");
-	leland_rotate_memory(machine, "slave");
+	leland_rotate_memory(machine(), "master");
+	leland_rotate_memory(machine(), "slave");
 
 	/* set up additional input ports */
-	machine.device("master")->memory().space(AS_IO)->install_read_port(0x0d, 0x0d, "P2");
-	machine.device("master")->memory().space(AS_IO)->install_read_port(0x0e, 0x0e, "P1");
-	machine.device("master")->memory().space(AS_IO)->install_read_port(0x0f, 0x0f, "P3");
+	machine().device("master")->memory().space(AS_IO).install_read_port(0x0d, 0x0d, "P2");
+	machine().device("master")->memory().space(AS_IO).install_read_port(0x0e, 0x0e, "P1");
+	machine().device("master")->memory().space(AS_IO).install_read_port(0x0f, 0x0f, "P3");
 }
 
 
-static DRIVER_INIT( asylum )
+DRIVER_INIT_MEMBER(leland_state,asylum)
 {
-	leland_rotate_memory(machine, "master");
-	leland_rotate_memory(machine, "slave");
+	leland_rotate_memory(machine(), "master");
+	leland_rotate_memory(machine(), "slave");
 
 	/* asylum appears to have some extra RAM for the slave CPU */
-	machine.device("slave")->memory().space(AS_PROGRAM)->install_ram(0xf000, 0xfffb);
+	machine().device("slave")->memory().space(AS_PROGRAM).install_ram(0xf000, 0xfffb);
 
 	/* set up additional input ports */
-	machine.device("master")->memory().space(AS_IO)->install_read_port(0x0d, 0x0d, "P2");
-	machine.device("master")->memory().space(AS_IO)->install_read_port(0x0e, 0x0e, "P1");
-	machine.device("master")->memory().space(AS_IO)->install_read_port(0x0f, 0x0f, "P3");
+	machine().device("master")->memory().space(AS_IO).install_read_port(0x0d, 0x0d, "P2");
+	machine().device("master")->memory().space(AS_IO).install_read_port(0x0e, 0x0e, "P1");
+	machine().device("master")->memory().space(AS_IO).install_read_port(0x0f, 0x0f, "P3");
 }
 
 
@@ -788,11 +788,11 @@ static DRIVER_INIT( asylum )
  *
  *************************************/
 
-GAME( 1990, ataxx,    0,      ataxx,   ataxx,    ataxx,    ROT0,   "Leland Corp.", "Ataxx (set 1)", 0 )
-GAME( 1990, ataxxa,   ataxx,  ataxx,   ataxx,    ataxx,    ROT0,   "Leland Corp.", "Ataxx (set 2)", 0 )
-GAME( 1990, ataxxe,   ataxx,  ataxx,   ataxx,    ataxx,    ROT0,   "Leland Corp.", "Ataxx (Europe)", 0 )
-GAME( 1990, ataxxj,   ataxx,  ataxx,   ataxx,    ataxxj,   ROT0,   "Leland Corp.", "Ataxx (Japan)", 0 )
-GAME( 1990, wsf,      0,      wsf,     wsf,      wsf,      ROT0,   "Leland Corp.", "World Soccer Finals", 0 )
-GAME( 1991, indyheat, 0,      wsf,     indyheat, indyheat, ROT0,   "Leland Corp.", "Danny Sullivan's Indy Heat", 0 )
-GAME( 1991, brutforc, 0,      wsf,     brutforc, brutforc, ROT0,   "Leland Corp.", "Brute Force", 0 )
-GAME( 1991, asylum,   0,      wsf,     brutforc, asylum,   ROT270, "Leland Corp.", "Asylum (prototype)", 0 )
+GAME( 1990, ataxx,    0,      ataxx,   ataxx,    leland_state, ataxx,    ROT0,   "Leland Corp.", "Ataxx (set 1)", 0 )
+GAME( 1990, ataxxa,   ataxx,  ataxx,   ataxx,    leland_state, ataxx,    ROT0,   "Leland Corp.", "Ataxx (set 2)", 0 )
+GAME( 1990, ataxxe,   ataxx,  ataxx,   ataxx,    leland_state, ataxx,    ROT0,   "Leland Corp.", "Ataxx (Europe)", 0 )
+GAME( 1990, ataxxj,   ataxx,  ataxx,   ataxx,    leland_state, ataxxj,   ROT0,   "Leland Corp. (Capcom license)", "Ataxx (Japan)", 0 )
+GAME( 1990, wsf,      0,      wsf,     wsf,      leland_state, wsf,      ROT0,   "Leland Corp.", "World Soccer Finals", 0 )
+GAME( 1991, indyheat, 0,      wsf,     indyheat, leland_state, indyheat, ROT0,   "Leland Corp.", "Danny Sullivan's Indy Heat", 0 )
+GAME( 1991, brutforc, 0,      wsf,     brutforc, leland_state, brutforc, ROT0,   "Leland Corp.", "Brute Force", 0 )
+GAME( 1991, asylum,   0,      wsf,     brutforc, leland_state, asylum,   ROT270, "Leland Corp.", "Asylum (prototype)", 0 )

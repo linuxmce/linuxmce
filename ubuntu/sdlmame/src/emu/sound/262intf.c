@@ -10,12 +10,11 @@
 #include "ymf262.h"
 
 
-typedef struct _ymf262_state ymf262_state;
-struct _ymf262_state
+struct ymf262_state
 {
-	sound_stream *	stream;
-	emu_timer *		timer[2];
-	void *			chip;
+	sound_stream *  stream;
+	emu_timer *     timer[2];
+	void *          chip;
 	const ymf262_interface *intf;
 	device_t *device;
 };
@@ -25,7 +24,7 @@ INLINE ymf262_state *get_safe_token(device_t *device)
 {
 	assert(device != NULL);
 	assert(device->type() == YMF262);
-	return (ymf262_state *)downcast<legacy_device_base *>(device)->token();
+	return (ymf262_state *)downcast<ymf262_device *>(device)->token();
 }
 
 
@@ -53,11 +52,11 @@ static void timer_handler_262(void *param,int timer, attotime period)
 {
 	ymf262_state *info = (ymf262_state *)param;
 	if( period == attotime::zero )
-	{	/* Reset FM Timer */
+	{   /* Reset FM Timer */
 		info->timer[timer]->enable(false);
 	}
 	else
-	{	/* Start FM Timer */
+	{   /* Start FM Timer */
 		info->timer[timer]->adjust(period);
 	}
 }
@@ -81,7 +80,7 @@ static DEVICE_START( ymf262 )
 	ymf262_state *info = get_safe_token(device);
 	int rate = device->clock()/288;
 
-	info->intf = device->baseconfig().static_config() ? (const ymf262_interface *)device->baseconfig().static_config() : &dummy;
+	info->intf = device->static_config() ? (const ymf262_interface *)device->static_config() : &dummy;
 	info->device = device;
 
 	/* stream system initialize */
@@ -125,37 +124,64 @@ WRITE8_DEVICE_HANDLER( ymf262_w )
 	ymf262_write(info->chip, offset & 3, data);
 }
 
-READ8_DEVICE_HANDLER ( ymf262_status_r ) { return ymf262_r(device, 0); }
-WRITE8_DEVICE_HANDLER( ymf262_register_a_w ) { ymf262_w(device, 0, data); }
-WRITE8_DEVICE_HANDLER( ymf262_register_b_w ) { ymf262_w(device, 2, data); }
-WRITE8_DEVICE_HANDLER( ymf262_data_a_w ) { ymf262_w(device, 1, data); }
-WRITE8_DEVICE_HANDLER( ymf262_data_b_w ) { ymf262_w(device, 3, data); }
+READ8_DEVICE_HANDLER ( ymf262_status_r ) { return ymf262_r(device, space, 0); }
+WRITE8_DEVICE_HANDLER( ymf262_register_a_w ) { ymf262_w(device, space, 0, data); }
+WRITE8_DEVICE_HANDLER( ymf262_register_b_w ) { ymf262_w(device, space, 2, data); }
+WRITE8_DEVICE_HANDLER( ymf262_data_a_w ) { ymf262_w(device, space, 1, data); }
+WRITE8_DEVICE_HANDLER( ymf262_data_b_w ) { ymf262_w(device, space, 3, data); }
 
+const device_type YMF262 = &device_creator<ymf262_device>;
 
-/**************************************************************************
- * Generic get_info
- **************************************************************************/
-
-DEVICE_GET_INFO( ymf262 )
+ymf262_device::ymf262_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, YMF262, "YMF262", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
 {
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(ymf262_state);				break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME( ymf262 );				break;
-		case DEVINFO_FCT_STOP:							info->stop = DEVICE_STOP_NAME( ymf262 );				break;
-		case DEVINFO_FCT_RESET:							info->reset = DEVICE_RESET_NAME( ymf262 );				break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "YMF262");							break;
-		case DEVINFO_STR_FAMILY:					strcpy(info->s, "Yamaha FM");						break;
-		case DEVINFO_STR_VERSION:					strcpy(info->s, "1.0");								break;
-		case DEVINFO_STR_SOURCE_FILE:						strcpy(info->s, __FILE__);							break;
-		case DEVINFO_STR_CREDITS:					strcpy(info->s, "Copyright Nicola Salmoria and the MAME Team"); break;
-	}
+	m_token = global_alloc_clear(ymf262_state);
 }
 
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
 
-DEFINE_LEGACY_SOUND_DEVICE(YMF262, ymf262);
+void ymf262_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void ymf262_device::device_start()
+{
+	DEVICE_START_NAME( ymf262 )(this);
+}
+
+//-------------------------------------------------
+//  device_reset - device-specific reset
+//-------------------------------------------------
+
+void ymf262_device::device_reset()
+{
+	DEVICE_RESET_NAME( ymf262 )(this);
+}
+
+//-------------------------------------------------
+//  device_stop - device-specific stop
+//-------------------------------------------------
+
+void ymf262_device::device_stop()
+{
+	DEVICE_STOP_NAME( ymf262 )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void ymf262_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}

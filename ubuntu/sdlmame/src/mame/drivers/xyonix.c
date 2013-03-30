@@ -25,9 +25,9 @@ TODO:
 #include "includes/xyonix.h"
 
 
-static WRITE8_HANDLER( xyonix_irqack_w )
+WRITE8_MEMBER(xyonix_state::xyonix_irqack_w)
 {
-	cputag_set_input_line(space->machine(), "maincpu", 0, CLEAR_LINE);
+	machine().device("maincpu")->execute().set_input_line(0, CLEAR_LINE);
 }
 
 
@@ -41,9 +41,9 @@ static void handle_coins(running_machine &machine, int coin)
 
 	//popmessage("Coin %d", state->m_coin);
 
-	if (coin & 1)	// Coin 2 !
+	if (coin & 1)   // Coin 2 !
 	{
-		tmp = (input_port_read(machine, "DSW") & 0xc0) >> 6;
+		tmp = (state->ioport("DSW")->read() & 0xc0) >> 6;
 		state->m_coins++;
 		if (state->m_coins >= coinage_table[tmp][0])
 		{
@@ -54,9 +54,9 @@ static void handle_coins(running_machine &machine, int coin)
 		coin_counter_w(machine,1,1); coin_counter_w(machine,1,0); /* Count slot B */
 	}
 
-	if (coin & 2)	// Coin 1 !
+	if (coin & 2)   // Coin 1 !
 	{
-		tmp = (input_port_read(machine, "DSW") & 0x30) >> 4;
+		tmp = (machine.root_device().ioport("DSW")->read() & 0x30) >> 4;
 		state->m_coins++;
 		if (state->m_coins >= coinage_table[tmp][0])
 		{
@@ -72,81 +72,79 @@ static void handle_coins(running_machine &machine, int coin)
 }
 
 
-static READ8_HANDLER ( xyonix_io_r )
+READ8_MEMBER(xyonix_state::xyonix_io_r)
 {
-	xyonix_state *state = space->machine().driver_data<xyonix_state>();
-	int regPC = cpu_get_pc(&space->device());
+	int regPC = space.device().safe_pc();
 
 	if (regPC == 0x27ba)
 		return 0x88;
 
 	if (regPC == 0x27c2)
-		return state->m_e0_data;
+		return m_e0_data;
 
 	if (regPC == 0x27c7)
 	{
 		int coin;
 
-		switch (state->m_e0_data)
+		switch (m_e0_data)
 		{
 			case 0x81 :
-				return input_port_read(space->machine(), "P1") & 0x7f;
+				return ioport("P1")->read() & 0x7f;
 			case 0x82 :
-				return input_port_read(space->machine(), "P2") & 0x7f;
+				return ioport("P2")->read() & 0x7f;
 			case 0x91:
 				/* check coin inputs */
-				coin = ((input_port_read(space->machine(), "P1") & 0x80) >> 7) | ((input_port_read(space->machine(), "P2") & 0x80) >> 6);
-				if (coin ^ state->m_prev_coin && coin != 3)
+				coin = ((ioport("P1")->read() & 0x80) >> 7) | ((ioport("P2")->read() & 0x80) >> 6);
+				if (coin ^ m_prev_coin && coin != 3)
 				{
-					if (state->m_credits < 9) handle_coins(space->machine(), coin);
+					if (m_credits < 9) handle_coins(machine(), coin);
 				}
-				state->m_prev_coin = coin;
-				return state->m_credits;
+				m_prev_coin = coin;
+				return m_credits;
 			case 0x92:
-				return ((input_port_read(space->machine(), "P1") & 0x80) >> 7) | ((input_port_read(space->machine(), "P2") & 0x80) >> 6);
-			case 0xe0:	/* reset? */
-				state->m_coins = 0;
-				state->m_credits = 0;
+				return ((ioport("P1")->read() & 0x80) >> 7) | ((ioport("P2")->read() & 0x80) >> 6);
+			case 0xe0:  /* reset? */
+				m_coins = 0;
+				m_credits = 0;
 				return 0xff;
 			case 0xe1:
-				state->m_credits--;
+				m_credits--;
 				return 0xff;
-			case 0xfe:	/* Dip Switches 1 to 4 */
-				return input_port_read(space->machine(), "DSW") & 0x0f;
-			case 0xff:	/* Dip Switches 5 to 8 */
-				return input_port_read(space->machine(), "DSW") >> 4;
+			case 0xfe:  /* Dip Switches 1 to 4 */
+				return ioport("DSW")->read() & 0x0f;
+			case 0xff:  /* Dip Switches 5 to 8 */
+				return ioport("DSW")->read() >> 4;
 		}
 	}
 
-	//logerror ("xyonix_port_e0_r - PC = %04x - port = %02x\n", regPC, state->m_e0_data);
-	//popmessage("%02x",state->m_e0_data);
+	//logerror ("xyonix_port_e0_r - PC = %04x - port = %02x\n", regPC, m_e0_data);
+	//popmessage("%02x",m_e0_data);
 
 	return 0xff;
 }
 
-static WRITE8_HANDLER ( xyonix_io_w )
+WRITE8_MEMBER(xyonix_state::xyonix_io_w)
 {
-	xyonix_state *state = space->machine().driver_data<xyonix_state>();
 
-	//logerror ("xyonix_port_e0_w %02x - PC = %04x\n", data, cpu_get_pc(&space->device()));
-	state->m_e0_data = data;
+	//logerror ("xyonix_port_e0_w %02x - PC = %04x\n", data, space.device().safe_pc());
+	m_e0_data = data;
 }
 
 /* Mem / Port Maps ***********************************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, xyonix_state )
 	AM_RANGE(0x0000, 0xbfff) AM_ROM
 	AM_RANGE(0xc000, 0xdfff) AM_RAM
-	AM_RANGE(0xe000, 0xffff) AM_RAM_WRITE(xyonix_vidram_w) AM_BASE_MEMBER(xyonix_state,m_vidram)
+	AM_RANGE(0xe000, 0xffff) AM_RAM_WRITE(xyonix_vidram_w) AM_SHARE("vidram")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( port_map, AS_IO, 8 )
+static ADDRESS_MAP_START( port_map, AS_IO, 8, xyonix_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x20, 0x20) AM_READNOP AM_DEVWRITE("sn1", sn76496_w)	/* SN76496 ready signal */
-	AM_RANGE(0x21, 0x21) AM_READNOP AM_DEVWRITE("sn2", sn76496_w)
-	AM_RANGE(0x40, 0x40) AM_WRITENOP		/* NMI ack? */
+	AM_RANGE(0x20, 0x20) AM_READNOP AM_DEVWRITE("sn1", sn76496_device, write)   /* SN76496 ready signal */
+	AM_RANGE(0x21, 0x21) AM_READNOP AM_DEVWRITE("sn2", sn76496_device, write)
+	AM_RANGE(0x40, 0x40) AM_WRITENOP        /* NMI ack? */
 	AM_RANGE(0x50, 0x50) AM_WRITE(xyonix_irqack_w)
-	AM_RANGE(0x60, 0x61) AM_WRITENOP		/* mc6845 */
+	AM_RANGE(0x60, 0x61) AM_WRITENOP        /* mc6845 */
 	AM_RANGE(0xe0, 0xe0) AM_READWRITE(xyonix_io_r, xyonix_io_w)
 ADDRESS_MAP_END
 
@@ -161,7 +159,7 @@ static INPUT_PORTS_START( xyonix )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START1 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )		/* handled by xyonix_io_r() */
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )      /* handled by xyonix_io_r() */
 
 	PORT_START("P2")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(2)
@@ -171,14 +169,14 @@ static INPUT_PORTS_START( xyonix )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START2 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )		/* handled by xyonix_io_r() */
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )      /* handled by xyonix_io_r() */
 
 	PORT_START("DSW")
 	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Difficulty ) )
 	PORT_DIPSETTING(    0x03, DEF_STR( Easy ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( Normal ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Hard ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) )			// DEF_STR( Very_Hard )
+	PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) )          // DEF_STR( Very_Hard )
 	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Allow_Continue ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
@@ -212,40 +210,56 @@ static GFXDECODE_START( xyonix )
 	GFXDECODE_ENTRY( "gfx1", 0, charlayout, 0, 16 )
 GFXDECODE_END
 
+
+/*************************************
+ *
+ *  Sound interface
+ *
+ *************************************/
+
+//-------------------------------------------------
+//  sn76496_config psg_intf
+//-------------------------------------------------
+
+static const sn76496_config psg_intf =
+{
+	DEVCB_NULL
+};
+
+
 /* MACHINE driver *************************************************************/
 
 static MACHINE_CONFIG_START( xyonix, xyonix_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80,16000000 / 4)		 /* 4 MHz ? */
+	MCFG_CPU_ADD("maincpu", Z80,16000000 / 4)        /* 4 MHz ? */
 	MCFG_CPU_PROGRAM_MAP(main_map)
 	MCFG_CPU_IO_MAP(port_map)
-	MCFG_CPU_VBLANK_INT("screen", nmi_line_pulse)
-	MCFG_CPU_PERIODIC_INT(irq0_line_assert,4*60)	/* ?? controls music tempo */
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", xyonix_state,  nmi_line_pulse)
+	MCFG_CPU_PERIODIC_INT_DRIVER(xyonix_state, irq0_line_assert, 4*60)  /* ?? controls music tempo */
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(80*4, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0, 80*4-1, 0, 28*8-1)
-	MCFG_SCREEN_UPDATE(xyonix)
+	MCFG_SCREEN_UPDATE_DRIVER(xyonix_state, screen_update_xyonix)
 
 	MCFG_GFXDECODE(xyonix)
 	MCFG_PALETTE_LENGTH(256)
 
-	MCFG_PALETTE_INIT(xyonix)
-	MCFG_VIDEO_START(xyonix)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
 	MCFG_SOUND_ADD("sn1", SN76496, 16000000/4)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
+	MCFG_SOUND_CONFIG(psg_intf)
 
 	MCFG_SOUND_ADD("sn2", SN76496, 16000000/4)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
+	MCFG_SOUND_CONFIG(psg_intf)
 MACHINE_CONFIG_END
 
 /* ROM Loading ***************************************************************/
@@ -264,4 +278,4 @@ ROM_END
 
 /* GAME drivers **************************************************************/
 
-GAME( 1989, xyonix, 0, xyonix, xyonix, 0, ROT0, "Philko", "Xyonix", 0 )
+GAME( 1989, xyonix, 0, xyonix, xyonix, driver_device, 0, ROT0, "Philko", "Xyonix", 0 )

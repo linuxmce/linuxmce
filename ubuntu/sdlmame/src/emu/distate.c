@@ -80,13 +80,13 @@ const UINT64 device_state_entry::k_decimal_divisor[] =
 
 device_state_entry::device_state_entry(int index, const char *symbol, void *dataptr, UINT8 size)
 	: m_next(NULL),
-	  m_index(index),
-	  m_datamask(0),
-	  m_datasize(size),
-	  m_flags(0),
-	  m_symbol(symbol),
-	  m_default_format(true),
-	  m_sizemask(0)
+		m_index(index),
+		m_datamask(0),
+		m_datasize(size),
+		m_flags(0),
+		m_symbol(symbol),
+		m_default_format(true),
+		m_sizemask(0)
 {
 	// set the data pointer
 	m_dataptr.v = dataptr;
@@ -137,6 +137,25 @@ device_state_entry &device_state_entry::formatstr(const char *_format)
 
 
 //-------------------------------------------------
+//  format_from_mask - make a format based on
+//  the data mask
+//-------------------------------------------------
+
+void device_state_entry::format_from_mask()
+{
+	// skip if we have a user-provided format
+	if (!m_default_format)
+		return;
+
+	// make up a format based on the mask
+	int width = 0;
+	for (UINT64 tempmask = m_datamask; tempmask != 0; tempmask >>= 4)
+		width++;
+	m_format.printf("%%0%dX", width);
+}
+
+
+//-------------------------------------------------
 //  value - return the current value as a UINT64
 //-------------------------------------------------
 
@@ -147,10 +166,10 @@ UINT64 device_state_entry::value() const
 	switch (m_datasize)
 	{
 		default:
-		case 1:	result = *m_dataptr.u8;		break;
-		case 2:	result = *m_dataptr.u16;	break;
-		case 4:	result = *m_dataptr.u32;	break;
-		case 8:	result = *m_dataptr.u64;	break;
+		case 1: result = *m_dataptr.u8;     break;
+		case 2: result = *m_dataptr.u16;    break;
+		case 4: result = *m_dataptr.u32;    break;
+		case 8: result = *m_dataptr.u64;    break;
 	}
 	return result & m_datamask;
 }
@@ -212,8 +231,8 @@ astring &device_state_entry::format(astring &dest, const char *string, bool maxo
 				break;
 
 			// 1-9 accumulate into the width
-			case '1':	case '2':	case '3':	case '4':	case '5':
-			case '6':	case '7':	case '8':	case '9':
+			case '1':   case '2':   case '3':   case '4':   case '5':
+			case '6':   case '7':   case '8':   case '9':
 				width = width * 10 + (*fptr - '0');
 				break;
 
@@ -313,7 +332,6 @@ astring &device_state_entry::format(astring &dest, const char *string, bool maxo
 			// other formats unknown
 			default:
 				throw emu_fatalerror("Unknown format character '%c'\n", *fptr);
-				break;
 		}
 	}
 	return dest;
@@ -337,10 +355,10 @@ void device_state_entry::set_value(UINT64 value) const
 	switch (m_datasize)
 	{
 		default:
-		case 1:	*m_dataptr.u8 = value;		break;
-		case 2:	*m_dataptr.u16 = value;		break;
-		case 4:	*m_dataptr.u32 = value;		break;
-		case 8:	*m_dataptr.u64 = value;		break;
+		case 1: *m_dataptr.u8 = value;      break;
+		case 2: *m_dataptr.u16 = value;     break;
+		case 4: *m_dataptr.u32 = value;     break;
+		case 8: *m_dataptr.u64 = value;     break;
 	}
 }
 
@@ -355,49 +373,6 @@ void device_state_entry::set_value(const char *string) const
 }
 
 
-//-------------------------------------------------
-//  format_from_mask - make a format based on
-//  the data mask
-//-------------------------------------------------
-
-void device_state_entry::format_from_mask()
-{
-	// skip if we have a user-provided format
-	if (!m_default_format)
-		return;
-
-	// make up a format based on the mask
-	int width = 0;
-	for (UINT64 tempmask = m_datamask; tempmask != 0; tempmask >>= 4)
-		width++;
-	m_format.printf("%%0%dX", width);
-}
-
-
-
-//**************************************************************************
-//  DEVICE CONFIG STATE INTERFACE
-//**************************************************************************
-
-//-------------------------------------------------
-//  device_config_state_interface - constructor
-//-------------------------------------------------
-
-device_config_state_interface::device_config_state_interface(const machine_config &mconfig, device_config &devconfig)
-	: device_config_interface(mconfig, devconfig)
-{
-}
-
-
-//-------------------------------------------------
-//  ~device_config_state_interface - destructor
-//-------------------------------------------------
-
-device_config_state_interface::~device_config_state_interface()
-{
-}
-
-
 
 //**************************************************************************
 //  DEVICE STATE INTERFACE
@@ -407,11 +382,13 @@ device_config_state_interface::~device_config_state_interface()
 //  device_state_interface - constructor
 //-------------------------------------------------
 
-device_state_interface::device_state_interface(running_machine &machine, const device_config &config, device_t &device)
-	: device_interface(machine, config, device),
-	  m_state_config(dynamic_cast<const device_config_state_interface &>(config))
+device_state_interface::device_state_interface(const machine_config &mconfig, device_t &device)
+	: device_interface(device)
 {
 	memset(m_fast_state, 0, sizeof(m_fast_state));
+
+	// configure the fast accessor
+	device.m_state = this;
 }
 
 
@@ -425,11 +402,11 @@ device_state_interface::~device_state_interface()
 
 
 //-------------------------------------------------
-//  state - return the value of the given piece
+//  state_int - return the value of the given piece
 //  of indexed state as a UINT64
 //-------------------------------------------------
 
-UINT64 device_state_interface::state(int index)
+UINT64 device_state_interface::state_int(int index)
 {
 	// NULL or out-of-range entry returns 0
 	const device_state_entry *entry = state_find_entry(index);
@@ -486,11 +463,11 @@ int device_state_interface::state_string_max_length(int index)
 
 
 //-------------------------------------------------
-//  set_state - set the value of the given piece
-//  of indexed state from a UINT64
+//  set_state_int - set the value of the given
+//  piece of indexed state from a UINT64
 //-------------------------------------------------
 
-void device_state_interface::set_state(int index, UINT64 value)
+void device_state_interface::set_state_int(int index, UINT64 value)
 {
 	// NULL or out-of-range entry is a no-op
 	const device_state_entry *entry = state_find_entry(index);
@@ -511,7 +488,7 @@ void device_state_interface::set_state(int index, UINT64 value)
 //  of indexed state from a string
 //-------------------------------------------------
 
-void device_state_interface::set_state(int index, const char *string)
+void device_state_interface::set_state_string(int index, const char *string)
 {
 	// NULL or out-of-range entry is a no-op
 	const device_state_entry *entry = state_find_entry(index);
@@ -528,46 +505,6 @@ void device_state_interface::set_state(int index, const char *string)
 
 
 //-------------------------------------------------
-//  state_import - called after new state is
-//  written to perform any post-processing
-//-------------------------------------------------
-
-void device_state_interface::state_import(const device_state_entry &entry)
-{
-}
-
-
-//-------------------------------------------------
-//  state_export - called prior to new state
-//  reading the state
-//-------------------------------------------------
-
-void device_state_interface::state_export(const device_state_entry &entry)
-{
-}
-
-
-//-------------------------------------------------
-//  state_string_import - called after new state is
-//  written to perform any post-processing
-//-------------------------------------------------
-
-void device_state_interface::state_string_import(const device_state_entry &entry, astring &string)
-{
-}
-
-
-//-------------------------------------------------
-//  state_string_export - called after new state is
-//  written to perform any post-processing
-//-------------------------------------------------
-
-void device_state_interface::state_string_export(const device_state_entry &entry, astring &string)
-{
-}
-
-
-//-------------------------------------------------
 //  state_add - return the value of the given
 //  pieces of indexed state as a UINT64
 //-------------------------------------------------
@@ -579,37 +516,60 @@ device_state_entry &device_state_interface::state_add(int index, const char *sym
 	assert(symbol != NULL);
 
 	// allocate new entry
-	device_state_entry *entry = auto_alloc(device().machine(), device_state_entry(index, symbol, data, size));
+	device_state_entry *entry = global_alloc(device_state_entry(index, symbol, data, size));
 
 	// append to the end of the list
 	m_state_list.append(*entry);
 
 	// set the fast entry if applicable
-	if (index >= k_fast_state_min && index <= k_fast_state_max)
-		m_fast_state[index - k_fast_state_min] = entry;
+	if (index >= FAST_STATE_MIN && index <= FAST_STATE_MAX)
+		m_fast_state[index - FAST_STATE_MIN] = entry;
 
 	return *entry;
 }
 
 
 //-------------------------------------------------
-//  state_find_entry - return a pointer to the
-//  state entry for the given index
+//  state_import - called after new state is
+//  written to perform any post-processing
 //-------------------------------------------------
 
-const device_state_entry *device_state_interface::state_find_entry(int index)
+void device_state_interface::state_import(const device_state_entry &entry)
 {
-	// use fast lookup if possible
-	if (index >= k_fast_state_min && index <= k_fast_state_max)
-		return m_fast_state[index - k_fast_state_min];
+	// do nothing by default
+}
 
-	// otherwise, scan the first
-	for (const device_state_entry *entry = m_state_list.first(); entry != NULL; entry = entry->m_next)
-		if (entry->m_index == index)
-			return entry;
 
-	// handle failure by returning NULL
-	return NULL;
+//-------------------------------------------------
+//  state_export - called prior to new state
+//  reading the state
+//-------------------------------------------------
+
+void device_state_interface::state_export(const device_state_entry &entry)
+{
+	// do nothing by default
+}
+
+
+//-------------------------------------------------
+//  state_string_import - called after new state is
+//  written to perform any post-processing
+//-------------------------------------------------
+
+void device_state_interface::state_string_import(const device_state_entry &entry, astring &string)
+{
+	// do nothing by default
+}
+
+
+//-------------------------------------------------
+//  state_string_export - called after new state is
+//  written to perform any post-processing
+//-------------------------------------------------
+
+void device_state_interface::state_string_export(const device_state_entry &entry, astring &string)
+{
+	// do nothing by default
 }
 
 
@@ -623,4 +583,25 @@ void device_state_interface::interface_post_start()
 	// make sure we got something during startup
 	if (m_state_list.count() == 0)
 		throw emu_fatalerror("No state registered for device '%s' that supports it!", m_device.tag());
+}
+
+
+//-------------------------------------------------
+//  state_find_entry - return a pointer to the
+//  state entry for the given index
+//-------------------------------------------------
+
+const device_state_entry *device_state_interface::state_find_entry(int index)
+{
+	// use fast lookup if possible
+	if (index >= FAST_STATE_MIN && index <= FAST_STATE_MAX)
+		return m_fast_state[index - FAST_STATE_MIN];
+
+	// otherwise, scan the first
+	for (const device_state_entry *entry = m_state_list.first(); entry != NULL; entry = entry->m_next)
+		if (entry->m_index == index)
+			return entry;
+
+	// handle failure by returning NULL
+	return NULL;
 }

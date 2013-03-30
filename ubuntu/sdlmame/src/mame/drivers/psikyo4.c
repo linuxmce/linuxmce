@@ -134,8 +134,6 @@ ROMs -
 #include "rendlay.h"
 #include "includes/psikyo4.h"
 
-#define ROMTEST 1 /* Does necessary stuff to perform rom test, uses RAM as it doesn't dispose of GFX after decoding */
-
 
 static const gfx_layout layout_16x16x8 =
 {
@@ -154,24 +152,26 @@ GFXDECODE_END
 
 static const eeprom_interface eeprom_interface_93C56 =
 {
-	8,		// address bits 8
-	8,		// data bits    8
-	"*110x",	// read         110x aaaaaaaa
-	"*101x",	// write        101x aaaaaaaa dddddddd
-	"*111x",	// erase        111x aaaaaaaa
+	8,      // address bits 8
+	8,      // data bits    8
+	"*110x",    // read         110x aaaaaaaa
+	"*101x",    // write        101x aaaaaaaa dddddddd
+	"*111x",    // erase        111x aaaaaaaa
 	"*10000xxxxxxx",// lock         100x 00xxxx
 	"*10011xxxxxxx",// unlock       100x 11xxxx
 //  "*10001xxxx",   // write all    1 00 01xxxx dddddddddddddddd
 //  "*10010xxxx"    // erase all    1 00 10xxxx
 };
 
-static WRITE32_DEVICE_HANDLER( ps4_eeprom_w )
+WRITE32_MEMBER(psikyo4_state::ps4_eeprom_w)
 {
+	device_t *device = machine().device("eeprom");
 	if (ACCESSING_BITS_16_31)
 	{
-		eeprom_write_bit(device, (data & 0x00200000) ? 1 : 0);
-		eeprom_set_cs_line(device, (data & 0x00800000) ? CLEAR_LINE : ASSERT_LINE);
-		eeprom_set_clock_line(device, (data & 0x00400000) ? ASSERT_LINE : CLEAR_LINE);
+		eeprom_device *eeprom = downcast<eeprom_device *>(device);
+		eeprom->write_bit((data & 0x00200000) ? 1 : 0);
+		eeprom->set_cs_line((data & 0x00800000) ? CLEAR_LINE : ASSERT_LINE);
+		eeprom->set_clock_line((data & 0x00400000) ? ASSERT_LINE : CLEAR_LINE);
 
 		return;
 	}
@@ -179,11 +179,11 @@ static WRITE32_DEVICE_HANDLER( ps4_eeprom_w )
 	logerror("Unk EEPROM write %x mask %x\n", data, mem_mask);
 }
 
-static READ32_DEVICE_HANDLER( ps4_eeprom_r )
+READ32_MEMBER(psikyo4_state::ps4_eeprom_r)
 {
 	if (ACCESSING_BITS_16_31)
 	{
-		return input_port_read(device->machine(), "JP4");
+		return machine().root_device().ioport("JP4")->read();
 	}
 
 //  logerror("Unk EEPROM read mask %x\n", mem_mask);
@@ -191,109 +191,103 @@ static READ32_DEVICE_HANDLER( ps4_eeprom_r )
 	return 0x00;
 }
 
-static INTERRUPT_GEN(psikyosh_interrupt)
+INTERRUPT_GEN_MEMBER(psikyo4_state::psikyosh_interrupt)
 {
-	device_set_input_line(device, 4, HOLD_LINE);
+	device.execute().set_input_line(4, HOLD_LINE);
 }
 
-static CUSTOM_INPUT( system_port_r )
+CUSTOM_INPUT_MEMBER(psikyo4_state::system_port_r)
 {
-	return input_port_read(field->port->machine(), "SYSTEM");
+	return ioport("SYSTEM")->read();
 }
 
-static CUSTOM_INPUT( mahjong_ctrl_r ) /* used by hotgmck/hgkairak */
+CUSTOM_INPUT_MEMBER(psikyo4_state::mahjong_ctrl_r)/* used by hotgmck/hgkairak */
 {
-	psikyo4_state *state = field->port->machine().driver_data<psikyo4_state>();
 	int player = (FPTR)param;
-	int sel = (state->m_io_select[0] & 0x0000ff00) >> 8;
+	int sel = (m_io_select[0] & 0x0000ff00) >> 8;
 	int ret = 0xff;
 
-	if (sel & 1) ret &= input_port_read(field->port->machine(), player ? "KEY4" : "KEY0" );
-	if (sel & 2) ret &= input_port_read(field->port->machine(), player ? "KEY5" : "KEY1" );
-	if (sel & 4) ret &= input_port_read(field->port->machine(), player ? "KEY6" : "KEY2" );
-	if (sel & 8) ret &= input_port_read(field->port->machine(), player ? "KEY7" : "KEY3" );
+	if (sel & 1) ret &= ioport(player ? "KEY4" : "KEY0" )->read();
+	if (sel & 2) ret &= ioport(player ? "KEY5" : "KEY1" )->read();
+	if (sel & 4) ret &= ioport(player ? "KEY6" : "KEY2" )->read();
+	if (sel & 8) ret &= ioport(player ? "KEY7" : "KEY3" )->read();
 
 	return ret;
 }
 
-static WRITE32_HANDLER( ps4_paletteram32_RRRRRRRRGGGGGGGGBBBBBBBBxxxxxxxx_dword_w )
+WRITE32_MEMBER(psikyo4_state::ps4_paletteram32_RRRRRRRRGGGGGGGGBBBBBBBBxxxxxxxx_dword_w)
 {
-	psikyo4_state *state = space->machine().driver_data<psikyo4_state>();
 	int r, g, b;
-	COMBINE_DATA(&state->m_paletteram[offset]);
+	COMBINE_DATA(&m_paletteram[offset]);
 
-	b = ((state->m_paletteram[offset] & 0x0000ff00) >> 8);
-	g = ((state->m_paletteram[offset] & 0x00ff0000) >> 16);
-	r = ((state->m_paletteram[offset] & 0xff000000) >> 24);
+	b = ((m_paletteram[offset] & 0x0000ff00) >> 8);
+	g = ((m_paletteram[offset] & 0x00ff0000) >> 16);
+	r = ((m_paletteram[offset] & 0xff000000) >> 24);
 
-	palette_set_color(space->machine(), offset, MAKE_RGB(r, g, b));
-	palette_set_color(space->machine(), offset + 0x800, MAKE_RGB(r, g, b)); // For screen 2
+	palette_set_color(machine(), offset, MAKE_RGB(r, g, b));
+	palette_set_color(machine(), offset + 0x800, MAKE_RGB(r, g, b)); // For screen 2
 }
 
-static WRITE32_HANDLER( ps4_bgpen_1_dword_w )
+WRITE32_MEMBER(psikyo4_state::ps4_bgpen_1_dword_w)
 {
-	psikyo4_state *state = space->machine().driver_data<psikyo4_state>();
 	int r, g, b;
-	COMBINE_DATA(&state->m_bgpen_1[0]);
+	COMBINE_DATA(&m_bgpen_1[0]);
 
-	b = ((state->m_bgpen_1[0] & 0x0000ff00) >>8);
-	g = ((state->m_bgpen_1[0] & 0x00ff0000) >>16);
-	r = ((state->m_bgpen_1[0] & 0xff000000) >>24);
+	b = ((m_bgpen_1[0] & 0x0000ff00) >>8);
+	g = ((m_bgpen_1[0] & 0x00ff0000) >>16);
+	r = ((m_bgpen_1[0] & 0xff000000) >>24);
 
-	palette_set_color(space->machine(), 0x1000, MAKE_RGB(r, g, b)); // Clear colour for screen 1
+	palette_set_color(machine(), 0x1000, MAKE_RGB(r, g, b)); // Clear colour for screen 1
 }
 
-static WRITE32_HANDLER( ps4_bgpen_2_dword_w )
+WRITE32_MEMBER(psikyo4_state::ps4_bgpen_2_dword_w)
 {
-	psikyo4_state *state = space->machine().driver_data<psikyo4_state>();
 	int r, g, b;
-	COMBINE_DATA(&state->m_bgpen_2[0]);
+	COMBINE_DATA(&m_bgpen_2[0]);
 
-	b = ((state->m_bgpen_2[0] & 0x0000ff00) >>8);
-	g = ((state->m_bgpen_2[0] & 0x00ff0000) >>16);
-	r = ((state->m_bgpen_2[0] & 0xff000000) >>24);
+	b = ((m_bgpen_2[0] & 0x0000ff00) >>8);
+	g = ((m_bgpen_2[0] & 0x00ff0000) >>16);
+	r = ((m_bgpen_2[0] & 0xff000000) >>24);
 
-	palette_set_color(space->machine(), 0x1001, MAKE_RGB(r, g, b)); // Clear colour for screen 2
+	palette_set_color(machine(), 0x1001, MAKE_RGB(r, g, b)); // Clear colour for screen 2
 }
 
-static WRITE32_HANDLER( ps4_screen1_brt_w )
+WRITE32_MEMBER(psikyo4_state::ps4_screen1_brt_w)
 {
-	psikyo4_state *state = space->machine().driver_data<psikyo4_state>();
 
 	if (ACCESSING_BITS_0_7)
 	{
-		/* Need seperate brightness for both screens if displaying together */
+		/* Need separate brightness for both screens if displaying together */
 		double brt1 = data & 0xff;
 
 		if (brt1 > 0x7f)
 			brt1 = 0x7f; /* I reckon values must be clamped to 0x7f */
 
 		brt1 = (0x7f - brt1) / 127.0;
-		if (state->m_oldbrt1 != brt1)
+		if (m_oldbrt1 != brt1)
 		{
 			int i;
 
 			for (i = 0; i < 0x800; i++)
-				palette_set_pen_contrast(space->machine(), i, brt1);
+				palette_set_pen_contrast(machine(), i, brt1);
 
-			state->m_oldbrt1 = brt1;
+			m_oldbrt1 = brt1;
 		}
 	}
 	else
 	{
-		/* I believe this to be seperate rgb brightness due to strings in hotdebut, unused in 4 dumped games */
+		/* I believe this to be separate rgb brightness due to strings in hotdebut, unused in 4 dumped games */
 		if((data & mem_mask) != 0)
 			logerror("Unk Scr 1 rgb? brt write %08x mask %08x\n", data, mem_mask);
 	}
 }
 
-static WRITE32_HANDLER( ps4_screen2_brt_w )
+WRITE32_MEMBER(psikyo4_state::ps4_screen2_brt_w)
 {
-	psikyo4_state *state = space->machine().driver_data<psikyo4_state>();
 
 	if (ACCESSING_BITS_0_7)
 	{
-		/* Need seperate brightness for both screens if displaying together */
+		/* Need separate brightness for both screens if displaying together */
 		double brt2 = data & 0xff;
 
 		if (brt2 > 0x7f)
@@ -301,139 +295,116 @@ static WRITE32_HANDLER( ps4_screen2_brt_w )
 
 		brt2 = (0x7f - brt2) / 127.0;
 
-		if (state->m_oldbrt2 != brt2)
+		if (m_oldbrt2 != brt2)
 		{
 			int i;
 
 			for (i = 0x800; i < 0x1000; i++)
-				palette_set_pen_contrast(space->machine(), i, brt2);
+				palette_set_pen_contrast(machine(), i, brt2);
 
-			state->m_oldbrt2 = brt2;
+			m_oldbrt2 = brt2;
 		}
 	}
 	else
 	{
-		/* I believe this to be seperate rgb brightness due to strings in hotdebut, unused in 4 dumped games */
+		/* I believe this to be separate rgb brightness due to strings in hotdebut, unused in 4 dumped games */
 		if((data & mem_mask) != 0)
 			logerror("Unk Scr 2 rgb? brt write %08x mask %08x\n", data, mem_mask);
 	}
 }
 
-static WRITE32_HANDLER( ps4_vidregs_w )
+WRITE32_MEMBER(psikyo4_state::ps4_vidregs_w)
 {
-	psikyo4_state *state = space->machine().driver_data<psikyo4_state>();
-	COMBINE_DATA(&state->m_vidregs[offset]);
+	COMBINE_DATA(&m_vidregs[offset]);
 
-#if ROMTEST
 	if (offset == 2) /* Configure bank for gfx test */
 	{
-		if (ACCESSING_BITS_0_15)	// Bank
-		{
-//          memory_set_bank(space->machine(), "bank2", state->m_vidregs[offset] & 0x1fff);  /* Bank comes from vidregs */
-			memory_set_bankptr(space->machine(), "bank2", space->machine().region("gfx1")->base() + 0x2000 * (state->m_vidregs[offset] & 0x1fff)); /* Bank comes from vidregs */		}
+		if (ACCESSING_BITS_0_15)    // Bank
+			membank("bank2")->set_base(machine().root_device().memregion("gfx1")->base() + 0x2000 * (m_vidregs[offset] & 0x1fff)); /* Bank comes from vidregs */
 	}
-#endif
 }
 
-#if ROMTEST
-static READ32_HANDLER( ps4_sample_r ) /* Send sample data for test */
-{
-	psikyo4_state *state = space->machine().driver_data<psikyo4_state>();
-	UINT8 *ROM = space->machine().region("ymf")->base();
-	return ROM[state->m_sample_offs++] << 16;
-}
-#endif
-
-#define PCM_BANK_NO(n)	((state->m_io_select[0] >> (n * 4 + 24)) & 0x07)
+#define PCM_BANK_NO_LEGACY(n)   ((state->m_io_select[0] >> (n * 4 + 24)) & 0x07)
 
 static void set_hotgmck_pcm_bank( running_machine &machine, int n )
 {
 	psikyo4_state *state = machine.driver_data<psikyo4_state>();
-	UINT8 *ymf_pcmbank = machine.region("ymf")->base() + 0x200000;
-	UINT8 *pcm_rom = machine.region("ymfsource")->base();
+	UINT8 *ymf_pcmbank = state->memregion("ymf")->base() + 0x200000;
+	UINT8 *pcm_rom = state->memregion("ymfsource")->base();
 
-	memcpy(ymf_pcmbank + n * 0x100000, pcm_rom + PCM_BANK_NO(n) * 0x100000, 0x100000);
+	memcpy(ymf_pcmbank + n * 0x100000, pcm_rom + PCM_BANK_NO_LEGACY(n) * 0x100000, 0x100000);
 }
-
-static WRITE32_HANDLER( hotgmck_pcm_bank_w )
+#define PCM_BANK_NO(n)  ((m_io_select[0] >> (n * 4 + 24)) & 0x07)
+WRITE32_MEMBER(psikyo4_state::hotgmck_pcm_bank_w)
 {
-	psikyo4_state *state = space->machine().driver_data<psikyo4_state>();
 	int old_bank0 = PCM_BANK_NO(0);
 	int old_bank1 = PCM_BANK_NO(1);
 	int new_bank0, new_bank1;
 
-	COMBINE_DATA(&state->m_io_select[0]);
+	COMBINE_DATA(&m_io_select[0]);
 
 	new_bank0 = PCM_BANK_NO(0);
 	new_bank1 = PCM_BANK_NO(1);
 
 	if (old_bank0 != new_bank0)
-		set_hotgmck_pcm_bank(space->machine(), 0);
+		set_hotgmck_pcm_bank(machine(), 0);
 
 	if (old_bank1 != new_bank1)
-		set_hotgmck_pcm_bank(space->machine(), 1);
+		set_hotgmck_pcm_bank(machine(), 1);
 }
 
-static ADDRESS_MAP_START( ps4_map, AS_PROGRAM, 32 )
-	AM_RANGE(0x00000000, 0x000fffff) AM_ROM		// program ROM (1 meg)
+static ADDRESS_MAP_START( ps4_map, AS_PROGRAM, 32, psikyo4_state )
+	AM_RANGE(0x00000000, 0x000fffff) AM_ROM     // program ROM (1 meg)
 	AM_RANGE(0x02000000, 0x021fffff) AM_ROMBANK("bank1") // data ROM
-	AM_RANGE(0x03000000, 0x030037ff) AM_RAM AM_BASE_SIZE_MEMBER(psikyo4_state, m_spriteram, m_spriteram_size)
-	AM_RANGE(0x03003fe0, 0x03003fe3) AM_DEVREADWRITE("eeprom", ps4_eeprom_r,ps4_eeprom_w)
+	AM_RANGE(0x03000000, 0x030037ff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0x03003fe0, 0x03003fe3) AM_READWRITE(ps4_eeprom_r,ps4_eeprom_w)
 	AM_RANGE(0x03003fe4, 0x03003fe7) AM_READNOP // also writes to this address - might be vblank?
 //  AM_RANGE(0x03003fe4, 0x03003fe7) AM_WRITENOP // might be vblank?
-	AM_RANGE(0x03003fe4, 0x03003fef) AM_RAM_WRITE(ps4_vidregs_w) AM_BASE_MEMBER(psikyo4_state, m_vidregs) // vid regs?
+	AM_RANGE(0x03003fe4, 0x03003fef) AM_RAM_WRITE(ps4_vidregs_w) AM_SHARE("vidregs") // vid regs?
 	AM_RANGE(0x03003ff0, 0x03003ff3) AM_WRITE(ps4_screen1_brt_w) // screen 1 brightness
-	AM_RANGE(0x03003ff4, 0x03003ff7) AM_WRITE(ps4_bgpen_1_dword_w) AM_BASE_MEMBER(psikyo4_state, m_bgpen_1) // screen 1 clear colour
+	AM_RANGE(0x03003ff4, 0x03003ff7) AM_WRITE(ps4_bgpen_1_dword_w) AM_SHARE("bgpen_1") // screen 1 clear colour
 	AM_RANGE(0x03003ff8, 0x03003ffb) AM_WRITE(ps4_screen2_brt_w) // screen 2 brightness
-	AM_RANGE(0x03003ffc, 0x03003fff) AM_WRITE(ps4_bgpen_2_dword_w) AM_BASE_MEMBER(psikyo4_state, m_bgpen_2) // screen 2 clear colour
-	AM_RANGE(0x03004000, 0x03005fff) AM_RAM_WRITE(ps4_paletteram32_RRRRRRRRGGGGGGGGBBBBBBBBxxxxxxxx_dword_w) AM_BASE_MEMBER(psikyo4_state, m_paletteram) // palette
-	AM_RANGE(0x05000000, 0x05000003) AM_DEVREAD8("ymf", ymf278b_r, 0xffffffff) // read YMF status
-	AM_RANGE(0x05000000, 0x05000007) AM_DEVWRITE8("ymf", ymf278b_w, 0xffffffff)
+	AM_RANGE(0x03003ffc, 0x03003fff) AM_WRITE(ps4_bgpen_2_dword_w) AM_SHARE("bgpen_2") // screen 2 clear colour
+	AM_RANGE(0x03004000, 0x03005fff) AM_RAM_WRITE(ps4_paletteram32_RRRRRRRRGGGGGGGGBBBBBBBBxxxxxxxx_dword_w) AM_SHARE("paletteram") // palette
+	AM_RANGE(0x03006000, 0x03007fff) AM_ROMBANK("bank2") // data for rom tests (gfx), data is controlled by vidreg
+	AM_RANGE(0x05000000, 0x05000007) AM_DEVREADWRITE8_LEGACY("ymf", ymf278b_r, ymf278b_w, 0xffffffff)
 	AM_RANGE(0x05800000, 0x05800003) AM_READ_PORT("P1_P2")
 	AM_RANGE(0x05800004, 0x05800007) AM_READ_PORT("P3_P4")
-	AM_RANGE(0x05800008, 0x0580000b) AM_WRITEONLY AM_BASE_MEMBER(psikyo4_state, m_io_select) // Used by Mahjong games to choose input (also maps normal loderndf inputs to offsets)
+	AM_RANGE(0x05800008, 0x0580000b) AM_WRITEONLY AM_SHARE("io_select") // Used by Mahjong games to choose input (also maps normal loderndf inputs to offsets)
 
-	AM_RANGE(0x06000000, 0x060fffff) AM_RAM AM_BASE_MEMBER(psikyo4_state, m_ram) // main RAM (1 meg)
+	AM_RANGE(0x06000000, 0x060fffff) AM_RAM AM_SHARE("ram") // main RAM (1 meg)
 
-#if ROMTEST
-	AM_RANGE(0x05000004, 0x05000007) AM_READ(ps4_sample_r) // data for rom tests (Used to verify Sample rom)
-	AM_RANGE(0x03006000, 0x03007fff) AM_ROMBANK("bank2") // data for rom tests (gfx), data is controlled by vidreg
-#endif
 ADDRESS_MAP_END
 
 
 static INPUT_PORTS_START( hotgmck )
 	PORT_START("P1_P2")
-	PORT_BIT( 0x000000ff, IP_ACTIVE_HIGH, IPT_UNKNOWN ) PORT_CUSTOM(system_port_r, NULL)
+	PORT_BIT( 0x000000ff, IP_ACTIVE_HIGH, IPT_UNKNOWN ) PORT_CUSTOM_MEMBER(DEVICE_SELF, psikyo4_state,system_port_r, NULL)
 	PORT_BIT( 0x00ffff00, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0xff000000, IP_ACTIVE_HIGH, IPT_UNKNOWN ) PORT_CUSTOM(mahjong_ctrl_r, (void *)0)
+	PORT_BIT( 0xff000000, IP_ACTIVE_HIGH, IPT_UNKNOWN ) PORT_CUSTOM_MEMBER(DEVICE_SELF, psikyo4_state,mahjong_ctrl_r, (void *)0)
 
 	PORT_START("P3_P4")
-	PORT_BIT( 0x000000ff, IP_ACTIVE_HIGH, IPT_UNKNOWN ) PORT_CUSTOM(system_port_r, NULL)
+	PORT_BIT( 0x000000ff, IP_ACTIVE_HIGH, IPT_UNKNOWN ) PORT_CUSTOM_MEMBER(DEVICE_SELF, psikyo4_state,system_port_r, NULL)
 	PORT_BIT( 0x00ffff00, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0xff000000, IP_ACTIVE_HIGH, IPT_UNKNOWN ) PORT_CUSTOM(mahjong_ctrl_r, (void *)1)
+	PORT_BIT( 0xff000000, IP_ACTIVE_HIGH, IPT_UNKNOWN ) PORT_CUSTOM_MEMBER(DEVICE_SELF, psikyo4_state,mahjong_ctrl_r, (void *)1)
 
 	PORT_START("JP4")/* jumper pads 'JP4' on the PCB */
 	/* EEPROM is read here */
-	PORT_BIT( 0x00100000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE("eeprom", eeprom_read_bit)
+	PORT_BIT( 0x00100000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE_MEMBER("eeprom", eeprom_device, read_bit)
 
-	PORT_START("SYSTEM")	/* system inputs */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )	// Screen 1
+	PORT_START("SYSTEM")    /* system inputs */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )  // Screen 1
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN2 )	// Screen 2
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN2 )  // Screen 2
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE1 )	// Screen 1
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE1 )   // Screen 1
 	PORT_SERVICE_NO_TOGGLE( 0x20, IP_ACTIVE_LOW)
-#if ROMTEST
 	PORT_DIPNAME( 0x40, 0x40, "Debug" ) /* Unknown effects */
-	PORT_DIPSETTING(	0x40, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
-#else
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-#endif
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE2 )	// Screen 2
+	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE2 )   // Screen 2
 
-	PORT_START("KEY0")	/* fake player 1 controls 1st bank */
+	PORT_START("KEY0")  /* fake player 1 controls 1st bank */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_MAHJONG_A )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_MAHJONG_E )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_MAHJONG_I )
@@ -443,7 +414,7 @@ static INPUT_PORTS_START( hotgmck )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("KEY1")	/* fake player 1 controls 2nd bank */
+	PORT_START("KEY1")  /* fake player 1 controls 2nd bank */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_MAHJONG_B )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_MAHJONG_F )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_MAHJONG_J )
@@ -453,7 +424,7 @@ static INPUT_PORTS_START( hotgmck )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("KEY2")	/* fake player 1 controls 3rd bank */
+	PORT_START("KEY2")  /* fake player 1 controls 3rd bank */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_MAHJONG_C )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_MAHJONG_G )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_MAHJONG_K )
@@ -463,7 +434,7 @@ static INPUT_PORTS_START( hotgmck )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("KEY3")	/* fake player 1 controls 4th bank */
+	PORT_START("KEY3")  /* fake player 1 controls 4th bank */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_MAHJONG_D )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_MAHJONG_H )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_MAHJONG_L )
@@ -473,7 +444,7 @@ static INPUT_PORTS_START( hotgmck )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("KEY4")	/* fake player 2 controls 1st bank */
+	PORT_START("KEY4")  /* fake player 2 controls 1st bank */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_MAHJONG_A ) PORT_PLAYER(2)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_MAHJONG_E ) PORT_PLAYER(2)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_MAHJONG_I ) PORT_PLAYER(2)
@@ -483,7 +454,7 @@ static INPUT_PORTS_START( hotgmck )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("KEY5")	/* fake player 2 controls 2nd bank */
+	PORT_START("KEY5")  /* fake player 2 controls 2nd bank */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_MAHJONG_B ) PORT_PLAYER(2)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_MAHJONG_F ) PORT_PLAYER(2)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_MAHJONG_J ) PORT_PLAYER(2)
@@ -493,7 +464,7 @@ static INPUT_PORTS_START( hotgmck )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("KEY6")	/* fake player 2 controls 3rd bank */
+	PORT_START("KEY6")  /* fake player 2 controls 3rd bank */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_MAHJONG_C ) PORT_PLAYER(2)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_MAHJONG_G ) PORT_PLAYER(2)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_MAHJONG_K ) PORT_PLAYER(2)
@@ -503,7 +474,7 @@ static INPUT_PORTS_START( hotgmck )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("KEY7")	/* fake player 2 controls 4th bank */
+	PORT_START("KEY7")  /* fake player 2 controls 4th bank */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_MAHJONG_D ) PORT_PLAYER(2)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_MAHJONG_H ) PORT_PLAYER(2)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_MAHJONG_L ) PORT_PLAYER(2)
@@ -516,20 +487,16 @@ INPUT_PORTS_END
 
 static INPUT_PORTS_START( loderndf )
 	PORT_START("P1_P2")
-	PORT_BIT( 0x00000001, IP_ACTIVE_LOW, IPT_COIN1 )	// Screen 1
-	PORT_BIT( 0x00000002, IP_ACTIVE_LOW, IPT_COIN2 )	// Screen 1 - 2nd slot
-	PORT_BIT( 0x00000004, IP_ACTIVE_LOW, IPT_COIN3 )	// Screen 2
-	PORT_BIT( 0x00000008, IP_ACTIVE_LOW, IPT_COIN4 )	// Screen 2 - 2nd slot
-	PORT_BIT( 0x00000010, IP_ACTIVE_LOW, IPT_SERVICE1 )	// Screen 1
+	PORT_BIT( 0x00000001, IP_ACTIVE_LOW, IPT_COIN1 )    // Screen 1
+	PORT_BIT( 0x00000002, IP_ACTIVE_LOW, IPT_COIN2 )    // Screen 1 - 2nd slot
+	PORT_BIT( 0x00000004, IP_ACTIVE_LOW, IPT_COIN3 )    // Screen 2
+	PORT_BIT( 0x00000008, IP_ACTIVE_LOW, IPT_COIN4 )    // Screen 2 - 2nd slot
+	PORT_BIT( 0x00000010, IP_ACTIVE_LOW, IPT_SERVICE1 ) // Screen 1
 	PORT_SERVICE_NO_TOGGLE( 0x00000020, IP_ACTIVE_LOW)
-#if ROMTEST
 	PORT_DIPNAME( 0x00000040, 0x00000040, "Debug" ) /* Must be high for rom test, unknown other side-effects */
-	PORT_DIPSETTING(	      0x00000040, DEF_STR( Off ) )
-	PORT_DIPSETTING(	      0x00000000, DEF_STR( On ) )
-#else
-	PORT_BIT( 0x00000040, IP_ACTIVE_LOW, IPT_UNKNOWN )
-#endif
-	PORT_BIT( 0x00000080, IP_ACTIVE_LOW, IPT_SERVICE2 )	// Screen 2
+	PORT_DIPSETTING(          0x00000040, DEF_STR( Off ) )
+	PORT_DIPSETTING(          0x00000000, DEF_STR( On ) )
+	PORT_BIT( 0x00000080, IP_ACTIVE_LOW, IPT_SERVICE2 ) // Screen 2
 	PORT_BIT( 0x00000100, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x00000200, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x00000400, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -556,7 +523,7 @@ static INPUT_PORTS_START( loderndf )
 	PORT_BIT( 0x40000000, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(1) // Can be used as Retry button
 	PORT_BIT( 0x80000000, IP_ACTIVE_LOW, IPT_START1 )
 
-	PORT_START("P3_P4")	/* player 1/2 controls on second screen */
+	PORT_START("P3_P4") /* player 1/2 controls on second screen */
 	PORT_BIT( 0x00000001, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x00000002, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x00000004, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -595,29 +562,25 @@ static INPUT_PORTS_START( loderndf )
 //  1-ON,2-ON,3-ON,4-ON  --> Japanese
 //  1-ON,2-ON,3-ON,4-OFF --> English
 	PORT_DIPNAME( 0x00030000, 0x00010000, DEF_STR( Region ) )
-	PORT_DIPSETTING(	      0x00000000, "Japan (Shows Version Number)" )
-	PORT_DIPSETTING(	      0x00010000, "World (Does Not Show Version Number)" )
+	PORT_DIPSETTING(          0x00000000, "Japan (Shows Version Number)" )
+	PORT_DIPSETTING(          0x00010000, "World (Does Not Show Version Number)" )
 	/* EEPROM is read here */
-	PORT_BIT( 0x00100000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE("eeprom", eeprom_read_bit)
+	PORT_BIT( 0x00100000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE_MEMBER("eeprom", eeprom_device, read_bit)
 INPUT_PORTS_END
 
 /* unused inputs also act as duplicate buttons */
 static INPUT_PORTS_START( hotdebut )
 	PORT_START("P1_P2")
-	PORT_BIT( 0x00000001, IP_ACTIVE_LOW, IPT_COIN1 )	// Screen 1
-	PORT_BIT( 0x00000002, IP_ACTIVE_LOW, IPT_COIN2 )	// Screen 1 - 2nd slot
-	PORT_BIT( 0x00000004, IP_ACTIVE_LOW, IPT_COIN3 )	// Screen 2
-	PORT_BIT( 0x00000008, IP_ACTIVE_LOW, IPT_COIN4 )	// Screen 2 - 2nd slot
-	PORT_BIT( 0x00000010, IP_ACTIVE_LOW, IPT_SERVICE1 )	// Screen 1
+	PORT_BIT( 0x00000001, IP_ACTIVE_LOW, IPT_COIN1 )    // Screen 1
+	PORT_BIT( 0x00000002, IP_ACTIVE_LOW, IPT_COIN2 )    // Screen 1 - 2nd slot
+	PORT_BIT( 0x00000004, IP_ACTIVE_LOW, IPT_COIN3 )    // Screen 2
+	PORT_BIT( 0x00000008, IP_ACTIVE_LOW, IPT_COIN4 )    // Screen 2 - 2nd slot
+	PORT_BIT( 0x00000010, IP_ACTIVE_LOW, IPT_SERVICE1 ) // Screen 1
 	PORT_SERVICE_NO_TOGGLE( 0x00000020, IP_ACTIVE_LOW)
-#if ROMTEST
 	PORT_DIPNAME( 0x00000040, 0x00000040, "Debug" ) /* Must be high for rom test, unknown other side-effects */
-	PORT_DIPSETTING(	      0x00000040, DEF_STR( Off ) )
-	PORT_DIPSETTING(	      0x00000000, DEF_STR( On ) )
-#else
-	PORT_BIT( 0x00000040, IP_ACTIVE_LOW, IPT_UNKNOWN )
-#endif
-	PORT_BIT( 0x00000080, IP_ACTIVE_LOW, IPT_SERVICE2 )	// Screen 2
+	PORT_DIPSETTING(          0x00000040, DEF_STR( Off ) )
+	PORT_DIPSETTING(          0x00000000, DEF_STR( On ) )
+	PORT_BIT( 0x00000080, IP_ACTIVE_LOW, IPT_SERVICE2 ) // Screen 2
 	PORT_BIT( 0x00000100, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x00000200, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x00000400, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -644,7 +607,7 @@ static INPUT_PORTS_START( hotdebut )
 	PORT_BIT( 0x40000000, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x80000000, IP_ACTIVE_LOW, IPT_START1 )
 
-	PORT_START("P3_P4")	/* player 1/2 controls on second screen */
+	PORT_START("P3_P4") /* player 1/2 controls on second screen */
 	PORT_BIT( 0x00000001, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x00000002, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x00000004, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -681,14 +644,14 @@ static INPUT_PORTS_START( hotdebut )
 
 	PORT_START("JP4")/* jumper pads 'JP4' on the PCB */
 	/* EEPROM is read here */
-	PORT_BIT( 0x00100000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE("eeprom", eeprom_read_bit)
+	PORT_BIT( 0x00100000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE_MEMBER("eeprom", eeprom_device, read_bit)
 INPUT_PORTS_END
 
 
 static void irqhandler( device_t *device, int linestate )
 {
 	psikyo4_state *state = device->machine().driver_data<psikyo4_state>();
-	device_set_input_line(state->m_maincpu, 12, linestate ? ASSERT_LINE : CLEAR_LINE);
+	state->m_maincpu->set_input_line(12, linestate ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static const ymf278b_interface ymf278b_config =
@@ -697,30 +660,20 @@ static const ymf278b_interface ymf278b_config =
 };
 
 
-static MACHINE_START( psikyo4 )
+void psikyo4_state::machine_start()
 {
-	psikyo4_state *state = machine.driver_data<psikyo4_state>();
 
-	state->m_maincpu = machine.device("maincpu");
+	m_maincpu = machine().device<cpu_device>("maincpu");
 
-#if ROMTEST
-//  FIXME: Too many banks! it cannot be handled in this way, currently
-//  memory_configure_bank(machine, "bank2", 0, 0x2000, machine.region("gfx1")->base(), 0x2000);
-
-	state->m_sample_offs = 0;
-	state->save_item(NAME(state->m_sample_offs));
-#endif
-
-	state->save_item(NAME(state->m_oldbrt1));
-	state->save_item(NAME(state->m_oldbrt2));
+	save_item(NAME(m_oldbrt1));
+	save_item(NAME(m_oldbrt2));
 }
 
-static MACHINE_RESET( psikyo4 )
+void psikyo4_state::machine_reset()
 {
-	psikyo4_state *state = machine.driver_data<psikyo4_state>();
 
-	state->m_oldbrt1 = -1;
-	state->m_oldbrt2 = -1;
+	m_oldbrt1 = -1;
+	m_oldbrt2 = -1;
 }
 
 static MACHINE_CONFIG_START( ps4big, psikyo4_state )
@@ -728,10 +681,8 @@ static MACHINE_CONFIG_START( ps4big, psikyo4_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", SH2, MASTER_CLOCK/2)
 	MCFG_CPU_PROGRAM_MAP(ps4_map)
-	MCFG_CPU_VBLANK_INT("lscreen", psikyosh_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("lscreen", psikyo4_state,  psikyosh_interrupt)
 
-	MCFG_MACHINE_START(psikyo4)
-	MCFG_MACHINE_RESET(psikyo4)
 
 	MCFG_EEPROM_ADD("eeprom", eeprom_interface_93C56)
 	MCFG_EEPROM_DEFAULT_VALUE(0)
@@ -742,22 +693,19 @@ static MACHINE_CONFIG_START( ps4big, psikyo4_state )
 	MCFG_DEFAULT_LAYOUT(layout_dualhsxs)
 
 	MCFG_SCREEN_ADD("lscreen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
 	MCFG_SCREEN_SIZE(40*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 40*8-1, 0*8, 28*8-1)
-	MCFG_SCREEN_UPDATE(psikyo4)
+	MCFG_SCREEN_UPDATE_DRIVER(psikyo4_state, screen_update_psikyo4_left)
 
 	MCFG_SCREEN_ADD("rscreen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
 	MCFG_SCREEN_SIZE(40*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 40*8-1, 0*8, 28*8-1)
-	MCFG_SCREEN_UPDATE(psikyo4)
+	MCFG_SCREEN_UPDATE_DRIVER(psikyo4_state, screen_update_psikyo4_right)
 
-	MCFG_VIDEO_START(psikyo4)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
@@ -811,7 +759,7 @@ ROM_START( hgkairak )
 	ROM_LOAD32_WORD_SWAP( "1.u22",   0x000000, 0x080000, CRC(24b04aa2) SHA1(b63d02fc15f03b93a74f5549fad236939905e382) )
 	ROM_LOAD16_WORD_SWAP( "prog.u1", 0x100000, 0x100000, CRC(83cff542) SHA1(0ea5717e0b9e6c27aaf61f7e4909ed9a353b4d3b) )
 
-	ROM_REGION( 0x3000000, "gfx1", 0 )	/* Sprites */
+	ROM_REGION( 0x3000000, "gfx1", 0 )  /* Sprites */
 	ROM_LOAD32_WORD( "0l.u2",  0x0000000, 0x400000, CRC(f7472212) SHA1(6f6c1a75615f6a1df4d9bc97225b8e1422eb114a) )
 	ROM_LOAD32_WORD( "0h.u11", 0x0000002, 0x400000, CRC(30019d0f) SHA1(1b6690ead9941171086afc89d95292c40348a15b) )
 	ROM_LOAD32_WORD( "1l.u3",  0x0800000, 0x400000, CRC(f46d5002) SHA1(0ce47b1c6da1a8ec3fd341d903d6a3e0447529e2) )
@@ -839,7 +787,7 @@ ROM_START( hotgmck3 )
 	ROM_LOAD32_WORD_SWAP( "1.u23",   0x000002, 0x080000, CRC(7aad6b24) SHA1(160dfac94002766709369aad66d3b1b11d35ee63) )
 	ROM_LOAD16_WORD_SWAP( "prog.u1", 0x100000, 0x100000, CRC(316c3356) SHA1(4664465c3f88d655379235881f1142a7954c80fc) )
 
-	ROM_REGION( 0x4000000, "gfx1", 0 )	/* Sprites */
+	ROM_REGION( 0x4000000, "gfx1", 0 )  /* Sprites */
 	ROM_LOAD32_WORD( "0l.u2",  0x0000000, 0x400000, CRC(d4bbd035) SHA1(525739eafa4574541b217707514b256af588a996) )
 	ROM_LOAD32_WORD( "0h.u11", 0x0000002, 0x400000, CRC(e8832b0b) SHA1(aa13c264964b1c48094a303b18407a7873c60267) )
 	ROM_LOAD32_WORD( "1l.u3",  0x0800000, 0x400000, CRC(08426cb2) SHA1(a66463a93580fa7b730df7d0b72176daf6d0a6f2) )
@@ -871,7 +819,7 @@ ROM_START( hotgm4ev )
 	ROM_LOAD32_WORD_SWAP( "1.u23",   0x000002, 0x080000, CRC(b1a1c643) SHA1(1912a2d231e97ffbe9b668ca7f25cf406664f3ba) )
 	ROM_LOAD16_WORD_SWAP( "prog.u1", 0x100000, 0x400000, CRC(ad556d8e) SHA1(d3dc3c5cbe939b6fc28f861e4132c5485ba89f50) ) // no test
 
-	ROM_REGION( 0x8000000, "gfx1", 0 )	/* Sprites */
+	ROM_REGION( 0x8000000, "gfx1", 0 )  /* Sprites */
 	ROM_LOAD32_WORD( "0l.u2",  0x0000000, 0x400000, CRC(f65986f7) SHA1(3824a7ea7f14ef3f319b07bd1224847131f6cac0) ) // ok
 	ROM_LOAD32_WORD( "0h.u11", 0x0000002, 0x400000, CRC(51fd07a9) SHA1(527097a376fc0ecb23aa8707eb5e029ec1126873) ) // ok
 	ROM_LOAD32_WORD( "1l.u3",  0x0800000, 0x400000, CRC(f59d21d7) SHA1(05a1b93f2926b419ff5e031a25fd227706d66050) ) // ok
@@ -904,7 +852,7 @@ ROM_START( hotgmcki )
 	ROM_RELOAD(0x300000,0x200000)
 
 	/* Roms have to be mirrored with ROM_RELOAD for rom tests to pass */
-	ROM_REGION( 0x4000000, "gfx1", ROMREGION_ERASEFF | 0 )	/* Sprites */
+	ROM_REGION( 0x4000000, "gfx1", ROMREGION_ERASEFF | 0 )  /* Sprites */
 	ROM_LOAD32_WORD( "0l.u2",  0x0000000, 0x200000, CRC(58ae45eb) SHA1(76a23e79f2c772c5e85b8c15cf79f56b6f71fbc6) ) // ok
 	ROM_RELOAD(                0x0400000, 0x200000 )
 	ROM_LOAD32_WORD( "0h.u11", 0x0000002, 0x200000, CRC(d7bbb929) SHA1(c505ad04cdafb84800099bbbb67c5f6b52212124) ) // ok
@@ -957,7 +905,7 @@ ROM_START( loderndf )
 	ROM_LOAD32_WORD( "1l.u3",  0x1000000, 0x800000, CRC(7a9cd21e) SHA1(dfb36625c2aae3e774ec2451051b7038e0767b6d) )
 	ROM_LOAD32_WORD( "1h.u12", 0x1000002, 0x800000, CRC(78f40d0d) SHA1(243acb73a183a41a3e35a2c746ad31dd6fcd3ef4) )
 
-	ROM_REGION( 0x800000, "ymf", ROMREGION_ERASE00 )
+	ROM_REGION( 0x800000, "ymf", 0 )
 	ROM_LOAD( "snd0.u10", 0x000000, 0x800000, CRC(2da3788f) SHA1(199d4d750a107cbdf8c16cd5b097171743769d9c) ) // Fails hidden rom test (banking problem?)
 ROM_END
 
@@ -972,7 +920,7 @@ ROM_START( loderndfa )
 	ROM_LOAD32_WORD( "1l.u3",  0x1000000, 0x800000, CRC(7a9cd21e) SHA1(dfb36625c2aae3e774ec2451051b7038e0767b6d) )
 	ROM_LOAD32_WORD( "1h.u12", 0x1000002, 0x800000, CRC(78f40d0d) SHA1(243acb73a183a41a3e35a2c746ad31dd6fcd3ef4) )
 
-	ROM_REGION( 0x800000, "ymf", ROMREGION_ERASE00 )
+	ROM_REGION( 0x800000, "ymf", 0 )
 	ROM_LOAD( "snd0.u10", 0x000000, 0x800000, CRC(2da3788f) SHA1(199d4d750a107cbdf8c16cd5b097171743769d9c) ) // Fails hidden rom test (banking problem?)
 ROM_END
 
@@ -981,7 +929,7 @@ ROM_START( hotdebut )
 	ROM_LOAD32_WORD_SWAP( "1.u23",   0x000002, 0x080000, CRC(0b0d0027) SHA1(f62c487a725439af035d2904d453d3c2f7a5649b) )
 	ROM_LOAD32_WORD_SWAP( "2.u22",   0x000000, 0x080000, CRC(c3b5180b) SHA1(615cc1fd99a1e4634b04bb92a3c41f914644e903) )
 
-	ROM_REGION( 0x1800000, "gfx1", 0 )	/* Sprites */
+	ROM_REGION( 0x1800000, "gfx1", 0 )  /* Sprites */
 	ROM_LOAD32_WORD( "0l.u2",  0x0000000, 0x400000, CRC(15da9983) SHA1(a96dd048080b5bb5ce903b5f72b3c24e89e1bee3) )
 	ROM_LOAD32_WORD( "0h.u11", 0x0000002, 0x400000, CRC(76d7b73f) SHA1(0682d4155ad61cab958d55b85914c69120d7d6fc) )
 	ROM_LOAD32_WORD( "1l.u3",  0x0800000, 0x400000, CRC(76ea3498) SHA1(ab2fb4008cf1e2b48a81306386cdc463b3bb4783) )
@@ -989,82 +937,22 @@ ROM_START( hotdebut )
 	ROM_LOAD32_WORD( "2l.u4",  0x1000000, 0x400000, CRC(9d2d1bb1) SHA1(33b41aa50be3040871b6dc6faee0bd99c5e46cd3) )
 	ROM_LOAD32_WORD( "2h.u13", 0x1000002, 0x400000, CRC(a7753c4d) SHA1(adb33de478064cc9255d1bb5c63acc5d8bfbb8eb) )
 
-	ROM_REGION( 0x400000, "ymf", ROMREGION_ERASE00 )
+	ROM_REGION( 0x400000, "ymf", 0 )
 	ROM_LOAD( "snd0.u10", 0x000000, 0x400000, CRC(eef28aa7) SHA1(d10d3f62a2e4c2a8e5fccece9c272f8ead50e5ed) )
 ROM_END
 
-/* are these right? should i fake the counter return?
-   'speedups / idle skipping isn't needed for 'hotgmck, hgkairak'
-   as the core catches and skips the idle loops automatically'
-*/
 
-static READ32_HANDLER( loderndf_speedup_r )
+static void hotgmck_pcm_bank_postload(running_machine &machine)
 {
-/*
-PC  :00001B3C: MOV.L   @R14,R3  R14 = 0x6000020
-PC  :00001B3E: ADD     #$01,R3
-PC  :00001B40: MOV.L   R3,@R14
-PC  :00001B42: MOV.L   @($54,PC),R1
-PC  :00001B44: MOV.L   @R1,R2
-PC  :00001B46: TST     R2,R2
-PC  :00001B48: BT      $00001B3C
-*/
-	psikyo4_state *state = space->machine().driver_data<psikyo4_state>();
-
-	if (cpu_get_pc(&space->device()) == 0x00001b3e)
-		device_spin_until_interrupt(&space->device());
-
-	return state->m_ram[0x000020 / 4];
-}
-
-static READ32_HANDLER( loderdfa_speedup_r )
-{
-/*
-PC  :00001B48: MOV.L   @R14,R3  R14 = 0x6000020
-PC  :00001B4A: ADD     #$01,R3
-PC  :00001B4C: MOV.L   R3,@R14
-PC  :00001B4E: MOV.L   @($54,PC),R1
-PC  :00001B50: MOV.L   @R1,R2
-PC  :00001B52: TST     R2,R2
-PC  :00001B54: BT      $00001B48
-*/
-	psikyo4_state *state = space->machine().driver_data<psikyo4_state>();
-
-	if (cpu_get_pc(&space->device()) == 0x00001b4a)
-		device_spin_until_interrupt(&space->device());
-
-	return state->m_ram[0x000020 / 4];
-}
-
-static READ32_HANDLER( hotdebut_speedup_r )
-{
-/*
-PC  :000029EC: MOV.L   @R14,R2
-PC  :000029EE: ADD     #$01,R2
-PC  :000029F0: MOV.L   R2,@R14
-PC  :000029F2: MOV.L   @($64,PC),R1
-PC  :000029F4: MOV.L   @R1,R3
-PC  :000029F6: TST     R3,R3
-PC  :000029F8: BT      $000029EC
-*/
-	psikyo4_state *state = space->machine().driver_data<psikyo4_state>();
-
-	if (cpu_get_pc(&space->device()) == 0x000029ee)
-		device_spin_until_interrupt(&space->device());
-
-	return state->m_ram[0x00001c / 4];
-}
-
-static STATE_POSTLOAD( hotgmck_pcm_bank_postload )
-{
-	set_hotgmck_pcm_bank(machine, (FPTR)param);
+	set_hotgmck_pcm_bank(machine, 0);
+	set_hotgmck_pcm_bank(machine, 1);
 }
 
 static void install_hotgmck_pcm_bank(running_machine &machine)
 {
 	psikyo4_state *state = machine.driver_data<psikyo4_state>();
-	UINT8 *ymf_pcm = machine.region("ymf")->base();
-	UINT8 *pcm_rom = machine.region("ymfsource")->base();
+	UINT8 *ymf_pcm = state->memregion("ymf")->base();
+	UINT8 *pcm_rom = state->memregion("ymfsource")->base();
 
 	memcpy(ymf_pcm, pcm_rom, 0x200000);
 
@@ -1072,41 +960,24 @@ static void install_hotgmck_pcm_bank(running_machine &machine)
 	set_hotgmck_pcm_bank(machine, 0);
 	set_hotgmck_pcm_bank(machine, 1);
 
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x5800008, 0x580000b, FUNC(hotgmck_pcm_bank_w) );
-	machine.state().register_postload(hotgmck_pcm_bank_postload, (void *)0);
-	machine.state().register_postload(hotgmck_pcm_bank_postload, (void *)1);
+	machine.device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0x5800008, 0x580000b, write32_delegate(FUNC(psikyo4_state::hotgmck_pcm_bank_w),state));
+	machine.save().register_postload(save_prepost_delegate(FUNC(hotgmck_pcm_bank_postload), &machine));
 }
 
-static DRIVER_INIT( hotgmck )
+DRIVER_INIT_MEMBER(psikyo4_state,hotgmck)
 {
-	UINT8 *RAM = machine.region("maincpu")->base();
-	memory_set_bankptr(machine, "bank1", &RAM[0x100000]);
-	install_hotgmck_pcm_bank(machine);	// Banked PCM ROM
-}
-
-static DRIVER_INIT( loderndf )
-{
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x6000020, 0x6000023, FUNC(loderndf_speedup_r) );
-}
-
-static DRIVER_INIT( loderdfa )
-{
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x6000020, 0x6000023, FUNC(loderdfa_speedup_r) );
-}
-
-static DRIVER_INIT( hotdebut )
-{
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x600001c, 0x600001f, FUNC(hotdebut_speedup_r) );
+	UINT8 *RAM = machine().root_device().memregion("maincpu")->base();
+	machine().root_device().membank("bank1")->set_base(&RAM[0x100000]);
+	install_hotgmck_pcm_bank(machine());    // Banked PCM ROM
 }
 
 
-/*     YEAR  NAME      PARENT    MACHINE    INPUT     INIT      MONITOR COMPANY   FULLNAME FLAGS */
-
-GAME( 1997, hotgmck,  0,        ps4big,    hotgmck,  hotgmck,  ROT0,   "Psikyo", "Taisen Hot Gimmick (Japan)", 0 )
-GAME( 1998, hgkairak, 0,        ps4big,    hotgmck,  hotgmck,  ROT0,   "Psikyo", "Taisen Hot Gimmick Kairakuten (Japan)", 0 )
-GAME( 1999, hotgmck3, 0,        ps4big,    hotgmck,  hotgmck,  ROT0,   "Psikyo", "Taisen Hot Gimmick 3 Digital Surfing (Japan)", 0 )
-GAME( 2000, hotgm4ev, 0,        ps4big,    hotgmck,  hotgmck,  ROT0,   "Psikyo", "Taisen Hot Gimmick 4 Ever (Japan)", 0 )
-GAME( 2001, hotgmcki, 0,        ps4big,    hotgmck,  hotgmck,  ROT0,   "Psikyo", "Mahjong Hot Gimmick Integral (Japan)", 0 )
-GAME( 2000, loderndf, 0,        ps4small,  loderndf, loderndf, ROT0,   "Psikyo", "Lode Runner - The Dig Fight (ver. B)", 0 )
-GAME( 2000, loderndfa,loderndf, ps4small,  loderndf, loderdfa, ROT0,   "Psikyo", "Lode Runner - The Dig Fight (ver. A)", 0 )
-GAME( 2000, hotdebut, 0,        ps4small,  hotdebut, hotdebut, ROT0,   "Psikyo / Moss", "Quiz de Idol! Hot Debut (Japan)", 0 )
+/*    YEAR  NAME      PARENT    MACHINE    INPUT     INIT      MONITOR COMPANY   FULLNAME     FLAGS */
+GAME( 1997, hotgmck,  0,        ps4big,    hotgmck, psikyo4_state,  hotgmck,  ROT0,   "Psikyo", "Taisen Hot Gimmick (Japan)", 0 )
+GAME( 1998, hgkairak, 0,        ps4big,    hotgmck, psikyo4_state,  hotgmck,  ROT0,   "Psikyo", "Taisen Hot Gimmick Kairakuten (Japan)", 0 )
+GAME( 1999, hotgmck3, 0,        ps4big,    hotgmck, psikyo4_state,  hotgmck,  ROT0,   "Psikyo", "Taisen Hot Gimmick 3 Digital Surfing (Japan)", 0 )
+GAME( 2000, hotgm4ev, 0,        ps4big,    hotgmck, psikyo4_state,  hotgmck,  ROT0,   "Psikyo", "Taisen Hot Gimmick 4 Ever (Japan)", 0 )
+GAME( 2001, hotgmcki, 0,        ps4big,    hotgmck, psikyo4_state,  hotgmck,  ROT0,   "Psikyo", "Mahjong Hot Gimmick Integral (Japan)", 0 )
+GAME( 2000, loderndf, 0,        ps4small,  loderndf, driver_device, 0,        ROT0,   "Psikyo", "Lode Runner - The Dig Fight (ver. B)", 0 )
+GAME( 2000, loderndfa,loderndf, ps4small,  loderndf, driver_device, 0,        ROT0,   "Psikyo", "Lode Runner - The Dig Fight (ver. A)", 0 )
+GAME( 2000, hotdebut, 0,        ps4small,  hotdebut, driver_device, 0,        ROT0,   "Psikyo / Moss", "Quiz de Idol! Hot Debut (Japan)", 0 )

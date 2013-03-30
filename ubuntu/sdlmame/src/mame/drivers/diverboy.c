@@ -56,28 +56,33 @@
 class diverboy_state : public driver_device
 {
 public:
-	diverboy_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	diverboy_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_spriteram(*this, "spriteram"){ }
 
 	/* memory pointers */
-	UINT16 *  m_spriteram;
+	required_shared_ptr<UINT16> m_spriteram;
 //  UINT16 *  m_paletteram;   // currently this uses generic palette handling
-	size_t    m_spriteram_size;
 
 	/* devices */
-	device_t *m_audiocpu;
+	cpu_device *m_audiocpu;
+	DECLARE_WRITE16_MEMBER(soundcmd_w);
+	DECLARE_WRITE8_MEMBER(okibank_w);
+	virtual void machine_start();
+	virtual void video_start();
+	UINT32 screen_update_diverboy(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
-static VIDEO_START(diverboy)
+void diverboy_state::video_start()
 {
 }
 
-static void draw_sprites( running_machine& machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_sprites( running_machine& machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	diverboy_state *state = machine.driver_data<diverboy_state>();
 	UINT16 *source = state->m_spriteram;
-	UINT16 *finish = source + (state->m_spriteram_size / 2);
+	UINT16 *finish = source + (state->m_spriteram.bytes() / 2);
 
 	while (source < finish)
 	{
@@ -109,27 +114,27 @@ static void draw_sprites( running_machine& machine, bitmap_t *bitmap, const rect
 	}
 }
 
-static SCREEN_UPDATE(diverboy)
+UINT32 diverboy_state::screen_update_diverboy(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-//  bitmap_fill(bitmap,cliprect,get_black_pen(screen->machine()));
-	draw_sprites(screen->machine(), bitmap, cliprect);
+//  bitmap.fill(get_black_pen(machine()), cliprect);
+	draw_sprites(machine(), bitmap, cliprect);
 	return 0;
 }
 
 
-static WRITE16_HANDLER( soundcmd_w )
+WRITE16_MEMBER(diverboy_state::soundcmd_w)
 {
-	diverboy_state *state = space->machine().driver_data<diverboy_state>();
 
 	if (ACCESSING_BITS_0_7)
 	{
-		soundlatch_w(space, 0, data & 0xff);
-		device_set_input_line(state->m_audiocpu, 0, HOLD_LINE);
+		soundlatch_byte_w(space, 0, data & 0xff);
+		m_audiocpu->set_input_line(0, HOLD_LINE);
 	}
 }
 
-static WRITE8_DEVICE_HANDLER( okibank_w )
+WRITE8_MEMBER(diverboy_state::okibank_w)
 {
+	device_t *device = machine().device("oki");
 	/* bit 2 might be reset */
 //  popmessage("%02x",data);
 
@@ -139,12 +144,12 @@ static WRITE8_DEVICE_HANDLER( okibank_w )
 
 
 
-static ADDRESS_MAP_START( diverboy_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( diverboy_map, AS_PROGRAM, 16, diverboy_state )
 	AM_RANGE(0x000000, 0x03ffff) AM_ROM
 	AM_RANGE(0x040000, 0x04ffff) AM_RAM
-	AM_RANGE(0x080000, 0x083fff) AM_RAM AM_BASE_SIZE_MEMBER(diverboy_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0x080000, 0x083fff) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0x100000, 0x100001) AM_WRITE(soundcmd_w)
-	AM_RANGE(0x140000, 0x1407ff) AM_WRITE(paletteram16_xxxxBBBBGGGGRRRR_word_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x140000, 0x1407ff) AM_WRITE(paletteram_xxxxBBBBGGGGRRRR_word_w) AM_SHARE("paletteram")
 	AM_RANGE(0x180000, 0x180001) AM_READ_PORT("P1_P2")
 	AM_RANGE(0x180002, 0x180003) AM_READ_PORT("DSW")
 	AM_RANGE(0x180008, 0x180009) AM_READ_PORT("COINS")
@@ -156,36 +161,36 @@ static ADDRESS_MAP_START( diverboy_map, AS_PROGRAM, 16 )
 //  AM_RANGE(0x340002, 0x340003) AM_WRITENOP
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( snd_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( snd_map, AS_PROGRAM, 8, diverboy_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x87ff) AM_RAM
-	AM_RANGE(0x9000, 0x9000) AM_DEVWRITE("oki", okibank_w)
-	AM_RANGE(0x9800, 0x9800) AM_DEVREADWRITE_MODERN("oki", okim6295_device, read, write)
-	AM_RANGE(0xa000, 0xa000) AM_READ(soundlatch_r)
+	AM_RANGE(0x9000, 0x9000) AM_WRITE(okibank_w)
+	AM_RANGE(0x9800, 0x9800) AM_DEVREADWRITE("oki", okim6295_device, read, write)
+	AM_RANGE(0xa000, 0xa000) AM_READ(soundlatch_byte_r)
 ADDRESS_MAP_END
 
 
 
 static INPUT_PORTS_START( diverboy )
-	PORT_START("P1_P2")	// 0x180000.w
-	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(1)	// unused ?
-	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(1)	// unused ?
+	PORT_START("P1_P2") // 0x180000.w
+	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(1)   // unused ?
+	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(1) // unused ?
 	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(1)
 	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(1)
-	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)		// "Dive"
-	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)		// unknown effect
+	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)       // "Dive"
+	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)       // unknown effect
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_START1 )
-	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(2)	// unused ?
-	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(2)	// unused ?
+	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(2)   // unused ?
+	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(2) // unused ?
 	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(2)
 	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(2)
-	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)		// "Dive"
-	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)		// unknown effect
+	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)       // "Dive"
+	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)       // unknown effect
 	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_START2 )
 
-	PORT_START("DSW")	// 0x180002.w
+	PORT_START("DSW")   // 0x180002.w
 	PORT_DIPNAME( 0x07, 0x00, DEF_STR( Coinage ) )
 	PORT_DIPSETTING(    0x07, DEF_STR( 4C_1C ) )
 	PORT_DIPSETTING(    0x06, DEF_STR( 3C_1C ) )
@@ -210,11 +215,11 @@ static INPUT_PORTS_START( diverboy )
 	PORT_DIPSETTING(    0x80, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
 
-	PORT_START("COINS")	// 0x180008.w
+	PORT_START("COINS") // 0x180008.w
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN3 )		// read notes
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN )	// must be 00 - check code at 0x001680
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN3 )      // read notes
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN )   // must be 00 - check code at 0x001680
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -230,9 +235,9 @@ static const gfx_layout diverboy_spritelayout =
 	4,
 	{ 0,1,2,3 },
 	{  4, 0,  12, 8,  20, 16, 28, 24,
-	  36, 32, 44, 40, 52, 48, 60, 56 },
+		36, 32, 44, 40, 52, 48, 60, 56 },
 	{ 0*64, 1*64, 2*64,  3*64,  4*64,  5*64,  6*64,  7*64,
-	  8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64 },
+		8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64 },
 	16*64
 };
 
@@ -242,37 +247,33 @@ static GFXDECODE_START( diverboy )
 GFXDECODE_END
 
 
-static MACHINE_START( diverboy )
+void diverboy_state::machine_start()
 {
-	diverboy_state *state = machine.driver_data<diverboy_state>();
 
-	state->m_audiocpu = machine.device("audiocpu");
+	m_audiocpu = machine().device<cpu_device>("audiocpu");
 }
 
 static MACHINE_CONFIG_START( diverboy, diverboy_state )
 
 	MCFG_CPU_ADD("maincpu", M68000, 12000000) /* guess */
 	MCFG_CPU_PROGRAM_MAP(diverboy_map)
-	MCFG_CPU_VBLANK_INT("screen", irq6_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", diverboy_state,  irq6_line_hold)
 
 	MCFG_CPU_ADD("audiocpu", Z80, 4000000)
 	MCFG_CPU_PROGRAM_MAP(snd_map)
 
-	MCFG_MACHINE_START(diverboy)
 
 	MCFG_GFXDECODE(diverboy)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8+4, 40*8+1, 2*8, 32*8-1)
-	MCFG_SCREEN_UPDATE(diverboy)
+	MCFG_SCREEN_UPDATE_DRIVER(diverboy_state, screen_update_diverboy)
 
 	MCFG_PALETTE_LENGTH(0x400)
 
-	MCFG_VIDEO_START(diverboy)
 
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
@@ -314,4 +315,4 @@ ROM_END
 
 
 
-GAME( 1992, diverboy, 0, diverboy, diverboy, 0, ORIENTATION_FLIP_X, "Electronic Devices Italy", "Diver Boy", GAME_SUPPORTS_SAVE )
+GAME( 1992, diverboy, 0, diverboy, diverboy, driver_device, 0, ORIENTATION_FLIP_X, "Electronic Devices Italy", "Diver Boy", GAME_SUPPORTS_SAVE )

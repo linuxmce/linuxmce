@@ -2,8 +2,9 @@
 #include "includes/mainsnk.h"
 
 
-PALETTE_INIT( mainsnk )
+void mainsnk_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 	int num_colors = 0x400;
 
@@ -29,11 +30,11 @@ PALETTE_INIT( mainsnk )
 		bit3 = (color_prom[i + num_colors] >> 1) & 0x01;
 		b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 
-		palette_set_color(machine,i,MAKE_RGB(r,g,b));
+		palette_set_color(machine(),i,MAKE_RGB(r,g,b));
 	}
 }
 
-static TILEMAP_MAPPER( marvins_tx_scan_cols )
+TILEMAP_MAPPER_MEMBER(mainsnk_state::marvins_tx_scan_cols)
 {
 	// tilemap is 36x28, the central part is from the first RAM page and the
 	// extra 4 columns are from the second page
@@ -44,91 +45,85 @@ static TILEMAP_MAPPER( marvins_tx_scan_cols )
 		return row + (col << 5);
 }
 
-static TILE_GET_INFO( get_tx_tile_info )
+TILE_GET_INFO_MEMBER(mainsnk_state::get_tx_tile_info)
 {
-	mainsnk_state *state = machine.driver_data<mainsnk_state>();
-	int code = state->m_fgram[tile_index];
+	int code = m_fgram[tile_index];
 
-	SET_TILE_INFO(0,
+	SET_TILE_INFO_MEMBER(0,
 			code,
 			0,
 			tile_index & 0x400 ? TILE_FORCE_LAYER0 : 0);
 }
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(mainsnk_state::get_bg_tile_info)
 {
-	mainsnk_state *state = machine.driver_data<mainsnk_state>();
-	int code = (state->m_bgram[tile_index]);
+	int code = (m_bgram[tile_index]);
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			0,
-			state->m_bg_tile_offset + code,
+			m_bg_tile_offset + code,
 			0,
 			0);
 }
 
 
-VIDEO_START(mainsnk)
+void mainsnk_state::video_start()
 {
-	mainsnk_state *state = machine.driver_data<mainsnk_state>();
 
-	state->m_tx_tilemap = tilemap_create(machine, get_tx_tile_info, marvins_tx_scan_cols, 8, 8, 36, 28);
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_cols,    8, 8, 32, 32);
+	m_tx_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(mainsnk_state::get_tx_tile_info),this), tilemap_mapper_delegate(FUNC(mainsnk_state::marvins_tx_scan_cols),this), 8, 8, 36, 28);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(mainsnk_state::get_bg_tile_info),this), TILEMAP_SCAN_COLS,    8, 8, 32, 32);
 
-	tilemap_set_transparent_pen(state->m_tx_tilemap, 15);
-	tilemap_set_scrolldy(state->m_tx_tilemap, 8, 8);
+	m_tx_tilemap->set_transparent_pen(15);
+	m_tx_tilemap->set_scrolldy(8, 8);
 
-	tilemap_set_scrolldx(state->m_bg_tilemap, 16, 16);
-	tilemap_set_scrolldy(state->m_bg_tilemap,  8,  8);
+	m_bg_tilemap->set_scrolldx(16, 16);
+	m_bg_tilemap->set_scrolldy(8,  8);
 }
 
 
-WRITE8_HANDLER(mainsnk_c600_w)
+WRITE8_MEMBER(mainsnk_state::mainsnk_c600_w)
 {
-	mainsnk_state *state = space->machine().driver_data<mainsnk_state>();
 	int bank;
-	int total_elements = space->machine().gfx[0]->total_elements;
+	int total_elements = machine().gfx[0]->elements();
 
-	flip_screen_set(space->machine(), ~data & 0x80);
+	flip_screen_set(~data & 0x80);
 
-	tilemap_set_palette_offset(state->m_bg_tilemap, (data & 0x07) << 4);
-	tilemap_set_palette_offset(state->m_tx_tilemap, (data & 0x07) << 4);
+	m_bg_tilemap->set_palette_offset((data & 0x07) << 4);
+	m_tx_tilemap->set_palette_offset((data & 0x07) << 4);
 
 	bank = 0;
-	if (total_elements == 0x400)	// mainsnk
+	if (total_elements == 0x400)    // mainsnk
 		bank = ((data & 0x30) >> 4);
-	else if (total_elements == 0x800)	// canvas
+	else if (total_elements == 0x800)   // canvas
 		bank = ((data & 0x40) >> 6) | ((data & 0x30) >> 3);
 
-	if (state->m_bg_tile_offset != (bank << 8))
+	if (m_bg_tile_offset != (bank << 8))
 	{
-		state->m_bg_tile_offset = bank << 8;
-		tilemap_mark_all_tiles_dirty(state->m_bg_tilemap);
+		m_bg_tile_offset = bank << 8;
+		m_bg_tilemap->mark_all_dirty();
 	}
 }
 
-WRITE8_HANDLER( mainsnk_fgram_w )
+WRITE8_MEMBER(mainsnk_state::mainsnk_fgram_w)
 {
-	mainsnk_state *state = space->machine().driver_data<mainsnk_state>();
 
-	state->m_fgram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_tx_tilemap, offset);
+	m_fgram[offset] = data;
+	m_tx_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( mainsnk_bgram_w )
+WRITE8_MEMBER(mainsnk_state::mainsnk_bgram_w)
 {
-	mainsnk_state *state = space->machine().driver_data<mainsnk_state>();
 
-	state->m_bgram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_bgram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
 
 
-static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, int scrollx, int scrolly )
+static void draw_sprites(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, int scrollx, int scrolly )
 {
 	mainsnk_state *state = machine.driver_data<mainsnk_state>();
-	const gfx_element *gfx = machine.gfx[1];
+	gfx_element *gfx = machine.gfx[1];
 	const UINT8 *source, *finish;
 	source =  state->m_spriteram;
 	finish =  source + 25*4;
@@ -149,7 +144,7 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 		sx = 288-16 - sx;
 		sy += 8;
 
-		if (flip_screen_get(machine))
+		if (state->flip_screen())
 		{
 			sx = 288-16 - sx;
 			sy = 224-16 - sy;
@@ -168,13 +163,12 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 }
 
 
-SCREEN_UPDATE(mainsnk)
+UINT32 mainsnk_state::screen_update_mainsnk(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	mainsnk_state *state = screen->machine().driver_data<mainsnk_state>();
 
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
-	draw_sprites(screen->machine(), bitmap, cliprect, 0, 0);
-	tilemap_draw(bitmap, cliprect, state->m_tx_tilemap, 0, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
+	draw_sprites(machine(), bitmap, cliprect, 0, 0);
+	m_tx_tilemap->draw(bitmap, cliprect, 0, 0);
 
 	return 0;
 }

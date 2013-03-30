@@ -53,13 +53,12 @@ void ultraman_zoom_callback_2(running_machine &machine, int *code, int *color, i
 
 ***************************************************************************/
 
-VIDEO_START( ultraman )
+void ultraman_state::video_start()
 {
-	ultraman_state *state = machine.driver_data<ultraman_state>();
-	state->m_sprite_colorbase = 192;
-	state->m_zoom_colorbase[0] = 0;
-	state->m_zoom_colorbase[1] = 64;
-	state->m_zoom_colorbase[2] = 128;
+	m_sprite_colorbase = 192;
+	m_zoom_colorbase[0] = 0;
+	m_zoom_colorbase[1] = 64;
+	m_zoom_colorbase[2] = 128;
 }
 
 
@@ -70,47 +69,46 @@ VIDEO_START( ultraman )
 
 ***************************************************************************/
 
-WRITE16_HANDLER( ultraman_gfxctrl_w )
+WRITE16_MEMBER(ultraman_state::ultraman_gfxctrl_w)
 {
-	ultraman_state *state = space->machine().driver_data<ultraman_state>();
 
 	if (ACCESSING_BITS_0_7)
 	{
 		/*  bit 0: enable wraparound for scr #1
-            bit 1: msb of code for scr #1
-            bit 2: enable wraparound for scr #2
-            bit 3: msb of code for scr #2
-            bit 4: enable wraparound for scr #3
-            bit 5: msb of code for scr #3
-            bit 6: coin counter 1
-            bit 7: coin counter 2 */
+		    bit 1: msb of code for scr #1
+		    bit 2: enable wraparound for scr #2
+		    bit 3: msb of code for scr #2
+		    bit 4: enable wraparound for scr #3
+		    bit 5: msb of code for scr #3
+		    bit 6: coin counter 1
+		    bit 7: coin counter 2 */
 
-		k051316_wraparound_enable(state->m_k051316_1, data & 0x01);
+		k051316_wraparound_enable(m_k051316_1, data & 0x01);
 
-		if (state->m_bank0 != ((data & 0x02) >> 1))
+		if (m_bank0 != ((data & 0x02) >> 1))
 		{
-			state->m_bank0 = (data & 0x02) >> 1;
-			tilemap_mark_all_tiles_dirty_all(space->machine());	/* should mark only zoom0 */
+			m_bank0 = (data & 0x02) >> 1;
+			machine().tilemap().mark_all_dirty();   /* should mark only zoom0 */
 		}
 
-		k051316_wraparound_enable(state->m_k051316_2, data & 0x04);
+		k051316_wraparound_enable(m_k051316_2, data & 0x04);
 
-		if (state->m_bank1 != ((data & 0x08) >> 3))
+		if (m_bank1 != ((data & 0x08) >> 3))
 		{
-			state->m_bank1 = (data & 0x08) >> 3;
-			tilemap_mark_all_tiles_dirty_all(space->machine());	/* should mark only zoom1 */
+			m_bank1 = (data & 0x08) >> 3;
+			machine().tilemap().mark_all_dirty();   /* should mark only zoom1 */
 		}
 
-		k051316_wraparound_enable(state->m_k051316_3, data & 0x10);
+		k051316_wraparound_enable(m_k051316_3, data & 0x10);
 
-		if (state->m_bank2 != ((data & 0x20) >> 5))
+		if (m_bank2 != ((data & 0x20) >> 5))
 		{
-			state->m_bank2 = (data & 0x20) >> 5;
-			tilemap_mark_all_tiles_dirty_all(space->machine());	/* should mark only zoom2 */
+			m_bank2 = (data & 0x20) >> 5;
+			machine().tilemap().mark_all_dirty();   /* should mark only zoom2 */
 		}
 
-		coin_counter_w(space->machine(), 0, data & 0x40);
-		coin_counter_w(space->machine(), 1, data & 0x80);
+		coin_counter_w(machine(), 0, data & 0x40);
+		coin_counter_w(machine(), 1, data & 0x80);
 	}
 }
 
@@ -122,14 +120,13 @@ WRITE16_HANDLER( ultraman_gfxctrl_w )
 
 ***************************************************************************/
 
-SCREEN_UPDATE( ultraman )
+UINT32 ultraman_state::screen_update_ultraman(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	ultraman_state *state = screen->machine().driver_data<ultraman_state>();
 
-	k051316_zoom_draw(state->m_k051316_3, bitmap, cliprect, 0, 0);
-	k051316_zoom_draw(state->m_k051316_2, bitmap, cliprect, 0, 0);
-	k051960_sprites_draw(state->m_k051960, bitmap, cliprect, 0, 0);
-	k051316_zoom_draw(state->m_k051316_1, bitmap, cliprect, 0, 0);
-	k051960_sprites_draw(state->m_k051960, bitmap, cliprect, 1, 1);
+	k051316_zoom_draw(m_k051316_3, bitmap, cliprect, 0, 0);
+	k051316_zoom_draw(m_k051316_2, bitmap, cliprect, 0, 0);
+	k051960_sprites_draw(m_k051960, bitmap, cliprect, 0, 0);
+	k051316_zoom_draw(m_k051316_1, bitmap, cliprect, 0, 0);
+	k051960_sprites_draw(m_k051960, bitmap, cliprect, 1, 1);
 	return 0;
 }

@@ -5,6 +5,7 @@
 ****************************************************************************/
 
 #include "emu.h"
+#include "video/atarimo.h"
 #include "includes/vindictr.h"
 
 
@@ -15,24 +16,22 @@
  *
  *************************************/
 
-static TILE_GET_INFO( get_alpha_tile_info )
+TILE_GET_INFO_MEMBER(vindictr_state::get_alpha_tile_info)
 {
-	vindictr_state *state = machine.driver_data<vindictr_state>();
-	UINT16 data = state->m_alpha[tile_index];
+	UINT16 data = m_alpha[tile_index];
 	int code = data & 0x3ff;
 	int color = ((data >> 10) & 0x0f) | ((data >> 9) & 0x20);
 	int opaque = data & 0x8000;
-	SET_TILE_INFO(1, code, color, opaque ? TILE_FORCE_LAYER0 : 0);
+	SET_TILE_INFO_MEMBER(1, code, color, opaque ? TILE_FORCE_LAYER0 : 0);
 }
 
 
-static TILE_GET_INFO( get_playfield_tile_info )
+TILE_GET_INFO_MEMBER(vindictr_state::get_playfield_tile_info)
 {
-	vindictr_state *state = machine.driver_data<vindictr_state>();
-	UINT16 data = state->m_playfield[tile_index];
-	int code = (state->m_playfield_tile_bank * 0x1000) + (data & 0xfff);
+	UINT16 data = m_playfield[tile_index];
+	int code = (m_playfield_tile_bank * 0x1000) + (data & 0xfff);
 	int color = 0x10 + 2 * ((data >> 12) & 7);
-	SET_TILE_INFO(0, code, color, (data >> 15) & 1);
+	SET_TILE_INFO_MEMBER(0, code, color, (data >> 15) & 1);
 }
 
 
@@ -43,60 +42,59 @@ static TILE_GET_INFO( get_playfield_tile_info )
  *
  *************************************/
 
-VIDEO_START( vindictr )
+VIDEO_START_MEMBER(vindictr_state,vindictr)
 {
 	static const atarimo_desc modesc =
 	{
-		0,					/* index to which gfx system */
-		1,					/* number of motion object banks */
-		1,					/* are the entries linked? */
-		0,					/* are the entries split? */
-		0,					/* render in reverse order? */
-		0,					/* render in swapped X/Y order? */
-		0,					/* does the neighbor bit affect the next object? */
-		8,					/* pixels per SLIP entry (0 for no-slip) */
-		0,					/* pixel offset for SLIPs */
-		0,					/* maximum number of links to visit/scanline (0=all) */
+		0,                  /* index to which gfx system */
+		1,                  /* number of motion object banks */
+		1,                  /* are the entries linked? */
+		0,                  /* are the entries split? */
+		0,                  /* render in reverse order? */
+		0,                  /* render in swapped X/Y order? */
+		0,                  /* does the neighbor bit affect the next object? */
+		8,                  /* pixels per SLIP entry (0 for no-slip) */
+		0,                  /* pixel offset for SLIPs */
+		0,                  /* maximum number of links to visit/scanline (0=all) */
 
-		0x100,				/* base palette entry */
-		0x100,				/* maximum number of colors */
-		0,					/* transparent pen index */
+		0x100,              /* base palette entry */
+		0x100,              /* maximum number of colors */
+		0,                  /* transparent pen index */
 
-		{{ 0,0,0,0x03ff }},	/* mask for the link */
-		{{ 0 }},			/* mask for the graphics bank */
-		{{ 0x7fff,0,0,0 }},	/* mask for the code index */
-		{{ 0 }},			/* mask for the upper code index */
-		{{ 0,0x000f,0,0 }},	/* mask for the color */
-		{{ 0,0xff80,0,0 }},	/* mask for the X position */
-		{{ 0,0,0xff80,0 }},	/* mask for the Y position */
-		{{ 0,0,0x0038,0 }},	/* mask for the width, in tiles*/
-		{{ 0,0,0x0007,0 }},	/* mask for the height, in tiles */
-		{{ 0,0,0x0040,0 }},	/* mask for the horizontal flip */
-		{{ 0 }},			/* mask for the vertical flip */
-		{{ 0,0x0070,0,0 }},	/* mask for the priority */
-		{{ 0 }},			/* mask for the neighbor */
-		{{ 0 }},			/* mask for absolute coordinates */
+		{{ 0,0,0,0x03ff }}, /* mask for the link */
+		{{ 0 }},            /* mask for the graphics bank */
+		{{ 0x7fff,0,0,0 }}, /* mask for the code index */
+		{{ 0 }},            /* mask for the upper code index */
+		{{ 0,0x000f,0,0 }}, /* mask for the color */
+		{{ 0,0xff80,0,0 }}, /* mask for the X position */
+		{{ 0,0,0xff80,0 }}, /* mask for the Y position */
+		{{ 0,0,0x0038,0 }}, /* mask for the width, in tiles*/
+		{{ 0,0,0x0007,0 }}, /* mask for the height, in tiles */
+		{{ 0,0,0x0040,0 }}, /* mask for the horizontal flip */
+		{{ 0 }},            /* mask for the vertical flip */
+		{{ 0,0x0070,0,0 }}, /* mask for the priority */
+		{{ 0 }},            /* mask for the neighbor */
+		{{ 0 }},            /* mask for absolute coordinates */
 
-		{{ 0 }},			/* mask for the special value */
-		0,					/* resulting value to indicate "special" */
-		NULL				/* callback routine for special entries */
+		{{ 0 }},            /* mask for the special value */
+		0,                  /* resulting value to indicate "special" */
+		NULL                /* callback routine for special entries */
 	};
-	vindictr_state *state = machine.driver_data<vindictr_state>();
 
 	/* initialize the playfield */
-	state->m_playfield_tilemap = tilemap_create(machine, get_playfield_tile_info, tilemap_scan_cols,  8,8, 64,64);
+	m_playfield_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(vindictr_state::get_playfield_tile_info),this), TILEMAP_SCAN_COLS,  8,8, 64,64);
 
 	/* initialize the motion objects */
-	atarimo_init(machine, 0, &modesc);
+	atarimo_init(machine(), 0, &modesc);
 
 	/* initialize the alphanumerics */
-	state->m_alpha_tilemap = tilemap_create(machine, get_alpha_tile_info, tilemap_scan_rows,  8,8, 64,32);
-	tilemap_set_transparent_pen(state->m_alpha_tilemap, 0);
+	m_alpha_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(vindictr_state::get_alpha_tile_info),this), TILEMAP_SCAN_ROWS,  8,8, 64,32);
+	m_alpha_tilemap->set_transparent_pen(0);
 
 	/* save states */
-	state->save_item(NAME(state->m_playfield_tile_bank));
-	state->save_item(NAME(state->m_playfield_xscroll));
-	state->save_item(NAME(state->m_playfield_yscroll));
+	save_item(NAME(m_playfield_tile_bank));
+	save_item(NAME(m_playfield_xscroll));
+	save_item(NAME(m_playfield_yscroll));
 }
 
 
@@ -114,8 +112,9 @@ WRITE16_HANDLER( vindictr_paletteram_w )
 	int c;
 
 	/* first blend the data */
-	COMBINE_DATA(&space->machine().generic.paletteram.u16[offset]);
-	data = space->machine().generic.paletteram.u16[offset];
+	vindictr_state *state = space.machine().driver_data<vindictr_state>();
+	COMBINE_DATA(&state->m_generic_paletteram_16[offset]);
+	data = state->m_generic_paletteram_16[offset];
 
 	/* now generate colors at all 16 intensities */
 	for (c = 0; c < 8; c++)
@@ -125,7 +124,7 @@ WRITE16_HANDLER( vindictr_paletteram_w )
 		int g = ((data >> 4) & 15) * i;
 		int b = ((data >> 0) & 15) * i;
 
-		palette_set_color(space->machine(),offset + c*2048,MAKE_RGB(r,g,b));
+		palette_set_color(space.machine(),offset + c*2048,MAKE_RGB(r,g,b));
 	}
 }
 
@@ -137,16 +136,15 @@ WRITE16_HANDLER( vindictr_paletteram_w )
  *
  *************************************/
 
-void vindictr_scanline_update(screen_device &screen, int scanline)
+void vindictr_state::scanline_update(screen_device &screen, int scanline)
 {
-	vindictr_state *state = screen.machine().driver_data<vindictr_state>();
-	UINT16 *base = &state->m_alpha[((scanline - 8) / 8) * 64 + 42];
+	UINT16 *base = &m_alpha[((scanline - 8) / 8) * 64 + 42];
 	int x;
 
 	/* keep in range */
-	if (base < state->m_alpha)
+	if (base < m_alpha)
 		base += 0x7c0;
-	else if (base >= &state->m_alpha[0x7c0])
+	else if (base >= &m_alpha[0x7c0])
 		return;
 
 	/* update the current parameters */
@@ -156,25 +154,25 @@ void vindictr_scanline_update(screen_device &screen, int scanline)
 
 		switch ((data >> 9) & 7)
 		{
-			case 2:		/* /PFB */
-				if (state->m_playfield_tile_bank != (data & 7))
+			case 2:     /* /PFB */
+				if (m_playfield_tile_bank != (data & 7))
 				{
 					screen.update_partial(scanline - 1);
-					state->m_playfield_tile_bank = data & 7;
-					tilemap_mark_all_tiles_dirty(state->m_playfield_tilemap);
+					m_playfield_tile_bank = data & 7;
+					m_playfield_tilemap->mark_all_dirty();
 				}
 				break;
 
-			case 3:		/* /PFHSLD */
-				if (state->m_playfield_xscroll != (data & 0x1ff))
+			case 3:     /* /PFHSLD */
+				if (m_playfield_xscroll != (data & 0x1ff))
 				{
 					screen.update_partial(scanline - 1);
-					tilemap_set_scrollx(state->m_playfield_tilemap, 0, data);
-					state->m_playfield_xscroll = data & 0x1ff;
+					m_playfield_tilemap->set_scrollx(0, data);
+					m_playfield_xscroll = data & 0x1ff;
 				}
 				break;
 
-			case 4:		/* /MOHS */
+			case 4:     /* /MOHS */
 				if (atarimo_get_xscroll(0) != (data & 0x1ff))
 				{
 					screen.update_partial(scanline - 1);
@@ -182,14 +180,14 @@ void vindictr_scanline_update(screen_device &screen, int scanline)
 				}
 				break;
 
-			case 5:		/* /PFSPC */
+			case 5:     /* /PFSPC */
 				break;
 
-			case 6:		/* /VIRQ */
-				atarigen_scanline_int_gen(screen.machine().device("maincpu"));
+			case 6:     /* /VIRQ */
+				scanline_int_gen(*subdevice("maincpu"));
 				break;
 
-			case 7:		/* /PFVS */
+			case 7:     /* /PFVS */
 			{
 				/* a new vscroll latches the offset into a counter; we must adjust for this */
 				int offset = scanline;
@@ -197,10 +195,10 @@ void vindictr_scanline_update(screen_device &screen, int scanline)
 				if (offset > visible_area.max_y)
 					offset -= visible_area.max_y + 1;
 
-				if (state->m_playfield_yscroll != ((data - offset) & 0x1ff))
+				if (m_playfield_yscroll != ((data - offset) & 0x1ff))
 				{
 					screen.update_partial(scanline - 1);
-					tilemap_set_scrolly(state->m_playfield_tilemap, 0, data - offset);
+					m_playfield_tilemap->set_scrolly(0, data - offset);
 					atarimo_set_yscroll(0, (data - offset) & 0x1ff);
 				}
 				break;
@@ -217,35 +215,34 @@ void vindictr_scanline_update(screen_device &screen, int scanline)
  *
  *************************************/
 
-SCREEN_UPDATE( vindictr )
+UINT32 vindictr_state::screen_update_vindictr(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	vindictr_state *state = screen->machine().driver_data<vindictr_state>();
 	atarimo_rect_list rectlist;
-	bitmap_t *mobitmap;
+	bitmap_ind16 *mobitmap;
 	int x, y, r;
 
 	/* draw the playfield */
-	tilemap_draw(bitmap, cliprect, state->m_playfield_tilemap, 0, 0);
+	m_playfield_tilemap->draw(bitmap, cliprect, 0, 0);
 
 	/* draw and merge the MO */
 	mobitmap = atarimo_render(0, cliprect, &rectlist);
 	for (r = 0; r < rectlist.numrects; r++, rectlist.rect++)
 		for (y = rectlist.rect->min_y; y <= rectlist.rect->max_y; y++)
 		{
-			UINT16 *mo = (UINT16 *)mobitmap->base + mobitmap->rowpixels * y;
-			UINT16 *pf = (UINT16 *)bitmap->base + bitmap->rowpixels * y;
+			UINT16 *mo = &mobitmap->pix16(y);
+			UINT16 *pf = &bitmap.pix16(y);
 			for (x = rectlist.rect->min_x; x <= rectlist.rect->max_x; x++)
 				if (mo[x])
 				{
 					/* partially verified via schematics (there are a lot of PALs involved!):
 
-                        SHADE = PAL(MPR1-0, LB7-0, PFX6-5, PFX3-2, PF/M)
+					    SHADE = PAL(MPR1-0, LB7-0, PFX6-5, PFX3-2, PF/M)
 
-                        if (SHADE)
-                            CRA |= 0x100
+					    if (SHADE)
+					        CRA |= 0x100
 
-                        MOG3-1 = ~MAT3-1 if MAT6==1 and MSD3==1
-                    */
+					    MOG3-1 = ~MAT3-1 if MAT6==1 and MSD3==1
+					*/
 					int mopriority = mo[x] >> ATARIMO_PRIORITY_SHIFT;
 
 					/* upper bit of MO priority signals special rendering and doesn't draw anything */
@@ -266,15 +263,15 @@ SCREEN_UPDATE( vindictr )
 		}
 
 	/* add the alpha on top */
-	tilemap_draw(bitmap, cliprect, state->m_alpha_tilemap, 0, 0);
+	m_alpha_tilemap->draw(bitmap, cliprect, 0, 0);
 
 	/* now go back and process the upper bit of MO priority */
 	rectlist.rect -= rectlist.numrects;
 	for (r = 0; r < rectlist.numrects; r++, rectlist.rect++)
 		for (y = rectlist.rect->min_y; y <= rectlist.rect->max_y; y++)
 		{
-			UINT16 *mo = (UINT16 *)mobitmap->base + mobitmap->rowpixels * y;
-			UINT16 *pf = (UINT16 *)bitmap->base + bitmap->rowpixels * y;
+			UINT16 *mo = &mobitmap->pix16(y);
+			UINT16 *pf = &bitmap.pix16(y);
 			for (x = rectlist.rect->min_x; x <= rectlist.rect->max_x; x++)
 				if (mo[x])
 				{

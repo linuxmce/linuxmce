@@ -36,7 +36,7 @@
 #include <fcntl.h>
 #ifdef _MSC_VER
 #include <io.h>
-#define	S_IRWXU	(_S_IREAD | _S_IWRITE | _S_IEXEC)
+#define S_IRWXU (_S_IREAD | _S_IWRITE | _S_IEXEC)
 #else
 #include <unistd.h>
 #endif
@@ -45,11 +45,11 @@
 #include <sys/mman.h>
 #endif
 
-#define VERBOSE		(0)
+#define VERBOSE     (0)
 #if VERBOSE
-#define LOGMSG(x)	logerror x
+#define LOGMSG(x)   logerror x
 #else
-#define LOGMSG(x)	do {} while (0);
+#define LOGMSG(x)   do {} while (0);
 #endif
 
 /*
@@ -77,8 +77,7 @@
 #define LINK_SLACK_B ((LINK_SLACK / 3) + 1)
 
 
-typedef struct _buf_t buf_t;
-struct _buf_t
+struct buf_t
 {
 	volatile UINT8 data;
 	volatile UINT8 stat;
@@ -86,17 +85,15 @@ struct _buf_t
 	volatile int data_cnt;
 };
 
-typedef struct _shmem_t shmem_t;
-struct _shmem_t
+struct shmem_t
 {
-	volatile INT32	lock;
-	buf_t				buf[2];
+	volatile INT32  lock;
+	buf_t               buf[2];
 };
 
-typedef struct _osd_shared_mem osd_shared_mem;
+struct osd_shared_mem;
 
-typedef struct _gaelco_serial_state gaelco_serial_state;
-struct _gaelco_serial_state
+struct gaelco_serial_state
 {
 	device_t *m_device;
 	devcb_resolved_write_line m_irq_func;
@@ -113,7 +110,7 @@ struct _gaelco_serial_state
 	shmem_t *m_shmem;
 };
 
-struct _osd_shared_mem
+struct osd_shared_mem
 {
 	char *fn;
 	size_t size;
@@ -130,7 +127,7 @@ static osd_shared_mem *osd_sharedmem_alloc(const char *path, int create, size_t 
 
 	if (create)
 	{
-		char *buf = (char *) osd_malloc(size);
+		char *buf = (char *) osd_malloc_array(size);
 		memset(buf,0, size);
 
 		fd = open(path, O_RDWR | O_CREAT, S_IRWXU);
@@ -147,7 +144,7 @@ static osd_shared_mem *osd_sharedmem_alloc(const char *path, int create, size_t 
 		}
 		os_shmem->creator = 0;
 	}
-	os_shmem->fn = (char *) osd_malloc(strlen(path)+1);
+	os_shmem->fn = (char *) osd_malloc_array(strlen(path)+1);
 	strcpy(os_shmem->fn, path);
 
 	assert(fd != -1);
@@ -178,7 +175,7 @@ static osd_shared_mem *osd_sharedmem_alloc(const char *path, int create, size_t 
 
 	os_shmem->creator = 0;
 
-	os_shmem->ptr = (void *) osd_malloc(size);
+	os_shmem->ptr = (void *) osd_malloc_array(size);
 	os_shmem->size = size;
 	return os_shmem;
 }
@@ -208,14 +205,14 @@ INLINE gaelco_serial_state *get_token(device_t *device)
 {
 	assert(device != NULL);
 	assert(device->type() == GAELCO_SERIAL);
-	return (gaelco_serial_state *) downcast<legacy_device_base *>(device)->token();
+	return (gaelco_serial_state *) downcast<gaelco_serial_device *>(device)->token();
 }
 
 INLINE const gaelco_serial_interface *get_interface(device_t *device)
 {
 	assert(device != NULL);
 	assert(device->type() == GAELCO_SERIAL);
-	return (gaelco_serial_interface *) downcast<legacy_device_base *>(device)->baseconfig().static_config();
+	return (gaelco_serial_interface *) downcast<gaelco_serial_device *>(device)->static_config();
 }
 
 INLINE void shmem_lock(shmem_t *shmem)
@@ -268,7 +265,7 @@ static void process_in(gaelco_serial_state *state)
 			LOGMSG(("command receive %02x at %d (%d)\n", state->m_in_ptr->data, state->m_out_ptr->cnt, state->m_in_ptr->cnt));
 			if ((state->m_status & GAELCOSER_STATUS_IRQ_ENABLE) != 0)
 			{
-				devcb_call_write_line(&state->m_irq_func, 1);
+				state->m_irq_func(1);
 				LOGMSG(("irq!\n"));
 			}
 		}
@@ -333,8 +330,8 @@ READ8_DEVICE_HANDLER( gaelco_serial_status_r)
 		ret |= 0x01;
 	if ((serial->m_in_ptr->stat & GAELCOSER_STATUS_RTS) != 0)
 		ret |= 0x02;
-	return ret;
 	shmem_unlock(serial->m_shmem);
+	return ret;
 }
 
 WRITE8_DEVICE_HANDLER( gaelco_serial_data_w)
@@ -362,7 +359,7 @@ READ8_DEVICE_HANDLER( gaelco_serial_data_r)
 	process_in(serial);
 	ret = (serial->m_in_ptr->data & 0xff);
 
-	devcb_call_write_line(&serial->m_irq_func, 0);
+	serial->m_irq_func(0);
 	LOGMSG(("read %02x at %d (%d)\n", ret, serial->m_out_ptr->cnt, serial->m_in_ptr->cnt));
 
 	/* if we are not sending, mark as as ready */
@@ -435,7 +432,7 @@ static DEVICE_START( gaelco_serial )
 	memset(state, 0, sizeof(*state));
 	state->m_device = device;
 
-	devcb_resolve_write_line(&state->m_irq_func, &intf->irq_func, device);
+	state->m_irq_func.resolve(intf->irq_func, *device);
 	state->m_sync_timer = device->machine().scheduler().timer_alloc(FUNC(link_cb), state);
 
 	/* register for save states */
@@ -475,7 +472,7 @@ static DEVICE_RESET( gaelco_serial )
 {
 	gaelco_serial_state *state = get_token(device);
 
-	state->m_status = GAELCOSER_STATUS_READY	|GAELCOSER_STATUS_IRQ_ENABLE ;
+	state->m_status = GAELCOSER_STATUS_READY    |GAELCOSER_STATUS_IRQ_ENABLE ;
 
 	state->m_last_in_msg_cnt = -1;
 	state->m_slack_cnt = LINK_SLACK_B;
@@ -498,28 +495,47 @@ static DEVICE_STOP( gaelco_serial )
 	osd_sharedmem_free(state->m_os_shmem);
 }
 
-DEVICE_GET_INFO( gaelco_serial )
+const device_type GAELCO_SERIAL = &device_creator<gaelco_serial_device>;
+
+gaelco_serial_device::gaelco_serial_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, GAELCO_SERIAL, "gaelco_serial", tag, owner, clock)
 {
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(gaelco_serial_state);	break;
-		case DEVINFO_INT_INLINE_CONFIG_BYTES:			info->i = 0;							break;
-		//case DEVINFO_INT_CLASS:                           info->i = DEVICE_CLASS_PERIPHERAL;      break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME(gaelco_serial);break;
-		case DEVINFO_FCT_STOP:							info->stop = DEVICE_STOP_NAME(gaelco_serial);break;
-		case DEVINFO_FCT_RESET:							info->reset = DEVICE_RESET_NAME(gaelco_serial);break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "gaelco_serial");		break;
-		case DEVINFO_STR_FAMILY:						strcpy(info->s, "SERIAL");				break;
-		case DEVINFO_STR_VERSION:						strcpy(info->s, "1.0");					break;
-		case DEVINFO_STR_SOURCE_FILE:					strcpy(info->s, __FILE__);				break;
-		case DEVINFO_STR_CREDITS:						strcpy(info->s, "Copyright Nicola Salmoria and the MAME Team"); break;
-	}
+	m_token = global_alloc_clear(gaelco_serial_state);
 }
 
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
 
-DEFINE_LEGACY_DEVICE(GAELCO_SERIAL, gaelco_serial);
+void gaelco_serial_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void gaelco_serial_device::device_start()
+{
+	DEVICE_START_NAME( gaelco_serial )(this);
+}
+
+//-------------------------------------------------
+//  device_reset - device-specific reset
+//-------------------------------------------------
+
+void gaelco_serial_device::device_reset()
+{
+	DEVICE_RESET_NAME( gaelco_serial )(this);
+}
+
+//-------------------------------------------------
+//  device_stop - device-specific stop
+//-------------------------------------------------
+
+void gaelco_serial_device::device_stop()
+{
+	DEVICE_STOP_NAME( gaelco_serial )(this);
+}

@@ -12,19 +12,19 @@
  *   they do the opposite (set if not found, reset if found)
  */
 
-#define F7AEND(cs)	\
+#define F7AEND(cs)  \
 	return (cs)->amlength1 + (cs)->amlength2 + 4;
 
-#define F7BEND(cs)	\
+#define F7BEND(cs)  \
 	return (cs)->amlength1 + (cs)->amlength2 + 3;
 
-#define F7CEND(cs)	\
+#define F7CEND(cs)  \
 	return (cs)->amlength1 + (cs)->amlength2 + 3;
 
-#define F7BCREATEBITMASK(x)	\
+#define F7BCREATEBITMASK(x) \
 	x = ((1 << (x)) - 1)
 
-#define F7CCREATEBITMASK(x)	\
+#define F7CCREATEBITMASK(x) \
 	x = ((1 << (x)) - 1)
 
 static void F7aDecodeOperands(v60_state *cpustate, UINT32 (*DecodeOp1)(v60_state *), UINT8 dim1, UINT32 (*DecodeOp2)(v60_state *), UINT8 dim2)
@@ -193,11 +193,11 @@ static UINT32 opCMPSTRB(v60_state *cpustate, UINT8 bFill, UINT8 bStop)
 
 		if (c1 > c2)
 		{
-			cpustate->_S = 1;	break;
+			cpustate->_S = 1;   break;
 		}
 		else if (c2 > c1)
 		{
-			cpustate->_S = 0;	break;
+			cpustate->_S = 0;   break;
 		}
 
 		if (bStop)
@@ -259,11 +259,11 @@ static UINT32 opCMPSTRH(v60_state *cpustate, UINT8 bFill, UINT8 bStop)
 
 		if (c1 > c2)
 		{
-			cpustate->_S = 1;	break;
+			cpustate->_S = 1;   break;
 		}
 		else if (c2 > c1)
 		{
-			cpustate->_S = 0;	break;
+			cpustate->_S = 0;   break;
 		}
 
 		if (bStop)
@@ -965,31 +965,31 @@ static UINT32 opCVTDZP(v60_state *cpustate)
 
 static UINT32 op58UNHANDLED(v60_state *cpustate)
 {
-	fatalerror("Unhandled 58 opcode at cpustate->PC: /%06x", cpustate->PC);
+	fatalerror("Unhandled 58 opcode at cpustate->PC: /%06x\n", cpustate->PC);
 	return 0; /* never reached, fatalerror won't return */
 }
 
 static UINT32 op5AUNHANDLED(v60_state *cpustate)
 {
-	fatalerror("Unhandled 5A opcode at cpustate->PC: /%06x", cpustate->PC);
+	fatalerror("Unhandled 5A opcode at cpustate->PC: /%06x\n", cpustate->PC);
 	return 0; /* never reached, fatalerror won't return */
 }
 
 static UINT32 op5BUNHANDLED(v60_state *cpustate)
 {
-	fatalerror("Unhandled 5B opcode at cpustate->PC: /%06x", cpustate->PC);
+	fatalerror("Unhandled 5B opcode at cpustate->PC: /%06x\n", cpustate->PC);
 	return 0; /* never reached, fatalerror won't return */
 }
 
 static UINT32 op5DUNHANDLED(v60_state *cpustate)
 {
-	fatalerror("Unhandled 5D opcode at cpustate->PC: /%06x", cpustate->PC);
+	fatalerror("Unhandled 5D opcode at cpustate->PC: /%06x\n", cpustate->PC);
 	return 0; /* never reached, fatalerror won't return */
 }
 
 static UINT32 op59UNHANDLED(v60_state *cpustate)
 {
-	fatalerror("Unhandled 59 opcode at cpustate->PC: /%06x", cpustate->PC);
+	fatalerror("Unhandled 59 opcode at cpustate->PC: /%06x\n", cpustate->PC);
 	return 0; /* never reached, fatalerror won't return */
 }
 
@@ -1035,7 +1035,7 @@ static UINT32 (*const Op5BTable[32])(v60_state *) =
 	opSCH0BSU,
 	op5BUNHANDLED,
 	opSCH1BSU,
-    	op5BUNHANDLED,
+		op5BUNHANDLED,
 	op5BUNHANDLED,
 	op5BUNHANDLED,
 	op5BUNHANDLED,

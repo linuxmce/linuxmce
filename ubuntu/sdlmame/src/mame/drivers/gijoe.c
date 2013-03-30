@@ -48,25 +48,23 @@ Known Issues
 
 static const eeprom_interface eeprom_intf =
 {
-	7,				/* address bits */
-	8,				/* data bits */
-	"011000",		/*  read command */
-	"011100",		/* write command */
+	7,              /* address bits */
+	8,              /* data bits */
+	"011000",       /*  read command */
+	"011100",       /* write command */
 	"0100100000000",/* erase command */
 	"0100000000000",/* lock command */
 	"0100110000000" /* unlock command */
 };
 
 
-static READ16_HANDLER( control2_r )
+READ16_MEMBER(gijoe_state::control2_r)
 {
-	gijoe_state *state = space->machine().driver_data<gijoe_state>();
-	return state->m_cur_control2;
+	return m_cur_control2;
 }
 
-static WRITE16_HANDLER( control2_w )
+WRITE16_MEMBER(gijoe_state::control2_w)
 {
-	gijoe_state *state = space->machine().driver_data<gijoe_state>();
 
 	if (ACCESSING_BITS_0_7)
 	{
@@ -76,12 +74,12 @@ static WRITE16_HANDLER( control2_w )
 		/* bit 3  (unknown: coin) */
 		/* bit 5  is enable irq 6 */
 		/* bit 7  (unknown: enable irq 5?) */
-		input_port_write(space->machine(), "EEPROMOUT", data, 0xff);
+		ioport("EEPROMOUT")->write(data, 0xff);
 
-		state->m_cur_control2 = data;
+		m_cur_control2 = data;
 
 		/* bit 6 = enable sprite ROM reading */
-		k053246_set_objcha_line(state->m_k053246, (data & 0x0040) ? ASSERT_LINE : CLEAR_LINE);
+		k053246_set_objcha_line(m_k053246, (data & 0x0040) ? ASSERT_LINE : CLEAR_LINE);
 	}
 }
 
@@ -110,74 +108,71 @@ static void gijoe_objdma( running_machine &machine )
 	}
 }
 
-static TIMER_CALLBACK( dmaend_callback )
+TIMER_CALLBACK_MEMBER(gijoe_state::dmaend_callback)
 {
-	gijoe_state *state = machine.driver_data<gijoe_state>();
 
-	if (state->m_cur_control2 & 0x0020)
-		device_set_input_line(state->m_maincpu, 6, HOLD_LINE);
+	if (m_cur_control2 & 0x0020)
+		m_maincpu->set_input_line(6, HOLD_LINE);
 }
 
-static INTERRUPT_GEN( gijoe_interrupt )
+INTERRUPT_GEN_MEMBER(gijoe_state::gijoe_interrupt)
 {
-	gijoe_state *state = device->machine().driver_data<gijoe_state>();
 
 	// global interrupt masking (*this game only)
-	if (!k056832_is_irq_enabled(state->m_k056832, 0))
+	if (!k056832_is_irq_enabled(m_k056832, 0))
 		return;
 
-	if (k053246_is_irq_enabled(state->m_k053246))
+	if (k053246_is_irq_enabled(m_k053246))
 	{
-		gijoe_objdma(device->machine());
+		gijoe_objdma(machine());
 
 		// 42.7us(clr) + 341.3us(xfer) delay at 6Mhz dotclock
-		state->m_dmadelay_timer->adjust(JOE_DMADELAY);
+		m_dmadelay_timer->adjust(JOE_DMADELAY);
 	}
 
 	// trigger V-blank interrupt
-	if (state->m_cur_control2 & 0x0080)
-		device_set_input_line(device, 5, HOLD_LINE);
+	if (m_cur_control2 & 0x0080)
+		device.execute().set_input_line(5, HOLD_LINE);
 }
 
-static WRITE16_HANDLER( sound_cmd_w )
+WRITE16_MEMBER(gijoe_state::sound_cmd_w)
 {
 	if (ACCESSING_BITS_0_7)
 	{
 		data &= 0xff;
-		soundlatch_w(space, 0, data);
+		soundlatch_byte_w(space, 0, data);
 	}
 }
 
-static WRITE16_HANDLER( sound_irq_w )
+WRITE16_MEMBER(gijoe_state::sound_irq_w)
 {
-	gijoe_state *state = space->machine().driver_data<gijoe_state>();
-	device_set_input_line(state->m_audiocpu, 0, HOLD_LINE);
+	m_audiocpu->set_input_line(0, HOLD_LINE);
 }
 
-static READ16_HANDLER( sound_status_r )
+READ16_MEMBER(gijoe_state::sound_status_r)
 {
-	return soundlatch2_r(space, 0);
+	return soundlatch2_byte_r(space, 0);
 }
 
 static void sound_nmi( device_t *device )
 {
 	gijoe_state *state = device->machine().driver_data<gijoe_state>();
-	device_set_input_line(state->m_audiocpu, INPUT_LINE_NMI, PULSE_LINE);
+	state->m_audiocpu->set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 }
 
-static ADDRESS_MAP_START( gijoe_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( gijoe_map, AS_PROGRAM, 16, gijoe_state )
 	AM_RANGE(0x000000, 0x0fffff) AM_ROM
-	AM_RANGE(0x100000, 0x100fff) AM_RAM AM_BASE_MEMBER(gijoe_state, m_spriteram)								// Sprites
-	AM_RANGE(0x110000, 0x110007) AM_DEVWRITE("k053246", k053246_word_w)
-	AM_RANGE(0x120000, 0x121fff) AM_DEVREADWRITE("k056832", k056832_ram_word_r, k056832_ram_word_w)		// Graphic planes
-	AM_RANGE(0x122000, 0x123fff) AM_DEVREADWRITE("k056832", k056832_ram_word_r, k056832_ram_word_w)		// Graphic planes mirror read
-	AM_RANGE(0x130000, 0x131fff) AM_DEVREAD("k056832", k056832_rom_word_r)								// Passthrough to tile roms
-	AM_RANGE(0x160000, 0x160007) AM_DEVWRITE("k056832", k056832_b_word_w)									// VSCCS (board dependent)
-	AM_RANGE(0x170000, 0x170001) AM_WRITENOP												// Watchdog
-	AM_RANGE(0x180000, 0x18ffff) AM_RAM AM_BASE_MEMBER(gijoe_state, m_workram)					// Main RAM.  Spec. 180000-1803ff, 180400-187fff
-	AM_RANGE(0x190000, 0x190fff) AM_RAM_WRITE(paletteram16_xBBBBBGGGGGRRRRR_word_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0x1a0000, 0x1a001f) AM_DEVWRITE("k053251", k053251_lsb_w)
-	AM_RANGE(0x1b0000, 0x1b003f) AM_DEVWRITE("k056832", k056832_word_w)
+	AM_RANGE(0x100000, 0x100fff) AM_RAM AM_SHARE("spriteram")                               // Sprites
+	AM_RANGE(0x110000, 0x110007) AM_DEVWRITE_LEGACY("k053246", k053246_word_w)
+	AM_RANGE(0x120000, 0x121fff) AM_DEVREADWRITE_LEGACY("k056832", k056832_ram_word_r, k056832_ram_word_w)      // Graphic planes
+	AM_RANGE(0x122000, 0x123fff) AM_DEVREADWRITE_LEGACY("k056832", k056832_ram_word_r, k056832_ram_word_w)      // Graphic planes mirror read
+	AM_RANGE(0x130000, 0x131fff) AM_DEVREAD_LEGACY("k056832", k056832_rom_word_r)                               // Passthrough to tile roms
+	AM_RANGE(0x160000, 0x160007) AM_DEVWRITE_LEGACY("k056832", k056832_b_word_w)                                    // VSCCS (board dependent)
+	AM_RANGE(0x170000, 0x170001) AM_WRITENOP                                                // Watchdog
+	AM_RANGE(0x180000, 0x18ffff) AM_RAM AM_SHARE("workram")                 // Main RAM.  Spec. 180000-1803ff, 180400-187fff
+	AM_RANGE(0x190000, 0x190fff) AM_RAM_WRITE(paletteram_xBBBBBGGGGGRRRRR_word_w) AM_SHARE("paletteram")
+	AM_RANGE(0x1a0000, 0x1a001f) AM_DEVWRITE_LEGACY("k053251", k053251_lsb_w)
+	AM_RANGE(0x1b0000, 0x1b003f) AM_DEVWRITE_LEGACY("k056832", k056832_word_w)
 	AM_RANGE(0x1c000c, 0x1c000d) AM_WRITE(sound_cmd_w)
 	AM_RANGE(0x1c0014, 0x1c0015) AM_READ(sound_status_r)
 	AM_RANGE(0x1c0000, 0x1c001f) AM_RAM
@@ -187,21 +182,21 @@ static ADDRESS_MAP_START( gijoe_map, AS_PROGRAM, 16 )
 	AM_RANGE(0x1e4000, 0x1e4001) AM_READ_PORT("SYSTEM")
 	AM_RANGE(0x1e4002, 0x1e4003) AM_READ_PORT("START")
 	AM_RANGE(0x1e8000, 0x1e8001) AM_READWRITE(control2_r, control2_w)
-	AM_RANGE(0x1f0000, 0x1f0001) AM_DEVREAD("k053246", k053246_word_r)
+	AM_RANGE(0x1f0000, 0x1f0001) AM_DEVREAD_LEGACY("k053246", k053246_word_r)
 #if JOE_DEBUG
-	AM_RANGE(0x110000, 0x110007) AM_DEVREAD("k053246", k053246_reg_word_r)
-	AM_RANGE(0x160000, 0x160007) AM_DEVREAD("k056832", k056832_b_word_r)
-	AM_RANGE(0x1a0000, 0x1a001f) AM_DEVREAD("k053251", k053251_lsb_r)
-	AM_RANGE(0x1b0000, 0x1b003f) AM_DEVREAD("k056832", k056832_word_r)
+	AM_RANGE(0x110000, 0x110007) AM_DEVREAD_LEGACY("k053246", k053246_reg_word_r)
+	AM_RANGE(0x160000, 0x160007) AM_DEVREAD_LEGACY("k056832", k056832_b_word_r)
+	AM_RANGE(0x1a0000, 0x1a001f) AM_DEVREAD_LEGACY("k053251", k053251_lsb_r)
+	AM_RANGE(0x1b0000, 0x1b003f) AM_DEVREAD_LEGACY("k056832", k056832_word_r)
 #endif
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, gijoe_state )
 	AM_RANGE(0x0000, 0xebff) AM_ROM
 	AM_RANGE(0xf000, 0xf7ff) AM_RAM
-	AM_RANGE(0xf800, 0xfa2f) AM_DEVREADWRITE("k054539", k054539_r, k054539_w)
-	AM_RANGE(0xfc00, 0xfc00) AM_WRITE(soundlatch2_w)
-	AM_RANGE(0xfc02, 0xfc02) AM_READ(soundlatch_r)
+	AM_RANGE(0xf800, 0xfa2f) AM_DEVREADWRITE("k054539", k054539_device, read, write)
+	AM_RANGE(0xfc00, 0xfc00) AM_WRITE(soundlatch2_byte_w)
+	AM_RANGE(0xfc02, 0xfc02) AM_READ(soundlatch_byte_r)
 ADDRESS_MAP_END
 
 static INPUT_PORTS_START( gijoe )
@@ -210,14 +205,14 @@ static INPUT_PORTS_START( gijoe )
 	PORT_BIT( 0x0002, IP_ACTIVE_LOW,  IPT_START2 )
 	PORT_BIT( 0x0004, IP_ACTIVE_LOW,  IPT_START3 )
 	PORT_BIT( 0x0008, IP_ACTIVE_LOW,  IPT_START4 )
-	PORT_BIT( 0x0100, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE("eeprom", eeprom_read_bit)
-	PORT_BIT( 0x0200, IP_ACTIVE_LOW,  IPT_SPECIAL )	// EEPROM ready (always 1)
+	PORT_BIT( 0x0100, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE_MEMBER("eeprom", eeprom_device, read_bit)
+	PORT_BIT( 0x0200, IP_ACTIVE_LOW,  IPT_SPECIAL ) // EEPROM ready (always 1)
 	PORT_SERVICE_NO_TOGGLE( 0x0800, IP_ACTIVE_LOW )
 
 	PORT_START( "EEPROMOUT" )
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE("eeprom", eeprom_write_bit)
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE("eeprom", eeprom_set_cs_line)
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE("eeprom", eeprom_set_clock_line)
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE_MEMBER("eeprom", eeprom_device, write_bit)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE_MEMBER("eeprom", eeprom_device, set_cs_line)
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE_MEMBER("eeprom", eeprom_device, set_clock_line)
 
 	PORT_START("SYSTEM")
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW,  IPT_COIN1 )
@@ -231,21 +226,21 @@ static INPUT_PORTS_START( gijoe )
 
 	PORT_START("P1_P2")
 	KONAMI16_LSB_40(1, IPT_BUTTON3 )
-	PORT_DIPNAME( 0x0080, 0x0000, "Sound" )			PORT_DIPLOCATION("SW1:1")
+	PORT_DIPNAME( 0x0080, 0x0000, "Sound" )         PORT_DIPLOCATION("SW1:1")
 	PORT_DIPSETTING(      0x0080, DEF_STR( Mono ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( Stereo ) )
 	KONAMI16_MSB_40(2, IPT_BUTTON3 )
-	PORT_DIPNAME( 0x8000, 0x8000, "Coin mechanism" )	PORT_DIPLOCATION("SW1:2")
+	PORT_DIPNAME( 0x8000, 0x8000, "Coin mechanism" )    PORT_DIPLOCATION("SW1:2")
 	PORT_DIPSETTING(      0x8000, "Common" )
 	PORT_DIPSETTING(      0x0000, "Independent" )
 
 	PORT_START("P3_P4")
 	KONAMI16_LSB_40(3, IPT_BUTTON3 )
-	PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( Players ) )	PORT_DIPLOCATION("SW1:3")
+	PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( Players ) )  PORT_DIPLOCATION("SW1:3")
 	PORT_DIPSETTING(      0x0080, "2" )
 	PORT_DIPSETTING(      0x0000, "4" )
 	KONAMI16_MSB_40(4, IPT_BUTTON3 )
-	PORT_DIPUNUSED_DIPLOC( 0x8000, 0x8000, "SW1:4" )	/* Listed as "Unused" */
+	PORT_DIPUNUSED_DIPLOC( 0x8000, 0x8000, "SW1:4" )    /* Listed as "Unused" */
 INPUT_PORTS_END
 
 static const k054539_interface k054539_config =
@@ -274,40 +269,36 @@ static const k053247_interface gijoe_k053247_intf =
 	gijoe_sprite_callback
 };
 
-static MACHINE_START( gijoe )
+void gijoe_state::machine_start()
 {
-	gijoe_state *state = machine.driver_data<gijoe_state>();
 
-	state->m_maincpu = machine.device("maincpu");
-	state->m_audiocpu = machine.device("audiocpu");
-	state->m_k054539 = machine.device("k054539");
-	state->m_k056832 = machine.device("k056832");
-	state->m_k053246 = machine.device("k053246");
-	state->m_k053251 = machine.device("k053251");
+	m_maincpu = machine().device<cpu_device>("maincpu");
+	m_audiocpu = machine().device<cpu_device>("audiocpu");
+	m_k054539 = machine().device("k054539");
+	m_k056832 = machine().device("k056832");
+	m_k053246 = machine().device("k053246");
+	m_k053251 = machine().device("k053251");
 
-	state->m_dmadelay_timer = machine.scheduler().timer_alloc(FUNC(dmaend_callback));
+	m_dmadelay_timer = machine().scheduler().timer_alloc(timer_expired_delegate(FUNC(gijoe_state::dmaend_callback),this));
 
-	state->save_item(NAME(state->m_cur_control2));
+	save_item(NAME(m_cur_control2));
 }
 
-static MACHINE_RESET( gijoe )
+void gijoe_state::machine_reset()
 {
-	gijoe_state *state = machine.driver_data<gijoe_state>();
-	state->m_cur_control2 = 0;
+	m_cur_control2 = 0;
 }
 
 static MACHINE_CONFIG_START( gijoe, gijoe_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M68000, 16000000)	/* Confirmed */
+	MCFG_CPU_ADD("maincpu", M68000, 16000000)   /* Confirmed */
 	MCFG_CPU_PROGRAM_MAP(gijoe_map)
-	MCFG_CPU_VBLANK_INT("screen", gijoe_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", gijoe_state,  gijoe_interrupt)
 
-	MCFG_CPU_ADD("audiocpu", Z80, 8000000)	/* Amuse & confirmed. z80e */
+	MCFG_CPU_ADD("audiocpu", Z80, 8000000)  /* Amuse & confirmed. z80e */
 	MCFG_CPU_PROGRAM_MAP(sound_map)
 
-	MCFG_MACHINE_START(gijoe)
-	MCFG_MACHINE_RESET(gijoe)
 
 	MCFG_EEPROM_ADD("eeprom", eeprom_intf)
 
@@ -317,14 +308,12 @@ static MACHINE_CONFIG_START( gijoe, gijoe_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(24, 24+288-1, 16, 16+224-1)
-	MCFG_SCREEN_UPDATE(gijoe)
+	MCFG_SCREEN_UPDATE_DRIVER(gijoe_state, screen_update_gijoe)
 
 	MCFG_PALETTE_LENGTH(2048)
 
-	MCFG_VIDEO_START(gijoe)
 
 	MCFG_K056832_ADD("k056832", gijoe_k056832_intf)
 	MCFG_K053246_ADD("k053246", gijoe_k053247_intf)
@@ -333,8 +322,7 @@ static MACHINE_CONFIG_START( gijoe, gijoe_state )
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
 
-	MCFG_SOUND_ADD("k054539", K054539, 48000)
-	MCFG_SOUND_CONFIG(k054539_config)
+	MCFG_K054539_ADD("k054539", 48000, k054539_config)
 	MCFG_SOUND_ROUTE(0, "lspeaker", 1.0)
 	MCFG_SOUND_ROUTE(1, "rspeaker", 1.0)
 MACHINE_CONFIG_END
@@ -455,7 +443,7 @@ ROM_START( gijoej )
 ROM_END
 
 
-GAME( 1992, gijoe,  0,     gijoe, gijoe, 0, ROT0, "Konami", "G.I. Joe (World, EAB, set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1992, gijoea, gijoe, gijoe, gijoe, 0, ROT0, "Konami", "G.I. Joe (World, EB8, prototype?)", GAME_SUPPORTS_SAVE )
-GAME( 1992, gijoeu, gijoe, gijoe, gijoe, 0, ROT0, "Konami", "G.I. Joe (US, UAB)", GAME_SUPPORTS_SAVE )
-GAME( 1992, gijoej, gijoe, gijoe, gijoe, 0, ROT0, "Konami", "G.I. Joe (Japan, JAA)", GAME_SUPPORTS_SAVE )
+GAME( 1992, gijoe,  0,     gijoe, gijoe, driver_device, 0, ROT0, "Konami", "G.I. Joe (World, EAB, set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1992, gijoea, gijoe, gijoe, gijoe, driver_device, 0, ROT0, "Konami", "G.I. Joe (World, EB8, prototype?)", GAME_SUPPORTS_SAVE )
+GAME( 1992, gijoeu, gijoe, gijoe, gijoe, driver_device, 0, ROT0, "Konami", "G.I. Joe (US, UAB)", GAME_SUPPORTS_SAVE )
+GAME( 1992, gijoej, gijoe, gijoe, gijoe, driver_device, 0, ROT0, "Konami", "G.I. Joe (Japan, JAA)", GAME_SUPPORTS_SAVE )

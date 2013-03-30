@@ -8,15 +8,15 @@
 #include "includes/fcombat.h"
 
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(fcombat_state::get_bg_tile_info)
 {
-	int tileno, palno;	//32*16 x 32
+	int tileno, palno;  //32*16 x 32
 
 	//palno = (tile_index - (tile_index / 32 * 16) * 32 * 16) / 32;
 
-	tileno = machine.region("user1")->base()[tile_index];
-	palno = 0x18; //machine.region("user2")->base()[tile_index] >> 3;
-	SET_TILE_INFO(2, tileno, palno, 0);
+	tileno = machine().root_device().memregion("user1")->base()[tile_index];
+	palno = 0x18; //machine().root_device().memregion("user2")->base()[tile_index] >> 3;
+	SET_TILE_INFO_MEMBER(2, tileno, palno, 0);
 }
 
 
@@ -37,12 +37,13 @@ static TILE_GET_INFO( get_bg_tile_info )
 
 ***************************************************************************/
 
-PALETTE_INIT( fcombat )
+void fcombat_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 
 	/* allocate the colortable */
-	machine.colortable = colortable_alloc(machine, 0x20);
+	machine().colortable = colortable_alloc(machine(), 0x20);
 
 	/* create a lookup table for the palette */
 	for (i = 0; i < 0x20; i++)
@@ -68,7 +69,7 @@ PALETTE_INIT( fcombat )
 		bit2 = (color_prom[i] >> 7) & 0x01;
 		b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 
-		colortable_palette_set_color(machine.colortable, i, MAKE_RGB(r, g, b));
+		colortable_palette_set_color(machine().colortable, i, MAKE_RGB(r, g, b));
 	}
 
 	/* color_prom now points to the beginning of the lookup table */
@@ -78,7 +79,7 @@ PALETTE_INIT( fcombat )
 	for (i = 0; i < 0x200; i++)
 	{
 		UINT8 ctabentry = (color_prom[(i & 0x1c0) | ((i & 3) << 4) | ((i >> 2) & 0x0f)] & 0x0f) | 0x10;
-		colortable_entry_set_value(machine.colortable, i, ctabentry);
+		colortable_entry_set_value(machine().colortable, i, ctabentry);
 	}
 
 	/* bg chars (this is not the full story... there are four layers mixed */
@@ -86,7 +87,7 @@ PALETTE_INIT( fcombat )
 	for (i = 0x200; i < 0x300; i++)
 	{
 		UINT8 ctabentry = color_prom[i] & 0x0f;
-		colortable_entry_set_value(machine.colortable, i, ctabentry);
+		colortable_entry_set_value(machine().colortable, i, ctabentry);
 	}
 }
 
@@ -98,10 +99,9 @@ PALETTE_INIT( fcombat )
  *
  *************************************/
 
-VIDEO_START( fcombat )
+void fcombat_state::video_start()
 {
-	fcombat_state *state = machine.driver_data<fcombat_state>();
-	state->m_bgmap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_rows, 16, 16, 32 * 8 * 2, 32);
+	m_bgmap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(fcombat_state::get_bg_tile_info),this), TILEMAP_SCAN_ROWS, 16, 16, 32 * 8 * 2, 32);
 }
 
 
@@ -112,48 +112,46 @@ VIDEO_START( fcombat )
  *
  *************************************/
 
-WRITE8_HANDLER( fcombat_videoreg_w )
+WRITE8_MEMBER(fcombat_state::fcombat_videoreg_w)
 {
-	fcombat_state *state = space->machine().driver_data<fcombat_state>();
 
 	/* bit 0 = flip screen and joystick input multiplexor */
-	state->m_cocktail_flip = data & 1;
+	m_cocktail_flip = data & 1;
 
 	/* bits 1-2 char lookup table bank */
-	state->m_char_palette = (data & 0x06) >> 1;
+	m_char_palette = (data & 0x06) >> 1;
 
 	/* bits 3 char bank */
-	state->m_char_bank = (data & 0x08) >> 3;
+	m_char_bank = (data & 0x08) >> 3;
 
 	/* bits 4-5 unused */
 
 	/* bits 6-7 sprite lookup table bank */
-	state->m_sprite_palette = 0;//(data & 0xc0) >> 6;
+	m_sprite_palette = 0;//(data & 0xc0) >> 6;
 	//popmessage("%08x",data);
 }
 
 
 
-SCREEN_UPDATE( fcombat )
+UINT32 fcombat_state::screen_update_fcombat(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	fcombat_state *state = screen->machine().driver_data<fcombat_state>();
 	int sx, sy, offs, i;
 
 	/* draw background */
-	tilemap_set_scrolly(state->m_bgmap, 0, state->m_fcombat_sh);
-	tilemap_set_scrollx(state->m_bgmap, 0, state->m_fcombat_sv - 24);
+	m_bgmap->set_scrolly(0, m_fcombat_sh);
+	m_bgmap->set_scrollx(0, m_fcombat_sv - 24);
 
-	tilemap_mark_all_tiles_dirty(state->m_bgmap);
-	tilemap_draw(bitmap, cliprect, state->m_bgmap, 0, 0);
+	m_bgmap->mark_all_dirty();
+	m_bgmap->draw(bitmap, cliprect, 0, 0);
 	//draw_background(bitmap, cliprect);
 
 	/* draw sprites */
-	for (i = 0; i < state->m_spriteram_size; i += 4)
+	for (i = 0; i < m_spriteram.bytes(); i += 4)
 	{
-		int flags = state->m_spriteram[i + 0];
-		int y = state->m_spriteram[i + 1] ^ 255;
-		int code = state->m_spriteram[i + 2] + ((flags & 0x20) << 3);
-		int x = state->m_spriteram[i + 3] * 2 + 72;
+		int flags = m_spriteram[i + 0];
+		int y = m_spriteram[i + 1] ^ 255;
+		int code = m_spriteram[i + 2] + ((flags & 0x20) << 3);
+		int x = m_spriteram[i + 3] * 2 + 72;
 
 		int xflip = flags & 0x80;
 		int yflip = flags & 0x40;
@@ -161,14 +159,14 @@ SCREEN_UPDATE( fcombat )
 		int wide = flags & 0x08;
 		int code2 = code;
 
-		int color = ((flags >> 1) & 0x03) | ((code >> 5) & 0x04) | (code & 0x08) | (state->m_sprite_palette * 16);
-				const gfx_element *gfx = screen->machine().gfx[1];
+		int color = ((flags >> 1) & 0x03) | ((code >> 5) & 0x04) | (code & 0x08) | (m_sprite_palette * 16);
+				gfx_element *gfx = machine().gfx[1];
 
-		if (state->m_cocktail_flip)
+		if (m_cocktail_flip)
 		{
-			x = 64 * 8 - gfx->width - x;
-			y = 32 * 8 - gfx->height - y;
-			if (wide) y -= gfx->height;
+			x = 64 * 8 - gfx->width() - x;
+			y = 32 * 8 - gfx->height() - y;
+			if (wide) y -= gfx->height();
 			xflip = !xflip;
 			yflip = !yflip;
 		}
@@ -180,14 +178,14 @@ SCREEN_UPDATE( fcombat )
 			else
 				code &= ~0x10, code2 |= 0x10;
 
-			drawgfx_transpen(bitmap, cliprect, gfx, code2, color, xflip, yflip, x, y + gfx->height, 0);
+			drawgfx_transpen(bitmap, cliprect, gfx, code2, color, xflip, yflip, x, y + gfx->height(), 0);
 		}
 
 		if(flags&0x10)
 		{
-			drawgfx_transpen(bitmap, cliprect, gfx, code2 + 16, color, xflip, yflip, x, y + gfx->height, 0);
-			drawgfx_transpen(bitmap, cliprect, gfx, code2 + 16 * 2, color, xflip, yflip, x, y + 2 * gfx->height, 0);
-			drawgfx_transpen(bitmap, cliprect, gfx, code2 + 16 * 3, color, xflip, yflip, x, y + 3 * gfx->height, 0);
+			drawgfx_transpen(bitmap, cliprect, gfx, code2 + 16, color, xflip, yflip, x, y + gfx->height(), 0);
+			drawgfx_transpen(bitmap, cliprect, gfx, code2 + 16 * 2, color, xflip, yflip, x, y + 2 * gfx->height(), 0);
+			drawgfx_transpen(bitmap, cliprect, gfx, code2 + 16 * 3, color, xflip, yflip, x, y + 3 * gfx->height(), 0);
 
 		}
 
@@ -200,14 +198,14 @@ SCREEN_UPDATE( fcombat )
 	for (sy = VISIBLE_Y_MIN/8; sy < VISIBLE_Y_MAX/8; sy++)
 		for (sx = VISIBLE_X_MIN/8; sx < VISIBLE_X_MAX/8; sx++)
 		{
-			int x = state->m_cocktail_flip ? (63 * 8 - 8 * sx) : 8 * sx;
-			int y = state->m_cocktail_flip ? (31 * 8 - 8 * sy) : 8 * sy;
+			int x = m_cocktail_flip ? (63 * 8 - 8 * sx) : 8 * sx;
+			int y = m_cocktail_flip ? (31 * 8 - 8 * sy) : 8 * sy;
 
 			offs = sx + sy * 64;
-			drawgfx_transpen(bitmap, cliprect, screen->machine().gfx[0],
-				state->m_videoram[offs] + 256 * state->m_char_bank,
-				((state->m_videoram[offs] & 0xf0) >> 4) + state->m_char_palette * 16,
-				state->m_cocktail_flip, state->m_cocktail_flip, x, y, 0);
+			drawgfx_transpen(bitmap, cliprect, machine().gfx[0],
+				m_videoram[offs] + 256 * m_char_bank,
+				((m_videoram[offs] & 0xf0) >> 4) + m_char_palette * 16,
+				m_cocktail_flip, m_cocktail_flip, x, y, 0);
 		}
 	return 0;
 }

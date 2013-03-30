@@ -24,7 +24,7 @@
 nearly all sharp pocket pc's system roms should be readable
 this way.
 
-for some early pocket pc's it would be neccessary to load
+for some early pocket pc's it would be necessary to load
 this program into memory.
 (they don't have poke/peek/call instructions,
 so this program can't be typed in)
@@ -38,7 +38,7 @@ adapter sharp - cteprommer
 5 f1    handshake -->      8 bit textool data 1 pin 18
 6 save
 7 load
-8 ib7   <--handshake       8 bit textool adress 0 pin 16
+8 ib7   <--handshake       8 bit textool address 0 pin 16
 9 ib9
 10
 11
@@ -56,10 +56,10 @@ but the pc side must not be interrupted with interrupt
 
 #if 0
 		/* this routine dump the memory (start 0)
-           in an endless loop,
-           the pc side must be started before this
-           actual version should be in mess/machine/pocketc.c
-        */
+		   in an endless loop,
+		   the pc side must be started before this
+		   actual version should be in mess/machine/pocketc.c
+		*/
 
 1 restore: for i=16384 to 16455:read a: poke i,a: next i
 10 call 16384
@@ -192,4 +192,3 @@ int main(int argc, char *argv[])
 #endif
 	return 0;
 }
-

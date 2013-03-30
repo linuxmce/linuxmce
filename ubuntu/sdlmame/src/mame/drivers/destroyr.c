@@ -2,23 +2,32 @@
 
 Atari Destroyer Driver
 
+TODO:
+- discrete sound
+- accurate implementation of scanline counter as documented in schematics,
+  generate irqs from there, and refresh rate 15750/262 (~60.1) instead of 60
+
 ***************************************************************************/
 
 #include "emu.h"
 #include "cpu/m6800/m6800.h"
-#include "deprecat.h"
+
+#include "destroyr.lh"
 
 
 class destroyr_state : public driver_device
 {
 public:
-	destroyr_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	destroyr_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_alpha_num_ram(*this, "alpha_nuram"),
+		m_major_obj_ram(*this, "major_obj_ram"),
+		m_minor_obj_ram(*this, "minor_obj_ram"){ }
 
 	/* memory pointers */
-	UINT8 *        m_major_obj_ram;
-	UINT8 *        m_minor_obj_ram;
-	UINT8 *        m_alpha_num_ram;
+	required_shared_ptr<UINT8> m_alpha_num_ram;
+	required_shared_ptr<UINT8> m_major_obj_ram;
+	required_shared_ptr<UINT8> m_minor_obj_ram;
 
 	/* video-related */
 	int            m_cursor;
@@ -32,22 +41,33 @@ public:
 	int            m_noise;
 
 	/* devices */
-	device_t *m_maincpu;
+	cpu_device *m_maincpu;
+	DECLARE_WRITE8_MEMBER(destroyr_misc_w);
+	DECLARE_WRITE8_MEMBER(destroyr_cursor_load_w);
+	DECLARE_WRITE8_MEMBER(destroyr_interrupt_ack_w);
+	DECLARE_WRITE8_MEMBER(destroyr_output_w);
+	DECLARE_READ8_MEMBER(destroyr_input_r);
+	DECLARE_READ8_MEMBER(destroyr_scanline_r);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void palette_init();
+	UINT32 screen_update_destroyr(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	TIMER_CALLBACK_MEMBER(destroyr_dial_callback);
+	TIMER_CALLBACK_MEMBER(destroyr_frame_callback);
 };
 
 
-static SCREEN_UPDATE( destroyr )
+UINT32 destroyr_state::screen_update_destroyr(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	destroyr_state *state = screen->machine().driver_data<destroyr_state>();
 	int i, j;
 
-	bitmap_fill(bitmap, cliprect, 0);
+	bitmap.fill(0, cliprect);
 
 	/* draw major objects */
 	for (i = 0; i < 16; i++)
 	{
-		int attr = state->m_major_obj_ram[2 * i + 0] ^ 0xff;
-		int horz = state->m_major_obj_ram[2 * i + 1];
+		int attr = m_major_obj_ram[2 * i + 0] ^ 0xff;
+		int horz = m_major_obj_ram[2 * i + 1];
 
 		int num = attr & 3;
 		int scan = attr & 4;
@@ -64,7 +84,7 @@ static SCREEN_UPDATE( destroyr )
 				continue;
 		}
 
-		drawgfx_transpen(bitmap, cliprect, screen->machine().gfx[2], num, 0, flipx, 0, horz, 16 * i, 0);
+		drawgfx_transpen(bitmap, cliprect, machine().gfx[2], num, 0, flipx, 0, horz, 16 * i, 0);
 	}
 
 	/* draw alpha numerics */
@@ -72,131 +92,125 @@ static SCREEN_UPDATE( destroyr )
 	{
 		for (j = 0; j < 32; j++)
 		{
-			int num = state->m_alpha_num_ram[32 * i + j];
+			int num = m_alpha_num_ram[32 * i + j];
 
-			drawgfx_transpen(bitmap, cliprect, screen->machine().gfx[0], num, 0, 0, 0, 8 * j, 8 * i, 0);
+			drawgfx_transpen(bitmap, cliprect, machine().gfx[0], num, 0, 0, 0, 8 * j, 8 * i, 0);
 		}
 	}
 
 	/* draw minor objects */
 	for (i = 0; i < 2; i++)
 	{
-		int num = i << 4 | (state->m_minor_obj_ram[i + 0] & 0xf);
-		int horz = 256 - state->m_minor_obj_ram[i + 2];
-		int vert = 256 - state->m_minor_obj_ram[i + 4];
+		int num = i << 4 | (m_minor_obj_ram[i + 0] & 0xf);
+		int horz = 256 - m_minor_obj_ram[i + 2];
+		int vert = 256 - m_minor_obj_ram[i + 4];
 
-		drawgfx_transpen(bitmap, cliprect, screen->machine().gfx[1], num, 0, 0, 0, horz, vert, 0);
+		drawgfx_transpen(bitmap, cliprect, machine().gfx[1], num, 0, 0, 0, horz, vert, 0);
 	}
 
 	/* draw waves */
 	for (i = 0; i < 4; i++)
 	{
-		drawgfx_transpen(bitmap, cliprect, screen->machine().gfx[3], state->m_wavemod ? 1 : 0, 0, 0, 0, 64 * i, 0x4e, 0);
+		drawgfx_transpen(bitmap, cliprect, machine().gfx[3], m_wavemod ? 1 : 0, 0, 0, 0, 64 * i, 0x4e, 0);
 	}
 
 	/* draw cursor */
 	for (i = 0; i < 256; i++)
 	{
 		if (i & 4)
-			*BITMAP_ADDR16(bitmap, state->m_cursor ^ 0xff, i) = 7;
+			bitmap.pix16(m_cursor ^ 0xff, i) = 7;
 	}
 	return 0;
 }
 
-static TIMER_CALLBACK( destroyr_dial_callback )
+TIMER_CALLBACK_MEMBER(destroyr_state::destroyr_dial_callback)
 {
-	destroyr_state *state = machine.driver_data<destroyr_state>();
 	int dial = param;
 
 	/* Analog inputs come from the player's depth control potentiometer.
-       The voltage is compared to a voltage ramp provided by a discrete
-       analog circuit that conditions the VBLANK signal. When the ramp
-       voltage exceeds the input voltage an NMI signal is generated. The
-       computer then reads the VSYNC data functions to tell where the
-       cursor should be located. */
+	   The voltage is compared to a voltage ramp provided by a discrete
+	   analog circuit that conditions the VBLANK signal. When the ramp
+	   voltage exceeds the input voltage an NMI signal is generated. The
+	   computer then reads the VSYNC data functions to tell where the
+	   cursor should be located. */
 
-	state->m_potsense[dial] = 1;
+	m_potsense[dial] = 1;
 
-	if (state->m_potmask[dial])
+	if (m_potmask[dial])
 	{
-		device_set_input_line(state->m_maincpu, INPUT_LINE_NMI, PULSE_LINE);
+		m_maincpu->set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 	}
 }
 
 
-static TIMER_CALLBACK( destroyr_frame_callback )
+TIMER_CALLBACK_MEMBER(destroyr_state::destroyr_frame_callback)
 {
-	destroyr_state *state = machine.driver_data<destroyr_state>();
-	state->m_potsense[0] = 0;
-	state->m_potsense[1] = 0;
+	m_potsense[0] = 0;
+	m_potsense[1] = 0;
 
 	/* PCB supports two dials, but cab has only got one */
-	machine.scheduler().timer_set(machine.primary_screen->time_until_pos(input_port_read(machine, "PADDLE")), FUNC(destroyr_dial_callback));
-	machine.scheduler().timer_set(machine.primary_screen->time_until_pos(0), FUNC(destroyr_frame_callback));
+	machine().scheduler().timer_set(machine().primary_screen->time_until_pos(ioport("PADDLE")->read()), timer_expired_delegate(FUNC(destroyr_state::destroyr_dial_callback),this));
+	machine().scheduler().timer_set(machine().primary_screen->time_until_pos(0), timer_expired_delegate(FUNC(destroyr_state::destroyr_frame_callback),this));
 }
 
 
-static MACHINE_RESET( destroyr )
+void destroyr_state::machine_reset()
 {
-	destroyr_state *state = machine.driver_data<destroyr_state>();
 
-	machine.scheduler().timer_set(machine.primary_screen->time_until_pos(0), FUNC(destroyr_frame_callback));
+	machine().scheduler().timer_set(machine().primary_screen->time_until_pos(0), timer_expired_delegate(FUNC(destroyr_state::destroyr_frame_callback),this));
 
-	state->m_cursor = 0;
-	state->m_wavemod = 0;
-	state->m_potmask[0] = 0;
-	state->m_potmask[1] = 0;
-	state->m_potsense[0] = 0;
-	state->m_potsense[1] = 0;
-	state->m_attract = 0;
-	state->m_motor_speed = 0;
-	state->m_noise = 0;
+	m_cursor = 0;
+	m_wavemod = 0;
+	m_potmask[0] = 0;
+	m_potmask[1] = 0;
+	m_potsense[0] = 0;
+	m_potsense[1] = 0;
+	m_attract = 0;
+	m_motor_speed = 0;
+	m_noise = 0;
 }
 
 
-static WRITE8_HANDLER( destroyr_misc_w )
+WRITE8_MEMBER(destroyr_state::destroyr_misc_w)
 {
-	destroyr_state *state = space->machine().driver_data<destroyr_state>();
 
 	/* bits 0 to 2 connect to the sound circuits */
-	state->m_attract = data & 0x01;
-	state->m_noise = data & 0x02;
-	state->m_motor_speed = data & 0x04;
-	state->m_potmask[0] = data & 0x08;
-	state->m_wavemod = data & 0x10;
-	state->m_potmask[1] = data & 0x20;
+	m_attract = data & 0x01;
+	m_noise = data & 0x02;
+	m_motor_speed = data & 0x04;
+	m_potmask[0] = data & 0x08;
+	m_wavemod = data & 0x10;
+	m_potmask[1] = data & 0x20;
 
-	coin_lockout_w(space->machine(), 0, !state->m_attract);
-	coin_lockout_w(space->machine(), 1, !state->m_attract);
+	coin_lockout_w(machine(), 0, !m_attract);
+	coin_lockout_w(machine(), 1, !m_attract);
 }
 
 
-static WRITE8_HANDLER( destroyr_cursor_load_w )
+WRITE8_MEMBER(destroyr_state::destroyr_cursor_load_w)
 {
-	destroyr_state *state = space->machine().driver_data<destroyr_state>();
-	state->m_cursor = data;
+	m_cursor = data;
 	watchdog_reset_w(space, offset, data);
 }
 
 
-static WRITE8_HANDLER( destroyr_interrupt_ack_w )
+WRITE8_MEMBER(destroyr_state::destroyr_interrupt_ack_w)
 {
-	destroyr_state *state = space->machine().driver_data<destroyr_state>();
-	device_set_input_line(state->m_maincpu, 0, CLEAR_LINE);
+	m_maincpu->set_input_line(0, CLEAR_LINE);
 }
 
 
-static WRITE8_HANDLER( destroyr_output_w )
+WRITE8_MEMBER(destroyr_state::destroyr_output_w)
 {
 	if (offset & 8) destroyr_misc_w(space, 8, data);
 
 	else switch (offset & 7)
 	{
 	case 0:
-		set_led_status(space->machine(), 0, data & 1);
+		set_led_status(machine(), 0, data & 1);
 		break;
 	case 1:
-		set_led_status(space->machine(), 1, data & 1); /* no second LED present on cab */
+		set_led_status(machine(), 1, data & 1); /* no second LED present on cab */
 		break;
 	case 2:
 		/* bit 0 => songate */
@@ -220,22 +234,21 @@ static WRITE8_HANDLER( destroyr_output_w )
 }
 
 
-static READ8_HANDLER( destroyr_input_r )
+READ8_MEMBER(destroyr_state::destroyr_input_r)
 {
-	destroyr_state *state = space->machine().driver_data<destroyr_state>();
 
 	if (offset & 1)
 	{
-		return input_port_read(space->machine(), "IN1");
+		return ioport("IN1")->read();
 	}
 
 	else
 	{
-		UINT8 ret = input_port_read(space->machine(), "IN0");
+		UINT8 ret = ioport("IN0")->read();
 
-		if (state->m_potsense[0] && state->m_potmask[0])
+		if (m_potsense[0] && m_potmask[0])
 			ret |= 4;
-		if (state->m_potsense[1] && state->m_potmask[1])
+		if (m_potsense[1] && m_potmask[1])
 			ret |= 8;
 
 		return ret;
@@ -243,22 +256,22 @@ static READ8_HANDLER( destroyr_input_r )
 }
 
 
-static READ8_HANDLER( destroyr_scanline_r )
+READ8_MEMBER(destroyr_state::destroyr_scanline_r)
 {
-	return space->machine().primary_screen->vpos();
+	return machine().primary_screen->vpos();
 }
 
 
-static ADDRESS_MAP_START( destroyr_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( destroyr_map, AS_PROGRAM, 8, destroyr_state )
 	ADDRESS_MAP_GLOBAL_MASK(0x7fff)
 	AM_RANGE(0x0000, 0x00ff) AM_MIRROR(0xf00) AM_RAM
 	AM_RANGE(0x1000, 0x1fff) AM_READWRITE(destroyr_input_r, destroyr_output_w)
 	AM_RANGE(0x2000, 0x2fff) AM_READ_PORT("IN2")
-	AM_RANGE(0x3000, 0x30ff) AM_MIRROR(0xf00) AM_WRITEONLY AM_BASE_MEMBER(destroyr_state, m_alpha_num_ram)
-	AM_RANGE(0x4000, 0x401f) AM_MIRROR(0xfe0) AM_WRITEONLY AM_BASE_MEMBER(destroyr_state, m_major_obj_ram)
+	AM_RANGE(0x3000, 0x30ff) AM_MIRROR(0xf00) AM_WRITEONLY AM_SHARE("alpha_nuram")
+	AM_RANGE(0x4000, 0x401f) AM_MIRROR(0xfe0) AM_WRITEONLY AM_SHARE("major_obj_ram")
 	AM_RANGE(0x5000, 0x5000) AM_MIRROR(0xff8) AM_WRITE(destroyr_cursor_load_w)
 	AM_RANGE(0x5001, 0x5001) AM_MIRROR(0xff8) AM_WRITE(destroyr_interrupt_ack_w)
-	AM_RANGE(0x5002, 0x5007) AM_MIRROR(0xff8) AM_WRITEONLY AM_BASE_MEMBER(destroyr_state, m_minor_obj_ram)
+	AM_RANGE(0x5002, 0x5007) AM_MIRROR(0xff8) AM_WRITEONLY AM_SHARE("minor_obj_ram")
 	AM_RANGE(0x6000, 0x6fff) AM_READ(destroyr_scanline_r)
 	AM_RANGE(0x7000, 0x7fff) AM_ROM
 ADDRESS_MAP_END
@@ -280,13 +293,13 @@ static INPUT_PORTS_START( destroyr )
 
 	PORT_START("IN1")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_TILT )
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON2 ) /* actually a lever */
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_NAME("Speed Control") PORT_TOGGLE
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_BUTTON1 )
 	PORT_SERVICE( 0x08, IP_ACTIVE_LOW )
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_COIN1 )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_COIN2 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW,  IPT_UNUSED )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_VBLANK )
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 
 	PORT_START("IN2")
 	PORT_DIPNAME( 0x03, 0x02, DEF_STR( Coinage ) ) PORT_DIPLOCATION("SW:4,3")
@@ -335,12 +348,12 @@ static const gfx_layout destroyr_minor_object_layout =
 	1,        /* planes        */
 	{ 0 },    /* plane offsets */
 	{
-	  0x04, 0x05, 0x06, 0x07, 0x0C, 0x0D, 0x0E, 0x0F,
-	  0x14, 0x15, 0x16, 0x17, 0x1C, 0x1D, 0x1E, 0x1F
+		0x04, 0x05, 0x06, 0x07, 0x0C, 0x0D, 0x0E, 0x0F,
+		0x14, 0x15, 0x16, 0x17, 0x1C, 0x1D, 0x1E, 0x1F
 	},
 	{
-	  0x000, 0x020, 0x040, 0x060, 0x080, 0x0a0, 0x0c0, 0x0e0,
-	  0x100, 0x120, 0x140, 0x160, 0x180, 0x1a0, 0x1c0, 0x1e0
+		0x000, 0x020, 0x040, 0x060, 0x080, 0x0a0, 0x0c0, 0x0e0,
+		0x100, 0x120, 0x140, 0x160, 0x180, 0x1a0, 0x1c0, 0x1e0
 	},
 	0x200     /* increment */
 };
@@ -407,32 +420,31 @@ static GFXDECODE_START( destroyr )
 GFXDECODE_END
 
 
-static PALETTE_INIT( destroyr )
+void destroyr_state::palette_init()
 {
-	palette_set_color(machine, 0, MAKE_RGB(0x00, 0x00, 0x00));   /* major objects */
-	palette_set_color(machine, 1, MAKE_RGB(0x50, 0x50, 0x50));
-	palette_set_color(machine, 2, MAKE_RGB(0xAF, 0xAF, 0xAF));
-	palette_set_color(machine, 3, MAKE_RGB(0xFF ,0xFF, 0xFF));
-	palette_set_color(machine, 4, MAKE_RGB(0x00, 0x00, 0x00));   /* alpha numerics, waves, minor objects */
-	palette_set_color(machine, 5, MAKE_RGB(0xFF, 0xFF, 0xFF));
-	palette_set_color(machine, 6, MAKE_RGB(0x00, 0x00, 0x00));   /* cursor */
-	palette_set_color(machine, 7, MAKE_RGB(0x78, 0x78, 0x78));
+	palette_set_color(machine(), 0, MAKE_RGB(0x00, 0x00, 0x00));   /* major objects */
+	palette_set_color(machine(), 1, MAKE_RGB(0x50, 0x50, 0x50));
+	palette_set_color(machine(), 2, MAKE_RGB(0xAF, 0xAF, 0xAF));
+	palette_set_color(machine(), 3, MAKE_RGB(0xFF ,0xFF, 0xFF));
+	palette_set_color(machine(), 4, MAKE_RGB(0x00, 0x00, 0x00));   /* alpha numerics, waves, minor objects */
+	palette_set_color(machine(), 5, MAKE_RGB(0xFF, 0xFF, 0xFF));
+	palette_set_color(machine(), 6, MAKE_RGB(0x00, 0x00, 0x00));   /* cursor */
+	palette_set_color(machine(), 7, MAKE_RGB(0x78, 0x78, 0x78));
 }
 
 
-static MACHINE_START( destroyr )
+void destroyr_state::machine_start()
 {
-	destroyr_state *state = machine.driver_data<destroyr_state>();
 
-	state->m_maincpu = machine.device("maincpu");
+	m_maincpu = machine().device<cpu_device>("maincpu");
 
-	state->save_item(NAME(state->m_cursor));
-	state->save_item(NAME(state->m_wavemod));
-	state->save_item(NAME(state->m_attract));
-	state->save_item(NAME(state->m_motor_speed));
-	state->save_item(NAME(state->m_noise));
-	state->save_item(NAME(state->m_potmask));
-	state->save_item(NAME(state->m_potsense));
+	save_item(NAME(m_cursor));
+	save_item(NAME(m_wavemod));
+	save_item(NAME(m_attract));
+	save_item(NAME(m_motor_speed));
+	save_item(NAME(m_noise));
+	save_item(NAME(m_potmask));
+	save_item(NAME(m_potsense));
 }
 
 static MACHINE_CONFIG_START( destroyr, destroyr_state )
@@ -440,76 +452,72 @@ static MACHINE_CONFIG_START( destroyr, destroyr_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6800, XTAL_12_096MHz / 16)
 	MCFG_CPU_PROGRAM_MAP(destroyr_map)
-	MCFG_CPU_VBLANK_INT_HACK(irq0_line_assert, 4)
+	MCFG_CPU_PERIODIC_INT_DRIVER(destroyr_state, irq0_line_assert,  4*60)
 
-	MCFG_MACHINE_START(destroyr)
-	MCFG_MACHINE_RESET(destroyr)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_REFRESH_RATE(15750.0/262)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
+	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_SIZE(256, 262)
 	MCFG_SCREEN_VISIBLE_AREA(0, 255, 0, 239)
-	MCFG_SCREEN_UPDATE(destroyr)
+	MCFG_SCREEN_UPDATE_DRIVER(destroyr_state, screen_update_destroyr)
 
 	MCFG_GFXDECODE(destroyr)
 	MCFG_PALETTE_LENGTH(8)
-	MCFG_PALETTE_INIT(destroyr)
 
 	/* sound hardware */
 MACHINE_CONFIG_END
 
 
 ROM_START( destroyr )
-	ROM_REGION( 0x8000, "maincpu", 0 )	/* program code */
+	ROM_REGION( 0x8000, "maincpu", 0 )  /* program code */
 	ROM_LOAD( "language.rom",0x7000, 0x0800, NO_DUMP ) // optional add-on translation rom
 	ROM_LOAD( "30146-01.c3", 0x7800, 0x0800, CRC(e560c712) SHA1(0505ab57eee5421b4ff4e87d14505e02b18fd54c) )
 
-	ROM_REGION( 0x0400, "gfx1", 0 )		/* alpha numerics */
+	ROM_REGION( 0x0400, "gfx1", 0 )     /* alpha numerics */
 	ROM_LOAD( "30135-01.p4", 0x0000, 0x0400, CRC(184824cf) SHA1(713cfd1d41ef7b1c345ea0038b652c4ba3f08301) )
 
-	ROM_REGION( 0x0800, "gfx2", 0 )		/* minor objects */
+	ROM_REGION( 0x0800, "gfx2", 0 )     /* minor objects */
 	ROM_LOAD( "30132-01.f4", 0x0000, 0x0400, CRC(e09d3d55) SHA1(b26013397ef2cb32d0416ecb118387b9c2dffa9a) )
 	ROM_LOAD( "30132-01.k4", 0x0400, 0x0400, CRC(e09d3d55) SHA1(b26013397ef2cb32d0416ecb118387b9c2dffa9a) ) // identical to f4
 
-	ROM_REGION( 0x0400, "gfx3", 0 )		/* major objects */
+	ROM_REGION( 0x0400, "gfx3", 0 )     /* major objects */
 	ROM_LOAD_NIB_HIGH( "30134-01.p8", 0x0000, 0x0400, CRC(6259e007) SHA1(049f5f7160305cb4f4b499dd113cb11eea73fc95) )
 	ROM_LOAD_NIB_LOW ( "30133-01.n8", 0x0000, 0x0400, CRC(108d3e2c) SHA1(8c993369d37c6713670483af78e6d04d38f4b4fc) )
 
-	ROM_REGION( 0x0020, "gfx4", 0 )		/* waves */
+	ROM_REGION( 0x0020, "gfx4", 0 )     /* waves */
 	ROM_LOAD( "30136-01.k2", 0x0000, 0x0020, CRC(532c11b1) SHA1(18ab5369a3f2cfcc9a44f38fa8649524bea5b203) )
 
-	ROM_REGION( 0x0100, "user1", 0 )	/* sync (used for vsync/vblank signals, not hooked up yet) */
+	ROM_REGION( 0x0100, "user1", 0 )    /* sync (used for vsync/vblank signals, not hooked up yet) */
 	ROM_LOAD( "30131-01.m1", 0x0000, 0x0100, CRC(b8094b4c) SHA1(82dc6799a19984f3b204ee3aeeb007e55afc8be3) )
 ROM_END
 
 ROM_START( destroyr1 )
-	ROM_REGION( 0x8000, "maincpu", 0 )	/* program code */
+	ROM_REGION( 0x8000, "maincpu", 0 )  /* program code */
 	ROM_LOAD( "language.rom",0x7000, 0x0800, NO_DUMP ) // optional add-on translation rom
 	ROM_LOAD_NIB_HIGH( "30142-01.f3", 0x7800, 0x0400, CRC(9e9a08d3) SHA1(eb31bab1537caf43ab8c3d23a6c9cc2009fcb98e) )
 	ROM_LOAD_NIB_LOW ( "30141-01.e2", 0x7800, 0x0400, CRC(c924fbce) SHA1(53aa9a3c4c6e90fb94500ddfa6c2ae3076eee2ef) )
 	ROM_LOAD_NIB_HIGH( "30144-01.j3", 0x7c00, 0x0400, CRC(0c7135c6) SHA1(6a0180353a0a6f34639dadc23179f6323aae8d62) )
 	ROM_LOAD_NIB_LOW ( "30143-01.h2", 0x7c00, 0x0400, CRC(b946e6f0) SHA1(b906024bb0e03a644fff1d5516637c24916b096e) )
 
-	ROM_REGION( 0x0400, "gfx1", 0 )		/* alpha numerics */
+	ROM_REGION( 0x0400, "gfx1", 0 )     /* alpha numerics */
 	ROM_LOAD( "30135-01.p4", 0x0000, 0x0400, CRC(184824cf) SHA1(713cfd1d41ef7b1c345ea0038b652c4ba3f08301) )
 
-	ROM_REGION( 0x0800, "gfx2", 0 )		/* minor objects */
+	ROM_REGION( 0x0800, "gfx2", 0 )     /* minor objects */
 	ROM_LOAD( "30132-01.f4", 0x0000, 0x0400, CRC(e09d3d55) SHA1(b26013397ef2cb32d0416ecb118387b9c2dffa9a) )
 	ROM_LOAD( "30132-01.k4", 0x0400, 0x0400, CRC(e09d3d55) SHA1(b26013397ef2cb32d0416ecb118387b9c2dffa9a) ) // identical to f4
 
-	ROM_REGION( 0x0400, "gfx3", 0 )		/* major objects */
+	ROM_REGION( 0x0400, "gfx3", 0 )     /* major objects */
 	ROM_LOAD_NIB_HIGH( "30134-01.p8", 0x0000, 0x0400, CRC(6259e007) SHA1(049f5f7160305cb4f4b499dd113cb11eea73fc95) )
 	ROM_LOAD_NIB_LOW ( "30133-01.n8", 0x0000, 0x0400, CRC(108d3e2c) SHA1(8c993369d37c6713670483af78e6d04d38f4b4fc) )
 
-	ROM_REGION( 0x0020, "gfx4", 0 )		/* waves */
+	ROM_REGION( 0x0020, "gfx4", 0 )     /* waves */
 	ROM_LOAD( "30136-01.k2", 0x0000, 0x0020, CRC(532c11b1) SHA1(18ab5369a3f2cfcc9a44f38fa8649524bea5b203) )
 
-	ROM_REGION( 0x0100, "user1", 0 )	/* sync (used for vsync/vblank signals, not hooked up yet) */
+	ROM_REGION( 0x0100, "user1", 0 )    /* sync (used for vsync/vblank signals, not hooked up yet) */
 	ROM_LOAD( "30131-01.m1", 0x0000, 0x0100, CRC(b8094b4c) SHA1(82dc6799a19984f3b204ee3aeeb007e55afc8be3) )
 ROM_END
 
 
-GAME( 1977, destroyr,  0,        destroyr, destroyr, 0, ORIENTATION_FLIP_X, "Atari", "Destroyer (version O2)", GAME_NO_SOUND )
-GAME( 1977, destroyr1, destroyr, destroyr, destroyr, 0, ORIENTATION_FLIP_X, "Atari", "Destroyer (version O1)", GAME_NO_SOUND )
+GAMEL( 1977, destroyr,  0,        destroyr, destroyr, driver_device, 0, ORIENTATION_FLIP_X, "Atari", "Destroyer (version O2)", GAME_NO_SOUND, layout_destroyr )
+GAMEL( 1977, destroyr1, destroyr, destroyr, destroyr, driver_device, 0, ORIENTATION_FLIP_X, "Atari", "Destroyer (version O1)", GAME_NO_SOUND, layout_destroyr )

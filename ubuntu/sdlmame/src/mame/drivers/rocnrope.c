@@ -23,13 +23,18 @@
  *************************************/
 
 /* Roc'n'Rope has the IRQ vectors in RAM. The rom contains $FFFF at this address! */
-static WRITE8_HANDLER( rocnrope_interrupt_vector_w )
+WRITE8_MEMBER(rocnrope_state::rocnrope_interrupt_vector_w)
 {
-	UINT8 *RAM = space->machine().region("maincpu")->base();
+	UINT8 *RAM = memregion("maincpu")->base();
 
 	RAM[0xfff2 + offset] = data;
 }
 
+WRITE8_MEMBER(rocnrope_state::irq_mask_w)
+{
+
+	m_irq_mask = data & 1;
+}
 
 /*************************************
  *
@@ -37,27 +42,27 @@ static WRITE8_HANDLER( rocnrope_interrupt_vector_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( rocnrope_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( rocnrope_map, AS_PROGRAM, 8, rocnrope_state )
 	AM_RANGE(0x3080, 0x3080) AM_READ_PORT("SYSTEM")
 	AM_RANGE(0x3081, 0x3081) AM_READ_PORT("P1")
 	AM_RANGE(0x3082, 0x3082) AM_READ_PORT("P2")
 	AM_RANGE(0x3083, 0x3083) AM_READ_PORT("DSW1")
 	AM_RANGE(0x3000, 0x3000) AM_READ_PORT("DSW2")
 	AM_RANGE(0x3100, 0x3100) AM_READ_PORT("DSW3")
-	AM_RANGE(0x4000, 0x402f) AM_RAM AM_BASE_MEMBER(rocnrope_state, m_spriteram2)
-	AM_RANGE(0x4400, 0x442f) AM_RAM AM_BASE_SIZE_MEMBER(rocnrope_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0x4000, 0x402f) AM_RAM AM_SHARE("spriteram2")
+	AM_RANGE(0x4400, 0x442f) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0x4000, 0x47ff) AM_RAM
-	AM_RANGE(0x4800, 0x4bff) AM_RAM_WRITE(rocnrope_colorram_w) AM_BASE_MEMBER(rocnrope_state, m_colorram)
-	AM_RANGE(0x4c00, 0x4fff) AM_RAM_WRITE(rocnrope_videoram_w) AM_BASE_MEMBER(rocnrope_state, m_videoram)
+	AM_RANGE(0x4800, 0x4bff) AM_RAM_WRITE(rocnrope_colorram_w) AM_SHARE("colorram")
+	AM_RANGE(0x4c00, 0x4fff) AM_RAM_WRITE(rocnrope_videoram_w) AM_SHARE("videoram")
 	AM_RANGE(0x5000, 0x5fff) AM_RAM
 	AM_RANGE(0x8000, 0x8000) AM_WRITE(watchdog_reset_w)
 	AM_RANGE(0x8080, 0x8080) AM_WRITE(rocnrope_flipscreen_w)
-	AM_RANGE(0x8081, 0x8081) AM_WRITE(timeplt_sh_irqtrigger_w)  /* cause interrupt on audio CPU */
-	AM_RANGE(0x8082, 0x8082) AM_WRITENOP	/* interrupt acknowledge??? */
-	AM_RANGE(0x8083, 0x8083) AM_WRITENOP	/* Coin counter 1 */
-	AM_RANGE(0x8084, 0x8084) AM_WRITENOP	/* Coin counter 2 */
-	AM_RANGE(0x8087, 0x8087) AM_WRITE(interrupt_enable_w)
-	AM_RANGE(0x8100, 0x8100) AM_WRITE(soundlatch_w)
+	AM_RANGE(0x8081, 0x8081) AM_WRITE_LEGACY(timeplt_sh_irqtrigger_w)  /* cause interrupt on audio CPU */
+	AM_RANGE(0x8082, 0x8082) AM_WRITENOP    /* interrupt acknowledge??? */
+	AM_RANGE(0x8083, 0x8083) AM_WRITENOP    /* Coin counter 1 */
+	AM_RANGE(0x8084, 0x8084) AM_WRITENOP    /* Coin counter 2 */
+	AM_RANGE(0x8087, 0x8087) AM_WRITE(irq_mask_w)
+	AM_RANGE(0x8100, 0x8100) AM_WRITE(soundlatch_byte_w)
 	AM_RANGE(0x8182, 0x818d) AM_WRITE(rocnrope_interrupt_vector_w)
 	AM_RANGE(0x6000, 0xffff) AM_ROM
 ADDRESS_MAP_END
@@ -80,63 +85,60 @@ static INPUT_PORTS_START( rocnrope )
 	KONAMI8_COCKTAIL_4WAY_B12_UNK
 
 	PORT_START("DSW1")
-	KONAMI_COINAGE(DEF_STR( Free_Play ), "No Coin B")
+	KONAMI_COINAGE_LOC(DEF_STR( Free_Play ), "No Coin B", SW1)
 	/* "No Coin B" = coins produce sound, but no effect on coin counter */
 
 	PORT_START("DSW2")
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Lives ) )		PORT_DIPLOCATION("DSW2:1,2")
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW2:1,2")
 	PORT_DIPSETTING(    0x03, "3" )
 	PORT_DIPSETTING(    0x02, "4" )
 	PORT_DIPSETTING(    0x01, "5" )
 	PORT_DIPSETTING(    0x00, "255 (Cheat)")
-	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Cabinet ) )		PORT_DIPLOCATION("DSW2:3")
+	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Cabinet ) )      PORT_DIPLOCATION("SW2:3")
 	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( Cocktail ) )
-	PORT_DIPNAME( 0x78, 0x58, DEF_STR( Difficulty ) )	PORT_DIPLOCATION("DSW2:4,5,6,7")
-	PORT_DIPSETTING(    0x78, "Easy 1" )
-	PORT_DIPSETTING(    0x70, "Easy 2" )
-	PORT_DIPSETTING(    0x68, "Easy 3" )
-	PORT_DIPSETTING(    0x60, "Easy 4" )
-	PORT_DIPSETTING(    0x58, "Normal 1" )
-	PORT_DIPSETTING(    0x50, "Normal 2" )
-	PORT_DIPSETTING(    0x48, "Normal 3" )
-	PORT_DIPSETTING(    0x40, "Normal 4" )
-	PORT_DIPSETTING(    0x38, "Normal 5" )
-	PORT_DIPSETTING(    0x30, "Normal 6" )
-	PORT_DIPSETTING(    0x28, "Normal 7" )
-	PORT_DIPSETTING(    0x20, "Normal 8" )
-	PORT_DIPSETTING(    0x18, "Difficult 1" )
-	PORT_DIPSETTING(    0x10, "Difficult 2" )
-	PORT_DIPSETTING(    0x08, "Difficult 3" )
-	PORT_DIPSETTING(    0x00, "Difficult 4" )
-	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Demo_Sounds ) )	PORT_DIPLOCATION("DSW2:8")
+	PORT_DIPNAME( 0x78, 0x58, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("SW2:4,5,6,7")
+	PORT_DIPSETTING(    0x78, "1 (Easy)" )
+	PORT_DIPSETTING(    0x70, "2" )
+	PORT_DIPSETTING(    0x68, "3" )
+	PORT_DIPSETTING(    0x60, "4" )
+	PORT_DIPSETTING(    0x58, "5" )
+	PORT_DIPSETTING(    0x50, "6" )
+	PORT_DIPSETTING(    0x48, "7" )
+	PORT_DIPSETTING(    0x40, "8" )
+	PORT_DIPSETTING(    0x38, "9" )
+	PORT_DIPSETTING(    0x30, "10" )
+	PORT_DIPSETTING(    0x28, "11" )
+	PORT_DIPSETTING(    0x20, "12" )
+	PORT_DIPSETTING(    0x18, "13" )
+	PORT_DIPSETTING(    0x10, "14" )
+	PORT_DIPSETTING(    0x08, "15" )
+	PORT_DIPSETTING(    0x00, "16 (Difficult)" )
+	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW2:8")
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("DSW3")
-	PORT_DIPNAME( 0x07, 0x07, "First Bonus" )		PORT_DIPLOCATION("DSW3:1,2,3")
-	PORT_DIPSETTING(    0x07, "20000" )
+	PORT_DIPNAME( 0x07, 0x06, "First Bonus" )           PORT_DIPLOCATION("SW3:1,2,3")
+//  PORT_DIPSETTING(    0x07, "20000" ) // unused
+	PORT_DIPSETTING(    0x06, "20000" )
 	PORT_DIPSETTING(    0x05, "30000" )
 	PORT_DIPSETTING(    0x04, "40000" )
 	PORT_DIPSETTING(    0x03, "50000" )
 	PORT_DIPSETTING(    0x02, "60000" )
 	PORT_DIPSETTING(    0x01, "70000" )
 	PORT_DIPSETTING(    0x00, "80000" )
-	/* 0x06 gives 20000 */
-	PORT_DIPNAME( 0x38, 0x10, "Repeated Bonus" )		PORT_DIPLOCATION("DSW3:4,5,6")
-	PORT_DIPSETTING(    0x38, "40000" )
+	PORT_DIPNAME( 0x38, 0x10, "Repeated Bonus" )        PORT_DIPLOCATION("SW3:4,5,6")
+	/* 0x28, 0x30 and 0x38 (unused) all gives 40000 */
+	PORT_DIPSETTING(    0x20, "40000" )
 	PORT_DIPSETTING(    0x18, "50000" )
 	PORT_DIPSETTING(    0x10, "60000" )
 	PORT_DIPSETTING(    0x08, "70000" )
 	PORT_DIPSETTING(    0x00, "80000" )
-	/* 0x20, 0x28 and 0x30 all gives 40000 */
-	PORT_DIPNAME( 0x40, 0x00, "Grant Repeated Bonus" )	PORT_DIPLOCATION("DSW3:7")
+	PORT_DIPNAME( 0x40, 0x00, "Grant Repeated Bonus" )  PORT_DIPLOCATION("SW3:7")
 	PORT_DIPSETTING(    0x40, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
-	PORT_DIPUNUSED_DIPLOC( 0x80, IP_ACTIVE_LOW, "DSW3:8" )
-//  PORT_DIPNAME( 0x80, 0x00, "Unknown DSW 8" )
-//  PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-//  PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPUNUSED_DIPLOC( 0x80, IP_ACTIVE_LOW, "SW3:8" )
 INPUT_PORTS_END
 
 
@@ -149,26 +151,26 @@ INPUT_PORTS_END
 
 static const gfx_layout charlayout =
 {
-	8,8,	/* 8*8 sprites */
-	512,	/* 512 characters */
-	4,	/* 4 bits per pixel */
+	8,8,    /* 8*8 sprites */
+	512,    /* 512 characters */
+	4,  /* 4 bits per pixel */
 	{ 0x2000*8+4, 0x2000*8+0, 4, 0 },
 	{ 0, 1, 2, 3, 8*8+0, 8*8+1, 8*8+2, 8*8+3 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
-	16*8	/* every sprite takes 64 consecutive bytes */
+	16*8    /* every sprite takes 64 consecutive bytes */
 };
 
 static const gfx_layout spritelayout =
 {
-	16,16,	/* 16*16 sprites */
-	256,	/* 256 sprites */
-	4,	/* 4 bits per pixel */
+	16,16,  /* 16*16 sprites */
+	256,    /* 256 sprites */
+	4,  /* 4 bits per pixel */
 	{ 256*64*8+4, 256*64*8+0, 4, 0 },
 	{ 0, 1, 2, 3, 8*8+0, 8*8+1, 8*8+2, 8*8+3,
 			16*8+0, 16*8+1, 16*8+2, 16*8+3, 24*8+0, 24*8+1, 24*8+2, 24*8+3 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8 },
-	64*8	/* every sprite takes 64 consecutive bytes */
+	64*8    /* every sprite takes 64 consecutive bytes */
 };
 
 static GFXDECODE_START( rocnrope )
@@ -184,27 +186,32 @@ GFXDECODE_END
  *
  *************************************/
 
+INTERRUPT_GEN_MEMBER(rocnrope_state::vblank_irq)
+{
+
+	if(m_irq_mask)
+		device.execute().set_input_line(0, HOLD_LINE);
+}
+
+
 static MACHINE_CONFIG_START( rocnrope, rocnrope_state )
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6809, MASTER_CLOCK / 3 / 4)        /* Verified in schematics */
 	MCFG_CPU_PROGRAM_MAP(rocnrope_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", rocnrope_state,  vblank_irq)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(rocnrope)
+	MCFG_SCREEN_UPDATE_DRIVER(rocnrope_state, screen_update_rocnrope)
 
 	MCFG_GFXDECODE(rocnrope)
 	MCFG_PALETTE_LENGTH(16*16+16*16)
 
-	MCFG_PALETTE_INIT(rocnrope)
-	MCFG_VIDEO_START(rocnrope)
 
 	/* sound hardware */
 	MCFG_FRAGMENT_ADD(timeplt_sound)
@@ -250,8 +257,8 @@ ROM_START( rocnrope )
 	ROM_LOAD( "b16_prom.bin", 0x0020, 0x0100, CRC(750a9677) SHA1(7a5b4aed5f87180850657b8852bb3f3138d58b5b) )
 	ROM_LOAD( "rocnrope.pr3", 0x0120, 0x0100, CRC(b5c75a27) SHA1(923d6ccf015fd7458494416cc05426cc922a9238) )
 
-    ROM_REGION( 0x0001, "pal_cpuvidbd", 0 ) /* PAL located on the cpu/video board */
-    ROM_LOAD( "h100.6g",      0x0000, 0x0001, NO_DUMP ) /* 20 Pin chip.  Appears to be a PAL.  Schematics obsfucated. */
+	ROM_REGION( 0x0001, "pal_cpuvidbd", 0 ) /* PAL located on the cpu/video board */
+	ROM_LOAD( "h100.6g",      0x0000, 0x0001, NO_DUMP ) /* 20 Pin chip.  Appears to be a PAL.  Schematics obsfucated. */
 ROM_END
 
 ROM_START( rocnropek )
@@ -281,8 +288,8 @@ ROM_START( rocnropek )
 	ROM_LOAD( "b16_prom.bin", 0x0020, 0x0100, CRC(750a9677) SHA1(7a5b4aed5f87180850657b8852bb3f3138d58b5b) )
 	ROM_LOAD( "rocnrope.pr3", 0x0120, 0x0100, CRC(b5c75a27) SHA1(923d6ccf015fd7458494416cc05426cc922a9238) )
 
-    ROM_REGION( 0x0001, "pal_cpuvidbd", 0 ) /* PAL located on the cpu/video board */
-    ROM_LOAD( "h100.6g",      0x0000, 0x0001, NO_DUMP ) /* 20 Pin chip.  Appears to be a PAL.  Schematics obsfucated. */
+	ROM_REGION( 0x0001, "pal_cpuvidbd", 0 ) /* PAL located on the cpu/video board */
+	ROM_LOAD( "h100.6g",      0x0000, 0x0001, NO_DUMP ) /* 20 Pin chip.  Appears to be a PAL.  Schematics obsfucated. */
 ROM_END
 
 /* Rope Man (a pirate of Roc'n'Rope)
@@ -323,8 +330,8 @@ ROM_START( ropeman )
 	ROM_LOAD( "b16_prom.bin", 0x0020, 0x0100, CRC(750a9677) SHA1(7a5b4aed5f87180850657b8852bb3f3138d58b5b) )
 	ROM_LOAD( "rocnrope.pr3", 0x0120, 0x0100, CRC(b5c75a27) SHA1(923d6ccf015fd7458494416cc05426cc922a9238) )
 
-    ROM_REGION( 0x0001, "pal_cpuvidbd", 0 ) /* PAL located on the cpu/video board */
-    ROM_LOAD( "h100.6g",      0x0000, 0x0001, NO_DUMP ) /* 20 Pin chip.  Appears to be a PAL.  Schematics obsfucated. */
+	ROM_REGION( 0x0001, "pal_cpuvidbd", 0 ) /* PAL located on the cpu/video board */
+	ROM_LOAD( "h100.6g",      0x0000, 0x0001, NO_DUMP ) /* 20 Pin chip.  Appears to be a PAL.  Schematics obsfucated. */
 ROM_END
 
 /*************************************
@@ -333,16 +340,16 @@ ROM_END
  *
  *************************************/
 
-static DRIVER_INIT( rocnrope )
+DRIVER_INIT_MEMBER(rocnrope_state,rocnrope)
 {
-	UINT8 *decrypted = konami1_decode(machine, "maincpu");
+	UINT8 *decrypted = konami1_decode(machine(), "maincpu");
 
-	decrypted[0x703d] = 0x98;	/* fix one instruction */
+	decrypted[0x703d] = 0x98;   /* fix one instruction */
 }
 
-static DRIVER_INIT( rocnropk )
+DRIVER_INIT_MEMBER(rocnrope_state,rocnropk)
 {
-	konami1_decode(machine, "maincpu");
+	konami1_decode(machine(), "maincpu");
 }
 
 
@@ -352,6 +359,6 @@ static DRIVER_INIT( rocnropk )
  *
  *************************************/
 
-GAME( 1983, rocnrope, 0,        rocnrope, rocnrope, rocnrope, ROT270, "Konami", "Roc'n Rope", GAME_SUPPORTS_SAVE )
-GAME( 1983, rocnropek,rocnrope, rocnrope, rocnrope, rocnropk, ROT270, "Konami / Kosuka", "Roc'n Rope (Kosuka)", GAME_SUPPORTS_SAVE )
-GAME( 1983, ropeman,  rocnrope, rocnrope, rocnrope, rocnrope, ROT270, "bootleg", "Ropeman (bootleg of Roc'n Rope)", GAME_SUPPORTS_SAVE )
+GAME( 1983, rocnrope, 0,        rocnrope, rocnrope, rocnrope_state, rocnrope, ROT270, "Konami", "Roc'n Rope", GAME_SUPPORTS_SAVE )
+GAME( 1983, rocnropek,rocnrope, rocnrope, rocnrope, rocnrope_state, rocnropk, ROT270, "Konami / Kosuka", "Roc'n Rope (Kosuka)", GAME_SUPPORTS_SAVE )
+GAME( 1983, ropeman,  rocnrope, rocnrope, rocnrope, rocnrope_state, rocnrope, ROT270, "bootleg", "Ropeman (bootleg of Roc'n Rope)", GAME_SUPPORTS_SAVE )

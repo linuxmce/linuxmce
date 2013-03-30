@@ -148,65 +148,42 @@
 
 struct z80dart_interface
 {
-	int m_rx_clock_a;			// channel A receive clock
-	int m_tx_clock_a;			// channel A transmit clock
-	int m_rx_clock_b;			// channel B receive clock
-	int m_tx_clock_b;			// channel B transmit clock
+	int m_rx_clock_a;           // channel A receive clock
+	int m_tx_clock_a;           // channel A transmit clock
+	int m_rx_clock_b;           // channel B receive clock
+	int m_tx_clock_b;           // channel B transmit clock
 
-	devcb_read_line		m_in_rxda_func;
-	devcb_write_line	m_out_txda_func;
-	devcb_write_line	m_out_dtra_func;
-	devcb_write_line	m_out_rtsa_func;
-	devcb_write_line	m_out_wrdya_func;
-	devcb_write_line	m_out_synca_func;
+	devcb_read_line     m_in_rxda_cb;
+	devcb_write_line    m_out_txda_cb;
+	devcb_write_line    m_out_dtra_cb;
+	devcb_write_line    m_out_rtsa_cb;
+	devcb_write_line    m_out_wrdya_cb;
+	devcb_write_line    m_out_synca_cb;
 
-	devcb_read_line		m_in_rxdb_func;
-	devcb_write_line	m_out_txdb_func;
-	devcb_write_line	m_out_dtrb_func;
-	devcb_write_line	m_out_rtsb_func;
-	devcb_write_line	m_out_wrdyb_func;
-	devcb_write_line	m_out_syncb_func;
+	devcb_read_line     m_in_rxdb_cb;
+	devcb_write_line    m_out_txdb_cb;
+	devcb_write_line    m_out_dtrb_cb;
+	devcb_write_line    m_out_rtsb_cb;
+	devcb_write_line    m_out_wrdyb_cb;
+	devcb_write_line    m_out_syncb_cb;
 
-	devcb_write_line	m_out_int_func;
-};
-
-
-
-// ======================> z80dart_device_config
-
-class z80dart_device_config :	public device_config,
-								public device_config_z80daisy_interface,
-								public z80dart_interface
-{
-	friend class z80dart_device;
-
-	// construction/destruction
-	z80dart_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock);
-
-public:
-	// allocators
-	static device_config *static_alloc_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock);
-	virtual device_t *alloc_device(running_machine &machine) const;
-
-protected:
-	// device_config overrides
-	virtual void device_config_complete();
+	devcb_write_line    m_out_int_cb;
 };
 
 
 
 // ======================> z80dart_device
 
-class z80dart_device :	public device_t,
-						public device_z80daisy_interface
+class z80dart_device :  public device_t,
+						public device_z80daisy_interface,
+						public z80dart_interface
 {
-	friend class z80dart_device_config;
 	friend class dart_channel;
 
-	// construction/destruction
-	z80dart_device(running_machine &_machine, const z80dart_device_config &_config);
-
 public:
+	// construction/destruction
+	z80dart_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock);
+
 	// control register access
 	UINT8 control_read(int which) { return m_channel[which].control_read(); }
 	void control_write(int which, UINT8 data) { return m_channel[which].control_write(data); }
@@ -218,6 +195,9 @@ public:
 	// put data on the input lines
 	void receive_data(int which, UINT8 data) { m_channel[which].receive_data(data); }
 
+	// interrupt acknowledge
+	int m1_r();
+
 	// control line access
 	void cts_w(int which, int state) { m_channel[which].cts_w(state); }
 	void dcd_w(int which, int state) { m_channel[which].dcd_w(state); }
@@ -228,6 +208,7 @@ public:
 
 private:
 	// device-level overrides
+	virtual void device_config_complete();
 	virtual void device_start();
 	virtual void device_reset();
 
@@ -284,65 +265,64 @@ private:
 		static TIMER_CALLBACK( static_txc_tick ) { reinterpret_cast<dart_channel *>(ptr)->tx_w(1); }
 
 		z80dart_device *m_device;
-		int	m_index;
+		int m_index;
 
-		devcb_resolved_read_line	m_in_rxd_func;
-		devcb_resolved_write_line	m_out_txd_func;
-		devcb_resolved_write_line	m_out_dtr_func;
-		devcb_resolved_write_line	m_out_rts_func;
-		devcb_resolved_write_line	m_out_wrdy_func;
-		devcb_resolved_write_line	m_out_sync_func;
+		devcb_resolved_read_line    m_in_rxd_func;
+		devcb_resolved_write_line   m_out_txd_func;
+		devcb_resolved_write_line   m_out_dtr_func;
+		devcb_resolved_write_line   m_out_rts_func;
+		devcb_resolved_write_line   m_out_wrdy_func;
+		devcb_resolved_write_line   m_out_sync_func;
 
 		// register state
-		UINT8 m_rr[3];				// read register
-		UINT8 m_wr[6];				// write register
+		UINT8 m_rr[3];              // read register
+		UINT8 m_wr[6];              // write register
 
 		// receiver state
-		UINT8 m_rx_data_fifo[3];	// receive data FIFO
-		UINT8 m_rx_error_fifo[3];	// receive error FIFO
-		UINT8 m_rx_shift;			// 8-bit receive shift register
-		UINT8 m_rx_error;			// current receive error
-		int m_rx_fifo;				// receive FIFO pointer
+		UINT8 m_rx_data_fifo[3];    // receive data FIFO
+		UINT8 m_rx_error_fifo[3];   // receive error FIFO
+		UINT8 m_rx_shift;           // 8-bit receive shift register
+		UINT8 m_rx_error;           // current receive error
+		int m_rx_fifo;              // receive FIFO pointer
 
-		int m_rx_clock;				// receive clock pulse count
-		int m_rx_state;				// receive state
-		int m_rx_bits;				// bits received
-		int m_rx_first;				// first character received
-		int m_rx_parity;			// received data parity
-		int m_rx_break;				// receive break condition
-		UINT8 m_rx_rr0_latch;		// read register 0 latched
+		int m_rx_clock;             // receive clock pulse count
+		int m_rx_state;             // receive state
+		int m_rx_bits;              // bits received
+		int m_rx_first;             // first character received
+		int m_rx_parity;            // received data parity
+		int m_rx_break;             // receive break condition
+		UINT8 m_rx_rr0_latch;       // read register 0 latched
 
-		int m_ri;					// ring indicator latch
-		int m_cts;					// clear to send latch
-		int m_dcd;					// data carrier detect latch
+		int m_ri;                   // ring indicator latch
+		int m_cts;                  // clear to send latch
+		int m_dcd;                  // data carrier detect latch
 
 		// transmitter state
-		UINT8 m_tx_data;			// transmit data register
-		UINT8 m_tx_shift;			// transmit shift register
+		UINT8 m_tx_data;            // transmit data register
+		UINT8 m_tx_shift;           // transmit shift register
 
-		int m_tx_clock;				// transmit clock pulse count
-		int m_tx_state;				// transmit state
-		int m_tx_bits;				// bits transmitted
-		int m_tx_parity;			// transmitted data parity
+		int m_tx_clock;             // transmit clock pulse count
+		int m_tx_state;             // transmit state
+		int m_tx_bits;              // bits transmitted
+		int m_tx_parity;            // transmitted data parity
 
-		int m_dtr;					// data terminal ready
-		int m_rts;					// request to send
+		int m_dtr;                  // data terminal ready
+		int m_rts;                  // request to send
 
 		// synchronous state
-		UINT16 m_sync;				// sync character
+		UINT16 m_sync;              // sync character
 	};
 
 	// internal state
-	const z80dart_device_config &	m_config;
-	devcb_resolved_write_line		m_out_int_func;
-	dart_channel					m_channel[2];		// channels
-	int 							m_int_state[8];		// interrupt state
+	devcb_resolved_write_line       m_out_int_func;
+	dart_channel                    m_channel[2];       // channels
+	int                             m_int_state[8];     // interrupt state
 
 	// timers
-	emu_timer *						m_rxca_timer;
-	emu_timer *						m_txca_timer;
-	emu_timer *						m_rxcb_timer;
-	emu_timer *						m_txcb_timer;
+	emu_timer *                     m_rxca_timer;
+	emu_timer *                     m_txca_timer;
+	emu_timer *                     m_rxcb_timer;
+	emu_timer *                     m_txcb_timer;
 };
 
 
@@ -361,19 +341,19 @@ extern const device_type Z80SIO4;
 //**************************************************************************
 
 // register access
-READ8_DEVICE_HANDLER( z80dart_cd_ba_r );
-WRITE8_DEVICE_HANDLER( z80dart_cd_ba_w );
+DECLARE_READ8_DEVICE_HANDLER( z80dart_cd_ba_r );
+DECLARE_WRITE8_DEVICE_HANDLER( z80dart_cd_ba_w );
 
-READ8_DEVICE_HANDLER( z80dart_ba_cd_r );
-WRITE8_DEVICE_HANDLER( z80dart_ba_cd_w );
+DECLARE_READ8_DEVICE_HANDLER( z80dart_ba_cd_r );
+DECLARE_WRITE8_DEVICE_HANDLER( z80dart_ba_cd_w );
 
 // control register access
-WRITE8_DEVICE_HANDLER( z80dart_c_w );
-READ8_DEVICE_HANDLER( z80dart_c_r );
+DECLARE_WRITE8_DEVICE_HANDLER( z80dart_c_w );
+DECLARE_READ8_DEVICE_HANDLER( z80dart_c_r );
 
 // data register access
-WRITE8_DEVICE_HANDLER( z80dart_d_w );
-READ8_DEVICE_HANDLER( z80dart_d_r );
+DECLARE_WRITE8_DEVICE_HANDLER( z80dart_d_w );
+DECLARE_READ8_DEVICE_HANDLER( z80dart_d_r );
 
 // serial clocks
 WRITE_LINE_DEVICE_HANDLER( z80dart_rxca_w );

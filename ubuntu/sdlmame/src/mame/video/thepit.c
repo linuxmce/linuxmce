@@ -10,20 +10,6 @@
 #include "includes/thepit.h"
 
 
-static const rectangle spritevisiblearea =
-{
-	2*8+1, 32*8-1,
-	2*8, 30*8-1
-};
-
-static const rectangle spritevisibleareaflipx =
-{
-	0*8, 30*8-2,
-	2*8, 30*8-1
-};
-
-
-
 /***************************************************************************
 
   Convert the color PROMs into a more useable format.
@@ -40,8 +26,9 @@ static const rectangle spritevisibleareaflipx =
 
 ***************************************************************************/
 
-PALETTE_INIT( thepit )
+void thepit_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 
 	for (i = 0; i < 32; i++)
@@ -63,13 +50,13 @@ PALETTE_INIT( thepit )
 		bit2 = (color_prom[i] >> 7) & 0x01;
 		b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 
-		palette_set_color(machine, i, MAKE_RGB(r, g, b));
+		palette_set_color(machine(), i, MAKE_RGB(r, g, b));
 	}
 
 	/* allocate primary colors for the background and foreground
-       this is wrong, but I don't know where to pick the colors from */
+	   this is wrong, but I don't know where to pick the colors from */
 	for (i = 0; i < 8; i++)
-		palette_set_color_rgb(machine, i + 32, pal1bit(i >> 2), pal1bit(i >> 1), pal1bit(i >> 0));
+		palette_set_color_rgb(machine(), i + 32, pal1bit(i >> 2), pal1bit(i >> 1), pal1bit(i >> 0));
 }
 
 
@@ -80,8 +67,9 @@ PALETTE_INIT( thepit )
 
 ***************************************************************************/
 
-PALETTE_INIT( suprmous )
+PALETTE_INIT_MEMBER(thepit_state,suprmous)
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 
 	for (i = 0; i < 32; i++)
@@ -90,13 +78,13 @@ PALETTE_INIT( suprmous )
 		UINT8 g = BITSWAP8(color_prom[i + 0x20], 0, 1, 2, 3, 4, 5, 6, 7);
 		UINT8 r = (b>>5&7)<<2 | (g>>6&3);
 
-		palette_set_color_rgb(machine, i, pal5bit(r), pal5bit(g), pal4bit(b));
+		palette_set_color_rgb(machine(), i, pal5bit(r), pal5bit(g), pal4bit(b));
 	}
 
 	/* allocate primary colors for the background and foreground
-       this is wrong, but I don't know where to pick the colors from */
+	   this is wrong, but I don't know where to pick the colors from */
 	for (i = 0; i < 8; i++)
-		palette_set_color_rgb(machine, i + 32, pal1bit(i >> 2), pal1bit(i >> 1), pal1bit(i >> 0));
+		palette_set_color_rgb(machine(), i + 32, pal1bit(i >> 2), pal1bit(i >> 1), pal1bit(i >> 0));
 }
 
 
@@ -107,23 +95,21 @@ PALETTE_INIT( suprmous )
 
 ***************************************************************************/
 
-static TILE_GET_INFO( solid_get_tile_info )
+TILE_GET_INFO_MEMBER(thepit_state::solid_get_tile_info)
 {
-	thepit_state *state = machine.driver_data<thepit_state>();
-	UINT8 back_color = (state->m_colorram[tile_index] & 0x70) >> 4;
-	int priority = (back_color != 0) && ((state->m_colorram[tile_index] & 0x80) == 0);
-	tileinfo->pen_data = state->m_dummy_tile;
-	tileinfo->palette_base = back_color + 32;
-	tileinfo->category = priority;
+	UINT8 back_color = (m_colorram[tile_index] & 0x70) >> 4;
+	int priority = (back_color != 0) && ((m_colorram[tile_index] & 0x80) == 0);
+	tileinfo.pen_data = m_dummy_tile;
+	tileinfo.palette_base = back_color + 32;
+	tileinfo.category = priority;
 }
 
 
-static TILE_GET_INFO( get_tile_info )
+TILE_GET_INFO_MEMBER(thepit_state::get_tile_info)
 {
-	thepit_state *state = machine.driver_data<thepit_state>();
-	UINT8 fore_color = state->m_colorram[tile_index] % machine.gfx[0]->total_colors;
-	UINT8 code = state->m_videoram[tile_index];
-	SET_TILE_INFO(2 * state->m_graphics_bank, code, fore_color, 0);
+	UINT8 fore_color = m_colorram[tile_index] % machine().gfx[0]->colors();
+	UINT8 code = m_videoram[tile_index];
+	SET_TILE_INFO_MEMBER(2 * m_graphics_bank, code, fore_color, 0);
 }
 
 
@@ -134,20 +120,19 @@ static TILE_GET_INFO( get_tile_info )
  *
  *************************************/
 
-VIDEO_START( thepit )
+void thepit_state::video_start()
 {
-	thepit_state *state = machine.driver_data<thepit_state>();
-	state->m_solid_tilemap = tilemap_create(machine, solid_get_tile_info,tilemap_scan_rows,8,8,32,32);
+	m_solid_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(thepit_state::solid_get_tile_info),this),TILEMAP_SCAN_ROWS,8,8,32,32);
 
-	state->m_tilemap = tilemap_create(machine, get_tile_info,tilemap_scan_rows,8,8,32,32);
-	tilemap_set_transparent_pen(state->m_tilemap, 0);
+	m_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(thepit_state::get_tile_info),this),TILEMAP_SCAN_ROWS,8,8,32,32);
+	m_tilemap->set_transparent_pen(0);
 
-	tilemap_set_scroll_cols(state->m_solid_tilemap, 32);
-	tilemap_set_scroll_cols(state->m_tilemap, 32);
+	m_solid_tilemap->set_scroll_cols(32);
+	m_tilemap->set_scroll_cols(32);
 
-	state->m_dummy_tile = auto_alloc_array_clear(machine, UINT8, 8*8);
+	m_dummy_tile = auto_alloc_array_clear(machine(), UINT8, 8*8);
 
-	state->m_graphics_bank = 0;	/* only used in intrepid */
+	m_graphics_bank = 0;    /* only used in intrepid */
 }
 
 
@@ -158,81 +143,75 @@ VIDEO_START( thepit )
  *
  *************************************/
 
-WRITE8_HANDLER( thepit_videoram_w )
+WRITE8_MEMBER(thepit_state::thepit_videoram_w)
 {
-	thepit_state *state = space->machine().driver_data<thepit_state>();
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_tilemap, offset);
+	m_videoram[offset] = data;
+	m_tilemap->mark_tile_dirty(offset);
 }
 
 
-WRITE8_HANDLER( thepit_colorram_w )
+WRITE8_MEMBER(thepit_state::thepit_colorram_w)
 {
-	thepit_state *state = space->machine().driver_data<thepit_state>();
-	state->m_colorram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_tilemap, offset);
-	tilemap_mark_tile_dirty(state->m_solid_tilemap, offset);
+	m_colorram[offset] = data;
+	m_tilemap->mark_tile_dirty(offset);
+	m_solid_tilemap->mark_tile_dirty(offset);
 }
 
 
-WRITE8_HANDLER( thepit_flip_screen_x_w )
+WRITE8_MEMBER(thepit_state::thepit_flip_screen_x_w)
 {
-	thepit_state *state = space->machine().driver_data<thepit_state>();
 	int flip;
 
-	state->m_flip_screen_x = data & 0x01;
+	m_flip_screen_x = data & 0x01;
 
-	flip = state->m_flip_screen_x ? TILEMAP_FLIPX : 0;
-	if (state->m_flip_screen_y)
+	flip = m_flip_screen_x ? TILEMAP_FLIPX : 0;
+	if (m_flip_screen_y)
 		flip |= TILEMAP_FLIPY ;
 
-	tilemap_set_flip(state->m_tilemap, flip);
-	tilemap_set_flip(state->m_solid_tilemap, flip);
+	m_tilemap->set_flip(flip);
+	m_solid_tilemap->set_flip(flip);
 
 }
 
 
-WRITE8_HANDLER( thepit_flip_screen_y_w )
+WRITE8_MEMBER(thepit_state::thepit_flip_screen_y_w)
 {
-	thepit_state *state = space->machine().driver_data<thepit_state>();
 	int flip;
 
-	state->m_flip_screen_y = data & 0x01;
+	m_flip_screen_y = data & 0x01;
 
-	flip = state->m_flip_screen_x ? TILEMAP_FLIPX : 0;
-	if (state->m_flip_screen_y)
+	flip = m_flip_screen_x ? TILEMAP_FLIPX : 0;
+	if (m_flip_screen_y)
 		flip |= TILEMAP_FLIPY ;
 
-	tilemap_set_flip(state->m_tilemap, flip);
-	tilemap_set_flip(state->m_solid_tilemap, flip);
+	m_tilemap->set_flip(flip);
+	m_solid_tilemap->set_flip(flip);
 
 }
 
 
-WRITE8_HANDLER( intrepid_graphics_bank_w )
+WRITE8_MEMBER(thepit_state::intrepid_graphics_bank_w)
 {
-	thepit_state *state = space->machine().driver_data<thepit_state>();
-	if (state->m_graphics_bank != (data & 0x01))
+	if (m_graphics_bank != (data & 0x01))
 	{
-		state->m_graphics_bank = data & 0x01;
+		m_graphics_bank = data & 0x01;
 
-		tilemap_mark_all_tiles_dirty(state->m_tilemap);
+		m_tilemap->mark_all_dirty();
 	}
 }
 
 
-READ8_HANDLER( thepit_input_port_0_r )
+READ8_MEMBER(thepit_state::thepit_input_port_0_r)
 {
-	thepit_state *state = space->machine().driver_data<thepit_state>();
 	/* Read either the real or the fake input ports depending on the
-       horizontal flip switch. (This is how the real PCB does it) */
-	if (state->m_flip_screen_x)
+	   horizontal flip switch. (This is how the real PCB does it) */
+	if (m_flip_screen_x)
 	{
-		return input_port_read(space->machine(), "IN2");
+		return ioport("IN2")->read();
 	}
 	else
 	{
-		return input_port_read(space->machine(), "IN0");
+		return ioport("IN0")->read();
 	}
 }
 
@@ -245,14 +224,17 @@ READ8_HANDLER( thepit_input_port_0_r )
  *************************************/
 
 static void draw_sprites(running_machine &machine,
-						 bitmap_t *bitmap,
-						 const rectangle *cliprect,
-						 int priority_to_draw)
+							bitmap_ind16 &bitmap,
+							const rectangle &cliprect,
+							int priority_to_draw)
 {
+	const rectangle spritevisiblearea(2*8+1, 32*8-1, 2*8, 30*8-1);
+	const rectangle spritevisibleareaflipx(0*8, 30*8-2, 2*8, 30*8-1);
+
 	thepit_state *state = machine.driver_data<thepit_state>();
 	int offs;
 
-	for (offs = state->m_spriteram_size - 4; offs >= 0; offs -= 4)
+	for (offs = state->m_spriteram.bytes() - 4; offs >= 0; offs -= 4)
 	{
 		if (((state->m_spriteram[offs + 2] & 0x08) >> 3) == priority_to_draw)
 		{
@@ -284,7 +266,7 @@ static void draw_sprites(running_machine &machine,
 			/* sprites 0-3 are drawn one pixel down */
 			if (offs < 16) y++;
 
-			drawgfx_transpen(bitmap, state->m_flip_screen_x ? &spritevisibleareaflipx : &spritevisiblearea,
+			drawgfx_transpen(bitmap, state->m_flip_screen_x ? spritevisibleareaflipx : spritevisiblearea,
 					machine.gfx[2 * state->m_graphics_bank + 1],
 					state->m_spriteram[offs + 1] & 0x3f,
 					state->m_spriteram[offs + 2],
@@ -294,35 +276,34 @@ static void draw_sprites(running_machine &machine,
 }
 
 
-SCREEN_UPDATE( thepit )
+UINT32 thepit_state::screen_update_thepit(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	thepit_state *state = screen->machine().driver_data<thepit_state>();
 	offs_t offs;
 
 	for (offs = 0; offs < 32; offs++)
 	{
-		int xshift = state->m_flip_screen_x ? 128 : 0;
-		int yshift = state->m_flip_screen_y ? -8 : 0;
+		int xshift = m_flip_screen_x ? 128 : 0;
+		int yshift = m_flip_screen_y ? -8 : 0;
 
-		tilemap_set_scrollx(state->m_tilemap, offs, xshift);
-		tilemap_set_scrollx(state->m_solid_tilemap, offs, xshift);
+		m_tilemap->set_scrollx(offs, xshift);
+		m_solid_tilemap->set_scrollx(offs, xshift);
 
-		tilemap_set_scrolly(state->m_tilemap, offs, yshift + state->m_attributesram[offs << 1]);
-		tilemap_set_scrolly(state->m_solid_tilemap, offs, yshift + state->m_attributesram[offs << 1]);
+		m_tilemap->set_scrolly(offs, yshift + m_attributesram[offs << 1]);
+		m_solid_tilemap->set_scrolly(offs, yshift + m_attributesram[offs << 1]);
 	}
 
 	/* low priority tiles */
-	tilemap_draw(bitmap, cliprect, state->m_solid_tilemap, 0, 0);
-	tilemap_draw(bitmap, cliprect, state->m_tilemap, 0, 0);
+	m_solid_tilemap->draw(bitmap, cliprect, 0, 0);
+	m_tilemap->draw(bitmap, cliprect, 0, 0);
 
 	/* low priority sprites */
-	draw_sprites(screen->machine(), bitmap, cliprect, 0);
+	draw_sprites(machine(), bitmap, cliprect, 0);
 
 	/* high priority tiles */
-	tilemap_draw(bitmap, cliprect, state->m_solid_tilemap, 1, 1);
+	m_solid_tilemap->draw(bitmap, cliprect, 1, 1);
 
 	/* high priority sprites */
-	draw_sprites(screen->machine(), bitmap, cliprect, 1);
+	draw_sprites(machine(), bitmap, cliprect, 1);
 
 	return 0;
 }

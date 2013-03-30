@@ -47,8 +47,8 @@
 //**************************************************************************
 
 // ensure that all memory allocated is aligned to an 8-byte boundary
-#define ALIGN_PTR_UP(p)			((void *)(((FPTR)(p) + (CACHE_ALIGNMENT - 1)) & ~(CACHE_ALIGNMENT - 1)))
-#define ALIGN_PTR_DOWN(p)		((void *)((FPTR)(p) & ~(CACHE_ALIGNMENT - 1)))
+#define ALIGN_PTR_UP(p)         ((void *)(((FPTR)(p) + (CACHE_ALIGNMENT - 1)) & ~(CACHE_ALIGNMENT - 1)))
+#define ALIGN_PTR_DOWN(p)       ((void *)((FPTR)(p) & ~(CACHE_ALIGNMENT - 1)))
 
 
 
@@ -62,12 +62,12 @@
 
 drc_cache::drc_cache(size_t bytes)
 	: m_near((drccodeptr)osd_alloc_executable(bytes)),
-	  m_neartop(m_near),
-	  m_base(m_near + NEAR_CACHE_SIZE),
-	  m_top(m_base),
-	  m_end(m_near + bytes),
-	  m_codegen(0),
-	  m_size(bytes)
+		m_neartop(m_near),
+		m_base(m_near + NEAR_CACHE_SIZE),
+		m_top(m_base),
+		m_end(m_near + bytes),
+		m_codegen(0),
+		m_size(bytes)
 {
 	memset(m_free, 0, sizeof(m_free));
 	memset(m_nearfree, 0, sizeof(m_nearfree));
@@ -243,7 +243,7 @@ drccodeptr drc_cache::end_codegen()
 	while ((oob = m_ooblist.detach_head()) != NULL)
 	{
 		// call the callback
-		(*oob->m_callback)(&m_top, oob->m_param1, oob->m_param2, oob->m_param3);
+		oob->m_callback(&m_top, oob->m_param1, oob->m_param2);
 		assert(m_top - m_codegen < CODEGEN_MAX_BYTES);
 
 		// release our memory
@@ -263,7 +263,7 @@ drccodeptr drc_cache::end_codegen()
 //  out-of-band codegen
 //-------------------------------------------------
 
-void drc_cache::request_oob_codegen(oob_func callback, void *param1, void *param2, void *param3)
+void drc_cache::request_oob_codegen(drc_oob_delegate callback, void *param1, void *param2)
 {
 	assert(m_codegen != NULL);
 
@@ -275,7 +275,6 @@ void drc_cache::request_oob_codegen(oob_func callback, void *param1, void *param
 	oob->m_callback = callback;
 	oob->m_param1 = param1;
 	oob->m_param2 = param2;
-	oob->m_param3 = param3;
 
 	// add to the tail
 	m_ooblist.append(*oob);

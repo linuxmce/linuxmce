@@ -63,60 +63,75 @@ JALCF1   BIN     1,048,576  02-07-99  1:11a JALCF1.BIN
 class acommand_state : public driver_device
 {
 public:
-	acommand_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	acommand_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_ac_bgvram(*this, "ac_bgvram"),
+		m_ac_txvram(*this, "ac_txvram"),
+		m_spriteram(*this, "spriteram"),
+		m_ac_devram(*this, "ac_devram"){ }
 
+	required_shared_ptr<UINT16> m_ac_bgvram;
+	required_shared_ptr<UINT16> m_ac_txvram;
+	required_shared_ptr<UINT16> m_spriteram;
+	required_shared_ptr<UINT16> m_ac_devram;
 	tilemap_t *m_tx_tilemap;
 	tilemap_t *m_bg_tilemap;
-	UINT16 *m_ac_txvram;
-	UINT16 *m_ac_bgvram;
 	UINT16 *m_ac_vregs;
 	UINT16 m_led0;
 	UINT16 m_led1;
-	UINT16 *m_ac_devram;
 	UINT16 m_ufo_sw1;
 	UINT16 m_ufo_sw2;
-	UINT16 *m_spriteram;
-	size_t m_spriteram_size;
+	DECLARE_WRITE16_MEMBER(ac_bgvram_w);
+	DECLARE_WRITE16_MEMBER(ac_txvram_w);
+	DECLARE_WRITE16_MEMBER(ac_bgscroll_w);
+	DECLARE_WRITE16_MEMBER(ac_txscroll_w);
+	DECLARE_READ16_MEMBER(ac_devices_r);
+	DECLARE_WRITE16_MEMBER(ac_devices_w);
+	DECLARE_WRITE16_MEMBER(ac_unk2_w);
+	TILEMAP_MAPPER_MEMBER(bg_scan);
+	TILE_GET_INFO_MEMBER(ac_get_bg_tile_info);
+	TILE_GET_INFO_MEMBER(ac_get_tx_tile_info);
+	virtual void video_start();
+	UINT32 screen_update_acommand(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	TIMER_DEVICE_CALLBACK_MEMBER(acommand_scanline);
+	void draw_sprites(bitmap_ind16 &bitmap, const rectangle &cliprect, int priority, int pri_mask);
+	void draw_led(bitmap_ind16 &bitmap, int x, int y,UINT8 value);
 };
 
 
 
-static TILEMAP_MAPPER( bg_scan )
+TILEMAP_MAPPER_MEMBER(acommand_state::bg_scan)
 {
 	/* logical (col,row) -> memory offset */
 	return (row & 0x0f) + ((col & 0xff) << 4) + ((row & 0x70) << 8);
 }
 
-static TILE_GET_INFO( ac_get_bg_tile_info )
+TILE_GET_INFO_MEMBER(acommand_state::ac_get_bg_tile_info)
 {
-	acommand_state *state = machine.driver_data<acommand_state>();
-	int code = state->m_ac_bgvram[tile_index];
-	SET_TILE_INFO(
+	int code = m_ac_bgvram[tile_index];
+	SET_TILE_INFO_MEMBER(
 			1,
 			code & 0xfff,
 			(code & 0xf000) >> 12,
 			0);
 }
 
-static TILE_GET_INFO( ac_get_tx_tile_info )
+TILE_GET_INFO_MEMBER(acommand_state::ac_get_tx_tile_info)
 {
-	acommand_state *state = machine.driver_data<acommand_state>();
-	int code = state->m_ac_txvram[tile_index];
-	SET_TILE_INFO(
+	int code = m_ac_txvram[tile_index];
+	SET_TILE_INFO_MEMBER(
 			0,
 			code & 0xfff,
 			(code & 0xf000) >> 12,
 			0);
 }
 
-static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, int priority, int pri_mask)
+void acommand_state::draw_sprites(bitmap_ind16 &bitmap, const rectangle &cliprect, int priority, int pri_mask)
 {
-	acommand_state *state = machine.driver_data<acommand_state>();
-	UINT16 *spriteram16 = state->m_spriteram;
+	UINT16 *spriteram16 = m_spriteram;
 	int offs;
 
-	for (offs = 0;offs < state->m_spriteram_size/2;offs += 8)
+	for (offs = 0;offs < m_spriteram.bytes()/2;offs += 8)
 	{
 		if (!(spriteram16[offs+0] & 0x1000))
 		{
@@ -126,19 +141,19 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 			int w = (spriteram16[offs+0] & 0x0f);
 			int h = ((spriteram16[offs+0] & 0xf0) >> 4);
 			int sy = (spriteram16[offs+4] & 0x0ff) - ((h+1)*0x10);
-/**/		int pri = spriteram16[offs+5];
-/**/		int flipy = ((spriteram16[offs+1] & 0x0200) >> 9);
-/**/		int flipx = ((spriteram16[offs+1] & 0x0100) >> 8);
+/**/        int pri = spriteram16[offs+5];
+/**/        int flipy = ((spriteram16[offs+1] & 0x0200) >> 9);
+/**/        int flipx = ((spriteram16[offs+1] & 0x0100) >> 8);
 
 			int xx,yy,x;
 			int delta = 16;
 
-			flipx ^= flip_screen_get(machine);
-			flipy ^= flip_screen_get(machine);
+			flipx ^= flip_screen();
+			flipy ^= flip_screen();
 
 			if ((pri&pri_mask)!=priority) continue;
 
-			if (flip_screen_get(machine))
+			if (flip_screen())
 			{
 				sx = 368 - sx;
 				sy = 240 - sy;
@@ -152,7 +167,7 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 				xx = w;
 				do
 				{
-					drawgfx_transpen(bitmap,cliprect,machine.gfx[2],
+					drawgfx_transpen(bitmap,cliprect,machine().gfx[2],
 							code,
 							color,
 							flipx, flipy,
@@ -169,20 +184,19 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 }
 
 
-static VIDEO_START( acommand )
+void acommand_state::video_start()
 {
-	acommand_state *state = machine.driver_data<acommand_state>();
-	state->m_tx_tilemap = tilemap_create(machine, ac_get_tx_tile_info,tilemap_scan_cols,8,8,512,32);
-	state->m_bg_tilemap = tilemap_create(machine, ac_get_bg_tile_info,bg_scan,16,16,256,16);
+	m_tx_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(acommand_state::ac_get_tx_tile_info),this),TILEMAP_SCAN_COLS,8,8,512,32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(acommand_state::ac_get_bg_tile_info),this),tilemap_mapper_delegate(FUNC(acommand_state::bg_scan),this),16,16,256,16);
 
-	state->m_ac_vregs = auto_alloc_array(machine, UINT16, 0x80/2);
+	m_ac_vregs = auto_alloc_array(machine(), UINT16, 0x80/2);
 
-	tilemap_set_transparent_pen(state->m_tx_tilemap,15);
+	m_tx_tilemap->set_transparent_pen(15);
 }
 
 
-#define LED_ON		0x01c00
-#define LED_OFF		0x00000
+#define LED_ON      0x01c00
+#define LED_OFF     0x00000
 /*
      a
     ---
@@ -203,92 +217,87 @@ g & 40
 /*                                    0    1    2    3    4    5    6    7    8    9    a    b    c    d    e    f*/
 static const UINT8 led_fill[0x10] = { 0x3f,0x06,0x5b,0x4f,0x66,0x6d,0x7d,0x07,0x7f,0x6f,0x00,0x00,0x00,0x00,0x00,0x00};
 
-static void draw_led(bitmap_t *bitmap, int x, int y,UINT8 value)
+void acommand_state::draw_led(bitmap_ind16 &bitmap, int x, int y,UINT8 value)
 {
-	plot_box(bitmap, x, y, 6, 10, 0x00000000);
+	bitmap.plot_box(x, y, 6, 10, 0x00000000);
 
 	/*a*/
-	*BITMAP_ADDR16(bitmap, y+0, x+1) = ((led_fill[value] & 0x0001) ? LED_ON : LED_OFF);
-	*BITMAP_ADDR16(bitmap, y+0, x+2) = ((led_fill[value] & 0x0001) ? LED_ON : LED_OFF);
-	*BITMAP_ADDR16(bitmap, y+0, x+3) = ((led_fill[value] & 0x0001) ? LED_ON : LED_OFF);
+	bitmap.pix16(y+0, x+1) = ((led_fill[value] & 0x0001) ? LED_ON : LED_OFF);
+	bitmap.pix16(y+0, x+2) = ((led_fill[value] & 0x0001) ? LED_ON : LED_OFF);
+	bitmap.pix16(y+0, x+3) = ((led_fill[value] & 0x0001) ? LED_ON : LED_OFF);
 	/*b*/
-	*BITMAP_ADDR16(bitmap, y+1, x+4) = ((led_fill[value] & 0x0002) ? LED_ON : LED_OFF);
-	*BITMAP_ADDR16(bitmap, y+2, x+4) = ((led_fill[value] & 0x0002) ? LED_ON : LED_OFF);
-	*BITMAP_ADDR16(bitmap, y+3, x+4) = ((led_fill[value] & 0x0002) ? LED_ON : LED_OFF);
+	bitmap.pix16(y+1, x+4) = ((led_fill[value] & 0x0002) ? LED_ON : LED_OFF);
+	bitmap.pix16(y+2, x+4) = ((led_fill[value] & 0x0002) ? LED_ON : LED_OFF);
+	bitmap.pix16(y+3, x+4) = ((led_fill[value] & 0x0002) ? LED_ON : LED_OFF);
 	/*c*/
-	*BITMAP_ADDR16(bitmap, y+5, x+4) = ((led_fill[value] & 0x0004) ? LED_ON : LED_OFF);
-	*BITMAP_ADDR16(bitmap, y+6, x+4) = ((led_fill[value] & 0x0004) ? LED_ON : LED_OFF);
-	*BITMAP_ADDR16(bitmap, y+7, x+4) = ((led_fill[value] & 0x0004) ? LED_ON : LED_OFF);
+	bitmap.pix16(y+5, x+4) = ((led_fill[value] & 0x0004) ? LED_ON : LED_OFF);
+	bitmap.pix16(y+6, x+4) = ((led_fill[value] & 0x0004) ? LED_ON : LED_OFF);
+	bitmap.pix16(y+7, x+4) = ((led_fill[value] & 0x0004) ? LED_ON : LED_OFF);
 	/*d*/
-	*BITMAP_ADDR16(bitmap, y+8, x+1) = ((led_fill[value] & 0x0008) ? LED_ON : LED_OFF);
-	*BITMAP_ADDR16(bitmap, y+8, x+2) = ((led_fill[value] & 0x0008) ? LED_ON : LED_OFF);
-	*BITMAP_ADDR16(bitmap, y+8, x+3) = ((led_fill[value] & 0x0008) ? LED_ON : LED_OFF);
+	bitmap.pix16(y+8, x+1) = ((led_fill[value] & 0x0008) ? LED_ON : LED_OFF);
+	bitmap.pix16(y+8, x+2) = ((led_fill[value] & 0x0008) ? LED_ON : LED_OFF);
+	bitmap.pix16(y+8, x+3) = ((led_fill[value] & 0x0008) ? LED_ON : LED_OFF);
 	/*e*/
-	*BITMAP_ADDR16(bitmap, y+5, x+0) = ((led_fill[value] & 0x0010) ? LED_ON : LED_OFF);
-	*BITMAP_ADDR16(bitmap, y+6, x+0) = ((led_fill[value] & 0x0010) ? LED_ON : LED_OFF);
-	*BITMAP_ADDR16(bitmap, y+7, x+0) = ((led_fill[value] & 0x0010) ? LED_ON : LED_OFF);
+	bitmap.pix16(y+5, x+0) = ((led_fill[value] & 0x0010) ? LED_ON : LED_OFF);
+	bitmap.pix16(y+6, x+0) = ((led_fill[value] & 0x0010) ? LED_ON : LED_OFF);
+	bitmap.pix16(y+7, x+0) = ((led_fill[value] & 0x0010) ? LED_ON : LED_OFF);
 	/*f*/
-	*BITMAP_ADDR16(bitmap, y+1, x+0) = ((led_fill[value] & 0x0020) ? LED_ON : LED_OFF);
-	*BITMAP_ADDR16(bitmap, y+2, x+0) = ((led_fill[value] & 0x0020) ? LED_ON : LED_OFF);
-	*BITMAP_ADDR16(bitmap, y+3, x+0) = ((led_fill[value] & 0x0020) ? LED_ON : LED_OFF);
+	bitmap.pix16(y+1, x+0) = ((led_fill[value] & 0x0020) ? LED_ON : LED_OFF);
+	bitmap.pix16(y+2, x+0) = ((led_fill[value] & 0x0020) ? LED_ON : LED_OFF);
+	bitmap.pix16(y+3, x+0) = ((led_fill[value] & 0x0020) ? LED_ON : LED_OFF);
 	/*g*/
-	*BITMAP_ADDR16(bitmap, y+4, x+1) = ((led_fill[value] & 0x0040) ? LED_ON : LED_OFF);
-	*BITMAP_ADDR16(bitmap, y+4, x+2) = ((led_fill[value] & 0x0040) ? LED_ON : LED_OFF);
-	*BITMAP_ADDR16(bitmap, y+4, x+3) = ((led_fill[value] & 0x0040) ? LED_ON : LED_OFF);
+	bitmap.pix16(y+4, x+1) = ((led_fill[value] & 0x0040) ? LED_ON : LED_OFF);
+	bitmap.pix16(y+4, x+2) = ((led_fill[value] & 0x0040) ? LED_ON : LED_OFF);
+	bitmap.pix16(y+4, x+3) = ((led_fill[value] & 0x0040) ? LED_ON : LED_OFF);
 }
 
 
-static SCREEN_UPDATE( acommand )
+UINT32 acommand_state::screen_update_acommand(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	acommand_state *state = screen->machine().driver_data<acommand_state>();
-	tilemap_draw(bitmap,cliprect,state->m_bg_tilemap,0,0);
-	draw_sprites(screen->machine(),bitmap,cliprect,0,0);
-	tilemap_draw(bitmap,cliprect,state->m_tx_tilemap,0,0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0,0);
+	draw_sprites(bitmap,cliprect,0,0);
+	m_tx_tilemap->draw(bitmap, cliprect, 0,0);
 
 	/*Order might be wrong,but these for sure are the led numbers tested*/
-	draw_led(bitmap,  0, 20, (state->m_led0 & 0x0f00) >> 8);
-	draw_led(bitmap,  6, 20, (state->m_led0 & 0x00f0) >> 4);
-	draw_led(bitmap, 12, 20, (state->m_led0 & 0x000f));
+	draw_led(bitmap,  0, 20, (m_led0 & 0x0f00) >> 8);
+	draw_led(bitmap,  6, 20, (m_led0 & 0x00f0) >> 4);
+	draw_led(bitmap, 12, 20, (m_led0 & 0x000f));
 
-	draw_led(bitmap, 256-18,20,(state->m_led0 & 0xf000) >> 12);
-	draw_led(bitmap, 256-12,20,(state->m_led1 & 0xf0) >> 4);
-	draw_led(bitmap, 256-6,20, (state->m_led1 & 0xf));
+	draw_led(bitmap, 256-18,20,(m_led0 & 0xf000) >> 12);
+	draw_led(bitmap, 256-12,20,(m_led1 & 0xf0) >> 4);
+	draw_led(bitmap, 256-6,20, (m_led1 & 0xf));
 	return 0;
 }
 
 
-static WRITE16_HANDLER( ac_bgvram_w )
+WRITE16_MEMBER(acommand_state::ac_bgvram_w)
 {
-	acommand_state *state = space->machine().driver_data<acommand_state>();
-	COMBINE_DATA(&state->m_ac_bgvram[offset]);
-	tilemap_mark_tile_dirty(state->m_bg_tilemap,offset);
+	COMBINE_DATA(&m_ac_bgvram[offset]);
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-static WRITE16_HANDLER( ac_txvram_w )
+WRITE16_MEMBER(acommand_state::ac_txvram_w)
 {
-	acommand_state *state = space->machine().driver_data<acommand_state>();
-	COMBINE_DATA(&state->m_ac_txvram[offset]);
-	tilemap_mark_tile_dirty(state->m_tx_tilemap,offset);
+	COMBINE_DATA(&m_ac_txvram[offset]);
+	m_tx_tilemap->mark_tile_dirty(offset);
 }
 
-static WRITE16_HANDLER(ac_bgscroll_w)
+WRITE16_MEMBER(acommand_state::ac_bgscroll_w)
 {
-	acommand_state *state = space->machine().driver_data<acommand_state>();
 	switch(offset)
 	{
-		case 0: tilemap_set_scrollx(state->m_bg_tilemap,0,data); break;
-		case 1: tilemap_set_scrolly(state->m_bg_tilemap,0,data); break;
+		case 0: m_bg_tilemap->set_scrollx(0,data); break;
+		case 1: m_bg_tilemap->set_scrolly(0,data); break;
 		case 2: /*BG_TILEMAP priority?*/ break;
 	}
 }
 
-static WRITE16_HANDLER(ac_txscroll_w)
+WRITE16_MEMBER(acommand_state::ac_txscroll_w)
 {
-	acommand_state *state = space->machine().driver_data<acommand_state>();
 	switch(offset)
 	{
-		case 0: tilemap_set_scrollx(state->m_tx_tilemap,0,data); break;
-		case 1: tilemap_set_scrolly(state->m_tx_tilemap,0,data); break;
+		case 0: m_tx_tilemap->set_scrollx(0,data); break;
+		case 1: m_tx_tilemap->set_scrolly(0,data); break;
 		case 2: /*TX_TILEMAP priority?*/ break;
 	}
 }
@@ -296,113 +305,111 @@ static WRITE16_HANDLER(ac_txscroll_w)
 /******************************************************************************************/
 
 
-static READ16_HANDLER(ac_devices_r)
+READ16_MEMBER(acommand_state::ac_devices_r)
 {
-	acommand_state *state = space->machine().driver_data<acommand_state>();
-	logerror("(PC=%06x) read at %04x\n",cpu_get_pc(&space->device()),offset*2);
+	logerror("(PC=%06x) read at %04x\n",space.device().safe_pc(),offset*2);
 
 	switch(offset)
 	{
 		case 0x0008/2:
 			/*
-                --x- ---- ---- ---- Ticket Dispenser - 2
-                ---x ---- ---- ---- Ticket Dispenser - 1
-                ---- -x-- ---- ---- Right Gun HIT
-                ---- ---x ---- ---- Left Gun HIT
-                ---- ---- --x- ---- Service Mode (Toggle)
-                ---- ---- ---x ---- Service Coin
-                ---- ---- ---- x--- COIN2
-                ---- ---- ---- -x-- COIN1
-                ---- ---- ---- --x- (Activate Test)
-                ---- ---- ---- ---x (Advance Thru Tests)
-            */
-			return input_port_read(space->machine(), "IN0");
+			    --x- ---- ---- ---- Ticket Dispenser - 2
+			    ---x ---- ---- ---- Ticket Dispenser - 1
+			    ---- -x-- ---- ---- Right Gun HIT
+			    ---- ---x ---- ---- Left Gun HIT
+			    ---- ---- --x- ---- Service Mode (Toggle)
+			    ---- ---- ---x ---- Service Coin
+			    ---- ---- ---- x--- COIN2
+			    ---- ---- ---- -x-- COIN1
+			    ---- ---- ---- --x- (Activate Test)
+			    ---- ---- ---- ---x (Advance through Tests)
+			*/
+			return ioport("IN0")->read();
 		case 0x0014/2:
 		case 0x0016/2:
-			return space->machine().device<okim6295_device>("oki1")->read(*space,0);
+			return machine().device<okim6295_device>("oki1")->read(space,0);
 		case 0x0018/2:
 		case 0x001a/2:
-			return space->machine().device<okim6295_device>("oki2")->read(*space,0);
+			return machine().device<okim6295_device>("oki2")->read(space,0);
 		case 0x0040/2:
 			/*
-                "Upper switch / Under Switch"
-                xx-x ---- xx-x xx-x
-                -x-- ---- ---- ---- Catch Switch - 3
-                --x- ---- ---- ---- Lower Switch - 3
-                ---x ---- ---- ---- Upper Switch - 3
-                ---- -x-- ---- ---- Catch Switch - 2
-                ---- --x- ---- ---- Lower Switch - 2
-                ---- ---x ---- ---- Upper Switch - 2
-                ---- ---- -x-- ---- Catch Switch - 1
-                ---- ---- --x- ---- Lower Switch - 1 (active high)
-                ---- ---- ---x ---- Upper Switch - 1 (active low)
-                ---- ---- ---- --xx Boss Door - Motor
-            */
-        //22dc8
+			    "Upper switch / Under Switch"
+			    xx-x ---- xx-x xx-x
+			    -x-- ---- ---- ---- Catch Switch - 3
+			    --x- ---- ---- ---- Lower Switch - 3
+			    ---x ---- ---- ---- Upper Switch - 3
+			    ---- -x-- ---- ---- Catch Switch - 2
+			    ---- --x- ---- ---- Lower Switch - 2
+			    ---- ---x ---- ---- Upper Switch - 2
+			    ---- ---- -x-- ---- Catch Switch - 1
+			    ---- ---- --x- ---- Lower Switch - 1 (active high)
+			    ---- ---- ---x ---- Upper Switch - 1 (active low)
+			    ---- ---- ---- --xx Boss Door - Motor
+			*/
+		//22dc8
 		{
-			state->m_ufo_sw1 = state->m_ac_devram[offset] & 3;
-			if(state->m_ac_devram[offset] & 0x10)
-				state->m_ufo_sw1|= 0x10;
-			if(state->m_ac_devram[offset] & 0x40)
-				state->m_ufo_sw1|= 0x20;
-			if(state->m_ac_devram[offset] & 0x100)
-				state->m_ufo_sw1|=0x100;
-			if(state->m_ac_devram[offset] & 0x400)
-				state->m_ufo_sw1|=0x200;
-			if(state->m_ac_devram[offset] & 0x1000)
-				state->m_ufo_sw1|=0x1000;
-			if(state->m_ac_devram[offset] & 0x4000)
-				state->m_ufo_sw1|=0x2000;
-//          if(state->m_ac_devram[0x0048/2] & 0x0001)
-//              state->m_ufo_sw1|=0x0040;
-//          if(state->m_ac_devram[0x0048/2] & 0x0004)
-//              state->m_ufo_sw1|=0x0400;
-//          if(state->m_ac_devram[0x0048/2] & 0x0100)
-//              state->m_ufo_sw1|=0x4000;
-			return state->m_ufo_sw1;
+			m_ufo_sw1 = m_ac_devram[offset] & 3;
+			if(m_ac_devram[offset] & 0x10)
+				m_ufo_sw1|= 0x10;
+			if(m_ac_devram[offset] & 0x40)
+				m_ufo_sw1|= 0x20;
+			if(m_ac_devram[offset] & 0x100)
+				m_ufo_sw1|=0x100;
+			if(m_ac_devram[offset] & 0x400)
+				m_ufo_sw1|=0x200;
+			if(m_ac_devram[offset] & 0x1000)
+				m_ufo_sw1|=0x1000;
+			if(m_ac_devram[offset] & 0x4000)
+				m_ufo_sw1|=0x2000;
+//          if(m_ac_devram[0x0048/2] & 0x0001)
+//              m_ufo_sw1|=0x0040;
+//          if(m_ac_devram[0x0048/2] & 0x0004)
+//              m_ufo_sw1|=0x0400;
+//          if(m_ac_devram[0x0048/2] & 0x0100)
+//              m_ufo_sw1|=0x4000;
+			return m_ufo_sw1;
 		}
 		case 0x0044/2:
 			/*
-                ---- ---- --x- ---- Lower Switch - 5
-                ---- ---- ---x ---- Upper Switch - 5
-                ---- ---- ---- --x- Lower Switch - 4 (active high)
-                ---- ---- ---- ---x Upper Switch - 4 (active low)
-            */
+			    ---- ---- --x- ---- Lower Switch - 5
+			    ---- ---- ---x ---- Upper Switch - 5
+			    ---- ---- ---- --x- Lower Switch - 4 (active high)
+			    ---- ---- ---- ---x Upper Switch - 4 (active low)
+			*/
 		{
-			state->m_ufo_sw2 = 0;
-			if(state->m_ac_devram[offset] & 0x01)
-				state->m_ufo_sw2|= 1;
-			if(state->m_ac_devram[offset] & 0x04)
-				state->m_ufo_sw2|= 2;
-			if(state->m_ac_devram[offset] & 0x10)
-				state->m_ufo_sw2|=0x10;
-			if(state->m_ac_devram[offset] & 0x40)
-				state->m_ufo_sw2|=0x20;
-			return state->m_ufo_sw2;
+			m_ufo_sw2 = 0;
+			if(m_ac_devram[offset] & 0x01)
+				m_ufo_sw2|= 1;
+			if(m_ac_devram[offset] & 0x04)
+				m_ufo_sw2|= 2;
+			if(m_ac_devram[offset] & 0x10)
+				m_ufo_sw2|=0x10;
+			if(m_ac_devram[offset] & 0x40)
+				m_ufo_sw2|=0x20;
+			return m_ufo_sw2;
 		}
 		case 0x0048/2:
-			return state->m_ac_devram[offset];
+			return m_ac_devram[offset];
 		case 0x005c/2:
 			/*
-                xxxx xxxx ---- ---- DIPSW4
-                ---- ---- xxxx xxxx DIPSW3
-            */
-			return input_port_read(space->machine(), "IN1");
+			    xxxx xxxx ---- ---- DIPSW4
+			    ---- ---- xxxx xxxx DIPSW3
+			*/
+			return ioport("IN1")->read();
 	}
-	return state->m_ac_devram[offset];
+	return m_ac_devram[offset];
 }
 
-static WRITE16_HANDLER(ac_devices_w)
+WRITE16_MEMBER(acommand_state::ac_devices_w)
 {
-	acommand_state *state = space->machine().driver_data<acommand_state>();
-	COMBINE_DATA(&state->m_ac_devram[offset]);
+	COMBINE_DATA(&m_ac_devram[offset]);
 	switch(offset)
 	{
 		case 0x00/2:
 			if (ACCESSING_BITS_0_7)
 			{
-				okim6295_device *oki1 = space->machine().device<okim6295_device>("oki1");
-				okim6295_device *oki2 = space->machine().device<okim6295_device>("oki2");
+				okim6295_device *oki1 = machine().device<okim6295_device>("oki1");
+				okim6295_device *oki2 = machine().device<okim6295_device>("oki2");
 				oki1->set_bank_base(0x40000 * (data & 0x3));
 				oki2->set_bank_base(0x40000 * (data & 0x30) >> 4);
 			}
@@ -411,16 +418,16 @@ static WRITE16_HANDLER(ac_devices_w)
 		case 0x16/2:
 			if(ACCESSING_BITS_0_7)
 			{
-				okim6295_device *oki1 = space->machine().device<okim6295_device>("oki1");
-				oki1->write(*space,0,data);
+				okim6295_device *oki1 = machine().device<okim6295_device>("oki1");
+				oki1->write(space,0,data);
 			}
 			break;
 		case 0x18/2:
 		case 0x1a/2:
 			if(ACCESSING_BITS_0_7)
 			{
-				okim6295_device *oki2 = space->machine().device<okim6295_device>("oki2");
-				oki2->write(*space,0,data);
+				okim6295_device *oki2 = machine().device<okim6295_device>("oki2");
+				oki2->write(space,0,data);
 			}
 			break;
 		case 0x1c/2:
@@ -433,44 +440,44 @@ static WRITE16_HANDLER(ac_devices_w)
 		case 0x48/2:
 			break;
 		case 0x50/2:
-			state->m_led0 = state->m_ac_devram[offset];
-			//popmessage("%04x",state->m_led0);
+			m_led0 = m_ac_devram[offset];
+			//popmessage("%04x",m_led0);
 			break;
 		case 0x54/2:
-			state->m_led1 = state->m_ac_devram[offset];
-			//popmessage("%04x",state->m_led0);
+			m_led1 = m_ac_devram[offset];
+			//popmessage("%04x",m_led0);
 			break;
 	}
 }
 
 /*This is always zero ATM*/
-static WRITE16_HANDLER(ac_unk2_w)
+WRITE16_MEMBER(acommand_state::ac_unk2_w)
 {
 	if(data)
 		popmessage("UNK-2 enabled %04x",data);
 }
 
-static ADDRESS_MAP_START( acommand_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( acommand_map, AS_PROGRAM, 16, acommand_state )
 	AM_RANGE(0x000000, 0x03ffff) AM_ROM
 	AM_RANGE(0x082000, 0x082005) AM_WRITE(ac_bgscroll_w)
 	AM_RANGE(0x082100, 0x082105) AM_WRITE(ac_txscroll_w)
 	AM_RANGE(0x082208, 0x082209) AM_WRITE(ac_unk2_w)
-	AM_RANGE(0x0a0000, 0x0a3fff) AM_RAM_WRITE(ac_bgvram_w) AM_BASE_MEMBER(acommand_state, m_ac_bgvram)
-	AM_RANGE(0x0b0000, 0x0b3fff) AM_RAM_WRITE(ac_txvram_w) AM_BASE_MEMBER(acommand_state, m_ac_txvram)
-	AM_RANGE(0x0b8000, 0x0bffff) AM_RAM_WRITE(paletteram16_RRRRGGGGBBBBRGBx_word_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x0a0000, 0x0a3fff) AM_RAM_WRITE(ac_bgvram_w) AM_SHARE("ac_bgvram")
+	AM_RANGE(0x0b0000, 0x0b3fff) AM_RAM_WRITE(ac_txvram_w) AM_SHARE("ac_txvram")
+	AM_RANGE(0x0b8000, 0x0bffff) AM_RAM_WRITE(paletteram_RRRRGGGGBBBBRGBx_word_w) AM_SHARE("paletteram")
 	AM_RANGE(0x0f0000, 0x0f7fff) AM_RAM
-	AM_RANGE(0x0f8000, 0x0f8fff) AM_RAM AM_BASE_SIZE_MEMBER(acommand_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0x0f8000, 0x0f8fff) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0x0f9000, 0x0fffff) AM_RAM
-	AM_RANGE(0x100000, 0x1000ff) AM_READ(ac_devices_r) AM_WRITE(ac_devices_w) AM_BASE_MEMBER(acommand_state, m_ac_devram)
+	AM_RANGE(0x100000, 0x1000ff) AM_READ(ac_devices_r) AM_WRITE(ac_devices_w) AM_SHARE("ac_devram")
 ADDRESS_MAP_END
 
 static INPUT_PORTS_START( acommand )
 	PORT_START("IN0")
-    PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_START1 )
-    PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_START2 )
-    PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_COIN1 )
-    PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_COIN2 )
-    PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_SERVICE1 )
+	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_START1 )
+	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_START2 )
+	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_COIN1 )
+	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_COIN2 )
+	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_SERVICE_NO_TOGGLE( 0x0020, IP_ACTIVE_LOW )
 	PORT_DIPNAME( 0x0040, 0x0040, "IN0" )
 	PORT_DIPSETTING(      0x0040, DEF_STR( Off ) )
@@ -478,11 +485,11 @@ static INPUT_PORTS_START( acommand )
 	PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(      0x0080, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-    PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_BUTTON1 )
+	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_DIPNAME( 0x0200, 0x0200, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(      0x0200, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-    PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
+	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_DIPNAME( 0x0800, 0x0800, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(      0x0800, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
@@ -580,15 +587,15 @@ static GFXDECODE_START( acommand )
 	GFXDECODE_ENTRY( "gfx3", 0, tilelayout, 0x1800, 256 )
 GFXDECODE_END
 
-static TIMER_DEVICE_CALLBACK( acommand_scanline )
+TIMER_DEVICE_CALLBACK_MEMBER(acommand_state::acommand_scanline)
 {
 	int scanline = param;
 
 	if(scanline == 240) // vblank-out irq
-		cputag_set_input_line(timer.machine(), "maincpu", 2, HOLD_LINE);
+		machine().device("maincpu")->execute().set_input_line(2, HOLD_LINE);
 
 	if(scanline == 0) // vblank-in irq? (update palette and layers)
-		cputag_set_input_line(timer.machine(), "maincpu", 3, HOLD_LINE);
+		machine().device("maincpu")->execute().set_input_line(3, HOLD_LINE);
 }
 
 static MACHINE_CONFIG_START( acommand, acommand_state )
@@ -596,21 +603,19 @@ static MACHINE_CONFIG_START( acommand, acommand_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu",M68000,12000000)
 	MCFG_CPU_PROGRAM_MAP(acommand_map)
-	MCFG_TIMER_ADD_SCANLINE("scantimer", acommand_scanline, "screen", 0, 1)
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("scantimer", acommand_state, acommand_scanline, "screen", 0, 1)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(acommand)
+	MCFG_SCREEN_UPDATE_DRIVER(acommand_state, screen_update_acommand)
 
 	MCFG_GFXDECODE(acommand)
 	MCFG_PALETTE_LENGTH(0x4000)
 
-	MCFG_VIDEO_START(acommand)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
@@ -651,10 +656,10 @@ ROM_START( acommand )
 	ROM_LOAD16_BYTE( "jalgp7.bin",   0x300000, 0x080000, CRC(44b71098) SHA1(a6ec2573f9a266d4f8f315f6e99b12525011f512) )
 	ROM_LOAD16_BYTE( "jalgp8.bin",   0x300001, 0x080000, CRC(ce0b7838) SHA1(46e34971cb62565a3948d8c0a18086648c32e13b) )
 
-	ROM_REGION( 0x100000, "oki1", 0 )	/* M6295 samples */
+	ROM_REGION( 0x100000, "oki1", 0 )   /* M6295 samples */
 	ROM_LOAD( "jalcf2.bin",   0x000000, 0x100000, CRC(b982fd97) SHA1(35ee5b1b9be762ccfefda24d73e329ceea876deb) )
 
-	ROM_REGION( 0x100000, "oki2", 0 )	/* M6295 samples */
+	ROM_REGION( 0x100000, "oki2", 0 )   /* M6295 samples */
 	ROM_LOAD( "jalcf1.bin",   0x000000, 0x100000, CRC(24af21d3) SHA1(f68ab81a6c833b57ae9eef916a1c8578f3d893dd) )
 
 	ROM_REGION( 0x100000, "user1", 0 ) /* ? these two below are identical*/
@@ -662,4 +667,4 @@ ROM_START( acommand )
 	ROM_LOAD( "jalmr17.bin",   0x080000, 0x080000, CRC(9d428fb7) SHA1(02f72938d73db932bd217620a175a05215f6016a) )
 ROM_END
 
-GAME( 1994, acommand,  0,       acommand,  acommand,  0, ROT0, "Jaleco", "Alien Command" , GAME_NOT_WORKING | GAME_MECHANICAL)
+GAME( 1994, acommand,  0,       acommand,  acommand, driver_device,  0, ROT0, "Jaleco", "Alien Command" , GAME_NOT_WORKING | GAME_MECHANICAL)

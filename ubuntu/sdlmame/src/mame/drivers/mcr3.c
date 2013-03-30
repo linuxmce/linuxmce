@@ -103,35 +103,35 @@
 
 #include "emu.h"
 #include "cpu/z80/z80.h"
-#include "deprecat.h"
 #include "machine/z80ctc.h"
-#include "audio/mcr.h"
+#include "audio/midway.h"
 #include "machine/nvram.h"
 #include "includes/mcr.h"
 #include "includes/mcr3.h"
 
+#include "spyhunt.lh"
 #include "turbotag.lh"
 
 
-#define MASTER_CLOCK		XTAL_20MHz
+#define MASTER_CLOCK        XTAL_20MHz
 
 
 
-static WRITE8_HANDLER( mcrmono_control_port_w )
+WRITE8_MEMBER(mcr3_state::mcrmono_control_port_w)
 {
 	/*
-        Bit layout is as follows:
-            D7 = n/c
-            D6 = cocktail flip
-            D5 = n/c
-            D4 = n/c
-            D3 = n/c
-            D2 = n/c
-            D1 = n/c
-            D0 = coin meter 1
-    */
+	    Bit layout is as follows:
+	        D7 = n/c
+	        D6 = cocktail flip
+	        D5 = n/c
+	        D4 = n/c
+	        D3 = n/c
+	        D2 = n/c
+	        D1 = n/c
+	        D0 = coin meter 1
+	*/
 
-	coin_counter_w(space->machine(), 0, (data >> 0) & 1);
+	coin_counter_w(machine(), 0, (data >> 0) & 1);
 	mcr_cocktail_flip = (data >> 6) & 1;
 }
 
@@ -142,31 +142,28 @@ static WRITE8_HANDLER( mcrmono_control_port_w )
  *
  *************************************/
 
-static READ8_HANDLER( demoderm_ip1_r )
+READ8_MEMBER(mcr3_state::demoderm_ip1_r)
 {
-	mcr3_state *state = space->machine().driver_data<mcr3_state>();
-	return input_port_read(space->machine(), "MONO.IP1") |
-		(input_port_read(space->machine(), state->m_input_mux ? "MONO.IP1.ALT2" : "MONO.IP1.ALT1") << 2);
+	return ioport("MONO.IP1")->read() |
+		(ioport(m_input_mux ? "MONO.IP1.ALT2" : "MONO.IP1.ALT1")->read() << 2);
 }
 
 
-static READ8_HANDLER( demoderm_ip2_r )
+READ8_MEMBER(mcr3_state::demoderm_ip2_r)
 {
-	mcr3_state *state = space->machine().driver_data<mcr3_state>();
-	return input_port_read(space->machine(), "MONO.IP2") |
-		(input_port_read(space->machine(), state->m_input_mux ? "MONO.IP2.ALT2" : "MONO.IP2.ALT1") << 2);
+	return ioport("MONO.IP2")->read() |
+		(ioport(m_input_mux ? "MONO.IP2.ALT2" : "MONO.IP2.ALT1")->read() << 2);
 }
 
 
-static WRITE8_HANDLER( demoderm_op6_w )
+WRITE8_MEMBER(mcr3_state::demoderm_op6_w)
 {
-	mcr3_state *state = space->machine().driver_data<mcr3_state>();
 	/* top 2 bits select the input */
-	if (data & 0x80) state->m_input_mux = 0;
-	if (data & 0x40) state->m_input_mux = 1;
+	if (data & 0x80) m_input_mux = 0;
+	if (data & 0x40) m_input_mux = 1;
 
 	/* low 5 bits control the turbo CS */
-	turbocs_data_w(space, offset, data);
+	m_turbo_chip_squeak->write(space, offset, data);
 }
 
 
@@ -177,103 +174,100 @@ static WRITE8_HANDLER( demoderm_op6_w )
  *
  *************************************/
 
-static READ8_HANDLER( maxrpm_ip1_r )
+READ8_MEMBER(mcr3_state::maxrpm_ip1_r)
 {
-	mcr3_state *state = space->machine().driver_data<mcr3_state>();
-	return state->m_latched_input;
+	return m_latched_input;
 }
 
 
-static READ8_HANDLER( maxrpm_ip2_r )
+READ8_MEMBER(mcr3_state::maxrpm_ip2_r)
 {
-	mcr3_state *state = space->machine().driver_data<mcr3_state>();
+	/* this is a blatant hack, should really do a better implementation */
 	static const UINT8 shift_bits[5] = { 0x00, 0x05, 0x06, 0x01, 0x02 };
-	UINT8 start = input_port_read(space->machine(), "MONO.IP0");
-	UINT8 shift = input_port_read(space->machine(), "SHIFT");
+	UINT8 start = ioport("MONO.IP0")->read();
+	UINT8 shift = ioport("SHIFT")->read();
 
 	/* reset on a start */
 	if (!(start & 0x08))
-		state->m_maxrpm_p1_shift = 0;
+		m_maxrpm_p1_shift = 0;
 	if (!(start & 0x04))
-		state->m_maxrpm_p2_shift = 0;
+		m_maxrpm_p2_shift = 0;
 
 	/* increment, decrement on falling edge */
-	if (!(shift & 0x01) && (state->m_maxrpm_last_shift & 0x01))
+	if (!(shift & 0x01) && (m_maxrpm_last_shift & 0x01))
 	{
-		state->m_maxrpm_p1_shift++;
-		if (state->m_maxrpm_p1_shift > 4)
-			state->m_maxrpm_p1_shift = 4;
+		m_maxrpm_p1_shift++;
+		if (m_maxrpm_p1_shift > 4)
+			m_maxrpm_p1_shift = 4;
 	}
-	if (!(shift & 0x02) && (state->m_maxrpm_last_shift & 0x02))
+	if (!(shift & 0x02) && (m_maxrpm_last_shift & 0x02))
 	{
-		state->m_maxrpm_p1_shift--;
-		if (state->m_maxrpm_p1_shift < 0)
-			state->m_maxrpm_p1_shift = 0;
+		m_maxrpm_p1_shift--;
+		if (m_maxrpm_p1_shift < 0)
+			m_maxrpm_p1_shift = 0;
 	}
-	if (!(shift & 0x04) && (state->m_maxrpm_last_shift & 0x04))
+	if (!(shift & 0x04) && (m_maxrpm_last_shift & 0x04))
 	{
-		state->m_maxrpm_p2_shift++;
-		if (state->m_maxrpm_p2_shift > 4)
-			state->m_maxrpm_p2_shift = 4;
+		m_maxrpm_p2_shift++;
+		if (m_maxrpm_p2_shift > 4)
+			m_maxrpm_p2_shift = 4;
 	}
-	if (!(shift & 0x08) && (state->m_maxrpm_last_shift & 0x08))
+	if (!(shift & 0x08) && (m_maxrpm_last_shift & 0x08))
 	{
-		state->m_maxrpm_p2_shift--;
-		if (state->m_maxrpm_p2_shift < 0)
-			state->m_maxrpm_p2_shift = 0;
+		m_maxrpm_p2_shift--;
+		if (m_maxrpm_p2_shift < 0)
+			m_maxrpm_p2_shift = 0;
 	}
 
-	state->m_maxrpm_last_shift = shift;
+	m_maxrpm_last_shift = shift;
 
-	return ~((shift_bits[state->m_maxrpm_p1_shift] << 4) + shift_bits[state->m_maxrpm_p2_shift]);
+	return ~((shift_bits[m_maxrpm_p1_shift] << 4) + shift_bits[m_maxrpm_p2_shift]);
 }
 
 
-static WRITE8_HANDLER( maxrpm_op5_w )
+WRITE8_MEMBER(mcr3_state::maxrpm_op5_w)
 {
-	mcr3_state *state = space->machine().driver_data<mcr3_state>();
 	/* latch the low 4 bits as input to the ADC0844 */
-	state->m_maxrpm_adc_control = data & 0x0f;
+	m_maxrpm_adc_control = data & 0x0f;
 
 	/* remaining bits go to standard connections */
 	mcrmono_control_port_w(space, offset, data);
 }
 
 
-static WRITE8_HANDLER( maxrpm_op6_w )
+WRITE8_MEMBER(mcr3_state::maxrpm_op6_w)
 {
-	mcr3_state *state = space->machine().driver_data<mcr3_state>();
 	static const char *const inputs[] = { "MONO.IP1", "MONO.IP1.ALT1", "MONO.IP1.ALT2", "MONO.IP1.ALT3" };
 	/*
-        Reflective Sensor Control:
-            4 bits of input from OP5 are routed to a transceiver at U2, and
-            ultimately on to the low 4 I/O pins of the ADC0844. The /EN on
-            the transceiver is directly connected to J2-2.
+	    Reflective Sensor Control:
+	        4 bits of input from OP5 are routed to a transceiver at U2, and
+	        ultimately on to the low 4 I/O pins of the ADC0844. The /EN on
+	        the transceiver is directly connected to J2-2.
 
-            In order to perform a read or a write to the ADC0844, the /RD and
-            /WR signals are directly controlled via J2-8 and J2-7 respectively.
-            The input from the /WR is controlled by enabling the transceiver
-            above to allow the 4 bits of input to flow through. The output
-            from an /RD is controlled by disabling the transceiver and allowing
-            the 8 bits of output to flow through J2-13 through J2-20. These are
-            read via IP1.
-    */
+	        In order to perform a read or a write to the ADC0844, the /RD and
+	        /WR signals are directly controlled via J2-8 and J2-7 respectively.
+	        The input from the /WR is controlled by enabling the transceiver
+	        above to allow the 4 bits of input to flow through. The output
+	        from an /RD is controlled by disabling the transceiver and allowing
+	        the 8 bits of output to flow through J2-13 through J2-20. These are
+	        read via IP1.
+	*/
 	/* bit 7 = /RD (J2-8) on ADC0844 */
 	/* bit 6 = /WR (J2-7) on ADC0844 */
 	/* bit 5 = /EN (J2-2) on input latch */
 
 	/* when the read is toggled is when the ADC value is latched */
 	if (!(data & 0x80))
-		state->m_latched_input = input_port_read(space->machine(), inputs[state->m_maxrpm_adc_select]);
+		m_latched_input = ioport(inputs[m_maxrpm_adc_select])->read();
 
 	/* when both the write and the enable are low, it's a write to the ADC0844 */
 	/* unfortunately the behavior below doesn't match up with the inputs on the */
 	/* schematics and wiring diagrams, so they must be wrong */
 	if (!(data & 0x40) && !(data & 0x20))
-		state->m_maxrpm_adc_select = (state->m_maxrpm_adc_control >> 1) & 3;
+		m_maxrpm_adc_select = (m_maxrpm_adc_control >> 1) & 3;
 
 	/* low 5 bits control the turbo CS */
-	turbocs_data_w(space, offset, data);
+	m_turbo_chip_squeak->write(space, offset, data);
 }
 
 
@@ -284,19 +278,19 @@ static WRITE8_HANDLER( maxrpm_op6_w )
  *
  *************************************/
 
-static READ8_HANDLER( rampage_ip4_r )
+READ8_MEMBER(mcr3_state::rampage_ip4_r)
 {
-	return input_port_read(space->machine(), "MONO.IP4") | (soundsgood_status_r(space,0) << 7);
+	return ioport("MONO.IP4")->read() | (m_sounds_good->read(space,0) << 7);
 }
 
 
-static WRITE8_HANDLER( rampage_op6_w )
+WRITE8_MEMBER(mcr3_state::rampage_op6_w)
 {
 	/* bit 5 controls reset of the Sounds Good board */
-	soundsgood_reset_w(space->machine(), (~data >> 5) & 1);
+	m_sounds_good->reset_write((~data >> 5) & 1);
 
 	/* low 5 bits go directly to the Sounds Good board */
-	soundsgood_data_w(space, offset, data);
+	m_sounds_good->write(space, offset, data);
 }
 
 
@@ -307,40 +301,40 @@ static WRITE8_HANDLER( rampage_op6_w )
  *
  *************************************/
 
-static READ8_HANDLER( powerdrv_ip2_r )
+READ8_MEMBER(mcr3_state::powerdrv_ip2_r)
 {
-	return input_port_read(space->machine(), "MONO.IP2") | (soundsgood_status_r(space, 0) << 7);
+	return ioport("MONO.IP2")->read() | (m_sounds_good->read(space, 0) << 7);
 }
 
 
-static WRITE8_HANDLER( powerdrv_op5_w )
+WRITE8_MEMBER(mcr3_state::powerdrv_op5_w)
 {
 	/*
-        Lamp Board:
-            Very simple board with direct lamp controls.
-            Pin J1-10 controls lamp 1.
-            Pin J1-8 controls lamp 2.
-            Pin J1-6 controls lamp 3.
-    */
+	    Lamp Board:
+	        Very simple board with direct lamp controls.
+	        Pin J1-10 controls lamp 1.
+	        Pin J1-8 controls lamp 2.
+	        Pin J1-6 controls lamp 3.
+	*/
 	/* bit 3 -> J1-10 = lamp 1 */
 	/* bit 2 -> J1-8 = lamp 2 */
 	/* bit 1 -> J1-6 = lamp 3 */
-	set_led_status(space->machine(), 0, (data >> 3) & 1);
-	set_led_status(space->machine(), 1, (data >> 2) & 1);
-	set_led_status(space->machine(), 2, (data >> 1) & 1);
+	set_led_status(machine(), 0, (data >> 3) & 1);
+	set_led_status(machine(), 1, (data >> 2) & 1);
+	set_led_status(machine(), 2, (data >> 1) & 1);
 
 	/* remaining bits go to standard connections */
 	mcrmono_control_port_w(space, offset, data);
 }
 
 
-static WRITE8_HANDLER( powerdrv_op6_w )
+WRITE8_MEMBER(mcr3_state::powerdrv_op6_w)
 {
 	/* bit 5 controls reset of the Sounds Good board */
-	soundsgood_reset_w(space->machine(), (~data >> 5) & 1);
+	m_sounds_good->reset_write((~data >> 5) & 1);
 
 	/* low 5 bits go directly to the Sounds Good board */
-	soundsgood_data_w(space, offset, data);
+	m_sounds_good->write(space, offset, data);
 }
 
 
@@ -351,41 +345,39 @@ static WRITE8_HANDLER( powerdrv_op6_w )
  *
  *************************************/
 
-static READ8_HANDLER( stargrds_ip0_r )
+READ8_MEMBER(mcr3_state::stargrds_ip0_r)
 {
-	mcr3_state *state = space->machine().driver_data<mcr3_state>();
-	UINT8 result = input_port_read(space->machine(), "MONO.IP0");
-	if (state->m_input_mux)
-		result = (result & ~0x0a) | (input_port_read(space->machine(), "MONO.IP0.ALT") & 0x0a);
-	return (result & ~0x10) | ((soundsgood_status_r(space, 0) << 4) & 0x10);
+	UINT8 result = ioport("MONO.IP0")->read();
+	if (m_input_mux)
+		result = (result & ~0x0a) | (ioport("MONO.IP0.ALT")->read() & 0x0a);
+	return (result & ~0x10) | ((m_sounds_good->read(space, 0) << 4) & 0x10);
 }
 
 
-static WRITE8_HANDLER( stargrds_op5_w )
+WRITE8_MEMBER(mcr3_state::stargrds_op5_w)
 {
-	mcr3_state *state = space->machine().driver_data<mcr3_state>();
 	/* bit 1 controls input muxing on port 0 */
-	state->m_input_mux = (data >> 1) & 1;
+	m_input_mux = (data >> 1) & 1;
 
 	/* bit 2 controls light #0 */
 	/* bit 3 controls light #1 */
 	/* bit 4 controls light #2 */
-	set_led_status(space->machine(), 0, (data >> 2) & 1);
-	set_led_status(space->machine(), 1, (data >> 3) & 1);
-	set_led_status(space->machine(), 2, (data >> 4) & 1);
+	set_led_status(machine(), 0, (data >> 2) & 1);
+	set_led_status(machine(), 1, (data >> 3) & 1);
+	set_led_status(machine(), 2, (data >> 4) & 1);
 
 	/* remaining bits go to standard connections */
 	mcrmono_control_port_w(space, offset, data);
 }
 
 
-static WRITE8_HANDLER( stargrds_op6_w )
+WRITE8_MEMBER(mcr3_state::stargrds_op6_w)
 {
 	/* bit 6 controls reset of the Sounds Good board */
-	soundsgood_reset_w(space->machine(), (~data >> 6) & 1);
+	m_sounds_good->reset_write((~data >> 6) & 1);
 
 	/* unline the other games, the STROBE is in the high bit instead of the low bit */
-	soundsgood_data_w(space, offset, (data << 1) | (data >> 7));
+	m_sounds_good->write(space, offset, (data << 1) | (data >> 7));
 }
 
 
@@ -396,39 +388,37 @@ static WRITE8_HANDLER( stargrds_op6_w )
  *
  *************************************/
 
-static READ8_HANDLER( spyhunt_ip1_r )
+READ8_MEMBER(mcr3_state::spyhunt_ip1_r)
 {
-	return input_port_read(space->machine(), "SSIO.IP1") | (csdeluxe_status_r(space, 0) << 5);
+	return ioport("ssio:IP1")->read() | (m_chip_squeak_deluxe->read(space, 0) << 5);
 }
 
 
-static READ8_HANDLER( spyhunt_ip2_r )
+READ8_MEMBER(mcr3_state::spyhunt_ip2_r)
 {
-	mcr3_state *state = space->machine().driver_data<mcr3_state>();
 	/* multiplexed steering wheel/gas pedal */
-	return input_port_read(space->machine(), state->m_input_mux ? "SSIO.IP2.ALT" : "SSIO.IP2");
+	return ioport(m_input_mux ? "ssio:IP2.ALT" : "ssio:IP2")->read();
 }
 
 
-static WRITE8_HANDLER( spyhunt_op4_w )
+WRITE8_MEMBER(mcr3_state::spyhunt_op4_w)
 {
-	mcr3_state *state = space->machine().driver_data<mcr3_state>();
 	/* Spy Hunter uses port 4 for talking to the Chip Squeak Deluxe */
 	/* (and for toggling the lamps and muxing the analog inputs) */
 
 	/* mux select is in bit 7 */
-	state->m_input_mux = (data >> 7) & 1;
+	m_input_mux = (data >> 7) & 1;
 
 	/*
-        Lamp Driver:
-            A 3-to-8 latching demuxer is connected to the input bits.
-            Three of the inputs (J1-11,10,12) specify which output to write
-            to, and the fourth input (J1-14) is the data value. A fifth input
-            (J1-13) controls the strobe to latch the data value for the
-            demuxer. The eight outputs directly control 8 lamps.
-    */
+	    Lamp Driver:
+	        A 3-to-8 latching demuxer is connected to the input bits.
+	        Three of the inputs (J1-11,10,12) specify which output to write
+	        to, and the fourth input (J1-14) is the data value. A fifth input
+	        (J1-13) controls the strobe to latch the data value for the
+	        demuxer. The eight outputs directly control 8 lamps.
+	*/
 	/* bit 5 = STR1 (J1-13) */
-	if (((state->m_last_op4 ^ data) & 0x20) && !(data & 0x20))
+	if (((m_last_op4 ^ data) & 0x20) && !(data & 0x20))
 	{
 		static const char *const lampname[8] =
 		{
@@ -441,10 +431,10 @@ static WRITE8_HANDLER( spyhunt_op4_w )
 		/* bit 0 -> J1-12 (A0) */
 		output_set_value(lampname[data & 7], (data >> 3) & 1);
 	}
-	state->m_last_op4 = data;
+	m_last_op4 = data;
 
 	/* low 5 bits go to control the Chip Squeak Deluxe */
-	csdeluxe_data_w(space, offset, data);
+	m_chip_squeak_deluxe->write(space, offset, data);
 }
 
 
@@ -455,25 +445,24 @@ static WRITE8_HANDLER( spyhunt_op4_w )
  *
  *************************************/
 
-static READ8_HANDLER( turbotag_ip2_r )
+READ8_MEMBER(mcr3_state::turbotag_ip2_r)
 {
-	mcr3_state *state = space->machine().driver_data<mcr3_state>();
 	/* multiplexed steering wheel/gas pedal */
-	if (state->m_input_mux)
-		return input_port_read(space->machine(), "SSIO.IP2.ALT");
+	if (m_input_mux)
+		return ioport("ssio:IP2.ALT")->read();
 
-	return input_port_read(space->machine(), "SSIO.IP2") + 5 * (space->machine().primary_screen->frame_number() & 1);
+	return ioport("ssio:IP2")->read() + 5 * (machine().primary_screen->frame_number() & 1);
 }
 
 
-static READ8_HANDLER( turbotag_kludge_r )
+READ8_MEMBER(mcr3_state::turbotag_kludge_r)
 {
 	/* The checksum on the ttprog1.bin ROM seems to be bad by 1 bit */
 	/* The checksum should come out to $82 but it should be $92     */
 	/* Unfortunately, the game refuses to start if any bad ROM is   */
 	/* found; to work around this, we catch the checksum byte read  */
 	/* and modify it to what we know we will be getting.            */
-	if (cpu_get_previouspc(&space->device()) == 0xb29)
+	if (space.device().safe_pcbase() == 0xb29)
 		return 0x82;
 	else
 		return 0x92;
@@ -488,19 +477,19 @@ static READ8_HANDLER( turbotag_kludge_r )
  *************************************/
 
 /* address map verified from schematics */
-static ADDRESS_MAP_START( mcrmono_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( mcrmono_map, AS_PROGRAM, 8, mcr3_state )
 	ADDRESS_MAP_UNMAP_HIGH
 	AM_RANGE(0x0000, 0xdfff) AM_ROM
 	AM_RANGE(0xe000, 0xe7ff) AM_RAM AM_SHARE("nvram")
-	AM_RANGE(0xe800, 0xe9ff) AM_RAM AM_BASE_SIZE_MEMBER(mcr3_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0xe800, 0xe9ff) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0xea00, 0xebff) AM_RAM
-	AM_RANGE(0xec00, 0xec7f) AM_MIRROR(0x0380) AM_WRITE(mcr3_paletteram_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0xf000, 0xf7ff) AM_RAM_WRITE(mcr3_videoram_w) AM_BASE_MEMBER(mcr3_state, m_videoram)
-	AM_RANGE(0xf800, 0xffff) AM_ROM		/* schematics show a 2716 @ 2B here, but nobody used it */
+	AM_RANGE(0xec00, 0xec7f) AM_MIRROR(0x0380) AM_WRITE(mcr3_paletteram_w) AM_SHARE("paletteram")
+	AM_RANGE(0xf000, 0xf7ff) AM_RAM_WRITE(mcr3_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0xf800, 0xffff) AM_ROM     /* schematics show a 2716 @ 2B here, but nobody used it */
 ADDRESS_MAP_END
 
 /* I/O map verified from schematics */
-static ADDRESS_MAP_START( mcrmono_portmap, AS_IO, 8 )
+static ADDRESS_MAP_START( mcrmono_portmap, AS_IO, 8, mcr3_state )
 	ADDRESS_MAP_UNMAP_HIGH
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0x00) AM_MIRROR(0x78) AM_READ_PORT("MONO.IP0")
@@ -510,7 +499,7 @@ static ADDRESS_MAP_START( mcrmono_portmap, AS_IO, 8 )
 	AM_RANGE(0x04, 0x04) AM_MIRROR(0x78) AM_READ_PORT("MONO.IP4")
 	AM_RANGE(0x05, 0x05) AM_MIRROR(0x78) AM_WRITE(mcrmono_control_port_w)
 	AM_RANGE(0x07, 0x07) AM_MIRROR(0x78) AM_WRITE(watchdog_reset_w)
-	AM_RANGE(0xf0, 0xf3) AM_MIRROR(0x0c) AM_DEVREADWRITE("ctc", z80ctc_r, z80ctc_w)
+	AM_RANGE(0xf0, 0xf3) AM_MIRROR(0x0c) AM_DEVREADWRITE("ctc", z80ctc_device, read, write)
 ADDRESS_MAP_END
 
 
@@ -522,25 +511,25 @@ ADDRESS_MAP_END
  *************************************/
 
 /* address map verified from schematics */
-static ADDRESS_MAP_START( spyhunt_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( spyhunt_map, AS_PROGRAM, 8, mcr3_state )
 	ADDRESS_MAP_UNMAP_HIGH
 	AM_RANGE(0x0000, 0xdfff) AM_ROM
-	AM_RANGE(0xe000, 0xe7ff) AM_RAM_WRITE(spyhunt_videoram_w) AM_BASE_MEMBER(mcr3_state, m_videoram)
-	AM_RANGE(0xe800, 0xebff) AM_MIRROR(0x0400) AM_RAM_WRITE(spyhunt_alpharam_w) AM_BASE_MEMBER(mcr3_state, m_spyhunt_alpharam)
+	AM_RANGE(0xe000, 0xe7ff) AM_RAM_WRITE(spyhunt_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0xe800, 0xebff) AM_MIRROR(0x0400) AM_RAM_WRITE(spyhunt_alpharam_w) AM_SHARE("spyhunt_alpha")
 	AM_RANGE(0xf000, 0xf7ff) AM_RAM AM_SHARE("nvram")
-	AM_RANGE(0xf800, 0xf9ff) AM_RAM AM_BASE_SIZE_MEMBER(mcr3_state, m_spriteram, m_spriteram_size)
-	AM_RANGE(0xfa00, 0xfa7f) AM_MIRROR(0x0180) AM_WRITE(mcr3_paletteram_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0xf800, 0xf9ff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0xfa00, 0xfa7f) AM_MIRROR(0x0180) AM_WRITE(mcr3_paletteram_w) AM_SHARE("paletteram")
 ADDRESS_MAP_END
 
 /* upper I/O map determined by PAL; only SSIO ports and scroll registers are verified from schematics */
-static ADDRESS_MAP_START( spyhunt_portmap, AS_IO, 8 )
+static ADDRESS_MAP_START( spyhunt_portmap, AS_IO, 8, mcr3_state )
 	ADDRESS_MAP_UNMAP_HIGH
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	SSIO_INPUT_PORTS
+	SSIO_INPUT_PORTS("ssio")
 	AM_RANGE(0x84, 0x86) AM_WRITE(spyhunt_scroll_value_w)
 	AM_RANGE(0xe0, 0xe0) AM_WRITE(watchdog_reset_w)
 	AM_RANGE(0xe8, 0xe8) AM_WRITENOP
-	AM_RANGE(0xf0, 0xf3) AM_DEVREADWRITE("ctc", z80ctc_r, z80ctc_w)
+	AM_RANGE(0xf0, 0xf3) AM_DEVREADWRITE("ctc", z80ctc_device, read, write)
 ADDRESS_MAP_END
 
 
@@ -553,7 +542,7 @@ ADDRESS_MAP_END
 
 /* verified from wiring diagram, plus DIP switches from manual */
 static INPUT_PORTS_START( demoderm )
-	PORT_START("MONO.IP0")	/* J2 1-8 */
+	PORT_START("MONO.IP0")  /* J2 1-8 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 )
@@ -563,27 +552,27 @@ static INPUT_PORTS_START( demoderm )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_TILT )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("MONO.IP1")	/* J2 10-13,15-18 */	/* The high 6 bits contain the steering wheel value */
+	PORT_START("MONO.IP1")  /* J2 10-13,15-18 */    /* The high 6 bits contain the steering wheel value */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
 
-	PORT_START("MONO.IP1.ALT1")	/* J2 10-13,15-18 */	/* The high 6 bits contain the steering wheel value */
+	PORT_START("MONO.IP1.ALT1") /* J2 10-13,15-18 */    /* The high 6 bits contain the steering wheel value */
 	PORT_BIT( 0x3f, 0x00, IPT_DIAL ) PORT_SENSITIVITY(50) PORT_KEYDELTA(10) PORT_REVERSE PORT_PLAYER(1)
 
-	PORT_START("MONO.IP1.ALT2")	/* IN1 (muxed) -- the high 6 bits contain the steering wheel value */
+	PORT_START("MONO.IP1.ALT2") /* IN1 (muxed) -- the high 6 bits contain the steering wheel value */
 	PORT_BIT( 0x3f, 0x00, IPT_DIAL ) PORT_SENSITIVITY(50) PORT_KEYDELTA(10) PORT_REVERSE PORT_PLAYER(3)
 
-	PORT_START("MONO.IP2")	/* J3 1-8 */	/* The high 6 bits contain the steering wheel value */
+	PORT_START("MONO.IP2")  /* J3 1-8 */    /* The high 6 bits contain the steering wheel value */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
 
-	PORT_START("MONO.IP2.ALT1")	/* J3 1-8 */	/* The high 6 bits contain the steering wheel value */
+	PORT_START("MONO.IP2.ALT1") /* J3 1-8 */    /* The high 6 bits contain the steering wheel value */
 	PORT_BIT( 0x3f, 0x00, IPT_DIAL ) PORT_SENSITIVITY(50) PORT_KEYDELTA(10) PORT_REVERSE PORT_PLAYER(2)
 
-	PORT_START("MONO.IP2.ALT2")	/* IN2 (muxed) -- the high 6 bits contain the steering wheel value */
+	PORT_START("MONO.IP2.ALT2") /* IN2 (muxed) -- the high 6 bits contain the steering wheel value */
 	PORT_BIT( 0x3f, 0x00, IPT_DIAL ) PORT_SENSITIVITY(50) PORT_KEYDELTA(10) PORT_REVERSE PORT_PLAYER(4)
 
-	PORT_START("MONO.IP3")	/* DIPSW @ B3 */
+	PORT_START("MONO.IP3")  /* DIPSW @ B3 */
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Cabinet ) )
 	PORT_DIPSETTING(    0x01, "2P Upright" )
 	PORT_DIPSETTING(    0x00, "4P Cocktail" )
@@ -603,7 +592,7 @@ static INPUT_PORTS_START( demoderm )
 	PORT_DIPSETTING(    0x10, DEF_STR( 1C_2C ) )
 	PORT_BIT( 0xc0, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("MONO.IP4")	/* J4 1-7,9 */
+	PORT_START("MONO.IP4")  /* J4 1-7,9 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN3 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN4 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START3 )
@@ -612,13 +601,12 @@ static INPUT_PORTS_START( demoderm )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(3)
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(4)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(4)
-
 INPUT_PORTS_END
 
 
-/* not verified, no manual found */
+/* inputs not verfied yet, DIP switches from manual */
 static INPUT_PORTS_START( sarge )
-	PORT_START("MONO.IP0")	/* J2 1-8 */
+	PORT_START("MONO.IP0")  /* J2 1-8 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 )
@@ -627,7 +615,7 @@ static INPUT_PORTS_START( sarge )
 	PORT_SERVICE( 0x20, IP_ACTIVE_LOW )
 	PORT_BIT( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("MONO.IP1")	/* J2 10-13,15-18 */
+	PORT_START("MONO.IP1")  /* J2 10-13,15-18 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_UP ) PORT_2WAY PORT_PLAYER(1)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_DOWN ) PORT_2WAY PORT_PLAYER(1)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_UP ) PORT_2WAY PORT_PLAYER(1)
@@ -635,7 +623,7 @@ static INPUT_PORTS_START( sarge )
 	PORT_BIT( 0x30, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
 	PORT_BIT( 0xc0, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
 
-	PORT_START("MONO.IP2")	/* J3 1-8 */
+	PORT_START("MONO.IP2")  /* J3 1-8 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_UP ) PORT_2WAY PORT_PLAYER(2)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_DOWN ) PORT_2WAY PORT_PLAYER(2)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_UP ) PORT_2WAY PORT_PLAYER(2)
@@ -643,7 +631,10 @@ static INPUT_PORTS_START( sarge )
 	PORT_BIT( 0x30, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT( 0xc0, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
 
-	PORT_START("MONO.IP3")
+	PORT_START("MONO.IP3")  /* DIPSW @ A13 */
+	PORT_DIPUNKNOWN( 0x01, 0x01 ) // used, maybe for the "hidden player incentive" easter egg?
+	PORT_DIPUNKNOWN( 0x02, 0x02 ) // "
+	PORT_DIPUNKNOWN( 0x04, 0x04 ) // "
 	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Free_Play ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -651,17 +642,18 @@ static INPUT_PORTS_START( sarge )
 	PORT_DIPSETTING(    0x20, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x30, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(    0x10, DEF_STR( 1C_2C ) )
-/* 0x00 says 2 Coins/2 Credits in service mode, but gives 1 Coin/1 Credit */
-	PORT_BIT( 0xc7, IP_ACTIVE_LOW, IPT_UNKNOWN )
+//  PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) ) // dupe/invalid
+	PORT_DIPUNUSED( 0x40, 0x40 )
+	PORT_DIPUNUSED( 0x80, 0x80 )
 
-	PORT_START("MONO.IP4")	/* J4 1-7,9 */
+	PORT_START("MONO.IP4")  /* J4 1-7,9 */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )
 INPUT_PORTS_END
 
 
 /* verified from wiring diagram, plus DIP switches from manual */
 static INPUT_PORTS_START( maxrpm )
-	PORT_START("MONO.IP0")	/* J2 1-8 */
+	PORT_START("MONO.IP0")  /* J2 1-8 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START2 )
@@ -671,10 +663,10 @@ static INPUT_PORTS_START( maxrpm )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
 
-	PORT_START("MONO.IP1")	/* J2 10-13,15-18 */
+	PORT_START("MONO.IP1")  /* J2 10-13,15-18 */
 	PORT_BIT( 0xff, 0x30, IPT_PEDAL ) PORT_MINMAX(0x30,0xff) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_REVERSE PORT_PLAYER(2)
 
-	PORT_START("MONO.IP2")	/* J3 1-8 */
+	PORT_START("MONO.IP2")  /* J3 1-8 */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_SPECIAL )
 
 	PORT_START("MONO.IP3")
@@ -685,10 +677,10 @@ static INPUT_PORTS_START( maxrpm )
 	PORT_DIPSETTING(    0x20, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x30, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(    0x10, DEF_STR( 1C_2C ) )
-/* 0x00 says 2 Coins/2 Credits in service mode, but gives 1 Coin/1 Credit */
+//  PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) ) // dupe/invalid
 	PORT_BIT( 0xc7, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("MONO.IP4")	/* J4 1-7,9 */
+	PORT_START("MONO.IP4")  /* J4 1-7,9 */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START("MONO.IP1.ALT1")
@@ -700,27 +692,27 @@ static INPUT_PORTS_START( maxrpm )
 	PORT_START("MONO.IP1.ALT3")
 	PORT_BIT( 0xff, 0x74, IPT_PADDLE ) PORT_MINMAX(0x34,0xb4) PORT_SENSITIVITY(40) PORT_KEYDELTA(10) PORT_REVERSE PORT_PLAYER(1)
 
-	PORT_START("SHIFT")	/* fake for shifting */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1) PORT_NAME("P1 Shift Up")
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1) PORT_NAME("P1 Shift Down")
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2) PORT_NAME("P2 Shift Up")
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2) PORT_NAME("P2 Shift Down")
-	PORT_BIT( 0xf0, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_START("SHIFT") /* fake for shifting */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP   ) PORT_2WAY PORT_PLAYER(1) PORT_NAME("P1 Shift Up")
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_2WAY PORT_PLAYER(1) PORT_NAME("P1 Shift Down")
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP   ) PORT_2WAY PORT_PLAYER(2) PORT_NAME("P2 Shift Up")
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_2WAY PORT_PLAYER(2) PORT_NAME("P2 Shift Down")
+	PORT_BIT( 0xf0, IP_ACTIVE_LOW, IPT_UNUSED )
 INPUT_PORTS_END
 
 
 /* verified from wiring diagram, plus DIP switches from manual */
 static INPUT_PORTS_START( rampage )
-	PORT_START("MONO.IP0")	/* J2 1-8 */
+	PORT_START("MONO.IP0")  /* J2 1-8 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x0c, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_TILT )
 	PORT_SERVICE( 0x20, IP_ACTIVE_LOW )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE )
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("MONO.IP1")	/* J2 10-13,15-18 */
+	PORT_START("MONO.IP1")  /* J2 10-13,15-18 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(1)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(1)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(1)
@@ -729,7 +721,7 @@ static INPUT_PORTS_START( rampage )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
 	PORT_BIT( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("MONO.IP2")	/* J3 1-8 */
+	PORT_START("MONO.IP2")  /* J3 1-8 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(2)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(2)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(2)
@@ -763,7 +755,7 @@ static INPUT_PORTS_START( rampage )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-	PORT_START("MONO.IP4")	/* J4 1-7,9 */
+	PORT_START("MONO.IP4")  /* J4 1-7,9 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(3)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(3)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(3)
@@ -771,13 +763,13 @@ static INPUT_PORTS_START( rampage )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(3)
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(3)
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* status from Sounds Good board */
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL )   /* status from Sounds Good board */
 INPUT_PORTS_END
 
 
 /* verified from wiring diagram, plus DIP switches from manual */
 static INPUT_PORTS_START( powerdrv )
-	PORT_START("MONO.IP0")	/* J2 1-8 */
+	PORT_START("MONO.IP0")  /* J2 1-8 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN3 )
@@ -787,7 +779,7 @@ static INPUT_PORTS_START( powerdrv )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("MONO.IP1")	/* J2 10-13,15-18 */
+	PORT_START("MONO.IP1")  /* J2 10-13,15-18 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(1)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_TOGGLE PORT_PLAYER(1)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
@@ -797,13 +789,13 @@ static INPUT_PORTS_START( powerdrv )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
 
-	PORT_START("MONO.IP2")	/* J3 1-8 */
+	PORT_START("MONO.IP2")  /* J3 1-8 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(3)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_TOGGLE PORT_PLAYER(3)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(3)
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(3)
 	PORT_BIT( 0x70, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* status from Sounds Good board */
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL )   /* status from Sounds Good board */
 
 	PORT_START("MONO.IP3")
 	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coinage ) )
@@ -824,24 +816,24 @@ static INPUT_PORTS_START( powerdrv )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-	PORT_START("MONO.IP4")	/* J4 1-7,9 */
+	PORT_START("MONO.IP4")  /* J4 1-7,9 */
 	PORT_BIT( 0xff, IP_ACTIVE_HIGH, IPT_UNUSED )
 INPUT_PORTS_END
 
 
 /* verified from wiring diagram, plus DIP switches from manual */
 static INPUT_PORTS_START( stargrds )
-	PORT_START("MONO.IP0")	/* J2 1-8 */
+	PORT_START("MONO.IP0")  /* J2 1-8 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START2 )
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* status from Sounds Good board */
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_SPECIAL )   /* status from Sounds Good board */
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_TILT )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
 
-	PORT_START("MONO.IP1")	/* J2 10-13,15-18 */
+	PORT_START("MONO.IP1")  /* J2 10-13,15-18 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_UP ) PORT_PLAYER(1)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_DOWN ) PORT_PLAYER(1)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_LEFT ) PORT_PLAYER(1)
@@ -851,7 +843,7 @@ static INPUT_PORTS_START( stargrds )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_LEFT ) PORT_PLAYER(1)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_RIGHT ) PORT_PLAYER(1)
 
-	PORT_START("MONO.IP2")	/* J3 1-8 */
+	PORT_START("MONO.IP2")  /* J3 1-8 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_UP ) PORT_PLAYER(2)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_DOWN ) PORT_PLAYER(2)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_LEFT ) PORT_PLAYER(2)
@@ -878,7 +870,7 @@ static INPUT_PORTS_START( stargrds )
 	PORT_DIPSETTING(    0x40, DEF_STR( Hard ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) )
 
-	PORT_START("MONO.IP4")	/* J4 1-7,9 */
+	PORT_START("MONO.IP4")  /* J4 1-7,9 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_UP ) PORT_PLAYER(3)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_DOWN ) PORT_PLAYER(3)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_LEFT ) PORT_PLAYER(3)
@@ -888,39 +880,39 @@ static INPUT_PORTS_START( stargrds )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_LEFT ) PORT_PLAYER(3)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_RIGHT ) PORT_PLAYER(3)
 
-	PORT_START("MONO.IP0.ALT")	/* IN0 (muxed) */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )		/* same as MONO.IN0 */
+	PORT_START("MONO.IP0.ALT")  /* IN0 (muxed) */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )     /* same as MONO.IN0 */
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN3 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )		/* same as MONO.IN0 */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )     /* same as MONO.IN0 */
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START3 )
-	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_UNUSED )		/* same as MONO.IN0 */
+	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_UNUSED )    /* same as MONO.IN0 */
 INPUT_PORTS_END
 
 
 /* verified from wiring diagram, plus DIP switches from manual */
 static INPUT_PORTS_START( spyhunt )
-	PORT_START("SSIO.IP0")	/* J4 1-8 */
+	PORT_START("ssio:IP0")  /* J4 1-8 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x0c, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON6 ) PORT_NAME("Gear Shift") PORT_CODE(KEYCODE_ENTER) PORT_TOGGLE
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_NAME("Gear Shift") PORT_TOGGLE
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_TILT )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
 
-	PORT_START("SSIO.IP1")	/* J4 10-13,15-18 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_NAME("Oil Slick")
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_NAME("Missiles")
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_NAME("Weapon Truck")
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_NAME("Smoke Screen")
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_NAME("Machine Guns")
-	PORT_BIT( 0x60, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* status from CS deluxe, never read */
+	PORT_START("ssio:IP1")  /* J4 10-13,15-18 */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_NAME("Left Button / Oil Slick")
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_NAME("Left Trigger / Missiles")
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1  ) PORT_NAME("Center Button / Weapons Van")
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_NAME("Right Button / Smoke Screen")
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON6 ) PORT_NAME("Right Trigger / Machine Guns")
+	PORT_BIT( 0x60, IP_ACTIVE_HIGH, IPT_SPECIAL )   /* status from CS deluxe, never read */
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("SSIO.IP2")	/* J5 1-8 */
+	PORT_START("ssio:IP2")  /* J5 1-8 */
 	PORT_BIT( 0xff, 0x30, IPT_PEDAL ) PORT_MINMAX(0x30,0xff) PORT_SENSITIVITY(100) PORT_KEYDELTA(10)
 
-	PORT_START("SSIO.IP3")	/* DIPSW @ B3 */
+	PORT_START("ssio:IP3")  /* DIPSW @ B3 */
 	PORT_DIPNAME( 0x01, 0x01, "Game Timer" )
 	PORT_DIPSETTING(    0x00, "1:00" )
 	PORT_DIPSETTING(    0x01, "1:30" )
@@ -931,20 +923,20 @@ static INPUT_PORTS_START( spyhunt )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0xf0, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("SSIO.IP4")	/* J6 1-8 */
+	PORT_START("ssio:IP4")  /* J6 1-8 */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("SSIO.DIP")
+	PORT_START("ssio:DIP")
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("SSIO.IP2.ALT")
+	PORT_START("ssio:IP2.ALT")
 	PORT_BIT( 0xff, 0x74, IPT_PADDLE ) PORT_MINMAX(0x34,0xb4) PORT_SENSITIVITY(40) PORT_KEYDELTA(10)
 INPUT_PORTS_END
 
 
 /* not verified, no manual found */
 static INPUT_PORTS_START( crater )
-	PORT_START("SSIO.IP0")	/* J4 1-8 */
+	PORT_START("ssio:IP0")  /* J4 1-8 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 )
@@ -954,10 +946,10 @@ static INPUT_PORTS_START( crater )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
 
-	PORT_START("SSIO.IP1")	/* J4 10-13,15-18 */
+	PORT_START("ssio:IP1")  /* J4 10-13,15-18 */
 	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_SENSITIVITY(25) PORT_KEYDELTA(10) PORT_CODE_DEC(KEYCODE_Z) PORT_CODE_INC(KEYCODE_X) PORT_REVERSE
 
-	PORT_START("SSIO.IP2")	/* J5 1-8 */
+	PORT_START("ssio:IP2")  /* J5 1-8 */
 	PORT_BIT( 0x03, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_2WAY
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_2WAY
@@ -966,41 +958,41 @@ static INPUT_PORTS_START( crater )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("SSIO.IP3")	/* DIPSW @ B3 */
+	PORT_START("ssio:IP3")  /* DIPSW @ B3 */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("SSIO.IP4")	/* J6 1-8 */
+	PORT_START("ssio:IP4")  /* J6 1-8 */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("SSIO.DIP")
+	PORT_START("ssio:DIP")
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )
 INPUT_PORTS_END
 
 
 /* not verified, no manual found */
 static INPUT_PORTS_START( turbotag )
-	PORT_START("SSIO.IP0")	/* J4 1-8 */
+	PORT_START("ssio:IP0")  /* J4 1-8 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x0c, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON6 ) PORT_NAME("Gear Shift") PORT_CODE(KEYCODE_ENTER) PORT_TOGGLE
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_NAME("Gear Shift") PORT_TOGGLE
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_TILT )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
 
-	PORT_START("SSIO.IP1")	/* J4 10-13,15-18 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_NAME("Left Button")
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_NAME("Left Trigger")
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_NAME("Center Button")
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_NAME("Right Button")
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_NAME("Right Trigger")
-	PORT_BIT( 0x60, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* status from CS deluxe, never read */
+	PORT_START("ssio:IP1")  /* J4 10-13,15-18 */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_START1  ) PORT_NAME("Left Button / 1 Player")
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_NAME("Left Trigger")
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_NAME("Center Button")
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START2  ) PORT_NAME("Right Button / 2 Player")
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_NAME("Right Trigger")
+	PORT_BIT( 0x60, IP_ACTIVE_HIGH, IPT_SPECIAL )   /* status from CS deluxe, never read */
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("SSIO.IP2")	/* J5 1-8 */
+	PORT_START("ssio:IP2")  /* J5 1-8 */
 	PORT_BIT( 0xff, 0x3c, IPT_PEDAL ) PORT_MINMAX(60,180) PORT_SENSITIVITY(100) PORT_KEYDELTA(10)
 
-	PORT_START("SSIO.IP3")	/* DIPSW @ B3 */
+	PORT_START("ssio:IP3")  /* DIPSW @ B3 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_DIPNAME( 0x02, 0x00, DEF_STR( Demo_Sounds ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
@@ -1009,13 +1001,13 @@ static INPUT_PORTS_START( turbotag )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0xf0, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("SSIO.IP4")	/* J6 1-8 */
+	PORT_START("ssio:IP4")  /* J6 1-8 */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("SSIO.DIP")
+	PORT_START("ssio:DIP")
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("SSIO.IP2.ALT")
+	PORT_START("ssio:IP2.ALT")
 	PORT_BIT( 0xff, 0x60, IPT_PADDLE ) PORT_SENSITIVITY(40) PORT_KEYDELTA(10)
 INPUT_PORTS_END
 
@@ -1029,10 +1021,10 @@ INPUT_PORTS_END
 
 static const UINT32 spyhunt_charlayout_xoffset[64] =
 {
-	   0,  0,  2,  2,  4,  4,  6,  6,  8,  8, 10, 10, 12, 12, 14, 14,
-	  16, 16, 18, 18, 20, 20, 22, 22, 24, 24, 26, 26, 28, 28, 30, 30,
-	  32, 32, 34, 34, 36, 36, 38, 38, 40, 40, 42, 42, 44, 44, 46, 46,
-	  48, 48, 50, 50, 52, 52, 54, 54, 56, 56, 58, 58, 60, 60, 62, 62
+		0,  0,  2,  2,  4,  4,  6,  6,  8,  8, 10, 10, 12, 12, 14, 14,
+		16, 16, 18, 18, 20, 20, 22, 22, 24, 24, 26, 26, 28, 28, 30, 30,
+		32, 32, 34, 34, 36, 36, 38, 38, 40, 40, 42, 42, 44, 44, 46, 46,
+		48, 48, 50, 50, 52, 52, 54, 54, 56, 56, 58, 58, 60, 60, 62, 62
 };
 
 static const gfx_layout spyhunt_charlayout =
@@ -1043,10 +1035,10 @@ static const gfx_layout spyhunt_charlayout =
 	{ RGN_FRAC(1,2), RGN_FRAC(1,2)+1, 0, 1 },
 	EXTENDED_XOFFS,
 	{
-		  0*32,  0*32,  2*32,  2*32,  4*32,  4*32,  6*32,  6*32,
-		  8*32,  8*32, 10*32, 10*32, 12*32, 12*32, 14*32, 14*32,
-		 16*32, 16*32, 18*32, 18*32, 20*32, 20*32, 22*32, 22*32,
-		 24*32, 24*32, 26*32, 26*32, 28*32, 28*32, 30*32, 30*32
+			0*32,  0*32,  2*32,  2*32,  4*32,  4*32,  6*32,  6*32,
+			8*32,  8*32, 10*32, 10*32, 12*32, 12*32, 14*32, 14*32,
+			16*32, 16*32, 18*32, 18*32, 20*32, 20*32, 22*32, 22*32,
+			24*32, 24*32, 26*32, 26*32, 28*32, 28*32, 30*32, 30*32
 	},
 	128*8,
 	spyhunt_charlayout_xoffset,
@@ -1073,7 +1065,7 @@ GFXDECODE_END
 
 
 static GFXDECODE_START( spyhunt )
-	GFXDECODE_ENTRY( "gfx1", 0, spyhunt_charlayout,  1*16, 1 )
+	GFXDECODE_ENTRY( "gfx1", 0, spyhunt_charlayout,  3*16, 1 )
 	GFXDECODE_ENTRY( "gfx2", 0, mcr_sprite_layout,   0*16, 4 )
 	GFXDECODE_ENTRY( "gfx3", 0, spyhunt_alphalayout, 4*16, 1 )
 GFXDECODE_END
@@ -1094,14 +1086,17 @@ static MACHINE_CONFIG_START( mcrmono, mcr3_state )
 	MCFG_CPU_PROGRAM_MAP(mcrmono_map)
 	MCFG_CPU_IO_MAP(mcrmono_portmap)
 	MCFG_CPU_CONFIG(mcr_daisy_chain)
-	MCFG_CPU_VBLANK_INT_HACK(mcr_interrupt,2)
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("scantimer", mcr3_state, mcr_interrupt, "screen", 0, 1)
 
 	MCFG_Z80CTC_ADD("ctc", MASTER_CLOCK/4 /* same as "maincpu" */, mcr_ctc_intf)
 
 	MCFG_WATCHDOG_VBLANK_INIT(16)
-	MCFG_MACHINE_START(mcr)
-	MCFG_MACHINE_RESET(mcr)
+	MCFG_MACHINE_START_OVERRIDE(mcr3_state,mcr)
+	MCFG_MACHINE_RESET_OVERRIDE(mcr3_state,mcr)
 	MCFG_NVRAM_ADD_0FILL("nvram")
+
+	// sound hardware
+	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
 
 	/* video hardware */
 	MCFG_VIDEO_ATTRIBUTES(VIDEO_UPDATE_BEFORE_VBLANK)
@@ -1109,15 +1104,14 @@ static MACHINE_CONFIG_START( mcrmono, mcr3_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(30)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*16, 30*16)
 	MCFG_SCREEN_VISIBLE_AREA(0*16, 32*16-1, 0*16, 30*16-1)
-	MCFG_SCREEN_UPDATE(mcr3)
+	MCFG_SCREEN_UPDATE_DRIVER(mcr3_state, screen_update_mcr3)
 
 	MCFG_GFXDECODE(mcr3)
 	MCFG_PALETTE_LENGTH(64)
 
-	MCFG_VIDEO_START(mcrmono)
+	MCFG_VIDEO_START_OVERRIDE(mcr3_state,mcrmono)
 MACHINE_CONFIG_END
 
 
@@ -1128,7 +1122,9 @@ MACHINE_CONFIG_END
 static MACHINE_CONFIG_DERIVED( mono_tcs, mcrmono )
 
 	/* basic machine hardware */
-	MCFG_FRAGMENT_ADD(turbo_chip_squeak)
+	MCFG_MIDWAY_TURBO_CHIP_SQUEAK_ADD("tcs")
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "lspeaker", 1.0)
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "rspeaker", 1.0)
 MACHINE_CONFIG_END
 
 
@@ -1136,7 +1132,9 @@ MACHINE_CONFIG_END
 static MACHINE_CONFIG_DERIVED( mono_sg, mcrmono )
 
 	/* basic machine hardware */
-	MCFG_FRAGMENT_ADD(sounds_good)
+	MCFG_MIDWAY_SOUNDS_GOOD_ADD("sg")
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "lspeaker", 1.0)
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "rspeaker", 1.0)
 MACHINE_CONFIG_END
 
 
@@ -1147,7 +1145,9 @@ MACHINE_CONFIG_END
 static MACHINE_CONFIG_DERIVED( mcrscroll, mcrmono )
 
 	/* basic machine hardware */
-	MCFG_FRAGMENT_ADD(mcr_ssio)
+	MCFG_MIDWAY_SSIO_ADD("ssio")
+	MCFG_SOUND_ROUTE(0, "lspeaker", 1.0)
+	MCFG_SOUND_ROUTE(1, "rspeaker", 1.0)
 
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_PROGRAM_MAP(spyhunt_map)
@@ -1157,12 +1157,12 @@ static MACHINE_CONFIG_DERIVED( mcrscroll, mcrmono )
 	MCFG_SCREEN_MODIFY("screen")
 	MCFG_SCREEN_SIZE(30*16, 30*16)
 	MCFG_SCREEN_VISIBLE_AREA(0, 30*16-1, 0, 30*16-1)
-	MCFG_SCREEN_UPDATE(spyhunt)
+	MCFG_SCREEN_UPDATE_DRIVER(mcr3_state, screen_update_spyhunt)
 	MCFG_GFXDECODE(spyhunt)
 	MCFG_PALETTE_LENGTH(64+4)
 
-	MCFG_PALETTE_INIT(spyhunt)
-	MCFG_VIDEO_START(spyhunt)
+	MCFG_PALETTE_INIT_OVERRIDE(mcr3_state,spyhunt)
+	MCFG_VIDEO_START_OVERRIDE(mcr3_state,spyhunt)
 MACHINE_CONFIG_END
 
 
@@ -1170,7 +1170,9 @@ MACHINE_CONFIG_END
 static MACHINE_CONFIG_DERIVED( mcrsc_csd, mcrscroll )
 
 	/* basic machine hardware */
-	MCFG_FRAGMENT_ADD(chip_squeak_deluxe_stereo)
+	MCFG_MIDWAY_CHIP_SQUEAK_DELUXE_ADD("csd")
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "lspeaker", 1.0)
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "rspeaker", 1.0)
 MACHINE_CONFIG_END
 
 
@@ -1185,9 +1187,9 @@ ROM_START( demoderm )
 	ROM_REGION( 0x10000, "maincpu", 0 )
 	ROM_LOAD( "pro0.3b",      0x00000, 0x8000, CRC(2e24527b) SHA1(df8d1129b52ca0f4326c7c7e4f10d81b4ced65b5) )
 	ROM_LOAD( "pro1.5b",      0x08000, 0x8000, CRC(034c00fc) SHA1(0f0e8f123a34c330021bce76ed7f38bcb2e9af4e) )
-	ROM_FILL(                 0x0e000, 0x2000, 0xff )	/* upper 8k is not mapped on monoboard */
+	ROM_FILL(                 0x0e000, 0x2000, 0xff )   /* upper 8k is not mapped on monoboard */
 
-	ROM_REGION( 0x10000, "tcscpu", 0 )	/* 64k for the Turbo Cheap Squeak */
+	ROM_REGION( 0x10000, "tcs:cpu", 0 ) /* 64k for the Turbo Cheap Squeak */
 	ROM_LOAD( "tcs_u5.bin",   0x0c000, 0x2000, CRC(eca33b2c) SHA1(938b021ea3b0f23aed7a98a930a58af371a02303) )
 	ROM_LOAD( "tcs_u4.bin",   0x0e000, 0x2000, CRC(3490289a) SHA1(a9d56ea60bb901267da41ab408f8e1ed3742b0ac) )
 
@@ -1211,9 +1213,9 @@ ROM_START( sarge )
 	ROM_REGION( 0x10000, "maincpu", 0 )
 	ROM_LOAD( "cpu_3b.bin",   0x00000, 0x8000, CRC(da31a58f) SHA1(29b97caf61f8f59042519a6b501cd1d15099dd59) )
 	ROM_LOAD( "cpu_5b.bin",   0x08000, 0x8000, CRC(6800e746) SHA1(018c2b622b3654530ebc2c299b3f745777163d4b) )
-	ROM_FILL(                 0x0e000, 0x2000, 0xff )	/* upper 8k is not mapped on monoboard */
+	ROM_FILL(                 0x0e000, 0x2000, 0xff )   /* upper 8k is not mapped on monoboard */
 
-	ROM_REGION( 0x10000, "tcscpu", 0 )  /* 64k for the Turbo Cheap Squeak */
+	ROM_REGION( 0x10000, "tcs:cpu", 0 )  /* 64k for the Turbo Cheap Squeak */
 	ROM_LOAD( "tcs_u5.bin",   0xc000, 0x2000, CRC(a894ef8a) SHA1(7f53927fc185fff8ba1b1747f0d565e089d879e6) )
 	ROM_LOAD( "tcs_u4.bin",   0xe000, 0x2000, CRC(6ca6faf3) SHA1(4647e633dd11f55a65c3acf81adeb3af93624991) )
 
@@ -1227,14 +1229,14 @@ ROM_START( sarge )
 	ROM_LOAD( "spr_5e.bin",   0x10000, 0x8000, CRC(c832375c) SHA1(dfb7782b13e1e959e0ecd5da771cd38962f6952b) )
 	ROM_LOAD( "spr_4e.bin",   0x18000, 0x8000, CRC(c382267d) SHA1(6b459e9ec7948a529b5308357851a0bede085aef) )
 
-    ROM_REGION( 0x0007, "pals", 0) /* PAL's located on the Mono Board (91787) */
-    ROM_LOAD( "a59a26axlcxhd.13j.bin",  0x0000, 0x0001, NO_DUMP ) /* PLS153N */
-    ROM_LOAD( "a59a26axlbxhd.2j.bin",   0x0000, 0x0001, NO_DUMP ) /* PLS153N */
-    ROM_LOAD( "a59a26axlaxhd.3j.bin",   0x0000, 0x0001, NO_DUMP ) /* PLS153N */
-    ROM_LOAD( "0066-314bx-xxqx.6h.bin", 0x0000, 0x0001, NO_DUMP ) /* Unknown PAL Type */
-    ROM_LOAD( "0066-316bx-xxqx.5h.bin", 0x0000, 0x0001, NO_DUMP ) /* Unknown PAL Type */
-    ROM_LOAD( "0066-315bx-xxqx.5g.bin", 0x0000, 0x0001, NO_DUMP ) /* Unknown PAL Type */
-    ROM_LOAD( "0066-313bx-xxqx.4g.bin", 0x0000, 0x0001, NO_DUMP ) /* Unknown PAL Type */
+	ROM_REGION( 0x0007, "pals", 0) /* PAL's located on the Mono Board (91787) */
+	ROM_LOAD( "a59a26axlcxhd.13j.bin",  0x0000, 0x0001, NO_DUMP ) /* PLS153N */
+	ROM_LOAD( "a59a26axlbxhd.2j.bin",   0x0000, 0x0001, NO_DUMP ) /* PLS153N */
+	ROM_LOAD( "a59a26axlaxhd.3j.bin",   0x0000, 0x0001, NO_DUMP ) /* PLS153N */
+	ROM_LOAD( "0066-314bx-xxqx.6h.bin", 0x0000, 0x0001, NO_DUMP ) /* Unknown PAL Type */
+	ROM_LOAD( "0066-316bx-xxqx.5h.bin", 0x0000, 0x0001, NO_DUMP ) /* Unknown PAL Type */
+	ROM_LOAD( "0066-315bx-xxqx.5g.bin", 0x0000, 0x0001, NO_DUMP ) /* Unknown PAL Type */
+	ROM_LOAD( "0066-313bx-xxqx.4g.bin", 0x0000, 0x0001, NO_DUMP ) /* Unknown PAL Type */
 ROM_END
 
 
@@ -1242,9 +1244,9 @@ ROM_START( maxrpm )
 	ROM_REGION( 0x12000, "maincpu", 0 )
 	ROM_LOAD( "pro.0",        0x00000, 0x8000, CRC(3f9ec35f) SHA1(ebdcf480aee5569af631106cc6478adc26c4ac24) )
 	ROM_LOAD( "pro.1",        0x08000, 0x8000, CRC(f628bb30) SHA1(0514906b9764a7f02a730a610affea4d42a4510d) )
-	ROM_FILL(                 0x0e000, 0x2000, 0xff )	/* upper 8k is not mapped on monoboard */
+	ROM_FILL(                 0x0e000, 0x2000, 0xff )   /* upper 8k is not mapped on monoboard */
 
-	ROM_REGION( 0x10000, "tcscpu", 0 )  /* 64k for the Turbo Cheap Squeak */
+	ROM_REGION( 0x10000, "tcs:cpu", 0 )  /* 64k for the Turbo Cheap Squeak */
 	ROM_LOAD( "turbskwk.u5",   0x8000, 0x4000, CRC(55c3b759) SHA1(89d690a007a996e9c7df7b365942e4da755d15d7) )
 	ROM_LOAD( "turbskwk.u4",   0xc000, 0x4000, CRC(31a2da2e) SHA1(582434b5d6bc8e84f39191976d8aa0ef9245f253) )
 
@@ -1262,25 +1264,28 @@ ROM_END
 
 ROM_START( rampage )
 	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD( "pro0rev3.3b",  0x00000, 0x8000, CRC(2f7ca03c) SHA1(1e3a1f213fd67938adf14ea0d04dab687ea8f4ef) )
-	ROM_LOAD( "pro1rev3.5b",  0x08000, 0x8000, CRC(d89bd9a4) SHA1(3531464ffe49dfaf2755d9e2dc1aea23819b3a5d) )
-	ROM_FILL(                 0x0e000, 0x2000, 0xff )	/* upper 8k is not mapped on monoboard */
+	ROM_LOAD( "pro-0_3b_rev_3_8-27-86.3b", 0x00000, 0x8000, CRC(2f7ca03c) SHA1(1e3a1f213fd67938adf14ea0d04dab687ea8f4ef) )
+	ROM_LOAD( "pro-1_5b_rev_3_8-27-86.5b", 0x08000, 0x8000, CRC(d89bd9a4) SHA1(3531464ffe49dfaf2755d9e2dc1aea23819b3a5d) )
+	ROM_FILL(                              0x0e000, 0x2000, 0xff )  /* upper 8k is not mapped on monoboard */
 
-	ROM_REGION( 0x40000, "sgcpu", 0 )  /* 256k for the Sounds Good board */
-	ROM_LOAD16_BYTE( "ramp_u7.snd",  0x00000, 0x8000, CRC(cffd7fa5) SHA1(7c5cecce1d428f847fea37d53eb09c6f62055c6f) )	/* these are Revision 2 sound ROMs */
-	ROM_LOAD16_BYTE( "ramp_u17.snd", 0x00001, 0x8000, CRC(e92c596b) SHA1(4e2d87398f2e7b637cbad6cb16d832dfa8f8288c) )
-	ROM_LOAD16_BYTE( "ramp_u8.snd",  0x10000, 0x8000, CRC(11f787e4) SHA1(1fa195bf9169608099d17be5801738a4e17bec3d) )
-	ROM_LOAD16_BYTE( "ramp_u18.snd", 0x10001, 0x8000, CRC(6b8bf5e1) SHA1(aa8c0260dcd19a795bfc23197cd87348a685d20b) )
+	ROM_REGION( 0x40000, "sg:cpu", 0 )  /* 256k for the Sounds Good board */
+	ROM_LOAD16_BYTE( "u-7_rev.2_8-14-86.u7",   0x00000, 0x8000, CRC(cffd7fa5) SHA1(7c5cecce1d428f847fea37d53eb09c6f62055c6f) )  /* these are Revision 2 sound ROMs */
+	ROM_LOAD16_BYTE( "u-17_rev.2_8-14-86.u17", 0x00001, 0x8000, CRC(e92c596b) SHA1(4e2d87398f2e7b637cbad6cb16d832dfa8f8288c) )
+	ROM_LOAD16_BYTE( "u-8_rev.2_8-14-86.u8",   0x10000, 0x8000, CRC(11f787e4) SHA1(1fa195bf9169608099d17be5801738a4e17bec3d) )
+	ROM_LOAD16_BYTE( "u-18_rev.2_8-14-86.u18", 0x10001, 0x8000, CRC(6b8bf5e1) SHA1(aa8c0260dcd19a795bfc23197cd87348a685d20b) )
 
 	ROM_REGION( 0x08000, "gfx1", ROMREGION_INVERT )
-	ROM_LOAD( "bg-0",         0x00000, 0x04000, CRC(c0d8b7a5) SHA1(692219388a3124fb48db7e35c4127b0fe066a289) )
-	ROM_LOAD( "bg-1",         0x04000, 0x04000, CRC(2f6e3aa1) SHA1(ae86ce90bb6bf660e38c0f91e7ce90d44be82d60) )
+	ROM_LOAD( "bg-0_u15_7-23-86.15a", 0x00000, 0x04000, CRC(c0d8b7a5) SHA1(692219388a3124fb48db7e35c4127b0fe066a289) )
+	ROM_LOAD( "bg-1_u14_7-23-86.14b", 0x04000, 0x04000, CRC(2f6e3aa1) SHA1(ae86ce90bb6bf660e38c0f91e7ce90d44be82d60) )
 
 	ROM_REGION( 0x40000, "gfx2", 0 )
-	ROM_LOAD( "fg-0",         0x00000, 0x10000, CRC(0974be5d) SHA1(be347faaa345383dc6e5c2b3789c372d6bd25905) )
-	ROM_LOAD( "fg-1",         0x10000, 0x10000, CRC(8728532b) SHA1(327df92db7e3506b827d497859980cd2de51f45d) )
-	ROM_LOAD( "fg-2",         0x20000, 0x10000, CRC(9489f714) SHA1(df17a45cdc6a9310856d64f89954be79bbeac12e) )
-	ROM_LOAD( "fg-3",         0x30000, 0x10000, CRC(81e1de40) SHA1(7e7818792845ec3687b3202eeade60a298ef513e) )
+	ROM_LOAD( "fg-0_8-e_6-30-86.8e",  0x00000, 0x10000, CRC(0974be5d) SHA1(be347faaa345383dc6e5c2b3789c372d6bd25905) )
+	ROM_LOAD( "fg-1_6e_6-30-86.6e",   0x10000, 0x10000, CRC(8728532b) SHA1(327df92db7e3506b827d497859980cd2de51f45d) )
+	ROM_LOAD( "fg-2_5e_6-30-86.5e",   0x20000, 0x10000, CRC(9489f714) SHA1(df17a45cdc6a9310856d64f89954be79bbeac12e) )
+	ROM_LOAD( "fg-3_4e_6-30-86.4e",   0x30000, 0x10000, CRC(81e1de40) SHA1(7e7818792845ec3687b3202eeade60a298ef513e) )
+
+	ROM_REGION( 0x0001, "sg:pal", 0 ) /* Sounds Good board pal */
+	ROM_LOAD( "e36a31axnaxqd.u15.bin", 0x0000, 0x0001, NO_DUMP) /* PAL20L10CNS */
 ROM_END
 
 
@@ -1288,23 +1293,26 @@ ROM_START( rampage2 )
 	ROM_REGION( 0x10000, "maincpu", 0 )
 	ROM_LOAD( "pro0rev2.3b",  0x00000, 0x8000, CRC(3f1d0293) SHA1(d68f04b9b3fc377b9e57b823db4e7f9cfedbcf99) )
 	ROM_LOAD( "pro1rev2.5b",  0x08000, 0x8000, CRC(58523d75) SHA1(5cd512864568ec7793bda0164f21e7d72a7ea817) )
-	ROM_FILL(                 0x0e000, 0x2000, 0xff )	/* upper 8k is not mapped on monoboard */
+	ROM_FILL(                 0x0e000, 0x2000, 0xff )   /* upper 8k is not mapped on monoboard */
 
-	ROM_REGION( 0x40000, "sgcpu", 0 )  /* 256k for the Sounds Good board */
-	ROM_LOAD16_BYTE( "ramp_u7.snd",  0x00000, 0x8000, CRC(cffd7fa5) SHA1(7c5cecce1d428f847fea37d53eb09c6f62055c6f) )    /* these are Revision 2 sound ROMs */
-	ROM_LOAD16_BYTE( "ramp_u17.snd", 0x00001, 0x8000, CRC(e92c596b) SHA1(4e2d87398f2e7b637cbad6cb16d832dfa8f8288c) )
-	ROM_LOAD16_BYTE( "ramp_u8.snd",  0x10000, 0x8000, CRC(11f787e4) SHA1(1fa195bf9169608099d17be5801738a4e17bec3d) )
-	ROM_LOAD16_BYTE( "ramp_u18.snd", 0x10001, 0x8000, CRC(6b8bf5e1) SHA1(aa8c0260dcd19a795bfc23197cd87348a685d20b) )
+	ROM_REGION( 0x40000, "sg:cpu", 0 )  /* 256k for the Sounds Good board */
+	ROM_LOAD16_BYTE( "u-7_rev.2_8-14-86.u7",   0x00000, 0x8000, CRC(cffd7fa5) SHA1(7c5cecce1d428f847fea37d53eb09c6f62055c6f) )  /* these are Revision 2 sound ROMs */
+	ROM_LOAD16_BYTE( "u-17_rev.2_8-14-86.u17", 0x00001, 0x8000, CRC(e92c596b) SHA1(4e2d87398f2e7b637cbad6cb16d832dfa8f8288c) )
+	ROM_LOAD16_BYTE( "u-8_rev.2_8-14-86.u8",   0x10000, 0x8000, CRC(11f787e4) SHA1(1fa195bf9169608099d17be5801738a4e17bec3d) )
+	ROM_LOAD16_BYTE( "u-18_rev.2_8-14-86.u18", 0x10001, 0x8000, CRC(6b8bf5e1) SHA1(aa8c0260dcd19a795bfc23197cd87348a685d20b) )
 
 	ROM_REGION( 0x08000, "gfx1", ROMREGION_INVERT )
-	ROM_LOAD( "bg-0",         0x00000, 0x04000, CRC(c0d8b7a5) SHA1(692219388a3124fb48db7e35c4127b0fe066a289) )
-	ROM_LOAD( "bg-1",         0x04000, 0x04000, CRC(2f6e3aa1) SHA1(ae86ce90bb6bf660e38c0f91e7ce90d44be82d60) )
+	ROM_LOAD( "bg-0.15a",     0x00000, 0x04000, CRC(c0d8b7a5) SHA1(692219388a3124fb48db7e35c4127b0fe066a289) )
+	ROM_LOAD( "bg-1.14b",     0x04000, 0x04000, CRC(2f6e3aa1) SHA1(ae86ce90bb6bf660e38c0f91e7ce90d44be82d60) )
 
 	ROM_REGION( 0x40000, "gfx2", 0 )
-	ROM_LOAD( "fg-0",         0x00000, 0x10000, CRC(0974be5d) SHA1(be347faaa345383dc6e5c2b3789c372d6bd25905) )
-	ROM_LOAD( "fg-1",         0x10000, 0x10000, CRC(8728532b) SHA1(327df92db7e3506b827d497859980cd2de51f45d) )
-	ROM_LOAD( "fg-2",         0x20000, 0x10000, CRC(9489f714) SHA1(df17a45cdc6a9310856d64f89954be79bbeac12e) )
-	ROM_LOAD( "fg-3",         0x30000, 0x10000, CRC(81e1de40) SHA1(7e7818792845ec3687b3202eeade60a298ef513e) )
+	ROM_LOAD( "fg-0.8e",      0x00000, 0x10000, CRC(0974be5d) SHA1(be347faaa345383dc6e5c2b3789c372d6bd25905) )
+	ROM_LOAD( "fg-1.6e",      0x10000, 0x10000, CRC(8728532b) SHA1(327df92db7e3506b827d497859980cd2de51f45d) )
+	ROM_LOAD( "fg-2.5e",      0x20000, 0x10000, CRC(9489f714) SHA1(df17a45cdc6a9310856d64f89954be79bbeac12e) )
+	ROM_LOAD( "fg-3.4e",      0x30000, 0x10000, CRC(81e1de40) SHA1(7e7818792845ec3687b3202eeade60a298ef513e) )
+
+	ROM_REGION( 0x0001, "sg:pal", 0 ) /* Sounds Good board pal */
+	ROM_LOAD( "e36a31axnaxqd.u15.bin", 0x0000, 0x0001, NO_DUMP) /* PAL20L10CNS */
 ROM_END
 
 
@@ -1312,9 +1320,9 @@ ROM_START( powerdrv )
 	ROM_REGION( 0x10000, "maincpu", 0 )
 	ROM_LOAD( "pdrv3b.bin",   0x00000, 0x8000, CRC(d870b704) SHA1(300d6ff3c92a45f5c4f28c171280174924aecb6c) )
 	ROM_LOAD( "pdrv5b.bin",   0x08000, 0x8000, CRC(fa0544ad) SHA1(55a9cf8c8648761443e4a5a3b214f4d6236cbaff) )
-	ROM_FILL(                 0x0e000, 0x2000, 0xff )	/* upper 8k is not mapped on monoboard */
+	ROM_FILL(                 0x0e000, 0x2000, 0xff )   /* upper 8k is not mapped on monoboard */
 
-	ROM_REGION( 0x40000, "sgcpu", 0 )  /* 256k for the Sounds Good board */
+	ROM_REGION( 0x40000, "sg:cpu", 0 )  /* 256k for the Sounds Good board */
 	ROM_LOAD16_BYTE( "pdsndu7.bin",  0x00000, 0x8000, CRC(78713e78) SHA1(11382c024536f743e051ba208ae02d0f5e07cf5e) )
 	ROM_LOAD16_BYTE( "pdsndu17.bin", 0x00001, 0x8000, CRC(c41de6e4) SHA1(0391afd96ee80dd1d4a34e661e5df1e01fbbd57a) )
 	ROM_LOAD16_BYTE( "pdsndu8.bin",  0x10000, 0x8000, CRC(15714036) SHA1(77ca5f703eb7f146e13d9c01f4427f6aaa31df39) )
@@ -1336,9 +1344,9 @@ ROM_START( stargrds )
 	ROM_REGION( 0x10000, "maincpu", 0 )
 	ROM_LOAD( "pro-0.3b",  0x00000, 0x8000, CRC(3ad94aa2) SHA1(1e17ac70fddee1f3d0dd71172e15a7a256168a70) )
 	ROM_LOAD( "pro-1.5b",  0x08000, 0x8000, CRC(dba428b0) SHA1(72efa2f02e95f05a5503ced136fbdf3fcdf57554) )
-	ROM_FILL(              0x0e000, 0x2000, 0xff )	/* upper 8k is not mapped on monoboard */
+	ROM_FILL(              0x0e000, 0x2000, 0xff )  /* upper 8k is not mapped on monoboard */
 
-	ROM_REGION( 0x40000, "sgcpu", 0 )  /* 256k for the Sounds Good board */
+	ROM_REGION( 0x40000, "sg:cpu", 0 )  /* 256k for the Sounds Good board */
 	ROM_LOAD16_BYTE( "snd0.u7",      0x00000, 0x8000, CRC(7755a493) SHA1(a888fba45a2a31de5b3082bfc5ccef94dafc4d16) )
 	ROM_LOAD16_BYTE( "snd1.u17",     0x00001, 0x8000, CRC(d98d14ae) SHA1(51dbb97655ab8a389ca67f0e796ab57894f5bb32) )
 
@@ -1363,11 +1371,11 @@ ROM_START( spyhunt )
 	ROM_LOAD( "cpu_pg4.10d",  0x8000, 0x2000, CRC(a3033c15) SHA1(e9811450a7c952561912777d679fe45a6b5a794a) )
 	ROM_LOAD( "cpu_pg5.11d",  0xa000, 0x4000, CRC(53a4f7cd) SHA1(051b07ae993e14b329507710c0f7cadaa952f9ae) )
 
-	ROM_REGION( 0x10000, "ssiocpu", 0 )
+	ROM_REGION( 0x10000, "ssio:cpu", 0 )
 	ROM_LOAD( "snd_0sd.a8",   0x0000, 0x1000, CRC(c95cf31e) SHA1(d1b0e299a27e306ddbc0654fd3a9d981c92afe8c) )
 	ROM_LOAD( "snd_1sd.a7",   0x1000, 0x1000, CRC(12aaa48e) SHA1(c6b835fc45e4484a4d52b682ce015caa242c8b4f) )
 
-	ROM_REGION( 0x8000, "csdcpu", 0 )  /* 32k for the Chip Squeak Deluxe */
+	ROM_REGION( 0x8000, "csd:cpu", 0 )  /* 32k for the Chip Squeak Deluxe */
 	ROM_LOAD16_BYTE( "csd_u7a.u7",   0x00000, 0x2000, CRC(6e689fe7) SHA1(38ad2e9f12b9d389fb2568ebcb32c8bd1ac6879e) )
 	ROM_LOAD16_BYTE( "csd_u17b.u17", 0x00001, 0x2000, CRC(0d9ddce6) SHA1(d955c0e67fc78b517cc229601ab4023cc5a644c2) )
 	ROM_LOAD16_BYTE( "csd_u8c.u8",   0x04000, 0x2000, CRC(35563cd0) SHA1(5708d374dd56758194c95118f096ea51bf12bf64) )
@@ -1391,9 +1399,6 @@ ROM_START( spyhunt )
 
 	ROM_REGION( 0x01000, "gfx3", 0 )
 	ROM_LOAD( "cpu_alph.10g", 0x00000, 0x1000, CRC(936dc87f) SHA1(cdf73bea82481fbc300ec5a1fbbe8d662007c56b) )
-
-	ROM_REGION( 0x0020, "proms", 0 )
-	ROM_LOAD( "82s123.12d",   0x0000, 0x0020, CRC(e1281ee9) SHA1(9ac9b01d24affc0ee9227a4364c4fd8f8290343a) )	/* from shollow, assuming it's the same */
 ROM_END
 
 
@@ -1406,11 +1411,11 @@ ROM_START( spyhuntp )
 	ROM_LOAD( "sh_mb_6.bin",  0x8000, 0x2000, CRC(8cbf04d8) SHA1(e45cb36935367e46ea41de0177b3453cd8bdce85) )
 	ROM_LOAD( "cpu_pg5.11d",  0xa000, 0x4000, CRC(53a4f7cd) SHA1(051b07ae993e14b329507710c0f7cadaa952f9ae) )
 
-	ROM_REGION( 0x10000, "ssiocpu", 0 )
+	ROM_REGION( 0x10000, "ssio:cpu", 0 )
 	ROM_LOAD( "snd_0sd.a8",   0x0000, 0x1000, CRC(c95cf31e) SHA1(d1b0e299a27e306ddbc0654fd3a9d981c92afe8c) )
 	ROM_LOAD( "snd_1sd.a7",   0x1000, 0x1000, CRC(12aaa48e) SHA1(c6b835fc45e4484a4d52b682ce015caa242c8b4f) )
 
-	ROM_REGION( 0x8000, "csdcpu", 0 )  /* 32k for the Chip Squeak Deluxe */
+	ROM_REGION( 0x8000, "csd:cpu", 0 )  /* 32k for the Chip Squeak Deluxe */
 	ROM_LOAD16_BYTE( "csd_u7a.u7",   0x00000, 0x2000, CRC(6e689fe7) SHA1(38ad2e9f12b9d389fb2568ebcb32c8bd1ac6879e) )
 	ROM_LOAD16_BYTE( "csd_u17b.u17", 0x00001, 0x2000, CRC(0d9ddce6) SHA1(d955c0e67fc78b517cc229601ab4023cc5a644c2) )
 	ROM_LOAD16_BYTE( "csd_u8c.u8",   0x04000, 0x2000, CRC(35563cd0) SHA1(5708d374dd56758194c95118f096ea51bf12bf64) )
@@ -1434,9 +1439,6 @@ ROM_START( spyhuntp )
 
 	ROM_REGION( 0x01000, "gfx3", 0 )
 	ROM_LOAD( "sh_mb_1.bin",  0x00000, 0x0800, CRC(5c74c9f0) SHA1(e42789d14e5510d1dcf4a30f6bd40a40ab46f7f3) )
-
-	ROM_REGION( 0x0020, "proms", 0 )
-	ROM_LOAD( "82s123.12d",   0x0000, 0x0020, CRC(e1281ee9) SHA1(9ac9b01d24affc0ee9227a4364c4fd8f8290343a) )	/* from shollow, assuming it's the same */
 ROM_END
 
 
@@ -1448,7 +1450,7 @@ ROM_START( crater )
 	ROM_LOAD( "crcpu.9d",     0x6000, 0x2000, CRC(a03c4b11) SHA1(6a442a0828942dc51dbe0d3f19be855a52c12f39) )
 	ROM_LOAD( "crcpu.10d",    0x8000, 0x2000, CRC(44ae4cbd) SHA1(2188bf697f1b3fcbb2ad6cbd4d9098e3b8d56a95) )
 
-	ROM_REGION( 0x10000, "ssiocpu", 0 )
+	ROM_REGION( 0x10000, "ssio:cpu", 0 )
 	ROM_LOAD( "crsnd4.a7",    0x0000, 0x1000, CRC(fd666cb5) SHA1(257174266e264db8ac9af5f2296fd0a22847f85f) )
 	ROM_LOAD( "crsnd1.a8",    0x1000, 0x1000, CRC(90bf2c4c) SHA1(7adfbf2251b5d46043d614554320e2fe544cc570) )
 	ROM_LOAD( "crsnd2.a9",    0x2000, 0x1000, CRC(3b8deef1) SHA1(a14186a33a7b5ca07086ce44fb1c8c64900654d0) )
@@ -1472,9 +1474,6 @@ ROM_START( crater )
 
 	ROM_REGION( 0x01000, "gfx3", 0 )
 	ROM_LOAD( "crcpu.10g",    0x00000, 0x1000, CRC(6fe53c8d) SHA1(ceb04916af42d58f3173e5986756a0db8be11999) )
-
-	ROM_REGION( 0x0020, "proms", 0 )
-	ROM_LOAD( "82s123.12d",   0x0000, 0x0020, CRC(e1281ee9) SHA1(9ac9b01d24affc0ee9227a4364c4fd8f8290343a) )	/* from shollow, assuming it's the same */
 ROM_END
 
 
@@ -1488,9 +1487,9 @@ ROM_START( turbotag )
 	ROM_LOAD( "ttprog5.bin",  0xa000, 0x2000, CRC(11e62fe4) SHA1(72897702c61486b654e4b4a3f6560c144c862e1f) )
 	ROM_RELOAD(               0xc000, 0x2000 )
 
-	ROM_REGION( 0x10000, "ssiocpu", ROMREGION_ERASE00 )
+	ROM_REGION( 0x10000, "ssio:cpu", ROMREGION_ERASE00 )
 
-	ROM_REGION( 0x8000, "csdcpu", 0 )  /* 32k for the Chip Squeak Deluxe */
+	ROM_REGION( 0x8000, "csd:cpu", 0 )  /* 32k for the Chip Squeak Deluxe */
 	ROM_LOAD16_BYTE( "ttu7.bin",  0x00000, 0x2000, CRC(8ebb3302) SHA1(c516abdae6eea524a6d2a039ed9bd7dff72ab986) )
 	ROM_LOAD16_BYTE( "ttu17.bin", 0x00001, 0x2000, CRC(605d6c74) SHA1(a6c2bc95cca372fa823ab256c9dd1f92b6ba45fd) )
 	ROM_LOAD16_BYTE( "ttu8.bin",  0x04000, 0x2000, CRC(6bfcb22a) SHA1(7b895e3ae1e99f195bb32b052f801b58c63a401c) )
@@ -1514,9 +1513,6 @@ ROM_START( turbotag )
 
 	ROM_REGION( 0x01000, "gfx3", 0 )
 	ROM_LOAD( "ttan.bin",     0x00000, 0x1000, CRC(aa0b1471) SHA1(e3dd69f1a14926c6b709d6b19d9e90a1f0867465) )
-
-	ROM_REGION( 0x0020, "proms", 0 )
-	ROM_LOAD( "82s123.12d",   0x0000, 0x0020, CRC(e1281ee9) SHA1(9ac9b01d24affc0ee9227a4364c4fd8f8290343a) )	/* from shollow, assuming it's the same */
 ROM_END
 
 
@@ -1527,10 +1523,9 @@ ROM_END
  *
  *************************************/
 
-static void mcr_common_init(running_machine &machine, int sound_board)
+static void mcr_common_init(running_machine &machine)
 {
 	mcr3_state *state = machine.driver_data<mcr3_state>();
-	mcr_sound_init(machine, sound_board);
 
 	state_save_register_global(machine, state->m_input_mux);
 	state_save_register_global(machine, state->m_latched_input);
@@ -1538,104 +1533,100 @@ static void mcr_common_init(running_machine &machine, int sound_board)
 }
 
 
-static DRIVER_INIT( demoderm )
+DRIVER_INIT_MEMBER(mcr3_state,demoderm)
 {
-	mcr_common_init(machine, MCR_TURBO_CHIP_SQUEAK);
-	machine.device("maincpu")->memory().space(AS_IO)->install_legacy_read_handler(0x01, 0x01, FUNC(demoderm_ip1_r));
-	machine.device("maincpu")->memory().space(AS_IO)->install_legacy_read_handler(0x02, 0x02, FUNC(demoderm_ip2_r));
-	machine.device("maincpu")->memory().space(AS_IO)->install_legacy_write_handler(0x06, 0x06, FUNC(demoderm_op6_w));
+	mcr_common_init(machine());
+	machine().device("maincpu")->memory().space(AS_IO).install_read_handler(0x01, 0x01, read8_delegate(FUNC(mcr3_state::demoderm_ip1_r),this));
+	machine().device("maincpu")->memory().space(AS_IO).install_read_handler(0x02, 0x02, read8_delegate(FUNC(mcr3_state::demoderm_ip2_r),this));
+	machine().device("maincpu")->memory().space(AS_IO).install_write_handler(0x06, 0x06, write8_delegate(FUNC(mcr3_state::demoderm_op6_w),this));
 }
 
 
-static DRIVER_INIT( sarge )
+DRIVER_INIT_MEMBER(mcr3_state,sarge)
 {
-	mcr_common_init(machine, MCR_TURBO_CHIP_SQUEAK);
-	machine.device("maincpu")->memory().space(AS_IO)->install_legacy_write_handler(0x06, 0x06, FUNC(turbocs_data_w));
+	mcr_common_init(machine());
+	machine().device("maincpu")->memory().space(AS_IO).install_write_handler(0x06, 0x06, write8_delegate(FUNC(midway_turbo_chip_squeak_device::write),m_turbo_chip_squeak.target()));
 }
 
 
-static DRIVER_INIT( maxrpm )
+DRIVER_INIT_MEMBER(mcr3_state,maxrpm)
 {
-	mcr3_state *state = machine.driver_data<mcr3_state>();
-	mcr_common_init(machine, MCR_TURBO_CHIP_SQUEAK);
-	machine.device("maincpu")->memory().space(AS_IO)->install_legacy_read_handler(0x01, 0x01, FUNC(maxrpm_ip1_r));
-	machine.device("maincpu")->memory().space(AS_IO)->install_legacy_read_handler(0x02, 0x02, FUNC(maxrpm_ip2_r));
-	machine.device("maincpu")->memory().space(AS_IO)->install_legacy_write_handler(0x05, 0x05, FUNC(maxrpm_op5_w));
-	machine.device("maincpu")->memory().space(AS_IO)->install_legacy_write_handler(0x06, 0x06, FUNC(maxrpm_op6_w));
+	mcr_common_init(machine());
+	machine().device("maincpu")->memory().space(AS_IO).install_read_handler(0x01, 0x01, read8_delegate(FUNC(mcr3_state::maxrpm_ip1_r),this));
+	machine().device("maincpu")->memory().space(AS_IO).install_read_handler(0x02, 0x02, read8_delegate(FUNC(mcr3_state::maxrpm_ip2_r),this));
+	machine().device("maincpu")->memory().space(AS_IO).install_write_handler(0x05, 0x05, write8_delegate(FUNC(mcr3_state::maxrpm_op5_w),this));
+	machine().device("maincpu")->memory().space(AS_IO).install_write_handler(0x06, 0x06, write8_delegate(FUNC(mcr3_state::maxrpm_op6_w),this));
 
-	state_save_register_global(machine, state->m_maxrpm_adc_control);
-	state_save_register_global(machine, state->m_maxrpm_adc_select);
-	state_save_register_global(machine, state->m_maxrpm_last_shift);
-	state_save_register_global(machine, state->m_maxrpm_p1_shift);
-	state_save_register_global(machine, state->m_maxrpm_p2_shift);
+	state_save_register_global(machine(), m_maxrpm_adc_control);
+	state_save_register_global(machine(), m_maxrpm_adc_select);
+	state_save_register_global(machine(), m_maxrpm_last_shift);
+	state_save_register_global(machine(), m_maxrpm_p1_shift);
+	state_save_register_global(machine(), m_maxrpm_p2_shift);
 }
 
 
-static DRIVER_INIT( rampage )
+DRIVER_INIT_MEMBER(mcr3_state,rampage)
 {
-	mcr_common_init(machine, MCR_SOUNDS_GOOD);
-	machine.device("maincpu")->memory().space(AS_IO)->install_legacy_read_handler(0x04, 0x04, FUNC(rampage_ip4_r));
-	machine.device("maincpu")->memory().space(AS_IO)->install_legacy_write_handler(0x06, 0x06, FUNC(rampage_op6_w));
+	mcr_common_init(machine());
+	machine().device("maincpu")->memory().space(AS_IO).install_read_handler(0x04, 0x04, read8_delegate(FUNC(mcr3_state::rampage_ip4_r),this));
+	machine().device("maincpu")->memory().space(AS_IO).install_write_handler(0x06, 0x06, write8_delegate(FUNC(mcr3_state::rampage_op6_w),this));
 }
 
 
-static DRIVER_INIT( powerdrv )
+DRIVER_INIT_MEMBER(mcr3_state,powerdrv)
 {
-	mcr_common_init(machine, MCR_SOUNDS_GOOD);
-	machine.device("maincpu")->memory().space(AS_IO)->install_legacy_read_handler(0x02, 0x02, FUNC(powerdrv_ip2_r));
-	machine.device("maincpu")->memory().space(AS_IO)->install_legacy_write_handler(0x05, 0x05, FUNC(powerdrv_op5_w));
-	machine.device("maincpu")->memory().space(AS_IO)->install_legacy_write_handler(0x06, 0x06, FUNC(powerdrv_op6_w));
+	mcr_common_init(machine());
+	machine().device("maincpu")->memory().space(AS_IO).install_read_handler(0x02, 0x02, read8_delegate(FUNC(mcr3_state::powerdrv_ip2_r),this));
+	machine().device("maincpu")->memory().space(AS_IO).install_write_handler(0x05, 0x05, write8_delegate(FUNC(mcr3_state::powerdrv_op5_w),this));
+	machine().device("maincpu")->memory().space(AS_IO).install_write_handler(0x06, 0x06, write8_delegate(FUNC(mcr3_state::powerdrv_op6_w),this));
 }
 
 
-static DRIVER_INIT( stargrds )
+DRIVER_INIT_MEMBER(mcr3_state,stargrds)
 {
-	mcr_common_init(machine, MCR_SOUNDS_GOOD);
-	machine.device("maincpu")->memory().space(AS_IO)->install_legacy_read_handler(0x00, 0x00, FUNC(stargrds_ip0_r));
-	machine.device("maincpu")->memory().space(AS_IO)->install_legacy_write_handler(0x05, 0x05, FUNC(stargrds_op5_w));
-	machine.device("maincpu")->memory().space(AS_IO)->install_legacy_write_handler(0x06, 0x06, FUNC(stargrds_op6_w));
+	mcr_common_init(machine());
+	machine().device("maincpu")->memory().space(AS_IO).install_read_handler(0x00, 0x00, read8_delegate(FUNC(mcr3_state::stargrds_ip0_r),this));
+	machine().device("maincpu")->memory().space(AS_IO).install_write_handler(0x05, 0x05, write8_delegate(FUNC(mcr3_state::stargrds_op5_w),this));
+	machine().device("maincpu")->memory().space(AS_IO).install_write_handler(0x06, 0x06, write8_delegate(FUNC(mcr3_state::stargrds_op6_w),this));
 }
 
 
-static DRIVER_INIT( spyhunt )
+DRIVER_INIT_MEMBER(mcr3_state,spyhunt)
 {
-	mcr3_state *state = machine.driver_data<mcr3_state>();
-	mcr_common_init(machine, MCR_SSIO | MCR_CHIP_SQUEAK_DELUXE);
-	ssio_set_custom_input(1, 0x60, spyhunt_ip1_r);
-	ssio_set_custom_input(2, 0xff, spyhunt_ip2_r);
-	ssio_set_custom_output(4, 0xff, spyhunt_op4_w);
+	mcr_common_init(machine());
+	machine().device<midway_ssio_device>("ssio")->set_custom_input(1, 0x60, read8_delegate(FUNC(mcr3_state::spyhunt_ip1_r),this));
+	machine().device<midway_ssio_device>("ssio")->set_custom_input(2, 0xff, read8_delegate(FUNC(mcr3_state::spyhunt_ip2_r),this));
+	machine().device<midway_ssio_device>("ssio")->set_custom_output(4, 0xff, write8_delegate(FUNC(mcr3_state::spyhunt_op4_w),this));
 
-	state->m_spyhunt_sprite_color_mask = 0x00;
-	state->m_spyhunt_scroll_offset = 16;
+	m_spyhunt_sprite_color_mask = 0x00;
+	m_spyhunt_scroll_offset = 16;
 }
 
 
-static DRIVER_INIT( crater )
+DRIVER_INIT_MEMBER(mcr3_state,crater)
 {
-	mcr3_state *state = machine.driver_data<mcr3_state>();
-	mcr_common_init(machine, MCR_SSIO);
+	mcr_common_init(machine());
 
-	state->m_spyhunt_sprite_color_mask = 0x03;
-	state->m_spyhunt_scroll_offset = 96;
+	m_spyhunt_sprite_color_mask = 0x03;
+	m_spyhunt_scroll_offset = 96;
 }
 
 
-static DRIVER_INIT( turbotag )
+DRIVER_INIT_MEMBER(mcr3_state,turbotag)
 {
-	mcr3_state *state = machine.driver_data<mcr3_state>();
-	mcr_common_init(machine, MCR_SSIO | MCR_CHIP_SQUEAK_DELUXE);
-	ssio_set_custom_input(1, 0x60, spyhunt_ip1_r);
-	ssio_set_custom_input(2, 0xff, turbotag_ip2_r);
-	ssio_set_custom_output(4, 0xff, spyhunt_op4_w);
+	mcr_common_init(machine());
+	machine().device<midway_ssio_device>("ssio")->set_custom_input(1, 0x60, read8_delegate(FUNC(mcr3_state::spyhunt_ip1_r),this));
+	machine().device<midway_ssio_device>("ssio")->set_custom_input(2, 0xff, read8_delegate(FUNC(mcr3_state::turbotag_ip2_r),this));
+	machine().device<midway_ssio_device>("ssio")->set_custom_output(4, 0xff, write8_delegate(FUNC(mcr3_state::spyhunt_op4_w),this));
 
-	state->m_spyhunt_sprite_color_mask = 0x00;
-	state->m_spyhunt_scroll_offset = 88;
+	m_spyhunt_sprite_color_mask = 0x00;
+	m_spyhunt_scroll_offset = 88;
 
 	/* the SSIO Z80 doesn't have any program to execute */
-	machine.device<cpu_device>("csdcpu")->suspend(SUSPEND_REASON_DISABLE, 1);
+	machine().device<cpu_device>("csd:cpu")->suspend(SUSPEND_REASON_DISABLE, 1);
 
 	/* kludge for bad ROM read */
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x0b53, 0x0b53, FUNC(turbotag_kludge_r));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(0x0b53, 0x0b53, read8_delegate(FUNC(mcr3_state::turbotag_kludge_r),this));
 }
 
 
@@ -1647,16 +1638,16 @@ static DRIVER_INIT( turbotag )
  *************************************/
 
 /* MCR monoboard games */
-GAME( 1984, demoderm, demoderb, mono_tcs,  demoderm, demoderm, ROT0,  "Bally Midway", "Demolition Derby (2-Player Mono Board Version)", GAME_SUPPORTS_SAVE )
-GAME( 1985, sarge,    0,        mono_tcs,  sarge,    sarge,    ROT0,  "Bally Midway", "Sarge", GAME_SUPPORTS_SAVE )
-GAME( 1986, maxrpm,   0,        mono_tcs,  maxrpm,   maxrpm,   ROT0,  "Bally Midway", "Max RPM (ver 2)", GAME_SUPPORTS_SAVE )
-GAME( 1986, rampage,  0,        mono_sg,   rampage,  rampage,  ROT0,  "Bally Midway", "Rampage (ver 3 8-27-86)", GAME_SUPPORTS_SAVE )
-GAME( 1986, rampage2, rampage,  mono_sg,   rampage,  rampage,  ROT0,  "Bally Midway", "Rampage (ver 2 8-4-86)", GAME_SUPPORTS_SAVE )
-GAME( 1986, powerdrv, 0,        mono_sg,   powerdrv, powerdrv, ROT0,  "Bally Midway", "Power Drive", GAME_SUPPORTS_SAVE )
-GAME( 1987, stargrds, 0,        mono_sg,   stargrds, stargrds, ROT0,  "Bally Midway", "Star Guards", GAME_SUPPORTS_SAVE )
+GAME( 1984, demoderm, demoderb, mono_tcs,  demoderm, mcr3_state, demoderm, ROT0,  "Bally Midway", "Demolition Derby (2-Player Mono Board Version)", GAME_SUPPORTS_SAVE )
+GAME( 1985, sarge,    0,        mono_tcs,  sarge, mcr3_state,    sarge,    ROT0,  "Bally Midway", "Sarge", GAME_SUPPORTS_SAVE )
+GAME( 1986, maxrpm,   0,        mono_tcs,  maxrpm, mcr3_state,   maxrpm,   ROT0,  "Bally Midway", "Max RPM (ver 2)", GAME_SUPPORTS_SAVE )
+GAME( 1986, rampage,  0,        mono_sg,   rampage, mcr3_state,  rampage,  ROT0,  "Bally Midway", "Rampage (Rev 3, 8/27/86)", GAME_SUPPORTS_SAVE )
+GAME( 1986, rampage2, rampage,  mono_sg,   rampage, mcr3_state,  rampage,  ROT0,  "Bally Midway", "Rampage (Rev 2, 8/4/86)", GAME_SUPPORTS_SAVE )
+GAME( 1986, powerdrv, 0,        mono_sg,   powerdrv, mcr3_state, powerdrv, ROT0,  "Bally Midway", "Power Drive", GAME_SUPPORTS_SAVE )
+GAME( 1987, stargrds, 0,        mono_sg,   stargrds, mcr3_state, stargrds, ROT0,  "Bally Midway", "Star Guards", GAME_SUPPORTS_SAVE )
 
 /* MCR scrolling games */
-GAME( 1983, spyhunt,  0,        mcrsc_csd, spyhunt,  spyhunt,  ROT90, "Bally Midway", "Spy Hunter", GAME_SUPPORTS_SAVE )
-GAME( 1983, spyhuntp, spyhunt,  mcrsc_csd, spyhunt,  spyhunt,  ROT90, "Bally Midway", "Spy Hunter (Playtronic license)", GAME_SUPPORTS_SAVE )
-GAME( 1984, crater,   0,        mcrscroll, crater,   crater,   ORIENTATION_FLIP_X, "Bally Midway", "Crater Raider", GAME_SUPPORTS_SAVE )
-GAMEL(1985, turbotag, 0,        mcrsc_csd, turbotag, turbotag, ROT90, "Bally Midway", "Turbo Tag (prototype)", GAME_SUPPORTS_SAVE, layout_turbotag )
+GAMEL(1983, spyhunt,  0,        mcrsc_csd, spyhunt, mcr3_state,  spyhunt,  ROT90, "Bally Midway", "Spy Hunter", GAME_SUPPORTS_SAVE, layout_spyhunt )
+GAMEL(1983, spyhuntp, spyhunt,  mcrsc_csd, spyhunt, mcr3_state,  spyhunt,  ROT90, "Bally Midway (Playtronic license)", "Spy Hunter (Playtronic license)", GAME_SUPPORTS_SAVE, layout_spyhunt )
+GAME( 1984, crater,   0,        mcrscroll, crater, mcr3_state,   crater,   ORIENTATION_FLIP_X, "Bally Midway", "Crater Raider", GAME_SUPPORTS_SAVE )
+GAMEL(1985, turbotag, 0,        mcrsc_csd, turbotag, mcr3_state, turbotag, ROT90, "Bally Midway", "Turbo Tag (prototype)", GAME_SUPPORTS_SAVE, layout_turbotag )

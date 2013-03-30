@@ -36,52 +36,48 @@ Daughterboard: Custom made, plugged in the 2 roms and Z80 mainboard sockets.
 #include "includes/trucocl.h"
 
 
-PALETTE_INIT( trucocl )
+void trucocl_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 
 	for (i = 0;i < 32;i++)
-		palette_set_color_rgb(machine,i,pal4bit(color_prom[i] >> 0),pal4bit(color_prom[i+32] >> 0),pal4bit(color_prom[i+32] >> 4));
+		palette_set_color_rgb(machine(),i,pal4bit(color_prom[i] >> 0),pal4bit(color_prom[i+32] >> 0),pal4bit(color_prom[i+32] >> 4));
 }
 
-WRITE8_HANDLER( trucocl_videoram_w )
+WRITE8_MEMBER(trucocl_state::trucocl_videoram_w)
 {
-	trucocl_state *state = space->machine().driver_data<trucocl_state>();
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_videoram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( trucocl_colorram_w )
+WRITE8_MEMBER(trucocl_state::trucocl_colorram_w)
 {
-	trucocl_state *state = space->machine().driver_data<trucocl_state>();
-	state->m_colorram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_colorram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(trucocl_state::get_bg_tile_info)
 {
-	trucocl_state *state = machine.driver_data<trucocl_state>();
-	int gfxsel = state->m_colorram[tile_index] & 1;
-	int bank = ( ( state->m_colorram[tile_index] >> 2 ) & 0x07 );
-	int code = state->m_videoram[tile_index];
-	int colour = (state->m_colorram[tile_index] & 2) >> 1;
+	int gfxsel = m_colorram[tile_index] & 1;
+	int bank = ( ( m_colorram[tile_index] >> 2 ) & 0x07 );
+	int code = m_videoram[tile_index];
+	int colour = (m_colorram[tile_index] & 2) >> 1;
 
 	code |= ( bank & 1 ) << 10;
 	code |= ( bank & 2 ) << 8;
 	code += ( bank & 4 ) << 6;
 
-	SET_TILE_INFO(gfxsel,code,colour,0);
+	SET_TILE_INFO_MEMBER(gfxsel,code,colour,0);
 }
 
-VIDEO_START( trucocl )
+void trucocl_state::video_start()
 {
-	trucocl_state *state = machine.driver_data<trucocl_state>();
-	state->m_bg_tilemap = tilemap_create( machine, get_bg_tile_info, tilemap_scan_rows,  8, 8, 32, 32 );
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(trucocl_state::get_bg_tile_info),this), TILEMAP_SCAN_ROWS,  8, 8, 32, 32 );
 }
 
-SCREEN_UPDATE( trucocl )
+UINT32 trucocl_state::screen_update_trucocl(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	trucocl_state *state = screen->machine().driver_data<trucocl_state>();
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
 	return 0;
 }

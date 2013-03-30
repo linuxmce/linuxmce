@@ -12,33 +12,15 @@
 #include "includes/naughtyb.h"
 
 
-static const rectangle scrollvisiblearea =
-{
-	2*8, 34*8-1,
-	0*8, 28*8-1
-};
-
-static const rectangle leftvisiblearea =
-{
-	0*8, 2*8-1,
-	0*8, 28*8-1
-};
-
-static const rectangle rightvisiblearea =
-{
-	34*8, 36*8-1,
-	0*8, 28*8-1
-};
-
 static const res_net_decode_info naughtyb_decode_info =
 {
-	2,		/*  two proms          */
-	0,		/*  start at 0         */
-	255,	/*  end at 255         */
+	2,      /*  two proms          */
+	0,      /*  start at 0         */
+	255,    /*  end at 255         */
 	/*  R,   G,   B,   R,   G,   B */
-	{   0,   0,   0, 256, 256, 256},		/*  offsets */
-	{   0,   2,   1,  -1,   1,   0},		/*  shifts */
-	{0x01,0x01,0x01,0x02,0x02,0x02}		    /*  masks */
+	{   0,   0,   0, 256, 256, 256},        /*  offsets */
+	{   0,   2,   1,  -1,   1,   0},        /*  shifts */
+	{0x01,0x01,0x01,0x02,0x02,0x02}         /*  masks */
 };
 
 static const res_net_info naughtyb_net_info =
@@ -74,8 +56,9 @@ static const res_net_info naughtyb_net_info =
 
 ***************************************************************************/
 
-PALETTE_INIT( naughtyb )
+void naughtyb_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	static const int resistances[2] = { 270, 130 };
 	double weights[2];
 	int i;
@@ -86,7 +69,7 @@ PALETTE_INIT( naughtyb )
 			2, resistances, weights, 0, 0,
 			0, 0, 0, 0, 0);
 
-	for (i = 0;i < machine.total_colors(); i++)
+	for (i = 0;i < machine().total_colors(); i++)
 	{
 		int bit0, bit1;
 		int r, g, b;
@@ -106,7 +89,7 @@ PALETTE_INIT( naughtyb )
 		bit1 = (color_prom[i+0x100] >> 1) & 0x01;
 		b = combine_2_weights(weights, bit0, bit1);
 
-		palette_set_color(machine, BITSWAP8(i,5,7,6,2,1,0,4,3), MAKE_RGB(r, g, b));
+		palette_set_color(machine(), BITSWAP8(i,5,7,6,2,1,0,4,3), MAKE_RGB(r, g, b));
 	}
 }
 
@@ -116,42 +99,39 @@ PALETTE_INIT( naughtyb )
   Start the video hardware emulation.
 
 ***************************************************************************/
-VIDEO_START( naughtyb )
+void naughtyb_state::video_start()
 {
-	naughtyb_state *state = machine.driver_data<naughtyb_state>();
-	state->m_palreg = state->m_bankreg = 0;
+	m_palreg = m_bankreg = 0;
 
 	/* Naughty Boy has a virtual screen twice as large as the visible screen */
-	machine.generic.tmpbitmap = auto_bitmap_alloc(machine,68*8,28*8,machine.primary_screen->format());
+	m_tmpbitmap.allocate(68*8,28*8,machine().primary_screen->format());
 }
 
 
 
 
-WRITE8_HANDLER( naughtyb_videoreg_w )
+WRITE8_MEMBER(naughtyb_state::naughtyb_videoreg_w)
 {
-	naughtyb_state *state = space->machine().driver_data<naughtyb_state>();
 	// bits 4+5 control the sound circuit
-	pleiads_sound_control_c_w(space->machine().device("cust"),offset,data);
+	pleiads_sound_control_c_w(machine().device("cust"),space,offset,data);
 
-	state->m_cocktail =
-		( ( input_port_read(space->machine(), "DSW0") & 0x80 ) &&	// cabinet == cocktail
-		  ( data & 0x01 ) );				// handling player 2
-	state->m_palreg  = (data >> 1) & 0x03;			// pallette sel is bit 1 & 2
-	state->m_bankreg = (data >> 2) & 0x01;			// banksel is just bit 2
+	m_cocktail =
+		( ( ioport("DSW0")->read() & 0x80 ) &&  // cabinet == cocktail
+			( data & 0x01 ) );              // handling player 2
+	m_palreg  = (data >> 1) & 0x03;         // palette sel is bit 1 & 2
+	m_bankreg = (data >> 2) & 0x01;         // banksel is just bit 2
 }
 
-WRITE8_HANDLER( popflame_videoreg_w )
+WRITE8_MEMBER(naughtyb_state::popflame_videoreg_w)
 {
-	naughtyb_state *state = space->machine().driver_data<naughtyb_state>();
 	// bits 4+5 control the sound circuit
-	pleiads_sound_control_c_w(space->machine().device("cust"),offset,data);
+	pleiads_sound_control_c_w(machine().device("cust"),space,offset,data);
 
-	state->m_cocktail =
-		( ( input_port_read(space->machine(), "DSW0") & 0x80 ) &&	// cabinet == cocktail
-		  ( data & 0x01 ) );				// handling player 2
-	state->m_palreg  = (data >> 1) & 0x03;			// pallette sel is bit 1 & 2
-	state->m_bankreg = (data >> 3) & 0x01;			// banksel is just bit 3
+	m_cocktail =
+		( ( ioport("DSW0")->read() & 0x80 ) &&  // cabinet == cocktail
+			( data & 0x01 ) );              // handling player 2
+	m_palreg  = (data >> 1) & 0x03;         // palette sel is bit 1 & 2
+	m_bankreg = (data >> 3) & 0x01;         // banksel is just bit 3
 }
 
 
@@ -200,10 +180,14 @@ WRITE8_HANDLER( popflame_videoreg_w )
 
 
 ***************************************************************************/
-SCREEN_UPDATE( naughtyb )
+UINT32 naughtyb_state::screen_update_naughtyb(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	naughtyb_state *state = screen->machine().driver_data<naughtyb_state>();
-	UINT8 *videoram = state->m_videoram;
+	const rectangle scrollvisiblearea(2*8, 34*8-1, 0*8, 28*8-1);
+	const rectangle leftvisiblearea(0*8, 2*8-1, 0*8, 28*8-1);
+	const rectangle rightvisiblearea(34*8, 36*8-1, 0*8, 28*8-1);
+
+	UINT8 *videoram = m_videoram;
+	bitmap_ind16 &tmpbitmap = m_tmpbitmap;
 	int offs;
 
 	// for every character in the Video RAM
@@ -212,7 +196,7 @@ SCREEN_UPDATE( naughtyb )
 	{
 		int sx,sy;
 
-		if ( state->m_cocktail )
+		if ( m_cocktail )
 		{
 			if (offs < 0x700)
 			{
@@ -239,16 +223,16 @@ SCREEN_UPDATE( naughtyb )
 			}
 		}
 
-		drawgfx_opaque(screen->machine().generic.tmpbitmap,0,screen->machine().gfx[0],
-				state->m_videoram2[offs] + 256 * state->m_bankreg,
-				(state->m_videoram2[offs] >> 5) + 8 * state->m_palreg,
-				state->m_cocktail,state->m_cocktail,
+		drawgfx_opaque(tmpbitmap,tmpbitmap.cliprect(),machine().gfx[0],
+				m_videoram2[offs] + 256 * m_bankreg,
+				(m_videoram2[offs] >> 5) + 8 * m_palreg,
+				m_cocktail,m_cocktail,
 				8*sx,8*sy);
 
-		drawgfx_transpen(screen->machine().generic.tmpbitmap,0,screen->machine().gfx[1],
-				videoram[offs] + 256*state->m_bankreg,
-				(videoram[offs] >> 5) + 8 * state->m_palreg,
-				state->m_cocktail,state->m_cocktail,
+		drawgfx_transpen(tmpbitmap,tmpbitmap.cliprect(),machine().gfx[1],
+				videoram[offs] + 256*m_bankreg,
+				(videoram[offs] >> 5) + 8 * m_palreg,
+				m_cocktail,m_cocktail,
 				8*sx,8*sy,0);
 	}
 
@@ -256,11 +240,11 @@ SCREEN_UPDATE( naughtyb )
 	{
 		int scrollx;
 
-		copybitmap(bitmap,screen->machine().generic.tmpbitmap,0,0,-66*8,0,&leftvisiblearea);
-		copybitmap(bitmap,screen->machine().generic.tmpbitmap,0,0,-30*8,0,&rightvisiblearea);
+		copybitmap(bitmap,tmpbitmap,0,0,-66*8,0,leftvisiblearea);
+		copybitmap(bitmap,tmpbitmap,0,0,-30*8,0,rightvisiblearea);
 
-		scrollx = ( state->m_cocktail ) ? *state->m_scrollreg - 239 : -*state->m_scrollreg + 16;
-		copyscrollbitmap(bitmap,screen->machine().generic.tmpbitmap,1,&scrollx,0,0,&scrollvisiblearea);
+		scrollx = ( m_cocktail ) ? *m_scrollreg - 239 : -*m_scrollreg + 16;
+		copyscrollbitmap(bitmap,tmpbitmap,1,&scrollx,0,0,scrollvisiblearea);
 	}
 	return 0;
 }

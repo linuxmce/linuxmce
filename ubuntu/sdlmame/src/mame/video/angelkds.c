@@ -14,31 +14,28 @@ enable / disable tilemap bits might be wrong
 
 */
 
-static TILE_GET_INFO( get_tx_tile_info )
+TILE_GET_INFO_MEMBER(angelkds_state::get_tx_tile_info)
 {
-	angelkds_state *state = machine.driver_data<angelkds_state>();
 	int tileno;
 
-	tileno = state->m_txvideoram[tile_index] + (state->m_txbank * 0x100);
-	SET_TILE_INFO(0, tileno, 0, 0);
+	tileno = m_txvideoram[tile_index] + (m_txbank * 0x100);
+	SET_TILE_INFO_MEMBER(0, tileno, 0, 0);
 }
 
-WRITE8_HANDLER( angelkds_txvideoram_w )
+WRITE8_MEMBER(angelkds_state::angelkds_txvideoram_w)
 {
-	angelkds_state *state = space->machine().driver_data<angelkds_state>();
 
-	state->m_txvideoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_tx_tilemap, offset);
+	m_txvideoram[offset] = data;
+	m_tx_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( angelkds_txbank_write )
+WRITE8_MEMBER(angelkds_state::angelkds_txbank_write)
 {
-	angelkds_state *state = space->machine().driver_data<angelkds_state>();
 
-	if (state->m_txbank != data)
+	if (m_txbank != data)
 	{
-		state->m_txbank = data;
-		tilemap_mark_all_tiles_dirty(state->m_tx_tilemap);
+		m_txbank = data;
+		m_tx_tilemap->mark_all_dirty();
 	}
 }
 
@@ -46,91 +43,82 @@ WRITE8_HANDLER( angelkds_txbank_write )
 
 */
 
-static TILE_GET_INFO( get_bgtop_tile_info )
+TILE_GET_INFO_MEMBER(angelkds_state::get_bgtop_tile_info)
 {
-	angelkds_state *state = machine.driver_data<angelkds_state>();
 	int tileno;
 
-	tileno = state->m_bgtopvideoram[tile_index];
+	tileno = m_bgtopvideoram[tile_index];
 
-	tileno += state->m_bgtopbank * 0x100 ;
-	SET_TILE_INFO(1, tileno, 0, 0);
+	tileno += m_bgtopbank * 0x100 ;
+	SET_TILE_INFO_MEMBER(1, tileno, 0, 0);
 }
 
-WRITE8_HANDLER( angelkds_bgtopvideoram_w )
+WRITE8_MEMBER(angelkds_state::angelkds_bgtopvideoram_w)
 {
-	angelkds_state *state = space->machine().driver_data<angelkds_state>();
 
-	state->m_bgtopvideoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bgtop_tilemap, offset);
+	m_bgtopvideoram[offset] = data;
+	m_bgtop_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( angelkds_bgtopbank_write )
+WRITE8_MEMBER(angelkds_state::angelkds_bgtopbank_write)
 {
-	angelkds_state *state = space->machine().driver_data<angelkds_state>();
 
-	if (state->m_bgtopbank != data)
+	if (m_bgtopbank != data)
 	{
-		state->m_bgtopbank = data;
-		tilemap_mark_all_tiles_dirty(state->m_bgtop_tilemap);
+		m_bgtopbank = data;
+		m_bgtop_tilemap->mark_all_dirty();
 	}
 }
 
-WRITE8_HANDLER( angelkds_bgtopscroll_write )
+WRITE8_MEMBER(angelkds_state::angelkds_bgtopscroll_write)
 {
-	angelkds_state *state = space->machine().driver_data<angelkds_state>();
 
-	tilemap_set_scrollx(state->m_bgtop_tilemap, 0, data);
+	m_bgtop_tilemap->set_scrollx(0, data);
 }
 
 /*** Bottom Half Background Tilemap
 
 */
 
-static TILE_GET_INFO( get_bgbot_tile_info )
+TILE_GET_INFO_MEMBER(angelkds_state::get_bgbot_tile_info)
 {
-	angelkds_state *state = machine.driver_data<angelkds_state>();
 	int tileno;
 
-	tileno = state->m_bgbotvideoram[tile_index];
+	tileno = m_bgbotvideoram[tile_index];
 
-	tileno += state->m_bgbotbank * 0x100 ;
-	SET_TILE_INFO(2, tileno, 1, 0);
+	tileno += m_bgbotbank * 0x100 ;
+	SET_TILE_INFO_MEMBER(2, tileno, 1, 0);
 }
 
-WRITE8_HANDLER( angelkds_bgbotvideoram_w )
+WRITE8_MEMBER(angelkds_state::angelkds_bgbotvideoram_w)
 {
-	angelkds_state *state = space->machine().driver_data<angelkds_state>();
 
-	state->m_bgbotvideoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bgbot_tilemap, offset);
+	m_bgbotvideoram[offset] = data;
+	m_bgbot_tilemap->mark_tile_dirty(offset);
 }
 
 
-WRITE8_HANDLER( angelkds_bgbotbank_write )
+WRITE8_MEMBER(angelkds_state::angelkds_bgbotbank_write)
 {
-	angelkds_state *state = space->machine().driver_data<angelkds_state>();
 
-	if (state->m_bgbotbank != data)
+	if (m_bgbotbank != data)
 	{
-		state->m_bgbotbank = data;
-		tilemap_mark_all_tiles_dirty(state->m_bgbot_tilemap);
+		m_bgbotbank = data;
+		m_bgbot_tilemap->mark_all_dirty();
 	}
 }
 
-WRITE8_HANDLER( angelkds_bgbotscroll_write )
+WRITE8_MEMBER(angelkds_state::angelkds_bgbotscroll_write)
 {
-	angelkds_state *state = space->machine().driver_data<angelkds_state>();
 
-	tilemap_set_scrollx(state->m_bgbot_tilemap, 0, data);
+	m_bgbot_tilemap->set_scrollx(0, data);
 }
 
 
-WRITE8_HANDLER( angelkds_layer_ctrl_write )
+WRITE8_MEMBER(angelkds_state::angelkds_layer_ctrl_write)
 {
-	angelkds_state *state = space->machine().driver_data<angelkds_state>();
 
-	state->m_layer_ctrl = data;
+	m_layer_ctrl = data;
 }
 
 /*** Sprites
@@ -140,31 +128,31 @@ a split down the middle of the screen
 
 */
 
-static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, int enable_n)
+static void draw_sprites(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, int enable_n)
 {
 	angelkds_state *state = machine.driver_data<angelkds_state>();
 	const UINT8 *source = state->m_spriteram + 0x100 - 4;
 	const UINT8 *finish = state->m_spriteram;
-	const gfx_element *gfx = machine.gfx[3];
+	gfx_element *gfx = machine.gfx[3];
 
 	while (source >= finish)
 	{
 	/*
 
-    nnnn nnnn - EeFf B?cc - yyyy yyyy - xxxx xxxx
+	nnnn nnnn - EeFf B?cc - yyyy yyyy - xxxx xxxx
 
-    n = sprite number
-    E = Sprite Enabled in Top Half of Screen
-    e = Sprite Enabled in Bottom Half of Screen
-    F = Flip Y
-    f = Flip X
-    B = Tile Bank
-    ? = unknown, nothing / unused? recheck
-    c = color
-    y = Y position
-    x = X position
+	n = sprite number
+	E = Sprite Enabled in Top Half of Screen
+	e = Sprite Enabled in Bottom Half of Screen
+	F = Flip Y
+	f = Flip X
+	B = Tile Bank
+	? = unknown, nothing / unused? recheck
+	c = color
+	y = Y position
+	x = X position
 
-    */
+	*/
 		UINT16 tile_no = source[0];
 		UINT8 attr = source[1];
 		UINT8 ypos = source[2];
@@ -241,72 +229,63 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 
 */
 
-WRITE8_HANDLER( angelkds_paletteram_w )
+WRITE8_MEMBER(angelkds_state::angelkds_paletteram_w)
 {
-	angelkds_state *state = space->machine().driver_data<angelkds_state>();
 	int no;
 
-	state->m_paletteram[offset] = data;
+	m_paletteram[offset] = data;
 
 	no = offset & 0xff;
-	palette_set_color_rgb(space->machine(), no, pal4bit(state->m_paletteram[no]), pal4bit(state->m_paletteram[no]>>4), pal4bit(state->m_paletteram[no + 0x100]));
+	palette_set_color_rgb(machine(), no, pal4bit(m_paletteram[no]), pal4bit(m_paletteram[no]>>4), pal4bit(m_paletteram[no + 0x100]));
 }
 
 /*** Video Start & Update
 
 */
 
-VIDEO_START( angelkds )
+void angelkds_state::video_start()
 {
-	angelkds_state *state = machine.driver_data<angelkds_state>();
 
-	state->m_tx_tilemap = tilemap_create(machine, get_tx_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
-	tilemap_set_transparent_pen(state->m_tx_tilemap, 0);
+	m_tx_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(angelkds_state::get_tx_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
+	m_tx_tilemap->set_transparent_pen(0);
 
-	state->m_bgbot_tilemap = tilemap_create(machine, get_bgbot_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
-	tilemap_set_transparent_pen(state->m_bgbot_tilemap, 15);
+	m_bgbot_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(angelkds_state::get_bgbot_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
+	m_bgbot_tilemap->set_transparent_pen(15);
 
-	state->m_bgtop_tilemap = tilemap_create(machine, get_bgtop_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
-	tilemap_set_transparent_pen(state->m_bgtop_tilemap, 15);
+	m_bgtop_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(angelkds_state::get_bgtop_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
+	m_bgtop_tilemap->set_transparent_pen(15);
 }
 
 /* enable bits are uncertain */
 
-SCREEN_UPDATE( angelkds )
+UINT32 angelkds_state::screen_update_angelkds(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	angelkds_state *state = screen->machine().driver_data<angelkds_state>();
-	const rectangle &visarea = screen->visible_area();
+	const rectangle &visarea = screen.visible_area();
 	rectangle clip;
 
-	bitmap_fill(bitmap, cliprect, 0x3f); /* is there a register controling the colour?, we currently use the last colour of the tx palette */
+	bitmap.fill(0x3f, cliprect); /* is there a register controling the colour?, we currently use the last colour of the tx palette */
 
 	/* draw top of screen */
-	clip.min_x = 8*0;
-	clip.max_x = 8*16-1;
-	clip.min_y = visarea.min_y;
-	clip.max_y = visarea.max_y;
+	clip.set(8*0, 8*16-1, visarea.min_y, visarea.max_y);
 
-	if ((state->m_layer_ctrl & 0x80) == 0x00)
-		tilemap_draw(bitmap, &clip, state->m_bgtop_tilemap, 0, 0);
+	if ((m_layer_ctrl & 0x80) == 0x00)
+		m_bgtop_tilemap->draw(bitmap, clip, 0, 0);
 
-	draw_sprites(screen->machine(), bitmap, &clip, 0x80);
+	draw_sprites(machine(), bitmap, clip, 0x80);
 
-	if ((state->m_layer_ctrl & 0x20) == 0x00)
-		tilemap_draw(bitmap, &clip, state->m_tx_tilemap, 0, 0);
+	if ((m_layer_ctrl & 0x20) == 0x00)
+		m_tx_tilemap->draw(bitmap, clip, 0, 0);
 
 	/* draw bottom of screen */
-	clip.min_x = 8*16;
-	clip.max_x = 8*32-1;
-	clip.min_y = visarea.min_y;
-	clip.max_y = visarea.max_y;
+	clip.set(8*16, 8*32-1, visarea.min_y, visarea.max_y);
 
-	if ((state->m_layer_ctrl & 0x40) == 0x00)
-		tilemap_draw(bitmap, &clip, state->m_bgbot_tilemap, 0, 0);
+	if ((m_layer_ctrl & 0x40) == 0x00)
+		m_bgbot_tilemap->draw(bitmap, clip, 0, 0);
 
-	draw_sprites(screen->machine(), bitmap, &clip, 0x40);
+	draw_sprites(machine(), bitmap, clip, 0x40);
 
-	if ((state->m_layer_ctrl & 0x20) == 0x00)
-		tilemap_draw(bitmap, &clip, state->m_tx_tilemap, 0, 0);
+	if ((m_layer_ctrl & 0x20) == 0x00)
+		m_tx_tilemap->draw(bitmap, clip, 0, 0);
 
 	return 0;
 }

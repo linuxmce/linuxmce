@@ -23,18 +23,43 @@
 class atarisy4_state : public driver_device
 {
 public:
-	atarisy4_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	atarisy4_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_m68k_ram(*this, "m68k_ram"),
+		m_screen_ram(*this, "screen_ram"){ }
 
 	UINT8 m_r_color_table[256];
 	UINT8 m_g_color_table[256];
 	UINT8 m_b_color_table[256];
 	UINT16 m_dsp_bank[2];
 	UINT8 m_csr[2];
-	UINT16 *m_m68k_ram;
+	required_shared_ptr<UINT16> m_m68k_ram;
 	UINT16 *m_shared_ram[2];
-	UINT16 *m_screen_ram;
+	required_shared_ptr<UINT16> m_screen_ram;
 	poly_manager *m_poly;
+	DECLARE_WRITE16_MEMBER(gpu_w);
+	DECLARE_READ16_MEMBER(gpu_r);
+	DECLARE_READ16_MEMBER(m68k_shared_0_r);
+	DECLARE_WRITE16_MEMBER(m68k_shared_0_w);
+	DECLARE_READ16_MEMBER(m68k_shared_1_r);
+	DECLARE_WRITE16_MEMBER(m68k_shared_1_w);
+	DECLARE_READ16_MEMBER(dsp0_status_r);
+	DECLARE_WRITE16_MEMBER(dsp0_control_w);
+	DECLARE_READ16_MEMBER(dsp0_bio_r);
+	DECLARE_WRITE16_MEMBER(dsp0_bank_w);
+	DECLARE_READ16_MEMBER(dsp1_status_r);
+	DECLARE_WRITE16_MEMBER(dsp1_control_w);
+	DECLARE_READ16_MEMBER(dsp1_bio_r);
+	DECLARE_WRITE16_MEMBER(dsp1_bank_w);
+	DECLARE_READ16_MEMBER(analog_r);
+	DECLARE_DRIVER_INIT(airrace);
+	DECLARE_DRIVER_INIT(laststar);
+	virtual void machine_reset();
+	virtual void video_start();
+	virtual void video_reset();
+	DECLARE_MACHINE_RESET(airrace);
+	UINT32 screen_update_atarisy4(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(vblank_int);
 };
 
 
@@ -45,15 +70,15 @@ public:
  *
  *************************************/
 
-struct _gpu_
+struct gpu_
 {
 	/* Memory-mapped registers */
-	UINT16 gr[8];	/* Command parameters */
+	UINT16 gr[8];   /* Command parameters */
 
-	UINT16 bcrw;	/* Screen buffer W control */
-	UINT16 bcrx;	/* Screen buffer X control */
-	UINT16 bcry;	/* Screen buffer Y control */
-	UINT16 bcrz;	/* Screen buffer Z control */
+	UINT16 bcrw;    /* Screen buffer W control */
+	UINT16 bcrx;    /* Screen buffer X control */
+	UINT16 bcry;    /* Screen buffer Y control */
+	UINT16 bcrz;    /* Screen buffer Z control */
 	UINT16 psrw;
 	UINT16 psrx;
 	UINT16 psry;
@@ -63,13 +88,13 @@ struct _gpu_
 	UINT16 ctr;
 	UINT16 lfr;
 	UINT16 ifr;
-	UINT16 ecr;		/* Execute command register */
+	UINT16 ecr;     /* Execute command register */
 	UINT16 far;
-	UINT16 mcr;		/* Interrupt control */
+	UINT16 mcr;     /* Interrupt control */
 	UINT16 qlr;
 	UINT16 qar;
 
-	UINT16 dhr;		/* Scanline counter */
+	UINT16 dhr;     /* Scanline counter */
 	UINT16 dlr;
 
 	/* Others */
@@ -98,8 +123,7 @@ struct _gpu_
 
 
 
-typedef struct _poly_extra_data poly_extra_data;
-struct _poly_extra_data
+struct poly_extra_data
 {
 	UINT16 color;
 	UINT16 *screen_ram;
@@ -112,9 +136,9 @@ struct _poly_extra_data
  *
  *************************************/
 
-static READ16_HANDLER( analog_r );
-static MACHINE_RESET( atarisy4 );
-static MACHINE_RESET( airrace );
+
+
+
 
 
 /*************************************
@@ -123,20 +147,18 @@ static MACHINE_RESET( airrace );
  *
  *************************************/
 
-static VIDEO_START( atarisy4 )
+void atarisy4_state::video_start()
 {
-	atarisy4_state *state = machine.driver_data<atarisy4_state>();
-	state->m_poly = poly_alloc(machine, 1024, sizeof(poly_extra_data), POLYFLAG_NO_WORK_QUEUE);
+	m_poly = poly_alloc(machine(), 1024, sizeof(poly_extra_data), POLYFLAG_NO_WORK_QUEUE);
 }
 
-static VIDEO_RESET( atarisy4 )
+void atarisy4_state::video_reset()
 {
 	gpu.vblank_wait = 0;
 }
 
-static SCREEN_UPDATE( atarisy4 )
+UINT32 atarisy4_state::screen_update_atarisy4(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	atarisy4_state *state = screen->machine().driver_data<atarisy4_state>();
 	int y;
 	UINT32 offset = 0;
 
@@ -151,18 +173,18 @@ static SCREEN_UPDATE( atarisy4 )
 
 	//UINT32 offset = gpu.dpr << 5;
 
-	for (y = cliprect->min_y; y <= cliprect->max_y; ++y)
+	for (y = cliprect.min_y; y <= cliprect.max_y; ++y)
 	{
-		UINT16 *src = &state->m_screen_ram[(offset + (4096 * y)) / 2];
-		UINT32 *dest = BITMAP_ADDR32(bitmap, y, cliprect->min_x);
+		UINT16 *src = &m_screen_ram[(offset + (4096 * y)) / 2];
+		UINT32 *dest = &bitmap.pix32(y, cliprect.min_x);
 		int x;
 
-		for (x = cliprect->min_x; x < cliprect->max_x; x += 2)
+		for (x = cliprect.min_x; x < cliprect.max_x; x += 2)
 		{
 			UINT16 data = *src++;
 
-			*dest++ = screen->machine().pens[data & 0xff];
-			*dest++ = screen->machine().pens[data >> 8];
+			*dest++ = machine().pens[data & 0xff];
+			*dest++ = machine().pens[data >> 8];
 		}
 	}
 	return 0;
@@ -251,10 +273,7 @@ static void draw_polygon(atarisy4_state *state, UINT16 color)
 	poly_vertex v1, v2, v3;
 	poly_extra_data *extra = (poly_extra_data *)poly_get_extra_data(state->m_poly);
 
-	clip.min_x = 0;
-	clip.min_y = 0;
-	clip.max_x = 511;
-	clip.max_y = 511;
+	clip.set(0, 511, 0, 511);
 
 	extra->color = color;
 	extra->screen_ram = state->m_screen_ram;
@@ -271,7 +290,7 @@ static void draw_polygon(atarisy4_state *state, UINT16 color)
 		v3.x = gpu.points[i].x;
 		v3.y = gpu.points[i].y;
 
-		poly_render_triangle(state->m_poly, 0, &clip, draw_scanline, 1, &v1, &v2, &v3);
+		poly_render_triangle(state->m_poly, 0, clip, draw_scanline, 1, &v1, &v2, &v3);
 		v2 = v3;
 	}
 }
@@ -346,13 +365,13 @@ void execute_gpu_command(running_machine &machine)
 		case 0x16:
 		{
 			/*
-                Copy screen RAM to color RAM
-                GR0 : Color start X
-                GR1 : Color start Y
-                GR2 : Color table offset
-                GR3 : Size
-                GR4 : Channels to set (R: 0x10, G: 0x20, B: 0x40)
-            */
+			    Copy screen RAM to color RAM
+			    GR0 : Color start X
+			    GR1 : Color start Y
+			    GR2 : Color table offset
+			    GR3 : Size
+			    GR4 : Channels to set (R: 0x10, G: 0x20, B: 0x40)
+			*/
 			int i;
 			int offset = xy_to_screen_addr(gpu.gr[0] - 0x400, gpu.gr[1] - 0x200);
 			int table_offs = gpu.gr[2];
@@ -429,79 +448,79 @@ void execute_gpu_command(running_machine &machine)
 	}
 }
 
-static WRITE16_HANDLER( gpu_w )
+WRITE16_MEMBER(atarisy4_state::gpu_w)
 {
 	switch (offset)
 	{
-		case 0x00:	gpu.gr[0] = data;	break;
-		case 0x01:	gpu.gr[1] = data;	break;
-		case 0x02:	gpu.gr[2] = data;	break;
-		case 0x03:	gpu.gr[3] = data;	break;
-		case 0x04:	gpu.gr[4] = data;	break;
-		case 0x05:	gpu.gr[5] = data;	break;
-		case 0x06:	gpu.gr[6] = data;	break;
-		case 0x07:	gpu.gr[7] = data;	break;
+		case 0x00:  gpu.gr[0] = data;   break;
+		case 0x01:  gpu.gr[1] = data;   break;
+		case 0x02:  gpu.gr[2] = data;   break;
+		case 0x03:  gpu.gr[3] = data;   break;
+		case 0x04:  gpu.gr[4] = data;   break;
+		case 0x05:  gpu.gr[5] = data;   break;
+		case 0x06:  gpu.gr[6] = data;   break;
+		case 0x07:  gpu.gr[7] = data;   break;
 
-		case 0x08:	gpu.bcrw = data;	break;
-		case 0x09:	gpu.bcrx = data;	break;
-		case 0x0a:	gpu.bcry = data;	break;
-		case 0x0b:	gpu.bcrz = data;	break;
-		case 0x0c:	gpu.psrw = data;	break;
-		case 0x0d:	gpu.psrx = data;	break;
-		case 0x0e:	gpu.psry = data;	break;
-		case 0x0f:	gpu.psrz = data;	break;
+		case 0x08:  gpu.bcrw = data;    break;
+		case 0x09:  gpu.bcrx = data;    break;
+		case 0x0a:  gpu.bcry = data;    break;
+		case 0x0b:  gpu.bcrz = data;    break;
+		case 0x0c:  gpu.psrw = data;    break;
+		case 0x0d:  gpu.psrx = data;    break;
+		case 0x0e:  gpu.psry = data;    break;
+		case 0x0f:  gpu.psrz = data;    break;
 
-		case 0x14:	gpu.dpr = data;		break;
-		case 0x15:	gpu.ctr = data;		break;
-		case 0x16:	gpu.ifr = data;		break;
+		case 0x14:  gpu.dpr = data;     break;
+		case 0x15:  gpu.ctr = data;     break;
+		case 0x16:  gpu.ifr = data;     break;
 		case 0x17:
 		{
 			gpu.ecr = data;
-			execute_gpu_command(space->machine());
+			execute_gpu_command(machine());
 			break;
 		}
-		case 0x1a:	gpu.far = data;		break;
+		case 0x1a:  gpu.far = data;     break;
 		case 0x20:
 		{
 			gpu.mcr = data;
 
 			if (~data & 0x08)
-				cputag_set_input_line(space->machine(), "maincpu", 6, CLEAR_LINE);
+				machine().device("maincpu")->execute().set_input_line(6, CLEAR_LINE);
 
 			break;
 		}
 
-		case 0x21:	gpu.qlr = data;		break;
-		case 0x22:	gpu.qar = data;		break;
+		case 0x21:  gpu.qlr = data;     break;
+		case 0x22:  gpu.qar = data;     break;
 	}
 }
 
-static READ16_HANDLER( gpu_r )
+READ16_MEMBER(atarisy4_state::gpu_r)
 {
 	UINT16 res = 0;
 
 	switch (offset)
 	{
-		case 0x08:	res = gpu.bcrw;		break;
-		case 0x09:	res = gpu.bcrx;		break;
-		case 0x0a:	res = gpu.bcry;		break;
-		case 0x0b:	res = gpu.bcrz;		break;
+		case 0x08:  res = gpu.bcrw;     break;
+		case 0x09:  res = gpu.bcrx;     break;
+		case 0x0a:  res = gpu.bcry;     break;
+		case 0x0b:  res = gpu.bcrz;     break;
 
-		case 0x20:	res = gpu.mcr;		break;
+		case 0x20:  res = gpu.mcr;      break;
 
-		case 0x400:	res = 5;			break; // TODO!
-		case 0x420:	res = 5;			break;
+		case 0x400: res = 5;            break; // TODO!
+		case 0x420: res = 5;            break;
 
-		default:	logerror("GPU_R[%x]\n", offset);
+		default:    logerror("GPU_R[%x]\n", offset);
 	}
 
 	return res;
 }
 
-static INTERRUPT_GEN( vblank_int )
+INTERRUPT_GEN_MEMBER(atarisy4_state::vblank_int)
 {
 	if (gpu.mcr & 0x08)
-		cputag_set_input_line(device->machine(), "maincpu", 6, ASSERT_LINE);
+		machine().device("maincpu")->execute().set_input_line(6, ASSERT_LINE);
 }
 
 
@@ -511,112 +530,100 @@ static INTERRUPT_GEN( vblank_int )
  *
  *************************************/
 
-static READ16_HANDLER( m68k_shared_0_r )
+READ16_MEMBER(atarisy4_state::m68k_shared_0_r)
 {
-	atarisy4_state *state = space->machine().driver_data<atarisy4_state>();
-	if (!BIT(state->m_csr[0], 3))
-		return (state->m_shared_ram[0][offset]);
+	if (!BIT(m_csr[0], 3))
+		return (m_shared_ram[0][offset]);
 	else
 		return 0xffff;
 }
 
-static WRITE16_HANDLER( m68k_shared_0_w )
+WRITE16_MEMBER(atarisy4_state::m68k_shared_0_w)
 {
-	atarisy4_state *state = space->machine().driver_data<atarisy4_state>();
-	if (!BIT(state->m_csr[0], 3))
-		COMBINE_DATA(&state->m_shared_ram[0][offset]);
+	if (!BIT(m_csr[0], 3))
+		COMBINE_DATA(&m_shared_ram[0][offset]);
 }
 
-static READ16_HANDLER( m68k_shared_1_r )
+READ16_MEMBER(atarisy4_state::m68k_shared_1_r)
 {
-	atarisy4_state *state = space->machine().driver_data<atarisy4_state>();
-	if (!BIT(state->m_csr[1], 3))
-		return (state->m_shared_ram[1][offset]);
+	if (!BIT(m_csr[1], 3))
+		return (m_shared_ram[1][offset]);
 	else
 		return 0xffff;
 }
 
-static WRITE16_HANDLER( m68k_shared_1_w )
+WRITE16_MEMBER(atarisy4_state::m68k_shared_1_w)
 {
-	atarisy4_state *state = space->machine().driver_data<atarisy4_state>();
-	if (!BIT(state->m_csr[1], 3))
-		COMBINE_DATA(&state->m_shared_ram[1][offset]);
+	if (!BIT(m_csr[1], 3))
+		COMBINE_DATA(&m_shared_ram[1][offset]);
 }
 
-static READ16_HANDLER( dsp0_status_r )
+READ16_MEMBER(atarisy4_state::dsp0_status_r)
 {
-	atarisy4_state *state = space->machine().driver_data<atarisy4_state>();
-	return state->m_csr[0];
+	return m_csr[0];
 }
 
-static WRITE16_HANDLER( dsp0_control_w )
+WRITE16_MEMBER(atarisy4_state::dsp0_control_w)
 {
-	atarisy4_state *state = space->machine().driver_data<atarisy4_state>();
-	cputag_set_input_line(space->machine(), "dsp0", INPUT_LINE_RESET, data & 0x01 ? CLEAR_LINE : ASSERT_LINE);
-	cputag_set_input_line(space->machine(), "dsp0", 0, data & 0x02 ? ASSERT_LINE : CLEAR_LINE);
+	machine().device("dsp0")->execute().set_input_line(INPUT_LINE_RESET, data & 0x01 ? CLEAR_LINE : ASSERT_LINE);
+	machine().device("dsp0")->execute().set_input_line(0, data & 0x02 ? ASSERT_LINE : CLEAR_LINE);
 
-	state->m_csr[0] = data;
+	m_csr[0] = data;
 }
 
-static READ16_HANDLER( dsp0_bio_r )
+READ16_MEMBER(atarisy4_state::dsp0_bio_r)
 {
-	atarisy4_state *state = space->machine().driver_data<atarisy4_state>();
-	return BIT(state->m_csr[0], 2);
+	return BIT(m_csr[0], 2);
 }
 
-static WRITE16_HANDLER( dsp0_bank_w )
+WRITE16_MEMBER(atarisy4_state::dsp0_bank_w)
 {
-	atarisy4_state *state = space->machine().driver_data<atarisy4_state>();
 	if (data & 0x4000)
 	{
 		/* Set TIDONE bit */
-		state->m_csr[0] |= 0x10;
+		m_csr[0] |= 0x10;
 
-		if (BIT(state->m_csr[0], 5) == 1)
-			fatalerror("68000 interrupt enable was set!");
+		if (BIT(m_csr[0], 5) == 1)
+			fatalerror("68000 interrupt enable was set!\n");
 	}
 
 	data &= 0x3800;
-	memory_set_bankptr(space->machine(), "dsp0_bank1", &state->m_shared_ram[0][data]);
-	state->m_dsp_bank[0] = data;
+	membank("dsp0_bank1")->set_base(&m_shared_ram[0][data]);
+	m_dsp_bank[0] = data;
 }
 
-static READ16_HANDLER( dsp1_status_r )
+READ16_MEMBER(atarisy4_state::dsp1_status_r)
 {
-	atarisy4_state *state = space->machine().driver_data<atarisy4_state>();
-	return state->m_csr[1];
+	return m_csr[1];
 }
 
-static WRITE16_HANDLER( dsp1_control_w )
+WRITE16_MEMBER(atarisy4_state::dsp1_control_w)
 {
-	atarisy4_state *state = space->machine().driver_data<atarisy4_state>();
-	cputag_set_input_line(space->machine(), "dsp1", INPUT_LINE_RESET, data & 0x01 ? CLEAR_LINE : ASSERT_LINE);
-	cputag_set_input_line(space->machine(), "dsp1", 0, data & 0x02 ? ASSERT_LINE : CLEAR_LINE);
+	machine().device("dsp1")->execute().set_input_line(INPUT_LINE_RESET, data & 0x01 ? CLEAR_LINE : ASSERT_LINE);
+	machine().device("dsp1")->execute().set_input_line(0, data & 0x02 ? ASSERT_LINE : CLEAR_LINE);
 
-	state->m_csr[1] = data;
+	m_csr[1] = data;
 }
 
-static READ16_HANDLER( dsp1_bio_r )
+READ16_MEMBER(atarisy4_state::dsp1_bio_r)
 {
-	atarisy4_state *state = space->machine().driver_data<atarisy4_state>();
-	return BIT(state->m_csr[1], 2);
+	return BIT(m_csr[1], 2);
 }
 
-static WRITE16_HANDLER( dsp1_bank_w )
+WRITE16_MEMBER(atarisy4_state::dsp1_bank_w)
 {
-	atarisy4_state *state = space->machine().driver_data<atarisy4_state>();
 	if (data & 0x4000)
 	{
 		/* Set TIDONE bit */
-		state->m_csr[1] |= 0x10;
+		m_csr[1] |= 0x10;
 
-		if (BIT(state->m_csr[1], 5) == 1)
-			fatalerror("68000 interrupt enable was set!");
+		if (BIT(m_csr[1], 5) == 1)
+			fatalerror("68000 interrupt enable was set!\n");
 	}
 
 	data &= 0x3800;
-	memory_set_bankptr(space->machine(), "dsp1_bank1", &state->m_shared_ram[1][data]);
-	state->m_dsp_bank[1] = data;
+	membank("dsp1_bank1")->set_base(&m_shared_ram[1][data]);
+	m_dsp_bank[1] = data;
 }
 
 
@@ -626,8 +633,8 @@ static WRITE16_HANDLER( dsp1_bank_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16 )
-	AM_RANGE(0x000000, 0x00ffff) AM_RAM AM_BASE_MEMBER(atarisy4_state, m_m68k_ram)
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16, atarisy4_state )
+	AM_RANGE(0x000000, 0x00ffff) AM_RAM AM_SHARE("m68k_ram")
 	AM_RANGE(0x010000, 0x01ffff) AM_RAM
 	AM_RANGE(0x580000, 0x580001) AM_READ_PORT("JOYSTICK")
 	AM_RANGE(0x588000, 0x588001) AM_READ(analog_r)
@@ -636,7 +643,7 @@ static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16 )
 	AM_RANGE(0x7c6000, 0x7c6001) AM_READWRITE(dsp1_status_r, dsp1_control_w)
 	AM_RANGE(0x7f0000, 0x7f4fff) AM_READWRITE(m68k_shared_0_r, m68k_shared_0_w)
 	AM_RANGE(0x7f6000, 0x7f6001) AM_READWRITE(dsp0_status_r, dsp0_control_w)
-	AM_RANGE(0xa00400, 0xbfffff) AM_RAM AM_BASE_MEMBER(atarisy4_state, m_screen_ram)
+	AM_RANGE(0xa00400, 0xbfffff) AM_RAM AM_SHARE("screen_ram")
 	AM_RANGE(0xff8000, 0xff8fff) AM_READWRITE(gpu_r, gpu_w)
 ADDRESS_MAP_END
 
@@ -647,13 +654,13 @@ ADDRESS_MAP_END
  *
  *************************************/
 
-static ADDRESS_MAP_START( dsp0_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( dsp0_map, AS_PROGRAM, 16, atarisy4_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xfff)
 	AM_RANGE(0x0000, 0x07ff) AM_RAMBANK("dsp0_bank0")
 	AM_RANGE(0x0800, 0x0fff) AM_RAMBANK("dsp0_bank1")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( dsp0_io_map, AS_IO, 16 )
+static ADDRESS_MAP_START( dsp0_io_map, AS_IO, 16, atarisy4_state )
 	AM_RANGE(0x00, 0x01) AM_WRITE(dsp0_bank_w)
 	AM_RANGE(TMS32010_BIO, TMS32010_BIO) AM_READ(dsp0_bio_r)
 ADDRESS_MAP_END
@@ -665,13 +672,13 @@ ADDRESS_MAP_END
  *
  *************************************/
 
-static ADDRESS_MAP_START( dsp1_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( dsp1_map, AS_PROGRAM, 16, atarisy4_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xfff)
 	AM_RANGE(0x0000, 0x07ff) AM_RAMBANK("dsp1_bank0")
 	AM_RANGE(0x0800, 0x0fff) AM_RAMBANK("dsp1_bank1")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( dsp1_io_map, AS_IO, 16 )
+static ADDRESS_MAP_START( dsp1_io_map, AS_IO, 16, atarisy4_state )
 	AM_RANGE(0x00, 0x01) AM_WRITE(dsp1_bank_w)
 	AM_RANGE(TMS32010_BIO, TMS32010_BIO) AM_READ(dsp1_bio_r)
 ADDRESS_MAP_END
@@ -683,9 +690,9 @@ ADDRESS_MAP_END
  *
  *************************************/
 
- static READ16_HANDLER( analog_r )
+READ16_MEMBER(atarisy4_state::analog_r)
 {
-	return (input_port_read(space->machine(), "STICKX") << 8) | input_port_read(space->machine(), "STICKY");
+	return (ioport("STICKX")->read() << 8) | ioport("STICKY")->read();
 }
 
 static INPUT_PORTS_START( atarisy4 )
@@ -724,23 +731,19 @@ INPUT_PORTS_END
 static MACHINE_CONFIG_START( atarisy4, atarisy4_state )
 	MCFG_CPU_ADD("maincpu", M68000, 8000000)
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT("screen", vblank_int)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", atarisy4_state,  vblank_int)
 
 	MCFG_CPU_ADD("dsp0", TMS32010, 16000000)
 	MCFG_CPU_PROGRAM_MAP(dsp0_map)
 	MCFG_CPU_IO_MAP(dsp0_io_map)
 
-	MCFG_VIDEO_RESET(atarisy4)
-	MCFG_MACHINE_RESET(atarisy4)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_RAW_PARAMS(32000000/2, 660, 0, 512, 404, 0, 384)
 	MCFG_VIDEO_ATTRIBUTES(VIDEO_UPDATE_AFTER_VBLANK)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
-	MCFG_SCREEN_UPDATE(atarisy4)
+	MCFG_SCREEN_UPDATE_DRIVER(atarisy4_state, screen_update_atarisy4)
 	MCFG_PALETTE_LENGTH(256)
 
-	MCFG_VIDEO_START(atarisy4)
 MACHINE_CONFIG_END
 
 static MACHINE_CONFIG_DERIVED( airrace, atarisy4 )
@@ -749,7 +752,7 @@ static MACHINE_CONFIG_DERIVED( airrace, atarisy4 )
 	MCFG_CPU_PROGRAM_MAP(dsp1_map)
 	MCFG_CPU_IO_MAP(dsp1_io_map)
 
-	MCFG_MACHINE_RESET(airrace)
+	MCFG_MACHINE_RESET_OVERRIDE(atarisy4_state,airrace)
 MACHINE_CONFIG_END
 
 
@@ -802,9 +805,9 @@ INLINE UINT8 hex_to_ascii(UINT8 in)
 		return in;
 }
 
-void load_ldafile(address_space *space, const UINT8 *file)
+void load_ldafile(address_space &space, const UINT8 *file)
 {
-#define READ_CHAR()		file[i++]
+#define READ_CHAR()     file[i++]
 	int i = 0;
 
 	while (true)
@@ -815,10 +818,10 @@ void load_ldafile(address_space *space, const UINT8 *file)
 		UINT16 addr;
 
 		if (READ_CHAR() != 0x01)
-			fatalerror("Bad .LDA file");
+			fatalerror("Bad .LDA file\n");
 
 		if (READ_CHAR() != 0x00)
-			fatalerror("Bad .LDA file");
+			fatalerror("Bad .LDA file\n");
 
 		len = READ_CHAR();
 		sum += len;
@@ -845,20 +848,20 @@ void load_ldafile(address_space *space, const UINT8 *file)
 		{
 			UINT8 data = READ_CHAR();
 			sum += data;
-			space->write_byte(addr++, data);
+			space.write_byte(addr++, data);
 		} while (--len);
 
 		sum += READ_CHAR();
 
 		if (sum != 0)
-			fatalerror(".LDA checksum failure");
+			fatalerror(".LDA checksum failure\n");
 	}
 }
 
 /* Load memory space with data from a Tektronix-Extended HEX file */
-void load_hexfile(address_space *space, const UINT8 *file)
+void load_hexfile(address_space &space, const UINT8 *file)
 {
-#define READ_HEX_CHAR()		hex_to_ascii(file[i++])
+#define READ_HEX_CHAR()     hex_to_ascii(file[i++])
 
 	UINT32 i = 0;
 	UINT32 line = 1;
@@ -878,7 +881,7 @@ void load_hexfile(address_space *space, const UINT8 *file)
 
 		/* First character of each line should be a '%' */
 		if (file[i++] != '%')
-			fatalerror("Error on line %d - invalid line start character", line);
+			fatalerror("Error on line %d - invalid line start character\n", line);
 
 		/* Get the line length */
 		len = READ_HEX_CHAR() << 4;
@@ -940,7 +943,7 @@ void load_hexfile(address_space *space, const UINT8 *file)
 			sum += data & 0xf;
 
 			if (record == 6)
-				space->write_byte(addr++, data);
+				space.write_byte(addr++, data);
 
 			len -= 2;
 		}
@@ -959,54 +962,52 @@ next_line:
 	}
 }
 
-static DRIVER_INIT( laststar )
+DRIVER_INIT_MEMBER(atarisy4_state,laststar)
 {
-	atarisy4_state *state = machine.driver_data<atarisy4_state>();
-	address_space *main = machine.device("maincpu")->memory().space(AS_PROGRAM);
+	address_space &main = machine().device("maincpu")->memory().space(AS_PROGRAM);
 
 	/* Allocate 16kB of shared RAM */
-	state->m_shared_ram[0] = auto_alloc_array_clear(machine, UINT16, 0x2000);
+	m_shared_ram[0] = auto_alloc_array_clear(machine(), UINT16, 0x2000);
 
 	/* Populate the 68000 address space with data from the HEX files */
-	load_hexfile(main, machine.region("code")->base());
-	load_hexfile(main, machine.region("data")->base());
+	load_hexfile(main, memregion("code")->base());
+	load_hexfile(main, memregion("data")->base());
 
 	/* Set up the DSP */
-	memory_set_bankptr(machine, "dsp0_bank0", state->m_shared_ram[0]);
-	memory_set_bankptr(machine, "dsp0_bank1", &state->m_shared_ram[0][0x800]);
-	load_ldafile(machine.device("dsp0")->memory().space(AS_PROGRAM), machine.region("dsp")->base());
+	membank("dsp0_bank0")->set_base(m_shared_ram[0]);
+	membank("dsp0_bank1")->set_base(&m_shared_ram[0][0x800]);
+	load_ldafile(machine().device("dsp0")->memory().space(AS_PROGRAM), memregion("dsp")->base());
 }
 
-static DRIVER_INIT( airrace )
+DRIVER_INIT_MEMBER(atarisy4_state,airrace)
 {
-	atarisy4_state *state = machine.driver_data<atarisy4_state>();
 	/* Allocate two sets of 32kB shared RAM */
-	state->m_shared_ram[0] = auto_alloc_array_clear(machine, UINT16, 0x4000);
-	state->m_shared_ram[1] = auto_alloc_array_clear(machine, UINT16, 0x4000);
+	m_shared_ram[0] = auto_alloc_array_clear(machine(), UINT16, 0x4000);
+	m_shared_ram[1] = auto_alloc_array_clear(machine(), UINT16, 0x4000);
 
 	/* Populate RAM with data from the HEX files */
-	load_hexfile(machine.device("maincpu")->memory().space(AS_PROGRAM), machine.region("code")->base());
+	load_hexfile(machine().device("maincpu")->memory().space(AS_PROGRAM), memregion("code")->base());
 
 	/* Set up the first DSP */
-	memory_set_bankptr(machine, "dsp0_bank0", state->m_shared_ram[0]);
-	memory_set_bankptr(machine, "dsp0_bank1", &state->m_shared_ram[0][0x800]);
-	load_ldafile(machine.device("dsp0")->memory().space(AS_PROGRAM), machine.region("dsp")->base());
+	membank("dsp0_bank0")->set_base(m_shared_ram[0]);
+	membank("dsp0_bank1")->set_base(&m_shared_ram[0][0x800]);
+	load_ldafile(machine().device("dsp0")->memory().space(AS_PROGRAM), memregion("dsp")->base());
 
 	/* Set up the second DSP */
-	memory_set_bankptr(machine, "dsp1_bank0", state->m_shared_ram[1]);
-	memory_set_bankptr(machine, "dsp1_bank1", &state->m_shared_ram[1][0x800]);
-	load_ldafile(machine.device("dsp1")->memory().space(AS_PROGRAM), machine.region("dsp")->base());
+	membank("dsp1_bank0")->set_base(m_shared_ram[1]);
+	membank("dsp1_bank1")->set_base(&m_shared_ram[1][0x800]);
+	load_ldafile(machine().device("dsp1")->memory().space(AS_PROGRAM), memregion("dsp")->base());
 }
 
-static MACHINE_RESET( atarisy4 )
+void atarisy4_state::machine_reset()
 {
-	cputag_set_input_line(machine, "dsp0", INPUT_LINE_RESET, ASSERT_LINE);
+	machine().device("dsp0")->execute().set_input_line(INPUT_LINE_RESET, ASSERT_LINE);
 }
 
-static MACHINE_RESET( airrace )
+MACHINE_RESET_MEMBER(atarisy4_state,airrace)
 {
-	cputag_set_input_line(machine, "dsp0", INPUT_LINE_RESET, ASSERT_LINE);
-	cputag_set_input_line(machine, "dsp1", INPUT_LINE_RESET, ASSERT_LINE);
+	machine().device("dsp0")->execute().set_input_line(INPUT_LINE_RESET, ASSERT_LINE);
+	machine().device("dsp1")->execute().set_input_line(INPUT_LINE_RESET, ASSERT_LINE);
 }
 
 
@@ -1016,5 +1017,5 @@ static MACHINE_RESET( airrace )
  *
  *************************************/
 
-GAME( 1984, laststar, 0, atarisy4, atarisy4, laststar, ROT0, "Atari Games", "The Last Starfighter (prototype)", GAME_IMPERFECT_GRAPHICS | GAME_NO_SOUND_HW )
-GAME( 1985, airrace,  0, airrace,  atarisy4, airrace,  ROT0, "Atari Games", "Air Race (prototype)",             GAME_IMPERFECT_GRAPHICS | GAME_NO_SOUND_HW )
+GAME( 1984, laststar, 0, atarisy4, atarisy4, atarisy4_state, laststar, ROT0, "Atari Games", "The Last Starfighter (prototype)", GAME_IMPERFECT_GRAPHICS | GAME_NO_SOUND_HW )
+GAME( 1985, airrace,  0, airrace,  atarisy4, atarisy4_state, airrace,  ROT0, "Atari Games", "Air Race (prototype)",             GAME_IMPERFECT_GRAPHICS | GAME_NO_SOUND_HW )

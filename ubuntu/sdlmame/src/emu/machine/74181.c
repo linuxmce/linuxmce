@@ -10,14 +10,13 @@
 
 
 
-#define TTL74181_MAX_CHIPS		(2)
-#define TTL74181_INPUT_TOTAL	(14)
-#define TTL74181_OUTPUT_TOTAL	(8)
+#define TTL74181_MAX_CHIPS      (2)
+#define TTL74181_INPUT_TOTAL    (14)
+#define TTL74181_OUTPUT_TOTAL   (8)
 
 
 
-typedef struct _TTL74181_state TTL74181_state;
-struct _TTL74181_state
+struct TTL74181_state
 {
 	UINT8 inputs[TTL74181_INPUT_TOTAL];
 	UINT8 outputs[TTL74181_OUTPUT_TOTAL];

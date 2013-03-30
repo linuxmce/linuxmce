@@ -76,17 +76,18 @@ ROMS: All ROM labels say only "PROM" and a number.
 */
 #include "emu.h"
 #include "cpu/z80/z80.h"
-#include "deprecat.h"
 #include "sound/ay8910.h"
 
 
 class pturn_state : public driver_device
 {
 public:
-	pturn_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	pturn_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"),
+		m_spriteram(*this, "spriteram"){ }
 
-	UINT8 *m_videoram;
+	required_shared_ptr<UINT8> m_videoram;
 	tilemap_t *m_fgmap;
 	tilemap_t *m_bgmap;
 	int m_bgbank;
@@ -96,8 +97,29 @@ public:
 	int m_bgcolor;
 	int m_nmi_main;
 	int m_nmi_sub;
-	UINT8 *m_spriteram;
-	size_t m_spriteram_size;
+	required_shared_ptr<UINT8> m_spriteram;
+	DECLARE_WRITE8_MEMBER(pturn_videoram_w);
+	DECLARE_WRITE8_MEMBER(nmi_main_enable_w);
+	DECLARE_WRITE8_MEMBER(nmi_sub_enable_w);
+	DECLARE_WRITE8_MEMBER(sound_w);
+	DECLARE_WRITE8_MEMBER(bgcolor_w);
+	DECLARE_WRITE8_MEMBER(bg_scrollx_w);
+	DECLARE_WRITE8_MEMBER(fgpalette_w);
+	DECLARE_WRITE8_MEMBER(bg_scrolly_w);
+	DECLARE_WRITE8_MEMBER(fgbank_w);
+	DECLARE_WRITE8_MEMBER(bgbank_w);
+	DECLARE_WRITE8_MEMBER(flip_w);
+	DECLARE_READ8_MEMBER(pturn_custom_r);
+	DECLARE_READ8_MEMBER(pturn_protection_r);
+	DECLARE_READ8_MEMBER(pturn_protection2_r);
+	DECLARE_DRIVER_INIT(pturn);
+	TILE_GET_INFO_MEMBER(get_pturn_tile_info);
+	TILE_GET_INFO_MEMBER(get_pturn_bg_tile_info);
+	virtual void machine_reset();
+	virtual void video_start();
+	UINT32 screen_update_pturn(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(pturn_sub_intgen);
+	INTERRUPT_GEN_MEMBER(pturn_main_intgen);
 };
 
 
@@ -111,52 +133,48 @@ static const UINT8 tile_lookup[0x10]=
 	0xa0, 0xb0, 0xe0, 0xf0
 };
 
-static TILE_GET_INFO( get_pturn_tile_info )
+TILE_GET_INFO_MEMBER(pturn_state::get_pturn_tile_info)
 {
-	pturn_state *state = machine.driver_data<pturn_state>();
-	UINT8 *videoram = state->m_videoram;
+	UINT8 *videoram = m_videoram;
 	int tileno;
 	tileno = videoram[tile_index];
 
-	tileno=tile_lookup[tileno>>4]|(tileno&0xf)|(state->m_fgbank<<8);
+	tileno=tile_lookup[tileno>>4]|(tileno&0xf)|(m_fgbank<<8);
 
-	SET_TILE_INFO(0,tileno,state->m_fgpalette,0);
+	SET_TILE_INFO_MEMBER(0,tileno,m_fgpalette,0);
 }
 
 
 
-static TILE_GET_INFO( get_pturn_bg_tile_info )
+TILE_GET_INFO_MEMBER(pturn_state::get_pturn_bg_tile_info)
 {
-	pturn_state *state = machine.driver_data<pturn_state>();
 	int tileno,palno;
-	tileno = machine.region("user1")->base()[tile_index];
-	palno=state->m_bgpalette;
+	tileno = memregion("user1")->base()[tile_index];
+	palno=m_bgpalette;
 	if(palno==1)
 	{
 		palno=25;
 	}
-	SET_TILE_INFO(1,tileno+state->m_bgbank*256,palno,0);
+	SET_TILE_INFO_MEMBER(1,tileno+m_bgbank*256,palno,0);
 }
 
-static VIDEO_START(pturn)
+void pturn_state::video_start()
 {
-	pturn_state *state = machine.driver_data<pturn_state>();
-	state->m_fgmap = tilemap_create(machine, get_pturn_tile_info,tilemap_scan_rows,8, 8,32,32);
-	tilemap_set_transparent_pen(state->m_fgmap,0);
-	state->m_bgmap = tilemap_create(machine, get_pturn_bg_tile_info,tilemap_scan_rows,8, 8,32,32*8);
-	tilemap_set_transparent_pen(state->m_bgmap,0);
+	m_fgmap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(pturn_state::get_pturn_tile_info),this),TILEMAP_SCAN_ROWS,8, 8,32,32);
+	m_fgmap->set_transparent_pen(0);
+	m_bgmap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(pturn_state::get_pturn_bg_tile_info),this),TILEMAP_SCAN_ROWS,8, 8,32,32*8);
+	m_bgmap->set_transparent_pen(0);
 }
 
-static SCREEN_UPDATE(pturn)
+UINT32 pturn_state::screen_update_pturn(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	pturn_state *state = screen->machine().driver_data<pturn_state>();
-	UINT8 *spriteram = state->m_spriteram;
+	UINT8 *spriteram = m_spriteram;
 	int offs;
 	int sx, sy;
 	int flipx, flipy;
 
-	bitmap_fill(bitmap, cliprect, state->m_bgcolor);
-	tilemap_draw(bitmap,cliprect,state->m_bgmap,0,0);
+	bitmap.fill(m_bgcolor, cliprect);
+	m_bgmap->draw(bitmap, cliprect, 0,0);
 	for ( offs = 0x80-4 ; offs >=0 ; offs -= 4)
 	{
 		sy=256-spriteram[offs]-16 ;
@@ -166,13 +184,13 @@ static SCREEN_UPDATE(pturn)
 		flipy=spriteram[offs+1]&0x80;
 
 
-		if (flip_screen_x_get(screen->machine()))
+		if (flip_screen_x())
 		{
 			sx = 224 - sx;
 			flipx ^= 0x40;
 		}
 
-		if (flip_screen_y_get(screen->machine()))
+		if (flip_screen_y())
 		{
 			flipy ^= 0x80;
 			sy = 224 - sy;
@@ -180,104 +198,95 @@ static SCREEN_UPDATE(pturn)
 
 		if(sx|sy)
 		{
-			drawgfx_transpen(bitmap, cliprect,screen->machine().gfx[2],
+			drawgfx_transpen(bitmap, cliprect,machine().gfx[2],
 			spriteram[offs+1] & 0x3f ,
 			(spriteram[offs+2] & 0x1f),
 			flipx, flipy,
 			sx,sy,0);
 		}
 	}
-	tilemap_draw(bitmap,cliprect,state->m_fgmap,0,0);
+	m_fgmap->draw(bitmap, cliprect, 0,0);
 	return 0;
 }
 
 #ifdef UNUSED_FUNCTION
-READ8_HANDLER (pturn_protection_r)
+READ8_MEMBER(pturn_state::pturn_protection_r)
 {
-    return 0x66;
+	return 0x66;
 }
 
-READ8_HANDLER (pturn_protection2_r)
+READ8_MEMBER(pturn_state::pturn_protection2_r)
 {
-    return 0xfe;
+	return 0xfe;
 }
 #endif
 
-static WRITE8_HANDLER( pturn_videoram_w )
+WRITE8_MEMBER(pturn_state::pturn_videoram_w)
 {
-	pturn_state *state = space->machine().driver_data<pturn_state>();
-	UINT8 *videoram = state->m_videoram;
+	UINT8 *videoram = m_videoram;
 	videoram[offset]=data;
-	tilemap_mark_tile_dirty(state->m_fgmap,offset);
+	m_fgmap->mark_tile_dirty(offset);
 }
 
 
-static WRITE8_HANDLER( nmi_main_enable_w )
+WRITE8_MEMBER(pturn_state::nmi_main_enable_w)
 {
-	pturn_state *state = space->machine().driver_data<pturn_state>();
-	state->m_nmi_main = data;
+	m_nmi_main = data;
 }
 
-static WRITE8_HANDLER( nmi_sub_enable_w )
+WRITE8_MEMBER(pturn_state::nmi_sub_enable_w)
 {
-	pturn_state *state = space->machine().driver_data<pturn_state>();
-	state->m_nmi_sub = data;
+	m_nmi_sub = data;
 }
 
-static WRITE8_HANDLER(sound_w)
+WRITE8_MEMBER(pturn_state::sound_w)
 {
-	soundlatch_w(space,0,data);
+	soundlatch_byte_w(space,0,data);
 }
 
 
-static WRITE8_HANDLER(bgcolor_w)
+WRITE8_MEMBER(pturn_state::bgcolor_w)
 {
-	pturn_state *state = space->machine().driver_data<pturn_state>();
-	state->m_bgcolor=data;
+	m_bgcolor=data;
 }
 
-static WRITE8_HANDLER(bg_scrollx_w)
+WRITE8_MEMBER(pturn_state::bg_scrollx_w)
 {
-	pturn_state *state = space->machine().driver_data<pturn_state>();
-	tilemap_set_scrolly(state->m_bgmap, 0, (data>>5)*32*8);
-	state->m_bgpalette=data&0x1f;
-	tilemap_mark_all_tiles_dirty(state->m_bgmap);
+	m_bgmap->set_scrolly(0, (data>>5)*32*8);
+	m_bgpalette=data&0x1f;
+	m_bgmap->mark_all_dirty();
 }
 
-static WRITE8_HANDLER(fgpalette_w)
+WRITE8_MEMBER(pturn_state::fgpalette_w)
 {
-	pturn_state *state = space->machine().driver_data<pturn_state>();
-	state->m_fgpalette=data&0x1f;
-	tilemap_mark_all_tiles_dirty(state->m_fgmap);
+	m_fgpalette=data&0x1f;
+	m_fgmap->mark_all_dirty();
 }
 
-static WRITE8_HANDLER(bg_scrolly_w)
+WRITE8_MEMBER(pturn_state::bg_scrolly_w)
 {
-	pturn_state *state = space->machine().driver_data<pturn_state>();
-	tilemap_set_scrollx(state->m_bgmap, 0, data);
+	m_bgmap->set_scrollx(0, data);
 }
 
-static WRITE8_HANDLER(fgbank_w)
+WRITE8_MEMBER(pturn_state::fgbank_w)
 {
-	pturn_state *state = space->machine().driver_data<pturn_state>();
-	state->m_fgbank=data&1;
-	tilemap_mark_all_tiles_dirty(state->m_fgmap);
+	m_fgbank=data&1;
+	m_fgmap->mark_all_dirty();
 }
 
-static WRITE8_HANDLER(bgbank_w)
+WRITE8_MEMBER(pturn_state::bgbank_w)
 {
-	pturn_state *state = space->machine().driver_data<pturn_state>();
-	state->m_bgbank=data&1;
-	tilemap_mark_all_tiles_dirty(state->m_bgmap);
+	m_bgbank=data&1;
+	m_bgmap->mark_all_dirty();
 }
 
-static WRITE8_HANDLER(flip_w)
+WRITE8_MEMBER(pturn_state::flip_w)
 {
-	flip_screen_set(space->machine(), data);
+	flip_screen_set(data);
 }
 
 
-static READ8_HANDLER (pturn_custom_r)
+READ8_MEMBER(pturn_state::pturn_custom_r)
 {
 	int addr = (int)offset + 0xc800;
 
@@ -303,18 +312,18 @@ static READ8_HANDLER (pturn_custom_r)
 }
 
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, pturn_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0xc000, 0xc7ff) AM_RAM
 	AM_RANGE(0xc800, 0xcfff) AM_WRITENOP AM_READ(pturn_custom_r)
 
 	AM_RANGE(0xdfe0, 0xdfe0) AM_NOP
 
-	AM_RANGE(0xe000, 0xe3ff) AM_RAM_WRITE(pturn_videoram_w) AM_BASE_MEMBER(pturn_state, m_videoram)
+	AM_RANGE(0xe000, 0xe3ff) AM_RAM_WRITE(pturn_videoram_w) AM_SHARE("videoram")
 	AM_RANGE(0xe400, 0xe400) AM_WRITE(fgpalette_w)
 	AM_RANGE(0xe800, 0xe800) AM_WRITE(sound_w)
 
-	AM_RANGE(0xf000, 0xf0ff) AM_RAM AM_BASE_SIZE_MEMBER(pturn_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0xf000, 0xf0ff) AM_RAM AM_SHARE("spriteram")
 
 	AM_RANGE(0xf400, 0xf400) AM_WRITE(bg_scrollx_w)
 
@@ -326,7 +335,7 @@ static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
 	AM_RANGE(0xf805, 0xf805) AM_READ_PORT("DSW1")
 	AM_RANGE(0xf806, 0xf806) AM_READNOP /* Protection related, ((val&3)==2) -> jump to 0 */
 
-	AM_RANGE(0xfc00, 0xfc00) AM_WRITE (flip_w)
+	AM_RANGE(0xfc00, 0xfc00) AM_WRITE(flip_w)
 	AM_RANGE(0xfc01, 0xfc01) AM_WRITE(nmi_main_enable_w)
 	AM_RANGE(0xfc02, 0xfc02) AM_WRITENOP /* Unknown */
 	AM_RANGE(0xfc03, 0xfc03) AM_WRITENOP /* Unknown */
@@ -337,13 +346,13 @@ static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
 
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sub_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sub_map, AS_PROGRAM, 8, pturn_state )
 	AM_RANGE(0x0000, 0x0fff) AM_ROM
 	AM_RANGE(0x2000, 0x23ff) AM_RAM
-	AM_RANGE(0x3000, 0x3000) AM_READ(soundlatch_r) AM_WRITE(nmi_sub_enable_w)
+	AM_RANGE(0x3000, 0x3000) AM_READ(soundlatch_byte_r) AM_WRITE(nmi_sub_enable_w)
 	AM_RANGE(0x4000, 0x4000) AM_RAM
-	AM_RANGE(0x5000, 0x5001) AM_DEVWRITE("ay1", ay8910_address_data_w)
-	AM_RANGE(0x6000, 0x6001) AM_DEVWRITE("ay2", ay8910_address_data_w)
+	AM_RANGE(0x5000, 0x5001) AM_DEVWRITE_LEGACY("ay1", ay8910_address_data_w)
+	AM_RANGE(0x6000, 0x6001) AM_DEVWRITE_LEGACY("ay2", ay8910_address_data_w)
 ADDRESS_MAP_END
 
 static const gfx_layout charlayout =
@@ -364,7 +373,7 @@ static const gfx_layout spritelayout =
 	3,
 	{ RGN_FRAC(0,3),RGN_FRAC(1,3),RGN_FRAC(2,3) },
 	{ 0, 1, 2, 3, 4, 5, 6, 7,
-	 8*8+0, 8*8+1, 8*8+2, 8*8+3, 8*8+4, 8*8+5, 8*8+6, 8*8+7,
+		8*8+0, 8*8+1, 8*8+2, 8*8+3, 8*8+4, 8*8+5, 8*8+6, 8*8+7,
 	16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7,
 	24*8+0, 24*8+1, 24*8+2, 24*8+3, 24*8+4, 24*8+5, 24*8+6, 24*8+7 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
@@ -452,55 +461,49 @@ static INPUT_PORTS_START( pturn )
 	PORT_DIPSETTING(    0x80, DEF_STR( Japanese ) )
 INPUT_PORTS_END
 
-static INTERRUPT_GEN( pturn_sub_intgen )
+INTERRUPT_GEN_MEMBER(pturn_state::pturn_sub_intgen)
 {
-	pturn_state *state = device->machine().driver_data<pturn_state>();
-	if(state->m_nmi_sub)
+	if(m_nmi_sub)
 	{
-		device_set_input_line(device,INPUT_LINE_NMI,PULSE_LINE);
+		device.execute().set_input_line(INPUT_LINE_NMI,PULSE_LINE);
 	}
 }
 
-static INTERRUPT_GEN( pturn_main_intgen )
+INTERRUPT_GEN_MEMBER(pturn_state::pturn_main_intgen)
 {
-	pturn_state *state = device->machine().driver_data<pturn_state>();
-	if (state->m_nmi_main)
+	if (m_nmi_main)
 	{
-		device_set_input_line(device,INPUT_LINE_NMI,PULSE_LINE);
+		device.execute().set_input_line(INPUT_LINE_NMI,PULSE_LINE);
 	}
 }
 
-static MACHINE_RESET( pturn )
+void pturn_state::machine_reset()
 {
-	address_space *space = machine.device("maincpu")->memory().space(AS_PROGRAM);
-	soundlatch_clear_w(space,0,0);
+	address_space &space = machine().device("maincpu")->memory().space(AS_PROGRAM);
+	soundlatch_clear_byte_w(space,0,0);
 }
 
 static MACHINE_CONFIG_START( pturn, pturn_state )
 	MCFG_CPU_ADD("maincpu", Z80, 12000000/3)
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT("screen", pturn_main_intgen)
-	MCFG_MACHINE_RESET(pturn)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", pturn_state,  pturn_main_intgen)
 
 	MCFG_CPU_ADD("audiocpu", Z80, 12000000/3)
 	MCFG_CPU_PROGRAM_MAP(sub_map)
-	MCFG_CPU_VBLANK_INT_HACK(pturn_sub_intgen,3)
-
-	MCFG_GFXDECODE(pturn)
+	MCFG_CPU_PERIODIC_INT_DRIVER(pturn_state, pturn_sub_intgen, 3*60)
 
 
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(pturn)
+	MCFG_SCREEN_UPDATE_DRIVER(pturn_state, screen_update_pturn)
 
 	MCFG_PALETTE_LENGTH(0x100)
 	MCFG_PALETTE_INIT(RRRR_GGGG_BBBB)
 
-	MCFG_VIDEO_START(pturn)
+	MCFG_GFXDECODE(pturn)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -549,12 +552,12 @@ ROM_START( pturn )
 ROM_END
 
 
-static DRIVER_INIT(pturn)
+DRIVER_INIT_MEMBER(pturn_state,pturn)
 {
 	/*
-    machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0xc0dd, 0xc0dd, FUNC(pturn_protection_r));
-    machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0xc0db, 0xc0db, FUNC(pturn_protection2_r));
-    */
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_legacy_read_handler(0xc0dd, 0xc0dd, FUNC(pturn_protection_r));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_legacy_read_handler(0xc0db, 0xc0db, FUNC(pturn_protection2_r));
+	*/
 }
 
-GAME( 1984, pturn,  0, pturn,  pturn,  pturn, ROT90,   "Jaleco", "Parallel Turn",	GAME_IMPERFECT_COLORS )
+GAME( 1984, pturn,  0, pturn,  pturn, pturn_state,  pturn, ROT90,   "Jaleco", "Parallel Turn",  GAME_IMPERFECT_COLORS )

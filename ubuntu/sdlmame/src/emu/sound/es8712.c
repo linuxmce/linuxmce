@@ -15,29 +15,28 @@
 #include "emu.h"
 #include "es8712.h"
 
-#define MAX_SAMPLE_CHUNK	10000
+#define MAX_SAMPLE_CHUNK    10000
 
 
 /* struct describing a playing ADPCM chip */
-typedef struct _es8712_state es8712_state;
-struct _es8712_state
+struct es8712_state
 {
-	UINT8 playing;			/* 1 if we're actively playing */
+	UINT8 playing;          /* 1 if we're actively playing */
 
-	UINT32 base_offset;		/* pointer to the base memory location */
-	UINT32 sample;			/* current sample number */
-	UINT32 count;			/* total samples to play */
+	UINT32 base_offset;     /* pointer to the base memory location */
+	UINT32 sample;          /* current sample number */
+	UINT32 count;           /* total samples to play */
 
-	UINT32 signal;			/* current ADPCM signal */
-	UINT32 step;			/* current ADPCM step */
+	UINT32 signal;          /* current ADPCM signal */
+	UINT32 step;            /* current ADPCM step */
 
-	UINT32 start;			/* starting address for the next loop */
-	UINT32 end;				/* ending address for the next loop */
-	UINT8  repeat;			/* Repeat current sample when 1 */
+	UINT32 start;           /* starting address for the next loop */
+	UINT32 end;             /* ending address for the next loop */
+	UINT8  repeat;          /* Repeat current sample when 1 */
 
 	INT32 bank_offset;
-	UINT8 *region_base;		/* pointer to the base of the region */
-	sound_stream *stream;	/* which stream are we playing on? */
+	UINT8 *region_base;     /* pointer to the base of the region */
+	sound_stream *stream;   /* which stream are we playing on? */
 };
 
 /* step size index shift table */
@@ -51,7 +50,7 @@ INLINE es8712_state *get_safe_token(device_t *device)
 {
 	assert(device != NULL);
 	assert(device->type() == ES8712);
-	return (es8712_state *)downcast<legacy_device_base *>(device)->token();
+	return (es8712_state *)downcast<es8712_device *>(device)->token();
 }
 
 
@@ -85,9 +84,9 @@ static void compute_tables(void)
 		{
 			diff_lookup[step*16 + nib] = nbl2bit[nib][0] *
 				(stepval   * nbl2bit[nib][1] +
-				 stepval/2 * nbl2bit[nib][2] +
-				 stepval/4 * nbl2bit[nib][3] +
-				 stepval/8);
+					stepval/2 * nbl2bit[nib][2] +
+					stepval/4 * nbl2bit[nib][3] +
+					stepval/8);
 		}
 	}
 }
@@ -359,52 +358,69 @@ WRITE8_DEVICE_HANDLER( es8712_w )
 	es8712_state *chip = get_safe_token(device);
 	switch (offset)
 	{
-		case 00:	chip->start &= 0x000fff00;
+		case 00:    chip->start &= 0x000fff00;
 					chip->start |= ((data & 0xff) <<  0); break;
-		case 01:	chip->start &= 0x000f00ff;
+		case 01:    chip->start &= 0x000f00ff;
 					chip->start |= ((data & 0xff) <<  8); break;
-		case 02:	chip->start &= 0x0000ffff;
+		case 02:    chip->start &= 0x0000ffff;
 					chip->start |= ((data & 0x0f) << 16); break;
-		case 03:	chip->end   &= 0x000fff00;
+		case 03:    chip->end   &= 0x000fff00;
 					chip->end   |= ((data & 0xff) <<  0); break;
-		case 04:	chip->end   &= 0x000f00ff;
+		case 04:    chip->end   &= 0x000f00ff;
 					chip->end   |= ((data & 0xff) <<  8); break;
-		case 05:	chip->end   &= 0x0000ffff;
+		case 05:    chip->end   &= 0x0000ffff;
 					chip->end   |= ((data & 0x0f) << 16); break;
 		case 06:
 				es8712_play(device);
 				break;
-		default:	break;
+		default:    break;
 	}
 	chip->start &= 0xfffff; chip->end &= 0xfffff;
 }
 
+const device_type ES8712 = &device_creator<es8712_device>;
 
-
-/**************************************************************************
- * Generic get_info
- **************************************************************************/
-
-DEVICE_GET_INFO( es8712 )
+es8712_device::es8712_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, ES8712, "ES8712", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
 {
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(es8712_state);				break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME( es8712 );			break;
-		case DEVINFO_FCT_STOP:							/* nothing */									break;
-		case DEVINFO_FCT_RESET:							info->reset = DEVICE_RESET_NAME( es8712 );			break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "ES8712");						break;
-		case DEVINFO_STR_FAMILY:					strcpy(info->s, "Excellent Systems ADPCM");		break;
-		case DEVINFO_STR_VERSION:					strcpy(info->s, "1.0");							break;
-		case DEVINFO_STR_SOURCE_FILE:						strcpy(info->s, __FILE__);						break;
-		case DEVINFO_STR_CREDITS:					strcpy(info->s, "Copyright Nicola Salmoria and the MAME Team"); break;
-	}
+	m_token = global_alloc_clear(es8712_state);
 }
 
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
 
-DEFINE_LEGACY_SOUND_DEVICE(ES8712, es8712);
+void es8712_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void es8712_device::device_start()
+{
+	DEVICE_START_NAME( es8712 )(this);
+}
+
+//-------------------------------------------------
+//  device_reset - device-specific reset
+//-------------------------------------------------
+
+void es8712_device::device_reset()
+{
+	DEVICE_RESET_NAME( es8712 )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void es8712_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}

@@ -3,10 +3,9 @@
 #define __NEC_H_
 
 
-typedef struct _nec_config nec_config;
-struct _nec_config
+struct nec_config
 {
-	const UINT8*	v25v35_decryptiontable; // internal decryption table
+	const UINT8*    v25v35_decryptiontable; // internal decryption table
 };
 
 #define NEC_INPUT_LINE_INTP0 10

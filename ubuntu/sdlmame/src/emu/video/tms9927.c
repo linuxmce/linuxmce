@@ -15,23 +15,22 @@ static const UINT8 chars_per_row_value[8] = { 20, 32, 40, 64, 72, 80, 96, 132 };
 static const UINT8 skew_bits_value[4] = { 0, 1, 2, 2 };
 
 
-#define HCOUNT(t)				((t)->reg[0] + 1)
-#define INTERLACED(t)			(((t)->reg[1] >> 7) & 0x01)
-#define HSYNC_WIDTH(t)			(((t)->reg[1] >> 4) & 0x0f)
-#define HSYNC_DELAY(t)			(((t)->reg[1] >> 0) & 0x07)
-#define SCANS_PER_DATA_ROW(t)	((((t)->reg[2] >> 3) & 0x0f) + 1)
-#define CHARS_PER_DATA_ROW(t)	(chars_per_row_value[((t)->reg[2] >> 0) & 0x07])
-#define SKEW_BITS(t)			(skew_bits_value[((t)->reg[3] >> 6) & 0x03])
-#define DATA_ROWS_PER_FRAME(t)	((((t)->reg[3] >> 0) & 0x3f) + 1)
-#define SCAN_LINES_PER_FRAME(t)	(((t)->reg[4] * 2) + 256)
-#define VERTICAL_DATA_START(t)	((t)->reg[5])
-#define LAST_DISP_DATA_ROW(t)	((t)->reg[6] & 0x3f)
-#define CURSOR_CHAR_ADDRESS(t)	((t)->reg[7])
-#define CURSOR_ROW_ADDRESS(t)	((t)->reg[8] & 0x3f)
+#define HCOUNT(t)               ((t)->reg[0] + 1)
+#define INTERLACED(t)           (((t)->reg[1] >> 7) & 0x01)
+#define HSYNC_WIDTH(t)          (((t)->reg[1] >> 4) & 0x0f)
+#define HSYNC_DELAY(t)          (((t)->reg[1] >> 0) & 0x07)
+#define SCANS_PER_DATA_ROW(t)   ((((t)->reg[2] >> 3) & 0x0f) + 1)
+#define CHARS_PER_DATA_ROW(t)   (chars_per_row_value[((t)->reg[2] >> 0) & 0x07])
+#define SKEW_BITS(t)            (skew_bits_value[((t)->reg[3] >> 6) & 0x03])
+#define DATA_ROWS_PER_FRAME(t)  ((((t)->reg[3] >> 0) & 0x3f) + 1)
+#define SCAN_LINES_PER_FRAME(t) (((t)->reg[4] * 2) + 256)
+#define VERTICAL_DATA_START(t)  ((t)->reg[5])
+#define LAST_DISP_DATA_ROW(t)   ((t)->reg[6] & 0x3f)
+#define CURSOR_CHAR_ADDRESS(t)  ((t)->reg[7])
+#define CURSOR_ROW_ADDRESS(t)   ((t)->reg[8] & 0x3f)
 
 
-typedef struct _tms9927_state tms9927_state;
-struct _tms9927_state
+struct tms9927_state
 {
 	/* driver-controlled state */
 	const tms9927_interface *intf;
@@ -39,20 +38,20 @@ struct _tms9927_state
 	const UINT8 *selfload;
 
 	/* live state */
-	UINT32	clock;
-	UINT8	reg[9];
-	UINT8	start_datarow;
-	UINT8	reset;
-	UINT8	hpixels_per_column;
+	UINT32  clock;
+	UINT8   reg[9];
+	UINT8   start_datarow;
+	UINT8   reset;
+	UINT8   hpixels_per_column;
 
 	/* derived state; no need to save */
-	UINT8	valid_config;
-	UINT16	total_hpix, total_vpix;
-	UINT16	visible_hpix, visible_vpix;
+	UINT8   valid_config;
+	UINT16  total_hpix, total_vpix;
+	UINT16  visible_hpix, visible_vpix;
 };
 
 
-static STATE_POSTLOAD( tms9927_state_save_postload );
+static void tms9927_state_save_postload(tms9927_state *state);
 static void recompute_parameters(tms9927_state *tms, int postload);
 
 
@@ -64,42 +63,42 @@ INLINE tms9927_state *get_safe_token(device_t *device)
 {
 	assert(device != NULL);
 	assert(device->type() == TMS9927);
-	return (tms9927_state *)downcast<legacy_device_base *>(device)->token();
+	return (tms9927_state *)downcast<tms9927_device *>(device)->token();
 }
 
 
-static STATE_POSTLOAD( tms9927_state_save_postload )
+static void tms9927_state_save_postload(tms9927_state *state)
 {
-	recompute_parameters((tms9927_state *)param, TRUE);
+	recompute_parameters(state, TRUE);
 }
 
 
-static void generic_access(device_t *device, offs_t offset)
+static void generic_access(device_t *device, address_space &space, offs_t offset)
 {
 	tms9927_state *tms = get_safe_token(device);
 
 	switch (offset)
 	{
-		case 0x07:	/* Processor Self Load */
-		case 0x0f:	/* Non-processor self-load */
+		case 0x07:  /* Processor Self Load */
+		case 0x0f:  /* Non-processor self-load */
 			if (tms->selfload != NULL)
 			{
 				int cur;
 
 				for (cur = 0; cur < 7; cur++)
-					tms9927_w(device, cur, tms->selfload[cur]);
+					tms9927_w(device, space, cur, tms->selfload[cur]);
 				for (cur = 0; cur < 1; cur++)
-					tms9927_w(device, cur + 0xc, tms->selfload[cur + 7]);
+					tms9927_w(device, space, cur + 0xc, tms->selfload[cur + 7]);
 			}
 			else
 				popmessage("tms9927: self-load initiated with no PROM!");
 
 			/* processor self-load waits with reset enabled;
-               non-processor just goes ahead */
+			   non-processor just goes ahead */
 			tms->reset = (offset == 0x07);
 			break;
 
-		case 0x0a:	/* Reset */
+		case 0x0a:  /* Reset */
 			if (!tms->reset)
 			{
 				tms->screen->update_now();
@@ -107,13 +106,13 @@ static void generic_access(device_t *device, offs_t offset)
 			}
 			break;
 
-		case 0x0b:	/* Up scroll */
+		case 0x0b:  /* Up scroll */
 mame_printf_debug("Up scroll\n");
 			tms->screen->update_now();
 			tms->start_datarow = (tms->start_datarow + 1) % DATA_ROWS_PER_FRAME(tms);
 			break;
 
-		case 0x0e:	/* Start timing chain */
+		case 0x0e:  /* Start timing chain */
 			if (tms->reset)
 			{
 				tms->screen->update_now();
@@ -131,26 +130,26 @@ WRITE8_DEVICE_HANDLER( tms9927_w )
 
 	switch (offset)
 	{
-		case 0x00:	/* HORIZONTAL CHARACTER COUNT */
-		case 0x01:	/* INTERLACED / HSYNC WIDTH / HSYNC DELAY */
-		case 0x02:	/* SCANS PER DATA ROW / CHARACTERS PER DATA ROW */
-		case 0x03:	/* SKEW BITS / DATA ROWS PER FRAME */
-		case 0x04:	/* SCAN LINES / FRAME */
-		case 0x05:	/* VERTICAL DATA START */
-		case 0x06:	/* LAST DISPLAYED DATA ROW */
+		case 0x00:  /* HORIZONTAL CHARACTER COUNT */
+		case 0x01:  /* INTERLACED / HSYNC WIDTH / HSYNC DELAY */
+		case 0x02:  /* SCANS PER DATA ROW / CHARACTERS PER DATA ROW */
+		case 0x03:  /* SKEW BITS / DATA ROWS PER FRAME */
+		case 0x04:  /* SCAN LINES / FRAME */
+		case 0x05:  /* VERTICAL DATA START */
+		case 0x06:  /* LAST DISPLAYED DATA ROW */
 			tms->reg[offset] = data;
 			recompute_parameters(tms, FALSE);
 			break;
 
-		case 0x0c:	/* LOAD CURSOR CHARACTER ADDRESS */
-		case 0x0d:	/* LOAD CURSOR ROW ADDRESS */
+		case 0x0c:  /* LOAD CURSOR CHARACTER ADDRESS */
+		case 0x0d:  /* LOAD CURSOR ROW ADDRESS */
 mame_printf_debug("Cursor address changed\n");
 			tms->reg[offset - 0x0c + 7] = data;
 			recompute_parameters(tms, FALSE);
 			break;
 
 		default:
-			generic_access(device, offset);
+			generic_access(device, space, offset);
 			break;
 	}
 }
@@ -162,12 +161,12 @@ READ8_DEVICE_HANDLER( tms9927_r )
 
 	switch (offset)
 	{
-		case 0x08:	/* READ CURSOR CHARACTER ADDRESS */
-		case 0x09:	/* READ CURSOR ROW ADDRESS */
+		case 0x08:  /* READ CURSOR CHARACTER ADDRESS */
+		case 0x09:  /* READ CURSOR ROW ADDRESS */
 			return tms->reg[offset - 0x08 + 7];
 
 		default:
-			generic_access(device, offset);
+			generic_access(device, space, offset);
 			break;
 	}
 	return 0xff;
@@ -188,16 +187,16 @@ int tms9927_upscroll_offset(device_t *device)
 }
 
 
-int tms9927_cursor_bounds(device_t *device, rectangle *bounds)
+int tms9927_cursor_bounds(device_t *device, rectangle &bounds)
 {
 	tms9927_state *tms = get_safe_token(device);
 	int cursorx = CURSOR_CHAR_ADDRESS(tms);
 	int cursory = CURSOR_ROW_ADDRESS(tms);
 
-	bounds->min_x = cursorx * tms->hpixels_per_column;
-	bounds->max_x = bounds->min_x + tms->hpixels_per_column - 1;
-	bounds->min_y = cursory * SCANS_PER_DATA_ROW(tms);
-	bounds->max_y = bounds->min_y + SCANS_PER_DATA_ROW(tms) - 1;
+	bounds.min_x = cursorx * tms->hpixels_per_column;
+	bounds.max_x = bounds.min_x + tms->hpixels_per_column - 1;
+	bounds.min_y = cursory * SCANS_PER_DATA_ROW(tms);
+	bounds.max_y = bounds.min_y + SCANS_PER_DATA_ROW(tms) - 1;
 
 	return (cursorx < HCOUNT(tms) && cursory <= LAST_DISP_DATA_ROW(tms));
 }
@@ -240,10 +239,7 @@ static void recompute_parameters(tms9927_state *tms, int postload)
 
 	/* create a visible area */
 	/* fix me: how do the offsets fit in here? */
-	visarea.min_x = 0;
-	visarea.max_x = tms->visible_hpix - 1;
-	visarea.min_y = 0;
-	visarea.max_y = tms->visible_vpix - 1;
+	visarea.set(0, tms->visible_hpix - 1, 0, tms->visible_vpix - 1);
 
 	refresh = HZ_TO_ATTOSECONDS(tms->clock) * tms->total_hpix * tms->total_vpix;
 
@@ -259,7 +255,7 @@ static DEVICE_START( tms9927 )
 	/* validate arguments */
 	assert(device != NULL);
 
-	tms->intf = (const tms9927_interface *)device->baseconfig().static_config();
+	tms->intf = (const tms9927_interface *)device->static_config();
 
 	if (tms->intf != NULL)
 	{
@@ -277,13 +273,13 @@ static DEVICE_START( tms9927 )
 		/* get the self-load PROM */
 		if (tms->intf->selfload_region != NULL)
 		{
-			tms->selfload = device->machine().region(tms->intf->selfload_region)->base();
+			tms->selfload = device->machine().root_device().memregion(tms->intf->selfload_region)->base();
 			assert(tms->selfload != NULL);
 		}
 	}
 
 	/* register for state saving */
-	device->machine().state().register_postload(tms9927_state_save_postload, tms);
+	device->machine().save().register_postload(save_prepost_delegate(FUNC(tms9927_state_save_postload), tms));
 
 	device->save_item(NAME(tms->clock));
 	device->save_item(NAME(tms->reg));
@@ -310,58 +306,76 @@ static DEVICE_RESET( tms9927 )
 {
 }
 
+const device_type TMS9927 = &device_creator<tms9927_device>;
 
-DEVICE_GET_INFO( tms9927 )
+tms9927_device::tms9927_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, TMS9927, "TMS9927", tag, owner, clock)
 {
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(tms9927_state);			break;
-		case DEVINFO_INT_INLINE_CONFIG_BYTES:			info->i = 0;								break;
-
-		/* --- the following bits of info are returned as pointers to functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME(tms9927);	break;
-		case DEVINFO_FCT_STOP:							info->stop = DEVICE_STOP_NAME(tms9927);		break;
-		case DEVINFO_FCT_RESET:							info->reset = DEVICE_RESET_NAME(tms9927);	break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "TMS9927");					break;
-		case DEVINFO_STR_FAMILY:						strcpy(info->s, "TMS9927 CRTC");			break;
-		case DEVINFO_STR_VERSION:						strcpy(info->s, "1.0");						break;
-		case DEVINFO_STR_SOURCE_FILE:					strcpy(info->s, __FILE__);					break;
-		case DEVINFO_STR_CREDITS:						strcpy(info->s, "Copyright Nicola Salmoria and the MAME Team"); break;
-	}
+	m_token = global_alloc_clear(tms9927_state);
+}
+tms9927_device::tms9927_device(const machine_config &mconfig, device_type type, const char *name, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, type, name, tag, owner, clock)
+{
+	m_token = global_alloc_clear(tms9927_state);
 }
 
-DEVICE_GET_INFO( crt5027 )
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
+
+void tms9927_device::device_config_complete()
 {
-	switch (state)
-	{
-		case DEVINFO_STR_NAME:							strcpy(info->s, "CRT5027");					break;
-		default:										DEVICE_GET_INFO_CALL(tms9927);				break;
-	}
 }
 
-DEVICE_GET_INFO( crt5037 )
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void tms9927_device::device_start()
 {
-	switch (state)
-	{
-		case DEVINFO_STR_NAME:							strcpy(info->s, "CRT5037");					break;
-		default:										DEVICE_GET_INFO_CALL(tms9927);				break;
-	}
+	DEVICE_START_NAME( tms9927 )(this);
 }
 
-DEVICE_GET_INFO( crt5057 )
+//-------------------------------------------------
+//  device_reset - device-specific reset
+//-------------------------------------------------
+
+void tms9927_device::device_reset()
 {
-	switch (state)
-	{
-		case DEVINFO_STR_NAME:							strcpy(info->s, "CRT5057");					break;
-		default:										DEVICE_GET_INFO_CALL(tms9927);				break;
-	}
+	DEVICE_RESET_NAME( tms9927 )(this);
+}
+
+//-------------------------------------------------
+//  device_stop - device-specific stop
+//-------------------------------------------------
+
+void tms9927_device::device_stop()
+{
+	DEVICE_STOP_NAME( tms9927 )(this);
 }
 
 
-DEFINE_LEGACY_DEVICE(TMS9927, tms9927);
-DEFINE_LEGACY_DEVICE(CRT5027, crt5027);
-DEFINE_LEGACY_DEVICE(CRT5037, crt5037);
-DEFINE_LEGACY_DEVICE(CRT5057, crt5057);
+const device_type CRT5027 = &device_creator<crt5027_device>;
+
+crt5027_device::crt5027_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: tms9927_device(mconfig, CRT5027, "CRT5027", tag, owner, clock)
+{
+}
+
+
+const device_type CRT5037 = &device_creator<crt5037_device>;
+
+crt5037_device::crt5037_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: tms9927_device(mconfig, CRT5037, "CRT5037", tag, owner, clock)
+{
+}
+
+
+const device_type CRT5057 = &device_creator<crt5057_device>;
+
+crt5057_device::crt5057_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: tms9927_device(mconfig, CRT5057, "CRT5057", tag, owner, clock)
+{
+}

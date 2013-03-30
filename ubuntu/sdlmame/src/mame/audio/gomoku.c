@@ -19,18 +19,17 @@ static const int defgain = 48;
 
 
 /* this structure defines the parameters for a channel */
-typedef struct
+struct sound_channel
 {
 	int channel;
 	int frequency;
 	int counter;
 	int volume;
 	int oneshotplaying;
-} sound_channel;
+};
 
 
-typedef struct _gomoku_sound_state gomoku_sound_state;
-struct _gomoku_sound_state
+struct gomoku_sound_state
 {
 	/* data about the sound system */
 	sound_channel m_channel_list[MAX_VOICES];
@@ -57,7 +56,7 @@ INLINE gomoku_sound_state *get_safe_token( device_t *device )
 	assert(device != NULL);
 	assert(device->type() == GOMOKU);
 
-	return (gomoku_sound_state *)downcast<legacy_device_base *>(device)->token();
+	return (gomoku_sound_state *)downcast<gomoku_sound_device *>(device)->token();
 }
 
 
@@ -192,7 +191,7 @@ static DEVICE_START( gomoku_sound )
 	state->m_num_voices = MAX_VOICES;
 	state->m_last_channel = state->m_channel_list + state->m_num_voices;
 
-	state->m_sound_rom = machine.region("gomoku")->base();
+	state->m_sound_rom = machine.root_device().memregion("gomoku")->base();
 
 	/* start with sound enabled, many games don't have a sound enable register */
 	state->m_sound_enable = 1;
@@ -205,23 +204,6 @@ static DEVICE_START( gomoku_sound )
 		voice->counter = 0;
 		voice->volume = 0;
 		voice->oneshotplaying = 0;
-	}
-}
-
-
-DEVICE_GET_INFO( gomoku_sound )
-{
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(gomoku_sound_state);			break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME(gomoku_sound);	break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "Gomoku Custom");				break;
-		case DEVINFO_STR_SOURCE_FILE:						strcpy(info->s, __FILE__);						break;
 	}
 }
 
@@ -279,9 +261,9 @@ WRITE8_DEVICE_HANDLER( gomoku_sound2_w )
 
 		// oneshot frequency is hand tune...
 		if ((state->m_soundregs2[0x1d] & 0x0f) < 0x0c)
-			voice->frequency = 3000 / 16;			// ichi, ni, san, yon, go
+			voice->frequency = 3000 / 16;           // ichi, ni, san, yon, go
 		else
-			voice->frequency = 8000 / 16;			// shoot
+			voice->frequency = 8000 / 16;           // shoot
 
 		voice->volume = 8;
 		voice->counter = 0;
@@ -294,4 +276,40 @@ WRITE8_DEVICE_HANDLER( gomoku_sound2_w )
 }
 
 
-DEFINE_LEGACY_SOUND_DEVICE(GOMOKU, gomoku_sound);
+const device_type GOMOKU = &device_creator<gomoku_sound_device>;
+
+gomoku_sound_device::gomoku_sound_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, GOMOKU, "Gomoku Custom", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
+{
+	m_token = global_alloc_clear(gomoku_sound_state);
+}
+
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
+
+void gomoku_sound_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void gomoku_sound_device::device_start()
+{
+	DEVICE_START_NAME( gomoku_sound )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void gomoku_sound_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}

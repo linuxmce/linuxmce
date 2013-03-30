@@ -67,59 +67,64 @@ Notes:
 class dominob_state : public driver_device
 {
 public:
-	dominob_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	dominob_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"),
+		m_spriteram(*this, "spriteram"),
+		m_bgram(*this, "bgram"){ }
 
 	/* memory pointers */
-	UINT8 *  m_spriteram;
-	UINT8 *  m_videoram;
-	UINT8 *  m_bgram;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_spriteram;
+	required_shared_ptr<UINT8> m_bgram;
 //  UINT8 *  m_paletteram;    // currently this uses generic palette handling
-	size_t   m_spriteram_size;
 
 	/* input-related */
 	//UINT8 m_paddle_select;
 	//UINT8 m_paddle_value;
+	DECLARE_WRITE8_MEMBER(dominob_d008_w);
+	DECLARE_READ8_MEMBER(dominob_unk_port02_r);
+	virtual void video_start();
+	UINT32 screen_update_dominob(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
-static VIDEO_START( dominob )
+void dominob_state::video_start()
 {
-	machine.gfx[0]->color_granularity = 8;
+	machine().gfx[0]->set_granularity(8);
 }
 
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	dominob_state *state = machine.driver_data<dominob_state>();
 	int offs;
 
-	for (offs = 0; offs < state->m_spriteram_size; offs += 4)
+	for (offs = 0; offs < state->m_spriteram.bytes(); offs += 4)
 	{
 		int sx, sy, code;
 
 		sx = state->m_spriteram[offs];
 		sy = 248 - state->m_spriteram[offs + 1];
-		if (flip_screen_x_get(machine)) sx = 248 - sx;
-		if (flip_screen_y_get(machine)) sy = 248 - sy;
+		if (state->flip_screen_x()) sx = 248 - sx;
+		if (state->flip_screen_y()) sy = 248 - sy;
 
 		code = state->m_spriteram[offs + 3] + ((state->m_spriteram[offs + 2] & 0x03) << 8)  ;
 
 		drawgfx_transpen(bitmap,cliprect,machine.gfx[0],
 				2 * code,
 				((state->m_spriteram[offs + 2] & 0xf8) >> 3)  ,
-				flip_screen_x_get(machine),flip_screen_y_get(machine),
-				sx,sy + (flip_screen_y_get(machine) ? 8 : -8),0);
+				state->flip_screen_x(),state->flip_screen_y(),
+				sx,sy + (state->flip_screen_y() ? 8 : -8),0);
 		drawgfx_transpen(bitmap,cliprect,machine.gfx[0],
 				2 * code + 1,
 				((state->m_spriteram[offs + 2] & 0xf8) >> 3)  ,
-				flip_screen_x_get(machine),flip_screen_y_get(machine),
+				state->flip_screen_x(),state->flip_screen_y(),
 				sx,sy,0);
 	}
 }
 
 
-static SCREEN_UPDATE( dominob )
+UINT32 dominob_state::screen_update_dominob(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	dominob_state *state = screen->machine().driver_data<dominob_state>();
 	int x,y;
 	int index = 0;
 
@@ -130,9 +135,9 @@ static SCREEN_UPDATE( dominob )
 		{
 			drawgfx_opaque(bitmap,
 					cliprect,
-					screen->machine().gfx[1],
-					state->m_bgram[index] + 256 * (state->m_bgram[index + 1] & 0xf),
-					state->m_bgram[index + 1] >> 4,
+					machine().gfx[1],
+					m_bgram[index] + 256 * (m_bgram[index + 1] & 0xf),
+					m_bgram[index + 1] >> 4,
 					0, 0,
 					x * 32, y * 32);
 			index += 2;
@@ -143,54 +148,54 @@ static SCREEN_UPDATE( dominob )
 	{
 		for (x = 0; x < 32; x++)
 		{
-			drawgfx_transpen(	bitmap,
+			drawgfx_transpen(   bitmap,
 					cliprect,
-					screen->machine().gfx[0],
-					state->m_videoram[(y * 32 + x) * 2 + 1] + (state->m_videoram[(y * 32 + x) * 2] & 7) * 256,
-					(state->m_videoram[(y * 32 + x) * 2] >> 3),
+					machine().gfx[0],
+					m_videoram[(y * 32 + x) * 2 + 1] + (m_videoram[(y * 32 + x) * 2] & 7) * 256,
+					(m_videoram[(y * 32 + x) * 2] >> 3),
 					0, 0,
 					x * 8, y * 8,0);
 		}
 	}
 
-	draw_sprites(screen->machine(), bitmap, cliprect);
+	draw_sprites(machine(), bitmap, cliprect);
 
 	return 0;
 }
 
 
-static WRITE8_HANDLER( dominob_d008_w )
+WRITE8_MEMBER(dominob_state::dominob_d008_w)
 {
 	/* is there a purpose on this ? always set to 0x00 (read from 0xc47b in RAM) */
 }
 
-static ADDRESS_MAP_START( memmap, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( memmap, AS_PROGRAM, 8, dominob_state )
 	AM_RANGE(0x0000, 0xbfff) AM_ROM AM_WRITENOP // there are some garbage writes to ROM
 	AM_RANGE(0xc000, 0xc7ff) AM_RAM
 
-	AM_RANGE(0xd000, 0xd001) AM_DEVWRITE("aysnd", ay8910_address_data_w)
-	AM_RANGE(0xd001, 0xd001) AM_DEVREAD("aysnd", ay8910_r)
+	AM_RANGE(0xd000, 0xd001) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_data_w)
+	AM_RANGE(0xd001, 0xd001) AM_DEVREAD_LEGACY("aysnd", ay8910_r)
 	AM_RANGE(0xd008, 0xd008) AM_WRITE(dominob_d008_w)
 	AM_RANGE(0xd00c, 0xd00c) AM_READ_PORT("IN0")
 	AM_RANGE(0xd010, 0xd010) AM_READ_PORT("IN1") AM_WRITENOP
 	AM_RANGE(0xd018, 0xd018) AM_READ_PORT("IN2") AM_WRITENOP
 
-	AM_RANGE(0xe000, 0xe7ff) AM_RAM AM_BASE_MEMBER(dominob_state, m_videoram)
-	AM_RANGE(0xe800, 0xe83f) AM_RAM AM_BASE_SIZE_MEMBER(dominob_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0xe000, 0xe7ff) AM_RAM AM_SHARE("videoram")
+	AM_RANGE(0xe800, 0xe83f) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0xe840, 0xefff) AM_RAM
-	AM_RANGE(0xf000, 0xf07f) AM_RAM AM_BASE_MEMBER(dominob_state, m_bgram)
+	AM_RANGE(0xf000, 0xf07f) AM_RAM AM_SHARE("bgram")
 	AM_RANGE(0xf080, 0xf7ff) AM_RAM
-	AM_RANGE(0xf800, 0xfbff) AM_RAM_WRITE(paletteram_xxxxRRRRGGGGBBBB_le_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0xf800, 0xfbff) AM_RAM_WRITE(paletteram_xxxxRRRRGGGGBBBB_byte_le_w) AM_SHARE("paletteram")
 	AM_RANGE(0xfc00, 0xffff) AM_RAM
 ADDRESS_MAP_END
 
 /* I don't know if this has a purpose - also read in 'arkatayt' but not handled */
-static READ8_HANDLER( dominob_unk_port02_r )
+READ8_MEMBER(dominob_state::dominob_unk_port02_r)
 {
 	return 0xff;
 }
 
-static ADDRESS_MAP_START( portmap, AS_IO, 8 )
+static ADDRESS_MAP_START( portmap, AS_IO, 8, dominob_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x02, 0x02) AM_READ(dominob_unk_port02_r)
 ADDRESS_MAP_END
@@ -294,21 +299,19 @@ static MACHINE_CONFIG_START( dominob, dominob_state )
 	MCFG_CPU_ADD("maincpu", Z80,XTAL_12MHz/2)
 	MCFG_CPU_PROGRAM_MAP(memmap)
 	MCFG_CPU_IO_MAP(portmap)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", dominob_state,  irq0_line_hold)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(59.1524)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 32*8-1)
-	MCFG_SCREEN_UPDATE(dominob)
+	MCFG_SCREEN_UPDATE_DRIVER(dominob_state, screen_update_dominob)
 
 	MCFG_GFXDECODE(dominob)
 	MCFG_PALETTE_LENGTH(512)
 
-	MCFG_VIDEO_START(dominob)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -360,5 +363,5 @@ ROM_START( dominobv2 )
 	ROM_LOAD( "u114v2",   0xc0000, 0x40000, CRC(df17ee65) SHA1(1cb434719a8c406726d2c966392be03a2dc1d758) )
 ROM_END
 
-GAME( 1996, dominob,  0,       dominob,  dominob,  0, ROT0, "Wonwoo Systems", "Domino Block", GAME_SUPPORTS_SAVE )
-GAME( 1996, dominobv2,dominob, dominob,  dominob,  0, ROT0, "Wonwoo Systems", "Domino Block ver.2", GAME_SUPPORTS_SAVE )
+GAME( 1996, dominob,  0,       dominob,  dominob, driver_device,  0, ROT0, "Wonwoo Systems", "Domino Block", GAME_SUPPORTS_SAVE )
+GAME( 1996, dominobv2,dominob, dominob,  dominob, driver_device,  0, ROT0, "Wonwoo Systems", "Domino Block ver.2", GAME_SUPPORTS_SAVE )

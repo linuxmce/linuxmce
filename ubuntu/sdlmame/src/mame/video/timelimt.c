@@ -20,10 +20,11 @@
 
 ***************************************************************************/
 
-PALETTE_INIT( timelimt ) {
+void timelimt_state::palette_init(){
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 
-	for (i = 0;i < machine.total_colors();i++)
+	for (i = 0;i < machine().total_colors();i++)
 	{
 		int bit0,bit1,bit2,r,g,b;
 
@@ -42,7 +43,7 @@ PALETTE_INIT( timelimt ) {
 		bit1 = (*color_prom >> 7) & 0x01;
 		b = 0x4f * bit0 + 0xa8 * bit1;
 
-		palette_set_color(machine,i,MAKE_RGB(r,g,b));
+		palette_set_color(machine(),i,MAKE_RGB(r,g,b));
 		color_prom++;
 	}
 }
@@ -53,76 +54,68 @@ PALETTE_INIT( timelimt ) {
 
 ***************************************************************************/
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(timelimt_state::get_bg_tile_info)
 {
-	timelimt_state *state = machine.driver_data<timelimt_state>();
-	SET_TILE_INFO(1, state->m_bg_videoram[tile_index], 0, 0);
+	SET_TILE_INFO_MEMBER(1, m_bg_videoram[tile_index], 0, 0);
 }
 
-static TILE_GET_INFO( get_fg_tile_info )
+TILE_GET_INFO_MEMBER(timelimt_state::get_fg_tile_info)
 {
-	timelimt_state *state = machine.driver_data<timelimt_state>();
-	UINT8 *videoram = state->m_videoram;
-	SET_TILE_INFO(0, videoram[tile_index], 0, 0);
+	UINT8 *videoram = m_videoram;
+	SET_TILE_INFO_MEMBER(0, videoram[tile_index], 0, 0);
 }
 
-VIDEO_START( timelimt )
+void timelimt_state::video_start()
 {
-	timelimt_state *state = machine.driver_data<timelimt_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_rows,
-		 8, 8, 64, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(timelimt_state::get_bg_tile_info),this), TILEMAP_SCAN_ROWS,
+			8, 8, 64, 32);
 
-	state->m_fg_tilemap = tilemap_create(machine, get_fg_tile_info, tilemap_scan_rows,
-		 8, 8, 32, 32);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(timelimt_state::get_fg_tile_info),this), TILEMAP_SCAN_ROWS,
+			8, 8, 32, 32);
 
-	tilemap_set_transparent_pen(state->m_fg_tilemap, 0);
+	m_fg_tilemap->set_transparent_pen(0);
 }
 
 /***************************************************************************/
 
-WRITE8_HANDLER( timelimt_videoram_w )
+WRITE8_MEMBER(timelimt_state::timelimt_videoram_w)
 {
-	timelimt_state *state = space->machine().driver_data<timelimt_state>();
-	UINT8 *videoram = state->m_videoram;
+	UINT8 *videoram = m_videoram;
 	videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_fg_tilemap, offset);
+	m_fg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( timelimt_bg_videoram_w )
+WRITE8_MEMBER(timelimt_state::timelimt_bg_videoram_w)
 {
-	timelimt_state *state = space->machine().driver_data<timelimt_state>();
-	state->m_bg_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_bg_videoram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( timelimt_scroll_x_lsb_w )
+WRITE8_MEMBER(timelimt_state::timelimt_scroll_x_lsb_w)
 {
-	timelimt_state *state = space->machine().driver_data<timelimt_state>();
-	state->m_scrollx &= 0x100;
-	state->m_scrollx |= data & 0xff;
+	m_scrollx &= 0x100;
+	m_scrollx |= data & 0xff;
 }
 
-WRITE8_HANDLER( timelimt_scroll_x_msb_w )
+WRITE8_MEMBER(timelimt_state::timelimt_scroll_x_msb_w)
 {
-	timelimt_state *state = space->machine().driver_data<timelimt_state>();
-	state->m_scrollx &= 0xff;
-	state->m_scrollx |= ( data & 1 ) << 8;
+	m_scrollx &= 0xff;
+	m_scrollx |= ( data & 1 ) << 8;
 }
 
-WRITE8_HANDLER( timelimt_scroll_y_w )
+WRITE8_MEMBER(timelimt_state::timelimt_scroll_y_w)
 {
-	timelimt_state *state = space->machine().driver_data<timelimt_state>();
-	state->m_scrolly = data;
+	m_scrolly = data;
 }
 
 
-static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect)
+static void draw_sprites(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	timelimt_state *state = machine.driver_data<timelimt_state>();
 	UINT8 *spriteram = state->m_spriteram;
 	int offs;
 
-	for( offs = state->m_spriteram_size; offs >= 0; offs -= 4 )
+	for( offs = state->m_spriteram.bytes(); offs >= 0; offs -= 4 )
 	{
 		int sy = 240 - spriteram[offs];
 		int sx = spriteram[offs+3];
@@ -143,15 +136,14 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 }
 
 
-SCREEN_UPDATE( timelimt )
+UINT32 timelimt_state::screen_update_timelimt(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	timelimt_state *state = screen->machine().driver_data<timelimt_state>();
-	tilemap_set_scrollx(state->m_bg_tilemap, 0, state->m_scrollx);
-	tilemap_set_scrolly(state->m_bg_tilemap, 0, state->m_scrolly);
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
+	m_bg_tilemap->set_scrollx(0, m_scrollx);
+	m_bg_tilemap->set_scrolly(0, m_scrolly);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
 
-	draw_sprites(screen->machine(), bitmap, cliprect);
+	draw_sprites(machine(), bitmap, cliprect);
 
-	tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, 0, 0);
+	m_fg_tilemap->draw(bitmap, cliprect, 0, 0);
 	return 0;
 }

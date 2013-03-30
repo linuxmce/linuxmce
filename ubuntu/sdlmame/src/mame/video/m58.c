@@ -9,7 +9,7 @@
 #include "includes/m58.h"
 
 #define SCROLL_PANEL_WIDTH  (14*4)
-#define RADAR_PALETTE_BASE	(256)
+#define RADAR_PALETTE_BASE  (256)
 
 
 
@@ -19,8 +19,9 @@
  *
  *************************************/
 
-PALETTE_INIT( yard )
+void m58_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	const UINT8 *char_lopal = color_prom + 0x000;
 	const UINT8 *char_hipal = color_prom + 0x100;
 	const UINT8 *sprite_pal = color_prom + 0x200;
@@ -32,10 +33,10 @@ PALETTE_INIT( yard )
 	double weights_r[3], weights_g[3], weights_b[3], scale;
 	int i;
 
-	machine.colortable = colortable_alloc(machine, 256+256+16);
+	machine().colortable = colortable_alloc(machine(), 256+256+16);
 
 	/* compute palette information for characters/radar */
-	scale = compute_resistor_weights(0,	255, -1.0,
+	scale = compute_resistor_weights(0, 255, -1.0,
 			2, resistances_2, weights_r, 0, 0,
 			3, resistances_3, weights_g, 0, 0,
 			3, resistances_3, weights_b, 0, 0);
@@ -48,7 +49,7 @@ PALETTE_INIT( yard )
 		int g = combine_3_weights(weights_g, BIT(promval,3), BIT(promval,4), BIT(promval,5));
 		int b = combine_3_weights(weights_b, BIT(promval,0), BIT(promval,1), BIT(promval,2));
 
-		colortable_palette_set_color(machine.colortable, i, MAKE_RGB(r,g,b));
+		colortable_palette_set_color(machine().colortable, i, MAKE_RGB(r,g,b));
 	}
 
 	/* radar palette */
@@ -59,11 +60,11 @@ PALETTE_INIT( yard )
 		int g = combine_3_weights(weights_g, BIT(promval,3), BIT(promval,4), BIT(promval,5));
 		int b = combine_3_weights(weights_b, BIT(promval,0), BIT(promval,1), BIT(promval,2));
 
-		colortable_palette_set_color(machine.colortable, 256+i, MAKE_RGB(r,g,b));
+		colortable_palette_set_color(machine().colortable, 256+i, MAKE_RGB(r,g,b));
 	}
 
 	/* compute palette information for sprites */
-	scale = compute_resistor_weights(0,	255, scale,
+	scale = compute_resistor_weights(0, 255, scale,
 			2, resistances_2, weights_r, 470, 0,
 			3, resistances_3, weights_g, 470, 0,
 			3, resistances_3, weights_b, 470, 0);
@@ -76,22 +77,22 @@ PALETTE_INIT( yard )
 		int g = combine_3_weights(weights_g, BIT(promval,3), BIT(promval,4), BIT(promval,5));
 		int b = combine_3_weights(weights_b, BIT(promval,0), BIT(promval,1), BIT(promval,2));
 
-		colortable_palette_set_color(machine.colortable, 256+256+i, MAKE_RGB(r,g,b));
+		colortable_palette_set_color(machine().colortable, 256+256+i, MAKE_RGB(r,g,b));
 	}
 
 	/* character lookup table */
 	for (i = 0; i < 256; i++)
-		colortable_entry_set_value(machine.colortable, i, i);
+		colortable_entry_set_value(machine().colortable, i, i);
 
 	/* radar lookup table */
 	for (i = 0; i < 256; i++)
-		colortable_entry_set_value(machine.colortable, 256+i, 256+i);
+		colortable_entry_set_value(machine().colortable, 256+i, 256+i);
 
 	/* sprite lookup table */
 	for (i = 0; i < 256; i++)
 	{
 		UINT8 promval = sprite_table[i] & 0x0f;
-		colortable_entry_set_value(machine.colortable, 256+256+i, 256+256+promval);
+		colortable_entry_set_value(machine().colortable, 256+256+i, 256+256+promval);
 	}
 }
 
@@ -103,18 +104,16 @@ PALETTE_INIT( yard )
  *
  *************************************/
 
-WRITE8_HANDLER( yard_videoram_w )
+WRITE8_MEMBER(m58_state::yard_videoram_w)
 {
-	m58_state *state = space->machine().driver_data<m58_state>();
 
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset / 2);
+	m_videoram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset / 2);
 }
 
 
-WRITE8_HANDLER( yard_scroll_panel_w )
+WRITE8_MEMBER(m58_state::yard_scroll_panel_w)
 {
-	m58_state *state = space->machine().driver_data<m58_state>();
 
 	int sx,sy,i;
 
@@ -133,7 +132,7 @@ WRITE8_HANDLER( yard_scroll_panel_w )
 		col = (data >> i) & 0x11;
 		col = ((col >> 3) | col) & 3;
 
-		*BITMAP_ADDR16(state->m_scroll_panel_bitmap, sy, sx + i) = RADAR_PALETTE_BASE + (sy & 0xfc) + col;
+		m_scroll_panel_bitmap->pix16(sy, sx + i) = RADAR_PALETTE_BASE + (sy & 0xfc) + col;
 	}
 }
 
@@ -145,21 +144,20 @@ WRITE8_HANDLER( yard_scroll_panel_w )
  *
  *************************************/
 
-static TILE_GET_INFO( yard_get_bg_tile_info )
+TILE_GET_INFO_MEMBER(m58_state::yard_get_bg_tile_info)
 {
-	m58_state *state = machine.driver_data<m58_state>();
 
 	int offs = tile_index * 2;
-	int attr = state->m_videoram[offs + 1];
-	int code = state->m_videoram[offs] + ((attr & 0xc0) << 2);
+	int attr = m_videoram[offs + 1];
+	int code = m_videoram[offs] + ((attr & 0xc0) << 2);
 	int color = attr & 0x1f;
 	int flags = (attr & 0x20) ? TILE_FLIPX : 0;
 
-	SET_TILE_INFO(0, code, color, flags);
+	SET_TILE_INFO_MEMBER(0, code, color, flags);
 }
 
 
-static UINT32 yard_tilemap_scan_rows( UINT32 col, UINT32 row, UINT32 num_cols, UINT32 num_rows )
+TILEMAP_MAPPER_MEMBER(m58_state::yard_tilemap_scan_rows)
 {
 	/* logical (col,row) -> memory offset */
 	if (col >= 32)
@@ -176,20 +174,18 @@ static UINT32 yard_tilemap_scan_rows( UINT32 col, UINT32 row, UINT32 num_cols, U
  *
  *************************************/
 
-VIDEO_START( yard )
+void m58_state::video_start()
 {
-	m58_state *state = machine.driver_data<m58_state>();
 
-	int width = machine.primary_screen->width();
-	int height = machine.primary_screen->height();
-	bitmap_format format = machine.primary_screen->format();
-	const rectangle &visarea = machine.primary_screen->visible_area();
+	int width = machine().primary_screen->width();
+	int height = machine().primary_screen->height();
+	const rectangle &visarea = machine().primary_screen->visible_area();
 
-	state->m_bg_tilemap = tilemap_create(machine, yard_get_bg_tile_info, yard_tilemap_scan_rows,  8, 8, 64, 32);
-	tilemap_set_scrolldx(state->m_bg_tilemap, visarea.min_x, width - (visarea.max_x + 1));
-	tilemap_set_scrolldy(state->m_bg_tilemap, visarea.min_y - 8, height + 16 - (visarea.max_y + 1));
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(m58_state::yard_get_bg_tile_info),this), tilemap_mapper_delegate(FUNC(m58_state::yard_tilemap_scan_rows),this),  8, 8, 64, 32);
+	m_bg_tilemap->set_scrolldx(visarea.min_x, width - (visarea.max_x + 1));
+	m_bg_tilemap->set_scrolldy(visarea.min_y - 8, height + 16 - (visarea.max_y + 1));
 
-	state->m_scroll_panel_bitmap = auto_bitmap_alloc(machine, SCROLL_PANEL_WIDTH, height, format);
+	m_scroll_panel_bitmap = auto_bitmap_ind16_alloc(machine(), SCROLL_PANEL_WIDTH, height);
 }
 
 
@@ -200,13 +196,13 @@ VIDEO_START( yard )
  *
  *************************************/
 
-WRITE8_HANDLER( yard_flipscreen_w )
+WRITE8_MEMBER(m58_state::yard_flipscreen_w)
 {
 	/* screen flip is handled both by software and hardware */
-	flip_screen_set(space->machine(), (data & 0x01) ^ (~input_port_read(space->machine(), "DSW2") & 0x01));
+	flip_screen_set((data & 0x01) ^ (~ioport("DSW2")->read() & 0x01));
 
-	coin_counter_w(space->machine(), 0, data & 0x02);
-	coin_counter_w(space->machine(), 1, data & 0x20);
+	coin_counter_w(machine(), 0, data & 0x02);
+	coin_counter_w(machine(), 1, data & 0x20);
 }
 
 
@@ -219,13 +215,13 @@ WRITE8_HANDLER( yard_flipscreen_w )
 
 #define DRAW_SPRITE(code, sy) drawgfx_transmask(bitmap, cliprect, machine.gfx[1], code, color, flipx, flipy, sx, sy, colortable_get_transpen_mask(machine.colortable, machine.gfx[1], color, 512));
 
-static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_sprites(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	m58_state *state = machine.driver_data<m58_state>();
 	int offs;
 	const rectangle &visarea = machine.primary_screen->visible_area();
 
-	for (offs = state->m_spriteram_size - 4; offs >= 0; offs -= 4)
+	for (offs = state->m_spriteram.bytes() - 4; offs >= 0; offs -= 4)
 	{
 		int attr = state->m_spriteram[offs + 1];
 		int bank = (attr & 0x20) >> 5;
@@ -248,7 +244,7 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 			code2 = code1 + 0x40;
 		}
 
-		if (flip_screen_get(machine))
+		if (state->flip_screen())
 		{
 			sx = 240 - sx;
 			sy2 = 192 - sy1;
@@ -274,33 +270,25 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
  *
  *************************************/
 
-static void draw_panel( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_panel( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	m58_state *state = machine.driver_data<m58_state>();
 
 	if (!*state->m_yard_score_panel_disabled)
 	{
-		static const rectangle clippanel =
-		{
-			26*8, 32*8-1,
-			1*8, 31*8-1
-		};
-		static const rectangle clippanelflip =
-		{
-			0*8, 6*8-1,
-			1*8, 31*8-1
-		};
-		rectangle clip = flip_screen_get(machine) ? clippanelflip : clippanel;
+		const rectangle clippanel(26*8, 32*8-1, 1*8, 31*8-1);
+		const rectangle clippanelflip(0*8, 6*8-1, 1*8, 31*8-1);
+		rectangle clip = state->flip_screen() ? clippanelflip : clippanel;
 		const rectangle &visarea = machine.primary_screen->visible_area();
-		int sx = flip_screen_get(machine) ? cliprect->min_x - 8 : cliprect->max_x + 1 - SCROLL_PANEL_WIDTH;
-		int yoffs = flip_screen_get(machine) ? -40 : -16;
+		int sx = state->flip_screen() ? cliprect.min_x - 8 : cliprect.max_x + 1 - SCROLL_PANEL_WIDTH;
+		int yoffs = state->flip_screen() ? -40 : -16;
 
 		clip.min_y += visarea.min_y + yoffs;
 		clip.max_y += visarea.max_y + yoffs;
-		sect_rect(&clip, cliprect);
+		clip &= cliprect;
 
-		copybitmap(bitmap, state->m_scroll_panel_bitmap, flip_screen_get(machine), flip_screen_get(machine),
-				   sx, visarea.min_y + yoffs, &clip);
+		copybitmap(bitmap, *state->m_scroll_panel_bitmap, state->flip_screen(), state->flip_screen(),
+					sx, visarea.min_y + yoffs, clip);
 	}
 }
 
@@ -312,15 +300,14 @@ static void draw_panel( running_machine &machine, bitmap_t *bitmap, const rectan
  *
  *************************************/
 
-SCREEN_UPDATE( yard )
+UINT32 m58_state::screen_update_yard(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	m58_state *state = screen->machine().driver_data<m58_state>();
 
-	tilemap_set_scrollx(state->m_bg_tilemap, 0, (*state->m_yard_scroll_x_high * 0x100) + *state->m_yard_scroll_x_low);
-	tilemap_set_scrolly(state->m_bg_tilemap, 0, *state->m_yard_scroll_y_low);
+	m_bg_tilemap->set_scrollx(0, (*m_yard_scroll_x_high * 0x100) + *m_yard_scroll_x_low);
+	m_bg_tilemap->set_scrolly(0, *m_yard_scroll_y_low);
 
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
-	draw_sprites(screen->machine(), bitmap, cliprect);
-	draw_panel(screen->machine(), bitmap, cliprect);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
+	draw_sprites(machine(), bitmap, cliprect);
+	draw_panel(machine(), bitmap, cliprect);
 	return 0;
 }

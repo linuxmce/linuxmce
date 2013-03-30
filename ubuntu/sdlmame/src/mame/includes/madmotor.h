@@ -7,24 +7,24 @@
 class madmotor_state : public driver_device
 {
 public:
-	madmotor_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	madmotor_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_spriteram(*this, "spriteram"){ }
 
 	/* memory pointers */
-	UINT16 *        m_spriteram;
+	required_shared_ptr<UINT16> m_spriteram;
 //  UINT16 *        m_paletteram;     // this currently uses generic palette handlers
-	size_t          m_spriteram_size;
 
 	/* video-related */
 	int             m_flipscreen;
 
 	/* devices */
-	device_t *m_maincpu;
-	device_t *m_audiocpu;
+	cpu_device *m_maincpu;
+	cpu_device *m_audiocpu;
+	DECLARE_WRITE16_MEMBER(madmotor_sound_w);
+	DECLARE_DRIVER_INIT(madmotor);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	UINT32 screen_update_madmotor(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
-
-
-/*----------- defined in video/madmotor.c -----------*/
-
-VIDEO_START( madmotor );
-SCREEN_UPDATE( madmotor );

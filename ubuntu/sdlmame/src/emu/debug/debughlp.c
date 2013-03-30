@@ -19,8 +19,8 @@
     CONSTANTS
 ***************************************************************************/
 
-#define CONSOLE_HISTORY		(10000)
-#define CONSOLE_LINE_CHARS	(100)
+#define CONSOLE_HISTORY     (10000)
+#define CONSOLE_LINE_CHARS  (100)
 
 
 
@@ -28,11 +28,10 @@
     TYPE DEFINITIONS
 ***************************************************************************/
 
-typedef struct _help_item help_item;
-struct _help_item
+struct help_item
 {
-	const char *		tag;
-	const char *		help;
+	const char *        tag;
+	const char *        help;
 };
 
 
@@ -70,6 +69,7 @@ static const help_item static_help_list[] =
 		"  Expressions\n"
 		"  Comments\n"
 		"  Cheats\n"
+		"  Image\n"
 	},
 	{
 		"general",
@@ -219,6 +219,16 @@ static const help_item static_help_list[] =
 		"  cheatnextf <condition>[,<comparisonvalue>] -- continue cheat search comparing with the the first value\n"
 		"  cheatlist [<filename>] -- show the list of cheat search matches or save them to <filename>\n"
 		"  cheatundo -- undo the last cheat search (state only)\n"
+	},
+	{
+		"image",
+		"\n"
+		"Image Commands\n"
+		"Type help <command> for further details on each command\n"
+		"\n"
+		"  images -- lists all image devices and mounted files\n"
+		"  mount <device>,<filename> -- mounts file to named device\n"
+		"  unmount <device> -- unmounts file from named device\n"
 	},
 	{
 		"do",
@@ -630,7 +640,7 @@ static const help_item static_help_list[] =
 		"  gt[ime] <milliseconds>\n"
 		"\n"
 		"The gtime command resumes execution of the current code. Control will not be returned to the "
-		"debugger until	a specified delay has elapsed. The delay is in milliseconds.\n"
+		"debugger until a specified delay has elapsed. The delay is in milliseconds.\n"
 		"\n"
 		"Example:\n"
 		"\n"
@@ -1223,6 +1233,43 @@ static const help_item static_help_list[] =
 		"\n"
 		"cheatundo\n"
 		"  Undo the last search (state only).\n"
+	},
+	{
+		"images",
+		"\n"
+		"  images\n"
+		"\n"
+		"Used to display list of available image devices.\n"
+		"\n"
+		"Examples:\n"
+		"\n"
+		"images\n"
+		"  Show list of devices and mounted files for current driver.\n"
+	},
+	{
+		"mount",
+		"\n"
+		"  mount <device>,<filename>\n"
+		"\n"
+		"Mount <filename> to image <device>.\n"
+		"<filename> can be softlist item or full path to file.\n"
+		"\n"
+		"Examples:\n"
+		"\n"
+		"mount cart,aladdin\n"
+		"  Mounts softlist item alladin on cart device.\n"
+	},
+	{
+		"unmount",
+		"\n"
+		"  unmount <device>\n"
+		"\n"
+		"Unmounts file from image <device>.\n"
+		"\n"
+		"Examples:\n"
+		"\n"
+		"unmount cart\n"
+		"  Unmounts any file mounted on device named cart.\n"
 	}
 };
 
@@ -1272,4 +1319,3 @@ const char *debug_get_help(const char *tag)
 			msglen += sprintf(&ambig_message[msglen], "  help %s?\n", static_help_list[i].tag);
 	return ambig_message;
 }
-

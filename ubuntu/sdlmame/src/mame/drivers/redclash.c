@@ -27,48 +27,48 @@ TODO:
 
 static WRITE8_HANDLER( irqack_w )
 {
-	ladybug_state *state = space->machine().driver_data<ladybug_state>();
-	device_set_input_line(state->m_maincpu, 0, CLEAR_LINE);
+	ladybug_state *state = space.machine().driver_data<ladybug_state>();
+	state->m_maincpu->set_input_line(0, CLEAR_LINE);
 }
 
-static ADDRESS_MAP_START( zerohour_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( zerohour_map, AS_PROGRAM, 8, ladybug_state )
 	AM_RANGE(0x0000, 0x2fff) AM_ROM
 	AM_RANGE(0x3000, 0x37ff) AM_RAM
-	AM_RANGE(0x3800, 0x3bff) AM_RAM AM_BASE_SIZE_MEMBER(ladybug_state, m_spriteram, m_spriteram_size)
-	AM_RANGE(0x4000, 0x43ff) AM_RAM_WRITE(redclash_videoram_w) AM_BASE_MEMBER(ladybug_state, m_videoram)
-	AM_RANGE(0x4800, 0x4800) AM_READ_PORT("IN0")	/* IN0 */
-	AM_RANGE(0x4801, 0x4801) AM_READ_PORT("IN1")	/* IN1 */
-	AM_RANGE(0x4802, 0x4802) AM_READ_PORT("DSW1")	/* DSW0 */
-	AM_RANGE(0x4803, 0x4803) AM_READ_PORT("DSW2")	/* DSW1 */
-	AM_RANGE(0x5000, 0x5007) AM_WRITENOP	/* to sound board */
-	AM_RANGE(0x5800, 0x5800) AM_WRITE(redclash_star0_w)
-	AM_RANGE(0x5801, 0x5804) AM_WRITENOP	/* to sound board */
-	AM_RANGE(0x5805, 0x5805) AM_WRITE(redclash_star1_w)
-	AM_RANGE(0x5806, 0x5806) AM_WRITE(redclash_star2_w)
-	AM_RANGE(0x5807, 0x5807) AM_WRITE(redclash_flipscreen_w)
-	AM_RANGE(0x7000, 0x7000) AM_WRITE(redclash_star_reset_w)
-	AM_RANGE(0x7800, 0x7800) AM_WRITE(irqack_w)
+	AM_RANGE(0x3800, 0x3bff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0x4000, 0x43ff) AM_RAM_WRITE_LEGACY(redclash_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0x4800, 0x4800) AM_READ_PORT("IN0")    /* IN0 */
+	AM_RANGE(0x4801, 0x4801) AM_READ_PORT("IN1")    /* IN1 */
+	AM_RANGE(0x4802, 0x4802) AM_READ_PORT("DSW1")   /* DSW0 */
+	AM_RANGE(0x4803, 0x4803) AM_READ_PORT("DSW2")   /* DSW1 */
+	AM_RANGE(0x5000, 0x5007) AM_WRITENOP    /* to sound board */
+	AM_RANGE(0x5800, 0x5800) AM_WRITE_LEGACY(redclash_star0_w)
+	AM_RANGE(0x5801, 0x5804) AM_WRITENOP    /* to sound board */
+	AM_RANGE(0x5805, 0x5805) AM_WRITE_LEGACY(redclash_star1_w)
+	AM_RANGE(0x5806, 0x5806) AM_WRITE_LEGACY(redclash_star2_w)
+	AM_RANGE(0x5807, 0x5807) AM_WRITE_LEGACY(redclash_flipscreen_w)
+	AM_RANGE(0x7000, 0x7000) AM_WRITE_LEGACY(redclash_star_reset_w)
+	AM_RANGE(0x7800, 0x7800) AM_WRITE_LEGACY(irqack_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( redclash_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( redclash_map, AS_PROGRAM, 8, ladybug_state )
 	AM_RANGE(0x0000, 0x2fff) AM_ROM
 //  AM_RANGE(0x3000, 0x3000) AM_WRITENOP
 //  AM_RANGE(0x3800, 0x3800) AM_WRITENOP
-	AM_RANGE(0x4000, 0x43ff) AM_RAM_WRITE(redclash_videoram_w) AM_BASE_MEMBER(ladybug_state, m_videoram)
-	AM_RANGE(0x4800, 0x4800) AM_READ_PORT("IN0")	/* IN0 */
-	AM_RANGE(0x4801, 0x4801) AM_READ_PORT("IN1")	/* IN1 */
-	AM_RANGE(0x4802, 0x4802) AM_READ_PORT("DSW1")	/* DSW0 */
-	AM_RANGE(0x4803, 0x4803) AM_READ_PORT("DSW2")	/* DSW1 */
-	AM_RANGE(0x5000, 0x5007) AM_WRITENOP	/* to sound board */
-	AM_RANGE(0x5800, 0x5800) AM_WRITE(redclash_star0_w)
-	AM_RANGE(0x5801, 0x5801) AM_WRITE(redclash_gfxbank_w)
-	AM_RANGE(0x5805, 0x5805) AM_WRITE(redclash_star1_w)
-	AM_RANGE(0x5806, 0x5806) AM_WRITE(redclash_star2_w)
-	AM_RANGE(0x5807, 0x5807) AM_WRITE(redclash_flipscreen_w)
+	AM_RANGE(0x4000, 0x43ff) AM_RAM_WRITE_LEGACY(redclash_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0x4800, 0x4800) AM_READ_PORT("IN0")    /* IN0 */
+	AM_RANGE(0x4801, 0x4801) AM_READ_PORT("IN1")    /* IN1 */
+	AM_RANGE(0x4802, 0x4802) AM_READ_PORT("DSW1")   /* DSW0 */
+	AM_RANGE(0x4803, 0x4803) AM_READ_PORT("DSW2")   /* DSW1 */
+	AM_RANGE(0x5000, 0x5007) AM_WRITENOP    /* to sound board */
+	AM_RANGE(0x5800, 0x5800) AM_WRITE_LEGACY(redclash_star0_w)
+	AM_RANGE(0x5801, 0x5801) AM_WRITE_LEGACY(redclash_gfxbank_w)
+	AM_RANGE(0x5805, 0x5805) AM_WRITE_LEGACY(redclash_star1_w)
+	AM_RANGE(0x5806, 0x5806) AM_WRITE_LEGACY(redclash_star2_w)
+	AM_RANGE(0x5807, 0x5807) AM_WRITE_LEGACY(redclash_flipscreen_w)
 	AM_RANGE(0x6000, 0x67ff) AM_RAM
-	AM_RANGE(0x6800, 0x6bff) AM_RAM AM_BASE_SIZE_MEMBER(ladybug_state, m_spriteram, m_spriteram_size)
-	AM_RANGE(0x7000, 0x7000) AM_WRITE(redclash_star_reset_w)
-	AM_RANGE(0x7800, 0x7800) AM_WRITE(irqack_w)
+	AM_RANGE(0x6800, 0x6bff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0x7000, 0x7000) AM_WRITE_LEGACY(redclash_star_reset_w)
+	AM_RANGE(0x7800, 0x7800) AM_WRITE_LEGACY(irqack_w)
 ADDRESS_MAP_END
 
 /*
@@ -76,20 +76,16 @@ ADDRESS_MAP_END
   Interrupts are still used, but they are related to coin
   slots. Left slot generates an IRQ, Right slot a NMI.
 */
-static INPUT_CHANGED( left_coin_inserted )
+INPUT_CHANGED_MEMBER( ladybug_state::left_coin_inserted )
 {
-	ladybug_state *state = field->port->machine().driver_data<ladybug_state>();
-
 	if(newval)
-		device_set_input_line(state->m_maincpu, 0, ASSERT_LINE);
+		m_maincpu->set_input_line(0, ASSERT_LINE);
 }
 
-static INPUT_CHANGED( right_coin_inserted )
+INPUT_CHANGED_MEMBER( ladybug_state::right_coin_inserted )
 {
-	ladybug_state *state = field->port->machine().driver_data<ladybug_state>();
-
 	if(newval)
-		device_set_input_line(state->m_maincpu, INPUT_LINE_NMI, PULSE_LINE);
+		m_maincpu->set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 }
 
 static INPUT_PORTS_START( redclash )
@@ -113,7 +109,8 @@ static INPUT_PORTS_START( redclash )
 	/* Note that there are TWO VBlank inputs, one is active low, the other active */
 	/* high. There are probably other differencies in the hardware, but emulating */
 	/* them this way is enough to get the game running. */
-	PORT_BIT( 0xc0, 0x40, IPT_VBLANK )
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 
 	PORT_START("DSW1")
 	PORT_DIPNAME( 0x03, 0x03, "Difficulty?" )
@@ -181,8 +178,8 @@ static INPUT_PORTS_START( redclash )
 	/* handler to be notified of coin insertions. We use IMPULSE to */
 	/* trigger exactly one interrupt, without having to check when the */
 	/* user releases the key. */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_IMPULSE(1) PORT_CHANGED(left_coin_inserted, 0)
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_COIN2 ) PORT_IMPULSE(1) PORT_CHANGED(right_coin_inserted, 0)
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_IMPULSE(1) PORT_CHANGED_MEMBER(DEVICE_SELF, ladybug_state, left_coin_inserted, 0)
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_COIN2 ) PORT_IMPULSE(1) PORT_CHANGED_MEMBER(DEVICE_SELF, ladybug_state, right_coin_inserted, 0)
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( zerohour )
@@ -206,16 +203,17 @@ static INPUT_PORTS_START( zerohour )
 	/* Note that there are TWO VBlank inputs, one is active low, the other active */
 	/* high. There are probably other differencies in the hardware, but emulating */
 	/* them this way is enough to get the game running. */
-	PORT_BIT( 0xc0, 0x40, IPT_VBLANK )
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 
 	PORT_START("DSW1")
-	PORT_DIPUNUSED_DIPLOC( 0x01, 0x01, "SW1:8" )	/* Switches 6-8 are not used */
+	PORT_DIPUNUSED_DIPLOC( 0x01, 0x01, "SW1:8" )    /* Switches 6-8 are not used */
 	PORT_DIPUNUSED_DIPLOC( 0x02, 0x02, "SW1:7" )
 	PORT_DIPUNUSED_DIPLOC( 0x04, 0x04, "SW1:6" )
 	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Cabinet ) ) PORT_DIPLOCATION("SW1:5")
 	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( Cocktail ) )
-	PORT_DIPNAME( 0x30, 0x00, DEF_STR( Bonus_Life ) ) PORT_DIPLOCATION("SW1:4,3")	/* Also determines the default topscore, 0 for "No Bonus" */
+	PORT_DIPNAME( 0x30, 0x00, DEF_STR( Bonus_Life ) ) PORT_DIPLOCATION("SW1:4,3")   /* Also determines the default topscore, 0 for "No Bonus" */
 	PORT_DIPSETTING(    0x00, "No Bonus" )
 	PORT_DIPSETTING(    0x30, "5000" )
 	PORT_DIPSETTING(    0x20, "8000" )
@@ -232,7 +230,7 @@ static INPUT_PORTS_START( zerohour )
 	PORT_DIPSETTING(    0x08, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(    0x0a, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x07, DEF_STR( 3C_2C ) )
-	PORT_DIPSETTING(    0x0f, DEF_STR( 1C_1C ) )	/* all other combinations give 1C_1C */
+	PORT_DIPSETTING(    0x0f, DEF_STR( 1C_1C ) )    /* all other combinations give 1C_1C */
 	PORT_DIPSETTING(    0x09, DEF_STR( 2C_3C ) )
 	PORT_DIPSETTING(    0x0e, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(    0x0d, DEF_STR( 1C_3C ) )
@@ -243,7 +241,7 @@ static INPUT_PORTS_START( zerohour )
 	PORT_DIPSETTING(    0x80, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(    0xa0, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x70, DEF_STR( 3C_2C ) )
-	PORT_DIPSETTING(    0xf0, DEF_STR( 1C_1C ) )	/* all other combinations give 1C_1C */
+	PORT_DIPSETTING(    0xf0, DEF_STR( 1C_1C ) )    /* all other combinations give 1C_1C */
 	PORT_DIPSETTING(    0x90, DEF_STR( 2C_3C ) )
 	PORT_DIPSETTING(    0xe0, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(    0xd0, DEF_STR( 1C_3C ) )
@@ -256,8 +254,8 @@ static INPUT_PORTS_START( zerohour )
 	/* handler to be notified of coin insertions. We use IMPULSE to */
 	/* trigger exactly one interrupt, without having to check when the */
 	/* user releases the key. */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_IMPULSE(1) PORT_CHANGED(left_coin_inserted, 0)
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_COIN2 ) PORT_IMPULSE(1) PORT_CHANGED(right_coin_inserted, 0)
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_IMPULSE(1) PORT_CHANGED_MEMBER(DEVICE_SELF, ladybug_state, left_coin_inserted, 0)
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_COIN2 ) PORT_IMPULSE(1) PORT_CHANGED_MEMBER(DEVICE_SELF, ladybug_state, right_coin_inserted, 0)
 INPUT_PORTS_END
 
 static const gfx_layout charlayout =
@@ -326,32 +324,30 @@ GFXDECODE_END
 
 
 
-static MACHINE_START( redclash )
+MACHINE_START_MEMBER(ladybug_state,redclash)
 {
-	ladybug_state *state = machine.driver_data<ladybug_state>();
 
-	state->m_maincpu = machine.device("maincpu");
+	m_maincpu = machine().device<cpu_device>("maincpu");
 
-	state->save_item(NAME(state->m_star_speed));
-	state->save_item(NAME(state->m_gfxbank));
-	state->save_item(NAME(state->m_stars_enable));
-	state->save_item(NAME(state->m_stars_speed));
-	state->save_item(NAME(state->m_stars_state));
-	state->save_item(NAME(state->m_stars_offset));
-	state->save_item(NAME(state->m_stars_count));
+	save_item(NAME(m_star_speed));
+	save_item(NAME(m_gfxbank));
+	save_item(NAME(m_stars_enable));
+	save_item(NAME(m_stars_speed));
+	save_item(NAME(m_stars_state));
+	save_item(NAME(m_stars_offset));
+	save_item(NAME(m_stars_count));
 }
 
-static MACHINE_RESET( redclash )
+MACHINE_RESET_MEMBER(ladybug_state,redclash)
 {
-	ladybug_state *state = machine.driver_data<ladybug_state>();
 
-	state->m_star_speed = 0;
-	state->m_gfxbank = 0;
-	state->m_stars_enable = 0;
-	state->m_stars_speed = 0;
-	state->m_stars_state = 0;
-	state->m_stars_offset = 0;
-	state->m_stars_count = 0;
+	m_star_speed = 0;
+	m_gfxbank = 0;
+	m_stars_enable = 0;
+	m_stars_speed = 0;
+	m_stars_state = 0;
+	m_stars_offset = 0;
+	m_stars_count = 0;
 }
 
 static MACHINE_CONFIG_START( zerohour, ladybug_state )
@@ -360,24 +356,23 @@ static MACHINE_CONFIG_START( zerohour, ladybug_state )
 	MCFG_CPU_ADD("maincpu", Z80, 4000000)  /* 4 MHz */
 	MCFG_CPU_PROGRAM_MAP(zerohour_map)
 
-	MCFG_MACHINE_START(redclash)
-	MCFG_MACHINE_RESET(redclash)
+	MCFG_MACHINE_START_OVERRIDE(ladybug_state,redclash)
+	MCFG_MACHINE_RESET_OVERRIDE(ladybug_state,redclash)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(1*8, 31*8-1, 4*8, 28*8-1)
-	MCFG_SCREEN_UPDATE(redclash)
-	MCFG_SCREEN_EOF(redclash)
+	MCFG_SCREEN_UPDATE_DRIVER(ladybug_state, screen_update_redclash)
+	MCFG_SCREEN_VBLANK_DRIVER(ladybug_state, screen_eof_redclash)
 
 	MCFG_GFXDECODE(redclash)
 	MCFG_PALETTE_LENGTH(4*8+4*16+32)
 
-	MCFG_PALETTE_INIT(redclash)
-	MCFG_VIDEO_START(redclash)
+	MCFG_PALETTE_INIT_OVERRIDE(ladybug_state,redclash)
+	MCFG_VIDEO_START_OVERRIDE(ladybug_state,redclash)
 
 	/* sound hardware */
 MACHINE_CONFIG_END
@@ -389,24 +384,23 @@ static MACHINE_CONFIG_START( redclash, ladybug_state )
 	MCFG_CPU_ADD("maincpu", Z80, 4000000)  /* 4 MHz */
 	MCFG_CPU_PROGRAM_MAP(redclash_map)
 
-	MCFG_MACHINE_START(redclash)
-	MCFG_MACHINE_RESET(redclash)
+	MCFG_MACHINE_START_OVERRIDE(ladybug_state,redclash)
+	MCFG_MACHINE_RESET_OVERRIDE(ladybug_state,redclash)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(1*8, 31*8-1, 4*8, 28*8-1)
-	MCFG_SCREEN_UPDATE(redclash)
-	MCFG_SCREEN_EOF(redclash)
+	MCFG_SCREEN_UPDATE_DRIVER(ladybug_state, screen_update_redclash)
+	MCFG_SCREEN_VBLANK_DRIVER(ladybug_state, screen_eof_redclash)
 
 	MCFG_GFXDECODE(redclash)
 	MCFG_PALETTE_LENGTH(4*8+4*16+32)
 
-	MCFG_PALETTE_INIT(redclash)
-	MCFG_VIDEO_START(redclash)
+	MCFG_PALETTE_INIT_OVERRIDE(ladybug_state,redclash)
+	MCFG_VIDEO_START_OVERRIDE(ladybug_state,redclash)
 
 	/* sound hardware */
 MACHINE_CONFIG_END
@@ -542,12 +536,12 @@ ROM_START( redclashk )
 	ROM_LOAD( "3.11e",        0x0040, 0x0020, CRC(27fa3a50) SHA1(7cf59b7a37c156640d6ea91554d1c4276c1780e0) ) /* 6331.6w */
 ROM_END
 
-static DRIVER_INIT( redclash )
+DRIVER_INIT_MEMBER(ladybug_state,redclash)
 {
 	int i,j;
-	const UINT8 *src = machine.region("gfx2")->base();
-	UINT8 *dst = machine.region("gfx3")->base();
-	int len = machine.region("gfx3")->bytes();
+	const UINT8 *src = machine().root_device().memregion("gfx2")->base();
+	UINT8 *dst = machine().root_device().memregion("gfx3")->base();
+	int len = machine().root_device().memregion("gfx3")->bytes();
 
 	/* rearrange the sprite graphics */
 	for (i = 0;i < len;i++)
@@ -558,8 +552,8 @@ static DRIVER_INIT( redclash )
 }
 
 
-GAME( 1980, zerohour,  0,        zerohour, zerohour, redclash, ROT270, "Universal", "Zero Hour (set 1)",  GAME_NO_SOUND | GAME_WRONG_COLORS | GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
-GAME( 1980, zerohoura, zerohour, zerohour, zerohour, redclash, ROT270, "Universal", "Zero Hour (set 2)",  GAME_NO_SOUND | GAME_WRONG_COLORS | GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
-GAME( 1981, redclash,  0,        redclash, redclash, redclash, ROT270, "Tehkan",    "Red Clash (set 1)",  GAME_NO_SOUND | GAME_WRONG_COLORS | GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
-GAME( 1981, redclasha, redclash, redclash, redclash, redclash, ROT270, "Tehkan",    "Red Clash (set 2)",  GAME_NO_SOUND | GAME_WRONG_COLORS | GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
-GAME( 1981, redclashk, redclash, redclash, redclash, redclash, ROT270, "Tehkan (Kaneko license)", "Red Clash (Kaneko)", GAME_NO_SOUND | GAME_WRONG_COLORS | GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
+GAME( 1980, zerohour,  0,        zerohour, zerohour, ladybug_state, redclash, ROT270, "Universal", "Zero Hour (set 1)",  GAME_NO_SOUND | GAME_WRONG_COLORS | GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
+GAME( 1980, zerohoura, zerohour, zerohour, zerohour, ladybug_state, redclash, ROT270, "Universal", "Zero Hour (set 2)",  GAME_NO_SOUND | GAME_WRONG_COLORS | GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
+GAME( 1981, redclash,  0,        redclash, redclash, ladybug_state, redclash, ROT270, "Tehkan",    "Red Clash (set 1)",  GAME_NO_SOUND | GAME_WRONG_COLORS | GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
+GAME( 1981, redclasha, redclash, redclash, redclash, ladybug_state, redclash, ROT270, "Tehkan",    "Red Clash (set 2)",  GAME_NO_SOUND | GAME_WRONG_COLORS | GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
+GAME( 1981, redclashk, redclash, redclash, redclash, ladybug_state, redclash, ROT270, "Tehkan (Kaneko license)", "Red Clash (Kaneko)", GAME_NO_SOUND | GAME_WRONG_COLORS | GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )

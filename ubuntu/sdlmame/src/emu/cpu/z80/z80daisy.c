@@ -11,30 +11,6 @@
 
 
 //**************************************************************************
-//  DEVICE CONFIG Z80 DAISY INTERFACE
-//**************************************************************************
-
-//-------------------------------------------------
-//  device_config_z80daisy_interface - constructor
-//-------------------------------------------------
-
-device_config_z80daisy_interface::device_config_z80daisy_interface(const machine_config &mconfig, device_config &devconfig)
-	: device_config_interface(mconfig, devconfig)
-{
-}
-
-
-//-------------------------------------------------
-//  ~device_config_z80daisy_interface - destructor
-//-------------------------------------------------
-
-device_config_z80daisy_interface::~device_config_z80daisy_interface()
-{
-}
-
-
-
-//**************************************************************************
 //  DEVICE Z80 DAISY INTERFACE
 //**************************************************************************
 
@@ -42,9 +18,8 @@ device_config_z80daisy_interface::~device_config_z80daisy_interface()
 //  device_z80daisy_interface - constructor
 //-------------------------------------------------
 
-device_z80daisy_interface::device_z80daisy_interface(running_machine &machine, const device_config &config, device_t &device)
-	: device_interface(machine, config, device),
-	  m_z80daisy_config(dynamic_cast<const device_config_z80daisy_interface &>(config))
+device_z80daisy_interface::device_z80daisy_interface(const machine_config &mconfig, device_t &device)
+	: device_interface(device)
 {
 }
 
@@ -87,12 +62,12 @@ void z80_daisy_chain::init(device_t *cpudevice, const z80_daisy_config *daisy)
 		// find the device
 		device_t *target = cpudevice->siblingdevice(daisy->devname);
 		if (target == NULL)
-			fatalerror("Unable to locate device '%s'", daisy->devname);
+			fatalerror("Unable to locate device '%s'\n", daisy->devname);
 
 		// make sure it has an interface
 		device_z80daisy_interface *intf;
 		if (!target->interface(intf))
-			fatalerror("Device '%s' does not implement the z80daisy interface!", daisy->devname);
+			fatalerror("Device '%s' does not implement the z80daisy interface!\n", daisy->devname);
 
 		// append to the end
 		*tailptr = auto_alloc(cpudevice->machine(), daisy_entry(target));
@@ -188,8 +163,8 @@ void z80_daisy_chain::call_reti_device()
 
 z80_daisy_chain::daisy_entry::daisy_entry(device_t *device)
 	: m_next(NULL),
-	  m_device(device),
-	  m_interface(NULL)
+		m_device(device),
+		m_interface(NULL)
 {
 	device->interface(m_interface);
 }

@@ -19,8 +19,9 @@
 
 #include "emu.h"
 #include "cpu/m68000/m68000.h"
-#include "includes/klax.h"
 #include "sound/okim6295.h"
+#include "video/atarimo.h"
+#include "includes/klax.h"
 
 
 
@@ -30,25 +31,24 @@
  *
  *************************************/
 
-static void update_interrupts(running_machine &machine)
+void klax_state::update_interrupts()
 {
-	klax_state *state = machine.driver_data<klax_state>();
-	cputag_set_input_line(machine, "maincpu", 4, state->m_video_int_state || state->m_scanline_int_state ? ASSERT_LINE : CLEAR_LINE);
+	subdevice("maincpu")->execute().set_input_line(4, m_video_int_state || m_scanline_int_state ? ASSERT_LINE : CLEAR_LINE);
 }
 
 
-static void scanline_update(screen_device &screen, int scanline)
+void klax_state::scanline_update(screen_device &screen, int scanline)
 {
 	/* generate 32V signals */
-	if ((scanline & 32) == 0 && !(input_port_read(screen.machine(), "P1") & 0x800))
-		atarigen_scanline_int_gen(screen.machine().device("maincpu"));
+	if ((scanline & 32) == 0 && !(ioport("P1")->read() & 0x800))
+		scanline_int_gen(*subdevice("maincpu"));
 }
 
 
-static WRITE16_HANDLER( interrupt_ack_w )
+WRITE16_MEMBER(klax_state::interrupt_ack_w)
 {
-	atarigen_scanline_int_ack_w(space, offset, data, mem_mask);
-	atarigen_video_int_ack_w(space, offset, data, mem_mask);
+	scanline_int_ack_w(space, offset, data, mem_mask);
+	video_int_ack_w(space, offset, data, mem_mask);
 }
 
 
@@ -59,19 +59,10 @@ static WRITE16_HANDLER( interrupt_ack_w )
  *
  *************************************/
 
-static MACHINE_START( klax )
+MACHINE_RESET_MEMBER(klax_state,klax)
 {
-	atarigen_init(machine);
-}
-
-
-static MACHINE_RESET( klax )
-{
-	klax_state *state = machine.driver_data<klax_state>();
-
-	atarigen_eeprom_reset(state);
-	atarigen_interrupt_reset(state, update_interrupts);
-	atarigen_scanline_timer_reset(*machine.primary_screen, scanline_update, 32);
+	atarigen_state::machine_reset();
+	scanline_timer_reset(*machine().primary_screen, 32);
 }
 
 
@@ -82,20 +73,20 @@ static MACHINE_RESET( klax )
  *
  *************************************/
 
-static ADDRESS_MAP_START( klax_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( klax_map, AS_PROGRAM, 16, klax_state )
 	AM_RANGE(0x000000, 0x03ffff) AM_ROM
-	AM_RANGE(0x0e0000, 0x0e0fff) AM_READWRITE(atarigen_eeprom_r,atarigen_eeprom_w) AM_SHARE("eeprom")
-	AM_RANGE(0x1f0000, 0x1fffff) AM_WRITE(atarigen_eeprom_enable_w)
-	AM_RANGE(0x260000, 0x260001) AM_READ_PORT("P1") AM_WRITE(klax_latch_w)
+	AM_RANGE(0x0e0000, 0x0e0fff) AM_READWRITE(eeprom_r, eeprom_w) AM_SHARE("eeprom")
+	AM_RANGE(0x1f0000, 0x1fffff) AM_WRITE(eeprom_enable_w)
+	AM_RANGE(0x260000, 0x260001) AM_READ_PORT("P1") AM_WRITE_LEGACY(klax_latch_w)
 	AM_RANGE(0x260002, 0x260003) AM_READ_PORT("P2")
-	AM_RANGE(0x270000, 0x270001) AM_DEVREADWRITE8_MODERN("oki", okim6295_device, read, write, 0x00ff)
+	AM_RANGE(0x270000, 0x270001) AM_DEVREADWRITE8("oki", okim6295_device, read, write, 0x00ff)
 	AM_RANGE(0x2e0000, 0x2e0001) AM_WRITE(watchdog_reset16_w)
 	AM_RANGE(0x360000, 0x360001) AM_WRITE(interrupt_ack_w)
-	AM_RANGE(0x3e0000, 0x3e07ff) AM_RAM_WRITE(atarigen_expanded_666_paletteram_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0x3f0000, 0x3f0f7f) AM_RAM_WRITE(atarigen_playfield_w) AM_BASE_MEMBER(klax_state, m_playfield)
-	AM_RANGE(0x3f0f80, 0x3f0fff) AM_RAM_WRITE(atarimo_0_slipram_w) AM_BASE(&atarimo_0_slipram)
-	AM_RANGE(0x3f1000, 0x3f1fff) AM_RAM_WRITE(atarigen_playfield_upper_w) AM_BASE_MEMBER(klax_state, m_playfield_upper)
-	AM_RANGE(0x3f2000, 0x3f27ff) AM_RAM_WRITE(atarimo_0_spriteram_w) AM_BASE(&atarimo_0_spriteram)
+	AM_RANGE(0x3e0000, 0x3e07ff) AM_RAM_WRITE(expanded_paletteram_666_w) AM_SHARE("paletteram")
+	AM_RANGE(0x3f0000, 0x3f0f7f) AM_RAM_WRITE(playfield_w) AM_SHARE("playfield")
+	AM_RANGE(0x3f0f80, 0x3f0fff) AM_READWRITE_LEGACY(atarimo_0_slipram_r, atarimo_0_slipram_w)
+	AM_RANGE(0x3f1000, 0x3f1fff) AM_RAM_WRITE(playfield_upper_w) AM_SHARE("playfield_up")
+	AM_RANGE(0x3f2000, 0x3f27ff) AM_READWRITE_LEGACY(atarimo_0_spriteram_r, atarimo_0_spriteram_w)
 	AM_RANGE(0x3f2800, 0x3f3fff) AM_RAM
 ADDRESS_MAP_END
 
@@ -114,7 +105,7 @@ static INPUT_PORTS_START( klax )
 	PORT_BIT( 0x00fc, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
 	PORT_BIT( 0x0600, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x0800, IP_ACTIVE_HIGH, IPT_VBLANK )
+	PORT_BIT( 0x0800, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(1)
 	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(1)
 	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(1)
@@ -152,8 +143,8 @@ static const gfx_layout pfmolayout =
 
 
 static GFXDECODE_START( klax )
-	GFXDECODE_ENTRY( "gfx1", 0, pfmolayout,  256, 16 )		/* sprites & playfield */
-	GFXDECODE_ENTRY( "gfx2", 0, pfmolayout,    0, 16 )		/* sprites & playfield */
+	GFXDECODE_ENTRY( "gfx1", 0, pfmolayout,  256, 16 )      /* sprites & playfield */
+	GFXDECODE_ENTRY( "gfx2", 0, pfmolayout,    0, 16 )      /* sprites & playfield */
 GFXDECODE_END
 
 
@@ -169,10 +160,9 @@ static MACHINE_CONFIG_START( klax, klax_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, ATARI_CLOCK_14MHz/2)
 	MCFG_CPU_PROGRAM_MAP(klax_map)
-	MCFG_CPU_VBLANK_INT("screen", atarigen_video_int_gen)
+	MCFG_DEVICE_VBLANK_INT_DRIVER("screen", atarigen_state, video_int_gen)
 
-	MCFG_MACHINE_START(klax)
-	MCFG_MACHINE_RESET(klax)
+	MCFG_MACHINE_RESET_OVERRIDE(klax_state,klax)
 	MCFG_NVRAM_ADD_1FILL("eeprom")
 
 	/* video hardware */
@@ -181,13 +171,12 @@ static MACHINE_CONFIG_START( klax, klax_state )
 	MCFG_PALETTE_LENGTH(512)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	/* note: these parameters are from published specs, not derived */
 	/* the board uses an SOS-2 chip to generate video signals */
 	MCFG_SCREEN_RAW_PARAMS(ATARI_CLOCK_14MHz/2, 456, 0, 336, 262, 0, 240)
-	MCFG_SCREEN_UPDATE(klax)
+	MCFG_SCREEN_UPDATE_DRIVER(klax_state, screen_update_klax)
 
-	MCFG_VIDEO_START(klax)
+	MCFG_VIDEO_START_OVERRIDE(klax_state,klax)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -205,7 +194,7 @@ MACHINE_CONFIG_END
  *************************************/
 
 ROM_START( klax )
-	ROM_REGION( 0x40000, "maincpu", 0 )	/* 4*64k for 68000 code */
+	ROM_REGION( 0x40000, "maincpu", 0 ) /* 4*64k for 68000 code */
 	ROM_LOAD16_BYTE( "136075-6006.3n", 0x00000, 0x10000, CRC(e8991709) SHA1(90d69b0712e68e842a8b946539f1f43ef165e8de) )
 	ROM_LOAD16_BYTE( "136075-6005.1n", 0x00001, 0x10000, CRC(72b8c510) SHA1(f79d3a2de4deaabbcec632e8be9a1d5f6c0c3740) )
 	ROM_LOAD16_BYTE( "136075-6008.3k", 0x20000, 0x10000, CRC(c7c91a9d) SHA1(9f79ca689ec635f8113a74162e81f253c88992f5) )
@@ -221,7 +210,7 @@ ROM_START( klax )
 	ROM_LOAD( "136075-2014.17y", 0x00000, 0x10000, CRC(5c551e92) SHA1(cbff8fc4f4d370b6db2b4953ecbedd249916b891) )
 	ROM_LOAD( "136075-2013.17w", 0x10000, 0x10000, CRC(36764bbc) SHA1(5762996a327b5f7f93f42dad7eccb6297b3e4c0b) )
 
-	ROM_REGION( 0x40000, "oki", 0 )	/* ADPCM data */
+	ROM_REGION( 0x40000, "oki", 0 ) /* ADPCM data */
 	ROM_LOAD( "136075-1015.14b", 0x00000, 0x10000, CRC(4d24c768) SHA1(da102105a4d8c552e3594b8ffb1903ecbaa69415) )
 	ROM_LOAD( "136075-1016.12b", 0x10000, 0x10000, CRC(12e9b4b7) SHA1(2447f116cd865e46e61022143a2668beca99d5d1) )
 
@@ -235,7 +224,7 @@ ROM_END
 
 
 ROM_START( klax2 )
-	ROM_REGION( 0x40000, "maincpu", 0 )	/* 4*64k for 68000 code */
+	ROM_REGION( 0x40000, "maincpu", 0 ) /* 4*64k for 68000 code */
 	ROM_LOAD16_BYTE( "13607-5006.3n", 0x00000, 0x10000, CRC(05c98fc0) SHA1(84880d3d65c46c96c739063b3f61b1663989c56e) )
 	ROM_LOAD16_BYTE( "13607-5005.1n", 0x00001, 0x10000, CRC(d461e1ee) SHA1(73e8615a742555f74c1086c0b745afc7e94a478f) )
 	ROM_LOAD16_BYTE( "13607-5008.3k", 0x20000, 0x10000, CRC(f1b8e588) SHA1(080511f90aecb7526ab2107c196e73cb881a2bb5) )
@@ -251,7 +240,7 @@ ROM_START( klax2 )
 	ROM_LOAD( "136075-2014.17y", 0x00000, 0x10000, CRC(5c551e92) SHA1(cbff8fc4f4d370b6db2b4953ecbedd249916b891) )
 	ROM_LOAD( "136075-2013.17w", 0x10000, 0x10000, CRC(36764bbc) SHA1(5762996a327b5f7f93f42dad7eccb6297b3e4c0b) )
 
-	ROM_REGION( 0x40000, "oki", 0 )	/* ADPCM data */
+	ROM_REGION( 0x40000, "oki", 0 ) /* ADPCM data */
 	ROM_LOAD( "136075-1015.14b", 0x00000, 0x10000, CRC(4d24c768) SHA1(da102105a4d8c552e3594b8ffb1903ecbaa69415) )
 	ROM_LOAD( "136075-1016.12b", 0x10000, 0x10000, CRC(12e9b4b7) SHA1(2447f116cd865e46e61022143a2668beca99d5d1) )
 
@@ -265,7 +254,7 @@ ROM_END
 
 
 ROM_START( klax3 )
-	ROM_REGION( 0x40000, "maincpu", 0 )	/* 4*64k for 68000 code */
+	ROM_REGION( 0x40000, "maincpu", 0 ) /* 4*64k for 68000 code */
 	ROM_LOAD16_BYTE( "136075-5006.3n", 0x00000, 0x10000, CRC(65eb9a31) SHA1(3f47d58fe9eb154ab14ac282919f92679b5c7922) )
 	ROM_LOAD16_BYTE( "136075-5005.1n", 0x00001, 0x10000, CRC(7be27349) SHA1(79eef2b7f4a0fb6991d81f6543d5ae00de9f2452) )
 	ROM_LOAD16_BYTE( "136075-4008.3k", 0x20000, 0x10000, CRC(f3c79106) SHA1(c315159020d5bc6f919c3fb975fb8b228584f88c) )
@@ -281,7 +270,7 @@ ROM_START( klax3 )
 	ROM_LOAD( "136075-2014.17y", 0x00000, 0x10000, CRC(5c551e92) SHA1(cbff8fc4f4d370b6db2b4953ecbedd249916b891) )
 	ROM_LOAD( "136075-2013.17w", 0x10000, 0x10000, CRC(36764bbc) SHA1(5762996a327b5f7f93f42dad7eccb6297b3e4c0b) )
 
-	ROM_REGION( 0x40000, "oki", 0 )	/* ADPCM data */
+	ROM_REGION( 0x40000, "oki", 0 ) /* ADPCM data */
 	ROM_LOAD( "136075-1015.14b", 0x00000, 0x10000, CRC(4d24c768) SHA1(da102105a4d8c552e3594b8ffb1903ecbaa69415) )
 	ROM_LOAD( "136075-1016.12b", 0x10000, 0x10000, CRC(12e9b4b7) SHA1(2447f116cd865e46e61022143a2668beca99d5d1) )
 
@@ -295,7 +284,7 @@ ROM_END
 
 
 ROM_START( klaxj )
-	ROM_REGION( 0x40000, "maincpu", 0 )	/* 4*64k for 68000 code */
+	ROM_REGION( 0x40000, "maincpu", 0 ) /* 4*64k for 68000 code */
 	ROM_LOAD16_BYTE( "136075-3406.3n", 0x00000, 0x10000, CRC(ab2aa50b) SHA1(0ebffc8b4724eb8c4423e0b1f62b0fff7cc30aab) )
 	ROM_LOAD16_BYTE( "136075-3405.1n", 0x00001, 0x10000, CRC(9dc9a590) SHA1(4c77b1ad9c083325f33520f2b6aa598dde247ad8) )
 	ROM_LOAD16_BYTE( "136075-2408.3k", 0x20000, 0x10000, CRC(89d515ce) SHA1(4991b859a53f34776671f660dbdb18a746259549) )
@@ -311,7 +300,7 @@ ROM_START( klaxj )
 	ROM_LOAD( "136075-2014.17y", 0x00000, 0x10000, CRC(5c551e92) SHA1(cbff8fc4f4d370b6db2b4953ecbedd249916b891) )
 	ROM_LOAD( "136075-2013.17w", 0x10000, 0x10000, CRC(36764bbc) SHA1(5762996a327b5f7f93f42dad7eccb6297b3e4c0b) )
 
-	ROM_REGION( 0x40000, "oki", 0 )	/* ADPCM data */
+	ROM_REGION( 0x40000, "oki", 0 ) /* ADPCM data */
 	ROM_LOAD( "136075-1015.14b", 0x00000, 0x10000, CRC(4d24c768) SHA1(da102105a4d8c552e3594b8ffb1903ecbaa69415) )
 	ROM_LOAD( "136075-1016.12b", 0x10000, 0x10000, CRC(12e9b4b7) SHA1(2447f116cd865e46e61022143a2668beca99d5d1) )
 
@@ -325,7 +314,7 @@ ROM_END
 
 
 ROM_START( klaxd )
-	ROM_REGION( 0x40000, "maincpu", 0 )	/* 4*64k for 68000 code */
+	ROM_REGION( 0x40000, "maincpu", 0 ) /* 4*64k for 68000 code */
 	ROM_LOAD16_BYTE( "136075-2206.3n", 0x00000, 0x10000, CRC(9d1a713b) SHA1(6e60a43934bd8959c5c07dd12e087c63ea791bb9) )
 	ROM_LOAD16_BYTE( "136075-1205.1n", 0x00001, 0x10000, CRC(45065a5a) SHA1(77339ca04e54a04489ce9d6e11816475e57d1311) )
 	ROM_LOAD16_BYTE( "136075-1208.3k", 0x20000, 0x10000, CRC(b4019b32) SHA1(83fba82a9100af14cddd812be9f3dbd58d8511d2) )
@@ -341,7 +330,7 @@ ROM_START( klaxd )
 	ROM_LOAD( "136075-2014.17y", 0x00000, 0x10000, CRC(5c551e92) SHA1(cbff8fc4f4d370b6db2b4953ecbedd249916b891) )
 	ROM_LOAD( "136075-2013.17w", 0x10000, 0x10000, CRC(36764bbc) SHA1(5762996a327b5f7f93f42dad7eccb6297b3e4c0b) )
 
-	ROM_REGION( 0x40000, "oki", 0 )	/* ADPCM data */
+	ROM_REGION( 0x40000, "oki", 0 ) /* ADPCM data */
 	ROM_LOAD( "136075-1015.14b", 0x00000, 0x10000, CRC(4d24c768) SHA1(da102105a4d8c552e3594b8ffb1903ecbaa69415) )
 	ROM_LOAD( "136075-1016.12b", 0x10000, 0x10000, CRC(12e9b4b7) SHA1(2447f116cd865e46e61022143a2668beca99d5d1) )
 
@@ -361,8 +350,8 @@ ROM_END
  *
  *************************************/
 
-GAME( 1989, klax,  0,    klax, klax, 0, ROT0, "Atari Games", "Klax (set 1)", 0 )
-GAME( 1989, klax2, klax, klax, klax, 0, ROT0, "Atari Games", "Klax (set 2)", 0 )
-GAME( 1989, klax3, klax, klax, klax, 0, ROT0, "Atari Games", "Klax (set 3)", 0 )
-GAME( 1989, klaxj, klax, klax, klax, 0, ROT0, "Atari Games", "Klax (Japan)", 0 )
-GAME( 1989, klaxd, klax, klax, klax, 0, ROT0, "Atari Games", "Klax (Germany)", 0 )
+GAME( 1989, klax,  0,    klax, klax, driver_device, 0, ROT0, "Atari Games", "Klax (set 1)", 0 )
+GAME( 1989, klax2, klax, klax, klax, driver_device, 0, ROT0, "Atari Games", "Klax (set 2)", 0 )
+GAME( 1989, klax3, klax, klax, klax, driver_device, 0, ROT0, "Atari Games", "Klax (set 3)", 0 )
+GAME( 1989, klaxj, klax, klax, klax, driver_device, 0, ROT0, "Atari Games", "Klax (Japan)", 0 )
+GAME( 1989, klaxd, klax, klax, klax, driver_device, 0, ROT0, "Atari Games", "Klax (Germany)", 0 )

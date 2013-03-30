@@ -1,97 +1,90 @@
 #include "emu.h"
 #include "includes/solomon.h"
 
-WRITE8_HANDLER( solomon_videoram_w )
+WRITE8_MEMBER(solomon_state::solomon_videoram_w)
 {
-	solomon_state *state = space->machine().driver_data<solomon_state>();
 
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_fg_tilemap, offset);
+	m_videoram[offset] = data;
+	m_fg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( solomon_colorram_w )
+WRITE8_MEMBER(solomon_state::solomon_colorram_w)
 {
-	solomon_state *state = space->machine().driver_data<solomon_state>();
 
-	state->m_colorram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_fg_tilemap, offset);
+	m_colorram[offset] = data;
+	m_fg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( solomon_videoram2_w )
+WRITE8_MEMBER(solomon_state::solomon_videoram2_w)
 {
-	solomon_state *state = space->machine().driver_data<solomon_state>();
 
-	state->m_videoram2[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_videoram2[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( solomon_colorram2_w )
+WRITE8_MEMBER(solomon_state::solomon_colorram2_w)
 {
-	solomon_state *state = space->machine().driver_data<solomon_state>();
 
-	state->m_colorram2[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_colorram2[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( solomon_flipscreen_w )
+WRITE8_MEMBER(solomon_state::solomon_flipscreen_w)
 {
-	if (flip_screen_get(space->machine()) != (data & 0x01))
+	if (flip_screen() != (data & 0x01))
 	{
-		flip_screen_set(space->machine(), data & 0x01);
-		tilemap_mark_all_tiles_dirty_all(space->machine());
+		flip_screen_set(data & 0x01);
+		machine().tilemap().mark_all_dirty();
 	}
 }
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(solomon_state::get_bg_tile_info)
 {
-	solomon_state *state = machine.driver_data<solomon_state>();
-	int attr = state->m_colorram2[tile_index];
-	int code = state->m_videoram2[tile_index] + 256 * (attr & 0x07);
+	int attr = m_colorram2[tile_index];
+	int code = m_videoram2[tile_index] + 256 * (attr & 0x07);
 	int color = ((attr & 0x70) >> 4);
 	int flags = ((attr & 0x80) ? TILE_FLIPX : 0) | ((attr & 0x08) ? TILE_FLIPY : 0);
 
-	SET_TILE_INFO(1, code, color, flags);
+	SET_TILE_INFO_MEMBER(1, code, color, flags);
 }
 
-static TILE_GET_INFO( get_fg_tile_info )
+TILE_GET_INFO_MEMBER(solomon_state::get_fg_tile_info)
 {
-	solomon_state *state = machine.driver_data<solomon_state>();
-	int attr = state->m_colorram[tile_index];
-	int code = state->m_videoram[tile_index] + 256 * (attr & 0x07);
+	int attr = m_colorram[tile_index];
+	int code = m_videoram[tile_index] + 256 * (attr & 0x07);
 	int color = (attr & 0x70) >> 4;
 
-	SET_TILE_INFO(0, code, color, 0);
+	SET_TILE_INFO_MEMBER(0, code, color, 0);
 }
 
-VIDEO_START( solomon )
+void solomon_state::video_start()
 {
-	solomon_state *state = machine.driver_data<solomon_state>();
 
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_rows,
-		 8, 8, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(solomon_state::get_bg_tile_info),this), TILEMAP_SCAN_ROWS,
+			8, 8, 32, 32);
 
-	state->m_fg_tilemap = tilemap_create(machine, get_fg_tile_info, tilemap_scan_rows,
-		 8, 8, 32, 32);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(solomon_state::get_fg_tile_info),this), TILEMAP_SCAN_ROWS,
+			8, 8, 32, 32);
 
-	tilemap_set_transparent_pen(state->m_fg_tilemap, 0);
+	m_fg_tilemap->set_transparent_pen(0);
 }
 
-static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_sprites(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	solomon_state *state = machine.driver_data<solomon_state>();
 	UINT8 *spriteram = state->m_spriteram;
 	int offs;
 
-	for (offs = state->m_spriteram_size - 4; offs >= 0; offs -= 4)
+	for (offs = state->m_spriteram.bytes() - 4; offs >= 0; offs -= 4)
 	{
 		int code = spriteram[offs] + 16 * (spriteram[offs + 1] & 0x10);
 		int color = (spriteram[offs + 1] & 0x0e) >> 1;
 		int flipx = spriteram[offs + 1] & 0x40;
-		int flipy =	spriteram[offs + 1] & 0x80;
+		int flipy = spriteram[offs + 1] & 0x80;
 		int sx = spriteram[offs + 3];
 		int sy = 241 - spriteram[offs + 2];
 
-		if (flip_screen_get(machine))
+		if (state->flip_screen())
 		{
 			sx = 240 - sx;
 			sy = 242 - sy;
@@ -107,11 +100,10 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 	}
 }
 
-SCREEN_UPDATE( solomon )
+UINT32 solomon_state::screen_update_solomon(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	solomon_state *state = screen->machine().driver_data<solomon_state>();
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
-	tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, 0, 0);
-	draw_sprites(screen->machine(), bitmap, cliprect);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
+	m_fg_tilemap->draw(bitmap, cliprect, 0, 0);
+	draw_sprites(machine(), bitmap, cliprect);
 	return 0;
 }

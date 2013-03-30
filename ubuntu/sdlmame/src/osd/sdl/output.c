@@ -25,7 +25,7 @@
 //  CONSTANTS
 //============================================================
 
-#define SDLMAME_OUTPUT	"/tmp/sdlmame_out"
+#define SDLMAME_OUTPUT  "/tmp/sdlmame_out"
 
 /*
  * Using long/int should be sufficient on all
@@ -75,20 +75,20 @@ void sdloutput_init(running_machine &machine)
 {
 	int fildes;
 
-	machine.add_notifier(MACHINE_NOTIFY_EXIT, sdloutput_exit);
+	machine.add_notifier(MACHINE_NOTIFY_EXIT, machine_notify_delegate(FUNC(sdloutput_exit), &machine));
 
 	fildes = open(SDLMAME_OUTPUT, O_RDWR | O_NONBLOCK);
 
 	if (fildes < 0)
 	{
 		output = NULL;
-		mame_printf_verbose("ouput: unable to open output notifier file %s\n", SDLMAME_OUTPUT);
+		mame_printf_verbose("output: unable to open output notifier file %s\n", SDLMAME_OUTPUT);
 	}
 	else
 	{
 		output = fdopen(fildes, "w");
 
-		mame_printf_verbose("ouput: opened output notifier file %s\n", SDLMAME_OUTPUT);
+		mame_printf_verbose("output: opened output notifier file %s\n", SDLMAME_OUTPUT);
 		fprintf(output, "MAME " PID_FMT " START %s\n", osd_getpid(), machine.system().name);
 		fflush(output);
 	}
@@ -109,7 +109,7 @@ static void sdloutput_exit(running_machine &machine)
 		fflush(output);
 		fclose(output);
 		output = NULL;
-		mame_printf_verbose("ouput: closed output notifier file\n");
+		mame_printf_verbose("output: closed output notifier file\n");
 	}
 }
 

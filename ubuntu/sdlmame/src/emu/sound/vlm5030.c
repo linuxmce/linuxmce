@@ -12,7 +12,7 @@
         OSC2  ck |  3     _     38 | ??    TST3
         OSC1  ck |  4    (_)    37 | ??    TST2
         D0    -> |  5           36 | ->    DAO
-        D1    -> |  6           35 | --    VREF (+5v thru 5.6k resistor)
+        D1    -> |  6           35 | --    VREF (+5v through 5.6k resistor)
         D2    -> |  7           34 | ->    MTE
         D3    -> |  8      V    33 | ->    /ME
         D4    -> |  9      L    32 | <-    VCU
@@ -119,13 +119,15 @@ chirp 12-..: vokume   0   : silent
 #define IP_SIZE_FAST    (120/FR_SIZE)
 #define IP_SIZE_FASTER  ( 80/FR_SIZE)
 
-typedef struct _vlm5030_state vlm5030_state;
-struct _vlm5030_state
+struct vlm5030_state
 {
 	device_t *device;
 	const vlm5030_interface *intf;
 
 	sound_stream * channel;
+
+	/* coefficient tables */
+	const struct tms5100_coeffs *coeff;
 
 	/* need to save state */
 
@@ -181,6 +183,9 @@ enum {
 	PH_END
 };
 
+/* Pull in the ROM tables */
+#include "tms5110r.c"
+
 /*
   speed parameter
 SPC SPB SPA
@@ -192,71 +197,23 @@ SPC SPB SPA
 */
 static const int vlm5030_speed_table[8] =
 {
- IP_SIZE_NORMAL,
- IP_SIZE_FAST,
- IP_SIZE_FASTER,
- IP_SIZE_FASTER,
- IP_SIZE_NORMAL,
- IP_SIZE_SLOWER,
- IP_SIZE_SLOW,
- IP_SIZE_SLOW
+	IP_SIZE_NORMAL,
+	IP_SIZE_FAST,
+	IP_SIZE_FASTER,
+	IP_SIZE_FASTER,
+	IP_SIZE_NORMAL,
+	IP_SIZE_SLOWER,
+	IP_SIZE_SLOW,
+	IP_SIZE_SLOW
 };
 
 static const char VLM_NAME[] = "VLM5030";
-
-/* ROM Tables */
-
-/* This is the energy lookup table */
-
-/* sampled from real chip */
-static const unsigned short energytable[0x20] =
-{
-	  0,  2,  4,  6, 10, 12, 14, 18, /*  0-7  */
-	 22, 26, 30, 34, 38, 44, 48, 54, /*  8-15 */
-	 62, 68, 76, 84, 94,102,114,124, /* 16-23 */
-	136,150,164,178,196,214,232,254  /* 24-31 */
-};
-
-/* This is the pitch lookup table */
-static const unsigned char pitchtable [0x20]=
-{
-   1,                               /* 0     : random mode */
-   22,                              /* 1     : start=22    */
-   23, 24, 25, 26, 27, 28, 29, 30,  /*  2- 9 : 1step       */
-   32, 34, 36, 38, 40, 42, 44, 46,  /* 10-17 : 2step       */
-   50, 54, 58, 62, 66, 70, 74, 78,  /* 18-25 : 4step       */
-   86, 94, 102,110,118,126          /* 26-31 : 8step       */
-};
-
-static const INT16 K1_table[] = {
-  -24898,  -25672,  -26446,  -27091,  -27736,  -28252,  -28768,  -29155,
-  -29542,  -29929,  -30316,  -30574,  -30832,  -30961,  -31219,  -31348,
-  -31606,  -31735,  -31864,  -31864,  -31993,  -32122,  -32122,  -32251,
-  -32251,  -32380,  -32380,  -32380,  -32509,  -32509,  -32509,  -32509,
-   24898,   23995,   22963,   21931,   20770,   19480,   18061,   16642,
-   15093,   13416,   11610,    9804,    7998,    6063,    3999,    1935,
-       0,   -1935,   -3999,   -6063,   -7998,   -9804,  -11610,  -13416,
-  -15093,  -16642,  -18061,  -19480,  -20770,  -21931,  -22963,  -23995
-};
-static const INT16 K2_table[] = {
-       0,   -3096,   -6321,   -9417,  -12513,  -15351,  -18061,  -20770,
-  -23092,  -25285,  -27220,  -28897,  -30187,  -31348,  -32122,  -32638,
-       0,   32638,   32122,   31348,   30187,   28897,   27220,   25285,
-   23092,   20770,   18061,   15351,   12513,    9417,    6321,    3096
-};
-static const INT16 K3_table[] = {
-       0,   -3999,   -8127,  -12255,  -16384,  -20383,  -24511,  -28639,
-   32638,   28639,   24511,   20383,   16254,   12255,    8127,    3999
-};
-static const INT16 K5_table[] = {
-       0,   -8127,  -16384,  -24511,   32638,   24511,   16254,    8127
-};
 
 INLINE vlm5030_state *get_safe_token(device_t *device)
 {
 	assert(device != NULL);
 	assert(device->type() == VLM5030);
-	return (vlm5030_state *)downcast<legacy_device_base *>(device)->token();
+	return (vlm5030_state *)downcast<vlm5030_device *>(device)->token();
 }
 
 static int get_bits(vlm5030_state *chip, int sbit,int bits)
@@ -265,7 +222,7 @@ static int get_bits(vlm5030_state *chip, int sbit,int bits)
 	int data;
 
 	data = chip->rom[offset&chip->address_mask] +
-	       (((int)chip->rom[(offset+1)&chip->address_mask])*256);
+			(((int)chip->rom[(offset+1)&chip->address_mask])*256);
 	data >>= (sbit&7);
 	data &= (0xff>>(8-bits));
 
@@ -287,43 +244,44 @@ static int parse_frame (vlm5030_state *chip)
 	/* command byte check */
 	cmd = chip->rom[chip->address&chip->address_mask];
 	if( cmd & 0x01 )
-	{	/* extend frame */
+	{   /* extend frame */
 		chip->new_energy = chip->new_pitch = 0;
 		for(i=0;i<=9;i++)
 			chip->new_k[i] = 0;
 		chip->address++;
 		if( cmd & 0x02 )
-		{	/* end of speech */
+		{   /* end of speech */
 
 			/* logerror("VLM5030 %04X end \n",chip->address ); */
 			return 0;
 		}
 		else
-		{	/* silent frame */
+		{   /* silent frame */
 			int nums = ( (cmd>>2)+1 )*2;
 			/* logerror("VLM5030 %04X silent %d frame\n",chip->address,nums ); */
 			return nums * FR_SIZE;
 		}
 	}
 	/* pitch */
-	chip->new_pitch  = ( pitchtable[get_bits(chip, 1,5)] + chip->pitch_offset )&0xff;
+	chip->new_pitch  = ( chip->coeff->pitchtable[get_bits(chip, 1,chip->coeff->pitch_bits)] + chip->pitch_offset )&0xff;
 	/* energy */
-	chip->new_energy = energytable[get_bits(chip, 6,5)];
+	chip->new_energy = chip->coeff->energytable[get_bits(chip, 6,chip->coeff->energy_bits)];
 
 	/* 10 K's */
-	chip->new_k[9] = K5_table[get_bits(chip,11,3)];
-	chip->new_k[8] = K5_table[get_bits(chip,14,3)];
-	chip->new_k[7] = K5_table[get_bits(chip,17,3)];
-	chip->new_k[6] = K5_table[get_bits(chip,20,3)];
-	chip->new_k[5] = K5_table[get_bits(chip,23,3)];
-	chip->new_k[4] = K5_table[get_bits(chip,26,3)];
-	chip->new_k[3] = K3_table[get_bits(chip,29,4)];
-	chip->new_k[2] = K3_table[get_bits(chip,33,4)];
-	chip->new_k[1] = K2_table[get_bits(chip,37,5)];
-	chip->new_k[0] = K1_table[get_bits(chip,42,6)];
+	chip->new_k[9] = chip->coeff->ktable[9][get_bits(chip,11,chip->coeff->kbits[9])];
+	chip->new_k[8] = chip->coeff->ktable[8][get_bits(chip,14,chip->coeff->kbits[8])];
+	chip->new_k[7] = chip->coeff->ktable[7][get_bits(chip,17,chip->coeff->kbits[7])];
+	chip->new_k[6] = chip->coeff->ktable[6][get_bits(chip,20,chip->coeff->kbits[6])];
+	chip->new_k[5] = chip->coeff->ktable[5][get_bits(chip,23,chip->coeff->kbits[5])];
+	chip->new_k[4] = chip->coeff->ktable[4][get_bits(chip,26,chip->coeff->kbits[4])];
+	chip->new_k[3] = chip->coeff->ktable[3][get_bits(chip,29,chip->coeff->kbits[3])];
+	chip->new_k[2] = chip->coeff->ktable[2][get_bits(chip,33,chip->coeff->kbits[2])];
+	chip->new_k[1] = chip->coeff->ktable[1][get_bits(chip,37,chip->coeff->kbits[1])];
+	chip->new_k[0] = chip->coeff->ktable[0][get_bits(chip,42,chip->coeff->kbits[0])];
 
 	chip->address+=6;
 	logerror("VLM5030 %04X voice \n",chip->address );
+	//fprintf(stderr,"*** target Energy, Pitch, and Ks = %04d, %04d, %04d, %04d, %04d, %04d, %04d, %04d, %04d, %04d, %04d, %04d\n",chip->new_energy, chip->new_pitch, chip->new_k[0], chip->new_k[1], chip->new_k[2], chip->new_k[3], chip->new_k[4], chip->new_k[5], chip->new_k[6], chip->new_k[7], chip->new_k[8], chip->new_k[9]);
 	return FR_SIZE;
 }
 
@@ -361,7 +319,7 @@ static STREAM_UPDATE( vlm5030_update_callback )
 					/* change to new frame */
 					chip->interp_count = parse_frame(chip); /* with change phase */
 					if ( chip->interp_count == 0 )
-					{	/* end mark found */
+					{   /* end mark found */
 						chip->interp_count = FR_SIZE;
 						chip->sample_count = chip->frame_size; /* end -> stop time */
 						chip->phase = PH_STOP;
@@ -409,7 +367,7 @@ static STREAM_UPDATE( vlm5030_update_callback )
 				current_val = 0x00;
 			}
 			else if (chip->old_pitch <= 1)
-			{	/* generate unvoiced samples here */
+			{   /* generate unvoiced samples here */
 				current_val = (chip->device->machine().rand()&1) ? chip->current_energy : -chip->current_energy;
 			}
 			else
@@ -421,9 +379,9 @@ static STREAM_UPDATE( vlm5030_update_callback )
 			/* Lattice filter here */
 			u[10] = current_val;
 			for (i = 9; i >= 0; i--)
-				u[i] = u[i+1] - ((chip->current_k[i] * chip->x[i]) / 32768);
+				u[i] = u[i+1] - ((-chip->current_k[i] * chip->x[i]) / 512);
 			for (i = 9; i >= 1; i--)
-				chip->x[i] = chip->x[i-1] + ((chip->current_k[i-1] * u[i-1]) / 32768);
+				chip->x[i] = chip->x[i-1] + ((-chip->current_k[i-1] * u[i-1]) / 512);
 			chip->x[0] = u[0];
 
 			/* clipping, buffering */
@@ -501,25 +459,24 @@ static void vlm5030_setup_parameter(vlm5030_state *chip, UINT8 param)
 		chip->interp_step = 4; /* 9600bps : no interporator */
 	else if(param&1) /* bit1 = 0 & bit0 = 1 , 4800bps */
 		chip->interp_step = 2; /* 4800bps : 2 interporator */
-	else	/* bit1 = bit0 = 0 : 2400bps */
+	else    /* bit1 = bit0 = 0 : 2400bps */
 		chip->interp_step = 1; /* 2400bps : 4 interporator */
 
 	/* bit 3,4,5 : speed (frame size) */
 	chip->frame_size = vlm5030_speed_table[(param>>3) &7];
 
 	/* bit 6,7 : low / high pitch */
-	if(param&0x80)	/* bit7=1 , high pitch */
+	if(param&0x80)  /* bit7=1 , high pitch */
 		chip->pitch_offset = -8;
-	else if(param&0x40)	/* bit6=1 , low pitch */
+	else if(param&0x40) /* bit6=1 , low pitch */
 		chip->pitch_offset = 8;
 	else
 		chip->pitch_offset = 0;
 }
 
 
-static STATE_POSTLOAD( vlm5030_restore_state )
+static void vlm5030_restore_state(vlm5030_state *chip)
 {
-	vlm5030_state *chip = (vlm5030_state *)param;
 	int i;
 
 	int interp_effect = FR_SIZE - (chip->interp_count%FR_SIZE);
@@ -591,7 +548,7 @@ void vlm5030_rst (device_t *device, int pin )
 	if( chip->pin_RST )
 	{
 		if( !pin )
-		{	/* H -> L : latch parameters */
+		{   /* H -> L : latch parameters */
 			chip->pin_RST = 0;
 			vlm5030_setup_parameter(chip, chip->latch_data);
 		}
@@ -599,7 +556,7 @@ void vlm5030_rst (device_t *device, int pin )
 	else
 	{
 		if( pin )
-		{	/* L -> H : reset chip */
+		{   /* L -> H : reset chip */
 			chip->pin_RST = 1;
 			if( chip->pin_BSY )
 			{
@@ -628,11 +585,11 @@ void vlm5030_st(device_t *device, int pin )
 	{
 		/* pin level is change */
 		if( !pin )
-		{	/* H -> L */
+		{   /* H -> L */
 			chip->pin_ST = 0;
 
 			if( chip->pin_VCU )
-			{	/* direct access mode & address High */
+			{   /* direct access mode & address High */
 				chip->vcu_addr_h = ((int)chip->latch_data<<8) + 0x01;
 			}
 			else
@@ -640,15 +597,15 @@ void vlm5030_st(device_t *device, int pin )
 				/* start speech */
 				/* check access mode */
 				if( chip->vcu_addr_h )
-				{	/* direct access mode */
+				{   /* direct access mode */
 					chip->address = (chip->vcu_addr_h&0xff00) + chip->latch_data;
 					chip->vcu_addr_h = 0;
 				}
 				else
-				{	/* indirect accedd mode */
+				{   /* indirect accedd mode */
 					table = (chip->latch_data&0xfe) + (((int)chip->latch_data&1)<<8);
 					chip->address = (((int)chip->rom[table&chip->address_mask])<<8)
-					                |        chip->rom[(table+1)&chip->address_mask];
+									|        chip->rom[(table+1)&chip->address_mask];
 #if 0
 /* show unsupported parameter message */
 if( chip->interp_step != 1)
@@ -666,7 +623,7 @@ if( chip->interp_step != 1)
 			}
 		}
 		else
-		{	/* L -> H */
+		{   /* L -> H */
 			chip->pin_ST = 1;
 			/* setup speech , BSY on after 30ms? */
 			chip->phase = PH_SETUP;
@@ -685,7 +642,8 @@ static DEVICE_START( vlm5030 )
 	vlm5030_state *chip = get_safe_token(device);
 
 	chip->device = device;
-	chip->intf = (device->baseconfig().static_config() != NULL) ? (const vlm5030_interface *)device->baseconfig().static_config() : &defintrf;
+	chip->coeff = &vlm5030_coeff;
+	chip->intf = (device->static_config() != NULL) ? (const vlm5030_interface *)device->static_config() : &defintrf;
 
 	emulation_rate = device->clock() / 440;
 
@@ -726,34 +684,52 @@ static DEVICE_START( vlm5030 )
 	device->save_item(NAME(chip->target_pitch));
 	device->save_item(NAME(chip->target_k));
 	device->save_item(NAME(chip->x));
-	device->machine().state().register_postload(vlm5030_restore_state, chip);
+	device->machine().save().register_postload(save_prepost_delegate(FUNC(vlm5030_restore_state), chip));
 }
 
+const device_type VLM5030 = &device_creator<vlm5030_device>;
 
-/**************************************************************************
- * Generic get_info
- **************************************************************************/
-
-DEVICE_GET_INFO( vlm5030 )
+vlm5030_device::vlm5030_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, VLM5030, "VLM5030", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
 {
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(vlm5030_state);			break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME( vlm5030 );		break;
-		case DEVINFO_FCT_STOP:							/* Nothing */									break;
-		case DEVINFO_FCT_RESET:							info->reset = DEVICE_RESET_NAME( vlm5030 );		break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "VLM5030");						break;
-		case DEVINFO_STR_FAMILY:					strcpy(info->s, "VLM speech");					break;
-		case DEVINFO_STR_VERSION:					strcpy(info->s, "1.0");							break;
-		case DEVINFO_STR_SOURCE_FILE:						strcpy(info->s, __FILE__);						break;
-		case DEVINFO_STR_CREDITS:					strcpy(info->s, "Copyright Nicola Salmoria and the MAME Team"); break;
-	}
+	m_token = global_alloc_clear(vlm5030_state);
 }
 
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
 
-DEFINE_LEGACY_SOUND_DEVICE(VLM5030, vlm5030);
+void vlm5030_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void vlm5030_device::device_start()
+{
+	DEVICE_START_NAME( vlm5030 )(this);
+}
+
+//-------------------------------------------------
+//  device_reset - device-specific reset
+//-------------------------------------------------
+
+void vlm5030_device::device_reset()
+{
+	DEVICE_RESET_NAME( vlm5030 )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void vlm5030_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}

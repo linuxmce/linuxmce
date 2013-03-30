@@ -15,23 +15,23 @@
 #include "tinv2650.lh"
 #include "includes/zac2650.h"
 
-static WRITE8_HANDLER( tinvader_sound_w );
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, zac2650_state )
 	AM_RANGE(0x0000, 0x17ff) AM_ROM
-	AM_RANGE(0x1800, 0x1bff) AM_RAM_WRITE(tinvader_videoram_w) AM_BASE_MEMBER(zac2650_state, m_videoram)
+	AM_RANGE(0x1800, 0x1bff) AM_RAM_WRITE(tinvader_videoram_w) AM_SHARE("videoram")
 	AM_RANGE(0x1c00, 0x1cff) AM_RAM
 	AM_RANGE(0x1d00, 0x1dff) AM_RAM
-	AM_RANGE(0x1e80, 0x1e80) AM_READWRITE(tinvader_port_0_r, tinvader_sound_w)
+	AM_RANGE(0x1e80, 0x1e80) AM_READ(tinvader_port_0_r) AM_WRITE(tinvader_sound_w)
 	AM_RANGE(0x1e81, 0x1e81) AM_READ_PORT("1E81")
-    AM_RANGE(0x1e82, 0x1e82) AM_READ_PORT("1E82")
-	AM_RANGE(0x1e85, 0x1e85) AM_READ_PORT("1E85")					/* Dodgem Only */
-	AM_RANGE(0x1e86, 0x1e86) AM_READ_PORT("1E86") AM_WRITENOP		/* Dodgem Only */
-	AM_RANGE(0x1f00, 0x1fff) AM_READWRITE(zac_s2636_r, zac_s2636_w) AM_BASE_MEMBER(zac2650_state, m_s2636_0_ram)
+	AM_RANGE(0x1e82, 0x1e82) AM_READ_PORT("1E82")
+	AM_RANGE(0x1e85, 0x1e85) AM_READ_PORT("1E85")                   /* Dodgem Only */
+	AM_RANGE(0x1e86, 0x1e86) AM_READ_PORT("1E86") AM_WRITENOP       /* Dodgem Only */
+	AM_RANGE(0x1f00, 0x1fff) AM_READWRITE(zac_s2636_r, zac_s2636_w) AM_SHARE("s2636_0_ram")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( port_map, AS_IO, 8 )
-    AM_RANGE(S2650_SENSE_PORT, S2650_SENSE_PORT) AM_READ_PORT("SENSE")
+static ADDRESS_MAP_START( port_map, AS_IO, 8, zac2650_state )
+	AM_RANGE(S2650_SENSE_PORT, S2650_SENSE_PORT) AM_READ_PORT("SENSE")
 ADDRESS_MAP_END
 
 static INPUT_PORTS_START( tinvader )
@@ -43,28 +43,28 @@ static INPUT_PORTS_START( tinvader )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE2 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED  )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* Missile-Background Collision */
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )    /* Missile-Background Collision */
 
-    PORT_START("1E81")
+	PORT_START("1E81")
 	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Lives ) )
 	PORT_DIPSETTING(    0x00, "3" )
 	PORT_DIPSETTING(    0x01, "4" )
-    PORT_DIPNAME( 0x02, 0x00, "Lightning Speed" )	/* Velocita Laser Inv */
+	PORT_DIPNAME( 0x02, 0x00, "Lightning Speed" )   /* Velocita Laser Inv */
 	PORT_DIPSETTING(    0x00, "Slow" )
 	PORT_DIPSETTING(    0x02, "Fast" )
 	PORT_DIPNAME( 0x1C, 0x04, DEF_STR( Coinage ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0x04, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0x08, DEF_STR( 1C_2C ) )
-	PORT_DIPSETTING(	0x0C, DEF_STR( 1C_3C ) )
-	PORT_DIPSETTING(	0x10, DEF_STR( 1C_4C ) )
-	PORT_DIPSETTING(	0x14, DEF_STR( 1C_5C ) )
-	PORT_DIPSETTING(	0x18, DEF_STR( 1C_6C ) )
-	PORT_DIPSETTING(	0x1C, DEF_STR( 1C_7C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x04, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x08, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(    0x0C, DEF_STR( 1C_3C ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( 1C_4C ) )
+	PORT_DIPSETTING(    0x14, DEF_STR( 1C_5C ) )
+	PORT_DIPSETTING(    0x18, DEF_STR( 1C_6C ) )
+	PORT_DIPSETTING(    0x1C, DEF_STR( 1C_7C ) )
 	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Bonus_Life ) )
 	PORT_DIPSETTING(    0x00, "1000" )
 	PORT_DIPSETTING(    0x20, "1500" )
-    PORT_DIPNAME( 0x40, 0x00, "Extended Play" )
+	PORT_DIPNAME( 0x40, 0x00, "Extended Play" )
 	PORT_DIPSETTING(    0x00, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( Yes ) )
 
@@ -79,7 +79,7 @@ static INPUT_PORTS_START( tinvader )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("SENSE")
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 
 	PORT_START("1E85")
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -95,7 +95,7 @@ static INPUT_PORTS_START( sinvader )
 	PORT_MODIFY("1E80")
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNUSED )
 
-    PORT_MODIFY("1E81")
+	PORT_MODIFY("1E81")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED  )
 INPUT_PORTS_END
 
@@ -108,9 +108,9 @@ static INPUT_PORTS_START( dodgem )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED  )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* Missile-Background Collision */
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )    /* Missile-Background Collision */
 
-    PORT_START("1E81")
+	PORT_START("1E81")
 	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Lives ) )
 	PORT_DIPSETTING(    0x00, "3" )
 	PORT_DIPSETTING(    0x01, "4" )
@@ -118,14 +118,14 @@ static INPUT_PORTS_START( dodgem )
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( On ) )
 	PORT_DIPNAME( 0x1C, 0x04, DEF_STR( Coinage ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0x04, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0x08, DEF_STR( 1C_2C ) )
-	PORT_DIPSETTING(	0x0C, DEF_STR( 1C_3C ) )
-	PORT_DIPSETTING(	0x10, DEF_STR( 1C_4C ) )
-	PORT_DIPSETTING(	0x14, DEF_STR( 1C_5C ) )
-	PORT_DIPSETTING(	0x18, DEF_STR( 1C_6C ) )
-	PORT_DIPSETTING(	0x1C, DEF_STR( 1C_7C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x04, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x08, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(    0x0C, DEF_STR( 1C_3C ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( 1C_4C ) )
+	PORT_DIPSETTING(    0x14, DEF_STR( 1C_5C ) )
+	PORT_DIPSETTING(    0x18, DEF_STR( 1C_6C ) )
+	PORT_DIPSETTING(    0x1C, DEF_STR( 1C_7C ) )
 	PORT_DIPNAME( 0x20, 0x00, "Show High Scores" )
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( On ) )
@@ -137,7 +137,7 @@ static INPUT_PORTS_START( dodgem )
 	PORT_DIPSETTING(    0x80, DEF_STR( On ) )
 
 	PORT_START("1E82")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP	 ) PORT_4WAY
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP   ) PORT_4WAY
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_4WAY
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -147,7 +147,7 @@ static INPUT_PORTS_START( dodgem )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("SENSE")
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 
 	PORT_START("1E85")
 	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Difficulty ) )
@@ -181,12 +181,12 @@ static INPUT_PORTS_START( dodgem )
 INPUT_PORTS_END
 
 
-static PALETTE_INIT( zac2650 )
+void zac2650_state::palette_init()
 {
-	palette_set_color(machine,0,RGB_BLACK);
-	palette_set_color(machine,1,RGB_WHITE);
-	palette_set_color(machine,2,RGB_BLACK);
-	palette_set_color(machine,3,RGB_BLACK);
+	palette_set_color(machine(),0,RGB_BLACK);
+	palette_set_color(machine(),1,RGB_WHITE);
+	palette_set_color(machine(),2,RGB_BLACK);
+	palette_set_color(machine(),3,RGB_BLACK);
 }
 
 /************************************************************************************************
@@ -227,8 +227,8 @@ static const gfx_layout s2636_character =
 
 static GFXDECODE_START( tinvader )
 	GFXDECODE_SCALE( "gfx1", 0, tinvader_character,   0, 2, 3, 3 )
-	GFXDECODE_SCALE( NULL,   0x1F00, s2636_character, 0, 2, 4, 3 )	/* dynamic */
-	GFXDECODE_SCALE( NULL,   0x1F00, s2636_character, 0, 2, 8, 6 )	/* dynamic */
+	GFXDECODE_SCALE( NULL,   0x1F00, s2636_character, 0, 2, 4, 3 )  /* dynamic */
+	GFXDECODE_SCALE( NULL,   0x1F00, s2636_character, 0, 2, 8, 6 )  /* dynamic */
 GFXDECODE_END
 
 static MACHINE_CONFIG_START( tinvader, zac2650_state )
@@ -242,16 +242,13 @@ static MACHINE_CONFIG_START( tinvader, zac2650_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(55)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(1041))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(30*24, 32*24)
 	MCFG_SCREEN_VISIBLE_AREA(0, 719, 0, 767)
-	MCFG_SCREEN_UPDATE(tinvader)
+	MCFG_SCREEN_UPDATE_DRIVER(zac2650_state, screen_update_tinvader)
 
 	MCFG_GFXDECODE(tinvader)
 	MCFG_PALETTE_LENGTH(4)
 
-	MCFG_PALETTE_INIT(zac2650)
-	MCFG_VIDEO_START(tinvader)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -260,18 +257,18 @@ static MACHINE_CONFIG_START( tinvader, zac2650_state )
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.25)
 MACHINE_CONFIG_END
 
-static WRITE8_HANDLER( tinvader_sound_w )
+WRITE8_MEMBER(zac2650_state::tinvader_sound_w)
 {
-    /* sounds are NOT the same as space invaders */
+	/* sounds are NOT the same as &space invaders */
 
 	logerror("Register %x = Data %d\n",data & 0xfe,data & 0x01);
 
-    /* 08 = hit invader */
-    /* 20 = bonus (extra base) */
-    /* 40 = saucer */
+	/* 08 = hit invader */
+	/* 20 = bonus (extra base) */
+	/* 40 = saucer */
 	/* 84 = fire */
-    /* 90 = die */
-    /* c4 = hit saucer */
+	/* 90 = die */
+	/* c4 = hit saucer */
 }
 
 ROM_START( sia2650 )
@@ -304,14 +301,14 @@ ROM_START( dodgem )
 	ROM_LOAD( "rom6.bin",     0x1400, 0x0400, CRC(e131eacf) SHA1(6f5244a9d27b3c5696ed83843e46079d579f7b39) )
 
 	ROM_REGION( 0x400, "gfx1", 0 )
-	ROM_LOAD( "93451.bin",	  0x0000, 0x0400, CRC(004b26d2) SHA1(0b825510e7a8afa9db589f87ec93467ab8c73f93) )
+	ROM_LOAD( "93451.bin",    0x0000, 0x0400, CRC(004b26d2) SHA1(0b825510e7a8afa9db589f87ec93467ab8c73f93) )
 
 	/* unknown */
 	ROM_REGION( 0x0200, "proms", 0 )
-	ROM_LOAD( "74s571",		  0x0000, 0x0200, CRC(cc0b407e) SHA1(e675e3d7ff82e1cff9001e367620208bffa8b42f) )
+	ROM_LOAD( "74s571",       0x0000, 0x0200, CRC(cc0b407e) SHA1(e675e3d7ff82e1cff9001e367620208bffa8b42f) )
 ROM_END
 
 
-GAME( 1978, sia2650,  0,       tinvader, sinvader, 0, ROT270, "Zelco / Zaccaria", "Super Invader Attack", 0 )
-GAMEL(1978, tinv2650, sia2650, tinvader, tinvader, 0, ROT270, "Zelco / Zaccaria", "The Invaders",         0, layout_tinv2650 )
-GAME( 1979, dodgem,   0,       tinvader, dodgem,   0, ROT0,   "Zaccaria",         "Dodgem",               0 )
+GAME( 1978, sia2650,  0,       tinvader, sinvader, driver_device, 0, ROT270, "Zaccaria / Zelco", "Super Invader Attack", 0 )
+GAMEL(1978, tinv2650, sia2650, tinvader, tinvader, driver_device, 0, ROT270, "Zaccaria / Zelco", "The Invaders",         0, layout_tinv2650 )
+GAME( 1979, dodgem,   0,       tinvader, dodgem, driver_device,   0, ROT0,   "Zaccaria",         "Dodgem",               0 )

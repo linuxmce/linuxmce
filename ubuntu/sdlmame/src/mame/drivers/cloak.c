@@ -116,7 +116,6 @@
 
 #include "emu.h"
 #include "cpu/m6502/m6502.h"
-#include "deprecat.h"
 #include "sound/pokey.h"
 #include "machine/nvram.h"
 #include "includes/cloak.h"
@@ -127,34 +126,33 @@
  *
  *************************************/
 
-static WRITE8_HANDLER( cloak_led_w )
+WRITE8_MEMBER(cloak_state::cloak_led_w)
 {
-	set_led_status(space->machine(), 1 - offset, ~data & 0x80);
+	set_led_status(machine(), 1 - offset, ~data & 0x80);
 }
 
-static WRITE8_HANDLER( cloak_coin_counter_w )
+WRITE8_MEMBER(cloak_state::cloak_coin_counter_w)
 {
-	coin_counter_w(space->machine(), 1 - offset, data & 0x80);
+	coin_counter_w(machine(), 1 - offset, data & 0x80);
 }
 
-static WRITE8_HANDLER( cloak_custom_w )
+WRITE8_MEMBER(cloak_state::cloak_custom_w)
 {
 }
 
-static WRITE8_HANDLER( cloak_irq_reset_0_w )
+WRITE8_MEMBER(cloak_state::cloak_irq_reset_0_w)
 {
-	cputag_set_input_line(space->machine(), "maincpu", 0, CLEAR_LINE);
+	machine().device("maincpu")->execute().set_input_line(0, CLEAR_LINE);
 }
 
-static WRITE8_HANDLER( cloak_irq_reset_1_w )
+WRITE8_MEMBER(cloak_state::cloak_irq_reset_1_w)
 {
-	cputag_set_input_line(space->machine(), "slave", 0, CLEAR_LINE);
+	machine().device("slave")->execute().set_input_line(0, CLEAR_LINE);
 }
 
-static WRITE8_HANDLER( cloak_nvram_enable_w )
+WRITE8_MEMBER(cloak_state::cloak_nvram_enable_w)
 {
-	cloak_state *state = space->machine().driver_data<cloak_state>();
-	state->m_nvram_enabled = data & 0x01;
+	m_nvram_enabled = data & 0x01;
 }
 
 
@@ -165,23 +163,23 @@ static WRITE8_HANDLER( cloak_nvram_enable_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( master_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( master_map, AS_PROGRAM, 8, cloak_state )
 	AM_RANGE(0x0000, 0x03ff) AM_RAM
-	AM_RANGE(0x0400, 0x07ff) AM_RAM_WRITE(cloak_videoram_w) AM_BASE_MEMBER(cloak_state, m_videoram)
+	AM_RANGE(0x0400, 0x07ff) AM_RAM_WRITE(cloak_videoram_w) AM_SHARE("videoram")
 	AM_RANGE(0x0800, 0x0fff) AM_RAM AM_SHARE("share1")
-	AM_RANGE(0x1000, 0x100f) AM_DEVREADWRITE("pokey1", pokey_r, pokey_w)		/* DSW0 also */
-	AM_RANGE(0x1800, 0x180f) AM_DEVREADWRITE("pokey2", pokey_r, pokey_w)		/* DSW1 also */
+	AM_RANGE(0x1000, 0x100f) AM_DEVREADWRITE("pokey1", pokey_device, read, write)       /* DSW0 also */
+	AM_RANGE(0x1800, 0x180f) AM_DEVREADWRITE("pokey2", pokey_device, read, write)       /* DSW1 also */
 	AM_RANGE(0x2000, 0x2000) AM_READ_PORT("P1")
 	AM_RANGE(0x2200, 0x2200) AM_READ_PORT("P2")
 	AM_RANGE(0x2400, 0x2400) AM_READ_PORT("SYSTEM")
 	AM_RANGE(0x2600, 0x2600) AM_WRITE(cloak_custom_w)
 	AM_RANGE(0x2800, 0x29ff) AM_RAM AM_SHARE("nvram")
 	AM_RANGE(0x2f00, 0x2fff) AM_NOP
-	AM_RANGE(0x3000, 0x30ff) AM_RAM AM_BASE_MEMBER(cloak_state, m_spriteram)
+	AM_RANGE(0x3000, 0x30ff) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0x3200, 0x327f) AM_WRITE(cloak_paletteram_w)
 	AM_RANGE(0x3800, 0x3801) AM_WRITE(cloak_coin_counter_w)
 	AM_RANGE(0x3803, 0x3803) AM_WRITE(cloak_flipscreen_w)
-	AM_RANGE(0x3805, 0x3805) AM_WRITENOP	// ???
+	AM_RANGE(0x3805, 0x3805) AM_WRITENOP    // ???
 	AM_RANGE(0x3806, 0x3807) AM_WRITE(cloak_led_w)
 	AM_RANGE(0x3a00, 0x3a00) AM_WRITE(watchdog_reset_w)
 	AM_RANGE(0x3c00, 0x3c00) AM_WRITE(cloak_irq_reset_0_w)
@@ -196,7 +194,7 @@ ADDRESS_MAP_END
  *
  *************************************/
 
-static ADDRESS_MAP_START( slave_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( slave_map, AS_PROGRAM, 8, cloak_state )
 	AM_RANGE(0x0000, 0x0007) AM_RAM
 	AM_RANGE(0x0008, 0x000f) AM_READWRITE(graph_processor_r, graph_processor_w)
 	AM_RANGE(0x0010, 0x07ff) AM_RAM
@@ -227,21 +225,21 @@ static INPUT_PORTS_START( cloak )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_LEFT ) PORT_8WAY
 
 	PORT_START("P2")
-	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )		// player 2 controls, not used
+	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )     // player 2 controls, not used
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_SERVICE( 0x02, IP_ACTIVE_LOW )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN1 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNUSED )		// cocktail mode switch, not used
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNUSED )     // cocktail mode switch, not used
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE1 )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )		// player 2 button 1, not used
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )     // player 2 button 1, not used
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 )
 
 	PORT_START("START")
-	PORT_BIT( 0x0f, IP_ACTIVE_LOW, IPT_UNUSED )		// not connected
-	PORT_BIT( 0x30, IP_ACTIVE_HIGH, IPT_UNUSED )	// pulled high
+	PORT_BIT( 0x0f, IP_ACTIVE_LOW, IPT_UNUSED )     // not connected
+	PORT_BIT( 0x30, IP_ACTIVE_HIGH, IPT_UNUSED )    // pulled high
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_START2 )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_START1 )
 
@@ -259,11 +257,11 @@ static INPUT_PORTS_START( cloak )
 	PORT_DIPNAME( 0x10, 0x00, DEF_STR( Coin_A ) ) PORT_DIPLOCATION("5A:!4")
 	PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(    0x10, DEF_STR( 1C_2C ) )
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNUSED )	// "5A:!3" - it must be OFF according to manual.
-	PORT_DIPNAME( 0x40, 0x00, "Demo Freeze Mode" ) PORT_DIPLOCATION("5A:!2")	// when active, press button 1 to freeze
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNUSED )    // "5A:!3" - it must be OFF according to manual.
+	PORT_DIPNAME( 0x40, 0x00, "Demo Freeze Mode" ) PORT_DIPLOCATION("5A:!2")    // when active, press button 1 to freeze
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( On ) )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNUSED )	// "5A:!1" - Not Used according to manual.
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNUSED )    // "5A:!1" - Not Used according to manual.
 INPUT_PORTS_END
 
 
@@ -333,13 +331,13 @@ static const pokey_interface pokey_interface_2 =
 static MACHINE_CONFIG_START( cloak, cloak_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M6502, 1000000)		/* 1 MHz ???? */
+	MCFG_CPU_ADD("maincpu", M6502, 1000000)     /* 1 MHz ???? */
 	MCFG_CPU_PROGRAM_MAP(master_map)
-	MCFG_CPU_VBLANK_INT_HACK(irq0_line_hold, 4)
+	MCFG_CPU_PERIODIC_INT_DRIVER(cloak_state, irq0_line_hold,  4*60)
 
-	MCFG_CPU_ADD("slave", M6502, 1250000)		/* 1.25 MHz ???? */
+	MCFG_CPU_ADD("slave", M6502, 1250000)       /* 1.25 MHz ???? */
 	MCFG_CPU_PROGRAM_MAP(slave_map)
-	MCFG_CPU_VBLANK_INT_HACK(irq0_line_hold, 2)
+	MCFG_CPU_PERIODIC_INT_DRIVER(cloak_state, irq0_line_hold,  2*60)
 
 	MCFG_QUANTUM_TIME(attotime::from_hz(1000))
 
@@ -349,25 +347,26 @@ static MACHINE_CONFIG_START( cloak, cloak_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 3*8, 32*8-1)
-	MCFG_SCREEN_UPDATE(cloak)
+	MCFG_SCREEN_UPDATE_DRIVER(cloak_state, screen_update_cloak)
 
 	MCFG_GFXDECODE(cloak)
 	MCFG_PALETTE_LENGTH(64)
 
-	MCFG_VIDEO_START(cloak)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("pokey1", POKEY, XTAL_10MHz/8)		/* Accurate to recording */
-	MCFG_SOUND_CONFIG(pokey_interface_1)
+	/* more low pass filters ==> DISCRETE processing */
+	MCFG_POKEY_ADD("pokey1", XTAL_10MHz/8)      /* Accurate to recording */
+	MCFG_POKEY_CONFIG(pokey_interface_1)
+	MCFG_POKEY_OUTPUT_OPAMP_LOW_PASS(RES_K(1), CAP_U(0.047), 5.0)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 
-	MCFG_SOUND_ADD("pokey2", POKEY, XTAL_10MHz/8)		/* Accurate to recording */
-	MCFG_SOUND_CONFIG(pokey_interface_2)
+	MCFG_POKEY_ADD("pokey2", XTAL_10MHz/8)      /* Accurate to recording */
+	MCFG_POKEY_CONFIG(pokey_interface_2)
+	MCFG_POKEY_OUTPUT_OPAMP_LOW_PASS(RES_K(1), CAP_U(0.022), 5.0)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 MACHINE_CONFIG_END
 
@@ -618,11 +617,11 @@ ROM_END
  *
  *************************************/
 
-GAME( 1983, cloak,   0,     cloak, cloak, 0, ROT0, "Atari", "Cloak & Dagger (rev 5)", GAME_SUPPORTS_SAVE )
-GAME( 1983, cloaksp, cloak, cloak, cloak, 0, ROT0, "Atari", "Cloak & Dagger (Spanish)", GAME_SUPPORTS_SAVE )
-GAME( 1983, cloakfr, cloak, cloak, cloak, 0, ROT0, "Atari", "Cloak & Dagger (French)", GAME_SUPPORTS_SAVE )
-GAME( 1983, cloakgr, cloak, cloak, cloak, 0, ROT0, "Atari", "Cloak & Dagger (German)", GAME_SUPPORTS_SAVE )
-GAME( 1983, agentx4, cloak, cloak, cloak, 0, ROT0, "Atari", "Agent X (prototype, rev 4)", GAME_SUPPORTS_SAVE )
-GAME( 1983, agentx3, cloak, cloak, cloak, 0, ROT0, "Atari", "Agent X (prototype, rev 3)", GAME_SUPPORTS_SAVE )
-GAME( 1983, agentx2, cloak, cloak, cloak, 0, ROT0, "Atari", "Agent X (prototype, rev 2)", GAME_SUPPORTS_SAVE )
-GAME( 1983, agentx1, cloak, cloak, cloak, 0, ROT0, "Atari", "Agent X (prototype, rev 1)", GAME_SUPPORTS_SAVE )
+GAME( 1983, cloak,   0,     cloak, cloak, driver_device, 0, ROT0, "Atari", "Cloak & Dagger (rev 5)", GAME_SUPPORTS_SAVE )
+GAME( 1983, cloaksp, cloak, cloak, cloak, driver_device, 0, ROT0, "Atari", "Cloak & Dagger (Spanish)", GAME_SUPPORTS_SAVE )
+GAME( 1983, cloakfr, cloak, cloak, cloak, driver_device, 0, ROT0, "Atari", "Cloak & Dagger (French)", GAME_SUPPORTS_SAVE )
+GAME( 1983, cloakgr, cloak, cloak, cloak, driver_device, 0, ROT0, "Atari", "Cloak & Dagger (German)", GAME_SUPPORTS_SAVE )
+GAME( 1983, agentx4, cloak, cloak, cloak, driver_device, 0, ROT0, "Atari", "Agent X (prototype, rev 4)", GAME_SUPPORTS_SAVE )
+GAME( 1983, agentx3, cloak, cloak, cloak, driver_device, 0, ROT0, "Atari", "Agent X (prototype, rev 3)", GAME_SUPPORTS_SAVE )
+GAME( 1983, agentx2, cloak, cloak, cloak, driver_device, 0, ROT0, "Atari", "Agent X (prototype, rev 2)", GAME_SUPPORTS_SAVE )
+GAME( 1983, agentx1, cloak, cloak, cloak, driver_device, 0, ROT0, "Atari", "Agent X (prototype, rev 1)", GAME_SUPPORTS_SAVE )

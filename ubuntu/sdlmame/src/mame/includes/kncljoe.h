@@ -7,19 +7,21 @@
 class kncljoe_state : public driver_device
 {
 public:
-	kncljoe_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	kncljoe_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"),
+		m_scrollregs(*this, "scrollregs"),
+		m_spriteram(*this, "spriteram"){ }
 
 	/* memory pointers */
-	UINT8 *    m_videoram;
-	UINT8 *    m_spriteram;
-	UINT8 *    m_scrollregs;
-	size_t     m_spriteram_size;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_scrollregs;
+	required_shared_ptr<UINT8> m_spriteram;
 
 	/* video-related */
 	tilemap_t    *m_bg_tilemap;
 	int        m_tile_bank;
-	int			m_sprite_bank;
+	int         m_sprite_bank;
 	int        m_flipscreen;
 
 	/* misc */
@@ -27,17 +29,22 @@ public:
 	UINT8      m_port2;
 
 	/* devices */
-	device_t *m_soundcpu;
+	cpu_device *m_soundcpu;
+	DECLARE_WRITE8_MEMBER(sound_cmd_w);
+	DECLARE_WRITE8_MEMBER(sound_irq_ack_w);
+	DECLARE_WRITE8_MEMBER(kncljoe_videoram_w);
+	DECLARE_WRITE8_MEMBER(kncljoe_control_w);
+	DECLARE_WRITE8_MEMBER(kncljoe_scroll_w);
+	DECLARE_WRITE8_MEMBER(m6803_port1_w);
+	DECLARE_WRITE8_MEMBER(m6803_port2_w);
+	DECLARE_READ8_MEMBER(m6803_port1_r);
+	DECLARE_READ8_MEMBER(m6803_port2_r);
+	DECLARE_WRITE8_MEMBER(unused_w);
+	TILE_GET_INFO_MEMBER(get_bg_tile_info);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_kncljoe(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(sound_nmi);
 };
-
-
-
-/*----------- defined in video/kncljoe.c -----------*/
-
-WRITE8_HANDLER(kncljoe_videoram_w);
-WRITE8_HANDLER(kncljoe_control_w);
-WRITE8_HANDLER(kncljoe_scroll_w);
-
-PALETTE_INIT( kncljoe );
-VIDEO_START( kncljoe );
-SCREEN_UPDATE( kncljoe );

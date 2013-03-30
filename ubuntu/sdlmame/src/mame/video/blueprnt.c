@@ -20,11 +20,11 @@
 
 ***************************************************************************/
 
-PALETTE_INIT( blueprnt )
+void blueprnt_state::palette_init()
 {
 	int i;
 
-	for (i = 0; i < machine.total_colors(); i++)
+	for (i = 0; i < machine().total_colors(); i++)
 	{
 		UINT8 pen;
 		int r, g, b;
@@ -32,8 +32,8 @@ PALETTE_INIT( blueprnt )
 		if (i < 0x200)
 			/* characters */
 			pen = ((i & 0x100) >> 5) |
-				  ((i & 0x002) ? ((i & 0x0e0) >> 5) : 0) |
-				  ((i & 0x001) ? ((i & 0x01c) >> 2) : 0);
+					((i & 0x002) ? ((i & 0x0e0) >> 5) : 0) |
+					((i & 0x001) ? ((i & 0x01c) >> 2) : 0);
 		else
 			/* sprites */
 			pen = i - 0x200;
@@ -42,76 +42,102 @@ PALETTE_INIT( blueprnt )
 		g = ((pen >> 2) & 1) * ((pen & 0x08) ? 0xbf : 0xff);
 		b = ((pen >> 1) & 1) * ((pen & 0x08) ? 0xbf : 0xff);
 
-		palette_set_color(machine, i, MAKE_RGB(r, g, b));
+		palette_set_color(machine(), i, MAKE_RGB(r, g, b));
 	}
 }
 
-WRITE8_HANDLER( blueprnt_videoram_w )
+WRITE8_MEMBER(blueprnt_state::blueprnt_videoram_w)
 {
-	blueprnt_state *state = space->machine().driver_data<blueprnt_state>();
-
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_videoram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( blueprnt_colorram_w )
+WRITE8_MEMBER(blueprnt_state::blueprnt_colorram_w)
 {
-	blueprnt_state *state = space->machine().driver_data<blueprnt_state>();
+	m_colorram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 
-	state->m_colorram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	offset-=32;
+	offset &=0x3ff;
+	m_bg_tilemap->mark_tile_dirty(offset);
+
+	offset+=64;
+	offset &=0x3ff;
+	m_bg_tilemap->mark_tile_dirty(offset);
+
+
 }
 
-WRITE8_HANDLER( blueprnt_flipscreen_w )
+WRITE8_MEMBER(blueprnt_state::blueprnt_flipscreen_w)
 {
-	blueprnt_state *state = space->machine().driver_data<blueprnt_state>();
+	flip_screen_set(~data & 0x02);
 
-	flip_screen_set(space->machine(), ~data & 0x02);
-
-	if (state->m_gfx_bank != ((data & 0x04) >> 2))
+	if (m_gfx_bank != ((data & 0x04) >> 2))
 	{
-		state->m_gfx_bank = ((data & 0x04) >> 2);
-		tilemap_mark_all_tiles_dirty_all(space->machine());
+		m_gfx_bank = ((data & 0x04) >> 2);
+		machine().tilemap().mark_all_dirty();
 	}
 }
 
-static TILE_GET_INFO( get_bg_tile_info )
+
+
+TILE_GET_INFO_MEMBER(blueprnt_state::get_bg_tile_info)
 {
-	blueprnt_state *state = machine.driver_data<blueprnt_state>();
-	int attr = state->m_colorram[tile_index];
-	int code = state->m_videoram[tile_index] + 256 * state->m_gfx_bank;
+	int attr = m_colorram[tile_index];
+	int bank;
+
+	// It looks like the upper bank attribute bit (at least) comes from the previous tile read.
+	// Obviously if the screen is flipped the previous tile the hardware would read is different
+	// to the previous tile when it's not flipped hence the if (flip_screen()) logic
+	//
+	// note, one line still ends up darkened in the cocktail mode of grasspin, but on the real
+	// hardware there was no observable brightness difference between any part of the screen so
+	// I'm not convinced the brightness implementation is correct anyway, it might simply be
+	// tied to the use of upper / lower tiles or priority instead?
+	if (flip_screen())
+	{
+		bank = m_colorram[(tile_index+32)&0x3ff] & 0x40;
+	}
+	else
+	{
+		bank = m_colorram[(tile_index-32)&0x3ff] & 0x40;
+	}
+
+	int code = m_videoram[tile_index];
 	int color = attr & 0x7f;
 
-	tileinfo->category = (attr & 0x80) ? 1 : 0;
+	tileinfo.category = (attr & 0x80) ? 1 : 0;
+	if (bank) code += m_gfx_bank * 0x100;
 
-	SET_TILE_INFO(0, code, color, 0);
+	SET_TILE_INFO_MEMBER(0, code, color, 0);
 }
 
-VIDEO_START( blueprnt )
+
+
+VIDEO_START_MEMBER(blueprnt_state,blueprnt)
 {
-	blueprnt_state *state = machine.driver_data<blueprnt_state>();
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(blueprnt_state::get_bg_tile_info),this), TILEMAP_SCAN_COLS_FLIP_X, 8, 8, 32, 32);
+	m_bg_tilemap->set_transparent_pen(0);
+	m_bg_tilemap->set_scroll_cols(32);
 
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_cols_flip_x, 8, 8, 32, 32);
-	tilemap_set_transparent_pen(state->m_bg_tilemap, 0);
-	tilemap_set_scroll_cols(state->m_bg_tilemap, 32);
-
-	state->save_item(NAME(state->m_gfx_bank));
+	save_item(NAME(m_gfx_bank));
 }
 
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	blueprnt_state *state = machine.driver_data<blueprnt_state>();
 	int offs;
 
-	for (offs = 0; offs < state->m_spriteram_size; offs += 4)
+	for (offs = 0; offs < state->m_spriteram.bytes(); offs += 4)
 	{
 		int code = state->m_spriteram[offs + 1];
 		int sx = state->m_spriteram[offs + 3];
 		int sy = 240 - state->m_spriteram[offs];
 		int flipx = state->m_spriteram[offs + 2] & 0x40;
-		int flipy = state->m_spriteram[offs + 2 - 4] & 0x80;	// -4? Awkward, isn't it?
+		int flipy = state->m_spriteram[offs + 2 - 4] & 0x80;    // -4? Awkward, isn't it?
 
-		if (flip_screen_get(machine))
+		if (state->flip_screen())
 		{
 			sx = 248 - sx;
 			sy = 240 - sy;
@@ -124,21 +150,20 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 	}
 }
 
-SCREEN_UPDATE( blueprnt )
+UINT32 blueprnt_state::screen_update_blueprnt(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	blueprnt_state *state = screen->machine().driver_data<blueprnt_state>();
 	int i;
 
-	if (flip_screen_get(screen->machine()))
+	if (flip_screen())
 		for (i = 0; i < 32; i++)
-			tilemap_set_scrolly(state->m_bg_tilemap, i, state->m_scrollram[32 - i]);
+			m_bg_tilemap->set_scrolly(i, m_scrollram[32 - i]);
 	else
 		for (i = 0; i < 32; i++)
-			tilemap_set_scrolly(state->m_bg_tilemap, i, state->m_scrollram[30 - i]);
+			m_bg_tilemap->set_scrolly(i, m_scrollram[30 - i]);
 
-	bitmap_fill(bitmap, cliprect, get_black_pen(screen->machine()));
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
-	draw_sprites(screen->machine(), bitmap, cliprect);
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 1, 0);
+	bitmap.fill(get_black_pen(machine()), cliprect);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
+	draw_sprites(machine(), bitmap, cliprect);
+	m_bg_tilemap->draw(bitmap, cliprect, 1, 0);
 	return 0;
 }

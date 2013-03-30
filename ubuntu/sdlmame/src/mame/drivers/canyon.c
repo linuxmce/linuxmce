@@ -48,12 +48,12 @@
  *
  *************************************/
 
-static PALETTE_INIT( canyon )
+void canyon_state::palette_init()
 {
-	palette_set_color(machine, 0, MAKE_RGB(0x80, 0x80, 0x80)); /* GREY  */
-	palette_set_color(machine, 1, MAKE_RGB(0x00, 0x00, 0x00)); /* BLACK */
-	palette_set_color(machine, 2, MAKE_RGB(0x80, 0x80, 0x80)); /* GREY  */
-	palette_set_color(machine, 3, MAKE_RGB(0xff, 0xff, 0xff)); /* WHITE */
+	palette_set_color(machine(), 0, MAKE_RGB(0x80, 0x80, 0x80)); /* GREY  */
+	palette_set_color(machine(), 1, MAKE_RGB(0x00, 0x00, 0x00)); /* BLACK */
+	palette_set_color(machine(), 2, MAKE_RGB(0x80, 0x80, 0x80)); /* GREY  */
+	palette_set_color(machine(), 3, MAKE_RGB(0xff, 0xff, 0xff)); /* WHITE */
 }
 
 
@@ -63,23 +63,23 @@ static PALETTE_INIT( canyon )
  *
  *************************************/
 
-static READ8_HANDLER( canyon_switches_r )
+READ8_MEMBER(canyon_state::canyon_switches_r)
 {
 	UINT8 val = 0;
 
-	if ((input_port_read(space->machine(), "IN2") >> (offset & 7)) & 1)
+	if ((ioport("IN2")->read() >> (offset & 7)) & 1)
 		val |= 0x80;
 
-	if ((input_port_read(space->machine(), "IN1") >> (offset & 3)) & 1)
+	if ((ioport("IN1")->read() >> (offset & 3)) & 1)
 		val |= 0x01;
 
 	return val;
 }
 
 
-static READ8_HANDLER( canyon_options_r )
+READ8_MEMBER(canyon_state::canyon_options_r)
 {
-	return (input_port_read(space->machine(), "DSW") >> (2 * (~offset & 3))) & 3;
+	return (ioport("DSW")->read() >> (2 * (~offset & 3))) & 3;
 }
 
 
@@ -91,9 +91,9 @@ static READ8_HANDLER( canyon_options_r )
  *
  *************************************/
 
-static WRITE8_HANDLER( canyon_led_w )
+WRITE8_MEMBER(canyon_state::canyon_led_w)
 {
-	set_led_status(space->machine(), offset & 0x01, offset & 0x02);
+	set_led_status(machine(), offset & 0x01, offset & 0x02);
 }
 
 
@@ -105,16 +105,16 @@ static WRITE8_HANDLER( canyon_led_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, canyon_state )
 	ADDRESS_MAP_GLOBAL_MASK(0x3fff)
 	AM_RANGE(0x0000, 0x00ff) AM_MIRROR(0x100) AM_RAM
-	AM_RANGE(0x0400, 0x0401) AM_DEVWRITE("discrete", canyon_motor_w)
-	AM_RANGE(0x0500, 0x0500) AM_DEVWRITE("discrete", canyon_explode_w)
+	AM_RANGE(0x0400, 0x0401) AM_WRITE(canyon_motor_w)
+	AM_RANGE(0x0500, 0x0500) AM_WRITE(canyon_explode_w)
 	AM_RANGE(0x0501, 0x0501) AM_WRITE(watchdog_reset_w) /* watchdog, disabled in service mode */
-	AM_RANGE(0x0600, 0x0603) AM_DEVWRITE("discrete", canyon_whistle_w)
+	AM_RANGE(0x0600, 0x0603) AM_WRITE(canyon_whistle_w)
 	AM_RANGE(0x0680, 0x0683) AM_WRITE(canyon_led_w)
-	AM_RANGE(0x0700, 0x0703) AM_DEVWRITE("discrete", canyon_attract_w)
-	AM_RANGE(0x0800, 0x0bff) AM_RAM_WRITE(canyon_videoram_w) AM_BASE_MEMBER(canyon_state, m_videoram)
+	AM_RANGE(0x0700, 0x0703) AM_WRITE(canyon_attract_w)
+	AM_RANGE(0x0800, 0x0bff) AM_RAM_WRITE(canyon_videoram_w) AM_SHARE("videoram")
 	AM_RANGE(0x1000, 0x17ff) AM_READ(canyon_switches_r) AM_WRITENOP  /* sloppy code writes here */
 	AM_RANGE(0x1800, 0x1fff) AM_READ(canyon_options_r)
 	AM_RANGE(0x2000, 0x3fff) AM_ROM
@@ -135,8 +135,8 @@ static INPUT_PORTS_START( canyon )
 	PORT_DIPSETTING(    0x01, DEF_STR( Spanish ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( French ) )
 	PORT_DIPSETTING(    0x03, DEF_STR( German ) )
-	PORT_DIPUNKNOWN_DIPLOC( 0x04, 0x04, "SW:3" )	/* Manual says these are unused */
-	PORT_DIPUNKNOWN_DIPLOC( 0x08, 0x08, "SW:4" )	/* Manual says these are unused */
+	PORT_DIPUNKNOWN_DIPLOC( 0x04, 0x04, "SW:3" )    /* Manual says these are unused */
+	PORT_DIPUNKNOWN_DIPLOC( 0x08, 0x08, "SW:4" )    /* Manual says these are unused */
 	PORT_DIPNAME( 0x30, 0x00, "Misses Per Play" ) PORT_DIPLOCATION("SW:5,6")
 	PORT_DIPSETTING(    0x00, "3" )
 	PORT_DIPSETTING(    0x10, "4" )
@@ -160,7 +160,7 @@ static INPUT_PORTS_START( canyon )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_START1 )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_START2 )
 	PORT_SERVICE( 0x10, IP_ACTIVE_HIGH )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON7 ) PORT_NAME("Hiscore Reset") PORT_CODE(KEYCODE_H)
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_TILT ) /* SLAM */
 
@@ -239,23 +239,20 @@ static MACHINE_CONFIG_START( canyon, canyon_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6502, XTAL_12_096MHz / 16)
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT("screen", nmi_line_pulse)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", canyon_state,  nmi_line_pulse)
 	MCFG_WATCHDOG_VBLANK_INIT(8)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(22 * 1000000 / 15750))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(256, 240)
 	MCFG_SCREEN_VISIBLE_AREA(0, 255, 0, 239)
-	MCFG_SCREEN_UPDATE(canyon)
+	MCFG_SCREEN_UPDATE_DRIVER(canyon_state, screen_update_canyon)
 
 	MCFG_GFXDECODE(canyon)
 	MCFG_PALETTE_LENGTH(4)
 
-	MCFG_PALETTE_INIT(canyon)
-	MCFG_VIDEO_START(canyon)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
@@ -288,7 +285,7 @@ ROM_START( canyon )
 	ROM_LOAD_NIB_HIGH( "9505-01.n5", 0x0000, 0x0100, CRC(60507c07) SHA1(fcb76890cbaa37e02392bf8b97f7be9a6fe6a721) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "9491-01.j6", 0x0000, 0x0100, CRC(b8094b4c) SHA1(82dc6799a19984f3b204ee3aeeb007e55afc8be3) )	/* sync (not used) */
+	ROM_LOAD( "9491-01.j6", 0x0000, 0x0100, CRC(b8094b4c) SHA1(82dc6799a19984f3b204ee3aeeb007e55afc8be3) )  /* sync (not used) */
 ROM_END
 
 
@@ -307,7 +304,7 @@ ROM_START( canyonp )
 	ROM_LOAD_NIB_HIGH( "9505-01.n5", 0x0000, 0x0100, CRC(60507c07) SHA1(fcb76890cbaa37e02392bf8b97f7be9a6fe6a721) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "9491-01.j6", 0x0000, 0x0100, CRC(b8094b4c) SHA1(82dc6799a19984f3b204ee3aeeb007e55afc8be3) )	/* sync (not used) */
+	ROM_LOAD( "9491-01.j6", 0x0000, 0x0100, CRC(b8094b4c) SHA1(82dc6799a19984f3b204ee3aeeb007e55afc8be3) )  /* sync (not used) */
 ROM_END
 
 
@@ -318,5 +315,5 @@ ROM_END
  *
  *************************************/
 
-GAME( 1977, canyon,  0,      canyon, canyon, 0, ROT0, "Atari", "Canyon Bomber", GAME_SUPPORTS_SAVE )
-GAME( 1977, canyonp, canyon, canyon, canyon, 0, ROT0, "Atari", "Canyon Bomber (prototype)", GAME_SUPPORTS_SAVE )
+GAME( 1977, canyon,  0,      canyon, canyon, driver_device, 0, ROT0, "Atari", "Canyon Bomber", GAME_SUPPORTS_SAVE )
+GAME( 1977, canyonp, canyon, canyon, canyon, driver_device, 0, ROT0, "Atari", "Canyon Bomber (prototype)", GAME_SUPPORTS_SAVE )

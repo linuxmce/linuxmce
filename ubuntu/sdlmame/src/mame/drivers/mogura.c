@@ -8,25 +8,36 @@
 class mogura_state : public driver_device
 {
 public:
-	mogura_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	mogura_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_gfxram(*this, "gfxram"),
+		m_tileram(*this, "tileram"){ }
 
 	/* memory pointers */
-	UINT8 *   m_tileram;
-	UINT8 *   m_gfxram;
+	required_shared_ptr<UINT8> m_gfxram;
+	required_shared_ptr<UINT8> m_tileram;
 
 	/* video-related */
 	tilemap_t *m_tilemap;
 
 	/* devices */
-	device_t *m_maincpu;
-	device_t *m_dac1;
-	device_t *m_dac2;
+	cpu_device *m_maincpu;
+	dac_device *m_dac1;
+	dac_device *m_dac2;
+	DECLARE_WRITE8_MEMBER(mogura_tileram_w);
+	DECLARE_WRITE8_MEMBER(mogura_dac_w);
+	DECLARE_WRITE8_MEMBER(mogura_gfxram_w);
+	TILE_GET_INFO_MEMBER(get_mogura_tile_info);
+	virtual void machine_start();
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_mogura(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
-static PALETTE_INIT( mogura )
+void mogura_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i, j;
 
 	j = 0;
@@ -50,20 +61,19 @@ static PALETTE_INIT( mogura )
 		bit2 = BIT(color_prom[i], 7);
 		b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 
-		palette_set_color(machine, j, MAKE_RGB(r, g, b));
+		palette_set_color(machine(), j, MAKE_RGB(r, g, b));
 		j += 4;
 		if (j > 31) j -= 31;
 	}
 }
 
 
-static TILE_GET_INFO( get_mogura_tile_info )
+TILE_GET_INFO_MEMBER(mogura_state::get_mogura_tile_info)
 {
-	mogura_state *state = machine.driver_data<mogura_state>();
-	int code = state->m_tileram[tile_index];
-	int attr = state->m_tileram[tile_index + 0x800];
+	int code = m_tileram[tile_index];
+	int attr = m_tileram[tile_index + 0x800];
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			0,
 			code,
 			(attr >> 1) & 7,
@@ -71,78 +81,68 @@ static TILE_GET_INFO( get_mogura_tile_info )
 }
 
 
-static VIDEO_START( mogura )
+void mogura_state::video_start()
 {
-	mogura_state *state = machine.driver_data<mogura_state>();
-	gfx_element_set_source(machine.gfx[0], state->m_gfxram);
-	state->m_tilemap = tilemap_create(machine, get_mogura_tile_info, tilemap_scan_rows, 8, 8, 64, 32);
+	machine().gfx[0]->set_source(m_gfxram);
+	m_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(mogura_state::get_mogura_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 64, 32);
 }
 
-static SCREEN_UPDATE( mogura )
+UINT32 mogura_state::screen_update_mogura(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	mogura_state *state = screen->machine().driver_data<mogura_state>();
-	const rectangle &visarea = screen->visible_area();
+	const rectangle &visarea = screen.visible_area();
 
 	/* tilemap layout is a bit strange ... */
-	rectangle clip;
-	clip.min_x = visarea.min_x;
+	rectangle clip = visarea;
 	clip.max_x = 256 - 1;
-	clip.min_y = visarea.min_y;
-	clip.max_y = visarea.max_y;
-	tilemap_set_scrollx(state->m_tilemap, 0, 256);
-	tilemap_draw(bitmap, &clip, state->m_tilemap, 0, 0);
+	m_tilemap->set_scrollx(0, 256);
+	m_tilemap->draw(bitmap, clip, 0, 0);
 
 	clip.min_x = 256;
 	clip.max_x = 512 - 1;
-	clip.min_y = visarea.min_y;
-	clip.max_y = visarea.max_y;
-	tilemap_set_scrollx(state->m_tilemap, 0, -128);
-	tilemap_draw(bitmap, &clip, state->m_tilemap, 0, 0);
+	m_tilemap->set_scrollx(0, -128);
+	m_tilemap->draw(bitmap, clip, 0, 0);
 
 	return 0;
 }
 
-static WRITE8_HANDLER( mogura_tileram_w )
+WRITE8_MEMBER(mogura_state::mogura_tileram_w)
 {
-	mogura_state *state = space->machine().driver_data<mogura_state>();
-	state->m_tileram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_tilemap, offset & 0x7ff);
+	m_tileram[offset] = data;
+	m_tilemap->mark_tile_dirty(offset & 0x7ff);
 }
 
-static WRITE8_HANDLER(mogura_dac_w)
+WRITE8_MEMBER(mogura_state::mogura_dac_w)
 {
-	mogura_state *state = space->machine().driver_data<mogura_state>();
-	dac_data_w(state->m_dac1, data & 0xf0);	/* left */
-	dac_data_w(state->m_dac2, (data & 0x0f) << 4);	/* right */
-}
-
-
-static WRITE8_HANDLER ( mogura_gfxram_w )
-{
-	mogura_state *state = space->machine().driver_data<mogura_state>();
-	state->m_gfxram[offset] = data ;
-
-	gfx_element_mark_dirty(space->machine().gfx[0], offset / 16);
+	m_dac1->write_unsigned8(data & 0xf0);   /* left */
+	m_dac2->write_unsigned8((data & 0x0f) << 4);    /* right */
 }
 
 
-static ADDRESS_MAP_START( mogura_map, AS_PROGRAM, 8 )
+WRITE8_MEMBER(mogura_state::mogura_gfxram_w)
+{
+	m_gfxram[offset] = data ;
+
+	machine().gfx[0]->mark_dirty(offset / 16);
+}
+
+
+static ADDRESS_MAP_START( mogura_map, AS_PROGRAM, 8, mogura_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0xc000, 0xdfff) AM_RAM // main ram
-	AM_RANGE(0xe000, 0xefff) AM_RAM_WRITE(mogura_gfxram_w) AM_BASE_MEMBER(mogura_state, m_gfxram) // ram based characters
-	AM_RANGE(0xf000, 0xffff) AM_RAM_WRITE(mogura_tileram_w) AM_BASE_MEMBER(mogura_state, m_tileram) // tilemap
+	AM_RANGE(0xe000, 0xefff) AM_RAM_WRITE(mogura_gfxram_w) AM_SHARE("gfxram") // ram based characters
+	AM_RANGE(0xf000, 0xffff) AM_RAM_WRITE(mogura_tileram_w) AM_SHARE("tileram") // tilemap
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( mogura_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( mogura_io_map, AS_IO, 8, mogura_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x00) AM_WRITENOP	// ??
+	AM_RANGE(0x00, 0x00) AM_WRITENOP    // ??
 	AM_RANGE(0x08, 0x08) AM_READ_PORT("SYSTEM")
 	AM_RANGE(0x0c, 0x0c) AM_READ_PORT("P1")
 	AM_RANGE(0x0d, 0x0d) AM_READ_PORT("P2")
 	AM_RANGE(0x0e, 0x0e) AM_READ_PORT("P3")
 	AM_RANGE(0x0f, 0x0f) AM_READ_PORT("P4")
 	AM_RANGE(0x10, 0x10) AM_READ_PORT("SERVICE")
-	AM_RANGE(0x14, 0x14) AM_WRITE(mogura_dac_w)	/* 4 bit DAC x 2. MSB = left, LSB = right */
+	AM_RANGE(0x14, 0x14) AM_WRITE(mogura_dac_w) /* 4 bit DAC x 2. MSB = left, LSB = right */
 ADDRESS_MAP_END
 
 static INPUT_PORTS_START( mogura )
@@ -190,24 +190,22 @@ static GFXDECODE_START( mogura )
 	GFXDECODE_ENTRY( NULL, 0, tiles8x8_layout, 0, 8 )
 GFXDECODE_END
 
-static MACHINE_START( mogura )
+void mogura_state::machine_start()
 {
-	mogura_state *state = machine.driver_data<mogura_state>();
 
-	state->m_maincpu = machine.device("maincpu");
-	state->m_dac1 = machine.device("dac1");
-	state->m_dac2 = machine.device("dac2");
+	m_maincpu = machine().device<cpu_device>("maincpu");
+	m_dac1 = machine().device<dac_device>("dac1");
+	m_dac2 = machine().device<dac_device>("dac2");
 }
 
 static MACHINE_CONFIG_START( mogura, mogura_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80,3000000)		 /* 3 MHz */
+	MCFG_CPU_ADD("maincpu", Z80,3000000)         /* 3 MHz */
 	MCFG_CPU_PROGRAM_MAP(mogura_map)
 	MCFG_CPU_IO_MAP(mogura_io_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", mogura_state,  irq0_line_hold)
 
-	MCFG_MACHINE_START(mogura)
 
 	MCFG_GFXDECODE(mogura)
 
@@ -215,23 +213,20 @@ static MACHINE_CONFIG_START( mogura, mogura_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60) // ?
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(512, 512)
 	MCFG_SCREEN_VISIBLE_AREA(0, 320-1, 0, 256-1)
-	MCFG_SCREEN_UPDATE(mogura)
+	MCFG_SCREEN_UPDATE_DRIVER(mogura_state, screen_update_mogura)
 
 	MCFG_PALETTE_LENGTH(32)
 
-	MCFG_PALETTE_INIT(mogura)
-	MCFG_VIDEO_START(mogura)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
 
-	MCFG_SOUND_ADD("dac1", DAC, 0)
+	MCFG_DAC_ADD("dac1")
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "lspeaker", 0.50)
 
-	MCFG_SOUND_ADD("dac2", DAC, 0)
+	MCFG_DAC_ADD("dac2")
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "rspeaker", 0.50)
 MACHINE_CONFIG_END
 
@@ -243,4 +238,4 @@ ROM_START( mogura )
 	ROM_LOAD( "gx141.7j", 0x00, 0x20,  CRC(b21c5d5f) SHA1(6913c840dd69a7d4687f4c4cbe3ff12300f62bc2) )
 ROM_END
 
-GAME( 1991, mogura, 0, mogura, mogura, 0, ROT0, "Konami", "Mogura Desse (Japan)", GAME_SUPPORTS_SAVE )
+GAME( 1991, mogura, 0, mogura, mogura, driver_device, 0, ROT0, "Konami", "Mogura Desse (Japan)", GAME_SUPPORTS_SAVE )

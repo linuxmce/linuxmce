@@ -42,8 +42,9 @@
 
 ***************************************************************************/
 
-PALETTE_INIT( mrdo )
+void mrdo_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 
 	const int R1 = 150;
@@ -53,7 +54,7 @@ PALETTE_INIT( mrdo )
 	const int pull = 220;
 	float pot[16];
 	int weight[16];
-	const float potadjust = 0.7f;	/* diode voltage drop */
+	const float potadjust = 0.7f;   /* diode voltage drop */
 
 	for (i = 0x0f; i >= 0; i--)
 	{
@@ -71,10 +72,11 @@ PALETTE_INIT( mrdo )
 		else pot[i] = 0;
 
 		weight[i] = 0xff * pot[i] / pot[0x0f];
+		if (weight[i] < 0) weight[i] = 0;
 	}
 
 	/* allocate the colortable */
-	machine.colortable = colortable_alloc(machine, 0x100);
+	machine().colortable = colortable_alloc(machine(), 0x100);
 
 	for (i = 0; i < 0x100; i++)
 	{
@@ -100,7 +102,7 @@ PALETTE_INIT( mrdo )
 		bits2 = (color_prom[a2] >> 4) & 0x03;
 		b = weight[bits0 + (bits2 << 2)];
 
-		colortable_palette_set_color(machine.colortable, i, MAKE_RGB(r, g, b));
+		colortable_palette_set_color(machine().colortable, i, MAKE_RGB(r, g, b));
 	}
 
 	/* color_prom now points to the beginning of the lookup table */
@@ -108,7 +110,7 @@ PALETTE_INIT( mrdo )
 
 	/* characters */
 	for (i = 0; i < 0x100; i++)
-		colortable_entry_set_value(machine.colortable, i, i);
+		colortable_entry_set_value(machine().colortable, i, i);
 
 	/* sprites */
 	for (i = 0x100; i < 0x140; i++)
@@ -116,11 +118,11 @@ PALETTE_INIT( mrdo )
 		UINT8 ctabentry = color_prom[(i - 0x100) & 0x1f];
 
 		if ((i - 0x100) & 0x20)
-			ctabentry >>= 4;		/* high 4 bits are for sprite color n + 8 */
+			ctabentry >>= 4;        /* high 4 bits are for sprite color n + 8 */
 		else
-			ctabentry &= 0x0f;	/* low 4 bits are for sprite color n */
+			ctabentry &= 0x0f;  /* low 4 bits are for sprite color n */
 
-		colortable_entry_set_value(machine.colortable, i, ctabentry + ((ctabentry & 0x0c) << 3));
+		colortable_entry_set_value(machine().colortable, i, ctabentry + ((ctabentry & 0x0c) << 3));
 	}
 }
 
@@ -132,24 +134,22 @@ PALETTE_INIT( mrdo )
 
 ***************************************************************************/
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(mrdo_state::get_bg_tile_info)
 {
-	mrdo_state *state = machine.driver_data<mrdo_state>();
-	UINT8 attr = state->m_bgvideoram[tile_index];
-	SET_TILE_INFO(
+	UINT8 attr = m_bgvideoram[tile_index];
+	SET_TILE_INFO_MEMBER(
 			1,
-			state->m_bgvideoram[tile_index + 0x400] + ((attr & 0x80) << 1),
+			m_bgvideoram[tile_index + 0x400] + ((attr & 0x80) << 1),
 			attr & 0x3f,
 			(attr & 0x40) ? TILE_FORCE_LAYER0 : 0);
 }
 
-static TILE_GET_INFO( get_fg_tile_info )
+TILE_GET_INFO_MEMBER(mrdo_state::get_fg_tile_info)
 {
-	mrdo_state *state = machine.driver_data<mrdo_state>();
-	UINT8 attr = state->m_fgvideoram[tile_index];
-	SET_TILE_INFO(
+	UINT8 attr = m_fgvideoram[tile_index];
+	SET_TILE_INFO_MEMBER(
 			0,
-			state->m_fgvideoram[tile_index+0x400] + ((attr & 0x80) << 1),
+			m_fgvideoram[tile_index+0x400] + ((attr & 0x80) << 1),
 			attr & 0x3f,
 			(attr & 0x40) ? TILE_FORCE_LAYER0 : 0);
 }
@@ -162,24 +162,23 @@ static TILE_GET_INFO( get_fg_tile_info )
 
 ***************************************************************************/
 
-VIDEO_START( mrdo )
+void mrdo_state::video_start()
 {
-	mrdo_state *state = machine.driver_data<mrdo_state>();
 
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info,tilemap_scan_rows,8,8,32,32);
-	state->m_fg_tilemap = tilemap_create(machine, get_fg_tile_info,tilemap_scan_rows,8,8,32,32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(mrdo_state::get_bg_tile_info),this),TILEMAP_SCAN_ROWS,8,8,32,32);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(mrdo_state::get_fg_tile_info),this),TILEMAP_SCAN_ROWS,8,8,32,32);
 
-	tilemap_set_transparent_pen(state->m_bg_tilemap,0);
-	tilemap_set_transparent_pen(state->m_fg_tilemap,0);
+	m_bg_tilemap->set_transparent_pen(0);
+	m_fg_tilemap->set_transparent_pen(0);
 
-	tilemap_set_scrolldx(state->m_bg_tilemap, 0, 56);
-	tilemap_set_scrolldx(state->m_fg_tilemap, 0, 56);
-	tilemap_set_scrolldy(state->m_bg_tilemap, 0, 6);
-	tilemap_set_scrolldy(state->m_fg_tilemap, 0, 6);
+	m_bg_tilemap->set_scrolldx(0, 56);
+	m_fg_tilemap->set_scrolldx(0, 56);
+	m_bg_tilemap->set_scrolldy(0, 6);
+	m_fg_tilemap->set_scrolldy(0, 6);
 
-	state->m_flipscreen = 0;
+	m_flipscreen = 0;
 
-	state->save_item(NAME(state->m_flipscreen));
+	save_item(NAME(m_flipscreen));
 }
 
 
@@ -190,48 +189,43 @@ VIDEO_START( mrdo )
 
 ***************************************************************************/
 
-WRITE8_HANDLER( mrdo_bgvideoram_w )
+WRITE8_MEMBER(mrdo_state::mrdo_bgvideoram_w)
 {
-	mrdo_state *state = space->machine().driver_data<mrdo_state>();
-	state->m_bgvideoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset & 0x3ff);
+	m_bgvideoram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset & 0x3ff);
 }
 
-WRITE8_HANDLER( mrdo_fgvideoram_w )
+WRITE8_MEMBER(mrdo_state::mrdo_fgvideoram_w)
 {
-	mrdo_state *state = space->machine().driver_data<mrdo_state>();
-	state->m_fgvideoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_fg_tilemap, offset & 0x3ff);
+	m_fgvideoram[offset] = data;
+	m_fg_tilemap->mark_tile_dirty(offset & 0x3ff);
 }
 
 
-WRITE8_HANDLER( mrdo_scrollx_w )
+WRITE8_MEMBER(mrdo_state::mrdo_scrollx_w)
 {
-	mrdo_state *state = space->machine().driver_data<mrdo_state>();
-	tilemap_set_scrollx(state->m_bg_tilemap, 0, data);
+	m_bg_tilemap->set_scrollx(0, data);
 }
 
-WRITE8_HANDLER( mrdo_scrolly_w )
+WRITE8_MEMBER(mrdo_state::mrdo_scrolly_w)
 {
-	mrdo_state *state = space->machine().driver_data<mrdo_state>();
 
 	/* This is NOT affected by flipscreen (so stop it happening) */
-	if (state->m_flipscreen)
-		tilemap_set_scrolly(state->m_bg_tilemap, 0,((256 - data) & 0xff));
+	if (m_flipscreen)
+		m_bg_tilemap->set_scrolly(0,((256 - data) & 0xff));
 	else
-		tilemap_set_scrolly(state->m_bg_tilemap, 0, data);
+		m_bg_tilemap->set_scrolly(0, data);
 }
 
 
-WRITE8_HANDLER( mrdo_flipscreen_w )
+WRITE8_MEMBER(mrdo_state::mrdo_flipscreen_w)
 {
-	mrdo_state *state = space->machine().driver_data<mrdo_state>();
 
 	/* bits 1-3 control the playfield priority, but they are not used by */
 	/* Mr. Do! so we don't emulate them */
 
-	state->m_flipscreen = data & 0x01;
-	tilemap_set_flip_all(space->machine(), state->m_flipscreen ? (TILEMAP_FLIPY | TILEMAP_FLIPX) : 0);
+	m_flipscreen = data & 0x01;
+	machine().tilemap().set_flip_all(m_flipscreen ? (TILEMAP_FLIPY | TILEMAP_FLIPX) : 0);
 }
 
 
@@ -242,13 +236,13 @@ WRITE8_HANDLER( mrdo_flipscreen_w )
 
 ***************************************************************************/
 
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap,const rectangle *cliprect )
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap,const rectangle &cliprect )
 {
 	mrdo_state *state = machine.driver_data<mrdo_state>();
 	UINT8 *spriteram = state->m_spriteram;
 	int offs;
 
-	for (offs = state->m_spriteram_size - 4; offs >= 0; offs -= 4)
+	for (offs = state->m_spriteram.bytes() - 4; offs >= 0; offs -= 4)
 	{
 		if (spriteram[offs + 1] != 0)
 		{
@@ -260,13 +254,12 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap,const recta
 	}
 }
 
-SCREEN_UPDATE( mrdo )
+UINT32 mrdo_state::screen_update_mrdo(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	mrdo_state *state = screen->machine().driver_data<mrdo_state>();
 
-	bitmap_fill(bitmap, cliprect,0);
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
-	tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, 0, 0);
-	draw_sprites(screen->machine(), bitmap, cliprect);
+	bitmap.fill(0, cliprect);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
+	m_fg_tilemap->draw(bitmap, cliprect, 0, 0);
+	draw_sprites(machine(), bitmap, cliprect);
 	return 0;
 }

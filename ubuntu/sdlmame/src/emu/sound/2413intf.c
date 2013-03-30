@@ -10,11 +10,10 @@
 
 
 /* for stream system */
-typedef struct _ym2413_state ym2413_state;
-struct _ym2413_state
+struct ym2413_state
 {
-	sound_stream *	stream;
-	void *			chip;
+	sound_stream *  stream;
+	void *          chip;
 };
 
 
@@ -22,21 +21,21 @@ INLINE ym2413_state *get_safe_token(device_t *device)
 {
 	assert(device != NULL);
 	assert(device->type() == YM2413);
-	return (ym2413_state *)downcast<legacy_device_base *>(device)->token();
+	return (ym2413_state *)downcast<ym2413_device *>(device)->token();
 }
 
 
 #ifdef UNUSED_FUNCTION
 void YM2413DAC_update(int chip,stream_sample_t **inputs, stream_sample_t **_buffer,int length)
 {
-    INT16 *buffer = _buffer[0];
-    static int out = 0;
+	INT16 *buffer = _buffer[0];
+	static int out = 0;
 
-    if ( ym2413[chip].reg[0x0F] & 0x01 )
-    {
-        out = ((ym2413[chip].reg[0x10] & 0xF0) << 7);
-    }
-    while (length--) *(buffer++) = out;
+	if ( ym2413[chip].reg[0x0F] & 0x01 )
+	{
+		out = ((ym2413[chip].reg[0x10] & 0xF0) << 7);
+	}
+	while (length--) *(buffer++) = out;
 }
 #endif
 
@@ -112,34 +111,61 @@ WRITE8_DEVICE_HANDLER( ym2413_w )
 	ym2413_write(info->chip, offset & 1, data);
 }
 
-WRITE8_DEVICE_HANDLER( ym2413_register_port_w ) { ym2413_w(device, 0, data); }
-WRITE8_DEVICE_HANDLER( ym2413_data_port_w ) { ym2413_w(device, 1, data); }
+WRITE8_DEVICE_HANDLER( ym2413_register_port_w ) { ym2413_w(device, space, 0, data); }
+WRITE8_DEVICE_HANDLER( ym2413_data_port_w ) { ym2413_w(device, space, 1, data); }
 
+const device_type YM2413 = &device_creator<ym2413_device>;
 
-/**************************************************************************
- * Generic get_info
- **************************************************************************/
-
-DEVICE_GET_INFO( ym2413 )
+ym2413_device::ym2413_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, YM2413, "YM2413", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
 {
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(ym2413_state);				break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME( ym2413 );				break;
-		case DEVINFO_FCT_STOP:							info->stop = DEVICE_STOP_NAME( ym2413 );				break;
-		case DEVINFO_FCT_RESET:							info->reset = DEVICE_RESET_NAME( ym2413 );				break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "YM2413");							break;
-		case DEVINFO_STR_FAMILY:					strcpy(info->s, "Yamaha FM");						break;
-		case DEVINFO_STR_VERSION:					strcpy(info->s, "1.0");								break;
-		case DEVINFO_STR_SOURCE_FILE:						strcpy(info->s, __FILE__);							break;
-		case DEVINFO_STR_CREDITS:					strcpy(info->s, "Copyright Nicola Salmoria and the MAME Team"); break;
-	}
+	m_token = global_alloc_clear(ym2413_state);
 }
 
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
 
-DEFINE_LEGACY_SOUND_DEVICE(YM2413, ym2413);
+void ym2413_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void ym2413_device::device_start()
+{
+	DEVICE_START_NAME( ym2413 )(this);
+}
+
+//-------------------------------------------------
+//  device_reset - device-specific reset
+//-------------------------------------------------
+
+void ym2413_device::device_reset()
+{
+	DEVICE_RESET_NAME( ym2413 )(this);
+}
+
+//-------------------------------------------------
+//  device_stop - device-specific stop
+//-------------------------------------------------
+
+void ym2413_device::device_stop()
+{
+	DEVICE_STOP_NAME( ym2413 )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void ym2413_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}

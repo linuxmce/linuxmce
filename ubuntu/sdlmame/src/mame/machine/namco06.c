@@ -93,8 +93,7 @@
 
 
 
-typedef struct _namco_06xx_state namco_06xx_state;
-struct _namco_06xx_state
+struct namco_06xx_state
 {
 	UINT8 m_control;
 	emu_timer *m_nmi_timer;
@@ -110,7 +109,7 @@ INLINE namco_06xx_state *get_safe_token(device_t *device)
 	assert(device != NULL);
 	assert(device->type() == NAMCO_06XX);
 
-	return (namco_06xx_state *)downcast<legacy_device_base *>(device)->token();
+	return (namco_06xx_state *)downcast<namco_06xx_device *>(device)->token();
 }
 
 
@@ -123,7 +122,7 @@ static TIMER_CALLBACK( nmi_generate )
 	{
 		LOG(("NMI cpu '%s'\n",state->m_nmicpu->tag()));
 
-		device_set_input_line(state->m_nmicpu, INPUT_LINE_NMI, PULSE_LINE);
+		state->m_nmicpu->set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 	}
 	else
 		LOG(("NMI not generated because cpu '%s' is suspended\n",state->m_nmicpu->tag()));
@@ -136,17 +135,17 @@ READ8_DEVICE_HANDLER( namco_06xx_data_r )
 	UINT8 result = 0xff;
 	int devnum;
 
-	LOG(("%s: 06XX '%s' read offset %d\n",device->machine().describe_context(),device->tag(),offset));
+	LOG(("%s: 06XX '%s' read offset %d\n",space.machine().describe_context(),device->tag(),offset));
 
 	if (!(state->m_control & 0x10))
 	{
-		logerror("%s: 06XX '%s' read in write mode %02x\n",device->machine().describe_context(),device->tag(),state->m_control);
+		logerror("%s: 06XX '%s' read in write mode %02x\n",space.machine().describe_context(),device->tag(),state->m_control);
 		return 0;
 	}
 
 	for (devnum = 0; devnum < 4; devnum++)
 		if ((state->m_control & (1 << devnum)) && state->m_read[devnum] != NULL)
-			result &= (*state->m_read[devnum])(state->m_device[devnum], 0);
+			result &= (*state->m_read[devnum])(state->m_device[devnum], space, 0, 0xff);
 
 	return result;
 }
@@ -157,24 +156,24 @@ WRITE8_DEVICE_HANDLER( namco_06xx_data_w )
 	namco_06xx_state *state = get_safe_token(device);
 	int devnum;
 
-	LOG(("%s: 06XX '%s' write offset %d = %02x\n",device->machine().describe_context(),device->tag(),offset,data));
+	LOG(("%s: 06XX '%s' write offset %d = %02x\n",space.machine().describe_context(),device->tag(),offset,data));
 
 	if (state->m_control & 0x10)
 	{
-		logerror("%s: 06XX '%s' write in read mode %02x\n",device->machine().describe_context(),device->tag(),state->m_control);
+		logerror("%s: 06XX '%s' write in read mode %02x\n",space.machine().describe_context(),device->tag(),state->m_control);
 		return;
 	}
 
 	for (devnum = 0; devnum < 4; devnum++)
 		if ((state->m_control & (1 << devnum)) && state->m_write[devnum] != NULL)
-			(*state->m_write[devnum])(state->m_device[devnum], 0, data);
+			(*state->m_write[devnum])(state->m_device[devnum], space, 0, data, 0xff);
 }
 
 
 READ8_DEVICE_HANDLER( namco_06xx_ctrl_r )
 {
 	namco_06xx_state *state = get_safe_token(device);
-	LOG(("%s: 06XX '%s' ctrl_r\n",device->machine().describe_context(),device->tag()));
+	LOG(("%s: 06XX '%s' ctrl_r\n",space.machine().describe_context(),device->tag()));
 	return state->m_control;
 }
 
@@ -183,7 +182,7 @@ WRITE8_DEVICE_HANDLER( namco_06xx_ctrl_w )
 	namco_06xx_state *state = get_safe_token(device);
 	int devnum;
 
-	LOG(("%s: 06XX '%s' control %02x\n",device->machine().describe_context(),device->tag(),data));
+	LOG(("%s: 06XX '%s' control %02x\n",space.machine().describe_context(),device->tag(),data));
 
 	state->m_control = data;
 
@@ -220,7 +219,7 @@ WRITE8_DEVICE_HANDLER( namco_06xx_ctrl_w )
 
 static DEVICE_START( namco_06xx )
 {
-	const namco_06xx_config *config = (const namco_06xx_config *)downcast<const legacy_device_config_base &>(device->baseconfig()).inline_config();
+	const namco_06xx_config *config = (const namco_06xx_config *)device->static_config();
 	namco_06xx_state *state = get_safe_token(device);
 	int devnum;
 
@@ -267,7 +266,7 @@ static DEVICE_START( namco_06xx )
 			else if (type == NAMCO_54XX)
 				state->m_write[devnum] = namco_54xx_write;
 			else
-				fatalerror("Unknown device type %s connected to Namco 06xx", state->m_device[devnum]->name());
+				fatalerror("Unknown device type %s connected to Namco 06xx\n", state->m_device[devnum]->name());
 		}
 
 	/* allocate a timer */
@@ -288,18 +287,39 @@ static DEVICE_RESET( namco_06xx )
 }
 
 
-/*-------------------------------------------------
-    device definition
--------------------------------------------------*/
+const device_type NAMCO_06XX = &device_creator<namco_06xx_device>;
 
-static const char DEVTEMPLATE_SOURCE[] = __FILE__;
+namco_06xx_device::namco_06xx_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, NAMCO_06XX, "Namco 06xx", tag, owner, clock)
+{
+	m_token = global_alloc_clear(namco_06xx_state);
+}
 
-#define DEVTEMPLATE_ID(p,s)		p##namco_06xx##s
-#define DEVTEMPLATE_FEATURES	DT_HAS_START | DT_HAS_RESET | DT_HAS_INLINE_CONFIG
-#define DEVTEMPLATE_NAME		"Namco 06xx"
-#define DEVTEMPLATE_FAMILY		"Namco I/O"
-#define DEVTEMPLATE_SHORTNAME   "namco06xx"
-#include "devtempl.h"
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
 
+void namco_06xx_device::device_config_complete()
+{
+	m_shortname = "namco06xx";
+}
 
-DEFINE_LEGACY_DEVICE(NAMCO_06XX, namco_06xx);
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void namco_06xx_device::device_start()
+{
+	DEVICE_START_NAME( namco_06xx )(this);
+}
+
+//-------------------------------------------------
+//  device_reset - device-specific reset
+//-------------------------------------------------
+
+void namco_06xx_device::device_reset()
+{
+	DEVICE_RESET_NAME( namco_06xx )(this);
+}

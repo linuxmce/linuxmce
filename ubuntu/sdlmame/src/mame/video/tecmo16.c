@@ -14,40 +14,37 @@
 
 /******************************************************************************/
 
-static TILE_GET_INFO( fg_get_tile_info )
+TILE_GET_INFO_MEMBER(tecmo16_state::fg_get_tile_info)
 {
-	tecmo16_state *state = machine.driver_data<tecmo16_state>();
-	int tile = state->m_videoram[tile_index] & 0x1fff;
-	int color = state->m_colorram[tile_index] & 0x0f;
+	int tile = m_videoram[tile_index] & 0x1fff;
+	int color = m_colorram[tile_index] & 0x0f;
 
 	/* bit 4 controls blending */
-	tileinfo->category = (state->m_colorram[tile_index] & 0x10) >> 4;
+	tileinfo.category = (m_colorram[tile_index] & 0x10) >> 4;
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			1,
 			tile,
-			color | (tileinfo->category ? 0x70 : 0x00),
+			color | (tileinfo.category ? 0x70 : 0x00),
 			0);
 }
 
-static TILE_GET_INFO( bg_get_tile_info )
+TILE_GET_INFO_MEMBER(tecmo16_state::bg_get_tile_info)
 {
-	tecmo16_state *state = machine.driver_data<tecmo16_state>();
-	int tile = state->m_videoram2[tile_index] & 0x1fff;
-	int color = (state->m_colorram2[tile_index] & 0x0f)+0x10;
+	int tile = m_videoram2[tile_index] & 0x1fff;
+	int color = (m_colorram2[tile_index] & 0x0f)+0x10;
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			1,
 			tile,
 			color,
 			0);
 }
 
-static TILE_GET_INFO( tx_get_tile_info )
+TILE_GET_INFO_MEMBER(tecmo16_state::tx_get_tile_info)
 {
-	tecmo16_state *state = machine.driver_data<tecmo16_state>();
-	int tile = state->m_charram[tile_index];
-	SET_TILE_INFO(
+	int tile = m_charram[tile_index];
+	SET_TILE_INFO_MEMBER(
 			0,
 			tile & 0x0fff,
 			tile >> 12,
@@ -56,176 +53,155 @@ static TILE_GET_INFO( tx_get_tile_info )
 
 /******************************************************************************/
 
-VIDEO_START( fstarfrc )
+void tecmo16_state::video_start()
 {
-	tecmo16_state *state = machine.driver_data<tecmo16_state>();
-	int width = machine.primary_screen->width();
-	int height = machine.primary_screen->height();
 
 	/* set up tile layers */
-	state->m_tile_bitmap_bg = auto_bitmap_alloc(machine, width, height, BITMAP_FORMAT_INDEXED16);
-	state->m_tile_bitmap_fg = auto_bitmap_alloc(machine, width, height, BITMAP_FORMAT_INDEXED16);
+	machine().primary_screen->register_screen_bitmap(m_tile_bitmap_bg);
+	machine().primary_screen->register_screen_bitmap(m_tile_bitmap_fg);
 
 	/* set up sprites */
-	state->m_sprite_bitmap = auto_bitmap_alloc(machine, width, height, BITMAP_FORMAT_INDEXED16);
+	machine().primary_screen->register_screen_bitmap(m_sprite_bitmap);
 
-	state->m_fg_tilemap = tilemap_create(machine, fg_get_tile_info,tilemap_scan_rows,16,16,32,32);
-	state->m_bg_tilemap = tilemap_create(machine, bg_get_tile_info,tilemap_scan_rows,16,16,32,32);
-	state->m_tx_tilemap = tilemap_create(machine, tx_get_tile_info,tilemap_scan_rows, 8, 8,64,32);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(tecmo16_state::fg_get_tile_info),this),TILEMAP_SCAN_ROWS,16,16,32,32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(tecmo16_state::bg_get_tile_info),this),TILEMAP_SCAN_ROWS,16,16,32,32);
+	m_tx_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(tecmo16_state::tx_get_tile_info),this),TILEMAP_SCAN_ROWS, 8, 8,64,32);
 
-	tilemap_set_transparent_pen(state->m_fg_tilemap,0);
-	tilemap_set_transparent_pen(state->m_bg_tilemap,0);
-	tilemap_set_transparent_pen(state->m_tx_tilemap,0);
+	m_fg_tilemap->set_transparent_pen(0);
+	m_bg_tilemap->set_transparent_pen(0);
+	m_tx_tilemap->set_transparent_pen(0);
 
-	tilemap_set_scrolly(state->m_tx_tilemap,0,-16);
-	state->m_flipscreen = 0;
-	state->m_game_is_riot = 0;
+	m_tx_tilemap->set_scrolly(0,-16);
+	m_flipscreen = 0;
+	m_game_is_riot = 0;
 }
 
-VIDEO_START( ginkun )
+VIDEO_START_MEMBER(tecmo16_state,ginkun)
 {
-	tecmo16_state *state = machine.driver_data<tecmo16_state>();
-	int width = machine.primary_screen->width();
-	int height = machine.primary_screen->height();
 
 	/* set up tile layers */
-	state->m_tile_bitmap_bg = auto_bitmap_alloc(machine, width, height, BITMAP_FORMAT_INDEXED16);
-	state->m_tile_bitmap_fg = auto_bitmap_alloc(machine, width, height, BITMAP_FORMAT_INDEXED16);
+	machine().primary_screen->register_screen_bitmap(m_tile_bitmap_bg);
+	machine().primary_screen->register_screen_bitmap(m_tile_bitmap_fg);
 
 	/* set up sprites */
-	state->m_sprite_bitmap = auto_bitmap_alloc(machine, width, height, BITMAP_FORMAT_INDEXED16);
+	machine().primary_screen->register_screen_bitmap(m_sprite_bitmap);
 
-	state->m_fg_tilemap = tilemap_create(machine, fg_get_tile_info,tilemap_scan_rows,16,16,64,32);
-	state->m_bg_tilemap = tilemap_create(machine, bg_get_tile_info,tilemap_scan_rows,16,16,64,32);
-	state->m_tx_tilemap = tilemap_create(machine, tx_get_tile_info,tilemap_scan_rows, 8, 8,64,32);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(tecmo16_state::fg_get_tile_info),this),TILEMAP_SCAN_ROWS,16,16,64,32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(tecmo16_state::bg_get_tile_info),this),TILEMAP_SCAN_ROWS,16,16,64,32);
+	m_tx_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(tecmo16_state::tx_get_tile_info),this),TILEMAP_SCAN_ROWS, 8, 8,64,32);
 
-	tilemap_set_transparent_pen(state->m_fg_tilemap,0);
-	tilemap_set_transparent_pen(state->m_bg_tilemap,0);
-	tilemap_set_transparent_pen(state->m_tx_tilemap,0);
-	state->m_flipscreen = 0;
-	state->m_game_is_riot = 0;
+	m_fg_tilemap->set_transparent_pen(0);
+	m_bg_tilemap->set_transparent_pen(0);
+	m_tx_tilemap->set_transparent_pen(0);
+	m_flipscreen = 0;
+	m_game_is_riot = 0;
 }
 
-VIDEO_START( riot )
+VIDEO_START_MEMBER(tecmo16_state,riot)
 {
-	tecmo16_state *state = machine.driver_data<tecmo16_state>();
-	int width = machine.primary_screen->width();
-	int height = machine.primary_screen->height();
 
 	/* set up tile layers */
-	state->m_tile_bitmap_bg = auto_bitmap_alloc(machine, width, height, BITMAP_FORMAT_INDEXED16);
-	state->m_tile_bitmap_fg = auto_bitmap_alloc(machine, width, height, BITMAP_FORMAT_INDEXED16);
+	machine().primary_screen->register_screen_bitmap(m_tile_bitmap_bg);
+	machine().primary_screen->register_screen_bitmap(m_tile_bitmap_fg);
 
 	/* set up sprites */
-	state->m_sprite_bitmap = auto_bitmap_alloc(machine, width, height, BITMAP_FORMAT_INDEXED16);
+	machine().primary_screen->register_screen_bitmap(m_sprite_bitmap);
 
-	state->m_fg_tilemap = tilemap_create(machine, fg_get_tile_info,tilemap_scan_rows,16,16,64,32);
-	state->m_bg_tilemap = tilemap_create(machine, bg_get_tile_info,tilemap_scan_rows,16,16,64,32);
-	state->m_tx_tilemap = tilemap_create(machine, tx_get_tile_info,tilemap_scan_rows, 8, 8,64,32);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(tecmo16_state::fg_get_tile_info),this),TILEMAP_SCAN_ROWS,16,16,64,32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(tecmo16_state::bg_get_tile_info),this),TILEMAP_SCAN_ROWS,16,16,64,32);
+	m_tx_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(tecmo16_state::tx_get_tile_info),this),TILEMAP_SCAN_ROWS, 8, 8,64,32);
 
-	tilemap_set_transparent_pen(state->m_fg_tilemap,0);
-	tilemap_set_transparent_pen(state->m_bg_tilemap,0);
-	tilemap_set_transparent_pen(state->m_tx_tilemap,0);
-	tilemap_set_scrolldy(state->m_tx_tilemap,-16,-16);
-	state->m_flipscreen = 0;
-	state->m_game_is_riot = 1;
+	m_fg_tilemap->set_transparent_pen(0);
+	m_bg_tilemap->set_transparent_pen(0);
+	m_tx_tilemap->set_transparent_pen(0);
+	m_tx_tilemap->set_scrolldy(-16,-16);
+	m_flipscreen = 0;
+	m_game_is_riot = 1;
 }
 
 /******************************************************************************/
 
-WRITE16_HANDLER( tecmo16_videoram_w )
+WRITE16_MEMBER(tecmo16_state::tecmo16_videoram_w)
 {
-	tecmo16_state *state = space->machine().driver_data<tecmo16_state>();
-	COMBINE_DATA(&state->m_videoram[offset]);
-	tilemap_mark_tile_dirty(state->m_fg_tilemap,offset);
+	COMBINE_DATA(&m_videoram[offset]);
+	m_fg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE16_HANDLER( tecmo16_colorram_w )
+WRITE16_MEMBER(tecmo16_state::tecmo16_colorram_w)
 {
-	tecmo16_state *state = space->machine().driver_data<tecmo16_state>();
-	COMBINE_DATA(&state->m_colorram[offset]);
-	tilemap_mark_tile_dirty(state->m_fg_tilemap,offset);
+	COMBINE_DATA(&m_colorram[offset]);
+	m_fg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE16_HANDLER( tecmo16_videoram2_w )
+WRITE16_MEMBER(tecmo16_state::tecmo16_videoram2_w)
 {
-	tecmo16_state *state = space->machine().driver_data<tecmo16_state>();
-	COMBINE_DATA(&state->m_videoram2[offset]);
-	tilemap_mark_tile_dirty(state->m_bg_tilemap,offset);
+	COMBINE_DATA(&m_videoram2[offset]);
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE16_HANDLER( tecmo16_colorram2_w )
+WRITE16_MEMBER(tecmo16_state::tecmo16_colorram2_w)
 {
-	tecmo16_state *state = space->machine().driver_data<tecmo16_state>();
-	COMBINE_DATA(&state->m_colorram2[offset]);
-	tilemap_mark_tile_dirty(state->m_bg_tilemap,offset);
+	COMBINE_DATA(&m_colorram2[offset]);
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
 
-WRITE16_HANDLER( tecmo16_charram_w )
+WRITE16_MEMBER(tecmo16_state::tecmo16_charram_w)
 {
-	tecmo16_state *state = space->machine().driver_data<tecmo16_state>();
-	COMBINE_DATA(&state->m_charram[offset]);
-	tilemap_mark_tile_dirty(state->m_tx_tilemap,offset);
+	COMBINE_DATA(&m_charram[offset]);
+	m_tx_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE16_HANDLER( tecmo16_flipscreen_w )
+WRITE16_MEMBER(tecmo16_state::tecmo16_flipscreen_w)
 {
-	tecmo16_state *state = space->machine().driver_data<tecmo16_state>();
-	state->m_flipscreen = data & 0x01;
-	flip_screen_set(space->machine(), state->m_flipscreen);
+	m_flipscreen = data & 0x01;
+	flip_screen_set(m_flipscreen);
 }
 
 /******************************************************************************/
 
-WRITE16_HANDLER( tecmo16_scroll_x_w )
+WRITE16_MEMBER(tecmo16_state::tecmo16_scroll_x_w)
 {
-	tecmo16_state *state = space->machine().driver_data<tecmo16_state>();
-	COMBINE_DATA(&state->m_scroll_x_w);
-	tilemap_set_scrollx(state->m_fg_tilemap,0,state->m_scroll_x_w);
+	COMBINE_DATA(&m_scroll_x_w);
+	m_fg_tilemap->set_scrollx(0,m_scroll_x_w);
 }
 
-WRITE16_HANDLER( tecmo16_scroll_y_w )
+WRITE16_MEMBER(tecmo16_state::tecmo16_scroll_y_w)
 {
-	tecmo16_state *state = space->machine().driver_data<tecmo16_state>();
-	COMBINE_DATA(&state->m_scroll_y_w);
-	tilemap_set_scrolly(state->m_fg_tilemap,0,state->m_scroll_y_w);
+	COMBINE_DATA(&m_scroll_y_w);
+	m_fg_tilemap->set_scrolly(0,m_scroll_y_w);
 }
 
-WRITE16_HANDLER( tecmo16_scroll2_x_w )
+WRITE16_MEMBER(tecmo16_state::tecmo16_scroll2_x_w)
 {
-	tecmo16_state *state = space->machine().driver_data<tecmo16_state>();
-	COMBINE_DATA(&state->m_scroll2_x_w);
-	tilemap_set_scrollx(state->m_bg_tilemap,0,state->m_scroll2_x_w);
+	COMBINE_DATA(&m_scroll2_x_w);
+	m_bg_tilemap->set_scrollx(0,m_scroll2_x_w);
 }
 
-WRITE16_HANDLER( tecmo16_scroll2_y_w )
+WRITE16_MEMBER(tecmo16_state::tecmo16_scroll2_y_w)
 {
-	tecmo16_state *state = space->machine().driver_data<tecmo16_state>();
-	COMBINE_DATA(&state->m_scroll2_y_w);
-	tilemap_set_scrolly(state->m_bg_tilemap,0,state->m_scroll2_y_w);
+	COMBINE_DATA(&m_scroll2_y_w);
+	m_bg_tilemap->set_scrolly(0,m_scroll2_y_w);
 }
 
-WRITE16_HANDLER( tecmo16_scroll_char_x_w )
+WRITE16_MEMBER(tecmo16_state::tecmo16_scroll_char_x_w)
 {
-	tecmo16_state *state = space->machine().driver_data<tecmo16_state>();
-	COMBINE_DATA(&state->m_scroll_char_x_w);
-	tilemap_set_scrollx(state->m_tx_tilemap,0,state->m_scroll_char_x_w);
+	COMBINE_DATA(&m_scroll_char_x_w);
+	m_tx_tilemap->set_scrollx(0,m_scroll_char_x_w);
 }
 
-WRITE16_HANDLER( tecmo16_scroll_char_y_w )
+WRITE16_MEMBER(tecmo16_state::tecmo16_scroll_char_y_w)
 {
-	tecmo16_state *state = space->machine().driver_data<tecmo16_state>();
-	COMBINE_DATA(&state->m_scroll_char_y_w);
-	tilemap_set_scrolly(state->m_tx_tilemap,0,state->m_scroll_char_y_w-16);
+	COMBINE_DATA(&m_scroll_char_y_w);
+	m_tx_tilemap->set_scrolly(0,m_scroll_char_y_w-16);
 }
 
 /******************************************************************************/
 
 /* mix & blend the paletted 16-bit tile and sprite bitmaps into an RGB 32-bit bitmap */
 static void blendbitmaps(running_machine &machine,
-		bitmap_t *dest,bitmap_t *src1,bitmap_t *src2,bitmap_t *src3,
-		int sx,int sy,const rectangle *clip)
+		bitmap_rgb32 &dest,bitmap_ind16 &src1,bitmap_ind16 &src2,bitmap_ind16 &src3,
+		int sx,int sy,const rectangle &clip)
 {
 	int ox;
 	int oy;
@@ -236,34 +212,34 @@ static void blendbitmaps(running_machine &machine,
 	ox = sx;
 	oy = sy;
 
-	ex = sx + src1->width - 1;
+	ex = sx + src1.width() - 1;
 	if (sx < 0) sx = 0;
-	if (sx < clip->min_x) sx = clip->min_x;
-	if (ex >= dest->width) ex = dest->width - 1;
-	if (ex > clip->max_x) ex = clip->max_x;
+	if (sx < clip.min_x) sx = clip.min_x;
+	if (ex >= dest.width()) ex = dest.width() - 1;
+	if (ex > clip.max_x) ex = clip.max_x;
 	if (sx > ex) return;
 
-	ey = sy + src1->height - 1;
+	ey = sy + src1.height() - 1;
 	if (sy < 0) sy = 0;
-	if (sy < clip->min_y) sy = clip->min_y;
-	if (ey >= dest->height) ey = dest->height - 1;
-	if (ey > clip->max_y) ey = clip->max_y;
+	if (sy < clip.min_y) sy = clip.min_y;
+	if (ey >= dest.height()) ey = dest.height() - 1;
+	if (ey > clip.max_y) ey = clip.max_y;
 	if (sy > ey) return;
 
 	{
 		const pen_t *paldata = machine.pens;
 		UINT32 *end;
 
-		UINT16 *sd1 = (UINT16 *)src1->base;												/* source data   */
-		UINT16 *sd2 = (UINT16 *)src2->base;
-		UINT16 *sd3 = (UINT16 *)src3->base;
+		UINT16 *sd1 = &src1.pix16(0);
+		UINT16 *sd2 = &src2.pix16(0);
+		UINT16 *sd3 = &src3.pix16(0);
 
-		int sw = ex-sx+1;														/* source width  */
-		int sh = ey-sy+1;														/* source height */
-		int sm = src1->rowpixels;												/* source modulo */
+		int sw = ex-sx+1;                                                       /* source width  */
+		int sh = ey-sy+1;                                                       /* source height */
+		int sm = src1.rowpixels();                                              /* source modulo */
 
-		UINT32 *dd = BITMAP_ADDR32(dest, sy, sx);								/* dest data     */
-		int dm = dest->rowpixels;												/* dest modulo   */
+		UINT32 *dd = &dest.pix32(sy, sx);                               /* dest data     */
+		int dm = dest.rowpixels();                                              /* dest modulo   */
 
 		sd1 += (sx-ox);
 		sd1 += sm * (sy-oy);
@@ -278,22 +254,22 @@ static void blendbitmaps(running_machine &machine,
 		while (sh)
 		{
 
-#define BLENDPIXEL(x)	if (sd3[x]) {														\
-							if (sd2[x]) {													\
-								dd[x] = paldata[sd2[x] | 0x0400] + paldata[sd3[x]];			\
-							} else {														\
-								dd[x] = paldata[sd1[x] | 0x0400] + paldata[sd3[x]];			\
-							}																\
-						} else {															\
-							if (sd2[x]) {													\
-								if (sd2[x] & 0x0800) {										\
-									dd[x] = paldata[sd1[x] | 0x0400] + paldata[sd2[x]];		\
-								} else {													\
-									dd[x] = paldata[sd2[x]];								\
-								}															\
-							} else {														\
-								dd[x] = paldata[sd1[x]];									\
-							}																\
+#define BLENDPIXEL(x)   if (sd3[x]) {                                                       \
+							if (sd2[x]) {                                                   \
+								dd[x] = paldata[sd2[x] | 0x0400] + paldata[sd3[x]];         \
+							} else {                                                        \
+								dd[x] = paldata[sd1[x] | 0x0400] + paldata[sd3[x]];         \
+							}                                                               \
+						} else {                                                            \
+							if (sd2[x]) {                                                   \
+								if (sd2[x] & 0x0800) {                                      \
+									dd[x] = paldata[sd1[x] | 0x0400] + paldata[sd2[x]];     \
+								} else {                                                    \
+									dd[x] = paldata[sd2[x]];                                \
+								}                                                           \
+							} else {                                                        \
+								dd[x] = paldata[sd1[x]];                                    \
+							}                                                               \
 						}
 
 			end = dd + sw;
@@ -332,7 +308,7 @@ static void blendbitmaps(running_machine &machine,
 	}
 }
 
-static void draw_sprites(running_machine &machine, bitmap_t *bitmap_bg, bitmap_t *bitmap_fg, bitmap_t *bitmap_sp, const rectangle *cliprect)
+static void draw_sprites(running_machine &machine, bitmap_ind16 &bitmap_bg, bitmap_ind16 &bitmap_fg, bitmap_ind16 &bitmap_sp, const rectangle &cliprect)
 {
 	tecmo16_state *state = machine.driver_data<tecmo16_state>();
 	UINT16 *spriteram16 = state->m_spriteram;
@@ -349,11 +325,11 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap_bg, bitmap_t
 		{42,43,46,47,58,59,62,63}
 	};
 
-	bitmap_t *bitmap = bitmap_bg;
+	bitmap_ind16 &bitmap = bitmap_bg;
 
-	for (offs = state->m_spriteram_size/2 - 8;offs >= 0;offs -= 8)
+	for (offs = state->m_spriteram.bytes()/2 - 8;offs >= 0;offs -= 8)
 	{
-		if (spriteram16[offs] & 0x04)	/* enable */
+		if (spriteram16[offs] & 0x04)   /* enable */
 		{
 			int code,color,sizex,sizey,flipx,flipy,xpos,ypos;
 			int x,y,priority,priority_mask;
@@ -387,7 +363,7 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap_bg, bitmap_t
 				default:
 				case 0x0: priority_mask = 0; break;
 				case 0x1: priority_mask = 0xf0; break; /* obscured by text layer */
-				case 0x2: priority_mask = 0xf0|0xcc; break;	/* obscured by foreground */
+				case 0x2: priority_mask = 0xf0|0xcc; break; /* obscured by foreground */
 				case 0x3: priority_mask = 0xf0|0xcc|0xaa; break; /* obscured by bg and fg */
 			}
 
@@ -418,7 +394,7 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap_bg, bitmap_t
 						}
 						pdrawgfx_transpen_raw(bitmap,cliprect,machine.gfx[2],
 								code + layout[y][x],
-								machine.gfx[2]->color_base + color * machine.gfx[2]->color_granularity,
+								machine.gfx[2]->colorbase() + color * machine.gfx[2]->granularity(),
 								flipx,flipy,
 								sx,sy,
 								machine.priority_bitmap, priority_mask,0);
@@ -426,7 +402,7 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap_bg, bitmap_t
 						/* wrap around x */
 						pdrawgfx_transpen_raw(bitmap,cliprect,machine.gfx[2],
 								code + layout[y][x],
-								machine.gfx[2]->color_base + color * machine.gfx[2]->color_granularity,
+								machine.gfx[2]->colorbase() + color * machine.gfx[2]->granularity(),
 								flipx,flipy,
 								sx-512,sy,
 								machine.priority_bitmap, priority_mask,0);
@@ -434,7 +410,7 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap_bg, bitmap_t
 						/* wrap around x */
 						pdrawgfx_transpen_raw(bitmap,cliprect,machine.gfx[2],
 								code + layout[y][x],
-								machine.gfx[2]->color_base + color * machine.gfx[2]->color_granularity,
+								machine.gfx[2]->colorbase() + color * machine.gfx[2]->granularity(),
 								flipx,flipy,
 								sx+512,sy,
 								machine.priority_bitmap, priority_mask,0);
@@ -443,7 +419,7 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap_bg, bitmap_t
 			}
 			else
 			{
-				bitmap = (priority >= 2) ? bitmap_bg : bitmap_fg;
+				bitmap_ind16 &bitmap = (priority >= 2) ? bitmap_bg : bitmap_fg;
 
 				for (y = 0;y < sizey;y++)
 				{
@@ -461,7 +437,7 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap_bg, bitmap_t
 						}
 						pdrawgfx_transpen_raw(bitmap,cliprect,machine.gfx[2],
 								code + layout[y][x],
-								machine.gfx[2]->color_base + color * machine.gfx[2]->color_granularity,
+								machine.gfx[2]->colorbase() + color * machine.gfx[2]->granularity(),
 								flipx,flipy,
 								sx,sy,
 								machine.priority_bitmap, priority_mask,0);
@@ -469,7 +445,7 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap_bg, bitmap_t
 						/* wrap around x */
 						pdrawgfx_transpen_raw(bitmap,cliprect,machine.gfx[2],
 								code + layout[y][x],
-								machine.gfx[2]->color_base + color * machine.gfx[2]->color_granularity,
+								machine.gfx[2]->colorbase() + color * machine.gfx[2]->granularity(),
 								flipx,flipy,
 								sx-512,sy,
 								machine.priority_bitmap, priority_mask,0);
@@ -477,7 +453,7 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap_bg, bitmap_t
 						/* wrap around x */
 						pdrawgfx_transpen_raw(bitmap,cliprect,machine.gfx[2],
 								code + layout[y][x],
-								machine.gfx[2]->color_base + color * machine.gfx[2]->color_granularity,
+								machine.gfx[2]->colorbase() + color * machine.gfx[2]->granularity(),
 								flipx,flipy,
 								sx+512,sy,
 								machine.priority_bitmap, priority_mask,0);
@@ -490,27 +466,26 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap_bg, bitmap_t
 
 /******************************************************************************/
 
-SCREEN_UPDATE( tecmo16 )
+UINT32 tecmo16_state::screen_update_tecmo16(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	tecmo16_state *state = screen->machine().driver_data<tecmo16_state>();
-	bitmap_fill(screen->machine().priority_bitmap,cliprect,0);
+	machine().priority_bitmap.fill(0, cliprect);
 
-	bitmap_fill(state->m_tile_bitmap_bg, cliprect, 0x300);
-	bitmap_fill(state->m_tile_bitmap_fg,     cliprect, 0);
-	bitmap_fill(state->m_sprite_bitmap,      cliprect, 0);
+	m_tile_bitmap_bg.fill(0x300, cliprect);
+	m_tile_bitmap_fg.fill(0, cliprect);
+	m_sprite_bitmap.fill(0, cliprect);
 
 	/* draw tilemaps into a 16-bit bitmap */
-	tilemap_draw(state->m_tile_bitmap_bg, cliprect,state->m_bg_tilemap, 0, 1);
-	tilemap_draw(state->m_tile_bitmap_fg, cliprect,state->m_fg_tilemap, 0, 2);
+	m_bg_tilemap->draw(m_tile_bitmap_bg, cliprect, 0, 1);
+	m_fg_tilemap->draw(m_tile_bitmap_fg, cliprect, 0, 2);
 	/* draw the blended tiles at a lower priority
-       so sprites covered by them will still be drawn */
-	tilemap_draw(state->m_tile_bitmap_fg, cliprect,state->m_fg_tilemap, 1, 0);
-	tilemap_draw(state->m_tile_bitmap_fg, cliprect,state->m_tx_tilemap, 0, 4);
+	   so sprites covered by them will still be drawn */
+	m_fg_tilemap->draw(m_tile_bitmap_fg, cliprect, 1, 0);
+	m_tx_tilemap->draw(m_tile_bitmap_fg, cliprect, 0, 4);
 
 	/* draw sprites into a 16-bit bitmap */
-	draw_sprites(screen->machine(), state->m_tile_bitmap_bg, state->m_tile_bitmap_fg, state->m_sprite_bitmap, cliprect);
+	draw_sprites(machine(), m_tile_bitmap_bg, m_tile_bitmap_fg, m_sprite_bitmap, cliprect);
 
 	/* mix & blend the tilemaps and sprites into a 32-bit bitmap */
-	blendbitmaps(screen->machine(), bitmap, state->m_tile_bitmap_bg, state->m_tile_bitmap_fg, state->m_sprite_bitmap, 0, 0, cliprect);
+	blendbitmaps(machine(), bitmap, m_tile_bitmap_bg, m_tile_bitmap_fg, m_sprite_bitmap, 0, 0, cliprect);
 	return 0;
 }

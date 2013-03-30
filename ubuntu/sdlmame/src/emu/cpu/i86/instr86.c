@@ -6,7 +6,7 @@
 /*
  * file will be included in all cpu variants
  * put non i86 instructions in own files (i286, i386, nec)
- * function renaming will be added when neccessary
+ * function renaming will be added when necessary
  * timing value should move to separate array
  */
 
@@ -42,7 +42,7 @@ static void PREFIX86(_interrupt)(i8086_state *cpustate, unsigned int_num)
 
 #ifdef I80286
 	if (PM) {
-		i80286_interrupt_descriptor(cpustate, int_num);
+		i80286_interrupt_descriptor(cpustate, int_num, 0, 0);
 	} else {
 #endif
 		dest_off = ReadWord(int_num*4);
@@ -55,11 +55,10 @@ static void PREFIX86(_interrupt)(i8086_state *cpustate, unsigned int_num)
 		cpustate->sregs[CS] = (WORD)dest_seg;
 		cpustate->base[CS] = SegBase(CS);
 		cpustate->pc = (cpustate->base[CS] + dest_off) & AMASK;
+		CHANGE_PC(cpustate->pc);
 #ifdef I80286
 	}
 #endif
-	CHANGE_PC(cpustate->pc);
-
 	cpustate->extra_cycles += timing.exception;
 }
 
@@ -71,9 +70,9 @@ static void PREFIX86(_trap)(i8086_state *cpustate)
 #endif
 
 #ifndef I80186
-static void PREFIX86(_rotate_shift_Byte)(i8086_state *cpustate, unsigned ModRM, unsigned count)
+static void PREFIX86(_rotate_shift_Byte)(i8086_state *cpustate, unsigned ModRM, unsigned count, unsigned src)
 {
-	unsigned src = (unsigned)GetRMByte(ModRM);
+//  unsigned src = (unsigned)GetRMByte(ModRM);
 	unsigned dst=src;
 
 	if (count==0)
@@ -86,31 +85,31 @@ static void PREFIX86(_rotate_shift_Byte)(i8086_state *cpustate, unsigned ModRM, 
 
 		switch (ModRM & 0x38)
 		{
-		case 0x00:	/* ROL eb,1 */
+		case 0x00:  /* ROL eb,1 */
 			cpustate->CarryVal = src & 0x80;
 			dst=(src<<1)+CF;
 			PutbackRMByte(ModRM,dst);
 			cpustate->OverVal = (src^dst)&0x80;
 			break;
-		case 0x08:	/* ROR eb,1 */
+		case 0x08:  /* ROR eb,1 */
 			cpustate->CarryVal = src & 0x01;
 			dst = ((CF<<8)+src) >> 1;
 			PutbackRMByte(ModRM,dst);
 			cpustate->OverVal = (src^dst)&0x80;
 			break;
-		case 0x10:	/* RCL eb,1 */
+		case 0x10:  /* RCL eb,1 */
 			dst=(src<<1)+CF;
 			PutbackRMByte(ModRM,dst);
 			SetCFB(dst);
 			cpustate->OverVal = (src^dst)&0x80;
 			break;
-		case 0x18:	/* RCR eb,1 */
+		case 0x18:  /* RCR eb,1 */
 			dst = ((CF<<8)+src) >> 1;
 			PutbackRMByte(ModRM,dst);
 			cpustate->CarryVal = src & 0x01;
 			cpustate->OverVal = (src^dst)&0x80;
 			break;
-		case 0x20:	/* SHL eb,1 */
+		case 0x20:  /* SHL eb,1 */
 		case 0x30:
 			dst = src << 1;
 			PutbackRMByte(ModRM,dst);
@@ -119,7 +118,7 @@ static void PREFIX86(_rotate_shift_Byte)(i8086_state *cpustate, unsigned ModRM, 
 			cpustate->AuxVal = 1;
 			SetSZPF_Byte(dst);
 			break;
-		case 0x28:	/* SHR eb,1 */
+		case 0x28:  /* SHR eb,1 */
 			dst = src >> 1;
 			PutbackRMByte(ModRM,dst);
 			cpustate->CarryVal = src & 0x01;
@@ -127,7 +126,7 @@ static void PREFIX86(_rotate_shift_Byte)(i8086_state *cpustate, unsigned ModRM, 
 			cpustate->AuxVal = 1;
 			SetSZPF_Byte(dst);
 			break;
-		case 0x38:	/* SAR eb,1 */
+		case 0x38:  /* SAR eb,1 */
 			dst = ((INT8)src) >> 1;
 			PutbackRMByte(ModRM,dst);
 			cpustate->CarryVal = src & 0x01;
@@ -139,11 +138,12 @@ static void PREFIX86(_rotate_shift_Byte)(i8086_state *cpustate, unsigned ModRM, 
 	}
 	else
 	{
-		ICOUNT -= (ModRM >= 0xc0) ? timing.rot_reg_base + timing.rot_reg_bit : timing.rot_m8_base + timing.rot_m8_bit;
+		int tmpcf = CF;
+		ICOUNT -= (ModRM >= 0xc0) ? timing.rot_reg_base + (timing.rot_reg_bit * count) : timing.rot_m8_base + (timing.rot_m8_bit * count);
 
 		switch (ModRM & 0x38)
 		{
-		case 0x00:	/* ROL eb,count */
+		case 0x00:  /* ROL eb,count */
 			for (; count > 0; count--)
 			{
 				cpustate->CarryVal = dst & 0x80;
@@ -151,7 +151,7 @@ static void PREFIX86(_rotate_shift_Byte)(i8086_state *cpustate, unsigned ModRM, 
 			}
 			PutbackRMByte(ModRM,(BYTE)dst);
 			break;
-		case 0x08:	/* ROR eb,count */
+		case 0x08:  /* ROR eb,count */
 			for (; count > 0; count--)
 			{
 				cpustate->CarryVal = dst & 0x01;
@@ -159,41 +159,43 @@ static void PREFIX86(_rotate_shift_Byte)(i8086_state *cpustate, unsigned ModRM, 
 			}
 			PutbackRMByte(ModRM,(BYTE)dst);
 			break;
-		case 0x10:	/* RCL eb,count */
+		case 0x10:  /* RCL eb,count */
 			for (; count > 0; count--)
 			{
-				dst = (dst << 1) + CF;
-				SetCFB(dst);
+				dst = (dst << 1) + tmpcf;
+				tmpcf = (int)((dst & 0x100) != 0);
 			}
 			PutbackRMByte(ModRM,(BYTE)dst);
+			cpustate->CarryVal = tmpcf;
 			break;
-		case 0x18:	/* RCR eb,count */
+		case 0x18:  /* RCR eb,count */
 			for (; count > 0; count--)
 			{
-				dst = (CF<<8)+dst;
-				cpustate->CarryVal = dst & 0x01;
+				dst = (tmpcf<<8)+dst;
+				tmpcf = dst & 0x01;
 				dst >>= 1;
 			}
 			PutbackRMByte(ModRM,(BYTE)dst);
+			cpustate->CarryVal = tmpcf;
 			break;
 		case 0x20:
-		case 0x30:	/* SHL eb,count */
-			dst <<= count;
+		case 0x30:  /* SHL eb,count */
+			for(int i=0;i<count;i++) dst<<= 1;
 			SetCFB(dst);
 			cpustate->AuxVal = 1;
 			SetSZPF_Byte(dst);
 			PutbackRMByte(ModRM,(BYTE)dst);
 			break;
-		case 0x28:	/* SHR eb,count */
-			dst >>= count-1;
+		case 0x28:  /* SHR eb,count */
+			for(int i=0;i<count-1;i++) dst>>= 1;
 			cpustate->CarryVal = dst & 0x1;
 			dst >>= 1;
 			SetSZPF_Byte(dst);
 			cpustate->AuxVal = 1;
 			PutbackRMByte(ModRM,(BYTE)dst);
 			break;
-		case 0x38:	/* SAR eb,count */
-			dst = ((INT8)dst) >> (count-1);
+		case 0x38:  /* SAR eb,count */
+			for(int i=0;i<count-1;i++) dst = ((INT8)dst) >> 1;
 			cpustate->CarryVal = dst & 0x1;
 			dst = ((INT8)((BYTE)dst)) >> 1;
 			SetSZPF_Byte(dst);
@@ -204,9 +206,9 @@ static void PREFIX86(_rotate_shift_Byte)(i8086_state *cpustate, unsigned ModRM, 
 	}
 }
 
-static void PREFIX86(_rotate_shift_Word)(i8086_state *cpustate, unsigned ModRM, unsigned count)
+static void PREFIX86(_rotate_shift_Word)(i8086_state *cpustate, unsigned ModRM, unsigned count, unsigned src)
 {
-	unsigned src = GetRMWord(ModRM);
+//  unsigned src = GetRMWord(ModRM);
 	unsigned dst=src;
 
 	if (count==0)
@@ -220,42 +222,42 @@ static void PREFIX86(_rotate_shift_Word)(i8086_state *cpustate, unsigned ModRM, 
 		switch (ModRM & 0x38)
 		{
 #if 0
-		case 0x00:	/* ROL ew,1 */
+		case 0x00:  /* ROL ew,1 */
 			tmp2 = (tmp << 1) + CF;
 			SetCFW(tmp2);
 			cpustate->OverVal = !(!(tmp & 0x4000)) != CF;
 			PutbackRMWord(ModRM,tmp2);
 			break;
-		case 0x08:	/* ROR ew,1 */
+		case 0x08:  /* ROR ew,1 */
 			cpustate->CarryVal = tmp & 0x01;
 			tmp2 = (tmp >> 1) + ((unsigned)CF << 15);
 			cpustate->OverVal = !(!(tmp & 0x8000)) != CF;
 			PutbackRMWord(ModRM,tmp2);
 			break;
-		case 0x10:	/* RCL ew,1 */
+		case 0x10:  /* RCL ew,1 */
 			tmp2 = (tmp << 1) + CF;
 			SetCFW(tmp2);
 			cpustate->OverVal = (tmp ^ (tmp << 1)) & 0x8000;
 			PutbackRMWord(ModRM,tmp2);
 			break;
-		case 0x18:	/* RCR ew,1 */
+		case 0x18:  /* RCR ew,1 */
 			tmp2 = (tmp >> 1) + ((unsigned)CF << 15);
 			cpustate->OverVal = !(!(tmp & 0x8000)) != CF;
 			cpustate->CarryVal = tmp & 0x01;
 			PutbackRMWord(ModRM,tmp2);
 			break;
-		case 0x20:	/* SHL ew,1 */
+		case 0x20:  /* SHL ew,1 */
 		case 0x30:
 			tmp <<= 1;
 
-            SetCFW(tmp);
+			SetCFW(tmp);
 			SetOFW_Add(tmp,tmp2,tmp2);
 			cpustate->AuxVal = 1;
 			SetSZPF_Word(tmp);
 
 			PutbackRMWord(ModRM,tmp);
 			break;
-		case 0x28:	/* SHR ew,1 */
+		case 0x28:  /* SHR ew,1 */
 			cpustate->CarryVal = tmp & 0x01;
 			cpustate->OverVal = tmp & 0x8000;
 
@@ -265,7 +267,7 @@ static void PREFIX86(_rotate_shift_Word)(i8086_state *cpustate, unsigned ModRM, 
 			cpustate->AuxVal = 1;
 			PutbackRMWord(ModRM,tmp2);
 			break;
-			case 0x38:	/* SAR ew,1 */
+			case 0x38:  /* SAR ew,1 */
 			cpustate->CarryVal = tmp & 0x01;
 			cpustate->OverVal = 0;
 
@@ -276,31 +278,31 @@ static void PREFIX86(_rotate_shift_Word)(i8086_state *cpustate, unsigned ModRM, 
 			PutbackRMWord(ModRM,tmp2);
 			break;
 #else
-		case 0x00:	/* ROL ew,1 */
+		case 0x00:  /* ROL ew,1 */
 			cpustate->CarryVal = src & 0x8000;
 			dst=(src<<1)+CF;
 			PutbackRMWord(ModRM,dst);
 			cpustate->OverVal = (src^dst)&0x8000;
 			break;
-		case 0x08:	/* ROR ew,1 */
+		case 0x08:  /* ROR ew,1 */
 			cpustate->CarryVal = src & 0x01;
 			dst = ((CF<<16)+src) >> 1;
 			PutbackRMWord(ModRM,dst);
 			cpustate->OverVal = (src^dst)&0x8000;
 			break;
-		case 0x10:	/* RCL ew,1 */
+		case 0x10:  /* RCL ew,1 */
 			dst=(src<<1)+CF;
 			PutbackRMWord(ModRM,dst);
 			SetCFW(dst);
 			cpustate->OverVal = (src^dst)&0x8000;
 			break;
-		case 0x18:	/* RCR ew,1 */
+		case 0x18:  /* RCR ew,1 */
 			dst = ((CF<<16)+src) >> 1;
 			PutbackRMWord(ModRM,dst);
 			cpustate->CarryVal = src & 0x01;
 			cpustate->OverVal = (src^dst)&0x8000;
 			break;
-		case 0x20:	/* SHL ew,1 */
+		case 0x20:  /* SHL ew,1 */
 		case 0x30:
 			dst = src << 1;
 			PutbackRMWord(ModRM,dst);
@@ -309,7 +311,7 @@ static void PREFIX86(_rotate_shift_Word)(i8086_state *cpustate, unsigned ModRM, 
 			cpustate->AuxVal = 1;
 			SetSZPF_Word(dst);
 			break;
-		case 0x28:	/* SHR ew,1 */
+		case 0x28:  /* SHR ew,1 */
 			dst = src >> 1;
 			PutbackRMWord(ModRM,dst);
 			cpustate->CarryVal = src & 0x01;
@@ -317,7 +319,7 @@ static void PREFIX86(_rotate_shift_Word)(i8086_state *cpustate, unsigned ModRM, 
 			cpustate->AuxVal = 1;
 			SetSZPF_Word(dst);
 			break;
-		case 0x38:	/* SAR ew,1 */
+		case 0x38:  /* SAR ew,1 */
 			dst = ((INT16)src) >> 1;
 			PutbackRMWord(ModRM,dst);
 			cpustate->CarryVal = src & 0x01;
@@ -330,11 +332,12 @@ static void PREFIX86(_rotate_shift_Word)(i8086_state *cpustate, unsigned ModRM, 
 	}
 	else
 	{
-		ICOUNT -= (ModRM >= 0xc0) ? timing.rot_reg_base + timing.rot_reg_bit : timing.rot_m8_base + timing.rot_m16_bit;
+		int tmpcf = CF;
+		ICOUNT -= (ModRM >= 0xc0) ? timing.rot_reg_base + (timing.rot_reg_bit * count) : timing.rot_m8_base + (timing.rot_m16_bit * count);
 
 		switch (ModRM & 0x38)
 		{
-		case 0x00:	/* ROL ew,count */
+		case 0x00:  /* ROL ew,count */
 			for (; count > 0; count--)
 			{
 				cpustate->CarryVal = dst & 0x8000;
@@ -342,7 +345,7 @@ static void PREFIX86(_rotate_shift_Word)(i8086_state *cpustate, unsigned ModRM, 
 			}
 			PutbackRMWord(ModRM,dst);
 			break;
-		case 0x08:	/* ROR ew,count */
+		case 0x08:  /* ROR ew,count */
 			for (; count > 0; count--)
 			{
 				cpustate->CarryVal = dst & 0x01;
@@ -353,38 +356,40 @@ static void PREFIX86(_rotate_shift_Word)(i8086_state *cpustate, unsigned ModRM, 
 		case 0x10:  /* RCL ew,count */
 			for (; count > 0; count--)
 			{
-				dst = (dst << 1) + CF;
-				SetCFW(dst);
+				dst = (dst << 1) + tmpcf;
+				tmpcf = (int)((dst & 0x10000) != 0);
 			}
 			PutbackRMWord(ModRM,dst);
+			cpustate->CarryVal = tmpcf;
 			break;
-		case 0x18:	/* RCR ew,count */
+		case 0x18:  /* RCR ew,count */
 			for (; count > 0; count--)
 			{
-				dst = dst + (CF << 16);
-				cpustate->CarryVal = dst & 0x01;
+				dst = dst + (tmpcf << 16);
+				tmpcf = dst & 0x01;
 				dst >>= 1;
 			}
 			PutbackRMWord(ModRM,dst);
+			cpustate->CarryVal = tmpcf;
 			break;
 		case 0x20:
-		case 0x30:	/* SHL ew,count */
-			dst <<= count;
+		case 0x30:  /* SHL ew,count */
+			for(int i=0;i<count;i++) dst<<= 1;
 			SetCFW(dst);
 			cpustate->AuxVal = 1;
 			SetSZPF_Word(dst);
 			PutbackRMWord(ModRM,dst);
 			break;
-		case 0x28:	/* SHR ew,count */
-			dst >>= count-1;
+		case 0x28:  /* SHR ew,count */
+			for(int i=0;i<count-1;i++) dst>>= 1;
 			cpustate->CarryVal = dst & 0x1;
 			dst >>= 1;
 			SetSZPF_Word(dst);
 			cpustate->AuxVal = 1;
 			PutbackRMWord(ModRM,dst);
 			break;
-		case 0x38:	/* SAR ew,count */
-			dst = ((INT16)dst) >> (count-1);
+		case 0x38:  /* SAR ew,count */
+			for(int i=0;i<count-1;i++) dst = ((INT16)dst) >> 1;
 			cpustate->CarryVal = dst & 0x01;
 			dst = ((INT16)((WORD)dst)) >> 1;
 			SetSZPF_Word(dst);
@@ -398,14 +403,13 @@ static void PREFIX86(_rotate_shift_Word)(i8086_state *cpustate, unsigned ModRM, 
 
 static void PREFIX(rep)(i8086_state *cpustate,int flagval)
 {
-    /* Handles rep- and repnz- prefixes. flagval is the value of ZF for the
-         loop  to continue for CMPS and SCAS instructions. */
+	/* Handles rep- and repnz- prefixes. flagval is the value of ZF for the
+	     loop  to continue for CMPS and SCAS instructions. */
 
 	unsigned next = FETCHOP;
-	unsigned count = cpustate->regs.w[CX];
 
-    switch(next)
-    {
+	switch(next)
+	{
 	case 0x26:  /* ES: */
 		cpustate->seg_prefix = TRUE;
 		cpustate->prefix_seg = ES;
@@ -435,214 +439,230 @@ static void PREFIX(rep)(i8086_state *cpustate,int flagval)
 		PREFIX(rep)(cpustate, flagval);
 		break;
 #ifndef I8086
-	case 0x6c:	/* REP INSB */
+	case 0x6c:  /* REP INSB */
+#ifdef I80286
+		if (PM && (CPL>IOPL)) throw TRAP(GENERAL_PROTECTION_FAULT, 0);
+#endif
 		if (!cpustate->rep_in_progress)
 			ICOUNT -= timing.rep_ins8_base;
 		cpustate->rep_in_progress = FALSE;
-		for (; count > 0; count--)
+		while(cpustate->regs.w[CX])
 		{
 			if (ICOUNT <= 0) { cpustate->pc = cpustate->prevpc; cpustate->rep_in_progress = TRUE; break; }
 			PutMemB(ES,cpustate->regs.w[DI],read_port_byte(cpustate->regs.w[DX]));
+			cpustate->regs.w[CX]--;
 			cpustate->regs.w[DI] += cpustate->DirVal;
 			ICOUNT -= timing.rep_ins8_count;
 		}
-		cpustate->regs.w[CX]=count;
 		break;
 	case 0x6d:  /* REP INSW */
+#ifdef I80286
+		if (PM && (CPL>IOPL)) throw TRAP(GENERAL_PROTECTION_FAULT, 0);
+#endif
 		if (!cpustate->rep_in_progress)
 			ICOUNT -= timing.rep_ins16_base;
 		cpustate->rep_in_progress = FALSE;
-		for (; count > 0; count--)
+		while(cpustate->regs.w[CX])
 		{
 			if (ICOUNT <= 0) { cpustate->pc = cpustate->prevpc; cpustate->rep_in_progress = TRUE; break; }
 			PutMemW(ES,cpustate->regs.w[DI],read_port_word(cpustate->regs.w[DX]));
+			cpustate->regs.w[CX]--;
 			cpustate->regs.w[DI] += 2 * cpustate->DirVal;
 			ICOUNT -= timing.rep_ins16_count;
 		}
-		cpustate->regs.w[CX]=count;
 		break;
 	case 0x6e:  /* REP OUTSB */
+#ifdef I80286
+		if (PM && (CPL>IOPL)) throw TRAP(GENERAL_PROTECTION_FAULT, 0);
+#endif
 		if (!cpustate->rep_in_progress)
 			ICOUNT -= timing.rep_outs8_base;
 		cpustate->rep_in_progress = FALSE;
-		for (; count > 0; count--)
+		while(cpustate->regs.w[CX])
 		{
 			if (ICOUNT <= 0) { cpustate->pc = cpustate->prevpc; cpustate->rep_in_progress = TRUE; break; }
 			write_port_byte(cpustate->regs.w[DX],GetMemB(DS,cpustate->regs.w[SI]));
+			cpustate->regs.w[CX]--;
 			cpustate->regs.w[SI] += cpustate->DirVal; /* GOL 11/27/01 */
 			ICOUNT -= timing.rep_outs8_count;
 		}
-		cpustate->regs.w[CX]=count;
 		break;
 	case 0x6f:  /* REP OUTSW */
+#ifdef I80286
+		if (PM && (CPL>IOPL)) throw TRAP(GENERAL_PROTECTION_FAULT, 0);
+#endif
 		if (!cpustate->rep_in_progress)
 			ICOUNT -= timing.rep_outs16_base;
 		cpustate->rep_in_progress = FALSE;
-		for (; count > 0; count--)
+		while(cpustate->regs.w[CX])
 		{
 			if (ICOUNT <= 0) { cpustate->pc = cpustate->prevpc; cpustate->rep_in_progress = TRUE; break; }
 			write_port_word(cpustate->regs.w[DX],GetMemW(DS,cpustate->regs.w[SI]));
+			cpustate->regs.w[CX]--;
 			cpustate->regs.w[SI] += 2 * cpustate->DirVal; /* GOL 11/27/01 */
 			ICOUNT -= timing.rep_outs16_count;
 		}
-		cpustate->regs.w[CX]=count;
 		break;
 #endif
 	case 0xa4:  /* REP MOVSB */
 		if (!cpustate->rep_in_progress)
 			ICOUNT -= timing.rep_movs8_base;
 		cpustate->rep_in_progress = FALSE;
-		for (; count > 0; count--)
+		while(cpustate->regs.w[CX])
 		{
 			BYTE tmp;
 
 			if (ICOUNT <= 0) { cpustate->pc = cpustate->prevpc; cpustate->rep_in_progress = TRUE; break; }
 			tmp = GetMemB(DS,cpustate->regs.w[SI]);
 			PutMemB(ES,cpustate->regs.w[DI], tmp);
+			cpustate->regs.w[CX]--;
 			cpustate->regs.w[DI] += cpustate->DirVal;
 			cpustate->regs.w[SI] += cpustate->DirVal;
 			ICOUNT -= timing.rep_movs8_count;
 		}
-		cpustate->regs.w[CX]=count;
 		break;
 	case 0xa5:  /* REP MOVSW */
 		if (!cpustate->rep_in_progress)
 			ICOUNT -= timing.rep_movs16_base;
 		cpustate->rep_in_progress = FALSE;
-		for (; count > 0; count--)
+		while(cpustate->regs.w[CX])
 		{
 			WORD tmp;
 
 			if (ICOUNT <= 0) { cpustate->pc = cpustate->prevpc; cpustate->rep_in_progress = TRUE; break; }
 			tmp = GetMemW(DS,cpustate->regs.w[SI]);
 			PutMemW(ES,cpustate->regs.w[DI], tmp);
+			cpustate->regs.w[CX]--;
 			cpustate->regs.w[DI] += 2 * cpustate->DirVal;
 			cpustate->regs.w[SI] += 2 * cpustate->DirVal;
 			ICOUNT -= timing.rep_movs16_count;
 		}
-		cpustate->regs.w[CX]=count;
 		break;
 	case 0xa6:  /* REP(N)E CMPSB */
 		if (!cpustate->rep_in_progress)
 			ICOUNT -= timing.rep_cmps8_base;
 		cpustate->rep_in_progress = FALSE;
-		for (cpustate->ZeroVal = !flagval; (ZF == flagval) && (count > 0); count--)
+		cpustate->ZeroVal = !flagval;
+		while(cpustate->regs.w[CX] && (ZF == flagval))
 		{
 			unsigned dst, src;
 
 			if (ICOUNT <= 0) { cpustate->pc = cpustate->prevpc; cpustate->rep_in_progress = TRUE; break; }
 			dst = GetMemB(ES, cpustate->regs.w[DI]);
 			src = GetMemB(DS, cpustate->regs.w[SI]);
-		    SUBB(src,dst); /* opposite of the usual convention */
+			SUBB(src,dst); /* opposite of the usual convention */
+			cpustate->regs.w[CX]--;
 			cpustate->regs.w[DI] += cpustate->DirVal;
 			cpustate->regs.w[SI] += cpustate->DirVal;
 			ICOUNT -= timing.rep_cmps8_count;
 		}
-		cpustate->regs.w[CX]=count;
 		break;
 	case 0xa7:  /* REP(N)E CMPSW */
 		if (!cpustate->rep_in_progress)
 			ICOUNT -= timing.rep_cmps16_base;
 		cpustate->rep_in_progress = FALSE;
-		for (cpustate->ZeroVal = !flagval; (ZF == flagval) && (count > 0); count--)
+		cpustate->ZeroVal = !flagval;
+		while(cpustate->regs.w[CX] && (ZF == flagval))
 		{
 			unsigned dst, src;
 
 			if (ICOUNT <= 0) { cpustate->pc = cpustate->prevpc; cpustate->rep_in_progress = TRUE; break; }
 			dst = GetMemW(ES, cpustate->regs.w[DI]);
 			src = GetMemW(DS, cpustate->regs.w[SI]);
-		    SUBW(src,dst); /* opposite of the usual convention */
+			SUBW(src,dst); /* opposite of the usual convention */
+			cpustate->regs.w[CX]--;
 			cpustate->regs.w[DI] += 2 * cpustate->DirVal;
 			cpustate->regs.w[SI] += 2 * cpustate->DirVal;
 			ICOUNT -= timing.rep_cmps16_count;
 		}
-		cpustate->regs.w[CX]=count;
 		break;
 	case 0xaa:  /* REP STOSB */
 		if (!cpustate->rep_in_progress)
 			ICOUNT -= timing.rep_stos8_base;
 		cpustate->rep_in_progress = FALSE;
-		for (; count > 0; count--)
+		while(cpustate->regs.w[CX])
 		{
 			if (ICOUNT <= 0) { cpustate->pc = cpustate->prevpc; cpustate->rep_in_progress = TRUE; break; }
 			PutMemB(ES,cpustate->regs.w[DI],cpustate->regs.b[AL]);
+			cpustate->regs.w[CX]--;
 			cpustate->regs.w[DI] += cpustate->DirVal;
 			ICOUNT -= timing.rep_stos8_count;
 		}
-		cpustate->regs.w[CX]=count;
 		break;
 	case 0xab:  /* REP STOSW */
 		if (!cpustate->rep_in_progress)
 			ICOUNT -= timing.rep_stos16_base;
 		cpustate->rep_in_progress = FALSE;
-		for (; count > 0; count--)
+		while(cpustate->regs.w[CX])
 		{
 			if (ICOUNT <= 0) { cpustate->pc = cpustate->prevpc; cpustate->rep_in_progress = TRUE; break; }
 			PutMemW(ES,cpustate->regs.w[DI],cpustate->regs.w[AX]);
+			cpustate->regs.w[CX]--;
 			cpustate->regs.w[DI] += 2 * cpustate->DirVal;
 			ICOUNT -= timing.rep_stos16_count;
 		}
-		cpustate->regs.w[CX]=count;
 		break;
 	case 0xac:  /* REP LODSB */
 		if (!cpustate->rep_in_progress)
 			ICOUNT -= timing.rep_lods8_base;
 		cpustate->rep_in_progress = FALSE;
-		for (; count > 0; count--)
+		while(cpustate->regs.w[CX])
 		{
 			if (ICOUNT <= 0) { cpustate->pc = cpustate->prevpc; cpustate->rep_in_progress = TRUE; break; }
 			cpustate->regs.b[AL] = GetMemB(DS,cpustate->regs.w[SI]);
+			cpustate->regs.w[CX]--;
 			cpustate->regs.w[SI] += cpustate->DirVal;
 			ICOUNT -= timing.rep_lods8_count;
 		}
-		cpustate->regs.w[CX]=count;
 		break;
 	case 0xad:  /* REP LODSW */
 		if (!cpustate->rep_in_progress)
 			ICOUNT -= timing.rep_lods16_base;
 		cpustate->rep_in_progress = FALSE;
-		for (; count > 0; count--)
+		while(cpustate->regs.w[CX])
 		{
 			if (ICOUNT <= 0) { cpustate->pc = cpustate->prevpc; cpustate->rep_in_progress = TRUE; break; }
 			cpustate->regs.w[AX] = GetMemW(DS,cpustate->regs.w[SI]);
+			cpustate->regs.w[CX]--;
 			cpustate->regs.w[SI] += 2 * cpustate->DirVal;
 			ICOUNT -= timing.rep_lods16_count;
 		}
-		cpustate->regs.w[CX]=count;
 		break;
 	case 0xae:  /* REP(N)E SCASB */
 		if (!cpustate->rep_in_progress)
 			ICOUNT -= timing.rep_scas8_base;
 		cpustate->rep_in_progress = FALSE;
-		for (cpustate->ZeroVal = !flagval; (ZF == flagval) && (count > 0); count--)
+		cpustate->ZeroVal = !flagval;
+		while(cpustate->regs.w[CX] && (ZF == flagval))
 		{
 			unsigned src, dst;
 
 			if (ICOUNT <= 0) { cpustate->pc = cpustate->prevpc; cpustate->rep_in_progress = TRUE; break; }
 			src = GetMemB(ES, cpustate->regs.w[DI]);
 			dst = cpustate->regs.b[AL];
-		    SUBB(dst,src);
+			SUBB(dst,src);
+			cpustate->regs.w[CX]--;
 			cpustate->regs.w[DI] += cpustate->DirVal;
 			ICOUNT -= timing.rep_scas8_count;
 		}
-		cpustate->regs.w[CX]=count;
 		break;
 	case 0xaf:  /* REP(N)E SCASW */
 		if (!cpustate->rep_in_progress)
 			ICOUNT -= timing.rep_scas16_base;
 		cpustate->rep_in_progress = FALSE;
-		for (cpustate->ZeroVal = !flagval; (ZF == flagval) && (count > 0); count--)
+		cpustate->ZeroVal = !flagval;
+		while(cpustate->regs.w[CX] && (ZF == flagval))
 		{
 			unsigned src, dst;
 
 			if (ICOUNT <= 0) { cpustate->pc = cpustate->prevpc; cpustate->rep_in_progress = TRUE; break; }
 			src = GetMemW(ES, cpustate->regs.w[DI]);
 			dst = cpustate->regs.w[AX];
-		    SUBW(dst,src);
+			SUBW(dst,src);
+			cpustate->regs.w[CX]--;
 			cpustate->regs.w[DI] += 2 * cpustate->DirVal;
 			ICOUNT -= timing.rep_scas16_count;
 		}
-		cpustate->regs.w[CX]=count;
 		break;
 	default:
 		PREFIX(_instruction)[next](cpustate);
@@ -655,12 +675,12 @@ static void PREFIX86(_add_br8)(i8086_state *cpustate)    /* Opcode 0x00 */
 	DEF_br8(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr8 : timing.alu_mr8;
 	ADDB(dst,src);
-    PutbackRMByte(ModRM,dst);
+	PutbackRMByte(ModRM,dst);
 }
 
 static void PREFIX86(_add_wr16)(i8086_state *cpustate)    /* Opcode 0x01 */
 {
-    DEF_wr16(dst,src);
+	DEF_wr16(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr16 : timing.alu_mr16;
 	ADDW(dst,src);
 	PutbackRMWord(ModRM,dst);
@@ -670,13 +690,13 @@ static void PREFIX86(_add_r8b)(i8086_state *cpustate)    /* Opcode 0x02 */
 {
 	DEF_r8b(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr8 : timing.alu_rm8;
-    ADDB(dst,src);
-    RegByte(ModRM)=dst;
+	ADDB(dst,src);
+	RegByte(ModRM)=dst;
 }
 
 static void PREFIX86(_add_r16w)(i8086_state *cpustate)    /* Opcode 0x03 */
 {
-    DEF_r16w(dst,src);
+	DEF_r16w(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr16 : timing.alu_rm16;
 	ADDW(dst,src);
 	RegWord(ModRM)=dst;
@@ -685,16 +705,16 @@ static void PREFIX86(_add_r16w)(i8086_state *cpustate)    /* Opcode 0x03 */
 
 static void PREFIX86(_add_ald8)(i8086_state *cpustate)    /* Opcode 0x04 */
 {
-    DEF_ald8(dst,src);
+	DEF_ald8(dst,src);
 	ICOUNT -= timing.alu_ri8;
-    ADDB(dst,src);
+	ADDB(dst,src);
 	cpustate->regs.b[AL]=dst;
 }
 
 
 static void PREFIX86(_add_axd16)(i8086_state *cpustate)    /* Opcode 0x05 */
 {
-    DEF_axd16(dst,src);
+	DEF_axd16(dst,src);
 	ICOUNT -= timing.alu_ri16;
 	ADDW(dst,src);
 	cpustate->regs.w[AX]=dst;
@@ -711,9 +731,7 @@ static void PREFIX86(_push_es)(i8086_state *cpustate)    /* Opcode 0x06 */
 static void PREFIX86(_pop_es)(i8086_state *cpustate)    /* Opcode 0x07 */
 {
 #ifdef I80286
-	UINT16 tmp;
-	POP(tmp);
-	i80286_data_descriptor(cpustate,ES,tmp);
+	i80286_pop_seg(cpustate,ES);
 #else
 	POP(cpustate->sregs[ES]);
 	cpustate->base[ES] = SegBase(ES);
@@ -723,47 +741,47 @@ static void PREFIX86(_pop_es)(i8086_state *cpustate)    /* Opcode 0x07 */
 
 static void PREFIX86(_or_br8)(i8086_state *cpustate)    /* Opcode 0x08 */
 {
-    DEF_br8(dst,src);
+	DEF_br8(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr8 : timing.alu_mr8;
 	ORB(dst,src);
-    PutbackRMByte(ModRM,dst);
+	PutbackRMByte(ModRM,dst);
 }
 
 static void PREFIX86(_or_wr16)(i8086_state *cpustate)    /* Opcode 0x09 */
 {
 	DEF_wr16(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr16 : timing.alu_mr16;
-    ORW(dst,src);
-    PutbackRMWord(ModRM,dst);
+	ORW(dst,src);
+	PutbackRMWord(ModRM,dst);
 }
 
 static void PREFIX86(_or_r8b)(i8086_state *cpustate)    /* Opcode 0x0a */
 {
 	DEF_r8b(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr8 : timing.alu_rm8;
-    ORB(dst,src);
-    RegByte(ModRM)=dst;
+	ORB(dst,src);
+	RegByte(ModRM)=dst;
 }
 
 static void PREFIX86(_or_r16w)(i8086_state *cpustate)    /* Opcode 0x0b */
 {
-    DEF_r16w(dst,src);
+	DEF_r16w(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr16 : timing.alu_rm16;
-    ORW(dst,src);
-    RegWord(ModRM)=dst;
+	ORW(dst,src);
+	RegWord(ModRM)=dst;
 }
 
 static void PREFIX86(_or_ald8)(i8086_state *cpustate)    /* Opcode 0x0c */
 {
-    DEF_ald8(dst,src);
+	DEF_ald8(dst,src);
 	ICOUNT -= timing.alu_ri8;
-    ORB(dst,src);
+	ORB(dst,src);
 	cpustate->regs.b[AL]=dst;
 }
 
 static void PREFIX86(_or_axd16)(i8086_state *cpustate)    /* Opcode 0x0d */
 {
-    DEF_axd16(dst,src);
+	DEF_axd16(dst,src);
 	ICOUNT -= timing.alu_ri16;
 	ORW(dst,src);
 	cpustate->regs.w[AX]=dst;
@@ -775,50 +793,64 @@ static void PREFIX86(_push_cs)(i8086_state *cpustate)    /* Opcode 0x0e */
 	PUSH(cpustate->sregs[CS]);
 }
 
-/* Opcode 0x0f invalid */
+#ifndef I80286
+static void PREFIX86(_pop_cs)(i8086_state *cpustate)    /* Opcode 0x0f */
+{
+	int ip = cpustate->pc - cpustate->base[CS];
+	ICOUNT -= timing.push_seg;
+	POP(cpustate->sregs[CS]);
+	cpustate->base[CS] = SegBase(CS);
+	cpustate->pc = (ip + cpustate->base[CS]) & AMASK;
+	CHANGE_PC(cpustate->pc);
+}
+#endif
 
 static void PREFIX86(_adc_br8)(i8086_state *cpustate)    /* Opcode 0x10 */
 {
-    DEF_br8(dst,src);
+	int tmpcf;
+	DEF_br8(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr8 : timing.alu_mr8;
-    src+=CF;
-    ADDB(dst,src);
-    PutbackRMByte(ModRM,dst);
+	src+=CF;
+	ADCB(dst,src,tmpcf);
+	PutbackRMByte(ModRM,dst);
+	cpustate->CarryVal = tmpcf;
 }
 
 static void PREFIX86(_adc_wr16)(i8086_state *cpustate)    /* Opcode 0x11 */
 {
-    DEF_wr16(dst,src);
+	int tmpcf;
+	DEF_wr16(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr16 : timing.alu_mr16;
-    src+=CF;
-    ADDW(dst,src);
+	src+=CF;
+	ADCW(dst,src,tmpcf);
 	PutbackRMWord(ModRM,dst);
+	cpustate->CarryVal = tmpcf;
 }
 
 static void PREFIX86(_adc_r8b)(i8086_state *cpustate)    /* Opcode 0x12 */
 {
-    DEF_r8b(dst,src);
+	DEF_r8b(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr8 : timing.alu_rm8;
 	src+=CF;
-    ADDB(dst,src);
-    RegByte(ModRM)=dst;
+	ADDB(dst,src);
+	RegByte(ModRM)=dst;
 }
 
 static void PREFIX86(_adc_r16w)(i8086_state *cpustate)    /* Opcode 0x13 */
 {
-    DEF_r16w(dst,src);
+	DEF_r16w(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr16 : timing.alu_rm16;
 	src+=CF;
-    ADDW(dst,src);
-    RegWord(ModRM)=dst;
+	ADDW(dst,src);
+	RegWord(ModRM)=dst;
 }
 
 static void PREFIX86(_adc_ald8)(i8086_state *cpustate)    /* Opcode 0x14 */
 {
-    DEF_ald8(dst,src);
+	DEF_ald8(dst,src);
 	ICOUNT -= timing.alu_ri8;
-    src+=CF;
-    ADDB(dst,src);
+	src+=CF;
+	ADDB(dst,src);
 	cpustate->regs.b[AL] = dst;
 }
 
@@ -827,7 +859,7 @@ static void PREFIX86(_adc_axd16)(i8086_state *cpustate)    /* Opcode 0x15 */
 	DEF_axd16(dst,src);
 	ICOUNT -= timing.alu_ri16;
 	src+=CF;
-    ADDW(dst,src);
+	ADDW(dst,src);
 	cpustate->regs.w[AX]=dst;
 }
 
@@ -839,20 +871,24 @@ static void PREFIX86(_push_ss)(i8086_state *cpustate)    /* Opcode 0x16 */
 
 static void PREFIX86(_sbb_br8)(i8086_state *cpustate)    /* Opcode 0x18 */
 {
-    DEF_br8(dst,src);
+	int tmpcf;
+	DEF_br8(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr8 : timing.alu_mr8;
-    src+=CF;
-    SUBB(dst,src);
-    PutbackRMByte(ModRM,dst);
+	src+=CF;
+	SBBB(dst,src,tmpcf);
+	PutbackRMByte(ModRM,dst);
+	cpustate->CarryVal = tmpcf;
 }
 
 static void PREFIX86(_sbb_wr16)(i8086_state *cpustate)    /* Opcode 0x19 */
 {
-    DEF_wr16(dst,src);
+	int tmpcf;
+	DEF_wr16(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr16 : timing.alu_mr16;
-    src+=CF;
-	SUBW(dst,src);
+	src+=CF;
+	SBBW(dst,src,tmpcf);
 	PutbackRMWord(ModRM,dst);
+	cpustate->CarryVal = tmpcf;
 }
 
 static void PREFIX86(_sbb_r8b)(i8086_state *cpustate)    /* Opcode 0x1a */
@@ -860,34 +896,34 @@ static void PREFIX86(_sbb_r8b)(i8086_state *cpustate)    /* Opcode 0x1a */
 	DEF_r8b(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr8 : timing.alu_rm8;
 	src+=CF;
-    SUBB(dst,src);
-    RegByte(ModRM)=dst;
+	SUBB(dst,src);
+	RegByte(ModRM)=dst;
 }
 
 static void PREFIX86(_sbb_r16w)(i8086_state *cpustate)    /* Opcode 0x1b */
 {
-    DEF_r16w(dst,src);
+	DEF_r16w(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr16 : timing.alu_rm16;
 	src+=CF;
-    SUBW(dst,src);
-    RegWord(ModRM)= dst;
+	SUBW(dst,src);
+	RegWord(ModRM)= dst;
 }
 
 static void PREFIX86(_sbb_ald8)(i8086_state *cpustate)    /* Opcode 0x1c */
 {
-    DEF_ald8(dst,src);
+	DEF_ald8(dst,src);
 	ICOUNT -= timing.alu_ri8;
-    src+=CF;
-    SUBB(dst,src);
+	src+=CF;
+	SUBB(dst,src);
 	cpustate->regs.b[AL] = dst;
 }
 
 static void PREFIX86(_sbb_axd16)(i8086_state *cpustate)    /* Opcode 0x1d */
 {
-    DEF_axd16(dst,src);
+	DEF_axd16(dst,src);
 	ICOUNT -= timing.alu_ri16;
 	src+=CF;
-    SUBW(dst,src);
+	SUBW(dst,src);
 	cpustate->regs.w[AX]=dst;
 }
 
@@ -900,9 +936,7 @@ static void PREFIX86(_push_ds)(i8086_state *cpustate)    /* Opcode 0x1e */
 static void PREFIX86(_pop_ds)(i8086_state *cpustate)    /* Opcode 0x1f */
 {
 #ifdef I80286
-	UINT16 tmp;
-	POP(tmp);
-	i80286_data_descriptor(cpustate,DS,tmp);
+	i80286_pop_seg(cpustate,DS);
 #else
 	POP(cpustate->sregs[DS]);
 	cpustate->base[DS] = SegBase(DS);
@@ -912,49 +946,49 @@ static void PREFIX86(_pop_ds)(i8086_state *cpustate)    /* Opcode 0x1f */
 
 static void PREFIX86(_and_br8)(i8086_state *cpustate)    /* Opcode 0x20 */
 {
-    DEF_br8(dst,src);
+	DEF_br8(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr8 : timing.alu_mr8;
-    ANDB(dst,src);
-    PutbackRMByte(ModRM,dst);
+	ANDB(dst,src);
+	PutbackRMByte(ModRM,dst);
 }
 
 static void PREFIX86(_and_wr16)(i8086_state *cpustate)    /* Opcode 0x21 */
 {
-    DEF_wr16(dst,src);
+	DEF_wr16(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr16 : timing.alu_mr16;
-    ANDW(dst,src);
-    PutbackRMWord(ModRM,dst);
+	ANDW(dst,src);
+	PutbackRMWord(ModRM,dst);
 }
 
 static void PREFIX86(_and_r8b)(i8086_state *cpustate)    /* Opcode 0x22 */
 {
-    DEF_r8b(dst,src);
+	DEF_r8b(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr8 : timing.alu_rm8;
-    ANDB(dst,src);
-    RegByte(ModRM)=dst;
+	ANDB(dst,src);
+	RegByte(ModRM)=dst;
 }
 
 static void PREFIX86(_and_r16w)(i8086_state *cpustate)    /* Opcode 0x23 */
 {
-    DEF_r16w(dst,src);
+	DEF_r16w(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr16 : timing.alu_rm16;
 	ANDW(dst,src);
-    RegWord(ModRM)=dst;
+	RegWord(ModRM)=dst;
 }
 
 static void PREFIX86(_and_ald8)(i8086_state *cpustate)    /* Opcode 0x24 */
 {
-    DEF_ald8(dst,src);
+	DEF_ald8(dst,src);
 	ICOUNT -= timing.alu_ri8;
-    ANDB(dst,src);
+	ANDB(dst,src);
 	cpustate->regs.b[AL] = dst;
 }
 
 static void PREFIX86(_and_axd16)(i8086_state *cpustate)    /* Opcode 0x25 */
 {
-    DEF_axd16(dst,src);
+	DEF_axd16(dst,src);
 	ICOUNT -= timing.alu_ri16;
-    ANDW(dst,src);
+	ANDW(dst,src);
 	cpustate->regs.w[AX]=dst;
 }
 
@@ -980,41 +1014,41 @@ static void PREFIX86(_daa)(i8086_state *cpustate)    /* Opcode 0x27 */
 
 static void PREFIX86(_sub_br8)(i8086_state *cpustate)    /* Opcode 0x28 */
 {
-    DEF_br8(dst,src);
+	DEF_br8(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr8 : timing.alu_mr8;
-    SUBB(dst,src);
-    PutbackRMByte(ModRM,dst);
+	SUBB(dst,src);
+	PutbackRMByte(ModRM,dst);
 }
 
 static void PREFIX86(_sub_wr16)(i8086_state *cpustate)    /* Opcode 0x29 */
 {
-    DEF_wr16(dst,src);
+	DEF_wr16(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr16 : timing.alu_mr16;
-    SUBW(dst,src);
-    PutbackRMWord(ModRM,dst);
+	SUBW(dst,src);
+	PutbackRMWord(ModRM,dst);
 }
 
 static void PREFIX86(_sub_r8b)(i8086_state *cpustate)    /* Opcode 0x2a */
 {
-    DEF_r8b(dst,src);
+	DEF_r8b(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr8 : timing.alu_rm8;
 	SUBB(dst,src);
-    RegByte(ModRM)=dst;
+	RegByte(ModRM)=dst;
 }
 
 static void PREFIX86(_sub_r16w)(i8086_state *cpustate)    /* Opcode 0x2b */
 {
-    DEF_r16w(dst,src);
+	DEF_r16w(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr16 : timing.alu_rm16;
-    SUBW(dst,src);
-    RegWord(ModRM)=dst;
+	SUBW(dst,src);
+	RegWord(ModRM)=dst;
 }
 
 static void PREFIX86(_sub_ald8)(i8086_state *cpustate)    /* Opcode 0x2c */
 {
-    DEF_ald8(dst,src);
+	DEF_ald8(dst,src);
 	ICOUNT -= timing.alu_ri8;
-    SUBB(dst,src);
+	SUBB(dst,src);
 	cpustate->regs.b[AL] = dst;
 }
 
@@ -1022,7 +1056,7 @@ static void PREFIX86(_sub_axd16)(i8086_state *cpustate)    /* Opcode 0x2d */
 {
 	DEF_axd16(dst,src);
 	ICOUNT -= timing.alu_ri16;
-    SUBW(dst,src);
+	SUBW(dst,src);
 	cpustate->regs.w[AX]=dst;
 }
 
@@ -1049,9 +1083,9 @@ static void PREFIX86(_das)(i8086_state *cpustate)    /* Opcode 0x2f */
 
 static void PREFIX86(_xor_br8)(i8086_state *cpustate)    /* Opcode 0x30 */
 {
-    DEF_br8(dst,src);
+	DEF_br8(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr8 : timing.alu_mr8;
-    XORB(dst,src);
+	XORB(dst,src);
 	PutbackRMByte(ModRM,dst);
 }
 
@@ -1060,22 +1094,22 @@ static void PREFIX86(_xor_wr16)(i8086_state *cpustate)    /* Opcode 0x31 */
 	DEF_wr16(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr16 : timing.alu_mr16;
 	XORW(dst,src);
-    PutbackRMWord(ModRM,dst);
+	PutbackRMWord(ModRM,dst);
 }
 
 static void PREFIX86(_xor_r8b)(i8086_state *cpustate)    /* Opcode 0x32 */
 {
-    DEF_r8b(dst,src);
+	DEF_r8b(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr8 : timing.alu_rm8;
-    XORB(dst,src);
-    RegByte(ModRM)=dst;
+	XORB(dst,src);
+	RegByte(ModRM)=dst;
 }
 
 static void PREFIX86(_xor_r16w)(i8086_state *cpustate)    /* Opcode 0x33 */
 {
-    DEF_r16w(dst,src);
+	DEF_r16w(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr16 : timing.alu_rm16;
-    XORW(dst,src);
+	XORW(dst,src);
 	RegWord(ModRM)=dst;
 }
 
@@ -1083,15 +1117,15 @@ static void PREFIX86(_xor_ald8)(i8086_state *cpustate)    /* Opcode 0x34 */
 {
 	DEF_ald8(dst,src);
 	ICOUNT -= timing.alu_ri8;
-    XORB(dst,src);
+	XORB(dst,src);
 	cpustate->regs.b[AL] = dst;
 }
 
 static void PREFIX86(_xor_axd16)(i8086_state *cpustate)    /* Opcode 0x35 */
 {
-    DEF_axd16(dst,src);
+	DEF_axd16(dst,src);
 	ICOUNT -= timing.alu_ri16;
-    XORW(dst,src);
+	XORW(dst,src);
 	cpustate->regs.w[AX]=dst;
 }
 
@@ -1101,103 +1135,103 @@ static void PREFIX86(_aaa)(i8086_state *cpustate)    /* Opcode 0x37 */
 	if (cpustate->regs.b[AL]>0xf9) ALcarry=2;
 
 	if (AF || ((cpustate->regs.b[AL] & 0xf) > 9))
-    {
+	{
 		cpustate->regs.b[AL] += 6;
 		cpustate->regs.b[AH] += ALcarry;
 		cpustate->AuxVal = 1;
 		cpustate->CarryVal = 1;
-    }
+	}
 	else
 	{
 		cpustate->AuxVal = 0;
 		cpustate->CarryVal = 0;
-    }
+	}
 	cpustate->regs.b[AL] &= 0x0F;
 	ICOUNT -= timing.aaa;
 }
 
 static void PREFIX86(_cmp_br8)(i8086_state *cpustate)    /* Opcode 0x38 */
 {
-    DEF_br8(dst,src);
+	DEF_br8(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr8 : timing.alu_rm8;
-    SUBB(dst,src);
+	SUBB(dst,src);
 }
 
 static void PREFIX86(_cmp_wr16)(i8086_state *cpustate)    /* Opcode 0x39 */
 {
 	DEF_wr16(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr16 : timing.alu_rm16;
-    SUBW(dst,src);
+	SUBW(dst,src);
 }
 
 static void PREFIX86(_cmp_r8b)(i8086_state *cpustate)    /* Opcode 0x3a */
 {
-    DEF_r8b(dst,src);
+	DEF_r8b(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr8 : timing.alu_rm8;
-    SUBB(dst,src);
+	SUBB(dst,src);
 }
 
 static void PREFIX86(_cmp_r16w)(i8086_state *cpustate)    /* Opcode 0x3b */
 {
 	DEF_r16w(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr16 : timing.alu_rm16;
-    SUBW(dst,src);
+	SUBW(dst,src);
 }
 
 static void PREFIX86(_cmp_ald8)(i8086_state *cpustate)    /* Opcode 0x3c */
 {
-    DEF_ald8(dst,src);
+	DEF_ald8(dst,src);
 	ICOUNT -= timing.alu_ri8;
-    SUBB(dst,src);
+	SUBB(dst,src);
 }
 
 static void PREFIX86(_cmp_axd16)(i8086_state *cpustate)    /* Opcode 0x3d */
 {
-    DEF_axd16(dst,src);
+	DEF_axd16(dst,src);
 	ICOUNT -= timing.alu_ri16;
-    SUBW(dst,src);
+	SUBW(dst,src);
 }
 
 static void PREFIX86(_aas)(i8086_state *cpustate)    /* Opcode 0x3f */
 {
-	UINT8 ALcarry=1;
-	if (cpustate->regs.b[AL]>0xf9) ALcarry=2;
+//  UINT8 ALcarry=1;
+//  if (cpustate->regs.b[AL]>0xf9) ALcarry=2;
 
 	if (AF || ((cpustate->regs.b[AL] & 0xf) > 9))
-    {
+	{
 		cpustate->regs.b[AL] -= 6;
 		cpustate->regs.b[AH] -= 1;
 		cpustate->AuxVal = 1;
 		cpustate->CarryVal = 1;
-    }
+	}
 	else
 	{
 		cpustate->AuxVal = 0;
 		cpustate->CarryVal = 0;
-    }
+	}
 	cpustate->regs.b[AL] &= 0x0F;
 	ICOUNT -= timing.aas;
 }
 
-#define IncWordReg(Reg) 					\
-{											\
+#define IncWordReg(Reg)                     \
+{                                           \
 	unsigned tmp = (unsigned)cpustate->regs.w[Reg]; \
-	unsigned tmp1 = tmp+1;					\
-	SetOFW_Add(tmp1,tmp,1); 				\
-	SetAF(tmp1,tmp,1);						\
-	SetSZPF_Word(tmp1); 					\
-	cpustate->regs.w[Reg]=tmp1; 					\
-	ICOUNT -= timing.incdec_r16;			\
+	unsigned tmp1 = tmp+1;                  \
+	SetOFW_Add(tmp1,tmp,1);                 \
+	SetAF(tmp1,tmp,1);                      \
+	SetSZPF_Word(tmp1);                     \
+	cpustate->regs.w[Reg]=tmp1;                     \
+	ICOUNT -= timing.incdec_r16;            \
 }
 
 static void PREFIX86(_inc_ax)(i8086_state *cpustate)    /* Opcode 0x40 */
 {
-    IncWordReg(AX);
+	IncWordReg(AX);
 }
 
 static void PREFIX86(_inc_cx)(i8086_state *cpustate)    /* Opcode 0x41 */
 {
-    IncWordReg(CX);
+	IncWordReg(CX);
 }
 
 static void PREFIX86(_inc_dx)(i8086_state *cpustate)    /* Opcode 0x42 */
@@ -1212,7 +1246,7 @@ static void PREFIX(_inc_bx)(i8086_state *cpustate)    /* Opcode 0x43 */
 
 static void PREFIX86(_inc_sp)(i8086_state *cpustate)    /* Opcode 0x44 */
 {
-    IncWordReg(SP);
+	IncWordReg(SP);
 }
 
 static void PREFIX86(_inc_bp)(i8086_state *cpustate)    /* Opcode 0x45 */
@@ -1227,23 +1261,23 @@ static void PREFIX86(_inc_si)(i8086_state *cpustate)    /* Opcode 0x46 */
 
 static void PREFIX86(_inc_di)(i8086_state *cpustate)    /* Opcode 0x47 */
 {
-    IncWordReg(DI);
+	IncWordReg(DI);
 }
 
-#define DecWordReg(Reg) 					\
-{											\
+#define DecWordReg(Reg)                     \
+{                                           \
 	unsigned tmp = (unsigned)cpustate->regs.w[Reg]; \
-    unsigned tmp1 = tmp-1;					\
-    SetOFW_Sub(tmp1,1,tmp); 				\
-    SetAF(tmp1,tmp,1);						\
-	SetSZPF_Word(tmp1);						\
-	cpustate->regs.w[Reg]=tmp1; 					\
-	ICOUNT -= timing.incdec_r16;			\
+	unsigned tmp1 = tmp-1;                  \
+	SetOFW_Sub(tmp1,1,tmp);                 \
+	SetAF(tmp1,tmp,1);                      \
+	SetSZPF_Word(tmp1);                     \
+	cpustate->regs.w[Reg]=tmp1;                     \
+	ICOUNT -= timing.incdec_r16;            \
 }
 
 static void PREFIX86(_dec_ax)(i8086_state *cpustate)    /* Opcode 0x48 */
 {
-    DecWordReg(AX);
+	DecWordReg(AX);
 }
 
 static void PREFIX86(_dec_cx)(i8086_state *cpustate)    /* Opcode 0x49 */
@@ -1263,22 +1297,22 @@ static void PREFIX86(_dec_bx)(i8086_state *cpustate)    /* Opcode 0x4b */
 
 static void PREFIX86(_dec_sp)(i8086_state *cpustate)    /* Opcode 0x4c */
 {
-    DecWordReg(SP);
+	DecWordReg(SP);
 }
 
 static void PREFIX86(_dec_bp)(i8086_state *cpustate)    /* Opcode 0x4d */
 {
-    DecWordReg(BP);
+	DecWordReg(BP);
 }
 
 static void PREFIX86(_dec_si)(i8086_state *cpustate)    /* Opcode 0x4e */
 {
-    DecWordReg(SI);
+	DecWordReg(SI);
 }
 
 static void PREFIX86(_dec_di)(i8086_state *cpustate)    /* Opcode 0x4f */
 {
-    DecWordReg(DI);
+	DecWordReg(DI);
 }
 
 static void PREFIX86(_push_ax)(i8086_state *cpustate)    /* Opcode 0x50 */
@@ -1308,7 +1342,11 @@ static void PREFIX86(_push_bx)(i8086_state *cpustate)    /* Opcode 0x53 */
 static void PREFIX86(_push_sp)(i8086_state *cpustate)    /* Opcode 0x54 */
 {
 	ICOUNT -= timing.push_r16;
+#ifdef I80286
+	PUSH(cpustate->regs.w[SP]+2);
+#else
 	PUSH(cpustate->regs.w[SP]);
+#endif
 }
 
 static void PREFIX86(_push_bp)(i8086_state *cpustate)    /* Opcode 0x55 */
@@ -1448,7 +1486,7 @@ static void PREFIX86(_jnz)(i8086_state *cpustate)    /* Opcode 0x75 */
 static void PREFIX86(_jbe)(i8086_state *cpustate)    /* Opcode 0x76 */
 {
 	int tmp = (int)((INT8)FETCH);
-    if (CF || ZF) {
+	if (CF || ZF) {
 		cpustate->pc += tmp;
 		ICOUNT -= timing.jcc_t;
 /* ASG - can probably assume this is safe
@@ -1470,7 +1508,7 @@ static void PREFIX86(_jnbe)(i8086_state *cpustate)    /* Opcode 0x77 */
 static void PREFIX86(_js)(i8086_state *cpustate)    /* Opcode 0x78 */
 {
 	int tmp = (int)((INT8)FETCH);
-    if (SF) {
+	if (SF) {
 		cpustate->pc += tmp;
 		ICOUNT -= timing.jcc_t;
 /* ASG - can probably assume this is safe
@@ -1481,7 +1519,7 @@ static void PREFIX86(_js)(i8086_state *cpustate)    /* Opcode 0x78 */
 static void PREFIX86(_jns)(i8086_state *cpustate)    /* Opcode 0x79 */
 {
 	int tmp = (int)((INT8)FETCH);
-    if (!SF) {
+	if (!SF) {
 		cpustate->pc += tmp;
 		ICOUNT -= timing.jcc_t;
 /* ASG - can probably assume this is safe
@@ -1492,7 +1530,7 @@ static void PREFIX86(_jns)(i8086_state *cpustate)    /* Opcode 0x79 */
 static void PREFIX86(_jp)(i8086_state *cpustate)    /* Opcode 0x7a */
 {
 	int tmp = (int)((INT8)FETCH);
-    if (PF) {
+	if (PF) {
 		cpustate->pc += tmp;
 		ICOUNT -= timing.jcc_t;
 /* ASG - can probably assume this is safe
@@ -1503,7 +1541,7 @@ static void PREFIX86(_jp)(i8086_state *cpustate)    /* Opcode 0x7a */
 static void PREFIX86(_jnp)(i8086_state *cpustate)    /* Opcode 0x7b */
 {
 	int tmp = (int)((INT8)FETCH);
-    if (!PF) {
+	if (!PF) {
 		cpustate->pc += tmp;
 		ICOUNT -= timing.jcc_t;
 /* ASG - can probably assume this is safe
@@ -1514,7 +1552,7 @@ static void PREFIX86(_jnp)(i8086_state *cpustate)    /* Opcode 0x7b */
 static void PREFIX86(_jl)(i8086_state *cpustate)    /* Opcode 0x7c */
 {
 	int tmp = (int)((INT8)FETCH);
-    if ((SF!=OF)&&!ZF) {
+	if ((SF!=OF)&&!ZF) {
 		cpustate->pc += tmp;
 		ICOUNT -= timing.jcc_t;
 /* ASG - can probably assume this is safe
@@ -1525,7 +1563,7 @@ static void PREFIX86(_jl)(i8086_state *cpustate)    /* Opcode 0x7c */
 static void PREFIX86(_jnl)(i8086_state *cpustate)    /* Opcode 0x7d */
 {
 	int tmp = (int)((INT8)FETCH);
-    if (ZF||(SF==OF)) {
+	if (ZF||(SF==OF)) {
 		cpustate->pc += tmp;
 		ICOUNT -= timing.jcc_t;
 /* ASG - can probably assume this is safe
@@ -1536,7 +1574,7 @@ static void PREFIX86(_jnl)(i8086_state *cpustate)    /* Opcode 0x7d */
 static void PREFIX86(_jle)(i8086_state *cpustate)    /* Opcode 0x7e */
 {
 	int tmp = (int)((INT8)FETCH);
-    if (ZF||(SF!=OF)) {
+	if (ZF||(SF!=OF)) {
 		cpustate->pc += tmp;
 		ICOUNT -= timing.jcc_t;
 /* ASG - can probably assume this is safe
@@ -1547,7 +1585,7 @@ static void PREFIX86(_jle)(i8086_state *cpustate)    /* Opcode 0x7e */
 static void PREFIX86(_jnle)(i8086_state *cpustate)    /* Opcode 0x7f */
 {
 	int tmp = (int)((INT8)FETCH);
-    if ((SF==OF)&&!ZF) {
+	if ((SF==OF)&&!ZF) {
 		cpustate->pc += tmp;
 		ICOUNT -= timing.jcc_t;
 /* ASG - can probably assume this is safe
@@ -1559,50 +1597,53 @@ static void PREFIX86(_80pre)(i8086_state *cpustate)    /* Opcode 0x80 */
 {
 	unsigned ModRM = FETCHOP;
 	unsigned dst = GetRMByte(ModRM);
-    unsigned src = FETCH;
+	unsigned src = FETCH;
+	int tmpcf;
 
-    switch (ModRM & 0x38)
+	switch (ModRM & 0x38)
 	{
-    case 0x00:  /* ADD eb,d8 */
-        ADDB(dst,src);
-        PutbackRMByte(ModRM,dst);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8;
-		break;
-    case 0x08:  /* OR eb,d8 */
-        ORB(dst,src);
+	case 0x00:  /* ADD eb,d8 */
+		ADDB(dst,src);
 		PutbackRMByte(ModRM,dst);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8;
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8;
 		break;
-    case 0x10:  /* ADC eb,d8 */
-        src+=CF;
-        ADDB(dst,src);
+	case 0x08:  /* OR eb,d8 */
+		ORB(dst,src);
 		PutbackRMByte(ModRM,dst);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8;
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8;
 		break;
-    case 0x18:  /* SBB eb,b8 */
+	case 0x10:  /* ADC eb,d8 */
 		src+=CF;
+		ADCB(dst,src,tmpcf);
+		PutbackRMByte(ModRM,dst);
+		cpustate->CarryVal = tmpcf;
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8;
+		break;
+	case 0x18:  /* SBB eb,b8 */
+		src+=CF;
+		SBBB(dst,src,tmpcf);
+		PutbackRMByte(ModRM,dst);
+		cpustate->CarryVal = tmpcf;
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8;
+		break;
+	case 0x20:  /* AND eb,d8 */
+		ANDB(dst,src);
+		PutbackRMByte(ModRM,dst);
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8;
+		break;
+	case 0x28:  /* SUB eb,d8 */
 		SUBB(dst,src);
-        PutbackRMByte(ModRM,dst);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8;
-		break;
-    case 0x20:  /* AND eb,d8 */
-        ANDB(dst,src);
 		PutbackRMByte(ModRM,dst);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8;
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8;
 		break;
-    case 0x28:  /* SUB eb,d8 */
-        SUBB(dst,src);
-        PutbackRMByte(ModRM,dst);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8;
-		break;
-    case 0x30:  /* XOR eb,d8 */
-        XORB(dst,src);
+	case 0x30:  /* XOR eb,d8 */
+		XORB(dst,src);
 		PutbackRMByte(ModRM,dst);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8;
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8;
 		break;
-    case 0x38:  /* CMP eb,d8 */
-        SUBB(dst,src);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8_ro;
+	case 0x38:  /* CMP eb,d8 */
+		SUBB(dst,src);
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8_ro;
 		break;
 	}
 }
@@ -1612,103 +1653,109 @@ static void PREFIX86(_81pre)(i8086_state *cpustate)    /* Opcode 0x81 */
 {
 	unsigned ModRM = FETCH;
 	unsigned dst = GetRMWord(ModRM);
-    unsigned src = FETCH;
-    src+= (FETCH << 8);
+	unsigned src = FETCH;
+	int tmpcf;
+	src+= (FETCH << 8);
 
 	switch (ModRM & 0x38)
-    {
-    case 0x00:  /* ADD ew,d16 */
+	{
+	case 0x00:  /* ADD ew,d16 */
 		ADDW(dst,src);
 		PutbackRMWord(ModRM,dst);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri16 : timing.alu_mi16;
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri16 : timing.alu_mi16;
 		break;
-    case 0x08:  /* OR ew,d16 */
-        ORW(dst,src);
-        PutbackRMWord(ModRM,dst);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri16 : timing.alu_mi16;
+	case 0x08:  /* OR ew,d16 */
+		ORW(dst,src);
+		PutbackRMWord(ModRM,dst);
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri16 : timing.alu_mi16;
 		break;
-	case 0x10:	/* ADC ew,d16 */
+	case 0x10:  /* ADC ew,d16 */
 		src+=CF;
-		ADDW(dst,src);
-        PutbackRMWord(ModRM,dst);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri16 : timing.alu_mi16;
-		break;
-    case 0x18:  /* SBB ew,d16 */
-        src+=CF;
-		SUBW(dst,src);
-        PutbackRMWord(ModRM,dst);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri16 : timing.alu_mi16;
-		break;
-    case 0x20:  /* AND ew,d16 */
-        ANDW(dst,src);
+		ADCW(dst,src,tmpcf);
 		PutbackRMWord(ModRM,dst);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri16 : timing.alu_mi16;
+		cpustate->CarryVal = tmpcf;
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri16 : timing.alu_mi16;
 		break;
-    case 0x28:  /* SUB ew,d16 */
-        SUBW(dst,src);
-        PutbackRMWord(ModRM,dst);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri16 : timing.alu_mi16;
+	case 0x18:  /* SBB ew,d16 */
+		src+=CF;
+		SBBW(dst,src,tmpcf);
+		PutbackRMWord(ModRM,dst);
+		cpustate->CarryVal = tmpcf;
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri16 : timing.alu_mi16;
 		break;
-    case 0x30:  /* XOR ew,d16 */
+	case 0x20:  /* AND ew,d16 */
+		ANDW(dst,src);
+		PutbackRMWord(ModRM,dst);
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri16 : timing.alu_mi16;
+		break;
+	case 0x28:  /* SUB ew,d16 */
+		SUBW(dst,src);
+		PutbackRMWord(ModRM,dst);
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri16 : timing.alu_mi16;
+		break;
+	case 0x30:  /* XOR ew,d16 */
 		XORW(dst,src);
-        PutbackRMWord(ModRM,dst);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri16 : timing.alu_mi16;
+		PutbackRMWord(ModRM,dst);
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri16 : timing.alu_mi16;
 		break;
-    case 0x38:  /* CMP ew,d16 */
-        SUBW(dst,src);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri16 : timing.alu_mi16_ro;
+	case 0x38:  /* CMP ew,d16 */
+		SUBW(dst,src);
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri16 : timing.alu_mi16_ro;
 		break;
-    }
+	}
 }
 
-static void PREFIX86(_82pre)(i8086_state *cpustate)	 /* Opcode 0x82 */
+static void PREFIX86(_82pre)(i8086_state *cpustate)  /* Opcode 0x82 */
 {
 	unsigned ModRM = FETCH;
 	unsigned dst = GetRMByte(ModRM);
 	unsigned src = FETCH;
+	int tmpcf;
 
 	switch (ModRM & 0x38)
 	{
-	case 0x00:	/* ADD eb,d8 */
+	case 0x00:  /* ADD eb,d8 */
 		ADDB(dst,src);
 		PutbackRMByte(ModRM,dst);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8;
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8;
 		break;
-	case 0x08:	/* OR eb,d8 */
+	case 0x08:  /* OR eb,d8 */
 		ORB(dst,src);
 		PutbackRMByte(ModRM,dst);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8;
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8;
 		break;
-	case 0x10:	/* ADC eb,d8 */
+	case 0x10:  /* ADC eb,d8 */
 		src+=CF;
-		ADDB(dst,src);
+		ADCB(dst,src,tmpcf);
 		PutbackRMByte(ModRM,dst);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8;
+		cpustate->CarryVal = tmpcf;
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8;
 		break;
-	case 0x18:	/* SBB eb,d8 */
-        src+=CF;
-		SUBB(dst,src);
+	case 0x18:  /* SBB eb,d8 */
+		src+=CF;
+		SBBB(dst,src,tmpcf);
 		PutbackRMByte(ModRM,dst);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8;
+		cpustate->CarryVal = tmpcf;
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8;
 		break;
-	case 0x20:	/* AND eb,d8 */
+	case 0x20:  /* AND eb,d8 */
 		ANDB(dst,src);
 		PutbackRMByte(ModRM,dst);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8;
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8;
 		break;
-	case 0x28:	/* SUB eb,d8 */
+	case 0x28:  /* SUB eb,d8 */
 		SUBB(dst,src);
 		PutbackRMByte(ModRM,dst);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8;
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8;
 		break;
-	case 0x30:	/* XOR eb,d8 */
+	case 0x30:  /* XOR eb,d8 */
 		XORB(dst,src);
 		PutbackRMByte(ModRM,dst);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8;
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8;
 		break;
-	case 0x38:	/* CMP eb,d8 */
+	case 0x38:  /* CMP eb,d8 */
 		SUBB(dst,src);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8_ro;
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8_ro;
 		break;
 	}
 }
@@ -1716,107 +1763,110 @@ static void PREFIX86(_82pre)(i8086_state *cpustate)	 /* Opcode 0x82 */
 static void PREFIX86(_83pre)(i8086_state *cpustate)    /* Opcode 0x83 */
 {
 	unsigned ModRM = FETCH;
-    unsigned dst = GetRMWord(ModRM);
-    unsigned src = (WORD)((INT16)((INT8)FETCH));
+	unsigned dst = GetRMWord(ModRM);
+	unsigned src = (WORD)((INT16)((INT8)FETCH));
+	int tmpcf;
 
 	switch (ModRM & 0x38)
-    {
-    case 0x00:  /* ADD ew,d16 */
-        ADDW(dst,src);
-        PutbackRMWord(ModRM,dst);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_r16i8 : timing.alu_m16i8;
-		break;
-    case 0x08:  /* OR ew,d16 */
-		ORW(dst,src);
-        PutbackRMWord(ModRM,dst);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_r16i8 : timing.alu_m16i8;
-		break;
-    case 0x10:  /* ADC ew,d16 */
-        src+=CF;
+	{
+	case 0x00:  /* ADD ew,d16 */
 		ADDW(dst,src);
-        PutbackRMWord(ModRM,dst);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_r16i8 : timing.alu_m16i8;
+		PutbackRMWord(ModRM,dst);
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_r16i8 : timing.alu_m16i8;
 		break;
-	case 0x18:	/* SBB ew,d16 */
+	case 0x08:  /* OR ew,d16 */
+		ORW(dst,src);
+		PutbackRMWord(ModRM,dst);
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_r16i8 : timing.alu_m16i8;
+		break;
+	case 0x10:  /* ADC ew,d16 */
 		src+=CF;
-        SUBW(dst,src);
-        PutbackRMWord(ModRM,dst);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_r16i8 : timing.alu_m16i8;
+		ADCW(dst,src,tmpcf);
+		PutbackRMWord(ModRM,dst);
+		cpustate->CarryVal = tmpcf;
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_r16i8 : timing.alu_m16i8;
 		break;
-	case 0x20:	/* AND ew,d16 */
-        ANDW(dst,src);
-        PutbackRMWord(ModRM,dst);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_r16i8 : timing.alu_m16i8;
+	case 0x18:  /* SBB ew,d16 */
+		src+=CF;
+		SBBW(dst,src,tmpcf);
+		PutbackRMWord(ModRM,dst);
+		cpustate->CarryVal = tmpcf;
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_r16i8 : timing.alu_m16i8;
 		break;
-    case 0x28:  /* SUB ew,d16 */
+	case 0x20:  /* AND ew,d16 */
+		ANDW(dst,src);
+		PutbackRMWord(ModRM,dst);
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_r16i8 : timing.alu_m16i8;
+		break;
+	case 0x28:  /* SUB ew,d16 */
 		SUBW(dst,src);
 		PutbackRMWord(ModRM,dst);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_r16i8 : timing.alu_m16i8;
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_r16i8 : timing.alu_m16i8;
 		break;
-    case 0x30:  /* XOR ew,d16 */
+	case 0x30:  /* XOR ew,d16 */
 		XORW(dst,src);
-        PutbackRMWord(ModRM,dst);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_r16i8 : timing.alu_m16i8;
+		PutbackRMWord(ModRM,dst);
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_r16i8 : timing.alu_m16i8;
 		break;
-    case 0x38:  /* CMP ew,d16 */
-        SUBW(dst,src);
-        ICOUNT -= (ModRM >= 0xc0) ? timing.alu_r16i8 : timing.alu_m16i8_ro;
+	case 0x38:  /* CMP ew,d16 */
+		SUBW(dst,src);
+		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_r16i8 : timing.alu_m16i8_ro;
 		break;
-    }
+	}
 }
 
 static void PREFIX86(_test_br8)(i8086_state *cpustate)    /* Opcode 0x84 */
 {
-    DEF_br8(dst,src);
+	DEF_br8(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr8 : timing.alu_rm8;
-    ANDB(dst,src);
+	ANDB(dst,src);
 }
 
 static void PREFIX86(_test_wr16)(i8086_state *cpustate)    /* Opcode 0x85 */
 {
-    DEF_wr16(dst,src);
+	DEF_wr16(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.alu_rr16 : timing.alu_rm16;
 	ANDW(dst,src);
 }
 
 static void PREFIX86(_xchg_br8)(i8086_state *cpustate)    /* Opcode 0x86 */
 {
-    DEF_br8(dst,src);
+	DEF_br8(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.xchg_rr8 : timing.xchg_rm8;
-    RegByte(ModRM)=dst;
-    PutbackRMByte(ModRM,src);
+	PutbackRMByte(ModRM,src);
+	RegByte(ModRM)=dst;
 }
 
 static void PREFIX86(_xchg_wr16)(i8086_state *cpustate)    /* Opcode 0x87 */
 {
-    DEF_wr16(dst,src);
+	DEF_wr16(dst,src);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.xchg_rr16 : timing.xchg_rm16;
-    RegWord(ModRM)=dst;
-    PutbackRMWord(ModRM,src);
+	PutbackRMWord(ModRM,src);
+	RegWord(ModRM)=dst;
 }
 
 static void PREFIX86(_mov_br8)(i8086_state *cpustate)    /* Opcode 0x88 */
 {
 	unsigned ModRM = FETCH;
-    BYTE src = RegByte(ModRM);
+	BYTE src = RegByte(ModRM);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.mov_rr8 : timing.mov_mr8;
-    PutRMByte(ModRM,src);
+	PutRMByte(ModRM,src);
 }
 
 static void PREFIX86(_mov_wr16)(i8086_state *cpustate)    /* Opcode 0x89 */
 {
 	unsigned ModRM = FETCH;
-    WORD src = RegWord(ModRM);
+	WORD src = RegWord(ModRM);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.mov_rr16 : timing.mov_mr16;
-    PutRMWord(ModRM,src);
+	PutRMWord(ModRM,src);
 }
 
 static void PREFIX86(_mov_r8b)(i8086_state *cpustate)    /* Opcode 0x8a */
 {
 	unsigned ModRM = FETCH;
-    BYTE src = GetRMByte(ModRM);
+	BYTE src = GetRMByte(ModRM);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.mov_rr8 : timing.mov_rm8;
-    RegByte(ModRM)=src;
+	RegByte(ModRM)=src;
 }
 
 static void PREFIX86(_mov_r16w)(i8086_state *cpustate)    /* Opcode 0x8b */
@@ -1831,14 +1881,11 @@ static void PREFIX86(_mov_wsreg)(i8086_state *cpustate)    /* Opcode 0x8c */
 {
 	unsigned ModRM = FETCH;
 	ICOUNT -= (ModRM >= 0xc0) ? timing.mov_rs : timing.mov_ms;
-#ifdef I80286
-	if (ModRM & 0x20) {	/* HJB 12/13/98 1xx is invalid */
-		i80286_trap2(cpustate,ILLEGAL_INSTRUCTION);
-		return;
+	if (ModRM & 0x20) { /* HJB 12/13/98 1xx is invalid */
+		cpustate->pc = cpustate->prevpc;
+		return PREFIX86(_invalid)(cpustate);
 	}
-#else
-	if (ModRM & 0x20) return;	/* HJB 12/13/98 1xx is invalid */
-#endif
+
 	PutRMWord(ModRM,cpustate->sregs[(ModRM & 0x38) >> 3]);
 }
 
@@ -1847,32 +1894,33 @@ static void PREFIX86(_lea)(i8086_state *cpustate)    /* Opcode 0x8d */
 	unsigned ModRM = FETCH;
 	ICOUNT -= timing.lea;
 	(void)(*GetEA[ModRM])(cpustate);
-	RegWord(ModRM)=cpustate->eo;	/* HJB 12/13/98 effective offset (no segment part) */
+	RegWord(ModRM)=cpustate->eo;    /* HJB 12/13/98 effective offset (no segment part) */
 }
 
 static void PREFIX86(_popw)(i8086_state *cpustate)    /* Opcode 0x8f */
 {
 	unsigned ModRM = FETCH;
-    WORD tmp;
-	POP(tmp);
+		WORD tmp;
+	tmp = ReadWord(cpustate->base[SS] + cpustate->regs.w[SP]);
 	ICOUNT -= (ModRM >= 0xc0) ? timing.pop_r16 : timing.pop_m16;
 	PutRMWord(ModRM,tmp);
+	cpustate->regs.w[SP] += 2;
 }
 
 
-#define XchgAXReg(Reg)				\
-{									\
-    WORD tmp;						\
-	tmp = cpustate->regs.w[Reg];			\
-	cpustate->regs.w[Reg] = cpustate->regs.w[AX];	\
-	cpustate->regs.w[AX] = tmp; 			\
-	ICOUNT -= timing.xchg_ar16; 	\
+#define XchgAXReg(Reg)              \
+{                                   \
+	WORD tmp;                       \
+	tmp = cpustate->regs.w[Reg];            \
+	cpustate->regs.w[Reg] = cpustate->regs.w[AX];   \
+	cpustate->regs.w[AX] = tmp;             \
+	ICOUNT -= timing.xchg_ar16;     \
 }
 
 
 static void PREFIX86(_nop)(i8086_state *cpustate)    /* Opcode 0x90 */
 {
-    /* this is XchgAXReg(AX); */
+	/* this is XchgAXReg(AX); */
 	ICOUNT -= timing.nop;
 }
 
@@ -1883,7 +1931,7 @@ static void PREFIX86(_xchg_axcx)(i8086_state *cpustate)    /* Opcode 0x91 */
 
 static void PREFIX86(_xchg_axdx)(i8086_state *cpustate)    /* Opcode 0x92 */
 {
-    XchgAXReg(DX);
+	XchgAXReg(DX);
 }
 
 static void PREFIX86(_xchg_axbx)(i8086_state *cpustate)    /* Opcode 0x93 */
@@ -1898,7 +1946,7 @@ static void PREFIX86(_xchg_axsp)(i8086_state *cpustate)    /* Opcode 0x94 */
 
 static void PREFIX86(_xchg_axbp)(i8086_state *cpustate)    /* Opcode 0x95 */
 {
-    XchgAXReg(BP);
+	XchgAXReg(BP);
 }
 
 static void PREFIX86(_xchg_axsi)(i8086_state *cpustate)    /* Opcode 0x96 */
@@ -1925,8 +1973,8 @@ static void PREFIX86(_cwd)(i8086_state *cpustate)    /* Opcode 0x99 */
 
 static void PREFIX86(_call_far)(i8086_state *cpustate)
 {
-    unsigned tmp, tmp2;
-	WORD ip;
+	unsigned int tmp, tmp2;
+	WORD cs, ip;
 
 	tmp = FETCH;
 	tmp += FETCH << 8;
@@ -1935,22 +1983,26 @@ static void PREFIX86(_call_far)(i8086_state *cpustate)
 	tmp2 += FETCH << 8;
 
 	ip = cpustate->pc - cpustate->base[CS];
-	PUSH(cpustate->sregs[CS]);
-	PUSH(ip);
+	cs = cpustate->sregs[CS];
 
 #ifdef I80286
-	i80286_code_descriptor(cpustate, tmp2, tmp);
+	i80286_code_descriptor(cpustate, tmp2, tmp, 2);
 #else
 	cpustate->sregs[CS] = (WORD)tmp2;
 	cpustate->base[CS] = SegBase(CS);
 	cpustate->pc = (cpustate->base[CS] + (WORD)tmp) & AMASK;
 #endif
+	PUSH(cs);
+	PUSH(ip);
 	ICOUNT -= timing.call_far;
 	CHANGE_PC(cpustate->pc);
 }
 
 static void PREFIX86(_wait)(i8086_state *cpustate)    /* Opcode 0x9b */
 {
+#ifdef I80286
+	if ((cpustate->msw&0x0a) == 0x0a) throw TRAP(FPU_UNAVAILABLE,-1);
+#endif
 	if (cpustate->test_state)
 	{
 		ICOUNT = 0;
@@ -1967,18 +2019,21 @@ static void PREFIX86(_pushf)(i8086_state *cpustate)    /* Opcode 0x9c */
 
 	tmp = CompressFlags();
 #ifdef I80286
-    PUSH( tmp &= ~0xf000 );
-#else
-    PUSH( tmp | 0xf000 );
+	if(!PM) ( tmp &= ~0xf000 );
 #endif
+	PUSH( tmp );
 }
 
+#ifndef I80286
 static void PREFIX86(_popf)(i8086_state *cpustate)    /* Opcode 0x9d */
 {
 	unsigned tmp;
-    POP(tmp);
+	POP(tmp);
 	ICOUNT -= timing.popf;
-    ExpandFlags(tmp);
+
+	ExpandFlags(tmp);
+	cpustate->flags = tmp;
+	cpustate->flags = CompressFlags();
 
 	if (cpustate->TF) PREFIX(_trap)(cpustate);
 
@@ -1986,12 +2041,13 @@ static void PREFIX86(_popf)(i8086_state *cpustate)    /* Opcode 0x9d */
 	if (cpustate->IF && cpustate->irq_state)
 		PREFIX(_interrupt)(cpustate, (UINT32)-1);
 }
+#endif
 
 static void PREFIX86(_sahf)(i8086_state *cpustate)    /* Opcode 0x9e */
 {
 	unsigned tmp = (CompressFlags() & 0xff00) | (cpustate->regs.b[AH] & 0xd5);
 	ICOUNT -= timing.sahf;
-    ExpandFlags(tmp);
+	ExpandFlags(tmp);
 }
 
 static void PREFIX86(_lahf)(i8086_state *cpustate)    /* Opcode 0x9f */
@@ -2025,7 +2081,7 @@ static void PREFIX86(_mov_axdisp)(i8086_state *cpustate)    /* Opcode 0xa1 */
 
 static void PREFIX86(_mov_dispal)(i8086_state *cpustate)    /* Opcode 0xa2 */
 {
-    unsigned addr;
+	unsigned addr;
 
 	addr = FETCH;
 	addr += FETCH << 8;
@@ -2067,7 +2123,7 @@ static void PREFIX86(_cmpsb)(i8086_state *cpustate)    /* Opcode 0xa6 */
 {
 	unsigned dst = GetMemB(ES, cpustate->regs.w[DI]);
 	unsigned src = GetMemB(DS, cpustate->regs.w[SI]);
-    SUBB(src,dst); /* opposite of the usual convention */
+	SUBB(src,dst); /* opposite of the usual convention */
 	cpustate->regs.w[DI] += cpustate->DirVal;
 	cpustate->regs.w[SI] += cpustate->DirVal;
 	ICOUNT -= timing.cmps8;
@@ -2085,16 +2141,16 @@ static void PREFIX86(_cmpsw)(i8086_state *cpustate)    /* Opcode 0xa7 */
 
 static void PREFIX86(_test_ald8)(i8086_state *cpustate)    /* Opcode 0xa8 */
 {
-    DEF_ald8(dst,src);
+	DEF_ald8(dst,src);
 	ICOUNT -= timing.alu_ri8;
-    ANDB(dst,src);
+	ANDB(dst,src);
 }
 
 static void PREFIX86(_test_axd16)(i8086_state *cpustate)    /* Opcode 0xa9 */
 {
-    DEF_axd16(dst,src);
+	DEF_axd16(dst,src);
 	ICOUNT -= timing.alu_ri16;
-    ANDW(dst,src);
+	ANDW(dst,src);
 }
 
 static void PREFIX86(_stosb)(i8086_state *cpustate)    /* Opcode 0xaa */
@@ -2129,7 +2185,7 @@ static void PREFIX86(_scasb)(i8086_state *cpustate)    /* Opcode 0xae */
 {
 	unsigned src = GetMemB(ES, cpustate->regs.w[DI]);
 	unsigned dst = cpustate->regs.b[AL];
-    SUBB(dst,src);
+	SUBB(dst,src);
 	cpustate->regs.w[DI] += cpustate->DirVal;
 	ICOUNT -= timing.scas8;
 }
@@ -2138,7 +2194,7 @@ static void PREFIX86(_scasw)(i8086_state *cpustate)    /* Opcode 0xaf */
 {
 	unsigned src = GetMemW(ES, cpustate->regs.w[DI]);
 	unsigned dst = cpustate->regs.w[AX];
-    SUBW(dst,src);
+	SUBW(dst,src);
 	cpustate->regs.w[DI] += 2 * cpustate->DirVal;
 	ICOUNT -= timing.scas16;
 }
@@ -2269,30 +2325,30 @@ static void PREFIX86(_ret)(i8086_state *cpustate)    /* Opcode 0xc3 */
 static void PREFIX86(_les_dw)(i8086_state *cpustate)    /* Opcode 0xc4 */
 {
 	unsigned ModRM = FETCH;
-    WORD tmp = GetRMWord(ModRM);
+	WORD tmp = GetRMWord(ModRM);
 
-    RegWord(ModRM)= tmp;
 #ifdef I80286
 	i80286_data_descriptor(cpustate,ES,GetnextRMWord);
 #else
 	cpustate->sregs[ES] = GetnextRMWord;
 	cpustate->base[ES] = SegBase(ES);
 #endif
+	RegWord(ModRM)= tmp;
 	ICOUNT -= timing.load_ptr;
 }
 
 static void PREFIX86(_lds_dw)(i8086_state *cpustate)    /* Opcode 0xc5 */
 {
 	unsigned ModRM = FETCH;
-    WORD tmp = GetRMWord(ModRM);
+	WORD tmp = GetRMWord(ModRM);
 
-    RegWord(ModRM)=tmp;
 #ifdef I80286
 	i80286_data_descriptor(cpustate,DS,GetnextRMWord);
 #else
 	cpustate->sregs[DS] = GetnextRMWord;
 	cpustate->base[DS] = SegBase(DS);
 #endif
+	RegWord(ModRM)=tmp;
 	ICOUNT -= timing.load_ptr;
 }
 
@@ -2310,24 +2366,16 @@ static void PREFIX86(_mov_wd16)(i8086_state *cpustate)    /* Opcode 0xc7 */
 	PutImmRMWord(ModRM);
 }
 
+#ifndef I80286
 static void PREFIX86(_retf_d16)(i8086_state *cpustate)    /* Opcode 0xca */
 {
 	unsigned count = FETCH;
 	count += FETCH << 8;
 
-#ifdef I80286
-	{
-		int tmp, tmp2;
-		POP(tmp2);
-		POP(tmp);
-		i80286_code_descriptor(cpustate, tmp, tmp2);
-	}
-#else
 	POP(cpustate->pc);
 	POP(cpustate->sregs[CS]);
 	cpustate->base[CS] = SegBase(CS);
 	cpustate->pc = (cpustate->pc + cpustate->base[CS]) & AMASK;
-#endif
 	cpustate->regs.w[SP]+=count;
 	ICOUNT -= timing.ret_far_imm;
 	CHANGE_PC(cpustate->pc);
@@ -2335,22 +2383,14 @@ static void PREFIX86(_retf_d16)(i8086_state *cpustate)    /* Opcode 0xca */
 
 static void PREFIX86(_retf)(i8086_state *cpustate)    /* Opcode 0xcb */
 {
-#ifdef I80286
-	{
-		int tmp, tmp2;
-		POP(tmp2);
-		POP(tmp);
-		i80286_code_descriptor(cpustate, tmp, tmp2);
-	}
-#else
 	POP(cpustate->pc);
 	POP(cpustate->sregs[CS]);
 	cpustate->base[CS] = SegBase(CS);
 	cpustate->pc = (cpustate->pc + cpustate->base[CS]) & AMASK;
-#endif
 	ICOUNT -= timing.ret_far;
 	CHANGE_PC(cpustate->pc);
 }
+#endif
 
 static void PREFIX86(_int3)(i8086_state *cpustate)    /* Opcode 0xcc */
 {
@@ -2373,51 +2413,50 @@ static void PREFIX86(_into)(i8086_state *cpustate)    /* Opcode 0xce */
 	} else ICOUNT -= timing.into_nt;
 }
 
+#ifndef I80286
 static void PREFIX86(_iret)(i8086_state *cpustate)    /* Opcode 0xcf */
 {
 	ICOUNT -= timing.iret;
-#ifdef I80286
-	{
-		int tmp, tmp2;
-		POP(tmp2);
-		POP(tmp);
-		i80286_code_descriptor(cpustate, tmp, tmp2);
-	}
-#else
 	POP(cpustate->pc);
 	POP(cpustate->sregs[CS]);
 	cpustate->base[CS] = SegBase(CS);
 	cpustate->pc = (cpustate->pc + cpustate->base[CS]) & AMASK;
-#endif
-    PREFIX(_popf)(cpustate);
+		PREFIX(_popf)(cpustate);
 	CHANGE_PC(cpustate->pc);
 
 	/* if the IF is set, and an interrupt is pending, signal an interrupt */
 	if (cpustate->IF && cpustate->irq_state)
 		PREFIX(_interrupt)(cpustate, (UINT32)-1);
 }
+#endif
 
 static void PREFIX86(_rotshft_b)(i8086_state *cpustate)    /* Opcode 0xd0 */
 {
-	PREFIX(_rotate_shift_Byte)(cpustate,FETCHOP,1);
+	unsigned ModRM = FETCHOP;
+	PREFIX(_rotate_shift_Byte)(cpustate,ModRM,1,GetRMByte(ModRM));
 }
 
 
 static void PREFIX86(_rotshft_w)(i8086_state *cpustate)    /* Opcode 0xd1 */
 {
-	PREFIX(_rotate_shift_Word)(cpustate,FETCHOP,1);
+	unsigned ModRM = FETCHOP;
+	PREFIX(_rotate_shift_Word)(cpustate,ModRM,1,GetRMWord(ModRM));
 }
 
 
+#ifdef I8086
 static void PREFIX86(_rotshft_bcl)(i8086_state *cpustate)    /* Opcode 0xd2 */
 {
-	PREFIX(_rotate_shift_Byte)(cpustate,FETCHOP,cpustate->regs.b[CL]);
+	unsigned ModRM = FETCHOP;
+	PREFIX(_rotate_shift_Byte)(cpustate,ModRM,cpustate->regs.b[CL],GetRMByte(ModRM));
 }
 
 static void PREFIX86(_rotshft_wcl)(i8086_state *cpustate)    /* Opcode 0xd3 */
 {
-	PREFIX(_rotate_shift_Word)(cpustate,FETCHOP,cpustate->regs.b[CL]);
+	unsigned ModRM = FETCHOP;
+	PREFIX(_rotate_shift_Word)(cpustate,ModRM,cpustate->regs.b[CL],GetRMWord(ModRM));
 }
+#endif
 
 /* OB: Opcode works on NEC V-Series but not the Variants              */
 /*     one could specify any byte value as operand but the NECs */
@@ -2461,12 +2500,14 @@ static void PREFIX86(_xlat)(i8086_state *cpustate)    /* Opcode 0xd7 */
 	cpustate->regs.b[AL] = GetMemB(DS, dest);
 }
 
+#ifndef I80286
 static void PREFIX86(_escape)(i8086_state *cpustate)    /* Opcodes 0xd8, 0xd9, 0xda, 0xdb, 0xdc, 0xdd, 0xde and 0xdf */
 {
 	unsigned ModRM = FETCH;
 	ICOUNT -= timing.nop;
-    GetRMByte(ModRM);
+	GetRMByte(ModRM);
 }
+#endif
 
 static void PREFIX86(_loopne)(i8086_state *cpustate)    /* Opcode 0xe0 */
 {
@@ -2475,7 +2516,7 @@ static void PREFIX86(_loopne)(i8086_state *cpustate)    /* Opcode 0xe0 */
 
 	cpustate->regs.w[CX]=tmp;
 
-    if (!ZF && tmp) {
+	if (!ZF && tmp) {
 		ICOUNT -= timing.loop_t;
 		cpustate->pc += disp;
 /* ASG - can probably assume this is safe
@@ -2492,7 +2533,7 @@ static void PREFIX86(_loope)(i8086_state *cpustate)    /* Opcode 0xe1 */
 
 	if (ZF && tmp) {
 		ICOUNT -= timing.loope_t;
-		 cpustate->pc += disp;
+			cpustate->pc += disp;
 /* ASG - can probably assume this is safe
          CHANGE_PC(cpustate->pc);*/
 	} else ICOUNT -= timing.loope_nt;
@@ -2505,7 +2546,7 @@ static void PREFIX86(_loop)(i8086_state *cpustate)    /* Opcode 0xe2 */
 
 	cpustate->regs.w[CX]=tmp;
 
-    if (tmp) {
+	if (tmp) {
 		ICOUNT -= timing.loop_t;
 		cpustate->pc += disp;
 /* ASG - can probably assume this is safe
@@ -2528,7 +2569,11 @@ static void PREFIX86(_jcxz)(i8086_state *cpustate)    /* Opcode 0xe3 */
 
 static void PREFIX86(_inal)(i8086_state *cpustate)    /* Opcode 0xe4 */
 {
-	unsigned port = FETCH;
+	unsigned port;
+#ifdef I80286
+	if (PM && (CPL>IOPL)) throw TRAP(GENERAL_PROTECTION_FAULT, 0);
+#endif
+	port = FETCH;
 
 	ICOUNT -= timing.in_imm8;
 	cpustate->regs.b[AL] = read_port_byte(port);
@@ -2536,7 +2581,11 @@ static void PREFIX86(_inal)(i8086_state *cpustate)    /* Opcode 0xe4 */
 
 static void PREFIX86(_inax)(i8086_state *cpustate)    /* Opcode 0xe5 */
 {
-	unsigned port = FETCH;
+	unsigned port;
+#ifdef I80286
+	if (PM && (CPL>IOPL)) throw TRAP(GENERAL_PROTECTION_FAULT, 0);
+#endif
+	port = FETCH;
 
 	ICOUNT -= timing.in_imm16;
 	cpustate->regs.w[AX] = read_port_word(port);
@@ -2544,7 +2593,11 @@ static void PREFIX86(_inax)(i8086_state *cpustate)    /* Opcode 0xe5 */
 
 static void PREFIX86(_outal)(i8086_state *cpustate)    /* Opcode 0xe6 */
 {
-	unsigned port = FETCH;
+	unsigned port;
+#ifdef I80286
+	if (PM && (CPL>IOPL)) throw TRAP(GENERAL_PROTECTION_FAULT, 0);
+#endif
+	port = FETCH;
 
 	ICOUNT -= timing.out_imm8;
 	write_port_byte(port, cpustate->regs.b[AL]);
@@ -2552,7 +2605,11 @@ static void PREFIX86(_outal)(i8086_state *cpustate)    /* Opcode 0xe6 */
 
 static void PREFIX86(_outax)(i8086_state *cpustate)    /* Opcode 0xe7 */
 {
-	unsigned port = FETCH;
+	unsigned port;
+#ifdef I80286
+	if (PM && (CPL>IOPL)) throw TRAP(GENERAL_PROTECTION_FAULT, 0);
+#endif
+	port = FETCH;
 
 	ICOUNT -= timing.out_imm16;
 	write_port_word(port, cpustate->regs.w[AX]);
@@ -2593,7 +2650,7 @@ static void PREFIX86(_jmp_far)(i8086_state *cpustate)    /* Opcode 0xea */
 	tmp1 += FETCH << 8;
 
 #ifdef I80286
-	i80286_code_descriptor(cpustate, tmp1,tmp);
+	i80286_code_descriptor(cpustate, tmp1,tmp, 1);
 #else
 	cpustate->sregs[CS] = (WORD)tmp1;
 	cpustate->base[CS] = SegBase(CS);
@@ -2614,6 +2671,9 @@ static void PREFIX86(_jmp_d8)(i8086_state *cpustate)    /* Opcode 0xeb */
 
 static void PREFIX86(_inaldx)(i8086_state *cpustate)    /* Opcode 0xec */
 {
+#ifdef I80286
+	if (PM && (CPL>IOPL)) throw TRAP(GENERAL_PROTECTION_FAULT, 0);
+#endif
 	ICOUNT -= timing.in_dx8;
 	cpustate->regs.b[AL] = read_port_byte(cpustate->regs.w[DX]);
 }
@@ -2621,13 +2681,18 @@ static void PREFIX86(_inaldx)(i8086_state *cpustate)    /* Opcode 0xec */
 static void PREFIX86(_inaxdx)(i8086_state *cpustate)    /* Opcode 0xed */
 {
 	unsigned port = cpustate->regs.w[DX];
-
+#ifdef I80286
+	if (PM && (CPL>IOPL)) throw TRAP(GENERAL_PROTECTION_FAULT, 0);
+#endif
 	ICOUNT -= timing.in_dx16;
 	cpustate->regs.w[AX] = read_port_word(port);
 }
 
 static void PREFIX86(_outdxal)(i8086_state *cpustate)    /* Opcode 0xee */
 {
+#ifdef I80286
+	if (PM && (CPL>IOPL)) throw TRAP(GENERAL_PROTECTION_FAULT, 0);
+#endif
 	ICOUNT -= timing.out_dx8;
 	write_port_byte(cpustate->regs.w[DX], cpustate->regs.b[AL]);
 }
@@ -2635,7 +2700,9 @@ static void PREFIX86(_outdxal)(i8086_state *cpustate)    /* Opcode 0xee */
 static void PREFIX86(_outdxax)(i8086_state *cpustate)    /* Opcode 0xef */
 {
 	unsigned port = cpustate->regs.w[DX];
-
+#ifdef I80286
+	if (PM && (CPL>IOPL)) throw TRAP(GENERAL_PROTECTION_FAULT, 0);
+#endif
 	ICOUNT -= timing.out_dx16;
 	write_port_word(port, cpustate->regs.w[AX]);
 }
@@ -2643,6 +2710,9 @@ static void PREFIX86(_outdxax)(i8086_state *cpustate)    /* Opcode 0xef */
 /* I think thats not a V20 instruction...*/
 static void PREFIX86(_lock)(i8086_state *cpustate)    /* Opcode 0xf0 */
 {
+#ifdef I80286
+	if(PM && (CPL>IOPL)) throw TRAP(GENERAL_PROTECTION_FAULT,0);
+#endif
 	ICOUNT -= timing.nop;
 	PREFIX(_instruction)[FETCHOP](cpustate);  /* un-interruptible */
 }
@@ -2651,9 +2721,7 @@ static void PREFIX86(_lock)(i8086_state *cpustate)    /* Opcode 0xf0 */
 static void PREFIX(_pop_ss)(i8086_state *cpustate)    /* Opcode 0x17 */
 {
 #ifdef I80286
-	UINT16 tmp;
-	POP(tmp);
-	i80286_data_descriptor(cpustate, SS, tmp);
+	i80286_pop_seg(cpustate, SS);
 #else
 	POP(cpustate->sregs[SS]);
 	cpustate->base[SS] = SegBase(SS);
@@ -2672,7 +2740,7 @@ static void PREFIX(_es)(i8086_state *cpustate)    /* Opcode 0x26 */
 
 static void PREFIX(_cs)(i8086_state *cpustate)    /* Opcode 0x2e */
 {
-    cpustate->seg_prefix = TRUE;
+	cpustate->seg_prefix = TRUE;
 	cpustate->prefix_seg = CS;
 	ICOUNT -= timing.override;
 	PREFIX(_instruction)[FETCHOP](cpustate);
@@ -2697,50 +2765,60 @@ static void PREFIX(_ds)(i8086_state *cpustate)    /* Opcode 0x3e */
 static void PREFIX(_mov_sregw)(i8086_state *cpustate)    /* Opcode 0x8e */
 {
 	unsigned ModRM = FETCH;
-    WORD src = GetRMWord(ModRM);
+	WORD src = GetRMWord(ModRM);
 
 	ICOUNT -= (ModRM >= 0xc0) ? timing.mov_sr : timing.mov_sm;
 #ifdef I80286
-    switch (ModRM & 0x38)
-    {
-    case 0x00:  /* mov es,ew */
+	switch (ModRM & 0x38)
+	{
+	case 0x00:  /* mov es,ew */
 		i80286_data_descriptor(cpustate,ES,src);
 		break;
-    case 0x18:  /* mov ds,ew */
+	case 0x18:  /* mov ds,ew */
 		i80286_data_descriptor(cpustate,DS,src);
 		break;
-    case 0x10:  /* mov ss,ew */
+	case 0x10:  /* mov ss,ew */
 		i80286_data_descriptor(cpustate,SS,src);
+		cpustate->seg_prefix = FALSE;
 		PREFIX(_instruction)[FETCHOP](cpustate);
 		break;
-    case 0x08:  /* mov cs,ew */
+	case 0x08:  /* mov cs,ew */
+		PREFIX(_invalid)(cpustate);
 		break;  /* doesn't do a jump far */
-    }
+	}
 #else
-    switch (ModRM & 0x38)
-    {
-    case 0x00:  /* mov es,ew */
+	switch (ModRM & 0x38)
+	{
+	case 0x00:  /* mov es,ew */
 		cpustate->sregs[ES] = src;
 		cpustate->base[ES] = SegBase(ES);
 		break;
-    case 0x18:  /* mov ds,ew */
+	case 0x18:  /* mov ds,ew */
 		cpustate->sregs[DS] = src;
 		cpustate->base[DS] = SegBase(DS);
 		break;
-    case 0x10:  /* mov ss,ew */
+	case 0x10:  /* mov ss,ew */
 		cpustate->sregs[SS] = src;
 		cpustate->base[SS] = SegBase(SS); /* no interrupt allowed before next instr */
+		cpustate->seg_prefix = FALSE;
 		PREFIX(_instruction)[FETCHOP](cpustate);
 		break;
-    case 0x08:  /* mov cs,ew */
-		break;  /* doesn't do a jump far */
-    }
+	case 0x08:  /* mov cs,ew */
+#ifndef I80186
+		int ip = cpustate->pc - cpustate->base[CS];
+		cpustate->sregs[CS] = src;
+		cpustate->base[CS] = SegBase(CS);
+		cpustate->pc = (ip + cpustate->base[CS]) & AMASK;
+		CHANGE_PC(cpustate->pc);
+#endif
+		break;
+	}
 #endif
 }
 
 static void PREFIX(_repne)(i8086_state *cpustate)    /* Opcode 0xf2 */
 {
-	 PREFIX(rep)(cpustate, 0);
+		PREFIX(rep)(cpustate, 0);
 }
 
 static void PREFIX(_repe)(i8086_state *cpustate)    /* Opcode 0xf3 */
@@ -2750,18 +2828,28 @@ static void PREFIX(_repe)(i8086_state *cpustate)    /* Opcode 0xf3 */
 
 static void PREFIX(_sti)(i8086_state *cpustate)    /* Opcode 0xfb */
 {
+#ifdef I80286
+	if(PM && (CPL>IOPL)) throw TRAP(GENERAL_PROTECTION_FAULT,0);
+#endif
 	ICOUNT -= timing.flag_ops;
 	SetIF(1);
 	PREFIX(_instruction)[FETCHOP](cpustate); /* no interrupt before next instruction */
 
 	/* if an interrupt is pending, signal an interrupt */
 	if (cpustate->irq_state)
+#ifdef I80286
+		i80286_interrupt_descriptor(cpustate, (*cpustate->irq_callback)(cpustate->device, 0), 2, -1);
+#else
 		PREFIX86(_interrupt)(cpustate, (UINT32)-1);
+#endif
 }
 
 #ifndef I80186
 static void PREFIX86(_hlt)(i8086_state *cpustate)    /* Opcode 0xf4 */
 {
+#ifdef I80286
+	if(PM && (CPL!=0)) throw TRAP(GENERAL_PROTECTION_FAULT,0);
+#endif
 	cpustate->halted=1;
 	ICOUNT = 0;
 }
@@ -2776,14 +2864,14 @@ static void PREFIX86(_f6pre)(i8086_state *cpustate)
 {
 	/* Opcode 0xf6 */
 	unsigned ModRM = FETCH;
-    unsigned tmp = (unsigned)GetRMByte(ModRM);
-    unsigned tmp2;
+	unsigned tmp = (unsigned)GetRMByte(ModRM);
+	unsigned tmp2;
 
 
-    switch (ModRM & 0x38)
-    {
-    case 0x00:  /* TEST Eb, data8 */
-    case 0x08:  /* ??? */
+	switch (ModRM & 0x38)
+	{
+	case 0x00:  /* TEST Eb, data8 */
+	case 0x08:  /* ??? */
 		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri8 : timing.alu_mi8_ro;
 		tmp &= FETCH;
 
@@ -2791,18 +2879,18 @@ static void PREFIX86(_f6pre)(i8086_state *cpustate)
 		SetSZPF_Byte(tmp);
 		break;
 
-    case 0x10:  /* NOT Eb */
+	case 0x10:  /* NOT Eb */
 		ICOUNT -= (ModRM >= 0xc0) ? timing.negnot_r8 : timing.negnot_m8;
 		PutbackRMByte(ModRM,~tmp);
 		break;
 
-	 case 0x18:  /* NEG Eb */
+		case 0x18:  /* NEG Eb */
 		ICOUNT -= (ModRM >= 0xc0) ? timing.negnot_r8 : timing.negnot_m8;
-        tmp2=0;
-        SUBB(tmp2,tmp);
-        PutbackRMByte(ModRM,tmp2);
+		tmp2=0;
+		SUBB(tmp2,tmp);
+		PutbackRMByte(ModRM,tmp2);
 		break;
-    case 0x20:  /* MUL AL, Eb */
+	case 0x20:  /* MUL AL, Eb */
 		ICOUNT -= (ModRM >= 0xc0) ? timing.mul_r8 : timing.mul_m8;
 		{
 			UINT16 result;
@@ -2818,7 +2906,7 @@ static void PREFIX86(_f6pre)(i8086_state *cpustate)
 			cpustate->CarryVal = cpustate->OverVal = (cpustate->regs.b[AH] != 0);
 		}
 		break;
-	 case 0x28:  /* IMUL AL, Eb */
+		case 0x28:  /* IMUL AL, Eb */
 		ICOUNT -= (ModRM >= 0xc0) ? timing.imul_r8 : timing.imul_m8;
 		{
 			INT16 result;
@@ -2836,7 +2924,7 @@ static void PREFIX86(_f6pre)(i8086_state *cpustate)
 			cpustate->CarryVal = cpustate->OverVal = (result >> 7 != 0) && (result >> 7 != -1);
 		}
 		break;
-    case 0x30:  /* DIV AL, Ew */
+	case 0x30:  /* DIV AL, Ew */
 		ICOUNT -= (ModRM >= 0xc0) ? timing.div_r8 : timing.div_m8;
 		{
 			UINT16 result;
@@ -2863,7 +2951,7 @@ static void PREFIX86(_f6pre)(i8086_state *cpustate)
 			}
 		}
 		break;
-    case 0x38:  /* IDIV AL, Ew */
+	case 0x38:  /* IDIV AL, Ew */
 		ICOUNT -= (ModRM >= 0xc0) ? timing.idiv_r8 : timing.idiv_m8;
 		{
 
@@ -2893,7 +2981,7 @@ static void PREFIX86(_f6pre)(i8086_state *cpustate)
 			}
 		}
 		break;
-    }
+	}
 }
 
 
@@ -2901,14 +2989,14 @@ static void PREFIX86(_f7pre)(i8086_state *cpustate)
 {
 	/* Opcode 0xf7 */
 	unsigned ModRM = FETCH;
-	 unsigned tmp = GetRMWord(ModRM);
-    unsigned tmp2;
+		unsigned tmp = GetRMWord(ModRM);
+	unsigned tmp2;
 
 
-    switch (ModRM & 0x38)
-    {
-    case 0x00:  /* TEST Ew, data16 */
-    case 0x08:  /* ??? */
+	switch (ModRM & 0x38)
+	{
+	case 0x00:  /* TEST Ew, data16 */
+	case 0x08:  /* ??? */
 		ICOUNT -= (ModRM >= 0xc0) ? timing.alu_ri16 : timing.alu_mi16_ro;
 		tmp2 = FETCH;
 		tmp2 += FETCH << 8;
@@ -2919,19 +3007,19 @@ static void PREFIX86(_f7pre)(i8086_state *cpustate)
 		SetSZPF_Word(tmp);
 		break;
 
-    case 0x10:  /* NOT Ew */
+	case 0x10:  /* NOT Ew */
 		ICOUNT -= (ModRM >= 0xc0) ? timing.negnot_r16 : timing.negnot_m16;
 		tmp = ~tmp;
 		PutbackRMWord(ModRM,tmp);
 		break;
 
-    case 0x18:  /* NEG Ew */
+	case 0x18:  /* NEG Ew */
 		ICOUNT -= (ModRM >= 0xc0) ? timing.negnot_r16 : timing.negnot_m16;
-        tmp2 = 0;
-        SUBW(tmp2,tmp);
-        PutbackRMWord(ModRM,tmp2);
+		tmp2 = 0;
+		SUBW(tmp2,tmp);
+		PutbackRMWord(ModRM,tmp2);
 		break;
-    case 0x20:  /* MUL AX, Ew */
+	case 0x20:  /* MUL AX, Ew */
 		ICOUNT -= (ModRM >= 0xc0) ? timing.mul_r16 : timing.mul_m16;
 		{
 			UINT32 result;
@@ -2942,7 +3030,7 @@ static void PREFIX86(_f7pre)(i8086_state *cpustate)
 
 			result = (UINT32)tmp2*tmp;
 			cpustate->regs.w[AX]=(WORD)result;
-            result >>= 16;
+			result >>= 16;
 			cpustate->regs.w[DX]=result;
 
 			SetZF(cpustate->regs.w[AX] | cpustate->regs.w[DX]);
@@ -2950,7 +3038,7 @@ static void PREFIX86(_f7pre)(i8086_state *cpustate)
 		}
 		break;
 
-    case 0x28:  /* IMUL AX, Ew */
+	case 0x28:  /* IMUL AX, Ew */
 		ICOUNT -= (ModRM >= 0xc0) ? timing.imul_r16 : timing.imul_m16;
 		{
 			INT32 result;
@@ -2970,7 +3058,7 @@ static void PREFIX86(_f7pre)(i8086_state *cpustate)
 			SetZF(cpustate->regs.w[AX] | cpustate->regs.w[DX]);
 		}
 		break;
-	 case 0x30:  /* DIV AX, Ew */
+		case 0x30:  /* DIV AX, Ew */
 		ICOUNT -= (ModRM >= 0xc0) ? timing.div_r16 : timing.div_m16;
 		{
 			UINT32 result;
@@ -2999,7 +3087,7 @@ static void PREFIX86(_f7pre)(i8086_state *cpustate)
 			}
 		}
 		break;
-    case 0x38:  /* IDIV AX, Ew */
+	case 0x38:  /* IDIV AX, Ew */
 		ICOUNT -= (ModRM >= 0xc0) ? timing.idiv_r16 : timing.idiv_m16;
 		{
 			INT32 result;
@@ -3027,7 +3115,7 @@ static void PREFIX86(_f7pre)(i8086_state *cpustate)
 			}
 		}
 		break;
-    }
+	}
 }
 
 
@@ -3045,6 +3133,9 @@ static void PREFIX86(_stc)(i8086_state *cpustate)    /* Opcode 0xf9 */
 
 static void PREFIX86(_cli)(i8086_state *cpustate)    /* Opcode 0xfa */
 {
+#ifdef I80286
+	if(PM && (CPL>IOPL)) throw TRAP(GENERAL_PROTECTION_FAULT,0);
+#endif
 	ICOUNT -= timing.flag_ops;
 	SetIF(0);
 }
@@ -3065,37 +3156,37 @@ static void PREFIX86(_fepre)(i8086_state *cpustate)    /* Opcode 0xfe */
 {
 	unsigned ModRM = FETCH;
 	unsigned tmp = GetRMByte(ModRM);
-    unsigned tmp1;
+	unsigned tmp1;
 
 	ICOUNT -= (ModRM >= 0xc0) ? timing.incdec_r8 : timing.incdec_m8;
-    if ((ModRM & 0x38) == 0)  /* INC eb */
+	if ((ModRM & 0x38) == 0)  /* INC eb */
 	{
 		tmp1 = tmp+1;
 		SetOFB_Add(tmp1,tmp,1);
-    }
+	}
 	else  /* DEC eb */
-    {
+	{
 		tmp1 = tmp-1;
 		SetOFB_Sub(tmp1,1,tmp);
-    }
+	}
 
-    SetAF(tmp1,tmp,1);
-    SetSZPF_Byte(tmp1);
+	SetAF(tmp1,tmp,1);
+	SetSZPF_Byte(tmp1);
 
-    PutbackRMByte(ModRM,(BYTE)tmp1);
+	PutbackRMByte(ModRM,(BYTE)tmp1);
 }
 
 
 static void PREFIX86(_ffpre)(i8086_state *cpustate)    /* Opcode 0xff */
 {
 	unsigned ModRM = FETCHOP;
-    unsigned tmp;
-    unsigned tmp1;
-    WORD ip;
+	unsigned tmp;
+	unsigned tmp1;
+	WORD ip;
 
-    switch(ModRM & 0x38)
-    {
-    case 0x00:  /* INC ew */
+	switch(ModRM & 0x38)
+	{
+	case 0x00:  /* INC ew */
 		ICOUNT -= (ModRM >= 0xc0) ? timing.incdec_r16 : timing.incdec_m16;
 		tmp = GetRMWord(ModRM);
 		tmp1 = tmp+1;
@@ -3107,7 +3198,7 @@ static void PREFIX86(_ffpre)(i8086_state *cpustate)    /* Opcode 0xff */
 		PutbackRMWord(ModRM,(WORD)tmp1);
 		break;
 
-    case 0x08:  /* DEC ew */
+	case 0x08:  /* DEC ew */
 		ICOUNT -= (ModRM >= 0xc0) ? timing.incdec_r16 : timing.incdec_m16;
 		tmp = GetRMWord(ModRM);
 		tmp1 = tmp-1;
@@ -3119,7 +3210,7 @@ static void PREFIX86(_ffpre)(i8086_state *cpustate)    /* Opcode 0xff */
 		PutbackRMWord(ModRM,(WORD)tmp1);
 		break;
 
-    case 0x10:  /* CALL ew */
+	case 0x10:  /* CALL ew */
 		ICOUNT -= (ModRM >= 0xc0) ? timing.call_r16 : timing.call_m16;
 		tmp = GetRMWord(ModRM);
 		ip = cpustate->pc - cpustate->base[CS];
@@ -3130,34 +3221,34 @@ static void PREFIX86(_ffpre)(i8086_state *cpustate)    /* Opcode 0xff */
 
 	case 0x18:  /* CALL FAR ea */
 		ICOUNT -= timing.call_m32;
-		tmp = cpustate->sregs[CS];	/* HJB 12/13/98 need to skip displacements of cpustate->ea */
+		tmp = cpustate->sregs[CS];  /* HJB 12/13/98 need to skip displacements of cpustate->ea */
 		tmp1 = GetRMWord(ModRM);
 		ip = cpustate->pc - cpustate->base[CS];
-		PUSH(tmp);
-		PUSH(ip);
 #ifdef I80286
-		i80286_code_descriptor(cpustate, GetnextRMWord, tmp1);
+		i80286_code_descriptor(cpustate, GetnextRMWord, tmp1, 2);
 #else
 		cpustate->sregs[CS] = GetnextRMWord;
 		cpustate->base[CS] = SegBase(CS);
 		cpustate->pc = (cpustate->base[CS] + tmp1) & AMASK;
 #endif
+		PUSH(tmp);
+		PUSH(ip);
 		CHANGE_PC(cpustate->pc);
 		break;
 
-    case 0x20:  /* JMP ea */
+	case 0x20:  /* JMP ea */
 		ICOUNT -= (ModRM >= 0xc0) ? timing.jmp_r16 : timing.jmp_m16;
 		ip = GetRMWord(ModRM);
 		cpustate->pc = (cpustate->base[CS] + ip) & AMASK;
 		CHANGE_PC(cpustate->pc);
 		break;
 
-    case 0x28:  /* JMP FAR ea */
+	case 0x28:  /* JMP FAR ea */
 		ICOUNT -= timing.jmp_m32;
 
 #ifdef I80286
 		tmp = GetRMWord(ModRM);
-		i80286_code_descriptor(cpustate, GetnextRMWord, tmp);
+		i80286_code_descriptor(cpustate, GetnextRMWord, tmp, 1);
 #else
 		cpustate->pc = GetRMWord(ModRM);
 		cpustate->sregs[CS] = GetnextRMWord;
@@ -3167,11 +3258,14 @@ static void PREFIX86(_ffpre)(i8086_state *cpustate)    /* Opcode 0xff */
 		CHANGE_PC(cpustate->pc);
 		break;
 
-    case 0x30:  /* PUSH ea */
+	case 0x30:  /* PUSH ea */
 		ICOUNT -= (ModRM >= 0xc0) ? timing.push_r16 : timing.push_m16;
 		tmp = GetRMWord(ModRM);
 		PUSH(tmp);
 		break;
+	default:
+		tmp = GetRMWord(ModRM);  // 286 doesn't matter but 8086?
+		return PREFIX(_invalid)(cpustate);
 	}
 }
 
@@ -3179,7 +3273,7 @@ static void PREFIX86(_ffpre)(i8086_state *cpustate)    /* Opcode 0xff */
 static void PREFIX86(_invalid)(i8086_state *cpustate)
 {
 #ifdef I80286
-	i80286_trap2(cpustate,ILLEGAL_INSTRUCTION);
+	throw TRAP(ILLEGAL_INSTRUCTION,-1);
 #else
 	/* i8086/i8088 ignore an invalid opcode. */
 	/* i80186/i80188 probably also ignore an invalid opcode. */
@@ -3187,4 +3281,14 @@ static void PREFIX86(_invalid)(i8086_state *cpustate)
 	ICOUNT -= 10;
 #endif
 }
+
+#ifndef I80286
+static void PREFIX86(_invalid_2b)(i8086_state *cpustate)
+{
+	unsigned ModRM = FETCH;
+	GetRMByte(ModRM);
+	logerror("illegal 2 byte instruction %.2x at %.5x\n",PEEKBYTE(cpustate->pc-2), cpustate->pc-2);
+	ICOUNT -= 10;
+}
+#endif
 #endif

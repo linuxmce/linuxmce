@@ -44,6 +44,7 @@
 #include <windows.h>
 #include <windowsx.h>
 #include <tchar.h>
+#include <commdlg.h>
 #ifdef _MSC_VER
 #include <zmouse.h>
 #endif
@@ -51,6 +52,7 @@
 // MAME headers
 #include "emu.h"
 #include "uiinput.h"
+#include "imagedev/cassette.h"
 #include "debugger.h"
 #include "debug/debugvw.h"
 #include "debug/dvdisasm.h"
@@ -76,35 +78,35 @@
 //  PARAMETERS
 //============================================================
 
-#define MAX_VIEWS				4
-#define EDGE_WIDTH				3
-#define MAX_EDIT_STRING			256
-#define HISTORY_LENGTH			20
-#define MAX_OTHER_WND			4
+#define MAX_VIEWS               4
+#define EDGE_WIDTH              3
+#define MAX_EDIT_STRING         256
+#define HISTORY_LENGTH          20
+#define MAX_OTHER_WND           4
 
 // debugger window styles
-#define DEBUG_WINDOW_STYLE		(WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN) & (~WS_MINIMIZEBOX & ~WS_MAXIMIZEBOX)
-#define DEBUG_WINDOW_STYLE_EX	0
+#define DEBUG_WINDOW_STYLE      (WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN) & (~WS_MINIMIZEBOX & ~WS_MAXIMIZEBOX)
+#define DEBUG_WINDOW_STYLE_EX   0
 
 // debugger view styles
-#define DEBUG_VIEW_STYLE		WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN
-#define DEBUG_VIEW_STYLE_EX		0
+#define DEBUG_VIEW_STYLE        WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN
+#define DEBUG_VIEW_STYLE_EX     0
 
 // edit box styles
-#define EDIT_BOX_STYLE			WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL
-#define EDIT_BOX_STYLE_EX		0
+#define EDIT_BOX_STYLE          WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL
+#define EDIT_BOX_STYLE_EX       0
 
 // combo box styles
-#define COMBO_BOX_STYLE			WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_VSCROLL
-#define COMBO_BOX_STYLE_EX		0
+#define COMBO_BOX_STYLE         WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_VSCROLL
+#define COMBO_BOX_STYLE_EX      0
 
 // horizontal scroll bar styles
-#define HSCROLL_STYLE			WS_CHILD | WS_VISIBLE | SBS_HORZ
-#define HSCROLL_STYLE_EX		0
+#define HSCROLL_STYLE           WS_CHILD | WS_VISIBLE | SBS_HORZ
+#define HSCROLL_STYLE_EX        0
 
 // vertical scroll bar styles
-#define VSCROLL_STYLE			WS_CHILD | WS_VISIBLE | SBS_VERT
-#define VSCROLL_STYLE_EX		0
+#define VSCROLL_STYLE           WS_CHILD | WS_VISIBLE | SBS_VERT
+#define VSCROLL_STYLE_EX        0
 
 
 enum
@@ -138,7 +140,9 @@ enum
 	ID_SHOW_ENCRYPTED,
 	ID_SHOW_COMMENTS,
 	ID_RUN_TO_CURSOR,
-	ID_TOGGLE_BREAKPOINT
+	ID_TOGGLE_BREAKPOINT,
+
+	ID_DEVICE_OPTIONS  // keep this always at the end
 };
 
 
@@ -147,51 +151,56 @@ enum
 //  TYPES
 //============================================================
 
-typedef struct _debugview_info debugview_info;
-typedef struct _debugwin_info debugwin_info;
+struct debugview_info;
+class debugwin_info;
 
 
-struct _debugview_info
+struct debugview_info
 {
-	debugwin_info *			owner;
-	debug_view *			view;
-	HWND					wnd;
-	HWND					hscroll;
-	HWND					vscroll;
+	debugwin_info *         owner;
+	debug_view *            view;
+	HWND                    wnd;
+	HWND                    hscroll;
+	HWND                    vscroll;
 };
 
 
-struct _debugwin_info
+class debugwin_info
 {
-	running_machine &machine() const { assert(m_machine != NULL); return *m_machine; }
+public:
+	debugwin_info(running_machine &machine)
+		: m_machine(machine) { }
 
-	debugwin_info *			next;
-	HWND					wnd;
-	HWND					focuswnd;
-	WNDPROC					handler;
+	running_machine &machine() const { return m_machine; }
 
-	UINT32					minwidth, maxwidth;
-	UINT32					minheight, maxheight;
-	void					(*recompute_children)(debugwin_info *);
-	void					(*update_menu)(debugwin_info *);
+	debugwin_info *         next;
+	HWND                    wnd;
+	HWND                    focuswnd;
+	WNDPROC                 handler;
 
-	int						(*handle_command)(debugwin_info *, WPARAM, LPARAM);
-	int						(*handle_key)(debugwin_info *, WPARAM, LPARAM);
-	UINT16					ignore_char_lparam;
+	UINT32                  minwidth, maxwidth;
+	UINT32                  minheight, maxheight;
+	void                    (*recompute_children)(debugwin_info *);
+	void                    (*update_menu)(debugwin_info *);
 
-	debugview_info			view[MAX_VIEWS];
+	int                     (*handle_command)(debugwin_info *, WPARAM, LPARAM);
+	int                     (*handle_key)(debugwin_info *, WPARAM, LPARAM);
+	UINT16                  ignore_char_lparam;
 
-	HWND					editwnd;
-	char					edit_defstr[256];
-	void					(*process_string)(debugwin_info *, const char *);
-	WNDPROC 				original_editproc;
-	TCHAR					history[HISTORY_LENGTH][MAX_EDIT_STRING];
-	int						history_count;
-	int						last_history;
+	debugview_info          view[MAX_VIEWS];
 
-	HWND					otherwnd[MAX_OTHER_WND];
+	HWND                    editwnd;
+	char                    edit_defstr[256];
+	void                    (*process_string)(debugwin_info *, const char *);
+	WNDPROC                 original_editproc;
+	TCHAR                   history[HISTORY_LENGTH][MAX_EDIT_STRING];
+	int                     history_count;
+	int                     last_history;
 
-	running_machine *		m_machine;
+	HWND                    otherwnd[MAX_OTHER_WND];
+
+private:
+	running_machine &       m_machine;
 };
 
 
@@ -261,7 +270,7 @@ static void smart_set_window_bounds(HWND wnd, HWND parent, RECT *bounds);
 static void smart_show_window(HWND wnd, BOOL show);
 static void smart_show_all(BOOL show);
 
-
+static void image_update_menu(debugwin_info *info);
 
 //============================================================
 //  wait_for_debugger
@@ -326,26 +335,27 @@ void windows_osd_interface::wait_for_debugger(device_t &device, bool firststop)
 
 static int debugwin_seq_pressed(running_machine &machine)
 {
-	const input_seq *seq = input_type_seq(machine, IPT_UI_DEBUG_BREAK, 0, SEQ_TYPE_STANDARD);
+	const input_seq &seq = machine.ioport().type_seq(IPT_UI_DEBUG_BREAK);
 	int result = FALSE;
 	int invert = FALSE;
 	int first = TRUE;
 	int codenum;
 
 	// iterate over all of the codes
-	for (codenum = 0; codenum < ARRAY_LENGTH(seq->code); codenum++)
+	int length = seq.length();
+	for (codenum = 0; codenum < length; codenum++)
 	{
-		input_code code = seq->code[codenum];
+		input_code code = seq[codenum];
 
 		// handle NOT
-		if (code == SEQCODE_NOT)
+		if (code == input_seq::not_code)
 			invert = TRUE;
 
 		// handle OR and END
-		else if (code == SEQCODE_OR || code == SEQCODE_END)
+		else if (code == input_seq::or_code || code == input_seq::end_code)
 		{
 			// if we have a positive result from the previous set, we're done
-			if (result || code == SEQCODE_END)
+			if (result || code == input_seq::end_code)
 				break;
 
 			// otherwise, reset our state
@@ -393,28 +403,28 @@ void debugwin_init_windows(running_machine &machine)
 		WNDCLASS wc = { 0 };
 
 		// initialize the description of the window class
-		wc.lpszClassName	= TEXT("MAMEDebugWindow");
-		wc.hInstance		= GetModuleHandle(NULL);
-		wc.lpfnWndProc		= debugwin_window_proc;
-		wc.hCursor			= LoadCursor(NULL, IDC_ARROW);
-		wc.hIcon			= LoadIcon(NULL, IDI_APPLICATION);
-		wc.lpszMenuName		= NULL;
-		wc.hbrBackground	= NULL;
-		wc.style			= 0;
-		wc.cbClsExtra		= 0;
-		wc.cbWndExtra		= 0;
+		wc.lpszClassName    = TEXT("MAMEDebugWindow");
+		wc.hInstance        = GetModuleHandle(NULL);
+		wc.lpfnWndProc      = debugwin_window_proc;
+		wc.hCursor          = LoadCursor(NULL, IDC_ARROW);
+		wc.hIcon            = LoadIcon(wc.hInstance, MAKEINTRESOURCE(2));
+		wc.lpszMenuName     = NULL;
+		wc.hbrBackground    = NULL;
+		wc.style            = 0;
+		wc.cbClsExtra       = 0;
+		wc.cbWndExtra       = 0;
 
 		// register the class; fail if we can't
 		if (!RegisterClass(&wc))
-			fatalerror("Unable to register debug window class");
+			fatalerror("Unable to register debug window class\n");
 
 		// initialize the description of the view class
-		wc.lpszClassName	= TEXT("MAMEDebugView");
-		wc.lpfnWndProc		= debugwin_view_proc;
+		wc.lpszClassName    = TEXT("MAMEDebugView");
+		wc.lpfnWndProc      = debugwin_view_proc;
 
 		// register the class; fail if we can't
 		if (!RegisterClass(&wc))
-			fatalerror("Unable to register debug view class");
+			fatalerror("Unable to register debug view class\n");
 
 		class_registered = TRUE;
 	}
@@ -436,17 +446,12 @@ void debugwin_init_windows(running_machine &machine)
 			// create a standard font
 			t_face = tstring_from_utf8(options.debugger_font());
 			debug_font = CreateFont(-MulDiv(size, GetDeviceCaps(temp_dc, LOGPIXELSY), 72), 0, 0, 0, FW_MEDIUM, FALSE, FALSE, FALSE,
-						ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_DONTCARE, t_face);
+						ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FIXED_PITCH, t_face);
 			osd_free(t_face);
+			t_face = NULL;
 
-			// fall back to Lucida Console 8
 			if (debug_font == NULL)
-			{
-				debug_font = CreateFont(-MulDiv(8, GetDeviceCaps(temp_dc, LOGPIXELSY), 72), 0, 0, 0, FW_MEDIUM, FALSE, FALSE, FALSE,
-							ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_DONTCARE, TEXT("Lucida Console"));
-				if (debug_font == NULL)
-					fatalerror("Unable to create debug font");
-			}
+				fatalerror("Unable to create debugger font\n");
 
 			// get the metrics
 			old_font = SelectObject(temp_dc, debug_font);
@@ -542,7 +547,7 @@ static debugwin_info *debugwin_window_create(running_machine &machine, LPCSTR ti
 	RECT work_bounds;
 
 	// allocate memory
-	info = global_alloc_clear(debugwin_info);
+	info = global_alloc_clear(debugwin_info(machine));
 
 	// create the window
 	info->handler = handler;
@@ -562,8 +567,6 @@ static debugwin_info *debugwin_window_create(running_machine &machine, LPCSTR ti
 	info->handle_command = global_handle_command;
 	info->handle_key = global_handle_key;
 	strcpy(info->edit_defstr, "");
-
-	info->m_machine = &machine;
 
 	// hook us in
 	info->next = window_list;
@@ -2372,6 +2375,79 @@ static void disasm_update_caption(running_machine &machine, HWND wnd)
 }
 
 
+enum
+{
+	DEVOPTION_OPEN,
+	DEVOPTION_CREATE,
+	DEVOPTION_CLOSE,
+	DEVOPTION_CASSETTE_STOPPAUSE,
+	DEVOPTION_CASSETTE_PLAY,
+	DEVOPTION_CASSETTE_RECORD,
+	DEVOPTION_CASSETTE_REWIND,
+	DEVOPTION_CASSETTE_FASTFORWARD,
+	DEVOPTION_MAX
+};
+
+//============================================================
+//  memory_update_menu
+//============================================================
+
+static void image_update_menu(debugwin_info *info)
+{
+	UINT32 cnt = 0;
+	HMENU devicesmenu;
+
+	DeleteMenu(GetMenu(info->wnd), 2, MF_BYPOSITION);
+
+	// create the image menu
+	devicesmenu = CreatePopupMenu();
+	image_interface_iterator iter(info->machine().root_device());
+	for (device_image_interface *img = iter.first(); img != NULL; img = iter.next())
+	{
+		astring temp;
+		UINT flags_for_exists;
+		UINT flags_for_writing;
+		HMENU devicesubmenu = CreatePopupMenu();
+
+		UINT_PTR new_item = ID_DEVICE_OPTIONS + (cnt * DEVOPTION_MAX);
+
+		flags_for_exists = MF_ENABLED | MF_STRING;
+
+		if (!img->exists())
+			flags_for_exists |= MF_GRAYED;
+
+		flags_for_writing = flags_for_exists;
+		if (img->is_readonly())
+			flags_for_writing |= MF_GRAYED;
+
+		AppendMenu(devicesubmenu, MF_STRING, new_item + DEVOPTION_OPEN, TEXT("Mount..."));
+
+		/*if (img->is_creatable())
+		    AppendMenu(devicesubmenu, MF_STRING, new_item + DEVOPTION_CREATE, TEXT("Create..."));
+		*/
+		AppendMenu(devicesubmenu, flags_for_exists, new_item + DEVOPTION_CLOSE, TEXT("Unmount"));
+
+		if (img->device().type() == CASSETTE)
+		{
+			cassette_state state;
+			state = (cassette_state)(img->exists() ? (dynamic_cast<cassette_image_device*>(&img->device())->get_state() & CASSETTE_MASK_UISTATE) : CASSETTE_STOPPED);
+			AppendMenu(devicesubmenu, MF_SEPARATOR, 0, NULL);
+			AppendMenu(devicesubmenu, flags_for_exists  | ((state == CASSETTE_STOPPED)  ? MF_CHECKED : 0), new_item + DEVOPTION_CASSETTE_STOPPAUSE, TEXT("Pause/Stop"));
+			AppendMenu(devicesubmenu, flags_for_exists  | ((state == CASSETTE_PLAY) ? MF_CHECKED : 0), new_item + DEVOPTION_CASSETTE_PLAY, TEXT("Play"));
+			AppendMenu(devicesubmenu, flags_for_writing | ((state == CASSETTE_RECORD)   ? MF_CHECKED : 0), new_item + DEVOPTION_CASSETTE_RECORD, TEXT("Record"));
+			AppendMenu(devicesubmenu, flags_for_exists, new_item + DEVOPTION_CASSETTE_REWIND, TEXT("Rewind"));
+			AppendMenu(devicesubmenu, flags_for_exists, new_item + DEVOPTION_CASSETTE_FASTFORWARD, TEXT("Fast Forward"));
+		}
+
+		temp.format("%s :%s", img->device().name(), img->exists() ? img->filename() : "[empty slot]");
+
+		AppendMenu(devicesmenu, MF_ENABLED | MF_POPUP, (UINT_PTR)devicesubmenu,  tstring_from_utf8(temp.cstr()));
+
+		cnt++;
+	}
+	AppendMenu(GetMenu(info->wnd), MF_ENABLED | MF_POPUP, (UINT_PTR)devicesmenu, TEXT("Images"));
+
+}
 
 //============================================================
 //  console_create_window
@@ -2408,6 +2484,15 @@ void console_create_window(running_machine &machine)
 	AppendMenu(optionsmenu, MF_ENABLED, ID_SHOW_ENCRYPTED, TEXT("Encrypted opcodes\tCtrl+E"));
 	AppendMenu(optionsmenu, MF_ENABLED, ID_SHOW_COMMENTS, TEXT("Comments\tCtrl+N"));
 	AppendMenu(GetMenu(info->wnd), MF_ENABLED | MF_POPUP, (UINT_PTR)optionsmenu, TEXT("Options"));
+
+	// Add image menu only if image devices exist
+	{
+		image_interface_iterator iter(machine.root_device());
+		if (iter.first() != NULL) {
+			info->update_menu = image_update_menu;
+			image_update_menu(info);
+		}
+	}
 
 	// set the handlers
 	info->handle_command = disasm_handle_command;
@@ -2512,15 +2597,15 @@ cleanup:
 static void console_recompute_children(debugwin_info *info)
 {
 	RECT parent, regrect, disrect, conrect, editrect;
-	UINT32 regchars, dischars, conchars;
+	UINT32 regchars;//, dischars, conchars;
 
 	// get the parent's dimensions
 	GetClientRect(info->wnd, &parent);
 
 	// get the total width of all three children
-	dischars = info->view[0].view->total_size().x;
+	//dischars = info->view[0].view->total_size().x;
 	regchars = main_console_regwidth;
-	conchars = info->view[2].view->total_size().x;
+	//conchars = info->view[2].view->total_size().x;
 
 	// registers always get their desired width, and span the entire height
 	regrect.top = parent.top + EDGE_WIDTH;
@@ -2643,7 +2728,94 @@ static HMENU create_standard_menubar(void)
 	return menubar;
 }
 
+//============================================================
+//  copy_extension_list
+//============================================================
 
+static int copy_extension_list(char *dest, size_t dest_len, const char *extensions)
+{
+	const char *s;
+	int pos = 0;
+
+	// our extension lists are comma delimited; Win32 expects to see lists
+	// delimited by semicolons
+	s = extensions;
+	while(*s)
+	{
+		// append a semicolon if not at the beginning
+		if (s != extensions)
+			pos += snprintf(&dest[pos], dest_len - pos, ";");
+
+		// append ".*"
+		pos += snprintf(&dest[pos], dest_len - pos, "*.");
+
+		// append the file extension
+		while(*s && (*s != ','))
+		{
+			pos += snprintf(&dest[pos], dest_len - pos, "%c", *s);
+			s++;
+		}
+
+		// if we found a comma, advance
+		while(*s == ',')
+			s++;
+	}
+	return pos;
+}
+
+//============================================================
+//  add_filter_entry
+//============================================================
+
+static int add_filter_entry(char *dest, size_t dest_len, const char *description, const char *extensions)
+{
+	int pos = 0;
+
+	// add the description
+	pos += snprintf(&dest[pos], dest_len - pos, "%s (", description);
+
+	// add the extensions to the description
+	pos += copy_extension_list(&dest[pos], dest_len - pos, extensions);
+
+	// add the trailing rparen and '|' character
+	pos += snprintf(&dest[pos], dest_len - pos, ")|");
+
+	// now add the extension list itself
+	pos += copy_extension_list(&dest[pos], dest_len - pos, extensions);
+
+	// append a '|'
+	pos += snprintf(&dest[pos], dest_len - pos, "|");
+
+	return pos;
+}
+//============================================================
+//  build_generic_filter
+//============================================================
+
+static void build_generic_filter(device_image_interface *img, int is_save, char *filter, size_t filter_len)
+{
+	char *s;
+
+	const char *file_extension;
+
+	/* copy the string */
+	file_extension = img->file_extensions();
+
+	// start writing the filter
+	s = filter;
+
+	// common image types
+	s += add_filter_entry(filter, filter_len, "Common image types", file_extension);
+
+	// all files
+	s += sprintf(s, "All files (*.*)|*.*|");
+
+	// compressed
+	if (!is_save)
+		s += sprintf(s, "Compressed Images (*.zip)|*.zip|");
+
+	*(s++) = '\0';
+}
 
 //============================================================
 //  global_handle_command
@@ -2711,7 +2883,85 @@ static int global_handle_command(debugwin_info *info, WPARAM wparam, LPARAM lpar
 				info->machine().schedule_exit();
 				return 1;
 		}
+		if (LOWORD(wparam) >= ID_DEVICE_OPTIONS) {
+			UINT32 devid = (LOWORD(wparam) - ID_DEVICE_OPTIONS) / DEVOPTION_MAX;
+			image_interface_iterator iter(info->machine().root_device());
+			device_image_interface *img = iter.byindex(devid);
+			if (img!=NULL) {
+				switch ((LOWORD(wparam) - ID_DEVICE_OPTIONS) % DEVOPTION_MAX)
+				{
+					case DEVOPTION_OPEN :
+											{
+												char filter[2048];
+												build_generic_filter(img, FALSE, filter, ARRAY_LENGTH(filter));
 
+												TCHAR selectedFilename[MAX_PATH];
+												selectedFilename[0] = '\0';
+												LPTSTR buffer;
+												LPTSTR t_filter = NULL;
+
+												buffer = tstring_from_utf8(filter);
+
+												// convert a pipe-char delimited string into a NUL delimited string
+												t_filter = (LPTSTR) alloca((_tcslen(buffer) + 2) * sizeof(*t_filter));
+												int i = 0;
+												for (i = 0; buffer[i] != '\0'; i++)
+													t_filter[i] = (buffer[i] != '|') ? buffer[i] : '\0';
+												t_filter[i++] = '\0';
+												t_filter[i++] = '\0';
+												osd_free(buffer);
+
+
+												OPENFILENAME  ofn;
+												memset(&ofn,0,sizeof(ofn));
+												ofn.lStructSize = sizeof(ofn);
+												ofn.hwndOwner = NULL;
+												ofn.lpstrFile = selectedFilename;
+												ofn.lpstrFile[0] = '\0';
+												ofn.nMaxFile = MAX_PATH;
+												ofn.lpstrFilter = t_filter;
+												ofn.nFilterIndex = 1;
+												ofn.lpstrFileTitle = NULL;
+												ofn.nMaxFileTitle = 0;
+												ofn.lpstrInitialDir = NULL;
+												ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+												if (GetOpenFileName(&ofn)) {
+													img->load(utf8_from_tstring(selectedFilename));
+												}
+											}
+											return 1;
+/*                  case DEVOPTION_CREATE:
+                                            return 1;*/
+					case DEVOPTION_CLOSE:
+											img->unload();
+											return 1;
+					default:
+						if (img->device().type() == CASSETTE) {
+							cassette_image_device* cassette = dynamic_cast<cassette_image_device*>(&img->device());
+							switch ((LOWORD(wparam) - ID_DEVICE_OPTIONS) % DEVOPTION_MAX)
+							{
+
+								case DEVOPTION_CASSETTE_STOPPAUSE:
+														cassette->change_state(CASSETTE_STOPPED, CASSETTE_MASK_UISTATE);
+														return 1;
+								case DEVOPTION_CASSETTE_PLAY:
+														cassette->change_state(CASSETTE_PLAY, CASSETTE_MASK_UISTATE);
+														return 1;
+								case DEVOPTION_CASSETTE_RECORD:
+														cassette->change_state(CASSETTE_RECORD, CASSETTE_MASK_UISTATE);
+														return 1;
+								case DEVOPTION_CASSETTE_REWIND:
+														cassette->seek(-60.0, SEEK_CUR);
+														return 1;
+								case DEVOPTION_CASSETTE_FASTFORWARD:
+														cassette->seek(+60.0, SEEK_CUR);
+														return 1;
+							}
+						}
+				}
+			}
+		}
 	return 0;
 }
 

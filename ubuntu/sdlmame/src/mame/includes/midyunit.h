@@ -5,38 +5,46 @@
 **************************************************************************/
 
 #include "cpu/tms34010/tms34010.h"
+#include "audio/williams.h"
 #include "machine/nvram.h"
 
 /* protection data types */
 struct protection_data
 {
-	UINT16	reset_sequence[3];
-	UINT16	data_sequence[100];
+	UINT16  reset_sequence[3];
+	UINT16  data_sequence[100];
 };
 
 struct dma_state_t
 {
-	UINT32		offset;			/* source offset, in bits */
-	INT32		rowbytes;		/* source bytes to skip each row */
-	INT32		xpos;			/* x position, clipped */
-	INT32		ypos;			/* y position, clipped */
-	INT32		width;			/* horizontal pixel count */
-	INT32		height;			/* vertical pixel count */
-	UINT16		palette;		/* palette base */
-	UINT16		color;			/* current foreground color with palette */
+	UINT32      offset;         /* source offset, in bits */
+	INT32       rowbytes;       /* source bytes to skip each row */
+	INT32       xpos;           /* x position, clipped */
+	INT32       ypos;           /* y position, clipped */
+	INT32       width;          /* horizontal pixel count */
+	INT32       height;         /* vertical pixel count */
+	UINT16      palette;        /* palette base */
+	UINT16      color;          /* current foreground color with palette */
 };
 
 
 class midyunit_state : public driver_device
 {
 public:
-	midyunit_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	midyunit_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+			m_narc_sound(*this, "narcsnd"),
+			m_cvsd_sound(*this, "cvsd"),
+			m_adpcm_sound(*this, "adpcm"),
+			m_gfx_rom(*this, "gfx_rom", 16) { }
+
+	optional_device<williams_narc_sound_device> m_narc_sound;
+	optional_device<williams_cvsd_sound_device> m_cvsd_sound;
+	optional_device<williams_adpcm_sound_device> m_adpcm_sound;
 
 	UINT16 *m_cmos_ram;
 	UINT32 m_cmos_page;
-	UINT8 *	m_gfx_rom;
-	size_t m_gfx_rom_size;
+	optional_shared_ptr<UINT8> m_gfx_rom;
 	UINT16 m_prot_result;
 	UINT16 m_prot_sequence[3];
 	UINT8 m_prot_index;
@@ -48,64 +56,61 @@ public:
 	UINT8 *m_cvsd_protection_base;
 	UINT8 m_autoerase_enable;
 	UINT32 m_palette_mask;
-	pen_t *	m_pen_map;
-	UINT16 *	m_local_videoram;
+	pen_t * m_pen_map;
+	UINT16 *    m_local_videoram;
 	UINT8 m_videobank_select;
 	UINT8 m_yawdim_dma;
 	UINT16 m_dma_register[16];
 	dma_state_t m_dma_state;
+	DECLARE_WRITE16_MEMBER(midyunit_cmos_w);
+	DECLARE_READ16_MEMBER(midyunit_cmos_r);
+	DECLARE_WRITE16_MEMBER(midyunit_cmos_enable_w);
+	DECLARE_READ16_MEMBER(midyunit_protection_r);
+	DECLARE_READ16_MEMBER(midyunit_input_r);
+	DECLARE_WRITE16_MEMBER(midyunit_sound_w);
+	DECLARE_READ16_MEMBER(term2_input_r);
+	DECLARE_WRITE16_MEMBER(term2_sound_w);
+	DECLARE_WRITE16_MEMBER(term2_hack_w);
+	DECLARE_WRITE16_MEMBER(term2la3_hack_w);
+	DECLARE_WRITE16_MEMBER(term2la2_hack_w);
+	DECLARE_WRITE16_MEMBER(term2la1_hack_w);
+	DECLARE_WRITE8_MEMBER(cvsd_protection_w);
+	DECLARE_READ16_MEMBER(mkturbo_prot_r);
+	DECLARE_READ16_MEMBER(midyunit_gfxrom_r);
+	DECLARE_WRITE16_MEMBER(midyunit_vram_w);
+	DECLARE_READ16_MEMBER(midyunit_vram_r);
+	DECLARE_WRITE16_MEMBER(midyunit_control_w);
+	DECLARE_WRITE16_MEMBER(midyunit_paletteram_w);
+	DECLARE_READ16_MEMBER(midyunit_dma_r);
+	DECLARE_WRITE16_MEMBER(midyunit_dma_w);
+	DECLARE_CUSTOM_INPUT_MEMBER(narc_talkback_strobe_r);
+	DECLARE_CUSTOM_INPUT_MEMBER(narc_talkback_data_r);
+	DECLARE_CUSTOM_INPUT_MEMBER(adpcm_irq_state_r);
+	DECLARE_WRITE8_MEMBER(yawdim_oki_bank_w);
+	DECLARE_DRIVER_INIT(smashtv);
+	DECLARE_DRIVER_INIT(strkforc);
+	DECLARE_DRIVER_INIT(narc);
+	DECLARE_DRIVER_INIT(term2);
+	DECLARE_DRIVER_INIT(term2la1);
+	DECLARE_DRIVER_INIT(term2la3);
+	DECLARE_DRIVER_INIT(mkyunit);
+	DECLARE_DRIVER_INIT(trog);
+	DECLARE_DRIVER_INIT(totcarn);
+	DECLARE_DRIVER_INIT(mkyawdim);
+	DECLARE_DRIVER_INIT(shimpact);
+	DECLARE_DRIVER_INIT(hiimpact);
+	DECLARE_DRIVER_INIT(mkyturbo);
+	DECLARE_DRIVER_INIT(term2la2);
+	DECLARE_MACHINE_RESET(midyunit);
+	DECLARE_VIDEO_START(midzunit);
+	DECLARE_VIDEO_START(midyunit_4bit);
+	DECLARE_VIDEO_START(midyunit_6bit);
+	DECLARE_VIDEO_START(mkyawdim);
+	DECLARE_VIDEO_START(common);
+	TIMER_CALLBACK_MEMBER(dma_callback);
+	TIMER_CALLBACK_MEMBER(autoerase_line);
 };
-
-
-/*----------- defined in machine/midyunit.c -----------*/
-
-WRITE16_HANDLER( midyunit_cmos_w );
-READ16_HANDLER( midyunit_cmos_r );
-
-WRITE16_HANDLER( midyunit_cmos_enable_w );
-READ16_HANDLER( midyunit_protection_r );
-
-READ16_HANDLER( midyunit_input_r );
-
-DRIVER_INIT( narc );
-DRIVER_INIT( trog );
-DRIVER_INIT( smashtv );
-DRIVER_INIT( hiimpact );
-DRIVER_INIT( shimpact );
-DRIVER_INIT( strkforc );
-DRIVER_INIT( mkyunit );
-DRIVER_INIT( mkyturbo );
-DRIVER_INIT( mkyawdim );
-DRIVER_INIT( term2 );
-DRIVER_INIT( term2la3 );
-DRIVER_INIT( term2la2 );
-DRIVER_INIT( term2la1 );
-DRIVER_INIT( totcarn );
-
-MACHINE_RESET( midyunit );
-
-WRITE16_HANDLER( midyunit_sound_w );
-
-
 /*----------- defined in video/midyunit.c -----------*/
-
-VIDEO_START( midyunit_4bit );
-VIDEO_START( midyunit_6bit );
-VIDEO_START( mkyawdim );
-VIDEO_START( midzunit );
-
-READ16_HANDLER( midyunit_gfxrom_r );
-
-WRITE16_HANDLER( midyunit_vram_w );
-READ16_HANDLER( midyunit_vram_r );
-
-void midyunit_to_shiftreg(address_space *space, UINT32 address, UINT16 *shiftreg);
-void midyunit_from_shiftreg(address_space *space, UINT32 address, UINT16 *shiftreg);
-
-WRITE16_HANDLER( midyunit_control_w );
-WRITE16_HANDLER( midyunit_paletteram_w );
-
-READ16_HANDLER( midyunit_dma_r );
-WRITE16_HANDLER( midyunit_dma_w );
-
-void midyunit_scanline_update(screen_device &screen, bitmap_t *bitmap, int scanline, const tms34010_display_params *params);
+void midyunit_to_shiftreg(address_space &space, UINT32 address, UINT16 *shiftreg);
+void midyunit_from_shiftreg(address_space &space, UINT32 address, UINT16 *shiftreg);
+void midyunit_scanline_update(screen_device &screen, bitmap_ind16 &bitmap, int scanline, const tms34010_display_params *params);

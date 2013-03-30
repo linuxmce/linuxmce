@@ -46,7 +46,7 @@
 
 #include "emu.h"
 #include "nes_apu.h"
-#include "cpu/m6502/m6502.h"
+#include "cpu/m6502/n2a03.h"
 
 #include "nes_defs.h"
 
@@ -55,10 +55,9 @@
 #define  SYNCS_MAX2     0x80
 
 /* GLOBAL VARIABLES */
-typedef struct _nesapu_state nesapu_state;
-struct _nesapu_state
+struct nesapu_state
 {
-	apu_t   APU;			       /* Actual APUs */
+	apu_t   APU;                   /* Actual APUs */
 	float   apu_incsize;           /* Adjustment increment */
 	uint32  samps_per_sync;        /* Number of samples per vsync */
 	uint32  buffer_size;           /* Actual buffer size in bytes */
@@ -75,7 +74,7 @@ INLINE nesapu_state *get_safe_token(device_t *device)
 {
 	assert(device != NULL);
 	assert(device->type() == NES);
-	return (nesapu_state *)downcast<legacy_device_base *>(device)->token();
+	return (nesapu_state *)downcast<nesapu_device *>(device)->token();
 }
 
 /* INTERNAL FUNCTIONS */
@@ -137,10 +136,10 @@ static int8 apu_square(nesapu_state *info, square_t *chan)
 	int8 output;
 
 	/* reg0: 0-3=volume, 4=envelope, 5=hold, 6-7=duty cycle
-    ** reg1: 0-2=sweep shifts, 3=sweep inc/dec, 4-6=sweep length, 7=sweep on
-    ** reg2: 8 bits of freq
-    ** reg3: 0-2=high freq, 7-4=vbl length counter
-    */
+	** reg1: 0-2=sweep shifts, 3=sweep inc/dec, 4-6=sweep length, 7=sweep on
+	** reg2: 8 bits of freq
+	** reg3: 0-2=high freq, 7-4=vbl length counter
+	*/
 
 	if (FALSE == chan->enabled)
 		return 0;
@@ -182,7 +181,7 @@ static int8 apu_square(nesapu_state *info, square_t *chan)
 	}
 
 	if ((0 == (chan->regs[1] & 8) && (chan->freq >> 16) > freq_limit[chan->regs[1] & 7])
-		 || (chan->freq >> 16) < 4)
+			|| (chan->freq >> 16) < 4)
 		return 0;
 
 	chan->phaseacc -= (float) info->apu_incsize; /* # of cycles per sample */
@@ -210,9 +209,9 @@ static int8 apu_triangle(nesapu_state *info, triangle_t *chan)
 	int freq;
 	int8 output;
 	/* reg0: 7=holdnote, 6-0=linear length counter
-    ** reg2: low 8 bits of frequency
-    ** reg3: 7-3=length counter, 2-0=high 3 bits of frequency
-    */
+	** reg2: low 8 bits of frequency
+	** reg3: 7-3=length counter, 2-0=high 3 bits of frequency
+	*/
 
 	if (FALSE == chan->enabled)
 		return 0;
@@ -270,9 +269,9 @@ static int8 apu_noise(nesapu_state *info, noise_t *chan)
 	uint8 output;
 
 	/* reg0: 0-3=volume, 4=envelope, 5=hold
-    ** reg2: 7=small(93 byte) sample,3-0=freq lookup
-    ** reg3: 7-4=vbl length counter
-    */
+	** reg2: 7=small(93 byte) sample,3-0=freq lookup
+	** reg3: 7-4=vbl length counter
+	*/
 
 	if (FALSE == chan->enabled)
 		return 0;
@@ -347,10 +346,10 @@ static int8 apu_dpcm(nesapu_state *info, dpcm_t *chan)
 	int freq, bit_pos;
 
 	/* reg0: 7=irq gen, 6=looping, 3-0=pointer to clock table
-    ** reg1: output dc level, 7 bits unsigned
-    ** reg2: 8 bits of 64-byte aligned address offset : $C000 + (value * 64)
-    ** reg3: length, (value * 16) + 1
-    */
+	** reg1: output dc level, 7 bits unsigned
+	** reg2: 8 bits of 64-byte aligned address offset : $C000 + (value * 64)
+	** reg3: length, (value * 16) + 1
+	*/
 
 	if (chan->enabled)
 	{
@@ -372,7 +371,7 @@ static int8 apu_dpcm(nesapu_state *info, dpcm_t *chan)
 					if (chan->regs[0] & 0x80) /* IRQ Generator */
 					{
 						chan->irq_occurred = TRUE;
-						n2a03_irq(&info->APU.dpcm.memory->device());
+						downcast<n2a03_device &>(info->APU.dpcm.memory->device()).set_input_line(N2A03_APU_IRQ_LINE, ASSERT_LINE);
 					}
 					break;
 				}
@@ -468,19 +467,19 @@ INLINE void apu_regwrite(nesapu_state *info,int address, uint8 value)
 		info->APU.tri.regs[3] = value;
 
 		/* this is somewhat of a hack.  there is some latency on the Real
-        ** Thing between when trireg0 is written to and when the linear
-        ** length counter actually begins its countdown.  we want to prevent
-        ** the case where the program writes to the freq regs first, then
-        ** to reg 0, and the counter accidentally starts running because of
-        ** the sound queue's timestamp processing.
-        **
-        ** set to a few NES sample -- should be sufficient
-        **
-        **    3 * (1789772.727 / 44100) = ~122 cycles, just around one scanline
-        **
-        ** should be plenty of time for the 6502 code to do a couple of table
-        ** dereferences and load up the other triregs
-        */
+		** Thing between when trireg0 is written to and when the linear
+		** length counter actually begins its countdown.  we want to prevent
+		** the case where the program writes to the freq regs first, then
+		** to reg 0, and the counter accidentally starts running because of
+		** the sound queue's timestamp processing.
+		**
+		** set to a few NES sample -- should be sufficient
+		**
+		**    3 * (1789772.727 / 44100) = ~122 cycles, just around one scanline
+		**
+		** should be plenty of time for the 6502 code to do a couple of table
+		** dereferences and load up the other triregs
+		*/
 
 	/* used to be 3, but now we run the clock faster, so base it on samples/sync */
 		info->APU.tri.write_latency = (info->samps_per_sync + 239) / 240;
@@ -521,8 +520,10 @@ INLINE void apu_regwrite(nesapu_state *info,int address, uint8 value)
 	/* DMC */
 	case APU_WRE0:
 		info->APU.dpcm.regs[0] = value;
-		if (0 == (value & 0x80))
+		if (0 == (value & 0x80)) {
+			downcast<n2a03_device &>(info->APU.dpcm.memory->device()).set_input_line(N2A03_APU_IRQ_LINE, CLEAR_LINE);
 			info->APU.dpcm.irq_occurred = FALSE;
+		}
 		break;
 
 	case APU_WRE1: /* 7-bit DAC */
@@ -676,15 +677,15 @@ WRITE8_DEVICE_HANDLER( nes_psg_w ) {apu_write(get_safe_token(device),offset,data
 /* UPDATE APU SYSTEM */
 static STREAM_UPDATE( nes_psg_update_sound )
 {
-  nesapu_state *info = (nesapu_state *)param;
-  apu_update(info, outputs[0], samples);
+	nesapu_state *info = (nesapu_state *)param;
+	apu_update(info, outputs[0], samples);
 }
 
 
 /* INITIALIZE APU SYSTEM */
 static DEVICE_START( nesapu )
 {
-	const nes_interface *intf = (const nes_interface *)device->baseconfig().static_config();
+	const nes_interface *intf = (const nes_interface *)device->static_config();
 	nesapu_state *info = get_safe_token(device);
 	int rate = device->clock() / 4;
 	int i;
@@ -704,7 +705,7 @@ static DEVICE_START( nesapu )
 	info->buffer_size+=info->samps_per_sync;
 
 	/* Initialize individual chips */
-	(info->APU.dpcm).memory = device->machine().device(intf->cpu_tag)->memory().space(AS_PROGRAM);
+	(info->APU.dpcm).memory = &device->machine().device(intf->cpu_tag)->memory().space(AS_PROGRAM);
 
 	info->stream = device->machine().sound().stream_alloc(*device, 0, 1, rate, info, nes_psg_update_sound);
 
@@ -765,31 +766,40 @@ static DEVICE_START( nesapu )
 #endif
 }
 
+const device_type NES = &device_creator<nesapu_device>;
 
-/**************************************************************************
- * Generic get_info
- **************************************************************************/
-
-DEVICE_GET_INFO( nesapu )
+nesapu_device::nesapu_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, NES, "N2A03", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
 {
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(nesapu_state);			break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME( nesapu );			break;
-		case DEVINFO_FCT_STOP:							/* Nothing */									break;
-		case DEVINFO_FCT_RESET:							/* Nothing */									break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "N2A03");						break;
-		case DEVINFO_STR_FAMILY:					strcpy(info->s, "Nintendo custom");				break;
-		case DEVINFO_STR_VERSION:					strcpy(info->s, "1.0");							break;
-		case DEVINFO_STR_SOURCE_FILE:						strcpy(info->s, __FILE__);      					break;
-		case DEVINFO_STR_CREDITS:					strcpy(info->s, "Copyright Nicola Salmoria and the MAME Team");  break;
-	}
+	m_token = global_alloc_clear(nesapu_state);
 }
 
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
 
-DEFINE_LEGACY_SOUND_DEVICE(NES, nesapu);
+void nesapu_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void nesapu_device::device_start()
+{
+	DEVICE_START_NAME( nesapu )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void nesapu_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}

@@ -41,51 +41,51 @@ DIPs   : 8 position (x2)
 Typed from sheet supplied with PCB (* = Default)
 
 DIP SWA
-            1   2   3   4   5   6   7   8
+              1   2   3   4   5   6   7   8
 --------------------------------------------------------------------------------------
-Lives       1   OFF
-        2*  ON
+Lives     1   OFF
+          2*  ON
 
-Special     OFF     OFF
-Effect      ON*     ON
+Special  OFF      OFF
+Effect   ON*      ON
 
-Position 3-5    Not used        OFF OFF OFF
+Not used              OFF OFF OFF
 
-Difficulty  1                       OFF OFF ON
-        2                       ON  OFF ON
-        3                       OFF ON  ON
-        4*                      ON  ON  ON
-        5                       OFF OFF OFF
-        6                       ON  OFF OFF
-        7                       OFF ON  OFF
-        8                       ON  ON  OFF
+Difficulty 1                      OFF OFF ON
+           2                      ON  OFF ON
+           3                      OFF ON  ON
+           4*                     ON  ON  ON
+           5                      OFF OFF OFF
+           6                      ON  OFF OFF
+           7                      OFF ON  OFF
+           8                      ON  ON  OFF
 --------------------------------------------------------------------------------------
 
 
 DIP SWB
             1   2   3   4   5   6   7   8
 --------------------------------------------------------------------------------------
-Position 1    Not Used  OFF
+Not Used    OFF
 
-Freeplay    No*     OFF
-        Yes     ON
+Freeplay  No*   OFF
+         Yes    ON
 
-Position 3  Not Used        OFF
+Not Used            OFF
 
-Demo Sound  No              OFF
-        Yes*                ON
+Demo Sound  No          OFF
+           Yes*         ON
 
-Chute Type  Single*                 OFF
-        Multi                   ON
+Chute Type  Single*         OFF
+            Multi           ON
 
-Coin/Credit 1 Coin 1 Credit*                OFF OFF OFF
-        1 Coin 2 Credit                 ON  OFF OFF
-        1 Coin 3 Credit                 OFF ON  OFF
-        1 Coin 4 Credit                 ON  ON  OFF
-        2 Coin 1 Credit                 OFF OFF ON
-        3 Coin 1 Credit                 ON  OFF ON
-        4 Coin 1 Credit                 OFF ON  ON
-        5 Coin 1 Credit                 ON  ON  ON
+Coin/Credit 1 Coin 1 Credit*    OFF OFF OFF
+            1 Coin 2 Credit     ON  OFF OFF
+            1 Coin 3 Credit     OFF ON  OFF
+            1 Coin 4 Credit     ON  ON  OFF
+            2 Coin 1 Credit     OFF OFF ON
+            3 Coin 1 Credit     ON  OFF ON
+            4 Coin 1 Credit     OFF ON  ON
+            5 Coin 1 Credit     ON  ON  ON
 --------------------------------------------------------------------------------------
 
 ROMs:
@@ -127,46 +127,46 @@ ROM15.BIN       MX29F1610, SOP44 Surface Mounted Mask ROM /
 
 */
 
-static WRITE32_HANDLER( paletteram32_xRRRRRGGGGGBBBBB_dword_w )
+WRITE32_MEMBER(silkroad_state::paletteram32_xRRRRRGGGGGBBBBB_dword_w)
 {
-	COMBINE_DATA(&space->machine().generic.paletteram.u32[offset]);
-	palette_set_color_rgb(space->machine(),offset,pal5bit(space->machine().generic.paletteram.u32[offset] >> (10+16)),pal5bit(space->machine().generic.paletteram.u32[offset] >> (5+16)),pal5bit(space->machine().generic.paletteram.u32[offset] >> (0+16)));
+	COMBINE_DATA(&m_generic_paletteram_32[offset]);
+	palette_set_color_rgb(machine(),offset,pal5bit(m_generic_paletteram_32[offset] >> (10+16)),pal5bit(m_generic_paletteram_32[offset] >> (5+16)),pal5bit(m_generic_paletteram_32[offset] >> (0+16)));
 }
 
-static WRITE32_DEVICE_HANDLER(silk_6295_bank_w)
+WRITE32_MEMBER(silkroad_state::silk_6295_bank_w)
 {
 	if (ACCESSING_BITS_24_31)
 	{
 		int bank = (data & 0x3000000) >> 24;
 		if(bank < 3)
-			device->machine().device<okim6295_device>("oki1")->set_bank_base(0x40000 * (bank));
+			machine().device<okim6295_device>("oki1")->set_bank_base(0x40000 * (bank));
 	}
 }
 
-static WRITE32_HANDLER(silk_coin_counter_w)
+WRITE32_MEMBER(silkroad_state::silk_coin_counter_w)
 {
 	if (ACCESSING_BITS_16_23)
 	{
-		coin_counter_w(space->machine(), 0, data & 0x10000);
-		coin_counter_w(space->machine(), 1, data & 0x80000);
+		coin_counter_w(machine(), 0, data & 0x10000);
+		coin_counter_w(machine(), 1, data & 0x80000);
 	}
 }
 
-static ADDRESS_MAP_START( cpu_map, AS_PROGRAM, 32 )
+static ADDRESS_MAP_START( cpu_map, AS_PROGRAM, 32, silkroad_state )
 	AM_RANGE(0x000000, 0x1fffff) AM_ROM
-	AM_RANGE(0x40c000, 0x40cfff) AM_RAM AM_BASE_MEMBER(silkroad_state,m_sprram) // sprites
-	AM_RANGE(0x600000, 0x603fff) AM_RAM_WRITE(paletteram32_xRRRRRGGGGGBBBBB_dword_w) AM_BASE_GENERIC(paletteram) // palette
-	AM_RANGE(0x800000, 0x803fff) AM_RAM_WRITE(silkroad_fgram_w) AM_BASE_MEMBER(silkroad_state,m_vidram)  // lower Layer
-	AM_RANGE(0x804000, 0x807fff) AM_RAM_WRITE(silkroad_fgram2_w) AM_BASE_MEMBER(silkroad_state,m_vidram2)  // mid layer
-	AM_RANGE(0x808000, 0x80bfff) AM_RAM_WRITE(silkroad_fgram3_w) AM_BASE_MEMBER(silkroad_state,m_vidram3) // higher layer
+	AM_RANGE(0x40c000, 0x40cfff) AM_RAM AM_SHARE("sprram") // sprites
+	AM_RANGE(0x600000, 0x603fff) AM_RAM_WRITE(paletteram32_xRRRRRGGGGGBBBBB_dword_w) AM_SHARE("paletteram") // palette
+	AM_RANGE(0x800000, 0x803fff) AM_RAM_WRITE(silkroad_fgram_w) AM_SHARE("vidram")  // lower Layer
+	AM_RANGE(0x804000, 0x807fff) AM_RAM_WRITE(silkroad_fgram2_w) AM_SHARE("vidram2")  // mid layer
+	AM_RANGE(0x808000, 0x80bfff) AM_RAM_WRITE(silkroad_fgram3_w) AM_SHARE("vidram3") // higher layer
 	AM_RANGE(0xc00000, 0xc00003) AM_READ_PORT("INPUTS")
 	AM_RANGE(0xc00004, 0xc00007) AM_READ_PORT("DSW")
-	AM_RANGE(0xc00024, 0xc00027) AM_DEVREADWRITE8_MODERN("oki1", okim6295_device, read, write, 0x00ff0000)
-	AM_RANGE(0xc00028, 0xc0002f) AM_DEVREADWRITE8("ymsnd", ym2151_r, ym2151_w, 0x00ff0000)
-	AM_RANGE(0xc00030, 0xc00033) AM_DEVREADWRITE8_MODERN("oki2", okim6295_device, read, write, 0x00ff0000)
-	AM_RANGE(0xc00034, 0xc00037) AM_DEVWRITE("oki1", silk_6295_bank_w)
+	AM_RANGE(0xc00024, 0xc00027) AM_DEVREADWRITE8("oki1", okim6295_device, read, write, 0x00ff0000)
+	AM_RANGE(0xc00028, 0xc0002f) AM_DEVREADWRITE8("ymsnd", ym2151_device, read, write, 0x00ff0000)
+	AM_RANGE(0xc00030, 0xc00033) AM_DEVREADWRITE8("oki2", okim6295_device, read, write, 0x00ff0000)
+	AM_RANGE(0xc00034, 0xc00037) AM_WRITE(silk_6295_bank_w)
 	AM_RANGE(0xc00038, 0xc0003b) AM_WRITE(silk_coin_counter_w)
-	AM_RANGE(0xc0010c, 0xc00123) AM_WRITEONLY AM_BASE_MEMBER(silkroad_state,m_regs)
+	AM_RANGE(0xc0010c, 0xc00123) AM_WRITEONLY AM_SHARE("regs")
 	AM_RANGE(0xfe0000, 0xffffff) AM_RAM
 ADDRESS_MAP_END
 
@@ -179,9 +179,9 @@ static INPUT_PORTS_START( silkroad )
 	PORT_BIT( 0x00000008, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT( 0x00000010, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_SERVICE_NO_TOGGLE( 0x00000020, IP_ACTIVE_LOW )
-	PORT_BIT( 0x00000040, IP_ACTIVE_LOW, IPT_SERVICE2 )	/* Not mentioned in the "test mode" */
-	PORT_BIT( 0x00000080, IP_ACTIVE_LOW, IPT_SPECIAL )	/* See notes - Stephh*/
-	PORT_BIT( 0x00000100, IP_ACTIVE_LOW, IPT_UNKNOWN )	// this input makes the 020 lock up...- RB
+	PORT_BIT( 0x00000040, IP_ACTIVE_LOW, IPT_SERVICE2 ) /* Not mentioned in the "test mode" */
+	PORT_BIT( 0x00000080, IP_ACTIVE_LOW, IPT_SPECIAL )  /* See notes - Stephh*/
+	PORT_BIT( 0x00000100, IP_ACTIVE_LOW, IPT_UNKNOWN )  // this input makes the 020 lock up...- RB
 	PORT_BIT( 0x00000200, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x00000400, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x00000800, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -207,46 +207,36 @@ static INPUT_PORTS_START( silkroad )
 	PORT_BIT( 0x80000000, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(1)
 
 	PORT_START("DSW")
-	PORT_DIPNAME( 0x00010000, 0x00000000, DEF_STR( Lives ) )
+	PORT_DIPNAME( 0x00010000, 0x00000000, DEF_STR( Lives ) )    PORT_DIPLOCATION("SWA:1")
 	PORT_DIPSETTING(          0x00010000, "1" )
 	PORT_DIPSETTING(          0x00000000, "2" )
-	PORT_DIPNAME( 0x00020000, 0x00000000, "Special Effect" )
+	PORT_DIPNAME( 0x00020000, 0x00000000, "Special Effect" )    PORT_DIPLOCATION("SWA:2")
 	PORT_DIPSETTING(          0x00020000, DEF_STR( Off ) )
 	PORT_DIPSETTING(          0x00000000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x00040000, 0x00040000, "Unused DIP A-2" )
-	PORT_DIPSETTING(          0x00040000, DEF_STR( Off ) )
-	PORT_DIPSETTING(          0x00000000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x00080000, 0x00080000, "Unused DIP A-3" )
-	PORT_DIPSETTING(          0x00080000, DEF_STR( Off ) )
-	PORT_DIPSETTING(          0x00000000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x00100000, 0x00100000, "Unused DIP A-4" )
-	PORT_DIPSETTING(          0x00100000, DEF_STR( Off ) )
-	PORT_DIPSETTING(          0x00000000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x00e00000, 0x00000000, DEF_STR( Difficulty ) )
-	PORT_DIPSETTING(          0x00600000, DEF_STR( Easiest ) )			// "1"
-	PORT_DIPSETTING(          0x00400000, DEF_STR( Easier ) )			// "2"
-	PORT_DIPSETTING(          0x00200000, DEF_STR( Easy ) )				// "3"
-	PORT_DIPSETTING(          0x00000000, DEF_STR( Normal ) )			// "4"
-	PORT_DIPSETTING(          0x00e00000, DEF_STR( Medium ) )			// "5"
-	PORT_DIPSETTING(          0x00c00000, DEF_STR( Hard ) )				// "6"
-	PORT_DIPSETTING(          0x00a00000, DEF_STR( Harder ) )			// "7"
-	PORT_DIPSETTING(          0x00800000, DEF_STR( Hardest ) )			// "8"
-	PORT_DIPNAME( 0x01000000, 0x01000000, "Unused DIP B-0" )
-	PORT_DIPSETTING(          0x01000000, DEF_STR( Off ) )
-	PORT_DIPSETTING(          0x00000000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x02000000, 0x02000000, DEF_STR( Free_Play ) )
+	PORT_DIPUNUSED_DIPLOC( 0x00040000, IP_ACTIVE_LOW, "SWA:3" )
+	PORT_DIPUNUSED_DIPLOC( 0x00080000, IP_ACTIVE_LOW, "SWA:4" )
+	PORT_DIPUNUSED_DIPLOC( 0x00100000, IP_ACTIVE_LOW, "SWA:5" )
+	PORT_DIPNAME( 0x00e00000, 0x00000000, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("SWA:6,7,8")
+	PORT_DIPSETTING(          0x00600000, DEF_STR( Easiest ) )          // "1"
+	PORT_DIPSETTING(          0x00400000, DEF_STR( Easier ) )           // "2"
+	PORT_DIPSETTING(          0x00200000, DEF_STR( Easy ) )             // "3"
+	PORT_DIPSETTING(          0x00000000, DEF_STR( Normal ) )           // "4"
+	PORT_DIPSETTING(          0x00e00000, DEF_STR( Medium ) )           // "5"
+	PORT_DIPSETTING(          0x00c00000, DEF_STR( Hard ) )             // "6"
+	PORT_DIPSETTING(          0x00a00000, DEF_STR( Harder ) )           // "7"
+	PORT_DIPSETTING(          0x00800000, DEF_STR( Hardest ) )          // "8"
+	PORT_DIPUNUSED_DIPLOC( 0x01000000, IP_ACTIVE_LOW, "SWB:1" )
+	PORT_DIPNAME( 0x02000000, 0x02000000, DEF_STR( Free_Play ) )    PORT_DIPLOCATION("SWB:2")
 	PORT_DIPSETTING(          0x02000000, DEF_STR( Off ) )
 	PORT_DIPSETTING(          0x00000000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x04000000, 0x04000000, "Unused DIP B-2" )
-	PORT_DIPSETTING(          0x04000000, DEF_STR( Off ) )
-	PORT_DIPSETTING(          0x00000000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x08000000, 0x00000000, DEF_STR( Demo_Sounds ) )
+	PORT_DIPUNUSED_DIPLOC( 0x04000000, IP_ACTIVE_LOW, "SWB:3" )
+	PORT_DIPNAME( 0x08000000, 0x00000000, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SWB:4")
 	PORT_DIPSETTING(          0x08000000, DEF_STR( Off ) )
 	PORT_DIPSETTING(          0x00000000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x10000000, 0x10000000, "Chute Type" )				// "Coin Box"
-	PORT_DIPSETTING(          0x10000000, DEF_STR( Single ) )			// "1"
-	PORT_DIPSETTING(          0x00000000, "Multi" )						// "2"
-	PORT_DIPNAME( 0xe0000000, 0xe0000000, DEF_STR( Coin_A ) )
+	PORT_DIPNAME( 0x10000000, 0x10000000, "Chute Type" )        PORT_DIPLOCATION("SWB:5")   // "Coin Box"
+	PORT_DIPSETTING(          0x10000000, DEF_STR( Single ) )                   // "1"
+	PORT_DIPSETTING(          0x00000000, "Multi" )                         // "2"
+	PORT_DIPNAME( 0xe0000000, 0xe0000000, DEF_STR( Coin_A ) )   PORT_DIPLOCATION("SWB:6,7,8")
 	PORT_DIPSETTING(          0x00000000, DEF_STR(5C_1C))
 	PORT_DIPSETTING(          0x20000000, DEF_STR(4C_1C))
 	PORT_DIPSETTING(          0x40000000, DEF_STR(3C_1C))
@@ -281,28 +271,26 @@ GFXDECODE_END
 static MACHINE_CONFIG_START( silkroad, silkroad_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M68EC020, 16000000)
+	MCFG_CPU_ADD("maincpu", M68EC020, XTAL_32MHz/2) /* 16MHz */
 	MCFG_CPU_PROGRAM_MAP(cpu_map)
-	MCFG_CPU_VBLANK_INT("screen", irq4_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", silkroad_state,  irq4_line_hold)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(6*8+2, 64*8-1-(10*8)-2, 2*8, 32*8-1-(2*8))
-	MCFG_SCREEN_UPDATE(silkroad)
+	MCFG_SCREEN_UPDATE_DRIVER(silkroad_state, screen_update_silkroad)
 
 	MCFG_GFXDECODE(silkroad)
 	MCFG_PALETTE_LENGTH(0x2000)
 
-	MCFG_VIDEO_START(silkroad)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
 
-	MCFG_SOUND_ADD("ymsnd", YM2151, 3579545)
+	MCFG_YM2151_ADD("ymsnd", XTAL_3_579545MHz)
 	MCFG_SOUND_ROUTE(0, "lspeaker", 1.0)
 	MCFG_SOUND_ROUTE(1, "rspeaker", 1.0)
 
@@ -321,14 +309,14 @@ MACHINE_CONFIG_END
   Game driver(s)
 
 ***************************************************************************/
-static DRIVER_INIT( silkroad )
+DRIVER_INIT_MEMBER(silkroad_state,silkroad)
 {
 
 	/* why? rom04.bin looks like a bad dump, but it seems not since it was
-       verified as correct... problem with the original which the gfx
-       hardware didn't care about? */
+	   verified as correct... problem with the original which the gfx hardware
+	   didn't care about? Ideally it should be checked against a different PCB */
 
-	UINT8 *src = machine.region("gfx1")->base()+0x1000000;
+	UINT8 *src = machine().root_device().memregion("gfx1")->base()+0x1000000;
 	int len = 0x0200000;
 	UINT8 *buffer;
 
@@ -336,13 +324,13 @@ static DRIVER_INIT( silkroad )
 
 	src += tileoffset; len -=tileoffset;
 
-	buffer = auto_alloc_array(machine, UINT8, len);
+	buffer = auto_alloc_array(machine(), UINT8, len);
 	{
 		int i;
 		for (i = 0;i < len; i++)
 			buffer[i] = src[i-1];
 		memcpy(src,buffer,len);
-		auto_free(machine, buffer);
+		auto_free(machine(), buffer);
 	}
 }
 
@@ -353,20 +341,21 @@ ROM_START( silkroad )
 
 	ROM_REGION( 0x1800000, "gfx1", ROMREGION_INVERT )
 	/* Sprites */
-	ROM_LOAD( "rom12.bin",	0x0000000, 0x0200000, CRC(96393d04) SHA1(f512bb8603510d39e649f4ec1c5e2d0e4bf3a2cc) ) // 0
-	ROM_LOAD( "rom08.bin",	0x0800000, 0x0200000, CRC(23f1d462) SHA1(6ca8052b16ccc1fe59716e03f66bd33af5145b37) ) // 0
-	ROM_LOAD( "rom04.bin",	0x1000000, 0x0200000, BAD_DUMP CRC(2cf6ed30) SHA1(e96585cd109debc45960090d73b15db87e91ce0f) ) // 0, check DRIVER_INIT, definitely needs re-checking
+	ROM_LOAD( "rom12.bin",  0x0000000, 0x0200000, CRC(96393d04) SHA1(f512bb8603510d39e649f4ec1c5e2d0e4bf3a2cc) ) // 0
+	ROM_LOAD( "rom08.bin",  0x0800000, 0x0200000, CRC(23f1d462) SHA1(6ca8052b16ccc1fe59716e03f66bd33af5145b37) ) // 0
+	ROM_LOAD( "rom04.bin",  0x1000000, 0x0200000, BAD_DUMP CRC(2cf6ed30) SHA1(e96585cd109debc45960090d73b15db87e91ce0f) ) // 0, See DRIVER_INIT
 
-	ROM_LOAD( "rom13.bin",	0x0200000, 0x0200000, CRC(4ca1698e) SHA1(4fffc2f2a5fb434c42463ce904fd811866c53f81) ) // 1
-	ROM_LOAD( "rom09.bin",	0x0a00000, 0x0200000, CRC(ef0b5bf4) SHA1(acd3bc5070de84608c5da0d091094382853cb048) ) // 1
-	ROM_LOAD( "rom05.bin",	0x1200000, 0x0200000, CRC(512d6e25) SHA1(fc0a56663d77bbdfbd4242e14a55563073634582) ) // 1
-	ROM_LOAD( "rom14.bin",	0x0400000, 0x0200000, CRC(d00b19c4) SHA1(d5b955dca5d0d251166a7f35a0bbbda6a91ecbd0) ) // 2
-	ROM_LOAD( "rom10.bin",	0x0c00000, 0x0200000, CRC(7d324280) SHA1(cdf6d9342292f693cc5ec1b72816f2788963fcec) ) // 2
-	ROM_LOAD( "rom06.bin",	0x1400000, 0x0200000, CRC(3ac26060) SHA1(98ad8efbbf8020daf7469db3e0fda02af6c4c767) ) // 2
+	ROM_LOAD( "rom13.bin",  0x0200000, 0x0200000, CRC(4ca1698e) SHA1(4fffc2f2a5fb434c42463ce904fd811866c53f81) ) // 1
+	ROM_LOAD( "rom09.bin",  0x0a00000, 0x0200000, CRC(ef0b5bf4) SHA1(acd3bc5070de84608c5da0d091094382853cb048) ) // 1
+	ROM_LOAD( "rom05.bin",  0x1200000, 0x0200000, CRC(512d6e25) SHA1(fc0a56663d77bbdfbd4242e14a55563073634582) ) // 1
+
+	ROM_LOAD( "rom14.bin",  0x0400000, 0x0200000, CRC(d00b19c4) SHA1(d5b955dca5d0d251166a7f35a0bbbda6a91ecbd0) ) // 2
+	ROM_LOAD( "rom10.bin",  0x0c00000, 0x0200000, CRC(7d324280) SHA1(cdf6d9342292f693cc5ec1b72816f2788963fcec) ) // 2
+	ROM_LOAD( "rom06.bin",  0x1400000, 0x0200000, CRC(3ac26060) SHA1(98ad8efbbf8020daf7469db3e0fda02af6c4c767) ) // 2
 	/* Backgrounds */
-	ROM_LOAD( "rom07.bin",	0x0600000, 0x0200000, CRC(9fc6ff9d) SHA1(51c3ca9709a01e0ad6bc76c0d674ed03f9822598) ) // 3
-	ROM_LOAD( "rom11.bin",	0x0e00000, 0x0200000, CRC(11abaf1c) SHA1(19e86f3ebfec518a96c0520f36cfc1b525e7e55c) ) // 3
-	ROM_LOAD( "rom15.bin",	0x1600000, 0x0200000, CRC(26a3b168) SHA1(a4b7955cc4d4fbec7c975a9456f2219ef33f1166) ) // 3
+	ROM_LOAD( "rom07.bin",  0x0600000, 0x0200000, CRC(9fc6ff9d) SHA1(51c3ca9709a01e0ad6bc76c0d674ed03f9822598) ) // 3
+	ROM_LOAD( "rom11.bin",  0x0e00000, 0x0200000, CRC(11abaf1c) SHA1(19e86f3ebfec518a96c0520f36cfc1b525e7e55c) ) // 3
+	ROM_LOAD( "rom15.bin",  0x1600000, 0x0200000, CRC(26a3b168) SHA1(a4b7955cc4d4fbec7c975a9456f2219ef33f1166) ) // 3
 
 	ROM_REGION( 0x080000, "user1", 0 )
 	ROM_LOAD( "rom00.bin", 0x000000, 0x080000, CRC(b10ba7ab) SHA1(a6a3ae71b803af9c31d7e97dc86cfcc123ee9a40) )
@@ -386,4 +375,4 @@ ROM_START( silkroad )
 ROM_END
 
 
-GAME( 1999, silkroad, 0, silkroad, silkroad, silkroad, ROT0, "Unico", "The Legend of Silkroad", 0 )
+GAME( 1999, silkroad, 0, silkroad, silkroad, silkroad_state, silkroad, ROT0, "Unico", "The Legend of Silkroad", 0 )

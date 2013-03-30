@@ -9,6 +9,9 @@
 #
 ###########################################################################
 
+# add some additional include libraries for the mame files
+INCPATH += \
+	-I$(SRC)/mame \
 
 LDPSRC = $(SRC)/ldplayer
 LDPOBJ = $(OBJ)/ldplayer
@@ -44,7 +47,6 @@ SOUNDS += WAVE
 #-------------------------------------------------
 
 DRVLIBS = \
-	$(LDPOBJ)/ldpdriv.o \
 	$(EMUDRIVERS)/emudummy.o \
 	$(LDPOBJ)/ldplayer.o \
 
@@ -53,4 +55,4 @@ DRVLIBS = \
 # layout dependencies
 #-------------------------------------------------
 
-$(LDPOBJ)/ldplayer.o:	$(LAYOUT)/pr8210.lh \
+$(LDPOBJ)/ldplayer.o:   $(LAYOUT)/pr8210.lh \

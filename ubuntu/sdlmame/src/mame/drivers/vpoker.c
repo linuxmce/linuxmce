@@ -115,25 +115,29 @@ nm23114     x2
 class vpoker_state : public driver_device
 {
 public:
-	vpoker_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	vpoker_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) { }
 
 	UINT8 *m_videoram;
 	UINT8 m_blit_ram[8];
+	DECLARE_READ8_MEMBER(blitter_r);
+	DECLARE_WRITE8_MEMBER(blitter_w);
+	DECLARE_WRITE_LINE_MEMBER(ptm_irq);
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_vpoker(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
-static VIDEO_START( vpoker )
+void vpoker_state::video_start()
 {
-	vpoker_state *state = machine.driver_data<vpoker_state>();
-	state->m_videoram = auto_alloc_array(machine, UINT8, 0x200);
+	m_videoram = auto_alloc_array(machine(), UINT8, 0x200);
 }
 
-static SCREEN_UPDATE( vpoker )
+UINT32 vpoker_state::screen_update_vpoker(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	vpoker_state *state = screen->machine().driver_data<vpoker_state>();
-	UINT8 *videoram = state->m_videoram;
-	const gfx_element *gfx = screen->machine().gfx[0];
+	UINT8 *videoram = m_videoram;
+	gfx_element *gfx = machine().gfx[0];
 	int count = 0x0000;
 
 	int y,x;
@@ -153,36 +157,35 @@ static SCREEN_UPDATE( vpoker )
 	return 0;
 }
 
-static READ8_HANDLER( blitter_r )
+READ8_MEMBER(vpoker_state::blitter_r)
 {
 	if(offset == 6)
-		return input_port_read(space->machine(), "IN0");
+		return ioport("IN0")->read();
 
 	return 0;
 }
 
-static WRITE8_HANDLER( blitter_w )
+WRITE8_MEMBER(vpoker_state::blitter_w)
 {
-	vpoker_state *state = space->machine().driver_data<vpoker_state>();
-	UINT8 *videoram = state->m_videoram;
+	UINT8 *videoram = m_videoram;
 
-	state->m_blit_ram[offset] = data;
+	m_blit_ram[offset] = data;
 
 	if(offset == 2)
 	{
 		int blit_offs;
 
-		blit_offs = (state->m_blit_ram[1] & 0x01)<<8|(state->m_blit_ram[2] & 0xff);
+		blit_offs = (m_blit_ram[1] & 0x01)<<8|(m_blit_ram[2] & 0xff);
 
-		videoram[blit_offs] = state->m_blit_ram[0];
-//      printf("%02x %02x %02x %02x %02x %02x %02x %02x\n",state->m_blit_ram[0],state->m_blit_ram[1],state->m_blit_ram[2],state->m_blit_ram[3],state->m_blit_ram[4],state->m_blit_ram[5],state->m_blit_ram[6],state->m_blit_ram[7]);
+		videoram[blit_offs] = m_blit_ram[0];
+//      printf("%02x %02x %02x %02x %02x %02x %02x %02x\n",m_blit_ram[0],m_blit_ram[1],m_blit_ram[2],m_blit_ram[3],m_blit_ram[4],m_blit_ram[5],m_blit_ram[6],m_blit_ram[7]);
 	}
 }
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, vpoker_state )
 	ADDRESS_MAP_GLOBAL_MASK(0x3fff)
-	AM_RANGE(0x0000, 0x01ff) AM_RAM		/* vpoker has 0x100, 5acespkr has 0x200 */
-	AM_RANGE(0x0400, 0x0407) AM_DEVREADWRITE("6840ptm", ptm6840_read, ptm6840_write)
+	AM_RANGE(0x0000, 0x01ff) AM_RAM     /* vpoker has 0x100, 5acespkr has 0x200 */
+	AM_RANGE(0x0400, 0x0407) AM_DEVREADWRITE("6840ptm", ptm6840_device, read, write)
 	AM_RANGE(0x0800, 0x0807) AM_READ(blitter_r) AM_WRITE(blitter_w)
 	AM_RANGE(0x2000, 0x3fff) AM_ROM
 ADDRESS_MAP_END
@@ -190,7 +193,7 @@ ADDRESS_MAP_END
 
 static INPUT_PORTS_START( vpoker )
 	PORT_START("IN0")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )	PORT_IMPULSE(3) PORT_NAME("Coin In")
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )  PORT_IMPULSE(3) PORT_NAME("Coin In")
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_POKER_BET )
 	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
@@ -621,7 +624,7 @@ static GFXDECODE_START( vpoker )
 	GFXDECODE_ENTRY( "gfx1", 0, charlayout,     0, 1 )
 GFXDECODE_END
 
-static PALETTE_INIT( vpoker )
+void vpoker_state::palette_init()
 {
 	int i;
 
@@ -631,13 +634,13 @@ static PALETTE_INIT( vpoker )
 
 		color = MAKE_RGB(pal1bit((i & 4) >> 2),pal1bit(i & 1),pal1bit((i & 2) >> 1));
 
-		palette_set_color(machine, i, color);
+		palette_set_color(machine(), i, color);
 	}
 }
 
-static WRITE_LINE_DEVICE_HANDLER( ptm_irq )
+WRITE_LINE_MEMBER(vpoker_state::ptm_irq)
 {
-	cputag_set_input_line(device->machine(), "maincpu", M6809_IRQ_LINE, state ? ASSERT_LINE : CLEAR_LINE);
+	machine().device("maincpu")->execute().set_input_line(M6809_IRQ_LINE, state ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static const ptm6840_interface ptm_intf =
@@ -645,7 +648,7 @@ static const ptm6840_interface ptm_intf =
 	XTAL_4MHz,
 	{ 0, 0, 0 },
 	{ DEVCB_NULL, DEVCB_NULL, DEVCB_NULL },
-	DEVCB_LINE(ptm_irq)
+	DEVCB_DRIVER_LINE_MEMBER(vpoker_state,ptm_irq)
 };
 
 static MACHINE_CONFIG_START( vpoker, vpoker_state )
@@ -653,23 +656,20 @@ static MACHINE_CONFIG_START( vpoker, vpoker_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu",M6809,XTAL_4MHz)
 	MCFG_CPU_PROGRAM_MAP(main_map)
-//  MCFG_CPU_VBLANK_INT("screen",irq0_line_hold) //irq0 valid too
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", vpoker_state, irq0_line_hold) //irq0 valid too
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500)) // not accurate
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(512, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 480-1, 0*8, 240-1)
 //  MCFG_SCREEN_VISIBLE_AREA(0*8, 512-1, 0*8, 256-1)
-	MCFG_SCREEN_UPDATE(vpoker)
+	MCFG_SCREEN_UPDATE_DRIVER(vpoker_state, screen_update_vpoker)
 
 	MCFG_GFXDECODE(vpoker)
 	MCFG_PALETTE_LENGTH(8)
-	MCFG_PALETTE_INIT(vpoker)
 
-	MCFG_VIDEO_START(vpoker)
 
 	/* 6840 PTM */
 	MCFG_PTM6840_ADD("6840ptm", ptm_intf)
@@ -716,12 +716,12 @@ ROM_START( 5acespkr )
 	ROM_REGION( 0x8000, "gfx1", ROMREGION_ERASE00 )
 	ROM_LOAD16_BYTE( "rjok2.bin",  0x0000, 0x1000, CRC(88712bb4) SHA1(f36aba6f8184c7e01caed875696f01cd281b682b) )
 	ROM_LOAD16_BYTE( "rjok1.bin",  0x0001, 0x1000, CRC(a88ba6a1) SHA1(61165f2afcd174878705dfc487935ee54f45a014) )
-	ROM_LOAD16_BYTE( "gjok2.bin",  0x2000, 0x1000, CRC(1f9e25a0) SHA1(19756b0e99c052f0a87f042bfca1aca0b7aa78db) )
-	ROM_LOAD16_BYTE( "gjok1.bin",  0x2001, 0x1000, CRC(da0c0a33) SHA1(d5c09965ea4f01082c87520a1fce5a39fef6e8e1) )
-	ROM_LOAD16_BYTE( "bjok2.bin",  0x4000, 0x1000, CRC(d845f8a1) SHA1(fb050e72164662c2f5670f59a8ad43d19c0485ea) )
-	ROM_LOAD16_BYTE( "bjok1.bin",  0x4001, 0x1000, CRC(20cdda67) SHA1(6c631b09e3da5f6660aa1c018fc0ff3004f7fe85) )
+	ROM_LOAD16_BYTE( "gjok2.bin",  0x4000, 0x1000, CRC(1f9e25a0) SHA1(19756b0e99c052f0a87f042bfca1aca0b7aa78db) )
+	ROM_LOAD16_BYTE( "gjok1.bin",  0x4001, 0x1000, CRC(da0c0a33) SHA1(d5c09965ea4f01082c87520a1fce5a39fef6e8e1) )
+	ROM_LOAD16_BYTE( "bjok2.bin",  0x2000, 0x1000, CRC(d845f8a1) SHA1(fb050e72164662c2f5670f59a8ad43d19c0485ea) )
+	ROM_LOAD16_BYTE( "bjok1.bin",  0x2001, 0x1000, CRC(20cdda67) SHA1(6c631b09e3da5f6660aa1c018fc0ff3004f7fe85) )
 ROM_END
 
 
-GAME( 198?, vpoker,   0,     vpoker,  vpoker,   0,  ROT0, "Videotronics", "Videotronics Poker", GAME_NOT_WORKING | GAME_NO_SOUND )
-GAME( 198?, 5acespkr, 0,     vpoker,  5acespkr, 0,  ROT0, "<unknown>",    "5-Aces Poker",       GAME_NOT_WORKING | GAME_NO_SOUND )
+GAME( 198?, vpoker,   0,     vpoker,  vpoker, driver_device,   0,  ROT0, "Videotronics", "Videotronics Poker", GAME_NOT_WORKING | GAME_NO_SOUND )
+GAME( 198?, 5acespkr, 0,     vpoker,  5acespkr, driver_device, 0,  ROT0, "<unknown>",    "5-Aces Poker",       GAME_NOT_WORKING | GAME_NO_SOUND )

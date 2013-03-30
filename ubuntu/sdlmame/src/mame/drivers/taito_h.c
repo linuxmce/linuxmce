@@ -5,8 +5,8 @@ Taito H system
 driver by Yochizo
 
 This driver is heavily dependent on the Raine source.
-Very thanks to Richard Bush and the Raine team. Also,
-I have been given a lot of helpful informations by
+Special thanks to Richard Bush and the Raine team. Also,
+I have been given a lot of helpful information by
 Yasuhiro Ogawa. Thank you, Yasu.
 
 
@@ -20,14 +20,14 @@ Supported games :
 System specs :
 ===============
  CPU   : MC68000 (12 MHz) x 1, Z80 (4 MHz?, sound CPU) x 1
- Sound : YM2610, YM3016?
+ Sound : YM2610, YM3016
  OSC   : 20.000 MHz, 8.000 MHz, 24.000 MHz
- Chips : TC0070RGB (Palette?)
+ Chips : TC0070RGB (RGB/Video Mixer)
          TC0220IOC (Input)
          TC0140SYT (Sound communication)
          TC0130LNB (???)
          TC0160ROM (???)
-         TC0080VCO (Video?)
+         TC0080VCO (Tilemap & Motion Object Gen)
 
  name             irq    resolution   tx-layer   tc0220ioc
  --------------------------------------------------------------
@@ -159,7 +159,7 @@ some kind of zoom table?
 static void irqhandler( device_t *device, int irq )
 {
 	taitoh_state *state = device->machine().driver_data<taitoh_state>();
-	device_set_input_line(state->m_audiocpu, 0, irq ? ASSERT_LINE : CLEAR_LINE);
+	state->m_audiocpu->set_input_line(0, irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static const ym2610_interface ym2610_config =
@@ -179,67 +179,65 @@ static const ym2610_interface ym2610_config =
 #define P2TRACKX_PORT_TAG     "P2X"
 #define P2TRACKY_PORT_TAG     "P2Y"
 
-static READ8_HANDLER( syvalion_input_bypass_r )
+READ8_MEMBER(taitoh_state::syvalion_input_bypass_r)
 {
 	/* Bypass TC0220IOC controller for analog input */
 
-	taitoh_state *state = space->machine().driver_data<taitoh_state>();
-	UINT8	port = tc0220ioc_port_r(state->m_tc0220ioc, 0);	/* read port number */
+	UINT8   port = tc0220ioc_port_r(m_tc0220ioc, space, 0); /* read port number */
 
 	switch( port )
 	{
-		case 0x08:				/* trackball y coords bottom 8 bits for 2nd player */
-			return input_port_read(space->machine(), P2TRACKY_PORT_TAG);
+		case 0x08:              /* trackball y coords bottom 8 bits for 2nd player */
+			return ioport(P2TRACKY_PORT_TAG)->read();
 
-		case 0x09:				/* trackball y coords top 8 bits for 2nd player */
-			if (input_port_read(space->machine(), P2TRACKY_PORT_TAG) & 0x80)	/* y- direction (negative value) */
+		case 0x09:              /* trackball y coords top 8 bits for 2nd player */
+			if (ioport(P2TRACKY_PORT_TAG)->read() & 0x80)   /* y- direction (negative value) */
 				return 0xff;
-			else												/* y+ direction (positive value) */
+			else                                                /* y+ direction (positive value) */
 				return 0x00;
 
-		case 0x0a:				/* trackball x coords bottom 8 bits for 2nd player */
-			return input_port_read(space->machine(), P2TRACKX_PORT_TAG);
+		case 0x0a:              /* trackball x coords bottom 8 bits for 2nd player */
+			return ioport(P2TRACKX_PORT_TAG)->read();
 
-		case 0x0b:				/* trackball x coords top 8 bits for 2nd player */
-			if (input_port_read(space->machine(), P2TRACKX_PORT_TAG) & 0x80)	/* x- direction (negative value) */
+		case 0x0b:              /* trackball x coords top 8 bits for 2nd player */
+			if (ioport(P2TRACKX_PORT_TAG)->read() & 0x80)   /* x- direction (negative value) */
 				return 0xff;
-			else												/* x+ direction (positive value) */
+			else                                                /* x+ direction (positive value) */
 				return 0x00;
 
-		case 0x0c:				/* trackball y coords bottom 8 bits for 1st player */
-			return input_port_read(space->machine(), P1TRACKY_PORT_TAG);
+		case 0x0c:              /* trackball y coords bottom 8 bits for 1st player */
+			return ioport(P1TRACKY_PORT_TAG)->read();
 
-		case 0x0d:				/* trackball y coords top 8 bits for 1st player */
-			if (input_port_read(space->machine(), P1TRACKY_PORT_TAG) & 0x80)	/* y- direction (negative value) */
+		case 0x0d:              /* trackball y coords top 8 bits for 1st player */
+			if (ioport(P1TRACKY_PORT_TAG)->read() & 0x80)   /* y- direction (negative value) */
 				return 0xff;
-			else												/* y+ direction (positive value) */
+			else                                                /* y+ direction (positive value) */
 				return 0x00;
 
-		case 0x0e:				/* trackball x coords bottom 8 bits for 1st player */
-			return input_port_read(space->machine(), P1TRACKX_PORT_TAG);
+		case 0x0e:              /* trackball x coords bottom 8 bits for 1st player */
+			return ioport(P1TRACKX_PORT_TAG)->read();
 
-		case 0x0f:				/* trackball x coords top 8 bits for 1st player */
-			if (input_port_read(space->machine(), P1TRACKX_PORT_TAG) & 0x80)	/* x- direction (negative value) */
+		case 0x0f:              /* trackball x coords top 8 bits for 1st player */
+			if (ioport(P1TRACKX_PORT_TAG)->read() & 0x80)   /* x- direction (negative value) */
 				return 0xff;
-			else												/* x+ direction (positive value) */
+			else                                                /* x+ direction (positive value) */
 				return 0x00;
 
 		default:
-			return tc0220ioc_portreg_r(state->m_tc0220ioc, offset);
+			return tc0220ioc_portreg_r(m_tc0220ioc, space, offset);
 	}
 }
 
 static void reset_sound_region(running_machine &machine)
 {
 	taitoh_state *state = machine.driver_data<taitoh_state>();
-	memory_set_bank(machine, "bank1", state->m_banknum);
+	state->membank("bank1")->set_entry(state->m_banknum);
 }
 
-static WRITE8_HANDLER( sound_bankswitch_w )
+WRITE8_MEMBER(taitoh_state::sound_bankswitch_w)
 {
-	taitoh_state *state = space->machine().driver_data<taitoh_state>();
-	state->m_banknum = data & 3;
-	reset_sound_region(space->machine());
+	m_banknum = data & 3;
+	reset_sound_region(machine());
 }
 
 
@@ -249,51 +247,51 @@ static WRITE8_HANDLER( sound_bankswitch_w )
 
 ***************************************************************************/
 
-static ADDRESS_MAP_START( syvalion_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( syvalion_map, AS_PROGRAM, 16, taitoh_state )
 	AM_RANGE(0x000000, 0x07ffff) AM_ROM
-	AM_RANGE(0x100000, 0x10ffff) AM_MIRROR(0x010000) AM_RAM AM_BASE_MEMBER(taitoh_state, m_m68000_mainram)
-	AM_RANGE(0x200000, 0x200001) AM_READ8(syvalion_input_bypass_r, 0x00ff) AM_DEVWRITE8("tc0220ioc", tc0220ioc_portreg_w, 0x00ff)
-	AM_RANGE(0x200002, 0x200003) AM_DEVREADWRITE8("tc0220ioc", tc0220ioc_port_r, tc0220ioc_port_w, 0x00ff)
-	AM_RANGE(0x300000, 0x300001) AM_READNOP AM_DEVWRITE8("tc0140syt", tc0140syt_port_w, 0x00ff)
-	AM_RANGE(0x300002, 0x300003) AM_DEVREADWRITE8("tc0140syt", tc0140syt_comm_r, tc0140syt_comm_w, 0x00ff)
-	AM_RANGE(0x400000, 0x420fff) AM_DEVREADWRITE("tc0080vco", tc0080vco_word_r, tc0080vco_word_w)
-	AM_RANGE(0x500800, 0x500fff) AM_RAM_WRITE(paletteram16_xBBBBBGGGGGRRRRR_word_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x100000, 0x10ffff) AM_MIRROR(0x010000) AM_RAM AM_SHARE("m68000_mainram")
+	AM_RANGE(0x200000, 0x200001) AM_READ8(syvalion_input_bypass_r, 0x00ff) AM_DEVWRITE8_LEGACY("tc0220ioc", tc0220ioc_portreg_w, 0x00ff)
+	AM_RANGE(0x200002, 0x200003) AM_DEVREADWRITE8_LEGACY("tc0220ioc", tc0220ioc_port_r, tc0220ioc_port_w, 0x00ff)
+	AM_RANGE(0x300000, 0x300001) AM_READNOP AM_DEVWRITE8_LEGACY("tc0140syt", tc0140syt_port_w, 0x00ff)
+	AM_RANGE(0x300002, 0x300003) AM_DEVREADWRITE8_LEGACY("tc0140syt", tc0140syt_comm_r, tc0140syt_comm_w, 0x00ff)
+	AM_RANGE(0x400000, 0x420fff) AM_DEVREADWRITE_LEGACY("tc0080vco", tc0080vco_word_r, tc0080vco_word_w)
+	AM_RANGE(0x500800, 0x500fff) AM_RAM_WRITE(paletteram_xBBBBBGGGGGRRRRR_word_w) AM_SHARE("paletteram")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( recordbr_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( recordbr_map, AS_PROGRAM, 16, taitoh_state )
 	AM_RANGE(0x000000, 0x07ffff) AM_ROM
-	AM_RANGE(0x100000, 0x10ffff) AM_MIRROR(0x010000) AM_RAM AM_BASE_MEMBER(taitoh_state, m_m68000_mainram)
-	AM_RANGE(0x200000, 0x200001) AM_DEVREADWRITE8("tc0220ioc", tc0220ioc_portreg_r, tc0220ioc_portreg_w, 0x00ff)
-	AM_RANGE(0x200002, 0x200003) AM_DEVREADWRITE8("tc0220ioc", tc0220ioc_port_r, tc0220ioc_port_w, 0x00ff)
-	AM_RANGE(0x300000, 0x300001) AM_READNOP AM_DEVWRITE8("tc0140syt", tc0140syt_port_w, 0x00ff)
-	AM_RANGE(0x300002, 0x300003) AM_DEVREADWRITE8("tc0140syt", tc0140syt_comm_r, tc0140syt_comm_w, 0x00ff)
-	AM_RANGE(0x400000, 0x420fff) AM_DEVREADWRITE("tc0080vco", tc0080vco_word_r, tc0080vco_word_w)
-	AM_RANGE(0x500800, 0x500fff) AM_RAM_WRITE(paletteram16_xBBBBBGGGGGRRRRR_word_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x100000, 0x10ffff) AM_MIRROR(0x010000) AM_RAM AM_SHARE("m68000_mainram")
+	AM_RANGE(0x200000, 0x200001) AM_DEVREADWRITE8_LEGACY("tc0220ioc", tc0220ioc_portreg_r, tc0220ioc_portreg_w, 0x00ff)
+	AM_RANGE(0x200002, 0x200003) AM_DEVREADWRITE8_LEGACY("tc0220ioc", tc0220ioc_port_r, tc0220ioc_port_w, 0x00ff)
+	AM_RANGE(0x300000, 0x300001) AM_READNOP AM_DEVWRITE8_LEGACY("tc0140syt", tc0140syt_port_w, 0x00ff)
+	AM_RANGE(0x300002, 0x300003) AM_DEVREADWRITE8_LEGACY("tc0140syt", tc0140syt_comm_r, tc0140syt_comm_w, 0x00ff)
+	AM_RANGE(0x400000, 0x420fff) AM_DEVREADWRITE_LEGACY("tc0080vco", tc0080vco_word_r, tc0080vco_word_w)
+	AM_RANGE(0x500800, 0x500fff) AM_RAM_WRITE(paletteram_xBBBBBGGGGGRRRRR_word_w) AM_SHARE("paletteram")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( dleague_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( dleague_map, AS_PROGRAM, 16, taitoh_state )
 	AM_RANGE(0x000000, 0x05ffff) AM_ROM
-	AM_RANGE(0x100000, 0x10ffff) AM_MIRROR(0x010000) AM_RAM AM_BASE_MEMBER(taitoh_state, m_m68000_mainram)
-	AM_RANGE(0x200000, 0x20000f) AM_DEVREADWRITE8("tc0220ioc", tc0220ioc_r, tc0220ioc_w, 0x00ff)
-	AM_RANGE(0x300000, 0x300001) AM_READNOP AM_DEVWRITE8("tc0140syt", tc0140syt_port_w, 0x00ff)
-	AM_RANGE(0x300002, 0x300003) AM_DEVREADWRITE8("tc0140syt", tc0140syt_comm_r, tc0140syt_comm_w, 0x00ff)
-	AM_RANGE(0x400000, 0x420fff) AM_DEVREADWRITE("tc0080vco", tc0080vco_word_r, tc0080vco_word_w)
-	AM_RANGE(0x500800, 0x500fff) AM_RAM_WRITE(paletteram16_xBBBBBGGGGGRRRRR_word_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0x600000, 0x600001) AM_WRITENOP	/* ?? writes zero once per frame */
+	AM_RANGE(0x100000, 0x10ffff) AM_MIRROR(0x010000) AM_RAM AM_SHARE("m68000_mainram")
+	AM_RANGE(0x200000, 0x20000f) AM_DEVREADWRITE8_LEGACY("tc0220ioc", tc0220ioc_r, tc0220ioc_w, 0x00ff)
+	AM_RANGE(0x300000, 0x300001) AM_READNOP AM_DEVWRITE8_LEGACY("tc0140syt", tc0140syt_port_w, 0x00ff)
+	AM_RANGE(0x300002, 0x300003) AM_DEVREADWRITE8_LEGACY("tc0140syt", tc0140syt_comm_r, tc0140syt_comm_w, 0x00ff)
+	AM_RANGE(0x400000, 0x420fff) AM_DEVREADWRITE_LEGACY("tc0080vco", tc0080vco_word_r, tc0080vco_word_w)
+	AM_RANGE(0x500800, 0x500fff) AM_RAM_WRITE(paletteram_xBBBBBGGGGGRRRRR_word_w) AM_SHARE("paletteram")
+	AM_RANGE(0x600000, 0x600001) AM_WRITENOP    /* ?? writes zero once per frame */
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, taitoh_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
 	AM_RANGE(0x4000, 0x7fff) AM_ROMBANK("bank1")
 	AM_RANGE(0xc000, 0xdfff) AM_RAM
-	AM_RANGE(0xe000, 0xe003) AM_DEVREADWRITE("ymsnd", ym2610_r, ym2610_w)
-	AM_RANGE(0xe200, 0xe200) AM_READNOP AM_DEVWRITE("tc0140syt", tc0140syt_slave_port_w)
-	AM_RANGE(0xe201, 0xe201) AM_DEVREADWRITE("tc0140syt", tc0140syt_slave_comm_r, tc0140syt_slave_comm_w)
-	AM_RANGE(0xe400, 0xe403) AM_WRITENOP		/* pan control */
+	AM_RANGE(0xe000, 0xe003) AM_DEVREADWRITE_LEGACY("ymsnd", ym2610_r, ym2610_w)
+	AM_RANGE(0xe200, 0xe200) AM_READNOP AM_DEVWRITE_LEGACY("tc0140syt", tc0140syt_slave_port_w)
+	AM_RANGE(0xe201, 0xe201) AM_DEVREADWRITE_LEGACY("tc0140syt", tc0140syt_slave_comm_r, tc0140syt_slave_comm_w)
+	AM_RANGE(0xe400, 0xe403) AM_WRITENOP        /* pan control */
 	AM_RANGE(0xea00, 0xea00) AM_READNOP
-	AM_RANGE(0xee00, 0xee00) AM_WRITENOP		/* ? */
-	AM_RANGE(0xf000, 0xf000) AM_WRITENOP		/* ? */
+	AM_RANGE(0xee00, 0xee00) AM_WRITENOP        /* ? */
+	AM_RANGE(0xf000, 0xf000) AM_WRITENOP        /* ? */
 	AM_RANGE(0xf200, 0xf200) AM_WRITE(sound_bankswitch_w)
 ADDRESS_MAP_END
 
@@ -307,26 +305,26 @@ ADDRESS_MAP_END
 static INPUT_PORTS_START( syvalion )
 	/* 0x200000 (port 0) -> 0x102842.b (-$57be,A5) */
 	PORT_START("DSWA")
-	TAITO_MACHINE_COCKTAIL
-	TAITO_COINAGE_JAPAN_OLD
+	TAITO_MACHINE_COCKTAIL_LOC(SW1)
+	TAITO_COINAGE_JAPAN_OLD_LOC(SW1)
 
 	/* 0x200000 (port 1) -> 0x102843.b (-$57bd,A5) */
 	PORT_START("DSWB")
-	TAITO_DIFFICULTY
-	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Bonus_Life ) )
+	TAITO_DIFFICULTY_LOC(SW2)
+	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION("SW2:3,4")
 	PORT_DIPSETTING(    0x08, "1000k" )
 	PORT_DIPSETTING(    0x0c, "1500k" )
 	PORT_DIPSETTING(    0x04, "2000k" )
 	PORT_DIPSETTING(    0x00, DEF_STR( None ) )
-	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Lives ) )
+	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW2:5,6")
 	PORT_DIPSETTING(    0x00, "2" )
 	PORT_DIPSETTING(    0x30, "3" )
 	PORT_DIPSETTING(    0x20, "4" )
 	PORT_DIPSETTING(    0x10, "5" )
-	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )               /* code at 0x002af8 - see notes */
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW2:7") /* code at 0x002af8 - see notes */
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPUNUSED( 0x80, IP_ACTIVE_LOW )
+	PORT_DIPUNUSED_DIPLOC( 0x80, 0x80, "SW2:8" )        /* Listed as "Unused" */
 
 	PORT_START("IN0")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_UNKNOWN )
@@ -367,18 +365,18 @@ INPUT_PORTS_END
 static INPUT_PORTS_START( recordbr )
 	/* 0x200000 (port 0) -> 0x1022e6.b (-$5d1a,A5) */
 	PORT_START("DSWA")
-	TAITO_MACHINE_NO_COCKTAIL
-	TAITO_COINAGE_WORLD
+	TAITO_MACHINE_NO_COCKTAIL_LOC(SW1)
+	TAITO_COINAGE_WORLD_LOC(SW1)
 
 	PORT_START("DSWB")
 	/* 0x200000 (port 1) -> 0x1022e7.b (-$5d19,A5) */
-	TAITO_DIFFICULTY
-	PORT_DIPUNUSED( 0x04, IP_ACTIVE_LOW )
-	PORT_DIPUNUSED( 0x08, IP_ACTIVE_LOW )
-	PORT_DIPUNUSED( 0x10, IP_ACTIVE_LOW )
-	PORT_DIPUNUSED( 0x20, IP_ACTIVE_LOW )
-	PORT_DIPUNUSED( 0x40, IP_ACTIVE_LOW )
-	PORT_DIPUNUSED( 0x80, IP_ACTIVE_LOW )
+	TAITO_DIFFICULTY_LOC(SW2)
+	PORT_DIPUNUSED_DIPLOC( 0x04, 0x04, "SW2:3" )
+	PORT_DIPUNUSED_DIPLOC( 0x08, 0x08, "SW2:4" )
+	PORT_DIPUNUSED_DIPLOC( 0x10, 0x10, "SW2:5" )
+	PORT_DIPUNUSED_DIPLOC( 0x20, 0x20, "SW2:6" )
+	PORT_DIPUNUSED_DIPLOC( 0x40, 0x40, "SW2:7" )
+	PORT_DIPUNUSED_DIPLOC( 0x80, 0x80, "SW2:8" )
 
 	PORT_START("IN0")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_UNKNOWN )
@@ -416,31 +414,31 @@ static INPUT_PORTS_START( gogold )
 	PORT_INCLUDE(recordbr)
 
 	PORT_MODIFY("DSWA")
-	TAITO_COINAGE_JAPAN_OLD
+	TAITO_COINAGE_JAPAN_OLD_LOC(SW1)
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( dleague )
 	/* 0x200000 -> 0x100526.b ($526,A5) */
 	PORT_START("DSWA")
-	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Difficulty ) )            /* see notes */
+	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("SW1:1") /* see notes */
 	PORT_DIPSETTING(    0x01, "Constant" )
 	PORT_DIPSETTING(    0x00, "Based on Inning" )
-	TAITO_DSWA_BITS_1_TO_3
-	TAITO_COINAGE_JAPAN_OLD
+	TAITO_DSWA_BITS_1_TO_3_LOC(SW1)
+	TAITO_COINAGE_US_LOC(SW1)
 
 	/* 0x200002 -> 0x100527.b ($527,A5) */
 	PORT_START("DSWB")
-	PORT_DIPUNUSED( 0x01, IP_ACTIVE_LOW )                        /* see notes */
-	PORT_DIPUNUSED( 0x02, IP_ACTIVE_LOW )
-	PORT_DIPNAME( 0x0c, 0x0c, "Extra Credit Needed" )            /* see notes */
+	PORT_DIPUNUSED_DIPLOC( 0x01, 0x01, "SW2:1" )        /* see notes */
+	PORT_DIPUNUSED_DIPLOC( 0x02, 0x02, "SW2:2" )
+	PORT_DIPNAME( 0x0c, 0x0c, "Extra Credit Needed" )   PORT_DIPLOCATION("SW2:3,4") /* see notes */
 	PORT_DIPSETTING(    0x08, "After Inning 6" )
 	PORT_DIPSETTING(    0x00, "After Innings 5 and 7" )
 	PORT_DIPSETTING(    0x0c, "After Innings 3 and 6" )
 	PORT_DIPSETTING(    0x04, "After Innings 3, 5 and 7" )
-	PORT_DIPUNUSED( 0x10, IP_ACTIVE_LOW )
-	PORT_DIPUNUSED( 0x20, IP_ACTIVE_LOW )
-	PORT_DIPUNUSED( 0x40, IP_ACTIVE_LOW )
-	PORT_DIPUNUSED( 0x80, IP_ACTIVE_LOW )
+	PORT_DIPUNUSED_DIPLOC( 0x10, 0x10, "SW2:5" )
+	PORT_DIPUNUSED_DIPLOC( 0x20, 0x20, "SW2:6" )
+	PORT_DIPUNUSED_DIPLOC( 0x40, 0x40, "SW2:7" )
+	PORT_DIPUNUSED_DIPLOC( 0x80, 0x80, "SW2:8" )
 
 	PORT_START("IN0")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_SERVICE1 )
@@ -466,6 +464,13 @@ static INPUT_PORTS_START( dleague )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 INPUT_PORTS_END
 
+static INPUT_PORTS_START( dleaguej )
+	PORT_INCLUDE(dleague)
+
+	PORT_MODIFY("DSWA")
+	TAITO_COINAGE_JAPAN_OLD_LOC(SW1)
+INPUT_PORTS_END
+
 
 /***************************************************************************
 
@@ -475,12 +480,12 @@ INPUT_PORTS_END
 
 static const gfx_layout tilelayout =
 {
-	16,16,	/* 16x16 pixels */
-	32768,	/* 32768 tiles */
+	16,16,  /* 16x16 pixels */
+	32768,  /* 32768 tiles */
 	4,
 	{ 0, 1, 2, 3 },
 	{ 4, 0, 12, 8, 0x100000*8+4, 0x100000*8, 0x100000*8+12, 0x100000*8+8,
-	    0x200000*8+4, 0x200000*8, 0x200000*8+12, 0x200000*8+8, 0x300000*8+4, 0x300000*8, 0x300000*8+12, 0x300000*8+8 },
+		0x200000*8+4, 0x200000*8, 0x200000*8+12, 0x200000*8+8, 0x300000*8+4, 0x300000*8, 0x300000*8+12, 0x300000*8+8 },
 	{ 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
 		8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16 },
 	16*16
@@ -488,9 +493,9 @@ static const gfx_layout tilelayout =
 
 static const gfx_layout charlayout =
 {
-	8, 8,	/* 8x8 pixels */
-	256,	/* 256 chars */
-	4,		/* 4 bit per pixel */
+	8, 8,   /* 8x8 pixels */
+	256,    /* 256 chars */
+	4,      /* 4 bit per pixel */
 	{ 0x1000*8 + 8, 0x1000*8, 8, 0 },
 	{ 0, 1, 2, 3, 4, 5, 6, 7 },
 	{ 16*0, 16*1, 16*2, 16*3, 16*4, 16*5, 16*6, 16*7 },
@@ -511,43 +516,36 @@ static GFXDECODE_START( dleague )
 GFXDECODE_END
 
 
-static STATE_POSTLOAD( taitoh_postload )
+void taitoh_state::machine_reset()
 {
-	reset_sound_region(machine);
+	m_banknum = 0;
 }
 
-static MACHINE_RESET( taitoh )
+void taitoh_state::machine_start()
 {
-	taitoh_state *state = machine.driver_data<taitoh_state>();
-	state->m_banknum = 0;
-}
+	UINT8 *ROM = memregion("audiocpu")->base();
 
-static MACHINE_START( taitoh )
-{
-	taitoh_state *state = machine.driver_data<taitoh_state>();
-	UINT8 *ROM = machine.region("audiocpu")->base();
+	membank("bank1")->configure_entries(0, 4, &ROM[0xc000], 0x4000);
 
-	memory_configure_bank(machine, "bank1", 0, 4, &ROM[0xc000], 0x4000);
+	m_audiocpu = machine().device<cpu_device>("audiocpu");
+	m_tc0220ioc = machine().device("tc0220ioc");
+	m_tc0080vco = machine().device("tc0080vco");
 
-	state->m_audiocpu = machine.device("audiocpu");
-	state->m_tc0220ioc = machine.device("tc0220ioc");
-	state->m_tc0080vco = machine.device("tc0080vco");
-
-	state->save_item(NAME(state->m_banknum));
-	machine.state().register_postload(taitoh_postload, NULL);
+	save_item(NAME(m_banknum));
+	machine().save().register_postload(save_prepost_delegate(FUNC(reset_sound_region), &machine()));
 }
 
 
 static const tc0080vco_interface syvalion_tc0080vco_intf =
 {
-	0, 1,	/* gfxnum, txnum */
+	0, 1,   /* gfxnum, txnum */
 	1, 1, -2,
 	1
 };
 
 static const tc0080vco_interface recordbr_tc0080vco_intf =
 {
-	0, 1,	/* gfxnum, txnum */
+	0, 1,   /* gfxnum, txnum */
 	1, 1, -2,
 	0
 };
@@ -555,7 +553,7 @@ static const tc0080vco_interface recordbr_tc0080vco_intf =
 static const tc0220ioc_interface taitoh_io_intf =
 {
 	DEVCB_INPUT_PORT("DSWA"), DEVCB_INPUT_PORT("DSWB"),
-	DEVCB_INPUT_PORT("IN0"), DEVCB_INPUT_PORT("IN1"), DEVCB_INPUT_PORT("IN2")	/* port read handlers */
+	DEVCB_INPUT_PORT("IN0"), DEVCB_INPUT_PORT("IN1"), DEVCB_INPUT_PORT("IN2")   /* port read handlers */
 };
 
 static const tc0140syt_interface taitoh_tc0140syt_intf =
@@ -566,15 +564,13 @@ static const tc0140syt_interface taitoh_tc0140syt_intf =
 static MACHINE_CONFIG_START( syvalion, taitoh_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M68000,24000000 / 2)		/* 12 MHz */
+	MCFG_CPU_ADD("maincpu", M68000, XTAL_24MHz / 2)     /* 12 MHz */
 	MCFG_CPU_PROGRAM_MAP(syvalion_map)
-	MCFG_CPU_VBLANK_INT("screen", irq2_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", taitoh_state,  irq2_line_hold)
 
-	MCFG_CPU_ADD("audiocpu", Z80,8000000 / 2)		/* 4 MHz ??? */
+	MCFG_CPU_ADD("audiocpu", Z80, XTAL_8MHz / 2)        /* 4 MHz ??? */
 	MCFG_CPU_PROGRAM_MAP(sound_map)
 
-	MCFG_MACHINE_START(taitoh)
-	MCFG_MACHINE_RESET(taitoh)
 
 	MCFG_QUANTUM_TIME(attotime::from_hz(600))
 
@@ -584,10 +580,9 @@ static MACHINE_CONFIG_START( syvalion, taitoh_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*16, 64*16)
 	MCFG_SCREEN_VISIBLE_AREA(0*16, 32*16-1, 3*16, 28*16-1)
-	MCFG_SCREEN_UPDATE(syvalion)
+	MCFG_SCREEN_UPDATE_DRIVER(taitoh_state, screen_update_syvalion)
 
 	MCFG_GFXDECODE(syvalion)
 	MCFG_PALETTE_LENGTH(33*16)
@@ -597,7 +592,7 @@ static MACHINE_CONFIG_START( syvalion, taitoh_state )
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("ymsnd", YM2610, 8000000)
+	MCFG_SOUND_ADD("ymsnd", YM2610, XTAL_8MHz)
 	MCFG_SOUND_CONFIG(ym2610_config)
 	MCFG_SOUND_ROUTE(0, "mono", 0.25)
 	MCFG_SOUND_ROUTE(1, "mono", 1.0)
@@ -610,15 +605,13 @@ MACHINE_CONFIG_END
 static MACHINE_CONFIG_START( recordbr, taitoh_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M68000,24000000 / 2)		/* 12 MHz */
+	MCFG_CPU_ADD("maincpu", M68000, XTAL_24MHz / 2)     /* 12 MHz */
 	MCFG_CPU_PROGRAM_MAP(recordbr_map)
-	MCFG_CPU_VBLANK_INT("screen", irq2_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", taitoh_state,  irq2_line_hold)
 
-	MCFG_CPU_ADD("audiocpu", Z80,8000000 / 2)		/* 4 MHz ??? */
+	MCFG_CPU_ADD("audiocpu", Z80, XTAL_8MHz / 2)        /* 4 MHz ??? */
 	MCFG_CPU_PROGRAM_MAP(sound_map)
 
-	MCFG_MACHINE_START(taitoh)
-	MCFG_MACHINE_RESET(taitoh)
 
 	MCFG_QUANTUM_TIME(attotime::from_hz(600))
 
@@ -628,10 +621,9 @@ static MACHINE_CONFIG_START( recordbr, taitoh_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*16, 64*16)
 	MCFG_SCREEN_VISIBLE_AREA(1*16, 21*16-1, 2*16, 17*16-1)
-	MCFG_SCREEN_UPDATE(recordbr)
+	MCFG_SCREEN_UPDATE_DRIVER(taitoh_state, screen_update_recordbr)
 
 	MCFG_GFXDECODE(recordbr)
 	MCFG_PALETTE_LENGTH(32*16)
@@ -641,7 +633,7 @@ static MACHINE_CONFIG_START( recordbr, taitoh_state )
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("ymsnd", YM2610, 8000000)
+	MCFG_SOUND_ADD("ymsnd", YM2610, XTAL_8MHz)
 	MCFG_SOUND_CONFIG(ym2610_config)
 	MCFG_SOUND_ROUTE(0, "mono", 0.25)
 	MCFG_SOUND_ROUTE(1, "mono", 1.0)
@@ -654,15 +646,13 @@ MACHINE_CONFIG_END
 static MACHINE_CONFIG_START( dleague, taitoh_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M68000,24000000 / 2)		/* 12 MHz */
+	MCFG_CPU_ADD("maincpu", M68000, XTAL_24MHz / 2)     /* 12 MHz */
 	MCFG_CPU_PROGRAM_MAP(dleague_map)
-	MCFG_CPU_VBLANK_INT("screen", irq1_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", taitoh_state,  irq1_line_hold)
 
-	MCFG_CPU_ADD("audiocpu", Z80,8000000 / 2)		/* 4 MHz ??? */
+	MCFG_CPU_ADD("audiocpu", Z80, XTAL_8MHz / 2)        /* 4 MHz ??? */
 	MCFG_CPU_PROGRAM_MAP(sound_map)
 
-	MCFG_MACHINE_START(taitoh)
-	MCFG_MACHINE_RESET(taitoh)
 
 	MCFG_QUANTUM_TIME(attotime::from_hz(600))
 
@@ -672,10 +662,9 @@ static MACHINE_CONFIG_START( dleague, taitoh_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*16, 64*16)
 	MCFG_SCREEN_VISIBLE_AREA(1*16, 21*16-1, 2*16, 17*16-1)
-	MCFG_SCREEN_UPDATE(dleague)
+	MCFG_SCREEN_UPDATE_DRIVER(taitoh_state, screen_update_dleague)
 
 	MCFG_GFXDECODE(dleague)
 	MCFG_PALETTE_LENGTH(33*16)
@@ -685,7 +674,7 @@ static MACHINE_CONFIG_START( dleague, taitoh_state )
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("ymsnd", YM2610, 8000000)
+	MCFG_SOUND_ADD("ymsnd", YM2610, XTAL_8MHz)
 	MCFG_SOUND_CONFIG(ym2610_config)
 	MCFG_SOUND_ROUTE(0, "mono", 0.25)
 	MCFG_SOUND_ROUTE(1, "mono", 1.0)
@@ -702,13 +691,13 @@ MACHINE_CONFIG_END
 ***************************************************************************/
 
 ROM_START( syvalion )
-	ROM_REGION( 0x80000, "maincpu", 0 )		/* main cpu */
+	ROM_REGION( 0x80000, "maincpu", 0 )     /* main cpu */
 	ROM_LOAD16_BYTE( "b51-20.bin", 0x00000, 0x20000, CRC(440b6418) SHA1(262b65f39eb13c11ae7b87013951097ab0a9cb63) )
 	ROM_LOAD16_BYTE( "b51-22.bin", 0x00001, 0x20000, CRC(e6c61079) SHA1(b786ef1bfc72706347c12c17616652bc8302a98c) )
 	ROM_LOAD16_BYTE( "b51-19.bin", 0x40000, 0x20000, CRC(2abd762c) SHA1(97cdb9f1dba5b11b96b5d3431937669de5220512) )
 	ROM_LOAD16_BYTE( "b51-21.bin", 0x40001, 0x20000, CRC(aa111f30) SHA1(77da4a8db49999f5fa2cf0209028d0f70e26dfe3) )
 
-	ROM_REGION( 0x1c000, "audiocpu", 0 )		/* sound cpu */
+	ROM_REGION( 0x1c000, "audiocpu", 0 )        /* sound cpu */
 	ROM_LOAD( "b51-23.bin", 0x00000, 0x04000, CRC(734662de) SHA1(0058d6de68f26cd58b9eb8859e15f3ced6bd3489) )
 	ROM_CONTINUE(           0x10000, 0x0c000 )
 
@@ -730,21 +719,21 @@ ROM_START( syvalion )
 	ROM_LOAD16_BYTE( "b51-05.bin", 0x340000, 0x20000, CRC(47976ae9) SHA1(a2b19a39d8968b886412a85c082806917e02d9fd) )
 	ROM_LOAD16_BYTE( "b51-01.bin", 0x340001, 0x20000, CRC(8dab004a) SHA1(1772cdcb9d0ca5ebf429f371c041b9ae12fafcd0) )
 
-	ROM_REGION( 0x80000, "ymsnd.deltat", 0 )	/* samples */
+	ROM_REGION( 0x80000, "ymsnd.deltat", 0 )    /* samples */
 	ROM_LOAD( "b51-18.bin", 0x00000, 0x80000, CRC(8b23ac83) SHA1(340b9e7f09c1809a332b41d3fb579f5f8cd6367f) )
 
-	ROM_REGION( 0x80000, "ymsnd", 0 )	/* samples */
+	ROM_REGION( 0x80000, "ymsnd", 0 )   /* samples */
 	ROM_LOAD( "b51-17.bin", 0x00000, 0x80000, CRC(d85096aa) SHA1(dac39ed182e9eda06575f1667c4c1ff9a4a56599) )
 ROM_END
 
 ROM_START( recordbr )
-	ROM_REGION( 0x80000, "maincpu", 0 )		/* main cpu */
+	ROM_REGION( 0x80000, "maincpu", 0 )     /* main cpu */
 	ROM_LOAD16_BYTE( "b56-17.bin", 0x00000, 0x20000, CRC(3e0a9c35) SHA1(900a741b2abbbbe883b9d78162a88b4397af1a56) )
 	ROM_LOAD16_BYTE( "b56-16.bin", 0x00001, 0x20000, CRC(b447f12c) SHA1(58ee30337836f260c7fbda728dac93f06d861ec4) )
 	ROM_LOAD16_BYTE( "b56-15.bin", 0x40000, 0x20000, CRC(b346e282) SHA1(f6b4a2e9093a33d19c2eaf3ef9801179f39a83a3) )
 	ROM_LOAD16_BYTE( "b56-21.bin", 0x40001, 0x20000, CRC(e5f63790) SHA1(b81db7690a989146c438609d9633ddcb1fd219dd) )
 
-	ROM_REGION( 0x1c000, "audiocpu", 0 )		/* sound cpu */
+	ROM_REGION( 0x1c000, "audiocpu", 0 )        /* sound cpu */
 	ROM_LOAD( "b56-19.bin", 0x00000, 0x04000, CRC(c68085ee) SHA1(78634216a622a08c20dae0422283c4a7ed360546) )
 	ROM_CONTINUE(           0x10000, 0x0c000 )
 
@@ -758,10 +747,10 @@ ROM_START( recordbr )
 	ROM_LOAD16_BYTE( "b56-01.bin", 0x300000, 0x20000, CRC(766b7260) SHA1(f7d7176af614f06e8c66e890e4d194ffb6f7af73) )
 	ROM_LOAD16_BYTE( "b56-05.bin", 0x300001, 0x20000, CRC(ed390378) SHA1(0275e5ead206028bfcff7ecbe11c7ab961e648ea) )
 
-	ROM_REGION( 0x80000, "ymsnd.deltat", 0 )	/* samples */
+	ROM_REGION( 0x80000, "ymsnd.deltat", 0 )    /* samples */
 	ROM_LOAD( "b56-09.bin", 0x00000, 0x80000, CRC(7fd9ee68) SHA1(edc4455b3f6a6f30f418d03c6e53af875542a325) )
 
-	ROM_REGION( 0x80000, "ymsnd", 0 )	/* samples */
+	ROM_REGION( 0x80000, "ymsnd", 0 )   /* samples */
 	ROM_LOAD( "b56-10.bin", 0x00000, 0x80000, CRC(de1bce59) SHA1(aa3aea30d6f53e60d9a0d4ec767e1b261d5efc8a) )
 
 	ROM_REGION( 0x02000, "user1", 0 ) /* zoom table / mixing? */
@@ -769,13 +758,13 @@ ROM_START( recordbr )
 ROM_END
 
 ROM_START( gogold )
-	ROM_REGION( 0x80000, "maincpu", 0 )		/* main cpu */
+	ROM_REGION( 0x80000, "maincpu", 0 )     /* main cpu */
 	ROM_LOAD16_BYTE( "b56-17.bin", 0x00000, 0x20000, CRC(3e0a9c35) SHA1(900a741b2abbbbe883b9d78162a88b4397af1a56) )
 	ROM_LOAD16_BYTE( "b56-16.bin", 0x00001, 0x20000, CRC(b447f12c) SHA1(58ee30337836f260c7fbda728dac93f06d861ec4) )
 	ROM_LOAD16_BYTE( "b56-15.bin", 0x40000, 0x20000, CRC(b346e282) SHA1(f6b4a2e9093a33d19c2eaf3ef9801179f39a83a3) )
 	ROM_LOAD16_BYTE( "b56-14.bin", 0x40001, 0x20000, CRC(b6c195b9) SHA1(80541d9a686fdc1850d764d8e00ba03526e7174c) )
 
-	ROM_REGION( 0x1c000, "audiocpu", 0 )		/* sound cpu */
+	ROM_REGION( 0x1c000, "audiocpu", 0 )        /* sound cpu */
 	ROM_LOAD( "b56-19.bin", 0x00000, 0x04000, CRC(c68085ee) SHA1(78634216a622a08c20dae0422283c4a7ed360546) )
 	ROM_CONTINUE(           0x10000, 0x0c000 )
 
@@ -789,10 +778,10 @@ ROM_START( gogold )
 	ROM_LOAD16_BYTE( "b56-01.bin", 0x300000, 0x20000, CRC(766b7260) SHA1(f7d7176af614f06e8c66e890e4d194ffb6f7af73) )
 	ROM_LOAD16_BYTE( "b56-05.bin", 0x300001, 0x20000, CRC(ed390378) SHA1(0275e5ead206028bfcff7ecbe11c7ab961e648ea) )
 
-	ROM_REGION( 0x80000, "ymsnd.deltat", 0 )	/* samples */
+	ROM_REGION( 0x80000, "ymsnd.deltat", 0 )    /* samples */
 	ROM_LOAD( "b56-09.bin", 0x00000, 0x80000, CRC(7fd9ee68) SHA1(edc4455b3f6a6f30f418d03c6e53af875542a325) )
 
-	ROM_REGION( 0x80000, "ymsnd", 0 )	/* samples */
+	ROM_REGION( 0x80000, "ymsnd", 0 )   /* samples */
 	ROM_LOAD( "b56-10.bin", 0x00000, 0x80000, CRC(de1bce59) SHA1(aa3aea30d6f53e60d9a0d4ec767e1b261d5efc8a) )
 
 	ROM_REGION( 0x02000, "user1", 0 ) /* zoom table / mixing? */
@@ -800,6 +789,38 @@ ROM_START( gogold )
 ROM_END
 
 ROM_START( dleague )
+	ROM_REGION( 0x60000, "maincpu", 0 )
+	ROM_LOAD16_BYTE( "c02-xx.33", 0x00000, 0x20000, CRC(eda870a7) SHA1(1749a6eb80c137b042d4935fcb9cff1ca50d4397) ) /* Need to verify proper Taito chip number */
+	ROM_LOAD16_BYTE( "c02-xx.36", 0x00001, 0x20000, CRC(f52114af) SHA1(d500933852332a9463a5738cf5890625c9b35d65) ) /* Need to verify proper Taito chip number */
+	ROM_LOAD16_BYTE( "c02-20.34", 0x40000, 0x10000, CRC(cdf593f3) SHA1(6afbd9d8d74e6801dc991eb9fd3205057747b986) )
+	ROM_LOAD16_BYTE( "c02-xx.37", 0x40001, 0x10000, CRC(820a8241) SHA1(a1b75e76f6806d5cbdb97f59d29aa846a6f3bb8b) ) /* Need to verify proper Taito chip number */
+
+	ROM_REGION( 0x1c000, "audiocpu", 0 )
+	ROM_LOAD( "c02-23.40", 0x00000, 0x04000, CRC(5632ee49) SHA1(90dedaf40ab526529cd7d569b78a9d5451ec3e25) )
+	ROM_CONTINUE(          0x10000, 0x0c000 )
+
+	ROM_REGION( 0x400000, "gfx1", 0 )
+	ROM_LOAD       ( "c02-02.15", 0x000000, 0x80000, CRC(b273f854) SHA1(5961b9fe2c49fb05f5bc3e27e05925dbef8577e9) )
+	ROM_LOAD16_BYTE( "c02-06.6",  0x080000, 0x20000, CRC(b8473c7b) SHA1(8fe8d838bdba7aaaf4527ac1c5c16604922bb245) )
+	ROM_LOAD16_BYTE( "c02-10.14", 0x080001, 0x20000, CRC(50c02f0f) SHA1(7d13b798c0a98387719ab738b9178ee6079327b2) )
+	ROM_LOAD       ( "c02-03.17", 0x100000, 0x80000, CRC(c3fd0dcd) SHA1(43f32cefbca203bd0453e1c3d4523f0834900418) )
+	ROM_LOAD16_BYTE( "c02-07.7",  0x180000, 0x20000, CRC(8c1e3296) SHA1(088b028189131186c82c61c38d5a936a0cc9830f) )
+	ROM_LOAD16_BYTE( "c02-11.16", 0x180001, 0x20000, CRC(fbe548b8) SHA1(c2b453fc213c21d118810b8502836e7a2ba5626b) )
+	ROM_LOAD       ( "c02-24.19", 0x200000, 0x80000, CRC(18ef740a) SHA1(27f0445c053e28267e5688627d4f91d158d4fb07) )
+	ROM_LOAD16_BYTE( "c02-08.8",  0x280000, 0x20000, CRC(1a3c2f93) SHA1(0e45f8211dae8e17e67d26173262ca9831ccd283) )
+	ROM_LOAD16_BYTE( "c02-12.18", 0x280001, 0x20000, CRC(b1c151c5) SHA1(3fc3d4270cad52c4a82c217b452e534d24bd8548) )
+	ROM_LOAD       ( "c02-05.21", 0x300000, 0x80000, CRC(fe3a5179) SHA1(34a98969c553ee8c52aeb4fb09670a4ad572446e) )
+	ROM_LOAD16_BYTE( "c02-09.9",  0x380000, 0x20000, CRC(a614d234) SHA1(dc68a6a8cf89ab82edc571853249643aa304d37f) )
+	ROM_LOAD16_BYTE( "c02-13.20", 0x380001, 0x20000, CRC(8eb3194d) SHA1(98290f77a03826cdf7c8238dd35da1f9349d5cf5) )
+
+	ROM_REGION( 0x02000, "user1", 0 ) /* zoom table / mixing? */
+	ROM_LOAD( "c02-18.22", 0x00000, 0x02000, CRC(c88f0bbe) SHA1(18c87c744fbeca35d13033e50f62e5383eb4ec2c) )
+
+	ROM_REGION( 0x80000, "ymsnd", 0 )   /* samples */
+	ROM_LOAD( "c02-01.31", 0x00000, 0x80000, CRC(d5a3d1aa) SHA1(544f807015b5d854a4d8cb73e4dbae4b953fd440) )
+ROM_END
+
+ROM_START( dleaguej )
 	ROM_REGION( 0x60000, "maincpu", 0 )
 	ROM_LOAD16_BYTE( "c02-19a.33", 0x00000, 0x20000, CRC(7e904e45) SHA1(04ac470c973753e71fba3998099a88ab0e6fcbab) )
 	ROM_LOAD16_BYTE( "c02-21a.36", 0x00001, 0x20000, CRC(18c8a32b) SHA1(507cd7a83dcb6eaefa52f2661b9f3a6fabbfbd46) )
@@ -827,13 +848,14 @@ ROM_START( dleague )
 	ROM_REGION( 0x02000, "user1", 0 ) /* zoom table / mixing? */
 	ROM_LOAD( "c02-18.22", 0x00000, 0x02000, CRC(c88f0bbe) SHA1(18c87c744fbeca35d13033e50f62e5383eb4ec2c) )
 
-	ROM_REGION( 0x80000, "ymsnd", 0 )	/* samples */
+	ROM_REGION( 0x80000, "ymsnd", 0 )   /* samples */
 	ROM_LOAD( "c02-01.31", 0x00000, 0x80000, CRC(d5a3d1aa) SHA1(544f807015b5d854a4d8cb73e4dbae4b953fd440) )
 ROM_END
 
 
-/*  ( YEAR  NAME      PARENT    MACHINE   INPUT     INIT     MONITOR  COMPANY  FULLNAME */
-GAME( 1988, syvalion, 0,        syvalion, syvalion, 0,       ROT0,    "Taito Corporation",       "Syvalion (Japan)",        GAME_SUPPORTS_SAVE )
-GAME( 1988, recordbr, 0,        recordbr, recordbr, 0,       ROT0,    "Taito Corporation Japan", "Recordbreaker (World)",   GAME_SUPPORTS_SAVE )
-GAME( 1988, gogold,   recordbr, recordbr, gogold,   0,       ROT0,    "Taito Corporation",       "Go For The Gold (Japan)", GAME_SUPPORTS_SAVE )
-GAME( 1990, dleague,  0,        dleague,  dleague,  0,       ROT0,    "Taito Corporation",       "Dynamite League (Japan)", GAME_SUPPORTS_SAVE )
+/*  ( YEAR  NAME      PARENT    MACHINE   INPUT     INIT     MONITOR  COMPANY                      FULLNAME */
+GAME( 1988, syvalion, 0,        syvalion, syvalion, driver_device, 0,       ROT0,    "Taito Corporation",         "Syvalion (Japan)",        GAME_SUPPORTS_SAVE )
+GAME( 1988, recordbr, 0,        recordbr, recordbr, driver_device, 0,       ROT0,    "Taito Corporation Japan",   "Recordbreaker (World)",   GAME_SUPPORTS_SAVE )
+GAME( 1988, gogold,   recordbr, recordbr, gogold, driver_device,   0,       ROT0,    "Taito Corporation",         "Go For The Gold (Japan)", GAME_SUPPORTS_SAVE )
+GAME( 1990, dleague,  0,        dleague,  dleague, driver_device,  0,       ROT0,    "Taito America Corporation", "Dynamite League (US)", GAME_SUPPORTS_SAVE )
+GAME( 1990, dleaguej, dleague,  dleague,  dleaguej, driver_device, 0,       ROT0,    "Taito Corporation",         "Dynamite League (Japan)", GAME_SUPPORTS_SAVE )

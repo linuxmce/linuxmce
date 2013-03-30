@@ -20,8 +20,6 @@
  - tmpdoki isn't a dual screen game, we should remove the dual screen layout from VIDEO_UPDATE and from the MACHINE_DRIVER, also notice that MAME
    doesn't have a macro for removing previously declared screens.
 
- - sound (see rabbit.c for preliminary details, not copied here)
-
  - sprites from one screen are overlapping on the other, probably there's a way to limit them to a single screen
 
  - priority is wrong.
@@ -31,59 +29,78 @@
 
 #include "emu.h"
 #include "cpu/m68000/m68000.h"
-#include "deprecat.h"
 #include "machine/eeprom.h"
+#include "sound/i5000.h"
 #include "rendlay.h"
 
 
 class tmmjprd_state : public driver_device
 {
 public:
-	tmmjprd_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	tmmjprd_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+			m_tilemap_regs(*this, "tilemap_regs"),
+			m_spriteregs(*this, "spriteregs"),
+			m_spriteram(*this, "spriteram") { }
 
-	UINT32 *m_tilemap_regs[4];
-	UINT32 *m_spriteregs;
+	required_shared_ptr_array<UINT32, 4> m_tilemap_regs;
+	required_shared_ptr<UINT32> m_spriteregs;
 	UINT32 *m_tilemap_ram[4];
-	UINT32 *m_spriteram;
+	required_shared_ptr<UINT32> m_spriteram;
 	UINT8 m_mux_data;
 	UINT8 m_system_in;
 	double m_old_brt1;
 	double m_old_brt2;
+	DECLARE_WRITE32_MEMBER(tmmjprd_tilemap0_w);
+	DECLARE_WRITE32_MEMBER(tmmjprd_tilemap1_w);
+	DECLARE_WRITE32_MEMBER(tmmjprd_tilemap2_w);
+	DECLARE_WRITE32_MEMBER(tmmjprd_tilemap3_w);
+	DECLARE_READ32_MEMBER(tmmjprd_tilemap0_r);
+	DECLARE_READ32_MEMBER(tmmjprd_tilemap1_r);
+	DECLARE_READ32_MEMBER(tmmjprd_tilemap2_r);
+	DECLARE_READ32_MEMBER(tmmjprd_tilemap3_r);
+	DECLARE_READ32_MEMBER(randomtmmjprds);
+	DECLARE_WRITE32_MEMBER(tmmjprd_blitter_w);
+	DECLARE_READ32_MEMBER(tmmjprd_mux_r);
+	DECLARE_WRITE32_MEMBER(tmmjprd_paletteram_dword_w);
+	DECLARE_WRITE32_MEMBER(tmmjprd_brt_1_w);
+	DECLARE_WRITE32_MEMBER(tmmjprd_brt_2_w);
+	DECLARE_WRITE32_MEMBER(tmmjprd_eeprom_write);
+	virtual void video_start();
+	UINT32 screen_update_tmmjprd_left(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_tmmjprd_right(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	TIMER_CALLBACK_MEMBER(tmmjprd_blit_done);
+	TIMER_DEVICE_CALLBACK_MEMBER(tmmjprd_scanline);
 };
 
 
-static WRITE32_HANDLER( tmmjprd_tilemap0_w )
+WRITE32_MEMBER(tmmjprd_state::tmmjprd_tilemap0_w)
 {
-	tmmjprd_state *state = space->machine().driver_data<tmmjprd_state>();
-	COMBINE_DATA(&state->m_tilemap_ram[0][offset]);
+	COMBINE_DATA(&m_tilemap_ram[0][offset]);
 }
 
 
 
-static WRITE32_HANDLER( tmmjprd_tilemap1_w )
+WRITE32_MEMBER(tmmjprd_state::tmmjprd_tilemap1_w)
 {
-	tmmjprd_state *state = space->machine().driver_data<tmmjprd_state>();
-	COMBINE_DATA(&state->m_tilemap_ram[1][offset]);
+	COMBINE_DATA(&m_tilemap_ram[1][offset]);
 }
 
-static WRITE32_HANDLER( tmmjprd_tilemap2_w )
+WRITE32_MEMBER(tmmjprd_state::tmmjprd_tilemap2_w)
 {
-	tmmjprd_state *state = space->machine().driver_data<tmmjprd_state>();
-	COMBINE_DATA(&state->m_tilemap_ram[2][offset]);
+	COMBINE_DATA(&m_tilemap_ram[2][offset]);
 }
 
-static WRITE32_HANDLER( tmmjprd_tilemap3_w )
+WRITE32_MEMBER(tmmjprd_state::tmmjprd_tilemap3_w)
 {
-	tmmjprd_state *state = space->machine().driver_data<tmmjprd_state>();
-	COMBINE_DATA(&state->m_tilemap_ram[3][offset]);
+	COMBINE_DATA(&m_tilemap_ram[3][offset]);
 }
 
-static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, int screen)
+static void draw_sprites(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, int screen)
 {
 	tmmjprd_state *state = machine.driver_data<tmmjprd_state>();
 	int xpos,ypos,tileno,xflip,yflip, colr;
-	const gfx_element *gfx = machine.gfx[0];
+	gfx_element *gfx = machine.gfx[0];
 	int xoffs;
 	//  int todraw = (state->m_spriteregs[5]&0x0fff0000)>>16; // how many sprites to draw (start/end reg..) what is the other half?
 
@@ -156,7 +173,7 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 	}
 }
 
-static void ttmjprd_draw_tile(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, int x,int y,int sizex,int sizey, UINT32 tiledata, UINT8* rom)
+static void ttmjprd_draw_tile(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, int x,int y,int sizex,int sizey, UINT32 tiledata, UINT8* rom)
 {
 	/* note, it's tile address _NOT_ tile number, 'sub-tile' access is possible, hence using the custom rendering */
 	int tileaddr = (tiledata&0x000fffff)>>0;
@@ -168,19 +185,19 @@ static void ttmjprd_draw_tile(running_machine &machine, bitmap_t *bitmap, const 
 	int count;
 
 	// entirely off right
-	if (x > cliprect->max_x)
+	if (x > cliprect.max_x)
 		return;
 
 	// entirely off left
-	if ((x+sizex) < cliprect->min_x)
+	if ((x+sizex) < cliprect.min_x)
 		return;
 
 	// entirely off bottom
-	if (y > cliprect->max_y)
+	if (y > cliprect.max_y)
 		return;
 
 	// entirely off bottom
-	if ((y+sizey) < cliprect->min_y)
+	if ((y+sizey) < cliprect.min_y)
 		return;
 
 	count = 0;
@@ -193,24 +210,24 @@ static void ttmjprd_draw_tile(running_machine &machine, bitmap_t *bitmap, const 
 
 			if (!depth)
 			{
-				if ((drawx < cliprect->max_x) && (drawx > cliprect->min_x) && (drawy < cliprect->max_y) && (drawy > cliprect->min_y))
+				if (cliprect.contains(drawx, drawy))
 				{
 					dat = (rom[(tileaddr*32)+count] & 0xf0)>>4;
 					if (dat!=15)
 					{
 						//dat += (colour<<8);
-						dst = BITMAP_ADDR16(bitmap, drawy, drawx);
+						dst = &bitmap.pix16(drawy, drawx);
 						dst[0] = dat;
 					}
 				}
 				drawx++;
-				if ((drawx < cliprect->max_x) && (drawx > cliprect->min_x) && (drawy < cliprect->max_y) && (drawy > cliprect->min_y))
+				if (cliprect.contains(drawx, drawy))
 				{
 					dat = (rom[(tileaddr*32)+count] & 0x0f);
 					if (dat!=15)
 					{
 						//dat += (colour<<8);
-						dst = BITMAP_ADDR16(bitmap, drawy, drawx);
+						dst = &bitmap.pix16(drawy, drawx);
 						dst[0] = dat;
 					}
 				}
@@ -219,13 +236,13 @@ static void ttmjprd_draw_tile(running_machine &machine, bitmap_t *bitmap, const 
 			}
 			else
 			{
-				if ((drawx < cliprect->max_x) && (drawx > cliprect->min_x) && (drawy < cliprect->max_y) && (drawy > cliprect->min_y))
+				if (cliprect.contains(drawx, drawy))
 				{
 					dat = (rom[(tileaddr*32)+count] & 0xff);
 					if (dat!=255)
 					{
 						dat += (colour<<8) & 0xf00;
-						dst = BITMAP_ADDR16(bitmap, drawy, drawx);
+						dst = &bitmap.pix16(drawy, drawx);
 						dst[0] = dat;
 					}
 				}
@@ -235,7 +252,7 @@ static void ttmjprd_draw_tile(running_machine &machine, bitmap_t *bitmap, const 
 	}
 }
 
-static void ttmjprd_draw_tilemap(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, UINT32*tileram, UINT32*tileregs, UINT8*rom )
+static void ttmjprd_draw_tilemap(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, UINT32*tileram, UINT32*tileregs, UINT8*rom )
 {
 	int y,x;
 	int count;
@@ -276,90 +293,86 @@ static void ttmjprd_draw_tilemap(running_machine &machine, bitmap_t *bitmap, con
 
 }
 
-static SCREEN_UPDATE( tmmjprd )
+UINT32 tmmjprd_state::screen_update_tmmjprd_left(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	tmmjprd_state *state = screen->machine().driver_data<tmmjprd_state>();
-	UINT8* gfxroms = screen->machine().region("gfx2")->base();
-	device_t *left_screen  = screen->machine().device("lscreen");
-	device_t *right_screen = screen->machine().device("rscreen");
+	UINT8* gfxroms = memregion("gfx2")->base();
 
-	bitmap_fill(bitmap,cliprect,get_black_pen(screen->machine()));
+	bitmap.fill(get_black_pen(machine()), cliprect);
 
-	if (screen == left_screen)
-	{
-		ttmjprd_draw_tilemap( screen->machine(), bitmap, cliprect, state->m_tilemap_ram[3], state->m_tilemap_regs[3], gfxroms );
-		draw_sprites(screen->machine(),bitmap,cliprect, 1);
-		ttmjprd_draw_tilemap( screen->machine(), bitmap, cliprect, state->m_tilemap_ram[2], state->m_tilemap_regs[2], gfxroms );
-	}
-	if (screen == right_screen)
-	{
-		ttmjprd_draw_tilemap( screen->machine(), bitmap, cliprect, state->m_tilemap_ram[1], state->m_tilemap_regs[1], gfxroms );
-		draw_sprites(screen->machine(),bitmap,cliprect, 0);
-		ttmjprd_draw_tilemap( screen->machine(), bitmap, cliprect, state->m_tilemap_ram[0], state->m_tilemap_regs[0], gfxroms );
-	}
+	ttmjprd_draw_tilemap( machine(), bitmap, cliprect, m_tilemap_ram[3], m_tilemap_regs[3], gfxroms );
+	draw_sprites(machine(),bitmap,cliprect, 1);
+	ttmjprd_draw_tilemap( machine(), bitmap, cliprect, m_tilemap_ram[2], m_tilemap_regs[2], gfxroms );
 
 	/*
-    popmessage("%08x %08x %08x %08x %08x %08x",
-    state->m_tilemap_regs[2][0],
-    state->m_tilemap_regs[2][1],
-    state->m_tilemap_regs[2][2],
-    state->m_tilemap_regs[2][3],
-    state->m_tilemap_regs[2][4],
-    state->m_tilemap_regs[2][5]);
-    */
+	popmessage("%08x %08x %08x %08x %08x %08x",
+	m_tilemap_regs[2][0],
+	m_tilemap_regs[2][1],
+	m_tilemap_regs[2][2],
+	m_tilemap_regs[2][3],
+	m_tilemap_regs[2][4],
+	m_tilemap_regs[2][5]);
+	*/
 
 /*
     popmessage("%08x %08x %08x %08x %08x %08x %08x",
-    state->m_spriteregs[0],
-    state->m_spriteregs[1],
-    state->m_spriteregs[2],
-    state->m_spriteregs[3],
-    state->m_spriteregs[4],
-    state->m_spriteregs[5],
-    state->m_spriteregs[6]);
+    m_spriteregs[0],
+    m_spriteregs[1],
+    m_spriteregs[2],
+    m_spriteregs[3],
+    m_spriteregs[4],
+    m_spriteregs[5],
+    m_spriteregs[6]);
 */
 
 	return 0;
 }
 
-static VIDEO_START(tmmjprd)
+UINT32 tmmjprd_state::screen_update_tmmjprd_right(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	tmmjprd_state *state = machine.driver_data<tmmjprd_state>();
+	UINT8* gfxroms = memregion("gfx2")->base();
+
+	bitmap.fill(get_black_pen(machine()), cliprect);
+
+	ttmjprd_draw_tilemap( machine(), bitmap, cliprect, m_tilemap_ram[1], m_tilemap_regs[1], gfxroms );
+	draw_sprites(machine(),bitmap,cliprect, 0);
+	ttmjprd_draw_tilemap( machine(), bitmap, cliprect, m_tilemap_ram[0], m_tilemap_regs[0], gfxroms );
+
+	return 0;
+}
+
+void tmmjprd_state::video_start()
+{
 	/* the tilemaps are bigger than the regions the cpu can see, need to allocate the ram here */
 	/* or maybe not for this game/hw .... */
-	state->m_tilemap_ram[0] = auto_alloc_array_clear(machine, UINT32, 0x8000);
-	state->m_tilemap_ram[1] = auto_alloc_array_clear(machine, UINT32, 0x8000);
-	state->m_tilemap_ram[2] = auto_alloc_array_clear(machine, UINT32, 0x8000);
-	state->m_tilemap_ram[3] = auto_alloc_array_clear(machine, UINT32, 0x8000);
+	m_tilemap_ram[0] = auto_alloc_array_clear(machine(), UINT32, 0x8000);
+	m_tilemap_ram[1] = auto_alloc_array_clear(machine(), UINT32, 0x8000);
+	m_tilemap_ram[2] = auto_alloc_array_clear(machine(), UINT32, 0x8000);
+	m_tilemap_ram[3] = auto_alloc_array_clear(machine(), UINT32, 0x8000);
 }
 
-static READ32_HANDLER( tmmjprd_tilemap0_r )
+READ32_MEMBER(tmmjprd_state::tmmjprd_tilemap0_r)
 {
-	tmmjprd_state *state = space->machine().driver_data<tmmjprd_state>();
-	return state->m_tilemap_ram[0][offset];
+	return m_tilemap_ram[0][offset];
 }
 
-static READ32_HANDLER( tmmjprd_tilemap1_r )
+READ32_MEMBER(tmmjprd_state::tmmjprd_tilemap1_r)
 {
-	tmmjprd_state *state = space->machine().driver_data<tmmjprd_state>();
-	return state->m_tilemap_ram[1][offset];
+	return m_tilemap_ram[1][offset];
 }
 
-static READ32_HANDLER( tmmjprd_tilemap2_r )
+READ32_MEMBER(tmmjprd_state::tmmjprd_tilemap2_r)
 {
-	tmmjprd_state *state = space->machine().driver_data<tmmjprd_state>();
-	return state->m_tilemap_ram[2][offset];
+	return m_tilemap_ram[2][offset];
 }
 
-static READ32_HANDLER( tmmjprd_tilemap3_r )
+READ32_MEMBER(tmmjprd_state::tmmjprd_tilemap3_r)
 {
-	tmmjprd_state *state = space->machine().driver_data<tmmjprd_state>();
-	return state->m_tilemap_ram[3][offset];
+	return m_tilemap_ram[3][offset];
 }
 
-static READ32_HANDLER( randomtmmjprds )
+READ32_MEMBER(tmmjprd_state::randomtmmjprds)
 {
-	return 0x0000;//space->machine().rand();
+	return 0x0000;//machine().rand();
 }
 
 
@@ -367,15 +380,15 @@ static READ32_HANDLER( randomtmmjprds )
 #define BLITLOG 0
 
 #if 0
-static TIMER_CALLBACK( tmmjprd_blit_done )
+TIMER_CALLBACK_MEMBER(tmmjprd_state::tmmjprd_blit_done)
 {
-	cputag_set_input_line(machine, "maincpu", 3, HOLD_LINE);
+	machine().device("maincpu")->execute().set_input_line(3, HOLD_LINE);
 }
 
 static void tmmjprd_do_blit(running_machine &machine)
 {
 	tmmjprd_state *state = machine.driver_data<tmmjprd_state>();
-	UINT8 *blt_data = machine.region("gfx1")->base();
+	UINT8 *blt_data = state->memregion("gfx1")->base();
 	int blt_source = (tmmjprd_blitterregs[0]&0x000fffff)>>0;
 	int blt_column = (tmmjprd_blitterregs[1]&0x00ff0000)>>16;
 	int blt_line   = (tmmjprd_blitterregs[1]&0x000000ff);
@@ -417,7 +430,7 @@ static void tmmjprd_do_blit(running_machine &machine)
 				if (!blt_amount)
 				{
 					if(BLITLOG) mame_printf_debug("end of blit list\n");
-					machine.scheduler().timer_set(attotime::from_usec(500), FUNC(tmmjprd_blit_done));
+					machine.scheduler().timer_set(attotime::from_usec(500), timer_expired_delegate(FUNC(tmmjprd_state::tmmjprd_blit_done),this));
 					return;
 				}
 
@@ -428,7 +441,7 @@ static void tmmjprd_do_blit(running_machine &machine)
 					blt_source+=2;
 					writeoffs=blt_oddflg+blt_column;
 					state->m_tilemap_ram[blt_tilemp][writeoffs]=(state->m_tilemap_ram[blt_tilemp][writeoffs]&mask)|(blt_value<<shift);
-					tilemap_mark_tile_dirty(tmmjprd_tilemap[blt_tilemp],writeoffs);
+					tmmjprd_tilemap[blt_tilemp]->mark_tile_dirty(writeoffs);
 
 					blt_column++;
 					blt_column&=0x7f;
@@ -445,7 +458,7 @@ static void tmmjprd_do_blit(running_machine &machine)
 				{
 					writeoffs=blt_oddflg+blt_column;
 					state->m_tilemap_ram[blt_tilemp][writeoffs]=(state->m_tilemap_ram[blt_tilemp][writeoffs]&mask)|(blt_value<<shift);
-					tilemap_mark_tile_dirty(tmmjprd_tilemap[blt_tilemp],writeoffs);
+					tmmjprd_tilemap[blt_tilemp]->mark_tile_dirty(writeoffs);
 					blt_column++;
 					blt_column&=0x7f;
 				}
@@ -468,55 +481,55 @@ static void tmmjprd_do_blit(running_machine &machine)
 
 
 
-static WRITE32_HANDLER( tmmjprd_blitter_w )
+WRITE32_MEMBER(tmmjprd_state::tmmjprd_blitter_w)
 {
 	COMBINE_DATA(&tmmjprd_blitterregs[offset]);
 
 	if (offset == 0x0c/4)
 	{
-		tmmjprd_do_blit(space->machine());
+		tmmjprd_do_blit(machine());
 	}
 }
 #endif
 
 
-static WRITE32_DEVICE_HANDLER( tmmjprd_eeprom_write )
+WRITE32_MEMBER(tmmjprd_state::tmmjprd_eeprom_write)
 {
-	tmmjprd_state *state = device->machine().driver_data<tmmjprd_state>();
+	device_t *device = machine().device("eeprom");
 	// don't disturb the EEPROM if we're not actually writing to it
 	// (in particular, data & 0x100 here with mask = ffff00ff looks to be the watchdog)
 	if (mem_mask == 0x000000ff)
-		state->m_mux_data = (~data & 0xff);
+		m_mux_data = (~data & 0xff);
 
 	if (mem_mask == 0xff000000)
 	{
 		// latch the bit
-		eeprom_write_bit(device, data & 0x01000000);
+		eeprom_device *eeprom = downcast<eeprom_device *>(device);
+		eeprom->write_bit(data & 0x01000000);
 
 		// reset line asserted: reset.
-		eeprom_set_cs_line(device, (data & 0x04000000) ? CLEAR_LINE : ASSERT_LINE );
+		eeprom->set_cs_line((data & 0x04000000) ? CLEAR_LINE : ASSERT_LINE );
 
 		// clock line asserted: write latch or select next bit to read
-		eeprom_set_clock_line(device, (data & 0x02000000) ? ASSERT_LINE : CLEAR_LINE );
+		eeprom->set_clock_line((data & 0x02000000) ? ASSERT_LINE : CLEAR_LINE );
 	}
 }
 
-static READ32_HANDLER( tmmjprd_mux_r )
+READ32_MEMBER(tmmjprd_state::tmmjprd_mux_r)
 {
-	tmmjprd_state *state = space->machine().driver_data<tmmjprd_state>();
 
-	state->m_system_in = input_port_read(space->machine(), "SYSTEM");
+	m_system_in = ioport("SYSTEM")->read();
 
-	switch(state->m_mux_data)
+	switch(m_mux_data)
 	{
-		case 0x01: return (state->m_system_in & 0xff) | (input_port_read(space->machine(), "PL1_1")<<8) | (input_port_read(space->machine(), "PL2_1")<<16) | 0xff000000;
-		case 0x02: return (state->m_system_in & 0xff) | (input_port_read(space->machine(), "PL1_2")<<8) | (input_port_read(space->machine(), "PL2_2")<<16) | 0xff000000;
-		case 0x04: return (state->m_system_in & 0xff) | (input_port_read(space->machine(), "PL1_3")<<8) | (input_port_read(space->machine(), "PL2_3")<<16) | 0xff000000;
-		case 0x08: return (state->m_system_in & 0xff) | (input_port_read(space->machine(), "PL1_4")<<8) | (input_port_read(space->machine(), "PL2_4")<<16) | 0xff000000;
-		case 0x10: return (state->m_system_in & 0xff) | (input_port_read(space->machine(), "PL1_5")<<8) | (input_port_read(space->machine(), "PL2_5")<<16) | 0xff000000;
+		case 0x01: return (m_system_in & 0xff) | (ioport("PL1_1")->read()<<8) | (ioport("PL2_1")->read()<<16) | 0xff000000;
+		case 0x02: return (m_system_in & 0xff) | (ioport("PL1_2")->read()<<8) | (ioport("PL2_2")->read()<<16) | 0xff000000;
+		case 0x04: return (m_system_in & 0xff) | (ioport("PL1_3")->read()<<8) | (ioport("PL2_3")->read()<<16) | 0xff000000;
+		case 0x08: return (m_system_in & 0xff) | (ioport("PL1_4")->read()<<8) | (ioport("PL2_4")->read()<<16) | 0xff000000;
+		case 0x10: return (m_system_in & 0xff) | (ioport("PL1_5")->read()<<8) | (ioport("PL2_5")->read()<<16) | 0xff000000;
 	}
 
-	return (state->m_system_in & 0xff) | 0xffffff00;
+	return (m_system_in & 0xff) | 0xffffff00;
 }
 
 static INPUT_PORTS_START( tmmjprd )
@@ -528,7 +541,7 @@ static INPUT_PORTS_START( tmmjprd )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_COIN4 ) PORT_NAME("Right Screen Coin B") // might actually be service 1
 	PORT_SERVICE( 0x20, IP_ACTIVE_LOW )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE("eeprom", eeprom_read_bit)	// CHECK!
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE_MEMBER("eeprom", eeprom_device, read_bit)   // CHECK!
 
 	PORT_START("PL1_1")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_MAHJONG_A ) PORT_PLAYER(1)
@@ -606,24 +619,23 @@ static INPUT_PORTS_START( tmmjprd )
 INPUT_PORTS_END
 
 
-static WRITE32_HANDLER( tmmjprd_paletteram_dword_w )
+WRITE32_MEMBER(tmmjprd_state::tmmjprd_paletteram_dword_w)
 {
 	int r,g,b;
-	COMBINE_DATA(&space->machine().generic.paletteram.u32[offset]);
+	COMBINE_DATA(&m_generic_paletteram_32[offset]);
 
-	b = ((space->machine().generic.paletteram.u32[offset] & 0x000000ff) >>0);
-	r = ((space->machine().generic.paletteram.u32[offset] & 0x0000ff00) >>8);
-	g = ((space->machine().generic.paletteram.u32[offset] & 0x00ff0000) >>16);
+	b = ((m_generic_paletteram_32[offset] & 0x000000ff) >>0);
+	r = ((m_generic_paletteram_32[offset] & 0x0000ff00) >>8);
+	g = ((m_generic_paletteram_32[offset] & 0x00ff0000) >>16);
 
-	palette_set_color(space->machine(),offset,MAKE_RGB(r,g,b));
+	palette_set_color(machine(),offset,MAKE_RGB(r,g,b));
 }
 
 
 /* notice that data & 0x4 is always cleared on brt_1 and set on brt_2.        *
  * My wild guess is that bits 0,1 and 2 controls what palette entries to dim. */
-static WRITE32_HANDLER( tmmjprd_brt_1_w )
+WRITE32_MEMBER(tmmjprd_state::tmmjprd_brt_1_w)
 {
-	tmmjprd_state *state = space->machine().driver_data<tmmjprd_state>();
 	int i;
 	double brt;
 	int bank;
@@ -632,17 +644,16 @@ static WRITE32_HANDLER( tmmjprd_brt_1_w )
 	brt = ((data & 0x78)>>3) / 15.0;
 	bank = data & 0x4 ? 0x800 : 0; //guess
 
-	if(data & 0x80 && state->m_old_brt1 != brt)
+	if(data & 0x80 && m_old_brt1 != brt)
 	{
-		state->m_old_brt1 = brt;
+		m_old_brt1 = brt;
 		for (i = bank; i < 0x800+bank; i++)
-			palette_set_pen_contrast(space->machine(), i, brt);
+			palette_set_pen_contrast(machine(), i, brt);
 	}
 }
 
-static WRITE32_HANDLER( tmmjprd_brt_2_w )
+WRITE32_MEMBER(tmmjprd_state::tmmjprd_brt_2_w)
 {
-	tmmjprd_state *state = space->machine().driver_data<tmmjprd_state>();
 	int i;
 	double brt;
 	int bank;
@@ -651,45 +662,43 @@ static WRITE32_HANDLER( tmmjprd_brt_2_w )
 	brt = ((data & 0x78)>>3) / 15.0;
 	bank = data & 0x4 ? 0x800 : 0; //guess
 
-	if(data & 0x80 && state->m_old_brt2 != brt)
+	if(data & 0x80 && m_old_brt2 != brt)
 	{
-		state->m_old_brt2 = brt;
+		m_old_brt2 = brt;
 		for (i = bank; i < 0x800+bank; i++)
-			palette_set_pen_contrast(space->machine(), i, brt);
+			palette_set_pen_contrast(machine(), i, brt);
 	}
 }
 
-static ADDRESS_MAP_START( tmmjprd_map, AS_PROGRAM, 32 )
+static ADDRESS_MAP_START( tmmjprd_map, AS_PROGRAM, 32, tmmjprd_state )
 	AM_RANGE(0x000000, 0x1fffff) AM_ROM
 	AM_RANGE(0x200010, 0x200013) AM_READ(randomtmmjprds) // gfx chip status?
-	AM_RANGE(0x200980, 0x200983) AM_READ(randomtmmjprds) // sound chip status?
-	AM_RANGE(0x200984, 0x200987) AM_READ(randomtmmjprds) // sound chip status?
 	/* check these are used .. */
-//  AM_RANGE(0x200010, 0x200013) AM_WRITEONLY AM_BASE( &tmmjprd_viewregs0 )
-	AM_RANGE(0x200100, 0x200117) AM_WRITEONLY AM_BASE_MEMBER(tmmjprd_state, m_tilemap_regs[0] ) // tilemap regs1
-	AM_RANGE(0x200120, 0x200137) AM_WRITEONLY AM_BASE_MEMBER(tmmjprd_state, m_tilemap_regs[1] ) // tilemap regs2
-	AM_RANGE(0x200140, 0x200157) AM_WRITEONLY AM_BASE_MEMBER(tmmjprd_state, m_tilemap_regs[2] ) // tilemap regs3
-	AM_RANGE(0x200160, 0x200177) AM_WRITEONLY AM_BASE_MEMBER(tmmjprd_state, m_tilemap_regs[3] ) // tilemap regs4
-	AM_RANGE(0x200200, 0x20021b) AM_WRITEONLY AM_BASE_MEMBER(tmmjprd_state, m_spriteregs ) // sprregs?
-//  AM_RANGE(0x200300, 0x200303) AM_WRITE(tmmjprd_rombank_w) // used during rom testing, rombank/area select + something else?
+//  AM_RANGE(0x200010, 0x200013) AM_WRITEONLY AM_SHARE("tmmjprd_viewregs0")
+	AM_RANGE(0x200100, 0x200117) AM_WRITEONLY AM_SHARE("tilemap_regs.0" ) // tilemap regs1
+	AM_RANGE(0x200120, 0x200137) AM_WRITEONLY AM_SHARE("tilemap_regs.1" ) // tilemap regs2
+	AM_RANGE(0x200140, 0x200157) AM_WRITEONLY AM_SHARE("tilemap_regs.2" ) // tilemap regs3
+	AM_RANGE(0x200160, 0x200177) AM_WRITEONLY AM_SHARE("tilemap_regs.3" ) // tilemap regs4
+	AM_RANGE(0x200200, 0x20021b) AM_WRITEONLY AM_SHARE("spriteregs" ) // sprregs?
+//  AM_RANGE(0x200300, 0x200303) AM_WRITE_LEGACY(tmmjprd_rombank_w) // used during rom testing, rombank/area select + something else?
 	AM_RANGE(0x20040c, 0x20040f) AM_WRITE(tmmjprd_brt_1_w)
-    AM_RANGE(0x200410, 0x200413) AM_WRITE(tmmjprd_brt_2_w)
-//  AM_RANGE(0x200500, 0x200503) AM_WRITEONLY AM_BASE( &tmmjprd_viewregs7 )
-//  AM_RANGE(0x200700, 0x20070f) AM_WRITE(tmmjprd_blitter_w) AM_BASE( &tmmjprd_blitterregs )
-//  AM_RANGE(0x200800, 0x20080f) AM_WRITEONLY AM_BASE( &tmmjprd_viewregs9 ) // never changes?
-//  AM_RANGE(0x200900, 0x20098f) AM_WRITE(tmmjprd_audio_w)
+	AM_RANGE(0x200410, 0x200413) AM_WRITE(tmmjprd_brt_2_w)
+//  AM_RANGE(0x200500, 0x200503) AM_WRITEONLY AM_SHARE("tmmjprd_viewregs7")
+//  AM_RANGE(0x200700, 0x20070f) AM_WRITE(tmmjprd_blitter_w) AM_SHARE("tmmjprd_blitterregs")
+//  AM_RANGE(0x200800, 0x20080f) AM_WRITEONLY AM_SHARE("tmmjprd_viewregs9") // never changes?
+	AM_RANGE(0x200900, 0x2009ff) AM_DEVREADWRITE16("i5000snd", i5000snd_device, read, write, 0xffffffff)
 	/* hmm */
-//  AM_RANGE(0x279700, 0x279713) AM_WRITEONLY AM_BASE( &tmmjprd_viewregs10 )
+//  AM_RANGE(0x279700, 0x279713) AM_WRITEONLY AM_SHARE("tmmjprd_viewregs10")
 	/* tilemaps */
 	AM_RANGE(0x280000, 0x283fff) AM_READWRITE(tmmjprd_tilemap0_r,tmmjprd_tilemap0_w)
 	AM_RANGE(0x284000, 0x287fff) AM_READWRITE(tmmjprd_tilemap1_r,tmmjprd_tilemap1_w)
 	AM_RANGE(0x288000, 0x28bfff) AM_READWRITE(tmmjprd_tilemap2_r,tmmjprd_tilemap2_w)
 	AM_RANGE(0x28c000, 0x28ffff) AM_READWRITE(tmmjprd_tilemap3_r,tmmjprd_tilemap3_w)
 	/* ?? is palette ram shared with sprites in this case or just a different map */
-	AM_RANGE(0x290000, 0x29bfff) AM_RAM AM_BASE_MEMBER(tmmjprd_state, m_spriteram)
-	AM_RANGE(0x29c000, 0x29ffff) AM_RAM_WRITE(tmmjprd_paletteram_dword_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x290000, 0x29bfff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0x29c000, 0x29ffff) AM_RAM_WRITE(tmmjprd_paletteram_dword_w) AM_SHARE("paletteram")
 
-	AM_RANGE(0x400000, 0x400003) AM_READ(tmmjprd_mux_r) AM_DEVWRITE("eeprom", tmmjprd_eeprom_write)
+	AM_RANGE(0x400000, 0x400003) AM_READ(tmmjprd_mux_r) AM_WRITE(tmmjprd_eeprom_write)
 	AM_RANGE(0xf00000, 0xffffff) AM_RAM
 ADDRESS_MAP_END
 
@@ -724,22 +733,23 @@ static GFXDECODE_START( tmmjprd )
 GFXDECODE_END
 
 
-static INTERRUPT_GEN( tmmjprd_interrupt )
+TIMER_DEVICE_CALLBACK_MEMBER(tmmjprd_state::tmmjprd_scanline)
 {
-	int intlevel = 0;
+	int scanline = param;
 
-	if (cpu_getiloops(device)==0)
-		intlevel = 5;
-	else
-		intlevel = 3;
+	if(scanline == 224) // vblank-out irq
+		machine().device("maincpu")->execute().set_input_line(5, HOLD_LINE);
 
-	device_set_input_line(device, intlevel, HOLD_LINE);
+	if(scanline == 736) // blitter irq?
+		machine().device("maincpu")->execute().set_input_line(3, HOLD_LINE);
+
 }
 
 static MACHINE_CONFIG_START( tmmjprd, tmmjprd_state )
 	MCFG_CPU_ADD("maincpu",M68EC020,24000000) /* 24 MHz */
 	MCFG_CPU_PROGRAM_MAP(tmmjprd_map)
-	MCFG_CPU_VBLANK_INT_HACK(tmmjprd_interrupt,2)
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("scantimer", tmmjprd_state, tmmjprd_scanline, "lscreen", 0, 1)
+
 	MCFG_EEPROM_93C46_ADD("eeprom")
 
 	MCFG_GFXDECODE(tmmjprd)
@@ -747,7 +757,7 @@ static MACHINE_CONFIG_START( tmmjprd, tmmjprd_state )
 //  MCFG_SCREEN_ADD("screen", RASTER)
 //  MCFG_SCREEN_REFRESH_RATE(60)
 //  MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-//  MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
+//  MCFG_SCREEN_UPDATE_DRIVER(tmmjprd_state, screen_update)
 //  MCFG_SCREEN_SIZE(64*16, 64*16)
 //  MCFG_SCREEN_VISIBLE_AREA(0*8, 40*8-1, 0*8, 28*8-1)
 	MCFG_PALETTE_LENGTH(0x1000)
@@ -756,24 +766,28 @@ static MACHINE_CONFIG_START( tmmjprd, tmmjprd_state )
 	MCFG_DEFAULT_LAYOUT(layout_dualhsxs)
 
 	MCFG_SCREEN_ADD("lscreen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
 	MCFG_SCREEN_SIZE(64*16, 64*16)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 40*8-1, 0*8, 28*8-1)
 	//MCFG_SCREEN_VISIBLE_AREA(0*8, 64*16-1, 0*8, 64*16-1)
-	MCFG_SCREEN_UPDATE(tmmjprd)
+	MCFG_SCREEN_UPDATE_DRIVER(tmmjprd_state, screen_update_tmmjprd_left)
 
 	MCFG_SCREEN_ADD("rscreen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
 	MCFG_SCREEN_SIZE(64*16, 64*16)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 40*8-1, 0*8, 28*8-1)
 	//MCFG_SCREEN_VISIBLE_AREA(0*8, 64*16-1, 0*8, 64*16-1)
-	MCFG_SCREEN_UPDATE(tmmjprd)
+	MCFG_SCREEN_UPDATE_DRIVER(tmmjprd_state, screen_update_tmmjprd_right)
 
-	MCFG_VIDEO_START(tmmjprd)
+
+	/* sound hardware */
+	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
+
+	MCFG_I5000_SND_ADD("i5000snd", XTAL_40MHz)
+	MCFG_SOUND_ROUTE(0, "rspeaker", 1.00)
+	MCFG_SOUND_ROUTE(1, "lspeaker", 1.00)
 MACHINE_CONFIG_END
 
 static MACHINE_CONFIG_DERIVED( tmpdoki, tmmjprd )
@@ -810,8 +824,8 @@ ROM_START( tmmjprd )
 	ROM_LOAD32_WORD( "70.bin", 0x1800000, 0x400000, CRC(9b737ae4) SHA1(0b62a90d42ace81ee32db073a57731a55a32f989) )
 	ROM_LOAD32_WORD( "71.bin", 0x1800002, 0x400000, CRC(189f694e) SHA1(ad0799d4aadade51be38d824910d299257a758a3) )
 
-	ROM_REGION( 0x800000, "unknown", 0 ) /* Sound Roms? */
-	ROM_LOAD16_BYTE( "21.bin", 0x0000001, 0x400000, CRC(bb5fa8da) SHA1(620e609b3e2524d06d58844625f186fd4682205f))
+	ROM_REGION( 0x400000, "i5000snd", 0 ) /* Sound Roms */
+	ROM_LOAD( "21.bin", 0x0000000, 0x400000, CRC(bb5fa8da) SHA1(620e609b3e2524d06d58844625f186fd4682205f))
 ROM_END
 
 // single screen?
@@ -839,16 +853,16 @@ ROM_START( tmpdoki )
 	ROM_LOAD32_WORD( "51.bin", 0x0800002, 0x400000, CRC(6ba1d2ec) SHA1(bbe7309b33f213c8cb9ab7adb3221ea79f89e8b0) )
 
 	/* I think these should be different, the game attempts to draw tiles from here for the title logo, but
-       the tiles are empty.  Once the ROM check is hooked up this will be easier to confirm */
+	   the tiles are empty.  Once the ROM check is hooked up this will be easier to confirm */
 	ROM_LOAD32_WORD( "60.bin", 0x1000000, 0x400000, BAD_DUMP CRC(7cb132e0) SHA1(f9c366befec46c7f6e307111a62eede029202b16) )
 	ROM_LOAD32_WORD( "61.bin", 0x1000002, 0x400000, BAD_DUMP CRC(caa7e854) SHA1(592867e001abd0781f83a5124bf9aa62ad1aa7f3) )
 	ROM_LOAD32_WORD( "70.bin", 0x1800000, 0x400000, BAD_DUMP CRC(9b737ae4) SHA1(0b62a90d42ace81ee32db073a57731a55a32f989) )
 	ROM_LOAD32_WORD( "71.bin", 0x1800002, 0x400000, BAD_DUMP CRC(189f694e) SHA1(ad0799d4aadade51be38d824910d299257a758a3) )
 
-	ROM_REGION( 0x800000, "unknown", 0 ) /* Sound Roms? */
-	ROM_LOAD16_BYTE( "21.bin", 0x0000001, 0x400000, CRC(bb5fa8da) SHA1(620e609b3e2524d06d58844625f186fd4682205f))
+	ROM_REGION( 0x400000, "i5000snd", 0 ) /* Sound Roms */
+	ROM_LOAD( "21.bin", 0x0000000, 0x400000, CRC(bb5fa8da) SHA1(620e609b3e2524d06d58844625f186fd4682205f))
 ROM_END
 
 
-GAME( 1997, tmmjprd,       0, tmmjprd, tmmjprd, 0, ROT0, "Media / Sonnet", "Tokimeki Mahjong Paradise - Dear My Love", GAME_IMPERFECT_GRAPHICS | GAME_NO_SOUND )
-GAME( 1998, tmpdoki, tmmjprd, tmpdoki, tmmjprd, 0, ROT0, "Media / Sonnet", "Tokimeki Mahjong Paradise - Doki Doki Hen", GAME_IMPERFECT_GRAPHICS | GAME_NO_SOUND ) // missing gfx due to wrong roms?
+GAME( 1997, tmmjprd,       0, tmmjprd, tmmjprd, driver_device, 0, ROT0, "Media / Sonnet", "Tokimeki Mahjong Paradise - Dear My Love", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND )
+GAME( 1998, tmpdoki, tmmjprd, tmpdoki, tmmjprd, driver_device, 0, ROT0, "Media / Sonnet", "Tokimeki Mahjong Paradise - Doki Doki Hen", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND ) // missing gfx due to wrong roms?

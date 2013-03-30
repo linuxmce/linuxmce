@@ -12,76 +12,66 @@
 #include "includes/momoko.h"
 
 
-WRITE8_HANDLER ( momoko_fg_scrollx_w )
+WRITE8_MEMBER(momoko_state::momoko_fg_scrollx_w)
 {
-	momoko_state *state = space->machine().driver_data<momoko_state>();
-	state->m_fg_scrollx = data;
+	m_fg_scrollx = data;
 }
 
-WRITE8_HANDLER ( momoko_fg_scrolly_w )
+WRITE8_MEMBER(momoko_state::momoko_fg_scrolly_w)
 {
-	momoko_state *state = space->machine().driver_data<momoko_state>();
-	state->m_fg_scrolly = data;
+	m_fg_scrolly = data;
 }
 
-WRITE8_HANDLER ( momoko_fg_select_w )
+WRITE8_MEMBER(momoko_state::momoko_fg_select_w)
 {
-	momoko_state *state = space->machine().driver_data<momoko_state>();
-	state->m_fg_select = data & 0x0f;
-	state->m_fg_mask = data & 0x10;
+	m_fg_select = data & 0x0f;
+	m_fg_mask = data & 0x10;
 }
 
-WRITE8_HANDLER ( momoko_text_scrolly_w )
+WRITE8_MEMBER(momoko_state::momoko_text_scrolly_w)
 {
-	momoko_state *state = space->machine().driver_data<momoko_state>();
-	state->m_text_scrolly = data;
+	m_text_scrolly = data;
 }
 
-WRITE8_HANDLER ( momoko_text_mode_w )
+WRITE8_MEMBER(momoko_state::momoko_text_mode_w)
 {
-	momoko_state *state = space->machine().driver_data<momoko_state>();
-	state->m_text_mode = data;
+	m_text_mode = data;
 }
 
-WRITE8_HANDLER ( momoko_bg_scrollx_w )
+WRITE8_MEMBER(momoko_state::momoko_bg_scrollx_w)
 {
-	momoko_state *state = space->machine().driver_data<momoko_state>();
-	state->m_bg_scrollx[offset] = data;
+	m_bg_scrollx[offset] = data;
 }
 
-WRITE8_HANDLER ( momoko_bg_scrolly_w )
+WRITE8_MEMBER(momoko_state::momoko_bg_scrolly_w)
 {
-	momoko_state *state = space->machine().driver_data<momoko_state>();
-	state->m_bg_scrolly[offset] = data;
+	m_bg_scrolly[offset] = data;
 }
 
-WRITE8_HANDLER( momoko_bg_select_w )
+WRITE8_MEMBER(momoko_state::momoko_bg_select_w)
 {
-	momoko_state *state = space->machine().driver_data<momoko_state>();
-	state->m_bg_select = data & 0x0f;
-	state->m_bg_mask = data & 0x10;
+	m_bg_select = data & 0x0f;
+	m_bg_mask = data & 0x10;
 }
 
-WRITE8_HANDLER( momoko_bg_priority_w )
+WRITE8_MEMBER(momoko_state::momoko_bg_priority_w)
 {
-	momoko_state *state = space->machine().driver_data<momoko_state>();
-	state->m_bg_priority = data & 0x01;
+	m_bg_priority = data & 0x01;
 }
 
-WRITE8_HANDLER( momoko_flipscreen_w )
+WRITE8_MEMBER(momoko_state::momoko_flipscreen_w)
 {
-	momoko_state *state = space->machine().driver_data<momoko_state>();
-	state->m_flipscreen = data & 0x01;
+	m_flipscreen = data & 0x01;
 }
 
 /****************************************************************************/
 
-static void momoko_draw_bg_pri( running_machine &machine, bitmap_t *bitmap, int chr, int col, int flipx, int flipy, int x, int y, int pri )
+static void momoko_draw_bg_pri( running_machine &machine, bitmap_ind16 &bitmap, int chr, int col, int flipx, int flipy, int x, int y, int pri )
 {
 	int xx, sx, sy, px, py, dot;
 	UINT32 gfxadr;
 	UINT8 d0, d1;
-	UINT8 *BG_GFX = machine.region("gfx2")->base();
+	UINT8 *BG_GFX = machine.root_device().memregion("gfx2")->base();
 
 	for (sy = 0; sy < 8; sy++)
 	{
@@ -100,7 +90,7 @@ static void momoko_draw_bg_pri( running_machine &machine, bitmap_t *bitmap, int 
 					else      py = 7 - sy + y;
 
 				if (dot >= pri)
-					*BITMAP_ADDR16(bitmap, py, px) = col * 16 + dot + 256;
+					bitmap.pix16(py, px) = col * 16 + dot + 256;
 
 				d0 = d0 << 1;
 				d1 = d1 << 1;
@@ -111,27 +101,26 @@ static void momoko_draw_bg_pri( running_machine &machine, bitmap_t *bitmap, int 
 
 /****************************************************************************/
 
-SCREEN_UPDATE( momoko )
+UINT32 momoko_state::screen_update_momoko(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	momoko_state *state = screen->machine().driver_data<momoko_state>();
 	int x, y, dx, dy, rx, ry, radr, chr, sy, fx, fy, px, py, offs, col, pri, flip ;
-	UINT8 *spriteram = state->m_spriteram;
+	UINT8 *spriteram = m_spriteram;
 
-	UINT8 *BG_MAP     = screen->machine().region("user1")->base();
-	UINT8 *BG_COL_MAP = screen->machine().region("user2")->base();
-	UINT8 *FG_MAP     = screen->machine().region("user3")->base();
-	UINT8 *TEXT_COLOR = screen->machine().region("proms")->base();
+	UINT8 *BG_MAP     = machine().root_device().memregion("user1")->base();
+	UINT8 *BG_COL_MAP = machine().root_device().memregion("user2")->base();
+	UINT8 *FG_MAP     = machine().root_device().memregion("user3")->base();
+	UINT8 *TEXT_COLOR = memregion("proms")->base();
 
 
-	flip = state->m_flipscreen ^ (input_port_read(screen->machine(), "FAKE") & 0x01);
+	flip = m_flipscreen ^ (machine().root_device().ioport("FAKE")->read() & 0x01);
 
 	/* draw BG layer */
-	dx = (7 - state->m_bg_scrollx[0]) & 7;
-	dy = (7 - state->m_bg_scrolly[0]) & 7;
-	rx = (state->m_bg_scrollx[0] + state->m_bg_scrollx[1] * 256) >> 3;
-	ry = (state->m_bg_scrolly[0] + state->m_bg_scrolly[1] * 256) >> 3;
+	dx = (7 - m_bg_scrollx[0]) & 7;
+	dy = (7 - m_bg_scrolly[0]) & 7;
+	rx = (m_bg_scrollx[0] + m_bg_scrollx[1] * 256) >> 3;
+	ry = (m_bg_scrolly[0] + m_bg_scrolly[1] * 256) >> 3;
 
-	if (state->m_bg_mask == 0)
+	if (m_bg_mask == 0)
 	{
 		for (y = 0; y < 29; y++)
 		{
@@ -139,8 +128,8 @@ SCREEN_UPDATE( momoko )
 			{
 				radr = ((ry + y + 2) & 0x3ff) * 128 + ((rx + x) & 0x7f);
 				chr = BG_MAP[radr];
-				col = BG_COL_MAP[chr + state->m_bg_select * 512 + state->m_bg_priority * 256] & 0x0f;
-				chr = chr + state->m_bg_select * 512;
+				col = BG_COL_MAP[chr + m_bg_select * 512 + m_bg_priority * 256] & 0x0f;
+				chr = chr + m_bg_select * 512;
 
 				if (flip == 0)
 				{
@@ -153,7 +142,7 @@ SCREEN_UPDATE( momoko )
 					py = 248 - (8 * y + dy + 9);
 				}
 
-				drawgfx_opaque(bitmap,cliprect,screen->machine().gfx[1],
+				drawgfx_opaque(bitmap,cliprect,machine().gfx[1],
 					chr,
 					col,
 					flip,flip,
@@ -162,7 +151,7 @@ SCREEN_UPDATE( momoko )
 		}
 	}
 	else
-	bitmap_fill(bitmap, cliprect, 256);
+	bitmap.fill(256, cliprect);
 
 
 	/* draw sprites (momoko) */
@@ -187,7 +176,7 @@ SCREEN_UPDATE( momoko )
 			py = y + 1;
 		}
 
-		drawgfx_transpen(bitmap,cliprect,screen->machine().gfx[3],
+		drawgfx_transpen(bitmap,cliprect,machine().gfx[3],
 			chr,
 			col,
 			!fx,fy,
@@ -196,7 +185,7 @@ SCREEN_UPDATE( momoko )
 
 
 	/* draw BG layer */
-	if (state->m_bg_mask ==0)
+	if (m_bg_mask ==0)
 	{
 		for (y = 0; y < 29; y++)
 		{
@@ -204,14 +193,14 @@ SCREEN_UPDATE( momoko )
 			{
 				radr = ((ry + y + 2) & 0x3ff) * 128 + ((rx + x) & 0x7f) ;
 				chr = BG_MAP[radr] ;
-				col = BG_COL_MAP[chr + state->m_bg_select * 512 + state->m_bg_priority * 256];
+				col = BG_COL_MAP[chr + m_bg_select * 512 + m_bg_priority * 256];
 				pri = (col & 0x10) >> 1;
 
 				if (flip == 0)
 				{
 					px = 8 * x + dx - 6;
 					py = 8 * y + dy + 9;
-				 }
+					}
 				else
 				{
 					px = 248 - (8 * x + dx - 8);
@@ -220,8 +209,8 @@ SCREEN_UPDATE( momoko )
 				if (pri != 0)
 				{
 					col = col & 0x0f;
-					chr = chr + state->m_bg_select * 512;
-					momoko_draw_bg_pri(screen->machine(), bitmap, chr, col, flip, flip, px, py, pri);
+					chr = chr + m_bg_select * 512;
+					momoko_draw_bg_pri(machine(), bitmap, chr, col, flip, flip, px, py, pri);
 				}
 			}
 		}
@@ -229,7 +218,7 @@ SCREEN_UPDATE( momoko )
 
 
 	/* draw sprites (others) */
-	for (offs = 9 * 4; offs < state->m_spriteram_size; offs += 4)
+	for (offs = 9 * 4; offs < m_spriteram.bytes(); offs += 4)
 	{
 		chr = spriteram[offs + 1] | ((spriteram[offs + 2] & 0x60) << 3);
 		chr = ((chr & 0x380) << 1) | (chr & 0x7f);
@@ -249,7 +238,7 @@ SCREEN_UPDATE( momoko )
 			px = 248 - x;
 			py = y + 1;
 		}
-		drawgfx_transpen(bitmap,cliprect,screen->machine().gfx[3],
+		drawgfx_transpen(bitmap,cliprect,machine().gfx[3],
 			chr,
 			col,
 			!fx,fy,
@@ -263,12 +252,12 @@ SCREEN_UPDATE( momoko )
 		for (x = 0; x < 32; x++)
 		{
 			sy = y;
-			if (state->m_text_mode == 0)
+			if (m_text_mode == 0)
 				col = TEXT_COLOR[(sy >> 3) + 0x100] & 0x0f;
 			else
 			{
 				if (TEXT_COLOR[y] < 0x08)
-					sy += state->m_text_scrolly;
+					sy += m_text_scrolly;
 				col = (TEXT_COLOR[y] & 0x07) + 0x10;
 			}
 			dy = sy & 7;
@@ -282,8 +271,8 @@ SCREEN_UPDATE( momoko )
 				px = 248 - x * 8;
 				py = 255 - y;
 			}
-			drawgfx_transpen(bitmap,cliprect,screen->machine().gfx[0],
-				state->m_videoram[(sy >> 3) * 32 + x] * 8 + dy,
+			drawgfx_transpen(bitmap,cliprect,machine().gfx[0],
+				m_videoram[(sy >> 3) * 32 + x] * 8 + dy,
 				col,
 				flip,0,
 				px,py,0);
@@ -292,18 +281,18 @@ SCREEN_UPDATE( momoko )
 
 
 	/* draw FG layer */
-	if (state->m_fg_mask == 0)
+	if (m_fg_mask == 0)
 	{
-		dx = (7 - state->m_fg_scrollx) & 7;
-		dy = (7 - state->m_fg_scrolly) & 7;
-		rx = state->m_fg_scrollx >> 3;
-		ry = state->m_fg_scrolly >> 3;
+		dx = (7 - m_fg_scrollx) & 7;
+		dy = (7 - m_fg_scrolly) & 7;
+		rx = m_fg_scrollx >> 3;
+		ry = m_fg_scrolly >> 3;
 
 		for (y = 0; y < 29; y++)
 		{
 			for (x = 0; x < 32; x++)
 			{
-				radr = ((ry + y + 34) & 0x3f) * 0x20 + ((rx + x) & 0x1f) + (state->m_fg_select & 3) * 0x800;
+				radr = ((ry + y + 34) & 0x3f) * 0x20 + ((rx + x) & 0x1f) + (m_fg_select & 3) * 0x800;
 				chr = FG_MAP[radr] ;
 				if (flip == 0)
 				{
@@ -315,7 +304,7 @@ SCREEN_UPDATE( momoko )
 					px = 248 - (8 * x + dx - 8);
 					py = 248 - (8 * y + dy + 9);
 				}
-				drawgfx_transpen(bitmap,cliprect,screen->machine().gfx[2],
+				drawgfx_transpen(bitmap,cliprect,machine().gfx[2],
 					chr,
 					0, /* color */
 					flip,flip, /* flip */

@@ -4,126 +4,137 @@
 
 ***************************************************************************/
 
+#ifndef __KANEKO16_H__
+#define __KANEKO16_H__
+
 #include "machine/nvram.h"
-
-/*----------- defined in machine/kaneko16.c -----------*/
-
-extern UINT16 *kaneko16_mcu_ram; /* for calc3 and toybox */
-extern UINT8 kaneko16_nvram_save[128];
-
-READ16_HANDLER( galpanib_calc_r );
-WRITE16_HANDLER( galpanib_calc_w );
-
-READ16_HANDLER( bloodwar_calc_r );
-WRITE16_HANDLER( bloodwar_calc_w );
-
-void calc3_mcu_init(void);
-WRITE16_HANDLER( calc3_mcu_ram_w );
-WRITE16_HANDLER( calc3_mcu_com0_w );
-WRITE16_HANDLER( calc3_mcu_com1_w );
-WRITE16_HANDLER( calc3_mcu_com2_w );
-WRITE16_HANDLER( calc3_mcu_com3_w );
-
-void toybox_mcu_init(void);
-WRITE16_HANDLER( toybox_mcu_com0_w );
-WRITE16_HANDLER( toybox_mcu_com1_w );
-WRITE16_HANDLER( toybox_mcu_com2_w );
-WRITE16_HANDLER( toybox_mcu_com3_w );
-READ16_HANDLER( toybox_mcu_status_r );
-
-extern void (*toybox_mcu_run)(running_machine &machine);	/* one of the following */
-void bloodwar_mcu_run(running_machine &machine);
-void bonkadv_mcu_run(running_machine &machine);
-void gtmr_mcu_run(running_machine &machine);
-void calc3_mcu_run(running_machine &machine);
-
-void toxboy_handle_04_subcommand(running_machine& machine,UINT8 mcu_subcmd, UINT16*mcu_ram);
-
-DRIVER_INIT( decrypt_toybox_rom );
-DRIVER_INIT( decrypt_toybox_rom_alt );
-DRIVER_INIT( calc3_scantables );
+#include "video/kaneko_tmap.h"
+#include "video/kaneko_spr.h"
+#include "machine/kaneko_calc3.h"
+#include "machine/kaneko_toybox.h"
 
 
 
-/*----------- defined in drivers/kaneko16.c -----------*/
 
-MACHINE_RESET( kaneko16 );
-
-/*----------- defined in video/kaneko16.c -----------*/
-
-WRITE16_HANDLER( kaneko16_display_enable );
-
-/* Tile Layers: */
-
-extern UINT16 *kaneko16_vram_0,    *kaneko16_vram_1,    *kaneko16_layers_0_regs;
-extern UINT16 *kaneko16_vscroll_0, *kaneko16_vscroll_1;
-extern UINT16 *kaneko16_vram_2,    *kaneko16_vram_3,    *kaneko16_layers_1_regs;
-extern UINT16 *kaneko16_vscroll_2, *kaneko16_vscroll_3;
-
-WRITE16_HANDLER( kaneko16_vram_0_w );
-WRITE16_HANDLER( kaneko16_vram_1_w );
-WRITE16_HANDLER( kaneko16_vram_2_w );
-WRITE16_HANDLER( kaneko16_vram_3_w );
-
-WRITE16_HANDLER( kaneko16_layers_0_regs_w );
-WRITE16_HANDLER( kaneko16_layers_1_regs_w );
-
-
-/* Sprites: */
-
-extern int kaneko16_sprite_type;
-extern int kaneko16_sprite_fliptype;
-extern UINT16 kaneko16_sprite_xoffs, kaneko16_sprite_flipx;
-extern UINT16 kaneko16_sprite_yoffs, kaneko16_sprite_flipy;
-extern UINT16 *kaneko16_sprites_regs;
-
-READ16_HANDLER ( kaneko16_sprites_regs_r );
-WRITE16_HANDLER( kaneko16_sprites_regs_w );
-
-void kaneko16_draw_sprites(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect);
-
-/* Pixel Layer: */
-
-extern UINT16 *kaneko16_bg15_select, *kaneko16_bg15_reg;
-
-READ16_HANDLER ( kaneko16_bg15_select_r );
-WRITE16_HANDLER( kaneko16_bg15_select_w );
-
-READ16_HANDLER ( kaneko16_bg15_reg_r );
-WRITE16_HANDLER( kaneko16_bg15_reg_w );
-
-PALETTE_INIT( berlwall );
-
-
-/* Priorities: */
-
-typedef struct
+class kaneko16_state : public driver_device
 {
+public:
+	kaneko16_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+		m_maincpu(*this, "maincpu"),
+		m_spriteram(*this, "spriteram"),
+		m_mainram(*this, "mainram"),
+		m_view2_0(*this, "view2_0"),
+		m_view2_1(*this, "view2_1"),
+		m_kaneko_spr(*this, "kan_spr")
+	{ }
+
+	required_device<cpu_device> m_maincpu;
+	optional_shared_ptr<UINT16> m_spriteram;
+	optional_shared_ptr<UINT16> m_mainram;
+	optional_device<kaneko_view2_tilemap_device> m_view2_0;
+	optional_device<kaneko_view2_tilemap_device> m_view2_1;
+	optional_device<kaneko16_sprite_device> m_kaneko_spr;
+
+	UINT16 m_disp_enable;
+
 	int VIEW2_2_pri;
-	int sprite[4];
-}	kaneko16_priority_t;
-
-extern kaneko16_priority_t kaneko16_priority;
 
 
-/* Machine */
+	DECLARE_WRITE16_MEMBER(kaneko16_coin_lockout_w);
+	DECLARE_WRITE16_MEMBER(kaneko16_soundlatch_w);
+	DECLARE_WRITE16_MEMBER(kaneko16_eeprom_w);
 
 
-VIDEO_START( kaneko16_sprites );
-VIDEO_START( kaneko16_1xVIEW2_tilemaps );
-VIDEO_START( kaneko16_1xVIEW2 );
-VIDEO_START( kaneko16_2xVIEW2 );
-VIDEO_START( berlwall );
-VIDEO_START( sandscrp_1xVIEW2 );
+	DECLARE_WRITE16_MEMBER(kaneko16_display_enable);
+
+	DECLARE_READ16_MEMBER(kaneko16_ay1_YM2149_r);
+	DECLARE_WRITE16_MEMBER(kaneko16_ay1_YM2149_w);
+	DECLARE_READ16_MEMBER(kaneko16_ay2_YM2149_r);
+	DECLARE_WRITE16_MEMBER(kaneko16_ay2_YM2149_w);
+	DECLARE_WRITE16_MEMBER(bakubrkr_oki_bank_sw);
+
+	DECLARE_WRITE8_MEMBER(kaneko16_eeprom_reset_w);
+
+	DECLARE_DRIVER_INIT(kaneko16);
+	DECLARE_DRIVER_INIT(samplebank);
 
 
-SCREEN_UPDATE( kaneko16 );
-SCREEN_UPDATE( sandscrp );
-SCREEN_UPDATE( berlwall );
-SCREEN_UPDATE( jchan_view2 );
+	DECLARE_MACHINE_RESET(gtmr);
+	DECLARE_VIDEO_START(kaneko16);
+	DECLARE_MACHINE_RESET(mgcrystl);
+	UINT32 screen_update_kaneko16(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_common(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	TIMER_DEVICE_CALLBACK_MEMBER(kaneko16_interrupt);
+	TIMER_DEVICE_CALLBACK_MEMBER(shogwarr_interrupt);
+};
 
-VIDEO_START( galsnew );
-SCREEN_UPDATE( galsnew );
+class kaneko16_gtmr_state : public kaneko16_state
+{
+public:
+	kaneko16_gtmr_state(const machine_config &mconfig, device_type type, const char *tag)
+		: kaneko16_state(mconfig, type, tag)
+	{
+	}
 
-extern UINT16* galsnew_bg_pixram;
-extern UINT16* galsnew_fg_pixram;
+	DECLARE_WRITE16_MEMBER(bloodwar_oki_0_bank_w);
+	DECLARE_WRITE16_MEMBER(bloodwar_oki_1_bank_w);
+	DECLARE_WRITE16_MEMBER(bonkadv_oki_0_bank_w);
+	DECLARE_WRITE16_MEMBER(bonkadv_oki_1_bank_w);
+	DECLARE_WRITE16_MEMBER(gtmr_oki_0_bank_w);
+	DECLARE_WRITE16_MEMBER(gtmr_oki_1_bank_w);
+	DECLARE_WRITE16_MEMBER(bloodwar_coin_lockout_w);
+	DECLARE_READ16_MEMBER(gtmr_wheel_r);
+	DECLARE_READ16_MEMBER(gtmr2_wheel_r);
+	DECLARE_READ16_MEMBER(gtmr2_IN1_r);
+	DECLARE_DRIVER_INIT(gtmr);
+
+};
+
+
+
+class kaneko16_berlwall_state : public kaneko16_state
+{
+public:
+	kaneko16_berlwall_state(const machine_config &mconfig, device_type type, const char *tag)
+		: kaneko16_state(mconfig, type, tag),
+		m_bg15_reg(*this, "bg15_reg"),
+		m_bg15_select(*this, "bg15_select")
+	{
+	}
+
+	optional_shared_ptr<UINT16> m_bg15_reg;
+	optional_shared_ptr<UINT16> m_bg15_select;
+
+	bitmap_ind16 m_bg15_bitmap;
+
+	DECLARE_READ16_MEMBER(kaneko16_bg15_select_r);
+	DECLARE_WRITE16_MEMBER(kaneko16_bg15_select_w);
+	DECLARE_READ16_MEMBER(kaneko16_bg15_reg_r);
+	DECLARE_WRITE16_MEMBER(kaneko16_bg15_reg_w);
+
+	DECLARE_DRIVER_INIT(berlwall);
+	DECLARE_PALETTE_INIT(berlwall);
+	DECLARE_VIDEO_START(berlwall);
+	UINT32 screen_update_berlwall(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+};
+
+class kaneko16_shogwarr_state : public kaneko16_state
+{
+public:
+	kaneko16_shogwarr_state(const machine_config &mconfig, device_type type, const char *tag)
+		: kaneko16_state(mconfig, type, tag),
+		m_calc3_prot(*this, "calc3_prot")
+	{
+	}
+
+	optional_device<kaneko_calc3_device> m_calc3_prot;
+
+	DECLARE_WRITE16_MEMBER(shogwarr_oki_bank_w);
+	DECLARE_WRITE16_MEMBER(brapboys_oki_bank_w);
+
+	DECLARE_DRIVER_INIT(shogwarr);
+	DECLARE_DRIVER_INIT(brapboys);
+};
+
+#endif

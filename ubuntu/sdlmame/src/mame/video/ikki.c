@@ -11,13 +11,13 @@ Video hardware driver by Uki
 #include "emu.h"
 #include "includes/ikki.h"
 
-PALETTE_INIT( ikki )
+void ikki_state::palette_init()
 {
-	ikki_state *state = machine.driver_data<ikki_state>();
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 
 	/* allocate the colortable - extra pen for the punch through pen */
-	machine.colortable = colortable_alloc(machine, 0x101);
+	machine().colortable = colortable_alloc(machine(), 0x101);
 
 	/* create a lookup table for the palette */
 	for (i = 0; i < 0x100; i++)
@@ -26,7 +26,7 @@ PALETTE_INIT( ikki )
 		int g = pal4bit(color_prom[i + 0x100]);
 		int b = pal4bit(color_prom[i + 0x200]);
 
-		colortable_palette_set_color(machine.colortable, i, MAKE_RGB(r, g, b));
+		colortable_palette_set_color(machine().colortable, i, MAKE_RGB(r, g, b));
 	}
 
 	/* color_prom now points to the beginning of the lookup table */
@@ -40,44 +40,43 @@ PALETTE_INIT( ikki )
 		if (((i & 0x07) == 0x07) && (ctabentry == 0))
 		{
 			/* punch through */
-			state->m_punch_through_pen = i;
+			m_punch_through_pen = i;
 			ctabentry = 0x100;
 		}
 
-		colortable_entry_set_value(machine.colortable, i, ctabentry);
+		colortable_entry_set_value(machine().colortable, i, ctabentry);
 	}
 
 	/* bg lookup table */
 	for (i = 0x200; i < 0x400; i++)
 	{
 		UINT8 ctabentry = color_prom[i];
-		colortable_entry_set_value(machine.colortable, i, ctabentry);
+		colortable_entry_set_value(machine().colortable, i, ctabentry);
 	}
 }
 
-WRITE8_HANDLER( ikki_scrn_ctrl_w )
+WRITE8_MEMBER(ikki_state::ikki_scrn_ctrl_w)
 {
-	ikki_state *state = space->machine().driver_data<ikki_state>();
-	state->m_flipscreen = (data >> 2) & 1;
+	m_flipscreen = (data >> 2) & 1;
 }
 
 
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	ikki_state *state = machine.driver_data<ikki_state>();
 	UINT8 *spriteram = state->m_spriteram;
 	int y;
 	offs_t offs;
 
-	bitmap_fill(state->m_sprite_bitmap, cliprect, state->m_punch_through_pen);
+	state->m_sprite_bitmap.fill(state->m_punch_through_pen, cliprect);
 
-	for (offs = 0; offs < state->m_spriteram_size; offs += 4)
+	for (offs = 0; offs < state->m_spriteram.bytes(); offs += 4)
 	{
 		int code = (spriteram[offs + 2] & 0x80) | (spriteram[offs + 1] >> 1);
 		int color = spriteram[offs + 2] & 0x3f;
 
 		int x = spriteram[offs + 3];
-		    y = spriteram[offs + 0];
+			y = spriteram[offs + 0];
 
 		if (state->m_flipscreen)
 			x = 240 - x;
@@ -101,38 +100,36 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 	}
 
 	/* copy the sprite bitmap into the main bitmap, skipping the transparent pixels */
-	for (y = cliprect->min_y; y <= cliprect->max_y; y++)
+	for (y = cliprect.min_y; y <= cliprect.max_y; y++)
 	{
 		int x;
 
-		for (x = cliprect->min_x; x <= cliprect->max_x; x++)
+		for (x = cliprect.min_x; x <= cliprect.max_x; x++)
 		{
-			UINT16 pen = *BITMAP_ADDR16(state->m_sprite_bitmap, y, x);
+			UINT16 pen = state->m_sprite_bitmap.pix16(y, x);
 
 			if (colortable_entry_get_value(machine.colortable, pen) != 0x100)
-				*BITMAP_ADDR16(bitmap, y, x) = pen;
+				bitmap.pix16(y, x) = pen;
 		}
 	}
 }
 
 
-VIDEO_START( ikki )
+void ikki_state::video_start()
 {
-	ikki_state *state = machine.driver_data<ikki_state>();
-	state->m_sprite_bitmap = machine.primary_screen->alloc_compatible_bitmap();
-	state->save_item(NAME(*state->m_sprite_bitmap));
+	machine().primary_screen->register_screen_bitmap(m_sprite_bitmap);
+	save_item(NAME(m_sprite_bitmap));
 }
 
 
-SCREEN_UPDATE( ikki )
+UINT32 ikki_state::screen_update_ikki(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	ikki_state *state = screen->machine().driver_data<ikki_state>();
 	offs_t offs;
-	UINT8 *VIDEOATTR = screen->machine().region("user1")->base();
+	UINT8 *VIDEOATTR = memregion("user1")->base();
 
 	/* draw bg layer */
 
-	for (offs = 0; offs < (state->m_videoram_size / 2); offs++)
+	for (offs = 0; offs < (m_videoram.bytes() / 2); offs++)
 	{
 		int color, bank;
 
@@ -146,10 +143,10 @@ SCREEN_UPDATE( ikki )
 		switch (d)
 		{
 			case 0x02: /* scroll area */
-				x = sx * 8 - state->m_scroll[1];
+				x = sx * 8 - m_scroll[1];
 				if (x < 0)
 					x += 8 * 22;
-				y = (sy * 8 + ~state->m_scroll[0]) & 0xff;
+				y = (sy * 8 + ~m_scroll[0]) & 0xff;
 				break;
 
 			case 0x03: /* non-scroll area */
@@ -168,28 +165,28 @@ SCREEN_UPDATE( ikki )
 				break;
 		}
 
-		if (state->m_flipscreen)
+		if (m_flipscreen)
 		{
 			x = 248 - x;
 			y = 248 - y;
 		}
 
-		color = state->m_videoram[offs * 2];
+		color = m_videoram[offs * 2];
 		bank = (color & 0xe0) << 3;
 		color = ((color & 0x1f)<<0) | ((color & 0x80) >> 2);
 
-		drawgfx_opaque(bitmap,cliprect,screen->machine().gfx[0],
-			state->m_videoram[offs * 2 + 1] + bank,
+		drawgfx_opaque(bitmap,cliprect,machine().gfx[0],
+			m_videoram[offs * 2 + 1] + bank,
 			color,
-			state->m_flipscreen,state->m_flipscreen,
+			m_flipscreen,m_flipscreen,
 			x,y);
 	}
 
-	draw_sprites(screen->machine(), bitmap, cliprect);
+	draw_sprites(machine(), bitmap, cliprect);
 
 	/* mask sprites */
 
-	for (offs = 0; offs < (state->m_videoram_size / 2); offs++)
+	for (offs = 0; offs < (m_videoram.bytes() / 2); offs++)
 	{
 		int sx = offs / 32;
 		int sy = offs % 32;
@@ -203,20 +200,20 @@ SCREEN_UPDATE( ikki )
 			int y = sy * 8;
 			int x = sx * 8;
 
-			if (state->m_flipscreen)
+			if (m_flipscreen)
 			{
 				x = 248 - x;
 				y = 248 - y;
 			}
 
-			color = state->m_videoram[offs * 2];
+			color = m_videoram[offs * 2];
 			bank = (color & 0xe0) << 3;
 			color = ((color & 0x1f)<<0) | ((color & 0x80) >> 2);
 
-			drawgfx_opaque(bitmap,cliprect,screen->machine().gfx[0],
-				state->m_videoram[offs * 2 + 1] + bank,
+			drawgfx_opaque(bitmap,cliprect,machine().gfx[0],
+				m_videoram[offs * 2 + 1] + bank,
 				color,
-				state->m_flipscreen,state->m_flipscreen,
+				m_flipscreen,m_flipscreen,
 				x,y);
 		}
 	}

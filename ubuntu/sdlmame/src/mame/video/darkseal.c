@@ -29,52 +29,52 @@
 
 static void update_24bitcol(running_machine &machine, int offset)
 {
+	darkseal_state *state = machine.driver_data<darkseal_state>();
 	int r,g,b;
 
-	r = (machine.generic.paletteram.u16[offset] >> 0) & 0xff;
-	g = (machine.generic.paletteram.u16[offset] >> 8) & 0xff;
-	b = (machine.generic.paletteram2.u16[offset] >> 0) & 0xff;
+	r = (state->m_generic_paletteram_16[offset] >> 0) & 0xff;
+	g = (state->m_generic_paletteram_16[offset] >> 8) & 0xff;
+	b = (state->m_generic_paletteram2_16[offset] >> 0) & 0xff;
 
 	palette_set_color(machine,offset,MAKE_RGB(r,g,b));
 }
 
-WRITE16_HANDLER( darkseal_palette_24bit_rg_w )
+WRITE16_MEMBER(darkseal_state::darkseal_palette_24bit_rg_w)
 {
-	COMBINE_DATA(&space->machine().generic.paletteram.u16[offset]);
-	update_24bitcol(space->machine(), offset);
+	COMBINE_DATA(&m_generic_paletteram_16[offset]);
+	update_24bitcol(machine(), offset);
 }
 
-WRITE16_HANDLER( darkseal_palette_24bit_b_w )
+WRITE16_MEMBER(darkseal_state::darkseal_palette_24bit_b_w)
 {
-	COMBINE_DATA(&space->machine().generic.paletteram2.u16[offset]);
-	update_24bitcol(space->machine(), offset);
-}
-
-/******************************************************************************/
-
-VIDEO_START( darkseal )
-{
-
+	COMBINE_DATA(&m_generic_paletteram2_16[offset]);
+	update_24bitcol(machine(), offset);
 }
 
 /******************************************************************************/
 
-SCREEN_UPDATE( darkseal )
+void darkseal_state::video_start()
 {
-	darkseal_state *state = screen->machine().driver_data<darkseal_state>();
-	tilemap_set_flip_all(screen->machine(),state->m_flipscreen ? (TILEMAP_FLIPY | TILEMAP_FLIPX) : 0);
 
-	bitmap_fill(bitmap,cliprect,get_black_pen(screen->machine()));
+}
 
-	deco16ic_pf_update(state->m_deco_tilegen1, state->m_pf1_rowscroll, state->m_pf1_rowscroll);
-	deco16ic_pf_update(state->m_deco_tilegen2, state->m_pf3_rowscroll, state->m_pf3_rowscroll);
+/******************************************************************************/
 
-	deco16ic_tilemap_1_draw(state->m_deco_tilegen2, bitmap, cliprect, 0, 0);
-	deco16ic_tilemap_2_draw(state->m_deco_tilegen2, bitmap, cliprect, 0, 0);
+UINT32 darkseal_state::screen_update_darkseal(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
+{
+	machine().tilemap().set_flip_all(m_flipscreen ? (TILEMAP_FLIPY | TILEMAP_FLIPX) : 0);
 
-	deco16ic_tilemap_1_draw(state->m_deco_tilegen1, bitmap, cliprect, 0, 0);
-	screen->machine().device<decospr_device>("spritegen")->draw_sprites(screen->machine(), bitmap, cliprect, screen->machine().generic.buffered_spriteram.u16, 0x400);
-	deco16ic_tilemap_2_draw(state->m_deco_tilegen1, bitmap, cliprect, 0, 0);
+	bitmap.fill(get_black_pen(machine()), cliprect);
+
+	deco16ic_pf_update(m_deco_tilegen1, m_pf1_rowscroll, m_pf1_rowscroll);
+	deco16ic_pf_update(m_deco_tilegen2, m_pf3_rowscroll, m_pf3_rowscroll);
+
+	deco16ic_tilemap_1_draw(m_deco_tilegen2, bitmap, cliprect, 0, 0);
+	deco16ic_tilemap_2_draw(m_deco_tilegen2, bitmap, cliprect, 0, 0);
+
+	deco16ic_tilemap_1_draw(m_deco_tilegen1, bitmap, cliprect, 0, 0);
+	machine().device<decospr_device>("spritegen")->draw_sprites(bitmap, cliprect, m_spriteram->buffer(), 0x400);
+	deco16ic_tilemap_2_draw(m_deco_tilegen1, bitmap, cliprect, 0, 0);
 
 	return 0;
 }

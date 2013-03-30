@@ -41,20 +41,21 @@
             220 ohm
             100 ohm
 */
-PALETTE_INIT( tp84 )
+void tp84_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	static const int resistances[4] = { 1000, 470, 220, 100 };
 	double weights[4];
 	int i;
 
 	/* compute the color output resistor weights */
-	compute_resistor_weights(0,	255, -1.0,
+	compute_resistor_weights(0, 255, -1.0,
 			4, resistances, weights, 470, 0,
 			0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0);
 
 	/* allocate the colortable */
-	machine.colortable = colortable_alloc(machine, 0x100);
+	machine().colortable = colortable_alloc(machine(), 0x100);
 
 	/* create a lookup table for the palette */
 	for (i = 0; i < 0x100; i++)
@@ -83,7 +84,7 @@ PALETTE_INIT( tp84 )
 		bit3 = (color_prom[i + 0x200] >> 3) & 0x01;
 		b = combine_4_weights(weights, bit0, bit1, bit2, bit3);
 
-		colortable_palette_set_color(machine.colortable, i, MAKE_RGB(r, g, b));
+		colortable_palette_set_color(machine().colortable, i, MAKE_RGB(r, g, b));
 	}
 
 	/* color_prom now points to the beginning of the lookup table */
@@ -97,62 +98,58 @@ PALETTE_INIT( tp84 )
 		for (j = 0; j < 8; j++)
 		{
 			UINT8 ctabentry = ((~i & 0x100) >> 1) | (j << 4) | (color_prom[i] & 0x0f);
-			colortable_entry_set_value(machine.colortable, ((i & 0x100) << 3) | (j << 8) | (i & 0xff), ctabentry);
+			colortable_entry_set_value(machine().colortable, ((i & 0x100) << 3) | (j << 8) | (i & 0xff), ctabentry);
 		}
 	}
 }
 
 
-WRITE8_HANDLER( tp84_spriteram_w )
+WRITE8_MEMBER(tp84_state::tp84_spriteram_w)
 {
-	tp84_state *state = space->machine().driver_data<tp84_state>();
 	/* the game multiplexes the sprites, so update now */
-	space->machine().primary_screen->update_now();
-	state->m_spriteram[offset] = data;
+	machine().primary_screen->update_now();
+	m_spriteram[offset] = data;
 }
 
 
-READ8_HANDLER( tp84_scanline_r )
+READ8_MEMBER(tp84_state::tp84_scanline_r)
 {
 	/* reads 1V - 128V */
-	return space->machine().primary_screen->vpos();
+	return machine().primary_screen->vpos();
 }
 
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(tp84_state::get_bg_tile_info)
 {
-	tp84_state *state = machine.driver_data<tp84_state>();
-	int code = ((state->m_bg_colorram[tile_index] & 0x30) << 4) | state->m_bg_videoram[tile_index];
-	int color = ((*state->m_palette_bank & 0x07) << 6) |
-				((*state->m_palette_bank & 0x18) << 1) |
-				(state->m_bg_colorram[tile_index] & 0x0f);
-	int flags = TILE_FLIPYX(state->m_bg_colorram[tile_index] >> 6);
+	int code = ((m_bg_colorram[tile_index] & 0x30) << 4) | m_bg_videoram[tile_index];
+	int color = ((*m_palette_bank & 0x07) << 6) |
+				((*m_palette_bank & 0x18) << 1) |
+				(m_bg_colorram[tile_index] & 0x0f);
+	int flags = TILE_FLIPYX(m_bg_colorram[tile_index] >> 6);
 
-	SET_TILE_INFO(0, code, color, flags);
+	SET_TILE_INFO_MEMBER(0, code, color, flags);
 }
 
-static TILE_GET_INFO( get_fg_tile_info )
+TILE_GET_INFO_MEMBER(tp84_state::get_fg_tile_info)
 {
-	tp84_state *state = machine.driver_data<tp84_state>();
-	int code = ((state->m_fg_colorram[tile_index] & 0x30) << 4) | state->m_fg_videoram[tile_index];
-	int color = ((*state->m_palette_bank & 0x07) << 6) |
-				((*state->m_palette_bank & 0x18) << 1) |
-				(state->m_fg_colorram[tile_index] & 0x0f);
-	int flags = TILE_FLIPYX(state->m_fg_colorram[tile_index] >> 6);
+	int code = ((m_fg_colorram[tile_index] & 0x30) << 4) | m_fg_videoram[tile_index];
+	int color = ((*m_palette_bank & 0x07) << 6) |
+				((*m_palette_bank & 0x18) << 1) |
+				(m_fg_colorram[tile_index] & 0x0f);
+	int flags = TILE_FLIPYX(m_fg_colorram[tile_index] >> 6);
 
-	SET_TILE_INFO(0, code, color, flags);
+	SET_TILE_INFO_MEMBER(0, code, color, flags);
 }
 
 
-VIDEO_START( tp84 )
+void tp84_state::video_start()
 {
-	tp84_state *state = machine.driver_data<tp84_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
-	state->m_fg_tilemap = tilemap_create(machine, get_fg_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(tp84_state::get_bg_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(tp84_state::get_fg_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
 }
 
 
-static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect)
+static void draw_sprites(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	tp84_state *state = machine.driver_data<tp84_state>();
 	int offs;
@@ -175,35 +172,34 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 }
 
 
-SCREEN_UPDATE( tp84 )
+UINT32 tp84_state::screen_update_tp84(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	tp84_state *state = screen->machine().driver_data<tp84_state>();
-	rectangle clip = *cliprect;
-	const rectangle &visarea = screen->visible_area();
+	rectangle clip = cliprect;
+	const rectangle &visarea = screen.visible_area();
 
-	if (cliprect->min_y == screen->visible_area().min_y)
+	if (cliprect.min_y == screen.visible_area().min_y)
 	{
-		tilemap_mark_all_tiles_dirty_all(screen->machine());
+		machine().tilemap().mark_all_dirty();
 
-		tilemap_set_scrollx(state->m_bg_tilemap, 0, *state->m_scroll_x);
-		tilemap_set_scrolly(state->m_bg_tilemap, 0, *state->m_scroll_y);
+		m_bg_tilemap->set_scrollx(0, *m_scroll_x);
+		m_bg_tilemap->set_scrolly(0, *m_scroll_y);
 
-		tilemap_set_flip_all(screen->machine(), ((*state->m_flipscreen_x & 0x01) ? TILEMAP_FLIPX : 0) |
-									   ((*state->m_flipscreen_y & 0x01) ? TILEMAP_FLIPY : 0));
+		machine().tilemap().set_flip_all(((*m_flipscreen_x & 0x01) ? TILEMAP_FLIPX : 0) |
+										((*m_flipscreen_y & 0x01) ? TILEMAP_FLIPY : 0));
 	}
 
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
-	draw_sprites(screen->machine(), bitmap, cliprect);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
+	draw_sprites(machine(), bitmap, cliprect);
 
 	/* draw top status region */
 	clip.min_x = visarea.min_x;
 	clip.max_x = visarea.min_x + 15;
-	tilemap_draw(bitmap, &clip, state->m_fg_tilemap, 0, 0);
+	m_fg_tilemap->draw(bitmap, clip, 0, 0);
 
 	/* draw bottom status region */
 	clip.min_x = visarea.max_x - 15;
 	clip.max_x = visarea.max_x;
-	tilemap_draw(bitmap, &clip, state->m_fg_tilemap, 0, 0);
+	m_fg_tilemap->draw(bitmap, clip, 0, 0);
 
 	return 0;
 }

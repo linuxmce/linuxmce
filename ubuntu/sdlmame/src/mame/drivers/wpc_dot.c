@@ -1,28 +1,39 @@
+
 #include "emu.h"
 #include "cpu/m6809/m6809.h"
-
-extern const char layout_pinball[];
 
 class wpc_dot_state : public driver_device
 {
 public:
-	wpc_dot_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	wpc_dot_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+			m_maincpu(*this, "maincpu")
+	{ }
+
+protected:
+
+	// devices
+	required_device<cpu_device> m_maincpu;
+
+	// driver_device overrides
+	virtual void machine_reset();
+public:
+	DECLARE_DRIVER_INIT(wpc_dot);
 };
 
 
-static ADDRESS_MAP_START( wpc_dot_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( wpc_dot_map, AS_PROGRAM, 8, wpc_dot_state )
 	AM_RANGE(0x0000, 0xffff) AM_NOP
 ADDRESS_MAP_END
 
 static INPUT_PORTS_START( wpc_dot )
 INPUT_PORTS_END
 
-static MACHINE_RESET( wpc_dot )
+void wpc_dot_state::machine_reset()
 {
 }
 
-static DRIVER_INIT( wpc_dot )
+DRIVER_INIT_MEMBER(wpc_dot_state,wpc_dot)
 {
 }
 
@@ -30,11 +41,6 @@ static MACHINE_CONFIG_START( wpc_dot, wpc_dot_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6809, 2000000)
 	MCFG_CPU_PROGRAM_MAP(wpc_dot_map)
-
-	MCFG_MACHINE_RESET( wpc_dot )
-
-	/* video hardware */
-	MCFG_DEFAULT_LAYOUT(layout_pinball)
 MACHINE_CONFIG_END
 
 /*-----------------
@@ -60,6 +66,7 @@ ROM_START(gi_l9)
 	ROM_RELOAD( 0x100000 + 0x40000, 0x20000)
 	ROM_RELOAD( 0x100000 + 0x60000, 0x20000)
 ROM_END
+
 ROM_START(gi_l3)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
 	ROM_REGION(0x2000, "user1", ROMREGION_ERASEFF)
@@ -80,6 +87,7 @@ ROM_START(gi_l3)
 	ROM_RELOAD( 0x100000 + 0x40000, 0x20000)
 	ROM_RELOAD( 0x100000 + 0x60000, 0x20000)
 ROM_END
+
 ROM_START(gi_l4)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
 	ROM_REGION(0x2000, "user1", ROMREGION_ERASEFF)
@@ -100,6 +108,7 @@ ROM_START(gi_l4)
 	ROM_RELOAD( 0x100000 + 0x40000, 0x20000)
 	ROM_RELOAD( 0x100000 + 0x60000, 0x20000)
 ROM_END
+
 ROM_START(gi_l6)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
 	ROM_REGION(0x2000, "user1", ROMREGION_ERASEFF)
@@ -183,6 +192,7 @@ ROM_START(pz_f4)
 	ROM_LOAD("pz_u14.l1", 0x100000, 0x40000, CRC(4d8897ce) SHA1(7a4ac9e849dae93078ddd60adbd34f3930e4cd46))
 	ROM_RELOAD( 0x100000 + 0x40000, 0x40000)
 ROM_END
+
 ROM_START(pz_l1)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
 	ROM_REGION(0x2000, "user1", ROMREGION_ERASEFF)
@@ -201,6 +211,7 @@ ROM_START(pz_l1)
 	ROM_LOAD("pz_u14.l1", 0x100000, 0x40000, CRC(4d8897ce) SHA1(7a4ac9e849dae93078ddd60adbd34f3930e4cd46))
 	ROM_RELOAD( 0x100000 + 0x40000, 0x40000)
 ROM_END
+
 ROM_START(pz_l2)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
 	ROM_REGION(0x2000, "user1", ROMREGION_ERASEFF)
@@ -219,6 +230,7 @@ ROM_START(pz_l2)
 	ROM_LOAD("pz_u14.l1", 0x100000, 0x40000, CRC(4d8897ce) SHA1(7a4ac9e849dae93078ddd60adbd34f3930e4cd46))
 	ROM_RELOAD( 0x100000 + 0x40000, 0x40000)
 ROM_END
+
 ROM_START(pz_l3)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
 	ROM_REGION(0x2000, "user1", ROMREGION_ERASEFF)
@@ -263,7 +275,7 @@ ROM_START(sf_l1)
 ROM_END
 
 /*-----------------
-/  Terminator 2: Judgement Day
+/  Terminator 2: Judgment Day
 /------------------*/
 ROM_START(t2_l8)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
@@ -285,6 +297,7 @@ ROM_START(t2_l8)
 	ROM_RELOAD( 0x100000 + 0x40000, 0x20000)
 	ROM_RELOAD( 0x100000 + 0x60000, 0x20000)
 ROM_END
+
 ROM_START(t2_l6)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
 	ROM_REGION(0x2000, "user1", ROMREGION_ERASEFF)
@@ -305,6 +318,7 @@ ROM_START(t2_l6)
 	ROM_RELOAD( 0x100000 + 0x40000, 0x20000)
 	ROM_RELOAD( 0x100000 + 0x60000, 0x20000)
 ROM_END
+
 ROM_START(t2_p2f)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
 	ROM_REGION(0x2000, "user1", ROMREGION_ERASEFF)
@@ -325,6 +339,7 @@ ROM_START(t2_p2f)
 	ROM_RELOAD( 0x100000 + 0x40000, 0x20000)
 	ROM_RELOAD( 0x100000 + 0x60000, 0x20000)
 ROM_END
+
 ROM_START(t2_l4)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
 	ROM_REGION(0x2000, "user1", ROMREGION_ERASEFF)
@@ -345,6 +360,7 @@ ROM_START(t2_l4)
 	ROM_RELOAD( 0x100000 + 0x40000, 0x20000)
 	ROM_RELOAD( 0x100000 + 0x60000, 0x20000)
 ROM_END
+
 ROM_START(t2_l3)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
 	ROM_REGION(0x2000, "user1", ROMREGION_ERASEFF)
@@ -365,6 +381,7 @@ ROM_START(t2_l3)
 	ROM_RELOAD( 0x100000 + 0x40000, 0x20000)
 	ROM_RELOAD( 0x100000 + 0x60000, 0x20000)
 ROM_END
+
 ROM_START(t2_l2)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
 	ROM_REGION(0x2000, "user1", ROMREGION_ERASEFF)
@@ -397,21 +414,21 @@ ROM_START(tfdmd_l3)
 ROM_END
 
 
-GAME(1991,	tfdmd_l3,	0,		wpc_dot,	wpc_dot,	wpc_dot,	ROT0,	"Bally",				"WPC Test Fixture: DMD (L-3)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1991,	gi_l9,		0,		wpc_dot,	wpc_dot,	wpc_dot,	ROT0,	"Bally",				"Gilligan's Island (L-9)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1991,	gi_l3,		gi_l9,	wpc_dot,	wpc_dot,	wpc_dot,	ROT0,	"Bally",				"Gilligan's Island (L-3)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1991,	gi_l4,		gi_l9,	wpc_dot,	wpc_dot,	wpc_dot,	ROT0,	"Bally",				"Gilligan's Island (L-4)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1991,	gi_l6,		gi_l9,	wpc_dot,	wpc_dot,	wpc_dot,	ROT0,	"Bally",				"Gilligan's Island (L-6)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1992,	hshot_p8,	0,		wpc_dot,	wpc_dot,	wpc_dot,	ROT0,	"Midway",				"Hot Shot Basketball (P-8)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1991,	hurr_l2,	0,		wpc_dot,	wpc_dot,	wpc_dot,	ROT0,	"Williams",				"Hurricane (L-2)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1991,	pz_f4,		0,		wpc_dot,	wpc_dot,	wpc_dot,	ROT0,	"Bally",				"Party Zone (F-4)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1991,	pz_l1,		pz_f4,	wpc_dot,	wpc_dot,	wpc_dot,	ROT0,	"Bally",				"Party Zone (L-1)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1991,	pz_l2,		pz_f4,	wpc_dot,	wpc_dot,	wpc_dot,	ROT0,	"Bally",				"Party Zone (L-2)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1991,	pz_l3,		pz_f4,	wpc_dot,	wpc_dot,	wpc_dot,	ROT0,	"Bally",				"Party Zone (L-3)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1991,	sf_l1,		0,		wpc_dot,	wpc_dot,	wpc_dot,	ROT0,	"Williams",				"Slugfest (L-1)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1991,	t2_l8,		0,		wpc_dot,	wpc_dot,	wpc_dot,	ROT0,	"Williams",				"Terminator 2: Judgement Day (L-8)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1991,	t2_l6,		t2_l8,	wpc_dot,	wpc_dot,	wpc_dot,	ROT0,	"Williams",				"Terminator 2: Judgement Day (L-6)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1991,	t2_p2f,		t2_l8,	wpc_dot,	wpc_dot,	wpc_dot,	ROT0,	"Williams",				"Terminator 2: Judgement Day (P-2F) Profanity",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1991,	t2_l4,		t2_l8,	wpc_dot,	wpc_dot,	wpc_dot,	ROT0,	"Williams",				"Terminator 2: Judgement Day (L-4)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1991,	t2_l3,		t2_l8,	wpc_dot,	wpc_dot,	wpc_dot,	ROT0,	"Williams",				"Terminator 2: Judgement Day (L-3)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1991,	t2_l2,		t2_l8,	wpc_dot,	wpc_dot,	wpc_dot,	ROT0,	"Williams",				"Terminator 2: Judgement Day (L-2)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
+GAME(1991,  tfdmd_l3,   0,      wpc_dot,    wpc_dot, wpc_dot_state, wpc_dot,    ROT0,   "Bally",        "WPC Test Fixture: DMD (L-3)",                  GAME_IS_SKELETON_MECHANICAL)
+GAME(1991,  gi_l9,      0,      wpc_dot,    wpc_dot, wpc_dot_state, wpc_dot,    ROT0,   "Bally",        "Gilligan's Island (L-9)",                      GAME_IS_SKELETON_MECHANICAL)
+GAME(1991,  gi_l3,      gi_l9,  wpc_dot,    wpc_dot, wpc_dot_state, wpc_dot,    ROT0,   "Bally",        "Gilligan's Island (L-3)",                      GAME_IS_SKELETON_MECHANICAL)
+GAME(1991,  gi_l4,      gi_l9,  wpc_dot,    wpc_dot, wpc_dot_state, wpc_dot,    ROT0,   "Bally",        "Gilligan's Island (L-4)",                      GAME_IS_SKELETON_MECHANICAL)
+GAME(1991,  gi_l6,      gi_l9,  wpc_dot,    wpc_dot, wpc_dot_state, wpc_dot,    ROT0,   "Bally",        "Gilligan's Island (L-6)",                      GAME_IS_SKELETON_MECHANICAL)
+GAME(1992,  hshot_p8,   0,      wpc_dot,    wpc_dot, wpc_dot_state, wpc_dot,    ROT0,   "Midway",       "Hot Shot Basketball (P-8)",                    GAME_IS_SKELETON_MECHANICAL)
+GAME(1991,  hurr_l2,    0,      wpc_dot,    wpc_dot, wpc_dot_state, wpc_dot,    ROT0,   "Williams",     "Hurricane (L-2)",                              GAME_IS_SKELETON_MECHANICAL)
+GAME(1991,  pz_f4,      0,      wpc_dot,    wpc_dot, wpc_dot_state, wpc_dot,    ROT0,   "Bally",        "The Party Zone (F-4)",                         GAME_IS_SKELETON_MECHANICAL)
+GAME(1991,  pz_l1,      pz_f4,  wpc_dot,    wpc_dot, wpc_dot_state, wpc_dot,    ROT0,   "Bally",        "The Party Zone (L-1)",                         GAME_IS_SKELETON_MECHANICAL)
+GAME(1991,  pz_l2,      pz_f4,  wpc_dot,    wpc_dot, wpc_dot_state, wpc_dot,    ROT0,   "Bally",        "The Party Zone (L-2)",                         GAME_IS_SKELETON_MECHANICAL)
+GAME(1991,  pz_l3,      pz_f4,  wpc_dot,    wpc_dot, wpc_dot_state, wpc_dot,    ROT0,   "Bally",        "The Party Zone (L-3)",                         GAME_IS_SKELETON_MECHANICAL)
+GAME(1991,  sf_l1,      0,      wpc_dot,    wpc_dot, wpc_dot_state, wpc_dot,    ROT0,   "Williams",     "Slugfest (L-1)",                               GAME_IS_SKELETON_MECHANICAL)
+GAME(1991,  t2_l8,      0,      wpc_dot,    wpc_dot, wpc_dot_state, wpc_dot,    ROT0,   "Williams",     "Terminator 2: Judgment Day (L-8)",             GAME_IS_SKELETON_MECHANICAL)
+GAME(1991,  t2_l6,      t2_l8,  wpc_dot,    wpc_dot, wpc_dot_state, wpc_dot,    ROT0,   "Williams",     "Terminator 2: Judgment Day (L-6)",             GAME_IS_SKELETON_MECHANICAL)
+GAME(1991,  t2_p2f,     t2_l8,  wpc_dot,    wpc_dot, wpc_dot_state, wpc_dot,    ROT0,   "Williams",     "Terminator 2: Judgment Day (P-2F) Profanity",  GAME_IS_SKELETON_MECHANICAL)
+GAME(1991,  t2_l4,      t2_l8,  wpc_dot,    wpc_dot, wpc_dot_state, wpc_dot,    ROT0,   "Williams",     "Terminator 2: Judgment Day (L-4)",             GAME_IS_SKELETON_MECHANICAL)
+GAME(1991,  t2_l3,      t2_l8,  wpc_dot,    wpc_dot, wpc_dot_state, wpc_dot,    ROT0,   "Williams",     "Terminator 2: Judgment Day (L-3)",             GAME_IS_SKELETON_MECHANICAL)
+GAME(1991,  t2_l2,      t2_l8,  wpc_dot,    wpc_dot, wpc_dot_state, wpc_dot,    ROT0,   "Williams",     "Terminator 2: Judgment Day (L-2)",             GAME_IS_SKELETON_MECHANICAL)

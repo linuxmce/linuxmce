@@ -46,7 +46,7 @@
     CONSTANTS
 ***************************************************************************/
 
-#define TEMP_BUFFER_SIZE		4096
+#define TEMP_BUFFER_SIZE        4096
 
 
 
@@ -54,13 +54,12 @@
     TYPE DEFINITIONS
 ***************************************************************************/
 
-typedef struct _xml_parse_info xml_parse_info;
-struct _xml_parse_info
+struct xml_parse_info
 {
-	XML_Parser			parser;
-	xml_data_node *		rootnode;
-	xml_data_node *		curnode;
-	UINT32				flags;
+	XML_Parser          parser;
+	xml_data_node *     rootnode;
+	xml_data_node *     curnode;
+	UINT32              flags;
 };
 
 

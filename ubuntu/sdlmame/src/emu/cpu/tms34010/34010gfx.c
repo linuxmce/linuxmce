@@ -11,7 +11,7 @@
 
 
 #define LOG_GFX_OPS 0
-#define LOGGFX(x) do { if (LOG_GFX_OPS && input_code_pressed(tms->device->machine(), KEYCODE_L)) logerror x; } while (0)
+#define LOGGFX(x) do { if (LOG_GFX_OPS && tms->device->machine().input().code_pressed(KEYCODE_L)) logerror x; } while (0)
 
 
 /* Graphics Instructions */
@@ -35,7 +35,7 @@ static void line(tms34010_state *tms, UINT16 op)
 		COUNT(tms)--;
 		if (WINDOW_CHECKING(tms) != 3 ||
 			(DADDR_X(tms) >= WSTART_X(tms) && DADDR_X(tms) <= WEND_X(tms) &&
-			 DADDR_Y(tms) >= WSTART_Y(tms) && DADDR_Y(tms) <= WEND_Y(tms)))
+				DADDR_Y(tms) >= WSTART_Y(tms) && DADDR_Y(tms) <= WEND_Y(tms)))
 			WPIXEL(tms,DXYTOL(tms,DADDR_XY(tms)),COLOR1(tms));
 
 		if (SADDR(tms) >= TEMP(tms))
@@ -84,7 +84,7 @@ static int apply_window(tms34010_state *tms, const char *inst_name,int srcbpp, U
 		int diff, cycles = 3;
 
 		if (WINDOW_CHECKING(tms) == 2)
-			logerror("%08x: %s apply_window window mode %d not supported!\n", cpu_get_pc(tms->device), inst_name, WINDOW_CHECKING(tms));
+			logerror("%08x: %s apply_window window mode %d not supported!\n", tms->device->pc(), inst_name, WINDOW_CHECKING(tms));
 
 		CLR_V(tms);
 		if (WINDOW_CHECKING(tms) == 1)
@@ -201,28 +201,28 @@ static int compute_pixblt_b_cycles(int left_partials, int right_partials, int fu
 
 
 /* Shift register handling */
-static void memory_w(address_space *space, offs_t offset,UINT16 data)
+static void memory_w(address_space &space, offs_t offset,UINT16 data)
 {
-	space->write_word(offset, data);
+	space.write_word(offset, data);
 }
 
-static UINT16 memory_r(address_space *space, offs_t offset)
+static UINT16 memory_r(address_space &space, offs_t offset)
 {
-	return space->read_word(offset);
+	return space.read_word(offset);
 }
 
-static void shiftreg_w(address_space *space, offs_t offset,UINT16 data)
+static void shiftreg_w(address_space &space, offs_t offset,UINT16 data)
 {
-	tms34010_state *tms = get_safe_token(&space->device());
+	tms34010_state *tms = get_safe_token(&space.device());
 	if (tms->config->from_shiftreg)
 		(*tms->config->from_shiftreg)(space, (UINT32)(offset << 3) & ~15, &tms->shiftreg[0]);
 	else
 		logerror("From ShiftReg function not set. PC = %08X\n", tms->pc);
 }
 
-static UINT16 shiftreg_r(address_space *space, offs_t offset)
+static UINT16 shiftreg_r(address_space &space, offs_t offset)
 {
-	tms34010_state *tms = get_safe_token(&space->device());
+	tms34010_state *tms = get_safe_token(&space.device());
 	if (tms->config->to_shiftreg)
 		(*tms->config->to_shiftreg)(space, (UINT32)(offset << 3) & ~15, &tms->shiftreg[0]);
 	else
@@ -230,9 +230,9 @@ static UINT16 shiftreg_r(address_space *space, offs_t offset)
 	return tms->shiftreg[0];
 }
 
-static UINT16 dummy_shiftreg_r(address_space *space, offs_t offset)
+static UINT16 dummy_shiftreg_r(address_space &space, offs_t offset)
 {
-	tms34010_state *tms = get_safe_token(&space->device());
+	tms34010_state *tms = get_safe_token(&space.device());
 	return tms->shiftreg[0];
 }
 
@@ -264,10 +264,10 @@ static UINT32 pixel_op21(UINT32 dstpix, UINT32 mask, UINT32 srcpix) { dstpix &= 
 
 static UINT32 (*const pixel_op_table[])(UINT32, UINT32, UINT32) =
 {
-	pixel_op00,	pixel_op01,	pixel_op02,	pixel_op03,	pixel_op04,	pixel_op05,	pixel_op06,	pixel_op07,
-	pixel_op08,	pixel_op09,	pixel_op10,	pixel_op11,	pixel_op12,	pixel_op13,	pixel_op14,	pixel_op15,
-	pixel_op16,	pixel_op17,	pixel_op18,	pixel_op19,	pixel_op20,	pixel_op21,	pixel_op00,	pixel_op00,
-	pixel_op00,	pixel_op00,	pixel_op00,	pixel_op00,	pixel_op00,	pixel_op00,	pixel_op00,	pixel_op00
+	pixel_op00, pixel_op01, pixel_op02, pixel_op03, pixel_op04, pixel_op05, pixel_op06, pixel_op07,
+	pixel_op08, pixel_op09, pixel_op10, pixel_op11, pixel_op12, pixel_op13, pixel_op14, pixel_op15,
+	pixel_op16, pixel_op17, pixel_op18, pixel_op19, pixel_op20, pixel_op21, pixel_op00, pixel_op00,
+	pixel_op00, pixel_op00, pixel_op00, pixel_op00, pixel_op00, pixel_op00, pixel_op00, pixel_op00
 };
 static const UINT8 pixel_op_timing_table[] =
 {
@@ -366,396 +366,396 @@ static void fill_16_opx_trans(tms34010_state *tms, int dst_is_linear);
 /* tables */
 static void (*const pixblt_op_table[])(tms34010_state *, int, int) =
 {
-	pixblt_1_op0,	pixblt_1_op0_trans,		pixblt_1_opx,	pixblt_1_opx_trans,
-	pixblt_1_opx,	pixblt_1_opx_trans,		pixblt_1_opx,	pixblt_1_opx_trans,
-	pixblt_1_opx,	pixblt_1_opx_trans,		pixblt_1_opx,	pixblt_1_opx_trans,
-	pixblt_1_opx,	pixblt_1_opx_trans,		pixblt_1_opx,	pixblt_1_opx_trans,
-	pixblt_1_opx,	pixblt_1_opx_trans,		pixblt_1_opx,	pixblt_1_opx_trans,
-	pixblt_1_opx,	pixblt_1_opx_trans,		pixblt_1_opx,	pixblt_1_opx_trans,
-	pixblt_1_opx,	pixblt_1_opx_trans,		pixblt_1_opx,	pixblt_1_opx_trans,
-	pixblt_1_opx,	pixblt_1_opx_trans,		pixblt_1_opx,	pixblt_1_opx_trans,
-	pixblt_1_opx,	pixblt_1_opx_trans,		pixblt_1_opx,	pixblt_1_opx_trans,
-	pixblt_1_opx,	pixblt_1_opx_trans,		pixblt_1_opx,	pixblt_1_opx_trans,
-	pixblt_1_opx,	pixblt_1_opx_trans,		pixblt_1_opx,	pixblt_1_opx_trans,
-	pixblt_1_opx,	pixblt_1_opx_trans,		pixblt_1_opx,	pixblt_1_opx_trans,
-	pixblt_1_opx,	pixblt_1_opx_trans,		pixblt_1_opx,	pixblt_1_opx_trans,
-	pixblt_1_opx,	pixblt_1_opx_trans,		pixblt_1_opx,	pixblt_1_opx_trans,
-	pixblt_1_opx,	pixblt_1_opx_trans,		pixblt_1_opx,	pixblt_1_opx_trans,
-	pixblt_1_opx,	pixblt_1_opx_trans,		pixblt_1_opx,	pixblt_1_opx_trans,
+	pixblt_1_op0,   pixblt_1_op0_trans,     pixblt_1_opx,   pixblt_1_opx_trans,
+	pixblt_1_opx,   pixblt_1_opx_trans,     pixblt_1_opx,   pixblt_1_opx_trans,
+	pixblt_1_opx,   pixblt_1_opx_trans,     pixblt_1_opx,   pixblt_1_opx_trans,
+	pixblt_1_opx,   pixblt_1_opx_trans,     pixblt_1_opx,   pixblt_1_opx_trans,
+	pixblt_1_opx,   pixblt_1_opx_trans,     pixblt_1_opx,   pixblt_1_opx_trans,
+	pixblt_1_opx,   pixblt_1_opx_trans,     pixblt_1_opx,   pixblt_1_opx_trans,
+	pixblt_1_opx,   pixblt_1_opx_trans,     pixblt_1_opx,   pixblt_1_opx_trans,
+	pixblt_1_opx,   pixblt_1_opx_trans,     pixblt_1_opx,   pixblt_1_opx_trans,
+	pixblt_1_opx,   pixblt_1_opx_trans,     pixblt_1_opx,   pixblt_1_opx_trans,
+	pixblt_1_opx,   pixblt_1_opx_trans,     pixblt_1_opx,   pixblt_1_opx_trans,
+	pixblt_1_opx,   pixblt_1_opx_trans,     pixblt_1_opx,   pixblt_1_opx_trans,
+	pixblt_1_opx,   pixblt_1_opx_trans,     pixblt_1_opx,   pixblt_1_opx_trans,
+	pixblt_1_opx,   pixblt_1_opx_trans,     pixblt_1_opx,   pixblt_1_opx_trans,
+	pixblt_1_opx,   pixblt_1_opx_trans,     pixblt_1_opx,   pixblt_1_opx_trans,
+	pixblt_1_opx,   pixblt_1_opx_trans,     pixblt_1_opx,   pixblt_1_opx_trans,
+	pixblt_1_opx,   pixblt_1_opx_trans,     pixblt_1_opx,   pixblt_1_opx_trans,
 
-	pixblt_2_op0,	pixblt_2_op0_trans,		pixblt_2_opx,	pixblt_2_opx_trans,
-	pixblt_2_opx,	pixblt_2_opx_trans,		pixblt_2_opx,	pixblt_2_opx_trans,
-	pixblt_2_opx,	pixblt_2_opx_trans,		pixblt_2_opx,	pixblt_2_opx_trans,
-	pixblt_2_opx,	pixblt_2_opx_trans,		pixblt_2_opx,	pixblt_2_opx_trans,
-	pixblt_2_opx,	pixblt_2_opx_trans,		pixblt_2_opx,	pixblt_2_opx_trans,
-	pixblt_2_opx,	pixblt_2_opx_trans,		pixblt_2_opx,	pixblt_2_opx_trans,
-	pixblt_2_opx,	pixblt_2_opx_trans,		pixblt_2_opx,	pixblt_2_opx_trans,
-	pixblt_2_opx,	pixblt_2_opx_trans,		pixblt_2_opx,	pixblt_2_opx_trans,
-	pixblt_2_opx,	pixblt_2_opx_trans,		pixblt_2_opx,	pixblt_2_opx_trans,
-	pixblt_2_opx,	pixblt_2_opx_trans,		pixblt_2_opx,	pixblt_2_opx_trans,
-	pixblt_2_opx,	pixblt_2_opx_trans,		pixblt_2_opx,	pixblt_2_opx_trans,
-	pixblt_2_opx,	pixblt_2_opx_trans,		pixblt_2_opx,	pixblt_2_opx_trans,
-	pixblt_2_opx,	pixblt_2_opx_trans,		pixblt_2_opx,	pixblt_2_opx_trans,
-	pixblt_2_opx,	pixblt_2_opx_trans,		pixblt_2_opx,	pixblt_2_opx_trans,
-	pixblt_2_opx,	pixblt_2_opx_trans,		pixblt_2_opx,	pixblt_2_opx_trans,
-	pixblt_2_opx,	pixblt_2_opx_trans,		pixblt_2_opx,	pixblt_2_opx_trans,
+	pixblt_2_op0,   pixblt_2_op0_trans,     pixblt_2_opx,   pixblt_2_opx_trans,
+	pixblt_2_opx,   pixblt_2_opx_trans,     pixblt_2_opx,   pixblt_2_opx_trans,
+	pixblt_2_opx,   pixblt_2_opx_trans,     pixblt_2_opx,   pixblt_2_opx_trans,
+	pixblt_2_opx,   pixblt_2_opx_trans,     pixblt_2_opx,   pixblt_2_opx_trans,
+	pixblt_2_opx,   pixblt_2_opx_trans,     pixblt_2_opx,   pixblt_2_opx_trans,
+	pixblt_2_opx,   pixblt_2_opx_trans,     pixblt_2_opx,   pixblt_2_opx_trans,
+	pixblt_2_opx,   pixblt_2_opx_trans,     pixblt_2_opx,   pixblt_2_opx_trans,
+	pixblt_2_opx,   pixblt_2_opx_trans,     pixblt_2_opx,   pixblt_2_opx_trans,
+	pixblt_2_opx,   pixblt_2_opx_trans,     pixblt_2_opx,   pixblt_2_opx_trans,
+	pixblt_2_opx,   pixblt_2_opx_trans,     pixblt_2_opx,   pixblt_2_opx_trans,
+	pixblt_2_opx,   pixblt_2_opx_trans,     pixblt_2_opx,   pixblt_2_opx_trans,
+	pixblt_2_opx,   pixblt_2_opx_trans,     pixblt_2_opx,   pixblt_2_opx_trans,
+	pixblt_2_opx,   pixblt_2_opx_trans,     pixblt_2_opx,   pixblt_2_opx_trans,
+	pixblt_2_opx,   pixblt_2_opx_trans,     pixblt_2_opx,   pixblt_2_opx_trans,
+	pixblt_2_opx,   pixblt_2_opx_trans,     pixblt_2_opx,   pixblt_2_opx_trans,
+	pixblt_2_opx,   pixblt_2_opx_trans,     pixblt_2_opx,   pixblt_2_opx_trans,
 
-	pixblt_4_op0,	pixblt_4_op0_trans,		pixblt_4_opx,	pixblt_4_opx_trans,
-	pixblt_4_opx,	pixblt_4_opx_trans,		pixblt_4_opx,	pixblt_4_opx_trans,
-	pixblt_4_opx,	pixblt_4_opx_trans,		pixblt_4_opx,	pixblt_4_opx_trans,
-	pixblt_4_opx,	pixblt_4_opx_trans,		pixblt_4_opx,	pixblt_4_opx_trans,
-	pixblt_4_opx,	pixblt_4_opx_trans,		pixblt_4_opx,	pixblt_4_opx_trans,
-	pixblt_4_opx,	pixblt_4_opx_trans,		pixblt_4_opx,	pixblt_4_opx_trans,
-	pixblt_4_opx,	pixblt_4_opx_trans,		pixblt_4_opx,	pixblt_4_opx_trans,
-	pixblt_4_opx,	pixblt_4_opx_trans,		pixblt_4_opx,	pixblt_4_opx_trans,
-	pixblt_4_opx,	pixblt_4_opx_trans,		pixblt_4_opx,	pixblt_4_opx_trans,
-	pixblt_4_opx,	pixblt_4_opx_trans,		pixblt_4_opx,	pixblt_4_opx_trans,
-	pixblt_4_opx,	pixblt_4_opx_trans,		pixblt_4_opx,	pixblt_4_opx_trans,
-	pixblt_4_opx,	pixblt_4_opx_trans,		pixblt_4_opx,	pixblt_4_opx_trans,
-	pixblt_4_opx,	pixblt_4_opx_trans,		pixblt_4_opx,	pixblt_4_opx_trans,
-	pixblt_4_opx,	pixblt_4_opx_trans,		pixblt_4_opx,	pixblt_4_opx_trans,
-	pixblt_4_opx,	pixblt_4_opx_trans,		pixblt_4_opx,	pixblt_4_opx_trans,
-	pixblt_4_opx,	pixblt_4_opx_trans,		pixblt_4_opx,	pixblt_4_opx_trans,
+	pixblt_4_op0,   pixblt_4_op0_trans,     pixblt_4_opx,   pixblt_4_opx_trans,
+	pixblt_4_opx,   pixblt_4_opx_trans,     pixblt_4_opx,   pixblt_4_opx_trans,
+	pixblt_4_opx,   pixblt_4_opx_trans,     pixblt_4_opx,   pixblt_4_opx_trans,
+	pixblt_4_opx,   pixblt_4_opx_trans,     pixblt_4_opx,   pixblt_4_opx_trans,
+	pixblt_4_opx,   pixblt_4_opx_trans,     pixblt_4_opx,   pixblt_4_opx_trans,
+	pixblt_4_opx,   pixblt_4_opx_trans,     pixblt_4_opx,   pixblt_4_opx_trans,
+	pixblt_4_opx,   pixblt_4_opx_trans,     pixblt_4_opx,   pixblt_4_opx_trans,
+	pixblt_4_opx,   pixblt_4_opx_trans,     pixblt_4_opx,   pixblt_4_opx_trans,
+	pixblt_4_opx,   pixblt_4_opx_trans,     pixblt_4_opx,   pixblt_4_opx_trans,
+	pixblt_4_opx,   pixblt_4_opx_trans,     pixblt_4_opx,   pixblt_4_opx_trans,
+	pixblt_4_opx,   pixblt_4_opx_trans,     pixblt_4_opx,   pixblt_4_opx_trans,
+	pixblt_4_opx,   pixblt_4_opx_trans,     pixblt_4_opx,   pixblt_4_opx_trans,
+	pixblt_4_opx,   pixblt_4_opx_trans,     pixblt_4_opx,   pixblt_4_opx_trans,
+	pixblt_4_opx,   pixblt_4_opx_trans,     pixblt_4_opx,   pixblt_4_opx_trans,
+	pixblt_4_opx,   pixblt_4_opx_trans,     pixblt_4_opx,   pixblt_4_opx_trans,
+	pixblt_4_opx,   pixblt_4_opx_trans,     pixblt_4_opx,   pixblt_4_opx_trans,
 
-	pixblt_8_op0,	pixblt_8_op0_trans,		pixblt_8_opx,	pixblt_8_opx_trans,
-	pixblt_8_opx,	pixblt_8_opx_trans,		pixblt_8_opx,	pixblt_8_opx_trans,
-	pixblt_8_opx,	pixblt_8_opx_trans,		pixblt_8_opx,	pixblt_8_opx_trans,
-	pixblt_8_opx,	pixblt_8_opx_trans,		pixblt_8_opx,	pixblt_8_opx_trans,
-	pixblt_8_opx,	pixblt_8_opx_trans,		pixblt_8_opx,	pixblt_8_opx_trans,
-	pixblt_8_opx,	pixblt_8_opx_trans,		pixblt_8_opx,	pixblt_8_opx_trans,
-	pixblt_8_opx,	pixblt_8_opx_trans,		pixblt_8_opx,	pixblt_8_opx_trans,
-	pixblt_8_opx,	pixblt_8_opx_trans,		pixblt_8_opx,	pixblt_8_opx_trans,
-	pixblt_8_opx,	pixblt_8_opx_trans,		pixblt_8_opx,	pixblt_8_opx_trans,
-	pixblt_8_opx,	pixblt_8_opx_trans,		pixblt_8_opx,	pixblt_8_opx_trans,
-	pixblt_8_opx,	pixblt_8_opx_trans,		pixblt_8_opx,	pixblt_8_opx_trans,
-	pixblt_8_opx,	pixblt_8_opx_trans,		pixblt_8_opx,	pixblt_8_opx_trans,
-	pixblt_8_opx,	pixblt_8_opx_trans,		pixblt_8_opx,	pixblt_8_opx_trans,
-	pixblt_8_opx,	pixblt_8_opx_trans,		pixblt_8_opx,	pixblt_8_opx_trans,
-	pixblt_8_opx,	pixblt_8_opx_trans,		pixblt_8_opx,	pixblt_8_opx_trans,
-	pixblt_8_opx,	pixblt_8_opx_trans,		pixblt_8_opx,	pixblt_8_opx_trans,
+	pixblt_8_op0,   pixblt_8_op0_trans,     pixblt_8_opx,   pixblt_8_opx_trans,
+	pixblt_8_opx,   pixblt_8_opx_trans,     pixblt_8_opx,   pixblt_8_opx_trans,
+	pixblt_8_opx,   pixblt_8_opx_trans,     pixblt_8_opx,   pixblt_8_opx_trans,
+	pixblt_8_opx,   pixblt_8_opx_trans,     pixblt_8_opx,   pixblt_8_opx_trans,
+	pixblt_8_opx,   pixblt_8_opx_trans,     pixblt_8_opx,   pixblt_8_opx_trans,
+	pixblt_8_opx,   pixblt_8_opx_trans,     pixblt_8_opx,   pixblt_8_opx_trans,
+	pixblt_8_opx,   pixblt_8_opx_trans,     pixblt_8_opx,   pixblt_8_opx_trans,
+	pixblt_8_opx,   pixblt_8_opx_trans,     pixblt_8_opx,   pixblt_8_opx_trans,
+	pixblt_8_opx,   pixblt_8_opx_trans,     pixblt_8_opx,   pixblt_8_opx_trans,
+	pixblt_8_opx,   pixblt_8_opx_trans,     pixblt_8_opx,   pixblt_8_opx_trans,
+	pixblt_8_opx,   pixblt_8_opx_trans,     pixblt_8_opx,   pixblt_8_opx_trans,
+	pixblt_8_opx,   pixblt_8_opx_trans,     pixblt_8_opx,   pixblt_8_opx_trans,
+	pixblt_8_opx,   pixblt_8_opx_trans,     pixblt_8_opx,   pixblt_8_opx_trans,
+	pixblt_8_opx,   pixblt_8_opx_trans,     pixblt_8_opx,   pixblt_8_opx_trans,
+	pixblt_8_opx,   pixblt_8_opx_trans,     pixblt_8_opx,   pixblt_8_opx_trans,
+	pixblt_8_opx,   pixblt_8_opx_trans,     pixblt_8_opx,   pixblt_8_opx_trans,
 
-	pixblt_16_op0,	pixblt_16_op0_trans,	pixblt_16_opx,	pixblt_16_opx_trans,
-	pixblt_16_opx,	pixblt_16_opx_trans,	pixblt_16_opx,	pixblt_16_opx_trans,
-	pixblt_16_opx,	pixblt_16_opx_trans,	pixblt_16_opx,	pixblt_16_opx_trans,
-	pixblt_16_opx,	pixblt_16_opx_trans,	pixblt_16_opx,	pixblt_16_opx_trans,
-	pixblt_16_opx,	pixblt_16_opx_trans,	pixblt_16_opx,	pixblt_16_opx_trans,
-	pixblt_16_opx,	pixblt_16_opx_trans,	pixblt_16_opx,	pixblt_16_opx_trans,
-	pixblt_16_opx,	pixblt_16_opx_trans,	pixblt_16_opx,	pixblt_16_opx_trans,
-	pixblt_16_opx,	pixblt_16_opx_trans,	pixblt_16_opx,	pixblt_16_opx_trans,
-	pixblt_16_opx,	pixblt_16_opx_trans,	pixblt_16_opx,	pixblt_16_opx_trans,
-	pixblt_16_opx,	pixblt_16_opx_trans,	pixblt_16_opx,	pixblt_16_opx_trans,
-	pixblt_16_opx,	pixblt_16_opx_trans,	pixblt_16_opx,	pixblt_16_opx_trans,
-	pixblt_16_opx,	pixblt_16_opx_trans,	pixblt_16_opx,	pixblt_16_opx_trans,
-	pixblt_16_opx,	pixblt_16_opx_trans,	pixblt_16_opx,	pixblt_16_opx_trans,
-	pixblt_16_opx,	pixblt_16_opx_trans,	pixblt_16_opx,	pixblt_16_opx_trans,
-	pixblt_16_opx,	pixblt_16_opx_trans,	pixblt_16_opx,	pixblt_16_opx_trans,
-	pixblt_16_opx,	pixblt_16_opx_trans,	pixblt_16_opx,	pixblt_16_opx_trans
+	pixblt_16_op0,  pixblt_16_op0_trans,    pixblt_16_opx,  pixblt_16_opx_trans,
+	pixblt_16_opx,  pixblt_16_opx_trans,    pixblt_16_opx,  pixblt_16_opx_trans,
+	pixblt_16_opx,  pixblt_16_opx_trans,    pixblt_16_opx,  pixblt_16_opx_trans,
+	pixblt_16_opx,  pixblt_16_opx_trans,    pixblt_16_opx,  pixblt_16_opx_trans,
+	pixblt_16_opx,  pixblt_16_opx_trans,    pixblt_16_opx,  pixblt_16_opx_trans,
+	pixblt_16_opx,  pixblt_16_opx_trans,    pixblt_16_opx,  pixblt_16_opx_trans,
+	pixblt_16_opx,  pixblt_16_opx_trans,    pixblt_16_opx,  pixblt_16_opx_trans,
+	pixblt_16_opx,  pixblt_16_opx_trans,    pixblt_16_opx,  pixblt_16_opx_trans,
+	pixblt_16_opx,  pixblt_16_opx_trans,    pixblt_16_opx,  pixblt_16_opx_trans,
+	pixblt_16_opx,  pixblt_16_opx_trans,    pixblt_16_opx,  pixblt_16_opx_trans,
+	pixblt_16_opx,  pixblt_16_opx_trans,    pixblt_16_opx,  pixblt_16_opx_trans,
+	pixblt_16_opx,  pixblt_16_opx_trans,    pixblt_16_opx,  pixblt_16_opx_trans,
+	pixblt_16_opx,  pixblt_16_opx_trans,    pixblt_16_opx,  pixblt_16_opx_trans,
+	pixblt_16_opx,  pixblt_16_opx_trans,    pixblt_16_opx,  pixblt_16_opx_trans,
+	pixblt_16_opx,  pixblt_16_opx_trans,    pixblt_16_opx,  pixblt_16_opx_trans,
+	pixblt_16_opx,  pixblt_16_opx_trans,    pixblt_16_opx,  pixblt_16_opx_trans
 };
 
 static void (*const pixblt_r_op_table[])(tms34010_state *, int, int) =
 {
-	pixblt_r_1_op0,	pixblt_r_1_op0_trans,	pixblt_r_1_opx,	pixblt_r_1_opx_trans,
-	pixblt_r_1_opx,	pixblt_r_1_opx_trans,	pixblt_r_1_opx,	pixblt_r_1_opx_trans,
-	pixblt_r_1_opx,	pixblt_r_1_opx_trans,	pixblt_r_1_opx,	pixblt_r_1_opx_trans,
-	pixblt_r_1_opx,	pixblt_r_1_opx_trans,	pixblt_r_1_opx,	pixblt_r_1_opx_trans,
-	pixblt_r_1_opx,	pixblt_r_1_opx_trans,	pixblt_r_1_opx,	pixblt_r_1_opx_trans,
-	pixblt_r_1_opx,	pixblt_r_1_opx_trans,	pixblt_r_1_opx,	pixblt_r_1_opx_trans,
-	pixblt_r_1_opx,	pixblt_r_1_opx_trans,	pixblt_r_1_opx,	pixblt_r_1_opx_trans,
-	pixblt_r_1_opx,	pixblt_r_1_opx_trans,	pixblt_r_1_opx,	pixblt_r_1_opx_trans,
-	pixblt_r_1_opx,	pixblt_r_1_opx_trans,	pixblt_r_1_opx,	pixblt_r_1_opx_trans,
-	pixblt_r_1_opx,	pixblt_r_1_opx_trans,	pixblt_r_1_opx,	pixblt_r_1_opx_trans,
-	pixblt_r_1_opx,	pixblt_r_1_opx_trans,	pixblt_r_1_opx,	pixblt_r_1_opx_trans,
-	pixblt_r_1_opx,	pixblt_r_1_opx_trans,	pixblt_r_1_opx,	pixblt_r_1_opx_trans,
-	pixblt_r_1_opx,	pixblt_r_1_opx_trans,	pixblt_r_1_opx,	pixblt_r_1_opx_trans,
-	pixblt_r_1_opx,	pixblt_r_1_opx_trans,	pixblt_r_1_opx,	pixblt_r_1_opx_trans,
-	pixblt_r_1_opx,	pixblt_r_1_opx_trans,	pixblt_r_1_opx,	pixblt_r_1_opx_trans,
-	pixblt_r_1_opx,	pixblt_r_1_opx_trans,	pixblt_r_1_opx,	pixblt_r_1_opx_trans,
+	pixblt_r_1_op0, pixblt_r_1_op0_trans,   pixblt_r_1_opx, pixblt_r_1_opx_trans,
+	pixblt_r_1_opx, pixblt_r_1_opx_trans,   pixblt_r_1_opx, pixblt_r_1_opx_trans,
+	pixblt_r_1_opx, pixblt_r_1_opx_trans,   pixblt_r_1_opx, pixblt_r_1_opx_trans,
+	pixblt_r_1_opx, pixblt_r_1_opx_trans,   pixblt_r_1_opx, pixblt_r_1_opx_trans,
+	pixblt_r_1_opx, pixblt_r_1_opx_trans,   pixblt_r_1_opx, pixblt_r_1_opx_trans,
+	pixblt_r_1_opx, pixblt_r_1_opx_trans,   pixblt_r_1_opx, pixblt_r_1_opx_trans,
+	pixblt_r_1_opx, pixblt_r_1_opx_trans,   pixblt_r_1_opx, pixblt_r_1_opx_trans,
+	pixblt_r_1_opx, pixblt_r_1_opx_trans,   pixblt_r_1_opx, pixblt_r_1_opx_trans,
+	pixblt_r_1_opx, pixblt_r_1_opx_trans,   pixblt_r_1_opx, pixblt_r_1_opx_trans,
+	pixblt_r_1_opx, pixblt_r_1_opx_trans,   pixblt_r_1_opx, pixblt_r_1_opx_trans,
+	pixblt_r_1_opx, pixblt_r_1_opx_trans,   pixblt_r_1_opx, pixblt_r_1_opx_trans,
+	pixblt_r_1_opx, pixblt_r_1_opx_trans,   pixblt_r_1_opx, pixblt_r_1_opx_trans,
+	pixblt_r_1_opx, pixblt_r_1_opx_trans,   pixblt_r_1_opx, pixblt_r_1_opx_trans,
+	pixblt_r_1_opx, pixblt_r_1_opx_trans,   pixblt_r_1_opx, pixblt_r_1_opx_trans,
+	pixblt_r_1_opx, pixblt_r_1_opx_trans,   pixblt_r_1_opx, pixblt_r_1_opx_trans,
+	pixblt_r_1_opx, pixblt_r_1_opx_trans,   pixblt_r_1_opx, pixblt_r_1_opx_trans,
 
-	pixblt_r_2_op0,	pixblt_r_2_op0_trans,	pixblt_r_2_opx,	pixblt_r_2_opx_trans,
-	pixblt_r_2_opx,	pixblt_r_2_opx_trans,	pixblt_r_2_opx,	pixblt_r_2_opx_trans,
-	pixblt_r_2_opx,	pixblt_r_2_opx_trans,	pixblt_r_2_opx,	pixblt_r_2_opx_trans,
-	pixblt_r_2_opx,	pixblt_r_2_opx_trans,	pixblt_r_2_opx,	pixblt_r_2_opx_trans,
-	pixblt_r_2_opx,	pixblt_r_2_opx_trans,	pixblt_r_2_opx,	pixblt_r_2_opx_trans,
-	pixblt_r_2_opx,	pixblt_r_2_opx_trans,	pixblt_r_2_opx,	pixblt_r_2_opx_trans,
-	pixblt_r_2_opx,	pixblt_r_2_opx_trans,	pixblt_r_2_opx,	pixblt_r_2_opx_trans,
-	pixblt_r_2_opx,	pixblt_r_2_opx_trans,	pixblt_r_2_opx,	pixblt_r_2_opx_trans,
-	pixblt_r_2_opx,	pixblt_r_2_opx_trans,	pixblt_r_2_opx,	pixblt_r_2_opx_trans,
-	pixblt_r_2_opx,	pixblt_r_2_opx_trans,	pixblt_r_2_opx,	pixblt_r_2_opx_trans,
-	pixblt_r_2_opx,	pixblt_r_2_opx_trans,	pixblt_r_2_opx,	pixblt_r_2_opx_trans,
-	pixblt_r_2_opx,	pixblt_r_2_opx_trans,	pixblt_r_2_opx,	pixblt_r_2_opx_trans,
-	pixblt_r_2_opx,	pixblt_r_2_opx_trans,	pixblt_r_2_opx,	pixblt_r_2_opx_trans,
-	pixblt_r_2_opx,	pixblt_r_2_opx_trans,	pixblt_r_2_opx,	pixblt_r_2_opx_trans,
-	pixblt_r_2_opx,	pixblt_r_2_opx_trans,	pixblt_r_2_opx,	pixblt_r_2_opx_trans,
-	pixblt_r_2_opx,	pixblt_r_2_opx_trans,	pixblt_r_2_opx,	pixblt_r_2_opx_trans,
+	pixblt_r_2_op0, pixblt_r_2_op0_trans,   pixblt_r_2_opx, pixblt_r_2_opx_trans,
+	pixblt_r_2_opx, pixblt_r_2_opx_trans,   pixblt_r_2_opx, pixblt_r_2_opx_trans,
+	pixblt_r_2_opx, pixblt_r_2_opx_trans,   pixblt_r_2_opx, pixblt_r_2_opx_trans,
+	pixblt_r_2_opx, pixblt_r_2_opx_trans,   pixblt_r_2_opx, pixblt_r_2_opx_trans,
+	pixblt_r_2_opx, pixblt_r_2_opx_trans,   pixblt_r_2_opx, pixblt_r_2_opx_trans,
+	pixblt_r_2_opx, pixblt_r_2_opx_trans,   pixblt_r_2_opx, pixblt_r_2_opx_trans,
+	pixblt_r_2_opx, pixblt_r_2_opx_trans,   pixblt_r_2_opx, pixblt_r_2_opx_trans,
+	pixblt_r_2_opx, pixblt_r_2_opx_trans,   pixblt_r_2_opx, pixblt_r_2_opx_trans,
+	pixblt_r_2_opx, pixblt_r_2_opx_trans,   pixblt_r_2_opx, pixblt_r_2_opx_trans,
+	pixblt_r_2_opx, pixblt_r_2_opx_trans,   pixblt_r_2_opx, pixblt_r_2_opx_trans,
+	pixblt_r_2_opx, pixblt_r_2_opx_trans,   pixblt_r_2_opx, pixblt_r_2_opx_trans,
+	pixblt_r_2_opx, pixblt_r_2_opx_trans,   pixblt_r_2_opx, pixblt_r_2_opx_trans,
+	pixblt_r_2_opx, pixblt_r_2_opx_trans,   pixblt_r_2_opx, pixblt_r_2_opx_trans,
+	pixblt_r_2_opx, pixblt_r_2_opx_trans,   pixblt_r_2_opx, pixblt_r_2_opx_trans,
+	pixblt_r_2_opx, pixblt_r_2_opx_trans,   pixblt_r_2_opx, pixblt_r_2_opx_trans,
+	pixblt_r_2_opx, pixblt_r_2_opx_trans,   pixblt_r_2_opx, pixblt_r_2_opx_trans,
 
-	pixblt_r_4_op0,	pixblt_r_4_op0_trans,	pixblt_r_4_opx,	pixblt_r_4_opx_trans,
-	pixblt_r_4_opx,	pixblt_r_4_opx_trans,	pixblt_r_4_opx,	pixblt_r_4_opx_trans,
-	pixblt_r_4_opx,	pixblt_r_4_opx_trans,	pixblt_r_4_opx,	pixblt_r_4_opx_trans,
-	pixblt_r_4_opx,	pixblt_r_4_opx_trans,	pixblt_r_4_opx,	pixblt_r_4_opx_trans,
-	pixblt_r_4_opx,	pixblt_r_4_opx_trans,	pixblt_r_4_opx,	pixblt_r_4_opx_trans,
-	pixblt_r_4_opx,	pixblt_r_4_opx_trans,	pixblt_r_4_opx,	pixblt_r_4_opx_trans,
-	pixblt_r_4_opx,	pixblt_r_4_opx_trans,	pixblt_r_4_opx,	pixblt_r_4_opx_trans,
-	pixblt_r_4_opx,	pixblt_r_4_opx_trans,	pixblt_r_4_opx,	pixblt_r_4_opx_trans,
-	pixblt_r_4_opx,	pixblt_r_4_opx_trans,	pixblt_r_4_opx,	pixblt_r_4_opx_trans,
-	pixblt_r_4_opx,	pixblt_r_4_opx_trans,	pixblt_r_4_opx,	pixblt_r_4_opx_trans,
-	pixblt_r_4_opx,	pixblt_r_4_opx_trans,	pixblt_r_4_opx,	pixblt_r_4_opx_trans,
-	pixblt_r_4_opx,	pixblt_r_4_opx_trans,	pixblt_r_4_opx,	pixblt_r_4_opx_trans,
-	pixblt_r_4_opx,	pixblt_r_4_opx_trans,	pixblt_r_4_opx,	pixblt_r_4_opx_trans,
-	pixblt_r_4_opx,	pixblt_r_4_opx_trans,	pixblt_r_4_opx,	pixblt_r_4_opx_trans,
-	pixblt_r_4_opx,	pixblt_r_4_opx_trans,	pixblt_r_4_opx,	pixblt_r_4_opx_trans,
-	pixblt_r_4_opx,	pixblt_r_4_opx_trans,	pixblt_r_4_opx,	pixblt_r_4_opx_trans,
+	pixblt_r_4_op0, pixblt_r_4_op0_trans,   pixblt_r_4_opx, pixblt_r_4_opx_trans,
+	pixblt_r_4_opx, pixblt_r_4_opx_trans,   pixblt_r_4_opx, pixblt_r_4_opx_trans,
+	pixblt_r_4_opx, pixblt_r_4_opx_trans,   pixblt_r_4_opx, pixblt_r_4_opx_trans,
+	pixblt_r_4_opx, pixblt_r_4_opx_trans,   pixblt_r_4_opx, pixblt_r_4_opx_trans,
+	pixblt_r_4_opx, pixblt_r_4_opx_trans,   pixblt_r_4_opx, pixblt_r_4_opx_trans,
+	pixblt_r_4_opx, pixblt_r_4_opx_trans,   pixblt_r_4_opx, pixblt_r_4_opx_trans,
+	pixblt_r_4_opx, pixblt_r_4_opx_trans,   pixblt_r_4_opx, pixblt_r_4_opx_trans,
+	pixblt_r_4_opx, pixblt_r_4_opx_trans,   pixblt_r_4_opx, pixblt_r_4_opx_trans,
+	pixblt_r_4_opx, pixblt_r_4_opx_trans,   pixblt_r_4_opx, pixblt_r_4_opx_trans,
+	pixblt_r_4_opx, pixblt_r_4_opx_trans,   pixblt_r_4_opx, pixblt_r_4_opx_trans,
+	pixblt_r_4_opx, pixblt_r_4_opx_trans,   pixblt_r_4_opx, pixblt_r_4_opx_trans,
+	pixblt_r_4_opx, pixblt_r_4_opx_trans,   pixblt_r_4_opx, pixblt_r_4_opx_trans,
+	pixblt_r_4_opx, pixblt_r_4_opx_trans,   pixblt_r_4_opx, pixblt_r_4_opx_trans,
+	pixblt_r_4_opx, pixblt_r_4_opx_trans,   pixblt_r_4_opx, pixblt_r_4_opx_trans,
+	pixblt_r_4_opx, pixblt_r_4_opx_trans,   pixblt_r_4_opx, pixblt_r_4_opx_trans,
+	pixblt_r_4_opx, pixblt_r_4_opx_trans,   pixblt_r_4_opx, pixblt_r_4_opx_trans,
 
-	pixblt_r_8_op0,	pixblt_r_8_op0_trans,	pixblt_r_8_opx,	pixblt_r_8_opx_trans,
-	pixblt_r_8_opx,	pixblt_r_8_opx_trans,	pixblt_r_8_opx,	pixblt_r_8_opx_trans,
-	pixblt_r_8_opx,	pixblt_r_8_opx_trans,	pixblt_r_8_opx,	pixblt_r_8_opx_trans,
-	pixblt_r_8_opx,	pixblt_r_8_opx_trans,	pixblt_r_8_opx,	pixblt_r_8_opx_trans,
-	pixblt_r_8_opx,	pixblt_r_8_opx_trans,	pixblt_r_8_opx,	pixblt_r_8_opx_trans,
-	pixblt_r_8_opx,	pixblt_r_8_opx_trans,	pixblt_r_8_opx,	pixblt_r_8_opx_trans,
-	pixblt_r_8_opx,	pixblt_r_8_opx_trans,	pixblt_r_8_opx,	pixblt_r_8_opx_trans,
-	pixblt_r_8_opx,	pixblt_r_8_opx_trans,	pixblt_r_8_opx,	pixblt_r_8_opx_trans,
-	pixblt_r_8_opx,	pixblt_r_8_opx_trans,	pixblt_r_8_opx,	pixblt_r_8_opx_trans,
-	pixblt_r_8_opx,	pixblt_r_8_opx_trans,	pixblt_r_8_opx,	pixblt_r_8_opx_trans,
-	pixblt_r_8_opx,	pixblt_r_8_opx_trans,	pixblt_r_8_opx,	pixblt_r_8_opx_trans,
-	pixblt_r_8_opx,	pixblt_r_8_opx_trans,	pixblt_r_8_opx,	pixblt_r_8_opx_trans,
-	pixblt_r_8_opx,	pixblt_r_8_opx_trans,	pixblt_r_8_opx,	pixblt_r_8_opx_trans,
-	pixblt_r_8_opx,	pixblt_r_8_opx_trans,	pixblt_r_8_opx,	pixblt_r_8_opx_trans,
-	pixblt_r_8_opx,	pixblt_r_8_opx_trans,	pixblt_r_8_opx,	pixblt_r_8_opx_trans,
-	pixblt_r_8_opx,	pixblt_r_8_opx_trans,	pixblt_r_8_opx,	pixblt_r_8_opx_trans,
+	pixblt_r_8_op0, pixblt_r_8_op0_trans,   pixblt_r_8_opx, pixblt_r_8_opx_trans,
+	pixblt_r_8_opx, pixblt_r_8_opx_trans,   pixblt_r_8_opx, pixblt_r_8_opx_trans,
+	pixblt_r_8_opx, pixblt_r_8_opx_trans,   pixblt_r_8_opx, pixblt_r_8_opx_trans,
+	pixblt_r_8_opx, pixblt_r_8_opx_trans,   pixblt_r_8_opx, pixblt_r_8_opx_trans,
+	pixblt_r_8_opx, pixblt_r_8_opx_trans,   pixblt_r_8_opx, pixblt_r_8_opx_trans,
+	pixblt_r_8_opx, pixblt_r_8_opx_trans,   pixblt_r_8_opx, pixblt_r_8_opx_trans,
+	pixblt_r_8_opx, pixblt_r_8_opx_trans,   pixblt_r_8_opx, pixblt_r_8_opx_trans,
+	pixblt_r_8_opx, pixblt_r_8_opx_trans,   pixblt_r_8_opx, pixblt_r_8_opx_trans,
+	pixblt_r_8_opx, pixblt_r_8_opx_trans,   pixblt_r_8_opx, pixblt_r_8_opx_trans,
+	pixblt_r_8_opx, pixblt_r_8_opx_trans,   pixblt_r_8_opx, pixblt_r_8_opx_trans,
+	pixblt_r_8_opx, pixblt_r_8_opx_trans,   pixblt_r_8_opx, pixblt_r_8_opx_trans,
+	pixblt_r_8_opx, pixblt_r_8_opx_trans,   pixblt_r_8_opx, pixblt_r_8_opx_trans,
+	pixblt_r_8_opx, pixblt_r_8_opx_trans,   pixblt_r_8_opx, pixblt_r_8_opx_trans,
+	pixblt_r_8_opx, pixblt_r_8_opx_trans,   pixblt_r_8_opx, pixblt_r_8_opx_trans,
+	pixblt_r_8_opx, pixblt_r_8_opx_trans,   pixblt_r_8_opx, pixblt_r_8_opx_trans,
+	pixblt_r_8_opx, pixblt_r_8_opx_trans,   pixblt_r_8_opx, pixblt_r_8_opx_trans,
 
-	pixblt_r_16_op0,pixblt_r_16_op0_trans,	pixblt_r_16_opx,pixblt_r_16_opx_trans,
-	pixblt_r_16_opx,pixblt_r_16_opx_trans,	pixblt_r_16_opx,pixblt_r_16_opx_trans,
-	pixblt_r_16_opx,pixblt_r_16_opx_trans,	pixblt_r_16_opx,pixblt_r_16_opx_trans,
-	pixblt_r_16_opx,pixblt_r_16_opx_trans,	pixblt_r_16_opx,pixblt_r_16_opx_trans,
-	pixblt_r_16_opx,pixblt_r_16_opx_trans,	pixblt_r_16_opx,pixblt_r_16_opx_trans,
-	pixblt_r_16_opx,pixblt_r_16_opx_trans,	pixblt_r_16_opx,pixblt_r_16_opx_trans,
-	pixblt_r_16_opx,pixblt_r_16_opx_trans,	pixblt_r_16_opx,pixblt_r_16_opx_trans,
-	pixblt_r_16_opx,pixblt_r_16_opx_trans,	pixblt_r_16_opx,pixblt_r_16_opx_trans,
-	pixblt_r_16_opx,pixblt_r_16_opx_trans,	pixblt_r_16_opx,pixblt_r_16_opx_trans,
-	pixblt_r_16_opx,pixblt_r_16_opx_trans,	pixblt_r_16_opx,pixblt_r_16_opx_trans,
-	pixblt_r_16_opx,pixblt_r_16_opx_trans,	pixblt_r_16_opx,pixblt_r_16_opx_trans,
-	pixblt_r_16_opx,pixblt_r_16_opx_trans,	pixblt_r_16_opx,pixblt_r_16_opx_trans,
-	pixblt_r_16_opx,pixblt_r_16_opx_trans,	pixblt_r_16_opx,pixblt_r_16_opx_trans,
-	pixblt_r_16_opx,pixblt_r_16_opx_trans,	pixblt_r_16_opx,pixblt_r_16_opx_trans,
-	pixblt_r_16_opx,pixblt_r_16_opx_trans,	pixblt_r_16_opx,pixblt_r_16_opx_trans,
-	pixblt_r_16_opx,pixblt_r_16_opx_trans,	pixblt_r_16_opx,pixblt_r_16_opx_trans
+	pixblt_r_16_op0,pixblt_r_16_op0_trans,  pixblt_r_16_opx,pixblt_r_16_opx_trans,
+	pixblt_r_16_opx,pixblt_r_16_opx_trans,  pixblt_r_16_opx,pixblt_r_16_opx_trans,
+	pixblt_r_16_opx,pixblt_r_16_opx_trans,  pixblt_r_16_opx,pixblt_r_16_opx_trans,
+	pixblt_r_16_opx,pixblt_r_16_opx_trans,  pixblt_r_16_opx,pixblt_r_16_opx_trans,
+	pixblt_r_16_opx,pixblt_r_16_opx_trans,  pixblt_r_16_opx,pixblt_r_16_opx_trans,
+	pixblt_r_16_opx,pixblt_r_16_opx_trans,  pixblt_r_16_opx,pixblt_r_16_opx_trans,
+	pixblt_r_16_opx,pixblt_r_16_opx_trans,  pixblt_r_16_opx,pixblt_r_16_opx_trans,
+	pixblt_r_16_opx,pixblt_r_16_opx_trans,  pixblt_r_16_opx,pixblt_r_16_opx_trans,
+	pixblt_r_16_opx,pixblt_r_16_opx_trans,  pixblt_r_16_opx,pixblt_r_16_opx_trans,
+	pixblt_r_16_opx,pixblt_r_16_opx_trans,  pixblt_r_16_opx,pixblt_r_16_opx_trans,
+	pixblt_r_16_opx,pixblt_r_16_opx_trans,  pixblt_r_16_opx,pixblt_r_16_opx_trans,
+	pixblt_r_16_opx,pixblt_r_16_opx_trans,  pixblt_r_16_opx,pixblt_r_16_opx_trans,
+	pixblt_r_16_opx,pixblt_r_16_opx_trans,  pixblt_r_16_opx,pixblt_r_16_opx_trans,
+	pixblt_r_16_opx,pixblt_r_16_opx_trans,  pixblt_r_16_opx,pixblt_r_16_opx_trans,
+	pixblt_r_16_opx,pixblt_r_16_opx_trans,  pixblt_r_16_opx,pixblt_r_16_opx_trans,
+	pixblt_r_16_opx,pixblt_r_16_opx_trans,  pixblt_r_16_opx,pixblt_r_16_opx_trans
 };
 
 static void (*const pixblt_b_op_table[])(tms34010_state *, int) =
 {
-	pixblt_b_1_op0,	pixblt_b_1_op0_trans,	pixblt_b_1_opx,	pixblt_b_1_opx_trans,
-	pixblt_b_1_opx,	pixblt_b_1_opx_trans,	pixblt_b_1_opx,	pixblt_b_1_opx_trans,
-	pixblt_b_1_opx,	pixblt_b_1_opx_trans,	pixblt_b_1_opx,	pixblt_b_1_opx_trans,
-	pixblt_b_1_opx,	pixblt_b_1_opx_trans,	pixblt_b_1_opx,	pixblt_b_1_opx_trans,
-	pixblt_b_1_opx,	pixblt_b_1_opx_trans,	pixblt_b_1_opx,	pixblt_b_1_opx_trans,
-	pixblt_b_1_opx,	pixblt_b_1_opx_trans,	pixblt_b_1_opx,	pixblt_b_1_opx_trans,
-	pixblt_b_1_opx,	pixblt_b_1_opx_trans,	pixblt_b_1_opx,	pixblt_b_1_opx_trans,
-	pixblt_b_1_opx,	pixblt_b_1_opx_trans,	pixblt_b_1_opx,	pixblt_b_1_opx_trans,
-	pixblt_b_1_opx,	pixblt_b_1_opx_trans,	pixblt_b_1_opx,	pixblt_b_1_opx_trans,
-	pixblt_b_1_opx,	pixblt_b_1_opx_trans,	pixblt_b_1_opx,	pixblt_b_1_opx_trans,
-	pixblt_b_1_opx,	pixblt_b_1_opx_trans,	pixblt_b_1_opx,	pixblt_b_1_opx_trans,
-	pixblt_b_1_opx,	pixblt_b_1_opx_trans,	pixblt_b_1_opx,	pixblt_b_1_opx_trans,
-	pixblt_b_1_opx,	pixblt_b_1_opx_trans,	pixblt_b_1_opx,	pixblt_b_1_opx_trans,
-	pixblt_b_1_opx,	pixblt_b_1_opx_trans,	pixblt_b_1_opx,	pixblt_b_1_opx_trans,
-	pixblt_b_1_opx,	pixblt_b_1_opx_trans,	pixblt_b_1_opx,	pixblt_b_1_opx_trans,
-	pixblt_b_1_opx,	pixblt_b_1_opx_trans,	pixblt_b_1_opx,	pixblt_b_1_opx_trans,
+	pixblt_b_1_op0, pixblt_b_1_op0_trans,   pixblt_b_1_opx, pixblt_b_1_opx_trans,
+	pixblt_b_1_opx, pixblt_b_1_opx_trans,   pixblt_b_1_opx, pixblt_b_1_opx_trans,
+	pixblt_b_1_opx, pixblt_b_1_opx_trans,   pixblt_b_1_opx, pixblt_b_1_opx_trans,
+	pixblt_b_1_opx, pixblt_b_1_opx_trans,   pixblt_b_1_opx, pixblt_b_1_opx_trans,
+	pixblt_b_1_opx, pixblt_b_1_opx_trans,   pixblt_b_1_opx, pixblt_b_1_opx_trans,
+	pixblt_b_1_opx, pixblt_b_1_opx_trans,   pixblt_b_1_opx, pixblt_b_1_opx_trans,
+	pixblt_b_1_opx, pixblt_b_1_opx_trans,   pixblt_b_1_opx, pixblt_b_1_opx_trans,
+	pixblt_b_1_opx, pixblt_b_1_opx_trans,   pixblt_b_1_opx, pixblt_b_1_opx_trans,
+	pixblt_b_1_opx, pixblt_b_1_opx_trans,   pixblt_b_1_opx, pixblt_b_1_opx_trans,
+	pixblt_b_1_opx, pixblt_b_1_opx_trans,   pixblt_b_1_opx, pixblt_b_1_opx_trans,
+	pixblt_b_1_opx, pixblt_b_1_opx_trans,   pixblt_b_1_opx, pixblt_b_1_opx_trans,
+	pixblt_b_1_opx, pixblt_b_1_opx_trans,   pixblt_b_1_opx, pixblt_b_1_opx_trans,
+	pixblt_b_1_opx, pixblt_b_1_opx_trans,   pixblt_b_1_opx, pixblt_b_1_opx_trans,
+	pixblt_b_1_opx, pixblt_b_1_opx_trans,   pixblt_b_1_opx, pixblt_b_1_opx_trans,
+	pixblt_b_1_opx, pixblt_b_1_opx_trans,   pixblt_b_1_opx, pixblt_b_1_opx_trans,
+	pixblt_b_1_opx, pixblt_b_1_opx_trans,   pixblt_b_1_opx, pixblt_b_1_opx_trans,
 
-	pixblt_b_2_op0,	pixblt_b_2_op0_trans,	pixblt_b_2_opx,	pixblt_b_2_opx_trans,
-	pixblt_b_2_opx,	pixblt_b_2_opx_trans,	pixblt_b_2_opx,	pixblt_b_2_opx_trans,
-	pixblt_b_2_opx,	pixblt_b_2_opx_trans,	pixblt_b_2_opx,	pixblt_b_2_opx_trans,
-	pixblt_b_2_opx,	pixblt_b_2_opx_trans,	pixblt_b_2_opx,	pixblt_b_2_opx_trans,
-	pixblt_b_2_opx,	pixblt_b_2_opx_trans,	pixblt_b_2_opx,	pixblt_b_2_opx_trans,
-	pixblt_b_2_opx,	pixblt_b_2_opx_trans,	pixblt_b_2_opx,	pixblt_b_2_opx_trans,
-	pixblt_b_2_opx,	pixblt_b_2_opx_trans,	pixblt_b_2_opx,	pixblt_b_2_opx_trans,
-	pixblt_b_2_opx,	pixblt_b_2_opx_trans,	pixblt_b_2_opx,	pixblt_b_2_opx_trans,
-	pixblt_b_2_opx,	pixblt_b_2_opx_trans,	pixblt_b_2_opx,	pixblt_b_2_opx_trans,
-	pixblt_b_2_opx,	pixblt_b_2_opx_trans,	pixblt_b_2_opx,	pixblt_b_2_opx_trans,
-	pixblt_b_2_opx,	pixblt_b_2_opx_trans,	pixblt_b_2_opx,	pixblt_b_2_opx_trans,
-	pixblt_b_2_opx,	pixblt_b_2_opx_trans,	pixblt_b_2_opx,	pixblt_b_2_opx_trans,
-	pixblt_b_2_opx,	pixblt_b_2_opx_trans,	pixblt_b_2_opx,	pixblt_b_2_opx_trans,
-	pixblt_b_2_opx,	pixblt_b_2_opx_trans,	pixblt_b_2_opx,	pixblt_b_2_opx_trans,
-	pixblt_b_2_opx,	pixblt_b_2_opx_trans,	pixblt_b_2_opx,	pixblt_b_2_opx_trans,
-	pixblt_b_2_opx,	pixblt_b_2_opx_trans,	pixblt_b_2_opx,	pixblt_b_2_opx_trans,
+	pixblt_b_2_op0, pixblt_b_2_op0_trans,   pixblt_b_2_opx, pixblt_b_2_opx_trans,
+	pixblt_b_2_opx, pixblt_b_2_opx_trans,   pixblt_b_2_opx, pixblt_b_2_opx_trans,
+	pixblt_b_2_opx, pixblt_b_2_opx_trans,   pixblt_b_2_opx, pixblt_b_2_opx_trans,
+	pixblt_b_2_opx, pixblt_b_2_opx_trans,   pixblt_b_2_opx, pixblt_b_2_opx_trans,
+	pixblt_b_2_opx, pixblt_b_2_opx_trans,   pixblt_b_2_opx, pixblt_b_2_opx_trans,
+	pixblt_b_2_opx, pixblt_b_2_opx_trans,   pixblt_b_2_opx, pixblt_b_2_opx_trans,
+	pixblt_b_2_opx, pixblt_b_2_opx_trans,   pixblt_b_2_opx, pixblt_b_2_opx_trans,
+	pixblt_b_2_opx, pixblt_b_2_opx_trans,   pixblt_b_2_opx, pixblt_b_2_opx_trans,
+	pixblt_b_2_opx, pixblt_b_2_opx_trans,   pixblt_b_2_opx, pixblt_b_2_opx_trans,
+	pixblt_b_2_opx, pixblt_b_2_opx_trans,   pixblt_b_2_opx, pixblt_b_2_opx_trans,
+	pixblt_b_2_opx, pixblt_b_2_opx_trans,   pixblt_b_2_opx, pixblt_b_2_opx_trans,
+	pixblt_b_2_opx, pixblt_b_2_opx_trans,   pixblt_b_2_opx, pixblt_b_2_opx_trans,
+	pixblt_b_2_opx, pixblt_b_2_opx_trans,   pixblt_b_2_opx, pixblt_b_2_opx_trans,
+	pixblt_b_2_opx, pixblt_b_2_opx_trans,   pixblt_b_2_opx, pixblt_b_2_opx_trans,
+	pixblt_b_2_opx, pixblt_b_2_opx_trans,   pixblt_b_2_opx, pixblt_b_2_opx_trans,
+	pixblt_b_2_opx, pixblt_b_2_opx_trans,   pixblt_b_2_opx, pixblt_b_2_opx_trans,
 
-	pixblt_b_4_op0,	pixblt_b_4_op0_trans,	pixblt_b_4_opx,	pixblt_b_4_opx_trans,
-	pixblt_b_4_opx,	pixblt_b_4_opx_trans,	pixblt_b_4_opx,	pixblt_b_4_opx_trans,
-	pixblt_b_4_opx,	pixblt_b_4_opx_trans,	pixblt_b_4_opx,	pixblt_b_4_opx_trans,
-	pixblt_b_4_opx,	pixblt_b_4_opx_trans,	pixblt_b_4_opx,	pixblt_b_4_opx_trans,
-	pixblt_b_4_opx,	pixblt_b_4_opx_trans,	pixblt_b_4_opx,	pixblt_b_4_opx_trans,
-	pixblt_b_4_opx,	pixblt_b_4_opx_trans,	pixblt_b_4_opx,	pixblt_b_4_opx_trans,
-	pixblt_b_4_opx,	pixblt_b_4_opx_trans,	pixblt_b_4_opx,	pixblt_b_4_opx_trans,
-	pixblt_b_4_opx,	pixblt_b_4_opx_trans,	pixblt_b_4_opx,	pixblt_b_4_opx_trans,
-	pixblt_b_4_opx,	pixblt_b_4_opx_trans,	pixblt_b_4_opx,	pixblt_b_4_opx_trans,
-	pixblt_b_4_opx,	pixblt_b_4_opx_trans,	pixblt_b_4_opx,	pixblt_b_4_opx_trans,
-	pixblt_b_4_opx,	pixblt_b_4_opx_trans,	pixblt_b_4_opx,	pixblt_b_4_opx_trans,
-	pixblt_b_4_opx,	pixblt_b_4_opx_trans,	pixblt_b_4_opx,	pixblt_b_4_opx_trans,
-	pixblt_b_4_opx,	pixblt_b_4_opx_trans,	pixblt_b_4_opx,	pixblt_b_4_opx_trans,
-	pixblt_b_4_opx,	pixblt_b_4_opx_trans,	pixblt_b_4_opx,	pixblt_b_4_opx_trans,
-	pixblt_b_4_opx,	pixblt_b_4_opx_trans,	pixblt_b_4_opx,	pixblt_b_4_opx_trans,
-	pixblt_b_4_opx,	pixblt_b_4_opx_trans,	pixblt_b_4_opx,	pixblt_b_4_opx_trans,
+	pixblt_b_4_op0, pixblt_b_4_op0_trans,   pixblt_b_4_opx, pixblt_b_4_opx_trans,
+	pixblt_b_4_opx, pixblt_b_4_opx_trans,   pixblt_b_4_opx, pixblt_b_4_opx_trans,
+	pixblt_b_4_opx, pixblt_b_4_opx_trans,   pixblt_b_4_opx, pixblt_b_4_opx_trans,
+	pixblt_b_4_opx, pixblt_b_4_opx_trans,   pixblt_b_4_opx, pixblt_b_4_opx_trans,
+	pixblt_b_4_opx, pixblt_b_4_opx_trans,   pixblt_b_4_opx, pixblt_b_4_opx_trans,
+	pixblt_b_4_opx, pixblt_b_4_opx_trans,   pixblt_b_4_opx, pixblt_b_4_opx_trans,
+	pixblt_b_4_opx, pixblt_b_4_opx_trans,   pixblt_b_4_opx, pixblt_b_4_opx_trans,
+	pixblt_b_4_opx, pixblt_b_4_opx_trans,   pixblt_b_4_opx, pixblt_b_4_opx_trans,
+	pixblt_b_4_opx, pixblt_b_4_opx_trans,   pixblt_b_4_opx, pixblt_b_4_opx_trans,
+	pixblt_b_4_opx, pixblt_b_4_opx_trans,   pixblt_b_4_opx, pixblt_b_4_opx_trans,
+	pixblt_b_4_opx, pixblt_b_4_opx_trans,   pixblt_b_4_opx, pixblt_b_4_opx_trans,
+	pixblt_b_4_opx, pixblt_b_4_opx_trans,   pixblt_b_4_opx, pixblt_b_4_opx_trans,
+	pixblt_b_4_opx, pixblt_b_4_opx_trans,   pixblt_b_4_opx, pixblt_b_4_opx_trans,
+	pixblt_b_4_opx, pixblt_b_4_opx_trans,   pixblt_b_4_opx, pixblt_b_4_opx_trans,
+	pixblt_b_4_opx, pixblt_b_4_opx_trans,   pixblt_b_4_opx, pixblt_b_4_opx_trans,
+	pixblt_b_4_opx, pixblt_b_4_opx_trans,   pixblt_b_4_opx, pixblt_b_4_opx_trans,
 
-	pixblt_b_8_op0,	pixblt_b_8_op0_trans,	pixblt_b_8_opx,	pixblt_b_8_opx_trans,
-	pixblt_b_8_opx,	pixblt_b_8_opx_trans,	pixblt_b_8_opx,	pixblt_b_8_opx_trans,
-	pixblt_b_8_opx,	pixblt_b_8_opx_trans,	pixblt_b_8_opx,	pixblt_b_8_opx_trans,
-	pixblt_b_8_opx,	pixblt_b_8_opx_trans,	pixblt_b_8_opx,	pixblt_b_8_opx_trans,
-	pixblt_b_8_opx,	pixblt_b_8_opx_trans,	pixblt_b_8_opx,	pixblt_b_8_opx_trans,
-	pixblt_b_8_opx,	pixblt_b_8_opx_trans,	pixblt_b_8_opx,	pixblt_b_8_opx_trans,
-	pixblt_b_8_opx,	pixblt_b_8_opx_trans,	pixblt_b_8_opx,	pixblt_b_8_opx_trans,
-	pixblt_b_8_opx,	pixblt_b_8_opx_trans,	pixblt_b_8_opx,	pixblt_b_8_opx_trans,
-	pixblt_b_8_opx,	pixblt_b_8_opx_trans,	pixblt_b_8_opx,	pixblt_b_8_opx_trans,
-	pixblt_b_8_opx,	pixblt_b_8_opx_trans,	pixblt_b_8_opx,	pixblt_b_8_opx_trans,
-	pixblt_b_8_opx,	pixblt_b_8_opx_trans,	pixblt_b_8_opx,	pixblt_b_8_opx_trans,
-	pixblt_b_8_opx,	pixblt_b_8_opx_trans,	pixblt_b_8_opx,	pixblt_b_8_opx_trans,
-	pixblt_b_8_opx,	pixblt_b_8_opx_trans,	pixblt_b_8_opx,	pixblt_b_8_opx_trans,
-	pixblt_b_8_opx,	pixblt_b_8_opx_trans,	pixblt_b_8_opx,	pixblt_b_8_opx_trans,
-	pixblt_b_8_opx,	pixblt_b_8_opx_trans,	pixblt_b_8_opx,	pixblt_b_8_opx_trans,
-	pixblt_b_8_opx,	pixblt_b_8_opx_trans,	pixblt_b_8_opx,	pixblt_b_8_opx_trans,
+	pixblt_b_8_op0, pixblt_b_8_op0_trans,   pixblt_b_8_opx, pixblt_b_8_opx_trans,
+	pixblt_b_8_opx, pixblt_b_8_opx_trans,   pixblt_b_8_opx, pixblt_b_8_opx_trans,
+	pixblt_b_8_opx, pixblt_b_8_opx_trans,   pixblt_b_8_opx, pixblt_b_8_opx_trans,
+	pixblt_b_8_opx, pixblt_b_8_opx_trans,   pixblt_b_8_opx, pixblt_b_8_opx_trans,
+	pixblt_b_8_opx, pixblt_b_8_opx_trans,   pixblt_b_8_opx, pixblt_b_8_opx_trans,
+	pixblt_b_8_opx, pixblt_b_8_opx_trans,   pixblt_b_8_opx, pixblt_b_8_opx_trans,
+	pixblt_b_8_opx, pixblt_b_8_opx_trans,   pixblt_b_8_opx, pixblt_b_8_opx_trans,
+	pixblt_b_8_opx, pixblt_b_8_opx_trans,   pixblt_b_8_opx, pixblt_b_8_opx_trans,
+	pixblt_b_8_opx, pixblt_b_8_opx_trans,   pixblt_b_8_opx, pixblt_b_8_opx_trans,
+	pixblt_b_8_opx, pixblt_b_8_opx_trans,   pixblt_b_8_opx, pixblt_b_8_opx_trans,
+	pixblt_b_8_opx, pixblt_b_8_opx_trans,   pixblt_b_8_opx, pixblt_b_8_opx_trans,
+	pixblt_b_8_opx, pixblt_b_8_opx_trans,   pixblt_b_8_opx, pixblt_b_8_opx_trans,
+	pixblt_b_8_opx, pixblt_b_8_opx_trans,   pixblt_b_8_opx, pixblt_b_8_opx_trans,
+	pixblt_b_8_opx, pixblt_b_8_opx_trans,   pixblt_b_8_opx, pixblt_b_8_opx_trans,
+	pixblt_b_8_opx, pixblt_b_8_opx_trans,   pixblt_b_8_opx, pixblt_b_8_opx_trans,
+	pixblt_b_8_opx, pixblt_b_8_opx_trans,   pixblt_b_8_opx, pixblt_b_8_opx_trans,
 
-	pixblt_b_16_op0,pixblt_b_16_op0_trans,	pixblt_b_16_opx,pixblt_b_16_opx_trans,
-	pixblt_b_16_opx,pixblt_b_16_opx_trans,	pixblt_b_16_opx,pixblt_b_16_opx_trans,
-	pixblt_b_16_opx,pixblt_b_16_opx_trans,	pixblt_b_16_opx,pixblt_b_16_opx_trans,
-	pixblt_b_16_opx,pixblt_b_16_opx_trans,	pixblt_b_16_opx,pixblt_b_16_opx_trans,
-	pixblt_b_16_opx,pixblt_b_16_opx_trans,	pixblt_b_16_opx,pixblt_b_16_opx_trans,
-	pixblt_b_16_opx,pixblt_b_16_opx_trans,	pixblt_b_16_opx,pixblt_b_16_opx_trans,
-	pixblt_b_16_opx,pixblt_b_16_opx_trans,	pixblt_b_16_opx,pixblt_b_16_opx_trans,
-	pixblt_b_16_opx,pixblt_b_16_opx_trans,	pixblt_b_16_opx,pixblt_b_16_opx_trans,
-	pixblt_b_16_opx,pixblt_b_16_opx_trans,	pixblt_b_16_opx,pixblt_b_16_opx_trans,
-	pixblt_b_16_opx,pixblt_b_16_opx_trans,	pixblt_b_16_opx,pixblt_b_16_opx_trans,
-	pixblt_b_16_opx,pixblt_b_16_opx_trans,	pixblt_b_16_opx,pixblt_b_16_opx_trans,
-	pixblt_b_16_opx,pixblt_b_16_opx_trans,	pixblt_b_16_opx,pixblt_b_16_opx_trans,
-	pixblt_b_16_opx,pixblt_b_16_opx_trans,	pixblt_b_16_opx,pixblt_b_16_opx_trans,
-	pixblt_b_16_opx,pixblt_b_16_opx_trans,	pixblt_b_16_opx,pixblt_b_16_opx_trans,
-	pixblt_b_16_opx,pixblt_b_16_opx_trans,	pixblt_b_16_opx,pixblt_b_16_opx_trans,
-	pixblt_b_16_opx,pixblt_b_16_opx_trans,	pixblt_b_16_opx,pixblt_b_16_opx_trans
+	pixblt_b_16_op0,pixblt_b_16_op0_trans,  pixblt_b_16_opx,pixblt_b_16_opx_trans,
+	pixblt_b_16_opx,pixblt_b_16_opx_trans,  pixblt_b_16_opx,pixblt_b_16_opx_trans,
+	pixblt_b_16_opx,pixblt_b_16_opx_trans,  pixblt_b_16_opx,pixblt_b_16_opx_trans,
+	pixblt_b_16_opx,pixblt_b_16_opx_trans,  pixblt_b_16_opx,pixblt_b_16_opx_trans,
+	pixblt_b_16_opx,pixblt_b_16_opx_trans,  pixblt_b_16_opx,pixblt_b_16_opx_trans,
+	pixblt_b_16_opx,pixblt_b_16_opx_trans,  pixblt_b_16_opx,pixblt_b_16_opx_trans,
+	pixblt_b_16_opx,pixblt_b_16_opx_trans,  pixblt_b_16_opx,pixblt_b_16_opx_trans,
+	pixblt_b_16_opx,pixblt_b_16_opx_trans,  pixblt_b_16_opx,pixblt_b_16_opx_trans,
+	pixblt_b_16_opx,pixblt_b_16_opx_trans,  pixblt_b_16_opx,pixblt_b_16_opx_trans,
+	pixblt_b_16_opx,pixblt_b_16_opx_trans,  pixblt_b_16_opx,pixblt_b_16_opx_trans,
+	pixblt_b_16_opx,pixblt_b_16_opx_trans,  pixblt_b_16_opx,pixblt_b_16_opx_trans,
+	pixblt_b_16_opx,pixblt_b_16_opx_trans,  pixblt_b_16_opx,pixblt_b_16_opx_trans,
+	pixblt_b_16_opx,pixblt_b_16_opx_trans,  pixblt_b_16_opx,pixblt_b_16_opx_trans,
+	pixblt_b_16_opx,pixblt_b_16_opx_trans,  pixblt_b_16_opx,pixblt_b_16_opx_trans,
+	pixblt_b_16_opx,pixblt_b_16_opx_trans,  pixblt_b_16_opx,pixblt_b_16_opx_trans,
+	pixblt_b_16_opx,pixblt_b_16_opx_trans,  pixblt_b_16_opx,pixblt_b_16_opx_trans
 };
 
 static void (*const fill_op_table[])(tms34010_state *tms, int) =
 {
-	fill_1_op0,		fill_1_op0_trans,		fill_1_opx,		fill_1_opx_trans,
-	fill_1_opx,		fill_1_opx_trans,		fill_1_opx,		fill_1_opx_trans,
-	fill_1_opx,		fill_1_opx_trans,		fill_1_opx,		fill_1_opx_trans,
-	fill_1_opx,		fill_1_opx_trans,		fill_1_opx,		fill_1_opx_trans,
-	fill_1_opx,		fill_1_opx_trans,		fill_1_opx,		fill_1_opx_trans,
-	fill_1_opx,		fill_1_opx_trans,		fill_1_opx,		fill_1_opx_trans,
-	fill_1_opx,		fill_1_opx_trans,		fill_1_opx,		fill_1_opx_trans,
-	fill_1_opx,		fill_1_opx_trans,		fill_1_opx,		fill_1_opx_trans,
-	fill_1_opx,		fill_1_opx_trans,		fill_1_opx,		fill_1_opx_trans,
-	fill_1_opx,		fill_1_opx_trans,		fill_1_opx,		fill_1_opx_trans,
-	fill_1_opx,		fill_1_opx_trans,		fill_1_opx,		fill_1_opx_trans,
-	fill_1_opx,		fill_1_opx_trans,		fill_1_opx,		fill_1_opx_trans,
-	fill_1_opx,		fill_1_opx_trans,		fill_1_opx,		fill_1_opx_trans,
-	fill_1_opx,		fill_1_opx_trans,		fill_1_opx,		fill_1_opx_trans,
-	fill_1_opx,		fill_1_opx_trans,		fill_1_opx,		fill_1_opx_trans,
-	fill_1_opx,		fill_1_opx_trans,		fill_1_opx,		fill_1_opx_trans,
+	fill_1_op0,     fill_1_op0_trans,       fill_1_opx,     fill_1_opx_trans,
+	fill_1_opx,     fill_1_opx_trans,       fill_1_opx,     fill_1_opx_trans,
+	fill_1_opx,     fill_1_opx_trans,       fill_1_opx,     fill_1_opx_trans,
+	fill_1_opx,     fill_1_opx_trans,       fill_1_opx,     fill_1_opx_trans,
+	fill_1_opx,     fill_1_opx_trans,       fill_1_opx,     fill_1_opx_trans,
+	fill_1_opx,     fill_1_opx_trans,       fill_1_opx,     fill_1_opx_trans,
+	fill_1_opx,     fill_1_opx_trans,       fill_1_opx,     fill_1_opx_trans,
+	fill_1_opx,     fill_1_opx_trans,       fill_1_opx,     fill_1_opx_trans,
+	fill_1_opx,     fill_1_opx_trans,       fill_1_opx,     fill_1_opx_trans,
+	fill_1_opx,     fill_1_opx_trans,       fill_1_opx,     fill_1_opx_trans,
+	fill_1_opx,     fill_1_opx_trans,       fill_1_opx,     fill_1_opx_trans,
+	fill_1_opx,     fill_1_opx_trans,       fill_1_opx,     fill_1_opx_trans,
+	fill_1_opx,     fill_1_opx_trans,       fill_1_opx,     fill_1_opx_trans,
+	fill_1_opx,     fill_1_opx_trans,       fill_1_opx,     fill_1_opx_trans,
+	fill_1_opx,     fill_1_opx_trans,       fill_1_opx,     fill_1_opx_trans,
+	fill_1_opx,     fill_1_opx_trans,       fill_1_opx,     fill_1_opx_trans,
 
-	fill_2_op0,		fill_2_op0_trans,		fill_2_opx,		fill_2_opx_trans,
-	fill_2_opx,		fill_2_opx_trans,		fill_2_opx,		fill_2_opx_trans,
-	fill_2_opx,		fill_2_opx_trans,		fill_2_opx,		fill_2_opx_trans,
-	fill_2_opx,		fill_2_opx_trans,		fill_2_opx,		fill_2_opx_trans,
-	fill_2_opx,		fill_2_opx_trans,		fill_2_opx,		fill_2_opx_trans,
-	fill_2_opx,		fill_2_opx_trans,		fill_2_opx,		fill_2_opx_trans,
-	fill_2_opx,		fill_2_opx_trans,		fill_2_opx,		fill_2_opx_trans,
-	fill_2_opx,		fill_2_opx_trans,		fill_2_opx,		fill_2_opx_trans,
-	fill_2_opx,		fill_2_opx_trans,		fill_2_opx,		fill_2_opx_trans,
-	fill_2_opx,		fill_2_opx_trans,		fill_2_opx,		fill_2_opx_trans,
-	fill_2_opx,		fill_2_opx_trans,		fill_2_opx,		fill_2_opx_trans,
-	fill_2_opx,		fill_2_opx_trans,		fill_2_opx,		fill_2_opx_trans,
-	fill_2_opx,		fill_2_opx_trans,		fill_2_opx,		fill_2_opx_trans,
-	fill_2_opx,		fill_2_opx_trans,		fill_2_opx,		fill_2_opx_trans,
-	fill_2_opx,		fill_2_opx_trans,		fill_2_opx,		fill_2_opx_trans,
-	fill_2_opx,		fill_2_opx_trans,		fill_2_opx,		fill_2_opx_trans,
+	fill_2_op0,     fill_2_op0_trans,       fill_2_opx,     fill_2_opx_trans,
+	fill_2_opx,     fill_2_opx_trans,       fill_2_opx,     fill_2_opx_trans,
+	fill_2_opx,     fill_2_opx_trans,       fill_2_opx,     fill_2_opx_trans,
+	fill_2_opx,     fill_2_opx_trans,       fill_2_opx,     fill_2_opx_trans,
+	fill_2_opx,     fill_2_opx_trans,       fill_2_opx,     fill_2_opx_trans,
+	fill_2_opx,     fill_2_opx_trans,       fill_2_opx,     fill_2_opx_trans,
+	fill_2_opx,     fill_2_opx_trans,       fill_2_opx,     fill_2_opx_trans,
+	fill_2_opx,     fill_2_opx_trans,       fill_2_opx,     fill_2_opx_trans,
+	fill_2_opx,     fill_2_opx_trans,       fill_2_opx,     fill_2_opx_trans,
+	fill_2_opx,     fill_2_opx_trans,       fill_2_opx,     fill_2_opx_trans,
+	fill_2_opx,     fill_2_opx_trans,       fill_2_opx,     fill_2_opx_trans,
+	fill_2_opx,     fill_2_opx_trans,       fill_2_opx,     fill_2_opx_trans,
+	fill_2_opx,     fill_2_opx_trans,       fill_2_opx,     fill_2_opx_trans,
+	fill_2_opx,     fill_2_opx_trans,       fill_2_opx,     fill_2_opx_trans,
+	fill_2_opx,     fill_2_opx_trans,       fill_2_opx,     fill_2_opx_trans,
+	fill_2_opx,     fill_2_opx_trans,       fill_2_opx,     fill_2_opx_trans,
 
-	fill_4_op0,		fill_4_op0_trans,		fill_4_opx,		fill_4_opx_trans,
-	fill_4_opx,		fill_4_opx_trans,		fill_4_opx,		fill_4_opx_trans,
-	fill_4_opx,		fill_4_opx_trans,		fill_4_opx,		fill_4_opx_trans,
-	fill_4_opx,		fill_4_opx_trans,		fill_4_opx,		fill_4_opx_trans,
-	fill_4_opx,		fill_4_opx_trans,		fill_4_opx,		fill_4_opx_trans,
-	fill_4_opx,		fill_4_opx_trans,		fill_4_opx,		fill_4_opx_trans,
-	fill_4_opx,		fill_4_opx_trans,		fill_4_opx,		fill_4_opx_trans,
-	fill_4_opx,		fill_4_opx_trans,		fill_4_opx,		fill_4_opx_trans,
-	fill_4_opx,		fill_4_opx_trans,		fill_4_opx,		fill_4_opx_trans,
-	fill_4_opx,		fill_4_opx_trans,		fill_4_opx,		fill_4_opx_trans,
-	fill_4_opx,		fill_4_opx_trans,		fill_4_opx,		fill_4_opx_trans,
-	fill_4_opx,		fill_4_opx_trans,		fill_4_opx,		fill_4_opx_trans,
-	fill_4_opx,		fill_4_opx_trans,		fill_4_opx,		fill_4_opx_trans,
-	fill_4_opx,		fill_4_opx_trans,		fill_4_opx,		fill_4_opx_trans,
-	fill_4_opx,		fill_4_opx_trans,		fill_4_opx,		fill_4_opx_trans,
-	fill_4_opx,		fill_4_opx_trans,		fill_4_opx,		fill_4_opx_trans,
+	fill_4_op0,     fill_4_op0_trans,       fill_4_opx,     fill_4_opx_trans,
+	fill_4_opx,     fill_4_opx_trans,       fill_4_opx,     fill_4_opx_trans,
+	fill_4_opx,     fill_4_opx_trans,       fill_4_opx,     fill_4_opx_trans,
+	fill_4_opx,     fill_4_opx_trans,       fill_4_opx,     fill_4_opx_trans,
+	fill_4_opx,     fill_4_opx_trans,       fill_4_opx,     fill_4_opx_trans,
+	fill_4_opx,     fill_4_opx_trans,       fill_4_opx,     fill_4_opx_trans,
+	fill_4_opx,     fill_4_opx_trans,       fill_4_opx,     fill_4_opx_trans,
+	fill_4_opx,     fill_4_opx_trans,       fill_4_opx,     fill_4_opx_trans,
+	fill_4_opx,     fill_4_opx_trans,       fill_4_opx,     fill_4_opx_trans,
+	fill_4_opx,     fill_4_opx_trans,       fill_4_opx,     fill_4_opx_trans,
+	fill_4_opx,     fill_4_opx_trans,       fill_4_opx,     fill_4_opx_trans,
+	fill_4_opx,     fill_4_opx_trans,       fill_4_opx,     fill_4_opx_trans,
+	fill_4_opx,     fill_4_opx_trans,       fill_4_opx,     fill_4_opx_trans,
+	fill_4_opx,     fill_4_opx_trans,       fill_4_opx,     fill_4_opx_trans,
+	fill_4_opx,     fill_4_opx_trans,       fill_4_opx,     fill_4_opx_trans,
+	fill_4_opx,     fill_4_opx_trans,       fill_4_opx,     fill_4_opx_trans,
 
-	fill_8_op0,		fill_8_op0_trans,		fill_8_opx,		fill_8_opx_trans,
-	fill_8_opx,		fill_8_opx_trans,		fill_8_opx,		fill_8_opx_trans,
-	fill_8_opx,		fill_8_opx_trans,		fill_8_opx,		fill_8_opx_trans,
-	fill_8_opx,		fill_8_opx_trans,		fill_8_opx,		fill_8_opx_trans,
-	fill_8_opx,		fill_8_opx_trans,		fill_8_opx,		fill_8_opx_trans,
-	fill_8_opx,		fill_8_opx_trans,		fill_8_opx,		fill_8_opx_trans,
-	fill_8_opx,		fill_8_opx_trans,		fill_8_opx,		fill_8_opx_trans,
-	fill_8_opx,		fill_8_opx_trans,		fill_8_opx,		fill_8_opx_trans,
-	fill_8_opx,		fill_8_opx_trans,		fill_8_opx,		fill_8_opx_trans,
-	fill_8_opx,		fill_8_opx_trans,		fill_8_opx,		fill_8_opx_trans,
-	fill_8_opx,		fill_8_opx_trans,		fill_8_opx,		fill_8_opx_trans,
-	fill_8_opx,		fill_8_opx_trans,		fill_8_opx,		fill_8_opx_trans,
-	fill_8_opx,		fill_8_opx_trans,		fill_8_opx,		fill_8_opx_trans,
-	fill_8_opx,		fill_8_opx_trans,		fill_8_opx,		fill_8_opx_trans,
-	fill_8_opx,		fill_8_opx_trans,		fill_8_opx,		fill_8_opx_trans,
-	fill_8_opx,		fill_8_opx_trans,		fill_8_opx,		fill_8_opx_trans,
+	fill_8_op0,     fill_8_op0_trans,       fill_8_opx,     fill_8_opx_trans,
+	fill_8_opx,     fill_8_opx_trans,       fill_8_opx,     fill_8_opx_trans,
+	fill_8_opx,     fill_8_opx_trans,       fill_8_opx,     fill_8_opx_trans,
+	fill_8_opx,     fill_8_opx_trans,       fill_8_opx,     fill_8_opx_trans,
+	fill_8_opx,     fill_8_opx_trans,       fill_8_opx,     fill_8_opx_trans,
+	fill_8_opx,     fill_8_opx_trans,       fill_8_opx,     fill_8_opx_trans,
+	fill_8_opx,     fill_8_opx_trans,       fill_8_opx,     fill_8_opx_trans,
+	fill_8_opx,     fill_8_opx_trans,       fill_8_opx,     fill_8_opx_trans,
+	fill_8_opx,     fill_8_opx_trans,       fill_8_opx,     fill_8_opx_trans,
+	fill_8_opx,     fill_8_opx_trans,       fill_8_opx,     fill_8_opx_trans,
+	fill_8_opx,     fill_8_opx_trans,       fill_8_opx,     fill_8_opx_trans,
+	fill_8_opx,     fill_8_opx_trans,       fill_8_opx,     fill_8_opx_trans,
+	fill_8_opx,     fill_8_opx_trans,       fill_8_opx,     fill_8_opx_trans,
+	fill_8_opx,     fill_8_opx_trans,       fill_8_opx,     fill_8_opx_trans,
+	fill_8_opx,     fill_8_opx_trans,       fill_8_opx,     fill_8_opx_trans,
+	fill_8_opx,     fill_8_opx_trans,       fill_8_opx,     fill_8_opx_trans,
 
-	fill_16_op0,	fill_16_op0_trans,		fill_16_opx,	fill_16_opx_trans,
-	fill_16_opx,	fill_16_opx_trans,		fill_16_opx,	fill_16_opx_trans,
-	fill_16_opx,	fill_16_opx_trans,		fill_16_opx,	fill_16_opx_trans,
-	fill_16_opx,	fill_16_opx_trans,		fill_16_opx,	fill_16_opx_trans,
-	fill_16_opx,	fill_16_opx_trans,		fill_16_opx,	fill_16_opx_trans,
-	fill_16_opx,	fill_16_opx_trans,		fill_16_opx,	fill_16_opx_trans,
-	fill_16_opx,	fill_16_opx_trans,		fill_16_opx,	fill_16_opx_trans,
-	fill_16_opx,	fill_16_opx_trans,		fill_16_opx,	fill_16_opx_trans,
-	fill_16_opx,	fill_16_opx_trans,		fill_16_opx,	fill_16_opx_trans,
-	fill_16_opx,	fill_16_opx_trans,		fill_16_opx,	fill_16_opx_trans,
-	fill_16_opx,	fill_16_opx_trans,		fill_16_opx,	fill_16_opx_trans,
-	fill_16_opx,	fill_16_opx_trans,		fill_16_opx,	fill_16_opx_trans,
-	fill_16_opx,	fill_16_opx_trans,		fill_16_opx,	fill_16_opx_trans,
-	fill_16_opx,	fill_16_opx_trans,		fill_16_opx,	fill_16_opx_trans,
-	fill_16_opx,	fill_16_opx_trans,		fill_16_opx,	fill_16_opx_trans,
-	fill_16_opx,	fill_16_opx_trans,		fill_16_opx,	fill_16_opx_trans
+	fill_16_op0,    fill_16_op0_trans,      fill_16_opx,    fill_16_opx_trans,
+	fill_16_opx,    fill_16_opx_trans,      fill_16_opx,    fill_16_opx_trans,
+	fill_16_opx,    fill_16_opx_trans,      fill_16_opx,    fill_16_opx_trans,
+	fill_16_opx,    fill_16_opx_trans,      fill_16_opx,    fill_16_opx_trans,
+	fill_16_opx,    fill_16_opx_trans,      fill_16_opx,    fill_16_opx_trans,
+	fill_16_opx,    fill_16_opx_trans,      fill_16_opx,    fill_16_opx_trans,
+	fill_16_opx,    fill_16_opx_trans,      fill_16_opx,    fill_16_opx_trans,
+	fill_16_opx,    fill_16_opx_trans,      fill_16_opx,    fill_16_opx_trans,
+	fill_16_opx,    fill_16_opx_trans,      fill_16_opx,    fill_16_opx_trans,
+	fill_16_opx,    fill_16_opx_trans,      fill_16_opx,    fill_16_opx_trans,
+	fill_16_opx,    fill_16_opx_trans,      fill_16_opx,    fill_16_opx_trans,
+	fill_16_opx,    fill_16_opx_trans,      fill_16_opx,    fill_16_opx_trans,
+	fill_16_opx,    fill_16_opx_trans,      fill_16_opx,    fill_16_opx_trans,
+	fill_16_opx,    fill_16_opx_trans,      fill_16_opx,    fill_16_opx_trans,
+	fill_16_opx,    fill_16_opx_trans,      fill_16_opx,    fill_16_opx_trans,
+	fill_16_opx,    fill_16_opx_trans,      fill_16_opx,    fill_16_opx_trans
 };
 
 
 #define RECURSIVE_INCLUDE
 
 /* non-transparent replace ops */
-#define PIXEL_OP(src, mask, pixel)		pixel = pixel
-#define PIXEL_OP_TIMING					2
-#define PIXEL_OP_REQUIRES_SOURCE		0
-#define TRANSPARENCY					0
+#define PIXEL_OP(src, mask, pixel)      pixel = pixel
+#define PIXEL_OP_TIMING                 2
+#define PIXEL_OP_REQUIRES_SOURCE        0
+#define TRANSPARENCY                    0
 
 	/* 1bpp cases */
-	#define BITS_PER_PIXEL					1
-	#define FUNCTION_NAME(base)				base##_1_op0
+	#define BITS_PER_PIXEL                  1
+	#define FUNCTION_NAME(base)             base##_1_op0
 	#include "34010gfx.c"
 	#undef FUNCTION_NAME
 	#undef BITS_PER_PIXEL
 
 	/* 2bpp cases */
-	#define BITS_PER_PIXEL					2
-	#define FUNCTION_NAME(base)				base##_2_op0
+	#define BITS_PER_PIXEL                  2
+	#define FUNCTION_NAME(base)             base##_2_op0
 	#include "34010gfx.c"
 	#undef FUNCTION_NAME
 	#undef BITS_PER_PIXEL
 
 	/* 4bpp cases */
-	#define BITS_PER_PIXEL					4
-	#define FUNCTION_NAME(base)				base##_4_op0
+	#define BITS_PER_PIXEL                  4
+	#define FUNCTION_NAME(base)             base##_4_op0
 	#include "34010gfx.c"
 	#undef FUNCTION_NAME
 	#undef BITS_PER_PIXEL
 
 	/* 8bpp cases */
-	#define BITS_PER_PIXEL					8
-	#define FUNCTION_NAME(base)				base##_8_op0
+	#define BITS_PER_PIXEL                  8
+	#define FUNCTION_NAME(base)             base##_8_op0
 	#include "34010gfx.c"
 	#undef FUNCTION_NAME
 	#undef BITS_PER_PIXEL
 
 	/* 16bpp cases */
-	#define BITS_PER_PIXEL					16
-	#define FUNCTION_NAME(base)				base##_16_op0
+	#define BITS_PER_PIXEL                  16
+	#define FUNCTION_NAME(base)             base##_16_op0
 	#include "34010gfx.c"
 	#undef FUNCTION_NAME
 	#undef BITS_PER_PIXEL
@@ -766,42 +766,42 @@ static void (*const fill_op_table[])(tms34010_state *tms, int) =
 #undef PIXEL_OP
 
 
-#define PIXEL_OP(src, mask, pixel)		pixel = (*pixel_op)(src, mask, pixel)
-#define PIXEL_OP_TIMING					pixel_op_timing
-#define PIXEL_OP_REQUIRES_SOURCE		1
-#define TRANSPARENCY					0
+#define PIXEL_OP(src, mask, pixel)      pixel = (*pixel_op)(src, mask, pixel)
+#define PIXEL_OP_TIMING                 pixel_op_timing
+#define PIXEL_OP_REQUIRES_SOURCE        1
+#define TRANSPARENCY                    0
 
 	/* 1bpp cases */
-	#define BITS_PER_PIXEL					1
-	#define FUNCTION_NAME(base)				base##_1_opx
+	#define BITS_PER_PIXEL                  1
+	#define FUNCTION_NAME(base)             base##_1_opx
 	#include "34010gfx.c"
 	#undef FUNCTION_NAME
 	#undef BITS_PER_PIXEL
 
 	/* 2bpp cases */
-	#define BITS_PER_PIXEL					2
-	#define FUNCTION_NAME(base)				base##_2_opx
+	#define BITS_PER_PIXEL                  2
+	#define FUNCTION_NAME(base)             base##_2_opx
 	#include "34010gfx.c"
 	#undef FUNCTION_NAME
 	#undef BITS_PER_PIXEL
 
 	/* 4bpp cases */
-	#define BITS_PER_PIXEL					4
-	#define FUNCTION_NAME(base)				base##_4_opx
+	#define BITS_PER_PIXEL                  4
+	#define FUNCTION_NAME(base)             base##_4_opx
 	#include "34010gfx.c"
 	#undef FUNCTION_NAME
 	#undef BITS_PER_PIXEL
 
 	/* 8bpp cases */
-	#define BITS_PER_PIXEL					8
-	#define FUNCTION_NAME(base)				base##_8_opx
+	#define BITS_PER_PIXEL                  8
+	#define FUNCTION_NAME(base)             base##_8_opx
 	#include "34010gfx.c"
 	#undef FUNCTION_NAME
 	#undef BITS_PER_PIXEL
 
 	/* 16bpp cases */
-	#define BITS_PER_PIXEL					16
-	#define FUNCTION_NAME(base)				base##_16_opx
+	#define BITS_PER_PIXEL                  16
+	#define FUNCTION_NAME(base)             base##_16_opx
 	#include "34010gfx.c"
 	#undef FUNCTION_NAME
 	#undef BITS_PER_PIXEL
@@ -813,42 +813,42 @@ static void (*const fill_op_table[])(tms34010_state *tms, int) =
 
 
 /* transparent replace ops */
-#define PIXEL_OP(src, mask, pixel)		pixel = pixel
-#define PIXEL_OP_REQUIRES_SOURCE		0
-#define PIXEL_OP_TIMING					4
-#define TRANSPARENCY					1
+#define PIXEL_OP(src, mask, pixel)      pixel = pixel
+#define PIXEL_OP_REQUIRES_SOURCE        0
+#define PIXEL_OP_TIMING                 4
+#define TRANSPARENCY                    1
 
 	/* 1bpp cases */
-	#define BITS_PER_PIXEL					1
-	#define FUNCTION_NAME(base)				base##_1_op0_trans
+	#define BITS_PER_PIXEL                  1
+	#define FUNCTION_NAME(base)             base##_1_op0_trans
 	#include "34010gfx.c"
 	#undef FUNCTION_NAME
 	#undef BITS_PER_PIXEL
 
 	/* 2bpp cases */
-	#define BITS_PER_PIXEL					2
-	#define FUNCTION_NAME(base)				base##_2_op0_trans
+	#define BITS_PER_PIXEL                  2
+	#define FUNCTION_NAME(base)             base##_2_op0_trans
 	#include "34010gfx.c"
 	#undef FUNCTION_NAME
 	#undef BITS_PER_PIXEL
 
 	/* 4bpp cases */
-	#define BITS_PER_PIXEL					4
-	#define FUNCTION_NAME(base)				base##_4_op0_trans
+	#define BITS_PER_PIXEL                  4
+	#define FUNCTION_NAME(base)             base##_4_op0_trans
 	#include "34010gfx.c"
 	#undef FUNCTION_NAME
 	#undef BITS_PER_PIXEL
 
 	/* 8bpp cases */
-	#define BITS_PER_PIXEL					8
-	#define FUNCTION_NAME(base)				base##_8_op0_trans
+	#define BITS_PER_PIXEL                  8
+	#define FUNCTION_NAME(base)             base##_8_op0_trans
 	#include "34010gfx.c"
 	#undef FUNCTION_NAME
 	#undef BITS_PER_PIXEL
 
 	/* 16bpp cases */
-	#define BITS_PER_PIXEL					16
-	#define FUNCTION_NAME(base)				base##_16_op0_trans
+	#define BITS_PER_PIXEL                  16
+	#define FUNCTION_NAME(base)             base##_16_op0_trans
 	#include "34010gfx.c"
 	#undef FUNCTION_NAME
 	#undef BITS_PER_PIXEL
@@ -859,42 +859,42 @@ static void (*const fill_op_table[])(tms34010_state *tms, int) =
 #undef PIXEL_OP
 
 
-#define PIXEL_OP(src, mask, pixel)		pixel = (*pixel_op)(src, mask, pixel)
-#define PIXEL_OP_REQUIRES_SOURCE		1
-#define PIXEL_OP_TIMING					(2+pixel_op_timing)
-#define TRANSPARENCY					1
+#define PIXEL_OP(src, mask, pixel)      pixel = (*pixel_op)(src, mask, pixel)
+#define PIXEL_OP_REQUIRES_SOURCE        1
+#define PIXEL_OP_TIMING                 (2+pixel_op_timing)
+#define TRANSPARENCY                    1
 
 	/* 1bpp cases */
-	#define BITS_PER_PIXEL					1
-	#define FUNCTION_NAME(base)				base##_1_opx_trans
+	#define BITS_PER_PIXEL                  1
+	#define FUNCTION_NAME(base)             base##_1_opx_trans
 	#include "34010gfx.c"
 	#undef FUNCTION_NAME
 	#undef BITS_PER_PIXEL
 
 	/* 2bpp cases */
-	#define BITS_PER_PIXEL					2
-	#define FUNCTION_NAME(base)				base##_2_opx_trans
+	#define BITS_PER_PIXEL                  2
+	#define FUNCTION_NAME(base)             base##_2_opx_trans
 	#include "34010gfx.c"
 	#undef FUNCTION_NAME
 	#undef BITS_PER_PIXEL
 
 	/* 4bpp cases */
-	#define BITS_PER_PIXEL					4
-	#define FUNCTION_NAME(base)				base##_4_opx_trans
+	#define BITS_PER_PIXEL                  4
+	#define FUNCTION_NAME(base)             base##_4_opx_trans
 	#include "34010gfx.c"
 	#undef FUNCTION_NAME
 	#undef BITS_PER_PIXEL
 
 	/* 8bpp cases */
-	#define BITS_PER_PIXEL					8
-	#define FUNCTION_NAME(base)				base##_8_opx_trans
+	#define BITS_PER_PIXEL                  8
+	#define FUNCTION_NAME(base)             base##_8_opx_trans
 	#include "34010gfx.c"
 	#undef FUNCTION_NAME
 	#undef BITS_PER_PIXEL
 
 	/* 16bpp cases */
-	#define BITS_PER_PIXEL					16
-	#define FUNCTION_NAME(base)				base##_16_opx_trans
+	#define BITS_PER_PIXEL                  16
+	#define FUNCTION_NAME(base)             base##_16_opx_trans
 	#include "34010gfx.c"
 	#undef FUNCTION_NAME
 	#undef BITS_PER_PIXEL
@@ -1038,8 +1038,8 @@ static void FUNCTION_NAME(pixblt)(tms34010_state *tms, int src_is_linear, int ds
 	if (!P_FLAG(tms))
 	{
 		int dx, dy, x, y, /*words,*/ yreverse;
-		void (*word_write)(address_space *space,offs_t address,UINT16 data);
-		UINT16 (*word_read)(address_space *space,offs_t address);
+		void (*word_write)(address_space &space,offs_t address,UINT16 data);
+		UINT16 (*word_read)(address_space &space,offs_t address);
 		UINT32 readwrites = 0;
 		UINT32 saddr, daddr;
 		XY dstxy = { 0 };
@@ -1113,13 +1113,13 @@ static void FUNCTION_NAME(pixblt)(tms34010_state *tms, int src_is_linear, int ds
 			UINT32 srcword, dstword = 0;
 
 			/* fetch the initial source word */
-			srcword = (*word_read)(tms->program, srcwordaddr++ << 1);
+			srcword = (*word_read)(*tms->program, srcwordaddr++ << 1);
 			readwrites++;
 
 			/* fetch the initial dest word */
 			if (PIXEL_OP_REQUIRES_SOURCE || TRANSPARENCY || (daddr & 0x0f) != 0)
 			{
-				dstword = (*word_read)(tms->program, dstwordaddr << 1);
+				dstword = (*word_read)(*tms->program, dstwordaddr << 1);
 				readwrites++;
 			}
 
@@ -1132,7 +1132,7 @@ static void FUNCTION_NAME(pixblt)(tms34010_state *tms, int src_is_linear, int ds
 				/* fetch more words if necessary */
 				if (srcbit + BITS_PER_PIXEL > 16)
 				{
-					srcword |= (*word_read)(tms->program, srcwordaddr++ << 1) << 16;
+					srcword |= (*word_read)(*tms->program, srcwordaddr++ << 1) << 16;
 					readwrites++;
 				}
 
@@ -1149,7 +1149,7 @@ static void FUNCTION_NAME(pixblt)(tms34010_state *tms, int src_is_linear, int ds
 				if (PIXEL_OP_REQUIRES_SOURCE || TRANSPARENCY)
 					if (dstbit + BITS_PER_PIXEL > 16)
 					{
-						dstword |= (*word_read)(tms->program, (dstwordaddr + 1) << 1) << 16;
+						dstword |= (*word_read)(*tms->program, (dstwordaddr + 1) << 1) << 16;
 						readwrites++;
 					}
 
@@ -1164,7 +1164,7 @@ static void FUNCTION_NAME(pixblt)(tms34010_state *tms, int src_is_linear, int ds
 				dstbit += BITS_PER_PIXEL;
 				if (dstbit > 16)
 				{
-					(*word_write)(tms->program, dstwordaddr++ << 1, dstword);
+					(*word_write)(*tms->program, dstwordaddr++ << 1, dstword);
 					readwrites++;
 					dstbit -= 16;
 					dstword >>= 16;
@@ -1177,13 +1177,13 @@ static void FUNCTION_NAME(pixblt)(tms34010_state *tms, int src_is_linear, int ds
 				/* if we're right-partial, read and mask the remaining bits */
 				if (dstbit != 16)
 				{
-					UINT16 origdst = (*word_read)(tms->program, dstwordaddr << 1);
+					UINT16 origdst = (*word_read)(*tms->program, dstwordaddr << 1);
 					UINT16 mask = 0xffff << dstbit;
 					dstword = (dstword & ~mask) | (origdst & mask);
 					readwrites++;
 				}
 
-				(*word_write)(tms->program, dstwordaddr++ << 1, dstword);
+				(*word_write)(*tms->program, dstwordaddr++ << 1, dstword);
 				readwrites++;
 			}
 
@@ -1215,14 +1215,14 @@ static void FUNCTION_NAME(pixblt)(tms34010_state *tms, int src_is_linear, int ds
 			dwordaddr = daddr >> 4;
 
 			/* fetch the initial source word */
-			srcword = (*word_read)(tms->program, swordaddr++ << 1);
+			srcword = (*word_read)(*tms->program, swordaddr++ << 1);
 			srcmask = PIXEL_MASK << (saddr & 15);
 
 			/* handle the left partial word */
 			if (left_partials != 0)
 			{
 				/* fetch the destination word */
-				dstword = (*word_read)(tms->program, dwordaddr << 1);
+				dstword = (*word_read)(*tms->program, dwordaddr << 1);
 				dstmask = PIXEL_MASK << (daddr & 15);
 
 				/* loop over partials */
@@ -1231,7 +1231,7 @@ static void FUNCTION_NAME(pixblt)(tms34010_state *tms, int src_is_linear, int ds
 					/* fetch another word if necessary */
 					if (srcmask == 0)
 					{
-						srcword = (*word_read)(tms->program, swordaddr++ << 1);
+						srcword = (*word_read)(*tms->program, swordaddr++ << 1);
 						srcmask = PIXEL_MASK;
 					}
 
@@ -1253,7 +1253,7 @@ static void FUNCTION_NAME(pixblt)(tms34010_state *tms, int src_is_linear, int ds
 				}
 
 				/* write the result */
-				(*word_write)(tms->program, dwordaddr++ << 1, dstword);
+				(*word_write)(*tms->program, dwordaddr++ << 1, dstword);
 			}
 
 			/* loop over full words */
@@ -1261,7 +1261,7 @@ static void FUNCTION_NAME(pixblt)(tms34010_state *tms, int src_is_linear, int ds
 			{
 				/* fetch the destination word (if necessary) */
 				if (PIXEL_OP_REQUIRES_SOURCE || TRANSPARENCY)
-					dstword = (*word_read)(tms->program, dwordaddr << 1);
+					dstword = (*word_read)(*tms->program, dwordaddr << 1);
 				else
 					dstword = 0;
 				dstmask = PIXEL_MASK;
@@ -1272,7 +1272,7 @@ static void FUNCTION_NAME(pixblt)(tms34010_state *tms, int src_is_linear, int ds
 					/* fetch another word if necessary */
 					if (srcmask == 0)
 					{
-						srcword = (*word_read)(tms->program, swordaddr++ << 1);
+						srcword = (*word_read)(*tms->program, swordaddr++ << 1);
 						srcmask = PIXEL_MASK;
 					}
 
@@ -1294,14 +1294,14 @@ static void FUNCTION_NAME(pixblt)(tms34010_state *tms, int src_is_linear, int ds
 				}
 
 				/* write the result */
-				(*word_write)(tms->program, dwordaddr++ << 1, dstword);
+				(*word_write)(*tms->program, dwordaddr++ << 1, dstword);
 			}
 
 			/* handle the right partial word */
 			if (right_partials != 0)
 			{
 				/* fetch the destination word */
-				dstword = (*word_read)(tms->program, dwordaddr << 1);
+				dstword = (*word_read)(*tms->program, dwordaddr << 1);
 				dstmask = PIXEL_MASK;
 
 				/* loop over partials */
@@ -1311,7 +1311,7 @@ static void FUNCTION_NAME(pixblt)(tms34010_state *tms, int src_is_linear, int ds
 					if (srcmask == 0)
 					{
 		LOGGFX(("  right fetch @ %08x\n", swordaddr));
-						srcword = (*word_read)(tms->program, swordaddr++ << 1);
+						srcword = (*word_read)(*tms->program, swordaddr++ << 1);
 						srcmask = PIXEL_MASK;
 					}
 
@@ -1333,7 +1333,7 @@ static void FUNCTION_NAME(pixblt)(tms34010_state *tms, int src_is_linear, int ds
 				}
 
 				/* write the result */
-				(*word_write)(tms->program, dwordaddr++ << 1, dstword);
+				(*word_write)(*tms->program, dwordaddr++ << 1, dstword);
 			}
 #endif
 
@@ -1385,8 +1385,8 @@ static void FUNCTION_NAME(pixblt_r)(tms34010_state *tms, int src_is_linear, int 
 	if (!P_FLAG(tms))
 	{
 		int dx, dy, x, y, words, yreverse;
-		void (*word_write)(address_space *space,offs_t address,UINT16 data);
-		UINT16 (*word_read)(address_space *space,offs_t address);
+		void (*word_write)(address_space &space,offs_t address,UINT16 data);
+		UINT16 (*word_read)(address_space &space,offs_t address);
 		UINT32 saddr, daddr;
 		XY dstxy = { 0 };
 
@@ -1484,14 +1484,14 @@ if ((daddr & (BITS_PER_PIXEL - 1)) != 0) mame_printf_debug("PIXBLT_R%d with odd 
 			dwordaddr = (daddr + 15) >> 4;
 
 			/* fetch the initial source word */
-			srcword = (*word_read)(tms->program, --swordaddr << 1);
+			srcword = (*word_read)(*tms->program, --swordaddr << 1);
 			srcmask = PIXEL_MASK << ((saddr - BITS_PER_PIXEL) & 15);
 
 			/* handle the right partial word */
 			if (right_partials != 0)
 			{
 				/* fetch the destination word */
-				dstword = (*word_read)(tms->program, --dwordaddr << 1);
+				dstword = (*word_read)(*tms->program, --dwordaddr << 1);
 				dstmask = PIXEL_MASK << ((daddr - BITS_PER_PIXEL) & 15);
 
 				/* loop over partials */
@@ -1500,7 +1500,7 @@ if ((daddr & (BITS_PER_PIXEL - 1)) != 0) mame_printf_debug("PIXBLT_R%d with odd 
 					/* fetch source pixel if necessary */
 					if (srcmask == 0)
 					{
-						srcword = (*word_read)(tms->program, --swordaddr << 1);
+						srcword = (*word_read)(*tms->program, --swordaddr << 1);
 						srcmask = PIXEL_MASK << (16 - BITS_PER_PIXEL);
 					}
 
@@ -1522,7 +1522,7 @@ if ((daddr & (BITS_PER_PIXEL - 1)) != 0) mame_printf_debug("PIXBLT_R%d with odd 
 				}
 
 				/* write the result */
-				(*word_write)(tms->program, dwordaddr << 1, dstword);
+				(*word_write)(*tms->program, dwordaddr << 1, dstword);
 			}
 
 			/* loop over full words */
@@ -1531,7 +1531,7 @@ if ((daddr & (BITS_PER_PIXEL - 1)) != 0) mame_printf_debug("PIXBLT_R%d with odd 
 				/* fetch the destination word (if necessary) */
 				dwordaddr--;
 				if (PIXEL_OP_REQUIRES_SOURCE || TRANSPARENCY)
-					dstword = (*word_read)(tms->program, dwordaddr << 1);
+					dstword = (*word_read)(*tms->program, dwordaddr << 1);
 				else
 					dstword = 0;
 				dstmask = PIXEL_MASK << (16 - BITS_PER_PIXEL);
@@ -1542,7 +1542,7 @@ if ((daddr & (BITS_PER_PIXEL - 1)) != 0) mame_printf_debug("PIXBLT_R%d with odd 
 					/* fetch source pixel if necessary */
 					if (srcmask == 0)
 					{
-						srcword = (*word_read)(tms->program, --swordaddr << 1);
+						srcword = (*word_read)(*tms->program, --swordaddr << 1);
 						srcmask = PIXEL_MASK << (16 - BITS_PER_PIXEL);
 					}
 
@@ -1564,14 +1564,14 @@ if ((daddr & (BITS_PER_PIXEL - 1)) != 0) mame_printf_debug("PIXBLT_R%d with odd 
 				}
 
 				/* write the result */
-				(*word_write)(tms->program, dwordaddr << 1, dstword);
+				(*word_write)(*tms->program, dwordaddr << 1, dstword);
 			}
 
 			/* handle the left partial word */
 			if (left_partials != 0)
 			{
 				/* fetch the destination word */
-				dstword = (*word_read)(tms->program, --dwordaddr << 1);
+				dstword = (*word_read)(*tms->program, --dwordaddr << 1);
 				dstmask = PIXEL_MASK << (16 - BITS_PER_PIXEL);
 
 				/* loop over partials */
@@ -1580,7 +1580,7 @@ if ((daddr & (BITS_PER_PIXEL - 1)) != 0) mame_printf_debug("PIXBLT_R%d with odd 
 					/* fetch the source pixel if necessary */
 					if (srcmask == 0)
 					{
-						srcword = (*word_read)(tms->program, --swordaddr << 1);
+						srcword = (*word_read)(*tms->program, --swordaddr << 1);
 						srcmask = PIXEL_MASK << (16 - BITS_PER_PIXEL);
 					}
 
@@ -1602,7 +1602,7 @@ if ((daddr & (BITS_PER_PIXEL - 1)) != 0) mame_printf_debug("PIXBLT_R%d with odd 
 				}
 
 				/* write the result */
-				(*word_write)(tms->program, dwordaddr << 1, dstword);
+				(*word_write)(*tms->program, dwordaddr << 1, dstword);
 			}
 
 			/* update for next row */
@@ -1650,8 +1650,8 @@ static void FUNCTION_NAME(pixblt_b)(tms34010_state *tms, int dst_is_linear)
 	if (!P_FLAG(tms))
 	{
 		int dx, dy, x, y, words, left_partials, right_partials, full_words;
-		void (*word_write)(address_space *space,offs_t address,UINT16 data);
-		UINT16 (*word_read)(address_space *space,offs_t address);
+		void (*word_write)(address_space &space,offs_t address,UINT16 data);
+		UINT16 (*word_read)(address_space &space,offs_t address);
 		UINT32 saddr, daddr;
 		XY dstxy = { 0 };
 
@@ -1727,14 +1727,14 @@ static void FUNCTION_NAME(pixblt_b)(tms34010_state *tms, int dst_is_linear)
 			dwordaddr = daddr >> 4;
 
 			/* fetch the initial source word */
-			srcword = (*word_read)(tms->program, swordaddr++ << 1);
+			srcword = (*word_read)(*tms->program, swordaddr++ << 1);
 			srcmask = 1 << (saddr & 15);
 
 			/* handle the left partial word */
 			if (left_partials != 0)
 			{
 				/* fetch the destination word */
-				dstword = (*word_read)(tms->program, dwordaddr << 1);
+				dstword = (*word_read)(*tms->program, dwordaddr << 1);
 				dstmask = PIXEL_MASK << (daddr & 15);
 
 				/* loop over partials */
@@ -1751,7 +1751,7 @@ static void FUNCTION_NAME(pixblt_b)(tms34010_state *tms, int dst_is_linear)
 					srcmask <<= 1;
 					if (srcmask == 0)
 					{
-						srcword = (*word_read)(tms->program, swordaddr++ << 1);
+						srcword = (*word_read)(*tms->program, swordaddr++ << 1);
 						srcmask = 0x0001;
 					}
 
@@ -1760,7 +1760,7 @@ static void FUNCTION_NAME(pixblt_b)(tms34010_state *tms, int dst_is_linear)
 				}
 
 				/* write the result */
-				(*word_write)(tms->program, dwordaddr++ << 1, dstword);
+				(*word_write)(*tms->program, dwordaddr++ << 1, dstword);
 			}
 
 			/* loop over full words */
@@ -1768,7 +1768,7 @@ static void FUNCTION_NAME(pixblt_b)(tms34010_state *tms, int dst_is_linear)
 			{
 				/* fetch the destination word (if necessary) */
 				if (PIXEL_OP_REQUIRES_SOURCE || TRANSPARENCY)
-					dstword = (*word_read)(tms->program, dwordaddr << 1);
+					dstword = (*word_read)(*tms->program, dwordaddr << 1);
 				else
 					dstword = 0;
 				dstmask = PIXEL_MASK;
@@ -1787,7 +1787,7 @@ static void FUNCTION_NAME(pixblt_b)(tms34010_state *tms, int dst_is_linear)
 					srcmask <<= 1;
 					if (srcmask == 0)
 					{
-						srcword = (*word_read)(tms->program, swordaddr++ << 1);
+						srcword = (*word_read)(*tms->program, swordaddr++ << 1);
 						srcmask = 0x0001;
 					}
 
@@ -1796,14 +1796,14 @@ static void FUNCTION_NAME(pixblt_b)(tms34010_state *tms, int dst_is_linear)
 				}
 
 				/* write the result */
-				(*word_write)(tms->program, dwordaddr++ << 1, dstword);
+				(*word_write)(*tms->program, dwordaddr++ << 1, dstword);
 			}
 
 			/* handle the right partial word */
 			if (right_partials != 0)
 			{
 				/* fetch the destination word */
-				dstword = (*word_read)(tms->program, dwordaddr << 1);
+				dstword = (*word_read)(*tms->program, dwordaddr << 1);
 				dstmask = PIXEL_MASK;
 
 				/* loop over partials */
@@ -1820,7 +1820,7 @@ static void FUNCTION_NAME(pixblt_b)(tms34010_state *tms, int dst_is_linear)
 					srcmask <<= 1;
 					if (srcmask == 0)
 					{
-						srcword = (*word_read)(tms->program, swordaddr++ << 1);
+						srcword = (*word_read)(*tms->program, swordaddr++ << 1);
 						srcmask = 0x0001;
 					}
 
@@ -1829,7 +1829,7 @@ static void FUNCTION_NAME(pixblt_b)(tms34010_state *tms, int dst_is_linear)
 				}
 
 				/* write the result */
-				(*word_write)(tms->program, dwordaddr++ << 1, dstword);
+				(*word_write)(*tms->program, dwordaddr++ << 1, dstword);
 			}
 
 			/* update for next row */
@@ -1864,8 +1864,8 @@ static void FUNCTION_NAME(fill)(tms34010_state *tms, int dst_is_linear)
 	if (!P_FLAG(tms))
 	{
 		int dx, dy, x, y, words, left_partials, right_partials, full_words;
-		void (*word_write)(address_space *space,offs_t address,UINT16 data);
-		UINT16 (*word_read)(address_space *space,offs_t address);
+		void (*word_write)(address_space &space,offs_t address,UINT16 data);
+		UINT16 (*word_read)(address_space &space,offs_t address);
 		UINT32 daddr;
 		XY dstxy = { 0 };
 
@@ -1943,7 +1943,7 @@ static void FUNCTION_NAME(fill)(tms34010_state *tms, int dst_is_linear)
 			if (left_partials != 0)
 			{
 				/* fetch the destination word */
-				dstword = (*word_read)(tms->program, dwordaddr << 1);
+				dstword = (*word_read)(*tms->program, dwordaddr << 1);
 				dstmask = PIXEL_MASK << (daddr & 15);
 
 				/* loop over partials */
@@ -1960,7 +1960,7 @@ static void FUNCTION_NAME(fill)(tms34010_state *tms, int dst_is_linear)
 				}
 
 				/* write the result */
-				(*word_write)(tms->program, dwordaddr++ << 1, dstword);
+				(*word_write)(*tms->program, dwordaddr++ << 1, dstword);
 			}
 
 			/* loop over full words */
@@ -1968,7 +1968,7 @@ static void FUNCTION_NAME(fill)(tms34010_state *tms, int dst_is_linear)
 			{
 				/* fetch the destination word (if necessary) */
 				if (PIXEL_OP_REQUIRES_SOURCE || TRANSPARENCY)
-					dstword = (*word_read)(tms->program, dwordaddr << 1);
+					dstword = (*word_read)(*tms->program, dwordaddr << 1);
 				else
 					dstword = 0;
 				dstmask = PIXEL_MASK;
@@ -1987,14 +1987,14 @@ static void FUNCTION_NAME(fill)(tms34010_state *tms, int dst_is_linear)
 				}
 
 				/* write the result */
-				(*word_write)(tms->program, dwordaddr++ << 1, dstword);
+				(*word_write)(*tms->program, dwordaddr++ << 1, dstword);
 			}
 
 			/* handle the right partial word */
 			if (right_partials != 0)
 			{
 				/* fetch the destination word */
-				dstword = (*word_read)(tms->program, dwordaddr << 1);
+				dstword = (*word_read)(*tms->program, dwordaddr << 1);
 				dstmask = PIXEL_MASK;
 
 				/* loop over partials */
@@ -2011,7 +2011,7 @@ static void FUNCTION_NAME(fill)(tms34010_state *tms, int dst_is_linear)
 				}
 
 				/* write the result */
-				(*word_write)(tms->program, dwordaddr++ << 1, dstword);
+				(*word_write)(*tms->program, dwordaddr++ << 1, dstword);
 			}
 
 			/* update for next row */
@@ -2040,4 +2040,3 @@ static void FUNCTION_NAME(fill)(tms34010_state *tms, int dst_is_linear)
 }
 
 #endif
-

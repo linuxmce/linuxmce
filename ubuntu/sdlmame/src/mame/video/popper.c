@@ -19,13 +19,13 @@
 
 static const res_net_decode_info popper_decode_info =
 {
-	1,		// there may be two proms needed to construct color
-	0,		// start at 0
-	63,	// end at 255
+	1,      // there may be two proms needed to construct color
+	0,      // start at 0
+	63, // end at 255
 	//  R,   G,   B,
-	{   0,   0,   0, },		// offsets
-	{   0,   3,   6, },		// shifts
-	{0x07,0x07,0x03, }	    // masks
+	{   0,   0,   0, },     // offsets
+	{   0,   3,   6, },     // shifts
+	{0x07,0x07,0x03, }      // masks
 };
 
 static const res_net_info popper_net_info =
@@ -44,172 +44,161 @@ static const res_net_info popper_net_info =
  *
  ***************************************************************************/
 
-PALETTE_INIT( popper )
+void popper_state::palette_init()
 {
-	rgb_t	*rgb;
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
+	rgb_t   *rgb;
 
-	rgb = compute_res_net_all(machine, color_prom, &popper_decode_info, &popper_net_info);
-	palette_set_colors(machine, 0, rgb, 64);
-	palette_normalize_range(machine.palette, 0, 63, 0, 255);
-	auto_free(machine, rgb);
+	rgb = compute_res_net_all(machine(), color_prom, &popper_decode_info, &popper_net_info);
+	palette_set_colors(machine(), 0, rgb, 64);
+	palette_normalize_range(machine().palette, 0, 63, 0, 255);
+	auto_free(machine(), rgb);
 }
 
-WRITE8_HANDLER( popper_ol_videoram_w )
+WRITE8_MEMBER(popper_state::popper_ol_videoram_w)
 {
-	popper_state *state = space->machine().driver_data<popper_state>();
 
-	state->m_ol_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_ol_p123_tilemap, offset);
-	tilemap_mark_tile_dirty(state->m_ol_p0_tilemap, offset);
+	m_ol_videoram[offset] = data;
+	m_ol_p123_tilemap->mark_tile_dirty(offset);
+	m_ol_p0_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( popper_videoram_w )
+WRITE8_MEMBER(popper_state::popper_videoram_w)
 {
-	popper_state *state = space->machine().driver_data<popper_state>();
 
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_p123_tilemap, offset);
-	tilemap_mark_tile_dirty(state->m_p0_tilemap, offset);
+	m_videoram[offset] = data;
+	m_p123_tilemap->mark_tile_dirty(offset);
+	m_p0_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( popper_ol_attribram_w )
+WRITE8_MEMBER(popper_state::popper_ol_attribram_w)
 {
-	popper_state *state = space->machine().driver_data<popper_state>();
 
-	state->m_ol_attribram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_ol_p123_tilemap, offset);
-	tilemap_mark_tile_dirty(state->m_ol_p0_tilemap, offset);
+	m_ol_attribram[offset] = data;
+	m_ol_p123_tilemap->mark_tile_dirty(offset);
+	m_ol_p0_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( popper_attribram_w )
+WRITE8_MEMBER(popper_state::popper_attribram_w)
 {
-	popper_state *state = space->machine().driver_data<popper_state>();
 
-	state->m_attribram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_p123_tilemap, offset);
-	tilemap_mark_tile_dirty(state->m_p0_tilemap, offset);
+	m_attribram[offset] = data;
+	m_p123_tilemap->mark_tile_dirty(offset);
+	m_p0_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( popper_flipscreen_w )
+WRITE8_MEMBER(popper_state::popper_flipscreen_w)
 {
-	popper_state *state = space->machine().driver_data<popper_state>();
 
-	state->m_flipscreen = data;
-	tilemap_set_flip_all(space->machine(), state->m_flipscreen ? (TILEMAP_FLIPX | TILEMAP_FLIPY) : 0);
+	m_flipscreen = data;
+	machine().tilemap().set_flip_all(m_flipscreen ? (TILEMAP_FLIPX | TILEMAP_FLIPY) : 0);
 
-	if (state->m_flipscreen)
-		state->m_tilemap_clip.min_x = state->m_tilemap_clip.max_x - 15;
+	if (m_flipscreen)
+		m_tilemap_clip.min_x = m_tilemap_clip.max_x - 15;
 	else
-		state->m_tilemap_clip.max_x = 15;
+		m_tilemap_clip.max_x = 15;
 }
 
-WRITE8_HANDLER( popper_e002_w )
+WRITE8_MEMBER(popper_state::popper_e002_w)
 {
-	popper_state *state = space->machine().driver_data<popper_state>();
-	state->m_e002 = data;
+	m_e002 = data;
 }
 
-WRITE8_HANDLER( popper_gfx_bank_w )
+WRITE8_MEMBER(popper_state::popper_gfx_bank_w)
 {
-	popper_state *state = space->machine().driver_data<popper_state>();
 
-	if (state->m_gfx_bank != data)
+	if (m_gfx_bank != data)
 	{
-		state->m_gfx_bank = data;
-		tilemap_mark_all_tiles_dirty_all(space->machine());
+		m_gfx_bank = data;
+		machine().tilemap().mark_all_dirty();
 	}
 }
 
-static TILE_GET_INFO( get_popper_p123_tile_info )
+TILE_GET_INFO_MEMBER(popper_state::get_popper_p123_tile_info)
 {
-	popper_state *state = machine.driver_data<popper_state>();
-	UINT32 tile_number = state->m_videoram[tile_index];
-	UINT8 attr = state->m_attribram[tile_index];
-	tile_number += state->m_gfx_bank << 8;
+	UINT32 tile_number = m_videoram[tile_index];
+	UINT8 attr = m_attribram[tile_index];
+	tile_number += m_gfx_bank << 8;
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			0,
 			tile_number,
 			(attr & 0xf),
 			0);
-	tileinfo->group = (attr & 0x80) >> 7;
+	tileinfo.group = (attr & 0x80) >> 7;
 }
 
-static TILE_GET_INFO( get_popper_p0_tile_info )
+TILE_GET_INFO_MEMBER(popper_state::get_popper_p0_tile_info)
 {
-	popper_state *state = machine.driver_data<popper_state>();
-	UINT32 tile_number = state->m_videoram[tile_index];
-	UINT8 attr = state->m_attribram[tile_index];
-	tile_number += state->m_gfx_bank << 8;
+	UINT32 tile_number = m_videoram[tile_index];
+	UINT8 attr = m_attribram[tile_index];
+	tile_number += m_gfx_bank << 8;
 
 	//pen 0 only in front if colour set as well
-	tileinfo->group = (attr & 0x70) ? ((attr & 0x80) >> 7) : 0;
+	tileinfo.group = (attr & 0x70) ? ((attr & 0x80) >> 7) : 0;
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			0,
 			tile_number,
 			((attr & 0x70) >> 4) + 8,
 			0);
 }
 
-static TILE_GET_INFO( get_popper_ol_p123_tile_info )
+TILE_GET_INFO_MEMBER(popper_state::get_popper_ol_p123_tile_info)
 {
-	popper_state *state = machine.driver_data<popper_state>();
-	UINT32 tile_number = state->m_ol_videoram[tile_index];
-	UINT8 attr  = state->m_ol_attribram[tile_index];
-	tile_number += state->m_gfx_bank << 8;
+	UINT32 tile_number = m_ol_videoram[tile_index];
+	UINT8 attr  = m_ol_attribram[tile_index];
+	tile_number += m_gfx_bank << 8;
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			0,
 			tile_number,
 			(attr & 0xf),
 			0);
-	tileinfo->group = (attr & 0x80) >> 7;
+	tileinfo.group = (attr & 0x80) >> 7;
 }
 
-static TILE_GET_INFO( get_popper_ol_p0_tile_info )
+TILE_GET_INFO_MEMBER(popper_state::get_popper_ol_p0_tile_info)
 {
-	popper_state *state = machine.driver_data<popper_state>();
-	UINT32 tile_number = state->m_ol_videoram[tile_index];
-	UINT8 attr = state->m_ol_attribram[tile_index];
-	tile_number += state->m_gfx_bank << 8;
+	UINT32 tile_number = m_ol_videoram[tile_index];
+	UINT8 attr = m_ol_attribram[tile_index];
+	tile_number += m_gfx_bank << 8;
 
 	//pen 0 only in front if colour set as well
-	tileinfo->group = (attr & 0x70) ? ((attr & 0x80) >> 7) : 0;
+	tileinfo.group = (attr & 0x70) ? ((attr & 0x80) >> 7) : 0;
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			0,
 			tile_number,
 			((attr & 0x70) >> 4) + 8,
 			0);
 }
 
-VIDEO_START( popper )
+void popper_state::video_start()
 {
-	popper_state *state = machine.driver_data<popper_state>();
-	state->m_p123_tilemap    = tilemap_create(machine, get_popper_p123_tile_info,    tilemap_scan_cols, 8, 8, 33, 32 );
-	state->m_p0_tilemap      = tilemap_create(machine, get_popper_p0_tile_info,      tilemap_scan_cols, 8, 8, 33, 32);
-	state->m_ol_p123_tilemap = tilemap_create(machine, get_popper_ol_p123_tile_info, tilemap_scan_cols, 8, 8, 2, 32);
-	state->m_ol_p0_tilemap   = tilemap_create(machine, get_popper_ol_p0_tile_info,   tilemap_scan_cols, 8, 8, 2, 32);
+	m_p123_tilemap    = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(popper_state::get_popper_p123_tile_info),this),    TILEMAP_SCAN_COLS, 8, 8, 33, 32 );
+	m_p0_tilemap      = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(popper_state::get_popper_p0_tile_info),this),      TILEMAP_SCAN_COLS, 8, 8, 33, 32);
+	m_ol_p123_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(popper_state::get_popper_ol_p123_tile_info),this), TILEMAP_SCAN_COLS, 8, 8, 2, 32);
+	m_ol_p0_tilemap   = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(popper_state::get_popper_ol_p0_tile_info),this),   TILEMAP_SCAN_COLS, 8, 8, 2, 32);
 
-	tilemap_set_transmask(state->m_p123_tilemap,    0, 0x0f, 0x01);
-	tilemap_set_transmask(state->m_p123_tilemap,    1, 0x01, 0x0f);
-	tilemap_set_transmask(state->m_p0_tilemap,      0, 0x0f, 0x0e);
-	tilemap_set_transmask(state->m_p0_tilemap,      1, 0x0e, 0x0f);
-	tilemap_set_transmask(state->m_ol_p123_tilemap, 0, 0x0f, 0x01);
-	tilemap_set_transmask(state->m_ol_p123_tilemap, 1, 0x01, 0x0f);
-	tilemap_set_transmask(state->m_ol_p0_tilemap,   0, 0x0f, 0x0e);
-	tilemap_set_transmask(state->m_ol_p0_tilemap,   1, 0x0e, 0x0f);
+	m_p123_tilemap->set_transmask(0, 0x0f, 0x01);
+	m_p123_tilemap->set_transmask(1, 0x01, 0x0f);
+	m_p0_tilemap->set_transmask(0, 0x0f, 0x0e);
+	m_p0_tilemap->set_transmask(1, 0x0e, 0x0f);
+	m_ol_p123_tilemap->set_transmask(0, 0x0f, 0x01);
+	m_ol_p123_tilemap->set_transmask(1, 0x01, 0x0f);
+	m_ol_p0_tilemap->set_transmask(0, 0x0f, 0x0e);
+	m_ol_p0_tilemap->set_transmask(1, 0x0e, 0x0f);
 
-	state->m_tilemap_clip = machine.primary_screen->visible_area();
+	m_tilemap_clip = machine().primary_screen->visible_area();
 }
 
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap,const rectangle *cliprect )
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap,const rectangle &cliprect )
 {
 	popper_state *state = machine.driver_data<popper_state>();
 	int offs, sx, sy, flipx, flipy;
 
-	for (offs = 0; offs < state->m_spriteram_size - 4; offs += 4)
+	for (offs = 0; offs < state->m_spriteram.bytes() - 4; offs += 4)
 	{
 		//if y position is in the current strip
 		if (state->m_spriteram[offs + 1] && (((state->m_spriteram[offs] + (state->m_flipscreen ? 2 : 0)) & 0xf0) == (0x0f - offs / 0x80) << 4))
@@ -246,11 +235,10 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap,const recta
 	}
 }
 
-SCREEN_UPDATE( popper )
+UINT32 popper_state::screen_update_popper(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	popper_state *state = screen->machine().driver_data<popper_state>();
-	rectangle finalclip = state->m_tilemap_clip;
-	sect_rect(&finalclip, cliprect);
+	rectangle finalclip = m_tilemap_clip;
+	finalclip &= cliprect;
 
 	//attribram
 	//76543210
@@ -258,16 +246,16 @@ SCREEN_UPDATE( popper )
 	//-xxx---- colour for pen 0 (from second prom?)
 	//----xxxx colour for pens 1,2,3
 
-	tilemap_draw(bitmap, cliprect, state->m_p123_tilemap,      TILEMAP_DRAW_LAYER1, 0);
-	tilemap_draw(bitmap, cliprect, state->m_p0_tilemap,        TILEMAP_DRAW_LAYER1, 0);
-	tilemap_draw(bitmap, &finalclip, state->m_ol_p123_tilemap, TILEMAP_DRAW_LAYER1, 0);
-	tilemap_draw(bitmap, &finalclip, state->m_ol_p0_tilemap,   TILEMAP_DRAW_LAYER1, 0);
+	m_p123_tilemap->draw(bitmap, cliprect, TILEMAP_DRAW_LAYER1, 0);
+	m_p0_tilemap->draw(bitmap, cliprect, TILEMAP_DRAW_LAYER1, 0);
+	m_ol_p123_tilemap->draw(bitmap, finalclip, TILEMAP_DRAW_LAYER1, 0);
+	m_ol_p0_tilemap->draw(bitmap, finalclip, TILEMAP_DRAW_LAYER1, 0);
 
-	draw_sprites(screen->machine(), bitmap, cliprect);
+	draw_sprites(machine(), bitmap, cliprect);
 
-	tilemap_draw(bitmap, cliprect, state->m_p123_tilemap,      TILEMAP_DRAW_LAYER0, 0);
-	tilemap_draw(bitmap, cliprect, state->m_p0_tilemap,        TILEMAP_DRAW_LAYER0, 0);
-	tilemap_draw(bitmap, &finalclip, state->m_ol_p123_tilemap, TILEMAP_DRAW_LAYER0, 0);
-	tilemap_draw(bitmap, &finalclip, state->m_ol_p0_tilemap,   TILEMAP_DRAW_LAYER0, 0);
+	m_p123_tilemap->draw(bitmap, cliprect, TILEMAP_DRAW_LAYER0, 0);
+	m_p0_tilemap->draw(bitmap, cliprect, TILEMAP_DRAW_LAYER0, 0);
+	m_ol_p123_tilemap->draw(bitmap, finalclip, TILEMAP_DRAW_LAYER0, 0);
+	m_ol_p0_tilemap->draw(bitmap, finalclip, TILEMAP_DRAW_LAYER0, 0);
 	return 0;
 }

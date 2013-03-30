@@ -50,14 +50,15 @@
 *********************************************************************/
 
 #include "emu.h"
+#include "machine/nvram.h"
 #include "cpu/e132xs/e132xs.h"
 
 
 class dgpix_state : public driver_device
 {
 public:
-	dgpix_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	dgpix_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) { }
 
 	UINT32 *m_vram;
 	int m_vbuffer;
@@ -65,32 +66,44 @@ public:
 	int m_old_vbuf;
 	UINT32 m_flash_cmd;
 	INT32 m_first_offset;
+	DECLARE_READ32_MEMBER(flash_r);
+	DECLARE_WRITE32_MEMBER(flash_w);
+	DECLARE_WRITE32_MEMBER(vram_w);
+	DECLARE_READ32_MEMBER(vram_r);
+	DECLARE_WRITE32_MEMBER(vbuffer_w);
+	DECLARE_WRITE32_MEMBER(coin_w);
+	DECLARE_READ32_MEMBER(vblank_r);
+	DECLARE_DRIVER_INIT(fmaniac3);
+	DECLARE_DRIVER_INIT(xfiles);
+	DECLARE_DRIVER_INIT(kdynastg);
+	virtual void machine_reset();
+	virtual void video_start();
+	UINT32 screen_update_dgpix(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
-static READ32_HANDLER( flash_r )
+READ32_MEMBER(dgpix_state::flash_r)
 {
-	dgpix_state *state = space->machine().driver_data<dgpix_state>();
-	UINT32 *ROM = (UINT32 *)space->machine().region("user1")->base();
+	UINT32 *ROM = (UINT32 *)memregion("flash")->base();
 
-	if(offset >= (0x2000000 - state->m_flash_roms * 0x400000) / 4)
+	if(offset >= (0x2000000 - m_flash_roms * 0x400000) / 4)
 	{
-		if(state->m_flash_cmd == 0x90900000)
+		if(m_flash_cmd == 0x90900000)
 		{
 			//read maker ID and chip ID
 			return 0x00890014;
 		}
-		else if(state->m_flash_cmd == 0x00700000)
+		else if(m_flash_cmd == 0x00700000)
 		{
 			//read status
 			return 0x80<<16;
 		}
-		else if(state->m_flash_cmd == 0x70700000)
+		else if(m_flash_cmd == 0x70700000)
 		{
 			//read status and ?
 			return 0x82<<16;
 		}
-		else if(state->m_flash_cmd == 0xe8e80000)
+		else if(m_flash_cmd == 0xe8e80000)
 		{
 			//read status ?
 			return 0x80<<16;
@@ -100,34 +113,33 @@ static READ32_HANDLER( flash_r )
 	return ROM[offset];
 }
 
-static WRITE32_HANDLER( flash_w )
+WRITE32_MEMBER(dgpix_state::flash_w)
 {
-	dgpix_state *state = space->machine().driver_data<dgpix_state>();
-	if(state->m_flash_cmd == 0x20200000)
+	if(m_flash_cmd == 0x20200000)
 	{
 		// erase game settings
 		if(data == 0xd0d00000)
 		{
 			// point to game settings
-			UINT8 *rom = (UINT8 *)space->machine().region("user1")->base() + offset*4;
+			UINT8 *rom = (UINT8 *)memregion("flash")->base() + offset*4;
 
 			// erase one block
 			memset(rom, 0xff, 0x10000);
 
-			state->m_flash_cmd = 0;
+			m_flash_cmd = 0;
 		}
 	}
-	else if(state->m_flash_cmd == 0x0f0f0000)
+	else if(m_flash_cmd == 0x0f0f0000)
 	{
-		if(data == 0xd0d00000 && offset == state->m_first_offset)
+		if(data == 0xd0d00000 && offset == m_first_offset)
 		{
 			// finished
-			state->m_flash_cmd = 0;
-			state->m_first_offset = -1;
+			m_flash_cmd = 0;
+			m_first_offset = -1;
 		}
 		else
 		{
-			UINT16 *rom = (UINT16 *)space->machine().region("user1")->base();
+			UINT16 *rom = (UINT16 *)memregion("flash")->base();
 
 			// write game settings
 
@@ -139,19 +151,18 @@ static WRITE32_HANDLER( flash_w )
 	}
 	else
 	{
-		state->m_flash_cmd = data;
+		m_flash_cmd = data;
 
-		if(state->m_flash_cmd == 0x0f0f0000 && state->m_first_offset == -1)
+		if(m_flash_cmd == 0x0f0f0000 && m_first_offset == -1)
 		{
-			state->m_first_offset = offset;
+			m_first_offset = offset;
 		}
 	}
 }
 
-static WRITE32_HANDLER( vram_w )
+WRITE32_MEMBER(dgpix_state::vram_w)
 {
-	dgpix_state *state = space->machine().driver_data<dgpix_state>();
-	UINT32 *dest = &state->m_vram[offset+(0x40000/4)*state->m_vbuffer];
+	UINT32 *dest = &m_vram[offset+(0x40000/4)*m_vbuffer];
 
 	if (mem_mask == 0xffffffff)
 	{
@@ -162,49 +173,47 @@ static WRITE32_HANDLER( vram_w )
 			*dest = (*dest & 0xffff0000) | (data & 0x0000ffff);
 	}
 	else if (((mem_mask == 0xffff0000) && (~data & 0x80000000)) ||
-	    	 ((mem_mask == 0x0000ffff) && (~data & 0x00008000)))
+				((mem_mask == 0x0000ffff) && (~data & 0x00008000)))
 		COMBINE_DATA(dest);
 }
 
-static READ32_HANDLER( vram_r )
+READ32_MEMBER(dgpix_state::vram_r)
 {
-	dgpix_state *state = space->machine().driver_data<dgpix_state>();
-	return state->m_vram[offset+(0x40000/4)*state->m_vbuffer];
+	return m_vram[offset+(0x40000/4)*m_vbuffer];
 }
 
-static WRITE32_HANDLER( vbuffer_w )
+WRITE32_MEMBER(dgpix_state::vbuffer_w)
 {
-	dgpix_state *state = space->machine().driver_data<dgpix_state>();
-	if(state->m_old_vbuf == 3 && (data & 3) == 2)
+	if(m_old_vbuf == 3 && (data & 3) == 2)
 	{
-		state->m_vbuffer ^= 1;
+		m_vbuffer ^= 1;
 	}
 
-	state->m_old_vbuf = data & 3;
+	m_old_vbuf = data & 3;
 }
 
-static WRITE32_HANDLER( coin_w )
+WRITE32_MEMBER(dgpix_state::coin_w)
 {
-	coin_counter_w(space->machine(), 0, data & 1);
-	coin_counter_w(space->machine(), 1, data & 2);
+	coin_counter_w(machine(), 0, data & 1);
+	coin_counter_w(machine(), 1, data & 2);
 }
 
-static READ32_HANDLER( vblank_r )
+READ32_MEMBER(dgpix_state::vblank_r)
 {
 	/* burn a bunch of cycles because this is polled frequently during busy loops */
-	device_eat_cycles(&space->device(), 100);
-	return input_port_read(space->machine(), "VBLANK");
+	space.device().execute().eat_cycles(100);
+	return ioport("VBLANK")->read();
 }
 
-static ADDRESS_MAP_START( cpu_map, AS_PROGRAM, 32 )
+static ADDRESS_MAP_START( cpu_map, AS_PROGRAM, 32, dgpix_state )
 	AM_RANGE(0x00000000, 0x007fffff) AM_RAM
 	AM_RANGE(0x40000000, 0x4003ffff) AM_READWRITE(vram_r, vram_w)
 	AM_RANGE(0xe0000000, 0xe1ffffff) AM_READWRITE(flash_r, flash_w)
 	AM_RANGE(0xe2000000, 0xe3ffffff) AM_READWRITE(flash_r, flash_w)
-	AM_RANGE(0xffc00000, 0xffffffff) AM_ROM AM_REGION("user1", 0x1c00000)
+	AM_RANGE(0xffc00000, 0xffffffff) AM_ROM AM_REGION("flash", 0x1c00000) AM_SHARE("nvram")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( io_map, AS_IO, 32 )
+static ADDRESS_MAP_START( io_map, AS_IO, 32, dgpix_state )
 	AM_RANGE(0x0200, 0x0203) AM_READNOP // used to sync with the protecion PIC? tested bits 0 and 1
 	AM_RANGE(0x0400, 0x0403) AM_READWRITE(vblank_r, vbuffer_w)
 	AM_RANGE(0x0a10, 0x0a13) AM_READ_PORT("INPUTS")
@@ -216,54 +225,24 @@ static ADDRESS_MAP_START( io_map, AS_IO, 32 )
 ADDRESS_MAP_END
 
 
-static NVRAM_HANDLER( flashroms )
-{
-	if (read_or_write)
-	{
-		// point to game settings
-		UINT8 *rom = (UINT8 *)machine.region("user1")->base() + 0x1c00000 + 0x360000;
-		UINT8 tmp[0x40000];
-		int i;
-
-		// save the new settings
-		for( i = 0; i < 0x40000; i++ )
-			tmp[i] = rom[WORD_XOR_BE(i)];
-
-		file->write( tmp, 0x40000 );
-	}
-	else if (file)
-	{
-		// point to game settings
-		UINT8 *rom = (UINT8 *)machine.region("user1")->base() + 0x1c00000 + 0x360000;
-		UINT8 tmp[0x40000];
-		int i;
-
-		file->read( tmp, 0x40000 );
-
-		// overlap the default settings with the saved ones
-		for( i = 0; i < 0x40000; i++ )
-			rom[WORD_XOR_BE(i)] = tmp[i];
-	}
-}
-
 static INPUT_PORTS_START( dgpix )
 	PORT_START("VBLANK")
-	PORT_BIT( 0x00000003, IP_ACTIVE_LOW, IPT_VBLANK ) //value 2 is used by fmaniac3
+	PORT_BIT( 0x00000003, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen") //value 2 is used by fmaniac3
 	PORT_BIT( 0xfffffffc, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("INPUTS")
-	PORT_BIT( 0x00000001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP	) PORT_8WAY PORT_PLAYER(1)
-	PORT_BIT( 0x00000002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN	) PORT_8WAY PORT_PLAYER(1)
-	PORT_BIT( 0x00000004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT	) PORT_8WAY PORT_PLAYER(1)
-	PORT_BIT( 0x00000008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT	) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x00000001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x00000002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x00000004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x00000008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(1)
 	PORT_BIT( 0x00000010, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
 	PORT_BIT( 0x00000020, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
 	PORT_BIT( 0x00000040, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x00000080, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x00000100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP	) PORT_8WAY PORT_PLAYER(2)
-	PORT_BIT( 0x00000200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN	) PORT_8WAY PORT_PLAYER(2)
-	PORT_BIT( 0x00000400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT	) PORT_8WAY PORT_PLAYER(2)
-	PORT_BIT( 0x00000800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT	) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x00000100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x00000200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x00000400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x00000800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(2)
 	PORT_BIT( 0x00001000, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT( 0x00002000, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
 	PORT_BIT( 0x00004000, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -279,22 +258,20 @@ static INPUT_PORTS_START( dgpix )
 	PORT_BIT( 0xff000000, IP_ACTIVE_LOW, IPT_UNUSED )
 INPUT_PORTS_END
 
-static VIDEO_START( dgpix )
+void dgpix_state::video_start()
 {
-	dgpix_state *state = machine.driver_data<dgpix_state>();
-	state->m_vram = auto_alloc_array(machine, UINT32, 0x40000*2/4);
+	m_vram = auto_alloc_array(machine(), UINT32, 0x40000*2/4);
 }
 
-static SCREEN_UPDATE( dgpix )
+UINT32 dgpix_state::screen_update_dgpix(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	dgpix_state *state = screen->machine().driver_data<dgpix_state>();
 	int y;
 
 	for (y = 0; y < 240; y++)
 	{
 		int x;
-		UINT32 *src = &state->m_vram[(state->m_vbuffer ? 0 : 0x10000) | (y << 8)];
-		UINT16 *dest = BITMAP_ADDR16(bitmap, y, 0);
+		UINT32 *src = &m_vram[(m_vbuffer ? 0 : 0x10000) | (y << 8)];
+		UINT16 *dest = &bitmap.pix16(y);
 
 		for (x = 0; x < 320; x += 2)
 		{
@@ -309,18 +286,17 @@ static SCREEN_UPDATE( dgpix )
 	return 0;
 }
 
-static MACHINE_RESET( dgpix )
+void dgpix_state::machine_reset()
 {
-	dgpix_state *state = machine.driver_data<dgpix_state>();
-	state->m_vbuffer = 0;
-	state->m_flash_cmd = 0;
-	state->m_first_offset = -1;
-	state->m_old_vbuf = 3;
+	m_vbuffer = 0;
+	m_flash_cmd = 0;
+	m_first_offset = -1;
+	m_old_vbuf = 3;
 }
 
 
 static MACHINE_CONFIG_START( dgpix, dgpix_state )
-	MCFG_CPU_ADD("maincpu", E132XT, 20000000*4)	/* 4x internal multiplier */
+	MCFG_CPU_ADD("maincpu", E132XT, 20000000*4) /* 4x internal multiplier */
 	MCFG_CPU_PROGRAM_MAP(cpu_map)
 	MCFG_CPU_IO_MAP(io_map)
 
@@ -329,22 +305,19 @@ static MACHINE_CONFIG_START( dgpix, dgpix_state )
     running at 16.9MHz
 */
 
-	MCFG_MACHINE_RESET(dgpix)
-	MCFG_NVRAM_HANDLER(flashroms)
+	MCFG_NVRAM_ADD_NO_FILL("nvram")
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(512, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 319, 0, 239)
-	MCFG_SCREEN_UPDATE(dgpix)
+	MCFG_SCREEN_UPDATE_DRIVER(dgpix_state, screen_update_dgpix)
 
 	MCFG_PALETTE_INIT(BBBBB_GGGGG_RRRRR)
 	MCFG_PALETTE_LENGTH(32768)
 
-	MCFG_VIDEO_START(dgpix)
 
 	/* sound hardware */
 	// KS0164 sound chip
@@ -405,7 +378,7 @@ SEC KM6161002    : Graphics RAM (SOJ44)
 */
 
 ROM_START( xfiles )
-	ROM_REGION32_BE( 0x2000000, "user1", ROMREGION_ERASE00 ) /* Hyperstone CPU Code & Data */
+	ROM_REGION32_BE( 0x2000000, "flash", ROMREGION_ERASE00 ) /* Hyperstone CPU Code & Data */
 	/* 0 - 0x17fffff empty space */
 	ROM_LOAD16_WORD_SWAP( "u8.bin",  0x1800000, 0x400000, CRC(3b2c2bc1) SHA1(1c07fb5bd8a8c9b5fb169e6400fef845f3aee7aa) )
 	ROM_LOAD16_WORD_SWAP( "u9.bin",  0x1c00000, 0x400000, CRC(6ecdd1eb) SHA1(e26c9711e589865cc75ec693d382758fa52528b8) )
@@ -480,7 +453,7 @@ Notes:
 */
 
 ROM_START( kdynastg )
-	ROM_REGION32_BE( 0x2000000, "user1", ROMREGION_ERASE00 )  /* Hyperstone CPU Code & Data */
+	ROM_REGION32_BE( 0x2000000, "flash", ROMREGION_ERASE00 )  /* Hyperstone CPU Code & Data */
 	/* 0 - 0x0ffffff empty space */
 	ROM_LOAD16_WORD_SWAP( "flash.u6",  0x1000000, 0x400000, CRC(280dd64e) SHA1(0e23b227b1183fb5591c3a849b5a5fe7faa23cc8) )
 	ROM_LOAD16_WORD_SWAP( "flash.u7",  0x1400000, 0x400000, CRC(f9125894) SHA1(abaad31f7a02143ea7029e47e6baf2976365f70c) )
@@ -558,7 +531,7 @@ Notes:
 */
 
 ROM_START( fmaniac3 )
-	ROM_REGION32_BE( 0x2000000, "user1", ROMREGION_ERASE00 ) /* Hyperstone CPU Code & Data */
+	ROM_REGION32_BE( 0x2000000, "flash", ROMREGION_ERASE00 ) /* Hyperstone CPU Code & Data */
 	/* 0 - 0x17fffff empty space */
 	ROM_LOAD16_WORD_SWAP( "flash.u8", 0x1800000, 0x400000, CRC(dc08a224) SHA1(4d14145eb84ad13674296f81e90b9d60403fa0de) )
 	ROM_LOAD16_WORD_SWAP( "flash.u9", 0x1c00000, 0x400000, CRC(c1fee95f) SHA1(0ed5ed9fa18e7da9242a6df2c210c46de25a2281) )
@@ -570,10 +543,9 @@ ROM_START( fmaniac3 )
 	// not present
 ROM_END
 
-static DRIVER_INIT( xfiles )
+DRIVER_INIT_MEMBER(dgpix_state,xfiles)
 {
-	dgpix_state *state = machine.driver_data<dgpix_state>();
-	UINT8 *rom = (UINT8 *)machine.region("user1")->base() + 0x1c00000;
+	UINT8 *rom = (UINT8 *)memregion("flash")->base() + 0x1c00000;
 
 	rom[BYTE4_XOR_BE(0x3aa92e)] = 3;
 	rom[BYTE4_XOR_BE(0x3aa92f)] = 0;
@@ -583,15 +555,14 @@ static DRIVER_INIT( xfiles )
 	rom[BYTE4_XOR_BE(0x3aa933)] = 0;
 
 //  protection related ?
-//  machine.device("maincpu")->memory().space(AS_PROGRAM)->nop_read(0xf0c8b440, 0xf0c8b447);
+//  machine().device("maincpu")->memory().space(AS_PROGRAM).nop_read(0xf0c8b440, 0xf0c8b447);
 
-	state->m_flash_roms = 2;
+	m_flash_roms = 2;
 }
 
-static DRIVER_INIT( kdynastg )
+DRIVER_INIT_MEMBER(dgpix_state,kdynastg)
 {
-	dgpix_state *state = machine.driver_data<dgpix_state>();
-	UINT8 *rom = (UINT8 *)machine.region("user1")->base() + 0x1c00000;
+	UINT8 *rom = (UINT8 *)memregion("flash")->base() + 0x1c00000;
 
 	rom[BYTE4_XOR_BE(0x3aaa10)] = 3; // 129f0 - nopped call
 	rom[BYTE4_XOR_BE(0x3aaa11)] = 0;
@@ -604,17 +575,16 @@ static DRIVER_INIT( kdynastg )
 	rom[BYTE4_XOR_BE(0x3a45c9)] = 0;
 
 //  protection related ?
-//  machine.device("maincpu")->memory().space(AS_PROGRAM)->nop_read(0x12341234, 0x12341243);
+//  machine().device("maincpu")->memory().space(AS_PROGRAM).nop_read(0x12341234, 0x12341243);
 
-	state->m_flash_roms = 4;
+	m_flash_roms = 4;
 }
 
-static DRIVER_INIT( fmaniac3 )
+DRIVER_INIT_MEMBER(dgpix_state,fmaniac3)
 {
-	dgpix_state *state = machine.driver_data<dgpix_state>();
-	state->m_flash_roms = 2;
+	m_flash_roms = 2;
 }
 
-GAME( 1999, xfiles,   0, dgpix, dgpix, xfiles,   ROT0, "dgPIX Entertainment Inc.", "X-Files",                           GAME_NO_SOUND )
-GAME( 1999, kdynastg, 0, dgpix, dgpix, kdynastg, ROT0, "EZ Graphics",              "King of Dynast Gear (version 1.8)", GAME_NO_SOUND )
-GAME( 2002, fmaniac3, 0, dgpix, dgpix, fmaniac3, ROT0, "Saero Entertainment",      "Fishing Maniac 3",                  GAME_NO_SOUND )
+GAME( 1999, xfiles,   0, dgpix, dgpix, dgpix_state, xfiles,   ROT0, "dgPIX Entertainment Inc.", "X-Files",                           GAME_NO_SOUND )
+GAME( 1999, kdynastg, 0, dgpix, dgpix, dgpix_state, kdynastg, ROT0, "EZ Graphics",              "King of Dynast Gear (version 1.8)", GAME_NO_SOUND )
+GAME( 2002, fmaniac3, 0, dgpix, dgpix, dgpix_state, fmaniac3, ROT0, "Saero Entertainment",      "Fishing Maniac 3",                  GAME_NO_SOUND )

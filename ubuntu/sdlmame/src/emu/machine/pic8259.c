@@ -14,41 +14,43 @@
 #include "emu.h"
 #include "machine/pic8259.h"
 
-#define IRQ_COUNT	8
+#define IRQ_COUNT   8
 
-#define LOG_ICW		0
-#define LOG_OCW		0
-#define LOG_GENERAL	 0
+#define LOG_ICW     0
+#define LOG_OCW     0
+#define LOG_GENERAL  0
 
-typedef enum
+enum pic8259_state_t
 {
 	STATE_ICW1,
 	STATE_ICW2,
 	STATE_ICW3,
 	STATE_ICW4,
 	STATE_READY
-} pic8259_state_t;
+};
 
-typedef struct pic8259	pic8259_t;
-
-struct pic8259
+struct pic8259_t
 {
 	devcb_resolved_write_line out_int_func;
+
+	devcb_resolved_read_line sp_en_func;
+
+	devcb_resolved_read8 read_slave_ack_func;
 
 	emu_timer *timer;
 
 	pic8259_state_t state;
 
-	UINT8 irq_lines;
-	UINT8 esr;
 	UINT8 isr;
 	UINT8 irr;
 	UINT8 prio;
 	UINT8 imr;
+	UINT8 irq_lines;
 
 	UINT8 input;
 	UINT8 ocw3;
 
+	UINT8 master;
 	/* ICW1 state */
 	UINT32 level_trig_mode : 1;
 	UINT32 vector_size : 1;
@@ -73,14 +75,14 @@ struct pic8259
 INLINE pic8259_t *get_safe_token(device_t *device) {
 	assert( device != NULL );
 	assert( device->type() == PIC8259 );
-	return ( pic8259_t *) downcast<legacy_device_base *>(device)->token();
+	return ( pic8259_t *) downcast<pic8259_device *>(device)->token();
 }
 
 
 static TIMER_CALLBACK( pic8259_timerproc )
 {
 	device_t *device = (device_t *)ptr;
-	pic8259_t	*pic8259 = get_safe_token(device);
+	pic8259_t   *pic8259 = get_safe_token(device);
 	int irq;
 	UINT8 mask;
 
@@ -103,12 +105,12 @@ static TIMER_CALLBACK( pic8259_timerproc )
 			if (LOG_GENERAL)
 				logerror("pic8259_timerproc(): PIC triggering IRQ #%d\n", irq);
 			if (!BIT(pic8259->ocw3, 2))
-				devcb_call_write_line(&pic8259->out_int_func, 1);
+				pic8259->out_int_func(1);
 			return;
 		}
 	}
 	if (!BIT(pic8259->ocw3, 2))
-		devcb_call_write_line(&pic8259->out_int_func, 0);
+		pic8259->out_int_func(0);
 }
 
 
@@ -120,8 +122,8 @@ INLINE void pic8259_set_timer(pic8259_t *pic8259)
 
 static void pic8259_set_irq_line(device_t *device, int irq, int state)
 {
-	pic8259_t	*pic8259 = get_safe_token(device);
-	UINT8		old_irq_lines = pic8259->irq_lines;
+	pic8259_t   *pic8259 = get_safe_token(device);
+	UINT8 mask = (1 << irq);
 
 	if (state)
 	{
@@ -129,11 +131,9 @@ static void pic8259_set_irq_line(device_t *device, int irq, int state)
 		if (LOG_GENERAL)
 			logerror("pic8259_set_irq_line(): PIC set IRQ line #%d\n", irq);
 
-		pic8259->irq_lines |= 1 << irq;
-
-		/* Set ESR bit if we see a 0 -> 1 transition */
-		if ( ! ( old_irq_lines & ( 1 << irq ) ) )
-			pic8259->esr |= ( 1 << irq );
+		if(pic8259->level_trig_mode || (!pic8259->level_trig_mode && !(pic8259->irq_lines & mask)))
+			pic8259->irr |= mask;
+		pic8259->irq_lines |= mask;
 	}
 	else
 	{
@@ -141,10 +141,9 @@ static void pic8259_set_irq_line(device_t *device, int irq, int state)
 		if (LOG_GENERAL)
 			logerror("pic8259_set_irq_line(): PIC cleared IRQ line #%d\n", irq);
 
-		pic8259->irq_lines &= ~(1 << irq);
+		pic8259->irq_lines &= ~mask;
+		pic8259->irr &= ~mask;
 	}
-
-	pic8259->irr = ( pic8259->level_trig_mode ) ? pic8259->esr & pic8259->irq_lines : pic8259->irq_lines;
 	pic8259_set_timer(pic8259);
 }
 
@@ -157,9 +156,18 @@ WRITE_LINE_DEVICE_HANDLER( pic8259_ir5_w ) { pic8259_set_irq_line(device, 5, sta
 WRITE_LINE_DEVICE_HANDLER( pic8259_ir6_w ) { pic8259_set_irq_line(device, 6, state); }
 WRITE_LINE_DEVICE_HANDLER( pic8259_ir7_w ) { pic8259_set_irq_line(device, 7, state); }
 
+WRITE_LINE_MEMBER( pic8259_device::ir0_w ) { pic8259_set_irq_line(this, 0, state); }
+WRITE_LINE_MEMBER( pic8259_device::ir1_w ) { pic8259_set_irq_line(this, 1, state); }
+WRITE_LINE_MEMBER( pic8259_device::ir2_w ) { pic8259_set_irq_line(this, 2, state); }
+WRITE_LINE_MEMBER( pic8259_device::ir3_w ) { pic8259_set_irq_line(this, 3, state); }
+WRITE_LINE_MEMBER( pic8259_device::ir4_w ) { pic8259_set_irq_line(this, 4, state); }
+WRITE_LINE_MEMBER( pic8259_device::ir5_w ) { pic8259_set_irq_line(this, 5, state); }
+WRITE_LINE_MEMBER( pic8259_device::ir6_w ) { pic8259_set_irq_line(this, 6, state); }
+WRITE_LINE_MEMBER( pic8259_device::ir7_w ) { pic8259_set_irq_line(this, 7, state); }
+
 int pic8259_acknowledge(device_t *device)
 {
-	pic8259_t	*pic8259 = get_safe_token(device);
+	pic8259_t   *pic8259 = get_safe_token(device);
 	UINT8 mask;
 	int irq;
 
@@ -172,18 +180,25 @@ int pic8259_acknowledge(device_t *device)
 		{
 			if (LOG_GENERAL)
 				logerror("pic8259_acknowledge(): PIC acknowledge IRQ #%d\n", irq);
-			pic8259->irr &= ~mask;
-			pic8259->esr &= ~mask;
+			if (!pic8259->level_trig_mode)
+				pic8259->irr &= ~mask;
 
 			if (!pic8259->auto_eoi)
 				pic8259->isr |= mask;
+
 			pic8259_set_timer(pic8259);
-			if (pic8259->is_x86) {
-				/* For x86 mode*/
-				return irq + pic8259->base;
+
+			if ((pic8259->cascade!=0) && (pic8259->master!=0) && (mask & pic8259->slave)) {
+				// it's from slave device
+				return pic8259->read_slave_ack_func(irq);
 			} else {
-				/* in case of 8080/85) */
-				return 0xcd0000 + (pic8259->vector_addr_high << 8) + pic8259->vector_addr_low + (irq << (3-pic8259->vector_size));
+				if (pic8259->is_x86) {
+					/* For x86 mode*/
+					return irq + pic8259->base;
+				} else {
+					/* in case of 8080/85) */
+					return 0xcd0000 + (pic8259->vector_addr_high << 8) + pic8259->vector_addr_low + (irq << (3-pic8259->vector_size));
+				}
 			}
 		}
 	}
@@ -194,7 +209,7 @@ int pic8259_acknowledge(device_t *device)
 
 READ8_DEVICE_HANDLER( pic8259_r )
 {
-	pic8259_t	*pic8259 = get_safe_token(device);
+	pic8259_t   *pic8259 = get_safe_token(device);
 
 	/* NPW 18-May-2003 - Changing 0xFF to 0x00 as per Ruslan */
 	UINT8 data = 0x00;
@@ -246,10 +261,15 @@ READ8_DEVICE_HANDLER( pic8259_r )
 }
 
 
+READ8_MEMBER( pic8259_device::read )
+{
+	return pic8259_r(this, space, offset);
+}
+
 
 WRITE8_DEVICE_HANDLER( pic8259_w )
 {
-	pic8259_t	*pic8259 = get_safe_token(device);
+	pic8259_t   *pic8259 = get_safe_token(device);
 
 	switch(offset)
 	{
@@ -260,17 +280,16 @@ WRITE8_DEVICE_HANDLER( pic8259_w )
 				if (LOG_ICW)
 					logerror("pic8259_w(): ICW1; data=0x%02X\n", data);
 
-				pic8259->imr				= 0x00;
-				pic8259->esr				= 0x00;
-				pic8259->isr				= 0x00;
-				pic8259->irr				= 0x00;
-				pic8259->level_trig_mode	= (data & 0x08) ? 1 : 0;
-				pic8259->vector_size		= (data & 0x04) ? 1 : 0;
-				pic8259->cascade			= (data & 0x02) ? 0 : 1;
-				pic8259->icw4_needed		= (data & 0x01) ? 1 : 0;
-				pic8259->vector_addr_low	= (data & 0xe0);
-				pic8259->state			= STATE_ICW2;
-				pic8259->irq_lines          = 0x00;
+				pic8259->imr                = 0x00;
+				pic8259->isr                = 0x00;
+				pic8259->irr                = 0x00;
+				pic8259->level_trig_mode    = (data & 0x08) ? 1 : 0;
+				pic8259->vector_size        = (data & 0x04) ? 1 : 0;
+				pic8259->cascade            = (data & 0x02) ? 0 : 1;
+				pic8259->icw4_needed        = (data & 0x01) ? 1 : 0;
+				pic8259->vector_addr_low    = (data & 0xe0);
+				pic8259->state          = STATE_ICW2;
+				pic8259->out_int_func(0);
 			}
 			else if (pic8259->state == STATE_READY)
 			{
@@ -335,7 +354,6 @@ WRITE8_DEVICE_HANDLER( pic8259_w )
 							if( pic8259->isr & mask )
 							{
 								pic8259->isr &= ~mask;
-								pic8259->irr &= ~mask;
 								pic8259->prio = (pic8259->prio + 1) & 7;
 							}
 							break;
@@ -377,7 +395,7 @@ WRITE8_DEVICE_HANDLER( pic8259_w )
 					if (LOG_ICW)
 						logerror("pic8259_w(): ICW4; data=0x%02X\n", data);
 
-					pic8259->nested	= (data & 0x10) ? 1 : 0;
+					pic8259->nested = (data & 0x10) ? 1 : 0;
 					pic8259->mode = (data >> 2) & 3;
 					pic8259->auto_eoi = (data & 0x02) ? 1 : 0;
 					pic8259->is_x86 = (data & 0x01) ? 1 : 0;
@@ -389,38 +407,45 @@ WRITE8_DEVICE_HANDLER( pic8259_w )
 					if (LOG_OCW)
 						logerror("pic8259_w(): OCW1; data=0x%02X\n", data);
 
+					//printf("%s %02x\n",pic8259->master ? "master pic8259 mask" : "slave pic8259 mask",data);
 					pic8259->imr = data;
 					break;
 			}
 			break;
-    }
+	}
 	pic8259_set_timer(pic8259);
 }
 
 
+WRITE8_MEMBER( pic8259_device::write )
+{
+	pic8259_w(this, space, offset, data);
+}
+
 
 static DEVICE_START( pic8259 )
 {
-	pic8259_t	*pic8259 = get_safe_token(device);
-	const struct pic8259_interface *intf = (const struct pic8259_interface *)device->baseconfig().static_config();
+	pic8259_t   *pic8259 = get_safe_token(device);
+	const struct pic8259_interface *intf = (const struct pic8259_interface *)device->static_config();
 
 	assert(intf != NULL);
 
 	pic8259->timer = device->machine().scheduler().timer_alloc( FUNC(pic8259_timerproc), (void *)device );
 
 	/* resolve callbacks */
-	devcb_resolve_write_line(&pic8259->out_int_func, &intf->out_int_func, device);
+	pic8259->out_int_func.resolve(intf->out_int_func, *device);
+	pic8259->sp_en_func.resolve(intf->sp_en_func, *device);
+	pic8259->read_slave_ack_func.resolve(intf->read_slave_ack_func, *device);
 }
 
 
 static DEVICE_RESET( pic8259 ) {
-	pic8259_t	*pic8259 = get_safe_token(device);
+	pic8259_t   *pic8259 = get_safe_token(device);
 
 	pic8259->state = STATE_READY;
-	pic8259->irq_lines = 0;
 	pic8259->isr = 0;
-	pic8259->esr = 0;
 	pic8259->irr = 0;
+	pic8259->irq_lines = 0;
 	pic8259->prio = 0;
 	pic8259->imr = 0;
 	pic8259->input = 0;
@@ -437,28 +462,42 @@ static DEVICE_RESET( pic8259 ) {
 	pic8259->is_x86 = 0;
 	pic8259->vector_addr_low = 0;
 	pic8259->vector_addr_high = 0;
+
+	pic8259->master = pic8259->sp_en_func();
 }
 
+const device_type PIC8259 = &device_creator<pic8259_device>;
 
-DEVICE_GET_INFO( pic8259 ) {
-	switch ( state ) {
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:				info->i = sizeof(pic8259_t);				break;
-		case DEVINFO_INT_INLINE_CONFIG_BYTES:		info->i = 0;								break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:						info->start = DEVICE_START_NAME(pic8259);	break;
-		case DEVINFO_FCT_STOP:						/* nothing */								break;
-		case DEVINFO_FCT_RESET:						info->reset = DEVICE_RESET_NAME(pic8259);	break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:						strcpy(info->s, "Intel PIC8259");			break;
-		case DEVINFO_STR_FAMILY:					strcpy(info->s, "PIC8259");					break;
-		case DEVINFO_STR_VERSION:					strcpy(info->s, "1.00");					break;
-		case DEVINFO_STR_SOURCE_FILE:				strcpy(info->s, __FILE__);					break;
-		case DEVINFO_STR_CREDITS:					strcpy(info->s, "Copyright the MAME and MESS Teams");	break;
-	}
+pic8259_device::pic8259_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, PIC8259, "Intel PIC8259", tag, owner, clock)
+{
+	m_token = global_alloc_clear(pic8259_t);
 }
 
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
 
-DEFINE_LEGACY_DEVICE(PIC8259, pic8259);
+void pic8259_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void pic8259_device::device_start()
+{
+	DEVICE_START_NAME( pic8259 )(this);
+}
+
+//-------------------------------------------------
+//  device_reset - device-specific reset
+//-------------------------------------------------
+
+void pic8259_device::device_reset()
+{
+	DEVICE_RESET_NAME( pic8259 )(this);
+}

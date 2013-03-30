@@ -10,7 +10,7 @@
 //============================================================
 
 // standard sdl header
-#include <SDL/SDL.h>
+#include "sdlinc.h"
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
@@ -57,4 +57,3 @@ void osd_break_into_debugger(const char *message)
 {
 	printf("Ignoring MAME exception: %s\n", message);
 }
-

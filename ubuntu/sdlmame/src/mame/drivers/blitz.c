@@ -281,8 +281,8 @@
 *******************************************************************************/
 
 
-#define MASTER_CLOCK	XTAL_10MHz
-#define CPU_CLOCK		(MASTER_CLOCK/16)
+#define MASTER_CLOCK    XTAL_10MHz
+#define CPU_CLOCK       (MASTER_CLOCK/16)
 
 #include "emu.h"
 #include "cpu/m6502/m6502.h"
@@ -295,13 +295,25 @@
 class blitz_state : public driver_device
 {
 public:
-	blitz_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	blitz_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"),
+		m_colorram(*this, "colorram"){ }
 
-	UINT8 *m_videoram;
-	UINT8 *m_colorram;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_colorram;
 	tilemap_t *m_bg_tilemap;
 	int m_mux_data;
+	DECLARE_WRITE8_MEMBER(megadpkr_videoram_w);
+	DECLARE_WRITE8_MEMBER(megadpkr_colorram_w);
+	DECLARE_READ8_MEMBER(megadpkr_mux_port_r);
+	DECLARE_WRITE8_MEMBER(mux_w);
+	DECLARE_WRITE8_MEMBER(lamps_a_w);
+	DECLARE_WRITE8_MEMBER(sound_w);
+	TILE_GET_INFO_MEMBER(get_bg_tile_info);
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_megadpkr(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
@@ -311,24 +323,21 @@ public:
 *********************************************/
 
 
-static WRITE8_HANDLER( megadpkr_videoram_w )
+WRITE8_MEMBER(blitz_state::megadpkr_videoram_w)
 {
-	blitz_state *state = space->machine().driver_data<blitz_state>();
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_videoram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-static WRITE8_HANDLER( megadpkr_colorram_w )
+WRITE8_MEMBER(blitz_state::megadpkr_colorram_w)
 {
-	blitz_state *state = space->machine().driver_data<blitz_state>();
-	state->m_colorram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_colorram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(blitz_state::get_bg_tile_info)
 {
-	blitz_state *state = machine.driver_data<blitz_state>();
 /*  - bits -
     7654 3210
     --xx xx--   tiles color.
@@ -337,31 +346,30 @@ static TILE_GET_INFO( get_bg_tile_info )
     xx-- ----   unused.
 */
 
-	int attr = state->m_colorram[tile_index];
-	int code = ((attr & 1) << 8) | state->m_videoram[tile_index];
-	int bank = (attr & 0x02) >> 1;	/* bit 1 switch the gfx banks */
-	int color = (attr & 0x3c) >> 2;	/* bits 2-3-4-5 for color */
+	int attr = m_colorram[tile_index];
+	int code = ((attr & 1) << 8) | m_videoram[tile_index];
+	int bank = (attr & 0x02) >> 1;  /* bit 1 switch the gfx banks */
+	int color = (attr & 0x3c) >> 2; /* bits 2-3-4-5 for color */
 
-	SET_TILE_INFO(bank, code, color, 0);
+	SET_TILE_INFO_MEMBER(bank, code, color, 0);
 }
 
 
-static VIDEO_START( megadpkr )
+void blitz_state::video_start()
 {
-	blitz_state *state = machine.driver_data<blitz_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(blitz_state::get_bg_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
 }
 
-static SCREEN_UPDATE( megadpkr )
+UINT32 blitz_state::screen_update_megadpkr(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	blitz_state *state = screen->machine().driver_data<blitz_state>();
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
 	return 0;
 }
 
 
-static PALETTE_INIT( megadpkr )
+void blitz_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 /*
     This hardware has a feature called BLUE KILLER.
     Using the original intensity line, the PCB has a bridge
@@ -380,13 +388,13 @@ static PALETTE_INIT( megadpkr )
 
 	if (color_prom == 0) return;
 
-	for (i = 0;i < machine.total_colors();i++)
+	for (i = 0;i < machine().total_colors();i++)
 	{
 		int bit0, bit1, bit2, bit3, r, g, b, bk;
 
 		/* blue killer (from schematics) */
-        bit3 = (color_prom[i] >> 3) & 0x01;
-        bk = bit3;
+		bit3 = (color_prom[i] >> 3) & 0x01;
+		bk = bit3;
 
 		/* red component */
 		bit0 = (color_prom[i] >> 0) & 0x01;
@@ -400,7 +408,7 @@ static PALETTE_INIT( megadpkr )
 		bit2 = (color_prom[i] >> 2) & 0x01;
 		b = bk * (bit2 * 0xff);
 
-		palette_set_color(machine, i, MAKE_RGB(r, g, b));
+		palette_set_color(machine(), i, MAKE_RGB(r, g, b));
 	}
 }
 
@@ -414,24 +422,22 @@ static PALETTE_INIT( megadpkr )
    There are 4 sets of 5 bits each and are connected to PIA0, portA.
    The selector bits are located in PIA1, portB (bits 4-7).
 */
-static READ8_DEVICE_HANDLER( megadpkr_mux_port_r )
+READ8_MEMBER(blitz_state::megadpkr_mux_port_r)
 {
-	blitz_state *state = device->machine().driver_data<blitz_state>();
-	switch( state->m_mux_data & 0xf0 )		/* bits 4-7 */
+	switch( m_mux_data & 0xf0 )     /* bits 4-7 */
 	{
-		case 0x10: return input_port_read(device->machine(), "IN0-0");
-		case 0x20: return input_port_read(device->machine(), "IN0-1");
-		case 0x40: return input_port_read(device->machine(), "IN0-2");
-		case 0x80: return input_port_read(device->machine(), "IN0-3");
+		case 0x10: return ioport("IN0-0")->read();
+		case 0x20: return ioport("IN0-1")->read();
+		case 0x40: return ioport("IN0-2")->read();
+		case 0x80: return ioport("IN0-3")->read();
 	}
 	return 0xff;
 }
 
 
-static WRITE8_DEVICE_HANDLER( mux_w )
+WRITE8_MEMBER(blitz_state::mux_w)
 {
-	blitz_state *state = device->machine().driver_data<blitz_state>();
-	state->m_mux_data = data ^ 0xff;	/* inverted */
+	m_mux_data = data ^ 0xff;   /* inverted */
 }
 
 
@@ -440,7 +446,7 @@ static WRITE8_DEVICE_HANDLER( mux_w )
 
 */
 
-static WRITE8_DEVICE_HANDLER( lamps_a_w )
+WRITE8_MEMBER(blitz_state::lamps_a_w)
 {
 //  output_set_lamp_value(0, 1 - ((data) & 1));         /* Lamp 0 */
 //  output_set_lamp_value(1, 1 - ((data >> 1) & 1));    /* Lamp 1 */
@@ -449,16 +455,16 @@ static WRITE8_DEVICE_HANDLER( lamps_a_w )
 //  output_set_lamp_value(4, 1 - ((data >> 4) & 1));    /* Lamp 4 */
 
 //  popmessage("written : %02X", data);
-//  coin_counter_w(device->machine(), 0, data & 0x40);    /* counter1 */
-//  coin_counter_w(device->machine(), 1, data & 0x80);    /* counter2 */
-//  coin_counter_w(device->machine(), 2, data & 0x20);    /* counter3 */
+//  coin_counter_w(machine(), 0, data & 0x40);    /* counter1 */
+//  coin_counter_w(machine(), 1, data & 0x80);    /* counter2 */
+//  coin_counter_w(machine(), 2, data & 0x20);    /* counter3 */
 
 /*  Counters:
 
 */
 }
 
-static WRITE8_DEVICE_HANDLER( sound_w )
+WRITE8_MEMBER(blitz_state::sound_w)
 {
 	/* 555 voltage controlled */
 	logerror("Sound Data: %2x\n",data & 0x0f);
@@ -469,24 +475,24 @@ static WRITE8_DEVICE_HANDLER( sound_w )
 *           Memory Map Information           *
 *********************************************/
 
-static ADDRESS_MAP_START( megadpkr_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( megadpkr_map, AS_PROGRAM, 8, blitz_state )
 //  ADDRESS_MAP_GLOBAL_MASK(0x7fff) // seems that hardware is playing with A14 & A15 CPU lines...
 
 	AM_RANGE(0x0000, 0x07ff) AM_RAM //AM_SHARE("nvram")   /* battery backed RAM */
-//  AM_RANGE(0x0800, 0x0800) AM_DEVWRITE("crtc", mc6845_address_w)
-//  AM_RANGE(0x0801, 0x0801) AM_DEVREADWRITE("crtc", mc6845_register_r, mc6845_register_w)
-	AM_RANGE(0x0844, 0x0847) AM_DEVREADWRITE("pia0", pia6821_r, pia6821_w)
-	AM_RANGE(0x0848, 0x084b) AM_DEVREADWRITE("pia1", pia6821_r, pia6821_w)
+//  AM_RANGE(0x0800, 0x0800) AM_DEVWRITE_LEGACY("crtc", mc6845_address_w)
+//  AM_RANGE(0x0801, 0x0801) AM_DEVREADWRITE_LEGACY("crtc", mc6845_register_r, mc6845_register_w)
+	AM_RANGE(0x0844, 0x0847) AM_DEVREADWRITE("pia0", pia6821_device, read, write)
+	AM_RANGE(0x0848, 0x084b) AM_DEVREADWRITE("pia1", pia6821_device, read, write)
 
 /*  There is another set of PIAs controlled by the code.
     Maybe they are just mirrors...
 
-    AM_RANGE(0x10f4, 0x10f7) AM_DEVREADWRITE("pia0", pia6821_r, pia6821_w)
-    AM_RANGE(0x10f8, 0x10fb) AM_DEVREADWRITE("pia1", pia6821_r, pia6821_w)
+    AM_RANGE(0x10f4, 0x10f7) AM_DEVREADWRITE("pia0", pia6821_device, read, write)
+    AM_RANGE(0x10f8, 0x10fb) AM_DEVREADWRITE("pia1", pia6821_device, read, write)
 */
 
-	AM_RANGE(0x1000, 0x13ff) AM_RAM_WRITE(megadpkr_videoram_w) AM_BASE_MEMBER(blitz_state, m_videoram)
-	AM_RANGE(0x1800, 0x1bff) AM_RAM_WRITE(megadpkr_colorram_w) AM_BASE_MEMBER(blitz_state, m_colorram)
+	AM_RANGE(0x1000, 0x13ff) AM_RAM_WRITE(megadpkr_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0x1800, 0x1bff) AM_RAM_WRITE(megadpkr_colorram_w) AM_SHARE("colorram")
 
 	AM_RANGE(0xc000, 0xffff) AM_ROM
 ADDRESS_MAP_END
@@ -538,7 +544,7 @@ ADDRESS_MAP_END
   FEE7: 4C 3F 62      jmp  $623F     ; transfer the control to $623f (no valid code there. RTS in the alt program)
 
 
-  Some routines are writting to $47xx that should be ROM space.
+  Some routines are writing to $47xx that should be ROM space.
 
   Also some pieces of code are copying code to the first 0x80 bytes of the stack and execute from there.
   The code is so obfuscated. The copied code is using undocumented opcodes as LAX.
@@ -590,7 +596,7 @@ ADDRESS_MAP_END
 
 
 /*
-static ADDRESS_MAP_START( mcu_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( mcu_map, AS_PROGRAM, 8, blitz_state )
     ADDRESS_MAP_GLOBAL_MASK(0x7ff)
     AM_RANGE(0x0080, 0x07ff) AM_ROM
 ADDRESS_MAP_END
@@ -697,34 +703,34 @@ GFXDECODE_END
 
 static const pia6821_interface megadpkr_pia0_intf =
 {
-	DEVCB_HANDLER(megadpkr_mux_port_r),	/* port A in */
-	DEVCB_NULL,					/* port B in */
-	DEVCB_NULL,					/* line CA1 in */
-	DEVCB_NULL,					/* line CB1 in */
-	DEVCB_NULL,					/* line CA2 in */
-	DEVCB_NULL,					/* line CB2 in */
-	DEVCB_NULL,					/* port A out */
-	DEVCB_HANDLER(lamps_a_w),	/* port B out */
-	DEVCB_NULL,					/* line CA2 out */
-	DEVCB_NULL,					/* port CB2 out */
-	DEVCB_NULL,					/* IRQA */
-	DEVCB_NULL					/* IRQB */
+	DEVCB_DRIVER_MEMBER(blitz_state,megadpkr_mux_port_r),   /* port A in */
+	DEVCB_NULL,                 /* port B in */
+	DEVCB_NULL,                 /* line CA1 in */
+	DEVCB_NULL,                 /* line CB1 in */
+	DEVCB_NULL,                 /* line CA2 in */
+	DEVCB_NULL,                 /* line CB2 in */
+	DEVCB_NULL,                 /* port A out */
+	DEVCB_DRIVER_MEMBER(blitz_state,lamps_a_w), /* port B out */
+	DEVCB_NULL,                 /* line CA2 out */
+	DEVCB_NULL,                 /* port CB2 out */
+	DEVCB_NULL,                 /* IRQA */
+	DEVCB_NULL                  /* IRQB */
 };
 
 static const pia6821_interface megadpkr_pia1_intf =
 {
-	DEVCB_INPUT_PORT("SW1"),	/* port A in */
-	DEVCB_NULL,					/* port B in */
-	DEVCB_NULL,					/* line CA1 in */
-	DEVCB_NULL,					/* line CB1 in */
-	DEVCB_NULL,					/* line CA2 in */
-	DEVCB_NULL,					/* line CB2 in */
-	DEVCB_HANDLER(sound_w),		/* port A out */
-	DEVCB_HANDLER(mux_w),		/* port B out */
-	DEVCB_NULL,					/* line CA2 out */
-	DEVCB_NULL,					/* port CB2 out */
-	DEVCB_NULL,					/* IRQA */
-	DEVCB_NULL					/* IRQB */
+	DEVCB_INPUT_PORT("SW1"),    /* port A in */
+	DEVCB_NULL,                 /* port B in */
+	DEVCB_NULL,                 /* line CA1 in */
+	DEVCB_NULL,                 /* line CB1 in */
+	DEVCB_NULL,                 /* line CA2 in */
+	DEVCB_NULL,                 /* line CB2 in */
+	DEVCB_DRIVER_MEMBER(blitz_state,sound_w),       /* port A out */
+	DEVCB_DRIVER_MEMBER(blitz_state,mux_w),     /* port B out */
+	DEVCB_NULL,                 /* line CA2 out */
+	DEVCB_NULL,                 /* port CB2 out */
+	DEVCB_NULL,                 /* IRQA */
+	DEVCB_NULL                  /* IRQB */
 };
 
 
@@ -734,16 +740,16 @@ static const pia6821_interface megadpkr_pia1_intf =
 
 static const mc6845_interface mc6845_intf =
 {
-	"screen",	/* screen we are acting on */
-	8,			/* number of pixels per video memory address */
-	NULL,		/* before pixel update callback */
-	NULL,		/* row update callback */
-	NULL,		/* after pixel update callback */
-	DEVCB_NULL,	/* callback for display state changes */
-	DEVCB_NULL,	/* callback for cursor state changes */
-	DEVCB_NULL,	/* HSYNC callback */
-	DEVCB_NULL,	/* VSYNC callback */
-	NULL		/* update address callback */
+	"screen",   /* screen we are acting on */
+	8,          /* number of pixels per video memory address */
+	NULL,       /* before pixel update callback */
+	NULL,       /* row update callback */
+	NULL,       /* after pixel update callback */
+	DEVCB_NULL, /* callback for display state changes */
+	DEVCB_NULL, /* callback for cursor state changes */
+	DEVCB_NULL, /* HSYNC callback */
+	DEVCB_NULL, /* VSYNC callback */
+	NULL        /* update address callback */
 };
 
 
@@ -788,7 +794,7 @@ static MACHINE_CONFIG_START( megadpkr, blitz_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6502, CPU_CLOCK)
 	MCFG_CPU_PROGRAM_MAP(megadpkr_map)
-	MCFG_CPU_VBLANK_INT("screen", nmi_line_pulse)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", blitz_state,  nmi_line_pulse)
 
 //  MCFG_CPU_ADD("mcu", M68705, CPU_CLOCK) /* unknown */
 //  MCFG_CPU_PROGRAM_MAP(mcu_map)
@@ -802,17 +808,14 @@ static MACHINE_CONFIG_START( megadpkr, blitz_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE((32)*8, (32)*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 0*8, 32*8-1)
-	MCFG_SCREEN_UPDATE(megadpkr)
+	MCFG_SCREEN_UPDATE_DRIVER(blitz_state, screen_update_megadpkr)
 
 	MCFG_MC6845_ADD("crtc", MC6845, CPU_CLOCK, mc6845_intf)
 
 	MCFG_GFXDECODE(megadpkr)
-	MCFG_PALETTE_INIT(megadpkr)
 	MCFG_PALETTE_LENGTH(256)
-	MCFG_VIDEO_START(megadpkr)
 
 MACHINE_CONFIG_END
 
@@ -831,27 +834,27 @@ MACHINE_CONFIG_END
 ******************************************/
 
 ROM_START( megadpkr )
-	ROM_REGION( 0x10000, "maincpu", 0 )	/* program ROM */
-	ROM_LOAD( "mega-2.u2",	0x8000, 0x8000, CRC(2b133b92) SHA1(97bc21c42897cfd13c0247e239aebb18f73cde91) )
+	ROM_REGION( 0x10000, "maincpu", 0 ) /* program ROM */
+	ROM_LOAD( "mega-2.u2",  0x8000, 0x8000, CRC(2b133b92) SHA1(97bc21c42897cfd13c0247e239aebb18f73cde91) )
 
 	/* sharing the same space, but not totally understood... banked through MCU? */
 	ROM_REGION( 0x10000, "cpubank", 0 )
-	ROM_LOAD( "mega-3.u3",	0x8000, 0x8000, CRC(ff0a46c6) SHA1(df053c323c0e2dd0e41e22286d38e889bfda3aa5) )
+	ROM_LOAD( "mega-3.u3",  0x8000, 0x8000, CRC(ff0a46c6) SHA1(df053c323c0e2dd0e41e22286d38e889bfda3aa5) )
 
-	ROM_REGION( 0x0800, "mcu", 0 )	/* 2k for the undumped 68705 microcontroller */
+	ROM_REGION( 0x0800, "mcu", 0 )  /* 2k for the undumped 68705 microcontroller */
 	ROM_LOAD( "mega-1.u1",  0x0000, 0x0800, NO_DUMP )
 
 	ROM_REGION( 0x3000, "gfx1", 0 )
-	ROM_FILL(				0x0000, 0x2000, 0 ) /* filling the R-G bitplanes */
-	ROM_LOAD( "car1.5a",	0x2000, 0x1000, CRC(29e244d2) SHA1(c309a5ee6922bf2752d218c134edb3ef5f808afa) )    /* text chars / cards deck gfx, bitplane3 */
+	ROM_FILL(               0x0000, 0x2000, 0 ) /* filling the R-G bitplanes */
+	ROM_LOAD( "car1.5a",    0x2000, 0x1000, CRC(29e244d2) SHA1(c309a5ee6922bf2752d218c134edb3ef5f808afa) )    /* text chars / cards deck gfx, bitplane3 */
 
 	ROM_REGION( 0x3000, "gfx2", 0 )
-	ROM_LOAD( "car3.2a",	0x0000, 0x1000, CRC(819c06c4) SHA1(45b874554fb487173acf12daa4ff99e49e335362) )    /* cards deck gfx, bitplane1 */
-	ROM_LOAD( "car2.4a",	0x1000, 0x1000, CRC(41eec680) SHA1(3723f66e1def3908f2e6ba2989def229d9846b02) )    /* cards deck gfx, bitplane2 */
-	ROM_COPY( "gfx1",	0x2800, 0x2000, 0x0800 )    /* cards deck gfx, bitplane3. found in the 2nd quarter of the chars rom */
+	ROM_LOAD( "car3.2a",    0x0000, 0x1000, CRC(819c06c4) SHA1(45b874554fb487173acf12daa4ff99e49e335362) )    /* cards deck gfx, bitplane1 */
+	ROM_LOAD( "car2.4a",    0x1000, 0x1000, CRC(41eec680) SHA1(3723f66e1def3908f2e6ba2989def229d9846b02) )    /* cards deck gfx, bitplane2 */
+	ROM_COPY( "gfx1",   0x2800, 0x2000, 0x0800 )    /* cards deck gfx, bitplane3. found in the 2nd quarter of the chars rom */
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "m3-7611-5.7d",	0x0000, 0x0100, CRC(7f31066b) SHA1(15420780ec6b2870fc4539ec3afe4f0c58eedf12) )
+	ROM_LOAD( "m3-7611-5.7d",   0x0000, 0x0100, CRC(7f31066b) SHA1(15420780ec6b2870fc4539ec3afe4f0c58eedf12) )
 ROM_END
 
 /*
@@ -884,27 +887,27 @@ note : MC68705P5S is protected
 */
 
 ROM_START( megadpkrb )
-	ROM_REGION( 0x10000, "maincpu", 0 )	/* program ROM */
-	ROM_LOAD( "u2.bin",	0x8000, 0x8000, CRC(0efdf472) SHA1(4b1ae10427c2ae8d7cbbe525a6b30973372d4420) )
+	ROM_REGION( 0x10000, "maincpu", 0 ) /* program ROM */
+	ROM_LOAD( "u2.bin", 0x8000, 0x8000, CRC(0efdf472) SHA1(4b1ae10427c2ae8d7cbbe525a6b30973372d4420) )
 
 	/* sharing the same space, but not totally understood... banked through MCU? */
 	ROM_REGION( 0x10000, "cpubank", 0 )
-	ROM_LOAD( "u3.bin",	0x8000, 0x8000, CRC(c973e345) SHA1(aae9da8cbaf0cf07086e5acacf9052e49fbdd896) )
+	ROM_LOAD( "u3.bin", 0x8000, 0x8000, CRC(c973e345) SHA1(aae9da8cbaf0cf07086e5acacf9052e49fbdd896) )
 
-	ROM_REGION( 0x0800, "mcu", 0 )	/* 2k for the undumped 68705 microcontroller */
+	ROM_REGION( 0x0800, "mcu", 0 )  /* 2k for the undumped 68705 microcontroller */
 	ROM_LOAD( "u11.bin",  0x0000, 0x0800, NO_DUMP )
 
 	ROM_REGION( 0x3000, "gfx1", 0 )
-	ROM_FILL(				0x0000, 0x2000, 0 ) /* filling the R-G bitplanes */
-	ROM_LOAD( "car1_5a.bin",	0x2000, 0x1000, CRC(29e244d2) SHA1(c309a5ee6922bf2752d218c134edb3ef5f808afa) )    /* text chars / cards deck gfx, bitplane3 */
+	ROM_FILL(               0x0000, 0x2000, 0 ) /* filling the R-G bitplanes */
+	ROM_LOAD( "car1_5a.bin",    0x2000, 0x1000, CRC(29e244d2) SHA1(c309a5ee6922bf2752d218c134edb3ef5f808afa) )    /* text chars / cards deck gfx, bitplane3 */
 
 	ROM_REGION( 0x3000, "gfx2", 0 )
-	ROM_LOAD( "car3_2a.bin",	0x0000, 0x1000, CRC(819c06c4) SHA1(45b874554fb487173acf12daa4ff99e49e335362) )    /* cards deck gfx, bitplane1 */
-	ROM_LOAD( "car2_4a.bin",	0x1000, 0x1000, CRC(41eec680) SHA1(3723f66e1def3908f2e6ba2989def229d9846b02) )    /* cards deck gfx, bitplane2 */
-	ROM_COPY( "gfx1",	0x2800, 0x2000, 0x0800 )    /* cards deck gfx, bitplane3. found in the 2nd quarter of the chars rom */
+	ROM_LOAD( "car3_2a.bin",    0x0000, 0x1000, CRC(819c06c4) SHA1(45b874554fb487173acf12daa4ff99e49e335362) )    /* cards deck gfx, bitplane1 */
+	ROM_LOAD( "car2_4a.bin",    0x1000, 0x1000, CRC(41eec680) SHA1(3723f66e1def3908f2e6ba2989def229d9846b02) )    /* cards deck gfx, bitplane2 */
+	ROM_COPY( "gfx1",   0x2800, 0x2000, 0x0800 )    /* cards deck gfx, bitplane3. found in the 2nd quarter of the chars rom */
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "m3-7611-5.7d",	0x0000, 0x0100, CRC(7f31066b) SHA1(15420780ec6b2870fc4539ec3afe4f0c58eedf12) )
+	ROM_LOAD( "m3-7611-5.7d",   0x0000, 0x0100, CRC(7f31066b) SHA1(15420780ec6b2870fc4539ec3afe4f0c58eedf12) )
 ROM_END
 
 
@@ -913,5 +916,5 @@ ROM_END
 *********************************************/
 
 /*    YEAR  NAME       PARENT    MACHINE   INPUT     INIT  ROT     COMPANY              FULLNAME                                    FLAGS */
-GAME( 1990, megadpkr,  0,        megadpkr, megadpkr, 0,    ROT0,  "Blitz System Inc.", "Mega Double Poker (conversion kit, set 1)", GAME_NO_SOUND | GAME_NOT_WORKING )
-GAME( 1990, megadpkrb, megadpkr, megadpkr, megadpkr, 0,    ROT0,  "Blitz System Inc.", "Mega Double Poker (conversion kit, set 2)", GAME_NO_SOUND | GAME_NOT_WORKING )
+GAME( 1990, megadpkr,  0,        megadpkr, megadpkr, driver_device, 0,    ROT0,  "Blitz System Inc.", "Mega Double Poker (conversion kit, set 1)", GAME_NO_SOUND | GAME_NOT_WORKING )
+GAME( 1990, megadpkrb, megadpkr, megadpkr, megadpkr, driver_device, 0,    ROT0,  "Blitz System Inc.", "Mega Double Poker (conversion kit, set 2)", GAME_NO_SOUND | GAME_NOT_WORKING )

@@ -96,50 +96,50 @@ Notes:
 
 static const eeprom_interface eeprom_intf =
 {
-	6,				/* address bits */
-	16,				/* data bits */
-	"*110",			/*  read command */
-	"*101",			/* write command */
-	0,				/* erase command */
-	"*10000xxxx",	/* lock command */
-	"*10011xxxx"	/* unlock command */
+	6,              /* address bits */
+	16,             /* data bits */
+	"*110",         /*  read command */
+	"*101",         /* write command */
+	0,              /* erase command */
+	"*10000xxxx",   /* lock command */
+	"*10011xxxx"    /* unlock command */
 };
 
-static WRITE16_HANDLER( pirates_out_w )
+WRITE16_MEMBER(pirates_state::pirates_out_w)
 {
 	if (ACCESSING_BITS_0_7)
 	{
-		eeprom_device *eeprom = space->machine().device<eeprom_device>("eeprom");
+		eeprom_device *eeprom = machine().device<eeprom_device>("eeprom");
 
 		/* bits 0-2 control EEPROM */
-		eeprom_write_bit(eeprom, data & 0x04);
-		eeprom_set_cs_line(eeprom, (data & 0x01) ? CLEAR_LINE : ASSERT_LINE);
-		eeprom_set_clock_line(eeprom, (data & 0x02) ? ASSERT_LINE : CLEAR_LINE);
+		eeprom->write_bit(data & 0x04);
+		eeprom->set_cs_line((data & 0x01) ? CLEAR_LINE : ASSERT_LINE);
+		eeprom->set_clock_line((data & 0x02) ? ASSERT_LINE : CLEAR_LINE);
 
 		/* bit 6 selects oki bank */
-		okim6295_device *oki = space->machine().device<okim6295_device>("oki");
+		okim6295_device *oki = machine().device<okim6295_device>("oki");
 		oki->set_bank_base((data & 0x40) ? 0x40000 : 0x00000);
 
 		/* bit 7 used (function unknown) */
 	}
 
-//  logerror("%06x: out_w %04x\n",cpu_get_pc(&space->device()),data);
+//  logerror("%06x: out_w %04x\n",space.device().safe_pc(),data);
 }
 
-static CUSTOM_INPUT( prot_r )
+CUSTOM_INPUT_MEMBER(pirates_state::prot_r)
 {
 //  static int prot = 0xa3;
 //  offs_t pc;
 	int bit;
 
-//  logerror("%s: IN1_r\n",field->port->machine().describe_context());
+//  logerror("%s: IN1_r\n",machine().describe_context());
 
 #if 0
 	/* Pirates protection workaround. It more complicated than this... see code at
-       602e and 62a6 */
+	   602e and 62a6 */
 	/* For Genix, see 6576 for setting values and 67c2,d3b4 and dbc2 for tests. */
 
-	pc = cpu_get_pc(field->port->machine().device("main"));
+	pc = machine().device("main")->safe_pc();
 	if (pc == 0x6134)
 	{
 		bit = prot & 1;
@@ -162,31 +162,31 @@ static CUSTOM_INPUT( prot_r )
 
 /* Memory Maps */
 
-static ADDRESS_MAP_START( pirates_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( pirates_map, AS_PROGRAM, 16, pirates_state )
 	AM_RANGE(0x000000, 0x0fffff) AM_ROM
 	AM_RANGE(0x100000, 0x10ffff) AM_RAM // main ram
 	AM_RANGE(0x300000, 0x300001) AM_READ_PORT("INPUTS")
 	AM_RANGE(0x400000, 0x400001) AM_READ_PORT("SYSTEM")
 //  AM_RANGE(0x500000, 0x5007ff) AM_RAM
-	AM_RANGE(0x500000, 0x5007ff) AM_WRITEONLY AM_BASE_MEMBER(pirates_state, m_spriteram)
+	AM_RANGE(0x500000, 0x5007ff) AM_WRITEONLY AM_SHARE("spriteram")
 //  AM_RANGE(0x500800, 0x50080f) AM_WRITENOP
 	AM_RANGE(0x600000, 0x600001) AM_WRITE(pirates_out_w)
-	AM_RANGE(0x700000, 0x700001) AM_WRITEONLY AM_BASE_MEMBER(pirates_state, m_scroll)	// scroll reg
-	AM_RANGE(0x800000, 0x803fff) AM_RAM_WRITE(paletteram16_xRRRRRGGGGGBBBBB_word_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x700000, 0x700001) AM_WRITEONLY AM_SHARE("scroll")    // scroll reg
+	AM_RANGE(0x800000, 0x803fff) AM_RAM_WRITE(paletteram_xRRRRRGGGGGBBBBB_word_w) AM_SHARE("paletteram")
 	AM_RANGE(0x900000, 0x90017f) AM_RAM  // more of tilemaps ?
-	AM_RANGE(0x900180, 0x90137f) AM_RAM_WRITE(pirates_tx_tileram_w) AM_BASE_MEMBER(pirates_state, m_tx_tileram)
-	AM_RANGE(0x901380, 0x902a7f) AM_RAM_WRITE(pirates_fg_tileram_w) AM_BASE_MEMBER(pirates_state, m_fg_tileram)
+	AM_RANGE(0x900180, 0x90137f) AM_RAM_WRITE(pirates_tx_tileram_w) AM_SHARE("tx_tileram")
+	AM_RANGE(0x901380, 0x902a7f) AM_RAM_WRITE(pirates_fg_tileram_w) AM_SHARE("fg_tileram")
 //  AM_RANGE(0x902580, 0x902a7f) AM_RAM  // more of tilemaps ?
-	AM_RANGE(0x902a80, 0x904187) AM_RAM_WRITE(pirates_bg_tileram_w) AM_BASE_MEMBER(pirates_state, m_bg_tileram)
+	AM_RANGE(0x902a80, 0x904187) AM_RAM_WRITE(pirates_bg_tileram_w) AM_SHARE("bg_tileram")
 //  AM_RANGE(0x903c80, 0x904187) AM_RAM  // more of tilemaps ?
-	AM_RANGE(0xa00000, 0xa00001) AM_DEVREADWRITE8_MODERN("oki", okim6295_device, read, write, 0x00ff)
+	AM_RANGE(0xa00000, 0xa00001) AM_DEVREADWRITE8("oki", okim6295_device, read, write, 0x00ff)
 ADDRESS_MAP_END
 
 
 /* Input Ports */
 
 static INPUT_PORTS_START( pirates )
-	PORT_START("INPUTS")	/* 0x300000.w */
+	PORT_START("INPUTS")    /* 0x300000.w */
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(1)
 	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(1)
 	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(1)
@@ -204,15 +204,15 @@ static INPUT_PORTS_START( pirates )
 	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_START2 )
 
-	PORT_START("SYSTEM")	/* 0x400000.w */
+	PORT_START("SYSTEM")    /* 0x400000.w */
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_SERVICE_NO_TOGGLE( 0x0008, IP_ACTIVE_LOW )
-	PORT_BIT( 0x0010, IP_ACTIVE_HIGH,IPT_SPECIAL ) PORT_READ_LINE_DEVICE("eeprom", eeprom_read_bit)	// EEPROM data
-	PORT_BIT( 0x0020, IP_ACTIVE_HIGH, IPT_UNKNOWN )		// seems checked in "test mode"
-	PORT_BIT( 0x0040, IP_ACTIVE_HIGH, IPT_UNKNOWN )		// seems checked in "test mode"
-	PORT_BIT( 0x0080, IP_ACTIVE_HIGH,IPT_SPECIAL ) PORT_CUSTOM(prot_r, NULL)		// protection
+	PORT_BIT( 0x0010, IP_ACTIVE_HIGH,IPT_SPECIAL ) PORT_READ_LINE_DEVICE_MEMBER("eeprom", eeprom_device, read_bit)  // EEPROM data
+	PORT_BIT( 0x0020, IP_ACTIVE_HIGH, IPT_UNKNOWN )     // seems checked in "test mode"
+	PORT_BIT( 0x0040, IP_ACTIVE_HIGH, IPT_UNKNOWN )     // seems checked in "test mode"
+	PORT_BIT( 0x0080, IP_ACTIVE_HIGH,IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, pirates_state,prot_r, NULL)      // protection
 	/* What do these bits do ? */
 	PORT_BIT( 0x0100, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x0200, IP_ACTIVE_HIGH, IPT_UNKNOWN )
@@ -244,9 +244,9 @@ static const gfx_layout spritelayout =
 	4,
 	{ RGN_FRAC(3,4), RGN_FRAC(2,4), RGN_FRAC(1,4), RGN_FRAC(0,4) },
 	{ 7, 6, 5, 4, 3, 2, 1, 0,
-	 15,14,13,12,11,10, 9, 8 },
+		15,14,13,12,11,10, 9, 8 },
 	{ 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
-	  8*16, 9*16,10*16,11*16,12*16,13*16,14*16,15*16 },
+		8*16, 9*16,10*16,11*16,12*16,13*16,14*16,15*16 },
 	16*16
 };
 
@@ -263,7 +263,7 @@ GFXDECODE_END
 static MACHINE_CONFIG_START( pirates, pirates_state )
 	MCFG_CPU_ADD("maincpu", M68000, 16000000) /* 16mhz */
 	MCFG_CPU_PROGRAM_MAP(pirates_map)
-	MCFG_CPU_VBLANK_INT("screen", irq1_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", pirates_state,  irq1_line_hold)
 
 	MCFG_EEPROM_ADD("eeprom", eeprom_intf)
 
@@ -273,14 +273,12 @@ static MACHINE_CONFIG_START( pirates, pirates_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(36*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 36*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(pirates)
+	MCFG_SCREEN_UPDATE_DRIVER(pirates_state, screen_update_pirates)
 
 	MCFG_PALETTE_LENGTH(0x2000)
 
-	MCFG_VIDEO_START(pirates)
 
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
@@ -339,133 +337,133 @@ ROM_END
 
 static void pirates_decrypt_68k(running_machine &machine)
 {
-    int rom_size;
-    UINT16 *buf, *rom;
-    int i;
+	int rom_size;
+	UINT16 *buf, *rom;
+	int i;
 
-    rom_size = machine.region("maincpu")->bytes();
+	rom_size = machine.root_device().memregion("maincpu")->bytes();
 
-    buf = auto_alloc_array(machine, UINT16, rom_size/2);
+	buf = auto_alloc_array(machine, UINT16, rom_size/2);
 
-    rom = (UINT16 *)machine.region("maincpu")->base();
-    memcpy (buf, rom, rom_size);
+	rom = (UINT16 *)machine.root_device().memregion("maincpu")->base();
+	memcpy (buf, rom, rom_size);
 
-    for (i=0; i<rom_size/2; i++)
-    {
-        int adrl, adrr;
-        UINT8 vl, vr;
+	for (i=0; i<rom_size/2; i++)
+	{
+		int adrl, adrr;
+		UINT8 vl, vr;
 
-        adrl = BITSWAP24(i,23,22,21,20,19,18,4,8,3,14,2,15,17,0,9,13,10,5,16,7,12,6,1,11);
-        vl = BITSWAP8(buf[adrl],    4,2,7,1,6,5,0,3);
+		adrl = BITSWAP24(i,23,22,21,20,19,18,4,8,3,14,2,15,17,0,9,13,10,5,16,7,12,6,1,11);
+		vl = BITSWAP8(buf[adrl],    4,2,7,1,6,5,0,3);
 
-        adrr = BITSWAP24(i,23,22,21,20,19,18,4,10,1,11,12,5,9,17,14,0,13,6,15,8,3,16,7,2);
-        vr = BITSWAP8(buf[adrr]>>8, 1,4,7,0,3,5,6,2);
+		adrr = BITSWAP24(i,23,22,21,20,19,18,4,10,1,11,12,5,9,17,14,0,13,6,15,8,3,16,7,2);
+		vr = BITSWAP8(buf[adrr]>>8, 1,4,7,0,3,5,6,2);
 
-        rom[i] = (vr<<8) | vl;
-    }
-    auto_free (machine, buf);
+		rom[i] = (vr<<8) | vl;
+	}
+	auto_free (machine, buf);
 }
 
 static void pirates_decrypt_p(running_machine &machine)
 {
-    int rom_size;
-    UINT8 *buf, *rom;
-    int i;
+	int rom_size;
+	UINT8 *buf, *rom;
+	int i;
 
-    rom_size = machine.region("gfx1")->bytes();
+	rom_size = machine.root_device().memregion("gfx1")->bytes();
 
-    buf = auto_alloc_array(machine, UINT8, rom_size);
+	buf = auto_alloc_array(machine, UINT8, rom_size);
 
-    rom = machine.region("gfx1")->base();
-    memcpy (buf, rom, rom_size);
+	rom = machine.root_device().memregion("gfx1")->base();
+	memcpy (buf, rom, rom_size);
 
-    for (i=0; i<rom_size/4; i++)
-    {
+	for (i=0; i<rom_size/4; i++)
+	{
 		int adr = BITSWAP24(i,23,22,21,20,19,18,10,2,5,9,7,13,16,14,11,4,1,6,12,17,3,0,15,8);
 		rom[adr+0*(rom_size/4)] = BITSWAP8(buf[i+0*(rom_size/4)], 2,3,4,0,7,5,1,6);
 		rom[adr+1*(rom_size/4)] = BITSWAP8(buf[i+1*(rom_size/4)], 4,2,7,1,6,5,0,3);
 		rom[adr+2*(rom_size/4)] = BITSWAP8(buf[i+2*(rom_size/4)], 1,4,7,0,3,5,6,2);
 		rom[adr+3*(rom_size/4)] = BITSWAP8(buf[i+3*(rom_size/4)], 2,3,4,0,7,5,1,6);
-    }
-    auto_free (machine, buf);
+	}
+	auto_free (machine, buf);
 }
 
 static void pirates_decrypt_s(running_machine &machine)
 {
-    int rom_size;
-    UINT8 *buf, *rom;
-    int i;
+	int rom_size;
+	UINT8 *buf, *rom;
+	int i;
 
-    rom_size = machine.region("gfx2")->bytes();
+	rom_size = machine.root_device().memregion("gfx2")->bytes();
 
-    buf = auto_alloc_array(machine, UINT8, rom_size);
+	buf = auto_alloc_array(machine, UINT8, rom_size);
 
-    rom = machine.region("gfx2")->base();
-    memcpy (buf, rom, rom_size);
+	rom = machine.root_device().memregion("gfx2")->base();
+	memcpy (buf, rom, rom_size);
 
-    for (i=0; i<rom_size/4; i++)
-    {
+	for (i=0; i<rom_size/4; i++)
+	{
 		int adr = BITSWAP24(i,23,22,21,20,19,18,17,5,12,14,8,3,0,7,9,16,4,2,6,11,13,1,10,15);
 		rom[adr+0*(rom_size/4)] = BITSWAP8(buf[i+0*(rom_size/4)], 4,2,7,1,6,5,0,3);
 		rom[adr+1*(rom_size/4)] = BITSWAP8(buf[i+1*(rom_size/4)], 1,4,7,0,3,5,6,2);
 		rom[adr+2*(rom_size/4)] = BITSWAP8(buf[i+2*(rom_size/4)], 2,3,4,0,7,5,1,6);
 		rom[adr+3*(rom_size/4)] = BITSWAP8(buf[i+3*(rom_size/4)], 4,2,7,1,6,5,0,3);
-    }
-    auto_free (machine, buf);
+	}
+	auto_free (machine, buf);
 }
 
 
 static void pirates_decrypt_oki(running_machine &machine)
 {
-    int rom_size;
-    UINT8 *buf, *rom;
-    int i;
+	int rom_size;
+	UINT8 *buf, *rom;
+	int i;
 
-    rom_size = machine.region("oki")->bytes();
+	rom_size = machine.root_device().memregion("oki")->bytes();
 
-    buf = auto_alloc_array(machine, UINT8, rom_size);
+	buf = auto_alloc_array(machine, UINT8, rom_size);
 
-    rom = machine.region("oki")->base();
-    memcpy (buf, rom, rom_size);
+	rom = machine.root_device().memregion("oki")->base();
+	memcpy (buf, rom, rom_size);
 
-    for (i=0; i<rom_size; i++)
-    {
+	for (i=0; i<rom_size; i++)
+	{
 		int adr = BITSWAP24(i,23,22,21,20,19,10,16,13,8,4,7,11,14,17,12,6,2,0,5,18,15,3,1,9);
 		rom[adr] = BITSWAP8(buf[i], 2,3,4,0,7,5,1,6);
-    }
-    auto_free (machine, buf);
+	}
+	auto_free (machine, buf);
 }
 
 
-static DRIVER_INIT( pirates )
+DRIVER_INIT_MEMBER(pirates_state,pirates)
 {
-	UINT16 *rom = (UINT16 *)machine.region("maincpu")->base();
+	UINT16 *rom = (UINT16 *)machine().root_device().memregion("maincpu")->base();
 
-	pirates_decrypt_68k(machine);
-	pirates_decrypt_p(machine);
-	pirates_decrypt_s(machine);
-	pirates_decrypt_oki(machine);
+	pirates_decrypt_68k(machine());
+	pirates_decrypt_p(machine());
+	pirates_decrypt_s(machine());
+	pirates_decrypt_oki(machine());
 
 	/* patch out protection check */
 	rom[0x62c0/2] = 0x6006; // beq -> bra
 }
 
-static READ16_HANDLER( genix_prot_r ) {	if(!offset)	return 0x0004; else	return 0x0000; }
+READ16_MEMBER(pirates_state::genix_prot_r){ if(!offset) return 0x0004; else return 0x0000; }
 
-static DRIVER_INIT( genix )
+DRIVER_INIT_MEMBER(pirates_state,genix)
 {
-	pirates_decrypt_68k(machine);
-	pirates_decrypt_p(machine);
-	pirates_decrypt_s(machine);
-	pirates_decrypt_oki(machine);
+	pirates_decrypt_68k(machine());
+	pirates_decrypt_p(machine());
+	pirates_decrypt_s(machine());
+	pirates_decrypt_oki(machine());
 
 	/* If this value is increased then something has gone wrong and the protection failed */
 	/* Write-protect it for now */
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x109e98, 0x109e9b, FUNC(genix_prot_r) );
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(0x109e98, 0x109e9b, read16_delegate(FUNC(pirates_state::genix_prot_r),this));
 }
 
 
 /* GAME */
 
-GAME( 1994, pirates, 0, pirates, pirates, pirates, 0, "NIX", "Pirates", 0 )
-GAME( 1994, genix,   0, pirates, pirates, genix,   0, "NIX", "Genix Family", 0 )
+GAME( 1994, pirates, 0, pirates, pirates, pirates_state, pirates, 0, "NIX", "Pirates", 0 )
+GAME( 1994, genix,   0, pirates, pirates, pirates_state, genix,   0, "NIX", "Genix Family", 0 )

@@ -16,8 +16,7 @@ CPU_DISASSEMBLE( i960  );
 
 enum { RCACHE_SIZE = 4 };
 
-typedef struct _i960_state_t i960_state_t;
-struct _i960_state_t {
+struct i960_state_t {
 	UINT32 r[0x20];
 	UINT32 rcache[RCACHE_SIZE][0x10];
 	UINT32 rcache_frame_addr[RCACHE_SIZE];
@@ -33,7 +32,7 @@ struct _i960_state_t {
 
 	int immediate_irq, immediate_vector, immediate_pri;
 
-	device_irq_callback irq_cb;
+	device_irq_acknowledge_callback irq_cb;
 	legacy_cpu_device *device;
 	address_space *program;
 	direct_read_data *direct;
@@ -109,7 +108,7 @@ INLINE void send_iac(i960_state_t *i960, UINT32 adr)
 		i960->IP   = iac[3];
 		break;
 	default:
-		fatalerror("I960: %x: IAC %08x %08x %08x %08x", i960->PIP, iac[0], iac[1], iac[2], iac[3]);
+		fatalerror("I960: %x: IAC %08x %08x %08x %08x\n", i960->PIP, iac[0], iac[1], iac[2], iac[3]);
 		break;
 	}
 }
@@ -157,7 +156,7 @@ INLINE UINT32 get_ea(i960_state_t *i960, UINT32 opcode)
 			return ret;
 
 		default:
-			fatalerror("I960: %x: unhandled MEMB mode %x", i960->PIP, mode);
+			fatalerror("I960: %x: unhandled MEMB mode %x\n", i960->PIP, mode);
 			return 0;
 		}
 	}
@@ -192,7 +191,7 @@ INLINE void set_ri(i960_state_t *i960, UINT32 opcode, UINT32 val)
 	if(!(opcode & 0x00002000))
 		i960->r[(opcode>>19) & 0x1f] = val;
 	else {
-		fatalerror("I960: %x: set_ri on literal?", i960->PIP);
+		fatalerror("I960: %x: set_ri on literal?\n", i960->PIP);
 	}
 }
 
@@ -204,7 +203,7 @@ INLINE void set_ri2(i960_state_t *i960, UINT32 opcode, UINT32 val, UINT32 val2)
 		i960->r[((opcode>>19) & 0x1f)+1] = val2;
 	}
 	else {
-		fatalerror("I960: %x: set_ri2 on literal?", i960->PIP);
+		fatalerror("I960: %x: set_ri2 on literal?\n", i960->PIP);
 	}
 }
 
@@ -214,7 +213,7 @@ INLINE void set_ri64(i960_state_t *i960, UINT32 opcode, UINT64 val)
 		i960->r[(opcode>>19) & 0x1f] = val;
 		i960->r[((opcode>>19) & 0x1f)+1] = val >> 32;
 	} else
-		fatalerror("I960: %x: set_ri64 on literal?", i960->PIP);
+		fatalerror("I960: %x: set_ri64 on literal?\n", i960->PIP);
 }
 
 INLINE double get_1_rif(i960_state_t *i960, UINT32 opcode)
@@ -252,7 +251,7 @@ INLINE void set_rif(i960_state_t *i960, UINT32 opcode, double val)
 	else if(!(opcode & 0x00e00000))
 		i960->fp[(opcode>>19) & 3] = val;
 	else
-		fatalerror("I960: %x: set_rif on literal?", i960->PIP);
+		fatalerror("I960: %x: set_rif on literal?\n", i960->PIP);
 }
 
 INLINE double get_1_rifl(i960_state_t *i960, UINT32 opcode)
@@ -296,7 +295,7 @@ INLINE void set_rifl(i960_state_t *i960, UINT32 opcode, double val)
 	} else if(!(opcode & 0x00e00000))
 		i960->fp[(opcode>>19) & 3] = val;
 	else
-		fatalerror("I960: %x: set_rifl on literal?", i960->PIP);
+		fatalerror("I960: %x: set_rifl on literal?\n", i960->PIP);
 }
 
 INLINE UINT32 get_1_ci(i960_state_t *i960, UINT32 opcode)
@@ -416,15 +415,15 @@ INLINE const char *i960_get_strflags(i960_state_t *i960)
 // interrupt dispatch
 static void take_interrupt(i960_state_t *i960, int vector, int lvl)
 {
-	int int_tab =  i960->program->read_dword(i960->PRCB+20);	// interrupt table
-	int int_SP  =  i960->program->read_dword(i960->PRCB+24);	// interrupt stack
+	int int_tab =  i960->program->read_dword(i960->PRCB+20);    // interrupt table
+	int int_SP  =  i960->program->read_dword(i960->PRCB+24);    // interrupt stack
 	int SP;
 	UINT32 IRQV;
 
 	IRQV = i960->program->read_dword(int_tab + 36 + (vector-8)*4);
 
 	// start the process
-	if(!(i960->PC & 0x2000))	// if this is a nested interrupt, don't re-get int_SP
+	if(!(i960->PC & 0x2000))    // if this is a nested interrupt, don't re-get int_SP
 	{
 		SP = int_SP;
 	}
@@ -434,7 +433,7 @@ static void take_interrupt(i960_state_t *i960, int vector, int lvl)
 	}
 
 	SP = (SP + 63) & ~63;
-	SP += 128;	// emulate ElSemi's core, this fixes the crash in sonic the fighters
+	SP += 128;  // emulate ElSemi's core, this fixes the crash in sonic the fighters
 
 	do_call(i960, IRQV, 7, SP);
 
@@ -444,21 +443,21 @@ static void take_interrupt(i960_state_t *i960, int vector, int lvl)
 	// store the vector
 	i960->program->write_dword(i960->r[I960_FP]-8, vector-8);
 
-	i960->PC &= ~0x1f00;	// clear priority, state, trace-fault pending, and trace enable
-	i960->PC |= (lvl<<16);	// set CPU level to current IRQ level
-	i960->PC |= 0x2002;	// set supervisor mode & interrupt flag
+	i960->PC &= ~0x1f00;    // clear priority, state, trace-fault pending, and trace enable
+	i960->PC |= (lvl<<16);  // set CPU level to current IRQ level
+	i960->PC |= 0x2002; // set supervisor mode & interrupt flag
 }
 
 static void check_irqs(i960_state_t *i960)
 {
-	int int_tab =  i960->program->read_dword(i960->PRCB+20);	// interrupt table
+	int int_tab =  i960->program->read_dword(i960->PRCB+20);    // interrupt table
 	int cpu_pri = (i960->PC>>16)&0x1f;
 	int pending_pri;
 	int lvl, irq, take = -1;
 	int vword;
 	static const UINT32 lvlmask[4] = { 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000 };
 
-	pending_pri = i960->program->read_dword(int_tab);		// read pending priorities
+	pending_pri = i960->program->read_dword(int_tab);       // read pending priorities
 
 	if ((i960->immediate_irq) && ((cpu_pri < i960->immediate_pri) || (i960->immediate_pri == 31)))
 	{
@@ -472,7 +471,7 @@ static void check_irqs(i960_state_t *i960)
 				int word, wordl, wordh;
 
 				// figure out which word contains this level's priorities
-				word = ((lvl / 4) * 4) + 4;	// (lvl/4) = word address, *4 for byte address, +4 to skip pending priorities
+				word = ((lvl / 4) * 4) + 4; // (lvl/4) = word address, *4 for byte address, +4 to skip pending priorities
 				wordl = (lvl % 4) * 8;
 				wordh = (wordl + 8) - 1;
 
@@ -534,7 +533,7 @@ static void do_call(i960_state_t *i960, UINT32 adr, int type, UINT32 stack)
 			i960->program->write_dword(FP + (i*4), i960->r[i]);
 		}
 	}
-	else	// a cache entry is available, use it
+	else    // a cache entry is available, use it
 	{
 		memcpy(&i960->rcache[i960->rcache_pos][0], i960->r, 0x10 * sizeof(UINT32));
 		i960->rcache_frame_addr[i960->rcache_pos] = i960->r[I960_FP] & ~0x3f;
@@ -545,7 +544,7 @@ static void do_call(i960_state_t *i960, UINT32 adr, int type, UINT32 stack)
 	i960->r[I960_PFP] = i960->r[I960_FP] & ~7;
 	i960->r[I960_PFP] |= type;
 
-	if(type == 7) {	// interrupts need special handling
+	if(type == 7) { // interrupts need special handling
 		// set the stack to the passed-in value to properly handle nested interrupts
 		// (can't set it externally or the original program's SP will be lost)
 		i960->r[I960_SP] = stack;
@@ -608,7 +607,7 @@ static void do_ret(i960_state_t *i960)
 		break;
 
 	default:
-		fatalerror("I960: %x: Unsupported return mode %d", i960->PIP, i960->r[I960_PFP] & 7);
+		fatalerror("I960: %x: Unsupported return mode %d\n", i960->PIP, i960->r[I960_PFP] & 7);
 	}
 }
 
@@ -950,7 +949,7 @@ INLINE void execute_op(i960_state_t *i960, UINT32 opcode)
 				break;
 
 			default:
-				fatalerror("I960: %x: Unhandled 58.%x", i960->PIP, (opcode >> 7) & 0xf);
+				fatalerror("I960: %x: Unhandled 58.%x\n", i960->PIP, (opcode >> 7) & 0xf);
 			}
 			break;
 
@@ -1036,7 +1035,7 @@ INLINE void execute_op(i960_state_t *i960, UINT32 opcode)
 				break;
 
 			default:
-				fatalerror("I960: %x: Unhandled 59.%x", i960->PIP, (opcode >> 7) & 0xf);
+				fatalerror("I960: %x: Unhandled 59.%x\n", i960->PIP, (opcode >> 7) & 0xf);
 			}
 			break;
 
@@ -1117,13 +1116,13 @@ INLINE void execute_op(i960_state_t *i960, UINT32 opcode)
 				break;
 
 			default:
-				fatalerror("I960: %x: Unhandled 5a.%x", i960->PIP, (opcode >> 7) & 0xf);
+				fatalerror("I960: %x: Unhandled 5a.%x\n", i960->PIP, (opcode >> 7) & 0xf);
 			}
 			break;
 
 		case 0x5b:
 			switch((opcode >> 7) & 0xf) {
-			case 0x0:	// addc
+			case 0x0:   // addc
 				{
 					UINT64 res;
 
@@ -1133,7 +1132,7 @@ INLINE void execute_op(i960_state_t *i960, UINT32 opcode)
 					res = t2+(t1+((i960->AC>>1)&1));
 					set_ri(i960, opcode, res&0xffffffff);
 
-					i960->AC &= ~0x3;	// clear C and V
+					i960->AC &= ~0x3;   // clear C and V
 					// set carry
 					i960->AC |= ((res) & (((UINT64)1) << 32)) ? 0x2 : 0;
 					// set overflow
@@ -1141,7 +1140,7 @@ INLINE void execute_op(i960_state_t *i960, UINT32 opcode)
 				}
 				break;
 
-			case 0x2:	// subc
+			case 0x2:   // subc
 				{
 					UINT64 res;
 
@@ -1151,7 +1150,7 @@ INLINE void execute_op(i960_state_t *i960, UINT32 opcode)
 					res = t2-(t1+((i960->AC>>1)&1));
 					set_ri(i960, opcode, res&0xffffffff);
 
-					i960->AC &= ~0x3;	// clear C and V
+					i960->AC &= ~0x3;   // clear C and V
 					// set carry
 					i960->AC |= ((res) & (((UINT64)1) << 32)) ? 0x2 : 0;
 					// set overflow
@@ -1160,7 +1159,7 @@ INLINE void execute_op(i960_state_t *i960, UINT32 opcode)
 				break;
 
 			default:
-				fatalerror("I960: %x: Unhandled 5b.%x", i960->PIP, (opcode >> 7) & 0xf);
+				fatalerror("I960: %x: Unhandled 5b.%x\n", i960->PIP, (opcode >> 7) & 0xf);
 			}
 			break;
 
@@ -1173,7 +1172,7 @@ INLINE void execute_op(i960_state_t *i960, UINT32 opcode)
 				break;
 
 			default:
-				fatalerror("I960: %x: Unhandled 5c.%x", i960->PIP, (opcode >> 7) & 0xf);
+				fatalerror("I960: %x: Unhandled 5c.%x\n", i960->PIP, (opcode >> 7) & 0xf);
 			}
 			break;
 
@@ -1190,7 +1189,7 @@ INLINE void execute_op(i960_state_t *i960, UINT32 opcode)
 				break;
 
 			default:
-				fatalerror("I960: %x: Unhandled 5d.%x", i960->PIP, (opcode >> 7) & 0xf);
+				fatalerror("I960: %x: Unhandled 5d.%x\n", i960->PIP, (opcode >> 7) & 0xf);
 			}
 			break;
 
@@ -1207,7 +1206,7 @@ INLINE void execute_op(i960_state_t *i960, UINT32 opcode)
 				break;
 
 			default:
-				fatalerror("I960: %x: Unhandled 5e.%x", i960->PIP, (opcode >> 7) & 0xf);
+				fatalerror("I960: %x: Unhandled 5e.%x\n", i960->PIP, (opcode >> 7) & 0xf);
 			}
 			break;
 
@@ -1224,7 +1223,7 @@ INLINE void execute_op(i960_state_t *i960, UINT32 opcode)
 				break;
 
 			default:
-				fatalerror("I960: %x: Unhandled 5f.%x", i960->PIP, (opcode >> 7) & 0xf);
+				fatalerror("I960: %x: Unhandled 5f.%x\n", i960->PIP, (opcode >> 7) & 0xf);
 			}
 			break;
 
@@ -1258,7 +1257,7 @@ INLINE void execute_op(i960_state_t *i960, UINT32 opcode)
 				break;
 
 			default:
-				fatalerror("I960: %x: Unhandled 60.%x", i960->PIP, (opcode >> 7) & 0xf);
+				fatalerror("I960: %x: Unhandled 60.%x\n", i960->PIP, (opcode >> 7) & 0xf);
 			}
 			break;
 
@@ -1321,7 +1320,7 @@ INLINE void execute_op(i960_state_t *i960, UINT32 opcode)
 				break;
 
 			default:
-				fatalerror("I960: %x: Unhandled 64.%x", i960->PIP, (opcode >> 7) & 0xf);
+				fatalerror("I960: %x: Unhandled 64.%x\n", i960->PIP, (opcode >> 7) & 0xf);
 			}
 			break;
 
@@ -1336,7 +1335,7 @@ INLINE void execute_op(i960_state_t *i960, UINT32 opcode)
 				break;
 
 			default:
-				fatalerror("I960: %x: Unhandled 65.%x", i960->PIP, (opcode >> 7) & 0xf);
+				fatalerror("I960: %x: Unhandled 65.%x\n", i960->PIP, (opcode >> 7) & 0xf);
 			}
 			break;
 
@@ -1360,7 +1359,7 @@ INLINE void execute_op(i960_state_t *i960, UINT32 opcode)
 				break;
 
 			default:
-				fatalerror("I960: %x: Unhandled 66.%x", i960->PIP, (opcode >> 7) & 0xf);
+				fatalerror("I960: %x: Unhandled 66.%x\n", i960->PIP, (opcode >> 7) & 0xf);
 			}
 			break;
 
@@ -1407,7 +1406,7 @@ INLINE void execute_op(i960_state_t *i960, UINT32 opcode)
 				break;
 
 			default:
-				fatalerror("I960: %x: Unhandled 67.%x", i960->PIP, (opcode >> 7) & 0xf);
+				fatalerror("I960: %x: Unhandled 67.%x\n", i960->PIP, (opcode >> 7) & 0xf);
 			}
 			break;
 
@@ -1428,7 +1427,7 @@ INLINE void execute_op(i960_state_t *i960, UINT32 opcode)
 				break;
 
 			case 0x3: // remr
-				i960->icount -= 67;	// (67 to 75878 depending on opcodes!!!)
+				i960->icount -= 67; // (67 to 75878 depending on opcodes!!!)
 				t1f = get_1_rif(i960, opcode);
 				t2f = get_2_rif(i960, opcode);
 				set_rif(i960, opcode, fmod(t2f, t1f));
@@ -1480,7 +1479,7 @@ INLINE void execute_op(i960_state_t *i960, UINT32 opcode)
 				break;
 
 			default:
-				fatalerror("I960: %x: Unhandled 68.%x", i960->PIP, (opcode >> 7) & 0xf);
+				fatalerror("I960: %x: Unhandled 68.%x\n", i960->PIP, (opcode >> 7) & 0xf);
 			}
 			break;
 
@@ -1551,7 +1550,7 @@ INLINE void execute_op(i960_state_t *i960, UINT32 opcode)
 				break;
 
 			default:
-				fatalerror("I960: %x: Unhandled 69.%x", i960->PIP, (opcode >> 7) & 0xf);
+				fatalerror("I960: %x: Unhandled 69.%x\n", i960->PIP, (opcode >> 7) & 0xf);
 			}
 			break;
 
@@ -1592,7 +1591,7 @@ INLINE void execute_op(i960_state_t *i960, UINT32 opcode)
 				break;
 
 			default:
-				fatalerror("I960: %x: Unhandled 6c.%x", i960->PIP, (opcode >> 7) & 0xf);
+				fatalerror("I960: %x: Unhandled 6c.%x\n", i960->PIP, (opcode >> 7) & 0xf);
 			}
 			break;
 
@@ -1605,7 +1604,7 @@ INLINE void execute_op(i960_state_t *i960, UINT32 opcode)
 				break;
 
 			default:
-				fatalerror("I960: %x: Unhandled 6d.%x", i960->PIP, (opcode >> 7) & 0xf);
+				fatalerror("I960: %x: Unhandled 6d.%x\n", i960->PIP, (opcode >> 7) & 0xf);
 			}
 			break;
 
@@ -1646,7 +1645,7 @@ INLINE void execute_op(i960_state_t *i960, UINT32 opcode)
 					set_rifl(i960, opcode, -fabs(t1f));
 				break;
 			default:
-				fatalerror("I960: %x: Unhandled 6e.%x", i960->PIP, (opcode >> 7) & 0xf);
+				fatalerror("I960: %x: Unhandled 6e.%x\n", i960->PIP, (opcode >> 7) & 0xf);
 			}
 			break;
 
@@ -1670,14 +1669,14 @@ INLINE void execute_op(i960_state_t *i960, UINT32 opcode)
 				i960->icount -= 37;
 				t1 = get_1_ri(i960, opcode);
 				t2 = get_2_ri(i960, opcode);
-				if (t1 == 0)	// HACK!
+				if (t1 == 0)    // HACK!
 					set_ri(i960, opcode, 0);
 				else
 					set_ri(i960, opcode, t2/t1);
 				break;
 
 			default:
-				fatalerror("I960: %x: Unhandled 70.%x", i960->PIP, (opcode >> 7) & 0xf);
+				fatalerror("I960: %x: Unhandled 70.%x\n", i960->PIP, (opcode >> 7) & 0xf);
 			}
 			break;
 
@@ -1717,7 +1716,7 @@ INLINE void execute_op(i960_state_t *i960, UINT32 opcode)
 				break;
 
 			default:
-				fatalerror("I960: %x: Unhandled 74.%x", i960->PIP, (opcode >> 7) & 0xf);
+				fatalerror("I960: %x: Unhandled 74.%x\n", i960->PIP, (opcode >> 7) & 0xf);
 			}
 			break;
 
@@ -1752,7 +1751,7 @@ INLINE void execute_op(i960_state_t *i960, UINT32 opcode)
 				break;
 
 			default:
-				fatalerror("I960: %x: Unhandled 78.%x", i960->PIP, (opcode >> 7) & 0xf);
+				fatalerror("I960: %x: Unhandled 78.%x\n", i960->PIP, (opcode >> 7) & 0xf);
 			}
 			break;
 
@@ -1787,7 +1786,7 @@ INLINE void execute_op(i960_state_t *i960, UINT32 opcode)
 				break;
 
 			default:
-				fatalerror("I960: %x: Unhandled 79.%x", i960->PIP, (opcode >> 7) & 0xf);
+				fatalerror("I960: %x: Unhandled 79.%x\n", i960->PIP, (opcode >> 7) & 0xf);
 			}
 			break;
 
@@ -1948,7 +1947,7 @@ INLINE void execute_op(i960_state_t *i960, UINT32 opcode)
 			break;
 
 		default:
-			fatalerror("I960: %x: Unhandled %02x", i960->PIP, opcode >> 24);
+			fatalerror("I960: %x: Unhandled %02x\n", i960->PIP, opcode >> 24);
 	}
 
 }
@@ -1974,7 +1973,7 @@ static CPU_EXECUTE( i960 )
 
 static void set_irq_line(i960_state_t *i960, int irqline, int state)
 {
-	int int_tab =  i960->program->read_dword(i960->PRCB+20);	// interrupt table
+	int int_tab =  i960->program->read_dword(i960->PRCB+20);    // interrupt table
 	int cpu_pri = (i960->PC>>16)&0x1f;
 	int vector =0;
 	int priority;
@@ -2051,14 +2050,14 @@ static CPU_SET_INFO( i960 )
 
 	switch(state) {
 		// Interfacing
-	case CPUINFO_INT_REGISTER + I960_IP:		i960->IP = info->i; 						break;
-	case CPUINFO_INT_INPUT_STATE + I960_IRQ0:	set_irq_line(i960, I960_IRQ0, info->i);		break;
-	case CPUINFO_INT_INPUT_STATE + I960_IRQ1:	set_irq_line(i960, I960_IRQ1, info->i);		break;
-	case CPUINFO_INT_INPUT_STATE + I960_IRQ2:	set_irq_line(i960, I960_IRQ2, info->i);		break;
-	case CPUINFO_INT_INPUT_STATE + I960_IRQ3:	set_irq_line(i960, I960_IRQ3, info->i);		break;
+	case CPUINFO_INT_REGISTER + I960_IP:        i960->IP = info->i;                         break;
+	case CPUINFO_INT_INPUT_STATE + I960_IRQ0:   set_irq_line(i960, I960_IRQ0, info->i);     break;
+	case CPUINFO_INT_INPUT_STATE + I960_IRQ1:   set_irq_line(i960, I960_IRQ1, info->i);     break;
+	case CPUINFO_INT_INPUT_STATE + I960_IRQ2:   set_irq_line(i960, I960_IRQ2, info->i);     break;
+	case CPUINFO_INT_INPUT_STATE + I960_IRQ3:   set_irq_line(i960, I960_IRQ3, info->i);     break;
 
 	default:
-		fatalerror("i960_set_info %x", state);
+		fatalerror("i960_set_info %x\n", state);
 	}
 }
 
@@ -2068,7 +2067,7 @@ static CPU_INIT( i960 )
 
 	i960->irq_cb = irqcallback;
 	i960->device = device;
-	i960->program = device->space(AS_PROGRAM);
+	i960->program = &device->space(AS_PROGRAM);
 	i960->direct = &i960->program->direct();
 
 	device->save_item(NAME(i960->PIP));
@@ -2092,7 +2091,7 @@ static CPU_RESET( i960 )
 	i960->IP         = i960->program->read_dword(12);
 	i960->PC         = 0x001f2002;
 	i960->AC         = 0;
-	i960->ICR	    = 0xff000000;
+	i960->ICR       = 0xff000000;
 	i960->bursting   = 0;
 	i960->immediate_irq = 0;
 
@@ -2115,103 +2114,103 @@ CPU_GET_INFO( i960 )
 
 	switch(state) {
 		// Interface functions and variables
-	case CPUINFO_FCT_SET_INFO:					info->setinfo     = CPU_SET_INFO_NAME(i960);	break;
-	case CPUINFO_FCT_INIT:						info->init        = CPU_INIT_NAME(i960);		break;
-	case CPUINFO_FCT_RESET:						info->reset       = CPU_RESET_NAME(i960);		break;
-	case CPUINFO_FCT_EXIT:						info->exit        = 0;							break;
-	case CPUINFO_FCT_EXECUTE:					info->execute     = CPU_EXECUTE_NAME(i960);		break;
-	case CPUINFO_FCT_BURN:						info->burn        = 0;							break;
-	case CPUINFO_FCT_DISASSEMBLE:				info->disassemble = CPU_DISASSEMBLE_NAME(i960);	break;
-	case CPUINFO_PTR_INSTRUCTION_COUNTER:		info->icount      = &i960->icount;				break;
-	case CPUINFO_INT_CONTEXT_SIZE:				info->i           = sizeof(i960_state_t);		break;
-	case CPUINFO_INT_MIN_INSTRUCTION_BYTES:		info->i           = 4;							break;
-	case CPUINFO_INT_MAX_INSTRUCTION_BYTES:		info->i           = 8;							break;
+	case CPUINFO_FCT_SET_INFO:                  info->setinfo     = CPU_SET_INFO_NAME(i960);    break;
+	case CPUINFO_FCT_INIT:                      info->init        = CPU_INIT_NAME(i960);        break;
+	case CPUINFO_FCT_RESET:                     info->reset       = CPU_RESET_NAME(i960);       break;
+	case CPUINFO_FCT_EXIT:                      info->exit        = 0;                          break;
+	case CPUINFO_FCT_EXECUTE:                   info->execute     = CPU_EXECUTE_NAME(i960);     break;
+	case CPUINFO_FCT_BURN:                      info->burn        = 0;                          break;
+	case CPUINFO_FCT_DISASSEMBLE:               info->disassemble = CPU_DISASSEMBLE_NAME(i960); break;
+	case CPUINFO_PTR_INSTRUCTION_COUNTER:       info->icount      = &i960->icount;              break;
+	case CPUINFO_INT_CONTEXT_SIZE:              info->i           = sizeof(i960_state_t);       break;
+	case CPUINFO_INT_MIN_INSTRUCTION_BYTES:     info->i           = 4;                          break;
+	case CPUINFO_INT_MAX_INSTRUCTION_BYTES:     info->i           = 8;                          break;
 
 		// Bus sizes
-	case DEVINFO_INT_DATABUS_WIDTH + AS_PROGRAM:	info->i = 32;						break;
-	case DEVINFO_INT_ADDRBUS_WIDTH + AS_PROGRAM:	info->i = 32;						break;
-	case DEVINFO_INT_ADDRBUS_SHIFT + AS_PROGRAM:	info->i = 0;						break;
-	case CPUINFO_INT_LOGADDR_WIDTH_PROGRAM:	info->i = 0;						break;
-	case DEVINFO_INT_DATABUS_WIDTH + AS_DATA:	info->i = 0;						break;
-	case DEVINFO_INT_ADDRBUS_WIDTH + AS_DATA:	info->i = 0;						break;
-	case DEVINFO_INT_ADDRBUS_SHIFT + AS_DATA:	info->i = 0;						break;
-	case CPUINFO_INT_LOGADDR_WIDTH_DATA:	info->i = 0;						break;
-	case DEVINFO_INT_DATABUS_WIDTH + AS_IO:		info->i = 0;						break;
-	case DEVINFO_INT_ADDRBUS_WIDTH + AS_IO:		info->i = 0;						break;
-	case DEVINFO_INT_ADDRBUS_SHIFT + AS_IO:		info->i = 0;						break;
-	case CPUINFO_INT_LOGADDR_WIDTH_IO:		info->i = 0;						break;
+	case CPUINFO_INT_DATABUS_WIDTH + AS_PROGRAM:    info->i = 32;                       break;
+	case CPUINFO_INT_ADDRBUS_WIDTH + AS_PROGRAM:    info->i = 32;                       break;
+	case CPUINFO_INT_ADDRBUS_SHIFT + AS_PROGRAM:    info->i = 0;                        break;
+	case CPUINFO_INT_LOGADDR_WIDTH_PROGRAM: info->i = 0;                        break;
+	case CPUINFO_INT_DATABUS_WIDTH + AS_DATA:   info->i = 0;                        break;
+	case CPUINFO_INT_ADDRBUS_WIDTH + AS_DATA:   info->i = 0;                        break;
+	case CPUINFO_INT_ADDRBUS_SHIFT + AS_DATA:   info->i = 0;                        break;
+	case CPUINFO_INT_LOGADDR_WIDTH_DATA:    info->i = 0;                        break;
+	case CPUINFO_INT_DATABUS_WIDTH + AS_IO:     info->i = 0;                        break;
+	case CPUINFO_INT_ADDRBUS_WIDTH + AS_IO:     info->i = 0;                        break;
+	case CPUINFO_INT_ADDRBUS_SHIFT + AS_IO:     info->i = 0;                        break;
+	case CPUINFO_INT_LOGADDR_WIDTH_IO:      info->i = 0;                        break;
 
 		// Internal maps
-	case DEVINFO_PTR_INTERNAL_MEMORY_MAP + AS_PROGRAM:	info->internal_map32 = NULL;break;
-	case DEVINFO_PTR_INTERNAL_MEMORY_MAP + AS_DATA:		info->internal_map32 = NULL;break;
-	case DEVINFO_PTR_INTERNAL_MEMORY_MAP + AS_IO:		info->internal_map32 = NULL;break;
+	case CPUINFO_PTR_INTERNAL_MEMORY_MAP + AS_PROGRAM:  info->internal_map32 = NULL;break;
+	case CPUINFO_PTR_INTERNAL_MEMORY_MAP + AS_DATA:     info->internal_map32 = NULL;break;
+	case CPUINFO_PTR_INTERNAL_MEMORY_MAP + AS_IO:       info->internal_map32 = NULL;break;
 
 		// CPU misc parameters
-	case DEVINFO_STR_NAME:					strcpy(info->s, "i960KB");							break;
-	case DEVINFO_STR_SOURCE_FILE:				strcpy(info->s, __FILE__);							break;
-	case CPUINFO_STR_FLAGS:					strcpy(info->s, i960_get_strflags(i960));			break;
-	case DEVINFO_INT_ENDIANNESS:			info->i = ENDIANNESS_LITTLE;								break;
-	case CPUINFO_INT_INPUT_LINES:			info->i = 4;										break;
-	case CPUINFO_INT_DEFAULT_IRQ_VECTOR:	info->i = -1;										break;
-	case CPUINFO_INT_CLOCK_MULTIPLIER:		info->i = 1;										break;
-	case CPUINFO_INT_CLOCK_DIVIDER:			info->i = 1;										break;
+	case CPUINFO_STR_NAME:                  strcpy(info->s, "i960KB");                          break;
+	case CPUINFO_STR_SOURCE_FILE:               strcpy(info->s, __FILE__);                          break;
+	case CPUINFO_STR_FLAGS:                 strcpy(info->s, i960_get_strflags(i960));           break;
+	case CPUINFO_INT_ENDIANNESS:            info->i = ENDIANNESS_LITTLE;                                break;
+	case CPUINFO_INT_INPUT_LINES:           info->i = 4;                                        break;
+	case CPUINFO_INT_DEFAULT_IRQ_VECTOR:    info->i = -1;                                       break;
+	case CPUINFO_INT_CLOCK_MULTIPLIER:      info->i = 1;                                        break;
+	case CPUINFO_INT_CLOCK_DIVIDER:         info->i = 1;                                        break;
 
 		// CPU main state
-	case CPUINFO_INT_PC:					info->i = i960->IP;									break;
-	case CPUINFO_INT_SP:					info->i = i960->r[I960_SP];							break;
-	case CPUINFO_INT_PREVIOUSPC:			info->i = i960->PIP;								break;
+	case CPUINFO_INT_PC:                    info->i = i960->IP;                                 break;
+	case CPUINFO_INT_SP:                    info->i = i960->r[I960_SP];                         break;
+	case CPUINFO_INT_PREVIOUSPC:            info->i = i960->PIP;                                break;
 
-	case CPUINFO_INT_REGISTER + I960_SAT:	info->i = i960->SAT;								break;
-	case CPUINFO_INT_REGISTER + I960_PRCB:	info->i = i960->PRCB;								break;
-	case CPUINFO_INT_REGISTER + I960_PC:	info->i = i960->PC;									break;
-	case CPUINFO_INT_REGISTER + I960_AC:	info->i = i960->AC;									break;
-	case CPUINFO_INT_REGISTER + I960_IP:	info->i = i960->IP;									break;
-	case CPUINFO_INT_REGISTER + I960_PIP:	info->i = i960->PIP;								break;
+	case CPUINFO_INT_REGISTER + I960_SAT:   info->i = i960->SAT;                                break;
+	case CPUINFO_INT_REGISTER + I960_PRCB:  info->i = i960->PRCB;                               break;
+	case CPUINFO_INT_REGISTER + I960_PC:    info->i = i960->PC;                                 break;
+	case CPUINFO_INT_REGISTER + I960_AC:    info->i = i960->AC;                                 break;
+	case CPUINFO_INT_REGISTER + I960_IP:    info->i = i960->IP;                                 break;
+	case CPUINFO_INT_REGISTER + I960_PIP:   info->i = i960->PIP;                                break;
 
 		// CPU debug stuff
-	case CPUINFO_STR_REGISTER + I960_SAT:	sprintf(info->s, "sat  :%08x", i960->SAT);			break;
-	case CPUINFO_STR_REGISTER + I960_PRCB:	sprintf(info->s, "prcb :%08x", i960->PRCB);			break;
-	case CPUINFO_STR_REGISTER + I960_PC:	sprintf(info->s, "pc   :%08x", i960->PC);			break;
-	case CPUINFO_STR_REGISTER + I960_AC:	sprintf(info->s, "ac   :%08x", i960->AC);			break;
-	case CPUINFO_STR_REGISTER + I960_IP:	sprintf(info->s, "ip   :%08x", i960->IP);			break;
-	case CPUINFO_STR_REGISTER + I960_PIP:	sprintf(info->s, "pip  :%08x", i960->PIP);			break;
+	case CPUINFO_STR_REGISTER + I960_SAT:   sprintf(info->s, "sat  :%08x", i960->SAT);          break;
+	case CPUINFO_STR_REGISTER + I960_PRCB:  sprintf(info->s, "prcb :%08x", i960->PRCB);         break;
+	case CPUINFO_STR_REGISTER + I960_PC:    sprintf(info->s, "pc   :%08x", i960->PC);           break;
+	case CPUINFO_STR_REGISTER + I960_AC:    sprintf(info->s, "ac   :%08x", i960->AC);           break;
+	case CPUINFO_STR_REGISTER + I960_IP:    sprintf(info->s, "ip   :%08x", i960->IP);           break;
+	case CPUINFO_STR_REGISTER + I960_PIP:   sprintf(info->s, "pip  :%08x", i960->PIP);          break;
 
-	case CPUINFO_STR_REGISTER + I960_R0:	sprintf(info->s, "pfp  :%08x", i960->r[ 0]);		break;
-	case CPUINFO_STR_REGISTER + I960_R1:	sprintf(info->s, "sp   :%08x", i960->r[ 1]);		break;
-	case CPUINFO_STR_REGISTER + I960_R2:	sprintf(info->s, "rip  :%08x", i960->r[ 2]);		break;
-	case CPUINFO_STR_REGISTER + I960_R3:	sprintf(info->s, "r3   :%08x", i960->r[ 3]);		break;
-	case CPUINFO_STR_REGISTER + I960_R4:	sprintf(info->s, "r4   :%08x", i960->r[ 4]);		break;
-	case CPUINFO_STR_REGISTER + I960_R5:	sprintf(info->s, "r5   :%08x", i960->r[ 5]);		break;
-	case CPUINFO_STR_REGISTER + I960_R6:	sprintf(info->s, "r6   :%08x", i960->r[ 6]);		break;
-	case CPUINFO_STR_REGISTER + I960_R7:	sprintf(info->s, "r7   :%08x", i960->r[ 7]);		break;
-	case CPUINFO_STR_REGISTER + I960_R8:	sprintf(info->s, "r8   :%08x", i960->r[ 8]);		break;
-	case CPUINFO_STR_REGISTER + I960_R9:	sprintf(info->s, "r9   :%08x", i960->r[ 9]);		break;
-	case CPUINFO_STR_REGISTER + I960_R10:	sprintf(info->s, "r10  :%08x", i960->r[10]);		break;
-	case CPUINFO_STR_REGISTER + I960_R11:	sprintf(info->s, "r11  :%08x", i960->r[11]);		break;
-	case CPUINFO_STR_REGISTER + I960_R12:	sprintf(info->s, "r12  :%08x", i960->r[12]);		break;
-	case CPUINFO_STR_REGISTER + I960_R13:	sprintf(info->s, "r13  :%08x", i960->r[13]);		break;
-	case CPUINFO_STR_REGISTER + I960_R14:	sprintf(info->s, "r14  :%08x", i960->r[14]);		break;
-	case CPUINFO_STR_REGISTER + I960_R15:	sprintf(info->s, "r15  :%08x", i960->r[15]);		break;
+	case CPUINFO_STR_REGISTER + I960_R0:    sprintf(info->s, "pfp  :%08x", i960->r[ 0]);        break;
+	case CPUINFO_STR_REGISTER + I960_R1:    sprintf(info->s, "sp   :%08x", i960->r[ 1]);        break;
+	case CPUINFO_STR_REGISTER + I960_R2:    sprintf(info->s, "rip  :%08x", i960->r[ 2]);        break;
+	case CPUINFO_STR_REGISTER + I960_R3:    sprintf(info->s, "r3   :%08x", i960->r[ 3]);        break;
+	case CPUINFO_STR_REGISTER + I960_R4:    sprintf(info->s, "r4   :%08x", i960->r[ 4]);        break;
+	case CPUINFO_STR_REGISTER + I960_R5:    sprintf(info->s, "r5   :%08x", i960->r[ 5]);        break;
+	case CPUINFO_STR_REGISTER + I960_R6:    sprintf(info->s, "r6   :%08x", i960->r[ 6]);        break;
+	case CPUINFO_STR_REGISTER + I960_R7:    sprintf(info->s, "r7   :%08x", i960->r[ 7]);        break;
+	case CPUINFO_STR_REGISTER + I960_R8:    sprintf(info->s, "r8   :%08x", i960->r[ 8]);        break;
+	case CPUINFO_STR_REGISTER + I960_R9:    sprintf(info->s, "r9   :%08x", i960->r[ 9]);        break;
+	case CPUINFO_STR_REGISTER + I960_R10:   sprintf(info->s, "r10  :%08x", i960->r[10]);        break;
+	case CPUINFO_STR_REGISTER + I960_R11:   sprintf(info->s, "r11  :%08x", i960->r[11]);        break;
+	case CPUINFO_STR_REGISTER + I960_R12:   sprintf(info->s, "r12  :%08x", i960->r[12]);        break;
+	case CPUINFO_STR_REGISTER + I960_R13:   sprintf(info->s, "r13  :%08x", i960->r[13]);        break;
+	case CPUINFO_STR_REGISTER + I960_R14:   sprintf(info->s, "r14  :%08x", i960->r[14]);        break;
+	case CPUINFO_STR_REGISTER + I960_R15:   sprintf(info->s, "r15  :%08x", i960->r[15]);        break;
 
-	case CPUINFO_STR_REGISTER + I960_G0:	sprintf(info->s, "g0   :%08x", i960->r[16]);		break;
-	case CPUINFO_STR_REGISTER + I960_G1:	sprintf(info->s, "g1   :%08x", i960->r[17]);		break;
-	case CPUINFO_STR_REGISTER + I960_G2:	sprintf(info->s, "g2   :%08x", i960->r[18]);		break;
-	case CPUINFO_STR_REGISTER + I960_G3:	sprintf(info->s, "g3   :%08x", i960->r[19]);		break;
-	case CPUINFO_STR_REGISTER + I960_G4:	sprintf(info->s, "g4   :%08x", i960->r[20]);		break;
-	case CPUINFO_STR_REGISTER + I960_G5:	sprintf(info->s, "g5   :%08x", i960->r[21]);		break;
-	case CPUINFO_STR_REGISTER + I960_G6:	sprintf(info->s, "g6   :%08x", i960->r[22]);		break;
-	case CPUINFO_STR_REGISTER + I960_G7:	sprintf(info->s, "g7   :%08x", i960->r[23]);		break;
-	case CPUINFO_STR_REGISTER + I960_G8:	sprintf(info->s, "g8   :%08x", i960->r[24]);		break;
-	case CPUINFO_STR_REGISTER + I960_G9:	sprintf(info->s, "g9   :%08x", i960->r[25]);		break;
-	case CPUINFO_STR_REGISTER + I960_G10:	sprintf(info->s, "g10  :%08x", i960->r[26]);		break;
-	case CPUINFO_STR_REGISTER + I960_G11:	sprintf(info->s, "g11  :%08x", i960->r[27]);		break;
-	case CPUINFO_STR_REGISTER + I960_G12:	sprintf(info->s, "g12  :%08x", i960->r[28]);		break;
-	case CPUINFO_STR_REGISTER + I960_G13:	sprintf(info->s, "g13  :%08x", i960->r[29]);		break;
-	case CPUINFO_STR_REGISTER + I960_G14:	sprintf(info->s, "g14  :%08x", i960->r[30]);		break;
-	case CPUINFO_STR_REGISTER + I960_G15:	sprintf(info->s, "fp   :%08x", i960->r[31]);		break;
+	case CPUINFO_STR_REGISTER + I960_G0:    sprintf(info->s, "g0   :%08x", i960->r[16]);        break;
+	case CPUINFO_STR_REGISTER + I960_G1:    sprintf(info->s, "g1   :%08x", i960->r[17]);        break;
+	case CPUINFO_STR_REGISTER + I960_G2:    sprintf(info->s, "g2   :%08x", i960->r[18]);        break;
+	case CPUINFO_STR_REGISTER + I960_G3:    sprintf(info->s, "g3   :%08x", i960->r[19]);        break;
+	case CPUINFO_STR_REGISTER + I960_G4:    sprintf(info->s, "g4   :%08x", i960->r[20]);        break;
+	case CPUINFO_STR_REGISTER + I960_G5:    sprintf(info->s, "g5   :%08x", i960->r[21]);        break;
+	case CPUINFO_STR_REGISTER + I960_G6:    sprintf(info->s, "g6   :%08x", i960->r[22]);        break;
+	case CPUINFO_STR_REGISTER + I960_G7:    sprintf(info->s, "g7   :%08x", i960->r[23]);        break;
+	case CPUINFO_STR_REGISTER + I960_G8:    sprintf(info->s, "g8   :%08x", i960->r[24]);        break;
+	case CPUINFO_STR_REGISTER + I960_G9:    sprintf(info->s, "g9   :%08x", i960->r[25]);        break;
+	case CPUINFO_STR_REGISTER + I960_G10:   sprintf(info->s, "g10  :%08x", i960->r[26]);        break;
+	case CPUINFO_STR_REGISTER + I960_G11:   sprintf(info->s, "g11  :%08x", i960->r[27]);        break;
+	case CPUINFO_STR_REGISTER + I960_G12:   sprintf(info->s, "g12  :%08x", i960->r[28]);        break;
+	case CPUINFO_STR_REGISTER + I960_G13:   sprintf(info->s, "g13  :%08x", i960->r[29]);        break;
+	case CPUINFO_STR_REGISTER + I960_G14:   sprintf(info->s, "g14  :%08x", i960->r[30]);        break;
+	case CPUINFO_STR_REGISTER + I960_G15:   sprintf(info->s, "fp   :%08x", i960->r[31]);        break;
 
 //  default:
-//      fatalerror("i960_get_info %x          ", state);
+//      fatalerror("i960_get_info %x          \n", state);
 	}
 }
 

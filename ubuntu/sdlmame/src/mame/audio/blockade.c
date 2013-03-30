@@ -11,8 +11,8 @@
  * along with proper mixing and volume control
  */
 
-#define BLOCKADE_NOTE_DATA		NODE_01
-#define BLOCKADE_NOTE   		NODE_02
+#define BLOCKADE_NOTE_DATA      NODE_01
+#define BLOCKADE_NOTE           NODE_02
 
 DISCRETE_SOUND_START(blockade)
 	DISCRETE_INPUT_DATA  (BLOCKADE_NOTE_DATA)
@@ -36,21 +36,21 @@ DISCRETE_SOUND_START(blockade)
 	DISCRETE_OUTPUT(NODE_10, 7500)
 DISCRETE_SOUND_END
 
-WRITE8_DEVICE_HANDLER( blockade_sound_freq_w )
+WRITE8_MEMBER(blockade_state::blockade_sound_freq_w)
 {
-	discrete_sound_w(device,BLOCKADE_NOTE_DATA, data);
+	discrete_sound_w(m_discrete,space,BLOCKADE_NOTE_DATA, data);
 	return;
 }
 
-WRITE8_HANDLER( blockade_env_on_w )
+WRITE8_MEMBER(blockade_state::blockade_env_on_w)
 {
-	device_t *samples = space->machine().device("samples");
+	samples_device *samples = machine().device<samples_device>("samples");
 	if (BLOCKADE_LOG) mame_printf_debug("Boom Start\n");
-	sample_start(samples, 0,0,0);
+	samples->start(0,0);
 	return;
 }
 
-WRITE8_HANDLER( blockade_env_off_w )
+WRITE8_MEMBER(blockade_state::blockade_env_off_w)
 {
 	if (BLOCKADE_LOG) mame_printf_debug("Boom End\n");
 	return;
@@ -59,12 +59,12 @@ WRITE8_HANDLER( blockade_env_off_w )
 static const char *const blockade_sample_names[] =
 {
 	"*blockade",
-	"boom.wav",
+	"boom",
 	0
 };
 
 const samples_interface blockade_samples_interface =
 {
-	1,	/* 1 channel */
+	1,  /* 1 channel */
 	blockade_sample_names
 };

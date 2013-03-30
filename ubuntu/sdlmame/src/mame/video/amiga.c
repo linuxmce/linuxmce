@@ -17,7 +17,7 @@
  *
  *************************************/
 
-#define COPPER_CYCLES_TO_PIXELS(x)		(4 * (x))
+#define COPPER_CYCLES_TO_PIXELS(x)      (4 * (x))
 
 
 
@@ -67,23 +67,23 @@ const UINT16 amiga_expand_byte[256] =
 
 const UINT16 delay[256] =
 {
-	1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,1,1,1,1,0,0,0,0,0,0,0,0,	/* 0x000 - 0x03e */
-	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,						/* 0x040 - 0x05e */
-	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,						/* 0x060 - 0x07e */
-	0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,						/* 0x080 - 0x09e */
-	1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,	/* 0x0a0 - 0x0de */
+	1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,1,1,1,1,0,0,0,0,0,0,0,0,    /* 0x000 - 0x03e */
+	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,                        /* 0x040 - 0x05e */
+	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,                        /* 0x060 - 0x07e */
+	0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,                        /* 0x080 - 0x09e */
+	1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,    /* 0x0a0 - 0x0de */
 	/* BPLxPTH/BPLxPTL */
-	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,						/* 0x0e0 - 0x0fe */
+	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,                        /* 0x0e0 - 0x0fe */
 	/* BPLCON0-3,BPLMOD1-2 */
-	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,						/* 0x100 - 0x11e */
+	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,                        /* 0x100 - 0x11e */
 	/* SPRxPTH/SPRxPTL */
-	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,						/* 0x120 - 0x13e */
+	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,                        /* 0x120 - 0x13e */
 	/* SPRxPOS/SPRxCTL/SPRxDATA/SPRxDATB */
-	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,	/* 0x140 - 0x17e */
+	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,    /* 0x140 - 0x17e */
 	/* COLORxx */
-	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,	/* 0x180 - 0x1be */
+	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,    /* 0x180 - 0x1be */
 	/* RESERVED */
-	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	/* 0x1c0 - 0x1fe */
+	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 /* 0x1c0 - 0x1fe */
 };
 
 
@@ -94,12 +94,12 @@ const UINT16 delay[256] =
  *
  *************************************/
 
-PALETTE_INIT( amiga )
+PALETTE_INIT_MEMBER(amiga_state,amiga)
 {
 	int i;
 
 	for (i = 0; i < 0x1000; i++)
-		palette_set_color_rgb(machine, i, pal4bit(i >> 8), pal4bit(i >> 4), pal4bit(i));
+		palette_set_color_rgb(machine(), i, pal4bit(i >> 8), pal4bit(i >> 4), pal4bit(i));
 }
 
 
@@ -110,9 +110,8 @@ PALETTE_INIT( amiga )
  *
  *************************************/
 
-VIDEO_START( amiga )
+VIDEO_START_MEMBER(amiga_state,amiga)
 {
-	amiga_state *state = machine.driver_data<amiga_state>();
 	int j;
 
 	/* generate tables that produce the correct playfield color for dual playfield mode */
@@ -121,18 +120,18 @@ VIDEO_START( amiga )
 		int pf1pix = ((j >> 0) & 1) | ((j >> 1) & 2) | ((j >> 2) & 4);
 		int pf2pix = ((j >> 1) & 1) | ((j >> 2) & 2) | ((j >> 3) & 4);
 
-		state->m_separate_bitplanes[0][j] = (pf1pix || !pf2pix) ? pf1pix : (pf2pix + 8);
-		state->m_separate_bitplanes[1][j] = pf2pix ? (pf2pix + 8) : pf1pix;
+		m_separate_bitplanes[0][j] = (pf1pix || !pf2pix) ? pf1pix : (pf2pix + 8);
+		m_separate_bitplanes[1][j] = pf2pix ? (pf2pix + 8) : pf1pix;
 	}
 
 #if GUESS_COPPER_OFFSET
-	state->m_wait_offset = 3;
+	m_wait_offset = 3;
 #endif
 
 	/* reset the genlock color */
-	state->m_genlock_color = 0xffff;
+	m_genlock_color = 0xffff;
 
-	state->m_sprite_ctl_written = 0;
+	m_sprite_ctl_written = 0;
 }
 
 
@@ -147,7 +146,7 @@ UINT32 amiga_gethvpos(screen_device &screen)
 {
 	amiga_state *state = screen.machine().driver_data<amiga_state>();
 	UINT32 hvpos = (state->m_last_scanline << 8) | (screen.hpos() >> 2);
-	UINT32 latchedpos = input_port_read_safe(screen.machine(), "HVPOS", 0);
+	UINT32 latchedpos = state->ioport("HVPOS")->read_safe(0);
 
 	/* if there's no latched position, or if we are in the active display area */
 	/* but before the latching point, return the live HV position */
@@ -265,7 +264,7 @@ int amiga_copper_execute_next(running_machine &machine, int xpos)
 					logerror("%02X.%02X: Write to %s = %04x\n", state->m_last_scanline, xpos / 2, amiga_custom_names[word0 & 0xff], word1);
 				amiga_custom_w(machine.device("maincpu")->memory().space(AS_PROGRAM), word0, word1, 0xffff);
 			}
-			else	// additional 2 cycles needed for non-Agnus registers
+			else    // additional 2 cycles needed for non-Agnus registers
 			{
 				state->m_copper_pending_offset = word0;
 				state->m_copper_pending_data = word1;
@@ -425,7 +424,7 @@ static void update_sprite_dma(amiga_state *state, int scanline)
 			state->m_sprite_ctl_written &= ~bitmask;
 			state->m_sprite_comparitor_enable_mask &= ~bitmask;
 			state->m_sprite_dma_reload_mask |= 1 << num;
-			CUSTOM_REG(REG_SPR0DATA + 4 * num) = 0;		/* just a guess */
+			CUSTOM_REG(REG_SPR0DATA + 4 * num) = 0;     /* just a guess */
 			CUSTOM_REG(REG_SPR0DATB + 4 * num) = 0;
 			if (LOG_SPRITE_DMA) logerror("%3d:sprite %d comparitor disable, prepare for reload\n", scanline, num);
 		}
@@ -449,7 +448,7 @@ static void update_sprite_dma(amiga_state *state, int scanline)
 INLINE UINT32 interleave_sprite_data(UINT16 lobits, UINT16 hibits)
 {
 	return (amiga_expand_byte[lobits & 0xff] << 0) | (amiga_expand_byte[lobits >> 8] << 16) |
-		   (amiga_expand_byte[hibits & 0xff] << 1) | (amiga_expand_byte[hibits >> 8] << 17);
+			(amiga_expand_byte[hibits & 0xff] << 1) | (amiga_expand_byte[hibits >> 8] << 17);
 }
 
 
@@ -515,10 +514,10 @@ static int get_sprite_pixel(amiga_state *state, int x)
 			if (pixels & 0x0f)
 			{
 				/* final result is:
-                    topmost sprite color in bits 0-5
-                    sprite present bitmask in bits 6-9
-                    topmost sprite pair index in bits 10-11
-                */
+				    topmost sprite color in bits 0-5
+				    sprite present bitmask in bits 6-9
+				    topmost sprite pair index in bits 10-11
+				*/
 				UINT32 result = (collide << 6) | (pair << 10);
 
 				/* attached case */
@@ -619,12 +618,12 @@ INLINE int update_ham(amiga_state *state, int newpix)
  *
  *************************************/
 
-void amiga_render_scanline(running_machine &machine, bitmap_t *bitmap, int scanline)
+void amiga_render_scanline(running_machine &machine, bitmap_ind16 &bitmap, int scanline)
 {
 	amiga_state *state = machine.driver_data<amiga_state>();
 	UINT16 save_color0 = CUSTOM_REG(REG_COLOR00);
 	int ddf_start_pixel = 0, ddf_stop_pixel = 0;
-	int hires = 0, dualpf = 0, lace = 0, ham = 0;
+	int hires = 0, dualpf = 0, ham = 0;
 	int hstart = 0, hstop = 0;
 	int vstart = 0, vstop = 0;
 	int pf1pri = 0, pf2pri = 0;
@@ -652,8 +651,8 @@ void amiga_render_scanline(running_machine &machine, bitmap_t *bitmap, int scanl
 	update_sprite_dma(state, scanline);
 
 	/* start of a new line, signal we're not done with it and fill up vars */
-	if (bitmap != NULL)
-		dst = BITMAP_ADDR16(bitmap, scanline, 0);
+	if (bitmap.valid())
+		dst = &bitmap.pix16(scanline);
 
 	/* all sprites off at the start of the line */
 	memset(state->m_sprite_remain, 0, sizeof(state->m_sprite_remain));
@@ -683,7 +682,7 @@ void amiga_render_scanline(running_machine &machine, bitmap_t *bitmap, int scanl
 			hires = CUSTOM_REG(REG_BPLCON0) & BPLCON0_HIRES;
 			ham = CUSTOM_REG(REG_BPLCON0) & BPLCON0_HOMOD;
 			dualpf = CUSTOM_REG(REG_BPLCON0) & BPLCON0_DBLPF;
-			lace = CUSTOM_REG(REG_BPLCON0) & BPLCON0_LACE;
+//          lace = CUSTOM_REG(REG_BPLCON0) & BPLCON0_LACE;
 
 			/* compute the pixel fetch parameters */
 			ddf_start_pixel = ( CUSTOM_REG(REG_DDFSTRT) & 0xfc ) * 2 + (hires ? 9 : 17);
@@ -983,9 +982,9 @@ void amiga_render_scanline(running_machine &machine, bitmap_t *bitmap, int scanl
 #if GUESS_COPPER_OFFSET
 	if (machine.primary_screen->frame_number() % 64 == 0 && scanline == 0)
 	{
-		if (input_code_pressed(machine, KEYCODE_Q))
+		if (machine.input().code_pressed(KEYCODE_Q))
 			popmessage("%d", state->m_wait_offset -= 1);
-		if (input_code_pressed(machine, KEYCODE_W))
+		if (machine.input().code_pressed(KEYCODE_W))
 			popmessage("%d", state->m_wait_offset += 1);
 	}
 #endif
@@ -999,14 +998,14 @@ void amiga_render_scanline(running_machine &machine, bitmap_t *bitmap, int scanl
  *
  *************************************/
 
-SCREEN_UPDATE( amiga )
+/* TODO: alg.c requires that this uses RGB32 */
+UINT32 amiga_state::screen_update_amiga(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	int y;
 
 	/* render each scanline in the visible region */
-	for (y = cliprect->min_y; y <= cliprect->max_y; y++)
-		amiga_render_scanline(screen->machine(), bitmap, y);
+	for (y = cliprect.min_y; y <= cliprect.max_y; y++)
+		amiga_render_scanline(machine(), bitmap, y);
 
 	return 0;
 }
-

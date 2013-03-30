@@ -1,34 +1,80 @@
+/*************************************************************************
+
+    Jaleco Moero Pro Yakyuu Homerun hardware
+
+*************************************************************************/
+
 #include "emu.h"
 #include "includes/homerun.h"
 
 
-#define half_screen 116
+/**************************************************************************/
 
-WRITE8_DEVICE_HANDLER(homerun_banking_w)
+CUSTOM_INPUT_MEMBER(homerun_state::homerun_sprite0_r)
 {
-	homerun_state *state = device->machine().driver_data<homerun_state>();
-	if (device->machine().primary_screen->vpos() > half_screen)
-		state->m_gc_down = data & 3;
-	else
-		state->m_gc_up = data & 3;
-
-	tilemap_mark_all_tiles_dirty(state->m_tilemap);
-
-	data >>= 5;
-	memory_set_bank(device->machine(), "bank1", data & 0x07);
+	// sprite-0 vs background collision status, similar to NES
+	return (machine().primary_screen->vpos() > (m_spriteram[0] - 15)) ? 1 : 0;
 }
 
-WRITE8_HANDLER( homerun_videoram_w )
+WRITE8_MEMBER(homerun_state::homerun_scrollhi_w)
 {
-	homerun_state *state = space->machine().driver_data<homerun_state>();
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_tilemap, offset & 0xfff);
+	// d0: scroll y high bit
+	// d1: scroll x high bit
+	// other bits: ?
+	m_scrolly = (m_scrolly & 0xff) | (data << 8 & 0x100);
+	m_scrollx = (m_scrollx & 0xff) | (data << 7 & 0x100);
 }
 
-WRITE8_HANDLER(homerun_color_w)
+WRITE8_MEMBER(homerun_state::homerun_scrolly_w)
 {
+	m_scrolly = (m_scrolly & 0xff00) | data;
+}
+
+WRITE8_MEMBER(homerun_state::homerun_scrollx_w)
+{
+	m_scrollx = (m_scrollx & 0xff00) | data;
+}
+
+WRITE8_MEMBER(homerun_state::homerun_banking_w)
+{
+
+	// games do mid-screen gfx bank switching
+	int vpos = machine().primary_screen->vpos();
+	machine().primary_screen->update_partial(vpos);
+
+	// d0-d1: gfx bank
+	// d2-d4: ?
+	// d5-d7: prg bank
+	m_gfx_ctrl = data;
+	m_tilemap->mark_all_dirty();
+	membank("bank1")->set_entry(data >> 5 & 7);
+}
+
+WRITE8_MEMBER(homerun_state::homerun_videoram_w)
+{
+	m_videoram[offset] = data;
+	m_tilemap->mark_tile_dirty(offset & 0xfff);
+}
+
+WRITE8_MEMBER(homerun_state::homerun_color_w)
+{
+	m_colorram[offset] = data;
+
+	/* from PCB photo:
+	    bit 7:  470 ohm resistor \
+	    bit 6:  220 ohm resistor -  --> 470 ohm resistor  --> blue
+	    bit 5:  470 ohm resistor \
+	    bit 4:  220 ohm resistor -  --> 470 ohm resistor  --> green
+	    bit 3:  1  kohm resistor /
+	    bit 2:  470 ohm resistor \
+	    bit 1:  220 ohm resistor -  --> 470 ohm resistor  --> red
+	    bit 0:  1  kohm resistor /
+	*/
+
+	// let's implement it the old fashioned way until it's found out how exactly the resnet is hooked up
 	int r, g, b;
 	int bit0, bit1, bit2;
+
 	bit0 = (data >> 0) & 0x01;
 	bit1 = (data >> 1) & 0x01;
 	bit2 = (data >> 2) & 0x01;
@@ -41,68 +87,66 @@ WRITE8_HANDLER(homerun_color_w)
 	bit1 = (data >> 6) & 0x01;
 	bit2 = (data >> 7) & 0x01;
 	b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
-	palette_set_color(space->machine(), offset, MAKE_RGB(r,g,b));
+
+	palette_set_color(machine(), offset, MAKE_RGB(r,g,b));
 }
 
-static TILE_GET_INFO( get_homerun_tile_info )
+
+/**************************************************************************/
+
+TILE_GET_INFO_MEMBER(homerun_state::get_homerun_tile_info)
 {
-	homerun_state *state = machine.driver_data<homerun_state>();
-	int tileno = (state->m_videoram[tile_index]) + ((state->m_videoram[tile_index + 0x1000] & 0x38) << 5) + ((state->m_gfx_ctrl & 1) << 11);
-	int palno = (state->m_videoram[tile_index + 0x1000] & 0x07);
+	int tileno = (m_videoram[tile_index]) | ((m_videoram[tile_index | 0x1000] & 0x38) << 5) | ((m_gfx_ctrl & 1) << 11);
+	int palno = (m_videoram[tile_index | 0x1000] & 0x07);
 
-	SET_TILE_INFO(0, tileno, palno, 0);
+	SET_TILE_INFO_MEMBER(0, tileno, palno, 0);
 }
 
-VIDEO_START( homerun )
+
+void homerun_state::video_start()
 {
-	homerun_state *state = machine.driver_data<homerun_state>();
-	state->m_tilemap = tilemap_create(machine, get_homerun_tile_info, tilemap_scan_rows, 8, 8, 64, 64);
+	m_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(homerun_state::get_homerun_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 64, 64);
 }
 
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	homerun_state *state = machine.driver_data<homerun_state>();
 	UINT8 *spriteram = state->m_spriteram;
 	int offs;
 
-	for (offs = state->m_spriteram_size - 4; offs >=0; offs -= 4)
+	for (offs = state->m_spriteram.bytes() - 4; offs >= 0; offs -= 4)
 	{
-		int code, color, sx, sy, flipx, flipy;
-		sx = spriteram[offs + 3];
-		sy = spriteram[offs + 0] - 16;
-		code = (spriteram[offs + 1]) + ((spriteram[offs + 2] & 0x8) << 5) + (state->m_gfx_ctrl << 9);
-		color = (spriteram[offs + 2] & 0x7) + 8 ;
-		flipx=(spriteram[offs + 2] & 0x40) ;
-		flipy=(spriteram[offs + 2] & 0x80) ;
+		int sx = spriteram[offs + 3];
+		int sy = spriteram[offs + 0] - 15;
+		int code = (spriteram[offs + 1]) | ((spriteram[offs + 2] & 0x8) << 5) | ((state->m_gfx_ctrl & 3) << 9);
+		int color = (spriteram[offs + 2] & 0x07) | 8;
+		int flipx = (spriteram[offs + 2] & 0x40) >> 6;
+		int flipy = (spriteram[offs + 2] & 0x80) >> 7;
+
 		drawgfx_transpen(bitmap, cliprect, machine.gfx[1],
 				code,
 				color,
 				flipx,flipy,
 				sx,sy,0);
+
+		// wraparound
+		drawgfx_transpen(bitmap, cliprect, machine.gfx[1],
+				code,
+				color,
+				flipx,flipy,
+				sx-256,sy,0);
 	}
 }
 
-SCREEN_UPDATE(homerun)
+UINT32 homerun_state::screen_update_homerun(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	homerun_state *state = screen->machine().driver_data<homerun_state>();
-	rectangle myclip = *cliprect;
 
-	/* upper part */
-	tilemap_set_scrollx(state->m_tilemap, 0, state->m_xpc + ((state->m_xpa & 2) << 7) );
-	tilemap_set_scrolly(state->m_tilemap, 0, state->m_xpb + ((state->m_xpa & 1) << 8) );
+	m_tilemap->set_scrolly(0, m_scrolly);
+	m_tilemap->set_scrollx(0, m_scrollx);
 
-	myclip.max_y /= 2;
-	state->m_gfx_ctrl = state->m_gc_up;
-	tilemap_draw(bitmap, &myclip, state->m_tilemap, 0, 0);
-	draw_sprites(screen->machine(), bitmap, &myclip);
+	m_tilemap->draw(bitmap, cliprect, 0, 0);
+	draw_sprites(machine(), bitmap, cliprect);
 
-	/* lower part */
-	myclip.min_y += myclip.max_y;
-	myclip.max_y *= 2;
-	state->m_gfx_ctrl = state->m_gc_down;
-	tilemap_draw(bitmap, &myclip, state->m_tilemap, 0, 0);
-	draw_sprites(screen->machine(), bitmap, &myclip);
-
-	state->m_gc_down = state->m_gc_up;
 	return 0;
 }

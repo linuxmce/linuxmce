@@ -18,9 +18,9 @@ Two Crystals:
 
 Two 8 position DIPS
 
-rom3 thru rom7 - Main pcb PRG.
+rom3 through rom7 - Main pcb PRG.
 
-roma thru romi - Sub pcb Questions.
+roma through romi - Sub pcb Questions.
 
 The main pcb had empty sockets for
 rom0, rom1 and rom2.
@@ -43,14 +43,14 @@ Notes:
 
 static READ8_HANDLER( trvquest_question_r )
 {
-	gameplan_state *state = space->machine().driver_data<gameplan_state>();
+	gameplan_state *state = space.machine().driver_data<gameplan_state>();
 
-	return space->machine().region("questions")->base()[*state->m_trvquest_question * 0x2000 + offset];
+	return state->memregion("questions")->base()[*state->m_trvquest_question * 0x2000 + offset];
 }
 
 static WRITE8_DEVICE_HANDLER( trvquest_coin_w )
 {
-	coin_counter_w(device->machine(), 0, ~data & 1);
+	coin_counter_w(space.machine(), 0, ~data & 1);
 }
 
 static WRITE8_DEVICE_HANDLER( trvquest_misc_w )
@@ -58,18 +58,18 @@ static WRITE8_DEVICE_HANDLER( trvquest_misc_w )
 	// data & 1 -> led on/off ?
 }
 
-static ADDRESS_MAP_START( cpu_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( cpu_map, AS_PROGRAM, 8, gameplan_state )
 	AM_RANGE(0x0000, 0x1fff) AM_RAM AM_SHARE("nvram") // cmos ram
 	AM_RANGE(0x2000, 0x27ff) AM_RAM // main ram
-	AM_RANGE(0x3800, 0x380f) AM_DEVREADWRITE_MODERN("via6522_1", via6522_device, read, write)
-	AM_RANGE(0x3810, 0x381f) AM_DEVREADWRITE_MODERN("via6522_2", via6522_device, read, write)
-	AM_RANGE(0x3820, 0x382f) AM_DEVREADWRITE_MODERN("via6522_0", via6522_device, read, write)
-	AM_RANGE(0x3830, 0x3831) AM_DEVWRITE("ay1", ay8910_address_data_w)
-	AM_RANGE(0x3840, 0x3841) AM_DEVWRITE("ay2", ay8910_address_data_w)
+	AM_RANGE(0x3800, 0x380f) AM_DEVREADWRITE("via6522_1", via6522_device, read, write)
+	AM_RANGE(0x3810, 0x381f) AM_DEVREADWRITE("via6522_2", via6522_device, read, write)
+	AM_RANGE(0x3820, 0x382f) AM_DEVREADWRITE("via6522_0", via6522_device, read, write)
+	AM_RANGE(0x3830, 0x3831) AM_DEVWRITE_LEGACY("ay1", ay8910_address_data_w)
+	AM_RANGE(0x3840, 0x3841) AM_DEVWRITE_LEGACY("ay2", ay8910_address_data_w)
 	AM_RANGE(0x3850, 0x3850) AM_READNOP //watchdog_reset_r ?
-	AM_RANGE(0x8000, 0x9fff) AM_READ(trvquest_question_r)
-	AM_RANGE(0xa000, 0xa000) AM_WRITEONLY AM_BASE_MEMBER(gameplan_state, m_trvquest_question)
-	AM_RANGE(0xa000, 0xa000) AM_READNOP	// bogus read from the game code when reads question roms
+	AM_RANGE(0x8000, 0x9fff) AM_READ_LEGACY(trvquest_question_r)
+	AM_RANGE(0xa000, 0xa000) AM_WRITEONLY AM_SHARE("trvquest_q")
+	AM_RANGE(0xa000, 0xa000) AM_READNOP // bogus read from the game code when reads question roms
 	AM_RANGE(0xb000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
@@ -150,7 +150,7 @@ INPUT_PORTS_END
 static TIMER_CALLBACK( via_irq_delayed )
 {
 	gameplan_state *state = machine.driver_data<gameplan_state>();
-	device_set_input_line(state->m_maincpu, 0, param);
+	state->m_maincpu->set_input_line(0, param);
 }
 
 static void via_irq( device_t *device, int state )
@@ -158,8 +158,8 @@ static void via_irq( device_t *device, int state )
 	// from gameplan.c
 
 	/* Kaos sits in a tight loop polling the VIA irq flags register, but that register is
-       cleared by the irq handler. Therefore, I wait a bit before triggering the irq to
-       leave time for the program to see the flag change. */
+	   cleared by the irq handler. Therefore, I wait a bit before triggering the irq to
+	   leave time for the program to see the flag change. */
 	device->machine().scheduler().timer_set(attotime::from_usec(50), FUNC(via_irq_delayed), state);
 }
 
@@ -183,45 +183,42 @@ static const via6522_interface via_2_interface =
 };
 
 
-static MACHINE_START( trvquest )
+MACHINE_START_MEMBER(gameplan_state,trvquest)
 {
-	gameplan_state *state = machine.driver_data<gameplan_state>();
 
-	state->m_maincpu = machine.device("maincpu");
+	m_maincpu = machine().device<cpu_device>("maincpu");
 
 	/* register for save states */
-	state->save_item(NAME(state->m_video_x));
-	state->save_item(NAME(state->m_video_y));
-	state->save_item(NAME(state->m_video_command));
-	state->save_item(NAME(state->m_video_data));
+	save_item(NAME(m_video_x));
+	save_item(NAME(m_video_y));
+	save_item(NAME(m_video_command));
+	save_item(NAME(m_video_data));
 }
 
-static MACHINE_RESET( trvquest )
+MACHINE_RESET_MEMBER(gameplan_state,trvquest)
 {
-	gameplan_state *state = machine.driver_data<gameplan_state>();
 
-	state->m_video_x = 0;
-	state->m_video_y = 0;
-	state->m_video_command = 0;
-	state->m_video_data = 0;
+	m_video_x = 0;
+	m_video_y = 0;
+	m_video_command = 0;
+	m_video_data = 0;
 }
 
-static INTERRUPT_GEN( trvquest_interrupt )
+INTERRUPT_GEN_MEMBER(gameplan_state::trvquest_interrupt)
 {
-	gameplan_state *state = device->machine().driver_data<gameplan_state>();
-	state->m_via_2->write_ca1(1);
-	state->m_via_2->write_ca1(0);
+	m_via_2->write_ca1(1);
+	m_via_2->write_ca1(0);
 }
 
 static MACHINE_CONFIG_START( trvquest, gameplan_state )
 
 	MCFG_CPU_ADD("maincpu", M6809,XTAL_6MHz/4)
 	MCFG_CPU_PROGRAM_MAP(cpu_map)
-	MCFG_CPU_VBLANK_INT("screen", trvquest_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", gameplan_state, trvquest_interrupt)
 
 	MCFG_NVRAM_ADD_1FILL("nvram")
-	MCFG_MACHINE_START(trvquest)
-	MCFG_MACHINE_RESET(trvquest)
+	MCFG_MACHINE_START_OVERRIDE(gameplan_state,trvquest)
+	MCFG_MACHINE_RESET_OVERRIDE(gameplan_state,trvquest)
 
 	/* video hardware */
 	MCFG_FRAGMENT_ADD(trvquest_video)
@@ -262,4 +259,4 @@ ROM_START( trvquest )
 	ROM_LOAD( "roma", 0x16000, 0x2000, CRC(b4bcaf33) SHA1(c6b08fb8d55b2834d0c6c5baff9f544c795e4c15) )
 ROM_END
 
-GAME( 1984, trvquest, 0, trvquest, trvquest, 0, ROT90, "Sunn / Techstar", "Trivia Quest", GAME_SUPPORTS_SAVE )
+GAME( 1984, trvquest, 0, trvquest, trvquest, driver_device, 0, ROT90, "Sunn / Techstar", "Trivia Quest", GAME_SUPPORTS_SAVE )

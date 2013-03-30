@@ -12,30 +12,30 @@
 sub sound functions
 ***************************************************************************/
 
-WRITE8_DEVICE_HANDLER( subs_sonar1_w )
+WRITE8_MEMBER(subs_state::subs_sonar1_w)
 {
-	discrete_sound_w(device, SUBS_SONAR1_EN, offset & 0x01);
+	discrete_sound_w(m_discrete, space, SUBS_SONAR1_EN, offset & 0x01);
 }
 
-WRITE8_DEVICE_HANDLER( subs_sonar2_w )
+WRITE8_MEMBER(subs_state::subs_sonar2_w)
 {
-	discrete_sound_w(device, SUBS_SONAR2_EN, offset & 0x01);
+	discrete_sound_w(m_discrete, space, SUBS_SONAR2_EN, offset & 0x01);
 }
 
-WRITE8_DEVICE_HANDLER( subs_crash_w )
+WRITE8_MEMBER(subs_state::subs_crash_w)
 {
-	discrete_sound_w(device, SUBS_CRASH_EN, offset & 0x01);
+	discrete_sound_w(m_discrete, space, SUBS_CRASH_EN, offset & 0x01);
 }
 
-WRITE8_DEVICE_HANDLER( subs_explode_w )
+WRITE8_MEMBER(subs_state::subs_explode_w)
 {
-	discrete_sound_w(device, SUBS_EXPLODE_EN, offset & 0x01);
+	discrete_sound_w(m_discrete, space, SUBS_EXPLODE_EN, offset & 0x01);
 }
 
-WRITE8_DEVICE_HANDLER( subs_noise_reset_w )
+WRITE8_MEMBER(subs_state::subs_noise_reset_w)
 {
 	/* Pulse noise reset */
-	discrete_sound_w(device, SUBS_NOISE_RESET, 0);
+	discrete_sound_w(m_discrete, space, SUBS_NOISE_RESET, 0);
 }
 
 
@@ -46,25 +46,25 @@ WRITE8_DEVICE_HANDLER( subs_noise_reset_w )
 static const discrete_lfsr_desc subs_lfsr =
 {
 	DISC_CLK_IS_FREQ,
-	16,			/* Bit Length */
-	0,			/* Reset Value */
-	13,			/* Use Bit 13 as XOR input 0 */
-	14,			/* Use Bit 14 as XOR input 1 */
-	DISC_LFSR_XNOR,		/* Feedback stage1 is XNOR */
-	DISC_LFSR_OR,		/* Feedback stage2 is just stage 1 output OR with external feed */
-	DISC_LFSR_REPLACE,	/* Feedback stage3 replaces the shifted register contents */
-	0x000001,		/* Everything is shifted into the first bit only */
-	0,			/* Output is already inverted by XNOR */
-	13			/* Output bit */
+	16,         /* Bit Length */
+	0,          /* Reset Value */
+	13,         /* Use Bit 13 as XOR input 0 */
+	14,         /* Use Bit 14 as XOR input 1 */
+	DISC_LFSR_XNOR,     /* Feedback stage1 is XNOR */
+	DISC_LFSR_OR,       /* Feedback stage2 is just stage 1 output OR with external feed */
+	DISC_LFSR_REPLACE,  /* Feedback stage3 replaces the shifted register contents */
+	0x000001,       /* Everything is shifted into the first bit only */
+	0,          /* Output is already inverted by XNOR */
+	13          /* Output bit */
 };
 
 /* Nodes - Sounds */
-#define SUBS_NOISE			NODE_10
-#define SUBS_SONAR1_SND		NODE_11
-#define SUBS_SONAR2_SND		NODE_12
-#define SUBS_LAUNCH_SND		NODE_13
-#define SUBS_CRASH_SND		NODE_14
-#define SUBS_EXPLODE_SND	NODE_15
+#define SUBS_NOISE          NODE_10
+#define SUBS_SONAR1_SND     NODE_11
+#define SUBS_SONAR2_SND     NODE_12
+#define SUBS_LAUNCH_SND     NODE_13
+#define SUBS_CRASH_SND      NODE_14
+#define SUBS_EXPLODE_SND    NODE_15
 
 DISCRETE_SOUND_START(subs)
 	/************************************************/
@@ -108,7 +108,7 @@ DISCRETE_SOUND_START(subs)
 	/* controls the amplitude.                      */
 	/* 8V = Hsync/2/8 = 15750/2/8                   */
 	/************************************************/
-	DISCRETE_SQUAREWFIX(NODE_20, 1, 15750.0/2/8, 1.0, 50, 1.0/2, 0)	/* Resample freq. */
+	DISCRETE_SQUAREWFIX(NODE_20, 1, 15750.0/2/8, 1.0, 50, 1.0/2, 0) /* Resample freq. */
 	DISCRETE_SAMPLHOLD(NODE_21, SUBS_NOISE, NODE_20, DISC_SAMPHOLD_REDGE)
 	DISCRETE_MULTIPLY(NODE_22, NODE_21, SUBS_CRASH_DATA)
 	DISCRETE_ONOFF(SUBS_CRASH_SND, SUBS_CRASH_EN, NODE_22)
@@ -123,12 +123,12 @@ DISCRETE_SOUND_START(subs)
 	/************************************************/
 	/* Not sure how the sonar works yet.            */
 	/************************************************/
-	DISCRETE_RCDISC2(NODE_40, SUBS_SONAR1_EN, SUBS_SONAR1_EN, 680000.0, SUBS_SONAR1_EN, 1000.0, 1e-6)	/* Decay envelope */
+	DISCRETE_RCDISC2(NODE_40, SUBS_SONAR1_EN, SUBS_SONAR1_EN, 680000.0, SUBS_SONAR1_EN, 1000.0, 1e-6)   /* Decay envelope */
 	DISCRETE_ADDER2(NODE_41, 1, NODE_40, 800)
 	DISCRETE_LOGIC_AND(NODE_42, SUBS_SONAR1_EN, SUBS_NOISE)
 	DISCRETE_TRIANGLEWAVE(SUBS_SONAR1_SND, NODE_42, NODE_41, 320.8, 0.0, 0)
 
-	DISCRETE_RCDISC2(NODE_50, SUBS_SONAR2_EN, SUBS_SONAR2_EN, 18600.0, SUBS_SONAR2_EN, 20.0, 4.7e-6)	/* Decay envelope */
+	DISCRETE_RCDISC2(NODE_50, SUBS_SONAR2_EN, SUBS_SONAR2_EN, 18600.0, SUBS_SONAR2_EN, 20.0, 4.7e-6)    /* Decay envelope */
 	DISCRETE_ADDER2(NODE_51, 1, NODE_50, 800)
 	DISCRETE_LOGIC_AND(NODE_52, SUBS_SONAR2_EN, SUBS_NOISE)
 	DISCRETE_TRIANGLEWAVE(SUBS_SONAR2_SND, NODE_52, NODE_51, 320.8, 0.0, 0)

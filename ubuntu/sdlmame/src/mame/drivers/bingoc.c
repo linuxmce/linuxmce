@@ -37,26 +37,32 @@ SOUND : YM2151 uPD7759C
 class bingoc_state : public driver_device
 {
 public:
-	bingoc_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	bingoc_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) { }
 
 	UINT8 m_x;
+	DECLARE_READ16_MEMBER(bingoc_rand_r);
+	DECLARE_READ8_MEMBER(sound_test_r);
+	DECLARE_WRITE16_MEMBER(main_sound_latch_w);
+	DECLARE_WRITE8_MEMBER(bingoc_play_w);
+	virtual void video_start();
+	UINT32 screen_update_bingoc(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
 #define SOUND_TEST 0
 
-static VIDEO_START(bingoc)
+void bingoc_state::video_start()
 {
 
 }
 
-static SCREEN_UPDATE(bingoc)
+UINT32 bingoc_state::screen_update_bingoc(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	return 0;
 }
 
-static READ16_HANDLER( bingoc_rand_r )
+READ16_MEMBER(bingoc_state::bingoc_rand_r)
 {
 	return 0xffff;
 }
@@ -68,43 +74,43 @@ static READ16_HANDLER( bingoc_rand_r )
 0x80-0x85 ym2151 bgm
 0x90-0x9b ym2151 sfx
 */
-static READ8_HANDLER( sound_test_r )
+READ8_MEMBER(bingoc_state::sound_test_r)
 {
-	bingoc_state *state = space->machine().driver_data<bingoc_state>();
 
-	if(input_code_pressed_once(space->machine(), KEYCODE_Z))
-		state->m_x++;
+	if(machine().input().code_pressed_once(KEYCODE_Z))
+		m_x++;
 
-	if(input_code_pressed_once(space->machine(), KEYCODE_X))
-		state->m_x--;
+	if(machine().input().code_pressed_once(KEYCODE_X))
+		m_x--;
 
-	if(input_code_pressed_once(space->machine(), KEYCODE_A))
+	if(machine().input().code_pressed_once(KEYCODE_A))
 		return 0xff;
 
-	popmessage("%02x",state->m_x);
-	return state->m_x;
+	popmessage("%02x",m_x);
+	return m_x;
 }
 #else
-static WRITE16_HANDLER( main_sound_latch_w )
+WRITE16_MEMBER(bingoc_state::main_sound_latch_w)
 {
-	soundlatch_w(space,0,data&0xff);
-	cputag_set_input_line(space->machine(), "soundcpu", INPUT_LINE_NMI, PULSE_LINE);
+	soundlatch_byte_w(space,0,data&0xff);
+	machine().device("soundcpu")->execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 }
 #endif
 
-static WRITE8_DEVICE_HANDLER( bingoc_play_w )
+WRITE8_MEMBER(bingoc_state::bingoc_play_w)
 {
+	device_t *device = machine().device("upd");
 	/*
-    ---- --x- sound rom banking
-    ---- ---x start-stop sample
-    */
-	UINT8 *upd = device->machine().region("upd")->base();
+	---- --x- sound rom banking
+	---- ---x start-stop sample
+	*/
+	UINT8 *upd = machine().root_device().memregion("upd")->base();
 	memcpy(&upd[0x00000], &upd[0x20000 + (((data & 2)>>1) * 0x20000)], 0x20000);
 	upd7759_start_w(device, data & 1);
 //  printf("%02x\n",data);
 }
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16, bingoc_state )
 	AM_RANGE(0x000000, 0x03ffff) AM_ROM
 	AM_RANGE(0x100000, 0x10007f) AM_READ(bingoc_rand_r) //comms? lamps?
 	AM_RANGE(0x180000, 0x18007f) AM_READ(bingoc_rand_r) //comms? lamps?
@@ -114,18 +120,18 @@ static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16 )
 	AM_RANGE(0xff8000, 0xffffff) AM_RAM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, bingoc_state )
 	AM_RANGE(0x0000, 0x4fff) AM_ROM
 	AM_RANGE(0xf800, 0xffff) AM_RAM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sound_io, AS_IO, 8 )
+static ADDRESS_MAP_START( sound_io, AS_IO, 8, bingoc_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x01) AM_DEVREADWRITE("ymsnd", ym2151_r, ym2151_w)
-	AM_RANGE(0x40, 0x40) AM_DEVWRITE("upd", bingoc_play_w)
-	AM_RANGE(0x80, 0x80) AM_DEVWRITE("upd", upd7759_port_w)
+	AM_RANGE(0x00, 0x01) AM_DEVREADWRITE("ymsnd", ym2151_device, read, write)
+	AM_RANGE(0x40, 0x40) AM_WRITE(bingoc_play_w)
+	AM_RANGE(0x80, 0x80) AM_DEVWRITE_LEGACY("upd", upd7759_port_w)
 #if !SOUND_TEST
-	AM_RANGE(0xc0, 0xc0) AM_READ(soundlatch_r) //soundlatch
+	AM_RANGE(0xc0, 0xc0) AM_READ(soundlatch_byte_r) //soundlatch
 #else
 	AM_RANGE(0xc0, 0xc0) AM_READ(sound_test_r)
 #endif
@@ -138,33 +144,31 @@ INPUT_PORTS_END
 
 static MACHINE_CONFIG_START( bingoc, bingoc_state )
 
-	MCFG_CPU_ADD("maincpu", M68000,8000000)		 /* ? MHz */
+	MCFG_CPU_ADD("maincpu", M68000,8000000)      /* ? MHz */
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT("screen", irq2_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", bingoc_state,  irq2_line_hold)
 
-	MCFG_CPU_ADD("soundcpu", Z80,4000000)		 /* ? MHz */
+	MCFG_CPU_ADD("soundcpu", Z80,4000000)        /* ? MHz */
 	MCFG_CPU_PROGRAM_MAP(sound_map)
 	MCFG_CPU_IO_MAP(sound_io)
 #if SOUND_TEST
-	MCFG_CPU_VBLANK_INT("screen", nmi_line_pulse)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", bingoc_state,  nmi_line_pulse)
 #endif
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(512, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 512-1, 0, 256-1)
-	MCFG_SCREEN_UPDATE(bingoc)
+	MCFG_SCREEN_UPDATE_DRIVER(bingoc_state, screen_update_bingoc)
 
 	MCFG_PALETTE_LENGTH(0x100)
 
-	MCFG_VIDEO_START(bingoc)
 
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker") //might just be mono...
 
-	MCFG_SOUND_ADD("ymsnd", YM2151, 7159160/2)
+	MCFG_YM2151_ADD("ymsnd", 7159160/2)
 	MCFG_SOUND_ROUTE(0, "lspeaker", 1.0)
 	MCFG_SOUND_ROUTE(1, "rspeaker", 1.0)
 
@@ -190,4 +194,4 @@ ROM_START( bingoc )
 	ROM_COPY( "upd",       0x20000, 0x00000, 0x20000 )
 ROM_END
 
-GAME( 1989, bingoc,  0,    bingoc, bingoc,  0, ROT0, "Sega", "Bingo Circus (Rev. A 891001)", GAME_NOT_WORKING )
+GAME( 1989, bingoc,  0,    bingoc, bingoc, driver_device,  0, ROT0, "Sega", "Bingo Circus (Rev. A 891001)", GAME_NOT_WORKING )

@@ -143,7 +143,6 @@ Fax                  1982  6502   FXL, FLA
 
 #include "emu.h"
 #include "cpu/m6502/m6502.h"
-#include "deprecat.h"
 #include "machine/6821pia.h"
 #include "audio/exidy.h"
 #include "includes/targ.h"
@@ -156,22 +155,21 @@ Fax                  1982  6502   FXL, FLA
  *
  *************************************/
 
-static CUSTOM_INPUT( teetert_input_r )
+CUSTOM_INPUT_MEMBER(exidy_state::teetert_input_r)
 {
-	exidy_state *state = field->port->machine().driver_data<exidy_state>();
-	UINT8 dial = input_port_read(field->port->machine(), "DIAL");
+	UINT8 dial = ioport("DIAL")->read();
 	int result = 0;
 
-	result = (dial != state->m_last_dial) << 4;
+	result = (dial != m_last_dial) << 4;
 	if (result != 0)
 	{
-		if (((dial - state->m_last_dial) & 0xff) < 0x80)
+		if (((dial - m_last_dial) & 0xff) < 0x80)
 		{
 			result |= 1;
-			state->m_last_dial++;
+			m_last_dial++;
 		}
 		else
-			state->m_last_dial--;
+			m_last_dial--;
 	}
 
 	return result;
@@ -185,11 +183,11 @@ static CUSTOM_INPUT( teetert_input_r )
  *
  *************************************/
 
-static WRITE8_HANDLER( fax_bank_select_w )
+WRITE8_MEMBER(exidy_state::fax_bank_select_w)
 {
-	UINT8 *RAM = space->machine().region("maincpu")->base();
+	UINT8 *RAM = memregion("maincpu")->base();
 
-	memory_set_bankptr(space->machine(), "bank1", &RAM[0x10000 + (0x2000 * (data & 0x1f))]);
+	membank("bank1")->set_base(&RAM[0x10000 + (0x2000 * (data & 0x1f))]);
 	if ((data & 0x1f) > 0x17)
 		logerror("Banking to unpopulated ROM bank %02X!\n",data & 0x1f);
 }
@@ -202,101 +200,101 @@ static WRITE8_HANDLER( fax_bank_select_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( exidy_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( exidy_map, AS_PROGRAM, 8, exidy_state )
 	AM_RANGE(0x0000, 0x03ff) AM_RAM
-	AM_RANGE(0x4000, 0x43ff) AM_MIRROR(0x0400) AM_RAM AM_BASE_MEMBER(exidy_state, m_videoram)
-	AM_RANGE(0x5000, 0x5000) AM_MIRROR(0x003f) AM_WRITEONLY AM_BASE_MEMBER(exidy_state, m_sprite1_xpos)
-	AM_RANGE(0x5040, 0x5040) AM_MIRROR(0x003f) AM_WRITEONLY AM_BASE_MEMBER(exidy_state, m_sprite1_ypos)
-	AM_RANGE(0x5080, 0x5080) AM_MIRROR(0x003f) AM_WRITEONLY AM_BASE_MEMBER(exidy_state, m_sprite2_xpos)
-	AM_RANGE(0x50c0, 0x50c0) AM_MIRROR(0x003f) AM_WRITEONLY AM_BASE_MEMBER(exidy_state, m_sprite2_ypos)
+	AM_RANGE(0x4000, 0x43ff) AM_MIRROR(0x0400) AM_RAM AM_SHARE("videoram")
+	AM_RANGE(0x5000, 0x5000) AM_MIRROR(0x003f) AM_WRITEONLY AM_SHARE("sprite1_xpos")
+	AM_RANGE(0x5040, 0x5040) AM_MIRROR(0x003f) AM_WRITEONLY AM_SHARE("sprite1_ypos")
+	AM_RANGE(0x5080, 0x5080) AM_MIRROR(0x003f) AM_WRITEONLY AM_SHARE("sprite2_xpos")
+	AM_RANGE(0x50c0, 0x50c0) AM_MIRROR(0x003f) AM_WRITEONLY AM_SHARE("sprite2_ypos")
 	AM_RANGE(0x5100, 0x5100) AM_MIRROR(0x00fc) AM_READ_PORT("DSW")
-	AM_RANGE(0x5100, 0x5100) AM_MIRROR(0x00fc) AM_WRITEONLY AM_BASE_MEMBER(exidy_state, m_spriteno)
+	AM_RANGE(0x5100, 0x5100) AM_MIRROR(0x00fc) AM_WRITEONLY AM_SHARE("spriteno")
 	AM_RANGE(0x5101, 0x5101) AM_MIRROR(0x00fc) AM_READ_PORT("IN0")
-	AM_RANGE(0x5101, 0x5101) AM_MIRROR(0x00fc) AM_WRITEONLY AM_BASE_MEMBER(exidy_state, m_sprite_enable)
+	AM_RANGE(0x5101, 0x5101) AM_MIRROR(0x00fc) AM_WRITEONLY AM_SHARE("sprite_enable")
 	AM_RANGE(0x5103, 0x5103) AM_MIRROR(0x00fc) AM_READ(exidy_interrupt_r)
-	AM_RANGE(0x5210, 0x5212) AM_WRITEONLY AM_BASE_MEMBER(exidy_state, m_color_latch)
+	AM_RANGE(0x5210, 0x5212) AM_WRITEONLY AM_SHARE("color_latch")
 	AM_RANGE(0x5213, 0x5213) AM_READ_PORT("IN2")
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( sidetrac_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sidetrac_map, AS_PROGRAM, 8, exidy_state )
 	AM_RANGE(0x0800, 0x3fff) AM_ROM
-	AM_RANGE(0x4800, 0x4fff) AM_ROM AM_BASE_MEMBER(exidy_state, m_characterram)
-	AM_RANGE(0x5200, 0x5200) AM_WRITE(targ_audio_1_w)
-	AM_RANGE(0x5201, 0x5201) AM_WRITE(spectar_audio_2_w)
+	AM_RANGE(0x4800, 0x4fff) AM_ROM AM_SHARE("characterram")
+	AM_RANGE(0x5200, 0x5200) AM_WRITE_LEGACY(targ_audio_1_w)
+	AM_RANGE(0x5201, 0x5201) AM_WRITE_LEGACY(spectar_audio_2_w)
 	AM_RANGE(0xff00, 0xffff) AM_ROM AM_REGION("maincpu", 0x3f00)
 	AM_IMPORT_FROM(exidy_map)
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( targ_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( targ_map, AS_PROGRAM, 8, exidy_state )
 	AM_RANGE(0x0800, 0x3fff) AM_ROM
-	AM_RANGE(0x4800, 0x4fff) AM_RAM AM_BASE_MEMBER(exidy_state, m_characterram)
-	AM_RANGE(0x5200, 0x5200) AM_WRITE(targ_audio_1_w)
-	AM_RANGE(0x5201, 0x5201) AM_WRITE(targ_audio_2_w)
+	AM_RANGE(0x4800, 0x4fff) AM_RAM AM_SHARE("characterram")
+	AM_RANGE(0x5200, 0x5200) AM_WRITE_LEGACY(targ_audio_1_w)
+	AM_RANGE(0x5201, 0x5201) AM_WRITE_LEGACY(targ_audio_2_w)
 	AM_RANGE(0xff00, 0xffff) AM_ROM AM_REGION("maincpu", 0x3f00)
 	AM_IMPORT_FROM(exidy_map)
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( spectar_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( spectar_map, AS_PROGRAM, 8, exidy_state )
 	AM_RANGE(0x0800, 0x3fff) AM_ROM
-	AM_RANGE(0x4800, 0x4fff) AM_RAM AM_BASE_MEMBER(exidy_state, m_characterram)
-	AM_RANGE(0x5200, 0x5200) AM_WRITE(targ_audio_1_w)
-	AM_RANGE(0x5201, 0x5201) AM_WRITE(spectar_audio_2_w)
+	AM_RANGE(0x4800, 0x4fff) AM_RAM AM_SHARE("characterram")
+	AM_RANGE(0x5200, 0x5200) AM_WRITE_LEGACY(targ_audio_1_w)
+	AM_RANGE(0x5201, 0x5201) AM_WRITE_LEGACY(spectar_audio_2_w)
 	AM_RANGE(0xff00, 0xffff) AM_ROM AM_REGION("maincpu", 0x3f00)
 	AM_IMPORT_FROM(exidy_map)
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( rallys_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( rallys_map, AS_PROGRAM, 8, exidy_state )
 	AM_RANGE(0x0000, 0x03ff) AM_RAM
 	AM_RANGE(0x0800, 0x3fff) AM_ROM
-	AM_RANGE(0x4000, 0x43ff) AM_MIRROR(0x0400) AM_RAM AM_BASE_MEMBER(exidy_state, m_videoram)
-	AM_RANGE(0x4800, 0x4fff) AM_RAM AM_BASE_MEMBER(exidy_state, m_characterram)
-	AM_RANGE(0x5000, 0x5000) AM_WRITEONLY AM_BASE_MEMBER(exidy_state, m_sprite1_xpos)
-	AM_RANGE(0x5001, 0x5001) AM_WRITEONLY AM_BASE_MEMBER(exidy_state, m_sprite1_ypos)
+	AM_RANGE(0x4000, 0x43ff) AM_MIRROR(0x0400) AM_RAM AM_SHARE("videoram")
+	AM_RANGE(0x4800, 0x4fff) AM_RAM AM_SHARE("characterram")
+	AM_RANGE(0x5000, 0x5000) AM_WRITEONLY AM_SHARE("sprite1_xpos")
+	AM_RANGE(0x5001, 0x5001) AM_WRITEONLY AM_SHARE("sprite1_ypos")
 	AM_RANGE(0x5100, 0x5100) AM_MIRROR(0x00fc) AM_READ_PORT("DSW")
-	AM_RANGE(0x5100, 0x5100) AM_MIRROR(0x00fc) AM_WRITEONLY AM_BASE_MEMBER(exidy_state, m_spriteno)
+	AM_RANGE(0x5100, 0x5100) AM_MIRROR(0x00fc) AM_WRITEONLY AM_SHARE("spriteno")
 	AM_RANGE(0x5101, 0x5101) AM_MIRROR(0x00fc) AM_READ_PORT("IN0")
-	AM_RANGE(0x5101, 0x5101) AM_MIRROR(0x00fc) AM_WRITEONLY AM_BASE_MEMBER(exidy_state, m_sprite_enable)
+	AM_RANGE(0x5101, 0x5101) AM_MIRROR(0x00fc) AM_WRITEONLY AM_SHARE("sprite_enable")
 	AM_RANGE(0x5103, 0x5103) AM_MIRROR(0x00fc) AM_READ(exidy_interrupt_r)
-	AM_RANGE(0x5200, 0x5200) AM_WRITE(targ_audio_1_w)
-	AM_RANGE(0x5201, 0x5201) AM_WRITE(spectar_audio_2_w)
-	AM_RANGE(0x5210, 0x5212) AM_WRITEONLY AM_BASE_MEMBER(exidy_state, m_color_latch)
+	AM_RANGE(0x5200, 0x5200) AM_WRITE_LEGACY(targ_audio_1_w)
+	AM_RANGE(0x5201, 0x5201) AM_WRITE_LEGACY(spectar_audio_2_w)
+	AM_RANGE(0x5210, 0x5212) AM_WRITEONLY AM_SHARE("color_latch")
 	AM_RANGE(0x5213, 0x5213) AM_READ_PORT("IN2")
-	AM_RANGE(0x5300, 0x5300) AM_WRITEONLY AM_BASE_MEMBER(exidy_state, m_sprite2_xpos)
-	AM_RANGE(0x5301, 0x5301) AM_WRITEONLY AM_BASE_MEMBER(exidy_state, m_sprite2_ypos)
+	AM_RANGE(0x5300, 0x5300) AM_WRITEONLY AM_SHARE("sprite2_xpos")
+	AM_RANGE(0x5301, 0x5301) AM_WRITEONLY AM_SHARE("sprite2_ypos")
 	AM_RANGE(0xff00, 0xffff) AM_ROM AM_REGION("maincpu", 0x3f00)
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( venture_map, AS_PROGRAM, 8 )
-	AM_RANGE(0x4800, 0x4fff) AM_RAM AM_BASE_MEMBER(exidy_state, m_characterram)
-	AM_RANGE(0x5200, 0x520f) AM_DEVREADWRITE("pia0", pia6821_r, pia6821_w)
+static ADDRESS_MAP_START( venture_map, AS_PROGRAM, 8, exidy_state )
+	AM_RANGE(0x4800, 0x4fff) AM_RAM AM_SHARE("characterram")
+	AM_RANGE(0x5200, 0x520f) AM_DEVREADWRITE("pia0", pia6821_device, read, write)
 	AM_RANGE(0x8000, 0xffff) AM_ROM
 	AM_IMPORT_FROM(exidy_map)
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( pepper2_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( pepper2_map, AS_PROGRAM, 8, exidy_state )
 	AM_RANGE(0x4800, 0x4fff) AM_NOP
-	AM_RANGE(0x5200, 0x520f) AM_DEVREADWRITE("pia0", pia6821_r, pia6821_w)
-	AM_RANGE(0x6000, 0x6fff) AM_RAM AM_BASE_MEMBER(exidy_state, m_characterram)
+	AM_RANGE(0x5200, 0x520f) AM_DEVREADWRITE("pia0", pia6821_device, read, write)
+	AM_RANGE(0x6000, 0x6fff) AM_RAM AM_SHARE("characterram")
 	AM_RANGE(0x8000, 0xffff) AM_ROM
 	AM_IMPORT_FROM(exidy_map)
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( fax_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( fax_map, AS_PROGRAM, 8, exidy_state )
 	AM_RANGE(0x0400, 0x07ff) AM_RAM
 	AM_RANGE(0x1a00, 0x1a00) AM_READ_PORT("IN4")
 	AM_RANGE(0x1c00, 0x1c00) AM_READ_PORT("IN3")
 	AM_RANGE(0x2000, 0x2000) AM_WRITE(fax_bank_select_w)
 	AM_RANGE(0x2000, 0x3fff) AM_ROMBANK("bank1")
-	AM_RANGE(0x5200, 0x520f) AM_DEVREADWRITE("pia0", pia6821_r, pia6821_w)
-	AM_RANGE(0x5213, 0x5217) AM_WRITENOP		/* empty control lines on color/sound board */
-	AM_RANGE(0x6000, 0x6fff) AM_RAM AM_BASE_MEMBER(exidy_state, m_characterram)
+	AM_RANGE(0x5200, 0x520f) AM_DEVREADWRITE("pia0", pia6821_device, read, write)
+	AM_RANGE(0x5213, 0x5217) AM_WRITENOP        /* empty control lines on color/sound board */
+	AM_RANGE(0x6000, 0x6fff) AM_RAM AM_SHARE("characterram")
 	AM_RANGE(0x8000, 0xffff) AM_ROM
 	AM_IMPORT_FROM(exidy_map)
 ADDRESS_MAP_END
@@ -381,7 +379,7 @@ static INPUT_PORTS_START( targ )
 	PORT_BIT( 0x1f, IP_ACTIVE_HIGH, IPT_SPECIAL )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_COIN2 )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_COIN1 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 
 	PORT_START("IN2")
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -406,14 +404,14 @@ static INPUT_PORTS_START( rallys )
 
 	PORT_MODIFY("DSW")
 	PORT_DIPNAME( 0x03, 0x01, DEF_STR( Coinage ) ) PORT_DIPLOCATION("SW1:1,2")
-	PORT_DIPSETTING(    0x00, DEF_STR( 2C_1C ) )		PORT_CONDITION("DSW", 0x80, PORTCOND_EQUALS, 0x00)
-	PORT_DIPSETTING(    0x01, DEF_STR( 1C_1C ) )		PORT_CONDITION("DSW", 0x80, PORTCOND_EQUALS, 0x00)
-	PORT_DIPSETTING(    0x02, DEF_STR( 1C_2C ) )		PORT_CONDITION("DSW", 0x80, PORTCOND_EQUALS, 0x00)
-	PORT_DIPSETTING(    0x03, DEF_STR( 1C_3C ) )		PORT_CONDITION("DSW", 0x80, PORTCOND_EQUALS, 0x00)
-	PORT_DIPSETTING(    0x00, "2C/1P, 50P Coin/3P" )	PORT_CONDITION("DSW", 0x80, PORTCOND_NOTEQUALS, 0x00)
-	PORT_DIPSETTING(    0x01, "1C/1P, 50P Coin/6P" )	PORT_CONDITION("DSW", 0x80, PORTCOND_NOTEQUALS, 0x00)
-	PORT_DIPSETTING(    0x02, "1C/2P, 50P Coin/12P" )	PORT_CONDITION("DSW", 0x80, PORTCOND_NOTEQUALS, 0x00)
-	PORT_DIPSETTING(    0x03, "1C/3P, 50P Coin/18P" )	PORT_CONDITION("DSW", 0x80, PORTCOND_NOTEQUALS, 0x00)
+	PORT_DIPSETTING(    0x00, DEF_STR( 2C_1C ) )        PORT_CONDITION("DSW", 0x80, EQUALS, 0x00)
+	PORT_DIPSETTING(    0x01, DEF_STR( 1C_1C ) )        PORT_CONDITION("DSW", 0x80, EQUALS, 0x00)
+	PORT_DIPSETTING(    0x02, DEF_STR( 1C_2C ) )        PORT_CONDITION("DSW", 0x80, EQUALS, 0x00)
+	PORT_DIPSETTING(    0x03, DEF_STR( 1C_3C ) )        PORT_CONDITION("DSW", 0x80, EQUALS, 0x00)
+	PORT_DIPSETTING(    0x00, "2C/1P, 50P Coin/3P" )    PORT_CONDITION("DSW", 0x80, NOTEQUALS, 0x00)
+	PORT_DIPSETTING(    0x01, "1C/1P, 50P Coin/6P" )    PORT_CONDITION("DSW", 0x80, NOTEQUALS, 0x00)
+	PORT_DIPSETTING(    0x02, "1C/2P, 50P Coin/12P" )   PORT_CONDITION("DSW", 0x80, NOTEQUALS, 0x00)
+	PORT_DIPSETTING(    0x03, "1C/3P, 50P Coin/18P" )   PORT_CONDITION("DSW", 0x80, NOTEQUALS, 0x00)
 	PORT_DIPNAME( 0x04, 0x00, "Top Score Award" ) PORT_DIPLOCATION("SW1:3")
 	PORT_DIPSETTING(    0x00, "Credit" )
 	PORT_DIPSETTING(    0x04, "Extended Play" )
@@ -447,14 +445,14 @@ static INPUT_PORTS_START( phantoma )
 
 	PORT_MODIFY("DSW")
 	PORT_DIPNAME( 0x03, 0x01, DEF_STR( Coinage ) ) PORT_DIPLOCATION("SW1:1,2")
-	PORT_DIPSETTING(    0x00, DEF_STR( 2C_1C ) )		PORT_CONDITION("DSW", 0x80, PORTCOND_EQUALS, 0x00)
-	PORT_DIPSETTING(    0x01, DEF_STR( 1C_1C ) )		PORT_CONDITION("DSW", 0x80, PORTCOND_EQUALS, 0x00)
-	PORT_DIPSETTING(    0x02, DEF_STR( 1C_2C ) )		PORT_CONDITION("DSW", 0x80, PORTCOND_EQUALS, 0x00)
-	PORT_DIPSETTING(    0x03, DEF_STR( 1C_3C ) )		PORT_CONDITION("DSW", 0x80, PORTCOND_EQUALS, 0x00)
-	PORT_DIPSETTING(    0x00, "2F/1P, 5F Coin/3P" )		PORT_CONDITION("DSW", 0x80, PORTCOND_NOTEQUALS, 0x00)
-	PORT_DIPSETTING(    0x01, "1F/1P, 5F Coin/6P" )		PORT_CONDITION("DSW", 0x80, PORTCOND_NOTEQUALS, 0x00)
-	PORT_DIPSETTING(    0x02, "1F/2P, 5F Coin/12P" )	PORT_CONDITION("DSW", 0x80, PORTCOND_NOTEQUALS, 0x00)
-	PORT_DIPSETTING(    0x03, "1F/3P, 5F Coin/18P" )	PORT_CONDITION("DSW", 0x80, PORTCOND_NOTEQUALS, 0x00)
+	PORT_DIPSETTING(    0x00, DEF_STR( 2C_1C ) )        PORT_CONDITION("DSW", 0x80, EQUALS, 0x00)
+	PORT_DIPSETTING(    0x01, DEF_STR( 1C_1C ) )        PORT_CONDITION("DSW", 0x80, EQUALS, 0x00)
+	PORT_DIPSETTING(    0x02, DEF_STR( 1C_2C ) )        PORT_CONDITION("DSW", 0x80, EQUALS, 0x00)
+	PORT_DIPSETTING(    0x03, DEF_STR( 1C_3C ) )        PORT_CONDITION("DSW", 0x80, EQUALS, 0x00)
+	PORT_DIPSETTING(    0x00, "2F/1P, 5F Coin/3P" )     PORT_CONDITION("DSW", 0x80, NOTEQUALS, 0x00)
+	PORT_DIPSETTING(    0x01, "1F/1P, 5F Coin/6P" )     PORT_CONDITION("DSW", 0x80, NOTEQUALS, 0x00)
+	PORT_DIPSETTING(    0x02, "1F/2P, 5F Coin/12P" )    PORT_CONDITION("DSW", 0x80, NOTEQUALS, 0x00)
+	PORT_DIPSETTING(    0x03, "1F/3P, 5F Coin/18P" )    PORT_CONDITION("DSW", 0x80, NOTEQUALS, 0x00)
 INPUT_PORTS_END
 
 
@@ -509,7 +507,7 @@ static INPUT_PORTS_START( mtrap )
 	PORT_BIT( 0x1f, IP_ACTIVE_HIGH, IPT_SPECIAL )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_COIN2 )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_COIN1 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 
 	PORT_START("IN2")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_NAME("Yellow Button")
@@ -571,7 +569,7 @@ static INPUT_PORTS_START( venture )
 	PORT_BIT( 0x1f, IP_ACTIVE_HIGH, IPT_SPECIAL )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_COIN2 )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_COIN1 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 
 	PORT_START("IN2")
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -604,7 +602,7 @@ static INPUT_PORTS_START( teetert )
 	PORT_START("IN0")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START2 )
-	PORT_BIT( 0x44, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(teetert_input_r, NULL)
+	PORT_BIT( 0x44, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, exidy_state,teetert_input_r, NULL)
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -627,7 +625,7 @@ static INPUT_PORTS_START( teetert )
 	PORT_BIT( 0x1f, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_COIN2 )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_COIN1 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 
 	PORT_START("IN2")
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -645,12 +643,12 @@ static INPUT_PORTS_START( pepper2 )
 	PORT_DIPSETTING(    0x04, "50000" )
 	PORT_DIPSETTING(    0x02, "60000" )
 	PORT_DIPSETTING(    0x00, "70000" )
-        PORT_DIPNAME( 0x60, 0x40, DEF_STR( Lives ) ) PORT_DIPLOCATION("SW1:6,7")
+		PORT_DIPNAME( 0x60, 0x40, DEF_STR( Lives ) ) PORT_DIPLOCATION("SW1:6,7")
 	PORT_DIPSETTING(    0x60, "2" )
 	PORT_DIPSETTING(    0x40, "3" )
 	PORT_DIPSETTING(    0x20, "4" )
 	PORT_DIPSETTING(    0x00, "5" )
-        PORT_DIPNAME( 0x98, 0x98, DEF_STR( Coinage ) ) PORT_DIPLOCATION("SW1:4,5,8")
+		PORT_DIPNAME( 0x98, 0x98, DEF_STR( Coinage ) ) PORT_DIPLOCATION("SW1:4,5,8")
 	PORT_DIPSETTING(    0x90, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x00, "Coin A 2C/1C Coin B 1C/3C" )
 	PORT_DIPSETTING(    0x98, DEF_STR( 1C_1C ) )
@@ -687,7 +685,7 @@ static INPUT_PORTS_START( pepper2 )
 	PORT_BIT( 0x1f, IP_ACTIVE_HIGH, IPT_SPECIAL )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_COIN2 )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_COIN1 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 
 	PORT_START("IN2")
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -739,7 +737,7 @@ static INPUT_PORTS_START( fax )
 	PORT_BIT( 0x1f, IP_ACTIVE_HIGH, IPT_SPECIAL )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_COIN2 )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_COIN1 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 
 	PORT_START("IN2")
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -793,10 +791,9 @@ GFXDECODE_END
  *
  *************************************/
 
-static MACHINE_START( teetert )
+MACHINE_START_MEMBER(exidy_state,teetert)
 {
-	exidy_state *state = machine.driver_data<exidy_state>();
-	state_save_register_global(machine, state->m_last_dial);
+	state_save_register_global(machine(), m_last_dial);
 }
 
 /*************************************
@@ -809,18 +806,16 @@ static MACHINE_CONFIG_START( base, exidy_state )
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6502, EXIDY_CPU_CLOCK)
-	MCFG_CPU_VBLANK_INT("screen", exidy_vblank_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", exidy_state,  exidy_vblank_interrupt)
 
 	/* video hardware */
 	MCFG_VIDEO_ATTRIBUTES(VIDEO_ALWAYS_UPDATE)
-	MCFG_VIDEO_START(exidy)
 	MCFG_GFXDECODE(exidy)
 	MCFG_PALETTE_LENGTH(8)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_RAW_PARAMS(EXIDY_PIXEL_CLOCK, EXIDY_HTOTAL, EXIDY_HBEND, EXIDY_HBSTART, EXIDY_VTOTAL, EXIDY_VBEND, EXIDY_VBSTART)
-	MCFG_SCREEN_UPDATE(exidy)
+	MCFG_SCREEN_UPDATE_DRIVER(exidy_state, screen_update_exidy)
 
 MACHINE_CONFIG_END
 
@@ -883,9 +878,9 @@ static MACHINE_CONFIG_DERIVED( teetert, venture )
 
 	/* basic machine hardware */
 	MCFG_CPU_MODIFY("maincpu")
-	MCFG_CPU_VBLANK_INT_HACK(teetert_vblank_interrupt,10)
+	MCFG_CPU_PERIODIC_INT_DRIVER(exidy_state, nmi_line_pulse, 10*60)
 
-	MCFG_MACHINE_START( teetert )
+	MCFG_MACHINE_START_OVERRIDE(exidy_state, teetert )
 
 MACHINE_CONFIG_END
 
@@ -948,12 +943,12 @@ ROM_START( targ )
 	ROM_LOAD( "hrl11d-1", 0x0000, 0x0400, CRC(9f03513e) SHA1(aa4763e49df65e5686a96431543580b8d8285893) )
 
 	ROM_REGION( 0x0140, "proms", 0 )
-	ROM_LOAD( "hrl5c-1",  0x0000, 0x0100, CRC(a24290d0) SHA1(5f2888d168de874021b51c5d19a62fb8165e4454) )	/* address decoder */
-	ROM_LOAD( "stl6d-1",  0x0100, 0x0020, CRC(e26f9053) SHA1(eec35b6aa2c2d305418306bf4a1754a0583f109f) )	/* unknown */
-	ROM_LOAD( "hrl14h-1", 0x0120, 0x0020, CRC(f76b4fcf) SHA1(197e0cc508ffeb5cefa4046bdfb158939d598225) )	/* unknown */
+	ROM_LOAD( "hrl5c-1",  0x0000, 0x0100, CRC(a24290d0) SHA1(5f2888d168de874021b51c5d19a62fb8165e4454) )    /* address decoder */
+	ROM_LOAD( "stl6d-1",  0x0100, 0x0020, CRC(e26f9053) SHA1(eec35b6aa2c2d305418306bf4a1754a0583f109f) )    /* unknown */
+	ROM_LOAD( "hrl14h-1", 0x0120, 0x0020, CRC(f76b4fcf) SHA1(197e0cc508ffeb5cefa4046bdfb158939d598225) )    /* unknown */
 
 	ROM_REGION( 0x0020, "targ", 0 )
-	ROM_LOAD( "hra2b-1",  0x0000, 0x0020, CRC(38e8024b) SHA1(adf1c1770695f7614c95eceb803f662c5b096a76) )	/* unknown */
+	ROM_LOAD( "hra2b-1",  0x0000, 0x0020, CRC(38e8024b) SHA1(adf1c1770695f7614c95eceb803f662c5b096a76) )    /* unknown */
 ROM_END
 
 
@@ -969,7 +964,7 @@ ROM_START( targc )
 	ROM_LOAD( "hrl11d-1", 0x0000, 0x0400, CRC(9f03513e) SHA1(aa4763e49df65e5686a96431543580b8d8285893) )
 
 	ROM_REGION( 0x0020, "targ", 0 )
-	ROM_LOAD( "hra2b-1",  0x0000, 0x0020, CRC(38e8024b) SHA1(adf1c1770695f7614c95eceb803f662c5b096a76) )	/* unknown */
+	ROM_LOAD( "hra2b-1",  0x0000, 0x0020, CRC(38e8024b) SHA1(adf1c1770695f7614c95eceb803f662c5b096a76) )    /* unknown */
 ROM_END
 
 
@@ -1021,7 +1016,27 @@ ROM_START( rallys )
 	ROM_LOAD( "hrl11d-1",    0x0000, 0x0400, CRC(9f03513e) SHA1(aa4763e49df65e5686a96431543580b8d8285893) )
 
 	ROM_REGION( 0x0020, "proms", 0 )
-	ROM_LOAD( "targ82s.123", 0x0000, 0x0020, CRC(9eb9125c) SHA1(660ad9b2c7c28c3fda4b10c1401c03165d131c61) )	/* unknown */
+	ROM_LOAD( "targ82s.123", 0x0000, 0x0020, CRC(9eb9125c) SHA1(660ad9b2c7c28c3fda4b10c1401c03165d131c61) ) /* unknown */
+ROM_END
+
+ROM_START( rallysa )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "rallys.01",   0x1000, 0x0400, CRC(a192b22b) SHA1(aaae0b1822f934df30b354f787ffa8848c71b52f) ) // 1a
+	ROM_LOAD( "rallys.02",   0x1400, 0x0400, CRC(19e730aa) SHA1(4f4e87d26c14a9ff2be5b4173c4e5804db551e33) ) // 2a
+	ROM_LOAD( "rallys.03",   0x1800, 0x0400, CRC(2a3e7b69) SHA1(d31a3e6acca87881741e88e70d46a4a0ee59fcf8) ) // 3a
+	ROM_LOAD( "rallys.04",   0x1c00, 0x0400, CRC(6d224696) SHA1(586bc8efdc8ac0a73e4a4300459efaf89021f6f5) ) // 4a
+	ROM_LOAD( "rallys.05",   0x2000, 0x0400, CRC(af943b5e) SHA1(819fa8a6ee78a39cdade49789cd42b4a215f82f0) ) // 5a
+	ROM_LOAD( "rallys.06",   0x2400, 0x0400, CRC(9b3d9e61) SHA1(b183e0844706713eb0a241a6e45c09c53e4077a3) ) // 6a
+	ROM_LOAD( "rallys.07",   0x2800, 0x0400, CRC(8ef8bc67) SHA1(c8d80cc8e89a9bc5d957d648d704e4c66b17932d) ) // p7
+	ROM_LOAD( "rallys.08",   0x2c00, 0x0400, CRC(243c54f2) SHA1(813b3ecbd5642034b5de0bae96698ed2b036fc7b) ) // p8
+	ROM_LOAD( "rallys.10",   0x3400, 0x0400, CRC(46f473d2) SHA1(e6a180fdcf2ac13ffab624554ef8aab128e80321) ) // 10b
+	ROM_LOAD( "unk.c13",     0x3c00, 0x0400, CRC(57527332) SHA1(1c6ff898a06cc4fde01f39d1222e36cf762c4345) )
+
+	ROM_REGION( 0x0400, "gfx1", 0 )
+	ROM_LOAD( "hrl11d-1",    0x0000, 0x0400, CRC(9f03513e) SHA1(aa4763e49df65e5686a96431543580b8d8285893) ) // 5c
+
+	ROM_REGION( 0x0020, "proms", 0 )
+	ROM_LOAD( "6331.f6",     0x0000, 0x0020, CRC(9fb1daee) SHA1(2ec1189a57c95d7ad820eb12343fcf2c3fb08431) ) /* unknown */
 ROM_END
 
 ROM_START( panzer )
@@ -1041,7 +1056,7 @@ ROM_START( panzer )
 	ROM_LOAD( "sc.4d",    0x0000, 0x0400, CRC(9f03513e) SHA1(aa4763e49df65e5686a96431543580b8d8285893) )
 
 	ROM_REGION( 0x0020, "proms", 0 )
-	ROM_LOAD( "targ82s.123", 0x0000, 0x0020, CRC(9eb9125c) SHA1(660ad9b2c7c28c3fda4b10c1401c03165d131c61) )	/* unknown */
+	ROM_LOAD( "targ82s.123", 0x0000, 0x0020, CRC(9eb9125c) SHA1(660ad9b2c7c28c3fda4b10c1401c03165d131c61) ) /* unknown */
 ROM_END
 
 ROM_START( phantoma )
@@ -1240,6 +1255,25 @@ ROM_START( pepper2 )
 ROM_END
 
 
+ROM_START( pepper27 )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "p2l12ar7.bin", 0x9000, 0x1000, CRC(b3bc51cd) SHA1(12475ac5784bb2ab6887476ee8166c3585864cd6) )
+	ROM_LOAD( "p2l11ar7.bin", 0xa000, 0x1000, CRC(c8b834cd) SHA1(28b4de322de845effaa1d2fc6c9f129145965b8a) )
+	ROM_LOAD( "p2l10ar7.bin", 0xb000, 0x1000, CRC(c3e864a2) SHA1(cfc769b34d181724a5826d3a1bb3313ef5fbbd62) )
+	ROM_LOAD( "p2l9ar7.bin",  0xc000, 0x1000, CRC(451003b2) SHA1(87b9aecfcf861b3d812f0e3c23b40c98c198e933) )
+	ROM_LOAD( "p2l8ar7.bin",  0xd000, 0x1000, CRC(c666cafb) SHA1(5783fcfeeb651c850a1d9676e97a6beaafb06c6e) )
+	ROM_LOAD( "p2l7ar7.bin",  0xe000, 0x1000, CRC(ac1282ef) SHA1(34023d8a01c1f26ec8268d7387660d6f7e875014) )
+	ROM_LOAD( "p2l6ar7.bin",  0xf000, 0x1000, CRC(db8dd4fc) SHA1(9ae00f8d1a19280670dc65a20cf9cc4e7f1cc973) )
+
+	ROM_REGION( 0x8000, "audiocpu", 0 )
+	ROM_LOAD( "audio_5a", 0x6800, 0x0800, CRC(90e3c781) SHA1(d51a9e011167a132e8af9f4b1201600a58e86b62) )
+	ROM_LOAD( "audio_6a", 0x7000, 0x0800, CRC(dd343e34) SHA1(4ec55bb73d6afbd167fa91d2606d1d55a15b5c39) )
+	ROM_LOAD( "audio_7a", 0x7800, 0x0800, CRC(e02b4356) SHA1(9891e14d84221c1d6f2d15a29813eb41024290ca) )
+
+	ROM_REGION( 0x0800, "gfx1", 0 )
+	ROM_LOAD( "main_11d", 0x0000, 0x0800, CRC(b25160cd) SHA1(3d768552960a3a660891dcb85da6a5c382b33991) )
+ROM_END
+
 ROM_START( hardhat )
 	ROM_REGION( 0x10000, "maincpu", 0 )
 	ROM_LOAD( "hhl-2.11a", 0xa000, 0x1000, CRC(7623deea) SHA1(3c47c0439c80e66536af42c5ee4e522fea5f8374) )
@@ -1326,6 +1360,13 @@ ROM_START( fax )
 
 	ROM_REGION( 0x0800, "gfx1", 0 )
 	ROM_LOAD( "fxl1-11d.32",  0x0000, 0x0800, CRC(62083db2) SHA1(0c6e90b73419bff53f991e66d4faa9495c7d8e09) )
+
+// loaded, but not hooked up
+	ROM_REGION( 0x0240, "proms", 0 )
+	ROM_LOAD( "fxl-6b",   0x0000, 0x0100, CRC(e1e867ae) SHA1(fe4cb560860579102aedad2c81fd7bed5825f484) )
+	ROM_LOAD( "fxl-8b",   0x0100, 0x0020, CRC(0da1bdf9) SHA1(0c2d85da59cf86f2d9cf5f33bdc63902ca5507d3) )
+	ROM_LOAD( "fxl-11b",  0x0120, 0x0020, CRC(f76b4fcf) SHA1(197e0cc508ffeb5cefa4046bdfb158939d598225) )
+	ROM_LOAD( "fxl-12b",  0x0140, 0x0100, CRC(6b5aa3d7) SHA1(bfc4a6d01b977d55ad4dadc0123339343f1aa975) )
 ROM_END
 
 
@@ -1372,6 +1413,13 @@ ROM_START( fax2 )
 
 	ROM_REGION( 0x0800, "gfx1", 0 )
 	ROM_LOAD( "fxl1-11d.32",   0x0000, 0x0800, CRC(62083db2) SHA1(0c6e90b73419bff53f991e66d4faa9495c7d8e09) )
+
+// loaded, but not hooked up
+	ROM_REGION( 0x0240, "proms", 0 )
+	ROM_LOAD( "fxl-6b",   0x0000, 0x0100, CRC(e1e867ae) SHA1(fe4cb560860579102aedad2c81fd7bed5825f484) )
+	ROM_LOAD( "fxl-8b",   0x0100, 0x0020, CRC(0da1bdf9) SHA1(0c2d85da59cf86f2d9cf5f33bdc63902ca5507d3) )
+	ROM_LOAD( "fxl-11b",  0x0120, 0x0020, CRC(f76b4fcf) SHA1(197e0cc508ffeb5cefa4046bdfb158939d598225) )
+	ROM_LOAD( "fxl-12b",  0x0140, 0x0100, CRC(6b5aa3d7) SHA1(bfc4a6d01b977d55ad4dadc0123339343f1aa975) )
 ROM_END
 
 
@@ -1382,97 +1430,92 @@ ROM_END
  *
  *************************************/
 
-static DRIVER_INIT( sidetrac )
+DRIVER_INIT_MEMBER(exidy_state,sidetrac)
 {
-	exidy_state *state = machine.driver_data<exidy_state>();
-	exidy_video_config(machine, 0x00, 0x00, FALSE);
+	exidy_video_config(machine(), 0x00, 0x00, FALSE);
 
 	/* hard-coded palette controlled via 8x3 DIP switches on the board */
-	state->m_color_latch[2] = 0xf8;
-	state->m_color_latch[1] = 0xdc;
-	state->m_color_latch[0] = 0xb8;
+	m_color_latch[2] = 0xf8;
+	m_color_latch[1] = 0xdc;
+	m_color_latch[0] = 0xb8;
 }
 
 
-static DRIVER_INIT( targ )
+DRIVER_INIT_MEMBER(exidy_state,targ)
 {
-	exidy_state *state = machine.driver_data<exidy_state>();
-	exidy_video_config(machine, 0x00, 0x00, FALSE);
+	exidy_video_config(machine(), 0x00, 0x00, FALSE);
 
 	/* hard-coded palette controlled via 8x3 DIP switches on the board */
-	state->m_color_latch[2] = 0x5c;
-	state->m_color_latch[1] = 0xee;
-	state->m_color_latch[0] = 0x6b;
+	m_color_latch[2] = 0x5c;
+	m_color_latch[1] = 0xee;
+	m_color_latch[0] = 0x6b;
 }
 
 
-static DRIVER_INIT( spectar )
+DRIVER_INIT_MEMBER(exidy_state,spectar)
 {
-	exidy_state *state = machine.driver_data<exidy_state>();
-	exidy_video_config(machine, 0x00, 0x00, FALSE);
+	exidy_video_config(machine(), 0x00, 0x00, FALSE);
 
 	/* hard-coded palette controlled via 8x3 DIP switches on the board */
-	state->m_color_latch[2] = 0x58;
-	state->m_color_latch[1] = 0xee;
-	state->m_color_latch[0] = 0x09;
+	m_color_latch[2] = 0x58;
+	m_color_latch[1] = 0xee;
+	m_color_latch[0] = 0x09;
 }
 
-static DRIVER_INIT( rallys )
+DRIVER_INIT_MEMBER(exidy_state,rallys)
 {
-	exidy_state *state = machine.driver_data<exidy_state>();
-	exidy_video_config(machine, 0x00, 0x00, FALSE);
+	exidy_video_config(machine(), 0x00, 0x00, FALSE);
 
 	/* hard-coded palette controlled via 8x3 DIP switches on the board */
-	state->m_color_latch[2] = 0x58;
-	state->m_color_latch[1] = 0xee;
-	state->m_color_latch[0] = 0x09;
+	m_color_latch[2] = 0x58;
+	m_color_latch[1] = 0xee;
+	m_color_latch[0] = 0x09;
 }
 
-static DRIVER_INIT( phantoma )
+DRIVER_INIT_MEMBER(exidy_state,phantoma)
 {
-	exidy_state *state = machine.driver_data<exidy_state>();
-	exidy_video_config(machine, 0x00, 0x00, FALSE);
+	exidy_video_config(machine(), 0x00, 0x00, FALSE);
 
 	/* hard-coded palette controlled via 8x3 DIP switches on the board */
-	state->m_color_latch[2] = 0x58;
-	state->m_color_latch[1] = 0xee;
-	state->m_color_latch[0] = 0x09;
+	m_color_latch[2] = 0x58;
+	m_color_latch[1] = 0xee;
+	m_color_latch[0] = 0x09;
 
 	/* the ROM is actually mapped high */
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_read_bank(0xf800, 0xffff, "bank1");
-	memory_set_bankptr(machine, "bank1", machine.region("maincpu")->base() + 0xf800);
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_bank(0xf800, 0xffff, "bank1");
+	membank("bank1")->set_base(memregion("maincpu")->base() + 0xf800);
 }
 
 
-static DRIVER_INIT( mtrap )
+DRIVER_INIT_MEMBER(exidy_state,mtrap)
 {
-	exidy_video_config(machine, 0x14, 0x00, FALSE);
+	exidy_video_config(machine(), 0x14, 0x00, FALSE);
 }
 
 
-static DRIVER_INIT( venture )
+DRIVER_INIT_MEMBER(exidy_state,venture)
 {
-	exidy_video_config(machine, 0x04, 0x04, FALSE);
+	exidy_video_config(machine(), 0x04, 0x04, FALSE);
 }
 
 
-static DRIVER_INIT( teetert )
+DRIVER_INIT_MEMBER(exidy_state,teetert)
 {
-	exidy_video_config(machine, 0x0c, 0x0c, FALSE);
+	exidy_video_config(machine(), 0x0c, 0x0c, FALSE);
 }
 
 
-static DRIVER_INIT( pepper2 )
+DRIVER_INIT_MEMBER(exidy_state,pepper2)
 {
-	exidy_video_config(machine, 0x14, 0x04, TRUE);
+	exidy_video_config(machine(), 0x14, 0x04, TRUE);
 }
 
 
-static DRIVER_INIT( fax )
+DRIVER_INIT_MEMBER(exidy_state,fax)
 {
-	address_space *space = machine.device("maincpu")->memory().space(AS_PROGRAM);
+	address_space &space = machine().device("maincpu")->memory().space(AS_PROGRAM);
 
-	exidy_video_config(machine, 0x04, 0x04, TRUE);
+	exidy_video_config(machine(), 0x04, 0x04, TRUE);
 
 	/* reset the ROM bank */
 	fax_bank_select_w(space,0,0);
@@ -1486,24 +1529,26 @@ static DRIVER_INIT( fax )
  *
  *************************************/
 
-GAME( 1979, sidetrac, 0,       sidetrac, sidetrac, sidetrac, ROT0, "Exidy",   "Side Track", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1980, targ,     0,       targ,     targ,     targ,     ROT0, "Exidy",   "Targ", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1980, targc,    targ,    targ,     targ,     targ,     ROT0, "Exidy",   "Targ (cocktail?)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1980, spectar,  0,       spectar,  spectar,  spectar,  ROT0, "Exidy",   "Spectar (revision 3)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1980, spectar1, spectar, spectar,  spectar,  spectar,  ROT0, "Exidy",   "Spectar (revision 1?)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1980, rallys,   spectar, rallys,   rallys,   rallys,   ROT0, "bootleg (Novar)", "Rallys (bootleg of Spectar)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1980, panzer,   spectar, rallys,   rallys,   rallys,   ROT0, "bootleg (Proel)", "Panzer (bootleg of Spectar)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1980, phantoma, spectar, rallys,   phantoma, phantoma, ROT0, "bootleg (Jeutel)", "Phantomas (bootleg of Spectar)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1980, phantom,  spectar, rallys,   phantoma, phantoma, ROT0, "bootleg (Proel)", "Phantom (bootleg of Spectar)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1979, sidetrac, 0,       sidetrac, sidetrac, exidy_state, sidetrac, ROT0, "Exidy",   "Side Track", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1980, targ,     0,       targ,     targ, exidy_state,     targ,     ROT0, "Exidy",   "Targ", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1980, targc,    targ,    targ,     targ, exidy_state,     targ,     ROT0, "Exidy",   "Targ (cocktail?)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1980, spectar,  0,       spectar,  spectar, exidy_state,  spectar,  ROT0, "Exidy",   "Spectar (revision 3)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1980, spectar1, spectar, spectar,  spectar, exidy_state,  spectar,  ROT0, "Exidy",   "Spectar (revision 1?)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1980, rallys,   spectar, rallys,   rallys, exidy_state,   rallys,   ROT0, "bootleg (Novar)", "Rallys (bootleg of Spectar)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1980, rallysa,  spectar, rallys,   rallys, exidy_state,   rallys,   ROT0, "bootleg (Musik Box Brescia)", "Rallys (alternate bootleg of Spectar)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1980, panzer,   spectar, rallys,   rallys, exidy_state,   rallys,   ROT0, "bootleg (Proel)", "Panzer (bootleg of Spectar)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1980, phantoma, spectar, rallys,   phantoma, exidy_state, phantoma, ROT0, "bootleg (Jeutel)", "Phantomas (bootleg of Spectar)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1980, phantom,  spectar, rallys,   phantoma, exidy_state, phantoma, ROT0, "bootleg (Proel)", "Phantom (bootleg of Spectar)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
 
-GAME( 1981, mtrap,    0,       mtrap,    mtrap,    mtrap,    ROT0, "Exidy",   "Mouse Trap (version 5)", GAME_SUPPORTS_SAVE )
-GAME( 1981, mtrap3,   mtrap,   mtrap,    mtrap,    mtrap,    ROT0, "Exidy",   "Mouse Trap (version 3)", GAME_SUPPORTS_SAVE )
-GAME( 1981, mtrap4,   mtrap,   mtrap,    mtrap,    mtrap,    ROT0, "Exidy",   "Mouse Trap (version 4)", GAME_SUPPORTS_SAVE )
-GAME( 1981, venture,  0,       venture,  venture,  venture,  ROT0, "Exidy",   "Venture (version 5 set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1981, venture2, venture, venture,  venture,  venture,  ROT0, "Exidy",   "Venture (version 5 set 2)", GAME_SUPPORTS_SAVE )
-GAME( 1981, venture4, venture, venture,  venture,  venture,  ROT0, "Exidy",   "Venture (version 4)", GAME_SUPPORTS_SAVE )
-GAME( 1982, teetert,  0,       teetert,  teetert,  teetert,  ROT0, "Exidy",   "Teeter Torture (prototype)", GAME_SUPPORTS_SAVE )
-GAME( 1982, pepper2,  0,       pepper2,  pepper2,  pepper2,  ROT0, "Exidy",   "Pepper II", GAME_SUPPORTS_SAVE )
-GAME( 1982, hardhat,  0,       pepper2,  pepper2,  pepper2,  ROT0, "Exidy",   "Hard Hat", GAME_SUPPORTS_SAVE )
-GAME( 1983, fax,      0,       fax,      fax,      fax,      ROT0, "Exidy",   "FAX", GAME_SUPPORTS_SAVE )
-GAME( 1983, fax2,     fax,     fax,      fax,      fax,      ROT0, "Exidy",   "FAX 2", GAME_SUPPORTS_SAVE )
+GAME( 1981, mtrap,    0,       mtrap,    mtrap, exidy_state,    mtrap,    ROT0, "Exidy",   "Mouse Trap (version 5)", GAME_SUPPORTS_SAVE )
+GAME( 1981, mtrap3,   mtrap,   mtrap,    mtrap, exidy_state,    mtrap,    ROT0, "Exidy",   "Mouse Trap (version 3)", GAME_SUPPORTS_SAVE )
+GAME( 1981, mtrap4,   mtrap,   mtrap,    mtrap, exidy_state,    mtrap,    ROT0, "Exidy",   "Mouse Trap (version 4)", GAME_SUPPORTS_SAVE )
+GAME( 1981, venture,  0,       venture,  venture, exidy_state,  venture,  ROT0, "Exidy",   "Venture (version 5 set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1981, venture2, venture, venture,  venture, exidy_state,  venture,  ROT0, "Exidy",   "Venture (version 5 set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1981, venture4, venture, venture,  venture, exidy_state,  venture,  ROT0, "Exidy",   "Venture (version 4)", GAME_SUPPORTS_SAVE )
+GAME( 1982, teetert,  0,       teetert,  teetert, exidy_state,  teetert,  ROT0, "Exidy",   "Teeter Torture (prototype)", GAME_SUPPORTS_SAVE )
+GAME( 1982, pepper2,  0,       pepper2,  pepper2, exidy_state,  pepper2,  ROT0, "Exidy",   "Pepper II (version 8)", GAME_SUPPORTS_SAVE )
+GAME( 1982, pepper27, pepper2, pepper2,  pepper2, exidy_state,  pepper2,  ROT0, "Exidy",   "Pepper II (version 7)", GAME_SUPPORTS_SAVE )
+GAME( 1982, hardhat,  0,       pepper2,  pepper2, exidy_state,  pepper2,  ROT0, "Exidy",   "Hard Hat", GAME_SUPPORTS_SAVE )
+GAME( 1983, fax,      0,       fax,      fax, exidy_state,      fax,      ROT0, "Exidy",   "FAX", GAME_SUPPORTS_SAVE )
+GAME( 1983, fax2,     fax,     fax,      fax, exidy_state,      fax,      ROT0, "Exidy",   "FAX 2", GAME_SUPPORTS_SAVE )

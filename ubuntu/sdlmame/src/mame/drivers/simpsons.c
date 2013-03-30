@@ -83,7 +83,7 @@ Custom ICs - 053260        - sound chip (QFP80)
 
 ***************************************************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, simpsons_state )
 	AM_RANGE(0x0000, 0x0fff) AM_RAM
 	AM_RANGE(0x1f80, 0x1f80) AM_READ_PORT("COIN")
 	AM_RANGE(0x1f81, 0x1f81) AM_READ_PORT("TEST")
@@ -91,55 +91,53 @@ static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
 	AM_RANGE(0x1f91, 0x1f91) AM_READ_PORT("P2")
 	AM_RANGE(0x1f92, 0x1f92) AM_READ_PORT("P3")
 	AM_RANGE(0x1f93, 0x1f93) AM_READ_PORT("P4")
-	AM_RANGE(0x1fa0, 0x1fa7) AM_DEVWRITE("k053246", k053246_w)
-	AM_RANGE(0x1fb0, 0x1fbf) AM_DEVWRITE("k053251", k053251_w)
+	AM_RANGE(0x1fa0, 0x1fa7) AM_DEVWRITE_LEGACY("k053246", k053246_w)
+	AM_RANGE(0x1fb0, 0x1fbf) AM_DEVWRITE_LEGACY("k053251", k053251_w)
 	AM_RANGE(0x1fc0, 0x1fc0) AM_WRITE(simpsons_coin_counter_w)
 	AM_RANGE(0x1fc2, 0x1fc2) AM_WRITE(simpsons_eeprom_w)
 	AM_RANGE(0x1fc4, 0x1fc4) AM_READ(simpsons_sound_interrupt_r)
-	AM_RANGE(0x1fc6, 0x1fc7) AM_DEVREADWRITE("k053260", simpsons_sound_r, k053260_w)
-	AM_RANGE(0x1fc8, 0x1fc9) AM_DEVREAD("k053246", k053246_r)
+	AM_RANGE(0x1fc6, 0x1fc7) AM_READ(simpsons_sound_r) AM_DEVWRITE_LEGACY("k053260",k053260_w)
+	AM_RANGE(0x1fc8, 0x1fc9) AM_DEVREAD_LEGACY("k053246", k053246_r)
 	AM_RANGE(0x1fca, 0x1fca) AM_READ(watchdog_reset_r)
 	AM_RANGE(0x2000, 0x3fff) AM_RAMBANK("bank4")
-	AM_RANGE(0x0000, 0x3fff) AM_DEVREADWRITE("k052109", k052109_r, k052109_w)
+	AM_RANGE(0x0000, 0x3fff) AM_DEVREADWRITE_LEGACY("k052109", k052109_r, k052109_w)
 	AM_RANGE(0x4000, 0x5fff) AM_RAM
 	AM_RANGE(0x6000, 0x7fff) AM_ROMBANK("bank1")
 	AM_RANGE(0x8000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
-static WRITE8_HANDLER( z80_bankswitch_w )
+WRITE8_MEMBER(simpsons_state::z80_bankswitch_w)
 {
-	memory_set_bank(space->machine(), "bank2", data & 7);
+	membank("bank2")->set_entry(data & 7);
 }
 
 #if 0
 static void sound_nmi_callback( running_machine &machine, int param )
 {
 	simpsons_state *state = machine.driver_data<simpsons_state>();
-	device_set_input_line(state->m_audiocpu, INPUT_LINE_NMI, (state->m_nmi_enabled) ? CLEAR_LINE : ASSERT_LINE );
+	state->m_audiocpu->set_input_line(INPUT_LINE_NMI, (state->m_nmi_enabled) ? CLEAR_LINE : ASSERT_LINE );
 	state->m_nmi_enabled = 0;
 }
 #endif
 
-static TIMER_CALLBACK( nmi_callback )
+TIMER_CALLBACK_MEMBER(simpsons_state::nmi_callback)
 {
-	simpsons_state *state = machine.driver_data<simpsons_state>();
-	device_set_input_line(state->m_audiocpu, INPUT_LINE_NMI, ASSERT_LINE);
+	m_audiocpu->set_input_line(INPUT_LINE_NMI, ASSERT_LINE);
 }
 
-static WRITE8_HANDLER( z80_arm_nmi_w )
+WRITE8_MEMBER(simpsons_state::z80_arm_nmi_w)
 {
-	simpsons_state *state = space->machine().driver_data<simpsons_state>();
-	device_set_input_line(state->m_audiocpu, INPUT_LINE_NMI, CLEAR_LINE);
-	space->machine().scheduler().timer_set(attotime::from_usec(25), FUNC(nmi_callback));	/* kludge until the K053260 is emulated correctly */
+	m_audiocpu->set_input_line(INPUT_LINE_NMI, CLEAR_LINE);
+	machine().scheduler().timer_set(attotime::from_usec(25), timer_expired_delegate(FUNC(simpsons_state::nmi_callback),this));  /* kludge until the K053260 is emulated correctly */
 }
 
-static ADDRESS_MAP_START( z80_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( z80_map, AS_PROGRAM, 8, simpsons_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0xbfff) AM_ROMBANK("bank2")
 	AM_RANGE(0xf000, 0xf7ff) AM_RAM
-	AM_RANGE(0xf800, 0xf801) AM_DEVREADWRITE("ymsnd", ym2151_r, ym2151_w)
+	AM_RANGE(0xf800, 0xf801) AM_DEVREADWRITE("ymsnd", ym2151_device, read, write)
 	AM_RANGE(0xfa00, 0xfa00) AM_WRITE(z80_arm_nmi_w)
-	AM_RANGE(0xfc00, 0xfc2f) AM_DEVREADWRITE("k053260", k053260_r, k053260_w)
+	AM_RANGE(0xfc00, 0xfc2f) AM_DEVREADWRITE_LEGACY("k053260", k053260_r, k053260_w)
 	AM_RANGE(0xfe00, 0xfe00) AM_WRITE(z80_bankswitch_w)
 ADDRESS_MAP_END
 
@@ -174,14 +172,14 @@ static INPUT_PORTS_START( simpsons )
 
 	PORT_START("TEST")
 	PORT_SERVICE_NO_TOGGLE( 0x01, IP_ACTIVE_LOW )
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE("eeprom", eeprom_read_bit)
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )	// eeprom ack
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE_MEMBER("eeprom", eeprom_device, read_bit)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )    // eeprom ack
 	PORT_BIT( 0xce, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START( "EEPROMOUT" )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE("eeprom", eeprom_set_cs_line)
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE("eeprom", eeprom_set_clock_line)
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE("eeprom", eeprom_write_bit)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE_MEMBER("eeprom", eeprom_device, set_cs_line)
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE_MEMBER("eeprom", eeprom_device, set_clock_line)
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE_MEMBER("eeprom", eeprom_device, write_bit)
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( simpsn2p )
@@ -209,14 +207,14 @@ static INPUT_PORTS_START( simpsn2p )
 
 	PORT_START("TEST")
 	PORT_SERVICE_NO_TOGGLE( 0x01, IP_ACTIVE_LOW )
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE("eeprom", eeprom_read_bit)
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )	// eeprom ack
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE_MEMBER("eeprom", eeprom_device, read_bit)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )    // eeprom ack
 	PORT_BIT( 0xce, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START( "EEPROMOUT" )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE("eeprom", eeprom_set_cs_line)
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE("eeprom", eeprom_set_clock_line)
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE("eeprom", eeprom_write_bit)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE_MEMBER("eeprom", eeprom_device, set_cs_line)
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE_MEMBER("eeprom", eeprom_device, set_clock_line)
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE_MEMBER("eeprom", eeprom_device, write_bit)
 INPUT_PORTS_END
 
 
@@ -253,27 +251,25 @@ static void simpsons_objdma( running_machine &machine )
 	if (num_inactive) do { *dst = 0; dst += 8; } while (--num_inactive);
 }
 
-static TIMER_CALLBACK( dmaend_callback )
+TIMER_CALLBACK_MEMBER(simpsons_state::dmaend_callback)
 {
-	simpsons_state *state = machine.driver_data<simpsons_state>();
-	if (state->m_firq_enabled)
-		device_set_input_line(state->m_maincpu, KONAMI_FIRQ_LINE, HOLD_LINE);
+	if (m_firq_enabled)
+		m_maincpu->set_input_line(KONAMI_FIRQ_LINE, HOLD_LINE);
 }
 
 
-static INTERRUPT_GEN( simpsons_irq )
+INTERRUPT_GEN_MEMBER(simpsons_state::simpsons_irq)
 {
-	simpsons_state *state = device->machine().driver_data<simpsons_state>();
 
-	if (k053246_is_irq_enabled(state->m_k053246))
+	if (k053246_is_irq_enabled(m_k053246))
 	{
-		simpsons_objdma(device->machine());
+		simpsons_objdma(machine());
 		// 32+256us delay at 8MHz dotclock; artificially shortened since actual V-blank length is unknown
-		device->machine().scheduler().timer_set(attotime::from_usec(30), FUNC(dmaend_callback));
+		machine().scheduler().timer_set(attotime::from_usec(30), timer_expired_delegate(FUNC(simpsons_state::dmaend_callback),this));
 	}
 
-	if (k052109_is_irq_enabled(state->m_k052109))
-		device_set_input_line(device, KONAMI_IRQ_LINE, HOLD_LINE);
+	if (k052109_is_irq_enabled(m_k052109))
+		device.execute().set_input_line(KONAMI_IRQ_LINE, HOLD_LINE);
 }
 
 static const k052109_interface simpsons_k052109_intf =
@@ -296,11 +292,11 @@ static const k053247_interface simpsons_k053246_intf =
 
 static const eeprom_interface eeprom_intf =
 {
-	7,				/* address bits */
-	8,				/* data bits */
-	"011000",		/*  read command */
-	"011100",		/* write command */
-	0,				/* erase command */
+	7,              /* address bits */
+	8,              /* data bits */
+	"011000",       /*  read command */
+	"011100",       /* write command */
+	0,              /* erase command */
 	"0100000000000",/* lock command */
 	"0100110000000" /* unlock command */
 };
@@ -308,16 +304,14 @@ static const eeprom_interface eeprom_intf =
 static MACHINE_CONFIG_START( simpsons, simpsons_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", KONAMI, XTAL_24MHz/2/4) /* pin 18 of konami cpu is 12Mhz, while pin 17 is 3mhz. Clock probably divided internally by 4  */
+	MCFG_CPU_ADD("maincpu", KONAMI, XTAL_24MHz/8) /* 052001 (verified on pcb) */
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT("screen", simpsons_irq)	/* IRQ triggered by the 052109, FIRQ by the sprite hardware */
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", simpsons_state,  simpsons_irq) /* IRQ triggered by the 052109, FIRQ by the sprite hardware */
 
-	MCFG_CPU_ADD("audiocpu", Z80, XTAL_3_579545MHz)	/* verified on pcb */
+	MCFG_CPU_ADD("audiocpu", Z80, XTAL_3_579545MHz) /* verified on pcb */
 	MCFG_CPU_PROGRAM_MAP(z80_map)
 								/* NMIs are generated by the 053260 */
 
-	MCFG_MACHINE_START(simpsons)
-	MCFG_MACHINE_RESET(simpsons)
 
 	MCFG_EEPROM_ADD("eeprom", eeprom_intf)
 
@@ -327,10 +321,9 @@ static MACHINE_CONFIG_START( simpsons, simpsons_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(59.1856)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(14*8, (64-14)*8-1, 2*8, 30*8-1 )
-	MCFG_SCREEN_UPDATE(simpsons)
+	MCFG_SCREEN_UPDATE_DRIVER(simpsons_state, screen_update_simpsons)
 
 	MCFG_PALETTE_LENGTH(2048)
 
@@ -341,8 +334,8 @@ static MACHINE_CONFIG_START( simpsons, simpsons_state )
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
 
-	MCFG_SOUND_ADD("ymsnd", YM2151, XTAL_3_579545MHz) /* verified on pcb */
-	MCFG_SOUND_ROUTE(0, "lspeaker", 1.0)	/* only left channel is connected */
+	MCFG_YM2151_ADD("ymsnd", XTAL_3_579545MHz) /* verified on pcb */
+	MCFG_SOUND_ROUTE(0, "lspeaker", 1.0)    /* only left channel is connected */
 	MCFG_SOUND_ROUTE(0, "rspeaker", 1.0)
 	MCFG_SOUND_ROUTE(1, "lspeaker", 0.0)
 	MCFG_SOUND_ROUTE(1, "rspeaker", 0.0)
@@ -365,18 +358,18 @@ ROM_START( simpsons ) /* World 4 Player */
 	ROM_LOAD( "072-g01.17c", 0x30000, 0x20000, CRC(9f843def) SHA1(858432b59101b0577c5cec6ac0c7c20ab0780c9a) )
 	ROM_LOAD( "072-j13.13c", 0x50000, 0x20000, CRC(aade2abd) SHA1(10f178d5ed399b4866266e075d91ca3db26798f8) )
 	ROM_LOAD( "072-j12.15c", 0x70000, 0x18000, CRC(479e12f2) SHA1(15a6cb12e68b4773a29ab463640a43f8e814de59) )
-	ROM_CONTINUE(		 0x08000, 0x08000 )
+	ROM_CONTINUE(        0x08000, 0x08000 )
 
 	ROM_REGION( 0x28000, "audiocpu", 0 ) /* Z80 code + banks */
 	ROM_LOAD( "072-e03.6g", 0x00000, 0x08000, CRC(866b7a35) SHA1(98905764eb4c7d968ccc17618a1f24ee12e33c0e) )
-	ROM_CONTINUE(		0x10000, 0x18000 )
+	ROM_CONTINUE(       0x10000, 0x18000 )
 
 	ROM_REGION( 0x100000, "gfx1", 0 ) /* graphics ( dont dispose as the program can read them, 0 ) */
-	ROM_LOAD( "072-b07.18h", 0x000000, 0x080000, CRC(ba1ec910) SHA1(0805ccb641271dea43185dc0365732260db1763d) )	/* tiles */
+	ROM_LOAD( "072-b07.18h", 0x000000, 0x080000, CRC(ba1ec910) SHA1(0805ccb641271dea43185dc0365732260db1763d) ) /* tiles */
 	ROM_LOAD( "072-b06.16h", 0x080000, 0x080000, CRC(cf2bbcab) SHA1(47afea47f9bc8cb5eb1c7b7fbafe954b3e749aeb) )
 
 	ROM_REGION( 0x400000, "gfx2", 0 ) /* graphics ( dont dispose as the program can read them, 0 ) */
-	ROM_LOAD( "072-b08.3n",  0x000000, 0x100000, CRC(7de500ad) SHA1(61b76b8f402e3bde1509679aaaa28ef08cafb0ab) )	/* sprites */
+	ROM_LOAD( "072-b08.3n",  0x000000, 0x100000, CRC(7de500ad) SHA1(61b76b8f402e3bde1509679aaaa28ef08cafb0ab) ) /* sprites */
 	ROM_LOAD( "072-b09.8n",  0x100000, 0x100000, CRC(aa085093) SHA1(925239d79bf607021d371263352618876f59c1f8) )
 	ROM_LOAD( "072-b10.12n", 0x200000, 0x100000, CRC(577dbd53) SHA1(e603e03e3dcba766074561faa92afafa5761953d) )
 	ROM_LOAD( "072-b11.16l", 0x300000, 0x100000, CRC(55fab05d) SHA1(54db8559d71ed257de9a29c8808654eaea0df9e2) )
@@ -399,7 +392,7 @@ ROM_START( simpsons4pa ) /* World 4 Player, later? (by use of later leters) */
 
 	ROM_REGION( 0x28000, "audiocpu", 0 ) /* Z80 code + banks */
 	ROM_LOAD( "072-e03.6g", 0x00000, 0x08000, CRC(866b7a35) SHA1(98905764eb4c7d968ccc17618a1f24ee12e33c0e) )
-	ROM_CONTINUE(   	0x10000, 0x18000 )
+	ROM_CONTINUE(       0x10000, 0x18000 )
 
 	ROM_REGION( 0x100000, "gfx1", 0 ) /* graphics ( dont dispose as the program can read them, 0 ) */
 	ROM_LOAD( "072-b07.18h", 0x000000, 0x080000, CRC(ba1ec910) SHA1(0805ccb641271dea43185dc0365732260db1763d) ) /* tiles */
@@ -426,18 +419,18 @@ ROM_START( simpsons2p ) /* World 2 Player */
 	ROM_LOAD( "072-p01.17c",  0x30000, 0x20000, CRC(07ceeaea) SHA1(c18255ae1d578c2d53de80d6323cdf41cbe47b57) )
 	ROM_LOAD( "072-013.13c",  0x50000, 0x20000, CRC(8781105a) SHA1(ef2f16f7a56d3715536511c674df4b3aab1be2bd) )
 	ROM_LOAD( "072-012.15c",  0x70000, 0x18000, CRC(244f9289) SHA1(eeda7f5c7340cbd1a1cd576af48cd5d1a629914a) )
-	ROM_CONTINUE(		  0x08000, 0x08000 )
+	ROM_CONTINUE(         0x08000, 0x08000 )
 
 	ROM_REGION( 0x28000, "audiocpu", 0 ) /* Z80 code + banks */
 	ROM_LOAD( "072-g03.6g", 0x00000, 0x08000, CRC(76c1850c) SHA1(9047c6b26c4e33c74eb7400a807d3d9f206f7bbe) )
-	ROM_CONTINUE(		0x10000, 0x18000 )
+	ROM_CONTINUE(       0x10000, 0x18000 )
 
 	ROM_REGION( 0x100000, "gfx1", 0 ) /* graphics ( dont dispose as the program can read them, 0 ) */
-	ROM_LOAD( "072-b07.18h", 0x000000, 0x080000, CRC(ba1ec910) SHA1(0805ccb641271dea43185dc0365732260db1763d) )	/* tiles */
+	ROM_LOAD( "072-b07.18h", 0x000000, 0x080000, CRC(ba1ec910) SHA1(0805ccb641271dea43185dc0365732260db1763d) ) /* tiles */
 	ROM_LOAD( "072-b06.16h", 0x080000, 0x080000, CRC(cf2bbcab) SHA1(47afea47f9bc8cb5eb1c7b7fbafe954b3e749aeb) )
 
 	ROM_REGION( 0x400000, "gfx2", 0 ) /* graphics ( dont dispose as the program can read them, 0 ) */
-	ROM_LOAD( "072-b08.3n",  0x000000, 0x100000, CRC(7de500ad) SHA1(61b76b8f402e3bde1509679aaaa28ef08cafb0ab) )	/* sprites */
+	ROM_LOAD( "072-b08.3n",  0x000000, 0x100000, CRC(7de500ad) SHA1(61b76b8f402e3bde1509679aaaa28ef08cafb0ab) ) /* sprites */
 	ROM_LOAD( "072-b09.8n",  0x100000, 0x100000, CRC(aa085093) SHA1(925239d79bf607021d371263352618876f59c1f8) )
 	ROM_LOAD( "072-b10.12n", 0x200000, 0x100000, CRC(577dbd53) SHA1(e603e03e3dcba766074561faa92afafa5761953d) )
 	ROM_LOAD( "072-b11.16l", 0x300000, 0x100000, CRC(55fab05d) SHA1(54db8559d71ed257de9a29c8808654eaea0df9e2) )
@@ -452,22 +445,22 @@ ROM_END
 
 ROM_START( simpsons2p2 ) /* World 2 Player, alt */
 	ROM_REGION( 0x88000, "maincpu", 0 ) /* code + banked roms + banked ram */
-    ROM_LOAD( "072-g02.16c", 0x10000, 0x20000, CRC(580ce1d6) SHA1(5b07fb8e8041e1663980aa35d853fdc13b22dac5) )
+	ROM_LOAD( "072-g02.16c", 0x10000, 0x20000, CRC(580ce1d6) SHA1(5b07fb8e8041e1663980aa35d853fdc13b22dac5) )
 	ROM_LOAD( "072-p01.17c", 0x30000, 0x20000, CRC(07ceeaea) SHA1(c18255ae1d578c2d53de80d6323cdf41cbe47b57) )
-    ROM_LOAD( "072-_13.13c", 0x50000, 0x20000, CRC(54e6df66) SHA1(1b83ae56cf1deb51b04880fa421f06568c938a99) ) /* Unknown revision/region code */
-    ROM_LOAD( "072-_12.15c", 0x70000, 0x18000, CRC(96636225) SHA1(5de95606e5c9337f18bc42f4df791cacafa20399) ) /* Unknown revision/region code */
-	ROM_CONTINUE(		 0x08000, 0x08000 )
+	ROM_LOAD( "072-_13.13c", 0x50000, 0x20000, CRC(54e6df66) SHA1(1b83ae56cf1deb51b04880fa421f06568c938a99) ) /* Unknown revision/region code */
+	ROM_LOAD( "072-_12.15c", 0x70000, 0x18000, CRC(96636225) SHA1(5de95606e5c9337f18bc42f4df791cacafa20399) ) /* Unknown revision/region code */
+	ROM_CONTINUE(        0x08000, 0x08000 )
 
 	ROM_REGION( 0x28000, "audiocpu", 0 ) /* Z80 code + banks */
 	ROM_LOAD( "072-g03.6g", 0x00000, 0x08000, CRC(76c1850c) SHA1(9047c6b26c4e33c74eb7400a807d3d9f206f7bbe) )
-	ROM_CONTINUE(		0x10000, 0x18000 )
+	ROM_CONTINUE(       0x10000, 0x18000 )
 
 	ROM_REGION( 0x100000, "gfx1", 0 ) /* graphics ( dont dispose as the program can read them, 0 ) */
-	ROM_LOAD( "072-b07.18h", 0x000000, 0x080000, CRC(ba1ec910) SHA1(0805ccb641271dea43185dc0365732260db1763d) )	/* tiles */
+	ROM_LOAD( "072-b07.18h", 0x000000, 0x080000, CRC(ba1ec910) SHA1(0805ccb641271dea43185dc0365732260db1763d) ) /* tiles */
 	ROM_LOAD( "072-b06.16h", 0x080000, 0x080000, CRC(cf2bbcab) SHA1(47afea47f9bc8cb5eb1c7b7fbafe954b3e749aeb) )
 
 	ROM_REGION( 0x400000, "gfx2", 0 ) /* graphics ( dont dispose as the program can read them, 0 ) */
-	ROM_LOAD( "072-b08.3n",  0x000000, 0x100000, CRC(7de500ad) SHA1(61b76b8f402e3bde1509679aaaa28ef08cafb0ab) )	/* sprites */
+	ROM_LOAD( "072-b08.3n",  0x000000, 0x100000, CRC(7de500ad) SHA1(61b76b8f402e3bde1509679aaaa28ef08cafb0ab) ) /* sprites */
 	ROM_LOAD( "072-b09.8n",  0x100000, 0x100000, CRC(aa085093) SHA1(925239d79bf607021d371263352618876f59c1f8) )
 	ROM_LOAD( "072-b10.12n", 0x200000, 0x100000, CRC(577dbd53) SHA1(e603e03e3dcba766074561faa92afafa5761953d) )
 	ROM_LOAD( "072-b11.16l", 0x300000, 0x100000, CRC(55fab05d) SHA1(54db8559d71ed257de9a29c8808654eaea0df9e2) )
@@ -486,18 +479,18 @@ ROM_START( simpsons2pa ) /* Asia 2 Player */
 	ROM_LOAD( "072-p01.17c", 0x30000, 0x20000, CRC(07ceeaea) SHA1(c18255ae1d578c2d53de80d6323cdf41cbe47b57) ) /* Same as both world 2p sets */
 	ROM_LOAD( "072-113.13c", 0x50000, 0x20000, CRC(8781105a) SHA1(ef2f16f7a56d3715536511c674df4b3aab1be2bd) ) /* Same as world set simpsn2p */
 	ROM_LOAD( "072-112.15c", 0x70000, 0x18000, CRC(3bd69404) SHA1(e055fed7e9bde8315ae2f9b2d35bc05fece6b80b) )
-	ROM_CONTINUE(		 0x08000, 0x08000 )
+	ROM_CONTINUE(        0x08000, 0x08000 )
 
 	ROM_REGION( 0x28000, "audiocpu", 0 ) /* Z80 code + banks */
 	ROM_LOAD( "072-e03.6g", 0x00000, 0x08000, CRC(866b7a35) SHA1(98905764eb4c7d968ccc17618a1f24ee12e33c0e) )
-	ROM_CONTINUE(		0x10000, 0x18000 )
+	ROM_CONTINUE(       0x10000, 0x18000 )
 
 	ROM_REGION( 0x100000, "gfx1", 0 ) /* graphics ( dont dispose as the program can read them, 0 ) */
-	ROM_LOAD( "072-b07.18h", 0x000000, 0x080000, CRC(ba1ec910) SHA1(0805ccb641271dea43185dc0365732260db1763d) )	/* tiles */
+	ROM_LOAD( "072-b07.18h", 0x000000, 0x080000, CRC(ba1ec910) SHA1(0805ccb641271dea43185dc0365732260db1763d) ) /* tiles */
 	ROM_LOAD( "072-b06.16h", 0x080000, 0x080000, CRC(cf2bbcab) SHA1(47afea47f9bc8cb5eb1c7b7fbafe954b3e749aeb) )
 
 	ROM_REGION( 0x400000, "gfx2", 0 ) /* graphics ( dont dispose as the program can read them, 0 ) */
-	ROM_LOAD( "072-b08.3n",  0x000000, 0x100000, CRC(7de500ad) SHA1(61b76b8f402e3bde1509679aaaa28ef08cafb0ab) )	/* sprites */
+	ROM_LOAD( "072-b08.3n",  0x000000, 0x100000, CRC(7de500ad) SHA1(61b76b8f402e3bde1509679aaaa28ef08cafb0ab) ) /* sprites */
 	ROM_LOAD( "072-b09.8n",  0x100000, 0x100000, CRC(aa085093) SHA1(925239d79bf607021d371263352618876f59c1f8) )
 	ROM_LOAD( "072-b10.12n", 0x200000, 0x100000, CRC(577dbd53) SHA1(e603e03e3dcba766074561faa92afafa5761953d) )
 	ROM_LOAD( "072-b11.16l", 0x300000, 0x100000, CRC(55fab05d) SHA1(54db8559d71ed257de9a29c8808654eaea0df9e2) )
@@ -516,18 +509,18 @@ ROM_START( simpsons2pj ) /* Japan 2 Player */
 	ROM_LOAD( "072-t01.17c", 0x30000, 0x20000, CRC(91de5c2d) SHA1(1e18a5585ed821ec7cda69bdcdbfa4e6c71455c6) )
 	ROM_LOAD( "072-213.13c", 0x50000, 0x20000, CRC(b326a9ae) SHA1(f222c33f2e8b306f2f0ef6f0da9febbf8219e1a4) )
 	ROM_LOAD( "072-212.15c", 0x70000, 0x18000, CRC(584d9d37) SHA1(61b9df4dfb323b7284894e5e1eb9d713ebf64721) )
-	ROM_CONTINUE(		 0x08000, 0x08000 )
+	ROM_CONTINUE(        0x08000, 0x08000 )
 
 	ROM_REGION( 0x28000, "audiocpu", 0 ) /* Z80 code + banks */
 	ROM_LOAD( "072-g03.6g", 0x00000, 0x08000, CRC(76c1850c) SHA1(9047c6b26c4e33c74eb7400a807d3d9f206f7bbe) )
-	ROM_CONTINUE(		0x10000, 0x18000 )
+	ROM_CONTINUE(       0x10000, 0x18000 )
 
 	ROM_REGION( 0x100000, "gfx1", 0 ) /* graphics ( dont dispose as the program can read them, 0 ) */
-	ROM_LOAD( "072-b07.18h", 0x000000, 0x080000, CRC(ba1ec910) SHA1(0805ccb641271dea43185dc0365732260db1763d) )	/* tiles */
+	ROM_LOAD( "072-b07.18h", 0x000000, 0x080000, CRC(ba1ec910) SHA1(0805ccb641271dea43185dc0365732260db1763d) ) /* tiles */
 	ROM_LOAD( "072-b06.16h", 0x080000, 0x080000, CRC(cf2bbcab) SHA1(47afea47f9bc8cb5eb1c7b7fbafe954b3e749aeb) )
 
 	ROM_REGION( 0x400000, "gfx2", 0 ) /* graphics ( dont dispose as the program can read them, 0 ) */
-	ROM_LOAD( "072-b08.3n",  0x000000, 0x100000, CRC(7de500ad) SHA1(61b76b8f402e3bde1509679aaaa28ef08cafb0ab) )	/* sprites */
+	ROM_LOAD( "072-b08.3n",  0x000000, 0x100000, CRC(7de500ad) SHA1(61b76b8f402e3bde1509679aaaa28ef08cafb0ab) ) /* sprites */
 	ROM_LOAD( "072-b09.8n",  0x100000, 0x100000, CRC(aa085093) SHA1(925239d79bf607021d371263352618876f59c1f8) )
 	ROM_LOAD( "072-b10.12n", 0x200000, 0x100000, CRC(577dbd53) SHA1(e603e03e3dcba766074561faa92afafa5761953d) )
 	ROM_LOAD( "072-b11.16l", 0x300000, 0x100000, CRC(55fab05d) SHA1(54db8559d71ed257de9a29c8808654eaea0df9e2) )
@@ -547,9 +540,9 @@ ROM_END
 ***************************************************************************/
 
 // the region warning, if one exists, is shown after the high-score screen in attract mode
-GAME( 1991, simpsons,    0,        simpsons, simpsons, 0, ROT0, "Konami", "The Simpsons (4 Players World, set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1991, simpsons4pa, simpsons, simpsons, simpsons, 0, ROT0, "Konami", "The Simpsons (4 Players World, set 2)", GAME_SUPPORTS_SAVE )
-GAME( 1991, simpsons2p,  simpsons, simpsons, simpsn2p, 0, ROT0, "Konami", "The Simpsons (2 Players World, set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1991, simpsons2p2, simpsons, simpsons, simpsons, 0, ROT0, "Konami", "The Simpsons (2 Players World, set 2)", GAME_SUPPORTS_SAVE )
-GAME( 1991, simpsons2pa, simpsons, simpsons, simpsn2p, 0, ROT0, "Konami", "The Simpsons (2 Players Asia)", GAME_SUPPORTS_SAVE )
-GAME( 1991, simpsons2pj, simpsons, simpsons, simpsn2p, 0, ROT0, "Konami", "The Simpsons (2 Players Japan)", GAME_SUPPORTS_SAVE )
+GAME( 1991, simpsons,    0,        simpsons, simpsons, driver_device, 0, ROT0, "Konami", "The Simpsons (4 Players World, set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1991, simpsons4pa, simpsons, simpsons, simpsons, driver_device, 0, ROT0, "Konami", "The Simpsons (4 Players World, set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1991, simpsons2p,  simpsons, simpsons, simpsn2p, driver_device, 0, ROT0, "Konami", "The Simpsons (2 Players World, set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1991, simpsons2p2, simpsons, simpsons, simpsons, driver_device, 0, ROT0, "Konami", "The Simpsons (2 Players World, set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1991, simpsons2pa, simpsons, simpsons, simpsn2p, driver_device, 0, ROT0, "Konami", "The Simpsons (2 Players Asia)", GAME_SUPPORTS_SAVE )
+GAME( 1991, simpsons2pj, simpsons, simpsons, simpsn2p, driver_device, 0, ROT0, "Konami", "The Simpsons (2 Players Japan)", GAME_SUPPORTS_SAVE )

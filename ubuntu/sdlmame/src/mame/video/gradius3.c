@@ -58,37 +58,36 @@ void gradius3_sprite_callback( running_machine &machine, int *code, int *color, 
 
 ***************************************************************************/
 
-static STATE_POSTLOAD( gradius3_postload )
+static void gradius3_postload(running_machine &machine)
 {
 	int i;
 
 	for (i = 0; i < 0x20000; i += 16)
 	{
-		gfx_element_mark_dirty(machine.gfx[0], i / 16);
+		machine.gfx[0]->mark_dirty(i / 16);
 	}
 }
 
-VIDEO_START( gradius3 )
+void gradius3_state::video_start()
 {
-	gradius3_state *state = machine.driver_data<gradius3_state>();
 	int i;
 
-	state->m_layer_colorbase[0] = 0;
-	state->m_layer_colorbase[1] = 32;
-	state->m_layer_colorbase[2] = 48;
-	state->m_sprite_colorbase = 16;
+	m_layer_colorbase[0] = 0;
+	m_layer_colorbase[1] = 32;
+	m_layer_colorbase[2] = 48;
+	m_sprite_colorbase = 16;
 
-	k052109_set_layer_offsets(state->m_k052109, 2, -2, 0);
-	k051960_set_sprite_offsets(state->m_k051960, 2, 0);
+	k052109_set_layer_offsets(m_k052109, 2, -2, 0);
+	k051960_set_sprite_offsets(m_k051960, 2, 0);
 
 	/* re-decode the sprites because the ROMs are connected to the custom IC differently
-       from how they are connected to the CPU. */
+	   from how they are connected to the CPU. */
 	for (i = 0; i < TOTAL_SPRITES; i++)
-		gfx_element_mark_dirty(machine.gfx[1], i);
+		machine().gfx[1]->mark_dirty(i);
 
-	gfx_element_set_source(machine.gfx[0], (UINT8 *)state->m_gfxram);
+	machine().gfx[0]->set_source((UINT8 *)m_gfxram.target());
 
-	machine.state().register_postload(gradius3_postload, NULL);
+	machine().save().register_postload(save_prepost_delegate(FUNC(gradius3_postload), &machine()));
 }
 
 
@@ -99,22 +98,21 @@ VIDEO_START( gradius3 )
 
 ***************************************************************************/
 
-READ16_HANDLER( gradius3_gfxrom_r )
+READ16_MEMBER(gradius3_state::gradius3_gfxrom_r)
 {
-	UINT8 *gfxdata = space->machine().region("gfx2")->base();
+	UINT8 *gfxdata = memregion("gfx2")->base();
 
 	return (gfxdata[2 * offset + 1] << 8) | gfxdata[2 * offset];
 }
 
-WRITE16_HANDLER( gradius3_gfxram_w )
+WRITE16_MEMBER(gradius3_state::gradius3_gfxram_w)
 {
-	gradius3_state *state = space->machine().driver_data<gradius3_state>();
-	int oldword = state->m_gfxram[offset];
+	int oldword = m_gfxram[offset];
 
-	COMBINE_DATA(&state->m_gfxram[offset]);
+	COMBINE_DATA(&m_gfxram[offset]);
 
-	if (oldword != state->m_gfxram[offset])
-		gfx_element_mark_dirty(space->machine().gfx[0], offset / 16);
+	if (oldword != m_gfxram[offset])
+		machine().gfx[0]->mark_dirty(offset / 16);
 }
 
 /***************************************************************************
@@ -123,30 +121,30 @@ WRITE16_HANDLER( gradius3_gfxram_w )
 
 ***************************************************************************/
 
-SCREEN_UPDATE( gradius3 )
+UINT32 gradius3_state::screen_update_gradius3(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	gradius3_state *state = screen->machine().driver_data<gradius3_state>();
 
 	/* TODO: this kludge enforces the char banks. For some reason, they don't work otherwise. */
-	k052109_w(state->m_k052109, 0x1d80, 0x10);
-	k052109_w(state->m_k052109, 0x1f00, 0x32);
+	address_space &space = machine().driver_data()->generic_space();
+	k052109_w(m_k052109, space, 0x1d80, 0x10);
+	k052109_w(m_k052109, space, 0x1f00, 0x32);
 
-	k052109_tilemap_update(state->m_k052109);
+	k052109_tilemap_update(m_k052109);
 
-	bitmap_fill(screen->machine().priority_bitmap, cliprect, 0);
-	if (state->m_priority == 0)
+	machine().priority_bitmap.fill(0, cliprect);
+	if (m_priority == 0)
 	{
-		k052109_tilemap_draw(state->m_k052109, bitmap, cliprect, 1, TILEMAP_DRAW_OPAQUE, 2);
-		k052109_tilemap_draw(state->m_k052109, bitmap, cliprect, 2, 0, 4);
-		k052109_tilemap_draw(state->m_k052109, bitmap, cliprect, 0, 0, 1);
+		k052109_tilemap_draw(m_k052109, bitmap, cliprect, 1, TILEMAP_DRAW_OPAQUE, 2);
+		k052109_tilemap_draw(m_k052109, bitmap, cliprect, 2, 0, 4);
+		k052109_tilemap_draw(m_k052109, bitmap, cliprect, 0, 0, 1);
 	}
 	else
 	{
-		k052109_tilemap_draw(state->m_k052109, bitmap, cliprect, 0, TILEMAP_DRAW_OPAQUE, 1);
-		k052109_tilemap_draw(state->m_k052109, bitmap, cliprect, 1, 0, 2);
-		k052109_tilemap_draw(state->m_k052109, bitmap, cliprect, 2, 0, 4);
+		k052109_tilemap_draw(m_k052109, bitmap, cliprect, 0, TILEMAP_DRAW_OPAQUE, 1);
+		k052109_tilemap_draw(m_k052109, bitmap, cliprect, 1, 0, 2);
+		k052109_tilemap_draw(m_k052109, bitmap, cliprect, 2, 0, 4);
 	}
 
-	k051960_sprites_draw(state->m_k051960, bitmap, cliprect, -1, -1);
+	k051960_sprites_draw(m_k051960, bitmap, cliprect, -1, -1);
 	return 0;
 }

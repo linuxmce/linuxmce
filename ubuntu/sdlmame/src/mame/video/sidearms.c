@@ -9,135 +9,126 @@
 #include "emu.h"
 #include "includes/sidearms.h"
 
-WRITE8_HANDLER( sidearms_videoram_w )
+WRITE8_MEMBER(sidearms_state::sidearms_videoram_w)
 {
-	sidearms_state *state = space->machine().driver_data<sidearms_state>();
 
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_fg_tilemap, offset);
+	m_videoram[offset] = data;
+	m_fg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( sidearms_colorram_w )
+WRITE8_MEMBER(sidearms_state::sidearms_colorram_w)
 {
-	sidearms_state *state = space->machine().driver_data<sidearms_state>();
 
-	state->m_colorram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_fg_tilemap, offset);
+	m_colorram[offset] = data;
+	m_fg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( sidearms_c804_w )
+WRITE8_MEMBER(sidearms_state::sidearms_c804_w)
 {
-	sidearms_state *state = space->machine().driver_data<sidearms_state>();
 
 	/* bits 0 and 1 are coin counters */
-	coin_counter_w(space->machine(), 0, data & 0x01);
-	coin_counter_w(space->machine(), 1, data & 0x02);
+	coin_counter_w(machine(), 0, data & 0x01);
+	coin_counter_w(machine(), 1, data & 0x02);
 
 	/* bit 2 and 3 lock the coin chutes */
-	if (!state->m_gameid || state->m_gameid==3)
+	if (!m_gameid || m_gameid==3)
 	{
-		coin_lockout_w(space->machine(), 0, !(data & 0x04));
-		coin_lockout_w(space->machine(), 1, !(data & 0x08));
+		coin_lockout_w(machine(), 0, !(data & 0x04));
+		coin_lockout_w(machine(), 1, !(data & 0x08));
 	}
 	else
 	{
-		coin_lockout_w(space->machine(), 0, data & 0x04);
-		coin_lockout_w(space->machine(), 1, data & 0x08);
+		coin_lockout_w(machine(), 0, data & 0x04);
+		coin_lockout_w(machine(), 1, data & 0x08);
 	}
 
 	/* bit 4 resets the sound CPU */
 	if (data & 0x10)
 	{
-		cputag_set_input_line(space->machine(), "audiocpu", INPUT_LINE_RESET, PULSE_LINE);
+		machine().device("audiocpu")->execute().set_input_line(INPUT_LINE_RESET, PULSE_LINE);
 	}
 
 	/* bit 5 enables starfield */
-	if (state->m_staron != (data & 0x20))
+	if (m_staron != (data & 0x20))
 	{
-		state->m_staron = data & 0x20;
-		state->m_hflop_74a_n = 1;
-		state->m_hcount_191 = state->m_vcount_191 = 0;
+		m_staron = data & 0x20;
+		m_hflop_74a_n = 1;
+		m_hcount_191 = m_vcount_191 = 0;
 	}
 
 	/* bit 6 enables char layer */
-	state->m_charon = data & 0x40;
+	m_charon = data & 0x40;
 
 	/* bit 7 flips screen */
-	if (state->m_flipon != (data & 0x80))
+	if (m_flipon != (data & 0x80))
 	{
-		state->m_flipon = data & 0x80;
-		flip_screen_set(space->machine(), state->m_flipon);
-		tilemap_mark_all_tiles_dirty_all(space->machine());
+		m_flipon = data & 0x80;
+		flip_screen_set(m_flipon);
+		machine().tilemap().mark_all_dirty();
 	}
 }
 
-WRITE8_HANDLER( sidearms_gfxctrl_w )
+WRITE8_MEMBER(sidearms_state::sidearms_gfxctrl_w)
 {
-	sidearms_state *state = space->machine().driver_data<sidearms_state>();
-	state->m_objon = data & 0x01;
-	state->m_bgon = data & 0x02;
+	m_objon = data & 0x01;
+	m_bgon = data & 0x02;
 }
 
-WRITE8_HANDLER( sidearms_star_scrollx_w )
+WRITE8_MEMBER(sidearms_state::sidearms_star_scrollx_w)
 {
-	sidearms_state *state = space->machine().driver_data<sidearms_state>();
-	UINT32 last_state = state->m_hcount_191;
+	UINT32 last_state = m_hcount_191;
 
-	state->m_hcount_191++;
-	state->m_hcount_191 &= 0x1ff;
+	m_hcount_191++;
+	m_hcount_191 &= 0x1ff;
 
 	// invert 74LS74A(flipflop) output on 74LS191(hscan counter) carry's rising edge
-	if (state->m_hcount_191 & ~last_state & 0x100)
-		state->m_hflop_74a_n ^= 1;
+	if (m_hcount_191 & ~last_state & 0x100)
+		m_hflop_74a_n ^= 1;
 }
 
-WRITE8_HANDLER( sidearms_star_scrolly_w )
+WRITE8_MEMBER(sidearms_state::sidearms_star_scrolly_w)
 {
-	sidearms_state *state = space->machine().driver_data<sidearms_state>();
-	state->m_vcount_191++;
-	state->m_vcount_191 &= 0xff;
+	m_vcount_191++;
+	m_vcount_191 &= 0xff;
 }
 
 
-static TILE_GET_INFO( get_sidearms_bg_tile_info )
+TILE_GET_INFO_MEMBER(sidearms_state::get_sidearms_bg_tile_info)
 {
-	sidearms_state *state = machine.driver_data<sidearms_state>();
 	int code, attr, color, flags;
 
-	code = state->m_tilerom[tile_index];
-	attr = state->m_tilerom[tile_index + 1];
+	code = m_tilerom[tile_index];
+	attr = m_tilerom[tile_index + 1];
 	code |= attr<<8 & 0x100;
 	color = attr>>3 & 0x1f;
 	flags = attr>>1 & 0x03;
 
-	SET_TILE_INFO(1, code, color, flags);
+	SET_TILE_INFO_MEMBER(1, code, color, flags);
 }
 
-static TILE_GET_INFO( get_philko_bg_tile_info )
+TILE_GET_INFO_MEMBER(sidearms_state::get_philko_bg_tile_info)
 {
-	sidearms_state *state = machine.driver_data<sidearms_state>();
 	int code, attr, color, flags;
 
-	code = state->m_tilerom[tile_index];
-	attr = state->m_tilerom[tile_index + 1];
+	code = m_tilerom[tile_index];
+	attr = m_tilerom[tile_index + 1];
 	code |= (((attr>>6 & 0x02) | (attr & 0x01)) * 0x100);
 	color = attr>>3 & 0x0f;
 	flags = attr>>1 & 0x03;
 
-	SET_TILE_INFO(1, code, color, flags);
+	SET_TILE_INFO_MEMBER(1, code, color, flags);
 }
 
-static TILE_GET_INFO( get_fg_tile_info )
+TILE_GET_INFO_MEMBER(sidearms_state::get_fg_tile_info)
 {
-	sidearms_state *state = machine.driver_data<sidearms_state>();
-	int attr = state->m_colorram[tile_index];
-	int code = state->m_videoram[tile_index] + (attr<<2 & 0x300);
+	int attr = m_colorram[tile_index];
+	int code = m_videoram[tile_index] + (attr<<2 & 0x300);
 	int color = attr & 0x3f;
 
-	SET_TILE_INFO(0, code, color, 0);
+	SET_TILE_INFO_MEMBER(0, code, color, 0);
 }
 
-static TILEMAP_MAPPER( sidearms_tilemap_scan )
+TILEMAP_MAPPER_MEMBER(sidearms_state::sidearms_tilemap_scan)
 {
 	/* logical (col,row) -> memory offset */
 	int offset = ((row << 7) + col) << 1;
@@ -146,40 +137,39 @@ static TILEMAP_MAPPER( sidearms_tilemap_scan )
 	return ((offset & 0xf801) | ((offset & 0x0700) >> 7) | ((offset & 0x00fe) << 3)) & 0x7fff;
 }
 
-VIDEO_START( sidearms )
+void sidearms_state::video_start()
 {
-	sidearms_state *state = machine.driver_data<sidearms_state>();
-	state->m_tilerom = machine.region("gfx4")->base();
+	m_tilerom = memregion("gfx4")->base();
 
-	if (!state->m_gameid)
+	if (!m_gameid)
 	{
-		state->m_bg_tilemap = tilemap_create(machine, get_sidearms_bg_tile_info, sidearms_tilemap_scan,
-			 32, 32, 128, 128);
+		m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(sidearms_state::get_sidearms_bg_tile_info),this), tilemap_mapper_delegate(FUNC(sidearms_state::sidearms_tilemap_scan),this),
+				32, 32, 128, 128);
 
-		tilemap_set_transparent_pen(state->m_bg_tilemap, 15);
+		m_bg_tilemap->set_transparent_pen(15);
 	}
 	else
 	{
-		state->m_bg_tilemap = tilemap_create(machine, get_philko_bg_tile_info, sidearms_tilemap_scan, 32, 32, 128, 128);
+		m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(sidearms_state::get_philko_bg_tile_info),this), tilemap_mapper_delegate(FUNC(sidearms_state::sidearms_tilemap_scan),this), 32, 32, 128, 128);
 	}
 
-	state->m_fg_tilemap = tilemap_create(machine, get_fg_tile_info, tilemap_scan_rows,
-		 8, 8, 64, 64);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(sidearms_state::get_fg_tile_info),this), TILEMAP_SCAN_ROWS,
+			8, 8, 64, 64);
 
-	tilemap_set_transparent_pen(state->m_fg_tilemap, 3);
+	m_fg_tilemap->set_transparent_pen(3);
 
-	state->m_hflop_74a_n = 1;
-	state->m_latch_374 = state->m_vcount_191 = state->m_hcount_191 = 0;
+	m_hflop_74a_n = 1;
+	m_latch_374 = m_vcount_191 = m_hcount_191 = 0;
 
-	state->m_flipon = state->m_charon = state->m_staron = state->m_objon = state->m_bgon = 0;
+	m_flipon = m_charon = m_staron = m_objon = m_bgon = 0;
 }
 
-static void draw_sprites_region(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, int start_offset, int end_offset )
+static void draw_sprites_region(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, int start_offset, int end_offset )
 {
-	UINT8 *buffered_spriteram = machine.generic.buffered_spriteram.u8;
-	const gfx_element *gfx = machine.gfx[2];
-	int offs, attr, color, code, x, y, flipx, flipy;
 	sidearms_state *state = machine.driver_data<sidearms_state>();
+	UINT8 *buffered_spriteram = state->m_spriteram->buffer();
+	gfx_element *gfx = machine.gfx[2];
+	int offs, attr, color, code, x, y, flipx, flipy;
 
 	flipy = flipx = state->m_flipon;
 
@@ -207,7 +197,7 @@ static void draw_sprites_region(running_machine &machine, bitmap_t *bitmap, cons
 	}
 }
 
-static void sidearms_draw_starfield( running_machine &machine, bitmap_t *bitmap )
+static void sidearms_draw_starfield( running_machine &machine, bitmap_ind16 &bitmap )
 {
 	int x, y, i;
 	UINT32 hadd_283, vadd_283, _hflop_74a_n, _hcount_191, _vcount_191;
@@ -217,8 +207,8 @@ static void sidearms_draw_starfield( running_machine &machine, bitmap_t *bitmap 
 	sidearms_state *state = machine.driver_data<sidearms_state>();
 
 	// clear starfield background
-	lineptr = BITMAP_ADDR16(bitmap, 16, 64);
-	lineadv = bitmap->rowpixels;
+	lineptr = &bitmap.pix16(16, 64);
+	lineadv = bitmap.rowpixels();
 
 	for (i=224; i; i--) { memset(lineptr, 0, 768); lineptr += lineadv; }
 
@@ -232,18 +222,18 @@ static void sidearms_draw_starfield( running_machine &machine, bitmap_t *bitmap 
 	_vcount_191 = state->m_vcount_191;
 	_hcount_191 = state->m_hcount_191 & 0xff;
 
-	sf_rom = machine.region("user1")->base();
+	sf_rom = machine.root_device().memregion("user1")->base();
 
 #if 0 // old loop (for reference; easier to read)
 	if (!flipon)
 	{
-		lineptr = bitmap->base;
+		lineptr = bitmap.base;
 		pixadv  = 1;
 		lineadv = lineadv - 512;
 	}
 	else
 	{
-		lineptr = BITMAP_ADDR16(bitmap, 255, 512 - 1);
+		lineptr = &bitmap.pix16(255, 512 - 1);
 		pixadv  = -1;
 		lineadv = -lineadv + 512;
 	}
@@ -259,16 +249,16 @@ static void sidearms_draw_starfield( running_machine &machine, bitmap_t *bitmap 
 
 			vadd_283 = _vcount_191 + y; // add lower 8 bits and discard carry (later)
 
-			if (!((vadd_283 ^ (x>>3)) & 4)) continue;		// logic rejection 1
-			if ((vadd_283 | (hadd_283>>1)) & 2) continue;	// logic rejection 2
+			if (!((vadd_283 ^ (x>>3)) & 4)) continue;       // logic rejection 1
+			if ((vadd_283 | (hadd_283>>1)) & 2) continue;   // logic rejection 2
 
 			// latch data from starfield EPROM on rising edge of 74LS374's clock input
 			if (!(~i & 0x1f))
 			{
-				i = vadd_283<<4 & 0xff0;				// to starfield EPROM A04-A11 (8 bits)
-				i |= (_hflop_74a_n^(hadd_283>>8)) << 3;	// to starfield EPROM A03     (1 bit)
-				i |= hadd_283>>5 & 7;					// to starfield EPROM A00-A02 (3 bits)
-				latch_374 = sf_rom[i + 0x3000];			// lines A12-A13 are always high
+				i = vadd_283<<4 & 0xff0;                // to starfield EPROM A04-A11 (8 bits)
+				i |= (_hflop_74a_n^(hadd_283>>8)) << 3; // to starfield EPROM A03     (1 bit)
+				i |= hadd_283>>5 & 7;                   // to starfield EPROM A00-A02 (3 bits)
+				latch_374 = sf_rom[i + 0x3000];         // lines A12-A13 are always high
 			}
 
 			if ((~((latch_374^hadd_283)^1) & 0x1f)) continue; // logic rejection 3
@@ -280,13 +270,13 @@ static void sidearms_draw_starfield( running_machine &machine, bitmap_t *bitmap 
 #else // optimized loop
 	if (!state->m_flipon)
 	{
-		lineptr = BITMAP_ADDR16(bitmap, 16, 64);
+		lineptr = &bitmap.pix16(16, 64);
 		pixadv  = 1;
 		lineadv = lineadv - 384;
 	}
 	else
 	{
-		lineptr = BITMAP_ADDR16(bitmap, 239, 512 - 64 - 1);
+		lineptr = &bitmap.pix16(239, 512 - 64 - 1);
 		pixadv  = -1;
 		lineadv = -lineadv + 384;
 	}
@@ -297,29 +287,29 @@ static void sidearms_draw_starfield( running_machine &machine, bitmap_t *bitmap 
 		hadd_283 = (_hcount_191 + 64) & ~0x1f;
 		vadd_283 = _vcount_191 + y;
 
-		i = vadd_283<<4 & 0xff0;				// to starfield EPROM A04-A11 (8 bits)
-		i |= (_hflop_74a_n^(hadd_283>>8)) << 3;	// to starfield EPROM A03     (1 bit)
-		i |= hadd_283>>5 & 7;					// to starfield EPROM A00-A02 (3 bits)
-		state->m_latch_374 = sf_rom[i + 0x3000];			// lines A12-A13 are always high
+		i = vadd_283<<4 & 0xff0;                // to starfield EPROM A04-A11 (8 bits)
+		i |= (_hflop_74a_n^(hadd_283>>8)) << 3; // to starfield EPROM A03     (1 bit)
+		i |= hadd_283>>5 & 7;                   // to starfield EPROM A00-A02 (3 bits)
+		state->m_latch_374 = sf_rom[i + 0x3000];            // lines A12-A13 are always high
 
 		hadd_283 = _hcount_191 + 63;
 
 		for (x=64; x<448; lineptr+=pixadv,x++) // 9-bit H-clock input (clipped against horizontal visible area)
 		{
-			i = hadd_283;							// store horizontal adder's previous state in i
-			hadd_283 = _hcount_191 + (x & 0xff);	// add lower 8 bits and preserve carry
-			vadd_283 = _vcount_191 + y;				// add lower 8 bits and discard carry (later)
+			i = hadd_283;                           // store horizontal adder's previous state in i
+			hadd_283 = _hcount_191 + (x & 0xff);    // add lower 8 bits and preserve carry
+			vadd_283 = _vcount_191 + y;             // add lower 8 bits and discard carry (later)
 
-			if (!((vadd_283 ^ (x>>3)) & 4)) continue;		// logic rejection 1
-			if ((vadd_283 | (hadd_283>>1)) & 2) continue;	// logic rejection 2
+			if (!((vadd_283 ^ (x>>3)) & 4)) continue;       // logic rejection 1
+			if ((vadd_283 | (hadd_283>>1)) & 2) continue;   // logic rejection 2
 
 			// latch data from starfield EPROM on rising edge of 74LS374's clock input
 			if (!(~i & 0x1f))
 			{
-				i = vadd_283<<4 & 0xff0;				// to starfield EPROM A04-A11 (8 bits)
-				i |= (_hflop_74a_n^(hadd_283>>8)) << 3;	// to starfield EPROM A03     (1 bit)
-				i |= hadd_283>>5 & 7;					// to starfield EPROM A00-A02 (3 bits)
-				state->m_latch_374 = sf_rom[i + 0x3000];			// lines A12-A13 are always high
+				i = vadd_283<<4 & 0xff0;                // to starfield EPROM A04-A11 (8 bits)
+				i |= (_hflop_74a_n^(hadd_283>>8)) << 3; // to starfield EPROM A03     (1 bit)
+				i |= hadd_283>>5 & 7;                   // to starfield EPROM A00-A02 (3 bits)
+				state->m_latch_374 = sf_rom[i + 0x3000];            // lines A12-A13 are always high
 			}
 
 			if ((~((state->m_latch_374^hadd_283)^1) & 0x1f)) continue; // logic rejection 3
@@ -331,7 +321,7 @@ static void sidearms_draw_starfield( running_machine &machine, bitmap_t *bitmap 
 #endif
 }
 
-static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect)
+static void draw_sprites(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	sidearms_state *state = machine.driver_data<sidearms_state>();
 
@@ -346,29 +336,21 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 	}
 }
 
-SCREEN_UPDATE( sidearms )
+UINT32 sidearms_state::screen_update_sidearms(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	sidearms_state *state = screen->machine().driver_data<sidearms_state>();
 
-	sidearms_draw_starfield(screen->machine(), bitmap);
+	sidearms_draw_starfield(machine(), bitmap);
 
-	tilemap_set_scrollx(state->m_bg_tilemap, 0, state->m_bg_scrollx[0] + (state->m_bg_scrollx[1] << 8 & 0xf00));
-	tilemap_set_scrolly(state->m_bg_tilemap, 0, state->m_bg_scrolly[0] + (state->m_bg_scrolly[1] << 8 & 0xf00));
+	m_bg_tilemap->set_scrollx(0, m_bg_scrollx[0] + (m_bg_scrollx[1] << 8 & 0xf00));
+	m_bg_tilemap->set_scrolly(0, m_bg_scrolly[0] + (m_bg_scrolly[1] << 8 & 0xf00));
 
-	if (state->m_bgon)
-		tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
+	if (m_bgon)
+		m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
 
-	if (state->m_objon)
-		draw_sprites(screen->machine(), bitmap, cliprect);
+	if (m_objon)
+		draw_sprites(machine(), bitmap, cliprect);
 
-	if (state->m_charon)
-		tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, 0, 0);
+	if (m_charon)
+		m_fg_tilemap->draw(bitmap, cliprect, 0, 0);
 	return 0;
-}
-
-SCREEN_EOF( sidearms )
-{
-	address_space *space = machine.device("maincpu")->memory().space(AS_PROGRAM);
-
-	buffer_spriteram_w(space, 0, 0);
 }

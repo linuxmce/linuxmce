@@ -25,30 +25,15 @@ inline void ATTR_PRINTF(3,4) x76f041_device::verboselog(int n_level, const char 
 		va_start(v, s_fmt);
 		vsprintf(buf, s_fmt, v);
 		va_end(v);
-		logerror("x76f041 %s %s: %s", config.tag(), m_machine.describe_context(), buf);
+		logerror("x76f041 %s %s: %s", tag(), machine().describe_context(), buf);
 	}
 }
 
-const device_type X76F041 = x76f041_device_config::static_alloc_device_config;
+// device type definition
+const device_type X76F041 = &device_creator<x76f041_device>;
 
-x76f041_device_config::x76f041_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock)
-	: device_secure_serial_flash_config(mconfig, static_alloc_device_config, "X76F041", tag, owner, clock)
-{
-}
-
-device_config *x76f041_device_config::static_alloc_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock)
-{
-	return global_alloc(x76f041_device_config(mconfig, tag, owner, clock));
-}
-
-device_t *x76f041_device_config::alloc_device(running_machine &machine) const
-{
-	return auto_alloc(machine, x76f041_device(machine, *this));
-}
-
-x76f041_device::x76f041_device(running_machine &_machine, const x76f041_device_config &_config)
-	: device_secure_serial_flash(_machine, _config),
-	  config(_config)
+x76f041_device::x76f041_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_secure_serial_flash(mconfig, X76F041, "X76F041", tag, owner, clock)
 {
 }
 
@@ -89,11 +74,11 @@ void x76f041_device::nvram_default()
 	{
 		// Ensure the size is correct though
 		if(m_region->bytes() != SIZE_RESPONSE_TO_RESET+SIZE_WRITE_PASSWORD+
-		   SIZE_READ_PASSWORD+SIZE_CONFIGURATION_PASSWORD+SIZE_CONFIGURATION_REGISTERS+SIZE_DATA)
+			SIZE_READ_PASSWORD+SIZE_CONFIGURATION_PASSWORD+SIZE_CONFIGURATION_REGISTERS+SIZE_DATA)
 			logerror("X76F041: Wrong region length for initialization data, expected 0x%x, got 0x%x\n",
-					 SIZE_RESPONSE_TO_RESET+SIZE_WRITE_PASSWORD+
-					 SIZE_READ_PASSWORD+SIZE_CONFIGURATION_PASSWORD+SIZE_CONFIGURATION_REGISTERS+SIZE_DATA,
-					 m_region->bytes());
+						SIZE_RESPONSE_TO_RESET+SIZE_WRITE_PASSWORD+
+						SIZE_READ_PASSWORD+SIZE_CONFIGURATION_PASSWORD+SIZE_CONFIGURATION_REGISTERS+SIZE_DATA,
+						m_region->bytes());
 		else {
 			UINT8 *rb = m_region->base();
 			int offset = 0;
@@ -221,14 +206,14 @@ void x76f041_device::load_address()
 		bcr >>= 4;
 
 	if(((command & 0xe0) == COMMAND_READ && (bcr & BCR_Z) && (bcr & BCR_T)) ||
-	   ((command & 0xe0) == COMMAND_WRITE && (bcr & BCR_Z))) {
+		((command & 0xe0) == COMMAND_WRITE && (bcr & BCR_Z))) {
 		/* todo: find out when this is really checked. */
 		verboselog(1, "command not allowed\n");
 		state = STATE_STOP;
 		sdar = false;
 
 	} else if(((command & 0xe0) == COMMAND_WRITE && !(bcr & BCR_X)) ||
-			  ((command & 0xe0) == COMMAND_READ && !(bcr & BCR_Y))) {
+				((command & 0xe0) == COMMAND_READ && !(bcr & BCR_Y))) {
 		verboselog(1, "password not required\n");
 		password_ok();
 

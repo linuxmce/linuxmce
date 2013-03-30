@@ -1,31 +1,43 @@
 /*
     Game Plan MPU-2
 */
+
+
 #include "emu.h"
 #include "cpu/z80/z80.h"
-
-extern const char layout_pinball[];
 
 class gp_2_state : public driver_device
 {
 public:
-	gp_2_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	gp_2_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+			m_maincpu(*this, "maincpu")
+	{ }
+
+protected:
+
+	// devices
+	required_device<cpu_device> m_maincpu;
+
+	// driver_device overrides
+	virtual void machine_reset();
+public:
+	DECLARE_DRIVER_INIT(gp_2);
 };
 
 
-static ADDRESS_MAP_START( gp_2_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( gp_2_map, AS_PROGRAM, 8, gp_2_state )
 	AM_RANGE(0x0000, 0xffff) AM_NOP
 ADDRESS_MAP_END
 
 static INPUT_PORTS_START( gp_2 )
 INPUT_PORTS_END
 
-static MACHINE_RESET( gp_2 )
+void gp_2_state::machine_reset()
 {
 }
 
-static DRIVER_INIT( gp_2 )
+DRIVER_INIT_MEMBER(gp_2_state,gp_2)
 {
 }
 
@@ -33,11 +45,6 @@ static MACHINE_CONFIG_START( gp_2, gp_2_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", Z80, 2457600)
 	MCFG_CPU_PROGRAM_MAP(gp_2_map)
-
-	MCFG_MACHINE_RESET( gp_2 )
-
-	/* video hardware */
-	MCFG_DEFAULT_LAYOUT(layout_pinball)
 MACHINE_CONFIG_END
 
 /*-------------------------------------------------------------------
@@ -146,6 +153,16 @@ ROM_START(ladyshot)
 	ROM_CONTINUE(0x7800, 0x0800)
 	ROM_RELOAD (0xf000, 0x1000)
 ROM_END
+ROM_START(ladyshota)
+	ROM_REGION(0x10000, "maincpu", 0)
+	ROM_LOAD( "830a2.716", 0x0000, 0x0800, CRC(2c1f1629) SHA1(9233ce4328d779ff6548cdd5d6819cd368bef313))
+	ROM_LOAD( "830b2.716", 0x0800, 0x0800, CRC(2105a538) SHA1(0360d3e740d8b6f816cfe7fe1fb32ac476251b9f))
+	ROM_LOAD( "830c2.716", 0x1000, 0x0800, CRC(2d96bdde) SHA1(7c03a29a91f03fba9ed5e53a93335113a7cbafb3))
+	ROM_REGION(0x10000, "cpu2", 0)
+	ROM_LOAD ("830.snd", 0x3800, 0x0800, NO_DUMP)
+	ROM_CONTINUE(0x7800, 0x0800)
+	ROM_RELOAD (0xf000, 0x1000)
+ROM_END
 
 /*-------------------------------------------------------------------
 / Loch Ness Monster (November 1985) - Model #???
@@ -232,19 +249,20 @@ ROM_START(vegasgp)
 	ROM_LOAD( "140b.13", 0x0800, 0x0800, CRC(cf26d67b) SHA1(05481e880e23a7bc1d1716b52ac1effc0db437f2))
 ROM_END
 
-GAME(1984,	agent777,	0,			gp_2,	gp_2,	gp_2,	ROT0,	"Game Plan",	"Agents 777",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1985,	andromep,	0,			gp_2,	gp_2,	gp_2,	ROT0,	"Game Plan",	"Andromeda",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1985,	andromepa,	andromep,	gp_2,	gp_2,	gp_2,	ROT0,	"Game Plan",	"Andromeda (alternate set)",GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1984,	attila,		0,			gp_2,	gp_2,	gp_2,	ROT0,	"Game Plan",	"Attila The Hun",			GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1985,	cpthook,	0,			gp_2,	gp_2,	gp_2,	ROT0,	"Game Plan",	"Captain Hook",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1985,	cyclopes,	0,			gp_2,	gp_2,	gp_2,	ROT0,	"Game Plan",	"Cyclopes",					GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1981,	gwarfare,	0,			gp_2,	gp_2,	gp_2,	ROT0,	"Game Plan",	"Global Warfare",			GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1985,	ladyshot,	0,			gp_2,	gp_2,	gp_2,	ROT0,	"Game Plan",	"Lady Sharpshooter",		GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1982,	mbossy,		0,			gp_2,	gp_2,	gp_2,	ROT0,	"Game Plan",	"Mike Bossy",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1979,	coneyis,	0,			gp_2,	gp_2,	gp_2,	ROT0,	"Game Plan",	"Old Coney Island!",		GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1980,	lizard,		0,			gp_2,	gp_2,	gp_2,	ROT0,	"Game Plan",	"Pinball Lizard",			GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1983,	sshootr2,	0,			gp_2,	gp_2,	gp_2,	ROT0,	"Game Plan",	"Sharp Shooter II",			GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1979,	sshootep,	0,			gp_2,	gp_2,	gp_2,	ROT0,	"Game Plan",	"Sharpshooter",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1982,	suprnova,	0,			gp_2,	gp_2,	gp_2,	ROT0,	"Game Plan",	"Super Nova",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1979,	vegasgp,	0,			gp_2,	gp_2,	gp_2,	ROT0,	"Game Plan",	"Vegas (Game Plan)",		GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
 
+GAME(1984,  agent777,   0,          gp_2,   gp_2, gp_2_state,   gp_2,   ROT0,   "Game Plan",    "Agents 777",               GAME_IS_SKELETON_MECHANICAL)
+GAME(1985,  andromep,   0,          gp_2,   gp_2, gp_2_state,   gp_2,   ROT0,   "Game Plan",    "Andromeda (set 1)",        GAME_IS_SKELETON_MECHANICAL)
+GAME(1985,  andromepa,  andromep,   gp_2,   gp_2, gp_2_state,   gp_2,   ROT0,   "Game Plan",    "Andromeda (set 2)",        GAME_IS_SKELETON_MECHANICAL)
+GAME(1984,  attila,     0,          gp_2,   gp_2, gp_2_state,   gp_2,   ROT0,   "Game Plan",    "Attila The Hun",           GAME_IS_SKELETON_MECHANICAL)
+GAME(1985,  cpthook,    0,          gp_2,   gp_2, gp_2_state,   gp_2,   ROT0,   "Game Plan",    "Captain Hook",             GAME_IS_SKELETON_MECHANICAL)
+GAME(1985,  cyclopes,   0,          gp_2,   gp_2, gp_2_state,   gp_2,   ROT0,   "Game Plan",    "Cyclopes",                 GAME_IS_SKELETON_MECHANICAL)
+GAME(1981,  gwarfare,   0,          gp_2,   gp_2, gp_2_state,   gp_2,   ROT0,   "Game Plan",    "Global Warfare",           GAME_IS_SKELETON_MECHANICAL)
+GAME(1985,  ladyshot,   0,          gp_2,   gp_2, gp_2_state,   gp_2,   ROT0,   "Game Plan",    "Lady Sharpshooter",        GAME_IS_SKELETON_MECHANICAL)
+GAME(1985,  ladyshota,  ladyshot,   gp_2,   gp_2, gp_2_state,   gp_2,   ROT0,   "Game Plan",    "Lady Sharpshooter (alternate set)",        GAME_IS_SKELETON_MECHANICAL)
+GAME(1982,  mbossy,     0,          gp_2,   gp_2, gp_2_state,   gp_2,   ROT0,   "Game Plan",    "Mike Bossy",               GAME_IS_SKELETON_MECHANICAL)
+GAME(1979,  coneyis,    0,          gp_2,   gp_2, gp_2_state,   gp_2,   ROT0,   "Game Plan",    "Old Coney Island!",        GAME_IS_SKELETON_MECHANICAL)
+GAME(1980,  lizard,     0,          gp_2,   gp_2, gp_2_state,   gp_2,   ROT0,   "Game Plan",    "Pinball Lizard",           GAME_IS_SKELETON_MECHANICAL)
+GAME(1983,  sshootr2,   0,          gp_2,   gp_2, gp_2_state,   gp_2,   ROT0,   "Game Plan",    "Sharp Shooter II",         GAME_IS_SKELETON_MECHANICAL)
+GAME(1979,  sshootep,   0,          gp_2,   gp_2, gp_2_state,   gp_2,   ROT0,   "Game Plan",    "Sharpshooter",             GAME_IS_SKELETON_MECHANICAL)
+GAME(1982,  suprnova,   0,          gp_2,   gp_2, gp_2_state,   gp_2,   ROT0,   "Game Plan",    "Super Nova",               GAME_IS_SKELETON_MECHANICAL)
+GAME(1979,  vegasgp,    0,          gp_2,   gp_2, gp_2_state,   gp_2,   ROT0,   "Game Plan",    "Vegas (Game Plan)",        GAME_IS_SKELETON_MECHANICAL)

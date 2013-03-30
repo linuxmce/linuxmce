@@ -86,31 +86,30 @@
 //**************************************************************************
 
 // texture formats
-enum
+enum texture_format
 {
-	TEXFORMAT_UNDEFINED = 0,							// require a format to be specified
-	TEXFORMAT_PALETTE16,								// 16bpp palettized, alpha ignored
-	TEXFORMAT_PALETTEA16,								// 16bpp palettized, alpha respected
-	TEXFORMAT_RGB15,									// 16bpp 5-5-5 RGB
-	TEXFORMAT_RGB32,									// 32bpp 8-8-8 RGB
-	TEXFORMAT_ARGB32,									// 32bpp 8-8-8-8 ARGB
-	TEXFORMAT_YUY16										// 16bpp 8-8 Y/Cb, Y/Cr in sequence
+	TEXFORMAT_UNDEFINED = 0,                            // require a format to be specified
+	TEXFORMAT_PALETTE16,                                // 16bpp palettized, alpha ignored
+	TEXFORMAT_PALETTEA16,                               // 16bpp palettized, alpha respected
+	TEXFORMAT_RGB32,                                    // 32bpp 8-8-8 RGB
+	TEXFORMAT_ARGB32,                                   // 32bpp 8-8-8-8 ARGB
+	TEXFORMAT_YUY16                                     // 16bpp 8-8 Y/Cb, Y/Cr in sequence
 };
 
 // blending modes
 enum
 {
-	BLENDMODE_NONE = 0,									// no blending
-	BLENDMODE_ALPHA,									// standard alpha blend
-	BLENDMODE_RGB_MULTIPLY,								// apply source alpha to source pix, then multiply RGB values
-	BLENDMODE_ADD										// apply source alpha to source pix, then add to destination
+	BLENDMODE_NONE = 0,                                 // no blending
+	BLENDMODE_ALPHA,                                    // standard alpha blend
+	BLENDMODE_RGB_MULTIPLY,                             // apply source alpha to source pix, then multiply RGB values
+	BLENDMODE_ADD                                       // apply source alpha to source pix, then add to destination
 };
 
 
 // render creation flags
-const UINT8 RENDER_CREATE_NO_ART		= 0x01;			// ignore any views that have art in them
-const UINT8 RENDER_CREATE_SINGLE_FILE	= 0x02;			// only load views from the file specified
-const UINT8 RENDER_CREATE_HIDDEN		= 0x04;			// don't make this target visible
+const UINT8 RENDER_CREATE_NO_ART        = 0x01;         // ignore any views that have art in them
+const UINT8 RENDER_CREATE_SINGLE_FILE   = 0x02;         // only load views from the file specified
+const UINT8 RENDER_CREATE_HIDDEN        = 0x04;         // don't make this target visible
 
 
 // flags for primitives
@@ -132,30 +131,50 @@ const UINT32 PRIMFLAG_SCREENTEX_MASK = 1 << PRIMFLAG_SCREENTEX_SHIFT;
 const int PRIMFLAG_TEXWRAP_SHIFT = 14;
 const UINT32 PRIMFLAG_TEXWRAP_MASK = 1 << PRIMFLAG_TEXWRAP_SHIFT;
 
+const int PRIMFLAG_TEXSHADE_SHIFT = 15;
+const UINT32 PRIMFLAG_TEXSHADE_MASK = 3 << PRIMFLAG_TEXSHADE_SHIFT;
 
+const int PRIMFLAG_VECTOR_SHIFT = 17;
+const UINT32 PRIMFLAG_VECTOR_MASK = 1 << PRIMFLAG_VECTOR_SHIFT;
+
+const int PRIMFLAG_VECTORBUF_SHIFT = 18;
+const UINT32 PRIMFLAG_VECTORBUF_MASK = 1 << PRIMFLAG_VECTORBUF_SHIFT;
+
+const int PRIMFLAG_TYPE_SHIFT = 19;
+const UINT32 PRIMFLAG_TYPE_MASK = 3 << PRIMFLAG_TYPE_SHIFT;
+const UINT32 PRIMFLAG_TYPE_LINE = 0 << PRIMFLAG_TYPE_SHIFT;
+const UINT32 PRIMFLAG_TYPE_QUAD = 1 << PRIMFLAG_TYPE_SHIFT;
 
 //**************************************************************************
 //  MACROS
 //**************************************************************************
 
-#define PRIMFLAG_TEXORIENT(x)		((x) << PRIMFLAG_TEXORIENT_SHIFT)
-#define PRIMFLAG_GET_TEXORIENT(x)	(((x) & PRIMFLAG_TEXORIENT_MASK) >> PRIMFLAG_TEXORIENT_SHIFT)
+#define PRIMFLAG_TEXORIENT(x)       ((x) << PRIMFLAG_TEXORIENT_SHIFT)
+#define PRIMFLAG_GET_TEXORIENT(x)   (((x) & PRIMFLAG_TEXORIENT_MASK) >> PRIMFLAG_TEXORIENT_SHIFT)
 
-#define PRIMFLAG_TEXFORMAT(x)		((x) << PRIMFLAG_TEXFORMAT_SHIFT)
-#define PRIMFLAG_GET_TEXFORMAT(x)	(((x) & PRIMFLAG_TEXFORMAT_MASK) >> PRIMFLAG_TEXFORMAT_SHIFT)
+#define PRIMFLAG_TEXFORMAT(x)       ((x) << PRIMFLAG_TEXFORMAT_SHIFT)
+#define PRIMFLAG_GET_TEXFORMAT(x)   (((x) & PRIMFLAG_TEXFORMAT_MASK) >> PRIMFLAG_TEXFORMAT_SHIFT)
 
-#define PRIMFLAG_BLENDMODE(x)		((x) << PRIMFLAG_BLENDMODE_SHIFT)
-#define PRIMFLAG_GET_BLENDMODE(x)	(((x) & PRIMFLAG_BLENDMODE_MASK) >> PRIMFLAG_BLENDMODE_SHIFT)
+#define PRIMFLAG_BLENDMODE(x)       ((x) << PRIMFLAG_BLENDMODE_SHIFT)
+#define PRIMFLAG_GET_BLENDMODE(x)   (((x) & PRIMFLAG_BLENDMODE_MASK) >> PRIMFLAG_BLENDMODE_SHIFT)
 
-#define PRIMFLAG_ANTIALIAS(x)		((x) << PRIMFLAG_ANTIALIAS_SHIFT)
-#define PRIMFLAG_GET_ANTIALIAS(x)	(((x) & PRIMFLAG_ANTIALIAS_MASK) >> PRIMFLAG_ANTIALIAS_SHIFT)
+#define PRIMFLAG_ANTIALIAS(x)       ((x) << PRIMFLAG_ANTIALIAS_SHIFT)
+#define PRIMFLAG_GET_ANTIALIAS(x)   (((x) & PRIMFLAG_ANTIALIAS_MASK) >> PRIMFLAG_ANTIALIAS_SHIFT)
 
-#define PRIMFLAG_SCREENTEX(x)		((x) << PRIMFLAG_SCREENTEX_SHIFT)
-#define PRIMFLAG_GET_SCREENTEX(x)	(((x) & PRIMFLAG_SCREENTEX_MASK) >> PRIMFLAG_SCREENTEX_SHIFT)
+#define PRIMFLAG_SCREENTEX(x)       ((x) << PRIMFLAG_SCREENTEX_SHIFT)
+#define PRIMFLAG_GET_SCREENTEX(x)   (((x) & PRIMFLAG_SCREENTEX_MASK) >> PRIMFLAG_SCREENTEX_SHIFT)
 
-#define PRIMFLAG_TEXWRAP(x)			((x) << PRIMFLAG_TEXWRAP_SHIFT)
-#define PRIMFLAG_GET_TEXWRAP(x)		(((x) & PRIMFLAG_TEXWRAP_MASK) >> PRIMFLAG_TEXWRAP_SHIFT)
+#define PRIMFLAG_TEXWRAP(x)         ((x) << PRIMFLAG_TEXWRAP_SHIFT)
+#define PRIMFLAG_GET_TEXWRAP(x)     (((x) & PRIMFLAG_TEXWRAP_MASK) >> PRIMFLAG_TEXWRAP_SHIFT)
 
+#define PRIMFLAG_TEXSHADE(x)        ((x) << PRIMFLAG_TEXSHADE_SHIFT)
+#define PRIMFLAG_GET_TEXSHADE(x)    (((x) & PRIMFLAG_TEXSHADE_MASK) >> PRIMFLAG_TEXSHADE_SHIFT)
+
+#define PRIMFLAG_VECTOR(x)          ((x) << PRIMFLAG_VECTOR_SHIFT)
+#define PRIMFLAG_GET_VECTOR(x)      (((x) & PRIMFLAG_VECTOR_MASK) >> PRIMFLAG_VECTOR_SHIFT)
+
+#define PRIMFLAG_VECTORBUF(x)       ((x) << PRIMFLAG_VECTORBUF_SHIFT)
+#define PRIMFLAG_GET_VECTORBUF(x)   (((x) & PRIMFLAG_VECTORBUF_MASK) >> PRIMFLAG_VECTORBUF_SHIFT)
 
 
 //**************************************************************************
@@ -167,7 +186,7 @@ class device_t;
 class screen_device;
 class render_container;
 class render_manager;
-typedef struct _xml_data_node xml_data_node;
+struct xml_data_node;
 class render_font;
 struct object_transform;
 class layout_element;
@@ -176,56 +195,60 @@ class layout_file;
 
 
 // texture scaling callback
-typedef void (*texture_scaler_func)(bitmap_t &dest, const bitmap_t &source, const rectangle &sbounds, void *param);
+typedef void (*texture_scaler_func)(bitmap_argb32 &dest, bitmap_argb32 &source, const rectangle &sbounds, void *param);
 
 
 // render_bounds - floating point bounding rectangle
 struct render_bounds
 {
-	float				x0;					// leftmost X coordinate
-	float				y0;					// topmost Y coordinate
-	float				x1;					// rightmost X coordinate
-	float				y1;					// bottommost Y coordinate
+	float               x0;                 // leftmost X coordinate
+	float               y0;                 // topmost Y coordinate
+	float               x1;                 // rightmost X coordinate
+	float               y1;                 // bottommost Y coordinate
+
+	float width() const { return x1 - x0; }
+	float height() const { return y1 - y0; }
 };
 
 
 // render_color - floating point set of ARGB values
 struct render_color
 {
-	float				a;					// alpha component (0.0 = transparent, 1.0 = opaque)
-	float				r;					// red component (0.0 = none, 1.0 = max)
-	float				g;					// green component (0.0 = none, 1.0 = max)
-	float				b;					// blue component (0.0 = none, 1.0 = max)
+	float               a;                  // alpha component (0.0 = transparent, 1.0 = opaque)
+	float               r;                  // red component (0.0 = none, 1.0 = max)
+	float               g;                  // green component (0.0 = none, 1.0 = max)
+	float               b;                  // blue component (0.0 = none, 1.0 = max)
 };
 
 
 // render_texuv - floating point set of UV texture coordinates
 struct render_texuv
 {
-	float				u;					// U coodinate (0.0-1.0)
-	float				v;					// V coordinate (0.0-1.0)
+	float               u;                  // U coodinate (0.0-1.0)
+	float               v;                  // V coordinate (0.0-1.0)
 };
 
 
 // render_quad_texuv - floating point set of UV texture coordinates
 struct render_quad_texuv
 {
-	render_texuv		tl;					// top-left UV coordinate
-	render_texuv		tr;					// top-right UV coordinate
-	render_texuv		bl;					// bottom-left UV coordinate
-	render_texuv		br;					// bottom-right UV coordinate
+	render_texuv        tl;                 // top-left UV coordinate
+	render_texuv        tr;                 // top-right UV coordinate
+	render_texuv        bl;                 // bottom-left UV coordinate
+	render_texuv        br;                 // bottom-right UV coordinate
 };
 
 
 // render_texinfo - texture information
 struct render_texinfo
 {
-	void *				base;				// base of the data
-	UINT32				rowpixels;			// pixels per row
-	UINT32				width;				// width of the image
-	UINT32				height;				// height of the image
-	const rgb_t *		palette;			// palette for PALETTE16 textures, LUTs for RGB15/RGB32
-	UINT32				seqid;				// sequence ID
+	void *              base;               // base of the data
+	UINT32              rowpixels;          // pixels per row
+	UINT32              width;              // width of the image
+	UINT32              height;             // height of the image
+	const rgb_t *       palette;            // palette for PALETTE16 textures, LUTs for RGB15/RGB32
+	UINT32              seqid;              // sequence ID
+	UINT64              osddata;            // aux data to pass to osd
 };
 
 
@@ -244,16 +267,16 @@ class render_screen_list
 		// construction/destruction
 		item(screen_device &screen)
 			: m_next(NULL),
-			  m_screen(screen) { }
+				m_screen(screen) { }
 
 		// state
-		item *				m_next;				// next screen in list
-		screen_device &		m_screen;			// reference to screen device
+		item *              m_next;             // next screen in list
+		screen_device &     m_screen;           // reference to screen device
 	};
 
 public:
 	// construction/destruction
-	render_screen_list(resource_pool &pool = global_resource_pool)
+	render_screen_list(resource_pool &pool = global_resource_pool())
 		: m_list(pool) { }
 
 	// getters
@@ -282,12 +305,14 @@ private:
 // render_layer_config - describes the state of layers
 class render_layer_config
 {
-	static const UINT8 ENABLE_BACKDROP			= 0x01;	// enable backdrop layers
-	static const UINT8 ENABLE_OVERLAY			= 0x02;	// enable overlay layers
-	static const UINT8 ENABLE_BEZEL				= 0x04;	// enable bezel layers
-	static const UINT8 ZOOM_TO_SCREEN			= 0x08;	// zoom to screen area by default
-	static const UINT8 ENABLE_SCREEN_OVERLAY	= 0x10;	// enable screen overlays
-	static const UINT8 DEFAULT = ENABLE_BACKDROP | ENABLE_OVERLAY | ENABLE_BEZEL | ENABLE_SCREEN_OVERLAY;
+	static const UINT8 ENABLE_BACKDROP          = 0x01; // enable backdrop layers
+	static const UINT8 ENABLE_OVERLAY           = 0x02; // enable overlay layers
+	static const UINT8 ENABLE_BEZEL             = 0x04; // enable bezel layers
+	static const UINT8 ENABLE_CPANEL            = 0x08; // enable cpanel layers
+	static const UINT8 ENABLE_MARQUEE           = 0x10; // enable marquee layers
+	static const UINT8 ZOOM_TO_SCREEN           = 0x20; // zoom to screen area by default
+	static const UINT8 ENABLE_SCREEN_OVERLAY    = 0x40; // enable screen overlays
+	static const UINT8 DEFAULT = ENABLE_BACKDROP | ENABLE_OVERLAY | ENABLE_BEZEL | ENABLE_CPANEL | ENABLE_MARQUEE | ENABLE_SCREEN_OVERLAY;
 
 public:
 	render_layer_config()
@@ -299,17 +324,21 @@ public:
 	bool backdrops_enabled() const { return ((m_state & ENABLE_BACKDROP) != 0); }
 	bool overlays_enabled() const { return ((m_state & ENABLE_OVERLAY) != 0); }
 	bool bezels_enabled() const { return ((m_state & ENABLE_BEZEL) != 0); }
+	bool cpanels_enabled() const { return ((m_state & ENABLE_CPANEL) != 0); }
+	bool marquees_enabled() const { return ((m_state & ENABLE_MARQUEE) != 0); }
 	bool screen_overlay_enabled() const { return ((m_state & ENABLE_SCREEN_OVERLAY) != 0); }
 	bool zoom_to_screen() const { return ((m_state & ZOOM_TO_SCREEN) != 0); }
 
 	render_layer_config &set_backdrops_enabled(bool enable) { if (enable) m_state |= ENABLE_BACKDROP; else m_state &= ~ENABLE_BACKDROP; return *this; }
 	render_layer_config &set_overlays_enabled(bool enable) { if (enable) m_state |= ENABLE_OVERLAY; else m_state &= ~ENABLE_OVERLAY; return *this; }
 	render_layer_config &set_bezels_enabled(bool enable) { if (enable) m_state |= ENABLE_BEZEL; else m_state &= ~ENABLE_BEZEL; return *this; }
+	render_layer_config &set_cpanels_enabled(bool enable) { if (enable) m_state |= ENABLE_CPANEL; else m_state &= ~ENABLE_CPANEL; return *this; }
+	render_layer_config &set_marquees_enabled(bool enable) { if (enable) m_state |= ENABLE_MARQUEE; else m_state &= ~ENABLE_MARQUEE; return *this; }
 	render_layer_config &set_screen_overlay_enabled(bool enable) { if (enable) m_state |= ENABLE_SCREEN_OVERLAY; else m_state &= ~ENABLE_SCREEN_OVERLAY; return *this; }
 	render_layer_config &set_zoom_to_screen(bool zoom) { if (zoom) m_state |= ZOOM_TO_SCREEN; else m_state &= ~ZOOM_TO_SCREEN; return *this; }
 
 private:
-	UINT8				m_state;
+	UINT8               m_state;
 };
 
 
@@ -324,9 +353,9 @@ public:
 	// render primitive types
 	enum primitive_type
 	{
-		INVALID = 0,						// invalid type
-		LINE,								// a single line
-		QUAD								// a rectilinear quad
+		INVALID = 0,                        // invalid type
+		LINE,                               // a single line
+		QUAD                                // a rectilinear quad
 	};
 
 	// getters
@@ -336,17 +365,17 @@ public:
 	void reset();
 
 	// public state
-	primitive_type		type;				// type of primitive
-	render_bounds		bounds;				// bounds or positions
-	render_color		color;				// RGBA values
-	UINT32				flags;				// flags
-	float				width;				// width (for line primitives)
-	render_texinfo		texture;			// texture info (for quad primitives)
-	render_quad_texuv	texcoords;			// texture coordinates (for quad primitives)
+	primitive_type      type;               // type of primitive
+	render_bounds       bounds;             // bounds or positions
+	render_color        color;              // RGBA values
+	UINT32              flags;              // flags
+	float               width;              // width (for line primitives)
+	render_texinfo      texture;            // texture info (for quad primitives)
+	render_quad_texuv   texcoords;          // texture coordinates (for quad primitives)
 
 private:
 	// internal state
-	render_primitive *	m_next;				// pointer to next element
+	render_primitive *  m_next;             // pointer to next element
 };
 
 
@@ -385,18 +414,18 @@ private:
 	{
 	public:
 		reference *next() const { return m_next; }
-		reference *			m_next;				// link to the next reference
-		void *				m_refptr;			// reference pointer
+		reference *         m_next;             // link to the next reference
+		void *              m_refptr;           // reference pointer
 	};
 
 	// internal state
-	simple_list<render_primitive> m_primlist;				// list of primitives
-	simple_list<reference> m_reflist;						// list of references
+	simple_list<render_primitive> m_primlist;               // list of primitives
+	simple_list<reference> m_reflist;                       // list of references
 
 	fixed_allocator<render_primitive> m_primitive_allocator;// allocator for primitives
-	fixed_allocator<reference> m_reference_allocator;		// allocator for references
+	fixed_allocator<reference> m_reference_allocator;       // allocator for references
 
-	osd_lock *			m_lock;								// lock to protect list accesses
+	osd_lock *          m_lock;                             // lock to protect list accesses
 };
 
 
@@ -426,10 +455,13 @@ public:
 	int format() const { return m_format; }
 
 	// configure the texture bitmap
-	void set_bitmap(bitmap_t *bitmap, const rectangle *sbounds, int format, palette_t *palette = NULL);
+	void set_bitmap(bitmap_t &bitmap, const rectangle &sbounds, texture_format format);
+
+	// set any necessary aux data
+	void set_osd_data(UINT64 data) { m_osddata = data; }
 
 	// generic high-quality bitmap scaler
-	static void hq_scale(bitmap_t &dest, const bitmap_t &source, const rectangle &sbounds, void *param);
+	static void hq_scale(bitmap_argb32 &dest, bitmap_argb32 &source, const rectangle &sbounds, void *param);
 
 private:
 	// internal helpers
@@ -441,23 +473,25 @@ private:
 	// a scaled_texture contains a single scaled entry for a texture
 	struct scaled_texture
 	{
-		bitmap_t *			bitmap;					// final bitmap
-		UINT32				seqid;					// sequence number
+		bitmap_argb32 *     bitmap;                 // final bitmap
+		UINT32              seqid;                  // sequence number
 	};
 
 	// internal state
-	render_manager *	m_manager;					// reference to our manager
-	render_texture *	m_next;						// next texture (for free list)
-	bitmap_t *			m_bitmap;					// pointer to the original bitmap
-	rectangle			m_sbounds;					// source bounds within the bitmap
-	palette_t *			m_palette;					// palette associated with the texture
-	int					m_format;					// format of the texture data
-	texture_scaler_func	m_scaler;					// scaling callback
-	void *				m_param;					// scaling callback parameter
-	UINT32				m_curseq;					// current sequence number
-	scaled_texture		m_scaled[MAX_TEXTURE_SCALES];// array of scaled variants of this texture
-	rgb_t *				m_bcglookup;				// dynamically allocated B/C/G lookup table
-	UINT32				m_bcglookup_entries;		// number of B/C/G lookup entries allocated
+	render_manager *    m_manager;                  // reference to our manager
+	render_texture *    m_next;                     // next texture (for free list)
+	bitmap_t *          m_bitmap;                   // pointer to the original bitmap
+	rectangle           m_sbounds;                  // source bounds within the bitmap
+	texture_format      m_format;                   // format of the texture data
+	rgb_t *             m_bcglookup;                // dynamically allocated B/C/G lookup table
+	UINT32              m_bcglookup_entries;        // number of B/C/G lookup entries allocated
+	UINT64              m_osddata;                  // aux data to pass to osd
+
+	// scaling state (ARGB32 only)
+	texture_scaler_func m_scaler;                   // scaling callback
+	void *              m_param;                    // scaling callback parameter
+	UINT32              m_curseq;                   // current sequence number
+	scaled_texture      m_scaled[MAX_TEXTURE_SCALES];// array of scaled variants of this texture
 };
 
 
@@ -483,14 +517,14 @@ public:
 		user_settings();
 
 		// public state
-		int					m_orientation;		// orientation
-		float				m_brightness;		// brightness
-		float				m_contrast;			// contrast
-		float				m_gamma;			// gamma
-		float				m_xscale;			// horizontal scale factor
-		float				m_yscale;			// vertical scale factor
-		float				m_xoffset;			// horizontal offset
-		float				m_yoffset;			// vertical offset
+		int                 m_orientation;      // orientation
+		float               m_brightness;       // brightness
+		float               m_contrast;         // contrast
+		float               m_gamma;            // gamma
+		float               m_xscale;           // horizontal scale factor
+		float               m_yscale;           // vertical scale factor
+		float               m_xoffset;          // horizontal offset
+		float               m_yoffset;          // vertical offset
 	};
 
 	// getters
@@ -507,7 +541,7 @@ public:
 	void get_user_settings(user_settings &settings) const { settings = m_user; }
 
 	// setters
-	void set_overlay(bitmap_t *bitmap);
+	void set_overlay(bitmap_argb32 *bitmap);
 	void set_user_settings(const user_settings &settings);
 
 	// empty the item list
@@ -546,18 +580,18 @@ private:
 
 	private:
 		// internal state
-		item *				m_next;				// pointer to the next element in the list
-		UINT8				m_type;				// type of element
-		render_bounds		m_bounds;			// bounds of the element
-		render_color		m_color;			// RGBA factors
-		UINT32				m_flags;			// option flags
-		UINT32				m_internal;			// internal flags
-		float				m_width;			// width of the line (lines only)
-		render_texture *	m_texture;			// pointer to the source texture (quads only)
+		item *              m_next;             // pointer to the next element in the list
+		UINT8               m_type;             // type of element
+		render_bounds       m_bounds;           // bounds of the element
+		render_color        m_color;            // RGBA factors
+		UINT32              m_flags;            // option flags
+		UINT32              m_internal;         // internal flags
+		float               m_width;            // width of the line (lines only)
+		render_texture *    m_texture;          // pointer to the source texture (quads only)
 	};
 
 	// generic screen overlay scaler
-	static void overlay_scale(bitmap_t &dest, const bitmap_t &source, const rectangle &sbounds, void *param);
+	static void overlay_scale(bitmap_argb32 &dest, bitmap_argb32 &source, const rectangle &sbounds, void *param);
 
 	// internal helpers
 	item *first_item() const { return m_itemlist.first(); }
@@ -566,18 +600,17 @@ private:
 	void update_palette();
 
 	// internal state
-	render_container *		m_next;					// the next container in the list
-	render_manager &		m_manager;				// reference back to the owning manager
-	simple_list<item>		m_itemlist;				// head of the item list
-	fixed_allocator<item>	m_item_allocator;		// free container items
-	screen_device *			m_screen;				// the screen device
-	user_settings			m_user;					// user settings
-	bitmap_t *				m_overlaybitmap;		// overlay bitmap
-	render_texture *		m_overlaytexture;		// overlay texture
-	palette_client *		m_palclient;			// client to the system palette
-	rgb_t					m_bcglookup256[0x400];	// lookup table for brightness/contrast/gamma
-	rgb_t					m_bcglookup32[0x80];	// lookup table for brightness/contrast/gamma
-	rgb_t					m_bcglookup[0x10000];	// full palette lookup with bcg adjustements
+	render_container *      m_next;                 // the next container in the list
+	render_manager &        m_manager;              // reference back to the owning manager
+	simple_list<item>       m_itemlist;             // head of the item list
+	fixed_allocator<item>   m_item_allocator;       // free container items
+	screen_device *         m_screen;               // the screen device
+	user_settings           m_user;                 // user settings
+	bitmap_argb32 *         m_overlaybitmap;        // overlay bitmap
+	render_texture *        m_overlaytexture;       // overlay texture
+	palette_client *        m_palclient;            // client to the system palette
+	rgb_t                   m_bcglookup256[0x400];  // lookup table for brightness/contrast/gamma
+	rgb_t                   m_bcglookup[0x10000];   // full palette lookup with bcg adjustements
 };
 
 
@@ -620,6 +653,8 @@ public:
 	bool backdrops_enabled() const { return m_layerconfig.backdrops_enabled(); }
 	bool overlays_enabled() const { return m_layerconfig.overlays_enabled(); }
 	bool bezels_enabled() const { return m_layerconfig.bezels_enabled(); }
+	bool cpanels_enabled() const { return m_layerconfig.cpanels_enabled(); }
+	bool marquees_enabled() const { return m_layerconfig.marquees_enabled(); }
 	bool screen_overlay_enabled() const { return m_layerconfig.screen_overlay_enabled(); }
 	bool zoom_to_screen() const { return m_layerconfig.zoom_to_screen(); }
 
@@ -627,6 +662,8 @@ public:
 	void set_backdrops_enabled(bool enable) { m_layerconfig.set_backdrops_enabled(enable); update_layer_config(); }
 	void set_overlays_enabled(bool enable) { m_layerconfig.set_overlays_enabled(enable); update_layer_config(); }
 	void set_bezels_enabled(bool enable) { m_layerconfig.set_bezels_enabled(enable); update_layer_config(); }
+	void set_cpanels_enabled(bool enable) { m_layerconfig.set_cpanels_enabled(enable); update_layer_config(); }
+	void set_marquees_enabled(bool enable) { m_layerconfig.set_marquees_enabled(enable); update_layer_config(); }
 	void set_screen_overlay_enabled(bool enable) { m_layerconfig.set_screen_overlay_enabled(enable); update_layer_config(); }
 	void set_zoom_to_screen(bool zoom) { m_layerconfig.set_zoom_to_screen(zoom); update_layer_config(); }
 
@@ -646,7 +683,7 @@ public:
 
 	// hit testing
 	bool map_point_container(INT32 target_x, INT32 target_y, render_container &container, float &container_x, float &container_y);
-	bool map_point_input(INT32 target_x, INT32 target_y, const char *&input_tag, UINT32 &input_mask, float &input_x, float &input_y);
+	bool map_point_input(INT32 target_x, INT32 target_y, const char *&input_tag, ioport_value &input_mask, float &input_x, float &input_y);
 
 	// reference tracking
 	void invalidate_all(void *refptr);
@@ -663,7 +700,7 @@ private:
 	bool load_layout_file(const char *dirname, const char *filename);
 	void add_container_primitives(render_primitive_list &list, const object_transform &xform, render_container &container, int blendmode);
 	void add_element_primitives(render_primitive_list &list, const object_transform &xform, layout_element &element, int state, int blendmode);
-	bool map_point_internal(INT32 target_x, INT32 target_y, render_container *container, float &mapped_x, float &mapped_y, const char *&mapped_input_tag, UINT32 &mapped_input_mask);
+	bool map_point_internal(INT32 target_x, INT32 target_y, render_container *container, float &mapped_x, float &mapped_y, const char *&mapped_input_tag, ioport_value &mapped_input_mask);
 
 	// config callbacks
 	void config_load(xml_data_node &targetnode);
@@ -684,28 +721,28 @@ private:
 	static const int MAX_CLEAR_EXTENTS = 1000;
 
 	// internal state
-	render_target *			m_next;						// link to next target
-	render_manager &		m_manager;					// reference to our owning manager
-	layout_view *			m_curview;					// current view
-	simple_list<layout_file> &m_filelist;				// list of layout files
-	UINT32					m_flags;					// creation flags
-	render_primitive_list	m_primlist[NUM_PRIMLISTS];	// list of primitives
-	int						m_listindex;				// index of next primlist to use
-	INT32					m_width;					// width in pixels
-	INT32					m_height;					// height in pixels
-	render_bounds			m_bounds;					// bounds of the target
-	float					m_pixel_aspect;				// aspect ratio of individual pixels
-	float					m_max_refresh;				// maximum refresh rate, 0 or if none
-	int						m_orientation;				// orientation
-	render_layer_config		m_layerconfig;				// layer configuration
-	layout_view *			m_base_view;				// the view at the time of first frame
-	int						m_base_orientation;			// the orientation at the time of first frame
-	render_layer_config		m_base_layerconfig;			// the layer configuration at the time of first frame
-	int						m_maxtexwidth;				// maximum width of a texture
-	int						m_maxtexheight;				// maximum height of a texture
-	simple_list<render_container> m_debug_containers;	// list of debug containers
-	INT32					m_clear_extent_count;		// number of clear extents
-	INT32					m_clear_extents[MAX_CLEAR_EXTENTS]; // array of clear extents
+	render_target *         m_next;                     // link to next target
+	render_manager &        m_manager;                  // reference to our owning manager
+	layout_view *           m_curview;                  // current view
+	simple_list<layout_file> &m_filelist;               // list of layout files
+	UINT32                  m_flags;                    // creation flags
+	render_primitive_list   m_primlist[NUM_PRIMLISTS];  // list of primitives
+	int                     m_listindex;                // index of next primlist to use
+	INT32                   m_width;                    // width in pixels
+	INT32                   m_height;                   // height in pixels
+	render_bounds           m_bounds;                   // bounds of the target
+	float                   m_pixel_aspect;             // aspect ratio of individual pixels
+	float                   m_max_refresh;              // maximum refresh rate, 0 or if none
+	int                     m_orientation;              // orientation
+	render_layer_config     m_layerconfig;              // layer configuration
+	layout_view *           m_base_view;                // the view at the time of first frame
+	int                     m_base_orientation;         // the orientation at the time of first frame
+	render_layer_config     m_base_layerconfig;         // the layer configuration at the time of first frame
+	int                     m_maxtexwidth;              // maximum width of a texture
+	int                     m_maxtexheight;             // maximum height of a texture
+	simple_list<render_container> m_debug_containers;   // list of debug containers
+	INT32                   m_clear_extent_count;       // number of clear extents
+	INT32                   m_clear_extents[MAX_CLEAR_EXTENTS]; // array of clear extents
 
 	static const render_screen_list s_empty_screen_list;
 };
@@ -761,26 +798,24 @@ private:
 	void container_free(render_container *container);
 
 	// config callbacks
-	static void config_load_static(running_machine &machine, int config_type, xml_data_node *parentnode);
-	static void config_save_static(running_machine &machine, int config_type, xml_data_node *parentnode);
 	void config_load(int config_type, xml_data_node *parentnode);
 	void config_save(int config_type, xml_data_node *parentnode);
 
 	// internal state
-	running_machine &				m_machine;			// reference back to the machine
+	running_machine &               m_machine;          // reference back to the machine
 
 	// array of live targets
-	simple_list<render_target>		m_targetlist;		// list of targets
-	render_target *					m_ui_target;		// current UI target
+	simple_list<render_target>      m_targetlist;       // list of targets
+	render_target *                 m_ui_target;        // current UI target
 
 	// texture lists
-	UINT32							m_live_textures;	// number of live textures
-	fixed_allocator<render_texture>	m_texture_allocator;// texture allocator
+	UINT32                          m_live_textures;    // number of live textures
+	fixed_allocator<render_texture> m_texture_allocator;// texture allocator
 
 	// containers for the UI and for screens
-	render_container *				m_ui_container;		// UI container
-	simple_list<render_container>	m_screen_container_list; // list of containers for the screen
+	render_container *              m_ui_container;     // UI container
+	simple_list<render_container>   m_screen_container_list; // list of containers for the screen
 };
 
 
-#endif	// __RENDER_H__
+#endif  // __RENDER_H__

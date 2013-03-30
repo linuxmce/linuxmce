@@ -440,7 +440,7 @@
 *******************************************************************************/
 
 
-#define MASTER_CLOCK	XTAL_10MHz
+#define MASTER_CLOCK    XTAL_10MHz
 
 #include "emu.h"
 #include "cpu/m6502/m6502.h"
@@ -454,18 +454,39 @@
 class _5clown_state : public driver_device
 {
 public:
-	_5clown_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	_5clown_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"),
+		m_colorram(*this, "colorram"){ }
 
 	UINT8 m_main_latch_d800;
 	UINT8 m_snd_latch_0800;
 	UINT8 m_snd_latch_0a02;
 	UINT8 m_ay8910_addr;
 	device_t *m_ay8910;
-	UINT8 *m_videoram;
-	UINT8 *m_colorram;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_colorram;
 	tilemap_t *m_bg_tilemap;
 	int m_mux_data;
+	DECLARE_WRITE8_MEMBER(fclown_videoram_w);
+	DECLARE_WRITE8_MEMBER(fclown_colorram_w);
+	DECLARE_WRITE8_MEMBER(cpu_c048_w);
+	DECLARE_WRITE8_MEMBER(cpu_d800_w);
+	DECLARE_READ8_MEMBER(snd_e06_r);
+	DECLARE_WRITE8_MEMBER(snd_800_w);
+	DECLARE_WRITE8_MEMBER(snd_a02_w);
+	DECLARE_READ8_MEMBER(mux_port_r);
+	DECLARE_WRITE8_MEMBER(mux_w);
+	DECLARE_WRITE8_MEMBER(counters_w);
+	DECLARE_WRITE8_MEMBER(trigsnd_w);
+	DECLARE_READ8_MEMBER(pia0_b_r);
+	DECLARE_READ8_MEMBER(pia1_b_r);
+	DECLARE_WRITE8_MEMBER(fclown_ay8910_w);
+	DECLARE_DRIVER_INIT(fclown);
+	TILE_GET_INFO_MEMBER(get_fclown_tile_info);
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_fclown(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
@@ -477,24 +498,21 @@ public:
 
 
 
-static WRITE8_HANDLER( fclown_videoram_w )
+WRITE8_MEMBER(_5clown_state::fclown_videoram_w)
 {
-	_5clown_state *state = space->machine().driver_data<_5clown_state>();
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_videoram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-static WRITE8_HANDLER( fclown_colorram_w )
+WRITE8_MEMBER(_5clown_state::fclown_colorram_w)
 {
-	_5clown_state *state = space->machine().driver_data<_5clown_state>();
-	state->m_colorram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_colorram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
 
-static TILE_GET_INFO( get_fclown_tile_info )
+TILE_GET_INFO_MEMBER(_5clown_state::get_fclown_tile_info)
 {
-	_5clown_state *state = machine.driver_data<_5clown_state>();
 
 /*  - bits -
     7654 3210
@@ -505,31 +523,30 @@ static TILE_GET_INFO( get_fclown_tile_info )
     x--- ----   Extra color for 7's.
 */
 
-	int attr = state->m_colorram[tile_index];
-	int code = ((attr & 0x01) << 8) | ((attr & 0x40) << 2) | state->m_videoram[tile_index];	/* bit 8 for extended char set */
-	int bank = (attr & 0x02) >> 1;													/* bit 1 switch the gfx banks */
-	int color = (attr & 0x3c) >> 2 | ((attr & 0x80) >> 3);							/* bits 2-3-4-5-7 for color */
+	int attr = m_colorram[tile_index];
+	int code = ((attr & 0x01) << 8) | ((attr & 0x40) << 2) | m_videoram[tile_index];    /* bit 8 for extended char set */
+	int bank = (attr & 0x02) >> 1;                                                  /* bit 1 switch the gfx banks */
+	int color = (attr & 0x3c) >> 2 | ((attr & 0x80) >> 3);                          /* bits 2-3-4-5-7 for color */
 
-	SET_TILE_INFO(bank, code, color, 0);
+	SET_TILE_INFO_MEMBER(bank, code, color, 0);
 }
 
 
-static VIDEO_START(fclown)
+void _5clown_state::video_start()
 {
-	_5clown_state *state = machine.driver_data<_5clown_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_fclown_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(_5clown_state::get_fclown_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
 }
 
 
-static SCREEN_UPDATE( fclown )
+UINT32 _5clown_state::screen_update_fclown(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	_5clown_state *state = screen->machine().driver_data<_5clown_state>();
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
 	return 0;
 }
 
-static PALETTE_INIT( fclown )
+void _5clown_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 /*
     7654 3210
     ---- ---x   RED component.
@@ -544,13 +561,13 @@ static PALETTE_INIT( fclown )
 
 	if (color_prom == 0) return;
 
-	for (i = 0;i < machine.total_colors();i++)
+	for (i = 0;i < machine().total_colors();i++)
 	{
 		int bit0, bit1, bit2, bit3, r, g, b, bk;
 
 		/* background killer */
-        bit3 = (color_prom[i] >> 3) & 0x01;
-        bk = bit3;
+		bit3 = (color_prom[i] >> 3) & 0x01;
+		bk = bit3;
 
 		/* red component */
 		bit0 = (color_prom[i] >> 0) & 0x01;
@@ -564,7 +581,7 @@ static PALETTE_INIT( fclown )
 		bit2 = (color_prom[i] >> 2) & 0x01;
 		b = bk * (bit2 * 0xff);
 
-		palette_set_color(machine, i, MAKE_RGB(r, g, b));
+		palette_set_color(machine(), i, MAKE_RGB(r, g, b));
 	}
 }
 
@@ -578,29 +595,27 @@ static PALETTE_INIT( fclown )
    There are 4 sets of 5 bits each and are connected to PIA0, portA.
    The selector bits are located in PIA1, portB (bits 4-7).
 */
-static READ8_DEVICE_HANDLER( mux_port_r )
+READ8_MEMBER(_5clown_state::mux_port_r)
 {
-	_5clown_state *state = device->machine().driver_data<_5clown_state>();
-	switch( state->m_mux_data & 0xf0 )		/* bits 4-7 */
+	switch( m_mux_data & 0xf0 )     /* bits 4-7 */
 	{
-		case 0x10: return input_port_read(device->machine(), "IN0-0");
-		case 0x20: return input_port_read(device->machine(), "IN0-1");
-		case 0x40: return input_port_read(device->machine(), "IN0-2");
-		case 0x80: return input_port_read(device->machine(), "IN0-3");
+		case 0x10: return ioport("IN0-0")->read();
+		case 0x20: return ioport("IN0-1")->read();
+		case 0x40: return ioport("IN0-2")->read();
+		case 0x80: return ioport("IN0-3")->read();
 	}
 
 	return 0xff;
 }
 
 
-static WRITE8_DEVICE_HANDLER( mux_w )
+WRITE8_MEMBER(_5clown_state::mux_w)
 {
-	_5clown_state *state = device->machine().driver_data<_5clown_state>();
-	state->m_mux_data = data ^ 0xff;	/* Inverted */
+	m_mux_data = data ^ 0xff;   /* Inverted */
 }
 
 
-static WRITE8_DEVICE_HANDLER( counters_w )
+WRITE8_MEMBER(_5clown_state::counters_w)
 {
 /*  Counters:
 
@@ -611,58 +626,57 @@ static WRITE8_DEVICE_HANDLER( counters_w )
     -x-- ----   Unknown (increments at start).
     x--- ----   Unknown (increments at start).
 */
-	coin_counter_w(device->machine(), 0, data & 0x10);	/* Key In */
-	coin_counter_w(device->machine(), 1, data & 0x20);	/* Payout */
-	coin_counter_w(device->machine(), 2, data & 0x40);	/* unknown */
-	coin_counter_w(device->machine(), 3, data & 0x80);	/* unknown */
+	coin_counter_w(machine(), 0, data & 0x10);  /* Key In */
+	coin_counter_w(machine(), 1, data & 0x20);  /* Payout */
+	coin_counter_w(machine(), 2, data & 0x40);  /* unknown */
+	coin_counter_w(machine(), 3, data & 0x80);  /* unknown */
 
 }
 
 
-static WRITE8_DEVICE_HANDLER( trigsnd_w )
+WRITE8_MEMBER(_5clown_state::trigsnd_w)
 {
 	/************ Interrupts trigger **************
 
-    Writes 0x07 & 0x0F each time a sound is triggered through $D800 */
+	Writes 0x07 & 0x0F each time a sound is triggered through $D800 */
 
 	if ( (data & 0x0f) == 0x07 )
 	{
-		cputag_set_input_line(device->machine(), "audiocpu", INPUT_LINE_NMI, ASSERT_LINE );
+		machine().device("audiocpu")->execute().set_input_line(INPUT_LINE_NMI, ASSERT_LINE );
 	}
 
 	else
 	{
-		cputag_set_input_line(device->machine(), "audiocpu", INPUT_LINE_NMI, CLEAR_LINE );
+		machine().device("audiocpu")->execute().set_input_line(INPUT_LINE_NMI, CLEAR_LINE );
 	}
 
 }
 
-static READ8_DEVICE_HANDLER( pia0_b_r )
+READ8_MEMBER(_5clown_state::pia0_b_r)
 {
 	/* often read the port */
 	return 0x00;
 }
 
-static READ8_DEVICE_HANDLER( pia1_b_r )
+READ8_MEMBER(_5clown_state::pia1_b_r)
 {
 	/* constantly read the port */
-	return 0x00;	/* bit 2 shouldn't be active to allow work the key out system */
+	return 0x00;    /* bit 2 shouldn't be active to allow work the key out system */
 }
 
 
 /**********************************/
 
 
-static WRITE8_HANDLER( cpu_c048_w)
+WRITE8_MEMBER(_5clown_state::cpu_c048_w)
 {
 	logerror("Main: Write to $C048: %02X\n", data);
 }
 
-static WRITE8_HANDLER( cpu_d800_w )
+WRITE8_MEMBER(_5clown_state::cpu_d800_w)
 {
-	_5clown_state *state = space->machine().driver_data<_5clown_state>();
 	logerror("Main: Write to $D800: %02x\n", data);
-	state->m_main_latch_d800 = data;
+	m_main_latch_d800 = data;
 }
 
 
@@ -670,10 +684,10 @@ static WRITE8_HANDLER( cpu_d800_w )
 *  AY3-8910 R/W Handlers        *
 ********************************/
 
-static WRITE8_DEVICE_HANDLER( fclown_ay8910_w )
+WRITE8_MEMBER(_5clown_state::fclown_ay8910_w)
 {
-	ay8910_address_w(device, 0, offset);
-	ay8910_data_w(device, 0, data);
+	ay8910_address_w(m_ay8910, space, 0, offset);
+	ay8910_data_w(m_ay8910, space, 0, data);
 }
 
 
@@ -681,34 +695,31 @@ static WRITE8_DEVICE_HANDLER( fclown_ay8910_w )
 *  SOUND  R/W Handlers        *
 ******************************/
 
-static READ8_HANDLER( snd_e06_r )
+READ8_MEMBER(_5clown_state::snd_e06_r)
 {
-	_5clown_state *state = space->machine().driver_data<_5clown_state>();
 	logerror("Sound: Read from $0E06 \n");
-	return state->m_main_latch_d800;
+	return m_main_latch_d800;
 }
 
-static WRITE8_HANDLER( snd_800_w )
+WRITE8_MEMBER(_5clown_state::snd_800_w)
 {
-	_5clown_state *state = space->machine().driver_data<_5clown_state>();
-	state->m_snd_latch_0800 = data;
+	m_snd_latch_0800 = data;
 
-	if (state->m_snd_latch_0a02 == 0xc0)
+	if (m_snd_latch_0a02 == 0xc0)
 	{
-		state->m_ay8910_addr = state->m_snd_latch_0800;
+		m_ay8910_addr = m_snd_latch_0800;
 	}
 
-	if (state->m_snd_latch_0a02 == 0x00)
+	if (m_snd_latch_0a02 == 0x00)
 	{
-		fclown_ay8910_w( state->m_ay8910, state->m_ay8910_addr, state->m_snd_latch_0800);
+		fclown_ay8910_w(space, m_ay8910_addr, m_snd_latch_0800);
 	}
 }
 
-static WRITE8_HANDLER( snd_a02_w )
+WRITE8_MEMBER(_5clown_state::snd_a02_w)
 {
-	_5clown_state *state = space->machine().driver_data<_5clown_state>();
-	state->m_snd_latch_0a02 = data & 0xff;
-	logerror("Sound: Write to $0A02: %02x\n", state->m_snd_latch_0a02);
+	m_snd_latch_0a02 = data & 0xff;
+	logerror("Sound: Write to $0A02: %02x\n", m_snd_latch_0a02);
 }
 
 
@@ -716,24 +727,24 @@ static WRITE8_HANDLER( snd_a02_w )
 * Memory map information *
 *************************/
 
-static ADDRESS_MAP_START( fclown_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( fclown_map, AS_PROGRAM, 8, _5clown_state )
 	AM_RANGE(0x0000, 0x07ff) AM_RAM AM_SHARE("nvram")
-	AM_RANGE(0x0800, 0x0800) AM_DEVWRITE("crtc", mc6845_address_w)
-	AM_RANGE(0x0801, 0x0801) AM_DEVREADWRITE("crtc", mc6845_register_r, mc6845_register_w)
-	AM_RANGE(0x0844, 0x0847) AM_DEVREADWRITE("pia0", pia6821_r, pia6821_w)
-	AM_RANGE(0x0848, 0x084b) AM_DEVREADWRITE("pia1", pia6821_r, pia6821_w)
-	AM_RANGE(0x1000, 0x13ff) AM_RAM_WRITE(fclown_videoram_w) AM_BASE_MEMBER(_5clown_state, m_videoram)	/* Init'ed at $2042 */
-	AM_RANGE(0x1800, 0x1bff) AM_RAM_WRITE(fclown_colorram_w) AM_BASE_MEMBER(_5clown_state, m_colorram)	/* Init'ed at $2054 */
-	AM_RANGE(0x2000, 0x7fff) AM_ROM					/* ROM space */
+	AM_RANGE(0x0800, 0x0800) AM_DEVWRITE("crtc", mc6845_device, address_w)
+	AM_RANGE(0x0801, 0x0801) AM_DEVREADWRITE("crtc", mc6845_device, register_r, register_w)
+	AM_RANGE(0x0844, 0x0847) AM_DEVREADWRITE("pia0", pia6821_device, read, write)
+	AM_RANGE(0x0848, 0x084b) AM_DEVREADWRITE("pia1", pia6821_device, read, write)
+	AM_RANGE(0x1000, 0x13ff) AM_RAM_WRITE(fclown_videoram_w) AM_SHARE("videoram")   /* Init'ed at $2042 */
+	AM_RANGE(0x1800, 0x1bff) AM_RAM_WRITE(fclown_colorram_w) AM_SHARE("colorram")   /* Init'ed at $2054 */
+	AM_RANGE(0x2000, 0x7fff) AM_ROM                 /* ROM space */
 
 	AM_RANGE(0xc048, 0xc048) AM_WRITE(cpu_c048_w )
 	AM_RANGE(0xd800, 0xd800) AM_WRITE(cpu_d800_w )
 
-	AM_RANGE(0xc400, 0xc400) AM_READ_PORT("SW1")	/* DIP Switches bank */
-	AM_RANGE(0xcc00, 0xcc00) AM_READ_PORT("SW2")	/* DIP Switches bank */
-	AM_RANGE(0xd400, 0xd400) AM_READ_PORT("SW3")	/* Second DIP Switches bank */
+	AM_RANGE(0xc400, 0xc400) AM_READ_PORT("SW1")    /* DIP Switches bank */
+	AM_RANGE(0xcc00, 0xcc00) AM_READ_PORT("SW2")    /* DIP Switches bank */
+	AM_RANGE(0xd400, 0xd400) AM_READ_PORT("SW3")    /* Second DIP Switches bank */
 
-	AM_RANGE(0xe000, 0xffff) AM_ROM					/* ROM space */
+	AM_RANGE(0xe000, 0xffff) AM_ROM                 /* ROM space */
 ADDRESS_MAP_END
 
 /*
@@ -791,14 +802,14 @@ ADDRESS_MAP_END
 
 */
 
-static ADDRESS_MAP_START( fcaudio_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( fcaudio_map, AS_PROGRAM, 8, _5clown_state )
 	AM_RANGE(0x0000, 0x07ff) AM_RAM
 	AM_RANGE(0x0800, 0x0800) AM_WRITE(snd_800_w)
 	AM_RANGE(0x0a02, 0x0a02) AM_WRITE(snd_a02_w)
-	AM_RANGE(0x0c04, 0x0c04) AM_DEVWRITE_MODERN("oki6295", okim6295_device, write)
-	AM_RANGE(0x0c06, 0x0c06) AM_DEVREAD_MODERN("oki6295", okim6295_device, read)
+	AM_RANGE(0x0c04, 0x0c04) AM_DEVWRITE("oki6295", okim6295_device, write)
+	AM_RANGE(0x0c06, 0x0c06) AM_DEVREAD("oki6295", okim6295_device, read)
 	AM_RANGE(0x0e06, 0x0e06) AM_READ(snd_e06_r)
-	AM_RANGE(0xe000, 0xffff) AM_ROM					/* ROM space */
+	AM_RANGE(0xe000, 0xffff) AM_ROM                 /* ROM space */
 ADDRESS_MAP_END
 
 
@@ -810,10 +821,10 @@ static INPUT_PORTS_START( fclown )
 	/* Multiplexed - 4x5bits */
 	PORT_START("IN0-0")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_POKER_BET )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_GAMBLE_BOOK )	PORT_NAME("Record")
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_GAMBLE_BOOK )    PORT_NAME("Record")
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_GAMBLE_D_UP )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_GAMBLE_DEAL )	PORT_NAME("Start")
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )		/* cancel */
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_GAMBLE_DEAL )    PORT_NAME("Start")
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )        /* cancel */
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -821,9 +832,9 @@ static INPUT_PORTS_START( fclown )
 	PORT_START("IN0-1")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_GAMBLE_KEYOUT )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_GAMBLE_PAYOUT )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_GAMBLE_TAKE )	PORT_NAME("Collect")
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_GAMBLE_HIGH )	PORT_NAME("Big")
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_GAMBLE_LOW )		PORT_NAME("Small")
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_GAMBLE_TAKE )    PORT_NAME("Collect")
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_GAMBLE_HIGH )    PORT_NAME("Big")
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_GAMBLE_LOW )     PORT_NAME("Small")
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -839,10 +850,10 @@ static INPUT_PORTS_START( fclown )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START("IN0-3")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_SERVICE )	PORT_NAME("Setting") PORT_CODE(KEYCODE_9)
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_SERVICE )    PORT_NAME("Setting") PORT_CODE(KEYCODE_9)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN1 )		PORT_IMPULSE(3) PORT_NAME("Coin In")
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN1 )      PORT_IMPULSE(3) PORT_NAME("Coin In")
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_GAMBLE_KEYIN)
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -890,7 +901,7 @@ static INPUT_PORTS_START( fclown )
 	PORT_DIPNAME( 0x08, 0x08, "SW2-08 (CC00)" )
 	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x10, 0x00, "SW2-10 (CC00) System Boot" )	/* Should be turned ON to boot */
+	PORT_DIPNAME( 0x10, 0x00, "SW2-10 (CC00) System Boot" ) /* Should be turned ON to boot */
 	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x20, 0x00, "Key In (value)" )
@@ -904,26 +915,26 @@ static INPUT_PORTS_START( fclown )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SW3")
-	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )	PORT_DIPLOCATION("SW3:1")
+	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )  PORT_DIPLOCATION("SW3:1")
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unknown ) )	PORT_DIPLOCATION("SW3:2")
+	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unknown ) )  PORT_DIPLOCATION("SW3:2")
 	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )	PORT_DIPLOCATION("SW3:3")
+	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )  PORT_DIPLOCATION("SW3:3")
 	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x18, 0x10, "Min/Max Bet" )		PORT_DIPLOCATION("SW3:4,5")	/* Always 1-40 on screen */
+	PORT_DIPNAME( 0x18, 0x10, "Min/Max Bet" )       PORT_DIPLOCATION("SW3:4,5") /* Always 1-40 on screen */
 	PORT_DIPSETTING(    0x00, "Min:10; Max:80" )
 	PORT_DIPSETTING(    0x08, "Min:10; Max:50" )
 	PORT_DIPSETTING(    0x10, "Min:05; Max:40" )
 	PORT_DIPSETTING(    0x18, "Min:05; Max:10" )
-	PORT_DIPNAME( 0x60, 0x40, "Key In (screen)" )	PORT_DIPLOCATION("SW3:6,7")	/* Only on screen */
+	PORT_DIPNAME( 0x60, 0x40, "Key In (screen)" )   PORT_DIPLOCATION("SW3:6,7") /* Only on screen */
 	PORT_DIPSETTING(    0x60, "20" )
 	PORT_DIPSETTING(    0x40, "100" )
 	PORT_DIPSETTING(    0x20, "120" )
 	PORT_DIPSETTING(    0x00, "130" )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )	PORT_DIPLOCATION("SW3:8")
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )  PORT_DIPLOCATION("SW3:8")
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
@@ -933,16 +944,16 @@ static INPUT_PORTS_START( fclown )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_DIPNAME( 0x10, 0x00, "Jacks or Better" )	PORT_DIPLOCATION("SW4:1")
+	PORT_DIPNAME( 0x10, 0x00, "Jacks or Better" )   PORT_DIPLOCATION("SW4:1")
 	PORT_DIPSETTING(    0x10, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
-	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unused ) )	PORT_DIPLOCATION("SW4:2")
+	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unused ) )   PORT_DIPLOCATION("SW4:2")
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x40, 0x00, "Payout Mode" )		PORT_DIPLOCATION("SW4:3")
+	PORT_DIPNAME( 0x40, 0x00, "Payout Mode" )       PORT_DIPLOCATION("SW4:3")
 	PORT_DIPSETTING(    0x40, "Manual" )
 	PORT_DIPSETTING(    0x00, "Auto" )
-	PORT_DIPNAME( 0x80, 0x80, "Coin In" )			PORT_DIPLOCATION("SW4:4")
+	PORT_DIPNAME( 0x80, 0x80, "Coin In" )           PORT_DIPLOCATION("SW4:4")
 	PORT_DIPSETTING(    0x80, "x10" )
 	PORT_DIPSETTING(    0x00, "x5" )
 INPUT_PORTS_END
@@ -980,16 +991,16 @@ GFXDECODE_END
 
 static const mc6845_interface mc6845_intf =
 {
-	"screen",	/* screen we are acting on */
-	8,			/* number of pixels per video memory address */
-	NULL,		/* before pixel update callback */
-	NULL,		/* row update callback */
-	NULL,		/* after pixel update callback */
-	DEVCB_NULL,	/* callback for display state changes */
-	DEVCB_NULL,	/* callback for cursor state changes */
-	DEVCB_NULL,	/* HSYNC callback */
-	DEVCB_NULL,	/* VSYNC callback */
-	NULL		/* update address callback */
+	"screen",   /* screen we are acting on */
+	8,          /* number of pixels per video memory address */
+	NULL,       /* before pixel update callback */
+	NULL,       /* row update callback */
+	NULL,       /* after pixel update callback */
+	DEVCB_NULL, /* callback for display state changes */
+	DEVCB_NULL, /* callback for cursor state changes */
+	DEVCB_NULL, /* HSYNC callback */
+	DEVCB_NULL, /* VSYNC callback */
+	NULL        /* update address callback */
 };
 
 
@@ -999,34 +1010,34 @@ static const mc6845_interface mc6845_intf =
 
 static const pia6821_interface fclown_pia0_intf =
 {
-	DEVCB_HANDLER(mux_port_r),	/* Port A IN        Multiplexed Ports read */
-	DEVCB_HANDLER(pia0_b_r),	/* Port B IN        unknown (used) */
-	DEVCB_NULL,					/* Line CA1 IN */
-	DEVCB_NULL,					/* Line CB1 IN */
-	DEVCB_NULL,					/* Line CA2 IN */
-	DEVCB_NULL,					/* Line CA2 IN */
-	DEVCB_NULL,					/* Port A OUT       NULL */
-	DEVCB_HANDLER(counters_w),	/* Port B OUT       Counters */
-	DEVCB_NULL,					/* Line CA2 OUT */
-	DEVCB_NULL,					/* Line CB2 OUT */
-	DEVCB_NULL,					/* IRQA */
-	DEVCB_NULL					/* IRQB */
+	DEVCB_DRIVER_MEMBER(_5clown_state,mux_port_r),  /* Port A IN        Multiplexed Ports read */
+	DEVCB_DRIVER_MEMBER(_5clown_state,pia0_b_r),    /* Port B IN        unknown (used) */
+	DEVCB_NULL,                 /* Line CA1 IN */
+	DEVCB_NULL,                 /* Line CB1 IN */
+	DEVCB_NULL,                 /* Line CA2 IN */
+	DEVCB_NULL,                 /* Line CA2 IN */
+	DEVCB_NULL,                 /* Port A OUT       NULL */
+	DEVCB_DRIVER_MEMBER(_5clown_state,counters_w),  /* Port B OUT       Counters */
+	DEVCB_NULL,                 /* Line CA2 OUT */
+	DEVCB_NULL,                 /* Line CB2 OUT */
+	DEVCB_NULL,                 /* IRQA */
+	DEVCB_NULL                  /* IRQB */
 };
 
 static const pia6821_interface fclown_pia1_intf =
 {
-	DEVCB_INPUT_PORT("SW4"),	/* Port A IN        4th DIP Switchs bank */
-	DEVCB_HANDLER(pia1_b_r),	/* Port B IN        Check bit 2 to allow key out system to work */
-	DEVCB_NULL,					/* Line CA1 IN */
-	DEVCB_NULL,					/* Line CB1 IN */
-	DEVCB_NULL,					/* Line CA2 IN */
-	DEVCB_NULL,					/* Line CB2 IN */
-	DEVCB_HANDLER(trigsnd_w),	/* Port A OUT       Trigger the audio CPU interrupts */
-	DEVCB_HANDLER(mux_w),		/* Port B OUT       Multiplexed Ports selector */
-	DEVCB_NULL,					/* Line CA2 OUT */
-	DEVCB_NULL,					/* Line CB2 OUT */
-	DEVCB_NULL,					/* IRQA */
-	DEVCB_NULL					/* IRQB */
+	DEVCB_INPUT_PORT("SW4"),    /* Port A IN        4th DIP Switchs bank */
+	DEVCB_DRIVER_MEMBER(_5clown_state,pia1_b_r),    /* Port B IN        Check bit 2 to allow key out system to work */
+	DEVCB_NULL,                 /* Line CA1 IN */
+	DEVCB_NULL,                 /* Line CB1 IN */
+	DEVCB_NULL,                 /* Line CA2 IN */
+	DEVCB_NULL,                 /* Line CB2 IN */
+	DEVCB_DRIVER_MEMBER(_5clown_state,trigsnd_w),   /* Port A OUT       Trigger the audio CPU interrupts */
+	DEVCB_DRIVER_MEMBER(_5clown_state,mux_w),       /* Port B OUT       Multiplexed Ports selector */
+	DEVCB_NULL,                 /* Line CA2 OUT */
+	DEVCB_NULL,                 /* Line CB2 OUT */
+	DEVCB_NULL,                 /* IRQA */
+	DEVCB_NULL                  /* IRQB */
 };
 
 
@@ -1052,11 +1063,11 @@ static const ay8910_interface ay8910_config =
 static MACHINE_CONFIG_START( fclown, _5clown_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M6502, MASTER_CLOCK/8)	/* guess, seems ok */
+	MCFG_CPU_ADD("maincpu", M6502, MASTER_CLOCK/8)  /* guess, seems ok */
 	MCFG_CPU_PROGRAM_MAP(fclown_map)
-	MCFG_CPU_VBLANK_INT("screen", nmi_line_pulse)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", _5clown_state,  nmi_line_pulse)
 
-	MCFG_CPU_ADD("audiocpu", M6502, MASTER_CLOCK/8)	/* guess, seems ok */
+	MCFG_CPU_ADD("audiocpu", M6502, MASTER_CLOCK/8) /* guess, seems ok */
 	MCFG_CPU_PROGRAM_MAP(fcaudio_map)
 
 	MCFG_NVRAM_ADD_0FILL("nvram")
@@ -1068,27 +1079,24 @@ static MACHINE_CONFIG_START( fclown, _5clown_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE((39+1)*8, (31+1)*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 0*8, 32*8-1)
-	MCFG_SCREEN_UPDATE(fclown)
+	MCFG_SCREEN_UPDATE_DRIVER(_5clown_state, screen_update_fclown)
 
 	MCFG_GFXDECODE(fclown)
 	MCFG_PALETTE_LENGTH(256)
-	MCFG_PALETTE_INIT(fclown)
 
-	MCFG_VIDEO_START(fclown)
 
 	MCFG_MC6845_ADD("crtc", MC6845, MASTER_CLOCK/16, mc6845_intf) /* guess */
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("ay8910", AY8910, MASTER_CLOCK/8)		/* guess, seems ok */
+	MCFG_SOUND_ADD("ay8910", AY8910, MASTER_CLOCK/8)        /* guess, seems ok */
 	MCFG_SOUND_CONFIG(ay8910_config)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.00)
 
-	MCFG_OKIM6295_ADD("oki6295", MASTER_CLOCK/12, OKIM6295_PIN7_LOW)	/* guess, seems ok; pin7 guessed, seems ok */
+	MCFG_OKIM6295_ADD("oki6295", MASTER_CLOCK/12, OKIM6295_PIN7_LOW)    /* guess, seems ok; pin7 guessed, seems ok */
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.20)
 
 MACHINE_CONFIG_END
@@ -1100,94 +1108,94 @@ MACHINE_CONFIG_END
 
 ROM_START( 5clown )
 	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD( "4.u2",		0x2000, 0x8000, CRC(96e3e8ab) SHA1(fec20b9a8bde5306162f8288cdc9580f445cadf5) )
-	ROM_COPY( "maincpu",	0x2000, 0x8000, 0x8000 )
+	ROM_LOAD( "4.u2",       0x2000, 0x8000, CRC(96e3e8ab) SHA1(fec20b9a8bde5306162f8288cdc9580f445cadf5) )
+	ROM_COPY( "maincpu",    0x2000, 0x8000, 0x8000 )
 
 
 	ROM_REGION( 0x8000,  "gfxbanks", 0 )
-	ROM_LOAD( "7.u34",	0x0000, 0x8000, CRC(64c9f4ee) SHA1(6e695feee826e319f84d91f6bbf7cfacd443fc8f) )
+	ROM_LOAD( "7.u34",  0x0000, 0x8000, CRC(64c9f4ee) SHA1(6e695feee826e319f84d91f6bbf7cfacd443fc8f) )
 
 	ROM_REGION( 0x10000, "audiocpu", 0 )
-	ROM_LOAD( "9.u35",	0xe000, 0x2000, CRC(7e3c3af5) SHA1(ebc09da981dbdf4eac90bcf982e5bc8ede47e81a) )
+	ROM_LOAD( "9.u35",  0xe000, 0x2000, CRC(7e3c3af5) SHA1(ebc09da981dbdf4eac90bcf982e5bc8ede47e81a) )
 
 	ROM_REGION( 0x40000, "oki6295", 0 )
-	ROM_LOAD( "8.u50",	0x0000, 0x10000, CRC(e1e37180) SHA1(e162abcb01952e26deee74ece5719239961e1b69) )
+	ROM_LOAD( "8.u50",  0x0000, 0x10000, CRC(e1e37180) SHA1(e162abcb01952e26deee74ece5719239961e1b69) )
 
 
 	ROM_REGION( 0x3000, "gfx1", 0 )
-	ROM_FILL(				0x0000, 0x2000, 0 ) /* filling the remaining bitplanes */
-	ROM_COPY( "gfxbanks",	0x7000, 0x2000, 0x1000 )
+	ROM_FILL(               0x0000, 0x2000, 0 ) /* filling the remaining bitplanes */
+	ROM_COPY( "gfxbanks",   0x7000, 0x2000, 0x1000 )
 
 	ROM_REGION( 0x3000, "gfx2", 0 )
-	ROM_COPY( "gfxbanks",	0x6000, 0x0000, 0x1000 )
-	ROM_COPY( "gfxbanks",	0x5000, 0x1000, 0x1000 )
-	ROM_COPY( "gfxbanks",	0x4000, 0x2000, 0x1000 )
+	ROM_COPY( "gfxbanks",   0x6000, 0x0000, 0x1000 )
+	ROM_COPY( "gfxbanks",   0x5000, 0x1000, 0x1000 )
+	ROM_COPY( "gfxbanks",   0x4000, 0x2000, 0x1000 )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "dm74s287an.u32",	0x0000, 0x0100, CRC(2d207266) SHA1(374b4830a0a8ed3001cf0df16daa8dffee503cbe) )
+	ROM_LOAD( "dm74s287an.u32", 0x0000, 0x0100, CRC(2d207266) SHA1(374b4830a0a8ed3001cf0df16daa8dffee503cbe) )
 
 ROM_END
 
 
 ROM_START( 5clowna )
 	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD( "6.u2",	0x2000, 0x2000, BAD_DUMP CRC(15ecca37) SHA1(d8d0a43f559168cccc3a46418557ccfc30c8108e) )
-	ROM_LOAD( "5.u2",	0x4000, 0x2000, BAD_DUMP CRC(2e962007) SHA1(86599ba5030068c08ff5a19ada7250c410b2ba35) )
-	ROM_LOAD( "7.u2",	0xe000, 0x2000, BAD_DUMP CRC(308c4771) SHA1(f6ee402c120ff16601347cc994a45a7092511050) )
+	ROM_LOAD( "6.u2",   0x2000, 0x2000, BAD_DUMP CRC(15ecca37) SHA1(d8d0a43f559168cccc3a46418557ccfc30c8108e) )
+	ROM_LOAD( "5.u2",   0x4000, 0x2000, BAD_DUMP CRC(2e962007) SHA1(86599ba5030068c08ff5a19ada7250c410b2ba35) )
+	ROM_LOAD( "7.u2",   0xe000, 0x2000, BAD_DUMP CRC(308c4771) SHA1(f6ee402c120ff16601347cc994a45a7092511050) )
 
 
 	ROM_REGION( 0x8000,  "gfxbanks", 0 )
-	ROM_LOAD( "7.u34",	0x0000, 0x8000, CRC(64c9f4ee) SHA1(6e695feee826e319f84d91f6bbf7cfacd443fc8f) )
+	ROM_LOAD( "7.u34",  0x0000, 0x8000, CRC(64c9f4ee) SHA1(6e695feee826e319f84d91f6bbf7cfacd443fc8f) )
 
 	ROM_REGION( 0x10000, "audiocpu", 0 )
-	ROM_LOAD( "9.u35",	0xe000, 0x2000, CRC(7e3c3af5) SHA1(ebc09da981dbdf4eac90bcf982e5bc8ede47e81a) )
+	ROM_LOAD( "9.u35",  0xe000, 0x2000, CRC(7e3c3af5) SHA1(ebc09da981dbdf4eac90bcf982e5bc8ede47e81a) )
 
 	ROM_REGION( 0x40000, "oki6295", 0 )
-	ROM_LOAD( "8.u50",	0x0000, 0x10000, CRC(e1e37180) SHA1(e162abcb01952e26deee74ece5719239961e1b69) )
+	ROM_LOAD( "8.u50",  0x0000, 0x10000, CRC(e1e37180) SHA1(e162abcb01952e26deee74ece5719239961e1b69) )
 
 
 	ROM_REGION( 0x3000, "gfx1", 0 )
-	ROM_FILL(				0x0000, 0x2000, 0 ) /* filling the remaining bitplanes */
-	ROM_COPY( "gfxbanks",	0x7000, 0x2000, 0x1000 )
+	ROM_FILL(               0x0000, 0x2000, 0 ) /* filling the remaining bitplanes */
+	ROM_COPY( "gfxbanks",   0x7000, 0x2000, 0x1000 )
 
 	ROM_REGION( 0x3000, "gfx2", 0 )
-	ROM_COPY( "gfxbanks",	0x6000, 0x0000, 0x1000 )
-	ROM_COPY( "gfxbanks",	0x5000, 0x1000, 0x1000 )
-	ROM_COPY( "gfxbanks",	0x4000, 0x2000, 0x1000 )
+	ROM_COPY( "gfxbanks",   0x6000, 0x0000, 0x1000 )
+	ROM_COPY( "gfxbanks",   0x5000, 0x1000, 0x1000 )
+	ROM_COPY( "gfxbanks",   0x4000, 0x2000, 0x1000 )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "dm74s287an.u32",	0x0000, 0x0100, CRC(2d207266) SHA1(374b4830a0a8ed3001cf0df16daa8dffee503cbe) )
+	ROM_LOAD( "dm74s287an.u32", 0x0000, 0x0100, CRC(2d207266) SHA1(374b4830a0a8ed3001cf0df16daa8dffee503cbe) )
 
 ROM_END
 
 
 ROM_START( 5clownsp )
 	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD( "five_clown_sp.u2",	0x2000, 0x8000, CRC(fa18090d) SHA1(47feb5dbc77ae8621fc35b707c24d64a95227a39) )
-	ROM_COPY( "maincpu",			0x2000, 0x8000, 0x8000 )
+	ROM_LOAD( "five_clown_sp.u2",   0x2000, 0x8000, CRC(fa18090d) SHA1(47feb5dbc77ae8621fc35b707c24d64a95227a39) )
+	ROM_COPY( "maincpu",            0x2000, 0x8000, 0x8000 )
 
 
 	ROM_REGION( 0x8000,  "gfxbanks", 0 )
-	ROM_LOAD( "7.u34",	0x0000, 0x8000, CRC(64c9f4ee) SHA1(6e695feee826e319f84d91f6bbf7cfacd443fc8f) )
+	ROM_LOAD( "7.u34",  0x0000, 0x8000, CRC(64c9f4ee) SHA1(6e695feee826e319f84d91f6bbf7cfacd443fc8f) )
 
 	ROM_REGION( 0x10000, "audiocpu", 0 )
-	ROM_LOAD( "9.u35",	0xe000, 0x2000, CRC(7e3c3af5) SHA1(ebc09da981dbdf4eac90bcf982e5bc8ede47e81a) )
+	ROM_LOAD( "9.u35",  0xe000, 0x2000, CRC(7e3c3af5) SHA1(ebc09da981dbdf4eac90bcf982e5bc8ede47e81a) )
 
 	ROM_REGION( 0x40000, "oki6295", 0 )
-	ROM_LOAD( "8.u50",	0x0000, 0x10000, CRC(e1e37180) SHA1(e162abcb01952e26deee74ece5719239961e1b69) )
+	ROM_LOAD( "8.u50",  0x0000, 0x10000, CRC(e1e37180) SHA1(e162abcb01952e26deee74ece5719239961e1b69) )
 
 
 	ROM_REGION( 0x3000, "gfx1", 0 )
-	ROM_FILL(				0x0000, 0x2000, 0 ) /* filling the remaining bitplanes */
-	ROM_COPY( "gfxbanks",	0x7000, 0x2000, 0x1000 )
+	ROM_FILL(               0x0000, 0x2000, 0 ) /* filling the remaining bitplanes */
+	ROM_COPY( "gfxbanks",   0x7000, 0x2000, 0x1000 )
 
 	ROM_REGION( 0x3000, "gfx2", 0 )
-	ROM_COPY( "gfxbanks",	0x6000, 0x0000, 0x1000 )
-	ROM_COPY( "gfxbanks",	0x5000, 0x1000, 0x1000 )
-	ROM_COPY( "gfxbanks",	0x4000, 0x2000, 0x1000 )
+	ROM_COPY( "gfxbanks",   0x6000, 0x0000, 0x1000 )
+	ROM_COPY( "gfxbanks",   0x5000, 0x1000, 0x1000 )
+	ROM_COPY( "gfxbanks",   0x4000, 0x2000, 0x1000 )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "dm74s287an.u32",	0x0000, 0x0100, CRC(2d207266) SHA1(374b4830a0a8ed3001cf0df16daa8dffee503cbe) )
+	ROM_LOAD( "dm74s287an.u32", 0x0000, 0x0100, CRC(2d207266) SHA1(374b4830a0a8ed3001cf0df16daa8dffee503cbe) )
 
 ROM_END
 
@@ -1196,62 +1204,61 @@ ROM_END
 *      Driver Init       *
 *************************/
 
-static DRIVER_INIT( fclown )
+DRIVER_INIT_MEMBER(_5clown_state,fclown)
 {
-	_5clown_state *state = machine.driver_data<_5clown_state>();
-    /* Decrypting main program */
+	/* Decrypting main program */
 
 	int x;
-	UINT8 *src = machine.region( "maincpu" )->base();
+	UINT8 *src = memregion( "maincpu" )->base();
 
 	for (x = 0x0000; x < 0x10000; x++)
 	{
-		src[x] = src[x] ^ 0x20;		/* Decrypting byte */
+		src[x] = src[x] ^ 0x20;     /* Decrypting byte */
 	}
 
 
-    /* Decrypting GFX by segments */
+	/* Decrypting GFX by segments */
 
-	UINT8 *gfx1_src = machine.region( "gfx1" )->base();
-	UINT8 *gfx2_src = machine.region( "gfx2" )->base();
+	UINT8 *gfx1_src = machine().root_device().memregion( "gfx1" )->base();
+	UINT8 *gfx2_src = machine().root_device().memregion( "gfx2" )->base();
 
 	for (x = 0x2000; x < 0x3000; x++)
 	{
-		gfx1_src[x] = gfx1_src[x] ^ 0x22;	/* Decrypting bulk GFX segment 7000-7fff */
+		gfx1_src[x] = gfx1_src[x] ^ 0x22;   /* Decrypting bulk GFX segment 7000-7fff */
 	}
 
 	for (x = 0x0000; x < 0x1000; x++)
 	{
-		gfx2_src[x] = gfx2_src[x] ^ 0x3f;	/* Decrypting bulk GFX segment 6000-6fff */
+		gfx2_src[x] = gfx2_src[x] ^ 0x3f;   /* Decrypting bulk GFX segment 6000-6fff */
 	}
 
 	for (x = 0x2000; x < 0x3000; x++)
 	{
-		gfx2_src[x] = gfx2_src[x] ^ 0x22;	/* Decrypting bulk GFX segment 4000-4fff */
+		gfx2_src[x] = gfx2_src[x] ^ 0x22;   /* Decrypting bulk GFX segment 4000-4fff */
 	}
 
 
-    /* Decrypting sound samples */
+	/* Decrypting sound samples */
 
-	UINT8 *samples_src = machine.region( "oki6295" )->base();
+	UINT8 *samples_src = machine().root_device().memregion( "oki6295" )->base();
 
 	for (x = 0x0000; x < 0x10000; x++)
 	{
-		if (samples_src[x] & 0x02)						/* If bit 1 is active... */
+		if (samples_src[x] & 0x02)                      /* If bit 1 is active... */
 		{
-			samples_src[x] = samples_src[x] ^ 0x02;		/* Then bit 1 XOR'ed */
+			samples_src[x] = samples_src[x] ^ 0x02;     /* Then bit 1 XOR'ed */
 		}
 
 		else
 		{
-			samples_src[x] = samples_src[x] ^ 0x12;		/* Otherwise bit 1 & 5 XOR'ed */
+			samples_src[x] = samples_src[x] ^ 0x12;     /* Otherwise bit 1 & 5 XOR'ed */
 		}
 	}
 
 
 	/* Assigning AY-3-8910 sound device */
 
-	state->m_ay8910 = machine.device("ay8910");
+	m_ay8910 = machine().device("ay8910");
 }
 
 
@@ -1260,6 +1267,6 @@ static DRIVER_INIT( fclown )
 *************************/
 
 /*    YEAR  NAME      PARENT  MACHINE INPUT   INIT    ROT    COMPANY  FULLNAME                      FLAGS... */
-GAME( 1993, 5clown,   0,      fclown, fclown, fclown, ROT0, "IGS",   "Five Clown (English, set 1)", GAME_IMPERFECT_SOUND )
-GAME( 1993, 5clowna,  5clown, fclown, fclown, fclown, ROT0, "IGS",   "Five Clown (English, set 2)", GAME_IMPERFECT_SOUND )
-GAME( 1993, 5clownsp, 5clown, fclown, fclown, fclown, ROT0, "IGS",   "Five Clown (Spanish hack)",   GAME_IMPERFECT_SOUND )
+GAME( 1993, 5clown,   0,      fclown, fclown, _5clown_state, fclown, ROT0, "IGS",   "Five Clown (English, set 1)", GAME_IMPERFECT_SOUND )
+GAME( 1993, 5clowna,  5clown, fclown, fclown, _5clown_state, fclown, ROT0, "IGS",   "Five Clown (English, set 2)", GAME_IMPERFECT_SOUND )
+GAME( 1993, 5clownsp, 5clown, fclown, fclown, _5clown_state, fclown, ROT0, "IGS",   "Five Clown (Spanish hack)",   GAME_IMPERFECT_SOUND )

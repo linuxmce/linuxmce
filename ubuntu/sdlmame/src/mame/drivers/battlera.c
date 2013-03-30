@@ -13,6 +13,7 @@
     Twice as much VRAM.
 
     Todo:
+    - Convert this driver to use proper PC-Engine video.
     - Priority is wrong for the submarine at the end of level 1.
     - There seems to be a bug with a stuck note from the YM2203 FM channel
       at the start of scene 3 and near the ending when your characters are
@@ -21,7 +22,6 @@
 **********************************************************************/
 
 #include "emu.h"
-#include "deprecat.h"
 #include "cpu/h6280/h6280.h"
 #include "sound/2203intf.h"
 #include "sound/msm5205.h"
@@ -31,53 +31,51 @@
 
 /******************************************************************************/
 
-static WRITE8_HANDLER( battlera_sound_w )
+WRITE8_MEMBER(battlera_state::battlera_sound_w)
 {
 	if (offset == 0)
 	{
-		soundlatch_w(space,0,data);
-		cputag_set_input_line(space->machine(), "audiocpu", 0, HOLD_LINE);
+		soundlatch_byte_w(space,0,data);
+		machine().device("audiocpu")->execute().set_input_line(0, HOLD_LINE);
 	}
 }
 
 /******************************************************************************/
 
-static WRITE8_HANDLER( control_data_w )
+WRITE8_MEMBER(battlera_state::control_data_w)
 {
-	battlera_state *state = space->machine().driver_data<battlera_state>();
-	state->m_control_port_select=data;
+	m_control_port_select=data;
 }
 
-static READ8_HANDLER( control_data_r )
+READ8_MEMBER(battlera_state::control_data_r)
 {
-	battlera_state *state = space->machine().driver_data<battlera_state>();
-	switch (state->m_control_port_select)
+	switch (m_control_port_select)
 	{
-		case 0xfe: return input_port_read(space->machine(), "IN0"); /* Player 1 */
-		case 0xfd: return input_port_read(space->machine(), "IN1"); /* Player 2 */
-		case 0xfb: return input_port_read(space->machine(), "IN2"); /* Coins */
-		case 0xf7: return input_port_read(space->machine(), "DSW2"); /* Dip 2 */
-		case 0xef: return input_port_read(space->machine(), "DSW1"); /* Dip 1 */
+		case 0xfe: return ioport("IN0")->read(); /* Player 1 */
+		case 0xfd: return ioport("IN1")->read(); /* Player 2 */
+		case 0xfb: return ioport("IN2")->read(); /* Coins */
+		case 0xf7: return ioport("DSW2")->read(); /* Dip 2 */
+		case 0xef: return ioport("DSW1")->read(); /* Dip 1 */
 	}
 
-    return 0xff;
+	return 0xff;
 }
 
 /******************************************************************************/
 
-static ADDRESS_MAP_START( battlera_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( battlera_map, AS_PROGRAM, 8, battlera_state )
 	AM_RANGE(0x000000, 0x0fffff) AM_ROM
 	AM_RANGE(0x100000, 0x10ffff) AM_READWRITE(HuC6270_debug_r, HuC6270_debug_w) /* Cheat to edit vram data */
 	AM_RANGE(0x1e0800, 0x1e0801) AM_WRITE(battlera_sound_w)
-	AM_RANGE(0x1e1000, 0x1e13ff) AM_WRITE(battlera_palette_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x1e1000, 0x1e13ff) AM_WRITE(battlera_palette_w) AM_SHARE("paletteram")
 	AM_RANGE(0x1f0000, 0x1f1fff) AM_RAMBANK("bank8") /* Main ram */
 	AM_RANGE(0x1fe000, 0x1fe001) AM_READWRITE(HuC6270_register_r, HuC6270_register_w)
 	AM_RANGE(0x1fe002, 0x1fe003) AM_WRITE(HuC6270_data_w)
 	AM_RANGE(0x1ff000, 0x1ff001) AM_READWRITE(control_data_r, control_data_w)
-	AM_RANGE(0x1ff400, 0x1ff403) AM_WRITE(h6280_irq_status_w)
+	AM_RANGE(0x1ff400, 0x1ff403) AM_DEVWRITE("maincpu", h6280_device, irq_status_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( battlera_portmap, AS_IO, 8 )
+static ADDRESS_MAP_START( battlera_portmap, AS_IO, 8, battlera_state )
 	AM_RANGE(0x00, 0x01) AM_WRITE(HuC6270_register_w)
 	AM_RANGE(0x02, 0x03) AM_WRITE(HuC6270_data_w)
 ADDRESS_MAP_END
@@ -94,28 +92,28 @@ static void battlera_adpcm_int(device_t *device)
 
 	state->m_toggle = 1 - state->m_toggle;
 	if (state->m_toggle)
-		cputag_set_input_line(device->machine(), "audiocpu", 1, HOLD_LINE);
+		device->machine().device("audiocpu")->execute().set_input_line(1, HOLD_LINE);
 }
 
-static WRITE8_HANDLER( battlera_adpcm_data_w )
+WRITE8_MEMBER(battlera_state::battlera_adpcm_data_w)
 {
-	battlera_state *state = space->machine().driver_data<battlera_state>();
-	state->m_msm5205next = data;
+	m_msm5205next = data;
 }
 
-static WRITE8_DEVICE_HANDLER( battlera_adpcm_reset_w )
+WRITE8_MEMBER(battlera_state::battlera_adpcm_reset_w)
 {
+	device_t *device = machine().device("msm");
 	msm5205_reset_w(device, 0);
 }
 
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, battlera_state )
 	AM_RANGE(0x000000, 0x00ffff) AM_ROM
-	AM_RANGE(0x040000, 0x040001) AM_DEVWRITE("ymsnd", ym2203_w)
+	AM_RANGE(0x040000, 0x040001) AM_DEVWRITE_LEGACY("ymsnd", ym2203_w)
 	AM_RANGE(0x080000, 0x080001) AM_WRITE(battlera_adpcm_data_w)
-	AM_RANGE(0x1fe800, 0x1fe80f) AM_DEVWRITE("c6280", c6280_w)
+	AM_RANGE(0x1fe800, 0x1fe80f) AM_DEVWRITE("c6280", c6280_device, c6280_w)
 	AM_RANGE(0x1f0000, 0x1f1fff) AM_RAMBANK("bank7") /* Main ram */
-	AM_RANGE(0x1ff000, 0x1ff001) AM_READ(soundlatch_r) AM_DEVWRITE("msm", battlera_adpcm_reset_w)
-	AM_RANGE(0x1ff400, 0x1ff403) AM_WRITE(h6280_irq_status_w)
+	AM_RANGE(0x1ff000, 0x1ff001) AM_READ(soundlatch_byte_r) AM_WRITE(battlera_adpcm_reset_w)
+	AM_RANGE(0x1ff400, 0x1ff403) AM_DEVWRITE("audiocpu", h6280_device, irq_status_w)
 ADDRESS_MAP_END
 
 /******************************************************************************/
@@ -141,37 +139,37 @@ static INPUT_PORTS_START( battlera )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 )
 
-	PORT_START("IN2")	/* Coins */
+	PORT_START("IN2")   /* Coins */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN3 )
 	PORT_BIT( 0xf8, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START("DSW1")
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coin_A ) )		PORT_DIPLOCATION("SW1:1,2")
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coin_A ) )       PORT_DIPLOCATION("SW1:1,2")
 	PORT_DIPSETTING(    0x00, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x03, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( 1C_2C ) )
-	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Coin_B ) )		PORT_DIPLOCATION("SW1:3,4")
+	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Coin_B ) )       PORT_DIPLOCATION("SW1:3,4")
 	PORT_DIPSETTING(    0x00, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x0c, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( 1C_2C ) )
-	PORT_DIPUNUSED_DIPLOC( 0x10, 0x10, "SW1:5" )		/* Listed as "Unused" */
-	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Demo_Sounds ) )	PORT_DIPLOCATION("SW1:6")
+	PORT_DIPUNUSED_DIPLOC( 0x10, 0x10, "SW1:5" )        /* Listed as "Unused" */
+	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW1:6")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( On ) )
-	PORT_DIPUNUSED_DIPLOC( 0x40, 0x40, "SW1:7" )		/* Listed as "Unused" */
-	PORT_DIPUNUSED_DIPLOC( 0x80, 0x80, "SW1:8" )		/* Listed as "Unused" */
+	PORT_DIPUNUSED_DIPLOC( 0x40, 0x40, "SW1:7" )        /* Listed as "Unused" */
+	PORT_DIPUNUSED_DIPLOC( 0x80, 0x80, "SW1:8" )        /* Listed as "Unused" */
 
 	PORT_START("DSW2")
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Lives ) )		PORT_DIPLOCATION("SW2:1,2")
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW2:1,2")
 	PORT_DIPSETTING(    0x01, "1" )
 	PORT_DIPSETTING(    0x02, "2" )
 	PORT_DIPSETTING(    0x03, "3" )
 	PORT_DIPSETTING(    0x00, "Infinite (Cheat)")
-	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Difficulty ) )	PORT_DIPLOCATION("SW2:3,4")
+	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("SW2:3,4")
 	PORT_DIPSETTING(    0x08, DEF_STR( Easy ) )
 	PORT_DIPSETTING(    0x0c, DEF_STR( Normal ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( Hard ) )
@@ -179,9 +177,9 @@ static INPUT_PORTS_START( battlera )
 	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Allow_Continue ) ) PORT_DIPLOCATION("SW2:5")
 	PORT_DIPSETTING(    0x00, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x10, DEF_STR( Yes ) )
-	PORT_DIPUNUSED_DIPLOC( 0x20, 0x20, "SW2:6" )		/* Listed as "Unused" */
-	PORT_DIPUNUSED_DIPLOC( 0x40, 0x40, "SW2:7" )		/* Listed as "Unused" */
-	PORT_DIPUNUSED_DIPLOC( 0x80, 0x80, "SW2:8" )		/* Listed as "Unused" */
+	PORT_DIPUNUSED_DIPLOC( 0x20, 0x20, "SW2:6" )        /* Listed as "Unused" */
+	PORT_DIPUNUSED_DIPLOC( 0x40, 0x40, "SW2:7" )        /* Listed as "Unused" */
+	PORT_DIPUNUSED_DIPLOC( 0x80, 0x80, "SW2:8" )        /* Listed as "Unused" */
 INPUT_PORTS_END
 
 /******************************************************************************/
@@ -220,7 +218,7 @@ GFXDECODE_END
 static const msm5205_interface msm5205_config =
 {
 	battlera_adpcm_int,/* interrupt function */
-	MSM5205_S48_4B		/* 8KHz            */
+	MSM5205_S48_4B      /* 8KHz            */
 };
 
 /******************************************************************************/
@@ -236,7 +234,7 @@ static MACHINE_CONFIG_START( battlera, battlera_state )
 	MCFG_CPU_ADD("maincpu", H6280,21477200/3)
 	MCFG_CPU_PROGRAM_MAP(battlera_map)
 	MCFG_CPU_IO_MAP(battlera_portmap)
-	MCFG_CPU_VBLANK_INT_HACK(battlera_interrupt,256) /* 8 prelines, 232 lines, 16 vblank? */
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("scantimer", battlera_state, battlera_irq, "screen", 0, 1) /* 8 prelines, 232 lines, 16 vblank? */
 
 	MCFG_CPU_ADD("audiocpu", H6280,21477200/3)
 	MCFG_CPU_PROGRAM_MAP(sound_map)
@@ -245,15 +243,13 @@ static MACHINE_CONFIG_START( battlera, battlera_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 1*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(battlera)
+	MCFG_SCREEN_UPDATE_DRIVER(battlera_state, screen_update_battlera)
 
 	MCFG_GFXDECODE(battlera)
 	MCFG_PALETTE_LENGTH(512)
 
-	MCFG_VIDEO_START(battlera)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
@@ -333,6 +329,6 @@ ROM_END
 
 /******************************************************************************/
 
-GAME( 1988, battlera, 0,        battlera, battlera,  0,   ROT0, "Data East Corporation", "Battle Rangers (World)", GAME_IMPERFECT_SOUND | GAME_IMPERFECT_GRAPHICS )
-GAME( 1988, bldwolf,  battlera, battlera, battlera,  0,   ROT0, "Data East USA", "Bloody Wolf (US)", GAME_IMPERFECT_SOUND | GAME_IMPERFECT_GRAPHICS )
-GAME( 1988, bldwolfj, battlera, battlera, battlera,  0,   ROT0, "Data East Corporation", "Narazumono Sentoubutai Bloody Wolf (Japan)", GAME_IMPERFECT_SOUND | GAME_IMPERFECT_GRAPHICS )
+GAME( 1988, battlera, 0,        battlera, battlera, driver_device,  0,   ROT0, "Data East Corporation", "Battle Rangers (World)", GAME_IMPERFECT_SOUND | GAME_IMPERFECT_GRAPHICS )
+GAME( 1988, bldwolf,  battlera, battlera, battlera, driver_device,  0,   ROT0, "Data East USA", "Bloody Wolf (US)", GAME_IMPERFECT_SOUND | GAME_IMPERFECT_GRAPHICS )
+GAME( 1988, bldwolfj, battlera, battlera, battlera, driver_device,  0,   ROT0, "Data East Corporation", "Narazumono Sentoubutai Bloody Wolf (Japan)", GAME_IMPERFECT_SOUND | GAME_IMPERFECT_GRAPHICS )

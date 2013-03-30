@@ -4,34 +4,45 @@
 
 */
 
+
 #include "emu.h"
 #include "cpu/m6502/m6502.h"
-
-extern const char layout_pinball[];
 
 class gts80b_state : public driver_device
 {
 public:
-	gts80b_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	gts80b_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+			m_maincpu(*this, "maincpu")
+	{ }
+
+protected:
+
+	// devices
+	required_device<cpu_device> m_maincpu;
+
+	// driver_device overrides
+	virtual void machine_reset();
+public:
+	DECLARE_DRIVER_INIT(gts80b);
 };
 
-static ADDRESS_MAP_START( gts80b_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( gts80b_map, AS_PROGRAM, 8, gts80b_state )
 	AM_RANGE(0x0000, 0xffff) AM_NOP
-	AM_RANGE(0x1000, 0x17ff) AM_MIRROR(0xc000) AM_ROM	/* PROM */
-	AM_RANGE(0x2000, 0x2fff) AM_MIRROR(0xc000) AM_ROM	/* u2 ROM */
-	AM_RANGE(0x3000, 0x3fff) AM_MIRROR(0xc000) AM_ROM	/* u3 ROM */
+	AM_RANGE(0x1000, 0x17ff) AM_MIRROR(0xc000) AM_ROM   /* PROM */
+	AM_RANGE(0x2000, 0x2fff) AM_MIRROR(0xc000) AM_ROM   /* u2 ROM */
+	AM_RANGE(0x3000, 0x3fff) AM_MIRROR(0xc000) AM_ROM   /* u3 ROM */
 ADDRESS_MAP_END
 
 
 static INPUT_PORTS_START( gts80b )
 INPUT_PORTS_END
 
-static MACHINE_RESET( gts80b )
+void gts80b_state::machine_reset()
 {
 }
 
-static DRIVER_INIT( gts80b )
+DRIVER_INIT_MEMBER(gts80b_state,gts80b)
 {
 }
 
@@ -41,13 +52,8 @@ static MACHINE_CONFIG_START( gts80b_s, gts80b_state )
 	MCFG_CPU_ADD("maincpu", M6502, 850000)
 	MCFG_CPU_PROGRAM_MAP(gts80b_map)
 
-	MCFG_MACHINE_RESET( gts80b )
-
 	/* related to src/mame/audio/gottlieb.c */
 //  MCFG_IMPORT_FROM(gts80s_s)
-
-	/* video hardware */
-	MCFG_DEFAULT_LAYOUT(layout_pinball)
 MACHINE_CONFIG_END
 
 static MACHINE_CONFIG_START( gts80b_s1, gts80b_state )
@@ -55,13 +61,8 @@ static MACHINE_CONFIG_START( gts80b_s1, gts80b_state )
 	MCFG_CPU_ADD("maincpu", M6502, 850000)
 	MCFG_CPU_PROGRAM_MAP(gts80b_map)
 
-	MCFG_MACHINE_RESET( gts80b )
-
 	/* related to src/mame/audio/gottlieb.c? */
 //  MCFG_IMPORT_FROM(gts80s_b1)
-
-	/* video hardware */
-	MCFG_DEFAULT_LAYOUT(layout_pinball)
 MACHINE_CONFIG_END
 
 static MACHINE_CONFIG_START( gts80b_s2, gts80b_state )
@@ -69,13 +70,8 @@ static MACHINE_CONFIG_START( gts80b_s2, gts80b_state )
 	MCFG_CPU_ADD("maincpu", M6502, 850000)
 	MCFG_CPU_PROGRAM_MAP(gts80b_map)
 
-	MCFG_MACHINE_RESET( gts80b )
-
 	/* related to src/mame/audio/gottlieb.c? */
 //  MCFG_IMPORT_FROM(gts80s_b2)
-
-	/* video hardware */
-	MCFG_DEFAULT_LAYOUT(layout_pinball)
 MACHINE_CONFIG_END
 
 static MACHINE_CONFIG_START( gts80b_s3, gts80b_state )
@@ -83,13 +79,8 @@ static MACHINE_CONFIG_START( gts80b_s3, gts80b_state )
 	MCFG_CPU_ADD("maincpu", M6502, 850000)
 	MCFG_CPU_PROGRAM_MAP(gts80b_map)
 
-	MCFG_MACHINE_RESET( gts80b )
-
 	/* related to src/mame/audio/gottlieb.c? */
 //  MCFG_IMPORT_FROM(gts80s_b3)
-
-	/* video hardware */
-	MCFG_DEFAULT_LAYOUT(layout_pinball)
 MACHINE_CONFIG_END
 
 static MACHINE_CONFIG_START( bonebstr, gts80b_state )
@@ -97,13 +88,8 @@ static MACHINE_CONFIG_START( bonebstr, gts80b_state )
 	MCFG_CPU_ADD("maincpu", M6502, 850000)
 	MCFG_CPU_PROGRAM_MAP(gts80b_map)
 
-	MCFG_MACHINE_RESET( gts80b )
-
 	/* related to src/mame/audio/gottlieb.c? */
 //  MCFG_IMPORT_FROM(gts80s_b3a)
-
-	/* video hardware */
-	MCFG_DEFAULT_LAYOUT(layout_pinball)
 MACHINE_CONFIG_END
 
 
@@ -592,27 +578,28 @@ ROM_START(victoryp)
 	ROM_LOAD("yrom1.snd", 0x8000, 0x8000, CRC(921a100e) SHA1(0c3c7eae4ceeb5a1a8150bac52203d3f1e8f917e))
 ROM_END
 
-GAME(1987,	arena,	0,		gts80b_s1,	gts80b,	gts80b,	ROT0,	"Gottlieb",				"Arena",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1988,	badgirls,	0,		gts80b_s3,	gts80b,	gts80b,	ROT0,	"Gottlieb",				"Bad Girls",			GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1989,	bighouse,	0,		gts80b_s3,	gts80b,	gts80b,	ROT0,	"Gottlieb",				"Big House",			GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1989,	bonebstr,	0,		bonebstr,	gts80b,	gts80b,	ROT0,	"Gottlieb",				"Bone Busters Inc.",		GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1985,	bountyh,	0,		gts80b_s,	gts80b,	gts80b,	ROT0,	"Gottlieb",				"Bounty Hunter",			GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1985,	triplay,	0,		gts80b_s,	gts80b,	gts80b,	ROT0,	"Gottlieb",				"Triple Play",			GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1988,	diamondp,	0,		gts80b_s2,	gts80b,	gts80b,	ROT0,	"Gottlieb",				"Diamond Lady",			GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1988,	excalibr,	0,		gts80b_s3,	gts80b,	gts80b,	ROT0,	"Gottlieb",				"Excalibur",			GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1986,	genesisp,	0,		gts80b_s1,	gts80b,	gts80b,	ROT0,	"Gottlieb",				"Genesis",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1986,	goldwing,	0,		gts80b_s1,	gts80b,	gts80b,	ROT0,	"Gottlieb",				"Gold Wings",			GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1986,	hlywoodh,	0,		gts80b_s1,	gts80b,	gts80b,	ROT0,	"Gottlieb",				"Hollywood Heat",			GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1989,	hotshots,	0,		gts80b_s2,	gts80b,	gts80b,	ROT0,	"Gottlieb",				"Hot Shots",			GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1987,	mntecrlo,	0,		gts80b_s1,	gts80b,	gts80b,	ROT0,	"Gottlieb",				"Monte Carlo (Pinball)",			GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1989,	nmoves,	0,		gts80b_s2,	gts80b,	gts80b,	ROT0,	"International Concepts",	"Night Moves",			GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1986,	raven,	0,		gts80b_s1,	gts80b,	gts80b,	ROT0,	"Gottlieb",				"Raven",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1988,	robowars,	0,		gts80b_s2,	gts80b,	gts80b,	ROT0,	"Gottlieb",				"Robo-War",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1985,	rock,		0,		gts80b_s1,	gts80b,	gts80b,	ROT0,	"Gottlieb",				"Rock",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1986,	rock_enc,	rock,		gts80b_s1,	gts80b,	gts80b,	ROT0,	"Gottlieb",				"Rock Encore",			GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1987,	sprbreak,	0,		gts80b_s1,	gts80b,	gts80b,	ROT0,	"Gottlieb",				"Spring Break",			GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(19??,	sprbreaks,	sprbreak,gts80b_s1,	gts80b,	gts80b,	ROT0,	"Gottlieb",				"Spring Break (single ball game)",			GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1985,	tagteamp,	0,		gts80b_s,	gts80b,	gts80b,	ROT0,	"Gottlieb",				"Tag-Team Wrestling",		GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1985,	tagteamp2,	tagteamp,	gts80b_s,	gts80b,	gts80b,	ROT0,	"Gottlieb",				"Tag-Team Wrestling (rev.2)",	GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1988,	txsector,	0,		gts80b_s2,	gts80b,	gts80b,	ROT0,	"Gottlieb",				"TX-Sector",			GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1987,	victoryp,	0,		gts80b_s2,	gts80b,	gts80b,	ROT0,	"Gottlieb",				"Victory (Pinball)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
+
+GAME(1987,  arena,  0,      gts80b_s1,  gts80b, gts80b_state,   gts80b, ROT0,   "Gottlieb",             "Arena",                GAME_IS_SKELETON_MECHANICAL)
+GAME(1988,  badgirls,   0,      gts80b_s3,  gts80b, gts80b_state,   gts80b, ROT0,   "Gottlieb",             "Bad Girls",            GAME_IS_SKELETON_MECHANICAL)
+GAME(1989,  bighouse,   0,      gts80b_s3,  gts80b, gts80b_state,   gts80b, ROT0,   "Gottlieb",             "Big House",            GAME_IS_SKELETON_MECHANICAL)
+GAME(1989,  bonebstr,   0,      bonebstr,   gts80b, gts80b_state,   gts80b, ROT0,   "Gottlieb",             "Bone Busters Inc.",        GAME_IS_SKELETON_MECHANICAL)
+GAME(1985,  bountyh,    0,      gts80b_s,   gts80b, gts80b_state,   gts80b, ROT0,   "Gottlieb",             "Bounty Hunter",            GAME_IS_SKELETON_MECHANICAL)
+GAME(1985,  triplay,    0,      gts80b_s,   gts80b, gts80b_state,   gts80b, ROT0,   "Gottlieb",             "Triple Play",          GAME_IS_SKELETON_MECHANICAL)
+GAME(1988,  diamondp,   0,      gts80b_s2,  gts80b, gts80b_state,   gts80b, ROT0,   "Gottlieb",             "Diamond Lady",         GAME_IS_SKELETON_MECHANICAL)
+GAME(1988,  excalibr,   0,      gts80b_s3,  gts80b, gts80b_state,   gts80b, ROT0,   "Gottlieb",             "Excalibur",            GAME_IS_SKELETON_MECHANICAL)
+GAME(1986,  genesisp,   0,      gts80b_s1,  gts80b, gts80b_state,   gts80b, ROT0,   "Gottlieb",             "Genesis",              GAME_IS_SKELETON_MECHANICAL)
+GAME(1986,  goldwing,   0,      gts80b_s1,  gts80b, gts80b_state,   gts80b, ROT0,   "Gottlieb",             "Gold Wings",           GAME_IS_SKELETON_MECHANICAL)
+GAME(1986,  hlywoodh,   0,      gts80b_s1,  gts80b, gts80b_state,   gts80b, ROT0,   "Gottlieb",             "Hollywood Heat",           GAME_IS_SKELETON_MECHANICAL)
+GAME(1989,  hotshots,   0,      gts80b_s2,  gts80b, gts80b_state,   gts80b, ROT0,   "Gottlieb",             "Hot Shots",            GAME_IS_SKELETON_MECHANICAL)
+GAME(1987,  mntecrlo,   0,      gts80b_s1,  gts80b, gts80b_state,   gts80b, ROT0,   "Gottlieb",             "Monte Carlo (Pinball)",            GAME_IS_SKELETON_MECHANICAL)
+GAME(1989,  nmoves, 0,      gts80b_s2,  gts80b, gts80b_state,   gts80b, ROT0,   "International Concepts",   "Night Moves",          GAME_IS_SKELETON_MECHANICAL)
+GAME(1986,  raven,  0,      gts80b_s1,  gts80b, gts80b_state,   gts80b, ROT0,   "Gottlieb",             "Raven",                GAME_IS_SKELETON_MECHANICAL)
+GAME(1988,  robowars,   0,      gts80b_s2,  gts80b, gts80b_state,   gts80b, ROT0,   "Gottlieb",             "Robo-War",             GAME_IS_SKELETON_MECHANICAL)
+GAME(1985,  rock,       0,      gts80b_s1,  gts80b, gts80b_state,   gts80b, ROT0,   "Gottlieb",             "Rock",             GAME_IS_SKELETON_MECHANICAL)
+GAME(1986,  rock_enc,   rock,       gts80b_s1,  gts80b, gts80b_state,   gts80b, ROT0,   "Gottlieb",             "Rock Encore",          GAME_IS_SKELETON_MECHANICAL)
+GAME(1987,  sprbreak,   0,      gts80b_s1,  gts80b, gts80b_state,   gts80b, ROT0,   "Gottlieb",             "Spring Break",         GAME_IS_SKELETON_MECHANICAL)
+GAME(19??,  sprbreaks,  sprbreak,gts80b_s1, gts80b, gts80b_state,   gts80b, ROT0,   "Gottlieb",             "Spring Break (single ball game)",          GAME_IS_SKELETON_MECHANICAL)
+GAME(1985,  tagteamp,   0,      gts80b_s,   gts80b, gts80b_state,   gts80b, ROT0,   "Gottlieb",             "Tag-Team Wrestling",       GAME_IS_SKELETON_MECHANICAL)
+GAME(1985,  tagteamp2,  tagteamp,   gts80b_s,   gts80b, gts80b_state,   gts80b, ROT0,   "Gottlieb",             "Tag-Team Wrestling (rev.2)",   GAME_IS_SKELETON_MECHANICAL)
+GAME(1988,  txsector,   0,      gts80b_s2,  gts80b, gts80b_state,   gts80b, ROT0,   "Gottlieb",             "TX-Sector",            GAME_IS_SKELETON_MECHANICAL)
+GAME(1987,  victoryp,   0,      gts80b_s2,  gts80b, gts80b_state,   gts80b, ROT0,   "Gottlieb",             "Victory (Pinball)",                GAME_IS_SKELETON_MECHANICAL)

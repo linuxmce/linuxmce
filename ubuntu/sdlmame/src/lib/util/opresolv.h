@@ -57,8 +57,7 @@ enum option_type
 	OPTIONTYPE_ENUM_VALUE
 };
 
-typedef struct _option_guide option_guide;
-struct _option_guide
+struct option_guide
 {
 	enum option_type option_type;
 	int parameter;
@@ -66,33 +65,33 @@ struct _option_guide
 	const char *display_name;
 };
 
-#define OPTION_GUIDE_START(option_guide_)									\
-	const option_guide option_guide_[] =								\
-	{																		\
+#define OPTION_GUIDE_START(option_guide_)                                   \
+	const option_guide option_guide_[] =                                \
+	{                                                                       \
 
-#define OPTION_GUIDE_END													\
-		{ OPTIONTYPE_END }													\
-	};																		\
+#define OPTION_GUIDE_END                                                    \
+		{ OPTIONTYPE_END }                                                  \
+	};                                                                      \
 
-#define OPTION_GUIDE_EXTERN(option_guide_)									\
-	extern const option_guide option_guide_[]							\
+#define OPTION_GUIDE_EXTERN(option_guide_)                                  \
+	extern const option_guide option_guide_[]                           \
 
-#define OPTION_INT(option_char, identifier, display_name)					\
-		{ OPTIONTYPE_INT, (option_char), (identifier), (display_name) },	\
+#define OPTION_INT(option_char, identifier, display_name)                   \
+		{ OPTIONTYPE_INT, (option_char), (identifier), (display_name) },    \
 
-#define OPTION_STRING(option_char, identifier, display_name)				\
-	{ OPTIONTYPE_STRING, (option_char), (identifier), (display_name) },		\
+#define OPTION_STRING(option_char, identifier, display_name)                \
+	{ OPTIONTYPE_STRING, (option_char), (identifier), (display_name) },     \
 
-#define OPTION_ENUM_START(option_char, identifier, display_name)			\
-	{ OPTIONTYPE_ENUM_BEGIN, (option_char), (identifier), (display_name) },	\
+#define OPTION_ENUM_START(option_char, identifier, display_name)            \
+	{ OPTIONTYPE_ENUM_BEGIN, (option_char), (identifier), (display_name) }, \
 
-#define OPTION_ENUM(value, identifier, display_name)						\
-	{ OPTIONTYPE_ENUM_VALUE, (value), (identifier), (display_name) },		\
+#define OPTION_ENUM(value, identifier, display_name)                        \
+	{ OPTIONTYPE_ENUM_VALUE, (value), (identifier), (display_name) },       \
 
 #define OPTION_ENUM_END
 
 
-typedef enum
+enum optreserr_t
 {
 	OPTIONRESOLUTION_ERROR_SUCCESS,
 	OPTIONRESOLUTION_ERROR_OUTOFMEMORY,
@@ -103,7 +102,7 @@ typedef enum
 	OPTIONRESOLUTION_ERROR_BADPARAM,
 	OPTIONRESOLUTION_ERROR_SYNTAX,
 	OPTIONRESOLTUION_ERROR_INTERNAL
-} optreserr_t;
+};
 
 
 
@@ -115,7 +114,7 @@ struct OptionResolutionError
 
 
 
-typedef struct _option_resolution option_resolution;
+struct option_resolution;
 
 struct OptionRange
 {
@@ -157,4 +156,3 @@ int option_resolution_contains(const char *specification, int option_char);
 const char *option_resolution_error_string(optreserr_t err);
 
 #endif /* __OPRESOLV_H__ */
-

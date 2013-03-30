@@ -71,12 +71,11 @@
 #include "emu.h"
 #include "machine/mb87078.h"
 
-typedef struct _mb87078_state  mb87078_state;
-struct _mb87078_state
+struct mb87078_state
 {
-	int          gain[4];		/* gain index 0-63,64,65 */
-	int          channel_latch;	/* current channel */
-	UINT8        latch[2][4];	/* 6bit+3bit 4 data latches */
+	int          gain[4];       /* gain index 0-63,64,65 */
+	int          channel_latch; /* current channel */
+	UINT8        latch[2][4];   /* 6bit+3bit 4 data latches */
 	UINT8        reset_comp;
 
 	mb87078_gain_changed_cb   gain_changed_cb;
@@ -85,26 +84,26 @@ struct _mb87078_state
 
 static const float mb87078_gain_decibel[66] = {
 	0.0, -0.5, -1.0, -1.5, -2.0, -2.5, -3.0, -3.5,
-   -4.0, -4.5, -5.0, -5.5, -6.0, -6.5, -7.0, -7.5,
-   -8.0, -8.5, -9.0, -9.5,-10.0,-10.5,-11.0,-11.5,
-  -12.0,-12.5,-13.0,-13.5,-14.0,-14.5,-15.0,-15.5,
-  -16.0,-16.5,-17.0,-17.5,-18.0,-18.5,-19.0,-19.5,
-  -20.0,-20.5,-21.0,-21.5,-22.0,-22.5,-23.0,-23.5,
-  -24.0,-24.5,-25.0,-25.5,-26.0,-26.5,-27.0,-27.5,
-  -28.0,-28.5,-29.0,-29.5,-30.0,-30.5,-31.0,-31.5,
-  -32.0, -256.0
-  };
+	-4.0, -4.5, -5.0, -5.5, -6.0, -6.5, -7.0, -7.5,
+	-8.0, -8.5, -9.0, -9.5,-10.0,-10.5,-11.0,-11.5,
+	-12.0,-12.5,-13.0,-13.5,-14.0,-14.5,-15.0,-15.5,
+	-16.0,-16.5,-17.0,-17.5,-18.0,-18.5,-19.0,-19.5,
+	-20.0,-20.5,-21.0,-21.5,-22.0,-22.5,-23.0,-23.5,
+	-24.0,-24.5,-25.0,-25.5,-26.0,-26.5,-27.0,-27.5,
+	-28.0,-28.5,-29.0,-29.5,-30.0,-30.5,-31.0,-31.5,
+	-32.0, -256.0
+	};
 
 static const int mb87078_gain_percent[66] = {
-   100,94,89,84,79,74,70,66,
-    63,59,56,53,50,47,44,42,
-    39,37,35,33,31,29,28,26,
-    25,23,22,21,19,18,17,16,
-    15,14,14,13,12,11,11,10,
-    10, 9, 8, 8, 7, 7, 7, 6,
-     6, 5, 5, 5, 5, 4, 4, 4,
-     3, 3, 3, 3, 3, 2, 2, 2,
-   2, 0
+	100,94,89,84,79,74,70,66,
+	63,59,56,53,50,47,44,42,
+	39,37,35,33,31,29,28,26,
+	25,23,22,21,19,18,17,16,
+	15,14,14,13,12,11,11,10,
+	10, 9, 8, 8, 7, 7, 7, 6,
+		6, 5, 5, 5, 5, 4, 4, 4,
+		3, 3, 3, 3, 3, 2, 2, 2,
+	2, 0
 };
 
 /*****************************************************************************
@@ -116,14 +115,14 @@ INLINE mb87078_state *get_safe_token( device_t *device )
 	assert(device != NULL);
 	assert(device->type() == MB87078);
 
-	return (mb87078_state *)downcast<legacy_device_base *>(device)->token();
+	return (mb87078_state *)downcast<mb87078_device *>(device)->token();
 }
 
 INLINE const mb87078_interface *get_interface( device_t *device )
 {
 	assert(device != NULL);
 	assert((device->type() == MB87078));
-	return (const mb87078_interface *) device->baseconfig().static_config();
+	return (const mb87078_interface *) device->static_config();
 }
 
 /*****************************************************************************
@@ -149,7 +148,7 @@ static int calc_gain_index( int data0, int data1 )
 		if (data1 & 0x10)
 		{
 			return GAIN_MAX_INDEX;
-        }
+		}
 		else
 		{
 			if (data1 & 0x08)
@@ -188,11 +187,11 @@ void mb87078_data_w( device_t *device, int data, int dsel )
 	if (mb87078->reset_comp == 0)
 		return;
 
-	if (dsel == 0)	/* gd0 - gd5 */
+	if (dsel == 0)  /* gd0 - gd5 */
 	{
 		mb87078->latch[0][mb87078->channel_latch] = data & 0x3f;
 	}
-	else		/* dcs1, dsc2, en, c0, c32, X */
+	else        /* dcs1, dsc2, en, c0, c32, X */
 	{
 		mb87078->channel_latch = data & 3;
 		mb87078->latch[1][mb87078->channel_latch] = data & 0x1f; //always zero bit 5
@@ -266,13 +265,38 @@ static DEVICE_RESET( mb87078 )
 	mb87078_reset_comp_w(device, 1);
 }
 
-static const char DEVTEMPLATE_SOURCE[] = __FILE__;
+const device_type MB87078 = &device_creator<mb87078_device>;
 
-#define DEVTEMPLATE_ID( p, s )	p##mb87078##s
-#define DEVTEMPLATE_FEATURES	DT_HAS_START | DT_HAS_RESET
-#define DEVTEMPLATE_NAME		"Fujitsu MB87078"
-#define DEVTEMPLATE_FAMILY		"Fujitsu Volume Controller MB87078"
-#include "devtempl.h"
+mb87078_device::mb87078_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, MB87078, "Fujitsu MB87078", tag, owner, clock)
+{
+	m_token = global_alloc_clear(mb87078_state);
+}
 
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
 
-DEFINE_LEGACY_DEVICE(MB87078, mb87078);
+void mb87078_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void mb87078_device::device_start()
+{
+	DEVICE_START_NAME( mb87078 )(this);
+}
+
+//-------------------------------------------------
+//  device_reset - device-specific reset
+//-------------------------------------------------
+
+void mb87078_device::device_reset()
+{
+	DEVICE_RESET_NAME( mb87078 )(this);
+}

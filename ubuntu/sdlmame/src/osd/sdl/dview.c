@@ -12,8 +12,9 @@ static gboolean dview_expose(GtkWidget *wdv, GdkEventExpose *event)
 	DView *dv = DVIEW(wdv);
 	DViewClass *dvc = DVIEW_GET_CLASS(dv);
 	debug_view_xy vsize;
-	UINT32 i, j, xx, yy;
+	UINT32 i, j, k, l, xx, yy;
 	GdkColor bg, fg;
+	char s[256];
 
 	vsize = dv->view->visible_size();
 
@@ -24,77 +25,84 @@ static gboolean dview_expose(GtkWidget *wdv, GdkEventExpose *event)
 	if(dv->hs && dv->vs) {
 		gdk_gc_set_foreground(dv->gc, &wdv->style->bg[GTK_STATE_NORMAL]);
 		gdk_draw_rectangle(GDK_DRAWABLE(wdv->window), dv->gc, TRUE,
-						   wdv->allocation.width - dv->vsz, wdv->allocation.height - dv->hsz,
-						   dv->vsz, dv->hsz);
+							wdv->allocation.width - dv->vsz, wdv->allocation.height - dv->hsz,
+							dv->vsz, dv->hsz);
 	}
 
 	viewdata = dv->view->viewdata();
 
 	yy = wdv->style->ythickness;
 	for(j=0; j<vsize.y; j++) {
+		k = l = 0;
 		xx = wdv->style->xthickness;
 		for(i=0; i<vsize.x; i++) {
 			unsigned char attr = viewdata->attrib;
-			char s[3];
 			unsigned char v = viewdata->byte;
+
 			if(v < 128) {
-				s[0] = v;
-				s[1] = 0;
+				s[k++] = v;
 			} else {
-				s[0] = 0xc0 | (v>>6);
-				s[1] = 0x80 | (v & 0x3f);
-				s[2] = 0;
+				s[k++] = 0xc0 | (v>>6);
+				s[k++] = 0x80 | (v & 0x3f);
+			}
+			l++;
+
+			if ( i == 0 || attr != viewdata[-1].attrib ) {
+
+				bg.red = bg.green = bg.blue = 0xffff;
+				fg.red = fg.green = fg.blue = 0;
+
+				if(attr & DCA_ANCILLARY)
+					bg.red = bg.green = bg.blue = 0xe0e0;
+				if(attr & DCA_SELECTED) {
+					bg.red = 0xffff;
+					bg.green = bg.blue = 0x8080;
+				}
+				if(attr & DCA_CURRENT) {
+					bg.red = bg.green = 0xffff;
+					bg.blue = 0;
+				}
+				if(attr & DCA_CHANGED) {
+					fg.red = 0xffff;
+					fg.green = fg.blue = 0;
+				}
+				if(attr & DCA_INVALID) {
+					fg.red = fg.green = 0;
+					fg.blue = 0xffff;
+				}
+				if(attr & DCA_DISABLED) {
+					fg.red   = (fg.red   + bg.red)   >> 1;
+					fg.green = (fg.green + bg.green) >> 1;
+					fg.blue  = (fg.blue  + bg.blue)   >> 1;
+				}
+				if(attr & DCA_COMMENT) {
+					fg.red = fg.blue = 0;
+					fg.green = 0x8080;
+				}
 			}
 
-			bg.red = bg.green = bg.blue = 0xffff;
-			fg.red = fg.green = fg.blue = 0;
+			if ( i == vsize.x - 1 || attr != viewdata[1].attrib || k >= 254 ) {
+				s[k++] = 0;
+				pango_layout_set_text(dv->playout, s, -1);
+				gdk_gc_set_rgb_fg_color(dv->gc, &bg);
+				gdk_draw_rectangle(GDK_DRAWABLE(wdv->window), dv->gc, TRUE, xx, yy, l * dvc->fixedfont_width, dvc->fixedfont_height);
+				gdk_gc_set_rgb_fg_color(dv->gc, &fg);
+				gdk_draw_layout(GDK_DRAWABLE(wdv->window), dv->gc, xx, yy, dv->playout);
 
-			if(attr & DCA_ANCILLARY)
-				bg.red = bg.green = bg.blue = 0xe0e0;
-			if(attr & DCA_SELECTED) {
-				bg.red = 0xffff;
-				bg.green = bg.blue = 0x8080;
+				xx += l * dvc->fixedfont_width;
+				l = k = 0;
 			}
-			if(attr & DCA_CURRENT) {
-				bg.red = bg.green = 0xffff;
-				bg.blue = 0;
-			}
-			if(attr & DCA_CHANGED) {
-				fg.red = 0xffff;
-				fg.green = fg.blue = 0;
-			}
-			if(attr & DCA_INVALID) {
-				fg.red = fg.green = 0;
-				fg.blue = 0xffff;
-			}
-			if(attr & DCA_DISABLED) {
-				fg.red   = (fg.red   + bg.red)   >> 1;
-				fg.green = (fg.green + bg.green) >> 1;
-				fg.blue  = (fg.blue  + bg.blue)   >> 1;
-			}
-			if(attr & DCA_COMMENT) {
-				fg.red = fg.blue = 0;
-				fg.green = 0x8080;
-			}
-
-			pango_layout_set_text(dv->playout, s, -1);
-			gdk_gc_set_rgb_fg_color(dv->gc, &bg);
-			gdk_draw_rectangle(GDK_DRAWABLE(wdv->window), dv->gc, TRUE, xx, yy, dvc->fixedfont_width, dvc->fixedfont_height);
-			gdk_gc_set_rgb_fg_color(dv->gc, &fg);
-			gdk_draw_layout(GDK_DRAWABLE(wdv->window), dv->gc, xx, yy, dv->playout);
-
-			xx += dvc->fixedfont_width;
 			viewdata++;
 		}
 		yy += dvc->fixedfont_height;
 	}
 
 	gtk_paint_shadow(wdv->style, wdv->window,
-					 GTK_STATE_NORMAL, GTK_SHADOW_IN,
-					 &event->area, wdv, "scrolled_window",
-					 0, 0,
-					 wdv->allocation.width - (dv->vs ? dv->vsz : 0),
-					 wdv->allocation.height - (dv->hs ? dv->hsz : 0));
+						GTK_STATE_NORMAL, GTK_SHADOW_IN,
+						&event->area, wdv, "scrolled_window",
+						0, 0,
+						wdv->allocation.width - (dv->vs ? dv->vsz : 0),
+						wdv->allocation.height - (dv->hs ? dv->hsz : 0));
 
 	GTK_WIDGET_CLASS(g_type_class_peek_parent(dvc))->expose_event(wdv, event);
 
@@ -233,8 +241,8 @@ static void dview_size_allocate(GtkWidget *wdv, GtkAllocation *allocation)
 	if(gtk_widget_get_realized(wdv))
 #endif
 		gdk_window_move_resize(wdv->window,
-							   allocation->x, allocation->y,
-							   allocation->width, allocation->height);
+								allocation->x, allocation->y,
+								allocation->width, allocation->height);
 
 	if(dv->hs) {
 		GtkAllocation al;
@@ -339,26 +347,26 @@ static void dview_forall(GtkContainer *dvc, gboolean include_internals, GtkCallb
 static void dview_class_init(DViewClass *dvc)
 {
 #ifndef SDLMAME_WIN32
-    GConfClient *conf = gconf_client_get_default();
-    char *name = 0;
-    dvc->fixedfont = 0;
+	GConfClient *conf = gconf_client_get_default();
+	char *name = 0;
+	dvc->fixedfont = 0;
 
 	if(conf)
 		name = gconf_client_get_string(conf, "/desktop/gnome/interface/monospace_font_name", 0);
 
-    if(name) {
-        dvc->fixedfont = pango_font_description_from_string(name);
-        g_free(name);
-    }
+	if(name) {
+		dvc->fixedfont = pango_font_description_from_string(name);
+		g_free(name);
+	}
 
-    if(!dvc->fixedfont)
+	if(!dvc->fixedfont)
 #endif
 		dvc->fixedfont = pango_font_description_from_string("Monospace 10");
 
-    if(!dvc->fixedfont) {
+	if(!dvc->fixedfont) {
 		mame_printf_error("Couldn't find a monospace font, aborting\n");
 		abort();
-    }
+	}
 
 	GTK_CONTAINER_CLASS(dvc)->forall = dview_forall;
 	GTK_WIDGET_CLASS(dvc)->expose_event = dview_expose;
@@ -380,7 +388,7 @@ static void dview_init(DView *dv)
 
 		dvc->fixedfont_width = PANGO_PIXELS(pango_font_metrics_get_approximate_char_width(metrics));
 		dvc->fixedfont_height = PANGO_PIXELS(pango_font_metrics_get_ascent(metrics) +
-											 pango_font_metrics_get_descent(metrics));
+												pango_font_metrics_get_descent(metrics));
 	}
 
 	dv->view = 0;

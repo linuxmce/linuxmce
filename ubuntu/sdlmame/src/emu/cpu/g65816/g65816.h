@@ -53,7 +53,8 @@ enum
 {
 	G65816_PC=1, G65816_S, G65816_P, G65816_A, G65816_X, G65816_Y,
 	G65816_PB, G65816_DB, G65816_D, G65816_E,
-	G65816_NMI_STATE, G65816_IRQ_STATE
+	G65816_NMI_STATE, G65816_IRQ_STATE,
+	_5A22_FASTROM
 };
 
 /* Main interface function */
@@ -64,7 +65,7 @@ DECLARE_LEGACY_CPU_DEVICE(_5A22, _5a22);
 #define CPU_TYPE_5A22 1
 
 
-void g65816_set_read_vector_callback(device_t *device, read8_space_func read_vector);
+void g65816_set_read_vector_callback(device_t *device, read8_delegate read_vector);
 
 
 /* ======================================================================== */

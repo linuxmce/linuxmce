@@ -66,15 +66,7 @@
 //  DEBUGGING
 //**************************************************************************
 
-#define DETECT_MISALIGNED_MEMORY	0
-
-
-
-//**************************************************************************
-//  DEVICE DEFINITIONS
-//**************************************************************************
-
-const device_type DSP32C = dsp32c_device_config::static_alloc_device_config;
+#define DETECT_MISALIGNED_MEMORY    0
 
 
 
@@ -83,35 +75,35 @@ const device_type DSP32C = dsp32c_device_config::static_alloc_device_config;
 //**************************************************************************
 
 // internal register numbering for PIO registers
-#define PIO_PAR			0
-#define PIO_PDR			1
-#define PIO_EMR			2
-#define PIO_ESR			3
-#define PIO_PCR			4
-#define PIO_PIR			5
-#define PIO_PARE		6
-#define PIO_PDR2		7
-#define PIO_RESERVED	8
+#define PIO_PAR         0
+#define PIO_PDR         1
+#define PIO_EMR         2
+#define PIO_ESR         3
+#define PIO_PCR         4
+#define PIO_PIR         5
+#define PIO_PARE        6
+#define PIO_PDR2        7
+#define PIO_RESERVED    8
 
-#define UPPER			(0x00ff << 8)
-#define LOWER			(0xff00 << 8)
+#define UPPER           (0x00ff << 8)
+#define LOWER           (0xff00 << 8)
 
 // bits in the PCR register
-#define PCR_RESET		0x001
-#define PCR_REGMAP		0x002
-#define PCR_ENI			0x004
-#define PCR_DMA			0x008
-#define PCR_AUTO		0x010
-#define PCR_PDFs		0x020
-#define PCR_PIFs		0x040
-#define PCR_RES			0x080
-#define PCR_DMA32		0x100
-#define PCR_PIO16		0x200
-#define PCR_FLG			0x400
+#define PCR_RESET       0x001
+#define PCR_REGMAP      0x002
+#define PCR_ENI         0x004
+#define PCR_DMA         0x008
+#define PCR_AUTO        0x010
+#define PCR_PDFs        0x020
+#define PCR_PIFs        0x040
+#define PCR_RES         0x080
+#define PCR_DMA32       0x100
+#define PCR_PIO16       0x200
+#define PCR_FLG         0x400
 
 // internal flag bits
-#define UFLAGBIT		1
-#define VFLAGBIT		2
+#define UFLAGBIT        1
+#define VFLAGBIT        2
 
 
 
@@ -120,89 +112,103 @@ const device_type DSP32C = dsp32c_device_config::static_alloc_device_config;
 //**************************************************************************
 
 // register mapping
-#define R0				m_r[0]
-#define R1				m_r[1]
-#define R2				m_r[2]
-#define R3				m_r[3]
-#define R4				m_r[4]
-#define R5				m_r[5]
-#define R6				m_r[6]
-#define R7				m_r[7]
-#define R8				m_r[8]
-#define R9				m_r[9]
-#define R10				m_r[10]
-#define R11				m_r[11]
-#define R12				m_r[12]
-#define R13				m_r[13]
-#define R14				m_r[14]
-#define PC				m_r[15]
-#define R0_ALT			m_r[16]
-#define R15				m_r[17]
-#define R16				m_r[18]
-#define R17				m_r[19]
-#define R18				m_r[20]
-#define R19				m_r[21]
-#define RMM				m_r[22]
-#define RPP				m_r[23]
-#define R20				m_r[24]
-#define R21				m_r[25]
-#define DAUC			m_r[26]
-#define IOC				m_r[27]
-#define R22				m_r[29]
-#define PCSH			m_r[30]
+#define R0              m_r[0]
+#define R1              m_r[1]
+#define R2              m_r[2]
+#define R3              m_r[3]
+#define R4              m_r[4]
+#define R5              m_r[5]
+#define R6              m_r[6]
+#define R7              m_r[7]
+#define R8              m_r[8]
+#define R9              m_r[9]
+#define R10             m_r[10]
+#define R11             m_r[11]
+#define R12             m_r[12]
+#define R13             m_r[13]
+#define R14             m_r[14]
+#define PC              m_r[15]
+#define R0_ALT          m_r[16]
+#define R15             m_r[17]
+#define R16             m_r[18]
+#define R17             m_r[19]
+#define R18             m_r[20]
+#define R19             m_r[21]
+#define RMM             m_r[22]
+#define RPP             m_r[23]
+#define R20             m_r[24]
+#define R21             m_r[25]
+#define DAUC            m_r[26]
+#define IOC             m_r[27]
+#define R22             m_r[29]
+#define PCSH            m_r[30]
 
-#define A0				m_a[0]
-#define A1				m_a[1]
-#define A2				m_a[2]
-#define A3				m_a[3]
-#define A_0				m_a[4]
-#define A_1				m_a[5]
+#define A0              m_a[0]
+#define A1              m_a[1]
+#define A2              m_a[2]
+#define A3              m_a[3]
+#define A_0             m_a[4]
+#define A_1             m_a[5]
 
-#define zFLAG			((m_nzcflags & 0xffffff) == 0)
-#define nFLAG			((m_nzcflags & 0x800000) != 0)
-#define cFLAG			((m_nzcflags & 0x1000000) != 0)
-#define vFLAG			((m_vflags & 0x800000) != 0)
-#define ZFLAG			(m_NZflags == 0)
-#define NFLAG			(m_NZflags < 0)
-#define UFLAG			(m_VUflags & UFLAGBIT)
-#define VFLAG			(m_VUflags & VFLAGBIT)
+#define zFLAG           ((m_nzcflags & 0xffffff) == 0)
+#define nFLAG           ((m_nzcflags & 0x800000) != 0)
+#define cFLAG           ((m_nzcflags & 0x1000000) != 0)
+#define vFLAG           ((m_vflags & 0x800000) != 0)
+#define ZFLAG           (m_NZflags == 0)
+#define NFLAG           (m_NZflags < 0)
+#define UFLAG           (m_VUflags & UFLAGBIT)
+#define VFLAG           (m_VUflags & VFLAGBIT)
 
 
 
 //**************************************************************************
-//  DSP32C DEVICE CONFIG
+//  DEVICE INTERFACE
 //**************************************************************************
 
+const device_type DSP32C = &device_creator<dsp32c_device>;
+
 //-------------------------------------------------
-//  dsp32c_device_config - constructor
+//  dsp32c_device - constructor
 //-------------------------------------------------
 
-dsp32c_device_config::dsp32c_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock)
-	: cpu_device_config(mconfig, static_alloc_device_config, "DSP32C", tag, owner, clock),
-	  m_program_config("program", ENDIANNESS_LITTLE, 32, 24)
+dsp32c_device::dsp32c_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: cpu_device(mconfig, DSP32C, "DSP32C", tag, owner, clock),
+		m_program_config("program", ENDIANNESS_LITTLE, 32, 24),
+		m_pin(0),
+		m_pout(0),
+		m_ivtp(0),
+		m_nzcflags(0),
+		m_vflags(0),
+		m_NZflags(0),
+		m_VUflags(0),
+		m_abuf_index(0),
+		m_mbuf_index(0),
+		m_par(0),
+		m_pare(0),
+		m_pdr(0),
+		m_pdr2(0),
+		m_pir(0),
+		m_pcr(0),
+		m_emr(0),
+		m_esr(0),
+		m_pcw(0),
+		m_piop(0),
+		m_ibuf(0),
+		m_isr(0),
+		m_obuf(0),
+		m_osr(0),
+		m_iotemp(0),
+		m_lastp(0),
+		m_icount(0),
+		m_lastpins(0),
+		m_ppc(0),
+		m_program(NULL),
+		m_direct(NULL)
 {
 	m_output_pins_changed = NULL;
-}
 
-
-//-------------------------------------------------
-//  static_alloc_device_config - allocate a new
-//  configuration object
-//-------------------------------------------------
-
-device_config *dsp32c_device_config::static_alloc_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock)
-{
-	return global_alloc(dsp32c_device_config(mconfig, tag, owner, clock));
-}
-
-
-//-------------------------------------------------
-//  alloc_device - allocate a new device object
-//-------------------------------------------------
-
-device_t *dsp32c_device_config::alloc_device(running_machine &machine) const
-{
-	return auto_alloc(machine, dsp32c_device(machine, *this));
+	// set our instruction counter
+	m_icountptr = &m_icount;
 }
 
 
@@ -211,125 +217,10 @@ device_t *dsp32c_device_config::alloc_device(running_machine &machine) const
 //  structure
 //-------------------------------------------------
 
-void dsp32c_device_config::static_set_config(device_config *device, const dsp32_config &config)
+void dsp32c_device::static_set_config(device_t &device, const dsp32_config &config)
 {
-	dsp32c_device_config *dsp = downcast<dsp32c_device_config *>(device);
-	*static_cast<dsp32_config *>(dsp) = config;
-}
-
-
-//-------------------------------------------------
-//  execute_min_cycles - return minimum number of
-//  cycles it takes for one instruction to execute
-//-------------------------------------------------
-
-UINT32 dsp32c_device_config::execute_min_cycles() const
-{
-	return 4;
-}
-
-
-//-------------------------------------------------
-//  execute_max_cycles - return maximum number of
-//  cycles it takes for one instruction to execute
-//-------------------------------------------------
-
-UINT32 dsp32c_device_config::execute_max_cycles() const
-{
-	return 4;
-}
-
-
-//-------------------------------------------------
-//  execute_input_lines - return the number of
-//  input/interrupt lines
-//-------------------------------------------------
-
-UINT32 dsp32c_device_config::execute_input_lines() const
-{
-	return 2;
-}
-
-
-//-------------------------------------------------
-//  memory_space_config - return the configuration
-//  of the specified address space, or NULL if
-//  the space doesn't exist
-//-------------------------------------------------
-
-const address_space_config *dsp32c_device_config::memory_space_config(address_spacenum spacenum) const
-{
-	return (spacenum == AS_PROGRAM) ? &m_program_config : NULL;
-}
-
-
-//-------------------------------------------------
-//  disasm_min_opcode_bytes - return the length
-//  of the shortest instruction, in bytes
-//-------------------------------------------------
-
-UINT32 dsp32c_device_config::disasm_min_opcode_bytes() const
-{
-	return 4;
-}
-
-
-//-------------------------------------------------
-//  disasm_max_opcode_bytes - return the length
-//  of the longest instruction, in bytes
-//-------------------------------------------------
-
-UINT32 dsp32c_device_config::disasm_max_opcode_bytes() const
-{
-	return 4;
-}
-
-
-
-//**************************************************************************
-//  DEVICE INTERFACE
-//**************************************************************************
-
-//-------------------------------------------------
-//  dsp32c_device - constructor
-//-------------------------------------------------
-
-dsp32c_device::dsp32c_device(running_machine &_machine, const dsp32c_device_config &config)
-	: cpu_device(_machine, config),
-	  m_config(config),
-	  m_pin(0),
-	  m_pout(0),
-	  m_ivtp(0),
-	  m_nzcflags(0),
-	  m_vflags(0),
-	  m_NZflags(0),
-	  m_VUflags(0),
-	  m_abuf_index(0),
-	  m_mbuf_index(0),
-	  m_par(0),
-	  m_pare(0),
-	  m_pdr(0),
-	  m_pdr2(0),
-	  m_pir(0),
-	  m_pcr(0),
-	  m_emr(0),
-	  m_esr(0),
-	  m_pcw(0),
-	  m_piop(0),
-	  m_ibuf(0),
-	  m_isr(0),
-	  m_obuf(0),
-	  m_osr(0),
-	  m_iotemp(0),
-	  m_lastp(0),
-	  m_icount(0),
-	  m_lastpins(0),
-	  m_ppc(0),
-	  m_program(NULL),
-	  m_direct(NULL)
-{
-	// set our instruction counter
-	m_icountptr = &m_icount;
+	dsp32c_device &dsp = downcast<dsp32c_device &>(device);
+	static_cast<dsp32_config &>(dsp) = config;
 }
 
 
@@ -340,7 +231,7 @@ dsp32c_device::dsp32c_device(running_machine &_machine, const dsp32c_device_conf
 void dsp32c_device::device_start()
 {
 	// get our address spaces
-	m_program = space(AS_PROGRAM);
+	m_program = &space(AS_PROGRAM);
 	m_direct = &m_program->direct();
 
 	// register our state for the debugger
@@ -430,9 +321,13 @@ void dsp32c_device::device_reset()
 
 	// clear some registers
 	m_pcw &= 0x03ff;
-	update_pcr(m_pcr & PCR_RESET);
+	m_pcr = PCR_RESET;
 	m_esr = 0;
 	m_emr = 0xffff;
+
+	// clear the output pins
+	if (m_output_pins_changed != NULL)
+		(*m_output_pins_changed)(*this, 0);
 
 	// initialize fixed registers
 	R0 = R0_ALT = 0;
@@ -444,6 +339,18 @@ void dsp32c_device::device_reset()
 	// init internal stuff
 	m_abufcycle[0] = m_abufcycle[1] = m_abufcycle[2] = m_abufcycle[3] = 12345678;
 	m_mbufaddr[0] = m_mbufaddr[1] = m_mbufaddr[2] = m_mbufaddr[3] = 1;
+}
+
+
+//-------------------------------------------------
+//  memory_space_config - return the configuration
+//  of the specified address space, or NULL if
+//  the space doesn't exist
+//-------------------------------------------------
+
+const address_space_config *dsp32c_device::memory_space_config(address_spacenum spacenum) const
+{
+	return (spacenum == AS_PROGRAM) ? &m_program_config : NULL;
 }
 
 
@@ -480,7 +387,7 @@ void dsp32c_device::state_export(const device_state_entry &entry)
 	{
 		case STATE_GENFLAGS:
 			// no actual flags register, so just make something up
-			m_iotemp =	((zFLAG != 0) << 0) |
+			m_iotemp =  ((zFLAG != 0) << 0) |
 						((nFLAG != 0) << 1) |
 						((cFLAG != 0) << 2) |
 						((vFLAG != 0) << 3) |
@@ -514,12 +421,12 @@ void dsp32c_device::state_string_export(const device_state_entry &entry, astring
 			string.printf("%c%c%c%c%c%c%c%c",
 				NFLAG ? 'N':'.',
 				ZFLAG ? 'Z':'.',
-                UFLAG ? 'U':'.',
-                VFLAG ? 'V':'.',
-                nFLAG ? 'n':'.',
-                zFLAG ? 'z':'.',
-                cFLAG ? 'c':'.',
-                vFLAG ? 'v':'.');
+				UFLAG ? 'U':'.',
+				VFLAG ? 'V':'.',
+				nFLAG ? 'n':'.',
+				zFLAG ? 'z':'.',
+				cFLAG ? 'c':'.',
+				vFLAG ? 'v':'.');
 			break;
 
 		case DSP32_A0:
@@ -529,6 +436,28 @@ void dsp32c_device::state_string_export(const device_state_entry &entry, astring
 			string.printf("%8g", *(double *)entry.dataptr());
 			break;
 	}
+}
+
+
+//-------------------------------------------------
+//  disasm_min_opcode_bytes - return the length
+//  of the shortest instruction, in bytes
+//-------------------------------------------------
+
+UINT32 dsp32c_device::disasm_min_opcode_bytes() const
+{
+	return 4;
+}
+
+
+//-------------------------------------------------
+//  disasm_max_opcode_bytes - return the length
+//  of the longest instruction, in bytes
+//-------------------------------------------------
+
+UINT32 dsp32c_device::disasm_max_opcode_bytes() const
+{
+	return 4;
 }
 
 
@@ -628,15 +557,33 @@ void dsp32c_device::update_pcr(UINT16 newval)
 	// reset the chip if we get a reset
 	if ((oldval & PCR_RESET) == 0 && (newval & PCR_RESET) != 0)
 		reset();
+}
 
-	// track the state of the output pins
-	if (m_config.m_output_pins_changed != NULL)
+
+
+//**************************************************************************
+//  OUTPUT HANDLING
+//**************************************************************************
+
+void dsp32c_device::update_pins(void)
+{
+	if (m_pcr & PCR_ENI)
 	{
-		UINT16 newoutput = ((newval & (PCR_PIFs | PCR_ENI)) == (PCR_PIFs | PCR_ENI)) ? DSP32_OUTPUT_PIF : 0;
-		if (newoutput != m_lastpins)
+		if (m_output_pins_changed != NULL)
 		{
-			m_lastpins = newoutput;
-			(*m_config.m_output_pins_changed)(*this, newoutput);
+			UINT16 newoutput = 0;
+
+			if (m_pcr & PCR_PIFs)
+				newoutput |= DSP32_OUTPUT_PIF;
+
+			if (m_pcr & PCR_PDFs)
+				newoutput |= DSP32_OUTPUT_PDF;
+
+			if (newoutput != m_lastpins)
+			{
+				m_lastpins = newoutput;
+				(*m_output_pins_changed)(*this, newoutput);
+			}
 		}
 	}
 }
@@ -654,6 +601,39 @@ void dsp32c_device::update_pcr(UINT16 newval)
 //**************************************************************************
 //  CORE EXECUTION LOOP
 //**************************************************************************
+
+//-------------------------------------------------
+//  execute_min_cycles - return minimum number of
+//  cycles it takes for one instruction to execute
+//-------------------------------------------------
+
+UINT32 dsp32c_device::execute_min_cycles() const
+{
+	return 4;
+}
+
+
+//-------------------------------------------------
+//  execute_max_cycles - return maximum number of
+//  cycles it takes for one instruction to execute
+//-------------------------------------------------
+
+UINT32 dsp32c_device::execute_max_cycles() const
+{
+	return 4;
+}
+
+
+//-------------------------------------------------
+//  execute_input_lines - return the number of
+//  input/interrupt lines
+//-------------------------------------------------
+
+UINT32 dsp32c_device::execute_input_lines() const
+{
+	return 2;
+}
+
 
 void dsp32c_device::execute_set_input(int inputnum, int state)
 {
@@ -696,25 +676,25 @@ void dsp32c_device::execute_run()
 
 const UINT32 dsp32c_device::s_regmap[4][16] =
 {
-	{	// DSP32 compatible mode
+	{   // DSP32 compatible mode
 		PIO_PAR|LOWER, PIO_PAR|UPPER, PIO_PDR|LOWER, PIO_PDR|UPPER,
 		PIO_EMR|LOWER, PIO_EMR|UPPER, PIO_ESR|LOWER, PIO_PCR|LOWER,
 		PIO_PIR|UPPER, PIO_PIR|UPPER, PIO_PIR|UPPER, PIO_PIR|UPPER,
 		PIO_PIR|UPPER, PIO_PIR|UPPER, PIO_PIR|UPPER, PIO_PIR|UPPER
 	},
-	{	// DSP32C 8-bit mode
+	{   // DSP32C 8-bit mode
 		PIO_PAR|LOWER, PIO_PAR|UPPER, PIO_PDR|LOWER, PIO_PDR|UPPER,
 		PIO_EMR|LOWER, PIO_EMR|UPPER, PIO_ESR|LOWER, PIO_PCR|LOWER,
 		PIO_PIR|LOWER, PIO_PIR|UPPER, PIO_PCR|UPPER, PIO_PARE|LOWER,
 		PIO_PDR2|LOWER,PIO_PDR2|UPPER,PIO_RESERVED,  PIO_RESERVED
 	},
-	{	// DSP32C illegal mode
+	{   // DSP32C illegal mode
 		PIO_RESERVED,  PIO_RESERVED,  PIO_RESERVED,  PIO_RESERVED,
 		PIO_RESERVED,  PIO_RESERVED,  PIO_RESERVED,  PIO_RESERVED,
 		PIO_RESERVED,  PIO_RESERVED,  PIO_RESERVED,  PIO_RESERVED,
 		PIO_RESERVED,  PIO_RESERVED,  PIO_RESERVED,  PIO_RESERVED
 	},
-	{	// DSP32C 16-bit mode
+	{   // DSP32C 16-bit mode
 		PIO_PAR,       PIO_RESERVED,  PIO_PDR,       PIO_RESERVED,
 		PIO_EMR,       PIO_RESERVED,  PIO_ESR|LOWER, PIO_PCR,
 		PIO_PIR,       PIO_RESERVED,  PIO_RESERVED,  PIO_PARE|LOWER,
@@ -822,6 +802,7 @@ void dsp32c_device::pio_w(int reg, int data)
 			{
 				dma_store();
 				dma_increment();
+				update_pins();
 			}
 			break;
 
@@ -848,7 +829,10 @@ void dsp32c_device::pio_w(int reg, int data)
 
 			// set PIF on upper half
 			if (!(mask & 0xff00))
+			{
 				update_pcr(m_pcr | PCR_PIFs);
+				update_pins();
+			}
 			break;
 
 		// error case
@@ -896,7 +880,10 @@ int dsp32c_device::pio_r(int reg)
 
 			// trigger a fetch on the upper half
 			if (!(mask & 0xff00))
+			{
 				dma_load();
+				update_pins();
+			}
 			break;
 
 		case PIO_PDR2:
@@ -917,7 +904,10 @@ int dsp32c_device::pio_r(int reg)
 
 		case PIO_PIR:
 			if (!(mask & 0xff00))
-				update_pcr(m_pcr & ~PCR_PIFs);	// clear PIFs
+			{
+				update_pcr(m_pcr & ~PCR_PIFs);  // clear PIFs
+				update_pins();
+			}
 			result = m_pir;
 			break;
 

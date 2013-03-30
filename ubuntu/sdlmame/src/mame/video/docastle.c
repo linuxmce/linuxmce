@@ -29,8 +29,9 @@
 
 ***************************************************************************/
 
-PALETTE_INIT( docastle )
+void docastle_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 
 	for (i = 0; i < 256; i++)
@@ -54,113 +55,106 @@ PALETTE_INIT( docastle )
 		b = 0x23 * bit0 + 0x4b * bit1 + 0x91 * bit2;
 
 		/* because the graphics are decoded as 4bpp with the top bit used for transparency
-           or priority, we create matching 3bpp sets of palette entries, which effectively
-           ignores the value of the top bit */
-		palette_set_color(machine, ((i & 0xf8) << 1) | 0x00 | (i & 0x07), MAKE_RGB(r,g,b));
-		palette_set_color(machine, ((i & 0xf8) << 1) | 0x08 | (i & 0x07), MAKE_RGB(r,g,b));
+		   or priority, we create matching 3bpp sets of palette entries, which effectively
+		   ignores the value of the top bit */
+		palette_set_color(machine(), ((i & 0xf8) << 1) | 0x00 | (i & 0x07), MAKE_RGB(r,g,b));
+		palette_set_color(machine(), ((i & 0xf8) << 1) | 0x08 | (i & 0x07), MAKE_RGB(r,g,b));
 		color_prom++;
 	}
 }
 
-WRITE8_HANDLER( docastle_videoram_w )
+WRITE8_MEMBER(docastle_state::docastle_videoram_w)
 {
-	docastle_state *state = space->machine().driver_data<docastle_state>();
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_do_tilemap, offset);
+	m_videoram[offset] = data;
+	m_do_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( docastle_colorram_w )
+WRITE8_MEMBER(docastle_state::docastle_colorram_w)
 {
-	docastle_state *state = space->machine().driver_data<docastle_state>();
-	state->m_colorram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_do_tilemap, offset);
+	m_colorram[offset] = data;
+	m_do_tilemap->mark_tile_dirty(offset);
 }
 
-READ8_HANDLER( docastle_flipscreen_off_r )
+READ8_MEMBER(docastle_state::docastle_flipscreen_off_r)
 {
-	docastle_state *state = space->machine().driver_data<docastle_state>();
-	flip_screen_set(space->machine(), 0);
-	tilemap_mark_all_tiles_dirty(state->m_do_tilemap);
+	flip_screen_set(0);
+	m_do_tilemap->mark_all_dirty();
 	return 0;
 }
 
-READ8_HANDLER( docastle_flipscreen_on_r )
+READ8_MEMBER(docastle_state::docastle_flipscreen_on_r)
 {
-	docastle_state *state = space->machine().driver_data<docastle_state>();
-	flip_screen_set(space->machine(), 1);
-	tilemap_mark_all_tiles_dirty(state->m_do_tilemap);
+	flip_screen_set(1);
+	m_do_tilemap->mark_all_dirty();
 	return 1;
 }
 
-WRITE8_HANDLER( docastle_flipscreen_off_w )
+WRITE8_MEMBER(docastle_state::docastle_flipscreen_off_w)
 {
-	docastle_state *state = space->machine().driver_data<docastle_state>();
-	flip_screen_set(space->machine(), 0);
-	tilemap_mark_all_tiles_dirty(state->m_do_tilemap);
+	flip_screen_set(0);
+	m_do_tilemap->mark_all_dirty();
 }
 
-WRITE8_HANDLER( docastle_flipscreen_on_w )
+WRITE8_MEMBER(docastle_state::docastle_flipscreen_on_w)
 {
-	docastle_state *state = space->machine().driver_data<docastle_state>();
-	flip_screen_set(space->machine(), 1);
-	tilemap_mark_all_tiles_dirty(state->m_do_tilemap);
+	flip_screen_set(1);
+	m_do_tilemap->mark_all_dirty();
 }
 
-static TILE_GET_INFO( get_tile_info )
+TILE_GET_INFO_MEMBER(docastle_state::get_tile_info)
 {
-	docastle_state *state = machine.driver_data<docastle_state>();
-	int code = state->m_videoram[tile_index] + 8 * (state->m_colorram[tile_index] & 0x20);
-	int color = state->m_colorram[tile_index] & 0x1f;
+	int code = m_videoram[tile_index] + 8 * (m_colorram[tile_index] & 0x20);
+	int color = m_colorram[tile_index] & 0x1f;
 
-	SET_TILE_INFO(0, code, color, 0);
+	SET_TILE_INFO_MEMBER(0, code, color, 0);
 }
 
 static void video_start_common( running_machine &machine, UINT32 tile_transmask )
 {
 	docastle_state *state = machine.driver_data<docastle_state>();
-	state->m_do_tilemap = tilemap_create(machine, get_tile_info, tilemap_scan_rows,  8, 8, 32, 32);
-	tilemap_set_transmask(state->m_do_tilemap, 0, tile_transmask, 0x0000);
+	state->m_do_tilemap = &machine.tilemap().create(tilemap_get_info_delegate(FUNC(docastle_state::get_tile_info),state), TILEMAP_SCAN_ROWS,  8, 8, 32, 32);
+	state->m_do_tilemap->set_transmask(0, tile_transmask, 0x0000);
 }
 
-VIDEO_START( docastle )
+void docastle_state::video_start()
 {
-	video_start_common(machine, 0x00ff);
+	video_start_common(machine(), 0x00ff);
 }
 
-VIDEO_START( dorunrun )
+VIDEO_START_MEMBER(docastle_state,dorunrun)
 {
-	video_start_common(machine, 0xff00);
+	video_start_common(machine(), 0xff00);
 }
 
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	docastle_state *state = machine.driver_data<docastle_state>();
 	int offs;
 
-	bitmap_fill(machine.priority_bitmap, NULL, 1);
+	machine.priority_bitmap.fill(1);
 
-	for (offs = state->m_spriteram_size - 4; offs >= 0; offs -= 4)
+	for (offs = state->m_spriteram.bytes() - 4; offs >= 0; offs -= 4)
 	{
 		int sx, sy, flipx, flipy, code, color;
 
-		if (machine.gfx[1]->total_elements > 256)
+		if (machine.gfx[1]->elements() > 256)
 		{
 			/* spriteram
 
-             indoor soccer appears to have a slightly different spriteram
-             format to the other games, allowing a larger number of sprite
-             tiles
+			 indoor soccer appears to have a slightly different spriteram
+			 format to the other games, allowing a larger number of sprite
+			 tiles
 
-             yyyy yyyy  xxxx xxxx  TX-T pppp  tttt tttt
+			 yyyy yyyy  xxxx xxxx  TX-T pppp  tttt tttt
 
-             y = ypos
-             x = xpos
-             X = x-flip
-             T = extra tile number bits
-             p = palette
-             t = tile number
+			 y = ypos
+			 x = xpos
+			 X = x-flip
+			 T = extra tile number bits
+			 p = palette
+			 t = tile number
 
-             */
+			 */
 
 			code = state->m_spriteram[offs + 3];
 			color = state->m_spriteram[offs + 2] & 0x0f;
@@ -175,18 +169,18 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 		{
 			/* spriteram
 
-            this is the standard spriteram layout, used by most games
+			this is the standard spriteram layout, used by most games
 
-             yyyy yyyy  xxxx xxxx  YX-p pppp  tttt tttt
+			 yyyy yyyy  xxxx xxxx  YX-p pppp  tttt tttt
 
-             y = ypos
-             x = xpos
-             X = x-flip
-             Y = y-flip
-             p = palette
-             t = tile number
+			 y = ypos
+			 x = xpos
+			 X = x-flip
+			 Y = y-flip
+			 p = palette
+			 t = tile number
 
-             */
+			 */
 
 			code = state->m_spriteram[offs + 3];
 			color = state->m_spriteram[offs + 2] & 0x1f;
@@ -196,7 +190,7 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 			flipy = state->m_spriteram[offs + 2] & 0x80;
 		}
 
-		if (flip_screen_get(machine))
+		if (state->flip_screen())
 		{
 			sx = 240 - sx;
 			sy = 240 - sy;
@@ -224,12 +218,11 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 	}
 }
 
-SCREEN_UPDATE( docastle )
+UINT32 docastle_state::screen_update_docastle(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	docastle_state *state = screen->machine().driver_data<docastle_state>();
 
-	tilemap_draw(bitmap, cliprect, state->m_do_tilemap, TILEMAP_DRAW_OPAQUE, 0);
-	draw_sprites(screen->machine(), bitmap, cliprect);
-	tilemap_draw(bitmap, cliprect, state->m_do_tilemap, TILEMAP_DRAW_LAYER0, 0);
+	m_do_tilemap->draw(bitmap, cliprect, TILEMAP_DRAW_OPAQUE, 0);
+	draw_sprites(machine(), bitmap, cliprect);
+	m_do_tilemap->draw(bitmap, cliprect, TILEMAP_DRAW_LAYER0, 0);
 	return 0;
 }

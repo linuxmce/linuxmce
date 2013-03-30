@@ -46,55 +46,55 @@ PCB Layout
 #include "sound/okim6295.h"
 #include "includes/gumbo.h"
 
-static ADDRESS_MAP_START( gumbo_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( gumbo_map, AS_PROGRAM, 16, gumbo_state )
 	AM_RANGE(0x000000, 0x03ffff) AM_ROM
 	AM_RANGE(0x080000, 0x083fff) AM_RAM // main ram
-	AM_RANGE(0x1b0000, 0x1b03ff) AM_RAM_WRITE(paletteram16_xRRRRRGGGGGBBBBB_word_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x1b0000, 0x1b03ff) AM_RAM_WRITE(paletteram_xRRRRRGGGGGBBBBB_word_w) AM_SHARE("paletteram")
 	AM_RANGE(0x1c0100, 0x1c0101) AM_READ_PORT("P1_P2")
 	AM_RANGE(0x1c0200, 0x1c0201) AM_READ_PORT("DSW")
-	AM_RANGE(0x1c0300, 0x1c0301) AM_DEVREADWRITE8_MODERN("oki", okim6295_device, read, write, 0x00ff)
-	AM_RANGE(0x1e0000, 0x1e0fff) AM_RAM_WRITE(gumbo_bg_videoram_w) AM_BASE_MEMBER(gumbo_state, m_bg_videoram) // bg tilemap
-	AM_RANGE(0x1f0000, 0x1f3fff) AM_RAM_WRITE(gumbo_fg_videoram_w) AM_BASE_MEMBER(gumbo_state, m_fg_videoram) // fg tilemap
+	AM_RANGE(0x1c0300, 0x1c0301) AM_DEVREADWRITE8("oki", okim6295_device, read, write, 0x00ff)
+	AM_RANGE(0x1e0000, 0x1e0fff) AM_RAM_WRITE(gumbo_bg_videoram_w) AM_SHARE("bg_videoram") // bg tilemap
+	AM_RANGE(0x1f0000, 0x1f3fff) AM_RAM_WRITE(gumbo_fg_videoram_w) AM_SHARE("fg_videoram") // fg tilemap
 ADDRESS_MAP_END
 
 /* Miss Puzzle has a different memory map */
 
-static ADDRESS_MAP_START( mspuzzle_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( mspuzzle_map, AS_PROGRAM, 16, gumbo_state )
 	AM_RANGE(0x000000, 0x07ffff) AM_ROM
 	AM_RANGE(0x100000, 0x103fff) AM_RAM // main ram
-	AM_RANGE(0x190000, 0x197fff) AM_RAM_WRITE(gumbo_fg_videoram_w) AM_BASE_MEMBER(gumbo_state, m_fg_videoram) // fg tilemap
-	AM_RANGE(0x1a0000, 0x1a03ff) AM_RAM_WRITE(paletteram16_xRRRRRGGGGGBBBBB_word_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x190000, 0x197fff) AM_RAM_WRITE(gumbo_fg_videoram_w) AM_SHARE("fg_videoram") // fg tilemap
+	AM_RANGE(0x1a0000, 0x1a03ff) AM_RAM_WRITE(paletteram_xRRRRRGGGGGBBBBB_word_w) AM_SHARE("paletteram")
 	AM_RANGE(0x1b0100, 0x1b0101) AM_READ_PORT("P1_P2")
 	AM_RANGE(0x1b0200, 0x1b0201) AM_READ_PORT("DSW")
-	AM_RANGE(0x1b0300, 0x1b0301) AM_DEVREADWRITE8_MODERN("oki", okim6295_device, read, write, 0x00ff)
-	AM_RANGE(0x1c0000, 0x1c1fff) AM_RAM_WRITE(gumbo_bg_videoram_w) AM_BASE_MEMBER(gumbo_state, m_bg_videoram) // bg tilemap
+	AM_RANGE(0x1b0300, 0x1b0301) AM_DEVREADWRITE8("oki", okim6295_device, read, write, 0x00ff)
+	AM_RANGE(0x1c0000, 0x1c1fff) AM_RAM_WRITE(gumbo_bg_videoram_w) AM_SHARE("bg_videoram") // bg tilemap
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( dblpoint_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( dblpoint_map, AS_PROGRAM, 16, gumbo_state )
 	AM_RANGE(0x000000, 0x07ffff) AM_ROM
 	AM_RANGE(0x080000, 0x083fff) AM_RAM // main ram
-	AM_RANGE(0x1b0000, 0x1b03ff) AM_WRITE(paletteram16_xRRRRRGGGGGBBBBB_word_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x1b0000, 0x1b03ff) AM_WRITE(paletteram_xRRRRRGGGGGBBBBB_word_w) AM_SHARE("paletteram")
 	AM_RANGE(0x1c0100, 0x1c0101) AM_READ_PORT("P1_P2")
 	AM_RANGE(0x1c0200, 0x1c0201) AM_READ_PORT("DSW")
-	AM_RANGE(0x1c0300, 0x1c0301) AM_DEVREADWRITE8_MODERN("oki", okim6295_device, read, write, 0x00ff)
-	AM_RANGE(0x1e0000, 0x1e3fff) AM_RAM_WRITE(gumbo_fg_videoram_w) AM_BASE_MEMBER(gumbo_state, m_fg_videoram) // fg tilemap
-	AM_RANGE(0x1f0000, 0x1f0fff) AM_RAM_WRITE(gumbo_bg_videoram_w) AM_BASE_MEMBER(gumbo_state, m_bg_videoram) // bg tilemap
+	AM_RANGE(0x1c0300, 0x1c0301) AM_DEVREADWRITE8("oki", okim6295_device, read, write, 0x00ff)
+	AM_RANGE(0x1e0000, 0x1e3fff) AM_RAM_WRITE(gumbo_fg_videoram_w) AM_SHARE("fg_videoram") // fg tilemap
+	AM_RANGE(0x1f0000, 0x1f0fff) AM_RAM_WRITE(gumbo_bg_videoram_w) AM_SHARE("bg_videoram") // bg tilemap
 ADDRESS_MAP_END
 
 static INPUT_PORTS_START( gumbo )
 	PORT_START("P1_P2")
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)	// "Rotate" - also IPT_START1
-	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)	// "Help"
+	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)   // "Rotate" - also IPT_START1
+	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)   // "Help"
 	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(1)
 	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(1)
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(1)
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(1)
 	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)	// "Rotate" - also IPT_START2
-	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)	// "Help"
+	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)   // "Rotate" - also IPT_START2
+	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)   // "Help"
 	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(2)
 	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(2)
 	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(2)
@@ -102,47 +102,47 @@ static INPUT_PORTS_START( gumbo )
 
 	PORT_START("DSW")
 	PORT_BIT( 0x00ff, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_DIPNAME( 0x0300, 0x0300, DEF_STR( Coinage ) )
+	PORT_DIPNAME( 0x0300, 0x0300, DEF_STR( Coinage ) )  PORT_DIPLOCATION("SW1:1,2")
 	PORT_DIPSETTING(      0x0000, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(      0x0100, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(      0x0300, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(      0x0200, DEF_STR( 1C_2C ) )
-	PORT_DIPNAME( 0x0400, 0x0400, "Helps" )			// "Power Count" in test mode
+	PORT_DIPNAME( 0x0400, 0x0400, "Helps" )         PORT_DIPLOCATION("SW1:3")   // "Power Count" in test mode
 	PORT_DIPSETTING(      0x0000, "0" )
 	PORT_DIPSETTING(      0x0400, "1" )
-	PORT_DIPNAME( 0x0800, 0x0800, "Bonus Bar Level" )
+	PORT_DIPNAME( 0x0800, 0x0800, "Bonus Bar Level" )   PORT_DIPLOCATION("SW1:4")
 	PORT_DIPSETTING(      0x0800, DEF_STR( Normal ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( High ) )
-	PORT_DIPNAME( 0x3000, 0x3000, DEF_STR( Difficulty ) )
+	PORT_DIPNAME( 0x3000, 0x3000, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("SW1:5,6")
 	PORT_DIPSETTING(      0x2000, DEF_STR( Easy ) )
 	PORT_DIPSETTING(      0x3000, DEF_STR( Normal ) )
 	PORT_DIPSETTING(      0x1000, DEF_STR( Hard ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( Hardest ) )
-	PORT_DIPNAME( 0x4000, 0x4000, "Picture View" )
+	PORT_DIPNAME( 0x4000, 0x4000, "Picture View" )      PORT_DIPLOCATION("SW1:7")
 	PORT_DIPSETTING(      0x4000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_SERVICE( 0x8000, IP_ACTIVE_LOW )
+	PORT_SERVICE_DIPLOC(  0x8000, IP_ACTIVE_LOW, "SW1:8" )
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( msbingo )
 	PORT_INCLUDE( gumbo )
 
 	PORT_MODIFY("DSW")
-	PORT_DIPNAME( 0x0c00, 0x0c00, "Chance Count" )
+	PORT_DIPNAME( 0x0c00, 0x0c00, "Chance Count" )      PORT_DIPLOCATION("SW1:3,4")
 	PORT_DIPSETTING(      0x0c00, "0" )
 	PORT_DIPSETTING(      0x0800, "1" )
 	PORT_DIPSETTING(      0x0400, "2" )
 	PORT_DIPSETTING(      0x0000, "3" )
-	PORT_DIPNAME( 0x1000, 0x1000, "Play Level" )
+	PORT_DIPNAME( 0x1000, 0x1000, "Play Level" )        PORT_DIPLOCATION("SW1:5")
 	PORT_DIPSETTING(      0x1000, DEF_STR( Normal ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( Easy ) )
-	PORT_DIPNAME( 0x2000, 0x2000, "Play Speed" )
+	PORT_DIPNAME( 0x2000, 0x2000, "Play Speed" )        PORT_DIPLOCATION("SW1:6")
 	PORT_DIPSETTING(      0x2000, DEF_STR( Normal ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( High ) )
-	PORT_DIPNAME( 0x4000, 0x4000, "Left Count" )
+	PORT_DIPNAME( 0x4000, 0x4000, "Left Count" )        PORT_DIPLOCATION("SW1:7")
 	PORT_DIPSETTING(      0x4000, DEF_STR( Normal ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( Low ) )
-	PORT_SERVICE( 0x8000, IP_ACTIVE_LOW )
+	PORT_SERVICE_DIPLOC(  0x8000, IP_ACTIVE_LOW, "SW1:8" )
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( mspuzzle )
@@ -150,26 +150,26 @@ static INPUT_PORTS_START( mspuzzle )
 
 	PORT_MODIFY("DSW")
 	PORT_BIT( 0x00ff, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_DIPNAME( 0x0300, 0x0200, "Time Mode" )
+	PORT_DIPNAME( 0x0300, 0x0200, "Time Mode" )     PORT_DIPLOCATION("SW1:1,2") /* Manual list this as "Game Level" with Levels 1 through 4 */
 	PORT_DIPSETTING(      0x0300, "0" )
 	PORT_DIPSETTING(      0x0200, "1" )
 	PORT_DIPSETTING(      0x0100, "2" )
 	PORT_DIPSETTING(      0x0000, "3" )
-	PORT_DIPNAME( 0x0c00, 0x0c00, DEF_STR( Coinage ) )
+	PORT_DIPNAME( 0x0c00, 0x0c00, DEF_STR( Coinage ) )  PORT_DIPLOCATION("SW1:3,4")
 	PORT_DIPSETTING(      0x0000, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(      0x0c00, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(      0x0800, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(      0x0400, DEF_STR( 1C_3C ) )
-	PORT_DIPNAME( 0x1000, 0x1000, "Sound Test" )
+	PORT_DIPNAME( 0x1000, 0x1000, "Sound Test" )        PORT_DIPLOCATION("SW1:5")
 	PORT_DIPSETTING(      0x1000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x2000, 0x2000, "View Staff Credits" )
+	PORT_DIPNAME( 0x2000, 0x2000, "View Staff Credits" )    PORT_DIPLOCATION("SW1:6")
 	PORT_DIPSETTING(      0x2000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x4000, 0x4000, "Picture View" )
+	PORT_DIPNAME( 0x4000, 0x4000, "Picture View" )      PORT_DIPLOCATION("SW1:7")
 	PORT_DIPSETTING(      0x4000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_SERVICE( 0x8000, IP_ACTIVE_LOW )
+	PORT_SERVICE_DIPLOC(  0x8000, IP_ACTIVE_LOW, "SW1:8" )
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( dblpoint )
@@ -184,19 +184,19 @@ static INPUT_PORTS_START( dblpoint )
 	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
 
 	PORT_MODIFY("DSW")
-	PORT_DIPNAME( 0x0c00, 0x0800, DEF_STR( Difficulty ) )
+	PORT_DIPNAME( 0x0c00, 0x0800, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("SW1:3,4")
 	PORT_DIPSETTING(      0x0c00, DEF_STR( Easy ) )
 	PORT_DIPSETTING(      0x0800, DEF_STR( Normal ) )
 	PORT_DIPSETTING(      0x0400, DEF_STR( Hard ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( Very_Hard ) )
-	PORT_DIPNAME( 0x1000, 0x1000, "Sound Test" )
+	PORT_DIPNAME( 0x1000, 0x1000, "Sound Test" )        PORT_DIPLOCATION("SW1:5")
 	PORT_DIPSETTING(      0x1000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x2000, 0x2000, "Picture View" )
+	PORT_DIPNAME( 0x2000, 0x2000, "Picture View" )      PORT_DIPLOCATION("SW1:6")
 	PORT_DIPSETTING(      0x2000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPUNUSED( 0x4000, IP_ACTIVE_LOW )
-	PORT_SERVICE( 0x8000, IP_ACTIVE_LOW )
+	PORT_DIPUNUSED_DIPLOC( 0x4000, IP_ACTIVE_LOW, "SW1:7" )
+	PORT_SERVICE_DIPLOC(  0x8000, IP_ACTIVE_LOW, "SW1:8" )
 INPUT_PORTS_END
 
 static const gfx_layout gumbo_layout =
@@ -229,23 +229,21 @@ GFXDECODE_END
 
 static MACHINE_CONFIG_START( gumbo, gumbo_state )
 
-	MCFG_CPU_ADD("maincpu", M68000, 14318180 /2)	 // or 10mhz? ?
+	MCFG_CPU_ADD("maincpu", M68000, 14318180 /2)     // or 10mhz? ?
 	MCFG_CPU_PROGRAM_MAP(gumbo_map)
-	MCFG_CPU_VBLANK_INT("screen", irq1_line_hold) // all the same
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", gumbo_state,  irq1_line_hold) // all the same
 
 	MCFG_GFXDECODE(gumbo)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(8*8, 48*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(gumbo)
+	MCFG_SCREEN_UPDATE_DRIVER(gumbo_state, screen_update_gumbo)
 
 	MCFG_PALETTE_LENGTH(0x200)
 
-	MCFG_VIDEO_START(gumbo)
 
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
 
@@ -338,7 +336,7 @@ ROM_END
 
 ROM_START( mspuzzlen )
 	/* all the roms for this game could do with checking on another board, this one was in pretty bad condition
-       and reads weren't always consistent */
+	   and reads weren't always consistent */
 	ROM_REGION( 0x80000, "maincpu", 0 ) /* 68000 Code */
 	ROM_LOAD16_BYTE( "u1.rom", 0x00001, 0x20000, BAD_DUMP CRC(ec940df4) SHA1(20bb6e2757868cf8fbbb11e05adf8c1d625ee172) )
 	ROM_LOAD16_BYTE( "u2.rom", 0x00000, 0x20000, BAD_DUMP CRC(7b9cac82) SHA1(c5edfb3fbdf43219ba317c18222e671ebed94469) )
@@ -392,10 +390,10 @@ ROM_START( dblpointd )
 	ROM_LOAD( "d15.bin", 0x40000, 0x40000, CRC(6b899a51) SHA1(04114ec9695caaac722800ac1a4ffb563ec433c9) )
 ROM_END
 
-GAME( 1994, gumbo,    0,        gumbo,    gumbo,    0, ROT0,  "Min Corp.", "Gumbo", GAME_SUPPORTS_SAVE )
-GAME( 1994, mspuzzleg,gumbo,    gumbo,    gumbo,    0, ROT0,  "Min Corp.", "Miss Puzzle (Clone of Gumbo)", GAME_SUPPORTS_SAVE )
-GAME( 1994, msbingo,  0,        mspuzzle, msbingo,  0, ROT0,  "Min Corp.", "Miss Bingo", GAME_SUPPORTS_SAVE )
-GAME( 1994, mspuzzle, 0,        mspuzzle, mspuzzle, 0, ROT90, "Min Corp.", "Miss Puzzle", GAME_SUPPORTS_SAVE )
-GAME( 1994, mspuzzlen,mspuzzle, mspuzzle, mspuzzle, 0, ROT90, "Min Corp.", "Miss Puzzle (Nudes)", GAME_NOT_WORKING | GAME_SUPPORTS_SAVE )
-GAME( 1995, dblpoint, 0,        dblpoint, dblpoint, 0, ROT0,  "Min Corp.", "Double Point", GAME_SUPPORTS_SAVE )
-GAME( 1995, dblpointd,dblpoint, dblpoint, dblpoint, 0, ROT0,  "bootleg? (Dong Bang Electron)", "Double Point (Dong Bang Electron, bootleg?)", GAME_SUPPORTS_SAVE )
+GAME( 1994, gumbo,    0,        gumbo,    gumbo, driver_device,    0, ROT0,  "Min Corp.", "Gumbo", GAME_SUPPORTS_SAVE )
+GAME( 1994, mspuzzleg,gumbo,    gumbo,    gumbo, driver_device,    0, ROT0,  "Min Corp.", "Miss Puzzle (Clone of Gumbo)", GAME_SUPPORTS_SAVE )
+GAME( 1994, msbingo,  0,        mspuzzle, msbingo, driver_device,  0, ROT0,  "Min Corp.", "Miss Bingo", GAME_SUPPORTS_SAVE )
+GAME( 1994, mspuzzle, 0,        mspuzzle, mspuzzle, driver_device, 0, ROT90, "Min Corp.", "Miss Puzzle", GAME_SUPPORTS_SAVE )
+GAME( 1994, mspuzzlen,mspuzzle, mspuzzle, mspuzzle, driver_device, 0, ROT90, "Min Corp.", "Miss Puzzle (Nudes)", GAME_NOT_WORKING | GAME_SUPPORTS_SAVE )
+GAME( 1995, dblpoint, 0,        dblpoint, dblpoint, driver_device, 0, ROT0,  "Min Corp.", "Double Point", GAME_SUPPORTS_SAVE )
+GAME( 1995, dblpointd,dblpoint, dblpoint, dblpoint, driver_device, 0, ROT0,  "bootleg? (Dong Bang Electron)", "Double Point (Dong Bang Electron, bootleg?)", GAME_SUPPORTS_SAVE )

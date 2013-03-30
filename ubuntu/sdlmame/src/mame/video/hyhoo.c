@@ -14,51 +14,49 @@
 static void hyhoo_gfxdraw(running_machine &machine);
 
 
-WRITE8_HANDLER( hyhoo_blitter_w )
+WRITE8_MEMBER(hyhoo_state::hyhoo_blitter_w)
 {
-	hyhoo_state *state = space->machine().driver_data<hyhoo_state>();
 	switch (offset)
 	{
-		case 0x00:	state->m_blitter_src_addr = (state->m_blitter_src_addr & 0xff00) | data;
+		case 0x00:  m_blitter_src_addr = (m_blitter_src_addr & 0xff00) | data;
 					nb1413m3_gfxradr_l_w(space, 0, data); break;
-		case 0x01:	state->m_blitter_src_addr = (state->m_blitter_src_addr & 0x00ff) | (data << 8);
+		case 0x01:  m_blitter_src_addr = (m_blitter_src_addr & 0x00ff) | (data << 8);
 					nb1413m3_gfxradr_h_w(space, 0, data); break;
-		case 0x02:	state->m_blitter_destx = data; break;
-		case 0x03:	state->m_blitter_desty = data; break;
-		case 0x04:	state->m_blitter_sizex = data; break;
-		case 0x05:	state->m_blitter_sizey = data;
+		case 0x02:  m_blitter_destx = data; break;
+		case 0x03:  m_blitter_desty = data; break;
+		case 0x04:  m_blitter_sizex = data; break;
+		case 0x05:  m_blitter_sizey = data;
 					/* writing here also starts the blit */
-					hyhoo_gfxdraw(space->machine());
+					hyhoo_gfxdraw(machine());
 					break;
-		case 0x06:	state->m_blitter_direction_x = (data >> 0) & 0x01;
-					state->m_blitter_direction_y = (data >> 1) & 0x01;
-					state->m_flipscreen = (~data >> 2) & 0x01;
-					state->m_dispflag = (~data >> 3) & 0x01;
+		case 0x06:  m_blitter_direction_x = (data >> 0) & 0x01;
+					m_blitter_direction_y = (data >> 1) & 0x01;
+					m_flipscreen = (~data >> 2) & 0x01;
+					m_dispflag = (~data >> 3) & 0x01;
 					break;
-		case 0x07:	break;
+		case 0x07:  break;
 	}
 }
 
 
-WRITE8_HANDLER( hyhoo_romsel_w )
+WRITE8_MEMBER(hyhoo_state::hyhoo_romsel_w)
 {
-	hyhoo_state *state = space->machine().driver_data<hyhoo_state>();
-	int gfxlen = space->machine().region("gfx1")->bytes();
-	state->m_gfxrom = (((data & 0xc0) >> 4) + (data & 0x03));
-	state->m_highcolorflag = data;
+	int gfxlen = memregion("gfx1")->bytes();
+	m_gfxrom = (((data & 0xc0) >> 4) + (data & 0x03));
+	m_highcolorflag = data;
 	nb1413m3_gfxrombank_w(space, 0, data);
 
-	if ((0x20000 * state->m_gfxrom) > (gfxlen - 1))
+	if ((0x20000 * m_gfxrom) > (gfxlen - 1))
 	{
 #ifdef MAME_DEBUG
 		popmessage("GFXROM BANK OVER!!");
 #endif
-		state->m_gfxrom &= (gfxlen / 0x20000 - 1);
+		m_gfxrom &= (gfxlen / 0x20000 - 1);
 	}
 }
 
 
-static TIMER_CALLBACK( blitter_timer_callback )
+TIMER_CALLBACK_MEMBER(hyhoo_state::blitter_timer_callback)
 {
 	nb1413m3_busyflag = 1;
 }
@@ -66,7 +64,7 @@ static TIMER_CALLBACK( blitter_timer_callback )
 static void hyhoo_gfxdraw(running_machine &machine)
 {
 	hyhoo_state *state = machine.driver_data<hyhoo_state>();
-	UINT8 *GFX = machine.region("gfx1")->base();
+	UINT8 *GFX = state->memregion("gfx1")->base();
 
 	int x, y;
 	int dx1, dx2, dy;
@@ -108,7 +106,7 @@ static void hyhoo_gfxdraw(running_machine &machine)
 		skipy = -1;
 	}
 
-	gfxlen = machine.region("gfx1")->bytes();
+	gfxlen = machine.root_device().memregion("gfx1")->bytes();
 	gfxaddr = (state->m_gfxrom << 17) + (state->m_blitter_src_addr << 1);
 
 	for (y = starty, ctry = sizey; ctry >= 0; y += skipy, ctry--)
@@ -148,8 +146,8 @@ static void hyhoo_gfxdraw(running_machine &machine)
 
 						pen = MAKE_RGB(pal6bit(r), pal5bit(g), pal5bit(b));
 
-						*BITMAP_ADDR32(state->m_tmpbitmap, dy, dx1) = *BITMAP_ADDR32(state->m_tmpbitmap, dy, dx1) | pen;
-						*BITMAP_ADDR32(state->m_tmpbitmap, dy, dx2) = *BITMAP_ADDR32(state->m_tmpbitmap, dy, dx2) | pen;
+						state->m_tmpbitmap.pix32(dy, dx1) = state->m_tmpbitmap.pix32(dy, dx1) | pen;
+						state->m_tmpbitmap.pix32(dy, dx2) = state->m_tmpbitmap.pix32(dy, dx2) | pen;
 					}
 					else
 					{
@@ -164,8 +162,8 @@ static void hyhoo_gfxdraw(running_machine &machine)
 
 						pen = MAKE_RGB(pal6bit(r << 3), pal5bit(g << 2), pal5bit(b << 3));
 
-						*BITMAP_ADDR32(state->m_tmpbitmap, dy, dx1) = pen;
-						*BITMAP_ADDR32(state->m_tmpbitmap, dy, dx2) = pen;
+						state->m_tmpbitmap.pix32(dy, dx1) = pen;
+						state->m_tmpbitmap.pix32(dy, dx2) = pen;
 					}
 				}
 			}
@@ -197,7 +195,7 @@ static void hyhoo_gfxdraw(running_machine &machine)
 
 					pen = MAKE_RGB(pal6bit(r << 3), pal5bit(g << 2), pal5bit(b << 3));
 
-					*BITMAP_ADDR32(state->m_tmpbitmap, dy, dx1) = pen;
+					state->m_tmpbitmap.pix32(dy, dx1) = pen;
 				}
 
 				if (state->m_clut[color2])
@@ -211,7 +209,7 @@ static void hyhoo_gfxdraw(running_machine &machine)
 
 					pen = MAKE_RGB(pal6bit(r << 3), pal5bit(g << 2), pal5bit(b << 3));
 
-					*BITMAP_ADDR32(state->m_tmpbitmap, dy, dx2) = pen;
+					state->m_tmpbitmap.pix32(dy, dx2) = pen;
 				}
 			}
 
@@ -220,24 +218,22 @@ static void hyhoo_gfxdraw(running_machine &machine)
 	}
 
 	nb1413m3_busyflag = 0;
-	machine.scheduler().timer_set(attotime::from_hz(400000) * nb1413m3_busyctr, FUNC(blitter_timer_callback));
+	machine.scheduler().timer_set(attotime::from_hz(400000) * nb1413m3_busyctr, timer_expired_delegate(FUNC(hyhoo_state::blitter_timer_callback),state));
 }
 
 
-VIDEO_START( hyhoo )
+void hyhoo_state::video_start()
 {
-	hyhoo_state *state = machine.driver_data<hyhoo_state>();
-	state->m_tmpbitmap = machine.primary_screen->alloc_compatible_bitmap();
+	machine().primary_screen->register_screen_bitmap(m_tmpbitmap);
 }
 
 
-SCREEN_UPDATE( hyhoo )
+UINT32 hyhoo_state::screen_update_hyhoo(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	hyhoo_state *state = screen->machine().driver_data<hyhoo_state>();
-	if (state->m_dispflag)
-		copybitmap(bitmap, state->m_tmpbitmap, state->m_flipscreen, state->m_flipscreen, 0, 0, cliprect);
+	if (m_dispflag)
+		copybitmap(bitmap, m_tmpbitmap, m_flipscreen, m_flipscreen, 0, 0, cliprect);
 	else
-		bitmap_fill(bitmap, cliprect, RGB_BLACK);
+		bitmap.fill(RGB_BLACK, cliprect);
 
 	return 0;
 }

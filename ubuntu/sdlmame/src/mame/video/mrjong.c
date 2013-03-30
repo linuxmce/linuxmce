@@ -16,12 +16,13 @@
 
 ***************************************************************************/
 
-PALETTE_INIT( mrjong )
+void mrjong_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 
 	/* allocate the colortable */
-	machine.colortable = colortable_alloc(machine, 0x10);
+	machine().colortable = colortable_alloc(machine(), 0x10);
 
 	/* create a lookup table for the palette */
 	for (i = 0; i < 0x10; i++)
@@ -47,7 +48,7 @@ PALETTE_INIT( mrjong )
 		bit2 = BIT(color_prom[i], 7);
 		b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 
-		colortable_palette_set_color(machine.colortable, i, MAKE_RGB(r, g, b));
+		colortable_palette_set_color(machine().colortable, i, MAKE_RGB(r, g, b));
 	}
 
 	/* color_prom now points to the beginning of the lookup table */
@@ -57,7 +58,7 @@ PALETTE_INIT( mrjong )
 	for (i = 0; i < 0x80; i++)
 	{
 		UINT8 ctabentry = color_prom[i] & 0x0f;
-		colortable_entry_set_value(machine.colortable, i, ctabentry);
+		colortable_entry_set_value(machine().colortable, i, ctabentry);
 	}
 }
 
@@ -68,49 +69,45 @@ PALETTE_INIT( mrjong )
 
 ***************************************************************************/
 
-WRITE8_HANDLER( mrjong_videoram_w )
+WRITE8_MEMBER(mrjong_state::mrjong_videoram_w)
 {
-	mrjong_state *state = space->machine().driver_data<mrjong_state>();
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_videoram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( mrjong_colorram_w )
+WRITE8_MEMBER(mrjong_state::mrjong_colorram_w)
 {
-	mrjong_state *state = space->machine().driver_data<mrjong_state>();
-	state->m_colorram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_colorram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( mrjong_flipscreen_w )
+WRITE8_MEMBER(mrjong_state::mrjong_flipscreen_w)
 {
-	if (flip_screen_get(space->machine()) != BIT(data, 2))
+	if (flip_screen() != BIT(data, 2))
 	{
-		flip_screen_set(space->machine(), BIT(data, 2));
-		tilemap_mark_all_tiles_dirty_all(space->machine());
+		flip_screen_set(BIT(data, 2));
+		machine().tilemap().mark_all_dirty();
 	}
 }
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(mrjong_state::get_bg_tile_info)
 {
-	mrjong_state *state = machine.driver_data<mrjong_state>();
-	int code = state->m_videoram[tile_index] | ((state->m_colorram[tile_index] & 0x20) << 3);
-	int color = state->m_colorram[tile_index] & 0x1f;
-	int flags = ((state->m_colorram[tile_index] & 0x40) ? TILE_FLIPX : 0) | ((state->m_colorram[tile_index] & 0x80) ? TILE_FLIPY : 0);
+	int code = m_videoram[tile_index] | ((m_colorram[tile_index] & 0x20) << 3);
+	int color = m_colorram[tile_index] & 0x1f;
+	int flags = ((m_colorram[tile_index] & 0x40) ? TILE_FLIPX : 0) | ((m_colorram[tile_index] & 0x80) ? TILE_FLIPY : 0);
 
-	SET_TILE_INFO(0, code, color, flags);
+	SET_TILE_INFO_MEMBER(0, code, color, flags);
 }
 
-VIDEO_START( mrjong )
+void mrjong_state::video_start()
 {
-	mrjong_state *state = machine.driver_data<mrjong_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_rows_flip_xy, 8, 8, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(mrjong_state::get_bg_tile_info),this), TILEMAP_SCAN_ROWS_FLIP_XY, 8, 8, 32, 32);
 }
 
 /*
 Note: First 0x40 entries in the videoram are actually spriteram
 */
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	mrjong_state *state = machine.driver_data<mrjong_state>();
 	int offs;
@@ -129,7 +126,7 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 
 		sx = 224 - state->m_videoram[offs + 2];
 		sy = state->m_videoram[offs + 0];
-		if (flip_screen_get(machine))
+		if (state->flip_screen())
 		{
 			sx = 208 - sx;
 			sy = 240 - sy;
@@ -145,10 +142,9 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 	}
 }
 
-SCREEN_UPDATE( mrjong )
+UINT32 mrjong_state::screen_update_mrjong(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	mrjong_state *state = screen->machine().driver_data<mrjong_state>();
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
-	draw_sprites(screen->machine(), bitmap, cliprect);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
+	draw_sprites(machine(), bitmap, cliprect);
 	return 0;
 }

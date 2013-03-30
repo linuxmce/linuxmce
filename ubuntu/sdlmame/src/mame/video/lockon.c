@@ -9,10 +9,10 @@
 #include "cpu/nec/nec.h"
 #include "video/resnet.h"
 
-#define CURSOR_XPOS			168
-#define CURSOR_YPOS			239
-#define FRAMEBUFFER_MAX_X	431
-#define FRAMEBUFFER_MAX_Y	(UINT32)((FRAMEBUFFER_CLOCK / (float)(FRAMEBUFFER_MAX_X-1)) / ((float)PIXEL_CLOCK/(HTOTAL*VTOTAL)))
+#define CURSOR_XPOS         168
+#define CURSOR_YPOS         239
+#define FRAMEBUFFER_MAX_X   431
+#define FRAMEBUFFER_MAX_Y   (UINT32)((FRAMEBUFFER_CLOCK / (float)(FRAMEBUFFER_MAX_X-1)) / ((float)PIXEL_CLOCK/(HTOTAL*VTOTAL)))
 
 
 /*************************************
@@ -21,12 +21,12 @@
  *
  *************************************/
 
-READ16_HANDLER( lockon_crtc_r )
+READ16_MEMBER(lockon_state::lockon_crtc_r)
 {
 	return 0xffff;
 }
 
-WRITE16_HANDLER( lockon_crtc_w )
+WRITE16_MEMBER(lockon_state::lockon_crtc_w)
 {
 #if 0
 	data &= 0xff;
@@ -62,14 +62,13 @@ WRITE16_HANDLER( lockon_crtc_w )
 #endif
 }
 
-static TIMER_CALLBACK( cursor_callback )
+TIMER_CALLBACK_MEMBER(lockon_state::cursor_callback)
 {
-	lockon_state *state = machine.driver_data<lockon_state>();
 
-	if (state->m_main_inten)
-		device_set_input_line_and_vector(state->m_maincpu, 0, HOLD_LINE, 0xff);
+	if (m_main_inten)
+		m_maincpu->set_input_line_and_vector(0, HOLD_LINE, 0xff);
 
-	state->m_cursor_timer->adjust(machine.primary_screen->time_until_pos(CURSOR_YPOS, CURSOR_XPOS));
+	m_cursor_timer->adjust(machine().primary_screen->time_until_pos(CURSOR_YPOS, CURSOR_XPOS));
 }
 
 /*************************************
@@ -98,8 +97,9 @@ static const res_net_info lockon_pd_net_info =
 	}
 };
 
-PALETTE_INIT( lockon )
+void lockon_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 
 	for (i = 0; i < 1024; ++i)
@@ -121,7 +121,7 @@ PALETTE_INIT( lockon )
 			b = compute_res_net((p1 & 0x1f), 2, &lockon_pd_net_info);
 		}
 
-		palette_set_color(machine, i, MAKE_RGB(r, g, b));
+		palette_set_color(machine(), i, MAKE_RGB(r, g, b));
 	}
 }
 
@@ -132,21 +132,19 @@ PALETTE_INIT( lockon )
  *
  *************************************/
 
-WRITE16_HANDLER( lockon_char_w )
+WRITE16_MEMBER(lockon_state::lockon_char_w)
 {
-	lockon_state *state = space->machine().driver_data<lockon_state>();
-	state->m_char_ram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_tilemap, offset);
+	m_char_ram[offset] = data;
+	m_tilemap->mark_tile_dirty(offset);
 }
 
-static TILE_GET_INFO( get_lockon_tile_info )
+TILE_GET_INFO_MEMBER(lockon_state::get_lockon_tile_info)
 {
-	lockon_state *state = machine.driver_data<lockon_state>();
-	UINT32 tileno = state->m_char_ram[tile_index] & 0x03ff;
-	UINT32 col = (state->m_char_ram[tile_index] >> 10) & 0x3f;
+	UINT32 tileno = m_char_ram[tile_index] & 0x03ff;
+	UINT32 col = (m_char_ram[tile_index] >> 10) & 0x3f;
 
 	col = (col & 0x1f) + (col & 0x20 ? 64 : 0);
-	SET_TILE_INFO(0, tileno, col, 0);
+	SET_TILE_INFO_MEMBER(0, tileno, col, 0);
 }
 
 
@@ -156,16 +154,14 @@ static TILE_GET_INFO( get_lockon_tile_info )
 
 *******************************************************************************************/
 
-WRITE16_HANDLER( lockon_scene_h_scr_w )
+WRITE16_MEMBER(lockon_state::lockon_scene_h_scr_w)
 {
-	lockon_state *state = space->machine().driver_data<lockon_state>();
-	state->m_scroll_h = data & 0x1ff;
+	m_scroll_h = data & 0x1ff;
 }
 
-WRITE16_HANDLER( lockon_scene_v_scr_w )
+WRITE16_MEMBER(lockon_state::lockon_scene_v_scr_w)
 {
-	lockon_state *state = space->machine().driver_data<lockon_state>();
-	state->m_scroll_v = data & 0x81ff;
+	m_scroll_v = data & 0x81ff;
 }
 
 static void scene_draw( running_machine &machine )
@@ -174,7 +170,7 @@ static void scene_draw( running_machine &machine )
 	UINT32 y;
 
 	/* 3bpp characters */
-	const UINT8 *const gfx1 = machine.region("gfx2")->base();
+	const UINT8 *const gfx1 = state->memregion("gfx2")->base();
 	const UINT8 *const gfx2 = gfx1 + 0x10000;
 	const UINT8 *const gfx3 = gfx1 + 0x20000;
 	const UINT8 *const clut = gfx1 + 0x30000;
@@ -213,7 +209,7 @@ static void scene_draw( running_machine &machine )
 			d2 = *(gfx3 + tileidx);
 		}
 
-		bmpaddr = BITMAP_ADDR16(state->m_back_buffer, y, 0);
+		bmpaddr = &state->m_back_buffer->pix16(y);
 
 		for (x = 0; x < FRAMEBUFFER_MAX_X; ++x)
 		{
@@ -235,9 +231,9 @@ static void scene_draw( running_machine &machine )
 			}
 
 			col = colour
-				 | (((d2 >> x_gran) & 1) << 2)
-				 | (((d1 >> x_gran) & 1) << 1)
-				 | ( (d0 >> x_gran) & 1);
+					| (((d2 >> x_gran) & 1) << 2)
+					| (((d1 >> x_gran) & 1) << 1)
+					| ( (d0 >> x_gran) & 1);
 
 			*bmpaddr++ = 0xa00 + col;
 
@@ -279,17 +275,15 @@ static void scene_draw( running_machine &machine )
 
  *******************************************************************************************/
 
-WRITE16_HANDLER( lockon_ground_ctrl_w )
+WRITE16_MEMBER(lockon_state::lockon_ground_ctrl_w)
 {
-	lockon_state *state = space->machine().driver_data<lockon_state>();
-	state->m_ground_ctrl = data & 0xff;
+	m_ground_ctrl = data & 0xff;
 }
 
-static TIMER_CALLBACK( bufend_callback )
+TIMER_CALLBACK_MEMBER(lockon_state::bufend_callback)
 {
-	lockon_state *state = machine.driver_data<lockon_state>();
-	device_set_input_line_and_vector(state->m_ground, 0, HOLD_LINE, 0xff);
-	device_set_input_line(state->m_object, NEC_INPUT_LINE_POLL, ASSERT_LINE);
+	m_ground->execute().set_input_line_and_vector(0, HOLD_LINE, 0xff);
+	m_object->execute().set_input_line(NEC_INPUT_LINE_POLL, ASSERT_LINE);
 }
 
 /* Get data for a each 8x8x3 ground tile */
@@ -311,11 +305,11 @@ static void ground_draw( running_machine &machine )
 	lockon_state *state = machine.driver_data<lockon_state>();
 
 	/* ROM pointers */
-	const UINT8 *const gfx_rom  = machine.region("gfx4")->base();
+	const UINT8 *const gfx_rom  = state->memregion("gfx4")->base();
 	const UINT8 *const lut_rom  = gfx_rom + 0x30000 + ((state->m_ground_ctrl >> 2) & 0x3 ? 0x10000 : 0);
 	const UINT8 *const clut_rom = gfx_rom + 0x50000;
 
-	UINT32 lut_a15_14	= (state->m_ground_ctrl & 0x3) << 14;
+	UINT32 lut_a15_14   = (state->m_ground_ctrl & 0x3) << 14;
 	UINT32 clut_a14_12 = (state->m_ground_ctrl & 0x70) << 8;
 	UINT32 gfx_a15 = (state->m_ground_ctrl & 0x40) << 9;
 	UINT32 offs = 3;
@@ -324,7 +318,7 @@ static void ground_draw( running_machine &machine )
 	/* TODO: Clean up and emulate CS of GFX ROMs? */
 	for (y = 0; y < FRAMEBUFFER_MAX_Y; ++y)
 	{
-		UINT16 *bmpaddr = BITMAP_ADDR16(state->m_back_buffer, y, 0);
+		UINT16 *bmpaddr = &state->m_back_buffer->pix16(y);
 		UINT8 ls163;
 		UINT32 clut_addr;
 		UINT32 gfx_addr;
@@ -340,8 +334,8 @@ static void ground_draw( running_machine &machine )
 			UINT32 gfx_a2_0  =  state->m_ground_ram[offs] & 0x0007;
 			UINT32 gfx_a6_5  = (state->m_ground_ram[offs] & 0x0018) << 2;
 			UINT32 clut_a4_3 = (state->m_ground_ram[offs] & 0x0018) >> 1;
-			UINT8	tz2213_x  = state->m_ground_ram[offs + 1] & 0xff;
-			UINT8	tz2213_dx = state->m_ground_ram[offs + 2] & 0xff;
+			UINT8   tz2213_x  = state->m_ground_ram[offs + 1] & 0xff;
+			UINT8   tz2213_dx = state->m_ground_ram[offs + 2] & 0xff;
 
 			UINT32 lut_address = lut_a15_14 + ((state->m_ground_ram[offs] & 0x7fe0) >> 1);
 			UINT32 cy = state->m_ground_ram[offs + 2] & 0x0100;
@@ -422,13 +416,13 @@ static void ground_draw( running_machine &machine )
 */
 #define DRAW_OBJ_PIXEL(COLOR)                            \
 do {                                                     \
-	if (px < FRAMEBUFFER_MAX_X)							 \
+	if (px < FRAMEBUFFER_MAX_X)                          \
 	if (COLOR != 0xf)                                    \
 	{                                                    \
 		UINT8 clr = state->m_obj_pal_ram[(pal << 4) + COLOR];     \
-		UINT16 *pix = (line + px);						 \
+		UINT16 *pix = (line + px);                       \
 		if (!(clr == 0xff && ((*pix & 0xe00) == 0xa00))) \
-			*pix = 0x400 + clr;			 \
+			*pix = 0x400 + clr;          \
 	}                                                    \
 	px = (px + 1) & 0x7ff;                               \
 } while(0)
@@ -438,12 +432,12 @@ static void objects_draw( running_machine &machine )
 	UINT32 offs;
 	lockon_state *state = machine.driver_data<lockon_state>();
 
-	const UINT8  *const romlut = machine.region("user1")->base();
-	const UINT16 *const chklut = (UINT16*)machine.region("user2")->base();
-	const UINT8  *const gfxrom = machine.region("gfx5")->base();
-	const UINT8  *const sproms = machine.region("proms")->base() + 0x800;
+	const UINT8  *const romlut = state->memregion("user1")->base();
+	const UINT16 *const chklut = (UINT16*)state->memregion("user2")->base();
+	const UINT8  *const gfxrom = state->memregion("gfx5")->base();
+	const UINT8  *const sproms = state->memregion("proms")->base() + 0x800;
 
-	for (offs = 0; offs < state->m_objectram_size; offs += 4)
+	for (offs = 0; offs < state->m_object_ram.bytes(); offs += 4)
 	{
 		UINT32 y;
 		UINT32 xpos;
@@ -459,15 +453,15 @@ static void objects_draw( running_machine &machine )
 		UINT32 opsta15_8;
 
 		/* Retrieve the object attributes */
-		ypos	= state->m_object_ram[offs] & 0x03ff;
-		xpos	= state->m_object_ram[offs + 3] & 0x07ff;
-		ysize	= (state->m_object_ram[offs] >> 10) & 0x3;
-		xsize	= (state->m_object_ram[offs] >> 12) & 0x3;
-		yflip	= BIT(state->m_object_ram[offs], 14);
-		xflip	= BIT(state->m_object_ram[offs], 15);
-		scale	= state->m_object_ram[offs + 1] & 0xff;
+		ypos    = state->m_object_ram[offs] & 0x03ff;
+		xpos    = state->m_object_ram[offs + 3] & 0x07ff;
+		ysize   = (state->m_object_ram[offs] >> 10) & 0x3;
+		xsize   = (state->m_object_ram[offs] >> 12) & 0x3;
+		yflip   = BIT(state->m_object_ram[offs], 14);
+		xflip   = BIT(state->m_object_ram[offs], 15);
+		scale   = state->m_object_ram[offs + 1] & 0xff;
 		pal = (state->m_object_ram[offs + 1] >> 8) & 0x7f;
-		opsta	= state->m_object_ram[offs + 2];
+		opsta   = state->m_object_ram[offs + 2];
 
 		if (state->m_iden)
 		{
@@ -489,9 +483,9 @@ static void objects_draw( running_machine &machine )
 			UINT32 optab;
 			UINT32 lutaddr;
 			UINT32 tile;
-			UINT8	cnt;
+			UINT8   cnt;
 			UINT32 yidx;
-			UINT16 *line = BITMAP_ADDR16(state->m_back_buffer, y, 0);
+			UINT16 *line = &state->m_back_buffer->pix16(y);
 			UINT32 px = xpos;
 
 			/* Outside the limits? */
@@ -608,30 +602,27 @@ static void objects_draw( running_machine &machine )
 }
 
 /* The mechanism used by the object CPU to update the object ASICs palette RAM */
-WRITE16_HANDLER( lockon_tza112_w )
+WRITE16_MEMBER(lockon_state::lockon_tza112_w)
 {
-	lockon_state *state = space->machine().driver_data<lockon_state>();
 
-	if (state->m_iden)
+	if (m_iden)
 	{
-		state->m_obj_pal_latch = data & 0xff;
-		state->m_obj_pal_addr = offset & 0xf;
-		objects_draw(space->machine());
+		m_obj_pal_latch = data & 0xff;
+		m_obj_pal_addr = offset & 0xf;
+		objects_draw(machine());
 	}
 }
 
-READ16_HANDLER( lockon_obj_4000_r )
+READ16_MEMBER(lockon_state::lockon_obj_4000_r)
 {
-	lockon_state *state = space->machine().driver_data<lockon_state>();
 
-	device_set_input_line(state->m_object, NEC_INPUT_LINE_POLL, CLEAR_LINE);
+	m_object->execute().set_input_line(NEC_INPUT_LINE_POLL, CLEAR_LINE);
 	return 0xffff;
 }
 
-WRITE16_HANDLER( lockon_obj_4000_w )
+WRITE16_MEMBER(lockon_state::lockon_obj_4000_w)
 {
-	lockon_state *state = space->machine().driver_data<lockon_state>();
-	state->m_iden = data & 1;
+	m_iden = data & 1;
 }
 
 
@@ -657,30 +648,29 @@ WRITE16_HANDLER( lockon_obj_4000_w )
 
 *******************************************************************************************/
 
-WRITE16_HANDLER( lockon_fb_clut_w )
+WRITE16_MEMBER(lockon_state::lockon_fb_clut_w)
 {
 	rgb_t color;
 
-	color = palette_get_color(space->machine(), 0x300 + (data & 0xff));
-	palette_set_color(space->machine(), 0x400 + offset, color);
+	color = palette_get_color(machine(), 0x300 + (data & 0xff));
+	palette_set_color(machine(), 0x400 + offset, color);
 }
 
 /* Rotation control register */
-WRITE16_HANDLER( lockon_rotate_w )
+WRITE16_MEMBER(lockon_state::lockon_rotate_w)
 {
-	lockon_state *state = space->machine().driver_data<lockon_state>();
 
 	switch (offset & 7)
 	{
-		case 0: state->m_xsal  = data & 0x1ff;	break;
-		case 1: state->m_x0ll  = data & 0xff;	break;
-		case 2: state->m_dx0ll = data & 0x1ff;	break;
-		case 3: state->m_dxll  = data & 0x1ff;	break;
+		case 0: m_xsal  = data & 0x1ff; break;
+		case 1: m_x0ll  = data & 0xff;  break;
+		case 2: m_dx0ll = data & 0x1ff; break;
+		case 3: m_dxll  = data & 0x1ff; break;
 
-		case 4: state->m_ysal  = data & 0x1ff;	break;
-		case 5: state->m_y0ll  = data & 0xff;	break;
-		case 6: state->m_dy0ll =	data & 0x1ff;	break;
-		case 7: state->m_dyll  = data & 0x3ff;	break;
+		case 4: m_ysal  = data & 0x1ff; break;
+		case 5: m_y0ll  = data & 0xff;  break;
+		case 6: m_dy0ll =   data & 0x1ff;   break;
+		case 7: m_dyll  = data & 0x3ff; break;
 	}
 }
 
@@ -698,7 +688,7 @@ do {                                     \
 	if (carry) --CNT;                    \
 } while(0)
 
-static void rotate_draw( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void rotate_draw( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	lockon_state *state = machine.driver_data<lockon_state>();
 	UINT32 y;
@@ -722,10 +712,10 @@ static void rotate_draw( running_machine &machine, bitmap_t *bitmap, const recta
 	UINT32 axy_en  = !BIT(state->m_dx0ll, 8);
 	UINT32 ayy_en  = !BIT(state->m_dy0ll, 8);
 
-	for (y = 0; y <= cliprect->max_y; ++y)
+	for (y = 0; y <= cliprect.max_y; ++y)
 	{
 		UINT32 carry;
-		UINT16 *dst = BITMAP_ADDR16(bitmap, y, 0);
+		UINT16 *dst = &bitmap.pix16(y);
 		UINT32 x;
 
 		UINT32 cx = cxy;
@@ -734,12 +724,12 @@ static void rotate_draw( running_machine &machine, bitmap_t *bitmap, const recta
 		UINT8 axx = axy;
 		UINT8 ayx = ayy;
 
-		for (x = 0; x <= cliprect->max_x; ++x)
+		for (x = 0; x <= cliprect.max_x; ++x)
 		{
 			cx &= 0x1ff;
 			cy &= 0x1ff;
 
-			*dst++ = *BITMAP_ADDR16(state->m_front_buffer, cy, cx);
+			*dst++ = state->m_front_buffer->pix16(cy, cx);
 
 			if (axx_en)
 				INCREMENT(axx, cx);
@@ -803,13 +793,13 @@ static void rotate_draw( running_machine &machine, bitmap_t *bitmap, const recta
 
 *******************************************************************************************/
 
-static void hud_draw( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void hud_draw( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	lockon_state *state = machine.driver_data<lockon_state>();
-	UINT8	*tile_rom = machine.region("gfx3")->base();
+	UINT8   *tile_rom = state->memregion("gfx3")->base();
 	UINT32 offs;
 
-	for (offs = 0x0; offs <= state->m_hudram_size; offs += 2)
+	for (offs = 0x0; offs <= state->m_hud_ram.bytes(); offs += 2)
 	{
 		UINT32 y;
 		UINT32 y_pos;
@@ -825,10 +815,10 @@ static void hud_draw( running_machine &machine, bitmap_t *bitmap, const rectangl
 		if (state->m_hud_ram[offs + 1] & 0x8000)
 			break;
 
-		y_pos	= state->m_hud_ram[offs] & 0x1ff;
-		x_pos	= state->m_hud_ram[offs + 1] & 0x1ff;
+		y_pos   = state->m_hud_ram[offs] & 0x1ff;
+		x_pos   = state->m_hud_ram[offs + 1] & 0x1ff;
 		x_size = (state->m_hud_ram[offs + 1] >> 12) & 7;
-		code	= (state->m_hud_ram[offs] >> 9) & 0x7f;
+		code    = (state->m_hud_ram[offs] >> 9) & 0x7f;
 		colour = 0x200 + ((state->m_hud_ram[offs + 1] >> 9) & 7);
 		layout = (code >> 5) & 3;
 
@@ -844,7 +834,7 @@ static void hud_draw( running_machine &machine, bitmap_t *bitmap, const rectangl
 		else
 			y_size = 8;
 
-		for (y = cliprect->min_y; y <= cliprect->max_y; ++y)
+		for (y = cliprect.min_y; y <= cliprect.max_y; ++y)
 		{
 			UINT32 xt;
 			UINT32 cy;
@@ -861,7 +851,7 @@ static void hud_draw( running_machine &machine, bitmap_t *bitmap, const rectangl
 			{
 				UINT32 rom_a6_3;
 				UINT32 px;
-				UINT8	gfx_strip;
+				UINT8   gfx_strip;
 
 				if (layout == 3)
 					rom_a6_3 = (BIT(cy, 4) << 3) | (BIT(cy, 3) << 2) | (BIT(xt, 1) << 1) | BIT(xt, 0);
@@ -883,9 +873,9 @@ static void hud_draw( running_machine &machine, bitmap_t *bitmap, const rectangl
 				{
 					UINT32 x = x_pos + (xt << 3) + px;
 
-					if (x <= cliprect->max_x)
+					if (x <= cliprect.max_x)
 					{
-						UINT16 *dst = BITMAP_ADDR16(bitmap, y, x);
+						UINT16 *dst = &bitmap.pix16(y, x);
 
 						if (BIT(gfx_strip, px ^ 7) && *dst > 255)
 							*dst = colour;
@@ -903,66 +893,67 @@ static void hud_draw( running_machine &machine, bitmap_t *bitmap, const rectangl
  *
  *************************************/
 
-VIDEO_START( lockon )
+void lockon_state::video_start()
 {
-	lockon_state *state = machine.driver_data<lockon_state>();
 
-	state->m_tilemap = tilemap_create(machine, get_lockon_tile_info, tilemap_scan_rows, 8, 8, 64, 32);
-	tilemap_set_transparent_pen(state->m_tilemap, 0);
+	m_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(lockon_state::get_lockon_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 64, 32);
+	m_tilemap->set_transparent_pen(0);
 
 	/* Allocate the two frame buffers for rotation */
-	state->m_back_buffer = auto_bitmap_alloc(machine, 512, 512, BITMAP_FORMAT_INDEXED16);
-	state->m_front_buffer = auto_bitmap_alloc(machine, 512, 512, BITMAP_FORMAT_INDEXED16);
+	m_back_buffer = auto_bitmap_ind16_alloc(machine(), 512, 512);
+	m_front_buffer = auto_bitmap_ind16_alloc(machine(), 512, 512);
 
 	/* 2kB of object ASIC palette RAM */
-	state->m_obj_pal_ram = auto_alloc_array(machine, UINT8, 2048);
+	m_obj_pal_ram = auto_alloc_array(machine(), UINT8, 2048);
 
 	/* Timer for ground display list callback */
-	state->m_bufend_timer = machine.scheduler().timer_alloc(FUNC(bufend_callback));
+	m_bufend_timer = machine().scheduler().timer_alloc(timer_expired_delegate(FUNC(lockon_state::bufend_callback),this));
 
 	/* Timer for the CRTC cursor pulse */
-	state->m_cursor_timer = machine.scheduler().timer_alloc(FUNC(cursor_callback));
-	state->m_cursor_timer->adjust(machine.primary_screen->time_until_pos(CURSOR_YPOS, CURSOR_XPOS));
+	m_cursor_timer = machine().scheduler().timer_alloc(timer_expired_delegate(FUNC(lockon_state::cursor_callback),this));
+	m_cursor_timer->adjust(machine().primary_screen->time_until_pos(CURSOR_YPOS, CURSOR_XPOS));
 
-	state->save_item(NAME(*state->m_back_buffer));
-	state->save_item(NAME(*state->m_front_buffer));
-	state->save_pointer(NAME(state->m_obj_pal_ram), 2048);
+	save_item(NAME(*m_back_buffer));
+	save_item(NAME(*m_front_buffer));
+	save_pointer(NAME(m_obj_pal_ram), 2048);
 }
 
-SCREEN_UPDATE( lockon )
+UINT32 lockon_state::screen_update_lockon(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	lockon_state *state = screen->machine().driver_data<lockon_state>();
 
 	/* If screen output is disabled, fill with black */
-	if (!BIT(state->m_ctrl_reg, 7))
+	if (!BIT(m_ctrl_reg, 7))
 	{
-		bitmap_fill(bitmap, cliprect, get_black_pen(screen->machine()));
+		bitmap.fill(get_black_pen(machine()), cliprect);
 		return 0;
 	}
 
 	/* Scan out the frame buffer in rotated order */
-	rotate_draw(screen->machine(), bitmap, cliprect);
+	rotate_draw(machine(), bitmap, cliprect);
 
 	/* Draw the character tilemap */
-	tilemap_draw(bitmap, cliprect, state->m_tilemap, 0, 0);
+	m_tilemap->draw(bitmap, cliprect, 0, 0);
 
 	/* Draw the HUD */
-	hud_draw(screen->machine(), bitmap, cliprect);
+	hud_draw(machine(), bitmap, cliprect);
 
 	return 0;
 }
 
-SCREEN_EOF( lockon )
+void lockon_state::screen_eof_lockon(screen_device &screen, bool state)
 {
-	lockon_state *state = machine.driver_data<lockon_state>();
+	// on falling edge
+	if (!state)
+	{
 
-	/* Swap the frame buffers */
-	bitmap_t *tmp = state->m_front_buffer;
-	state->m_front_buffer = state->m_back_buffer;
-	state->m_back_buffer = tmp;
+		/* Swap the frame buffers */
+		bitmap_ind16 *tmp = m_front_buffer;
+		m_front_buffer = m_back_buffer;
+		m_back_buffer = tmp;
 
-	/* Draw the frame buffer layers */
-	scene_draw(machine);
-	ground_draw(machine);
-	objects_draw(machine);
+		/* Draw the frame buffer layers */
+		scene_draw(machine());
+		ground_draw(machine());
+		objects_draw(machine());
+	}
 }

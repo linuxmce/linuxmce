@@ -7,16 +7,19 @@
 class citycon_state : public driver_device
 {
 public:
-	citycon_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	citycon_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"),
+		m_linecolor(*this, "linecolor"),
+		m_spriteram(*this, "spriteram"),
+		m_scroll(*this, "scroll"){ }
 
 	/* memory pointers */
-	UINT8 *        m_videoram;
-	UINT8 *        m_linecolor;
-	UINT8 *        m_scroll;
-	UINT8 *        m_spriteram;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_linecolor;
+	required_shared_ptr<UINT8> m_spriteram;
+	required_shared_ptr<UINT8> m_scroll;
 //  UINT8 *        m_paletteram;  // currently this uses generic palette handling
-	size_t         m_spriteram_size;
 
 	/* video-related */
 	tilemap_t        *m_bg_tilemap;
@@ -24,15 +27,18 @@ public:
 	int            m_bg_image;
 
 	/* devices */
-	device_t *m_maincpu;
+	cpu_device *m_maincpu;
+	DECLARE_READ8_MEMBER(citycon_in_r);
+	DECLARE_READ8_MEMBER(citycon_irq_ack_r);
+	DECLARE_WRITE8_MEMBER(citycon_videoram_w);
+	DECLARE_WRITE8_MEMBER(citycon_linecolor_w);
+	DECLARE_WRITE8_MEMBER(citycon_background_w);
+	DECLARE_DRIVER_INIT(citycon);
+	TILEMAP_MAPPER_MEMBER(citycon_scan);
+	TILE_GET_INFO_MEMBER(get_fg_tile_info);
+	TILE_GET_INFO_MEMBER(get_bg_tile_info);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	UINT32 screen_update_citycon(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
-
-
-/*----------- defined in video/citycon.c -----------*/
-
-WRITE8_HANDLER( citycon_videoram_w );
-WRITE8_HANDLER( citycon_linecolor_w );
-WRITE8_HANDLER( citycon_background_w );
-
-SCREEN_UPDATE( citycon );
-VIDEO_START( citycon );

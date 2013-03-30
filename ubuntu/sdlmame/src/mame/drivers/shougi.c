@@ -90,14 +90,29 @@ PROM  : Type MB7051
 class shougi_state : public driver_device
 {
 public:
-	shougi_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	shougi_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"){ }
 
-	UINT8 *m_videoram;
+	required_shared_ptr<UINT8> m_videoram;
 	int m_nmi_enabled;
 	//UINT8 *m_cpu_sharedram;
 	//UINT8 m_cpu_sharedram_control_val;
 	int m_r;
+	DECLARE_WRITE8_MEMBER(cpu_sharedram_sub_w);
+	DECLARE_WRITE8_MEMBER(cpu_sharedram_main_w);
+	DECLARE_READ8_MEMBER(cpu_sharedram_r);
+	DECLARE_WRITE8_MEMBER(cpu_shared_ctrl_sub_w);
+	DECLARE_WRITE8_MEMBER(cpu_shared_ctrl_main_w);
+	DECLARE_WRITE8_MEMBER(shougi_watchdog_reset_w);
+	DECLARE_WRITE8_MEMBER(shougi_mcu_halt_off_w);
+	DECLARE_WRITE8_MEMBER(shougi_mcu_halt_on_w);
+	DECLARE_WRITE8_MEMBER(nmi_disable_and_clear_line_w);
+	DECLARE_WRITE8_MEMBER(nmi_enable_w);
+	DECLARE_READ8_MEMBER(dummy_r);
+	virtual void palette_init();
+	UINT32 screen_update_shougi(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(shougi_vblank_nmi);
 };
 
 
@@ -119,20 +134,21 @@ public:
 ***************************************************************************/
 
 
-static PALETTE_INIT( shougi )
+void shougi_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 	static const int resistances_b[2]  = { 470, 220 };
 	static const int resistances_rg[3] = { 1000, 470, 220 };
 	double weights_r[3], weights_g[3], weights_b[2];
 
 
-	compute_resistor_weights(0,	255,	-1.0,
-			3,	resistances_rg,	weights_r,	1000, 0,
-			3,	resistances_rg,	weights_g,	1000, 0,
-			2,	resistances_b,	weights_b,	1000, 0);
+	compute_resistor_weights(0, 255,    -1.0,
+			3,  resistances_rg, weights_r,  1000, 0,
+			3,  resistances_rg, weights_g,  1000, 0,
+			2,  resistances_b,  weights_b,  1000, 0);
 
-	for (i = 0;i < machine.total_colors();i++)
+	for (i = 0;i < machine().total_colors();i++)
 	{
 		int bit0,bit1,bit2,r,g,b;
 
@@ -153,36 +169,35 @@ static PALETTE_INIT( shougi )
 		bit1 = (color_prom[i] >> 7) & 0x01;
 		b = combine_2_weights(weights_b, bit0, bit1);
 
-		palette_set_color(machine,i,MAKE_RGB(r,g,b));
+		palette_set_color(machine(),i,MAKE_RGB(r,g,b));
 	}
 }
 
 
 
 
-static SCREEN_UPDATE( shougi )
+UINT32 shougi_state::screen_update_shougi(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	shougi_state *state = screen->machine().driver_data<shougi_state>();
 	int offs;
 
 	for (offs = 0;offs <0x4000; offs++)
 	{
 		int sx, sy, x, data1, data2, color, data;
 
-		sx = offs >> 8;		/*00..0x3f (64*4=256)*/
-		sy = offs & 0xff;	/*00..0xff*/
+		sx = offs >> 8;     /*00..0x3f (64*4=256)*/
+		sy = offs & 0xff;   /*00..0xff*/
 		//if (flipscreen[0]) sx = 31 - sx;
 		//if (flipscreen[1]) sy = 31 - sy;
 
-		data1 = state->m_videoram[offs];				/* color */
-		data2 = state->m_videoram[0x4000 + offs];	/* pixel data */
+		data1 = m_videoram[offs];               /* color */
+		data2 = m_videoram[0x4000 + offs];  /* pixel data */
 
 		for (x=0; x<4; x++) /*4 pixels per byte (2 bitplanes in 2 nibbles: 1st=bits 7-4, 2nd=bits 3-0)*/
 		{
 			color= ((data1>>x) & 1) | (((data1>>(4+x)) & 1)<<1);
 			data = ((data2>>x) & 1) | (((data2>>(4+x)) & 1)<<1);
 
-			*BITMAP_ADDR16(bitmap, 255-sy, 255-(sx*4 + x)) = color*4 + data;
+			bitmap.pix16(255-sy, 255-(sx*4 + x)) = color*4 + data;
 		}
 	}
 
@@ -194,89 +209,86 @@ static SCREEN_UPDATE( shougi )
 //to do:
 // add separate sharedram/r/w() for both CPUs and use control value to verify access
 
-static WRITE8_HANDLER ( cpu_sharedram_sub_w )
+WRITE8_MEMBER(shougi_state::cpu_sharedram_sub_w)
 {
 	if (cpu_sharedram_control_val!=0) logerror("sub CPU access to shared RAM when access set for main cpu\n");
 	cpu_sharedram[offset] = data;
 }
 
-static WRITE8_HANDLER ( cpu_sharedram_main_w )
+WRITE8_MEMBER(shougi_state::cpu_sharedram_main_w)
 {
 	if (cpu_sharedram_control_val!=1) logerror("main CPU access to shared RAM when access set for sub cpu\n");
 	cpu_sharedram[offset] = data;
 }
 
-static READ8_HANDLER ( cpu_sharedram_r )
+READ8_MEMBER(shougi_state::cpu_sharedram_r)
 {
 	return cpu_sharedram[offset];
 }
 
 #endif
 
-static WRITE8_HANDLER ( cpu_shared_ctrl_sub_w )
+WRITE8_MEMBER(shougi_state::cpu_shared_ctrl_sub_w)
 {
 	//cpu_sharedram_control_val = 0;
 	//logerror("cpu_sharedram_ctrl=SUB");
 }
 
-static WRITE8_HANDLER ( cpu_shared_ctrl_main_w )
+WRITE8_MEMBER(shougi_state::cpu_shared_ctrl_main_w)
 {
 	//cpu_sharedram_control_val = 1;
 	//logerror("cpu_sharedram_ctrl=MAIN");
 }
 
-static WRITE8_HANDLER( shougi_watchdog_reset_w )
+WRITE8_MEMBER(shougi_state::shougi_watchdog_reset_w)
 {
 	watchdog_reset_w(space,0,data);
 }
 
-static WRITE8_HANDLER( shougi_mcu_halt_off_w )
+WRITE8_MEMBER(shougi_state::shougi_mcu_halt_off_w)
 {
 	/* logerror("mcu HALT OFF"); */
-	cputag_set_input_line(space->machine(), "mcu", INPUT_LINE_HALT, CLEAR_LINE);
+	machine().device("mcu")->execute().set_input_line(INPUT_LINE_HALT, CLEAR_LINE);
 }
 
-static WRITE8_HANDLER( shougi_mcu_halt_on_w )
+WRITE8_MEMBER(shougi_state::shougi_mcu_halt_on_w)
 {
 	/* logerror("mcu HALT ON"); */
-	cputag_set_input_line(space->machine(), "mcu", INPUT_LINE_HALT,ASSERT_LINE);
+	machine().device("mcu")->execute().set_input_line(INPUT_LINE_HALT,ASSERT_LINE);
 }
 
 
-static WRITE8_HANDLER( nmi_disable_and_clear_line_w )
+WRITE8_MEMBER(shougi_state::nmi_disable_and_clear_line_w)
 {
-	shougi_state *state = space->machine().driver_data<shougi_state>();
 
-	state->m_nmi_enabled = 0; /* disable NMIs */
+	m_nmi_enabled = 0; /* disable NMIs */
 
 	/* NMI lines are tied together on both CPUs and connected to the LS74 /Q output */
-	cputag_set_input_line(space->machine(), "maincpu", INPUT_LINE_NMI, CLEAR_LINE);
-	cputag_set_input_line(space->machine(), "sub", INPUT_LINE_NMI, CLEAR_LINE);
+	machine().device("maincpu")->execute().set_input_line(INPUT_LINE_NMI, CLEAR_LINE);
+	machine().device("sub")->execute().set_input_line(INPUT_LINE_NMI, CLEAR_LINE);
 }
 
-static WRITE8_HANDLER( nmi_enable_w )
+WRITE8_MEMBER(shougi_state::nmi_enable_w)
 {
-	shougi_state *state = space->machine().driver_data<shougi_state>();
 
-	state->m_nmi_enabled = 1; /* enable NMIs */
+	m_nmi_enabled = 1; /* enable NMIs */
 }
 
-static INTERRUPT_GEN( shougi_vblank_nmi )
+INTERRUPT_GEN_MEMBER(shougi_state::shougi_vblank_nmi)
 {
-	shougi_state *state = device->machine().driver_data<shougi_state>();
 
-	if ( state->m_nmi_enabled == 1 )
+	if ( m_nmi_enabled == 1 )
 	{
 		/* NMI lines are tied together on both CPUs and connected to the LS74 /Q output */
-		cputag_set_input_line(device->machine(), "maincpu", INPUT_LINE_NMI, ASSERT_LINE);
-		cputag_set_input_line(device->machine(), "sub", INPUT_LINE_NMI, ASSERT_LINE);
+		machine().device("maincpu")->execute().set_input_line(INPUT_LINE_NMI, ASSERT_LINE);
+		machine().device("sub")->execute().set_input_line(INPUT_LINE_NMI, ASSERT_LINE);
 	}
 }
 
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, shougi_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
-	AM_RANGE(0x4000, 0x43ff) AM_RAM		/* 2114 x 2 (0x400 x 4bit each) */
+	AM_RANGE(0x4000, 0x43ff) AM_RAM     /* 2114 x 2 (0x400 x 4bit each) */
 
 	/* 4800-480f connected to the 74LS259, A3 is data line so 4800-4807 write 0, and 4808-480f write 1 */
 	AM_RANGE(0x4800, 0x4800) AM_READ_PORT("DSW") AM_WRITE(cpu_shared_ctrl_sub_w)
@@ -284,7 +296,7 @@ static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
 	AM_RANGE(0x4802, 0x4802) AM_NOP
 	AM_RANGE(0x4803, 0x4803) AM_NOP
 	AM_RANGE(0x4804, 0x4804) AM_WRITE(shougi_mcu_halt_off_w)
-	AM_RANGE(0x4807, 0x4807) AM_WRITENOP	//?????? connected to +5v via resistor
+	AM_RANGE(0x4807, 0x4807) AM_WRITENOP    //?????? connected to +5v via resistor
 	AM_RANGE(0x4808, 0x4808) AM_WRITE(cpu_shared_ctrl_main_w)
 	AM_RANGE(0x4809, 0x4809) AM_WRITE(nmi_enable_w)
 	AM_RANGE(0x480a, 0x480a) AM_NOP
@@ -293,38 +305,37 @@ static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
 	AM_RANGE(0x480f, 0x480f) AM_NOP
 
 	AM_RANGE(0x5000, 0x5000) AM_READ_PORT("P1")
-	AM_RANGE(0x5800, 0x5800) AM_READ_PORT("P2") AM_WRITE(shougi_watchdog_reset_w)	/* game won't boot if watchdog doesn't work */
-	AM_RANGE(0x6000, 0x6000) AM_DEVWRITE("aysnd", ay8910_address_w)
-	AM_RANGE(0x6800, 0x6800) AM_DEVWRITE("aysnd", ay8910_data_w)
+	AM_RANGE(0x5800, 0x5800) AM_READ_PORT("P2") AM_WRITE(shougi_watchdog_reset_w)   /* game won't boot if watchdog doesn't work */
+	AM_RANGE(0x6000, 0x6000) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_w)
+	AM_RANGE(0x6800, 0x6800) AM_DEVWRITE_LEGACY("aysnd", ay8910_data_w)
 	AM_RANGE(0x7000, 0x73ff) AM_RAM AM_SHARE("share1") /* 2114 x 2 (0x400 x 4bit each) */
 	AM_RANGE(0x7800, 0x7bff) AM_RAM AM_SHARE("share2") /* 2114 x 2 (0x400 x 4bit each) */
 
-	AM_RANGE(0x8000, 0xffff) AM_RAM AM_BASE_MEMBER(shougi_state,m_videoram)	/* 4116 x 16 (32K) */
+	AM_RANGE(0x8000, 0xffff) AM_RAM AM_SHARE("videoram")    /* 4116 x 16 (32K) */
 ADDRESS_MAP_END
 
 /* sub */
-static READ8_HANDLER ( dummy_r )
+READ8_MEMBER(shougi_state::dummy_r)
 {
-	shougi_state *state = space->machine().driver_data<shougi_state>();
-	state->m_r ^= 1;
+	m_r ^= 1;
 
-	if(state->m_r)
+	if(m_r)
 		return 0xff;
 	else
 		return 0;
 }
 
-static ADDRESS_MAP_START( readport_sub, AS_IO, 8 )
+static ADDRESS_MAP_START( readport_sub, AS_IO, 8, shougi_state )
 	ADDRESS_MAP_GLOBAL_MASK( 0x00ff )
 	AM_RANGE(0x00, 0x00) AM_READ(dummy_r)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sub_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sub_map, AS_PROGRAM, 8, shougi_state )
 	AM_RANGE(0x0000, 0x5fff) AM_ROM
 	AM_RANGE(0x6000, 0x63ff) AM_RAM AM_SHARE("share2") /* 2114 x 2 (0x400 x 4bit each) */
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( mcu_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( mcu_map, AS_PROGRAM, 8, shougi_state )
 	AM_RANGE(0x0000, 0x03ff) AM_RAM AM_SHARE("share1")
 ADDRESS_MAP_END
 
@@ -394,7 +405,7 @@ static MACHINE_CONFIG_START( shougi, shougi_state )
 
 	MCFG_CPU_ADD("maincpu", Z80,10000000/4)
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT("screen", shougi_vblank_nmi)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", shougi_state,  shougi_vblank_nmi)
 
 	MCFG_CPU_ADD("sub", Z80,10000000/4)
 	MCFG_CPU_PROGRAM_MAP(sub_map)
@@ -406,20 +417,18 @@ static MACHINE_CONFIG_START( shougi, shougi_state )
 	MCFG_CPU_PROGRAM_MAP(mcu_map)
 
 	MCFG_QUANTUM_TIME(attotime::from_hz(600))
-	MCFG_WATCHDOG_VBLANK_INIT(16)	// assuming it's the same as champbas
+	MCFG_WATCHDOG_VBLANK_INIT(16)   // assuming it's the same as champbas
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(256, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 255, 0, 255)
-	MCFG_SCREEN_UPDATE(shougi)
+	MCFG_SCREEN_UPDATE_DRIVER(shougi_state, screen_update_shougi)
 
 	MCFG_PALETTE_LENGTH(32)
 
-	MCFG_PALETTE_INIT(shougi)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -476,5 +485,5 @@ ROM_END
 
 
 
-GAME( 1982, shougi,  0,      shougi, shougi,  0, ROT0, "Alpha Denshi Co.", "Shougi", 0 )
-GAME( 1982, shougi2, shougi, shougi, shougi2, 0, ROT0, "Alpha Denshi Co.", "Shougi 2", 0 )
+GAME( 1982, shougi,  0,      shougi, shougi, driver_device,  0, ROT0, "Alpha Denshi Co.", "Shougi", 0 )
+GAME( 1982, shougi2, shougi, shougi, shougi2, driver_device, 0, ROT0, "Alpha Denshi Co.", "Shougi 2", 0 )

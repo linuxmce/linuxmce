@@ -7,12 +7,11 @@
 
 ***************************************************************************/
 
-static TILE_GET_INFO( get_tile_info )
+TILE_GET_INFO_MEMBER(ohmygod_state::get_tile_info)
 {
-	ohmygod_state *state = machine.driver_data<ohmygod_state>();
-	UINT16 code = state->m_videoram[2 * tile_index + 1];
-	UINT16 attr = state->m_videoram[2 * tile_index];
-	SET_TILE_INFO(
+	UINT16 code = m_videoram[2 * tile_index + 1];
+	UINT16 attr = m_videoram[2 * tile_index];
+	SET_TILE_INFO_MEMBER(
 			0,
 			code,
 			(attr & 0x0f00) >> 8,
@@ -27,10 +26,9 @@ static TILE_GET_INFO( get_tile_info )
 
 ***************************************************************************/
 
-VIDEO_START( ohmygod )
+void ohmygod_state::video_start()
 {
-	ohmygod_state *state = machine.driver_data<ohmygod_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_tile_info, tilemap_scan_rows, 8, 8, 64, 64);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(ohmygod_state::get_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 64, 64);
 }
 
 
@@ -41,32 +39,28 @@ VIDEO_START( ohmygod )
 
 ***************************************************************************/
 
-WRITE16_HANDLER( ohmygod_videoram_w )
+WRITE16_MEMBER(ohmygod_state::ohmygod_videoram_w)
 {
-	ohmygod_state *state = space->machine().driver_data<ohmygod_state>();
-	COMBINE_DATA(&state->m_videoram[offset]);
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset / 2);
+	COMBINE_DATA(&m_videoram[offset]);
+	m_bg_tilemap->mark_tile_dirty(offset / 2);
 }
 
-WRITE16_HANDLER( ohmygod_spritebank_w )
+WRITE16_MEMBER(ohmygod_state::ohmygod_spritebank_w)
 {
-	ohmygod_state *state = space->machine().driver_data<ohmygod_state>();
 	if (ACCESSING_BITS_8_15)
-		state->m_spritebank = data & 0x8000;
+		m_spritebank = data & 0x8000;
 }
 
-WRITE16_HANDLER( ohmygod_scrollx_w )
+WRITE16_MEMBER(ohmygod_state::ohmygod_scrollx_w)
 {
-	ohmygod_state *state = space->machine().driver_data<ohmygod_state>();
-	COMBINE_DATA(&state->m_scrollx);
-	tilemap_set_scrollx(state->m_bg_tilemap, 0, state->m_scrollx - 0x81ec);
+	COMBINE_DATA(&m_scrollx);
+	m_bg_tilemap->set_scrollx(0, m_scrollx - 0x81ec);
 }
 
-WRITE16_HANDLER( ohmygod_scrolly_w )
+WRITE16_MEMBER(ohmygod_state::ohmygod_scrolly_w)
 {
-	ohmygod_state *state = space->machine().driver_data<ohmygod_state>();
-	COMBINE_DATA(&state->m_scrolly);
-	tilemap_set_scrolly(state->m_bg_tilemap, 0, state->m_scrolly - 0x81ef);
+	COMBINE_DATA(&m_scrolly);
+	m_bg_tilemap->set_scrolly(0, m_scrolly - 0x81ef);
 }
 
 
@@ -76,18 +70,18 @@ WRITE16_HANDLER( ohmygod_scrolly_w )
 
 ***************************************************************************/
 
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	ohmygod_state *state = machine.driver_data<ohmygod_state>();
 	UINT16 *spriteram = state->m_spriteram;
 	int offs;
 
-	for (offs = 0; offs < state->m_spriteram_size / 4; offs += 4)
+	for (offs = 0; offs < state->m_spriteram.bytes() / 4; offs += 4)
 	{
 		int sx, sy, code, color, flipx;
 		UINT16 *sr;
 
-		sr = state->m_spritebank ? (spriteram + state->m_spriteram_size / 4) : spriteram;
+		sr = state->m_spritebank ? (spriteram + state->m_spriteram.bytes() / 4) : spriteram;
 
 		code = sr[offs + 3] & 0x0fff;
 		color = sr[offs + 2] & 0x000f;
@@ -105,11 +99,10 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 	}
 }
 
-SCREEN_UPDATE( ohmygod )
+UINT32 ohmygod_state::screen_update_ohmygod(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	ohmygod_state *state = screen->machine().driver_data<ohmygod_state>();
 
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
-	draw_sprites(screen->machine(), bitmap, cliprect);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
+	draw_sprites(machine(), bitmap, cliprect);
 	return 0;
 }

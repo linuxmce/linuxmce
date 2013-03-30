@@ -107,19 +107,28 @@
 class jrpacman_state : public pacman_state
 {
 public:
-	jrpacman_state(running_machine &machine, const driver_device_config_base &config)
-		: pacman_state(machine, config) { }
+	jrpacman_state(const machine_config &mconfig, device_type type, const char *tag)
+		: pacman_state(mconfig, type, tag) { }
+	DECLARE_WRITE8_MEMBER(jrpacman_interrupt_vector_w);
+	DECLARE_WRITE8_MEMBER(irq_mask_w);
+	DECLARE_DRIVER_INIT(jrpacman);
+	INTERRUPT_GEN_MEMBER(vblank_irq);
 };
 
 
 
-static WRITE8_HANDLER( jrpacman_interrupt_vector_w )
+WRITE8_MEMBER(jrpacman_state::jrpacman_interrupt_vector_w)
 {
-	device_set_input_line_vector(space->machine().device("maincpu"), 0, data);
-	cputag_set_input_line(space->machine(), "maincpu", 0, CLEAR_LINE);
+	machine().device("maincpu")->execute().set_input_line_vector(0, data);
+	machine().device("maincpu")->execute().set_input_line(0, CLEAR_LINE);
 }
 
+WRITE8_MEMBER(jrpacman_state::irq_mask_w)
+{
 
+
+	m_irq_mask = data & 1;
+}
 
 /*************************************
  *
@@ -127,18 +136,18 @@ static WRITE8_HANDLER( jrpacman_interrupt_vector_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, jrpacman_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
-	AM_RANGE(0x4000, 0x47ff) AM_RAM_WRITE(jrpacman_videoram_w) AM_BASE_MEMBER(jrpacman_state, m_videoram)
+	AM_RANGE(0x4000, 0x47ff) AM_RAM_WRITE(jrpacman_videoram_w) AM_SHARE("videoram")
 	AM_RANGE(0x4800, 0x4fef) AM_RAM
-	AM_RANGE(0x4ff0, 0x4fff) AM_RAM AM_BASE_SIZE_GENERIC(spriteram)
+	AM_RANGE(0x4ff0, 0x4fff) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0x5000, 0x503f) AM_READ_PORT("P1")
-	AM_RANGE(0x5000, 0x5000) AM_WRITE(interrupt_enable_w)
-	AM_RANGE(0x5001, 0x5001) AM_DEVWRITE("namco", pacman_sound_enable_w)
+	AM_RANGE(0x5000, 0x5000) AM_WRITE(irq_mask_w)
+	AM_RANGE(0x5001, 0x5001) AM_DEVWRITE_LEGACY("namco", pacman_sound_enable_w)
 	AM_RANGE(0x5003, 0x5003) AM_WRITE(pacman_flipscreen_w)
 	AM_RANGE(0x5040, 0x507f) AM_READ_PORT("P2")
-	AM_RANGE(0x5040, 0x505f) AM_DEVWRITE("namco", pacman_sound_w)
-	AM_RANGE(0x5060, 0x506f) AM_WRITEONLY AM_BASE_GENERIC(spriteram2)
+	AM_RANGE(0x5040, 0x505f) AM_DEVWRITE_LEGACY("namco", pacman_sound_w)
+	AM_RANGE(0x5060, 0x506f) AM_WRITEONLY AM_SHARE("spriteram2")
 	AM_RANGE(0x5070, 0x5070) AM_WRITE(pengo_palettebank_w)
 	AM_RANGE(0x5071, 0x5071) AM_WRITE(pengo_colortablebank_w)
 	AM_RANGE(0x5073, 0x5073) AM_WRITE(jrpacman_bgpriority_w)
@@ -151,7 +160,7 @@ static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( port_map, AS_IO, 8 )
+static ADDRESS_MAP_START( port_map, AS_IO, 8, jrpacman_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0, 0) AM_WRITE(jrpacman_interrupt_vector_w)
 ADDRESS_MAP_END
@@ -190,25 +199,25 @@ static INPUT_PORTS_START( jrpacman )
 	PORT_DIPSETTING(    0x00, DEF_STR( Cocktail ) )
 
 	PORT_START("DSW")
-	PORT_DIPNAME( 0x03, 0x01, DEF_STR( Coinage ) )			PORT_DIPLOCATION("SW1:1,2")
+	PORT_DIPNAME( 0x03, 0x01, DEF_STR( Coinage ) )          PORT_DIPLOCATION("SW1:1,2")
 	PORT_DIPSETTING(    0x03, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
-	PORT_DIPNAME( 0x0c, 0x08, DEF_STR( Lives ) )			PORT_DIPLOCATION("SW1:3,4")
+	PORT_DIPNAME( 0x0c, 0x08, DEF_STR( Lives ) )            PORT_DIPLOCATION("SW1:3,4")
 	PORT_DIPSETTING(    0x00, "1" )
 	PORT_DIPSETTING(    0x04, "2" )
 	PORT_DIPSETTING(    0x08, "3" )
 	PORT_DIPSETTING(    0x0c, "5" )
-	PORT_DIPNAME( 0x30, 0x00, DEF_STR( Bonus_Life ) )		PORT_DIPLOCATION("SW1:5,6")
+	PORT_DIPNAME( 0x30, 0x00, DEF_STR( Bonus_Life ) )       PORT_DIPLOCATION("SW1:5,6")
 	PORT_DIPSETTING(    0x00, "10000" )
 	PORT_DIPSETTING(    0x10, "15000" )
 	PORT_DIPSETTING(    0x20, "20000" )
 	PORT_DIPSETTING(    0x30, "30000" )
-	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Difficulty ) )		PORT_DIPLOCATION("SW1:7")
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Difficulty ) )       PORT_DIPLOCATION("SW1:7")
 	PORT_DIPSETTING(    0x40, DEF_STR( Normal ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Hard ) )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )			PORT_DIPLOCATION("SW1:8")
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )          PORT_DIPLOCATION("SW1:8")
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 INPUT_PORTS_END
@@ -260,8 +269,8 @@ GFXDECODE_END
 
 static const namco_interface namco_config =
 {
-	3,			/* number of voices */
-	0			/* stereo */
+	3,          /* number of voices */
+	0           /* stereo */
 };
 
 
@@ -272,28 +281,34 @@ static const namco_interface namco_config =
  *
  *************************************/
 
+INTERRUPT_GEN_MEMBER(jrpacman_state::vblank_irq)
+{
+
+	if(m_irq_mask)
+		device.execute().set_input_line(0, HOLD_LINE);
+}
+
 static MACHINE_CONFIG_START( jrpacman, jrpacman_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, 18432000/6)	/* 3.072 MHz */
+	MCFG_CPU_ADD("maincpu", Z80, 18432000/6)    /* 3.072 MHz */
 	MCFG_CPU_PROGRAM_MAP(main_map)
 	MCFG_CPU_IO_MAP(port_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", jrpacman_state,  vblank_irq)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60.606060)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(36*8, 28*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 36*8-1, 0*8, 28*8-1)
-	MCFG_SCREEN_UPDATE(pacman)
+	MCFG_SCREEN_UPDATE_DRIVER(jrpacman_state, screen_update_pacman)
 
 	MCFG_GFXDECODE(jrpacman)
 	MCFG_PALETTE_LENGTH(128*4)
 
-	MCFG_PALETTE_INIT(pacman)
-	MCFG_VIDEO_START(jrpacman)
+	MCFG_PALETTE_INIT_OVERRIDE(jrpacman_state,pacman)
+	MCFG_VIDEO_START_OVERRIDE(jrpacman_state,jrpacman)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -313,24 +328,46 @@ MACHINE_CONFIG_END
 
 ROM_START( jrpacman )
 	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD( "jrp8d.bin",             0x0000, 0x2000, CRC(e3fa972e) SHA1(5ea34621213c649ca2848ab31aab2cbe751723d4) )
-	ROM_LOAD( "jrp8e.bin",             0x2000, 0x2000, CRC(ec889e94) SHA1(8294e9e79f8fd19a419431fa690e6ac4a1302f58) )
-	ROM_LOAD( "jrp8h.bin",             0x8000, 0x2000, CRC(35f1fc6e) SHA1(b84b34560b9aae18b24274712b052283faa01730) )
-	ROM_LOAD( "jrp8j.bin",             0xa000, 0x2000, CRC(9737099e) SHA1(07d912a61824323c8fc1b8bd0da89172d4f70b91) )
-	ROM_LOAD( "jrp8k.bin",             0xc000, 0x2000, CRC(5252dd97) SHA1(18bd4d5381656120e4242811006c20776774de4d) )
+	ROM_LOAD( "jrp8d.8d",                    0x0000, 0x2000, CRC(e3fa972e) SHA1(5ea34621213c649ca2848ab31aab2cbe751723d4) )
+	ROM_LOAD( "jrp8e.8e",                    0x2000, 0x2000, CRC(ec889e94) SHA1(8294e9e79f8fd19a419431fa690e6ac4a1302f58) )
+	ROM_LOAD( "jrp8h.8h",                    0x8000, 0x2000, CRC(35f1fc6e) SHA1(b84b34560b9aae18b24274712b052283faa01730) )
+	ROM_LOAD( "jrp8j.8j",                    0xa000, 0x2000, CRC(9737099e) SHA1(07d912a61824323c8fc1b8bd0da89172d4f70b91) )
+	ROM_LOAD( "jrp8k.8k",                    0xc000, 0x2000, CRC(5252dd97) SHA1(18bd4d5381656120e4242811006c20776774de4d) )
 
 	ROM_REGION( 0x4000, "gfx1", 0 )
-	ROM_LOAD( "jrp2c.bin",             0x0000, 0x2000, CRC(0527ff9b) SHA1(37fe3176b0d125b7d629e108e7ebdc1196e4a132) ) /* tiles (bank 1 & 2) */
-	ROM_LOAD( "jrp2e.bin",             0x2000, 0x2000, CRC(73477193) SHA1(f00a488958ea0438642d345693787bdf771219ad) ) /* sprites (bank 1 & 2) */
+	ROM_LOAD( "jrp2c.2c",                    0x0000, 0x2000, CRC(0527ff9b) SHA1(37fe3176b0d125b7d629e108e7ebdc1196e4a132) ) /* tiles (bank 1 & 2) */
+	ROM_LOAD( "jrp2e.2e",                    0x2000, 0x2000, CRC(73477193) SHA1(f00a488958ea0438642d345693787bdf771219ad) ) /* sprites (bank 1 & 2) */
 
 	ROM_REGION( 0x0120, "proms", 0 )
-	ROM_LOAD_NIB_LOW ( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4) SHA1(d9aa2dc442e9ac36cf3c346b9fb1aa745eaf3cb8) ) /* color palette (low bits) */
-	ROM_LOAD_NIB_HIGH( "jrprom.9f",    0x0000, 0x0100, CRC(eee34a79) SHA1(7561f8ccab2af85c111af6a02af6986eb67503e5) ) /* color palette (high bits) */
-	ROM_LOAD( "jrprom.9p",             0x0020, 0x0100, CRC(9f6ea9d8) SHA1(62cf15513934d34641433c891a7f73bef82e2fb1) ) /* color lookup table */
+	ROM_LOAD_NIB_LOW ( "a290-27axv-bxhd.9e", 0x0000, 0x0100, CRC(029d35c4) SHA1(d9aa2dc442e9ac36cf3c346b9fb1aa745eaf3cb8) ) /* color palette (low bits) */
+	ROM_LOAD_NIB_HIGH( "a290-27axv-cxhd.9f", 0x0000, 0x0100, CRC(eee34a79) SHA1(7561f8ccab2af85c111af6a02af6986eb67503e5) ) /* color palette (high bits) */
+	ROM_LOAD( "a290-27axv-axhd.9p",          0x0020, 0x0100, CRC(9f6ea9d8) SHA1(62cf15513934d34641433c891a7f73bef82e2fb1) ) /* color lookup table */
 
 	ROM_REGION( 0x0200, "namco", 0 )
-	ROM_LOAD( "jrprom.7p",             0x0000, 0x0100, CRC(a9cc86bf) SHA1(bbcec0570aeceb582ff8238a4bc8546a23430081) ) /* waveform */
-	ROM_LOAD( "jrprom.5s",             0x0100, 0x0100, CRC(77245b66) SHA1(0c4d0bee858b97632411c440bea6948a74759746) ) /* timing - not used */
+	ROM_LOAD( "a290-27axv-dxhd.7p",          0x0000, 0x0100, CRC(a9cc86bf) SHA1(bbcec0570aeceb582ff8238a4bc8546a23430081) ) /* waveform */
+	ROM_LOAD( "a290-27axv-exhd.5s",          0x0100, 0x0100, CRC(77245b66) SHA1(0c4d0bee858b97632411c440bea6948a74759746) ) /* timing - not used */
+ROM_END
+
+ROM_START( jrpacmanf )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "fast_jr.8d",                  0x0000, 0x2000, CRC(461e8b57) SHA1(42e25d384e653efb95a97bd64f55a8c3b3f71239) ) // only 1 byte difference
+	ROM_LOAD( "jrp8e.8e",                    0x2000, 0x2000, CRC(ec889e94) SHA1(8294e9e79f8fd19a419431fa690e6ac4a1302f58) )
+	ROM_LOAD( "jrp8h.8h",                    0x8000, 0x2000, CRC(35f1fc6e) SHA1(b84b34560b9aae18b24274712b052283faa01730) )
+	ROM_LOAD( "jrp8j.8j",                    0xa000, 0x2000, CRC(9737099e) SHA1(07d912a61824323c8fc1b8bd0da89172d4f70b91) )
+	ROM_LOAD( "jrp8k.8k",                    0xc000, 0x2000, CRC(5252dd97) SHA1(18bd4d5381656120e4242811006c20776774de4d) )
+
+	ROM_REGION( 0x4000, "gfx1", 0 )
+	ROM_LOAD( "jrp2c.2c",                    0x0000, 0x2000, CRC(0527ff9b) SHA1(37fe3176b0d125b7d629e108e7ebdc1196e4a132) ) /* tiles (bank 1 & 2) */
+	ROM_LOAD( "jrp2e.2e",                    0x2000, 0x2000, CRC(73477193) SHA1(f00a488958ea0438642d345693787bdf771219ad) ) /* sprites (bank 1 & 2) */
+
+	ROM_REGION( 0x0120, "proms", 0 )
+	ROM_LOAD_NIB_LOW ( "a290-27axv-bxhd.9e", 0x0000, 0x0100, CRC(029d35c4) SHA1(d9aa2dc442e9ac36cf3c346b9fb1aa745eaf3cb8) ) /* color palette (low bits) */
+	ROM_LOAD_NIB_HIGH( "a290-27axv-cxhd.9f", 0x0000, 0x0100, CRC(eee34a79) SHA1(7561f8ccab2af85c111af6a02af6986eb67503e5) ) /* color palette (high bits) */
+	ROM_LOAD( "a290-27axv-axhd.9p",          0x0020, 0x0100, CRC(9f6ea9d8) SHA1(62cf15513934d34641433c891a7f73bef82e2fb1) ) /* color lookup table */
+
+	ROM_REGION( 0x0200, "namco", 0 )
+	ROM_LOAD( "a290-27axv-dxhd.7p",          0x0000, 0x0100, CRC(a9cc86bf) SHA1(bbcec0570aeceb582ff8238a4bc8546a23430081) ) /* waveform */
+	ROM_LOAD( "a290-27axv-exhd.5s",          0x0100, 0x0100, CRC(77245b66) SHA1(0c4d0bee858b97632411c440bea6948a74759746) ) /* timing - not used */
 ROM_END
 
 
@@ -341,18 +378,18 @@ ROM_END
  *
  *************************************/
 
-static DRIVER_INIT( jrpacman )
+DRIVER_INIT_MEMBER(jrpacman_state,jrpacman)
 {
 	/* The encryption PALs garble bits 0, 2 and 7 of the ROMs. The encryption */
-	/* scheme is complex (basically it's a state machine) and can only be */
+	/* scheme is complex (basically it's a state machine()) and can only be */
 	/* faithfully emulated at run time. To avoid the performance hit that would */
 	/* cause, here we have a table of the values which must be XORed with */
 	/* each memory region to obtain the decrypted bytes. */
 	/* Decryption table provided by David Caldwell (david@indigita.com) */
 	/* For an accurate reproduction of the encryption, see jrcrypt.c */
 	static const struct {
-	    int count;
-	    int value;
+		int count;
+		int value;
 	} table[] =
 	{
 		{ 0x00C1, 0x00 },{ 0x0002, 0x80 },{ 0x0004, 0x00 },{ 0x0006, 0x80 },
@@ -375,10 +412,10 @@ static DRIVER_INIT( jrpacman )
 		{ 0x0001, 0x01 },{ 0x0001, 0x04 },{ 0x0001, 0x05 },{ 0x0001, 0x00 },
 		{ 0x01B0, 0x01 },{ 0x0001, 0x00 },{ 0x0002, 0x01 },{ 0x00AD, 0x00 },
 		{ 0x0031, 0x01 },{ 0x005C, 0x00 },{ 0x0005, 0x01 },{ 0x604E, 0x00 },
-	    { 0,0 }
+		{ 0,0 }
 	};
 
-	UINT8 *RAM = machine.region("maincpu")->base();
+	UINT8 *RAM = machine().root_device().memregion("maincpu")->base();
 	int i, j, A;
 
 	for (i = A = 0; table[i].count; i++)
@@ -394,4 +431,5 @@ static DRIVER_INIT( jrpacman )
  *
  *************************************/
 
-GAME( 1983, jrpacman, 0, jrpacman, jrpacman, jrpacman, ROT90, "Bally Midway", "Jr. Pac-Man", GAME_SUPPORTS_SAVE )
+GAME( 1983, jrpacman,  0,        jrpacman, jrpacman, jrpacman_state, jrpacman, ROT90, "Bally Midway", "Jr. Pac-Man (11/9/83)", GAME_SUPPORTS_SAVE )
+GAME( 1983, jrpacmanf, jrpacman, jrpacman, jrpacman, jrpacman_state, jrpacman, ROT90, "hack", "Jr. Pac-Man (speedup hack)", GAME_SUPPORTS_SAVE )

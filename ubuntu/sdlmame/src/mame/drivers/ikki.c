@@ -6,11 +6,14 @@ Ikki (c) 1985 Sun Electronics
 
     20/Jun/2001 -
 
+TODO:
+- understand proper CPU communications and irq firing;
+- timings
+
 *****************************************************************************/
 
 #include "emu.h"
 #include "cpu/z80/z80.h"
-#include "deprecat.h"
 #include "sound/sn76496.h"
 #include "includes/ikki.h"
 
@@ -21,19 +24,18 @@ Ikki (c) 1985 Sun Electronics
  *
  *************************************/
 
-static READ8_HANDLER( ikki_e000_r )
+READ8_MEMBER(ikki_state::ikki_e000_r)
 {
+
 /* bit1: interrupt type?, bit0: CPU2 busack? */
 
-	if (cpu_getiloops(&space->device()) == 0)
-		return 0;
-	return 2;
+	return (m_irq_source << 1);
 }
 
-static WRITE8_HANDLER( ikki_coin_counters )
+WRITE8_MEMBER(ikki_state::ikki_coin_counters)
 {
-	coin_counter_w(space->machine(), 0, data & 0x01);
-	coin_counter_w(space->machine(), 1, data & 0x02);
+	coin_counter_w(machine(), 0, data & 0x01);
+	coin_counter_w(machine(), 1, data & 0x02);
 }
 
 /*************************************
@@ -42,11 +44,11 @@ static WRITE8_HANDLER( ikki_coin_counters )
  *
  *************************************/
 
-static ADDRESS_MAP_START( ikki_cpu1, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( ikki_cpu1, AS_PROGRAM, 8, ikki_state )
 	AM_RANGE(0x0000, 0x9fff) AM_ROM
 	AM_RANGE(0xc000, 0xc7ff) AM_RAM
 	AM_RANGE(0xc800, 0xcfff) AM_RAM AM_SHARE("share1")
-	AM_RANGE(0xd000, 0xd7ff) AM_RAM AM_BASE_SIZE_MEMBER(ikki_state, m_videoram, m_videoram_size)
+	AM_RANGE(0xd000, 0xd7ff) AM_RAM AM_SHARE("videoram")
 	AM_RANGE(0xe000, 0xe000) AM_READ(ikki_e000_r)
 	AM_RANGE(0xe001, 0xe001) AM_READ_PORT("DSW1")
 	AM_RANGE(0xe002, 0xe002) AM_READ_PORT("DSW2")
@@ -55,15 +57,15 @@ static ADDRESS_MAP_START( ikki_cpu1, AS_PROGRAM, 8 )
 	AM_RANGE(0xe005, 0xe005) AM_READ_PORT("P2")
 	AM_RANGE(0xe008, 0xe008) AM_WRITE(ikki_scrn_ctrl_w)
 	AM_RANGE(0xe009, 0xe009) AM_WRITE(ikki_coin_counters)
-	AM_RANGE(0xe00a, 0xe00b) AM_WRITEONLY AM_BASE_MEMBER(ikki_state, m_scroll)
+	AM_RANGE(0xe00a, 0xe00b) AM_WRITEONLY AM_SHARE("scroll")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( ikki_cpu2, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( ikki_cpu2, AS_PROGRAM, 8, ikki_state )
 	AM_RANGE(0x0000, 0x1fff) AM_ROM
-	AM_RANGE(0xc000, 0xc7ff) AM_RAM AM_BASE_SIZE_MEMBER(ikki_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0xc000, 0xc7ff) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0xc800, 0xcfff) AM_RAM AM_SHARE("share1")
-	AM_RANGE(0xd801, 0xd801) AM_DEVWRITE("sn1", sn76496_w)
-	AM_RANGE(0xd802, 0xd802) AM_DEVWRITE("sn2", sn76496_w)
+	AM_RANGE(0xd801, 0xd801) AM_DEVWRITE("sn1", sn76496_device, write)
+	AM_RANGE(0xd802, 0xd802) AM_DEVWRITE("sn2", sn76496_device, write)
 ADDRESS_MAP_END
 
 
@@ -130,7 +132,7 @@ static INPUT_PORTS_START( ikki )
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( On ) )
 
-	PORT_START("P1")		/* e004 */
+	PORT_START("P1")        /* e004 */
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN )
@@ -140,7 +142,7 @@ static INPUT_PORTS_START( ikki )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_8WAY
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_8WAY
 
-	PORT_START("P2")		/* e005 */
+	PORT_START("P2")        /* e005 */
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN )
@@ -150,7 +152,7 @@ static INPUT_PORTS_START( ikki )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_COCKTAIL
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_COCKTAIL
 
-	PORT_START("SYSTEM")	/* e003 */
+	PORT_START("SYSTEM")    /* e003 */
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SERVICE1 )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN )
@@ -171,9 +173,9 @@ INPUT_PORTS_END
 static const gfx_layout charlayout =
 {
 	8,8,    /* 8*8 characters */
-	2048,   /* 2048 characters */
+	RGN_FRAC(1,3),   /* 2048 characters */
 	3,      /* 3 bits per pixel */
-	{0,16384*8,16384*8*2},
+	{RGN_FRAC(0,3),RGN_FRAC(1,3),RGN_FRAC(2,3)},
 	{7,6,5,4,3,2,1,0},
 	{8*0, 8*1, 8*2, 8*3, 8*4, 8*5, 8*6, 8*7},
 	8*8
@@ -182,9 +184,9 @@ static const gfx_layout charlayout =
 static const gfx_layout spritelayout =
 {
 	16,32,  /* 16*32 characters */
-	256,    /* 256 characters */
+	RGN_FRAC(1,3),    /* 256 characters */
 	3,      /* 3 bits per pixel */
-	{16384*8*2,16384*8,0},
+	{RGN_FRAC(0,3),RGN_FRAC(1,3),RGN_FRAC(2,3)},
 	{7,6,5,4,3,2,1,0,
 		8*16+7,8*16+6,8*16+5,8*16+4,8*16+3,8*16+2,8*16+1,8*16+0},
 	{8*0, 8*1, 8*2, 8*3, 8*4, 8*5, 8*6, 8*7,
@@ -202,64 +204,93 @@ GFXDECODE_END
 
 /*************************************
  *
+ *  Sound definitions
+ *
+ *************************************/
+
+
+//-------------------------------------------------
+//  sn76496_config psg_intf
+//-------------------------------------------------
+
+static const sn76496_config psg_intf =
+{
+	DEVCB_NULL
+};
+
+
+/*************************************
+ *
  *  Machine driver
  *
  *************************************/
 
-static MACHINE_START( ikki )
+void ikki_state::machine_start()
 {
-	ikki_state *state = machine.driver_data<ikki_state>();
 
-	state->save_item(NAME(state->m_flipscreen));
-	state->save_item(NAME(state->m_punch_through_pen));
+	save_item(NAME(m_flipscreen));
+	save_item(NAME(m_punch_through_pen));
+	save_item(NAME(m_irq_source));
 }
 
-static MACHINE_RESET( ikki )
+void ikki_state::machine_reset()
 {
-	ikki_state *state = machine.driver_data<ikki_state>();
 
-	state->m_flipscreen = 0;
+	m_flipscreen = 0;
 }
+
+TIMER_DEVICE_CALLBACK_MEMBER(ikki_state::ikki_irq)
+{
+	int scanline = param;
+
+	if(scanline == 240 || scanline == 120) // TODO: where non-timer IRQ happens?
+	{
+		m_maincpu->set_input_line(0,HOLD_LINE);
+
+		m_irq_source = (scanline != 240);
+	}
+}
+
+
+
 
 static MACHINE_CONFIG_START( ikki, ikki_state )
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", Z80,8000000/2) /* 4.000MHz */
 	MCFG_CPU_PROGRAM_MAP(ikki_cpu1)
-	MCFG_CPU_VBLANK_INT_HACK(irq0_line_hold,2)
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("scantimer", ikki_state, ikki_irq, "screen", 0, 1)
 
 	MCFG_CPU_ADD("sub", Z80,8000000/2) /* 4.000MHz */
 	MCFG_CPU_PROGRAM_MAP(ikki_cpu2)
-	MCFG_CPU_VBLANK_INT_HACK(irq0_line_hold,2)
+	MCFG_CPU_PERIODIC_INT_DRIVER(ikki_state, irq0_line_hold, 2*60)
 
-	MCFG_QUANTUM_TIME(attotime::from_hz(600))
+	MCFG_QUANTUM_PERFECT_CPU("maincpu")
 
-	MCFG_MACHINE_START(ikki)
-	MCFG_MACHINE_RESET(ikki)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
+//  MCFG_SCREEN_RAW_PARAMS(PIXEL_CLOCK, HTOTAL, HBEND, HBSTART, VTOTAL, VBEND, VBSTART)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
-	MCFG_SCREEN_SIZE(32*8, 32*8)
+	MCFG_SCREEN_SIZE(32*8, 32*8+3*8)
 	MCFG_SCREEN_VISIBLE_AREA(1*8, 31*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(ikki)
+	MCFG_SCREEN_UPDATE_DRIVER(ikki_state, screen_update_ikki)
 
 	MCFG_GFXDECODE(ikki)
 	MCFG_PALETTE_LENGTH(1024)
 
-	MCFG_PALETTE_INIT(ikki)
-	MCFG_VIDEO_START(ikki)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
 	MCFG_SOUND_ADD("sn1", SN76496, 8000000/4)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.75)
+	MCFG_SOUND_CONFIG(psg_intf)
 
 	MCFG_SOUND_ADD("sn2", SN76496, 8000000/2)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.75)
+	MCFG_SOUND_CONFIG(psg_intf)
 MACHINE_CONFIG_END
 
 
@@ -281,14 +312,14 @@ ROM_START( ikki )
 	ROM_LOAD( "tvg17_5",  0x0000,  0x2000, CRC(22bdb40e) SHA1(265801ad660a5a3fc5bb187fa92dbe6098b390f5) )
 
 	ROM_REGION( 0xc000, "gfx1", 0 ) /* sprite */
-	ROM_LOAD( "tvg17_6",  0x0000,  0x4000, CRC(dc8aa269) SHA1(fd8b5c2bead52e1e136d4df4c26f136d8992d9be) )
+	ROM_LOAD( "tvg17_8",  0x0000,  0x4000, CRC(45c9087a) SHA1(9db82fc194096588fde5048e922a654e2ad12c23) )
 	ROM_LOAD( "tvg17_7",  0x4000,  0x4000, CRC(0e9efeba) SHA1(d922c4276a988b78b9a2a3ca632136e64a80d995) )
-	ROM_LOAD( "tvg17_8",  0x8000,  0x4000, CRC(45c9087a) SHA1(9db82fc194096588fde5048e922a654e2ad12c23) )
+	ROM_LOAD( "tvg17_6",  0x8000,  0x4000, CRC(dc8aa269) SHA1(fd8b5c2bead52e1e136d4df4c26f136d8992d9be) )
 
 	ROM_REGION( 0xc000, "gfx2", 0 ) /* bg */
-	ROM_LOAD( "tvg17_9",  0x8000,  0x4000, CRC(c594f3c5) SHA1(6fe19d9ccbe6934a210eb2cab441cd0ba83cbcf4) )
-	ROM_LOAD( "tvg17_10", 0x4000,  0x4000, CRC(2e510b4e) SHA1(c0ff4515e66ab4959b597a4d930cbbcc31c53cda) )
 	ROM_LOAD( "tvg17_11", 0x0000,  0x4000, CRC(35012775) SHA1(c90386660755c85fb9f020f8161805dd02a16271) )
+	ROM_LOAD( "tvg17_10", 0x4000,  0x4000, CRC(2e510b4e) SHA1(c0ff4515e66ab4959b597a4d930cbbcc31c53cda) )
+	ROM_LOAD( "tvg17_9",  0x8000,  0x4000, CRC(c594f3c5) SHA1(6fe19d9ccbe6934a210eb2cab441cd0ba83cbcf4) )
 
 	ROM_REGION( 0x0700, "proms", 0 ) /* color PROMs */
 	ROM_LOAD( "prom17_3", 0x0000,  0x0100, CRC(dbcd3bec) SHA1(1baeec277b16c82b67e10da9d4c84cf383ef4a82) ) /* R */
@@ -314,14 +345,14 @@ ROM_START( farmer )
 	ROM_LOAD( "tvg-5.30",  0x0000, 0x2000, CRC(22bdb40e) SHA1(265801ad660a5a3fc5bb187fa92dbe6098b390f5) )
 
 	ROM_REGION( 0xc000, "gfx1", 0 ) /* sprite */
-	ROM_LOAD( "tvg-6.104", 0x0000, 0x4000, CRC(dc8aa269) SHA1(fd8b5c2bead52e1e136d4df4c26f136d8992d9be) )
+	ROM_LOAD( "tvg-8.102", 0x0000, 0x4000, CRC(45c9087a) SHA1(9db82fc194096588fde5048e922a654e2ad12c23) )
 	ROM_LOAD( "tvg-7.103", 0x4000, 0x4000, CRC(0e9efeba) SHA1(d922c4276a988b78b9a2a3ca632136e64a80d995) )
-	ROM_LOAD( "tvg-8.102", 0x8000, 0x4000, CRC(45c9087a) SHA1(9db82fc194096588fde5048e922a654e2ad12c23) )
+	ROM_LOAD( "tvg-6.104", 0x8000, 0x4000, CRC(dc8aa269) SHA1(fd8b5c2bead52e1e136d4df4c26f136d8992d9be) )
 
 	ROM_REGION( 0xc000, "gfx2", 0 ) /* bg */
-	ROM_LOAD( "tvg17_9",  0x8000,  0x4000, CRC(c594f3c5) SHA1(6fe19d9ccbe6934a210eb2cab441cd0ba83cbcf4) )
-	ROM_LOAD( "tvg17_10", 0x4000,  0x4000, CRC(2e510b4e) SHA1(c0ff4515e66ab4959b597a4d930cbbcc31c53cda) )
 	ROM_LOAD( "tvg17_11", 0x0000,  0x4000, CRC(35012775) SHA1(c90386660755c85fb9f020f8161805dd02a16271) )
+	ROM_LOAD( "tvg17_10", 0x4000,  0x4000, CRC(2e510b4e) SHA1(c0ff4515e66ab4959b597a4d930cbbcc31c53cda) )
+	ROM_LOAD( "tvg17_9",  0x8000,  0x4000, CRC(c594f3c5) SHA1(6fe19d9ccbe6934a210eb2cab441cd0ba83cbcf4) )
 
 	ROM_REGION( 0x0700, "proms", 0 ) /* color PROMs */
 	ROM_LOAD( "prom17_3", 0x0000,  0x0100, CRC(dbcd3bec) SHA1(1baeec277b16c82b67e10da9d4c84cf383ef4a82) ) /* R */
@@ -341,5 +372,5 @@ ROM_END
  *
  *************************************/
 
-GAME( 1985, ikki,   0,    ikki, ikki, 0, ROT0, "Sun Electronics", "Ikki (Japan)", GAME_SUPPORTS_SAVE )
-GAME( 1985, farmer, ikki, ikki, ikki, 0, ROT0, "Sun Electronics", "Farmers Rebellion", GAME_SUPPORTS_SAVE )
+GAME( 1985, ikki,   0,    ikki, ikki, driver_device, 0, ROT0, "Sun Electronics", "Ikki (Japan)", GAME_SUPPORTS_SAVE )
+GAME( 1985, farmer, ikki, ikki, ikki, driver_device, 0, ROT0, "Sun Electronics", "Farmers Rebellion", GAME_SUPPORTS_SAVE )

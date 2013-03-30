@@ -20,74 +20,72 @@
  *
  *************************************/
 
-static WRITE8_HANDLER( battlane_cpu_command_w )
+WRITE8_MEMBER(battlane_state::battlane_cpu_command_w)
 {
-	battlane_state *state = space->machine().driver_data<battlane_state>();
 
-	state->m_cpu_control = data;
-
-	/*
-      CPU control register
-
-        0x80    = Video Flip
-        0x08    = NMI
-        0x04    = CPU 0 IRQ   (0=Activate)
-        0x02    = CPU 1 IRQ   (0=Activate)
-        0x01    = Y Scroll MSB
-    */
-
-	flip_screen_set(space->machine(), data & 0x80);
+	m_cpu_control = data;
 
 	/*
-        I think that the NMI is an inhibitor. It is constantly set
-        to zero whenever an NMIs are allowed.
+	  CPU control register
 
-        However, it could also be that setting to zero could
-        cause the NMI to trigger. I really don't know.
-    */
+	    0x80    = Video Flip
+	    0x08    = NMI
+	    0x04    = CPU 0 IRQ   (0=Activate)
+	    0x02    = CPU 1 IRQ   (0=Activate)
+	    0x01    = Y Scroll MSB
+	*/
 
-    /*
-    if (~state->m_cpu_control & 0x08)
-    {
-        device_set_input_line(state->m_maincpu, INPUT_LINE_NMI, PULSE_LINE);
-        device_set_input_line(state->m_subcpu, INPUT_LINE_NMI, PULSE_LINE);
-    }
-    */
+	flip_screen_set(data & 0x80);
 
 	/*
-        CPU2's SWI will trigger an 6809 IRQ on the master by resetting 0x04
-        Master will respond by setting the bit back again
-    */
-    device_set_input_line(state->m_maincpu, M6809_IRQ_LINE,  data & 0x04 ? CLEAR_LINE : HOLD_LINE);
+	    I think that the NMI is an inhibitor. It is constantly set
+	    to zero whenever an NMIs are allowed.
+
+	    However, it could also be that setting to zero could
+	    cause the NMI to trigger. I really don't know.
+	*/
 
 	/*
-    Slave function call (e.g. ROM test):
-    FA7F: 86 03       LDA   #$03    ; Function code
-    FA81: 97 6B       STA   $6B
-    FA83: 86 0E       LDA   #$0E
-    FA85: 84 FD       ANDA  #$FD    ; Trigger IRQ
-    FA87: 97 66       STA   $66
-    FA89: B7 1C 03    STA   $1C03   ; Do Trigger
-    FA8C: C6 40       LDB   #$40
-    FA8E: D5 68       BITB  $68
-    FA90: 27 FA       BEQ   $FA8C   ; Wait for slave IRQ pre-function dispatch
-    FA92: 96 68       LDA   $68
-    FA94: 84 01       ANDA  #$01
-    FA96: 27 FA       BEQ   $FA92   ; Wait for bit to be set
-    */
+	if (~m_cpu_control & 0x08)
+	{
+	    m_maincpu->set_input_line(INPUT_LINE_NMI, PULSE_LINE);
+	    m_subcpu->set_input_line(INPUT_LINE_NMI, PULSE_LINE);
+	}
+	*/
 
-	device_set_input_line(state->m_subcpu, M6809_IRQ_LINE, data & 0x02 ? CLEAR_LINE : HOLD_LINE);
+	/*
+	    CPU2's SWI will trigger an 6809 IRQ on the master by resetting 0x04
+	    Master will respond by setting the bit back again
+	*/
+	m_maincpu->set_input_line(M6809_IRQ_LINE,  data & 0x04 ? CLEAR_LINE : HOLD_LINE);
+
+	/*
+	Slave function call (e.g. ROM test):
+	FA7F: 86 03       LDA   #$03    ; Function code
+	FA81: 97 6B       STA   $6B
+	FA83: 86 0E       LDA   #$0E
+	FA85: 84 FD       ANDA  #$FD    ; Trigger IRQ
+	FA87: 97 66       STA   $66
+	FA89: B7 1C 03    STA   $1C03   ; Do Trigger
+	FA8C: C6 40       LDB   #$40
+	FA8E: D5 68       BITB  $68
+	FA90: 27 FA       BEQ   $FA8C   ; Wait for slave IRQ pre-function dispatch
+	FA92: 96 68       LDA   $68
+	FA94: 84 01       ANDA  #$01
+	FA96: 27 FA       BEQ   $FA92   ; Wait for bit to be set
+	*/
+
+	m_subcpu->set_input_line(M6809_IRQ_LINE, data & 0x02 ? CLEAR_LINE : HOLD_LINE);
 }
 
-static INTERRUPT_GEN( battlane_cpu1_interrupt )
+INTERRUPT_GEN_MEMBER(battlane_state::battlane_cpu1_interrupt)
 {
-	battlane_state *state = device->machine().driver_data<battlane_state>();
 
 	/* See note in battlane_cpu_command_w */
-	if (~state->m_cpu_control & 0x08)
+	if (~m_cpu_control & 0x08)
 	{
-		device_set_input_line(device, INPUT_LINE_NMI, PULSE_LINE);
-		device_set_input_line(state->m_subcpu, INPUT_LINE_NMI, PULSE_LINE);
+		device.execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
+		m_subcpu->set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 	}
 }
 
@@ -98,15 +96,15 @@ static INTERRUPT_GEN( battlane_cpu1_interrupt )
  *
  *************************************/
 
-static ADDRESS_MAP_START( battlane_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( battlane_map, AS_PROGRAM, 8, battlane_state )
 	AM_RANGE(0x0000, 0x0fff) AM_RAM AM_SHARE("share1")
-	AM_RANGE(0x1000, 0x17ff) AM_RAM_WRITE(battlane_tileram_w) AM_SHARE("share2") AM_BASE_MEMBER(battlane_state, m_tileram)
-	AM_RANGE(0x1800, 0x18ff) AM_RAM_WRITE(battlane_spriteram_w) AM_SHARE("share3") AM_BASE_MEMBER(battlane_state, m_spriteram)
+	AM_RANGE(0x1000, 0x17ff) AM_RAM_WRITE(battlane_tileram_w) AM_SHARE("tileram")
+	AM_RANGE(0x1800, 0x18ff) AM_RAM_WRITE(battlane_spriteram_w) AM_SHARE("spriteram")
 	AM_RANGE(0x1c00, 0x1c00) AM_READ_PORT("P1") AM_WRITE(battlane_video_ctrl_w)
 	AM_RANGE(0x1c01, 0x1c01) AM_READ_PORT("P2") AM_WRITE(battlane_scrollx_w)
 	AM_RANGE(0x1c02, 0x1c02) AM_READ_PORT("DSW1") AM_WRITE(battlane_scrolly_w)
 	AM_RANGE(0x1c03, 0x1c03) AM_READ_PORT("DSW2") AM_WRITE(battlane_cpu_command_w)
-	AM_RANGE(0x1c04, 0x1c05) AM_DEVREADWRITE("ymsnd", ym3526_r, ym3526_w)
+	AM_RANGE(0x1c04, 0x1c05) AM_DEVREADWRITE_LEGACY("ymsnd", ym3526_r, ym3526_w)
 	AM_RANGE(0x1e00, 0x1e3f) AM_WRITE(battlane_palette_w)
 	AM_RANGE(0x2000, 0x3fff) AM_RAM_WRITE(battlane_bitmap_w) AM_SHARE("share4")
 	AM_RANGE(0x4000, 0xffff) AM_ROM
@@ -138,38 +136,38 @@ static INPUT_PORTS_START( battlane )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_COCKTAIL
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_COCKTAIL
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 
 	PORT_START("DSW1")
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coin_B ) )		PORT_DIPLOCATION("SW1:1,2")
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coin_B ) )       PORT_DIPLOCATION("SW1:1,2")
 	PORT_DIPSETTING(    0x00, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x03, DEF_STR( 1C_1C )  )
 	PORT_DIPSETTING(    0x02, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( 1C_3C ) )
-	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Coin_A ) )		PORT_DIPLOCATION("SW1:3,4")
+	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Coin_A ) )       PORT_DIPLOCATION("SW1:3,4")
 	PORT_DIPSETTING(    0x00, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x0c, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( 1C_3C ) )
-	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Demo_Sounds ) )	PORT_DIPLOCATION("SW1:5")
+	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW1:5")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x10, DEF_STR( On ) )
-	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Cabinet ) )		PORT_DIPLOCATION("SW1:6")
+	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Cabinet ) )      PORT_DIPLOCATION("SW1:6")
 	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( Cocktail ) )
-	PORT_DIPNAME( 0xc0, 0xc0, DEF_STR( Difficulty ) )	PORT_DIPLOCATION("SW1:7,8")
+	PORT_DIPNAME( 0xc0, 0xc0, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("SW1:7,8")
 	PORT_DIPSETTING(    0xc0, DEF_STR( Easy )  )
 	PORT_DIPSETTING(    0x80, DEF_STR( Normal ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( Hard )  )
 	PORT_DIPSETTING(    0x00, DEF_STR( Very_Hard ) )
 
 	PORT_START("DSW2")
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Lives ) )		PORT_DIPLOCATION("SW2:1,2")
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW2:1,2")
 	PORT_DIPSETTING(    0x03, "3" )
 	PORT_DIPSETTING(    0x02, "4" )
 	PORT_DIPSETTING(    0x01, "5" )
 	PORT_DIPSETTING(    0x00, DEF_STR( Free_Play) )
-	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Bonus_Life ) )	PORT_DIPLOCATION("SW2:3,4")
+	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION("SW2:3,4")
 	PORT_DIPSETTING(    0x0c, "20K 50K+" )
 	PORT_DIPSETTING(    0x08, "20K 70K+" )
 	PORT_DIPSETTING(    0x04, "20K 90K+" )
@@ -228,7 +226,7 @@ static const gfx_layout tilelayout2 =
 	16, 16,    /* 16*16 tiles */
 	256,    /* 256 tiles */
 	3,      /* 3 bits per pixel */
-    { 0x8000*8, 0x4000*8+4, 0x4000*8+0 },    /* plane offset */
+	{ 0x8000*8, 0x4000*8+4, 0x4000*8+0 },    /* plane offset */
 	{
 		3, 2, 1, 0,
 		8+3, 8+2, 8+1, 8+0,
@@ -244,9 +242,9 @@ static const gfx_layout tilelayout2 =
 
 
 static GFXDECODE_START( battlane )
-	GFXDECODE_ENTRY( "gfx1", 0, spritelayout,  0, 2 )	/* colors 0x00-0x0f */
-	GFXDECODE_ENTRY( "gfx2", 0, tilelayout,   32, 4 )	/* colors 0x20-0x3f */
-	GFXDECODE_ENTRY( "gfx2", 0, tilelayout2,  32, 4 )	/* colors 0x20-0x3f */
+	GFXDECODE_ENTRY( "gfx1", 0, spritelayout,  0, 2 )   /* colors 0x00-0x0f */
+	GFXDECODE_ENTRY( "gfx2", 0, tilelayout,   32, 4 )   /* colors 0x20-0x3f */
+	GFXDECODE_ENTRY( "gfx2", 0, tilelayout2,  32, 4 )   /* colors 0x20-0x3f */
 GFXDECODE_END
 
 
@@ -256,15 +254,9 @@ GFXDECODE_END
  *
  *************************************/
 
-static void irqhandler( device_t *device, int irq )
-{
-	battlane_state *state = device->machine().driver_data<battlane_state>();
-	device_set_input_line(state->m_maincpu, M6809_FIRQ_LINE, irq ? ASSERT_LINE : CLEAR_LINE);
-}
-
 static const ym3526_interface ym3526_config =
 {
-	irqhandler
+	DEVCB_CPU_INPUT_LINE("maincpu", M6809_FIRQ_LINE)
 };
 
 
@@ -274,23 +266,21 @@ static const ym3526_interface ym3526_config =
  *
  *************************************/
 
-static MACHINE_START( battlane )
+void battlane_state::machine_start()
 {
-	battlane_state *state = machine.driver_data<battlane_state>();
 
-	state->m_maincpu = machine.device("maincpu");
-	state->m_subcpu = machine.device("sub");
+	m_maincpu = machine().device<cpu_device>("maincpu");
+	m_subcpu = machine().device<cpu_device>("sub");
 
-	state->save_item(NAME(state->m_video_ctrl));
-	state->save_item(NAME(state->m_cpu_control));
+	save_item(NAME(m_video_ctrl));
+	save_item(NAME(m_cpu_control));
 }
 
-static MACHINE_RESET( battlane )
+void battlane_state::machine_reset()
 {
-	battlane_state *state = machine.driver_data<battlane_state>();
 
-	state->m_video_ctrl = 0;
-	state->m_cpu_control = 0;
+	m_video_ctrl = 0;
+	m_cpu_control = 0;
 }
 
 static MACHINE_CONFIG_START( battlane, battlane_state )
@@ -298,29 +288,25 @@ static MACHINE_CONFIG_START( battlane, battlane_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6809, 1500000)        /* 1.5 MHz ? */
 	MCFG_CPU_PROGRAM_MAP(battlane_map)
-	MCFG_CPU_VBLANK_INT("screen", battlane_cpu1_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", battlane_state,  battlane_cpu1_interrupt)
 
 	MCFG_CPU_ADD("sub", M6809, 1500000)        /* 1.5 MHz ? */
 	MCFG_CPU_PROGRAM_MAP(battlane_map)
 
 	MCFG_QUANTUM_TIME(attotime::from_hz(6000))
 
-	MCFG_MACHINE_START(battlane)
-	MCFG_MACHINE_RESET(battlane)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32 * 8, 32 * 8)
 	MCFG_SCREEN_VISIBLE_AREA(1 * 8, 31 * 8 - 1, 0 * 8, 32 * 8 - 1)
-	MCFG_SCREEN_UPDATE(battlane)
+	MCFG_SCREEN_UPDATE_DRIVER(battlane_state, screen_update_battlane)
 
 	MCFG_GFXDECODE(battlane)
 	MCFG_PALETTE_LENGTH(64)
 
-	MCFG_VIDEO_START(battlane)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -428,6 +414,6 @@ ROM_END
  *
  *************************************/
 
-GAME( 1986, battlane,  0,        battlane, battlane, 0, ROT90, "Technos Japan (Taito license)", "Battle Lane! Vol. 5 (set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1986, battlane2, battlane, battlane, battlane, 0, ROT90, "Technos Japan (Taito license)", "Battle Lane! Vol. 5 (set 2)", GAME_SUPPORTS_SAVE )
-GAME( 1986, battlane3, battlane, battlane, battlane, 0, ROT90, "Technos Japan (Taito license)", "Battle Lane! Vol. 5 (set 3)", GAME_SUPPORTS_SAVE )
+GAME( 1986, battlane,  0,        battlane, battlane, driver_device, 0, ROT90, "Technos Japan (Taito license)", "Battle Lane! Vol. 5 (set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1986, battlane2, battlane, battlane, battlane, driver_device, 0, ROT90, "Technos Japan (Taito license)", "Battle Lane! Vol. 5 (set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1986, battlane3, battlane, battlane, battlane, driver_device, 0, ROT90, "Technos Japan (Taito license)", "Battle Lane! Vol. 5 (set 3)", GAME_SUPPORTS_SAVE )

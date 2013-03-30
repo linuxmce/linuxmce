@@ -118,26 +118,26 @@
 #include "cpu/i8085/i8085.h"
 #include "includes/tiamc1.h"
 
-static MACHINE_RESET( tiamc1 )
+void tiamc1_state::machine_reset()
 {
-	address_space *space = machine.device("maincpu")->memory().space(AS_PROGRAM);
+	address_space &space = machine().device("maincpu")->memory().space(AS_PROGRAM);
 	tiamc1_bankswitch_w(space, 0, 0);
 }
 
-static WRITE8_HANDLER( tiamc1_control_w )
+WRITE8_MEMBER(tiamc1_state::tiamc1_control_w)
 {
-	coin_lockout_w(space->machine(), 0, ~data & 0x02);
-	coin_counter_w(space->machine(), 0, data & 0x04);
+	coin_lockout_w(machine(), 0, ~data & 0x02);
+	coin_counter_w(machine(), 0, data & 0x04);
 }
 
 
-static ADDRESS_MAP_START( tiamc1_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( tiamc1_map, AS_PROGRAM, 8, tiamc1_state )
 	AM_RANGE(0xb000, 0xb7ff) AM_WRITE(tiamc1_videoram_w)
 	AM_RANGE(0x0000, 0xdfff) AM_ROM
 	AM_RANGE(0xe000, 0xffff) AM_RAM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( tiamc1_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( tiamc1_io_map, AS_IO, 8, tiamc1_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x40, 0x4f) AM_WRITE(tiamc1_sprite_y_w) /* sprites Y */
 	AM_RANGE(0x50, 0x5f) AM_WRITE(tiamc1_sprite_x_w) /* sprites X */
@@ -148,46 +148,46 @@ static ADDRESS_MAP_START( tiamc1_io_map, AS_IO, 8 )
 	AM_RANGE(0xbd, 0xbd) AM_WRITE(tiamc1_bg_vshift_w)/* background V scroll */
 	AM_RANGE(0xbe, 0xbe) AM_WRITE(tiamc1_bankswitch_w) /* VRAM selector */
 	AM_RANGE(0xbf, 0xbf) AM_WRITENOP                 /* charset control */
-	AM_RANGE(0xc0, 0xc3) AM_DEVWRITE("2x8253", tiamc1_timer0_w)   /* timer 0 */
+	AM_RANGE(0xc0, 0xc3) AM_DEVWRITE_LEGACY("2x8253", tiamc1_timer0_w)   /* timer 0 */
 	AM_RANGE(0xd0, 0xd0) AM_READ_PORT("IN0")
 	AM_RANGE(0xd1, 0xd1) AM_READ_PORT("IN1")
 	AM_RANGE(0xd2, 0xd2) AM_READ_PORT("IN2")
 	AM_RANGE(0xd2, 0xd2) AM_WRITE(tiamc1_control_w)  /* coin counter and lockout */
 	AM_RANGE(0xd3, 0xd3) AM_WRITENOP                 /* 8255 ctrl. Used for i/o ports */
-	AM_RANGE(0xd4, 0xd7) AM_DEVWRITE("2x8253", tiamc1_timer1_w)   /* timer 1 */
-	AM_RANGE(0xda, 0xda) AM_DEVWRITE("2x8253", tiamc1_timer1_gate_w) /* timer 1 gate control */
+	AM_RANGE(0xd4, 0xd7) AM_DEVWRITE_LEGACY("2x8253", tiamc1_timer1_w)   /* timer 1 */
+	AM_RANGE(0xda, 0xda) AM_DEVWRITE_LEGACY("2x8253", tiamc1_timer1_gate_w) /* timer 1 gate control */
 ADDRESS_MAP_END
 
 static INPUT_PORTS_START( tiamc1 )
 	PORT_START("IN0")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNUSED )	/* Player 0 JOYSTICK_RIGHT */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNUSED )    /* Player 0 JOYSTICK_RIGHT */
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(1)
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_UNUSED )	/* Player 2 JOYSTICK_RIGHT */
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNUSED )	/* Player 3 JOYSTICK_RIGHT */
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNUSED )	/* Player 0 JOYSTICK_LEFT */
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_UNUSED )    /* Player 2 JOYSTICK_RIGHT */
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNUSED )    /* Player 3 JOYSTICK_RIGHT */
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNUSED )    /* Player 0 JOYSTICK_LEFT */
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_PLAYER(1)
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNUSED )	/* Player 2 JOYSTICK_LEFT */
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNUSED )	/* Player 3 JOYSTICK_LEFT */
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNUSED )    /* Player 2 JOYSTICK_LEFT */
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNUSED )    /* Player 3 JOYSTICK_LEFT */
 
 	PORT_START("IN1")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNUSED )	/* Player 0 JOYSTICK_UP */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNUSED )    /* Player 0 JOYSTICK_UP */
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_PLAYER(1)
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_UNUSED )	/* Player 2 JOYSTICK_UP */
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNUSED )	/* Player 3 JOYSTICK_UP */
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNUSED )	/* Player 0 JOYSTICK_DOWN */
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_UNUSED )    /* Player 2 JOYSTICK_UP */
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNUSED )    /* Player 3 JOYSTICK_UP */
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNUSED )    /* Player 0 JOYSTICK_DOWN */
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_PLAYER(1)
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNUSED )	/* Player 2 JOYSTICK_DOWN */
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNUSED )    /* Player 2 JOYSTICK_DOWN */
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SERVICE )
 
 	PORT_START("IN2")
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNUSED )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_SPECIAL )	/* OUT:coin lockout */
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* OUT:game counter */
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* RAZR ??? */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_SPECIAL )    /* OUT:coin lockout */
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_SPECIAL )   /* OUT:game counter */
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )    /* RAZR ??? */
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_COIN1 )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(1) // Kick
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_PLAYER(1) // Jump
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_VBLANK )
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 INPUT_PORTS_END
 
 static const gfx_layout sprites16x16_layout =
@@ -220,28 +220,24 @@ GFXDECODE_END
 
 static MACHINE_CONFIG_START( tiamc1, tiamc1_state )
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", I8080,16000000/9)		 /* 16 MHz */
+	MCFG_CPU_ADD("maincpu", I8080,16000000/9)        /* 16 MHz */
 	MCFG_CPU_PROGRAM_MAP(tiamc1_map)
 	MCFG_CPU_IO_MAP(tiamc1_io_map)
 
-	MCFG_CPU_VBLANK_INT("screen", irq1_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", tiamc1_state,  irq1_line_hold)
 
-	MCFG_MACHINE_RESET(tiamc1)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(50)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(1600))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(256, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 256-1, 0, 256-1)
-	MCFG_SCREEN_UPDATE(tiamc1)
+	MCFG_SCREEN_UPDATE_DRIVER(tiamc1_state, screen_update_tiamc1)
 
 	MCFG_GFXDECODE(tiamc1)
 	MCFG_PALETTE_LENGTH(16)
 
-	MCFG_PALETTE_INIT(tiamc1)
-	MCFG_VIDEO_START(tiamc1)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -329,7 +325,7 @@ ROM_START( bilyard )
 	ROM_LOAD( "03.6a", 0x06000, 0x2000, CRC(8bfc0b15) SHA1(221efdce516274d3b1d9009d11dc9ed6cd67ef12) )
 ROM_END
 
-GAME( 1988, konek, 0, tiamc1, tiamc1, 0, ROT0, "Terminal", "Konek-Gorbunok", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
-GAME( 1988, sosterm, 0, tiamc1, tiamc1, 0, ROT0, "Terminal", "S.O.S.", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
-GAME( 1988, koroleva, 0, tiamc1, tiamc1, 0, ROT0, "Terminal", "Snezhnaja Koroleva", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
-GAME( 1988, bilyard, 0, tiamc1, tiamc1, 0, ROT0, "Terminal", "Billiard", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
+GAME( 1988, konek, 0, tiamc1, tiamc1, driver_device, 0, ROT0, "Terminal", "Konek-Gorbunok", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
+GAME( 1988, sosterm, 0, tiamc1, tiamc1, driver_device, 0, ROT0, "Terminal", "S.O.S.", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
+GAME( 1988, koroleva, 0, tiamc1, tiamc1, driver_device, 0, ROT0, "Terminal", "Snezhnaja Koroleva", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
+GAME( 1988, bilyard, 0, tiamc1, tiamc1, driver_device, 0, ROT0, "Terminal", "Billiard", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )

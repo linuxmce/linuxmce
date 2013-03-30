@@ -32,50 +32,26 @@
 
 struct z80sio_interface
 {
-	void (*m_irq_cb)(device_t *device, int state);
-	write8_device_func m_dtr_changed_cb;
-	write8_device_func m_rts_changed_cb;
-	write8_device_func m_break_changed_cb;
-	write8_device_func m_transmit_cb;
-	int (*m_receive_poll_cb)(device_t *device, int channel);
-};
-
-
-
-// ======================> z80sio_device_config
-
-class z80sio_device_config :	public device_config,
-								public device_config_z80daisy_interface,
-								public z80sio_interface
-{
-	friend class z80sio_device;
-
-	// construction/destruction
-	z80sio_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock);
-
-public:
-	// allocators
-	static device_config *static_alloc_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock);
-	virtual device_t *alloc_device(running_machine &machine) const;
-
-protected:
-	// device_config overrides
-	virtual void device_config_complete();
+	devcb_write_line m_irq_cb;
+	devcb_write8 m_dtr_changed_cb;
+	devcb_write8 m_rts_changed_cb;
+	devcb_write8 m_break_changed_cb;
+	devcb_write16 m_transmit_cb;
+	devcb_read16 m_received_poll_cb;
 };
 
 
 
 // ======================> z80sio_device
 
-class z80sio_device :	public device_t,
-						public device_z80daisy_interface
+class z80sio_device :   public device_t,
+						public device_z80daisy_interface,
+						public z80sio_interface
 {
-	friend class z80sio_device_config;
-
-	// construction/destruction
-	z80sio_device(running_machine &_machine, const z80sio_device_config &config);
-
 public:
+	// construction/destruction
+	z80sio_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock);
+
 	// control register I/O
 	UINT8 control_read(int ch) { return m_channel[ch].control_read(); }
 	void control_write(int ch, UINT8 data) { m_channel[ch].control_write(data); }
@@ -91,8 +67,17 @@ public:
 	void set_dcd(int ch, int state) { m_channel[ch].set_dcd(state); }
 	void receive_data(int ch, int data) { m_channel[ch].receive_data(data); }
 
+	// standard read/write, with C/D in bit 1, B/A in bit 0
+	DECLARE_READ8_MEMBER( read );
+	DECLARE_WRITE8_MEMBER( write );
+
+	// alternate read/write, with C/D in bit 0, B/A in bit 1
+	DECLARE_READ8_MEMBER( read_alt );
+	DECLARE_WRITE8_MEMBER( write_alt );
+
 private:
 	// device-level overrides
+	virtual void device_config_complete();
 	virtual void device_start();
 	virtual void device_reset();
 
@@ -136,25 +121,32 @@ private:
 		void serial_callback();
 
 	public:
-		UINT8		m_regs[8];				// 8 writeable registers
+		UINT8       m_regs[8];              // 8 writeable registers
 
 	private:
-		z80sio_device *m_device;			// pointer back to our device
-		int			m_index;				// our channel index
-		UINT8		m_status[4];			// 3 readable registers
-		int			m_inbuf;				// input buffer
-		int			m_outbuf;				// output buffer
-		bool		m_int_on_next_rx;		// interrupt on next rx?
-		emu_timer *	m_receive_timer;		// timer to clock data in
-		UINT8		m_receive_buffer[16];	// buffer for incoming data
-		UINT8		m_receive_inptr;		// index of data coming in
-		UINT8		m_receive_outptr;		// index of data going out
+		z80sio_device *m_device;            // pointer back to our device
+		int         m_index;                // our channel index
+		UINT8       m_status[4];            // 3 readable registers
+		int         m_inbuf;                // input buffer
+		int         m_outbuf;               // output buffer
+		bool        m_int_on_next_rx;       // interrupt on next rx?
+		emu_timer * m_receive_timer;        // timer to clock data in
+		UINT8       m_receive_buffer[16];   // buffer for incoming data
+		UINT8       m_receive_inptr;        // index of data coming in
+		UINT8       m_receive_outptr;       // index of data going out
 	};
 
 	// internal state
-	const z80sio_device_config &m_config;
-	sio_channel					m_channel[2];			// 2 channels
-	UINT8						m_int_state[8];			// interrupt states
+	sio_channel                 m_channel[2];           // 2 channels
+	UINT8                       m_int_state[8];         // interrupt states
+
+	// callbacks
+	devcb_resolved_write_line m_irq;
+	devcb_resolved_write8 m_dtr_changed;
+	devcb_resolved_write8 m_rts_changed;
+	devcb_resolved_write8 m_break_changed;
+	devcb_resolved_write16 m_transmit;
+	devcb_resolved_read16 m_received_poll;
 
 	static const UINT8 k_int_priority[];
 };
@@ -162,37 +154,6 @@ private:
 
 // device type definition
 extern const device_type Z80SIO;
-
-
-
-//**************************************************************************
-//  CONTROL/DATA REGISTER READ/WRITE
-//**************************************************************************
-
-// register access (A1=C/_D A0=B/_A)
-READ8_DEVICE_HANDLER( z80sio_cd_ba_r );
-WRITE8_DEVICE_HANDLER( z80sio_cd_ba_w );
-
-// register access (A1=B/_A A0=C/_D)
-READ8_DEVICE_HANDLER( z80sio_ba_cd_r );
-WRITE8_DEVICE_HANDLER( z80sio_ba_cd_w );
-
-WRITE8_DEVICE_HANDLER( z80sio_c_w );
-READ8_DEVICE_HANDLER( z80sio_c_r );
-
-WRITE8_DEVICE_HANDLER( z80sio_d_w );
-READ8_DEVICE_HANDLER( z80sio_d_r );
-
-
-//**************************************************************************
-//  CONTROL LINE READ/WRITE
-//**************************************************************************
-
-READ8_DEVICE_HANDLER( z80sio_get_dtr );
-READ8_DEVICE_HANDLER( z80sio_get_rts );
-WRITE8_DEVICE_HANDLER( z80sio_set_cts );
-WRITE8_DEVICE_HANDLER( z80sio_set_dcd );
-WRITE8_DEVICE_HANDLER( z80sio_receive_data );
 
 
 #endif

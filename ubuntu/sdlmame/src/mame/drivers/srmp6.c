@@ -68,28 +68,44 @@ Dumped 06/15/2000
 
 #include "emu.h"
 #include "cpu/m68000/m68000.h"
-#include "deprecat.h"
 #include "sound/nile.h"
 
 class srmp6_state : public driver_device
 {
 public:
-	srmp6_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	srmp6_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_sprram(*this, "sprram"),
+		m_chrram(*this, "chrram"),
+		m_dmaram(*this, "dmaram"),
+		m_video_regs(*this, "video_regs"){ }
 
 	UINT16* m_tileram;
-	UINT16* m_dmaram;
+	required_shared_ptr<UINT16> m_sprram;
+	required_shared_ptr<UINT16> m_chrram;
+	optional_shared_ptr<UINT16> m_dmaram;
+	required_shared_ptr<UINT16> m_video_regs;
 
-	UINT16 *m_sprram;
 	UINT16 *m_sprram_old;
 
 	int m_brightness;
 	UINT16 m_input_select;
-	UINT16 *m_video_regs;
 
 	unsigned short m_lastb;
 	unsigned short m_lastb2;
 	int m_destl;
+	DECLARE_WRITE16_MEMBER(srmp6_input_select_w);
+	DECLARE_READ16_MEMBER(srmp6_inputs_r);
+	DECLARE_WRITE16_MEMBER(video_regs_w);
+	DECLARE_READ16_MEMBER(video_regs_r);
+	DECLARE_WRITE16_MEMBER(srmp6_dma_w);
+	DECLARE_READ16_MEMBER(tileram_r);
+	DECLARE_WRITE16_MEMBER(tileram_w);
+	DECLARE_WRITE16_MEMBER(paletteram_w);
+	DECLARE_READ16_MEMBER(srmp6_irq_ack_r);
+	DECLARE_DRIVER_INIT(INIT);
+	virtual void video_start();
+	UINT32 screen_update_srmp6(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
 };
 
 #define VERBOSE 0
@@ -115,9 +131,9 @@ static void update_palette(running_machine &machine)
 
 	for(i = 0; i < 0x800; i++)
 	{
-		r = machine.generic.paletteram.u16[i] >>  0 & 0x1F;
-		g = machine.generic.paletteram.u16[i] >>  5 & 0x1F;
-		b = machine.generic.paletteram.u16[i] >> 10 & 0x1F;
+		r = state->m_generic_paletteram_16[i] >>  0 & 0x1F;
+		g = state->m_generic_paletteram_16[i] >>  5 & 0x1F;
+		b = state->m_generic_paletteram_16[i] >> 10 & 0x1F;
 
 		if(brg < 0) {
 			r += (r * brg) >> 5;
@@ -139,31 +155,29 @@ static void update_palette(running_machine &machine)
 	}
 }
 
-static VIDEO_START(srmp6)
+void srmp6_state::video_start()
 {
-	srmp6_state *state = machine.driver_data<srmp6_state>();
 
-	state->m_tileram = auto_alloc_array_clear(machine, UINT16, 0x100000*16/2);
-	state->m_dmaram = auto_alloc_array(machine, UINT16, 0x100/2);
-	state->m_sprram_old = auto_alloc_array_clear(machine, UINT16, 0x80000/2);
+	m_tileram = auto_alloc_array_clear(machine(), UINT16, 0x100000*16/2);
+	m_dmaram.allocate(0x100/2);
+	m_sprram_old = auto_alloc_array_clear(machine(), UINT16, 0x80000/2);
 
 	/* create the char set (gfx will then be updated dynamically from RAM) */
-	machine.gfx[0] = gfx_element_alloc(machine, &tiles8x8_layout, (UINT8*)state->m_tileram, machine.total_colors() / 256, 0);
-	machine.gfx[0]->color_granularity=256;
+	machine().gfx[0] = auto_alloc(machine(), gfx_element(machine(), tiles8x8_layout, (UINT8*)m_tileram, machine().total_colors() / 256, 0));
+	machine().gfx[0]->set_granularity(256);
 
-	state->m_brightness = 0x60;
+	m_brightness = 0x60;
 }
 
 #if 0
 static int xixi=0;
 #endif
 
-static SCREEN_UPDATE(srmp6)
+UINT32 srmp6_state::screen_update_srmp6(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	srmp6_state *state = screen->machine().driver_data<srmp6_state>();
 	int alpha;
 	int x,y,tileno,height,width,xw,yw,sprite,xb,yb;
-	UINT16 *sprite_list = state->m_sprram_old;
+	UINT16 *sprite_list = m_sprram_old;
 	UINT16 mainlist_offset = 0;
 
 	union
@@ -172,17 +186,17 @@ static SCREEN_UPDATE(srmp6)
 		UINT16 b;
 	} temp;
 
-	bitmap_fill(bitmap,cliprect,0);
+	bitmap.fill(0, cliprect);
 
 #if 0
 	/* debug */
-	if(input_code_pressed_once(screen->machine(), KEYCODE_Q))
+	if(machine().input().code_pressed_once(KEYCODE_Q))
 	{
 		++xixi;
 		printf("%x\n",xixi);
 	}
 
-	if(input_code_pressed_once(screen->machine(), KEYCODE_W))
+	if(machine().input().code_pressed_once(KEYCODE_W))
 	{
 		--xixi;
 		printf("%x\n",xixi);
@@ -193,7 +207,7 @@ static SCREEN_UPDATE(srmp6)
 	while (mainlist_offset<0x2000/2)
 	{
 
-		UINT16 *sprite_sublist = &state->m_sprram_old[sprite_list[mainlist_offset+1]<<3];
+		UINT16 *sprite_sublist = &m_sprram_old[sprite_list[mainlist_offset+1]<<3];
 		UINT16 sublist_length=sprite_list[mainlist_offset+0]&0x7fff; //+1 ?
 		INT16 global_x,global_y, flip_x, flip_y;
 		UINT16 global_pal;
@@ -259,7 +273,7 @@ static SCREEN_UPDATE(srmp6)
 						else
 							yb=y+(height-yw-1)*8+global_y;
 
-						drawgfx_alpha(bitmap,cliprect,screen->machine().gfx[0],tileno,global_pal,flip_x,flip_y,xb,yb,0,alpha);
+						drawgfx_alpha(bitmap,cliprect,machine().gfx[0],tileno,global_pal,flip_x,flip_y,xb,yb,0,alpha);
 						tileno++;
 					}
 				}
@@ -271,12 +285,12 @@ static SCREEN_UPDATE(srmp6)
 		mainlist_offset+=8;
 	}
 
-	memcpy(state->m_sprram_old, state->m_sprram, 0x80000);
+	memcpy(m_sprram_old, m_sprram, 0x80000);
 
-	if(input_code_pressed_once(screen->machine(), KEYCODE_Q))
+	if(machine().input().code_pressed_once(KEYCODE_Q))
 	{
 		FILE *p=fopen("tileram.bin","wb");
-		fwrite(state->m_tileram, 1, 0x100000*16, p);
+		fwrite(m_tileram, 1, 0x100000*16, p);
 		fclose(p);
 	}
 
@@ -288,44 +302,41 @@ static SCREEN_UPDATE(srmp6)
     Main CPU memory handlers
 ***************************************************************************/
 
-static WRITE16_HANDLER( srmp6_input_select_w )
+WRITE16_MEMBER(srmp6_state::srmp6_input_select_w)
 {
-	srmp6_state *state = space->machine().driver_data<srmp6_state>();
 
-	state->m_input_select = data & 0x0f;
+	m_input_select = data & 0x0f;
 }
 
-static READ16_HANDLER( srmp6_inputs_r )
+READ16_MEMBER(srmp6_state::srmp6_inputs_r)
 {
-	srmp6_state *state = space->machine().driver_data<srmp6_state>();
 
-	if (offset == 0)			// DSW
-		return input_port_read(space->machine(), "DSW");
+	if (offset == 0)            // DSW
+		return ioport("DSW")->read();
 
-	switch (state->m_input_select)	// inputs
+	switch (m_input_select) // inputs
 	{
-		case 1<<0: return input_port_read(space->machine(), "KEY0");
-		case 1<<1: return input_port_read(space->machine(), "KEY1");
-		case 1<<2: return input_port_read(space->machine(), "KEY2");
-		case 1<<3: return input_port_read(space->machine(), "KEY3");
+		case 1<<0: return ioport("KEY0")->read();
+		case 1<<1: return ioport("KEY1")->read();
+		case 1<<2: return ioport("KEY2")->read();
+		case 1<<3: return ioport("KEY3")->read();
 	}
 
 	return 0;
 }
 
 
-static WRITE16_HANDLER( video_regs_w )
+WRITE16_MEMBER(srmp6_state::video_regs_w)
 {
-	srmp6_state *state = space->machine().driver_data<srmp6_state>();
 
 	switch(offset)
 	{
 
 		case 0x5e/2: // bank switch, used by ROM check
 		{
-			const UINT8 *rom = space->machine().region("nile")->base();
+			const UINT8 *rom = memregion("nile")->base();
 			LOG(("%x\n",data));
-			memory_set_bankptr(space->machine(), "bank1",(UINT16 *)(rom + (data & 0x0f)*0x200000));
+			membank("bank1")->set_base((UINT16 *)(rom + (data & 0x0f)*0x200000));
 			break;
 		}
 
@@ -333,9 +344,9 @@ static WRITE16_HANDLER( video_regs_w )
 		case 0x5c/2: // either 0x40 explicitely in many places, or according $2083b0 (IT4)
 			//Fade in/out (0x40(dark)-0x60(normal)-0x7e?(bright) reset by 0x00?
 			data = (!data)?0x60:(data == 0x5e)?0x60:data;
-			if (state->m_brightness != data) {
-				state->m_brightness = data;
-				update_palette(space->machine());
+			if (m_brightness != data) {
+				m_brightness = data;
+				update_palette(machine());
 			}
 			break;
 
@@ -350,18 +361,17 @@ static WRITE16_HANDLER( video_regs_w )
 		case 0x56/2: // written 8,9,8,9 successively
 
 		default:
-			logerror("video_regs_w (PC=%06X): %04x = %04x & %04x\n", cpu_get_previouspc(&space->device()), offset*2, data, mem_mask);
+			logerror("video_regs_w (PC=%06X): %04x = %04x & %04x\n", space.device().safe_pcbase(), offset*2, data, mem_mask);
 			break;
 	}
-	COMBINE_DATA(&state->m_video_regs[offset]);
+	COMBINE_DATA(&m_video_regs[offset]);
 }
 
-static READ16_HANDLER( video_regs_r )
+READ16_MEMBER(srmp6_state::video_regs_r)
 {
-	srmp6_state *state = space->machine().driver_data<srmp6_state>();
 
-	logerror("video_regs_r (PC=%06X): %04x\n", cpu_get_previouspc(&space->device()), offset*2);
-	return state->m_video_regs[offset];
+	logerror("video_regs_r (PC=%06X): %04x\n", space.device().safe_pcbase(), offset*2);
+	return m_video_regs[offset];
 }
 
 
@@ -373,7 +383,7 @@ static UINT32 process(running_machine &machine,UINT8 b,UINT32 dst_offset)
 
 	UINT8 *tram=(UINT8*)state->m_tileram;
 
-	if (state->m_lastb == state->m_lastb2)	//rle
+	if (state->m_lastb == state->m_lastb2)  //rle
 	{
 		int i;
 		int rle=(b+1)&0xff;
@@ -381,7 +391,7 @@ static UINT32 process(running_machine &machine,UINT8 b,UINT32 dst_offset)
 		for(i=0;i<rle;++i)
 		{
 			tram[dst_offset + state->m_destl] = state->m_lastb;
-			gfx_element_mark_dirty(machine.gfx[0], (dst_offset + state->m_destl)/0x40);
+			machine.gfx[0]->mark_dirty((dst_offset + state->m_destl)/0x40);
 
 			dst_offset++;
 			++l;
@@ -395,22 +405,21 @@ static UINT32 process(running_machine &machine,UINT8 b,UINT32 dst_offset)
 		state->m_lastb2 = state->m_lastb;
 		state->m_lastb = b;
 		tram[dst_offset + state->m_destl] = b;
-		gfx_element_mark_dirty(machine.gfx[0], (dst_offset + state->m_destl)/0x40);
+		machine.gfx[0]->mark_dirty((dst_offset + state->m_destl)/0x40);
 
 		return 1;
 	}
 }
 
 
-static WRITE16_HANDLER(srmp6_dma_w)
+WRITE16_MEMBER(srmp6_state::srmp6_dma_w)
 {
-	srmp6_state *state = space->machine().driver_data<srmp6_state>();
-	UINT16* dmaram = state->m_dmaram;
+	UINT16* dmaram = m_dmaram;
 
 	COMBINE_DATA(&dmaram[offset]);
 	if (offset==13 && dmaram[offset]==0x40)
 	{
-		const UINT8 *rom = space->machine().region("nile")->base();
+		const UINT8 *rom = memregion("nile")->base();
 		UINT32 srctab=2*((((UINT32)dmaram[5])<<16)|dmaram[4]);
 		UINT32 srcdata=2*((((UINT32)dmaram[11])<<16)|dmaram[10]);
 		UINT32 len=4*(((((UINT32)dmaram[7]&3)<<16)|dmaram[6])+1); //??? WRONG!
@@ -433,10 +442,10 @@ static WRITE16_HANDLER(srmp6_dma_w)
 				dmaram[0x18/2],
 				dmaram[0x1a/2]));
 
-		state->m_destl = dmaram[9]*0x40000;
+		m_destl = dmaram[9]*0x40000;
 
-		state->m_lastb = 0xfffe;
-		state->m_lastb2 = 0xffff;
+		m_lastb = 0xfffe;
+		m_lastb2 = 0xffff;
 
 		while(1)
 		{
@@ -452,13 +461,13 @@ static WRITE16_HANDLER(srmp6_dma_w)
 				{
 					UINT8 real_byte;
 					real_byte = rom[srctab+p*2];
-					tempidx+=process(space->machine(),real_byte,tempidx);
+					tempidx+=process(machine(),real_byte,tempidx);
 					real_byte = rom[srctab+p*2+1];//px[DMA_XOR((current_table_address+p*2+1))];
-					tempidx+=process(space->machine(),real_byte,tempidx);
+					tempidx+=process(machine(),real_byte,tempidx);
 				}
 				else
 				{
-					tempidx+=process(space->machine(),p,tempidx);
+					tempidx+=process(machine(),p,tempidx);
 				}
 
 				ctrl<<=1;
@@ -476,16 +485,17 @@ static WRITE16_HANDLER(srmp6_dma_w)
 }
 
 /* if tileram is actually bigger than the mapped area, how do we access the rest? */
-static READ16_HANDLER(tileram_r)
+READ16_MEMBER(srmp6_state::tileram_r)
 {
-	//return state->m_tileram[offset];
-	return 0x0000;
+
+	return m_chrram[offset];
 }
 
-static WRITE16_HANDLER(tileram_w)
+WRITE16_MEMBER(srmp6_state::tileram_w)
 {
+
 	//UINT16 tmp;
-	//COMBINE_DATA(&state->m_tileram[offset]);
+	COMBINE_DATA(&m_chrram[offset]);
 
 	/* are the DMA registers enabled some other way, or always mapped here, over RAM? */
 	if (offset >= 0xfff00/2 && offset <= 0xfff1a/2 )
@@ -495,13 +505,12 @@ static WRITE16_HANDLER(tileram_w)
 	}
 }
 
-static WRITE16_HANDLER(paletteram_w)
+WRITE16_MEMBER(srmp6_state::paletteram_w)
 {
-	srmp6_state *state = space->machine().driver_data<srmp6_state>();
 	INT8 r, g, b;
-	int brg = state->m_brightness - 0x60;
+	int brg = m_brightness - 0x60;
 
-	paletteram16_xBBBBBGGGGGRRRRR_word_w(space, offset, data, mem_mask);
+	paletteram_xBBBBBGGGGGRRRRR_word_w(space, offset, data, mem_mask);
 
 	if(brg)
 	{
@@ -526,30 +535,36 @@ static WRITE16_HANDLER(paletteram_w)
 			if(b > 0x1F) b = 0x1F;
 		}
 
-		palette_set_color(space->machine(), offset, MAKE_RGB(r << 3, g << 3, b << 3));
+		palette_set_color(machine(), offset, MAKE_RGB(r << 3, g << 3, b << 3));
 	}
 }
 
-static ADDRESS_MAP_START( srmp6, AS_PROGRAM, 16 )
+READ16_MEMBER(srmp6_state::srmp6_irq_ack_r)
+{
+	machine().device("maincpu")->execute().set_input_line(4, CLEAR_LINE);
+	return 0; // value read doesn't matter
+}
+
+static ADDRESS_MAP_START( srmp6_map, AS_PROGRAM, 16, srmp6_state )
 	AM_RANGE(0x000000, 0x0fffff) AM_ROM
-	AM_RANGE(0x200000, 0x23ffff) AM_RAM					// work RAM
-	AM_RANGE(0x600000, 0x7fffff) AM_ROMBANK("bank1")		// banked ROM (used by ROM check)
+	AM_RANGE(0x200000, 0x23ffff) AM_RAM                 // work RAM
+	AM_RANGE(0x600000, 0x7fffff) AM_ROMBANK("bank1")        // banked ROM (used by ROM check)
 	AM_RANGE(0x800000, 0x9fffff) AM_ROM AM_REGION("user1", 0)
 
-	AM_RANGE(0x300000, 0x300005) AM_READWRITE(srmp6_inputs_r, srmp6_input_select_w)		// inputs
-	AM_RANGE(0x480000, 0x480fff) AM_RAM_WRITE(paletteram_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0x4d0000, 0x4d0001) AM_READWRITE(watchdog_reset16_r, watchdog_reset16_w)	// watchdog
+	AM_RANGE(0x300000, 0x300005) AM_READWRITE(srmp6_inputs_r, srmp6_input_select_w)     // inputs
+	AM_RANGE(0x480000, 0x480fff) AM_RAM_WRITE(paletteram_w) AM_SHARE("paletteram")
+	AM_RANGE(0x4d0000, 0x4d0001) AM_READ(srmp6_irq_ack_r)
 
 	// OBJ RAM: checked [$400000-$47dfff]
-	AM_RANGE(0x400000, 0x47ffff) AM_RAM AM_BASE_MEMBER(srmp6_state,m_sprram)
+	AM_RANGE(0x400000, 0x47ffff) AM_RAM AM_SHARE("sprram")
 
 	// CHR RAM: checked [$500000-$5fffff]
-	AM_RANGE(0x500000, 0x5fffff) AM_READWRITE(tileram_r,tileram_w)//AM_RAM AM_BASE_MEMBER(srmp6_state,m_tileram)
-	//AM_RANGE(0x5fff00, 0x5fffff) AM_WRITE(dma_w) AM_BASE_MEMBER(srmp6_state,m_dmaram)
+	AM_RANGE(0x500000, 0x5fffff) AM_READWRITE(tileram_r,tileram_w) AM_SHARE("chrram")
+	//AM_RANGE(0x5fff00, 0x5fffff) AM_WRITE_LEGACY(dma_w) AM_SHARE("dmaram")
 
-	AM_RANGE(0x4c0000, 0x4c006f) AM_READWRITE(video_regs_r, video_regs_w) AM_BASE_MEMBER(srmp6_state,m_video_regs)	// ? gfx regs ST-0026 NiLe
-	AM_RANGE(0x4e0000, 0x4e00ff) AM_DEVREADWRITE("nile", nile_snd_r, nile_snd_w)
-	AM_RANGE(0x4e0100, 0x4e0101) AM_DEVREADWRITE("nile", nile_sndctrl_r, nile_sndctrl_w)
+	AM_RANGE(0x4c0000, 0x4c006f) AM_READWRITE(video_regs_r, video_regs_w) AM_SHARE("video_regs")    // ? gfx regs ST-0026 NiLe
+	AM_RANGE(0x4e0000, 0x4e00ff) AM_DEVREADWRITE("nile", nile_device, nile_snd_r, nile_snd_w)
+	AM_RANGE(0x4e0100, 0x4e0101) AM_DEVREADWRITE("nile", nile_device, nile_sndctrl_r, nile_sndctrl_w)
 	//AM_RANGE(0x4e0110, 0x4e0111) AM_NOP // ? accessed once ($268dc, written $b.w)
 	//AM_RANGE(0x5fff00, 0x5fff1f) AM_RAM // ? see routine $5ca8, video_regs related ???
 
@@ -602,8 +617,8 @@ static INPUT_PORTS_START( srmp6 )
 	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_MAHJONG_PON )
 	PORT_BIT( 0x0180, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("DSW")	/* 16-bit DSW1+DSW2 */
-	PORT_DIPNAME( 0x0007, 0x0007, DEF_STR( Coinage ) )		// DSW1
+	PORT_START("DSW")   /* 16-bit DSW1+DSW2 */
+	PORT_DIPNAME( 0x0007, 0x0007, DEF_STR( Coinage ) )      // DSW1
 	PORT_DIPSETTING(      0x0000, DEF_STR( 5C_1C ) )
 	PORT_DIPSETTING(      0x0001, DEF_STR( 4C_1C ) )
 	PORT_DIPSETTING(      0x0002, DEF_STR( 3C_1C ) )
@@ -627,7 +642,7 @@ static INPUT_PORTS_START( srmp6 )
 	PORT_DIPNAME( 0x0080, 0x0080, "Nudity" )
 	PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0080, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0700, 0x0700, DEF_STR( Difficulty ) )	// DSW2
+	PORT_DIPNAME( 0x0700, 0x0700, DEF_STR( Difficulty ) )   // DSW2
 	PORT_DIPSETTING(      0x0000, "8" )
 	PORT_DIPSETTING(      0x0100, "7" )
 	PORT_DIPSETTING(      0x0200, "6" )
@@ -655,37 +670,26 @@ INPUT_PORTS_END
     Machine driver
 ***************************************************************************/
 
-static INTERRUPT_GEN(srmp6_interrupt)
-{
-	if(!cpu_getiloops(device))
-		device_set_input_line(device,3,HOLD_LINE);
-	else
-		device_set_input_line(device,4,HOLD_LINE);
-}
-
 static MACHINE_CONFIG_START( srmp6, srmp6_state )
 
 	MCFG_CPU_ADD("maincpu", M68000, 16000000)
-	MCFG_CPU_PROGRAM_MAP(srmp6)
-	MCFG_CPU_VBLANK_INT_HACK(srmp6_interrupt,2)
-
+	MCFG_CPU_PROGRAM_MAP(srmp6_map)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", srmp6_state, irq4_line_assert) // irq3 is a timer irq, but it's never enabled
 
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
 	MCFG_SCREEN_SIZE(64*8, 64*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 42*8-1, 0*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(srmp6)
+	MCFG_SCREEN_UPDATE_DRIVER(srmp6_state, screen_update_srmp6)
 
 	MCFG_PALETTE_LENGTH(0x800)
 
-	MCFG_VIDEO_START(srmp6)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
 
-	MCFG_SOUND_ADD("nile", NILE, 0)
+	MCFG_NILE_ADD("nile", 0)
 	MCFG_SOUND_ROUTE(0, "lspeaker", 1.0)
 	MCFG_SOUND_ROUTE(1, "rspeaker", 1.0)
 MACHINE_CONFIG_END
@@ -704,7 +708,7 @@ ROM_START( srmp6 )
 	ROM_LOAD( "sx011-09.10", 0x000000, 0x200000, CRC(58f74438) SHA1(a256e39ca0406e513ab4dbd812fb0b559b4f61f2) )
 
 	/* these are accessed directly by the 68k, DMA device etc.  NOT decoded */
-	ROM_REGION( 0x2000000, "nile", 0)	/* Banked ROM */
+	ROM_REGION( 0x2000000, "nile", 0)   /* Banked ROM */
 	ROM_LOAD16_WORD_SWAP( "sx011-08.15", 0x0000000, 0x0400000, CRC(01b3b1f0) SHA1(bbd60509c9ba78358edbcbb5953eafafd6e2eaf5) ) // CHR00
 	ROM_LOAD16_WORD_SWAP( "sx011-07.16", 0x0400000, 0x0400000, CRC(26e57dac) SHA1(91272268977c5fbff7e8fbe1147bf108bd2ed321) ) // CHR01
 	ROM_LOAD16_WORD_SWAP( "sx011-06.17", 0x0800000, 0x0400000, CRC(220ee32c) SHA1(77f39b54891c2381b967534b0f6d380962eadcae) ) // CHR02
@@ -721,5 +725,5 @@ ROM_END
     Game driver(s)
 ***************************************************************************/
 
-/*GAME( YEAR,NAME,PARENT,MACHINE,INPUT,INIT,MONITOR,COMPANY,FULLNAME,FLAGS)*/
-GAME( 1995, srmp6, 0, srmp6, srmp6, 0, ROT0, "Seta", "Super Real Mahjong P6 (Japan)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND)
+/*GAME( YEAR,NAME,PARENT,MACHINE,INPUT,CLASS,INIT,MONITOR,COMPANY,FULLNAME,FLAGS)*/
+GAME( 1995, srmp6, 0, srmp6, srmp6, driver_device, 0, ROT0, "Seta", "Super Real Mahjong P6 (Japan)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND)

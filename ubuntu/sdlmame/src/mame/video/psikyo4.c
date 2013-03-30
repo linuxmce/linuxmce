@@ -14,9 +14,9 @@ Vid Regs:
 0x3003fe8 -- c0c0???? flipscreen for screen 1 and 2 resp.
              ????8080 Screen size select
 0x3003fec -- a0000xxx always? is in two working games. 0x00000fff is bank select for gfx test
-0x3003ff0 -- 000000ff brightness for screen 1, ffffff00 are probably seperate rgb brightness (not used)
+0x3003ff0 -- 000000ff brightness for screen 1, ffffff00 are probably separate rgb brightness (not used)
 0x3003ff4 -- ffffff00 screen 1 clear colour
-0x3003ff8 -- 000000ff brightness for screen 2, ffffff00 are probably seperate rgb brightness (not used)
+0x3003ff8 -- 000000ff brightness for screen 2, ffffff00 are probably separate rgb brightness (not used)
 0x3003ffc -- ffffff00 screen 2 clear colour
 
 HotDebut: 86010000 00009998 80000000 Small Screen
@@ -31,31 +31,31 @@ HgKairak: 86010000 1f201918 a0000000 Large Screen
 
 
 /* --- SPRITES --- */
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, UINT32 scr )
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, UINT32 scr )
 {
 	/*- Sprite Format 0x0000 - 0x2bff -**
 
-    0 hhhh --yy yyyy yyyy | wwww --xx xxxx xxxx  1  Ffpp pppp ---- -nnn | nnnn nnnn nnnn nnnn
+	0 hhhh --yy yyyy yyyy | wwww --xx xxxx xxxx  1  Ffpp pppp ---- -nnn | nnnn nnnn nnnn nnnn
 
-    y = ypos
-    x = xpos
+	y = ypos
+	x = xpos
 
-    h = height
-    w = width
+	h = height
+	w = width
 
-    f = flip (x)
-    F = flip (y) Unused?
+	f = flip (x)
+	F = flip (y) Unused?
 
-    n = tile number
+	n = tile number
 
-    p = palette
+	p = palette
 
-    **- End Sprite Format -*/
+	**- End Sprite Format -*/
 
 	psikyo4_state *state = machine.driver_data<psikyo4_state>();
-	const gfx_element *gfx = machine.gfx[0];
+	gfx_element *gfx = machine.gfx[0];
 	UINT32 *source = state->m_spriteram;
-	UINT16 *list = (UINT16 *)state->m_spriteram + 0x2c00/2 + 0x04/2; /* 0x2c00/0x2c02 what are these for, pointers? one for each screen */
+	UINT16 *list = (UINT16 *)state->m_spriteram.target() + 0x2c00/2 + 0x04/2; /* 0x2c00/0x2c02 what are these for, pointers? one for each screen */
 	UINT16 listlen = (0xc00/2 - 0x04/2), listcntr = 0;
 	int flipscreen1, flipscreen2;
 
@@ -105,11 +105,11 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 				flipy = !flipy;
 			}
 
-			if (flipx)	{ xstart = wide - 1;  xend = -1;    xinc = -1; }
-			else		{ xstart = 0;         xend = wide;  xinc = +1; }
+			if (flipx)  { xstart = wide - 1;  xend = -1;    xinc = -1; }
+			else        { xstart = 0;         xend = wide;  xinc = +1; }
 
-			if (flipy)	{ ystart = high - 1;  yend = -1;     yinc = -1; }
-			else		{ ystart = 0;         yend = high;   yinc = +1; }
+			if (flipy)  { ystart = high - 1;  yend = -1;     yinc = -1; }
+			else        { ystart = 0;         yend = high;   yinc = +1; }
 
 			for (j = ystart; j != yend; j += yinc)
 			{
@@ -127,25 +127,21 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 	}
 }
 
-SCREEN_UPDATE( psikyo4 )
+UINT32 psikyo4_state::screen_update_psikyo4_left(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	device_t *left_screen  = screen->machine().device("lscreen");
-	device_t *right_screen = screen->machine().device("rscreen");
-
-	if (screen == left_screen)
-	{
-		bitmap_fill(bitmap, cliprect, 0x1000);
-		draw_sprites(screen->machine(), bitmap, cliprect, 0x0000);
-	}
-	if (screen == right_screen)
-	{
-		bitmap_fill(bitmap, cliprect, 0x1001);
-		draw_sprites(screen->machine(), bitmap, cliprect, 0x2000);
-	}
+	bitmap.fill(0x1000, cliprect);
+	draw_sprites(machine(), bitmap, cliprect, 0x0000);
 	return 0;
 }
 
-VIDEO_START( psikyo4 )
+UINT32 psikyo4_state::screen_update_psikyo4_right(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	machine.gfx[0]->color_granularity = 32; /* 256 colour sprites with palette selectable on 32 colour boundaries */
+	bitmap.fill(0x1001, cliprect);
+	draw_sprites(machine(), bitmap, cliprect, 0x2000);
+	return 0;
+}
+
+void psikyo4_state::video_start()
+{
+	machine().gfx[0]->set_granularity(32); /* 256 colour sprites with palette selectable on 32 colour boundaries */
 }

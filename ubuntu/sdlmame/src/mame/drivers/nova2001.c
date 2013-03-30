@@ -119,7 +119,6 @@ e000 - e7ff        R/W      Work RAM
 
 #include "emu.h"
 #include "cpu/z80/z80.h"
-#include "deprecat.h"
 #include "sound/ay8910.h"
 #include "includes/nova2001.h"
 
@@ -133,24 +132,21 @@ e000 - e7ff        R/W      Work RAM
  *************************************/
 
 
-static CUSTOM_INPUT( ninjakun_io_A002_ctrl_r )
+CUSTOM_INPUT_MEMBER(nova2001_state::ninjakun_io_A002_ctrl_r)
 {
-	nova2001_state *state = field->port->machine().driver_data<nova2001_state>();
-	return state->m_ninjakun_io_a002_ctrl;
+	return m_ninjakun_io_a002_ctrl;
 }
 
-static WRITE8_HANDLER( ninjakun_cpu1_io_A002_w )
+WRITE8_MEMBER(nova2001_state::ninjakun_cpu1_io_A002_w)
 {
-	nova2001_state *state = space->machine().driver_data<nova2001_state>();
-	if( data == 0x80 ) state->m_ninjakun_io_a002_ctrl |= 0x01;
-	if( data == 0x40 ) state->m_ninjakun_io_a002_ctrl &= ~0x02;
+	if( data == 0x80 ) m_ninjakun_io_a002_ctrl |= 0x01;
+	if( data == 0x40 ) m_ninjakun_io_a002_ctrl &= ~0x02;
 }
 
-static WRITE8_HANDLER( ninjakun_cpu2_io_A002_w )
+WRITE8_MEMBER(nova2001_state::ninjakun_cpu2_io_A002_w)
 {
-	nova2001_state *state = space->machine().driver_data<nova2001_state>();
-	if( data == 0x40 ) state->m_ninjakun_io_a002_ctrl |= 0x02;
-	if( data == 0x80 ) state->m_ninjakun_io_a002_ctrl &= ~0x01;
+	if( data == 0x40 ) m_ninjakun_io_a002_ctrl |= 0x02;
+	if( data == 0x80 ) m_ninjakun_io_a002_ctrl &= ~0x01;
 }
 
 
@@ -161,11 +157,10 @@ static WRITE8_HANDLER( ninjakun_cpu2_io_A002_w )
  *
  *************************************/
 
-static MACHINE_START( ninjakun )
+MACHINE_START_MEMBER(nova2001_state,ninjakun)
 {
-	nova2001_state *state = machine.driver_data<nova2001_state>();
 	/* Save State Stuff */
-	state_save_register_global(machine, state->m_ninjakun_io_a002_ctrl);
+	state_save_register_global(machine(), m_ninjakun_io_a002_ctrl);
 }
 
 
@@ -176,16 +171,16 @@ static MACHINE_START( ninjakun )
  *
  *************************************/
 
-static ADDRESS_MAP_START( nova2001_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( nova2001_map, AS_PROGRAM, 8, nova2001_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
-	AM_RANGE(0xa000, 0xa7ff) AM_RAM_WRITE(nova2001_fg_videoram_w) AM_BASE_MEMBER(nova2001_state, m_fg_videoram)
-	AM_RANGE(0xa800, 0xafff) AM_RAM_WRITE(nova2001_bg_videoram_w) AM_BASE_MEMBER(nova2001_state, m_bg_videoram)
-	AM_RANGE(0xb000, 0xb7ff) AM_RAM AM_BASE_MEMBER(nova2001_state, m_spriteram)
+	AM_RANGE(0xa000, 0xa7ff) AM_RAM_WRITE(nova2001_fg_videoram_w) AM_SHARE("fg_videoram")
+	AM_RANGE(0xa800, 0xafff) AM_RAM_WRITE(nova2001_bg_videoram_w) AM_SHARE("bg_videoram")
+	AM_RANGE(0xb000, 0xb7ff) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0xb800, 0xbfff) AM_WRITE(nova2001_flipscreen_w)
-	AM_RANGE(0xc000, 0xc000) AM_DEVREADWRITE("ay1", ay8910_r, ay8910_data_w)
-	AM_RANGE(0xc001, 0xc001) AM_DEVREADWRITE("ay2", ay8910_r, ay8910_data_w)
-	AM_RANGE(0xc002, 0xc002) AM_DEVWRITE("ay1", ay8910_address_w)
-	AM_RANGE(0xc003, 0xc003) AM_DEVWRITE("ay2", ay8910_address_w)
+	AM_RANGE(0xc000, 0xc000) AM_DEVREADWRITE_LEGACY("ay1", ay8910_r, ay8910_data_w)
+	AM_RANGE(0xc001, 0xc001) AM_DEVREADWRITE_LEGACY("ay2", ay8910_r, ay8910_data_w)
+	AM_RANGE(0xc002, 0xc002) AM_DEVWRITE_LEGACY("ay1", ay8910_address_w)
+	AM_RANGE(0xc003, 0xc003) AM_DEVWRITE_LEGACY("ay2", ay8910_address_w)
 	AM_RANGE(0xc004, 0xc004) AM_READ(watchdog_reset_r)
 	AM_RANGE(0xc006, 0xc006) AM_READ_PORT("IN0")
 	AM_RANGE(0xc007, 0xc007) AM_READ_PORT("IN1")
@@ -194,85 +189,85 @@ static ADDRESS_MAP_START( nova2001_map, AS_PROGRAM, 8 )
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( ninjakun_cpu1_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( ninjakun_cpu1_map, AS_PROGRAM, 8, nova2001_state )
 	AM_RANGE(0x0000, 0x1fff) AM_ROM
 	AM_RANGE(0x2000, 0x7fff) AM_ROM
-	AM_RANGE(0x8000, 0x8001) AM_DEVWRITE("ay1", ay8910_address_data_w)
-	AM_RANGE(0x8001, 0x8001) AM_DEVREAD("ay1", ay8910_r)
-	AM_RANGE(0x8002, 0x8003) AM_DEVWRITE("ay2", ay8910_address_data_w)
-	AM_RANGE(0x8003, 0x8003) AM_DEVREAD("ay2", ay8910_r)
+	AM_RANGE(0x8000, 0x8001) AM_DEVWRITE_LEGACY("ay1", ay8910_address_data_w)
+	AM_RANGE(0x8001, 0x8001) AM_DEVREAD_LEGACY("ay1", ay8910_r)
+	AM_RANGE(0x8002, 0x8003) AM_DEVWRITE_LEGACY("ay2", ay8910_address_data_w)
+	AM_RANGE(0x8003, 0x8003) AM_DEVREAD_LEGACY("ay2", ay8910_r)
 	AM_RANGE(0xa000, 0xa000) AM_READ_PORT("IN0")
 	AM_RANGE(0xa001, 0xa001) AM_READ_PORT("IN1")
 	AM_RANGE(0xa002, 0xa002) AM_READ_PORT("IN2") AM_WRITE(ninjakun_cpu1_io_A002_w)
 	AM_RANGE(0xa003, 0xa003) AM_WRITE(pkunwar_flipscreen_w)
-	AM_RANGE(0xc000, 0xc7ff) AM_RAM_WRITE(nova2001_fg_videoram_w) AM_BASE_MEMBER(nova2001_state, m_fg_videoram) AM_SHARE("share1")
-	AM_RANGE(0xc800, 0xcfff) AM_READWRITE(ninjakun_bg_videoram_r, ninjakun_bg_videoram_w) AM_BASE_MEMBER(nova2001_state, m_bg_videoram) AM_SHARE("share2")
-	AM_RANGE(0xd000, 0xd7ff) AM_RAM AM_BASE_MEMBER(nova2001_state, m_spriteram) AM_SHARE("share3")
-	AM_RANGE(0xd800, 0xd9ff) AM_RAM_WRITE(ninjakun_paletteram_w) AM_BASE_GENERIC(paletteram) AM_SHARE("share4")
-	AM_RANGE(0xe000, 0xe3ff) AM_RAM AM_SHARE("share5")
-	AM_RANGE(0xe400, 0xe7ff) AM_RAM AM_SHARE("share6")
+	AM_RANGE(0xc000, 0xc7ff) AM_RAM_WRITE(nova2001_fg_videoram_w) AM_SHARE("fg_videoram")
+	AM_RANGE(0xc800, 0xcfff) AM_READWRITE(ninjakun_bg_videoram_r, ninjakun_bg_videoram_w) AM_SHARE("bg_videoram")
+	AM_RANGE(0xd000, 0xd7ff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0xd800, 0xd9ff) AM_RAM_WRITE(ninjakun_paletteram_w) AM_SHARE("paletteram")
+	AM_RANGE(0xe000, 0xe3ff) AM_RAM AM_SHARE("share1")
+	AM_RANGE(0xe400, 0xe7ff) AM_RAM AM_SHARE("share2")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( ninjakun_cpu2_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( ninjakun_cpu2_map, AS_PROGRAM, 8, nova2001_state )
 	AM_RANGE(0x0000, 0x1fff) AM_ROM
 	AM_RANGE(0x2000, 0x7fff) AM_ROM AM_REGION("maincpu", 0x2000)
-	AM_RANGE(0x8000, 0x8001) AM_DEVWRITE("ay1", ay8910_address_data_w)
-	AM_RANGE(0x8001, 0x8001) AM_DEVREAD("ay1", ay8910_r)
-	AM_RANGE(0x8002, 0x8003) AM_DEVWRITE("ay2", ay8910_address_data_w)
-	AM_RANGE(0x8003, 0x8003) AM_DEVREAD("ay2", ay8910_r)
+	AM_RANGE(0x8000, 0x8001) AM_DEVWRITE_LEGACY("ay1", ay8910_address_data_w)
+	AM_RANGE(0x8001, 0x8001) AM_DEVREAD_LEGACY("ay1", ay8910_r)
+	AM_RANGE(0x8002, 0x8003) AM_DEVWRITE_LEGACY("ay2", ay8910_address_data_w)
+	AM_RANGE(0x8003, 0x8003) AM_DEVREAD_LEGACY("ay2", ay8910_r)
 	AM_RANGE(0xa000, 0xa000) AM_READ_PORT("IN0")
 	AM_RANGE(0xa001, 0xa001) AM_READ_PORT("IN1")
 	AM_RANGE(0xa002, 0xa002) AM_READ_PORT("IN2") AM_WRITE(ninjakun_cpu2_io_A002_w)
 	AM_RANGE(0xa003, 0xa003) AM_WRITE(nova2001_flipscreen_w)
-	AM_RANGE(0xc000, 0xc7ff) AM_RAM_WRITE(nova2001_fg_videoram_w) AM_SHARE("share1")
-	AM_RANGE(0xc800, 0xcfff) AM_READWRITE(ninjakun_bg_videoram_r, ninjakun_bg_videoram_w) AM_SHARE("share2")
-	AM_RANGE(0xd000, 0xd7ff) AM_RAM AM_SHARE("share3")
-	AM_RANGE(0xd800, 0xd9ff) AM_RAM_WRITE(ninjakun_paletteram_w) AM_SHARE("share4")
-	AM_RANGE(0xe000, 0xe3ff) AM_RAM AM_SHARE("share6") /* swapped wrt CPU1 */
-	AM_RANGE(0xe400, 0xe7ff) AM_RAM AM_SHARE("share5") /* swapped wrt CPU1 */
+	AM_RANGE(0xc000, 0xc7ff) AM_RAM_WRITE(nova2001_fg_videoram_w) AM_SHARE("fg_videoram")
+	AM_RANGE(0xc800, 0xcfff) AM_READWRITE(ninjakun_bg_videoram_r, ninjakun_bg_videoram_w) AM_SHARE("bg_videoram")
+	AM_RANGE(0xd000, 0xd7ff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0xd800, 0xd9ff) AM_RAM_WRITE(ninjakun_paletteram_w) AM_SHARE("paletteram")
+	AM_RANGE(0xe000, 0xe3ff) AM_RAM AM_SHARE("share2") /* swapped wrt CPU1 */
+	AM_RANGE(0xe400, 0xe7ff) AM_RAM AM_SHARE("share1") /* swapped wrt CPU1 */
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( pkunwar_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( pkunwar_map, AS_PROGRAM, 8, nova2001_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
-	AM_RANGE(0x8000, 0x87ff) AM_RAM AM_BASE_MEMBER(nova2001_state, m_spriteram)
-	AM_RANGE(0x8800, 0x8fff) AM_RAM_WRITE(nova2001_bg_videoram_w) AM_BASE_MEMBER(nova2001_state, m_bg_videoram)
-	AM_RANGE(0xa000, 0xa001) AM_DEVWRITE("ay1", ay8910_address_data_w)
-	AM_RANGE(0xa001, 0xa001) AM_DEVREAD("ay1", ay8910_r)
-	AM_RANGE(0xa002, 0xa003) AM_DEVWRITE("ay2", ay8910_address_data_w)
-	AM_RANGE(0xa003, 0xa003) AM_DEVREAD("ay2", ay8910_r)
+	AM_RANGE(0x8000, 0x87ff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0x8800, 0x8fff) AM_RAM_WRITE(nova2001_bg_videoram_w) AM_SHARE("bg_videoram")
+	AM_RANGE(0xa000, 0xa001) AM_DEVWRITE_LEGACY("ay1", ay8910_address_data_w)
+	AM_RANGE(0xa001, 0xa001) AM_DEVREAD_LEGACY("ay1", ay8910_r)
+	AM_RANGE(0xa002, 0xa003) AM_DEVWRITE_LEGACY("ay2", ay8910_address_data_w)
+	AM_RANGE(0xa003, 0xa003) AM_DEVREAD_LEGACY("ay2", ay8910_r)
 	AM_RANGE(0xc000, 0xc7ff) AM_RAM
 	AM_RANGE(0xe000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( pkunwar_io, AS_IO, 8 )
+static ADDRESS_MAP_START( pkunwar_io, AS_IO, 8, nova2001_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0x00) AM_WRITE(pkunwar_flipscreen_w)
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( raiders5_cpu1_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( raiders5_cpu1_map, AS_PROGRAM, 8, nova2001_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
-	AM_RANGE(0x8000, 0x87ff) AM_RAM AM_BASE_MEMBER(nova2001_state, m_spriteram)
-	AM_RANGE(0x8800, 0x8fff) AM_RAM_WRITE(nova2001_fg_videoram_w) AM_BASE_MEMBER(nova2001_state, m_fg_videoram)
-	AM_RANGE(0x9000, 0x97ff) AM_READWRITE(ninjakun_bg_videoram_r, ninjakun_bg_videoram_w) AM_BASE_MEMBER(nova2001_state, m_bg_videoram)
+	AM_RANGE(0x8000, 0x87ff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0x8800, 0x8fff) AM_RAM_WRITE(nova2001_fg_videoram_w) AM_SHARE("fg_videoram")
+	AM_RANGE(0x9000, 0x97ff) AM_READWRITE(ninjakun_bg_videoram_r, ninjakun_bg_videoram_w) AM_SHARE("bg_videoram")
 	AM_RANGE(0xa000, 0xa000) AM_WRITE(nova2001_scroll_x_w)
 	AM_RANGE(0xa001, 0xa001) AM_WRITE(nova2001_scroll_y_w)
 	AM_RANGE(0xa002, 0xa002) AM_WRITE(pkunwar_flipscreen_w)
-	AM_RANGE(0xc000, 0xc001) AM_DEVWRITE("ay1", ay8910_address_data_w)
-	AM_RANGE(0xc001, 0xc001) AM_DEVREAD("ay1", ay8910_r)
-	AM_RANGE(0xc002, 0xc003) AM_DEVWRITE("ay2", ay8910_address_data_w)
-	AM_RANGE(0xc003, 0xc003) AM_DEVREAD("ay2", ay8910_r)
-	AM_RANGE(0xd000, 0xd1ff) AM_RAM_WRITE(ninjakun_paletteram_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0xc000, 0xc001) AM_DEVWRITE_LEGACY("ay1", ay8910_address_data_w)
+	AM_RANGE(0xc001, 0xc001) AM_DEVREAD_LEGACY("ay1", ay8910_r)
+	AM_RANGE(0xc002, 0xc003) AM_DEVWRITE_LEGACY("ay2", ay8910_address_data_w)
+	AM_RANGE(0xc003, 0xc003) AM_DEVREAD_LEGACY("ay2", ay8910_r)
+	AM_RANGE(0xd000, 0xd1ff) AM_RAM_WRITE(ninjakun_paletteram_w) AM_SHARE("paletteram")
 	AM_RANGE(0xe000, 0xe7ff) AM_RAM AM_SHARE("share1")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( raiders5_cpu2_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( raiders5_cpu2_map, AS_PROGRAM, 8, nova2001_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
-	AM_RANGE(0x8000, 0x8001) AM_DEVWRITE("ay1", ay8910_address_data_w)
-	AM_RANGE(0x8001, 0x8001) AM_DEVREAD("ay1", ay8910_r)
-	AM_RANGE(0x8002, 0x8003) AM_DEVWRITE("ay2", ay8910_address_data_w)
-	AM_RANGE(0x8003, 0x8003) AM_DEVREAD("ay2", ay8910_r)
+	AM_RANGE(0x8000, 0x8001) AM_DEVWRITE_LEGACY("ay1", ay8910_address_data_w)
+	AM_RANGE(0x8001, 0x8001) AM_DEVREAD_LEGACY("ay1", ay8910_r)
+	AM_RANGE(0x8002, 0x8003) AM_DEVWRITE_LEGACY("ay2", ay8910_address_data_w)
+	AM_RANGE(0x8003, 0x8003) AM_DEVREAD_LEGACY("ay2", ay8910_r)
 	AM_RANGE(0x9000, 0x9000) AM_READNOP /* unknown */
 	AM_RANGE(0xa000, 0xa7ff) AM_RAM AM_SHARE("share1")
 	AM_RANGE(0xc000, 0xc000) AM_READNOP /* unknown */
@@ -283,7 +278,7 @@ static ADDRESS_MAP_START( raiders5_cpu2_map, AS_PROGRAM, 8 )
 	AM_RANGE(0xe002, 0xe002) AM_WRITE(pkunwar_flipscreen_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( raiders5_io, AS_IO, 8 )
+static ADDRESS_MAP_START( raiders5_io, AS_IO, 8, nova2001_state )
 	AM_RANGE(0x00, 0x00) AM_READNOP /* unknown */
 ADDRESS_MAP_END
 
@@ -302,8 +297,8 @@ static INPUT_PORTS_START( nova2001 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
 	PORT_BIT( 0x30, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 )	// pause
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 )	// fire
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 )    // pause
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 )    // fire
 
 	PORT_START("IN1")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_COCKTAIL
@@ -319,7 +314,7 @@ static INPUT_PORTS_START( nova2001 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT( 0x78, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 
 	PORT_START("DSW1")
 	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Cabinet ) ) PORT_DIPLOCATION("SW1:1")
@@ -364,56 +359,56 @@ static INPUT_PORTS_START( nova2001 )
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( ninjakun )
-	PORT_START("IN0")	/* 0xa000 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW,	IPT_JOYSTICK_LEFT ) PORT_2WAY /* "XPOS1" */
-	PORT_BIT( 0x02, IP_ACTIVE_LOW,	IPT_JOYSTICK_RIGHT ) PORT_2WAY
-	PORT_BIT( 0x04, IP_ACTIVE_LOW,	IPT_BUTTON2 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW,	IPT_BUTTON1 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW,	IPT_UNKNOWN )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW,	IPT_START1  )
+	PORT_START("IN0")   /* 0xa000 */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_JOYSTICK_LEFT ) PORT_2WAY /* "XPOS1" */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_JOYSTICK_RIGHT ) PORT_2WAY
+	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_BUTTON2 )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_BUTTON1 )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_UNKNOWN )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_START1  )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 
-	PORT_START("IN1")	/* 0xa001 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW,	IPT_JOYSTICK_LEFT) PORT_2WAY PORT_COCKTAIL /* "YPOS1" */
-	PORT_BIT( 0x02, IP_ACTIVE_LOW,	IPT_JOYSTICK_RIGHT) PORT_2WAY PORT_COCKTAIL
-	PORT_BIT( 0x04, IP_ACTIVE_LOW,	IPT_BUTTON2 ) PORT_COCKTAIL
-	PORT_BIT( 0x08, IP_ACTIVE_LOW,	IPT_BUTTON1 ) PORT_COCKTAIL
-	PORT_BIT( 0x10, IP_ACTIVE_LOW,	IPT_UNKNOWN )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW,	IPT_START2  )
+	PORT_START("IN1")   /* 0xa001 */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_JOYSTICK_LEFT) PORT_2WAY PORT_COCKTAIL /* "YPOS1" */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_JOYSTICK_RIGHT) PORT_2WAY PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_BUTTON2 ) PORT_COCKTAIL
+	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_UNKNOWN )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_START2  )
 	PORT_SERVICE( 0x40, IP_ACTIVE_HIGH )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN1 )
 
-	PORT_START("IN2")	/* 0xa002 */
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_VBLANK )
-	PORT_BIT( 0x0c, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(ninjakun_io_A002_ctrl_r, NULL)
+	PORT_START("IN2")   /* 0xa002 */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
+	PORT_BIT( 0x0c, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, nova2001_state,ninjakun_io_A002_ctrl_r, NULL)
 
-	PORT_START("DSW1")
-	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Cabinet ) )  PORT_DIPLOCATION("SW1:1")
+	PORT_START("DSW1") // printed "SW 2"
+	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Cabinet ) )  PORT_DIPLOCATION("SW2:1")
 	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Cocktail ) )
-	PORT_DIPNAME( 0x06, 0x04, DEF_STR( Lives ) )  PORT_DIPLOCATION("SW1:2,3")
+	PORT_DIPNAME( 0x06, 0x04, DEF_STR( Lives ) )  PORT_DIPLOCATION("SW2:2,3")
 	PORT_DIPSETTING(    0x02, "2" )
-	PORT_DIPSETTING(    0x04, "3" )
+	PORT_DIPSETTING(    0x04, "3" ) // factory default = "3"
 	PORT_DIPSETTING(    0x06, "4" )
 	PORT_DIPSETTING(    0x00, "5" )
-	PORT_DIPNAME( 0x08, 0x08, "First Bonus" )  PORT_DIPLOCATION("SW1:4")
-	PORT_DIPSETTING(    0x08, "30000" )
+	PORT_DIPNAME( 0x08, 0x08, "First Bonus" )  PORT_DIPLOCATION("SW2:4")
+	PORT_DIPSETTING(    0x08, "30000" ) // factory default = "30000"
 	PORT_DIPSETTING(    0x00, "40000" )
-	PORT_DIPNAME( 0x30, 0x30, "Second Bonus" )  PORT_DIPLOCATION("SW1:5,6")
+	PORT_DIPNAME( 0x30, 0x20, "Second Bonus" )  PORT_DIPLOCATION("SW2:5,6")
 	PORT_DIPSETTING(    0x00, "No Bonus" )
 	PORT_DIPSETTING(    0x10, "Every 30000" )
 	PORT_DIPSETTING(    0x30, "Every 50000" )
-	PORT_DIPSETTING(    0x20, "Every 70000" )
-	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW1:7")
+	PORT_DIPSETTING(    0x20, "Every 70000" ) // factory default = "70000"
+	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW2:7")
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Difficulty ) )  PORT_DIPLOCATION("SW1:8")
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Difficulty ) )  PORT_DIPLOCATION("SW2:8")
 	PORT_DIPSETTING(    0x80, DEF_STR( Normal ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Hard )   )
 
-	PORT_START("DSW2")
-	PORT_DIPNAME( 0x07, 0x07, DEF_STR( Coinage ) )  PORT_DIPLOCATION("SW2:1,2,3")
+	PORT_START("DSW2") // printed "SW 1"
+	PORT_DIPNAME( 0x07, 0x07, DEF_STR( Coinage ) )  PORT_DIPLOCATION("SW1:1,2,3")
 	PORT_DIPSETTING(    0x04, DEF_STR( 4C_1C ) )
 	PORT_DIPSETTING(    0x05, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( 4C_2C ) )
@@ -422,17 +417,17 @@ static INPUT_PORTS_START( ninjakun )
 	PORT_DIPSETTING(    0x02, DEF_STR( 2C_2C ) )
 	PORT_DIPSETTING(    0x07, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(    0x03, DEF_STR( 1C_2C ) )
-	PORT_DIPNAME( 0x08, 0x08, "High Score Names" )  PORT_DIPLOCATION("SW2:4")
+	PORT_DIPNAME( 0x08, 0x08, "High Score Names" )  PORT_DIPLOCATION("SW1:4")
 	PORT_DIPSETTING(    0x00, "3 Letters" )
 	PORT_DIPSETTING(    0x08, "8 Letters" )
-	PORT_DIPNAME( 0x10, 0x00, DEF_STR( Allow_Continue ) )  PORT_DIPLOCATION("SW2:5")
+	PORT_DIPNAME( 0x10, 0x00, DEF_STR( Allow_Continue ) )  PORT_DIPLOCATION("SW1:5")
 	PORT_DIPSETTING(    0x10, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
-        PORT_DIPUNUSED_DIPLOC( 0x20, IP_ACTIVE_LOW, "SW2:6" )
-	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Free_Play ) )  PORT_DIPLOCATION("SW2:7")
+	PORT_DIPUNUSED_DIPLOC( 0x20, IP_ACTIVE_LOW, "SW1:6" )
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Free_Play ) )  PORT_DIPLOCATION("SW1:7")
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, "Infinite Lives (If Free Play)" )  PORT_DIPLOCATION("SW2:8")
+	PORT_DIPNAME( 0x80, 0x80, "Infinite Lives (If Free Play)" )  PORT_DIPLOCATION("SW1:8")
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 INPUT_PORTS_END
@@ -446,7 +441,7 @@ static INPUT_PORTS_START( pkunwar )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 
 	PORT_START("IN1")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_COCKTAIL
@@ -459,14 +454,14 @@ static INPUT_PORTS_START( pkunwar )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )
 
 	PORT_START("IN2")
-        PORT_DIPUNKNOWN_DIPLOC( 0x01, IP_ACTIVE_LOW, "SW1:1" )
-        PORT_DIPUNKNOWN_DIPLOC( 0x02, IP_ACTIVE_LOW, "SW1:2" )
-        PORT_DIPUNKNOWN_DIPLOC( 0x04, IP_ACTIVE_LOW, "SW1:3" )
-        PORT_DIPUNKNOWN_DIPLOC( 0x08, IP_ACTIVE_LOW, "SW1:4" )
-        PORT_DIPUNKNOWN_DIPLOC( 0x10, IP_ACTIVE_LOW, "SW1:5" )
-        PORT_DIPUNKNOWN_DIPLOC( 0x20, IP_ACTIVE_LOW, "SW1:6" )
-        PORT_DIPUNKNOWN_DIPLOC( 0x40, IP_ACTIVE_LOW, "SW1:7" )
-        PORT_DIPUNKNOWN_DIPLOC( 0x80, IP_ACTIVE_LOW, "SW1:8" )
+	PORT_DIPUNUSED_DIPLOC( 0x01, IP_ACTIVE_LOW, "SW1:1" )
+	PORT_DIPUNUSED_DIPLOC( 0x02, IP_ACTIVE_LOW, "SW1:2" )
+	PORT_DIPUNUSED_DIPLOC( 0x04, IP_ACTIVE_LOW, "SW1:3" )
+	PORT_DIPUNUSED_DIPLOC( 0x08, IP_ACTIVE_LOW, "SW1:4" )
+	PORT_DIPUNUSED_DIPLOC( 0x10, IP_ACTIVE_LOW, "SW1:5" )
+	PORT_DIPUNUSED_DIPLOC( 0x20, IP_ACTIVE_LOW, "SW1:6" )
+	PORT_DIPUNUSED_DIPLOC( 0x40, IP_ACTIVE_LOW, "SW1:7" )
+	PORT_DIPUNUSED_DIPLOC( 0x80, IP_ACTIVE_LOW, "SW1:8" )
 
 	PORT_START("DSW1")
 	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coinage ) )  PORT_DIPLOCATION("SW2:1,2")
@@ -495,7 +490,7 @@ INPUT_PORTS_END
 
 static INPUT_PORTS_START( raiders5 )
 	PORT_START("IN0")
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
@@ -554,7 +549,7 @@ static INPUT_PORTS_START( raiders5 )
 	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Allow_Continue ) )  PORT_DIPLOCATION("SW2:5")
 	PORT_DIPSETTING(    0x00, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x10, DEF_STR( Yes ) )
-        PORT_DIPUNUSED_DIPLOC( 0x20, IP_ACTIVE_LOW, "SW2:6" )
+	PORT_DIPUNUSED_DIPLOC( 0x20, IP_ACTIVE_LOW, "SW2:6" )
 	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Free_Play ) )  PORT_DIPLOCATION("SW2:7") // Unused in manual
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -605,26 +600,26 @@ static const gfx_layout layout16x16 =
 };
 
 static GFXDECODE_START( nova2001 )
-	GFXDECODE_ENTRY( "gfx1", 0x0000, layout16x16,    0x000, 16 )	// sprites
-	GFXDECODE_ENTRY( "gfx1", 0x0000, layout8x8_part, 0x000, 16 )	// fg tiles (using only 1/4th of the ROM space)
-	GFXDECODE_ENTRY( "gfx1", 0x4000, layout8x8_part, 0x100, 16 )	// bg tiles (using only 1/4th of the ROM space)
+	GFXDECODE_ENTRY( "gfx1", 0x0000, layout16x16,    0x000, 16 )    // sprites
+	GFXDECODE_ENTRY( "gfx1", 0x0000, layout8x8_part, 0x000, 16 )    // fg tiles (using only 1/4th of the ROM space)
+	GFXDECODE_ENTRY( "gfx1", 0x4000, layout8x8_part, 0x100, 16 )    // bg tiles (using only 1/4th of the ROM space)
 GFXDECODE_END
 
 static GFXDECODE_START( ninjakun )
-	GFXDECODE_ENTRY( "gfx1", 0, layout16x16, 0x200, 16 )	// sprites
-	GFXDECODE_ENTRY( "gfx1", 0, layout8x8,   0x000, 16 )	// fg tiles
-	GFXDECODE_ENTRY( "gfx2", 0, layout8x8,   0x100, 16 )	// bg tiles
+	GFXDECODE_ENTRY( "gfx1", 0, layout16x16, 0x200, 16 )    // sprites
+	GFXDECODE_ENTRY( "gfx1", 0, layout8x8,   0x000, 16 )    // fg tiles
+	GFXDECODE_ENTRY( "gfx2", 0, layout8x8,   0x100, 16 )    // bg tiles
 GFXDECODE_END
 
 static GFXDECODE_START( pkunwar )
-	GFXDECODE_ENTRY( "gfx1", 0, layout16x16, 0x000, 16 )	// sprites
-	GFXDECODE_ENTRY( "gfx1", 0, layout8x8,   0x100, 16 )	// bg tiles
+	GFXDECODE_ENTRY( "gfx1", 0, layout16x16, 0x000, 16 )    // sprites
+	GFXDECODE_ENTRY( "gfx1", 0, layout8x8,   0x100, 16 )    // bg tiles
 GFXDECODE_END
 
 static GFXDECODE_START( raiders5 )
-	GFXDECODE_ENTRY( "gfx1", 0, layout16x16,    0x200, 16 )	// sprites
-	GFXDECODE_ENTRY( "gfx1", 0, layout8x8_part, 0x000, 16 )	// fg tiles (using only 1/4th of the ROM space)
-	GFXDECODE_ENTRY( "gfx2", 0, layout8x8,      0x100, 16 )	// bg tiles
+	GFXDECODE_ENTRY( "gfx1", 0, layout16x16,    0x200, 16 ) // sprites
+	GFXDECODE_ENTRY( "gfx1", 0, layout8x8_part, 0x000, 16 ) // fg tiles (using only 1/4th of the ROM space)
+	GFXDECODE_ENTRY( "gfx2", 0, layout8x8,      0x100, 16 ) // bg tiles
 GFXDECODE_END
 
 
@@ -641,8 +636,8 @@ static const ay8910_interface nova2001_ay8910_interface_1 =
 	AY8910_DEFAULT_LOADS,
 	DEVCB_NULL,
 	DEVCB_NULL,
-	DEVCB_MEMORY_HANDLER("maincpu", PROGRAM, nova2001_scroll_x_w),
-	DEVCB_MEMORY_HANDLER("maincpu", PROGRAM, nova2001_scroll_y_w)
+	DEVCB_DRIVER_MEMBER(nova2001_state, nova2001_scroll_x_w),
+	DEVCB_DRIVER_MEMBER(nova2001_state, nova2001_scroll_y_w)
 };
 
 static const ay8910_interface nova2001_ay8910_interface_2 =
@@ -686,28 +681,27 @@ static const ay8910_interface pkunwar_ay8910_interface_2 =
 static MACHINE_CONFIG_START( nova2001, nova2001_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, MAIN_CLOCK/4)	// 3 MHz verified on schematics
+	MCFG_CPU_ADD("maincpu", Z80, MAIN_CLOCK/4)  // 3 MHz verified on schematics
 	MCFG_CPU_PROGRAM_MAP(nova2001_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", nova2001_state,  irq0_line_hold)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 4*8, 28*8-1)
-	MCFG_SCREEN_UPDATE(nova2001)
+	MCFG_SCREEN_UPDATE_DRIVER(nova2001_state, screen_update_nova2001)
 
 	MCFG_GFXDECODE(nova2001)
 	MCFG_PALETTE_LENGTH(0x200)
 
-	MCFG_PALETTE_INIT(nova2001)
-	MCFG_VIDEO_START(nova2001)
+	MCFG_PALETTE_INIT_OVERRIDE(nova2001_state,nova2001)
+	MCFG_VIDEO_START_OVERRIDE(nova2001_state,nova2001)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("ay1", AY8910, MAIN_CLOCK/6)	// 2 MHz verified on schematics
+	MCFG_SOUND_ADD("ay1", AY8910, MAIN_CLOCK/6) // 2 MHz verified on schematics
 	MCFG_SOUND_CONFIG(nova2001_ay8910_interface_1)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.25)
 
@@ -719,40 +713,39 @@ MACHINE_CONFIG_END
 static MACHINE_CONFIG_START( ninjakun, nova2001_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, MAIN_CLOCK/4)	// 3 MHz
+	MCFG_CPU_ADD("maincpu", Z80, MAIN_CLOCK/4)  // 3 MHz
 	MCFG_CPU_PROGRAM_MAP(ninjakun_cpu1_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", nova2001_state,  irq0_line_hold)
 
-	MCFG_CPU_ADD("sub", Z80, MAIN_CLOCK/4)	// 3 MHz
+	MCFG_CPU_ADD("sub", Z80, MAIN_CLOCK/4)  // 3 MHz
 	MCFG_CPU_PROGRAM_MAP(ninjakun_cpu2_map)
-	MCFG_CPU_VBLANK_INT_HACK(irq0_line_hold,4) /* ? */
+	MCFG_CPU_PERIODIC_INT_DRIVER(nova2001_state, irq0_line_hold, 4*60) /* ? */
 
-	MCFG_QUANTUM_TIME(attotime::from_hz(6000))	/* 100 CPU slices per frame */
+	MCFG_QUANTUM_TIME(attotime::from_hz(6000))  /* 100 CPU slices per frame */
 
-	MCFG_MACHINE_START(ninjakun)
+	MCFG_MACHINE_START_OVERRIDE(nova2001_state,ninjakun)
 
-    /* video hardware */
+	/* video hardware */
 
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 4*8, 28*8-1 )
-	MCFG_SCREEN_UPDATE(ninjakun)
+	MCFG_SCREEN_UPDATE_DRIVER(nova2001_state, screen_update_ninjakun)
 
 	MCFG_GFXDECODE(ninjakun)
 	MCFG_PALETTE_LENGTH(0x300)
 
-	MCFG_VIDEO_START(ninjakun)
+	MCFG_VIDEO_START_OVERRIDE(nova2001_state,ninjakun)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("ay1", AY8910, MAIN_CLOCK/4)	// 3 MHz
-	MCFG_SOUND_CONFIG(nova2001_ay8910_interface_2)	// note swapped order wrt nova2001
+	MCFG_SOUND_ADD("ay1", AY8910, MAIN_CLOCK/4) // 3 MHz
+	MCFG_SOUND_CONFIG(nova2001_ay8910_interface_2)  // note swapped order wrt nova2001
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.20)
 
-	MCFG_SOUND_ADD("ay2", AY8910, MAIN_CLOCK/4)	// 3 MHz
+	MCFG_SOUND_ADD("ay2", AY8910, MAIN_CLOCK/4) // 3 MHz
 	MCFG_SOUND_CONFIG(nova2001_ay8910_interface_1)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.20)
 MACHINE_CONFIG_END
@@ -760,29 +753,28 @@ MACHINE_CONFIG_END
 static MACHINE_CONFIG_START( pkunwar, nova2001_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, MAIN_CLOCK/4)	// 3 MHz
+	MCFG_CPU_ADD("maincpu", Z80, MAIN_CLOCK/4)  // 3 MHz
 	MCFG_CPU_PROGRAM_MAP(pkunwar_map)
 	MCFG_CPU_IO_MAP(pkunwar_io)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", nova2001_state,  irq0_line_hold)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 4*8, 28*8-1)
-	MCFG_SCREEN_UPDATE(pkunwar)
+	MCFG_SCREEN_UPDATE_DRIVER(nova2001_state, screen_update_pkunwar)
 
 	MCFG_GFXDECODE(pkunwar)
 	MCFG_PALETTE_LENGTH(0x200)
 
-	MCFG_PALETTE_INIT(nova2001)
-	MCFG_VIDEO_START(pkunwar)
+	MCFG_PALETTE_INIT_OVERRIDE(nova2001_state,nova2001)
+	MCFG_VIDEO_START_OVERRIDE(nova2001_state,pkunwar)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("ay1", AY8910, MAIN_CLOCK/8)	// 1.5MHz (correct?)
+	MCFG_SOUND_ADD("ay1", AY8910, MAIN_CLOCK/8) // 1.5MHz (correct?)
 	MCFG_SOUND_CONFIG(pkunwar_ay8910_interface_1)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.25)
 
@@ -794,34 +786,33 @@ MACHINE_CONFIG_END
 static MACHINE_CONFIG_START( raiders5, nova2001_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, MAIN_CLOCK/4)	// 3 MHz
+	MCFG_CPU_ADD("maincpu", Z80, MAIN_CLOCK/4)  // 3 MHz
 	MCFG_CPU_PROGRAM_MAP(raiders5_cpu1_map)
 	MCFG_CPU_IO_MAP(raiders5_io)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", nova2001_state,  irq0_line_hold)
 
-	MCFG_CPU_ADD("sub", Z80, MAIN_CLOCK/4)	// 3 MHz
+	MCFG_CPU_ADD("sub", Z80, MAIN_CLOCK/4)  // 3 MHz
 	MCFG_CPU_PROGRAM_MAP(raiders5_cpu2_map)
-	MCFG_CPU_VBLANK_INT_HACK(irq0_line_hold,4)	/* ? */
+	MCFG_CPU_PERIODIC_INT_DRIVER(nova2001_state, irq0_line_hold, 4*60)  /* ? */
 
 	MCFG_QUANTUM_TIME(attotime::from_hz(24000))
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 4*8, 28*8-1)
-	MCFG_SCREEN_UPDATE(raiders5)
+	MCFG_SCREEN_UPDATE_DRIVER(nova2001_state, screen_update_raiders5)
 
 	MCFG_GFXDECODE(raiders5)
 	MCFG_PALETTE_LENGTH(0x300)
 
-	MCFG_VIDEO_START(raiders5)
+	MCFG_VIDEO_START_OVERRIDE(nova2001_state,raiders5)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("ay1", AY8910, MAIN_CLOCK/8)	// 1.5MHz
+	MCFG_SOUND_ADD("ay1", AY8910, MAIN_CLOCK/8) // 1.5MHz
 	MCFG_SOUND_CONFIG(pkunwar_ay8910_interface_1)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.25)
 
@@ -844,7 +835,7 @@ ROM_START( nova2001 )
 	ROM_LOAD( "2.6d",         0x2000, 0x2000, CRC(bc4e442b) SHA1(6e1dca5dde442db95403377bf49aaad2a337813e) )
 	ROM_LOAD( "3.6f",         0x4000, 0x2000, CRC(b2849038) SHA1(b56c7c03ef7c677cc6df0280a485f9cda3435b23) )
 	ROM_LOAD( "4.6g",         0x6000, 0x1000, CRC(6b5bb12d) SHA1(74aee3d08a7ee1f98eaec4a4b3062aa9d17948ec) )
-	ROM_RELOAD(               0x7000, 0x1000 )	// half size ROM, mirrored
+	ROM_RELOAD(               0x7000, 0x1000 )  // half size ROM, mirrored
 
 	ROM_REGION( 0x8000, "gfx1", 0 )
 	ROM_LOAD16_BYTE( "5.12s",        0x0000, 0x2000, CRC(54198941) SHA1(fe762a0bbcf10b13ece87ded2ea730257cfbe7d3) )
@@ -862,7 +853,7 @@ ROM_START( nova2001u )
 	ROM_LOAD( "nova2001.2",   0x2000, 0x2000, CRC(fab87144) SHA1(506703f9d96443839f864ef5bde1a71120f54384) )
 	ROM_LOAD( "3.6f",         0x4000, 0x2000, CRC(b2849038) SHA1(b56c7c03ef7c677cc6df0280a485f9cda3435b23) )
 	ROM_LOAD( "4.6g",         0x6000, 0x1000, CRC(6b5bb12d) SHA1(74aee3d08a7ee1f98eaec4a4b3062aa9d17948ec) )
-	ROM_RELOAD(               0x7000, 0x1000 )	// half size ROM, mirrored
+	ROM_RELOAD(               0x7000, 0x1000 )  // half size ROM, mirrored
 
 	ROM_REGION( 0x8000, "gfx1", 0 )
 	ROM_LOAD16_BYTE( "nova2001.5",   0x0000, 0x2000, CRC(8ea576e8) SHA1(d8dbcfd43aafe25afad7f947a80737cdc55b23d7) )
@@ -903,7 +894,7 @@ ROM_START( pkunwar )
 	ROM_LOAD( "pkwar.02r",    0x4000, 0x4000, CRC(abc1f661) SHA1(c4bf4a345efd4271617de9f334303d81c6885aa5) )
 	ROM_LOAD( "pkwar.03r",    0xe000, 0x2000, CRC(56faebea) SHA1(dd0406c723a08f5d1120655857a115ab8c2d2a11) )
 
-	ROM_REGION( 0x10000, "gfx1", 0 )	// (need lineswapping)
+	ROM_REGION( 0x10000, "gfx1", 0 )    // (need lineswapping)
 	ROM_LOAD( "pkwar.01y",    0x0000, 0x4000, CRC(428d3b92) SHA1(7fe11e8d785fe829d34e512f233bb9ccc70cd431) )
 	ROM_LOAD( "pkwar.02y",    0x4000, 0x4000, CRC(ce1da7bc) SHA1(a2357b61703a689ce63aec7dd44702b119894f8e) )
 	ROM_LOAD( "pkwar.03y",    0x8000, 0x4000, CRC(63204400) SHA1(1ba87ad3425c51150cb65408f04ee0147ef332d3) )
@@ -919,7 +910,7 @@ ROM_START( pkunwarj )
 	ROM_LOAD( "pgunwar.5",    0x4000, 0x4000, CRC(0092e49e) SHA1(7945361036f7679e4f4bb6b94f60f3ca09c077dc) )
 	ROM_LOAD( "pkwar.03r",    0xe000, 0x2000, CRC(56faebea) SHA1(dd0406c723a08f5d1120655857a115ab8c2d2a11) )
 
-	ROM_REGION( 0x10000, "gfx1", 0 )	// (need lineswapping)
+	ROM_REGION( 0x10000, "gfx1", 0 )    // (need lineswapping)
 	ROM_LOAD( "pkwar.01y",    0x0000, 0x4000, CRC(428d3b92) SHA1(7fe11e8d785fe829d34e512f233bb9ccc70cd431) )
 	ROM_LOAD( "pkwar.02y",    0x4000, 0x4000, CRC(ce1da7bc) SHA1(a2357b61703a689ce63aec7dd44702b119894f8e) )
 	ROM_LOAD( "pgunwar.2",    0x8000, 0x4000, CRC(a2a43443) SHA1(4e10569886d364eb2539928ea81dc1565b60b590) )
@@ -937,11 +928,11 @@ ROM_START( raiders5 )
 	ROM_REGION( 0x10000, "sub", 0 )
 	ROM_LOAD( "raiders5.2", 0x0000,  0x4000, CRC(eb2ff410) SHA1(5c995b66b6301cd3cd58efd173481deaa036f842) )
 
-	ROM_REGION( 0x8000, "gfx1", 0 )	// (need lineswapping)
+	ROM_REGION( 0x8000, "gfx1", 0 ) // (need lineswapping)
 	ROM_LOAD( "raiders3.11f", 0x0000,  0x4000, CRC(30041d58) SHA1(a33087de7afb276925879898a96f418128a5a38c) )
 	ROM_LOAD( "raiders4.11g", 0x4000,  0x4000, CRC(e441931c) SHA1(f39b4c25de779c671a6e2b02df64e7fed726f4da) )
 
-	ROM_REGION( 0x4000, "gfx2", 0 )	// (need lineswapping)
+	ROM_REGION( 0x4000, "gfx2", 0 ) // (need lineswapping)
 	ROM_LOAD( "raiders5.11n", 0x0000,  0x4000, CRC(c0895090) SHA1(a3a1ae57ed66bc095ea9bfb26470290f67aab1fe) )
 ROM_END
 
@@ -953,11 +944,11 @@ ROM_START( raiders5t )
 	ROM_REGION( 0x10000, "sub", 0 )
 	ROM_LOAD( "raiders2.4d", 0x0000,  0x4000, CRC(c8604be1) SHA1(6d23f26174bb9b2f7db3a5fa6b39674fe237135b) )
 
-	ROM_REGION( 0x8000, "gfx1", 0 )	// (need lineswapping)
+	ROM_REGION( 0x8000, "gfx1", 0 ) // (need lineswapping)
 	ROM_LOAD( "raiders3.11f", 0x0000,  0x4000, CRC(30041d58) SHA1(a33087de7afb276925879898a96f418128a5a38c) )
 	ROM_LOAD( "raiders4.11g", 0x4000,  0x4000, CRC(e441931c) SHA1(f39b4c25de779c671a6e2b02df64e7fed726f4da) )
 
-	ROM_REGION( 0x4000, "gfx2", 0 )	// (need lineswapping)
+	ROM_REGION( 0x4000, "gfx2", 0 ) // (need lineswapping)
 	ROM_LOAD( "raiders5.11n", 0x0000,  0x4000, CRC(c0895090) SHA1(a3a1ae57ed66bc095ea9bfb26470290f67aab1fe) )
 ROM_END
 
@@ -988,9 +979,9 @@ This code is overly generic because it is used for several games in ninjakd2.c
 
 static void lineswap_gfx_roms(running_machine &machine, const char *region, const int bit)
 {
-	const int length = machine.region(region)->bytes();
+	const int length = machine.root_device().memregion(region)->bytes();
 
-	UINT8* const src = machine.region(region)->base();
+	UINT8* const src = machine.root_device().memregion(region)->base();
 
 	UINT8* const temp = auto_alloc_array(machine, UINT8, length);
 
@@ -1018,15 +1009,15 @@ static void lineswap_gfx_roms(running_machine &machine, const char *region, cons
  *
  *************************************/
 
-static DRIVER_INIT( pkunwar )
+DRIVER_INIT_MEMBER(nova2001_state,pkunwar)
 {
-	lineswap_gfx_roms(machine, "gfx1", 13);
+	lineswap_gfx_roms(machine(), "gfx1", 13);
 }
 
-static DRIVER_INIT( raiders5 )
+DRIVER_INIT_MEMBER(nova2001_state,raiders5)
 {
-	lineswap_gfx_roms(machine, "gfx1", 13);
-	lineswap_gfx_roms(machine, "gfx2", 13);
+	lineswap_gfx_roms(machine(), "gfx1", 13);
+	lineswap_gfx_roms(machine(), "gfx2", 13);
 }
 
 
@@ -1037,10 +1028,11 @@ static DRIVER_INIT( raiders5 )
  *
  *************************************/
 
-GAME( 1983, nova2001, 0,        nova2001, nova2001, 0,        ROT0, "UPL", "Nova 2001 (Japan)", 0 )
-GAME( 1983, nova2001u,nova2001, nova2001, nova2001, 0,        ROT0, "UPL (Universal license)", "Nova 2001 (US)", 0 )
-GAME( 1984, ninjakun, 0,        ninjakun, ninjakun, 0,        ROT0, "UPL (Taito license)", "Ninjakun Majou no Bouken", 0 )
-GAME( 1985, pkunwar,  0,        pkunwar,  pkunwar,  pkunwar,  ROT0, "UPL", "Penguin-Kun Wars (US)", 0 )
-GAME( 1985, pkunwarj, pkunwar,  pkunwar,  pkunwar,  pkunwar,  ROT0, "UPL", "Penguin-Kun Wars (Japan)", 0 )
-GAME( 1985, raiders5, 0,        raiders5, raiders5, raiders5, ROT0, "UPL", "Raiders5", 0 )
-GAME( 1985, raiders5t,raiders5, raiders5, raiders5, raiders5, ROT0, "UPL (Taito license)", "Raiders5 (Japan)", 0 )
+//    YEAR, NAME,      PARENT,   MACHINE,  INPUT,    INIT,     MONITOR,COMPANY,FULLNAME,FLAGS
+GAME( 1983, nova2001,  0,        nova2001, nova2001, driver_device, 0,        ROT0,   "UPL", "Nova 2001 (Japan)", 0 )
+GAME( 1983, nova2001u, nova2001, nova2001, nova2001, driver_device, 0,        ROT0,   "UPL (Universal license)", "Nova 2001 (US)", 0 )
+GAME( 1984, ninjakun,  0,        ninjakun, ninjakun, driver_device, 0,        ROT0,   "UPL (Taito license)", "Ninjakun Majou no Bouken", 0 )
+GAME( 1985, pkunwar,   0,        pkunwar,  pkunwar, nova2001_state,  pkunwar,  ROT0,   "UPL", "Penguin-Kun Wars (US)", 0 )
+GAME( 1985, pkunwarj,  pkunwar,  pkunwar,  pkunwar, nova2001_state,  pkunwar,  ROT0,   "UPL", "Penguin-Kun Wars (Japan)", 0 )
+GAME( 1985, raiders5,  0,        raiders5, raiders5, nova2001_state, raiders5, ROT0,   "UPL", "Raiders5", 0 )
+GAME( 1985, raiders5t, raiders5, raiders5, raiders5, nova2001_state, raiders5, ROT0,   "UPL (Taito license)", "Raiders5 (Japan)", 0 )

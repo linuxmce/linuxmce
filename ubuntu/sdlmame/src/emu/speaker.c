@@ -41,80 +41,26 @@
 #include "emuopts.h"
 #include "osdepend.h"
 #include "config.h"
-#include "profiler.h"
 #include "sound/wavwrite.h"
 
 
 
-/***************************************************************************
-    DEBUGGING
-***************************************************************************/
+//**************************************************************************
+//  DEBUGGING
+//**************************************************************************
 
-#define VERBOSE			(0)
+#define VERBOSE         (0)
 
-#define VPRINTF(x)		do { if (VERBOSE) mame_printf_debug x; } while (0)
-
-
-
-/***************************************************************************
-    DEVICE DEFINITIONS
-***************************************************************************/
-
-const device_type SPEAKER = speaker_device_config::static_alloc_device_config;
+#define VPRINTF(x)      do { if (VERBOSE) mame_printf_debug x; } while (0)
 
 
 
 //**************************************************************************
-//  SPEAKER DEVICE CONFIGURATION
+//  GLOBAL VARIABLES
 //**************************************************************************
 
-//-------------------------------------------------
-//  speaker_device_config - constructor
-//-------------------------------------------------
-
-speaker_device_config::speaker_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock)
-	: device_config(mconfig, static_alloc_device_config, "Speaker", tag, owner, clock),
-	  device_config_sound_interface(mconfig, *this),
-	  m_x(0.0),
-	  m_y(0.0),
-	  m_z(0.0)
-{
-}
-
-
-//-------------------------------------------------
-//  static_alloc_device_config - allocate a new
-//  configuration object
-//-------------------------------------------------
-
-device_config *speaker_device_config::static_alloc_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock)
-{
-	return global_alloc(speaker_device_config(mconfig, tag, owner, clock));
-}
-
-
-//-------------------------------------------------
-//  alloc_device - allocate a new device object
-//-------------------------------------------------
-
-device_t *speaker_device_config::alloc_device(running_machine &machine) const
-{
-	return auto_alloc(machine, speaker_device(machine, *this));
-}
-
-
-//-------------------------------------------------
-//  static_set_position - configuration helper to
-//  set the speaker position
-//-------------------------------------------------
-
-void speaker_device_config::static_set_position(device_config *device, double x, double y, double z)
-{
-	speaker_device_config *speaker = downcast<speaker_device_config *>(device);
-	speaker->m_x = x;
-	speaker->m_y = y;
-	speaker->m_z = z;
-}
+// device type definition
+const device_type SPEAKER = &device_creator<speaker_device>;
 
 
 
@@ -126,16 +72,17 @@ void speaker_device_config::static_set_position(device_config *device, double x,
 //  speaker_device - constructor
 //-------------------------------------------------
 
-speaker_device::speaker_device(running_machine &_machine, const speaker_device_config &config)
-	: device_t(_machine, config),
-	  device_sound_interface(_machine, config, *this),
-	  m_config(config),
-	  m_mixer_stream(NULL)
+speaker_device::speaker_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, SPEAKER, "Speaker", tag, owner, clock),
+		device_mixer_interface(mconfig, *this),
+		m_x(0.0),
+		m_y(0.0),
+		m_z(0.0)
 #ifdef MAME_DEBUG
 	,
-	  m_max_sample(0),
-	  m_clipped_samples(0),
-	  m_total_samples(0)
+		m_max_sample(0),
+		m_clipped_samples(0),
+		m_total_samples(0)
 #endif
 {
 }
@@ -156,53 +103,16 @@ speaker_device::~speaker_device()
 
 
 //-------------------------------------------------
-//  device_start - perform device-specific
-//  startup
+//  static_set_position - configuration helper to
+//  set the speaker position
 //-------------------------------------------------
 
-void speaker_device::device_start()
+void speaker_device::static_set_position(device_t &device, double x, double y, double z)
 {
-	// no inputs? that's weird
-	if (m_auto_allocated_inputs == 0)
-	{
-		logerror("Warning: speaker \"%s\" has no inputs\n", tag());
-		return;
-	}
-
-	// allocate the mixer stream
-	m_mixer_stream = m_machine.sound().stream_alloc(*this, m_auto_allocated_inputs, 1, m_machine.sample_rate());
-}
-
-
-//-------------------------------------------------
-//  device_post_load - after we load a save state
-//  be sure to update the mixer stream's output
-//  sample rate
-//-------------------------------------------------
-
-void speaker_device::device_post_load()
-{
-	m_mixer_stream->set_sample_rate(m_machine.sample_rate());
-}
-
-
-//-------------------------------------------------
-//  mixer_update - mix all inputs to one output
-//-------------------------------------------------
-
-void speaker_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
-{
-	VPRINTF(("Mixer_update(%d)\n", samples));
-
-	// loop over samples
-	for (int pos = 0; pos < samples; pos++)
-	{
-		// add up all the inputs
-		INT32 sample = inputs[0][pos];
-		for (int inp = 1; inp < m_auto_allocated_inputs; inp++)
-			sample += inputs[inp][pos];
-		outputs[0][pos] = sample;
-	}
+	speaker_device &speaker = downcast<speaker_device &>(device);
+	speaker.m_x = x;
+	speaker.m_y = y;
+	speaker.m_z = z;
 }
 
 
@@ -249,7 +159,7 @@ void speaker_device::mix(INT32 *leftmix, INT32 *rightmix, int &samples_this_upda
 	if (!suppress)
 	{
 		// if the speaker is centered, send to both left and right
-		if (m_config.m_x == 0)
+		if (m_x == 0)
 			for (int sample = 0; sample < samples_this_update; sample++)
 			{
 				leftmix[sample] += stream_buf[sample];
@@ -257,7 +167,7 @@ void speaker_device::mix(INT32 *leftmix, INT32 *rightmix, int &samples_this_upda
 			}
 
 		// if the speaker is to the left, send only to the left
-		else if (m_config.m_x < 0)
+		else if (m_x < 0)
 			for (int sample = 0; sample < samples_this_update; sample++)
 				leftmix[sample] += stream_buf[sample];
 
@@ -266,4 +176,14 @@ void speaker_device::mix(INT32 *leftmix, INT32 *rightmix, int &samples_this_upda
 			for (int sample = 0; sample < samples_this_update; sample++)
 				rightmix[sample] += stream_buf[sample];
 	}
+}
+
+
+//-------------------------------------------------
+//  device_start - handle device startup
+//-------------------------------------------------
+
+void speaker_device::device_start()
+{
+	// dummy save to make device.c happy
 }

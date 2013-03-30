@@ -4,19 +4,17 @@
 
 ***************************************************************************/
 
-#define	__uPD71054_TIMER	1
+#define __uPD71054_TIMER    1
 
-typedef struct _uPD71054_state uPD71054_state;
-struct _uPD71054_state
+struct uPD71054_state
 {
-	emu_timer *timer[3];			// Timer
-	UINT16	max[3];				// Max counter
-	UINT16	write_select;		// Max counter write select
-	UINT8	reg[4];				//
+	emu_timer *timer[3];            // Timer
+	UINT16  max[3];             // Max counter
+	UINT16  write_select;       // Max counter write select
+	UINT8   reg[4];             //
 };
 
-typedef struct _game_offset game_offset;
-struct _game_offset
+struct game_offset
 {
 	/* 2 values, for normal and flipped */
 	const char *gamename;
@@ -27,28 +25,44 @@ struct _game_offset
 class seta_state : public driver_device
 {
 public:
-	seta_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	seta_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+		m_maincpu(*this,"maincpu"),
+		m_subcpu(*this,"sub"),
+		m_sharedram(*this,"sharedram"),
+		m_workram(*this,"workram"),
+		m_vregs(*this,"vregs"),
+		m_vram_0(*this,"vram_0"),
+		m_vctrl_0(*this,"vctrl_0"),
+		m_vram_2(*this,"vram_2"),
+		m_vctrl_2(*this,"vctrl_2"),
+		m_paletteram(*this,"paletteram"),
+		m_paletteram2(*this,"paletteram2"),
+		m_kiwame_nvram(*this,"kiwame_nvram"),
+		m_inttoote_key_select(*this,"inttoote_keysel"),
+		m_inttoote_700000(*this,"inttoote_700000") { }
 
-	UINT8 *m_sharedram;
-	UINT16 *m_workram;
-	UINT16 *m_vregs;
-	UINT16 *m_vram_0;
-	UINT16 *m_vctrl_0;
-	UINT16 *m_vram_2;
-	UINT16 *m_vctrl_2;
-	UINT16 *m_spriteram;
-	UINT16 *m_spriteram2;
-	UINT16 *m_paletteram;
-	size_t m_paletteram_size;
-	UINT16 *m_paletteram2;
-	size_t m_paletteram2_size;
+	required_device<cpu_device> m_maincpu;
+	optional_device<cpu_device> m_subcpu;
+
+	optional_shared_ptr<UINT8> m_sharedram;
+	optional_shared_ptr<UINT16> m_workram;
+	optional_shared_ptr<UINT16> m_vregs;
+	optional_shared_ptr<UINT16> m_vram_0;
+	optional_shared_ptr<UINT16> m_vctrl_0;
+	optional_shared_ptr<UINT16> m_vram_2;
+	optional_shared_ptr<UINT16> m_vctrl_2;
+	optional_shared_ptr<UINT16> m_paletteram;
+	optional_shared_ptr<UINT16> m_paletteram2;
+	optional_shared_ptr<UINT16> m_kiwame_nvram;
+	optional_shared_ptr<UINT16> m_inttoote_key_select;
+	optional_shared_ptr<UINT16> m_inttoote_700000;
 
 	int m_tiles_offset;
 	tilemap_t *m_tilemap_0;
-	tilemap_t *m_tilemap_1;	// Layer 0
+	tilemap_t *m_tilemap_1; // Layer 0
 	tilemap_t *m_tilemap_2;
-	tilemap_t *m_tilemap_3;	// Layer 1
+	tilemap_t *m_tilemap_3; // Layer 1
 	int m_tilemaps_flip;
 	int m_samples_bank;
 	int m_color_mode_shift;
@@ -70,49 +84,132 @@ public:
 	UINT8 m_usclssic_port_select;
 	int m_keroppi_prize_hop;
 	int m_keroppi_protection_count;
-	UINT16 *m_kiwame_nvram;
 
 	int m_wiggie_soundlatch;
 
-	UINT16 *m_inttoote_key_select;
-	UINT16 *m_inttoote_700000;
 	UINT8 m_jockeyc_key_select;
 
 	UINT8 m_twineagl_xram[8];
 	int m_twineagl_tilebank[4];
 
+	UINT16 m_magspeed_lights[3];
+
 	UINT16 m_pairslove_protram[0x200];
 	UINT16 m_pairslove_protram_old[0x200];
 	UINT16 m_downtown_protection[0x200/2];
+
+	DECLARE_WRITE16_MEMBER(seta_vregs_w);
+	DECLARE_WRITE16_MEMBER(seta_vram_0_w);
+	DECLARE_WRITE16_MEMBER(seta_vram_2_w);
+	DECLARE_WRITE16_MEMBER(twineagl_tilebank_w);
+	DECLARE_WRITE16_MEMBER(timer_regs_w);
+	DECLARE_READ16_MEMBER(sharedram_68000_r);
+	DECLARE_WRITE16_MEMBER(sharedram_68000_w);
+	DECLARE_WRITE16_MEMBER(sub_ctrl_w);
+	DECLARE_READ16_MEMBER(seta_dsw_r);
+	DECLARE_READ16_MEMBER(calibr50_ip_r);
+	DECLARE_WRITE16_MEMBER(calibr50_soundlatch_w);
+	DECLARE_READ16_MEMBER(usclssic_dsw_r);
+	DECLARE_READ16_MEMBER(usclssic_trackball_x_r);
+	DECLARE_READ16_MEMBER(usclssic_trackball_y_r);
+	DECLARE_WRITE16_MEMBER(usclssic_lockout_w);
+	DECLARE_READ16_MEMBER(zombraid_gun_r);
+	DECLARE_WRITE16_MEMBER(zombraid_gun_w);
+	DECLARE_READ16_MEMBER(zingzipbl_unknown_r);
+	DECLARE_READ16_MEMBER(keroppi_protection_r);
+	DECLARE_READ16_MEMBER(keroppi_protection_init_r);
+	DECLARE_READ16_MEMBER(keroppi_coin_r);
+	DECLARE_WRITE16_MEMBER(keroppi_prize_w);
+	DECLARE_WRITE16_MEMBER(setaroul_spriteylow_w);
+	DECLARE_WRITE16_MEMBER(setaroul_spritectrl_w);
+	DECLARE_WRITE16_MEMBER(setaroul_spritecode_w);
+	DECLARE_READ16_MEMBER(setaroul_spritecode_r);
+	DECLARE_READ16_MEMBER(krzybowl_input_r);
+	DECLARE_WRITE16_MEMBER(msgundam_vregs_w);
+	DECLARE_READ16_MEMBER(kiwame_nvram_r);
+	DECLARE_WRITE16_MEMBER(kiwame_nvram_w);
+	DECLARE_READ16_MEMBER(kiwame_input_r);
+	DECLARE_READ16_MEMBER(thunderl_protection_r);
+	DECLARE_WRITE16_MEMBER(thunderl_protection_w);
+	DECLARE_READ8_MEMBER(wiggie_soundlatch_r);
+	DECLARE_WRITE16_MEMBER(wiggie_soundlatch_w);
+	DECLARE_WRITE16_MEMBER(utoukond_soundlatch_w);
+	DECLARE_READ16_MEMBER(pairlove_prot_r);
+	DECLARE_WRITE16_MEMBER(pairlove_prot_w);
+	DECLARE_READ16_MEMBER(inttoote_dsw_r);
+	DECLARE_READ16_MEMBER(inttoote_key_r);
+	DECLARE_READ16_MEMBER(inttoote_700000_r);
+	DECLARE_READ16_MEMBER(jockeyc_mux_r);
+	DECLARE_WRITE16_MEMBER(jockeyc_mux_w);
+	DECLARE_READ16_MEMBER(unk_r);
+	DECLARE_WRITE8_MEMBER(sub_bankswitch_w);
+	DECLARE_WRITE8_MEMBER(sub_bankswitch_lockout_w);
+	DECLARE_READ8_MEMBER(ff_r);
+	DECLARE_READ8_MEMBER(downtown_ip_r);
+	DECLARE_WRITE8_MEMBER(calibr50_soundlatch2_w);
+	DECLARE_READ16_MEMBER(twineagl_debug_r);
+	DECLARE_READ16_MEMBER(twineagl_200100_r);
+	DECLARE_WRITE16_MEMBER(twineagl_200100_w);
+	DECLARE_READ16_MEMBER(downtown_protection_r);
+	DECLARE_WRITE16_MEMBER(downtown_protection_w);
+	DECLARE_READ16_MEMBER(arbalest_debug_r);
+	DECLARE_WRITE16_MEMBER(magspeed_lights_w);
+	DECLARE_READ8_MEMBER(dsw1_r);
+	DECLARE_READ8_MEMBER(dsw2_r);
+	DECLARE_DRIVER_INIT(downtown);
+	DECLARE_DRIVER_INIT(rezon);
+	DECLARE_DRIVER_INIT(twineagl);
+	DECLARE_DRIVER_INIT(zombraid);
+	DECLARE_DRIVER_INIT(crazyfgt);
+	DECLARE_DRIVER_INIT(inttoote);
+	DECLARE_DRIVER_INIT(metafox);
+	DECLARE_DRIVER_INIT(arbalest);
+	DECLARE_DRIVER_INIT(inttootea);
+	DECLARE_DRIVER_INIT(wiggie);
+	DECLARE_DRIVER_INIT(blandia);
+	DECLARE_DRIVER_INIT(kiwame);
+	DECLARE_DRIVER_INIT(eightfrc);
+	TILE_GET_INFO_MEMBER(twineagl_get_tile_info_0);
+	TILE_GET_INFO_MEMBER(twineagl_get_tile_info_1);
+	TILE_GET_INFO_MEMBER(get_tile_info_0);
+	TILE_GET_INFO_MEMBER(get_tile_info_1);
+	TILE_GET_INFO_MEMBER(get_tile_info_2);
+	TILE_GET_INFO_MEMBER(get_tile_info_3);
+	DECLARE_VIDEO_START(seta_no_layers);
+	DECLARE_VIDEO_START(twineagl_1_layer);
+	DECLARE_VIDEO_START(seta_1_layer);
+	DECLARE_MACHINE_RESET(calibr50);
+	DECLARE_PALETTE_INIT(usclssic);
+	DECLARE_VIDEO_START(seta_2_layers);
+	DECLARE_PALETTE_INIT(blandia);
+	DECLARE_PALETTE_INIT(setaroul);
+	DECLARE_PALETTE_INIT(zingzip);
+	DECLARE_MACHINE_START(wrofaero);
+	DECLARE_PALETTE_INIT(gundhara);
+	DECLARE_PALETTE_INIT(jjsquawk);
+	DECLARE_MACHINE_START(keroppi);
+	DECLARE_VIDEO_START(oisipuzl_2_layers);
+	DECLARE_PALETTE_INIT(inttoote);
+	UINT32 screen_update_seta_no_layers(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_seta(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_usclssic(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_setaroul(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_inttoote(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_seta_layers(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	void screen_eof_seta_buffer_sprites(screen_device &screen, bool state);
+	void screen_eof_setaroul(screen_device &screen, bool state);
+	INTERRUPT_GEN_MEMBER(wrofaero_interrupt);
+	TIMER_CALLBACK_MEMBER(uPD71054_timer_callback);
+	TIMER_CALLBACK_MEMBER(keroppi_prize_hop_callback);
+	TIMER_DEVICE_CALLBACK_MEMBER(seta_interrupt_1_and_2);
+	TIMER_DEVICE_CALLBACK_MEMBER(seta_interrupt_2_and_4);
+	TIMER_DEVICE_CALLBACK_MEMBER(seta_sub_interrupt);
+	TIMER_DEVICE_CALLBACK_MEMBER(tndrcade_sub_interrupt);
+	TIMER_DEVICE_CALLBACK_MEMBER(calibr50_interrupt);
+	TIMER_DEVICE_CALLBACK_MEMBER(setaroul_interrupt);
+	TIMER_DEVICE_CALLBACK_MEMBER(crazyfgt_interrupt);
+	TIMER_DEVICE_CALLBACK_MEMBER(inttoote_interrupt);
 };
 
 /*----------- defined in video/seta.c -----------*/
-
 void seta_coin_lockout_w(running_machine &machine, int data);
-
-WRITE16_HANDLER( twineagl_tilebank_w );
-
-WRITE16_HANDLER( seta_vram_0_w );
-WRITE16_HANDLER( seta_vram_2_w );
-WRITE16_HANDLER( seta_vregs_w );
-
-PALETTE_INIT( blandia );
-PALETTE_INIT( gundhara );
-PALETTE_INIT( inttoote );
-PALETTE_INIT( setaroul );
-PALETTE_INIT( jjsquawk );
-PALETTE_INIT( usclssic );
-PALETTE_INIT( zingzip );
-
-VIDEO_START( seta_no_layers);
-VIDEO_START( twineagl_1_layer);
-VIDEO_START( seta_1_layer);
-VIDEO_START( seta_2_layers);
-VIDEO_START( oisipuzl_2_layers );
-
-SCREEN_UPDATE( seta );
-SCREEN_UPDATE( seta_no_layers );
-SCREEN_UPDATE( usclssic );
-SCREEN_UPDATE( inttoote );
-
-

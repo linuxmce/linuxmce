@@ -7,20 +7,28 @@
 class aeroboto_state : public driver_device
 {
 public:
-	aeroboto_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	aeroboto_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_mainram(*this, "mainram"),
+		m_videoram(*this, "videoram"),
+		m_hscroll(*this, "hscroll"),
+		m_tilecolor(*this, "tilecolor"),
+		m_spriteram(*this, "spriteram"),
+		m_vscroll(*this, "vscroll"),
+		m_starx(*this, "starx"),
+		m_stary(*this, "stary"),
+		m_bgcolor(*this, "bgcolor"){ }
 
 	/* memory pointers */
-	UINT8 * m_mainram;
-	UINT8 * m_spriteram;
-	UINT8 * m_videoram;
-	UINT8 * m_hscroll;
-	UINT8 * m_vscroll;
-	UINT8 * m_tilecolor;
-	UINT8 * m_starx;
-	UINT8 * m_stary;
-	UINT8 * m_bgcolor;
-	size_t  m_spriteram_size;
+	required_shared_ptr<UINT8> m_mainram;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_hscroll;
+	required_shared_ptr<UINT8> m_tilecolor;
+	required_shared_ptr<UINT8> m_spriteram;
+	required_shared_ptr<UINT8> m_vscroll;
+	required_shared_ptr<UINT8> m_starx;
+	required_shared_ptr<UINT8> m_stary;
+	required_shared_ptr<UINT8> m_bgcolor;
 
 	/* stars layout */
 	UINT8 * m_stars_rom;
@@ -38,15 +46,18 @@ public:
 	/* misc */
 	int m_count;
 	int m_disable_irq;
+	DECLARE_READ8_MEMBER(aeroboto_201_r);
+	DECLARE_READ8_MEMBER(aeroboto_irq_ack_r);
+	DECLARE_READ8_MEMBER(aeroboto_2973_r);
+	DECLARE_WRITE8_MEMBER(aeroboto_1a2_w);
+	DECLARE_READ8_MEMBER(aeroboto_in0_r);
+	DECLARE_WRITE8_MEMBER(aeroboto_3000_w);
+	DECLARE_WRITE8_MEMBER(aeroboto_videoram_w);
+	DECLARE_WRITE8_MEMBER(aeroboto_tilecolor_w);
+	TILE_GET_INFO_MEMBER(get_tile_info);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	UINT32 screen_update_aeroboto(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(aeroboto_interrupt);
 };
-
-
-/*----------- defined in video/aeroboto.c -----------*/
-
-VIDEO_START( aeroboto );
-SCREEN_UPDATE( aeroboto );
-
-READ8_HANDLER( aeroboto_in0_r );
-WRITE8_HANDLER( aeroboto_3000_w );
-WRITE8_HANDLER( aeroboto_videoram_w );
-WRITE8_HANDLER( aeroboto_tilecolor_w );

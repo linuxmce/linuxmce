@@ -18,7 +18,7 @@
 #include "includes/jedi.h"
 
 
-#define NUM_PENS	(0x1000)
+#define NUM_PENS    (0x1000)
 
 
 
@@ -28,13 +28,12 @@
  *
  *************************************/
 
-static VIDEO_START( jedi )
+VIDEO_START_MEMBER(jedi_state,jedi)
 {
-	jedi_state *state = machine.driver_data<jedi_state>();
 
 	/* register for saving */
-	state->save_item(NAME(state->m_vscroll));
-	state->save_item(NAME(state->m_hscroll));
+	save_item(NAME(m_vscroll));
+	save_item(NAME(m_hscroll));
 }
 
 
@@ -88,16 +87,16 @@ static void get_pens(jedi_state *state, pen_t *pens)
 }
 
 
-static void do_pen_lookup(jedi_state *state, bitmap_t *bitmap, const rectangle *cliprect)
+static void do_pen_lookup(jedi_state *state, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
 	int y, x;
 	pen_t pens[NUM_PENS];
 
 	get_pens(state, pens);
 
-	for (y = cliprect->min_y; y <= cliprect->max_y; y++)
-		for(x = cliprect->min_x; x <= cliprect->max_x; x++)
-			*BITMAP_ADDR32(bitmap, y, x) = pens[*BITMAP_ADDR32(bitmap, y, x)];
+	for (y = cliprect.min_y; y <= cliprect.max_y; y++)
+		for(x = cliprect.min_x; x <= cliprect.max_x; x++)
+			bitmap.pix32(y, x) = pens[bitmap.pix32(y, x)];
 }
 
 
@@ -108,19 +107,17 @@ static void do_pen_lookup(jedi_state *state, bitmap_t *bitmap, const rectangle *
  *
  *************************************/
 
-WRITE8_HANDLER( jedi_vscroll_w )
+WRITE8_MEMBER(jedi_state::jedi_vscroll_w)
 {
-	jedi_state *state = space->machine().driver_data<jedi_state>();
 
-	state->m_vscroll = data | (offset << 8);
+	m_vscroll = data | (offset << 8);
 }
 
 
-WRITE8_HANDLER( jedi_hscroll_w )
+WRITE8_MEMBER(jedi_state::jedi_hscroll_w)
 {
-	jedi_state *state = space->machine().driver_data<jedi_state>();
 
-	state->m_hscroll = data | (offset << 8);
+	m_hscroll = data | (offset << 8);
 }
 
 
@@ -132,15 +129,15 @@ WRITE8_HANDLER( jedi_hscroll_w )
  *
  *************************************/
 
-static void draw_background_and_text(running_machine &machine, jedi_state *state, bitmap_t *bitmap, const rectangle *cliprect)
+static void draw_background_and_text(running_machine &machine, jedi_state *state, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
 	int y;
-	int background_line_buffer[0x200];	/* RAM chip at 2A */
+	int background_line_buffer[0x200];  /* RAM chip at 2A */
 
-	UINT8 *tx_gfx = machine.region("gfx1")->base();
-	UINT8 *bg_gfx = machine.region("gfx2")->base();
-	UINT8 *prom1 = &machine.region("proms")->base()[0x0000 | ((*state->m_smoothing_table & 0x03) << 8)];
-	UINT8 *prom2 = &machine.region("proms")->base()[0x0800 | ((*state->m_smoothing_table & 0x03) << 8)];
+	UINT8 *tx_gfx = machine.root_device().memregion("gfx1")->base();
+	UINT8 *bg_gfx = machine.root_device().memregion("gfx2")->base();
+	UINT8 *prom1 = &machine.root_device().memregion("proms")->base()[0x0000 | ((*state->m_smoothing_table & 0x03) << 8)];
+	UINT8 *prom2 = &machine.root_device().memregion("proms")->base()[0x0800 | ((*state->m_smoothing_table & 0x03) << 8)];
 	int vscroll = state->m_vscroll;
 	int hscroll = state->m_hscroll;
 	int tx_bank = *state->m_foreground_bank;
@@ -149,12 +146,12 @@ static void draw_background_and_text(running_machine &machine, jedi_state *state
 
 	memset(background_line_buffer, 0, 0x200 * sizeof(int));
 
-	for (y = cliprect->min_y; y <= cliprect->max_y; y++)
+	for (y = cliprect.min_y; y <= cliprect.max_y; y++)
 	{
 		int x;
 		int bg_last_col = 0;
 
-		for (x = cliprect->min_x; x <= cliprect->max_x; x += 2)
+		for (x = cliprect.min_x; x <= cliprect.max_x; x += 2)
 		{
 			int tx_col1, tx_col2, bg_col;
 			int bg_tempcol;
@@ -172,9 +169,9 @@ static void draw_background_and_text(running_machine &machine, jedi_state *state
 			int tx_code = ((tx_bank & 0x80) << 1) | tx_ram[tx_offs];
 			int bg_bank = bg_ram[0x0400 | bg_offs];
 			int bg_code = bg_ram[0x0000 | bg_offs] |
-						  ((bg_bank & 0x01) << 8) |
-						  ((bg_bank & 0x08) << 6) |
-						  ((bg_bank & 0x02) << 9);
+							((bg_bank & 0x01) << 8) |
+							((bg_bank & 0x08) << 6) |
+							((bg_bank & 0x02) << 9);
 
 			/* background flip X */
 			if (bg_bank & 0x04)
@@ -211,11 +208,11 @@ static void draw_background_and_text(running_machine &machine, jedi_state *state
 			}
 
 			/* the first pixel is smoothed via a lookup using the current and last pixel value -
-               the next pixel just uses the current value directly. After we done with a pixel
-               save it for later in the line buffer RAM */
+			   the next pixel just uses the current value directly. After we done with a pixel
+			   save it for later in the line buffer RAM */
 			bg_tempcol = prom1[(bg_last_col << 4) | bg_col];
-			*BITMAP_ADDR32(bitmap, y, x + 0) = tx_col1 | prom2[(background_line_buffer[x + 0] << 4) | bg_tempcol];
-			*BITMAP_ADDR32(bitmap, y, x + 1) = tx_col2 | prom2[(background_line_buffer[x + 1] << 4) | bg_col];
+			bitmap.pix32(y, x + 0) = tx_col1 | prom2[(background_line_buffer[x + 0] << 4) | bg_tempcol];
+			bitmap.pix32(y, x + 1) = tx_col2 | prom2[(background_line_buffer[x + 1] << 4) | bg_col];
 			background_line_buffer[x + 0] = bg_tempcol;
 			background_line_buffer[x + 1] = bg_col;
 
@@ -232,11 +229,11 @@ static void draw_background_and_text(running_machine &machine, jedi_state *state
  *
  *************************************/
 
-static void draw_sprites(running_machine &machine, jedi_state *state, bitmap_t *bitmap, const rectangle *cliprect)
+static void draw_sprites(running_machine &machine, jedi_state *state, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
 	offs_t offs;
 	UINT8 *spriteram = state->m_spriteram;
-	UINT8 *gfx3 = machine.region("gfx3")->base();
+	UINT8 *gfx3 = machine.root_device().memregion("gfx3")->base();
 
 	for (offs = 0x00; offs < 0x30; offs++)
 	{
@@ -252,9 +249,9 @@ static void draw_sprites(running_machine &machine, jedi_state *state, bitmap_t *
 
 		/* shuffle the bank bits in */
 		UINT16 code = spriteram[offs] |
-					  ((spriteram[offs + 0x40] & 0x04) << 8) |
-					  ((spriteram[offs + 0x40] & 0x40) << 3) |
-					  ((spriteram[offs + 0x40] & 0x02) << 7);
+						((spriteram[offs + 0x40] & 0x04) << 8) |
+						((spriteram[offs + 0x40] & 0x40) << 3) |
+						((spriteram[offs + 0x40] & 0x02) << 7);
 
 		/* adjust for double-height */
 		if (tall)
@@ -276,7 +273,7 @@ static void draw_sprites(running_machine &machine, jedi_state *state, bitmap_t *
 			int i;
 			UINT16 x = spriteram[offs + 0x100] + ((spriteram[offs + 0x40] & 0x01) << 8) - 2;
 
-			if ((y < cliprect->min_y) || (y > cliprect->max_y))
+			if ((y < cliprect.min_y) || (y > cliprect.max_y))
 				continue;
 
 			if (flip_x)
@@ -296,7 +293,7 @@ static void draw_sprites(running_machine &machine, jedi_state *state, bitmap_t *
 					x = x & 0x1ff;
 
 					if (col)
-						*BITMAP_ADDR32(bitmap, y, x) = (*BITMAP_ADDR32(bitmap, y, x) & 0x30f) | col;
+						bitmap.pix32(y, x) = (bitmap.pix32(y, x) & 0x30f) | col;
 
 					/* next pixel */
 					if (flip_x)
@@ -327,20 +324,19 @@ static void draw_sprites(running_machine &machine, jedi_state *state, bitmap_t *
  *
  *************************************/
 
-static SCREEN_UPDATE( jedi )
+UINT32 jedi_state::screen_update_jedi(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	jedi_state *state = screen->machine().driver_data<jedi_state>();
 
 	/* if no video, clear it all to black */
-	if (*state->m_video_off & 0x01)
-		bitmap_fill(bitmap, cliprect, RGB_BLACK);
+	if (*m_video_off & 0x01)
+		bitmap.fill(RGB_BLACK, cliprect);
 	else
 	{
 		/* draw the background/text layers, followed by the sprites
-           - it needs to be done in this order*/
-		draw_background_and_text(screen->machine(), state, bitmap, cliprect);
-		draw_sprites(screen->machine(), state, bitmap, cliprect);
-		do_pen_lookup(state, bitmap, cliprect);
+		   - it needs to be done in this order*/
+		draw_background_and_text(machine(), this, bitmap, cliprect);
+		draw_sprites(machine(), this, bitmap, cliprect);
+		do_pen_lookup(this, bitmap, cliprect);
 	}
 
 	return 0;
@@ -356,11 +352,10 @@ static SCREEN_UPDATE( jedi )
 
 MACHINE_CONFIG_FRAGMENT( jedi_video )
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_SIZE(64*8, 262) /* verify vert size */
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 37*8-1, 0*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(jedi)
+	MCFG_SCREEN_UPDATE_DRIVER(jedi_state, screen_update_jedi)
 
-	MCFG_VIDEO_START(jedi)
+	MCFG_VIDEO_START_OVERRIDE(jedi_state,jedi)
 MACHINE_CONFIG_END

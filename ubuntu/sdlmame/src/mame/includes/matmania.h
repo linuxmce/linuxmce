@@ -2,28 +2,34 @@
 class matmania_state : public driver_device
 {
 public:
-	matmania_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	matmania_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"),
+		m_videoram2(*this, "videoram2"),
+		m_videoram3(*this, "videoram3"),
+		m_colorram(*this, "colorram"),
+		m_colorram2(*this, "colorram2"),
+		m_colorram3(*this, "colorram3"),
+		m_scroll(*this, "scroll"),
+		m_pageselect(*this, "pageselect"),
+		m_spriteram(*this, "spriteram"),
+		m_paletteram(*this, "paletteram"){ }
 
 	/* memory pointers */
-	UINT8 *         m_videoram;
-	UINT8 *         m_videoram2;
-	UINT8 *         m_videoram3;
-	UINT8 *         m_colorram;
-	UINT8 *         m_colorram2;
-	UINT8 *         m_colorram3;
-	UINT8 *         m_scroll;
-	UINT8 *         m_pageselect;
-	UINT8 *         m_spriteram;
-	UINT8 *         m_paletteram;
-	size_t          m_videoram_size;
-	size_t          m_videoram2_size;
-	size_t          m_videoram3_size;
-	size_t          m_spriteram_size;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_videoram2;
+	required_shared_ptr<UINT8> m_videoram3;
+	required_shared_ptr<UINT8> m_colorram;
+	required_shared_ptr<UINT8> m_colorram2;
+	required_shared_ptr<UINT8> m_colorram3;
+	required_shared_ptr<UINT8> m_scroll;
+	required_shared_ptr<UINT8> m_pageselect;
+	required_shared_ptr<UINT8> m_spriteram;
+	required_shared_ptr<UINT8> m_paletteram;
 
 	/* video-related */
-	bitmap_t        *m_tmpbitmap;
-	bitmap_t        *m_tmpbitmap2;
+	bitmap_ind16        *m_tmpbitmap;
+	bitmap_ind16        *m_tmpbitmap2;
 
 	/* mcu */
 	/* maniach 68705 protection */
@@ -42,31 +48,32 @@ public:
 	int             m_main_sent;
 
 	/* devices */
-	device_t *m_maincpu;
-	device_t *m_audiocpu;
+	cpu_device *m_maincpu;
+	cpu_device *m_audiocpu;
 	device_t *m_mcu;
+	DECLARE_WRITE8_MEMBER(matmania_sh_command_w);
+	DECLARE_WRITE8_MEMBER(maniach_sh_command_w);
+	DECLARE_WRITE8_MEMBER(matmania_paletteram_w);
+	virtual void video_start();
+	virtual void palette_init();
+	DECLARE_MACHINE_START(matmania);
+	DECLARE_MACHINE_START(maniach);
+	DECLARE_MACHINE_RESET(maniach);
+	UINT32 screen_update_matmania(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_maniach(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 /*----------- defined in machine/maniach.c -----------*/
 
-READ8_HANDLER( maniach_68705_port_a_r );
-WRITE8_HANDLER( maniach_68705_port_a_w );
-READ8_HANDLER( maniach_68705_port_b_r );
-WRITE8_HANDLER( maniach_68705_port_b_w );
-READ8_HANDLER( maniach_68705_port_c_r );
-WRITE8_HANDLER( maniach_68705_port_c_w );
-WRITE8_HANDLER( maniach_68705_ddr_a_w );
-WRITE8_HANDLER( maniach_68705_ddr_b_w );
-WRITE8_HANDLER( maniach_68705_ddr_c_w );
-WRITE8_HANDLER( maniach_mcu_w );
-READ8_HANDLER( maniach_mcu_r );
-READ8_HANDLER( maniach_mcu_status_r );
-
-
-/*----------- defined in video/matmania.c -----------*/
-
-WRITE8_HANDLER( matmania_paletteram_w );
-PALETTE_INIT( matmania );
-SCREEN_UPDATE( maniach );
-VIDEO_START( matmania );
-SCREEN_UPDATE( matmania );
+DECLARE_READ8_HANDLER( maniach_68705_port_a_r );
+DECLARE_WRITE8_HANDLER( maniach_68705_port_a_w );
+DECLARE_READ8_HANDLER( maniach_68705_port_b_r );
+DECLARE_WRITE8_HANDLER( maniach_68705_port_b_w );
+DECLARE_READ8_HANDLER( maniach_68705_port_c_r );
+DECLARE_WRITE8_HANDLER( maniach_68705_port_c_w );
+DECLARE_WRITE8_HANDLER( maniach_68705_ddr_a_w );
+DECLARE_WRITE8_HANDLER( maniach_68705_ddr_b_w );
+DECLARE_WRITE8_HANDLER( maniach_68705_ddr_c_w );
+DECLARE_WRITE8_HANDLER( maniach_mcu_w );
+DECLARE_READ8_HANDLER( maniach_mcu_r );
+DECLARE_READ8_HANDLER( maniach_mcu_status_r );

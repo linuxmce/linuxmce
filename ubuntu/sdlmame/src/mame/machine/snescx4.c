@@ -32,8 +32,8 @@ static UINT32 CX4_ldr(UINT8 r)
 {
 	UINT16 addr = 0x0080 + (r * 3);
 	return (cx4.reg[addr + 0] <<  0)
-	     | (cx4.reg[addr + 1] <<  8)
-	     | (cx4.reg[addr + 2] << 16);
+			| (cx4.reg[addr + 1] <<  8)
+			| (cx4.reg[addr + 2] << 16);
 }
 
 static void CX4_str(UINT8 r, UINT32 data)
@@ -108,10 +108,10 @@ static void CX4_transfer_data(running_machine &machine)
 	count = (cx4.reg[0x43]) | (cx4.reg[0x44] << 8);
 	dest  = (cx4.reg[0x45]) | (cx4.reg[0x46] << 8);
 
-	address_space *space = machine.device<cpu_device>("maincpu")->space(AS_PROGRAM);
+	address_space &space = machine.device<cpu_device>("maincpu")->space(AS_PROGRAM);
 	for(i=0;i<count;i++)
 	{
-		CX4_write(machine, dest++, space->read_byte(src++));
+		CX4_write(machine, dest++, space.read_byte(src++));
 	}
 }
 
@@ -255,4 +255,3 @@ void CX4_reset()
 	memset(cx4.reg, 0, 0x0100);
 }
 #endif
-

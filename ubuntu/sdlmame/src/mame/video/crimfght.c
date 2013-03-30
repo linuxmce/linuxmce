@@ -55,18 +55,15 @@ void crimfght_sprite_callback( running_machine &machine, int *code, int *color, 
 
 ***************************************************************************/
 
-VIDEO_START( crimfght )
+void crimfght_state::video_start()
 {
-	crimfght_state *state = machine.driver_data<crimfght_state>();
 
-	machine.generic.paletteram.u8 = auto_alloc_array(machine, UINT8, 0x400);
+	m_generic_paletteram_8.allocate(0x400);
 
-	state->m_layer_colorbase[0] = 0;
-	state->m_layer_colorbase[1] = 4;
-	state->m_layer_colorbase[2] = 8;
-	state->m_sprite_colorbase = 16;
-
-	state_save_register_global_pointer(machine, machine.generic.paletteram.u8, 0x400);
+	m_layer_colorbase[0] = 0;
+	m_layer_colorbase[1] = 4;
+	m_layer_colorbase[2] = 8;
+	m_sprite_colorbase = 16;
 }
 
 
@@ -77,17 +74,16 @@ VIDEO_START( crimfght )
 
 ***************************************************************************/
 
-SCREEN_UPDATE( crimfght )
+UINT32 crimfght_state::screen_update_crimfght(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	crimfght_state *state = screen->machine().driver_data<crimfght_state>();
 
-	k052109_tilemap_update(state->m_k052109);
+	k052109_tilemap_update(m_k052109);
 
-	k052109_tilemap_draw(state->m_k052109, bitmap, cliprect, 1, TILEMAP_DRAW_OPAQUE, 0);
-	k051960_sprites_draw(state->m_k051960, bitmap, cliprect, 2, 2);
-	k052109_tilemap_draw(state->m_k052109, bitmap, cliprect, 2, 0, 0);
-	k051960_sprites_draw(state->m_k051960, bitmap, cliprect, 1, 1);
-	k052109_tilemap_draw(state->m_k052109, bitmap, cliprect, 0, 0, 0);
-	k051960_sprites_draw(state->m_k051960, bitmap, cliprect, 0, 0);
+	k052109_tilemap_draw(m_k052109, bitmap, cliprect, 1, TILEMAP_DRAW_OPAQUE, 0);
+	k051960_sprites_draw(m_k051960, bitmap, cliprect, 2, 2);
+	k052109_tilemap_draw(m_k052109, bitmap, cliprect, 2, 0, 0);
+	k051960_sprites_draw(m_k051960, bitmap, cliprect, 1, 1);
+	k052109_tilemap_draw(m_k052109, bitmap, cliprect, 0, 0, 0);
+	k051960_sprites_draw(m_k051960, bitmap, cliprect, 0, 0);
 	return 0;
 }

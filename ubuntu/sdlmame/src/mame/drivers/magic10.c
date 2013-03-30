@@ -88,18 +88,40 @@
 class magic10_state : public driver_device
 {
 public:
-	magic10_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	magic10_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_layer0_videoram(*this, "layer0_videoram"),
+		m_layer1_videoram(*this, "layer1_videoram"),
+		m_layer2_videoram(*this, "layer2_videoram"),
+		m_vregs(*this, "vregs"){ }
 
 	tilemap_t *m_layer0_tilemap;
 	tilemap_t *m_layer1_tilemap;
 	tilemap_t *m_layer2_tilemap;
-	UINT16 *m_layer0_videoram;
-	UINT16 *m_layer1_videoram;
-	UINT16 *m_layer2_videoram;
+	required_shared_ptr<UINT16> m_layer0_videoram;
+	required_shared_ptr<UINT16> m_layer1_videoram;
+	required_shared_ptr<UINT16> m_layer2_videoram;
 	int m_layer2_offset[2];
-	UINT16 *m_vregs;
+	required_shared_ptr<UINT16> m_vregs;
 	UINT16 m_magic102_ret;
+	DECLARE_WRITE16_MEMBER(layer0_videoram_w);
+	DECLARE_WRITE16_MEMBER(layer1_videoram_w);
+	DECLARE_WRITE16_MEMBER(layer2_videoram_w);
+	DECLARE_WRITE16_MEMBER(paletteram_w);
+	DECLARE_READ16_MEMBER(magic102_r);
+	DECLARE_READ16_MEMBER(hotslot_copro_r);
+	DECLARE_WRITE16_MEMBER(hotslot_copro_w);
+	DECLARE_WRITE16_MEMBER(magic10_out_w);
+	DECLARE_DRIVER_INIT(sgsafari);
+	DECLARE_DRIVER_INIT(suprpool);
+	DECLARE_DRIVER_INIT(magic102);
+	DECLARE_DRIVER_INIT(magic10);
+	DECLARE_DRIVER_INIT(hotslot);
+	TILE_GET_INFO_MEMBER(get_layer0_tile_info);
+	TILE_GET_INFO_MEMBER(get_layer1_tile_info);
+	TILE_GET_INFO_MEMBER(get_layer2_tile_info);
+	virtual void video_start();
+	UINT32 screen_update_magic10(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
@@ -107,99 +129,91 @@ public:
 *      Video Hardware      *
 ***************************/
 
-static WRITE16_HANDLER( layer0_videoram_w )
+WRITE16_MEMBER(magic10_state::layer0_videoram_w)
 {
-	magic10_state *state = space->machine().driver_data<magic10_state>();
-	COMBINE_DATA(&state->m_layer0_videoram[offset]);
-	tilemap_mark_tile_dirty( state->m_layer0_tilemap, offset >> 1);
+	COMBINE_DATA(&m_layer0_videoram[offset]);
+	m_layer0_tilemap->mark_tile_dirty(offset >> 1);
 }
 
-static WRITE16_HANDLER( layer1_videoram_w )
+WRITE16_MEMBER(magic10_state::layer1_videoram_w)
 {
-	magic10_state *state = space->machine().driver_data<magic10_state>();
-	COMBINE_DATA(&state->m_layer1_videoram[offset]);
-	tilemap_mark_tile_dirty( state->m_layer1_tilemap, offset >> 1);
+	COMBINE_DATA(&m_layer1_videoram[offset]);
+	m_layer1_tilemap->mark_tile_dirty(offset >> 1);
 }
 
-static WRITE16_HANDLER( layer2_videoram_w )
+WRITE16_MEMBER(magic10_state::layer2_videoram_w)
 {
-	magic10_state *state = space->machine().driver_data<magic10_state>();
-	COMBINE_DATA(&state->m_layer2_videoram[offset]);
-	tilemap_mark_tile_dirty( state->m_layer2_tilemap, offset >> 1);
+	COMBINE_DATA(&m_layer2_videoram[offset]);
+	m_layer2_tilemap->mark_tile_dirty(offset >> 1);
 }
 
-static WRITE16_HANDLER( paletteram_w )
+WRITE16_MEMBER(magic10_state::paletteram_w)
 {
-	data = COMBINE_DATA(&space->machine().generic.paletteram.u16[offset]);
-	palette_set_color_rgb( space->machine(), offset, pal4bit(data >> 4), pal4bit(data >> 0), pal4bit(data >> 8));
+	data = COMBINE_DATA(&m_generic_paletteram_16[offset]);
+	palette_set_color_rgb( machine(), offset, pal4bit(data >> 4), pal4bit(data >> 0), pal4bit(data >> 8));
 }
 
 
-static TILE_GET_INFO( get_layer0_tile_info )
+TILE_GET_INFO_MEMBER(magic10_state::get_layer0_tile_info)
 {
-	magic10_state *state = machine.driver_data<magic10_state>();
-	SET_TILE_INFO
+	SET_TILE_INFO_MEMBER
 	(
 		1,
-		state->m_layer0_videoram[tile_index * 2],
-		state->m_layer0_videoram[tile_index * 2 + 1] & 0x0f,
-		TILE_FLIPYX((state->m_layer0_videoram[tile_index * 2 + 1] & 0xc0) >> 6)
+		m_layer0_videoram[tile_index * 2],
+		m_layer0_videoram[tile_index * 2 + 1] & 0x0f,
+		TILE_FLIPYX((m_layer0_videoram[tile_index * 2 + 1] & 0xc0) >> 6)
 	);
 }
 
-static TILE_GET_INFO( get_layer1_tile_info )
+TILE_GET_INFO_MEMBER(magic10_state::get_layer1_tile_info)
 {
-	magic10_state *state = machine.driver_data<magic10_state>();
-	SET_TILE_INFO
+	SET_TILE_INFO_MEMBER
 	(
 		1,
-		state->m_layer1_videoram[tile_index * 2],
-		state->m_layer1_videoram[tile_index * 2 + 1] & 0x0f,
-		TILE_FLIPYX((state->m_layer1_videoram[tile_index * 2 + 1] & 0xc0) >> 6)
+		m_layer1_videoram[tile_index * 2],
+		m_layer1_videoram[tile_index * 2 + 1] & 0x0f,
+		TILE_FLIPYX((m_layer1_videoram[tile_index * 2 + 1] & 0xc0) >> 6)
 	);
 }
 
-static TILE_GET_INFO( get_layer2_tile_info )
+TILE_GET_INFO_MEMBER(magic10_state::get_layer2_tile_info)
 {
-	magic10_state *state = machine.driver_data<magic10_state>();
-	SET_TILE_INFO
+	SET_TILE_INFO_MEMBER
 	(
 		0,
-		state->m_layer2_videoram[tile_index * 2],
-		state->m_layer2_videoram[tile_index * 2 + 1] & 0x0f,
+		m_layer2_videoram[tile_index * 2],
+		m_layer2_videoram[tile_index * 2 + 1] & 0x0f,
 		0
 	);
 }
 
 
-static VIDEO_START( magic10 )
+void magic10_state::video_start()
 {
-	magic10_state *state = machine.driver_data<magic10_state>();
-	state->m_layer0_tilemap = tilemap_create(machine, get_layer0_tile_info, tilemap_scan_rows, 16, 16, 32, 32);
-	state->m_layer1_tilemap = tilemap_create(machine, get_layer1_tile_info, tilemap_scan_rows, 16, 16, 32, 32);
-	state->m_layer2_tilemap = tilemap_create(machine, get_layer2_tile_info, tilemap_scan_rows, 8, 8, 64, 64);
+	m_layer0_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(magic10_state::get_layer0_tile_info),this), TILEMAP_SCAN_ROWS, 16, 16, 32, 32);
+	m_layer1_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(magic10_state::get_layer1_tile_info),this), TILEMAP_SCAN_ROWS, 16, 16, 32, 32);
+	m_layer2_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(magic10_state::get_layer2_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 64, 64);
 
-	tilemap_set_transparent_pen(state->m_layer1_tilemap, 0);
-	tilemap_set_transparent_pen(state->m_layer2_tilemap, 0);
+	m_layer1_tilemap->set_transparent_pen(0);
+	m_layer2_tilemap->set_transparent_pen(0);
 }
 
-static SCREEN_UPDATE( magic10 )
+UINT32 magic10_state::screen_update_magic10(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	magic10_state *state = screen->machine().driver_data<magic10_state>();
 	/*TODO: understand where this comes from. */
-	tilemap_set_scrollx(state->m_layer2_tilemap, 0, state->m_layer2_offset[0]);
-	tilemap_set_scrolly(state->m_layer2_tilemap, 0, state->m_layer2_offset[1]);
+	m_layer2_tilemap->set_scrollx(0, m_layer2_offset[0]);
+	m_layer2_tilemap->set_scrolly(0, m_layer2_offset[1]);
 
 	/*
-    4 and 6 are y/x global register writes.
-    0 and 2 are y/x writes for the scrolling layer.
-    */
-	tilemap_set_scrolly(state->m_layer1_tilemap, 0, (state->m_vregs[0/2] - state->m_vregs[4/2])+0);
-	tilemap_set_scrollx(state->m_layer1_tilemap, 0, (state->m_vregs[2/2] - state->m_vregs[6/2])+4);
+	4 and 6 are y/x global register writes.
+	0 and 2 are y/x writes for the scrolling layer.
+	*/
+	m_layer1_tilemap->set_scrolly(0, (m_vregs[0/2] - m_vregs[4/2])+0);
+	m_layer1_tilemap->set_scrollx(0, (m_vregs[2/2] - m_vregs[6/2])+4);
 
-	tilemap_draw(bitmap, cliprect, state->m_layer0_tilemap, 0, 0);
-	tilemap_draw(bitmap, cliprect, state->m_layer1_tilemap, 0, 0);
-	tilemap_draw(bitmap, cliprect, state->m_layer2_tilemap, 0, 0);
+	m_layer0_tilemap->draw(bitmap, cliprect, 0, 0);
+	m_layer1_tilemap->draw(bitmap, cliprect, 0, 0);
+	m_layer2_tilemap->draw(bitmap, cliprect, 0, 0);
 
 	return 0;
 }
@@ -209,24 +223,23 @@ static SCREEN_UPDATE( magic10 )
 *       R/W Handlers       *
 ***************************/
 
-static READ16_HANDLER( magic102_r )
+READ16_MEMBER(magic10_state::magic102_r)
 {
-	magic10_state *state = space->machine().driver_data<magic10_state>();
-	state->m_magic102_ret ^= 0x20;
-	return state->m_magic102_ret;
+	m_magic102_ret ^= 0x20;
+	return m_magic102_ret;
 }
 
-static READ16_HANDLER( hotslot_copro_r )
+READ16_MEMBER(magic10_state::hotslot_copro_r)
 {
 	return 0x80;
 }
 
-static WRITE16_HANDLER( hotslot_copro_w )
+WRITE16_MEMBER(magic10_state::hotslot_copro_w)
 {
-	logerror("Writting to copro: %d \n", data);
+	logerror("Writing to copro: %d \n", data);
 }
 
-static WRITE16_HANDLER( magic10_out_w )
+WRITE16_MEMBER(magic10_state::magic10_out_w)
 {
 /*
   ----------------------------------------------
@@ -266,61 +279,61 @@ static WRITE16_HANDLER( magic10_out_w )
 
 //  popmessage("lamps: %02X", data);
 
-	output_set_lamp_value(1, (data & 1));			/* Lamp 1 - HOLD 1 */
-	output_set_lamp_value(2, (data >> 1) & 1);		/* Lamp 2 - HOLD 2 */
-	output_set_lamp_value(3, (data >> 2) & 1);		/* Lamp 3 - HOLD 3 */
-	output_set_lamp_value(4, (data >> 3) & 1);		/* Lamp 4 - HOLD 4 */
-	output_set_lamp_value(5, (data >> 4) & 1);		/* Lamp 5 - HOLD 5 */
-	output_set_lamp_value(6, (data >> 5) & 1);		/* Lamp 6 - START  */
-	output_set_lamp_value(7, (data >> 6) & 1);		/* Lamp 7 - PLAY (BET/TAKE/CANCEL) */
-	output_set_lamp_value(8, (data >> 8) & 1);		/* Lamp 8 - PAYOUT/SUPERGAME */
+	output_set_lamp_value(1, (data & 1));           /* Lamp 1 - HOLD 1 */
+	output_set_lamp_value(2, (data >> 1) & 1);      /* Lamp 2 - HOLD 2 */
+	output_set_lamp_value(3, (data >> 2) & 1);      /* Lamp 3 - HOLD 3 */
+	output_set_lamp_value(4, (data >> 3) & 1);      /* Lamp 4 - HOLD 4 */
+	output_set_lamp_value(5, (data >> 4) & 1);      /* Lamp 5 - HOLD 5 */
+	output_set_lamp_value(6, (data >> 5) & 1);      /* Lamp 6 - START  */
+	output_set_lamp_value(7, (data >> 6) & 1);      /* Lamp 7 - PLAY (BET/TAKE/CANCEL) */
+	output_set_lamp_value(8, (data >> 8) & 1);      /* Lamp 8 - PAYOUT/SUPERGAME */
 
-	coin_counter_w(space->machine(), 0, data & 0x400);
+	coin_counter_w(machine(), 0, data & 0x400);
 }
 
 /***************************
 *       Memory Maps        *
 ***************************/
 
-static ADDRESS_MAP_START( magic10_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( magic10_map, AS_PROGRAM, 16, magic10_state )
 	AM_RANGE(0x000000, 0x03ffff) AM_ROM
-	AM_RANGE(0x100000, 0x100fff) AM_RAM_WRITE(layer1_videoram_w) AM_BASE_MEMBER(magic10_state, m_layer1_videoram)
-	AM_RANGE(0x101000, 0x101fff) AM_RAM_WRITE(layer0_videoram_w) AM_BASE_MEMBER(magic10_state, m_layer0_videoram)
-	AM_RANGE(0x102000, 0x103fff) AM_RAM_WRITE(layer2_videoram_w) AM_BASE_MEMBER(magic10_state, m_layer2_videoram)
+	AM_RANGE(0x100000, 0x100fff) AM_RAM_WRITE(layer1_videoram_w) AM_SHARE("layer1_videoram")
+	AM_RANGE(0x101000, 0x101fff) AM_RAM_WRITE(layer0_videoram_w) AM_SHARE("layer0_videoram")
+	AM_RANGE(0x102000, 0x103fff) AM_RAM_WRITE(layer2_videoram_w) AM_SHARE("layer2_videoram")
 	AM_RANGE(0x200000, 0x2007ff) AM_RAM AM_SHARE("nvram")
-	AM_RANGE(0x300000, 0x3001ff) AM_RAM_WRITE(paletteram_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x300000, 0x3001ff) AM_RAM_WRITE(paletteram_w) AM_SHARE("paletteram")
 	AM_RANGE(0x400000, 0x400001) AM_READ_PORT("INPUTS")
 	AM_RANGE(0x400002, 0x400003) AM_READ_PORT("DSW")
 	AM_RANGE(0x400008, 0x400009) AM_WRITE(magic10_out_w)
-	AM_RANGE(0x40000a, 0x40000b) AM_DEVREADWRITE8_MODERN("oki", okim6295_device, read, write, 0x00ff)
+	AM_RANGE(0x40000a, 0x40000b) AM_DEVREADWRITE8("oki", okim6295_device, read, write, 0x00ff)
 	AM_RANGE(0x40000e, 0x40000f) AM_WRITENOP
-	AM_RANGE(0x400080, 0x400087) AM_RAM AM_BASE_MEMBER(magic10_state, m_vregs)
+	AM_RANGE(0x400080, 0x400087) AM_RAM AM_SHARE("vregs")
 	AM_RANGE(0x600000, 0x603fff) AM_RAM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( magic10a_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( magic10a_map, AS_PROGRAM, 16, magic10_state )
 	AM_RANGE(0x000000, 0x03ffff) AM_ROM
-	AM_RANGE(0x100000, 0x100fff) AM_RAM_WRITE(layer1_videoram_w) AM_BASE_MEMBER(magic10_state, m_layer1_videoram)
-	AM_RANGE(0x101000, 0x101fff) AM_RAM_WRITE(layer0_videoram_w) AM_BASE_MEMBER(magic10_state, m_layer0_videoram)
-	AM_RANGE(0x102000, 0x103fff) AM_RAM_WRITE(layer2_videoram_w) AM_BASE_MEMBER(magic10_state, m_layer2_videoram)
+	AM_RANGE(0x100000, 0x100fff) AM_RAM_WRITE(layer1_videoram_w) AM_SHARE("layer1_videoram")
+	AM_RANGE(0x101000, 0x101fff) AM_RAM_WRITE(layer0_videoram_w) AM_SHARE("layer0_videoram")
+	AM_RANGE(0x102000, 0x103fff) AM_RAM_WRITE(layer2_videoram_w) AM_SHARE("layer2_videoram")
 	AM_RANGE(0x200000, 0x2007ff) AM_RAM AM_SHARE("nvram")
-	AM_RANGE(0x300000, 0x3001ff) AM_RAM_WRITE(paletteram_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x300000, 0x3001ff) AM_RAM_WRITE(paletteram_w) AM_SHARE("paletteram")
 	AM_RANGE(0x500000, 0x500001) AM_READ_PORT("INPUTS")
 	AM_RANGE(0x500002, 0x500003) AM_READ_PORT("DSW")
 	AM_RANGE(0x500008, 0x500009) AM_WRITE(magic10_out_w)
-	AM_RANGE(0x50000a, 0x50000b) AM_DEVREADWRITE8_MODERN("oki", okim6295_device, read, write, 0x00ff)
+	AM_RANGE(0x50000a, 0x50000b) AM_DEVREADWRITE8("oki", okim6295_device, read, write, 0x00ff)
 	AM_RANGE(0x50000e, 0x50000f) AM_WRITENOP
-	AM_RANGE(0x500080, 0x500087) AM_RAM AM_BASE_MEMBER(magic10_state, m_vregs)	// video registers?
+	AM_RANGE(0x500080, 0x500087) AM_RAM AM_SHARE("vregs")   // video registers?
 	AM_RANGE(0x600000, 0x603fff) AM_RAM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( magic102_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( magic102_map, AS_PROGRAM, 16, magic10_state )
 	AM_RANGE(0x000000, 0x03ffff) AM_ROM
-	AM_RANGE(0x100000, 0x100fff) AM_RAM_WRITE(layer1_videoram_w) AM_BASE_MEMBER(magic10_state, m_layer1_videoram)
-	AM_RANGE(0x101000, 0x101fff) AM_RAM_WRITE(layer0_videoram_w) AM_BASE_MEMBER(magic10_state, m_layer0_videoram)
-	AM_RANGE(0x102000, 0x103fff) AM_RAM_WRITE(layer2_videoram_w) AM_BASE_MEMBER(magic10_state, m_layer2_videoram)
+	AM_RANGE(0x100000, 0x100fff) AM_RAM_WRITE(layer1_videoram_w) AM_SHARE("layer1_videoram")
+	AM_RANGE(0x101000, 0x101fff) AM_RAM_WRITE(layer0_videoram_w) AM_SHARE("layer0_videoram")
+	AM_RANGE(0x102000, 0x103fff) AM_RAM_WRITE(layer2_videoram_w) AM_SHARE("layer2_videoram")
 	AM_RANGE(0x200000, 0x2007ff) AM_RAM AM_SHARE("nvram")
-	AM_RANGE(0x400000, 0x4001ff) AM_RAM_WRITE(paletteram_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x400000, 0x4001ff) AM_RAM_WRITE(paletteram_w) AM_SHARE("paletteram")
 	AM_RANGE(0x500000, 0x500001) AM_READ(magic102_r)
 	AM_RANGE(0x500004, 0x500005) AM_READNOP // gives credits
 	AM_RANGE(0x500006, 0x500007) AM_READNOP // gives credits
@@ -329,18 +342,18 @@ static ADDRESS_MAP_START( magic102_map, AS_PROGRAM, 16 )
 	AM_RANGE(0x500002, 0x50001f) AM_READNOP
 	AM_RANGE(0x500002, 0x50001f) AM_WRITENOP
 	AM_RANGE(0x600000, 0x603fff) AM_RAM
-	AM_RANGE(0x700000, 0x700001) AM_DEVREADWRITE8_MODERN("oki", okim6295_device, read, write, 0x00ff)
-	AM_RANGE(0x700080, 0x700087) AM_RAM AM_BASE_MEMBER(magic10_state, m_vregs)	// video registers?
+	AM_RANGE(0x700000, 0x700001) AM_DEVREADWRITE8("oki", okim6295_device, read, write, 0x00ff)
+	AM_RANGE(0x700080, 0x700087) AM_RAM AM_SHARE("vregs")   // video registers?
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( hotslot_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( hotslot_map, AS_PROGRAM, 16, magic10_state )
 	AM_RANGE(0x000000, 0x03ffff) AM_ROM
-	AM_RANGE(0x100000, 0x100fff) AM_RAM_WRITE(layer1_videoram_w) AM_BASE_MEMBER(magic10_state, m_layer1_videoram)
-	AM_RANGE(0x101000, 0x101fff) AM_RAM_WRITE(layer0_videoram_w) AM_BASE_MEMBER(magic10_state, m_layer0_videoram)
-	AM_RANGE(0x102000, 0x103fff) AM_RAM_WRITE(layer2_videoram_w) AM_BASE_MEMBER(magic10_state, m_layer2_videoram)
+	AM_RANGE(0x100000, 0x100fff) AM_RAM_WRITE(layer1_videoram_w) AM_SHARE("layer1_videoram")
+	AM_RANGE(0x101000, 0x101fff) AM_RAM_WRITE(layer0_videoram_w) AM_SHARE("layer0_videoram")
+	AM_RANGE(0x102000, 0x103fff) AM_RAM_WRITE(layer2_videoram_w) AM_SHARE("layer2_videoram")
 	AM_RANGE(0x200000, 0x2007ff) AM_RAM AM_SHARE("nvram")
-	AM_RANGE(0x400000, 0x4001ff) AM_RAM_WRITE(paletteram_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0x500004, 0x500005) AM_READWRITE(hotslot_copro_r, hotslot_copro_w)	// copro comm
+	AM_RANGE(0x400000, 0x4001ff) AM_RAM_WRITE(paletteram_w) AM_SHARE("paletteram")
+	AM_RANGE(0x500004, 0x500005) AM_READWRITE(hotslot_copro_r, hotslot_copro_w) // copro comm
 	AM_RANGE(0x500006, 0x500011) AM_RAM
 	AM_RANGE(0x500012, 0x500013) AM_READ_PORT("IN0")
 	AM_RANGE(0x500014, 0x500015) AM_READ_PORT("IN1")
@@ -348,22 +361,22 @@ static ADDRESS_MAP_START( hotslot_map, AS_PROGRAM, 16 )
 	AM_RANGE(0x500018, 0x500019) AM_READ_PORT("DSW1")
 	AM_RANGE(0x50001a, 0x50001d) AM_WRITENOP
 	AM_RANGE(0x600000, 0x603fff) AM_RAM
-	AM_RANGE(0x70000a, 0x70000b) AM_DEVREADWRITE8_MODERN("oki", okim6295_device, read, write, 0x00ff)
-	AM_RANGE(0x700080, 0x700087) AM_RAM AM_BASE_MEMBER(magic10_state, m_vregs)
+	AM_RANGE(0x70000a, 0x70000b) AM_DEVREADWRITE8("oki", okim6295_device, read, write, 0x00ff)
+	AM_RANGE(0x700080, 0x700087) AM_RAM AM_SHARE("vregs")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sgsafari_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( sgsafari_map, AS_PROGRAM, 16, magic10_state )
 	AM_RANGE(0x000000, 0x03ffff) AM_ROM
-	AM_RANGE(0x100000, 0x100fff) AM_RAM_WRITE(layer1_videoram_w) AM_BASE_MEMBER(magic10_state, m_layer1_videoram)
-	AM_RANGE(0x101000, 0x101fff) AM_RAM_WRITE(layer0_videoram_w) AM_BASE_MEMBER(magic10_state, m_layer0_videoram)
-	AM_RANGE(0x102000, 0x103fff) AM_RAM_WRITE(layer2_videoram_w) AM_BASE_MEMBER(magic10_state, m_layer2_videoram)
+	AM_RANGE(0x100000, 0x100fff) AM_RAM_WRITE(layer1_videoram_w) AM_SHARE("layer1_videoram")
+	AM_RANGE(0x101000, 0x101fff) AM_RAM_WRITE(layer0_videoram_w) AM_SHARE("layer0_videoram")
+	AM_RANGE(0x102000, 0x103fff) AM_RAM_WRITE(layer2_videoram_w) AM_SHARE("layer2_videoram")
 	AM_RANGE(0x200000, 0x203fff) AM_RAM AM_SHARE("nvram")
-	AM_RANGE(0x300000, 0x3001ff) AM_RAM_WRITE(paletteram_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x300000, 0x3001ff) AM_RAM_WRITE(paletteram_w) AM_SHARE("paletteram")
 	AM_RANGE(0x500002, 0x500003) AM_READ_PORT("DSW1")
 	AM_RANGE(0x500008, 0x500009) AM_WRITE(magic10_out_w)
-	AM_RANGE(0x50000a, 0x50000b) AM_DEVREADWRITE8_MODERN("oki", okim6295_device, read, write, 0x00ff)
+	AM_RANGE(0x50000a, 0x50000b) AM_DEVREADWRITE8("oki", okim6295_device, read, write, 0x00ff)
 	AM_RANGE(0x50000e, 0x50000f) AM_READ_PORT("IN0")
-	AM_RANGE(0x500080, 0x500087) AM_RAM AM_BASE_MEMBER(magic10_state, m_vregs)	// video registers?
+	AM_RANGE(0x500080, 0x500087) AM_RAM AM_SHARE("vregs")   // video registers?
 	AM_RANGE(0x600000, 0x603fff) AM_RAM
 ADDRESS_MAP_END
 /*
@@ -419,23 +432,23 @@ static INPUT_PORTS_START( magic10 )
 	PORT_DIPSETTING(      0x0800, "Note A: 20 - Note B: 40 - Note C: 100 - Note D: 200" )
 	PORT_DIPSETTING(      0x0400, "Note A: 50 - Note B: 100 - Note C: 500 - Note D: 1000" )
 	PORT_DIPSETTING(      0x0c00, "Note A: 100 - Note B: 200 - Note C: 1000 - Note D: 2000" )
-	PORT_DIPNAME( 0x3000, 0x3000, "Lots At" )			PORT_CONDITION("DSW", 0xc000, PORTCOND_EQUALS, 0xc000)
+	PORT_DIPNAME( 0x3000, 0x3000, "Lots At" )           PORT_CONDITION("DSW", 0xc000, EQUALS, 0xc000)
 	PORT_DIPSETTING(      0x0000, "50 200 500 1000 2000" )
 	PORT_DIPSETTING(      0x1000, "100 300 1000 3000 5000" )
 	PORT_DIPSETTING(      0x2000, "200 500 2000 3000 5000" )
 	PORT_DIPSETTING(      0x3000, "500 1000 2000 4000 8000" )
-	PORT_DIPNAME( 0x3000, 0x3000, "1 Ticket Won" )		PORT_CONDITION("DSW", 0xc000, PORTCOND_EQUALS, 0x8000)
+	PORT_DIPNAME( 0x3000, 0x3000, "1 Ticket Won" )      PORT_CONDITION("DSW", 0xc000, EQUALS, 0x8000)
 //  PORT_DIPSETTING(      0x0000, "Every 100 Score" )
 //  PORT_DIPSETTING(      0x1000, "Every 100 Score" )
 //  PORT_DIPSETTING(      0x2000, "Every 100 Score" )
 	PORT_DIPSETTING(      0x3000, "Every 100 Score" )
-	PORT_DIPNAME( 0x1000, 0x1000, DEF_STR( Unused ) )	PORT_CONDITION("DSW", 0xc000, PORTCOND_EQUALS, 0x4000)
+	PORT_DIPNAME( 0x1000, 0x1000, DEF_STR( Unused ) )   PORT_CONDITION("DSW", 0xc000, EQUALS, 0x4000)
 	PORT_DIPSETTING(      0x1000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x2000, 0x2000, DEF_STR( Unused ) )	PORT_CONDITION("DSW", 0xc000, PORTCOND_EQUALS, 0x4000)
+	PORT_DIPNAME( 0x2000, 0x2000, DEF_STR( Unused ) )   PORT_CONDITION("DSW", 0xc000, EQUALS, 0x4000)
 	PORT_DIPSETTING(      0x2000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x3000, 0x3000, "1 Play Won" )		PORT_CONDITION("DSW", 0xc000, PORTCOND_EQUALS, 0x0000)
+	PORT_DIPNAME( 0x3000, 0x3000, "1 Play Won" )        PORT_CONDITION("DSW", 0xc000, EQUALS, 0x0000)
 //  PORT_DIPSETTING(      0x0000, "Every 10 Score" )
 //  PORT_DIPSETTING(      0x1000, "Every 10 Score" )
 //  PORT_DIPSETTING(      0x2000, "Every 10 Score" )
@@ -549,26 +562,26 @@ static INPUT_PORTS_START( musicsrt )
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_GAMBLE_PAYOUT ) PORT_NAME("OK")
 
 	PORT_START("DSW")
-    PORT_BIT( 0x00ff, IP_ACTIVE_HIGH, IPT_UNUSED )
-	PORT_DIPNAME( 0x0300, 0x0100, DEF_STR( Difficulty ) )	PORT_DIPLOCATION("SW1: 1, 2")
+	PORT_BIT( 0x00ff, IP_ACTIVE_HIGH, IPT_UNUSED )
+	PORT_DIPNAME( 0x0300, 0x0100, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("SW1: 1, 2")
 	PORT_DIPSETTING(      0x0000, DEF_STR( Easy ) )
 	PORT_DIPSETTING(      0x0100, DEF_STR( Medium ) )
 	PORT_DIPSETTING(      0x0200, DEF_STR( Hard ) )
 	PORT_DIPSETTING(      0x0300, DEF_STR( Hardest ) )
-	PORT_DIPNAME( 0x0c00, 0x0c00, DEF_STR( Coinage ) )		PORT_DIPLOCATION("SW1: 3, 4")
+	PORT_DIPNAME( 0x0c00, 0x0c00, DEF_STR( Coinage ) )      PORT_DIPLOCATION("SW1: 3, 4")
 	PORT_DIPSETTING(      0x0000, "Coin A: 50 - Coin B: 50" )
 	PORT_DIPSETTING(      0x0800, "Coin A: 50 - Coin B: 50" )
 	PORT_DIPSETTING(      0x0400, "Coin A: 100 - Coin B: 100" )
 	PORT_DIPSETTING(      0x0c00, "Coin A: 100 - Coin B: 100" )
-	PORT_DIPNAME( 0x3000, 0x3000, "Bonus?" )				PORT_DIPLOCATION("SW1: 5, 6")
+	PORT_DIPNAME( 0x3000, 0x3000, "Bonus?" )                PORT_DIPLOCATION("SW1: 5, 6")
 	PORT_DIPSETTING(      0x3000, "1000= 1 Play; 2000= 2 Play; 3000= 3 Play" )
 	PORT_DIPSETTING(      0x2000, "2000= 1 Play; 4000= 2 Play; 6000= 3 Play" )
 	PORT_DIPSETTING(      0x1000, "2500= 1 Play; 5000= 2 Play; 7500= 3 Play" )
 	PORT_DIPSETTING(      0x0000, "5000= 1 Play; 10000= 2 Play; 15000= 3 Play" )
-	PORT_DIPNAME( 0x4000, 0x4000, "Hopper" )				PORT_DIPLOCATION("SW1: 7")
+	PORT_DIPNAME( 0x4000, 0x4000, "Hopper" )                PORT_DIPLOCATION("SW1: 7")
 	PORT_DIPSETTING(      0x0000, "Disabled" )
 	PORT_DIPSETTING(      0x4000, "Enabled" )
-	PORT_DIPNAME( 0x8000, 0x8000, "Score" )					PORT_DIPLOCATION("SW1: 8")
+	PORT_DIPNAME( 0x8000, 0x8000, "Score" )                 PORT_DIPLOCATION("SW1: 8")
 	PORT_DIPSETTING(      0x0000, "Play Score" )
 	PORT_DIPSETTING(      0x8000, "No Play Score" )
 INPUT_PORTS_END
@@ -596,32 +609,32 @@ static INPUT_PORTS_START( hotslot )
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_GAMBLE_DOOR )
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
-    PORT_START("IN2")
-    PORT_BIT( 0xffff, IP_ACTIVE_LOW, IPT_UNUSED )
+	PORT_START("IN2")
+	PORT_BIT( 0xffff, IP_ACTIVE_LOW, IPT_UNUSED )
 
-    PORT_START("DSW1")
-    PORT_DIPNAME( 0x03,	0x03, DEF_STR( Difficulty ) )
-    PORT_DIPSETTING(	0x00, DEF_STR( Easy ) )
-    PORT_DIPSETTING(	0x01, DEF_STR( Medium ) )
-    PORT_DIPSETTING(	0x02, DEF_STR( Hard ) )
-    PORT_DIPSETTING(	0x03, DEF_STR( Hardest ) )
-    PORT_DIPNAME( 0x0c,	0x0c, DEF_STR( Coinage ) )
-    PORT_DIPSETTING(	0x00, "Coin A=10; B=10" )
-    PORT_DIPSETTING(	0x08, "Coin A=10; B=20" )
-    PORT_DIPSETTING(	0x04, "Coin A=10; B=50" )
-    PORT_DIPSETTING(	0x0c, "Coin A=10; B=100" )
-    PORT_DIPNAME( 0x10,	0x10, "Bet Max" )
-    PORT_DIPSETTING(	0x10, "10" )
-    PORT_DIPSETTING(	0x00, "20" )
-    PORT_DIPNAME( 0x20,	0x20, "Cum" )
-    PORT_DIPSETTING(	0x20, "10" )
-    PORT_DIPSETTING(	0x00, "100" )
-    PORT_DIPNAME( 0xc0,	0xc0, "Payout" )
-    PORT_DIPSETTING(	0x00, "Replay Only" )
-    PORT_DIPSETTING(	0x40, "Tokens Only" )
-    PORT_DIPSETTING(	0x80, "Tickets Only" )
-    PORT_DIPSETTING(	0xc0, "Tickets & Tokens" )
-    PORT_BIT( 0xff00, IP_ACTIVE_HIGH, IPT_UNUSED )
+	PORT_START("DSW1")
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Difficulty ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Easy ) )
+	PORT_DIPSETTING(    0x01, DEF_STR( Medium ) )
+	PORT_DIPSETTING(    0x02, DEF_STR( Hard ) )
+	PORT_DIPSETTING(    0x03, DEF_STR( Hardest ) )
+	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Coinage ) )
+	PORT_DIPSETTING(    0x00, "Coin A=10; B=10" )
+	PORT_DIPSETTING(    0x08, "Coin A=10; B=20" )
+	PORT_DIPSETTING(    0x04, "Coin A=10; B=50" )
+	PORT_DIPSETTING(    0x0c, "Coin A=10; B=100" )
+	PORT_DIPNAME( 0x10, 0x10, "Bet Max" )
+	PORT_DIPSETTING(    0x10, "10" )
+	PORT_DIPSETTING(    0x00, "20" )
+	PORT_DIPNAME( 0x20, 0x20, "Cum" )
+	PORT_DIPSETTING(    0x20, "10" )
+	PORT_DIPSETTING(    0x00, "100" )
+	PORT_DIPNAME( 0xc0, 0xc0, "Payout" )
+	PORT_DIPSETTING(    0x00, "Replay Only" )
+	PORT_DIPSETTING(    0x40, "Tokens Only" )
+	PORT_DIPSETTING(    0x80, "Tickets Only" )
+	PORT_DIPSETTING(    0xc0, "Tickets & Tokens" )
+	PORT_BIT( 0xff00, IP_ACTIVE_HIGH, IPT_UNUSED )
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( sgsafari )
@@ -644,29 +657,29 @@ static INPUT_PORTS_START( sgsafari )
 	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_COIN5 ) PORT_NAME("Note D") PORT_CODE(KEYCODE_9)
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_GAMBLE_PAYOUT ) PORT_NAME("Payout / Super Game")
 
-    PORT_START("DSW1")
-    PORT_BIT( 0x00ff, IP_ACTIVE_HIGH, IPT_UNUSED )
-    PORT_DIPNAME( 0x0300,	0x0000, DEF_STR( Difficulty ) )	PORT_DIPLOCATION("SW1:1,2")
-    PORT_DIPSETTING(		0x0300, DEF_STR( Easy ) )
-    PORT_DIPSETTING(		0x0200, DEF_STR( Normal ) )
-    PORT_DIPSETTING(		0x0100, DEF_STR( Hard ) )
-    PORT_DIPSETTING(		0x0000, DEF_STR( Hardest ) )
-    PORT_DIPNAME( 0x0c00,	0x0c00, DEF_STR( Coinage ) )
-    PORT_DIPSETTING(		0x0c00, DEF_STR( 1C_1C ) )		PORT_DIPLOCATION("SW1:3,4")
-    PORT_DIPSETTING(		0x0800, DEF_STR( 1C_2C ) )
-    PORT_DIPSETTING(		0x0400, DEF_STR( 1C_4C ) )
-    PORT_DIPSETTING(		0x0000, "1 Coin/10 Credits" )
-    PORT_DIPNAME( 0x3000,	0x0000, "Payout Options" )		PORT_DIPLOCATION("SW1:5,6")
-    PORT_DIPSETTING(		0x3000, "Pay at 100 points" )
-    PORT_DIPSETTING(		0x2000, "Pay at 200 points" )
-    PORT_DIPSETTING(		0x1000, "Pay at 400 points" )
-    PORT_DIPSETTING(		0x0000, "Pay at 500 points" )
-    PORT_DIPNAME( 0x4000,	0x4000, "Tickets" )				PORT_DIPLOCATION("SW1:7")
-    PORT_DIPSETTING(		0x4000, DEF_STR( Off ) )
-    PORT_DIPSETTING(		0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x8000,	0x0000, "Hopper" )				PORT_DIPLOCATION("SW1:8")
-    PORT_DIPSETTING(		0x8000, DEF_STR( Off ) )
-    PORT_DIPSETTING(		0x0000, DEF_STR( On ) )
+	PORT_START("DSW1")
+	PORT_BIT( 0x00ff, IP_ACTIVE_HIGH, IPT_UNUSED )
+	PORT_DIPNAME( 0x0300,   0x0000, DEF_STR( Difficulty ) ) PORT_DIPLOCATION("SW1:1,2")
+	PORT_DIPSETTING(        0x0300, DEF_STR( Easy ) )
+	PORT_DIPSETTING(        0x0200, DEF_STR( Normal ) )
+	PORT_DIPSETTING(        0x0100, DEF_STR( Hard ) )
+	PORT_DIPSETTING(        0x0000, DEF_STR( Hardest ) )
+	PORT_DIPNAME( 0x0c00,   0x0c00, DEF_STR( Coinage ) )
+	PORT_DIPSETTING(        0x0c00, DEF_STR( 1C_1C ) )      PORT_DIPLOCATION("SW1:3,4")
+	PORT_DIPSETTING(        0x0800, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(        0x0400, DEF_STR( 1C_4C ) )
+	PORT_DIPSETTING(        0x0000, "1 Coin/10 Credits" )
+	PORT_DIPNAME( 0x3000,   0x0000, "Payout Options" )      PORT_DIPLOCATION("SW1:5,6")
+	PORT_DIPSETTING(        0x3000, "Pay at 100 points" )
+	PORT_DIPSETTING(        0x2000, "Pay at 200 points" )
+	PORT_DIPSETTING(        0x1000, "Pay at 400 points" )
+	PORT_DIPSETTING(        0x0000, "Pay at 500 points" )
+	PORT_DIPNAME( 0x4000,   0x4000, "Tickets" )             PORT_DIPLOCATION("SW1:7")
+	PORT_DIPSETTING(        0x4000, DEF_STR( Off ) )
+	PORT_DIPSETTING(        0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x8000,   0x0000, "Hopper" )              PORT_DIPLOCATION("SW1:8")
+	PORT_DIPSETTING(        0x8000, DEF_STR( Off ) )
+	PORT_DIPSETTING(        0x0000, DEF_STR( On ) )
 INPUT_PORTS_END
 
 
@@ -717,26 +730,24 @@ static MACHINE_CONFIG_START( magic10, magic10_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, 10000000) // ?
 	MCFG_CPU_PROGRAM_MAP(magic10_map)
-	MCFG_CPU_VBLANK_INT("screen", irq1_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", magic10_state,  irq1_line_hold)
 
 	MCFG_NVRAM_ADD_0FILL("nvram")
 
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 64*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 44*8-1, 2*8, 32*8-1)
-	MCFG_SCREEN_UPDATE(magic10)
+	MCFG_SCREEN_UPDATE_DRIVER(magic10_state, screen_update_magic10)
 
 	MCFG_PALETTE_LENGTH(0x100)
 	MCFG_GFXDECODE(magic10)
 
-	MCFG_VIDEO_START(magic10)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
-	MCFG_OKIM6295_ADD("oki", 1056000, OKIM6295_PIN7_HIGH)	/* clock frequency & pin 7 not verified */
+	MCFG_OKIM6295_ADD("oki", 1056000, OKIM6295_PIN7_HIGH)   /* clock frequency & pin 7 not verified */
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 MACHINE_CONFIG_END
 
@@ -776,7 +787,7 @@ static MACHINE_CONFIG_DERIVED( sgsafari, magic10 )
 	/* basic machine hardware */
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_PROGRAM_MAP(sgsafari_map)
-	MCFG_CPU_VBLANK_INT("screen", irq2_line_hold)	/* L1 interrupts */
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", magic10_state,  irq2_line_hold)    /* L1 interrupts */
 
 	MCFG_SCREEN_MODIFY("screen")
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 44*8-1, 0*8, 30*8-1)
@@ -893,7 +904,7 @@ pcb is marked: Copyright ABM - 9605 Rev.02
 
 */
 ROM_START( magic102 )
-	ROM_REGION( 0x40000, "maincpu", 0 )		/* 68000 code */
+	ROM_REGION( 0x40000, "maincpu", 0 )     /* 68000 code */
 	ROM_LOAD16_BYTE( "2.u3",  0x00000, 0x20000, CRC(6fc55fe4) SHA1(392ad92e55aeac9bf5235cceb6b0b415942105a4) )
 	ROM_LOAD16_BYTE( "1.u2",  0x00001, 0x20000, CRC(501507af) SHA1(ceed50c9380a9838cd3d171d2387334edfeff77f) )
 
@@ -1202,42 +1213,37 @@ ROM_END
 *       Driver Init         *
 ****************************/
 
-static DRIVER_INIT( magic10 )
+DRIVER_INIT_MEMBER(magic10_state,magic10)
 {
-	magic10_state *state = machine.driver_data<magic10_state>();
-	state->m_layer2_offset[0] = 32;
-	state->m_layer2_offset[1] = 2;
+	m_layer2_offset[0] = 32;
+	m_layer2_offset[1] = 2;
 }
 
-static DRIVER_INIT( magic102 )
+DRIVER_INIT_MEMBER(magic10_state,magic102)
 {
-	magic10_state *state = machine.driver_data<magic10_state>();
-	state->m_layer2_offset[0] = 8;
-	state->m_layer2_offset[1] = 20;
+	m_layer2_offset[0] = 8;
+	m_layer2_offset[1] = 20;
 }
 
-static DRIVER_INIT( suprpool )
+DRIVER_INIT_MEMBER(magic10_state,suprpool)
 {
-	magic10_state *state = machine.driver_data<magic10_state>();
-	state->m_layer2_offset[0] = 8;
-	state->m_layer2_offset[1] = 16;
+	m_layer2_offset[0] = 8;
+	m_layer2_offset[1] = 16;
 }
 
-static DRIVER_INIT( hotslot )
+DRIVER_INIT_MEMBER(magic10_state,hotslot)
 {
-	magic10_state *state = machine.driver_data<magic10_state>();
 /*  a value of -56 center the playfield, but displace the intro and initial screen.
     a value of -64 center the intro and initial screen, but displace the playfield.
 */
-	state->m_layer2_offset[0] = -56;	// X offset.
-	state->m_layer2_offset[1] = 0;	// Y offset.
+	m_layer2_offset[0] = -56;   // X offset.
+	m_layer2_offset[1] = 0; // Y offset.
 }
 
-static DRIVER_INIT( sgsafari )
+DRIVER_INIT_MEMBER(magic10_state,sgsafari)
 {
-	magic10_state *state = machine.driver_data<magic10_state>();
-	state->m_layer2_offset[0] = 16;
-	state->m_layer2_offset[1] = 20;
+	m_layer2_offset[0] = 16;
+	m_layer2_offset[1] = 20;
 }
 
 
@@ -1246,12 +1252,12 @@ static DRIVER_INIT( sgsafari )
 ******************************/
 
 /*     YEAR  NAME      PARENT    MACHINE   INPUT     INIT      ROT    COMPANY                 FULLNAME                         FLAGS            LAYOUT  */
-GAMEL( 1995, magic10,  0,        magic10,  magic10,  magic10,  ROT0, "A.W.P. Games",         "Magic's 10 (ver. 16.55)",        0,               layout_sgsafari )
-GAMEL( 1995, magic10a, magic10,  magic10a, magic10,  magic10,  ROT0, "A.W.P. Games",         "Magic's 10 (ver. 16.45)",        0,               layout_sgsafari )
-GAMEL( 1995, magic10b, magic10,  magic10a, magic10,  magic10,  ROT0, "A.W.P. Games",         "Magic's 10 (ver. 16.15)",        0,               layout_sgsafari )
-GAME(  1997, magic102, 0,        magic102, magic102, magic102, ROT0, "ABM Games",            "Magic's 10 2 (ver 1.1)",         GAME_NOT_WORKING                 )
-GAME(  1997, suprpool, 0,        magic102, magic102, suprpool, ROT0, "ABM Games",            "Super Pool (9743 rev.01)",       GAME_NOT_WORKING                 )
-GAME(  1996, hotslot,  0,        hotslot,  hotslot,  hotslot,  ROT0, "ABM Electronics",      "Hot Slot (ver. 05.01)",          GAME_NOT_WORKING                 )
-GAME(  1999, mcolors,  0,        magic102, magic102, magic102, ROT0, "<unknown>",            "Magic Colors (ver. 1.7a)",       GAME_NOT_WORKING                 )
-GAMEL( 1996, sgsafari, 0,        sgsafari, sgsafari, sgsafari, ROT0, "New Impeuropex Corp.", "Super Gran Safari (ver 3.11)",   0,               layout_sgsafari )
-GAMEL( 1995, musicsrt, 0,        magic10a, musicsrt, magic10,  ROT0, "ABM Games",            "Music Sort (ver 2.02, English)", 0,               layout_musicsrt )
+GAMEL( 1995, magic10,  0,        magic10,  magic10, magic10_state,  magic10,  ROT0, "A.W.P. Games",         "Magic's 10 (ver. 16.55)",        0,               layout_sgsafari )
+GAMEL( 1995, magic10a, magic10,  magic10a, magic10, magic10_state,  magic10,  ROT0, "A.W.P. Games",         "Magic's 10 (ver. 16.45)",        0,               layout_sgsafari )
+GAMEL( 1995, magic10b, magic10,  magic10a, magic10, magic10_state,  magic10,  ROT0, "A.W.P. Games",         "Magic's 10 (ver. 16.15)",        0,               layout_sgsafari )
+GAME(  1997, magic102, 0,        magic102, magic102, magic10_state, magic102, ROT0, "ABM Games",            "Magic's 10 2 (ver 1.1)",         GAME_NOT_WORKING                 )
+GAME(  1997, suprpool, 0,        magic102, magic102, magic10_state, suprpool, ROT0, "ABM Games",            "Super Pool (9743 rev.01)",       GAME_NOT_WORKING                 )
+GAME(  1996, hotslot,  0,        hotslot,  hotslot, magic10_state,  hotslot,  ROT0, "ABM Electronics",      "Hot Slot (ver. 05.01)",          GAME_NOT_WORKING                 )
+GAME(  1999, mcolors,  0,        magic102, magic102, magic10_state, magic102, ROT0, "<unknown>",            "Magic Colors (ver. 1.7a)",       GAME_NOT_WORKING                 )
+GAMEL( 1996, sgsafari, 0,        sgsafari, sgsafari, magic10_state, sgsafari, ROT0, "New Impeuropex Corp.", "Super Gran Safari (ver 3.11)",   0,               layout_sgsafari )
+GAMEL( 1995, musicsrt, 0,        magic10a, musicsrt, magic10_state, magic10,  ROT0, "ABM Games",            "Music Sort (ver 2.02, English)", 0,               layout_musicsrt )

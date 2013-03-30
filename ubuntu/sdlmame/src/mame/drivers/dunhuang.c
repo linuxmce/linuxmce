@@ -55,29 +55,29 @@ Notes:
 #include "sound/okim6295.h"
 #include "sound/2413intf.h"
 
-#define DUNHUANG_DEBUG	0
+#define DUNHUANG_DEBUG  0
 
 
 class dunhuang_state : public driver_device
 {
 public:
-	dunhuang_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	dunhuang_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) { }
 
 	/* video-related */
 	tilemap_t         *m_tmap;
-	tilemap_t		*m_tmap2;
+	tilemap_t       *m_tmap2;
 	int             m_written;
-	int				m_written2;
+	int             m_written2;
 	UINT8           m_pos_x;
-	UINT8			m_pos_y;
-	UINT8			m_clear_y;
+	UINT8           m_pos_y;
+	UINT8           m_clear_y;
 	UINT8           m_block_x;
-	UINT8			m_block_y;
-	UINT8			m_block_w;
-	UINT8			m_block_h;
+	UINT8           m_block_y;
+	UINT8           m_block_w;
+	UINT8           m_block_h;
 	UINT8           m_block_addr_hi;
-	UINT8			m_block_addr_lo;
+	UINT8           m_block_addr_lo;
 	UINT8           m_block_dest;
 	UINT8           m_block_c;
 	UINT8           m_layers;
@@ -90,9 +90,39 @@ public:
 	/* memory */
 	UINT16         m_videoram[0x40 * 0x20];
 	UINT16         m_videoram2[0x40 * 0x8];
-	UINT8	       m_colorram[0x40 * 0x20];
+	UINT8          m_colorram[0x40 * 0x20];
 	UINT8          m_colorram2[0x40 * 0x8];
 	UINT8          m_paldata[3 * 256];
+	DECLARE_WRITE8_MEMBER(dunhuang_pos_x_w);
+	DECLARE_WRITE8_MEMBER(dunhuang_pos_y_w);
+	DECLARE_WRITE8_MEMBER(dunhuang_tile_w);
+	DECLARE_WRITE8_MEMBER(dunhuang_tile2_w);
+	DECLARE_WRITE8_MEMBER(dunhuang_clear_y_w);
+	DECLARE_WRITE8_MEMBER(dunhuang_horiz_clear_w);
+	DECLARE_WRITE8_MEMBER(dunhuang_vert_clear_w);
+	DECLARE_WRITE8_MEMBER(dunhuang_block_dest_w);
+	DECLARE_WRITE8_MEMBER(dunhuang_block_x_w);
+	DECLARE_WRITE8_MEMBER(dunhuang_block_y_w);
+	DECLARE_WRITE8_MEMBER(dunhuang_block_w_w);
+	DECLARE_WRITE8_MEMBER(dunhuang_block_c_w);
+	DECLARE_WRITE8_MEMBER(dunhuang_block_addr_lo_w);
+	DECLARE_WRITE8_MEMBER(dunhuang_block_addr_hi_w);
+	DECLARE_WRITE8_MEMBER(dunhuang_block_h_w);
+	DECLARE_WRITE8_MEMBER(dunhuang_paloffs_w);
+	DECLARE_WRITE8_MEMBER(dunhuang_paldata_w);
+	DECLARE_WRITE8_MEMBER(dunhuang_layers_w);
+	DECLARE_WRITE8_MEMBER(dunhuang_input_w);
+	DECLARE_READ8_MEMBER(dunhuang_service_r);
+	DECLARE_READ8_MEMBER(dunhuang_input_r);
+	DECLARE_WRITE8_MEMBER(dunhuang_rombank_w);
+	DECLARE_WRITE8_MEMBER(dunhuang_82_w);
+	DECLARE_READ8_MEMBER(dunhuang_dsw_r);
+	TILE_GET_INFO_MEMBER(get_tile_info);
+	TILE_GET_INFO_MEMBER(get_tile_info2);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	UINT32 screen_update_dunhuang(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
@@ -101,67 +131,63 @@ public:
 ***************************************************************************/
 
 
-static TILE_GET_INFO( get_tile_info )
+TILE_GET_INFO_MEMBER(dunhuang_state::get_tile_info)
 {
-	dunhuang_state *state = machine.driver_data<dunhuang_state>();
-	UINT16 code = state->m_videoram[tile_index];
-	UINT8 color = state->m_colorram[tile_index] & 0x0f;
-	SET_TILE_INFO(0, code, color, 0);
+	UINT16 code = m_videoram[tile_index];
+	UINT8 color = m_colorram[tile_index] & 0x0f;
+	SET_TILE_INFO_MEMBER(0, code, color, 0);
 }
-static TILE_GET_INFO( get_tile_info2 )
+TILE_GET_INFO_MEMBER(dunhuang_state::get_tile_info2)
 {
-	dunhuang_state *state = machine.driver_data<dunhuang_state>();
-	UINT16 code = state->m_videoram2[tile_index];
-	UINT8 color = state->m_colorram2[tile_index] & 0x0f;
-	SET_TILE_INFO(1, code, color, 0);
+	UINT16 code = m_videoram2[tile_index];
+	UINT8 color = m_colorram2[tile_index] & 0x0f;
+	SET_TILE_INFO_MEMBER(1, code, color, 0);
 }
 
-static VIDEO_START(dunhuang)
+void dunhuang_state::video_start()
 {
-	dunhuang_state *state = machine.driver_data<dunhuang_state>();
-	state->m_tmap = tilemap_create(machine, get_tile_info, tilemap_scan_rows, 8,8, 0x40,0x20);
-	state->m_tmap2 = tilemap_create(machine, get_tile_info2, tilemap_scan_rows, 8,32, 0x40,0x8);
+	m_tmap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(dunhuang_state::get_tile_info),this), TILEMAP_SCAN_ROWS, 8,8, 0x40,0x20);
+	m_tmap2 = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(dunhuang_state::get_tile_info2),this), TILEMAP_SCAN_ROWS, 8,32, 0x40,0x8);
 
-	tilemap_set_transparent_pen(state->m_tmap, 0);
-	tilemap_set_transparent_pen(state->m_tmap2, 0);
+	m_tmap->set_transparent_pen(0);
+	m_tmap2->set_transparent_pen(0);
 
-	state->save_item(NAME(state->m_videoram));
-	state->save_item(NAME(state->m_colorram));
-	state->save_item(NAME(state->m_videoram2));
-	state->save_item(NAME(state->m_colorram2));
-	state->save_item(NAME(state->m_paldata));
+	save_item(NAME(m_videoram));
+	save_item(NAME(m_colorram));
+	save_item(NAME(m_videoram2));
+	save_item(NAME(m_colorram2));
+	save_item(NAME(m_paldata));
 }
 
-static SCREEN_UPDATE( dunhuang )
+UINT32 dunhuang_state::screen_update_dunhuang(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	dunhuang_state *state = screen->machine().driver_data<dunhuang_state>();
 	int layers_ctrl = -1;
 
 #if DUNHUANG_DEBUG
-if (input_code_pressed(screen->machine(), KEYCODE_Z))
+if (machine().input().code_pressed(KEYCODE_Z))
 {
 	int msk = 0;
-	if (input_code_pressed(screen->machine(), KEYCODE_Q))	msk |= 1;
-	if (input_code_pressed(screen->machine(), KEYCODE_W))	msk |= 2;
+	if (machine().input().code_pressed(KEYCODE_Q))  msk |= 1;
+	if (machine().input().code_pressed(KEYCODE_W))  msk |= 2;
 	if (msk != 0) layers_ctrl &= msk;
 }
 #endif
 
-	bitmap_fill(bitmap, cliprect, get_black_pen(screen->machine()));
+	bitmap.fill(get_black_pen(machine()), cliprect);
 
-	switch (state->m_layers)
+	switch (m_layers)
 	{
-		case 0x04:	// girl select: bg over fg
-			if (layers_ctrl & 2)	tilemap_draw(bitmap,cliprect, state->m_tmap2, TILEMAP_DRAW_OPAQUE, 0);
-			if (layers_ctrl & 1)	tilemap_draw(bitmap,cliprect, state->m_tmap,  0, 0);
+		case 0x04:  // girl select: bg over fg
+			if (layers_ctrl & 2)    m_tmap2->draw(bitmap, cliprect, TILEMAP_DRAW_OPAQUE, 0);
+			if (layers_ctrl & 1)    m_tmap->draw(bitmap, cliprect, 0, 0);
 			break;
-		case 0x05:	// dips: must hide fg
-			if (layers_ctrl & 1)	tilemap_draw(bitmap,cliprect, state->m_tmap,  TILEMAP_DRAW_OPAQUE, 0);
+		case 0x05:  // dips: must hide fg
+			if (layers_ctrl & 1)    m_tmap->draw(bitmap, cliprect, TILEMAP_DRAW_OPAQUE, 0);
 			break;
-		case 0x07:	// game,demo: fg over bg
+		case 0x07:  // game,demo: fg over bg
 		default:
-			if (layers_ctrl & 1)	tilemap_draw(bitmap,cliprect, state->m_tmap,  TILEMAP_DRAW_OPAQUE, 0);
-			if (layers_ctrl & 2)	tilemap_draw(bitmap,cliprect, state->m_tmap2, 0, 0);
+			if (layers_ctrl & 1)    m_tmap->draw(bitmap, cliprect, TILEMAP_DRAW_OPAQUE, 0);
+			if (layers_ctrl & 2)    m_tmap2->draw(bitmap, cliprect, 0, 0);
 			break;
 	}
 
@@ -170,112 +196,105 @@ if (input_code_pressed(screen->machine(), KEYCODE_Z))
 
 // Tilemaps access
 
-static WRITE8_HANDLER( dunhuang_pos_x_w )
+WRITE8_MEMBER(dunhuang_state::dunhuang_pos_x_w)
 {
-	dunhuang_state *state = space->machine().driver_data<dunhuang_state>();
-	state->m_pos_x = data & 0x3f;
-	state->m_written = 0;
-	state->m_written2 = 0;
+	m_pos_x = data & 0x3f;
+	m_written = 0;
+	m_written2 = 0;
 }
 
-static WRITE8_HANDLER( dunhuang_pos_y_w )
+WRITE8_MEMBER(dunhuang_state::dunhuang_pos_y_w)
 {
-	dunhuang_state *state = space->machine().driver_data<dunhuang_state>();
-	state->m_pos_y = data;
-	state->m_written = 0;
-	state->m_written2 = 0;
+	m_pos_y = data;
+	m_written = 0;
+	m_written2 = 0;
 }
 
-static WRITE8_HANDLER( dunhuang_tile_w )
+WRITE8_MEMBER(dunhuang_state::dunhuang_tile_w)
 {
-	dunhuang_state *state = space->machine().driver_data<dunhuang_state>();
 	int addr;
 
-	if (state->m_written & (1 << offset))
+	if (m_written & (1 << offset))
 	{
-		state->m_written = 0;
-		state->m_pos_x++;
-		if (state->m_pos_x == 0x40)
+		m_written = 0;
+		m_pos_x++;
+		if (m_pos_x == 0x40)
 		{
-			state->m_pos_x = 0;
-			state->m_pos_y++;
+			m_pos_x = 0;
+			m_pos_y++;
 		}
 	}
-	state->m_written |= 1 << offset;
+	m_written |= 1 << offset;
 
-	addr = (state->m_pos_x & 0x3f) + (state->m_pos_y & 0x1f) * 0x40;
+	addr = (m_pos_x & 0x3f) + (m_pos_y & 0x1f) * 0x40;
 	switch (offset)
 	{
-		case 0:	state->m_videoram[addr] = (state->m_videoram[addr] & 0xff00) | data;		break;
-		case 1:	state->m_videoram[addr] = (state->m_videoram[addr] & 0x00ff) | (data<<8);	break;
-		case 2:	state->m_colorram[addr] = data;												break;
+		case 0: m_videoram[addr] = (m_videoram[addr] & 0xff00) | data;      break;
+		case 1: m_videoram[addr] = (m_videoram[addr] & 0x00ff) | (data<<8); break;
+		case 2: m_colorram[addr] = data;                                                break;
 	}
-	tilemap_mark_tile_dirty(state->m_tmap, addr);
+	m_tmap->mark_tile_dirty(addr);
 }
 
-static WRITE8_HANDLER( dunhuang_tile2_w )
+WRITE8_MEMBER(dunhuang_state::dunhuang_tile2_w)
 {
-	dunhuang_state *state = space->machine().driver_data<dunhuang_state>();
 	int addr;
 
-	if (state->m_written2 & (1 << offset))
+	if (m_written2 & (1 << offset))
 	{
-		state->m_written2 = 0;
-		state->m_pos_x++;
-		if (state->m_pos_x == 0x40)
+		m_written2 = 0;
+		m_pos_x++;
+		if (m_pos_x == 0x40)
 		{
-			state->m_pos_x = 0;
-			state->m_pos_y++;
+			m_pos_x = 0;
+			m_pos_y++;
 		}
 	}
-	state->m_written2 |= 1 << offset;
+	m_written2 |= 1 << offset;
 
-	addr = (state->m_pos_x & 0x3f) + (state->m_pos_y & 0x07) * 0x40;
+	addr = (m_pos_x & 0x3f) + (m_pos_y & 0x07) * 0x40;
 	switch (offset)
 	{
-		case 0:	state->m_videoram2[addr] = (state->m_videoram2[addr] & 0xff00) | data;		break;
-		case 1:	state->m_videoram2[addr] = (state->m_videoram2[addr] & 0x00ff) | (data<<8);	break;
-		case 2:	state->m_colorram2[addr] = data;											break;
+		case 0: m_videoram2[addr] = (m_videoram2[addr] & 0xff00) | data;        break;
+		case 1: m_videoram2[addr] = (m_videoram2[addr] & 0x00ff) | (data<<8);   break;
+		case 2: m_colorram2[addr] = data;                                           break;
 	}
-	tilemap_mark_tile_dirty(state->m_tmap2, addr);
+	m_tmap2->mark_tile_dirty(addr);
 }
 
 // Clear a row of tiles (videoram)
 
-static WRITE8_HANDLER( dunhuang_clear_y_w )
+WRITE8_MEMBER(dunhuang_state::dunhuang_clear_y_w)
 {
-	dunhuang_state *state = space->machine().driver_data<dunhuang_state>();
-	state->m_clear_y = data;
+	m_clear_y = data;
 }
-static WRITE8_HANDLER( dunhuang_horiz_clear_w )
+WRITE8_MEMBER(dunhuang_state::dunhuang_horiz_clear_w)
 {
-	dunhuang_state *state = space->machine().driver_data<dunhuang_state>();
 	int i;
-//  logerror("%06x: horiz clear, y = %02x, data = %02d\n", cpu_get_pc(&space->device()), state->m_clear_y,data);
+//  logerror("%06x: horiz clear, y = %02x, data = %02d\n", space.device().safe_pc(), m_clear_y,data);
 	for (i = 0; i < 0x40; i++)
 	{
-		int addr = state->m_clear_y * 0x40 + i;
+		int addr = m_clear_y * 0x40 + i;
 
-		state->m_videoram[addr] = 0;
-		state->m_colorram[addr] = 0;
-		tilemap_mark_tile_dirty(state->m_tmap, addr);
+		m_videoram[addr] = 0;
+		m_colorram[addr] = 0;
+		m_tmap->mark_tile_dirty(addr);
 	}
 }
 
 // Clear a column of tiles (videoram2)
 
-static WRITE8_HANDLER( dunhuang_vert_clear_w )
+WRITE8_MEMBER(dunhuang_state::dunhuang_vert_clear_w)
 {
-	dunhuang_state *state = space->machine().driver_data<dunhuang_state>();
 	int i;
-//  logerror("%06x: vert clear, x = %02x, y = %02x, data = %02x\n", cpu_get_pc(&space->device()), state->m_pos_x,state->m_pos_y,data);
+//  logerror("%06x: vert clear, x = %02x, y = %02x, data = %02x\n", space.device().safe_pc(), m_pos_x,m_pos_y,data);
 	for (i = 0; i < 0x08; i++)
 	{
-		int addr = (state->m_pos_x & 0x3f) + (i & 0x07) * 0x40;
+		int addr = (m_pos_x & 0x3f) + (i & 0x07) * 0x40;
 
-		state->m_videoram2[addr] = 1;
-		state->m_colorram2[addr] = 0;
-		tilemap_mark_tile_dirty(state->m_tmap2, addr);
+		m_videoram2[addr] = 1;
+		m_colorram2[addr] = 0;
+		m_tmap2->mark_tile_dirty(addr);
 	}
 }
 
@@ -285,134 +304,123 @@ static WRITE8_HANDLER( dunhuang_vert_clear_w )
 // The tiles codes are read from the graphics roms too!
 //
 
-static WRITE8_HANDLER( dunhuang_block_dest_w )
+WRITE8_MEMBER(dunhuang_state::dunhuang_block_dest_w)
 {
-	dunhuang_state *state = space->machine().driver_data<dunhuang_state>();
-	state->m_block_dest = data;
+	m_block_dest = data;
 }
 
-static WRITE8_HANDLER( dunhuang_block_x_w )
+WRITE8_MEMBER(dunhuang_state::dunhuang_block_x_w)
 {
-	dunhuang_state *state = space->machine().driver_data<dunhuang_state>();
-	state->m_block_x = data;
+	m_block_x = data;
 }
 
-static WRITE8_HANDLER( dunhuang_block_y_w )
+WRITE8_MEMBER(dunhuang_state::dunhuang_block_y_w)
 {
-	dunhuang_state *state = space->machine().driver_data<dunhuang_state>();
-	state->m_block_y = data;
+	m_block_y = data;
 }
 
-static WRITE8_HANDLER( dunhuang_block_w_w )
+WRITE8_MEMBER(dunhuang_state::dunhuang_block_w_w)
 {
-	dunhuang_state *state = space->machine().driver_data<dunhuang_state>();
-	state->m_block_w = data;
+	m_block_w = data;
 }
 
-static WRITE8_HANDLER( dunhuang_block_c_w )
+WRITE8_MEMBER(dunhuang_state::dunhuang_block_c_w)
 {
-	dunhuang_state *state = space->machine().driver_data<dunhuang_state>();
-	state->m_block_c = data;
+	m_block_c = data;
 }
 
-static WRITE8_HANDLER( dunhuang_block_addr_lo_w )
+WRITE8_MEMBER(dunhuang_state::dunhuang_block_addr_lo_w)
 {
-	dunhuang_state *state = space->machine().driver_data<dunhuang_state>();
-	state->m_block_addr_lo = data;
+	m_block_addr_lo = data;
 }
 
-static WRITE8_HANDLER( dunhuang_block_addr_hi_w )
+WRITE8_MEMBER(dunhuang_state::dunhuang_block_addr_hi_w)
 {
-	dunhuang_state *state = space->machine().driver_data<dunhuang_state>();
-	state->m_block_addr_hi = data;
+	m_block_addr_hi = data;
 }
 
 
-static WRITE8_HANDLER( dunhuang_block_h_w )
+WRITE8_MEMBER(dunhuang_state::dunhuang_block_h_w)
 {
-	dunhuang_state *state = space->machine().driver_data<dunhuang_state>();
 	int i,j, addr;
 	UINT8 *tile_addr;
 
-//  logerror("%06x: block dst %x, src %x, xy %x %x, wh %x %x, clr %x\n", cpu_get_pc(&space->device()), state->m_block_dest, (state->m_block_addr_hi << 8) + state->m_block_addr_lo, state->m_block_x,state->m_block_y,state->m_block_w+1,state->m_block_h+1,state->m_block_c);
+//  logerror("%06x: block dst %x, src %x, xy %x %x, wh %x %x, clr %x\n", space.device().safe_pc(), m_block_dest, (m_block_addr_hi << 8) + m_block_addr_lo, m_block_x,m_block_y,m_block_w+1,m_block_h+1,m_block_c);
 
-	state->m_block_h = data;
+	m_block_h = data;
 
-	tile_addr = space->machine().region("gfx2")->base() + ((state->m_block_addr_hi << 8) + state->m_block_addr_lo) * 4;
+	tile_addr = memregion("gfx2")->base() + ((m_block_addr_hi << 8) + m_block_addr_lo) * 4;
 
-	switch (state->m_block_dest)
+	switch (m_block_dest)
 	{
-		case 0x04:	// write to videoram
-			for (j = 0; j <= state->m_block_h; j++)
+		case 0x04:  // write to videoram
+			for (j = 0; j <= m_block_h; j++)
 			{
-				for (i = 0; i <= state->m_block_w; i++)
+				for (i = 0; i <= m_block_w; i++)
 				{
-					addr = ((state->m_block_x + i)& 0x3f) + ((state->m_block_y + j) & 0x1f) * 0x40;
+					addr = ((m_block_x + i)& 0x3f) + ((m_block_y + j) & 0x1f) * 0x40;
 
-					state->m_videoram[addr] = (tile_addr[1] << 8) | tile_addr[0];
-					state->m_colorram[addr] = state->m_block_c;
-					tilemap_mark_tile_dirty(state->m_tmap, addr);
+					m_videoram[addr] = (tile_addr[1] << 8) | tile_addr[0];
+					m_colorram[addr] = m_block_c;
+					m_tmap->mark_tile_dirty(addr);
 					tile_addr += 4;
 				}
 			}
 			break;
 
-		case 0x08:	// write to videoram2
-			for (j = 0; j <= state->m_block_h; j++)
+		case 0x08:  // write to videoram2
+			for (j = 0; j <= m_block_h; j++)
 			{
-				for (i = 0; i <= state->m_block_w; i++)
+				for (i = 0; i <= m_block_w; i++)
 				{
-					addr = ((state->m_block_x + i)& 0x3f) + ((state->m_block_y + j) & 0x7) * 0x40;
+					addr = ((m_block_x + i)& 0x3f) + ((m_block_y + j) & 0x7) * 0x40;
 
-					state->m_videoram2[addr] = (tile_addr[1] << 8) | tile_addr[0];
-					state->m_colorram2[addr] = state->m_block_c;
-					tilemap_mark_tile_dirty(state->m_tmap2, addr);
+					m_videoram2[addr] = (tile_addr[1] << 8) | tile_addr[0];
+					m_colorram2[addr] = m_block_c;
+					m_tmap2->mark_tile_dirty(addr);
 					tile_addr += 4;
 				}
 			}
 			break;
 
 		default:
-			popmessage("%06x: block dst=%x", cpu_get_pc(&space->device()), state->m_block_dest);
+			popmessage("%06x: block dst=%x", space.device().safe_pc(), m_block_dest);
 	}
 }
 
 // Palette: HMC HM86171 VGA 256 colour RAMDAC
 
-static WRITE8_HANDLER( dunhuang_paloffs_w )
+WRITE8_MEMBER(dunhuang_state::dunhuang_paloffs_w)
 {
-	dunhuang_state *state = space->machine().driver_data<dunhuang_state>();
-	state->m_paloffs = data * 3;
+	m_paloffs = data * 3;
 }
 
-static WRITE8_HANDLER( dunhuang_paldata_w )
+WRITE8_MEMBER(dunhuang_state::dunhuang_paldata_w)
 {
-	dunhuang_state *state = space->machine().driver_data<dunhuang_state>();
-	state->m_paldata[state->m_paloffs] = data;
+	m_paldata[m_paloffs] = data;
 
-	palette_set_color_rgb( space->machine(), state->m_paloffs/3,
-		pal6bit(state->m_paldata[(state->m_paloffs/3)*3+0]),
-		pal6bit(state->m_paldata[(state->m_paloffs/3)*3+1]),
-		pal6bit(state->m_paldata[(state->m_paloffs/3)*3+2])
+	palette_set_color_rgb( machine(), m_paloffs/3,
+		pal6bit(m_paldata[(m_paloffs/3)*3+0]),
+		pal6bit(m_paldata[(m_paloffs/3)*3+1]),
+		pal6bit(m_paldata[(m_paloffs/3)*3+2])
 	);
 
-	state->m_paloffs = (state->m_paloffs + 1) % (3*256);
+	m_paloffs = (m_paloffs + 1) % (3*256);
 }
 
 // Layers control (not understood)
 
-static WRITE8_HANDLER( dunhuang_layers_w )
+WRITE8_MEMBER(dunhuang_state::dunhuang_layers_w)
 {
-	dunhuang_state *state = space->machine().driver_data<dunhuang_state>();
 //  popmessage("layers %02x",data);
-	state->m_layers = data;
+	m_layers = data;
 }
 
 /***************************************************************************
                                 Memory Maps
 ***************************************************************************/
 
-static ADDRESS_MAP_START( dunhuang_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( dunhuang_map, AS_PROGRAM, 8, dunhuang_state )
 	AM_RANGE( 0x0000, 0x5fff ) AM_ROM
 	AM_RANGE( 0x6000, 0x7fff ) AM_RAM
 	AM_RANGE( 0x8000, 0xffff ) AM_ROMBANK( "bank1" )
@@ -420,107 +428,102 @@ ADDRESS_MAP_END
 
 // Inputs
 
-static WRITE8_HANDLER( dunhuang_input_w )
+WRITE8_MEMBER(dunhuang_state::dunhuang_input_w)
 {
-	dunhuang_state *state = space->machine().driver_data<dunhuang_state>();
-	state->m_input = data;
+	m_input = data;
 }
 
-static READ8_HANDLER( dunhuang_service_r )
+READ8_MEMBER(dunhuang_state::dunhuang_service_r)
 {
-	dunhuang_state *state = space->machine().driver_data<dunhuang_state>();
-	return input_port_read(space->machine(), "SERVICE")
-	 | ((state->m_hopper && !(space->machine().primary_screen->frame_number() % 10)) ? 0x00 : 0x08)	// bit 3: hopper sensor
-	 | 0x80																// bit 7 low -> tiles block transferrer busy
+	return ioport("SERVICE")->read()
+		| ((m_hopper && !(machine().primary_screen->frame_number() % 10)) ? 0x00 : 0x08)    // bit 3: hopper sensor
+		| 0x80                                                              // bit 7 low -> tiles block transferrer busy
 	;
 }
 
-static READ8_DEVICE_HANDLER( dunhuang_dsw_r )
+READ8_MEMBER(dunhuang_state::dunhuang_dsw_r)
 {
-	dunhuang_state *state = device->machine().driver_data<dunhuang_state>();
-	if (!(state->m_input & 0x01))	return input_port_read(device->machine(), "DSW1");
-	if (!(state->m_input & 0x02))	return input_port_read(device->machine(), "DSW2");
-	if (!(state->m_input & 0x04))	return input_port_read(device->machine(), "DSW3");
-	if (!(state->m_input & 0x08))	return input_port_read(device->machine(), "DSW4");
-	if (!(state->m_input & 0x10))	return input_port_read(device->machine(), "DSW5");
-	logerror("%s: warning, unknown dsw bits read, input = %02x\n", device->machine().describe_context(), state->m_input);
+	if (!(m_input & 0x01))  return ioport("DSW1")->read();
+	if (!(m_input & 0x02))  return ioport("DSW2")->read();
+	if (!(m_input & 0x04))  return ioport("DSW3")->read();
+	if (!(m_input & 0x08))  return ioport("DSW4")->read();
+	if (!(m_input & 0x10))  return ioport("DSW5")->read();
+	logerror("%s: warning, unknown dsw bits read, input = %02x\n", machine().describe_context(), m_input);
 	return 0xff;
 }
-static READ8_HANDLER( dunhuang_input_r )
+READ8_MEMBER(dunhuang_state::dunhuang_input_r)
 {
-	dunhuang_state *state = space->machine().driver_data<dunhuang_state>();
-	if (!(state->m_input & 0x01))	return input_port_read(space->machine(), "IN0");
-	if (!(state->m_input & 0x02))	return input_port_read(space->machine(), "IN1");
-	if (!(state->m_input & 0x04))	return input_port_read(space->machine(), "IN2");
-	if (!(state->m_input & 0x08))	return input_port_read(space->machine(), "IN3");
-	if (!(state->m_input & 0x10))	return input_port_read(space->machine(), "IN4");
-	logerror("%s: warning, unknown input bits read, input = %02x\n", space->machine().describe_context(), state->m_input);
+	if (!(m_input & 0x01))  return ioport("IN0")->read();
+	if (!(m_input & 0x02))  return ioport("IN1")->read();
+	if (!(m_input & 0x04))  return ioport("IN2")->read();
+	if (!(m_input & 0x08))  return ioport("IN3")->read();
+	if (!(m_input & 0x10))  return ioport("IN4")->read();
+	logerror("%s: warning, unknown input bits read, input = %02x\n", machine().describe_context(), m_input);
 	return 0xff;
 }
 
-static WRITE8_HANDLER( dunhuang_rombank_w )
+WRITE8_MEMBER(dunhuang_state::dunhuang_rombank_w)
 {
-	dunhuang_state *state = space->machine().driver_data<dunhuang_state>();
 
 	// ?                data & 0x01
 	// ?                data & 0x02
 
-	memory_set_bank(space->machine(), "bank1", ((data >> 2) & 0x7));
+	membank("bank1")->set_entry(((data >> 2) & 0x7));
 
 	// COIN OUT:        data & 0x20
-	coin_counter_w(space->machine(), 0,	data & 0x40);
-	state->m_hopper = data & 0x80;
+	coin_counter_w(machine(), 0,    data & 0x40);
+	m_hopper = data & 0x80;
 }
 
 
 #ifdef UNUSED_FUNCTION
-static WRITE8_HANDLER( dunhuang_82_w )
+WRITE8_MEMBER(dunhuang_state::dunhuang_82_w)
 {
 //  popmessage("82 = %02x",dunhuang_82);
 }
 #endif
 
-static ADDRESS_MAP_START( dunhuang_io_map, AS_IO, 8 )
-	AM_RANGE( 0x0000, 0x0000 ) AM_WRITE( dunhuang_pos_x_w )
-	AM_RANGE( 0x0001, 0x0001 ) AM_WRITE( dunhuang_pos_y_w )
-	AM_RANGE( 0x0002, 0x0004 ) AM_WRITE( dunhuang_tile_w )
-	AM_RANGE( 0x0005, 0x0007 ) AM_WRITE( dunhuang_tile2_w )
+static ADDRESS_MAP_START( dunhuang_io_map, AS_IO, 8, dunhuang_state )
+	AM_RANGE( 0x0000, 0x0000 ) AM_WRITE(dunhuang_pos_x_w )
+	AM_RANGE( 0x0001, 0x0001 ) AM_WRITE(dunhuang_pos_y_w )
+	AM_RANGE( 0x0002, 0x0004 ) AM_WRITE(dunhuang_tile_w )
+	AM_RANGE( 0x0005, 0x0007 ) AM_WRITE(dunhuang_tile2_w )
 
-	AM_RANGE( 0x0008, 0x0008 ) AM_WRITE( dunhuang_vert_clear_w )
+	AM_RANGE( 0x0008, 0x0008 ) AM_WRITE(dunhuang_vert_clear_w )
 
-	AM_RANGE( 0x000c, 0x000c ) AM_READ( watchdog_reset_r )
+	AM_RANGE( 0x000c, 0x000c ) AM_READ(watchdog_reset_r )
 
-	AM_RANGE( 0x000f, 0x000f ) AM_WRITE( dunhuang_block_addr_lo_w )
-	AM_RANGE( 0x0010, 0x0010 ) AM_WRITE( dunhuang_block_addr_hi_w )
+	AM_RANGE( 0x000f, 0x000f ) AM_WRITE(dunhuang_block_addr_lo_w )
+	AM_RANGE( 0x0010, 0x0010 ) AM_WRITE(dunhuang_block_addr_hi_w )
 //  AM_RANGE( 0x0011, 0x0011 ) ?
-	AM_RANGE( 0x0012, 0x0012 ) AM_WRITE( dunhuang_block_c_w )
-	AM_RANGE( 0x0015, 0x0015 ) AM_WRITE( dunhuang_block_x_w )
-	AM_RANGE( 0x0016, 0x0016 ) AM_WRITE( dunhuang_block_y_w )
-	AM_RANGE( 0x0017, 0x0017 ) AM_WRITE( dunhuang_block_w_w )
-	AM_RANGE( 0x0018, 0x0018 ) AM_WRITE( dunhuang_block_h_w )
+	AM_RANGE( 0x0012, 0x0012 ) AM_WRITE(dunhuang_block_c_w )
+	AM_RANGE( 0x0015, 0x0015 ) AM_WRITE(dunhuang_block_x_w )
+	AM_RANGE( 0x0016, 0x0016 ) AM_WRITE(dunhuang_block_y_w )
+	AM_RANGE( 0x0017, 0x0017 ) AM_WRITE(dunhuang_block_w_w )
+	AM_RANGE( 0x0018, 0x0018 ) AM_WRITE(dunhuang_block_h_w )
 
-	AM_RANGE( 0x0019, 0x0019 ) AM_WRITE( dunhuang_clear_y_w )
-	AM_RANGE( 0x001a, 0x001a ) AM_WRITE( dunhuang_horiz_clear_w )
+	AM_RANGE( 0x0019, 0x0019 ) AM_WRITE(dunhuang_clear_y_w )
+	AM_RANGE( 0x001a, 0x001a ) AM_WRITE(dunhuang_horiz_clear_w )
 
-	AM_RANGE( 0x001b, 0x001b ) AM_WRITE( dunhuang_block_dest_w )
+	AM_RANGE( 0x001b, 0x001b ) AM_WRITE(dunhuang_block_dest_w )
 
-	AM_RANGE( 0x0081, 0x0081 ) AM_DEVWRITE( "ymsnd", ym2413_register_port_w	)
-	AM_RANGE( 0x0089, 0x0089 ) AM_DEVWRITE( "ymsnd", ym2413_data_port_w		)
+	AM_RANGE( 0x0081, 0x0081 ) AM_DEVWRITE_LEGACY("ymsnd", ym2413_register_port_w   )
+	AM_RANGE( 0x0089, 0x0089 ) AM_DEVWRITE_LEGACY("ymsnd", ym2413_data_port_w       )
 
-//  AM_RANGE( 0x0082, 0x0082 ) AM_WRITE( dunhuang_82_w )
+//  AM_RANGE( 0x0082, 0x0082 ) AM_WRITE(dunhuang_82_w )
 
-	AM_RANGE( 0x0083, 0x0083 ) AM_WRITE( dunhuang_paloffs_w )
-	AM_RANGE( 0x008b, 0x008b ) AM_WRITE( dunhuang_paldata_w )
+	AM_RANGE( 0x0083, 0x0083 ) AM_WRITE(dunhuang_paloffs_w )
+	AM_RANGE( 0x008b, 0x008b ) AM_WRITE(dunhuang_paldata_w )
 
-	AM_RANGE( 0x0084, 0x0084 ) AM_READ( dunhuang_service_r )
-	AM_RANGE( 0x0085, 0x0085 ) AM_READ( dunhuang_input_r )
+	AM_RANGE( 0x0084, 0x0084 ) AM_READ(dunhuang_service_r )
+	AM_RANGE( 0x0085, 0x0085 ) AM_READ(dunhuang_input_r )
 
-	AM_RANGE( 0x0086, 0x0086 ) AM_WRITE( dunhuang_rombank_w )
-	AM_RANGE( 0x0087, 0x0087 ) AM_WRITE( dunhuang_layers_w )
+	AM_RANGE( 0x0086, 0x0086 ) AM_WRITE(dunhuang_rombank_w )
+	AM_RANGE( 0x0087, 0x0087 ) AM_WRITE(dunhuang_layers_w )
 
-	AM_RANGE( 0x0088, 0x0088 ) AM_DEVREAD( "ay8910", ay8910_r )
-	AM_RANGE( 0x0090, 0x0090 ) AM_DEVWRITE( "ay8910", ay8910_data_w )
-	AM_RANGE( 0x0098, 0x0098 ) AM_DEVWRITE( "ay8910", ay8910_address_w )
+	AM_RANGE( 0x0088, 0x0088 ) AM_DEVREAD_LEGACY("ay8910", ay8910_r )
+	AM_RANGE( 0x0090, 0x0090 ) AM_DEVWRITE_LEGACY("ay8910", ay8910_data_w )
+	AM_RANGE( 0x0098, 0x0098 ) AM_DEVWRITE_LEGACY("ay8910", ay8910_address_w )
 ADDRESS_MAP_END
 
 
@@ -530,8 +533,8 @@ ADDRESS_MAP_END
 ***************************************************************************/
 
 static INPUT_PORTS_START( dunhuang )
-	PORT_START("DSW1")		/* IN0 - DSW1 */
-	PORT_DIPNAME( 0x0f, 0x0f, "Main Game Chance (%)" )	PORT_DIPLOCATION("SW1:1,2,3,4")
+	PORT_START("DSW1")      /* IN0 - DSW1 */
+	PORT_DIPNAME( 0x0f, 0x0f, "Main Game Chance (%)" )  PORT_DIPLOCATION("SW1:1,2,3,4")
 	PORT_DIPSETTING(    0x00, "78" )
 	PORT_DIPSETTING(    0x01, "80" )
 	PORT_DIPSETTING(    0x02, "81" )
@@ -548,63 +551,63 @@ static INPUT_PORTS_START( dunhuang )
 	PORT_DIPSETTING(    0x0d, "96" )
 	PORT_DIPSETTING(    0x0e, "97" )
 	PORT_DIPSETTING(    0x0f, "98" )
-	PORT_DIPNAME( 0x30, 0x30, "Main Game Rate" )		PORT_DIPLOCATION("SW1:5,6")
+	PORT_DIPNAME( 0x30, 0x30, "Main Game Rate" )        PORT_DIPLOCATION("SW1:5,6")
 	PORT_DIPSETTING(    0x30, "A" )
 	PORT_DIPSETTING(    0x20, "B" )
 	PORT_DIPSETTING(    0x10, "C" )
 	PORT_DIPSETTING(    0x00, "D" )
-	PORT_DIPNAME( 0x40, 0x40, "Input Tokens" )			PORT_DIPLOCATION("SW1:7")
+	PORT_DIPNAME( 0x40, 0x40, "Input Tokens" )          PORT_DIPLOCATION("SW1:7")
 	PORT_DIPSETTING(    0x40, "Keys" )
 	PORT_DIPSETTING(    0x00, "Coins" )
-	PORT_DIPNAME( 0x80, 0x80, "Output Tokens" )			PORT_DIPLOCATION("SW1:8")
+	PORT_DIPNAME( 0x80, 0x80, "Output Tokens" )         PORT_DIPLOCATION("SW1:8")
 	PORT_DIPSETTING(    0x80, "Keys" )
 	PORT_DIPSETTING(    0x00, "Payout" )
 
-	PORT_START("DSW2")		/* IN1 - DSW2 */
+	PORT_START("DSW2")      /* IN1 - DSW2 */
 	PORT_DIPUNKNOWN_DIPLOC( 0x01, 0x01, "SW2:1" )
-	PORT_DIPNAME( 0x06, 0x06, "Credits Per Coin" )		PORT_DIPLOCATION("SW2:2,3")
+	PORT_DIPNAME( 0x06, 0x06, "Credits Per Coin" )      PORT_DIPLOCATION("SW2:2,3")
 	PORT_DIPSETTING(    0x06, "1" )
 	PORT_DIPSETTING(    0x04, "2" )
 	PORT_DIPSETTING(    0x02, "5" )
 	PORT_DIPSETTING(    0x00, "20" )
-	PORT_DIPNAME( 0x18, 0x18, "Credits Per Key-In" )	PORT_DIPLOCATION("SW2:4,5")
+	PORT_DIPNAME( 0x18, 0x18, "Credits Per Key-In" )    PORT_DIPLOCATION("SW2:4,5")
 	PORT_DIPSETTING(    0x18, "1" )
 	PORT_DIPSETTING(    0x10, "10" )
 	PORT_DIPSETTING(    0x08, "50" )
 	PORT_DIPSETTING(    0x00, "100" )
-	PORT_DIPNAME( 0x20, 0x20, "Credits Per Key-Out" )	PORT_DIPLOCATION("SW2:6")
+	PORT_DIPNAME( 0x20, 0x20, "Credits Per Key-Out" )   PORT_DIPLOCATION("SW2:6")
 	PORT_DIPSETTING(    0x20, "1" )
 	PORT_DIPSETTING(    0x00, "100" )
-	PORT_DIPNAME( 0xc0, 0xc0, "Max Credits" )			PORT_DIPLOCATION("SW2:7,8")
+	PORT_DIPNAME( 0xc0, 0xc0, "Max Credits" )           PORT_DIPLOCATION("SW2:7,8")
 	PORT_DIPSETTING(    0x00, "300" )
 	PORT_DIPSETTING(    0x40, "500" )
 	PORT_DIPSETTING(    0x80, "1000" )
 	PORT_DIPSETTING(    0xc0, "3000" )
 
-	PORT_START("DSW3")		/* IN2 - DSW3 */
-	PORT_DIPNAME( 0x03, 0x03, "Min Bet" )				PORT_DIPLOCATION("SW3:1,2")
+	PORT_START("DSW3")      /* IN2 - DSW3 */
+	PORT_DIPNAME( 0x03, 0x03, "Min Bet" )               PORT_DIPLOCATION("SW3:1,2")
 	PORT_DIPSETTING(    0x03, "1" )
 	PORT_DIPSETTING(    0x02, "2" )
 	PORT_DIPSETTING(    0x01, "3" )
 	PORT_DIPSETTING(    0x00, "5" )
-	PORT_DIPNAME( 0x0c, 0x0c, "Max Bet" )				PORT_DIPLOCATION("SW3:3,4")
+	PORT_DIPNAME( 0x0c, 0x0c, "Max Bet" )               PORT_DIPLOCATION("SW3:3,4")
 	PORT_DIPSETTING(    0x0c, "1" )
 	PORT_DIPSETTING(    0x08, "5" )
 	PORT_DIPSETTING(    0x04, "10" )
 	PORT_DIPSETTING(    0x00, "20" )
-	PORT_DIPNAME( 0x30, 0x30, "Renso Bonus Time" )		PORT_DIPLOCATION("SW3:5,6")
+	PORT_DIPNAME( 0x30, 0x30, "Renso Bonus Time" )      PORT_DIPLOCATION("SW3:5,6")
 	PORT_DIPSETTING(    0x00, DEF_STR( None ) )
 	PORT_DIPSETTING(    0x10, "3" )
 	PORT_DIPSETTING(    0x20, "5" )
 	PORT_DIPSETTING(    0x30, "6" )
-	PORT_DIPNAME( 0xc0, 0xc0, "DonDen Times" )			PORT_DIPLOCATION("SW3:7,8")
+	PORT_DIPNAME( 0xc0, 0xc0, "DonDen Times" )          PORT_DIPLOCATION("SW3:7,8")
 	PORT_DIPSETTING(    0x00, DEF_STR( None ) )
 	PORT_DIPSETTING(    0x40, "3" )
 	PORT_DIPSETTING(    0x80, "5" )
 	PORT_DIPSETTING(    0xc0, "6" )
 
-	PORT_START("DSW4")		/* IN3 - DSW4 */
-	PORT_DIPNAME( 0x07, 0x07, "Credits Limit" )			PORT_DIPLOCATION("SW4:1,2,3")
+	PORT_START("DSW4")      /* IN3 - DSW4 */
+	PORT_DIPNAME( 0x07, 0x07, "Credits Limit" )         PORT_DIPLOCATION("SW4:1,2,3")
 	PORT_DIPSETTING(    0x07, "2k" )
 	PORT_DIPSETTING(    0x06, "3k" )
 	PORT_DIPSETTING(    0x05, "5k" )
@@ -613,7 +616,7 @@ static INPUT_PORTS_START( dunhuang )
 	PORT_DIPSETTING(    0x02, "30k" )
 	PORT_DIPSETTING(    0x01, "50k" )
 	PORT_DIPSETTING(    0x00, "100k" )
-	PORT_DIPNAME( 0x38, 0x38, "Service-In Limit" )		PORT_DIPLOCATION("SW4:4,5,6")
+	PORT_DIPNAME( 0x38, 0x38, "Service-In Limit" )      PORT_DIPLOCATION("SW4:4,5,6")
 	PORT_DIPSETTING(    0x00, "20k" )
 	PORT_DIPSETTING(    0x08, "30k" )
 	PORT_DIPSETTING(    0x10, "40k" )
@@ -622,89 +625,89 @@ static INPUT_PORTS_START( dunhuang )
 	PORT_DIPSETTING(    0x28, "100k" )
 	PORT_DIPSETTING(    0x30, "200k" )
 	PORT_DIPSETTING(    0x38, "990k" )
-	PORT_DIPNAME( 0x40, 0x40, "Hu Type" )				PORT_DIPLOCATION("SW4:7")
+	PORT_DIPNAME( 0x40, 0x40, "Hu Type" )               PORT_DIPLOCATION("SW4:7")
 	PORT_DIPSETTING(    0x40, "Topple" )
 	PORT_DIPSETTING(    0x00, "Non-Topple" )
-	PORT_DIPNAME( 0x80, 0x80, "Double Up" )				PORT_DIPLOCATION("SW4:8")
+	PORT_DIPNAME( 0x80, 0x80, "Double Up" )             PORT_DIPLOCATION("SW4:8")
 	PORT_DIPSETTING(    0x00, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( Yes ) )
 
-	PORT_START("DSW5")		/* IN4 - DSW5 */
-	PORT_DIPNAME( 0x03, 0x03, "Douple Up Chance (%)" )	PORT_DIPLOCATION("SW5:1,2")
+	PORT_START("DSW5")      /* IN4 - DSW5 */
+	PORT_DIPNAME( 0x03, 0x03, "Douple Up Chance (%)" )  PORT_DIPLOCATION("SW5:1,2")
 	PORT_DIPSETTING(    0x00, "50" )
 	PORT_DIPSETTING(    0x01, "60" )
 	PORT_DIPSETTING(    0x02, "70" )
 	PORT_DIPSETTING(    0x03, "80" )
-	PORT_DIPNAME( 0x04, 0x04, "Chinese Word" )			PORT_DIPLOCATION("SW5:3")
+	PORT_DIPNAME( 0x04, 0x04, "Chinese Word" )          PORT_DIPLOCATION("SW5:3")
 	PORT_DIPSETTING(    0x04, "3..6" )
 	PORT_DIPSETTING(    0x00, "5..10" )
-	PORT_DIPNAME( 0x08, 0x08, "Big Odds Times" )		PORT_DIPLOCATION("SW5:4")
+	PORT_DIPNAME( 0x08, 0x08, "Big Odds Times" )        PORT_DIPLOCATION("SW5:4")
 	PORT_DIPSETTING(    0x00, "3" )
 	PORT_DIPSETTING(    0x08, "5" )
-	PORT_DIPNAME( 0x30, 0x30, "Hu Test Times" )			PORT_DIPLOCATION("SW5:5,6")
+	PORT_DIPNAME( 0x30, 0x30, "Hu Test Times" )         PORT_DIPLOCATION("SW5:5,6")
 	PORT_DIPSETTING(    0x30, DEF_STR( None ) )
 	PORT_DIPSETTING(    0x00, "5" )
 	PORT_DIPSETTING(    0x10, "6" )
 	PORT_DIPSETTING(    0x20, "8" )
-	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Demo_Sounds ) )	PORT_DIPLOCATION("SW5:7")
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW5:7")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, "Computer Strength" )		PORT_DIPLOCATION("SW5:8")
+	PORT_DIPNAME( 0x80, 0x80, "Computer Strength" )     PORT_DIPLOCATION("SW5:8")
 	PORT_DIPSETTING(    0x80, "Strong" )
 	PORT_DIPSETTING(    0x00, "Weak" )
 
-	PORT_START("SERVICE")		/* IN5 - SERVICE */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_SERVICE3 )		// clear (during boot)
-	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_SERVICE2 )		// book
-	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_SERVICE  )		// test (in game: dips, during boot: service mode)
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_SPECIAL  )		// hopper sensor
-	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_SERVICE4 )		// payout
-	PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_COIN1 ) PORT_IMPULSE(2)	// "coin jam" otherwise
+	PORT_START("SERVICE")       /* IN5 - SERVICE */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_SERVICE3 )      // clear (during boot)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_SERVICE2 )      // book
+	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_SERVICE  )      // test (in game: dips, during boot: service mode)
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_SPECIAL  )      // hopper sensor
+	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_SERVICE4 )      // payout
+	PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_COIN1 ) PORT_IMPULSE(2) // "coin jam" otherwise
 	PORT_BIT( 0x40, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL )		// 0 = tiles block transferrer busy
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL )       // 0 = tiles block transferrer busy
 
-	PORT_START("IN0")		/* IN6 - P1 */
+	PORT_START("IN0")       /* IN6 - P1 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_MAHJONG_A )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_MAHJONG_E )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_MAHJONG_I )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_MAHJONG_M )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_MAHJONG_KAN )	// gun
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_MAHJONG_KAN )    // gun
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("IN1")		/* IN7 - P1 */
+	PORT_START("IN1")       /* IN7 - P1 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_MAHJONG_B )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_MAHJONG_F )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_MAHJONG_J )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_MAHJONG_N )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_MAHJONG_REACH )	// tin
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_MAHJONG_REACH )  // tin
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_MAHJONG_BET )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("IN2")		/* IN8 - P1 */
+	PORT_START("IN2")       /* IN8 - P1 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_MAHJONG_C )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_MAHJONG_G )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_MAHJONG_K )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_MAHJONG_CHI )	// eat
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_MAHJONG_RON )	// hu
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_MAHJONG_CHI )    // eat
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_MAHJONG_RON )    // hu
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("IN3")		/* IN9 - P1 */
+	PORT_START("IN3")       /* IN9 - P1 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_MAHJONG_D )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_MAHJONG_H )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_MAHJONG_L )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_MAHJONG_PON )	// pon
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_MAHJONG_PON )    // pon
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("IN4")		/* IN10 - P1 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_MAHJONG_LAST_CHANCE	)
+	PORT_START("IN4")       /* IN10 - P1 */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_MAHJONG_LAST_CHANCE  )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_MAHJONG_SCORE )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_MAHJONG_DOUBLE_UP )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -756,59 +759,57 @@ static const ay8910_interface dunhuang_ay8910_interface =
 	AY8910_LEGACY_OUTPUT,
 	AY8910_DEFAULT_LOADS,
 	//  A                   B
-	DEVCB_NULL,							DEVCB_HANDLER(dunhuang_dsw_r),	// R
-	DEVCB_MEMORY_HANDLER("maincpu", PROGRAM, dunhuang_input_w),	DEVCB_NULL						// W
+	DEVCB_NULL,                         DEVCB_DRIVER_MEMBER(dunhuang_state,dunhuang_dsw_r), // R
+	DEVCB_DRIVER_MEMBER(dunhuang_state, dunhuang_input_w),  DEVCB_NULL                      // W
 };
 
 
 
-static MACHINE_START( dunhuang )
+void dunhuang_state::machine_start()
 {
-	dunhuang_state *state = machine.driver_data<dunhuang_state>();
-	UINT8 *ROM = machine.region("maincpu")->base();
+	UINT8 *ROM = memregion("maincpu")->base();
 
-	memory_configure_bank(machine, "bank1", 0, 8, &ROM[0x10000], 0x8000);
+	membank("bank1")->configure_entries(0, 8, &ROM[0x10000], 0x8000);
 
-	state->save_item(NAME(state->m_written));
-	state->save_item(NAME(state->m_written2));
-	state->save_item(NAME(state->m_pos_x));
-	state->save_item(NAME(state->m_pos_y));
-	state->save_item(NAME(state->m_clear_y));
-	state->save_item(NAME(state->m_block_x));
-	state->save_item(NAME(state->m_block_y));
-	state->save_item(NAME(state->m_block_w));
-	state->save_item(NAME(state->m_block_h));
-	state->save_item(NAME(state->m_block_addr_hi));
-	state->save_item(NAME(state->m_block_addr_lo));
-	state->save_item(NAME(state->m_block_dest));
-	state->save_item(NAME(state->m_block_c));
-	state->save_item(NAME(state->m_layers));
-	state->save_item(NAME(state->m_paloffs));
-	state->save_item(NAME(state->m_input));
-	state->save_item(NAME(state->m_hopper));
+	save_item(NAME(m_written));
+	save_item(NAME(m_written2));
+	save_item(NAME(m_pos_x));
+	save_item(NAME(m_pos_y));
+	save_item(NAME(m_clear_y));
+	save_item(NAME(m_block_x));
+	save_item(NAME(m_block_y));
+	save_item(NAME(m_block_w));
+	save_item(NAME(m_block_h));
+	save_item(NAME(m_block_addr_hi));
+	save_item(NAME(m_block_addr_lo));
+	save_item(NAME(m_block_dest));
+	save_item(NAME(m_block_c));
+	save_item(NAME(m_layers));
+	save_item(NAME(m_paloffs));
+	save_item(NAME(m_input));
+	save_item(NAME(m_hopper));
 }
 
-static MACHINE_RESET( dunhuang )
+void dunhuang_state::machine_reset()
 {
-	dunhuang_state *state = machine.driver_data<dunhuang_state>();
 
-	state->m_written = 0;
-	state->m_written2 = 0;
-	state->m_pos_x = 0;
-	state->m_pos_y = 0;
-	state->m_clear_y = 0;
-	state->m_block_x = 0;
-	state->m_block_y = 0;
-	state->m_block_w = 0;
-	state->m_block_h = 0;
-	state->m_block_addr_hi = 0;
-	state->m_block_addr_lo = 0;
-	state->m_block_dest = 0;
-	state->m_block_c = 0;
-	state->m_layers = 0;
-	state->m_paloffs = 0;
-	state->m_input = 0;
-	state->m_hopper = 0;
+	m_written = 0;
+	m_written2 = 0;
+	m_pos_x = 0;
+	m_pos_y = 0;
+	m_clear_y = 0;
+	m_block_x = 0;
+	m_block_y = 0;
+	m_block_w = 0;
+	m_block_h = 0;
+	m_block_addr_hi = 0;
+	m_block_addr_lo = 0;
+	m_block_dest = 0;
+	m_block_c = 0;
+	m_layers = 0;
+	m_paloffs = 0;
+	m_input = 0;
+	m_hopper = 0;
 }
 
 
@@ -818,10 +819,8 @@ static MACHINE_CONFIG_START( dunhuang, dunhuang_state )
 	MCFG_CPU_ADD("maincpu", Z80,12000000/2)
 	MCFG_CPU_PROGRAM_MAP(dunhuang_map)
 	MCFG_CPU_IO_MAP(dunhuang_io_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", dunhuang_state,  irq0_line_hold)
 
-	MCFG_MACHINE_START(dunhuang)
-	MCFG_MACHINE_RESET(dunhuang)
 
 	MCFG_WATCHDOG_TIME_INIT(attotime::from_seconds(5))
 
@@ -829,15 +828,13 @@ static MACHINE_CONFIG_START( dunhuang, dunhuang_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(512, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0+8, 512-8-1, 0+16, 256-16-1)
-	MCFG_SCREEN_UPDATE(dunhuang)
+	MCFG_SCREEN_UPDATE_DRIVER(dunhuang_state, screen_update_dunhuang)
 
 	MCFG_GFXDECODE(dunhuang)
 	MCFG_PALETTE_LENGTH(0x100)
 
-	MCFG_VIDEO_START(dunhuang)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -867,7 +864,7 @@ ROM_START( dunhuang )
 	ROM_LOAD( "rom3.u4", 0x00000, 0x80000, CRC(1ff5d35e) SHA1(b808eb4f81be8fc77a58dadd661a9cc2b376a509) )
 	ROM_LOAD( "rom2.u5", 0x80000, 0x40000, CRC(384fa1d3) SHA1(f329db17aacacf1768ebd6ca2cc612503db93fac) )
 
-	ROM_REGION( 0xc0000, "gfx2", 0 )	// do not dispose
+	ROM_REGION( 0xc0000, "gfx2", 0 )    // do not dispose
 	ROM_LOAD( "rom4.u3", 0x00000, 0x40000, CRC(7db45227) SHA1(2a12a2b8a1e58946ce3e7c770b3ca4803c3c3ccd) )
 	ROM_LOAD( "rom5.u2", 0x40000, 0x80000, CRC(d609880e) SHA1(3d69800e959e8f24ef950fea4312610c4407f6ba) )
 
@@ -875,4 +872,4 @@ ROM_START( dunhuang )
 	ROM_LOAD( "rom6.u1", 0x00000, 0x20000, CRC(31cfdc29) SHA1(725249eae9227eadf05418b799e0da0254bb2f51) )
 ROM_END
 
-GAME( 1995, dunhuang, 0, dunhuang, dunhuang, 0, ROT0, "Spirit", "Mahjong Dunhuang", GAME_SUPPORTS_SAVE )
+GAME( 1995, dunhuang, 0, dunhuang, dunhuang, driver_device, 0, ROT0, "Spirit", "Mahjong Dunhuang", GAME_SUPPORTS_SAVE )

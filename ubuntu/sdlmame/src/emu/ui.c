@@ -13,16 +13,14 @@
 #include "emuopts.h"
 #include "video/vector.h"
 #include "machine/laserdsc.h"
-#include "profiler.h"
 #include "render.h"
 #include "cheat.h"
 #include "rendfont.h"
 #include "ui.h"
 #include "uiinput.h"
-#include "uimenu.h"
+#include "uimain.h"
 #include "uigfx.h"
 #include <ctype.h>
-
 
 
 /***************************************************************************
@@ -122,6 +120,8 @@ static int ui_use_natural_keyboard;
 static UINT8 non_char_keys_down[(ARRAY_LENGTH(non_char_keys) + 7) / 8];
 
 
+static render_texture *ui_mouse_arrow_texture;
+static bool ui_mouse_show;
 /***************************************************************************
     FUNCTION PROTOTYPES
 ***************************************************************************/
@@ -138,6 +138,7 @@ static UINT32 handler_messagebox_ok(running_machine &machine, render_container *
 static UINT32 handler_messagebox_anykey(running_machine &machine, render_container *container, UINT32 state);
 static UINT32 handler_ingame(running_machine &machine, render_container *container, UINT32 state);
 static UINT32 handler_load_save(running_machine &machine, render_container *container, UINT32 state);
+static UINT32 handler_confirm_quit(running_machine &machine, render_container *container, UINT32 state);
 
 /* slider controls */
 static slider_state *slider_alloc(running_machine &machine, const char *title, INT32 minval, INT32 defval, INT32 maxval, INT32 incval, slider_update update, void *arg);
@@ -161,7 +162,6 @@ static INT32 slider_overyoffset(running_machine &machine, void *arg, astring *st
 static INT32 slider_flicker(running_machine &machine, void *arg, astring *string, INT32 newval);
 static INT32 slider_beam(running_machine &machine, void *arg, astring *string, INT32 newval);
 static char *slider_get_screen_desc(screen_device &screen);
-static char *slider_get_laserdisc_desc(device_t *screen);
 #ifdef MAME_DEBUG
 static INT32 slider_crossscale(running_machine &machine, void *arg, astring *string, INT32 newval);
 static INT32 slider_crossoffset(running_machine &machine, void *arg, astring *string, INT32 newval);
@@ -197,19 +197,19 @@ INLINE int is_breakable_char(unicode_char ch)
 		return TRUE;
 
 	/* In the following character sets, any character is breakable:
-        Hiragana (3040-309F)
-        Katakana (30A0-30FF)
-        Bopomofo (3100-312F)
-        Hangul Compatibility Jamo (3130-318F)
-        Kanbun (3190-319F)
-        Bopomofo Extended (31A0-31BF)
-        CJK Strokes (31C0-31EF)
-        Katakana Phonetic Extensions (31F0-31FF)
-        Enclosed CJK Letters and Months (3200-32FF)
-        CJK Compatibility (3300-33FF)
-        CJK Unified Ideographs Extension A (3400-4DBF)
-        Yijing Hexagram Symbols (4DC0-4DFF)
-        CJK Unified Ideographs (4E00-9FFF) */
+	    Hiragana (3040-309F)
+	    Katakana (30A0-30FF)
+	    Bopomofo (3100-312F)
+	    Hangul Compatibility Jamo (3130-318F)
+	    Kanbun (3190-319F)
+	    Bopomofo Extended (31A0-31BF)
+	    CJK Strokes (31C0-31EF)
+	    Katakana Phonetic Extensions (31F0-31FF)
+	    Enclosed CJK Letters and Months (3200-32FF)
+	    CJK Compatibility (3300-33FF)
+	    CJK Unified Ideographs Extension A (3400-4DBF)
+	    Yijing Hexagram Symbols (4DC0-4DFF)
+	    CJK Unified Ideographs (4E00-9FFF) */
 	if (ch >= 0x3040 && ch <= 0x9fff)
 		return TRUE;
 
@@ -233,14 +233,48 @@ INLINE int is_breakable_char(unicode_char ch)
 /*-------------------------------------------------
     ui_init - set up the user interface
 -------------------------------------------------*/
+static const UINT32 mouse_bitmap[] = {
+	0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,
+	0x09a46f30,0x81ac7c43,0x24af8049,0x00ad7d45,0x00a8753a,0x00a46f30,0x009f6725,0x009b611c,0x00985b14,0x0095560d,0x00935308,0x00915004,0x00904e02,0x008f4e01,0x008f4d00,0x008f4d00,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,
+	0x00a16a29,0xa2aa783d,0xffbb864a,0xc0b0824c,0x5aaf7f48,0x09ac7b42,0x00a9773c,0x00a67134,0x00a26b2b,0x009e6522,0x009a5e19,0x00965911,0x0094550b,0x00925207,0x00915004,0x008f4e01,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,
+	0x009a5e18,0x39a06827,0xffb97c34,0xffe8993c,0xffc88940,0xedac7c43,0x93ad7c44,0x2dac7c43,0x00ab793f,0x00a87438,0x00a46f30,0x00a06827,0x009c611d,0x00985c15,0x0095570e,0x00935309,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,
+	0x00935308,0x00965810,0xcc9a5e19,0xffe78a21,0xfffb9929,0xfff49931,0xffd88e39,0xffb9813f,0xc9ac7c43,0x66ad7c44,0x0cac7a41,0x00a9773c,0x00a67134,0x00a26b2b,0x009e6522,0x009a5e19,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,
+	0x008f4e01,0x00904e02,0x60925106,0xffba670a,0xfff88b11,0xfff98f19,0xfff99422,0xfff9982b,0xffe89434,0xffc9883c,0xf3ac7a41,0x9cad7c44,0x39ac7c43,0x00ab7a40,0x00a87539,0x00a56f31,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,
+	0x008e4d00,0x008e4d00,0x098e4d00,0xea8f4d00,0xffee7f03,0xfff68407,0xfff6870d,0xfff78b15,0xfff78f1d,0xfff79426,0xfff49730,0xffd98d38,0xffbc823f,0xd2ac7c43,0x6fad7c44,0x12ac7b42,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,
+	0x008e4d00,0x008e4d00,0x008e4c00,0x8a8e4c00,0xffc46800,0xfff37e00,0xfff37f02,0xfff38106,0xfff3830a,0xfff48711,0xfff48b19,0xfff58f21,0xfff5942b,0xffe79134,0xffcb863b,0xf9ac7a41,0xa5ac7c43,0x3fac7c43,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,
+	0x008e4d00,0x008e4d00,0x008e4c00,0x218d4c00,0xfc8e4c00,0xffee7a00,0xfff07c00,0xfff17c00,0xfff17d02,0xfff17e04,0xfff18008,0xfff2830d,0xfff28614,0xfff38a1c,0xfff38f25,0xfff2932e,0xffd98b37,0xffbc813e,0xdbac7c43,0x78ad7c44,0x15ac7b42,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,
+	0x008e4d00,0x008e4d00,0x008e4d00,0x008e4c00,0xb18d4c00,0xffcf6b00,0xffed7900,0xffed7900,0xffee7900,0xffee7a01,0xffee7a01,0xffee7b03,0xffee7c06,0xffef7e0a,0xffef8110,0xfff08618,0xfff08a20,0xfff18f2a,0xffe78f33,0xffcc863b,0xfcab7a40,0xaeac7c43,0x4bac7c43,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,
+	0x008f4d00,0x008e4d00,0x008e4d00,0x008e4c00,0x488d4c00,0xffa85800,0xffe97500,0xffea7600,0xffea7600,0xffeb7600,0xffeb7600,0xffeb7600,0xffeb7701,0xffeb7702,0xffeb7804,0xffec7a07,0xffec7d0d,0xffec8013,0xffed851c,0xffee8a25,0xffee8f2e,0xffd98937,0xffbe813d,0xe4ab7a40,0x81ab7a40,0x1ba9763b,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,
+	0x008f4d00,0x008e4d00,0x008e4d00,0x008e4c00,0x008d4c00,0xdb8d4c00,0xffd86c00,0xffe77300,0xffe77300,0xffe87300,0xffe87300,0xffe87300,0xffe87300,0xffe87300,0xffe87401,0xffe87401,0xffe87503,0xffe97606,0xffe9780a,0xffe97c10,0xffea7f16,0xffeb831d,0xffeb8623,0xffe48426,0xffc67725,0xffa5661f,0xb7985c15,0x54935309,0x038e4d00,0x00ffffff,0x00ffffff,0x00ffffff,
+	0x008f4d00,0x008e4d00,0x008e4d00,0x008e4d00,0x008e4c00,0x6f8d4c00,0xffb25b00,0xffe36f00,0xffe47000,0xffe47000,0xffe57000,0xffe57000,0xffe57000,0xffe57000,0xffe57000,0xffe57000,0xffe57000,0xffe57000,0xffe57101,0xffe57000,0xffe47000,0xffe16e00,0xffde6c00,0xffd86900,0xffd06600,0xffc76200,0xffaa5500,0xff8a4800,0xea743f00,0x5a7a4200,0x00ffffff,0x00ffffff,
+	0x008f4d00,0x008f4d00,0x008e4d00,0x008e4d00,0x008e4c00,0x0f8d4c00,0xf38d4c00,0xffdc6a00,0xffe16d00,0xffe16d00,0xffe26d00,0xffe26d00,0xffe26d00,0xffe26d00,0xffe26d00,0xffe16d00,0xffe06c00,0xffde6b00,0xffd96900,0xffd16500,0xffc76000,0xffb95900,0xffab5200,0xff9c4b00,0xff894300,0xff6b3600,0xf9512c00,0xa5542d00,0x3c5e3200,0x00ffffff,0x00ffffff,0x00ffffff,
+	0x008f4d00,0x008f4d00,0x008e4d00,0x008e4d00,0x008e4c00,0x008d4c00,0x968d4c00,0xffbc5d00,0xffde6a00,0xffde6a00,0xffde6a00,0xffdf6a00,0xffdf6a00,0xffdf6a00,0xffde6a00,0xffdc6800,0xffd66600,0xffcc6100,0xffbf5b00,0xffaf5300,0xff9d4a00,0xff8a4200,0xff6d3500,0xff502900,0xe7402300,0x7b3f2200,0x15442500,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,
+	0x008f4d00,0x008f4d00,0x008f4d00,0x008e4d00,0x008e4d00,0x008e4c00,0x2a8d4c00,0xff9b5000,0xffda6600,0xffdb6700,0xffdb6700,0xffdc6700,0xffdc6700,0xffdb6700,0xffd96500,0xffd16200,0xffc25b00,0xffad5100,0xff974700,0xff7f3c00,0xff602f00,0xff472500,0xbd3d2100,0x513d2100,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,
+	0x008f4d00,0x008f4d00,0x008f4d00,0x008e4d00,0x008e4d00,0x008e4c00,0x008e4c00,0xc08d4c00,0xffc35c00,0xffd76300,0xffd76300,0xffd86300,0xffd86300,0xffd76300,0xffd06000,0xffc05800,0xffa54c00,0xff7f3b00,0xff582c00,0xf03f2200,0x903c2000,0x2a3e2100,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,
+	0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008e4d00,0x008e4d00,0x008e4c00,0x548d4c00,0xffa55200,0xffd35f00,0xffd46000,0xffd46000,0xffd46000,0xffd25e00,0xffc65900,0xffac4e00,0xff833c00,0xe7472600,0x693c2000,0x0c3d2100,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,
+	0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008e4d00,0x008e4d00,0x008e4c00,0x038d4c00,0xe48d4c00,0xffc95a00,0xffd15d00,0xffd15d00,0xffd15d00,0xffcb5a00,0xffb95200,0xff984300,0xff5f2e00,0x723f2200,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,
+	0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008e4d00,0x008e4d00,0x008e4d00,0x008e4c00,0x7b8d4c00,0xffad5200,0xffce5a00,0xffce5a00,0xffcd5900,0xffc35500,0xffaa4a00,0xff853a00,0xf9472600,0x15432400,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,
+	0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008e4d00,0x008e4d00,0x008e4c00,0x188d4c00,0xf98e4c00,0xffc95600,0xffcb5700,0xffc75500,0xffb94f00,0xff9b4200,0xff6c3100,0xab442500,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,
+	0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008e4d00,0x008e4d00,0x008e4d00,0x008e4c00,0xa58d4c00,0xffb35000,0xffc75300,0xffc05000,0xffac4800,0xff8b3a00,0xff542a00,0x45462500,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,
+	0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008e4d00,0x008e4d00,0x008e4c00,0x398d4c00,0xff994d00,0xffc24f00,0xffb74b00,0xff9e4000,0xff763200,0xde472600,0x03492800,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,
+	0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008e4d00,0x008e4d00,0x008e4c00,0x008e4c00,0xcf8d4c00,0xffb24b00,0xffab4500,0xff8d3900,0xff5e2b00,0x7e452500,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,
+	0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008e4d00,0x008e4d00,0x008e4d00,0x008e4c00,0x638d4c00,0xff984800,0xffa03f00,0xff7e3200,0xfc492800,0x1b472600,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,
+	0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008e4d00,0x008e4d00,0x008e4c00,0x098b4b00,0xed824600,0xff903800,0xff692c00,0xb4462600,0x004c2900,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,
+	0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008e4d00,0x008e4d00,0x008e4c00,0x008a4a00,0x8a7e4400,0xff793500,0xff572900,0x51472600,0x00542d00,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,
+	0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008e4d00,0x008d4c00,0x00884900,0x247a4200,0xfc633500,0xe74f2a00,0x034d2900,0x005e3300,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,
+	0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008e4d00,0x008d4c00,0x00884900,0x00794100,0xb4643600,0x87552e00,0x00593000,0x006b3900,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,
+	0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008f4d00,0x008d4c00,0x00884900,0x007c4300,0x486d3b00,0x24643600,0x00693800,0x00774000,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,
+	0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,
+	0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff,0x00ffffff
+};
 
 int ui_init(running_machine &machine)
 {
 	/* make sure we clean up after ourselves */
-	machine.add_notifier(MACHINE_NOTIFY_EXIT, ui_exit);
+	machine.add_notifier(MACHINE_NOTIFY_EXIT, machine_notify_delegate(FUNC(ui_exit), &machine));
 
 	/* initialize the other UI bits */
-	ui_menu_init(machine);
+	ui_menu::init(machine);
 	ui_gfx_init(machine);
 
 	/* reset globals */
@@ -248,7 +282,11 @@ int ui_init(running_machine &machine)
 	ui_set_handler(handler_messagebox, 0);
 	/* retrieve options */
 	ui_use_natural_keyboard = machine.options().natural_keyboard();
-
+	bitmap_argb32 *ui_mouse_bitmap = auto_alloc(machine, bitmap_argb32(32, 32));
+	UINT32 *dst = &ui_mouse_bitmap->pix32(0);
+	memcpy(dst,mouse_bitmap,32*32*sizeof(UINT32));
+	ui_mouse_arrow_texture = machine.render().texture_alloc();
+	ui_mouse_arrow_texture->set_bitmap(*ui_mouse_bitmap, ui_mouse_bitmap->cliprect(), TEXFORMAT_ARGB32);
 	return 0;
 }
 
@@ -259,6 +297,7 @@ int ui_init(running_machine &machine)
 
 static void ui_exit(running_machine &machine)
 {
+	machine.render().texture_free(ui_mouse_arrow_texture);
 	/* free the font */
 	machine.render().font_free(ui_font);
 	ui_font = NULL;
@@ -279,18 +318,16 @@ int ui_display_startup_screens(running_machine &machine, int first_time, int sho
 	int state;
 
 	/* disable everything if we are using -str for 300 or fewer seconds, or if we're the empty driver,
-       or if we are debugging */
-	if (!first_time || (str > 0 && str < 60*5) || &machine.system() == &GAME_NAME(empty) || (machine.debug_flags & DEBUG_FLAG_ENABLED) != 0)
+	   or if we are debugging */
+	if (!first_time || (str > 0 && str < 60*5) || &machine.system() == &GAME_NAME(___empty) || (machine.debug_flags & DEBUG_FLAG_ENABLED) != 0)
 		show_gameinfo = show_warnings = show_disclaimer = FALSE;
-
-	show_gameinfo=show_warnings=show_disclaimer=FALSE;
 
 	/* initialize the on-screen display system */
 	slider_list = slider_current = slider_init(machine);
 
 	/* loop over states */
 	ui_set_handler(handler_ingame, 0);
-	for (state = 0; state < maxstate && !machine.scheduled_event_pending() && !ui_menu_is_force_game_select(); state++)
+	for (state = 0; state < maxstate && !machine.scheduled_event_pending() && !ui_menu::stack_has_special_main_menu(); state++)
 	{
 		/* default to standard colors */
 		messagebox_backcolor = UI_BACKGROUND_COLOR;
@@ -307,7 +344,7 @@ int ui_display_startup_screens(running_machine &machine, int first_time, int sho
 				if (show_warnings && warnings_string(machine, messagebox_text).len() > 0)
 				{
 					ui_set_handler(handler_messagebox_ok, 0);
-					if (machine.system().flags & (GAME_WRONG_COLORS | GAME_IMPERFECT_COLORS | GAME_REQUIRES_ARTWORK | GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND | GAME_NO_SOUND))
+					if (machine.system().flags & (GAME_WRONG_COLORS | GAME_IMPERFECT_COLORS | GAME_REQUIRES_ARTWORK | GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND | GAME_IMPERFECT_KEYBOARD | GAME_NO_SOUND))
 						messagebox_backcolor = UI_YELLOW_COLOR;
 					if (machine.system().flags & (GAME_NOT_WORKING | GAME_UNEMULATED_PROTECTION | GAME_MECHANICAL))
 						messagebox_backcolor = UI_RED_COLOR;
@@ -321,11 +358,11 @@ int ui_display_startup_screens(running_machine &machine, int first_time, int sho
 		}
 
 		/* clear the input memory */
-		input_code_poll_switches(machine, TRUE);
-		while (input_code_poll_switches(machine, FALSE) != INPUT_CODE_INVALID) ;
+		machine.input().reset_polling();
+		while (machine.input().poll_switches() != INPUT_CODE_INVALID) ;
 
 		/* loop while we have a handler */
-		while (ui_handler_callback != handler_ingame && !machine.scheduled_event_pending() && !ui_menu_is_force_game_select())
+		while (ui_handler_callback != handler_ingame && !machine.scheduled_event_pending() && !ui_menu::stack_has_special_main_menu())
 			machine.video().frame_update();
 
 		/* clear the handler and force an update */
@@ -334,8 +371,8 @@ int ui_display_startup_screens(running_machine &machine, int first_time, int sho
 	}
 
 	/* if we're the empty driver, force the menus on */
-	if (ui_menu_is_force_game_select())
-		ui_set_handler(ui_menu_ui_handler, 0);
+	if (ui_menu::stack_has_special_main_menu())
+		ui_set_handler(ui_menu::ui_handler, 0);
 
 	return 0;
 }
@@ -378,7 +415,7 @@ void ui_update_and_render(running_machine &machine, render_container *container)
 	if (machine.phase() >= MACHINE_PHASE_RESET && (single_step || machine.paused()))
 	{
 		int alpha = (1.0f - machine.options().pause_brightness()) * 255.0f;
-		if (ui_menu_is_force_game_select())
+		if (ui_menu::stack_has_special_main_menu())
 			alpha = 255;
 		if (alpha > 255)
 			alpha = 255;
@@ -399,6 +436,21 @@ void ui_update_and_render(running_machine &machine, render_container *container)
 		ui_draw_text_box(container, messagebox_text, JUSTIFY_CENTER, 0.5f, 0.9f, messagebox_backcolor);
 	else
 		popup_text_end = 0;
+
+	if (ui_mouse_show || (machine.options().ui_mouse() && ui_is_menu_active()))
+	{
+		INT32 mouse_target_x, mouse_target_y;
+		int mouse_button;
+		render_target *mouse_target = ui_input_find_mouse(machine, &mouse_target_x, &mouse_target_y, &mouse_button);
+
+		if (mouse_target != NULL)
+		{
+			float mouse_y=-1,mouse_x=-1;
+			if (mouse_target->map_point_container(mouse_target_x, mouse_target_y, *container, mouse_x, mouse_y)) {
+				container->add_quad(mouse_x,mouse_y,mouse_x + 0.05*container->manager().ui_aspect(),mouse_y + 0.05,UI_TEXT_COLOR,ui_mouse_arrow_texture,PRIMFLAG_BLENDMODE(BLENDMODE_ALPHA));
+			}
+		}
+	}
 
 	/* cancel takes us back to the ingame handler */
 	if (ui_handler_param == UI_HANDLER_CANCEL)
@@ -528,6 +580,7 @@ void ui_draw_text_full(render_container *container, const char *origs, float x, 
 	const char *linestart;
 	float cury = y;
 	float maxwidth = 0;
+	float aspect = machine.render().ui_aspect();
 
 	/* if we don't want wrapping, guarantee a huge wrapwidth */
 	if (wrap == WRAP_NEVER)
@@ -576,7 +629,7 @@ void ui_draw_text_full(render_container *container, const char *origs, float x, 
 				break;
 
 			/* get the width of this character */
-			chwidth = ui_get_char_width(machine, schar);
+			chwidth = ui_get_font(machine)->char_width(lineheight, aspect, schar);
 
 			/* if we hit a space, remember the location and width *without* the space */
 			if (schar == ' ')
@@ -590,7 +643,7 @@ void ui_draw_text_full(render_container *container, const char *origs, float x, 
 			s += scharcount;
 
 			/* if we hit any non-space breakable character, remember the location and width
-               *with* the breakable character */
+			   *with* the breakable character */
 			if (schar != ' ' && is_breakable_char(schar) && curwidth <= wrapwidth)
 			{
 				lastbreak = s;
@@ -620,7 +673,7 @@ void ui_draw_text_full(render_container *container, const char *origs, float x, 
 					if (scharcount == -1)
 						break;
 
-					curwidth -= ui_get_char_width(machine, schar);
+					curwidth -= ui_get_font(machine)->char_width(lineheight, aspect, schar);
 				}
 			}
 
@@ -628,7 +681,7 @@ void ui_draw_text_full(render_container *container, const char *origs, float x, 
 			else if (wrap == WRAP_TRUNCATE)
 			{
 				/* add in the width of the ... */
-				curwidth += 3.0f * ui_get_char_width(machine, '.');
+				curwidth += 3.0f * ui_get_font(machine)->char_width(lineheight, aspect, '.');
 
 				/* while we are above the wrap width, back up one character */
 				while (curwidth > wrapwidth && s > linestart)
@@ -639,7 +692,7 @@ void ui_draw_text_full(render_container *container, const char *origs, float x, 
 					if (scharcount == -1)
 						break;
 
-					curwidth -= ui_get_char_width(machine, schar);
+					curwidth -= ui_get_font(machine)->char_width(lineheight, aspect, schar);
 				}
 			}
 		}
@@ -669,8 +722,8 @@ void ui_draw_text_full(render_container *container, const char *origs, float x, 
 
 			if (draw != DRAW_NONE)
 			{
-				container->add_char(curx, cury, lineheight, machine.render().ui_aspect(), fgcolor, *ui_get_font(machine), linechar);
-				curx += ui_get_char_width(machine, linechar);
+				container->add_char(curx, cury, lineheight, aspect, fgcolor, *ui_get_font(machine), linechar);
+				curx += ui_get_font(machine)->char_width(lineheight, aspect, linechar);
 			}
 			linestart += linecharcount;
 		}
@@ -678,12 +731,12 @@ void ui_draw_text_full(render_container *container, const char *origs, float x, 
 		/* append ellipses if needed */
 		if (wrap == WRAP_TRUNCATE && *s != 0 && draw != DRAW_NONE)
 		{
-			container->add_char(curx, cury, lineheight, machine.render().ui_aspect(), fgcolor, *ui_get_font(machine), '.');
-			curx += ui_get_char_width(machine, '.');
-			container->add_char(curx, cury, lineheight, machine.render().ui_aspect(), fgcolor, *ui_get_font(machine), '.');
-			curx += ui_get_char_width(machine, '.');
-			container->add_char(curx, cury, lineheight, machine.render().ui_aspect(), fgcolor, *ui_get_font(machine), '.');
-			curx += ui_get_char_width(machine, '.');
+			container->add_char(curx, cury, lineheight, aspect, fgcolor, *ui_get_font(machine), '.');
+			curx += ui_get_font(machine)->char_width(lineheight, aspect, '.');
+			container->add_char(curx, cury, lineheight, aspect, fgcolor, *ui_get_font(machine), '.');
+			curx += ui_get_font(machine)->char_width(lineheight, aspect, '.');
+			container->add_char(curx, cury, lineheight, aspect, fgcolor, *ui_get_font(machine), '.');
+			curx += ui_get_font(machine)->char_width(lineheight, aspect, '.');
 		}
 
 		/* if we're not word-wrapping, we're done */
@@ -763,9 +816,9 @@ void ui_draw_text_box(render_container *container, const char *text, int justify
 
 	/* add a box around that */
 	ui_draw_outlined_box(container, target_x - UI_BOX_LR_BORDER,
-					 target_y - UI_BOX_TB_BORDER,
-					 target_x + target_width + UI_BOX_LR_BORDER,
-					 target_y + target_height + UI_BOX_TB_BORDER, backcolor);
+						target_y - UI_BOX_TB_BORDER,
+						target_x + target_width + UI_BOX_LR_BORDER,
+						target_y + target_height + UI_BOX_TB_BORDER, backcolor);
 	ui_draw_text_full(container, text, target_x, target_y, target_width + 0.00001f,
 				justify, WRAP_WORD, DRAW_NORMAL, UI_TEXT_COLOR, UI_TEXT_BG_COLOR, NULL, NULL);
 }
@@ -857,9 +910,18 @@ int ui_get_show_profiler(void)
 
 void ui_show_menu(void)
 {
-	ui_set_handler(ui_menu_ui_handler, 0);
+	ui_set_handler(ui_menu::ui_handler, 0);
 }
 
+
+/*-------------------------------------------------
+    ui_show_mouse - change mouse status
+-------------------------------------------------*/
+
+void ui_show_mouse(bool status)
+{
+	ui_mouse_show = status;
+}
 
 /*-------------------------------------------------
     ui_is_menu_active - return TRUE if the menu
@@ -868,7 +930,7 @@ void ui_show_menu(void)
 
 int ui_is_menu_active(void)
 {
-	return (ui_handler_callback == ui_menu_ui_handler);
+	return (ui_handler_callback == ui_menu::ui_handler);
 }
 
 
@@ -898,7 +960,7 @@ static astring &disclaimer_string(running_machine &machine, astring &string)
 
 static astring &warnings_string(running_machine &machine, astring &string)
 {
-#define WARNING_FLAGS (	GAME_NOT_WORKING | \
+#define WARNING_FLAGS ( GAME_NOT_WORKING | \
 						GAME_UNEMULATED_PROTECTION | \
 						GAME_MECHANICAL | \
 						GAME_WRONG_COLORS | \
@@ -907,35 +969,45 @@ static astring &warnings_string(running_machine &machine, astring &string)
 						GAME_NO_SOUND |  \
 						GAME_IMPERFECT_SOUND |  \
 						GAME_IMPERFECT_GRAPHICS | \
+						GAME_IMPERFECT_KEYBOARD | \
 						GAME_NO_COCKTAIL)
-
-	int i;
 
 	string.reset();
 
 	/* if no warnings, nothing to return */
-	if (rom_load_warnings(machine) == 0 && rom_load_knownbad(machine) == 0 && !(machine.system().flags & WARNING_FLAGS))
+	if (rom_load_warnings(machine) == 0 && rom_load_knownbad(machine) == 0 && !(machine.system().flags & WARNING_FLAGS) && software_load_warnings_message(machine).len()==0)
 		return string;
 
 	/* add a warning if any ROMs were loaded with warnings */
 	if (rom_load_warnings(machine) > 0)
 	{
-		string.cat("One or more ROMs/CHDs for this game are incorrect. The " GAMENOUN " may not run correctly.\n");
+		string.cat("One or more ROMs/CHDs for this game are incorrect. The ");
+		string.cat(emulator_info::get_gamenoun());
+		string.cat(" may not run correctly.\n");
 		if (machine.system().flags & WARNING_FLAGS)
 			string.cat("\n");
 	}
 
+	if (software_load_warnings_message(machine).len()>0) {
+		string.cat(software_load_warnings_message(machine));
+		if (machine.system().flags & WARNING_FLAGS)
+			string.cat("\n");
+	}
 	/* if we have at least one warning flag, print the general header */
 	if ((machine.system().flags & WARNING_FLAGS) || rom_load_knownbad(machine) > 0)
 	{
-		string.cat("There are known problems with this " GAMENOUN "\n\n");
+		string.cat("There are known problems with this ");
+		string.cat(emulator_info::get_gamenoun());
+		string.cat("\n\n");
 
 		/* add a warning if any ROMs are flagged BAD_DUMP/NO_DUMP */
-		if (rom_load_knownbad(machine) > 0)
-			string.cat("One or more ROMs/CHDs for this "  GAMENOUN " have not been correctly dumped.\n");
-
+		if (rom_load_knownbad(machine) > 0) {
+			string.cat("One or more ROMs/CHDs for this ");
+			string.cat(emulator_info::get_gamenoun());
+			string.cat(" have not been correctly dumped.\n");
+		}
 		/* add one line per warning flag */
-		if (input_machine_has_keyboard(machine))
+		if (machine.system().flags & GAME_IMPERFECT_KEYBOARD)
 			string.cat("The keyboard emulation may not be 100% accurate.\n");
 		if (machine.system().flags & GAME_IMPERFECT_COLORS)
 			string.cat("The colors aren't 100% accurate.\n");
@@ -957,40 +1029,44 @@ static astring &warnings_string(running_machine &machine, astring &string)
 		/* if there's a NOT WORKING, UNEMULATED PROTECTION or GAME MECHANICAL warning, make it stronger */
 		if (machine.system().flags & (GAME_NOT_WORKING | GAME_UNEMULATED_PROTECTION | GAME_MECHANICAL))
 		{
-			const game_driver *maindrv;
-			const game_driver *clone_of;
-			int foundworking;
-
 			/* add the strings for these warnings */
 			if (machine.system().flags & GAME_UNEMULATED_PROTECTION)
 				string.cat("The game has protection which isn't fully emulated.\n");
-			if (machine.system().flags & GAME_NOT_WORKING)
-				string.cat("\nTHIS " CAPGAMENOUN " DOESN'T WORK. The emulation for this game is not yet complete. "
-					 "There is nothing you can do to fix this problem except wait for the developers to improve the emulation.\n");
-			if (machine.system().flags & GAME_MECHANICAL)
-				string.cat("\nCertain elements of this " GAMENOUN " cannot be emulated as it requires actual physical interaction or consists of mechanical devices. "
-					 "It is not possible to fully play this " GAMENOUN ".\n");
+			if (machine.system().flags & GAME_NOT_WORKING) {
+				string.cat("\nTHIS ");
+				string.cat(emulator_info::get_capgamenoun());
+				string.cat(" DOESN'T WORK. The emulation for this game is not yet complete. "
+						"There is nothing you can do to fix this problem except wait for the developers to improve the emulation.\n");
+			}
+			if (machine.system().flags & GAME_MECHANICAL) {
+				string.cat("\nCertain elements of this ");
+				string.cat(emulator_info::get_gamenoun());
+				string.cat(" cannot be emulated as it requires actual physical interaction or consists of mechanical devices. "
+						"It is not possible to fully play this ");
+				string.cat(emulator_info::get_gamenoun());
+				string.cat(".\n");
+			}
 
 			/* find the parent of this driver */
-			clone_of = driver_get_clone(&machine.system());
-			if (clone_of != NULL && !(clone_of->flags & GAME_IS_BIOS_ROOT))
+			driver_enumerator drivlist(machine.options());
+			int maindrv = drivlist.find(machine.system());
+			int clone_of = drivlist.non_bios_clone(maindrv);
+			if (clone_of != -1)
 				maindrv = clone_of;
-			else
-				maindrv = &machine.system();
 
 			/* scan the driver list for any working clones and add them */
-			foundworking = FALSE;
-			for (i = 0; drivers[i] != NULL; i++)
-				if (drivers[i] == maindrv || driver_get_clone(drivers[i]) == maindrv)
-					if ((drivers[i]->flags & (GAME_NOT_WORKING | GAME_UNEMULATED_PROTECTION | GAME_MECHANICAL)) == 0)
+			bool foundworking = false;
+			while (drivlist.next())
+				if (drivlist.current() == maindrv || drivlist.clone() == maindrv)
+					if ((drivlist.driver().flags & (GAME_NOT_WORKING | GAME_UNEMULATED_PROTECTION | GAME_MECHANICAL)) == 0)
 					{
 						/* this one works, add a header and display the name of the clone */
 						if (!foundworking)
 							string.cat("\n\nThere are working clones of this game: ");
 						else
 							string.cat(", ");
-						string.cat(drivers[i]->name);
-						foundworking = TRUE;
+						string.cat(drivlist.driver().name);
+						foundworking = true;
 					}
 
 			if (foundworking)
@@ -1011,34 +1087,35 @@ static astring &warnings_string(running_machine &machine, astring &string)
 
 astring &game_info_astring(running_machine &machine, astring &string)
 {
-	int scrcount = machine.m_devicelist.count(SCREEN);
-	int found_sound = FALSE;
-
 	/* print description, manufacturer, and CPU: */
-	string.printf("%s\n%s %s\n\nCPU:\n", machine.system().description, machine.system().year, machine.system().manufacturer);
+	astring tempstr;
+	string.printf("%s\n%s %s\nDriver: %s\n\nCPU:\n", machine.system().description, machine.system().year, machine.system().manufacturer, core_filename_extract_base(tempstr, machine.system().source_file).cstr());
 
 	/* loop over all CPUs */
-	device_execute_interface *exec = NULL;
-	for (bool gotone = machine.m_devicelist.first(exec); gotone; gotone = exec->next(exec))
+	execute_interface_iterator execiter(machine.root_device());
+	tagmap_t<UINT8> exectags;
+	for (device_execute_interface *exec = execiter.first(); exec != NULL; exec = execiter.next())
 	{
+		if (exectags.add(exec->device().tag(), 1, FALSE) == TMERR_DUPLICATE)
+			continue;
 		/* get cpu specific clock that takes internal multiplier/dividers into account */
 		int clock = exec->device().clock();
 
 		/* count how many identical CPUs we have */
 		int count = 1;
-		device_execute_interface *scan = NULL;
-		for (bool gotone = exec->next(scan); gotone; gotone = scan->next(scan))
+		const char *name = exec->device().name();
+		execute_interface_iterator execinneriter(machine.root_device());
+		for (device_execute_interface *scan = execinneriter.first(); scan != NULL; scan = execinneriter.next())
 		{
-			if (exec->device().type() != scan->device().type() || exec->device().clock() != scan->device().clock())
-				break;
-			count++;
-			exec = scan;
+			if (exec->device().type() == scan->device().type() && strcmp(name, scan->device().name()) == 0 && exec->device().clock() == scan->device().clock())
+				if (exectags.add(scan->device().tag(), 1, FALSE) != TMERR_DUPLICATE)
+					count++;
 		}
 
 		/* if more than one, prepend a #x in front of the CPU name */
 		if (count > 1)
 			string.catprintf("%d" UTF8_MULTIPLY, count);
-		string.cat(exec->device().name());
+		string.cat(name);
 
 		/* display clock in kHz or MHz */
 		if (clock >= 1000000)
@@ -1048,25 +1125,28 @@ astring &game_info_astring(running_machine &machine, astring &string)
 	}
 
 	/* loop over all sound chips */
-	device_sound_interface *sound = NULL;
-	for (bool gotone = machine.m_devicelist.first(sound); gotone; gotone = sound->next(sound))
+	sound_interface_iterator snditer(machine.root_device());
+	tagmap_t<UINT8> soundtags;
+	bool found_sound = false;
+	for (device_sound_interface *sound = snditer.first(); sound != NULL; sound = snditer.next())
 	{
+		if (soundtags.add(sound->device().tag(), 1, FALSE) == TMERR_DUPLICATE)
+			continue;
+
 		/* append the Sound: string */
 		if (!found_sound)
 			string.cat("\nSound:\n");
-		found_sound = TRUE;
+		found_sound = true;
 
 		/* count how many identical sound chips we have */
 		int count = 1;
-		device_sound_interface *scan = NULL;
-		for (bool gotanother = sound->next(scan); gotanother; gotanother = scan->next(scan))
+		sound_interface_iterator sndinneriter(machine.root_device());
+		for (device_sound_interface *scan = sndinneriter.first(); scan != NULL; scan = sndinneriter.next())
 		{
-			if (sound->device().type() != scan->device().type() || sound->device().clock() != scan->device().clock())
-				break;
-			count++;
-			sound = scan;
+			if (sound->device().type() == scan->device().type() && sound->device().clock() == scan->device().clock())
+				if (soundtags.add(scan->device().tag(), 1, FALSE) != TMERR_DUPLICATE)
+					count++;
 		}
-
 		/* if more than one, prepend a #x in front of the CPU name */
 		if (count > 1)
 			string.catprintf("%d" UTF8_MULTIPLY, count);
@@ -1084,11 +1164,13 @@ astring &game_info_astring(running_machine &machine, astring &string)
 
 	/* display screen information */
 	string.cat("\nVideo:\n");
+	screen_device_iterator scriter(machine.root_device());
+	int scrcount = scriter.count();
 	if (scrcount == 0)
 		string.cat("None\n");
 	else
 	{
-		for (screen_device *screen = machine.first_screen(); screen != NULL; screen = screen->next_screen())
+		for (screen_device *screen = scriter.first(); screen != NULL; screen = scriter.next())
 		{
 			if (scrcount > 1)
 			{
@@ -1103,8 +1185,7 @@ astring &game_info_astring(running_machine &machine, astring &string)
 				const rectangle &visarea = screen->visible_area();
 
 				string.catprintf("%d " UTF8_MULTIPLY " %d (%s) %f" UTF8_NBSP "Hz\n",
-						visarea.max_x - visarea.min_x + 1,
-						visarea.max_y - visarea.min_y + 1,
+						visarea.width(), visarea.height(),
 						(machine.system().flags & ORIENTATION_SWAP_XY) ? "V" : "H",
 						ATTOSECONDS_TO_HZ(screen->frame_period().attoseconds));
 			}
@@ -1143,11 +1224,11 @@ static UINT32 handler_messagebox_ok(running_machine &machine, render_container *
 	ui_draw_text_box(container, messagebox_text, JUSTIFY_LEFT, 0.5f, 0.5f, messagebox_backcolor);
 
 	/* an 'O' or left joystick kicks us to the next state */
-	if (state == 0 && (input_code_pressed_once(machine, KEYCODE_O) || ui_input_pressed(machine, IPT_UI_LEFT)))
+	if (state == 0 && (machine.input().code_pressed_once(KEYCODE_O) || ui_input_pressed(machine, IPT_UI_LEFT)))
 		state++;
 
 	/* a 'K' or right joystick exits the state */
-	else if (state == 1 && (input_code_pressed_once(machine, KEYCODE_K) || ui_input_pressed(machine, IPT_UI_RIGHT)))
+	else if (state == 1 && (machine.input().code_pressed_once(KEYCODE_K) || ui_input_pressed(machine, IPT_UI_RIGHT)))
 		state = UI_HANDLER_CANCEL;
 
 	/* if the user cancels, exit out completely */
@@ -1180,7 +1261,7 @@ static UINT32 handler_messagebox_anykey(running_machine &machine, render_contain
 	}
 
 	/* if any key is pressed, just exit */
-	else if (input_code_poll_switches(machine, FALSE) != INPUT_CODE_INVALID)
+	else if (machine.input().poll_switches() != INPUT_CODE_INVALID)
 		state = UI_HANDLER_CANCEL;
 
 	return state;
@@ -1205,7 +1286,7 @@ static void process_natural_keyboard(running_machine &machine)
 	{
 		/* if this was a UI_EVENT_CHAR event, post it */
 		if (event.event_type == UI_EVENT_CHAR)
-			inputx_postc(machine, event.ch);
+			machine.ioport().natkeyboard().post(event.ch);
 	}
 
 	/* process natural keyboard keys that don't get UI_EVENT_CHARs */
@@ -1213,10 +1294,10 @@ static void process_natural_keyboard(running_machine &machine)
 	{
 		/* identify this keycode */
 		itemid = non_char_keys[i];
-		code = input_code_from_input_item_id(machine, itemid);
+		code = machine.input().code_from_itemid(itemid);
 
 		/* ...and determine if it is pressed */
-		pressed = input_code_pressed(machine, code);
+		pressed = machine.input().code_pressed(code);
 
 		/* figure out whey we are in the key_down map */
 		key_down_ptr = &non_char_keys_down[i / 8];
@@ -1228,7 +1309,7 @@ static void process_natural_keyboard(running_machine &machine)
 			*key_down_ptr |= key_down_mask;
 
 			/* post the key */
-			inputx_postc(machine, UCHAR_MAMEKEY_BEGIN + code);
+			machine.ioport().natkeyboard().post(UCHAR_MAMEKEY_BEGIN + code.item_id());
 		}
 		else if (!pressed && (*key_down_ptr & key_down_mask))
 		{
@@ -1251,7 +1332,7 @@ void ui_paste(running_machine &machine)
 	if (text != NULL)
 	{
 		/* post the text */
-		inputx_post_utf8(machine, text);
+		machine.ioport().natkeyboard().post_utf8(text);
 
 		/* free the string */
 		osd_free(text);
@@ -1265,17 +1346,13 @@ void ui_paste(running_machine &machine)
 
 void ui_image_handler_ingame(running_machine &machine)
 {
-	device_image_interface *image = NULL;
-
 	/* run display routine for devices */
 	if (machine.phase() == MACHINE_PHASE_RUNNING)
 	{
-		for (bool gotone = machine.m_devicelist.first(image); gotone; gotone = image->next(image))
-		{
+		image_interface_iterator iter(machine.root_device());
+		for (device_image_interface *image = iter.first(); image != NULL; image = iter.next())
 			image->call_display();
-		}
 	}
-
 }
 
 /*-------------------------------------------------
@@ -1300,9 +1377,8 @@ static UINT32 handler_ingame(running_machine &machine, render_container *contain
 	/* draw the profiler if visible */
 	if (show_profiler)
 	{
-		astring profilertext;
-		g_profiler.text(machine, profilertext);
-		ui_draw_text_full(container, profilertext, 0.0f, 0.0f, 1.0f, JUSTIFY_LEFT, WRAP_WORD, DRAW_OPAQUE, ARGB_WHITE, ARGB_BLACK, NULL, NULL);
+		const char *text = g_profiler.text(machine);
+		ui_draw_text_full(container, text, 0.0f, 0.0f, 1.0f, JUSTIFY_LEFT, WRAP_WORD, DRAW_OPAQUE, ARGB_WHITE, ARGB_BLACK, NULL, NULL);
 	}
 
 	/* if we're single-stepping, pause now */
@@ -1313,10 +1389,10 @@ static UINT32 handler_ingame(running_machine &machine, render_container *contain
 	}
 
 	/* determine if we should disable the rest of the UI */
-	int ui_disabled = (input_machine_has_keyboard(machine) && !machine.ui_active());
+	int ui_disabled = (machine.ioport().has_keyboard() && !machine.ui_active());
 
 	/* is ScrLk UI toggling applicable here? */
-	if (input_machine_has_keyboard(machine))
+	if (machine.ioport().has_keyboard())
 	{
 		/* are we toggling the UI with ScrLk? */
 		if (ui_input_pressed(machine, IPT_UI_TOGGLE_UI))
@@ -1364,15 +1440,20 @@ static UINT32 handler_ingame(running_machine &machine, render_container *contain
 	if (ui_disabled) return ui_disabled;
 
 	if (ui_input_pressed(machine, IPT_UI_CANCEL))
-		machine.schedule_exit();
+	{
+		if (!machine.options().confirm_quit())
+			machine.schedule_exit();
+		else
+			return ui_set_handler(handler_confirm_quit, 0);
+	}
 
 	/* turn on menus if requested */
 	if (ui_input_pressed(machine, IPT_UI_CONFIGURE))
-		return ui_set_handler(ui_menu_ui_handler, 0);
+		return ui_set_handler(ui_menu::ui_handler, 0);
 
 	/* if the on-screen display isn't up and the user has toggled it, turn it on */
 	if ((machine.debug_flags & DEBUG_FLAG_ENABLED) == 0 && ui_input_pressed(machine, IPT_UI_ON_SCREEN_DISPLAY))
-		return ui_set_handler(ui_slider_ui_handler, 1);
+		return ui_set_handler(ui_menu_sliders::ui_handler, 1);
 
 	/* handle a reset request */
 	if (ui_input_pressed(machine, IPT_UI_RESET_MACHINE))
@@ -1410,7 +1491,7 @@ static UINT32 handler_ingame(running_machine &machine, render_container *contain
 	if (ui_input_pressed(machine, IPT_UI_PAUSE))
 	{
 		/* with a shift key, it is single step */
-		if (is_paused && (input_code_pressed(machine, KEYCODE_LSHIFT) || input_code_pressed(machine, KEYCODE_RSHIFT)))
+		if (is_paused && (machine.input().code_pressed(KEYCODE_LSHIFT) || machine.input().code_pressed(KEYCODE_RSHIFT)))
 		{
 			single_step = TRUE;
 			machine.resume();
@@ -1430,7 +1511,7 @@ static UINT32 handler_ingame(running_machine &machine, render_container *contain
 	{
 		if (!machine.video().is_recording())
 		{
-			machine.video().begin_recording(NULL, video_manager::MF_AVI);
+			machine.video().begin_recording(NULL, video_manager::MF_MNG);
 			popmessage("REC START");
 		}
 		else
@@ -1479,7 +1560,7 @@ static UINT32 handler_ingame(running_machine &machine, render_container *contain
 		machine.video().set_throttled(!machine.video().throttled());
 
 	/* check for fast forward */
-	if (input_type_pressed(machine, IPT_UI_FAST_FORWARD, 0))
+	if (machine.ioport().type_pressed(IPT_UI_FAST_FORWARD))
 	{
 		machine.video().set_fastforward(true);
 		ui_show_fps_temp(0.5);
@@ -1527,17 +1608,17 @@ static UINT32 handler_load_save(running_machine &machine, render_container *cont
 	}
 
 	/* check for A-Z or 0-9 */
-	for (code = KEYCODE_A; code <= (input_code)KEYCODE_Z; code++)
-		if (input_code_pressed_once(machine, code))
-			file = code - KEYCODE_A + 'a';
+	for (input_item_id id = ITEM_ID_A; id <= ITEM_ID_Z; id++)
+		if (machine.input().code_pressed_once(input_code(DEVICE_CLASS_KEYBOARD, 0, ITEM_CLASS_SWITCH, ITEM_MODIFIER_NONE, id)))
+			file = id - ITEM_ID_A + 'a';
 	if (file == 0)
-		for (code = KEYCODE_0; code <= (input_code)KEYCODE_9; code++)
-			if (input_code_pressed_once(machine, code))
-				file = code - KEYCODE_0 + '0';
+		for (input_item_id id = ITEM_ID_0; id <= ITEM_ID_9; id++)
+			if (machine.input().code_pressed_once(input_code(DEVICE_CLASS_KEYBOARD, 0, ITEM_CLASS_SWITCH, ITEM_MODIFIER_NONE, id)))
+				file = id - ITEM_ID_0 + '0';
 	if (file == 0)
-		for (code = KEYCODE_0_PAD; code <= (input_code)KEYCODE_9_PAD; code++)
-			if (input_code_pressed_once(machine, code))
-				file = code - KEYCODE_0_PAD + '0';
+		for (input_item_id id = ITEM_ID_0_PAD; id <= ITEM_ID_9_PAD; id++)
+			if (machine.input().code_pressed_once(input_code(DEVICE_CLASS_KEYBOARD, 0, ITEM_CLASS_SWITCH, ITEM_MODIFIER_NONE, id)))
+				file = id - ITEM_ID_0_PAD + '0';
 	if (file == 0)
 		return state;
 
@@ -1559,6 +1640,34 @@ static UINT32 handler_load_save(running_machine &machine, render_container *cont
 	return UI_HANDLER_CANCEL;
 }
 
+
+/*-------------------------------------------------
+ handler_confirm_quit - leads the user through
+ confirming quit emulation
+ -------------------------------------------------*/
+
+static UINT32 handler_confirm_quit(running_machine &machine, render_container *container, UINT32 state)
+{
+	astring quit_message("Are you sure you want to quit?\n\n");
+	quit_message.cat("Press ''UI Select'' (default: Enter) to quit,\n");
+	quit_message.cat("Press ''UI Cancel'' (default: Esc) to return to emulation.");
+
+	ui_draw_text_box(container, quit_message, JUSTIFY_CENTER, 0.5f, 0.5f, UI_RED_COLOR);
+	machine.pause();
+
+	/* if the user press ENTER, quit the game */
+	if (ui_input_pressed(machine, IPT_UI_SELECT))
+		machine.schedule_exit();
+
+	/* if the user press ESC, just continue */
+	else if (ui_input_pressed(machine, IPT_UI_CANCEL))
+	{
+		machine.resume();
+		state = UI_HANDLER_CANCEL;
+	}
+
+	return state;
+}
 
 
 /***************************************************************************
@@ -1603,9 +1712,8 @@ static slider_state *slider_alloc(running_machine &machine, const char *title, I
 
 static slider_state *slider_init(running_machine &machine)
 {
-	const input_field_config *field;
-	const input_port_config *port;
-	device_t *device;
+	ioport_field *field;
+	ioport_port *port;
 	slider_state *listhead = NULL;
 	slider_state **tailptr = &listhead;
 	astring string;
@@ -1616,14 +1724,11 @@ static slider_state *slider_init(running_machine &machine)
 	tailptr = &(*tailptr)->next;
 
 	/* add per-channel volume */
-	speaker_input info;
-	for (item = 0; machine.sound().indexed_speaker_input(item, info); item++)
+	mixer_input info;
+	for (item = 0; machine.sound().indexed_mixer_input(item, info); item++)
 	{
 		INT32 maxval = 2000;
-		INT32 defval = info.stream->initial_input_gain(info.inputnum) * 1000.0f + 0.5f;
-
-		if (defval > 1000)
-			maxval = 2 * defval;
+		INT32 defval = 1000;
 
 		info.stream->input_name(info.inputnum, string);
 		string.cat(" Volume");
@@ -1632,20 +1737,20 @@ static slider_state *slider_init(running_machine &machine)
 	}
 
 	/* add analog adjusters */
-	for (port = machine.m_portlist.first(); port != NULL; port = port->next())
-		for (field = port->fieldlist; field != NULL; field = field->next)
-			if (field->type == IPT_ADJUSTER)
+	for (port = machine.ioport().first_port(); port != NULL; port = port->next())
+		for (field = port->first_field(); field != NULL; field = field->next())
+			if (field->type() == IPT_ADJUSTER)
 			{
 				void *param = (void *)field;
-				*tailptr = slider_alloc(machine, field->name, 0, field->defvalue, 100, 1, slider_adjuster, param);
+				*tailptr = slider_alloc(machine, field->name(), field->minval(), field->defvalue(), field->maxval(), 1, slider_adjuster, param);
 				tailptr = &(*tailptr)->next;
 			}
 
 	/* add CPU overclocking (cheat only) */
 	if (machine.options().cheat())
 	{
-		device_execute_interface *exec = NULL;
-		for (bool gotone = machine.m_devicelist.first(exec); gotone; gotone = exec->next(exec))
+		execute_interface_iterator iter(machine.root_device());
+		for (device_execute_interface *exec = iter.first(); exec != NULL; exec = iter.next())
 		{
 			void *param = (void *)&exec->device();
 			string.printf("Overclock CPU %s", exec->device().tag());
@@ -1655,12 +1760,13 @@ static slider_state *slider_init(running_machine &machine)
 	}
 
 	/* add screen parameters */
-	for (screen_device *screen = machine.first_screen(); screen != NULL; screen = screen->next_screen())
+	screen_device_iterator scriter(machine.root_device());
+	for (screen_device *screen = scriter.first(); screen != NULL; screen = scriter.next())
 	{
-		int defxscale = floor(screen->config().xscale() * 1000.0f + 0.5f);
-		int defyscale = floor(screen->config().yscale() * 1000.0f + 0.5f);
-		int defxoffset = floor(screen->config().xoffset() * 1000.0f + 0.5f);
-		int defyoffset = floor(screen->config().yoffset() * 1000.0f + 0.5f);
+		int defxscale = floor(screen->xscale() * 1000.0f + 0.5f);
+		int defyscale = floor(screen->yscale() * 1000.0f + 0.5f);
+		int defxoffset = floor(screen->xoffset() * 1000.0f + 0.5f);
+		int defyoffset = floor(screen->yoffset() * 1000.0f + 0.5f);
 		void *param = (void *)screen;
 
 		/* add refresh rate tweaker */
@@ -1697,34 +1803,34 @@ static slider_state *slider_init(running_machine &machine)
 		tailptr = &(*tailptr)->next;
 	}
 
-	for (device = machine.m_devicelist.first(LASERDISC); device != NULL; device = device->typenext())
-	{
-		const laserdisc_config *config = (const laserdisc_config *)downcast<const legacy_device_config_base &>(device->baseconfig()).inline_config();
-		if (config->overupdate != NULL)
+	laserdisc_device_iterator lditer(machine.root_device());
+	for (laserdisc_device *laserdisc = lditer.first(); laserdisc != NULL; laserdisc = lditer.next())
+		if (laserdisc->overlay_configured())
 		{
-			int defxscale = floor(config->overscalex * 1000.0f + 0.5f);
-			int defyscale = floor(config->overscaley * 1000.0f + 0.5f);
-			int defxoffset = floor(config->overposx * 1000.0f + 0.5f);
-			int defyoffset = floor(config->overposy * 1000.0f + 0.5f);
-			void *param = (void *)device;
+			laserdisc_overlay_config config;
+			laserdisc->get_overlay_config(config);
+			int defxscale = floor(config.m_overscalex * 1000.0f + 0.5f);
+			int defyscale = floor(config.m_overscaley * 1000.0f + 0.5f);
+			int defxoffset = floor(config.m_overposx * 1000.0f + 0.5f);
+			int defyoffset = floor(config.m_overposy * 1000.0f + 0.5f);
+			void *param = (void *)laserdisc;
 
 			/* add scale and offset controls per-overlay */
-			string.printf("%s Horiz Stretch", slider_get_laserdisc_desc(device));
+			string.printf("Laserdisc '%s' Horiz Stretch", laserdisc->tag());
 			*tailptr = slider_alloc(machine, string, 500, (defxscale == 0) ? 1000 : defxscale, 1500, 2, slider_overxscale, param);
 			tailptr = &(*tailptr)->next;
-			string.printf("%s Horiz Position", slider_get_laserdisc_desc(device));
+			string.printf("Laserdisc '%s' Horiz Position", laserdisc->tag());
 			*tailptr = slider_alloc(machine, string, -500, defxoffset, 500, 2, slider_overxoffset, param);
 			tailptr = &(*tailptr)->next;
-			string.printf("%s Vert Stretch", slider_get_laserdisc_desc(device));
+			string.printf("Laserdisc '%s' Vert Stretch", laserdisc->tag());
 			*tailptr = slider_alloc(machine, string, 500, (defyscale == 0) ? 1000 : defyscale, 1500, 2, slider_overyscale, param);
 			tailptr = &(*tailptr)->next;
-			string.printf("%s Vert Position", slider_get_laserdisc_desc(device));
+			string.printf("Laserdisc '%s' Vert Position", laserdisc->tag());
 			*tailptr = slider_alloc(machine, string, -500, defyoffset, 500, 2, slider_overyoffset, param);
 			tailptr = &(*tailptr)->next;
 		}
-	}
 
-	for (screen_device *screen = machine.first_screen(); screen != NULL; screen = screen->next_screen())
+	for (screen_device *screen = scriter.first(); screen != NULL; screen = scriter.next())
 		if (screen->screen_type() == SCREEN_TYPE_VECTOR)
 		{
 			/* add flicker control */
@@ -1737,15 +1843,15 @@ static slider_state *slider_init(running_machine &machine)
 
 #ifdef MAME_DEBUG
 	/* add crosshair adjusters */
-	for (port = machine.m_portlist.first(); port != NULL; port = port->next())
-		for (field = port->fieldlist; field != NULL; field = field->next)
-			if (field->crossaxis != CROSSHAIR_AXIS_NONE && field->player == 0)
+	for (port = machine.ioport().first_port(); port != NULL; port = port->next())
+		for (field = port->first_field(); field != NULL; field = field->next())
+			if (field->crosshair_axis() != CROSSHAIR_AXIS_NONE && field->player() == 0)
 			{
 				void *param = (void *)field;
-				string.printf("Crosshair Scale %s", (field->crossaxis == CROSSHAIR_AXIS_X) ? "X" : "Y");
+				string.printf("Crosshair Scale %s", (field->crosshair_axis() == CROSSHAIR_AXIS_X) ? "X" : "Y");
 				*tailptr = slider_alloc(machine, string, -3000, 1000, 3000, 100, slider_crossscale, param);
 				tailptr = &(*tailptr)->next;
-				string.printf("Crosshair Offset %s", (field->crossaxis == CROSSHAIR_AXIS_X) ? "X" : "Y");
+				string.printf("Crosshair Offset %s", (field->crosshair_axis() == CROSSHAIR_AXIS_X) ? "X" : "Y");
 				*tailptr = slider_alloc(machine, string, -3000, 0, 3000, 100, slider_crossoffset, param);
 				tailptr = &(*tailptr)->next;
 			}
@@ -1776,18 +1882,18 @@ static INT32 slider_volume(running_machine &machine, void *arg, astring *string,
 
 static INT32 slider_mixervol(running_machine &machine, void *arg, astring *string, INT32 newval)
 {
-	speaker_input info;
-	if (!machine.sound().indexed_speaker_input((FPTR)arg, info))
+	mixer_input info;
+	if (!machine.sound().indexed_mixer_input((FPTR)arg, info))
 		return 0;
 	if (newval != SLIDER_NOCHANGE)
 	{
-		INT32 curval = floor(info.stream->input_gain(info.inputnum) * 1000.0f + 0.5f);
+		INT32 curval = floor(info.stream->user_gain(info.inputnum) * 1000.0f + 0.5f);
 		if (newval > curval && (newval - curval) <= 4) newval += 4; // round up on increment
-		info.stream->set_input_gain(info.inputnum, (float)newval * 0.001f);
+		info.stream->set_user_gain(info.inputnum, (float)newval * 0.001f);
 	}
 	if (string != NULL)
-		string->printf("%4.2f", info.stream->input_gain(info.inputnum));
-	return floor(info.stream->input_gain(info.inputnum) * 1000.0f + 0.5f);
+		string->printf("%4.2f", info.stream->user_gain(info.inputnum));
+	return floor(info.stream->user_gain(info.inputnum) * 1000.0f + 0.5f);
 }
 
 
@@ -1798,14 +1904,14 @@ static INT32 slider_mixervol(running_machine &machine, void *arg, astring *strin
 
 static INT32 slider_adjuster(running_machine &machine, void *arg, astring *string, INT32 newval)
 {
-	const input_field_config *field = (const input_field_config *)arg;
-	input_field_user_settings settings;
+	ioport_field *field = (ioport_field *)arg;
+	ioport_field::user_settings settings;
 
-	input_field_get_user_settings(field, &settings);
+	field->get_user_settings(settings);
 	if (newval != SLIDER_NOCHANGE)
 	{
 		settings.value = newval;
-		input_field_set_user_settings(field, &settings);
+		field->set_user_settings(settings);
 	}
 	if (string != NULL)
 		string->printf("%d%%", settings.value);
@@ -1836,7 +1942,7 @@ static INT32 slider_overclock(running_machine &machine, void *arg, astring *stri
 static INT32 slider_refresh(running_machine &machine, void *arg, astring *string, INT32 newval)
 {
 	screen_device *screen = reinterpret_cast<screen_device *>(arg);
-	double defrefresh = ATTOSECONDS_TO_HZ(screen->config().refresh());
+	double defrefresh = ATTOSECONDS_TO_HZ(screen->refresh_attoseconds());
 	double refresh;
 
 	if (newval != SLIDER_NOCHANGE)
@@ -2013,18 +2119,18 @@ static INT32 slider_yoffset(running_machine &machine, void *arg, astring *string
 
 static INT32 slider_overxscale(running_machine &machine, void *arg, astring *string, INT32 newval)
 {
-	device_t *laserdisc = (device_t *)arg;
-	laserdisc_config settings;
+	laserdisc_device *laserdisc = (laserdisc_device *)arg;
+	laserdisc_overlay_config settings;
 
-	laserdisc_get_config(laserdisc, &settings);
+	laserdisc->get_overlay_config(settings);
 	if (newval != SLIDER_NOCHANGE)
 	{
-		settings.overscalex = (float)newval * 0.001f;
-		laserdisc_set_config(laserdisc, &settings);
+		settings.m_overscalex = (float)newval * 0.001f;
+		laserdisc->set_overlay_config(settings);
 	}
 	if (string != NULL)
-		string->printf("%.3f", settings.overscalex);
-	return floor(settings.overscalex * 1000.0f + 0.5f);
+		string->printf("%.3f", settings.m_overscalex);
+	return floor(settings.m_overscalex * 1000.0f + 0.5f);
 }
 
 
@@ -2035,18 +2141,18 @@ static INT32 slider_overxscale(running_machine &machine, void *arg, astring *str
 
 static INT32 slider_overyscale(running_machine &machine, void *arg, astring *string, INT32 newval)
 {
-	device_t *laserdisc = (device_t *)arg;
-	laserdisc_config settings;
+	laserdisc_device *laserdisc = (laserdisc_device *)arg;
+	laserdisc_overlay_config settings;
 
-	laserdisc_get_config(laserdisc, &settings);
+	laserdisc->get_overlay_config(settings);
 	if (newval != SLIDER_NOCHANGE)
 	{
-		settings.overscaley = (float)newval * 0.001f;
-		laserdisc_set_config(laserdisc, &settings);
+		settings.m_overscaley = (float)newval * 0.001f;
+		laserdisc->set_overlay_config(settings);
 	}
 	if (string != NULL)
-		string->printf("%.3f", settings.overscaley);
-	return floor(settings.overscaley * 1000.0f + 0.5f);
+		string->printf("%.3f", settings.m_overscaley);
+	return floor(settings.m_overscaley * 1000.0f + 0.5f);
 }
 
 
@@ -2057,18 +2163,18 @@ static INT32 slider_overyscale(running_machine &machine, void *arg, astring *str
 
 static INT32 slider_overxoffset(running_machine &machine, void *arg, astring *string, INT32 newval)
 {
-	device_t *laserdisc = (device_t *)arg;
-	laserdisc_config settings;
+	laserdisc_device *laserdisc = (laserdisc_device *)arg;
+	laserdisc_overlay_config settings;
 
-	laserdisc_get_config(laserdisc, &settings);
+	laserdisc->get_overlay_config(settings);
 	if (newval != SLIDER_NOCHANGE)
 	{
-		settings.overposx = (float)newval * 0.001f;
-		laserdisc_set_config(laserdisc, &settings);
+		settings.m_overposx = (float)newval * 0.001f;
+		laserdisc->set_overlay_config(settings);
 	}
 	if (string != NULL)
-		string->printf("%.3f", settings.overposx);
-	return floor(settings.overposx * 1000.0f + 0.5f);
+		string->printf("%.3f", settings.m_overposx);
+	return floor(settings.m_overposx * 1000.0f + 0.5f);
 }
 
 
@@ -2079,18 +2185,18 @@ static INT32 slider_overxoffset(running_machine &machine, void *arg, astring *st
 
 static INT32 slider_overyoffset(running_machine &machine, void *arg, astring *string, INT32 newval)
 {
-	device_t *laserdisc = (device_t *)arg;
-	laserdisc_config settings;
+	laserdisc_device *laserdisc = (laserdisc_device *)arg;
+	laserdisc_overlay_config settings;
 
-	laserdisc_get_config(laserdisc, &settings);
+	laserdisc->get_overlay_config(settings);
 	if (newval != SLIDER_NOCHANGE)
 	{
-		settings.overposy = (float)newval * 0.001f;
-		laserdisc_set_config(laserdisc, &settings);
+		settings.m_overposy = (float)newval * 0.001f;
+		laserdisc->set_overlay_config(settings);
 	}
 	if (string != NULL)
-		string->printf("%.3f", settings.overposy);
-	return floor(settings.overposy * 1000.0f + 0.5f);
+		string->printf("%.3f", settings.m_overposy);
+	return floor(settings.m_overposy * 1000.0f + 0.5f);
 }
 
 
@@ -2131,7 +2237,8 @@ static INT32 slider_beam(running_machine &machine, void *arg, astring *string, I
 
 static char *slider_get_screen_desc(screen_device &screen)
 {
-	int scrcount = screen.machine().m_devicelist.count(SCREEN);
+	screen_device_iterator iter(screen.machine().root_device());
+	int scrcount = iter.count();
 	static char descbuf[256];
 
 	if (scrcount > 1)
@@ -2142,26 +2249,6 @@ static char *slider_get_screen_desc(screen_device &screen)
 	return descbuf;
 }
 
-
-/*-------------------------------------------------
-    slider_get_laserdisc_desc - returns the
-    description for a given laseridsc
--------------------------------------------------*/
-
-static char *slider_get_laserdisc_desc(device_t *laserdisc)
-{
-	int ldcount = laserdisc->machine().m_devicelist.count(LASERDISC);
-	static char descbuf[256];
-
-	if (ldcount > 1)
-		sprintf(descbuf, "Laserdisc '%s'", laserdisc->tag());
-	else
-		strcpy(descbuf, "Laserdisc");
-
-	return descbuf;
-}
-
-
 /*-------------------------------------------------
     slider_crossscale - crosshair scale slider
     callback
@@ -2170,13 +2257,13 @@ static char *slider_get_laserdisc_desc(device_t *laserdisc)
 #ifdef MAME_DEBUG
 static INT32 slider_crossscale(running_machine &machine, void *arg, astring *string, INT32 newval)
 {
-	input_field_config *field = (input_field_config *)arg;
+	ioport_field *field = (ioport_field *)arg;
 
 	if (newval != SLIDER_NOCHANGE)
-		field->crossscale = (float)newval * 0.001f;
+		field->set_crosshair_scale(float(newval) * 0.001);
 	if (string != NULL)
-		string->printf("%s %s %1.3f", "Crosshair Scale", (field->crossaxis == CROSSHAIR_AXIS_X) ? "X" : "Y", (float)newval * 0.001f);
-	return floor(field->crossscale * 1000.0f + 0.5f);
+		string->printf("%s %s %1.3f", "Crosshair Scale", (field->crosshair_axis() == CROSSHAIR_AXIS_X) ? "X" : "Y", float(newval) * 0.001f);
+	return floor(field->crosshair_scale() * 1000.0f + 0.5f);
 }
 #endif
 
@@ -2189,13 +2276,13 @@ static INT32 slider_crossscale(running_machine &machine, void *arg, astring *str
 #ifdef MAME_DEBUG
 static INT32 slider_crossoffset(running_machine &machine, void *arg, astring *string, INT32 newval)
 {
-	input_field_config *field = (input_field_config *)arg;
+	ioport_field *field = (ioport_field *)arg;
 
 	if (newval != SLIDER_NOCHANGE)
-		field->crossoffset = (float)newval * 0.001f;
+		field->set_crosshair_offset(float(newval) * 0.001f);
 	if (string != NULL)
-		string->printf("%s %s %1.3f", "Crosshair Offset", (field->crossaxis == CROSSHAIR_AXIS_X) ? "X" : "Y", (float)newval * 0.001f);
-	return field->crossoffset;
+		string->printf("%s %s %1.3f", "Crosshair Offset", (field->crosshair_axis() == CROSSHAIR_AXIS_X) ? "X" : "Y", float(newval) * 0.001f);
+	return field->crosshair_offset();
 }
 #endif
 
@@ -2224,4 +2311,3 @@ void ui_set_use_natural_keyboard(running_machine &machine, int use_natural_keybo
 	machine.options().set_value(OPTION_NATURAL_KEYBOARD, use_natural_keyboard, OPTION_PRIORITY_CMDLINE, error);
 	assert(!error);
 }
-

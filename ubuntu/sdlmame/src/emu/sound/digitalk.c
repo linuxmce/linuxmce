@@ -168,7 +168,7 @@ period.
         - Rom organization
 
 The rom starts with a vector of 16-bits little endian values which are
-the adresses of the segments table for the samples.  The segments data
+the addresses of the segments table for the samples.  The segments data
 is a vector of 24-bits little-endian values organized as such:
 
       adr+2    adr+1    adr
@@ -237,7 +237,7 @@ complete set of waveforms is repeated R times.
 */
 
 
-typedef struct {
+struct digitalker {
 	const UINT8 *rom;
 	device_t *device;
 	sound_stream *stream;
@@ -258,7 +258,7 @@ typedef struct {
 	UINT8 dac_index; // 128 for done
 	INT16 dac[128];
 
-} digitalker;
+};
 
 // Quantized intensity values, first index is the volume, second the
 // intensity (positive half only, real value goes -8..7)
@@ -288,7 +288,7 @@ INLINE digitalker *get_safe_token(device_t *device)
 {
 	assert(device != NULL);
 	assert(device->type() == DIGITALKER);
-	return (digitalker *)downcast<legacy_device_base *>(device)->token();
+	return (digitalker *)downcast<digitalker_device *>(device)->token();
 }
 
 
@@ -648,7 +648,7 @@ static DEVICE_START(digitalker)
 {
 	digitalker *dg = get_safe_token(device);
 	dg->device = device;
-	dg->rom = device->machine().region(device->tag())->base();
+	dg->rom = device->machine().root_device().memregion(device->tag())->base();
 	dg->stream = device->machine().sound().stream_alloc(*device, 0, 1, device->clock()/4, dg, digitalker_update);
 	dg->dac_index = 128;
 	dg->data = 0xff;
@@ -657,21 +657,6 @@ static DEVICE_START(digitalker)
 	digitalker_set_intr(dg, 1);
 
 	digitalker_register_for_save(dg);
-}
-
-DEVICE_GET_INFO(digitalker)
-{
-	switch(state) {
-	case DEVINFO_INT_TOKEN_BYTES:	info->i = sizeof(digitalker); break;
-	case DEVINFO_FCT_START:			info->start = DEVICE_START_NAME(digitalker); break;
-	case DEVINFO_FCT_STOP:      	break;
-	case DEVINFO_FCT_RESET:     	break;
-	case DEVINFO_STR_NAME:      	strcpy(info->s, "Digitalker"); break;
-	case DEVINFO_STR_FAMILY:	strcpy(info->s, "National Semiconductor"); break;
-	case DEVINFO_STR_VERSION:	strcpy(info->s, "1.0"); break;
-	case DEVINFO_STR_SOURCE_FILE:		strcpy(info->s, __FILE__); break;
-	case DEVINFO_STR_CREDITS:	strcpy(info->s, "Copyright Olivier Galibert"); break;
-	}
 }
 
 void digitalker_0_cs_w(device_t *device, int line)
@@ -705,4 +690,40 @@ WRITE8_DEVICE_HANDLER( digitalker_data_w )
 }
 
 
-DEFINE_LEGACY_SOUND_DEVICE(DIGITALKER, digitalker);
+const device_type DIGITALKER = &device_creator<digitalker_device>;
+
+digitalker_device::digitalker_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, DIGITALKER, "Digitalker", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
+{
+	m_token = global_alloc_clear(digitalker);
+}
+
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
+
+void digitalker_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void digitalker_device::device_start()
+{
+	DEVICE_START_NAME( digitalker )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void digitalker_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}

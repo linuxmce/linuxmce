@@ -55,9 +55,9 @@
 //  CONSTANTS
 //============================================================
 
-#define RESIZE_STATE_NORMAL		0
-#define RESIZE_STATE_RESIZING	1
-#define RESIZE_STATE_PENDING	2
+#define RESIZE_STATE_NORMAL     0
+#define RESIZE_STATE_RESIZING   1
+#define RESIZE_STATE_PENDING    2
 
 
 
@@ -65,59 +65,64 @@
 //  TYPE DEFINITIONS
 //============================================================
 
-typedef struct _win_window_info win_window_info;
-struct _win_window_info
+struct win_window_info
 {
-	running_machine &machine() const { assert(m_machine != NULL); return *m_machine; }
+public:
+	win_window_info(running_machine &machine)
+		: m_machine(machine) { }
 
-	win_window_info *	next;
-	volatile int		init_state;
+	running_machine &machine() const { return m_machine; }
+
+	win_window_info *   next;
+	volatile int        init_state;
 
 	// window handle and info
-	HWND				hwnd;
-	char				title[256];
-	RECT				non_fullscreen_bounds;
-	int					startmaximized;
-	int					isminimized;
-	int					ismaximized;
-	int					resize_state;
+	HWND                hwnd;
+	char                title[256];
+	RECT                non_fullscreen_bounds;
+	int                 startmaximized;
+	int                 isminimized;
+	int                 ismaximized;
+	int                 resize_state;
 
 	// monitor info
-	win_monitor_info *	monitor;
-	int					fullscreen;
-	int					fullscreen_safe;
-	int					maxwidth, maxheight;
-	int					refresh;
-	float				aspect;
+	win_monitor_info *  monitor;
+	int                 fullscreen;
+	int                 fullscreen_safe;
+	int                 maxwidth, maxheight;
+	int                 refresh;
+	float               aspect;
 
 	// rendering info
-	osd_lock *			render_lock;
-	render_target *		target;
-	int					targetview;
-	int					targetorient;
-	render_layer_config	targetlayerconfig;
+	osd_lock *          render_lock;
+	render_target *     target;
+	int                 targetview;
+	int                 targetorient;
+	render_layer_config targetlayerconfig;
 	render_primitive_list *primlist;
 
 	// input info
-	DWORD				lastclicktime;
-	int					lastclickx;
-	int					lastclicky;
+	DWORD               lastclicktime;
+	int                 lastclickx;
+	int                 lastclicky;
 
 	// drawing data
-	void *				drawdata;
+	void *              drawdata;
 
-	running_machine *	m_machine;
+private:
+	running_machine &   m_machine;
 };
 
 
-typedef struct _win_draw_callbacks win_draw_callbacks;
-struct _win_draw_callbacks
+struct win_draw_callbacks
 {
 	void (*exit)(void);
 
 	int (*window_init)(win_window_info *window);
 	render_primitive_list *(*window_get_primitives)(win_window_info *window);
 	int (*window_draw)(win_window_info *window, HDC dc, int update);
+	void (*window_save)(win_window_info *window);
+	void (*window_record)(win_window_info *window);
 	void (*window_destroy)(win_window_info *window);
 };
 
@@ -151,6 +156,8 @@ LRESULT CALLBACK winwindow_video_window_proc(HWND wnd, UINT message, WPARAM wpar
 extern LRESULT CALLBACK winwindow_video_window_proc_ui(HWND wnd, UINT message, WPARAM wparam, LPARAM lparam);
 
 void winwindow_toggle_full_screen(void);
+void winwindow_take_snap(void);
+void winwindow_take_video(void);
 
 void winwindow_process_events_periodic(running_machine &machine);
 void winwindow_process_events(running_machine &machine, int ingame);

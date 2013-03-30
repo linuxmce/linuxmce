@@ -25,27 +25,25 @@
  *
  *************************************/
 
-static INTERRUPT_GEN( battlnts_interrupt )
+INTERRUPT_GEN_MEMBER(battlnts_state::battlnts_interrupt)
 {
-	battlnts_state *state = device->machine().driver_data<battlnts_state>();
-	if (k007342_is_int_enabled(state->m_k007342))
-		device_set_input_line(device, HD6309_IRQ_LINE, HOLD_LINE);
+	if (k007342_is_int_enabled(m_k007342))
+		device.execute().set_input_line(HD6309_IRQ_LINE, HOLD_LINE);
 }
 
-static WRITE8_HANDLER( battlnts_sh_irqtrigger_w )
+WRITE8_MEMBER(battlnts_state::battlnts_sh_irqtrigger_w)
 {
-	battlnts_state *state = space->machine().driver_data<battlnts_state>();
-	device_set_input_line_and_vector(state->m_audiocpu, 0, HOLD_LINE, 0xff);
+	m_audiocpu->set_input_line_and_vector(0, HOLD_LINE, 0xff);
 }
 
-static WRITE8_HANDLER( battlnts_bankswitch_w )
+WRITE8_MEMBER(battlnts_state::battlnts_bankswitch_w)
 {
 	/* bits 6 & 7 = bank number */
-	memory_set_bank(space->machine(), "bank1", (data & 0xc0) >> 6);
+	membank("bank1")->set_entry((data & 0xc0) >> 6);
 
 	/* bits 4 & 5 = coin counters */
-	coin_counter_w(space->machine(), 0, data & 0x10);
-	coin_counter_w(space->machine(), 1, data & 0x20);
+	coin_counter_w(machine(), 0, data & 0x10);
+	coin_counter_w(machine(), 1, data & 0x20);
 
 	/* other bits unknown */
 }
@@ -57,32 +55,32 @@ static WRITE8_HANDLER( battlnts_bankswitch_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( battlnts_map, AS_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0x1fff) AM_DEVREADWRITE("k007342", k007342_r, k007342_w)	/* Color RAM + Video RAM */
-	AM_RANGE(0x2000, 0x21ff) AM_DEVREADWRITE("k007420", k007420_r, k007420_w)	/* Sprite RAM */
-	AM_RANGE(0x2200, 0x23ff) AM_DEVREADWRITE("k007342", k007342_scroll_r, k007342_scroll_w)		/* Scroll RAM */
-	AM_RANGE(0x2400, 0x24ff) AM_RAM_WRITE(paletteram_xBBBBBGGGGGRRRRR_be_w) AM_BASE_GENERIC(paletteram)/* palette */
-	AM_RANGE(0x2600, 0x2607) AM_DEVWRITE("k007342", k007342_vreg_w) 			/* Video Registers */
+static ADDRESS_MAP_START( battlnts_map, AS_PROGRAM, 8, battlnts_state )
+	AM_RANGE(0x0000, 0x1fff) AM_DEVREADWRITE_LEGACY("k007342", k007342_r, k007342_w)    /* Color RAM + Video RAM */
+	AM_RANGE(0x2000, 0x21ff) AM_DEVREADWRITE_LEGACY("k007420", k007420_r, k007420_w)    /* Sprite RAM */
+	AM_RANGE(0x2200, 0x23ff) AM_DEVREADWRITE_LEGACY("k007342", k007342_scroll_r, k007342_scroll_w)      /* Scroll RAM */
+	AM_RANGE(0x2400, 0x24ff) AM_RAM_WRITE(paletteram_xBBBBBGGGGGRRRRR_byte_be_w) AM_SHARE("paletteram")/* palette */
+	AM_RANGE(0x2600, 0x2607) AM_DEVWRITE_LEGACY("k007342", k007342_vreg_w)          /* Video Registers */
 	AM_RANGE(0x2e00, 0x2e00) AM_READ_PORT("DSW1")
 	AM_RANGE(0x2e01, 0x2e01) AM_READ_PORT("P2")
 	AM_RANGE(0x2e02, 0x2e02) AM_READ_PORT("P1")
-	AM_RANGE(0x2e03, 0x2e03) AM_READ_PORT("DSW3")				/* coinsw, testsw, startsw */
+	AM_RANGE(0x2e03, 0x2e03) AM_READ_PORT("DSW3")               /* coinsw, testsw, startsw */
 	AM_RANGE(0x2e04, 0x2e04) AM_READ_PORT("DSW2")
-	AM_RANGE(0x2e08, 0x2e08) AM_WRITE(battlnts_bankswitch_w)	/* bankswitch control */
-	AM_RANGE(0x2e0c, 0x2e0c) AM_WRITE(battlnts_spritebank_w)	/* sprite bank select */
-	AM_RANGE(0x2e10, 0x2e10) AM_WRITE(watchdog_reset_w)			/* watchdog reset */
-	AM_RANGE(0x2e14, 0x2e14) AM_WRITE(soundlatch_w)				/* sound code # */
-	AM_RANGE(0x2e18, 0x2e18) AM_WRITE(battlnts_sh_irqtrigger_w)	/* cause interrupt on audio CPU */
-	AM_RANGE(0x4000, 0x7fff) AM_ROMBANK("bank1")						/* banked ROM */
-	AM_RANGE(0x8000, 0xffff) AM_ROM								/* ROM 777e02.bin */
+	AM_RANGE(0x2e08, 0x2e08) AM_WRITE(battlnts_bankswitch_w)    /* bankswitch control */
+	AM_RANGE(0x2e0c, 0x2e0c) AM_WRITE(battlnts_spritebank_w)    /* sprite bank select */
+	AM_RANGE(0x2e10, 0x2e10) AM_WRITE(watchdog_reset_w)         /* watchdog reset */
+	AM_RANGE(0x2e14, 0x2e14) AM_WRITE(soundlatch_byte_w)                /* sound code # */
+	AM_RANGE(0x2e18, 0x2e18) AM_WRITE(battlnts_sh_irqtrigger_w) /* cause interrupt on audio CPU */
+	AM_RANGE(0x4000, 0x7fff) AM_ROMBANK("bank1")                        /* banked ROM */
+	AM_RANGE(0x8000, 0xffff) AM_ROM                             /* ROM 777e02.bin */
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( battlnts_sound_map, AS_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0x7fff) AM_ROM							/* ROM 777c01.rom */
-	AM_RANGE(0x8000, 0x87ff) AM_RAM							/* RAM */
-	AM_RANGE(0xa000, 0xa001) AM_DEVREADWRITE("ym1", ym3812_r, ym3812_w)		/* YM3812 (chip 1) */
-	AM_RANGE(0xc000, 0xc001) AM_DEVREADWRITE("ym2", ym3812_r, ym3812_w)		/* YM3812 (chip 2) */
-	AM_RANGE(0xe000, 0xe000) AM_READ(soundlatch_r)			/* soundlatch_r */
+static ADDRESS_MAP_START( battlnts_sound_map, AS_PROGRAM, 8, battlnts_state )
+	AM_RANGE(0x0000, 0x7fff) AM_ROM                         /* ROM 777c01.rom */
+	AM_RANGE(0x8000, 0x87ff) AM_RAM                         /* RAM */
+	AM_RANGE(0xa000, 0xa001) AM_DEVREADWRITE_LEGACY("ym1", ym3812_r, ym3812_w)      /* YM3812 (chip 1) */
+	AM_RANGE(0xc000, 0xc001) AM_DEVREADWRITE_LEGACY("ym2", ym3812_r, ym3812_w)      /* YM3812 (chip 2) */
+	AM_RANGE(0xe000, 0xe000) AM_READ(soundlatch_byte_r)         /* soundlatch_byte_r */
 ADDRESS_MAP_END
 
 /*************************************
@@ -97,65 +95,62 @@ static INPUT_PORTS_START( battlnts )
 	/* "No Coin B" = coins produce sound, but no effect on coin counter */
 
 	PORT_START("DSW2")
-	PORT_DIPNAME( 0x03, 0x02, DEF_STR( Lives ) )		PORT_DIPLOCATION("SW2:1,2")
-	PORT_DIPSETTING(	0x03, "2" )
-	PORT_DIPSETTING(	0x02, "3" )
-	PORT_DIPSETTING(	0x01, "5" )
-	PORT_DIPSETTING(	0x00, "7" )
-	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Cabinet ) )		PORT_DIPLOCATION("SW2:3")
-	PORT_DIPSETTING(	0x00, DEF_STR( Upright ) )
-	PORT_DIPSETTING(	0x04, DEF_STR( Cocktail ) )
-	PORT_DIPNAME( 0x18, 0x18, DEF_STR( Bonus_Life ) )	PORT_DIPLOCATION("SW2:4,5")
-	PORT_DIPSETTING(	0x18, "30k And Every 70k" )
-	PORT_DIPSETTING(	0x10, "40k And Every 80k" )
-	PORT_DIPSETTING(	0x08, "40k" )
-	PORT_DIPSETTING(	0x00, "50k" )
-	PORT_DIPNAME( 0x60, 0x40, DEF_STR( Difficulty ) )	PORT_DIPLOCATION("SW2:6,7")
-	PORT_DIPSETTING(	0x60, DEF_STR( Easy ) )
-	PORT_DIPSETTING(	0x40, DEF_STR( Normal ) )
-	PORT_DIPSETTING(	0x20, DEF_STR( Difficult ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Very_Difficult ) )
-	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Demo_Sounds ) )	PORT_DIPLOCATION("SW2:8")
-	PORT_DIPSETTING(	0x80, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x03, 0x02, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW2:1,2")
+	PORT_DIPSETTING(    0x03, "2" )
+	PORT_DIPSETTING(    0x02, "3" )
+	PORT_DIPSETTING(    0x01, "5" )
+	PORT_DIPSETTING(    0x00, "7" )
+	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Cabinet ) )      PORT_DIPLOCATION("SW2:3")
+	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
+	PORT_DIPSETTING(    0x04, DEF_STR( Cocktail ) )
+	PORT_DIPNAME( 0x18, 0x18, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION("SW2:4,5")
+	PORT_DIPSETTING(    0x18, "30k And Every 70k" )
+	PORT_DIPSETTING(    0x10, "40k And Every 80k" )
+	PORT_DIPSETTING(    0x08, "40k" )
+	PORT_DIPSETTING(    0x00, "50k" )
+	PORT_DIPNAME( 0x60, 0x40, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("SW2:6,7")
+	PORT_DIPSETTING(    0x60, DEF_STR( Easy ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( Normal ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( Difficult ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Very_Difficult ) )
+	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW2:8")
+	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("DSW3")
 	KONAMI8_SYSTEM_10
-	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Flip_Screen ) )	PORT_DIPLOCATION("SW3:1")
-	PORT_DIPSETTING(	0x20, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x40, 0x40, "Upright Controls" )		PORT_DIPLOCATION("SW3:2")
-	PORT_DIPSETTING(	0x40, DEF_STR( Single ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Dual ) )
+	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Flip_Screen ) )  PORT_DIPLOCATION("SW3:1")
+	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x40, 0x40, "Upright Controls" )      PORT_DIPLOCATION("SW3:2")
+	PORT_DIPSETTING(    0x40, DEF_STR( Single ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Dual ) )
 	PORT_SERVICE_DIPLOC(0x80, IP_ACTIVE_LOW, "SW3:3" )
 
 	PORT_START("P1")
 	KONAMI8_B1(1)
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Allow_Continue ) ) PORT_DIPLOCATION("SW3:4")
-	PORT_DIPSETTING(	0x80, "3 Times" )
-	PORT_DIPSETTING(	0x00, "5 Times" )
+	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Allow_Continue ) ) PORT_DIPLOCATION("SW3:4")
+	PORT_DIPSETTING(    0x80, "3 Times" )
+	PORT_DIPSETTING(    0x00, "5 Times" )
 
 	PORT_START("P2")
 	KONAMI8_B1_UNK(2)
 INPUT_PORTS_END
 
-static INPUT_PORTS_START( thehustlj )
+static INPUT_PORTS_START( rackemup )
 	PORT_INCLUDE( battlnts )
 
 	PORT_MODIFY("DSW2")
-	PORT_DIPNAME( 0x03, 0x02, "Balls" )					PORT_DIPLOCATION("SW2:1,2")
-	PORT_DIPSETTING(	0x03, "1" )
-	PORT_DIPSETTING(	0x02, "2" )
-	PORT_DIPSETTING(	0x01, "3" )
-	PORT_DIPSETTING(	0x00, "6" )
-	PORT_DIPNAME( 0x18, 0x18, "Time To Aim" )			PORT_DIPLOCATION("SW2:4,5")
-	PORT_DIPSETTING(	0x18, "25s (Stage 1: 30s)" )
-	PORT_DIPSETTING(	0x10, "20s (Stage 1: 25s)" )
-	PORT_DIPSETTING(	0x08, "17s (Stage 1: 22s)" )
-	PORT_DIPSETTING(	0x00, "15s (Stage 1: 20s)" )
-
-	PORT_MODIFY("DSW3")
-	PORT_DIPUNUSED_DIPLOC( 0x40, 0x40, "SW3:2" )
+	PORT_DIPNAME( 0x03, 0x02, "Balls" )                 PORT_DIPLOCATION("SW2:1,2")
+	PORT_DIPSETTING(    0x03, "2" )
+	PORT_DIPSETTING(    0x02, "3" )
+	PORT_DIPSETTING(    0x01, "4" )
+	PORT_DIPSETTING(    0x00, "7" )
+	PORT_DIPNAME( 0x18, 0x10, "Time To Aim" )           PORT_DIPLOCATION("SW2:4,5")
+	PORT_DIPSETTING(    0x18, "25s (Stage 1: 30s)" )
+	PORT_DIPSETTING(    0x10, "20s (Stage 1: 25s)" )
+	PORT_DIPSETTING(    0x08, "17s (Stage 1: 22s)" )
+	PORT_DIPSETTING(    0x00, "15s (Stage 1: 20s)" )
 
 	PORT_MODIFY("P1")
 	KONAMI8_B12(1)
@@ -163,6 +158,13 @@ static INPUT_PORTS_START( thehustlj )
 
 	PORT_MODIFY("P2")
 	KONAMI8_B12_UNK(2)
+INPUT_PORTS_END
+
+static INPUT_PORTS_START( thehustl )
+	PORT_INCLUDE( rackemup )
+
+	PORT_MODIFY("DSW3")
+	PORT_DIPUNUSED_DIPLOC( 0x40, 0x40, "SW3:2" )
 INPUT_PORTS_END
 
 
@@ -174,29 +176,29 @@ INPUT_PORTS_END
 
 static const gfx_layout charlayout =
 {
-	8,8,			/* 8 x 8 characters */
-	0x40000/32, 	/* 8192 characters */
-	4,				/* 4bpp */
+	8,8,            /* 8 x 8 characters */
+	0x40000/32,     /* 8192 characters */
+	4,              /* 4bpp */
 	{ 0, 1, 2, 3 }, /* the four bitplanes are packed in one nibble */
 	{ 2*4, 3*4, 0*4, 1*4, 6*4, 7*4, 4*4, 5*4 },
 	{ 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32 },
-	32*8			/* every character takes 32 consecutive bytes */
+	32*8            /* every character takes 32 consecutive bytes */
 };
 
 static const gfx_layout spritelayout =
 {
-	8,8,			/* 8*8 sprites */
+	8,8,            /* 8*8 sprites */
 	0x40000/32, /* 8192 sprites */
-	4,				/* 4 bpp */
+	4,              /* 4 bpp */
 	{ 0, 1, 2, 3 }, /* the four bitplanes are packed in one nibble */
 	{ 0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4},
 	{ 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32 },
-	32*8			/* every sprite takes 32 consecutive bytes */
+	32*8            /* every sprite takes 32 consecutive bytes */
 };
 
 
 static GFXDECODE_START( battlnts )
-	GFXDECODE_ENTRY( "gfx1", 0, charlayout,		0, 1 ) /* colors  0-15 */
+	GFXDECODE_ENTRY( "gfx1", 0, charlayout,     0, 1 ) /* colors  0-15 */
 	GFXDECODE_ENTRY( "gfx2", 0, spritelayout, 4*16, 1 ) /* colors 64-79 */
 GFXDECODE_END
 
@@ -209,37 +211,35 @@ GFXDECODE_END
 
 static const k007342_interface bladestl_k007342_intf =
 {
-	0,	battlnts_tile_callback	/* gfx_num (for tile creation), callback */
+	0,  battlnts_tile_callback  /* gfx_num (for tile creation), callback */
 };
 
 static const k007420_interface bladestl_k007420_intf =
 {
-	0x3ff,	battlnts_sprite_callback	/* banklimit, callback */
+	0x3ff,  battlnts_sprite_callback    /* banklimit, callback */
 };
 
 
-static MACHINE_START( battlnts )
+void battlnts_state::machine_start()
 {
-	battlnts_state *state = machine.driver_data<battlnts_state>();
-	UINT8 *ROM = machine.region("maincpu")->base();
+	UINT8 *ROM = memregion("maincpu")->base();
 
-	memory_configure_bank(machine, "bank1", 0, 4, &ROM[0x10000], 0x4000);
+	membank("bank1")->configure_entries(0, 4, &ROM[0x10000], 0x4000);
 
-	state->m_audiocpu = machine.device("audiocpu");
-	state->m_k007342 = machine.device("k007342");
-	state->m_k007420 = machine.device("k007420");
+	m_audiocpu = machine().device<cpu_device>("audiocpu");
+	m_k007342 = machine().device("k007342");
+	m_k007420 = machine().device("k007420");
 
-	state->save_item(NAME(state->m_spritebank));
-	state->save_item(NAME(state->m_layer_colorbase));
+	save_item(NAME(m_spritebank));
+	save_item(NAME(m_layer_colorbase));
 }
 
-static MACHINE_RESET( battlnts )
+void battlnts_state::machine_reset()
 {
-	battlnts_state *state = machine.driver_data<battlnts_state>();
 
-	state->m_layer_colorbase[0] = 0;
-	state->m_layer_colorbase[1] = 0;
-	state->m_spritebank = 0;
+	m_layer_colorbase[0] = 0;
+	m_layer_colorbase[1] = 0;
+	m_spritebank = 0;
 }
 
 static MACHINE_CONFIG_START( battlnts, battlnts_state )
@@ -247,22 +247,19 @@ static MACHINE_CONFIG_START( battlnts, battlnts_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", HD6309, XTAL_24MHz / 2 /* 3000000*4? */)
 	MCFG_CPU_PROGRAM_MAP(battlnts_map)
-	MCFG_CPU_VBLANK_INT("screen", battlnts_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", battlnts_state,  battlnts_interrupt)
 
 	MCFG_CPU_ADD("audiocpu", Z80, XTAL_24MHz / 6 /* 3579545? */)
 	MCFG_CPU_PROGRAM_MAP(battlnts_sound_map)
 
-	MCFG_MACHINE_START(battlnts)
-	MCFG_MACHINE_RESET(battlnts)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(battlnts)
+	MCFG_SCREEN_UPDATE_DRIVER(battlnts_state, screen_update_battlnts)
 
 	MCFG_GFXDECODE(battlnts)
 	MCFG_PALETTE_LENGTH(128)
@@ -296,10 +293,25 @@ ROM_START( battlnts )
 	ROM_LOAD( "777_c01.10a",  0x00000, 0x08000, CRC(c21206e9) SHA1(7b133e04be67dc061a186ab0481d848b69b370d7) )
 
 	ROM_REGION( 0x40000, "gfx1", 0 )
-	ROM_LOAD( "777_c04.13a",  0x00000, 0x40000, CRC(45d92347) SHA1(8537b4ccd0a80ea3260ef82fde177f1d65a49c03) ) /* tiles */
+	ROM_LOAD( "777c04.13a",  0x00000, 0x40000, CRC(45d92347) SHA1(8537b4ccd0a80ea3260ef82fde177f1d65a49c03) ) /* tiles */
 
 	ROM_REGION( 0x40000, "gfx2", 0 )
-	ROM_LOAD( "777_c05.13e",  0x00000, 0x40000, CRC(aeee778c) SHA1(fc58ada9c97361d13439b7b0918c947d48402445) ) /* sprites */
+	ROM_LOAD( "777c05.13e",  0x00000, 0x40000, CRC(aeee778c) SHA1(fc58ada9c97361d13439b7b0918c947d48402445) ) /* sprites */
+ROM_END
+
+ROM_START( battlntsa )
+	ROM_REGION( 0x20000, "maincpu", 0 ) /* code + banked roms */
+	ROM_LOAD( "777_f02.7e", 0x08000, 0x08000, CRC(9f1dc5c1) SHA1(86ae471b276d90bbebb97747b673cd5c31ff9043) ) /* fixed ROM */
+	ROM_LOAD( "777_f03.8e", 0x10000, 0x10000, CRC(040d00bf) SHA1(433afd38a80d79d6a95f2ef0b195a92688ace555) ) /* banked ROM */
+
+	ROM_REGION( 0x10000, "audiocpu", 0 ) /* 64k for the sound CPU */
+	ROM_LOAD( "777_c01.10a",  0x00000, 0x08000, CRC(c21206e9) SHA1(7b133e04be67dc061a186ab0481d848b69b370d7) )
+
+	ROM_REGION( 0x40000, "gfx1", 0 )
+	ROM_LOAD( "777c04.13a",  0x00000, 0x40000, CRC(45d92347) SHA1(8537b4ccd0a80ea3260ef82fde177f1d65a49c03) ) /* tiles */
+
+	ROM_REGION( 0x40000, "gfx2", 0 )
+	ROM_LOAD( "777c05.13e",  0x00000, 0x40000, CRC(aeee778c) SHA1(fc58ada9c97361d13439b7b0918c947d48402445) ) /* sprites */
 ROM_END
 
 ROM_START( battlntsj )
@@ -311,10 +323,10 @@ ROM_START( battlntsj )
 	ROM_LOAD( "777_c01.10a",  0x00000, 0x08000, CRC(c21206e9) SHA1(7b133e04be67dc061a186ab0481d848b69b370d7) )
 
 	ROM_REGION( 0x40000, "gfx1", 0 )
-	ROM_LOAD( "777_c04.13a",  0x00000, 0x40000, CRC(45d92347) SHA1(8537b4ccd0a80ea3260ef82fde177f1d65a49c03) ) /* tiles */
+	ROM_LOAD( "777c04.13a",  0x00000, 0x40000, CRC(45d92347) SHA1(8537b4ccd0a80ea3260ef82fde177f1d65a49c03) ) /* tiles */
 
 	ROM_REGION( 0x40000, "gfx2", 0 )
-	ROM_LOAD( "777_c05.13e",  0x00000, 0x40000, CRC(aeee778c) SHA1(fc58ada9c97361d13439b7b0918c947d48402445) ) /* sprites */
+	ROM_LOAD( "777c05.13e",  0x00000, 0x40000, CRC(aeee778c) SHA1(fc58ada9c97361d13439b7b0918c947d48402445) ) /* sprites */
 ROM_END
 
 ROM_START( rackemup )
@@ -383,7 +395,7 @@ static void shuffle( UINT8 *buf, int len )
 		return;
 
 	if (len % 4)
-		fatalerror("shuffle() - not modulo 4");	/* must not happen */
+		fatalerror("shuffle() - not modulo 4\n");   /* must not happen */
 
 	len /= 2;
 
@@ -399,10 +411,10 @@ static void shuffle( UINT8 *buf, int len )
 }
 
 
-static DRIVER_INIT( rackemup )
+DRIVER_INIT_MEMBER(battlnts_state,rackemup)
 {
 	/* rearrange char ROM */
-	shuffle(machine.region("gfx1")->base(), machine.region("gfx1")->bytes());
+	shuffle(machine().root_device().memregion("gfx1")->base(), machine().root_device().memregion("gfx1")->bytes());
 }
 
 
@@ -413,8 +425,9 @@ static DRIVER_INIT( rackemup )
  *
  *************************************/
 
-GAME( 1987, battlnts,  0,        battlnts, battlnts, 0,        ROT90, "Konami", "Battlantis", GAME_SUPPORTS_SAVE )
-GAME( 1987, battlntsj, battlnts, battlnts, battlnts, 0,        ROT90, "Konami", "Battlantis (Japan)", GAME_SUPPORTS_SAVE )
-GAME( 1987, rackemup,  0,        battlnts, thehustlj,rackemup, ROT90, "Konami", "Rack 'em Up", GAME_NO_COCKTAIL | GAME_SUPPORTS_SAVE )
-GAME( 1987, thehustl,  rackemup, battlnts, thehustlj,0,        ROT90, "Konami", "The Hustler (Japan version M)", GAME_NO_COCKTAIL | GAME_SUPPORTS_SAVE )
-GAME( 1987, thehustlj, rackemup, battlnts, thehustlj,0,        ROT90, "Konami", "The Hustler (Japan version J)", GAME_NO_COCKTAIL | GAME_SUPPORTS_SAVE )
+GAME( 1987, battlnts,  0,        battlnts, battlnts, driver_device, 0,        ROT90, "Konami", "Battlantis (program code G)",         GAME_SUPPORTS_SAVE )
+GAME( 1987, battlntsa, battlnts, battlnts, battlnts, driver_device, 0,        ROT90, "Konami", "Battlantis (program code F)",         GAME_SUPPORTS_SAVE )
+GAME( 1987, battlntsj, battlnts, battlnts, battlnts, driver_device, 0,        ROT90, "Konami", "Battlantis (Japan, program code E)",  GAME_SUPPORTS_SAVE )
+GAME( 1987, rackemup,  0,        battlnts, rackemup, battlnts_state, rackemup, ROT90, "Konami", "Rack 'em Up (program code L)",        GAME_NO_COCKTAIL | GAME_SUPPORTS_SAVE )
+GAME( 1987, thehustl,  rackemup, battlnts, thehustl, driver_device, 0,        ROT90, "Konami", "The Hustler (Japan, program code M)", GAME_NO_COCKTAIL | GAME_SUPPORTS_SAVE )
+GAME( 1987, thehustlj, rackemup, battlnts, thehustl, driver_device, 0,        ROT90, "Konami", "The Hustler (Japan, program code J)", GAME_NO_COCKTAIL | GAME_SUPPORTS_SAVE )

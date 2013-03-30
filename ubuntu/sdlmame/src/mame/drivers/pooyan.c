@@ -12,9 +12,10 @@
 #include "cpu/z80/z80.h"
 #include "audio/timeplt.h"
 #include "includes/pooyan.h"
+#include "includes/konamipt.h"
 
 
-#define MASTER_CLOCK		XTAL_18_432MHz
+#define MASTER_CLOCK        XTAL_18_432MHz
 
 
 /*************************************
@@ -23,22 +24,20 @@
  *
  *************************************/
 
-static INTERRUPT_GEN( pooyan_interrupt )
+INTERRUPT_GEN_MEMBER(pooyan_state::pooyan_interrupt)
 {
-	pooyan_state *state = device->machine().driver_data<pooyan_state>();
 
-	if (state->m_irq_enable)
-		device_set_input_line(device, INPUT_LINE_NMI, ASSERT_LINE);
+	if (m_irq_enable)
+		device.execute().set_input_line(INPUT_LINE_NMI, ASSERT_LINE);
 }
 
 
-static WRITE8_HANDLER( irq_enable_w )
+WRITE8_MEMBER(pooyan_state::irq_enable_w)
 {
-	pooyan_state *state = space->machine().driver_data<pooyan_state>();
 
-	state->m_irq_enable = data & 1;
-	if (!state->m_irq_enable)
-		device_set_input_line(state->m_maincpu, INPUT_LINE_NMI, CLEAR_LINE);
+	m_irq_enable = data & 1;
+	if (!m_irq_enable)
+		m_maincpu->set_input_line(INPUT_LINE_NMI, CLEAR_LINE);
 }
 
 
@@ -48,22 +47,22 @@ static WRITE8_HANDLER( irq_enable_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, pooyan_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
-	AM_RANGE(0x8000, 0x83ff) AM_RAM_WRITE(pooyan_colorram_w) AM_BASE_MEMBER(pooyan_state, m_colorram)
-	AM_RANGE(0x8400, 0x87ff) AM_RAM_WRITE(pooyan_videoram_w) AM_BASE_MEMBER(pooyan_state, m_videoram)
+	AM_RANGE(0x8000, 0x83ff) AM_RAM_WRITE(pooyan_colorram_w) AM_SHARE("colorram")
+	AM_RANGE(0x8400, 0x87ff) AM_RAM_WRITE(pooyan_videoram_w) AM_SHARE("videoram")
 	AM_RANGE(0x8800, 0x8fff) AM_RAM
-	AM_RANGE(0x9000, 0x90ff) AM_MIRROR(0x0b00) AM_RAM AM_BASE_MEMBER(pooyan_state, m_spriteram)
-	AM_RANGE(0x9400, 0x94ff) AM_MIRROR(0x0b00) AM_RAM AM_BASE_MEMBER(pooyan_state, m_spriteram2)
+	AM_RANGE(0x9000, 0x90ff) AM_MIRROR(0x0b00) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0x9400, 0x94ff) AM_MIRROR(0x0b00) AM_RAM AM_SHARE("spriteram2")
 	AM_RANGE(0xa000, 0xa000) AM_MIRROR(0x5e7f) AM_READ_PORT("DSW1")
 	AM_RANGE(0xa080, 0xa080) AM_MIRROR(0x5e1f) AM_READ_PORT("IN0")
 	AM_RANGE(0xa0a0, 0xa0a0) AM_MIRROR(0x5e1f) AM_READ_PORT("IN1")
 	AM_RANGE(0xa0c0, 0xa0c0) AM_MIRROR(0x5e1f) AM_READ_PORT("IN2")
 	AM_RANGE(0xa0e0, 0xa0e0) AM_MIRROR(0x5e1f) AM_READ_PORT("DSW0")
 	AM_RANGE(0xa000, 0xa000) AM_MIRROR(0x5e7f) AM_WRITE(watchdog_reset_w)
-	AM_RANGE(0xa100, 0xa100) AM_MIRROR(0x5e7f) AM_WRITE(soundlatch_w)
+	AM_RANGE(0xa100, 0xa100) AM_MIRROR(0x5e7f) AM_WRITE(soundlatch_byte_w)
 	AM_RANGE(0xa180, 0xa180) AM_MIRROR(0x5e78) AM_WRITE(irq_enable_w)
-	AM_RANGE(0xa181, 0xa181) AM_MIRROR(0x5e78) AM_WRITE(timeplt_sh_irqtrigger_w)
+	AM_RANGE(0xa181, 0xa181) AM_MIRROR(0x5e78) AM_WRITE_LEGACY(timeplt_sh_irqtrigger_w)
 	AM_RANGE(0xa183, 0xa183) AM_MIRROR(0x5e78) AM_WRITENOP // ???
 	AM_RANGE(0xa187, 0xa187) AM_MIRROR(0x5e78) AM_WRITE(pooyan_flipscreen_w)
 ADDRESS_MAP_END
@@ -100,55 +99,22 @@ static INPUT_PORTS_START( pooyan )
 	PORT_BIT( 0xe0, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("DSW0")
-	PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( Coin_A ) )
-	PORT_DIPSETTING(    0x02, DEF_STR( 4C_1C ) )
-	PORT_DIPSETTING(    0x05, DEF_STR( 3C_1C ) )
-	PORT_DIPSETTING(    0x08, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(    0x04, DEF_STR( 3C_2C ) )
-	PORT_DIPSETTING(    0x01, DEF_STR( 4C_3C ) )
-	PORT_DIPSETTING(    0x0f, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(    0x03, DEF_STR( 3C_4C ) )
-	PORT_DIPSETTING(    0x07, DEF_STR( 2C_3C ) )
-	PORT_DIPSETTING(    0x0e, DEF_STR( 1C_2C ) )
-	PORT_DIPSETTING(    0x06, DEF_STR( 2C_5C ) )
-	PORT_DIPSETTING(    0x0d, DEF_STR( 1C_3C ) )
-	PORT_DIPSETTING(    0x0c, DEF_STR( 1C_4C ) )
-	PORT_DIPSETTING(    0x0b, DEF_STR( 1C_5C ) )
-	PORT_DIPSETTING(    0x0a, DEF_STR( 1C_6C ) )
-	PORT_DIPSETTING(    0x09, DEF_STR( 1C_7C ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
-	PORT_DIPNAME( 0xf0, 0xf0, DEF_STR( Coin_B ) )
-	PORT_DIPSETTING(    0x20, DEF_STR( 4C_1C ) )
-	PORT_DIPSETTING(    0x50, DEF_STR( 3C_1C ) )
-	PORT_DIPSETTING(    0x80, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(    0x40, DEF_STR( 3C_2C ) )
-	PORT_DIPSETTING(    0x10, DEF_STR( 4C_3C ) )
-	PORT_DIPSETTING(    0xf0, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(    0x30, DEF_STR( 3C_4C ) )
-	PORT_DIPSETTING(    0x70, DEF_STR( 2C_3C ) )
-	PORT_DIPSETTING(    0xe0, DEF_STR( 1C_2C ) )
-	PORT_DIPSETTING(    0x60, DEF_STR( 2C_5C ) )
-	PORT_DIPSETTING(    0xd0, DEF_STR( 1C_3C ) )
-	PORT_DIPSETTING(    0xc0, DEF_STR( 1C_4C ) )
-	PORT_DIPSETTING(    0xb0, DEF_STR( 1C_5C ) )
-	PORT_DIPSETTING(    0xa0, DEF_STR( 1C_6C ) )
-	PORT_DIPSETTING(    0x90, DEF_STR( 1C_7C ) )
-	PORT_DIPSETTING(    0x00, "Invalid" )
+	KONAMI_COINAGE_LOC(DEF_STR( Free_Play ), "Invalid", SW1)
 	/* Invalid = both coin slots disabled */
 
 	PORT_START("DSW1")
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Lives ) )
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW2:1,2")
 	PORT_DIPSETTING(    0x03, "3" )
 	PORT_DIPSETTING(    0x02, "4" )
 	PORT_DIPSETTING(    0x01, "5" )
-	PORT_DIPSETTING(    0x00, "256" )
-	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Cabinet ) )
+	PORT_DIPSETTING(    0x00, "255 (Cheat)" )
+	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Cabinet ) )      PORT_DIPLOCATION("SW2:3")
 	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( Cocktail ) )
-	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Bonus_Life ) )
+	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION("SW2:4")
 	PORT_DIPSETTING(    0x08, "50K 80K+" )
 	PORT_DIPSETTING(    0x00, "30K 70K+" )
-	PORT_DIPNAME( 0x70, 0x70, DEF_STR( Difficulty ) )
+	PORT_DIPNAME( 0x70, 0x70, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("SW2:5,6,7")
 	PORT_DIPSETTING(    0x70, "1 (Easy)" )
 	PORT_DIPSETTING(    0x60, "2" )
 	PORT_DIPSETTING(    0x50, "3" )
@@ -157,7 +123,7 @@ static INPUT_PORTS_START( pooyan )
 	PORT_DIPSETTING(    0x20, "6" )
 	PORT_DIPSETTING(    0x10, "7" )
 	PORT_DIPSETTING(    0x00, "8 (Hard)" )
-	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Demo_Sounds ) )
+	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW2:8")
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 INPUT_PORTS_END
@@ -206,20 +172,18 @@ GFXDECODE_END
  *
  *************************************/
 
-static MACHINE_START( pooyan )
+void pooyan_state::machine_start()
 {
-	pooyan_state *state = machine.driver_data<pooyan_state>();
 
-	state->m_maincpu = machine.device<cpu_device>("maincpu");
+	m_maincpu = machine().device<cpu_device>("maincpu");
 
-	state->save_item(NAME(state->m_irq_enable));
+	save_item(NAME(m_irq_enable));
 }
 
 
-static MACHINE_RESET( pooyan )
+void pooyan_state::machine_reset()
 {
-	pooyan_state *state = machine.driver_data<pooyan_state>();
-	state->m_irq_enable = 0;
+	m_irq_enable = 0;
 }
 
 
@@ -228,24 +192,19 @@ static MACHINE_CONFIG_START( pooyan, pooyan_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", Z80, MASTER_CLOCK/3/2)
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT("screen", pooyan_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", pooyan_state,  pooyan_interrupt)
 
-	MCFG_MACHINE_START(pooyan)
-	MCFG_MACHINE_RESET(pooyan)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(pooyan)
+	MCFG_SCREEN_UPDATE_DRIVER(pooyan_state, screen_update_pooyan)
 
 	MCFG_GFXDECODE(pooyan)
 	MCFG_PALETTE_LENGTH(16*16+16*16)
 
-	MCFG_PALETTE_INIT(pooyan)
-	MCFG_VIDEO_START(pooyan)
 
 	/* sound hardware */
 	MCFG_FRAGMENT_ADD(timeplt_sound)
@@ -341,6 +300,7 @@ ROM_END
  *
  *************************************/
 
-GAME( 1982, pooyan,  0,      pooyan, pooyan, 0, ROT90, "Konami", "Pooyan", GAME_SUPPORTS_SAVE )
-GAME( 1982, pooyans, pooyan, pooyan, pooyan, 0, ROT90, "Konami (Stern Electronics license)", "Pooyan (Stern Electronics)", GAME_SUPPORTS_SAVE )
-GAME( 1982, pootan,  pooyan, pooyan, pooyan, 0, ROT90, "bootleg", "Pootan", GAME_SUPPORTS_SAVE )
+//    YEAR, NAME,    PARENT, MACHINE,INPUT,  INIT,MONITOR,COMPANY,FULLNAME,FLAGS
+GAME( 1982, pooyan,  0,      pooyan, pooyan, driver_device, 0,   ROT90,  "Konami", "Pooyan", GAME_SUPPORTS_SAVE )
+GAME( 1982, pooyans, pooyan, pooyan, pooyan, driver_device, 0,   ROT90,  "Konami (Stern Electronics license)", "Pooyan (Stern Electronics)", GAME_SUPPORTS_SAVE )
+GAME( 1982, pootan,  pooyan, pooyan, pooyan, driver_device, 0,   ROT90,  "bootleg", "Pootan", GAME_SUPPORTS_SAVE )

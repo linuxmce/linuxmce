@@ -512,10 +512,10 @@
 #include "sound/okim6295.h"
 
 
-#define FULL_LOGGING	0
+#define FULL_LOGGING    0
 
-#define CLOCK_8MHz		(8000000)
-#define CLOCK_12MHz		(12000000)
+#define CLOCK_8MHz      (8000000)
+#define CLOCK_12MHz     (12000000)
 
 
 
@@ -525,23 +525,23 @@
  *
  *************************************/
 
-static WRITE8_DEVICE_HANDLER( pia_porta_out );
-static WRITE8_HANDLER( pia_portb_out );
+
+
 
 static const pia6821_interface pia_interface =
 {
-	DEVCB_NULL,		/* port A in */
-	DEVCB_DEVICE_LINE("ticket", ticket_dispenser_line_r),			/* port B in */
-	DEVCB_NULL,		/* line CA1 in */
-	DEVCB_NULL,		/* line CB1 in */
-	DEVCB_NULL,		/* line CA2 in */
-	DEVCB_NULL,		/* line CB2 in */
-	DEVCB_HANDLER(pia_porta_out),		/* port A out */
-	DEVCB_MEMORY_HANDLER("maincpu", PROGRAM, pia_portb_out),		/* port B out */
-	DEVCB_NULL,		/* line CA2 out */
-	DEVCB_NULL,		/* port CB2 out */
-	DEVCB_NULL,		/* IRQA */
-	DEVCB_NULL		/* IRQB */
+	DEVCB_NULL,     /* port A in */
+	DEVCB_DEVICE_LINE_MEMBER("ticket", ticket_dispenser_device, line_r),            /* port B in */
+	DEVCB_NULL,     /* line CA1 in */
+	DEVCB_NULL,     /* line CB1 in */
+	DEVCB_NULL,     /* line CA2 in */
+	DEVCB_NULL,     /* line CB2 in */
+	DEVCB_DRIVER_MEMBER(itech8_state,pia_porta_out),        /* port A out */
+	DEVCB_DRIVER_MEMBER(itech8_state, pia_portb_out),       /* port B out */
+	DEVCB_NULL,     /* line CA2 out */
+	DEVCB_NULL,     /* port CB2 out */
+	DEVCB_NULL,     /* IRQA */
+	DEVCB_NULL      /* IRQB */
 };
 
 
@@ -556,7 +556,7 @@ static const via6522_interface via_interface =
 {
 	/*inputs : A/B         */ DEVCB_NULL, DEVCB_NULL,
 	/*inputs : CA/B1,CA/B2 */ DEVCB_NULL, DEVCB_NULL, DEVCB_NULL, DEVCB_NULL,
-	/*outputs: A/B         */ DEVCB_NULL, DEVCB_MEMORY_HANDLER("maincpu", PROGRAM, pia_portb_out),
+	/*outputs: A/B         */ DEVCB_NULL, DEVCB_DRIVER_MEMBER(itech8_state, pia_portb_out),
 	/*outputs: CA/B1,CA/B2 */ DEVCB_NULL, DEVCB_NULL, DEVCB_NULL, DEVCB_NULL,
 	/*irq                  */ DEVCB_CPU_INPUT_LINE("soundcpu", M6809_FIRQ_LINE)
 };
@@ -583,16 +583,16 @@ void itech8_update_interrupts(running_machine &machine, int periodic, int tms340
 	if (main_cpu_type == M6809 || main_cpu_type == HD6309)
 	{
 		/* just modify lines that have changed */
-		if (periodic != -1) cputag_set_input_line(machine, "maincpu", INPUT_LINE_NMI, periodic ? ASSERT_LINE : CLEAR_LINE);
-		if (tms34061 != -1) cputag_set_input_line(machine, "maincpu", M6809_IRQ_LINE, tms34061 ? ASSERT_LINE : CLEAR_LINE);
-		if (blitter != -1) cputag_set_input_line(machine, "maincpu", M6809_FIRQ_LINE, blitter ? ASSERT_LINE : CLEAR_LINE);
+		if (periodic != -1) machine.device("maincpu")->execute().set_input_line(INPUT_LINE_NMI, periodic ? ASSERT_LINE : CLEAR_LINE);
+		if (tms34061 != -1) machine.device("maincpu")->execute().set_input_line(M6809_IRQ_LINE, tms34061 ? ASSERT_LINE : CLEAR_LINE);
+		if (blitter != -1) machine.device("maincpu")->execute().set_input_line(M6809_FIRQ_LINE, blitter ? ASSERT_LINE : CLEAR_LINE);
 	}
 
 	/* handle the 68000 case */
 	else
 	{
-		cputag_set_input_line(machine, "maincpu", 2, state->m_blitter_int ? ASSERT_LINE : CLEAR_LINE);
-		cputag_set_input_line(machine, "maincpu", 3, state->m_periodic_int ? ASSERT_LINE : CLEAR_LINE);
+		machine.device("maincpu")->execute().set_input_line(2, state->m_blitter_int ? ASSERT_LINE : CLEAR_LINE);
+		machine.device("maincpu")->execute().set_input_line(3, state->m_periodic_int ? ASSERT_LINE : CLEAR_LINE);
 	}
 }
 
@@ -604,32 +604,32 @@ void itech8_update_interrupts(running_machine &machine, int periodic, int tms340
  *
  *************************************/
 
-static TIMER_CALLBACK( irq_off )
+TIMER_CALLBACK_MEMBER(itech8_state::irq_off)
 {
-	itech8_update_interrupts(machine, 0, -1, -1);
+	itech8_update_interrupts(machine(), 0, -1, -1);
 }
 
 
-static INTERRUPT_GEN( generate_nmi )
+INTERRUPT_GEN_MEMBER(itech8_state::generate_nmi)
 {
 	/* signal the NMI */
-	itech8_update_interrupts(device->machine(), 1, -1, -1);
-	device->machine().scheduler().timer_set(attotime::from_usec(1), FUNC(irq_off));
+	itech8_update_interrupts(machine(), 1, -1, -1);
+	machine().scheduler().timer_set(attotime::from_usec(1), timer_expired_delegate(FUNC(itech8_state::irq_off),this));
 
-	if (FULL_LOGGING) logerror("------------ VBLANK (%d) --------------\n", device->machine().primary_screen->vpos());
+	if (FULL_LOGGING) logerror("------------ VBLANK (%d) --------------\n", machine().primary_screen->vpos());
 }
 
 
-static WRITE8_HANDLER( itech8_nmi_ack_w )
+WRITE8_MEMBER(itech8_state::itech8_nmi_ack_w)
 {
 /* doesn't seem to hold for every game (e.g., hstennis) */
-/*  cputag_set_input_line(space->machine(), "maincpu", INPUT_LINE_NMI, CLEAR_LINE);*/
+/*  machine().device("maincpu")->execute().set_input_line(INPUT_LINE_NMI, CLEAR_LINE);*/
 }
 
 
 static void generate_sound_irq(device_t *device, int state)
 {
-	cputag_set_input_line(device->machine(), "soundcpu", M6809_FIRQ_LINE, state ? ASSERT_LINE : CLEAR_LINE);
+	device->machine().device("soundcpu")->execute().set_input_line(M6809_FIRQ_LINE, state ? ASSERT_LINE : CLEAR_LINE);
 }
 
 
@@ -640,32 +640,31 @@ static void generate_sound_irq(device_t *device, int state)
  *
  *************************************/
 
-static TIMER_CALLBACK( behind_the_beam_update );
 
 
-static MACHINE_START( sstrike )
+
+MACHINE_START_MEMBER(itech8_state,sstrike)
 {
 	/* we need to update behind the beam as well */
-	machine.scheduler().timer_set(machine.primary_screen->time_until_pos(0), FUNC(behind_the_beam_update), 32);
+	machine().scheduler().timer_set(machine().primary_screen->time_until_pos(0), timer_expired_delegate(FUNC(itech8_state::behind_the_beam_update),this), 32);
 }
 
-static MACHINE_RESET( itech8 )
+void itech8_state::machine_reset()
 {
-	itech8_state *state = machine.driver_data<itech8_state>();
-	device_type main_cpu_type = machine.device("maincpu")->type();
+	device_type main_cpu_type = machine().device("maincpu")->type();
 
 	/* make sure bank 0 is selected */
 	if (main_cpu_type == M6809 || main_cpu_type == HD6309)
 	{
-		memory_set_bankptr(machine, "bank1", &machine.region("maincpu")->base()[0x4000]);
-		machine.device("maincpu")->reset();
+		membank("bank1")->set_base(&memregion("maincpu")->base()[0x4000]);
+		machine().device("maincpu")->reset();
 	}
 
 	/* set the visible area */
-	if (state->m_visarea)
+	if (m_visarea.width() > 1)
 	{
-		machine.primary_screen->set_visible_area(state->m_visarea->min_x, state->m_visarea->max_x, state->m_visarea->min_y, state->m_visarea->max_y);
-		state->m_visarea = NULL;
+		machine().primary_screen->set_visible_area(m_visarea.min_x, m_visarea.max_x, m_visarea.min_y, m_visarea.max_y);
+		m_visarea.set(0, 0, 0, 0);
 	}
 }
 
@@ -677,20 +676,20 @@ static MACHINE_RESET( itech8 )
  *
  *************************************/
 
-static TIMER_CALLBACK( behind_the_beam_update )
+TIMER_CALLBACK_MEMBER(itech8_state::behind_the_beam_update)
 {
 	int scanline = param >> 8;
 	int interval = param & 0xff;
 
 	/* force a partial update to the current scanline */
-	machine.primary_screen->update_partial(scanline);
+	machine().primary_screen->update_partial(scanline);
 
 	/* advance by the interval, and wrap to 0 */
 	scanline += interval;
 	if (scanline >= 256) scanline = 0;
 
 	/* set a new timer */
-	machine.scheduler().timer_set(machine.primary_screen->time_until_pos(scanline), FUNC(behind_the_beam_update), (scanline << 8) + interval);
+	machine().scheduler().timer_set(machine().primary_screen->time_until_pos(scanline), timer_expired_delegate(FUNC(itech8_state::behind_the_beam_update),this), (scanline << 8) + interval);
 }
 
 
@@ -701,21 +700,21 @@ static TIMER_CALLBACK( behind_the_beam_update )
  *
  *************************************/
 
-static WRITE8_HANDLER( blitter_w )
+WRITE8_MEMBER(itech8_state::blitter_w)
 {
 	/* bit 0x20 on address 7 controls CPU banking */
 	if (offset / 2 == 7)
-		memory_set_bankptr(space->machine(), "bank1", &space->machine().region("maincpu")->base()[0x4000 + 0xc000 * ((data >> 5) & 1)]);
+		membank("bank1")->set_base(&machine().root_device().memregion("maincpu")->base()[0x4000 + 0xc000 * ((data >> 5) & 1)]);
 
 	/* the rest is handled by the video hardware */
 	itech8_blitter_w(space, offset, data);
 }
 
 
-static WRITE8_HANDLER( rimrockn_bank_w )
+WRITE8_MEMBER(itech8_state::rimrockn_bank_w)
 {
 	/* banking is controlled here instead of by the blitter output */
-	memory_set_bankptr(space->machine(), "bank1", &space->machine().region("maincpu")->base()[0x4000 + 0xc000 * (data & 3)]);
+	membank("bank1")->set_base(&machine().root_device().memregion("maincpu")->base()[0x4000 + 0xc000 * (data & 3)]);
 }
 
 
@@ -726,10 +725,9 @@ static WRITE8_HANDLER( rimrockn_bank_w )
  *
  *************************************/
 
-static CUSTOM_INPUT( special_r )
+CUSTOM_INPUT_MEMBER(itech8_state::special_r)
 {
-	itech8_state *state = field->port->machine().driver_data<itech8_state>();
-	return state->m_pia_portb_data & 0x01;
+	return m_pia_portb_data & 0x01;
 }
 
 
@@ -739,41 +737,38 @@ static CUSTOM_INPUT( special_r )
  *
  *************************************/
 
-static WRITE8_DEVICE_HANDLER( pia_porta_out )
+WRITE8_MEMBER(itech8_state::pia_porta_out)
 {
-	itech8_state *state = device->machine().driver_data<itech8_state>();
 	logerror("PIA port A write = %02x\n", data);
-	state->m_pia_porta_data = data;
+	m_pia_porta_data = data;
 }
 
 
-static WRITE8_HANDLER( pia_portb_out )
+WRITE8_MEMBER(itech8_state::pia_portb_out)
 {
-	itech8_state *state = space->machine().driver_data<itech8_state>();
 	logerror("PIA port B write = %02x\n", data);
 
 	/* bit 0 provides feedback to the main CPU */
 	/* bit 4 controls the ticket dispenser */
 	/* bit 5 controls the coin counter */
 	/* bit 6 controls the diagnostic sound LED */
-	state->m_pia_portb_data = data;
-	ticket_dispenser_w(space->machine().device("ticket"), 0, (data & 0x10) << 3);
-	coin_counter_w(space->machine(), 0, (data & 0x20) >> 5);
+	m_pia_portb_data = data;
+	machine().device<ticket_dispenser_device>("ticket")->write(space, 0, (data & 0x10) << 3);
+	coin_counter_w(machine(), 0, (data & 0x20) >> 5);
 }
 
 
-static WRITE8_DEVICE_HANDLER( ym2203_portb_out )
+WRITE8_MEMBER(itech8_state::ym2203_portb_out)
 {
-	itech8_state *state = device->machine().driver_data<itech8_state>();
 	logerror("YM2203 port B write = %02x\n", data);
 
 	/* bit 0 provides feedback to the main CPU */
 	/* bit 5 controls the coin counter */
 	/* bit 6 controls the diagnostic sound LED */
 	/* bit 7 controls the ticket dispenser */
-	state->m_pia_portb_data = data;
-	ticket_dispenser_w(device->machine().device("ticket"), 0, data & 0x80);
-	coin_counter_w(device->machine(), 0, (data & 0x20) >> 5);
+	m_pia_portb_data = data;
+	machine().device<ticket_dispenser_device>("ticket")->write(machine().driver_data()->generic_space(), 0, data & 0x80);
+	coin_counter_w(machine(), 0, (data & 0x20) >> 5);
 }
 
 
@@ -784,36 +779,40 @@ static WRITE8_DEVICE_HANDLER( ym2203_portb_out )
  *
  *************************************/
 
-static TIMER_CALLBACK( delayed_sound_data_w )
+TIMER_CALLBACK_MEMBER(itech8_state::delayed_sound_data_w)
 {
-	itech8_state *state = machine.driver_data<itech8_state>();
-	state->m_sound_data = param;
-	cputag_set_input_line(machine, "soundcpu", M6809_IRQ_LINE, ASSERT_LINE);
+	m_sound_data = param;
+	machine().device("soundcpu")->execute().set_input_line(M6809_IRQ_LINE, ASSERT_LINE);
 }
 
 
-static WRITE8_HANDLER( sound_data_w )
+WRITE8_MEMBER(itech8_state::sound_data_w)
 {
-	space->machine().scheduler().synchronize(FUNC(delayed_sound_data_w), data);
+	machine().scheduler().synchronize(timer_expired_delegate(FUNC(itech8_state::delayed_sound_data_w),this), data);
 }
 
 
-static WRITE8_HANDLER( gtg2_sound_data_w )
+WRITE8_MEMBER(itech8_state::gtg2_sound_data_w)
 {
 	/* on the later GTG2 board, they swizzle the data lines */
 	data = ((data & 0x80) >> 7) |
-	       ((data & 0x5d) << 1) |
-	       ((data & 0x20) >> 3) |
-	       ((data & 0x02) << 5);
-	space->machine().scheduler().synchronize(FUNC(delayed_sound_data_w), data);
+			((data & 0x5d) << 1) |
+			((data & 0x20) >> 3) |
+			((data & 0x02) << 5);
+	machine().scheduler().synchronize(timer_expired_delegate(FUNC(itech8_state::delayed_sound_data_w),this), data);
 }
 
 
-static READ8_HANDLER( sound_data_r )
+READ8_MEMBER(itech8_state::sound_data_r)
 {
-	itech8_state *state = space->machine().driver_data<itech8_state>();
-	cputag_set_input_line(space->machine(), "soundcpu", M6809_IRQ_LINE, CLEAR_LINE);
-	return state->m_sound_data;
+	machine().device("soundcpu")->execute().set_input_line(M6809_IRQ_LINE, CLEAR_LINE);
+	return m_sound_data;
+}
+
+
+WRITE8_MEMBER(itech8_state::grom_bank_w)
+{
+	m_grom_bank = data;
 }
 
 
@@ -824,22 +823,21 @@ static READ8_HANDLER( sound_data_r )
  *
  *************************************/
 
-static WRITE16_HANDLER( grom_bank16_w )
+WRITE16_MEMBER(itech8_state::grom_bank16_w)
 {
-	itech8_state *state = space->machine().driver_data<itech8_state>();
 	if (ACCESSING_BITS_8_15)
-		*state->m_grom_bank = data >> 8;
+		m_grom_bank = data >> 8;
 }
 
 
-static WRITE16_HANDLER( display_page16_w )
+WRITE16_MEMBER(itech8_state::display_page16_w)
 {
 	if (ACCESSING_BITS_8_15)
 		itech8_page_w(space, 0, ~data >> 8);
 }
 
 
-static WRITE16_HANDLER( palette16_w )
+WRITE16_MEMBER(itech8_state::palette16_w)
 {
 	if (ACCESSING_BITS_8_15)
 		itech8_palette_w(space, offset / 8, data >> 8);
@@ -854,15 +852,15 @@ static WRITE16_HANDLER( palette16_w )
  *************************************/
 
 /*------ common layout with TMS34061 at 0000 ------*/
-static ADDRESS_MAP_START( tmslo_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( tmslo_map, AS_PROGRAM, 8, itech8_state )
 	AM_RANGE(0x0000, 0x0fff) AM_READWRITE(itech8_tms34061_r, itech8_tms34061_w)
 	AM_RANGE(0x1100, 0x1100) AM_WRITENOP
 	AM_RANGE(0x1120, 0x1120) AM_WRITE(sound_data_w)
-	AM_RANGE(0x1140, 0x1140) AM_READ_PORT("40") AM_WRITEONLY AM_BASE_MEMBER(itech8_state, m_grom_bank)
+	AM_RANGE(0x1140, 0x1140) AM_READ_PORT("40") AM_WRITE(grom_bank_w)
 	AM_RANGE(0x1160, 0x1160) AM_READ_PORT("60") AM_WRITE(itech8_page_w)
-	AM_RANGE(0x1180, 0x1180) AM_READ_PORT("80") AM_WRITE(tms34061_latch_w)
+	AM_RANGE(0x1180, 0x1180) AM_READ_PORT("80") AM_WRITE_LEGACY(tms34061_latch_w)
 	AM_RANGE(0x11a0, 0x11a0) AM_WRITE(itech8_nmi_ack_w)
-	AM_RANGE(0x11c0, 0x11df) AM_READWRITE(itech8_blitter_r, blitter_w)
+	AM_RANGE(0x11c0, 0x11df) AM_READ(itech8_blitter_r) AM_WRITE(blitter_w)
 	AM_RANGE(0x11e0, 0x11ff) AM_WRITE(itech8_palette_w)
 	AM_RANGE(0x2000, 0x3fff) AM_RAM AM_SHARE("nvram")
 	AM_RANGE(0x4000, 0xffff) AM_ROMBANK("bank1")
@@ -870,15 +868,15 @@ ADDRESS_MAP_END
 
 
 /*------ common layout with TMS34061 at 1000 ------*/
-static ADDRESS_MAP_START( tmshi_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( tmshi_map, AS_PROGRAM, 8, itech8_state )
 	AM_RANGE(0x1000, 0x1fff) AM_READWRITE(itech8_tms34061_r, itech8_tms34061_w)
 	AM_RANGE(0x0100, 0x0100) AM_WRITENOP
 	AM_RANGE(0x0120, 0x0120) AM_WRITE(sound_data_w)
-	AM_RANGE(0x0140, 0x0140) AM_READ_PORT("40") AM_WRITEONLY AM_BASE_MEMBER(itech8_state, m_grom_bank)
+	AM_RANGE(0x0140, 0x0140) AM_READ_PORT("40") AM_WRITE(grom_bank_w)
 	AM_RANGE(0x0160, 0x0160) AM_READ_PORT("60") AM_WRITE(itech8_page_w)
-	AM_RANGE(0x0180, 0x0180) AM_READ_PORT("80") AM_WRITE(tms34061_latch_w)
+	AM_RANGE(0x0180, 0x0180) AM_READ_PORT("80") AM_WRITE_LEGACY(tms34061_latch_w)
 	AM_RANGE(0x01a0, 0x01a0) AM_WRITE(itech8_nmi_ack_w)
-	AM_RANGE(0x01c0, 0x01df) AM_READWRITE(itech8_blitter_r, blitter_w)
+	AM_RANGE(0x01c0, 0x01df) AM_READ(itech8_blitter_r) AM_WRITE(blitter_w)
 	AM_RANGE(0x01e0, 0x01ff) AM_WRITE(itech8_palette_w)
 	AM_RANGE(0x2000, 0x3fff) AM_RAM AM_SHARE("nvram")
 	AM_RANGE(0x4000, 0xffff) AM_ROMBANK("bank1")
@@ -886,15 +884,15 @@ ADDRESS_MAP_END
 
 
 /*------ Golden Tee Golf II 1992 layout ------*/
-static ADDRESS_MAP_START( gtg2_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( gtg2_map, AS_PROGRAM, 8, itech8_state )
 	AM_RANGE(0x0100, 0x0100) AM_READ_PORT("40") AM_WRITE(itech8_nmi_ack_w)
 	AM_RANGE(0x0120, 0x0120) AM_READ_PORT("60") AM_WRITE(itech8_page_w)
 	AM_RANGE(0x0140, 0x015f) AM_WRITE(itech8_palette_w)
 	AM_RANGE(0x0140, 0x0140) AM_READ_PORT("80")
-	AM_RANGE(0x0160, 0x0160) AM_WRITEONLY AM_BASE_MEMBER(itech8_state, m_grom_bank)
-	AM_RANGE(0x0180, 0x019f) AM_READWRITE(itech8_blitter_r, blitter_w)
+	AM_RANGE(0x0160, 0x0160) AM_WRITE(grom_bank_w)
+	AM_RANGE(0x0180, 0x019f) AM_READ(itech8_blitter_r) AM_WRITE(blitter_w)
 	AM_RANGE(0x01c0, 0x01c0) AM_WRITE(gtg2_sound_data_w)
-	AM_RANGE(0x01e0, 0x01e0) AM_WRITE(tms34061_latch_w)
+	AM_RANGE(0x01e0, 0x01e0) AM_WRITE_LEGACY(tms34061_latch_w)
 	AM_RANGE(0x1000, 0x1fff) AM_READWRITE(itech8_tms34061_r, itech8_tms34061_w)
 	AM_RANGE(0x2000, 0x3fff) AM_RAM AM_SHARE("nvram")
 	AM_RANGE(0x4000, 0xffff) AM_ROMBANK("bank1")
@@ -902,14 +900,14 @@ ADDRESS_MAP_END
 
 
 /*------ Ninja Clowns layout ------*/
-static ADDRESS_MAP_START( ninclown_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( ninclown_map, AS_PROGRAM, 16, itech8_state )
 	AM_RANGE(0x000000, 0x00007f) AM_RAM AM_REGION("maincpu", 0)
 	AM_RANGE(0x000080, 0x003fff) AM_RAM AM_SHARE("nvram")
 	AM_RANGE(0x004000, 0x07ffff) AM_ROM
 	AM_RANGE(0x100080, 0x100081) AM_WRITE8(sound_data_w, 0xff00)
-	AM_RANGE(0x100100, 0x100101) AM_READ_PORT("40") AM_WRITE(grom_bank16_w) AM_BASE_MEMBER(itech8_state, m_grom_bank)
+	AM_RANGE(0x100100, 0x100101) AM_READ_PORT("40") AM_WRITE(grom_bank16_w)
 	AM_RANGE(0x100180, 0x100181) AM_READ_PORT("60") AM_WRITE(display_page16_w)
-	AM_RANGE(0x100240, 0x100241) AM_WRITE8(tms34061_latch_w, 0xff00)
+	AM_RANGE(0x100240, 0x100241) AM_WRITE8_LEGACY(tms34061_latch_w, 0xff00)
 	AM_RANGE(0x100280, 0x100281) AM_READ_PORT("80") AM_WRITENOP
 	AM_RANGE(0x100300, 0x10031f) AM_READWRITE8(itech8_blitter_r, itech8_blitter_w, 0xffff)
 	AM_RANGE(0x100380, 0x1003ff) AM_WRITE(palette16_w)
@@ -925,46 +923,46 @@ ADDRESS_MAP_END
  *************************************/
 
 /*------ YM2203-based sound ------*/
-static ADDRESS_MAP_START( sound2203_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound2203_map, AS_PROGRAM, 8, itech8_state )
 	AM_RANGE(0x0000, 0x0000) AM_WRITENOP
 	AM_RANGE(0x1000, 0x1000) AM_READ(sound_data_r)
-	AM_RANGE(0x2000, 0x2001) AM_MIRROR(0x0002) AM_DEVREADWRITE("ymsnd", ym2203_r, ym2203_w)
+	AM_RANGE(0x2000, 0x2001) AM_MIRROR(0x0002) AM_DEVREADWRITE_LEGACY("ymsnd", ym2203_r, ym2203_w)
 	AM_RANGE(0x3000, 0x37ff) AM_RAM
-	AM_RANGE(0x4000, 0x4000) AM_DEVREADWRITE_MODERN("oki", okim6295_device, read, write)
+	AM_RANGE(0x4000, 0x4000) AM_DEVREADWRITE("oki", okim6295_device, read, write)
 	AM_RANGE(0x8000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
 
 /*------ YM2608B-based sound ------*/
-static ADDRESS_MAP_START( sound2608b_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound2608b_map, AS_PROGRAM, 8, itech8_state )
 	AM_RANGE(0x1000, 0x1000) AM_WRITENOP
 	AM_RANGE(0x2000, 0x2000) AM_READ(sound_data_r)
-	AM_RANGE(0x4000, 0x4003) AM_DEVREADWRITE("ymsnd", ym2608_r, ym2608_w)
+	AM_RANGE(0x4000, 0x4003) AM_DEVREADWRITE_LEGACY("ymsnd", ym2608_r, ym2608_w)
 	AM_RANGE(0x6000, 0x67ff) AM_RAM
 	AM_RANGE(0x8000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
 
 /*------ YM3812-based sound ------*/
-static ADDRESS_MAP_START( sound3812_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound3812_map, AS_PROGRAM, 8, itech8_state )
 	AM_RANGE(0x0000, 0x0000) AM_WRITENOP
 	AM_RANGE(0x1000, 0x1000) AM_READ(sound_data_r)
-	AM_RANGE(0x2000, 0x2001) AM_DEVREADWRITE("ymsnd", ym3812_r, ym3812_w)
+	AM_RANGE(0x2000, 0x2001) AM_DEVREADWRITE_LEGACY("ymsnd", ym3812_r, ym3812_w)
 	AM_RANGE(0x3000, 0x37ff) AM_RAM
-	AM_RANGE(0x4000, 0x4000) AM_DEVREADWRITE_MODERN("oki", okim6295_device, read, write)
-	AM_RANGE(0x5000, 0x5003) AM_DEVREADWRITE("pia", pia6821_r, pia6821_w)
+	AM_RANGE(0x4000, 0x4000) AM_DEVREADWRITE("oki", okim6295_device, read, write)
+	AM_RANGE(0x5000, 0x5003) AM_DEVREADWRITE("pia", pia6821_device, read, write)
 	AM_RANGE(0x8000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
 
 /*------ external YM3812-based sound board ------*/
-static ADDRESS_MAP_START( sound3812_external_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound3812_external_map, AS_PROGRAM, 8, itech8_state )
 	AM_RANGE(0x0000, 0x0000) AM_WRITENOP
 	AM_RANGE(0x1000, 0x1000) AM_READ(sound_data_r)
-	AM_RANGE(0x2000, 0x2001) AM_DEVREADWRITE("ymsnd", ym3812_r, ym3812_w)
+	AM_RANGE(0x2000, 0x2001) AM_DEVREADWRITE_LEGACY("ymsnd", ym3812_r, ym3812_w)
 	AM_RANGE(0x3000, 0x37ff) AM_RAM
-	AM_RANGE(0x4000, 0x4000) AM_DEVREADWRITE_MODERN("oki", okim6295_device, read, write)
-	AM_RANGE(0x5000, 0x500f) AM_DEVREADWRITE_MODERN("via6522_0", via6522_device, read, write)
+	AM_RANGE(0x4000, 0x4000) AM_DEVREADWRITE("oki", okim6295_device, read, write)
+	AM_RANGE(0x5000, 0x500f) AM_DEVREADWRITE("via6522_0", via6522_device, read, write)
 	AM_RANGE(0x8000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
@@ -976,14 +974,14 @@ ADDRESS_MAP_END
  *
  *************************************/
 
-static ADDRESS_MAP_START( slikz80_mem_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( slikz80_mem_map, AS_PROGRAM, 8, itech8_state )
 	AM_RANGE(0x0000, 0x7ff) AM_ROM
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( slikz80_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( slikz80_io_map, AS_IO, 8, itech8_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x00) AM_READWRITE(slikz80_port_r, slikz80_port_w)
+	AM_RANGE(0x00, 0x00) AM_READWRITE_LEGACY(slikz80_port_r, slikz80_port_w)
 ADDRESS_MAP_END
 
 
@@ -996,7 +994,7 @@ ADDRESS_MAP_END
 
 static INPUT_PORTS_START( wfortune )
 	PORT_START("40")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(special_r, NULL)	/* input from sound board */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, itech8_state,special_r, NULL) /* input from sound board */
 	PORT_BIT( 0x06, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Cabinet ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( Upright ) )
@@ -1015,17 +1013,17 @@ static INPUT_PORTS_START( wfortune )
 	PORT_START("80")
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("AN_D")	/* analog D */
+	PORT_START("AN_D")  /* analog D */
 	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_SENSITIVITY(75) PORT_KEYDELTA(10) PORT_PLAYER(1)
 
-	PORT_START("AN_F")	/* analog F */
+	PORT_START("AN_F")  /* analog F */
 	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_SENSITIVITY(75) PORT_KEYDELTA(10) PORT_COCKTAIL PORT_PLAYER(2)
 INPUT_PORTS_END
 
 
 static INPUT_PORTS_START( grmatch )
 	PORT_START("40")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(special_r, NULL)	/* input from sound board */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, itech8_state,special_r, NULL) /* input from sound board */
 	PORT_BIT( 0x06, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_DIPNAME( 0x08, 0x08, "Adjustments Lockout" )
 	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
@@ -1063,7 +1061,7 @@ INPUT_PORTS_END
 
 static INPUT_PORTS_START( stratab )
 	PORT_START("40")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(special_r, NULL)	/* input from sound board */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, itech8_state,special_r, NULL) /* input from sound board */
 	PORT_BIT( 0x06, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Cabinet ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( Upright ) )
@@ -1084,30 +1082,30 @@ static INPUT_PORTS_START( stratab )
 	PORT_START("80")
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("AN_C")	/* analog C */
-    PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(25) PORT_KEYDELTA(32) PORT_RESET PORT_PLAYER(1)
+	PORT_START("AN_C")  /* analog C */
+	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(25) PORT_KEYDELTA(32) PORT_RESET PORT_PLAYER(1)
 
-	PORT_START("AN_D")	/* analog D */
-    PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_X ) PORT_SENSITIVITY(25) PORT_KEYDELTA(32) PORT_RESET PORT_REVERSE PORT_PLAYER(1)
+	PORT_START("AN_D")  /* analog D */
+	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_X ) PORT_SENSITIVITY(25) PORT_KEYDELTA(32) PORT_RESET PORT_REVERSE PORT_PLAYER(1)
 
-	PORT_START("AN_E")	/* analog E */
-    PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(25) PORT_KEYDELTA(32) PORT_RESET PORT_COCKTAIL PORT_PLAYER(2)
+	PORT_START("AN_E")  /* analog E */
+	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(25) PORT_KEYDELTA(32) PORT_RESET PORT_COCKTAIL PORT_PLAYER(2)
 
-	PORT_START("AN_F")	/* analog F */
-    PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_X ) PORT_SENSITIVITY(25) PORT_KEYDELTA(32) PORT_RESET PORT_REVERSE PORT_COCKTAIL PORT_PLAYER(2)
+	PORT_START("AN_F")  /* analog F */
+	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_X ) PORT_SENSITIVITY(25) PORT_KEYDELTA(32) PORT_RESET PORT_REVERSE PORT_COCKTAIL PORT_PLAYER(2)
 INPUT_PORTS_END
 
 
-static CUSTOM_INPUT( gtg_mux )
+CUSTOM_INPUT_MEMBER(itech8_state::gtg_mux)
 {
 	const char *tag1 = (const char *)param;
 	const char *tag2 = tag1 + strlen(tag1) + 1;
-	return input_port_read(field->port->machine(), tag1) & input_port_read(field->port->machine(), tag2);
+	return ioport(tag1)->read() & ioport(tag2)->read();
 }
 
 static INPUT_PORTS_START( gtg )
 	PORT_START("40")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(special_r, NULL)	/* input from sound board */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, itech8_state,special_r, NULL) /* input from sound board */
 	PORT_BIT( 0x06, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Cabinet ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( Upright ) )
@@ -1118,7 +1116,7 @@ static INPUT_PORTS_START( gtg )
 	PORT_START("60")
 	/* it is still unknown how the second player inputs are muxed in */
 	/* currently we map both sets of controls to the same inputs */
-	PORT_BIT( 0x1f, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(gtg_mux, "P1\0P2")
+	PORT_BIT( 0x1f, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, itech8_state,gtg_mux, "P1\0P2")
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )
@@ -1144,7 +1142,7 @@ INPUT_PORTS_END
 
 static INPUT_PORTS_START( gtgt )
 	PORT_START("40")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(special_r, NULL)	/* input from sound board */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, itech8_state,special_r, NULL) /* input from sound board */
 	PORT_BIT( 0x7e, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_SERVICE_NO_TOGGLE( 0x80, IP_ACTIVE_LOW )
 
@@ -1161,17 +1159,17 @@ static INPUT_PORTS_START( gtgt )
 	PORT_START("80")
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("AN_C")	/* analog C */
-    PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_X ) PORT_SENSITIVITY(25) PORT_KEYDELTA(32) PORT_RESET PORT_PLAYER(1)
+	PORT_START("AN_C")  /* analog C */
+	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_X ) PORT_SENSITIVITY(25) PORT_KEYDELTA(32) PORT_RESET PORT_PLAYER(1)
 
-	PORT_START("AN_D")	/* analog D */
-    PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(25) PORT_KEYDELTA(32) PORT_RESET PORT_REVERSE PORT_PLAYER(1)
+	PORT_START("AN_D")  /* analog D */
+	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(25) PORT_KEYDELTA(32) PORT_RESET PORT_REVERSE PORT_PLAYER(1)
 INPUT_PORTS_END
 
 
 static INPUT_PORTS_START( gtg2t )
 	PORT_START("40")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(special_r, NULL)	/* input from sound board */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, itech8_state,special_r, NULL) /* input from sound board */
 	PORT_BIT( 0x06, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Cabinet ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( Upright ) )
@@ -1192,23 +1190,23 @@ static INPUT_PORTS_START( gtg2t )
 	PORT_START("80")
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("AN_C")	/* analog C */
-    PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_X ) PORT_SENSITIVITY(25) PORT_KEYDELTA(32) PORT_RESET PORT_PLAYER(1)
+	PORT_START("AN_C")  /* analog C */
+	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_X ) PORT_SENSITIVITY(25) PORT_KEYDELTA(32) PORT_RESET PORT_PLAYER(1)
 
-	PORT_START("AN_D")	/* analog D */
-    PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(25) PORT_KEYDELTA(32) PORT_RESET PORT_REVERSE PORT_PLAYER(1)
+	PORT_START("AN_D")  /* analog D */
+	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(25) PORT_KEYDELTA(32) PORT_RESET PORT_REVERSE PORT_PLAYER(1)
 
-	PORT_START("AN_E")	/* analog E */
-    PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_X ) PORT_SENSITIVITY(25) PORT_KEYDELTA(32) PORT_RESET PORT_COCKTAIL PORT_PLAYER(2)
+	PORT_START("AN_E")  /* analog E */
+	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_X ) PORT_SENSITIVITY(25) PORT_KEYDELTA(32) PORT_RESET PORT_COCKTAIL PORT_PLAYER(2)
 
-	PORT_START("AN_F")	/* analog F */
-    PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(25) PORT_KEYDELTA(32) PORT_RESET PORT_REVERSE PORT_COCKTAIL PORT_PLAYER(2)
+	PORT_START("AN_F")  /* analog F */
+	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(25) PORT_KEYDELTA(32) PORT_RESET PORT_REVERSE PORT_COCKTAIL PORT_PLAYER(2)
 INPUT_PORTS_END
 
 
 static INPUT_PORTS_START( slikshot )
 	PORT_START("40")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(special_r, NULL)	/* input from sound board */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, itech8_state,special_r, NULL) /* input from sound board */
 	PORT_BIT( 0x7e, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_SERVICE_NO_TOGGLE( 0x80, IP_ACTIVE_LOW )
 
@@ -1226,23 +1224,23 @@ static INPUT_PORTS_START( slikshot )
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START("FAKEX") /* fake */
-    PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_X ) PORT_SENSITIVITY(50) PORT_KEYDELTA(10) PORT_RESET PORT_PLAYER(1)
+	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_X ) PORT_SENSITIVITY(50) PORT_KEYDELTA(10) PORT_RESET PORT_PLAYER(1)
 
 	PORT_START("FAKEY") /* fake */
-    PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(50) PORT_KEYDELTA(100) PORT_RESET PORT_REVERSE PORT_PLAYER(1)
+	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(50) PORT_KEYDELTA(100) PORT_RESET PORT_REVERSE PORT_PLAYER(1)
 INPUT_PORTS_END
 
 
 static INPUT_PORTS_START( dynobop )
 	PORT_START("40")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(special_r, NULL)	/* input from sound board */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, itech8_state,special_r, NULL) /* input from sound board */
 	PORT_BIT( 0x7e, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_SERVICE_NO_TOGGLE( 0x80, IP_ACTIVE_LOW )
 
 	PORT_START("60")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* ball gate */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL )   /* ball gate */
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* ball detect */
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_SPECIAL )   /* ball detect */
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN3 )
@@ -1253,16 +1251,16 @@ static INPUT_PORTS_START( dynobop )
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START("FAKEX") /* fake */
-    PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_X ) PORT_SENSITIVITY(50) PORT_KEYDELTA(10) PORT_RESET PORT_PLAYER(1)
+	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_X ) PORT_SENSITIVITY(50) PORT_KEYDELTA(10) PORT_RESET PORT_PLAYER(1)
 
 	PORT_START("FAKEY") /* fake */
-    PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(50) PORT_KEYDELTA(100) PORT_RESET PORT_REVERSE PORT_PLAYER(1)
+	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(50) PORT_KEYDELTA(100) PORT_RESET PORT_REVERSE PORT_PLAYER(1)
 INPUT_PORTS_END
 
 
 static INPUT_PORTS_START( sstrike )
 	PORT_START("40")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(special_r, NULL)	/* input from sound board */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, itech8_state,special_r, NULL) /* input from sound board */
 	PORT_BIT( 0x7e, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_SERVICE_NO_TOGGLE( 0x80, IP_ACTIVE_LOW )
 
@@ -1280,16 +1278,16 @@ static INPUT_PORTS_START( sstrike )
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START("FAKEX") /* fake */
-    PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_X ) PORT_SENSITIVITY(50) PORT_KEYDELTA(10) PORT_RESET PORT_PLAYER(1)
+	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_X ) PORT_SENSITIVITY(50) PORT_KEYDELTA(10) PORT_RESET PORT_PLAYER(1)
 
 	PORT_START("FAKEY") /* fake */
-    PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(50) PORT_KEYDELTA(100) PORT_RESET PORT_REVERSE PORT_PLAYER(1)
+	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(50) PORT_KEYDELTA(100) PORT_RESET PORT_REVERSE PORT_PLAYER(1)
 INPUT_PORTS_END
 
 
 static INPUT_PORTS_START( pokrdice )
 	PORT_START("40")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(special_r, NULL)	/* input from sound board */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, itech8_state,special_r, NULL) /* input from sound board */
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_NAME("Lower Right") PORT_CODE(KEYCODE_3_PAD)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Cabinet ) )
@@ -1318,12 +1316,12 @@ INPUT_PORTS_END
 
 static INPUT_PORTS_START( hstennis )
 	PORT_START("40")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(special_r, NULL)	/* input from sound board */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, itech8_state,special_r, NULL) /* input from sound board */
 	PORT_BIT( 0x06, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Cabinet ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Cocktail ) )
-	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )	/* see code at fbb5 */
+	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )  /* see code at fbb5 */
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x10, DEF_STR( On ) )
 	PORT_BIT( 0x60, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -1353,9 +1351,9 @@ INPUT_PORTS_END
 
 static INPUT_PORTS_START( arlingtn )
 	PORT_START("40")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(special_r, NULL)	/* input from sound board */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, itech8_state,special_r, NULL) /* input from sound board */
 	PORT_BIT( 0x06, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )	/* see code at e23c */
+	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )  /* see code at e23c */
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( On ) )
 	PORT_BIT( 0x70, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -1384,7 +1382,7 @@ INPUT_PORTS_END
 
 static INPUT_PORTS_START( peggle )
 	PORT_START("40")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(special_r, NULL)	/* input from sound board */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, itech8_state,special_r, NULL) /* input from sound board */
 	PORT_BIT( 0x7e, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_SERVICE_NO_TOGGLE( 0x80, IP_ACTIVE_LOW )
 
@@ -1406,7 +1404,7 @@ INPUT_PORTS_END
 
 static INPUT_PORTS_START( pegglet )
 	PORT_START("40")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(special_r, NULL)	/* input from sound board */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, itech8_state,special_r, NULL) /* input from sound board */
 	PORT_BIT( 0x7e, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_SERVICE_NO_TOGGLE( 0x80, IP_ACTIVE_LOW )
 
@@ -1421,16 +1419,16 @@ static INPUT_PORTS_START( pegglet )
 	PORT_BIT( 0x7e, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )
 
-	PORT_START("AN_D")		/* analog D */
+	PORT_START("AN_D")      /* analog D */
 	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_SENSITIVITY(50) PORT_KEYDELTA(10) PORT_RESET PORT_PLAYER(1)
 INPUT_PORTS_END
 
 
 static INPUT_PORTS_START( neckneck )
 	PORT_START("40")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(special_r, NULL)	/* input from sound board */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, itech8_state,special_r, NULL) /* input from sound board */
 	PORT_BIT( 0x06, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Unknown ) )	/* see code at e23c */
+	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Unknown ) )  /* see code at e23c */
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( On ) )
 	PORT_BIT( 0x70, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -1469,12 +1467,12 @@ static INPUT_PORTS_START( rimrockn )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_COIN3 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN4 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(special_r, NULL)	/* input from sound board */
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, itech8_state,special_r, NULL) /* input from sound board */
 
 	PORT_START("80")
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("161")	/* special 161 */
+	PORT_START("161")   /* special 161 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_NAME("P1 Pass") PORT_PLAYER(1)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_NAME("P1 Shoot") PORT_PLAYER(1)
@@ -1484,7 +1482,7 @@ static INPUT_PORTS_START( rimrockn )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(1)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START1 )
 
-	PORT_START("162")	/* special 162 */
+	PORT_START("162")   /* special 162 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_NAME("P2 Pass") PORT_PLAYER(2)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_NAME("P2 Shoot") PORT_PLAYER(2)
@@ -1494,7 +1492,7 @@ static INPUT_PORTS_START( rimrockn )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(2)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 )
 
-	PORT_START("163")	/* special 163 */
+	PORT_START("163")   /* special 163 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_NAME("P3 Shoot") PORT_PLAYER(3)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_NAME("P3 Pass") PORT_PLAYER(3)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -1504,7 +1502,7 @@ static INPUT_PORTS_START( rimrockn )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(3)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START3 )
 
-	PORT_START("164")	/* special 164 */
+	PORT_START("164")   /* special 164 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_NAME("P4 Shoot") PORT_PLAYER(4)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_NAME("P4 Pass") PORT_PLAYER(4)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -1514,7 +1512,7 @@ static INPUT_PORTS_START( rimrockn )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(4)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START4 )
 
-	PORT_START("165")	/* special 165 */
+	PORT_START("165")   /* special 165 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_SERVICE2 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_SERVICE3 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE4 )
@@ -1590,17 +1588,17 @@ static INPUT_PORTS_START( gtg2 )
 	PORT_BIT( 0x78, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 )
 
-	PORT_START("AN_C")	/* analog C */
-    PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_X ) PORT_SENSITIVITY(25) PORT_KEYDELTA(32) PORT_RESET PORT_PLAYER(1)
+	PORT_START("AN_C")  /* analog C */
+	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_X ) PORT_SENSITIVITY(25) PORT_KEYDELTA(32) PORT_RESET PORT_PLAYER(1)
 
-	PORT_START("AN_D")	/* analog D */
-    PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(25) PORT_KEYDELTA(32) PORT_RESET PORT_REVERSE PORT_PLAYER(1)
+	PORT_START("AN_D")  /* analog D */
+	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(25) PORT_KEYDELTA(32) PORT_RESET PORT_REVERSE PORT_PLAYER(1)
 
-	PORT_START("AN_E")	/* analog E */
-    PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_X ) PORT_SENSITIVITY(25) PORT_KEYDELTA(32) PORT_RESET PORT_COCKTAIL PORT_PLAYER(2)
+	PORT_START("AN_E")  /* analog E */
+	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_X ) PORT_SENSITIVITY(25) PORT_KEYDELTA(32) PORT_RESET PORT_COCKTAIL PORT_PLAYER(2)
 
-	PORT_START("AN_F")	/* analog F */
-    PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(25) PORT_KEYDELTA(32) PORT_RESET PORT_REVERSE PORT_COCKTAIL PORT_PLAYER(2)
+	PORT_START("AN_F")  /* analog F */
+	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(25) PORT_KEYDELTA(32) PORT_RESET PORT_REVERSE PORT_COCKTAIL PORT_PLAYER(2)
 INPUT_PORTS_END
 
 
@@ -1646,9 +1644,9 @@ static const ym2203_interface ym2203_config =
 		DEVCB_NULL,
 		DEVCB_NULL,
 		DEVCB_NULL,
-		DEVCB_HANDLER(ym2203_portb_out)
+		DEVCB_DRIVER_MEMBER(itech8_state,ym2203_portb_out)
 	},
-	generate_sound_irq
+	DEVCB_LINE(generate_sound_irq)
 };
 
 
@@ -1660,7 +1658,7 @@ static const ym2608_interface ym2608b_config =
 		DEVCB_NULL,
 		DEVCB_NULL,
 		DEVCB_NULL,
-		DEVCB_HANDLER(ym2203_portb_out),
+		DEVCB_DRIVER_MEMBER(itech8_state,ym2203_portb_out),
 	},
 	generate_sound_irq
 };
@@ -1686,22 +1684,19 @@ static MACHINE_CONFIG_START( itech8_core_lo, itech8_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6809, CLOCK_8MHz/4)
 	MCFG_CPU_PROGRAM_MAP(tmslo_map)
-	MCFG_CPU_VBLANK_INT("screen", generate_nmi)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", itech8_state,  generate_nmi)
 
-	MCFG_MACHINE_RESET(itech8)
 	MCFG_NVRAM_ADD_RANDOM_FILL("nvram")
 
-	MCFG_TICKET_DISPENSER_ADD("ticket", 200, TICKET_MOTOR_ACTIVE_HIGH, TICKET_STATUS_ACTIVE_LOW)
+	MCFG_TICKET_DISPENSER_ADD("ticket", attotime::from_msec(200), TICKET_MOTOR_ACTIVE_HIGH, TICKET_STATUS_ACTIVE_LOW)
 
 	/* video hardware */
-	MCFG_TLC34076_ADD("tlc34076", TLC34076_6_BIT)
+	MCFG_TLC34076_ADD("tlc34076", tlc34076_6_bit_intf)
 
 	MCFG_VIDEO_ATTRIBUTES(VIDEO_UPDATE_BEFORE_VBLANK)
-	MCFG_VIDEO_START(itech8)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
 	MCFG_SCREEN_SIZE(512, 263)
 
 	/* sound hardware */
@@ -1796,7 +1791,7 @@ static MACHINE_CONFIG_DERIVED( wfortune, itech8_core_hi )
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
 	MCFG_SCREEN_VISIBLE_AREA(0, 255, 0, 239)
-	MCFG_SCREEN_UPDATE(itech8_2layer)
+	MCFG_SCREEN_UPDATE_DRIVER(itech8_state, screen_update_itech8_2layer)
 MACHINE_CONFIG_END
 
 
@@ -1808,10 +1803,10 @@ static MACHINE_CONFIG_DERIVED( grmatch, itech8_core_hi )
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
 	MCFG_SCREEN_VISIBLE_AREA(0, 399, 0, 239)
-	MCFG_SCREEN_UPDATE(itech8_grmatch)
+	MCFG_SCREEN_UPDATE_DRIVER(itech8_state, screen_update_itech8_grmatch)
 
 	/* palette updater */
-	MCFG_TIMER_ADD_SCANLINE("palette", grmatch_palette_update, "screen", 0, 0)
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("palette", itech8_state, grmatch_palette_update, "screen", 0, 0)
 MACHINE_CONFIG_END
 
 
@@ -1823,7 +1818,7 @@ static MACHINE_CONFIG_DERIVED( stratab_hi, itech8_core_hi )
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
 	MCFG_SCREEN_VISIBLE_AREA(0, 255, 0, 239)
-	MCFG_SCREEN_UPDATE(itech8_2layer)
+	MCFG_SCREEN_UPDATE_DRIVER(itech8_state, screen_update_itech8_2layer)
 MACHINE_CONFIG_END
 
 
@@ -1835,7 +1830,7 @@ static MACHINE_CONFIG_DERIVED( stratab_lo, itech8_core_lo )
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
 	MCFG_SCREEN_VISIBLE_AREA(0, 255, 0, 239)
-	MCFG_SCREEN_UPDATE(itech8_2layer)
+	MCFG_SCREEN_UPDATE_DRIVER(itech8_state, screen_update_itech8_2layer)
 MACHINE_CONFIG_END
 
 
@@ -1851,8 +1846,8 @@ static MACHINE_CONFIG_DERIVED( slikshot_hi, itech8_core_hi )
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
 	MCFG_SCREEN_VISIBLE_AREA(0, 255, 0, 239)
-	MCFG_SCREEN_UPDATE(slikshot)
-	MCFG_VIDEO_START(slikshot)
+	MCFG_SCREEN_UPDATE_DRIVER(itech8_state, screen_update_slikshot)
+	MCFG_VIDEO_START_OVERRIDE(itech8_state,slikshot)
 MACHINE_CONFIG_END
 
 
@@ -1868,8 +1863,8 @@ static MACHINE_CONFIG_DERIVED( slikshot_lo, itech8_core_lo )
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
 	MCFG_SCREEN_VISIBLE_AREA(0, 255, 0, 239)
-	MCFG_SCREEN_UPDATE(slikshot)
-	MCFG_VIDEO_START(slikshot)
+	MCFG_SCREEN_UPDATE_DRIVER(itech8_state, screen_update_slikshot)
+	MCFG_VIDEO_START_OVERRIDE(itech8_state,slikshot)
 MACHINE_CONFIG_END
 
 
@@ -1881,14 +1876,14 @@ static MACHINE_CONFIG_DERIVED( slikshot_lo_noz80, itech8_core_lo )
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
 	MCFG_SCREEN_VISIBLE_AREA(0, 255, 0, 239)
-	MCFG_SCREEN_UPDATE(itech8_2page)
+	MCFG_SCREEN_UPDATE_DRIVER(itech8_state, screen_update_itech8_2page)
 MACHINE_CONFIG_END
 
 
 static MACHINE_CONFIG_DERIVED( sstrike, slikshot_lo )
 
 	/* basic machine hardware */
-	MCFG_MACHINE_START(sstrike)
+	MCFG_MACHINE_START_OVERRIDE(itech8_state,sstrike)
 
 MACHINE_CONFIG_END
 
@@ -1901,7 +1896,7 @@ static MACHINE_CONFIG_DERIVED( hstennis_hi, itech8_core_hi )
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
 	MCFG_SCREEN_VISIBLE_AREA(0, 399, 0, 239)
-	MCFG_SCREEN_UPDATE(itech8_2page_large)
+	MCFG_SCREEN_UPDATE_DRIVER(itech8_state, screen_update_itech8_2page_large)
 MACHINE_CONFIG_END
 
 
@@ -1913,7 +1908,7 @@ static MACHINE_CONFIG_DERIVED( hstennis_lo, itech8_core_lo )
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
 	MCFG_SCREEN_VISIBLE_AREA(0, 399, 0, 239)
-	MCFG_SCREEN_UPDATE(itech8_2page_large)
+	MCFG_SCREEN_UPDATE_DRIVER(itech8_state, screen_update_itech8_2page_large)
 MACHINE_CONFIG_END
 
 
@@ -1924,12 +1919,12 @@ static MACHINE_CONFIG_DERIVED( rimrockn, itech8_core_hi )
 
 	MCFG_CPU_REPLACE("maincpu", HD6309, CLOCK_12MHz)
 	MCFG_CPU_PROGRAM_MAP(tmshi_map)
-	MCFG_CPU_VBLANK_INT("screen", generate_nmi)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", itech8_state,  generate_nmi)
 
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
 	MCFG_SCREEN_VISIBLE_AREA(24, 375, 0, 239)
-	MCFG_SCREEN_UPDATE(itech8_2page_large)
+	MCFG_SCREEN_UPDATE_DRIVER(itech8_state, screen_update_itech8_2page_large)
 MACHINE_CONFIG_END
 
 
@@ -1940,12 +1935,12 @@ static MACHINE_CONFIG_DERIVED( ninclown, itech8_core_hi )
 
 	MCFG_CPU_REPLACE("maincpu", M68000, CLOCK_12MHz)
 	MCFG_CPU_PROGRAM_MAP(ninclown_map)
-	MCFG_CPU_VBLANK_INT("screen", generate_nmi)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", itech8_state,  generate_nmi)
 
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
 	MCFG_SCREEN_VISIBLE_AREA(64, 423, 0, 239)
-	MCFG_SCREEN_UPDATE(itech8_2page_large)
+	MCFG_SCREEN_UPDATE_DRIVER(itech8_state, screen_update_itech8_2page_large)
 MACHINE_CONFIG_END
 
 
@@ -1960,7 +1955,7 @@ static MACHINE_CONFIG_DERIVED( gtg2, itech8_core_lo )
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
 	MCFG_SCREEN_VISIBLE_AREA(0, 255, 0, 239)
-	MCFG_SCREEN_UPDATE(itech8_2layer)
+	MCFG_SCREEN_UPDATE_DRIVER(itech8_state, screen_update_itech8_2layer)
 MACHINE_CONFIG_END
 
 
@@ -2072,20 +2067,20 @@ ROM_END
 
 ROM_START( gtg )
 	ROM_REGION( 0x1c000, "maincpu", 0 )
-	ROM_LOAD( "u5.bin", 0x04000, 0x4000, CRC(61984272) SHA1(be735f8576fb2cccc0e9e6ea6f2fd54b6c0b3bb3) )
-	ROM_CONTINUE(       0x10000, 0xc000 )
+	ROM_LOAD( "gtg.bin_3.1.u5", 0x04000, 0x4000, CRC(61984272) SHA1(be735f8576fb2cccc0e9e6ea6f2fd54b6c0b3bb3) ) /* Joystick version */
+	ROM_CONTINUE(        0x10000, 0xc000 )
 	ROM_COPY( "maincpu", 0x14000, 0x8000, 0x8000 )
 
 	ROM_REGION( 0x10000, "soundcpu", 0 )
 	ROM_LOAD( "u27.bin", 0x08000, 0x8000, CRC(358d2440) SHA1(7b09350c89f9d2c86dc187d8812bbf26b576a38f) )
 
 	ROM_REGION( 0xc0000, "grom", 0 )
-	ROM_LOAD( "grom0.bin", 0x00000, 0x20000, CRC(a29c688a) SHA1(32dbb996a5e4c23cfd44b79312ac4a767658f20a) )
-	ROM_LOAD( "grom1.bin", 0x20000, 0x20000, CRC(b52a23f6) SHA1(092961acf47875179b44342e2dd8955670e67ea2) )
-	ROM_LOAD( "grom2.bin", 0x40000, 0x20000, CRC(9b8e3a61) SHA1(1b5682b1328d6c97b604fb71512e8f72322a688f) )
-	ROM_LOAD( "grom3.bin", 0x60000, 0x20000, CRC(b6e9fb15) SHA1(c1b28ea911696cb4ed56bfba212848693530b59f) )
-	ROM_LOAD( "grom4.bin", 0x80000, 0x20000, CRC(faa16729) SHA1(5d46cddda66b6d23c9ebdf2fb4cebce15586b4ad) )
-	ROM_LOAD( "grom5.bin", 0xa0000, 0x20000, CRC(5b393314) SHA1(9e314a75ea52373369904915ec786f09eee725a9) )
+	ROM_LOAD( "golf-grom0.grom0", 0x00000, 0x20000, CRC(a29c688a) SHA1(32dbb996a5e4c23cfd44b79312ac4a767658f20a) )
+	ROM_LOAD( "golf-grom1.grom1", 0x20000, 0x20000, CRC(b52a23f6) SHA1(092961acf47875179b44342e2dd8955670e67ea2) )
+	ROM_LOAD( "golf-grom2.grom2", 0x40000, 0x20000, CRC(9b8e3a61) SHA1(1b5682b1328d6c97b604fb71512e8f72322a688f) )
+	ROM_LOAD( "golf-grom3.grom3", 0x60000, 0x20000, CRC(b6e9fb15) SHA1(c1b28ea911696cb4ed56bfba212848693530b59f) )
+	ROM_LOAD( "golf-grom4.grom4", 0x80000, 0x20000, CRC(faa16729) SHA1(5d46cddda66b6d23c9ebdf2fb4cebce15586b4ad) )
+	ROM_LOAD( "grom5.bin",        0xa0000, 0x20000, CRC(5b393314) SHA1(9e314a75ea52373369904915ec786f09eee725a9) )
 
 	ROM_REGION( 0x40000, "oki", 0 )
 	ROM_LOAD( "srom0.bin", 0x00000, 0x20000, CRC(1cccbfdf) SHA1(546059fea2e7cd5627a666d80b1fc3ed8fcc0762) )
@@ -2093,41 +2088,41 @@ ROM_END
 
 ROM_START( gtgt )
 	ROM_REGION( 0x1c000, "maincpu", 0 )
-	ROM_LOAD( "gtg.bim_2.0.u5",     0x4000, 0x4000, CRC(4c907166) SHA1(338a599645fa49c9fcbfbe5ba3431dafffddacc7) )
-	ROM_CONTINUE(       0x10000, 0xc000 )
+	ROM_LOAD( "gtg.bin_2.0.u5", 0x4000, 0x4000, CRC(4c907166) SHA1(338a599645fa49c9fcbfbe5ba3431dafffddacc7) ) /* Trackball version */
+	ROM_CONTINUE(        0x10000, 0xc000 )
 	ROM_COPY( "maincpu", 0x14000, 0x8000, 0x8000 )
 
 	ROM_REGION( 0x10000, "soundcpu", 0 )
 	ROM_LOAD( "golf-snd.u27", 0x08000, 0x8000, CRC(f6a7429b) SHA1(0fb378606c12c3543aa1ff603101e262acb9c692) )
 
 	ROM_REGION( 0xc0000, "grom", 0 )
-	ROM_LOAD( "grom0.bin", 0x00000, 0x20000, CRC(a29c688a) SHA1(32dbb996a5e4c23cfd44b79312ac4a767658f20a) )
-	ROM_LOAD( "grom1.bin", 0x20000, 0x20000, CRC(b52a23f6) SHA1(092961acf47875179b44342e2dd8955670e67ea2) )
-	ROM_LOAD( "grom2.bin", 0x40000, 0x20000, CRC(9b8e3a61) SHA1(1b5682b1328d6c97b604fb71512e8f72322a688f) )
-	ROM_LOAD( "grom3.bin", 0x60000, 0x20000, CRC(b6e9fb15) SHA1(c1b28ea911696cb4ed56bfba212848693530b59f) )
-	ROM_LOAD( "grom4.bin", 0x80000, 0x20000, CRC(faa16729) SHA1(5d46cddda66b6d23c9ebdf2fb4cebce15586b4ad) )
-	ROM_LOAD( "golf-grom5", 0xa0000, 0x10000, CRC(62a523d2) SHA1(431f89fa044bf0ed3c197745d9c1a61f666da658) )
+	ROM_LOAD( "golf-grom0.grom0", 0x00000, 0x20000, CRC(a29c688a) SHA1(32dbb996a5e4c23cfd44b79312ac4a767658f20a) )
+	ROM_LOAD( "golf-grom1.grom1", 0x20000, 0x20000, CRC(b52a23f6) SHA1(092961acf47875179b44342e2dd8955670e67ea2) )
+	ROM_LOAD( "golf-grom2.grom2", 0x40000, 0x20000, CRC(9b8e3a61) SHA1(1b5682b1328d6c97b604fb71512e8f72322a688f) )
+	ROM_LOAD( "golf-grom3.grom3", 0x60000, 0x20000, CRC(b6e9fb15) SHA1(c1b28ea911696cb4ed56bfba212848693530b59f) )
+	ROM_LOAD( "golf-grom4.grom4", 0x80000, 0x20000, CRC(faa16729) SHA1(5d46cddda66b6d23c9ebdf2fb4cebce15586b4ad) )
+	ROM_LOAD( "golf-grom5.grom5", 0xa0000, 0x10000, CRC(62a523d2) SHA1(431f89fa044bf0ed3c197745d9c1a61f666da658) )
 
 	ROM_REGION( 0x40000, "oki", 0 )
-	ROM_LOAD( "srom0.bin", 0x00000, 0x20000, CRC(1cccbfdf) SHA1(546059fea2e7cd5627a666d80b1fc3ed8fcc0762) )
+	ROM_LOAD( "golf-srom0.bin", 0x00000, 0x20000, CRC(1cccbfdf) SHA1(546059fea2e7cd5627a666d80b1fc3ed8fcc0762) )
 ROM_END
 
 ROM_START( gtgt1 )
 	ROM_REGION( 0x1c000, "maincpu", 0 )
-	ROM_LOAD( "pgm-u5.512", 0x04000, 0x4000, CRC(ec70b510) SHA1(318984d77eb1df6258b855781ae1c9a09aa74f15) )
-	ROM_CONTINUE(       0x10000, 0xc000 )
+	ROM_LOAD( "gtg.bin_1.0.u5", 0x04000, 0x4000, CRC(ec70b510) SHA1(318984d77eb1df6258b855781ae1c9a09aa74f15) ) /* Trackball version */
+	ROM_CONTINUE(        0x10000, 0xc000 )
 	ROM_COPY( "maincpu", 0x14000, 0x8000, 0x8000 )
 
 	ROM_REGION( 0x10000, "soundcpu", 0 )
 	ROM_LOAD( "snd-u27.256", 0x08000, 0x8000, CRC(471da557) SHA1(32bfe450a42d9eb6c14edcfa2b4e33f65a11126e) )
 
 	ROM_REGION( 0xb0000, "grom", 0 )
-	ROM_LOAD( "grom0.bin", 0x00000, 0x20000, CRC(a29c688a) SHA1(32dbb996a5e4c23cfd44b79312ac4a767658f20a) )
-	ROM_LOAD( "grom1.bin", 0x20000, 0x20000, CRC(b52a23f6) SHA1(092961acf47875179b44342e2dd8955670e67ea2) )
-	ROM_LOAD( "grom2.bin", 0x40000, 0x20000, CRC(9b8e3a61) SHA1(1b5682b1328d6c97b604fb71512e8f72322a688f) )
-	ROM_LOAD( "grom3.bin", 0x60000, 0x20000, CRC(b6e9fb15) SHA1(c1b28ea911696cb4ed56bfba212848693530b59f) )
-	ROM_LOAD( "grom4.bin", 0x80000, 0x20000, CRC(faa16729) SHA1(5d46cddda66b6d23c9ebdf2fb4cebce15586b4ad) )
-	ROM_LOAD( "grom5.512", 0xa0000, 0x10000, CRC(44b47015) SHA1(5dde4c932a697b51fe02eab8d948889b3fe7baff) )
+	ROM_LOAD( "golf-grom0.grom0", 0x00000, 0x20000, CRC(a29c688a) SHA1(32dbb996a5e4c23cfd44b79312ac4a767658f20a) )
+	ROM_LOAD( "golf-grom1.grom1", 0x20000, 0x20000, CRC(b52a23f6) SHA1(092961acf47875179b44342e2dd8955670e67ea2) )
+	ROM_LOAD( "golf-grom2.grom2", 0x40000, 0x20000, CRC(9b8e3a61) SHA1(1b5682b1328d6c97b604fb71512e8f72322a688f) )
+	ROM_LOAD( "golf-grom3.grom3", 0x60000, 0x20000, CRC(b6e9fb15) SHA1(c1b28ea911696cb4ed56bfba212848693530b59f) )
+	ROM_LOAD( "golf-grom4.grom4", 0x80000, 0x20000, CRC(faa16729) SHA1(5d46cddda66b6d23c9ebdf2fb4cebce15586b4ad) )
+	ROM_LOAD( "grom5.512",        0xa0000, 0x10000, CRC(44b47015) SHA1(5dde4c932a697b51fe02eab8d948889b3fe7baff) )
 
 	ROM_REGION( 0x40000, "oki", 0 )
 	ROM_LOAD( "srom0.010", 0x00000, 0x20000, CRC(d041e0c9) SHA1(1d90f37071d92c714ff69ab2b0337c7c66147995) )
@@ -2137,8 +2132,8 @@ ROM_END
 ROM_START( gtg2t )
 	/* banks are loaded in the opposite order from the others, */
 	ROM_REGION( 0x1c000, "maincpu", 0 )
-	ROM_LOAD( "u5",     0x10000, 0x4000, CRC(c7b3a9f3) SHA1(5edaca6fd6ee58bd1676dc9b2c86da4dd2f51687) )
-	ROM_CONTINUE(       0x04000, 0xc000 )
+	ROM_LOAD( "gtg2.bin_1.1.u5", 0x10000, 0x4000, CRC(c7b3a9f3) SHA1(5edaca6fd6ee58bd1676dc9b2c86da4dd2f51687) ) /* Trackball version */
+	ROM_CONTINUE(        0x04000, 0xc000 )
 	ROM_COPY( "maincpu", 0x8000, 0x14000, 0x8000 )
 
 	ROM_REGION( 0x10000, "soundcpu", 0 )
@@ -2163,8 +2158,8 @@ ROM_END
 
 ROM_START( gtg2j )
 	ROM_REGION( 0x1c000, "maincpu", 0 )
-	ROM_LOAD( "u5.bin", 0x04000, 0x4000, CRC(9c95ceaa) SHA1(d9fd2b2419c026822a07d2ba51d6ab40b7cd0d49) )
-	ROM_CONTINUE(       0x10000, 0xc000 )
+	ROM_LOAD( "gtg2.bin_1.0.u5", 0x04000, 0x4000, CRC(9c95ceaa) SHA1(d9fd2b2419c026822a07d2ba51d6ab40b7cd0d49) ) /* Joystick version */
+	ROM_CONTINUE(        0x10000, 0xc000 )
 	ROM_COPY( "maincpu", 0x14000, 0x8000, 0x8000 )
 
 	ROM_REGION( 0x10000, "soundcpu", 0 )
@@ -2455,17 +2450,17 @@ ROM_END
 
 ROM_START( rimrockn )
 	ROM_REGION( 0x34000, "maincpu", 0 )
-	ROM_LOAD( "u5-2_2",    0x04000, 0x4000, CRC(97777683) SHA1(0998dde26daaa2d2b78e83647e03ba01b0ef31f2) )
-	ROM_CONTINUE(          0x10000, 0x4000 )
-	ROM_CONTINUE(          0x1c000, 0x4000 )
-	ROM_CONTINUE(          0x28000, 0xc000 )
-	ROM_CONTINUE(          0x2c000, 0x8000 )
+	ROM_LOAD( "rrb.bin_2.2.u5", 0x04000, 0x4000, CRC(97777683) SHA1(0998dde26daaa2d2b78e83647e03ba01b0ef31f2) )
+	ROM_CONTINUE(        0x10000, 0x4000 )
+	ROM_CONTINUE(        0x1c000, 0x4000 )
+	ROM_CONTINUE(        0x28000, 0xc000 )
+	ROM_CONTINUE(        0x2c000, 0x8000 )
 	ROM_COPY( "maincpu", 0x2c000, 0x08000, 0x8000 )
 	ROM_COPY( "maincpu", 0x2c000, 0x14000, 0x8000 )
 	ROM_COPY( "maincpu", 0x2c000, 0x20000, 0x8000 )
 
 	ROM_REGION( 0x10000, "soundcpu", 0 )
-	ROM_LOAD( "u27", 0x08000, 0x8000, CRC(59f87f0e) SHA1(46f38aca35a7c2faee227b4c950d20a6076c6fa7) )
+	ROM_LOAD( "rrbsndv11.u27", 0x08000, 0x8000, CRC(59f87f0e) SHA1(46f38aca35a7c2faee227b4c950d20a6076c6fa7) ) /* Labeled as RRBSND V1.1 U27 */
 
 	ROM_REGION( 0x100000, "grom", 0 )
 	ROM_LOAD( "grom00",       0x00000, 0x40000, CRC(3eacbad9) SHA1(bff1ec6a24ccf983434e4e9453c30f36fa397534) )
@@ -2485,17 +2480,17 @@ ROM_END
 
 ROM_START( rimrockn20 )
 	ROM_REGION( 0x34000, "maincpu", 0 )
-	ROM_LOAD( "rrb.bin",   0x04000, 0x4000, CRC(7e9d5545) SHA1(2aa028b3f5d05bec4ee289e7d39eaad30b3d4d5f) )
-	ROM_CONTINUE(          0x10000, 0x4000 )
-	ROM_CONTINUE(          0x1c000, 0x4000 )
-	ROM_CONTINUE(          0x28000, 0xc000 )
-	ROM_CONTINUE(          0x2c000, 0x8000 )
+	ROM_LOAD( "rrb.bin_2.0.u5", 0x04000, 0x4000, CRC(7e9d5545) SHA1(2aa028b3f5d05bec4ee289e7d39eaad30b3d4d5f) )
+	ROM_CONTINUE(        0x10000, 0x4000 )
+	ROM_CONTINUE(        0x1c000, 0x4000 )
+	ROM_CONTINUE(        0x28000, 0xc000 )
+	ROM_CONTINUE(        0x2c000, 0x8000 )
 	ROM_COPY( "maincpu", 0x2c000, 0x08000, 0x8000 )
 	ROM_COPY( "maincpu", 0x2c000, 0x14000, 0x8000 )
 	ROM_COPY( "maincpu", 0x2c000, 0x20000, 0x8000 )
 
 	ROM_REGION( 0x10000, "soundcpu", 0 )
-	ROM_LOAD( "u27", 0x08000, 0x8000, CRC(59f87f0e) SHA1(46f38aca35a7c2faee227b4c950d20a6076c6fa7) )
+	ROM_LOAD( "rrbsndv11.u27", 0x08000, 0x8000, CRC(59f87f0e) SHA1(46f38aca35a7c2faee227b4c950d20a6076c6fa7) ) /* Labeled as RRBSND V1.1 U27 */
 
 	ROM_REGION( 0x100000, "grom", 0 )
 	ROM_LOAD( "grom00",       0x00000, 0x40000, CRC(3eacbad9) SHA1(bff1ec6a24ccf983434e4e9453c30f36fa397534) )
@@ -2510,17 +2505,17 @@ ROM_END
 
 ROM_START( rimrockn16 )
 	ROM_REGION( 0x34000, "maincpu", 0 )
-	ROM_LOAD( "rrbbv16.u5",0x04000, 0x4000, CRC(999cd502) SHA1(8ad0d641a9f853eff27be1d4de04ab86b9275d57) )
-	ROM_CONTINUE(          0x10000, 0x4000 )
-	ROM_CONTINUE(          0x1c000, 0x4000 )
-	ROM_CONTINUE(          0x28000, 0xc000 )
-	ROM_CONTINUE(          0x2c000, 0x8000 )
+	ROM_LOAD( "rrb.bin_1.6.u5",0x04000, 0x4000, CRC(999cd502) SHA1(8ad0d641a9f853eff27be1d4de04ab86b9275d57) )
+	ROM_CONTINUE(        0x10000, 0x4000 )
+	ROM_CONTINUE(        0x1c000, 0x4000 )
+	ROM_CONTINUE(        0x28000, 0xc000 )
+	ROM_CONTINUE(        0x2c000, 0x8000 )
 	ROM_COPY( "maincpu", 0x2c000, 0x08000, 0x8000 )
 	ROM_COPY( "maincpu", 0x2c000, 0x14000, 0x8000 )
 	ROM_COPY( "maincpu", 0x2c000, 0x20000, 0x8000 )
 
 	ROM_REGION( 0x10000, "soundcpu", 0 )
-	ROM_LOAD( "u27", 0x08000, 0x8000, CRC(59f87f0e) SHA1(46f38aca35a7c2faee227b4c950d20a6076c6fa7) )
+	ROM_LOAD( "rrbsndv11.u27", 0x08000, 0x8000, CRC(59f87f0e) SHA1(46f38aca35a7c2faee227b4c950d20a6076c6fa7) ) /* Labeled as RRBSND V1.1 U27 */
 
 	ROM_REGION( 0x100000, "grom", 0 )
 	ROM_LOAD( "grom00", 0x00000, 0x40000, CRC(3eacbad9) SHA1(bff1ec6a24ccf983434e4e9453c30f36fa397534) )
@@ -2535,11 +2530,11 @@ ROM_END
 
 ROM_START( rimrockn12 )
 	ROM_REGION( 0x34000, "maincpu", 0 )
-	ROM_LOAD( "rrbbv12.u5",0x04000, 0x4000, CRC(661761a6) SHA1(7224b1eac2fd0969d70657448ab241a433143df4) )
-	ROM_CONTINUE(          0x10000, 0x4000 )
-	ROM_CONTINUE(          0x1c000, 0x4000 )
-	ROM_CONTINUE(          0x28000, 0xc000 )
-	ROM_CONTINUE(          0x2c000, 0x8000 )
+	ROM_LOAD( "rrb.bin_1.2.u5",0x04000, 0x4000, CRC(661761a6) SHA1(7224b1eac2fd0969d70657448ab241a433143df4) )
+	ROM_CONTINUE(        0x10000, 0x4000 )
+	ROM_CONTINUE(        0x1c000, 0x4000 )
+	ROM_CONTINUE(        0x28000, 0xc000 )
+	ROM_CONTINUE(        0x2c000, 0x8000 )
 	ROM_COPY( "maincpu", 0x2c000, 0x08000, 0x8000 )
 	ROM_COPY( "maincpu", 0x2c000, 0x14000, 0x8000 )
 	ROM_COPY( "maincpu", 0x2c000, 0x20000, 0x8000 )
@@ -2582,7 +2577,7 @@ ROM_END
 
 ROM_START( gpgolf )
 	ROM_REGION( 0x1c000, "maincpu", 0 )
-	ROM_LOAD( "gpgjv1_1.bin",   0x04000, 0x4000, CRC(631e77e0) SHA1(847ba1e00d31441620a2a1f45a9aa58df84bde8b) )
+	ROM_LOAD( "gpgv1_1.bin",   0x04000, 0x4000, CRC(631e77e0) SHA1(847ba1e00d31441620a2a1f45a9aa58df84bde8b) ) /* Joystick version */
 	ROM_CONTINUE(       0x10000, 0xc000 )
 	ROM_COPY( "maincpu", 0x14000, 0x8000, 0x8000 )
 
@@ -2602,7 +2597,7 @@ ROM_END
 ROM_START( gtg2 )
 	/* banks are loaded in the opposite order from the others, */
 	ROM_REGION( 0x1c000, "maincpu", 0 )
-	ROM_LOAD( "u5.2",   0x10000, 0x4000, CRC(4a61580f) SHA1(7c64648d47418fbcc0f9b5bd91f88856209bc0f5) )
+	ROM_LOAD( "gtg2_v2_2.u5",   0x10000, 0x4000, CRC(4a61580f) SHA1(7c64648d47418fbcc0f9b5bd91f88856209bc0f5) ) /* Trackball version */
 	ROM_CONTINUE(       0x04000, 0xc000 )
 	ROM_COPY( "maincpu", 0x8000, 0x14000, 0x8000 )
 
@@ -2632,74 +2627,66 @@ ROM_END
  *
  *************************************/
 
-static DRIVER_INIT( grmatch )
+DRIVER_INIT_MEMBER(itech8_state,grmatch)
 {
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x0160, 0x0160, FUNC(grmatch_palette_w));
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x0180, 0x0180, FUNC(grmatch_xscroll_w));
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->unmap_write(0x01e0, 0x01ff);
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0x0160, 0x0160, write8_delegate(FUNC(itech8_state::grmatch_palette_w),this));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0x0180, 0x0180, write8_delegate(FUNC(itech8_state::grmatch_xscroll_w),this));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).unmap_write(0x01e0, 0x01ff);
 }
 
 
-static DRIVER_INIT( slikshot )
+DRIVER_INIT_MEMBER(itech8_state,slikshot)
 {
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler (0x0180, 0x0180, FUNC(slikshot_z80_r));
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler (0x01cf, 0x01cf, FUNC(slikshot_z80_control_r));
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x01cf, 0x01cf, FUNC(slikshot_z80_control_w));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_legacy_read_handler (0x0180, 0x0180, FUNC(slikshot_z80_r));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_legacy_read_handler (0x01cf, 0x01cf, FUNC(slikshot_z80_control_r));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_legacy_write_handler(0x01cf, 0x01cf, FUNC(slikshot_z80_control_w));
 }
 
 
-static DRIVER_INIT( sstrike )
+DRIVER_INIT_MEMBER(itech8_state,sstrike)
 {
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler (0x1180, 0x1180, FUNC(slikshot_z80_r));
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler (0x11cf, 0x11cf, FUNC(slikshot_z80_control_r));
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x11cf, 0x11cf, FUNC(slikshot_z80_control_w));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_legacy_read_handler (0x1180, 0x1180, FUNC(slikshot_z80_r));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_legacy_read_handler (0x11cf, 0x11cf, FUNC(slikshot_z80_control_r));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_legacy_write_handler(0x11cf, 0x11cf, FUNC(slikshot_z80_control_w));
 }
 
 
-static DRIVER_INIT( hstennis )
+DRIVER_INIT_MEMBER(itech8_state,hstennis)
 {
-	itech8_state *state = machine.driver_data<itech8_state>();
-	static const rectangle visible = { 0, 375, 0, 239 };
-	state->m_visarea = &visible;
+	m_visarea.set(0, 375, 0, 239);
 }
 
 
-static DRIVER_INIT( arligntn )
+DRIVER_INIT_MEMBER(itech8_state,arligntn)
 {
-	itech8_state *state = machine.driver_data<itech8_state>();
-	static const rectangle visible = { 16, 389, 0, 239 };
-	state->m_visarea = &visible;
+	m_visarea.set(16, 389, 0, 239);
 }
 
 
-static DRIVER_INIT( peggle )
+DRIVER_INIT_MEMBER(itech8_state,peggle)
 {
-	itech8_state *state = machine.driver_data<itech8_state>();
-	static const rectangle visible = { 18, 367, 0, 239 };
-	state->m_visarea = &visible;
+	m_visarea.set(18, 367, 0, 239);
 }
 
 
-static DRIVER_INIT( neckneck )
+DRIVER_INIT_MEMBER(itech8_state,neckneck)
 {
-	itech8_state *state = machine.driver_data<itech8_state>();
-	static const rectangle visible = { 8, 375, 0, 239 };
-	state->m_visarea = &visible;
+	m_visarea.set(8, 375, 0, 239);
 }
 
 
-static DRIVER_INIT( rimrockn )
+DRIVER_INIT_MEMBER(itech8_state,rimrockn)
 {
 	/* additional input ports */
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_read_port (0x0161, 0x0161, "161");
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_read_port (0x0162, 0x0162, "162");
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_read_port (0x0163, 0x0163, "163");
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_read_port (0x0164, 0x0164, "164");
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_read_port (0x0165, 0x0165, "165");
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_port (0x0161, 0x0161, "161");
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_port (0x0162, 0x0162, "162");
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_port (0x0163, 0x0163, "163");
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_port (0x0164, 0x0164, "164");
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_port (0x0165, 0x0165, "165");
 
 	/* different banking mechanism (disable the old one) */
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x01a0, 0x01a0, FUNC(rimrockn_bank_w));
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x01c0, 0x01df, FUNC(itech8_blitter_w));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0x01a0, 0x01a0, write8_delegate(FUNC(itech8_state::rimrockn_bank_w),this));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0x01c0, 0x01df, write8_delegate(FUNC(itech8_state::itech8_blitter_w),this));
 }
 
 
@@ -2711,46 +2698,46 @@ static DRIVER_INIT( rimrockn )
  *************************************/
 
 /* Wheel of Fortune-style PCB */
-GAME( 1989, wfortune, 0,        wfortune,          wfortune, 0,        ROT0,   "GameTek", "Wheel Of Fortune", 0 )
-GAME( 1989, wfortunea,wfortune, wfortune,          wfortune, 0,        ROT0,   "GameTek", "Wheel Of Fortune (alternate)", 0 )
+GAME( 1989, wfortune, 0,        wfortune,          wfortune, driver_device, 0,        ROT0,   "GameTek", "Wheel Of Fortune (set 1)", 0 )
+GAME( 1989, wfortunea,wfortune, wfortune,          wfortune, driver_device, 0,        ROT0,   "GameTek", "Wheel Of Fortune (set 2)", 0 )
 
 /* Grudge Match-style PCB */
-GAME( 1989, grmatch,  0,        grmatch,           grmatch,  grmatch,  ROT0,   "Yankee Game Technology", "Grudge Match (Yankee Game Technology)", 0 )
+GAME( 1989, grmatch,  0,        grmatch,           grmatch, itech8_state,  grmatch,  ROT0,   "Yankee Game Technology", "Grudge Match (Yankee Game Technology)", 0 )
 
 /* Strata Bowling-style PCB */
-GAME( 1990, stratab,  0,        stratab_hi,        stratab,  0,        ROT270, "Strata/Incredible Technologies", "Strata Bowling (V3)", 0 )
-GAME( 1990, stratab1, stratab,  stratab_hi,        stratab,  0,        ROT270, "Strata/Incredible Technologies", "Strata Bowling (V1)", 0 )
-GAME( 1990, gtg,      0,        stratab_hi,        gtg,      0,        ROT0,   "Strata/Incredible Technologies", "Golden Tee Golf (Joystick, v3.1)", 0 )
-GAME( 1989, gtgt,     gtg,      stratab_hi,        gtgt,     0,        ROT0,   "Strata/Incredible Technologies", "Golden Tee Golf (Trackball, v2.0)", 0 )
-GAME( 1989, gtgt1,    gtg,      stratab_hi,        gtgt,     0,        ROT0,   "Strata/Incredible Technologies", "Golden Tee Golf (Trackball, v1.0)", 0 )
-GAME( 1989, gtg2t,    gtg2,     stratab_hi,        gtg2t,    0,        ROT0,   "Strata/Incredible Technologies", "Golden Tee Golf II (Trackball, V1.1)", 0 )
-GAME( 1991, gtg2j,    gtg2,     stratab_lo,        gtg,      0,        ROT0,   "Strata/Incredible Technologies", "Golden Tee Golf II (Joystick, V1.0)", 0 )
+GAME( 1990, stratab,  0,        stratab_hi,        stratab, driver_device,  0,        ROT270, "Strata/Incredible Technologies", "Strata Bowling (V3)", 0 )
+GAME( 1990, stratab1, stratab,  stratab_hi,        stratab, driver_device,  0,        ROT270, "Strata/Incredible Technologies", "Strata Bowling (V1)", 0 )
+GAME( 1990, gtg,      0,        stratab_hi,        gtg, driver_device,      0,        ROT0,   "Strata/Incredible Technologies", "Golden Tee Golf (Joystick, v3.1)", 0 )
+GAME( 1989, gtgt,     gtg,      stratab_hi,        gtgt, driver_device,     0,        ROT0,   "Strata/Incredible Technologies", "Golden Tee Golf (Trackball, v2.0)", 0 )
+GAME( 1989, gtgt1,    gtg,      stratab_hi,        gtgt, driver_device,     0,        ROT0,   "Strata/Incredible Technologies", "Golden Tee Golf (Trackball, v1.0)", 0 )
+GAME( 1989, gtg2t,    gtg2,     stratab_hi,        gtg2t, driver_device,    0,        ROT0,   "Strata/Incredible Technologies", "Golden Tee Golf II (Trackball, V1.1)", 0 )
+GAME( 1991, gtg2j,    gtg2,     stratab_lo,        gtg, driver_device,      0,        ROT0,   "Strata/Incredible Technologies", "Golden Tee Golf II (Joystick, V1.0)", 0 )
 
 /* Slick Shot-style PCB */
-GAME( 1990, slikshot,  0,        slikshot_hi,       slikshot, slikshot, ROT90,  "Grand Products/Incredible Technologies", "Slick Shot (V2.2)", GAME_MECHANICAL )
-GAME( 1990, slikshot17,slikshot, slikshot_hi,       slikshot, slikshot, ROT90,  "Grand Products/Incredible Technologies", "Slick Shot (V1.7)", GAME_MECHANICAL )
-GAME( 1990, slikshot16,slikshot, slikshot_hi,       slikshot, slikshot, ROT90,  "Grand Products/Incredible Technologies", "Slick Shot (V1.6)", GAME_MECHANICAL )
-GAME( 1990, dynobop,   0,        slikshot_hi,       dynobop,  slikshot, ROT90,  "Grand Products/Incredible Technologies", "Dyno Bop", GAME_MECHANICAL )
-GAME( 1990, sstrike,   0,        sstrike,           sstrike,  sstrike,  ROT270, "Strata/Incredible Technologies", "Super Strike Bowling", GAME_MECHANICAL )
-GAME( 1991, pokrdice,  0,        slikshot_lo_noz80, pokrdice, 0,        ROT90,  "Strata/Incredible Technologies", "Poker Dice", 0 )
+GAME( 1990, slikshot,  0,        slikshot_hi,       slikshot, itech8_state, slikshot, ROT90,  "Grand Products/Incredible Technologies", "Slick Shot (V2.2)", GAME_MECHANICAL )
+GAME( 1990, slikshot17,slikshot, slikshot_hi,       slikshot, itech8_state, slikshot, ROT90,  "Grand Products/Incredible Technologies", "Slick Shot (V1.7)", GAME_MECHANICAL )
+GAME( 1990, slikshot16,slikshot, slikshot_hi,       slikshot, itech8_state, slikshot, ROT90,  "Grand Products/Incredible Technologies", "Slick Shot (V1.6)", GAME_MECHANICAL )
+GAME( 1990, dynobop,   0,        slikshot_hi,       dynobop, itech8_state,  slikshot, ROT90,  "Grand Products/Incredible Technologies", "Dyno Bop", GAME_MECHANICAL )
+GAME( 1990, sstrike,   0,        sstrike,           sstrike, itech8_state,  sstrike,  ROT270, "Strata/Incredible Technologies", "Super Strike Bowling", GAME_MECHANICAL )
+GAME( 1991, pokrdice,  0,        slikshot_lo_noz80, pokrdice, driver_device, 0,        ROT90,  "Strata/Incredible Technologies", "Poker Dice", 0 )
 
 /* Hot Shots Tennis-style PCB */
-GAME( 1990, hstennis,  0,        hstennis_hi,       hstennis, hstennis, ROT90,  "Strata/Incredible Technologies", "Hot Shots Tennis (V1.1)", 0 )
-GAME( 1990, hstennis10,hstennis, hstennis_hi,       hstennis, hstennis, ROT90,  "Strata/Incredible Technologies", "Hot Shots Tennis (V1.0)", 0 )
-GAME( 1991, arlingtn,  0,        hstennis_hi,       arlingtn, arligntn, ROT0,   "Strata/Incredible Technologies", "Arlington Horse Racing (v1.21-D)", 0 )
-GAME( 1991, peggle,    0,        hstennis_lo,       peggle,   peggle,   ROT90,  "Strata/Incredible Technologies", "Peggle (Joystick, v1.0)", 0 )
-GAME( 1991, pegglet,   peggle,   hstennis_lo,       pegglet,  peggle,   ROT90,  "Strata/Incredible Technologies", "Peggle (Trackball, v1.0)", 0 )
-GAME( 1992, neckneck,  0,        hstennis_lo,       neckneck, neckneck, ROT0,   "Bundra Games/Incredible Technologies", "Neck-n-Neck (v1.2)", 0 )
+GAME( 1990, hstennis,  0,        hstennis_hi,       hstennis, itech8_state, hstennis, ROT90,  "Strata/Incredible Technologies", "Hot Shots Tennis (V1.1)", 0 )
+GAME( 1990, hstennis10,hstennis, hstennis_hi,       hstennis, itech8_state, hstennis, ROT90,  "Strata/Incredible Technologies", "Hot Shots Tennis (V1.0)", 0 )
+GAME( 1991, arlingtn,  0,        hstennis_hi,       arlingtn, itech8_state, arligntn, ROT0,   "Strata/Incredible Technologies", "Arlington Horse Racing (v1.21-D)", 0 )
+GAME( 1991, peggle,    0,        hstennis_lo,       peggle, itech8_state,   peggle,   ROT90,  "Strata/Incredible Technologies", "Peggle (Joystick, v1.0)", 0 )
+GAME( 1991, pegglet,   peggle,   hstennis_lo,       pegglet, itech8_state,  peggle,   ROT90,  "Strata/Incredible Technologies", "Peggle (Trackball, v1.0)", 0 )
+GAME( 1992, neckneck,  0,        hstennis_lo,       neckneck, itech8_state, neckneck, ROT0,   "Bundra Games/Incredible Technologies", "Neck-n-Neck (v1.2)", 0 )
 
 /* Rim Rockin' Basketball-style PCB */
-GAME( 1991, rimrockn,   0,        rimrockn,          rimrockn, rimrockn, ROT0,   "Strata/Incredible Technologies", "Rim Rockin' Basketball (V2.2)", 0 )
-GAME( 1991, rimrockn20, rimrockn, rimrockn,          rimrockn, rimrockn, ROT0,   "Strata/Incredible Technologies", "Rim Rockin' Basketball (V2.0)", 0 )
-GAME( 1991, rimrockn16, rimrockn, rimrockn,          rimrockn, rimrockn, ROT0,   "Strata/Incredible Technologies", "Rim Rockin' Basketball (V1.6)", 0 )
-GAME( 1991, rimrockn12, rimrockn, rimrockn,          rimrockn, rimrockn, ROT0,   "Strata/Incredible Technologies", "Rim Rockin' Basketball (V1.2)", 0 )
+GAME( 1991, rimrockn,   0,        rimrockn,          rimrockn, itech8_state, rimrockn, ROT0,   "Strata/Incredible Technologies", "Rim Rockin' Basketball (V2.2)", 0 )
+GAME( 1991, rimrockn20, rimrockn, rimrockn,          rimrockn, itech8_state, rimrockn, ROT0,   "Strata/Incredible Technologies", "Rim Rockin' Basketball (V2.0)", 0 )
+GAME( 1991, rimrockn16, rimrockn, rimrockn,          rimrockn, itech8_state, rimrockn, ROT0,   "Strata/Incredible Technologies", "Rim Rockin' Basketball (V1.6)", 0 )
+GAME( 1991, rimrockn12, rimrockn, rimrockn,          rimrockn, itech8_state, rimrockn, ROT0,   "Strata/Incredible Technologies", "Rim Rockin' Basketball (V1.2)", 0 )
 
 /* Ninja Clowns-style PCB */
-GAME( 1991, ninclown, 0,        ninclown,          ninclown, 0,        ROT0,   "Strata/Incredible Technologies", "Ninja Clowns (08/27/91)", 0 )
+GAME( 1991, ninclown, 0,        ninclown,          ninclown, driver_device, 0,        ROT0,   "Strata/Incredible Technologies", "Ninja Clowns (08/27/91)", 0 )
 
 /* Golden Tee Golf II-style PCB */
-GAME( 1992, gpgolf,   0,        gtg2,              gpgolf,   0,        ROT0,   "Strata/Incredible Technologies", "Golden Par Golf (Joystick, V1.1)", 0 )
-GAME( 1992, gtg2,     0,        gtg2,              gtg2,     0,        ROT0,   "Strata/Incredible Technologies", "Golden Tee Golf II (Trackball, V2.2)", 0 )
+GAME( 1992, gpgolf,   0,        gtg2,              gpgolf, driver_device,   0,        ROT0,   "Strata/Incredible Technologies", "Golden Par Golf (Joystick, V1.1)", 0 )
+GAME( 1992, gtg2,     0,        gtg2,              gtg2, driver_device,     0,        ROT0,   "Strata/Incredible Technologies", "Golden Tee Golf II (Trackball, V2.2)", 0 )

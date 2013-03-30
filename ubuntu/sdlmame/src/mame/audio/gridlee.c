@@ -24,7 +24,7 @@ struct gridlee_sound_state
 
 	/* sound streaming variables */
 	sound_stream *m_stream;
-	device_t *m_samples;
+	samples_device *m_samples;
 	double m_freq_to_step;
 	UINT8 m_sound_data[24];
 };
@@ -41,7 +41,7 @@ INLINE gridlee_sound_state *get_safe_token( device_t *device )
 	assert(device != NULL);
 	assert(device->type() == GRIDLEE);
 
-	return (gridlee_sound_state *)downcast<legacy_device_base *>(device)->token();
+	return (gridlee_sound_state *)downcast<gridlee_sound_device *>(device)->token();
 }
 
 static STREAM_UPDATE( gridlee_stream_update )
@@ -74,35 +74,17 @@ static DEVICE_START( gridlee_sound )
 	/* allocate the stream */
 	state->m_stream = device->machine().sound().stream_alloc(*device, 0, 1, machine.sample_rate(), NULL, gridlee_stream_update);
 
-	state->m_samples = device->machine().device("samples");
+	state->m_samples = device->machine().device<samples_device>("samples");
 
 	state->m_freq_to_step = (double)(1 << 24) / (double)machine.sample_rate();
 }
-
-
-DEVICE_GET_INFO( gridlee_sound )
-{
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(gridlee_sound_state);			break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME(gridlee_sound);	break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "Gridlee Custom");				break;
-		case DEVINFO_STR_SOURCE_FILE:						strcpy(info->s, __FILE__);						break;
-	}
-}
-
 
 
 WRITE8_DEVICE_HANDLER( gridlee_sound_w )
 {
 	gridlee_sound_state *state = get_safe_token(device);
 	UINT8 *sound_data = state->m_sound_data;
-	device_t *samples = state->m_samples;
+	samples_device *samples = state->m_samples;
 
 	state->m_stream->update();
 
@@ -110,13 +92,13 @@ WRITE8_DEVICE_HANDLER( gridlee_sound_w )
 	{
 		case 0x04:
 			if (data == 0xef && sound_data[offset] != 0xef)
-				sample_start(samples, 4, 1, 0);
+				samples->start(4, 1);
 			else if (data != 0xef && sound_data[offset] == 0xef)
-				sample_stop(samples, 4);
+				samples->stop(4);
 //          if (!(data & 0x01) && (sound_data[offset] & 0x01))
-//              sample_start(samples, 5, 1, 0);
+//              samples->start(5, 1);
 //          else if ((data & 0x01) && !(sound_data[offset] & 0x01))
-//              sample_stop(samples, 5);
+//              samples->stop(5);
 			break;
 
 		case 0x0c:
@@ -124,9 +106,9 @@ WRITE8_DEVICE_HANDLER( gridlee_sound_w )
 		case 0x0e:
 		case 0x0f:
 			if ((data & 1) && !(sound_data[offset] & 1))
-				sample_start(samples, offset - 0x0c, 1 - sound_data[offset - 4], 0);
+				samples->start(offset - 0x0c, 1 - sound_data[offset - 4]);
 			else if (!(data & 1) && (sound_data[offset] & 1))
-				sample_stop(samples, offset - 0x0c);
+				samples->stop(offset - 0x0c);
 			break;
 
 		case 0x08+0x08:
@@ -197,4 +179,40 @@ fclose(f);
 }
 
 
-DEFINE_LEGACY_SOUND_DEVICE(GRIDLEE, gridlee_sound);
+const device_type GRIDLEE = &device_creator<gridlee_sound_device>;
+
+gridlee_sound_device::gridlee_sound_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, GRIDLEE, "Gridlee Custom", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
+{
+	m_token = global_alloc_clear(gridlee_sound_state);
+}
+
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
+
+void gridlee_sound_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void gridlee_sound_device::device_start()
+{
+	DEVICE_START_NAME( gridlee_sound )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void gridlee_sound_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}

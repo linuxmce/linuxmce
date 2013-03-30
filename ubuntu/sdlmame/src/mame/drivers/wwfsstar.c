@@ -106,7 +106,7 @@ Notes:
 
  Sound Chips : YM2151, M6295
 
- 3 Layers from now on if mentioned will be refered to as
+ 3 Layers from now on if mentioned will be referred to as
 
  BG0 - Background
  SPR - Sprites
@@ -144,14 +144,14 @@ Notes:
 #include "sound/okim6295.h"
 #include "includes/wwfsstar.h"
 
-#define MASTER_CLOCK		XTAL_20MHz
-#define CPU_CLOCK			MASTER_CLOCK / 2
-#define PIXEL_CLOCK		MASTER_CLOCK / 4
+#define MASTER_CLOCK        XTAL_20MHz
+#define CPU_CLOCK           MASTER_CLOCK / 2
+#define PIXEL_CLOCK     MASTER_CLOCK / 4
 
-static WRITE16_HANDLER( wwfsstar_irqack_w );
-static WRITE16_HANDLER( wwfsstar_flipscreen_w );
-static WRITE16_HANDLER ( wwfsstar_soundwrite );
-static WRITE16_HANDLER ( wwfsstar_scrollwrite );
+
+
+
+
 
 /*******************************************************************************
  Memory Maps
@@ -159,12 +159,12 @@ static WRITE16_HANDLER ( wwfsstar_scrollwrite );
  Pretty Straightforward
 *******************************************************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16, wwfsstar_state )
 	AM_RANGE(0x000000, 0x03ffff) AM_ROM
-	AM_RANGE(0x080000, 0x080fff) AM_RAM_WRITE(wwfsstar_fg0_videoram_w) AM_BASE_MEMBER(wwfsstar_state,m_fg0_videoram)	/* FG0 Ram */
-	AM_RANGE(0x0c0000, 0x0c0fff) AM_RAM_WRITE(wwfsstar_bg0_videoram_w) AM_BASE_MEMBER(wwfsstar_state,m_bg0_videoram)	/* BG0 Ram */
-	AM_RANGE(0x100000, 0x1003ff) AM_RAM AM_BASE_MEMBER(wwfsstar_state,m_spriteram)		/* SPR Ram */
-	AM_RANGE(0x140000, 0x140fff) AM_WRITE(paletteram16_xxxxBBBBGGGGRRRR_word_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x080000, 0x080fff) AM_RAM_WRITE(wwfsstar_fg0_videoram_w) AM_SHARE("fg0_videoram") /* FG0 Ram */
+	AM_RANGE(0x0c0000, 0x0c0fff) AM_RAM_WRITE(wwfsstar_bg0_videoram_w) AM_SHARE("bg0_videoram") /* BG0 Ram */
+	AM_RANGE(0x100000, 0x1003ff) AM_RAM AM_SHARE("spriteram")       /* SPR Ram */
+	AM_RANGE(0x140000, 0x140fff) AM_WRITE(paletteram_xxxxBBBBGGGGRRRR_word_w) AM_SHARE("paletteram")
 	AM_RANGE(0x180000, 0x180003) AM_WRITE(wwfsstar_irqack_w)
 	AM_RANGE(0x180000, 0x180001) AM_READ_PORT("DSW1")
 	AM_RANGE(0x180002, 0x180003) AM_READ_PORT("DSW2")
@@ -174,15 +174,15 @@ static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16 )
 	AM_RANGE(0x180008, 0x180009) AM_READ_PORT("SYSTEM")
 	AM_RANGE(0x180008, 0x180009) AM_WRITE(wwfsstar_soundwrite)
 	AM_RANGE(0x18000a, 0x18000b) AM_WRITE(wwfsstar_flipscreen_w)
-	AM_RANGE(0x1c0000, 0x1c3fff) AM_RAM								/* Work Ram */
+	AM_RANGE(0x1c0000, 0x1c3fff) AM_RAM                             /* Work Ram */
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, wwfsstar_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x87ff) AM_RAM
-	AM_RANGE(0x8800, 0x8801) AM_DEVREADWRITE("ymsnd", ym2151_r, ym2151_w)
-	AM_RANGE(0x9800, 0x9800) AM_DEVREADWRITE_MODERN("oki", okim6295_device, read, write)
-	AM_RANGE(0xa000, 0xa000) AM_READ(soundlatch_r)
+	AM_RANGE(0x8800, 0x8801) AM_DEVREADWRITE("ymsnd", ym2151_device, read, write)
+	AM_RANGE(0x9800, 0x9800) AM_DEVREADWRITE("oki", okim6295_device, read, write)
+	AM_RANGE(0xa000, 0xa000) AM_READ(soundlatch_byte_r)
 ADDRESS_MAP_END
 
 
@@ -192,39 +192,38 @@ ADDRESS_MAP_END
  as used by the above memory map
 *******************************************************************************/
 
-static WRITE16_HANDLER ( wwfsstar_scrollwrite )
+WRITE16_MEMBER(wwfsstar_state::wwfsstar_scrollwrite)
 {
-	wwfsstar_state *state = space->machine().driver_data<wwfsstar_state>();
 
 	switch (offset)
 	{
 		case 0x00:
-			state->m_scrollx = data;
+			m_scrollx = data;
 			break;
 		case 0x01:
-			state->m_scrolly = data;
+			m_scrolly = data;
 			break;
 	}
 }
 
-static WRITE16_HANDLER ( wwfsstar_soundwrite )
+WRITE16_MEMBER(wwfsstar_state::wwfsstar_soundwrite)
 {
-	soundlatch_w(space, 1, data & 0xff);
-	cputag_set_input_line(space->machine(), "audiocpu", INPUT_LINE_NMI, PULSE_LINE );
+	soundlatch_byte_w(space, 1, data & 0xff);
+	machine().device("audiocpu")->execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE );
 }
 
-static WRITE16_HANDLER( wwfsstar_flipscreen_w )
+WRITE16_MEMBER(wwfsstar_state::wwfsstar_flipscreen_w)
 {
-	flip_screen_set(space->machine(), data & 1);
+	flip_screen_set(data & 1);
 }
 
-static WRITE16_HANDLER( wwfsstar_irqack_w )
+WRITE16_MEMBER(wwfsstar_state::wwfsstar_irqack_w)
 {
 	if (offset == 0)
-		cputag_set_input_line(space->machine(), "maincpu", 6, CLEAR_LINE);
+		machine().device("maincpu")->execute().set_input_line(6, CLEAR_LINE);
 
 	else
-		cputag_set_input_line(space->machine(), "maincpu", 5, CLEAR_LINE);
+		machine().device("maincpu")->execute().set_input_line(5, CLEAR_LINE);
 }
 
 /*
@@ -240,43 +239,41 @@ static WRITE16_HANDLER( wwfsstar_irqack_w )
     A hack is required: raise the vblank bit a scanline early.
 */
 
-static TIMER_DEVICE_CALLBACK( wwfsstar_scanline )
+TIMER_DEVICE_CALLBACK_MEMBER(wwfsstar_state::wwfsstar_scanline)
 {
-	wwfsstar_state *state = timer.machine().driver_data<wwfsstar_state>();
 	int scanline = param;
 
 	/* Vblank is lowered on scanline 0 */
 	if (scanline == 0)
 	{
-		state->m_vblank = 0;
+		m_vblank = 0;
 	}
 	/* Hack */
-	else if (scanline == (240-1))		/* -1 is an hack needed to avoid deadlocks */
+	else if (scanline == (240-1))       /* -1 is an hack needed to avoid deadlocks */
 	{
-		state->m_vblank = 1;
+		m_vblank = 1;
 	}
 
 	/* An interrupt is generated every 16 scanlines */
 	if (scanline % 16 == 0)
 	{
 		if (scanline > 0)
-			timer.machine().primary_screen->update_partial(scanline - 1);
-		cputag_set_input_line(timer.machine(), "maincpu", 5, ASSERT_LINE);
+			machine().primary_screen->update_partial(scanline - 1);
+		machine().device("maincpu")->execute().set_input_line(5, ASSERT_LINE);
 	}
 
 	/* Vblank is raised on scanline 240 */
 	if (scanline == 240)
 	{
-		timer.machine().primary_screen->update_partial(scanline - 1);
-		cputag_set_input_line(timer.machine(), "maincpu", 6, ASSERT_LINE);
+		machine().primary_screen->update_partial(scanline - 1);
+		machine().device("maincpu")->execute().set_input_line(6, ASSERT_LINE);
 	}
 }
 
-static CUSTOM_INPUT( wwfsstar_vblank_r )
+CUSTOM_INPUT_MEMBER(wwfsstar_state::wwfsstar_vblank_r)
 {
-	wwfsstar_state *state = field->port->machine().driver_data<wwfsstar_state>();
 
-	return state->m_vblank;
+	return m_vblank;
 }
 
 /*******************************************************************************
@@ -309,7 +306,7 @@ static INPUT_PORTS_START( wwfsstar )
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_START2 ) PORT_NAME("Button B (1P VS 2P - Buy-in)")
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x0001, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(wwfsstar_vblank_r, NULL)	/* VBlank */
+	PORT_BIT( 0x0001, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, wwfsstar_state,wwfsstar_vblank_r, NULL) /* VBlank */
 	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_SERVICE1 )
@@ -319,7 +316,7 @@ static INPUT_PORTS_START( wwfsstar )
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("DSW1")
-	PORT_DIPNAME( 0x07, 0x07, DEF_STR( Coin_A ) )
+	PORT_DIPNAME( 0x07, 0x07, DEF_STR( Coin_A ) )       PORT_DIPLOCATION("SW1:1,2,3")
 	PORT_DIPSETTING(    0x00,  DEF_STR( 4C_1C ) )
 	PORT_DIPSETTING(    0x01,  DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(    0x02,  DEF_STR( 2C_1C ) )
@@ -328,7 +325,7 @@ static INPUT_PORTS_START( wwfsstar )
 	PORT_DIPSETTING(    0x05,  DEF_STR( 1C_3C ) )
 	PORT_DIPSETTING(    0x04,  DEF_STR( 1C_4C ) )
 	PORT_DIPSETTING(    0x03,  DEF_STR( 1C_5C ) )
-	PORT_DIPNAME( 0x38, 0x38, DEF_STR( Coin_B ) )
+	PORT_DIPNAME( 0x38, 0x38, DEF_STR( Coin_B ) )       PORT_DIPLOCATION("SW1:4,5,6")
 	PORT_DIPSETTING(    0x00,  DEF_STR( 4C_1C ) )
 	PORT_DIPSETTING(    0x08,  DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(    0x10,  DEF_STR( 2C_1C ) )
@@ -337,34 +334,30 @@ static INPUT_PORTS_START( wwfsstar )
 	PORT_DIPSETTING(    0x28,  DEF_STR( 1C_3C ) )
 	PORT_DIPSETTING(    0x20,  DEF_STR( 1C_4C ) )
 	PORT_DIPSETTING(    0x18,  DEF_STR( 1C_5C ) )
-	PORT_DIPNAME( 0x40, 0x40, "Unused SW 0-6" )
-	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Flip_Screen ) )
+	PORT_DIPUNUSED_DIPLOC( 0x40, 0x40, "SW1:7" )        /* Manual shows Cabinet Type: Off=Upright & On=Table, has no effect */
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Flip_Screen ) )  PORT_DIPLOCATION("SW1:8")
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("DSW2")
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Difficulty ) )
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("SW2:1,2")
 	PORT_DIPSETTING(    0x01, DEF_STR( Easy ) )
 	PORT_DIPSETTING(    0x03, DEF_STR( Normal ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( Hard ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) )
-	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Demo_Sounds ) )
+	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW2:3")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( On ) )
-	PORT_DIPNAME( 0x08, 0x08, "Super Techniques" )			// Check code at 0x014272
+	PORT_DIPNAME( 0x08, 0x08, "Super Techniques" )      PORT_DIPLOCATION("SW2:4")   // Check code at 0x014272
 	PORT_DIPSETTING(    0x08, DEF_STR( Normal ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Hard ) )
-	PORT_DIPNAME( 0x30, 0x30, "Time" )
+	PORT_DIPNAME( 0x30, 0x30, "Time" )          PORT_DIPLOCATION("SW2:5,6")
 	PORT_DIPSETTING(    0x20, "+2:30" )
 	PORT_DIPSETTING(    0x30, "Default" )
 	PORT_DIPSETTING(    0x10, "-2:30" )
 	PORT_DIPSETTING(    0x00, "-5:00" )
-	PORT_DIPNAME( 0x40, 0x40, "Unused SW 1-6" )
-	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, "Health For Winning" )
+	PORT_DIPUNUSED_DIPLOC( 0x40, 0x40, "SW2:7" )        /* Manual shows "3 Buttons" has no or unknown effect */
+	PORT_DIPNAME( 0x80, 0x80, "Health For Winning" )    PORT_DIPLOCATION("SW2:8")
 	PORT_DIPSETTING(    0x80, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
 INPUT_PORTS_END
@@ -394,34 +387,18 @@ static const gfx_layout tiles16x16_layout =
 	4,
 	{ RGN_FRAC(1,2)+0, RGN_FRAC(1,2)+4, 0, 4 },
 	{ 3, 2, 1, 0, 16*8+3, 16*8+2, 16*8+1, 16*8+0,
-		  32*8+3, 32*8+2, 32*8+1, 32*8+0, 48*8+3, 48*8+2, 48*8+1, 48*8+0 },
+			32*8+3, 32*8+2, 32*8+1, 32*8+0, 48*8+3, 48*8+2, 48*8+1, 48*8+0 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-		  8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8 },
+			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8 },
 	64*8
 };
 
 static GFXDECODE_START( wwfsstar )
-	GFXDECODE_ENTRY( "gfx1", 0, tiles8x8_layout,     0, 16 )	/* colors   0-255 */
-	GFXDECODE_ENTRY( "gfx2", 0, tiles16x16_layout, 128, 16 )	/* colors   128-383 */
-	GFXDECODE_ENTRY( "gfx3", 0, tiles16x16_layout, 256,  8 )	/* colors   256-383 */
+	GFXDECODE_ENTRY( "gfx1", 0, tiles8x8_layout,     0, 16 )    /* colors   0-255 */
+	GFXDECODE_ENTRY( "gfx2", 0, tiles16x16_layout, 128, 16 )    /* colors   128-383 */
+	GFXDECODE_ENTRY( "gfx3", 0, tiles16x16_layout, 256,  8 )    /* colors   256-383 */
 GFXDECODE_END
 
-
-/*******************************************************************************
- Sound Stuff..
-********************************************************************************
- Straight from Ddragon 3
-*******************************************************************************/
-
-static void wwfsstar_ymirq_handler(device_t *device, int irq)
-{
-	cputag_set_input_line(device->machine(), "audiocpu", 0 , irq ? ASSERT_LINE : CLEAR_LINE );
-}
-
-static const ym2151_interface ym2151_config =
-{
-	wwfsstar_ymirq_handler
-};
 
 /*******************************************************************************
  Machine Driver(s)
@@ -432,27 +409,25 @@ static MACHINE_CONFIG_START( wwfsstar, wwfsstar_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, CPU_CLOCK)
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_TIMER_ADD_SCANLINE("scantimer", wwfsstar_scanline, "screen", 0, 1)
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("scantimer", wwfsstar_state, wwfsstar_scanline, "screen", 0, 1)
 
 	MCFG_CPU_ADD("audiocpu", Z80, XTAL_3_579545MHz)
 	MCFG_CPU_PROGRAM_MAP(sound_map)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
-	MCFG_SCREEN_RAW_PARAMS(PIXEL_CLOCK, 320, 0, 256, 272, 8, 248)	/* HTOTAL and VTOTAL are guessed */
-	MCFG_SCREEN_UPDATE(wwfsstar)
+	MCFG_SCREEN_RAW_PARAMS(PIXEL_CLOCK, 320, 0, 256, 272, 8, 248)   /* HTOTAL and VTOTAL are guessed */
+	MCFG_SCREEN_UPDATE_DRIVER(wwfsstar_state, screen_update_wwfsstar)
 
 	MCFG_GFXDECODE(wwfsstar)
 	MCFG_PALETTE_LENGTH(384)
 
-	MCFG_VIDEO_START(wwfsstar)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
 
-	MCFG_SOUND_ADD("ymsnd", YM2151, XTAL_3_579545MHz)
-	MCFG_SOUND_CONFIG(ym2151_config)
+	MCFG_YM2151_ADD("ymsnd", XTAL_3_579545MHz)
+	MCFG_YM2151_IRQ_HANDLER(INPUTLINE("audiocpu", 0))
 	MCFG_SOUND_ROUTE(0, "lspeaker", 0.45)
 	MCFG_SOUND_ROUTE(1, "rspeaker", 0.45)
 
@@ -473,14 +448,14 @@ ROM_START( wwfsstar )
 	ROM_REGION( 0x10000, "audiocpu", 0 ) /* Sound CPU (Z80)  */
 	ROM_LOAD( "b.12",    0x00000, 0x08000, CRC(1e44f8aa) SHA1(e03857d6954e9b9b6073b211e2d6570032af8807) )
 
-	ROM_REGION( 0x40000, "oki", 0 )	/* ADPCM samples */
-	ROM_LOAD( "24a9.46",	   0x00000, 0x20000, CRC(703ff08f) SHA1(08c4d33208eb4c76c751a1a0fe16a817bdc30820) )
+	ROM_REGION( 0x40000, "oki", 0 ) /* ADPCM samples */
+	ROM_LOAD( "24a9.46",       0x00000, 0x20000, CRC(703ff08f) SHA1(08c4d33208eb4c76c751a1a0fe16a817bdc30820) )
 	ROM_LOAD( "wwfs03.bin",    0x20000, 0x10000, CRC(8a35a20e) SHA1(3bc1a43f956b6840a4bee9e8fb2a6e3d4ac18f75) )
 	ROM_LOAD( "wwfs05.bin",    0x30000, 0x10000, CRC(6df08962) SHA1(e3dec81644fe5867024a2fcf34a67924622f3a5b) )
 
 	ROM_REGION( 0x20000, "gfx1", 0 ) /* FG0 Tiles (8x8) */
 	/* this rom may not be correct for this set.. the rom in the set had half the data missing and only a 99%
-       match with wwfsstau for the first part */
+	   match with wwfsstau for the first part */
 	ROM_LOAD( "24a4-0.58",    0x00000, 0x20000, BAD_DUMP CRC(cb12ba40) SHA1(2d39f778d9daf0d3606b63975bd6cfc45847a265) )
 
 	/* these are bootleg roms ...  the original has mask roms */
@@ -537,8 +512,8 @@ ROM_START( wwfsstaru )
 	ROM_REGION( 0x10000, "audiocpu", 0 ) /* Sound CPU (Z80)  */
 	ROM_LOAD( "b.12",    0x00000, 0x08000, CRC(1e44f8aa) SHA1(e03857d6954e9b9b6073b211e2d6570032af8807) )
 
-	ROM_REGION( 0x40000, "oki", 0 )	/* ADPCM samples */
-	ROM_LOAD( "24a9.46",	   0x00000, 0x20000, CRC(703ff08f) SHA1(08c4d33208eb4c76c751a1a0fe16a817bdc30820) )
+	ROM_REGION( 0x40000, "oki", 0 ) /* ADPCM samples */
+	ROM_LOAD( "24a9.46",       0x00000, 0x20000, CRC(703ff08f) SHA1(08c4d33208eb4c76c751a1a0fe16a817bdc30820) )
 	ROM_LOAD( "wwfs03.bin",    0x20000, 0x10000, CRC(8a35a20e) SHA1(3bc1a43f956b6840a4bee9e8fb2a6e3d4ac18f75) )
 	ROM_LOAD( "wwfs05.bin",    0x30000, 0x10000, CRC(6df08962) SHA1(e3dec81644fe5867024a2fcf34a67924622f3a5b) )
 
@@ -600,7 +575,7 @@ ROM_START( wwfsstara )
 	ROM_REGION( 0x10000, "audiocpu", 0 ) /* Sound CPU (Z80)  */
 	ROM_LOAD( "24ab-0.12", 0x00000, 0x08000, CRC(1e44f8aa) SHA1(e03857d6954e9b9b6073b211e2d6570032af8807) )
 
-	ROM_REGION( 0x40000, "oki", 0 )	/* ADPCM samples */
+	ROM_REGION( 0x40000, "oki", 0 ) /* ADPCM samples */
 	ROM_LOAD( "24a9-0.46", 0x00000, 0x20000, CRC(703ff08f) SHA1(08c4d33208eb4c76c751a1a0fe16a817bdc30820) )
 	ROM_LOAD( "24j8-0.45", 0x20000, 0x20000, CRC(61138487) SHA1(6d5e3b12acdefb6923aa8ae0704f6c328f4747b3) )
 
@@ -628,14 +603,14 @@ ROM_START( wwfsstarj )
 	ROM_REGION( 0x10000, "audiocpu", 0 ) /* Sound CPU (Z80)  */
 	ROM_LOAD( "b.12",    0x00000, 0x08000, CRC(1e44f8aa) SHA1(e03857d6954e9b9b6073b211e2d6570032af8807) )
 
-	ROM_REGION( 0x40000, "oki", 0 )	/* ADPCM samples */
-	ROM_LOAD( "24a9.46",	   0x00000, 0x20000, CRC(703ff08f) SHA1(08c4d33208eb4c76c751a1a0fe16a817bdc30820) )
+	ROM_REGION( 0x40000, "oki", 0 ) /* ADPCM samples */
+	ROM_LOAD( "24a9.46",       0x00000, 0x20000, CRC(703ff08f) SHA1(08c4d33208eb4c76c751a1a0fe16a817bdc30820) )
 	ROM_LOAD( "wwfs03.bin",    0x20000, 0x10000, CRC(8a35a20e) SHA1(3bc1a43f956b6840a4bee9e8fb2a6e3d4ac18f75) )
 	ROM_LOAD( "wwfs05.bin",    0x30000, 0x10000, CRC(6df08962) SHA1(e3dec81644fe5867024a2fcf34a67924622f3a5b) )
 
 	ROM_REGION( 0x20000, "gfx1", 0 ) /* FG0 Tiles (8x8) */
 	/* this rom may not be correct for this set.. the rom in the set had half the data missing and only a 99%
-       match with wwfsstau for the first part */
+	   match with wwfsstau for the first part */
 	ROM_LOAD( "24a4-0.58",    0x00000, 0x20000, BAD_DUMP CRC(cb12ba40) SHA1(2d39f778d9daf0d3606b63975bd6cfc45847a265) )
 
 	/* these are bootleg roms ...  the original has mask roms */
@@ -686,7 +661,7 @@ ROM_END
 
 
 
-GAME( 1989, wwfsstar,  0,        wwfsstar, wwfsstar,  0, ROT0, "Technos Japan", "WWF Superstars (Europe)", 0 )
-GAME( 1989, wwfsstaru, wwfsstar, wwfsstar, wwfsstar,  0, ROT0, "Technos Japan", "WWF Superstars (US)", 0 )
-GAME( 1989, wwfsstara, wwfsstar, wwfsstar, wwfsstar,  0, ROT0, "Technos Japan", "WWF Superstars (US, Newer)", 0 )
-GAME( 1989, wwfsstarj, wwfsstar, wwfsstar, wwfsstar,  0, ROT0, "Technos Japan", "WWF Superstars (Japan)",GAME_NOT_WORKING ) // missing a program rom
+GAME( 1989, wwfsstar,  0,        wwfsstar, wwfsstar, driver_device,  0, ROT0, "Technos Japan", "WWF Superstars (Europe)", 0 )
+GAME( 1989, wwfsstaru, wwfsstar, wwfsstar, wwfsstar, driver_device,  0, ROT0, "Technos Japan", "WWF Superstars (US)", 0 )
+GAME( 1989, wwfsstara, wwfsstar, wwfsstar, wwfsstar, driver_device,  0, ROT0, "Technos Japan", "WWF Superstars (US, Newer)", 0 )
+GAME( 1989, wwfsstarj, wwfsstar, wwfsstar, wwfsstar, driver_device,  0, ROT0, "Technos Japan", "WWF Superstars (Japan)",GAME_NOT_WORKING ) // missing a program rom

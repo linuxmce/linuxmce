@@ -10,21 +10,27 @@
 class ccastles_state : public driver_device
 {
 public:
-	ccastles_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config),
-		  m_maincpu(*this, "maincpu"),
-		  m_nvram_4b(*this, "nvram_4b"),
-		  m_nvram_4a(*this, "nvram_4a") { }
+	ccastles_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+			m_maincpu(*this, "maincpu"),
+			m_nvram_4b(*this, "nvram_4b"),
+			m_nvram_4a(*this, "nvram_4a") ,
+		m_videoram(*this, "videoram"),
+		m_spriteram(*this, "spriteram"){ }
 
+	/* devices */
+	required_device<m6502_device> m_maincpu;
+	required_device<x2212_device> m_nvram_4b;
+	required_device<x2212_device> m_nvram_4a;
 	/* memory pointers */
-	UINT8 *  m_videoram;
-	UINT8 *  m_spriteram;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_spriteram;
 
 	/* video-related */
 	const UINT8 *m_syncprom;
 	const UINT8 *m_wpprom;
 	const UINT8 *m_priprom;
-	bitmap_t *m_spritebitmap;
+	bitmap_ind16 m_spritebitmap;
 	double m_rweights[3];
 	double m_gweights[3];
 	double m_bweights[3];
@@ -40,26 +46,27 @@ public:
 	UINT8    m_irq_state;
 	UINT8    m_nvram_store[2];
 
-	/* devices */
-	required_device<m6502_device> m_maincpu;
-	required_device<x2212_device> m_nvram_4b;
-	required_device<x2212_device> m_nvram_4a;
+	DECLARE_WRITE8_MEMBER(irq_ack_w);
+	DECLARE_WRITE8_MEMBER(led_w);
+	DECLARE_WRITE8_MEMBER(ccounter_w);
+	DECLARE_WRITE8_MEMBER(bankswitch_w);
+	DECLARE_READ8_MEMBER(leta_r);
+	DECLARE_WRITE8_MEMBER(nvram_recall_w);
+	DECLARE_WRITE8_MEMBER(nvram_store_w);
+	DECLARE_READ8_MEMBER(nvram_r);
+	DECLARE_WRITE8_MEMBER(nvram_w);
+	DECLARE_WRITE8_MEMBER(ccastles_hscroll_w);
+	DECLARE_WRITE8_MEMBER(ccastles_vscroll_w);
+	DECLARE_WRITE8_MEMBER(ccastles_video_control_w);
+	DECLARE_WRITE8_MEMBER(ccastles_paletteram_w);
+	DECLARE_WRITE8_MEMBER(ccastles_videoram_w);
+	DECLARE_READ8_MEMBER(ccastles_bitmode_r);
+	DECLARE_WRITE8_MEMBER(ccastles_bitmode_w);
+	DECLARE_WRITE8_MEMBER(ccastles_bitmode_addr_w);
+	DECLARE_CUSTOM_INPUT_MEMBER(get_vblank);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	UINT32 screen_update_ccastles(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	TIMER_CALLBACK_MEMBER(clock_irq);
 };
-
-
-/*----------- defined in video/ccastles.c -----------*/
-
-
-VIDEO_START( ccastles );
-SCREEN_UPDATE( ccastles );
-
-WRITE8_HANDLER( ccastles_hscroll_w );
-WRITE8_HANDLER( ccastles_vscroll_w );
-WRITE8_HANDLER( ccastles_video_control_w );
-
-WRITE8_HANDLER( ccastles_paletteram_w );
-WRITE8_HANDLER( ccastles_videoram_w );
-
-READ8_HANDLER( ccastles_bitmode_r );
-WRITE8_HANDLER( ccastles_bitmode_w );
-WRITE8_HANDLER( ccastles_bitmode_addr_w );

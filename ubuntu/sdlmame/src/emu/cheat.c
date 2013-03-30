@@ -105,7 +105,6 @@
 #include "emuopts.h"
 #include "xmlfile.h"
 #include "ui.h"
-#include "uimenu.h"
 #include "cheat.h"
 #include "debug/debugcpu.h"
 
@@ -118,7 +117,7 @@
 //**************************************************************************
 
 // turn this on to enable removing duplicate cheats; not sure if we should
-#define REMOVE_DUPLICATE_CHEATS	0
+#define REMOVE_DUPLICATE_CHEATS 0
 
 
 
@@ -167,7 +166,7 @@ inline const char *number_and_format::format(astring &string) const
 
 cheat_parameter::cheat_parameter(cheat_manager &manager, symbol_table &symbols, const char *filename, xml_data_node &paramnode)
 	: m_value(0),
-	  m_itemlist(manager.machine().respool())
+		m_itemlist(manager.machine().respool())
 {
 	// read the core attributes
 	m_minval = number_and_format(xml_get_attribute_int(&paramnode, "min", 0), xml_get_attribute_int_format(&paramnode, "min"));
@@ -348,7 +347,7 @@ bool cheat_parameter::set_next_state()
 
 cheat_script::cheat_script(cheat_manager &manager, symbol_table &symbols, const char *filename, xml_data_node &scriptnode)
 	: m_entrylist(manager.machine().respool()),
-	  m_state(SCRIPT_STATE_RUN)
+		m_state(SCRIPT_STATE_RUN)
 {
 	// read the core attributes
 	const char *state = xml_get_attribute_string(&scriptnode, "state", "run");
@@ -408,11 +407,11 @@ void cheat_script::save(emu_file &cheatfile) const
 	cheatfile.printf("\t\t<script");
 	switch (m_state)
 	{
-		case SCRIPT_STATE_OFF:		cheatfile.printf(" state=\"off\"");		break;
-		case SCRIPT_STATE_ON:		cheatfile.printf(" state=\"on\"");		break;
+		case SCRIPT_STATE_OFF:      cheatfile.printf(" state=\"off\"");     break;
+		case SCRIPT_STATE_ON:       cheatfile.printf(" state=\"on\"");      break;
 		default:
-		case SCRIPT_STATE_RUN:		cheatfile.printf(" state=\"run\"");		break;
-		case SCRIPT_STATE_CHANGE:	cheatfile.printf(" state=\"change\"");	break;
+		case SCRIPT_STATE_RUN:      cheatfile.printf(" state=\"run\"");     break;
+		case SCRIPT_STATE_CHANGE:   cheatfile.printf(" state=\"change\"");  break;
 	}
 	cheatfile.printf(">\n");
 
@@ -431,9 +430,9 @@ void cheat_script::save(emu_file &cheatfile) const
 
 cheat_script::script_entry::script_entry(cheat_manager &manager, symbol_table &symbols, const char *filename, xml_data_node &entrynode, bool isaction)
 	: m_next(NULL),
-	  m_condition(&symbols),
-	  m_expression(&symbols),
-	  m_arglist(manager.machine().respool())
+		m_condition(&symbols),
+		m_expression(&symbols),
+		m_arglist(manager.machine().respool())
 {
 	const char *expression = NULL;
 	try
@@ -642,8 +641,8 @@ void cheat_script::script_entry::validate_format(const char *filename, int line)
 
 cheat_script::script_entry::output_argument::output_argument(cheat_manager &manager, symbol_table &symbols, const char *filename, xml_data_node &argnode)
 	: m_next(NULL),
-	  m_expression(&symbols),
-	  m_count(0)
+		m_expression(&symbols),
+		m_count(0)
 {
 	// first extract attributes
 	m_count = xml_get_attribute_int(&argnode, "count", 1);
@@ -713,16 +712,16 @@ void cheat_script::script_entry::output_argument::save(emu_file &cheatfile) cons
 
 cheat_entry::cheat_entry(cheat_manager &manager, symbol_table &globaltable, const char *filename, xml_data_node &cheatnode)
 	: m_manager(manager),
-	  m_next(NULL),
-	  m_parameter(NULL),
-	  m_on_script(NULL),
-	  m_off_script(NULL),
-	  m_change_script(NULL),
-	  m_run_script(NULL),
-	  m_symbols(&manager.machine(), &globaltable),
-	  m_state(SCRIPT_STATE_OFF),
-	  m_numtemp(DEFAULT_TEMP_VARIABLES),
-	  m_argindex(0)
+		m_next(NULL),
+		m_parameter(NULL),
+		m_on_script(NULL),
+		m_off_script(NULL),
+		m_change_script(NULL),
+		m_run_script(NULL),
+		m_symbols(&manager.machine(), &globaltable),
+		m_state(SCRIPT_STATE_OFF),
+		m_numtemp(DEFAULT_TEMP_VARIABLES),
+		m_argindex(0)
 {
 	// reset scripts
 	try
@@ -1068,11 +1067,11 @@ cheat_script *&cheat_entry::script_for_state(script_state state)
 {
 	switch (state)
 	{
-		case SCRIPT_STATE_ON:		return m_on_script;
-		case SCRIPT_STATE_OFF:		return m_off_script;
-		case SCRIPT_STATE_CHANGE:	return m_change_script;
+		case SCRIPT_STATE_ON:       return m_on_script;
+		case SCRIPT_STATE_OFF:      return m_off_script;
+		case SCRIPT_STATE_CHANGE:   return m_change_script;
 		default:
-		case SCRIPT_STATE_RUN:		return m_run_script;
+		case SCRIPT_STATE_RUN:      return m_run_script;
 	}
 }
 
@@ -1088,16 +1087,16 @@ cheat_script *&cheat_entry::script_for_state(script_state state)
 
 cheat_manager::cheat_manager(running_machine &machine)
 	: m_machine(machine),
-	  m_cheatlist(machine.respool()),
-	  m_disabled(true),
-	  m_symtable(&machine)
+		m_cheatlist(machine.respool()),
+		m_disabled(true),
+		m_symtable(&machine)
 {
 	// if the cheat engine is disabled, we're done
 	if (!machine.options().cheat())
 		return;
 
 	// request a callback
-	machine.add_notifier(MACHINE_NOTIFY_FRAME, frame_update_static);
+	machine.add_notifier(MACHINE_NOTIFY_FRAME, machine_notify_delegate(FUNC(cheat_manager::frame_update), this));
 
 	// create a global symbol table
 	m_symtable.add("frame", symbol_table::READ_ONLY, &m_framecount);
@@ -1105,7 +1104,7 @@ cheat_manager::cheat_manager(running_machine &machine)
 	m_symtable.add("tobcd", NULL, 1, 1, execute_tobcd);
 
 	// we rely on the debugger expression callbacks; if the debugger isn't
-    // enabled, we must jumpstart them manually
+	// enabled, we must jumpstart them manually
 	if ((machine.debug_flags & DEBUG_FLAG_ENABLED) == 0)
 		debug_cpu_init(machine);
 
@@ -1125,7 +1124,7 @@ cheat_manager::cheat_manager(running_machine &machine)
 void cheat_manager::set_enable(bool enable)
 {
 	// if the cheat engine is disabled, we're done
-	if (!m_machine.options().cheat())
+	if (!machine().options().cheat())
 		return;
 
 	// if we're enabled currently and we don't want to be, turn things off
@@ -1160,7 +1159,7 @@ void cheat_manager::set_enable(bool enable)
 void cheat_manager::reload()
 {
 	// if the cheat engine is disabled, we're done
-	if (!m_machine.options().cheat())
+	if (!machine().options().cheat())
 		return;
 
 	// free everything
@@ -1173,9 +1172,9 @@ void cheat_manager::reload()
 	m_disabled = false;
 
 	// load the cheat file, MESS will load a crc32.xml ( eg. 01234567.xml )
-    // and MAME will load gamename.xml
-	device_image_interface *image = NULL;
-	for (bool gotone = m_machine.m_devicelist.first(image); gotone; gotone = image->next(image))
+	// and MAME will load gamename.xml
+	image_interface_iterator iter(machine().root_device());
+	for (device_image_interface *image = iter.first(); image != NULL; image = iter.next())
 		if (image->exists())
 		{
 			// if we are loading through software lists, try to load shortname.xml
@@ -1199,7 +1198,7 @@ void cheat_manager::reload()
 
 	// if we haven't found the cheats yet, load by basename
 	if (m_cheatlist.count() == 0)
-		load_cheats(m_machine.basename());
+		load_cheats(machine().basename());
 
 	// temporary: save the file back out as output.xml for comparison
 	if (m_cheatlist.count() != 0)
@@ -1215,7 +1214,7 @@ void cheat_manager::reload()
 bool cheat_manager::save_all(const char *filename)
 {
 	// open the file with the proper name
-	emu_file cheatfile(m_machine.options().cheat_path(), OPEN_FLAG_WRITE | OPEN_FLAG_CREATE | OPEN_FLAG_CREATE_PATHS);
+	emu_file cheatfile(machine().options().cheat_path(), OPEN_FLAG_WRITE | OPEN_FLAG_CREATE | OPEN_FLAG_CREATE_PATHS);
 	file_error filerr = cheatfile.open(filename, ".xml");
 
 	// if that failed, return nothing
@@ -1262,7 +1261,7 @@ void cheat_manager::render_text(render_container &container)
 		{
 			// output the text
 			ui_draw_text_full(&container, m_output[linenum],
-					0.0f, (float)linenum * ui_get_line_height(m_machine), 1.0f,
+					0.0f, (float)linenum * ui_get_line_height(machine()), 1.0f,
 					m_justify[linenum], WRAP_NEVER, DRAW_OPAQUE,
 					ARGB_WHITE, ARGB_BLACK, NULL, NULL);
 		}
@@ -1380,16 +1379,11 @@ UINT64 cheat_manager::execute_tobcd(symbol_table &table, void *ref, int params, 
 //  frame_update - per-frame callback
 //-------------------------------------------------
 
-void cheat_manager::frame_update_static(running_machine &machine)
-{
-	machine.cheat().frame_update();
-}
-
 void cheat_manager::frame_update()
 {
 	// set up for accumulating output
 	m_lastline = 0;
-	m_numlines = floor(1.0f / ui_get_line_height(m_machine));
+	m_numlines = floor(1.0f / ui_get_line_height(machine()));
 	m_numlines = MIN(m_numlines, ARRAY_LENGTH(m_output));
 	for (int linenum = 0; linenum < ARRAY_LENGTH(m_output); linenum++)
 		m_output[linenum].reset();
@@ -1411,7 +1405,7 @@ void cheat_manager::frame_update()
 void cheat_manager::load_cheats(const char *filename)
 {
 	xml_data_node *rootnode = NULL;
-	emu_file cheatfile(m_machine.options().cheat_path(), OPEN_FLAG_READ);
+	emu_file cheatfile(machine().options().cheat_path(), OPEN_FLAG_READ);
 	try
 	{
 		// open the file with the proper name
@@ -1446,7 +1440,7 @@ void cheat_manager::load_cheats(const char *filename)
 			for (xml_data_node *cheatnode = xml_get_sibling(mamecheatnode->child, "cheat"); cheatnode != NULL; cheatnode = xml_get_sibling(cheatnode->next, "cheat"))
 			{
 				// load this entry
-				cheat_entry *curcheat = auto_alloc(m_machine, cheat_entry(*this, m_symtable, filename, *cheatnode));
+				cheat_entry *curcheat = auto_alloc(machine(), cheat_entry(*this, m_symtable, filename, *cheatnode));
 
 				// make sure we're not a duplicate
 				cheat_entry *scannode = NULL;
@@ -1462,7 +1456,7 @@ void cheat_manager::load_cheats(const char *filename)
 				if (scannode == NULL)
 					m_cheatlist.append(*curcheat);
 				else
-					auto_free(m_machine, curcheat);
+					auto_free(machine(), curcheat);
 			}
 
 			// free the file and loop for the next one

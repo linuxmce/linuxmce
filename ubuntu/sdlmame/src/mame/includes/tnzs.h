@@ -1,5 +1,5 @@
 
-#define	MAX_SAMPLES	0x2f		/* max samples */
+#define MAX_SAMPLES 0x2f        /* max samples */
 
 enum
 {
@@ -18,15 +18,10 @@ enum
 class tnzs_state : public driver_device
 {
 public:
-	tnzs_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	tnzs_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) { }
 
 	/* memory pointers */
-	UINT8 *  m_objram;
-	UINT8 *  m_vdcram;
-	UINT8 *  m_scrollram;
-	UINT8 *  m_objctrl;
-	UINT8 *  m_bg_flag;
 //  UINT8 *  m_paletteram;    // currently this uses generic palette handling
 
 	/* video-related */
@@ -53,44 +48,56 @@ public:
 	int      m_bank1;
 	int      m_bank2;
 
+	UINT8*   m_bankedram;
+	UINT8*   m_ROM;
+
 	/* devices */
-	device_t *m_audiocpu;
-	device_t *m_subcpu;
+	cpu_device *m_audiocpu;
+	cpu_device *m_subcpu;
 	device_t *m_mcu;
+	DECLARE_WRITE8_MEMBER(tnzsb_sound_command_w);
+	DECLARE_WRITE8_MEMBER(jpopnics_palette_w);
+	DECLARE_WRITE8_MEMBER(jpopnics_subbankswitch_w);
+	DECLARE_READ8_MEMBER(tnzs_port1_r);
+	DECLARE_READ8_MEMBER(tnzs_port2_r);
+	DECLARE_WRITE8_MEMBER(tnzs_port2_w);
+	DECLARE_READ8_MEMBER(arknoid2_sh_f000_r);
+	DECLARE_READ8_MEMBER(tnzs_mcu_r);
+	DECLARE_WRITE8_MEMBER(tnzs_mcu_w);
+	DECLARE_WRITE8_MEMBER(tnzs_ramrom_bankswitch_w);
+	DECLARE_WRITE8_MEMBER(tnzs_bankswitch1_w);
+	DECLARE_READ8_MEMBER(mcu_tnzs_r);
+	DECLARE_WRITE8_MEMBER(mcu_tnzs_w);
+	DECLARE_READ8_MEMBER(mcu_arknoid2_r);
+	DECLARE_WRITE8_MEMBER(mcu_arknoid2_w);
+	DECLARE_READ8_MEMBER(mcu_extrmatn_r);
+	DECLARE_WRITE8_MEMBER(mcu_extrmatn_w);
+	DECLARE_WRITE8_MEMBER(tnzs_sync_kludge_w);
+	DECLARE_READ8_MEMBER(kageki_csport_r);
+	DECLARE_WRITE8_MEMBER(kageki_csport_w);
+	DECLARE_WRITE8_MEMBER(kabukiz_sound_bank_w);
+	DECLARE_WRITE8_MEMBER(kabukiz_sample_w);
+
+	DECLARE_READ8_MEMBER(tnzs_ramrom_bank_r);
+	DECLARE_WRITE8_MEMBER(tnzs_ramrom_bank_w);
+
+	DECLARE_DRIVER_INIT(arknoid2);
+	DECLARE_DRIVER_INIT(extrmatn);
+	DECLARE_DRIVER_INIT(drtoppel);
+	DECLARE_DRIVER_INIT(kabukiz);
+	DECLARE_DRIVER_INIT(plumpop);
+	DECLARE_DRIVER_INIT(insectx);
+	DECLARE_DRIVER_INIT(tnzs);
+	DECLARE_DRIVER_INIT(kageki);
+	DECLARE_DRIVER_INIT(chukatai);
+	DECLARE_DRIVER_INIT(tnzsb);
+	DECLARE_MACHINE_START(tnzs);
+	DECLARE_MACHINE_RESET(tnzs);
+	DECLARE_PALETTE_INIT(arknoid2);
+	DECLARE_MACHINE_START(jpopnics);
+	DECLARE_MACHINE_RESET(jpopnics);
+	UINT32 screen_update_tnzs(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	void screen_eof_tnzs(screen_device &screen, bool state);
+	INTERRUPT_GEN_MEMBER(arknoid2_interrupt);
+	TIMER_CALLBACK_MEMBER(kludge_callback);
 };
-
-
-/*----------- defined in machine/tnzs.c -----------*/
-
-READ8_HANDLER( tnzs_port1_r );
-READ8_HANDLER( tnzs_port2_r );
-WRITE8_HANDLER( tnzs_port2_w );
-READ8_HANDLER( arknoid2_sh_f000_r );
-READ8_HANDLER( tnzs_mcu_r );
-WRITE8_HANDLER( tnzs_mcu_w );
-WRITE8_HANDLER( tnzs_bankswitch_w );
-WRITE8_HANDLER( tnzs_bankswitch1_w );
-INTERRUPT_GEN( arknoid2_interrupt );
-
-DRIVER_INIT( plumpop );
-DRIVER_INIT( extrmatn );
-DRIVER_INIT( arknoid2 );
-DRIVER_INIT( drtoppel );
-DRIVER_INIT( chukatai );
-DRIVER_INIT( tnzs );
-DRIVER_INIT( tnzsb );
-DRIVER_INIT( kabukiz );
-DRIVER_INIT( insectx );
-DRIVER_INIT( kageki );
-
-MACHINE_START( tnzs );
-MACHINE_RESET( tnzs );
-MACHINE_RESET( jpopnics );
-MACHINE_START( jpopnics );
-
-
-/*----------- defined in video/tnzs.c -----------*/
-
-PALETTE_INIT( arknoid2 );
-SCREEN_UPDATE( tnzs );
-SCREEN_EOF( tnzs );

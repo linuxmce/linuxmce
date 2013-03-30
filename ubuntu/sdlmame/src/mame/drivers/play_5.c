@@ -1,43 +1,67 @@
 /*
     Playmatic MPU 5
 */
+
+
 #include "emu.h"
 #include "cpu/cosmac/cosmac.h"
-
-extern const char layout_pinball[];
 
 class play_5_state : public driver_device
 {
 public:
-	play_5_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	play_5_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+		m_maincpu(*this, "maincpu")
+	{ }
+
+protected:
+
+	// devices
+	required_device<cosmac_device> m_maincpu;
+
+	// driver_device overrides
+	virtual void machine_reset();
+public:
+	DECLARE_DRIVER_INIT(play_5);
 };
 
 
-static ADDRESS_MAP_START( play_5_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( play_5_map, AS_PROGRAM, 8, play_5_state )
 	AM_RANGE(0x0000, 0xffff) AM_NOP
 ADDRESS_MAP_END
 
 static INPUT_PORTS_START( play_5 )
 INPUT_PORTS_END
 
-static MACHINE_RESET( play_5 )
+void play_5_state::machine_reset()
 {
 }
 
-static DRIVER_INIT( play_5 )
+DRIVER_INIT_MEMBER(play_5_state,play_5)
 {
 }
+
+static COSMAC_INTERFACE( cdp1802_config )
+{
+	DEVCB_NULL,
+	DEVCB_NULL,
+	DEVCB_NULL,
+	DEVCB_NULL,
+	DEVCB_NULL,
+	DEVCB_NULL,
+	DEVCB_NULL,
+	DEVCB_NULL,
+	DEVCB_NULL,
+	NULL,
+	DEVCB_NULL,
+	DEVCB_NULL
+};
 
 static MACHINE_CONFIG_START( play_5, play_5_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", COSMAC, 2950000)
 	MCFG_CPU_PROGRAM_MAP(play_5_map)
-
-	MCFG_MACHINE_RESET( play_5 )
-
-	/* video hardware */
-	MCFG_DEFAULT_LAYOUT(layout_pinball)
+	MCFG_CPU_CONFIG(cdp1802_config)
 MACHINE_CONFIG_END
 
 /*-------------------------------------------------------------------
@@ -162,9 +186,9 @@ ROM_START(trailer)
 	ROM_RELOAD(0xe000, 0x0800)
 ROM_END
 
-GAME(1982,	spain82,	0,	play_5,	play_5,	play_5,	ROT0,	"Playmatic",		"Spain '82",		GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1984,	ufo_x,		0,	play_5,	play_5,	play_5,	ROT0,	"Playmatic",		"UFO-X",		GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1984,	kz26,		0,	play_5,	play_5,	play_5,	ROT0,	"Playmatic",		"KZ-26",		GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1985,	rock2500,	0,	play_5,	play_5,	play_5,	ROT0,	"Playmatic",		"Rock 2500",		GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1985,	starfirp,	0,	play_5,	play_5,	play_5,	ROT0,	"Playmatic",		"Star Fire",		GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1985,	trailer,	0,	play_5,	play_5,	play_5,	ROT0,	"Playmatic",		"Trailer",		GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
+GAME(1982,  spain82,    0,  play_5, play_5, play_5_state,   play_5, ROT0,   "Playmatic",        "Spain '82",        GAME_IS_SKELETON_MECHANICAL)
+GAME(1984,  ufo_x,      0,  play_5, play_5, play_5_state,   play_5, ROT0,   "Playmatic",        "UFO-X",        GAME_IS_SKELETON_MECHANICAL)
+GAME(1984,  kz26,       0,  play_5, play_5, play_5_state,   play_5, ROT0,   "Playmatic",        "KZ-26",        GAME_IS_SKELETON_MECHANICAL)
+GAME(1985,  rock2500,   0,  play_5, play_5, play_5_state,   play_5, ROT0,   "Playmatic",        "Rock 2500",        GAME_IS_SKELETON_MECHANICAL)
+GAME(1985,  starfirp,   0,  play_5, play_5, play_5_state,   play_5, ROT0,   "Playmatic",        "Star Fire",        GAME_IS_SKELETON_MECHANICAL)
+GAME(1985,  trailer,    0,  play_5, play_5, play_5_state,   play_5, ROT0,   "Playmatic",        "Trailer",      GAME_IS_SKELETON_MECHANICAL)

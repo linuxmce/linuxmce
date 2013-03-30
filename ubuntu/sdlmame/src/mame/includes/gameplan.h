@@ -24,15 +24,16 @@ driver by Chris Moore
 class gameplan_state : public driver_device
 {
 public:
-	gameplan_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config),
-		  m_via_0(*this, "via6522_0"),
-		  m_via_1(*this, "via6522_1"),
-		  m_via_2(*this, "via6522_2") { }
+	gameplan_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+			m_trvquest_question(*this, "trvquest_q"),
+			m_via_0(*this, "via6522_0"),
+			m_via_1(*this, "via6522_1"),
+			m_via_2(*this, "via6522_2") { }
 
 	/* machine state */
 	UINT8   m_current_port;
-	UINT8   *m_trvquest_question;
+	optional_shared_ptr<UINT8> m_trvquest_question;
 
 	/* video state */
 	UINT8   *m_videoram;
@@ -44,14 +45,41 @@ public:
 	emu_timer *m_via_0_ca1_timer;
 
 	/* devices */
-	device_t *m_maincpu;
-	device_t *m_audiocpu;
+	cpu_device *m_maincpu;
+	cpu_device *m_audiocpu;
 	device_t *m_riot;
 	required_device<via6522_device> m_via_0;
 	required_device<via6522_device> m_via_1;
 	required_device<via6522_device> m_via_2;
+	DECLARE_WRITE8_MEMBER(io_select_w);
+	DECLARE_READ8_MEMBER(io_port_r);
+	DECLARE_WRITE8_MEMBER(coin_w);
+	DECLARE_WRITE8_MEMBER(audio_reset_w);
+	DECLARE_WRITE8_MEMBER(audio_cmd_w);
+	DECLARE_WRITE8_MEMBER(audio_trigger_w);
+	DECLARE_WRITE_LINE_MEMBER(r6532_irq);
+	DECLARE_WRITE8_MEMBER(r6532_soundlatch_w);
+	DECLARE_MACHINE_START(gameplan);
+	DECLARE_MACHINE_RESET(gameplan);
+	DECLARE_MACHINE_START(trvquest);
+	DECLARE_MACHINE_RESET(trvquest);
+	DECLARE_VIDEO_START(gameplan);
+	DECLARE_VIDEO_RESET(gameplan);
+	DECLARE_VIDEO_START(leprechn);
+	DECLARE_VIDEO_START(trvquest);
+	DECLARE_VIDEO_START(common);
+	UINT32 screen_update_gameplan(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_leprechn(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(trvquest_interrupt);
+	TIMER_CALLBACK_MEMBER(clear_screen_done_callback);
+	TIMER_CALLBACK_MEMBER(via_irq_delayed);
+	TIMER_CALLBACK_MEMBER(via_0_ca1_timer_callback);
+	DECLARE_WRITE8_MEMBER(video_data_w);
+	DECLARE_WRITE8_MEMBER(gameplan_video_command_w);
+	DECLARE_WRITE8_MEMBER(leprechn_video_command_w);
+	DECLARE_WRITE_LINE_MEMBER(video_command_trigger_w);
+	DECLARE_READ8_MEMBER(vblank_r);
 };
-
 
 /*----------- defined in video/gameplan.c -----------*/
 

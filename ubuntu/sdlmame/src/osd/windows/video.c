@@ -111,7 +111,7 @@ void winvideo_init(running_machine &machine)
 	int index;
 
 	// ensure we get called on the way out
-	machine.add_notifier(MACHINE_NOTIFY_EXIT, winvideo_exit);
+	machine.add_notifier(MACHINE_NOTIFY_EXIT, machine_notify_delegate(FUNC(winvideo_exit), &machine));
 
 	// extract data from the options
 	extract_video_config(machine);
@@ -164,6 +164,7 @@ void winvideo_monitor_refresh(win_monitor_info *monitor)
 	monitor->info.cbSize = sizeof(monitor->info);
 	result = GetMonitorInfo(monitor->handle, (LPMONITORINFO)&monitor->info);
 	assert(result);
+	(void)result; // to silence gcc 4.6
 }
 
 
@@ -272,6 +273,7 @@ static BOOL CALLBACK monitor_enum_callback(HMONITOR handle, HDC dc, LPRECT rect,
 	info.cbSize = sizeof(info);
 	result = GetMonitorInfo(handle, (LPMONITORINFO)&info);
 	assert(result);
+	(void)result; // to silence gcc 4.6
 
 	// allocate a new monitor info
 	monitor = global_alloc_clear(win_monitor_info);
@@ -364,6 +366,14 @@ static void check_osd_inputs(running_machine &machine)
 	// check for toggling fullscreen mode
 	if (ui_input_pressed(machine, IPT_OSD_1))
 		winwindow_toggle_full_screen();
+
+	// check for taking fullscreen snap
+	if (ui_input_pressed(machine, IPT_OSD_2))
+		winwindow_take_snap();
+
+	// check for taking fullscreen video
+	if (ui_input_pressed(machine, IPT_OSD_3))
+		winwindow_take_video();
 }
 
 

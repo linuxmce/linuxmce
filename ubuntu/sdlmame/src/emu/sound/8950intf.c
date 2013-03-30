@@ -22,14 +22,13 @@
 #include "sound/fmopl.h"
 
 
-typedef struct _y8950_state y8950_state;
-struct _y8950_state
+struct y8950_state
 {
-	sound_stream *	stream;
-	emu_timer *		timer[2];
-	void *			chip;
+	sound_stream *  stream;
+	emu_timer *     timer[2];
+	void *          chip;
 	const y8950_interface *intf;
-	device_t *device;
+	y8950_device *device;
 };
 
 
@@ -37,14 +36,14 @@ INLINE y8950_state *get_safe_token(device_t *device)
 {
 	assert(device != NULL);
 	assert(device->type() == Y8950);
-	return (y8950_state *)downcast<legacy_device_base *>(device)->token();
+	return (y8950_state *)downcast<y8950_device *>(device)->token();
 }
 
 
 static void IRQHandler(void *param,int irq)
 {
 	y8950_state *info = (y8950_state *)param;
-	if (info->intf->handler) (info->intf->handler)(info->device, irq ? ASSERT_LINE : CLEAR_LINE);
+	if (!info->device->m_handler.isnull()) info->device->m_handler(irq ? ASSERT_LINE : CLEAR_LINE);
 }
 static TIMER_CALLBACK( timer_callback_0 )
 {
@@ -60,11 +59,11 @@ static void TimerHandler(void *param,int c,attotime period)
 {
 	y8950_state *info = (y8950_state *)param;
 	if( period == attotime::zero )
-	{	/* Reset FM Timer */
+	{   /* Reset FM Timer */
 		info->timer[c]->enable(false);
 	}
 	else
-	{	/* Start FM Timer */
+	{   /* Start FM Timer */
 		info->timer[c]->adjust(period);
 	}
 }
@@ -73,31 +72,31 @@ static void TimerHandler(void *param,int c,attotime period)
 static unsigned char Y8950PortHandler_r(void *param)
 {
 	y8950_state *info = (y8950_state *)param;
-	if (info->intf->portread)
-		return info->intf->portread(info->device,0);
+	if (!info->device->m_portread.isnull())
+		return info->device->m_portread(0);
 	return 0;
 }
 
 static void Y8950PortHandler_w(void *param,unsigned char data)
 {
 	y8950_state *info = (y8950_state *)param;
-	if (info->intf->portwrite)
-		info->intf->portwrite(info->device,0,data);
+	if (!info->device->m_portwrite.isnull())
+		info->device->m_portwrite(0,data);
 }
 
 static unsigned char Y8950KeyboardHandler_r(void *param)
 {
 	y8950_state *info = (y8950_state *)param;
-	if (info->intf->keyboardread)
-		return info->intf->keyboardread(info->device,0);
+	if (!info->device->m_keyboardread.isnull())
+		return info->device->m_keyboardread(0);
 	return 0;
 }
 
 static void Y8950KeyboardHandler_w(void *param,unsigned char data)
 {
 	y8950_state *info = (y8950_state *)param;
-	if (info->intf->keyboardwrite)
-		info->intf->keyboardwrite(info->device,0,data);
+	if (!info->device->m_keyboardwrite.isnull())
+		info->device->m_keyboardwrite(0,data);
 }
 
 static STREAM_UPDATE( y8950_stream_update )
@@ -115,12 +114,12 @@ static void _stream_update(void *param, int interval)
 
 static DEVICE_START( y8950 )
 {
-	static const y8950_interface dummy = { 0 };
+	static const y8950_interface dummy = { DEVCB_NULL, DEVCB_NULL, DEVCB_NULL, DEVCB_NULL, DEVCB_NULL };
 	y8950_state *info = get_safe_token(device);
 	int rate = device->clock()/72;
 
-	info->intf = device->baseconfig().static_config() ? (const y8950_interface *)device->baseconfig().static_config() : &dummy;
-	info->device = device;
+	info->intf = device->static_config() ? (const y8950_interface *)device->static_config() : &dummy;
+	info->device = downcast<y8950_device *>(device);
 
 	/* stream system initialize */
 	info->chip = y8950_init(device,device->clock(),rate);
@@ -168,36 +167,84 @@ WRITE8_DEVICE_HANDLER( y8950_w )
 	y8950_write(info->chip, offset & 1, data);
 }
 
-READ8_DEVICE_HANDLER( y8950_status_port_r ) { return y8950_r(device, 0); }
-READ8_DEVICE_HANDLER( y8950_read_port_r ) { return y8950_r(device, 1); }
-WRITE8_DEVICE_HANDLER( y8950_control_port_w ) { y8950_w(device, 0, data); }
-WRITE8_DEVICE_HANDLER( y8950_write_port_w ) { y8950_w(device, 1, data); }
+READ8_DEVICE_HANDLER( y8950_status_port_r ) { return y8950_r(device, space, 0); }
+READ8_DEVICE_HANDLER( y8950_read_port_r ) { return y8950_r(device, space, 1); }
+WRITE8_DEVICE_HANDLER( y8950_control_port_w ) { y8950_w(device, space, 0, data); }
+WRITE8_DEVICE_HANDLER( y8950_write_port_w ) { y8950_w(device, space, 1, data); }
 
 
-/**************************************************************************
- * Generic get_info
- **************************************************************************/
+const device_type Y8950 = &device_creator<y8950_device>;
 
-DEVICE_GET_INFO( y8950 )
+y8950_device::y8950_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, Y8950, "Y8950", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
 {
-	switch (state)
+	m_token = global_alloc_clear(y8950_state);
+}
+
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
+
+void y8950_device::device_config_complete()
+{
+	// inherit a copy of the static data
+	const y8950_interface *intf = reinterpret_cast<const y8950_interface *>(static_config());
+	if (intf != NULL)
+		*static_cast<y8950_interface *>(this) = *intf;
+
+	// or initialize to defaults if none provided
+	else
 	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(y8950_state);				break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME( y8950 );				break;
-		case DEVINFO_FCT_STOP:							info->stop = DEVICE_STOP_NAME( y8950 );				break;
-		case DEVINFO_FCT_RESET:							info->reset = DEVICE_RESET_NAME( y8950 );				break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "Y8950");							break;
-		case DEVINFO_STR_FAMILY:					strcpy(info->s, "Yamaha FM");						break;
-		case DEVINFO_STR_VERSION:					strcpy(info->s, "1.0");								break;
-		case DEVINFO_STR_SOURCE_FILE:						strcpy(info->s, __FILE__);							break;
-		case DEVINFO_STR_CREDITS:					strcpy(info->s, "Copyright Nicola Salmoria and the MAME Team"); break;
+		memset(&m_handler_cb, 0, sizeof(m_handler_cb));
+		memset(&m_keyboardread_cb, 0, sizeof(m_keyboardread_cb));
+		memset(&m_keyboardwrite_cb, 0, sizeof(m_keyboardwrite_cb));
+		memset(&m_portread_cb, 0, sizeof(m_portread_cb));
+		memset(&m_portwrite_cb, 0, sizeof(m_portwrite_cb));
 	}
 }
 
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
 
-DEFINE_LEGACY_SOUND_DEVICE(Y8950, y8950);
+void y8950_device::device_start()
+{
+	m_handler.resolve(m_handler_cb, *this);
+	m_keyboardread.resolve(m_keyboardread_cb, *this);
+	m_keyboardwrite.resolve(m_keyboardwrite_cb, *this);
+	m_portread.resolve(m_portread_cb, *this);
+	m_portwrite.resolve(m_portwrite_cb, *this);
+
+	DEVICE_START_NAME( y8950 )(this);
+}
+
+//-------------------------------------------------
+//  device_reset - device-specific reset
+//-------------------------------------------------
+
+void y8950_device::device_reset()
+{
+	DEVICE_RESET_NAME( y8950 )(this);
+}
+
+//-------------------------------------------------
+//  device_stop - device-specific stop
+//-------------------------------------------------
+
+void y8950_device::device_stop()
+{
+	DEVICE_STOP_NAME( y8950 )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void y8950_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}

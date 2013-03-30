@@ -18,38 +18,37 @@
 
 
 #ifndef M_LN2
-#define M_LN2		0.69314718055994530942
+#define M_LN2       0.69314718055994530942
 #endif
 
-#define TONE_VOLUME	50
-#define CHANNELS	3
+#define TONE_VOLUME 50
+#define CHANNELS    3
 
-#define SAMPLE_RATE	(48000)
-#define FRAC_BITS	16
-#define FRAC_ONE	(1 << FRAC_BITS)
-#define FRAC_MASK	(FRAC_ONE - 1)
+#define SAMPLE_RATE (48000)
+#define FRAC_BITS   16
+#define FRAC_ONE    (1 << FRAC_BITS)
+#define FRAC_MASK   (FRAC_ONE - 1)
 
-typedef struct tone
+struct TONE
 {
-	int	mute;
-	int	offset;
-	int	base;
-	int	mask;
-	INT32	sample_rate;
-	INT32	sample_step;
-	INT32	sample_cur;
-	INT16	form[16];
-} TONE;
+	int mute;
+	int offset;
+	int base;
+	int mask;
+	INT32   sample_rate;
+	INT32   sample_step;
+	INT32   sample_cur;
+	INT16   form[16];
+};
 
-typedef struct _snk6502_sound_state snk6502_sound_state;
-struct _snk6502_sound_state
+struct snk6502_sound_state
 {
 	TONE m_tone_channels[CHANNELS];
 	INT32 m_tone_clock_expire;
 	INT32 m_tone_clock;
 	sound_stream * m_tone_stream;
 
-	device_t *m_samples;
+	samples_device *m_samples;
 	UINT8 *m_ROM;
 	int m_Sound0StopOnRollover;
 	UINT8 m_LastPort1;
@@ -65,17 +64,17 @@ static const char *const sasuke_sample_names[] =
 	"*sasuke",
 
 	// SN76477 and discrete
-	"hit.wav",
-	"boss_start.wav",
-	"shot.wav",
-	"boss_attack.wav",
+	"hit",
+	"boss_start",
+	"shot",
+	"boss_attack",
 
 	0
 };
 
 const samples_interface sasuke_samples_interface =
 {
-	4,	/* 4 channels */
+	4,  /* 4 channels */
 	sasuke_sample_names
 };
 
@@ -84,33 +83,33 @@ static const char *const vanguard_sample_names[] =
 	"*vanguard",
 
 	// SN76477 and discrete
-	"fire.wav",
-	"explsion.wav",
+	"fire",
+	"explsion",
 
 	// HD38880 speech
-	"vg_voi-0.wav",
-	"vg_voi-1.wav",
-	"vg_voi-2.wav",
-	"vg_voi-3.wav",
-	"vg_voi-4.wav",
-	"vg_voi-5.wav",
-	"vg_voi-6.wav",
-	"vg_voi-7.wav",
-	"vg_voi-8.wav",
-	"vg_voi-9.wav",
-	"vg_voi-a.wav",
-	"vg_voi-b.wav",
-	"vg_voi-c.wav",
-	"vg_voi-d.wav",
-	"vg_voi-e.wav",
-	"vg_voi-f.wav",
+	"vg_voi-0",
+	"vg_voi-1",
+	"vg_voi-2",
+	"vg_voi-3",
+	"vg_voi-4",
+	"vg_voi-5",
+	"vg_voi-6",
+	"vg_voi-7",
+	"vg_voi-8",
+	"vg_voi-9",
+	"vg_voi-a",
+	"vg_voi-b",
+	"vg_voi-c",
+	"vg_voi-d",
+	"vg_voi-e",
+	"vg_voi-f",
 
 	0
 };
 
 const samples_interface vanguard_samples_interface =
 {
-	3,	/* 3 channel */
+	3,  /* 3 channel */
 	vanguard_sample_names
 };
 
@@ -119,230 +118,230 @@ static const char *const fantasy_sample_names[] =
 	"*fantasy",
 
 	// HD38880 speech
-	"ft_voi-0.wav",
-	"ft_voi-1.wav",
-	"ft_voi-2.wav",
-	"ft_voi-3.wav",
-	"ft_voi-4.wav",
-	"ft_voi-5.wav",
-	"ft_voi-6.wav",
-	"ft_voi-7.wav",
-	"ft_voi-8.wav",
-	"ft_voi-9.wav",
-	"ft_voi-a.wav",
-	"ft_voi-b.wav",
+	"ft_voi-0",
+	"ft_voi-1",
+	"ft_voi-2",
+	"ft_voi-3",
+	"ft_voi-4",
+	"ft_voi-5",
+	"ft_voi-6",
+	"ft_voi-7",
+	"ft_voi-8",
+	"ft_voi-9",
+	"ft_voi-a",
+	"ft_voi-b",
 
 	0
 };
 
 const samples_interface fantasy_samples_interface =
 {
-	1,	/* 1 channel */
+	1,  /* 1 channel */
 	fantasy_sample_names
 };
 
 
 const sn76477_interface sasuke_sn76477_intf_1 =
 {
-	RES_K(470),		/*  4  noise_res     */
-	RES_K(150),		/*  5  filter_res    */
-	CAP_P(4700),	/*  6  filter_cap    */
-	RES_K(22),		/*  7  decay_res     */
-	CAP_U(10),		/*  8  attack_decay_cap  */
-	RES_K(10),		/* 10  attack_res    */
-	RES_K(100),		/* 11  amplitude_res     */
-	RES_K(47),		/* 12  feedback_res      */
-	0 /* NC */,		/* 16  vco_voltage   */
-	0 /* NC */,		/* 17  vco_cap       */
-	0 /* NC */,		/* 18  vco_res       */
-	0 /* NC */,		/* 19  pitch_voltage     */
-	RES_K(10),		/* 20  slf_res       */
-	0 /* NC */,		/* 21  slf_cap       */
-	CAP_U(2.2),		/* 23  oneshot_cap   */
-	RES_K(100),		/* 24  oneshot_res   */
-	0,			    /* 22  vco                    */
-	0,			    /* 26  mixer A           */
-	1,			    /* 25  mixer B           */
-	0,			    /* 27  mixer C           */
-	1,			    /* 1   envelope 1        */
-	0,			    /* 28  envelope 2        */
-	1			    /* 9   enable (variable)      */
+	RES_K(470),     /*  4  noise_res     */
+	RES_K(150),     /*  5  filter_res    */
+	CAP_P(4700),    /*  6  filter_cap    */
+	RES_K(22),      /*  7  decay_res     */
+	CAP_U(10),      /*  8  attack_decay_cap  */
+	RES_K(10),      /* 10  attack_res    */
+	RES_K(100),     /* 11  amplitude_res     */
+	RES_K(47),      /* 12  feedback_res      */
+	0 /* NC */,     /* 16  vco_voltage   */
+	0 /* NC */,     /* 17  vco_cap       */
+	0 /* NC */,     /* 18  vco_res       */
+	0 /* NC */,     /* 19  pitch_voltage     */
+	RES_K(10),      /* 20  slf_res       */
+	0 /* NC */,     /* 21  slf_cap       */
+	CAP_U(2.2),     /* 23  oneshot_cap   */
+	RES_K(100),     /* 24  oneshot_res   */
+	0,              /* 22  vco                    */
+	0,              /* 26  mixer A           */
+	1,              /* 25  mixer B           */
+	0,              /* 27  mixer C           */
+	1,              /* 1   envelope 1        */
+	0,              /* 28  envelope 2        */
+	1               /* 9   enable (variable)      */
 
 	// ic48     GND: 2,22,26,27,28  +5V: 1,15,25
 };
 
 const sn76477_interface sasuke_sn76477_intf_2 =
 {
-	RES_K(340),		/*  4  noise_res     */
-	RES_K(47),		/*  5  filter_res    */
-	CAP_P(100),		/*  6  filter_cap    */
-	RES_K(470),		/*  7  decay_res     */
-	CAP_U(4.7),		/*  8  attack_decay_cap  */
-	RES_K(10),		/* 10  attack_res    */
-	RES_K(100),		/* 11  amplitude_res     */
-	RES_K(47),		/* 12  feedback_res      */
-	0 /* NC */,		/* 16  vco_voltage   */
-	CAP_P(220),		/* 17  vco_cap       */
-	RES_K(1000),	/* 18  vco_res       */
-	0 /* NC */,		/* 19  pitch_voltage     */
-	RES_K(220),		/* 20  slf_res       */
-	0 /* NC */,		/* 21  slf_cap       */
-	CAP_U(22),		/* 23  oneshot_cap   */
-	RES_K(47),		/* 24  oneshot_res   */
-	1,			    /* 22  vco                    */
-	0,			    /* 26  mixer A           */
-	1,			    /* 25  mixer B           */
-	0,			    /* 27  mixer C           */
-	1,			    /* 1   envelope 1        */
-	1,			    /* 28  envelope 2        */
-	1			    /* 9   enable (variable)      */
+	RES_K(340),     /*  4  noise_res     */
+	RES_K(47),      /*  5  filter_res    */
+	CAP_P(100),     /*  6  filter_cap    */
+	RES_K(470),     /*  7  decay_res     */
+	CAP_U(4.7),     /*  8  attack_decay_cap  */
+	RES_K(10),      /* 10  attack_res    */
+	RES_K(100),     /* 11  amplitude_res     */
+	RES_K(47),      /* 12  feedback_res      */
+	0 /* NC */,     /* 16  vco_voltage   */
+	CAP_P(220),     /* 17  vco_cap       */
+	RES_K(1000),    /* 18  vco_res       */
+	0 /* NC */,     /* 19  pitch_voltage     */
+	RES_K(220),     /* 20  slf_res       */
+	0 /* NC */,     /* 21  slf_cap       */
+	CAP_U(22),      /* 23  oneshot_cap   */
+	RES_K(47),      /* 24  oneshot_res   */
+	1,              /* 22  vco                    */
+	0,              /* 26  mixer A           */
+	1,              /* 25  mixer B           */
+	0,              /* 27  mixer C           */
+	1,              /* 1   envelope 1        */
+	1,              /* 28  envelope 2        */
+	1               /* 9   enable (variable)      */
 
 	// ic51     GND: 2,26,27        +5V: 1,15,22,25,28
 };
 
 const sn76477_interface sasuke_sn76477_intf_3 =
 {
-	RES_K(330),		/*  4  noise_res     */
-	RES_K(47),		/*  5  filter_res    */
-	CAP_P(100),		/*  6  filter_cap    */
-	RES_K(1),		/*  7  decay_res     */
-	0 /* NC */,		/*  8  attack_decay_cap  */
-	RES_K(1),		/* 10  attack_res    */
-	RES_K(100),		/* 11  amplitude_res     */
-	RES_K(47),		/* 12  feedback_res      */
-	0 /* NC */,		/* 16  vco_voltage   */
-	CAP_P(1000),	/* 17  vco_cap       */
-	RES_K(1000),	/* 18  vco_res       */
-	0 /* NC */,		/* 19  pitch_voltage     */
-	RES_K(10),		/* 20  slf_res       */
-	CAP_U(1),		/* 21  slf_cap       */
-	CAP_U(2.2),		/* 23  oneshot_cap   */
-	RES_K(150),		/* 24  oneshot_res   */
-	0,			    /* 22  vco                    */
-	1,			    /* 26  mixer A           */
-	1,			    /* 25  mixer B           */
-	0,			    /* 27  mixer C           */
-	1,			    /* 1   envelope 1        */
-	0,			    /* 28  envelope 2        */
-	1			    /* 9   enable (variable)      */
+	RES_K(330),     /*  4  noise_res     */
+	RES_K(47),      /*  5  filter_res    */
+	CAP_P(100),     /*  6  filter_cap    */
+	RES_K(1),       /*  7  decay_res     */
+	0 /* NC */,     /*  8  attack_decay_cap  */
+	RES_K(1),       /* 10  attack_res    */
+	RES_K(100),     /* 11  amplitude_res     */
+	RES_K(47),      /* 12  feedback_res      */
+	0 /* NC */,     /* 16  vco_voltage   */
+	CAP_P(1000),    /* 17  vco_cap       */
+	RES_K(1000),    /* 18  vco_res       */
+	0 /* NC */,     /* 19  pitch_voltage     */
+	RES_K(10),      /* 20  slf_res       */
+	CAP_U(1),       /* 21  slf_cap       */
+	CAP_U(2.2),     /* 23  oneshot_cap   */
+	RES_K(150),     /* 24  oneshot_res   */
+	0,              /* 22  vco                    */
+	1,              /* 26  mixer A           */
+	1,              /* 25  mixer B           */
+	0,              /* 27  mixer C           */
+	1,              /* 1   envelope 1        */
+	0,              /* 28  envelope 2        */
+	1               /* 9   enable (variable)      */
 
 	// ic52     GND: 2,22,27,28     +5V: 1,15,25,26
 };
 
 const sn76477_interface satansat_sn76477_intf =
 {
-	RES_K(470),		/*  4  noise_res     */
-	RES_M(1.5),		/*  5  filter_res    */
-	CAP_P(220),		/*  6  filter_cap    */
-	0,				/*  7  decay_res     */
-	0,				/*  8  attack_decay_cap  */
-	0,				/* 10  attack_res    */
-	RES_K(47),		/* 11  amplitude_res     */
-	RES_K(47),		/* 12  feedback_res      */
-	0,				/* 16  vco_voltage   */
-	0,				/* 17  vco_cap       */
-	0,				/* 18  vco_res       */
-	0,				/* 19  pitch_voltage     */
-	0,				/* 20  slf_res       */
-	0,				/* 21  slf_cap       */
-	0,				/* 23  oneshot_cap   */
-	0,				/* 24  oneshot_res   */
-	0,			    /* 22  vco                    */
-	0,			    /* 26  mixer A           */
-	1,			    /* 25  mixer B           */
-	0,			    /* 27  mixer C           */
-	1,			    /* 1   envelope 1        */
-	1,			    /* 28  envelope 2        */
-	1			    /* 9   enable (variable)      */
+	RES_K(470),     /*  4  noise_res     */
+	RES_M(1.5),     /*  5  filter_res    */
+	CAP_P(220),     /*  6  filter_cap    */
+	0,              /*  7  decay_res     */
+	0,              /*  8  attack_decay_cap  */
+	0,              /* 10  attack_res    */
+	RES_K(47),      /* 11  amplitude_res     */
+	RES_K(47),      /* 12  feedback_res      */
+	0,              /* 16  vco_voltage   */
+	0,              /* 17  vco_cap       */
+	0,              /* 18  vco_res       */
+	0,              /* 19  pitch_voltage     */
+	0,              /* 20  slf_res       */
+	0,              /* 21  slf_cap       */
+	0,              /* 23  oneshot_cap   */
+	0,              /* 24  oneshot_res   */
+	0,              /* 22  vco                    */
+	0,              /* 26  mixer A           */
+	1,              /* 25  mixer B           */
+	0,              /* 27  mixer C           */
+	1,              /* 1   envelope 1        */
+	1,              /* 28  envelope 2        */
+	1               /* 9   enable (variable)      */
 
 	// ???      GND: 2,26,27        +5V: 15,25
 };
 
 const sn76477_interface vanguard_sn76477_intf_1 =
 {
-	RES_K(470),		/*  4  noise_res     */
-	RES_M(1.5),		/*  5  filter_res    */
-	CAP_P(220),		/*  6  filter_cap    */
-	0,				/*  7  decay_res     */
-	0,				/*  8  attack_decay_cap  */
-	0,				/* 10  attack_res    */
-	RES_K(47),		/* 11  amplitude_res     */
-	RES_K(4.7),		/* 12  feedback_res      */
-	0,				/* 16  vco_voltage   */
-	0,				/* 17  vco_cap       */
-	0,				/* 18  vco_res       */
-	0,				/* 19  pitch_voltage     */
-	0,				/* 20  slf_res       */
-	0,				/* 21  slf_cap       */
-	0,				/* 23  oneshot_cap   */
-	0,				/* 24  oneshot_res   */
-	0,			    /* 22  vco                    */
-	0,				/* 26  mixer A           */
-	1,				/* 25  mixer B           */
-	0,				/* 27  mixer C           */
-	1,				/* 1   envelope 1        */
-	1,				/* 28  envelope 2        */
-	1			    /* 9   enable (variable)      */
+	RES_K(470),     /*  4  noise_res     */
+	RES_M(1.5),     /*  5  filter_res    */
+	CAP_P(220),     /*  6  filter_cap    */
+	0,              /*  7  decay_res     */
+	0,              /*  8  attack_decay_cap  */
+	0,              /* 10  attack_res    */
+	RES_K(47),      /* 11  amplitude_res     */
+	RES_K(4.7),     /* 12  feedback_res      */
+	0,              /* 16  vco_voltage   */
+	0,              /* 17  vco_cap       */
+	0,              /* 18  vco_res       */
+	0,              /* 19  pitch_voltage     */
+	0,              /* 20  slf_res       */
+	0,              /* 21  slf_cap       */
+	0,              /* 23  oneshot_cap   */
+	0,              /* 24  oneshot_res   */
+	0,              /* 22  vco                    */
+	0,              /* 26  mixer A           */
+	1,              /* 25  mixer B           */
+	0,              /* 27  mixer C           */
+	1,              /* 1   envelope 1        */
+	1,              /* 28  envelope 2        */
+	1               /* 9   enable (variable)      */
 
 	// SHOT A   GND: 2,9,26,27  +5V: 15,25
 };
 
 const sn76477_interface vanguard_sn76477_intf_2 =
 {
-	RES_K(10),		/*  4  noise_res     */
-	RES_K(30),		/*  5  filter_res    */
-	0,				/*  6  filter_cap    */
-	0,				/*  7  decay_res     */
-	0,				/*  8  attack_decay_cap  */
-	0,				/* 10  attack_res    */
-	RES_K(47),		/* 11  amplitude_res     */
-	RES_K(4.7),		/* 12  feedback_res      */
-	0,				/* 16  vco_voltage   */
-	0,				/* 17  vco_cap       */
-	0,				/* 18  vco_res       */
-	0,				/* 19  pitch_voltage     */
-	0,				/* 20  slf_res       */
-	0,				/* 21  slf_cap       */
-	0,				/* 23  oneshot_cap   */
-	0,				/* 24  oneshot_res   */
-	0,			    /* 22  vco                    */
-	0,				/* 26  mixer A           */
-	1,				/* 25  mixer B           */
-	0,				/* 27  mixer C           */
-	0,				/* 1   envelope 1        */
-	1,				/* 28  envelope 2        */
-	1			    /* 9   enable (variable)      */
+	RES_K(10),      /*  4  noise_res     */
+	RES_K(30),      /*  5  filter_res    */
+	0,              /*  6  filter_cap    */
+	0,              /*  7  decay_res     */
+	0,              /*  8  attack_decay_cap  */
+	0,              /* 10  attack_res    */
+	RES_K(47),      /* 11  amplitude_res     */
+	RES_K(4.7),     /* 12  feedback_res      */
+	0,              /* 16  vco_voltage   */
+	0,              /* 17  vco_cap       */
+	0,              /* 18  vco_res       */
+	0,              /* 19  pitch_voltage     */
+	0,              /* 20  slf_res       */
+	0,              /* 21  slf_cap       */
+	0,              /* 23  oneshot_cap   */
+	0,              /* 24  oneshot_res   */
+	0,              /* 22  vco                    */
+	0,              /* 26  mixer A           */
+	1,              /* 25  mixer B           */
+	0,              /* 27  mixer C           */
+	0,              /* 1   envelope 1        */
+	1,              /* 28  envelope 2        */
+	1               /* 9   enable (variable)      */
 
 	// SHOT B   GND: 1,2,26,27  +5V: 15,25,28
 };
 
 const sn76477_interface fantasy_sn76477_intf =
 {
-	RES_K(470),		/*  4  noise_res     */
-	RES_M(1.5),		/*  5  filter_res    */
-	CAP_P(220),		/*  6  filter_cap    */
-	0,				/*  7  decay_res     */
-	0,				/*  8  attack_decay_cap  */
-	0,				/* 10  attack_res    */
-	RES_K(470),		/* 11  amplitude_res     */
-	RES_K(4.7),		/* 12  feedback_res      */
-	0,				/* 16  vco_voltage   */
-	0,				/* 17  vco_cap       */
-	0,				/* 18  vco_res       */
-	0,				/* 19  pitch_voltage     */
-	0,				/* 20  slf_res       */
-	0,				/* 21  slf_cap       */
-	0,				/* 23  oneshot_cap   */
-	0,				/* 24  oneshot_res   */
-	0,			    /* 22  vco                    */
-	0,			    /* 26  mixer A           */
-	1,			    /* 25  mixer B           */
-	0,			    /* 27  mixer C           */
+	RES_K(470),     /*  4  noise_res     */
+	RES_M(1.5),     /*  5  filter_res    */
+	CAP_P(220),     /*  6  filter_cap    */
+	0,              /*  7  decay_res     */
+	0,              /*  8  attack_decay_cap  */
+	0,              /* 10  attack_res    */
+	RES_K(470),     /* 11  amplitude_res     */
+	RES_K(4.7),     /* 12  feedback_res      */
+	0,              /* 16  vco_voltage   */
+	0,              /* 17  vco_cap       */
+	0,              /* 18  vco_res       */
+	0,              /* 19  pitch_voltage     */
+	0,              /* 20  slf_res       */
+	0,              /* 21  slf_cap       */
+	0,              /* 23  oneshot_cap   */
+	0,              /* 24  oneshot_res   */
+	0,              /* 22  vco                    */
+	0,              /* 26  mixer A           */
+	1,              /* 25  mixer B           */
+	0,              /* 27  mixer C           */
 	/* schematic does not show pin 1 grounded, but it must be. */
 	/* otherwise it is using the VCO for the envelope, but the VCO is not hooked up */
-	0,			    /* 1   envelope 1        */
-	1,			    /* 28  envelope 2        */
-	0			    /* 9   enable (variable)      */
+	0,              /* 1   envelope 1        */
+	1,              /* 28  envelope 2        */
+	0               /* 9   enable (variable)      */
 
 	// BOMB     GND:    2,9,26,27       +5V: 15,25
 };
@@ -358,9 +357,9 @@ static const discrete_op_amp_filt_info fantasy_filter =
 	RES_K(10.5), 0, RES_K(33), 0, RES_K(470), CAP_U(.01), CAP_U(.01), 0, 0, 12, -12
 };
 
-#define FANTASY_BOMB_EN				NODE_01
-#define FANTASY_NOISE_STREAM_IN		NODE_02
-#define FANTASY_NOISE_LOGIC			NODE_03
+#define FANTASY_BOMB_EN             NODE_01
+#define FANTASY_NOISE_STREAM_IN     NODE_02
+#define FANTASY_NOISE_LOGIC         NODE_03
 
 DISCRETE_SOUND_START( fantasy )
 
@@ -386,7 +385,7 @@ INLINE snk6502_sound_state *get_safe_token( device_t *device )
 	assert(device != NULL);
 	assert(device->type() == SNK6502);
 
-	return (snk6502_sound_state *)downcast<legacy_device_base *>(device)->token();
+	return (snk6502_sound_state *)downcast<snk6502_sound_device *>(device)->token();
 }
 
 INLINE void validate_tone_channel(snk6502_sound_state *state, int channel)
@@ -431,7 +430,7 @@ static STREAM_UPDATE( snk6502_tone_update )
 
 				/* interpolate */
 				data += ((INT32)prev * (FRAC_ONE - (cur_pos & FRAC_MASK))
-				        + (INT32)cur * (cur_pos & FRAC_MASK)) >> FRAC_BITS;
+						+ (INT32)cur * (cur_pos & FRAC_MASK)) >> FRAC_BITS;
 
 				voice->sample_cur = cur_pos;
 			}
@@ -653,8 +652,8 @@ static DEVICE_START( snk6502_sound )
 {
 	snk6502_sound_state *state = get_safe_token(device);
 
-	state->m_samples = device->machine().device("samples");
-	state->m_ROM = device->machine().region("snk6502")->base();
+	state->m_samples = device->machine().device<samples_device>("samples");
+	state->m_ROM = device->machine().root_device().memregion("snk6502")->base();
 
 	// adjusted
 	snk6502_set_music_freq(device->machine(), 43000);
@@ -663,22 +662,6 @@ static DEVICE_START( snk6502_sound )
 	snk6502_set_music_clock(device->machine(), M_LN2 * (RES_K(18) * 2 + RES_K(1)) * CAP_U(1));
 
 	state->m_tone_stream = device->machine().sound().stream_alloc(*device, 0, 1, SAMPLE_RATE, NULL, snk6502_tone_update);
-}
-
-DEVICE_GET_INFO( snk6502_sound )
-{
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(snk6502_sound_state);			break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME(snk6502_sound);	break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "snk6502 Custom");				break;
-		case DEVINFO_STR_SOURCE_FILE:						strcpy(info->s, __FILE__);						break;
-	}
 }
 
 int snk6502_music0_playing(running_machine &machine)
@@ -693,35 +676,35 @@ int snk6502_music0_playing(running_machine &machine)
 
 WRITE8_HANDLER( sasuke_sound_w )
 {
-	device_t *device = space->machine().device("snk6502");
+	device_t *device = space.machine().device("snk6502");
 	snk6502_sound_state *state = get_safe_token(device);
-	device_t *samples = state->m_samples;
+	samples_device *samples = state->m_samples;
 	TONE *tone_channels = state->m_tone_channels;
 
 	switch (offset)
 	{
 	case 0:
 		/*
-            bit description
+		    bit description
 
-            0   hit (ic52)
-            1   boss start (ic51)
-            2   shot
-            3   boss attack (ic48?)
-            4   ??
-            5
-            6
-            7   reset counter
-        */
+		    0   hit (ic52)
+		    1   boss start (ic51)
+		    2   shot
+		    3   boss attack (ic48?)
+		    4   ??
+		    5
+		    6
+		    7   reset counter
+		*/
 
 		if ((~data & 0x01) && (state->m_LastPort1 & 0x01))
-			sample_start(samples, 0, 0, 0);
+			samples->start(0, 0);
 		if ((~data & 0x02) && (state->m_LastPort1 & 0x02))
-			sample_start(samples, 1, 1, 0);
+			samples->start(1, 1);
 		if ((~data & 0x04) && (state->m_LastPort1 & 0x04))
-			sample_start(samples, 2, 2, 0);
+			samples->start(2, 2);
 		if ((~data & 0x08) && (state->m_LastPort1 & 0x08))
-			sample_start(samples, 3, 3, 0);
+			samples->start(3, 3);
 
 		if ((data & 0x80) && (~state->m_LastPort1 & 0x80))
 		{
@@ -737,17 +720,17 @@ WRITE8_HANDLER( sasuke_sound_w )
 
 	case 1:
 		/*
-            bit description
+		    bit description
 
-            0
-            1   wave form
-            2   wave form
-            3   wave form
-            4   MUSIC A8
-            5   MUSIC A9
-            6   MUSIC A10
-            7
-        */
+		    0
+		    1   wave form
+		    2   wave form
+		    3   wave form
+		    4   MUSIC A8
+		    5   MUSIC A9
+		    6   MUSIC A10
+		    7
+		*/
 
 		/* select tune in ROM based on sound command byte */
 		tone_channels[0].base = 0x0000 + ((data & 0x70) << 4);
@@ -763,18 +746,18 @@ WRITE8_HANDLER( sasuke_sound_w )
 
 WRITE8_HANDLER( satansat_sound_w )
 {
-	device_t *device = space->machine().device("snk6502");
+	device_t *device = space.machine().device("snk6502");
 	snk6502_sound_state *state = get_safe_token(device);
-	device_t *samples = state->m_samples;
+	samples_device *samples = state->m_samples;
 	TONE *tone_channels = state->m_tone_channels;
 
 	switch (offset)
 	{
 	case 0:
 		/*
-            bit description
+		    bit description
 
-        */
+		*/
 
 		/* bit 0 = analog sound trigger */
 
@@ -782,7 +765,7 @@ WRITE8_HANDLER( satansat_sound_w )
 
 		/* bit 2 = analog sound trigger */
 		if (data & 0x04 && !(state->m_LastPort1 & 0x04))
-			sample_start(samples, 0, 1, 0);
+			samples->start(0, 1);
 
 		if (data & 0x08)
 		{
@@ -800,9 +783,9 @@ WRITE8_HANDLER( satansat_sound_w )
 		break;
 	case 1:
 		/*
-            bit description
+		    bit description
 
-        */
+		*/
 
 		/* select tune in ROM based on sound command byte */
 		tone_channels[0].base = 0x0000 + ((data & 0x0e) << 7);
@@ -830,26 +813,26 @@ WRITE8_HANDLER( satansat_sound_w )
 
 WRITE8_HANDLER( vanguard_sound_w )
 {
-	device_t *device = space->machine().device("snk6502");
+	device_t *device = space.machine().device("snk6502");
 	snk6502_sound_state *state = get_safe_token(device);
-	device_t *samples = state->m_samples;
+	samples_device *samples = state->m_samples;
 	TONE *tone_channels = state->m_tone_channels;
 
 	switch (offset)
 	{
 	case 0:
 		/*
-            bit description
+		    bit description
 
-            0   MUSIC A10
-            1   MUSIC A9
-            2   MUSIC A8
-            3   LS05 PORT 1
-            4   LS04 PORT 2
-            5   SHOT A
-            6   SHOT B
-            7   BOMB
-        */
+		    0   MUSIC A10
+		    1   MUSIC A9
+		    2   MUSIC A8
+		    3   LS05 PORT 1
+		    4   LS04 PORT 2
+		    5   SHOT A
+		    6   SHOT B
+		    7   BOMB
+		*/
 
 		/* select musical tune in ROM based on sound command byte */
 		tone_channels[0].base = ((data & 0x07) << 8);
@@ -860,13 +843,13 @@ WRITE8_HANDLER( vanguard_sound_w )
 		/* play noise samples requested by sound command byte */
 		/* SHOT A */
 		if (data & 0x20 && !(state->m_LastPort1 & 0x20))
-			sample_start(samples, 1, 0, 0);
+			samples->start(1, 0);
 		else if (!(data & 0x20) && state->m_LastPort1 & 0x20)
-			sample_stop(samples, 1);
+			samples->stop(1);
 
 		/* BOMB */
 		if (data & 0x80 && !(state->m_LastPort1 & 0x80))
-			sample_start(samples, 2, 1, 0);
+			samples->start(2, 1);
 
 		if (data & 0x08)
 		{
@@ -880,23 +863,23 @@ WRITE8_HANDLER( vanguard_sound_w )
 		}
 
 		/* SHOT B */
-		sn76477_enable_w(space->machine().device("sn76477.2"), (data & 0x40) ? 0 : 1);
+		sn76477_enable_w(space.machine().device("sn76477.2"), (data & 0x40) ? 0 : 1);
 
 		state->m_LastPort1 = data;
 		break;
 	case 1:
 		/*
-            bit description
+		    bit description
 
-            0   MUSIC A10
-            1   MUSIC A9
-            2   MUSIC A8
-            3   LS04 PORT 3
-            4   EXTP A (HD38880 external pitch control A)
-            5   EXTP B (HD38880 external pitch control B)
-            6
-            7
-        */
+		    0   MUSIC A10
+		    1   MUSIC A9
+		    2   MUSIC A8
+		    3   LS04 PORT 3
+		    4   EXTP A (HD38880 external pitch control A)
+		    5   EXTP B (HD38880 external pitch control B)
+		    6
+		    7
+		*/
 
 		/* select tune in ROM based on sound command byte */
 		tone_channels[1].base = 0x0800 + ((data & 0x07) << 8);
@@ -912,17 +895,17 @@ WRITE8_HANDLER( vanguard_sound_w )
 		break;
 	case 2:
 		/*
-            bit description
+		    bit description
 
-            0   AS 1    (sound0 waveform)
-            1   AS 2    (sound0 waveform)
-            2   AS 4    (sound0 waveform)
-            3   AS 3    (sound0 waveform)
-            4   AS 5    (sound1 waveform)
-            5   AS 6    (sound1 waveform)
-            6   AS 7    (sound1 waveform)
-            7   AS 8    (sound1 waveform)
-        */
+		    0   AS 1    (sound0 waveform)
+		    1   AS 2    (sound0 waveform)
+		    2   AS 4    (sound0 waveform)
+		    3   AS 3    (sound0 waveform)
+		    4   AS 5    (sound1 waveform)
+		    5   AS 6    (sound1 waveform)
+		    6   AS 7    (sound1 waveform)
+		    7   AS 8    (sound1 waveform)
+		*/
 
 		build_waveform(state, 0, (data & 0x3) | ((data & 4) << 1) | ((data & 8) >> 1));
 		build_waveform(state, 1, data >> 4);
@@ -931,7 +914,7 @@ WRITE8_HANDLER( vanguard_sound_w )
 
 WRITE8_HANDLER( fantasy_sound_w )
 {
-	device_t *device = space->machine().device("snk6502");
+	device_t *device = space.machine().device("snk6502");
 	snk6502_sound_state *state = get_safe_token(device);
 	TONE *tone_channels = state->m_tone_channels;
 
@@ -939,17 +922,17 @@ WRITE8_HANDLER( fantasy_sound_w )
 	{
 	case 0:
 		/*
-            bit description
+		    bit description
 
-            0   MUSIC A10
-            1   MUSIC A9
-            2   MUSIC A8
-            3   LS04 PART 1
-            4   LS04 PART 2
-            5
-            6
-            7   BOMB
-        */
+		    0   MUSIC A10
+		    1   MUSIC A9
+		    2   MUSIC A8
+		    3   LS04 PART 1
+		    4   LS04 PART 2
+		    5
+		    6
+		    7   BOMB
+		*/
 
 		/* select musical tune in ROM based on sound command byte */
 		tone_channels[0].base = 0x0000 + ((data & 0x07) << 8);
@@ -974,23 +957,23 @@ WRITE8_HANDLER( fantasy_sound_w )
 		}
 
 		/* BOMB */
-		discrete_sound_w(space->machine().device("discrete"), FANTASY_BOMB_EN, data & 0x80);
+		discrete_sound_w(space.machine().device("discrete"), space, FANTASY_BOMB_EN, data & 0x80);
 
 		state->m_LastPort1 = data;
 		break;
 	case 1:
 		/*
-            bit description
+		    bit description
 
-            0   MUSIC A10
-            1   MUSIC A9
-            2   MUSIC A8
-            3   LS04 PART 3
-            4   EXT PA (HD38880 external pitch control A)
-            5   EXT PB (HD38880 external pitch control B)
-            6
-            7
-        */
+		    0   MUSIC A10
+		    1   MUSIC A9
+		    2   MUSIC A8
+		    3   LS04 PART 3
+		    4   EXT PA (HD38880 external pitch control A)
+		    5   EXT PB (HD38880 external pitch control B)
+		    6
+		    7
+		*/
 
 		/* select tune in ROM based on sound command byte */
 		tone_channels[1].base = 0x0800 + ((data & 0x07) << 8);
@@ -1006,40 +989,40 @@ WRITE8_HANDLER( fantasy_sound_w )
 		break;
 	case 2:
 		/*
-            bit description
+		    bit description
 
-            0   AS 1    (sound0 waveform)
-            1   AS 3    (sound0 waveform)
-            2   AS 2    (sound0 waveform)
-            3   AS 4    (sound0 waveform)
-            4   AS 5    (sound1 waveform)
-            5   AS 6    (sound1 waveform)
-            6   AS 7    (sound1 waveform)
-            7   AS 8    (sound1 waveform)
-        */
+		    0   AS 1    (sound0 waveform)
+		    1   AS 3    (sound0 waveform)
+		    2   AS 2    (sound0 waveform)
+		    3   AS 4    (sound0 waveform)
+		    4   AS 5    (sound1 waveform)
+		    5   AS 6    (sound1 waveform)
+		    6   AS 7    (sound1 waveform)
+		    7   AS 8    (sound1 waveform)
+		*/
 
 		build_waveform(state, 0, (data & 0x9) | ((data & 2) << 1) | ((data & 4) >> 1));
 		build_waveform(state, 1, data >> 4);
 		break;
 	case 3:
 		/*
-            bit description
+		    bit description
 
-            0   BC 1
-            1   BC 2
-            2   BC 3
-            3   MUSIC A10
-            4   MUSIC A9
-            5   MUSIC A8
-            6
-            7   INV
-        */
+		    0   BC 1
+		    1   BC 2
+		    2   BC 3
+		    3   MUSIC A10
+		    4   MUSIC A9
+		    5   MUSIC A8
+		    6
+		    7   INV
+		*/
 
 		/* select tune in ROM based on sound command byte */
 		tone_channels[2].base = 0x1000 + ((data & 0x70) << 4);
 		tone_channels[2].mask = 0xff;
-
-		snk6502_flipscreen_w(space, 0, data);
+		snk6502_state *state = space.machine().driver_data<snk6502_state>();
+		state->snk6502_flipscreen_w(space, 0, data);
 		break;
 	}
 }
@@ -1054,39 +1037,39 @@ WRITE8_HANDLER( fantasy_sound_w )
 
 
 /* HD38880 command */
-#define	HD38880_ADSET	2
-#define	HD38880_READ	3
-#define	HD38880_INT1	4
-#define	HD38880_INT2	6
-#define	HD38880_SYSPD	8
-#define	HD38880_STOP	10
-#define	HD38880_CONDT	11
-#define	HD38880_START	12
-#define	HD38880_SSTART	14
+#define HD38880_ADSET   2
+#define HD38880_READ    3
+#define HD38880_INT1    4
+#define HD38880_INT2    6
+#define HD38880_SYSPD   8
+#define HD38880_STOP    10
+#define HD38880_CONDT   11
+#define HD38880_START   12
+#define HD38880_SSTART  14
 
 /* HD38880 control bits */
-#define HD38880_CTP	0x10
-#define HD38880_CMV	0x20
-#define HD68880_SYBS	0x0f
+#define HD38880_CTP 0x10
+#define HD38880_CMV 0x20
+#define HD68880_SYBS    0x0f
 
 
 static void snk6502_speech_w(running_machine &machine, UINT8 data, const UINT16 *table, int start)
 {
 	/*
-        bit description
-        0   SYBS1
-        1   SYBS2
-        2   SYBS3
-        3   SYBS4
-        4   CTP
-        5   CMV
-        6
-        7
-    */
+	    bit description
+	    0   SYBS1
+	    1   SYBS2
+	    2   SYBS3
+	    3   SYBS4
+	    4   CTP
+	    5   CMV
+	    6
+	    7
+	*/
 
 	device_t *device = machine.device("snk6502");
 	snk6502_sound_state *state = get_safe_token(device);
-	device_t *samples = state->m_samples;
+	samples_device *samples = state->m_samples;
 
 	if ((data & HD38880_CTP) && (data & HD38880_CMV))
 	{
@@ -1100,7 +1083,7 @@ static void snk6502_speech_w(running_machine &machine, UINT8 data, const UINT16 
 			case HD38880_START:
 				logerror("speech: START\n");
 
-				if (state->m_hd38880_data_bytes == 5 && !sample_playing(samples, 0))
+				if (state->m_hd38880_data_bytes == 5 && !samples->playing(0))
 				{
 					int i;
 
@@ -1108,7 +1091,7 @@ static void snk6502_speech_w(running_machine &machine, UINT8 data, const UINT16 
 					{
 						if (table[i] && table[i] == state->m_hd38880_addr)
 						{
-							sample_start(samples, 0, start + i, 0);
+							samples->start(0, start + i);
 							break;
 						}
 					}
@@ -1120,7 +1103,7 @@ static void snk6502_speech_w(running_machine &machine, UINT8 data, const UINT16 
 				break;
 
 			case HD38880_STOP:
-				sample_stop(samples, 0);
+				samples->stop(0);
 				logerror("speech: STOP\n");
 				break;
 
@@ -1237,7 +1220,7 @@ WRITE8_HANDLER( vanguard_speech_w )
 		0x054ce
 	};
 
-	snk6502_speech_w(space->machine(), data, vanguard_table, 2);
+	snk6502_speech_w(space.machine(), data, vanguard_table, 2);
 }
 
 WRITE8_HANDLER( fantasy_speech_w )
@@ -1262,8 +1245,44 @@ WRITE8_HANDLER( fantasy_speech_w )
 		0
 	};
 
-	snk6502_speech_w(space->machine(), data, fantasy_table, 0);
+	snk6502_speech_w(space.machine(), data, fantasy_table, 0);
 }
 
 
-DEFINE_LEGACY_SOUND_DEVICE(SNK6502, snk6502_sound);
+const device_type SNK6502 = &device_creator<snk6502_sound_device>;
+
+snk6502_sound_device::snk6502_sound_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, SNK6502, "snk6502 Custom", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
+{
+	m_token = global_alloc_clear(snk6502_sound_state);
+}
+
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
+
+void snk6502_sound_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void snk6502_sound_device::device_start()
+{
+	DEVICE_START_NAME( snk6502_sound )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void snk6502_sound_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}

@@ -22,33 +22,32 @@
     CONSTANTS
 ***************************************************************************/
 
-#define CROSSHAIR_RAW_SIZE		100
-#define CROSSHAIR_RAW_ROWBYTES	((CROSSHAIR_RAW_SIZE + 7) / 8)
+#define CROSSHAIR_RAW_SIZE      100
+#define CROSSHAIR_RAW_ROWBYTES  ((CROSSHAIR_RAW_SIZE + 7) / 8)
 
 
 /***************************************************************************
     TYPE DEFINITIONS
 ***************************************************************************/
 
-typedef struct _crosshair_global crosshair_global;
-struct _crosshair_global
+struct crosshair_global
 {
-	UINT8				usage;					/* true if any crosshairs are used */
-	UINT8				used[MAX_PLAYERS];		/* usage per player */
-	UINT8				mode[MAX_PLAYERS];		/* visibility mode per player */
-	UINT8				visible[MAX_PLAYERS];	/* visibility per player */
-	bitmap_t *			bitmap[MAX_PLAYERS];	/* bitmap per player */
-	render_texture *	texture[MAX_PLAYERS];	/* texture per player */
-	device_t *screen[MAX_PLAYERS];	/* the screen on which this player's crosshair is drawn */
-	float				x[MAX_PLAYERS];			/* current X position */
-	float				y[MAX_PLAYERS];			/* current Y position */
-	float				last_x[MAX_PLAYERS];	/* last X position */
-	float				last_y[MAX_PLAYERS];	/* last Y position */
-	UINT8				fade;					/* color fading factor */
-	UINT8				animation_counter;		/* animation frame index */
-	UINT16				auto_time;				/* time in seconds to turn invisible */
-	UINT16				time[MAX_PLAYERS];		/* time since last movement */
-	char				name[MAX_PLAYERS][CROSSHAIR_PIC_NAME_LENGTH + 1];	/* name of crosshair png file */
+	UINT8               usage;                  /* true if any crosshairs are used */
+	UINT8               used[MAX_PLAYERS];      /* usage per player */
+	UINT8               mode[MAX_PLAYERS];      /* visibility mode per player */
+	UINT8               visible[MAX_PLAYERS];   /* visibility per player */
+	bitmap_argb32 *     bitmap[MAX_PLAYERS];    /* bitmap per player */
+	render_texture *    texture[MAX_PLAYERS];   /* texture per player */
+	device_t *screen[MAX_PLAYERS];  /* the screen on which this player's crosshair is drawn */
+	float               x[MAX_PLAYERS];         /* current X position */
+	float               y[MAX_PLAYERS];         /* current Y position */
+	float               last_x[MAX_PLAYERS];    /* last X position */
+	float               last_y[MAX_PLAYERS];    /* last Y position */
+	UINT8               fade;                   /* color fading factor */
+	UINT8               animation_counter;      /* animation frame index */
+	UINT16              auto_time;              /* time in seconds to turn invisible */
+	UINT16              time[MAX_PLAYERS];      /* time since last movement */
+	char                name[MAX_PLAYERS][CROSSHAIR_PIC_NAME_LENGTH + 1];   /* name of crosshair png file */
 };
 
 
@@ -135,7 +134,7 @@ static void crosshair_exit(running_machine &machine);
 static void crosshair_load(running_machine &machine, int config_type, xml_data_node *parentnode);
 static void crosshair_save(running_machine &machine, int config_type, xml_data_node *parentnode);
 
-static void animate(screen_device &device, void *param, bool vblank_state);
+static void animate(running_machine &machine, screen_device &device, bool vblank_state);
 
 
 /***************************************************************************
@@ -155,7 +154,8 @@ static void create_bitmap(running_machine &machine, int player)
 	rgb_t color = crosshair_colors[player];
 
 	/* if we have a bitmap and texture for this player, kill it */
-	global_free(global.bitmap[player]);
+	if (global.bitmap[player] == NULL)
+		global.bitmap[player] = global_alloc(bitmap_argb32);
 	machine.render().texture_free(global.texture[player]);
 
 	emu_file crossfile(machine.options().crosshair_path(), OPEN_FLAG_READ);
@@ -163,32 +163,32 @@ static void create_bitmap(running_machine &machine, int player)
 	{
 		/* look for user specified file */
 		sprintf(filename, "%s.png", global.name[player]);
-		global.bitmap[player] = render_load_png(crossfile, NULL, filename, NULL, NULL);
+		render_load_png(*global.bitmap[player], crossfile, NULL, filename);
 	}
 	else
 	{
 		/* look for default cross?.png in crsshair\game dir */
 		sprintf(filename, "cross%d.png", player + 1);
-		global.bitmap[player] = render_load_png(crossfile, machine.system().name, filename, NULL, NULL);
+		render_load_png(*global.bitmap[player], crossfile, machine.system().name, filename);
 
 		/* look for default cross?.png in crsshair dir */
-		if (global.bitmap[player] == NULL)
-			global.bitmap[player] = render_load_png(crossfile, NULL, filename, NULL, NULL);
+		if (!global.bitmap[player]->valid())
+			render_load_png(*global.bitmap[player], crossfile, NULL, filename);
 	}
 
 	/* if that didn't work, use the built-in one */
-	if (global.bitmap[player] == NULL)
+	if (!global.bitmap[player]->valid())
 	{
 		/* allocate a blank bitmap to start with */
-		global.bitmap[player] = global_alloc(bitmap_t(CROSSHAIR_RAW_SIZE, CROSSHAIR_RAW_SIZE, BITMAP_FORMAT_ARGB32));
-		bitmap_fill(global.bitmap[player], NULL, MAKE_ARGB(0x00,0xff,0xff,0xff));
+		global.bitmap[player]->allocate(CROSSHAIR_RAW_SIZE, CROSSHAIR_RAW_SIZE);
+		global.bitmap[player]->fill(MAKE_ARGB(0x00,0xff,0xff,0xff));
 
 		/* extract the raw source data to it */
 		for (y = 0; y < CROSSHAIR_RAW_SIZE / 2; y++)
 		{
 			/* assume it is mirrored vertically */
-			UINT32 *dest0 = BITMAP_ADDR32(global.bitmap[player], y, 0);
-			UINT32 *dest1 = BITMAP_ADDR32(global.bitmap[player], CROSSHAIR_RAW_SIZE - 1 - y, 0);
+			UINT32 *dest0 = &global.bitmap[player]->pix32(y);
+			UINT32 *dest1 = &global.bitmap[player]->pix32(CROSSHAIR_RAW_SIZE - 1 - y);
 
 			/* extract to two rows simultaneously */
 			for (x = 0; x < CROSSHAIR_RAW_SIZE; x++)
@@ -199,7 +199,7 @@ static void create_bitmap(running_machine &machine, int player)
 
 	/* create a texture to reference the bitmap */
 	global.texture[player] = machine.render().texture_alloc(render_texture::hq_scale);
-	global.texture[player]->set_bitmap(global.bitmap[player], NULL, TEXFORMAT_ARGB32);
+	global.texture[player]->set_bitmap(*global.bitmap[player], global.bitmap[player]->cliprect(), TEXFORMAT_ARGB32);
 }
 
 
@@ -211,7 +211,7 @@ static void create_bitmap(running_machine &machine, int player)
 void crosshair_init(running_machine &machine)
 {
 	/* request a callback upon exiting */
-	machine.add_notifier(MACHINE_NOTIFY_EXIT, crosshair_exit);
+	machine.add_notifier(MACHINE_NOTIFY_EXIT, machine_notify_delegate(FUNC(crosshair_exit), &machine));
 
 	/* clear all the globals */
 	memset(&global, 0, sizeof(global));
@@ -220,11 +220,11 @@ void crosshair_init(running_machine &machine)
 	global.auto_time = CROSSHAIR_VISIBILITY_AUTOTIME_DEFAULT;
 
 	/* determine who needs crosshairs */
-	for (const input_port_config *port = machine.m_portlist.first(); port != NULL; port = port->next())
-		for (const input_field_config *field = port->fieldlist; field != NULL; field = field->next)
-			if (field->crossaxis != CROSSHAIR_AXIS_NONE)
+	for (ioport_port *port = machine.ioport().first_port(); port != NULL; port = port->next())
+		for (ioport_field *field = port->first_field(); field != NULL; field = field->next())
+			if (field->crosshair_axis() != CROSSHAIR_AXIS_NONE)
 			{
-				int player = field->player;
+				int player = field->player();
 
 				assert(player < MAX_PLAYERS);
 
@@ -242,11 +242,11 @@ void crosshair_init(running_machine &machine)
 
 	/* register callbacks for when we load/save configurations */
 	if (global.usage)
-		config_register(machine, "crosshairs", crosshair_load, crosshair_save);
+		config_register(machine, "crosshairs", config_saveload_delegate(FUNC(crosshair_load), &machine), config_saveload_delegate(FUNC(crosshair_save), &machine));
 
 	/* register the animation callback */
 	if (machine.primary_screen != NULL)
-		machine.primary_screen->register_vblank_callback(animate, NULL);
+		machine.primary_screen->register_vblank_callback(vblank_state_delegate(FUNC(animate), &machine));
 }
 
 
@@ -325,7 +325,7 @@ void crosshair_set_user_settings(running_machine &machine, UINT8 player, crossha
     animate - animates the crosshair once a frame
 -------------------------------------------------*/
 
-static void animate(screen_device &device, void *param, bool vblank_state)
+static void animate(running_machine &machine, screen_device &device, bool vblank_state)
 {
 	int player;
 
@@ -346,7 +346,7 @@ static void animate(screen_device &device, void *param, bool vblank_state)
 	{
 		/* read all the lightgun values */
 		if (global.used[player])
-			input_port_get_crosshair_position(device.machine(), player, &global.x[player], &global.y[player]);
+			device.machine().ioport().crosshair_position(player, global.x[player], global.y[player]);
 
 		/* auto visibility */
 		if (global.mode[player] == CROSSHAIR_VISIBILITY_AUTO)
@@ -506,7 +506,7 @@ static void crosshair_save(running_machine &machine, int config_type, xml_data_n
 				}
 
 				/* the default graphic name is "", so only save if not */
-				if (strlen(global.name[player]) > 0)
+				if (*(global.name[player]) != 0)
 				{
 					xml_set_attribute(crosshairnode, "pic", global.name[player]);
 					changed = TRUE;

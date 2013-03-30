@@ -32,24 +32,22 @@
       1  | xxxxxxxx x------- | not used?
 */
 
-static TILE_GET_INFO( get_tile_info_targeth_screen0 )
+TILE_GET_INFO_MEMBER(targeth_state::get_tile_info_targeth_screen0)
 {
-	targeth_state *state = machine.driver_data<targeth_state>();
-	int data = state->m_videoram[tile_index << 1];
-	int data2 = state->m_videoram[(tile_index << 1) + 1];
+	int data = m_videoram[tile_index << 1];
+	int data2 = m_videoram[(tile_index << 1) + 1];
 	int code = data & 0x3fff;
 
-	SET_TILE_INFO(0, code, data2 & 0x1f, TILE_FLIPXY((data2 >> 5) & 0x03));
+	SET_TILE_INFO_MEMBER(0, code, data2 & 0x1f, TILE_FLIPXY((data2 >> 5) & 0x03));
 }
 
-static TILE_GET_INFO( get_tile_info_targeth_screen1 )
+TILE_GET_INFO_MEMBER(targeth_state::get_tile_info_targeth_screen1)
 {
-	targeth_state *state = machine.driver_data<targeth_state>();
-	int data = state->m_videoram[(0x2000/2) + (tile_index << 1)];
-	int data2 = state->m_videoram[(0x2000/2) + (tile_index << 1) + 1];
+	int data = m_videoram[(0x2000/2) + (tile_index << 1)];
+	int data2 = m_videoram[(0x2000/2) + (tile_index << 1) + 1];
 	int code = data & 0x3fff;
 
-	SET_TILE_INFO(0, code, data2 & 0x1f, TILE_FLIPXY((data2 >> 5) & 0x03));
+	SET_TILE_INFO_MEMBER(0, code, data2 & 0x1f, TILE_FLIPXY((data2 >> 5) & 0x03));
 }
 
 /***************************************************************************
@@ -58,11 +56,10 @@ static TILE_GET_INFO( get_tile_info_targeth_screen1 )
 
 ***************************************************************************/
 
-WRITE16_HANDLER( targeth_vram_w )
+WRITE16_MEMBER(targeth_state::targeth_vram_w)
 {
-	targeth_state *state = space->machine().driver_data<targeth_state>();
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_pant[(offset & 0x1fff) >> 12], ((offset << 1) & 0x1fff) >> 2);
+	m_videoram[offset] = data;
+	m_pant[(offset & 0x1fff) >> 12]->mark_tile_dirty(((offset << 1) & 0x1fff) >> 2);
 }
 
 
@@ -72,13 +69,12 @@ WRITE16_HANDLER( targeth_vram_w )
 
 ***************************************************************************/
 
-VIDEO_START( targeth )
+void targeth_state::video_start()
 {
-	targeth_state *state = machine.driver_data<targeth_state>();
-	state->m_pant[0] = tilemap_create(machine, get_tile_info_targeth_screen0,tilemap_scan_rows,16,16,64,32);
-	state->m_pant[1] = tilemap_create(machine, get_tile_info_targeth_screen1,tilemap_scan_rows,16,16,64,32);
+	m_pant[0] = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(targeth_state::get_tile_info_targeth_screen0),this),TILEMAP_SCAN_ROWS,16,16,64,32);
+	m_pant[1] = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(targeth_state::get_tile_info_targeth_screen1),this),TILEMAP_SCAN_ROWS,16,16,64,32);
 
-	tilemap_set_transparent_pen(state->m_pant[0],0);
+	m_pant[0]->set_transparent_pen(0);
 }
 
 
@@ -105,11 +101,11 @@ VIDEO_START( targeth )
       3  | xx------ -------- | not used?
 */
 
-static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect)
+static void draw_sprites(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	targeth_state *state = machine.driver_data<targeth_state>();
 	int i;
-	const gfx_element *gfx = machine.gfx[0];
+	gfx_element *gfx = machine.gfx[0];
 
 	for (i = 3; i < (0x1000 - 6)/2; i += 4){
 		int sx = state->m_spriteram[i+2] & 0x03ff;
@@ -133,18 +129,17 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 
 ***************************************************************************/
 
-SCREEN_UPDATE( targeth )
+UINT32 targeth_state::screen_update_targeth(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	targeth_state *state = screen->machine().driver_data<targeth_state>();
 	/* set scroll registers */
-	tilemap_set_scrolly(state->m_pant[0], 0, state->m_vregs[0]);
-	tilemap_set_scrollx(state->m_pant[0], 0, state->m_vregs[1] + 0x04);
-	tilemap_set_scrolly(state->m_pant[1], 0, state->m_vregs[2]);
-	tilemap_set_scrollx(state->m_pant[1], 0, state->m_vregs[3]);
+	m_pant[0]->set_scrolly(0, m_vregs[0]);
+	m_pant[0]->set_scrollx(0, m_vregs[1] + 0x04);
+	m_pant[1]->set_scrolly(0, m_vregs[2]);
+	m_pant[1]->set_scrollx(0, m_vregs[3]);
 
-	tilemap_draw(bitmap,cliprect,state->m_pant[1],0,0);
-	tilemap_draw(bitmap,cliprect,state->m_pant[0],0,0);
-	draw_sprites(screen->machine(), bitmap,cliprect);
+	m_pant[1]->draw(bitmap, cliprect, 0,0);
+	m_pant[0]->draw(bitmap, cliprect, 0,0);
+	draw_sprites(machine(), bitmap,cliprect);
 
 	return 0;
 }

@@ -70,8 +70,12 @@
 #include "winutf8.h"
 #include "winutil.h"
 #include "debugger.h"
+#include "winfile.h"
+#ifdef USE_NETWORK
+#include "netdev.h"
+#endif
 
-#define DEBUG_SLOW_LOCKS	0
+#define DEBUG_SLOW_LOCKS    0
 
 
 //**************************************************************************
@@ -90,7 +94,7 @@
 //  TYPE DEFINITIONS
 //**************************************************************************
 
-template<typename func_ptr>
+template<typename _FunctionPtr>
 class dynamic_bind
 {
 public:
@@ -100,17 +104,17 @@ public:
 	{
 		HMODULE module = LoadLibrary(dll);
 		if (module != NULL)
-			m_function = reinterpret_cast<func_ptr>(GetProcAddress(module, symbol));
+			m_function = reinterpret_cast<_FunctionPtr>(GetProcAddress(module, symbol));
 	}
 
 	// bool to test if the function is NULL or not
 	operator bool() const { return (m_function != NULL); }
 
 	// dereference to get the underlying pointer
-	func_ptr operator *() const { return m_function; }
+	_FunctionPtr operator *() const { return m_function; }
 
 private:
-	func_ptr	m_function;
+	_FunctionPtr    m_function;
 };
 
 
@@ -128,11 +132,11 @@ public:
 	bool unwind();
 
 private:
-	HANDLE			m_process;
-	HANDLE			m_thread;
-	STACKFRAME64	m_stackframe;
-	CONTEXT			m_context;
-	bool			m_first;
+	HANDLE          m_process;
+	HANDLE          m_thread;
+	STACKFRAME64    m_stackframe;
+	CONTEXT         m_context;
+	bool            m_first;
 
 	dynamic_bind<BOOL (WINAPI *)(DWORD, HANDLE, HANDLE, LPSTACKFRAME64, PVOID, PREAD_PROCESS_MEMORY_ROUTINE64, PFUNCTION_TABLE_ACCESS_ROUTINE64, PGET_MODULE_BASE_ROUTINE64, PTRANSLATE_ADDRESS_ROUTINE64)>
 			m_stack_walk_64;
@@ -141,7 +145,7 @@ private:
 	dynamic_bind<DWORD64 (WINAPI *)(HANDLE, DWORD64)> m_sym_get_module_base_64;
 	dynamic_bind<VOID (WINAPI *)(PCONTEXT)> m_rtl_capture_context;
 
-	static bool		s_initialized;
+	static bool     s_initialized;
 };
 
 
@@ -162,6 +166,7 @@ public:
 	// force symbols to be cached
 	void cache_symbols() { scan_file_for_address(0, true); }
 
+	void reset_cache() { m_cache.reset(); }
 private:
 	// internal helpers
 	bool query_system_for_address(FPTR address);
@@ -179,18 +184,18 @@ private:
 			m_next(NULL), m_address(address), m_name(symbol) { }
 		cache_entry *next() const { return m_next; }
 
-		cache_entry *	m_next;
-		FPTR			m_address;
-		astring			m_name;
+		cache_entry *   m_next;
+		FPTR            m_address;
+		astring         m_name;
 	};
 	simple_list<cache_entry> m_cache;
 
-	astring			m_mapfile;
-	astring			m_symfile;
-	astring			m_buffer;
-	HANDLE			m_process;
-	FPTR			m_last_base;
-	FPTR			m_text_base;
+	astring         m_mapfile;
+	astring         m_symfile;
+	astring         m_buffer;
+	HANDLE          m_process;
+	FPTR            m_last_base;
+	FPTR            m_text_base;
 
 	dynamic_bind<BOOL (WINAPI *)(HANDLE, DWORD64, PDWORD64, PSYMBOL_INFO)> m_sym_from_addr;
 	dynamic_bind<BOOL (WINAPI *)(HANDLE, DWORD64, PDWORD, PIMAGEHLP_LINE64)> m_sym_get_line_from_addr_64;
@@ -216,18 +221,18 @@ private:
 	static int CLIB_DECL compare_address(const void *item1, const void *item2);
 	static int CLIB_DECL compare_frequency(const void *item1, const void *item2);
 
-	HANDLE			m_target_thread;
+	HANDLE          m_target_thread;
 
-	HANDLE			m_thread;
-	DWORD			m_thread_id;
-	volatile bool	m_thread_exit;
+	HANDLE          m_thread;
+	DWORD           m_thread_id;
+	volatile bool   m_thread_exit;
 
-	UINT8			m_stack_depth;
-	UINT8			m_entry_stride;
-	UINT32			m_max_seconds;
-	FPTR *			m_buffer;
-	FPTR *			m_buffer_ptr;
-	FPTR *			m_buffer_end;
+	UINT8           m_stack_depth;
+	UINT8           m_entry_stride;
+	UINT32          m_max_seconds;
+	FPTR *          m_buffer;
+	FPTR *          m_buffer_ptr;
+	FPTR *          m_buffer_end;
 };
 
 
@@ -279,7 +284,7 @@ static BOOL WINAPI control_handler(DWORD type);
 static int is_double_click_start(int argc);
 static DWORD WINAPI watchdog_thread_entry(LPVOID lpParameter);
 static LONG WINAPI exception_filter(struct _EXCEPTION_POINTERS *info);
-static void winui_output_error(void *param, const char *format, va_list argptr);
+static void winui_output_error(delegate_late_bind *__dummy, const char *format, va_list argptr);
 
 
 
@@ -300,8 +305,8 @@ const options_entry windows_options::s_option_entries[] =
 	// performance options
 	{ NULL,                                           NULL,       OPTION_HEADER,     "WINDOWS PERFORMANCE OPTIONS" },
 	{ WINOPTION_PRIORITY "(-15-1)",                   "0",        OPTION_INTEGER,    "thread priority for the main game thread; range from -15 to 1" },
-	{ WINOPTION_MULTITHREADING ";mt",                 "0",        OPTION_BOOLEAN,    "enable multithreading; this enables rendering and blitting on a separate thread" },
-	{ WINOPTION_NUMPROCESSORS ";np",                  "auto",     OPTION_STRING,	 "number of processors; this overrides the number the system reports" },
+	{ WINOPTION_MULTITHREADING ";mt",                 "1",        OPTION_BOOLEAN,    "enable multithreading; this enables rendering and blitting on a separate thread" },
+	{ WINOPTION_NUMPROCESSORS ";np",                  "auto",     OPTION_STRING,     "number of processors; this overrides the number the system reports" },
 	{ WINOPTION_PROFILE,                              "0",        OPTION_INTEGER,    "enable profiling, specifying the stack depth to track" },
 	{ WINOPTION_BENCH,                                "0",        OPTION_INTEGER,    "benchmark for the given number of emulated seconds; implies -video none -nosound -nothrottle" },
 
@@ -313,9 +318,9 @@ const options_entry windows_options::s_option_entries[] =
 	{ WINOPTION_MAXIMIZE ";max",                      "1",        OPTION_BOOLEAN,    "default to maximized windows; otherwise, windows will be minimized" },
 	{ WINOPTION_KEEPASPECT ";ka",                     "1",        OPTION_BOOLEAN,    "constrain to the proper aspect ratio" },
 	{ WINOPTION_PRESCALE,                             "1",        OPTION_INTEGER,    "scale screen rendering by this amount in software" },
-	{ WINOPTION_WAITVSYNC,                            "0",        OPTION_BOOLEAN,    "enable waiting for the start of VBLANK before flipping screens; reduces tearing effects" },
-	{ WINOPTION_SYNCREFRESH,                          "0",        OPTION_BOOLEAN,    "enable using the start of VBLANK for throttling instead of the game time" },
-	{ WINOPTION_MENU,           		              "0",        OPTION_BOOLEAN,    "enable menu bar if available by UI implementation" },
+	{ WINOPTION_WAITVSYNC ";vs",                      "0",        OPTION_BOOLEAN,    "enable waiting for the start of VBLANK before flipping screens; reduces tearing effects" },
+	{ WINOPTION_SYNCREFRESH ";srf",                   "0",        OPTION_BOOLEAN,    "enable using the start of VBLANK for throttling instead of the game time" },
+	{ WINOPTION_MENU,                                 "0",        OPTION_BOOLEAN,    "enable menu bar if available by UI implementation" },
 
 	// DirectDraw-specific options
 	{ NULL,                                           NULL,       OPTION_HEADER,     "DIRECTDRAW-SPECIFIC OPTIONS" },
@@ -325,6 +330,63 @@ const options_entry windows_options::s_option_entries[] =
 	{ NULL,                                           NULL,       OPTION_HEADER,     "DIRECT3D-SPECIFIC OPTIONS" },
 	{ WINOPTION_D3DVERSION "(8-9)",                   "9",        OPTION_INTEGER,    "specify the preferred Direct3D version (8 or 9)" },
 	{ WINOPTION_FILTER ";d3dfilter;flt",              "1",        OPTION_BOOLEAN,    "enable bilinear filtering on screen output" },
+
+	// post-processing options
+	{ NULL,                                                     NULL,        OPTION_HEADER,     "DIRECT3D POST-PROCESSING OPTIONS" },
+	{ WINOPTION_HLSL_ENABLE";hlsl",                             "0",         OPTION_BOOLEAN,    "enable HLSL post-processing (PS3.0 required)" },
+	{ WINOPTION_HLSLPATH,                                       "hlsl",      OPTION_STRING,     "path to hlsl files" },
+	{ WINOPTION_HLSL_INI_READ,                                  "0",         OPTION_BOOLEAN,    "enable HLSL INI reading" },
+	{ WINOPTION_HLSL_INI_WRITE,                                 "0",         OPTION_BOOLEAN,    "enable HLSL INI writing" },
+	{ WINOPTION_HLSL_INI_NAME,                                  "%g",        OPTION_STRING,     "HLSL INI file name for this game" },
+	{ WINOPTION_HLSL_PRESCALE_X,                                "0",         OPTION_INTEGER,    "HLSL pre-scale override factor for X (0 for auto)" },
+	{ WINOPTION_HLSL_PRESCALE_Y,                                "0",         OPTION_INTEGER,    "HLSL pre-scale override factor for Y (0 for auto)" },
+	{ WINOPTION_HLSL_PRESET";(-1-3)",                           "-1",        OPTION_INTEGER,    "HLSL preset to use (0-3)" },
+	{ WINOPTION_HLSL_WRITE,                                     NULL,        OPTION_STRING,     "enable HLSL AVI writing (huge disk bandwidth suggested)" },
+	{ WINOPTION_HLSL_SNAP_WIDTH,                                "2048",      OPTION_STRING,     "HLSL upscaled-snapshot width" },
+	{ WINOPTION_HLSL_SNAP_HEIGHT,                               "1536",      OPTION_STRING,     "HLSL upscaled-snapshot height" },
+	{ WINOPTION_SHADOW_MASK_ALPHA";fs_shadwa(0.0-1.0)",         "0.0",       OPTION_FLOAT,      "shadow mask alpha-blend value (1.0 is fully blended, 0.0 is no mask)" },
+	{ WINOPTION_SHADOW_MASK_TEXTURE";fs_shadwt(0.0-1.0)",       "aperture.png", OPTION_STRING,  "shadow mask texture name" },
+	{ WINOPTION_SHADOW_MASK_COUNT_X";fs_shadww",                "320",       OPTION_INTEGER,    "shadow mask width, in phosphor dots" },
+	{ WINOPTION_SHADOW_MASK_COUNT_Y";fs_shadwh",                "240",       OPTION_INTEGER,    "shadow mask height, in phosphor dots" },
+	{ WINOPTION_SHADOW_MASK_USIZE";fs_shadwu(0.0-1.0)",         "0.09375",   OPTION_FLOAT,      "shadow mask texture size in U direction" },
+	{ WINOPTION_SHADOW_MASK_VSIZE";fs_shadwv(0.0-1.0)",         "0.109375",  OPTION_FLOAT,      "shadow mask texture size in V direction" },
+	{ WINOPTION_CURVATURE";fs_curv(0.0-4.0)",                   "0.0",       OPTION_FLOAT,      "screen curvature amount" },
+	/* Beam-related values below this line*/
+	{ WINOPTION_PINCUSHION";fs_pin(0.0-4.0)",                   "0.0",       OPTION_FLOAT,      "pincushion amount" },
+	{ WINOPTION_SCANLINE_AMOUNT";fs_scanam(0.0-4.0)",           "0.0",       OPTION_FLOAT,      "overall alpha scaling value for scanlines" },
+	{ WINOPTION_SCANLINE_SCALE";fs_scansc(0.0-4.0)",            "1.0",       OPTION_FLOAT,      "overall height scaling value for scanlines" },
+	{ WINOPTION_SCANLINE_HEIGHT";fs_scanh(0.0-4.0)",            "0.7",       OPTION_FLOAT,      "individual height scaling value for scanlines" },
+	{ WINOPTION_SCANLINE_BRIGHT_SCALE";fs_scanbs(0.0-2.0)",     "1.0",       OPTION_FLOAT,      "overall brightness scaling value for scanlines (multiplicative)" },
+	{ WINOPTION_SCANLINE_BRIGHT_OFFSET";fs_scanbo(0.0-1.0)",    "0.0",       OPTION_FLOAT,      "overall brightness offset value for scanlines (additive)" },
+	{ WINOPTION_SCANLINE_OFFSET";fs_scanjt(0.0-4.0)",           "0.0",       OPTION_FLOAT,      "overall interlace jitter scaling value for scanlines" },
+	{ WINOPTION_DEFOCUS";fs_focus",                             "0.0,0.0",   OPTION_STRING,     "overall defocus value in screen-relative coords" },
+	{ WINOPTION_CONVERGE_X";fs_convx",                          "0.0,0.0,0.0",OPTION_STRING,    "convergence in screen-relative X direction" },
+	{ WINOPTION_CONVERGE_Y";fs_convy",                          "0.0,0.0,0.0",OPTION_STRING,    "convergence in screen-relative Y direction" },
+	{ WINOPTION_RADIAL_CONVERGE_X";fs_rconvx",                  "0.0,0.0,0.0",OPTION_STRING,    "radial convergence in screen-relative X direction" },
+	{ WINOPTION_RADIAL_CONVERGE_Y";fs_rconvy",                  "0.0,0.0,0.0",OPTION_STRING,    "radial convergence in screen-relative Y direction" },
+	/* RGB colorspace convolution below this line */
+	{ WINOPTION_RED_RATIO";fs_redratio",                        "1.0,0.0,0.0",OPTION_STRING,    "red output signal generated by input signal" },
+	{ WINOPTION_GRN_RATIO";fs_grnratio",                        "0.0,1.0,0.0",OPTION_STRING,    "green output signal generated by input signal" },
+	{ WINOPTION_BLU_RATIO";fs_bluratio",                        "0.0,0.0,1.0",OPTION_STRING,    "blue output signal generated by input signal" },
+	{ WINOPTION_SATURATION";fs_sat(0.0-4.0)",                   "1.0",       OPTION_FLOAT,      "saturation scaling value" },
+	{ WINOPTION_OFFSET";fs_offset",                             "0.0,0.0,0.0",OPTION_STRING,    "signal offset value (additive)" },
+	{ WINOPTION_SCALE";fs_scale",                               "1.0,1.0,1.0",OPTION_STRING,    "signal scaling value (multiplicative)" },
+	{ WINOPTION_POWER";fs_power",                               "1.0,1.0,1.0",OPTION_STRING,    "signal power value (exponential)" },
+	{ WINOPTION_FLOOR";fs_floor",                               "0.0,0.0,0.0",OPTION_STRING,    "signal floor level" },
+	{ WINOPTION_PHOSPHOR";fs_phosphor",                         "0.0,0.0,0.0",OPTION_STRING,    "phosphorescence decay rate (0.0 is instant, 1.0 is forever)" },
+	/* NTSC simulation below this line */
+	{ WINOPTION_YIQ_ENABLE";yiq",                               "0",         OPTION_BOOLEAN,    "enable YIQ-space HLSL post-processing" },
+	{ WINOPTION_YIQ_CCVALUE";yiqcc",                            "3.59754545",OPTION_FLOAT,      "Color Carrier frequency for NTSC signal processing" },
+	{ WINOPTION_YIQ_AVALUE";yiqa",                              "0.5",       OPTION_FLOAT,      "A value for NTSC signal processing" },
+	{ WINOPTION_YIQ_BVALUE";yiqb",                              "0.5",       OPTION_FLOAT,      "B value for NTSC signal processing" },
+	{ WINOPTION_YIQ_OVALUE";yiqo",                              "0.0",       OPTION_FLOAT,      "Outgoing Color Carrier phase offset for NTSC signal processing" },
+	{ WINOPTION_YIQ_PVALUE";yiqp",                              "1.0",       OPTION_FLOAT,      "Incoming Pixel Clock scaling value for NTSC signal processing" },
+	{ WINOPTION_YIQ_NVALUE";yiqn",                              "1.0",       OPTION_FLOAT,      "Y filter notch width for NTSC signal processing" },
+	{ WINOPTION_YIQ_YVALUE";yiqy",                              "6.0",       OPTION_FLOAT,      "Y filter cutoff frequency for NTSC signal processing" },
+	{ WINOPTION_YIQ_IVALUE";yiqi",                              "1.2",       OPTION_FLOAT,      "I filter cutoff frequency for NTSC signal processing" },
+	{ WINOPTION_YIQ_QVALUE";yiqq",                              "0.6",       OPTION_FLOAT,      "Q filter cutoff frequency for NTSC signal processing" },
+	{ WINOPTION_YIQ_SCAN_TIME";yiqsc",                          "52.6",      OPTION_FLOAT,      "Horizontal scanline duration for NTSC signal processing (in usec)" },
+	{ WINOPTION_YIQ_PHASE_COUNT";yiqp",                         "2",         OPTION_INTEGER,    "Phase Count value for NTSC signal processing" },
 
 	// per-window options
 	{ NULL,                                           NULL,       OPTION_HEADER,     "PER-WINDOW VIDEO OPTIONS" },
@@ -358,7 +420,7 @@ const options_entry windows_options::s_option_entries[] =
 	{ WINOPTION_TRIPLEBUFFER ";tb",                   "0",        OPTION_BOOLEAN,    "enable triple buffering" },
 	{ WINOPTION_SWITCHRES,                            "0",        OPTION_BOOLEAN,    "enable resolution switching" },
 	{ WINOPTION_FULLSCREENBRIGHTNESS ";fsb(0.1-2.0)", "1.0",      OPTION_FLOAT,      "brightness value in full screen mode" },
-	{ WINOPTION_FULLLSCREENCONTRAST ";fsc(0.1-2.0)",  "1.0",      OPTION_FLOAT,      "contrast value in full screen mode" },
+	{ WINOPTION_FULLSCREENCONTRAST ";fsc(0.1-2.0)",   "1.0",      OPTION_FLOAT,      "contrast value in full screen mode" },
 	{ WINOPTION_FULLSCREENGAMMA ";fsg(0.1-3.0)",      "1.0",      OPTION_FLOAT,      "gamma value in full screen mode" },
 
 	// sound options
@@ -371,8 +433,6 @@ const options_entry windows_options::s_option_entries[] =
 
 	{ NULL }
 };
-
-
 
 //**************************************************************************
 //  MAIN ENTRY POINT
@@ -407,19 +467,24 @@ int main(int argc, char *argv[])
 	if (win_is_gui_application() || is_double_click_start(argc))
 	{
 		// if we are a GUI app, output errors to message boxes
-		mame_set_output_channel(OUTPUT_CHANNEL_ERROR, winui_output_error, NULL, NULL, NULL);
+		mame_set_output_channel(OUTPUT_CHANNEL_ERROR, output_delegate(FUNC(winui_output_error), (delegate_late_bind *)0));
 
 		// make sure any console window that opened on our behalf is nuked
 		FreeConsole();
 	}
+
+	osd_init_midi();
 
 	// parse config and cmdline options
 	DWORD result = 0;
 	{
 		windows_options options;
 		windows_osd_interface osd;
-		result = cli_execute(options, osd, argc, argv);
+		cli_frontend frontend(options, osd);
+		result = frontend.execute(argc, argv);
 	}
+
+	osd_shutdown_midi();
 
 	// free symbols
 	symbols = NULL;
@@ -446,12 +511,12 @@ static BOOL WINAPI control_handler(DWORD type)
 	// indicate to the user that we detected something
 	switch (type)
 	{
-		case CTRL_C_EVENT:			fprintf(stderr, "Caught Ctrl+C");					break;
-		case CTRL_BREAK_EVENT:		fprintf(stderr, "Caught Ctrl+break");				break;
-		case CTRL_CLOSE_EVENT:		fprintf(stderr, "Caught console close");			break;
-		case CTRL_LOGOFF_EVENT:		fprintf(stderr, "Caught logoff");					break;
-		case CTRL_SHUTDOWN_EVENT:	fprintf(stderr, "Caught shutdown");					break;
-		default:					fprintf(stderr, "Caught unexpected console event");	break;
+		case CTRL_C_EVENT:          fprintf(stderr, "Caught Ctrl+C");                   break;
+		case CTRL_BREAK_EVENT:      fprintf(stderr, "Caught Ctrl+break");               break;
+		case CTRL_CLOSE_EVENT:      fprintf(stderr, "Caught console close");            break;
+		case CTRL_LOGOFF_EVENT:     fprintf(stderr, "Caught logoff");                   break;
+		case CTRL_SHUTDOWN_EVENT:   fprintf(stderr, "Caught shutdown");                 break;
+		default:                    fprintf(stderr, "Caught unexpected console event"); break;
 	}
 
 	// if we don't have a machine yet, or if we are handling ctrl+c/ctrl+break,
@@ -478,7 +543,7 @@ static BOOL WINAPI control_handler(DWORD type)
 //  winui_output_error
 //============================================================
 
-static void winui_output_error(void *param, const char *format, va_list argptr)
+static void winui_output_error(delegate_late_bind *param, const char *format, va_list argptr)
 {
 	char buffer[1024];
 
@@ -487,7 +552,7 @@ static void winui_output_error(void *param, const char *format, va_list argptr)
 		winwindow_toggle_full_screen();
 
 	vsnprintf(buffer, ARRAY_LENGTH(buffer), format, argptr);
-	win_message_box_utf8(win_window_list ? win_window_list->hwnd : NULL, buffer, APPNAME, MB_OK);
+	win_message_box_utf8(win_window_list ? win_window_list->hwnd : NULL, buffer, emulator_info::get_appname(), MB_OK);
 }
 
 
@@ -498,7 +563,8 @@ static void winui_output_error(void *param, const char *format, va_list argptr)
 
 static void output_oslog(running_machine &machine, const char *buffer)
 {
-	win_output_debug_string_utf8(buffer);
+	if (IsDebuggerPresent())
+		win_output_debug_string_utf8(buffer);
 }
 
 
@@ -559,7 +625,7 @@ void windows_osd_interface::init(running_machine &machine)
 		SetThreadPriority(GetCurrentThread(), options.priority());
 
 	// ensure we get called on the way out
-	machine.add_notifier(MACHINE_NOTIFY_EXIT, osd_exit);
+	machine.add_notifier(MACHINE_NOTIFY_EXIT, machine_notify_delegate(FUNC(osd_exit), &machine));
 
 	// get number of processors
 	stemp = options.numprocessors();
@@ -581,13 +647,17 @@ void windows_osd_interface::init(running_machine &machine)
 	winsound_init(machine);
 	wininput_init(machine);
 	winoutput_init(machine);
-
+#ifdef USE_NETWORK
+	winnetdev_init(machine);
+#endif
 	// notify listeners of screen configuration
 	astring tempstring;
 	for (win_window_info *info = win_window_list; info != NULL; info = info->next)
 	{
-		tempstring.printf("Orientation(%s)", utf8_from_tstring(info->monitor->info.szDevice));
+		char *tmp = utf8_from_tstring(info->monitor->info.szDevice);
+		tempstring.printf("Orientation(%s)", tmp);
 		output_set_value(tempstring, info->targetorient);
+		osd_free(tmp);
 	}
 
 	// hook up the debugger log
@@ -623,6 +693,9 @@ void windows_osd_interface::init(running_machine &machine)
 		profiler->start();
 	}
 
+	// initialize sockets
+	win_init_sockets();
+
 	// note the existence of a machine
 	g_current_machine = &machine;
 }
@@ -636,6 +709,13 @@ void windows_osd_interface::osd_exit(running_machine &machine)
 {
 	// no longer have a machine
 	g_current_machine = NULL;
+
+	// cleanup sockets
+	win_cleanup_sockets();
+
+	#ifdef USE_NETWORK
+	winnetdev_deinit(machine);
+	#endif
 
 	// take down the watchdog thread if it exists
 	if (watchdog_thread != NULL)
@@ -756,7 +836,7 @@ void windows_osd_interface::font_close(osd_font font)
 //  pixel of a black & white font
 //-------------------------------------------------
 
-bitmap_t *windows_osd_interface::font_get_bitmap(osd_font font, unicode_char chnum, INT32 &width, INT32 &xoffs, INT32 &yoffs)
+bool windows_osd_interface::font_get_bitmap(osd_font font, unicode_char chnum, bitmap_argb32 &bitmap, INT32 &width, INT32 &xoffs, INT32 &yoffs)
 {
 	// create a dummy DC to work with
 	HDC dummyDC = CreateCompatibleDC(NULL);
@@ -794,8 +874,10 @@ bitmap_t *windows_osd_interface::font_get_bitmap(osd_font font, unicode_char chn
 	info.bmiHeader.biYPelsPerMeter = GetDeviceCaps(dummyDC, VERTRES) / GetDeviceCaps(dummyDC, VERTSIZE);
 	info.bmiHeader.biClrUsed = 0;
 	info.bmiHeader.biClrImportant = 0;
-	info.bmiColors[0].rgbBlue = info.bmiColors[0].rgbGreen = info.bmiColors[0].rgbRed = 0x00;
-	info.bmiColors[1].rgbBlue = info.bmiColors[1].rgbGreen = info.bmiColors[1].rgbRed = 0xff;
+	RGBQUAD col1 = info.bmiColors[0];
+	RGBQUAD col2 = info.bmiColors[1];
+	col1.rgbBlue = col1.rgbGreen = col1.rgbRed = 0x00;
+	col2.rgbBlue = col2.rgbGreen = col2.rgbRed = 0xff;
 
 	// create a DIB to render to
 	BYTE *bits;
@@ -860,17 +942,16 @@ bitmap_t *windows_osd_interface::font_get_bitmap(osd_font font, unicode_char chn
 	}
 
 	// allocate a new bitmap
-	bitmap_t *bitmap = NULL;
 	if (actbounds.max_x >= actbounds.min_x && actbounds.max_y >= actbounds.min_y)
 	{
-		bitmap = auto_alloc(machine(), bitmap_t(actbounds.max_x + 1 - actbounds.min_x, actbounds.max_y + 1 - actbounds.min_y, BITMAP_FORMAT_ARGB32));
+		bitmap.allocate(actbounds.max_x + 1 - actbounds.min_x, actbounds.max_y + 1 - actbounds.min_y);
 
 		// copy the bits into it
-		for (int y = 0; y < bitmap->height; y++)
+		for (int y = 0; y < bitmap.height(); y++)
 		{
-			UINT32 *dstrow = BITMAP_ADDR32(bitmap, y, 0);
+			UINT32 *dstrow = &bitmap.pix32(y);
 			UINT8 *srcrow = &bits[(y + actbounds.min_y) * rowbytes];
-			for (int x = 0; x < bitmap->width; x++)
+			for (int x = 0; x < bitmap.width(); x++)
 			{
 				int effx = x + actbounds.min_x;
 				dstrow[x] = ((srcrow[effx / 8] << (effx % 8)) & 0x80) ? MAKE_ARGB(0xff,0xff,0xff,0xff) : MAKE_ARGB(0x00,0xff,0xff,0xff);
@@ -887,7 +968,7 @@ bitmap_t *windows_osd_interface::font_get_bitmap(osd_font font, unicode_char chn
 	DeleteObject(dib);
 	SelectObject(dummyDC, oldfont);
 	DeleteDC(dummyDC);
-	return bitmap;
+	return bitmap.valid();
 }
 
 
@@ -954,6 +1035,7 @@ static DWORD WINAPI watchdog_thread_entry(LPVOID lpParameter)
 		if (wait_result == WAIT_TIMEOUT)
 		{
 			fprintf(stderr, "Terminating due to watchdog timeout\n");
+			fflush(stderr);
 			TerminateProcess(GetCurrentProcess(), -1);
 		}
 	}
@@ -985,29 +1067,29 @@ static LONG WINAPI exception_filter(struct _EXCEPTION_POINTERS *info)
 		const char *string;
 	} exception_table[] =
 	{
-		{ EXCEPTION_ACCESS_VIOLATION,		"ACCESS VIOLATION" },
-		{ EXCEPTION_DATATYPE_MISALIGNMENT,	"DATATYPE MISALIGNMENT" },
-		{ EXCEPTION_BREAKPOINT, 			"BREAKPOINT" },
-		{ EXCEPTION_SINGLE_STEP,			"SINGLE STEP" },
-		{ EXCEPTION_ARRAY_BOUNDS_EXCEEDED,	"ARRAY BOUNDS EXCEEDED" },
-		{ EXCEPTION_FLT_DENORMAL_OPERAND,	"FLOAT DENORMAL OPERAND" },
-		{ EXCEPTION_FLT_DIVIDE_BY_ZERO,		"FLOAT DIVIDE BY ZERO" },
-		{ EXCEPTION_FLT_INEXACT_RESULT,		"FLOAT INEXACT RESULT" },
-		{ EXCEPTION_FLT_INVALID_OPERATION,	"FLOAT INVALID OPERATION" },
-		{ EXCEPTION_FLT_OVERFLOW,			"FLOAT OVERFLOW" },
-		{ EXCEPTION_FLT_STACK_CHECK,		"FLOAT STACK CHECK" },
-		{ EXCEPTION_FLT_UNDERFLOW,			"FLOAT UNDERFLOW" },
-		{ EXCEPTION_INT_DIVIDE_BY_ZERO,		"INTEGER DIVIDE BY ZERO" },
-		{ EXCEPTION_INT_OVERFLOW,			"INTEGER OVERFLOW" },
-		{ EXCEPTION_PRIV_INSTRUCTION,		"PRIVILEGED INSTRUCTION" },
-		{ EXCEPTION_IN_PAGE_ERROR,			"IN PAGE ERROR" },
-		{ EXCEPTION_ILLEGAL_INSTRUCTION,	"ILLEGAL INSTRUCTION" },
+		{ EXCEPTION_ACCESS_VIOLATION,       "ACCESS VIOLATION" },
+		{ EXCEPTION_DATATYPE_MISALIGNMENT,  "DATATYPE MISALIGNMENT" },
+		{ EXCEPTION_BREAKPOINT,             "BREAKPOINT" },
+		{ EXCEPTION_SINGLE_STEP,            "SINGLE STEP" },
+		{ EXCEPTION_ARRAY_BOUNDS_EXCEEDED,  "ARRAY BOUNDS EXCEEDED" },
+		{ EXCEPTION_FLT_DENORMAL_OPERAND,   "FLOAT DENORMAL OPERAND" },
+		{ EXCEPTION_FLT_DIVIDE_BY_ZERO,     "FLOAT DIVIDE BY ZERO" },
+		{ EXCEPTION_FLT_INEXACT_RESULT,     "FLOAT INEXACT RESULT" },
+		{ EXCEPTION_FLT_INVALID_OPERATION,  "FLOAT INVALID OPERATION" },
+		{ EXCEPTION_FLT_OVERFLOW,           "FLOAT OVERFLOW" },
+		{ EXCEPTION_FLT_STACK_CHECK,        "FLOAT STACK CHECK" },
+		{ EXCEPTION_FLT_UNDERFLOW,          "FLOAT UNDERFLOW" },
+		{ EXCEPTION_INT_DIVIDE_BY_ZERO,     "INTEGER DIVIDE BY ZERO" },
+		{ EXCEPTION_INT_OVERFLOW,           "INTEGER OVERFLOW" },
+		{ EXCEPTION_PRIV_INSTRUCTION,       "PRIVILEGED INSTRUCTION" },
+		{ EXCEPTION_IN_PAGE_ERROR,          "IN PAGE ERROR" },
+		{ EXCEPTION_ILLEGAL_INSTRUCTION,    "ILLEGAL INSTRUCTION" },
 		{ EXCEPTION_NONCONTINUABLE_EXCEPTION,"NONCONTINUABLE EXCEPTION" },
-		{ EXCEPTION_STACK_OVERFLOW, 		"STACK OVERFLOW" },
-		{ EXCEPTION_INVALID_DISPOSITION,	"INVALID DISPOSITION" },
-		{ EXCEPTION_GUARD_PAGE, 			"GUARD PAGE VIOLATION" },
-		{ EXCEPTION_INVALID_HANDLE, 		"INVALID HANDLE" },
-		{ 0,								"UNKNOWN EXCEPTION" }
+		{ EXCEPTION_STACK_OVERFLOW,         "STACK OVERFLOW" },
+		{ EXCEPTION_INVALID_DISPOSITION,    "INVALID DISPOSITION" },
+		{ EXCEPTION_GUARD_PAGE,             "GUARD PAGE VIOLATION" },
+		{ EXCEPTION_INVALID_HANDLE,         "INVALID HANDLE" },
+		{ 0,                                "UNKNOWN EXCEPTION" }
 	};
 	static int already_hit = 0;
 	int i;
@@ -1083,6 +1165,12 @@ static LONG WINAPI exception_filter(struct _EXCEPTION_POINTERS *info)
 	while (walker.unwind())
 		fprintf(stderr, "  %p: %p%s\n", (void *)walker.frame(), (void *)walker.ip(), (symbols == NULL) ? "" : symbols->symbol_for_address(walker.ip()));
 
+	// flush stderr, so the data is actually written when output is being redirected
+	fflush(stderr);
+
+	// flush stderr, so the data is actually written when output is being redirected
+	fflush(stderr);
+
 	// exit
 	return EXCEPTION_CONTINUE_SEARCH;
 }
@@ -1098,13 +1186,13 @@ static LONG WINAPI exception_filter(struct _EXCEPTION_POINTERS *info)
 
 stack_walker::stack_walker()
 	: m_process(GetCurrentProcess()),
-	  m_thread(GetCurrentThread()),
-	  m_first(true),
-	  m_stack_walk_64(TEXT("dbghelp.dll"), "StackWalk64"),
-	  m_sym_initialize(TEXT("dbghelp.dll"), "SymInitialize"),
-	  m_sym_function_table_access_64(TEXT("dbghelp.dll"), "SymFunctionTableAccess64"),
-	  m_sym_get_module_base_64(TEXT("dbghelp.dll"), "SymGetModuleBase64"),
-	  m_rtl_capture_context(TEXT("kernel32.dll"), "RtlCaptureContext")
+		m_thread(GetCurrentThread()),
+		m_first(true),
+		m_stack_walk_64(TEXT("dbghelp.dll"), "StackWalk64"),
+		m_sym_initialize(TEXT("dbghelp.dll"), "SymInitialize"),
+		m_sym_function_table_access_64(TEXT("dbghelp.dll"), "SymFunctionTableAccess64"),
+		m_sym_get_module_base_64(TEXT("dbghelp.dll"), "SymGetModuleBase64"),
+		m_rtl_capture_context(TEXT("kernel32.dll"), "RtlCaptureContext")
 {
 	// zap the structs
 	memset(&m_stackframe, 0, sizeof(m_stackframe));
@@ -1214,12 +1302,12 @@ bool stack_walker::unwind()
 
 symbol_manager::symbol_manager(const char *argv0)
 	: m_mapfile(argv0),
-	  m_symfile(argv0),
-	  m_process(GetCurrentProcess()),
-	  m_last_base(0),
-	  m_text_base(0),
-	  m_sym_from_addr(TEXT("dbghelp.dll"), "SymFromAddr"),
-	  m_sym_get_line_from_addr_64(TEXT("dbghelp.dll"), "SymGetLineFromAddr64")
+		m_symfile(argv0),
+		m_process(GetCurrentProcess()),
+		m_last_base(0),
+		m_text_base(0),
+		m_sym_from_addr(TEXT("dbghelp.dll"), "SymFromAddr"),
+		m_sym_get_line_from_addr_64(TEXT("dbghelp.dll"), "SymGetLineFromAddr64")
 {
 #ifdef __GNUC__
 	// compute the name of the mapfile
@@ -1287,7 +1375,7 @@ const char *symbol_manager::symbol_for_address(FPTR address)
 bool symbol_manager::query_system_for_address(FPTR address)
 {
 	// need at least the sym_from_addr API
-	if (m_sym_from_addr == NULL)
+	if (!m_sym_from_addr)
 		return false;
 
 	BYTE info_buffer[sizeof(SYMBOL_INFO) + 256] = { 0 };
@@ -1302,7 +1390,7 @@ bool symbol_manager::query_system_for_address(FPTR address)
 		// try to get source info as well; again we are returned an ANSI string
 		IMAGEHLP_LINE64 lineinfo = { sizeof(lineinfo) };
 		DWORD linedisp;
-		if (m_sym_get_line_from_addr_64 != NULL && (*m_sym_get_line_from_addr_64)(m_process, address, &linedisp, &lineinfo))
+		if (m_sym_get_line_from_addr_64 && (*m_sym_get_line_from_addr_64)(m_process, address, &linedisp, &lineinfo))
 			format_symbol(info.Name, displacement, lineinfo.FileName, lineinfo.LineNumber);
 		else
 			format_symbol(info.Name, displacement);
@@ -1351,7 +1439,7 @@ void symbol_manager::scan_file_for_address(FPTR address, bool create_cache)
 	while (fgets(line, sizeof(line) - 1, srcfile))
 	{
 		// parse the line looking for an interesting symbol
-		FPTR addr;
+		FPTR addr = 0;
 		bool valid = is_symfile ? parse_sym_line(line, addr, symbol) : parse_map_line(line, addr, symbol);
 
 		// if we got one, see if this is the best
@@ -1534,7 +1622,7 @@ FPTR symbol_manager::get_text_section_base()
 	assert(base != NULL);
 
 	// make sure we have the functions we need
-	if (image_nt_header != NULL && image_rva_to_section != NULL)
+	if (image_nt_header && image_rva_to_section)
 	{
 		// get the NT header
 		PIMAGE_NT_HEADERS headers = (*image_nt_header)(base);
@@ -1562,14 +1650,14 @@ FPTR symbol_manager::get_text_section_base()
 
 sampling_profiler::sampling_profiler(UINT32 max_seconds, UINT8 stack_depth = 0)
 	: m_thread(NULL),
-	  m_thread_id(0),
-	  m_thread_exit(false),
-	  m_stack_depth(stack_depth),
-	  m_entry_stride(stack_depth + 2),
-	  m_max_seconds(max_seconds),
-	  m_buffer(global_alloc(FPTR[max_seconds * 1000 * m_entry_stride])),
-	  m_buffer_ptr(m_buffer),
-	  m_buffer_end(m_buffer + max_seconds * 1000 * m_entry_stride)
+		m_thread_id(0),
+		m_thread_exit(false),
+		m_stack_depth(stack_depth),
+		m_entry_stride(stack_depth + 2),
+		m_max_seconds(max_seconds),
+		m_buffer(global_alloc(FPTR[max_seconds * 1000 * m_entry_stride])),
+		m_buffer_ptr(m_buffer),
+		m_buffer_end(m_buffer + max_seconds * 1000 * m_entry_stride)
 {
 }
 
@@ -1722,6 +1810,7 @@ void sampling_profiler::print_results(symbol_manager &symbols)
 		printf("\n");
 		num_printed++;
 	}
+	symbols.reset_cache();
 }
 
 

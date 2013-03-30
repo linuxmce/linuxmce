@@ -1,8 +1,8 @@
 class pastelg_state : public driver_device
 {
 public:
-	pastelg_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	pastelg_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) { }
 
 	UINT8 m_mux_data;
 	int m_blitter_destx;
@@ -19,20 +19,24 @@ public:
 	UINT8 *m_videoram;
 	UINT8 *m_clut;
 	int m_flipscreen_old;
+	DECLARE_READ8_MEMBER(pastelg_sndrom_r);
+	DECLARE_READ8_MEMBER(pastelg_irq_ack_r);
+	DECLARE_READ8_MEMBER(threeds_inputport1_r);
+	DECLARE_READ8_MEMBER(threeds_inputport2_r);
+	DECLARE_WRITE8_MEMBER(threeds_inputportsel_w);
+	DECLARE_WRITE8_MEMBER(pastelg_clut_w);
+	DECLARE_WRITE8_MEMBER(pastelg_blitter_w);
+	DECLARE_WRITE8_MEMBER(threeds_romsel_w);
+	DECLARE_WRITE8_MEMBER(threeds_output_w);
+	DECLARE_READ8_MEMBER(threeds_rom_readback_r);
+	DECLARE_WRITE8_MEMBER(pastelg_romsel_w);
+	DECLARE_CUSTOM_INPUT_MEMBER(nb1413m3_hackbusyflag_r);
+	DECLARE_DRIVER_INIT(pastelg);
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_pastelg(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	TIMER_CALLBACK_MEMBER(blitter_timer_callback);
 };
 
-
 /*----------- defined in video/pastelg.c -----------*/
-
-PALETTE_INIT( pastelg );
-SCREEN_UPDATE( pastelg );
-VIDEO_START( pastelg );
-
-WRITE8_HANDLER( pastelg_clut_w );
-WRITE8_HANDLER( pastelg_romsel_w );
-WRITE8_HANDLER( threeds_romsel_w );
-WRITE8_HANDLER( threeds_output_w );
-WRITE8_HANDLER( pastelg_blitter_w );
-READ8_HANDLER( threeds_rom_readback_r );
-
-int pastelg_blitter_src_addr_r(address_space *space);
+int pastelg_blitter_src_addr_r(address_space &space);

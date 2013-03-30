@@ -24,6 +24,9 @@
 
 
 
+// device type definition
+const device_type Z80STI = &device_creator<z80sti_device>;
+
 //**************************************************************************
 //  DEBUGGING
 //**************************************************************************
@@ -31,14 +34,6 @@
 #define VERBOSE 0
 
 #define LOG(x) do { if (VERBOSE) logerror x; } while (0)
-
-
-
-//**************************************************************************
-//  DEVICE DEFINITIONS
-//**************************************************************************
-
-const device_type Z80STI = z80sti_device_config::static_alloc_device_config;
 
 
 
@@ -112,17 +107,17 @@ enum
 };
 
 // timer C/D control register
-const int Z80STI_TCDC_TARS	= 0x80;
-const int Z80STI_TCDC_TBRS	= 0x08;
+const int Z80STI_TCDC_TARS  = 0x80;
+const int Z80STI_TCDC_TBRS  = 0x08;
 
 // interrupt vector register
-const int Z80STI_PVR_ISE	= 0x08;
-const int Z80STI_PVR_VR4	= 0x10;
+const int Z80STI_PVR_ISE    = 0x08;
+const int Z80STI_PVR_VR4    = 0x10;
 
 // general purpose I/O interrupt levels
 static const int INT_LEVEL_GPIP[] =
 {
-	Z80STI_IR_P0, Z80STI_IR_P1, Z80STI_IR_P2, Z80STI_IR_P3,	Z80STI_IR_P4, Z80STI_IR_P5, Z80STI_IR_P6, Z80STI_IR_P7
+	Z80STI_IR_P0, Z80STI_IR_P1, Z80STI_IR_P2, Z80STI_IR_P3, Z80STI_IR_P4, Z80STI_IR_P5, Z80STI_IR_P6, Z80STI_IR_P7
 };
 
 // timer interrupt levels
@@ -144,38 +139,27 @@ static const int PRESCALER[] = { 0, 4, 10, 16, 50, 64, 100, 200 };
 
 
 //**************************************************************************
-//  DEVICE CONFIGURATION
+//  LIVE DEVICE
 //**************************************************************************
 
 //-------------------------------------------------
-//  z80sti_device_config - constructor
+//  z80sti_device - constructor
 //-------------------------------------------------
 
-z80sti_device_config::z80sti_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock)
-	: device_config(mconfig, static_alloc_device_config, "Mostek MK3801", tag, owner, clock),
-	  device_config_z80daisy_interface(mconfig, *this)
+z80sti_device::z80sti_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, Z80STI, "Mostek MK3801", tag, owner, clock),
+		device_z80daisy_interface(mconfig, *this),
+		m_gpip(0),
+		m_aer(0),
+		m_ier(0),
+		m_ipr(0),
+		m_isr(0),
+		m_imr(0)
 {
-}
-
-
-//-------------------------------------------------
-//  static_alloc_device_config - allocate a new
-//  configuration object
-//-------------------------------------------------
-
-device_config *z80sti_device_config::static_alloc_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock)
-{
-	return global_alloc(z80sti_device_config(mconfig, tag, owner, clock));
-}
-
-
-//-------------------------------------------------
-//  alloc_device - allocate a new device object
-//-------------------------------------------------
-
-device_t *z80sti_device_config::alloc_device(running_machine &machine) const
-{
-	return auto_alloc(machine, z80sti_device(machine, *this));
+	for (int i = 0; i < 16; i++)
+	{
+		m_int_state[i] = 0;
+	}
 }
 
 
@@ -185,7 +169,7 @@ device_t *z80sti_device_config::alloc_device(running_machine &machine) const
 //  complete
 //-------------------------------------------------
 
-void z80sti_device_config::device_config_complete()
+void z80sti_device::device_config_complete()
 {
 	// inherit a copy of the static data
 	const z80sti_interface *intf = reinterpret_cast<const z80sti_interface *>(static_config());
@@ -196,33 +180,16 @@ void z80sti_device_config::device_config_complete()
 	else
 	{
 		m_rx_clock = m_tx_clock = 0;
-		memset(&m_out_int_func, 0, sizeof(m_out_int_func));
-		memset(&m_in_gpio_func, 0, sizeof(m_in_gpio_func));
-		memset(&m_out_gpio_func, 0, sizeof(m_out_gpio_func));
-		memset(&m_in_si_func, 0, sizeof(m_in_si_func));
-		memset(&m_out_so_func, 0, sizeof(m_out_so_func));
-		memset(&m_out_tao_func, 0, sizeof(m_out_tao_func));
-		memset(&m_out_tbo_func, 0, sizeof(m_out_tbo_func));
-		memset(&m_out_tco_func, 0, sizeof(m_out_tco_func));
-		memset(&m_out_tdo_func, 0, sizeof(m_out_tdo_func));
+		memset(&m_out_int_cb, 0, sizeof(m_out_int_cb));
+		memset(&m_in_gpio_cb, 0, sizeof(m_in_gpio_cb));
+		memset(&m_out_gpio_cb, 0, sizeof(m_out_gpio_cb));
+		memset(&m_in_si_cb, 0, sizeof(m_in_si_cb));
+		memset(&m_out_so_cb, 0, sizeof(m_out_so_cb));
+		memset(&m_out_tao_cb, 0, sizeof(m_out_tao_cb));
+		memset(&m_out_tbo_cb, 0, sizeof(m_out_tbo_cb));
+		memset(&m_out_tco_cb, 0, sizeof(m_out_tco_cb));
+		memset(&m_out_tdo_cb, 0, sizeof(m_out_tdo_cb));
 	}
-}
-
-
-
-//**************************************************************************
-//  LIVE DEVICE
-//**************************************************************************
-
-//-------------------------------------------------
-//  z80sti_device - constructor
-//-------------------------------------------------
-
-z80sti_device::z80sti_device(running_machine &_machine, const z80sti_device_config &config)
-	: device_t(_machine, config),
-	  device_z80daisy_interface(_machine, config, *this),
-	  m_config(config)
-{
 }
 
 
@@ -233,34 +200,34 @@ z80sti_device::z80sti_device(running_machine &_machine, const z80sti_device_conf
 void z80sti_device::device_start()
 {
 	// resolve callbacks
-	devcb_resolve_read8(&m_in_gpio_func, &m_config.m_in_gpio_func, this);
-	devcb_resolve_write8(&m_out_gpio_func, &m_config.m_out_gpio_func, this);
-	devcb_resolve_read_line(&m_in_si_func, &m_config.m_in_si_func, this);
-	devcb_resolve_write_line(&m_out_so_func, &m_config.m_out_so_func, this);
-	devcb_resolve_write_line(&m_out_timer_func[TIMER_A], &m_config.m_out_tao_func, this);
-	devcb_resolve_write_line(&m_out_timer_func[TIMER_B], &m_config.m_out_tbo_func, this);
-	devcb_resolve_write_line(&m_out_timer_func[TIMER_C], &m_config.m_out_tco_func, this);
-	devcb_resolve_write_line(&m_out_timer_func[TIMER_D], &m_config.m_out_tdo_func, this);
-	devcb_resolve_write_line(&m_out_int_func, &m_config.m_out_int_func, this);
+	m_in_gpio_func.resolve(m_in_gpio_cb, *this);
+	m_out_gpio_func.resolve(m_out_gpio_cb, *this);
+	m_in_si_func.resolve(m_in_si_cb, *this);
+	m_out_so_func.resolve(m_out_so_cb, *this);
+	m_out_timer_func[TIMER_A].resolve(m_out_tao_cb, *this);
+	m_out_timer_func[TIMER_B].resolve(m_out_tbo_cb, *this);
+	m_out_timer_func[TIMER_C].resolve(m_out_tco_cb, *this);
+	m_out_timer_func[TIMER_D].resolve(m_out_tdo_cb, *this);
+	m_out_int_func.resolve(m_out_int_cb, *this);
 
 	// create the counter timers
-	m_timer[TIMER_A] = m_machine.scheduler().timer_alloc(FUNC(static_timer_count), (void *)this);
-	m_timer[TIMER_B] = m_machine.scheduler().timer_alloc(FUNC(static_timer_count), (void *)this);
-	m_timer[TIMER_C] = m_machine.scheduler().timer_alloc(FUNC(static_timer_count), (void *)this);
-	m_timer[TIMER_D] = m_machine.scheduler().timer_alloc(FUNC(static_timer_count), (void *)this);
+	m_timer[TIMER_A] = machine().scheduler().timer_alloc(FUNC(static_timer_count), (void *)this);
+	m_timer[TIMER_B] = machine().scheduler().timer_alloc(FUNC(static_timer_count), (void *)this);
+	m_timer[TIMER_C] = machine().scheduler().timer_alloc(FUNC(static_timer_count), (void *)this);
+	m_timer[TIMER_D] = machine().scheduler().timer_alloc(FUNC(static_timer_count), (void *)this);
 
 	// create serial receive clock timer
-	if (m_config.m_rx_clock > 0)
+	if (m_rx_clock > 0)
 	{
-		m_rx_timer = m_machine.scheduler().timer_alloc(FUNC(static_rx_tick), (void *)this);
-		m_rx_timer->adjust(attotime::zero, 0, attotime::from_hz(m_config.m_rx_clock));
+		m_rx_timer = machine().scheduler().timer_alloc(FUNC(static_rx_tick), (void *)this);
+		m_rx_timer->adjust(attotime::zero, 0, attotime::from_hz(m_rx_clock));
 	}
 
 	// create serial transmit clock timer
-	if (m_config.m_tx_clock > 0)
+	if (m_tx_clock > 0)
 	{
-		m_tx_timer = m_machine.scheduler().timer_alloc(FUNC(static_tx_tick), (void *)this);
-		m_tx_timer->adjust(attotime::zero, 0, attotime::from_hz(m_config.m_tx_clock));
+		m_tx_timer = machine().scheduler().timer_alloc(FUNC(static_tx_tick), (void *)this);
+		m_tx_timer->adjust(attotime::zero, 0, attotime::from_hz(m_tx_clock));
 	}
 
 	// register for state saving
@@ -415,11 +382,11 @@ void z80sti_device::check_interrupts()
 {
 	if (m_ipr & m_imr)
 	{
-		devcb_call_write_line(&m_out_int_func, ASSERT_LINE);
+		m_out_int_func(ASSERT_LINE);
 	}
 	else
 	{
-		devcb_call_write_line(&m_out_int_func, CLEAR_LINE);
+		m_out_int_func(CLEAR_LINE);
 	}
 }
 
@@ -469,32 +436,32 @@ UINT8 z80sti_device::read(offs_t offset)
 	case Z80STI_REGISTER_IR:
 		switch (m_pvr & 0x07)
 		{
-		case Z80STI_REGISTER_IR_SCR:	return m_scr;
-		case Z80STI_REGISTER_IR_TDDR:	return m_tmc[TIMER_D];
-		case Z80STI_REGISTER_IR_TCDR:	return m_tmc[TIMER_C];
-		case Z80STI_REGISTER_IR_AER:	return m_aer;
-		case Z80STI_REGISTER_IR_IERB:	return m_ier & 0xff;
-		case Z80STI_REGISTER_IR_IERA:	return m_ier >> 8;
-		case Z80STI_REGISTER_IR_DDR:	return m_ddr;
-		case Z80STI_REGISTER_IR_TCDC:	return m_tcdc;
+		case Z80STI_REGISTER_IR_SCR:    return m_scr;
+		case Z80STI_REGISTER_IR_TDDR:   return m_tmc[TIMER_D];
+		case Z80STI_REGISTER_IR_TCDR:   return m_tmc[TIMER_C];
+		case Z80STI_REGISTER_IR_AER:    return m_aer;
+		case Z80STI_REGISTER_IR_IERB:   return m_ier & 0xff;
+		case Z80STI_REGISTER_IR_IERA:   return m_ier >> 8;
+		case Z80STI_REGISTER_IR_DDR:    return m_ddr;
+		case Z80STI_REGISTER_IR_TCDC:   return m_tcdc;
 		}
 		break;
 
-	case Z80STI_REGISTER_GPIP:	m_gpip = (devcb_call_read8(&m_in_gpio_func, 0) & ~m_ddr) | (m_gpip & m_ddr); return m_gpip;
-	case Z80STI_REGISTER_IPRB:	return m_ipr & 0xff;
-	case Z80STI_REGISTER_IPRA:	return m_ipr >> 8;
-	case Z80STI_REGISTER_ISRB:	return m_isr & 0xff;
-	case Z80STI_REGISTER_ISRA:	return m_isr >> 8;
-	case Z80STI_REGISTER_IMRB:	return m_imr & 0xff;
-	case Z80STI_REGISTER_IMRA:	return m_imr >> 8;
-	case Z80STI_REGISTER_PVR:	return m_pvr;
-	case Z80STI_REGISTER_TABC:	return m_tabc;
-	case Z80STI_REGISTER_TBDR:	return m_tmc[TIMER_B];
-	case Z80STI_REGISTER_TADR:	return m_tmc[TIMER_A];
-	case Z80STI_REGISTER_UCR:	return m_ucr;
-	case Z80STI_REGISTER_RSR:	return m_rsr;
-	case Z80STI_REGISTER_TSR:	return m_tsr;
-	case Z80STI_REGISTER_UDR:	return m_udr;
+	case Z80STI_REGISTER_GPIP:  m_gpip = (m_in_gpio_func(0) & ~m_ddr) | (m_gpip & m_ddr); return m_gpip;
+	case Z80STI_REGISTER_IPRB:  return m_ipr & 0xff;
+	case Z80STI_REGISTER_IPRA:  return m_ipr >> 8;
+	case Z80STI_REGISTER_ISRB:  return m_isr & 0xff;
+	case Z80STI_REGISTER_ISRA:  return m_isr >> 8;
+	case Z80STI_REGISTER_IMRB:  return m_imr & 0xff;
+	case Z80STI_REGISTER_IMRA:  return m_imr >> 8;
+	case Z80STI_REGISTER_PVR:   return m_pvr;
+	case Z80STI_REGISTER_TABC:  return m_tabc;
+	case Z80STI_REGISTER_TBDR:  return m_tmc[TIMER_B];
+	case Z80STI_REGISTER_TADR:  return m_tmc[TIMER_A];
+	case Z80STI_REGISTER_UCR:   return m_ucr;
+	case Z80STI_REGISTER_RSR:   return m_rsr;
+	case Z80STI_REGISTER_TSR:   return m_tsr;
+	case Z80STI_REGISTER_UDR:   return m_udr;
 	}
 
 	return 0;
@@ -574,7 +541,7 @@ void z80sti_device::write(offs_t offset, UINT8 data)
 				LOG(("Z80STI '%s' Timer A Reset\n", tag()));
 				m_to[TIMER_A] = 0;
 
-				devcb_call_write_line(&m_out_timer_func[TIMER_A], m_to[TIMER_A]);
+				m_out_timer_func[TIMER_A](m_to[TIMER_A]);
 			}
 
 			if (BIT(data, 3))
@@ -582,7 +549,7 @@ void z80sti_device::write(offs_t offset, UINT8 data)
 				LOG(("Z80STI '%s' Timer B Reset\n", tag()));
 				m_to[TIMER_B] = 0;
 
-				devcb_call_write_line(&m_out_timer_func[TIMER_B], m_to[TIMER_B]);
+				m_out_timer_func[TIMER_B](m_to[TIMER_B]);
 			}
 			}
 			break;
@@ -592,7 +559,7 @@ void z80sti_device::write(offs_t offset, UINT8 data)
 	case Z80STI_REGISTER_GPIP:
 		LOG(("Z80STI '%s' General Purpose I/O Register: %x\n", tag(), data));
 		m_gpip = data & m_ddr;
-		devcb_call_write8(&m_out_gpio_func, 0, m_gpip);
+		m_out_gpio_func(0, m_gpip);
 		break;
 
 	case Z80STI_REGISTER_IPRB:
@@ -687,21 +654,21 @@ void z80sti_device::write(offs_t offset, UINT8 data)
 		m_tdr[TIMER_A] = data;
 		break;
 #if 0
-    case Z80STI_REGISTER_UCR:
-        m_ucr = data;
-        break;
+	case Z80STI_REGISTER_UCR:
+		m_ucr = data;
+		break;
 
-    case Z80STI_REGISTER_RSR:
-        m_rsr = data;
-        break;
+	case Z80STI_REGISTER_RSR:
+		m_rsr = data;
+		break;
 
-    case Z80STI_REGISTER_TSR:
-        m_tsr = data;
-        break;
+	case Z80STI_REGISTER_TSR:
+		m_tsr = data;
+		break;
 
-    case Z80STI_REGISTER_UDR:
-        m_udr = data;
-        break;
+	case Z80STI_REGISTER_UDR:
+		m_udr = data;
+		break;
 #endif
 	default:
 		LOG(("Z80STI '%s' Unsupported Register %x\n", tag(), offset & 0x0f));
@@ -722,7 +689,7 @@ void z80sti_device::timer_count(int index)
 		// toggle timer output signal
 		m_to[index] = !m_to[index];
 
-		devcb_call_write_line(&m_out_timer_func[index], m_to[index]);
+		m_out_timer_func[index](m_to[index]);
 
 		if (m_ier & (1 << INT_LEVEL_TIMER[index]))
 		{

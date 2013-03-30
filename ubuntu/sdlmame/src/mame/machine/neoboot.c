@@ -22,8 +22,8 @@
 void neogeo_bootleg_cx_decrypt( running_machine &machine )
 {
 	int i;
-	int cx_size = machine.region( "sprites" )->bytes();
-	UINT8 *rom = machine.region( "sprites" )->base();
+	int cx_size = machine.root_device().memregion( "sprites" )->bytes();
+	UINT8 *rom = machine.root_device().memregion( "sprites" )->base();
 	UINT8 *buf = auto_alloc_array(machine, UINT8, cx_size );
 
 	memcpy( buf, rom, cx_size );
@@ -38,8 +38,8 @@ void neogeo_bootleg_cx_decrypt( running_machine &machine )
 
 void neogeo_bootleg_sx_decrypt( running_machine &machine, int value )
 {
-	int sx_size = machine.region( "fixed" )->bytes();
-	UINT8 *rom = machine.region( "fixed" )->base();
+	int sx_size = machine.root_device().memregion( "fixed" )->bytes();
+	UINT8 *rom = machine.root_device().memregion( "fixed" )->base();
 	int i;
 
 	if (value == 1)
@@ -71,9 +71,9 @@ void neogeo_bootleg_sx_decrypt( running_machine &machine, int value )
 void kog_px_decrypt( running_machine &machine )
 {
 	/* the protection chip does some *very* strange things to the rom */
-	UINT8 *src = machine.region("maincpu")->base();
+	UINT8 *src = machine.root_device().memregion("maincpu")->base();
 	UINT8 *dst = auto_alloc_array(machine, UINT8, 0x600000 );
-	UINT16 *rom = (UINT16 *)machine.region("maincpu")->base();
+	UINT16 *rom = (UINT16 *)machine.root_device().memregion("maincpu")->base();
 	int i;
 	static const int sec[] = { 0x3, 0x8, 0x7, 0xC, 0x1, 0xA, 0x6, 0xD };
 
@@ -130,6 +130,24 @@ void kog_px_decrypt( running_machine &machine )
 }
 
 
+/* The King of Fighters '97 Oroshi Plus 2003 (bootleg) */
+
+void kof97oro_px_decode( running_machine &machine )
+{
+	int i;
+	UINT16 *tmp = auto_alloc_array(machine, UINT16, 0x500000 );
+	UINT16 *src = (UINT16*)machine.root_device().memregion("maincpu")->base();
+
+	for (i = 0; i < 0x500000/2; i++) {
+		tmp[i] = src[i ^ 0x7ffef];
+	}
+
+	memcpy (src, tmp, 0x500000);
+
+	auto_free (machine, tmp);
+}
+
+
 /* The King of Fighters 10th Anniversary (The King of Fighters 2002 bootleg) */
 
 
@@ -139,7 +157,7 @@ void kog_px_decrypt( running_machine &machine )
 
 static UINT16 kof10thExtraRAMB[0x01000];
 
-static void kof10thBankswitch(address_space *space, UINT16 nBank)
+static void kof10thBankswitch(address_space &space, UINT16 nBank)
 {
 	UINT32 bank = 0x100000 + ((nBank & 7) << 20);
 	if (bank >= 0x700000)
@@ -155,10 +173,10 @@ static READ16_HANDLER( kof10th_RAMB_r )
 static WRITE16_HANDLER( kof10th_custom_w )
 {
 	if (!kof10thExtraRAMB[0xFFE]) { // Write to RAM bank A
-		UINT16 *prom = (UINT16*)space->machine().region( "maincpu" )->base();
+		UINT16 *prom = (UINT16*)space.machine().root_device().memregion( "maincpu" )->base();
 		COMBINE_DATA(&prom[(0xE0000/2) + (offset & 0xFFFF)]);
 	} else { // Write S data on-the-fly
-		UINT8 *srom = space->machine().region( "fixed" )->base();
+		UINT8 *srom = space.machine().root_device().memregion( "fixed" )->base();
 		srom[offset] = BITSWAP8(data,7,6,0,4,3,2,1,5);
 	}
 }
@@ -169,7 +187,7 @@ static WRITE16_HANDLER( kof10th_bankswitch_w )
 		if (offset == 0x5FFF8) { // Standard bankswitch
 			kof10thBankswitch(space, data);
 		} else if (offset == 0x5FFFC && kof10thExtraRAMB[0xFFC] != data) { // Special bankswitch
-			UINT8 *src = space->machine().region( "maincpu" )->base();
+			UINT8 *src = space.machine().root_device().memregion( "maincpu" )->base();
 			memcpy (src + 0x10000,  src + ((data & 1) ? 0x810000 : 0x710000), 0xcffff);
 		}
 		COMBINE_DATA(&kof10thExtraRAMB[offset & 0xFFF]);
@@ -178,16 +196,16 @@ static WRITE16_HANDLER( kof10th_bankswitch_w )
 
 void install_kof10th_protection ( running_machine &machine )
 {
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x2fe000, 0x2fffff, FUNC(kof10th_RAMB_r));
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x200000, 0x23ffff, FUNC(kof10th_custom_w));
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x240000, 0x2fffff, FUNC(kof10th_bankswitch_w));
+	machine.device("maincpu")->memory().space(AS_PROGRAM).install_legacy_read_handler(0x2fe000, 0x2fffff, FUNC(kof10th_RAMB_r));
+	machine.device("maincpu")->memory().space(AS_PROGRAM).install_legacy_write_handler(0x200000, 0x23ffff, FUNC(kof10th_custom_w));
+	machine.device("maincpu")->memory().space(AS_PROGRAM).install_legacy_write_handler(0x240000, 0x2fffff, FUNC(kof10th_bankswitch_w));
 }
 
 void decrypt_kof10th(running_machine &machine)
 {
 	int i, j;
 	UINT8 *dst = auto_alloc_array(machine, UINT8, 0x900000);
-	UINT8 *src = machine.region( "maincpu" )->base();
+	UINT8 *src = machine.root_device().memregion( "maincpu" )->base();
 
 	memcpy(dst + 0x000000, src + 0x700000, 0x100000); // Correct (Verified in Uni-bios)
 	memcpy(dst + 0x100000, src + 0x000000, 0x800000);
@@ -215,10 +233,10 @@ void decrypt_kof10th(running_machine &machine)
 void decrypt_kf10thep(running_machine &machine)
 {
 	int i;
-	UINT16 *rom = (UINT16*)machine.region("maincpu")->base();
-	UINT8  *src = machine.region("maincpu")->base();
-	UINT16 *buf = (UINT16*)machine.region("audiocrypt")->base();
-	UINT8 *srom = (UINT8*)machine.region("fixed")->base();
+	UINT16 *rom = (UINT16*)machine.root_device().memregion("maincpu")->base();
+	UINT8  *src = machine.root_device().memregion("maincpu")->base();
+	UINT16 *buf = (UINT16*)machine.root_device().memregion("audiocrypt")->base();
+	UINT8 *srom = (UINT8*)machine.root_device().memregion("fixed")->base();
 	UINT8 *sbuf = auto_alloc_array(machine, UINT8, 0x20000);
 
 	UINT8 *dst = auto_alloc_array(machine, UINT8, 0x200000);
@@ -256,7 +274,7 @@ void decrypt_kf10thep(running_machine &machine)
 static void kf2k5uni_px_decrypt( running_machine &machine )
 {
 	int i, j, ofst;
-	UINT8 *src = machine.region( "maincpu" )->base();
+	UINT8 *src = machine.root_device().memregion( "maincpu" )->base();
 	UINT8 *dst = auto_alloc_array(machine, UINT8, 0x80);
 
 	for (i = 0; i < 0x800000; i+=0x80)
@@ -276,7 +294,7 @@ static void kf2k5uni_px_decrypt( running_machine &machine )
 static void kf2k5uni_sx_decrypt( running_machine &machine )
 {
 	int i;
-	UINT8 *srom = machine.region( "fixed" )->base();
+	UINT8 *srom = machine.root_device().memregion( "fixed" )->base();
 
 	for (i = 0; i < 0x20000; i++)
 		srom[i] = BITSWAP8(srom[i], 4, 5, 6, 7, 0, 1, 2, 3);
@@ -285,7 +303,7 @@ static void kf2k5uni_sx_decrypt( running_machine &machine )
 static void kf2k5uni_mx_decrypt( running_machine &machine )
 {
 	int i;
-	UINT8 *mrom = machine.region( "audiocpu" )->base();
+	UINT8 *mrom = machine.root_device().memregion( "audiocpu" )->base();
 
 	for (i = 0; i < 0x30000; i++)
 		mrom[i] = BITSWAP8(mrom[i], 4, 5, 6, 7, 0, 1, 2, 3);
@@ -328,7 +346,7 @@ void kof2002b_gfx_decrypt(running_machine &machine, UINT8 *src, int size)
 		{
 			int n = (( j % 0x40) / 8 );
 			int ofst = BITSWAP16(j, 15, 14, 13, 12, 11, 10, 9, t[n][0], t[n][1], t[n][2],
-								 t[n][3], t[n][4], t[n][5], t[n][6], t[n][7], t[n][8]);
+									t[n][3], t[n][4], t[n][5], t[n][6], t[n][7], t[n][8]);
 			memcpy( src+i+ofst*128, dst+j*128, 128 );
 		}
 	}
@@ -343,7 +361,7 @@ void kf2k2mp_decrypt( running_machine &machine )
 {
 	int i,j;
 
-	UINT8 *src = machine.region("maincpu")->base();
+	UINT8 *src = machine.root_device().memregion("maincpu")->base();
 	UINT8 *dst = auto_alloc_array(machine, UINT8, 0x80);
 
 	memmove(src, src + 0x300000, 0x500000);
@@ -366,7 +384,7 @@ void kf2k2mp_decrypt( running_machine &machine )
 
 void kf2k2mp2_px_decrypt( running_machine &machine )
 {
-	UINT8 *src = machine.region("maincpu")->base();
+	UINT8 *src = machine.root_device().memregion("maincpu")->base();
 	UINT8 *dst = auto_alloc_array(machine, UINT8, 0x600000);
 
 	memcpy (dst + 0x000000, src + 0x1C0000, 0x040000);
@@ -387,8 +405,8 @@ static void cthd2003_neogeo_gfx_address_fix_do(running_machine &machine, int sta
 	int i,j;
 	int tilesize=128;
 
-	UINT8* rom = auto_alloc_array(machine, UINT8, 16*tilesize);	// 16 tiles buffer
-	UINT8* realrom = machine.region("sprites")->base() + start*tilesize;
+	UINT8* rom = auto_alloc_array(machine, UINT8, 16*tilesize); // 16 tiles buffer
+	UINT8* realrom = machine.root_device().memregion("sprites")->base() + start*tilesize;
 
 	for (i = 0; i < (end-start)/16; i++) {
 		for (j = 0; j < 16; j++) {
@@ -441,7 +459,7 @@ static void cthd2003_c(running_machine &machine, int pow)
 
 void decrypt_cthd2003( running_machine &machine )
 {
-	UINT8 *romdata = machine.region("fixed")->base();
+	UINT8 *romdata = machine.root_device().memregion("fixed")->base();
 	UINT8 *tmp = auto_alloc_array(machine, UINT8, 8*128*128);
 
 	memcpy(tmp+8*0*128, romdata+8*0*128, 8*32*128);
@@ -450,7 +468,7 @@ void decrypt_cthd2003( running_machine &machine )
 	memcpy(tmp+8*96*128, romdata+8*96*128, 8*32*128);
 	memcpy(romdata, tmp, 8*128*128);
 
-	romdata = machine.region("audiocpu")->base()+0x10000;
+	romdata = machine.root_device().memregion("audiocpu")->base()+0x10000;
 	memcpy(tmp+8*0*128, romdata+8*0*128, 8*32*128);
 	memcpy(tmp+8*32*128, romdata+8*64*128, 8*32*128);
 	memcpy(tmp+8*64*128, romdata+8*32*128, 8*32*128);
@@ -482,10 +500,10 @@ void patch_cthd2003( running_machine &machine )
 {
 	/* patches thanks to razoola */
 	int i;
-	UINT16 *mem16 = (UINT16 *)machine.region("maincpu")->base();
+	UINT16 *mem16 = (UINT16 *)machine.root_device().memregion("maincpu")->base();
 
 	/* special ROM banking handler */
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x2ffff0, 0x2fffff, FUNC(cthd2003_bankswitch_w));
+	machine.device("maincpu")->memory().space(AS_PROGRAM).install_legacy_write_handler(0x2ffff0, 0x2fffff, FUNC(cthd2003_bankswitch_w));
 
 	// theres still a problem on the character select screen but it seems to be related to cpu core timing issues,
 	// overclocking the 68k prevents it.
@@ -525,8 +543,8 @@ void patch_cthd2003( running_machine &machine )
 
 static void ct2k3sp_sx_decrypt( running_machine &machine )
 {
-	int rom_size = machine.region( "fixed" )->bytes();
-	UINT8 *rom = machine.region( "fixed" )->base();
+	int rom_size = machine.root_device().memregion( "fixed" )->bytes();
+	UINT8 *rom = machine.root_device().memregion( "fixed" )->base();
 	UINT8 *buf = auto_alloc_array(machine, UINT8,  rom_size );
 	int i;
 	int ofst;
@@ -535,8 +553,8 @@ static void ct2k3sp_sx_decrypt( running_machine &machine )
 
 	for( i = 0; i < rom_size; i++ ){
 		ofst = BITSWAP24( (i & 0x1ffff), 23, 22, 21, 20, 19, 18, 17,  3,
-									      0,  1,  4,  2, 13, 14, 16, 15,
-										  5,  6, 11, 10,  9,  8,  7, 12 );
+											0,  1,  4,  2, 13, 14, 16, 15,
+											5,  6, 11, 10,  9,  8,  7, 12 );
 
 		ofst += (i >> 17) << 17;
 
@@ -555,7 +573,7 @@ static void ct2k3sp_sx_decrypt( running_machine &machine )
 
 void decrypt_ct2k3sp( running_machine &machine )
 {
-	UINT8 *romdata = machine.region("audiocpu")->base()+0x10000;
+	UINT8 *romdata = machine.root_device().memregion("audiocpu")->base()+0x10000;
 	UINT8*tmp = auto_alloc_array(machine, UINT8, 8*128*128);
 	memcpy(tmp+8*0*128, romdata+8*0*128, 8*32*128);
 	memcpy(tmp+8*32*128, romdata+8*64*128, 8*32*128);
@@ -575,7 +593,7 @@ void decrypt_ct2k3sp( running_machine &machine )
 
 void decrypt_ct2k3sa( running_machine &machine )
 {
-	UINT8 *romdata = machine.region("audiocpu")->base()+0x10000;
+	UINT8 *romdata = machine.root_device().memregion("audiocpu")->base()+0x10000;
 	UINT8*tmp = auto_alloc_array(machine, UINT8, 8*128*128);
 	memcpy(tmp+8*0*128, romdata+8*0*128, 8*32*128);
 	memcpy(tmp+8*32*128, romdata+8*64*128, 8*32*128);
@@ -592,7 +610,7 @@ void patch_ct2k3sa( running_machine &machine )
 {
 	/* patches thanks to razoola - same as for cthd2003*/
 	int i;
-	UINT16 *mem16 = (UINT16 *)machine.region("maincpu")->base();
+	UINT16 *mem16 = (UINT16 *)machine.root_device().memregion("maincpu")->base();
 
 	// theres still a problem on the character select screen but it seems to be related to cpu core timing issues,
 	// overclocking the 68k prevents it.
@@ -633,7 +651,7 @@ void patch_ct2k3sa( running_machine &machine )
 
 void decrypt_kof2k4se_68k( running_machine &machine )
 {
-	UINT8 *src = machine.region("maincpu")->base()+0x100000;
+	UINT8 *src = machine.root_device().memregion("maincpu")->base()+0x100000;
 	UINT8 *dst = auto_alloc_array(machine, UINT8, 0x400000);
 	int i;
 	static const int sec[] = {0x300000,0x200000,0x100000,0x000000};
@@ -653,7 +671,7 @@ void decrypt_kof2k4se_68k( running_machine &machine )
 void lans2004_vx_decrypt( running_machine &machine )
 {
 	int i;
-	UINT8 *rom = machine.region( "ymsnd" )->base();
+	UINT8 *rom = machine.root_device().memregion( "ymsnd" )->base();
 	for (i = 0; i < 0xA00000; i++)
 		rom[i] = BITSWAP8(rom[i], 0, 1, 5, 4, 3, 2, 6, 7);
 }
@@ -662,8 +680,8 @@ void lans2004_decrypt_68k( running_machine &machine )
 {
 	/* Descrambling P ROMs - Thanks to Razoola for the info */
 	int i;
-	UINT8 *src = machine.region( "maincpu" )->base();
-	UINT16 *rom = (UINT16*)machine.region( "maincpu" )->base();
+	UINT8 *src = machine.root_device().memregion( "maincpu" )->base();
+	UINT16 *rom = (UINT16*)machine.root_device().memregion( "maincpu" )->base();
 	UINT8 *dst = auto_alloc_array(machine, UINT8, 0x600000);
 
 	{
@@ -702,19 +720,19 @@ void lans2004_decrypt_68k( running_machine &machine )
 
 static READ16_HANDLER( mslug5_prot_r )
 {
-	logerror("PC %06x: access protected\n",cpu_get_pc(&space->device()));
+	logerror("PC %06x: access protected\n",space.device().safe_pc());
 	return 0xa0;
 }
 
 static WRITE16_HANDLER ( ms5plus_bankswitch_w )
 {
 	int bankaddress;
-	logerror("offset: %06x PC %06x: set banking %04x\n",offset,cpu_get_pc(&space->device()),data);
+	logerror("offset: %06x PC %06x: set banking %04x\n",offset,space.device().safe_pc(),data);
 	if ((offset == 0)&&(data == 0xa0))
 	{
 		bankaddress=0xa0;
 		neogeo_set_main_cpu_bank_address(space, bankaddress);
-		logerror("offset: %06x PC %06x: set banking %04x\n\n",offset,cpu_get_pc(&space->device()),bankaddress);
+		logerror("offset: %06x PC %06x: set banking %04x\n\n",offset,space.device().safe_pc(),bankaddress);
 	}
 	else if(offset == 2)
 	{
@@ -722,14 +740,14 @@ static WRITE16_HANDLER ( ms5plus_bankswitch_w )
 		//data=data&7;
 		bankaddress=data*0x100000;
 		neogeo_set_main_cpu_bank_address(space, bankaddress);
-		logerror("offset: %06x PC %06x: set banking %04x\n\n",offset,cpu_get_pc(&space->device()),bankaddress);
+		logerror("offset: %06x PC %06x: set banking %04x\n\n",offset,space.device().safe_pc(),bankaddress);
 	}
 }
 
 void install_ms5plus_protection(running_machine &machine)
 {
 	// special ROM banking handler / additional protection
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_readwrite_handler(0x2ffff0, 0x2fffff,FUNC(mslug5_prot_r), FUNC(ms5plus_bankswitch_w));
+	machine.device("maincpu")->memory().space(AS_PROGRAM).install_legacy_readwrite_handler(0x2ffff0, 0x2fffff,FUNC(mslug5_prot_r), FUNC(ms5plus_bankswitch_w));
 }
 
 
@@ -742,8 +760,8 @@ void svcboot_px_decrypt( running_machine &machine )
 		0x06, 0x07, 0x01, 0x02, 0x03, 0x04, 0x05, 0x00
 	};
 	int i;
-	int size = machine.region( "maincpu" )->bytes();
-	UINT8 *src = machine.region( "maincpu" )->base();
+	int size = machine.root_device().memregion( "maincpu" )->bytes();
+	UINT8 *src = machine.root_device().memregion( "maincpu" )->base();
 	UINT8 *dst = auto_alloc_array(machine, UINT8,  size );
 	int ofst;
 	for( i = 0; i < size / 0x100000; i++ ){
@@ -771,8 +789,8 @@ void svcboot_cx_decrypt( running_machine &machine )
 		{ 3, 0, 2, 1 },
 	};
 	int i;
-	int size = machine.region( "sprites" )->bytes();
-	UINT8 *src = machine.region( "sprites" )->base();
+	int size = machine.root_device().memregion( "sprites" )->bytes();
+	UINT8 *src = machine.root_device().memregion( "sprites" )->base();
 	UINT8 *dst = auto_alloc_array(machine, UINT8,  size );
 	int ofst;
 	memcpy( dst, src, size );
@@ -798,16 +816,16 @@ void svcplus_px_decrypt( running_machine &machine )
 	static const int sec[] = {
 		0x00, 0x03, 0x02, 0x05, 0x04, 0x01
 	};
-	int size = machine.region( "maincpu" )->bytes();
-	UINT8 *src = machine.region( "maincpu" )->base();
+	int size = machine.root_device().memregion( "maincpu" )->bytes();
+	UINT8 *src = machine.root_device().memregion( "maincpu" )->base();
 	UINT8 *dst = auto_alloc_array(machine, UINT8,  size );
 	int i;
 	int ofst;
 	memcpy( dst, src, size );
 	for( i = 0; i < size / 2; i++ ){
 		ofst = BITSWAP24( (i & 0xfffff), 0x17, 0x16, 0x15, 0x14, 0x13, 0x00, 0x01, 0x02,
-										 0x0f, 0x0e, 0x0d, 0x0c, 0x0b, 0x0a, 0x09, 0x08,
-										 0x07, 0x06, 0x05, 0x04, 0x03, 0x10, 0x11, 0x12 );
+											0x0f, 0x0e, 0x0d, 0x0c, 0x0b, 0x0a, 0x09, 0x08,
+											0x07, 0x06, 0x05, 0x04, 0x03, 0x10, 0x11, 0x12 );
 		ofst ^= 0x0f0007;
 		ofst += (i & 0xff00000);
 		memcpy( &src[ i * 0x02 ], &dst[ ofst * 0x02 ], 0x02 );
@@ -822,7 +840,7 @@ void svcplus_px_decrypt( running_machine &machine )
 void svcplus_px_hack( running_machine &machine )
 {
 	/* patched by the protection chip? */
-	UINT8 *src = machine.region( "maincpu" )->base();
+	UINT8 *src = machine.root_device().memregion( "maincpu" )->base();
 	src[ 0x0f8010 ] = 0x40;
 	src[ 0x0f8011 ] = 0x04;
 	src[ 0x0f8012 ] = 0x00;
@@ -843,8 +861,8 @@ void svcplusa_px_decrypt( running_machine &machine )
 	static const int sec[] = {
 		0x01, 0x02, 0x03, 0x04, 0x05, 0x00
 	};
-	int size = machine.region( "maincpu" )->bytes();
-	UINT8 *src = machine.region( "maincpu" )->base();
+	int size = machine.root_device().memregion( "maincpu" )->bytes();
+	UINT8 *src = machine.root_device().memregion( "maincpu" )->base();
 	UINT8 *dst = auto_alloc_array(machine, UINT8,  size );
 	memcpy( dst, src, size );
 	for( i = 0; i < 6; i++ ){
@@ -862,15 +880,15 @@ void svcsplus_px_decrypt( running_machine &machine )
 	static const int sec[] = {
 		0x06, 0x07, 0x01, 0x02, 0x03, 0x04, 0x05, 0x00
 	};
-	int size = machine.region( "maincpu" )->bytes();
-	UINT8 *src = machine.region( "maincpu" )->base();
+	int size = machine.root_device().memregion( "maincpu" )->bytes();
+	UINT8 *src = machine.root_device().memregion( "maincpu" )->base();
 	UINT8 *dst = auto_alloc_array(machine, UINT8,  size );
 	int i;
 	int ofst;
 	memcpy( dst, src, size );
 	for( i = 0; i < size / 2; i++ ){
 		ofst = BITSWAP16( (i & 0x007fff), 0x0f, 0x00, 0x08, 0x09, 0x0b, 0x0a, 0x0c, 0x0d,
-										  0x04, 0x03, 0x01, 0x07, 0x06, 0x02, 0x05, 0x0e );
+											0x04, 0x03, 0x01, 0x07, 0x06, 0x02, 0x05, 0x0e );
 
 		ofst += (i & 0x078000);
 		ofst += sec[ (i & 0xf80000) >> 19 ] << 19;
@@ -882,7 +900,7 @@ void svcsplus_px_decrypt( running_machine &machine )
 void svcsplus_px_hack( running_machine &machine )
 {
 	/* patched by the protection chip? */
-	UINT16 *mem16 = (UINT16 *)machine.region("maincpu")->base();
+	UINT16 *mem16 = (UINT16 *)machine.root_device().memregion("maincpu")->base();
 	mem16[0x9e90/2] = 0x000f;
 	mem16[0x9e92/2] = 0xc9c0;
 	mem16[0xa10c/2] = 0x4eb9;
@@ -895,14 +913,14 @@ static UINT16 mv0_bank_ram[ 0x10/2 ];
 
 static READ16_HANDLER( mv0_bankswitch_r )
 {
-    return mv0_bank_ram[ offset ];
+	return mv0_bank_ram[ offset ];
 }
 
 static WRITE16_HANDLER( mv0_bankswitch_w )
 {
-    UINT32 bankaddress = (mv0_bank_ram[ 0 ] >> 8) + (mv0_bank_ram[ 1 ] << 8) + 0x100000;
+	UINT32 bankaddress = (mv0_bank_ram[ 0 ] >> 8) + (mv0_bank_ram[ 1 ] << 8) + 0x100000;
 	COMBINE_DATA( &mv0_bank_ram[ offset ] );
-    neogeo_set_main_cpu_bank_address( space, bankaddress );
+	neogeo_set_main_cpu_bank_address( space, bankaddress );
 }
 #endif
 
@@ -924,7 +942,7 @@ static WRITE16_HANDLER( kof2003_w )
 		UINT8* cr = (UINT8 *)kof2003_tbl;
 		UINT32 address = (cr[BYTE_XOR_LE(0x1ff3)]<<16)|(cr[BYTE_XOR_LE(0x1ff2)]<<8)|cr[BYTE_XOR_LE(0x1ff1)];
 		UINT8 prt = cr[BYTE_XOR_LE(0x1ff2)];
-		UINT8* mem = (UINT8 *)space->machine().region("maincpu")->base();
+		UINT8* mem = (UINT8 *)space.machine().root_device().memregion("maincpu")->base();
 
 		cr[BYTE_XOR_LE(0x1ff0)] =  0xa0;
 		cr[BYTE_XOR_LE(0x1ff1)] &= 0xfe;
@@ -942,7 +960,7 @@ static WRITE16_HANDLER( kof2003p_w )
 		UINT8* cr = (UINT8 *)kof2003_tbl;
 		UINT32 address = (cr[BYTE_XOR_LE(0x1ff3)]<<16)|(cr[BYTE_XOR_LE(0x1ff2)]<<8)|cr[BYTE_XOR_LE(0x1ff0)];
 		UINT8 prt = cr[BYTE_XOR_LE(0x1ff2)];
-		UINT8* mem = (UINT8 *)space->machine().region("maincpu")->base();
+		UINT8* mem = (UINT8 *)space.machine().root_device().memregion("maincpu")->base();
 
 		cr[BYTE_XOR_LE(0x1ff0)] &= 0xfe;
 		cr[BYTE_XOR_LE(0x1ff3)] &= 0x7f;
@@ -959,20 +977,20 @@ void kf2k3bl_px_decrypt( running_machine &machine )
 		0x07, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06
 	};
 
-    int rom_size = 0x800000;
-    UINT8 *rom = machine.region( "maincpu" )->base();
-    UINT8 *buf = auto_alloc_array(machine, UINT8,  rom_size );
-    memcpy( buf, rom, rom_size );
+	int rom_size = 0x800000;
+	UINT8 *rom = machine.root_device().memregion( "maincpu" )->base();
+	UINT8 *buf = auto_alloc_array(machine, UINT8,  rom_size );
+	memcpy( buf, rom, rom_size );
 
-    for( i = 0; i < rom_size / 0x100000; i++ ){
-        memcpy( &rom[ i * 0x100000 ], &buf[ sec[ i ] * 0x100000 ], 0x100000 );
-    }
-    auto_free( machine, buf );
+	for( i = 0; i < rom_size / 0x100000; i++ ){
+		memcpy( &rom[ i * 0x100000 ], &buf[ sec[ i ] * 0x100000 ], 0x100000 );
+	}
+	auto_free( machine, buf );
 }
 
 void kf2k3bl_install_protection(running_machine &machine)
 {
-    machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_readwrite_handler(0x2fe000, 0x2fffff, FUNC(kof2003_r), FUNC(kof2003_w) );
+	machine.device("maincpu")->memory().space(AS_PROGRAM).install_legacy_readwrite_handler(0x2fe000, 0x2fffff, FUNC(kof2003_r), FUNC(kof2003_w) );
 }
 
 
@@ -982,7 +1000,7 @@ void kf2k3bl_install_protection(running_machine &machine)
 void kf2k3pl_px_decrypt( running_machine &machine )
 {
 	UINT16*tmp = auto_alloc_array(machine, UINT16, 0x100000/2);
-	UINT16*rom = (UINT16*)machine.region( "maincpu" )->base();
+	UINT16*rom = (UINT16*)machine.root_device().memregion( "maincpu" )->base();
 	int j;
 	int i;
 
@@ -1000,7 +1018,7 @@ void kf2k3pl_px_decrypt( running_machine &machine )
 
 void kf2k3pl_install_protection(running_machine &machine)
 {
-    machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_readwrite_handler(0x2fe000, 0x2fffff, FUNC(kof2003_r), FUNC(kof2003p_w) );
+	machine.device("maincpu")->memory().space(AS_PROGRAM).install_legacy_readwrite_handler(0x2fe000, 0x2fffff, FUNC(kof2003_r), FUNC(kof2003p_w) );
 }
 
 
@@ -1010,7 +1028,7 @@ void kf2k3pl_install_protection(running_machine &machine)
 void kf2k3upl_px_decrypt( running_machine &machine )
 {
 	{
-		UINT8 *src = machine.region("maincpu")->base();
+		UINT8 *src = machine.root_device().memregion("maincpu")->base();
 		memmove(src+0x100000, src, 0x600000);
 		memmove(src, src+0x700000, 0x100000);
 	}
@@ -1019,8 +1037,8 @@ void kf2k3upl_px_decrypt( running_machine &machine )
 
 		int ofst;
 		int i;
-		UINT8 *rom = machine.region( "maincpu" )->base() + 0xfe000;
-		UINT8 *buf = machine.region( "maincpu" )->base() + 0xd0610;
+		UINT8 *rom = machine.root_device().memregion( "maincpu" )->base() + 0xfe000;
+		UINT8 *buf = machine.root_device().memregion( "maincpu" )->base() + 0xd0610;
 
 		for( i = 0; i < 0x2000 / 2; i++ ){
 			ofst = (i & 0xff00) + BITSWAP8( (i & 0x00ff), 7, 6, 0, 4, 3, 2, 1, 5 );
@@ -1031,7 +1049,7 @@ void kf2k3upl_px_decrypt( running_machine &machine )
 
 void kf2k3upl_install_protection(running_machine &machine)
 {
-    machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_readwrite_handler(0x2fe000, 0x2fffff, FUNC(kof2003_r), FUNC(kof2003_w) );
+	machine.device("maincpu")->memory().space(AS_PROGRAM).install_legacy_readwrite_handler(0x2fe000, 0x2fffff, FUNC(kof2003_r), FUNC(kof2003_w) );
 }
 
 
@@ -1040,8 +1058,8 @@ void kf2k3upl_install_protection(running_machine &machine)
 
 void samsho5b_px_decrypt( running_machine &machine )
 {
-	int px_size = machine.region( "maincpu" )->bytes();
-	UINT8 *rom = machine.region( "maincpu" )->base();
+	int px_size = machine.root_device().memregion( "maincpu" )->bytes();
+	UINT8 *rom = machine.root_device().memregion( "maincpu" )->base();
 	UINT8 *buf = auto_alloc_array(machine, UINT8,  px_size );
 	int ofst;
 	int i;
@@ -1067,8 +1085,8 @@ void samsho5b_px_decrypt( running_machine &machine )
 
 void samsho5b_vx_decrypt( running_machine &machine )
 {
-	int vx_size = machine.region( "ymsnd" )->bytes();
-	UINT8 *rom = machine.region( "ymsnd" )->base();
+	int vx_size = machine.root_device().memregion( "ymsnd" )->bytes();
+	UINT8 *rom = machine.root_device().memregion( "ymsnd" )->base();
 	int i;
 
 	for( i = 0; i < vx_size; i++ )
@@ -1084,7 +1102,7 @@ void samsho5b_vx_decrypt( running_machine &machine )
 void matrimbl_decrypt( running_machine &machine )
 {
 	/* decrypt Z80 */
-	UINT8 *rom = machine.region( "audiocpu" )->base()+0x10000;
+	UINT8 *rom = machine.root_device().memregion( "audiocpu" )->base()+0x10000;
 	UINT8 *buf = auto_alloc_array(machine, UINT8,  0x20000 );
 	int i, j=0;
 	memcpy( buf, rom, 0x20000 );
@@ -1122,4 +1140,3 @@ void matrimbl_decrypt( running_machine &machine )
 	/* decrypt gfx */
 	cthd2003_c( machine, 0 );
 }
-

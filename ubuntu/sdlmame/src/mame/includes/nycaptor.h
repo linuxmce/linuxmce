@@ -2,15 +2,18 @@
 class nycaptor_state : public driver_device
 {
 public:
-	nycaptor_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	nycaptor_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"),
+		m_scrlram(*this, "scrlram"),
+		m_sharedram(*this, "sharedram"){ }
 
 	/* memory pointers */
-	UINT8 *      m_sharedram;
-	UINT8 *      m_scrlram;
-	UINT8 *      m_videoram;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_scrlram;
+	required_shared_ptr<UINT8> m_sharedram;
+
 	UINT8 *      m_spriteram;
-	size_t       m_videoram_size;
 
 	/* video-related */
 	tilemap_t *m_bg_tilemap;
@@ -43,44 +46,63 @@ public:
 	int m_mask;
 
 	/* devices */
-	device_t *m_maincpu;
-	device_t *m_audiocpu;
-	device_t *m_subcpu;
+	cpu_device *m_maincpu;
+	cpu_device *m_audiocpu;
+	cpu_device *m_subcpu;
 	device_t *m_mcu;
+	DECLARE_WRITE8_MEMBER(sub_cpu_halt_w);
+	DECLARE_READ8_MEMBER(from_snd_r);
+	DECLARE_WRITE8_MEMBER(to_main_w);
+	DECLARE_READ8_MEMBER(nycaptor_sharedram_r);
+	DECLARE_WRITE8_MEMBER(nycaptor_sharedram_w);
+	DECLARE_READ8_MEMBER(nycaptor_b_r);
+	DECLARE_READ8_MEMBER(nycaptor_by_r);
+	DECLARE_READ8_MEMBER(nycaptor_bx_r);
+	DECLARE_WRITE8_MEMBER(sound_cpu_reset_w);
+	DECLARE_WRITE8_MEMBER(sound_command_w);
+	DECLARE_WRITE8_MEMBER(nmi_disable_w);
+	DECLARE_WRITE8_MEMBER(nmi_enable_w);
+	DECLARE_READ8_MEMBER(nycaptor_generic_control_r);
+	DECLARE_WRITE8_MEMBER(nycaptor_generic_control_w);
+	DECLARE_READ8_MEMBER(cyclshtg_mcu_status_r);
+	DECLARE_READ8_MEMBER(cyclshtg_mcu_r);
+	DECLARE_WRITE8_MEMBER(cyclshtg_mcu_w);
+	DECLARE_READ8_MEMBER(cyclshtg_mcu_status_r1);
+	DECLARE_WRITE8_MEMBER(cyclshtg_generic_control_w);
+	DECLARE_READ8_MEMBER(unk_r);
+	DECLARE_READ8_MEMBER(nycaptor_68705_port_a_r);
+	DECLARE_WRITE8_MEMBER(nycaptor_68705_port_a_w);
+	DECLARE_WRITE8_MEMBER(nycaptor_68705_ddr_a_w);
+	DECLARE_READ8_MEMBER(nycaptor_68705_port_b_r);
+	DECLARE_WRITE8_MEMBER(nycaptor_68705_port_b_w);
+	DECLARE_WRITE8_MEMBER(nycaptor_68705_ddr_b_w);
+	DECLARE_READ8_MEMBER(nycaptor_68705_port_c_r);
+	DECLARE_WRITE8_MEMBER(nycaptor_68705_port_c_w);
+	DECLARE_WRITE8_MEMBER(nycaptor_68705_ddr_c_w);
+	DECLARE_WRITE8_MEMBER(nycaptor_mcu_w);
+	DECLARE_READ8_MEMBER(nycaptor_mcu_r);
+	DECLARE_READ8_MEMBER(nycaptor_mcu_status_r1);
+	DECLARE_READ8_MEMBER(nycaptor_mcu_status_r2);
+	DECLARE_WRITE8_MEMBER(nycaptor_spriteram_w);
+	DECLARE_READ8_MEMBER(nycaptor_spriteram_r);
+	DECLARE_WRITE8_MEMBER(nycaptor_videoram_w);
+	DECLARE_READ8_MEMBER(nycaptor_videoram_r);
+	DECLARE_WRITE8_MEMBER(nycaptor_palette_w);
+	DECLARE_READ8_MEMBER(nycaptor_palette_r);
+	DECLARE_WRITE8_MEMBER(nycaptor_gfxctrl_w);
+	DECLARE_READ8_MEMBER(nycaptor_gfxctrl_r);
+	DECLARE_READ8_MEMBER(nycaptor_scrlram_r);
+	DECLARE_WRITE8_MEMBER(nycaptor_scrlram_w);
+	DECLARE_WRITE8_MEMBER(unk_w);
+	DECLARE_DRIVER_INIT(cyclshtg);
+	DECLARE_DRIVER_INIT(colt);
+	DECLARE_DRIVER_INIT(bronx);
+	DECLARE_DRIVER_INIT(nycaptor);
+	TILE_GET_INFO_MEMBER(get_tile_info);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	DECLARE_MACHINE_RESET(ta7630);
+	UINT32 screen_update_nycaptor(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	TIMER_CALLBACK_MEMBER(nmi_callback);
 };
-
-
-/*----------- defined in machine/nycaptor.c -----------*/
-
-READ8_HANDLER( nycaptor_mcu_r );
-READ8_HANDLER( nycaptor_mcu_status_r1 );
-READ8_HANDLER( nycaptor_mcu_status_r2 );
-READ8_HANDLER( nycaptor_68705_port_c_r );
-READ8_HANDLER( nycaptor_68705_port_b_r );
-READ8_HANDLER( nycaptor_68705_port_a_r );
-
-WRITE8_HANDLER( nycaptor_mcu_w );
-WRITE8_HANDLER( nycaptor_68705_port_a_w );
-WRITE8_HANDLER( nycaptor_68705_port_b_w );
-WRITE8_HANDLER( nycaptor_68705_port_c_w );
-WRITE8_HANDLER( nycaptor_68705_ddr_a_w );
-WRITE8_HANDLER( nycaptor_68705_ddr_b_w );
-WRITE8_HANDLER( nycaptor_68705_ddr_c_w );
-
-
-/*----------- defined in video/nycaptor.c -----------*/
-
-READ8_HANDLER( nycaptor_videoram_r );
-READ8_HANDLER( nycaptor_spriteram_r );
-READ8_HANDLER( nycaptor_palette_r );
-READ8_HANDLER( nycaptor_gfxctrl_r );
-READ8_HANDLER( nycaptor_scrlram_r );
-
-WRITE8_HANDLER( nycaptor_videoram_w );
-WRITE8_HANDLER( nycaptor_spriteram_w );
-WRITE8_HANDLER( nycaptor_palette_w );
-WRITE8_HANDLER( nycaptor_gfxctrl_w );
-WRITE8_HANDLER( nycaptor_scrlram_w );
-
-VIDEO_START( nycaptor );
-SCREEN_UPDATE( nycaptor );

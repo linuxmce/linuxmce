@@ -45,13 +45,14 @@
 
 *******************************************************************/
 
-#define MAIN_CLOCK	XTAL_30MHz
-#define SND_CLOCK	XTAL_1MHz
+#define MAIN_CLOCK  XTAL_30MHz
+#define SND_CLOCK   XTAL_1MHz
 
-#define MNUMBER_MAIN_CLOCK	XTAL_24MHz
-#define MNUMBER_SND_CLOCK	XTAL_16MHz
+#define MNUMBER_MAIN_CLOCK  XTAL_24MHz
+#define MNUMBER_SND_CLOCK   XTAL_16MHz
 
-#define EJOLLYX5_MAIN_CLOCK	XTAL_16MHz
+#define EJOLLYX5_MAIN_CLOCK XTAL_16MHz
+
 
 #include "emu.h"
 #include "cpu/h83002/h8.h"
@@ -61,9 +62,21 @@
 class itgamble_state : public driver_device
 {
 public:
-	itgamble_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	itgamble_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+			m_maincpu(*this, "maincpu")
+	{ }
 
+	UINT32 screen_update(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+
+protected:
+
+	// devices
+	required_device<cpu_device> m_maincpu;
+
+	// driver_device overrides
+	virtual void machine_reset();
+	virtual void video_start();
 };
 
 
@@ -71,12 +84,13 @@ public:
 *     Video Hardware     *
 *************************/
 
-static VIDEO_START( itgamble )
+void itgamble_state::video_start()
 {
 }
 
-static SCREEN_UPDATE( itgamble )
+UINT32 itgamble_state::screen_update(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
+	bitmap.fill(get_black_pen(machine()));
 	return 0;
 }
 
@@ -85,7 +99,7 @@ static SCREEN_UPDATE( itgamble )
 * Memory map information *
 *************************/
 
-static ADDRESS_MAP_START( itgamble_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( itgamble_map, AS_PROGRAM, 16, itgamble_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xffffff)
 	AM_RANGE(0x000000, 0xffffff) AM_ROM
 ADDRESS_MAP_END
@@ -96,55 +110,55 @@ ADDRESS_MAP_END
 *************************/
 
 static INPUT_PORTS_START( itgamble )
-    PORT_START("IN0")
-    PORT_DIPNAME( 0x0001, 0x0001, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x0001, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x0002, 0x0002, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x0002, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x0004, 0x0004, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x0004, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x0008, 0x0008, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x0008, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x0010, 0x0010, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x0010, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x0020, 0x0020, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x0020, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x0040, 0x0040, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x0040, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x0080, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x0100, 0x0100, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x0100, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x0200, 0x0200, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x0200, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x0400, 0x0400, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x0400, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x0800, 0x0800, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x0800, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x1000, 0x1000, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x1000, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x2000, 0x2000, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x2000, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x4000, 0x4000, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x4000, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-    PORT_DIPNAME( 0x8000, 0x8000, DEF_STR( Unknown ) )
-    PORT_DIPSETTING(      0x8000, DEF_STR( Off ) )
-    PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+	PORT_START("IN0")
+	PORT_DIPNAME( 0x0001, 0x0001, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x0001, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x0002, 0x0002, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x0002, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x0004, 0x0004, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x0004, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x0008, 0x0008, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x0008, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x0010, 0x0010, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x0010, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x0020, 0x0020, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x0020, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x0040, 0x0040, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x0040, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x0080, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x0100, 0x0100, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x0100, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x0200, 0x0200, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x0200, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x0400, 0x0400, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x0400, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x0800, 0x0800, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x0800, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x1000, 0x1000, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x1000, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x2000, 0x2000, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x2000, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x4000, 0x4000, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x4000, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x8000, 0x8000, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x8000, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 INPUT_PORTS_END
 
 
@@ -169,7 +183,7 @@ static const gfx_layout gfxlayout_8x8x8 =
 ******************************/
 
 static GFXDECODE_START( itgamble )
-    GFXDECODE_ENTRY( "gfx1", 0, gfxlayout_8x8x8,   0, 16  )
+	GFXDECODE_ENTRY( "gfx1", 0, gfxlayout_8x8x8,   0, 16  )
 GFXDECODE_END
 
 
@@ -177,10 +191,10 @@ GFXDECODE_END
 *      Machine Reset      *
 **************************/
 
-static MACHINE_RESET( itgamble )
+void itgamble_state::machine_reset()
 {
 	/* stop the CPU, we have no code for it anyway */
-	cputag_set_input_line(machine, "maincpu", INPUT_LINE_HALT, ASSERT_LINE);
+	machine().device("maincpu")->execute().set_input_line(INPUT_LINE_HALT, ASSERT_LINE);
 }
 
 
@@ -190,35 +204,31 @@ static MACHINE_RESET( itgamble )
 
 static MACHINE_CONFIG_START( itgamble, itgamble_state )
 
-    /* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", H83044, MAIN_CLOCK/2)	/* probably the wrong CPU */
+	/* basic machine hardware */
+	MCFG_CPU_ADD("maincpu", H83044, MAIN_CLOCK/2)   /* probably the wrong CPU */
 	MCFG_CPU_PROGRAM_MAP(itgamble_map)
 
-    /* video hardware */
+	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
+	MCFG_SCREEN_UPDATE_DRIVER(itgamble_state, screen_update)
 	MCFG_SCREEN_SIZE(512, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 512-1, 0, 256-1)
-	MCFG_SCREEN_UPDATE( itgamble )
-
-	MCFG_MACHINE_RESET( itgamble )
 
 	MCFG_GFXDECODE(itgamble)
 	MCFG_PALETTE_LENGTH(0x200)
-	MCFG_VIDEO_START( itgamble )
 
-    /* sound hardware */
+	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
-	MCFG_OKIM6295_ADD("oki", SND_CLOCK, OKIM6295_PIN7_HIGH)	/* 1MHz resonator */
+	MCFG_OKIM6295_ADD("oki", SND_CLOCK, OKIM6295_PIN7_HIGH) /* 1MHz resonator */
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 MACHINE_CONFIG_END
 
 
 static MACHINE_CONFIG_DERIVED( mnumber, itgamble )
 	MCFG_CPU_MODIFY("maincpu")
-	MCFG_CPU_CLOCK(MNUMBER_MAIN_CLOCK/2)	/* probably the wrong CPU */
+	MCFG_CPU_CLOCK(MNUMBER_MAIN_CLOCK/2)    /* probably the wrong CPU */
 
 	MCFG_OKIM6295_REPLACE("oki", MNUMBER_SND_CLOCK/16, OKIM6295_PIN7_HIGH) /* clock frequency & pin 7 not verified */
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
@@ -229,7 +239,7 @@ MACHINE_CONFIG_END
 static MACHINE_CONFIG_DERIVED( ejollyx5, itgamble )
 	/* wrong CPU. we need a Renesas M16/62A 16bit microcomputer core */
 	MCFG_CPU_MODIFY("maincpu")
-	MCFG_CPU_CLOCK(EJOLLYX5_MAIN_CLOCK/2)	/* up to 10MHz.*/
+	MCFG_CPU_CLOCK(EJOLLYX5_MAIN_CLOCK/2)   /* up to 10MHz.*/
 
 	MCFG_OKIM6295_REPLACE("oki", MNUMBER_SND_CLOCK/16, OKIM6295_PIN7_HIGH) /* clock frequency & pin 7 not verified */
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
@@ -508,10 +518,10 @@ ROM_START( euro2k2a )
 	ROM_LOAD( "4a.ic18", 0x000000, 0x80000, CRC(5decae2d) SHA1(d918aad0e2a1249b18677833f743c92fb678050a) )
 	ROM_LOAD( "5a.ic17", 0x080000, 0x80000, CRC(8f1bbbf3) SHA1(5efcf77674f8737fc1b98881acebacb26b10adc1) )
 	ROM_LOAD( "2a.ic20", 0x100000, 0x40000, CRC(f9bffb07) SHA1(efba175189d99a4548739a72f8a1f03c2782a3d0) )
-	ROM_LOAD( "3a.ic19", 0x140000, 0x80000, CRC(56c8a73d) SHA1(49b44e5604cd8675d8f9770e5fb68dad4394e11d) ) /* identical halves */
+	ROM_LOAD( "3a(__euro2k2a).ic19", 0x140000, 0x80000, CRC(56c8a73d) SHA1(49b44e5604cd8675d8f9770e5fb68dad4394e11d) ) /* identical halves */
 
 	ROM_REGION( 0x40000, "oki", 0 ) /* M6295 samples */
-	ROM_LOAD( "1.ic25", 0x00000, 0x40000, CRC(4fe79e43) SHA1(7c154cb00e9b64fbdcc218280f2183b816cef20b) )
+	ROM_LOAD( "1(__euro2k2a).ic25", 0x00000, 0x40000, CRC(4fe79e43) SHA1(7c154cb00e9b64fbdcc218280f2183b816cef20b) )
 ROM_END
 
 
@@ -667,11 +677,11 @@ Note:
 
 */
 
-ROM_START( mnumber )	/* clocks should be changed for this game */
-	ROM_REGION( 0x1000000, "maincpu", 0 )	/* all the program code is in here */
+ROM_START( mnumber )    /* clocks should be changed for this game */
+	ROM_REGION( 0x1000000, "maincpu", 0 )   /* all the program code is in here */
 	ROM_LOAD( "mnumber_hd64f3048f16.mcu", 0x00000, 0x4000, NO_DUMP )
 
-	ROM_REGION( 0x200000, "gfx1", 0 )	/* different encoded gfx */
+	ROM_REGION( 0x200000, "gfx1", 0 )   /* different encoded gfx */
 	ROM_LOAD( "mysterynumber3.u20", 0x000000, 0x80000, CRC(251f1e11) SHA1(e8c90b289e76cea6a541b701859be6465a381668) )
 	ROM_LOAD( "mysterynumber4.u21", 0x080000, 0x80000, CRC(2b8744e4) SHA1(8a12c6f300818de3738e7c44c7df71c432cb9975) )
 	ROM_LOAD( "mysterynumber1.u22", 0x100000, 0x80000, CRC(d2ce1f61) SHA1(8f30407050fc102191747996258d4b5da3a0d994) )
@@ -687,15 +697,15 @@ ROM_END
 *************************/
 
 /*    YEAR  NAME      PARENT   MACHINE   INPUT     INIT ROT    COMPANY                  FULLNAME                        FLAGS  */
-GAME( 2000, capunc,   0,       itgamble, itgamble, 0,   ROT0, "Nazionale Elettronica", "Capitan Uncino (Ver 1.2)",      GAME_NOT_WORKING )
-GAME( 2001, capcor,   0,       itgamble, itgamble, 0,   ROT0, "Nazionale Elettronica", "Capitani Coraggiosi (Ver 1.3)", GAME_NOT_WORKING )
-GAME( 2002, laperla,  0,       itgamble, itgamble, 0,   ROT0, "Nazionale Elettronica", "La Perla Nera (Ver 2.0)",       GAME_NOT_WORKING )
-GAME( 2001, laperlag, 0,       itgamble, itgamble, 0,   ROT0, "Nazionale Elettronica", "La Perla Nera Gold (Ver 2.0)",  GAME_NOT_WORKING )
-GAME( 2001, euro2k2,  0,       itgamble, itgamble, 0,   ROT0, "Nazionale Elettronica", "Europa 2002 (Ver 2.0, set 1)",  GAME_NOT_WORKING )
-GAME( 2001, euro2k2a, euro2k2, itgamble, itgamble, 0,   ROT0, "Nazionale Elettronica", "Europa 2002 (Ver 2.0, set 2)",  GAME_NOT_WORKING )
-GAME( 2002, euro2k2s, euro2k2, itgamble, itgamble, 0,   ROT0, "Nazionale Elettronica", "Europa 2002 Space (Ver 3.0)",   GAME_NOT_WORKING )
-GAME( 200?, abacus,   0,       itgamble, itgamble, 0,   ROT0, "<unknown>",             "Abacus (Ver 1.0)",              GAME_NOT_WORKING )
-GAME( 200?, bookthr,  0,       itgamble, itgamble, 0,   ROT0, "<unknown>",             "Book Theatre (Ver 1.2)",        GAME_NOT_WORKING )
+GAME( 2000, capunc,   0,       itgamble, itgamble, driver_device, 0,   ROT0, "Nazionale Elettronica", "Capitan Uncino (Ver 1.2)",      GAME_IS_SKELETON )
+GAME( 2001, capcor,   0,       itgamble, itgamble, driver_device, 0,   ROT0, "Nazionale Elettronica", "Capitani Coraggiosi (Ver 1.3)", GAME_IS_SKELETON )
+GAME( 2002, laperla,  0,       itgamble, itgamble, driver_device, 0,   ROT0, "Nazionale Elettronica", "La Perla Nera (Ver 2.0)",       GAME_IS_SKELETON )
+GAME( 2001, laperlag, 0,       itgamble, itgamble, driver_device, 0,   ROT0, "Nazionale Elettronica", "La Perla Nera Gold (Ver 2.0)",  GAME_IS_SKELETON )
+GAME( 2001, euro2k2,  0,       itgamble, itgamble, driver_device, 0,   ROT0, "Nazionale Elettronica", "Europa 2002 (Ver 2.0, set 1)",  GAME_IS_SKELETON )
+GAME( 2001, euro2k2a, euro2k2, itgamble, itgamble, driver_device, 0,   ROT0, "Nazionale Elettronica", "Europa 2002 (Ver 2.0, set 2)",  GAME_IS_SKELETON )
+GAME( 2002, euro2k2s, euro2k2, itgamble, itgamble, driver_device, 0,   ROT0, "Nazionale Elettronica", "Europa 2002 Space (Ver 3.0)",   GAME_IS_SKELETON )
+GAME( 200?, abacus,   0,       itgamble, itgamble, driver_device, 0,   ROT0, "<unknown>",             "Abacus (Ver 1.0)",              GAME_IS_SKELETON )
+GAME( 200?, bookthr,  0,       itgamble, itgamble, driver_device, 0,   ROT0, "<unknown>",             "Book Theatre (Ver 1.2)",        GAME_IS_SKELETON )
 
 /* different hardware */
-GAME( 200?, mnumber,  0,       mnumber,  itgamble, 0,   ROT0, "M.M. - B.R.L.",         "Mystery Number",                GAME_NOT_WORKING )
+GAME( 200?, mnumber,  0,       mnumber,  itgamble, driver_device, 0,   ROT0, "M.M. - B.R.L.",         "Mystery Number",                GAME_IS_SKELETON )

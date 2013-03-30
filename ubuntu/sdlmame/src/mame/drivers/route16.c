@@ -69,14 +69,13 @@
 
 #include "emu.h"
 #include "cpu/z80/z80.h"
-#include "deprecat.h"
 #include "sound/dac.h"
 #include "sound/sn76477.h"
 #include "sound/ay8910.h"
 #include "includes/route16.h"
 
 
-static READ8_HANDLER( routex_prot_read );
+
 
 
 
@@ -88,30 +87,27 @@ static READ8_HANDLER( routex_prot_read );
 
 
 
-static READ8_HANDLER( sharedram_r )
+READ8_MEMBER(route16_state::sharedram_r)
 {
-	route16_state *state = space->machine().driver_data<route16_state>();
-	return state->m_sharedram[offset];
+	return m_sharedram[offset];
 }
 
 
-static WRITE8_HANDLER( sharedram_w )
+WRITE8_MEMBER(route16_state::sharedram_w)
 {
-	route16_state *state = space->machine().driver_data<route16_state>();
-	state->m_sharedram[offset] = data;
+	m_sharedram[offset] = data;
 }
 
 
-static WRITE8_HANDLER( route16_sharedram_w )
+WRITE8_MEMBER(route16_state::route16_sharedram_w)
 {
-	route16_state *state = space->machine().driver_data<route16_state>();
-	state->m_sharedram[offset] = data;
+	m_sharedram[offset] = data;
 
 	// 4313-4319 are used in Route 16 as triggers to wake the other CPU
 	if (offset >= 0x0313 && offset <= 0x0319 && data == 0xff)
 	{
 		// Let the other CPU run
-		device_yield(&space->device());
+		space.device().execute().yield();
 	}
 }
 
@@ -123,26 +119,27 @@ static WRITE8_HANDLER( route16_sharedram_w )
  *
  *************************************/
 
-static WRITE8_DEVICE_HANDLER( stratvox_sn76477_w )
+WRITE8_MEMBER(route16_state::stratvox_sn76477_w)
 {
-    /***************************************************************
-     * AY8910 output bits are connected to...
-     * 7    - direct: 5V * 30k/(100+30k) = 1.15V - via DAC??
-     * 6    - SN76477 mixer C
-     * 5    - SN76477 mixer B
-     * 4    - SN76477 mixer A
-     * 3    - SN76477 envelope 2
-     * 2    - SN76477 envelope 1
-     * 1    - SN76477 vco
-     * 0    - SN76477 enable
-     ***************************************************************/
-    sn76477_enable_w(device, (data >> 0) & 1);
-    sn76477_vco_w(device, (data >> 1) & 1);
+	device_t *device = machine().device("snsnd");
+	/***************************************************************
+	 * AY8910 output bits are connected to...
+	 * 7    - direct: 5V * 30k/(100+30k) = 1.15V - via DAC??
+	 * 6    - SN76477 mixer C
+	 * 5    - SN76477 mixer B
+	 * 4    - SN76477 mixer A
+	 * 3    - SN76477 envelope 2
+	 * 2    - SN76477 envelope 1
+	 * 1    - SN76477 vco
+	 * 0    - SN76477 enable
+	 ***************************************************************/
+	sn76477_enable_w(device, (data >> 0) & 1);
+	sn76477_vco_w(device, (data >> 1) & 1);
 	sn76477_envelope_1_w(device, (data >> 2) & 1);
 	sn76477_envelope_2_w(device, (data >> 3) & 1);
-    sn76477_mixer_a_w(device, (data >> 4) & 1);
-    sn76477_mixer_b_w(device, (data >> 5) & 1);
-    sn76477_mixer_c_w(device, (data >> 6) & 1);
+	sn76477_mixer_a_w(device, (data >> 4) & 1);
+	sn76477_mixer_b_w(device, (data >> 5) & 1);
+	sn76477_mixer_c_w(device, (data >> 6) & 1);
 }
 
 
@@ -155,24 +152,22 @@ static WRITE8_DEVICE_HANDLER( stratvox_sn76477_w )
 
 
 
-static WRITE8_HANDLER( ttmahjng_input_port_matrix_w )
+WRITE8_MEMBER(route16_state::ttmahjng_input_port_matrix_w)
 {
-	route16_state *state = space->machine().driver_data<route16_state>();
-	state->m_ttmahjng_port_select = data;
+	m_ttmahjng_port_select = data;
 }
 
 
-static READ8_HANDLER( ttmahjng_input_port_matrix_r )
+READ8_MEMBER(route16_state::ttmahjng_input_port_matrix_r)
 {
-	route16_state *state = space->machine().driver_data<route16_state>();
 	UINT8 ret = 0;
 
-	switch (state->m_ttmahjng_port_select)
+	switch (m_ttmahjng_port_select)
 	{
-	case 1:  ret = input_port_read(space->machine(), "KEY0"); break;
-	case 2:  ret = input_port_read(space->machine(), "KEY1"); break;
-	case 4:  ret = input_port_read(space->machine(), "KEY2"); break;
-	case 8:  ret = input_port_read(space->machine(), "KEY3"); break;
+	case 1:  ret = ioport("KEY0")->read(); break;
+	case 2:  ret = ioport("KEY1")->read(); break;
+	case 4:  ret = ioport("KEY2")->read(); break;
+	case 8:  ret = ioport("KEY3")->read(); break;
 	default: break;
 	}
 
@@ -190,26 +185,24 @@ static READ8_HANDLER( ttmahjng_input_port_matrix_r )
   this would then be checking that the sounds are mixed correctly.
 ***************************************************************************/
 
-static READ8_HANDLER ( speakres_in3_r )
+READ8_MEMBER(route16_state::speakres_in3_r)
 {
-	route16_state *state = space->machine().driver_data<route16_state>();
 	int bit2=4, bit1=2, bit0=1;
 
 	/* just using a counter, the constants are the number of reads
-       before going low, each read is 40 cycles apart. the constants
-       were chosen based on the startup tests and for vr0=vr2 */
-	state->m_speakres_vrx++;
-	if(state->m_speakres_vrx>0x300) bit0=0;		/* VR0 100k ohm - speech */
-	if(state->m_speakres_vrx>0x200) bit1=0;		/* VR1  50k ohm - main volume */
-	if(state->m_speakres_vrx>0x300) bit2=0;		/* VR2 100k ohm - explosion */
+	   before going low, each read is 40 cycles apart. the constants
+	   were chosen based on the startup tests and for vr0=vr2 */
+	m_speakres_vrx++;
+	if(m_speakres_vrx>0x300) bit0=0;        /* VR0 100k ohm - speech */
+	if(m_speakres_vrx>0x200) bit1=0;        /* VR1  50k ohm - main volume */
+	if(m_speakres_vrx>0x300) bit2=0;        /* VR2 100k ohm - explosion */
 
 	return 0xf8|bit2|bit1|bit0;
 }
 
-static WRITE8_HANDLER ( speakres_out2_w )
+WRITE8_MEMBER(route16_state::speakres_out2_w)
 {
-	route16_state *state = space->machine().driver_data<route16_state>();
-	state->m_speakres_vrx=0;
+	m_speakres_vrx=0;
 }
 
 
@@ -220,86 +213,86 @@ static WRITE8_HANDLER ( speakres_out2_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( route16_cpu1_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( route16_cpu1_map, AS_PROGRAM, 8, route16_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
-  /*AM_RANGE(0x3000, 0x3001) AM_NOP   protection device */
-	AM_RANGE(0x4000, 0x43ff) AM_READWRITE(sharedram_r, route16_sharedram_w) AM_BASE_MEMBER(route16_state, m_sharedram)
+	/*AM_RANGE(0x3000, 0x3001) AM_NOP   protection device */
+	AM_RANGE(0x4000, 0x43ff) AM_READWRITE(sharedram_r, route16_sharedram_w) AM_SHARE("sharedram")
 	AM_RANGE(0x4800, 0x4800) AM_READ_PORT("DSW") AM_WRITE(route16_out0_w)
 	AM_RANGE(0x5000, 0x5000) AM_READ_PORT("P1") AM_WRITE(route16_out1_w)
 	AM_RANGE(0x5800, 0x5800) AM_READ_PORT("P2")
-	AM_RANGE(0x8000, 0xbfff) AM_RAM AM_BASE_MEMBER(route16_state, m_videoram1) AM_SIZE_MEMBER(route16_state, m_videoram_size)
+	AM_RANGE(0x8000, 0xbfff) AM_RAM AM_SHARE("videoram1")
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( routex_cpu1_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( routex_cpu1_map, AS_PROGRAM, 8, route16_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
-	AM_RANGE(0x4000, 0x43ff) AM_READWRITE(sharedram_r, route16_sharedram_w) AM_BASE_MEMBER(route16_state, m_sharedram)
+	AM_RANGE(0x4000, 0x43ff) AM_READWRITE(sharedram_r, route16_sharedram_w) AM_SHARE("sharedram")
 	AM_RANGE(0x4800, 0x4800) AM_READ_PORT("DSW") AM_WRITE(route16_out0_w)
 	AM_RANGE(0x5000, 0x5000) AM_READ_PORT("P1") AM_WRITE(route16_out1_w)
 	AM_RANGE(0x5800, 0x5800) AM_READ_PORT("P2")
 	AM_RANGE(0x6400, 0x6400) AM_READ(routex_prot_read)
-	AM_RANGE(0x8000, 0xbfff) AM_RAM AM_BASE_MEMBER(route16_state, m_videoram1) AM_SIZE_MEMBER(route16_state, m_videoram_size)
+	AM_RANGE(0x8000, 0xbfff) AM_RAM AM_SHARE("videoram1")
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( stratvox_cpu1_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( stratvox_cpu1_map, AS_PROGRAM, 8, route16_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
-	AM_RANGE(0x4000, 0x43ff) AM_READWRITE(sharedram_r, sharedram_w) AM_BASE_MEMBER(route16_state, m_sharedram)
+	AM_RANGE(0x4000, 0x43ff) AM_READWRITE(sharedram_r, sharedram_w) AM_SHARE("sharedram")
 	AM_RANGE(0x4800, 0x4800) AM_READ_PORT("DSW") AM_WRITE(route16_out0_w)
 	AM_RANGE(0x5000, 0x5000) AM_READ_PORT("P1") AM_WRITE(route16_out1_w)
 	AM_RANGE(0x5800, 0x5800) AM_READ_PORT("P2")
-	AM_RANGE(0x8000, 0xbfff) AM_RAM AM_BASE_MEMBER(route16_state, m_videoram1) AM_SIZE_MEMBER(route16_state, m_videoram_size)
+	AM_RANGE(0x8000, 0xbfff) AM_RAM AM_SHARE("videoram1")
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( speakres_cpu1_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( speakres_cpu1_map, AS_PROGRAM, 8, route16_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
-	AM_RANGE(0x4000, 0x43ff) AM_READWRITE(sharedram_r, sharedram_w) AM_BASE_MEMBER(route16_state, m_sharedram)
+	AM_RANGE(0x4000, 0x43ff) AM_READWRITE(sharedram_r, sharedram_w) AM_SHARE("sharedram")
 	AM_RANGE(0x4800, 0x4800) AM_READ_PORT("DSW") AM_WRITE(route16_out0_w)
 	AM_RANGE(0x5000, 0x5000) AM_READ_PORT("P1") AM_WRITE(route16_out1_w)
 	AM_RANGE(0x5800, 0x5800) AM_READ_PORT("P2") AM_WRITE(speakres_out2_w)
 	AM_RANGE(0x6000, 0x6000) AM_READ(speakres_in3_r)
-	AM_RANGE(0x8000, 0xbfff) AM_RAM AM_BASE_MEMBER(route16_state, m_videoram1) AM_SIZE_MEMBER(route16_state, m_videoram_size)
+	AM_RANGE(0x8000, 0xbfff) AM_RAM AM_SHARE("videoram1")
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( ttmahjng_cpu1_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( ttmahjng_cpu1_map, AS_PROGRAM, 8, route16_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
-	AM_RANGE(0x4000, 0x43ff) AM_READWRITE(sharedram_r, sharedram_w) AM_BASE_MEMBER(route16_state, m_sharedram)
+	AM_RANGE(0x4000, 0x43ff) AM_READWRITE(sharedram_r, sharedram_w) AM_SHARE("sharedram")
 	AM_RANGE(0x4800, 0x4800) AM_READ_PORT("DSW") AM_WRITE(route16_out0_w)
 	AM_RANGE(0x5000, 0x5000) AM_READ_PORT("IN0") AM_WRITE(route16_out1_w)
 	AM_RANGE(0x5800, 0x5800) AM_READWRITE(ttmahjng_input_port_matrix_r, ttmahjng_input_port_matrix_w)
-	AM_RANGE(0x6800, 0x6800) AM_DEVWRITE("ay8910", ay8910_data_w)
-	AM_RANGE(0x6900, 0x6900) AM_DEVWRITE("ay8910", ay8910_address_w)
-	AM_RANGE(0x8000, 0xbfff) AM_RAM AM_BASE_MEMBER(route16_state, m_videoram1) AM_SIZE_MEMBER(route16_state, m_videoram_size)
+	AM_RANGE(0x6800, 0x6800) AM_DEVWRITE_LEGACY("ay8910", ay8910_data_w)
+	AM_RANGE(0x6900, 0x6900) AM_DEVWRITE_LEGACY("ay8910", ay8910_address_w)
+	AM_RANGE(0x8000, 0xbfff) AM_RAM AM_SHARE("videoram1")
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( route16_cpu2_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( route16_cpu2_map, AS_PROGRAM, 8, route16_state )
 	AM_RANGE(0x0000, 0x1fff) AM_ROM
 	AM_RANGE(0x4000, 0x43ff) AM_READWRITE(sharedram_r, route16_sharedram_w)
-	AM_RANGE(0x8000, 0xbfff) AM_RAM AM_BASE_MEMBER(route16_state, m_videoram2)
+	AM_RANGE(0x8000, 0xbfff) AM_RAM AM_SHARE("videoram2")
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( stratvox_cpu2_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( stratvox_cpu2_map, AS_PROGRAM, 8, route16_state )
 	AM_RANGE(0x0000, 0x1fff) AM_ROM
-	AM_RANGE(0x2800, 0x2800) AM_DEVWRITE("dac", dac_w)
+	AM_RANGE(0x2800, 0x2800) AM_DEVWRITE("dac", dac_device, write_unsigned8)
 	AM_RANGE(0x4000, 0x43ff) AM_READWRITE(sharedram_r, sharedram_w)
-	AM_RANGE(0x8000, 0xbfff) AM_RAM AM_BASE_MEMBER(route16_state, m_videoram2)
+	AM_RANGE(0x8000, 0xbfff) AM_RAM AM_SHARE("videoram2")
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( cpu1_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( cpu1_io_map, AS_IO, 8, route16_state )
 	ADDRESS_MAP_GLOBAL_MASK(0x1ff)
-	AM_RANGE(0x0000, 0x0000) AM_MIRROR(0x00ff) AM_DEVWRITE("ay8910", ay8910_data_w)
-	AM_RANGE(0x0100, 0x0100) AM_MIRROR(0x00ff) AM_DEVWRITE("ay8910", ay8910_address_w)
+	AM_RANGE(0x0000, 0x0000) AM_MIRROR(0x00ff) AM_DEVWRITE_LEGACY("ay8910", ay8910_data_w)
+	AM_RANGE(0x0100, 0x0100) AM_MIRROR(0x00ff) AM_DEVWRITE_LEGACY("ay8910", ay8910_address_w)
 ADDRESS_MAP_END
 
 
 
 static INPUT_PORTS_START( route16 )
-	PORT_START("DSW")		/* DSW 1 */
+	PORT_START("DSW")       /* DSW 1 */
 	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Lives ) )
 	PORT_DIPSETTING(    0x00, "3" )
 	PORT_DIPSETTING(    0x01, "5" )
@@ -324,7 +317,7 @@ static INPUT_PORTS_START( route16 )
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( On ) )
 
-	PORT_START("P1")		/* Input Port 1 */
+	PORT_START("P1")        /* Input Port 1 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_4WAY
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_4WAY
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_4WAY
@@ -334,7 +327,7 @@ static INPUT_PORTS_START( route16 )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_SERVICE1 )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN1 )
 
-	PORT_START("P2")		/* Input Port 2 */
+	PORT_START("P2")        /* Input Port 2 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_4WAY PORT_COCKTAIL
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_4WAY PORT_COCKTAIL
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_4WAY PORT_COCKTAIL
@@ -347,7 +340,7 @@ INPUT_PORTS_END
 
 
 static INPUT_PORTS_START( stratvox )
-	PORT_START("DSW")		/* IN0 */
+	PORT_START("DSW")       /* IN0 */
 	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Lives ) )
 	PORT_DIPSETTING(    0x00, "3" )
 	PORT_DIPSETTING(    0x01, "5" )
@@ -372,7 +365,7 @@ static INPUT_PORTS_START( stratvox )
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( On ) )
 
-	PORT_START("P1")		/* IN1 */
+	PORT_START("P1")        /* IN1 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY
 	PORT_BIT( 0x0c, IP_ACTIVE_HIGH, IPT_UNUSED )
@@ -381,7 +374,7 @@ static INPUT_PORTS_START( stratvox )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_SERVICE1 )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN1 )
 
-	PORT_START("P2")		/* IN2 */
+	PORT_START("P2")        /* IN2 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_PLAYER(2)
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_PLAYER(2)
 	PORT_BIT( 0x0c, IP_ACTIVE_HIGH, IPT_UNUSED )
@@ -393,7 +386,7 @@ INPUT_PORTS_END
 
 
 static INPUT_PORTS_START( speakres )
-	PORT_START("DSW")		/* IN0 */
+	PORT_START("DSW")       /* IN0 */
 	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Lives ) )
 	PORT_DIPSETTING(    0x00, "3" )
 	PORT_DIPSETTING(    0x01, "4" )
@@ -417,7 +410,7 @@ static INPUT_PORTS_START( speakres )
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( On ) )
 
-	PORT_START("P1")		/* IN1 */
+	PORT_START("P1")        /* IN1 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY
 	PORT_BIT( 0x0c, IP_ACTIVE_HIGH, IPT_UNUSED )
@@ -426,7 +419,7 @@ static INPUT_PORTS_START( speakres )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_SERVICE1 )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN1 )
 
-	PORT_START("P2")		/* IN2 */
+	PORT_START("P2")        /* IN2 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_PLAYER(2)
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_PLAYER(2)
 	PORT_BIT( 0x0c, IP_ACTIVE_HIGH, IPT_UNUSED )
@@ -438,7 +431,7 @@ INPUT_PORTS_END
 
 
 static INPUT_PORTS_START( spacecho )
-	PORT_START("DSW")		/* IN0 */
+	PORT_START("DSW")       /* IN0 */
 	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Lives ) )
 	PORT_DIPSETTING(    0x00, "3" )
 	PORT_DIPSETTING(    0x01, "5" )
@@ -463,7 +456,7 @@ static INPUT_PORTS_START( spacecho )
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( On ) )
 
-	PORT_START("P1")		/* IN1 */
+	PORT_START("P1")        /* IN1 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY
 	PORT_BIT( 0x0c, IP_ACTIVE_HIGH, IPT_UNUSED )
@@ -472,7 +465,7 @@ static INPUT_PORTS_START( spacecho )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_SERVICE1 )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN1 )
 
-	PORT_START("P2")		/* IN2 */
+	PORT_START("P2")        /* IN2 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_PLAYER(2)
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_PLAYER(2)
 	PORT_BIT( 0x0c, IP_ACTIVE_HIGH, IPT_UNUSED )
@@ -484,7 +477,7 @@ INPUT_PORTS_END
 
 
 static INPUT_PORTS_START( ttmahjng )
-	PORT_START("DSW")		/* IN0 */
+	PORT_START("DSW")       /* IN0 */
 	PORT_DIPNAME( 0x01, 0x00, "Unknown 01" )
 	PORT_DIPSETTING(    0x00, "00" )
 	PORT_DIPSETTING(    0x01, "01" )
@@ -510,7 +503,7 @@ static INPUT_PORTS_START( ttmahjng )
 	PORT_DIPSETTING(    0x00, "00" )
 	PORT_DIPSETTING(    0x80, "80" )
 
-	PORT_START("IN0")		/* IN1 */
+	PORT_START("IN0")       /* IN1 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -520,27 +513,27 @@ static INPUT_PORTS_START( ttmahjng )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )
 
-	PORT_START("KEY0")		/* IN2 */
+	PORT_START("KEY0")      /* IN2 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_MAHJONG_A )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_MAHJONG_E )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_MAHJONG_I )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_MAHJONG_M )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_MAHJONG_KAN )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_START1 )		// START2?
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_START1 )     // START2?
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("KEY1")		/* IN3 */
+	PORT_START("KEY1")      /* IN3 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_MAHJONG_B )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_MAHJONG_F )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_MAHJONG_J )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_MAHJONG_N )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_MAHJONG_REACH )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_START2 )		// START1?
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_START2 )     // START1?
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("KEY2")		/* IN4 */
+	PORT_START("KEY2")      /* IN4 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_MAHJONG_C )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_MAHJONG_G )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_MAHJONG_K )
@@ -550,7 +543,7 @@ static INPUT_PORTS_START( ttmahjng )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("KEY3")		/* IN5 */
+	PORT_START("KEY3")      /* IN5 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_MAHJONG_D )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_MAHJONG_H )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_MAHJONG_L )
@@ -569,58 +562,57 @@ static const ay8910_interface stratvox_ay8910_interface =
 	AY8910_DEFAULT_LOADS,
 	DEVCB_NULL,
 	DEVCB_NULL,
-	DEVCB_DEVICE_HANDLER("snsnd", stratvox_sn76477_w),  /* SN76477 commands (not used in Route 16?) */
+	DEVCB_DRIVER_MEMBER(route16_state,stratvox_sn76477_w),  /* SN76477 commands (not used in Route 16?) */
 	DEVCB_NULL
 };
 
 
 static const sn76477_interface sn76477_intf =
 {
-	RES_K(47),		/*  4  noise_res                    */
-	RES_K(150),		/*  5  filter_res                   */
-	CAP_U(0.001),	/*  6  filter_cap                   */
-	RES_M(3.3),		/*  7  decay_res                    */
-	CAP_U(1),		/*  8  attack_decay_cap             */
-	RES_K(4.7),		/* 10  attack_res                   */
-	RES_K(200),		/* 11  amplitude_res                */
-	RES_K(55),		/* 12  feedback_res (5k + 100k pot) */
-	5.0*2/(2+10),	/* 16  vco_voltage                  */
-	CAP_U(0.022),	/* 17  vco_cap                      */
-	RES_K(100),		/* 18  vco_res                      */
-	5.0,			/* 19  pitch_voltage                */
-	RES_K(75),		/* 20  slf_res                      */
-	CAP_U(1.0),		/* 21  slf_cap                      */
-	CAP_U(2.2),		/* 23  oneshot_cap                  */
-	RES_K(4.7),		/* 24  oneshot_res                  */
-	0,			    /* 22  vco (variable)               */
-	0,			    /* 26  mixer A (variable)           */
-	0,			    /* 25  mixer B (variable)           */
-	0,			    /* 27  mixer C (variable)           */
-	0,			    /* 1   envelope 1 (variable)        */
-	0,			    /* 28  envelope 2 (variable)        */
-	1			    /* 9   enable (variable)            */
+	RES_K(47),      /*  4  noise_res                    */
+	RES_K(150),     /*  5  filter_res                   */
+	CAP_U(0.001),   /*  6  filter_cap                   */
+	RES_M(3.3),     /*  7  decay_res                    */
+	CAP_U(1),       /*  8  attack_decay_cap             */
+	RES_K(4.7),     /* 10  attack_res                   */
+	RES_K(200),     /* 11  amplitude_res                */
+	RES_K(55),      /* 12  feedback_res (5k + 100k pot) */
+	5.0*2/(2+10),   /* 16  vco_voltage                  */
+	CAP_U(0.022),   /* 17  vco_cap                      */
+	RES_K(100),     /* 18  vco_res                      */
+	5.0,            /* 19  pitch_voltage                */
+	RES_K(75),      /* 20  slf_res                      */
+	CAP_U(1.0),     /* 21  slf_cap                      */
+	CAP_U(2.2),     /* 23  oneshot_cap                  */
+	RES_K(4.7),     /* 24  oneshot_res                  */
+	0,              /* 22  vco (variable)               */
+	0,              /* 26  mixer A (variable)           */
+	0,              /* 25  mixer B (variable)           */
+	0,              /* 27  mixer C (variable)           */
+	0,              /* 1   envelope 1 (variable)        */
+	0,              /* 28  envelope 2 (variable)        */
+	1               /* 9   enable (variable)            */
 };
 
 
 static MACHINE_CONFIG_START( route16, route16_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("cpu1", Z80, 2500000)	/* 10MHz / 4 = 2.5MHz */
+	MCFG_CPU_ADD("cpu1", Z80, 2500000)  /* 10MHz / 4 = 2.5MHz */
 	MCFG_CPU_PROGRAM_MAP(route16_cpu1_map)
 	MCFG_CPU_IO_MAP(cpu1_io_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", route16_state,  irq0_line_hold)
 
-	MCFG_CPU_ADD("cpu2", Z80, 2500000)	/* 10MHz / 4 = 2.5MHz */
+	MCFG_CPU_ADD("cpu2", Z80, 2500000)  /* 10MHz / 4 = 2.5MHz */
 	MCFG_CPU_PROGRAM_MAP(route16_cpu2_map)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
 	MCFG_SCREEN_SIZE(256, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 256-1, 0, 256-1)
 	MCFG_SCREEN_REFRESH_RATE(57)
-	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)	/* frames per second, vblank duration */
-	MCFG_SCREEN_UPDATE(route16)
+	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)   /* frames per second, vblank duration */
+	MCFG_SCREEN_UPDATE_DRIVER(route16_state, screen_update_route16)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -648,18 +640,17 @@ static MACHINE_CONFIG_DERIVED( stratvox, route16 )
 
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
-	MCFG_SCREEN_UPDATE(stratvox)
+	MCFG_SCREEN_UPDATE_DRIVER(route16_state, screen_update_stratvox)
 
 	/* sound hardware */
 	MCFG_SOUND_MODIFY("ay8910")
 	MCFG_SOUND_CONFIG(stratvox_ay8910_interface)
-	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 
 	MCFG_SOUND_ADD("snsnd", SN76477, 0)
 	MCFG_SOUND_CONFIG(sn76477_intf)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 
-	MCFG_SOUND_ADD("dac", DAC, 0)
+	MCFG_DAC_ADD("dac")
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 MACHINE_CONFIG_END
 
@@ -676,7 +667,7 @@ static MACHINE_CONFIG_DERIVED( spacecho, speakres )
 
 	/* basic machine hardware */
 	MCFG_CPU_MODIFY("cpu2")
-	MCFG_CPU_VBLANK_INT_HACK(irq0_line_hold,48)
+	MCFG_CPU_PERIODIC_INT_DRIVER(route16_state, irq0_line_hold, 48*60)
 MACHINE_CONFIG_END
 
 
@@ -687,7 +678,7 @@ static MACHINE_CONFIG_DERIVED( ttmahjng, route16 )
 
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
-	MCFG_SCREEN_UPDATE(ttmahjng)
+	MCFG_SCREEN_UPDATE_DRIVER(route16_state, screen_update_ttmahjng)
 MACHINE_CONFIG_END
 
 
@@ -904,7 +895,7 @@ So... spacecho2 is avoiding to enter the sub at $2929.
 */
 ROM_START( spacecho2 )
 	ROM_REGION( 0x10000, "cpu1", 0 )
-	ROM_LOAD( "c11.5.6t",     0x0000, 0x0800, CRC(90637f25) SHA1(820d2f326a5d8d0a04a0fca46b035624dfd7222c) )	// 3 bytes different at 0x8e
+	ROM_LOAD( "c11.5.6t",     0x0000, 0x0800, CRC(90637f25) SHA1(820d2f326a5d8d0a04a0fca46b035624dfd7222c) )    // 3 bytes different at 0x8e
 	ROM_LOAD( "c2.5t",        0x0800, 0x0800, CRC(a5f0a34f) SHA1(359e7a9954dedb464f7456cd071db77b2219ab2c) )
 	ROM_LOAD( "c3.4.5t",      0x1000, 0x0800, CRC(cbbb3acb) SHA1(3dc71683f31da39a544382b463ece39cca8124b3) )
 	ROM_LOAD( "c4.4t",        0x1800, 0x0800, CRC(311050ca) SHA1(ed4a5cb7ec0306654178dae8f30b39b9c8db0ce3) )
@@ -948,11 +939,11 @@ ROM_END
  *
  *************************************/
 
-static READ8_HANDLER( routex_prot_read )
+READ8_MEMBER(route16_state::routex_prot_read)
 {
-	if (cpu_get_pc(&space->device()) == 0x2f) return 0xfb;
+	if (space.device().safe_pc() == 0x2f) return 0xfb;
 
-	logerror ("cpu '%s' (PC=%08X): unmapped prot read\n", space->device().tag(), cpu_get_pc(&space->device()));
+	logerror ("cpu '%s' (PC=%08X): unmapped prot read\n", space.device().tag(), space.device().safe_pc());
 	return 0x00;
 
 }
@@ -964,11 +955,11 @@ static READ8_HANDLER( routex_prot_read )
  *
  *************************************/
 
-static DRIVER_INIT( route16 )
+DRIVER_INIT_MEMBER(route16_state,route16)
 {
-	UINT8 *ROM = machine.region("cpu1")->base();
+	UINT8 *ROM = machine().root_device().memregion("cpu1")->base();
 	/* Is this actually a bootleg? some of the protection has
-       been removed */
+	   been removed */
 
 	/* patch the protection */
 	ROM[0x00e9] = 0x3a;
@@ -979,9 +970,9 @@ static DRIVER_INIT( route16 )
 }
 
 
-static DRIVER_INIT( route16a )
+DRIVER_INIT_MEMBER(route16_state,route16a)
 {
-	UINT8 *ROM = machine.region("cpu1")->base();
+	UINT8 *ROM = machine().root_device().memregion("cpu1")->base();
 	/* TO DO : Replace these patches with simulation of the protection device */
 
 	/* patch the protection */
@@ -1008,14 +999,14 @@ static DRIVER_INIT( route16a )
  *
  *************************************/
 
-GAME( 1981, route16,  0,        route16,  route16,  route16,  ROT270, "Tehkan / Sun Electronics (Centuri license)", "Route 16 (set 1)", 0 )
-GAME( 1981, route16a, route16,  route16,  route16,  route16a, ROT270, "Tehkan / Sun Electronics (Centuri license)", "Route 16 (set 2)", 0 )
-GAME( 1981, route16b, route16,  route16,  route16,  0,        ROT270, "bootleg", "Route 16 (bootleg)", 0 )
-GAME( 1981, routex,   route16,  routex,   route16,  0,        ROT270, "bootleg", "Route X (bootleg)", 0 )
-GAME( 1980, speakres, 0,        speakres, speakres, 0,        ROT270, "Sun Electronics", "Speak & Rescue", 0 )
-GAME( 1980, speakresb,speakres, speakres, speakres, 0,        ROT270, "bootleg", "Speak & Rescue (bootleg)", 0 )
-GAME( 1980, stratvox, speakres, stratvox, stratvox, 0,        ROT270, "Sun Electronics (Taito license)", "Stratovox", 0 )
-GAME( 1980, stratvoxb,speakres, stratvox, stratvox, 0,        ROT270, "bootleg", "Stratovox (bootleg)", 0 )
-GAME( 1980, spacecho, speakres, spacecho, spacecho, 0,        ROT270, "bootleg", "Space Echo (set 1)", 0 )
-GAME( 1980, spacecho2,speakres, spacecho, spacecho, 0,        ROT270, "bootleg", "Space Echo (set 2)", 0 )
-GAME( 1981, ttmahjng, 0,        ttmahjng, ttmahjng, 0,        ROT0,   "Taito", "T.T Mahjong", 0 )
+GAME( 1981, route16,  0,        route16,  route16, route16_state,  route16,  ROT270, "Tehkan / Sun Electronics (Centuri license)", "Route 16 (set 1)", 0 )
+GAME( 1981, route16a, route16,  route16,  route16, route16_state,  route16a, ROT270, "Tehkan / Sun Electronics (Centuri license)", "Route 16 (set 2)", 0 )
+GAME( 1981, route16b, route16,  route16,  route16, driver_device,  0,        ROT270, "bootleg", "Route 16 (bootleg)", 0 )
+GAME( 1981, routex,   route16,  routex,   route16, driver_device,  0,        ROT270, "bootleg", "Route X (bootleg)", 0 )
+GAME( 1980, speakres, 0,        speakres, speakres, driver_device, 0,        ROT270, "Sun Electronics", "Speak & Rescue", 0 )
+GAME( 1980, speakresb,speakres, speakres, speakres, driver_device, 0,        ROT270, "bootleg", "Speak & Rescue (bootleg)", 0 )
+GAME( 1980, stratvox, speakres, stratvox, stratvox, driver_device, 0,        ROT270, "Sun Electronics (Taito license)", "Stratovox", 0 )
+GAME( 1980, stratvoxb,speakres, stratvox, stratvox, driver_device, 0,        ROT270, "bootleg", "Stratovox (bootleg)", 0 )
+GAME( 1980, spacecho, speakres, spacecho, spacecho, driver_device, 0,        ROT270, "bootleg", "Space Echo (set 1)", 0 )
+GAME( 1980, spacecho2,speakres, spacecho, spacecho, driver_device, 0,        ROT270, "bootleg", "Space Echo (set 2)", 0 )
+GAME( 1981, ttmahjng, 0,        ttmahjng, ttmahjng, driver_device, 0,        ROT0,   "Taito", "T.T Mahjong", 0 )

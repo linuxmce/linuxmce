@@ -105,15 +105,20 @@ Notes:
 class jollyjgr_state : public driver_device
 {
 public:
-	jollyjgr_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	jollyjgr_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"),
+		m_colorram(*this, "colorram"),
+		m_spriteram(*this, "spriteram"),
+		m_bitmap(*this, "bitmap"),
+		m_bulletram(*this, "bulletram"){ }
 
 	/* memory pointers */
-	UINT8 *  m_videoram;
-	UINT8 *  m_colorram;
-	UINT8 *  m_spriteram;
-	UINT8 *  m_bulletram;
-	UINT8 *  m_bitmap;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_colorram;
+	required_shared_ptr<UINT8> m_spriteram;
+	required_shared_ptr<UINT8> m_bitmap;
+	optional_shared_ptr<UINT8> m_bulletram;
 
 	/* video-related */
 	tilemap_t  *m_bg_tilemap;
@@ -125,6 +130,18 @@ public:
 	UINT8      m_bitmap_disable;
 	UINT8      m_tilemap_bank;
 	UINT8      m_pri;
+	DECLARE_WRITE8_MEMBER(jollyjgr_videoram_w);
+	DECLARE_WRITE8_MEMBER(jollyjgr_attrram_w);
+	DECLARE_WRITE8_MEMBER(jollyjgr_misc_w);
+	DECLARE_WRITE8_MEMBER(jollyjgr_coin_lookout_w);
+	TILE_GET_INFO_MEMBER(get_bg_tile_info);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_jollyjgr(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_fspider(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(jollyjgr_interrupt);
 };
 
 
@@ -134,16 +151,14 @@ public:
  *
  *************************************/
 
-static WRITE8_HANDLER( jollyjgr_videoram_w )
+WRITE8_MEMBER(jollyjgr_state::jollyjgr_videoram_w)
 {
-	jollyjgr_state *state = space->machine().driver_data<jollyjgr_state>();
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_videoram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-static WRITE8_HANDLER( jollyjgr_attrram_w )
+WRITE8_MEMBER(jollyjgr_state::jollyjgr_attrram_w)
 {
-	jollyjgr_state *state = space->machine().driver_data<jollyjgr_state>();
 
 	if (offset & 1)
 	{
@@ -151,38 +166,37 @@ static WRITE8_HANDLER( jollyjgr_attrram_w )
 		int i;
 
 		for (i = offset >> 1; i < 0x0400; i += 32)
-			tilemap_mark_tile_dirty(state->m_bg_tilemap, i);
+			m_bg_tilemap->mark_tile_dirty(i);
 	}
 	else
 	{
-		tilemap_set_scrolly(state->m_bg_tilemap, offset >> 1, data);
+		m_bg_tilemap->set_scrolly(offset >> 1, data);
 	}
 
-	state->m_colorram[offset] = data;
+	m_colorram[offset] = data;
 }
 
-static WRITE8_HANDLER( jollyjgr_misc_w )
+WRITE8_MEMBER(jollyjgr_state::jollyjgr_misc_w)
 {
-	jollyjgr_state *state = space->machine().driver_data<jollyjgr_state>();
 
 	// they could be swapped, because it always set "data & 3"
-	state->m_flip_x = data & 1;
-	state->m_flip_y = data & 2;
+	m_flip_x = data & 1;
+	m_flip_y = data & 2;
 
 	// same for these two (used by Frog & Spiders)
-	state->m_bitmap_disable = data & 0x40;
-	state->m_tilemap_bank = data & 0x20;
+	m_bitmap_disable = data & 0x40;
+	m_tilemap_bank = data & 0x20;
 
-	state->m_pri = data & 4;
+	m_pri = data & 4;
 
-	tilemap_set_flip(state->m_bg_tilemap, (state->m_flip_x ? TILEMAP_FLIPX : 0) | (state->m_flip_y ? TILEMAP_FLIPY : 0));
+	m_bg_tilemap->set_flip((m_flip_x ? TILEMAP_FLIPX : 0) | (m_flip_y ? TILEMAP_FLIPY : 0));
 
-	state->m_nmi_enable = data & 0x80;
+	m_nmi_enable = data & 0x80;
 }
 
-static WRITE8_HANDLER( jollyjgr_coin_lookout_w )
+WRITE8_MEMBER(jollyjgr_state::jollyjgr_coin_lookout_w)
 {
-	coin_lockout_global_w(space->machine(), data & 1);
+	coin_lockout_global_w(machine(), data & 1);
 
 	/* bits 4, 5, 6 and 7 are used too */
 }
@@ -193,40 +207,40 @@ static WRITE8_HANDLER( jollyjgr_coin_lookout_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( jollyjgr_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( jollyjgr_map, AS_PROGRAM, 8, jollyjgr_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x87ff) AM_RAM
 	AM_RANGE(0x8ff8, 0x8ff8) AM_READ_PORT("DSW1")
 	AM_RANGE(0x8ff9, 0x8ff9) AM_READ_PORT("INPUTS")
-	AM_RANGE(0x8ff8, 0x8ff8) AM_DEVWRITE("aysnd", ay8910_address_w)
-	AM_RANGE(0x8ffa, 0x8ffa) AM_READ_PORT("SYSTEM") AM_DEVWRITE("aysnd", ay8910_data_w)
+	AM_RANGE(0x8ff8, 0x8ff8) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_w)
+	AM_RANGE(0x8ffa, 0x8ffa) AM_READ_PORT("SYSTEM") AM_DEVWRITE_LEGACY("aysnd", ay8910_data_w)
 	AM_RANGE(0x8ffc, 0x8ffc) AM_WRITE(jollyjgr_misc_w)
 	AM_RANGE(0x8ffd, 0x8ffd) AM_WRITE(jollyjgr_coin_lookout_w)
 	AM_RANGE(0x8fff, 0x8fff) AM_READ_PORT("DSW2")
-	AM_RANGE(0x9000, 0x93ff) AM_RAM_WRITE(jollyjgr_videoram_w) AM_BASE_MEMBER(jollyjgr_state, m_videoram)
-	AM_RANGE(0x9800, 0x983f) AM_RAM_WRITE(jollyjgr_attrram_w) AM_BASE_MEMBER(jollyjgr_state, m_colorram)
-	AM_RANGE(0x9840, 0x987f) AM_RAM AM_BASE_MEMBER(jollyjgr_state, m_spriteram)
+	AM_RANGE(0x9000, 0x93ff) AM_RAM_WRITE(jollyjgr_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0x9800, 0x983f) AM_RAM_WRITE(jollyjgr_attrram_w) AM_SHARE("colorram")
+	AM_RANGE(0x9840, 0x987f) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0x9880, 0x9bff) AM_RAM
-	AM_RANGE(0xa000, 0xffff) AM_RAM AM_BASE_MEMBER(jollyjgr_state, m_bitmap)
+	AM_RANGE(0xa000, 0xffff) AM_RAM AM_SHARE("bitmap")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( fspider_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( fspider_map, AS_PROGRAM, 8, jollyjgr_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x87ff) AM_RAM
 	AM_RANGE(0x8ff8, 0x8ff8) AM_READ_PORT("DSW1")
 	AM_RANGE(0x8ff9, 0x8ff9) AM_READ_PORT("INPUTS")
-	AM_RANGE(0x8ff8, 0x8ff8) AM_DEVWRITE("aysnd", ay8910_address_w)
-	AM_RANGE(0x8ffa, 0x8ffa) AM_READ_PORT("SYSTEM") AM_DEVWRITE("aysnd", ay8910_data_w)
+	AM_RANGE(0x8ff8, 0x8ff8) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_w)
+	AM_RANGE(0x8ffa, 0x8ffa) AM_READ_PORT("SYSTEM") AM_DEVWRITE_LEGACY("aysnd", ay8910_data_w)
 	AM_RANGE(0x8ffc, 0x8ffc) AM_WRITE(jollyjgr_misc_w)
 	AM_RANGE(0x8ffd, 0x8ffd) AM_WRITE(jollyjgr_coin_lookout_w)
 	AM_RANGE(0x8fff, 0x8fff) AM_READ_PORT("DSW2")
-	AM_RANGE(0x9000, 0x93ff) AM_RAM_WRITE(jollyjgr_videoram_w) AM_BASE_MEMBER(jollyjgr_state, m_videoram)
-	AM_RANGE(0x9800, 0x983f) AM_RAM_WRITE(jollyjgr_attrram_w) AM_BASE_MEMBER(jollyjgr_state, m_colorram)
-	AM_RANGE(0x9840, 0x987f) AM_RAM AM_BASE_MEMBER(jollyjgr_state, m_spriteram)
+	AM_RANGE(0x9000, 0x93ff) AM_RAM_WRITE(jollyjgr_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0x9800, 0x983f) AM_RAM_WRITE(jollyjgr_attrram_w) AM_SHARE("colorram")
+	AM_RANGE(0x9840, 0x987f) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0x9880, 0x989f) AM_RAM // ?
-	AM_RANGE(0x98a0, 0x98af) AM_RAM AM_BASE_MEMBER(jollyjgr_state, m_bulletram)
+	AM_RANGE(0x98a0, 0x98af) AM_RAM AM_SHARE("bulletram")
 	AM_RANGE(0x98b0, 0x9bff) AM_RAM // ?
-	AM_RANGE(0xa000, 0xffff) AM_RAM AM_BASE_MEMBER(jollyjgr_state, m_bitmap)
+	AM_RANGE(0xa000, 0xffff) AM_RAM AM_SHARE("bitmap")
 ADDRESS_MAP_END
 
 
@@ -239,48 +253,48 @@ ADDRESS_MAP_END
 
 static INPUT_PORTS_START( jollyjgr )
 	PORT_START("DSW1")
-	PORT_DIPNAME( 0x03, 0x02, DEF_STR( Bonus_Life ) )	PORT_DIPLOCATION("SW1:!1,!2")
+	PORT_DIPNAME( 0x03, 0x02, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION("SW1:!1,!2")
 	PORT_DIPSETTING(    0x03, "10000" )
 	PORT_DIPSETTING(    0x02, "20000" )
 	PORT_DIPSETTING(    0x01, "30000" )
 	PORT_DIPSETTING(    0x00, "40000" )
-	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Free_Play ) )	PORT_DIPLOCATION("SW1:!3")
+	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Free_Play ) )    PORT_DIPLOCATION("SW1:!3")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( On ) )
-	PORT_DIPNAME( 0x18, 0x10, "Timer" )			PORT_DIPLOCATION("SW1:!4,!5")
+	PORT_DIPNAME( 0x18, 0x10, "Timer" )         PORT_DIPLOCATION("SW1:!4,!5")
 	PORT_DIPSETTING(    0x18, "2 min 20 sec" )
 	PORT_DIPSETTING(    0x10, "2 min 40 sec" )
 	PORT_DIPSETTING(    0x08, "3 min" )
 	PORT_DIPSETTING(    0x00, "3 min 20 sec" )
-	PORT_SERVICE( 0x20, IP_ACTIVE_HIGH )			PORT_DIPLOCATION("SW1:!6")
-	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Flip_Screen ) )	PORT_DIPLOCATION("SW1:!7") // it works only when Cabinet is set to Upright
+	PORT_SERVICE( 0x20, IP_ACTIVE_HIGH )            PORT_DIPLOCATION("SW1:!6")
+	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Flip_Screen ) )  PORT_DIPLOCATION("SW1:!7") // it works only when Cabinet is set to Upright
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Cabinet ) )		PORT_DIPLOCATION("SW1:!8")
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Cabinet ) )      PORT_DIPLOCATION("SW1:!8")
 	PORT_DIPSETTING(    0x80, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Cocktail ) )
 
 	PORT_START("DSW2")
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coinage ) )		PORT_DIPLOCATION("SW2:!1,!2")
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coinage ) )      PORT_DIPLOCATION("SW2:!1,!2")
 	PORT_DIPSETTING(    0x00, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x03, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( 1C_2C ) )
-	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Lives ) )		PORT_DIPLOCATION("SW2:!3,!4")
+	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW2:!3,!4")
 	PORT_DIPSETTING(    0x0c, "3" )
 	PORT_DIPSETTING(    0x08, "4" )
 	PORT_DIPSETTING(    0x04, "5" )
 	PORT_DIPSETTING(    0x00, "6" )
-	PORT_DIPNAME( 0x10, 0x00, "Display Coinage" )		PORT_DIPLOCATION("SW2:!5")
+	PORT_DIPNAME( 0x10, 0x00, "Display Coinage" )       PORT_DIPLOCATION("SW2:!5")
 	PORT_DIPSETTING(    0x10, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
-	PORT_DIPNAME( 0x20, 0x00, "Display Year" )		PORT_DIPLOCATION("SW2:!6")
+	PORT_DIPNAME( 0x20, 0x00, "Display Year" )      PORT_DIPLOCATION("SW2:!6")
 	PORT_DIPSETTING(    0x20, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
-	PORT_DIPNAME( 0x40, 0x00, "No Hit" )			PORT_DIPLOCATION("SW2:!7")
+	PORT_DIPNAME( 0x40, 0x00, "No Hit" )            PORT_DIPLOCATION("SW2:!7")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x00, "Number of Coin Switches" )	PORT_DIPLOCATION("SW2:!8")
+	PORT_DIPNAME( 0x80, 0x00, "Number of Coin Switches" )   PORT_DIPLOCATION("SW2:!8")
 	PORT_DIPSETTING(    0x80, "1" )
 	PORT_DIPSETTING(    0x00, "2" )
 
@@ -307,7 +321,7 @@ INPUT_PORTS_END
 
 static INPUT_PORTS_START( fspider )
 	PORT_START("DSW1")
-	PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( Coin_A ) )		PORT_DIPLOCATION("SW1:!1,!2,!3,!4")
+	PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( Coin_A ) )       PORT_DIPLOCATION("SW1:!1,!2,!3,!4")
 	PORT_DIPSETTING(    0x00, DEF_STR( 9C_1C ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( 8C_1C ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( 7C_1C ) )
@@ -325,7 +339,7 @@ static INPUT_PORTS_START( fspider )
 	PORT_DIPSETTING(    0x09, DEF_STR( 1C_7C ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( 1C_8C ) )
 
-	PORT_DIPNAME( 0xf0, 0xf0, DEF_STR( Coin_B ) )		PORT_DIPLOCATION("SW1:!5,!6,!7,!8")
+	PORT_DIPNAME( 0xf0, 0xf0, DEF_STR( Coin_B ) )       PORT_DIPLOCATION("SW1:!5,!6,!7,!8")
 	PORT_DIPSETTING(    0x00, DEF_STR( 9C_1C ) )
 	PORT_DIPSETTING(    0x10, DEF_STR( 8C_1C ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( 7C_1C ) )
@@ -344,26 +358,26 @@ static INPUT_PORTS_START( fspider )
 	PORT_DIPSETTING(    0x80, DEF_STR( 1C_8C ) )
 
 	PORT_START("DSW2")
-	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Lives ) )		PORT_DIPLOCATION("SW2:!1,!2")
+	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW2:!1,!2")
 	PORT_DIPSETTING(    0x00, "3" )
 	PORT_DIPSETTING(    0x01, "4" )
 	PORT_DIPSETTING(    0x02, "5" )
 	PORT_DIPSETTING(    0x03, "6" )
-	PORT_DIPNAME( 0x0c, 0x00, DEF_STR( Bonus_Life ) )	PORT_DIPLOCATION("SW2:!3,!4")
+	PORT_DIPNAME( 0x0c, 0x00, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION("SW2:!3,!4")
 	PORT_DIPSETTING(    0x00, "10000" )
 	PORT_DIPSETTING(    0x04, "20000" )
 	PORT_DIPSETTING(    0x08, "30000" )
 	PORT_DIPSETTING(    0x0c, "40000" )
-	PORT_DIPNAME( 0x10, 0x10, "Display Coinage Settings" )	PORT_DIPLOCATION("SW2:!5")
+	PORT_DIPNAME( 0x10, 0x10, "Display Coinage Settings" )  PORT_DIPLOCATION("SW2:!5")
 	PORT_DIPSETTING(    0x00, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x10, DEF_STR( Yes ) )
-	PORT_DIPNAME( 0x20, 0x20, "Show only 1P Coinage" )	PORT_DIPLOCATION("SW2:!6")
+	PORT_DIPNAME( 0x20, 0x20, "Show only 1P Coinage" )  PORT_DIPLOCATION("SW2:!6")
 	PORT_DIPSETTING(    0x20, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
-	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Cabinet ) )		PORT_DIPLOCATION("SW2:!7")
+	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Cabinet ) )      PORT_DIPLOCATION("SW2:!7")
 	PORT_DIPSETTING(    0x40, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Cocktail ) )
-	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Free_Play ) )	PORT_DIPLOCATION("SW2:!8")
+	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Free_Play ) )    PORT_DIPLOCATION("SW2:!8")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( On ) )
 
@@ -394,8 +408,9 @@ INPUT_PORTS_END
  *
  *************************************/
 
-static PALETTE_INIT( jollyjgr )
+void jollyjgr_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 
 	/* tilemap / sprites palette */
@@ -418,34 +433,32 @@ static PALETTE_INIT( jollyjgr )
 		bit1 = BIT(*color_prom, 7);
 		b = 0x4f * bit0 + 0xa8 * bit1;
 
-		palette_set_color(machine, i, MAKE_RGB(r,g,b));
+		palette_set_color(machine(), i, MAKE_RGB(r,g,b));
 		color_prom++;
 	}
 
 	/* bitmap palette */
 	for (i = 0;i < 8;i++)
-		palette_set_color_rgb(machine, 32 + i, pal1bit(i >> 0), pal1bit(i >> 1), pal1bit(i >> 2));
+		palette_set_color_rgb(machine(), 32 + i, pal1bit(i >> 0), pal1bit(i >> 1), pal1bit(i >> 2));
 }
 
 /* Tilemap is the same as in Galaxian */
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(jollyjgr_state::get_bg_tile_info)
 {
-	jollyjgr_state *state = machine.driver_data<jollyjgr_state>();
-	int color = state->m_colorram[((tile_index & 0x1f) << 1) | 1] & 7;
-	int region = (state->m_tilemap_bank & 0x20) ? 2 : 0;
-	SET_TILE_INFO(region, state->m_videoram[tile_index], color, 0);
+	int color = m_colorram[((tile_index & 0x1f) << 1) | 1] & 7;
+	int region = (m_tilemap_bank & 0x20) ? 2 : 0;
+	SET_TILE_INFO_MEMBER(region, m_videoram[tile_index], color, 0);
 }
 
-static VIDEO_START( jollyjgr )
+void jollyjgr_state::video_start()
 {
-	jollyjgr_state *state = machine.driver_data<jollyjgr_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(jollyjgr_state::get_bg_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
 
-	tilemap_set_transparent_pen(state->m_bg_tilemap, 0);
-	tilemap_set_scroll_cols(state->m_bg_tilemap, 32);
+	m_bg_tilemap->set_transparent_pen(0);
+	m_bg_tilemap->set_scroll_cols(32);
 }
 
-static void draw_bitmap( running_machine &machine, bitmap_t *bitmap )
+static void draw_bitmap( running_machine &machine, bitmap_ind16 &bitmap )
 {
 	jollyjgr_state *state = machine.driver_data<jollyjgr_state>();
 	int x, y, count;
@@ -467,13 +480,13 @@ static void draw_bitmap( running_machine &machine, bitmap_t *bitmap )
 				if(color)
 				{
 					if(state->m_flip_x && state->m_flip_y)
-						*BITMAP_ADDR16(bitmap, y, x * 8 + i) = color + 32;
+						bitmap.pix16(y, x * 8 + i) = color + 32;
 					else if(state->m_flip_x && !state->m_flip_y)
-						*BITMAP_ADDR16(bitmap, 255 - y, x * 8 + i) = color + 32;
+						bitmap.pix16(255 - y, x * 8 + i) = color + 32;
 					else if(!state->m_flip_x && state->m_flip_y)
-						*BITMAP_ADDR16(bitmap, y, 255 - x * 8 - i) = color + 32;
+						bitmap.pix16(y, 255 - x * 8 - i) = color + 32;
 					else
-						*BITMAP_ADDR16(bitmap, 255 - y, 255 - x * 8 - i) = color + 32;
+						bitmap.pix16(255 - y, 255 - x * 8 - i) = color + 32;
 				}
 			}
 
@@ -482,27 +495,26 @@ static void draw_bitmap( running_machine &machine, bitmap_t *bitmap )
 	}
 }
 
-static SCREEN_UPDATE( jollyjgr )
+UINT32 jollyjgr_state::screen_update_jollyjgr(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	jollyjgr_state *state = screen->machine().driver_data<jollyjgr_state>();
-	UINT8 *spriteram = state->m_spriteram;
+	UINT8 *spriteram = m_spriteram;
 	int offs;
 
-	bitmap_fill(bitmap, cliprect, 32);
+	bitmap.fill(32, cliprect);
 
-	if(state->m_pri) //used in Frog & Spiders level 3
+	if(m_pri) //used in Frog & Spiders level 3
 	{
-		if(!(state->m_bitmap_disable))
-			draw_bitmap(screen->machine(), bitmap);
+		if(!(m_bitmap_disable))
+			draw_bitmap(machine(), bitmap);
 
-		tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
+		m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
 	}
 	else
 	{
-		tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
+		m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
 
-		if(!(state->m_bitmap_disable))
-			draw_bitmap(screen->machine(), bitmap);
+		if(!(m_bitmap_disable))
+			draw_bitmap(machine(), bitmap);
 	}
 
 	/* Sprites are the same as in Galaxian */
@@ -515,13 +527,13 @@ static SCREEN_UPDATE( jollyjgr )
 		int code = spriteram[offs + 1] & 0x3f;
 		int color = spriteram[offs + 2] & 7;
 
-		if (state->m_flip_x)
+		if (m_flip_x)
 		{
 			sx = 240 - sx;
 			flipx = !flipx;
 		}
 
-		if (state->m_flip_y)
+		if (m_flip_y)
 			flipy = !flipy;
 		else
 			sy = 240 - sy;
@@ -529,7 +541,7 @@ static SCREEN_UPDATE( jollyjgr )
 		if (offs < 3 * 4)
 			sy++;
 
-		drawgfx_transpen(bitmap,cliprect,screen->machine().gfx[1],
+		drawgfx_transpen(bitmap,cliprect,machine().gfx[1],
 				code,color,
 				flipx,flipy,
 				sx,sy,0);
@@ -538,31 +550,30 @@ static SCREEN_UPDATE( jollyjgr )
 	return 0;
 }
 
-static SCREEN_UPDATE( fspider )
+UINT32 jollyjgr_state::screen_update_fspider(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	jollyjgr_state *state = screen->machine().driver_data<jollyjgr_state>();
 
 	// Draw bg and sprites
-	SCREEN_UPDATE_CALL(jollyjgr);
+	screen_update_jollyjgr(screen, bitmap, cliprect);
 
 	/* Draw bullets
-    16 bytes, 2 bytes per bullet (y,x). 2 player bullets, 6 enemy bullets.
-    Assume bullets to look the same as on Galaxian hw,
-    that is, simply 4 pixels. Colours are unknown. */
+	16 bytes, 2 bytes per bullet (y,x). 2 player bullets, 6 enemy bullets.
+	Assume bullets to look the same as on Galaxian hw,
+	that is, simply 4 pixels. Colours are unknown. */
 	for (int offs=0;offs<0x10;offs+=2) {
-		UINT8 sy=~state->m_bulletram[offs];
-		UINT8 sx=~state->m_bulletram[offs|1];
+		UINT8 sy=~m_bulletram[offs];
+		UINT8 sx=~m_bulletram[offs|1];
 		UINT16 bc=(offs<4)?
 			32+7: // player, white
 			32+3; // enemy, yellow
 
-		if (state->m_flip_y) sy^=0xff;
-		if (state->m_flip_x) sx+=8;
+		if (m_flip_y) sy^=0xff;
+		if (m_flip_x) sx+=8;
 
-		if (sy>=cliprect->min_y && sy<=cliprect->max_y)
+		if (sy>=cliprect.min_y && sy<=cliprect.max_y)
 			for (int x=sx-4;x<sx;x++)
-				if (x>=cliprect->min_x && x<=cliprect->max_x)
-					*BITMAP_ADDR16(bitmap,sy,x)=bc;
+				if (x>=cliprect.min_x && x<=cliprect.max_x)
+					bitmap.pix16(sy, x)=bc;
 	}
 
 	return 0;
@@ -611,60 +622,52 @@ GFXDECODE_END
  *
  *************************************/
 
-static INTERRUPT_GEN( jollyjgr_interrupt )
+INTERRUPT_GEN_MEMBER(jollyjgr_state::jollyjgr_interrupt)
 {
-	jollyjgr_state *state = device->machine().driver_data<jollyjgr_state>();
-	if(state->m_nmi_enable)
-		device_set_input_line(device, INPUT_LINE_NMI, PULSE_LINE);
+	if(m_nmi_enable)
+		device.execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 }
 
 
-static MACHINE_START( jollyjgr )
+void jollyjgr_state::machine_start()
 {
-	jollyjgr_state *state = machine.driver_data<jollyjgr_state>();
 
-	state->save_item(NAME(state->m_nmi_enable));
-	state->save_item(NAME(state->m_flip_x));
-	state->save_item(NAME(state->m_flip_y));
-	state->save_item(NAME(state->m_bitmap_disable));
-	state->save_item(NAME(state->m_tilemap_bank));
+	save_item(NAME(m_nmi_enable));
+	save_item(NAME(m_flip_x));
+	save_item(NAME(m_flip_y));
+	save_item(NAME(m_bitmap_disable));
+	save_item(NAME(m_tilemap_bank));
 }
 
-static MACHINE_RESET( jollyjgr )
+void jollyjgr_state::machine_reset()
 {
-	jollyjgr_state *state = machine.driver_data<jollyjgr_state>();
 
-	state->m_nmi_enable = 0;
-	state->m_flip_x = 0;
-	state->m_flip_y = 0;
-	state->m_bitmap_disable = 0;
-	state->m_tilemap_bank = 0;
+	m_nmi_enable = 0;
+	m_flip_x = 0;
+	m_flip_y = 0;
+	m_bitmap_disable = 0;
+	m_tilemap_bank = 0;
 }
 
 static MACHINE_CONFIG_START( jollyjgr, jollyjgr_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, 3579545)		 /* 3,579545 MHz */
+	MCFG_CPU_ADD("maincpu", Z80, 3579545)        /* 3,579545 MHz */
 	MCFG_CPU_PROGRAM_MAP(jollyjgr_map)
-	MCFG_CPU_VBLANK_INT("screen", jollyjgr_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", jollyjgr_state,  jollyjgr_interrupt)
 
-	MCFG_MACHINE_START(jollyjgr)
-	MCFG_MACHINE_RESET(jollyjgr)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(256, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(jollyjgr)
+	MCFG_SCREEN_UPDATE_DRIVER(jollyjgr_state, screen_update_jollyjgr)
 
 	MCFG_GFXDECODE(jollyjgr)
 	MCFG_PALETTE_LENGTH(32+8) /* 32 for tilemap and sprites + 8 for the bitmap */
 
-	MCFG_PALETTE_INIT(jollyjgr)
-	MCFG_VIDEO_START(jollyjgr)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -679,7 +682,7 @@ static MACHINE_CONFIG_DERIVED( fspider, jollyjgr )
 	MCFG_CPU_PROGRAM_MAP(fspider_map)
 
 	MCFG_SCREEN_MODIFY("screen")
-	MCFG_SCREEN_UPDATE(fspider)
+	MCFG_SCREEN_UPDATE_DRIVER(jollyjgr_state, screen_update_fspider)
 
 MACHINE_CONFIG_END
 
@@ -758,5 +761,5 @@ ROM_END
  *
  *************************************/
 
-GAME( 1981, fspiderb, 0, fspider,  fspider,  0, ROT90, "Taito Corporation", "Frog & Spiders (bootleg?)", GAME_SUPPORTS_SAVE ) // comes from a Fawaz Group bootleg(?) board
-GAME( 1982, jollyjgr, 0, jollyjgr, jollyjgr, 0, ROT90, "Taito Corporation", "Jolly Jogger", GAME_SUPPORTS_SAVE )
+GAME( 1981, fspiderb, 0, fspider,  fspider, driver_device,  0, ROT90, "Taito Corporation", "Frog & Spiders (bootleg?)", GAME_SUPPORTS_SAVE ) // comes from a Fawaz Group bootleg(?) board
+GAME( 1982, jollyjgr, 0, jollyjgr, jollyjgr, driver_device, 0, ROT90, "Taito Corporation", "Jolly Jogger", GAME_SUPPORTS_SAVE )

@@ -1,137 +1,131 @@
 #ifndef _osdsdl_h_
 #define _osdsdl_h_
 
-#include <SDL/SDL.h>
+#include "sdlinc.h"
 
 #include "watchdog.h"
 #include "clifront.h"
-
-//============================================================
-//  Temporary SDL 1.3 defines
-//============================================================
-
-// set this to 0 if compiling against a "hg update 4464"
-// checkout of SDL 1.3
-
-#define SDL13_POST_HG4464	(1)
 
 //============================================================
 //  System dependent defines
 //============================================================
 
 // Process events in worker thread
-#if defined(SDLMAME_WIN32) || (SDL_VERSION_ATLEAST(1,3,0))
-#define SDLMAME_EVENTS_IN_WORKER_THREAD	(1)
+#if defined(SDLMAME_WIN32) || (SDLMAME_SDL2)
+#define SDLMAME_EVENTS_IN_WORKER_THREAD (1)
 #else
-#define SDLMAME_EVENTS_IN_WORKER_THREAD	(0)
+#define SDLMAME_EVENTS_IN_WORKER_THREAD (0)
 #endif
 
 #if defined(SDLMAME_WIN32)
-	#if (SDL_VERSION_ATLEAST(1,3,0))
-		#define SDLMAME_INIT_IN_WORKER_THREAD	(0) //FIXME: breaks mt
+	#if (SDLMAME_SDL2)
+		#define SDLMAME_INIT_IN_WORKER_THREAD   (0) //FIXME: breaks mt
 		#define SDL13_COMBINE_RESIZE (1)
 	#else
-		#define SDLMAME_INIT_IN_WORKER_THREAD	(1)
+		#define SDLMAME_INIT_IN_WORKER_THREAD   (1)
 		#define SDL13_COMBINE_RESIZE (0)
 	#endif
 #else
 	#define SDL13_COMBINE_RESIZE (0)
-	#define SDLMAME_INIT_IN_WORKER_THREAD	(0)
+	#define SDLMAME_INIT_IN_WORKER_THREAD   (0)
 #endif
 
 #if defined(NO_DEBUGGER)
-#define SDLMAME_HAS_DEBUGGER			(0)
+#define SDLMAME_HAS_DEBUGGER            (0)
 #else
-#define SDLMAME_HAS_DEBUGGER			(1)
+#define SDLMAME_HAS_DEBUGGER            (1)
 #endif
 
 //============================================================
 //  Defines
 //============================================================
 
-#define SDLOPTION_INIPATH				"inipath"
-#define SDLOPTION_AUDIO_LATENCY			"audio_latency"
-#define SDLOPTION_SCREEN				"screen"
-#define SDLOPTION_ASPECT				"aspect"
-#define SDLOPTION_RESOLUTION			"resolution"
-#define SDLOPTION_VIEW					"view"
-#define SDLOPTION_SDLVIDEOFPS			"sdlvideofps"
-#define SDLOPTION_KEEPASPECT			"keepaspect"
-#define SDLOPTION_WINDOW				"window"
-#define SDLOPTION_NUMSCREENS			"numscreens"
-#define SDLOPTION_UNEVENSTRETCH			"unevenstretch"
-#define SDLOPTION_USEALLHEADS			"useallheads"
-#define SDLOPTION_MAXIMIZE				"maximize"
-#define SDLOPTION_VIDEO					"video"
-#define SDLOPTION_SWITCHRES				"switchres"
-#define SDLOPTION_FILTER				"filter"
-#define SDLOPTION_CENTERH				"centerh"
-#define SDLOPTION_CENTERV				"centerv"
-#define SDLOPTION_PRESCALE				"prescale"
+#define SDLOPTION_INIPATH               "inipath"
+#define SDLOPTION_AUDIO_LATENCY         "audio_latency"
+#define SDLOPTION_SCREEN                "screen"
+#define SDLOPTION_ASPECT                "aspect"
+#define SDLOPTION_RESOLUTION            "resolution"
+#define SDLOPTION_VIEW                  "view"
+#define SDLOPTION_SDLVIDEOFPS           "sdlvideofps"
+#define SDLOPTION_KEEPASPECT            "keepaspect"
+#define SDLOPTION_WINDOW                "window"
+#define SDLOPTION_NUMSCREENS            "numscreens"
+#define SDLOPTION_UNEVENSTRETCH         "unevenstretch"
+#define SDLOPTION_USEALLHEADS           "useallheads"
+#define SDLOPTION_MAXIMIZE              "maximize"
+#define SDLOPTION_VIDEO                 "video"
+#define SDLOPTION_SWITCHRES             "switchres"
+#define SDLOPTION_FILTER                "filter"
+#define SDLOPTION_CENTERH               "centerh"
+#define SDLOPTION_CENTERV               "centerv"
+#define SDLOPTION_PRESCALE              "prescale"
 
-#define SDLOPTION_SCALEMODE				"scalemode"
+#define SDLOPTION_SCALEMODE             "scalemode"
 
-#define SDLOPTION_MULTITHREADING		"multithreading"
-#define SDLOPTION_BENCH					"bench"
-#define SDLOPTION_NUMPROCESSORS			"numprocessors"
+#define SDLOPTION_MULTITHREADING        "multithreading"
+#define SDLOPTION_BENCH                 "bench"
+#define SDLOPTION_NUMPROCESSORS         "numprocessors"
 
-#define SDLOPTION_WAITVSYNC				"waitvsync"
-#define SDLOPTION_SYNCREFRESH			"syncrefresh"
-#define SDLOPTION_KEYMAP				"keymap"
-#define SDLOPTION_KEYMAP_FILE			"keymap_file"
-#define SDLOPTION_UIMODEKEY				"uimodekey"
-#define SDLOPTION_OSLOG					"oslog"
-#define SDLOPTION_WATCHDOG				"watchdog"
+#define SDLOPTION_WAITVSYNC             "waitvsync"
+#define SDLOPTION_SYNCREFRESH           "syncrefresh"
+#define SDLOPTION_KEYMAP                "keymap"
+#define SDLOPTION_KEYMAP_FILE           "keymap_file"
+#define SDLOPTION_UIMODEKEY             "uimodekey"
+#define SDLOPTION_OSLOG                 "oslog"
+#define SDLOPTION_WATCHDOG              "watchdog"
 
-#define SDLOPTION_SIXAXIS				"sixaxis"
-#define SDLOPTION_JOYINDEX				"joy_idx"
-#define SDLOPTION_KEYBINDEX				"keyb_idx"
-#define SDLOPTION_MOUSEINDEX			"mouse_index"
+#define SDLOPTION_SIXAXIS               "sixaxis"
+#define SDLOPTION_JOYINDEX              "joy_idx"
+#define SDLOPTION_KEYBINDEX             "keyb_idx"
+#define SDLOPTION_MOUSEINDEX            "mouse_index"
+#if (USE_XINPUT)
+#define SDLOPTION_LIGHTGUNINDEX         "lightgun_index"
+#endif
 
-#define SDLOPTION_SHADER_MAME			"glsl_shader_mame"
-#define SDLOPTION_SHADER_SCREEN			"glsl_shader_screen"
-#define SDLOPTION_GLSL_FILTER			"gl_glsl_filter"
-#define SDLOPTION_GL_GLSL				"gl_glsl"
-#define SDLOPTION_GL_PBO				"gl_pbo"
-#define SDLOPTION_GL_VBO				"gl_vbo"
-#define SDLOPTION_GL_NOTEXTURERECT		"gl_notexturerect"
-#define SDLOPTION_GL_FORCEPOW2TEXTURE	"gl_forcepow2texture"
-#define SDLOPTION_GL_GLSL_VID_ATTR		"gl_glsl_vid_attr"
+#define SDLOPTION_SHADER_MAME           "glsl_shader_mame"
+#define SDLOPTION_SHADER_SCREEN         "glsl_shader_screen"
+#define SDLOPTION_GLSL_FILTER           "gl_glsl_filter"
+#define SDLOPTION_GL_GLSL               "gl_glsl"
+#define SDLOPTION_GL_PBO                "gl_pbo"
+#define SDLOPTION_GL_VBO                "gl_vbo"
+#define SDLOPTION_GL_NOTEXTURERECT      "gl_notexturerect"
+#define SDLOPTION_GL_FORCEPOW2TEXTURE   "gl_forcepow2texture"
+#define SDLOPTION_GL_GLSL_VID_ATTR      "gl_glsl_vid_attr"
 
-#define SDLOPTION_AUDIODRIVER			"audiodriver"
-#define SDLOPTION_VIDEODRIVER			"videodriver"
-#define SDLOPTION_RENDERDRIVER			"renderdriver"
-#define SDLOPTION_GL_LIB				"gl_lib"
+#define SDLOPTION_AUDIODRIVER           "audiodriver"
+#define SDLOPTION_VIDEODRIVER           "videodriver"
+#define SDLOPTION_RENDERDRIVER          "renderdriver"
+#define SDLOPTION_GL_LIB                "gl_lib"
 
-#define SDLOPTVAL_NONE					"none"
-#define SDLOPTVAL_AUTO					"auto"
+#define SDLOPTVAL_NONE                  "none"
+#define SDLOPTVAL_AUTO                  "auto"
 
-#define SDLOPTVAL_OPENGL				"opengl"
-#define SDLOPTVAL_OPENGL16				"opengl16"
-#define SDLOPTVAL_SOFT					"soft"
-#define SDLOPTVAL_SDL13					"sdl13"
+#define SDLOPTVAL_OPENGL                "opengl"
+#define SDLOPTVAL_OPENGL16              "opengl16"
+#define SDLOPTVAL_SOFT                  "soft"
+#define SDLOPTVAL_SDL13                 "sdl13"
 
-#define SDLMAME_LED(x)					"led" #x
+#define SDLMAME_LED(x)                  "led" #x
 
 // read by sdlmame
 
-#define SDLENV_DESKTOPDIM				"SDLMAME_DESKTOPDIM"
-#define SDLENV_VMWARE					"SDLMAME_VMWARE"
+#define SDLENV_DESKTOPDIM               "SDLMAME_DESKTOPDIM"
+#define SDLENV_VMWARE                   "SDLMAME_VMWARE"
 
 // set by sdlmame
 
-#define SDLENV_VISUALID					"SDL_VIDEO_X11_VISUALID"
-#define SDLENV_VIDEODRIVER				"SDL_VIDEODRIVER"
-#define SDLENV_AUDIODRIVER				"SDL_AUDIODRIVER"
-#define SDLENV_RENDERDRIVER				"SDL_VIDEO_RENDERER"
+#define SDLENV_VISUALID                 "SDL_VIDEO_X11_VISUALID"
+#define SDLENV_VIDEODRIVER              "SDL_VIDEODRIVER"
+#define SDLENV_AUDIODRIVER              "SDL_AUDIODRIVER"
+#define SDLENV_RENDERDRIVER             "SDL_VIDEO_RENDERER"
 
-#define SDLMAME_SOUND_LOG				"sound.log"
+#define SDLMAME_SOUND_LOG               "sound.log"
 
 #ifdef SDLMAME_MACOSX
 /* Vas Crabb: Default GL-lib for MACOSX */
-#define SDLOPTVAL_GLLIB					"/System/Library/Frameworks/OpenGL.framework/Libraries/libGL.dylib"
+#define SDLOPTVAL_GLLIB                 "/System/Library/Frameworks/OpenGL.framework/Libraries/libGL.dylib"
 #else
-#define SDLOPTVAL_GLLIB					SDLOPTVAL_AUTO
+#define SDLOPTVAL_GLLIB                 SDLOPTVAL_AUTO
 #endif
 
 
@@ -176,7 +170,7 @@ public:
 
 	// OpenGL specific options
 	bool filter() const { return bool_value(SDLOPTION_FILTER); }
-	int prescale() const { return bool_value(SDLOPTION_PRESCALE); }
+	int prescale() const { return int_value(SDLOPTION_PRESCALE); }
 	bool gl_force_pow2_texture() const { return bool_value(SDLOPTION_GL_FORCEPOW2TEXTURE); }
 	bool gl_no_texture_rect() const { return bool_value(SDLOPTION_GL_NOTEXTURERECT); }
 	bool gl_vbo() const { return bool_value(SDLOPTION_GL_VBO); }
@@ -215,7 +209,7 @@ public:
 	const char *joy_index(int index) const { astring temp; return value(temp.format("%s%d", SDLOPTION_JOYINDEX, index)); }
 	bool sixaxis() const { return bool_value(SDLOPTION_SIXAXIS); }
 
-#if (SDL_VERSION_ATLEAST(1,3,0))
+#if (SDLMAME_SDL2)
 	const char *mouse_index(int index) const { astring temp; return value(temp.format("%s%d", SDLOPTION_MOUSEINDEX, index)); }
 	const char *keyboard_index(int index) const { astring temp; return value(temp.format("%s%d", SDLOPTION_KEYBINDEX, index)); }
 #endif
@@ -252,12 +246,12 @@ public:
 	virtual void set_mastervolume(int attenuation);
 
 	// input overridables
-	virtual void customize_input_type_list(input_type_desc *typelist);
+	virtual void customize_input_type_list(simple_list<input_type_entry> &typelist);
 
 	// font overridables
 	virtual osd_font font_open(const char *name, int &height);
 	virtual void font_close(osd_font font);
-	virtual bitmap_t *font_get_bitmap(osd_font font, unicode_char chnum, INT32 &width, INT32 &xoffs, INT32 &yoffs);
+	virtual bool font_get_bitmap(osd_font font, unicode_char chnum, bitmap_argb32 &bitmap, INT32 &width, INT32 &xoffs, INT32 &yoffs);
 
 private:
 	static void osd_exit(running_machine &machine);
@@ -278,6 +272,6 @@ void sdlaudio_init(running_machine &machine);
 //  sdlwork.c
 //============================================================
 
-extern int sdl_num_processors;
+extern int osd_num_processors;
 
 #endif

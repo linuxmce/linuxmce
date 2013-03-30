@@ -171,107 +171,103 @@ TODO:
 #include "includes/taitosj.h"
 
 
-static WRITE8_DEVICE_HANDLER( taitosj_sndnmi_msk_w )
+WRITE8_MEMBER(taitosj_state::taitosj_sndnmi_msk_w)
 {
-	taitosj_state *state = device->machine().driver_data<taitosj_state>();
-	state->m_sndnmi_disable = data & 0x01;
+	m_sndnmi_disable = data & 0x01;
 }
 
-static WRITE8_HANDLER( taitosj_soundcommand_w )
+WRITE8_MEMBER(taitosj_state::taitosj_soundcommand_w)
 {
-	taitosj_state *state = space->machine().driver_data<taitosj_state>();
-	soundlatch_w(space,offset,data);
-	if (!state->m_sndnmi_disable) cputag_set_input_line(space->machine(), "audiocpu", INPUT_LINE_NMI, PULSE_LINE);
-}
-
-
-static WRITE8_DEVICE_HANDLER( input_port_4_f0_w )
-{
-	taitosj_state *state = device->machine().driver_data<taitosj_state>();
-	state->m_input_port_4_f0 = data >> 4;
-}
-
-static CUSTOM_INPUT( input_port_4_f0_r )
-{
-	taitosj_state *state = field->port->machine().driver_data<taitosj_state>();
-	return state->m_input_port_4_f0;
+	soundlatch_byte_w(space,offset,data);
+	if (!m_sndnmi_disable) machine().device("audiocpu")->execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 }
 
 
-static ADDRESS_MAP_START( taitosj_main_nomcu_map, AS_PROGRAM, 8 )
+WRITE8_MEMBER(taitosj_state::input_port_4_f0_w)
+{
+	m_input_port_4_f0 = data >> 4;
+}
+
+CUSTOM_INPUT_MEMBER(taitosj_state::input_port_4_f0_r)
+{
+	return m_input_port_4_f0;
+}
+
+
+static ADDRESS_MAP_START( taitosj_main_nomcu_map, AS_PROGRAM, 8, taitosj_state )
 	AM_RANGE(0x0000, 0x5fff) AM_ROM
 	AM_RANGE(0x6000, 0x7fff) AM_ROMBANK("bank1")
 	AM_RANGE(0x8000, 0x87ff) AM_RAM
 	AM_RANGE(0x8800, 0x8800) AM_MIRROR(0x07fe) AM_READWRITE(taitosj_fake_data_r, taitosj_fake_data_w)
 	AM_RANGE(0x8801, 0x8801) AM_MIRROR(0x07fe) AM_READ(taitosj_fake_status_r)
-	AM_RANGE(0x9000, 0xbfff) AM_WRITE(taitosj_characterram_w) AM_BASE_MEMBER(taitosj_state, m_characterram)
+	AM_RANGE(0x9000, 0xbfff) AM_WRITE(taitosj_characterram_w) AM_SHARE("characterram")
 	AM_RANGE(0xc000, 0xc3ff) AM_RAM
-	AM_RANGE(0xc400, 0xc7ff) AM_RAM AM_BASE_MEMBER(taitosj_state, m_videoram_1)
-	AM_RANGE(0xc800, 0xcbff) AM_RAM AM_BASE_MEMBER(taitosj_state, m_videoram_2)
-	AM_RANGE(0xcc00, 0xcfff) AM_RAM AM_BASE_MEMBER(taitosj_state, m_videoram_3)
-	AM_RANGE(0xd000, 0xd05f) AM_RAM AM_BASE_MEMBER(taitosj_state, m_colscrolly)
-	AM_RANGE(0xd100, 0xd1ff) AM_RAM AM_BASE_MEMBER(taitosj_state, m_spriteram)
-	AM_RANGE(0xd200, 0xd27f) AM_MIRROR(0x0080) AM_RAM AM_BASE_MEMBER(taitosj_state, m_paletteram)
-	AM_RANGE(0xd300, 0xd300) AM_MIRROR(0x00ff) AM_WRITEONLY AM_BASE_MEMBER(taitosj_state, m_video_priority)
-	AM_RANGE(0xd400, 0xd403) AM_MIRROR(0x00f0) AM_READONLY AM_BASE_MEMBER(taitosj_state, m_collision_reg)
+	AM_RANGE(0xc400, 0xc7ff) AM_RAM AM_SHARE("videoram_1")
+	AM_RANGE(0xc800, 0xcbff) AM_RAM AM_SHARE("videoram_2")
+	AM_RANGE(0xcc00, 0xcfff) AM_RAM AM_SHARE("videoram_3")
+	AM_RANGE(0xd000, 0xd05f) AM_RAM AM_SHARE("colscrolly")
+	AM_RANGE(0xd100, 0xd1ff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0xd200, 0xd27f) AM_MIRROR(0x0080) AM_RAM AM_SHARE("paletteram")
+	AM_RANGE(0xd300, 0xd300) AM_MIRROR(0x00ff) AM_WRITEONLY AM_SHARE("video_priority")
+	AM_RANGE(0xd400, 0xd403) AM_MIRROR(0x00f0) AM_READONLY AM_SHARE("collision_reg")
 	AM_RANGE(0xd404, 0xd404) AM_MIRROR(0x00f3) AM_READ(taitosj_gfxrom_r)
 	AM_RANGE(0xd408, 0xd408) AM_MIRROR(0x00f0) AM_READ_PORT("IN0")
 	AM_RANGE(0xd409, 0xd409) AM_MIRROR(0x00f0) AM_READ_PORT("IN1")
-	AM_RANGE(0xd40a, 0xd40a) AM_MIRROR(0x00f0) AM_READ_PORT("DSW1")			/* DSW1 */
+	AM_RANGE(0xd40a, 0xd40a) AM_MIRROR(0x00f0) AM_READ_PORT("DSW1")         /* DSW1 */
 	AM_RANGE(0xd40b, 0xd40b) AM_MIRROR(0x00f0) AM_READ_PORT("IN2")
-	AM_RANGE(0xd40c, 0xd40c) AM_MIRROR(0x00f0) AM_READ_PORT("IN3")			/* Service */
+	AM_RANGE(0xd40c, 0xd40c) AM_MIRROR(0x00f0) AM_READ_PORT("IN3")          /* Service */
 	AM_RANGE(0xd40d, 0xd40d) AM_MIRROR(0x00f0) AM_READ_PORT("IN4")
-	AM_RANGE(0xd40e, 0xd40f) AM_MIRROR(0x00f0) AM_DEVWRITE("ay1", ay8910_address_data_w)
-	AM_RANGE(0xd40f, 0xd40f) AM_MIRROR(0x00f0) AM_DEVREAD("ay1", ay8910_r)	/* DSW2 and DSW3 */
-	AM_RANGE(0xd500, 0xd505) AM_MIRROR(0x00f0) AM_WRITEONLY AM_BASE_MEMBER(taitosj_state, m_scroll)
-	AM_RANGE(0xd506, 0xd507) AM_MIRROR(0x00f0) AM_WRITEONLY AM_BASE_MEMBER(taitosj_state, m_colorbank)
+	AM_RANGE(0xd40e, 0xd40f) AM_MIRROR(0x00f0) AM_DEVWRITE_LEGACY("ay1", ay8910_address_data_w)
+	AM_RANGE(0xd40f, 0xd40f) AM_MIRROR(0x00f0) AM_DEVREAD_LEGACY("ay1", ay8910_r)   /* DSW2 and DSW3 */
+	AM_RANGE(0xd500, 0xd505) AM_MIRROR(0x00f0) AM_WRITEONLY AM_SHARE("scroll")
+	AM_RANGE(0xd506, 0xd507) AM_MIRROR(0x00f0) AM_WRITEONLY AM_SHARE("colorbank")
 	AM_RANGE(0xd508, 0xd508) AM_MIRROR(0x00f0) AM_WRITE(taitosj_collision_reg_clear_w)
-	AM_RANGE(0xd509, 0xd50a) AM_MIRROR(0x00f0) AM_WRITEONLY AM_BASE_MEMBER(taitosj_state, m_gfxpointer)
+	AM_RANGE(0xd509, 0xd50a) AM_MIRROR(0x00f0) AM_WRITEONLY AM_SHARE("gfxpointer")
 	AM_RANGE(0xd50b, 0xd50b) AM_MIRROR(0x00f0) AM_WRITE(taitosj_soundcommand_w)
 	AM_RANGE(0xd50d, 0xd50d) AM_MIRROR(0x00f0) AM_WRITEONLY /*watchdog_reset_w*/  /* Bio Attack sometimes resets after you die */
 	AM_RANGE(0xd50e, 0xd50e) AM_MIRROR(0x00f0) AM_WRITE(taitosj_bankswitch_w)
 	AM_RANGE(0xd50f, 0xd50f) AM_MIRROR(0x00f0) AM_WRITENOP
-	AM_RANGE(0xd600, 0xd600) AM_MIRROR(0x00ff) AM_WRITEONLY AM_BASE_MEMBER(taitosj_state, m_video_mode)
+	AM_RANGE(0xd600, 0xd600) AM_MIRROR(0x00ff) AM_WRITEONLY AM_SHARE("video_mode")
 	AM_RANGE(0xd700, 0xdfff) AM_NOP
 	AM_RANGE(0xe000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
 
 /* only difference is taitosj_fake_ replaced with taitosj_mcu_ */
-static ADDRESS_MAP_START( taitosj_main_mcu_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( taitosj_main_mcu_map, AS_PROGRAM, 8, taitosj_state )
 	AM_RANGE(0x0000, 0x5fff) AM_ROM
 	AM_RANGE(0x6000, 0x7fff) AM_ROMBANK("bank1")
 	AM_RANGE(0x8000, 0x87ff) AM_RAM
 	AM_RANGE(0x8800, 0x8800) AM_MIRROR(0x07fe) AM_READWRITE(taitosj_mcu_data_r, taitosj_mcu_data_w)
 	AM_RANGE(0x8801, 0x8801) AM_MIRROR(0x07fe) AM_READ(taitosj_mcu_status_r)
-	AM_RANGE(0x9000, 0xbfff) AM_WRITE(taitosj_characterram_w) AM_BASE_MEMBER(taitosj_state, m_characterram)
+	AM_RANGE(0x9000, 0xbfff) AM_WRITE(taitosj_characterram_w) AM_SHARE("characterram")
 	AM_RANGE(0xc000, 0xc3ff) AM_RAM
-	AM_RANGE(0xc400, 0xc7ff) AM_RAM AM_BASE_MEMBER(taitosj_state, m_videoram_1)
-	AM_RANGE(0xc800, 0xcbff) AM_RAM AM_BASE_MEMBER(taitosj_state, m_videoram_2)
-	AM_RANGE(0xcc00, 0xcfff) AM_RAM AM_BASE_MEMBER(taitosj_state, m_videoram_3)
-	AM_RANGE(0xd000, 0xd05f) AM_RAM AM_BASE_MEMBER(taitosj_state, m_colscrolly)
-	AM_RANGE(0xd100, 0xd1ff) AM_RAM AM_BASE_MEMBER(taitosj_state, m_spriteram)
-	AM_RANGE(0xd200, 0xd27f) AM_MIRROR(0x0080) AM_RAM AM_BASE_MEMBER(taitosj_state, m_paletteram)
-	AM_RANGE(0xd300, 0xd300) AM_MIRROR(0x00ff) AM_WRITEONLY AM_BASE_MEMBER(taitosj_state, m_video_priority)
-	AM_RANGE(0xd400, 0xd403) AM_MIRROR(0x00f0) AM_READONLY AM_BASE_MEMBER(taitosj_state, m_collision_reg)
+	AM_RANGE(0xc400, 0xc7ff) AM_RAM AM_SHARE("videoram_1")
+	AM_RANGE(0xc800, 0xcbff) AM_RAM AM_SHARE("videoram_2")
+	AM_RANGE(0xcc00, 0xcfff) AM_RAM AM_SHARE("videoram_3")
+	AM_RANGE(0xd000, 0xd05f) AM_RAM AM_SHARE("colscrolly")
+	AM_RANGE(0xd100, 0xd1ff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0xd200, 0xd27f) AM_MIRROR(0x0080) AM_RAM AM_SHARE("paletteram")
+	AM_RANGE(0xd300, 0xd300) AM_MIRROR(0x00ff) AM_WRITEONLY AM_SHARE("video_priority")
+	AM_RANGE(0xd400, 0xd403) AM_MIRROR(0x00f0) AM_READONLY AM_SHARE("collision_reg")
 	AM_RANGE(0xd404, 0xd404) AM_MIRROR(0x00f3) AM_READ(taitosj_gfxrom_r)
 	AM_RANGE(0xd408, 0xd408) AM_MIRROR(0x00f0) AM_READ_PORT("IN0")
 	AM_RANGE(0xd409, 0xd409) AM_MIRROR(0x00f0) AM_READ_PORT("IN1")
-	AM_RANGE(0xd40a, 0xd40a) AM_MIRROR(0x00f0) AM_READ_PORT("DSW1")			/* DSW1 */
+	AM_RANGE(0xd40a, 0xd40a) AM_MIRROR(0x00f0) AM_READ_PORT("DSW1")         /* DSW1 */
 	AM_RANGE(0xd40b, 0xd40b) AM_MIRROR(0x00f0) AM_READ_PORT("IN2")
-	AM_RANGE(0xd40c, 0xd40c) AM_MIRROR(0x00f0) AM_READ_PORT("IN3")			/* Service */
+	AM_RANGE(0xd40c, 0xd40c) AM_MIRROR(0x00f0) AM_READ_PORT("IN3")          /* Service */
 	AM_RANGE(0xd40d, 0xd40d) AM_MIRROR(0x00f0) AM_READ_PORT("IN4")
-	AM_RANGE(0xd40e, 0xd40f) AM_MIRROR(0x00f0) AM_DEVWRITE("ay1", ay8910_address_data_w)
-	AM_RANGE(0xd40f, 0xd40f) AM_MIRROR(0x00f0) AM_DEVREAD("ay1", ay8910_r)	/* DSW2 and DSW3 */
-	AM_RANGE(0xd500, 0xd505) AM_MIRROR(0x00f0) AM_WRITEONLY AM_BASE_MEMBER(taitosj_state, m_scroll)
-	AM_RANGE(0xd506, 0xd507) AM_MIRROR(0x00f0) AM_WRITEONLY AM_BASE_MEMBER(taitosj_state, m_colorbank)
+	AM_RANGE(0xd40e, 0xd40f) AM_MIRROR(0x00f0) AM_DEVWRITE_LEGACY("ay1", ay8910_address_data_w)
+	AM_RANGE(0xd40f, 0xd40f) AM_MIRROR(0x00f0) AM_DEVREAD_LEGACY("ay1", ay8910_r)   /* DSW2 and DSW3 */
+	AM_RANGE(0xd500, 0xd505) AM_MIRROR(0x00f0) AM_WRITEONLY AM_SHARE("scroll")
+	AM_RANGE(0xd506, 0xd507) AM_MIRROR(0x00f0) AM_WRITEONLY AM_SHARE("colorbank")
 	AM_RANGE(0xd508, 0xd508) AM_MIRROR(0x00f0) AM_WRITE(taitosj_collision_reg_clear_w)
-	AM_RANGE(0xd509, 0xd50a) AM_MIRROR(0x00f0) AM_WRITEONLY AM_BASE_MEMBER(taitosj_state, m_gfxpointer)
+	AM_RANGE(0xd509, 0xd50a) AM_MIRROR(0x00f0) AM_WRITEONLY AM_SHARE("gfxpointer")
 	AM_RANGE(0xd50b, 0xd50b) AM_MIRROR(0x00f0) AM_WRITE(taitosj_soundcommand_w)
 	AM_RANGE(0xd50d, 0xd50d) AM_MIRROR(0x00f0) AM_WRITEONLY /*watchdog_reset_w*/  /* Bio Attack sometimes resets after you die */
 	AM_RANGE(0xd50e, 0xd50e) AM_MIRROR(0x00f0) AM_WRITE(taitosj_bankswitch_w)
 	AM_RANGE(0xd50f, 0xd50f) AM_MIRROR(0x00f0) AM_WRITENOP
-	AM_RANGE(0xd600, 0xd600) AM_MIRROR(0x00ff) AM_WRITEONLY AM_BASE_MEMBER(taitosj_state, m_video_mode)
+	AM_RANGE(0xd600, 0xd600) AM_MIRROR(0x00ff) AM_WRITEONLY AM_SHARE("video_mode")
 	AM_RANGE(0xd700, 0xdfff) AM_NOP
 	AM_RANGE(0xe000, 0xffff) AM_ROM
 ADDRESS_MAP_END
@@ -280,9 +276,8 @@ ADDRESS_MAP_END
 
 /* seems the most logical way to do the gears */
 
-static CUSTOM_INPUT( kikstart_gear_r )
+CUSTOM_INPUT_MEMBER(taitosj_state::kikstart_gear_r)
 {
-	taitosj_state *state = field->port->machine().driver_data<taitosj_state>();
 	const char *port_tag;
 
 	int player = (int)(FPTR)param;
@@ -293,68 +288,68 @@ static CUSTOM_INPUT( kikstart_gear_r )
 		port_tag = "GEARP2";
 
 	/* gear MUST be 1, 2 or 3 */
-	if (input_port_read(field->port->machine(), port_tag) & 0x01) state->m_kikstart_gears[player] = 0x02;
-	if (input_port_read(field->port->machine(), port_tag) & 0x02) state->m_kikstart_gears[player] = 0x03;
-	if (input_port_read(field->port->machine(), port_tag) & 0x04) state->m_kikstart_gears[player] = 0x01;
+	if (ioport(port_tag)->read() & 0x01) m_kikstart_gears[player] = 0x02;
+	if (ioport(port_tag)->read() & 0x02) m_kikstart_gears[player] = 0x03;
+	if (ioport(port_tag)->read() & 0x04) m_kikstart_gears[player] = 0x01;
 
-	return state->m_kikstart_gears[player];
+	return m_kikstart_gears[player];
 }
 
 
-static ADDRESS_MAP_START( kikstart_main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( kikstart_main_map, AS_PROGRAM, 8, taitosj_state )
 	AM_RANGE(0x0000, 0x5fff) AM_ROM
 	AM_RANGE(0x6000, 0x7fff) AM_ROMBANK("bank1")
 	AM_RANGE(0x8000, 0x87ff) AM_RAM
 	AM_RANGE(0x8800, 0x8800) AM_READWRITE(taitosj_mcu_data_r, taitosj_mcu_data_w)
 	AM_RANGE(0x8801, 0x8801) AM_READ(taitosj_mcu_status_r)
 	AM_RANGE(0x8802, 0x8802) AM_NOP
-	AM_RANGE(0x8a00, 0x8a5f) AM_WRITEONLY AM_BASE_MEMBER(taitosj_state, m_colscrolly)
-	AM_RANGE(0x9000, 0xbfff) AM_WRITE(taitosj_characterram_w) AM_BASE_MEMBER(taitosj_state, m_characterram)
+	AM_RANGE(0x8a00, 0x8a5f) AM_WRITEONLY AM_SHARE("colscrolly")
+	AM_RANGE(0x9000, 0xbfff) AM_WRITE(taitosj_characterram_w) AM_SHARE("characterram")
 	AM_RANGE(0xc000, 0xc3ff) AM_RAM
-	AM_RANGE(0xc400, 0xc7ff) AM_RAM AM_BASE_MEMBER(taitosj_state, m_videoram_1)
-	AM_RANGE(0xc800, 0xcbff) AM_RAM AM_BASE_MEMBER(taitosj_state, m_videoram_2)
-	AM_RANGE(0xcc00, 0xcfff) AM_RAM AM_BASE_MEMBER(taitosj_state, m_videoram_3)
-	AM_RANGE(0xd000, 0xd001) AM_WRITEONLY AM_BASE_MEMBER(taitosj_state, m_colorbank)
-	AM_RANGE(0xd002, 0xd007) AM_WRITEONLY AM_BASE_MEMBER(taitosj_state, m_scroll)
-	AM_RANGE(0xd100, 0xd1ff) AM_RAM AM_BASE_MEMBER(taitosj_state, m_spriteram)
-	AM_RANGE(0xd200, 0xd27f) AM_RAM AM_BASE_MEMBER(taitosj_state, m_paletteram)
-	AM_RANGE(0xd300, 0xd300) AM_WRITEONLY AM_BASE_MEMBER(taitosj_state, m_video_priority)
-	AM_RANGE(0xd400, 0xd403) AM_READONLY AM_BASE_MEMBER(taitosj_state, m_collision_reg)
+	AM_RANGE(0xc400, 0xc7ff) AM_RAM AM_SHARE("videoram_1")
+	AM_RANGE(0xc800, 0xcbff) AM_RAM AM_SHARE("videoram_2")
+	AM_RANGE(0xcc00, 0xcfff) AM_RAM AM_SHARE("videoram_3")
+	AM_RANGE(0xd000, 0xd001) AM_WRITEONLY AM_SHARE("colorbank")
+	AM_RANGE(0xd002, 0xd007) AM_WRITEONLY AM_SHARE("scroll")
+	AM_RANGE(0xd100, 0xd1ff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0xd200, 0xd27f) AM_RAM AM_SHARE("paletteram")
+	AM_RANGE(0xd300, 0xd300) AM_WRITEONLY AM_SHARE("video_priority")
+	AM_RANGE(0xd400, 0xd403) AM_READONLY AM_SHARE("collision_reg")
 	AM_RANGE(0xd404, 0xd404) AM_READ(taitosj_gfxrom_r)
 	AM_RANGE(0xd408, 0xd408) AM_MIRROR(0x00f0) AM_READ_PORT("IN0")
 	AM_RANGE(0xd409, 0xd409) AM_MIRROR(0x00f0) AM_READ_PORT("IN1")
-	AM_RANGE(0xd40a, 0xd40a) AM_MIRROR(0x00f0) AM_READ_PORT("DSW1")			/* DSW1 */
+	AM_RANGE(0xd40a, 0xd40a) AM_MIRROR(0x00f0) AM_READ_PORT("DSW1")         /* DSW1 */
 	AM_RANGE(0xd40b, 0xd40b) AM_MIRROR(0x00f0) AM_READ_PORT("IN2")
-	AM_RANGE(0xd40c, 0xd40c) AM_MIRROR(0x00f0) AM_READ_PORT("IN3")			/* Service */
+	AM_RANGE(0xd40c, 0xd40c) AM_MIRROR(0x00f0) AM_READ_PORT("IN3")          /* Service */
 	AM_RANGE(0xd40d, 0xd40d) AM_MIRROR(0x00f0) AM_READ_PORT("IN4")
-	AM_RANGE(0xd40e, 0xd40f) AM_DEVWRITE("ay1", ay8910_address_data_w)
-	AM_RANGE(0xd40f, 0xd40f) AM_DEVREAD("ay1", ay8910_r)	/* DSW2 and DSW3 */
+	AM_RANGE(0xd40e, 0xd40f) AM_DEVWRITE_LEGACY("ay1", ay8910_address_data_w)
+	AM_RANGE(0xd40f, 0xd40f) AM_DEVREAD_LEGACY("ay1", ay8910_r) /* DSW2 and DSW3 */
 	AM_RANGE(0xd508, 0xd508) AM_WRITE(taitosj_collision_reg_clear_w)
-	AM_RANGE(0xd509, 0xd50a) AM_WRITEONLY AM_BASE_MEMBER(taitosj_state, m_gfxpointer)
+	AM_RANGE(0xd509, 0xd50a) AM_WRITEONLY AM_SHARE("gfxpointer")
 	AM_RANGE(0xd50b, 0xd50b) AM_WRITE(taitosj_soundcommand_w)
 	AM_RANGE(0xd50d, 0xd50d) AM_WRITE(watchdog_reset_w)
 	AM_RANGE(0xd50e, 0xd50e) AM_WRITE(taitosj_bankswitch_w)
-	AM_RANGE(0xd600, 0xd600) AM_WRITEONLY AM_BASE_MEMBER(taitosj_state, m_video_mode)
-	AM_RANGE(0xd800, 0xdfff) AM_RAM AM_BASE_MEMBER(taitosj_state, m_kikstart_scrollram)// scroll ram + ???
+	AM_RANGE(0xd600, 0xd600) AM_WRITEONLY AM_SHARE("video_mode")
+	AM_RANGE(0xd800, 0xdfff) AM_RAM AM_SHARE("kikstart_scroll")// scroll ram + ???
 	AM_RANGE(0xe000, 0xefff) AM_ROM
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( taitosj_audio_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( taitosj_audio_map, AS_PROGRAM, 8, taitosj_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
 	AM_RANGE(0x4000, 0x43ff) AM_RAM
-	AM_RANGE(0x4800, 0x4801) AM_DEVWRITE("ay2", ay8910_address_data_w)
-	AM_RANGE(0x4801, 0x4801) AM_DEVREAD("ay2", ay8910_r)
-	AM_RANGE(0x4802, 0x4803) AM_DEVWRITE("ay3", ay8910_address_data_w)
-	AM_RANGE(0x4803, 0x4803) AM_DEVREAD("ay3", ay8910_r)
-	AM_RANGE(0x4804, 0x4805) AM_DEVWRITE("ay4", ay8910_address_data_w)
-	AM_RANGE(0x4805, 0x4805) AM_DEVREAD("ay4", ay8910_r)
-	AM_RANGE(0x5000, 0x5000) AM_READ(soundlatch_r)
-	AM_RANGE(0xe000, 0xefff) AM_ROM	/* space for diagnostic ROM */
+	AM_RANGE(0x4800, 0x4801) AM_DEVWRITE_LEGACY("ay2", ay8910_address_data_w)
+	AM_RANGE(0x4801, 0x4801) AM_DEVREAD_LEGACY("ay2", ay8910_r)
+	AM_RANGE(0x4802, 0x4803) AM_DEVWRITE_LEGACY("ay3", ay8910_address_data_w)
+	AM_RANGE(0x4803, 0x4803) AM_DEVREAD_LEGACY("ay3", ay8910_r)
+	AM_RANGE(0x4804, 0x4805) AM_DEVWRITE_LEGACY("ay4", ay8910_address_data_w)
+	AM_RANGE(0x4805, 0x4805) AM_DEVREAD_LEGACY("ay4", ay8910_r)
+	AM_RANGE(0x5000, 0x5000) AM_READ(soundlatch_byte_r)
+	AM_RANGE(0xe000, 0xefff) AM_ROM /* space for diagnostic ROM */
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( taitosj_mcu_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( taitosj_mcu_map, AS_PROGRAM, 8, taitosj_state )
 	ADDRESS_MAP_GLOBAL_MASK(0x7ff)
 	AM_RANGE(0x0000, 0x0000) AM_READWRITE(taitosj_68705_portA_r, taitosj_68705_portA_w)
 	AM_RANGE(0x0001, 0x0001) AM_READWRITE(taitosj_68705_portB_r, taitosj_68705_portB_w)
@@ -479,7 +474,7 @@ ADDRESS_MAP_END
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_RIGHT ) PORT_8WAY PORT_COCKTAIL\
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_DOWN ) PORT_8WAY PORT_COCKTAIL\
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_UP ) PORT_8WAY PORT_COCKTAIL\
-	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_SPECIAL )	// from sound CPU
+	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_SPECIAL )   // from sound CPU
 
 static INPUT_PORTS_START( spaceskr )
 	COMMON_IN0
@@ -492,7 +487,7 @@ static INPUT_PORTS_START( spaceskr )
 
 	PORT_START("IN4")
 	PORT_BIT( 0x0f, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(input_port_4_f0_r, NULL)	// from sound CPU
+	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, taitosj_state,input_port_4_f0_r, NULL)    // from sound CPU
 
 	PORT_START("DSW1")
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
@@ -574,7 +569,7 @@ static INPUT_PORTS_START( spacecr )
 
 	PORT_START("IN4")
 	PORT_BIT( 0x0f, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(input_port_4_f0_r, NULL)	// from sound CPU
+	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, taitosj_state,input_port_4_f0_r, NULL)    // from sound CPU
 
 	PORT_START("DSW1")
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
@@ -658,7 +653,7 @@ static INPUT_PORTS_START( junglek )
 
 	PORT_START("IN4")
 	PORT_BIT( 0x0f, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(input_port_4_f0_r, NULL)	// from sound CPU
+	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, taitosj_state,input_port_4_f0_r, NULL)    // from sound CPU
 
 	PORT_START("DSW1")
 	PORT_DIPNAME( 0x03, 0x03, "Finish Bonus" )
@@ -718,10 +713,10 @@ static INPUT_PORTS_START( piratpet )
 	/* If cabinet is upright -> only 1 set of controls -> only P1 Skip Next Level    */
 	/* If cabinet is cocktal -> 2 sets of controls -> both Skip Next Level bits work */
 	PORT_MODIFY("IN0")
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_OTHER ) PORT_CODE(KEYCODE_Q) PORT_NAME("P1 Skip Next Level")	// Button 2 skips levels when Debug dips is on
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_OTHER ) PORT_CODE(KEYCODE_Q) PORT_NAME("P1 Skip Next Level") // Button 2 skips levels when Debug dips is on
 
 	PORT_MODIFY("IN1")
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_OTHER ) PORT_CODE(KEYCODE_W) PORT_NAME("P2 Skip Next Level")	// Button 2 skips levels when Debug dips is on
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_OTHER ) PORT_CODE(KEYCODE_W) PORT_NAME("P2 Skip Next Level") // Button 2 skips levels when Debug dips is on
 
 	PORT_MODIFY("DSW1")
 	PORT_DIPNAME( 0x04, 0x04, "Debug Mode" )
@@ -754,7 +749,7 @@ static INPUT_PORTS_START( alpine )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_COCKTAIL
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL		// "Fast"
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL      // "Fast"
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -764,14 +759,14 @@ static INPUT_PORTS_START( alpine )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_2WAY
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )				// "Fast"
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )                // "Fast"
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START("IN2")
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN2 )
-	PORT_BIT( 0x1e, 0x00, IPT_UNUSED )						/* protection read */
+	PORT_BIT( 0x1e, 0x00, IPT_UNUSED )                      /* protection read */
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_COIN1 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 )
@@ -780,7 +775,7 @@ static INPUT_PORTS_START( alpine )
 
 	PORT_START("IN4")
 	PORT_BIT( 0x0f, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(input_port_4_f0_r, NULL)	// from sound CPU
+	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, taitosj_state,input_port_4_f0_r, NULL)    // from sound CPU
 
 	PORT_START("DSW1")
 	PORT_DIPNAME( 0x03, 0x03, "Jump Bonus" )
@@ -839,7 +834,7 @@ static INPUT_PORTS_START( alpinea )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_COCKTAIL
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL		// "Fast"
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL      // "Fast"
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -849,13 +844,13 @@ static INPUT_PORTS_START( alpinea )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_2WAY
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )				// "Fast"
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )                // "Fast"
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START("IN2")
-	PORT_BIT( 0x0f, 0x00, IPT_UNUSED )						/* protection read */
+	PORT_BIT( 0x0f, 0x00, IPT_UNUSED )                      /* protection read */
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START1 )
@@ -865,7 +860,7 @@ static INPUT_PORTS_START( alpinea )
 
 	PORT_START("IN4")
 	PORT_BIT( 0x0f, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(input_port_4_f0_r, NULL)	// from sound CPU
+	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, taitosj_state,input_port_4_f0_r, NULL)    // from sound CPU
 
 	PORT_START("DSW1")
 	PORT_DIPNAME( 0x03, 0x03, "Jump Bonus" )
@@ -943,7 +938,7 @@ static INPUT_PORTS_START( timetunl )
 
 	PORT_START("IN4")
 	PORT_BIT( 0x0f, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(input_port_4_f0_r, NULL)	// from sound CPU
+	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, taitosj_state,input_port_4_f0_r, NULL)    // from sound CPU
 
 	PORT_START("DSW1")
 	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Unknown ) )
@@ -1006,7 +1001,7 @@ static INPUT_PORTS_START( wwestern )
 	PORT_START("IN2")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x1c, 0x18, IPT_UNUSED )					/* protection read, the game resets after a while without it */
+	PORT_BIT( 0x1c, 0x18, IPT_UNUSED )                  /* protection read, the game resets after a while without it */
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 )
@@ -1081,24 +1076,24 @@ static INPUT_PORTS_START( frontlin )
 	WWEST_INPUT2
 
 	PORT_START("DSW1")
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Bonus_Life ) )
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Bonus_Life ) )    PORT_DIPLOCATION("SW1:1,2")
 	PORT_DIPSETTING(    0x03, "10000" )
 	PORT_DIPSETTING(    0x02, "20000" )
 	PORT_DIPSETTING(    0x01, "30000" )
 	PORT_DIPSETTING(    0x00, "50000" )
-	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Free_Play ) )
+	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Free_Play ) )     PORT_DIPLOCATION("SW1:3")
 	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x18, 0x18, DEF_STR( Lives ) )
+	PORT_DIPNAME( 0x18, 0x18, DEF_STR( Lives ) )         PORT_DIPLOCATION("SW1:4,5")
 	PORT_DIPSETTING(    0x18, "3" )
 	PORT_DIPSETTING(    0x10, "4" )
 	PORT_DIPSETTING(    0x08, "5" )
 	PORT_DIPSETTING(    0x00, "6" )
 	PORT_SERVICE( 0x20, IP_ACTIVE_LOW )
-	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Flip_Screen ) )
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Flip_Screen ) )   PORT_DIPLOCATION("SW1:7")
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Cabinet ) )
+	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Cabinet ) )       PORT_DIPLOCATION("SW1:8")
 	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( Cocktail ) )
 
@@ -1118,16 +1113,16 @@ static INPUT_PORTS_START( frontlin )
 	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x10, 0x10, "Coinage Display" )
+	PORT_DIPNAME( 0x10, 0x10, "Coinage Display" )        PORT_DIPLOCATION("SW3:5")
 	PORT_DIPSETTING(    0x10, "Coins/Credits" )
 	PORT_DIPSETTING(    0x00, "Insert Coin" )
-	PORT_DIPNAME( 0x20, 0x20, "Year Display" )
+	PORT_DIPNAME( 0x20, 0x20, "Year Display" )           PORT_DIPLOCATION("SW3:6")
 	PORT_DIPSETTING(    0x00, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( Yes ) )
-	PORT_DIPNAME( 0x40, 0x40, "Invulnerability (Cheat)")
+	PORT_DIPNAME( 0x40, 0x40, "Invulnerability (Cheat)") PORT_DIPLOCATION("SW3:7")
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Coinage ) )
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Coinage ) )       PORT_DIPLOCATION("SW3:8")
 	PORT_DIPSETTING(    0x80, "A and B" )
 	PORT_DIPSETTING(    0x00, "A only" )
 INPUT_PORTS_END
@@ -1143,18 +1138,18 @@ static INPUT_PORTS_START( elevator )
 
 	PORT_START("IN4")
 	PORT_BIT( 0x0f, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(input_port_4_f0_r, NULL)	// from sound CPU
+	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, taitosj_state,input_port_4_f0_r, NULL)    // from sound CPU
 
 	PORT_START("DSW1")
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Bonus_Life ) )
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Bonus_Life ) )    PORT_DIPLOCATION("SW1:1,2")
 	PORT_DIPSETTING(    0x03, "10000" )
 	PORT_DIPSETTING(    0x02, "15000" )
 	PORT_DIPSETTING(    0x01, "20000" )
 	PORT_DIPSETTING(    0x00, "25000" )
-	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Free_Play ) )
+	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Free_Play ) )     PORT_DIPLOCATION("SW1:3")
 	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x18, 0x18, DEF_STR( Lives ) )
+	PORT_DIPNAME( 0x18, 0x18, DEF_STR( Lives ) )         PORT_DIPLOCATION("SW1:4,5")
 	PORT_DIPSETTING(    0x18, "3" )
 	PORT_DIPSETTING(    0x10, "4" )
 	PORT_DIPSETTING(    0x08, "5" )
@@ -1162,10 +1157,10 @@ static INPUT_PORTS_START( elevator )
 	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Flip_Screen ) )
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Flip_Screen ) )   PORT_DIPLOCATION("SW1:7")
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Cabinet ) )
+	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Cabinet ) )       PORT_DIPLOCATION("SW1:8")
 	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( Cocktail ) )
 
@@ -1173,7 +1168,7 @@ static INPUT_PORTS_START( elevator )
 	DSW2_PORT
 
 	PORT_START("DSW3")
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Difficulty ) )
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Difficulty ) )    PORT_DIPLOCATION("SW3:1,2")
 	PORT_DIPSETTING(    0x03, DEF_STR( Easiest ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( Easy ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Normal ) )
@@ -1184,16 +1179,16 @@ static INPUT_PORTS_START( elevator )
 	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x10, 0x10, "Coinage Display" )
+	PORT_DIPNAME( 0x10, 0x10, "Coinage Display" )        PORT_DIPLOCATION("SW3:5")
 	PORT_DIPSETTING(    0x10, "Coins/Credits" )
 	PORT_DIPSETTING(    0x00, "Insert Coin" )
-	PORT_DIPNAME( 0x20, 0x20, "Year Display" )
+	PORT_DIPNAME( 0x20, 0x20, "Year Display" )           PORT_DIPLOCATION("SW1:6")
 	PORT_DIPSETTING(    0x00, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( Yes ) )
-	PORT_DIPNAME( 0x40, 0x40, "Invulnerability (Cheat)")
+	PORT_DIPNAME( 0x40, 0x40, "Invulnerability (Cheat)") PORT_DIPLOCATION("SW3:7")
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Coinage ) )
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Coinage ) )       PORT_DIPLOCATION("SW3:8")
 	PORT_DIPSETTING(    0x80, "A and B" )
 	PORT_DIPSETTING(    0x00, "A only" )
 INPUT_PORTS_END
@@ -1226,7 +1221,7 @@ static INPUT_PORTS_START( tinstar )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_RIGHT ) PORT_8WAY PORT_COCKTAIL
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_DOWN ) PORT_8WAY PORT_COCKTAIL
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_UP ) PORT_8WAY PORT_COCKTAIL
-	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(input_port_4_f0_r, NULL)	// from sound CPU
+	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, taitosj_state,input_port_4_f0_r, NULL)    // from sound CPU
 
 	PORT_START("DSW1")
 	PORT_DIPNAME( 0x03, 0x03, "Bonus Life?" )
@@ -1309,7 +1304,7 @@ static INPUT_PORTS_START( waterski )
 
 	PORT_START("IN4")
 	PORT_BIT( 0x0f, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(input_port_4_f0_r, NULL)	// from sound CPU
+	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, taitosj_state,input_port_4_f0_r, NULL)    // from sound CPU
 
 	PORT_START("DSW1")
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
@@ -1398,7 +1393,7 @@ static INPUT_PORTS_START( bioatack )
 
 	PORT_START("IN4")
 	PORT_BIT( 0x0f, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(input_port_4_f0_r, NULL)	// from sound CPU
+	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, taitosj_state,input_port_4_f0_r, NULL)    // from sound CPU
 
 	PORT_START("DSW1")      /* d50a */
 	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Bonus_Life ) )
@@ -1465,7 +1460,7 @@ static INPUT_PORTS_START( sfposeid )
 
 	PORT_START("IN4")
 	PORT_BIT( 0x0f, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(input_port_4_f0_r, NULL)	// from sound CPU
+	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, taitosj_state,input_port_4_f0_r, NULL)    // from sound CPU
 
 	PORT_START("DSW1")
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
@@ -1533,7 +1528,7 @@ static INPUT_PORTS_START( hwrace )
 
 	PORT_START("IN4")
 	PORT_BIT( 0x0f, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(input_port_4_f0_r, NULL)	// from sound CPU
+	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, taitosj_state,input_port_4_f0_r, NULL)    // from sound CPU
 
 	PORT_START("DSW1")
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
@@ -1610,18 +1605,18 @@ static INPUT_PORTS_START( kikstart )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 )
 
 	PORT_START("IN3")      /* Service */
-	PORT_BIT( 0x03, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(kikstart_gear_r, (void *)0)
+	PORT_BIT( 0x03, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, taitosj_state,kikstart_gear_r, (void *)0)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* needs to be 0, otherwise cannot shift */
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN )   /* needs to be 0, otherwise cannot shift */
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_SERVICE1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_TILT )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START("IN4")
-	PORT_BIT( 0x03, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(kikstart_gear_r, (void *)1)
+	PORT_BIT( 0x03, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, taitosj_state,kikstart_gear_r, (void *)1)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* needs to be 0, otherwise cannot shift */
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN )   /* needs to be 0, otherwise cannot shift */
 	PORT_BIT( 0xf0, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START("DSW1")
@@ -1634,10 +1629,10 @@ static INPUT_PORTS_START( kikstart )
 	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME(0x18, 0x10, DEF_STR( Difficulty ) )
-	PORT_DIPSETTING(   0x18, DEF_STR( Easy ) )		/* 3:00 */
-	PORT_DIPSETTING(   0x10, DEF_STR( Normal ) )		/* 2:30 */
-	PORT_DIPSETTING(   0x08, DEF_STR( Difficult ) )		/* 2:00 */
-	PORT_DIPSETTING(   0x00, DEF_STR( Very_Difficult ) )	/* 1:30 */
+	PORT_DIPSETTING(   0x18, DEF_STR( Easy ) )      /* 3:00 */
+	PORT_DIPSETTING(   0x10, DEF_STR( Normal ) )        /* 2:30 */
+	PORT_DIPSETTING(   0x08, DEF_STR( Difficult ) )     /* 2:00 */
+	PORT_DIPSETTING(   0x00, DEF_STR( Very_Difficult ) )    /* 1:30 */
 	PORT_SERVICE( 0x20, IP_ACTIVE_LOW )
 	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Flip_Screen ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
@@ -1734,18 +1729,18 @@ static const UINT8 voltable[256] =
 };
 
 
-static WRITE8_DEVICE_HANDLER( dac_out_w )
+WRITE8_MEMBER(taitosj_state::dac_out_w)
 {
-	taitosj_state *state = device->machine().driver_data<taitosj_state>();
-	state->m_dac_out = data - 0x80;
-	dac_signed_data_16_w(device,state->m_dac_out * state->m_dac_vol + 0x8000);
+	dac_device *device = machine().device<dac_device>("dac");
+	m_dac_out = data - 0x80;
+	device->write_signed16(m_dac_out * m_dac_vol + 0x8000);
 }
 
-static WRITE8_DEVICE_HANDLER( dac_vol_w )
+WRITE8_MEMBER(taitosj_state::dac_vol_w)
 {
-	taitosj_state *state = device->machine().driver_data<taitosj_state>();
-	state->m_dac_vol = voltable[data];
-	dac_signed_data_16_w(device,state->m_dac_out * state->m_dac_vol + 0x8000);
+	dac_device *device = machine().device<dac_device>("dac");
+	m_dac_vol = voltable[data];
+	device->write_signed16(m_dac_out * m_dac_vol + 0x8000);
 }
 
 
@@ -1765,8 +1760,8 @@ static const ay8910_interface ay8910_interface_2 =
 	AY8910_DEFAULT_LOADS,
 	DEVCB_NULL,
 	DEVCB_NULL,
-	DEVCB_DEVICE_HANDLER("dac", dac_out_w),	/* port Awrite */
-	DEVCB_DEVICE_HANDLER("dac", dac_vol_w)	/* port Bwrite */
+	DEVCB_DRIVER_MEMBER(taitosj_state,dac_out_w),   /* port Awrite */
+	DEVCB_DRIVER_MEMBER(taitosj_state,dac_vol_w)    /* port Bwrite */
 };
 
 static const ay8910_interface ay8910_interface_3 =
@@ -1775,7 +1770,7 @@ static const ay8910_interface ay8910_interface_3 =
 	AY8910_DEFAULT_LOADS,
 	DEVCB_NULL,
 	DEVCB_NULL,
-	DEVCB_HANDLER(input_port_4_f0_w),
+	DEVCB_DRIVER_MEMBER(taitosj_state,input_port_4_f0_w),
 	DEVCB_NULL
 };
 
@@ -1786,7 +1781,7 @@ static const ay8910_interface ay8910_interface_4 =
 	DEVCB_NULL,
 	DEVCB_NULL,
 	DEVCB_NULL,
-	DEVCB_HANDLER(taitosj_sndnmi_msk_w)	/* port Bwrite */
+	DEVCB_DRIVER_MEMBER(taitosj_state,taitosj_sndnmi_msk_w) /* port Bwrite */
 };
 
 
@@ -1796,7 +1791,7 @@ static MACHINE_CONFIG_START( nomcu, taitosj_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu",Z80,8000000/2)      /* 4 MHz */
 	MCFG_CPU_PROGRAM_MAP(taitosj_main_nomcu_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", taitosj_state,  irq0_line_hold)
 
 	MCFG_CPU_ADD("audiocpu", Z80,6000000/2)    /* 3 MHz */
 	MCFG_CPU_PROGRAM_MAP(taitosj_audio_map)
@@ -1804,24 +1799,20 @@ static MACHINE_CONFIG_START( nomcu, taitosj_state )
 			/* - no interrupts synced with vblank */
 			/* - NMI triggered by the main CPU */
 			/* - periodic IRQ, with frequency 6000000/(4*16*16*10*16) = 36.621 Hz, */
-	MCFG_CPU_PERIODIC_INT(irq0_line_hold, (double)6000000/(4*16*16*10*16))
+	MCFG_CPU_PERIODIC_INT_DRIVER(taitosj_state, irq0_line_hold,  (double)6000000/(4*16*16*10*16))
 
-	MCFG_MACHINE_START(taitosj)
-	MCFG_MACHINE_RESET(taitosj)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(taitosj)
+	MCFG_SCREEN_UPDATE_DRIVER(taitosj_state, screen_update_taitosj)
 
 	MCFG_GFXDECODE(taitosj)
 	MCFG_PALETTE_LENGTH(64)
 
-	MCFG_VIDEO_START(taitosj)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -1842,7 +1833,7 @@ static MACHINE_CONFIG_START( nomcu, taitosj_state )
 	MCFG_SOUND_CONFIG(ay8910_interface_4)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.30)
 
-	MCFG_SOUND_ADD("dac", DAC, 0)
+	MCFG_DAC_ADD("dac")
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.20)
 MACHINE_CONFIG_END
 
@@ -1868,7 +1859,7 @@ static MACHINE_CONFIG_DERIVED( kikstart, mcu )
 	MCFG_CPU_PROGRAM_MAP(kikstart_main_map)
 
 	MCFG_SCREEN_MODIFY("screen")
-	MCFG_SCREEN_UPDATE(kikstart)
+	MCFG_SCREEN_UPDATE_DRIVER(taitosj_state, screen_update_kikstart)
 MACHINE_CONFIG_END
 
 
@@ -1954,6 +1945,38 @@ ROM_START( junglek )
 	ROM_LOAD( "kn37.bin",     0x0000, 0x1000, CRC(dee7f5d4) SHA1(cd8179a17ccd054fb470c4eee97192c2dd226397) )
 	ROM_LOAD( "kn38.bin",     0x1000, 0x1000, CRC(bffd3d21) SHA1(a2b3393e9694d6979d39ab0f1ab82b7ef892b3da) )
 	ROM_LOAD( "kn59-1.bin",   0x2000, 0x1000, CRC(cee485fc) SHA1(1e0c52ec6b1d3cfd47247db71bcf3fe476c32039) )
+
+	ROM_REGION( 0x8000, "gfx1", 0 )   /* graphic ROMs used at runtime */
+	ROM_LOAD( "kn29.bin",     0x0000, 0x1000, CRC(8f83c290) SHA1(aa95ed2d2e15f573e092e8eed7d80479512d9409) )
+	ROM_LOAD( "kn30.bin",     0x1000, 0x1000, CRC(89fd19f1) SHA1(fc7dfe3a1d78ac37a036fa9d8ebf3a33a2f4cbe8) )
+	ROM_LOAD( "kn51.bin",     0x2000, 0x1000, CRC(70e8fc12) SHA1(505c90c662d372d28cb38201433054b8e3d723d1) )
+	ROM_LOAD( "kn52.bin",     0x3000, 0x1000, CRC(bcbac1a3) SHA1(bcd5fc9b3791ab67e0ad9f9ced7226853e9a2a00) )
+	ROM_LOAD( "kn53.bin",     0x4000, 0x1000, CRC(b946c87d) SHA1(d16cb6bf38e00ae11c204cbf8f400f8a85c807c2) )
+	ROM_LOAD( "kn34.bin",     0x5000, 0x1000, CRC(320db2e1) SHA1(ca8722010712302b491eb5f51d73043bcb2ddc8f) )
+	ROM_LOAD( "kn55.bin",     0x6000, 0x1000, CRC(70aef58f) SHA1(df7454a1c3676181eca698bb3b2ef3253a45ca0f) )
+	ROM_LOAD( "kn56.bin",     0x7000, 0x1000, CRC(932eb667) SHA1(4bf7c01ab212b616931a21a43a453521aa01ff36) )
+
+	ROM_REGION( 0x0100, "proms", 0 )      /* layer PROM */
+	ROM_LOAD( "eb16.22",      0x0000, 0x0100, CRC(b833b5ea) SHA1(d233f1bf8a3e6cd876853ffd721b9b64c61c9047) )
+ROM_END
+
+ROM_START( junglekas ) /* alternate sound - no tarzan yell */
+	ROM_REGION( 0x12000, "maincpu", 0 )
+	ROM_LOAD( "kn21-1.bin",   0x00000, 0x1000, CRC(45f55d30) SHA1(bb9518d7728938f673a663801e47ae0438cdbea1) )
+	ROM_LOAD( "kn22-1.bin",   0x01000, 0x1000, CRC(07cc9a21) SHA1(3fe35935e0a430ab0edc6a762623972fa37ea926) )
+	ROM_LOAD( "kn43.bin",     0x02000, 0x1000, CRC(a20e5a48) SHA1(af961b671dc4c865d0181d08a70b902bb96f29d0) )
+	ROM_LOAD( "kn24.bin",     0x03000, 0x1000, CRC(19ea7f83) SHA1(2399cc89f73811575c3f644d5c04ef13ceec6838) )
+	ROM_LOAD( "kn25.bin",     0x04000, 0x1000, CRC(844365ea) SHA1(af34712620e4b784a5014283d3111048c5f81a56) )
+	ROM_LOAD( "kn46.bin",     0x05000, 0x1000, CRC(27a95fd5) SHA1(160ee5d11126ac4155b479e43ec1bd6a4e9e21e7) )
+	ROM_LOAD( "kn47.bin",     0x06000, 0x1000, CRC(5c3199e0) SHA1(c57dec92998b971d76aecd23674c25cf7b8be667) )
+	ROM_LOAD( "kn28.bin",     0x07000, 0x1000, CRC(194a2d09) SHA1(88999493e470acdcf932efff71cd6155387a63d0) )
+	/* 10000-10fff space for another banked ROM (not used) */
+	ROM_LOAD( "kn60.bin",     0x11000, 0x1000, CRC(1a9c0a26) SHA1(82f4cebeba90419e83a00427b671985824babd7a) ) /* banked at 7000 */
+
+	ROM_REGION( 0x10000, "audiocpu", 0 )
+	ROM_LOAD( "kn-a17.bin",   0x0000, 0x1000, CRC(62f6763a) SHA1(84eadbc5c6a37c53c104e4ac1fd273b6b2a335e5) )
+	ROM_LOAD( "kn-a18.bin",   0x1000, 0x1000, CRC(8a813a7c) SHA1(e1c1bba0e793afeebd463d5cba9ff4110af238b2) )
+	ROM_LOAD( "kn-a19.bin",   0x2000, 0x1000, CRC(abbe4ae5) SHA1(992db7b1748a8c1c5093fd8441de512794380478) )
 
 	ROM_REGION( 0x8000, "gfx1", 0 )   /* graphic ROMs used at runtime */
 	ROM_LOAD( "kn29.bin",     0x0000, 0x1000, CRC(8f83c290) SHA1(aa95ed2d2e15f573e092e8eed7d80479512d9409) )
@@ -2585,7 +2608,7 @@ ROM_START( waterski )
 	ROM_LOAD( "a03-14",       0x1000, 0x1000, CRC(31f991ca) SHA1(82cbaa618ac3de6fce12e9dcbb89ab064773b2bd) )
 
 	ROM_REGION( 0x8000, "gfx1", 0 )       /* graphic ROMs used at runtime */
-	ROM_LOAD( "a03-08",       0x0000, 0x1000, CRC(c206d870) SHA1(0be09b7da28d60bf23a0b87cff28957bb165bec5) )
+	ROM_LOAD( "a03-08",       0x0000, 0x1000, BAD_DUMP CRC(c206d870) SHA1(0be09b7da28d60bf23a0b87cff28957bb165bec5) ) // small glitches in font gfx
 	ROM_LOAD( "a03-09",       0x1000, 0x1000, CRC(48ac912a) SHA1(09d57b5b76a4416f1ee5eb2077bc969d2afbbf11) )
 	ROM_LOAD( "a03-10",       0x2000, 0x1000, CRC(a056defb) SHA1(15b4202b19f7190bfc953d0958c189db2db928cc) )
 	ROM_LOAD( "a03-11",       0x3000, 0x1000, CRC(f06cddd6) SHA1(483a25880a29552f4b70cd5d41de5cfe4ed64475) )
@@ -2729,68 +2752,69 @@ static void init_common(running_machine &machine)
 	state->save_item(NAME(state->m_dac_out));
 	state->save_item(NAME(state->m_dac_vol));
 
-	machine.add_notifier(MACHINE_NOTIFY_RESET, reset_common);
+	machine.add_notifier(MACHINE_NOTIFY_RESET, machine_notify_delegate(FUNC(reset_common), &machine));
 }
 
-static DRIVER_INIT( taitosj )
+DRIVER_INIT_MEMBER(taitosj_state,taitosj)
 {
-	init_common(machine);
+	init_common(machine());
 }
 
-static DRIVER_INIT( spacecr )
+DRIVER_INIT_MEMBER(taitosj_state,spacecr)
 {
-	init_common(machine);
+	init_common(machine());
 
 	/* install protection handler */
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0xd48b, 0xd48b, FUNC(spacecr_prot_r));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(0xd48b, 0xd48b, read8_delegate(FUNC(taitosj_state::spacecr_prot_r),this));
 }
 
-static DRIVER_INIT( alpine )
+DRIVER_INIT_MEMBER(taitosj_state,alpine)
 {
-	init_common(machine);
+	init_common(machine());
 
 	/* install protection handlers */
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0xd40b, 0xd40b, FUNC(alpine_port_2_r));
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0xd50f, 0xd50f, FUNC(alpine_protection_w));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(0xd40b, 0xd40b, read8_delegate(FUNC(taitosj_state::alpine_port_2_r),this));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0xd50f, 0xd50f, write8_delegate(FUNC(taitosj_state::alpine_protection_w),this));
 }
 
-static DRIVER_INIT( alpinea )
+DRIVER_INIT_MEMBER(taitosj_state,alpinea)
 {
-	init_common(machine);
+	init_common(machine());
 
 	/* install protection handlers */
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0xd40b, 0xd40b, FUNC(alpine_port_2_r));
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0xd50e, 0xd50e, FUNC(alpinea_bankswitch_w));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(0xd40b, 0xd40b, read8_delegate(FUNC(taitosj_state::alpine_port_2_r),this));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0xd50e, 0xd50e, write8_delegate(FUNC(taitosj_state::alpinea_bankswitch_w),this));
 }
 
-static DRIVER_INIT( junglhbr )
+DRIVER_INIT_MEMBER(taitosj_state,junglhbr)
 {
-	init_common(machine);
+	init_common(machine());
 
 	/* inverter on bits 0 and 1 */
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x9000, 0xbfff, FUNC(junglhbr_characterram_w));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0x9000, 0xbfff, write8_delegate(FUNC(taitosj_state::junglhbr_characterram_w),this));
 }
 
-GAME( 1981, spaceskr, 0,        nomcu,    spaceskr,   taitosj, ROT0,   "Taito Corporation", "Space Seeker", GAME_SUPPORTS_SAVE )
-GAME( 1981, spacecr,  0,        nomcu,    spacecr,    spacecr, ROT90,  "Taito Corporation", "Space Cruiser", GAME_SUPPORTS_SAVE )
-GAME( 1982, junglek,  0,        nomcu,    junglek,    taitosj, ROT180, "Taito Corporation", "Jungle King (Japan)", GAME_SUPPORTS_SAVE )
-GAME( 1982, junglekj2,junglek,  nomcu,    junglek,    taitosj, ROT180, "Taito Corporation", "Jungle King (Japan, earlier)", GAME_SUPPORTS_SAVE )
-GAME( 1982, jungleh,  junglek,  nomcu,    junglek,    taitosj, ROT180, "Taito America Corporation", "Jungle Hunt (US)", GAME_SUPPORTS_SAVE )
-GAME( 1983, junglehbr,junglek,  nomcu,    junglek,    junglhbr,ROT180, "Taito do Brasil",   "Jungle Hunt (Brazil)", GAME_SUPPORTS_SAVE )
-GAME( 1982, piratpet, junglek,  nomcu,    piratpet,   taitosj, ROT180, "Taito America Corporation", "Pirate Pete", GAME_SUPPORTS_SAVE )
-GAME( 1982, jungleby, junglek,  nomcu,    junglek,    taitosj, ROT180, "bootleg", "Jungle Boy (bootleg)", GAME_SUPPORTS_SAVE )
-GAME( 1982, alpine,   0,        nomcu,    alpine,     alpine,  ROT270, "Taito Corporation", "Alpine Ski (set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1982, alpinea,  alpine,   nomcu,    alpinea,    alpinea, ROT270, "Taito Corporation", "Alpine Ski (set 2)", GAME_SUPPORTS_SAVE )
-GAME( 1982, timetunl, 0,        nomcu,    timetunl,   taitosj, ROT0,   "Taito Corporation", "Time Tunnel", GAME_SUPPORTS_SAVE )
-GAME( 1982, wwestern, 0,        nomcu,    wwestern,   taitosj, ROT270, "Taito Corporation", "Wild Western (set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1982, wwestern1,wwestern, nomcu,    wwestern,   taitosj, ROT270, "Taito Corporation", "Wild Western (set 2)", GAME_SUPPORTS_SAVE )
-GAME( 1982, frontlin, 0,        mcu,      frontlin,   taitosj, ROT270, "Taito Corporation", "Front Line", GAME_SUPPORTS_SAVE )
-GAME( 1983, elevator, 0,        mcu,      elevator,   taitosj, ROT0,   "Taito Corporation", "Elevator Action", GAME_SUPPORTS_SAVE )
-GAME( 1983, elevatorb,elevator, nomcu,    elevator,   taitosj, ROT0,   "bootleg", "Elevator Action (bootleg)", GAME_SUPPORTS_SAVE )
-GAME( 1983, tinstar,  0,        mcu,      tinstar,    taitosj, ROT0,   "Taito Corporation", "The Tin Star (set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1983, tinstar2, tinstar,  mcu,      tinstar,    taitosj, ROT0,   "Taito Corporation", "The Tin Star (set 2)", GAME_SUPPORTS_SAVE )
-GAME( 1983, waterski, 0,        nomcu,    waterski,   taitosj, ROT270, "Taito Corporation", "Water Ski", GAME_SUPPORTS_SAVE )
-GAME( 1983, bioatack, 0,        nomcu,    bioatack,   taitosj, ROT270, "Taito Corporation (Fox Video Games license)", "Bio Attack", GAME_SUPPORTS_SAVE )
-GAME( 1984, sfposeid, 0,        mcu,      sfposeid,   taitosj, ROT0,   "Taito Corporation", "Sea Fighter Poseidon", GAME_SUPPORTS_SAVE )
-GAME( 1983, hwrace,   0,        nomcu,    hwrace,     taitosj, ROT270, "Taito Corporation", "High Way Race", GAME_SUPPORTS_SAVE )
-GAME( 1984, kikstart, 0,        kikstart, kikstart,   taitosj, ROT0,   "Taito Corporation", "Kick Start Wheelie King", GAME_SUPPORTS_SAVE )
+GAME( 1981, spaceskr, 0,        nomcu,    spaceskr, taitosj_state,   taitosj, ROT0,   "Taito Corporation", "Space Seeker", GAME_SUPPORTS_SAVE )
+GAME( 1981, spacecr,  0,        nomcu,    spacecr, taitosj_state,    spacecr, ROT90,  "Taito Corporation", "Space Cruiser", GAME_SUPPORTS_SAVE )
+GAME( 1982, junglek,  0,        nomcu,    junglek, taitosj_state,    taitosj, ROT180, "Taito Corporation", "Jungle King (Japan)", GAME_SUPPORTS_SAVE )
+GAME( 1982, junglekas,junglek,  nomcu,    junglek, taitosj_state,    taitosj, ROT180, "Taito Corporation", "Jungle King (alternate sound)", GAME_SUPPORTS_SAVE )
+GAME( 1982, junglekj2,junglek,  nomcu,    junglek, taitosj_state,    taitosj, ROT180, "Taito Corporation", "Jungle King (Japan, earlier)", GAME_SUPPORTS_SAVE )
+GAME( 1982, jungleh,  junglek,  nomcu,    junglek, taitosj_state,    taitosj, ROT180, "Taito America Corporation", "Jungle Hunt (US)", GAME_SUPPORTS_SAVE )
+GAME( 1983, junglehbr,junglek,  nomcu,    junglek, taitosj_state,    junglhbr,ROT180, "Taito do Brasil",   "Jungle Hunt (Brazil)", GAME_SUPPORTS_SAVE )
+GAME( 1982, piratpet, junglek,  nomcu,    piratpet, taitosj_state,   taitosj, ROT180, "Taito America Corporation", "Pirate Pete", GAME_SUPPORTS_SAVE )
+GAME( 1982, jungleby, junglek,  nomcu,    junglek, taitosj_state,    taitosj, ROT180, "bootleg", "Jungle Boy (bootleg)", GAME_SUPPORTS_SAVE )
+GAME( 1982, alpine,   0,        nomcu,    alpine, taitosj_state,     alpine,  ROT270, "Taito Corporation", "Alpine Ski (set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1982, alpinea,  alpine,   nomcu,    alpinea, taitosj_state,    alpinea, ROT270, "Taito Corporation", "Alpine Ski (set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1982, timetunl, 0,        nomcu,    timetunl, taitosj_state,   taitosj, ROT0,   "Taito Corporation", "Time Tunnel", GAME_SUPPORTS_SAVE )
+GAME( 1982, wwestern, 0,        nomcu,    wwestern, taitosj_state,   taitosj, ROT270, "Taito Corporation", "Wild Western (set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1982, wwestern1,wwestern, nomcu,    wwestern, taitosj_state,   taitosj, ROT270, "Taito Corporation", "Wild Western (set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1982, frontlin, 0,        mcu,      frontlin, taitosj_state,   taitosj, ROT270, "Taito Corporation", "Front Line", GAME_SUPPORTS_SAVE )
+GAME( 1983, elevator, 0,        mcu,      elevator, taitosj_state,   taitosj, ROT0,   "Taito Corporation", "Elevator Action", GAME_SUPPORTS_SAVE )
+GAME( 1983, elevatorb,elevator, nomcu,    elevator, taitosj_state,   taitosj, ROT0,   "bootleg", "Elevator Action (bootleg)", GAME_SUPPORTS_SAVE )
+GAME( 1983, tinstar,  0,        mcu,      tinstar, taitosj_state,    taitosj, ROT0,   "Taito Corporation", "The Tin Star (set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1983, tinstar2, tinstar,  mcu,      tinstar, taitosj_state,    taitosj, ROT0,   "Taito Corporation", "The Tin Star (set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1983, waterski, 0,        nomcu,    waterski, taitosj_state,   taitosj, ROT270, "Taito Corporation", "Water Ski", GAME_SUPPORTS_SAVE )
+GAME( 1983, bioatack, 0,        nomcu,    bioatack, taitosj_state,   taitosj, ROT270, "Taito Corporation (Fox Video Games license)", "Bio Attack", GAME_SUPPORTS_SAVE )
+GAME( 1984, sfposeid, 0,        mcu,      sfposeid, taitosj_state,   taitosj, ROT0,   "Taito Corporation", "Sea Fighter Poseidon", GAME_SUPPORTS_SAVE )
+GAME( 1983, hwrace,   0,        nomcu,    hwrace, taitosj_state,     taitosj, ROT270, "Taito Corporation", "High Way Race", GAME_SUPPORTS_SAVE )
+GAME( 1984, kikstart, 0,        kikstart, kikstart, taitosj_state,   taitosj, ROT0,   "Taito Corporation", "Kick Start - Wheelie King", GAME_SUPPORTS_SAVE )

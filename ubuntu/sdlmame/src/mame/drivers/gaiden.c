@@ -136,25 +136,23 @@ Notes:
 #include "sound/okim6295.h"
 #include "includes/gaiden.h"
 
-static WRITE16_HANDLER( gaiden_sound_command_w )
+WRITE16_MEMBER(gaiden_state::gaiden_sound_command_w)
 {
-	gaiden_state *state = space->machine().driver_data<gaiden_state>();
 
 	if (ACCESSING_BITS_0_7)
-		soundlatch_w(space, 0, data & 0xff);	/* Ninja Gaiden */
+		soundlatch_byte_w(space, 0, data & 0xff);   /* Ninja Gaiden */
 	if (ACCESSING_BITS_8_15)
-		soundlatch_w(space, 0, data >> 8);	/* Tecmo Knight */
-	device_set_input_line(state->m_audiocpu, INPUT_LINE_NMI, PULSE_LINE);
+		soundlatch_byte_w(space, 0, data >> 8); /* Tecmo Knight */
+	m_audiocpu->set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 }
 
-static WRITE16_HANDLER( drgnbowl_sound_command_w )
+WRITE16_MEMBER(gaiden_state::drgnbowl_sound_command_w)
 {
-	gaiden_state *state = space->machine().driver_data<gaiden_state>();
 
 	if (ACCESSING_BITS_8_15)
 	{
-		soundlatch_w(space, 0, data >> 8);
-		device_set_input_line(state->m_audiocpu, 0, HOLD_LINE);
+		soundlatch_byte_w(space, 0, data >> 8);
+		m_audiocpu->set_input_line(0, HOLD_LINE);
 	}
 }
 
@@ -164,9 +162,8 @@ static WRITE16_HANDLER( drgnbowl_sound_command_w )
 /* and reads the answer from 0x07a007. The returned values contain the address of */
 /* a function to jump to. */
 
-static WRITE16_HANDLER( wildfang_protection_w )
+WRITE16_MEMBER(gaiden_state::wildfang_protection_w)
 {
-	gaiden_state *state = space->machine().driver_data<gaiden_state>();
 
 	if (ACCESSING_BITS_8_15)
 	{
@@ -179,47 +176,46 @@ static WRITE16_HANDLER( wildfang_protection_w )
 
 		data >>= 8;
 
-//      logerror("PC %06x: prot = %02x\n",cpu_get_pc(&space->device()),data);
+//      logerror("PC %06x: prot = %02x\n",space.device().safe_pc(),data);
 
 		switch (data & 0xf0)
 		{
-			case 0x00:	/* init */
-				state->m_prot = 0x00;
+			case 0x00:  /* init */
+				m_prot = 0x00;
 				break;
-			case 0x10:	/* high 4 bits of jump code */
-				state->m_jumpcode = (data & 0x0f) << 4;
-				state->m_prot = 0x10;
+			case 0x10:  /* high 4 bits of jump code */
+				m_jumpcode = (data & 0x0f) << 4;
+				m_prot = 0x10;
 				break;
-			case 0x20:	/* low 4 bits of jump code */
-				state->m_jumpcode |= data & 0x0f;
-				if (state->m_jumpcode >= ARRAY_LENGTH(jumppoints))
+			case 0x20:  /* low 4 bits of jump code */
+				m_jumpcode |= data & 0x0f;
+				if (m_jumpcode >= ARRAY_LENGTH(jumppoints))
 				{
-					logerror("unknown jumpcode %02x\n", state->m_jumpcode);
-					state->m_jumpcode = 0;
+					logerror("unknown jumpcode %02x\n", m_jumpcode);
+					m_jumpcode = 0;
 				}
-				state->m_prot = 0x20;
+				m_prot = 0x20;
 				break;
-			case 0x30:	/* ask for bits 12-15 of function address */
-				state->m_prot = 0x40 | ((jumppoints[state->m_jumpcode] >> 12) & 0x0f);
+			case 0x30:  /* ask for bits 12-15 of function address */
+				m_prot = 0x40 | ((jumppoints[m_jumpcode] >> 12) & 0x0f);
 				break;
-			case 0x40:	/* ask for bits 8-11 of function address */
-				state->m_prot = 0x50 | ((jumppoints[state->m_jumpcode] >> 8) & 0x0f);
+			case 0x40:  /* ask for bits 8-11 of function address */
+				m_prot = 0x50 | ((jumppoints[m_jumpcode] >> 8) & 0x0f);
 				break;
-			case 0x50:	/* ask for bits 4-7 of function address */
-				state->m_prot = 0x60 | ((jumppoints[state->m_jumpcode] >> 4) & 0x0f);
+			case 0x50:  /* ask for bits 4-7 of function address */
+				m_prot = 0x60 | ((jumppoints[m_jumpcode] >> 4) & 0x0f);
 				break;
-			case 0x60:	/* ask for bits 0-3 of function address */
-				state->m_prot = 0x70 | ((jumppoints[state->m_jumpcode] >> 0) & 0x0f);
+			case 0x60:  /* ask for bits 0-3 of function address */
+				m_prot = 0x70 | ((jumppoints[m_jumpcode] >> 0) & 0x0f);
 				break;
 		}
 	}
 }
 
-static READ16_HANDLER( wildfang_protection_r )
+READ16_MEMBER(gaiden_state::wildfang_protection_r)
 {
-	gaiden_state *state = space->machine().driver_data<gaiden_state>();
-//  logerror("PC %06x: read prot %02x\n", cpu_get_pc(&space->device()), state->m_prot);
-	return state->m_prot;
+//  logerror("PC %06x: read prot %02x\n", space.device().safe_pc(), m_prot);
+	return m_prot;
 }
 
 
@@ -270,14 +266,14 @@ same commands as some of the above
 /* these are used during startup */
 static const int jumppoints_00[0x100] =
 {
-	0x6669,	   -1,    -1,    -1,    -1,    -1,    -1,    -1,
-	    -1,    -1,    -1,    -1,    -1,    -1,0x4a46,    -1,
-	    -1,0x6704,    -2,    -1,    -1,    -1,    -1,    -1,
-	    -1,    -2,    -1,    -1,    -1,    -1,    -1,    -1,
-	    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
-	    -2,    -1,    -1,    -1,    -1,0x4e75,    -1,    -1,
-	    -1,    -2,    -1,0x4e71,0x60fc,    -1,0x7288,    -1,
-	    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1
+	0x6669,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+		-1,    -1,    -1,    -1,    -1,    -1,0x4a46,    -1,
+		-1,0x6704,    -2,    -1,    -1,    -1,    -1,    -1,
+		-1,    -2,    -1,    -1,    -1,    -1,    -1,    -1,
+		-1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+		-2,    -1,    -1,    -1,    -1,0x4e75,    -1,    -1,
+		-1,    -2,    -1,0x4e71,0x60fc,    -1,0x7288,    -1,
+		-1,    -1,    -1,    -1,    -1,    -1,    -1,    -1
 };
 
 /* these are used the rest of the time */
@@ -285,122 +281,118 @@ static const int jumppoints_other[0x100] =
 {
 	0x5457,0x494e,0x5f4b,0x4149,0x5345,0x525f,0x4d49,0x5941,
 	0x5241,0x5349,0x4d4f,0x4a49,    -1,    -1,    -1,    -1,
-	    -1,    -1,    -2,0x594f,    -1,0x4e75,    -1,    -1,
-	    -1,    -2,    -1,    -1,0x4e75,    -1,0x5349,    -1,
-	    -1,    -1,    -1,0x4e75,    -1,0x4849,    -1,    -1,
-	    -2,    -1,    -1,0x524f,    -1,    -1,    -1,    -1,
-	    -1,    -2,    -1,    -1,    -1,    -1,    -1,    -1,
-	    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1
+		-1,    -1,    -2,0x594f,    -1,0x4e75,    -1,    -1,
+		-1,    -2,    -1,    -1,0x4e75,    -1,0x5349,    -1,
+		-1,    -1,    -1,0x4e75,    -1,0x4849,    -1,    -1,
+		-2,    -1,    -1,0x524f,    -1,    -1,    -1,    -1,
+		-1,    -2,    -1,    -1,    -1,    -1,    -1,    -1,
+		-1,    -1,    -1,    -1,    -1,    -1,    -1,    -1
 };
 
-static MACHINE_RESET( raiga )
+MACHINE_RESET_MEMBER(gaiden_state,raiga)
 {
-	gaiden_state *state = machine.driver_data<gaiden_state>();
 
-	state->m_prot = 0;
-	state->m_jumpcode = 0;
+	m_prot = 0;
+	m_jumpcode = 0;
 
-	state->m_tx_scroll_x = 0;
-	state->m_tx_scroll_y = 0;
-	state->m_bg_scroll_x = 0;
-	state->m_bg_scroll_y = 0;
-	state->m_fg_scroll_x = 0;
-	state->m_fg_scroll_y = 0;
+	m_tx_scroll_x = 0;
+	m_tx_scroll_y = 0;
+	m_bg_scroll_x = 0;
+	m_bg_scroll_y = 0;
+	m_fg_scroll_x = 0;
+	m_fg_scroll_y = 0;
 
-	state->m_tx_offset_y = 0;
-	state->m_fg_offset_y = 0;
-	state->m_bg_offset_y = 0;
-	state->m_spr_offset_y = 0;
+	m_tx_offset_y = 0;
+	m_fg_offset_y = 0;
+	m_bg_offset_y = 0;
+	m_spr_offset_y = 0;
 }
 
-static MACHINE_START( raiga )
+MACHINE_START_MEMBER(gaiden_state,raiga)
 {
-	gaiden_state *state = machine.driver_data<gaiden_state>();
-	state->m_audiocpu = machine.device("audiocpu");
+	m_audiocpu = machine().device<cpu_device>("audiocpu");
 
-	state->save_item(NAME(state->m_prot));
-	state->save_item(NAME(state->m_jumpcode));
+	save_item(NAME(m_prot));
+	save_item(NAME(m_jumpcode));
 
-	state->save_item(NAME(state->m_tx_scroll_x));
-	state->save_item(NAME(state->m_tx_scroll_y));
-	state->save_item(NAME(state->m_bg_scroll_x));
-	state->save_item(NAME(state->m_bg_scroll_y));
-	state->save_item(NAME(state->m_fg_scroll_x));
-	state->save_item(NAME(state->m_fg_scroll_y));
+	save_item(NAME(m_tx_scroll_x));
+	save_item(NAME(m_tx_scroll_y));
+	save_item(NAME(m_bg_scroll_x));
+	save_item(NAME(m_bg_scroll_y));
+	save_item(NAME(m_fg_scroll_x));
+	save_item(NAME(m_fg_scroll_y));
 
-	state->save_item(NAME(state->m_tx_offset_y));
-	state->save_item(NAME(state->m_fg_offset_y));
-	state->save_item(NAME(state->m_bg_offset_y));
-	state->save_item(NAME(state->m_spr_offset_y));
+	save_item(NAME(m_tx_offset_y));
+	save_item(NAME(m_fg_offset_y));
+	save_item(NAME(m_bg_offset_y));
+	save_item(NAME(m_spr_offset_y));
 }
 
-static WRITE16_HANDLER( raiga_protection_w )
+WRITE16_MEMBER(gaiden_state::raiga_protection_w)
 {
-	gaiden_state *state = space->machine().driver_data<gaiden_state>();
 
 	if (ACCESSING_BITS_8_15)
 	{
 		data >>= 8;
 
-//      logerror("PC %06x: prot = %02x\n", cpu_get_pc(&space->device()), data);
+//      logerror("PC %06x: prot = %02x\n", space.device().safe_pc(), data);
 
 		switch (data & 0xf0)
 		{
-			case 0x00:	/* init */
-				state->m_prot = 0x00;
+			case 0x00:  /* init */
+				m_prot = 0x00;
 				break;
-			case 0x10:	/* high 4 bits of jump code */
-				state->m_jumpcode = (data & 0x0f) << 4;
-				state->m_prot = 0x10;
+			case 0x10:  /* high 4 bits of jump code */
+				m_jumpcode = (data & 0x0f) << 4;
+				m_prot = 0x10;
 				break;
-			case 0x20:	/* low 4 bits of jump code */
-				state->m_jumpcode |= data & 0x0f;
-				logerror("requested protection jumpcode %02x\n", state->m_jumpcode);
-//              state->m_jumpcode = 0;
-				if (state->m_raiga_jumppoints[state->m_jumpcode] == -2)
+			case 0x20:  /* low 4 bits of jump code */
+				m_jumpcode |= data & 0x0f;
+				logerror("requested protection jumpcode %02x\n", m_jumpcode);
+//              m_jumpcode = 0;
+				if (m_raiga_jumppoints[m_jumpcode] == -2)
 				{
-					state->m_raiga_jumppoints = jumppoints_other;
+					m_raiga_jumppoints = jumppoints_other;
 				}
 
-				if (state->m_raiga_jumppoints[state->m_jumpcode] == -1)
+				if (m_raiga_jumppoints[m_jumpcode] == -1)
 				{
-					logerror("unknown jumpcode %02x\n", state->m_jumpcode);
-					popmessage("unknown jumpcode %02x", state->m_jumpcode);
-					state->m_jumpcode = 0;
+					logerror("unknown jumpcode %02x\n", m_jumpcode);
+					popmessage("unknown jumpcode %02x", m_jumpcode);
+					m_jumpcode = 0;
 				}
-				state->m_prot = 0x20;
+				m_prot = 0x20;
 				break;
-			case 0x30:	/* ask for bits 12-15 of function address */
-				state->m_prot = 0x40 | ((state->m_raiga_jumppoints[state->m_jumpcode] >> 12) & 0x0f);
+			case 0x30:  /* ask for bits 12-15 of function address */
+				m_prot = 0x40 | ((m_raiga_jumppoints[m_jumpcode] >> 12) & 0x0f);
 				break;
-			case 0x40:	/* ask for bits 8-11 of function address */
-				state->m_prot = 0x50 | ((state->m_raiga_jumppoints[state->m_jumpcode] >> 8) & 0x0f);
+			case 0x40:  /* ask for bits 8-11 of function address */
+				m_prot = 0x50 | ((m_raiga_jumppoints[m_jumpcode] >> 8) & 0x0f);
 				break;
-			case 0x50:	/* ask for bits 4-7 of function address */
-				state->m_prot = 0x60 | ((state->m_raiga_jumppoints[state->m_jumpcode] >> 4) & 0x0f);
+			case 0x50:  /* ask for bits 4-7 of function address */
+				m_prot = 0x60 | ((m_raiga_jumppoints[m_jumpcode] >> 4) & 0x0f);
 				break;
-			case 0x60:	/* ask for bits 0-3 of function address */
-				state->m_prot = 0x70 | ((state->m_raiga_jumppoints[state->m_jumpcode] >> 0) & 0x0f);
+			case 0x60:  /* ask for bits 0-3 of function address */
+				m_prot = 0x70 | ((m_raiga_jumppoints[m_jumpcode] >> 0) & 0x0f);
 				break;
 		}
 	}
 }
 
-static READ16_HANDLER( raiga_protection_r )
+READ16_MEMBER(gaiden_state::raiga_protection_r)
 {
-	gaiden_state *state = space->machine().driver_data<gaiden_state>();
-//  logerror("PC %06x: read prot %02x\n", cpu_get_pc(&space->device()), state->m_prot);
-	return state->m_prot;
+//  logerror("PC %06x: read prot %02x\n", space.device().safe_pc(), m_prot);
+	return m_prot;
 }
 
-static ADDRESS_MAP_START( gaiden_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( gaiden_map, AS_PROGRAM, 16, gaiden_state )
 	AM_RANGE(0x000000, 0x03ffff) AM_ROM
 	AM_RANGE(0x060000, 0x063fff) AM_RAM
-	AM_RANGE(0x070000, 0x070fff) AM_RAM_WRITE(gaiden_videoram_w) AM_BASE_MEMBER(gaiden_state, m_videoram)
-	AM_RANGE(0x072000, 0x073fff) AM_READWRITE(gaiden_videoram2_r, gaiden_videoram2_w) AM_BASE_MEMBER(gaiden_state, m_videoram2)
-	AM_RANGE(0x074000, 0x075fff) AM_READWRITE(gaiden_videoram3_r, gaiden_videoram3_w) AM_BASE_MEMBER(gaiden_state, m_videoram3)
-	AM_RANGE(0x076000, 0x077fff) AM_RAM AM_BASE_SIZE_MEMBER(gaiden_state, m_spriteram, m_spriteram_size)
-	AM_RANGE(0x078000, 0x079fff) AM_RAM_WRITE(paletteram16_xxxxBBBBGGGGRRRR_word_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x070000, 0x070fff) AM_RAM_WRITE(gaiden_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0x072000, 0x073fff) AM_READWRITE(gaiden_videoram2_r, gaiden_videoram2_w) AM_SHARE("videoram2")
+	AM_RANGE(0x074000, 0x075fff) AM_READWRITE(gaiden_videoram3_r, gaiden_videoram3_w) AM_SHARE("videoram3")
+	AM_RANGE(0x076000, 0x077fff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0x078000, 0x079fff) AM_RAM_WRITE(paletteram_xxxxBBBBGGGGRRRR_word_w) AM_SHARE("paletteram")
 	AM_RANGE(0x07a000, 0x07a001) AM_READ_PORT("SYSTEM")
 	AM_RANGE(0x07a002, 0x07a003) AM_READ_PORT("P1_P2") AM_WRITE(gaiden_sproffsety_w)
 	AM_RANGE(0x07a004, 0x07a005) AM_READ_PORT("DSW")
@@ -419,14 +411,14 @@ static ADDRESS_MAP_START( gaiden_map, AS_PROGRAM, 16 )
 	AM_RANGE(0x07a808, 0x07a809) AM_WRITE(gaiden_flip_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( drgnbowl_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( drgnbowl_map, AS_PROGRAM, 16, gaiden_state )
 	AM_RANGE(0x000000, 0x03ffff) AM_ROM
 	AM_RANGE(0x060000, 0x063fff) AM_RAM
-	AM_RANGE(0x070000, 0x070fff) AM_RAM_WRITE(gaiden_videoram_w) AM_BASE_MEMBER(gaiden_state, m_videoram)
-	AM_RANGE(0x072000, 0x073fff) AM_RAM_WRITE(gaiden_videoram2_w) AM_BASE_MEMBER(gaiden_state, m_videoram2)
-	AM_RANGE(0x074000, 0x075fff) AM_RAM_WRITE(gaiden_videoram3_w) AM_BASE_MEMBER(gaiden_state, m_videoram3)
-	AM_RANGE(0x076000, 0x077fff) AM_RAM AM_BASE_SIZE_MEMBER(gaiden_state, m_spriteram, m_spriteram_size)
-	AM_RANGE(0x078000, 0x079fff) AM_RAM_WRITE(paletteram16_xxxxBBBBGGGGRRRR_word_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x070000, 0x070fff) AM_RAM_WRITE(gaiden_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0x072000, 0x073fff) AM_RAM_WRITE(gaiden_videoram2_w) AM_SHARE("videoram2")
+	AM_RANGE(0x074000, 0x075fff) AM_RAM_WRITE(gaiden_videoram3_w) AM_SHARE("videoram3")
+	AM_RANGE(0x076000, 0x077fff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0x078000, 0x079fff) AM_RAM_WRITE(paletteram_xxxxBBBBGGGGRRRR_word_w) AM_SHARE("paletteram")
 	AM_RANGE(0x07a000, 0x07a001) AM_READ_PORT("SYSTEM")
 	AM_RANGE(0x07a002, 0x07a003) AM_READ_PORT("P1_P2")
 	AM_RANGE(0x07a004, 0x07a005) AM_READ_PORT("DSW")
@@ -438,27 +430,27 @@ static ADDRESS_MAP_START( drgnbowl_map, AS_PROGRAM, 16 )
 	AM_RANGE(0x07f006, 0x07f007) AM_WRITE(gaiden_fgscrollx_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, gaiden_state )
 	AM_RANGE(0x0000, 0xdfff) AM_ROM
-	AM_RANGE(0xe000, 0xefff) AM_ROM	/* raiga only */
+	AM_RANGE(0xe000, 0xefff) AM_ROM /* raiga only */
 	AM_RANGE(0xf000, 0xf7ff) AM_RAM
-	AM_RANGE(0xf800, 0xf800) AM_DEVREADWRITE_MODERN("oki", okim6295_device, read, write)
-	AM_RANGE(0xf810, 0xf811) AM_DEVWRITE("ym1", ym2203_w)
-	AM_RANGE(0xf820, 0xf821) AM_DEVWRITE("ym2", ym2203_w)
+	AM_RANGE(0xf800, 0xf800) AM_DEVREADWRITE("oki", okim6295_device, read, write)
+	AM_RANGE(0xf810, 0xf811) AM_DEVWRITE_LEGACY("ym1", ym2203_w)
+	AM_RANGE(0xf820, 0xf821) AM_DEVWRITE_LEGACY("ym2", ym2203_w)
 	AM_RANGE(0xfc00, 0xfc00) AM_NOP /* ?? */
-	AM_RANGE(0xfc20, 0xfc20) AM_READ(soundlatch_r)
+	AM_RANGE(0xfc20, 0xfc20) AM_READ(soundlatch_byte_r)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( drgnbowl_sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( drgnbowl_sound_map, AS_PROGRAM, 8, gaiden_state )
 	AM_RANGE(0x0000, 0xf7ff) AM_ROM
 	AM_RANGE(0xf800, 0xffff) AM_RAM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( drgnbowl_sound_port_map, AS_IO, 8 )
+static ADDRESS_MAP_START( drgnbowl_sound_port_map, AS_IO, 8, gaiden_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x01) AM_DEVREADWRITE("ymsnd", ym2151_r, ym2151_w)
-	AM_RANGE(0x80, 0x80) AM_DEVREADWRITE_MODERN("oki", okim6295_device, read, write)
-	AM_RANGE(0xc0, 0xc0) AM_READ(soundlatch_r)
+	AM_RANGE(0x00, 0x01) AM_DEVREADWRITE("ymsnd", ym2151_device, read, write)
+	AM_RANGE(0x80, 0x80) AM_DEVREADWRITE("oki", okim6295_device, read, write)
+	AM_RANGE(0xc0, 0xc0) AM_READ(soundlatch_byte_r)
 ADDRESS_MAP_END
 
 static INPUT_PORTS_START( common )
@@ -525,17 +517,20 @@ static INPUT_PORTS_START( common )
 	PORT_DIPSETTING(      0x3000, "3" )
 	PORT_DIPSETTING(      0x1000, "4" )
 	PORT_DIPSETTING(      0x2000, "5" )
-	PORT_DIPUNKNOWN_DIPLOC( 0x0800, 0x0800, "SWB:5" )
-	PORT_DIPUNKNOWN_DIPLOC( 0x0400, 0x0400, "SWB:6" )
-	PORT_DIPUNKNOWN_DIPLOC( 0x0200, 0x0200, "SWB:7" )
-	PORT_DIPUNKNOWN_DIPLOC( 0x0100, 0x0100, "SWB:8" )
+	PORT_DIPNAME( 0x0c00, 0x0c00, DEF_STR( Difficulty ) ) PORT_DIPLOCATION("SWB:6,5")
+	PORT_DIPSETTING(      0x0c00, DEF_STR( Normal ) )
+	PORT_DIPSETTING(      0x0400, "TBL 1" )
+	PORT_DIPSETTING(      0x0800, "TBL 2" )
+	PORT_DIPSETTING(      0x0000, "TBL 3" )
+	PORT_DIPUNUSED_DIPLOC( 0x0200, 0x0200, "SWB:7" )
+	PORT_DIPUNUSED_DIPLOC( 0x0100, 0x0100, "SWB:8" )
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( drgnbowl )
 	PORT_INCLUDE(  common )
 
 	PORT_MODIFY("DSW")
-	PORT_DIPUNKNOWN_DIPLOC( 0x0002, 0x0002, "SWA:7" ) /* No Flip Screen */
+	PORT_DIPUNUSED_DIPLOC( 0x0002, 0x0002, "SWA:7" ) /* No Flip Screen */
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( wildfang )
@@ -559,7 +554,7 @@ static INPUT_PORTS_START( wildfang )
 	PORT_DIPSETTING(      0x0400, DEF_STR( Normal ) )
 	PORT_DIPSETTING(      0x0800, DEF_STR( Hard ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( Hardest ) )
-	PORT_DIPNAME( 0x0100, 0x0100, "Title" ) PORT_DIPLOCATION("SWB:8")	// also affects Difficulty Table (see above)
+	PORT_DIPNAME( 0x0100, 0x0100, "Title" ) PORT_DIPLOCATION("SWB:8")   // also affects Difficulty Table (see above)
 	PORT_DIPSETTING(      0x0100, "Wild Fang" )
 	PORT_DIPSETTING(      0x0000, "Tecmo Knight" )
 INPUT_PORTS_END
@@ -568,15 +563,15 @@ static INPUT_PORTS_START( tknight )
 	PORT_INCLUDE(  wildfang )
 
 	PORT_MODIFY("DSW")
-	PORT_DIPUNKNOWN_DIPLOC( 0x2000, 0x2000, "SWB:3" ) /* No seperate difficulty option like parent set */
-	PORT_DIPUNKNOWN_DIPLOC( 0x1000, 0x1000, "SWB:4" ) /* No seperate difficulty option like parent set */
-	PORT_DIPUNKNOWN_DIPLOC( 0x0100, 0x0100, "SWB:8" ) /* No title change option */
+	PORT_DIPUNUSED_DIPLOC( 0x2000, 0x2000, "SWB:3" ) /* No separate difficulty option like parent set */
+	PORT_DIPUNUSED_DIPLOC( 0x1000, 0x1000, "SWB:4" ) /* No separate difficulty option like parent set */
+	PORT_DIPUNUSED_DIPLOC( 0x0100, 0x0100, "SWB:8" ) /* No title change option */
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( raiga )
 	PORT_INCLUDE(  common )
 
-	PORT_MODIFY("P1_P2")	/* Only 2 Buttons */
+	PORT_MODIFY("P1_P2")    /* Only 2 Buttons */
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
@@ -619,7 +614,7 @@ static INPUT_PORTS_START( raiga )
 	PORT_DIPNAME( 0x8000, 0x0000, DEF_STR( Demo_Sounds ) ) PORT_DIPLOCATION("SWB:1")
 	PORT_DIPSETTING(      0x8000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPUNKNOWN_DIPLOC( 0x4000, 0x4000, "SWB:2" )
+	PORT_DIPUNUSED_DIPLOC( 0x4000, 0x4000, "SWB:2" )
 	PORT_DIPNAME( 0x3000, 0x1000, DEF_STR( Difficulty ) ) PORT_DIPLOCATION("SWB:4,3")
 	PORT_DIPSETTING(      0x3000, DEF_STR( Easy ) )
 	PORT_DIPSETTING(      0x1000, DEF_STR( Normal ) )
@@ -641,50 +636,50 @@ INPUT_PORTS_END
 
 static const gfx_layout tilelayout =
 {
-	8,8,	/* tile size */
-	RGN_FRAC(1,1),	/* number of tiles */
-	4,	/* 4 bits per pixel */
+	8,8,    /* tile size */
+	RGN_FRAC(1,1),  /* number of tiles */
+	4,  /* 4 bits per pixel */
 	{ 0, 1, 2, 3 },
 	{ 0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4 },
 	{ 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32 },
-	32*8	/* offset to next tile */
+	32*8    /* offset to next tile */
 };
 
 static const gfx_layout tile2layout =
 {
-	16,16,	/* tile size */
-	RGN_FRAC(1,1),	/* number of tiles */
-	4,	/* 4 bits per pixel */
-	{ 0, 1, 2, 3 },	/* the bitplanes are packed in one nibble */
+	16,16,  /* tile size */
+	RGN_FRAC(1,1),  /* number of tiles */
+	4,  /* 4 bits per pixel */
+	{ 0, 1, 2, 3 }, /* the bitplanes are packed in one nibble */
 	{ 0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4,
-	  32*8+0*4, 32*8+1*4, 32*8+2*4, 32*8+3*4,
-	  32*8+4*4, 32*8+5*4, 32*8+6*4, 32*8+7*4 },
+		32*8+0*4, 32*8+1*4, 32*8+2*4, 32*8+3*4,
+		32*8+4*4, 32*8+5*4, 32*8+6*4, 32*8+7*4 },
 	{ 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
-	  16*32, 17*32, 18*32, 19*32, 20*32, 21*32, 22*32, 23*32},
-	128*8	/* offset to next tile */
+		16*32, 17*32, 18*32, 19*32, 20*32, 21*32, 22*32, 23*32},
+	128*8   /* offset to next tile */
 };
 
 static const gfx_layout spritelayout =
 {
-	8,8,	/* sprites size */
-	RGN_FRAC(1,2),	/* number of sprites */
-	4,	/* 4 bits per pixel */
-	{ 0, 1, 2, 3 },	/* the bitplanes are packed in one nibble */
+	8,8,    /* sprites size */
+	RGN_FRAC(1,2),  /* number of sprites */
+	4,  /* 4 bits per pixel */
+	{ 0, 1, 2, 3 }, /* the bitplanes are packed in one nibble */
 	{ 0,4,RGN_FRAC(1,2),4+RGN_FRAC(1,2),8,12,8+RGN_FRAC(1,2),12+RGN_FRAC(1,2) },
 	{ 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16 },
-	16*8	/* offset to next sprite */
+	16*8    /* offset to next sprite */
 };
 
 static GFXDECODE_START( gaiden )
-	GFXDECODE_ENTRY( "gfx1", 0, tilelayout,        0x100, 16 )	/* tiles 8x8  */
-	GFXDECODE_ENTRY( "gfx2", 0, tile2layout,       0x300, 16 )	/* tiles 16x16 */
-	GFXDECODE_ENTRY( "gfx3", 0, tile2layout,       0x200, 16+128 )	/* tiles 16x16 */
-	GFXDECODE_ENTRY( "gfx4", 0, spritelayout,      0x000, 16+128 )	/* sprites 8x8 */
+	GFXDECODE_ENTRY( "gfx1", 0, tilelayout,        0x100, 16 )  /* tiles 8x8  */
+	GFXDECODE_ENTRY( "gfx2", 0, tile2layout,       0x300, 16 )  /* tiles 16x16 */
+	GFXDECODE_ENTRY( "gfx3", 0, tile2layout,       0x200, 16+128 )  /* tiles 16x16 */
+	GFXDECODE_ENTRY( "gfx4", 0, spritelayout,      0x000, 16+128 )  /* sprites 8x8 */
 GFXDECODE_END
 
 static GFXDECODE_START( raiga )
-	GFXDECODE_ENTRY( "gfx1", 0, tilelayout,        0x100, 16 )	/* tiles 8x8  */
-	GFXDECODE_ENTRY( "gfx2", 0, tile2layout,       0x300, 16 )	/* tiles 16x16 */
+	GFXDECODE_ENTRY( "gfx1", 0, tilelayout,        0x100, 16 )  /* tiles 8x8  */
+	GFXDECODE_ENTRY( "gfx2", 0, tile2layout,       0x300, 16 )  /* tiles 16x16 */
 	GFXDECODE_ENTRY( "gfx3", 0, tile2layout,       0x200, 16 + 128 ) /* tiles 16x16 (only colors 0x00-x0f and 0x80-0x8f are used) */
 	GFXDECODE_ENTRY( "gfx4", 0, spritelayout,      0x000, 16 + 128 ) /* sprites 8x8 (only colors 0x00-x0f and 0x80-0x8f are used) */
 GFXDECODE_END
@@ -702,20 +697,20 @@ static const gfx_layout mastninj_tile2layout =
 
 static const gfx_layout mastninj_spritelayout =
 {
-	8,8,	/* tile size */
-	RGN_FRAC(1,4),	/* number of tiles */
-	4,	/* 4 bits per pixel */
+	8,8,    /* tile size */
+	RGN_FRAC(1,4),  /* number of tiles */
+	4,  /* 4 bits per pixel */
 	{ RGN_FRAC(0,4),RGN_FRAC(1,4),RGN_FRAC(2,4),RGN_FRAC(3,4) },
 	{ 0,1,2,3,4,5,6,7 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
-	8*8	/* offset to next tile */
+	8*8 /* offset to next tile */
 };
 
 static GFXDECODE_START( mastninj )
-	GFXDECODE_ENTRY( "gfx1", 0, tilelayout,        0x000, 16 )	/* tiles 8x8  */
-	GFXDECODE_ENTRY( "gfx2", 0, mastninj_tile2layout,       0x300, 16 )	/* tiles 16x16 */
-	GFXDECODE_ENTRY( "gfx3", 0, mastninj_tile2layout,       0x200, 16 )	/* tiles 16x16 */
-	GFXDECODE_ENTRY( "gfx4", 0, mastninj_spritelayout,      0x100, 16 )	/* sprites 8x8 */
+	GFXDECODE_ENTRY( "gfx1", 0, tilelayout,        0x000, 16 )  /* tiles 8x8  */
+	GFXDECODE_ENTRY( "gfx2", 0, mastninj_tile2layout,       0x300, 16 ) /* tiles 16x16 */
+	GFXDECODE_ENTRY( "gfx3", 0, mastninj_tile2layout,       0x200, 16 ) /* tiles 16x16 */
+	GFXDECODE_ENTRY( "gfx4", 0, mastninj_spritelayout,      0x100, 16 ) /* sprites 8x8 */
 GFXDECODE_END
 
 static const gfx_layout drgnbowl_tile2layout =
@@ -741,17 +736,17 @@ static const gfx_layout drgnbowl_spritelayout =
 };
 
 static GFXDECODE_START( drgnbowl )
-	GFXDECODE_ENTRY( "gfx1", 0,       tilelayout,                0, 16 )	/* tiles 8x8  */
-	GFXDECODE_ENTRY( "gfx2", 0x00000, drgnbowl_tile2layout,  0x300, 16 )	/* tiles 16x16 */
-	GFXDECODE_ENTRY( "gfx2", 0x20000, drgnbowl_tile2layout,  0x200, 16 )	/* tiles 16x16 */
-	GFXDECODE_ENTRY( "gfx3", 0,       drgnbowl_spritelayout, 0x100, 16 )	/* sprites 16x16 */
+	GFXDECODE_ENTRY( "gfx1", 0,       tilelayout,                0, 16 )    /* tiles 8x8  */
+	GFXDECODE_ENTRY( "gfx2", 0x00000, drgnbowl_tile2layout,  0x300, 16 )    /* tiles 16x16 */
+	GFXDECODE_ENTRY( "gfx2", 0x20000, drgnbowl_tile2layout,  0x200, 16 )    /* tiles 16x16 */
+	GFXDECODE_ENTRY( "gfx3", 0,       drgnbowl_spritelayout, 0x100, 16 )    /* sprites 16x16 */
 GFXDECODE_END
 
 /* handler called by the 2203 emulator when the internal timers cause an IRQ */
 static void irqhandler( device_t *device, int irq )
 {
 	gaiden_state *state = device->machine().driver_data<gaiden_state>();
-	device_set_input_line(state->m_audiocpu, 0, irq ? ASSERT_LINE : CLEAR_LINE);
+	state->m_audiocpu->set_input_line(0, irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static const ym2203_interface ym2203_config =
@@ -761,36 +756,35 @@ static const ym2203_interface ym2203_config =
 		AY8910_DEFAULT_LOADS,
 		DEVCB_NULL, DEVCB_NULL, DEVCB_NULL, DEVCB_NULL
 	},
-	irqhandler
+	DEVCB_LINE(irqhandler)
 };
 
 static MACHINE_CONFIG_START( shadoww, gaiden_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M68000, 18432000/2)	/* 9.216 MHz */
+	MCFG_CPU_ADD("maincpu", M68000, 18432000/2) /* 9.216 MHz */
 	MCFG_CPU_PROGRAM_MAP(gaiden_map)
-	MCFG_CPU_VBLANK_INT("screen", irq5_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", gaiden_state,  irq5_line_hold)
 
-	MCFG_CPU_ADD("audiocpu", Z80, 4000000)	/* 4 MHz */
+	MCFG_CPU_ADD("audiocpu", Z80, 4000000)  /* 4 MHz */
 	MCFG_CPU_PROGRAM_MAP(sound_map)
 								/* IRQs are triggered by the YM2203 */
 
-	MCFG_MACHINE_START(raiga)
-	MCFG_MACHINE_RESET(raiga)
+	MCFG_MACHINE_START_OVERRIDE(gaiden_state,raiga)
+	MCFG_MACHINE_RESET_OVERRIDE(gaiden_state,raiga)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(59.17)   /* verified on pcb */
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 4*8, 32*8-1)
-	MCFG_SCREEN_UPDATE(gaiden)
+	MCFG_SCREEN_UPDATE_DRIVER(gaiden_state, screen_update_gaiden)
 
 	MCFG_GFXDECODE(gaiden)
 	MCFG_PALETTE_LENGTH(4096)
 
-	MCFG_VIDEO_START(gaiden)
+	MCFG_VIDEO_START_OVERRIDE(gaiden_state,gaiden)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -815,45 +809,43 @@ MACHINE_CONFIG_END
 static MACHINE_CONFIG_DERIVED( raiga, shadoww )
 
 	MCFG_SCREEN_MODIFY("screen")
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
-	MCFG_SCREEN_UPDATE(raiga)
+	MCFG_SCREEN_UPDATE_DRIVER(gaiden_state, screen_update_raiga)
 
-	MCFG_VIDEO_START(raiga)
+	MCFG_VIDEO_START_OVERRIDE(gaiden_state,raiga)
 	MCFG_GFXDECODE(raiga)
 MACHINE_CONFIG_END
 
 static MACHINE_CONFIG_START( drgnbowl, gaiden_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M68000, 20000000/2)	/* 10 MHz */
+	MCFG_CPU_ADD("maincpu", M68000, 20000000/2) /* 10 MHz */
 	MCFG_CPU_PROGRAM_MAP(drgnbowl_map)
-	MCFG_CPU_VBLANK_INT("screen", irq5_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", gaiden_state,  irq5_line_hold)
 
-	MCFG_CPU_ADD("audiocpu", Z80, 12000000/2)	/* 6 MHz */
+	MCFG_CPU_ADD("audiocpu", Z80, 12000000/2)   /* 6 MHz */
 	MCFG_CPU_PROGRAM_MAP(drgnbowl_sound_map)
 	MCFG_CPU_IO_MAP(drgnbowl_sound_port_map)
 
-	MCFG_MACHINE_START(raiga)
-	MCFG_MACHINE_RESET(raiga)
+	MCFG_MACHINE_START_OVERRIDE(gaiden_state,raiga)
+	MCFG_MACHINE_RESET_OVERRIDE(gaiden_state,raiga)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(drgnbowl)
+	MCFG_SCREEN_UPDATE_DRIVER(gaiden_state, screen_update_drgnbowl)
 
 	MCFG_GFXDECODE(drgnbowl)
 	MCFG_PALETTE_LENGTH(4096)
 
-	MCFG_VIDEO_START(drgnbowl)
+	MCFG_VIDEO_START_OVERRIDE(gaiden_state,drgnbowl)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("ymsnd", YM2151, 4000000)
+	MCFG_YM2151_ADD("ymsnd", 4000000)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.40)
 
 	MCFG_OKIM6295_ADD("oki", 1000000, OKIM6295_PIN7_HIGH)
@@ -906,23 +898,23 @@ Others
 2x      8x2 switches DIP
 */
 
-static ADDRESS_MAP_START( mastninj_sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( mastninj_sound_map, AS_PROGRAM, 8, gaiden_state )
 	AM_RANGE(0x0000, 0xdfff) AM_ROM
 	AM_RANGE(0xf000, 0xf7ff) AM_RAM
-	AM_RANGE(0xc400, 0xc401) AM_DEVWRITE("ym1", ym2203_w)
-	AM_RANGE(0xc800, 0xc801) AM_DEVWRITE("ym2", ym2203_w)
+	AM_RANGE(0xc400, 0xc401) AM_DEVWRITE_LEGACY("ym1", ym2203_w)
+	AM_RANGE(0xc800, 0xc801) AM_DEVWRITE_LEGACY("ym2", ym2203_w)
 //  AM_RANGE(0xfc00, 0xfc00) AM_NOP /* ?? */
-//  AM_RANGE(0xfc20, 0xfc20) AM_READ(soundlatch_r)
+//  AM_RANGE(0xfc20, 0xfc20) AM_READ(soundlatch_byte_r)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( mastninj_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( mastninj_map, AS_PROGRAM, 16, gaiden_state )
 	AM_RANGE(0x000000, 0x03ffff) AM_ROM
 	AM_RANGE(0x060000, 0x063fff) AM_RAM
-	AM_RANGE(0x070000, 0x070fff) AM_RAM_WRITE(gaiden_videoram_w) AM_BASE_MEMBER(gaiden_state, m_videoram)
-	AM_RANGE(0x072000, 0x073fff) AM_READWRITE(gaiden_videoram2_r, gaiden_videoram2_w) AM_BASE_MEMBER(gaiden_state, m_videoram2)
-	AM_RANGE(0x074000, 0x075fff) AM_READWRITE(gaiden_videoram3_r, gaiden_videoram3_w) AM_BASE_MEMBER(gaiden_state, m_videoram3)
-	AM_RANGE(0x076000, 0x077fff) AM_RAM AM_BASE_SIZE_MEMBER(gaiden_state, m_spriteram, m_spriteram_size)
-	AM_RANGE(0x078000, 0x079fff) AM_RAM_WRITE(paletteram16_xxxxBBBBGGGGRRRR_word_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x070000, 0x070fff) AM_RAM_WRITE(gaiden_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0x072000, 0x073fff) AM_READWRITE(gaiden_videoram2_r, gaiden_videoram2_w) AM_SHARE("videoram2")
+	AM_RANGE(0x074000, 0x075fff) AM_READWRITE(gaiden_videoram3_r, gaiden_videoram3_w) AM_SHARE("videoram3")
+	AM_RANGE(0x076000, 0x077fff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0x078000, 0x079fff) AM_RAM_WRITE(paletteram_xxxxBBBBGGGGRRRR_word_w) AM_SHARE("paletteram")
 //  AM_RANGE(0x078800, 0x079fff) AM_RAM
 	AM_RANGE(0x07a000, 0x07a001) AM_READ_PORT("SYSTEM")
 	AM_RANGE(0x07a002, 0x07a003) AM_READ_PORT("P1_P2")
@@ -942,30 +934,29 @@ ADDRESS_MAP_END
 static MACHINE_CONFIG_START( mastninj, gaiden_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M68000, 10000000)	/* 10 MHz? */
+	MCFG_CPU_ADD("maincpu", M68000, 10000000)   /* 10 MHz? */
 	MCFG_CPU_PROGRAM_MAP(mastninj_map)
-	MCFG_CPU_VBLANK_INT("screen", irq5_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", gaiden_state,  irq5_line_hold)
 
-	MCFG_CPU_ADD("audiocpu", Z80, 4000000)	/* ?? MHz */
+	MCFG_CPU_ADD("audiocpu", Z80, 4000000)  /* ?? MHz */
 	MCFG_CPU_PROGRAM_MAP(mastninj_sound_map)
 								/* IRQs are triggered by the YM2203 */
 
-	MCFG_MACHINE_START(raiga)
-	MCFG_MACHINE_RESET(raiga)
+	MCFG_MACHINE_START_OVERRIDE(gaiden_state,raiga)
+	MCFG_MACHINE_RESET_OVERRIDE(gaiden_state,raiga)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(59.17)   /* verified on pcb */
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(gaiden)
+	MCFG_SCREEN_UPDATE_DRIVER(gaiden_state, screen_update_gaiden)
 
 	MCFG_GFXDECODE(mastninj)
 	MCFG_PALETTE_LENGTH(4096)
 
-	MCFG_VIDEO_START(mastninj)
+	MCFG_VIDEO_START_OVERRIDE(gaiden_state,mastninj)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -995,7 +986,7 @@ MACHINE_CONFIG_END
 ***************************************************************************/
 
 ROM_START( shadoww )
-	ROM_REGION( 0x40000, "maincpu", 0 )	/* 2*128k for 68000 code */
+	ROM_REGION( 0x40000, "maincpu", 0 ) /* 2*128k for 68000 code */
 	ROM_LOAD16_BYTE( "shadowa_1.3s",     0x00000, 0x20000, CRC(8290d567) SHA1(1e2f80c1548c853ec1127e79438f62eda6592a07) )
 	ROM_LOAD16_BYTE( "shadowa_2.4s",     0x00001, 0x20000, CRC(f3f08921) SHA1(df6bb7302714e0eab12cbd0a7f2a4ca751a600e1) )
 
@@ -1003,7 +994,7 @@ ROM_START( shadoww )
 	ROM_LOAD( "gaiden_3.4b",     0x0000, 0x10000, CRC(75fd3e6a) SHA1(3333e84ed4983caa133e60a8e8895fa897ab4949) )   /* Audio CPU is a Z80  */
 
 	ROM_REGION( 0x010000, "gfx1", 0 )
-	ROM_LOAD( "gaiden_5.7a",     0x000000, 0x10000, CRC(8d4035f7) SHA1(3473456cdd24e312e3073586d7e8f24eb71bbea1) )	/* 8x8 tiles */
+	ROM_LOAD( "gaiden_5.7a",     0x000000, 0x10000, CRC(8d4035f7) SHA1(3473456cdd24e312e3073586d7e8f24eb71bbea1) )  /* 8x8 tiles */
 
 	ROM_REGION( 0x080000, "gfx2", 0 )
 	ROM_LOAD( "14.3a",       0x000000, 0x20000, CRC(1ecfddaa) SHA1(e71d60ae1a98fe8512498f91cce01c16be9f0871) )
@@ -1019,24 +1010,24 @@ ROM_START( shadoww )
 
 	ROM_REGION( 0x100000, "gfx4", 0 )
 	/* Should all these roms be 0x10000 bytes on this board? */
-	ROM_LOAD( "6.3m",           0x000000, 0x20000, CRC(e7ccdf9f) SHA1(80ffcefc95660471124898a9c2bee55df36bda13) )	/* sprites A1 */
-	ROM_LOAD( "8.3n",           0x020000, 0x20000, CRC(7ef7f880) SHA1(26ba9a76adce24beea3cffa1cb95aeafe6f82f96) )	/* sprites B1 */
-	ROM_LOAD( "10.3r",          0x040000, 0x20000, CRC(a6451dec) SHA1(553e7a1453b59055fa0b10ca04125543d9f8987c) )	/* sprites C1 */
-	ROM_LOAD( "shadoww_12a.xx", 0x060000, 0x10000, CRC(9bb07731) SHA1(b799b1958dc9b84797fdab2591e33bd5d28884a3) )	/* sprites D1 */
-	ROM_LOAD( "shadoww_12b.xx", 0x070000, 0x10000, CRC(a4a950a2) SHA1(9766b5e88edd16554e59179a37cca49d29f83367) )	/* sprites D1 */
+	ROM_LOAD( "6.3m",           0x000000, 0x20000, CRC(e7ccdf9f) SHA1(80ffcefc95660471124898a9c2bee55df36bda13) )   /* sprites A1 */
+	ROM_LOAD( "8.3n",           0x020000, 0x20000, CRC(7ef7f880) SHA1(26ba9a76adce24beea3cffa1cb95aeafe6f82f96) )   /* sprites B1 */
+	ROM_LOAD( "10.3r",          0x040000, 0x20000, CRC(a6451dec) SHA1(553e7a1453b59055fa0b10ca04125543d9f8987c) )   /* sprites C1 */
+	ROM_LOAD( "shadoww_12a.xx", 0x060000, 0x10000, CRC(9bb07731) SHA1(b799b1958dc9b84797fdab2591e33bd5d28884a3) )   /* sprites D1 */
+	ROM_LOAD( "shadoww_12b.xx", 0x070000, 0x10000, CRC(a4a950a2) SHA1(9766b5e88edd16554e59179a37cca49d29f83367) )   /* sprites D1 */
 
-	ROM_LOAD( "7.1m",           0x080000, 0x20000, CRC(016bec95) SHA1(6a6757c52ca9a2398ea43d1af4a8d5adde6f4cd2) )	/* sprites A2 */
-	ROM_LOAD( "9.1n",           0x0a0000, 0x20000, CRC(6e9b7fd3) SHA1(c86ff61844fc94c02625bb812b9062d0649c8fdf) )	/* sprites B2 */
-	ROM_LOAD( "11.1r",          0x0c0000, 0x20000, CRC(7fbfdf5e) SHA1(ab67b72dcadb5f2236d29de751de5bf890a9e423) )	/* sprites C2 */
-	ROM_LOAD( "shadoww_13a.xx", 0x0e0000, 0x10000, CRC(996d2fa5) SHA1(a32526949af3635914927ebbbe684c3de9562a9d) )	/* sprites D2 */
-	ROM_LOAD( "shadoww_13b.xx", 0x0f0000, 0x10000, CRC(b8df8a34) SHA1(6810f7961052a983b8c78b42d550038051012c6d) )	/* sprites D2 */
+	ROM_LOAD( "7.1m",           0x080000, 0x20000, CRC(016bec95) SHA1(6a6757c52ca9a2398ea43d1af4a8d5adde6f4cd2) )   /* sprites A2 */
+	ROM_LOAD( "9.1n",           0x0a0000, 0x20000, CRC(6e9b7fd3) SHA1(c86ff61844fc94c02625bb812b9062d0649c8fdf) )   /* sprites B2 */
+	ROM_LOAD( "11.1r",          0x0c0000, 0x20000, CRC(7fbfdf5e) SHA1(ab67b72dcadb5f2236d29de751de5bf890a9e423) )   /* sprites C2 */
+	ROM_LOAD( "shadoww_13a.xx", 0x0e0000, 0x10000, CRC(996d2fa5) SHA1(a32526949af3635914927ebbbe684c3de9562a9d) )   /* sprites D2 */
+	ROM_LOAD( "shadoww_13b.xx", 0x0f0000, 0x10000, CRC(b8df8a34) SHA1(6810f7961052a983b8c78b42d550038051012c6d) )   /* sprites D2 */
 
-	ROM_REGION( 0x40000, "oki", 0 )	/* 128k for ADPCM samples - sound chip is OKIM6295 */
+	ROM_REGION( 0x40000, "oki", 0 ) /* 128k for ADPCM samples - sound chip is OKIM6295 */
 	ROM_LOAD( "4.4a",     0x0000, 0x20000, CRC(b0e0faf9) SHA1(2275d2ef5eee356ccf80b9e9644d16fc30a4d107) ) /* samples */
 ROM_END
 
 ROM_START( shadowwa )
-	ROM_REGION( 0x40000, "maincpu", 0 )	/* 2*128k for 68000 code */
+	ROM_REGION( 0x40000, "maincpu", 0 ) /* 2*128k for 68000 code */
 	ROM_LOAD16_BYTE( "shadoww_1.3s",    0x00000, 0x20000, CRC(fefba387) SHA1(20ce28da5877009494c3f3f67488bbe805d91340) )
 	ROM_LOAD16_BYTE( "shadoww_2.4s",    0x00001, 0x20000, CRC(9b9d6b18) SHA1(75068611fb1de61120be8bf840f61d90c0dc86ca) )
 
@@ -1044,7 +1035,7 @@ ROM_START( shadowwa )
 	ROM_LOAD( "gaiden_3.4b",     0x0000, 0x10000, CRC(75fd3e6a) SHA1(3333e84ed4983caa133e60a8e8895fa897ab4949) )   /* Audio CPU is a Z80  */
 
 	ROM_REGION( 0x010000, "gfx1", 0 )
-	ROM_LOAD( "gaiden_5.7a",     0x000000, 0x10000, CRC(8d4035f7) SHA1(3473456cdd24e312e3073586d7e8f24eb71bbea1) )	/* 8x8 tiles */
+	ROM_LOAD( "gaiden_5.7a",     0x000000, 0x10000, CRC(8d4035f7) SHA1(3473456cdd24e312e3073586d7e8f24eb71bbea1) )  /* 8x8 tiles */
 
 	ROM_REGION( 0x080000, "gfx2", 0 )
 	ROM_LOAD( "14.3a",       0x000000, 0x20000, CRC(1ecfddaa) SHA1(e71d60ae1a98fe8512498f91cce01c16be9f0871) )
@@ -1060,24 +1051,24 @@ ROM_START( shadowwa )
 
 	ROM_REGION( 0x100000, "gfx4", 0 )
 	/* Should all these roms be 0x10000 bytes on this board? */
-	ROM_LOAD( "6.3m",           0x000000, 0x20000, CRC(e7ccdf9f) SHA1(80ffcefc95660471124898a9c2bee55df36bda13) )	/* sprites A1 */
-	ROM_LOAD( "8.3n",           0x020000, 0x20000, CRC(7ef7f880) SHA1(26ba9a76adce24beea3cffa1cb95aeafe6f82f96) )	/* sprites B1 */
-	ROM_LOAD( "10.3r",          0x040000, 0x20000, CRC(a6451dec) SHA1(553e7a1453b59055fa0b10ca04125543d9f8987c) )	/* sprites C1 */
-	ROM_LOAD( "shadoww_12a.xx", 0x060000, 0x10000, CRC(9bb07731) SHA1(b799b1958dc9b84797fdab2591e33bd5d28884a3) )	/* sprites D1 */
-	ROM_LOAD( "shadoww_12b.xx", 0x070000, 0x10000, CRC(a4a950a2) SHA1(9766b5e88edd16554e59179a37cca49d29f83367) )	/* sprites D1 */
+	ROM_LOAD( "6.3m",           0x000000, 0x20000, CRC(e7ccdf9f) SHA1(80ffcefc95660471124898a9c2bee55df36bda13) )   /* sprites A1 */
+	ROM_LOAD( "8.3n",           0x020000, 0x20000, CRC(7ef7f880) SHA1(26ba9a76adce24beea3cffa1cb95aeafe6f82f96) )   /* sprites B1 */
+	ROM_LOAD( "10.3r",          0x040000, 0x20000, CRC(a6451dec) SHA1(553e7a1453b59055fa0b10ca04125543d9f8987c) )   /* sprites C1 */
+	ROM_LOAD( "shadoww_12a.xx", 0x060000, 0x10000, CRC(9bb07731) SHA1(b799b1958dc9b84797fdab2591e33bd5d28884a3) )   /* sprites D1 */
+	ROM_LOAD( "shadoww_12b.xx", 0x070000, 0x10000, CRC(a4a950a2) SHA1(9766b5e88edd16554e59179a37cca49d29f83367) )   /* sprites D1 */
 
-	ROM_LOAD( "7.1m",           0x080000, 0x20000, CRC(016bec95) SHA1(6a6757c52ca9a2398ea43d1af4a8d5adde6f4cd2) )	/* sprites A2 */
-	ROM_LOAD( "9.1n",           0x0a0000, 0x20000, CRC(6e9b7fd3) SHA1(c86ff61844fc94c02625bb812b9062d0649c8fdf) )	/* sprites B2 */
-	ROM_LOAD( "11.1r",          0x0c0000, 0x20000, CRC(7fbfdf5e) SHA1(ab67b72dcadb5f2236d29de751de5bf890a9e423) )	/* sprites C2 */
-	ROM_LOAD( "shadoww_13a.xx", 0x0e0000, 0x10000, CRC(996d2fa5) SHA1(a32526949af3635914927ebbbe684c3de9562a9d) )	/* sprites D2 */
-	ROM_LOAD( "shadoww_13b.xx", 0x0f0000, 0x10000, CRC(b8df8a34) SHA1(6810f7961052a983b8c78b42d550038051012c6d) )	/* sprites D2 */
+	ROM_LOAD( "7.1m",           0x080000, 0x20000, CRC(016bec95) SHA1(6a6757c52ca9a2398ea43d1af4a8d5adde6f4cd2) )   /* sprites A2 */
+	ROM_LOAD( "9.1n",           0x0a0000, 0x20000, CRC(6e9b7fd3) SHA1(c86ff61844fc94c02625bb812b9062d0649c8fdf) )   /* sprites B2 */
+	ROM_LOAD( "11.1r",          0x0c0000, 0x20000, CRC(7fbfdf5e) SHA1(ab67b72dcadb5f2236d29de751de5bf890a9e423) )   /* sprites C2 */
+	ROM_LOAD( "shadoww_13a.xx", 0x0e0000, 0x10000, CRC(996d2fa5) SHA1(a32526949af3635914927ebbbe684c3de9562a9d) )   /* sprites D2 */
+	ROM_LOAD( "shadoww_13b.xx", 0x0f0000, 0x10000, CRC(b8df8a34) SHA1(6810f7961052a983b8c78b42d550038051012c6d) )   /* sprites D2 */
 
-	ROM_REGION( 0x40000, "oki", 0 )	/* 128k for ADPCM samples - sound chip is OKIM6295 */
+	ROM_REGION( 0x40000, "oki", 0 ) /* 128k for ADPCM samples - sound chip is OKIM6295 */
 	ROM_LOAD( "4.4a",     0x0000, 0x20000, CRC(b0e0faf9) SHA1(2275d2ef5eee356ccf80b9e9644d16fc30a4d107) ) /* samples */
 ROM_END
 
 ROM_START( gaiden )
-	ROM_REGION( 0x40000, "maincpu", 0 )	/* 2*128k for 68000 code */
+	ROM_REGION( 0x40000, "maincpu", 0 ) /* 2*128k for 68000 code */
 	ROM_LOAD16_BYTE( "gaiden_1.3s",     0x00000, 0x20000, CRC(e037ff7c) SHA1(5418bcb80d4c52f05e3c26668193452fd51f1283) )
 	ROM_LOAD16_BYTE( "gaiden_2.4s",     0x00001, 0x20000, CRC(454f7314) SHA1(231296423870f00ea2e545faf0fbb37577430a4f) )
 
@@ -1085,7 +1076,7 @@ ROM_START( gaiden )
 	ROM_LOAD( "gaiden_3.4b",     0x0000, 0x10000, CRC(75fd3e6a) SHA1(3333e84ed4983caa133e60a8e8895fa897ab4949) )   /* Audio CPU is a Z80  */
 
 	ROM_REGION( 0x010000, "gfx1", 0 )
-	ROM_LOAD( "gaiden_5.7a",     0x000000, 0x10000, CRC(8d4035f7) SHA1(3473456cdd24e312e3073586d7e8f24eb71bbea1) )	/* 8x8 tiles */
+	ROM_LOAD( "gaiden_5.7a",     0x000000, 0x10000, CRC(8d4035f7) SHA1(3473456cdd24e312e3073586d7e8f24eb71bbea1) )  /* 8x8 tiles */
 
 	ROM_REGION( 0x080000, "gfx2", 0 )
 	ROM_LOAD( "14.3a",       0x000000, 0x20000, CRC(1ecfddaa) SHA1(e71d60ae1a98fe8512498f91cce01c16be9f0871) )
@@ -1100,22 +1091,22 @@ ROM_START( gaiden )
 	ROM_LOAD( "21.4b",       0x060000, 0x20000, CRC(1ac892f5) SHA1(28364266ca9d1955fb7953f5c2d6f35e114beec6) )
 
 	ROM_REGION( 0x100000, "gfx4", 0 )
-	ROM_LOAD( "6.3m",         0x000000, 0x20000, CRC(e7ccdf9f) SHA1(80ffcefc95660471124898a9c2bee55df36bda13) )	/* sprites A1 */
-	ROM_LOAD( "8.3n",         0x020000, 0x20000, CRC(7ef7f880) SHA1(26ba9a76adce24beea3cffa1cb95aeafe6f82f96) )	/* sprites B1 */
-	ROM_LOAD( "10.3r",        0x040000, 0x20000, CRC(a6451dec) SHA1(553e7a1453b59055fa0b10ca04125543d9f8987c) )	/* sprites C1 */
-	ROM_LOAD( "gaiden_12.3s", 0x060000, 0x20000, CRC(90f1e13a) SHA1(3fe9fe62aa9e92c871c791a3b11f96c9a48099a9) )	/* sprites D1 */
+	ROM_LOAD( "6.3m",         0x000000, 0x20000, CRC(e7ccdf9f) SHA1(80ffcefc95660471124898a9c2bee55df36bda13) ) /* sprites A1 */
+	ROM_LOAD( "8.3n",         0x020000, 0x20000, CRC(7ef7f880) SHA1(26ba9a76adce24beea3cffa1cb95aeafe6f82f96) ) /* sprites B1 */
+	ROM_LOAD( "10.3r",        0x040000, 0x20000, CRC(a6451dec) SHA1(553e7a1453b59055fa0b10ca04125543d9f8987c) ) /* sprites C1 */
+	ROM_LOAD( "gaiden_12.3s", 0x060000, 0x20000, CRC(90f1e13a) SHA1(3fe9fe62aa9e92c871c791a3b11f96c9a48099a9) ) /* sprites D1 */
 
-	ROM_LOAD( "7.1m",         0x080000, 0x20000, CRC(016bec95) SHA1(6a6757c52ca9a2398ea43d1af4a8d5adde6f4cd2) )	/* sprites A2 */
-	ROM_LOAD( "9.1n",         0x0a0000, 0x20000, CRC(6e9b7fd3) SHA1(c86ff61844fc94c02625bb812b9062d0649c8fdf) )	/* sprites B2 */
-	ROM_LOAD( "11.1r",        0x0c0000, 0x20000, CRC(7fbfdf5e) SHA1(ab67b72dcadb5f2236d29de751de5bf890a9e423) )	/* sprites C2 */
-	ROM_LOAD( "gaiden_13.1s", 0x0e0000, 0x20000, CRC(7d9f5c5e) SHA1(200102532ea9a88c7c708e03f8893c46dff827d1) )	/* sprites D2 */
+	ROM_LOAD( "7.1m",         0x080000, 0x20000, CRC(016bec95) SHA1(6a6757c52ca9a2398ea43d1af4a8d5adde6f4cd2) ) /* sprites A2 */
+	ROM_LOAD( "9.1n",         0x0a0000, 0x20000, CRC(6e9b7fd3) SHA1(c86ff61844fc94c02625bb812b9062d0649c8fdf) ) /* sprites B2 */
+	ROM_LOAD( "11.1r",        0x0c0000, 0x20000, CRC(7fbfdf5e) SHA1(ab67b72dcadb5f2236d29de751de5bf890a9e423) ) /* sprites C2 */
+	ROM_LOAD( "gaiden_13.1s", 0x0e0000, 0x20000, CRC(7d9f5c5e) SHA1(200102532ea9a88c7c708e03f8893c46dff827d1) ) /* sprites D2 */
 
-	ROM_REGION( 0x40000, "oki", 0 )	/* 128k for ADPCM samples - sound chip is OKIM6295 */
+	ROM_REGION( 0x40000, "oki", 0 ) /* 128k for ADPCM samples - sound chip is OKIM6295 */
 	ROM_LOAD( "4.4a",     0x0000, 0x20000, CRC(b0e0faf9) SHA1(2275d2ef5eee356ccf80b9e9644d16fc30a4d107) ) /* samples */
 ROM_END
 
 ROM_START( ryukendn )
-	ROM_REGION( 0x40000, "maincpu", 0 )	/* 2*128k for 68000 code */
+	ROM_REGION( 0x40000, "maincpu", 0 ) /* 2*128k for 68000 code */
 	ROM_LOAD16_BYTE( "ryukendn_1.3s",  0x00000, 0x20000, CRC(6203a5e2) SHA1(8cfe05c483a351e938b067ffa642d515e28605a3) )
 	ROM_LOAD16_BYTE( "ryukendn_2.4s",  0x00001, 0x20000, CRC(9e99f522) SHA1(b2277d8934b5e6e2f556aee5092f5d1050774a34) )
 
@@ -1123,7 +1114,7 @@ ROM_START( ryukendn )
 	ROM_LOAD( "3.4b",   0x0000, 0x10000, CRC(6b686b69) SHA1(f0fa553acb3945f8dbbf466073c8bae35a0375ef) )   /* Audio CPU is a Z80  */
 
 	ROM_REGION( 0x010000, "gfx1", 0 )
-	ROM_LOAD( "hn27512p.7a",   0x000000, 0x10000, CRC(765e7baa) SHA1(4d0a50f091b284739b6d9a8ceb4f81999da445fc) )	/* 8x8 tiles */
+	ROM_LOAD( "hn27512p.7a",   0x000000, 0x10000, CRC(765e7baa) SHA1(4d0a50f091b284739b6d9a8ceb4f81999da445fc) )    /* 8x8 tiles */
 
 	ROM_REGION( 0x080000, "gfx2", 0 )
 	ROM_LOAD( "14.3a",       0x000000, 0x20000, CRC(1ecfddaa) SHA1(e71d60ae1a98fe8512498f91cce01c16be9f0871) )
@@ -1139,19 +1130,19 @@ ROM_START( ryukendn )
 
 	ROM_REGION( 0x100000, "gfx4", 0 )
 	/* Should all these roms be 0x10000 bytes on this board? */
-	ROM_LOAD( "6.3m",            0x000000, 0x20000, CRC(e7ccdf9f) SHA1(80ffcefc95660471124898a9c2bee55df36bda13) )	/* sprites A1 */
-	ROM_LOAD( "8.3n",            0x020000, 0x20000, CRC(7ef7f880) SHA1(26ba9a76adce24beea3cffa1cb95aeafe6f82f96) )	/* sprites B1 */
-	ROM_LOAD( "10.3r",           0x040000, 0x20000, CRC(a6451dec) SHA1(553e7a1453b59055fa0b10ca04125543d9f8987c) )	/* sprites C1 */
-	ROM_LOAD( "shadoww_12a.xx",  0x060000, 0x10000, CRC(9bb07731) SHA1(b799b1958dc9b84797fdab2591e33bd5d28884a3) )	/* sprites D1 */
-	ROM_LOAD( "ryukendn_12b.xx", 0x070000, 0x10000, CRC(1773628a) SHA1(e7eacc880f2a4174f17b263bedf8c1bc64007dbd) )	/* sprites D1 */
+	ROM_LOAD( "6.3m",            0x000000, 0x20000, CRC(e7ccdf9f) SHA1(80ffcefc95660471124898a9c2bee55df36bda13) )  /* sprites A1 */
+	ROM_LOAD( "8.3n",            0x020000, 0x20000, CRC(7ef7f880) SHA1(26ba9a76adce24beea3cffa1cb95aeafe6f82f96) )  /* sprites B1 */
+	ROM_LOAD( "10.3r",           0x040000, 0x20000, CRC(a6451dec) SHA1(553e7a1453b59055fa0b10ca04125543d9f8987c) )  /* sprites C1 */
+	ROM_LOAD( "shadoww_12a.xx",  0x060000, 0x10000, CRC(9bb07731) SHA1(b799b1958dc9b84797fdab2591e33bd5d28884a3) )  /* sprites D1 */
+	ROM_LOAD( "ryukendn_12b.xx", 0x070000, 0x10000, CRC(1773628a) SHA1(e7eacc880f2a4174f17b263bedf8c1bc64007dbd) )  /* sprites D1 */
 
-	ROM_LOAD( "7.1m",            0x080000, 0x20000, CRC(016bec95) SHA1(6a6757c52ca9a2398ea43d1af4a8d5adde6f4cd2) )	/* sprites A2 */
-	ROM_LOAD( "9.1n",            0x0a0000, 0x20000, CRC(6e9b7fd3) SHA1(c86ff61844fc94c02625bb812b9062d0649c8fdf) )	/* sprites B2 */
-	ROM_LOAD( "11.1r",           0x0c0000, 0x20000, CRC(7fbfdf5e) SHA1(ab67b72dcadb5f2236d29de751de5bf890a9e423) )	/* sprites C2 */
-	ROM_LOAD( "shadoww_13a.xx",  0x0e0000, 0x10000, CRC(996d2fa5) SHA1(a32526949af3635914927ebbbe684c3de9562a9d) )	/* sprites D2 */
-	ROM_LOAD( "ryukendn_13b.xx", 0x0f0000, 0x10000, CRC(1f43c507) SHA1(29f655442c16677855073284c7ab41059c99c497) )	/* sprites D2 */
+	ROM_LOAD( "7.1m",            0x080000, 0x20000, CRC(016bec95) SHA1(6a6757c52ca9a2398ea43d1af4a8d5adde6f4cd2) )  /* sprites A2 */
+	ROM_LOAD( "9.1n",            0x0a0000, 0x20000, CRC(6e9b7fd3) SHA1(c86ff61844fc94c02625bb812b9062d0649c8fdf) )  /* sprites B2 */
+	ROM_LOAD( "11.1r",           0x0c0000, 0x20000, CRC(7fbfdf5e) SHA1(ab67b72dcadb5f2236d29de751de5bf890a9e423) )  /* sprites C2 */
+	ROM_LOAD( "shadoww_13a.xx",  0x0e0000, 0x10000, CRC(996d2fa5) SHA1(a32526949af3635914927ebbbe684c3de9562a9d) )  /* sprites D2 */
+	ROM_LOAD( "ryukendn_13b.xx", 0x0f0000, 0x10000, CRC(1f43c507) SHA1(29f655442c16677855073284c7ab41059c99c497) )  /* sprites D2 */
 
-	ROM_REGION( 0x40000, "oki", 0 )	/* 128k for ADPCM samples - sound chip is OKIM6295 */
+	ROM_REGION( 0x40000, "oki", 0 ) /* 128k for ADPCM samples - sound chip is OKIM6295 */
 	ROM_LOAD( "4.4a",     0x0000, 0x20000, CRC(b0e0faf9) SHA1(2275d2ef5eee356ccf80b9e9644d16fc30a4d107) ) /* samples */
 ROM_END
 
@@ -1165,7 +1156,7 @@ Dumped from an original Tecmo board. Board No. 6215-A. Serial A-59488.
 */
 
 ROM_START( ryukendna )
-	ROM_REGION( 0x40000, "maincpu", 0 )	/* 2*128k for 68000 code */
+	ROM_REGION( 0x40000, "maincpu", 0 ) /* 2*128k for 68000 code */
 	ROM_LOAD16_BYTE( "1.3s",  0x00000, 0x20000, CRC(0ed5464c) SHA1(2eab6650ad1c38cd560ec3d084f47156756c97a4) )
 	ROM_LOAD16_BYTE( "2.4s",  0x00001, 0x20000, CRC(a93a8256) SHA1(6bf6c189f82cb9341d3427a822de83cbaed27bc0) )
 
@@ -1173,7 +1164,7 @@ ROM_START( ryukendna )
 	ROM_LOAD( "3.4b",   0x0000, 0x10000, CRC(6b686b69) SHA1(f0fa553acb3945f8dbbf466073c8bae35a0375ef) )   /* Audio CPU is a Z80  */
 
 	ROM_REGION( 0x010000, "gfx1", 0 )
-	ROM_LOAD( "hn27512p.7a",   0x000000, 0x10000, CRC(765e7baa) SHA1(4d0a50f091b284739b6d9a8ceb4f81999da445fc) )	/* 8x8 tiles */
+	ROM_LOAD( "hn27512p.7a",   0x000000, 0x10000, CRC(765e7baa) SHA1(4d0a50f091b284739b6d9a8ceb4f81999da445fc) )    /* 8x8 tiles */
 
 	ROM_REGION( 0x080000, "gfx2", 0 )
 	ROM_LOAD( "14.3a",       0x000000, 0x20000, CRC(1ecfddaa) SHA1(e71d60ae1a98fe8512498f91cce01c16be9f0871) )
@@ -1188,17 +1179,17 @@ ROM_START( ryukendna )
 	ROM_LOAD( "21.4b",       0x060000, 0x20000, CRC(1ac892f5) SHA1(28364266ca9d1955fb7953f5c2d6f35e114beec6) )
 
 	ROM_REGION( 0x100000, "gfx4", 0 )
-	ROM_LOAD( "6.3m",     0x000000, 0x20000, CRC(e7ccdf9f) SHA1(80ffcefc95660471124898a9c2bee55df36bda13) )	/* sprites A1 */
-	ROM_LOAD( "8.3n",     0x020000, 0x20000, CRC(7ef7f880) SHA1(26ba9a76adce24beea3cffa1cb95aeafe6f82f96) )	/* sprites B1 */
-	ROM_LOAD( "10.3r",    0x040000, 0x20000, CRC(a6451dec) SHA1(553e7a1453b59055fa0b10ca04125543d9f8987c) )	/* sprites C1 */
-	ROM_LOAD( "12.3s",    0x060000, 0x20000, CRC(277204f0) SHA1(918e05f10959f2b50c16b6e0dc62e3076c99250e) )	/* sprites D1 */
+	ROM_LOAD( "6.3m",     0x000000, 0x20000, CRC(e7ccdf9f) SHA1(80ffcefc95660471124898a9c2bee55df36bda13) ) /* sprites A1 */
+	ROM_LOAD( "8.3n",     0x020000, 0x20000, CRC(7ef7f880) SHA1(26ba9a76adce24beea3cffa1cb95aeafe6f82f96) ) /* sprites B1 */
+	ROM_LOAD( "10.3r",    0x040000, 0x20000, CRC(a6451dec) SHA1(553e7a1453b59055fa0b10ca04125543d9f8987c) ) /* sprites C1 */
+	ROM_LOAD( "12.3s",    0x060000, 0x20000, CRC(277204f0) SHA1(918e05f10959f2b50c16b6e0dc62e3076c99250e) ) /* sprites D1 */
 
-	ROM_LOAD( "7.1m",     0x080000, 0x20000, CRC(016bec95) SHA1(6a6757c52ca9a2398ea43d1af4a8d5adde6f4cd2) )	/* sprites A2 */
-	ROM_LOAD( "9.1n",     0x0a0000, 0x20000, CRC(6e9b7fd3) SHA1(c86ff61844fc94c02625bb812b9062d0649c8fdf) )	/* sprites B2 */
-	ROM_LOAD( "11.1r",    0x0c0000, 0x20000, CRC(7fbfdf5e) SHA1(ab67b72dcadb5f2236d29de751de5bf890a9e423) )	/* sprites C2 */
-	ROM_LOAD( "13.1s",    0x0e0000, 0x20000, CRC(4e56a508) SHA1(f89a6037e602b26d6ce11859e0b43a602b50d985) )	/* sprites D2 */
+	ROM_LOAD( "7.1m",     0x080000, 0x20000, CRC(016bec95) SHA1(6a6757c52ca9a2398ea43d1af4a8d5adde6f4cd2) ) /* sprites A2 */
+	ROM_LOAD( "9.1n",     0x0a0000, 0x20000, CRC(6e9b7fd3) SHA1(c86ff61844fc94c02625bb812b9062d0649c8fdf) ) /* sprites B2 */
+	ROM_LOAD( "11.1r",    0x0c0000, 0x20000, CRC(7fbfdf5e) SHA1(ab67b72dcadb5f2236d29de751de5bf890a9e423) ) /* sprites C2 */
+	ROM_LOAD( "13.1s",    0x0e0000, 0x20000, CRC(4e56a508) SHA1(f89a6037e602b26d6ce11859e0b43a602b50d985) ) /* sprites D2 */
 
-	ROM_REGION( 0x40000, "oki", 0 )	/* 128k for ADPCM samples - sound chip is OKIM6295 */
+	ROM_REGION( 0x40000, "oki", 0 ) /* 128k for ADPCM samples - sound chip is OKIM6295 */
 	ROM_LOAD( "4.4a",     0x0000, 0x20000, CRC(b0e0faf9) SHA1(2275d2ef5eee356ccf80b9e9644d16fc30a4d107) ) /* samples */
 ROM_END
 
@@ -1261,18 +1252,18 @@ ROM_END
 
 
 ROM_START( wildfang ) /* Dipswitch selectable title of Wild Fang or Temco Knight */
-	ROM_REGION( 0x40000, "maincpu", 0 )	/* 2*128k for 68000 code */
+	ROM_REGION( 0x40000, "maincpu", 0 ) /* 2*128k for 68000 code */
 	ROM_LOAD16_BYTE( "1.3st",    0x00000, 0x20000, CRC(ab876c9b) SHA1(b02c822f107df4c9c4f0024998f225c1ddbbd496) )
 	ROM_LOAD16_BYTE( "2.5st",    0x00001, 0x20000, CRC(1dc74b3b) SHA1(c99051ebefd6ce666b13ab56c0a10b188f15ec28) )
 
 	ROM_REGION( 0x10000, "audiocpu", 0 )
 	ROM_LOAD( "tkni3.bin",    0x0000, 0x10000, CRC(15623ec7) SHA1(db43fe6c417117d7cd90a26e12a52efb0e1a5ca6) )   /* Audio CPU is a Z80  */
 
-	ROM_REGION( 0x1000, "mcu", 0 )	/* protection NEC D8749 */
+	ROM_REGION( 0x1000, "mcu", 0 )  /* protection NEC D8749 */
 	ROM_LOAD( "a-6v.mcu",         0x00000, 0x1000, NO_DUMP )
 
 	ROM_REGION( 0x010000, "gfx1", 0 )
-	ROM_LOAD( "tkni5.bin",    0x000000, 0x10000, CRC(5ed15896) SHA1(87bdddb26934af0b2c4e704e6d85c69a7531aeb1) )	/* 8x8 tiles */
+	ROM_LOAD( "tkni5.bin",    0x000000, 0x10000, CRC(5ed15896) SHA1(87bdddb26934af0b2c4e704e6d85c69a7531aeb1) ) /* 8x8 tiles */
 
 	ROM_REGION( 0x080000, "gfx2", 0 )
 	ROM_LOAD( "14.3a",        0x000000, 0x20000, CRC(0d20c10c) SHA1(209ca4e166d0b91ff99a338e135e5388af2c51f5) )
@@ -1284,26 +1275,26 @@ ROM_START( wildfang ) /* Dipswitch selectable title of Wild Fang or Temco Knight
 	ROM_LOAD( "tkni6.bin",    0x000000, 0x80000, CRC(f68fafb1) SHA1(aeca38eaea2f6dfc484e48ac1114c0c4abaafb9c) )
 
 	ROM_REGION( 0x100000, "gfx4", 0 )
-	ROM_LOAD( "tkni9.bin",    0x000000, 0x80000, CRC(d22f4239) SHA1(360a9a821faabe911eef407ef85452d8b706538f) )	/* sprites */
-	ROM_LOAD( "tkni8.bin",    0x080000, 0x80000, CRC(4931b184) SHA1(864e827ac109c0ee52a898034c021cd5e92ff000) )	/* sprites */
+	ROM_LOAD( "tkni9.bin",    0x000000, 0x80000, CRC(d22f4239) SHA1(360a9a821faabe911eef407ef85452d8b706538f) ) /* sprites */
+	ROM_LOAD( "tkni8.bin",    0x080000, 0x80000, CRC(4931b184) SHA1(864e827ac109c0ee52a898034c021cd5e92ff000) ) /* sprites */
 
-	ROM_REGION( 0x40000, "oki", 0 )	/* 128k for ADPCM samples - sound chip is OKIM6295 */
+	ROM_REGION( 0x40000, "oki", 0 ) /* 128k for ADPCM samples - sound chip is OKIM6295 */
 	ROM_LOAD( "tkni4.bin",    0x0000, 0x20000, CRC(a7a1dbcf) SHA1(2fee1d9745ce2ab54b0b9cbb6ab2e66ba9677245) ) /* samples */
 ROM_END
 
 ROM_START( wildfangs ) /* Wild Fang - No title change option */
-	ROM_REGION( 0x40000, "maincpu", 0 )	/* 2*128k for 68000 code */
+	ROM_REGION( 0x40000, "maincpu", 0 ) /* 2*128k for 68000 code */
 	ROM_LOAD16_BYTE( "1.3s",    0x00000, 0x20000, CRC(3421f691) SHA1(7829729e2007a53fc598db3ae3524b971cbf49e9) )
 	ROM_LOAD16_BYTE( "2.5s",    0x00001, 0x20000, CRC(d3547708) SHA1(91cc0575b25fe15d668eec26dd74945c51ed67eb) )
 
 	ROM_REGION( 0x10000, "audiocpu", 0 )
 	ROM_LOAD( "tkni3.bin",    0x0000, 0x10000, CRC(15623ec7) SHA1(db43fe6c417117d7cd90a26e12a52efb0e1a5ca6) )   /* Audio CPU is a Z80  */
 
-	ROM_REGION( 0x1000, "mcu", 0 )	/* protection NEC D8749 */
+	ROM_REGION( 0x1000, "mcu", 0 )  /* protection NEC D8749 */
 	ROM_LOAD( "a-6v.mcu",         0x00000, 0x1000, NO_DUMP )
 
 	ROM_REGION( 0x010000, "gfx1", 0 )
-	ROM_LOAD( "tkni5.bin",    0x000000, 0x10000, CRC(5ed15896) SHA1(87bdddb26934af0b2c4e704e6d85c69a7531aeb1) )	/* 8x8 tiles */
+	ROM_LOAD( "tkni5.bin",    0x000000, 0x10000, CRC(5ed15896) SHA1(87bdddb26934af0b2c4e704e6d85c69a7531aeb1) ) /* 8x8 tiles */
 
 	ROM_REGION( 0x080000, "gfx2", 0 )
 	ROM_LOAD( "14.3a",        0x000000, 0x20000, CRC(0d20c10c) SHA1(209ca4e166d0b91ff99a338e135e5388af2c51f5) )
@@ -1315,26 +1306,26 @@ ROM_START( wildfangs ) /* Wild Fang - No title change option */
 	ROM_LOAD( "tkni6.bin",    0x000000, 0x80000, CRC(f68fafb1) SHA1(aeca38eaea2f6dfc484e48ac1114c0c4abaafb9c) )
 
 	ROM_REGION( 0x100000, "gfx4", 0 )
-	ROM_LOAD( "tkni9.bin",    0x000000, 0x80000, CRC(d22f4239) SHA1(360a9a821faabe911eef407ef85452d8b706538f) )	/* sprites */
-	ROM_LOAD( "tkni8.bin",    0x080000, 0x80000, CRC(4931b184) SHA1(864e827ac109c0ee52a898034c021cd5e92ff000) )	/* sprites */
+	ROM_LOAD( "tkni9.bin",    0x000000, 0x80000, CRC(d22f4239) SHA1(360a9a821faabe911eef407ef85452d8b706538f) ) /* sprites */
+	ROM_LOAD( "tkni8.bin",    0x080000, 0x80000, CRC(4931b184) SHA1(864e827ac109c0ee52a898034c021cd5e92ff000) ) /* sprites */
 
-	ROM_REGION( 0x40000, "oki", 0 )	/* 128k for ADPCM samples - sound chip is OKIM6295 */
+	ROM_REGION( 0x40000, "oki", 0 ) /* 128k for ADPCM samples - sound chip is OKIM6295 */
 	ROM_LOAD( "tkni4.bin",    0x0000, 0x20000, CRC(a7a1dbcf) SHA1(2fee1d9745ce2ab54b0b9cbb6ab2e66ba9677245) ) /* samples */
 ROM_END
 
 ROM_START( tknight ) /* Temco Knight - No title change option */
-	ROM_REGION( 0x40000, "maincpu", 0 )	/* 2*128k for 68000 code */
+	ROM_REGION( 0x40000, "maincpu", 0 ) /* 2*128k for 68000 code */
 	ROM_LOAD16_BYTE( "tkni1.bin",    0x00000, 0x20000, CRC(9121daa8) SHA1(06ba7779602df8fae32e859371d27c0dbb8d3430) )
 	ROM_LOAD16_BYTE( "tkni2.bin",    0x00001, 0x20000, CRC(6669cd87) SHA1(8888522a3aef76a979ffc80ba457dd49f279abf1) )
 
 	ROM_REGION( 0x10000, "audiocpu", 0 )
 	ROM_LOAD( "tkni3.bin",    0x0000, 0x10000, CRC(15623ec7) SHA1(db43fe6c417117d7cd90a26e12a52efb0e1a5ca6) )   /* Audio CPU is a Z80  */
 
-	ROM_REGION( 0x1000, "mcu", 0 )	/* protection NEC D8749 */
+	ROM_REGION( 0x1000, "mcu", 0 )  /* protection NEC D8749 */
 	ROM_LOAD( "a-6v.mcu",         0x00000, 0x1000, NO_DUMP )
 
 	ROM_REGION( 0x010000, "gfx1", 0 )
-	ROM_LOAD( "tkni5.bin",    0x000000, 0x10000, CRC(5ed15896) SHA1(87bdddb26934af0b2c4e704e6d85c69a7531aeb1) )	/* 8x8 tiles */
+	ROM_LOAD( "tkni5.bin",    0x000000, 0x10000, CRC(5ed15896) SHA1(87bdddb26934af0b2c4e704e6d85c69a7531aeb1) ) /* 8x8 tiles */
 
 	ROM_REGION( 0x080000, "gfx2", 0 )
 	ROM_LOAD( "tkni7.bin",    0x000000, 0x80000, CRC(4b4d4286) SHA1(d386aa223eb288ea829c98d3f39279a75dc66b71) )
@@ -1343,10 +1334,10 @@ ROM_START( tknight ) /* Temco Knight - No title change option */
 	ROM_LOAD( "tkni6.bin",    0x000000, 0x80000, CRC(f68fafb1) SHA1(aeca38eaea2f6dfc484e48ac1114c0c4abaafb9c) )
 
 	ROM_REGION( 0x100000, "gfx4", 0 )
-	ROM_LOAD( "tkni9.bin",    0x000000, 0x80000, CRC(d22f4239) SHA1(360a9a821faabe911eef407ef85452d8b706538f) )	/* sprites */
-	ROM_LOAD( "tkni8.bin",    0x080000, 0x80000, CRC(4931b184) SHA1(864e827ac109c0ee52a898034c021cd5e92ff000) )	/* sprites */
+	ROM_LOAD( "tkni9.bin",    0x000000, 0x80000, CRC(d22f4239) SHA1(360a9a821faabe911eef407ef85452d8b706538f) ) /* sprites */
+	ROM_LOAD( "tkni8.bin",    0x080000, 0x80000, CRC(4931b184) SHA1(864e827ac109c0ee52a898034c021cd5e92ff000) ) /* sprites */
 
-	ROM_REGION( 0x40000, "oki", 0 )	/* 128k for ADPCM samples - sound chip is OKIM6295 */
+	ROM_REGION( 0x40000, "oki", 0 ) /* 128k for ADPCM samples - sound chip is OKIM6295 */
 	ROM_LOAD( "tkni4.bin",    0x0000, 0x20000, CRC(a7a1dbcf) SHA1(2fee1d9745ce2ab54b0b9cbb6ab2e66ba9677245) ) /* samples */
 ROM_END
 
@@ -1358,7 +1349,7 @@ ROM_START( stratof )
 	ROM_REGION( 0x10000, "audiocpu", 0 )
 	ROM_LOAD( "a-4b.3",           0x00000, 0x10000, CRC(18655c95) SHA1(8357e0520565a201bb930cadffc759463931ec41) )
 
-	ROM_REGION( 0x1000, "mcu", 0 )	/* protection NEC D8749 */
+	ROM_REGION( 0x1000, "mcu", 0 )  /* protection NEC D8749 */
 	ROM_LOAD( "a-6v.mcu",         0x00000, 0x1000, NO_DUMP )
 
 	ROM_REGION( 0x10000, "gfx1", 0 )
@@ -1386,7 +1377,7 @@ ROM_START( raiga )
 	ROM_REGION( 0x10000, "audiocpu", 0 )
 	ROM_LOAD( "a-4b.3",           0x00000, 0x10000, CRC(18655c95) SHA1(8357e0520565a201bb930cadffc759463931ec41) )
 
-	ROM_REGION( 0x1000, "mcu", 0 )	/* protection NEC D8749 */
+	ROM_REGION( 0x1000, "mcu", 0 )  /* protection NEC D8749 */
 	ROM_LOAD( "a-6v.mcu",         0x00000, 0x1000, NO_DUMP )
 
 	ROM_REGION( 0x10000, "gfx1", 0 )
@@ -1453,7 +1444,7 @@ Notes:
 */
 
 ROM_START( drgnbowl )
-	ROM_REGION( 0x40000, "maincpu", 0 )	/* 2*128k for 68000 code */
+	ROM_REGION( 0x40000, "maincpu", 0 ) /* 2*128k for 68000 code */
 	ROM_LOAD16_BYTE( "4.3h",         0x00000, 0x20000, CRC(90730008) SHA1(84f0668cf978d99f861cbaeb4b33f7cb1428a648) )
 	ROM_LOAD16_BYTE( "5.4h",         0x00001, 0x20000, CRC(193cc915) SHA1(e898f31766eaf515e0787848134b1365e75b32a9) )
 
@@ -1489,62 +1480,59 @@ ROM_START( drgnbowl )
 ROM_END
 
 
-static DRIVER_INIT( shadoww )
+DRIVER_INIT_MEMBER(gaiden_state,shadoww)
 {
-	gaiden_state *state = machine.driver_data<gaiden_state>();
 	/* sprite size Y = sprite size X */
-	state->m_sprite_sizey = 0;
-	state->m_raiga_jumppoints = jumppoints_00;
+	m_sprite_sizey = 0;
+	m_raiga_jumppoints = jumppoints_00;
 }
 
-static DRIVER_INIT( wildfang )
+DRIVER_INIT_MEMBER(gaiden_state,wildfang)
 {
-	gaiden_state *state = machine.driver_data<gaiden_state>();
 	/* sprite size Y = sprite size X */
-	state->m_sprite_sizey = 0;
-	state->m_raiga_jumppoints = jumppoints_00;
+	m_sprite_sizey = 0;
+	m_raiga_jumppoints = jumppoints_00;
 
-	state->m_prot = 0;
-	state->m_jumpcode = 0;
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x07a006, 0x07a007, FUNC(wildfang_protection_r));
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x07a804, 0x07a805, FUNC(wildfang_protection_w));
+	m_prot = 0;
+	m_jumpcode = 0;
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(0x07a006, 0x07a007, read16_delegate(FUNC(gaiden_state::wildfang_protection_r),this));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0x07a804, 0x07a805, write16_delegate(FUNC(gaiden_state::wildfang_protection_w),this));
 }
 
-static DRIVER_INIT( raiga )
+DRIVER_INIT_MEMBER(gaiden_state,raiga)
 {
-	gaiden_state *state = machine.driver_data<gaiden_state>();
 	/* sprite size Y independent from sprite size X */
-	state->m_sprite_sizey = 2;
-	state->m_raiga_jumppoints = jumppoints_00;
+	m_sprite_sizey = 2;
+	m_raiga_jumppoints = jumppoints_00;
 
-	state->m_prot = 0;
-	state->m_jumpcode = 0;
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x07a006, 0x07a007, FUNC(raiga_protection_r));
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x07a804, 0x07a805, FUNC(raiga_protection_w));
+	m_prot = 0;
+	m_jumpcode = 0;
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(0x07a006, 0x07a007, read16_delegate(FUNC(gaiden_state::raiga_protection_r),this));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0x07a804, 0x07a805, write16_delegate(FUNC(gaiden_state::raiga_protection_w),this));
 }
 
 static void descramble_drgnbowl_gfx(running_machine &machine)
 {
 	int i;
-	UINT8 *ROM = machine.region("maincpu")->base();
-	size_t size = machine.region("maincpu")->bytes();
+	UINT8 *ROM = machine.root_device().memregion("maincpu")->base();
+	size_t size = machine.root_device().memregion("maincpu")->bytes();
 	UINT8 *buffer = auto_alloc_array(machine, UINT8, size);
 
 	memcpy(buffer, ROM, size);
 	for( i = 0; i < size; i++ )
 	{
 		ROM[i] = buffer[BITSWAP24(i,23,22,21,20,
-			                        19,18,17,15,
+									19,18,17,15,
 							16,14,13,12,
 							11,10, 9, 8,
-							 7, 6, 5, 4,
-							 3, 2, 1, 0)];
+								7, 6, 5, 4,
+								3, 2, 1, 0)];
 	}
 
 	auto_free(machine, buffer);
 
-	ROM = machine.region("gfx2")->base();
-	size = machine.region("gfx2")->bytes();
+	ROM = machine.root_device().memregion("gfx2")->base();
+	size = machine.root_device().memregion("gfx2")->bytes();
 	buffer = auto_alloc_array(machine, UINT8, size);
 
 	memcpy(buffer,ROM,size);
@@ -1552,22 +1540,21 @@ static void descramble_drgnbowl_gfx(running_machine &machine)
 	{
 
 		ROM[i] = buffer[BITSWAP24(i,23,22,21,20,
-		                            19,18,16,17,
-		                            15,14,13, 4,
-		                             3,12,11,10,
-		                             9, 8, 7, 6,
-		                             5, 2, 1, 0)];
+									19,18,16,17,
+									15,14,13, 4,
+										3,12,11,10,
+										9, 8, 7, 6,
+										5, 2, 1, 0)];
 	}
 
 	auto_free(machine, buffer);
 }
 
-static DRIVER_INIT( drgnbowl )
+DRIVER_INIT_MEMBER(gaiden_state,drgnbowl)
 {
-	gaiden_state *state = machine.driver_data<gaiden_state>();
-	state->m_raiga_jumppoints = jumppoints_00;
+	m_raiga_jumppoints = jumppoints_00;
 
-	descramble_drgnbowl_gfx(machine);
+	descramble_drgnbowl_gfx(machine());
 }
 
 static void descramble_mastninj_gfx(running_machine &machine, UINT8* src)
@@ -1611,23 +1598,24 @@ static void descramble_mastninj_gfx(running_machine &machine, UINT8* src)
 	}
 }
 
-static DRIVER_INIT(mastninj)
+DRIVER_INIT_MEMBER(gaiden_state,mastninj)
 {
 	// rearrange the graphic roms into a format that MAME can decode
-	descramble_mastninj_gfx(machine, machine.region("gfx2")->base());
-	descramble_mastninj_gfx(machine, machine.region("gfx3")->base());
+	descramble_mastninj_gfx(machine(), machine().root_device().memregion("gfx2")->base());
+	descramble_mastninj_gfx(machine(), machine().root_device().memregion("gfx3")->base());
 	DRIVER_INIT_CALL(shadoww);
 }
 
-GAME( 1988, shadoww,  0,        shadoww, common,   shadoww,  ROT0, "Tecmo", "Shadow Warriors (World, set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1988, shadowwa, shadoww,  shadoww, common,   shadoww,  ROT0, "Tecmo", "Shadow Warriors (World, set 2)", GAME_SUPPORTS_SAVE )
-GAME( 1988, gaiden,   shadoww,  shadoww, common,   shadoww,  ROT0, "Tecmo", "Ninja Gaiden (US)", GAME_SUPPORTS_SAVE )
-GAME( 1989, ryukendn, shadoww,  shadoww, common,   shadoww,  ROT0, "Tecmo", "Ninja Ryukenden (Japan, set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1989, ryukendna,shadoww,  shadoww, common,   shadoww,  ROT0, "Tecmo", "Ninja Ryukenden (Japan, set 2)", GAME_SUPPORTS_SAVE )
-GAME( 1989, mastninj, shadoww,  mastninj,common,   mastninj, ROT0, "bootleg", "Master Ninja (bootleg of Shadow Warriors / Ninja Gaiden)", GAME_NOT_WORKING | GAME_SUPPORTS_SAVE ) // sprites need fixing, sound and yscroll too.
-GAME( 1989, wildfang, 0,        shadoww, wildfang, wildfang, ROT0, "Tecmo", "Wild Fang / Tecmo Knight", GAME_SUPPORTS_SAVE )
-GAME( 1989, wildfangs,wildfang, shadoww, tknight,  wildfang, ROT0, "Tecmo", "Wild Fang", GAME_SUPPORTS_SAVE )
-GAME( 1989, tknight,  wildfang, shadoww, tknight,  wildfang, ROT0, "Tecmo", "Tecmo Knight", GAME_SUPPORTS_SAVE )
-GAME( 1991, stratof,  0,        raiga,   raiga,    raiga,    ROT0, "Tecmo", "Raiga - Strato Fighter (US)", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
-GAME( 1991, raiga,    stratof,  raiga,   raiga,    raiga,    ROT0, "Tecmo", "Raiga - Strato Fighter (Japan)", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
-GAME( 1992, drgnbowl, 0,        drgnbowl,drgnbowl, drgnbowl, ROT0, "Nics",  "Dragon Bowl", GAME_SUPPORTS_SAVE )
+//    YEAR, NAME,      PARENT,   MACHINE,  INPUT,    INIT,     MONITOR,COMPANY,FULLNAME,FLAGS
+GAME( 1988, shadoww,   0,        shadoww,  common, gaiden_state,   shadoww,  ROT0,   "Tecmo", "Shadow Warriors (World, set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1988, shadowwa,  shadoww,  shadoww,  common, gaiden_state,   shadoww,  ROT0,   "Tecmo", "Shadow Warriors (World, set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1988, gaiden,    shadoww,  shadoww,  common, gaiden_state,   shadoww,  ROT0,   "Tecmo", "Ninja Gaiden (US)", GAME_SUPPORTS_SAVE )
+GAME( 1989, ryukendn,  shadoww,  shadoww,  common, gaiden_state,   shadoww,  ROT0,   "Tecmo", "Ninja Ryukenden (Japan, set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1989, ryukendna, shadoww,  shadoww,  common, gaiden_state,   shadoww,  ROT0,   "Tecmo", "Ninja Ryukenden (Japan, set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1989, mastninj,  shadoww,  mastninj, common, gaiden_state,   mastninj, ROT0,   "bootleg", "Master Ninja (bootleg of Shadow Warriors / Ninja Gaiden)", GAME_NOT_WORKING | GAME_SUPPORTS_SAVE ) // sprites need fixing, sound and yscroll too.
+GAME( 1989, wildfang,  0,        shadoww,  wildfang, gaiden_state, wildfang, ROT0,   "Tecmo", "Wild Fang / Tecmo Knight", GAME_SUPPORTS_SAVE )
+GAME( 1989, wildfangs, wildfang, shadoww,  tknight, gaiden_state,  wildfang, ROT0,   "Tecmo", "Wild Fang", GAME_SUPPORTS_SAVE )
+GAME( 1989, tknight,   wildfang, shadoww,  tknight, gaiden_state,  wildfang, ROT0,   "Tecmo", "Tecmo Knight", GAME_SUPPORTS_SAVE )
+GAME( 1991, stratof,   0,        raiga,    raiga, gaiden_state,    raiga,    ROT0,   "Tecmo", "Raiga - Strato Fighter (US)", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
+GAME( 1991, raiga,     stratof,  raiga,    raiga, gaiden_state,    raiga,    ROT0,   "Tecmo", "Raiga - Strato Fighter (Japan)", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
+GAME( 1992, drgnbowl,  0,        drgnbowl, drgnbowl, gaiden_state, drgnbowl, ROT0,   "Nics",  "Dragon Bowl", GAME_SUPPORTS_SAVE )

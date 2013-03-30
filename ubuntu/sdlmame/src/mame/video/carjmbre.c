@@ -12,12 +12,12 @@
 // palette info from Popper (OEC 1983, very similar video hw)
 static const res_net_decode_info carjmbre_decode_info =
 {
-	1,		// there may be two proms needed to construct color
-	0, 63,	// start/end
+	1,      // there may be two proms needed to construct color
+	0, 63,  // start/end
 	//  R,   G,   B,
-	{   0,   0,   0, },		// offsets
-	{   0,   3,   6, },		// shifts
-	{0x07,0x07,0x03, }	    // masks
+	{   0,   0,   0, },     // offsets
+	{   0,   3,   6, },     // shifts
+	{0x07,0x07,0x03, }      // masks
 };
 
 static const res_net_info carjmbre_net_info =
@@ -30,87 +30,82 @@ static const res_net_info carjmbre_net_info =
 	}
 };
 
-PALETTE_INIT( carjmbre )
+void carjmbre_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	rgb_t *rgb;
 
-	rgb = compute_res_net_all(machine, color_prom, &carjmbre_decode_info, &carjmbre_net_info);
-	palette_set_colors(machine, 0, rgb, 64);
-	palette_normalize_range(machine.palette, 0, 63, 0, 255);
-	auto_free(machine, rgb);
+	rgb = compute_res_net_all(machine(), color_prom, &carjmbre_decode_info, &carjmbre_net_info);
+	palette_set_colors(machine(), 0, rgb, 64);
+	palette_normalize_range(machine().palette, 0, 63, 0, 255);
+	auto_free(machine(), rgb);
 }
 
 
 
-WRITE8_HANDLER( carjmbre_flipscreen_w )
+WRITE8_MEMBER(carjmbre_state::carjmbre_flipscreen_w)
 {
-	carjmbre_state *state = space->machine().driver_data<carjmbre_state>();
 
-	state->m_flipscreen = (data & 1) ? (TILEMAP_FLIPX | TILEMAP_FLIPY) : 0;
-	tilemap_set_flip_all(space->machine(), state->m_flipscreen);
+	m_flipscreen = (data & 1) ? (TILEMAP_FLIPX | TILEMAP_FLIPY) : 0;
+	machine().tilemap().set_flip_all(m_flipscreen);
 }
 
-WRITE8_HANDLER( carjmbre_bgcolor_w )
+WRITE8_MEMBER(carjmbre_state::carjmbre_bgcolor_w)
 {
-	carjmbre_state *state = space->machine().driver_data<carjmbre_state>();
 	data = ~data & 0x3f;
 
-	if (data != state->m_bgcolor)
+	if (data != m_bgcolor)
 	{
 		int i;
 
-		state->m_bgcolor = data;
+		m_bgcolor = data;
 		if (data & 3)
 			for (i = 0; i < 64; i += 4)
-				palette_set_color(space->machine(), i, palette_get_color(space->machine(), data));
+				palette_set_color(machine(), i, palette_get_color(machine(), data));
 		else
 			// restore to initial state (black)
 			for (i = 0; i < 64; i += 4)
-				palette_set_color(space->machine(), i, RGB_BLACK);
+				palette_set_color(machine(), i, RGB_BLACK);
 	}
 }
 
-WRITE8_HANDLER( carjmbre_8806_w )
+WRITE8_MEMBER(carjmbre_state::carjmbre_8806_w)
 {
 	// unknown, gets updated at same time as carjmbre_bgcolor_w
 }
 
-WRITE8_HANDLER( carjmbre_videoram_w )
+WRITE8_MEMBER(carjmbre_state::carjmbre_videoram_w)
 {
-	carjmbre_state *state = space->machine().driver_data<carjmbre_state>();
 
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_cj_tilemap, offset & 0x3ff);
+	m_videoram[offset] = data;
+	m_cj_tilemap->mark_tile_dirty(offset & 0x3ff);
 }
 
 
 
-static TILE_GET_INFO( get_carjmbre_tile_info )
+TILE_GET_INFO_MEMBER(carjmbre_state::get_carjmbre_tile_info)
 {
-	carjmbre_state *state = machine.driver_data<carjmbre_state>();
-	UINT32 tile_number = state->m_videoram[tile_index] & 0xff;
-	UINT8 attr = state->m_videoram[tile_index + 0x400];
+	UINT32 tile_number = m_videoram[tile_index] & 0xff;
+	UINT8 attr = m_videoram[tile_index + 0x400];
 	tile_number += (attr & 0x80) << 1; /* bank */
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			0,
 			tile_number,
 			attr & 0xf,
 			0);
 }
 
-VIDEO_START( carjmbre )
+void carjmbre_state::video_start()
 {
-	carjmbre_state *state = machine.driver_data<carjmbre_state>();
 
-	state->m_cj_tilemap = tilemap_create(machine, get_carjmbre_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
-	state->save_item(NAME(state->m_flipscreen));
-	state->save_item(NAME(state->m_bgcolor));
+	m_cj_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(carjmbre_state::get_carjmbre_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
+	save_item(NAME(m_flipscreen));
+	save_item(NAME(m_bgcolor));
 }
 
-SCREEN_UPDATE( carjmbre )
+UINT32 carjmbre_state::screen_update_carjmbre(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	carjmbre_state *state = screen->machine().driver_data<carjmbre_state>();
 	int offs, troffs, sx, sy, flipx, flipy;
 
 	//colorram
@@ -119,7 +114,7 @@ SCREEN_UPDATE( carjmbre )
 	//-xxx---- unused
 	//----xxxx colour
 
-	tilemap_draw(bitmap, cliprect, state->m_cj_tilemap, 0, 0);
+	m_cj_tilemap->draw(bitmap, cliprect, 0, 0);
 
 	//spriteram[offs]
 	//+0       y pos
@@ -131,21 +126,21 @@ SCREEN_UPDATE( carjmbre )
 	//--xx---- unused
 	//----xxxx colour
 	//+3       x pos
-	for (offs = state->m_spriteram_size - 4; offs >= 0; offs -= 4)
+	for (offs = m_spriteram.bytes() - 4; offs >= 0; offs -= 4)
 	{
 		//before copying the sprites to spriteram the game reorders the first
 		//sprite to last, sprite ordering is incorrect if this isn't undone
-		troffs = (offs - 4 + state->m_spriteram_size) % state->m_spriteram_size;
+		troffs = (offs - 4 + m_spriteram.bytes()) % m_spriteram.bytes();
 
 		//unused sprites are marked with ypos <= 0x02 (or >= 0xfd if screen flipped)
-		if (state->m_spriteram[troffs] > 0x02 && state->m_spriteram[troffs] < 0xfd)
+		if (m_spriteram[troffs] > 0x02 && m_spriteram[troffs] < 0xfd)
 		{
-			sx = state->m_spriteram[troffs + 3] - 7;
-			sy = 241 - state->m_spriteram[troffs];
-			flipx = (state->m_spriteram[troffs + 2] & 0x40) >> 6;
-			flipy = (state->m_spriteram[troffs + 2] & 0x80) >> 7;
+			sx = m_spriteram[troffs + 3] - 7;
+			sy = 241 - m_spriteram[troffs];
+			flipx = (m_spriteram[troffs + 2] & 0x40) >> 6;
+			flipy = (m_spriteram[troffs + 2] & 0x80) >> 7;
 
-			if (state->m_flipscreen)
+			if (m_flipscreen)
 			{
 				sx = (256 + (226 - sx)) % 256;
 				sy = 242 - sy;
@@ -153,9 +148,9 @@ SCREEN_UPDATE( carjmbre )
 				flipy = !flipy;
 			}
 
-			drawgfx_transpen(bitmap, cliprect, screen->machine().gfx[1],
-					state->m_spriteram[troffs + 1],
-					state->m_spriteram[troffs + 2] & 0xf,
+			drawgfx_transpen(bitmap, cliprect, machine().gfx[1],
+					m_spriteram[troffs + 1],
+					m_spriteram[troffs + 2] & 0xf,
 					flipx,flipy,
 					sx,sy,0);
 		}

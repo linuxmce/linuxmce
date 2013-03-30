@@ -10,10 +10,10 @@
 //============================================================
 
 #ifndef _GNU_SOURCE
-#define _GNU_SOURCE 	// for PTHREAD_MUTEX_RECURSIVE; needs to be here before other glibc headers are included
+#define _GNU_SOURCE     // for PTHREAD_MUTEX_RECURSIVE; needs to be here before other glibc headers are included
 #endif
 
-#include "SDL/SDL.h"
+#include "sdlinc.h"
 
 #ifdef SDLMAME_MACOSX
 #include <mach/mach.h>
@@ -34,20 +34,19 @@
 #include <signal.h>
 #include <sys/time.h>
 
-typedef struct _hidden_mutex_t hidden_mutex_t;
-struct _hidden_mutex_t {
+struct hidden_mutex_t {
 	pthread_mutex_t id;
 };
 
-struct _osd_event {
-	pthread_mutex_t 	mutex;
-	pthread_cond_t		cond;
-	volatile INT32		autoreset;
-	volatile INT32		signalled;
+struct osd_event {
+	pthread_mutex_t     mutex;
+	pthread_cond_t      cond;
+	volatile INT32      autoreset;
+	volatile INT32      signalled;
 #ifdef PTR64
-	INT8				padding[40];	// Fill a 64-byte cache line
+	INT8                padding[40];    // Fill a 64-byte cache line
 #else
-	INT8				padding[48];	// A bit more padding
+	INT8                padding[48];    // A bit more padding
 #endif
 };
 
@@ -55,13 +54,13 @@ struct _osd_event {
 //  TYPE DEFINITIONS
 //============================================================
 
-struct _osd_thread {
-	pthread_t			thread;
+struct osd_thread {
+	pthread_t           thread;
 };
 
-struct _osd_scalable_lock
+struct osd_scalable_lock
 {
-	osd_lock			*lock;
+	osd_lock            *lock;
 };
 
 //============================================================
@@ -125,7 +124,7 @@ void osd_lock_acquire(osd_lock *lock)
 	hidden_mutex_t *mutex = (hidden_mutex_t *) lock;
 	int r;
 
-	r =	pthread_mutex_lock(&mutex->id);
+	r = pthread_mutex_lock(&mutex->id);
 	if (r==0)
 		return;
 	//mame_printf_error("Error on lock: %d: %s\n", r, strerror(r));
@@ -144,7 +143,7 @@ int osd_lock_try(osd_lock *lock)
 	if (r==0)
 		return 1;
 	//if (r!=EBUSY)
-    //  mame_printf_error("Error on trylock: %d: %s\n", r, strerror(r));
+	//  mame_printf_error("Error on trylock: %d: %s\n", r, strerror(r));
 	return 0;
 }
 
@@ -301,7 +300,7 @@ int osd_event_wait(osd_event *event, osd_ticks_t timeout)
 osd_thread *osd_thread_create(osd_thread_callback callback, void *cbparam)
 {
 	osd_thread *thread;
-	pthread_attr_t	attr;
+	pthread_attr_t  attr;
 
 	thread = (osd_thread *)calloc(1, sizeof(osd_thread));
 	pthread_attr_init(&attr);
@@ -320,8 +319,8 @@ osd_thread *osd_thread_create(osd_thread_callback callback, void *cbparam)
 
 int osd_thread_adjust_priority(osd_thread *thread, int adjust)
 {
-	struct sched_param	sched;
-	int					policy;
+	struct sched_param  sched;
+	int                 policy;
 
 	if ( pthread_getschedparam( thread->thread, &policy, &sched ) == 0 )
 	{
@@ -342,9 +341,9 @@ int osd_thread_adjust_priority(osd_thread *thread, int adjust)
 int osd_thread_cpu_affinity(osd_thread *thread, UINT32 mask)
 {
 #if !defined(NO_AFFINITY_NP)
-	cpu_set_t	cmask;
-	pthread_t	lthread;
-	int			bitnum;
+	cpu_set_t   cmask;
+	pthread_t   lthread;
+	int         bitnum;
 
 	CPU_ZERO(&cmask);
 	for (bitnum=0; bitnum<32; bitnum++)

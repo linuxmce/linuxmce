@@ -8,7 +8,6 @@
 ***************************************************************************/
 
 #include "emu.h"
-#include "deprecat.h"
 #include "machine/eeprom.h"
 #include "includes/gaelco2.h"
 
@@ -23,10 +22,10 @@ static void gaelco2_ROM16_split_gfx(running_machine &machine, const char *src_re
 	int i;
 
 	/* get a pointer to the source data */
-	UINT8 *src = (UINT8 *)machine.region(src_reg)->base();
+	UINT8 *src = (UINT8 *)machine.root_device().memregion(src_reg)->base();
 
 	/* get a pointer to the destination data */
-	UINT8 *dst = (UINT8 *)machine.region(dst_reg)->base();
+	UINT8 *dst = (UINT8 *)machine.root_device().memregion(dst_reg)->base();
 
 	/* fill destination areas with the proper data */
 	for (i = 0; i < length/2; i++){
@@ -42,93 +41,93 @@ static void gaelco2_ROM16_split_gfx(running_machine &machine, const char *src_re
 
 ***************************************************************************/
 
-DRIVER_INIT( alighunt )
+DRIVER_INIT_MEMBER(gaelco2_state,alighunt)
 {
 	/*
-    For "gfx2" we have this memory map:
-        0x0000000-0x03fffff ROM u48
-        0x0400000-0x07fffff ROM u47
-        0x0800000-0x0bfffff ROM u50
-        0x0c00000-0x0ffffff ROM u49
+	For "gfx2" we have this memory map:
+	    0x0000000-0x03fffff ROM u48
+	    0x0400000-0x07fffff ROM u47
+	    0x0800000-0x0bfffff ROM u50
+	    0x0c00000-0x0ffffff ROM u49
 
-    and we are going to construct this one for "gfx1":
-        0x0000000-0x01fffff ROM u48 even bytes
-        0x0200000-0x03fffff ROM u47 even bytes
-        0x0400000-0x05fffff ROM u48 odd bytes
-        0x0600000-0x07fffff ROM u47 odd bytes
-        0x0800000-0x09fffff ROM u50 even bytes
-        0x0a00000-0x0bfffff ROM u49 even bytes
-        0x0c00000-0x0dfffff ROM u50 odd bytes
-        0x0e00000-0x0ffffff ROM u49 odd bytes
-    */
+	and we are going to construct this one for "gfx1":
+	    0x0000000-0x01fffff ROM u48 even bytes
+	    0x0200000-0x03fffff ROM u47 even bytes
+	    0x0400000-0x05fffff ROM u48 odd bytes
+	    0x0600000-0x07fffff ROM u47 odd bytes
+	    0x0800000-0x09fffff ROM u50 even bytes
+	    0x0a00000-0x0bfffff ROM u49 even bytes
+	    0x0c00000-0x0dfffff ROM u50 odd bytes
+	    0x0e00000-0x0ffffff ROM u49 odd bytes
+	*/
 
 	/* split ROM u48 */
-	gaelco2_ROM16_split_gfx(machine, "gfx2", "gfx1", 0x0000000, 0x0400000, 0x0000000, 0x0400000);
+	gaelco2_ROM16_split_gfx(machine(), "gfx2", "gfx1", 0x0000000, 0x0400000, 0x0000000, 0x0400000);
 
 	/* split ROM u47 */
-	gaelco2_ROM16_split_gfx(machine, "gfx2", "gfx1", 0x0400000, 0x0400000, 0x0200000, 0x0600000);
+	gaelco2_ROM16_split_gfx(machine(), "gfx2", "gfx1", 0x0400000, 0x0400000, 0x0200000, 0x0600000);
 
 	/* split ROM u50 */
-	gaelco2_ROM16_split_gfx(machine, "gfx2", "gfx1", 0x0800000, 0x0400000, 0x0800000, 0x0c00000);
+	gaelco2_ROM16_split_gfx(machine(), "gfx2", "gfx1", 0x0800000, 0x0400000, 0x0800000, 0x0c00000);
 
 	/* split ROM u49 */
-	gaelco2_ROM16_split_gfx(machine, "gfx2", "gfx1", 0x0c00000, 0x0400000, 0x0a00000, 0x0e00000);
+	gaelco2_ROM16_split_gfx(machine(), "gfx2", "gfx1", 0x0c00000, 0x0400000, 0x0a00000, 0x0e00000);
 }
 
 
-DRIVER_INIT( touchgo )
+DRIVER_INIT_MEMBER(gaelco2_state,touchgo)
 {
 	/*
-    For "gfx2" we have this memory map:
-        0x0000000-0x03fffff ROM ic65
-        0x0400000-0x05fffff ROM ic66
-        0x0800000-0x0bfffff ROM ic67
+	For "gfx2" we have this memory map:
+	    0x0000000-0x03fffff ROM ic65
+	    0x0400000-0x05fffff ROM ic66
+	    0x0800000-0x0bfffff ROM ic67
 
-    and we are going to construct this one for "gfx1":
-        0x0000000-0x01fffff ROM ic65 even bytes
-        0x0200000-0x02fffff ROM ic66 even bytes
-        0x0400000-0x05fffff ROM ic65 odd bytes
-        0x0600000-0x06fffff ROM ic66 odd bytes
-        0x0800000-0x09fffff ROM ic67 even bytes
-        0x0c00000-0x0dfffff ROM ic67 odd bytes
-    */
+	and we are going to construct this one for "gfx1":
+	    0x0000000-0x01fffff ROM ic65 even bytes
+	    0x0200000-0x02fffff ROM ic66 even bytes
+	    0x0400000-0x05fffff ROM ic65 odd bytes
+	    0x0600000-0x06fffff ROM ic66 odd bytes
+	    0x0800000-0x09fffff ROM ic67 even bytes
+	    0x0c00000-0x0dfffff ROM ic67 odd bytes
+	*/
 
 	/* split ROM ic65 */
-	gaelco2_ROM16_split_gfx(machine, "gfx2", "gfx1", 0x0000000, 0x0400000, 0x0000000, 0x0400000);
+	gaelco2_ROM16_split_gfx(machine(), "gfx2", "gfx1", 0x0000000, 0x0400000, 0x0000000, 0x0400000);
 
 	/* split ROM ic66 */
-	gaelco2_ROM16_split_gfx(machine, "gfx2", "gfx1", 0x0400000, 0x0200000, 0x0200000, 0x0600000);
+	gaelco2_ROM16_split_gfx(machine(), "gfx2", "gfx1", 0x0400000, 0x0200000, 0x0200000, 0x0600000);
 
 	/* split ROM ic67 */
-	gaelco2_ROM16_split_gfx(machine, "gfx2", "gfx1", 0x0800000, 0x0400000, 0x0800000, 0x0c00000);
+	gaelco2_ROM16_split_gfx(machine(), "gfx2", "gfx1", 0x0800000, 0x0400000, 0x0800000, 0x0c00000);
 }
 
 
-DRIVER_INIT( snowboar )
+DRIVER_INIT_MEMBER(gaelco2_state,snowboar)
 {
 	/*
-    For "gfx2" we have this memory map:
-        0x0000000-0x03fffff ROM sb44
-        0x0400000-0x07fffff ROM sb45
-        0x0800000-0x0bfffff ROM sb46
+	For "gfx2" we have this memory map:
+	    0x0000000-0x03fffff ROM sb44
+	    0x0400000-0x07fffff ROM sb45
+	    0x0800000-0x0bfffff ROM sb46
 
-    and we are going to construct this one for "gfx1":
-        0x0000000-0x01fffff ROM sb44 even bytes
-        0x0200000-0x03fffff ROM sb45 even bytes
-        0x0400000-0x05fffff ROM sb44 odd bytes
-        0x0600000-0x07fffff ROM sb45 odd bytes
-        0x0800000-0x09fffff ROM sb46 even bytes
-        0x0c00000-0x0dfffff ROM sb46 odd bytes
-    */
+	and we are going to construct this one for "gfx1":
+	    0x0000000-0x01fffff ROM sb44 even bytes
+	    0x0200000-0x03fffff ROM sb45 even bytes
+	    0x0400000-0x05fffff ROM sb44 odd bytes
+	    0x0600000-0x07fffff ROM sb45 odd bytes
+	    0x0800000-0x09fffff ROM sb46 even bytes
+	    0x0c00000-0x0dfffff ROM sb46 odd bytes
+	*/
 
 	/* split ROM sb44 */
-	gaelco2_ROM16_split_gfx(machine, "gfx2", "gfx1", 0x0000000, 0x0400000, 0x0000000, 0x0400000);
+	gaelco2_ROM16_split_gfx(machine(), "gfx2", "gfx1", 0x0000000, 0x0400000, 0x0000000, 0x0400000);
 
 	/* split ROM sb45 */
-	gaelco2_ROM16_split_gfx(machine, "gfx2", "gfx1", 0x0400000, 0x0400000, 0x0200000, 0x0600000);
+	gaelco2_ROM16_split_gfx(machine(), "gfx2", "gfx1", 0x0400000, 0x0400000, 0x0200000, 0x0600000);
 
 	/* split ROM sb46 */
-	gaelco2_ROM16_split_gfx(machine, "gfx2", "gfx1", 0x0800000, 0x0400000, 0x0800000, 0x0c00000);
+	gaelco2_ROM16_split_gfx(machine(), "gfx2", "gfx1", 0x0800000, 0x0400000, 0x0800000, 0x0c00000);
 }
 
 /***************************************************************************
@@ -137,36 +136,36 @@ DRIVER_INIT( snowboar )
 
 ***************************************************************************/
 
-WRITE16_HANDLER( gaelco2_coin_w )
+WRITE16_MEMBER(gaelco2_state::gaelco2_coin_w)
 {
 	/* Coin Lockouts */
-	coin_lockout_w(space->machine(), 0, ~data & 0x01);
-	coin_lockout_w(space->machine(), 1, ~data & 0x02);
+	coin_lockout_w(machine(), 0, ~data & 0x01);
+	coin_lockout_w(machine(), 1, ~data & 0x02);
 
 	/* Coin Counters */
-	coin_counter_w(space->machine(), 0, data & 0x04);
-	coin_counter_w(space->machine(), 1, data & 0x08);
+	coin_counter_w(machine(), 0, data & 0x04);
+	coin_counter_w(machine(), 1, data & 0x08);
 }
 
-WRITE16_HANDLER( gaelco2_coin2_w )
+WRITE16_MEMBER(gaelco2_state::gaelco2_coin2_w)
 {
 	/* coin counters */
-	coin_counter_w(space->machine(), offset & 0x01,  data & 0x01);
+	coin_counter_w(machine(), offset & 0x01,  data & 0x01);
 }
 
-WRITE16_HANDLER( wrally2_coin_w )
+WRITE16_MEMBER(gaelco2_state::wrally2_coin_w)
 {
 	/* coin counters */
-	coin_counter_w(space->machine(), (offset >> 3) & 0x01,  data & 0x01);
+	coin_counter_w(machine(), (offset >> 3) & 0x01,  data & 0x01);
 }
 
-WRITE16_HANDLER( touchgo_coin_w )
+WRITE16_MEMBER(gaelco2_state::touchgo_coin_w)
 {
 	if ((offset >> 2) == 0){
-		coin_counter_w(space->machine(), 0, data & 0x01);
-		coin_counter_w(space->machine(), 1, data & 0x02);
-		coin_counter_w(space->machine(), 2, data & 0x04);
-		coin_counter_w(space->machine(), 3, data & 0x08);
+		coin_counter_w(machine(), 0, data & 0x01);
+		coin_counter_w(machine(), 1, data & 0x02);
+		coin_counter_w(machine(), 2, data & 0x04);
+		coin_counter_w(machine(), 3, data & 0x08);
 	}
 }
 
@@ -177,31 +176,27 @@ WRITE16_HANDLER( touchgo_coin_w )
 ***************************************************************************/
 
 
-DRIVER_INIT( bang )
+DRIVER_INIT_MEMBER(gaelco2_state,bang)
 {
-	gaelco2_state *state = machine.driver_data<gaelco2_state>();
-	state->m_clr_gun_int = 0;
+	m_clr_gun_int = 0;
 }
 
-WRITE16_HANDLER( bang_clr_gun_int_w )
+WRITE16_MEMBER(gaelco2_state::bang_clr_gun_int_w)
 {
-	gaelco2_state *state = space->machine().driver_data<gaelco2_state>();
-	state->m_clr_gun_int = 1;
+	m_clr_gun_int = 1;
 }
 
-INTERRUPT_GEN( bang_interrupt )
+TIMER_DEVICE_CALLBACK_MEMBER(gaelco2_state::bang_irq)
 {
-	gaelco2_state *state = device->machine().driver_data<gaelco2_state>();
-	if (cpu_getiloops(device) == 0){
-		device_set_input_line(device, 2, HOLD_LINE);
+	int scanline = param;
 
-		state->m_clr_gun_int = 0;
+	if (scanline == 256){
+		m_maincpu->set_input_line(2, HOLD_LINE);
+		m_clr_gun_int = 0;
 	}
-	else if (cpu_getiloops(device) % 2){
-		if (state->m_clr_gun_int){
-			device_set_input_line(device, 4, HOLD_LINE);
-		}
-	}
+
+	if ((scanline % 64) == 0 && m_clr_gun_int)
+		m_maincpu->set_input_line(4, HOLD_LINE);
 }
 
 /***************************************************************************
@@ -221,45 +216,42 @@ INTERRUPT_GEN( bang_interrupt )
 ***************************************************************************/
 
 
-CUSTOM_INPUT( wrally2_analog_bit_r )
+CUSTOM_INPUT_MEMBER(gaelco2_state::wrally2_analog_bit_r)
 {
-	gaelco2_state *state = field->port->machine().driver_data<gaelco2_state>();
 	int which = (FPTR)param;
-	return (state->m_analog_ports[which] >> 7) & 0x01;
+	return (m_analog_ports[which] >> 7) & 0x01;
 }
 
 
-WRITE16_HANDLER( wrally2_adc_clk )
+WRITE16_MEMBER(gaelco2_state::wrally2_adc_clk)
 {
-	gaelco2_state *state = space->machine().driver_data<gaelco2_state>();
 	/* a zero/one combo is written here to clock the next analog port bit */
 	if (ACCESSING_BITS_0_7)
 	{
 		if (!(data & 0xff))
 		{
-			state->m_analog_ports[0] <<= 1;
-			state->m_analog_ports[1] <<= 1;
+			m_analog_ports[0] <<= 1;
+			m_analog_ports[1] <<= 1;
 		}
 	}
 	else
-		logerror("%06X:analog_port_clock_w(%02X) = %08X & %08X\n", cpu_get_pc(&space->device()), offset, data, mem_mask);
+		logerror("%06X:analog_port_clock_w(%02X) = %08X & %08X\n", space.device().safe_pc(), offset, data, mem_mask);
 }
 
 
-WRITE16_HANDLER( wrally2_adc_cs )
+WRITE16_MEMBER(gaelco2_state::wrally2_adc_cs)
 {
-	gaelco2_state *state = space->machine().driver_data<gaelco2_state>();
 	/* a zero is written here to read the analog ports, and a one is written when finished */
 	if (ACCESSING_BITS_0_7)
 	{
 		if (!(data & 0xff))
 		{
-			state->m_analog_ports[0] = input_port_read_safe(space->machine(), "ANALOG0", 0);
-			state->m_analog_ports[1] = input_port_read_safe(space->machine(), "ANALOG1", 0);
+			m_analog_ports[0] = ioport("ANALOG0")->read_safe(0);
+			m_analog_ports[1] = ioport("ANALOG1")->read_safe(0);
 		}
 	}
 	else
-		logerror("%06X:analog_port_latch_w(%02X) = %08X & %08X\n", cpu_get_pc(&space->device()), offset, data, mem_mask);
+		logerror("%06X:analog_port_latch_w(%02X) = %08X & %08X\n", space.device().safe_pc(), offset, data, mem_mask);
 }
 
 /***************************************************************************
@@ -268,22 +260,25 @@ WRITE16_HANDLER( wrally2_adc_cs )
 
 ***************************************************************************/
 
-WRITE16_DEVICE_HANDLER( gaelco2_eeprom_cs_w )
+WRITE16_MEMBER(gaelco2_state::gaelco2_eeprom_cs_w)
 {
 	/* bit 0 is CS (active low) */
-	eeprom_set_cs_line(device, (data & 0x01) ? CLEAR_LINE : ASSERT_LINE);
+	eeprom_device *eeprom = downcast<eeprom_device *>(machine().device("eeprom"));
+	eeprom->set_cs_line((data & 0x01) ? CLEAR_LINE : ASSERT_LINE);
 }
 
-WRITE16_DEVICE_HANDLER( gaelco2_eeprom_sk_w )
+WRITE16_MEMBER(gaelco2_state::gaelco2_eeprom_sk_w)
 {
 	/* bit 0 is SK (active high) */
-	eeprom_set_clock_line(device, (data & 0x01) ? ASSERT_LINE : CLEAR_LINE);
+	eeprom_device *eeprom = downcast<eeprom_device *>(machine().device("eeprom"));
+	eeprom->set_clock_line((data & 0x01) ? ASSERT_LINE : CLEAR_LINE);
 }
 
-WRITE16_DEVICE_HANDLER( gaelco2_eeprom_data_w )
+WRITE16_MEMBER(gaelco2_state::gaelco2_eeprom_data_w)
 {
 	/* bit 0 is EEPROM data (DIN) */
-	eeprom_write_bit(device, data & 0x01);
+	eeprom_device *eeprom = downcast<eeprom_device *>(machine().device("eeprom"));
+	eeprom->write_bit(data & 0x01);
 }
 
 /***************************************************************************
@@ -302,16 +297,15 @@ WRITE16_DEVICE_HANDLER( gaelco2_eeprom_data_w )
     The protection handles sound, controls, gameplay and some sprites
 */
 
-READ16_HANDLER( snowboar_protection_r )
+READ16_MEMBER(gaelco2_state::snowboar_protection_r)
 {
-	logerror("%06x: protection read from %04x\n", cpu_get_pc(&space->device()), offset*2);
+	logerror("%06x: protection read from %04x\n", space.device().safe_pc(), offset*2);
 	return 0x0000;
 }
 
-WRITE16_HANDLER( snowboar_protection_w )
+WRITE16_MEMBER(gaelco2_state::snowboar_protection_w)
 {
-	gaelco2_state *state = space->machine().driver_data<gaelco2_state>();
-	COMBINE_DATA(&state->m_snowboar_protection[offset]);
-	logerror("%06x: protection write %04x to %04x\n", cpu_get_pc(&space->device()), data, offset*2);
+	COMBINE_DATA(&m_snowboar_protection[offset]);
+	logerror("%06x: protection write %04x to %04x\n", space.device().safe_pc(), data, offset*2);
 
 }

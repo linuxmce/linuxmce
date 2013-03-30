@@ -42,7 +42,7 @@
 /* Large file support on IRIX needs _SGI_SOURCE */
 #undef _POSIX_SOURCE
 
-#elif defined(__linux__)
+#elif defined(__linux__) || defined(__FreeBSD_kernel__)
 #define SDLMAME_LINUX 1
 
 #elif defined(__FreeBSD__)
@@ -59,6 +59,11 @@
 #define SDLMAME_BSD 1
 #endif
 
+#if defined(__HAIKU__)
+#define SDLMAME_HAIKU 1
+#define SDLMAME_NO64BITIO 1
+#endif
+
 // fix for Ubuntu 8.10
 #ifdef _FORTIFY_SOURCE
 #undef _FORTIFY_SOURCE
@@ -72,12 +77,11 @@ void *__cdecl _alloca(size_t);
 #endif
 
 #ifdef __GNUC__
-#define alloca	__builtin_alloca
+#define alloca  __builtin_alloca
 #endif
 
 //============================================================
 // misc.
 //============================================================
 
-#define PATH_SEPARATOR		"/"
-
+#define PATH_SEPARATOR      "/"

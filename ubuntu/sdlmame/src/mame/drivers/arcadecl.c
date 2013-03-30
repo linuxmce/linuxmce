@@ -69,10 +69,11 @@
 #include "emu.h"
 #include "cpu/m68000/m68000.h"
 #include "sound/okim6295.h"
+#include "video/atarimo.h"
 #include "includes/arcadecl.h"
 
 
-#define MASTER_CLOCK		XTAL_14_31818MHz
+#define MASTER_CLOCK        XTAL_14_31818MHz
 
 
 /*************************************
@@ -81,18 +82,17 @@
  *
  *************************************/
 
-static void update_interrupts(running_machine &machine)
+void arcadecl_state::update_interrupts()
 {
-	arcadecl_state *state = machine.driver_data<arcadecl_state>();
-	cputag_set_input_line(machine, "maincpu", 4, state->m_scanline_int_state ? ASSERT_LINE : CLEAR_LINE);
+	machine().device("maincpu")->execute().set_input_line(4, m_scanline_int_state ? ASSERT_LINE : CLEAR_LINE);
 }
 
 
-static void scanline_update(screen_device &screen, int scanline)
+void arcadecl_state::scanline_update(screen_device &screen, int scanline)
 {
 	/* generate 32V signals */
 	if ((scanline & 32) == 0)
-		atarigen_scanline_int_gen(screen.machine().device("maincpu"));
+		scanline_int_gen(*subdevice("maincpu"));
 }
 
 
@@ -103,19 +103,10 @@ static void scanline_update(screen_device &screen, int scanline)
  *
  *************************************/
 
-static MACHINE_START( arcadecl )
+MACHINE_RESET_MEMBER(arcadecl_state,arcadecl)
 {
-	atarigen_init(machine);
-}
-
-
-static MACHINE_RESET( arcadecl )
-{
-	arcadecl_state *state = machine.driver_data<arcadecl_state>();
-
-	atarigen_eeprom_reset(state);
-	atarigen_interrupt_reset(state, update_interrupts);
-	atarigen_scanline_timer_reset(*machine.primary_screen, scanline_update, 32);
+	atarigen_state::machine_reset();
+	scanline_timer_reset(*machine().primary_screen, 32);
 }
 
 
@@ -126,20 +117,20 @@ static MACHINE_RESET( arcadecl )
  *
  *************************************/
 
-static WRITE16_HANDLER( latch_w )
+WRITE16_MEMBER(arcadecl_state::latch_w)
 {
 	/* bit layout in this register:
 
-        0x0080 == ADPCM bank
-        0x001F == volume
-    */
+	    0x0080 == ADPCM bank
+	    0x001F == volume
+	*/
 
 	/* lower byte being modified? */
 	if (ACCESSING_BITS_0_7)
 	{
-		okim6295_device *oki = space->machine().device<okim6295_device>("oki");
+		okim6295_device *oki = machine().device<okim6295_device>("oki");
 		oki->set_bank_base((data & 0x80) ? 0x40000 : 0x00000);
-		atarigen_set_oki6295_vol(space->machine(), (data & 0x001f) * 100 / 0x1f);
+		set_oki6295_volume((data & 0x001f) * 100 / 0x1f);
 	}
 }
 
@@ -151,13 +142,13 @@ static WRITE16_HANDLER( latch_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16, arcadecl_state )
 	AM_RANGE(0x000000, 0x0fffff) AM_ROM
-	AM_RANGE(0x200000, 0x21ffff) AM_RAM AM_BASE_MEMBER(arcadecl_state, m_bitmap)
-	AM_RANGE(0x3c0000, 0x3c07ff) AM_RAM_WRITE(atarigen_expanded_666_paletteram_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0x3e0000, 0x3e07ff) AM_RAM_WRITE(atarimo_0_spriteram_w) AM_BASE(&atarimo_0_spriteram)
+	AM_RANGE(0x200000, 0x21ffff) AM_RAM AM_SHARE("bitmap")
+	AM_RANGE(0x3c0000, 0x3c07ff) AM_RAM_WRITE(expanded_paletteram_666_w) AM_SHARE("paletteram")
+	AM_RANGE(0x3e0000, 0x3e07ff) AM_READWRITE_LEGACY(atarimo_0_spriteram_r, atarimo_0_spriteram_w)
 	AM_RANGE(0x3e0800, 0x3effbf) AM_RAM
-	AM_RANGE(0x3effc0, 0x3effff) AM_RAM_WRITE(atarimo_0_slipram_w) AM_BASE(&atarimo_0_slipram)
+	AM_RANGE(0x3effc0, 0x3effff) AM_READWRITE_LEGACY(atarimo_0_slipram_r, atarimo_0_slipram_w)
 	AM_RANGE(0x640000, 0x640001) AM_READ_PORT("PLAYER1")
 	AM_RANGE(0x640002, 0x640003) AM_READ_PORT("PLAYER2")
 	AM_RANGE(0x640010, 0x640011) AM_READ_PORT("STATUS")
@@ -167,10 +158,10 @@ static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16 )
 	AM_RANGE(0x640024, 0x640025) AM_READ_PORT("TRACKX1")
 	AM_RANGE(0x640026, 0x640027) AM_READ_PORT("TRACKY1")
 	AM_RANGE(0x640040, 0x64004f) AM_WRITE(latch_w)
-	AM_RANGE(0x640060, 0x64006f) AM_WRITE(atarigen_eeprom_enable_w)
-	AM_RANGE(0x641000, 0x641fff) AM_READWRITE(atarigen_eeprom_r, atarigen_eeprom_w) AM_SHARE("eeprom")
-	AM_RANGE(0x642000, 0x642001) AM_DEVREADWRITE8_MODERN("oki", okim6295_device, read, write, 0xff00)
-	AM_RANGE(0x646000, 0x646fff) AM_WRITE(atarigen_scanline_int_ack_w)
+	AM_RANGE(0x640060, 0x64006f) AM_WRITE(eeprom_enable_w)
+	AM_RANGE(0x641000, 0x641fff) AM_READWRITE(eeprom_r, eeprom_w) AM_SHARE("eeprom")
+	AM_RANGE(0x642000, 0x642001) AM_DEVREADWRITE8("oki", okim6295_device, read, write, 0xff00)
+	AM_RANGE(0x646000, 0x646fff) AM_WRITE(scanline_int_ack_w)
 	AM_RANGE(0x647000, 0x647fff) AM_WRITE(watchdog_reset16_w)
 ADDRESS_MAP_END
 
@@ -207,7 +198,7 @@ static INPUT_PORTS_START( arcadecl )
 	PORT_BIT(  0x0010, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT(  0x0020, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_SERVICE( 0x0040, IP_ACTIVE_LOW )
-	PORT_BIT(  0x0080, IP_ACTIVE_HIGH, IPT_VBLANK )
+	PORT_BIT(  0x0080, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_BIT(  0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("COIN")
@@ -219,7 +210,7 @@ static INPUT_PORTS_START( arcadecl )
 	PORT_BIT(  0xffc0, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("TRACKX2")
-    PORT_BIT( 0x00ff, 0, IPT_TRACKBALL_X ) PORT_SENSITIVITY(50) PORT_KEYDELTA(32) PORT_REVERSE PORT_PLAYER(2)
+	PORT_BIT( 0x00ff, 0, IPT_TRACKBALL_X ) PORT_SENSITIVITY(50) PORT_KEYDELTA(32) PORT_REVERSE PORT_PLAYER(2)
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("TRACKY2")
@@ -227,11 +218,11 @@ static INPUT_PORTS_START( arcadecl )
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("TRACKX1")
-    PORT_BIT( 0x00ff, 0, IPT_TRACKBALL_X ) PORT_SENSITIVITY(50) PORT_KEYDELTA(32) PORT_REVERSE PORT_PLAYER(1)
+	PORT_BIT( 0x00ff, 0, IPT_TRACKBALL_X ) PORT_SENSITIVITY(50) PORT_KEYDELTA(32) PORT_REVERSE PORT_PLAYER(1)
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("TRACKY1")
-    PORT_BIT( 0x00ff, 0, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(50) PORT_KEYDELTA(32) PORT_PLAYER(1)
+	PORT_BIT( 0x00ff, 0, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(50) PORT_KEYDELTA(32) PORT_PLAYER(1)
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 INPUT_PORTS_END
 
@@ -267,7 +258,7 @@ static INPUT_PORTS_START( sparkz )
 	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_SERVICE( 0x0040, IP_ACTIVE_LOW )
-	PORT_BIT( 0x0080, IP_ACTIVE_HIGH, IPT_VBLANK )
+	PORT_BIT( 0x0080, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("COIN")
@@ -328,10 +319,9 @@ static MACHINE_CONFIG_START( arcadecl, arcadecl_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, MASTER_CLOCK)
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT("screen", atarigen_video_int_gen)
+	MCFG_DEVICE_VBLANK_INT_DRIVER("screen", atarigen_state, video_int_gen)
 
-	MCFG_MACHINE_START(arcadecl)
-	MCFG_MACHINE_RESET(arcadecl)
+	MCFG_MACHINE_RESET_OVERRIDE(arcadecl_state,arcadecl)
 	MCFG_NVRAM_ADD_1FILL("eeprom")
 
 	/* video hardware */
@@ -340,13 +330,12 @@ static MACHINE_CONFIG_START( arcadecl, arcadecl_state )
 	MCFG_PALETTE_LENGTH(512)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	/* note: these parameters are from published specs, not derived */
 	/* the board uses an SOS-2 chip to generate video signals */
 	MCFG_SCREEN_RAW_PARAMS(MASTER_CLOCK/2, 456, 0+12, 336+12, 262, 0, 240)
-	MCFG_SCREEN_UPDATE(arcadecl)
+	MCFG_SCREEN_UPDATE_DRIVER(arcadecl_state, screen_update_arcadecl)
 
-	MCFG_VIDEO_START(arcadecl)
+	MCFG_VIDEO_START_OVERRIDE(arcadecl_state,arcadecl)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -396,9 +385,9 @@ ROM_END
  *
  *************************************/
 
-static DRIVER_INIT( sparkz )
+DRIVER_INIT_MEMBER(arcadecl_state,sparkz)
 {
-	memset(machine.region("gfx1")->base(), 0, machine.region("gfx1")->bytes());
+	memset(machine().root_device().memregion("gfx1")->base(), 0, machine().root_device().memregion("gfx1")->bytes());
 }
 
 
@@ -409,5 +398,5 @@ static DRIVER_INIT( sparkz )
  *
  *************************************/
 
-GAME( 1992, arcadecl, 0, arcadecl, arcadecl, 0,      ROT0, "Atari Games", "Arcade Classics (prototype)", GAME_SUPPORTS_SAVE )
-GAME( 1992, sparkz,   0, arcadecl, sparkz,   sparkz, ROT0, "Atari Games", "Sparkz (prototype)", GAME_SUPPORTS_SAVE )
+GAME( 1992, arcadecl, 0, arcadecl, arcadecl, driver_device, 0,      ROT0, "Atari Games", "Arcade Classics (prototype)", GAME_SUPPORTS_SAVE )
+GAME( 1992, sparkz,   0, arcadecl, sparkz, arcadecl_state,   sparkz, ROT0, "Atari Games", "Sparkz (prototype)", GAME_SUPPORTS_SAVE )

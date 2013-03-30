@@ -50,38 +50,45 @@ Notes:
  *
  *************************************/
 
-static ADDRESS_MAP_START( carjmbre_map, AS_PROGRAM, 8 )
+WRITE8_MEMBER(carjmbre_state::nmi_mask_w)
+{
+
+	m_nmi_mask = data & 1;
+}
+
+
+static ADDRESS_MAP_START( carjmbre_map, AS_PROGRAM, 8, carjmbre_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x87ff) AM_RAM
 //  AM_RANGE(0x8800, 0x8800) AM_READNOP         // watchdog?
-	AM_RANGE(0x8803, 0x8803) AM_WRITE(interrupt_enable_w)
-	AM_RANGE(0x8805, 0x8805) AM_WRITE(carjmbre_bgcolor_w)	// guessed
-	AM_RANGE(0x8806, 0x8806) AM_WRITE(carjmbre_8806_w)		// video related?
+	AM_RANGE(0x8803, 0x8803) AM_WRITE(nmi_mask_w)
+	AM_RANGE(0x8805, 0x8805) AM_WRITE(carjmbre_bgcolor_w)   // guessed
+	AM_RANGE(0x8806, 0x8806) AM_WRITE(carjmbre_8806_w)      // video related?
 	AM_RANGE(0x8807, 0x8807) AM_WRITE(carjmbre_flipscreen_w)
 //  AM_RANGE(0x8fc1, 0x8fc1) AM_WRITENOP        // overrun during initial screen clear
 //  AM_RANGE(0x8fe1, 0x8fe1) AM_WRITENOP        // overrun during initial screen clear
-	AM_RANGE(0x9000, 0x97ff) AM_RAM_WRITE(carjmbre_videoram_w) AM_BASE_MEMBER(carjmbre_state, m_videoram)
-	AM_RANGE(0x9800, 0x985f) AM_MIRROR(0x80) AM_WRITEONLY AM_BASE_SIZE_MEMBER(carjmbre_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0x9000, 0x97ff) AM_RAM_WRITE(carjmbre_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0x9800, 0x985f) AM_MIRROR(0x80) AM_WRITEONLY AM_SHARE("spriteram")
 	AM_RANGE(0xa000, 0xa000) AM_READ_PORT("P1")
 	AM_RANGE(0xa800, 0xa800) AM_READ_PORT("P2")
-	AM_RANGE(0xb800, 0xb800) AM_READ_PORT("DSW") AM_WRITE(soundlatch_w)
+	AM_RANGE(0xb800, 0xb800) AM_READ_PORT("DSW") AM_WRITE(soundlatch_byte_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( carjmbre_sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( carjmbre_sound_map, AS_PROGRAM, 8, carjmbre_state )
 	AM_RANGE(0x0000, 0x0fff) AM_MIRROR(0x1000) AM_ROM
 	AM_RANGE(0x2000, 0x27ff) AM_RAM
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( carjmbre_sound_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( carjmbre_sound_io_map, AS_IO, 8, carjmbre_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x00) AM_READ(soundlatch_r)
-	AM_RANGE(0x10, 0x10) AM_WRITENOP			//?? written on init/0xff sound command reset
-	AM_RANGE(0x20, 0x21) AM_DEVWRITE("ay1", ay8910_address_data_w)
-	AM_RANGE(0x22, 0x22) AM_WRITENOP			//?? written before and after 0x21 with same value
-	AM_RANGE(0x24, 0x24) AM_READNOP				//??
-	AM_RANGE(0x30, 0x31) AM_DEVWRITE("ay2", ay8910_address_data_w)
-	AM_RANGE(0x32, 0x32) AM_WRITENOP			//?? written before and after 0x31 with same value
+	AM_RANGE(0x00, 0x00) AM_READ(soundlatch_byte_r)
+	AM_RANGE(0x10, 0x10) AM_WRITENOP            //?? written on init/0xff sound command reset
+	AM_RANGE(0x20, 0x21) AM_DEVWRITE_LEGACY("ay1", ay8910_address_data_w)
+	AM_RANGE(0x22, 0x22) AM_WRITENOP            //?? written before and after 0x21 with same value
+	AM_RANGE(0x24, 0x24) AM_READNOP             //??
+	AM_RANGE(0x30, 0x31) AM_DEVWRITE_LEGACY("ay2", ay8910_address_data_w)
+	AM_RANGE(0x32, 0x32) AM_WRITENOP            //?? written before and after 0x31 with same value
 ADDRESS_MAP_END
 
 /*************************************
@@ -92,8 +99,8 @@ ADDRESS_MAP_END
 
 static INPUT_PORTS_START( carjmbre )
 	PORT_START("P1")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 )		//coin error if held high for 1s
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_COIN2 )		//or if many coins inserted quickly
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 )     //coin error if held high for 1s
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_COIN2 )     //or if many coins inserted quickly
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_SERVICE1 )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_BUTTON1 )
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_4WAY
@@ -112,26 +119,26 @@ static INPUT_PORTS_START( carjmbre )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_4WAY PORT_COCKTAIL
 
 	PORT_START("DSW")
-	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Coin_A ) )	PORT_DIPLOCATION("SW1:1,2")
+	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Coin_A ) )   PORT_DIPLOCATION("SW1:1,2")
 	PORT_DIPSETTING(    0x02, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(    0x03, DEF_STR( Free_Play ) )
-	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Coin_B ) )	PORT_DIPLOCATION("SW1:3")
+	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Coin_B ) )   PORT_DIPLOCATION("SW1:3")
 	PORT_DIPSETTING(    0x00, DEF_STR( 1C_5C ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( 1C_6C ) )
-	PORT_DIPNAME( 0x18, 0x00, DEF_STR( Lives ) )	PORT_DIPLOCATION("SW1:4,5")
+	PORT_DIPNAME( 0x18, 0x00, DEF_STR( Lives ) )    PORT_DIPLOCATION("SW1:4,5")
 	PORT_DIPSETTING(    0x00, "3" )
 	PORT_DIPSETTING(    0x08, "4" )
 	PORT_DIPSETTING(    0x10, "5" )
 	PORT_DIPSETTING(    0x18, "Free") // 250 (cheat)
-	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Bonus_Life ) )		PORT_DIPLOCATION("SW1:6")
+	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Bonus_Life ) )       PORT_DIPLOCATION("SW1:6")
 	PORT_DIPSETTING(    0x00, "10k, then every 100k" )
 	PORT_DIPSETTING(    0x20, "20k, then every 100k" )
-	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Allow_Continue ) )	PORT_DIPLOCATION("SW1:7")
+	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Allow_Continue ) )   PORT_DIPLOCATION("SW1:7")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Cabinet ) )	PORT_DIPLOCATION("SW1:8")
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Cabinet ) )  PORT_DIPLOCATION("SW1:8")
 	PORT_DIPSETTING(    0x80, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Cocktail ) )
 INPUT_PORTS_END
@@ -176,12 +183,18 @@ GFXDECODE_END
  *
  *************************************/
 
-static MACHINE_RESET( carjmbre )
+void carjmbre_state::machine_reset()
 {
-	carjmbre_state *state = machine.driver_data<carjmbre_state>();
 
-	state->m_flipscreen = 0;
-	state->m_bgcolor = 0;
+	m_flipscreen = 0;
+	m_bgcolor = 0;
+}
+
+INTERRUPT_GEN_MEMBER(carjmbre_state::vblank_irq)
+{
+
+	if(m_nmi_mask)
+		device.execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 }
 
 static MACHINE_CONFIG_START( carjmbre, carjmbre_state )
@@ -189,29 +202,25 @@ static MACHINE_CONFIG_START( carjmbre, carjmbre_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", Z80, XTAL_18_432MHz/6)
 	MCFG_CPU_PROGRAM_MAP(carjmbre_map)
-	MCFG_CPU_VBLANK_INT("screen", nmi_line_pulse)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", carjmbre_state,  vblank_irq)
 
-	MCFG_MACHINE_RESET(carjmbre)
 
 	MCFG_CPU_ADD("audiocpu", Z80, XTAL_18_432MHz/6/2)
 	MCFG_CPU_PROGRAM_MAP(carjmbre_sound_map)
 	MCFG_CPU_IO_MAP(carjmbre_sound_io_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", carjmbre_state,  irq0_line_hold)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500)) /* not accurate */
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(carjmbre)
+	MCFG_SCREEN_UPDATE_DRIVER(carjmbre_state, screen_update_carjmbre)
 
 	MCFG_GFXDECODE(carjmbre)
 	MCFG_PALETTE_LENGTH(64)
 
-	MCFG_PALETTE_INIT(carjmbre)
-	MCFG_VIDEO_START(carjmbre)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -264,4 +273,4 @@ ROM_END
  *
  *************************************/
 
-GAME( 1983, carjmbre, 0, carjmbre, carjmbre, 0, ROT90, "Omori Electric Co., Ltd.", "Car Jamboree", GAME_IMPERFECT_COLORS | GAME_SUPPORTS_SAVE )
+GAME( 1983, carjmbre, 0, carjmbre, carjmbre, driver_device, 0, ROT90, "Omori Electric Co., Ltd.", "Car Jamboree", GAME_IMPERFECT_COLORS | GAME_SUPPORTS_SAVE )

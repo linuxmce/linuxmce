@@ -19,7 +19,6 @@
 **********************************************************************/
 
 #include "emu.h"
-#include "memconv.h"
 #include "8237dma.h"
 #include "devhelpr.h"
 
@@ -27,28 +26,38 @@
     MACROS
 ***************************************************************************/
 
-#define DMA_MODE_CHANNEL(mode)		((mode) & 0x03)
-#define DMA_MODE_OPERATION(mode)	((mode) & 0x0c)
-#define DMA_MODE_AUTO_INIT(mode)	((mode) & 0x10)
-#define DMA_MODE_DIRECTION(mode)	((mode) & 0x20)
-#define DMA_MODE_TRANSFERMODE(mode)	((mode) & 0xc0)
+#define DMA_MODE_CHANNEL(mode)      ((mode) & 0x03)
+#define DMA_MODE_OPERATION(mode)    ((mode) & 0x0c)
+#define DMA_MODE_AUTO_INIT(mode)    ((mode) & 0x10)
+#define DMA_MODE_DIRECTION(mode)    ((mode) & 0x20)
+#define DMA_MODE_TRANSFERMODE(mode) ((mode) & 0xc0)
 
-#define DMA8237_VERIFY_TRANSFER		0x00
-#define DMA8237_WRITE_TRANSFER		0x04
-#define DMA8237_READ_TRANSFER		0x08
-#define DMA8237_ILLEGAL_TRANSFER	0x0c
+#define DMA8237_VERIFY_TRANSFER     0x00
+#define DMA8237_WRITE_TRANSFER      0x04
+#define DMA8237_READ_TRANSFER       0x08
+#define DMA8237_ILLEGAL_TRANSFER    0x0c
 
-#define DMA8237_DEMAND_MODE		0x00
-#define DMA8237_SINGLE_MODE		0x40
-#define DMA8237_BLOCK_MODE		0x80
-#define DMA8237_CASCADE_MODE	0xc0
+#define DMA8237_DEMAND_MODE     0x00
+#define DMA8237_SINGLE_MODE     0x40
+#define DMA8237_BLOCK_MODE      0x80
+#define DMA8237_CASCADE_MODE    0xc0
 
 
 //**************************************************************************
-//  DEVICE CONFIGURATION
+//  LIVE DEVICE
 //**************************************************************************
 
-GENERIC_DEVICE_CONFIG_SETUP(i8237, "Intel 8237")
+// device type definition
+const device_type I8237 = &device_creator<i8237_device>;
+
+//-------------------------------------------------
+//  i8237_device - constructor
+//-------------------------------------------------
+
+i8237_device::i8237_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, I8237, "Intel 8237", tag, owner, clock)
+{
+}
 
 //-------------------------------------------------
 //  device_config_complete - perform any
@@ -56,7 +65,7 @@ GENERIC_DEVICE_CONFIG_SETUP(i8237, "Intel 8237")
 //  complete
 //-------------------------------------------------
 
-void i8237_device_config::device_config_complete()
+void i8237_device::device_config_complete()
 {
 	// inherit a copy of the static data
 	const i8237_interface *intf = reinterpret_cast<const i8237_interface *>(static_config());
@@ -68,42 +77,25 @@ void i8237_device_config::device_config_complete()
 	// or initialize to defaults if none provided
 	else
 	{
-    	memset(&m_out_hrq_func, 0, sizeof(m_out_hrq_func));
-    	memset(&m_out_eop_func, 0, sizeof(m_out_eop_func));
-    	memset(&m_in_memr_func, 0, sizeof(m_in_memr_func));
-    	memset(&m_out_memw_func, 0, sizeof(m_out_memw_func));
-    	memset(&m_in_ior_func[0], 0, sizeof(m_in_ior_func[0]));
-    	memset(&m_in_ior_func[1], 0, sizeof(m_in_ior_func[1]));
-    	memset(&m_in_ior_func[2], 0, sizeof(m_in_ior_func[2]));
-    	memset(&m_in_ior_func[3], 0, sizeof(m_in_ior_func[3]));
-    	memset(&m_out_iow_func[0], 0, sizeof(m_out_iow_func[0]));
-    	memset(&m_out_iow_func[1], 0, sizeof(m_out_iow_func[1]));
-    	memset(&m_out_iow_func[2], 0, sizeof(m_out_iow_func[2]));
-    	memset(&m_out_iow_func[3], 0, sizeof(m_out_iow_func[3]));
-    	memset(&m_out_dack_func[0], 0, sizeof(m_out_dack_func[0]));
-    	memset(&m_out_dack_func[1], 0, sizeof(m_out_dack_func[1]));
-    	memset(&m_out_dack_func[2], 0, sizeof(m_out_dack_func[2]));
-    	memset(&m_out_dack_func[3], 0, sizeof(m_out_dack_func[3]));
+		memset(&m_out_hrq_cb, 0, sizeof(m_out_hrq_cb));
+		memset(&m_out_eop_cb, 0, sizeof(m_out_eop_cb));
+		memset(&m_in_memr_cb, 0, sizeof(m_in_memr_cb));
+		memset(&m_out_memw_cb, 0, sizeof(m_out_memw_cb));
+		memset(&m_in_ior_cb[0], 0, sizeof(m_in_ior_cb[0]));
+		memset(&m_in_ior_cb[1], 0, sizeof(m_in_ior_cb[1]));
+		memset(&m_in_ior_cb[2], 0, sizeof(m_in_ior_cb[2]));
+		memset(&m_in_ior_cb[3], 0, sizeof(m_in_ior_cb[3]));
+		memset(&m_out_iow_cb[0], 0, sizeof(m_out_iow_cb[0]));
+		memset(&m_out_iow_cb[1], 0, sizeof(m_out_iow_cb[1]));
+		memset(&m_out_iow_cb[2], 0, sizeof(m_out_iow_cb[2]));
+		memset(&m_out_iow_cb[3], 0, sizeof(m_out_iow_cb[3]));
+		memset(&m_out_dack_cb[0], 0, sizeof(m_out_dack_cb[0]));
+		memset(&m_out_dack_cb[1], 0, sizeof(m_out_dack_cb[1]));
+		memset(&m_out_dack_cb[2], 0, sizeof(m_out_dack_cb[2]));
+		memset(&m_out_dack_cb[3], 0, sizeof(m_out_dack_cb[3]));
 	}
 }
 
-
-
-//**************************************************************************
-//  LIVE DEVICE
-//**************************************************************************
-
-const device_type I8237 = i8237_device_config::static_alloc_device_config;
-
-//-------------------------------------------------
-//  i8237_device - constructor
-//-------------------------------------------------
-
-i8237_device::i8237_device(running_machine &_machine, const i8237_device_config &config)
-    : device_t(_machine, config),
-      m_config(config)
-{
-}
 
 //-------------------------------------------------
 //  device_start - device-specific startup
@@ -112,19 +104,19 @@ i8237_device::i8237_device(running_machine &_machine, const i8237_device_config 
 void i8237_device::device_start()
 {
 	/* resolve callbacks */
-	devcb_resolve_write_line(&m_out_hrq_func, &m_config.m_out_hrq_func, this);
-	devcb_resolve_write_line(&m_out_eop_func, &m_config.m_out_eop_func, this);
-	devcb_resolve_read8(&m_in_memr_func, &m_config.m_in_memr_func, this);
-	devcb_resolve_write8(&m_out_memw_func, &m_config.m_out_memw_func, this);
+	m_out_hrq_func.resolve(m_out_hrq_cb, *this);
+	m_out_eop_func.resolve(m_out_eop_cb, *this);
+	m_in_memr_func.resolve(m_in_memr_cb, *this);
+	m_out_memw_func.resolve(m_out_memw_cb, *this);
 
 	for (int i = 0; i < 4; i++)
 	{
-		devcb_resolve_read8(&m_chan[i].m_in_ior_func, &m_config.m_in_ior_func[i], this);
-		devcb_resolve_write8(&m_chan[i].m_out_iow_func, &m_config.m_out_iow_func[i], this);
-		devcb_resolve_write_line(&m_chan[i].m_out_dack_func, &m_config.m_out_dack_func[i], this);
+		m_chan[i].m_in_ior_func.resolve(m_in_ior_cb[i], *this);
+		m_chan[i].m_out_iow_func.resolve(m_out_iow_cb[i], *this);
+		m_chan[i].m_out_dack_func.resolve(m_out_dack_cb[i], *this);
 	}
 
-	m_timer = m_machine.scheduler().timer_alloc(FUNC(i8237_timerproc_callback), (void *)this);
+	m_timer = machine().scheduler().timer_alloc(FUNC(i8237_timerproc_callback), (void *)this);
 }
 
 
@@ -135,14 +127,14 @@ void i8237_device::device_start()
 void i8237_device::device_reset()
 {
 	m_status = 0x0F;
-	m_eop = 1;
+	m_eop = ASSERT_LINE;
 	m_state = DMA8237_SI;
 	m_last_service_channel = 3;
+	m_service_channel = 0;
 
 	m_command = 0;
 	m_drq = 0;
 	m_mask = 0x00;
-	m_status = 0x0F;
 	m_hrq = 0;
 	m_hlda = 0;
 	m_chan[0].m_mode = 0;
@@ -161,10 +153,10 @@ void i8237_device::i8237_do_read()
 	switch( DMA_MODE_OPERATION( m_chan[ channel ].m_mode ) )
 	{
 	case DMA8237_WRITE_TRANSFER:
-		m_temporary_data = devcb_call_read8(&m_chan[channel].m_in_ior_func, 0);
+		m_temporary_data = m_chan[channel].m_in_ior_func(0);
 		break;
 	case DMA8237_READ_TRANSFER:
-		m_temporary_data = devcb_call_read8(&m_in_memr_func, m_chan[ channel ].m_address);
+		m_temporary_data = m_in_memr_func(m_chan[ channel ].m_address);
 		break;
 	case DMA8237_VERIFY_TRANSFER:
 	case DMA8237_ILLEGAL_TRANSFER:
@@ -180,10 +172,10 @@ void i8237_device::i8237_do_write()
 	switch( DMA_MODE_OPERATION( m_chan[ channel ].m_mode ) )
 	{
 	case DMA8237_WRITE_TRANSFER:
-		devcb_call_write8(&m_out_memw_func, m_chan[ channel ].m_address, m_temporary_data);
+		m_out_memw_func(m_chan[ channel ].m_address, m_temporary_data);
 		break;
 	case DMA8237_READ_TRANSFER:
-		devcb_call_write8(&m_chan[channel].m_out_iow_func, 0, m_temporary_data);
+		m_chan[channel].m_out_iow_func(0, m_temporary_data);
 		break;
 	case DMA8237_VERIFY_TRANSFER:
 	case DMA8237_ILLEGAL_TRANSFER:
@@ -252,7 +244,7 @@ void i8237_device::i8327_set_dack(int channel)
 	{
 		int state = (i == channel) ^ !BIT(m_command, 7);
 
-		devcb_call_write_line(&m_chan[i].m_out_dack_func, state);
+		m_chan[i].m_out_dack_func(state);
 	}
 }
 
@@ -277,15 +269,15 @@ void i8237_device::i8237_timerproc()
 	case DMA8237_SI:
 	{
 		/* Make sure EOP is high */
-		if ( !m_eop )
+		if ( m_eop == CLEAR_LINE )
 		{
-			m_eop = 1;
-			devcb_call_write_line(&m_out_eop_func, m_eop ? ASSERT_LINE : CLEAR_LINE);
+			m_eop = ASSERT_LINE;
+			m_out_eop_func(m_eop);
 		}
 
 		/* Check if a new DMA request has been received. */
 		/* Bit 6 of the command register determines whether the DREQ signals are active
-          high or active low. */
+		  high or active low. */
 		UINT16 pending_request = ( ( m_command & 0x40 ) ? ~m_drq : m_drq ) & ~m_mask;
 
 		if ( pending_request & 0x0f )
@@ -306,8 +298,9 @@ void i8237_device::i8237_timerproc()
 			/* Store the channel we will be servicing and go to the next state */
 			m_service_channel = prio_channel;
 			m_last_service_channel = prio_channel;
+
 			m_hrq = 1;
-			devcb_call_write_line(&m_out_hrq_func, m_hrq);
+			m_out_hrq_func(m_hrq);
 			m_state = DMA8237_S0;
 
 			m_timer->enable( true );
@@ -327,27 +320,59 @@ void i8237_device::i8237_timerproc()
 
 	case DMA8237_S0:
 		/* S0 is the first of the DMA service. We have requested a hold but are waiting
-          for confirmation. */
+		  for confirmation. */
 		if ( m_hlda )
 		{
-			if ( m_command & 0x01 )
+			if ( DMA_MODE_TRANSFERMODE( m_chan[m_service_channel].m_mode ) == DMA8237_CASCADE_MODE )
 			{
-				/* Memory-to-memory transfers */
-				m_state = DMA8237_S11;
+				/* Cascade Mode, set DACK */
+				i8327_set_dack(m_service_channel);
+
+				/* Wait until peripheral is done */
+				m_state = DMA8237_SC;
 			}
 			else
 			{
-				/* Regular transfers */
-				m_state = DMA8237_S1;
+				if ( m_command & 0x01 )
+				{
+					/* Memory-to-memory transfers */
+					m_state = DMA8237_S11;
+				}
+				else
+				{
+					/* Regular transfers */
+					m_state = DMA8237_S1;
+				}
 			}
 		}
 		break;
 
-	case DMA8237_S1:	/* Output A8-A15 */
+	case DMA8237_SC:    /* Cascade mode, waiting until peripheral is done */
+		if ( ! ( m_drq & ( 0x01 << m_service_channel ) ) )
+		{
+			m_hrq = 0;
+			m_hlda = 0;
+			m_out_hrq_func(m_hrq);
+			m_state = DMA8237_SI;
+
+			/* Clear DACK */
+			i8327_set_dack(-1);
+		}
+
+		/* Not sure if this is correct, documentation is not clear */
+		/* Check if EOP output needs to be asserted  */
+		if ( m_status & ( 0x01 << m_service_channel ) )
+		{
+			m_eop = CLEAR_LINE;
+			m_out_eop_func(m_eop);
+		}
+		break;
+
+	case DMA8237_S1:    /* Output A8-A15 */
 		m_state = DMA8237_S2;
 		break;
 
-	case DMA8237_S2:	/* Output A7-A0 */
+	case DMA8237_S2:    /* Output A7-A0 */
 		/* set DACK */
 		i8327_set_dack(m_service_channel);
 
@@ -362,12 +387,12 @@ void i8237_device::i8237_timerproc()
 		}
 		break;
 
-	case DMA8237_S3:	/* Initiate read */
+	case DMA8237_S3:    /* Initiate read */
 		i8237_do_read();
 		m_state = DMA8237_S4;
 		break;
 
-	case DMA8237_S4:	/* Perform read/write */
+	case DMA8237_S4:    /* Perform read/write */
 		/* Perform read when in compressed timing mode */
 		if ( m_command & 0x08 )
 		{
@@ -388,11 +413,11 @@ void i8237_device::i8237_timerproc()
 			{
 			case DMA8237_DEMAND_MODE:
 				/* Check for terminal count or EOP signal or DREQ begin de-asserted */
-				if ( ( m_status & ( 0x01 << channel ) ) || !m_eop || !( m_drq & ( 0x01 << channel ) ) )
+				if ( ( m_status & ( 0x01 << channel ) ) || m_eop == CLEAR_LINE || !( m_drq & ( 0x01 << channel ) ) )
 				{
 					m_hrq = 0;
 					m_hlda = 0;
-					devcb_call_write_line(&m_out_hrq_func, m_hrq);
+					m_out_hrq_func(m_hrq);
 					m_state = DMA8237_SI;
 				}
 				else
@@ -404,17 +429,17 @@ void i8237_device::i8237_timerproc()
 			case DMA8237_SINGLE_MODE:
 				m_hrq = 0;
 				m_hlda = 0;
-				devcb_call_write_line(&m_out_hrq_func, m_hrq);
+				m_out_hrq_func(m_hrq);
 				m_state = DMA8237_SI;
 				break;
 
 			case DMA8237_BLOCK_MODE:
 				/* Check for terminal count or EOP signal */
-				if ( ( m_status & ( 0x01 << channel ) ) || !m_eop )
+				if ( ( m_status & ( 0x01 << channel ) ) || m_eop == CLEAR_LINE )
 				{
 					m_hrq = 0;
 					m_hlda = 0;
-					devcb_call_write_line(&m_out_hrq_func, m_hrq);
+					m_out_hrq_func(m_hrq);
 					m_state = DMA8237_SI;
 				}
 				else
@@ -422,28 +447,21 @@ void i8237_device::i8237_timerproc()
 					m_state = m_chan[channel].m_high_address_changed ? DMA8237_S1 : DMA8237_S2;
 				}
 				break;
-
-			case DMA8237_CASCADE_MODE:
-				if ( ! ( m_drq & ( 0x01 << channel ) ) )
-				{
-					m_hrq = 0;
-					m_hlda = 0;
-					devcb_call_write_line(&m_out_hrq_func, m_hrq);
-					m_state = DMA8237_SI;
-				}
-				break;
 			}
 
 			/* Check if EOP output needs to be asserted */
 			if ( m_status & ( 0x01 << channel ) )
 			{
-				m_eop = 0;
-				devcb_call_write_line(&m_out_eop_func, m_eop ? ASSERT_LINE : CLEAR_LINE);
+				m_eop = CLEAR_LINE;
+				m_out_eop_func(m_eop);
 			}
 		}
 
 		/* clear DACK */
-		i8327_set_dack(-1);
+		if ( m_state == DMA8237_SI )
+		{
+			i8327_set_dack(-1);
+		}
 		break;
 
 	case DMA8237_S11: /* Output A8-A15 */
@@ -453,8 +471,8 @@ void i8237_device::i8237_timerproc()
 //              m_chan[1].m_address, m_chan[1].m_count);
 
 		// FIXME: this will copy bytes correct, but not 16 bit words
-		m_temporary_data = devcb_call_read8(&m_in_memr_func, m_chan[0].m_address);
-		devcb_call_write8(&m_out_memw_func, m_chan[1].m_address, m_temporary_data);
+		m_temporary_data = m_in_memr_func(m_chan[0].m_address);
+		m_out_memw_func(m_chan[1].m_address, m_temporary_data);
 
 		m_service_channel = 0;
 
@@ -468,7 +486,7 @@ void i8237_device::i8237_timerproc()
 		if (m_chan[0].m_count == 0xFFFF || m_chan[1].m_count == 0xFFFF) {
 			m_hrq = 0;
 			m_hlda = 0;
-			devcb_call_write_line(&m_out_hrq_func, m_hrq);
+			m_out_hrq_func(m_hrq);
 			m_state = DMA8237_SI;
 			m_status |= 3; // set TC for channel 0 and 1
 			m_drq &= ~3; // clear drq for channel 0 and 1
@@ -523,11 +541,11 @@ READ8_DEVICE_HANDLER_TRAMPOLINE(i8237, i8237_r)
 		data = m_temp;
 		break;
 
-	case 9:		/* DMA write request register */
-	case 11:	/* DMA mode register */
-	case 12:	/* DMA clear byte pointer flip-flop */
-	case 14:	/* DMA clear mask register */
-	case 15:	/* DMA write mask register */
+	case 9:     /* DMA write request register */
+	case 11:    /* DMA mode register */
+	case 12:    /* DMA clear byte pointer flip-flop */
+	case 14:    /* DMA clear mask register */
+	case 15:    /* DMA write mask register */
 		data = 0xFF;
 		break;
 	}
@@ -674,7 +692,6 @@ void i8237_device::i8237_drq_write(int channel, int state)
 	}
 
 	m_timer->enable( ( m_command & 0x04 ) ? 0 : 1 );
-
 }
 
 

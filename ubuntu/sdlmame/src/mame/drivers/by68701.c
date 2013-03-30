@@ -1,17 +1,28 @@
+
 #include "emu.h"
 #include "cpu/m6800/m6800.h"
-
-extern const char layout_pinball[];
 
 class by68701_state : public driver_device
 {
 public:
-	by68701_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	by68701_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+			m_maincpu(*this, "maincpu")
+	{ }
+
+protected:
+
+	// devices
+	required_device<cpu_device> m_maincpu;
+
+	// driver_device overrides
+	virtual void machine_reset();
+public:
+	DECLARE_DRIVER_INIT(by68701);
 };
 
 
-static ADDRESS_MAP_START( by68701_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( by68701_map, AS_PROGRAM, 8, by68701_state )
 	AM_RANGE(0x0000, 0xffff) AM_NOP
 	AM_RANGE(0x0000, 0x00ff) AM_RAM
 	AM_RANGE(0x0400, 0x04ff) AM_RAM
@@ -22,11 +33,11 @@ ADDRESS_MAP_END
 static INPUT_PORTS_START( by68701 )
 INPUT_PORTS_END
 
-static MACHINE_RESET( by68701 )
+void by68701_state::machine_reset()
 {
 }
 
-static DRIVER_INIT( by68701 )
+DRIVER_INIT_MEMBER(by68701_state,by68701)
 {
 }
 
@@ -34,11 +45,6 @@ static MACHINE_CONFIG_START( by68701, by68701_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6803, 3579545/4)
 	MCFG_CPU_PROGRAM_MAP(by68701_map)
-
-	MCFG_MACHINE_RESET( by68701 )
-
-	/* video hardware */
-	MCFG_DEFAULT_LAYOUT(layout_pinball)
 MACHINE_CONFIG_END
 
 /*------------------
@@ -121,9 +127,10 @@ ROM_START(eballdlxp4)
 	ROM_LOAD("838-16_5.532", 0xf000, 0x1000, CRC(63d92025) SHA1(2f8e8435326a39064b99b9971b0d8944586571fb))
 ROM_END
 
-GAME(1981,	flashgdnp1,	flashgdn,	by68701,	by68701,	by68701,	ROT0,	"Bally",	"Flash Gordon (prototype rev. 1)",		 GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1981,	flashgdnp2,	flashgdn,	by68701,	by68701,	by68701,	ROT0,	"Bally",	"Flash Gordon (prototype rev. 2)",		 GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1981,	eballdlxp1,	eballdlx,	by68701,	by68701,	by68701,	ROT0,	"Bally",	"Eight Ball Deluxe (prototype rev. 1)", GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1981,	eballdlxp2,	eballdlx,	by68701,	by68701,	by68701,	ROT0,	"Bally",	"Eight Ball Deluxe (prototype rev. 2)", GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1981,	eballdlxp3,	eballdlx,	by68701,	by68701,	by68701,	ROT0,	"Bally",	"Eight Ball Deluxe (prototype rev. 3)", GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1981,	eballdlxp4,	eballdlx,	by68701,	by68701,	by68701,	ROT0,	"Bally",	"Eight Ball Deluxe (prototype rev. 4)", GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
+
+GAME(1981,  flashgdnp1, flashgdn,   by68701,    by68701, by68701_state, by68701,    ROT0,   "Bally",    "Flash Gordon (prototype rev. 1)",       GAME_IS_SKELETON_MECHANICAL)
+GAME(1981,  flashgdnp2, flashgdn,   by68701,    by68701, by68701_state, by68701,    ROT0,   "Bally",    "Flash Gordon (prototype rev. 2)",       GAME_IS_SKELETON_MECHANICAL)
+GAME(1981,  eballdlxp1, eballdlx,   by68701,    by68701, by68701_state, by68701,    ROT0,   "Bally",    "Eight Ball Deluxe (prototype rev. 1)", GAME_IS_SKELETON_MECHANICAL)
+GAME(1981,  eballdlxp2, eballdlx,   by68701,    by68701, by68701_state, by68701,    ROT0,   "Bally",    "Eight Ball Deluxe (prototype rev. 2)", GAME_IS_SKELETON_MECHANICAL)
+GAME(1981,  eballdlxp3, eballdlx,   by68701,    by68701, by68701_state, by68701,    ROT0,   "Bally",    "Eight Ball Deluxe (prototype rev. 3)", GAME_IS_SKELETON_MECHANICAL)
+GAME(1981,  eballdlxp4, eballdlx,   by68701,    by68701, by68701_state, by68701,    ROT0,   "Bally",    "Eight Ball Deluxe (prototype rev. 4)", GAME_IS_SKELETON_MECHANICAL)

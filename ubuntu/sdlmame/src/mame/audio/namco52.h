@@ -6,14 +6,13 @@
 #include "devcb.h"
 
 
-typedef struct _namco_52xx_interface namco_52xx_interface;
-struct _namco_52xx_interface
+struct namco_52xx_interface
 {
-	const char *	discrete;	/* name of the discrete sound device */
-	int				firstnode;	/* index of the first node */
-	attoseconds_t	extclock;	/* external clock period */
-	devcb_read8		romread;	/* ROM read handler */
-	devcb_read8 	si;			/* SI (pin 6) read handler */
+	const char *    discrete;   /* name of the discrete sound device */
+	int             firstnode;  /* index of the first node */
+	attoseconds_t   extclock;   /* external clock period */
+	devcb_read8     romread;    /* ROM read handler */
+	devcb_read8     si;         /* SI (pin 6) read handler */
 };
 
 
@@ -22,14 +21,34 @@ struct _namco_52xx_interface
 	MCFG_DEVICE_CONFIG(_interface)
 
 
-WRITE8_DEVICE_HANDLER( namco_52xx_write );
+DECLARE_WRITE8_DEVICE_HANDLER( namco_52xx_write );
 
 
-DECLARE_LEGACY_DEVICE(NAMCO_52XX, namco_52xx);
+class namco_52xx_device : public device_t
+{
+public:
+	namco_52xx_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock);
+	~namco_52xx_device() { global_free(m_token); }
+
+	// access to legacy token
+	void *token() const { assert(m_token != NULL); return m_token; }
+protected:
+	// device-level overrides
+	virtual void device_config_complete();
+	virtual void device_start();
+	virtual const rom_entry *device_rom_region() const;
+	virtual machine_config_constructor device_mconfig_additions() const;
+private:
+	// internal state
+	void *m_token;
+};
+
+extern const device_type NAMCO_52XX;
+
 
 
 /* discrete nodes */
-#define NAMCO_52XX_P_DATA(base)		(base)
+#define NAMCO_52XX_P_DATA(base)     (base)
 
 
-#endif	/* NAMCO52_H */
+#endif  /* NAMCO52_H */

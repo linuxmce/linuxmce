@@ -18,7 +18,7 @@
     CONSTANTS
 ***************************************************************************/
 
-#define HASH_SIZE		53
+#define HASH_SIZE       53
 
 
 
@@ -26,24 +26,22 @@
     TYPE DEFINITIONS
 ***************************************************************************/
 
-typedef struct _output_notify output_notify;
-struct _output_notify
+struct output_notify
 {
-	output_notify *		next;			/* link to next item */
-	output_notifier_func		notifier;		/* callback to call */
-	void *				param;			/* parameter to pass the callback */
+	output_notify *     next;           /* link to next item */
+	output_notifier_func        notifier;       /* callback to call */
+	void *              param;          /* parameter to pass the callback */
 };
 
 
-typedef struct _output_item output_item;
-struct _output_item
+struct output_item
 {
-	output_item *		next;			/* next item in list */
-	const char *		name;			/* string name of the item */
-	UINT32				hash;			/* hash for this item name */
-	UINT32				id;				/* unique ID for this item */
-	INT32				value;			/* current value */
-	output_notify *		notifylist;		/* list of notifier callbacks */
+	output_item *       next;           /* next item in list */
+	const char *        name;           /* string name of the item */
+	UINT32              hash;           /* hash for this item name */
+	UINT32              id;             /* unique ID for this item */
+	INT32               value;          /* current value */
+	output_notify *     notifylist;     /* list of notifier callbacks */
 };
 
 
@@ -147,11 +145,11 @@ INLINE output_item *create_new_item(const char *outname, INT32 value)
 void output_init(running_machine &machine)
 {
 	/* add pause callback */
-	machine.add_notifier(MACHINE_NOTIFY_PAUSE, output_pause);
-	machine.add_notifier(MACHINE_NOTIFY_RESUME, output_resume);
+	machine.add_notifier(MACHINE_NOTIFY_PAUSE, machine_notify_delegate(FUNC(output_pause), &machine));
+	machine.add_notifier(MACHINE_NOTIFY_RESUME, machine_notify_delegate(FUNC(output_resume), &machine));
 
 	/* get a callback when done */
-	machine.add_notifier(MACHINE_NOTIFY_EXIT, output_exit);
+	machine.add_notifier(MACHINE_NOTIFY_EXIT, machine_notify_delegate(FUNC(output_exit), &machine));
 
 	/* reset the lists */
 	memset(itemtable, 0, sizeof(itemtable));

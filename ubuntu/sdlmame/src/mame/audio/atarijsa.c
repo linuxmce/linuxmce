@@ -47,7 +47,7 @@ ALL: the LPF (low pass filter) bit which selectively places a lowpass filter in 
 #include "audio/atarijsa.h"
 
 
-#define JSA_MASTER_CLOCK			XTAL_3_579545MHz
+#define JSA_MASTER_CLOCK            XTAL_3_579545MHz
 
 
 static UINT8 *bank_base;
@@ -73,12 +73,12 @@ static UINT8 ym2151_ct2;
 
 static void update_all_volumes(running_machine &machine);
 
-static READ8_HANDLER( jsa1_io_r );
-static WRITE8_HANDLER( jsa1_io_w );
-static READ8_HANDLER( jsa2_io_r );
-static WRITE8_HANDLER( jsa2_io_w );
-static READ8_HANDLER( jsa3_io_r );
-static WRITE8_HANDLER( jsa3_io_w );
+static DECLARE_READ8_HANDLER( jsa1_io_r );
+static DECLARE_WRITE8_HANDLER( jsa1_io_w );
+static DECLARE_READ8_HANDLER( jsa2_io_r );
+static DECLARE_WRITE8_HANDLER( jsa2_io_w );
+static DECLARE_READ8_HANDLER( jsa3_io_r );
+static DECLARE_WRITE8_HANDLER( jsa3_io_w );
 
 
 /*************************************
@@ -87,12 +87,12 @@ static WRITE8_HANDLER( jsa3_io_w );
  *
  *************************************/
 
-static ADDRESS_MAP_START( jsa3_oki_map, AS_0, 8 )
+static ADDRESS_MAP_START( jsa3_oki_map, AS_0, 8, driver_device )
 	AM_RANGE(0x00000, 0x1ffff) AM_ROMBANK("bank12")
 	AM_RANGE(0x20000, 0x3ffff) AM_ROMBANK("bank13")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( jsa3_oki2_map, AS_0, 8 )
+static ADDRESS_MAP_START( jsa3_oki2_map, AS_0, 8, driver_device )
 	AM_RANGE(0x00000, 0x1ffff) AM_ROMBANK("bank14")
 	AM_RANGE(0x20000, 0x3ffff) AM_ROMBANK("bank15")
 ADDRESS_MAP_END
@@ -133,7 +133,7 @@ void atarijsa_init(running_machine &machine, const char *testport, int testmask)
 	test_mask = testmask;
 
 	/* predetermine the bank base */
-	rgn = machine.region("jsa")->base();
+	rgn = machine.root_device().memregion("jsa")->base();
 	bank_base = &rgn[0x03000];
 	bank_source_data = &rgn[0x10000];
 
@@ -147,10 +147,10 @@ void atarijsa_init(running_machine &machine, const char *testport, int testmask)
 
 	/* install POKEY memory handlers */
 	if (pokey != NULL)
-		jsacpu->memory().space(AS_PROGRAM)->install_legacy_readwrite_handler(*pokey, 0x2c00, 0x2c0f, FUNC(pokey_r), FUNC(pokey_w));
+		jsacpu->space(AS_PROGRAM).install_readwrite_handler(0x2c00, 0x2c0f, read8_delegate(FUNC(pokey_device::read),pokey), write8_delegate(FUNC(pokey_device::write),pokey));
 
 	init_save_state(machine);
-	atarijsa_reset();
+	atarijsa_reset(machine);
 
 	/* initialize JSA III ADPCM */
 	{
@@ -161,24 +161,24 @@ void atarijsa_init(running_machine &machine, const char *testport, int testmask)
 		/* the upper 128k is fixed, the lower 128k is bankswitched */
 		for (rgn = 0; rgn < ARRAY_LENGTH(regions); rgn++)
 		{
-			UINT8 *base = machine.region(regions[rgn])->base();
-			if (base != NULL && machine.region(regions[rgn])->bytes() >= 0x80000)
+			UINT8 *base = machine.root_device().memregion(regions[rgn])->base();
+			if (base != NULL && machine.root_device().memregion(regions[rgn])->bytes() >= 0x80000)
 			{
 				const char *bank = (rgn != 2) ? "bank12" : "bank14";
 				const char *bank_plus_1 = (rgn != 2) ? "bank13" : "bank15";
-				memory_configure_bank(machine, bank, 0, 2, base + 0x00000, 0x00000);
-				memory_configure_bank(machine, bank, 2, 2, base + 0x20000, 0x20000);
-				memory_set_bankptr(machine, bank_plus_1, base + 0x60000);
+				machine.root_device().membank(bank)->configure_entries(0, 2, base + 0x00000, 0x00000);
+				machine.root_device().membank(bank)->configure_entries(2, 2, base + 0x20000, 0x20000);
+				machine.root_device().membank(bank_plus_1)->set_base(base + 0x60000);
 			}
 		}
 	}
 }
 
 
-void atarijsa_reset(void)
+void atarijsa_reset(running_machine &machine)
 {
 	/* reset the sound I/O system */
-	atarigen_sound_io_reset(jsacpu);
+	machine.driver_data<atarigen_state>()->sound_io_reset();
 
 	/* reset the static states */
 	overall_volume = 100;
@@ -203,32 +203,32 @@ void atarijsa_reset(void)
 
 static READ8_HANDLER( jsa1_io_r )
 {
-	atarigen_state *atarigen = space->machine().driver_data<atarigen_state>();
+	atarigen_state *atarigen = space.machine().driver_data<atarigen_state>();
 	int result = 0xff;
 
 	switch (offset & 0x206)
 	{
-		case 0x000:		/* n/c */
+		case 0x000:     /* n/c */
 			logerror("atarijsa: Unknown read at %04X\n", offset & 0x206);
 			break;
 
-		case 0x002:		/* /RDP */
-			result = atarigen_6502_sound_r(space, offset);
+		case 0x002:     /* /RDP */
+			result = atarigen->m6502_sound_r(space, offset);
 			break;
 
-		case 0x004:		/* /RDIO */
+		case 0x004:     /* /RDIO */
 			/*
-                0x80 = self test
-                0x40 = NMI line state (active low)
-                0x20 = sound output full
-                0x10 = TMS5220 ready (active low)
-                0x08 = +5V
-                0x04 = +5V
-                0x02 = coin 2
-                0x01 = coin 1
-            */
-			result = input_port_read(space->machine(), "JSAI");
-			if (!(input_port_read(space->machine(), test_port) & test_mask)) result ^= 0x80;
+			    0x80 = self test
+			    0x40 = NMI line state (active low)
+			    0x20 = sound output full
+			    0x10 = TMS5220 ready (active low)
+			    0x08 = +5V
+			    0x04 = +5V
+			    0x02 = coin 2
+			    0x01 = coin 1
+			*/
+			result = space.machine().root_device().ioport("JSAI")->read();
+			if (!(space.machine().root_device().ioport(test_port)->read() & test_mask)) result ^= 0x80;
 			if (atarigen->m_cpu_to_sound_ready) result ^= 0x40;
 			if (atarigen->m_sound_to_cpu_ready) result ^= 0x20;
 			if ((tms5220 != NULL) && (tms5220_readyq_r(tms5220) == 0))
@@ -237,14 +237,14 @@ static READ8_HANDLER( jsa1_io_r )
 				result &= ~0x10;
 			break;
 
-		case 0x006:		/* /IRQACK */
-			atarigen_6502_irq_ack_r(space, 0);
+		case 0x006:     /* /IRQACK */
+			atarigen->m6502_irq_ack_r(space, 0);
 			break;
 
-		case 0x200:		/* /VOICE */
-		case 0x202:		/* /WRP */
-		case 0x204:		/* /WRIO */
-		case 0x206:		/* /MIX */
+		case 0x200:     /* /VOICE */
+		case 0x202:     /* /WRP */
+		case 0x204:     /* /WRIO */
+		case 0x206:     /* /MIX */
 			logerror("atarijsa: Unknown read at %04X\n", offset & 0x206);
 			break;
 	}
@@ -257,35 +257,35 @@ static WRITE8_HANDLER( jsa1_io_w )
 {
 	switch (offset & 0x206)
 	{
-		case 0x000:		/* n/c */
-		case 0x002:		/* /RDP */
-		case 0x004:		/* /RDIO */
+		case 0x000:     /* n/c */
+		case 0x002:     /* /RDP */
+		case 0x004:     /* /RDIO */
 			logerror("atarijsa: Unknown write (%02X) at %04X\n", data & 0xff, offset & 0x206);
 			break;
 
-		case 0x006:		/* /IRQACK */
-			atarigen_6502_irq_ack_r(space, 0);
+		case 0x006:     /* /IRQACK */
+			space.machine().driver_data<atarigen_state>()->m6502_irq_ack_r(space, 0);
 			break;
 
-		case 0x200:		/* /VOICE */
+		case 0x200:     /* /VOICE */
 			if (tms5220 != NULL)
-				tms5220_data_w(tms5220, 0, data);
+				tms5220_data_w(tms5220, space, 0, data);
 			break;
 
-		case 0x202:		/* /WRP */
-			atarigen_6502_sound_w(space, offset, data);
+		case 0x202:     /* /WRP */
+			space.machine().driver_data<atarigen_state>()->m6502_sound_w(space, offset, data);
 			break;
 
-		case 0x204:		/* WRIO */
+		case 0x204:     /* WRIO */
 			/*
-                0xc0 = bank address
-                0x20 = coin counter 2
-                0x10 = coin counter 1
-                0x08 = squeak (tweaks the 5220 frequency)
-                0x04 = TMS5220 reset (actually the read strobe) (active low)
-                0x02 = TMS5220 write strobe (active low)
-                0x01 = YM2151 reset (active low)
-            */
+			    0xc0 = bank address
+			    0x20 = coin counter 2
+			    0x10 = coin counter 1
+			    0x08 = squeak (tweaks the 5220 frequency)
+			    0x04 = TMS5220 reset (actually the read strobe) (active low)
+			    0x02 = TMS5220 write strobe (active low)
+			    0x01 = YM2151 reset (active low)
+			*/
 
 			/* handle TMS5220 I/O */
 			if (tms5220 != NULL)
@@ -298,27 +298,27 @@ static WRITE8_HANDLER( jsa1_io_w )
 			}
 
 			/* reset the YM2151 if needed */
-			if ((data&1) == 0) devtag_reset(space->machine(), "ymsnd");
+			if ((data&1) == 0) space.machine().device("ymsnd")->reset();
 
 			/* coin counters */
-			coin_counter_w(space->machine(), 1, (data >> 5) & 1);
-			coin_counter_w(space->machine(), 0, (data >> 4) & 1);
+			coin_counter_w(space.machine(), 1, (data >> 5) & 1);
+			coin_counter_w(space.machine(), 0, (data >> 4) & 1);
 
 			/* update the bank */
 			memcpy(bank_base, &bank_source_data[0x1000 * ((data >> 6) & 3)], 0x1000);
 			break;
 
-		case 0x206:		/* MIX */
+		case 0x206:     /* MIX */
 			/*
-                0xc0 = TMS5220 volume (0-3)
-                0x30 = POKEY volume (0-3)
-                0x0e = YM2151 volume (0-7)
-                0x01 = low-pass filter enable
-            */
+			    0xc0 = TMS5220 volume (0-3)
+			    0x30 = POKEY volume (0-3)
+			    0x0e = YM2151 volume (0-7)
+			    0x01 = low-pass filter enable
+			*/
 			tms5220_volume = ((data >> 6) & 3) * 100 / 3;
 			pokey_volume = ((data >> 4) & 3) * 100 / 3;
 			ym2151_volume = ((data >> 1) & 7) * 100 / 7;
-			update_all_volumes(space->machine());
+			update_all_volumes(space.machine());
 			break;
 	}
 }
@@ -333,47 +333,47 @@ static WRITE8_HANDLER( jsa1_io_w )
 
 static READ8_HANDLER( jsa2_io_r )
 {
-	atarigen_state *atarigen = space->machine().driver_data<atarigen_state>();
+	atarigen_state *atarigen = space.machine().driver_data<atarigen_state>();
 	int result = 0xff;
 
 	switch (offset & 0x206)
 	{
-		case 0x000:		/* /RDV */
+		case 0x000:     /* /RDV */
 			if (oki6295 != NULL)
-				result = oki6295->read(*space, offset);
+				result = oki6295->read(space, offset);
 			else
 				logerror("atarijsa: Unknown read at %04X\n", offset & 0x206);
 			break;
 
-		case 0x002:		/* /RDP */
-			result = atarigen_6502_sound_r(space, offset);
+		case 0x002:     /* /RDP */
+			result = atarigen->m6502_sound_r(space, offset);
 			break;
 
-		case 0x004:		/* /RDIO */
+		case 0x004:     /* /RDIO */
 			/*
-                0x80 = self test
-                0x40 = NMI line state (active low)
-                0x20 = sound output full
-                0x10 = +5V
-                0x08 = +5V
-                0x04 = +5V
-                0x02 = coin 2
-                0x01 = coin 1
-            */
-			result = input_port_read(space->machine(), "JSAII");
-			if (!(input_port_read(space->machine(), test_port) & test_mask)) result ^= 0x80;
+			    0x80 = self test
+			    0x40 = NMI line state (active low)
+			    0x20 = sound output full
+			    0x10 = +5V
+			    0x08 = +5V
+			    0x04 = +5V
+			    0x02 = coin 2
+			    0x01 = coin 1
+			*/
+			result = space.machine().root_device().ioport("JSAII")->read();
+			if (!(space.machine().root_device().ioport(test_port)->read() & test_mask)) result ^= 0x80;
 			if (atarigen->m_cpu_to_sound_ready) result ^= 0x40;
 			if (atarigen->m_sound_to_cpu_ready) result ^= 0x20;
 			break;
 
-		case 0x006:		/* /IRQACK */
-			atarigen_6502_irq_ack_r(space, 0);
+		case 0x006:     /* /IRQACK */
+			atarigen->m6502_irq_ack_r(space, 0);
 			break;
 
-		case 0x200:		/* /WRV */
-		case 0x202:		/* /WRP */
-		case 0x204:		/* /WRIO */
-		case 0x206:		/* /MIX */
+		case 0x200:     /* /WRV */
+		case 0x202:     /* /WRP */
+		case 0x204:     /* /WRIO */
+		case 0x206:     /* /MIX */
 			logerror("atarijsa: Unknown read at %04X\n", offset & 0x206);
 			break;
 	}
@@ -386,64 +386,64 @@ static WRITE8_HANDLER( jsa2_io_w )
 {
 	switch (offset & 0x206)
 	{
-		case 0x000:		/* /RDV */
-		case 0x002:		/* /RDP */
-		case 0x004:		/* /RDIO */
+		case 0x000:     /* /RDV */
+		case 0x002:     /* /RDP */
+		case 0x004:     /* /RDIO */
 			logerror("atarijsa: Unknown write (%02X) at %04X\n", data & 0xff, offset & 0x206);
 			break;
 
-		case 0x006:		/* /IRQACK */
-			atarigen_6502_irq_ack_r(space, 0);
+		case 0x006:     /* /IRQACK */
+			space.machine().driver_data<atarigen_state>()->m6502_irq_ack_r(space, 0);
 			break;
 
-		case 0x200:		/* /WRV */
+		case 0x200:     /* /WRV */
 			if (oki6295 != NULL)
-				oki6295->write(*space, offset, data);
+				oki6295->write(space, offset, data);
 			else
 				logerror("atarijsa: Unknown write (%02X) at %04X\n", data & 0xff, offset & 0x206);
 			break;
 
-		case 0x202:		/* /WRP */
-			atarigen_6502_sound_w(space, offset, data);
+		case 0x202:     /* /WRP */
+			space.machine().driver_data<atarigen_state>()->m6502_sound_w(space, offset, data);
 			break;
 
-		case 0x204:		/* /WRIO */
+		case 0x204:     /* /WRIO */
 			/*
-                0xc0 = bank address
-                0x20 = coin counter 2
-                0x10 = coin counter 1
-                0x08 = voice frequency (tweaks the OKI6295 frequency)
-                0x04 = OKI6295 reset (active low)
-                0x02 = n/c
-                0x01 = YM2151 reset (active low)
-            */
+			    0xc0 = bank address
+			    0x20 = coin counter 2
+			    0x10 = coin counter 1
+			    0x08 = voice frequency (tweaks the OKI6295 frequency)
+			    0x04 = OKI6295 reset (active low)
+			    0x02 = n/c
+			    0x01 = YM2151 reset (active low)
+			*/
 
 			/* reset the YM2151 if needed */
-			if ((data&1) == 0) devtag_reset(space->machine(), "ymsnd");
+			if ((data&1) == 0) space.machine().device("ymsnd")->reset();
 
 			/* update the bank */
 			memcpy(bank_base, &bank_source_data[0x1000 * ((data >> 6) & 3)], 0x1000);
 
 			/* coin counters */
-			coin_counter_w(space->machine(), 1, (data >> 5) & 1);
-			coin_counter_w(space->machine(), 0, (data >> 4) & 1);
+			coin_counter_w(space.machine(), 1, (data >> 5) & 1);
+			coin_counter_w(space.machine(), 0, (data >> 4) & 1);
 
 			/* update the OKI frequency */
 			if (oki6295 != NULL)
 				oki6295->set_pin7(data & 8);
 			break;
 
-		case 0x206:		/* /MIX */
+		case 0x206:     /* /MIX */
 			/*
-                0xc0 = n/c
-                0x20 = low-pass filter enable
-                0x10 = n/c
-                0x0e = YM2151 volume (0-7)
-                0x01 = OKI6295 volume (0-1)
-            */
+			    0xc0 = n/c
+			    0x20 = low-pass filter enable
+			    0x10 = n/c
+			    0x0e = YM2151 volume (0-7)
+			    0x01 = OKI6295 volume (0-1)
+			*/
 			ym2151_volume = ((data >> 1) & 7) * 100 / 7;
 			oki6295_volume = 50 + (data & 1) * 50;
-			update_all_volumes(space->machine());
+			update_all_volumes(space.machine());
 			break;
 	}
 }
@@ -458,45 +458,45 @@ static WRITE8_HANDLER( jsa2_io_w )
 
 static READ8_HANDLER( jsa3_io_r )
 {
-	atarigen_state *atarigen = space->machine().driver_data<atarigen_state>();
+	atarigen_state *atarigen = space.machine().driver_data<atarigen_state>();
 	int result = 0xff;
 
 	switch (offset & 0x206)
 	{
-		case 0x000:		/* /RDV */
+		case 0x000:     /* /RDV */
 			if (oki6295 != NULL)
-				result = oki6295->read(*space, offset);
+				result = oki6295->read(space, offset);
 			break;
 
-		case 0x002:		/* /RDP */
-			result = atarigen_6502_sound_r(space, offset);
+		case 0x002:     /* /RDP */
+			result = atarigen->m6502_sound_r(space, offset);
 			break;
 
-		case 0x004:		/* /RDIO */
+		case 0x004:     /* /RDIO */
 			/*
-                0x80 = self test (active high)
-                0x40 = NMI line state (active high)
-                0x20 = sound output full (active high)
-                0x10 = self test (active high)
-                0x08 = service (active high)
-                0x04 = tilt (active high)
-                0x02 = coin L (active high)
-                0x01 = coin R (active high)
-            */
-			result = input_port_read(space->machine(), "JSAIII");
-			if (!(input_port_read(space->machine(), test_port) & test_mask)) result ^= 0x90;
+			    0x80 = self test (active high)
+			    0x40 = NMI line state (active high)
+			    0x20 = sound output full (active high)
+			    0x10 = self test (active high)
+			    0x08 = service (active high)
+			    0x04 = tilt (active high)
+			    0x02 = coin L (active high)
+			    0x01 = coin R (active high)
+			*/
+			result = space.machine().root_device().ioport("JSAIII")->read();
+			if (!(space.machine().root_device().ioport(test_port)->read() & test_mask)) result ^= 0x90;
 			if (atarigen->m_cpu_to_sound_ready) result ^= 0x40;
 			if (atarigen->m_sound_to_cpu_ready) result ^= 0x20;
 			break;
 
-		case 0x006:		/* /IRQACK */
-			atarigen_6502_irq_ack_r(space, 0);
+		case 0x006:     /* /IRQACK */
+			atarigen->m6502_irq_ack_r(space, 0);
 			break;
 
-		case 0x200:		/* /WRV */
-		case 0x202:		/* /WRP */
-		case 0x204:		/* /WRIO */
-		case 0x206:		/* /MIX */
+		case 0x200:     /* /WRV */
+		case 0x202:     /* /WRP */
+		case 0x204:     /* /WRIO */
+		case 0x206:     /* /MIX */
 			logerror("atarijsa: Unknown read at %04X\n", offset & 0x206);
 			break;
 	}
@@ -509,75 +509,75 @@ static WRITE8_HANDLER( jsa3_io_w )
 {
 	switch (offset & 0x206)
 	{
-		case 0x000:		/* /RDV */
+		case 0x000:     /* /RDV */
 			overall_volume = data * 100 / 127;
-			update_all_volumes(space->machine());
+			update_all_volumes(space.machine());
 			break;
 
-		case 0x002:		/* /RDP */
-		case 0x004:		/* /RDIO */
+		case 0x002:     /* /RDP */
+		case 0x004:     /* /RDIO */
 			logerror("atarijsa: Unknown write (%02X) at %04X\n", data & 0xff, offset & 0x206);
 			break;
 
-		case 0x006:		/* /IRQACK */
-			atarigen_6502_irq_ack_r(space, 0);
+		case 0x006:     /* /IRQACK */
+			space.machine().driver_data<atarigen_state>()->m6502_irq_ack_r(space, 0);
 			break;
 
-		case 0x200:		/* /WRV */
+		case 0x200:     /* /WRV */
 			if (oki6295 != NULL)
-				oki6295->write(*space, offset, data);
+				oki6295->write(space, offset, data);
 			break;
 
-		case 0x202:		/* /WRP */
-			atarigen_6502_sound_w(space, offset, data);
+		case 0x202:     /* /WRP */
+			space.machine().driver_data<atarigen_state>()->m6502_sound_w(space, offset, data);
 			break;
 
-		case 0x204:		/* /WRIO */
+		case 0x204:     /* /WRIO */
 			/*
-                0xc0 = bank address
-                0x20 = coin counter 2
-                0x10 = coin counter 1
-                0x08 = voice frequency (tweaks the OKI6295 frequency)
-                0x04 = OKI6295 reset (active low)
-                0x02 = OKI6295 bank bit 0
-                0x01 = YM2151 reset (active low)
-            */
+			    0xc0 = bank address
+			    0x20 = coin counter 2
+			    0x10 = coin counter 1
+			    0x08 = voice frequency (tweaks the OKI6295 frequency)
+			    0x04 = OKI6295 reset (active low)
+			    0x02 = OKI6295 bank bit 0
+			    0x01 = YM2151 reset (active low)
+			*/
 
 			/* reset the YM2151 if needed */
-			if ((data&1) == 0) devtag_reset(space->machine(), "ymsnd");
+			if ((data&1) == 0) space.machine().device("ymsnd")->reset();
 
 			/* update the OKI bank */
 			if (oki6295 != NULL)
-				memory_set_bank(space->machine(), "bank12", (memory_get_bank(space->machine(), "bank12") & 2) | ((data >> 1) & 1));
+				space.machine().root_device().membank("bank12")->set_entry((space.machine().root_device().membank("bank12")->entry() & 2) | ((data >> 1) & 1));
 
 			/* update the bank */
 			memcpy(bank_base, &bank_source_data[0x1000 * ((data >> 6) & 3)], 0x1000);
 
 			/* coin counters */
-			coin_counter_w(space->machine(), 1, (data >> 5) & 1);
-			coin_counter_w(space->machine(), 0, (data >> 4) & 1);
+			coin_counter_w(space.machine(), 1, (data >> 5) & 1);
+			coin_counter_w(space.machine(), 0, (data >> 4) & 1);
 
 			/* update the OKI frequency */
 			if (oki6295 != NULL) oki6295->set_pin7(data & 8);
 			break;
 
-		case 0x206:		/* /MIX */
+		case 0x206:     /* /MIX */
 			/*
-                0xc0 = n/c
-                0x20 = low-pass filter enable
-                0x10 = OKI6295 bank bit 1
-                0x0e = YM2151 volume (0-7)
-                0x01 = OKI6295 volume (0-1)
-            */
+			    0xc0 = n/c
+			    0x20 = low-pass filter enable
+			    0x10 = OKI6295 bank bit 1
+			    0x0e = YM2151 volume (0-7)
+			    0x01 = OKI6295 volume (0-1)
+			*/
 
 			/* update the OKI bank */
 			if (oki6295 != NULL)
-				memory_set_bank(space->machine(), "bank12", (memory_get_bank(space->machine(), "bank12") & 1) | ((data >> 3) & 2));
+				space.machine().root_device().membank("bank12")->set_entry((space.machine().root_device().membank("bank12")->entry() & 1) | ((data >> 3) & 2));
 
 			/* update the volumes */
 			ym2151_volume = ((data >> 1) & 7) * 100 / 7;
 			oki6295_volume = 50 + (data & 1) * 50;
-			update_all_volumes(space->machine());
+			update_all_volumes(space.machine());
 			break;
 	}
 }
@@ -592,45 +592,45 @@ static WRITE8_HANDLER( jsa3_io_w )
 
 static READ8_HANDLER( jsa3s_io_r )
 {
-	atarigen_state *atarigen = space->machine().driver_data<atarigen_state>();
+	atarigen_state *atarigen = space.machine().driver_data<atarigen_state>();
 	int result = 0xff;
 
 	switch (offset & 0x206)
 	{
-		case 0x000:		/* /RDV */
+		case 0x000:     /* /RDV */
 			if (oki6295_l != NULL)
-				result = ((offset & 1) ? oki6295_r : oki6295_l)->read(*space, offset);
+				result = ((offset & 1) ? oki6295_r : oki6295_l)->read(space, offset);
 			break;
 
-		case 0x002:		/* /RDP */
-			result = atarigen_6502_sound_r(space, offset);
+		case 0x002:     /* /RDP */
+			result = atarigen->m6502_sound_r(space, offset);
 			break;
 
-		case 0x004:		/* /RDIO */
+		case 0x004:     /* /RDIO */
 			/*
-                0x80 = self test (active high)
-                0x40 = NMI line state (active high)
-                0x20 = sound output full (active high)
-                0x10 = self test (active high)
-                0x08 = service (active high)
-                0x04 = tilt (active high)
-                0x02 = coin L (active high)
-                0x01 = coin R (active high)
-            */
-			result = input_port_read(space->machine(), "JSAIII");
-			if (!(input_port_read(space->machine(), test_port) & test_mask)) result ^= 0x90;
+			    0x80 = self test (active high)
+			    0x40 = NMI line state (active high)
+			    0x20 = sound output full (active high)
+			    0x10 = self test (active high)
+			    0x08 = service (active high)
+			    0x04 = tilt (active high)
+			    0x02 = coin L (active high)
+			    0x01 = coin R (active high)
+			*/
+			result = space.machine().root_device().ioport("JSAIII")->read();
+			if (!(space.machine().root_device().ioport(test_port)->read() & test_mask)) result ^= 0x90;
 			if (atarigen->m_cpu_to_sound_ready) result ^= 0x40;
 			if (atarigen->m_sound_to_cpu_ready) result ^= 0x20;
 			break;
 
-		case 0x006:		/* /IRQACK */
-			atarigen_6502_irq_ack_r(space, 0);
+		case 0x006:     /* /IRQACK */
+			atarigen->m6502_irq_ack_r(space, 0);
 			break;
 
-		case 0x200:		/* /WRV */
-		case 0x202:		/* /WRP */
-		case 0x204:		/* /WRIO */
-		case 0x206:		/* /MIX */
+		case 0x200:     /* /WRV */
+		case 0x202:     /* /WRP */
+		case 0x204:     /* /WRIO */
+		case 0x206:     /* /MIX */
 			logerror("atarijsa: Unknown read at %04X\n", offset & 0x206);
 			break;
 	}
@@ -643,84 +643,84 @@ static WRITE8_HANDLER( jsa3s_io_w )
 {
 	switch (offset & 0x206)
 	{
-		case 0x000:		/* /RDV */
+		case 0x000:     /* /RDV */
 			overall_volume = data * 100 / 127;
-			update_all_volumes(space->machine());
+			update_all_volumes(space.machine());
 			break;
 
-		case 0x002:		/* /RDP */
-		case 0x004:		/* /RDIO */
+		case 0x002:     /* /RDP */
+		case 0x004:     /* /RDIO */
 			logerror("atarijsa: Unknown write (%02X) at %04X\n", data & 0xff, offset & 0x206);
 			break;
 
-		case 0x006:		/* /IRQACK */
-			atarigen_6502_irq_ack_r(space, 0);
+		case 0x006:     /* /IRQACK */
+			space.machine().driver_data<atarigen_state>()->m6502_irq_ack_r(space, 0);
 			break;
 
-		case 0x200:		/* /WRV */
+		case 0x200:     /* /WRV */
 			if (oki6295_l != NULL)
-				((offset & 1) ? oki6295_r : oki6295_l)->write(*space, 0, data);
+				((offset & 1) ? oki6295_r : oki6295_l)->write(space, 0, data);
 			break;
 
-		case 0x202:		/* /WRP */
-			atarigen_6502_sound_w(space, offset, data);
+		case 0x202:     /* /WRP */
+			space.machine().driver_data<atarigen_state>()->m6502_sound_w(space, offset, data);
 			break;
 
-		case 0x204:		/* /WRIO */
+		case 0x204:     /* /WRIO */
 			/*
-                0xc0 = bank address
-                0x20 = coin counter 2
-                0x10 = coin counter 1
-                0x08 = voice frequency (tweaks the OKI6295 frequency)
-                0x04 = OKI6295 reset (active low)
-                0x02 = left OKI6295 bank bit 0
-                0x01 = YM2151 reset (active low)
-            */
+			    0xc0 = bank address
+			    0x20 = coin counter 2
+			    0x10 = coin counter 1
+			    0x08 = voice frequency (tweaks the OKI6295 frequency)
+			    0x04 = OKI6295 reset (active low)
+			    0x02 = left OKI6295 bank bit 0
+			    0x01 = YM2151 reset (active low)
+			*/
 
 			/* reset the YM2151 if needed */
-			if ((data&1) == 0) devtag_reset(space->machine(), "ymsnd");
+			if ((data&1) == 0) space.machine().device("ymsnd")->reset();
 
 			/* update the OKI bank */
-			memory_set_bank(space->machine(), "bank12", (memory_get_bank(space->machine(), "bank12") & 2) | ((data >> 1) & 1));
+			space.machine().root_device().membank("bank12")->set_entry((space.machine().root_device().membank("bank12")->entry() & 2) | ((data >> 1) & 1));
 
 			/* update the bank */
 			memcpy(bank_base, &bank_source_data[0x1000 * ((data >> 6) & 3)], 0x1000);
 
 			/* coin counters */
-			coin_counter_w(space->machine(), 1, (data >> 5) & 1);
-			coin_counter_w(space->machine(), 0, (data >> 4) & 1);
+			coin_counter_w(space.machine(), 1, (data >> 5) & 1);
+			coin_counter_w(space.machine(), 0, (data >> 4) & 1);
 
 			/* update the OKI frequency */
 			oki6295_l->set_pin7(data & 8);
 			oki6295_r->set_pin7(data & 8);
 			break;
 
-		case 0x206:		/* /MIX */
+		case 0x206:     /* /MIX */
 			/*
-                0xc0 = right OKI6295 bank bits 0-1
-                0x20 = low-pass filter enable
-                0x10 = left OKI6295 bank bit 1
-                0x0e = YM2151 volume (0-7)
-                0x01 = OKI6295 volume (0-1)
-            */
+			    0xc0 = right OKI6295 bank bits 0-1
+			    0x20 = low-pass filter enable
+			    0x10 = left OKI6295 bank bit 1
+			    0x0e = YM2151 volume (0-7)
+			    0x01 = OKI6295 volume (0-1)
+			*/
 
 			/* update the OKI bank */
-			memory_set_bank(space->machine(), "bank12", (memory_get_bank(space->machine(), "bank12") & 1) | ((data >> 3) & 2));
-			memory_set_bank(space->machine(), "bank14", data >> 6);
+			space.machine().root_device().membank("bank12")->set_entry((space.machine().root_device().membank("bank12")->entry() & 1) | ((data >> 3) & 2));
+			space.machine().root_device().membank("bank14")->set_entry(data >> 6);
 
 			/* update the volumes */
 			ym2151_volume = ((data >> 1) & 7) * 100 / 7;
 			oki6295_volume = 50 + (data & 1) * 50;
-			update_all_volumes(space->machine());
+			update_all_volumes(space.machine());
 			break;
 	}
 }
 
-static WRITE8_DEVICE_HANDLER( ym2151_ctl_w )
+WRITE8_DEVICE_HANDLER( ym2151_ctl_w )
 {
 	ym2151_ct1 = data&0x1;
 	ym2151_ct2 = (data&0x2)>>1;
-	update_all_volumes(device->machine());
+	update_all_volumes(space.machine());
 }
 
 
@@ -732,12 +732,13 @@ static WRITE8_DEVICE_HANDLER( ym2151_ctl_w )
 
 static void update_all_volumes(running_machine &machine )
 {
-	if (pokey != NULL) atarigen_set_pokey_vol(machine, (overall_volume * pokey_volume / 100) * ym2151_ct1);
+	atarigen_state *state = machine.driver_data<atarigen_state>();
+	if (pokey != NULL) state->set_pokey_volume((overall_volume * pokey_volume / 100) * ym2151_ct1);
 	//if (pokey != NULL) atarigen_set_pokey_stereo_vol(machine, (overall_volume * pokey_volume / 100) * ym2151_ct1, (overall_volume * pokey_volume / 100) * ym2151_ct2);
-	if (ym2151 != NULL) atarigen_set_ym2151_vol(machine, overall_volume * ym2151_volume / 100);
-	if (tms5220 != NULL) atarigen_set_tms5220_vol(machine, (overall_volume * tms5220_volume / 100) * ym2151_ct1);
+	if (ym2151 != NULL) state->set_ym2151_volume(overall_volume * ym2151_volume / 100);
+	if (tms5220 != NULL) state->set_tms5220_volume((overall_volume * tms5220_volume / 100) * ym2151_ct1);
 	//if (tms5220 != NULL) atarigen_set_tms5220_stereo_vol(machine, (overall_volume * tms5220_volume / 100) * ym2151_ct1, (overall_volume * tms5220_volume / 100) * ym2151_ct2);
-	if (oki6295 != NULL || oki6295_l != NULL || oki6295_r != NULL) atarigen_set_oki6295_vol(machine, overall_volume * oki6295_volume / 100);
+	if (oki6295 != NULL || oki6295_l != NULL || oki6295_r != NULL) state->set_oki6295_volume(overall_volume * oki6295_volume / 100);
 }
 
 
@@ -748,51 +749,37 @@ static void update_all_volumes(running_machine &machine )
  *
  *************************************/
 
-static ADDRESS_MAP_START( atarijsa1_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( atarijsa1_map, AS_PROGRAM, 8, driver_device )
 	AM_RANGE(0x0000, 0x1fff) AM_RAM
-	AM_RANGE(0x2000, 0x2001) AM_DEVREADWRITE("ymsnd", ym2151_r, ym2151_w)
-	AM_RANGE(0x2800, 0x2bff) AM_READWRITE(jsa1_io_r, jsa1_io_w)
+	AM_RANGE(0x2000, 0x2001) AM_DEVREADWRITE("ymsnd", ym2151_device, read, write)
+	AM_RANGE(0x2800, 0x2bff) AM_READWRITE_LEGACY(jsa1_io_r, jsa1_io_w)
 	AM_RANGE(0x3000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( atarijsa2_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( atarijsa2_map, AS_PROGRAM, 8, driver_device )
 	AM_RANGE(0x0000, 0x1fff) AM_RAM
-	AM_RANGE(0x2000, 0x2001) AM_DEVREADWRITE("ymsnd", ym2151_r, ym2151_w)
-	AM_RANGE(0x2800, 0x2bff) AM_READWRITE(jsa2_io_r, jsa2_io_w)
+	AM_RANGE(0x2000, 0x2001) AM_DEVREADWRITE("ymsnd", ym2151_device, read, write)
+	AM_RANGE(0x2800, 0x2bff) AM_READWRITE_LEGACY(jsa2_io_r, jsa2_io_w)
 	AM_RANGE(0x3000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
 
 /* full map verified from schematics and Batman GALs */
-static ADDRESS_MAP_START( atarijsa3_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( atarijsa3_map, AS_PROGRAM, 8, driver_device )
 	AM_RANGE(0x0000, 0x1fff) AM_RAM
-	AM_RANGE(0x2000, 0x2001) AM_MIRROR(0x07fe) AM_DEVREADWRITE("ymsnd", ym2151_r, ym2151_w)
-	AM_RANGE(0x2800, 0x2fff) AM_READWRITE(jsa3_io_r, jsa3_io_w)
+	AM_RANGE(0x2000, 0x2001) AM_MIRROR(0x07fe) AM_DEVREADWRITE("ymsnd", ym2151_device, read, write)
+	AM_RANGE(0x2800, 0x2fff) AM_READWRITE_LEGACY(jsa3_io_r, jsa3_io_w)
 	AM_RANGE(0x3000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( atarijsa3s_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( atarijsa3s_map, AS_PROGRAM, 8, driver_device )
 	AM_RANGE(0x0000, 0x1fff) AM_RAM
-	AM_RANGE(0x2000, 0x2001) AM_MIRROR(0x07fe) AM_DEVREADWRITE("ymsnd", ym2151_r, ym2151_w)
-	AM_RANGE(0x2800, 0x2fff) AM_READWRITE(jsa3s_io_r, jsa3s_io_w)
+	AM_RANGE(0x2000, 0x2001) AM_MIRROR(0x07fe) AM_DEVREADWRITE("ymsnd", ym2151_device, read, write)
+	AM_RANGE(0x2800, 0x2fff) AM_READWRITE_LEGACY(jsa3s_io_r, jsa3s_io_w)
 	AM_RANGE(0x3000, 0xffff) AM_ROM
 ADDRESS_MAP_END
-
-
-
-/*************************************
- *
- *  Sound definitions
- *
- *************************************/
-
-static const ym2151_interface ym2151_config =
-{
-	atarigen_ym2151_irq_gen,
-	ym2151_ctl_w
-};
 
 
 
@@ -808,13 +795,14 @@ MACHINE_CONFIG_FRAGMENT( jsa_i_stereo )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("jsa", M6502, JSA_MASTER_CLOCK/2)
 	MCFG_CPU_PROGRAM_MAP(atarijsa1_map)
-	MCFG_CPU_PERIODIC_INT(atarigen_6502_irq_gen, (double)JSA_MASTER_CLOCK/4/16/16/14)
+	MCFG_CPU_PERIODIC_INT_DRIVER(atarigen_state, m6502_irq_gen, (double)JSA_MASTER_CLOCK/4/16/16/14)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
 
-	MCFG_SOUND_ADD("ymsnd", YM2151, JSA_MASTER_CLOCK)
-	MCFG_SOUND_CONFIG(ym2151_config)
+	MCFG_YM2151_ADD("ymsnd", JSA_MASTER_CLOCK)
+	MCFG_YM2151_IRQ_HANDLER(WRITELINE(atarigen_state, ym2151_irq_gen))
+	MCFG_YM2151_PORT_WRITE_HANDLER(WRITE8(driver_device, member_wrapper8<ym2151_ctl_w>))
 	MCFG_SOUND_ROUTE(0, "lspeaker", 0.60)
 	MCFG_SOUND_ROUTE(1, "rspeaker", 0.60)
 MACHINE_CONFIG_END
@@ -826,8 +814,8 @@ MACHINE_CONFIG_DERIVED( jsa_i_stereo_swapped, jsa_i_stereo )
 	/* basic machine hardware */
 
 	/* sound hardware */
-	MCFG_SOUND_REPLACE("ymsnd", YM2151, JSA_MASTER_CLOCK)
-	MCFG_SOUND_CONFIG(ym2151_config)
+	MCFG_DEVICE_MODIFY("ymsnd")
+	MCFG_SOUND_ROUTES_RESET()
 	MCFG_SOUND_ROUTE(0, "rspeaker", 0.60)
 	MCFG_SOUND_ROUTE(1, "lspeaker", 0.60)
 MACHINE_CONFIG_END
@@ -839,7 +827,7 @@ MACHINE_CONFIG_DERIVED( jsa_i_stereo_pokey, jsa_i_stereo )
 	/* basic machine hardware */
 
 	/* sound hardware */
-	MCFG_SOUND_ADD("pokey", POKEY, JSA_MASTER_CLOCK/2)
+	MCFG_POKEY_ADD("pokey", JSA_MASTER_CLOCK/2)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "lspeaker", 0.40)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "rspeaker", 0.40)
 MACHINE_CONFIG_END
@@ -851,13 +839,14 @@ MACHINE_CONFIG_FRAGMENT( jsa_i_mono_speech )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("jsa", M6502, JSA_MASTER_CLOCK/2)
 	MCFG_CPU_PROGRAM_MAP(atarijsa1_map)
-	MCFG_CPU_PERIODIC_INT(atarigen_6502_irq_gen, (double)JSA_MASTER_CLOCK/4/16/16/14)
+	MCFG_CPU_PERIODIC_INT_DRIVER(atarigen_state, m6502_irq_gen, (double)JSA_MASTER_CLOCK/4/16/16/14)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("ymsnd", YM2151, JSA_MASTER_CLOCK)
-	MCFG_SOUND_CONFIG(ym2151_config)
+	MCFG_YM2151_ADD("ymsnd", JSA_MASTER_CLOCK)
+	MCFG_YM2151_IRQ_HANDLER(WRITELINE(atarigen_state, ym2151_irq_gen))
+	MCFG_YM2151_PORT_WRITE_HANDLER(WRITE8(driver_device, member_wrapper8<ym2151_ctl_w>))
 	MCFG_SOUND_ROUTE(0, "mono", 0.60)
 	MCFG_SOUND_ROUTE(1, "mono", 0.60)
 
@@ -872,13 +861,14 @@ MACHINE_CONFIG_FRAGMENT( jsa_ii_mono )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("jsa", M6502, JSA_MASTER_CLOCK/2)
 	MCFG_CPU_PROGRAM_MAP(atarijsa2_map)
-	MCFG_CPU_PERIODIC_INT(atarigen_6502_irq_gen, (double)JSA_MASTER_CLOCK/4/16/16/14)
+	MCFG_CPU_PERIODIC_INT_DRIVER(atarigen_state, m6502_irq_gen, (double)JSA_MASTER_CLOCK/4/16/16/14)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("ymsnd", YM2151, JSA_MASTER_CLOCK)
-	MCFG_SOUND_CONFIG(ym2151_config)
+	MCFG_YM2151_ADD("ymsnd", JSA_MASTER_CLOCK)
+	MCFG_YM2151_IRQ_HANDLER(WRITELINE(atarigen_state, ym2151_irq_gen))
+	MCFG_YM2151_PORT_WRITE_HANDLER(WRITE8(driver_device, member_wrapper8<ym2151_ctl_w>))
 	MCFG_SOUND_ROUTE(0, "mono", 0.60)
 	MCFG_SOUND_ROUTE(1, "mono", 0.60)
 
@@ -915,13 +905,14 @@ MACHINE_CONFIG_FRAGMENT( jsa_iiis_stereo )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("jsa", M6502, JSA_MASTER_CLOCK/2)
 	MCFG_CPU_PROGRAM_MAP(atarijsa3s_map)
-	MCFG_CPU_PERIODIC_INT(atarigen_6502_irq_gen, (double)JSA_MASTER_CLOCK/4/16/16/14)
+	MCFG_CPU_PERIODIC_INT_DRIVER(atarigen_state, m6502_irq_gen, (double)JSA_MASTER_CLOCK/4/16/16/14)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
 
-	MCFG_SOUND_ADD("ymsnd", YM2151, JSA_MASTER_CLOCK)
-	MCFG_SOUND_CONFIG(ym2151_config)
+	MCFG_YM2151_ADD("ymsnd", JSA_MASTER_CLOCK)
+	MCFG_YM2151_IRQ_HANDLER(WRITELINE(atarigen_state, ym2151_irq_gen))
+	MCFG_YM2151_PORT_WRITE_HANDLER(WRITE8(driver_device, member_wrapper8<ym2151_ctl_w>))
 	MCFG_SOUND_ROUTE(0, "lspeaker", 0.60)
 	MCFG_SOUND_ROUTE(1, "rspeaker", 0.60)
 
@@ -947,10 +938,10 @@ INPUT_PORTS_START( atarijsa_i )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_COIN2 )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_COIN3 )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNUSED )
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNUSED )	/* speech chip ready */
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNUSED )	/* output buffer full */
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )		/* input buffer full */
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNUSED )	/* self test */
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNUSED )    /* speech chip ready */
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNUSED )    /* output buffer full */
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )     /* input buffer full */
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNUSED )    /* self test */
 INPUT_PORTS_END
 
 INPUT_PORTS_START( atarijsa_ii )
@@ -960,9 +951,9 @@ INPUT_PORTS_START( atarijsa_ii )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_COIN3 )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNUSED )
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNUSED )
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNUSED )	/* output buffer full */
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )		/* input buffer full */
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNUSED )	/* self test */
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNUSED )    /* output buffer full */
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )     /* input buffer full */
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNUSED )    /* self test */
 INPUT_PORTS_END
 
 INPUT_PORTS_START( atarijsa_iii )
@@ -971,8 +962,8 @@ INPUT_PORTS_START( atarijsa_iii )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_COIN1 )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_TILT )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_SERVICE )
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNUSED )	/* self test */
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNUSED )	/* output buffer full */
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNUSED )	/* input buffer full */
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNUSED )	/* self test */
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNUSED )    /* self test */
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNUSED )    /* output buffer full */
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNUSED )    /* input buffer full */
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNUSED )    /* self test */
 INPUT_PORTS_END

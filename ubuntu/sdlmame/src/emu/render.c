@@ -72,7 +72,9 @@
 #include "rendlay.h"
 #include "rendutil.h"
 #include "config.h"
+#include "drivenum.h"
 #include "xmlfile.h"
+#include "ui.h"
 
 
 
@@ -80,7 +82,7 @@
 //  CONSTANTS
 //**************************************************************************
 
-#define INTERNAL_FLAG_CHAR		0x00000001
+#define INTERNAL_FLAG_CHAR      0x00000001
 
 enum
 {
@@ -116,11 +118,11 @@ enum
 // an object_transform is used to track transformations when building an object list
 struct object_transform
 {
-	float				xoffs, yoffs;		// offset transforms
-	float				xscale, yscale;		// scale transforms
-	render_color		color;				// color transform
-	int					orientation;		// orientation transform
-	bool				no_center;			// center the container?
+	float               xoffs, yoffs;       // offset transforms
+	float               xscale, yscale;     // scale transforms
+	render_color        color;              // color transform
+	int                 orientation;        // orientation transform
+	bool                no_center;          // center the container?
 };
 
 
@@ -132,19 +134,19 @@ struct object_transform
 // precomputed UV coordinates for various orientations
 static const render_quad_texuv oriented_texcoords[8] =
 {
-	{ { 0,0 }, { 1,0 }, { 0,1 }, { 1,1 } },		// 0
-	{ { 1,0 }, { 0,0 }, { 1,1 }, { 0,1 } },		// ORIENTATION_FLIP_X
-	{ { 0,1 }, { 1,1 }, { 0,0 }, { 1,0 } },		// ORIENTATION_FLIP_Y
-	{ { 1,1 }, { 0,1 }, { 1,0 }, { 0,0 } },		// ORIENTATION_FLIP_X | ORIENTATION_FLIP_Y
-	{ { 0,0 }, { 0,1 }, { 1,0 }, { 1,1 } },		// ORIENTATION_SWAP_XY
-	{ { 0,1 }, { 0,0 }, { 1,1 }, { 1,0 } },		// ORIENTATION_SWAP_XY | ORIENTATION_FLIP_X
-	{ { 1,0 }, { 1,1 }, { 0,0 }, { 0,1 } },		// ORIENTATION_SWAP_XY | ORIENTATION_FLIP_Y
-	{ { 1,1 }, { 1,0 }, { 0,1 }, { 0,0 } }		// ORIENTATION_SWAP_XY | ORIENTATION_FLIP_X | ORIENTATION_FLIP_Y
+	{ { 0,0 }, { 1,0 }, { 0,1 }, { 1,1 } },     // 0
+	{ { 1,0 }, { 0,0 }, { 1,1 }, { 0,1 } },     // ORIENTATION_FLIP_X
+	{ { 0,1 }, { 1,1 }, { 0,0 }, { 1,0 } },     // ORIENTATION_FLIP_Y
+	{ { 1,1 }, { 0,1 }, { 1,0 }, { 0,0 } },     // ORIENTATION_FLIP_X | ORIENTATION_FLIP_Y
+	{ { 0,0 }, { 0,1 }, { 1,0 }, { 1,1 } },     // ORIENTATION_SWAP_XY
+	{ { 0,1 }, { 0,0 }, { 1,1 }, { 1,0 } },     // ORIENTATION_SWAP_XY | ORIENTATION_FLIP_X
+	{ { 1,0 }, { 1,1 }, { 0,0 }, { 0,1 } },     // ORIENTATION_SWAP_XY | ORIENTATION_FLIP_Y
+	{ { 1,1 }, { 1,0 }, { 0,1 }, { 0,0 } }      // ORIENTATION_SWAP_XY | ORIENTATION_FLIP_X | ORIENTATION_FLIP_Y
 };
 
 // layer orders
-static const int layer_order_standard[] = { ITEM_LAYER_SCREEN, ITEM_LAYER_OVERLAY, ITEM_LAYER_BACKDROP, ITEM_LAYER_BEZEL };
-static const int layer_order_alternate[] = { ITEM_LAYER_BACKDROP, ITEM_LAYER_SCREEN, ITEM_LAYER_OVERLAY, ITEM_LAYER_BEZEL };
+static const int layer_order_standard[] = { ITEM_LAYER_SCREEN, ITEM_LAYER_OVERLAY, ITEM_LAYER_BACKDROP, ITEM_LAYER_BEZEL, ITEM_LAYER_CPANEL, ITEM_LAYER_MARQUEE };
+static const int layer_order_alternate[] = { ITEM_LAYER_BACKDROP, ITEM_LAYER_SCREEN, ITEM_LAYER_OVERLAY, ITEM_LAYER_BEZEL, ITEM_LAYER_CPANEL, ITEM_LAYER_MARQUEE };
 
 
 
@@ -204,11 +206,11 @@ inline void normalize_bounds(render_bounds &bounds)
 inline item_layer get_layer_and_blendmode(const layout_view &view, int index, int &blendmode)
 {
 	//  if we have multiple backdrop pieces and no overlays, render:
-    //      backdrop (add) + screens (add) + bezels (alpha)
-    //  else render:
-    //      screens (add) + overlays (RGB multiply) + backdrop (add) + bezels (alpha)
+	//      backdrop (add) + screens (add) + bezels (alpha) + cpanels (alpha) + marquees (alpha)
+	//  else render:
+	//      screens (add) + overlays (RGB multiply) + backdrop (add) + bezels (alpha) + cpanels (alpha) + marquees (alpha)
 
-    const int *layer_order = layer_order_standard;
+	const int *layer_order = layer_order_standard;
 	if (view.first_item(ITEM_LAYER_BACKDROP) != NULL && view.first_item(ITEM_LAYER_BACKDROP)->next() != NULL && view.first_item(ITEM_LAYER_OVERLAY) == NULL)
 		layer_order = layer_order_alternate;
 
@@ -357,17 +359,16 @@ void render_primitive_list::append_or_return(render_primitive &prim, bool clippe
 
 render_texture::render_texture()
 	: m_manager(NULL),
-	  m_next(NULL),
-	  m_bitmap(NULL),
-	  m_palette(NULL),
-	  m_format(TEXFORMAT_ARGB32),
-	  m_scaler(NULL),
-	  m_param(NULL),
-	  m_curseq(0),
-	  m_bcglookup(NULL),
-	  m_bcglookup_entries(0)
+		m_next(NULL),
+		m_bitmap(NULL),
+		m_format(TEXFORMAT_ARGB32),
+		m_bcglookup(NULL),
+		m_bcglookup_entries(0),
+		m_scaler(NULL),
+		m_param(NULL),
+		m_curseq(0)
 {
-	m_sbounds.min_x = m_sbounds.min_y = m_sbounds.max_x = m_sbounds.max_y = 0;
+	m_sbounds.set(0, -1, 0, -1);
 	memset(m_scaled, 0, sizeof(m_scaled));
 }
 
@@ -390,8 +391,12 @@ render_texture::~render_texture()
 void render_texture::reset(render_manager &manager, texture_scaler_func scaler, void *param)
 {
 	m_manager = &manager;
-	m_scaler = scaler;
-	m_param = param;
+	if (scaler != NULL)
+	{
+		assert(m_format == TEXFORMAT_ARGB32);
+		m_scaler = scaler;
+		m_param = param;
+	}
 }
 
 
@@ -413,14 +418,9 @@ void render_texture::release()
 	// invalidate references to the original bitmap as well
 	m_manager->invalidate_all(m_bitmap);
 	m_bitmap = NULL;
-	m_sbounds.min_x = m_sbounds.min_y = m_sbounds.max_x = m_sbounds.max_y = 0;
+	m_sbounds.set(0, -1, 0, -1);
 	m_format = TEXFORMAT_ARGB32;
 	m_curseq = 0;
-
-	// release palette references
-	if (m_palette != NULL)
-		palette_deref(m_palette);
-	m_palette = NULL;
 
 	// free any B/C/G lookup tables
 	auto_free(m_manager->machine(), m_bcglookup);
@@ -433,32 +433,21 @@ void render_texture::release()
 //  set_bitmap - set a new source bitmap
 //-------------------------------------------------
 
-void render_texture::set_bitmap(bitmap_t *bitmap, const rectangle *sbounds, int format, palette_t *palette)
+void render_texture::set_bitmap(bitmap_t &bitmap, const rectangle &sbounds, texture_format format)
 {
+	assert(bitmap.cliprect().contains(sbounds));
+
 	// ensure we have a valid palette for palettized modes
 	if (format == TEXFORMAT_PALETTE16 || format == TEXFORMAT_PALETTEA16)
-		assert(palette != NULL);
+		assert(bitmap.palette() != NULL);
 
 	// invalidate references to the old bitmap
-	if (bitmap != m_bitmap && m_bitmap != NULL)
+	if (&bitmap != m_bitmap && m_bitmap != NULL)
 		m_manager->invalidate_all(m_bitmap);
 
-	// if the palette is different, adjust references
-	if (palette != m_palette)
-	{
-		if (m_palette != NULL)
-			palette_deref(m_palette);
-		if (palette != NULL)
-			palette_ref(palette);
-	}
-
 	// set the new bitmap/palette
-	m_bitmap = bitmap;
-	m_sbounds.min_x = (sbounds != NULL) ? sbounds->min_x : 0;
-	m_sbounds.min_y = (sbounds != NULL) ? sbounds->min_y : 0;
-	m_sbounds.max_x = (sbounds != NULL) ? sbounds->max_x : (bitmap != NULL) ? bitmap->width : 1000;
-	m_sbounds.max_y = (sbounds != NULL) ? sbounds->max_y : (bitmap != NULL) ? bitmap->height : 1000;
-	m_palette = palette;
+	m_bitmap = &bitmap;
+	m_sbounds = sbounds;
 	m_format = format;
 
 	// invalidate all scaled versions
@@ -480,10 +469,11 @@ void render_texture::set_bitmap(bitmap_t *bitmap, const rectangle *sbounds, int 
 //  scaler
 //-------------------------------------------------
 
-void render_texture::hq_scale(bitmap_t &dest, const bitmap_t &source, const rectangle &sbounds, void *param)
+void render_texture::hq_scale(bitmap_argb32 &dest, bitmap_argb32 &source, const rectangle &sbounds, void *param)
 {
 	render_color color = { 1.0f, 1.0f, 1.0f, 1.0f };
-	render_resample_argb_bitmap_hq(dest.base, dest.rowpixels, dest.width, dest.height, &source, &sbounds, &color);
+	bitmap_argb32 sourcesub(source, sbounds);
+	render_resample_argb_bitmap_hq(dest, sourcesub, color);
 }
 
 
@@ -494,28 +484,32 @@ void render_texture::hq_scale(bitmap_t &dest, const bitmap_t &source, const rect
 bool render_texture::get_scaled(UINT32 dwidth, UINT32 dheight, render_texinfo &texinfo, render_primitive_list &primlist)
 {
 	// source width/height come from the source bounds
-	int swidth = m_sbounds.max_x - m_sbounds.min_x;
-	int sheight = m_sbounds.max_y - m_sbounds.min_y;
+	int swidth = m_sbounds.width();
+	int sheight = m_sbounds.height();
 
 	// ensure height/width are non-zero
 	if (dwidth < 1) dwidth = 1;
 	if (dheight < 1) dheight = 1;
 
 	// are we scaler-free? if so, just return the source bitmap
-	const rgb_t *palbase = (m_format == TEXFORMAT_PALETTE16 || m_format == TEXFORMAT_PALETTEA16) ? palette_entry_list_adjusted(m_palette) : NULL;
+	const rgb_t *palbase = (m_format == TEXFORMAT_PALETTE16 || m_format == TEXFORMAT_PALETTEA16) ? palette_entry_list_adjusted(m_bitmap->palette()) : NULL;
 	if (m_scaler == NULL || (m_bitmap != NULL && swidth == dwidth && sheight == dheight))
 	{
 		// add a reference and set up the source bitmap
 		primlist.add_reference(m_bitmap);
-		UINT8 bpp = (m_format == TEXFORMAT_PALETTE16 || m_format == TEXFORMAT_PALETTEA16 || m_format == TEXFORMAT_RGB15 || m_format == TEXFORMAT_YUY16) ? 16 : 32;
-		texinfo.base = (UINT8 *)m_bitmap->base + (m_sbounds.min_y * m_bitmap->rowpixels + m_sbounds.min_x) * (bpp / 8);
-		texinfo.rowpixels = m_bitmap->rowpixels;
+		texinfo.base = m_bitmap->raw_pixptr(m_sbounds.min_y, m_sbounds.min_x);
+		texinfo.rowpixels = m_bitmap->rowpixels();
 		texinfo.width = swidth;
 		texinfo.height = sheight;
 		texinfo.palette = palbase;
+		texinfo.osddata = m_osddata;
 		texinfo.seqid = ++m_curseq;
 		return true;
 	}
+
+	// make sure we can recover the original argb32 bitmap
+	bitmap_argb32 dummy;
+	bitmap_argb32 &srcbitmap = (m_bitmap != NULL) ? downcast<bitmap_argb32 &>(*m_bitmap) : dummy;
 
 	// is it a size we already have?
 	scaled_texture *scaled = NULL;
@@ -525,7 +519,7 @@ bool render_texture::get_scaled(UINT32 dwidth, UINT32 dheight, render_texinfo &t
 		scaled = &m_scaled[scalenum];
 
 		// we need a non-NULL bitmap with matching dest size
-		if (scaled->bitmap != NULL && dwidth == scaled->bitmap->width && dheight == scaled->bitmap->height)
+		if (scaled->bitmap != NULL && dwidth == scaled->bitmap->width() && dheight == scaled->bitmap->height())
 			break;
 	}
 
@@ -549,17 +543,17 @@ bool render_texture::get_scaled(UINT32 dwidth, UINT32 dheight, render_texinfo &t
 		}
 
 		// allocate a new bitmap
-		scaled->bitmap = auto_alloc(m_manager->machine(), bitmap_t(dwidth, dheight, BITMAP_FORMAT_ARGB32));
+		scaled->bitmap = auto_alloc(m_manager->machine(), bitmap_argb32(dwidth, dheight));
 		scaled->seqid = ++m_curseq;
 
 		// let the scaler do the work
-		(*m_scaler)(*scaled->bitmap, *m_bitmap, m_sbounds, m_param);
+		(*m_scaler)(*scaled->bitmap, srcbitmap, m_sbounds, m_param);
 	}
 
 	// finally fill out the new info
 	primlist.add_reference(scaled->bitmap);
-	texinfo.base = scaled->bitmap->base;
-	texinfo.rowpixels = scaled->bitmap->rowpixels;
+	texinfo.base = &scaled->bitmap->pix32(0);
+	texinfo.rowpixels = scaled->bitmap->rowpixels();
 	texinfo.width = dwidth;
 	texinfo.height = dheight;
 	texinfo.palette = palbase;
@@ -585,18 +579,18 @@ const rgb_t *render_texture::get_adjusted_palette(render_container &container)
 		case TEXFORMAT_PALETTEA16:
 
 			// if no adjustment necessary, return the raw palette
-			assert(m_palette != NULL);
-			adjusted = palette_entry_list_adjusted(m_palette);
+			assert(m_bitmap->palette() != NULL);
+			adjusted = palette_entry_list_adjusted(m_bitmap->palette());
 			if (!container.has_brightness_contrast_gamma_changes())
 				return adjusted;
 
 			// if this is the machine palette, return our precomputed adjusted palette
-			adjusted = container.bcg_lookup_table(m_format, m_palette);
+			adjusted = container.bcg_lookup_table(m_format, m_bitmap->palette());
 			if (adjusted != NULL)
 				return adjusted;
 
 			// otherwise, ensure we have memory allocated and compute the adjusted result ourself
-			numentries = palette_get_num_colors(m_palette) * palette_get_num_groups(m_palette);
+			numentries = palette_get_num_colors(m_bitmap->palette()) * palette_get_num_groups(m_bitmap->palette());
 			if (m_bcglookup == NULL || m_bcglookup_entries < numentries)
 			{
 				rgb_t *newlookup = auto_alloc_array(m_manager->machine(), rgb_t, numentries);
@@ -614,73 +608,14 @@ const rgb_t *render_texture::get_adjusted_palette(render_container &container)
 			}
 			return m_bcglookup;
 
-		case TEXFORMAT_RGB15:
-
-			// if no adjustment necessary, return NULL
-			if (!container.has_brightness_contrast_gamma_changes() && m_palette == NULL)
-				return NULL;
-
-			// if no palette, return the standard lookups
-			if (m_palette == NULL)
-				return container.bcg_lookup_table(m_format);
-
-			// otherwise, ensure we have memory allocated and compute the adjusted result ourself
-			assert(palette_get_num_colors(m_palette) == 32);
-			adjusted = palette_entry_list_adjusted(m_palette);
-			if (m_bcglookup == NULL || m_bcglookup_entries < 4 * 32)
-			{
-				rgb_t *newlookup = auto_alloc_array(m_manager->machine(), rgb_t, 4 * 32);
-				memcpy(newlookup, m_bcglookup, m_bcglookup_entries * sizeof(rgb_t));
-				auto_free(m_manager->machine(), m_bcglookup);
-				m_bcglookup = newlookup;
-				m_bcglookup_entries = 4 * 32;
-			}
-
-			// otherwise, return the 32-entry BCG lookups
-			for (int index = 0; index < 32; index++)
-			{
-				UINT8 val = container.apply_brightness_contrast_gamma(RGB_GREEN(adjusted[index]));
-				m_bcglookup[0x00 + index] = val << 0;
-				m_bcglookup[0x20 + index] = val << 8;
-				m_bcglookup[0x40 + index] = val << 16;
-				m_bcglookup[0x60 + index] = val << 24;
-			}
-			return m_bcglookup;
-
 		case TEXFORMAT_RGB32:
 		case TEXFORMAT_ARGB32:
 		case TEXFORMAT_YUY16:
 
 			// if no adjustment necessary, return NULL
-			if (!container.has_brightness_contrast_gamma_changes() && m_palette == NULL)
+			if (!container.has_brightness_contrast_gamma_changes())
 				return NULL;
-
-			// if no palette, return the standard lookups
-			if (m_palette == NULL)
-				return container.bcg_lookup_table(m_format);
-
-			// otherwise, ensure we have memory allocated and compute the adjusted result ourself
-			assert(palette_get_num_colors(m_palette) == 256);
-			adjusted = palette_entry_list_adjusted(m_palette);
-			if (m_bcglookup == NULL || m_bcglookup_entries < 4 * 256)
-			{
-				rgb_t *newlookup = auto_alloc_array(m_manager->machine(), rgb_t, 4 * 256);
-				memcpy(newlookup, m_bcglookup, m_bcglookup_entries * sizeof(rgb_t));
-				auto_free(m_manager->machine(), m_bcglookup);
-				m_bcglookup = newlookup;
-				m_bcglookup_entries = 4 * 256;
-			}
-
-			// otherwise, return the 32-entry BCG lookups
-			for (int index = 0; index < 256; index++)
-			{
-				UINT8 val = container.apply_brightness_contrast_gamma(RGB_GREEN(adjusted[index]));
-				m_bcglookup[0x000 + index] = val << 0;
-				m_bcglookup[0x100 + index] = val << 8;
-				m_bcglookup[0x200 + index] = val << 16;
-				m_bcglookup[0x300 + index] = val << 24;
-			}
-			return m_bcglookup;
+			return container.bcg_lookup_table(m_format);
 
 		default:
 			assert(FALSE);
@@ -701,13 +636,13 @@ const rgb_t *render_texture::get_adjusted_palette(render_container &container)
 
 render_container::render_container(render_manager &manager, screen_device *screen)
 	: m_next(NULL),
-	  m_manager(manager),
-	  m_itemlist(manager.machine().respool()),
-	  m_item_allocator(manager.machine().respool()),
-	  m_screen(screen),
-	  m_overlaybitmap(NULL),
-	  m_overlaytexture(NULL),
-	  m_palclient(NULL)
+		m_manager(manager),
+		m_itemlist(manager.machine().respool()),
+		m_item_allocator(manager.machine().respool()),
+		m_screen(screen),
+		m_overlaybitmap(NULL),
+		m_overlaytexture(NULL),
+		m_palclient(NULL)
 {
 	// all palette entries are opaque by default
 	for (int color = 0; color < ARRAY_LENGTH(m_bcglookup); color++)
@@ -756,7 +691,7 @@ render_container::~render_container()
 //  container
 //-------------------------------------------------
 
-void render_container::set_overlay(bitmap_t *bitmap)
+void render_container::set_overlay(bitmap_argb32 *bitmap)
 {
 	// free any existing texture
 	m_manager.texture_free(m_overlaytexture);
@@ -766,7 +701,7 @@ void render_container::set_overlay(bitmap_t *bitmap)
 	if (m_overlaybitmap != NULL)
 	{
 		m_overlaytexture = m_manager.texture_alloc(render_container::overlay_scale);
-		m_overlaytexture->set_bitmap(bitmap, NULL, TEXFORMAT_ARGB32);
+		m_overlaytexture->set_bitmap(*bitmap, bitmap->cliprect(), TEXFORMAT_ARGB32);
 	}
 }
 
@@ -865,9 +800,6 @@ const rgb_t *render_container::bcg_lookup_table(int texformat, palette_t *palett
 		case TEXFORMAT_PALETTEA16:
 			return (palette != NULL && palette == palette_client_get_palette(m_palclient)) ? m_bcglookup : NULL;
 
-		case TEXFORMAT_RGB15:
-			return m_bcglookup32;
-
 		case TEXFORMAT_RGB32:
 		case TEXFORMAT_ARGB32:
 		case TEXFORMAT_YUY16:
@@ -883,20 +815,20 @@ const rgb_t *render_container::bcg_lookup_table(int texformat, palette_t *palett
 //  overlay_scale - scaler for an overlay
 //-------------------------------------------------
 
-void render_container::overlay_scale(bitmap_t &dest, const bitmap_t &source, const rectangle &sbounds, void *param)
+void render_container::overlay_scale(bitmap_argb32 &dest, bitmap_argb32 &source, const rectangle &sbounds, void *param)
 {
 	// simply replicate the source bitmap over the target
-	for (int y = 0; y < dest.height; y++)
+	for (int y = 0; y < dest.height(); y++)
 	{
-		UINT32 *src = (UINT32 *)source.base + (y % source.height) * source.rowpixels;
-		UINT32 *dst = (UINT32 *)dest.base + y * dest.rowpixels;
+		UINT32 *src = &source.pix32(y % source.height());
+		UINT32 *dst = &dest.pix32(y);
 		int sx = 0;
 
 		// loop over columns
-		for (int x = 0; x < dest.width; x++)
+		for (int x = 0; x < dest.width(); x++)
 		{
 			*dst++ = src[sx++];
-			if (sx >= source.width)
+			if (sx >= source.width())
 				sx = 0;
 		}
 	}
@@ -949,16 +881,6 @@ void render_container::recompute_lookups()
 		m_bcglookup256[i + 0x300] = adjustedval << 24;
 	}
 
-	// recompute the 32 entry lookup table
-	for (int i = 0; i < 0x20; i++)
-	{
-		UINT8 adjustedval = apply_brightness_contrast_gamma(pal5bit(i));
-		m_bcglookup32[i + 0x000] = adjustedval << 0;
-		m_bcglookup32[i + 0x020] = adjustedval << 8;
-		m_bcglookup32[i + 0x040] = adjustedval << 16;
-		m_bcglookup32[i + 0x060] = adjustedval << 24;
-	}
-
 	// recompute the palette entries
 	if (m_palclient != NULL)
 	{
@@ -970,9 +892,9 @@ void render_container::recompute_lookups()
 		{
 			pen_t newval = adjusted_palette[i];
 			m_bcglookup[i] = (newval & 0xff000000) |
-									  m_bcglookup256[0x200 + RGB_RED(newval)] |
-									  m_bcglookup256[0x100 + RGB_GREEN(newval)] |
-									  m_bcglookup256[0x000 + RGB_BLUE(newval)];
+										m_bcglookup256[0x200 + RGB_RED(newval)] |
+										m_bcglookup256[0x100 + RGB_GREEN(newval)] |
+										m_bcglookup256[0x000 + RGB_BLUE(newval)];
 		}
 	}
 }
@@ -1012,9 +934,9 @@ void render_container::update_palette()
 						UINT32 finalentry = entry32 * 32 + entry;
 						rgb_t newval = adjusted_palette[finalentry];
 						m_bcglookup[finalentry] = (newval & 0xff000000) |
-													  m_bcglookup256[0x200 + RGB_RED(newval)] |
-													  m_bcglookup256[0x100 + RGB_GREEN(newval)] |
-													  m_bcglookup256[0x000 + RGB_BLUE(newval)];
+														m_bcglookup256[0x200 + RGB_RED(newval)] |
+														m_bcglookup256[0x100 + RGB_GREEN(newval)] |
+														m_bcglookup256[0x000 + RGB_BLUE(newval)];
 					}
 		}
 	}
@@ -1027,13 +949,13 @@ void render_container::update_palette()
 
 render_container::user_settings::user_settings()
 	: m_orientation(0),
-	  m_brightness(1.0f),
-	  m_contrast(1.0f),
-	  m_gamma(1.0f),
-	  m_xscale(1.0f),
-	  m_yscale(1.0f),
-	  m_xoffset(0.0f),
-	  m_yoffset(0.0f)
+		m_brightness(1.0f),
+		m_contrast(1.0f),
+		m_gamma(1.0f),
+		m_xscale(1.0f),
+		m_yscale(1.0f),
+		m_xoffset(0.0f),
+		m_yoffset(0.0f)
 {
 }
 
@@ -1049,26 +971,28 @@ render_container::user_settings::user_settings()
 
 render_target::render_target(render_manager &manager, const char *layoutfile, UINT32 flags)
 	: m_next(NULL),
-	  m_manager(manager),
-	  m_curview(NULL),
-	  m_filelist(*auto_alloc(manager.machine(), simple_list<layout_file>(manager.machine().respool()))),
-	  m_flags(flags),
-	  m_listindex(0),
-	  m_width(640),
-	  m_height(480),
-	  m_pixel_aspect(0.0f),
-	  m_max_refresh(0),
-	  m_orientation(0),
-	  m_base_view(NULL),
-	  m_base_orientation(ROT0),
-	  m_maxtexwidth(65536),
-	  m_maxtexheight(65536),
-	  m_debug_containers(manager.machine().respool())
+		m_manager(manager),
+		m_curview(NULL),
+		m_filelist(*auto_alloc(manager.machine(), simple_list<layout_file>(manager.machine().respool()))),
+		m_flags(flags),
+		m_listindex(0),
+		m_width(640),
+		m_height(480),
+		m_pixel_aspect(0.0f),
+		m_max_refresh(0),
+		m_orientation(0),
+		m_base_view(NULL),
+		m_base_orientation(ROT0),
+		m_maxtexwidth(65536),
+		m_maxtexheight(65536),
+		m_debug_containers(manager.machine().respool())
 {
 	// determine the base layer configuration based on options
 	m_base_layerconfig.set_backdrops_enabled(manager.machine().options().use_backdrops());
 	m_base_layerconfig.set_overlays_enabled(manager.machine().options().use_overlays());
 	m_base_layerconfig.set_bezels_enabled(manager.machine().options().use_bezels());
+	m_base_layerconfig.set_cpanels_enabled(manager.machine().options().use_cpanels());
+	m_base_layerconfig.set_marquees_enabled(manager.machine().options().use_marquees());
 	m_base_layerconfig.set_zoom_to_screen(manager.machine().options().artwork_crop());
 
 	// determine the base orientation based on options
@@ -1199,17 +1123,15 @@ int render_target::configured_view(const char *viewname, int targetindex, int nu
 	}
 
 	// if we don't have a match, default to the nth view
-	int scrcount = m_manager.machine().m_devicelist.count(SCREEN);
+	screen_device_iterator iter(m_manager.machine().root_device());
+	int scrcount = iter.count();
 	if (view == NULL && scrcount > 0)
 	{
 		// if we have enough targets to be one per screen, assign in order
 		if (numtargets >= scrcount)
 		{
 			int ourindex = index() % scrcount;
-			screen_device *screen;
-			for (screen = m_manager.machine().first_screen(); screen != NULL; screen = screen->next_screen())
-				if (ourindex-- == 0)
-					break;
+			screen_device *screen = iter.byindex(ourindex);
 
 			// find the first view with this screen and this screen only
 			for (view = view_by_index(viewindex = 0); view != NULL; view = view_by_index(++viewindex))
@@ -1236,7 +1158,7 @@ int render_target::configured_view(const char *viewname, int targetindex, int nu
 				if (viewscreens.count() >= scrcount)
 				{
 					screen_device *screen;
-					for (screen = m_manager.machine().first_screen(); screen != NULL; screen = screen->next_screen())
+					for (screen = iter.first(); screen != NULL; screen = iter.next())
 						if (!viewscreens.contains(*screen))
 							break;
 					if (screen == NULL)
@@ -1334,12 +1256,15 @@ void render_target::compute_minimum_size(INT32 &minwidth, INT32 &minheight)
 	int screens_considered = 0;
 
 	// early exit in case we are called between device teardown and render teardown
-	if (m_manager.machine().m_devicelist.count() == 0)
+	if (m_manager.machine().phase() == MACHINE_PHASE_EXIT)
 	{
 		minwidth = 640;
 		minheight = 480;
 		return;
 	}
+
+	if (m_curview == NULL)
+		throw emu_fatalerror("Mandatory artwork is missing");
 
 	// scan the current view for all screens
 	for (item_layer layer = ITEM_LAYER_FIRST; layer < ITEM_LAYER_MAX; layer++)
@@ -1350,7 +1275,7 @@ void render_target::compute_minimum_size(INT32 &minwidth, INT32 &minheight)
 			{
 				// use a hard-coded default visible area for vector screens
 				screen_device *screen = curitem->screen();
-				const rectangle vectorvis = { 0, 639, 0, 479 };
+				const rectangle vectorvis(0, 639, 0, 479);
 				const rectangle &visarea = (screen->screen_type() == SCREEN_TYPE_VECTOR) ? vectorvis : screen->visible_area();
 
 				// apply target orientation to the bounds
@@ -1362,13 +1287,13 @@ void render_target::compute_minimum_size(INT32 &minwidth, INT32 &minheight)
 				float xscale, yscale;
 				if (!(orientation_add(m_orientation, screen->container().orientation()) & ORIENTATION_SWAP_XY))
 				{
-					xscale = (float)(visarea.max_x + 1 - visarea.min_x) / (bounds.x1 - bounds.x0);
-					yscale = (float)(visarea.max_y + 1 - visarea.min_y) / (bounds.y1 - bounds.y0);
+					xscale = float(visarea.width()) / bounds.width();
+					yscale = float(visarea.height()) / bounds.height();
 				}
 				else
 				{
-					xscale = (float)(visarea.max_y + 1 - visarea.min_y) / (bounds.x1 - bounds.x0);
-					yscale = (float)(visarea.max_x + 1 - visarea.min_x) / (bounds.y1 - bounds.y0);
+					xscale = float(visarea.height()) / bounds.width();
+					yscale = float(visarea.width()) / bounds.height();
 				}
 
 				// pick the greater
@@ -1421,7 +1346,7 @@ render_primitive_list &render_target::get_primitives()
 	root_xform.yscale = (float)visheight;
 	root_xform.color.r = root_xform.color.g = root_xform.color.b = root_xform.color.a = 1.0f;
 	root_xform.orientation = m_orientation;
-    root_xform.no_center = false;
+	root_xform.no_center = false;
 
 	// iterate over layers back-to-front, but only if we're running
 	if (m_manager.machine().phase() >= MACHINE_PHASE_RESET)
@@ -1450,7 +1375,7 @@ render_primitive_list &render_target::get_primitives()
 					item_xform.color.b = curitem->color().b * root_xform.color.b;
 					item_xform.color.a = curitem->color().a * root_xform.color.a;
 					item_xform.orientation = orientation_add(curitem->orientation(), root_xform.orientation);
-                    item_xform.no_center = false;
+					item_xform.no_center = false;
 
 					// if there is no associated element, it must be a screen element
 					if (curitem->screen() != NULL)
@@ -1510,7 +1435,7 @@ render_primitive_list &render_target::get_primitives()
 		ui_xform.yscale = (float) m_height;
 		ui_xform.color.r = ui_xform.color.g = ui_xform.color.b = ui_xform.color.a = 1.0f;
 		ui_xform.orientation = m_orientation;
-        ui_xform.no_center = false;
+		ui_xform.no_center = false;
 
 		// add UI elements
 		add_container_primitives(list, ui_xform, m_manager.ui_container(), BLENDMODE_ALPHA);
@@ -1532,7 +1457,7 @@ render_primitive_list &render_target::get_primitives()
 bool render_target::map_point_container(INT32 target_x, INT32 target_y, render_container &container, float &container_x, float &container_y)
 {
 	const char *input_tag;
-	UINT32 input_mask;
+	ioport_value input_mask;
 	return map_point_internal(target_x, target_y, &container, container_x, container_y, input_tag, input_mask);
 }
 
@@ -1543,7 +1468,7 @@ bool render_target::map_point_container(INT32 target_x, INT32 target_y, render_c
 //  container, if possible
 //-------------------------------------------------
 
-bool render_target::map_point_input(INT32 target_x, INT32 target_y, const char *&input_tag, UINT32 &input_mask, float &input_x, float &input_y)
+bool render_target::map_point_input(INT32 target_x, INT32 target_y, const char *&input_tag, ioport_value &input_mask, float &input_x, float &input_y)
 {
 	return map_point_internal(target_x, target_y, NULL, input_x, input_y, input_tag, input_mask);
 }
@@ -1621,10 +1546,11 @@ void render_target::update_layer_config()
 
 void render_target::load_layout_files(const char *layoutfile, bool singlefile)
 {
+	bool have_default = false;
 	// if there's an explicit file, load that first
 	const char *basename = m_manager.machine().basename();
 	if (layoutfile != NULL)
-		load_layout_file(basename, layoutfile);
+		have_default |= load_layout_file(basename, layoutfile);
 
 	// if we're only loading this file, we know our final result
 	if (singlefile)
@@ -1633,28 +1559,60 @@ void render_target::load_layout_files(const char *layoutfile, bool singlefile)
 	// try to load a file based on the driver name
 	const game_driver &system = m_manager.machine().system();
 	if (!load_layout_file(basename, system.name))
-		load_layout_file(basename, "default");
+		have_default |= load_layout_file(basename, "default");
+	else
+		have_default |= true;
 
 	// if a default view has been specified, use that as a fallback
 	if (system.default_layout != NULL)
-		load_layout_file(NULL, system.default_layout);
+		have_default |= load_layout_file(NULL, system.default_layout);
 	if (m_manager.machine().config().m_default_layout != NULL)
-		load_layout_file(NULL, m_manager.machine().config().m_default_layout);
+		have_default |= load_layout_file(NULL, m_manager.machine().config().m_default_layout);
 
 	// try to load another file based on the parent driver name
-	const game_driver *cloneof = driver_get_clone(&system);
-	if (cloneof != NULL)
-		if (!load_layout_file(cloneof->name, cloneof->name))
-			load_layout_file(cloneof->name, "default");
-
+	int cloneof = driver_list::clone(system);
+	if (cloneof != -1) {
+		if (!load_layout_file(driver_list::driver(cloneof).name, driver_list::driver(cloneof).name))
+			have_default |= load_layout_file(driver_list::driver(cloneof).name, "default");
+		else
+			have_default |= true;
+	}
+	screen_device_iterator iter(m_manager.machine().root_device());
+	int screens = iter.count();
 	// now do the built-in layouts for single-screen games
-	if (m_manager.machine().m_devicelist.count(SCREEN) == 1)
+	if (screens == 1)
 	{
 		if (system.flags & ORIENTATION_SWAP_XY)
 			load_layout_file(NULL, layout_vertical);
 		else
 			load_layout_file(NULL, layout_horizont);
 		assert_always(m_filelist.count() > 0, "Couldn't parse default layout??");
+	}
+	if (!have_default)
+	{
+		if (screens == 0)
+		{
+			load_layout_file(NULL, layout_noscreens);
+			assert_always(m_filelist.count() > 0, "Couldn't parse default layout??");
+		}
+		else
+		if (screens == 2)
+		{
+			load_layout_file(NULL, layout_dualhsxs);
+			assert_always(m_filelist.count() > 0, "Couldn't parse default layout??");
+		}
+		else
+		if (screens == 3)
+		{
+			load_layout_file(NULL, layout_triphsxs);
+			assert_always(m_filelist.count() > 0, "Couldn't parse default layout??");
+		}
+		else
+		if (screens == 4)
+		{
+			load_layout_file(NULL, layout_quadhsxs);
+			assert_always(m_filelist.count() > 0, "Couldn't parse default layout??");
+		}
 	}
 }
 
@@ -1693,9 +1651,9 @@ bool render_target::load_layout_file(const char *dirname, const char *filename)
 	if (rootnode == NULL)
 	{
 		if (filename[0] != '<')
-			mame_printf_warning("Improperly formatted XML file '%s', ignorning\n", filename);
+			mame_printf_warning("Improperly formatted XML file '%s', ignoring\n", filename);
 		else
-			mame_printf_warning("Improperly formatted XML string, ignorning");
+			mame_printf_warning("Improperly formatted XML string, ignoring\n");
 		return false;
 	}
 
@@ -1804,6 +1762,7 @@ void render_target::add_container_primitives(render_primitive_list &list, const 
 
 				// set the line type
 				prim->type = render_primitive::LINE;
+				prim->flags |= PRIMFLAG_TYPE_LINE;
 
 				// scale the width by the minimum of X/Y scale factors
 				prim->width = curitem->width() * MIN(container_xform.xscale, container_xform.yscale);
@@ -1816,6 +1775,7 @@ void render_target::add_container_primitives(render_primitive_list &list, const 
 			case CONTAINER_ITEM_QUAD:
 				// set the quad type
 				prim->type = render_primitive::QUAD;
+				prim->flags |= PRIMFLAG_TYPE_QUAD;
 
 				// normalize the bounds
 				normalize_bounds(prim->bounds);
@@ -1894,7 +1854,8 @@ void render_target::add_container_primitives(render_primitive_list &list, const 
 			// set the flags and add it to the list
 			prim->flags = PRIMFLAG_TEXORIENT(container_xform.orientation) |
 							PRIMFLAG_BLENDMODE(BLENDMODE_RGB_MULTIPLY) |
-							PRIMFLAG_TEXFORMAT(container.overlay()->format());
+							PRIMFLAG_TEXFORMAT(container.overlay()->format()) |
+							PRIMFLAG_TEXSHADE(1);
 		}
 		list.append_or_return(*prim, !got_scaled);
 	}
@@ -1961,8 +1922,17 @@ void render_target::add_element_primitives(render_primitive_list &list, const ob
 //  mapping points
 //-------------------------------------------------
 
-bool render_target::map_point_internal(INT32 target_x, INT32 target_y, render_container *container, float &mapped_x, float &mapped_y, const char *&mapped_input_tag, UINT32 &mapped_input_mask)
+bool render_target::map_point_internal(INT32 target_x, INT32 target_y, render_container *container, float &mapped_x, float &mapped_y, const char *&mapped_input_tag, ioport_value &mapped_input_mask)
 {
+	// compute the visible width/height
+	INT32 viswidth, visheight;
+	compute_visible_area(m_width, m_height, m_pixel_aspect, m_orientation, viswidth, visheight);
+
+	// create a root transform for the target
+	object_transform root_xform;
+	root_xform.xoffs = (float)(m_width - viswidth) / 2;
+	root_xform.yoffs = (float)(m_height - visheight) / 2;
+
 	// default to point not mapped
 	mapped_x = -1.0;
 	mapped_y = -1.0;
@@ -1970,9 +1940,13 @@ bool render_target::map_point_internal(INT32 target_x, INT32 target_y, render_co
 	mapped_input_mask = 0;
 
 	// convert target coordinates to float
-	float target_fx = (float)target_x / m_width;
-	float target_fy = (float)target_y / m_height;
-
+	float target_fx = (float)(target_x - root_xform.xoffs) / viswidth;
+	float target_fy = (float)(target_y - root_xform.yoffs) / visheight;
+	if (ui_is_menu_active())
+	{
+		target_fx = (float)target_x / m_width;
+		target_fy = (float)target_y / m_height;
+	}
 	// explicitly check for the UI container
 	if (container != NULL && container == &m_manager.ui_container())
 	{
@@ -1980,8 +1954,8 @@ bool render_target::map_point_internal(INT32 target_x, INT32 target_y, render_co
 		if (target_fx >= 0.0 && target_fx < 1.0 && target_fy >= 0.0 && target_fy < 1.0)
 		{
 			// this point was successfully mapped
-			mapped_x = target_fx;
-			mapped_y = target_fy;
+			mapped_x = (float)target_x / m_width;
+			mapped_y = (float)target_y / m_height;
 			return true;
 		}
 		return false;
@@ -2097,6 +2071,14 @@ void render_target::config_load(xml_data_node &targetnode)
 	if (tmpint == 0 || tmpint == 1)
 		set_bezels_enabled(tmpint);
 
+	tmpint = xml_get_attribute_int(&targetnode, "cpanels", -1);
+	if (tmpint == 0 || tmpint == 1)
+		set_cpanels_enabled(tmpint);
+
+	tmpint = xml_get_attribute_int(&targetnode, "marquees", -1);
+	if (tmpint == 0 || tmpint == 1)
+		set_marquees_enabled(tmpint);
+
 	tmpint = xml_get_attribute_int(&targetnode, "zoom", -1);
 	if (tmpint == 0 || tmpint == 1)
 		set_zoom_to_screen(tmpint);
@@ -2154,6 +2136,8 @@ bool render_target::config_save(xml_data_node &targetnode)
 		xml_set_attribute_int(&targetnode, "backdrops", m_layerconfig.backdrops_enabled());
 		xml_set_attribute_int(&targetnode, "overlays", m_layerconfig.overlays_enabled());
 		xml_set_attribute_int(&targetnode, "bezels", m_layerconfig.bezels_enabled());
+		xml_set_attribute_int(&targetnode, "cpanels", m_layerconfig.cpanels_enabled());
+		xml_set_attribute_int(&targetnode, "marquees", m_layerconfig.marquees_enabled());
 		xml_set_attribute_int(&targetnode, "zoom", m_layerconfig.zoom_to_screen());
 		changed = true;
 	}
@@ -2454,18 +2438,19 @@ done:
 
 render_manager::render_manager(running_machine &machine)
 	: m_machine(machine),
-	  m_targetlist(machine.respool()),
-	  m_ui_target(NULL),
-	  m_live_textures(0),
-	  m_texture_allocator(machine.respool()),
-	  m_ui_container(auto_alloc(machine, render_container(*this))),
-	  m_screen_container_list(machine.respool())
+		m_targetlist(machine.respool()),
+		m_ui_target(NULL),
+		m_live_textures(0),
+		m_texture_allocator(machine.respool()),
+		m_ui_container(auto_alloc(machine, render_container(*this))),
+		m_screen_container_list(machine.respool())
 {
 	// register callbacks
-	config_register(machine, "video", config_load_static, config_save_static);
+	config_register(machine, "video", config_saveload_delegate(FUNC(render_manager::config_load), this), config_saveload_delegate(FUNC(render_manager::config_save), this));
 
 	// create one container per screen
-	for (screen_device *screen = machine.first_screen(); screen != NULL; screen = screen->next_screen())
+	screen_device_iterator iter(machine.root_device());
+	for (screen_device *screen = iter.first(); screen != NULL; screen = iter.next())
 		screen->set_container(*container_alloc(screen));
 }
 
@@ -2493,7 +2478,7 @@ bool render_manager::is_live(screen_device &screen) const
 {
 	// iterate over all live targets and or together their screen masks
 	for (render_target *target = m_targetlist.first(); target != NULL; target = target->next())
-		if (target->view_screens(target->view()).contains(screen))
+		if (!target->hidden() && target->view_screens(target->view()).contains(screen))
 			return true;
 	return false;
 }
@@ -2527,7 +2512,7 @@ float render_manager::max_update_rate() const
 
 render_target *render_manager::target_alloc(const char *layoutfile, UINT32 flags)
 {
-	return &m_targetlist.append(*auto_alloc(m_machine, render_target(*this, layoutfile, flags)));
+	return &m_targetlist.append(*auto_alloc(machine(), render_target(*this, layoutfile, flags)));
 }
 
 
@@ -2621,7 +2606,7 @@ void render_manager::texture_free(render_texture *texture)
 
 render_font *render_manager::font_alloc(const char *filename)
 {
-	return auto_alloc(m_machine, render_font(*this, filename));
+	return auto_alloc(machine(), render_font(*this, filename));
 }
 
 
@@ -2631,7 +2616,7 @@ render_font *render_manager::font_alloc(const char *filename)
 
 void render_manager::font_free(render_font *font)
 {
-	auto_free(m_machine, font);
+	auto_free(machine(), font);
 }
 
 
@@ -2658,7 +2643,7 @@ void render_manager::invalidate_all(void *refptr)
 
 render_container *render_manager::container_alloc(screen_device *screen)
 {
-	render_container *container = auto_alloc(m_machine, render_container(*this, screen));
+	render_container *container = auto_alloc(machine(), render_container(*this, screen));
 	if (screen != NULL)
 		m_screen_container_list.append(*container);
 	return container;
@@ -2672,7 +2657,7 @@ render_container *render_manager::container_alloc(screen_device *screen)
 void render_manager::container_free(render_container *container)
 {
 	m_screen_container_list.detach(*container);
-	auto_free(m_machine, container);
+	auto_free(machine(), container);
 }
 
 
@@ -2680,11 +2665,6 @@ void render_manager::container_free(render_container *container)
 //  config_load - read and apply data from the
 //  configuration file
 //-------------------------------------------------
-
-void render_manager::config_load_static(running_machine &machine, int config_type, xml_data_node *parentnode)
-{
-	machine.render().config_load(config_type, parentnode);
-}
 
 void render_manager::config_load(int config_type, xml_data_node *parentnode)
 {
@@ -2745,11 +2725,6 @@ void render_manager::config_load(int config_type, xml_data_node *parentnode)
 //  file
 //-------------------------------------------------
 
-void render_manager::config_save_static(running_machine &machine, int config_type, xml_data_node *parentnode)
-{
-	machine.render().config_save(config_type, parentnode);
-}
-
 void render_manager::config_save(int config_type, xml_data_node *parentnode)
 {
 	// we only care about game files
@@ -2796,19 +2771,19 @@ void render_manager::config_save(int config_type, xml_data_node *parentnode)
 			container->get_user_settings(settings);
 
 			// output the color controls
-			if (settings.m_brightness != m_machine.options().brightness())
+			if (settings.m_brightness != machine().options().brightness())
 			{
 				xml_set_attribute_float(screennode, "brightness", settings.m_brightness);
 				changed = true;
 			}
 
-			if (settings.m_contrast != m_machine.options().contrast())
+			if (settings.m_contrast != machine().options().contrast())
 			{
 				xml_set_attribute_float(screennode, "contrast", settings.m_contrast);
 				changed = true;
 			}
 
-			if (settings.m_gamma != m_machine.options().gamma())
+			if (settings.m_gamma != machine().options().gamma())
 			{
 				xml_set_attribute_float(screennode, "gamma", settings.m_gamma);
 				changed = true;

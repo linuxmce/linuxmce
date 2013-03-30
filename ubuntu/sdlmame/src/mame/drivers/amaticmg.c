@@ -1,23 +1,19 @@
 /**********************************************************************************
 
-
-  AMATIC - MULTI GAME SYSTEM
-  --------------------------
-
-  Preliminary driver by Roberto Fresca.
-
+  AMA-8000-1 / AMA-8000-2 Multi Game System.
+  Amatic Trading GmbH.
 
   Encrypted gambling hardware based on a custom CPU.
 
+  Driver by Roberto Fresca & Angelo Salese
 
 ***********************************************************************************
-
 
   Hardware Notes
   --------------
 
   ------------------------------------------------
-    Board #1 (unknown slots game)
+    Board #1 (Super Stars) AMA-8000-1
   ------------------------------------------------
 
   1x 40-pin custom CPU labeled:
@@ -58,7 +54,7 @@
 
 
   ------------------------------------------------
-     Multi-Game I v2.4
+     Multi-Game I v2.4 (AMA-8000-2)
   ------------------------------------------------
 
   1x 40-pin custom CPU labeled:
@@ -185,7 +181,7 @@
 
 
   ------------------------------------------------
-     Multi-Game III v3.5
+     Multi-Game III v3.5 (AMA-8000-2)
   ------------------------------------------------
 
   1x 40-pin custom CPU labeled:
@@ -229,10 +225,25 @@
 ***********************************************************************************
 
 
-    Memory Map
-    ----------
+  Memory Map
+  ----------
 
-    $00000 - $FFFFF   Still unknown...
+  0000-7FFF   ROM Space.
+  8000-9FFF   NVRAM.
+  A000-AFFF   Video RAM.
+  B000-BFFF   RAM.
+  C000-FFFF   ROM Banking
+
+  I/O
+
+  00-03       PPI 8255 0
+  20-23       PPI 8255 1
+  40-41       YM3812 Sound device.
+  60-60       MC6845 CRTC Address.
+  61-61       MC6845 CRTC Register.
+  80-80       unknown (W)
+  C0-C0       ROM Bank selector.
+  E6-E6       NMI Mask.
 
 
 ***********************************************************************************
@@ -350,6 +361,31 @@
 ***********************************************************************************
 
 
+  [2012/08/15]
+
+  - Added dynamic length to the color PROMs decode routines based on ROM region length.
+    This fixes a horrible hang/crash in DEBUG=1 builds.
+
+  [2012/04/27]
+
+  - Reworked the decryption function.
+  - Added Multi Game III (V.Ger 3.64).
+
+  [2012/04/23]
+
+  - A lot of work on AMA-8000-1 machine and gfx.
+  - Identified the slots game as Super Stars.
+  - Changed am_uslot to suprstar.
+  - Reworked inputs from the scratch.
+  - Added support for outputs: lamps & counters.
+  - Added a button-lamps layout.
+  - Promoted the game to working state.
+  - Added technical notes.
+  - Renamed amaticmg3 to amaticmg2 since is the AMA-8000-2 system.
+  - Found the hopper motor signal. Mapped the hopper pay pulse to
+     key 'Q'. Now is possible to payout manually, avoiding the hang
+     for hopper empty or timeout.
+
   [2009/09/11]
 
   - Initial release.
@@ -362,39 +398,63 @@
 
   *** TO DO ***
 
-  - Decrypt the program ROMs.
-  - Identify the CPU type.
-  - Memory map.
+  - Super Stars: video garbage at first boot (doesn't happen if you soft-reset), btanb?
   - Hook the remaining GFX bitplanes.
-  - CRTC
-  - Proper inputs.
   - Color decode routines.
-  - Sound support.
+  - Remaining sound devices.
+  - Hopper as device... ;)
 
 
 ***********************************************************************************/
 
 
-#define MASTER_CLOCK	XTAL_16MHz
-#define CPU_CLOCK		MASTER_CLOCK/4	/* guess */
-#define SND_CLOCK		MASTER_CLOCK/4	/* guess */
-#define CRTC_CLOCK		MASTER_CLOCK/8	/* guess */
+#define MASTER_CLOCK    XTAL_16MHz
+#define CPU_CLOCK       MASTER_CLOCK/4  /* guess */
+#define SND_CLOCK       MASTER_CLOCK/4  /* guess */
+#define CRTC_CLOCK      MASTER_CLOCK/8  /* guess */
 
 
 #include "emu.h"
 #include "cpu/z80/z80.h"
 #include "video/mc6845.h"
-#include "machine/8255ppi.h"
+#include "machine/i8255.h"
 #include "sound/3812intf.h"
 #include "sound/dac.h"
+
+#include "suprstar.lh"
 
 
 class amaticmg_state : public driver_device
 {
 public:
-	amaticmg_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	amaticmg_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+		m_attr(*this, "attr"),
+		m_vram(*this, "vram")
+		{ }
 
+	required_shared_ptr<UINT8> m_attr;
+	required_shared_ptr<UINT8> m_vram;
+
+	DECLARE_WRITE8_MEMBER(rombank_w);
+	DECLARE_WRITE8_MEMBER(nmi_mask_w);
+	DECLARE_WRITE8_MEMBER(unk80_w);
+
+	UINT8 m_nmi_mask;
+	DECLARE_WRITE8_MEMBER(out_a_w);
+	DECLARE_WRITE8_MEMBER(out_c_w);
+	DECLARE_DRIVER_INIT(ama8000_3_o);
+	DECLARE_DRIVER_INIT(ama8000_2_i);
+	DECLARE_DRIVER_INIT(ama8000_2_v);
+	DECLARE_DRIVER_INIT(ama8000_1_x);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	virtual void palette_init();
+	DECLARE_PALETTE_INIT(amaticmg2);
+	UINT32 screen_update_amaticmg(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_amaticmg2(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(amaticmg2_irq);
 };
 
 
@@ -402,23 +462,164 @@ public:
 *          Video Hardware           *
 ************************************/
 
-static VIDEO_START( amaticmg )
+void amaticmg_state::video_start()
 {
 }
 
-static SCREEN_UPDATE( amaticmg )
+UINT32 amaticmg_state::screen_update_amaticmg(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
+	gfx_element *gfx = machine().gfx[0];
+	int y,x;
+	int count = 0;
+
+	for (y=0;y<32;y++)
+	{
+		for (x=0;x<96;x++)
+		{
+			UINT16 tile = m_vram[count];
+			UINT8 color;
+
+			tile += ((m_attr[count]&0x0f)<<8);
+			/* TODO: this looks so out of place ... */
+			color = (m_attr[count]&0xf0)>>3;
+
+			drawgfx_opaque(bitmap,cliprect,gfx,tile,color,0,0,x*4,y*8);
+			count++;
+		}
+	}
+
 	return 0;
 }
 
-static PALETTE_INIT( amaticmg )
+UINT32 amaticmg_state::screen_update_amaticmg2(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
+	gfx_element *gfx = machine().gfx[0];
+	int y,x;
+	int count = 16;
+
+	for (y=0;y<32;y++)
+	{
+		for (x=0;x<96;x++)
+		{
+			UINT16 tile = m_vram[count];
+			UINT8 color;
+
+			tile += ((m_attr[count]&0xff)<<8);
+			color = 0;
+
+			drawgfx_opaque(bitmap,cliprect,gfx,tile,color,0,0,x*4,y*8);
+			count++;
+		}
+	}
+
+	return 0;
 }
 
+void amaticmg_state::palette_init()
+{
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
+	int bit0, bit1, bit2 , r, g, b;
+	int i;
+
+	for (i = 0; i < 0x200; ++i)
+	{
+		bit0 = 0;
+		bit1 = (color_prom[0] >> 6) & 0x01;
+		bit2 = (color_prom[0] >> 7) & 0x01;
+		g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
+		bit0 = (color_prom[0] >> 0) & 0x01;
+		bit1 = (color_prom[0] >> 1) & 0x01;
+		bit2 = (color_prom[0] >> 2) & 0x01;
+		r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
+		bit0 = (color_prom[0] >> 3) & 0x01;
+		bit1 = (color_prom[0] >> 4) & 0x01;
+		bit2 = (color_prom[0] >> 5) & 0x01;
+		b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
+
+		palette_set_color(machine(), i, MAKE_RGB(r, g, b));
+		color_prom++;
+	}
+}
+
+
+PALETTE_INIT_MEMBER(amaticmg_state,amaticmg2)
+{
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
+	int r, g, b;
+	int i;
+
+	for (i = 0; i < machine().root_device().memregion("proms")->bytes(); i+=2)
+	{
+		b = ((color_prom[1] & 0xf8) >> 3);
+		g = ((color_prom[0] & 0xc0) >> 6) | ((color_prom[1] & 0x7) << 2);
+		r = ((color_prom[0] & 0x3e) >> 1);
+
+		palette_set_color_rgb(machine(), i >> 1, pal5bit(r), pal5bit(g), pal5bit(b));
+		color_prom+=2;
+	}
+}
 
 /************************************
 *       Read/Write Handlers         *
 ************************************/
+
+WRITE8_MEMBER( amaticmg_state::rombank_w )
+{
+	membank("bank1")->set_entry(data & 0xf);
+}
+
+WRITE8_MEMBER( amaticmg_state::nmi_mask_w )
+{
+	m_nmi_mask = (data & 1) ^ 1;
+}
+
+WRITE8_MEMBER(amaticmg_state::out_a_w)
+{
+/*  LAMPS A:
+
+    7654 3210
+    x--- -xxx  (unknown)
+    ---- x---  START
+    ---x ----  BET
+    --x- ----  HOLD3
+    -x-- ----  HOLD4
+*/
+
+	output_set_lamp_value(0, (data >> 3) & 1);  /* START */
+	output_set_lamp_value(1, (data >> 4) & 1);  /* BET */
+	output_set_lamp_value(2, (data >> 5) & 1);  /* HOLD3 */
+	output_set_lamp_value(3, (data >> 6) & 1);  /* HOLD4 */
+
+	logerror("port A: %2X\n", data);
+}
+
+WRITE8_MEMBER(amaticmg_state::out_c_w)
+{
+/*  LAMPS B:
+
+    7654 3210
+    ---- ---x  Coin Out counter
+    ---- --x-  HOLD1
+    ---- -x--  Coin In counter
+    ---x ----  HOLD2
+    -x-- ----  CANCEL
+    x--- ----  Hopper motor
+    --x- x---  (unknown)
+*/
+	output_set_lamp_value(4, (data >> 1) & 1);  /* HOLD1 */
+	output_set_lamp_value(5, (data >> 4) & 1);  /* HOLD2 */
+	output_set_lamp_value(6, (data >> 6) & 1);  /* CANCEL */
+
+//  coin_counter_w(machine(), 0, data & 0x04);  /* Coin In */
+//  coin_counter_w(machine(), 1, data & 0x01);  /* Coin Out */
+
+	logerror("port C: %2X\n", data);
+}
+
+WRITE8_MEMBER( amaticmg_state::unk80_w )
+{
+//  machine().device<dac_device>("dac")->write_unsigned8(data & 0x01);       /* Sound DAC */
+}
 
 
 
@@ -426,25 +627,43 @@ static PALETTE_INIT( amaticmg )
 *      Memory Map Information       *
 ************************************/
 
-static ADDRESS_MAP_START( amaticmg_map, AS_PROGRAM, 8 )
-	AM_RANGE(0x00000, 0x3ffff) AM_ROM
-//  AM_RANGE(0x0000, 0x0000) AM_RAM // AM_SHARE("nvram")
-//  AM_RANGE(0x0000, 0x0000) AM_DEVWRITE("crtc", mc6845_address_w)
-//  AM_RANGE(0x0000, 0x0000) AM_DEVREADWRITE("crtc", mc6845_register_r, mc6845_register_w)
-//  AM_RANGE(0x0000, 0x0000) AM_RAM_WRITE(amaticmg_videoram_w) AM_BASE(&amaticmg_videoram)
-//  AM_RANGE(0x0000, 0x0000) AM_RAM_WRITE(amaticmg_colorram_w) AM_BASE(&amaticmg_colorram)
+static ADDRESS_MAP_START( amaticmg_map, AS_PROGRAM, 8, amaticmg_state )
+	AM_RANGE(0x0000, 0x7fff) AM_ROM
+	AM_RANGE(0x8000, 0x9fff) AM_RAM // AM_SHARE("nvram")
+	AM_RANGE(0xa000, 0xafff) AM_RAM AM_SHARE("vram")
+	AM_RANGE(0xb000, 0xbfff) AM_RAM AM_SHARE("attr")
+//  AM_RANGE(0xa010, 0xafff) AM_RAM AM_SHARE("vram")
+//  AM_RANGE(0xb010, 0xbfff) AM_RAM AM_SHARE("attr")
+	AM_RANGE(0xc000, 0xffff) AM_ROMBANK("bank1")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( amaticmg_portmap, AS_IO, 8 )
+static ADDRESS_MAP_START( amaticmg_portmap, AS_IO, 8, amaticmg_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-//  AM_RANGE(0x00, 0x00) AM_DEVREADWRITE("ppi8255_0", ppi8255_r, ppi8255_w)
-//  AM_RANGE(0x00, 0x00) AM_DEVREADWRITE("ppi8255_1", ppi8255_r, ppi8255_w)
-//  AM_RANGE(0x00, 0x00) AM_DEVREADWRITE("ppi8255_2", ppi8255_r, ppi8255_w)
-//  AM_RANGE(0x00, 0x00) AM_DEVWRITE("ymsnd", ym3812_w)
-//  AM_RANGE(0x00, 0x00) AM_DEVWRITE("dac1", dac_signed_w)
-//  AM_RANGE(0x00, 0x00) AM_DEVWRITE("dac2", dac_signed_w)
+	AM_RANGE(0x00, 0x03) AM_DEVREADWRITE("ppi8255_0", i8255_device, read, write)
+	AM_RANGE(0x20, 0x23) AM_DEVREADWRITE("ppi8255_1", i8255_device, read, write)
+	AM_RANGE(0x40, 0x41) AM_DEVWRITE_LEGACY("ymsnd", ym3812_w)
+	AM_RANGE(0x60, 0x60) AM_DEVWRITE("crtc", mc6845_device, address_w)
+	AM_RANGE(0x61, 0x61) AM_DEVREADWRITE("crtc", mc6845_device, register_r, register_w)
+	AM_RANGE(0x80, 0x80) AM_WRITE(unk80_w)
+	AM_RANGE(0xc0, 0xc0) AM_WRITE(rombank_w)
+//  AM_RANGE(0x00, 0x00) AM_DEVREADWRITE("ppi8255_2", ppi8255_device, read, write)
+//  AM_RANGE(0x00, 0x00) AM_DEVWRITE("dac1", dac_device, write_signed8)
+//  AM_RANGE(0x00, 0x00) AM_DEVWRITE("dac2", dac_device, write_signed8)
 
 ADDRESS_MAP_END
+
+static ADDRESS_MAP_START( amaticmg2_portmap, AS_IO, 8, amaticmg_state )
+	ADDRESS_MAP_GLOBAL_MASK(0xff)
+//  ADDRESS_MAP_UNMAP_HIGH
+	AM_RANGE(0x00, 0x03) AM_DEVREADWRITE("ppi8255_0", i8255_device, read, write)
+	AM_RANGE(0x20, 0x23) AM_DEVREADWRITE("ppi8255_1", i8255_device, read, write)
+	AM_RANGE(0x40, 0x41) AM_DEVWRITE_LEGACY("ymsnd", ym3812_w)
+	AM_RANGE(0x60, 0x60) AM_DEVWRITE("crtc", mc6845_device, address_w)                  // 0e for mg_iii_vger_3.64_v_8309
+	AM_RANGE(0x61, 0x61) AM_DEVREADWRITE("crtc", mc6845_device, register_r, register_w) // 0f for mg_iii_vger_3.64_v_8309
+	AM_RANGE(0xc0, 0xc0) AM_WRITE(rombank_w)
+	AM_RANGE(0xe6, 0xe6) AM_WRITE(nmi_mask_w)
+ADDRESS_MAP_END
+
 
 /*
     Unknown R/W
@@ -460,70 +679,70 @@ ADDRESS_MAP_END
 
 static INPUT_PORTS_START( amaticmg )
 	PORT_START("IN0")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("0-1") PORT_CODE(KEYCODE_1)
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("0-2") PORT_CODE(KEYCODE_2)
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("0-3") PORT_CODE(KEYCODE_3)
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("0-4") PORT_CODE(KEYCODE_4)
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("0-5") PORT_CODE(KEYCODE_5)
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("0-6") PORT_CODE(KEYCODE_6)
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("0-7") PORT_CODE(KEYCODE_7)
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("0-8") PORT_CODE(KEYCODE_8)
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )          PORT_NAME("Coin 1 (Muenze 1)") PORT_IMPULSE(3)
 
 	PORT_START("IN1")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("1-1") PORT_CODE(KEYCODE_Q)
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("1-2") PORT_CODE(KEYCODE_W)
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("1-3") PORT_CODE(KEYCODE_E)
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("1-4") PORT_CODE(KEYCODE_R)
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("1-5") PORT_CODE(KEYCODE_T)
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("1-6") PORT_CODE(KEYCODE_Y)
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("1-7") PORT_CODE(KEYCODE_U)
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("1-8") PORT_CODE(KEYCODE_I)
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_SERVICE2 )       PORT_NAME("Service B (Dienst B") PORT_CODE(KEYCODE_8) PORT_TOGGLE
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN2 )          PORT_NAME("Coin 2 (Muenze 2)")   PORT_IMPULSE(3)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_OTHER )          PORT_NAME("Hopper Payout pulse") PORT_IMPULSE(3)      PORT_CODE(KEYCODE_Q)  // Hopper paying pulse
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_GAMBLE_PAYOUT )  PORT_CODE(KEYCODE_W)           // 'Ausgegeben 0 - Hopper Leer' (spent 0 - hopper empty)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_POKER_HOLD3 )    PORT_NAME("Hold 3 (Halten 3)")
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_POKER_HOLD2 )    PORT_NAME("Hold 2 (Halten 2)")
 
 	PORT_START("IN2")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("2-1") PORT_CODE(KEYCODE_A)
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("2-2") PORT_CODE(KEYCODE_S)
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("2-3") PORT_CODE(KEYCODE_D)
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("2-4") PORT_CODE(KEYCODE_F)
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("2-5") PORT_CODE(KEYCODE_G)
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("2-6") PORT_CODE(KEYCODE_H)
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("2-7") PORT_CODE(KEYCODE_J)
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("2-8") PORT_CODE(KEYCODE_K)
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_START1 )         PORT_NAME("Start")
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_POKER_CANCEL )   PORT_NAME("Clear / Take (Loeschen)")
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_POKER_HOLD1 )    PORT_NAME("Hold 1 (Halten 1)")
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE1 )       PORT_NAME("Service A (Dienst A") PORT_CODE(KEYCODE_7) PORT_TOGGLE
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_GAMBLE_BET )     PORT_NAME("Bet (Setzen) / Half Take")
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE3 )       PORT_NAME("Service C (Dienst C") PORT_CODE(KEYCODE_9) PORT_TOGGLE
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_NAME("Service (Master)")    PORT_CODE(KEYCODE_0)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_POKER_HOLD4 )    PORT_NAME("Hold 4 (Halten 4)")
 
 	PORT_START("IN3")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("3-1") PORT_CODE(KEYCODE_Z)
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("3-2") PORT_CODE(KEYCODE_X)
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("3-3") PORT_CODE(KEYCODE_C)
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("3-4") PORT_CODE(KEYCODE_V)
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("3-5") PORT_CODE(KEYCODE_B)
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("3-6") PORT_CODE(KEYCODE_N)
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("3-7") PORT_CODE(KEYCODE_M)
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("3-8") PORT_CODE(KEYCODE_L)
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START("SW1")
-	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x01, 0x01, "DIP1")                   PORT_DIPLOCATION("DIP:1")
+	PORT_DIPSETTING(    0x01, "Off (Aus)" )
+	PORT_DIPSETTING(    0x00, "On (Ein)" )
+	PORT_DIPNAME( 0x02, 0x02, "DIP2")                   PORT_DIPLOCATION("DIP:2")
+	PORT_DIPSETTING(    0x02, "Off (Aus)" )
+	PORT_DIPSETTING(    0x00, "On (Ein)" )
+	PORT_DIPNAME( 0x04, 0x04, "Coin 1 (Muenzen 1)" )    PORT_DIPLOCATION("DIP:3")
+	PORT_DIPSETTING(    0x04, "10" )
+	PORT_DIPSETTING(    0x00, "5" )
+	PORT_DIPNAME( 0x08, 0x08, "Coin 2 (Muenzen 2)" )    PORT_DIPLOCATION("DIP:4")
+	PORT_DIPSETTING(    0x08, "100" )
+	PORT_DIPSETTING(    0x00, "5" )
+	PORT_DIPNAME( 0x10, 0x10, "Jackpot")                PORT_DIPLOCATION("DIP:5")
+	PORT_DIPSETTING(    0x10, "Jackpot KZB")
+	PORT_DIPSETTING(    0x00, "Jackpot LZB")
+	PORT_DIPNAME( 0x20, 0x20, "Fruechtebonus" )         PORT_DIPLOCATION("DIP:6")
+	PORT_DIPSETTING(    0x20, "Fruechtebonus Bleibt" )
+	PORT_DIPSETTING(    0x00, "Fruechtebonus Clear" )
+	PORT_DIPNAME( 0x40, 0x40, "DIP7")                   PORT_DIPLOCATION("DIP:7")
+	PORT_DIPSETTING(    0x40, "Off (Aus)" )
+	PORT_DIPSETTING(    0x00, "On (Ein)" )
+	PORT_DIPNAME( 0x80, 0x80, "BH")                     PORT_DIPLOCATION("DIP:8")
+	PORT_DIPSETTING(    0x80, "BH Dreifach")
+	PORT_DIPSETTING(    0x00, "BH Normal")
 INPUT_PORTS_END
 
 
@@ -531,15 +750,24 @@ INPUT_PORTS_END
 *         Graphics Layouts          *
 ************************************/
 
-static const gfx_layout charlayout =
+static const gfx_layout charlayout_4bpp =
 {
-/* Only 2 planes are hooked. This need to be fixed */
-
 	4,8,
 	RGN_FRAC(1,2),
-	2,
-	{ RGN_FRAC(0,2), RGN_FRAC(0,2) + 4 },
-	{ 3, 2, 1, 0 },	/* tiles are x-flipped */
+	4,
+	{ RGN_FRAC(0,2), RGN_FRAC(0,2) + 4, RGN_FRAC(1,2), RGN_FRAC(1,2) + 4 },
+	{ 3, 2, 1, 0 },
+	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
+	8*4*2
+};
+
+static const gfx_layout charlayout_6bpp =
+{
+	4,8,
+	RGN_FRAC(1,3),
+	6,
+	{ RGN_FRAC(0,3) + 0, RGN_FRAC(0,3) + 4, RGN_FRAC(1,3) + 0, RGN_FRAC(1,3) + 4,RGN_FRAC(2,3) + 0, RGN_FRAC(2,3) + 4, },
+	{ 3, 2, 1, 0 }, /* tiles are x-flipped */
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
 	8*4*2
 };
@@ -550,70 +778,85 @@ static const gfx_layout charlayout =
 ************************************/
 
 static GFXDECODE_START( amaticmg )
-	GFXDECODE_ENTRY( "gfx1", 0x0000, charlayout, 0, 16 )
+	GFXDECODE_ENTRY( "gfx1", 0x0000, charlayout_4bpp, 0, 0x20 )
 GFXDECODE_END
 
+static GFXDECODE_START( amaticmg2 )
+	GFXDECODE_ENTRY( "gfx1", 0x0000, charlayout_6bpp, 0, 0x10000/0x40 )
+GFXDECODE_END
 
 /************************************
 *          Sound Interface          *
 ************************************/
 
-//static const ym3812_interface ym3812_config =
-//{
-//  sound_irq
-//};
+static const ym3812_interface ym3812_config =
+{
+	0
+};
 
 
 /************************************
 *          CRTC Interface           *
 ************************************/
 
-//static const mc6845_interface mc6845_intf =
-//{
-//  "screen",   /* screen we are acting on */
-//  8,          /* number of pixels per video memory address */
-//  NULL,       /* before pixel update callback */
-//  NULL,       /* row update callback */
-//  NULL,       /* after pixel update callback */
-//  DEVCB_NULL, /* callback for display state changes */
-//  DEVCB_NULL, /* callback for cursor state changes */
-//  DEVCB_NULL, /* HSYNC callback */
-//  DEVCB_NULL, /* VSYNC callback */
-//  NULL        /* update address callback */
-//};
+static const mc6845_interface mc6845_intf =
+{
+	"screen",   /* screen we are acting on */
+	4,          /* number of pixels per video memory address */
+	NULL,       /* before pixel update callback */
+	NULL,       /* row update callback */
+	NULL,       /* after pixel update callback */
+	DEVCB_NULL, /* callback for display state changes */
+	DEVCB_NULL, /* callback for cursor state changes */
+	DEVCB_NULL, /* HSYNC callback */
+	DEVCB_NULL, /* VSYNC callback */
+	NULL        /* update address callback */
+};
 
 
 /************************************
 *      PPI 8255 (x3) Interface      *
 ************************************/
 
-//static const ppi8255_interface ppi8255_intf[3] =
-//{
-//  {   /* (00-00) Mode X - Port X set as input */
-//      DEVCB_NULL,                     /* Port A read */
-//      DEVCB_NULL,                     /* Port B read */
-//      DEVCB_NULL,                     /* Port C read */
-//      DEVCB_NULL,                     /* Port A write */
-//      DEVCB_NULL,                     /* Port B write */
-//      DEVCB_NULL,                     /* Port C write */
-//  },
-//  {   /* (00-00) Mode X - Port X set as input */
-//      DEVCB_NULL,                     /* Port A read */
-//      DEVCB_NULL,                     /* Port B read */
-//      DEVCB_NULL,                     /* Port C read */
-//      DEVCB_NULL,                     /* Port A write */
-//      DEVCB_NULL,                     /* Port B write */
-//      DEVCB_NULL,                     /* Port C write */
-//  },
-//  {   /* (00-00) Mode X - Port X set as input */
-//      DEVCB_NULL,                     /* Port A read */
-//      DEVCB_NULL,                     /* Port B read */
-//      DEVCB_NULL,                     /* Port C read */
-//      DEVCB_NULL,                     /* Port A write */
-//      DEVCB_NULL,                     /* Port B write */
-//      DEVCB_NULL,                     /* Port C write */
-//  }
-//};
+static I8255A_INTERFACE( ppi8255_intf_0 )
+{
+	DEVCB_INPUT_PORT("IN0"),        /* Port A read */
+	DEVCB_NULL,                     /* Port A write */
+	DEVCB_INPUT_PORT("IN1"),        /* Port B read */
+	DEVCB_NULL,                     /* Port B write */
+	DEVCB_INPUT_PORT("IN2"),        /* Port C read */
+	DEVCB_NULL                      /* Port C write */
+};
+
+static I8255A_INTERFACE( ppi8255_intf_1 )
+{
+	DEVCB_NULL,                     /* Port A read */
+	DEVCB_DRIVER_MEMBER(amaticmg_state,out_a_w),            /* Port A write */
+	DEVCB_INPUT_PORT("SW1"),        /* Port B read */
+	DEVCB_NULL,                     /* Port B write */
+	DEVCB_NULL,                     /* Port C read */
+	DEVCB_DRIVER_MEMBER(amaticmg_state,out_c_w)         /* Port C write */
+};
+
+
+/************************************
+*       Machine Start & Reset       *
+************************************/
+
+void amaticmg_state::machine_start()
+{
+	UINT8 *rombank = machine().root_device().memregion("maincpu")->base();
+
+	machine().root_device().membank("bank1")->configure_entries(0, 0x10, &rombank[0x8000], 0x4000);
+}
+
+void amaticmg_state::machine_reset()
+{
+
+	membank("bank1")->set_entry(0);
+	m_nmi_mask = 0;
+}
+
 
 /************************************
 *          Machine Drivers          *
@@ -621,45 +864,66 @@ GFXDECODE_END
 
 static MACHINE_CONFIG_START( amaticmg, amaticmg_state )
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, CPU_CLOCK)		/* WRONG! */
+	MCFG_CPU_ADD("maincpu", Z80, CPU_CLOCK)     /* WRONG! */
 	MCFG_CPU_PROGRAM_MAP(amaticmg_map)
 	MCFG_CPU_IO_MAP(amaticmg_portmap)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", amaticmg_state,  nmi_line_pulse) // no NMI mask?
 
 //  MCFG_NVRAM_ADD_0FILL("nvram")
 
 	/* 3x 8255 */
-//  MCFG_PPI8255_ADD( "ppi8255_0", ppi8255_intf[0] )
-//  MCFG_PPI8255_ADD( "ppi8255_1", ppi8255_intf[1] )
+	MCFG_I8255A_ADD( "ppi8255_0", ppi8255_intf_0 )
+	MCFG_I8255A_ADD( "ppi8255_1", ppi8255_intf_1 )
 //  MCFG_PPI8255_ADD( "ppi8255_2", ppi8255_intf[2] )
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(512, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 512-1, 0, 256-1)
-	MCFG_SCREEN_UPDATE(amaticmg)
+	MCFG_SCREEN_UPDATE_DRIVER(amaticmg_state, screen_update_amaticmg)
 
-//  MCFG_MC6845_ADD("crtc", MC6845, CRTC_CLOCK, mc6845_intf)
+	MCFG_MC6845_ADD("crtc", MC6845, CRTC_CLOCK, mc6845_intf)
 
 	MCFG_GFXDECODE(amaticmg)
 
-	MCFG_PALETTE_INIT(amaticmg)
-	MCFG_PALETTE_LENGTH(0x100)
-	MCFG_VIDEO_START(amaticmg)
+	MCFG_PALETTE_LENGTH(0x200)
+
 
 	/* sound hardware */
-//  MCFG_SPEAKER_STANDARD_MONO("mono")
+	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-//  MCFG_SOUND_ADD("ymsnd", YM3812, SND_CLOCK)
-//  MCFG_SOUND_CONFIG(ym3812_config)
+	MCFG_SOUND_ADD("ymsnd", YM3812, SND_CLOCK)
+	MCFG_SOUND_CONFIG(ym3812_config)
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
+
+//  MCFG_DAC_ADD("dac")   /* Y3014B */
 //  MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 
-//  MCFG_SOUND_ADD("dac", DAC, 0)   /* Y3014B */
-//  MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
+MACHINE_CONFIG_END
 
+
+INTERRUPT_GEN_MEMBER(amaticmg_state::amaticmg2_irq)
+{
+
+	if(m_nmi_mask)
+		device.execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
+}
+
+
+static MACHINE_CONFIG_DERIVED( amaticmg2, amaticmg )
+
+	MCFG_CPU_MODIFY("maincpu")
+	MCFG_CPU_IO_MAP(amaticmg2_portmap)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", amaticmg_state,  amaticmg2_irq)
+
+	MCFG_SCREEN_MODIFY("screen")
+	MCFG_SCREEN_UPDATE_DRIVER(amaticmg_state, screen_update_amaticmg2)
+
+	MCFG_GFXDECODE(amaticmg2)
+	MCFG_PALETTE_INIT_OVERRIDE(amaticmg_state,amaticmg2)
+	MCFG_PALETTE_LENGTH(0x10000)
 MACHINE_CONFIG_END
 
 
@@ -667,13 +931,17 @@ MACHINE_CONFIG_END
 *             Rom Load              *
 ************************************/
 
-ROM_START( am_uslot )
-	ROM_REGION( 0x40000, "maincpu", 0 )	/* encrypted program ROM...*/
+ROM_START( suprstar )
+	ROM_REGION( 0x40000, "maincpu", ROMREGION_ERASE00 )
+
+	ROM_REGION( 0x20000, "mainprg", 0 ) /* encrypted program ROM...*/
 	ROM_LOAD( "u3.bin",  0x00000, 0x20000, CRC(29bf4a95) SHA1(a73873f7cd1fdf5accc3e79f4619949f261400b8) )
 
-	ROM_REGION( 0x20000, "gfx1", 0 )	/* There are only slots tiles. No chars inside */
-	ROM_LOAD( "u9.bin",  0x00000, 0x10000, CRC(823a736a) SHA1(a5227e3080367736aac1198d9dbb55efc4114624) )
-	ROM_LOAD( "u10.bin", 0x00000, 0x10000, CRC(6a811c81) SHA1(af01cd9b1ce6aca92df71febb05fe216b18cf42a) )
+	ROM_REGION( 0x10000, "gfx1", 0 )
+	ROM_LOAD( "u10.bin", 0x00000, 0x08000, CRC(6a811c81) SHA1(af01cd9b1ce6aca92df71febb05fe216b18cf42a) )
+	ROM_CONTINUE(        0x00000, 0x08000 )
+	ROM_LOAD( "u9.bin",  0x08000, 0x08000, CRC(823a736a) SHA1(a5227e3080367736aac1198d9dbb55efc4114624) )
+	ROM_CONTINUE(        0x08000, 0x08000 )
 
 	ROM_REGION( 0x0200, "proms", 0 )
 	ROM_LOAD( "n82s147a.bin", 0x0000, 0x0200, CRC(dfeabd11) SHA1(21e8bbcf4aba5e4d672e5585890baf8c5bc77c98) )
@@ -681,30 +949,111 @@ ROM_END
 
 
 ROM_START( am_mg24 )
-	ROM_REGION( 0x40000, "maincpu", 0 )	/* encrypted program ROM...*/
+	ROM_REGION( 0x40000, "maincpu", ROMREGION_ERASE00 )
+
+	ROM_REGION( 0x40000, "mainprg", 0 ) /* encrypted program ROM...*/
 	ROM_LOAD( "mgi_vger_3.9-i-8201.i6.bin", 0x00000, 0x40000, CRC(9ce159f7) SHA1(101c277d579a69cb03f879288b2cecf838cf1741) )
 
 	ROM_REGION( 0x180000, "gfx1", 0 )
-	ROM_LOAD( "multi_2.4_zg1.i17.bin", 0x000000, 0x80000, CRC(4a60a718) SHA1(626991abee768da58e87c7cdfc4fcbae86c6ea2a) )
+	ROM_LOAD( "multi_2.4_zg1.i17.bin", 0x100000, 0x80000, CRC(4a60a718) SHA1(626991abee768da58e87c7cdfc4fcbae86c6ea2a) )
 	ROM_LOAD( "multi_2.4_zg2.i18.bin", 0x080000, 0x80000, CRC(b504e1b8) SHA1(ffa17a2c212eb2fffb89b131868e69430cb41203) )
-	ROM_LOAD( "multi_2.4_zg3.i33.bin", 0x100000, 0x80000, CRC(9b66bb4d) SHA1(64035d2028a9b68164c87475a1ec9754453ad572) )
+	ROM_LOAD( "multi_2.4_zg3.i33.bin", 0x000000, 0x80000, CRC(9b66bb4d) SHA1(64035d2028a9b68164c87475a1ec9754453ad572) )
 
-	ROM_REGION( 0x0400, "proms", 0 )
+	ROM_REGION( 0x20000/*0x0400*/, "proms", 0 )
 	ROM_LOAD( "n82s147a_1.bin", 0x0000, 0x0200, NO_DUMP )
 	ROM_LOAD( "n82s147a_2.bin", 0x0200, 0x0200, NO_DUMP )
 ROM_END
 
 ROM_START( am_mg3 )
-	ROM_REGION( 0x40000, "maincpu", 0 )	/* encrypted program ROM...*/
+	ROM_REGION( 0x40000, "maincpu", ROMREGION_ERASE00 )
+
+	ROM_REGION( 0x40000, "mainprg", 0 ) /* encrypted program ROM...*/
 	ROM_LOAD( "mg_iii_vger_3.5-i-8205.bin", 0x00000, 0x40000, CRC(21d64029) SHA1(d5c3fde02833a96dd7a43481a489bfc4a5c9609d) )
 
 	ROM_REGION( 0x180000, "gfx1", 0 )
-	ROM_LOAD( "mg_iii_51_zg1.bin", 0x000000, 0x80000, CRC(84f86874) SHA1(c483a50df6a9a71ddfdf8530a894135f9b852b89) )
+	ROM_LOAD( "mg_iii_51_zg1.bin", 0x100000, 0x80000, CRC(84f86874) SHA1(c483a50df6a9a71ddfdf8530a894135f9b852b89) )
 	ROM_LOAD( "mg_iii_51_zg2.bin", 0x080000, 0x80000, CRC(4425e535) SHA1(726c322c5d0b391b82e49dd1797ebf0abfa4a65a) )
-	ROM_LOAD( "mg_iii_51_zg3.bin", 0x100000, 0x80000, CRC(36d4c0fa) SHA1(20352dbbb2ce2233be0f4f694ddf49b8f5d6a64f) )
+	ROM_LOAD( "mg_iii_51_zg3.bin", 0x000000, 0x80000, CRC(36d4c0fa) SHA1(20352dbbb2ce2233be0f4f694ddf49b8f5d6a64f) )
 
-	ROM_REGION( 0x20000, "other", 0 )
+	ROM_REGION( 0x20000, "proms", 0 )
 	ROM_LOAD( "v.bin", 0x00000, 0x20000, CRC(524767e2) SHA1(03a108494f42365c820fdfbcba9496bda86f3081) )
+ROM_END
+
+ROM_START( am_mg3a )
+	ROM_REGION( 0x40000, "maincpu", ROMREGION_ERASE00 )
+
+	ROM_REGION( 0x40000, "mainprg", 0 ) /* encrypted program ROM...*/
+	ROM_LOAD( "mg_iii_vger_3.64_v_8309.i16", 0x00000, 0x40000, CRC(c54f97c4) SHA1(d5ce91be7332ada304d18d07706e3b98ac0fa74b) )
+
+	ROM_REGION( 0x180000, "gfx1", 0 )
+	ROM_LOAD( "mg_iii_51_zg1.i17", 0x100000, 0x80000, CRC(84f86874) SHA1(c483a50df6a9a71ddfdf8530a894135f9b852b89) )
+	ROM_LOAD( "mg_iii_51_zg2.i18", 0x080000, 0x80000, CRC(4425e535) SHA1(726c322c5d0b391b82e49dd1797ebf0abfa4a65a) )
+	ROM_LOAD( "mg_iii_51_zg3.i19", 0x000000, 0x80000, CRC(36d4c0fa) SHA1(20352dbbb2ce2233be0f4f694ddf49b8f5d6a64f) )
+
+	ROM_REGION( 0x20000, "proms", 0 )
+	ROM_LOAD( "iv.i35", 0x00000, 0x20000, CRC(82af7296) SHA1(1a07d6481e0f8fd785be9f1b737182d7e0b84605) )
+ROM_END
+
+/* Italian sets... */
+
+ROM_START( am_mg31i )
+	ROM_REGION( 0x40000, "maincpu", ROMREGION_ERASE00 )
+
+	ROM_REGION( 0x40000, "mainprg", 0 ) /* encrypted program ROM...*/
+	ROM_LOAD( "mgi_sita_3.1_o_8270.bin", 0x00000, 0x40000, CRC(7358bdde) SHA1(674b57ddaaaed9b88ad563762b2421be7057e498) )
+
+	ROM_REGION( 0x180000, "gfx1", 0 )
+	ROM_LOAD( "mg2_ita.1", 0x100000, 0x80000, BAD_DUMP CRC(8663ce10) SHA1(00606bc69bd3a81a2f1b618d018d3ac315169fe4) )
+	ROM_LOAD( "mg2_ita.2", 0x080000, 0x80000, BAD_DUMP CRC(7dbaf752) SHA1(afefbd239519abb4898348a3923ff093e36fbcb0) )
+	ROM_LOAD( "mg2_ita.3", 0x000000, 0x80000, BAD_DUMP CRC(5dba55cf) SHA1(d237f8b3c72e8b59974059156070d0618ec41e9a) )
+
+	ROM_REGION( 0x4000, "proms", 0 )
+	ROM_LOAD( "ama80003_fprom.bin", 0x0000, 0x4000, BAD_DUMP CRC(65a784b8) SHA1(bd23136261e22f0294cff90040f3015ba0c10d7e) )
+ROM_END
+
+ROM_START( am_mg33i )
+	ROM_REGION( 0x40000, "maincpu", ROMREGION_ERASE00 )
+
+	ROM_REGION( 0x40000, "mainprg", 0 ) /* encrypted program ROM...*/
+	ROM_LOAD( "mgi_sita_3.3_o_8270.bin", 0x00000, 0x40000, CRC(eaa1ed83) SHA1(e50d06ea3631bd6e4f5fe14d8283c3550b2779a6) )
+
+	ROM_REGION( 0x180000, "gfx1", 0 )
+	ROM_LOAD( "mg2_ita.1", 0x100000, 0x80000, BAD_DUMP CRC(8663ce10) SHA1(00606bc69bd3a81a2f1b618d018d3ac315169fe4) )
+	ROM_LOAD( "mg2_ita.2", 0x080000, 0x80000, BAD_DUMP CRC(7dbaf752) SHA1(afefbd239519abb4898348a3923ff093e36fbcb0) )
+	ROM_LOAD( "mg2_ita.3", 0x000000, 0x80000, BAD_DUMP CRC(5dba55cf) SHA1(d237f8b3c72e8b59974059156070d0618ec41e9a) )
+
+	ROM_REGION( 0x4000, "proms", 0 )
+	ROM_LOAD( "ama80003_fprom.bin", 0x0000, 0x4000, BAD_DUMP CRC(65a784b8) SHA1(bd23136261e22f0294cff90040f3015ba0c10d7e) )
+ROM_END
+
+ROM_START( am_mg34i )
+	ROM_REGION( 0x40000, "maincpu", ROMREGION_ERASE00 )
+
+	ROM_REGION( 0x40000, "mainprg", 0 ) /* encrypted program ROM...*/
+	ROM_LOAD( "mgi_sita_3.4_o_8270.bin", 0x00000, 0x40000, CRC(bea7cd25) SHA1(89c9e02b48f34b2168e8624e552ead476cc339b9) )
+
+	ROM_REGION( 0x180000, "gfx1", 0 )
+	ROM_LOAD( "mg2_ita.1", 0x100000, 0x80000, BAD_DUMP CRC(8663ce10) SHA1(00606bc69bd3a81a2f1b618d018d3ac315169fe4) )
+	ROM_LOAD( "mg2_ita.2", 0x080000, 0x80000, BAD_DUMP CRC(7dbaf752) SHA1(afefbd239519abb4898348a3923ff093e36fbcb0) )
+	ROM_LOAD( "mg2_ita.3", 0x000000, 0x80000, BAD_DUMP CRC(5dba55cf) SHA1(d237f8b3c72e8b59974059156070d0618ec41e9a) )
+
+	ROM_REGION( 0x4000, "proms", 0 )
+	ROM_LOAD( "ama80003_fprom.bin", 0x0000, 0x4000, BAD_DUMP CRC(65a784b8) SHA1(bd23136261e22f0294cff90040f3015ba0c10d7e) )
+ROM_END
+
+ROM_START( am_mg35i )
+	ROM_REGION( 0x40000, "maincpu", ROMREGION_ERASE00 )
+
+	ROM_REGION( 0x40000, "mainprg", 0 ) /* encrypted program ROM...*/
+	ROM_LOAD( "mgi_sita_3.5_o_8270.bin", 0x00000, 0x40000, CRC(816eb41e) SHA1(0cad597e764455011d03f519e4adafb310e75451) )
+
+	ROM_REGION( 0x180000, "gfx1", 0 )
+	ROM_LOAD( "mg2_ita.1", 0x100000, 0x80000, BAD_DUMP CRC(8663ce10) SHA1(00606bc69bd3a81a2f1b618d018d3ac315169fe4) )
+	ROM_LOAD( "mg2_ita.2", 0x080000, 0x80000, BAD_DUMP CRC(7dbaf752) SHA1(afefbd239519abb4898348a3923ff093e36fbcb0) )
+	ROM_LOAD( "mg2_ita.3", 0x000000, 0x80000, BAD_DUMP CRC(5dba55cf) SHA1(d237f8b3c72e8b59974059156070d0618ec41e9a) )
+
+	ROM_REGION( 0x4000, "proms", 0 )
+	ROM_LOAD( "ama80003_fprom.bin", 0x0000, 0x4000, BAD_DUMP CRC(65a784b8) SHA1(bd23136261e22f0294cff90040f3015ba0c10d7e) )
 ROM_END
 
 
@@ -712,9 +1061,54 @@ ROM_END
 *       Driver Initialization       *
 ************************************/
 
-static DRIVER_INIT( amaticmg )
+static void encf(UINT8 ciphertext, int address, UINT8 &plaintext, int &newaddress)
 {
+	int aux = address & 0xfff;
+	aux = aux ^ (aux>>6);
+	aux = ((aux<<6) | (aux>>6)) & 0xfff;
+	UINT8 aux2 = BITSWAP8(aux, 9,10,4,1,6,0,7,3);
+	aux2 ^= aux2>>4;
+	aux2 = (aux2<<4) | (aux2>>4);
+	ciphertext ^= ciphertext<<4;
+	plaintext = (ciphertext<<4) | (ciphertext>>4);
+	plaintext ^= aux2;
+	newaddress = (address & ~0xfff) | aux;
+}
 
+static void decrypt(running_machine &machine, int key1, int key2)
+{
+	UINT8 plaintext;
+	int newaddress;
+
+	UINT8 *src = machine.root_device().memregion("mainprg")->base();
+	UINT8 *dest = machine.root_device().memregion("maincpu")->base();
+	int len = machine.root_device().memregion("mainprg")->bytes();
+
+	for (int i = 0; i < len; i++)
+	{
+		encf(src[i], i, plaintext, newaddress);
+		dest[newaddress^(key1^(key1>>6))] = plaintext^key2;
+	}
+}
+
+DRIVER_INIT_MEMBER(amaticmg_state,ama8000_1_x)
+{
+	decrypt(machine(), 0x4d1, 0xf5);
+}
+
+DRIVER_INIT_MEMBER(amaticmg_state,ama8000_2_i)
+{
+	decrypt(machine(), 0x436, 0x55);
+}
+
+DRIVER_INIT_MEMBER(amaticmg_state,ama8000_2_v)
+{
+	decrypt(machine(), 0x703, 0xaf);
+}
+
+DRIVER_INIT_MEMBER(amaticmg_state,ama8000_3_o)
+{
+	decrypt(machine(), 0x56e, 0xa7);
 }
 
 
@@ -722,7 +1116,12 @@ static DRIVER_INIT( amaticmg )
 *           Game Drivers            *
 ************************************/
 
-/*    YEAR  NAME      PARENT  MACHINE   INPUT     INIT      ROT    COMPANY                FULLNAME                     FLAGS  */
-GAME( 1996, am_uslot, 0,      amaticmg, amaticmg, amaticmg, ROT0, "Amatic Trading GmbH", "Amatic Unknown Slots Game",  GAME_IMPERFECT_GRAPHICS | GAME_WRONG_COLORS | GAME_UNEMULATED_PROTECTION | GAME_NO_SOUND | GAME_NOT_WORKING )
-GAME( 2000, am_mg24,  0,      amaticmg, amaticmg, amaticmg, ROT0, "Amatic Trading GmbH", "Multi Game I (V.Ger 2.4)",   GAME_IMPERFECT_GRAPHICS | GAME_WRONG_COLORS | GAME_UNEMULATED_PROTECTION | GAME_NO_SOUND | GAME_NOT_WORKING )
-GAME( 2000, am_mg3,   0,      amaticmg, amaticmg, amaticmg, ROT0, "Amatic Trading GmbH", "Multi Game III (V.Ger 3.5)", GAME_IMPERFECT_GRAPHICS | GAME_WRONG_COLORS | GAME_UNEMULATED_PROTECTION | GAME_NO_SOUND | GAME_NOT_WORKING )
+/*     YEAR  NAME      PARENT    MACHINE    INPUT     STATE           INIT         ROT     COMPANY                FULLNAME                      FLAGS                                                                                                        LAYOUT */
+GAMEL( 1996, suprstar, 0,        amaticmg,  amaticmg, amaticmg_state, ama8000_1_x, ROT90, "Amatic Trading GmbH", "Super Stars",                 GAME_IMPERFECT_SOUND,                                                                                        layout_suprstar )
+GAME(  2000, am_mg24,  0,        amaticmg2, amaticmg, amaticmg_state, ama8000_2_i, ROT0,  "Amatic Trading GmbH", "Multi Game I (V.Ger 2.4)",    GAME_IMPERFECT_GRAPHICS | GAME_WRONG_COLORS | GAME_UNEMULATED_PROTECTION | GAME_NO_SOUND | GAME_NOT_WORKING )
+GAME(  2000, am_mg3,   0,        amaticmg2, amaticmg, amaticmg_state, ama8000_2_i, ROT0,  "Amatic Trading GmbH", "Multi Game III (V.Ger 3.5)",  GAME_IMPERFECT_GRAPHICS | GAME_WRONG_COLORS | GAME_UNEMULATED_PROTECTION | GAME_NO_SOUND | GAME_NOT_WORKING )
+GAME(  2000, am_mg3a,  0,        amaticmg2, amaticmg, amaticmg_state, ama8000_2_v, ROT0,  "Amatic Trading GmbH", "Multi Game III (V.Ger 3.64)", GAME_IMPERFECT_GRAPHICS | GAME_WRONG_COLORS | GAME_UNEMULATED_PROTECTION | GAME_NO_SOUND | GAME_NOT_WORKING )
+GAME(  2000, am_mg35i, 0,        amaticmg2, amaticmg, amaticmg_state, ama8000_3_o, ROT0,  "Amatic Trading GmbH", "Multi Game III (S.Ita 3.5)",  GAME_IMPERFECT_GRAPHICS | GAME_WRONG_COLORS | GAME_UNEMULATED_PROTECTION | GAME_NO_SOUND | GAME_NOT_WORKING )
+GAME(  2000, am_mg34i, am_mg35i, amaticmg2, amaticmg, amaticmg_state, ama8000_3_o, ROT0,  "Amatic Trading GmbH", "Multi Game III (S.Ita 3.4)",  GAME_IMPERFECT_GRAPHICS | GAME_WRONG_COLORS | GAME_UNEMULATED_PROTECTION | GAME_NO_SOUND | GAME_NOT_WORKING )
+GAME(  2000, am_mg33i, am_mg35i, amaticmg2, amaticmg, amaticmg_state, ama8000_3_o, ROT0,  "Amatic Trading GmbH", "Multi Game III (S.Ita 3.3)",  GAME_IMPERFECT_GRAPHICS | GAME_WRONG_COLORS | GAME_UNEMULATED_PROTECTION | GAME_NO_SOUND | GAME_NOT_WORKING )
+GAME(  2000, am_mg31i, am_mg35i, amaticmg2, amaticmg, amaticmg_state, ama8000_3_o, ROT0,  "Amatic Trading GmbH", "Multi Game III (S.Ita 3.1)",  GAME_IMPERFECT_GRAPHICS | GAME_WRONG_COLORS | GAME_UNEMULATED_PROTECTION | GAME_NO_SOUND | GAME_NOT_WORKING )

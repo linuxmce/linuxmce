@@ -2,83 +2,94 @@
 
     Maygay M1 A/B driver, (under heavy construction !!!)
 
-    A.G.E Code Copyright J. Wallace and the AGEMAME Development Team.
-    Visit http://agemame.mameworld.info for more information.
-
     M.A.M.E Core Copyright Nicola Salmoria and the MAME Team,
     used under license from http://mamedev.org
 
     This only loads the basic stuff - there needs to be more done to make this run.
+
+    The sound ROM + OKIM6376 is on the game plug-in board, so not all games have it
+    (although in some cases it is just missing)
+
+
+    Gladiators
+    ----------
+
+    Produttore
+        MayGay
+
+    N.revisione
+        M1A
+
+    CPU
+        on main board:
+            1x TMP82C79P-2
+            1x S22EA-EF68B21P
+            1x EP840034.A-P-80C51AVW
+            1x MC68681P
+            1x S22EB-EF68B09P
+            1x YM2149F
+            2x oscillator 8.000MHz
+            1x oscillator 12.000MHz
+
+        on piggyback (SA5-029D):
+            1x OKIM6376
+
+    ROMs
+        on main board:
+            1x GAL16V8
+
+        on piggyback (SA5-029D):
+            1x AM27C512
+            2x M27C4001
+            1x GAL16V8
+
+    Note
+        on main board:
+            1x 26 pins dual line connector (serial pot?)
+            1x 2 legs connector (speaker)
+            2x 15 legs connector (coin mech, switch matrix)
+            3x 10 legs connector (meters, reel index, triacs)
+            1x 11 legs connector (spare stepper motors)
+            1x 20 legs connector (stepper motors)
+            1x 19 legs connector (aux display)
+            1x 9 legs connector (lamps)
+            1x 17 legs connector (P3)
+            1x 24 legs connector (lamps)
+            1x 14 legs connector (power supply)
+            1x 8 legs connector (control port)
+            1x trimmer (volume)
+            1x battery (2.4V 100mAh)
+            9x red leds
+            1x pushbutton
+            2x 8 switches dip
+
+        on piggyback (SA5-029D):
+            1x 5 legs connector
+            3x trimmer
+
+
 ******************************************************************************************/
 #include "emu.h"
-#include "cpu/m6809/m6809.h"
-#include "video/awpvid.h"		//Fruit Machines Only
-#include "machine/6821pia.h"
-#include "machine/68681.h"
-#include "machine/meters.h"
-#include "machine/roc10937.h"	// vfd
-#include "machine/steppers.h"	// stepper motor
-#include "sound/ay8910.h"
-#include "sound/2413intf.h"
-#include "sound/okim6376.h"
-#include "machine/nvram.h"
+#include "includes/maygay1b.h"
 
-#define VERBOSE 1
-#define LOG(x)	do { if (VERBOSE) logerror x; } while (0)
-
-#define M1_MASTER_CLOCK (XTAL_8MHz)
-#define M1_DUART_CLOCK  (XTAL_3_6864MHz)
-
-struct i8279_state
-{
-	UINT8		command;
-	UINT8		mode;
-	UINT8		prescale;
-	UINT8		inhibit;
-	UINT8		clear;
-	UINT8		ram[16];
-	UINT8		read_sensor;
-	UINT8		write_display;
-	UINT8		sense_address;
-	UINT8		sense_auto_inc;
-	UINT8		disp_address;
-	UINT8		disp_auto_inc;
-};
+#include "maygay1b.lh"
 
 
-class maygay1b_state : public driver_device
-{
-public:
-	maygay1b_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
-
-	UINT8 m_lamppos;
-	int m_alpha_clock;
-	int m_RAMEN;
-	int m_ALARMEN;
-	int m_PSUrelay;
-	int m_WDOG;
-	int m_SRSEL;
-	UINT8 m_Lamps[256];
-	int m_optic_pattern;
-	device_t *m_duart68681;
-	i8279_state m_i8279[2];
-};
-
-
-static void m1_draw_lamps(maygay1b_state *state, int data,int strobe, int col)
+void maygay1b_state::m1_draw_lamps(int data,int strobe, int col)
 {
 	int i;
-	int scramble[8] = { 0x10, 0x20, 0x40, 0x80, 0x01, 0x02, 0x04, 0x08 };
-
-	state->m_lamppos = strobe + col * 8;
 
 	for ( i = 0; i < 8; i++ )
 	{
-		state->m_Lamps[state->m_lamppos] = ( data & scramble[i] );
-		output_set_lamp_value(state->m_lamppos, state->m_Lamps[state->m_lamppos]);
+		m_lamppos = (strobe*8) + col + i;
+
+		if ((data>>i)&1)
+			m_Lamps[m_lamppos] = 1;
+		else
+			m_Lamps[m_lamppos] = 0;
+
+		output_set_lamp_value(m_lamppos, m_Lamps[m_lamppos]);
 	}
-	state->m_lamppos++;
 }
 
 
@@ -112,10 +123,9 @@ static void update_outputs(i8279_state *chip, UINT16 which)
 		}
 }
 
-static READ8_HANDLER( m1_8279_r )
+READ8_MEMBER(maygay1b_state::m1_8279_r)
 {
-	maygay1b_state *state = space->machine().driver_data<maygay1b_state>();
-	i8279_state *chip = state->m_i8279 + 0;
+	i8279_state *chip = m_i8279 + 0;
 	static const char *const portnames[] = { "SW1","STROBE5","STROBE7","STROBE3","SW2","STROBE4","STROBE6","STROBE2" };
 	UINT8 result = 0xff;
 	UINT8 addr;
@@ -128,7 +138,7 @@ static READ8_HANDLER( m1_8279_r )
 			/* read sensor RAM */
 			case 0x40:
 				addr = chip->command & 0x07;
-				result = input_port_read(space->machine(),"SW1");
+				result = ioport("SW1")->read();
 				/* handle autoincrement */
 				if (chip->command & 0x10)
 					chip->command = (chip->command & 0xf0) | ((addr + 1) & 0x0f);
@@ -155,7 +165,7 @@ static READ8_HANDLER( m1_8279_r )
 	{
 		if ( chip->read_sensor )
 		{
-			result = input_port_read(space->machine(),portnames[chip->sense_address]);
+			result = ioport(portnames[chip->sense_address])->read();
 //          break
 		}
 		if ( chip->sense_auto_inc )
@@ -172,10 +182,9 @@ static READ8_HANDLER( m1_8279_r )
 	return result;
 }
 
-static WRITE8_HANDLER( m1_8279_w )
+WRITE8_MEMBER(maygay1b_state::m1_8279_w)
 {
-	maygay1b_state *state = space->machine().driver_data<maygay1b_state>();
-	i8279_state *chip = state->m_i8279 + 0;
+	i8279_state *chip = m_i8279 + 0;
 	UINT8 addr;
 
 	/* write data */
@@ -210,24 +219,24 @@ static WRITE8_HANDLER( m1_8279_w )
 		{
 			/* command 0: set mode */
 			/*
-                Display modes:
+			    Display modes:
 
-                00 = 8 x 8-bit character display -- left entry
-                01 = 16 x 8-bit character display -- left entry
-                10 = 8 x 8-bit character display -- right entry
-                11 = 16 x 8-bit character display -- right entry
+			    00 = 8 x 8-bit character display -- left entry
+			    01 = 16 x 8-bit character display -- left entry
+			    10 = 8 x 8-bit character display -- right entry
+			    11 = 16 x 8-bit character display -- right entry
 
-                Keyboard modes:
+			    Keyboard modes:
 
-                000 = Encoded scan keyboard -- 2 key lockout
-                001 = Decoded scan keyboard -- 2 key lockout
-                010 = Encoded scan keyboard -- N-key rollover
-                011 = Decoded scan keyboard -- N-key rollover
-                100 = Encoded scan sensor matrix
-                101 = Decoded scan sensor matrix
-                110 = Strobed input, encoded display scan
-                111 = Strobed input, decoded display scan
-            */
+			    000 = Encoded scan keyboard -- 2 key lockout
+			    001 = Decoded scan keyboard -- 2 key lockout
+			    010 = Encoded scan keyboard -- N-key rollover
+			    011 = Decoded scan keyboard -- N-key rollover
+			    100 = Encoded scan sensor matrix
+			    101 = Decoded scan sensor matrix
+			    110 = Strobed input, encoded display scan
+			    111 = Strobed input, decoded display scan
+			*/
 			case 0x00:
 				logerror("8279A: display mode = %d, keyboard mode = %d\n", (data >> 3) & 3, data & 7);
 				chip->mode = data & 0x1f;
@@ -283,18 +292,18 @@ static WRITE8_HANDLER( m1_8279_w )
 	{  // Data
 		if ( chip->ram[chip->disp_address] != data )
 		{
-			m1_draw_lamps(state,chip->ram[chip->disp_address],chip->disp_address, 0);
+			m1_draw_lamps(chip->ram[chip->disp_address],chip->disp_address, 0);
 		}
 		chip->ram[chip->disp_address] = data;
+
 		if ( chip->disp_auto_inc )
-		chip->disp_address ++;
+			chip->disp_address ++;
 	}
 }
 
-static READ8_HANDLER( m1_8279_2_r )
+READ8_MEMBER(maygay1b_state::m1_8279_2_r)
 {
-	maygay1b_state *state = space->machine().driver_data<maygay1b_state>();
-	i8279_state *chip = state->m_i8279 + 1;
+	i8279_state *chip = m_i8279 + 1;
 	UINT8 result = 0xff;
 	UINT8 addr;
 
@@ -305,7 +314,7 @@ static READ8_HANDLER( m1_8279_2_r )
 		{
 			/* read sensor RAM */
 			case 0x40:
-				//result = ~input_port_read(machine,"DSW1");  /* DSW 1 - inverted! */
+				//result = ~ioport("DSW1")->read();  /* DSW 1 - inverted! */
 				break;
 
 			/* read display RAM */
@@ -332,10 +341,9 @@ static READ8_HANDLER( m1_8279_2_r )
 }
 
 
-static WRITE8_HANDLER( m1_8279_2_w )
+WRITE8_MEMBER(maygay1b_state::m1_8279_2_w)
 {
-	maygay1b_state *state = space->machine().driver_data<maygay1b_state>();
-	i8279_state *chip = state->m_i8279 + 1;
+	i8279_state *chip = m_i8279 + 1;
 	UINT8 addr;
 
 	/* write data */
@@ -370,24 +378,24 @@ static WRITE8_HANDLER( m1_8279_2_w )
 		{
 			/* command 0: set mode */
 			/*
-                Display modes:
+			    Display modes:
 
-                00 = 8 x 8-bit character display -- left entry
-                01 = 16 x 8-bit character display -- left entry
-                10 = 8 x 8-bit character display -- right entry
-                11 = 16 x 8-bit character display -- right entry
+			    00 = 8 x 8-bit character display -- left entry
+			    01 = 16 x 8-bit character display -- left entry
+			    10 = 8 x 8-bit character display -- right entry
+			    11 = 16 x 8-bit character display -- right entry
 
-                Keyboard modes:
+			    Keyboard modes:
 
-                000 = Encoded scan keyboard -- 2 key lockout
-                001 = Decoded scan keyboard -- 2 key lockout
-                010 = Encoded scan keyboard -- N-key rollover
-                011 = Decoded scan keyboard -- N-key rollover
-                100 = Encoded scan sensor matrix
-                101 = Decoded scan sensor matrix
-                110 = Strobed input, encoded display scan
-                111 = Strobed input, decoded display scan
-            */
+			    000 = Encoded scan keyboard -- 2 key lockout
+			    001 = Decoded scan keyboard -- 2 key lockout
+			    010 = Encoded scan keyboard -- N-key rollover
+			    011 = Decoded scan keyboard -- N-key rollover
+			    100 = Encoded scan sensor matrix
+			    101 = Decoded scan sensor matrix
+			    110 = Strobed input, encoded display scan
+			    111 = Strobed input, decoded display scan
+			*/
 			case 0x00:
 				logerror("8279A: display mode = %d, keyboard mode = %d\n", (data >> 3) & 3, data & 7);
 				chip->mode = data & 0x1f;
@@ -435,11 +443,11 @@ static WRITE8_HANDLER( m1_8279_2_w )
 	{  // Data
 		if ( chip->ram[chip->disp_address] != data )
 		{
-			m1_draw_lamps(state,chip->ram[chip->disp_address],chip->disp_address, 128);
+			m1_draw_lamps(chip->ram[chip->disp_address],chip->disp_address, 128);
 		}
 		chip->ram[chip->disp_address] = data;
 		if ( chip->disp_auto_inc )
-		chip->disp_address ++;
+			chip->disp_address ++;
 	}
 
 }
@@ -460,81 +468,96 @@ static void m1_stepper_reset(running_machine &machine)
 	state->m_optic_pattern = pattern;
 }
 
-static MACHINE_RESET( m1 )
+void maygay1b_state::machine_reset()
 {
-	maygay1b_state *state = machine.driver_data<maygay1b_state>();
-	ROC10937_reset(0);	// reset display1
-	state->m_duart68681 = machine.device( "duart68681" );
-	m1_stepper_reset(machine);
+	m_vfd->reset(); // reset display1
+	m_duart68681 = machine().device( "duart68681" );
+	m1_stepper_reset(machine());
 }
 
 ///////////////////////////////////////////////////////////////////////////
 
-static void duart_irq_handler(device_t *device, UINT8 state)
+// IRQ from Duart (hopper?)
+static void duart_irq_handler(device_t *device, int state, UINT8 vector)
 {
-	cputag_set_input_line(device->machine(), "maincpu", M6809_IRQ_LINE, state?ASSERT_LINE:CLEAR_LINE);
+	device->machine().device("maincpu")->execute().set_input_line(M6809_IRQ_LINE,  state?ASSERT_LINE:CLEAR_LINE);
 	LOG(("6809 irq%d \n",state));
 }
 
-#if 0
-static void cpu0_firq(int state)
+// FIRQ, related to the sample playback?
+READ8_MEMBER( maygay1b_state::m1_firq_trg_r )
 {
-	cpunum_set_input_line(Machine, 0, M6809_FIRQ_LINE, state?ASSERT_LINE:CLEAR_LINE);
-	LOG(("6809 firq%d \n",state));
+	static int i = 0xff;
+	i ^= 0xff;
+	space.machine().device("maincpu")->execute().set_input_line(M6809_FIRQ_LINE, HOLD_LINE);
+	LOG(("6809 firq\n"));
+	return i;
 }
 
-static void cpu0_nmi(int state)
+// NMI is periodic? or triggered by a write?
+TIMER_DEVICE_CALLBACK_MEMBER( maygay1b_state::maygay1b_nmitimer_callback )
 {
-	cpunum_set_input_line(Machine, 0, INPUT_LINE_NMI, state?ASSERT_LINE:CLEAR_LINE);
-	LOG(("6809 nmi%d \n",state));
+	if (m_NMIENABLE)
+	{
+		LOG(("6809 nmi\n"));
+		machine().device("maincpu")->execute().set_input_line(INPUT_LINE_NMI, HOLD_LINE);
+	}
 }
-#endif
+
+
 
 /***************************************************************************
     6821 PIA
 ***************************************************************************/
 
-static WRITE8_DEVICE_HANDLER( m1_pia_porta_w )
+// some games might differ..
+WRITE8_MEMBER(maygay1b_state::m1_pia_porta_w)
 {
-	maygay1b_state *state = device->machine().driver_data<maygay1b_state>();
-	if ( data & 0x40 ) ROC10937_reset(0);
+//  printf("m1_pia_porta_w %02x\n",data);
 
-	if ( !state->m_alpha_clock && (data & 0x20) )
+	if((data & 0x40))
 	{
-		ROC10937_shift_data(0, ( data & 0x10 )?0:1);
+		if (m_alpha_clock != (data & 0x20))
+		{
+			if (!m_alpha_clock)
+			{
+				m_vfd->shift_data((data & 0x10)?0:1);
+			}
+		}
+		m_alpha_clock = (data & 0x20);
 	}
-
-	state->m_alpha_clock = data & 0x20;
-
-	ROC10937_draw_16seg(0);
+	else
+	{
+		m_vfd->reset();
+	}
 }
 
-static WRITE8_DEVICE_HANDLER( m1_pia_portb_w )
+WRITE8_MEMBER(maygay1b_state::m1_pia_portb_w)
 {
 	int i;
 	for (i=0; i<8; i++)
-		if ( data & (1 << i) )		output_set_indexed_value("triac", i, data & (1 << i));
+		if ( data & (1 << i) )      output_set_indexed_value("triac", i, data & (1 << i));
 }
 
 static const pia6821_interface m1_pia_intf =
 {
-	DEVCB_NULL,		/* port A in */
-	DEVCB_NULL,		/* port B in */
-	DEVCB_NULL,		/* line CA1 in */
-	DEVCB_NULL,		/* line CB1 in */
-	DEVCB_NULL,		/* line CA2 in */
-	DEVCB_NULL,		/* line CB2 in */
-	DEVCB_HANDLER(m1_pia_porta_w),		/* port A out */
-	DEVCB_HANDLER(m1_pia_portb_w),		/* port B out */
-	DEVCB_NULL,		/* line CA2 out */
-	DEVCB_NULL,		/* port CB2 out */
-	DEVCB_NULL,		/* IRQA */
-	DEVCB_NULL		/* IRQB */
+	DEVCB_NULL,     /* port A in */
+	DEVCB_NULL,     /* port B in */
+	DEVCB_NULL,     /* line CA1 in */
+	DEVCB_NULL,     /* line CB1 in */
+	DEVCB_NULL,     /* line CA2 in */
+	DEVCB_NULL,     /* line CB2 in */
+	DEVCB_DRIVER_MEMBER(maygay1b_state,m1_pia_porta_w),     /* port A out */
+	DEVCB_DRIVER_MEMBER(maygay1b_state,m1_pia_portb_w),     /* port B out */
+	DEVCB_NULL,     /* line CA2 out */
+	DEVCB_NULL,     /* port CB2 out */
+	DEVCB_NULL,     /* IRQA */
+	DEVCB_NULL      /* IRQB */
 };
 
 // input ports for M1 board ////////////////////////////////////////
 
-static INPUT_PORTS_START( m1 )
+INPUT_PORTS_START( maygay_m1 )
 	PORT_START("SW1")
 	PORT_DIPNAME( 0x01, 0x00, "SW101" ) PORT_DIPLOCATION("SW1:01")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
@@ -649,62 +672,57 @@ static INPUT_PORTS_START( m1 )
 
 INPUT_PORTS_END
 
-static MACHINE_START( m1 )
+void maygay1b_state::machine_start()
 {
 	int i;
 
 // setup 8 mechanical meters ////////////////////////////////////////////
-	MechMtr_config(machine,8);
+	MechMtr_config(machine(),8);
 
 // setup 6 default 96 half step reels ///////////////////////////////////
 	for ( i = 0; i < 6; i++ )
 	{
-		stepper_config(machine, i, &starpoint_interface_48step);
+		stepper_config(machine(), i, &starpoint_interface_48step);
 	}
 
-// setup the standard oki MSC1937 display ///////////////////////////////
-	ROC10937_init(0, MSC1937,0);
 }
-static WRITE8_HANDLER( reel12_w )
+WRITE8_MEMBER(maygay1b_state::reel12_w)
 {
-	maygay1b_state *state = space->machine().driver_data<maygay1b_state>();
 	stepper_update(0, data & 0x0F );
 	stepper_update(1, (data>>4) & 0x0F );
 
-	if ( stepper_optic_state(0) ) state->m_optic_pattern |=  0x01;
-	else                          state->m_optic_pattern &= ~0x01;
-	if ( stepper_optic_state(1) ) state->m_optic_pattern |=  0x02;
-	else                          state->m_optic_pattern &= ~0x02;
+	if ( stepper_optic_state(0) ) m_optic_pattern |=  0x01;
+	else                          m_optic_pattern &= ~0x01;
+	if ( stepper_optic_state(1) ) m_optic_pattern |=  0x02;
+	else                          m_optic_pattern &= ~0x02;
 
 	awp_draw_reel(0);
 	awp_draw_reel(1);
 }
 
-static WRITE8_HANDLER( reel34_w )
+WRITE8_MEMBER(maygay1b_state::reel34_w)
 {
-	maygay1b_state *state = space->machine().driver_data<maygay1b_state>();
 	stepper_update(2, data & 0x0F );
 	stepper_update(3, (data>>4) & 0x0F );
 
-	if ( stepper_optic_state(2) ) state->m_optic_pattern |=  0x04;
-	else                          state->m_optic_pattern &= ~0x04;
-	if ( stepper_optic_state(3) ) state->m_optic_pattern |=  0x08;
-	else                          state->m_optic_pattern &= ~0x08;
+	if ( stepper_optic_state(2) ) m_optic_pattern |=  0x04;
+	else                          m_optic_pattern &= ~0x04;
+	if ( stepper_optic_state(3) ) m_optic_pattern |=  0x08;
+	else                          m_optic_pattern &= ~0x08;
 
 	awp_draw_reel(2);
 	awp_draw_reel(3);
 }
 
-static WRITE8_HANDLER( reel56_w )
+WRITE8_MEMBER(maygay1b_state::reel56_w)
 {
-	maygay1b_state *state = space->machine().driver_data<maygay1b_state>();
 	stepper_update(4, data & 0x0F );
 	stepper_update(5, (data>>4) & 0x0F );
 
-	if ( stepper_optic_state(4) ) state->m_optic_pattern |=  0x10;
-	else                          state->m_optic_pattern &= ~0x10;
-	if ( stepper_optic_state(5) ) state->m_optic_pattern |=  0x20;
-	else                          state->m_optic_pattern &= ~0x20;
+	if ( stepper_optic_state(4) ) m_optic_pattern |=  0x10;
+	else                          m_optic_pattern &= ~0x10;
+	if ( stepper_optic_state(5) ) m_optic_pattern |=  0x20;
+	else                          m_optic_pattern &= ~0x20;
 
 	awp_draw_reel(4);
 	awp_draw_reel(5);
@@ -713,74 +731,108 @@ static WRITE8_HANDLER( reel56_w )
 static UINT8 m1_duart_r (device_t *device)
 {
 	maygay1b_state *state = device->machine().driver_data<maygay1b_state>();
-	return (state->m_optic_pattern);
+	return ~(state->m_optic_pattern);
 }
 
-static WRITE8_DEVICE_HANDLER( m1_meter_w )
+WRITE8_MEMBER(maygay1b_state::m1_meter_w)
 {
 	int i;
 
 	for (i=0; i<8; i++)
-	if ( data & (1 << i) )	MechMtr_update(i, data & (1 << i) );
+	if ( data & (1 << i) )  MechMtr_update(i, data & (1 << i) );
 }
 
-static WRITE8_HANDLER( m1_latch_w )
+WRITE8_MEMBER(maygay1b_state::m1_latch_w)
 {
-	maygay1b_state *state = space->machine().driver_data<maygay1b_state>();
 	switch ( offset )
 	{
-		case 0: // state->m_RAMEN
-		state->m_RAMEN = (data & 1);
+		case 0: // m_RAMEN
+		m_RAMEN = (data & 1);
 		break;
 		case 1: // AlarmEn
-		state->m_ALARMEN = (data & 1);
+		m_ALARMEN = (data & 1);
 		break;
 		case 2: // Enable
-//      if ( m1_enable == 0 && ( data & 1 ) && Vmm )
-//      {
-	//      cpu0_nmi(1)
-		//  m1_enable = (data & 1);
-//      }
+		//printf("nmi enable %02x\n",data);
+		m_NMIENABLE = (data & 1);
 		break;
 		case 3: // RTS
 		{
 		}
 		break;
 		case 4: // PSURelay
-		state->m_PSUrelay = (data & 1);
+		m_PSUrelay = (data & 1);
 		break;
 		case 5: // WDog
-		state->m_WDOG = (data & 1);
+		m_WDOG = (data & 1);
 		break;
 		case 6: // Srsel
-		state->m_SRSEL = (data & 1);
+		// this is the ROM banking?
+		printf("rom bank %02x\n",data);
+		m_SRSEL = (data & 1);
 		break;
 	}
 }
 
+WRITE8_MEMBER(maygay1b_state::latch_ch2_w)
+{
+	device_t *msm6376 = machine().device("msm6376");
+	okim6376_w(msm6376, space, 0, data&0x7f);
+	okim6376_ch2_w(msm6376,data&0x80);
+}
 
-static ADDRESS_MAP_START( m1_memmap, AS_PROGRAM, 8 )
+//A strange setup this, the address lines are used to move st to the right level
+READ8_MEMBER(maygay1b_state::latch_st_hi)
+{
+	device_t *msm6376 = machine().device("msm6376");
+	okim6376_st_w(msm6376,1);
+	return 0;
+}
+
+READ8_MEMBER(maygay1b_state::latch_st_lo)
+{
+	device_t *msm6376 = machine().device("msm6376");
+	okim6376_st_w(msm6376,0);
+	return 0;
+}
+
+READ8_MEMBER(maygay1b_state::m1_meter_r)
+{
+	device_t *ay8910 = machine().device("aysnd");
+	return ~ay8910_read_ym(ay8910);
+}
+
+static ADDRESS_MAP_START( m1_memmap, AS_PROGRAM, 8, maygay1b_state )
 	AM_RANGE(0x0000, 0x1fff) AM_RAM AM_SHARE("nvram")
 
 	AM_RANGE(0x2000, 0x2000) AM_WRITE(reel12_w)
 	AM_RANGE(0x2010, 0x2010) AM_WRITE(reel34_w)
 	AM_RANGE(0x2020, 0x2020) AM_WRITE(reel56_w)
 
+	// there is actually an 8279 and an 8051..
 	AM_RANGE(0x2030, 0x2031) AM_READWRITE(m1_8279_r,m1_8279_w)
 	AM_RANGE(0x2040, 0x2041) AM_READWRITE(m1_8279_2_r,m1_8279_2_w)
-	AM_RANGE(0x2050, 0x2050)// SCAN on M1B
+//  AM_RANGE(0x2050, 0x2050)// SCAN on M1B
 
-	AM_RANGE(0x2070, 0x207f) AM_DEVREADWRITE( "duart68681", duart68681_r, duart68681_w )
+	AM_RANGE(0x2070, 0x207f) AM_DEVREADWRITE_LEGACY("duart68681", duart68681_r, duart68681_w )
 
-	AM_RANGE(0x2090, 0x2091) AM_DEVWRITE("aysnd", ay8910_address_data_w)
-	AM_RANGE(0x20B0, 0x20B0) AM_DEVREAD("aysnd", ay8910_r)
+	AM_RANGE(0x2090, 0x2091) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_data_w)
+	AM_RANGE(0x20B0, 0x20B0) AM_READ(m1_meter_r)
 
-	AM_RANGE(0x20A0, 0x20A3) AM_DEVWRITE("pia", pia6821_w)
-	AM_RANGE(0x20A0, 0x20A3) AM_DEVREAD("pia", pia6821_r)
+	AM_RANGE(0x20A0, 0x20A3) AM_DEVWRITE("pia", pia6821_device, write)
+	AM_RANGE(0x20A0, 0x20A3) AM_DEVREAD("pia", pia6821_device, read)
 
 	AM_RANGE(0x20C0, 0x20C7) AM_WRITE(m1_latch_w)
 
-	AM_RANGE(0x2400, 0x2401) AM_DEVWRITE( "ymsnd", ym2413_w )
+	AM_RANGE(0x2400, 0x2401) AM_DEVWRITE_LEGACY("ymsnd", ym2413_w ) // 2149F??
+	AM_RANGE(0x2404, 0x2405) AM_READ(latch_st_lo)
+	AM_RANGE(0x2406, 0x2407) AM_READ(latch_st_hi)
+
+	AM_RANGE(0x2412, 0x2412) AM_READ(m1_firq_trg_r) // firq, sample playback?
+
+
+
+	AM_RANGE(0x2420, 0x2421) AM_WRITE(latch_ch2_w ) // oki
 
 	AM_RANGE(0x2800, 0xffff) AM_ROM
 ADDRESS_MAP_END
@@ -791,7 +843,7 @@ static const ay8910_interface ay8910_config =
 	AY8910_DEFAULT_LOADS,
 	DEVCB_NULL,
 	DEVCB_NULL,
-	DEVCB_HANDLER(m1_meter_w),
+	DEVCB_DRIVER_MEMBER(maygay1b_state,m1_meter_w),
 	DEVCB_NULL,
 };
 
@@ -805,34 +857,79 @@ static const duart68681_config maygaym1_duart68681_config =
 
 // machine driver for maygay m1 board /////////////////////////////////
 
-static MACHINE_CONFIG_START( m1, maygay1b_state )
 
-	MCFG_MACHINE_START(m1)
-	MCFG_MACHINE_RESET(m1)
+
+MACHINE_CONFIG_START( maygay_m1, maygay1b_state )
+
 	MCFG_CPU_ADD("maincpu", M6809, M1_MASTER_CLOCK/2)
 	MCFG_CPU_PROGRAM_MAP(m1_memmap)
 
 	MCFG_DUART68681_ADD("duart68681", M1_DUART_CLOCK, maygaym1_duart68681_config)
 	MCFG_PIA6821_ADD("pia", m1_pia_intf)
-
+	MCFG_MSC1937_ADD("vfd",0,RIGHT_TO_LEFT)
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 	MCFG_SOUND_ADD("aysnd",AY8913, M1_MASTER_CLOCK)
 	MCFG_SOUND_CONFIG(ay8910_config)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 
-	MCFG_SOUND_ADD("ymsnd", YM2413, M1_MASTER_CLOCK/4)
+	MCFG_SOUND_ADD("ymsnd", YM2413, M1_MASTER_CLOCK/4) // should be a 2149F?
 
 	MCFG_SOUND_ADD("msm6376", OKIM6376, M1_MASTER_CLOCK/4) //?
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 
+	MCFG_TIMER_DRIVER_ADD_PERIODIC("nmitimer", maygay1b_state, maygay1b_nmitimer_callback, attotime::from_hz(75)) // freq?
+
 	MCFG_NVRAM_ADD_0FILL("nvram")
 
-	MCFG_DEFAULT_LAYOUT(layout_awpvid16)
+	MCFG_DEFAULT_LAYOUT(layout_maygay1b)
 MACHINE_CONFIG_END
 
-ROM_START( m_sptlgt )
-	ROM_REGION( 0x10000, "maincpu", ROMREGION_ERASE00  )
-	ROM_LOAD( "sa2-412.bin",0x0000, 0x10000,  CRC(17531aad) SHA1(decec517b89be9019913be59c5fC2aa2ee6e3f8f))
-ROM_END
 
-GAME( 199?, m_sptlgt,0,  m1,m1,0, ROT0, "Maygay Machines Ltd.", "Spotlight",GAME_NOT_WORKING|GAME_NO_SOUND|GAME_REQUIRES_ARTWORK|GAME_MECHANICAL )
+
+
+
+
+
+
+WRITE8_MEMBER(maygay1b_state::m1ab_no_oki_w)
+{
+	popmessage("write to OKI, but no OKI rom");
+}
+
+DRIVER_INIT_MEMBER(maygay1b_state,m1)
+{
+
+	//AM_RANGE(0x2420, 0x2421) AM_WRITE(latch_ch2_w ) // oki
+	// if there is no OKI region disable writes here, the rom might be missing, so alert user
+
+	UINT8 *okirom = machine().root_device().memregion( "msm6376" )->base();
+
+	if (!okirom) {
+		machine().device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0x2420, 0x2421, write8_delegate(FUNC(maygay1b_state::m1ab_no_oki_w), this));
+	}
+	// print out the rom id / header info to give us some hints
+	// note this isn't always correct, alley cat has 'Calpsyo' still in the ident string?
+	{
+		UINT8 *cpu = machine().root_device().memregion( "maincpu" )->base();
+		int base = 0xff20;
+		for (int i=0;i<14;i++)
+		{
+			for (int j=0;j<16;j++)
+			{
+				UINT8 rom = cpu[base];
+
+				if ((rom>=0x20) && (rom<0x7f))
+				{
+					printf("%c", rom);
+				}
+				else
+				{
+					printf("*");
+				}
+
+				base++;
+			}
+			printf("\n");
+		}
+	}
+}

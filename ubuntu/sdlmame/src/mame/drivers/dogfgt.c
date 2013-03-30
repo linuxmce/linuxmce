@@ -9,67 +9,60 @@ driver by Nicola Salmoria
 
 #include "emu.h"
 #include "cpu/m6502/m6502.h"
-#include "deprecat.h"
 #include "includes/dogfgt.h"
 #include "sound/ay8910.h"
 
 
-static READ8_HANDLER( sharedram_r )
+READ8_MEMBER(dogfgt_state::sharedram_r)
 {
-	dogfgt_state *state = space->machine().driver_data<dogfgt_state>();
-	return state->m_sharedram[offset];
+	return m_sharedram[offset];
 }
 
-static WRITE8_HANDLER( sharedram_w )
+WRITE8_MEMBER(dogfgt_state::sharedram_w)
 {
-	dogfgt_state *state = space->machine().driver_data<dogfgt_state>();
-	state->m_sharedram[offset] = data;
+	m_sharedram[offset] = data;
 }
 
 
-static WRITE8_HANDLER( subirqtrigger_w )
+WRITE8_MEMBER(dogfgt_state::subirqtrigger_w)
 {
-	dogfgt_state *state = space->machine().driver_data<dogfgt_state>();
 	/* bit 0 used but unknown */
 	if (data & 0x04)
-		device_set_input_line(state->m_subcpu, 0, ASSERT_LINE);
+		m_subcpu->set_input_line(0, ASSERT_LINE);
 }
 
-static WRITE8_HANDLER( sub_irqack_w )
+WRITE8_MEMBER(dogfgt_state::sub_irqack_w)
 {
-	dogfgt_state *state = space->machine().driver_data<dogfgt_state>();
-	device_set_input_line(state->m_subcpu, 0, CLEAR_LINE);
+	m_subcpu->set_input_line(0, CLEAR_LINE);
 }
 
-static WRITE8_HANDLER( dogfgt_soundlatch_w )
+WRITE8_MEMBER(dogfgt_state::dogfgt_soundlatch_w)
 {
-	dogfgt_state *state = space->machine().driver_data<dogfgt_state>();
-	state->m_soundlatch = data;
+	m_soundlatch = data;
 }
 
-static WRITE8_HANDLER( dogfgt_soundcontrol_w )
+WRITE8_MEMBER(dogfgt_state::dogfgt_soundcontrol_w)
 {
-	dogfgt_state *state = space->machine().driver_data<dogfgt_state>();
 
 	/* bit 5 goes to 8910 #0 BDIR pin  */
-	if ((state->m_last_snd_ctrl & 0x20) == 0x20 && (data & 0x20) == 0x00)
-		ay8910_data_address_w(space->machine().device("ay1"), state->m_last_snd_ctrl >> 4, state->m_soundlatch);
+	if ((m_last_snd_ctrl & 0x20) == 0x20 && (data & 0x20) == 0x00)
+		ay8910_data_address_w(machine().device("ay1"), space, m_last_snd_ctrl >> 4, m_soundlatch);
 
 	/* bit 7 goes to 8910 #1 BDIR pin  */
-	if ((state->m_last_snd_ctrl & 0x80) == 0x80 && (data & 0x80) == 0x00)
-		ay8910_data_address_w(space->machine().device("ay2"), state->m_last_snd_ctrl >> 6, state->m_soundlatch);
+	if ((m_last_snd_ctrl & 0x80) == 0x80 && (data & 0x80) == 0x00)
+		ay8910_data_address_w(machine().device("ay2"), space, m_last_snd_ctrl >> 6, m_soundlatch);
 
-	state->m_last_snd_ctrl = data;
+	m_last_snd_ctrl = data;
 }
 
 
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0x07ff) AM_READWRITE(sharedram_r, sharedram_w) AM_BASE_MEMBER(dogfgt_state, m_sharedram)
-	AM_RANGE(0x0f80, 0x0fdf) AM_WRITEONLY AM_BASE_SIZE_MEMBER(dogfgt_state, m_spriteram, m_spriteram_size)
-	AM_RANGE(0x1000, 0x17ff) AM_WRITE(dogfgt_bgvideoram_w) AM_BASE_MEMBER(dogfgt_state, m_bgvideoram)
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, dogfgt_state )
+	AM_RANGE(0x0000, 0x07ff) AM_READWRITE(sharedram_r, sharedram_w) AM_SHARE("sharedram")
+	AM_RANGE(0x0f80, 0x0fdf) AM_WRITEONLY AM_SHARE("spriteram")
+	AM_RANGE(0x1000, 0x17ff) AM_WRITE(dogfgt_bgvideoram_w) AM_SHARE("bgvideoram")
 	AM_RANGE(0x1800, 0x1800) AM_READ_PORT("P1")
-	AM_RANGE(0x1800, 0x1800) AM_WRITE(dogfgt_1800_w)	/* text color, flip screen & coin counters */
+	AM_RANGE(0x1800, 0x1800) AM_WRITE(dogfgt_1800_w)    /* text color, flip screen & coin counters */
 	AM_RANGE(0x1810, 0x1810) AM_READ_PORT("P2")
 	AM_RANGE(0x1810, 0x1810) AM_WRITE(subirqtrigger_w)
 	AM_RANGE(0x1820, 0x1820) AM_READ_PORT("DSW1")
@@ -78,12 +71,12 @@ static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
 	AM_RANGE(0x1830, 0x1830) AM_READ_PORT("DSW2")
 	AM_RANGE(0x1830, 0x1830) AM_WRITE(dogfgt_soundlatch_w)
 	AM_RANGE(0x1840, 0x1840) AM_WRITE(dogfgt_soundcontrol_w)
-	AM_RANGE(0x1870, 0x187f) AM_WRITE(paletteram_BBGGGRRR_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x1870, 0x187f) AM_WRITE(paletteram_BBGGGRRR_byte_w) AM_SHARE("paletteram")
 	AM_RANGE(0x2000, 0x3fff) AM_READWRITE(dogfgt_bitmapram_r, dogfgt_bitmapram_w)
 	AM_RANGE(0x8000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sub_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sub_map, AS_PROGRAM, 8, dogfgt_state )
 	AM_RANGE(0x0000, 0x07ff) AM_RAM
 	AM_RANGE(0x2000, 0x27ff) AM_READWRITE(sharedram_r, sharedram_w)
 	AM_RANGE(0x4000, 0x4000) AM_WRITE(sub_irqack_w)
@@ -136,7 +129,7 @@ static INPUT_PORTS_START( dogfgt )
 	PORT_DIPSETTING(    0x00, "Upright 1 Player" )
 	PORT_DIPSETTING(    0x80, "Upright 2 Players" )
 //  PORT_DIPSETTING(    0x40, DEF_STR( Cocktail ) )     // "Cocktail 1 Player" - IMPOSSIBLE !
-	PORT_DIPSETTING(    0xc0, DEF_STR( Cocktail ) )		// "Cocktail 2 Players"
+	PORT_DIPSETTING(    0xc0, DEF_STR( Cocktail ) )     // "Cocktail 2 Players"
 
 
 /*  Manual shows:
@@ -167,7 +160,7 @@ There is a side note for these two: "Change both together"
 	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unused ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_VBLANK )
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 
 /*  Manual shows:
 
@@ -213,68 +206,61 @@ GFXDECODE_END
 
 
 
-static MACHINE_START( dogfgt )
+void dogfgt_state::machine_start()
 {
-	dogfgt_state *state = machine.driver_data<dogfgt_state>();
 
-	state->m_subcpu = machine.device("sub");
+	m_subcpu = machine().device<cpu_device>("sub");
 
-	state->save_item(NAME(state->m_bm_plane));
-	state->save_item(NAME(state->m_lastflip));
-	state->save_item(NAME(state->m_pixcolor));
-	state->save_item(NAME(state->m_lastpixcolor));
-	state->save_item(NAME(state->m_soundlatch));
-	state->save_item(NAME(state->m_last_snd_ctrl));
+	save_item(NAME(m_bm_plane));
+	save_item(NAME(m_lastflip));
+	save_item(NAME(m_pixcolor));
+	save_item(NAME(m_lastpixcolor));
+	save_item(NAME(m_soundlatch));
+	save_item(NAME(m_last_snd_ctrl));
 
-	state->save_item(NAME(state->m_scroll));
+	save_item(NAME(m_scroll));
 }
 
-static MACHINE_RESET( dogfgt )
+void dogfgt_state::machine_reset()
 {
-	dogfgt_state *state = machine.driver_data<dogfgt_state>();
 	int i;
 
-	state->m_bm_plane = 0;
-	state->m_lastflip = 0;
-	state->m_pixcolor = 0;
-	state->m_lastpixcolor = 0;
-	state->m_soundlatch = 0;
-	state->m_last_snd_ctrl = 0;
+	m_bm_plane = 0;
+	m_lastflip = 0;
+	m_pixcolor = 0;
+	m_lastpixcolor = 0;
+	m_soundlatch = 0;
+	m_last_snd_ctrl = 0;
 
 	for (i = 0; i < 3; i++)
-		state->m_scroll[i] = 0;
+		m_scroll[i] = 0;
 }
 
 
 static MACHINE_CONFIG_START( dogfgt, dogfgt_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M6502, 1500000)	/* 1.5 MHz ???? */
+	MCFG_CPU_ADD("maincpu", M6502, 1500000) /* 1.5 MHz ???? */
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT_HACK(irq0_line_hold,16)	/* ? controls music tempo */
+	MCFG_CPU_PERIODIC_INT_DRIVER(dogfgt_state, irq0_line_hold, 16*60)   /* ? controls music tempo */
 
-	MCFG_CPU_ADD("sub", M6502, 1500000)	/* 1.5 MHz ???? */
+	MCFG_CPU_ADD("sub", M6502, 1500000) /* 1.5 MHz ???? */
 	MCFG_CPU_PROGRAM_MAP(sub_map)
 
 	MCFG_QUANTUM_TIME(attotime::from_hz(6000))
 
-	MCFG_MACHINE_START(dogfgt)
-	MCFG_MACHINE_RESET(dogfgt)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 1*8, 31*8-1)
-	MCFG_SCREEN_UPDATE(dogfgt)
+	MCFG_SCREEN_UPDATE_DRIVER(dogfgt_state, screen_update_dogfgt)
 
 	MCFG_GFXDECODE(dogfgt)
 	MCFG_PALETTE_LENGTH(16+64)
 
-	MCFG_PALETTE_INIT(dogfgt)
-	MCFG_VIDEO_START(dogfgt)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -295,7 +281,7 @@ ROM_START( dogfgt )
 	ROM_LOAD( "bx02-5.36",   0xc000, 0x2000, CRC(d11b50c3) SHA1(99dbbc85e8ff66eadc48a9f65f800676b10e35e4) )
 	ROM_LOAD( "bx03-5.22",   0xe000, 0x2000, CRC(0e4813fb) SHA1(afcbd17029bc3c2de83c15cc941fe8f2ad062a5d) )
 
-	ROM_REGION( 0x10000, "sub", 0 )	/* 64k for audio code */
+	ROM_REGION( 0x10000, "sub", 0 ) /* 64k for audio code */
 	ROM_LOAD( "bx04.117",    0x8000, 0x2000, CRC(f8945f9d) SHA1(a0782a5007dc5efc302c4fd61827e1b68475e7ab) )
 	ROM_LOAD( "bx05.118",    0xa000, 0x2000, CRC(3ade57ad) SHA1(cc0a35257c00c463614a6718a24cc6dee75c2e5d) )
 	ROM_LOAD( "bx06.119",    0xc000, 0x2000, CRC(4a3b34cf) SHA1(f2e0bf9923a288b8137840f46fd90a23010f8018) )
@@ -329,7 +315,7 @@ ROM_START( dogfgtu )
 	ROM_LOAD( "bx02-7.36",   0xc000, 0x2000, CRC(afaf10e6) SHA1(67b1e0722ae0e8110acc44bc582b308e86743d60) )
 	ROM_LOAD( "bx03-6.33",   0xe000, 0x2000, CRC(51b20e8b) SHA1(0247345b3f9736e9140faf765cb33f97660f0ddd) )
 
-	ROM_REGION( 0x10000, "sub", 0 )	/* 64k for audio code */
+	ROM_REGION( 0x10000, "sub", 0 ) /* 64k for audio code */
 	ROM_LOAD( "bx04-7.117",  0x8000, 0x2000, CRC(c4c2183b) SHA1(27cf40d6f03b078c5cc4497f393309bf33dea9dc) )
 	ROM_LOAD( "bx05-7.118",  0xa000, 0x2000, CRC(d9a705ab) SHA1(7a49769d6c32e3d9840e4b24e3cbcd84a075d36d) )
 	ROM_LOAD( "bx06.119",    0xc000, 0x2000, CRC(4a3b34cf) SHA1(f2e0bf9923a288b8137840f46fd90a23010f8018) )
@@ -363,7 +349,7 @@ ROM_START( dogfgtj )
 	ROM_LOAD( "bx02.36",     0xc000, 0x2000, CRC(91f1b9b3) SHA1(dd939538abf615d3a0271fd561038acc6a2a616d) )
 	ROM_LOAD( "bx03.22",     0xe000, 0x2000, CRC(959ebf93) SHA1(de79dd44c68a232278b8d251e39c0ad35d160595) )
 
-	ROM_REGION( 0x10000, "sub", 0 )	/* 64k for audio code */
+	ROM_REGION( 0x10000, "sub", 0 ) /* 64k for audio code */
 	ROM_LOAD( "bx04.117",    0x8000, 0x2000, CRC(f8945f9d) SHA1(a0782a5007dc5efc302c4fd61827e1b68475e7ab) )
 	ROM_LOAD( "bx05.118",    0xa000, 0x2000, CRC(3ade57ad) SHA1(cc0a35257c00c463614a6718a24cc6dee75c2e5d) )
 	ROM_LOAD( "bx06.119",    0xc000, 0x2000, CRC(4a3b34cf) SHA1(f2e0bf9923a288b8137840f46fd90a23010f8018) )
@@ -392,6 +378,6 @@ ROM_END
 
 
 
-GAME( 1984, dogfgt,  0,      dogfgt, dogfgt, 0, ROT0, "Technos Japan",       "Acrobatic Dog-Fight", GAME_SUPPORTS_SAVE )
-GAME( 1985, dogfgtu, dogfgt, dogfgt, dogfgt, 0, ROT0, "Data East USA, Inc.", "Acrobatic Dog-Fight (USA)", GAME_SUPPORTS_SAVE )
-GAME( 1984, dogfgtj, dogfgt, dogfgt, dogfgt, 0, ROT0, "Technos Japan",       "Dog-Fight (Japan)", GAME_SUPPORTS_SAVE )
+GAME( 1984, dogfgt,  0,      dogfgt, dogfgt, driver_device, 0, ROT0, "Technos Japan",       "Acrobatic Dog-Fight", GAME_SUPPORTS_SAVE )
+GAME( 1985, dogfgtu, dogfgt, dogfgt, dogfgt, driver_device, 0, ROT0, "Data East USA, Inc.", "Acrobatic Dog-Fight (USA)", GAME_SUPPORTS_SAVE )
+GAME( 1984, dogfgtj, dogfgt, dogfgt, dogfgt, driver_device, 0, ROT0, "Technos Japan",       "Dog-Fight (Japan)", GAME_SUPPORTS_SAVE )

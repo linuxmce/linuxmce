@@ -9,8 +9,8 @@ struct iox_t
 class srmp2_state : public driver_device
 {
 public:
-	srmp2_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	srmp2_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) { }
 
 	int m_color_bank;
 	int m_gfx_bank;
@@ -22,20 +22,31 @@ public:
 
 	int m_port_select;
 
-	union
-	{
-		UINT8 *u8;
-		UINT16 *u16;
-	} m_spriteram1, m_spriteram2, m_spriteram3;
-
 	iox_t m_iox;
+	DECLARE_WRITE16_MEMBER(srmp2_flags_w);
+	DECLARE_WRITE16_MEMBER(mjyuugi_flags_w);
+	DECLARE_WRITE16_MEMBER(mjyuugi_adpcm_bank_w);
+	DECLARE_READ8_MEMBER(vox_status_r);
+	DECLARE_READ8_MEMBER(iox_mux_r);
+	DECLARE_READ8_MEMBER(iox_status_r);
+	DECLARE_WRITE8_MEMBER(iox_command_w);
+	DECLARE_WRITE8_MEMBER(iox_data_w);
+	DECLARE_WRITE8_MEMBER(srmp3_rombank_w);
+	DECLARE_WRITE8_MEMBER(srmp2_irq2_ack_w);
+	DECLARE_WRITE8_MEMBER(srmp2_irq4_ack_w);
+	DECLARE_READ8_MEMBER(mjyuugi_irq2_ack_r);
+	DECLARE_READ8_MEMBER(mjyuugi_irq4_ack_r);
+	DECLARE_WRITE8_MEMBER(srmp3_flags_w);
+	DECLARE_WRITE8_MEMBER(srmp3_irq_ack_w);
+	DECLARE_WRITE8_MEMBER(rmgoldyh_rombank_w);
+	DECLARE_WRITE16_MEMBER(srmp2_adpcm_code_w);
+	DECLARE_WRITE8_MEMBER(srmp3_adpcm_code_w);
+	DECLARE_MACHINE_START(srmp2);
+	DECLARE_PALETTE_INIT(srmp2);
+	DECLARE_MACHINE_START(srmp3);
+	DECLARE_PALETTE_INIT(srmp3);
+	DECLARE_MACHINE_START(rmgoldyh);
+	UINT32 screen_update_srmp2(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_srmp3(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_mjyuugi(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
-
-
-/*----------- defined in video/srmp2.c -----------*/
-
-PALETTE_INIT( srmp2 );
-SCREEN_UPDATE( srmp2 );
-PALETTE_INIT( srmp3 );
-SCREEN_UPDATE( srmp3 );
-SCREEN_UPDATE( mjyuugi );

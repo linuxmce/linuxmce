@@ -166,7 +166,7 @@ Topland
 Sprite/tile priority bad.
 
 After demo game in attract, palette seems too dark for a while.
-Palette corruption has occured with areas not restored after a fade.
+Palette corruption has occurred with areas not restored after a fade.
 Don't know why. (Perhaps 68000 relies on feedback from co-processor
 in determining what parts of palette ram to write... but this would
 then be fixed by hookup of 32025 core, which it isn't.)
@@ -230,74 +230,101 @@ cpu #2 (PC=0000060E): unmapped memory word read from 0000683A & FFFF
                 MEMORY handlers
 ***********************************************************/
 
-static WRITE16_HANDLER( system_control_w )
+WRITE16_MEMBER(taitoair_state::system_control_w)
 {
-	taitoair_state *state = space->machine().driver_data<taitoair_state>();
 
 	if ((ACCESSING_BITS_0_7 == 0) && ACCESSING_BITS_8_15)
 		data >>= 8;
 
-	state->m_dsp_hold_signal = (data & 4) ? CLEAR_LINE : ASSERT_LINE;
+	m_dsp_hold_signal = (data & 4) ? CLEAR_LINE : ASSERT_LINE;
 
-	device_set_input_line(state->m_dsp, INPUT_LINE_RESET, (data & 1) ? CLEAR_LINE : ASSERT_LINE);
+	m_dsp->execute().set_input_line(INPUT_LINE_RESET, (data & 1) ? CLEAR_LINE : ASSERT_LINE);
 
-	logerror("68K:%06x writing %04x to TMS32025.  %s HOLD , %s RESET\n", cpu_get_previouspc(&space->device()), data, ((data & 4) ? "Clear" : "Assert"), ((data & 1) ? "Clear" : "Assert"));
+	logerror("68K:%06x writing %04x to TMS32025.  %s HOLD , %s RESET\n", space.device().safe_pcbase(), data, ((data & 4) ? "Clear" : "Assert"), ((data & 1) ? "Clear" : "Assert"));
 }
 
-static READ16_HANDLER( lineram_r )
+READ16_MEMBER(taitoair_state::lineram_r)
 {
-	taitoair_state *state = space->machine().driver_data<taitoair_state>();
-	return state->m_line_ram[offset];
+	return m_line_ram[offset];
 }
 
-static WRITE16_HANDLER( lineram_w )
+WRITE16_MEMBER(taitoair_state::lineram_w)
 {
-	taitoair_state *state = space->machine().driver_data<taitoair_state>();
 
 	if (ACCESSING_BITS_8_15 && ACCESSING_BITS_0_7)
-		state->m_line_ram[offset] = data;
+		m_line_ram[offset] = data;
+
+	//if(offset == 0x3fff)
+	//  printf("LineRAM go %d\n",(int)machine().primary_screen->frame_number());
 }
 
-static READ16_HANDLER( dspram_r )
+READ16_MEMBER(taitoair_state::dspram_r)
 {
-	taitoair_state *state = space->machine().driver_data<taitoair_state>();
-	return state->m_dsp_ram[offset];
+	return m_dsp_ram[offset];
 }
 
-static WRITE16_HANDLER( dspram_w )
+WRITE16_MEMBER(taitoair_state::dspram_w)
 {
-	taitoair_state *state = space->machine().driver_data<taitoair_state>();
 
 	if (ACCESSING_BITS_8_15 && ACCESSING_BITS_0_7)
-		state->m_dsp_ram[offset] = data;
+		m_dsp_ram[offset] = data;
 }
 
-static READ16_HANDLER( dsp_HOLD_signal_r )
+READ16_MEMBER(taitoair_state::dsp_HOLD_signal_r)
 {
-	taitoair_state *state = space->machine().driver_data<taitoair_state>();
 
 	/* HOLD signal is active low */
-	//  logerror("TMS32025:%04x Reading %01x level from HOLD signal\n", cpu_get_previouspc(&space->device()), state->m_dsp_hold_signal);
+	//  logerror("TMS32025:%04x Reading %01x level from HOLD signal\n", space.device().safe_pcbase(), m_dsp_hold_signal);
 
-	return state->m_dsp_hold_signal;
+	return m_dsp_hold_signal;
 }
 
-static WRITE16_HANDLER( dsp_HOLDA_signal_w )
+WRITE16_MEMBER(taitoair_state::dsp_HOLDA_signal_w)
 {
 	if (offset)
-		logerror("TMS32025:%04x Writing %01x level to HOLD-Acknowledge signal\n", cpu_get_previouspc(&space->device()), data);
+		logerror("TMS32025:%04x Writing %01x level to HOLD-Acknowledge signal\n", space.device().safe_pcbase(), data);
 }
 
 
-static WRITE16_HANDLER( airsys_paletteram16_w )	/* xxBBBBxRRRRxGGGG */
+WRITE16_MEMBER(taitoair_state::airsys_paletteram16_w)/* xxBBBBxRRRRxGGGG */
 {
-	taitoair_state *state = space->machine().driver_data<taitoair_state>();
 	int a;
 
-	COMBINE_DATA(&state->m_paletteram[offset]);
+	COMBINE_DATA(&m_paletteram[offset]);
 
-	a = state->m_paletteram[offset];
-	palette_set_color_rgb(space->machine(), offset, pal4bit(a >> 0), pal4bit(a >> 5), pal4bit(a >> 10));
+	a = m_paletteram[offset];
+	palette_set_color_rgb(machine(), offset, pal4bit(a >> 0), pal4bit(a >> 5), pal4bit(a >> 10));
+}
+
+WRITE16_MEMBER(taitoair_state::airsys_gradram_w)
+{
+	UINT32 pen;
+	int r,g,b;
+	//int pal_r,pal_g,pal_b;
+
+	COMBINE_DATA(&m_gradram[offset]);
+	offset &= 0x1fff;
+
+	pen = (m_gradram[offset])|(m_gradram[(offset+0x2000)]<<16);
+	/* TODO: correct? */
+	r = (pen & 0x00007f) >> 0;
+	g = (pen & 0x007f00) >> (8);
+	b = (pen & 0x7f0000) >> (16);
+
+	r = (r << 1) | (r & 1);
+	g = (g << 1) | (g & 1);
+	b = (b << 1) | (b & 1);
+
+	/* TODO: I'm sure that normal paletteram and gradiation ram mixes in some way ... */
+	//pal_r = ((m_paletteram[(offset >> 7) + 0x300] & 0x000f) >> 0) * 0x11;
+	//pal_g = ((m_paletteram[(offset >> 7) + 0x300] & 0x01e0) >> 5) * 0x11;
+	//pal_b = ((m_paletteram[(offset >> 7) + 0x300] & 0x7c00) >> 10) * 0x11;
+
+	//if(r == 0) { r = (pal_r); }
+	//if(g == 0) { g = (pal_g); }
+	//if(b == 0) { b = (pal_b); }
+
+	palette_set_color_rgb(machine(), offset+0x2000, r, g, b);
 }
 
 
@@ -309,35 +336,38 @@ static WRITE16_HANDLER( airsys_paletteram16_w )	/* xxBBBBxRRRRxGGGG */
 #define STICK2_PORT_TAG  "STICK2"
 #define STICK3_PORT_TAG  "STICK3"
 
-static READ16_HANDLER( stick_input_r )
+READ16_MEMBER(taitoair_state::stick_input_r)
 {
 	switch( offset )
 	{
-		case 0x00:	/* "counter 1" lo */
-			return input_port_read(space->machine(), STICK1_PORT_TAG);
+		case 0x00:  /* "counter 1" lo */
+			return ioport(STICK1_PORT_TAG)->read();
 
-		case 0x01:	/* "counter 2" lo */
-			return input_port_read(space->machine(), STICK2_PORT_TAG);
+		case 0x01:  /* "counter 2" lo */
+			return ioport(STICK2_PORT_TAG)->read();
 
-		case 0x02:	/* "counter 1" hi */
-			return (input_port_read(space->machine(), STICK1_PORT_TAG) & 0xff00) >> 8;
+		case 0x02:  /* "counter 1" hi */
+			if(ioport(STICK1_PORT_TAG)->read() & 0x80)
+				return 0xff;
 
-		case 0x03:	/* "counter 2" hi */
-			return (input_port_read(space->machine(), STICK2_PORT_TAG) & 0xff00) >> 8;
+			return 0;
+
+		case 0x03:  /* "counter 2" hi */
+			return (ioport(STICK2_PORT_TAG)->read() & 0xff00) >> 8;
 	}
 
 	return 0;
 }
 
-static READ16_HANDLER( stick2_input_r )
+READ16_MEMBER(taitoair_state::stick2_input_r)
 {
 	switch( offset )
 	{
-		case 0x00:	/* "counter 3" lo */
-			return input_port_read(space->machine(), STICK3_PORT_TAG);
+		case 0x00:  /* "counter 3" lo */
+			return ioport(STICK3_PORT_TAG)->read();
 
-		case 0x02:	/* "counter 3" hi */
-			return (input_port_read(space->machine(), STICK3_PORT_TAG) & 0xff00) >> 8;
+		case 0x02:  /* "counter 3" hi */
+			return (ioport(STICK3_PORT_TAG)->read() & 0xff00) >> 8;
 	}
 
 	return 0;
@@ -348,15 +378,14 @@ static READ16_HANDLER( stick2_input_r )
 static void reset_sound_region( running_machine &machine )
 {
 	taitoair_state *state = machine.driver_data<taitoair_state>();
-	memory_set_bank(machine, "bank1", state->m_banknum);
+	state->membank("bank1")->set_entry(state->m_banknum);
 }
 
-static WRITE8_HANDLER( sound_bankswitch_w )
+WRITE8_MEMBER(taitoair_state::sound_bankswitch_w)
 {
-	taitoair_state *state = space->machine().driver_data<taitoair_state>();
 
-	state->m_banknum = data & 3;
-	reset_sound_region(space->machine());
+	m_banknum = data & 3;
+	reset_sound_region(machine());
 }
 
 
@@ -364,51 +393,95 @@ static WRITE8_HANDLER( sound_bankswitch_w )
              MEMORY STRUCTURES
 ***********************************************************/
 
-static ADDRESS_MAP_START( airsys_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( airsys_map, AS_PROGRAM, 16, taitoair_state )
 	AM_RANGE(0x000000, 0x0bffff) AM_ROM
-	AM_RANGE(0x0c0000, 0x0cffff) AM_RAM AM_BASE_MEMBER(taitoair_state, m_m68000_mainram)
-	AM_RANGE(0x140000, 0x140001) AM_WRITE(system_control_w)	/* Pause the TMS32025 */
-	AM_RANGE(0x180000, 0x183fff) AM_RAM             		/* "gradiation ram (0)" */
-	AM_RANGE(0x184000, 0x187fff) AM_RAM         			/* "gradiation ram (1)" */
-	AM_RANGE(0x188000, 0x18bfff) AM_RAM_WRITE(airsys_paletteram16_w) AM_BASE_MEMBER(taitoair_state, m_paletteram)
-	AM_RANGE(0x800000, 0x820fff) AM_DEVREADWRITE("tc0080vco", tc0080vco_word_r, tc0080vco_word_w)	/* tilemaps, sprites */
-	AM_RANGE(0x908000, 0x90ffff) AM_RAM AM_BASE_MEMBER(taitoair_state, m_line_ram)	/* "line ram" */
-	AM_RANGE(0x910000, 0x91ffff) AM_RAM	AM_BASE_MEMBER(taitoair_state, m_dsp_ram)	/* "dsp common ram" (TMS320C25) */
+	AM_RANGE(0x0c0000, 0x0cffff) AM_RAM AM_SHARE("m68000_mainram")
+	AM_RANGE(0x140000, 0x140001) AM_WRITE(system_control_w) /* Pause the TMS32025 */
+	AM_RANGE(0x180000, 0x187fff) AM_RAM_WRITE(airsys_gradram_w) AM_SHARE("gradram")                 /* "gradiation ram (0/1)" */
+	AM_RANGE(0x188000, 0x189fff) AM_MIRROR(0x2000) AM_RAM_WRITE(airsys_paletteram16_w) AM_SHARE("paletteram")
+	AM_RANGE(0x800000, 0x820fff) AM_DEVREADWRITE_LEGACY("tc0080vco", tc0080vco_word_r, tc0080vco_word_w)    /* tilemaps, sprites */
+	AM_RANGE(0x906000, 0x906007) AM_RAM // DMA?
+	AM_RANGE(0x908000, 0x90ffff) AM_RAM AM_SHARE("line_ram")    /* "line ram" */
+	AM_RANGE(0x910000, 0x91ffff) AM_RAM AM_SHARE("dsp_ram") /* "dsp common ram" (TMS320C25) */
+	AM_RANGE(0x980000, 0x98000f) AM_RAM AM_SHARE("backregs")
 	AM_RANGE(0xa00000, 0xa00007) AM_READ(stick_input_r)
 	AM_RANGE(0xa00100, 0xa00107) AM_READ(stick2_input_r)
-	AM_RANGE(0xa00200, 0xa0020f) AM_DEVREADWRITE8("tc0220ioc", tc0220ioc_r, tc0220ioc_w, 0x00ff)	/* other I/O */
-	AM_RANGE(0xa80000, 0xa80001) AM_READNOP AM_DEVWRITE8("tc0140syt", tc0140syt_port_w, 0x00ff)
-	AM_RANGE(0xa80002, 0xa80003) AM_DEVREADWRITE8("tc0140syt", tc0140syt_comm_r, tc0140syt_comm_w, 0x00ff)
-	AM_RANGE(0xb00000, 0xb007ff) AM_RAM						/* "power common ram" (mecha drive) */
+	AM_RANGE(0xa00200, 0xa0020f) AM_DEVREADWRITE8_LEGACY("tc0220ioc", tc0220ioc_r, tc0220ioc_w, 0x00ff) /* other I/O */
+	AM_RANGE(0xa80000, 0xa80001) AM_READNOP AM_DEVWRITE8_LEGACY("tc0140syt", tc0140syt_port_w, 0x00ff)
+	AM_RANGE(0xa80002, 0xa80003) AM_DEVREADWRITE8_LEGACY("tc0140syt", tc0140syt_comm_r, tc0140syt_comm_w, 0x00ff)
+	AM_RANGE(0xb00000, 0xb007ff) AM_RAM                     /* "power common ram" (mecha drive) */
 ADDRESS_MAP_END
 
 /************************** Z80 ****************************/
 
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, taitoair_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
 	AM_RANGE(0x4000, 0x7fff) AM_ROMBANK("bank1")
 	AM_RANGE(0xc000, 0xdfff) AM_RAM
-	AM_RANGE(0xe000, 0xe003) AM_DEVREADWRITE("ymsnd", ym2610_r, ym2610_w)
-	AM_RANGE(0xe200, 0xe200) AM_READNOP AM_DEVWRITE("tc0140syt", tc0140syt_slave_port_w)
-	AM_RANGE(0xe201, 0xe201) AM_DEVREADWRITE("tc0140syt", tc0140syt_slave_comm_r, tc0140syt_slave_comm_w)
-	AM_RANGE(0xe400, 0xe403) AM_WRITENOP		/* pan control */
+	AM_RANGE(0xe000, 0xe003) AM_DEVREADWRITE_LEGACY("ymsnd", ym2610_r, ym2610_w)
+	AM_RANGE(0xe200, 0xe200) AM_READNOP AM_DEVWRITE_LEGACY("tc0140syt", tc0140syt_slave_port_w)
+	AM_RANGE(0xe201, 0xe201) AM_DEVREADWRITE_LEGACY("tc0140syt", tc0140syt_slave_comm_r, tc0140syt_slave_comm_w)
+	AM_RANGE(0xe400, 0xe403) AM_WRITENOP        /* pan control */
 	AM_RANGE(0xea00, 0xea00) AM_READNOP
-	AM_RANGE(0xee00, 0xee00) AM_WRITENOP		/* ? */
-	AM_RANGE(0xf000, 0xf000) AM_WRITENOP		/* ? */
+	AM_RANGE(0xee00, 0xee00) AM_WRITENOP        /* ? */
+	AM_RANGE(0xf000, 0xf000) AM_WRITENOP        /* ? */
 	AM_RANGE(0xf200, 0xf200) AM_WRITE(sound_bankswitch_w)
 ADDRESS_MAP_END
 
 /********************************** TMS32025 ********************************/
-static ADDRESS_MAP_START( DSP_map_program, AS_PROGRAM, 16 )
+
+/*
+Air Inferno:
+
+write to 0x3404 - almost always 0x00fd / 0xff38  (253, -200)
+write to 0x3408 /
+
+write to 0x341b - May not be numeric - it's weird.  stays stable,
+                  then freaks out just before "quad: unknown value 0066"
+                  This function seems to break things up into different polygon
+                  'classes'
+
+write to 0x3418 - X value
+write to 0x3419 - Y value
+write to 0x341a - Z value
+read to 0x341b, puts data to internal RAM 0x380 - 0x384 - 0x388 - 0x38c
+
+checks 0x341c - if != to 0 then skip ... ?
+checks 0x341d - if == to 0 then skip ... ?
+
+write to 0x3405 ; X value
+write to 0x3409 ; Y value
+write to 0x3406 ; Z value
+write to 0x340a ; Z value
+read to 0x340b, puts to line RAM (y) with offset + 0x160
+read to 0x3407, puts to line RAM (x) with offset + 0x5d
+
+*/
+
+static ADDRESS_MAP_START( DSP_map_program, AS_PROGRAM, 16, taitoair_state )
 	AM_RANGE(0x0000, 0x1fff) AM_ROM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( DSP_map_data, AS_DATA, 16 )
+static ADDRESS_MAP_START( DSP_map_data, AS_DATA, 16, taitoair_state )
+	AM_RANGE(0x2003, 0x2003) AM_READNOP //bit 0 DMA status flag or vblank
+	AM_RANGE(0x3000, 0x3002) AM_WRITE(dsp_flags_w)
+	AM_RANGE(0x3404, 0x3404) AM_WRITE(dsp_frustum_left_w)
+	AM_RANGE(0x3405, 0x3405) AM_WRITE(dsp_x_eyecoord_w)
+	AM_RANGE(0x3406, 0x3406) AM_WRITE(dsp_z_eyecoord_w)
+	AM_RANGE(0x3407, 0x3407) AM_READ(dsp_x_return_r)
+	AM_RANGE(0x3408, 0x3408) AM_WRITE(dsp_frustum_bottom_w)
+	AM_RANGE(0x3409, 0x3409) AM_WRITE(dsp_y_eyecoord_w)
+	AM_RANGE(0x340a, 0x340a) AM_WRITE(dsp_rasterize_w)      /* Just a (lame) guess */
+	AM_RANGE(0x340b, 0x340b) AM_READ(dsp_y_return_r)
+//  AM_RANGE(0x3418, 0x341a) AM_WRITE_LEGACY(dsp_sqrt_w)
+//  AM_RANGE(0x341b, 0x341b) AM_WRITE_LEGACY(dsp_sqrt_r)
+//  AM_RANGE(0x341c, 0x341c) AM_READ_LEGACY(dsp_sqrt_flags1_r)
+//  AM_RANGE(0x341d, 0x341d) AM_READ_LEGACY(dsp_sqrt_flags2_r)
 	AM_RANGE(0x4000, 0x7fff) AM_READWRITE(lineram_r, lineram_w)
 	AM_RANGE(0x8000, 0xffff) AM_READWRITE(dspram_r, dspram_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( DSP_map_io, AS_IO, 16 )
+static ADDRESS_MAP_START( DSP_map_io, AS_IO, 16, taitoair_state )
 	AM_RANGE(TMS32025_HOLD, TMS32025_HOLD) AM_READ(dsp_HOLD_signal_r)
 	AM_RANGE(TMS32025_HOLDA, TMS32025_HOLDA) AM_WRITE(dsp_HOLDA_signal_w)
 ADDRESS_MAP_END
@@ -444,43 +517,38 @@ static INPUT_PORTS_START( topland )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_SERVICE1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_TILT )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW,  IPT_START1 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_BUTTON3 ) PORT_PLAYER(1)	/* "door" (!) */
+	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_BUTTON3 ) PORT_PLAYER(1)    /* "door" (!) */
 
 	PORT_START("IN1")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_BUTTON1 ) PORT_PLAYER(1)	/* slot down */
-	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_BUTTON2 ) PORT_PLAYER(1)	/* slot up */
-	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(1)	/* handle */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_BUTTON1 ) PORT_PLAYER(1)    /* slot down */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_BUTTON2 ) PORT_PLAYER(1)    /* slot up */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(1)    /* handle */
 	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(1)
 	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(1)
 	PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(1)
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_OTHER ) PORT_NAME("Freeze") PORT_CODE(KEYCODE_F1)
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_OTHER ) // DMA status flag
 	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 
 	PORT_START("IN2")
 	PORT_BIT( 0xff, IP_ACTIVE_LOW,  IPT_UNUSED )
 
-	/* The range of these sticks reflects the range test mode displays.
-       Eventually we want standard 0-0xff input range and a scale-up later
-       in the stick_r routines.  And fake DSW with self-centering option
-       to make keyboard control feasible! */
-
 	PORT_START(STICK1_PORT_TAG)
-	PORT_BIT( 0xffff, 0x0000, IPT_AD_STICK_X ) PORT_MINMAX(0xf800,0x7ff) PORT_SENSITIVITY(30) PORT_KEYDELTA(40) PORT_PLAYER(1)
+	PORT_BIT( 0x00ff, 0x0000, IPT_AD_STICK_Z ) PORT_MINMAX(0x0080,0x007f) PORT_SENSITIVITY(30) PORT_KEYDELTA(40) PORT_PLAYER(1) PORT_REVERSE
 
 	PORT_START(STICK2_PORT_TAG)
-	PORT_BIT( 0xffff, 0x0000, IPT_AD_STICK_Y ) PORT_MINMAX(0xf800,0x7ff) PORT_SENSITIVITY(30) PORT_KEYDELTA(40) PORT_PLAYER(1)
+	PORT_BIT( 0xffff, 0x0000, IPT_AD_STICK_X ) PORT_MINMAX(0xf800,0x07ff) PORT_SENSITIVITY(30) PORT_KEYDELTA(40) PORT_PLAYER(1)
 
 	PORT_START(STICK3_PORT_TAG)
-	PORT_BIT( 0xffff, 0x0000, IPT_AD_STICK_Y ) PORT_MINMAX(0xf800,0x7ff) PORT_SENSITIVITY(30) PORT_KEYDELTA(40) PORT_PLAYER(2)
+	PORT_BIT( 0xffff, 0x0000, IPT_AD_STICK_Y ) PORT_MINMAX(0xf800,0x07ff) PORT_SENSITIVITY(30) PORT_KEYDELTA(40) PORT_PLAYER(1)
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( ainferno )
 	/* 0xa00200 -> 0x0c0003.b (-$7ffd,A5) */
 	PORT_START("DSWA")
-	PORT_DIPNAME( 0x01, 0x01, "Moving Control" )		PORT_DIPLOCATION("SWA:1")
+	PORT_DIPNAME( 0x01, 0x01, "Moving Control" )        PORT_DIPLOCATION("SWA:1")
 	PORT_DIPSETTING(    0x01, "Upright/Cockpit" )
 	PORT_DIPSETTING(    0x00, "DX Moving Only" )
-	PORT_DIPNAME( 0x02, 0x02, "Motion Test Mode" )		PORT_DIPLOCATION("SWA:2")
+	PORT_DIPNAME( 0x02, 0x02, "Motion Test Mode" )      PORT_DIPLOCATION("SWA:2")
 	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	TAITO_DSWA_BITS_2_TO_3_LOC(SWA)
@@ -489,12 +557,12 @@ static INPUT_PORTS_START( ainferno )
 	/* 0xa00202 -> 0x0c0004.b (-$7ffc,A5) */
 	PORT_START("DSWB")
 	TAITO_DIFFICULTY_LOC(SWA)
-	PORT_DIPNAME( 0x0c, 0x0c, "Timer Length" )		PORT_DIPLOCATION("SWB:3,4")
+	PORT_DIPNAME( 0x0c, 0x0c, "Timer Length" )      PORT_DIPLOCATION("SWB:3,4")
 	PORT_DIPSETTING(    0x08, DEF_STR( Easy ) )
 	PORT_DIPSETTING(    0x0c, DEF_STR( Medium ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( Hard ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) )
-	PORT_DIPNAME( 0x10, 0x10, "Rudder Pedal" )		PORT_DIPLOCATION("SWB:5")
+	PORT_DIPNAME( 0x10, 0x10, "Rudder Pedal" )      PORT_DIPLOCATION("SWB:5")
 	PORT_DIPSETTING(    0x10, "Without (Upright)" )
 	PORT_DIPSETTING(    0x00, "With (Cockpit / DX)" )
 	PORT_DIPUNUSED_DIPLOC( 0x20, IP_ACTIVE_LOW, "SWB:6" )
@@ -512,31 +580,26 @@ static INPUT_PORTS_START( ainferno )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_START2 )
 
 	PORT_START("IN1")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_BUTTON1 ) PORT_PLAYER(1)	/* lever */
-	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_BUTTON2 ) PORT_PLAYER(1)	/* handle x */
-	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_BUTTON3 ) PORT_PLAYER(1)	/* handle y */
-	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_BUTTON4 ) PORT_PLAYER(1)	/* fire */
-	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_BUTTON6 ) PORT_PLAYER(1)	/* pedal r */
-	PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_BUTTON5 ) PORT_PLAYER(1)	/* pedal l */
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_OTHER ) PORT_NAME("Freeze") PORT_CODE(KEYCODE_F1)
+	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_BUTTON1 ) PORT_PLAYER(1)    /* lever */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_BUTTON2 ) PORT_PLAYER(1)    /* handle x */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_BUTTON3 ) PORT_PLAYER(1)    /* handle y */
+	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_BUTTON4 ) PORT_PLAYER(1)    /* fire */
+	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_BUTTON6 ) PORT_PLAYER(1)    /* pedal r */
+	PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_BUTTON5 ) PORT_PLAYER(1)    /* pedal l */
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_OTHER ) // DMA status flag
 	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 
 	PORT_START("IN2")
 	PORT_BIT( 0xff, IP_ACTIVE_LOW,  IPT_UNUSED )
 
-	/* The range of these sticks reflects the range test mode displays.
-       Eventually we want standard 0-0xff input range and a scale-up later
-       in the stick_r routines. And fake DSW with self-centering option
-       to make keyboard control feasible! */
-
 	PORT_START(STICK1_PORT_TAG)
-	PORT_BIT( 0xffff, 0x0000, IPT_AD_STICK_X ) PORT_MINMAX(0xf800,0x7ff) PORT_SENSITIVITY(30) PORT_KEYDELTA(40) PORT_PLAYER(1)
+	PORT_BIT( 0x00ff, 0x0000, IPT_AD_STICK_Z ) PORT_MINMAX(0x0080,0x007f) PORT_SENSITIVITY(30) PORT_KEYDELTA(40) PORT_PLAYER(1) PORT_REVERSE
 
 	PORT_START(STICK2_PORT_TAG)
-	PORT_BIT( 0xffff, 0x0000, IPT_AD_STICK_Y ) PORT_MINMAX(0xf800,0x7ff) PORT_SENSITIVITY(30) PORT_KEYDELTA(40) PORT_PLAYER(1)
+	PORT_BIT( 0xffff, 0x0000, IPT_AD_STICK_X ) PORT_MINMAX(0xf800,0x7ff) PORT_SENSITIVITY(30) PORT_KEYDELTA(40) PORT_PLAYER(1)
 
 	PORT_START(STICK3_PORT_TAG)
-	PORT_BIT( 0xffff, 0x0000, IPT_AD_STICK_Y ) PORT_MINMAX(0xf800,0x7ff) PORT_SENSITIVITY(30) PORT_KEYDELTA(40) PORT_PLAYER(2)
+	PORT_BIT( 0xffff, 0x0000, IPT_AD_STICK_Y ) PORT_MINMAX(0xf800,0x7ff) PORT_SENSITIVITY(30) PORT_KEYDELTA(40) PORT_PLAYER(1)
 INPUT_PORTS_END
 
 
@@ -546,16 +609,16 @@ INPUT_PORTS_END
 
 static const gfx_layout tilelayout =
 {
-	16,16,	/* 16x16 pixels */
+	16,16,  /* 16x16 pixels */
 	RGN_FRAC(1,4),
 	4,
 	{ 0, 1, 2, 3 },
 	{ 4, 0, 12, 8,
-	  RGN_FRAC(1,4)+4, RGN_FRAC(1,4), RGN_FRAC(1,4)+12, RGN_FRAC(1,4)+8,
-	  RGN_FRAC(2,4)+4, RGN_FRAC(2,4), RGN_FRAC(2,4)+12, RGN_FRAC(2,4)+8,
-	  RGN_FRAC(3,4)+4, RGN_FRAC(3,4), RGN_FRAC(3,4)+12, RGN_FRAC(3,4)+8 },
+		RGN_FRAC(1,4)+4, RGN_FRAC(1,4), RGN_FRAC(1,4)+12, RGN_FRAC(1,4)+8,
+		RGN_FRAC(2,4)+4, RGN_FRAC(2,4), RGN_FRAC(2,4)+12, RGN_FRAC(2,4)+8,
+		RGN_FRAC(3,4)+4, RGN_FRAC(3,4), RGN_FRAC(3,4)+12, RGN_FRAC(3,4)+8 },
 	{ 0*16, 1*16, 2*16,  3*16,  4*16,  5*16,  6*16,  7*16,
-	  8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16 },
+		8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16 },
 	16*16
 };
 
@@ -572,7 +635,7 @@ GFXDECODE_END
 static void irqhandler( device_t *device, int irq )
 {
 	taitoair_state *state = device->machine().driver_data<taitoair_state>();
-	device_set_input_line(state->m_audiocpu, 0, irq ? ASSERT_LINE : CLEAR_LINE);
+	state->m_audiocpu->set_input_line(0, irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static const ym2610_interface airsys_ym2610_interface =
@@ -587,7 +650,7 @@ static const ym2610_interface airsys_ym2610_interface =
 
 static const tc0080vco_interface airsys_tc0080vco_intf =
 {
-	0, 1,	/* gfxnum, txnum */
+	0, 1,   /* gfxnum, txnum */
 	1, 1, -2,
 	0
 };
@@ -595,7 +658,7 @@ static const tc0080vco_interface airsys_tc0080vco_intf =
 static const tc0220ioc_interface airsys_io_intf =
 {
 	DEVCB_INPUT_PORT("DSWA"), DEVCB_INPUT_PORT("DSWB"),
-	DEVCB_INPUT_PORT("IN0"), DEVCB_INPUT_PORT("IN1"), DEVCB_INPUT_PORT("IN2")	/* port read handlers */
+	DEVCB_INPUT_PORT("IN0"), DEVCB_INPUT_PORT("IN1"), DEVCB_INPUT_PORT("IN2")   /* port read handlers */
 };
 
 static const tc0140syt_interface airsys_tc0140syt_intf =
@@ -603,70 +666,61 @@ static const tc0140syt_interface airsys_tc0140syt_intf =
 	"maincpu", "audiocpu"
 };
 
-static STATE_POSTLOAD( taitoair_postload )
+void taitoair_state::machine_start()
 {
-	reset_sound_region(machine);
-}
-
-static MACHINE_START( taitoair )
-{
-	taitoair_state *state = machine.driver_data<taitoair_state>();
-	UINT8 *ROM = machine.region("audiocpu")->base();
+	UINT8 *ROM = memregion("audiocpu")->base();
 	int i;
 
-	memory_configure_bank(machine, "bank1", 0, 4, &ROM[0xc000], 0x4000);
+	membank("bank1")->configure_entries(0, 4, &ROM[0xc000], 0x4000);
 
-	state->m_audiocpu = machine.device("audiocpu");
-	state->m_dsp = machine.device("dsp");
-	state->m_tc0080vco = machine.device("tc0080vco");
+	m_audiocpu = machine().device<cpu_device>("audiocpu");
+	m_dsp = machine().device("dsp");
+	m_tc0080vco = machine().device("tc0080vco");
 
-	state->save_item(NAME(state->m_banknum));
-	state->save_item(NAME(state->m_q.col));
-	state->save_item(NAME(state->m_q.pcount));
+	save_item(NAME(m_banknum));
+	save_item(NAME(m_q.col));
+	save_item(NAME(m_q.pcount));
 
 	for (i = 0; i < TAITOAIR_POLY_MAX_PT; i++)
 	{
-		state_save_register_item(machine, "globals", NULL, i, state->m_q.p[i].x);
-		state_save_register_item(machine, "globals", NULL, i, state->m_q.p[i].y);
+		state_save_register_item(machine(), "globals", NULL, i, m_q.p[i].x);
+		state_save_register_item(machine(), "globals", NULL, i, m_q.p[i].y);
 	}
 
-	machine.state().register_postload(taitoair_postload, NULL);
+	machine().save().register_postload(save_prepost_delegate(FUNC(reset_sound_region), &machine()));
 }
 
-static MACHINE_RESET( taitoair )
+void taitoair_state::machine_reset()
 {
-	taitoair_state *state = machine.driver_data<taitoair_state>();
 	int i;
 
-	state->m_dsp_hold_signal = ASSERT_LINE;
-	state->m_banknum = 0;
+	m_dsp_hold_signal = ASSERT_LINE;
+	m_banknum = 0;
 
 	for (i = 0; i < TAITOAIR_POLY_MAX_PT; i++)
 	{
-		state->m_q.p[i].x = 0;
-		state->m_q.p[i].y = 0;
+		m_q.p[i].x = 0;
+		m_q.p[i].y = 0;
 	}
 }
 
 static MACHINE_CONFIG_START( airsys, taitoair_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M68000,24000000 / 2)		/* 12 MHz ??? */
+	MCFG_CPU_ADD("maincpu", M68000,24000000 / 2)        /* 12 MHz ??? */
 	MCFG_CPU_PROGRAM_MAP(airsys_map)
-	MCFG_CPU_VBLANK_INT("screen", irq5_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", taitoair_state,  irq5_line_hold)
 
-	MCFG_CPU_ADD("audiocpu", Z80,8000000 / 2)			/* 4 MHz ??? */
+	MCFG_CPU_ADD("audiocpu", Z80,8000000 / 2)           /* 4 MHz ??? */
 	MCFG_CPU_PROGRAM_MAP(sound_map)
 
-	MCFG_CPU_ADD("dsp", TMS32025,24000000)			/* 24 MHz ??? *///
+	MCFG_CPU_ADD("dsp", TMS32025,24000000)          /* 24 MHz ??? *///
 	MCFG_CPU_PROGRAM_MAP(DSP_map_program)
 	MCFG_CPU_DATA_MAP(DSP_map_data)
 	MCFG_CPU_IO_MAP(DSP_map_io)
 
-	MCFG_QUANTUM_TIME(attotime::from_hz(600))
+	MCFG_QUANTUM_PERFECT_CPU("maincpu")
 
-	MCFG_MACHINE_START(taitoair)
-	MCFG_MACHINE_RESET(taitoair)
 
 	MCFG_TC0220IOC_ADD("tc0220ioc", airsys_io_intf)
 
@@ -674,13 +728,13 @@ static MACHINE_CONFIG_START( airsys, taitoair_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*16, 64*16)
 	MCFG_SCREEN_VISIBLE_AREA(0*16, 32*16-1, 3*16, 28*16-1)
-	MCFG_SCREEN_UPDATE(taitoair)
+	MCFG_SCREEN_UPDATE_DRIVER(taitoair_state, screen_update_taitoair)
 
 	MCFG_GFXDECODE(airsys)
-	MCFG_PALETTE_LENGTH(512*16)
+	MCFG_PALETTE_LENGTH(512*16+512*16)
+	MCFG_PALETTE_INIT(all_black)
 
 	MCFG_TC0080VCO_ADD("tc0080vco", airsys_tc0080vco_intf)
 
@@ -705,7 +759,7 @@ board - possibly?
 *************************************************************/
 
 ROM_START( topland )
-	ROM_REGION( 0xc0000, "maincpu", 0 )	/* 68000 */
+	ROM_REGION( 0xc0000, "maincpu", 0 ) /* 68000 */
 	ROM_LOAD16_BYTE( "b62_41.43",  0x00000, 0x20000, CRC(28264798) SHA1(72e4441ad468f37cff69c36699867119ad28274c) )
 	ROM_LOAD16_BYTE( "b62_40.14",  0x00001, 0x20000, CRC(db872f7d) SHA1(6932c62d8051b1811c30139dbd0375115305c731) )
 	ROM_LOAD16_BYTE( "b62_25.42",  0x40000, 0x20000, CRC(1bd53a72) SHA1(ada679198739cd6a419d3fa4311bb92dc385099c) )
@@ -713,15 +767,15 @@ ROM_START( topland )
 	ROM_LOAD16_BYTE( "b62_23.41",  0x80000, 0x20000, CRC(ef3a971c) SHA1(0840668dda48f4c9a85410361bfba3ae9580a71f) )
 	ROM_LOAD16_BYTE( "b62_22.12",  0x80001, 0x20000, CRC(94279201) SHA1(8518d8e722d4f2516f75224d9a21ab20d8ee6c78) )
 
-	ROM_REGION( 0x1c000, "audiocpu", 0 )	/* Z80 */
+	ROM_REGION( 0x1c000, "audiocpu", 0 )    /* Z80 */
 	ROM_LOAD( "b62-42.34", 0x00000, 0x04000, CRC(389230e0) SHA1(3a336987aad7bf4df658f924de4bbe6f0fff6d59) )
 	ROM_CONTINUE(          0x10000, 0x0c000 )
 
-	ROM_REGION( 0x20000, "dsp", 0 )	/* TMS320C25 */
-	ROM_LOAD16_BYTE( "b62-21.35", 0x00000, 0x02000, CRC(5f38460d) SHA1(0593718d15b30b10f7686959932e2c934de2a529) )	// cpu board
-	ROM_LOAD16_BYTE( "b62-20.6",  0x00001, 0x02000, CRC(a4afe958) SHA1(7593a327f4ea0cc9e28fd3269278871f62fb0598) )	// cpu board
+	ROM_REGION( 0x20000, "dsp", 0 ) /* TMS320C25 */
+	ROM_LOAD16_BYTE( "b62-21.35", 0x00000, 0x02000, CRC(5f38460d) SHA1(0593718d15b30b10f7686959932e2c934de2a529) )  // cpu board
+	ROM_LOAD16_BYTE( "b62-20.6",  0x00001, 0x02000, CRC(a4afe958) SHA1(7593a327f4ea0cc9e28fd3269278871f62fb0598) )  // cpu board
 
-	ROM_REGION( 0x100000, "gfx1", 0 )	/* 16x16 tiles */
+	ROM_REGION( 0x100000, "gfx1", 0 )   /* 16x16 tiles */
 	ROM_LOAD16_BYTE( "b62-33.39",  0x000000, 0x20000, CRC(38786867) SHA1(7292e3fa69cad6494f2e8e7efa9c3f989bdf958d) )
 	ROM_LOAD16_BYTE( "b62-36.48",  0x000001, 0x20000, CRC(4259e76a) SHA1(eb0dc5d0a6f875e3b8335fb30d4c2ad3880c31b9) )
 	ROM_LOAD16_BYTE( "b62-29.27",  0x040000, 0x20000, CRC(efdd5c51) SHA1(6df3e9782946cf6f4a21ee3d335548c53cd21e3a) )
@@ -731,18 +785,18 @@ ROM_START( topland )
 	ROM_LOAD16_BYTE( "b62-31.29",  0x0c0000, 0x20000, CRC(3feebfe3) SHA1(5b014d7d6fa1daf400ac1a437f551281debfdba6) )
 	ROM_LOAD16_BYTE( "b62-32.30",  0x0c0001, 0x20000, CRC(66806646) SHA1(d8e0c37b5227d8583d523164ffc6828b4508d5a3) )
 
-	ROM_REGION( 0xa0000, "ymsnd", 0 )	/* ADPCM samples */
+	ROM_REGION( 0xa0000, "ymsnd", 0 )   /* ADPCM samples */
 	ROM_LOAD( "b62-17.5",  0x00000, 0x20000, CRC(36447066) SHA1(91c8cc4e99534b2d533895a342abb22766a20090) )
 	ROM_LOAD( "b62-16.4",  0x20000, 0x20000, CRC(203a5c27) SHA1(f6fc9322dea8d82bfec3be3fdc8616dc6adf666e) )
 	ROM_LOAD( "b62-15.3",  0x40000, 0x20000, CRC(e35ffe81) SHA1(f35afdd7cfd4c09907fb062beb5ae46c2286a381) )
 	ROM_LOAD( "b62-14.2",  0x60000, 0x20000, CRC(617948a3) SHA1(4660570fa6263c28cfae7ccdf154763cc6144896) )
 	ROM_LOAD( "b62-13.1",  0x80000, 0x20000, CRC(b37dc3ea) SHA1(198d4f828132316c624da998e49b1873b9886bf0) )
 
-	ROM_REGION( 0x20000, "ymsnd.deltat", 0 )	/* Delta-T samples */
+	ROM_REGION( 0x20000, "ymsnd.deltat", 0 )    /* Delta-T samples */
 	ROM_LOAD( "b62-18.31", 0x00000, 0x20000, CRC(3a4e687a) SHA1(43f07fe19dec351e851defdf9c7810fb9df04736) )
 
-	ROM_REGION( 0x02000, "user1", 0 )	/* unknown */
-	ROM_LOAD( "b62-28.22", 0x00000, 0x02000, CRC(c4be68a6) SHA1(2c07a0e71d11bca67427331217c507d849500ec1) )	// video board
+	ROM_REGION( 0x02000, "user1", 0 )   /* unknown */
+	ROM_LOAD( "b62-28.22", 0x00000, 0x02000, CRC(c4be68a6) SHA1(2c07a0e71d11bca67427331217c507d849500ec1) ) // video board
 
 	ROM_REGION( 0x0800, "plds", 0 )
 	ROM_LOAD( "pal20l8b-b62-02.bin", 0x0000, 0x0144, CRC(c43ab9d8) SHA1(38542b10e9206a25669534ee26a0472e5f2d6257) )
@@ -752,7 +806,7 @@ ROM_START( topland )
 ROM_END
 
 ROM_START( ainferno )
-	ROM_REGION( 0xc0000, "maincpu", 0 )	/* 68000 */
+	ROM_REGION( 0xc0000, "maincpu", 0 ) /* 68000 */
 	ROM_LOAD16_BYTE( "c45_22.43", 0x00000, 0x20000, CRC(50300926) SHA1(9c2a60282d3f9f115b94cb5b6d64bbfc9d726d1d) )
 	ROM_LOAD16_BYTE( "c45_20.14", 0x00001, 0x20000, CRC(39b189d9) SHA1(002013c02b546d3f5a9f3a3149971975a73cc8ce) )
 	ROM_LOAD16_BYTE( "c45_21.42", 0x40000, 0x20000, CRC(1b687241) SHA1(309e42f79cbd48ceae58a15afb648aef838822f0) )
@@ -760,15 +814,15 @@ ROM_START( ainferno )
 
 	/* 0x80000 to 0xbffff is empty for this game */
 
-	ROM_REGION( 0x1c000, "audiocpu", 0 )	/* Z80 */
+	ROM_REGION( 0x1c000, "audiocpu", 0 )    /* Z80 */
 	ROM_LOAD( "c45-23.34", 0x00000, 0x04000, CRC(d0750c78) SHA1(63232c2acef86e8c8ffaad36ab0b6c4cc1eb48f8) )
 	ROM_CONTINUE(          0x10000, 0x0c000 )
 
-	ROM_REGION( 0x20000, "dsp", 0 )	/* TMS320C25 */
+	ROM_REGION( 0x20000, "dsp", 0 ) /* TMS320C25 */
 	ROM_LOAD16_BYTE( "c45-25.35", 0x00000, 0x02000, CRC(c0d39f95) SHA1(542aa6e2af510aea00db40bf803cb6653d4e7747) )
 	ROM_LOAD16_BYTE( "c45-24.6",  0x00001, 0x02000, CRC(1013d937) SHA1(817769d21583f5281ba044ce8c134c9239d1e83e) )
 
-	ROM_REGION( 0x100000, "gfx1", 0 )	/* 16x16 tiles */
+	ROM_REGION( 0x100000, "gfx1", 0 )   /* 16x16 tiles */
 	ROM_LOAD16_BYTE( "c45-11.28", 0x000000, 0x20000, CRC(d9b4b77c) SHA1(69d570efa8146fb0a712ff45e77bda6fd85769f8) )
 	ROM_LOAD16_BYTE( "c45-15.40", 0x000001, 0x20000, CRC(d4610698) SHA1(5de519a23300d5b3b09ce7cf8c02a1a6b2fb985c) )
 	ROM_LOAD16_BYTE( "c45-12.29", 0x040000, 0x20000, CRC(4ae305b8) SHA1(2bbb981853a7abbba90afb8eb58f6869357551d3) )
@@ -778,18 +832,18 @@ ROM_START( ainferno )
 	ROM_LOAD16_BYTE( "c45-14.31", 0x0c0000, 0x20000, CRC(481b6f29) SHA1(0b047e805663b144dc2388c86438950fcdc29658) )
 	ROM_LOAD16_BYTE( "c45-18.43", 0x0c0001, 0x20000, CRC(ba7ecf3b) SHA1(dd073b7bfbf2f88432337027ae9fb6c4f02a538f) )
 
-	ROM_REGION( 0xa0000, "ymsnd", 0 )	/* ADPCM samples */
+	ROM_REGION( 0xa0000, "ymsnd", 0 )   /* ADPCM samples */
 	ROM_LOAD( "c45-01.5",  0x00000, 0x20000, CRC(052997b2) SHA1(3aa8b4f759a1c196de39754a9ccdf4fabdbab388) )
 	ROM_LOAD( "c45-02.4",  0x20000, 0x20000, CRC(2fc0a88e) SHA1(6a635671fa2518f74015429ce580d7b7f00299ad) )
 	ROM_LOAD( "c45-03.3",  0x40000, 0x20000, CRC(0e1e5b5f) SHA1(a53d5ba01825f825e31a014cb4808f59ef86f0c9) )
 	ROM_LOAD( "c45-04.2",  0x60000, 0x20000, CRC(6d081044) SHA1(2d98bde55621762509dfc645d9ca5e267b1757ae) )
 	ROM_LOAD( "c45-05.1",  0x80000, 0x20000, CRC(6c59a808) SHA1(6264bbe4d7ad3070c6441859eb704a42910a82f0) )
 
-	ROM_REGION( 0x20000, "ymsnd.deltat", 0 )	/* Delta-T samples */
+	ROM_REGION( 0x20000, "ymsnd.deltat", 0 )    /* Delta-T samples */
 	ROM_LOAD( "c45-06.31", 0x00000, 0x20000, CRC(6a7976d4) SHA1(a465f9bb874b1eff08742b33cc3c364703b281ca) )
 
 	ROM_REGION( 0x02000, "user1", 0 )
-	ROM_LOAD( "c45-xx.22", 0x00000, 0x02000, NO_DUMP )	// video board
+	ROM_LOAD( "c45-xx.22", 0x00000, 0x02000, NO_DUMP )  // video board
 
 	ROM_REGION( 0x1c00, "plds", 0 )
 	ROM_LOAD( "pal16l8b-c45-07.ic6",   0x0000, 0x0104, CRC(a139114f) SHA1(d21f0c02c34a59b2cea925a9a417d5c2db27a30e) )
@@ -810,5 +864,5 @@ ROM_END
 
 
 /*   ( YEAR  NAME      PARENT    MACHINE   INPUT     INIT      MONITOR  COMPANY  FULLNAME */
-GAME( 1988, topland,  0,        airsys,   topland,  0,        ROT0,    "Taito Corporation Japan", "Top Landing (World)", GAME_NOT_WORKING )
-GAME( 1990, ainferno, 0,        airsys,   ainferno, 0,        ROT0,    "Taito America Corporation", "Air Inferno (US)", GAME_NOT_WORKING )
+GAME( 1988, topland,  0,        airsys,   topland, driver_device,  0,        ROT0,    "Taito Corporation Japan", "Top Landing (World)", GAME_NOT_WORKING )
+GAME( 1990, ainferno, 0,        airsys,   ainferno, driver_device, 0,        ROT0,    "Taito America Corporation", "Air Inferno (US)", GAME_NOT_WORKING )

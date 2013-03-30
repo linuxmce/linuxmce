@@ -6,10 +6,9 @@
 #define __M6800_H__
 
 
-typedef struct _m6801_interface m6801_interface;
-struct _m6801_interface
+struct m6801_interface
 {
-	devcb_write_line		out_sc2_func;
+	devcb_write_line        out_sc2_func;
 };
 #define M6801_INTERFACE(name) const m6801_interface (name) =
 
@@ -22,8 +21,8 @@ enum
 
 enum
 {
-	M6800_IRQ_LINE = 0,				/* IRQ line number */
-	M6801_TIN_LINE,					/* P20/Tin Input Capture line (eddge sense)     */
+	M6800_IRQ_LINE = 0,             /* IRQ line number */
+	M6801_TIN_LINE,                 /* P20/Tin Input Capture line (eddge sense)     */
 									/* Active eddge is selecrable by internal reg.  */
 									/* raise eddge : CLEAR_LINE  -> ASSERT_LINE     */
 									/* fall  eddge : ASSERT_LINE -> CLEAR_LINE      */
@@ -60,8 +59,12 @@ DECLARE_LEGACY_CPU_DEVICE(HD6301, hd6301);
 DECLARE_LEGACY_CPU_DEVICE(HD63701, hd63701);
 DECLARE_LEGACY_CPU_DEVICE(NSC8105, nsc8105);
 
-READ8_HANDLER( m6801_io_r );
-WRITE8_HANDLER( m6801_io_w );
+DECLARE_LEGACY_CPU_DEVICE(HD6303R, hd6303r);
+DECLARE_LEGACY_CPU_DEVICE(HD6303Y, hd6303y);
+
+
+DECLARE_READ8_HANDLER( m6801_io_r );
+DECLARE_WRITE8_HANDLER( m6801_io_w );
 
 CPU_DISASSEMBLE( m6800 );
 CPU_DISASSEMBLE( m6801 );
@@ -73,4 +76,3 @@ CPU_DISASSEMBLE( hd63701 );
 CPU_DISASSEMBLE( nsc8105 );
 
 #endif /* __M6800_H__ */
-

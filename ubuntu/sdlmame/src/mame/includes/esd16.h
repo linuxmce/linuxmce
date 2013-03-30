@@ -1,26 +1,39 @@
-	/***************************************************************************
+/***************************************************************************
 
     ESD 16 Bit Games
 
 ***************************************************************************/
 
+#include "machine/eeprom.h"
+
 class esd16_state : public driver_device
 {
 public:
-	esd16_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	esd16_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_vram_0(*this, "vram_0"),
+		m_vram_1(*this, "vram_1"),
+		m_scroll_0(*this, "scroll_0"),
+		m_scroll_1(*this, "scroll_1"),
+		m_spriteram(*this, "spriteram"),
+		m_head_layersize(*this, "head_layersize"),
+		m_headpanic_platform_x(*this, "platform_x"),
+		m_headpanic_platform_y(*this, "platform_y")
+	{
+		m_tilemap0_color = 0;
+		m_tilemap1_color = 0;
+	}
 
 	/* memory pointers */
-	UINT16 *       m_vram_0;
-	UINT16 *       m_vram_1;
-	UINT16 *       m_scroll_0;
-	UINT16 *       m_scroll_1;
-	UINT16 *       m_spriteram;
-	UINT16 *       m_head_layersize;
-	UINT16 *       m_headpanic_platform_x;
-	UINT16 *       m_headpanic_platform_y;
+	required_shared_ptr<UINT16> m_vram_0;
+	required_shared_ptr<UINT16> m_vram_1;
+	required_shared_ptr<UINT16> m_scroll_0;
+	required_shared_ptr<UINT16> m_scroll_1;
+	required_shared_ptr<UINT16> m_spriteram;
+	required_shared_ptr<UINT16> m_head_layersize;
+	required_shared_ptr<UINT16> m_headpanic_platform_x;
+	required_shared_ptr<UINT16> m_headpanic_platform_y;
 //  UINT16 *       m_paletteram;  // currently this uses generic palette handling
-	size_t         m_spriteram_size;
 
 	/* video-related */
 	tilemap_t       *m_tilemap_0_16x16;
@@ -28,20 +41,27 @@ public:
 	tilemap_t       *m_tilemap_0;
 	tilemap_t       *m_tilemap_1;
 	int           m_tilemap0_color;
+	int           m_tilemap1_color;
 
 	/* devices */
 	device_t *m_audio_cpu;
-	device_t *m_eeprom;
+	eeprom_device *m_eeprom;
+	DECLARE_WRITE16_MEMBER(esd16_sound_command_w);
+	DECLARE_WRITE16_MEMBER(hedpanic_platform_w);
+	DECLARE_READ16_MEMBER(esd_eeprom_r);
+	DECLARE_WRITE16_MEMBER(esd_eeprom_w);
+	DECLARE_WRITE8_MEMBER(esd16_sound_rombank_w);
+	DECLARE_READ8_MEMBER(esd16_sound_command_r);
+	DECLARE_WRITE16_MEMBER(esd16_vram_0_w);
+	DECLARE_WRITE16_MEMBER(esd16_vram_1_w);
+	DECLARE_WRITE16_MEMBER(esd16_tilemap0_color_w);
+	DECLARE_WRITE16_MEMBER(esd16_tilemap0_color_jumppop_w);
+	TILE_GET_INFO_MEMBER(get_tile_info_0);
+	TILE_GET_INFO_MEMBER(get_tile_info_0_16x16);
+	TILE_GET_INFO_MEMBER(get_tile_info_1);
+	TILE_GET_INFO_MEMBER(get_tile_info_1_16x16);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	UINT32 screen_update_hedpanic(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
-
-
-/*----------- defined in video/esd16.c -----------*/
-
-WRITE16_HANDLER( esd16_vram_0_w );
-WRITE16_HANDLER( esd16_vram_1_w );
-WRITE16_HANDLER( esd16_tilemap0_color_w );
-
-VIDEO_START( esd16 );
-SCREEN_UPDATE( esd16 );
-SCREEN_UPDATE( hedpanic );
-SCREEN_UPDATE( hedpanio );

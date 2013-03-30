@@ -11,120 +11,121 @@
 class cball_state : public driver_device
 {
 public:
-	cball_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	cball_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+		m_video_ram(*this, "video_ram")
+	{ }
 
 	/* memory pointers */
-	UINT8 *  m_video_ram;
+	required_shared_ptr<UINT8> m_video_ram;
 
 	/* video-related */
 	tilemap_t* m_bg_tilemap;
 
 	/* devices */
-	device_t *m_maincpu;
+	cpu_device *m_maincpu;
+	DECLARE_WRITE8_MEMBER(cball_vram_w);
+	DECLARE_READ8_MEMBER(cball_wram_r);
+	DECLARE_WRITE8_MEMBER(cball_wram_w);
+	TILE_GET_INFO_MEMBER(get_tile_info);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_cball(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	TIMER_CALLBACK_MEMBER(interrupt_callback);
 };
 
 
-static TILE_GET_INFO( get_tile_info )
+TILE_GET_INFO_MEMBER(cball_state::get_tile_info)
 {
-	cball_state *state = machine.driver_data<cball_state>();
-	UINT8 code = state->m_video_ram[tile_index];
+	UINT8 code = m_video_ram[tile_index];
 
-	SET_TILE_INFO(0, code, code >> 7, 0);
+	SET_TILE_INFO_MEMBER(0, code, code >> 7, 0);
 }
 
 
-static WRITE8_HANDLER( cball_vram_w )
+WRITE8_MEMBER(cball_state::cball_vram_w)
 {
-	cball_state *state = space->machine().driver_data<cball_state>();
-
-	state->m_video_ram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_video_ram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
 
-static VIDEO_START( cball )
+void cball_state::video_start()
 {
-	cball_state *state = machine.driver_data<cball_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(cball_state::get_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
 }
 
 
-static SCREEN_UPDATE( cball )
+UINT32 cball_state::screen_update_cball(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	cball_state *state = screen->machine().driver_data<cball_state>();
 
 	/* draw playfield */
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
 
 	/* draw sprite */
-	drawgfx_transpen(bitmap, cliprect, screen->machine().gfx[1],
-		state->m_video_ram[0x399] >> 4,
+	drawgfx_transpen(bitmap, cliprect, machine().gfx[1],
+		m_video_ram[0x399] >> 4,
 		0,
 		0, 0,
-		240 - state->m_video_ram[0x390],
-		240 - state->m_video_ram[0x398], 0);
+		240 - m_video_ram[0x390],
+		240 - m_video_ram[0x398], 0);
 	return 0;
 }
 
 
-static TIMER_CALLBACK( interrupt_callback )
+TIMER_CALLBACK_MEMBER(cball_state::interrupt_callback)
 {
-	cball_state *state = machine.driver_data<cball_state>();
 	int scanline = param;
 
-	generic_pulse_irq_line(state->m_maincpu, 0);
+	generic_pulse_irq_line(*m_maincpu, 0, 1);
 
 	scanline = scanline + 32;
 
 	if (scanline >= 262)
 		scanline = 16;
 
-	machine.scheduler().timer_set(machine.primary_screen->time_until_pos(scanline), FUNC(interrupt_callback), scanline);
+	machine().scheduler().timer_set(machine().primary_screen->time_until_pos(scanline), timer_expired_delegate(FUNC(cball_state::interrupt_callback),this), scanline);
 }
 
 
-static MACHINE_START( cball )
+void cball_state::machine_start()
 {
-	cball_state *state = machine.driver_data<cball_state>();
-	state->m_maincpu = machine.device("maincpu");
+	m_maincpu = machine().device<cpu_device>("maincpu");
 }
 
-static MACHINE_RESET( cball )
+void cball_state::machine_reset()
 {
-	machine.scheduler().timer_set(machine.primary_screen->time_until_pos(16), FUNC(interrupt_callback), 16);
+	machine().scheduler().timer_set(machine().primary_screen->time_until_pos(16), timer_expired_delegate(FUNC(cball_state::interrupt_callback),this), 16);
 }
 
 
-static PALETTE_INIT( cball )
+void cball_state::palette_init()
 {
-	palette_set_color(machine, 0, MAKE_RGB(0x80, 0x80, 0x80));
-	palette_set_color(machine, 1, MAKE_RGB(0x00, 0x00, 0x00));
-	palette_set_color(machine, 2, MAKE_RGB(0x80, 0x80, 0x80));
-	palette_set_color(machine, 3, MAKE_RGB(0xff, 0xff, 0xff));
-	palette_set_color(machine, 4, MAKE_RGB(0x80, 0x80, 0x80));
-	palette_set_color(machine, 5, MAKE_RGB(0xc0, 0xc0, 0xc0));
+	palette_set_color(machine(), 0, MAKE_RGB(0x80, 0x80, 0x80));
+	palette_set_color(machine(), 1, MAKE_RGB(0x00, 0x00, 0x00));
+	palette_set_color(machine(), 2, MAKE_RGB(0x80, 0x80, 0x80));
+	palette_set_color(machine(), 3, MAKE_RGB(0xff, 0xff, 0xff));
+	palette_set_color(machine(), 4, MAKE_RGB(0x80, 0x80, 0x80));
+	palette_set_color(machine(), 5, MAKE_RGB(0xc0, 0xc0, 0xc0));
 }
 
 
-static READ8_HANDLER( cball_wram_r )
+READ8_MEMBER(cball_state::cball_wram_r)
 {
-	cball_state *state = space->machine().driver_data<cball_state>();
-
-	return state->m_video_ram[0x380 + offset];
+	return m_video_ram[0x380 + offset];
 }
 
 
-static WRITE8_HANDLER( cball_wram_w )
+WRITE8_MEMBER(cball_state::cball_wram_w)
 {
-	cball_state *state = space->machine().driver_data<cball_state>();
-
-	state->m_video_ram[0x380 + offset] = data;
+	m_video_ram[0x380 + offset] = data;
 }
 
 
 
-static ADDRESS_MAP_START( cpu_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( cpu_map, AS_PROGRAM, 8, cball_state )
 	ADDRESS_MAP_GLOBAL_MASK(0x7fff)
 
 	AM_RANGE(0x0000, 0x03ff) AM_READ(cball_wram_r) AM_MASK(0x7f)
@@ -138,7 +139,7 @@ static ADDRESS_MAP_START( cpu_map, AS_PROGRAM, 8 )
 	AM_RANGE(0x2800, 0x2800) AM_READ_PORT("2800")
 
 	AM_RANGE(0x0000, 0x03ff) AM_WRITE(cball_wram_w) AM_MASK(0x7f)
-	AM_RANGE(0x0400, 0x07ff) AM_WRITE(cball_vram_w) AM_BASE_MEMBER(cball_state, m_video_ram)
+	AM_RANGE(0x0400, 0x07ff) AM_WRITE(cball_vram_w) AM_SHARE("video_ram")
 	AM_RANGE(0x1800, 0x1800) AM_NOP /* watchdog? */
 	AM_RANGE(0x1810, 0x1811) AM_NOP
 	AM_RANGE(0x1820, 0x1821) AM_NOP
@@ -229,22 +230,17 @@ static MACHINE_CONFIG_START( cball, cball_state )
 	MCFG_CPU_ADD("maincpu", M6800, XTAL_12_096MHz / 16) /* ? */
 	MCFG_CPU_PROGRAM_MAP(cpu_map)
 
-	MCFG_MACHINE_START(cball)
-	MCFG_MACHINE_RESET(cball)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(256, 262)
 	MCFG_SCREEN_VISIBLE_AREA(0, 255, 0, 223)
-	MCFG_SCREEN_UPDATE(cball)
+	MCFG_SCREEN_UPDATE_DRIVER(cball_state, screen_update_cball)
 
 	MCFG_GFXDECODE(cball)
 	MCFG_PALETTE_LENGTH(6)
 
-	MCFG_PALETTE_INIT(cball)
-	MCFG_VIDEO_START(cball)
 
 	/* sound hardware */
 MACHINE_CONFIG_END
@@ -260,7 +256,7 @@ ROM_START( cball )
 	ROM_LOAD_NIB_HIGH( "canball.1j", 0x7c00, 0x0400, CRC(5b905d69) SHA1(2408dd6e44c51c0c9bdb82d2d33826c03f8308c4) )
 
 	ROM_REGION( 0x0200, "gfx1", 0 ) /* tiles */
-	ROM_LOAD_NIB_LOW ( "canball.6m", 0x0000, 0x0200, NO_DUMP )
+	ROM_LOAD_NIB_LOW ( "canball.6m", 0x0000, 0x0200, BAD_DUMP CRC(b2aa7578) SHA1(5c3eb80066420002bc3dcc7ca4ab6efad7ed4ae5) ) // missing rom, zerofilled
 	ROM_LOAD_NIB_HIGH( "canball.6l", 0x0000, 0x0200, CRC(5b1c9e88) SHA1(6e9630db9907170c53942a21302bcf8b721590a3) )
 
 	ROM_REGION( 0x0200, "gfx2", 0 ) /* sprites */
@@ -272,4 +268,4 @@ ROM_START( cball )
 ROM_END
 
 
-GAME( 1976, cball, 0, cball, cball, 0, ROT0, "Atari", "Cannonball (Atari, prototype)", GAME_NO_SOUND | GAME_WRONG_COLORS | GAME_IMPERFECT_GRAPHICS )
+GAME( 1976, cball, 0, cball, cball, driver_device, 0, ROT0, "Atari", "Cannonball (Atari, prototype)", GAME_NO_SOUND | GAME_WRONG_COLORS | GAME_IMPERFECT_GRAPHICS )

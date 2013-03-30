@@ -5,73 +5,73 @@ Shisen
 driver by Nicola Salmoria
 
 ***************************************************************************/
+
 #include "emu.h"
 #include "cpu/z80/z80.h"
-#include "deprecat.h"
 #include "audio/m72.h"
 #include "sound/dac.h"
 #include "sound/2151intf.h"
 #include "includes/shisen.h"
 
-static READ8_HANDLER( sichuan2_dsw1_r )
+READ8_MEMBER(shisen_state::sichuan2_dsw1_r)
 {
-	int ret = input_port_read(space->machine(), "DSW1");
+	int ret = ioport("DSW1")->read();
 
 	/* Based on the coin mode fill in the upper bits */
-	if (input_port_read(space->machine(), "DSW2") & 0x04)
+	if (ioport("DSW2")->read() & 0x04)
 	{
 		/* Mode 1 */
-		ret	|= (input_port_read(space->machine(), "DSW1") << 4);
+		ret |= (ioport("DSW1")->read() << 4);
 	}
 	else
 	{
 		/* Mode 2 */
-		ret	|= (input_port_read(space->machine(), "DSW1") & 0xf0);
+		ret |= (ioport("DSW1")->read() & 0xf0);
 	}
 
 	return ret;
 }
 
-static WRITE8_HANDLER( sichuan2_coin_w )
+WRITE8_MEMBER(shisen_state::sichuan2_coin_w)
 {
 	if ((data & 0xf9) != 0x01) logerror("coin ctrl = %02x\n",data);
 
-	coin_counter_w(space->machine(), 0, data & 0x02);
-	coin_counter_w(space->machine(), 1, data & 0x04);
+	coin_counter_w(machine(), 0, data & 0x02);
+	coin_counter_w(machine(), 1, data & 0x04);
 }
 
 
 
-static ADDRESS_MAP_START( shisen_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( shisen_map, AS_PROGRAM, 8, shisen_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0xbfff) AM_ROMBANK("bank1")
-	AM_RANGE(0xc800, 0xcaff) AM_RAM_WRITE(sichuan2_paletteram_w) AM_BASE_MEMBER(shisen_state, m_paletteram)
-	AM_RANGE(0xd000, 0xdfff) AM_RAM_WRITE(sichuan2_videoram_w) AM_BASE_MEMBER(shisen_state, m_videoram)
+	AM_RANGE(0xc800, 0xcaff) AM_RAM_WRITE(sichuan2_paletteram_w) AM_SHARE("paletteram")
+	AM_RANGE(0xd000, 0xdfff) AM_RAM_WRITE(sichuan2_videoram_w) AM_SHARE("videoram")
 	AM_RANGE(0xe000, 0xffff) AM_RAM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( shisen_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( shisen_io_map, AS_IO, 8, shisen_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0x00) AM_READWRITE(sichuan2_dsw1_r, sichuan2_coin_w)
-	AM_RANGE(0x01, 0x01) AM_READ_PORT("DSW2") AM_WRITE(m72_sound_command_byte_w)
+	AM_RANGE(0x01, 0x01) AM_READ_PORT("DSW2") AM_DEVWRITE_LEGACY("m72", m72_sound_command_byte_w)
 	AM_RANGE(0x02, 0x02) AM_READ_PORT("P1") AM_WRITE(sichuan2_bankswitch_w)
 	AM_RANGE(0x03, 0x03) AM_READ_PORT("P2")
 	AM_RANGE(0x04, 0x04) AM_READ_PORT("COIN")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( shisen_sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( shisen_sound_map, AS_PROGRAM, 8, shisen_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
 	AM_RANGE(0xfd00, 0xffff) AM_RAM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( shisen_sound_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( shisen_sound_io_map, AS_IO, 8, shisen_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x01) AM_DEVREADWRITE("ymsnd", ym2151_r, ym2151_w)
-	AM_RANGE(0x80, 0x80) AM_READ(soundlatch_r)
-	AM_RANGE(0x80, 0x81) AM_WRITE(shisen_sample_addr_w)
-	AM_RANGE(0x82, 0x82) AM_DEVWRITE("dac", m72_sample_w)
-	AM_RANGE(0x83, 0x83) AM_WRITE(m72_sound_irq_ack_w)
-	AM_RANGE(0x84, 0x84) AM_READ(m72_sample_r)
+	AM_RANGE(0x00, 0x01) AM_DEVREADWRITE("ymsnd", ym2151_device, read, write)
+	AM_RANGE(0x80, 0x80) AM_READ(soundlatch_byte_r)
+	AM_RANGE(0x80, 0x81) AM_DEVWRITE_LEGACY("m72", shisen_sample_addr_w)
+	AM_RANGE(0x82, 0x82) AM_DEVWRITE_LEGACY("m72", m72_sample_w)
+	AM_RANGE(0x83, 0x83) AM_DEVWRITE_LEGACY("m72", m72_sound_irq_ack_w)
+	AM_RANGE(0x84, 0x84) AM_DEVREAD_LEGACY("m72", m72_sample_r)
 ADDRESS_MAP_END
 
 
@@ -117,7 +117,7 @@ static INPUT_PORTS_START( shisen )
 	PORT_DIPSETTING(    0x08, DEF_STR( Normal ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( Hard ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) )
-	PORT_DIPNAME( 0xf0, 0xf0, DEF_STR( Coinage ) ) PORT_CONDITION("DSW2",0x04,PORTCOND_EQUALS,0x04) PORT_DIPLOCATION("SW1:5,6,7,8")
+	PORT_DIPNAME( 0xf0, 0xf0, DEF_STR( Coinage ) ) PORT_CONDITION("DSW2",0x04,EQUALS,0x04) PORT_DIPLOCATION("SW1:5,6,7,8")
 	PORT_DIPSETTING(    0xa0, DEF_STR( 6C_1C ) )
 	PORT_DIPSETTING(    0xb0, DEF_STR( 5C_1C ) )
 	PORT_DIPSETTING(    0xc0, DEF_STR( 4C_1C ) )
@@ -134,12 +134,12 @@ static INPUT_PORTS_START( shisen )
 	PORT_DIPSETTING(    0x60, DEF_STR( 1C_5C ) )
 	PORT_DIPSETTING(    0x50, DEF_STR( 1C_6C ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
-	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Coin_A ) ) PORT_CONDITION("DSW2",0x04,PORTCOND_NOTEQUALS,0x04) PORT_DIPLOCATION("SW1:5,6")
+	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Coin_A ) ) PORT_CONDITION("DSW2",0x04,NOTEQUALS,0x04) PORT_DIPLOCATION("SW1:5,6")
 	PORT_DIPSETTING(    0x00, DEF_STR( 5C_1C ) )
 	PORT_DIPSETTING(    0x10, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x30, DEF_STR( 1C_1C ) )
-	PORT_DIPNAME( 0xc0, 0xc0, DEF_STR( Coin_B ) ) PORT_CONDITION("DSW2",0x04,PORTCOND_NOTEQUALS,0x04) PORT_DIPLOCATION("SW1:7,8")
+	PORT_DIPNAME( 0xc0, 0xc0, DEF_STR( Coin_B ) ) PORT_CONDITION("DSW2",0x04,NOTEQUALS,0x04) PORT_DIPLOCATION("SW1:7,8")
 	PORT_DIPSETTING(    0xc0, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( 1C_3C ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( 1C_5C ) )
@@ -202,53 +202,42 @@ GFXDECODE_END
 
 
 
-static const ym2151_interface ym2151_config =
-{
-	m72_ym2151_irq_handler
-};
-
-
-
 static MACHINE_CONFIG_START( shisen, shisen_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, 6000000)	/* 6 MHz ? */
+	MCFG_CPU_ADD("maincpu", Z80, 6000000)   /* 6 MHz ? */
 	MCFG_CPU_PROGRAM_MAP(shisen_map)
 	MCFG_CPU_IO_MAP(shisen_io_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", shisen_state,  irq0_line_hold)
 
 	MCFG_CPU_ADD("soundcpu", Z80, 3579645)
 	MCFG_CPU_PROGRAM_MAP(shisen_sound_map)
 	MCFG_CPU_IO_MAP(shisen_sound_io_map)
-	MCFG_CPU_VBLANK_INT_HACK(nmi_line_pulse,128)	/* clocked by V1? (Vigilante) */
+	MCFG_CPU_PERIODIC_INT_DRIVER(shisen_state, nmi_line_pulse, 128*55)  /* clocked by V1? (Vigilante) */
 								/* IRQs are generated by main Z80 and YM2151 */
-
-	MCFG_SOUND_START(m72)
-	MCFG_SOUND_RESET(m72)
-
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(55)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 64*8-1, 0*8, 32*8-1)
-	MCFG_SCREEN_UPDATE(sichuan2)
+	MCFG_SCREEN_UPDATE_DRIVER(shisen_state, screen_update_sichuan2)
 
 	MCFG_GFXDECODE(shisen)
 	MCFG_PALETTE_LENGTH(256)
 
-	MCFG_VIDEO_START(sichuan2)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
 
-	MCFG_SOUND_ADD("ymsnd", YM2151, 3579545)
-	MCFG_SOUND_CONFIG(ym2151_config)
+	MCFG_SOUND_ADD("m72", M72, 0)
+
+	MCFG_YM2151_ADD("ymsnd", 3579545)
+	MCFG_YM2151_IRQ_HANDLER(WRITELINE(driver_device, member_wrapper_line<m72_ym2151_irq_handler>))
 	MCFG_SOUND_ROUTE(0, "lspeaker", 0.5)
 	MCFG_SOUND_ROUTE(1, "rspeaker", 0.5)
 
-	MCFG_SOUND_ADD("dac", DAC, 0)
+	MCFG_DAC_ADD("dac")
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "lspeaker", 0.25)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "rspeaker", 0.25)
 MACHINE_CONFIG_END
@@ -262,7 +251,7 @@ MACHINE_CONFIG_END
 ***************************************************************************/
 
 ROM_START( sichuan2 )
-	ROM_REGION( 0x30000, "maincpu", 0 )	/* 64k+128k for main CPU */
+	ROM_REGION( 0x30000, "maincpu", 0 ) /* 64k+128k for main CPU */
 	ROM_LOAD( "ic06.06",      0x00000, 0x10000, CRC(98a2459b) SHA1(42102cf2921f80be7600b11aba63538e3b3858ec) )
 	ROM_RELOAD(               0x10000, 0x10000 )
 	ROM_LOAD( "ic07.03",      0x20000, 0x10000, CRC(0350f6e2) SHA1(c683571969c0e4c66eb316a1bc580759db02bbfc) )
@@ -288,7 +277,7 @@ ROM_START( sichuan2 )
 	ROM_LOAD( "ic10.06",      0xe0000, 0x10000, CRC(473b349a) SHA1(9f5d08e07c8175bc7ec3854499177af2c398bd76) )
 	ROM_LOAD( "ic11.07",      0xf0000, 0x10000, CRC(d9a60285) SHA1(f8ef211e022e9c8ea25f6d8fb16266867656a591) )
 
-	ROM_REGION( 0x40000, "samples", 0 )	/* samples */
+	ROM_REGION( 0x40000, "samples", 0 ) /* samples */
 	ROM_LOAD( "ic02.02",      0x00000, 0x10000, CRC(92f0093d) SHA1(530b924aa991283045577d03524dfc7eacf1be49) )
 	ROM_LOAD( "ic03.03",      0x10000, 0x10000, CRC(116a049c) SHA1(656c0d1d7f945c5f5637892721a58421b682fd01) )
 	ROM_LOAD( "ic04.04",      0x20000, 0x10000, CRC(6840692b) SHA1(f6f7b063ecf7206e172843515be38376f8845b42) )
@@ -296,7 +285,7 @@ ROM_START( sichuan2 )
 ROM_END
 
 ROM_START( sichuan2a )
-	ROM_REGION( 0x30000, "maincpu", 0 )	/* 64k+128k for main CPU */
+	ROM_REGION( 0x30000, "maincpu", 0 ) /* 64k+128k for main CPU */
 	ROM_LOAD( "sichuan.a6",   0x00000, 0x10000, CRC(f8ac05ef) SHA1(cd20e5239d73264f1323ba6b1e35934685852ba1) )
 	ROM_RELOAD(               0x10000, 0x10000 )
 	ROM_LOAD( "ic07.03",      0x20000, 0x10000, CRC(0350f6e2) SHA1(c683571969c0e4c66eb316a1bc580759db02bbfc) )
@@ -322,7 +311,7 @@ ROM_START( sichuan2a )
 	ROM_LOAD( "ic10.06",      0xe0000, 0x10000, CRC(473b349a) SHA1(9f5d08e07c8175bc7ec3854499177af2c398bd76) )
 	ROM_LOAD( "ic11.07",      0xf0000, 0x10000, CRC(d9a60285) SHA1(f8ef211e022e9c8ea25f6d8fb16266867656a591) )
 
-	ROM_REGION( 0x40000, "samples", 0 )	/* samples */
+	ROM_REGION( 0x40000, "samples", 0 ) /* samples */
 	ROM_LOAD( "ic02.02",      0x00000, 0x10000, CRC(92f0093d) SHA1(530b924aa991283045577d03524dfc7eacf1be49) )
 	ROM_LOAD( "ic03.03",      0x10000, 0x10000, CRC(116a049c) SHA1(656c0d1d7f945c5f5637892721a58421b682fd01) )
 	ROM_LOAD( "ic04.04",      0x20000, 0x10000, CRC(6840692b) SHA1(f6f7b063ecf7206e172843515be38376f8845b42) )
@@ -330,7 +319,7 @@ ROM_START( sichuan2a )
 ROM_END
 
 ROM_START( shisen )
-	ROM_REGION( 0x30000, "maincpu", 0 )	/* 64k+128k for main CPU */
+	ROM_REGION( 0x30000, "maincpu", 0 ) /* 64k+128k for main CPU */
 	ROM_LOAD( "a-27-a.rom",   0x00000, 0x20000, CRC(de2ecf05) SHA1(7256c5587f92db10a52c43001e3236f3be3df5df) )
 	ROM_RELOAD(               0x10000, 0x20000 )
 
@@ -355,7 +344,7 @@ ROM_START( shisen )
 	ROM_LOAD( "ic10.06",      0xe0000, 0x10000, CRC(473b349a) SHA1(9f5d08e07c8175bc7ec3854499177af2c398bd76) )
 	ROM_LOAD( "ic11.07",      0xf0000, 0x10000, CRC(d9a60285) SHA1(f8ef211e022e9c8ea25f6d8fb16266867656a591) )
 
-	ROM_REGION( 0x40000, "samples", 0 )	/* samples */
+	ROM_REGION( 0x40000, "samples", 0 ) /* samples */
 	ROM_LOAD( "ic02.02",      0x00000, 0x10000, CRC(92f0093d) SHA1(530b924aa991283045577d03524dfc7eacf1be49) )
 	ROM_LOAD( "ic03.03",      0x10000, 0x10000, CRC(116a049c) SHA1(656c0d1d7f945c5f5637892721a58421b682fd01) )
 	ROM_LOAD( "ic04.04",      0x20000, 0x10000, CRC(6840692b) SHA1(f6f7b063ecf7206e172843515be38376f8845b42) )
@@ -402,7 +391,7 @@ ROMs  : (All ROMs type 27C512)
 */
 
 ROM_START( matchit )
-	ROM_REGION( 0x30000, "maincpu", 0 )	/* 64k+128k for main CPU */
+	ROM_REGION( 0x30000, "maincpu", 0 ) /* 64k+128k for main CPU */
 	ROM_LOAD( "2.11d",      0x00000, 0x10000, CRC(299815f7) SHA1(dd25f69d3c825e12e5c2e24b5bbfda9c39400345) )
 	ROM_RELOAD(               0x10000, 0x10000 )
 	ROM_LOAD( "ic07.03",      0x20000, 0x10000, CRC(0350f6e2) SHA1(c683571969c0e4c66eb316a1bc580759db02bbfc) )
@@ -428,12 +417,11 @@ ROM_START( matchit )
 	ROM_LOAD( "ic10.06",      0xe0000, 0x10000, CRC(473b349a) SHA1(9f5d08e07c8175bc7ec3854499177af2c398bd76) )
 	ROM_LOAD( "ic11.07",      0xf0000, 0x10000, CRC(d9a60285) SHA1(f8ef211e022e9c8ea25f6d8fb16266867656a591) )
 
-	ROM_REGION( 0x40000, "samples", ROMREGION_ERASE00 )	/* samples */
+	ROM_REGION( 0x40000, "samples", ROMREGION_ERASE00 ) /* samples */
 	/* no samples on this board */
 ROM_END
 
-GAME( 1989, matchit,  0,	     shisen,   matchit,  0, ROT0, "Tamtex",  "Match It", 0 )
-GAME( 1989, shisen,   matchit,   shisen,   shisen,   0, ROT0, "Tamtex",  "Shisensho - Joshiryo-Hen (Japan)", 0 )
-GAME( 1989, sichuan2, matchit,   shisen,   shisen,   0, ROT0, "hack", "Sichuan II (hack, set 1)", 0 )
-GAME( 1989, sichuan2a,matchit,   shisen,   shisen,   0, ROT0, "hack", "Sichuan II (hack, set 2)", 0 )
-
+GAME( 1989, matchit,  0,         shisen,   matchit, driver_device,  0, ROT0, "Tamtex",  "Match It", 0 )
+GAME( 1989, shisen,   matchit,   shisen,   shisen, driver_device,   0, ROT0, "Tamtex",  "Shisensho - Joshiryo-Hen (Japan)", 0 )
+GAME( 1989, sichuan2, matchit,   shisen,   shisen, driver_device,   0, ROT0, "hack", "Sichuan II (hack, set 1)", 0 )
+GAME( 1989, sichuan2a,matchit,   shisen,   shisen, driver_device,   0, ROT0, "hack", "Sichuan II (hack, set 2)", 0 )

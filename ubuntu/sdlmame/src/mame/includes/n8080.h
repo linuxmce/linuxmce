@@ -2,12 +2,14 @@
 class n8080_state : public driver_device
 {
 public:
-	n8080_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	n8080_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"),
+		m_colorram(*this, "colorram"){ }
 
 	/* memory pointers */
-	UINT8 * m_videoram;
-	UINT8 * m_colorram;	// for helifire
+	required_shared_ptr<UINT8> m_videoram;
+	optional_shared_ptr<UINT8> m_colorram;      // for helifire
 
 	/* video-related */
 	emu_timer* m_cannon_timer;
@@ -37,26 +39,56 @@ public:
 	int m_inte;
 
 	/* devices */
-	device_t *m_maincpu;
+	cpu_device *m_maincpu;
+	DECLARE_WRITE8_MEMBER(n8080_shift_bits_w);
+	DECLARE_WRITE8_MEMBER(n8080_shift_data_w);
+	DECLARE_READ8_MEMBER(n8080_shift_r);
+	DECLARE_WRITE8_MEMBER(n8080_video_control_w);
+	DECLARE_WRITE8_MEMBER(n8080_sound_1_w);
+	DECLARE_WRITE8_MEMBER(n8080_sound_2_w);
+	DECLARE_READ8_MEMBER(n8080_8035_p1_r);
+	DECLARE_READ8_MEMBER(n8080_8035_t0_r);
+	DECLARE_READ8_MEMBER(n8080_8035_t1_r);
+	DECLARE_READ8_MEMBER(helifire_8035_t0_r);
+	DECLARE_READ8_MEMBER(helifire_8035_t1_r);
+	DECLARE_READ8_MEMBER(helifire_8035_external_ram_r);
+	DECLARE_READ8_MEMBER(helifire_8035_p2_r);
+	DECLARE_WRITE8_MEMBER(n8080_dac_w);
+	DECLARE_WRITE8_MEMBER(helifire_dac_w);
+	DECLARE_WRITE8_MEMBER(helifire_sound_ctrl_w);
+	DECLARE_WRITE_LINE_MEMBER(n8080_inte_callback);
+	DECLARE_WRITE8_MEMBER(n8080_status_callback);
+	DECLARE_MACHINE_START(spacefev);
+	DECLARE_MACHINE_RESET(spacefev);
+	DECLARE_VIDEO_START(spacefev);
+	DECLARE_PALETTE_INIT(n8080);
+	DECLARE_MACHINE_START(sheriff);
+	DECLARE_MACHINE_RESET(sheriff);
+	DECLARE_VIDEO_START(sheriff);
+	DECLARE_MACHINE_START(helifire);
+	DECLARE_MACHINE_RESET(helifire);
+	DECLARE_VIDEO_START(helifire);
+	DECLARE_PALETTE_INIT(helifire);
+	DECLARE_MACHINE_START(spacefev_sound);
+	DECLARE_MACHINE_RESET(spacefev_sound);
+	DECLARE_MACHINE_START(sheriff_sound);
+	DECLARE_MACHINE_RESET(sheriff_sound);
+	DECLARE_MACHINE_START(helifire_sound);
+	DECLARE_MACHINE_RESET(helifire_sound);
+	DECLARE_MACHINE_START(n8080);
+	DECLARE_MACHINE_RESET(n8080);
+	UINT32 screen_update_spacefev(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_sheriff(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_helifire(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	void screen_eof_helifire(screen_device &screen, bool state);
+	TIMER_CALLBACK_MEMBER(spacefev_stop_red_cannon);
+	TIMER_DEVICE_CALLBACK_MEMBER(rst1_tick);
+	TIMER_DEVICE_CALLBACK_MEMBER(rst2_tick);
+	TIMER_DEVICE_CALLBACK_MEMBER(spacefev_vco_voltage_timer);
+	TIMER_DEVICE_CALLBACK_MEMBER(helifire_dac_volume_timer);
 };
 
-
-
 /*----------- defined in video/n8080.c -----------*/
-
-WRITE8_HANDLER( n8080_video_control_w );
-
-PALETTE_INIT( n8080 );
-PALETTE_INIT( helifire );
-
-VIDEO_START( spacefev );
-VIDEO_START( sheriff );
-VIDEO_START( helifire );
-SCREEN_UPDATE( spacefev );
-SCREEN_UPDATE( sheriff );
-SCREEN_UPDATE( helifire );
-SCREEN_EOF( helifire );
-
 void spacefev_start_red_cannon(running_machine &machine);
 
 /*----------- defined in audio/n8080.c -----------*/
@@ -64,13 +96,3 @@ void spacefev_start_red_cannon(running_machine &machine);
 MACHINE_CONFIG_EXTERN( spacefev_sound );
 MACHINE_CONFIG_EXTERN( sheriff_sound );
 MACHINE_CONFIG_EXTERN( helifire_sound );
-
-MACHINE_START( spacefev_sound );
-MACHINE_START( sheriff_sound );
-MACHINE_START( helifire_sound );
-MACHINE_RESET( spacefev_sound );
-MACHINE_RESET( sheriff_sound );
-MACHINE_RESET( helifire_sound );
-
-WRITE8_HANDLER( n8080_sound_1_w );
-WRITE8_HANDLER( n8080_sound_2_w );

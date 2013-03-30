@@ -11,8 +11,7 @@
 #include "includes/warpwarp.h"
 
 
-typedef struct _geebee_sound_state geebee_sound_state;
-struct _geebee_sound_state
+struct geebee_sound_state
 {
 	emu_timer *m_volume_timer;
 	UINT16 *m_decay;
@@ -29,7 +28,7 @@ INLINE geebee_sound_state *get_safe_token(device_t *device)
 	assert(device != NULL);
 	assert(device->type() == GEEBEE);
 
-	return (geebee_sound_state *)downcast<legacy_device_base *>(device)->token();
+	return (geebee_sound_state *)downcast<geebee_sound_device *>(device)->token();
 }
 
 static TIMER_CALLBACK( volume_decay )
@@ -51,28 +50,28 @@ WRITE8_DEVICE_HANDLER( geebee_sound_w )
 	if( state->m_sound_latch & 8 )
 	{
 		/*
-         * R24 is 10k, Rb is 0, C57 is 1uF
-         * charge time t1 = 0.693 * (R24 + Rb) * C57 -> 0.22176s
-         * discharge time t2 = 0.693 * (Rb) * C57 -> 0
-         * Then C33 is only charged via D6 (1N914), not discharged!
-         * Decay:
-         * discharge C33 (1uF) through R50 (22k) -> 0.14058s
-         */
+		 * R24 is 10k, Rb is 0, C57 is 1uF
+		 * charge time t1 = 0.693 * (R24 + Rb) * C57 -> 0.22176s
+		 * discharge time t2 = 0.693 * (Rb) * C57 -> 0
+		 * Then C33 is only charged via D6 (1N914), not discharged!
+		 * Decay:
+		 * discharge C33 (1uF) through R50 (22k) -> 0.14058s
+		 */
 		attotime period = attotime::from_hz(32768) * 14058 / 100000;
 		state->m_volume_timer->adjust(period, 0, period);
 	}
 	else
 	{
 		/*
-         * discharge only after R49 (100k) in the amplifier section,
-         * so the volume shouldn't very fast and only when the signal
-         * is gated through 6N (4066).
-         * I can only guess here that the decay should be slower,
-         * maybe half as fast?
-         */
+		 * discharge only after R49 (100k) in the amplifier section,
+		 * so the volume shouldn't very fast and only when the signal
+		 * is gated through 6N (4066).
+		 * I can only guess here that the decay should be slower,
+		 * maybe half as fast?
+		 */
 		attotime period = attotime::from_hz(32768) * 29060 / 100000;
 		state->m_volume_timer->adjust(period, 0, period);
-    }
+	}
 }
 
 static STREAM_UPDATE( geebee_sound_update )
@@ -144,20 +143,40 @@ static DEVICE_START( geebee_sound )
 	state->m_volume_timer = machine.scheduler().timer_alloc(FUNC(volume_decay), state);
 }
 
-DEVICE_GET_INFO( geebee_sound )
+const device_type GEEBEE = &device_creator<geebee_sound_device>;
+
+geebee_sound_device::geebee_sound_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, GEEBEE, "Gee Bee Custom", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
 {
-	switch (state)
-	{
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(geebee_sound_state);			break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME(geebee_sound);	break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "Gee Bee Custom");				break;
-		case DEVINFO_STR_SOURCE_FILE:						strcpy(info->s, __FILE__);						break;
-	}
+	m_token = global_alloc_clear(geebee_sound_state);
 }
 
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
 
-DEFINE_LEGACY_SOUND_DEVICE(GEEBEE, geebee_sound);
+void geebee_sound_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void geebee_sound_device::device_start()
+{
+	DEVICE_START_NAME( geebee_sound )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void geebee_sound_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}

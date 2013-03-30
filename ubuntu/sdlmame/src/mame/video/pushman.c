@@ -7,35 +7,34 @@
 
 ***************************************************************************/
 
-static TILEMAP_MAPPER( background_scan_rows )
+TILEMAP_MAPPER_MEMBER(pushman_state::background_scan_rows)
 {
 	/* logical (col,row) -> memory offset */
 	return ((col & 0x7)) + ((7 - (row & 0x7)) << 3) + ((col & 0x78) << 3) + ((0x38 - (row & 0x38)) << 7);
 }
 
-static TILE_GET_INFO( get_back_tile_info )
+TILE_GET_INFO_MEMBER(pushman_state::get_back_tile_info)
 {
-	UINT8 *bg_map = machine.region("gfx4")->base();
+	UINT8 *bg_map = machine().root_device().memregion("gfx4")->base();
 	int tile;
 
 	tile = bg_map[tile_index << 1] + (bg_map[(tile_index << 1) + 1] << 8);
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			2,
 			(tile & 0xff) | ((tile & 0x4000) >> 6),
 			(tile >> 8) & 0xf,
 			(tile & 0x2000) ? TILE_FLIPX : 0);
 }
 
-static TILE_GET_INFO( get_text_tile_info )
+TILE_GET_INFO_MEMBER(pushman_state::get_text_tile_info)
 {
-	pushman_state *state = machine.driver_data<pushman_state>();
 
-	int tile = state->m_videoram[tile_index];
-	SET_TILE_INFO(
+	int tile = m_videoram[tile_index];
+	SET_TILE_INFO_MEMBER(
 			0,
 			(tile & 0xff) | ((tile & 0xc000) >> 6) | ((tile & 0x2000) >> 3),
 			(tile >> 8) & 0xf,
-			(tile & 0x1000) ? TILE_FLIPY : 0);	/* not used? from Tiger Road */
+			(tile & 0x1000) ? TILE_FLIPY : 0);  /* not used? from Tiger Road */
 }
 
 
@@ -46,14 +45,13 @@ static TILE_GET_INFO( get_text_tile_info )
 
 ***************************************************************************/
 
-VIDEO_START( pushman )
+void pushman_state::video_start()
 {
-	pushman_state *state = machine.driver_data<pushman_state>();
 
-	state->m_bg_tilemap = tilemap_create(machine, get_back_tile_info, background_scan_rows, 32, 32, 128, 64);
-	state->m_tx_tilemap = tilemap_create(machine, get_text_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(pushman_state::get_back_tile_info),this), tilemap_mapper_delegate(FUNC(pushman_state::background_scan_rows),this), 32, 32, 128, 64);
+	m_tx_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(pushman_state::get_text_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
 
-	tilemap_set_transparent_pen(state->m_tx_tilemap, 3);
+	m_tx_tilemap->set_transparent_pen(3);
 }
 
 
@@ -64,17 +62,15 @@ VIDEO_START( pushman )
 
 ***************************************************************************/
 
-WRITE16_HANDLER( pushman_scroll_w )
+WRITE16_MEMBER(pushman_state::pushman_scroll_w)
 {
-	pushman_state *state = space->machine().driver_data<pushman_state>();
-	COMBINE_DATA(&state->m_control[offset]);
+	COMBINE_DATA(&m_control[offset]);
 }
 
-WRITE16_HANDLER( pushman_videoram_w )
+WRITE16_MEMBER(pushman_state::pushman_videoram_w)
 {
-	pushman_state *state = space->machine().driver_data<pushman_state>();
-	COMBINE_DATA(&state->m_videoram[offset]);
-	tilemap_mark_tile_dirty(state->m_tx_tilemap, offset);
+	COMBINE_DATA(&m_videoram[offset]);
+	m_tx_tilemap->mark_tile_dirty(offset);
 }
 
 
@@ -85,7 +81,7 @@ WRITE16_HANDLER( pushman_videoram_w )
 
 ***************************************************************************/
 
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	pushman_state *state = machine.driver_data<pushman_state>();
 	UINT16 *spriteram = state->m_spriteram;
@@ -105,9 +101,9 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 		sprite = spriteram[offs] & 0x7ff;
 		/* ElSemi - Sprite flip info */
 		flipx = spriteram[offs + 1] & 2;
-		flipy = spriteram[offs + 1] & 1;	/* flip y untested */
+		flipy = spriteram[offs + 1] & 1;    /* flip y untested */
 
-		if (flip_screen_get(machine))
+		if (state->flip_screen())
 		{
 			x = 240 - x;
 			y = 240 - y;
@@ -116,20 +112,19 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 		}
 
 		drawgfx_transpen(bitmap,cliprect,machine.gfx[1], sprite,
-                color, flipx, flipy, x, y, 15);
+				color, flipx, flipy, x, y, 15);
 	}
 }
 
-SCREEN_UPDATE( pushman )
+UINT32 pushman_state::screen_update_pushman(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	pushman_state *state = screen->machine().driver_data<pushman_state>();
 
 	/* Setup the tilemaps */
-	tilemap_set_scrollx(state->m_bg_tilemap, 0, state->m_control[0]);
-	tilemap_set_scrolly(state->m_bg_tilemap, 0, 0xf00 - state->m_control[1]);
+	m_bg_tilemap->set_scrollx(0, m_control[0]);
+	m_bg_tilemap->set_scrolly(0, 0xf00 - m_control[1]);
 
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
-	draw_sprites(screen->machine(), bitmap, cliprect);
-	tilemap_draw(bitmap, cliprect, state->m_tx_tilemap, 0, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
+	draw_sprites(machine(), bitmap, cliprect);
+	m_tx_tilemap->draw(bitmap, cliprect, 0, 0);
 	return 0;
 }

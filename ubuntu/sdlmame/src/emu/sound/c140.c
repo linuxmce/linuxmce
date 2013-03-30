@@ -65,29 +65,28 @@ struct voice_registers
 	UINT8 reserved[4];
 };
 
-typedef struct
+struct VOICE
 {
-	long	ptoffset;
-	long	pos;
-	long	key;
+	long    ptoffset;
+	long    pos;
+	long    key;
 	//--work
-	long	lastdt;
-	long	prevdt;
-	long	dltdt;
+	long    lastdt;
+	long    prevdt;
+	long    dltdt;
 	//--reg
-	long	rvol;
-	long	lvol;
-	long	frequency;
-	long	bank;
-	long	mode;
+	long    rvol;
+	long    lvol;
+	long    frequency;
+	long    bank;
+	long    mode;
 
-	long	sample_start;
-	long	sample_end;
-	long	sample_loop;
-} VOICE;
+	long    sample_start;
+	long    sample_end;
+	long    sample_loop;
+};
 
-typedef struct _c140_state c140_state;
-struct _c140_state
+struct c140_state
 {
 	int sample_rate;
 	sound_stream *stream;
@@ -100,7 +99,7 @@ struct _c140_state
 	void *pRom;
 	UINT8 REG[0x200];
 
-	INT16 pcmtbl[8];		//2000.06.26 CAB
+	INT16 pcmtbl[8];        //2000.06.26 CAB
 
 	VOICE voi[MAX_VOICE];
 };
@@ -109,7 +108,7 @@ INLINE c140_state *get_safe_token(device_t *device)
 {
 	assert(device != NULL);
 	assert(device->type() == C140);
-	return (c140_state *)downcast<legacy_device_base *>(device)->token();
+	return (c140_state *)downcast<c140_device *>(device)->token();
 }
 
 
@@ -156,31 +155,10 @@ static long find_sample(c140_state *info, long adrs, long bank, int voice)
 			newadr = ((adrs&0x200000)>>2)|(adrs&0x7ffff);
 			break;
 
-		case C140_TYPE_SYSTEM21_A:
-			// System 21 type A (simple) banking.
+		case C140_TYPE_SYSTEM21:
+			// System 21 banking.
 			// similar to System 2's.
 			newadr = ((adrs&0x300000)>>1)+(adrs&0x7ffff);
-			break;
-
-		case C140_TYPE_SYSTEM21_B:
-			// System 21 type B (chip select) banking
-
-			// get base address of sample inside the bank
-			newadr = ((adrs&0x100000)>>2) + (adrs&0x3ffff);
-
-			// now add the starting bank offsets based on the 2
-			// chip select bits.
-			// 0x40000 picks individual 512k ROMs
-			if (adrs & 0x40000)
-			{
-				newadr += 0x80000;
-			}
-
-			// and 0x200000 which group of chips...
-			if (adrs & 0x200000)
-			{
-				newadr += 0x100000;
-			}
 			break;
 
 		case C140_TYPE_ASIC219:
@@ -261,28 +239,28 @@ void c140_set_base(device_t *device, void *base)
 
 INLINE int limit(INT32 in)
 {
-	if(in>0x7fff)		return 0x7fff;
-	else if(in<-0x8000)	return -0x8000;
+	if(in>0x7fff)       return 0x7fff;
+	else if(in<-0x8000) return -0x8000;
 	return in;
 }
 
 static STREAM_UPDATE( update_stereo )
 {
 	c140_state *info = (c140_state *)param;
-	int		i,j;
+	int     i,j;
 
-	INT32	rvol,lvol;
-	INT32	dt;
-	INT32	sdt;
-	INT32	st,ed,sz;
+	INT32   rvol,lvol;
+	INT32   dt;
+	INT32   sdt;
+	INT32   st,ed,sz;
 
-	INT8	*pSampleData;
-	INT32	frequency,delta,offset,pos;
-	INT32	cnt, voicecnt;
-	INT32	lastdt,prevdt,dltdt;
-	float	pbase=(float)info->baserate*2.0 / (float)info->sample_rate;
+	INT8    *pSampleData;
+	INT32   frequency,delta,offset,pos;
+	INT32   cnt, voicecnt;
+	INT32   lastdt,prevdt,dltdt;
+	float   pbase=(float)info->baserate*2.0 / (float)info->sample_rate;
 
-	INT16	*lmix, *rmix;
+	INT16   *lmix, *rmix;
 
 	if(samples>info->sample_rate) samples=info->sample_rate;
 
@@ -363,10 +341,10 @@ static STREAM_UPDATE( update_stereo )
 						/* Read the chosen sample byte */
 						dt=pSampleData[pos];
 
-						/* decompress to 13bit range */		//2000.06.26 CAB
-						sdt=dt>>3;				//signed
-						if(sdt<0)	sdt = (sdt<<(dt&7)) - info->pcmtbl[dt&7];
-						else		sdt = (sdt<<(dt&7)) + info->pcmtbl[dt&7];
+						/* decompress to 13bit range */     //2000.06.26 CAB
+						sdt=dt>>3;              //signed
+						if(sdt<0)   sdt = (sdt<<(dt&7)) - info->pcmtbl[dt&7];
+						else        sdt = (sdt<<(dt&7)) + info->pcmtbl[dt&7];
 
 						prevdt=lastdt;
 						lastdt=sdt;
@@ -463,7 +441,7 @@ static STREAM_UPDATE( update_stereo )
 
 static DEVICE_START( c140 )
 {
-	const c140_interface *intf = (const c140_interface *)device->baseconfig().static_config();
+	const c140_interface *intf = (const c140_interface *)device->static_config();
 	c140_state *info = get_safe_token(device);
 
 	info->sample_rate=info->baserate=device->clock();
@@ -474,13 +452,13 @@ static DEVICE_START( c140 )
 
 	info->pRom=*device->region();
 
-	/* make decompress pcm table */		//2000.06.26 CAB
+	/* make decompress pcm table */     //2000.06.26 CAB
 	{
 		int i;
 		INT32 segbase=0;
 		for(i=0;i<8;i++)
 		{
-			info->pcmtbl[i]=segbase;	//segment base value
+			info->pcmtbl[i]=segbase;    //segment base value
 			segbase += 16<<i;
 		}
 	}
@@ -496,33 +474,40 @@ static DEVICE_START( c140 )
 	info->mixer_buffer_right = info->mixer_buffer_left + info->sample_rate;
 }
 
+const device_type C140 = &device_creator<c140_device>;
 
-
-
-/**************************************************************************
- * Generic get_info
- **************************************************************************/
-
-DEVICE_GET_INFO( c140 )
+c140_device::c140_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, C140, "C140", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
 {
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(c140_state);			break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME( c140 );		break;
-		case DEVINFO_FCT_STOP:							/* nothing */								break;
-		case DEVINFO_FCT_RESET:							/* nothing */								break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "C140");					break;
-		case DEVINFO_STR_FAMILY:					strcpy(info->s, "Namco PCM");				break;
-		case DEVINFO_STR_VERSION:					strcpy(info->s, "1.0");						break;
-		case DEVINFO_STR_SOURCE_FILE:						strcpy(info->s, __FILE__);					break;
-		case DEVINFO_STR_CREDITS:					strcpy(info->s, "Copyright Nicola Salmoria and the MAME Team"); break;
-	}
+	m_token = global_alloc_clear(c140_state);
 }
 
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
 
-DEFINE_LEGACY_SOUND_DEVICE(C140, c140);
+void c140_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void c140_device::device_start()
+{
+	DEVICE_START_NAME( c140 )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void c140_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}

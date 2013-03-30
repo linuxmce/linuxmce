@@ -7,22 +7,24 @@
 class epos_state : public driver_device
 {
 public:
-	epos_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	epos_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"){ }
 
 	/* memory pointers */
-	UINT8 *  m_videoram;
-	size_t   m_videoram_size;
+	required_shared_ptr<UINT8> m_videoram;
 
 	/* video-related */
 	UINT8    m_palette;
 
 	/* misc */
 	int      m_counter;
+	DECLARE_WRITE8_MEMBER(dealer_decrypt_rom);
+	DECLARE_WRITE8_MEMBER(epos_port_1_w);
+	DECLARE_WRITE8_MEMBER(write_prtc);
+	DECLARE_DRIVER_INIT(dealer);
+	virtual void machine_reset();
+	DECLARE_MACHINE_START(epos);
+	DECLARE_MACHINE_START(dealer);
+	UINT32 screen_update_epos(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
 };
-
-
-/*----------- defined in video/epos.c -----------*/
-
-WRITE8_HANDLER( epos_port_1_w );
-SCREEN_UPDATE( epos );

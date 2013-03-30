@@ -27,6 +27,9 @@ TO DO :
   - sound too fast in Maddonna?
   - layer order register?
 
+NOTE: An eBay auction of the PCB shows "1996.9.16 PROMAT" on the JAMMA+ adapter for
+      One Shot One Kill.  This information was used for the year & manufacturer.
+
 */
 
 #include "emu.h"
@@ -36,64 +39,60 @@ TO DO :
 #include "sound/okim6295.h"
 #include "sound/3812intf.h"
 
-static READ16_HANDLER( oneshot_in0_word_r )
+READ16_MEMBER(oneshot_state::oneshot_in0_word_r)
 {
-	oneshot_state *state = space->machine().driver_data<oneshot_state>();
-	int data = input_port_read(space->machine(), "DSW1");
+	int data = ioport("DSW1")->read();
 
 	switch (data & 0x0c)
 	{
 		case 0x00 :
-			state->m_gun_x_shift = 35;
+			m_gun_x_shift = 35;
 			break;
 		case 0x04 :
-			state->m_gun_x_shift = 30;
+			m_gun_x_shift = 30;
 			break;
 		case 0x08 :
-			state->m_gun_x_shift = 40;
+			m_gun_x_shift = 40;
 			break;
 		case 0x0c :
-			state->m_gun_x_shift = 50;
+			m_gun_x_shift = 50;
 			break;
 	}
 
 	return data;
 }
 
-static READ16_HANDLER( oneshot_gun_x_p1_r )
+READ16_MEMBER(oneshot_state::oneshot_gun_x_p1_r)
 {
-	oneshot_state *state = space->machine().driver_data<oneshot_state>();
 
 	/* shots must be in a different location to register */
-	state->m_p1_wobble ^= 1;
+	m_p1_wobble ^= 1;
 
-	return state->m_gun_x_p1 ^ state->m_p1_wobble;
+	return m_gun_x_p1 ^ m_p1_wobble;
 }
 
-static READ16_HANDLER( oneshot_gun_y_p1_r )
+READ16_MEMBER(oneshot_state::oneshot_gun_y_p1_r)
 {
-	oneshot_state *state = space->machine().driver_data<oneshot_state>();
-	return state->m_gun_y_p1;
+	return m_gun_y_p1;
 }
 
-static READ16_HANDLER( oneshot_gun_x_p2_r )
+READ16_MEMBER(oneshot_state::oneshot_gun_x_p2_r)
 {
-	oneshot_state *state = space->machine().driver_data<oneshot_state>();
 
 	/* shots must be in a different location to register */
-	state->m_p2_wobble ^= 1;
+	m_p2_wobble ^= 1;
 
-	return state->m_gun_x_p2 ^ state->m_p2_wobble;
+	return m_gun_x_p2 ^ m_p2_wobble;
 }
 
-static READ16_HANDLER( oneshot_gun_y_p2_r )
+READ16_MEMBER(oneshot_state::oneshot_gun_y_p2_r)
 {
-	oneshot_state *state = space->machine().driver_data<oneshot_state>();
-	return state->m_gun_y_p2;
+	return m_gun_y_p2;
 }
 
-static WRITE16_DEVICE_HANDLER( soundbank_w )
+WRITE16_MEMBER(oneshot_state::soundbank_w)
 {
+	device_t *device = machine().device("oki");
 	if (ACCESSING_BITS_0_7)
 	{
 		downcast<okim6295_device *>(device)->set_bank_base(0x40000 * ((data & 0x03) ^ 0x03));
@@ -102,18 +101,18 @@ static WRITE16_DEVICE_HANDLER( soundbank_w )
 
 
 
-static ADDRESS_MAP_START( oneshot_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( oneshot_map, AS_PROGRAM, 16, oneshot_state )
 	AM_RANGE(0x000000, 0x03ffff) AM_ROM
 	AM_RANGE(0x080000, 0x087fff) AM_RAM
-	AM_RANGE(0x0c0000, 0x0c07ff) AM_RAM_WRITE(paletteram16_xBBBBBGGGGGRRRRR_word_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0x120000, 0x120fff) AM_RAM AM_BASE_MEMBER(oneshot_state, m_sprites)
-	AM_RANGE(0x180000, 0x180fff) AM_RAM_WRITE(oneshot_mid_videoram_w) AM_BASE_MEMBER(oneshot_state, m_mid_videoram) // some people , girl etc.
-	AM_RANGE(0x181000, 0x181fff) AM_RAM_WRITE(oneshot_fg_videoram_w) AM_BASE_MEMBER(oneshot_state, m_fg_videoram) // credits etc.
-	AM_RANGE(0x182000, 0x182fff) AM_RAM_WRITE(oneshot_bg_videoram_w) AM_BASE_MEMBER(oneshot_state, m_bg_videoram) // credits etc.
-	AM_RANGE(0x188000, 0x18800f) AM_WRITEONLY AM_BASE_MEMBER(oneshot_state, m_scroll)	// scroll registers
+	AM_RANGE(0x0c0000, 0x0c07ff) AM_RAM_WRITE(paletteram_xBBBBBGGGGGRRRRR_word_w) AM_SHARE("paletteram")
+	AM_RANGE(0x120000, 0x120fff) AM_RAM AM_SHARE("sprites")
+	AM_RANGE(0x180000, 0x180fff) AM_RAM_WRITE(oneshot_mid_videoram_w) AM_SHARE("mid_videoram") // some people , girl etc.
+	AM_RANGE(0x181000, 0x181fff) AM_RAM_WRITE(oneshot_fg_videoram_w) AM_SHARE("fg_videoram") // credits etc.
+	AM_RANGE(0x182000, 0x182fff) AM_RAM_WRITE(oneshot_bg_videoram_w) AM_SHARE("bg_videoram") // credits etc.
+	AM_RANGE(0x188000, 0x18800f) AM_WRITEONLY AM_SHARE("scroll")    // scroll registers
 	AM_RANGE(0x190002, 0x190003) AM_READ(soundlatch_word_r)
 	AM_RANGE(0x190010, 0x190011) AM_WRITE(soundlatch_word_w)
-	AM_RANGE(0x190018, 0x190019) AM_DEVWRITE("oki", soundbank_w)
+	AM_RANGE(0x190018, 0x190019) AM_WRITE(soundbank_w)
 	AM_RANGE(0x190026, 0x190027) AM_READ(oneshot_gun_x_p1_r)
 	AM_RANGE(0x19002e, 0x19002f) AM_READ(oneshot_gun_x_p2_r)
 	AM_RANGE(0x190036, 0x190037) AM_READ(oneshot_gun_y_p1_r)
@@ -125,59 +124,59 @@ static ADDRESS_MAP_START( oneshot_map, AS_PROGRAM, 16 )
 	AM_RANGE(0x19c034, 0x19c035) AM_READ_PORT("P2")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( oneshot_sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( oneshot_sound_map, AS_PROGRAM, 8, oneshot_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
-	AM_RANGE(0x8000, 0x8000) AM_READWRITE(soundlatch_r,soundlatch_w)
+	AM_RANGE(0x8000, 0x8000) AM_READWRITE(soundlatch_byte_r,soundlatch_byte_w)
 	AM_RANGE(0x8001, 0x87ff) AM_RAM
-	AM_RANGE(0xe000, 0xe001) AM_DEVREADWRITE("ymsnd", ym3812_r,ym3812_w)
-	AM_RANGE(0xe010, 0xe010) AM_DEVREADWRITE_MODERN("oki", okim6295_device, read, write)
+	AM_RANGE(0xe000, 0xe001) AM_DEVREADWRITE_LEGACY("ymsnd", ym3812_r,ym3812_w)
+	AM_RANGE(0xe010, 0xe010) AM_DEVREADWRITE("oki", okim6295_device, read, write)
 ADDRESS_MAP_END
 
 
 static INPUT_PORTS_START( oneshot )
-	PORT_START("DSW1")	/* 0x19c020.l -> 0x08006c.l */
-	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Coinage ) )		// 0x080084.l : credits (00-09)
+	PORT_START("DSW1")  /* 0x19c020.l -> 0x08006c.l */
+	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Coinage ) )      // 0x080084.l : credits (00-09)
 	PORT_DIPSETTING(    0x03, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( 1C_2C ) )
-	PORT_DIPNAME( 0x0c, 0x00, "Gun X Shift Left" )		// 0x0824ec.l (not in "test mode")
+	PORT_DIPNAME( 0x0c, 0x00, "Gun X Shift Left" )      // 0x0824ec.l (not in "test mode")
 	PORT_DIPSETTING(    0x04, "30" )
 	PORT_DIPSETTING(    0x00, "35" )
 	PORT_DIPSETTING(    0x08, "40" )
 	PORT_DIPSETTING(    0x0c, "50" )
-	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Demo_Sounds ) )	// 0x082706.l - to be confirmed
+	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Demo_Sounds ) )  // 0x082706.l - to be confirmed
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x10, DEF_STR( On ) )
-	PORT_SERVICE( 0x20, IP_ACTIVE_HIGH )			// 0x0824fe.l
-	PORT_DIPNAME( 0x40, 0x00, "Start Round" )			// 0x08224e.l
+	PORT_SERVICE( 0x20, IP_ACTIVE_HIGH )            // 0x0824fe.l
+	PORT_DIPNAME( 0x40, 0x00, "Start Round" )           // 0x08224e.l
 	PORT_DIPSETTING(    0x00, "Gun Trigger" )
 	PORT_DIPSETTING(    0x40, "Start Button" )
-	PORT_DIPNAME( 0x80, 0x00, "Gun Test" )			// 0x082286.l
+	PORT_DIPNAME( 0x80, 0x00, "Gun Test" )          // 0x082286.l
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( On ) )
 
-	PORT_START("DSW2")	/* 0x19c024.l -> 0x08006e.l */
-	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Lives ) )		// 0x082500.l
+	PORT_START("DSW2")  /* 0x19c024.l -> 0x08006e.l */
+	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Lives ) )        // 0x082500.l
 	PORT_DIPSETTING(    0x01, "1" )
 	PORT_DIPSETTING(    0x02, "2" )
 	PORT_DIPSETTING(    0x00, "3" )
 	PORT_DIPSETTING(    0x03, "5" )
 	PORT_DIPUNUSED( 0x04, IP_ACTIVE_HIGH )
 	PORT_DIPUNUSED( 0x08, IP_ACTIVE_HIGH )
-	PORT_DIPNAME( 0x30, 0x00, DEF_STR( Difficulty ) )	// 0x082506.l
-	PORT_DIPSETTING(    0x10, DEF_STR( Easy ) )				// 0
-	PORT_DIPSETTING(    0x00, DEF_STR( Normal ) )			// 1
-	PORT_DIPSETTING(    0x20, DEF_STR( Hard ) )				// 2
-	PORT_DIPSETTING(    0x30, DEF_STR( Hardest ) )			// 3
-	PORT_DIPNAME( 0x40, 0x00, "Round Select" )		// 0x082f16.l - only after 1st stage
-	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )		// "On"  in the "test mode"
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )			// "Off" in the "test mode"
-	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Free_Play ) )	// 0x0800ca.l
+	PORT_DIPNAME( 0x30, 0x00, DEF_STR( Difficulty ) )   // 0x082506.l
+	PORT_DIPSETTING(    0x10, DEF_STR( Easy ) )             // 0
+	PORT_DIPSETTING(    0x00, DEF_STR( Normal ) )           // 1
+	PORT_DIPSETTING(    0x20, DEF_STR( Hard ) )             // 2
+	PORT_DIPSETTING(    0x30, DEF_STR( Hardest ) )          // 3
+	PORT_DIPNAME( 0x40, 0x00, "Round Select" )      // 0x082f16.l - only after 1st stage
+	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )      // "On"  in the "test mode"
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )           // "Off" in the "test mode"
+	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Free_Play ) )    // 0x0800ca.l
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( On ) )
 
-	PORT_START("CREDITS")	/* 0x19c02c.l -> 0x08007a.l */
+	PORT_START("CREDITS")   /* 0x19c02c.l -> 0x08007a.l */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_UNKNOWN )
@@ -187,7 +186,7 @@ static INPUT_PORTS_START( oneshot )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_START2 )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 
-	PORT_START("P1")	/* Player 1 Gun Trigger (0x19c030.l) */
+	PORT_START("P1")    /* Player 1 Gun Trigger (0x19c030.l) */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_UNKNOWN )
@@ -197,7 +196,7 @@ static INPUT_PORTS_START( oneshot )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 
-	PORT_START("P2")	/* Player 2 Gun Trigger (0x19c034.l) */
+	PORT_START("P2")    /* Player 2 Gun Trigger (0x19c034.l) */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_UNKNOWN )
@@ -207,16 +206,16 @@ static INPUT_PORTS_START( oneshot )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 
-	PORT_START("LIGHT0_X")	/* Player 1 Gun X       ($190026.l) */
+	PORT_START("LIGHT0_X")  /* Player 1 Gun X       ($190026.l) */
 	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_X ) PORT_CROSSHAIR(X, 1.0, 0.0, 0) PORT_SENSITIVITY(35) PORT_KEYDELTA(15) PORT_PLAYER(1)
 
-	PORT_START("LIGHT0_Y")	/* Player 1 Gun Y       ($190036.l) */
+	PORT_START("LIGHT0_Y")  /* Player 1 Gun Y       ($190036.l) */
 	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_Y ) PORT_CROSSHAIR(Y, 1.0, 0.0, 0) PORT_SENSITIVITY(35) PORT_KEYDELTA(15) PORT_PLAYER(1)
 
-	PORT_START("LIGHT1_X")	/* Player 2 Gun X       ($19002e.l) */
+	PORT_START("LIGHT1_X")  /* Player 2 Gun X       ($19002e.l) */
 	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_X ) PORT_CROSSHAIR(X, 1.0, 0.0, 0) PORT_SENSITIVITY(35) PORT_KEYDELTA(15) PORT_PLAYER(2)
 
-	PORT_START("LIGHT1_Y")	/* Player 2 Gun Y       ($19003e.l) */
+	PORT_START("LIGHT1_Y")  /* Player 2 Gun Y       ($19003e.l) */
 	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_Y ) PORT_CROSSHAIR(Y, 1.0, 0.0, 0) PORT_SENSITIVITY(35) PORT_KEYDELTA(15) PORT_PLAYER(2)
 
 INPUT_PORTS_END
@@ -231,26 +230,26 @@ static INPUT_PORTS_START( maddonna )
 	PORT_DIPNAME( 0x04, 0x04, "Girl Pictures" )
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( On ) )
-	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Unknown ) )		// Not defined in the manual
+	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Unknown ) )      // Not defined in the manual
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( On ) )
 	PORT_DIPNAME( 0x10, 0x00, DEF_STR( Demo_Sounds ) )
 	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Unknown ) )		// Not defined in the manual
+	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Unknown ) )      // Not defined in the manual
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( On ) )
-	PORT_DIPNAME( 0x40, 0x00, "Invulnerability" )		// This one was not defined in the manual
+	PORT_DIPNAME( 0x40, 0x00, "Invulnerability" )       // This one was not defined in the manual
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( On ) )
 	PORT_SERVICE( 0x80, IP_ACTIVE_HIGH )
 
 	PORT_START("DSW2")
 	PORT_DIPNAME( 0x03, 0x02, DEF_STR( Difficulty ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( Easy ) )				// 2 Monsters at start, but "dumber"??
-	PORT_DIPSETTING(    0x01, DEF_STR( Normal ) )			// 2 Monsters at start
-	PORT_DIPSETTING(    0x02, DEF_STR( Hard ) )				// 3 Monsters at start
-	PORT_DIPSETTING(    0x03, DEF_STR( Hardest ) )			// 4 Monsters at start
+	PORT_DIPSETTING(    0x00, DEF_STR( Easy ) )             // 2 Monsters at start, but "dumber"??
+	PORT_DIPSETTING(    0x01, DEF_STR( Normal ) )           // 2 Monsters at start
+	PORT_DIPSETTING(    0x02, DEF_STR( Hard ) )             // 3 Monsters at start
+	PORT_DIPSETTING(    0x03, DEF_STR( Hardest ) )          // 4 Monsters at start
 	PORT_DIPNAME( 0x0c, 0x08, "Time Per Round" )
 	PORT_DIPSETTING(    0x08, "80 Seconds" )
 	PORT_DIPSETTING(    0x04, "90 Seconds" )
@@ -259,12 +258,12 @@ static INPUT_PORTS_START( maddonna )
 	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Lives ) )
 	PORT_DIPSETTING(    0x10, "3" )
 	PORT_DIPSETTING(    0x00, "5" )
-	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Unknown ) )		// Not defined in the manual
+	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Unknown ) )      // Not defined in the manual
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( On ) )
-	PORT_DIPNAME( 0xc0, 0x00, "Hurry Up!" )			// Controls "Hurry Up!" banner & Vampire - Not defined the in manual
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )		// No Hurry up
-	PORT_DIPSETTING(    0x40, "On - 10" )			// The rest show the banner but is there a difference in how the Vampire shows up???
+	PORT_DIPNAME( 0xc0, 0x00, "Hurry Up!" )         // Controls "Hurry Up!" banner & Vampire - Not defined the in manual
+	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )      // No Hurry up
+	PORT_DIPSETTING(    0x40, "On - 10" )           // The rest show the banner but is there a difference in how the Vampire shows up???
 	PORT_DIPSETTING(    0x80, "On - 01" )
 	PORT_DIPSETTING(    0xc0, "On - 11" )
 
@@ -307,9 +306,9 @@ static const gfx_layout oneshot16x16_layout =
 	8,
 	{ RGN_FRAC(0,8),RGN_FRAC(1,8),RGN_FRAC(2,8),RGN_FRAC(3,8),RGN_FRAC(4,8),RGN_FRAC(5,8),RGN_FRAC(6,8),RGN_FRAC(7,8) },
 	{ 0,1,2,3,4,5,6,7,
-	 64+0,64+1,64+2,64+3,64+4,64+5,64+6,64+7 },
+		64+0,64+1,64+2,64+3,64+4,64+5,64+6,64+7 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-	 128+0*8, 128+1*8, 128+2*8, 128+3*8, 128+4*8, 128+5*8, 128+6*8, 128+7*8 },
+		128+0*8, 128+1*8, 128+2*8, 128+3*8, 128+4*8, 128+5*8, 128+6*8, 128+7*8 },
 	16*16
 };
 
@@ -333,7 +332,7 @@ GFXDECODE_END
 static void irq_handler(device_t *device, int irq)
 {
 	oneshot_state *state = device->machine().driver_data<oneshot_state>();
-	device_set_input_line(state->m_audiocpu, 0, irq ? ASSERT_LINE : CLEAR_LINE);
+	state->m_audiocpu->set_input_line(0, irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static const ym3812_interface ym3812_config =
@@ -341,33 +340,31 @@ static const ym3812_interface ym3812_config =
 	irq_handler
 };
 
-static MACHINE_START( oneshot )
+void oneshot_state::machine_start()
 {
-	oneshot_state *state = machine.driver_data<oneshot_state>();
 
-	state->m_maincpu = machine.device("maincpu");
-	state->m_audiocpu = machine.device("audiocpu");
+	m_maincpu = machine().device<cpu_device>("maincpu");
+	m_audiocpu = machine().device<cpu_device>("audiocpu");
 
-	state->save_item(NAME(state->m_gun_x_p1));
-	state->save_item(NAME(state->m_gun_y_p1));
-	state->save_item(NAME(state->m_gun_x_p2));
-	state->save_item(NAME(state->m_gun_y_p2));
-	state->save_item(NAME(state->m_gun_x_shift));
-	state->save_item(NAME(state->m_p1_wobble));
-	state->save_item(NAME(state->m_p2_wobble));
+	save_item(NAME(m_gun_x_p1));
+	save_item(NAME(m_gun_y_p1));
+	save_item(NAME(m_gun_x_p2));
+	save_item(NAME(m_gun_y_p2));
+	save_item(NAME(m_gun_x_shift));
+	save_item(NAME(m_p1_wobble));
+	save_item(NAME(m_p2_wobble));
 }
 
-static MACHINE_RESET( oneshot )
+void oneshot_state::machine_reset()
 {
-	oneshot_state *state = machine.driver_data<oneshot_state>();
 
-	state->m_gun_x_p1 = 0;
-	state->m_gun_y_p1 = 0;
-	state->m_gun_x_p2 = 0;
-	state->m_gun_y_p2 = 0;
-	state->m_gun_x_shift = 0;
-	state->m_p1_wobble = 0;
-	state->m_p2_wobble = 0;
+	m_gun_x_p1 = 0;
+	m_gun_y_p1 = 0;
+	m_gun_x_p2 = 0;
+	m_gun_y_p2 = 0;
+	m_gun_x_shift = 0;
+	m_p1_wobble = 0;
+	m_p2_wobble = 0;
 }
 
 static MACHINE_CONFIG_START( oneshot, oneshot_state )
@@ -375,27 +372,23 @@ static MACHINE_CONFIG_START( oneshot, oneshot_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, 12000000)
 	MCFG_CPU_PROGRAM_MAP(oneshot_map)
-	MCFG_CPU_VBLANK_INT("screen", irq4_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", oneshot_state,  irq4_line_hold)
 
 	MCFG_CPU_ADD("audiocpu", Z80, 5000000)
 	MCFG_CPU_PROGRAM_MAP(oneshot_sound_map)
 
-	MCFG_MACHINE_START(oneshot)
-	MCFG_MACHINE_RESET(oneshot)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*16, 32*16)
 	MCFG_SCREEN_VISIBLE_AREA(0*16, 20*16-1, 0*16, 15*16-1)
-	MCFG_SCREEN_UPDATE(oneshot)
+	MCFG_SCREEN_UPDATE_DRIVER(oneshot_state, screen_update_oneshot)
 
 	MCFG_GFXDECODE(oneshot)
 	MCFG_PALETTE_LENGTH(0x400)
 
-	MCFG_VIDEO_START(oneshot)
 
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
@@ -413,7 +406,7 @@ static MACHINE_CONFIG_DERIVED( maddonna, oneshot )
 
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
-	MCFG_SCREEN_UPDATE(maddonna) // no crosshair
+	MCFG_SCREEN_UPDATE_DRIVER(oneshot_state, screen_update_maddonna)
 MACHINE_CONFIG_END
 
 
@@ -496,6 +489,6 @@ ROM_END
 
 
 
-GAME( 199?, oneshot,  0,        oneshot,  oneshot , 0, ROT0, "<unknown>", "One Shot One Kill", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
-GAME( 1995, maddonna, 0,        maddonna, maddonna, 0, ROT0, "Tuning",  "Mad Donna (set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1995, maddonnb, maddonna, maddonna, maddonna, 0, ROT0, "Tuning",  "Mad Donna (set 2)", GAME_NOT_WORKING | GAME_SUPPORTS_SAVE )
+GAME( 1995, maddonna, 0,        maddonna, maddonna, driver_device, 0, ROT0, "Tuning",  "Mad Donna (set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1995, maddonnb, maddonna, maddonna, maddonna, driver_device, 0, ROT0, "Tuning",  "Mad Donna (set 2)", GAME_NOT_WORKING | GAME_SUPPORTS_SAVE )
+GAME( 1996, oneshot,  0,        oneshot,  oneshot , driver_device, 0, ROT0, "Promat",  "One Shot One Kill", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )

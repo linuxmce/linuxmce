@@ -252,42 +252,39 @@ TODO:
 static void update_irq( running_machine &machine )
 {
 	othunder_state *state = machine.driver_data<othunder_state>();
-	device_set_input_line(state->m_maincpu, 6, state->m_ad_irq ? ASSERT_LINE : CLEAR_LINE);
-	device_set_input_line(state->m_maincpu, 5, state->m_vblank_irq ? ASSERT_LINE : CLEAR_LINE);
+	state->m_maincpu->set_input_line(6, state->m_ad_irq ? ASSERT_LINE : CLEAR_LINE);
+	state->m_maincpu->set_input_line(5, state->m_vblank_irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
-static WRITE16_HANDLER( irq_ack_w )
+WRITE16_MEMBER(othunder_state::irq_ack_w)
 {
-	othunder_state *state = space->machine().driver_data<othunder_state>();
 
 	switch (offset)
 	{
 		case 0:
-			state->m_vblank_irq = 0;
+			m_vblank_irq = 0;
 			break;
 
 		case 1:
-			state->m_ad_irq = 0;
+			m_ad_irq = 0;
 			break;
 	}
 
-	update_irq(space->machine());
+	update_irq(machine());
 }
 
-static INTERRUPT_GEN( vblank_interrupt )
+INTERRUPT_GEN_MEMBER(othunder_state::vblank_interrupt)
 {
-	othunder_state *state = device->machine().driver_data<othunder_state>();
 
-	state->m_vblank_irq = 1;
-	update_irq(device->machine());
+	m_vblank_irq = 1;
+	update_irq(machine());
 }
 
-static TIMER_CALLBACK( ad_interrupt )
+TIMER_CALLBACK_MEMBER(othunder_state::ad_interrupt)
 {
-	othunder_state *state = machine.driver_data<othunder_state>();
 
-	state->m_ad_irq = 1;
-	update_irq(machine);
+	m_ad_irq = 1;
+	update_irq(machine());
 }
 
 
@@ -301,18 +298,17 @@ bits are different.
 
 static const eeprom_interface eeprom_intf =
 {
-	6,				/* address bits */
-	16,				/* data bits */
-	"0110",			/* read command */
-	"0101",			/* write command */
-	"0111",			/* erase command */
-	"0100000000",	/* lock command */
-	"0100111111"	/* unlock command */
+	6,              /* address bits */
+	16,             /* data bits */
+	"0110",         /* read command */
+	"0101",         /* write command */
+	"0111",         /* erase command */
+	"0100000000",   /* lock command */
+	"0100111111"    /* unlock command */
 };
 
-static WRITE16_HANDLER( othunder_tc0220ioc_w )
+WRITE16_MEMBER(othunder_state::othunder_tc0220ioc_w)
 {
-	othunder_state *state = space->machine().driver_data<othunder_state>();
 
 	if (ACCESSING_BITS_0_7)
 	{
@@ -336,13 +332,13 @@ static WRITE16_HANDLER( othunder_tc0220ioc_w )
 				if (data & 4)
 					popmessage("OBPRI SET!");
 
-				eeprom_write_bit(state->m_eeprom, data & 0x40);
-				eeprom_set_clock_line(state->m_eeprom, (data & 0x20) ? ASSERT_LINE : CLEAR_LINE);
-				eeprom_set_cs_line(state->m_eeprom, (data & 0x10) ? CLEAR_LINE : ASSERT_LINE);
+				m_eeprom->write_bit(data & 0x40);
+				m_eeprom->set_clock_line((data & 0x20) ? ASSERT_LINE : CLEAR_LINE);
+				m_eeprom->set_cs_line((data & 0x10) ? CLEAR_LINE : ASSERT_LINE);
 				break;
 
 			default:
-				tc0220ioc_w(state->m_tc0220ioc, offset, data & 0xff);
+				tc0220ioc_w(m_tc0220ioc, space, offset, data & 0xff);
 		}
 	}
 }
@@ -352,17 +348,16 @@ static WRITE16_HANDLER( othunder_tc0220ioc_w )
             GAME INPUTS
 **********************************************************/
 
-static READ16_HANDLER( othunder_tc0220ioc_r )
+READ16_MEMBER(othunder_state::othunder_tc0220ioc_r)
 {
-	othunder_state *state = space->machine().driver_data<othunder_state>();
 
 	switch (offset)
 	{
 		case 0x03:
-			return (eeprom_read_bit(state->m_eeprom) & 1) << 7;
+			return (m_eeprom->read_bit() & 1) << 7;
 
 		default:
-			return tc0220ioc_r(state->m_tc0220ioc, offset);
+			return tc0220ioc_r(m_tc0220ioc, space, offset);
 	}
 }
 
@@ -372,20 +367,20 @@ static READ16_HANDLER( othunder_tc0220ioc_r )
 #define P2Y_PORT_TAG     "P2Y"
 #define ROTARY_PORT_TAG  "ROTARY"
 
-static READ16_HANDLER( othunder_lightgun_r )
+READ16_MEMBER(othunder_state::othunder_lightgun_r)
 {
 	static const char *const portname[4] = { P1X_PORT_TAG, P1Y_PORT_TAG, P2X_PORT_TAG, P2Y_PORT_TAG };
-	return input_port_read(space->machine(), portname[offset]);
+	return ioport(portname[offset])->read();
 }
 
-static WRITE16_HANDLER( othunder_lightgun_w )
+WRITE16_MEMBER(othunder_state::othunder_lightgun_w)
 {
 	/* A write starts the A/D conversion. An interrupt will be triggered when
-       the conversion is complete.
-       The ADC60808 clock is 512kHz. Conversion takes between 0 and 8 clock
-       cycles, so would end in a maximum of 15.625us. We'll use 10. */
+	   the conversion is complete.
+	   The ADC60808 clock is 512kHz. Conversion takes between 0 and 8 clock
+	   cycles, so would end in a maximum of 15.625us. We'll use 10. */
 
-	space->machine().scheduler().timer_set(attotime::from_usec(10), FUNC(ad_interrupt));
+	machine().scheduler().timer_set(attotime::from_usec(10), timer_expired_delegate(FUNC(othunder_state::ad_interrupt),this));
 }
 
 
@@ -396,62 +391,58 @@ static WRITE16_HANDLER( othunder_lightgun_w )
 static void reset_sound_region( running_machine &machine )
 {
 	othunder_state *state = machine.driver_data<othunder_state>();
-	memory_set_bank(machine, "bank10", state->m_banknum);
+	state->membank("bank10")->set_entry(state->m_banknum);
 }
 
 
-static WRITE8_HANDLER( sound_bankswitch_w )
+WRITE8_MEMBER(othunder_state::sound_bankswitch_w)
 {
-	othunder_state *state = space->machine().driver_data<othunder_state>();
-	state->m_banknum = data & 7;
-	reset_sound_region(space->machine());
+	m_banknum = data & 7;
+	reset_sound_region(machine());
 }
 
-static WRITE16_HANDLER( othunder_sound_w )
+WRITE16_MEMBER(othunder_state::othunder_sound_w)
 {
-	othunder_state *state = space->machine().driver_data<othunder_state>();
 	if (offset == 0)
-		tc0140syt_port_w(state->m_tc0140syt, 0, data & 0xff);
+		tc0140syt_port_w(m_tc0140syt, space, 0, data & 0xff);
 	else if (offset == 1)
-		tc0140syt_comm_w(state->m_tc0140syt, 0, data & 0xff);
+		tc0140syt_comm_w(m_tc0140syt, space, 0, data & 0xff);
 }
 
-static READ16_HANDLER( othunder_sound_r )
+READ16_MEMBER(othunder_state::othunder_sound_r)
 {
-	othunder_state *state = space->machine().driver_data<othunder_state>();
 	if (offset == 1)
-		return ((tc0140syt_comm_r(state->m_tc0140syt, 0) & 0xff));
+		return ((tc0140syt_comm_r(m_tc0140syt, space, 0) & 0xff));
 	else
 		return 0;
 }
 
-static WRITE8_HANDLER( othunder_TC0310FAM_w )
+WRITE8_MEMBER(othunder_state::othunder_TC0310FAM_w)
 {
 	/* there are two TC0310FAM, one for CH1 and one for CH2 from the YM2610. The
-       PSG output is routed to both chips. */
-	othunder_state *state = space->machine().driver_data<othunder_state>();
+	   PSG output is routed to both chips. */
 	int voll, volr;
 
-	state->m_pan[offset] = data & 0x1f;
+	m_pan[offset] = data & 0x1f;
 
 	/* PSG output (single ANALOG OUT pin on the YM2610, but we have three channels
-       because we are using the AY-3-8910 emulation. */
-	volr = (state->m_pan[0] + state->m_pan[2]) * 100 / (2 * 0x1f);
-	voll = (state->m_pan[1] + state->m_pan[3]) * 100 / (2 * 0x1f);
-	flt_volume_set_volume(state->m_2610_0l, voll / 100.0);
-	flt_volume_set_volume(state->m_2610_0r, volr / 100.0);
+	   because we are using the AY-3-8910 emulation. */
+	volr = (m_pan[0] + m_pan[2]) * 100 / (2 * 0x1f);
+	voll = (m_pan[1] + m_pan[3]) * 100 / (2 * 0x1f);
+	flt_volume_set_volume(m_2610_0l, voll / 100.0);
+	flt_volume_set_volume(m_2610_0r, volr / 100.0);
 
 	/* CH1 */
-	volr = state->m_pan[0] * 100 / 0x1f;
-	voll = state->m_pan[1] * 100 / 0x1f;
-	flt_volume_set_volume(state->m_2610_1l, voll / 100.0);
-	flt_volume_set_volume(state->m_2610_1r, volr / 100.0);
+	volr = m_pan[0] * 100 / 0x1f;
+	voll = m_pan[1] * 100 / 0x1f;
+	flt_volume_set_volume(m_2610_1l, voll / 100.0);
+	flt_volume_set_volume(m_2610_1r, volr / 100.0);
 
 	/* CH2 */
-	volr = state->m_pan[2] * 100 / 0x1f;
-	voll = state->m_pan[3] * 100 / 0x1f;
-	flt_volume_set_volume(state->m_2610_2l, voll / 100.0);
-	flt_volume_set_volume(state->m_2610_2r, volr / 100.0);
+	volr = m_pan[2] * 100 / 0x1f;
+	voll = m_pan[3] * 100 / 0x1f;
+	flt_volume_set_volume(m_2610_2l, voll / 100.0);
+	flt_volume_set_volume(m_2610_2r, volr / 100.0);
 }
 
 
@@ -459,17 +450,17 @@ static WRITE8_HANDLER( othunder_TC0310FAM_w )
              MEMORY STRUCTURES
 ***********************************************************/
 
-static ADDRESS_MAP_START( othunder_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( othunder_map, AS_PROGRAM, 16, othunder_state )
 	AM_RANGE(0x000000, 0x07ffff) AM_ROM
 	AM_RANGE(0x080000, 0x08ffff) AM_RAM
 	AM_RANGE(0x090000, 0x09000f) AM_READWRITE(othunder_tc0220ioc_r, othunder_tc0220ioc_w)
-//  AM_RANGE(0x090006, 0x090007) AM_WRITE(eeprom_w)
+//  AM_RANGE(0x090006, 0x090007) AM_WRITE_LEGACY(eeprom_w)
 //  AM_RANGE(0x09000c, 0x09000d) AM_WRITENOP   /* ?? (keeps writing 0x77) */
-	AM_RANGE(0x100000, 0x100007) AM_DEVREADWRITE("tc0110pcr", tc0110pcr_word_r, tc0110pcr_step1_rbswap_word_w)	/* palette */
-	AM_RANGE(0x200000, 0x20ffff) AM_DEVREADWRITE("tc0100scn", tc0100scn_word_r, tc0100scn_word_w)	/* tilemaps */
-	AM_RANGE(0x220000, 0x22000f) AM_DEVREADWRITE("tc0100scn", tc0100scn_ctrl_word_r, tc0100scn_ctrl_word_w)
+	AM_RANGE(0x100000, 0x100007) AM_DEVREADWRITE_LEGACY("tc0110pcr", tc0110pcr_word_r, tc0110pcr_step1_rbswap_word_w)   /* palette */
+	AM_RANGE(0x200000, 0x20ffff) AM_DEVREADWRITE_LEGACY("tc0100scn", tc0100scn_word_r, tc0100scn_word_w)    /* tilemaps */
+	AM_RANGE(0x220000, 0x22000f) AM_DEVREADWRITE_LEGACY("tc0100scn", tc0100scn_ctrl_word_r, tc0100scn_ctrl_word_w)
 	AM_RANGE(0x300000, 0x300003) AM_READWRITE(othunder_sound_r, othunder_sound_w)
-	AM_RANGE(0x400000, 0x4005ff) AM_RAM AM_BASE_SIZE_MEMBER(othunder_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0x400000, 0x4005ff) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0x500000, 0x500007) AM_READWRITE(othunder_lightgun_r, othunder_lightgun_w)
 	AM_RANGE(0x600000, 0x600003) AM_WRITE(irq_ack_w)
 ADDRESS_MAP_END
@@ -477,16 +468,16 @@ ADDRESS_MAP_END
 
 /***************************************************************************/
 
-static ADDRESS_MAP_START( z80_sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( z80_sound_map, AS_PROGRAM, 8, othunder_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
 	AM_RANGE(0x4000, 0x7fff) AM_ROMBANK("bank10")
 	AM_RANGE(0xc000, 0xdfff) AM_RAM
-	AM_RANGE(0xe000, 0xe003) AM_DEVREADWRITE("ymsnd", ym2610_r, ym2610_w)
-	AM_RANGE(0xe200, 0xe200) AM_READNOP AM_DEVWRITE("tc0140syt", tc0140syt_slave_port_w)
-	AM_RANGE(0xe201, 0xe201) AM_DEVREADWRITE("tc0140syt", tc0140syt_slave_comm_r, tc0140syt_slave_comm_w)
+	AM_RANGE(0xe000, 0xe003) AM_DEVREADWRITE_LEGACY("ymsnd", ym2610_r, ym2610_w)
+	AM_RANGE(0xe200, 0xe200) AM_READNOP AM_DEVWRITE_LEGACY("tc0140syt", tc0140syt_slave_port_w)
+	AM_RANGE(0xe201, 0xe201) AM_DEVREADWRITE_LEGACY("tc0140syt", tc0140syt_slave_comm_r, tc0140syt_slave_comm_w)
 	AM_RANGE(0xe400, 0xe403) AM_WRITE(othunder_TC0310FAM_w) /* pan */
 	AM_RANGE(0xe600, 0xe600) AM_WRITENOP /* ? */
-	AM_RANGE(0xea00, 0xea00) AM_READ_PORT(ROTARY_PORT_TAG)	/* rotary input */
+	AM_RANGE(0xea00, 0xea00) AM_READ_PORT(ROTARY_PORT_TAG)  /* rotary input */
 	AM_RANGE(0xee00, 0xee00) AM_WRITENOP /* ? */
 	AM_RANGE(0xf000, 0xf000) AM_WRITENOP /* ? */
 	AM_RANGE(0xf200, 0xf200) AM_WRITE(sound_bankswitch_w)
@@ -540,7 +531,7 @@ static INPUT_PORTS_START( othunder )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 )
 
-	PORT_START("IN1")	/* unused */
+	PORT_START("IN1")   /* unused */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("IN2")
@@ -554,8 +545,8 @@ static INPUT_PORTS_START( othunder )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	/* speed of 13 is compromise between moving aim around screen fast
-       enough and being accurate enough not to miss targets. 20 is too
-       inaccurate, and 10 is too slow. */
+	   enough and being accurate enough not to miss targets. 20 is too
+	   inaccurate, and 10 is too slow. */
 
 	PORT_START(P1X_PORT_TAG)
 	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_X ) PORT_CROSSHAIR(X, 1.0, 0.0, 0) PORT_SENSITIVITY(25) PORT_KEYDELTA(13) PORT_REVERSE PORT_PLAYER(1)
@@ -623,8 +614,8 @@ static const gfx_layout charlayout =
 };
 
 static GFXDECODE_START( othunder )
-	GFXDECODE_ENTRY( "gfx2", 0, tile16x8_layout, 0, 256 )	/* sprite parts */
-	GFXDECODE_ENTRY( "gfx1", 0, charlayout,      0, 256 )	/* sprites & playfield */
+	GFXDECODE_ENTRY( "gfx2", 0, tile16x8_layout, 0, 256 )   /* sprite parts */
+	GFXDECODE_ENTRY( "gfx1", 0, charlayout,      0, 256 )   /* sprites & playfield */
 GFXDECODE_END
 
 
@@ -637,7 +628,7 @@ GFXDECODE_END
 static void irqhandler( device_t *device, int irq )
 {
 	othunder_state *state = device->machine().driver_data<othunder_state>();
-	device_set_input_line(state->m_audiocpu, 0, irq ? ASSERT_LINE : CLEAR_LINE);
+	state->m_audiocpu->set_input_line(0, irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static const ym2610_interface ym2610_config =
@@ -654,10 +645,10 @@ static const ym2610_interface ym2610_config =
 static const tc0100scn_interface othunder_tc0100scn_intf =
 {
 	"screen",
-	1, 2,		/* gfxnum, txnum */
-	4, 0,		/* x_offset, y_offset */
-	0, 0,		/* flip_xoff, flip_yoff */
-	0, 0,		/* flip_text_xoff, flip_text_yoff */
+	1, 2,       /* gfxnum, txnum */
+	4, 0,       /* x_offset, y_offset */
+	0, 0,       /* flip_xoff, flip_yoff */
+	0, 0,       /* flip_text_xoff, flip_text_yoff */
 	0, 0
 };
 
@@ -669,7 +660,7 @@ static const tc0110pcr_interface othunder_tc0110pcr_intf =
 static const tc0220ioc_interface othunder_io_intf =
 {
 	DEVCB_INPUT_PORT("DSWA"), DEVCB_INPUT_PORT("DSWB"),
-	DEVCB_INPUT_PORT("IN0"), DEVCB_INPUT_PORT("IN1"), DEVCB_INPUT_PORT("IN2")	/* port read handlers */
+	DEVCB_INPUT_PORT("IN0"), DEVCB_INPUT_PORT("IN1"), DEVCB_INPUT_PORT("IN2")   /* port read handlers */
 };
 
 static const tc0140syt_interface othunder_tc0140syt_intf =
@@ -677,62 +668,53 @@ static const tc0140syt_interface othunder_tc0140syt_intf =
 	"maincpu", "audiocpu"
 };
 
-static STATE_POSTLOAD( othunder_postload )
+void othunder_state::machine_start()
 {
-	reset_sound_region(machine);
+
+	membank("bank10")->configure_entries(0, 4, memregion("audiocpu")->base() + 0xc000, 0x4000);
+
+	m_maincpu = machine().device<cpu_device>("maincpu");
+	m_audiocpu = machine().device<cpu_device>("audiocpu");
+	m_eeprom = machine().device<eeprom_device>("eeprom");
+	m_tc0220ioc = machine().device("tc0220ioc");
+	m_tc0100scn = machine().device("tc0100scn");
+	m_tc0110pcr = machine().device("tc0110pcr");
+	m_tc0140syt = machine().device("tc0140syt");
+	m_2610_0l = machine().device("2610.0l");
+	m_2610_0r = machine().device("2610.0r");
+	m_2610_1l = machine().device("2610.1l");
+	m_2610_1r = machine().device("2610.1r");
+	m_2610_2l = machine().device("2610.2l");
+	m_2610_2r = machine().device("2610.2r");
+
+	save_item(NAME(m_vblank_irq));
+	save_item(NAME(m_ad_irq));
+	save_item(NAME(m_banknum));
+	save_item(NAME(m_pan));
+	machine().save().register_postload(save_prepost_delegate(FUNC(reset_sound_region), &machine()));
 }
 
-static MACHINE_START( othunder )
+void othunder_state::machine_reset()
 {
-	othunder_state *state = machine.driver_data<othunder_state>();
 
-	memory_configure_bank(machine, "bank10", 0, 4, machine.region("audiocpu")->base() + 0xc000, 0x4000);
-
-	state->m_maincpu = machine.device("maincpu");
-	state->m_audiocpu = machine.device("audiocpu");
-	state->m_eeprom = machine.device("eeprom");
-	state->m_tc0220ioc = machine.device("tc0220ioc");
-	state->m_tc0100scn = machine.device("tc0100scn");
-	state->m_tc0110pcr = machine.device("tc0110pcr");
-	state->m_tc0140syt = machine.device("tc0140syt");
-	state->m_2610_0l = machine.device("2610.0l");
-	state->m_2610_0r = machine.device("2610.0r");
-	state->m_2610_1l = machine.device("2610.1l");
-	state->m_2610_1r = machine.device("2610.1r");
-	state->m_2610_2l = machine.device("2610.2l");
-	state->m_2610_2r = machine.device("2610.2r");
-
-	state->save_item(NAME(state->m_vblank_irq));
-	state->save_item(NAME(state->m_ad_irq));
-	state->save_item(NAME(state->m_banknum));
-	state->save_item(NAME(state->m_pan));
-	machine.state().register_postload(othunder_postload, NULL);
-}
-
-static MACHINE_RESET( othunder )
-{
-	othunder_state *state = machine.driver_data<othunder_state>();
-
-	state->m_vblank_irq = 0;
-	state->m_ad_irq = 0;
-	state->m_banknum = 0;
+	m_vblank_irq = 0;
+	m_ad_irq = 0;
+	m_banknum = 0;
 }
 
 static MACHINE_CONFIG_START( othunder, othunder_state )
 
 	/* basic machine hardware */
 //  MCFG_CPU_ADD("maincpu", M68000, 24000000/2 )   /* 12 MHz */
-	MCFG_CPU_ADD("maincpu", M68000, 13000000 )	/* fixes garbage graphics on startup */
+	MCFG_CPU_ADD("maincpu", M68000, 13000000 )  /* fixes garbage graphics on startup */
 	MCFG_CPU_PROGRAM_MAP(othunder_map)
-	MCFG_CPU_VBLANK_INT("screen", vblank_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", othunder_state,  vblank_interrupt)
 
-	MCFG_CPU_ADD("audiocpu", Z80,16000000/4 )	/* 4 MHz */
+	MCFG_CPU_ADD("audiocpu", Z80,16000000/4 )   /* 4 MHz */
 	MCFG_CPU_PROGRAM_MAP(z80_sound_map)
 
 	MCFG_EEPROM_ADD("eeprom", eeprom_intf)
 
-	MCFG_MACHINE_START(othunder)
-	MCFG_MACHINE_RESET(othunder)
 
 	MCFG_TC0220IOC_ADD("tc0220ioc", othunder_io_intf)
 
@@ -740,15 +722,13 @@ static MACHINE_CONFIG_START( othunder, othunder_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(40*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 40*8-1, 2*8, 32*8-1)
-	MCFG_SCREEN_UPDATE(othunder)
+	MCFG_SCREEN_UPDATE_DRIVER(othunder_state, screen_update_othunder)
 
 	MCFG_GFXDECODE(othunder)
 	MCFG_PALETTE_LENGTH(4096)
 
-	MCFG_VIDEO_START(othunder)
 
 	MCFG_TC0100SCN_ADD("tc0100scn", othunder_tc0100scn_intf)
 	MCFG_TC0110PCR_ADD("tc0110pcr", othunder_tc0110pcr_intf)
@@ -788,32 +768,32 @@ MACHINE_CONFIG_END
 ***************************************************************************/
 
 ROM_START( othunder )
-	ROM_REGION( 0x80000, "maincpu", 0 )	/* 512K for 68000 code */
+	ROM_REGION( 0x80000, "maincpu", 0 ) /* 512K for 68000 code */
 	ROM_LOAD16_BYTE( "b67-20.63",   0x00000, 0x20000, CRC(21439ea2) SHA1(d5b5a194e9698cf43513c0d56146772e8132ab07) )
 	ROM_LOAD16_BYTE( "b67-23.64",   0x00001, 0x20000, CRC(789e9daa) SHA1(15bb0eec68aeea0b9f55889566338c9ce0ac9b5e) )
 	ROM_LOAD16_BYTE( "b67-14.61",   0x40000, 0x20000, CRC(7f3dd724) SHA1(2f2eeae0ee31e20082237b9a947c6848771eb73c) )
 	ROM_LOAD16_BYTE( "b67-15.62",   0x40001, 0x20000, CRC(e84f62d0) SHA1(3b4a55a14dee7d592467fde9a75bde64deabd27d) )
 
-	ROM_REGION( 0x1c000, "audiocpu", 0 )	/* sound cpu */
+	ROM_REGION( 0x1c000, "audiocpu", 0 )    /* sound cpu */
 	ROM_LOAD( "b67-13.40",   0x00000, 0x04000, CRC(2936b4b1) SHA1(39b41643464dd89e456ab6eb15a0ff0aef30afde) )
 	ROM_CONTINUE(            0x10000, 0x0c000 ) /* banked stuff */
 
 	ROM_REGION( 0x80000, "gfx1", 0 )
-	ROM_LOAD( "b67-06.66", 0x00000, 0x80000, CRC(b9a38d64) SHA1(7ae8165b444d9da6ccdbc4a769535bcbb6738aaa) )		/* SCN */
+	ROM_LOAD( "b67-06.66", 0x00000, 0x80000, CRC(b9a38d64) SHA1(7ae8165b444d9da6ccdbc4a769535bcbb6738aaa) )     /* SCN */
 
 	ROM_REGION( 0x200000, "gfx2", 0 )
-	ROM_LOAD32_BYTE( "b67-01", 0x00000, 0x80000, CRC(81ad9acb) SHA1(d9ad3f6332c6ca6b9872da57526a8158a3cf5b2f) )	/* OBJ: each rom has 1 bitplane, forming 16x8 tiles */
+	ROM_LOAD32_BYTE( "b67-01", 0x00000, 0x80000, CRC(81ad9acb) SHA1(d9ad3f6332c6ca6b9872da57526a8158a3cf5b2f) ) /* OBJ: each rom has 1 bitplane, forming 16x8 tiles */
 	ROM_LOAD32_BYTE( "b67-02", 0x00001, 0x80000, CRC(c20cd2fb) SHA1(b015e1fe167e19826aa451b45cd143d66a6db83c) )
 	ROM_LOAD32_BYTE( "b67-03", 0x00002, 0x80000, CRC(bc9019ed) SHA1(7eddc83d71be97ce6637e6b35c226d58e6c39c3f) )
 	ROM_LOAD32_BYTE( "b67-04", 0x00003, 0x80000, CRC(2af4c8af) SHA1(b2ae7aad0c59ffc368811f4bd5546dbb6860f9a9) )
 
 	ROM_REGION16_LE( 0x80000, "user1", 0 )
-	ROM_LOAD16_WORD( "b67-05.43", 0x00000, 0x80000, CRC(9593e42b) SHA1(54b5538c302a1734ff4b752ab87a8c45d5c6b23d) )	/* index used to create 64x64 sprites on the fly */
+	ROM_LOAD16_WORD( "b67-05.43", 0x00000, 0x80000, CRC(9593e42b) SHA1(54b5538c302a1734ff4b752ab87a8c45d5c6b23d) )  /* index used to create 64x64 sprites on the fly */
 
-	ROM_REGION( 0x80000, "ymsnd", 0 )	/* ADPCM samples */
+	ROM_REGION( 0x80000, "ymsnd", 0 )   /* ADPCM samples */
 	ROM_LOAD( "b67-08", 0x00000, 0x80000, CRC(458f41fb) SHA1(acca7c95acd1ae7a1cc51fb7fe644ad6d00ff5ac) )
 
-	ROM_REGION( 0x80000, "ymsnd.deltat", 0 )	/* Delta-T samples */
+	ROM_REGION( 0x80000, "ymsnd.deltat", 0 )    /* Delta-T samples */
 	ROM_LOAD( "b67-07", 0x00000, 0x80000, CRC(4f834357) SHA1(f34705ce64870a8b24ec2639505079cc031fb719) )
 
 	ROM_REGION( 0x0800, "plds", 0 )
@@ -827,32 +807,32 @@ ROM_START( othunder )
 ROM_END
 
 ROM_START( othunderu )
-	ROM_REGION( 0x80000, "maincpu", 0 )	/* 512K for 68000 code */
+	ROM_REGION( 0x80000, "maincpu", 0 ) /* 512K for 68000 code */
 	ROM_LOAD16_BYTE( "b67-20-1.63", 0x00000, 0x20000, CRC(851a453b) SHA1(48b8c379e78cd79463f1e24dc23816a97cf819b8) )
 	ROM_LOAD16_BYTE( "b67-22-1.64", 0x00001, 0x20000, CRC(19480dc0) SHA1(8bbc982c89f0878e7639330970df5aa93ecbb083) )
 	ROM_LOAD16_BYTE( "b67-14.61",   0x40000, 0x20000, CRC(7f3dd724) SHA1(2f2eeae0ee31e20082237b9a947c6848771eb73c) )
 	ROM_LOAD16_BYTE( "b67-15.62",   0x40001, 0x20000, CRC(e84f62d0) SHA1(3b4a55a14dee7d592467fde9a75bde64deabd27d) )
 
-	ROM_REGION( 0x1c000, "audiocpu", 0 )	/* sound cpu */
+	ROM_REGION( 0x1c000, "audiocpu", 0 )    /* sound cpu */
 	ROM_LOAD( "b67-13.40",   0x00000, 0x04000, CRC(2936b4b1) SHA1(39b41643464dd89e456ab6eb15a0ff0aef30afde) )
 	ROM_CONTINUE(            0x10000, 0x0c000 ) /* banked stuff */
 
 	ROM_REGION( 0x80000, "gfx1", 0 )
-	ROM_LOAD( "b67-06.66", 0x00000, 0x80000, CRC(b9a38d64) SHA1(7ae8165b444d9da6ccdbc4a769535bcbb6738aaa) )		/* SCN */
+	ROM_LOAD( "b67-06.66", 0x00000, 0x80000, CRC(b9a38d64) SHA1(7ae8165b444d9da6ccdbc4a769535bcbb6738aaa) )     /* SCN */
 
 	ROM_REGION( 0x200000, "gfx2", 0 )
-	ROM_LOAD32_BYTE( "b67-01", 0x00000, 0x80000, CRC(81ad9acb) SHA1(d9ad3f6332c6ca6b9872da57526a8158a3cf5b2f) )	/* OBJ: each rom has 1 bitplane, forming 16x8 tiles */
+	ROM_LOAD32_BYTE( "b67-01", 0x00000, 0x80000, CRC(81ad9acb) SHA1(d9ad3f6332c6ca6b9872da57526a8158a3cf5b2f) ) /* OBJ: each rom has 1 bitplane, forming 16x8 tiles */
 	ROM_LOAD32_BYTE( "b67-02", 0x00001, 0x80000, CRC(c20cd2fb) SHA1(b015e1fe167e19826aa451b45cd143d66a6db83c) )
 	ROM_LOAD32_BYTE( "b67-03", 0x00002, 0x80000, CRC(bc9019ed) SHA1(7eddc83d71be97ce6637e6b35c226d58e6c39c3f) )
 	ROM_LOAD32_BYTE( "b67-04", 0x00003, 0x80000, CRC(2af4c8af) SHA1(b2ae7aad0c59ffc368811f4bd5546dbb6860f9a9) )
 
 	ROM_REGION16_LE( 0x80000, "user1", 0 )
-	ROM_LOAD16_WORD( "b67-05.43", 0x00000, 0x80000, CRC(9593e42b) SHA1(54b5538c302a1734ff4b752ab87a8c45d5c6b23d) )	/* index used to create 64x64 sprites on the fly */
+	ROM_LOAD16_WORD( "b67-05.43", 0x00000, 0x80000, CRC(9593e42b) SHA1(54b5538c302a1734ff4b752ab87a8c45d5c6b23d) )  /* index used to create 64x64 sprites on the fly */
 
-	ROM_REGION( 0x80000, "ymsnd", 0 )	/* ADPCM samples */
+	ROM_REGION( 0x80000, "ymsnd", 0 )   /* ADPCM samples */
 	ROM_LOAD( "b67-08", 0x00000, 0x80000, CRC(458f41fb) SHA1(acca7c95acd1ae7a1cc51fb7fe644ad6d00ff5ac) )
 
-	ROM_REGION( 0x80000, "ymsnd.deltat", 0 )	/* Delta-T samples */
+	ROM_REGION( 0x80000, "ymsnd.deltat", 0 )    /* Delta-T samples */
 	ROM_LOAD( "b67-07", 0x00000, 0x80000, CRC(4f834357) SHA1(f34705ce64870a8b24ec2639505079cc031fb719) )
 
 	ROM_REGION( 0x0800, "plds", 0 )
@@ -866,32 +846,32 @@ ROM_START( othunderu )
 ROM_END
 
 ROM_START( othunderuo )
-	ROM_REGION( 0x80000, "maincpu", 0 )	/* 512K for 68000 code */
+	ROM_REGION( 0x80000, "maincpu", 0 ) /* 512K for 68000 code */
 	ROM_LOAD16_BYTE( "b67-20.63",   0x00000, 0x20000, CRC(21439ea2) SHA1(d5b5a194e9698cf43513c0d56146772e8132ab07) )
 	ROM_LOAD16_BYTE( "b67-22.64",   0x00001, 0x20000, CRC(0f99ad3c) SHA1(dd6c9e822470ca867ec01e642443a871e879bae5) )
 	ROM_LOAD16_BYTE( "b67-14.61",   0x40000, 0x20000, CRC(7f3dd724) SHA1(2f2eeae0ee31e20082237b9a947c6848771eb73c) )
 	ROM_LOAD16_BYTE( "b67-15.62",   0x40001, 0x20000, CRC(e84f62d0) SHA1(3b4a55a14dee7d592467fde9a75bde64deabd27d) )
 
-	ROM_REGION( 0x1c000, "audiocpu", 0 )	/* sound cpu */
+	ROM_REGION( 0x1c000, "audiocpu", 0 )    /* sound cpu */
 	ROM_LOAD( "b67-13.40",   0x00000, 0x04000, CRC(2936b4b1) SHA1(39b41643464dd89e456ab6eb15a0ff0aef30afde) )
 	ROM_CONTINUE(            0x10000, 0x0c000 ) /* banked stuff */
 
 	ROM_REGION( 0x80000, "gfx1", 0 )
-	ROM_LOAD( "b67-06.66", 0x00000, 0x80000, CRC(b9a38d64) SHA1(7ae8165b444d9da6ccdbc4a769535bcbb6738aaa) )		/* SCN */
+	ROM_LOAD( "b67-06.66", 0x00000, 0x80000, CRC(b9a38d64) SHA1(7ae8165b444d9da6ccdbc4a769535bcbb6738aaa) )     /* SCN */
 
 	ROM_REGION( 0x200000, "gfx2", 0 )
-	ROM_LOAD32_BYTE( "b67-01", 0x00000, 0x80000, CRC(81ad9acb) SHA1(d9ad3f6332c6ca6b9872da57526a8158a3cf5b2f) )	/* OBJ: each rom has 1 bitplane, forming 16x8 tiles */
+	ROM_LOAD32_BYTE( "b67-01", 0x00000, 0x80000, CRC(81ad9acb) SHA1(d9ad3f6332c6ca6b9872da57526a8158a3cf5b2f) ) /* OBJ: each rom has 1 bitplane, forming 16x8 tiles */
 	ROM_LOAD32_BYTE( "b67-02", 0x00001, 0x80000, CRC(c20cd2fb) SHA1(b015e1fe167e19826aa451b45cd143d66a6db83c) )
 	ROM_LOAD32_BYTE( "b67-03", 0x00002, 0x80000, CRC(bc9019ed) SHA1(7eddc83d71be97ce6637e6b35c226d58e6c39c3f) )
 	ROM_LOAD32_BYTE( "b67-04", 0x00003, 0x80000, CRC(2af4c8af) SHA1(b2ae7aad0c59ffc368811f4bd5546dbb6860f9a9) )
 
 	ROM_REGION16_LE( 0x80000, "user1", 0 )
-	ROM_LOAD16_WORD( "b67-05.43", 0x00000, 0x80000, CRC(9593e42b) SHA1(54b5538c302a1734ff4b752ab87a8c45d5c6b23d) )	/* index used to create 64x64 sprites on the fly */
+	ROM_LOAD16_WORD( "b67-05.43", 0x00000, 0x80000, CRC(9593e42b) SHA1(54b5538c302a1734ff4b752ab87a8c45d5c6b23d) )  /* index used to create 64x64 sprites on the fly */
 
-	ROM_REGION( 0x80000, "ymsnd", 0 )	/* ADPCM samples */
+	ROM_REGION( 0x80000, "ymsnd", 0 )   /* ADPCM samples */
 	ROM_LOAD( "b67-08", 0x00000, 0x80000, CRC(458f41fb) SHA1(acca7c95acd1ae7a1cc51fb7fe644ad6d00ff5ac) )
 
-	ROM_REGION( 0x80000, "ymsnd.deltat", 0 )	/* Delta-T samples */
+	ROM_REGION( 0x80000, "ymsnd.deltat", 0 )    /* Delta-T samples */
 	ROM_LOAD( "b67-07", 0x00000, 0x80000, CRC(4f834357) SHA1(f34705ce64870a8b24ec2639505079cc031fb719) )
 
 	ROM_REGION( 0x0800, "plds", 0 )
@@ -905,32 +885,32 @@ ROM_START( othunderuo )
 ROM_END
 
 ROM_START( othunderj )
-	ROM_REGION( 0x80000, "maincpu", 0 )	/* 512K for 68000 code */
+	ROM_REGION( 0x80000, "maincpu", 0 ) /* 512K for 68000 code */
 	ROM_LOAD16_BYTE( "b67-20.63",   0x00000, 0x20000, CRC(21439ea2) SHA1(d5b5a194e9698cf43513c0d56146772e8132ab07) )
 	ROM_LOAD16_BYTE( "b67-21.64",   0x00001, 0x20000, CRC(9690fc86) SHA1(4e695554fc9cc91c5f8cff95dc290333bb56d571) )
 	ROM_LOAD16_BYTE( "b67-14.61",   0x40000, 0x20000, CRC(7f3dd724) SHA1(2f2eeae0ee31e20082237b9a947c6848771eb73c) )
 	ROM_LOAD16_BYTE( "b67-15.62",   0x40001, 0x20000, CRC(e84f62d0) SHA1(3b4a55a14dee7d592467fde9a75bde64deabd27d) )
 
-	ROM_REGION( 0x1c000, "audiocpu", 0 )	/* sound cpu */
+	ROM_REGION( 0x1c000, "audiocpu", 0 )    /* sound cpu */
 	ROM_LOAD( "b67-13.40",   0x00000, 0x04000, CRC(2936b4b1) SHA1(39b41643464dd89e456ab6eb15a0ff0aef30afde) )
 	ROM_CONTINUE(            0x10000, 0x0c000 ) /* banked stuff */
 
 	ROM_REGION( 0x80000, "gfx1", 0 )
-	ROM_LOAD( "b67-06.66", 0x00000, 0x80000, CRC(b9a38d64) SHA1(7ae8165b444d9da6ccdbc4a769535bcbb6738aaa) )		/* SCN */
+	ROM_LOAD( "b67-06.66", 0x00000, 0x80000, CRC(b9a38d64) SHA1(7ae8165b444d9da6ccdbc4a769535bcbb6738aaa) )     /* SCN */
 
 	ROM_REGION( 0x200000, "gfx2", 0 )
-	ROM_LOAD32_BYTE( "b67-01", 0x00000, 0x80000, CRC(81ad9acb) SHA1(d9ad3f6332c6ca6b9872da57526a8158a3cf5b2f) )	/* OBJ: each rom has 1 bitplane, forming 16x8 tiles */
+	ROM_LOAD32_BYTE( "b67-01", 0x00000, 0x80000, CRC(81ad9acb) SHA1(d9ad3f6332c6ca6b9872da57526a8158a3cf5b2f) ) /* OBJ: each rom has 1 bitplane, forming 16x8 tiles */
 	ROM_LOAD32_BYTE( "b67-02", 0x00001, 0x80000, CRC(c20cd2fb) SHA1(b015e1fe167e19826aa451b45cd143d66a6db83c) )
 	ROM_LOAD32_BYTE( "b67-03", 0x00002, 0x80000, CRC(bc9019ed) SHA1(7eddc83d71be97ce6637e6b35c226d58e6c39c3f) )
 	ROM_LOAD32_BYTE( "b67-04", 0x00003, 0x80000, CRC(2af4c8af) SHA1(b2ae7aad0c59ffc368811f4bd5546dbb6860f9a9) )
 
 	ROM_REGION16_LE( 0x80000, "user1", 0 )
-	ROM_LOAD16_WORD( "b67-05.43", 0x00000, 0x80000, CRC(9593e42b) SHA1(54b5538c302a1734ff4b752ab87a8c45d5c6b23d) )	/* index used to create 64x64 sprites on the fly */
+	ROM_LOAD16_WORD( "b67-05.43", 0x00000, 0x80000, CRC(9593e42b) SHA1(54b5538c302a1734ff4b752ab87a8c45d5c6b23d) )  /* index used to create 64x64 sprites on the fly */
 
-	ROM_REGION( 0x80000, "ymsnd", 0 )	/* ADPCM samples */
+	ROM_REGION( 0x80000, "ymsnd", 0 )   /* ADPCM samples */
 	ROM_LOAD( "b67-08", 0x00000, 0x80000, CRC(458f41fb) SHA1(acca7c95acd1ae7a1cc51fb7fe644ad6d00ff5ac) )
 
-	ROM_REGION( 0x80000, "ymsnd.deltat", 0 )	/* Delta-T samples */
+	ROM_REGION( 0x80000, "ymsnd.deltat", 0 )    /* Delta-T samples */
 	ROM_LOAD( "b67-07", 0x00000, 0x80000, CRC(4f834357) SHA1(f34705ce64870a8b24ec2639505079cc031fb719) )
 
 	ROM_REGION( 0x0800, "plds", 0 )
@@ -945,7 +925,7 @@ ROM_END
 
 
 
-GAME( 1988, othunder,   0,        othunder, othunder, 0, ORIENTATION_FLIP_X, "Taito Corporation Japan", "Operation Thunderbolt (World)", GAME_SUPPORTS_SAVE )
-GAME( 1988, othunderu,  othunder, othunder, othundu,  0, ORIENTATION_FLIP_X, "Taito America Corporation", "Operation Thunderbolt (US)", GAME_SUPPORTS_SAVE )
-GAME( 1988, othunderuo, othunder, othunder, othundu,  0, ORIENTATION_FLIP_X, "Taito America Corporation", "Operation Thunderbolt (US, older)", GAME_SUPPORTS_SAVE )
-GAME( 1988, othunderj,  othunder, othunder, othundrj, 0, ORIENTATION_FLIP_X, "Taito Corporation", "Operation Thunderbolt (Japan)", GAME_SUPPORTS_SAVE )
+GAME( 1988, othunder,   0,        othunder, othunder, driver_device, 0, ORIENTATION_FLIP_X, "Taito Corporation Japan", "Operation Thunderbolt (World)", GAME_SUPPORTS_SAVE )
+GAME( 1988, othunderu,  othunder, othunder, othundu, driver_device,  0, ORIENTATION_FLIP_X, "Taito America Corporation", "Operation Thunderbolt (US)", GAME_SUPPORTS_SAVE )
+GAME( 1988, othunderuo, othunder, othunder, othundu, driver_device,  0, ORIENTATION_FLIP_X, "Taito America Corporation", "Operation Thunderbolt (US, older)", GAME_SUPPORTS_SAVE )
+GAME( 1988, othunderj,  othunder, othunder, othundrj, driver_device, 0, ORIENTATION_FLIP_X, "Taito Corporation", "Operation Thunderbolt (Japan)", GAME_SUPPORTS_SAVE )

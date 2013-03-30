@@ -23,12 +23,13 @@
 
 ***************************************************************************/
 
-PALETTE_INIT( gaplus )
+void gaplus_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 
 	/* allocate the colortable */
-	machine.colortable = colortable_alloc(machine, 256);
+	machine().colortable = colortable_alloc(machine(), 256);
 
 	for (i = 0;i < 256;i++)
 	{
@@ -53,20 +54,20 @@ PALETTE_INIT( gaplus )
 		bit3 = (color_prom[i + 0x200] >> 3) & 0x01;
 		b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 
-		colortable_palette_set_color(machine.colortable,i,MAKE_RGB(r,g,b));
+		colortable_palette_set_color(machine().colortable,i,MAKE_RGB(r,g,b));
 	}
 
 	color_prom += 0x300;
 	/* color_prom now points to the beginning of the lookup table */
 
 	/* characters use colors 0xf0-0xff */
-	for (i = 0;i < machine.gfx[0]->total_colors * machine.gfx[0]->color_granularity;i++)
-		colortable_entry_set_value(machine.colortable, machine.gfx[0]->color_base + i, 0xf0 + (*color_prom++ & 0x0f));
+	for (i = 0;i < machine().gfx[0]->colors() * machine().gfx[0]->granularity();i++)
+		colortable_entry_set_value(machine().colortable, machine().gfx[0]->colorbase() + i, 0xf0 + (*color_prom++ & 0x0f));
 
 	/* sprites */
-	for (i = 0;i < machine.gfx[1]->total_colors * machine.gfx[1]->color_granularity;i++)
+	for (i = 0;i < machine().gfx[1]->colors() * machine().gfx[1]->granularity();i++)
 	{
-		colortable_entry_set_value(machine.colortable, machine.gfx[1]->color_base + i, (color_prom[0] & 0x0f) + ((color_prom[0x200] & 0x0f) << 4));
+		colortable_entry_set_value(machine().colortable, machine().gfx[1]->colorbase() + i, (color_prom[0] & 0x0f) + ((color_prom[0x200] & 0x0f) << 4));
 		color_prom++;
 	}
 }
@@ -80,7 +81,7 @@ PALETTE_INIT( gaplus )
 ***************************************************************************/
 
 /* convert from 32x32 to 36x28 */
-static TILEMAP_MAPPER( tilemap_scan )
+TILEMAP_MAPPER_MEMBER(gaplus_state::tilemap_scan)
 {
 	int offs;
 
@@ -94,15 +95,14 @@ static TILEMAP_MAPPER( tilemap_scan )
 	return offs;
 }
 
-static TILE_GET_INFO( get_tile_info )
+TILE_GET_INFO_MEMBER(gaplus_state::get_tile_info)
 {
-	gaplus_state *state = machine.driver_data<gaplus_state>();
-	UINT8 attr = state->m_videoram[tile_index + 0x400];
-	tileinfo->category = (attr & 0x40) >> 6;
-	tileinfo->group = attr & 0x3f;
-	SET_TILE_INFO(
+	UINT8 attr = m_videoram[tile_index + 0x400];
+	tileinfo.category = (attr & 0x40) >> 6;
+	tileinfo.group = attr & 0x3f;
+	SET_TILE_INFO_MEMBER(
 			0,
-			state->m_videoram[tile_index] + ((attr & 0x80) << 1),
+			m_videoram[tile_index] + ((attr & 0x80) << 1),
 			attr & 0x3f,
 			0);
 }
@@ -179,14 +179,13 @@ static void starfield_init(running_machine &machine)
 
 ***************************************************************************/
 
-VIDEO_START( gaplus )
+void gaplus_state::video_start()
 {
-	gaplus_state *state = machine.driver_data<gaplus_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_tile_info,tilemap_scan,8,8,36,28);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(gaplus_state::get_tile_info),this),tilemap_mapper_delegate(FUNC(gaplus_state::tilemap_scan),this),8,8,36,28);
 
-	colortable_configure_tilemap_groups(machine.colortable, state->m_bg_tilemap, machine.gfx[0], 0xff);
+	colortable_configure_tilemap_groups(machine().colortable, m_bg_tilemap, machine().gfx[0], 0xff);
 
-	starfield_init(machine);
+	starfield_init(machine());
 }
 
 
@@ -197,24 +196,21 @@ VIDEO_START( gaplus )
 
 ***************************************************************************/
 
-READ8_HANDLER( gaplus_videoram_r )
+READ8_MEMBER(gaplus_state::gaplus_videoram_r)
 {
-	gaplus_state *state = space->machine().driver_data<gaplus_state>();
-	return state->m_videoram[offset];
+	return m_videoram[offset];
 }
 
-WRITE8_HANDLER( gaplus_videoram_w )
+WRITE8_MEMBER(gaplus_state::gaplus_videoram_w)
 {
-	gaplus_state *state = space->machine().driver_data<gaplus_state>();
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap,offset & 0x3ff);
+	m_videoram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset & 0x3ff);
 }
 
-WRITE8_HANDLER( gaplus_starfield_control_w )
+WRITE8_MEMBER(gaplus_state::gaplus_starfield_control_w)
 {
-	gaplus_state *state = space->machine().driver_data<gaplus_state>();
 	offset &= 3;
-	state->m_starfield_control[offset] = data;
+	m_starfield_control[offset] = data;
 }
 
 
@@ -225,7 +221,7 @@ WRITE8_HANDLER( gaplus_starfield_control_w )
 
 ***************************************************************************/
 
-static void starfield_render(running_machine &machine, bitmap_t *bitmap)
+static void starfield_render(running_machine &machine, bitmap_ind16 &bitmap)
 {
 	gaplus_state *state = machine.driver_data<gaplus_state>();
 	struct star *stars = state->m_stars;
@@ -248,12 +244,12 @@ static void starfield_render(running_machine &machine, bitmap_t *bitmap)
 
 		if ( x >=0 && x < width && y >= 0 && y < height )
 		{
-			*BITMAP_ADDR16(bitmap, y, x) = stars[i].col;
+			bitmap.pix16(y, x) = stars[i].col;
 		}
 	}
 }
 
-static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_sprites(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	gaplus_state *state = machine.driver_data<gaplus_state>();
 	UINT8 *spriteram = state->m_spriteram + 0x780;
@@ -282,14 +278,14 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 			int duplicate = spriteram_3[offs] & 0x80;
 			int x,y;
 
-			if (flip_screen_get(machine))
+			if (state->flip_screen())
 			{
 				flipx ^= 1;
 				flipy ^= 1;
 			}
 
 			sy -= 16 * sizey;
-			sy = (sy & 0xff) - 32;	// fix wraparound
+			sy = (sy & 0xff) - 32;  // fix wraparound
 
 			for (y = 0;y <= sizey;y++)
 			{
@@ -307,100 +303,102 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 	}
 }
 
-SCREEN_UPDATE( gaplus )
+UINT32 gaplus_state::screen_update_gaplus(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	gaplus_state *state = screen->machine().driver_data<gaplus_state>();
 	/* flip screen control is embedded in RAM */
-	flip_screen_set(screen->machine(), state->m_spriteram[0x1f7f-0x800] & 1);
+	flip_screen_set(m_spriteram[0x1f7f-0x800] & 1);
 
-	bitmap_fill(bitmap, cliprect, 0);
+	bitmap.fill(0, cliprect);
 
-	starfield_render(screen->machine(), bitmap);
+	starfield_render(machine(), bitmap);
 
 	/* draw the low priority characters */
-	tilemap_draw(bitmap,cliprect,state->m_bg_tilemap,0,0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0,0);
 
-	draw_sprites(screen->machine(), bitmap, cliprect);
+	draw_sprites(machine(), bitmap, cliprect);
 
 	/* draw the high priority characters */
 	/* (I don't know if this feature is used by Gaplus, but it's shown in the schematics) */
-	tilemap_draw(bitmap,cliprect,state->m_bg_tilemap,1,0);
+	m_bg_tilemap->draw(bitmap, cliprect, 1,0);
 	return 0;
 }
 
 
-SCREEN_EOF( gaplus )	/* update starfields */
+void gaplus_state::screen_eof_gaplus(screen_device &screen, bool state)/* update starfields */
 {
-	gaplus_state *state = machine.driver_data<gaplus_state>();
-	struct star *stars = state->m_stars;
-	int i;
+	// falling edge
+	if (!state)
+	{
+		struct star *stars = m_stars;
+		int i;
 
-	int width = machine.primary_screen->width();
-	int height = machine.primary_screen->height();
+		int width = machine().primary_screen->width();
+		int height = machine().primary_screen->height();
 
-	/* check if we're running */
-	if ( ( state->m_starfield_control[0] & 1 ) == 0 )
-		return;
+		/* check if we're running */
+		if ( ( m_starfield_control[0] & 1 ) == 0 )
+			return;
 
-	/* update the starfields */
-	for ( i = 0; i < state->m_total_stars; i++ ) {
-		switch( state->m_starfield_control[stars[i].set + 1] ) {
-			case 0x87:
-				/* stand still */
-			break;
+		/* update the starfields */
+		for ( i = 0; i < m_total_stars; i++ ) {
+			switch( m_starfield_control[stars[i].set + 1] ) {
+				case 0x87:
+					/* stand still */
+				break;
 
-			case 0x86:
-				/* scroll down (speed 1) */
-				stars[i].x += SPEED_1;
-			break;
+				case 0x86:
+					/* scroll down (speed 1) */
+					stars[i].x += SPEED_1;
+				break;
 
-			case 0x85:
-				/* scroll down (speed 2) */
-				stars[i].x += SPEED_2;
-			break;
+				case 0x85:
+					/* scroll down (speed 2) */
+					stars[i].x += SPEED_2;
+				break;
 
-			case 0x06:
-				/* scroll down (speed 3) */
-				stars[i].x += SPEED_3;
-			break;
+				case 0x06:
+					/* scroll down (speed 3) */
+					stars[i].x += SPEED_3;
+				break;
 
-			case 0x80:
-				/* scroll up (speed 1) */
-				stars[i].x -= SPEED_1;
-			break;
+				case 0x80:
+					/* scroll up (speed 1) */
+					stars[i].x -= SPEED_1;
+				break;
 
-			case 0x82:
-				/* scroll up (speed 2) */
-				stars[i].x -= SPEED_2;
-			break;
+				case 0x82:
+					/* scroll up (speed 2) */
+					stars[i].x -= SPEED_2;
+				break;
 
-			case 0x81:
-				/* scroll up (speed 3) */
-				stars[i].x -= SPEED_3;
-			break;
+				case 0x81:
+					/* scroll up (speed 3) */
+					stars[i].x -= SPEED_3;
+				break;
 
-			case 0x9f:
-				/* scroll left (speed 2) */
-				stars[i].y += SPEED_2;
-			break;
+				case 0x9f:
+					/* scroll left (speed 2) */
+					stars[i].y += SPEED_2;
+				break;
 
-			case 0xaf:
-				/* scroll left (speed 1) */
-				stars[i].y += SPEED_1;
-			break;
+				case 0xaf:
+					/* scroll left (speed 1) */
+					stars[i].y += SPEED_1;
+				break;
+			}
+
+			/* wrap */
+			if ( stars[i].x < 0 )
+				stars[i].x = ( float )( width*2 ) + stars[i].x;
+
+			if ( stars[i].x >= ( float )( width*2 ) )
+				stars[i].x -= ( float )( width*2 );
+
+			if ( stars[i].y < 0 )
+				stars[i].y = ( float )( height ) + stars[i].y;
+
+			if ( stars[i].y >= ( float )( height ) )
+				stars[i].y -= ( float )( height );
 		}
-
-		/* wrap */
-		if ( stars[i].x < 0 )
-			stars[i].x = ( float )( width*2 ) + stars[i].x;
-
-		if ( stars[i].x >= ( float )( width*2 ) )
-			stars[i].x -= ( float )( width*2 );
-
-		if ( stars[i].y < 0 )
-			stars[i].y = ( float )( height ) + stars[i].y;
-
-		if ( stars[i].y >= ( float )( height ) )
-			stars[i].y -= ( float )( height );
 	}
 }

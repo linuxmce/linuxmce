@@ -1,80 +1,90 @@
 /* This it the best way to allow game specific kludges until the system is fully understood */
 enum {
 	/* Early F3 class games, these are not cartridge games and system features may be different */
-	RINGRAGE=0,	/* D21 */
-	ARABIANM,	/* D29 */
-	RIDINGF,	/* D34 */
-	GSEEKER,	/* D40 */
-	TRSTAR,		/* D53 */
-	GUNLOCK,	/* D66 */
+	RINGRAGE=0, /* D21 */
+	ARABIANM,   /* D29 */
+	RIDINGF,    /* D34 */
+	GSEEKER,    /* D40 */
+	TRSTAR,     /* D53 */
+	GUNLOCK,    /* D66 */
 	TWINQIX,
-	UNDRFIRE,	/* D67 - Heavily modified F3 hardware (different memory map) */
+	UNDRFIRE,   /* D67 - Heavily modified F3 hardware (different memory map) */
 	SCFINALS,
-	LIGHTBR,	/* D69 */
+	LIGHTBR,    /* D69 */
 
 	/* D77 - F3 motherboard proms, all following games are 'F3 package system' */
 	/* D78 I CUP */
-	KAISERKN,	/* D84 */
-	DARIUSG,	/* D87 */
-	BUBSYMPH,	/* D90 */
-	SPCINVDX,	/* D93 */
-	HTHERO95,	/* D94 */
-	QTHEATER,	/* D95 */
-	EACTION2,	/* E02 */
-	SPCINV95,	/* E06 */
-	QUIZHUHU,	/* E08 */
-	PBOBBLE2,	/* E10 */
-	GEKIRIDO,	/* E11 */
-	KTIGER2,	/* E15 */
-	BUBBLEM,	/* E21 */
-	CLEOPATR,	/* E28 */
-	PBOBBLE3,	/* E29 */
-	ARKRETRN,	/* E36 */
-	KIRAMEKI,	/* E44 */
-	PUCHICAR,	/* E46 */
-	PBOBBLE4,	/* E49 */
-	POPNPOP,	/* E51 */
-	LANDMAKR,	/* E61 */
-	RECALH,		/* prototype */
-	COMMANDW	/* prototype */
+	KAISERKN,   /* D84 */
+	DARIUSG,    /* D87 */
+	BUBSYMPH,   /* D90 */
+	SPCINVDX,   /* D93 */
+	HTHERO95,   /* D94 */
+	QTHEATER,   /* D95 */
+	EACTION2,   /* E02 */
+	SPCINV95,   /* E06 */
+	QUIZHUHU,   /* E08 */
+	PBOBBLE2,   /* E10 */
+	GEKIRIDO,   /* E11 */
+	KTIGER2,    /* E15 */
+	BUBBLEM,    /* E21 */
+	CLEOPATR,   /* E28 */
+	PBOBBLE3,   /* E29 */
+	ARKRETRN,   /* E36 */
+	KIRAMEKI,   /* E44 */
+	PUCHICAR,   /* E46 */
+	PBOBBLE4,   /* E49 */
+	POPNPOP,    /* E51 */
+	LANDMAKR,   /* E61 */
+	RECALH,     /* prototype */
+	COMMANDW,   /* prototype */
+	TMDRILL
 };
 
 class taito_f3_state : public driver_device
 {
 public:
-	taito_f3_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	taito_f3_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+		m_f3_ram(*this,"f3_ram") { }
 
-	UINT32 *m_videoram;
-	UINT32 *m_spriteram;
-	size_t m_spriteram_size;
+	UINT16 *m_videoram;
+	UINT16 *m_spriteram;
+	optional_shared_ptr<UINT32> m_f3_ram;
+	UINT16 *m_f3_vram;
+	UINT16 *m_f3_line_ram;
+	UINT16 *m_f3_pf_data;
+	UINT16 *m_f3_pivot_ram;
+
 	UINT32 m_coin_word[2];
-	UINT32 *m_f3_ram;
 	int m_f3_game;
-	UINT32 *m_f3_vram;
-	UINT32 *m_f3_line_ram;
-	UINT32 *m_f3_pf_data;
-	UINT32 *m_f3_pivot_ram;
 	tilemap_t *m_pf1_tilemap;
 	tilemap_t *m_pf2_tilemap;
 	tilemap_t *m_pf3_tilemap;
 	tilemap_t *m_pf4_tilemap;
+	tilemap_t *m_pf5_tilemap;
+	tilemap_t *m_pf6_tilemap;
+	tilemap_t *m_pf7_tilemap;
+	tilemap_t *m_pf8_tilemap;
 	tilemap_t *m_pixel_layer;
 	tilemap_t *m_vram_layer;
-	UINT32 *m_spriteram32_buffered;
-	UINT32 m_f3_control_0[8];
-	UINT32 m_f3_control_1[8];
+	UINT16 *m_spriteram16_buffered;
+	UINT16 m_f3_control_0[8];
+	UINT16 m_f3_control_1[8];
 	int m_flipscreen;
 	UINT8 m_sprite_extra_planes;
 	UINT8 m_sprite_pen_mask;
-	UINT32 *m_f3_pf_data_1;
-	UINT32 *m_f3_pf_data_2;
-	UINT32 *m_f3_pf_data_3;
-	UINT32 *m_f3_pf_data_4;
+	UINT16 *m_f3_pf_data_1;
+	UINT16 *m_f3_pf_data_2;
+	UINT16 *m_f3_pf_data_3;
+	UINT16 *m_f3_pf_data_4;
+	UINT16 *m_f3_pf_data_5;
+	UINT16 *m_f3_pf_data_6;
+	UINT16 *m_f3_pf_data_7;
+	UINT16 *m_f3_pf_data_8;
 	int m_f3_skip_this_frame;
 	int m_sprite_lag;
 	UINT8 m_sprite_pri_usage;
-	bitmap_t *m_pri_alp_bitmap;
+	bitmap_ind8 m_pri_alp_bitmap;
 	int m_f3_alpha_level_2as;
 	int m_f3_alpha_level_2ad;
 	int m_f3_alpha_level_3as;
@@ -88,7 +98,7 @@ public:
 	int m_twidth_mask;
 	int m_twidth_mask_bit;
 	UINT8 *m_tile_opaque_sp;
-	UINT8 *m_tile_opaque_pf[4];
+	UINT8 *m_tile_opaque_pf[8];
 	UINT8 m_add_sat[256][256];
 	int m_alpha_s_1_1;
 	int m_alpha_s_1_2;
@@ -184,22 +194,84 @@ public:
 	int (*m_dpix_n[8][16])(taito_f3_state *state, UINT32 s_pix);
 	int (**m_dpix_lp[5])(taito_f3_state *state, UINT32 s_pix);
 	int (**m_dpix_sp[9])(taito_f3_state *state, UINT32 s_pix);
+
+	DECLARE_READ32_MEMBER(f3_control_r);
+	DECLARE_WRITE32_MEMBER(f3_control_w);
+	DECLARE_WRITE32_MEMBER(f3_sound_reset_0_w);
+	DECLARE_WRITE32_MEMBER(f3_sound_reset_1_w);
+	DECLARE_WRITE32_MEMBER(f3_sound_bankswitch_w);
+	DECLARE_WRITE16_MEMBER(f3_unk_w);
+	DECLARE_READ32_MEMBER(bubsympb_oki_r);
+	DECLARE_WRITE32_MEMBER(bubsympb_oki_w);
+	DECLARE_READ16_MEMBER(f3_pf_data_r);
+	DECLARE_WRITE16_MEMBER(f3_pf_data_w);
+	DECLARE_WRITE16_MEMBER(f3_control_0_w);
+	DECLARE_WRITE16_MEMBER(f3_control_1_w);
+	DECLARE_READ16_MEMBER(f3_spriteram_r);
+	DECLARE_WRITE16_MEMBER(f3_spriteram_w);
+	DECLARE_READ16_MEMBER(f3_videoram_r);
+	DECLARE_WRITE16_MEMBER(f3_videoram_w);
+	DECLARE_READ16_MEMBER(f3_vram_r);
+	DECLARE_WRITE16_MEMBER(f3_vram_w);
+	DECLARE_READ16_MEMBER(f3_pivot_r);
+	DECLARE_WRITE16_MEMBER(f3_pivot_w);
+	DECLARE_READ16_MEMBER(f3_lineram_r);
+	DECLARE_WRITE16_MEMBER(f3_lineram_w);
+	DECLARE_WRITE32_MEMBER(f3_palette_24bit_w);
+	DECLARE_CUSTOM_INPUT_MEMBER(f3_analog_r);
+	DECLARE_CUSTOM_INPUT_MEMBER(f3_coin_r);
+	DECLARE_DRIVER_INIT(commandw);
+	DECLARE_DRIVER_INIT(pbobble2);
+	DECLARE_DRIVER_INIT(puchicar);
+	DECLARE_DRIVER_INIT(intcup94);
+	DECLARE_DRIVER_INIT(landmakr);
+	DECLARE_DRIVER_INIT(twinqix);
+	DECLARE_DRIVER_INIT(elvactr);
+	DECLARE_DRIVER_INIT(arabianm);
+	DECLARE_DRIVER_INIT(bubsympb);
+	DECLARE_DRIVER_INIT(ktiger2);
+	DECLARE_DRIVER_INIT(lightbr);
+	DECLARE_DRIVER_INIT(gekirido);
+	DECLARE_DRIVER_INIT(arkretrn);
+	DECLARE_DRIVER_INIT(kirameki);
+	DECLARE_DRIVER_INIT(qtheater);
+	DECLARE_DRIVER_INIT(popnpop);
+	DECLARE_DRIVER_INIT(spcinvdj);
+	DECLARE_DRIVER_INIT(pbobbl2p);
+	DECLARE_DRIVER_INIT(landmkrp);
+	DECLARE_DRIVER_INIT(bubblem);
+	DECLARE_DRIVER_INIT(ridingf);
+	DECLARE_DRIVER_INIT(gseeker);
+	DECLARE_DRIVER_INIT(bubsymph);
+	DECLARE_DRIVER_INIT(hthero95);
+	DECLARE_DRIVER_INIT(gunlock);
+	DECLARE_DRIVER_INIT(pbobble4);
+	DECLARE_DRIVER_INIT(dariusg);
+	DECLARE_DRIVER_INIT(recalh);
+	DECLARE_DRIVER_INIT(kaiserkn);
+	DECLARE_DRIVER_INIT(spcinv95);
+	DECLARE_DRIVER_INIT(trstaroj);
+	DECLARE_DRIVER_INIT(ringrage);
+	DECLARE_DRIVER_INIT(cupfinal);
+	DECLARE_DRIVER_INIT(quizhuhu);
+	DECLARE_DRIVER_INIT(pbobble3);
+	DECLARE_DRIVER_INIT(cleopatr);
+	DECLARE_DRIVER_INIT(scfinals);
+	DECLARE_DRIVER_INIT(pbobbl2x);
+	TILE_GET_INFO_MEMBER(get_tile_info1);
+	TILE_GET_INFO_MEMBER(get_tile_info2);
+	TILE_GET_INFO_MEMBER(get_tile_info3);
+	TILE_GET_INFO_MEMBER(get_tile_info4);
+	TILE_GET_INFO_MEMBER(get_tile_info5);
+	TILE_GET_INFO_MEMBER(get_tile_info6);
+	TILE_GET_INFO_MEMBER(get_tile_info7);
+	TILE_GET_INFO_MEMBER(get_tile_info8);
+	TILE_GET_INFO_MEMBER(get_tile_info_vram);
+	TILE_GET_INFO_MEMBER(get_tile_info_pixel);
+	DECLARE_MACHINE_START(f3);
+	DECLARE_VIDEO_START(f3);
+	UINT32 screen_update_f3(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
+	void screen_eof_f3(screen_device &screen, bool state);
+	INTERRUPT_GEN_MEMBER(f3_interrupt2);
+	TIMER_CALLBACK_MEMBER(f3_interrupt3);
 };
-
-
-/*----------- defined in video/taito_f3.c -----------*/
-
-VIDEO_START( f3 );
-SCREEN_UPDATE( f3 );
-SCREEN_EOF( f3 );
-
-WRITE32_HANDLER( f3_control_0_w );
-WRITE32_HANDLER( f3_control_1_w );
-WRITE32_HANDLER( f3_palette_24bit_w );
-WRITE32_HANDLER( f3_pf_data_w );
-WRITE32_HANDLER( f3_vram_w );
-WRITE32_HANDLER( f3_pivot_w );
-WRITE32_HANDLER( f3_lineram_w );
-WRITE32_HANDLER( f3_videoram_w );
-
-

@@ -12,10 +12,10 @@ void rollerg_sprite_callback( running_machine &machine, int *code, int *color, i
 {
 	rollerg_state *state = machine.driver_data<rollerg_state>();
 #if 0
-	if (input_code_pressed(machine, KEYCODE_Q) && (*color & 0x80)) *color = rand();
-	if (input_code_pressed(machine, KEYCODE_W) && (*color & 0x40)) *color = rand();
-	if (input_code_pressed(machine, KEYCODE_E) && (*color & 0x20)) *color = rand();
-	if (input_code_pressed(machine, KEYCODE_R) && (*color & 0x10)) *color = rand();
+	if (machine.input().code_pressed(KEYCODE_Q) && (*color & 0x80)) *color = rand();
+	if (machine.input().code_pressed(KEYCODE_W) && (*color & 0x40)) *color = rand();
+	if (machine.input().code_pressed(KEYCODE_E) && (*color & 0x20)) *color = rand();
+	if (machine.input().code_pressed(KEYCODE_R) && (*color & 0x10)) *color = rand();
 #endif
 	*priority_mask = (*color & 0x10) ? 0 : 0x02;
 	*color = state->m_sprite_colorbase + (*color & 0x0f);
@@ -44,11 +44,10 @@ void rollerg_zoom_callback( running_machine &machine, int *code, int *color, int
 
 ***************************************************************************/
 
-VIDEO_START( rollerg )
+void rollerg_state::video_start()
 {
-	rollerg_state *state = machine.driver_data<rollerg_state>();
-	state->m_sprite_colorbase = 16;
-	state->m_zoom_colorbase = 0;
+	m_sprite_colorbase = 16;
+	m_zoom_colorbase = 0;
 }
 
 
@@ -59,14 +58,13 @@ VIDEO_START( rollerg )
 
 ***************************************************************************/
 
-SCREEN_UPDATE( rollerg )
+UINT32 rollerg_state::screen_update_rollerg(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	rollerg_state *state = screen->machine().driver_data<rollerg_state>();
 	int bg_colorbase = 16;
 
-	bitmap_fill(screen->machine().priority_bitmap, cliprect, 0);
-	bitmap_fill(bitmap, cliprect, 16 * bg_colorbase);
-	k051316_zoom_draw(state->m_k051316, bitmap, cliprect, 0, 1);
-	k053245_sprites_draw(state->m_k053244, bitmap, cliprect);
+	machine().priority_bitmap.fill(0, cliprect);
+	bitmap.fill(16 * bg_colorbase, cliprect);
+	k051316_zoom_draw(m_k051316, bitmap, cliprect, 0, 1);
+	k053245_sprites_draw(m_k053244, bitmap, cliprect);
 	return 0;
 }

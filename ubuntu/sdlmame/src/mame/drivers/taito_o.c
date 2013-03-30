@@ -29,7 +29,6 @@ TODO:
 *****************************************************************/
 
 #include "emu.h"
-#include "deprecat.h"
 #include "cpu/z80/z80.h"
 #include "cpu/m68000/m68000.h"
 #include "video/taitoic.h"
@@ -38,36 +37,36 @@ TODO:
 
 static const int clear_hack = 1;
 
-static WRITE16_HANDLER(io_w)
+WRITE16_MEMBER(taitoo_state::io_w)
 {
 	switch(offset)
 	{
-		case 2: watchdog_reset(space->machine()); break;
+		case 2: machine().watchdog_reset(); break;
 
 		default: logerror("IO W %x %x %x\n", offset, data, mem_mask);
 	}
 }
 
-static READ16_HANDLER(io_r)
+READ16_MEMBER(taitoo_state::io_r)
 {
 	int retval = 0;
 
 	switch(offset)
 	{
-		case 0: retval = input_port_read(space->machine(), "IN0") & (clear_hack ? 0xf7ff : 0xffff); break;
-		case 1: retval = input_port_read(space->machine(), "IN1") & (clear_hack ? 0xfff7 : 0xffff); break;
-		default: logerror("IO R %x %x = %x @ %x\n", offset, mem_mask, retval, cpu_get_pc(&space->device()));
+		case 0: retval = ioport("IN0")->read() & (clear_hack ? 0xf7ff : 0xffff); break;
+		case 1: retval = ioport("IN1")->read() & (clear_hack ? 0xfff7 : 0xffff); break;
+		default: logerror("IO R %x %x = %x @ %x\n", offset, mem_mask, retval, space.device().safe_pc());
 	}
 	return retval;
 }
 
-static ADDRESS_MAP_START( parentj_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( parentj_map, AS_PROGRAM, 16, taitoo_state )
 	AM_RANGE(0x000000, 0x01ffff) AM_ROM
 	AM_RANGE(0x100000, 0x10ffff) AM_MIRROR(0x010000) AM_RAM
 	AM_RANGE(0x200000, 0x20000f) AM_READWRITE(io_r, io_w) /* TC0220IOC ? */
-	AM_RANGE(0x300000, 0x300003) AM_DEVREADWRITE8("ymsnd", ym2203_r, ym2203_w, 0x00ff)
-	AM_RANGE(0x400000, 0x420fff) AM_DEVREADWRITE("tc0080vco", tc0080vco_word_r, tc0080vco_word_w)
-	AM_RANGE(0x500800, 0x500fff) AM_RAM_WRITE(paletteram16_xBBBBBGGGGGRRRRR_word_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x300000, 0x300003) AM_DEVREADWRITE8_LEGACY("ymsnd", ym2203_r, ym2203_w, 0x00ff)
+	AM_RANGE(0x400000, 0x420fff) AM_DEVREADWRITE_LEGACY("tc0080vco", tc0080vco_word_r, tc0080vco_word_w)
+	AM_RANGE(0x500800, 0x500fff) AM_RAM_WRITE(paletteram_xBBBBBGGGGGRRRRR_word_w) AM_SHARE("paletteram")
 ADDRESS_MAP_END
 
 static INPUT_PORTS_START( parentj )
@@ -101,9 +100,7 @@ static INPUT_PORTS_START( parentj )
 	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_CODE(KEYCODE_Y) PORT_NAME("Opto 2L")
 	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_CODE(KEYCODE_I) PORT_NAME("All Clear")
 
-	PORT_DIPNAME(0x0010,  0x10, "Test Mode") /* sometimes */
-	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x000, DEF_STR( On ) )
+	PORT_SERVICE_NO_TOGGLE(0x0010, IP_ACTIVE_LOW )
 	PORT_DIPNAME(0x0020,  0x20, "IN1 5")
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -197,14 +194,14 @@ static const gfx_layout parentj_layout =
 	4,
 	{ 0,1,2,3 },
 	{ RGN_FRAC(7,8)+4, RGN_FRAC(7,8)+0,
-	  RGN_FRAC(6,8)+4, RGN_FRAC(6,8)+0,
-	  RGN_FRAC(5,8)+4, RGN_FRAC(5,8)+0,
-	  RGN_FRAC(4,8)+4, RGN_FRAC(4,8)+0,
-	  RGN_FRAC(3,8)+4, RGN_FRAC(3,8)+0,
-	  RGN_FRAC(2,8)+4, RGN_FRAC(2,8)+0,
-	  RGN_FRAC(1,8)+4, RGN_FRAC(1,8)+0,
-	  RGN_FRAC(0,8)+4, RGN_FRAC(0,8)+0
-	  },
+		RGN_FRAC(6,8)+4, RGN_FRAC(6,8)+0,
+		RGN_FRAC(5,8)+4, RGN_FRAC(5,8)+0,
+		RGN_FRAC(4,8)+4, RGN_FRAC(4,8)+0,
+		RGN_FRAC(3,8)+4, RGN_FRAC(3,8)+0,
+		RGN_FRAC(2,8)+4, RGN_FRAC(2,8)+0,
+		RGN_FRAC(1,8)+4, RGN_FRAC(1,8)+0,
+		RGN_FRAC(0,8)+4, RGN_FRAC(0,8)+0
+		},
 	{ 0,8,16,24,32,40,48,56,64,72,80,88,96,104,112,120},
 
 	1*128
@@ -214,10 +211,16 @@ static GFXDECODE_START( parentj )
 	GFXDECODE_ENTRY( "gfx1", 0, parentj_layout,  0x0, 0x400/16  )
 GFXDECODE_END
 
-
-static INTERRUPT_GEN( parentj_interrupt )
+/* unknown sources ... */
+TIMER_DEVICE_CALLBACK_MEMBER(taitoo_state::parentj_interrupt)
 {
-	device_set_input_line(device, cpu_getiloops(device) ? 4 : 5, HOLD_LINE);
+	int scanline = param;
+
+	if(scanline == 448)
+		m_maincpu->set_input_line(4, HOLD_LINE);
+
+	if(scanline == 0)
+		m_maincpu->set_input_line(5, HOLD_LINE);
 }
 
 static const ym2203_interface ym2203_config =
@@ -228,39 +231,36 @@ static const ym2203_interface ym2203_config =
 		DEVCB_INPUT_PORT("DSWA"),DEVCB_INPUT_PORT("DSWB"),
 		DEVCB_NULL, DEVCB_NULL,
 	},
-	NULL
+	DEVCB_NULL
 };
 
 static const tc0080vco_interface parentj_intf =
 {
-	0, 1,	/* gfxnum, txnum */
+	0, 1,   /* gfxnum, txnum */
 	1, 1, -2,
 	0
 };
 
-static MACHINE_START( taitoo )
+void taitoo_state::machine_start()
 {
-	taitoo_state *state = machine.driver_data<taitoo_state>();
 
-	state->m_maincpu = machine.device("maincpu");
-	state->m_tc0080vco = machine.device("tc0080vco");
+	m_maincpu = machine().device<cpu_device>("maincpu");
+	m_tc0080vco = machine().device("tc0080vco");
 }
 
 static MACHINE_CONFIG_START( parentj, taitoo_state )
 
-	MCFG_CPU_ADD("maincpu", M68000,12000000 )		/*?? MHz */
+	MCFG_CPU_ADD("maincpu", M68000,12000000 )       /*?? MHz */
 	MCFG_CPU_PROGRAM_MAP(parentj_map)
-	MCFG_CPU_VBLANK_INT_HACK(parentj_interrupt,2)
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("scantimer", taitoo_state, parentj_interrupt, "screen", 0, 1)
 
-	MCFG_MACHINE_START(taitoo)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*16, 64*16)
 	MCFG_SCREEN_VISIBLE_AREA(0*16, 32*16-1, 3*16, 31*16-1)
-	MCFG_SCREEN_UPDATE(parentj)
+	MCFG_SCREEN_UPDATE_DRIVER(taitoo_state, screen_update_parentj)
 
 	MCFG_GFXDECODE(parentj)
 	MCFG_PALETTE_LENGTH(33*16)
@@ -296,4 +296,4 @@ ROM_START( parentj )
 	ROM_LOAD( "ampal22v10a-0233.c42", 0x000, 0x2dd, CRC(0c030a81) SHA1(0f8198df2cb046683d2db9ac8e609cdff53083ed) )
 ROM_END
 
-GAME( 1989, parentj,  0,        parentj,  parentj,  0,        ROT0,    "Taito", "Parent Jack", GAME_NOT_WORKING | GAME_SUPPORTS_SAVE )
+GAME( 1989, parentj,  0,        parentj,  parentj, driver_device,  0,        ROT0,    "Taito", "Parent Jack", GAME_NOT_WORKING | GAME_SUPPORTS_SAVE )

@@ -3,10 +3,7 @@
 B-Wings  (c) 1984 Data East Corporation
 Zaviga   (c) 1984 Data East Corporation
 
-drivers by Acho A. Tang
-
-
-JUL-2003
+driver by Acho A. Tang
 
 Known issues:
 
@@ -19,13 +16,14 @@ Known issues:
 
 - Zaviga's DIPs are incomplete. (manual missing)
 
+- "RGB dip-switch" looks kludgy at best;
+
 *****************************************************************************/
 // Directives
 
 #include "emu.h"
-#include "deprecat.h"
 #include "cpu/m6809/m6809.h"
-#include "cpu/m6502/m6502.h"
+#include "cpu/m6502/deco16.h"
 #include "sound/ay8910.h"
 #include "sound/dac.h"
 #include "includes/bwing.h"
@@ -34,112 +32,66 @@ Known issues:
 //****************************************************************************
 // Interrupt Handlers
 
-static INTERRUPT_GEN ( bwp1_interrupt )
+INTERRUPT_GEN_MEMBER(bwing_state::bwp3_interrupt)
 {
-	bwing_state *state = device->machine().driver_data<bwing_state>();
-	UINT8 latch_data;
 
-	switch (cpu_getiloops(device))
-	{
-		case 0:
-			if (state->m_ffcount)
-			{
-				state->m_ffcount--;
-				latch_data = state->m_sound_fifo[state->m_fftail];
-				state->m_fftail = (state->m_fftail + 1) & (MAX_SOUNDS - 1);
-				soundlatch_w(device->memory().space(AS_PROGRAM), 0, latch_data);
-				device_set_input_line(state->m_audiocpu, DECO16_IRQ_LINE, HOLD_LINE); // SNDREQ
-			}
-		break;
-
-		case 1:
-			if (~input_port_read(device->machine(), "IN2") & 0x03)
-			{
-				if (!state->m_coin)
-				{
-					state->m_coin = 1;
-					device_set_input_line(device, INPUT_LINE_NMI, ASSERT_LINE);
-				}
-			}
-			else
-				state->m_coin = 0;
-		break;
-
-		case 2:
-			if (input_port_read(device->machine(), "IN3"))
-				device_set_input_line(device, M6809_FIRQ_LINE, ASSERT_LINE);
-		break;
-	}
-}
-
-
-static INTERRUPT_GEN ( bwp3_interrupt )
-{
-	bwing_state *state = device->machine().driver_data<bwing_state>();
-
-	if (!state->m_bwp3_nmimask)
-		device_set_input_line(device, INPUT_LINE_NMI, ASSERT_LINE);
+	if (!m_bwp3_nmimask)
+		device.execute().set_input_line(INPUT_LINE_NMI, ASSERT_LINE);
 }
 
 //****************************************************************************
 // Memory and I/O Handlers
 
-static WRITE8_HANDLER( bwp12_sharedram1_w )
+WRITE8_MEMBER(bwing_state::bwp12_sharedram1_w)
 {
-	bwing_state *state = space->machine().driver_data<bwing_state>();
-	state->m_bwp1_sharedram1[offset] = state->m_bwp2_sharedram1[offset] = data;
+	m_bwp1_sharedram1[offset] = m_bwp2_sharedram1[offset] = data;
 }
 
-static WRITE8_HANDLER( bwp3_u8F_w )
+WRITE8_MEMBER(bwing_state::bwp3_u8F_w)
 {
-	bwing_state *state = space->machine().driver_data<bwing_state>();
-	state->m_bwp3_u8F_d = data;  // prepares custom chip for various operations
+	m_bwp3_u8F_d = data;  // prepares custom chip for various operations
 }
 
-static WRITE8_HANDLER( bwp3_nmimask_w )
+WRITE8_MEMBER(bwing_state::bwp3_nmimask_w)
 {
-	bwing_state *state = space->machine().driver_data<bwing_state>();
-	state->m_bwp3_nmimask = data & 0x80;
+	m_bwp3_nmimask = data & 0x80;
 }
 
-static WRITE8_HANDLER( bwp3_nmiack_w )
+WRITE8_MEMBER(bwing_state::bwp3_nmiack_w)
 {
-	bwing_state *state = space->machine().driver_data<bwing_state>();
-	device_set_input_line(state->m_audiocpu, INPUT_LINE_NMI, CLEAR_LINE);
+	m_audiocpu->set_input_line(INPUT_LINE_NMI, CLEAR_LINE);
 }
 
 
-static READ8_HANDLER( bwp1_io_r )
+READ8_MEMBER(bwing_state::bwp1_io_r)
 {
-	bwing_state *state = space->machine().driver_data<bwing_state>();
 
-	if (offset == 0) return(input_port_read(space->machine(), "DSW0"));
-	if (offset == 1) return(input_port_read(space->machine(), "DSW1"));
-	if (offset == 2) return(input_port_read(space->machine(), "IN0"));
-	if (offset == 3) return(input_port_read(space->machine(), "IN1"));
-	if (offset == 4) return(input_port_read(space->machine(), "IN2"));
+	if (offset == 0) return(ioport("DSW0")->read());
+	if (offset == 1) return(ioport("DSW1")->read());
+	if (offset == 2) return(ioport("IN0")->read());
+	if (offset == 3) return(ioport("IN1")->read());
+	if (offset == 4) return(ioport("IN2")->read());
 
-	return((state->m_bwp123_membase[0])[0x1b00 + offset]);
+	return((m_bwp123_membase[0])[0x1b00 + offset]);
 }
 
 
-static WRITE8_HANDLER( bwp1_ctrl_w )
+WRITE8_MEMBER(bwing_state::bwp1_ctrl_w)
 {
-	bwing_state *state = space->machine().driver_data<bwing_state>();
 
 	switch (offset)
 	{
 		// MSSTB
-		case 0: device_set_input_line(state->m_subcpu, M6809_IRQ_LINE, ASSERT_LINE); break;
+		case 0: m_subcpu->set_input_line(M6809_IRQ_LINE, ASSERT_LINE); break;
 
 		// IRQACK
-		case 1: device_set_input_line(state->m_maincpu, M6809_IRQ_LINE, CLEAR_LINE); break;
+		case 1: m_maincpu->set_input_line(M6809_IRQ_LINE, CLEAR_LINE); break;
 
 		// FIRQACK
-		case 2: device_set_input_line(state->m_maincpu, M6809_FIRQ_LINE, CLEAR_LINE); break;
+		case 2: m_maincpu->set_input_line(M6809_FIRQ_LINE, CLEAR_LINE); break;
 
 		// NMIACK
-		case 3: device_set_input_line(state->m_maincpu, INPUT_LINE_NMI, CLEAR_LINE); break;
+		case 3: m_maincpu->set_input_line(INPUT_LINE_NMI, CLEAR_LINE); break;
 
 		// SWAP(bank-swaps sprite RAM between 1800 & 1900; ignored bc. they're treated as a single chunk.)
 		case 4: break;
@@ -147,12 +99,11 @@ static WRITE8_HANDLER( bwp1_ctrl_w )
 		// SNDREQ
 		case 5:
 			if (data == 0x80) // protection trick to screw CPU1 & 3
-				device_set_input_line(state->m_subcpu, INPUT_LINE_NMI, ASSERT_LINE); // SNMI
-			else if (state->m_ffcount < MAX_SOUNDS)
+				m_subcpu->set_input_line(INPUT_LINE_NMI, ASSERT_LINE); // SNMI
+			else
 			{
-				state->m_ffcount++;
-				state->m_sound_fifo[state->m_ffhead] = data;
-				state->m_ffhead = (state->m_ffhead + 1) & (MAX_SOUNDS - 1);
+				soundlatch_byte_w(space, 0, data);
+				m_audiocpu->set_input_line(DECO16_IRQ_LINE, HOLD_LINE); // SNDREQ
 			}
 		break;
 
@@ -164,28 +115,27 @@ static WRITE8_HANDLER( bwp1_ctrl_w )
 	}
 
 	#if BW_DEBUG
-		(state->m_bwp123_membase[0])[0x1c00 + offset] = data;
+		(m_bwp123_membase[0])[0x1c00 + offset] = data;
 	#endif
 }
 
 
-static WRITE8_HANDLER( bwp2_ctrl_w )
+WRITE8_MEMBER(bwing_state::bwp2_ctrl_w)
 {
-	bwing_state *state = space->machine().driver_data<bwing_state>();
 	switch (offset)
 	{
-		case 0: device_set_input_line(state->m_maincpu, M6809_IRQ_LINE, ASSERT_LINE); break; // SMSTB
+		case 0: m_maincpu->set_input_line(M6809_IRQ_LINE, ASSERT_LINE); break; // SMSTB
 
-		case 1: device_set_input_line(state->m_subcpu, M6809_FIRQ_LINE, CLEAR_LINE); break;
+		case 1: m_subcpu->set_input_line(M6809_FIRQ_LINE, CLEAR_LINE); break;
 
-		case 2: device_set_input_line(state->m_subcpu, M6809_IRQ_LINE, CLEAR_LINE); break;
+		case 2: m_subcpu->set_input_line(M6809_IRQ_LINE, CLEAR_LINE); break;
 
-		case 3: device_set_input_line(state->m_subcpu, INPUT_LINE_NMI, CLEAR_LINE); break;
+		case 3: m_subcpu->set_input_line(INPUT_LINE_NMI, CLEAR_LINE); break;
 	}
 
 	#if BW_DEBUG
 	{
-		(state->m_bwp123_membase[1])[0x1800 + offset] = data;
+		(m_bwp123_membase[1])[0x1800 + offset] = data;
 	}
 	#endif
 }
@@ -194,14 +144,14 @@ static WRITE8_HANDLER( bwp2_ctrl_w )
 // CPU Memory Maps
 
 // Main CPU
-static ADDRESS_MAP_START( bwp1_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( bwp1_map, AS_PROGRAM, 8, bwing_state )
 	AM_RANGE(0x1b00, 0x1b07) AM_READ(bwp1_io_r)
-	AM_RANGE(0x0000, 0x07ff) AM_RAM_WRITE(bwp12_sharedram1_w) AM_BASE_MEMBER(bwing_state, m_bwp1_sharedram1)
+	AM_RANGE(0x0000, 0x07ff) AM_RAM_WRITE(bwp12_sharedram1_w) AM_SHARE("bwp1_sharedram1")
 	AM_RANGE(0x0800, 0x0fff) AM_RAM
-	AM_RANGE(0x1000, 0x13ff) AM_RAM_WRITE(bwing_videoram_w) AM_BASE_MEMBER(bwing_state, m_videoram)
+	AM_RANGE(0x1000, 0x13ff) AM_RAM_WRITE(bwing_videoram_w) AM_SHARE("videoram")
 	AM_RANGE(0x1400, 0x17ff) AM_RAM
-	AM_RANGE(0x1800, 0x19ff) AM_RAM_WRITE(bwing_spriteram_w) AM_BASE_MEMBER(bwing_state, m_spriteram)
-	AM_RANGE(0x1a00, 0x1aff) AM_RAM_WRITE(bwing_paletteram_w) AM_BASE_MEMBER(bwing_state, m_paletteram)
+	AM_RANGE(0x1800, 0x19ff) AM_RAM_WRITE(bwing_spriteram_w) AM_SHARE("spriteram")
+	AM_RANGE(0x1a00, 0x1aff) AM_RAM_WRITE(bwing_paletteram_w) AM_SHARE("paletteram")
 	AM_RANGE(0x1b00, 0x1b07) AM_RAM_WRITE(bwing_scrollreg_w)
 	AM_RANGE(0x1c00, 0x1c07) AM_RAM_WRITE(bwp1_ctrl_w)
 	AM_RANGE(0x2000, 0x3fff) AM_READWRITE(bwing_scrollram_r, bwing_scrollram_w)
@@ -210,8 +160,8 @@ ADDRESS_MAP_END
 
 
 // Sub CPU
-static ADDRESS_MAP_START( bwp2_map, AS_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0x07ff) AM_RAM_WRITE(bwp12_sharedram1_w) AM_BASE_MEMBER(bwing_state, m_bwp2_sharedram1)
+static ADDRESS_MAP_START( bwp2_map, AS_PROGRAM, 8, bwing_state )
+	AM_RANGE(0x0000, 0x07ff) AM_RAM_WRITE(bwp12_sharedram1_w) AM_SHARE("bwp2_sharedram1")
 	AM_RANGE(0x0800, 0x0fff) AM_RAM
 	AM_RANGE(0x1800, 0x1803) AM_WRITE(bwp2_ctrl_w)
 	AM_RANGE(0xa000, 0xffff) AM_ROM
@@ -219,74 +169,84 @@ ADDRESS_MAP_END
 
 
 // Sound CPU
-static ADDRESS_MAP_START( bwp3_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( bwp3_map, AS_PROGRAM, 8, bwing_state )
 	AM_RANGE(0x0000, 0x01ff) AM_RAM
-	AM_RANGE(0x0200, 0x0200) AM_DEVWRITE("dac", dac_signed_w)
+	AM_RANGE(0x0200, 0x0200) AM_DEVWRITE("dac", dac_device, write_signed8)
 	AM_RANGE(0x1000, 0x1000) AM_WRITE(bwp3_nmiack_w)
-	AM_RANGE(0x2000, 0x2000) AM_DEVWRITE("ay1", ay8910_data_w)
-	AM_RANGE(0x4000, 0x4000) AM_DEVWRITE("ay1", ay8910_address_w)
-	AM_RANGE(0x6000, 0x6000) AM_DEVWRITE("ay2", ay8910_data_w)
-	AM_RANGE(0x8000, 0x8000) AM_DEVWRITE("ay2", ay8910_address_w)
-	AM_RANGE(0xa000, 0xa000) AM_READ(soundlatch_r)
+	AM_RANGE(0x2000, 0x2000) AM_DEVWRITE_LEGACY("ay1", ay8910_data_w)
+	AM_RANGE(0x4000, 0x4000) AM_DEVWRITE_LEGACY("ay1", ay8910_address_w)
+	AM_RANGE(0x6000, 0x6000) AM_DEVWRITE_LEGACY("ay2", ay8910_data_w)
+	AM_RANGE(0x8000, 0x8000) AM_DEVWRITE_LEGACY("ay2", ay8910_address_w)
+	AM_RANGE(0xa000, 0xa000) AM_READ(soundlatch_byte_r)
 	AM_RANGE(0xd000, 0xd000) AM_WRITE(bwp3_nmimask_w)
-	AM_RANGE(0xe000, 0xffff) AM_ROM AM_BASE_SIZE_MEMBER(bwing_state, m_bwp3_rombase, m_bwp3_romsize)
+	AM_RANGE(0xe000, 0xffff) AM_ROM AM_SHARE("bwp3_rombase")
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( bwp3_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( bwp3_io_map, AS_IO, 8, bwing_state )
 	AM_RANGE(0x00, 0x00) AM_READ_PORT("VBLANK") AM_WRITE(bwp3_u8F_w)
 ADDRESS_MAP_END
 
 //****************************************************************************
 // I/O Port Maps
 
+INPUT_CHANGED_MEMBER(bwing_state::coin_inserted)
+{
+	machine().device("maincpu")->execute().set_input_line(INPUT_LINE_NMI, newval ? CLEAR_LINE : ASSERT_LINE);
+}
+
+INPUT_CHANGED_MEMBER(bwing_state::tilt_pressed)
+{
+	machine().device("maincpu")->execute().set_input_line(M6809_FIRQ_LINE, newval ? ASSERT_LINE : CLEAR_LINE);
+}
+
 static INPUT_PORTS_START( bwing )
 	PORT_START("DSW0")
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coin_A ) )		PORT_DIPLOCATION("SW1:1,2")
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coin_A ) )       PORT_DIPLOCATION("SW1:1,2")
 	PORT_DIPSETTING(    0x00, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x03, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( 1C_3C ) )
-	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Coin_B ) )		PORT_DIPLOCATION("SW1:3,4")
+	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Coin_B ) )       PORT_DIPLOCATION("SW1:3,4")
 	PORT_DIPSETTING(    0x00, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x0c, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( 1C_3C ) )
-	PORT_DIPNAME( 0x10, 0x10, "Diagnostics" )		PORT_DIPLOCATION("SW1:5")
+	PORT_DIPNAME( 0x10, 0x10, "Diagnostics" )       PORT_DIPLOCATION("SW1:5")
 	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Cabinet ) )		PORT_DIPLOCATION("SW1:6")
+	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Cabinet ) )      PORT_DIPLOCATION("SW1:6")
 	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( Cocktail ) )
-	PORT_DIPNAME( 0x40, 0x40, "Invincibility" )		PORT_DIPLOCATION("SW1:7")
+	PORT_DIPNAME( 0x40, 0x40, "Invincibility" )     PORT_DIPLOCATION("SW1:7")
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Infinite ) )		PORT_DIPLOCATION("SW1:8")
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Infinite ) )     PORT_DIPLOCATION("SW1:8")
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("DSW1")
-	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Lives ) )		PORT_DIPLOCATION("SW2:1")
+	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW2:1")
 	PORT_DIPSETTING(    0x00, "5" )
 	PORT_DIPSETTING(    0x01, "3" )
-	PORT_DIPNAME( 0x06, 0x06, DEF_STR( Bonus_Life ) )	PORT_DIPLOCATION("SW2:2,3") /* Listed as "Not Used" in the manual */
+	PORT_DIPNAME( 0x06, 0x06, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION("SW2:2,3") /* Listed as "Not Used" in the manual */
 	PORT_DIPSETTING(    0x00, "40000" )
 	PORT_DIPSETTING(    0x02, "20000 80000" )
 	PORT_DIPSETTING(    0x04, "20000 60000" )
 	PORT_DIPSETTING(    0x06, "20000 40000" )
-	PORT_DIPNAME( 0x08, 0x08, "Enemy Crafts" )		PORT_DIPLOCATION("SW2:4")
+	PORT_DIPNAME( 0x08, 0x08, "Enemy Crafts" )      PORT_DIPLOCATION("SW2:4")
 	PORT_DIPSETTING(    0x00, DEF_STR( Hard ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( Normal ) )
-	PORT_DIPNAME( 0x10, 0x10, "Enemy Missiles" )		PORT_DIPLOCATION("SW2:5")
+	PORT_DIPNAME( 0x10, 0x10, "Enemy Missiles" )        PORT_DIPLOCATION("SW2:5")
 	PORT_DIPSETTING(    0x00, DEF_STR( Hard ) )
 	PORT_DIPSETTING(    0x10, DEF_STR( Normal ) )
-	PORT_DIPNAME( 0x20, 0x20, "Freeze" )			PORT_DIPLOCATION("SW2:6") /* Listed as "Not Used" in the manual */
+	PORT_DIPNAME( 0x20, 0x20, "Freeze" )            PORT_DIPLOCATION("SW2:6") /* Listed as "Not Used" in the manual */
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x40, 0x00, "Country" )			PORT_DIPLOCATION("SW2:7") /* Listed as "Not Used" in the manual */
+	PORT_DIPNAME( 0x40, 0x00, "Country" )           PORT_DIPLOCATION("SW2:7") /* Listed as "Not Used" in the manual */
 	PORT_DIPSETTING(    0x00, "Japan/US" )
 	PORT_DIPSETTING(    0x40, "Japan Only" )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )		PORT_DIPLOCATION("SW2:8") /* Listed as "Not Used" in the manual */
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW2:8") /* Listed as "Not Used" in the manual */
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
@@ -311,20 +271,20 @@ static INPUT_PORTS_START( bwing )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START("IN2")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_CHANGED_MEMBER(DEVICE_SELF, bwing_state,coin_inserted, 0)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 ) PORT_CHANGED_MEMBER(DEVICE_SELF, bwing_state,coin_inserted, 0)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE1 )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_VBLANK )
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 
 	PORT_START("IN3")
-	PORT_BIT( 0xff, IP_ACTIVE_HIGH, IPT_TILT )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_TILT ) PORT_CHANGED_MEMBER(DEVICE_SELF, bwing_state,tilt_pressed,0)
 
 	PORT_START("VBLANK")
-	PORT_BIT( 0xff, IP_ACTIVE_HIGH, IPT_VBLANK )
+	PORT_BIT( 0xff, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 
 	PORT_START("EXTRA") // a matter of taste
 	PORT_DIPNAME( 0x07, 0x00, "RGB" )
@@ -357,7 +317,7 @@ static const gfx_layout spritelayout =
 	{ 0x40000, 0x20000, 0 },
 	{ 7, 6, 5, 4, 3, 2, 1, 0, 128+7, 128+6, 128+5, 128+4, 128+3, 128+2, 128+1, 128+0 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-	  8*8, 9*8,10*8,11*8,12*8,13*8,14*8,15*8 },
+		8*8, 9*8,10*8,11*8,12*8,13*8,14*8,15*8 },
 	32*8
 };
 
@@ -372,46 +332,33 @@ GFXDECODE_END
 //****************************************************************************
 // Hardware Definitions
 
-static MACHINE_START( bwing )
+void bwing_state::machine_start()
 {
-	bwing_state *state = machine.driver_data<bwing_state>();
 
-	state->m_maincpu = machine.device("maincpu");
-	state->m_subcpu = machine.device("sub");
-	state->m_audiocpu = machine.device("audiocpu");
+	m_maincpu = machine().device<cpu_device>("maincpu");
+	m_subcpu = machine().device<cpu_device>("sub");
+	m_audiocpu = machine().device<cpu_device>("audiocpu");
 
-	state->save_item(NAME(state->m_coin));
-	state->save_item(NAME(state->m_palatch));
-	state->save_item(NAME(state->m_srbank));
-	state->save_item(NAME(state->m_mapmask));
-	state->save_item(NAME(state->m_mapflip));
-	state->save_item(NAME(state->m_bwp3_nmimask));
-	state->save_item(NAME(state->m_bwp3_u8F_d));
-	state->save_item(NAME(state->m_ffcount));
-	state->save_item(NAME(state->m_ffhead));
-	state->save_item(NAME(state->m_fftail));
+	save_item(NAME(m_palatch));
+	save_item(NAME(m_srbank));
+	save_item(NAME(m_mapmask));
+	save_item(NAME(m_mapflip));
+	save_item(NAME(m_bwp3_nmimask));
+	save_item(NAME(m_bwp3_u8F_d));
 
-	state->save_item(NAME(state->m_sreg));
-	state->save_item(NAME(state->m_sound_fifo));
+	save_item(NAME(m_sreg));
 }
 
-static MACHINE_RESET( bwing )
+void bwing_state::machine_reset()
 {
-	bwing_state *state = machine.driver_data<bwing_state>();
-	int i;
 
-	state->m_coin = 0;
-	state->m_palatch = 0;
-	state->m_srbank = 0;
-	state->m_mapmask = 0;
-	state->m_mapflip = 0;
+	m_palatch = 0;
+	m_srbank = 0;
+	m_mapmask = 0;
+	m_mapflip = 0;
 
-	for (i = 0; i < MAX_SOUNDS; i++)
-		state->m_sound_fifo[i] = 0;
-
-	state->m_bwp3_nmimask = 0;
-	state->m_bwp3_u8F_d = 0;
-	state->m_fftail = state->m_ffhead = state->m_ffcount = 0;
+	m_bwp3_nmimask = 0;
+	m_bwp3_u8F_d = 0;
 }
 
 static MACHINE_CONFIG_START( bwing, bwing_state )
@@ -419,37 +366,31 @@ static MACHINE_CONFIG_START( bwing, bwing_state )
 	// basic machine hardware
 	MCFG_CPU_ADD("maincpu", M6809, 2000000)
 	MCFG_CPU_PROGRAM_MAP(bwp1_map)
-	MCFG_CPU_VBLANK_INT_HACK(bwp1_interrupt, 3)
 
 	MCFG_CPU_ADD("sub", M6809, 2000000)
 	MCFG_CPU_PROGRAM_MAP(bwp2_map)
-//  MCFG_CPU_VBLANK_INT("screen", irq1_line_assert) // vblank triggers FIRQ on CPU2 by design (unused)
 
 	MCFG_CPU_ADD("audiocpu", DECO16, 2000000)
 	MCFG_CPU_PROGRAM_MAP(bwp3_map)
 	MCFG_CPU_IO_MAP(bwp3_io_map)
-	MCFG_CPU_PERIODIC_INT(bwp3_interrupt, 1000)
+	MCFG_CPU_PERIODIC_INT_DRIVER(bwing_state, bwp3_interrupt,  1000)
 
-	MCFG_QUANTUM_TIME(attotime::from_hz(18000))		// high enough?
+	MCFG_QUANTUM_TIME(attotime::from_hz(18000))     // high enough?
 
-	MCFG_MACHINE_START(bwing)
-	MCFG_MACHINE_RESET(bwing)
 
 	// video hardware
 	MCFG_VIDEO_ATTRIBUTES(VIDEO_UPDATE_BEFORE_VBLANK)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
-	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(600))	// must be long enough for polling
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
+	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(600))   // must be long enough for polling
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 1*8, 31*8-1)
-	MCFG_SCREEN_UPDATE(bwing)
+	MCFG_SCREEN_UPDATE_DRIVER(bwing_state, screen_update_bwing)
 
 	MCFG_GFXDECODE(bwing)
 	MCFG_PALETTE_LENGTH(64)
 
-	MCFG_VIDEO_START(bwing)
 
 	// sound hardware
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -460,7 +401,7 @@ static MACHINE_CONFIG_START( bwing, bwing_state )
 	MCFG_SOUND_ADD("ay2", AY8910, 1500000)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 
-	MCFG_SOUND_ADD("dac", DAC, 0)
+	MCFG_DAC_ADD("dac")
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.10)
 MACHINE_CONFIG_END
 
@@ -493,8 +434,7 @@ ROM_START( bwings )
 	ROM_LOAD( "bw_bv-09.1h",  0x08000, 0x04000, CRC(a14c0b57) SHA1(5033354793d77922f5ef7f268cbe212e551efadf) )
 
 	// GPU Banks
-	ROM_REGION( 0x08000, "gpu", 0 )
-	ROM_FILL(0x00000, 0x08000, 0)
+	ROM_REGION( 0x08000, "gpu", ROMREGION_ERASE00 )
 ROM_END
 
 
@@ -524,8 +464,7 @@ ROM_START( bwingso )
 	ROM_LOAD( "bw_bv-09.1h",  0x08000, 0x04000, CRC(a14c0b57) SHA1(5033354793d77922f5ef7f268cbe212e551efadf) )
 
 	// GPU Banks
-	ROM_REGION( 0x08000, "gpu", 0 )
-	ROM_FILL(0x00000, 0x08000, 0)
+	ROM_REGION( 0x08000, "gpu", ROMREGION_ERASE00 )
 ROM_END
 
 
@@ -556,8 +495,7 @@ ROM_START( bwingsa )
 	ROM_LOAD( "bw_bv-09.1h",  0x08000, 0x04000, CRC(a14c0b57) SHA1(5033354793d77922f5ef7f268cbe212e551efadf) )
 
 	// GPU Banks
-	ROM_REGION( 0x08000, "gpu", 0 )
-	ROM_FILL(0x00000, 0x08000, 0)
+	ROM_REGION( 0x08000, "gpu", ROMREGION_ERASE00 )
 ROM_END
 
 ROM_START( zaviga )
@@ -586,8 +524,7 @@ ROM_START( zaviga )
 	ROM_LOAD( "as13.1h", 0x08000, 0x04000, CRC(15d0922b) SHA1(b8d715a9e610531472d516c19f6035adbce93c84) )
 
 	// GPU Banks
-	ROM_REGION( 0x08000, "gpu", 0 )
-	ROM_FILL(0x00000, 0x08000, 0)
+	ROM_REGION( 0x08000, "gpu", ROMREGION_ERASE00 )
 ROM_END
 
 
@@ -617,8 +554,7 @@ ROM_START( zavigaj )
 	ROM_LOAD( "as13.1h", 0x08000, 0x04000, CRC(15d0922b) SHA1(b8d715a9e610531472d516c19f6035adbce93c84) )
 
 	// GPU Banks
-	ROM_REGION( 0x08000, "gpu", 0 )
-	ROM_FILL(0x00000, 0x08000, 0)
+	ROM_REGION( 0x08000, "gpu", ROMREGION_ERASE00 )
 ROM_END
 
 //****************************************************************************
@@ -628,11 +564,11 @@ static void fix_bwp3( running_machine &machine )
 {
 	bwing_state *state = machine.driver_data<bwing_state>();
 	UINT8 *rom = state->m_bwp3_rombase;
-	int i, j = state->m_bwp3_romsize;
-	UINT8 ah, al;
+	int i, j = state->m_bwp3_rombase.bytes();
 
 	// swap nibbles
-	for (i = 0; i < j; i++) { ah = al = rom[i]; rom[i] = (ah >> 4) | (al << 4); }
+	for (i = 0; i < j; i++)
+		rom[i] = ((rom[i] & 0xf0) >> 4) | ((rom[i] & 0xf) << 4);
 
 	// relocate vectors
 	rom[j - (0x10 - 0x4)] = rom[j - (0x10 - 0xb)] = rom[j - (0x10 - 0x6)];
@@ -640,23 +576,22 @@ static void fix_bwp3( running_machine &machine )
 }
 
 
-static DRIVER_INIT( bwing )
+DRIVER_INIT_MEMBER(bwing_state,bwing)
 {
-	bwing_state *state = machine.driver_data<bwing_state>();
 
-	state->m_bwp123_membase[0] = machine.region("maincpu")->base();
-	state->m_bwp123_membase[1] = machine.region("sub")->base();
-	state->m_bwp123_membase[2] = machine.region("audiocpu")->base();
+	m_bwp123_membase[0] = memregion("maincpu")->base();
+	m_bwp123_membase[1] = memregion("sub")->base();
+	m_bwp123_membase[2] = memregion("audiocpu")->base();
 
-	fix_bwp3(machine);
+	fix_bwp3(machine());
 }
 
 //****************************************************************************
 // Game Entries
 
-GAME( 1984, bwings,       0, bwing, bwing, bwing, ROT90, "Data East Corporation", "B-Wings (Japan new Ver.)", 0 )
-GAME( 1984, bwingso, bwings, bwing, bwing, bwing, ROT90, "Data East Corporation", "B-Wings (Japan old Ver.)", 0 )
-GAME( 1984, bwingsa, bwings, bwing, bwing, bwing, ROT90, "Data East Corporation", "B-Wings (Alt Ver.?)", 0 )
+GAME( 1984, bwings,       0, bwing, bwing, bwing_state, bwing, ROT90, "Data East Corporation", "B-Wings (Japan new Ver.)", 0 )
+GAME( 1984, bwingso, bwings, bwing, bwing, bwing_state, bwing, ROT90, "Data East Corporation", "B-Wings (Japan old Ver.)", 0 )
+GAME( 1984, bwingsa, bwings, bwing, bwing, bwing_state, bwing, ROT90, "Data East Corporation", "B-Wings (Alt Ver.?)", 0 )
 
-GAME( 1984, zaviga,       0, bwing, bwing, bwing, ROT90, "Data East Corporation", "Zaviga", 0 )
-GAME( 1984, zavigaj, zaviga, bwing, bwing, bwing, ROT90, "Data East Corporation", "Zaviga (Japan)", 0 )
+GAME( 1984, zaviga,       0, bwing, bwing, bwing_state, bwing, ROT90, "Data East Corporation", "Zaviga", 0 )
+GAME( 1984, zavigaj, zaviga, bwing, bwing, bwing_state, bwing, ROT90, "Data East Corporation", "Zaviga (Japan)", 0 )

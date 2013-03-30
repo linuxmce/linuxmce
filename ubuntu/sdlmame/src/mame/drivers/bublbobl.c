@@ -269,14 +269,13 @@ TODO:
 #include "emu.h"
 #include "cpu/z80/z80.h"
 #include "cpu/m6800/m6800.h"
-#include "deprecat.h"
 #include "sound/2203intf.h"
 #include "sound/3526intf.h"
 #include "cpu/m6805/m6805.h"
 #include "includes/bublbobl.h"
 
 
-#define MAIN_XTAL	XTAL_24MHz
+#define MAIN_XTAL   XTAL_24MHz
 
 
 /*************************************
@@ -285,37 +284,37 @@ TODO:
  *
  *************************************/
 
-static ADDRESS_MAP_START( master_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( master_map, AS_PROGRAM, 8, bublbobl_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0xbfff) AM_ROMBANK("bank1")
-	AM_RANGE(0xc000, 0xdcff) AM_RAM AM_BASE_SIZE_MEMBER(bublbobl_state, m_videoram, m_videoram_size)
-	AM_RANGE(0xdd00, 0xdfff) AM_RAM AM_BASE_SIZE_MEMBER(bublbobl_state, m_objectram, m_objectram_size)
+	AM_RANGE(0xc000, 0xdcff) AM_RAM AM_SHARE("videoram")
+	AM_RANGE(0xdd00, 0xdfff) AM_RAM AM_SHARE("objectram")
 	AM_RANGE(0xe000, 0xf7ff) AM_RAM AM_SHARE("share1")
-	AM_RANGE(0xf800, 0xf9ff) AM_RAM_WRITE(paletteram_RRRRGGGGBBBBxxxx_be_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0xf800, 0xf9ff) AM_RAM_WRITE(paletteram_RRRRGGGGBBBBxxxx_byte_be_w) AM_SHARE("paletteram")
 	AM_RANGE(0xfa00, 0xfa00) AM_READWRITE(bublbobl_sound_status_r, bublbobl_sound_command_w)
 	AM_RANGE(0xfa03, 0xfa03) AM_WRITE(bublbobl_soundcpu_reset_w)
 	AM_RANGE(0xfa80, 0xfa80) AM_WRITE(watchdog_reset_w)
 	AM_RANGE(0xfb40, 0xfb40) AM_WRITE(bublbobl_bankswitch_w)
-	AM_RANGE(0xfc00, 0xffff) AM_RAM AM_BASE_MEMBER(bublbobl_state, m_mcu_sharedram)
+	AM_RANGE(0xfc00, 0xffff) AM_RAM AM_SHARE("mcu_sharedram")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( slave_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( slave_map, AS_PROGRAM, 8, bublbobl_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0xe000, 0xf7ff) AM_RAM AM_SHARE("share1")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, bublbobl_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x8fff) AM_RAM
-	AM_RANGE(0x9000, 0x9001) AM_DEVREADWRITE("ym1", ym2203_r, ym2203_w)
-	AM_RANGE(0xa000, 0xa001) AM_DEVREADWRITE("ym2", ym3526_r, ym3526_w)
-	AM_RANGE(0xb000, 0xb000) AM_READWRITE(soundlatch_r, bublbobl_sound_status_w)
+	AM_RANGE(0x9000, 0x9001) AM_DEVREADWRITE_LEGACY("ym1", ym2203_r, ym2203_w)
+	AM_RANGE(0xa000, 0xa001) AM_DEVREADWRITE_LEGACY("ym2", ym3526_r, ym3526_w)
+	AM_RANGE(0xb000, 0xb000) AM_READ(soundlatch_byte_r) AM_WRITE(bublbobl_sound_status_w)
 	AM_RANGE(0xb001, 0xb001) AM_WRITE(bublbobl_sh_nmi_enable_w) AM_READNOP
 	AM_RANGE(0xb002, 0xb002) AM_WRITE(bublbobl_sh_nmi_disable_w)
-	AM_RANGE(0xe000, 0xffff) AM_ROM	// space for diagnostic ROM?
+	AM_RANGE(0xe000, 0xffff) AM_ROM // space for diagnostic ROM?
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( mcu_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( mcu_map, AS_PROGRAM, 8, bublbobl_state )
 	AM_RANGE(0x0000, 0x0000) AM_READWRITE(bublbobl_mcu_ddr1_r, bublbobl_mcu_ddr1_w)
 	AM_RANGE(0x0001, 0x0001) AM_READWRITE(bublbobl_mcu_ddr2_r, bublbobl_mcu_ddr2_w)
 	AM_RANGE(0x0002, 0x0002) AM_READWRITE(bublbobl_mcu_port1_r, bublbobl_mcu_port1_w)
@@ -329,11 +328,11 @@ static ADDRESS_MAP_START( mcu_map, AS_PROGRAM, 8 )
 ADDRESS_MAP_END
 
 // The 68705 is from a bootleg, the original MCU is a 6801U4
-static ADDRESS_MAP_START( bootlegmcu_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( bootlegmcu_map, AS_PROGRAM, 8, bublbobl_state )
 	ADDRESS_MAP_GLOBAL_MASK(0x7ff)
 	AM_RANGE(0x000, 0x000) AM_READWRITE(bublbobl_68705_port_a_r, bublbobl_68705_port_a_w)
 	AM_RANGE(0x001, 0x001) AM_READWRITE(bublbobl_68705_port_b_r, bublbobl_68705_port_b_w)
-	AM_RANGE(0x002, 0x002) AM_READ_PORT("IN0")	// COIN
+	AM_RANGE(0x002, 0x002) AM_READ_PORT("IN0")  // COIN
 	AM_RANGE(0x004, 0x004) AM_WRITE(bublbobl_68705_ddr_a_w)
 	AM_RANGE(0x005, 0x005) AM_WRITE(bublbobl_68705_ddr_b_w)
 	AM_RANGE(0x006, 0x006) AM_WRITENOP // ???
@@ -341,13 +340,13 @@ static ADDRESS_MAP_START( bootlegmcu_map, AS_PROGRAM, 8 )
 	AM_RANGE(0x080, 0x7ff) AM_ROM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( bootleg_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( bootleg_map, AS_PROGRAM, 8, bublbobl_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0xbfff) AM_ROMBANK("bank1")
-	AM_RANGE(0xc000, 0xdcff) AM_RAM AM_BASE_SIZE_MEMBER(bublbobl_state, m_videoram, m_videoram_size)
-	AM_RANGE(0xdd00, 0xdfff) AM_RAM AM_BASE_SIZE_MEMBER(bublbobl_state, m_objectram, m_objectram_size)
+	AM_RANGE(0xc000, 0xdcff) AM_RAM AM_SHARE("videoram")
+	AM_RANGE(0xdd00, 0xdfff) AM_RAM AM_SHARE("objectram")
 	AM_RANGE(0xe000, 0xf7ff) AM_RAM AM_SHARE("share1")
-	AM_RANGE(0xf800, 0xf9ff) AM_RAM_WRITE(paletteram_RRRRGGGGBBBBxxxx_be_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0xf800, 0xf9ff) AM_RAM_WRITE(paletteram_RRRRGGGGBBBBxxxx_byte_be_w) AM_SHARE("paletteram")
 	AM_RANGE(0xfa00, 0xfa00) AM_READWRITE(bublbobl_sound_status_r, bublbobl_sound_command_w)
 	AM_RANGE(0xfa03, 0xfa03) AM_WRITE(bublbobl_soundcpu_reset_w)
 	AM_RANGE(0xfa80, 0xfa80) AM_WRITENOP // ???
@@ -365,13 +364,13 @@ static ADDRESS_MAP_START( bootleg_map, AS_PROGRAM, 8 )
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( tokio_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( tokio_map, AS_PROGRAM, 8, bublbobl_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0xbfff) AM_ROMBANK("bank1")
-	AM_RANGE(0xc000, 0xdcff) AM_RAM AM_BASE_SIZE_MEMBER(bublbobl_state, m_videoram, m_videoram_size)
-	AM_RANGE(0xdd00, 0xdfff) AM_RAM AM_BASE_SIZE_MEMBER(bublbobl_state, m_objectram, m_objectram_size)
+	AM_RANGE(0xc000, 0xdcff) AM_RAM AM_SHARE("videoram")
+	AM_RANGE(0xdd00, 0xdfff) AM_RAM AM_SHARE("objectram")
 	AM_RANGE(0xe000, 0xf7ff) AM_RAM AM_SHARE("share1")
-	AM_RANGE(0xf800, 0xf9ff) AM_RAM_WRITE(paletteram_RRRRGGGGBBBBxxxx_be_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0xf800, 0xf9ff) AM_RAM_WRITE(paletteram_RRRRGGGGBBBBxxxx_byte_be_w) AM_SHARE("paletteram")
 	AM_RANGE(0xfa00, 0xfa00) AM_WRITE(watchdog_reset_w)
 	AM_RANGE(0xfa03, 0xfa03) AM_READ_PORT("DSW0")
 	AM_RANGE(0xfa04, 0xfa04) AM_READ_PORT("DSW1")
@@ -385,20 +384,20 @@ static ADDRESS_MAP_START( tokio_map, AS_PROGRAM, 8 )
 	AM_RANGE(0xfe00, 0xfe00) AM_READ(tokio_mcu_r) AM_WRITENOP // ???
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( tokio_slave_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( tokio_slave_map, AS_PROGRAM, 8, bublbobl_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x97ff) AM_RAM AM_SHARE("share1")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( tokio_sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( tokio_sound_map, AS_PROGRAM, 8, bublbobl_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x8fff) AM_RAM
-	AM_RANGE(0x9000, 0x9000) AM_READWRITE(soundlatch_r, bublbobl_sound_status_w)
-	AM_RANGE(0x9800, 0x9800) AM_READNOP	// ???
+	AM_RANGE(0x9000, 0x9000) AM_READ(soundlatch_byte_r) AM_WRITE(bublbobl_sound_status_w)
+	AM_RANGE(0x9800, 0x9800) AM_READNOP // ???
 	AM_RANGE(0xa000, 0xa000) AM_WRITE(bublbobl_sh_nmi_disable_w)
 	AM_RANGE(0xa800, 0xa800) AM_WRITE(bublbobl_sh_nmi_enable_w)
-	AM_RANGE(0xb000, 0xb001) AM_DEVREADWRITE("ymsnd", ym2203_r, ym2203_w)
-	AM_RANGE(0xe000, 0xffff) AM_ROM	// space for diagnostic ROM?
+	AM_RANGE(0xb000, 0xb001) AM_DEVREADWRITE_LEGACY("ymsnd", ym2203_r, ym2203_w)
+	AM_RANGE(0xe000, 0xffff) AM_ROM // space for diagnostic ROM?
 ADDRESS_MAP_END
 
 
@@ -414,56 +413,56 @@ static INPUT_PORTS_START( bublbobl )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_COIN1 )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_COIN2 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SPECIAL )	// output: coin lockout
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SPECIAL )	// output: select 1-way or 2-way coin counter
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SPECIAL )	// output: trigger IRQ on main CPU (jumper switchable to vblank)
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SPECIAL )	// output: select read or write shared RAM
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SPECIAL )    // output: coin lockout
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SPECIAL )    // output: select 1-way or 2-way coin counter
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SPECIAL )    // output: trigger IRQ on main CPU (jumper switchable to vblank)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SPECIAL )    // output: select read or write shared RAM
 
 	PORT_START("DSW0")
-	PORT_DIPNAME( 0x05, 0x04, "Mode" )						PORT_DIPLOCATION("DSW-A:1,3")
+	PORT_DIPNAME( 0x05, 0x04, "Mode" )                      PORT_DIPLOCATION("DSW-A:1,3")
 	PORT_DIPSETTING(    0x04, "Game, English" )
 	PORT_DIPSETTING(    0x05, "Game, Japanese" )
 	PORT_DIPSETTING(    0x01, "Test (Grid and Inputs)" )
 	PORT_DIPSETTING(    0x00, "Test (RAM and Sound)/Pause" )
-	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Flip_Screen ) )		PORT_DIPLOCATION("DSW-A:2")
+	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Flip_Screen ) )      PORT_DIPLOCATION("DSW-A:2")
 	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Demo_Sounds ) )		PORT_DIPLOCATION("DSW-A:4")
+	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Demo_Sounds ) )      PORT_DIPLOCATION("DSW-A:4")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( On ) )
-	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Coin_A ) )			PORT_DIPLOCATION("DSW-A:5,6")
+	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Coin_A ) )           PORT_DIPLOCATION("DSW-A:5,6")
 	PORT_DIPSETTING(    0x10, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x30, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( 2C_3C ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( 1C_2C ) )
-	PORT_DIPNAME( 0xc0, 0xc0, DEF_STR( Coin_B ) )			PORT_DIPLOCATION("DSW-A:7,8")
+	PORT_DIPNAME( 0xc0, 0xc0, DEF_STR( Coin_B ) )           PORT_DIPLOCATION("DSW-A:7,8")
 	PORT_DIPSETTING(    0x40, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0xc0, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( 2C_3C ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( 1C_2C ) )
 
 	PORT_START("DSW1")
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Difficulty ) )		PORT_DIPLOCATION("DSW-B:1,2")
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Difficulty ) )       PORT_DIPLOCATION("DSW-B:1,2")
 	PORT_DIPSETTING(    0x02, DEF_STR( Easy ) )
 	PORT_DIPSETTING(    0x03, DEF_STR( Normal ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Hard ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Very_Hard ) )
-	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Bonus_Life ) )		PORT_DIPLOCATION("DSW-B:3,4")
+	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Bonus_Life ) )       PORT_DIPLOCATION("DSW-B:3,4")
 	PORT_DIPSETTING(    0x08, "20K 80K 300K" )
 	PORT_DIPSETTING(    0x0c, "30K 100K 400K" )
 	PORT_DIPSETTING(    0x04, "40K 200K 500K" )
 	PORT_DIPSETTING(    0x00, "50K 250K 500K" )
 	// then more bonus lives at 1M 2M 3M 4M 5M - for all dip switch settings
-	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Lives ) )			PORT_DIPLOCATION("DSW-B:5,6")
+	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Lives ) )            PORT_DIPLOCATION("DSW-B:5,6")
 	PORT_DIPSETTING(    0x10, "1" )
 	PORT_DIPSETTING(    0x00, "2" )
 	PORT_DIPSETTING(    0x30, "3" )
 	PORT_DIPSETTING(    0x20, "5" )
-	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )			PORT_DIPLOCATION("DSW-B:7")
-	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )				// must be off (see notes)
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )          PORT_DIPLOCATION("DSW-B:7")
+	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )              // must be off (see notes)
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, "ROM Type" )					PORT_DIPLOCATION("DSW-B:8")
-	PORT_DIPSETTING(    0x80, "IC52=512kb, IC53=none" )		// will hang on startup if set to wrong type
+	PORT_DIPNAME( 0x80, 0x80, "ROM Type" )                  PORT_DIPLOCATION("DSW-B:8")
+	PORT_DIPSETTING(    0x80, "IC52=512kb, IC53=none" )     // will hang on startup if set to wrong type
 	PORT_DIPSETTING(    0x00, "IC52=256kb, IC53=256kb" )
 
 	PORT_START("IN1")
@@ -592,46 +591,46 @@ INPUT_PORTS_END
 
 static INPUT_PORTS_START( tokio )
 	PORT_START("DSW0")
-	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Cabinet ) )		PORT_DIPLOCATION("SW A:1")
+	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Cabinet ) )      PORT_DIPLOCATION("SW A:1")
 	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Cocktail ) )
-	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Flip_Screen ) )	PORT_DIPLOCATION("SW A:2")
+	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Flip_Screen ) )  PORT_DIPLOCATION("SW A:2")
 	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_SERVICE_DIPLOC( 0x04, IP_ACTIVE_LOW, "SW A:3" )
-	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Demo_Sounds ) )	PORT_DIPLOCATION("SW A:4")
+	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW A:4")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( On ) )
-	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Coin_A ) )		PORT_DIPLOCATION("SW A:5,6")
+	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Coin_A ) )       PORT_DIPLOCATION("SW A:5,6")
 	PORT_DIPSETTING(    0x10, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x30, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( 2C_3C ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( 1C_2C ) )
-	PORT_DIPNAME( 0xc0, 0xc0, DEF_STR( Coin_B ) )		PORT_DIPLOCATION("SW A:7,8")
+	PORT_DIPNAME( 0xc0, 0xc0, DEF_STR( Coin_B ) )       PORT_DIPLOCATION("SW A:7,8")
 	PORT_DIPSETTING(    0x40, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0xc0, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( 2C_3C ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( 1C_2C ) )
 
 	PORT_START("DSW1")
-	PORT_DIPNAME( 0x01, 0x00, "Enemies" )				PORT_DIPLOCATION("SW B:1")
+	PORT_DIPNAME( 0x01, 0x00, "Enemies" )               PORT_DIPLOCATION("SW B:1")
 	PORT_DIPSETTING(    0x01, "Few (Easy)" )
 	PORT_DIPSETTING(    0x00, "Many (Hard)" )
-	PORT_DIPNAME( 0x02, 0x02, "Enemy Shots" )			PORT_DIPLOCATION("SW B:2")
+	PORT_DIPNAME( 0x02, 0x02, "Enemy Shots" )           PORT_DIPLOCATION("SW B:2")
 	PORT_DIPSETTING(    0x02, "Few (Easy)" )
 	PORT_DIPSETTING(    0x00, "Many (Hard)" )
-	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Bonus_Life ) )	PORT_DIPLOCATION("SW B:3,4")
+	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION("SW B:3,4")
 	PORT_DIPSETTING(    0x0c, "100K 400K" )
 	PORT_DIPSETTING(    0x08, "200K 400K" )
 	PORT_DIPSETTING(    0x04, "300K 400K" )
 	PORT_DIPSETTING(    0x00, "400K 400K" )
-	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Lives ) )		PORT_DIPLOCATION("SW B:5,6")
+	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Lives ) )        PORT_DIPLOCATION("SW B:5,6")
 	PORT_DIPSETTING(    0x30, "3" )
 	PORT_DIPSETTING(    0x20, "4" )
 	PORT_DIPSETTING(    0x10, "5" )
-	PORT_DIPSETTING(    0x00, "99 (Cheat)")	// 6 in original version
+	PORT_DIPSETTING(    0x00, "99 (Cheat)") // 6 in original version
 	PORT_DIPUNUSED_DIPLOC( 0x40, IP_ACTIVE_LOW, "SW B:7" )
-	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Language ) )		PORT_DIPLOCATION("SW B:8")
+	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Language ) )     PORT_DIPLOCATION("SW B:8")
 	PORT_DIPSETTING(    0x00, DEF_STR( English ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( Japanese ) )
 
@@ -641,7 +640,7 @@ static INPUT_PORTS_START( tokio )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_IMPULSE(1)
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_COIN2 ) PORT_IMPULSE(1)
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_SPECIAL )	// data ready from MCU
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_SPECIAL )   // data ready from MCU
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
@@ -700,7 +699,7 @@ GFXDECODE_END
 static void irqhandler(device_t *device, int irq)
 {
 	bublbobl_state *state = device->machine().driver_data<bublbobl_state>();
-	device_set_input_line(state->m_audiocpu, 0, irq ? ASSERT_LINE : CLEAR_LINE);
+	state->m_audiocpu->set_input_line(0, irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static const ym2203_interface ym2203_config =
@@ -710,7 +709,7 @@ static const ym2203_interface ym2203_config =
 		AY8910_DEFAULT_LOADS,
 		DEVCB_NULL, DEVCB_NULL, DEVCB_NULL, DEVCB_NULL
 	},
-	irqhandler
+	DEVCB_LINE(irqhandler)
 };
 
 
@@ -721,73 +720,68 @@ static const ym2203_interface ym2203_config =
  *
  *************************************/
 
-static MACHINE_START( common )
+MACHINE_START_MEMBER(bublbobl_state,common)
 {
-	bublbobl_state *state = machine.driver_data<bublbobl_state>();
 
-	state->m_maincpu = machine.device("maincpu");
-	state->m_mcu = machine.device("mcu");
-	state->m_audiocpu = machine.device("audiocpu");
-	state->m_slave = machine.device("slave");
+	m_maincpu = machine().device<cpu_device>("maincpu");
+	m_mcu = machine().device("mcu");
+	m_audiocpu = machine().device<cpu_device>("audiocpu");
+	m_slave = machine().device("slave");
 
-	state->save_item(NAME(state->m_sound_nmi_enable));
-	state->save_item(NAME(state->m_pending_nmi));
-	state->save_item(NAME(state->m_sound_status));
-	state->save_item(NAME(state->m_video_enable));
+	save_item(NAME(m_sound_nmi_enable));
+	save_item(NAME(m_pending_nmi));
+	save_item(NAME(m_sound_status));
+	save_item(NAME(m_video_enable));
 }
 
-static MACHINE_RESET( common )
+MACHINE_RESET_MEMBER(bublbobl_state,common)
 {
-	bublbobl_state *state = machine.driver_data<bublbobl_state>();
 
-	state->m_sound_nmi_enable = 0;
-	state->m_pending_nmi = 0;
-	state->m_sound_status = 0;
+	m_sound_nmi_enable = 0;
+	m_pending_nmi = 0;
+	m_sound_status = 0;
 }
 
 
-static MACHINE_START( tokio )
+MACHINE_START_MEMBER(bublbobl_state,tokio)
 {
-	bublbobl_state *state = machine.driver_data<bublbobl_state>();
 
-	MACHINE_START_CALL(common);
+	MACHINE_START_CALL_MEMBER(common);
 
-	state->save_item(NAME(state->m_tokio_prot_count));
+	save_item(NAME(m_tokio_prot_count));
 }
 
-static MACHINE_RESET( tokio )
+MACHINE_RESET_MEMBER(bublbobl_state,tokio)
 {
-	bublbobl_state *state = machine.driver_data<bublbobl_state>();
 
-	MACHINE_RESET_CALL(common);
+	MACHINE_RESET_CALL_MEMBER(common);
 
-	state->m_tokio_prot_count = 0;
+	m_tokio_prot_count = 0;
 }
 
 static MACHINE_CONFIG_START( tokio, bublbobl_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, MAIN_XTAL/4)	// 6 MHz
+	MCFG_CPU_ADD("maincpu", Z80, MAIN_XTAL/4)   // 6 MHz
 	MCFG_CPU_PROGRAM_MAP(tokio_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", bublbobl_state,  irq0_line_hold)
 
-	MCFG_CPU_ADD("slave", Z80, MAIN_XTAL/4)	// 6 MHz
+	MCFG_CPU_ADD("slave", Z80, MAIN_XTAL/4) // 6 MHz
 	MCFG_CPU_PROGRAM_MAP(tokio_slave_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", bublbobl_state,  irq0_line_hold)
 
-	MCFG_CPU_ADD("audiocpu", Z80, MAIN_XTAL/8)	// 3 MHz
+	MCFG_CPU_ADD("audiocpu", Z80, MAIN_XTAL/8)  // 3 MHz
 	MCFG_CPU_PROGRAM_MAP(tokio_sound_map) // NMIs are triggered by the main CPU, IRQs are triggered by the YM2203
 
 	MCFG_QUANTUM_TIME(attotime::from_hz(6000)) // 100 CPU slices per frame - a high value to ensure proper synchronization of the CPUs
 
-	MCFG_MACHINE_START(tokio)
-	MCFG_MACHINE_RESET(tokio)
+	MCFG_MACHINE_START_OVERRIDE(bublbobl_state,tokio)
+	MCFG_MACHINE_RESET_OVERRIDE(bublbobl_state,tokio)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_RAW_PARAMS(MAIN_XTAL/4, 384, 0, 256, 264, 16, 240)
-	MCFG_SCREEN_UPDATE(bublbobl)
+	MCFG_SCREEN_UPDATE_DRIVER(bublbobl_state, screen_update_bublbobl)
 
 	MCFG_GFXDECODE(bublbobl)
 	MCFG_PALETTE_LENGTH(256)
@@ -804,74 +798,71 @@ static MACHINE_CONFIG_START( tokio, bublbobl_state )
 MACHINE_CONFIG_END
 
 
-static MACHINE_START( bublbobl )
+MACHINE_START_MEMBER(bublbobl_state,bublbobl)
 {
-	bublbobl_state *state = machine.driver_data<bublbobl_state>();
 
-	MACHINE_START_CALL(common);
+	MACHINE_START_CALL_MEMBER(common);
 
-	state->save_item(NAME(state->m_ddr1));
-	state->save_item(NAME(state->m_ddr2));
-	state->save_item(NAME(state->m_ddr3));
-	state->save_item(NAME(state->m_ddr4));
-	state->save_item(NAME(state->m_port1_in));
-	state->save_item(NAME(state->m_port2_in));
-	state->save_item(NAME(state->m_port3_in));
-	state->save_item(NAME(state->m_port4_in));
-	state->save_item(NAME(state->m_port1_out));
-	state->save_item(NAME(state->m_port2_out));
-	state->save_item(NAME(state->m_port3_out));
-	state->save_item(NAME(state->m_port4_out));
+	save_item(NAME(m_ddr1));
+	save_item(NAME(m_ddr2));
+	save_item(NAME(m_ddr3));
+	save_item(NAME(m_ddr4));
+	save_item(NAME(m_port1_in));
+	save_item(NAME(m_port2_in));
+	save_item(NAME(m_port3_in));
+	save_item(NAME(m_port4_in));
+	save_item(NAME(m_port1_out));
+	save_item(NAME(m_port2_out));
+	save_item(NAME(m_port3_out));
+	save_item(NAME(m_port4_out));
 }
 
-static MACHINE_RESET( bublbobl )
+MACHINE_RESET_MEMBER(bublbobl_state,bublbobl)
 {
-	bublbobl_state *state = machine.driver_data<bublbobl_state>();
 
-	MACHINE_RESET_CALL(common);
+	MACHINE_RESET_CALL_MEMBER(common);
 
-	state->m_ddr1 = 0;
-	state->m_ddr2 = 0;
-	state->m_ddr3 = 0;
-	state->m_ddr4 = 0;
-	state->m_port1_in = 0;
-	state->m_port2_in = 0;
-	state->m_port3_in = 0;
-	state->m_port4_in = 0;
-	state->m_port1_out = 0;
-	state->m_port2_out = 0;
-	state->m_port3_out = 0;
-	state->m_port4_out = 0;
+	m_ddr1 = 0;
+	m_ddr2 = 0;
+	m_ddr3 = 0;
+	m_ddr4 = 0;
+	m_port1_in = 0;
+	m_port2_in = 0;
+	m_port3_in = 0;
+	m_port4_in = 0;
+	m_port1_out = 0;
+	m_port2_out = 0;
+	m_port3_out = 0;
+	m_port4_out = 0;
 }
 
 static MACHINE_CONFIG_START( bublbobl, bublbobl_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, MAIN_XTAL/4)	// 6 MHz
+	MCFG_CPU_ADD("maincpu", Z80, MAIN_XTAL/4)   // 6 MHz
 	MCFG_CPU_PROGRAM_MAP(master_map)
 	// IRQs are triggered by the MCU
 
-	MCFG_CPU_ADD("slave", Z80, MAIN_XTAL/4)	// 6 MHz
+	MCFG_CPU_ADD("slave", Z80, MAIN_XTAL/4) // 6 MHz
 	MCFG_CPU_PROGRAM_MAP(slave_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", bublbobl_state,  irq0_line_hold)
 
-	MCFG_CPU_ADD("audiocpu", Z80, MAIN_XTAL/8)	// 3 MHz
+	MCFG_CPU_ADD("audiocpu", Z80, MAIN_XTAL/8)  // 3 MHz
 	MCFG_CPU_PROGRAM_MAP(sound_map) // IRQs are triggered by the YM2203
 
-	MCFG_CPU_ADD("mcu", M6801, 4000000)	// actually 6801U4  // xtal is 4MHz, divided by 4 internally
+	MCFG_CPU_ADD("mcu", M6801, 4000000) // actually 6801U4  // xtal is 4MHz, divided by 4 internally
 	MCFG_CPU_PROGRAM_MAP(mcu_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_pulse) // comes from the same clock that latches the INT pin on the second Z80
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", bublbobl_state,  irq0_line_pulse) // comes from the same clock that latches the INT pin on the second Z80
 
 	MCFG_QUANTUM_TIME(attotime::from_hz(6000)) // 100 CPU slices per frame - a high value to ensure proper synchronization of the CPUs
 
-	MCFG_MACHINE_START(bublbobl)
-	MCFG_MACHINE_RESET(bublbobl)
+	MCFG_MACHINE_START_OVERRIDE(bublbobl_state,bublbobl)
+	MCFG_MACHINE_RESET_OVERRIDE(bublbobl_state,bublbobl)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_RAW_PARAMS(MAIN_XTAL/4, 384, 0, 256, 264, 16, 240)
-	MCFG_SCREEN_UPDATE(bublbobl)
+	MCFG_SCREEN_UPDATE_DRIVER(bublbobl_state, screen_update_bublbobl)
 
 	MCFG_GFXDECODE(bublbobl)
 	MCFG_PALETTE_LENGTH(256)
@@ -888,80 +879,76 @@ static MACHINE_CONFIG_START( bublbobl, bublbobl_state )
 MACHINE_CONFIG_END
 
 
-static MACHINE_START( boblbobl )
+MACHINE_START_MEMBER(bublbobl_state,boblbobl)
 {
-	bublbobl_state *state = machine.driver_data<bublbobl_state>();
 
-	MACHINE_START_CALL(common);
+	MACHINE_START_CALL_MEMBER(common);
 
-	state->save_item(NAME(state->m_ic43_a));
-	state->save_item(NAME(state->m_ic43_b));
+	save_item(NAME(m_ic43_a));
+	save_item(NAME(m_ic43_b));
 }
 
-static MACHINE_RESET( boblbobl )
+MACHINE_RESET_MEMBER(bublbobl_state,boblbobl)
 {
-	bublbobl_state *state = machine.driver_data<bublbobl_state>();
 
-	MACHINE_RESET_CALL(common);
+	MACHINE_RESET_CALL_MEMBER(common);
 
-	state->m_ic43_a = 0;
-	state->m_ic43_b = 0;
+	m_ic43_a = 0;
+	m_ic43_b = 0;
 }
 
 static MACHINE_CONFIG_DERIVED( boblbobl, bublbobl )
 
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_PROGRAM_MAP(bootleg_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)	// interrupt mode 1, unlike Bubble Bobble
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", bublbobl_state,  irq0_line_hold)   // interrupt mode 1, unlike Bubble Bobble
 
-	MCFG_MACHINE_START(boblbobl)
-	MCFG_MACHINE_RESET(boblbobl)
+	MCFG_MACHINE_START_OVERRIDE(bublbobl_state,boblbobl)
+	MCFG_MACHINE_RESET_OVERRIDE(bublbobl_state,boblbobl)
 
 	MCFG_DEVICE_REMOVE("mcu")
 MACHINE_CONFIG_END
 
 
-static MACHINE_START( bub68705 )
+MACHINE_START_MEMBER(bublbobl_state,bub68705)
 {
-	bublbobl_state *state = machine.driver_data<bublbobl_state>();
 
-	MACHINE_START_CALL(common);
+	MACHINE_START_CALL_MEMBER(common);
 
-	state->save_item(NAME(state->m_port_a_in));
-	state->save_item(NAME(state->m_port_a_out));
-	state->save_item(NAME(state->m_ddr_a));
-	state->save_item(NAME(state->m_port_b_in));
-	state->save_item(NAME(state->m_port_b_out));
-	state->save_item(NAME(state->m_ddr_b));
-	state->save_item(NAME(state->m_address));
-	state->save_item(NAME(state->m_latch));
+	save_item(NAME(m_port_a_in));
+	save_item(NAME(m_port_a_out));
+	save_item(NAME(m_ddr_a));
+	save_item(NAME(m_port_b_in));
+	save_item(NAME(m_port_b_out));
+	save_item(NAME(m_ddr_b));
+	save_item(NAME(m_address));
+	save_item(NAME(m_latch));
 }
 
-static MACHINE_RESET( bub68705 )
+MACHINE_RESET_MEMBER(bublbobl_state,bub68705)
 {
-	bublbobl_state *state = machine.driver_data<bublbobl_state>();
 
-	MACHINE_RESET_CALL(common);
+	MACHINE_RESET_CALL_MEMBER(common);
 
-	state->m_port_a_in = 0;
-	state->m_port_a_out = 0;
-	state->m_ddr_a = 0;
-	state->m_port_b_in = 0;
-	state->m_port_b_out = 0;
-	state->m_ddr_b = 0;
-	state->m_address = 0;
-	state->m_latch = 0;
+	m_port_a_in = 0;
+	m_port_a_out = 0;
+	m_ddr_a = 0;
+	m_port_b_in = 0;
+	m_port_b_out = 0;
+	m_ddr_b = 0;
+	m_address = 0;
+	m_latch = 0;
 }
 
 static MACHINE_CONFIG_DERIVED( bub68705, bublbobl )
 	MCFG_DEVICE_REMOVE("mcu")
 
-	MCFG_CPU_ADD("mcu", M68705, 4000000)	// xtal is 4MHz, divided by 4 internally
+	MCFG_CPU_ADD("mcu", M68705, 4000000)    // xtal is 4MHz, divided by 4 internally
 	MCFG_CPU_PROGRAM_MAP(bootlegmcu_map)
-	MCFG_CPU_VBLANK_INT_HACK(bublbobl_m68705_interrupt, 2) // ??? should come from the same clock which latches the INT pin on the second Z80
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", bublbobl_state, bublbobl_m68705_interrupt) // ??? should come from the same clock which latches the INT pin on the second Z80
 
-	MCFG_MACHINE_START(bub68705)
-	MCFG_MACHINE_RESET(bub68705)
+	MCFG_MACHINE_START_OVERRIDE(bublbobl_state,bub68705)
+	MCFG_MACHINE_RESET_OVERRIDE(bublbobl_state,bub68705)
 MACHINE_CONFIG_END
 
 
@@ -972,7 +959,7 @@ MACHINE_CONFIG_END
  *
  *************************************/
 ROM_START( tokio ) // newer japan set, has -1 revision of roms 02, 03 and 06
-	ROM_REGION( 0x30000, "maincpu", 0 )	/* main CPU */
+	ROM_REGION( 0x30000, "maincpu", 0 ) /* main CPU */
 	ROM_LOAD( "a71-02-1.ic4", 0x00000, 0x8000, CRC(BB8DABD7) SHA1(141E9F0C19BCF316477681369E2D98DFFDD8435D) )
 	/* ROMs banked at 8000-bfff */
 	ROM_LOAD( "a71-03-1.ic5", 0x10000, 0x8000, CRC(EE49B383) SHA1(D510A1D168542DF6A87C7D7C67A47CF776A51F29) )
@@ -980,13 +967,13 @@ ROM_START( tokio ) // newer japan set, has -1 revision of roms 02, 03 and 06
 	ROM_LOAD( "a71-05.ic7",   0x20000, 0x8000, CRC(6da0b945) SHA1(6c80b8333dd95657f99e6ba5b6e877733ac02a8c) )
 	ROM_LOAD( "a71-06-1.ic8", 0x28000, 0x8000, CRC(56927B3F) SHA1(33FB4E71B95664ECFF1F35F6782A14101982A56D) )
 
-	ROM_REGION( 0x10000, "slave", 0 )	/* video CPU */
+	ROM_REGION( 0x10000, "slave", 0 )   /* video CPU */
 	ROM_LOAD( "a71-01.ic1",   0x00000, 0x8000, CRC(0867c707) SHA1(7129974f1252b28e9e338bd3c7fcb87210dcf412) )
 
-	ROM_REGION( 0x10000, "audiocpu", 0 )	/* audio CPU */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* audio CPU */
 	ROM_LOAD( "a71-07.ic10",  0x0000, 0x08000, CRC(f298cc7b) SHA1(ebf5c804aa07b7f198ec3e1f8d1e111cd89ebdf3) )
 
-	ROM_REGION( 0x0800, "cpu3", 0 )	/* 2k for the microcontroller (68705P5) */
+	ROM_REGION( 0x0800, "cpu3", 0 ) /* 2k for the microcontroller (68705P5) */
 	ROM_LOAD( "a71-24.ic57",  0x0000, 0x0800, NO_DUMP )
 
 	ROM_REGION( 0x80000, "gfx1", ROMREGION_INVERT ) /* gfx roms, on gfx board */
@@ -1008,14 +995,14 @@ ROM_START( tokio ) // newer japan set, has -1 revision of roms 02, 03 and 06
 	ROM_LOAD( "a71-23.ic37",  0x78000, 0x8000, CRC(30bd46ad) SHA1(6e1618ed237c769d1a8d329fbd7a9f7216993215) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "a71-25.ic41",  0x0000, 0x0100, CRC(2d0f8545) SHA1(089c31e2f614145ef2743164f7b52ae35bc06808) )	/* video timing, on gfx board */
+	ROM_LOAD( "a71-25.ic41",  0x0000, 0x0100, CRC(2d0f8545) SHA1(089c31e2f614145ef2743164f7b52ae35bc06808) )    /* video timing, on gfx board */
 
 	ROM_REGION( 0x0200, "plds", 0 )
 	ROM_LOAD( "a71-26.ic19",  0x0000, 0x0117, CRC(4e1f119c) SHA1(0ac8eb2fdb202951e5f7145f92dfd10fe96b294b) )
 ROM_END
 
 ROM_START( tokioo ) // older japan set, has older roms 02, 03, 06
-	ROM_REGION( 0x30000, "maincpu", 0 )	/* main CPU */
+	ROM_REGION( 0x30000, "maincpu", 0 ) /* main CPU */
 	ROM_LOAD( "a71-02.ic4",   0x00000, 0x8000, CRC(d556c908) SHA1(d5d8afb7f7888d77aa9a372dfbab75fbd0358cc3) )
 	/* ROMs banked at 8000-bfff */
 	ROM_LOAD( "a71-03.ic5",   0x10000, 0x8000, CRC(69dacf44) SHA1(ee8c33702749c0e2562951f9f80c897d3fbd7dd7) )
@@ -1023,13 +1010,13 @@ ROM_START( tokioo ) // older japan set, has older roms 02, 03, 06
 	ROM_LOAD( "a71-05.ic7",   0x20000, 0x8000, CRC(6da0b945) SHA1(6c80b8333dd95657f99e6ba5b6e877733ac02a8c) )
 	ROM_LOAD( "a71-06.ic8",   0x28000, 0x8000, CRC(447d6779) SHA1(5b329b221357a9cea777415d409a6423529a925c) )
 
-	ROM_REGION( 0x10000, "slave", 0 )	/* video CPU */
+	ROM_REGION( 0x10000, "slave", 0 )   /* video CPU */
 	ROM_LOAD( "a71-01.ic1",   0x00000, 0x8000, CRC(0867c707) SHA1(7129974f1252b28e9e338bd3c7fcb87210dcf412) )
 
-	ROM_REGION( 0x10000, "audiocpu", 0 )	/* audio CPU */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* audio CPU */
 	ROM_LOAD( "a71-07.ic10",  0x0000, 0x08000, CRC(f298cc7b) SHA1(ebf5c804aa07b7f198ec3e1f8d1e111cd89ebdf3) )
 
-	ROM_REGION( 0x0800, "cpu3", 0 )	/* 2k for the microcontroller (68705P5) */
+	ROM_REGION( 0x0800, "cpu3", 0 ) /* 2k for the microcontroller (68705P5) */
 	ROM_LOAD( "a71-24.ic57",  0x0000, 0x0800, NO_DUMP )
 
 	ROM_REGION( 0x80000, "gfx1", ROMREGION_INVERT ) /* gfx roms, on gfx board */
@@ -1051,14 +1038,14 @@ ROM_START( tokioo ) // older japan set, has older roms 02, 03, 06
 	ROM_LOAD( "a71-23.ic37",  0x78000, 0x8000, CRC(30bd46ad) SHA1(6e1618ed237c769d1a8d329fbd7a9f7216993215) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "a71-25.ic41",  0x0000, 0x0100, CRC(2d0f8545) SHA1(089c31e2f614145ef2743164f7b52ae35bc06808) )	/* video timing, on gfx board */
+	ROM_LOAD( "a71-25.ic41",  0x0000, 0x0100, CRC(2d0f8545) SHA1(089c31e2f614145ef2743164f7b52ae35bc06808) )    /* video timing, on gfx board */
 
 	ROM_REGION( 0x0200, "plds", 0 )
 	ROM_LOAD( "a71-26.ic19",  0x0000, 0x0117, CRC(4e1f119c) SHA1(0ac8eb2fdb202951e5f7145f92dfd10fe96b294b) )
 ROM_END
 
 ROM_START( tokiou )
-	ROM_REGION( 0x30000, "maincpu", 0 )	/* main CPU */
+	ROM_REGION( 0x30000, "maincpu", 0 ) /* main CPU */
 	ROM_LOAD( "a71-27-1.ic4", 0x00000, 0x8000, CRC(8c180896) SHA1(bc8aeb42da4bae7db6f65b9874224f60a9bc4500) )
 	/* ROMs banked at 8000-bfff */
 	ROM_LOAD( "a71-28-1.ic5", 0x10000, 0x8000, CRC(1b447527) SHA1(6939e6c1b8492825d18f4e96f39ff45f4c96eea2) )
@@ -1066,13 +1053,13 @@ ROM_START( tokiou )
 	ROM_LOAD( "a71-05.ic7",   0x20000, 0x8000, CRC(6da0b945) SHA1(6c80b8333dd95657f99e6ba5b6e877733ac02a8c) )
 	ROM_LOAD( "a71-06-1.ic8", 0x28000, 0x8000, CRC(56927b3f) SHA1(33fb4e71b95664ecff1f35f6782a14101982a56d) )
 
-	ROM_REGION( 0x10000, "slave", 0 )	/* video CPU */
+	ROM_REGION( 0x10000, "slave", 0 )   /* video CPU */
 	ROM_LOAD( "a71-01.ic1",   0x00000, 0x8000, CRC(0867c707) SHA1(7129974f1252b28e9e338bd3c7fcb87210dcf412) )
 
-	ROM_REGION( 0x10000, "audiocpu", 0 )	/* audio CPU */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* audio CPU */
 	ROM_LOAD( "a71-07.ic10",  0x0000, 0x08000, CRC(f298cc7b) SHA1(ebf5c804aa07b7f198ec3e1f8d1e111cd89ebdf3) )
 
-	ROM_REGION( 0x0800, "cpu3", 0 )	/* 2k for the microcontroller (68705P5) */
+	ROM_REGION( 0x0800, "cpu3", 0 ) /* 2k for the microcontroller (68705P5) */
 	ROM_LOAD( "a71-24.ic57",  0x0000, 0x0800, NO_DUMP )
 
 	ROM_REGION( 0x80000, "gfx1", ROMREGION_INVERT ) /* gfx roms, on gfx board */
@@ -1094,7 +1081,7 @@ ROM_START( tokiou )
 	ROM_LOAD( "a71-23.ic37",  0x78000, 0x8000, CRC(30bd46ad) SHA1(6e1618ed237c769d1a8d329fbd7a9f7216993215) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "a71-25.ic41",  0x0000, 0x0100, CRC(2d0f8545) SHA1(089c31e2f614145ef2743164f7b52ae35bc06808) )	/* video timing, on gfx board */
+	ROM_LOAD( "a71-25.ic41",  0x0000, 0x0100, CRC(2d0f8545) SHA1(089c31e2f614145ef2743164f7b52ae35bc06808) )    /* video timing, on gfx board */
 
 	ROM_REGION( 0x0200, "plds", 0 )
 	ROM_LOAD( "a71-26.ic19",  0x0000, 0x0117, CRC(4e1f119c) SHA1(0ac8eb2fdb202951e5f7145f92dfd10fe96b294b) )
@@ -1109,10 +1096,10 @@ ROM_START( tokiob )
 	ROM_LOAD( "a71-05.ic7",   0x20000, 0x8000, CRC(6da0b945) SHA1(6c80b8333dd95657f99e6ba5b6e877733ac02a8c) )
 	ROM_LOAD( "6.ic8",        0x28000, 0x8000, CRC(1490e95b) SHA1(a73e1857a1029156f0b5f7f7fe34a37870e72209) )
 
-	ROM_REGION( 0x10000, "slave", 0 )	/* video CPU */
+	ROM_REGION( 0x10000, "slave", 0 )   /* video CPU */
 	ROM_LOAD( "a71-01.ic1",   0x00000, 0x8000, CRC(0867c707) SHA1(7129974f1252b28e9e338bd3c7fcb87210dcf412) )
 
-	ROM_REGION( 0x10000, "audiocpu", 0 )	/* audio CPU */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* audio CPU */
 	ROM_LOAD( "a71-07.ic10",  0x0000, 0x08000, CRC(f298cc7b) SHA1(ebf5c804aa07b7f198ec3e1f8d1e111cd89ebdf3) )
 
 	ROM_REGION( 0x80000, "gfx1", ROMREGION_INVERT ) /* gfx roms, on gfx board */
@@ -1134,7 +1121,7 @@ ROM_START( tokiob )
 	ROM_LOAD( "a71-23.ic37",  0x78000, 0x8000, CRC(30bd46ad) SHA1(6e1618ed237c769d1a8d329fbd7a9f7216993215) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "a71-25.ic41",  0x0000, 0x0100, CRC(2d0f8545) SHA1(089c31e2f614145ef2743164f7b52ae35bc06808) )	/* video timing, on gfx board */
+	ROM_LOAD( "a71-25.ic41",  0x0000, 0x0100, CRC(2d0f8545) SHA1(089c31e2f614145ef2743164f7b52ae35bc06808) )    /* video timing, on gfx board */
 ROM_END
 
 
@@ -1159,13 +1146,13 @@ ROM_START( bublbobl )
 	ROM_LOAD( "a78-05-1.52",    0x10000, 0x10000, CRC(9f8ee242) SHA1(924150d4e7e087a9b2b0a294c2d0e9903a266c6c) )
 	/* 20000-2ffff empty */
 
-	ROM_REGION( 0x10000, "slave", 0 )	/* 64k for the second CPU */
+	ROM_REGION( 0x10000, "slave", 0 )   /* 64k for the second CPU */
 	ROM_LOAD( "a78-08.37",    0x0000, 0x08000, CRC(ae11a07b) SHA1(af7a335c8da637103103cc274e077f123908ebb7) )
 
-	ROM_REGION( 0x10000, "audiocpu", 0 )	/* 64k for the third CPU */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for the third CPU */
 	ROM_LOAD( "a78-07.46",    0x0000, 0x08000, CRC(4f9a26e8) SHA1(3105b34b88a7134493c2b3f584729f8b0407a011) )
 
-	ROM_REGION( 0x10000, "mcu", 0 )	/* 64k for the MCU */
+	ROM_REGION( 0x10000, "mcu", 0 ) /* 64k for the MCU */
 	ROM_LOAD( "a78-01.17",    0xf000, 0x1000, CRC(b1bfb53d) SHA1(31b8f31acd3aa394acd80db362774749842e1285) )
 
 	ROM_REGION( 0x80000, "gfx1", ROMREGION_INVERT )
@@ -1185,7 +1172,7 @@ ROM_START( bublbobl )
 	/* 0x70000-0x7ffff empty */
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "a71-25.41",    0x0000, 0x0100, CRC(2d0f8545) SHA1(089c31e2f614145ef2743164f7b52ae35bc06808) )	/* video timing */
+	ROM_LOAD( "a71-25.41",    0x0000, 0x0100, CRC(2d0f8545) SHA1(089c31e2f614145ef2743164f7b52ae35bc06808) )    /* video timing */
 
 	/* Located on CPU/Sound Board */
 	ROM_REGION( 0x0003, "plds", 0 )
@@ -1208,13 +1195,13 @@ ROM_START( bublbobl1 )
 	ROM_LOAD( "a78-05.52",    0x10000, 0x10000, CRC(53f4bc6e) SHA1(15a2e6d83438d4136b154b3d90dd2cf9f1ce572c) )
 	/* 20000-2ffff empty */
 
-	ROM_REGION( 0x10000, "slave", 0 )	/* 64k for the second CPU */
+	ROM_REGION( 0x10000, "slave", 0 )   /* 64k for the second CPU */
 	ROM_LOAD( "a78-08.37",    0x0000, 0x08000, CRC(ae11a07b) SHA1(af7a335c8da637103103cc274e077f123908ebb7) )
 
-	ROM_REGION( 0x10000, "audiocpu", 0 )	/* 64k for the third CPU */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for the third CPU */
 	ROM_LOAD( "a78-07.46",    0x0000, 0x08000, CRC(4f9a26e8) SHA1(3105b34b88a7134493c2b3f584729f8b0407a011) )
 
-	ROM_REGION( 0x10000, "mcu", 0 )	/* 64k for the MCU */
+	ROM_REGION( 0x10000, "mcu", 0 ) /* 64k for the MCU */
 	ROM_LOAD( "a78-01.17",    0xf000, 0x1000, CRC(b1bfb53d) SHA1(31b8f31acd3aa394acd80db362774749842e1285) )
 
 	ROM_REGION( 0x80000, "gfx1", ROMREGION_INVERT )
@@ -1234,7 +1221,7 @@ ROM_START( bublbobl1 )
 	/* 0x70000-0x7ffff empty */
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "a71-25.41",    0x0000, 0x0100, CRC(2d0f8545) SHA1(089c31e2f614145ef2743164f7b52ae35bc06808) )	/* video timing */
+	ROM_LOAD( "a71-25.41",    0x0000, 0x0100, CRC(2d0f8545) SHA1(089c31e2f614145ef2743164f7b52ae35bc06808) )    /* video timing */
 
 	/* Located on CPU/Sound Board */
 	ROM_REGION( 0x0003, "plds", 0 )
@@ -1257,13 +1244,13 @@ ROM_START( bublboblr )
 	ROM_LOAD( "a78-24.52",    0x10000, 0x10000, CRC(b7afedc4) SHA1(6e4c8712f1fdf000e231cfd622dd3b514c61a6fd) )
 	/* 20000-2ffff empty */
 
-	ROM_REGION( 0x10000, "slave", 0 )	/* 64k for the second CPU */
+	ROM_REGION( 0x10000, "slave", 0 )   /* 64k for the second CPU */
 	ROM_LOAD( "a78-08.37",    0x0000, 0x08000, CRC(ae11a07b) SHA1(af7a335c8da637103103cc274e077f123908ebb7) )
 
-	ROM_REGION( 0x10000, "audiocpu", 0 )	/* 64k for the third CPU */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for the third CPU */
 	ROM_LOAD( "a78-07.46",    0x0000, 0x08000, CRC(4f9a26e8) SHA1(3105b34b88a7134493c2b3f584729f8b0407a011) )
 
-	ROM_REGION( 0x10000, "mcu", 0 )	/* 64k for the MCU */
+	ROM_REGION( 0x10000, "mcu", 0 ) /* 64k for the MCU */
 	ROM_LOAD( "a78-01.17",    0xf000, 0x1000, CRC(b1bfb53d) SHA1(31b8f31acd3aa394acd80db362774749842e1285) )
 
 	ROM_REGION( 0x80000, "gfx1", ROMREGION_INVERT )
@@ -1283,7 +1270,7 @@ ROM_START( bublboblr )
 	/* 0x70000-0x7ffff empty */
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "a71-25.41",    0x0000, 0x0100, CRC(2d0f8545) SHA1(089c31e2f614145ef2743164f7b52ae35bc06808) )	/* video timing */
+	ROM_LOAD( "a71-25.41",    0x0000, 0x0100, CRC(2d0f8545) SHA1(089c31e2f614145ef2743164f7b52ae35bc06808) )    /* video timing */
 
 	/* Located on CPU/Sound Board */
 	ROM_REGION( 0x0003, "plds", 0 )
@@ -1306,13 +1293,13 @@ ROM_START( bublboblr1 )
 	ROM_LOAD( "a78-21.52",    0x10000, 0x10000, CRC(2844033d) SHA1(6ac0b09d0325990cf18935f35b0adbc033758947) )
 	/* 20000-2ffff empty */
 
-	ROM_REGION( 0x10000, "slave", 0 )	/* 64k for the second CPU */
+	ROM_REGION( 0x10000, "slave", 0 )   /* 64k for the second CPU */
 	ROM_LOAD( "a78-08.37",    0x0000, 0x08000, CRC(ae11a07b) SHA1(af7a335c8da637103103cc274e077f123908ebb7) )
 
-	ROM_REGION( 0x10000, "audiocpu", 0 )	/* 64k for the third CPU */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for the third CPU */
 	ROM_LOAD( "a78-07.46",    0x0000, 0x08000, CRC(4f9a26e8) SHA1(3105b34b88a7134493c2b3f584729f8b0407a011) )
 
-	ROM_REGION( 0x10000, "mcu", 0 )	/* 64k for the MCU */
+	ROM_REGION( 0x10000, "mcu", 0 ) /* 64k for the MCU */
 	ROM_LOAD( "a78-01.17",    0xf000, 0x1000, CRC(b1bfb53d) SHA1(31b8f31acd3aa394acd80db362774749842e1285) )
 
 	ROM_REGION( 0x80000, "gfx1", ROMREGION_INVERT )
@@ -1332,7 +1319,7 @@ ROM_START( bublboblr1 )
 	/* 0x70000-0x7ffff empty */
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "a71-25.41",    0x0000, 0x0100, CRC(2d0f8545) SHA1(089c31e2f614145ef2743164f7b52ae35bc06808) )	/* video timing */
+	ROM_LOAD( "a71-25.41",    0x0000, 0x0100, CRC(2d0f8545) SHA1(089c31e2f614145ef2743164f7b52ae35bc06808) )    /* video timing */
 
 	/* Located on CPU/Sound Board */
 	ROM_REGION( 0x0003, "plds", 0 )
@@ -1349,10 +1336,10 @@ ROM_START( boblbobl )
 	ROM_LOAD( "bb4",          0x18000, 0x08000, CRC(afda99d8) SHA1(304324074ae726501bbb08e683850639d69939fb) )
 	/* 20000-2ffff empty */
 
-	ROM_REGION( 0x10000, "slave", 0 )	/* 64k for the second CPU */
+	ROM_REGION( 0x10000, "slave", 0 )   /* 64k for the second CPU */
 	ROM_LOAD( "a78-08.37",    0x0000, 0x08000, CRC(ae11a07b) SHA1(af7a335c8da637103103cc274e077f123908ebb7) )
 
-	ROM_REGION( 0x10000, "audiocpu", 0 )	/* 64k for the third CPU */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for the third CPU */
 	ROM_LOAD( "a78-07.46",    0x0000, 0x08000, CRC(4f9a26e8) SHA1(3105b34b88a7134493c2b3f584729f8b0407a011) )
 
 	ROM_REGION( 0x80000, "gfx1", ROMREGION_INVERT )
@@ -1372,7 +1359,7 @@ ROM_START( boblbobl )
 	/* 0x70000-0x7ffff empty */
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "a71-25.41",    0x0000, 0x0100, CRC(2d0f8545) SHA1(089c31e2f614145ef2743164f7b52ae35bc06808) )	/* video timing */
+	ROM_LOAD( "a71-25.41",    0x0000, 0x0100, CRC(2d0f8545) SHA1(089c31e2f614145ef2743164f7b52ae35bc06808) )    /* video timing */
 
 	ROM_REGION( 0x0600, "plds", 0 )
 	ROM_LOAD( "pal16r4.u36", 0x0000, 0x0104, CRC(22fe26ac) SHA1(bbbfcbe6faded4af7ceec57b800297c054a997da) )
@@ -1380,6 +1367,35 @@ ROM_START( boblbobl )
 	ROM_LOAD( "pal16l8.u4",  0x0400, 0x0104, CRC(077d20a8) SHA1(8e568ffd6f66c3dd61708dd0f3be9c2ed488ae4b) )
 ROM_END
 
+ROM_START( boblbobl2 )
+	ROM_REGION( 0x30000, "maincpu", 0 )
+	ROM_LOAD( "cpu2-3.bin",   0x00000, 0x08000, CRC(2d9107b6) SHA1(ab1a4a20f4b533cd06cc458668f407a8a14c9d70) )
+	/* ROMs banked at 8000-bfff */
+	ROM_LOAD( "bb5",          0x10000, 0x08000, CRC(13118eb1) SHA1(5a5da40c2cc82420f70bc58ffa32de1088c6c82f) )
+	ROM_LOAD( "cpu2-4.bin",   0x18000, 0x08000, CRC(3f9fed10) SHA1(1cc18a58d9a27495048825836accfa81ebbc0c56) )
+	/* 20000-2ffff empty */
+
+	ROM_REGION( 0x10000, "slave", 0 )   /* 64k for the second CPU */
+	ROM_LOAD( "a78-08.37",    0x0000, 0x08000, CRC(ae11a07b) SHA1(af7a335c8da637103103cc274e077f123908ebb7) )
+
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for the third CPU */
+	ROM_LOAD( "a78-07.46",    0x0000, 0x08000, CRC(4f9a26e8) SHA1(3105b34b88a7134493c2b3f584729f8b0407a011) )
+
+	ROM_REGION( 0x80000, "gfx1", ROMREGION_INVERT )
+	ROM_LOAD( "gfx7.bin",     0x00000, 0x10000, CRC(702f61c0) SHA1(2f294ab2b0286736a64ea2bfc95d855aa5b41ada) )
+	ROM_LOAD( "gfx8.bin",     0x10000, 0x10000, CRC(677840e8) SHA1(995b2125ca18910d7d4b96078f4ecb17465c4151) )
+	ROM_LOAD( "a78-13.16",    0x20000, 0x08000, CRC(d0af35c5) SHA1(c5a89f4d73acc0db86654540b3abfd77b3757db5) )
+	ROM_LOAD( "a78-14.17",    0x28000, 0x08000, CRC(7b5369a8) SHA1(1307b26d80e6f36ebe6c442bebec41d20066eaf9) )  // match
+	/* 0x30000-0x3ffff empty */
+	ROM_LOAD( "gfx10.bin",    0x40000, 0x10000, CRC(d370f499) SHA1(94ce157ff1a53fabf08abe5467531b94a56666a5) )
+	ROM_LOAD( "gfx11.bin",    0x50000, 0x10000, CRC(76f2b367) SHA1(3e357a5642c8747df77a995057cecdf96f3130ab) )
+	ROM_LOAD( "a78-19.34",    0x60000, 0x08000, CRC(66e9438c) SHA1(b94e62b6fbe7f4e08086d0365afc5cff6e0ccafd) )
+	ROM_LOAD( "a78-20.35",    0x68000, 0x08000, CRC(9ef863ad) SHA1(29f91b5a3765e4d6e6c3382db1d8d8297b6e56c8) )  // match
+	/* 0x70000-0x7ffff empty */
+
+	ROM_REGION( 0x0100, "proms", 0 )
+	ROM_LOAD( "a71-25.41",    0x0000, 0x0100, CRC(2d0f8545) SHA1(089c31e2f614145ef2743164f7b52ae35bc06808) )    /* video timing */
+ROM_END
 
 ROM_START( sboblboa )
 	ROM_REGION( 0x30000, "maincpu", 0 )
@@ -1389,10 +1405,10 @@ ROM_START( sboblboa )
 	ROM_LOAD( "1b.bin",          0x18000, 0x08000, CRC(1f29b5c0) SHA1(c15c84ca11cc10edac6340468bca463ecb2d89e6) )
 	/* 20000-2ffff empty */
 
-	ROM_REGION( 0x10000, "slave", 0 )	/* 64k for the second CPU */
+	ROM_REGION( 0x10000, "slave", 0 )   /* 64k for the second CPU */
 	ROM_LOAD( "1e.rom",    0x0000, 0x08000, CRC(ae11a07b) SHA1(af7a335c8da637103103cc274e077f123908ebb7) )
 
-	ROM_REGION( 0x10000, "audiocpu", 0 )	/* 64k for the third CPU */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for the third CPU */
 	ROM_LOAD( "1d.rom",    0x0000, 0x08000, CRC(4f9a26e8) SHA1(3105b34b88a7134493c2b3f584729f8b0407a011) )
 
 	ROM_REGION( 0x80000, "gfx1", ROMREGION_INVERT )
@@ -1412,7 +1428,7 @@ ROM_START( sboblboa )
 	/* 0x70000-0x7ffff empty */
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "a71-25.41",    0x0000, 0x0100, CRC(2d0f8545) SHA1(089c31e2f614145ef2743164f7b52ae35bc06808) )	/* video timing */
+	ROM_LOAD( "a71-25.41",    0x0000, 0x0100, CRC(2d0f8545) SHA1(089c31e2f614145ef2743164f7b52ae35bc06808) )    /* video timing */
 ROM_END
 
 ROM_START( sboblbob )
@@ -1423,10 +1439,10 @@ ROM_START( sboblbob )
 	ROM_LOAD( "bbb-4.rom",    0x18000, 0x08000, CRC(94c75591) SHA1(7698bc4b7d20e554a73a489cd3a15ae61b350e37) )
 	/* 20000-2ffff empty */
 
-	ROM_REGION( 0x10000, "slave", 0 )	/* 64k for the second CPU */
+	ROM_REGION( 0x10000, "slave", 0 )   /* 64k for the second CPU */
 	ROM_LOAD( "a78-08.37",    0x0000, 0x08000, CRC(ae11a07b) SHA1(af7a335c8da637103103cc274e077f123908ebb7) )
 
-	ROM_REGION( 0x10000, "audiocpu", 0 )	/* 64k for the third CPU */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for the third CPU */
 	ROM_LOAD( "a78-07.46",    0x0000, 0x08000, CRC(4f9a26e8) SHA1(3105b34b88a7134493c2b3f584729f8b0407a011) )
 
 	ROM_REGION( 0x80000, "gfx1", ROMREGION_INVERT )
@@ -1446,7 +1462,7 @@ ROM_START( sboblbob )
 	/* 0x70000-0x7ffff empty */
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "a71-25.41",    0x0000, 0x0100, CRC(2d0f8545) SHA1(089c31e2f614145ef2743164f7b52ae35bc06808) )	/* video timing */
+	ROM_LOAD( "a71-25.41",    0x0000, 0x0100, CRC(2d0f8545) SHA1(089c31e2f614145ef2743164f7b52ae35bc06808) )    /* video timing */
 ROM_END
 
 
@@ -1459,13 +1475,13 @@ ROM_START( bub68705 )
 	ROM_LOAD( "3.bin",          0x18000, 0x08000, CRC(e6c698f2) SHA1(8df116075f5891f74d0da8966ed11c597b5f544f) )
 	/* 20000-2ffff empty */
 
-	ROM_REGION( 0x10000, "slave", 0 )	/* 64k for the second CPU */
+	ROM_REGION( 0x10000, "slave", 0 )   /* 64k for the second CPU */
 	ROM_LOAD( "4.bin",    0x0000, 0x08000, CRC(ae11a07b) SHA1(af7a335c8da637103103cc274e077f123908ebb7) )
 
-	ROM_REGION( 0x10000, "audiocpu", 0 )	/* 64k for the third CPU */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for the third CPU */
 	ROM_LOAD( "1.bin",    0x0000, 0x08000, CRC(4f9a26e8) SHA1(3105b34b88a7134493c2b3f584729f8b0407a011) )
 
-	ROM_REGION( 0x800, "mcu", 0 )	/* 64k for the MCU */
+	ROM_REGION( 0x800, "mcu", 0 )   /* 64k for the MCU */
 	ROM_LOAD( "68705.bin",    0x000, 0x800, CRC(78caa635) SHA1(a756e45b25b007843ba4f2204cad6081cf7260e9) )
 
 	ROM_REGION( 0x80000, "gfx1", ROMREGION_INVERT )
@@ -1485,7 +1501,7 @@ ROM_START( bub68705 )
 	/* 0x70000-0x7ffff empty */
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "a71-25.41",    0x0000, 0x0100, CRC(2d0f8545) SHA1(089c31e2f614145ef2743164f7b52ae35bc06808) )	/* video timing */
+	ROM_LOAD( "a71-25.41",    0x0000, 0x0100, CRC(2d0f8545) SHA1(089c31e2f614145ef2743164f7b52ae35bc06808) )    /* video timing */
 ROM_END
 
 
@@ -1497,10 +1513,10 @@ ROM_START( dland )
 	ROM_LOAD( "dl_4.u68",    0x18000, 0x08000, CRC(c6a3776f) SHA1(473fc8c990046f90517f2506f1ca59eeb7ea13e5) )
 	/* 20000-2ffff empty */
 
-	ROM_REGION( 0x10000, "slave", 0 )	/* 64k for the second CPU */
+	ROM_REGION( 0x10000, "slave", 0 )   /* 64k for the second CPU */
 	ROM_LOAD( "dl_1.u42",    0x0000, 0x08000, CRC(ae11a07b) SHA1(af7a335c8da637103103cc274e077f123908ebb7) )
 
-	ROM_REGION( 0x10000, "audiocpu", 0 )	/* 64k for the third CPU */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* 64k for the third CPU */
 	ROM_LOAD( "dl_2.u74",    0x0000, 0x08000, CRC(4f9a26e8) SHA1(3105b34b88a7134493c2b3f584729f8b0407a011) )
 
 	ROM_REGION( 0x80000, "gfx1", ROMREGION_INVERT )
@@ -1514,7 +1530,7 @@ ROM_START( dland )
 	/* 0x70000-0x7ffff empty */
 
 	ROM_REGION( 0x0100, "proms", 0 ) // not on this? (but needed for the bublbobl video driver to work)
-	ROM_LOAD( "a71-25.41",    0x0000, 0x0100, CRC(2d0f8545) SHA1(089c31e2f614145ef2743164f7b52ae35bc06808) )	/* video timing */
+	ROM_LOAD( "a71-25.41",    0x0000, 0x0100, CRC(2d0f8545) SHA1(089c31e2f614145ef2743164f7b52ae35bc06808) )    /* video timing */
 ROM_END
 
 
@@ -1527,42 +1543,40 @@ ROM_END
 
 static void configure_banks( running_machine& machine )
 {
-	UINT8 *ROM = machine.region("maincpu")->base();
-	memory_configure_bank(machine, "bank1", 0, 8, &ROM[0x10000], 0x4000);
+	UINT8 *ROM = machine.root_device().memregion("maincpu")->base();
+	machine.root_device().membank("bank1")->configure_entries(0, 8, &ROM[0x10000], 0x4000);
 }
 
-static DRIVER_INIT( bublbobl )
+DRIVER_INIT_MEMBER(bublbobl_state,bublbobl)
 {
-	bublbobl_state *state = machine.driver_data<bublbobl_state>();
 
-	configure_banks(machine);
+	configure_banks(machine());
 
 	/* we init this here, so that it does not conflict with tokio init, below */
-	state->m_video_enable = 0;
+	m_video_enable = 0;
 }
 
-static DRIVER_INIT( tokio )
+DRIVER_INIT_MEMBER(bublbobl_state,tokio)
 {
-	bublbobl_state *state = machine.driver_data<bublbobl_state>();
-	configure_banks(machine);
+	configure_banks(machine());
 
 	/* preemptively enable video, the bit is not mapped for this game and */
 	/* I don't know if it even has it. */
-	state->m_video_enable = 1;
+	m_video_enable = 1;
 }
 
-static DRIVER_INIT( tokiob )
+DRIVER_INIT_MEMBER(bublbobl_state,tokiob)
 {
 	DRIVER_INIT_CALL(tokio);
 
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0xfe00, 0xfe00, FUNC(tokiob_mcu_r) );
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(0xfe00, 0xfe00, read8_delegate(FUNC(bublbobl_state::tokiob_mcu_r),this) );
 }
 
-static DRIVER_INIT( dland )
+DRIVER_INIT_MEMBER(bublbobl_state,dland)
 {
 	// rearrange gfx to original format
 	int i;
-	UINT8* src = machine.region("gfx1")->base();
+	UINT8* src = machine().root_device().memregion("gfx1")->base();
 	for (i = 0; i < 0x40000; i++)
 		src[i] = BITSWAP8(src[i],7,6,5,4,0,1,2,3);
 
@@ -1579,19 +1593,20 @@ static DRIVER_INIT( dland )
  *
  *************************************/
 
-GAME( 1986, tokio,      0,        tokio,    tokio,    tokio,    ROT90, "Taito Corporation", "Tokio / Scramble Formation (newer)", GAME_NOT_WORKING | GAME_UNEMULATED_PROTECTION | GAME_SUPPORTS_SAVE )
-GAME( 1986, tokioo,     tokio,        tokio,    tokio,    tokio,    ROT90, "Taito Corporation", "Tokio / Scramble Formation (older)", GAME_NOT_WORKING | GAME_UNEMULATED_PROTECTION | GAME_SUPPORTS_SAVE )
-GAME( 1986, tokiou,     tokio,    tokio,    tokio,    tokio,    ROT90, "Taito America Corporation (Romstar license)", "Tokio / Scramble Formation (US)", GAME_NOT_WORKING | GAME_UNEMULATED_PROTECTION | GAME_SUPPORTS_SAVE )
-GAME( 1986, tokiob,     tokio,    tokio,    tokio,    tokiob,   ROT90, "bootleg", "Tokio / Scramble Formation (bootleg)", GAME_SUPPORTS_SAVE )
+GAME( 1986, tokio,      0,        tokio,    tokio, bublbobl_state,    tokio,    ROT90, "Taito Corporation", "Tokio / Scramble Formation (newer)", GAME_NOT_WORKING | GAME_UNEMULATED_PROTECTION | GAME_SUPPORTS_SAVE )
+GAME( 1986, tokioo,     tokio,    tokio,    tokio, bublbobl_state,    tokio,    ROT90, "Taito Corporation", "Tokio / Scramble Formation (older)", GAME_NOT_WORKING | GAME_UNEMULATED_PROTECTION | GAME_SUPPORTS_SAVE )
+GAME( 1986, tokiou,     tokio,    tokio,    tokio, bublbobl_state,    tokio,    ROT90, "Taito America Corporation (Romstar license)", "Tokio / Scramble Formation (US)", GAME_NOT_WORKING | GAME_UNEMULATED_PROTECTION | GAME_SUPPORTS_SAVE )
+GAME( 1986, tokiob,     tokio,    tokio,    tokio, bublbobl_state,    tokiob,   ROT90, "bootleg", "Tokio / Scramble Formation (bootleg)", GAME_SUPPORTS_SAVE )
 
-GAME( 1986, bublbobl,   0,        bublbobl, bublbobl, bublbobl, ROT0,  "Taito Corporation", "Bubble Bobble", GAME_SUPPORTS_SAVE )
-GAME( 1986, bublbobl1,  bublbobl, bublbobl, bublbobl, bublbobl, ROT0,  "Taito Corporation", "Bubble Bobble (older)", GAME_SUPPORTS_SAVE )
-GAME( 1986, bublboblr,  bublbobl, bublbobl, bublbobl, bublbobl, ROT0,  "Taito America Corporation (Romstar license)", "Bubble Bobble (US with mode select)", GAME_SUPPORTS_SAVE )
-GAME( 1986, bublboblr1, bublbobl, bublbobl, bublbobl, bublbobl, ROT0,  "Taito America Corporation (Romstar license)", "Bubble Bobble (US)", GAME_SUPPORTS_SAVE )
+GAME( 1986, bublbobl,   0,        bublbobl, bublbobl, bublbobl_state, bublbobl, ROT0,  "Taito Corporation", "Bubble Bobble (Japan, Ver 0.1)", GAME_SUPPORTS_SAVE )
+GAME( 1986, bublbobl1,  bublbobl, bublbobl, bublbobl, bublbobl_state, bublbobl, ROT0,  "Taito Corporation", "Bubble Bobble (Japan, Ver 0.0)", GAME_SUPPORTS_SAVE )
+GAME( 1986, bublboblr,  bublbobl, bublbobl, bublbobl, bublbobl_state, bublbobl, ROT0,  "Taito America Corporation (Romstar license)", "Bubble Bobble (US, Ver 5.1)", GAME_SUPPORTS_SAVE ) // newest release, with mode select
+GAME( 1986, bublboblr1, bublbobl, bublbobl, bublbobl, bublbobl_state, bublbobl, ROT0,  "Taito America Corporation (Romstar license)", "Bubble Bobble (US, Ver 1.0)", GAME_SUPPORTS_SAVE )
 
-GAME( 1986, boblbobl,   bublbobl, boblbobl, boblbobl, bublbobl, ROT0,  "bootleg", "Bobble Bobble", GAME_SUPPORTS_SAVE )
-GAME( 1986, sboblboa,   bublbobl, boblbobl, boblbobl, bublbobl, ROT0,  "bootleg", "Super Bobble Bobble (set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1986, sboblbob,   bublbobl, boblbobl, sboblbob, bublbobl, ROT0,  "bootleg", "Super Bobble Bobble (set 2)", GAME_SUPPORTS_SAVE )
-GAME( 1986, bub68705,   bublbobl, bub68705, bublbobl, bublbobl, ROT0,  "bootleg", "Bubble Bobble (bootleg with 68705)", GAME_SUPPORTS_SAVE )
+GAME( 1986, boblbobl,   bublbobl, boblbobl, boblbobl, bublbobl_state, bublbobl, ROT0,  "bootleg", "Bobble Bobble (set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1986, boblbobl2,  bublbobl, boblbobl, boblbobl, bublbobl_state, bublbobl, ROT0,  "bootleg", "Bobble Bobble (set 2)", GAME_SUPPORTS_SAVE | GAME_NOT_WORKING )
+GAME( 1986, sboblboa,   bublbobl, boblbobl, boblbobl, bublbobl_state, bublbobl, ROT0,  "bootleg", "Super Bobble Bobble (set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1986, sboblbob,   bublbobl, boblbobl, sboblbob, bublbobl_state, bublbobl, ROT0,  "bootleg", "Super Bobble Bobble (set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1986, bub68705,   bublbobl, bub68705, bublbobl, bublbobl_state, bublbobl, ROT0,  "bootleg", "Bubble Bobble (bootleg with 68705)", GAME_SUPPORTS_SAVE )
 
-GAME( 1987, dland,      bublbobl, boblbobl, dland,    dland,    ROT0,  "bootleg", "Dream Land / Super Dream Land (bootleg of Bubble Bobble)", GAME_SUPPORTS_SAVE )
+GAME( 1987, dland,      bublbobl, boblbobl, dland, bublbobl_state,    dland,    ROT0,  "bootleg", "Dream Land / Super Dream Land (bootleg of Bubble Bobble)", GAME_SUPPORTS_SAVE )

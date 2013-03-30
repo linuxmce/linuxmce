@@ -1,42 +1,69 @@
-/*
+/*********************************************************************************
+
+    Pinball
     Playmatic MPU 1
-*/
+
+**********************************************************************************/
+
+
 #include "emu.h"
 #include "cpu/cosmac/cosmac.h"
-
-extern const char layout_pinball[];
 
 class play_1_state : public driver_device
 {
 public:
-	play_1_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	play_1_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+			m_maincpu(*this, "maincpu")
+	{ }
+
+protected:
+
+	// devices
+	required_device<cosmac_device> m_maincpu;
+
+	// driver_device overrides
+	virtual void machine_reset();
+public:
+	DECLARE_DRIVER_INIT(play_1);
 };
 
-static ADDRESS_MAP_START( play_1_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( play_1_map, AS_PROGRAM, 8, play_1_state )
 	AM_RANGE(0x0000, 0xffff) AM_NOP
 ADDRESS_MAP_END
 
 static INPUT_PORTS_START( play_1 )
 INPUT_PORTS_END
 
-static MACHINE_RESET( play_1 )
+void play_1_state::machine_reset()
 {
 }
 
-static DRIVER_INIT( play_1 )
+DRIVER_INIT_MEMBER(play_1_state,play_1)
 {
 }
+
+static COSMAC_INTERFACE( cdp1802_config )
+{
+	DEVCB_NULL,
+	DEVCB_NULL,
+	DEVCB_NULL,
+	DEVCB_NULL,
+	DEVCB_NULL,
+	DEVCB_NULL,
+	DEVCB_NULL,
+	DEVCB_NULL,
+	DEVCB_NULL,
+	NULL,
+	DEVCB_NULL,
+	DEVCB_NULL
+};
 
 static MACHINE_CONFIG_START( play_1, play_1_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", COSMAC, 400000)
 	MCFG_CPU_PROGRAM_MAP(play_1_map)
-
-	MCFG_MACHINE_RESET( play_1 )
-
-	/* video hardware */
-	MCFG_DEFAULT_LAYOUT(layout_pinball)
+	MCFG_CPU_CONFIG(cdp1802_config)
 MACHINE_CONFIG_END
 
 /*-------------------------------------------------------------------
@@ -85,8 +112,10 @@ ROM_START(party)
 	ROM_LOAD("party_b.bin", 0x0400, 0x0400, CRC(5e2ba9c0) SHA1(abd285aa5702c7fb84257b4341f64ff83c1fc0ce))
 ROM_END
 
-GAME(1978,	bigtown,	0,		play_1,	play_1,	play_1,	ROT0,	"Playmatic",	"Big Town",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1978,	chance,		0,		play_1,	play_1,	play_1,	ROT0,	"Playmatic",	"Chance",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1978,	lastlap,	0,		play_1,	play_1,	play_1,	ROT0,	"Playmatic",	"Last Lap",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1978,	spcgambl,	0,		play_1,	play_1,	play_1,	ROT0,	"Playmatic",	"Space Gambler",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1979,	party,		0,		play_1,	play_1,	play_1,	ROT0,	"Playmatic",	"Party",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
+
+/* Big Town, Last Lap and Party all reportedly share the same roms with different playfield/machine artworks */
+GAME(1978,  bigtown,    0,      play_1, play_1, play_1_state,   play_1, ROT0,   "Playmatic",    "Big Town",             GAME_IS_SKELETON_MECHANICAL)
+GAME(1978,  chance,     0,      play_1, play_1, play_1_state,   play_1, ROT0,   "Playmatic",    "Chance",               GAME_IS_SKELETON_MECHANICAL)
+GAME(1978,  lastlap,    0,      play_1, play_1, play_1_state,   play_1, ROT0,   "Playmatic",    "Last Lap",             GAME_IS_SKELETON_MECHANICAL)
+GAME(1978,  spcgambl,   0,      play_1, play_1, play_1_state,   play_1, ROT0,   "Playmatic",    "Space Gambler",                GAME_IS_SKELETON_MECHANICAL)
+GAME(1979,  party,      0,      play_1, play_1, play_1_state,   play_1, ROT0,   "Playmatic",    "Party",                GAME_IS_SKELETON_MECHANICAL)

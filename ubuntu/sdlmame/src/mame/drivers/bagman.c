@@ -67,107 +67,104 @@ DIP locations verified for:
 #include "includes/bagman.h"
 
 
-static WRITE8_DEVICE_HANDLER( bagman_ls259_w )
+WRITE8_MEMBER(bagman_state::bagman_ls259_w)
 {
-	bagman_state *state = device->machine().driver_data<bagman_state>();
-	address_space *space = device->machine().device("maincpu")->memory().space(AS_PROGRAM);
+	device_t *device = machine().device("tmsprom");
 	bagman_pal16r6_w(space, offset,data); /*this is just a simulation*/
 
-	if (state->m_ls259_buf[offset] != (data&1) )
+	if (m_ls259_buf[offset] != (data&1) )
 	{
-		state->m_ls259_buf[offset] = data&1;
+		m_ls259_buf[offset] = data&1;
 
 		switch (offset)
 		{
 		case 0:
 		case 1:
 		case 2:
-			tmsprom_bit_w(device, 0, 7 - ((state->m_ls259_buf[0]<<2) | (state->m_ls259_buf[1]<<1) | (state->m_ls259_buf[2]<<0)));
+			tmsprom_bit_w(device, space, 0, 7 - ((m_ls259_buf[0]<<2) | (m_ls259_buf[1]<<1) | (m_ls259_buf[2]<<0)));
 			break;
 		case 3:
-			tmsprom_enable_w(device, state->m_ls259_buf[offset]);
+			tmsprom_enable_w(device, m_ls259_buf[offset]);
 			break;
 		case 4:
-			tmsprom_rom_csq_w(device, 0, state->m_ls259_buf[offset]);
+			tmsprom_rom_csq_w(device, space, 0, m_ls259_buf[offset]);
 			break;
 		case 5:
-			tmsprom_rom_csq_w(device, 1, state->m_ls259_buf[offset]);
+			tmsprom_rom_csq_w(device, space, 1, m_ls259_buf[offset]);
 			break;
 		}
 	}
 }
 
-static WRITE8_HANDLER( bagman_coin_counter_w )
+WRITE8_MEMBER(bagman_state::bagman_coin_counter_w)
 {
-	coin_counter_w(space->machine(), offset,data);
+	coin_counter_w(machine(), offset,data);
 }
 
-static WRITE8_DEVICE_HANDLER( bagman_interrupt_w )
+WRITE8_MEMBER(bagman_state::irq_mask_w)
 {
-	data &= 1;
-	if (!data)
-		device_set_input_line(device, 0, CLEAR_LINE);
-	cpu_interrupt_enable(device, data);
+
+	m_irq_mask = data & 1;
 }
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, bagman_state )
 	AM_RANGE(0x0000, 0x5fff) AM_ROM
 	AM_RANGE(0x6000, 0x67ff) AM_RAM
-	AM_RANGE(0x9000, 0x93ff) AM_RAM_WRITE(bagman_videoram_w) AM_BASE_MEMBER(bagman_state, m_videoram)
-	AM_RANGE(0x9800, 0x9bff) AM_RAM_WRITE(bagman_colorram_w) AM_BASE_MEMBER(bagman_state, m_colorram)
-	AM_RANGE(0x9c00, 0x9fff) AM_WRITENOP	/* written to, but unused */
+	AM_RANGE(0x9000, 0x93ff) AM_RAM_WRITE(bagman_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0x9800, 0x9bff) AM_RAM_WRITE(bagman_colorram_w) AM_SHARE("colorram")
+	AM_RANGE(0x9c00, 0x9fff) AM_WRITENOP    /* written to, but unused */
 	AM_RANGE(0xa000, 0xa000) AM_READ(bagman_pal16r6_r)
-	//AM_RANGE(0xa800, 0xa805) AM_READ(bagman_ls259_r) /*just for debugging purposes*/
-	AM_RANGE(0xa000, 0xa000) AM_DEVWRITE("maincpu", bagman_interrupt_w)
+	//AM_RANGE(0xa800, 0xa805) AM_READ_LEGACY(bagman_ls259_r) /*just for debugging purposes*/
+	AM_RANGE(0xa000, 0xa000) AM_WRITE(irq_mask_w)
 	AM_RANGE(0xa001, 0xa002) AM_WRITE(bagman_flipscreen_w)
-	AM_RANGE(0xa003, 0xa003) AM_WRITEONLY AM_BASE_MEMBER(bagman_state, m_video_enable)
+	AM_RANGE(0xa003, 0xa003) AM_WRITEONLY AM_SHARE("video_enable")
 	AM_RANGE(0xc000, 0xffff) AM_ROM /* Super Bagman only */
-	AM_RANGE(0x9800, 0x981f) AM_WRITEONLY AM_BASE_SIZE_MEMBER(bagman_state, m_spriteram, m_spriteram_size)	/* hidden portion of color RAM */
+	AM_RANGE(0x9800, 0x981f) AM_WRITEONLY AM_SHARE("spriteram") /* hidden portion of color RAM */
 									/* here only to initialize the pointer, */
 									/* writes are handled by bagman_colorram_w */
-	AM_RANGE(0xa800, 0xa805) AM_DEVWRITE("tmsprom", bagman_ls259_w) /* TMS5110 driving state machine */
+	AM_RANGE(0xa800, 0xa805) AM_WRITE(bagman_ls259_w) /* TMS5110 driving state machine */
 	AM_RANGE(0xa004, 0xa004) AM_WRITE(bagman_coin_counter_w)
 	AM_RANGE(0xb000, 0xb000) AM_READ_PORT("DSW")
-	AM_RANGE(0xb800, 0xb800) AM_READNOP								/* looks like watchdog from schematics */
+	AM_RANGE(0xb800, 0xb800) AM_READNOP                             /* looks like watchdog from schematics */
 
 #if 0
-	AM_RANGE(0xa007, 0xa007) AM_WRITENOP	/* ???? */
-	AM_RANGE(0xb000, 0xb000) AM_WRITENOP	/* ???? */
-	AM_RANGE(0xb800, 0xb800) AM_WRITENOP	/* ???? */
+	AM_RANGE(0xa007, 0xa007) AM_WRITENOP    /* ???? */
+	AM_RANGE(0xb000, 0xb000) AM_WRITENOP    /* ???? */
+	AM_RANGE(0xb800, 0xb800) AM_WRITENOP    /* ???? */
 #endif
 ADDRESS_MAP_END
 
 
 
-static ADDRESS_MAP_START( pickin_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( pickin_map, AS_PROGRAM, 8, bagman_state )
 	AM_RANGE(0x0000, 0x5fff) AM_ROM
 	AM_RANGE(0x7000, 0x77ff) AM_RAM
-	AM_RANGE(0x8800, 0x8bff) AM_RAM_WRITE(bagman_videoram_w) AM_BASE_MEMBER(bagman_state, m_videoram)
-	AM_RANGE(0x9800, 0x9bff) AM_RAM_WRITE(bagman_colorram_w) AM_BASE_MEMBER(bagman_state, m_colorram)
-	AM_RANGE(0x9800, 0x981f) AM_WRITEONLY AM_BASE_SIZE_MEMBER(bagman_state, m_spriteram, m_spriteram_size)	/* hidden portion of color RAM */
+	AM_RANGE(0x8800, 0x8bff) AM_RAM_WRITE(bagman_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0x9800, 0x9bff) AM_RAM_WRITE(bagman_colorram_w) AM_SHARE("colorram")
+	AM_RANGE(0x9800, 0x981f) AM_WRITEONLY AM_SHARE("spriteram") /* hidden portion of color RAM */
 									/* here only to initialize the pointer, */
 									/* writes are handled by bagman_colorram_w */
-	AM_RANGE(0x9c00, 0x9fff) AM_WRITENOP	/* written to, but unused */
-	AM_RANGE(0xa000, 0xa000) AM_WRITE(interrupt_enable_w)
+	AM_RANGE(0x9c00, 0x9fff) AM_WRITENOP    /* written to, but unused */
+	AM_RANGE(0xa000, 0xa000) AM_WRITE(irq_mask_w)
 	AM_RANGE(0xa001, 0xa002) AM_WRITE(bagman_flipscreen_w)
-	AM_RANGE(0xa003, 0xa003) AM_WRITEONLY AM_BASE_MEMBER(bagman_state, m_video_enable)
+	AM_RANGE(0xa003, 0xa003) AM_WRITEONLY AM_SHARE("video_enable")
 	AM_RANGE(0xa004, 0xa004) AM_WRITE(bagman_coin_counter_w)
 	AM_RANGE(0xa800, 0xa800) AM_READ_PORT("DSW")
 
 
-	AM_RANGE(0xa005, 0xa005) AM_WRITENOP	/* ???? */
-	AM_RANGE(0xa006, 0xa006) AM_WRITENOP	/* ???? */
-	AM_RANGE(0xa007, 0xa007) AM_WRITENOP	/* ???? */
+	AM_RANGE(0xa005, 0xa005) AM_WRITENOP    /* ???? */
+	AM_RANGE(0xa006, 0xa006) AM_WRITENOP    /* ???? */
+	AM_RANGE(0xa007, 0xa007) AM_WRITENOP    /* ???? */
 
 	/* guess */
-	AM_RANGE(0xb000, 0xb000) AM_DEVWRITE("ay2", ay8910_address_w)
-	AM_RANGE(0xb800, 0xb800) AM_DEVREADWRITE("ay2", ay8910_r, ay8910_data_w)
+	AM_RANGE(0xb000, 0xb000) AM_DEVWRITE_LEGACY("ay2", ay8910_address_w)
+	AM_RANGE(0xb800, 0xb800) AM_DEVREADWRITE_LEGACY("ay2", ay8910_r, ay8910_data_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( main_portmap, AS_IO, 8 )
+static ADDRESS_MAP_START( main_portmap, AS_IO, 8, bagman_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x08, 0x09) AM_DEVWRITE("aysnd", ay8910_address_data_w)
-	AM_RANGE(0x0c, 0x0c) AM_DEVREAD("aysnd", ay8910_r)
+	AM_RANGE(0x08, 0x09) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_data_w)
+	AM_RANGE(0x0c, 0x0c) AM_DEVREAD_LEGACY("aysnd", ay8910_r)
 	//AM_RANGE(0x56, 0x56) AM_WRITENOP
 ADDRESS_MAP_END
 
@@ -195,28 +192,28 @@ static INPUT_PORTS_START( bagman )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
 
 	PORT_START("DSW")
-	PORT_DIPNAME( 0x03, 0x02, DEF_STR( Lives ) )			PORT_DIPLOCATION("SW1:1,2")
-	PORT_DIPSETTING(	0x03, "2" )
-	PORT_DIPSETTING(	0x02, "3" )
-	PORT_DIPSETTING(	0x01, "4" )
-	PORT_DIPSETTING(	0x00, "5" )
-	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Coinage ) )			PORT_DIPLOCATION("SW1:3")
-	PORT_DIPSETTING(	0x00, "2C/1C 1C/1C 1C/3C 1C/7C" )
-	PORT_DIPSETTING(	0x04, "1C/1C 1C/2C 1C/6C 1C/14C" )
-	PORT_DIPNAME( 0x18, 0x18, DEF_STR( Difficulty ) )		PORT_DIPLOCATION("SW1:4,5")
-	PORT_DIPSETTING(	0x18, DEF_STR( Easy ) )
-	PORT_DIPSETTING(	0x10, DEF_STR( Medium ) )
-	PORT_DIPSETTING(	0x08, DEF_STR( Hard ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Hardest ) )
-	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Language ) )			PORT_DIPLOCATION("SW1:6")
-	PORT_DIPSETTING(	0x20, DEF_STR( English ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( French ) )
-	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Bonus_Life ) )		PORT_DIPLOCATION("SW1:7")
-	PORT_DIPSETTING(	0x40, "30000" )
-	PORT_DIPSETTING(	0x00, "40000" )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Cabinet ) )			PORT_DIPLOCATION("SW1:8")
-	PORT_DIPSETTING(	0x80, DEF_STR( Upright ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Cocktail ) )
+	PORT_DIPNAME( 0x03, 0x02, DEF_STR( Lives ) )            PORT_DIPLOCATION("SW1:1,2")
+	PORT_DIPSETTING(    0x03, "2" )
+	PORT_DIPSETTING(    0x02, "3" )
+	PORT_DIPSETTING(    0x01, "4" )
+	PORT_DIPSETTING(    0x00, "5" )
+	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Coinage ) )          PORT_DIPLOCATION("SW1:3")
+	PORT_DIPSETTING(    0x00, "2C/1C 1C/1C 1C/3C 1C/7C" )
+	PORT_DIPSETTING(    0x04, "1C/1C 1C/2C 1C/6C 1C/14C" )
+	PORT_DIPNAME( 0x18, 0x18, DEF_STR( Difficulty ) )       PORT_DIPLOCATION("SW1:4,5")
+	PORT_DIPSETTING(    0x18, DEF_STR( Easy ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( Medium ) )
+	PORT_DIPSETTING(    0x08, DEF_STR( Hard ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) )
+	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Language ) )         PORT_DIPLOCATION("SW1:6")
+	PORT_DIPSETTING(    0x20, DEF_STR( English ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( French ) )
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Bonus_Life ) )       PORT_DIPLOCATION("SW1:7")
+	PORT_DIPSETTING(    0x40, "30000" )
+	PORT_DIPSETTING(    0x00, "40000" )
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Cabinet ) ) /* Cabinet type set through edge connector, not dip switch (verified on real pcb) */
+	PORT_DIPSETTING(    0x80, DEF_STR( Upright ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Cocktail ) )
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( bagmans )
@@ -224,8 +221,8 @@ static INPUT_PORTS_START( bagmans )
 
 	PORT_MODIFY("DSW")
 	PORT_DIPNAME( 0x20, 0x20, DEF_STR ( Demo_Sounds ) )
-	PORT_DIPSETTING(	0x00, DEF_STR ( Off ) )
-	PORT_DIPSETTING(	0x20, DEF_STR ( On ) )
+	PORT_DIPSETTING(    0x00, DEF_STR ( Off ) )
+	PORT_DIPSETTING(    0x20, DEF_STR ( On ) )
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( sbagman )
@@ -242,31 +239,31 @@ static INPUT_PORTS_START( pickin )
 	PORT_INCLUDE( bagman )
 
 	PORT_MODIFY("DSW")
-	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Coinage ) )			PORT_DIPLOCATION("SW1:1")
-	PORT_DIPSETTING(	0x00, "2C/1C 1C/1C 1C/3C 1C/7C" )
-	PORT_DIPSETTING(	0x01, "1C/1C 1C/2C 1C/6C 1C/14C" )
-	PORT_DIPNAME( 0x06, 0x04, DEF_STR( Lives ) )			PORT_DIPLOCATION("SW1:2,3")
-	PORT_DIPSETTING(	0x06, "2" )
-	PORT_DIPSETTING(	0x04, "3" )
-	PORT_DIPSETTING(	0x02, "4" )
-	PORT_DIPSETTING(	0x00, "5" )
-	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Free_Play ) )		PORT_DIPLOCATION("SW1:4")
-	PORT_DIPSETTING(	0x08, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Coinage ) )          PORT_DIPLOCATION("SW1:1")
+	PORT_DIPSETTING(    0x00, "2C/1C 1C/1C 1C/3C 1C/7C" )
+	PORT_DIPSETTING(    0x01, "1C/1C 1C/2C 1C/6C 1C/14C" )
+	PORT_DIPNAME( 0x06, 0x04, DEF_STR( Lives ) )            PORT_DIPLOCATION("SW1:2,3")
+	PORT_DIPSETTING(    0x06, "2" )
+	PORT_DIPSETTING(    0x04, "3" )
+	PORT_DIPSETTING(    0x02, "4" )
+	PORT_DIPSETTING(    0x00, "5" )
+	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Free_Play ) )        PORT_DIPLOCATION("SW1:4")
+	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPUNKNOWN_DIPLOC( 0x10, 0x10, "SW1:5" )
 	PORT_DIPUNKNOWN_DIPLOC( 0x20, 0x20, "SW1:6" )
-	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Language ) )			PORT_DIPLOCATION("SW1:7")
-	PORT_DIPSETTING(	0x40, DEF_STR( English ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( French ) )
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Language ) )         PORT_DIPLOCATION("SW1:7")
+	PORT_DIPSETTING(    0x40, DEF_STR( English ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( French ) )
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( botanic )
 	PORT_INCLUDE( bagman )
 
 	PORT_MODIFY("DSW")
-	PORT_DIPNAME( 0x08, 0x08, "Invulnerability Fruits" )	PORT_DIPLOCATION("SW1:4")
-	PORT_DIPSETTING(	0x08, "3" )
-	PORT_DIPSETTING(	0x00, DEF_STR( None ) )
+	PORT_DIPNAME( 0x08, 0x08, "Invulnerability Fruits" )    PORT_DIPLOCATION("SW1:4")
+	PORT_DIPSETTING(    0x08, "3" )
+	PORT_DIPSETTING(    0x00, DEF_STR( None ) )
 	PORT_DIPUNKNOWN_DIPLOC( 0x10, 0x10, "SW1:5" )
 	PORT_DIPUNKNOWN_DIPLOC( 0x20, 0x20, "SW1:6" )
 	PORT_DIPUNKNOWN_DIPLOC( 0x40, 0x40, "SW1:7" )
@@ -295,41 +292,41 @@ static INPUT_PORTS_START( squaitsa )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
 
 	PORT_START("DSW")
-    PORT_DIPNAME(    0x01, 0x01, DEF_STR( Coinage ) ) PORT_DIPLOCATION("SW:1")
-    PORT_DIPSETTING( 0x00, DEF_STR( 2C_1C ) )
-    PORT_DIPSETTING( 0x01, DEF_STR( 1C_1C ) )
-    PORT_DIPNAME(    0x06, 0x06, "Max Points" ) PORT_DIPLOCATION("SW:2,3")
-    PORT_DIPSETTING( 0x06, "7" )
-    PORT_DIPSETTING( 0x04, "11" )
-    PORT_DIPSETTING( 0x02, "15" )
-    PORT_DIPSETTING( 0x00, "21" )
-    PORT_DIPNAME(    0x18, 0x18, DEF_STR( Difficulty ) ) PORT_DIPLOCATION("SW:4,5")
-    PORT_DIPSETTING( 0x00, "Level 1" )
-    PORT_DIPSETTING( 0x08, "Level 2" )
-    PORT_DIPSETTING( 0x10, "Level 3" )
-    PORT_DIPSETTING( 0x18, "Level 4" )
-    PORT_DIPNAME(    0x20, 0x20, DEF_STR( Language ) ) PORT_DIPLOCATION("SW:6")
-    PORT_DIPSETTING( 0x20, DEF_STR( Spanish ) )
-    PORT_DIPSETTING( 0x00, DEF_STR( English ) )
-    PORT_DIPNAME(    0x40, 0x40, "Body Fault" ) PORT_DIPLOCATION("SW:7")
-    PORT_DIPSETTING( 0x40, DEF_STR( Off ) )
-    PORT_DIPSETTING( 0x00, DEF_STR( On ) )
-    PORT_DIPNAME(    0x80, 0x00, "Protection?" )	/* Left empty in the dips scan */
-    PORT_DIPSETTING( 0x80, DEF_STR( Off ) )
-    PORT_DIPSETTING( 0x00, DEF_STR( On ) )
+	PORT_DIPNAME(    0x01, 0x01, DEF_STR( Coinage ) ) PORT_DIPLOCATION("SW:1")
+	PORT_DIPSETTING( 0x00, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING( 0x01, DEF_STR( 1C_1C ) )
+	PORT_DIPNAME(    0x06, 0x06, "Max Points" ) PORT_DIPLOCATION("SW:2,3")
+	PORT_DIPSETTING( 0x06, "7" )
+	PORT_DIPSETTING( 0x04, "11" )
+	PORT_DIPSETTING( 0x02, "15" )
+	PORT_DIPSETTING( 0x00, "21" )
+	PORT_DIPNAME(    0x18, 0x18, DEF_STR( Difficulty ) ) PORT_DIPLOCATION("SW:4,5")
+	PORT_DIPSETTING( 0x00, "Level 1" )
+	PORT_DIPSETTING( 0x08, "Level 2" )
+	PORT_DIPSETTING( 0x10, "Level 3" )
+	PORT_DIPSETTING( 0x18, "Level 4" )
+	PORT_DIPNAME(    0x20, 0x20, DEF_STR( Language ) ) PORT_DIPLOCATION("SW:6")
+	PORT_DIPSETTING( 0x20, DEF_STR( Spanish ) )
+	PORT_DIPSETTING( 0x00, DEF_STR( English ) )
+	PORT_DIPNAME(    0x40, 0x40, "Body Fault" ) PORT_DIPLOCATION("SW:7")
+	PORT_DIPSETTING( 0x40, DEF_STR( Off ) )
+	PORT_DIPSETTING( 0x00, DEF_STR( On ) )
+	PORT_DIPNAME(    0x80, 0x00, "Protection?" )    /* Left empty in the dips scan */
+	PORT_DIPSETTING( 0x80, DEF_STR( Off ) )
+	PORT_DIPSETTING( 0x00, DEF_STR( On ) )
 
 	PORT_START("DIAL_P1")
-    PORT_BIT( 0xff, 0, IPT_DIAL ) PORT_SENSITIVITY(25) PORT_KEYDELTA(5)
+	PORT_BIT( 0xff, 0, IPT_DIAL ) PORT_SENSITIVITY(25) PORT_KEYDELTA(5)
 
 	PORT_START("DIAL_P2")
-    PORT_BIT( 0xff, 0, IPT_DIAL ) PORT_SENSITIVITY(25) PORT_KEYDELTA(5) PORT_COCKTAIL
+	PORT_BIT( 0xff, 0, IPT_DIAL ) PORT_SENSITIVITY(25) PORT_KEYDELTA(5) PORT_COCKTAIL
 INPUT_PORTS_END
 
 static const gfx_layout charlayout =
 {
-	8,8,	/* 8*8 characters */
-	512,	/* 512 characters */
-	2,	/* 2 bits per pixel */
+	8,8,    /* 8*8 characters */
+	512,    /* 512 characters */
+	2,  /* 2 bits per pixel */
 	{ 0, 512*8*8 }, /* the two bitplanes are separated */
 	{ 0, 1, 2, 3, 4, 5, 6, 7 }, /* pretty straightforward layout */
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
@@ -337,28 +334,28 @@ static const gfx_layout charlayout =
 };
 static const gfx_layout spritelayout =
 {
-	16,16,	/* 16*16 sprites */
-	128,	/* 128 sprites */
-	2,	/* 2 bits per pixel */
-	{ 0, 128*16*16 },	/* the two bitplanes are separated */
-	{ 0, 1, 2, 3, 4, 5, 6, 7,	/* pretty straightforward layout */
+	16,16,  /* 16*16 sprites */
+	128,    /* 128 sprites */
+	2,  /* 2 bits per pixel */
+	{ 0, 128*16*16 },   /* the two bitplanes are separated */
+	{ 0, 1, 2, 3, 4, 5, 6, 7,   /* pretty straightforward layout */
 			8*8+0, 8*8+1, 8*8+2, 8*8+3, 8*8+4, 8*8+5, 8*8+6, 8*8+7 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 			16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8 },
-	32*8	/* every sprite takes 32 consecutive bytes */
+	32*8    /* every sprite takes 32 consecutive bytes */
 };
 
 
 
 static GFXDECODE_START( bagman )
-	GFXDECODE_ENTRY( "gfx1", 0, charlayout,		0, 16 )	/* char set #1 */
-	GFXDECODE_ENTRY( "gfx1", 0, spritelayout,	0, 16 )	/* sprites */
-	GFXDECODE_ENTRY( "gfx2", 0, charlayout,		0, 16 )	/* char set #2 */
+	GFXDECODE_ENTRY( "gfx1", 0, charlayout,     0, 16 ) /* char set #1 */
+	GFXDECODE_ENTRY( "gfx1", 0, spritelayout,   0, 16 ) /* sprites */
+	GFXDECODE_ENTRY( "gfx2", 0, charlayout,     0, 16 ) /* char set #2 */
 GFXDECODE_END
 
 static GFXDECODE_START( pickin )
-	GFXDECODE_ENTRY( "gfx1", 0, charlayout,		0, 16 )	/* char set #1 */
-	GFXDECODE_ENTRY( "gfx1", 0, spritelayout,	0, 16 )	/* sprites */
+	GFXDECODE_ENTRY( "gfx1", 0, charlayout,     0, 16 ) /* char set #1 */
+	GFXDECODE_ENTRY( "gfx1", 0, spritelayout,   0, 16 ) /* sprites */
 	/* no gfx2 */
 GFXDECODE_END
 
@@ -374,56 +371,54 @@ static const ay8910_interface ay8910_config =
 	DEVCB_NULL
 };
 
-/* squaitsa doesn't map the dial directly, instead it polls the results of the dial thru an external circuitry.
+/* squaitsa doesn't map the dial directly, instead it polls the results of the dial through an external circuitry.
    I don't know if the following is correct, there can possbily be multiple solutions for the same problem. */
-static READ8_DEVICE_HANDLER( dial_input_p1_r )
+READ8_MEMBER(bagman_state::dial_input_p1_r)
 {
-	bagman_state *state = device->machine().driver_data<bagman_state>();
 	UINT8 dial_val;
 
-	dial_val = input_port_read(device->machine(), "DIAL_P1");
+	dial_val = ioport("DIAL_P1")->read();
 
-	if(state->m_p1_res != 0x60)
-		state->m_p1_res = 0x60;
-	else if(dial_val > state->m_p1_old_val)
-		state->m_p1_res = 0x40;
-	else if(dial_val < state->m_p1_old_val)
-		state->m_p1_res = 0x20;
+	if(m_p1_res != 0x60)
+		m_p1_res = 0x60;
+	else if(dial_val > m_p1_old_val)
+		m_p1_res = 0x40;
+	else if(dial_val < m_p1_old_val)
+		m_p1_res = 0x20;
 	else
-		state->m_p1_res = 0x60;
+		m_p1_res = 0x60;
 
-	state->m_p1_old_val = dial_val;
+	m_p1_old_val = dial_val;
 
-	return (input_port_read(device->machine(), "P1") & 0x9f) | (state->m_p1_res);
+	return (ioport("P1")->read() & 0x9f) | (m_p1_res);
 }
 
-static READ8_DEVICE_HANDLER( dial_input_p2_r )
+READ8_MEMBER(bagman_state::dial_input_p2_r)
 {
-	bagman_state *state = device->machine().driver_data<bagman_state>();
 	UINT8 dial_val;
 
-	dial_val = input_port_read(device->machine(), "DIAL_P2");
+	dial_val = ioport("DIAL_P2")->read();
 
-	if(state->m_p2_res != 0x60)
-		state->m_p2_res = 0x60;
-	else if(dial_val > state->m_p2_old_val)
-		state->m_p2_res = 0x40;
-	else if(dial_val < state->m_p2_old_val)
-		state->m_p2_res = 0x20;
+	if(m_p2_res != 0x60)
+		m_p2_res = 0x60;
+	else if(dial_val > m_p2_old_val)
+		m_p2_res = 0x40;
+	else if(dial_val < m_p2_old_val)
+		m_p2_res = 0x20;
 	else
-		state->m_p2_res = 0x60;
+		m_p2_res = 0x60;
 
-	state->m_p2_old_val = dial_val;
+	m_p2_old_val = dial_val;
 
-	return (input_port_read(device->machine(), "P2") & 0x9f) | (state->m_p2_res);
+	return (ioport("P2")->read() & 0x9f) | (m_p2_res);
 }
 
 static const ay8910_interface ay8910_dial_config =
 {
 	AY8910_LEGACY_OUTPUT,
 	AY8910_DEFAULT_LOADS,
-	DEVCB_HANDLER(dial_input_p1_r),
-	DEVCB_HANDLER(dial_input_p2_r),
+	DEVCB_DRIVER_MEMBER(bagman_state,dial_input_p1_r),
+	DEVCB_DRIVER_MEMBER(bagman_state,dial_input_p2_r),
 	DEVCB_NULL,
 	DEVCB_NULL
 };
@@ -440,32 +435,40 @@ static const ay8910_interface ay8910_interface_2 =
 
 static const tmsprom_interface prom_intf =
 {
-	"5110ctrl",						/* prom memory region - sound region is automatically assigned */
-	0x1000,							/* individual rom_size */
-	1,								/* bit # of pdc line */
+	"5110ctrl",                     /* prom memory region - sound region is automatically assigned */
+	0x1000,                         /* individual rom_size */
+	1,                              /* bit # of pdc line */
 	/* virtual bit 8: constant 0, virtual bit 9:constant 1 */
-	8,								/* bit # of ctl1 line */
-	2,								/* bit # of ctl2 line */
-	8,								/* bit # of ctl4 line */
-	2,								/* bit # of ctl8 line */
-	6,								/* bit # of rom reset */
-	7,								/* bit # of stop */
-	DEVCB_DEVICE_LINE("tms", tms5110_pdc_w),		/* tms pdc func */
-	DEVCB_DEVICE_HANDLER("tms", tms5110_ctl_w)		/* tms ctl func */
+	8,                              /* bit # of ctl1 line */
+	2,                              /* bit # of ctl2 line */
+	8,                              /* bit # of ctl4 line */
+	2,                              /* bit # of ctl8 line */
+	6,                              /* bit # of rom reset */
+	7,                              /* bit # of stop */
+	DEVCB_DEVICE_LINE("tms", tms5110_pdc_w),        /* tms pdc func */
+	DEVCB_DEVICE_HANDLER("tms", tms5110_ctl_w)      /* tms ctl func */
 };
 
 static const tms5110_interface bagman_tms5110_interface =
 {
 	/* legacy interface */
-	NULL,											/* function to be called when chip requests another bit */
-	NULL,											/* speech ROM load address callback */
+	NULL,                                           /* function to be called when chip requests another bit */
+	NULL,                                           /* speech ROM load address callback */
 	/* new rom controller interface */
-	DEVCB_DEVICE_LINE("tmsprom", tmsprom_m0_w),		/* the M0 line */
-	DEVCB_NULL,										/* the M1 line */
-	DEVCB_NULL,										/* Write to ADD1,2,4,8 - 4 address bits */
-	DEVCB_DEVICE_LINE("tmsprom", tmsprom_data_r),	/* Read one bit from ADD8/Data - voice data */
-	DEVCB_NULL										/* rom clock - Only used to drive the data lines */
+	DEVCB_DEVICE_LINE("tmsprom", tmsprom_m0_w),     /* the M0 line */
+	DEVCB_NULL,                                     /* the M1 line */
+	DEVCB_NULL,                                     /* Write to ADD1,2,4,8 - 4 address bits */
+	DEVCB_DEVICE_LINE("tmsprom", tmsprom_data_r),   /* Read one bit from ADD8/Data - voice data */
+	DEVCB_NULL                                      /* rom clock - Only used to drive the data lines */
 };
+
+INTERRUPT_GEN_MEMBER(bagman_state::vblank_irq)
+{
+
+	if(m_irq_mask)
+		device.execute().set_input_line(0, HOLD_LINE);
+}
+
 
 static MACHINE_CONFIG_START( bagman, bagman_state )
 
@@ -473,21 +476,20 @@ static MACHINE_CONFIG_START( bagman, bagman_state )
 	MCFG_CPU_ADD("maincpu", Z80, BAGMAN_H0)
 	MCFG_CPU_PROGRAM_MAP(main_map)
 	MCFG_CPU_IO_MAP(main_portmap)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_assert)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", bagman_state,  vblank_irq)
 
-	MCFG_MACHINE_RESET(bagman)
+	MCFG_MACHINE_RESET_OVERRIDE(bagman_state,bagman)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_RAW_PARAMS(BAGMAN_HCLK, HTOTAL, HBEND, HBSTART, VTOTAL, VBEND, VBSTART)
-	MCFG_SCREEN_UPDATE(bagman)
+	MCFG_SCREEN_UPDATE_DRIVER(bagman_state, screen_update_bagman)
 
 	MCFG_GFXDECODE(bagman)
 	MCFG_PALETTE_LENGTH(64)
 
-	MCFG_PALETTE_INIT(bagman)
-	MCFG_VIDEO_START(bagman)
+	MCFG_PALETTE_INIT_OVERRIDE(bagman_state,bagman)
+	MCFG_VIDEO_START_OVERRIDE(bagman_state,bagman)
 
 	MCFG_DEVICE_ADD("tmsprom", TMSPROM, 640000 / 2)  /* rom clock */
 	MCFG_DEVICE_CONFIG(prom_intf)
@@ -510,21 +512,20 @@ static MACHINE_CONFIG_START( pickin, bagman_state )
 	MCFG_CPU_ADD("maincpu", Z80, BAGMAN_H0)
 	MCFG_CPU_PROGRAM_MAP(pickin_map)
 	MCFG_CPU_IO_MAP(main_portmap)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", bagman_state,  vblank_irq)
 
-	MCFG_MACHINE_RESET(bagman)
+	MCFG_MACHINE_RESET_OVERRIDE(bagman_state,bagman)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_RAW_PARAMS(BAGMAN_HCLK, HTOTAL, HBEND, HBSTART, VTOTAL, VBEND, VBSTART)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
-	MCFG_SCREEN_UPDATE(bagman)
+	MCFG_SCREEN_UPDATE_DRIVER(bagman_state, screen_update_bagman)
 
 	MCFG_GFXDECODE(pickin)
 	MCFG_PALETTE_LENGTH(64)
 
-	MCFG_PALETTE_INIT(bagman)
-	MCFG_VIDEO_START(bagman)
+	MCFG_PALETTE_INIT_OVERRIDE(bagman_state,bagman)
+	MCFG_VIDEO_START_OVERRIDE(bagman_state,bagman)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -563,21 +564,20 @@ static MACHINE_CONFIG_START( botanic, bagman_state )
 	MCFG_CPU_ADD("maincpu", Z80, BAGMAN_H0)
 	MCFG_CPU_PROGRAM_MAP(pickin_map)
 	MCFG_CPU_IO_MAP(main_portmap)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", bagman_state,  vblank_irq)
 
-	MCFG_MACHINE_RESET(bagman)
+	MCFG_MACHINE_RESET_OVERRIDE(bagman_state,bagman)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_RAW_PARAMS(BAGMAN_HCLK, HTOTAL, HBEND, HBSTART, VTOTAL, VBEND, VBSTART)
-	MCFG_SCREEN_UPDATE(bagman)
+	MCFG_SCREEN_UPDATE_DRIVER(bagman_state, screen_update_bagman)
 
 	MCFG_GFXDECODE(bagman)
 	MCFG_PALETTE_LENGTH(64)
 
-	MCFG_PALETTE_INIT(bagman)
-	MCFG_VIDEO_START(bagman)
+	MCFG_PALETTE_INIT_OVERRIDE(bagman_state,bagman)
+	MCFG_VIDEO_START_OVERRIDE(bagman_state,bagman)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -594,7 +594,6 @@ MACHINE_CONFIG_END
 static MACHINE_CONFIG_DERIVED( squaitsa, botanic )
 	MCFG_SOUND_MODIFY("aysnd")
 	MCFG_SOUND_CONFIG(ay8910_dial_config)
-	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.40)
 MACHINE_CONFIG_END
 
 
@@ -760,15 +759,15 @@ ROM_START( sbagman )
 	ROM_LOAD( "9.9m",         0x4000, 0x1000, CRC(601f34ba) SHA1(1b7ee61a341b9a87abe4fe10b0c647a9b0b97d38) )
 	ROM_LOAD( "10.9n",        0x5000, 0x1000, CRC(5f750918) SHA1(3dc44f259e88999dbb95b4d4376281cc81c1ab87) )
 	ROM_LOAD( "13.8d",        0xc000, 0x0e00, CRC(944a4453) SHA1(cd64d9267d2c5cea39464ba9308752c690e7fd24) )
-	ROM_CONTINUE(			  0xfe00, 0x0200 )
+	ROM_CONTINUE(             0xfe00, 0x0200 )
 	ROM_LOAD( "14.8f",        0xd000, 0x0400, CRC(83b10139) SHA1(8a1880c6ab8a345676fe30465351d69cc1b416b2) )
-	ROM_CONTINUE(			  0xe400, 0x0200 )
-	ROM_CONTINUE(			  0xd600, 0x0a00 )
+	ROM_CONTINUE(             0xe400, 0x0200 )
+	ROM_CONTINUE(             0xd600, 0x0a00 )
 	ROM_LOAD( "15.8j",        0xe000, 0x0400, CRC(fe924879) SHA1(b80cbf9cba91e553f7685aef348854c02f0619c7) )
-	ROM_CONTINUE(			  0xd400, 0x0200 )
-	ROM_CONTINUE(			  0xe600, 0x0a00 )
+	ROM_CONTINUE(             0xd400, 0x0200 )
+	ROM_CONTINUE(             0xe600, 0x0a00 )
 	ROM_LOAD( "16.8k",        0xf000, 0x0e00, CRC(b77eb1f5) SHA1(ef94c1b449e3fa230491052fc3bd4db3f1239263) )
-	ROM_CONTINUE(			  0xce00, 0x0200 )
+	ROM_CONTINUE(             0xce00, 0x0200 )
 
 	ROM_REGION( 0x2000, "gfx1", 0 )
 	ROM_LOAD( "2.1e",         0x0000, 0x1000, CRC(f4d3d4e6) SHA1(167ad0259578966fe86384df844e69cf2cc77443) )
@@ -799,15 +798,15 @@ ROM_START( sbagmans )
 	ROM_LOAD( "sbag_9m.bin",  0x4000, 0x1000, CRC(b21e246e) SHA1(39d2e93ac5240bb45e76c30c535d12e302690dde) )
 	ROM_LOAD( "10.9n",        0x5000, 0x1000, CRC(5f750918) SHA1(3dc44f259e88999dbb95b4d4376281cc81c1ab87) )
 	ROM_LOAD( "13.8d",        0xc000, 0x0e00, CRC(944a4453) SHA1(cd64d9267d2c5cea39464ba9308752c690e7fd24) )
-	ROM_CONTINUE(			  0xfe00, 0x0200 )
+	ROM_CONTINUE(             0xfe00, 0x0200 )
 	ROM_LOAD( "sbag_f8.bin",  0xd000, 0x0400, CRC(0f3e6de4) SHA1(a7e50d210630b500e534d626d76110dee4aeb18d) )
-	ROM_CONTINUE(			  0xe400, 0x0200 )
-	ROM_CONTINUE(			  0xd600, 0x0a00 )
+	ROM_CONTINUE(             0xe400, 0x0200 )
+	ROM_CONTINUE(             0xd600, 0x0a00 )
 	ROM_LOAD( "15.8j",        0xe000, 0x0400, CRC(fe924879) SHA1(b80cbf9cba91e553f7685aef348854c02f0619c7) )
-	ROM_CONTINUE(			  0xd400, 0x0200 )
-	ROM_CONTINUE(			  0xe600, 0x0a00 )
+	ROM_CONTINUE(             0xd400, 0x0200 )
+	ROM_CONTINUE(             0xe600, 0x0a00 )
 	ROM_LOAD( "16.8k",        0xf000, 0x0e00, CRC(b77eb1f5) SHA1(ef94c1b449e3fa230491052fc3bd4db3f1239263) )
-	ROM_CONTINUE(			  0xce00, 0x0200 )
+	ROM_CONTINUE(             0xce00, 0x0200 )
 
 	ROM_REGION( 0x2000, "gfx1", 0 )
 	ROM_LOAD( "2.1e",         0x0000, 0x1000, CRC(f4d3d4e6) SHA1(167ad0259578966fe86384df844e69cf2cc77443) )
@@ -928,25 +927,24 @@ ROM_START( squaitsa )
 	ROM_LOAD( "mmi6331.3r",    0x0020, 0x0020,CRC(86c1e7db) SHA1(5c974b51d770a555ddab5c23f03a666c6f286cbf) )
 ROM_END
 
-static DRIVER_INIT( bagman )
+DRIVER_INIT_MEMBER(bagman_state,bagman)
 {
-	bagman_state *state = machine.driver_data<bagman_state>();
 
 	/* Unmap video enable register, not available on earlier hardware revision(s)
-       Bagman is supposed to have glitches during screen transitions */
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->unmap_write(0xa003, 0xa003);
-	*state->m_video_enable = 1;
+	   Bagman is supposed to have glitches during screen transitions */
+	machine().device("maincpu")->memory().space(AS_PROGRAM).unmap_write(0xa003, 0xa003);
+	*m_video_enable = 1;
 }
 
 
-GAME( 1982, bagman,   0,       bagman,  bagman,  bagman,  ROT270, "Valadon Automation", "Bagman", 0 )
-GAME( 1982, bagnard,  bagman,  bagman,  bagman,  bagman,  ROT270, "Valadon Automation", "Le Bagnard (set 1)", 0 )
-GAME( 1982, bagnarda, bagman,  bagman,  bagman,  bagman,  ROT270, "Valadon Automation", "Le Bagnard (set 2)", 0 )
-GAME( 1982, bagmans,  bagman,  bagman,  bagmans, bagman,  ROT270, "Valadon Automation (Stern Electronics license)", "Bagman (Stern Electronics, set 1)", 0 )
-GAME( 1982, bagmans2, bagman,  bagman,  bagman,  bagman,  ROT270, "Valadon Automation (Stern Electronics license)", "Bagman (Stern Electronics, set 2)", 0 )
+GAME( 1982, bagman,   0,       bagman,  bagman, bagman_state,  bagman,  ROT270, "Valadon Automation", "Bagman", 0 )
+GAME( 1982, bagnard,  bagman,  bagman,  bagman, bagman_state,  bagman,  ROT270, "Valadon Automation", "Le Bagnard (set 1)", 0 )
+GAME( 1982, bagnarda, bagman,  bagman,  bagman, bagman_state,  bagman,  ROT270, "Valadon Automation", "Le Bagnard (set 2)", 0 )
+GAME( 1982, bagmans,  bagman,  bagman,  bagmans, bagman_state, bagman,  ROT270, "Valadon Automation (Stern Electronics license)", "Bagman (Stern Electronics, set 1)", 0 )
+GAME( 1982, bagmans2, bagman,  bagman,  bagman, bagman_state,  bagman,  ROT270, "Valadon Automation (Stern Electronics license)", "Bagman (Stern Electronics, set 2)", 0 )
 
-GAME( 1984, sbagman,  0,       bagman,  sbagman, 0,       ROT270, "Valadon Automation", "Super Bagman", 0 )
-GAME( 1984, sbagmans, sbagman, bagman,  sbagman, 0,       ROT270, "Valadon Automation (Stern Electronics license)", "Super Bagman (Stern Electronics)", 0 )
-GAME( 1983, pickin,   0,       pickin,  pickin,  0,       ROT270, "Valadon Automation", "Pickin'", 0 )
-GAME( 1984, botanic,  0,       botanic, botanic, 0,       ROT270, "Valadon Automation (Itisa license)", "Botanic", 0 )
-GAME( 1984, squaitsa, 0,       squaitsa,squaitsa,0,       ROT0,   "Itisa", "Squash (Itisa)", 0 )
+GAME( 1984, sbagman,  0,       bagman,  sbagman, driver_device, 0,       ROT270, "Valadon Automation", "Super Bagman", 0 )
+GAME( 1984, sbagmans, sbagman, bagman,  sbagman, driver_device, 0,       ROT270, "Valadon Automation (Stern Electronics license)", "Super Bagman (Stern Electronics)", 0 )
+GAME( 1983, pickin,   0,       pickin,  pickin, driver_device,  0,       ROT270, "Valadon Automation", "Pickin'", 0 )
+GAME( 1984, botanic,  0,       botanic, botanic, driver_device, 0,       ROT270, "Valadon Automation (Itisa license)", "Botanic", 0 )
+GAME( 1984, squaitsa, 0,       squaitsa,squaitsa, driver_device,0,       ROT0,   "Itisa", "Squash (Itisa)", 0 )

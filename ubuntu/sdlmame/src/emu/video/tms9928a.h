@@ -9,98 +9,207 @@
     Model           Video       Hz
 
     TMS9918         NTSC        60
+    TMS9929?        YPbPr?      50     (not sure. 50Hz non-A model, used in Creativision? or was it a 3rd party clone chip?)
+
     TMS9918A        NTSC        60
-    TMS9118         NTSC        60
-    V9938
-    V9958
-    V9990
-
     TMS9928A        YPbPr       60
-    TMS9128         YPbPr       60
-
     TMS9929A        YPbPr       50
+
+    TMS9118         NTSC        60
+    TMS9128         YPbPr       60
     TMS9129         YPbPr       50
 
 */
 
-#define TMS9928A_PALETTE_SIZE           16
+#ifndef __TMS9928A_H__
+#define __TMS9928A_H__
 
-/*
-** The different models
-*/
-typedef enum
+#include "emu.h"
+
+
+#define TMS9928A_PALETTE_SIZE               16
+
+
+/* Some defines used in defining the screens */
+#define TMS9928A_TOTAL_HORZ                 342
+#define TMS9928A_TOTAL_VERT_NTSC            262
+#define TMS9928A_TOTAL_VERT_PAL             313
+
+#define TMS9928A_HORZ_DISPLAY_START         (2 + 14 + 8 + 13)
+#define TMS9928A_VERT_DISPLAY_START_PAL     (13 + 51)
+#define TMS9928A_VERT_DISPLAY_START_NTSC    (13 + 27)
+
+
+#define TMS9928A_INTERFACE(name) \
+	const tms9928a_interface (name) =
+
+
+#define MCFG_TMS9928A_ADD(_tag, _variant, _config) \
+	MCFG_DEVICE_ADD(_tag, _variant, XTAL_10_738635MHz / 2 ) \
+	MCFG_DEVICE_CONFIG(_config)
+
+
+#define MCFG_TMS9928A_SCREEN_ADD_NTSC(_screen_tag) \
+	MCFG_SCREEN_ADD( _screen_tag, RASTER ) \
+	MCFG_SCREEN_RAW_PARAMS( XTAL_10_738635MHz / 2, TMS9928A_TOTAL_HORZ, TMS9928A_HORZ_DISPLAY_START-12, TMS9928A_HORZ_DISPLAY_START + 256 + 12, \
+			TMS9928A_TOTAL_VERT_NTSC, TMS9928A_VERT_DISPLAY_START_NTSC - 12, TMS9928A_VERT_DISPLAY_START_NTSC + 192 + 12 )
+
+
+#define MCFG_TMS9928A_SCREEN_ADD_PAL(_screen_tag) \
+	MCFG_SCREEN_ADD(_screen_tag, RASTER ) \
+	MCFG_SCREEN_RAW_PARAMS( XTAL_10_738635MHz / 2, TMS9928A_TOTAL_HORZ, TMS9928A_HORZ_DISPLAY_START-12, TMS9928A_HORZ_DISPLAY_START + 256 + 12, \
+			TMS9928A_TOTAL_VERT_PAL, TMS9928A_VERT_DISPLAY_START_PAL - 12, TMS9928A_VERT_DISPLAY_START_PAL + 192 + 12 )
+
+
+extern const device_type TMS9918;
+extern const device_type TMS9918A;
+extern const device_type TMS9118;
+extern const device_type TMS9928A;
+extern const device_type TMS9128;
+extern const device_type TMS9929;
+extern const device_type TMS9929A;
+extern const device_type TMS9129;
+
+
+struct tms9928a_interface
 {
-	TMS_INVALID_MODEL,
-	TMS99x8,
-	TMS9929,
-	TMS99x8A,
-	TMS9929A
-} tms9928a_model;
+	const char          *m_screen_tag;
+	int                 m_vram_size;    /* 4K, 8K, or 16K. This should be replaced by fetching data from an address space? */
+	devcb_write_line    m_out_int_line; /* Callback is called whenever the state of the INT output changes */
+	const char          *m_regionname;      // Alternatively, get the name of the region (if vram size is 0)
+};
 
-/*
-** MachineDriver video declarations for the TMS9928A chip
-*/
-typedef struct TMS9928a_interface
+
+class tms9928a_device : public device_t,
+						public device_memory_interface,
+						public tms9928a_interface
 {
-	tms9928a_model model;		/* model: tms9929(a) runs at 50Hz instead of 60Hz */
-	int vram;					/* VRAM size in bytes (4k, 8k or 16k) */
-	int borderx, bordery;		/* number of border pixels to show in each direction */
-	void (*int_callback)(running_machine &, int);	/* callback which is called whenever the state
-                                ** of the INT output of the TMS9918A changes (may be NULL)*/
-} TMS9928a_interface;
+public:
+	// construction/destruction
+	tms9928a_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock);
+	tms9928a_device(const machine_config &mconfig, device_type type, const char *name, const char *tag, device_t *owner, UINT32 clock, bool is_50hz = false, bool is_reva = true, bool is_99 = true);
 
-/*
-** configuration function
-*/
-extern void TMS9928A_configure (const TMS9928a_interface *intf);
+	DECLARE_READ8_MEMBER( vram_read );
+	DECLARE_WRITE8_MEMBER( vram_write );
+	DECLARE_READ8_MEMBER( register_read );
+	DECLARE_WRITE8_MEMBER( register_write );
 
-/*
-** visible area query
-*/
-extern const rectangle *TMS9928A_get_visarea (void);
+	/* update the screen */
+	UINT32 screen_update( screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect );
+	bitmap_rgb32 &get_bitmap() { return m_tmpbmp; }
 
-/*
-** reset function
-*/
-extern void TMS9928A_reset (void);
+	/* RESET pin */
+	void reset_line(int state) { if (state==ASSERT_LINE) device_reset(); }
 
-/*
-** The I/O functions
-*/
-extern READ8_HANDLER (TMS9928A_vram_r);
-extern WRITE8_HANDLER (TMS9928A_vram_w);
-extern READ8_HANDLER (TMS9928A_register_r);
-extern WRITE8_HANDLER (TMS9928A_register_w);
+protected:
+	// device-level overrides
+	virtual void device_config_complete();
+	virtual void device_start();
+	virtual void device_reset();
+	virtual void device_timer(emu_timer &timer, device_timer_id id, int param, void *ptr);
 
-/*
-** Call this function to render the screen.
-*/
-extern VIDEO_START( tms9928a );
-extern SCREEN_UPDATE( tms9928a );
+	// device_memory_interface overrides
+	virtual const address_space_config *memory_space_config(address_spacenum spacenum = AS_DATA) const { return (spacenum == AS_DATA) ? &m_space_config : NULL; }
 
-/*
-** This next function must be called 50 (tms9929a) or 60 (tms99x8a) times per second,
-** to generate the necessary interrupts
-*/
-int TMS9928A_interrupt (running_machine &machine);
+private:
+	void change_register(UINT8 reg, UINT8 val);
+	void check_interrupt();
+	void update_backdrop();
+	void update_table_masks();
 
-/*
-** The parameter is a function pointer. This function is called whenever
-** the state of the INT output of the TMS9918A changes.
-*/
-/*void TMS9928A_int_callback (void (*callback)(int));*/
+	static const device_timer_id TIMER_LINE = 0;
 
-/*
-** Set display of illegal sprites on or off
-*/
-void TMS9928A_set_spriteslimit (int);
+	screen_device   *m_screen;
 
-/*
-** After loading a state, call this function
-*/
-void TMS9928A_post_load (running_machine &machine);
+	/* TMS9928A internal settings */
+	UINT8   m_ReadAhead;
+	UINT8   m_Regs[8];
+	UINT8   m_StatusReg;
+	UINT8   m_FifthSprite;
+	UINT8   m_latch;
+	UINT8   m_INT;
+	UINT16  m_Addr;
+	UINT16  m_colour;
+	UINT16  m_pattern;
+	UINT16  m_nametbl;
+	UINT16  m_spriteattribute;
+	UINT16  m_spritepattern;
+	int     m_colourmask;
+	int     m_patternmask;
+	devcb_resolved_write_line   m_irq_changed;
+	bool    m_50hz;
+	bool    m_reva;
+	bool    m_99;
+	rgb_t   m_palette[16];
 
-/*
-** MachineDriver video declarations for the TMS9928A chip
-*/
-MACHINE_CONFIG_EXTERN( tms9928a );
+	/* memory */
+	const address_space_config      m_space_config;
+	address_space*                  m_vram_space;
+
+	bitmap_rgb32 m_tmpbmp;
+	emu_timer   *m_line_timer;
+	UINT8       m_mode;
+
+	/* emulation settings */
+	int         m_top_border;
+	int         m_vertical_size;
+};
+
+
+class tms9918_device : public tms9928a_device
+{
+public:
+	tms9918_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+		: tms9928a_device( mconfig, TMS9918, "TMS9918", tag, owner, clock, false, false, true ) { }
+};
+
+
+class tms9918a_device : public tms9928a_device
+{
+public:
+	tms9918a_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+		: tms9928a_device( mconfig, TMS9918A, "TMS9918A", tag, owner, clock, false, true, true ) { }
+};
+
+
+class tms9118_device : public tms9928a_device
+{
+public:
+	tms9118_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+		: tms9928a_device( mconfig, TMS9118, "TMS9118", tag, owner, clock, false, true, false ) { }
+};
+
+
+class tms9128_device : public tms9928a_device
+{
+public:
+	tms9128_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+		: tms9928a_device( mconfig, TMS9128, "TMS9128", tag, owner, clock, false, true, false ) { }
+};
+
+
+class tms9929_device : public tms9928a_device
+{
+public:
+	tms9929_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+		: tms9928a_device( mconfig, TMS9929, "TMS9929", tag, owner, clock, true, false, true ) { }
+};
+
+
+class tms9929a_device : public tms9928a_device
+{
+public:
+	tms9929a_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+		: tms9928a_device( mconfig, TMS9929A, "TMS9929A", tag, owner, clock, true, true, true ) { }
+};
+
+
+class tms9129_device : public tms9928a_device
+{
+public:
+	tms9129_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+		: tms9928a_device( mconfig, TMS9129, "TMS9129", tag, owner, clock, true, true, false ) { }
+};
+
+
+#endif

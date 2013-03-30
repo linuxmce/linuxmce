@@ -32,34 +32,24 @@ TODO:
 #include "includes/nbmj8900.h"
 
 
-#define SIGNED_DAC	0		// 0:unsigned DAC, 1:signed DAC
-#if SIGNED_DAC
-#define DAC_WRITE	dac_signed_w
-#else
-#define DAC_WRITE	dac_w
-#endif
-
-
-
-
-static DRIVER_INIT( ohpaipee )
+DRIVER_INIT_MEMBER(nbmj8900_state,ohpaipee)
 {
 #if 0
-	UINT8 *prot = machine.region("protdata")->base();
+	UINT8 *prot = machine().root_device().memregion("protdata")->base();
 	int i;
 
 	/* this is one possible way to rearrange the protection ROM data to get the
-       expected 0x8374 checksum. It's probably completely wrong! But since the
-       game doesn't do anything else with that ROM, this is more than enough. I
-       could just fill this are with fake data, the only thing that matters is
-       the checksum. */
+	   expected 0x8374 checksum. It's probably completely wrong! But since the
+	   game doesn't do anything else with that ROM, this is more than enough. I
+	   could just fill this are with fake data, the only thing that matters is
+	   the checksum. */
 
 	for (i = 0;i < 0x20000;i++)
 	{
 		prot[i] = BITSWAP8(prot[i],2,7,3,5,0,6,4,1);
 	}
 #else
-	unsigned char *ROM = machine.region("maincpu")->base();
+	unsigned char *ROM = machine().root_device().memregion("maincpu")->base();
 
 	// Protection ROM check skip
 	ROM[0x00e4] = 0x00;
@@ -71,27 +61,25 @@ static DRIVER_INIT( ohpaipee )
 #endif
 
 	nb1413m3_type = NB1413M3_OHPAIPEE;
-
-//  init_nb1413m3(machine);
 }
 
-static DRIVER_INIT( togenkyo )
+DRIVER_INIT_MEMBER(nbmj8900_state,togenkyo)
 {
 #if 0
-	UINT8 *prot = machine.region("protdata")->base();
+	UINT8 *prot = machine().root_device().memregion("protdata")->base();
 	int i;
 
 	/* this is one possible way to rearrange the protection ROM data to get the
-       expected 0x5ece checksum. It's probably completely wrong! But since the
-       game doesn't do anything else with that ROM, this is more than enough. I
-       could just fill this are with fake data, the only thing that matters is
-       the checksum. */
+	   expected 0x5ece checksum. It's probably completely wrong! But since the
+	   game doesn't do anything else with that ROM, this is more than enough. I
+	   could just fill this are with fake data, the only thing that matters is
+	   the checksum. */
 	for (i = 0;i < 0x20000;i++)
 	{
 		prot[i] = BITSWAP8(prot[i],2,7,3,5,0,6,4,1);
 	}
 #else
-	unsigned char *ROM = machine.region("maincpu")->base();
+	unsigned char *ROM = machine().root_device().memregion("maincpu")->base();
 
 	// Protection ROM check skip
 	ROM[0x010b] = 0x00;
@@ -103,46 +91,44 @@ static DRIVER_INIT( togenkyo )
 #endif
 
 	nb1413m3_type = NB1413M3_TOGENKYO;
-
-//S init_nb1413m3(machine);
 }
 
 
-static ADDRESS_MAP_START( ohpaipee_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( ohpaipee_map, AS_PROGRAM, 8, nbmj8900_state )
 	AM_RANGE(0x0000, 0xefff) AM_ROM
 	AM_RANGE(0xf000, 0xf00f) AM_READWRITE(nbmj8900_clut_r, nbmj8900_clut_w)
 	AM_RANGE(0xf400, 0xf5ff) AM_READWRITE(nbmj8900_palette_type1_r, nbmj8900_palette_type1_w)
 	AM_RANGE(0xf800, 0xffff) AM_RAM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( togenkyo_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( togenkyo_map, AS_PROGRAM, 8, nbmj8900_state )
 	AM_RANGE(0x0000, 0xefff) AM_ROM
 	AM_RANGE(0xf000, 0xf00f) AM_READWRITE(nbmj8900_clut_r, nbmj8900_clut_w)
 	AM_RANGE(0xf400, 0xf5ff) AM_READWRITE(nbmj8900_palette_type1_r, nbmj8900_palette_type1_w)
 	AM_RANGE(0xf800, 0xffff) AM_RAM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( ohpaipee_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( ohpaipee_io_map, AS_IO, 8, nbmj8900_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x7f) AM_READ(nb1413m3_sndrom_r)
-	AM_RANGE(0x00, 0x00) AM_WRITE(nb1413m3_nmi_clock_w)
+	AM_RANGE(0x00, 0x7f) AM_READ_LEGACY(nb1413m3_sndrom_r)
+	AM_RANGE(0x00, 0x00) AM_WRITE_LEGACY(nb1413m3_nmi_clock_w)
 	AM_RANGE(0x20, 0x27) AM_WRITE(nbmj8900_blitter_w)
 
 	AM_RANGE(0x40, 0x40) AM_WRITE(nbmj8900_clutsel_w)
 	AM_RANGE(0x60, 0x60) AM_WRITE(nbmj8900_romsel_w)
 	AM_RANGE(0x70, 0x70) AM_WRITE(nbmj8900_scrolly_w)
 
-	AM_RANGE(0x80, 0x81) AM_DEVREADWRITE("ymsnd", ym3812_r,ym3812_w)
+	AM_RANGE(0x80, 0x81) AM_DEVREADWRITE_LEGACY("ymsnd", ym3812_r,ym3812_w)
 
-	AM_RANGE(0x90, 0x90) AM_READ(nb1413m3_inputport0_r)
+	AM_RANGE(0x90, 0x90) AM_READ_LEGACY(nb1413m3_inputport0_r)
 
-	AM_RANGE(0xa0, 0xa0) AM_READWRITE(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
-	AM_RANGE(0xb0, 0xb0) AM_READWRITE(nb1413m3_inputport2_r,nb1413m3_sndrombank1_w)
-	AM_RANGE(0xc0, 0xc0) AM_READ(nb1413m3_inputport3_r)
-	AM_RANGE(0xd0, 0xd0) AM_DEVWRITE("dac", DAC_WRITE)
+	AM_RANGE(0xa0, 0xa0) AM_READWRITE_LEGACY(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
+	AM_RANGE(0xb0, 0xb0) AM_READWRITE_LEGACY(nb1413m3_inputport2_r,nb1413m3_sndrombank1_w)
+	AM_RANGE(0xc0, 0xc0) AM_READ_LEGACY(nb1413m3_inputport3_r)
+	AM_RANGE(0xd0, 0xd0) AM_DEVWRITE("dac", dac_device, write_unsigned8)
 	AM_RANGE(0xe0, 0xe0) AM_WRITE(nbmj8900_vramsel_w)
-	AM_RANGE(0xf0, 0xf0) AM_READ(nb1413m3_dipsw1_r)
-	AM_RANGE(0xf1, 0xf1) AM_READWRITE(nb1413m3_dipsw2_r, nb1413m3_outcoin_w)
+	AM_RANGE(0xf0, 0xf0) AM_READ_LEGACY(nb1413m3_dipsw1_r)
+	AM_RANGE(0xf1, 0xf1) AM_READWRITE_LEGACY(nb1413m3_dipsw2_r, nb1413m3_outcoin_w)
 ADDRESS_MAP_END
 
 
@@ -200,7 +186,7 @@ static INPUT_PORTS_START( ohpaipee )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )			// DRAW BUSY
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )         // DRAW BUSY
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -210,22 +196,22 @@ static INPUT_PORTS_START( ohpaipee )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )
 
 	PORT_START("P1")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON2 )		PORT_PLAYER(1)
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 )		PORT_PLAYER(1)
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT )	PORT_PLAYER(1) PORT_4WAY
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  )	PORT_PLAYER(1) PORT_4WAY
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  )	PORT_PLAYER(1) PORT_4WAY
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    )	PORT_PLAYER(1) PORT_4WAY
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON2 )        PORT_PLAYER(1)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 )        PORT_PLAYER(1)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(1) PORT_4WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  ) PORT_PLAYER(1) PORT_4WAY
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  ) PORT_PLAYER(1) PORT_4WAY
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    ) PORT_PLAYER(1) PORT_4WAY
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("P2")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON2 )		PORT_PLAYER(2)
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 )		PORT_PLAYER(2)
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT )	PORT_PLAYER(2) PORT_4WAY
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  )	PORT_PLAYER(2) PORT_4WAY
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  )	PORT_PLAYER(2) PORT_4WAY
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    )	PORT_PLAYER(2) PORT_4WAY
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON2 )        PORT_PLAYER(2)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 )        PORT_PLAYER(2)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(2) PORT_4WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  ) PORT_PLAYER(2) PORT_4WAY
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  ) PORT_PLAYER(2) PORT_4WAY
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    ) PORT_PLAYER(2) PORT_4WAY
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 INPUT_PORTS_END
@@ -284,7 +270,7 @@ static INPUT_PORTS_START( togenkyo )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )			// DRAW BUSY
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )         // DRAW BUSY
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -294,22 +280,22 @@ static INPUT_PORTS_START( togenkyo )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )
 
 	PORT_START("P1")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON2 )		PORT_PLAYER(1)
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 )		PORT_PLAYER(1)
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT )	PORT_PLAYER(1) PORT_4WAY
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  )	PORT_PLAYER(1) PORT_4WAY
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  )	PORT_PLAYER(1) PORT_4WAY
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    )	PORT_PLAYER(1) PORT_4WAY
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON2 )        PORT_PLAYER(1)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 )        PORT_PLAYER(1)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(1) PORT_4WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  ) PORT_PLAYER(1) PORT_4WAY
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  ) PORT_PLAYER(1) PORT_4WAY
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    ) PORT_PLAYER(1) PORT_4WAY
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("P2")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON2 )		PORT_PLAYER(2)
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 )		PORT_PLAYER(2)
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT )	PORT_PLAYER(2) PORT_4WAY
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  )	PORT_PLAYER(2) PORT_4WAY
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  )	PORT_PLAYER(2) PORT_4WAY
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    )	PORT_PLAYER(2) PORT_4WAY
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON2 )        PORT_PLAYER(2)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 )        PORT_PLAYER(2)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(2) PORT_4WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  ) PORT_PLAYER(2) PORT_4WAY
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  ) PORT_PLAYER(2) PORT_4WAY
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    ) PORT_PLAYER(2) PORT_4WAY
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 INPUT_PORTS_END
@@ -319,35 +305,33 @@ INPUT_PORTS_END
 static MACHINE_CONFIG_START( ohpaipee, nbmj8900_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, 20000000/4)	/* 5.00 MHz ? */
+	MCFG_CPU_ADD("maincpu", Z80, 20000000/4)    /* 5.00 MHz ? */
 	MCFG_CPU_PROGRAM_MAP(ohpaipee_map)
 	MCFG_CPU_IO_MAP(ohpaipee_io_map)
 	MCFG_CPU_VBLANK_INT("screen", nb1413m3_interrupt)
 
+	MCFG_MACHINE_START(nb1413m3)
 	MCFG_MACHINE_RESET(nb1413m3)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(512, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 512-1, 8, 248-1)
-	MCFG_SCREEN_UPDATE(nbmj8900)
+	MCFG_SCREEN_UPDATE_DRIVER(nbmj8900_state, screen_update_nbmj8900)
 	MCFG_PALETTE_LENGTH(256)
 
-	MCFG_VIDEO_START(nbmj8900_2layer)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
 	MCFG_SOUND_ADD("ymsnd", YM3812, 2500000)
-	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.70)
 
-	MCFG_SOUND_ADD("dac", DAC, 0)
-	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
+	MCFG_DAC_ADD("dac")
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.85)
 MACHINE_CONFIG_END
-
 
 static MACHINE_CONFIG_DERIVED( togenkyo, ohpaipee )
 
@@ -355,7 +339,6 @@ static MACHINE_CONFIG_DERIVED( togenkyo, ohpaipee )
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_PROGRAM_MAP(togenkyo_map)
 MACHINE_CONFIG_END
-
 
 
 ROM_START( ohpaipee )
@@ -377,7 +360,7 @@ ROM_START( ohpaipee )
 	ROM_LOAD( "11.8m",  0x080000, 0x10000, CRC(d779661b) SHA1(914f29a1dde2861542ced28735441b05a520409a) )
 
 	ROM_REGION( 0x40000, "protdata", 0 ) /* protection data */
-	ROM_LOAD( "4i.bin", 0x000000, 0x40000, CRC(88f33049) SHA1(8b2d019b09ed854f40a8b0c7782645f50b1f2900) )	// same as housemnq/4i.bin gfx data
+	ROM_LOAD( "4i.bin", 0x000000, 0x40000, CRC(88f33049) SHA1(8b2d019b09ed854f40a8b0c7782645f50b1f2900) )   // same as housemnq/4i.bin gfx data
 ROM_END
 
 ROM_START( togenkyo )
@@ -402,9 +385,9 @@ ROM_START( togenkyo )
 	ROM_LOAD( "14.10d", 0x0b0000, 0x10000, CRC(cb472acc) SHA1(82b4089412ecded903745e5382a301c53a483698) )
 
 	ROM_REGION( 0x40000, "protdata", 0 ) /* protection data */
-	ROM_LOAD( "4i.bin", 0x000000, 0x40000, CRC(88f33049) SHA1(8b2d019b09ed854f40a8b0c7782645f50b1f2900) )	// same as housemnq/4i.bin gfx data
+	ROM_LOAD( "4i.bin", 0x000000, 0x40000, CRC(88f33049) SHA1(8b2d019b09ed854f40a8b0c7782645f50b1f2900) )   // same as housemnq/4i.bin gfx data
 ROM_END
 
 //    YEAR,     NAME,   PARENT,  MACHINE,    INPUT,     INIT, MONITOR,COMPANY,FULLNAME,FLAGS)
-GAME( 1989, ohpaipee,        0, ohpaipee, ohpaipee, ohpaipee,  ROT270, "Nichibutsu", "Oh! Paipee (Japan 890227)", GAME_IMPERFECT_GRAPHICS )
-GAME( 1989, togenkyo,        0, togenkyo, togenkyo, togenkyo,    ROT0, "Nichibutsu", "Tougenkyou (Japan 890418)", 0 )
+GAME( 1989, ohpaipee,        0, ohpaipee, ohpaipee, nbmj8900_state, ohpaipee,  ROT270, "Nichibutsu", "Oh! Paipee (Japan 890227)", GAME_IMPERFECT_GRAPHICS )
+GAME( 1989, togenkyo,        0, togenkyo, togenkyo, nbmj8900_state, togenkyo,    ROT0, "Nichibutsu", "Tougenkyou (Japan 890418)", 0 )

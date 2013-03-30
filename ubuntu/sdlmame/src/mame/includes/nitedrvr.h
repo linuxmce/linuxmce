@@ -7,23 +7,26 @@
 #include "sound/discrete.h"
 
 /* Discrete Sound Input Nodes */
-#define NITEDRVR_BANG_DATA	NODE_01
-#define NITEDRVR_SKID1_EN	NODE_02
-#define NITEDRVR_SKID2_EN	NODE_03
-#define NITEDRVR_MOTOR_DATA	NODE_04
-#define NITEDRVR_CRASH_EN	NODE_05
-#define NITEDRVR_ATTRACT_EN	NODE_06
+#define NITEDRVR_BANG_DATA  NODE_01
+#define NITEDRVR_SKID1_EN   NODE_02
+#define NITEDRVR_SKID2_EN   NODE_03
+#define NITEDRVR_MOTOR_DATA NODE_04
+#define NITEDRVR_CRASH_EN   NODE_05
+#define NITEDRVR_ATTRACT_EN NODE_06
 
 
 class nitedrvr_state : public driver_device
 {
 public:
-	nitedrvr_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	nitedrvr_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"),
+		m_hvc(*this, "hvc"),
+		m_discrete(*this, "discrete"){ }
 
 	/* memory pointers */
-	UINT8 *    m_hvc;
-	UINT8 *    m_videoram;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_hvc;
 
 	/* video-related */
 	tilemap_t  *m_bg_tilemap;
@@ -35,40 +38,28 @@ public:
 	INT32 m_steering_val;
 	UINT8 m_crash_en;
 	UINT8 m_crash_data;
-	UINT8 m_crash_data_en;	// IC D8
+	UINT8 m_crash_data_en;  // IC D8
 	UINT8 m_ac_line;
 	INT32 m_last_steering_val;
 
 	/* devices */
-	device_t *m_maincpu;
-	device_t *m_discrete;
+	cpu_device *m_maincpu;
+	required_device<discrete_device> m_discrete;
+	DECLARE_READ8_MEMBER(nitedrvr_steering_reset_r);
+	DECLARE_WRITE8_MEMBER(nitedrvr_steering_reset_w);
+	DECLARE_READ8_MEMBER(nitedrvr_in0_r);
+	DECLARE_READ8_MEMBER(nitedrvr_in1_r);
+	DECLARE_WRITE8_MEMBER(nitedrvr_out0_w);
+	DECLARE_WRITE8_MEMBER(nitedrvr_out1_w);
+	DECLARE_WRITE8_MEMBER(nitedrvr_videoram_w);
+	DECLARE_WRITE8_MEMBER(nitedrvr_hvc_w);
+	TILE_GET_INFO_MEMBER(get_bg_tile_info);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	UINT32 screen_update_nitedrvr(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	TIMER_DEVICE_CALLBACK_MEMBER(nitedrvr_crash_toggle_callback);
 };
 
-
-/*----------- defined in machine/nitedrvr.c -----------*/
-
-READ8_HANDLER( nitedrvr_in0_r );
-READ8_HANDLER( nitedrvr_in1_r );
-READ8_HANDLER( nitedrvr_steering_reset_r );
-WRITE8_HANDLER( nitedrvr_steering_reset_w );
-WRITE8_HANDLER( nitedrvr_out0_w );
-WRITE8_HANDLER( nitedrvr_out1_w );
-
-TIMER_DEVICE_CALLBACK( nitedrvr_crash_toggle_callback );
-
-MACHINE_RESET( nitedrvr );
-MACHINE_START( nitedrvr );
-
-
 /*----------- defined in audio/nitedrvr.c -----------*/
-
 DISCRETE_SOUND_EXTERN( nitedrvr );
-
-
-/*----------- defined in video/nitedrvr.c -----------*/
-
-WRITE8_HANDLER( nitedrvr_hvc_w );
-WRITE8_HANDLER( nitedrvr_videoram_w );
-
-VIDEO_START( nitedrvr );
-SCREEN_UPDATE( nitedrvr );

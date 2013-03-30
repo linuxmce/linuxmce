@@ -17,21 +17,22 @@
 
 ***************************************************************************/
 
-PALETTE_INIT( wiping )
+void wiping_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	static const int resistances_rg[3] = { 1000, 470, 220 };
 	static const int resistances_b [2] = { 470, 220 };
 	double rweights[3], gweights[3], bweights[2];
 	int i;
 
 	/* compute the color output resistor weights */
-	compute_resistor_weights(0,	255, -1.0,
+	compute_resistor_weights(0, 255, -1.0,
 			3, &resistances_rg[0], rweights, 470, 0,
 			3, &resistances_rg[0], gweights, 470, 0,
 			2, &resistances_b[0],  bweights, 470, 0);
 
 	/* allocate the colortable */
-	machine.colortable = colortable_alloc(machine, 0x20);
+	machine().colortable = colortable_alloc(machine(), 0x20);
 
 	/* create a lookup table for the palette */
 	for (i = 0; i < 0x20; i++)
@@ -56,7 +57,7 @@ PALETTE_INIT( wiping )
 		bit1 = (color_prom[i] >> 7) & 0x01;
 		b = combine_2_weights(bweights, bit0, bit1);
 
-		colortable_palette_set_color(machine.colortable, i, MAKE_RGB(r, g, b));
+		colortable_palette_set_color(machine().colortable, i, MAKE_RGB(r, g, b));
 	}
 
 	/* color_prom now points to the beginning of the lookup table */
@@ -66,30 +67,28 @@ PALETTE_INIT( wiping )
 	for (i = 0; i < 0x100; i++)
 	{
 		UINT8 ctabentry = color_prom[i ^ 0x03] & 0x0f;
-		colortable_entry_set_value(machine.colortable, i, ctabentry);
+		colortable_entry_set_value(machine().colortable, i, ctabentry);
 	}
 
 	/* sprites use colors 16-31 */
 	for (i = 0x100; i < 0x200; i++)
 	{
 		UINT8 ctabentry = (color_prom[i ^ 0x03] & 0x0f) | 0x10;
-		colortable_entry_set_value(machine.colortable, i, ctabentry);
+		colortable_entry_set_value(machine().colortable, i, ctabentry);
 	}
 }
 
 
 
-WRITE8_HANDLER( wiping_flipscreen_w )
+WRITE8_MEMBER(wiping_state::wiping_flipscreen_w)
 {
-	wiping_state *state = space->machine().driver_data<wiping_state>();
-	state->m_flipscreen = (data & 1);
+	m_flipscreen = (data & 1);
 }
 
 
-SCREEN_UPDATE( wiping )
+UINT32 wiping_state::screen_update_wiping(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	wiping_state *state = screen->machine().driver_data<wiping_state>();
-	UINT8 *spriteram = state->m_spriteram;
+	UINT8 *spriteram = m_spriteram;
 	int offs;
 
 	for (offs = 0x3ff; offs > 0; offs--)
@@ -115,16 +114,16 @@ SCREEN_UPDATE( wiping )
 			sy = my - 2;
 		}
 
-		if (state->m_flipscreen)
+		if (m_flipscreen)
 		{
 			sx = 35 - sx;
 			sy = 27 - sy;
 		}
 
-		drawgfx_opaque(bitmap,cliprect,screen->machine().gfx[0],
-				state->m_videoram[offs],
-				state->m_colorram[offs] & 0x3f,
-				state->m_flipscreen,state->m_flipscreen,
+		drawgfx_opaque(bitmap,cliprect,machine().gfx[0],
+				m_videoram[offs],
+				m_colorram[offs] & 0x3f,
+				m_flipscreen,m_flipscreen,
 				sx*8,sy*8);
 	}
 
@@ -142,25 +141,25 @@ SCREEN_UPDATE( wiping )
 		flipy = spriteram[offs] & 0x40;
 		flipx = spriteram[offs] & 0x80;
 
-		if (state->m_flipscreen)
+		if (m_flipscreen)
 		{
 			sy = 208 - sy;
 			flipx = !flipx;
 			flipy = !flipy;
 		}
 
-		drawgfx_transmask(bitmap,cliprect,screen->machine().gfx[1],
+		drawgfx_transmask(bitmap,cliprect,machine().gfx[1],
 			(spriteram[offs] & 0x3f) + 64 * otherbank,
 			color,
 			flipx,flipy,
 			sx,sy,
-			colortable_get_transpen_mask(screen->machine().colortable, screen->machine().gfx[1], color, 0x1f));
+			colortable_get_transpen_mask(machine().colortable, machine().gfx[1], color, 0x1f));
 	}
 
 	/* redraw high priority chars */
 	for (offs = 0x3ff; offs > 0; offs--)
 	{
-		if (state->m_colorram[offs] & 0x80)
+		if (m_colorram[offs] & 0x80)
 		{
 			int mx,my,sx,sy;
 
@@ -183,18 +182,18 @@ SCREEN_UPDATE( wiping )
 				sy = my - 2;
 			}
 
-			if (state->m_flipscreen)
+			if (m_flipscreen)
 			{
 				sx = 35 - sx;
 				sy = 27 - sy;
 			}
 
-			drawgfx_opaque(bitmap,cliprect,screen->machine().gfx[0],
-					state->m_videoram[offs],
-					state->m_colorram[offs] & 0x3f,
-					state->m_flipscreen,state->m_flipscreen,
+			drawgfx_opaque(bitmap,cliprect,machine().gfx[0],
+					m_videoram[offs],
+					m_colorram[offs] & 0x3f,
+					m_flipscreen,m_flipscreen,
 					sx*8,sy*8);
-        	}
+			}
 	}
 
 
@@ -207,7 +206,7 @@ SCREEN_UPDATE( wiping )
 		for (j = 0;j < 8;j++)
 		{
 			char buf[40];
-			sprintf(buf,"%01x",state->m_soundregs[i*8+j]&0xf);
+			sprintf(buf,"%01x",m_soundregs[i*8+j]&0xf);
 			ui_draw_text(buf,j*10,i*8);
 		}
 	}
@@ -217,7 +216,7 @@ SCREEN_UPDATE( wiping )
 		for (j = 0;j < 8;j++)
 		{
 			char buf[40];
-			sprintf(buf,"%01x",state->m_soundregs[0x2000+i*8+j]>>4);
+			sprintf(buf,"%01x",m_soundregs[0x2000+i*8+j]>>4);
 			ui_draw_text(buf,j*10,80+i*8);
 		}
 	}

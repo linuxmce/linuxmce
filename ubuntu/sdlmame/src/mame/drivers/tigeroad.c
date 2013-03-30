@@ -79,12 +79,12 @@ static const int f1dream_2450_lookup[32] = {
 0x0003, 0x0080, 0x0006, 0x0060, 0x0000, 0x00e0, 0x000a, 0x00c0, 0x0003, 0x0080, 0x0006, 0x0060, 0x0000, 0x00e0, 0x000a, 0x00c0,
 0x0003, 0x0080, 0x0006, 0x0060, 0x0000, 0x00e0, 0x000a, 0x00c0, 0x0003, 0x0080, 0x0006, 0x0060, 0x0000, 0x00e0, 0x000a, 0x00c0 };
 
-static void f1dream_protection_w(address_space *space)
+static void f1dream_protection_w(address_space &space)
 {
-	tigeroad_state *state = space->machine().driver_data<tigeroad_state>();
+	tigeroad_state *state = space.machine().driver_data<tigeroad_state>();
 	int indx;
 	int value = 255;
-	int prevpc = cpu_get_previouspc(&space->device());
+	int prevpc = space.device().safe_pcbase();
 
 	if (prevpc == 0x244c)
 	{
@@ -139,25 +139,25 @@ static void f1dream_protection_w(address_space *space)
 	else if ((prevpc == 0x27f8) || (prevpc == 0x511a) || (prevpc == 0x5142) || (prevpc == 0x516a))
 	{
 		/* The main CPU stuffs the byte for the soundlatch into 0xfffffd.*/
-		soundlatch_w(space,2,state->m_ram16[0x3ffc/2]);
+		state->soundlatch_byte_w(space,2,state->m_ram16[0x3ffc/2]);
 	}
 }
 
-static WRITE16_HANDLER( f1dream_control_w )
+WRITE16_MEMBER(tigeroad_state::f1dream_control_w)
 {
-	tigeroad_state *state = space->machine().driver_data<tigeroad_state>();
-	logerror("protection write, PC: %04x  FFE1 Value:%01x\n",cpu_get_pc(&space->device()), state->m_ram16[0x3fe0/2]);
+	logerror("protection write, PC: %04x  FFE1 Value:%01x\n",space.device().safe_pc(), m_ram16[0x3fe0/2]);
 	f1dream_protection_w(space);
 }
 
-static WRITE16_HANDLER( tigeroad_soundcmd_w )
+WRITE16_MEMBER(tigeroad_state::tigeroad_soundcmd_w)
 {
 	if (ACCESSING_BITS_8_15)
-		soundlatch_w(space,offset,data >> 8);
+		soundlatch_byte_w(space,offset,data >> 8);
 }
 
-static WRITE8_DEVICE_HANDLER( msm5205_w )
+WRITE8_MEMBER(tigeroad_state::msm5205_w)
 {
+	device_t *device = machine().device("msm");
 	msm5205_reset_w(device,(data>>7)&1);
 	msm5205_data_w(device,data);
 	msm5205_vclk_w(device,1);
@@ -167,43 +167,43 @@ static WRITE8_DEVICE_HANDLER( msm5205_w )
 
 /***************************************************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16, tigeroad_state )
 	AM_RANGE(0x000000, 0x03ffff) AM_ROM
-	AM_RANGE(0xfe0800, 0xfe0cff) AM_RAM AM_BASE_SIZE_GENERIC(spriteram)
-	AM_RANGE(0xfe0d00, 0xfe1807) AM_RAM		/* still part of OBJ RAM */
-	AM_RANGE(0xfe4000, 0xfe4001) AM_READ_PORT("P1_P2") AM_WRITE(tigeroad_videoctrl_w)	/* char bank, coin counters, + ? */
+	AM_RANGE(0xfe0800, 0xfe0cff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0xfe0d00, 0xfe1807) AM_RAM     /* still part of OBJ RAM */
+	AM_RANGE(0xfe4000, 0xfe4001) AM_READ_PORT("P1_P2") AM_WRITE(tigeroad_videoctrl_w)   /* char bank, coin counters, + ? */
 	AM_RANGE(0xfe4002, 0xfe4003) AM_READ_PORT("SYSTEM")
 /*  AM_RANGE(0xfe4002, 0xfe4003) AM_WRITE(tigeroad_soundcmd_w) added by init_tigeroad() */
 	AM_RANGE(0xfe4004, 0xfe4005) AM_READ_PORT("DSW")
-	AM_RANGE(0xfec000, 0xfec7ff) AM_RAM_WRITE(tigeroad_videoram_w) AM_BASE_MEMBER(tigeroad_state, m_videoram)
+	AM_RANGE(0xfec000, 0xfec7ff) AM_RAM_WRITE(tigeroad_videoram_w) AM_SHARE("videoram")
 	AM_RANGE(0xfe8000, 0xfe8003) AM_WRITE(tigeroad_scroll_w)
 	AM_RANGE(0xfe800e, 0xfe800f) AM_WRITEONLY    /* fe800e = watchdog or IRQ acknowledge */
-	AM_RANGE(0xff8200, 0xff867f) AM_RAM_WRITE(paletteram16_xxxxRRRRGGGGBBBB_word_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0xffc000, 0xffffff) AM_RAM AM_BASE_MEMBER(tigeroad_state, m_ram16)
+	AM_RANGE(0xff8200, 0xff867f) AM_RAM_WRITE(paletteram_xxxxRRRRGGGGBBBB_word_w) AM_SHARE("paletteram")
+	AM_RANGE(0xffc000, 0xffffff) AM_RAM AM_SHARE("ram16")
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, tigeroad_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
-	AM_RANGE(0x8000, 0x8001) AM_DEVREADWRITE("ym1", ym2203_r, ym2203_w)
-	AM_RANGE(0xa000, 0xa001) AM_DEVREADWRITE("ym2", ym2203_r, ym2203_w)
+	AM_RANGE(0x8000, 0x8001) AM_DEVREADWRITE_LEGACY("ym1", ym2203_r, ym2203_w)
+	AM_RANGE(0xa000, 0xa001) AM_DEVREADWRITE_LEGACY("ym2", ym2203_r, ym2203_w)
 	AM_RANGE(0xc000, 0xc7ff) AM_RAM
-	AM_RANGE(0xe000, 0xe000) AM_READ(soundlatch_r)
+	AM_RANGE(0xe000, 0xe000) AM_READ(soundlatch_byte_r)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sound_port_map, AS_IO, 8 )
+static ADDRESS_MAP_START( sound_port_map, AS_IO, 8, tigeroad_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x7f, 0x7f) AM_WRITE(soundlatch2_w)
+	AM_RANGE(0x7f, 0x7f) AM_WRITE(soundlatch2_byte_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sample_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sample_map, AS_PROGRAM, 8, tigeroad_state )
 	AM_RANGE(0x0000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sample_port_map, AS_IO, 8 )
+static ADDRESS_MAP_START( sample_port_map, AS_IO, 8, tigeroad_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x00) AM_READ(soundlatch2_r)
-	AM_RANGE(0x01, 0x01) AM_DEVWRITE("msm", msm5205_w)
+	AM_RANGE(0x00, 0x00) AM_READ(soundlatch2_byte_r)
+	AM_RANGE(0x01, 0x01) AM_WRITE(msm5205_w)
 ADDRESS_MAP_END
 
 
@@ -430,7 +430,7 @@ static INPUT_PORTS_START( f1dream )
 	PORT_DIPSETTING(      0x2000, DEF_STR( Normal ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( Difficult ) )
 	PORT_DIPNAME( 0x4000, 0x0000, DEF_STR( Version ) )
-	PORT_DIPSETTING(      0x0000, DEF_STR( International ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( World ) )
 	PORT_DIPSETTING(      0x4000, DEF_STR( Japan ) )
 	PORT_DIPNAME( 0x8000, 0x8000, DEF_STR( Allow_Continue ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( No ) )
@@ -495,7 +495,7 @@ GFXDECODE_END
 /* handler called by the 2203 emulator when the internal timers cause an IRQ */
 static void irqhandler(device_t *device, int irq)
 {
-	cputag_set_input_line(device->machine(), "audiocpu", 0, irq ? ASSERT_LINE : CLEAR_LINE);
+	device->machine().device("audiocpu")->execute().set_input_line(0, irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static const ym2203_interface ym2203_config =
@@ -505,13 +505,13 @@ static const ym2203_interface ym2203_config =
 			AY8910_DEFAULT_LOADS,
 			DEVCB_NULL, DEVCB_NULL, DEVCB_NULL, DEVCB_NULL,
 	},
-	irqhandler
+	DEVCB_LINE(irqhandler)
 };
 
 static const msm5205_interface msm5205_config =
 {
-	0,				/* interrupt function */
-	MSM5205_SEX_4B	/* 4KHz playback ?  */
+	0,              /* interrupt function */
+	MSM5205_SEX_4B  /* 4KHz playback ?  */
 };
 
 
@@ -520,7 +520,7 @@ static MACHINE_CONFIG_START( tigeroad, tigeroad_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, XTAL_10MHz) /* verified on pcb */
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT("screen", irq2_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", tigeroad_state,  irq2_line_hold)
 
 	MCFG_CPU_ADD("audiocpu", Z80, XTAL_3_579545MHz) /* verified on pcb */
 	MCFG_CPU_PROGRAM_MAP(sound_map)
@@ -529,21 +529,19 @@ static MACHINE_CONFIG_START( tigeroad, tigeroad_state )
 	/* IRQs are triggered by the YM2203 */
 
 	/* video hardware */
-	MCFG_VIDEO_ATTRIBUTES(VIDEO_BUFFERS_SPRITERAM)
+	MCFG_BUFFERED_SPRITERAM16_ADD("spriteram")
 
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60.08)   /* verified on pcb */
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(tigeroad)
-	MCFG_SCREEN_EOF(tigeroad)
+	MCFG_SCREEN_UPDATE_DRIVER(tigeroad_state, screen_update_tigeroad)
+	MCFG_SCREEN_VBLANK_DEVICE("spriteram", buffered_spriteram16_device, vblank_copy_rising)
 
 	MCFG_GFXDECODE(tigeroad)
 	MCFG_PALETTE_LENGTH(576)
 
-	MCFG_VIDEO_START(tigeroad)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -565,7 +563,7 @@ static MACHINE_CONFIG_DERIVED( toramich, tigeroad )
 	MCFG_CPU_ADD("sample", Z80, 3579545) /* ? */
 	MCFG_CPU_PROGRAM_MAP(sample_map)
 	MCFG_CPU_IO_MAP(sample_port_map)
-	MCFG_CPU_PERIODIC_INT(irq0_line_hold,4000)	/* ? */
+	MCFG_CPU_PERIODIC_INT_DRIVER(tigeroad_state, irq0_line_hold, 4000)  /* ? */
 
 	/* sound hardware */
 	MCFG_SOUND_ADD("msm", MSM5205, 384000)
@@ -610,11 +608,11 @@ ROM_START( tigeroad )
 	ROM_LOAD( "tr-11a.bin",   0x40000, 0x20000, CRC(cd9152e5) SHA1(6df3c43c0c41289890296c2b2aeca915dfdae3b0) )
 	ROM_LOAD( "tr-12a.bin",   0x60000, 0x20000, CRC(7d8a99d0) SHA1(af8221cfd2ce9aa3bf296981fb7fddd1e9ef4599) )
 
-	ROM_REGION( 0x08000, "gfx4", 0 )	/* background tilemaps */
+	ROM_REGION( 0x08000, "gfx4", 0 )    /* background tilemaps */
 	ROM_LOAD( "tr13.bin",     0x0000, 0x8000, CRC(a79be1eb) SHA1(4191ccd48f7650930f9a4c2be0790239d7420bb1) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "trprom.bin",   0x0000, 0x0100, CRC(ec80ae36) SHA1(397ec8fc1b106c8b8d4bf6798aa429e8768a101a) )	/* priority (not used) */
+	ROM_LOAD( "trprom.bin",   0x0000, 0x0100, CRC(ec80ae36) SHA1(397ec8fc1b106c8b8d4bf6798aa429e8768a101a) )    /* priority (not used) */
 ROM_END
 
 ROM_START( toramich )
@@ -647,11 +645,11 @@ ROM_START( toramich )
 	ROM_LOAD( "tr-11a.bin",   0x40000, 0x20000, CRC(cd9152e5) SHA1(6df3c43c0c41289890296c2b2aeca915dfdae3b0) )
 	ROM_LOAD( "tr-12a.bin",   0x60000, 0x20000, CRC(7d8a99d0) SHA1(af8221cfd2ce9aa3bf296981fb7fddd1e9ef4599) )
 
-	ROM_REGION( 0x08000, "gfx4", 0 )	/* background tilemaps */
+	ROM_REGION( 0x08000, "gfx4", 0 )    /* background tilemaps */
 	ROM_LOAD( "tr13.bin",     0x0000, 0x8000, CRC(a79be1eb) SHA1(4191ccd48f7650930f9a4c2be0790239d7420bb1) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "trprom.bin",   0x0000, 0x0100, CRC(ec80ae36) SHA1(397ec8fc1b106c8b8d4bf6798aa429e8768a101a) )	/* priority (not used) */
+	ROM_LOAD( "trprom.bin",   0x0000, 0x0100, CRC(ec80ae36) SHA1(397ec8fc1b106c8b8d4bf6798aa429e8768a101a) )    /* priority (not used) */
 ROM_END
 
 ROM_START( tigeroadb )
@@ -686,11 +684,11 @@ ROM_START( tigeroadb )
 	ROM_LOAD( "tr-11a.bin",   0x40000, 0x20000, CRC(cd9152e5) SHA1(6df3c43c0c41289890296c2b2aeca915dfdae3b0) )
 	ROM_LOAD( "tr-12a.bin",   0x60000, 0x20000, CRC(7d8a99d0) SHA1(af8221cfd2ce9aa3bf296981fb7fddd1e9ef4599) )
 
-	ROM_REGION( 0x08000, "gfx4", 0 )	/* background tilemaps */
+	ROM_REGION( 0x08000, "gfx4", 0 )    /* background tilemaps */
 	ROM_LOAD( "tr13.bin",     0x0000, 0x8000, CRC(a79be1eb) SHA1(4191ccd48f7650930f9a4c2be0790239d7420bb1) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "trprom.bin",   0x0000, 0x0100, CRC(ec80ae36) SHA1(397ec8fc1b106c8b8d4bf6798aa429e8768a101a) )	/* priority (not used) */
+	ROM_LOAD( "trprom.bin",   0x0000, 0x0100, CRC(ec80ae36) SHA1(397ec8fc1b106c8b8d4bf6798aa429e8768a101a) )    /* priority (not used) */
 ROM_END
 
 ROM_START( f1dream )
@@ -701,7 +699,7 @@ ROM_START( f1dream )
 	ROM_REGION( 0x10000, "audiocpu", 0 ) /* audio CPU */
 	ROM_LOAD( "12k_04.bin",   0x0000, 0x8000, CRC(4b9a7524) SHA1(19004958c19ac0af35f2c97790b0082ee2c15bc4) )
 
-	ROM_REGION( 0x1000, "mcu", 0 )	/* i8751 microcontroller */
+	ROM_REGION( 0x1000, "mcu", 0 )  /* i8751 microcontroller */
 	ROM_LOAD( "c8751h-88",     0x0000, 0x1000, NO_DUMP )
 
 	ROM_REGION( 0x008000, "text", 0 )
@@ -721,11 +719,11 @@ ROM_START( f1dream )
 	ROM_LOAD( "03d_08.bin",   0x20000, 0x10000, CRC(811f2e22) SHA1(cca7e8cc43408c2c3067a731a98a8a6418a000aa) )
 	ROM_LOAD( "02d_07.bin",   0x30000, 0x10000, CRC(aa9a1233) SHA1(c2079ad81d67b54483ea5f69ac2edf276ad58ca9) )
 
-	ROM_REGION( 0x08000, "gfx4", 0 )	/* background tilemaps */
+	ROM_REGION( 0x08000, "gfx4", 0 )    /* background tilemaps */
 	ROM_LOAD( "07l_15.bin",   0x0000, 0x8000, CRC(978758b7) SHA1(ebd415d70e2f1af3b1bd51f40e7d60f22369638c) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "09e_tr.bin",   0x0000, 0x0100, CRC(ec80ae36) SHA1(397ec8fc1b106c8b8d4bf6798aa429e8768a101a) )	/* priority (not used) */
+	ROM_LOAD( "09e_tr.bin",   0x0000, 0x0100, CRC(ec80ae36) SHA1(397ec8fc1b106c8b8d4bf6798aa429e8768a101a) )    /* priority (not used) */
 ROM_END
 
 ROM_START( f1dreamb )
@@ -755,31 +753,31 @@ ROM_START( f1dreamb )
 	ROM_LOAD( "03d_08.bin",   0x20000, 0x10000, CRC(811f2e22) SHA1(cca7e8cc43408c2c3067a731a98a8a6418a000aa) )
 	ROM_LOAD( "02d_07.bin",   0x30000, 0x10000, CRC(aa9a1233) SHA1(c2079ad81d67b54483ea5f69ac2edf276ad58ca9) )
 
-	ROM_REGION( 0x08000, "gfx4", 0 )	/* background tilemaps */
+	ROM_REGION( 0x08000, "gfx4", 0 )    /* background tilemaps */
 	ROM_LOAD( "07l_15.bin",   0x0000, 0x8000, CRC(978758b7) SHA1(ebd415d70e2f1af3b1bd51f40e7d60f22369638c) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
-	ROM_LOAD( "09e_tr.bin",   0x0000, 0x0100, CRC(ec80ae36) SHA1(397ec8fc1b106c8b8d4bf6798aa429e8768a101a) )	/* priority (not used) */
+	ROM_LOAD( "09e_tr.bin",   0x0000, 0x0100, CRC(ec80ae36) SHA1(397ec8fc1b106c8b8d4bf6798aa429e8768a101a) )    /* priority (not used) */
 ROM_END
 
 
 
-static DRIVER_INIT( tigeroad )
+DRIVER_INIT_MEMBER(tigeroad_state,tigeroad)
 {
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0xfe4002, 0xfe4003, FUNC(tigeroad_soundcmd_w));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0xfe4002, 0xfe4003, write16_delegate(FUNC(tigeroad_state::tigeroad_soundcmd_w),this));
 }
 
-static DRIVER_INIT( f1dream )
+DRIVER_INIT_MEMBER(tigeroad_state,f1dream)
 {
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0xfe4002, 0xfe4003, FUNC(f1dream_control_w));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0xfe4002, 0xfe4003, write16_delegate(FUNC(tigeroad_state::f1dream_control_w),this));
 }
 
 
 
-GAME( 1987, tigeroad, 0,        tigeroad, tigeroad, tigeroad, ROT0, "Capcom (Romstar license)", "Tiger Road (US)", 0 )
-GAME( 1987, toramich, tigeroad, toramich, toramich, tigeroad, ROT0, "Capcom", "Tora-he no Michi (Japan)", 0 )
-GAME( 1987, tigeroadb,tigeroad, tigeroad, tigeroad, tigeroad, ROT0, "bootleg", "Tiger Road (US bootleg)", 0 )
+GAME( 1987, tigeroad, 0,        tigeroad, tigeroad, tigeroad_state, tigeroad, ROT0, "Capcom (Romstar license)", "Tiger Road (US)", 0 )
+GAME( 1987, toramich, tigeroad, toramich, toramich, tigeroad_state, tigeroad, ROT0, "Capcom", "Tora e no Michi (Japan)", 0 )
+GAME( 1987, tigeroadb,tigeroad, tigeroad, tigeroad, tigeroad_state, tigeroad, ROT0, "bootleg", "Tiger Road (US bootleg)", 0 )
 
 /* F1 Dream has an Intel 8751 microcontroller for protection */
-GAME( 1988, f1dream,  0,        tigeroad, f1dream,  f1dream,  ROT0, "Capcom (Romstar license)", "F-1 Dream", 0 )
-GAME( 1988, f1dreamb, f1dream,  tigeroad, f1dream,  tigeroad, ROT0, "bootleg", "F-1 Dream (bootleg)", 0 )
+GAME( 1988, f1dream,  0,        tigeroad, f1dream, tigeroad_state,  f1dream,  ROT0, "Capcom (Romstar license)", "F-1 Dream", 0 )
+GAME( 1988, f1dreamb, f1dream,  tigeroad, f1dream, tigeroad_state,  tigeroad, ROT0, "bootleg", "F-1 Dream (bootleg)", 0 )

@@ -21,34 +21,34 @@ enum
 };
 
 
-struct _snes_bsx_state
+struct snes_bsx_state
 {
 	// base regs
 	// we don't emulate the base unit yet
 
 	// cart regs
-    UINT8 cart_regs[16];
+	UINT8 cart_regs[16];
 
 	// flash regs
-    UINT32 command;
-    UINT8 write_old;
-    UINT8 write_new;
+	UINT32 command;
+	UINT8 write_old;
+	UINT8 write_new;
 
-    int flash_enable;
-    int read_enable;
-    int write_enable;
+	int flash_enable;
+	int read_enable;
+	int write_enable;
 
 	UINT8 *pram;
 	int ram_source;
 };
 
-static struct _snes_bsx_state  bsx_state;
+static snes_bsx_state bsx_state;
 
 
 static void bsx_update_memory_map(void)
 {
 	bsx_state.ram_source = BIT(bsx_state.cart_regs[0x01], 7) ? SNES_BSX_PRAM : SNES_BSX_FLASH;
-//  UINT8 *RAM = (bsx_state.cart_regs[0x01] & 0x80) == 0x00 ? space->machine().region("flash")->base() : bsx_state.pram;
+//  UINT8 *RAM = (bsx_state.cart_regs[0x01] & 0x80) == 0x00 ? space.machine().root_device().memregion("flash")->base() : bsx_state.pram;
 
 	logerror("BSX: updated memory map, current RAM: %d", bsx_state.ram_source);
 	if (!BIT(bsx_state.cart_regs[0x02], 7))
@@ -149,7 +149,7 @@ static void bsx_init( running_machine &machine )
 #ifdef UNUSED_FUNCTION
 static READ8_HANDLER( bsx_flash_read )
 {
-	UINT8 *FLASH = space->machine().region("flash")->base();
+	UINT8 *FLASH = space.machine().root_device().memregion("flash")->base();
 
 	if (offset == 0x0002)
 	{
@@ -249,4 +249,3 @@ static WRITE8_HANDLER( bsx_flash_write )
 }
 
 #endif
-

@@ -4,8 +4,8 @@
 class taitol_state : public driver_device
 {
 public:
-	taitol_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	taitol_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) { }
 
 	/* memory pointers */
 	UINT8 *       m_shared_ram;
@@ -52,20 +52,79 @@ public:
 	const char *m_portf1_tag;
 
 	/* devices */
-	device_t *m_maincpu;
-	device_t *m_audiocpu;
+	cpu_device *m_maincpu;
+	cpu_device *m_audiocpu;
 
 	/* memory buffers */
 	UINT8         m_rambanks[0x1000 * 12];
 	UINT8         m_palette_ram[0x1000];
 	UINT8         m_empty_ram[0x1000];
+	DECLARE_WRITE8_MEMBER(irq_adr_w);
+	DECLARE_READ8_MEMBER(irq_adr_r);
+	DECLARE_WRITE8_MEMBER(irq_enable_w);
+	DECLARE_READ8_MEMBER(irq_enable_r);
+	DECLARE_WRITE8_MEMBER(rombankswitch_w);
+	DECLARE_WRITE8_MEMBER(rombank2switch_w);
+	DECLARE_READ8_MEMBER(rombankswitch_r);
+	DECLARE_READ8_MEMBER(rombank2switch_r);
+	DECLARE_WRITE8_MEMBER(rambankswitch_w);
+	DECLARE_READ8_MEMBER(rambankswitch_r);
+	DECLARE_WRITE8_MEMBER(bank0_w);
+	DECLARE_WRITE8_MEMBER(bank1_w);
+	DECLARE_WRITE8_MEMBER(bank2_w);
+	DECLARE_WRITE8_MEMBER(bank3_w);
+	DECLARE_WRITE8_MEMBER(control2_w);
+	DECLARE_WRITE8_MEMBER(mcu_data_w);
+	DECLARE_WRITE8_MEMBER(mcu_control_w);
+	DECLARE_READ8_MEMBER(mcu_data_r);
+	DECLARE_READ8_MEMBER(mcu_control_r);
+	DECLARE_WRITE8_MEMBER(sound_w);
+	DECLARE_READ8_MEMBER(mux_r);
+	DECLARE_WRITE8_MEMBER(mux_w);
+	DECLARE_WRITE8_MEMBER(mux_ctrl_w);
+	DECLARE_WRITE8_MEMBER(champwr_msm5205_lo_w);
+	DECLARE_WRITE8_MEMBER(champwr_msm5205_hi_w);
+	DECLARE_READ8_MEMBER(horshoes_tracky_reset_r);
+	DECLARE_READ8_MEMBER(horshoes_trackx_reset_r);
+	DECLARE_READ8_MEMBER(horshoes_tracky_lo_r);
+	DECLARE_READ8_MEMBER(horshoes_tracky_hi_r);
+	DECLARE_READ8_MEMBER(horshoes_trackx_lo_r);
+	DECLARE_READ8_MEMBER(horshoes_trackx_hi_r);
+	DECLARE_WRITE8_MEMBER(sound_bankswitch_w);
+	DECLARE_WRITE8_MEMBER(horshoes_bankg_w);
+	DECLARE_WRITE8_MEMBER(taitol_bankc_w);
+	DECLARE_READ8_MEMBER(taitol_bankc_r);
+	DECLARE_WRITE8_MEMBER(taitol_control_w);
+	DECLARE_READ8_MEMBER(taitol_control_r);
+	DECLARE_READ8_MEMBER(portA_r);
+	DECLARE_READ8_MEMBER(portB_r);
+	DECLARE_READ8_MEMBER(extport_select_and_ym2203_r);
+	DECLARE_WRITE8_MEMBER(champwr_msm5205_start_w);
+	DECLARE_WRITE8_MEMBER(champwr_msm5205_stop_w);
+	DECLARE_WRITE8_MEMBER(champwr_msm5205_volume_w);
+	DECLARE_WRITE8_MEMBER(portA_w);
+	DECLARE_DRIVER_INIT(plottinga);
+	TILE_GET_INFO_MEMBER(get_bg18_tile_info);
+	TILE_GET_INFO_MEMBER(get_bg19_tile_info);
+	TILE_GET_INFO_MEMBER(get_ch1a_tile_info);
+	DECLARE_MACHINE_START(taito_l);
+	DECLARE_MACHINE_RESET(fhawk);
+	DECLARE_VIDEO_START(taitol);
+	DECLARE_MACHINE_RESET(kurikint);
+	DECLARE_MACHINE_RESET(plotting);
+	DECLARE_MACHINE_RESET(evilston);
+	DECLARE_MACHINE_RESET(champwr);
+	DECLARE_MACHINE_RESET(raimais);
+	DECLARE_MACHINE_RESET(puzznic);
+	DECLARE_MACHINE_RESET(horshoes);
+	DECLARE_MACHINE_RESET(palamed);
+	DECLARE_MACHINE_RESET(cachat);
+	UINT32 screen_update_taitol(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	void screen_eof_taitol(screen_device &screen, bool state);
+	TIMER_DEVICE_CALLBACK_MEMBER(vbl_interrupt);
 };
 
 /*----------- defined in video/taito_l.c -----------*/
-
-SCREEN_EOF( taitol );
-VIDEO_START( taitol );
-SCREEN_UPDATE( taitol );
 
 void taitol_chardef14_m(running_machine &machine, int offset);
 void taitol_chardef15_m(running_machine &machine, int offset);
@@ -79,9 +138,3 @@ void taitol_bg18_m(running_machine &machine, int offset);
 void taitol_bg19_m(running_machine &machine, int offset);
 void taitol_char1a_m(running_machine &machine, int offset);
 void taitol_obj1b_m(running_machine &machine, int offset);
-
-WRITE8_HANDLER( taitol_control_w );
-READ8_HANDLER( taitol_control_r );
-WRITE8_HANDLER( horshoes_bankg_w );
-WRITE8_HANDLER( taitol_bankc_w );
-READ8_HANDLER( taitol_bankc_r );

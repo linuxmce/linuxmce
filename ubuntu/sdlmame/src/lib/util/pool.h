@@ -48,16 +48,16 @@
 ***************************************************************************/
 
 /* helper macros for memory pools that pass file/line number */
-#define pool_malloc_lib(pool, size)			pool_malloc_file_line((pool), (size), __FILE__, __LINE__)
-#define pool_realloc_lib(pool, ptr, size)	pool_realloc_file_line((pool), (ptr), (size), __FILE__, __LINE__)
-#define pool_strdup_lib(pool, size)			pool_strdup_file_line((pool), (size), __FILE__, __LINE__)
+#define pool_malloc_lib(pool, size)         pool_malloc_file_line((pool), (size), __FILE__, __LINE__)
+#define pool_realloc_lib(pool, ptr, size)   pool_realloc_file_line((pool), (ptr), (size), __FILE__, __LINE__)
+#define pool_strdup_lib(pool, size)         pool_strdup_file_line((pool), (size), __FILE__, __LINE__)
 
 /* macro to define a 4-character type for a pool */
-#define OBJECT_TYPE(a,b,c,d)			(((a) << 24) | ((b) << 16) | ((c) << 8) | (d))
+#define OBJECT_TYPE(a,b,c,d)            (((a) << 24) | ((b) << 16) | ((c) << 8) | (d))
 
 /* built-in pool types */
-#define OBJTYPE_WILDCARD				(0)
-#define OBJTYPE_MEMORY					OBJECT_TYPE('m','e','m','o')
+#define OBJTYPE_WILDCARD                (0)
+#define OBJTYPE_MEMORY                  OBJECT_TYPE('m','e','m','o')
 
 
 
@@ -69,10 +69,10 @@
 typedef UINT32 object_type;
 
 /* opaque type representing a pool of objects */
-typedef struct _object_pool object_pool;
+struct object_pool;
 
 /* opaque type representing an iterator over pool objects */
-typedef struct _object_pool_iterator object_pool_iterator;
+struct object_pool_iterator;
 
 
 

@@ -55,7 +55,7 @@ Notes:
 */
 
 #include "emu.h"
-#include "cpu/m6502/m6502.h"
+#include "cpu/m6502/n2a03.h"
 #include "sound/dac.h"
 #include "sound/nes_apu.h"
 #include "video/ppu2c0x.h"
@@ -64,8 +64,8 @@ Notes:
 class cham24_state : public driver_device
 {
 public:
-	cham24_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	cham24_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) { }
 
 	UINT8* m_nt_ram;
 	UINT8* m_nt_page[4];
@@ -73,6 +73,22 @@ public:
 	UINT32 m_in_1;
 	UINT32 m_in_0_shift;
 	UINT32 m_in_1_shift;
+	DECLARE_WRITE8_MEMBER(nt_w);
+	DECLARE_READ8_MEMBER(nt_r);
+	DECLARE_WRITE8_MEMBER(sprite_dma_w);
+	DECLARE_READ8_MEMBER(cham24_IN0_r);
+	DECLARE_WRITE8_MEMBER(cham24_IN0_w);
+	DECLARE_READ8_MEMBER(cham24_IN1_r);
+	DECLARE_WRITE8_MEMBER(cham24_mapper_w);
+	DECLARE_READ8_MEMBER(psg_4015_r);
+	DECLARE_WRITE8_MEMBER(psg_4015_w);
+	DECLARE_WRITE8_MEMBER(psg_4017_w);
+	DECLARE_DRIVER_INIT(cham24);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_cham24(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
@@ -110,52 +126,52 @@ static void cham24_set_mirroring( running_machine &machine, int mirroring )
 	}
 }
 
-static WRITE8_HANDLER( nt_w )
+WRITE8_MEMBER(cham24_state::nt_w)
 {
-	cham24_state *state = space->machine().driver_data<cham24_state>();
 	int page = ((offset & 0xc00) >> 10);
-	state->m_nt_page[page][offset & 0x3ff] = data;
+	m_nt_page[page][offset & 0x3ff] = data;
 }
 
-static READ8_HANDLER( nt_r )
+READ8_MEMBER(cham24_state::nt_r)
 {
-	cham24_state *state = space->machine().driver_data<cham24_state>();
 	int page = ((offset & 0xc00) >> 10);
-	return state->m_nt_page[page][offset & 0x3ff];
+	return m_nt_page[page][offset & 0x3ff];
 
 }
 
-static WRITE8_HANDLER( sprite_dma_w )
+WRITE8_MEMBER(cham24_state::sprite_dma_w)
 {
 	int source = (data & 7);
-	ppu2c0x_spriteram_dma(space, space->machine().device("ppu"), source);
+	ppu2c0x_device *ppu = machine().device<ppu2c0x_device>("ppu");
+	ppu->spriteram_dma(space, source);
 }
 
-static READ8_DEVICE_HANDLER( psg_4015_r )
+READ8_MEMBER(cham24_state::psg_4015_r)
 {
-	return nes_psg_r(device,0x15);
+	device_t *device = machine().device("nes");
+	return nes_psg_r(device,space,0x15);
 }
 
-static WRITE8_DEVICE_HANDLER( psg_4015_w )
+WRITE8_MEMBER(cham24_state::psg_4015_w)
 {
-	nes_psg_w(device,0x15, data);
+	device_t *device = machine().device("nes");
+	nes_psg_w(device,space,0x15, data);
 }
 
-static WRITE8_DEVICE_HANDLER( psg_4017_w )
+WRITE8_MEMBER(cham24_state::psg_4017_w)
 {
-	nes_psg_w(device,0x17, data);
+	device_t *device = machine().device("nes");
+	nes_psg_w(device,space,0x17, data);
 }
 
 
-static READ8_HANDLER( cham24_IN0_r )
+READ8_MEMBER(cham24_state::cham24_IN0_r)
 {
-	cham24_state *state = space->machine().driver_data<cham24_state>();
-	return ((state->m_in_0 >> state->m_in_0_shift++) & 0x01) | 0x40;
+	return ((m_in_0 >> m_in_0_shift++) & 0x01) | 0x40;
 }
 
-static WRITE8_HANDLER( cham24_IN0_w )
+WRITE8_MEMBER(cham24_state::cham24_IN0_w)
 {
-	cham24_state *state = space->machine().driver_data<cham24_state>();
 	if (data & 0xfe)
 	{
 		//logerror("Unhandled cham24_IN0_w write: data = %02X\n", data);
@@ -166,21 +182,20 @@ static WRITE8_HANDLER( cham24_IN0_w )
 		return;
 	}
 
-	state->m_in_0_shift = 0;
-	state->m_in_1_shift = 0;
+	m_in_0_shift = 0;
+	m_in_1_shift = 0;
 
-	state->m_in_0 = input_port_read(space->machine(), "P1");
-	state->m_in_1 = input_port_read(space->machine(), "P2");
+	m_in_0 = ioport("P1")->read();
+	m_in_1 = ioport("P2")->read();
 
 }
 
-static READ8_HANDLER( cham24_IN1_r )
+READ8_MEMBER(cham24_state::cham24_IN1_r)
 {
-	cham24_state *state = space->machine().driver_data<cham24_state>();
-	return ((state->m_in_1 >> state->m_in_1_shift++) & 0x01) | 0x40;
+	return ((m_in_1 >> m_in_1_shift++) & 0x01) | 0x40;
 }
 
-static WRITE8_HANDLER( cham24_mapper_w )
+WRITE8_MEMBER(cham24_state::cham24_mapper_w)
 {
 	UINT32 gfx_bank = offset & 0x3f;
 	UINT32 prg_16k_bank_page = (offset >> 6) & 0x01;
@@ -188,14 +203,14 @@ static WRITE8_HANDLER( cham24_mapper_w )
 	UINT32 prg_bank_page_size = (offset >> 12) & 0x01;
 	UINT32 gfx_mirroring = (offset >> 13) & 0x01;
 
-	UINT8* dst = space->machine().region("maincpu")->base();
-	UINT8* src = space->machine().region("user1")->base();
+	UINT8* dst = memregion("maincpu")->base();
+	UINT8* src = memregion("user1")->base();
 
 	// switch PPU VROM bank
-	memory_set_bankptr(space->machine(), "bank1", space->machine().region("gfx1")->base() + (0x2000 * gfx_bank));
+	membank("bank1")->set_base(machine().root_device().memregion("gfx1")->base() + (0x2000 * gfx_bank));
 
 	// set gfx mirroring
-	cham24_set_mirroring(space->machine(), gfx_mirroring != 0 ? PPU_MIRROR_HORZ : PPU_MIRROR_VERT);
+	cham24_set_mirroring(machine(), gfx_mirroring != 0 ? PPU_MIRROR_HORZ : PPU_MIRROR_VERT);
 
 	// switch PRG bank
 	if (prg_bank_page_size == 0)
@@ -220,14 +235,14 @@ static WRITE8_HANDLER( cham24_mapper_w )
 	}
 }
 
-static ADDRESS_MAP_START( cham24_map, AS_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0x07ff) AM_RAM	/* NES RAM */
-	AM_RANGE(0x2000, 0x3fff) AM_DEVREADWRITE("ppu", ppu2c0x_r, ppu2c0x_w)
-	AM_RANGE(0x4000, 0x4013) AM_DEVREADWRITE("nes", nes_psg_r, nes_psg_w)			/* PSG primary registers */
+static ADDRESS_MAP_START( cham24_map, AS_PROGRAM, 8, cham24_state )
+	AM_RANGE(0x0000, 0x07ff) AM_RAM /* NES RAM */
+	AM_RANGE(0x2000, 0x3fff) AM_DEVREADWRITE("ppu", ppu2c0x_device, read, write)
+	AM_RANGE(0x4000, 0x4013) AM_DEVREADWRITE_LEGACY("nes", nes_psg_r, nes_psg_w)            /* PSG primary registers */
 	AM_RANGE(0x4014, 0x4014) AM_WRITE(sprite_dma_w)
-	AM_RANGE(0x4015, 0x4015) AM_DEVREADWRITE("nes", psg_4015_r, psg_4015_w)			/* PSG status / first control register */
-	AM_RANGE(0x4016, 0x4016) AM_READWRITE(cham24_IN0_r,        cham24_IN0_w)			/* IN0 - input port 1 */
-	AM_RANGE(0x4017, 0x4017) AM_READ(cham24_IN1_r) AM_DEVWRITE("nes", psg_4017_w)		/* IN1 - input port 2 / PSG second control register */
+	AM_RANGE(0x4015, 0x4015) AM_READWRITE(psg_4015_r, psg_4015_w)           /* PSG status / first control register */
+	AM_RANGE(0x4016, 0x4016) AM_READWRITE(cham24_IN0_r,        cham24_IN0_w)            /* IN0 - input port 1 */
+	AM_RANGE(0x4017, 0x4017) AM_READ(cham24_IN1_r) AM_WRITE(psg_4017_w)     /* IN1 - input port 2 / PSG second control register */
 	AM_RANGE(0x8000, 0xffff) AM_ROM AM_WRITE(cham24_mapper_w)
 ADDRESS_MAP_END
 
@@ -235,7 +250,7 @@ static INPUT_PORTS_START( cham24 )
 	PORT_START("P1") /* IN0 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_PLAYER(1)
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(1)
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_BUTTON3 ) PORT_PLAYER(1)	/* Select */
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_BUTTON3 ) PORT_PLAYER(1)    /* Select */
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_START ) PORT_PLAYER(1)
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_PLAYER(1)
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_PLAYER(1)
@@ -245,7 +260,7 @@ static INPUT_PORTS_START( cham24 )
 	PORT_START("P2") /* IN1 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_PLAYER(2)
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(2)
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_BUTTON3 ) PORT_PLAYER(2)	/* Select */
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_BUTTON3 ) PORT_PLAYER(2)    /* Select */
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_START ) PORT_PLAYER(2)
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_PLAYER(2)
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_PLAYER(2)
@@ -258,67 +273,70 @@ static const nes_interface cham24_interface_1 =
 	"maincpu"
 };
 
-static MACHINE_RESET( cham24 )
+void cham24_state::machine_reset()
 {
 }
 
-static PALETTE_INIT( cham24 )
+void cham24_state::palette_init()
 {
-	ppu2c0x_init_palette(machine, 0);
+	ppu2c0x_device *ppu = machine().device<ppu2c0x_device>("ppu");
+	ppu->init_palette(machine(), 0);
 }
 
 static void ppu_irq( device_t *device, int *ppu_regs )
 {
-	cputag_set_input_line(device->machine(), "maincpu", INPUT_LINE_NMI, PULSE_LINE);
+	device->machine().device("maincpu")->execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 }
 
 /* our ppu interface                                            */
 static const ppu2c0x_interface ppu_interface =
 {
-	0,					/* gfxlayout num */
-	0,					/* color base */
-	PPU_MIRROR_NONE,	/* mirroring */
-	ppu_irq				/* irq */
+	"maincpu",
+	"screen",
+	0,                  /* gfxlayout num */
+	0,                  /* color base */
+	PPU_MIRROR_NONE,    /* mirroring */
+	ppu_irq             /* irq */
 };
 
-static VIDEO_START( cham24 )
+void cham24_state::video_start()
 {
 }
 
-static SCREEN_UPDATE( cham24 )
+UINT32 cham24_state::screen_update_cham24(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	/* render the ppu */
-	ppu2c0x_render(screen->machine().device("ppu"), bitmap, 0, 0, 0, 0);
+	ppu2c0x_device *ppu = machine().device<ppu2c0x_device>("ppu");
+	ppu->render(bitmap, 0, 0, 0, 0);
 	return 0;
 }
 
 
-static MACHINE_START( cham24 )
+void cham24_state::machine_start()
 {
-	cham24_state *state = machine.driver_data<cham24_state>();
 	/* switch PRG rom */
-	UINT8* dst = machine.region("maincpu")->base();
-	UINT8* src = machine.region("user1")->base();
+	UINT8* dst = memregion("maincpu")->base();
+	UINT8* src = memregion("user1")->base();
 
 	memcpy(&dst[0x8000], &src[0x0f8000], 0x4000);
 	memcpy(&dst[0xc000], &src[0x0f8000], 0x4000);
 
 	/* uses 8K swapping, all ROM!*/
-	machine.device("ppu")->memory().space(AS_PROGRAM)->install_read_bank(0x0000, 0x1fff, "bank1");
-	memory_set_bankptr(machine, "bank1", machine.region("gfx1")->base());
+	machine().device("ppu")->memory().space(AS_PROGRAM).install_read_bank(0x0000, 0x1fff, "bank1");
+	membank("bank1")->set_base(memregion("gfx1")->base());
 
 	/* need nametable ram, though. I doubt this uses more than 2k, but it starts up configured for 4 */
-	state->m_nt_ram = auto_alloc_array(machine, UINT8, 0x1000);
-	state->m_nt_page[0] = state->m_nt_ram;
-	state->m_nt_page[1] = state->m_nt_ram + 0x400;
-	state->m_nt_page[2] = state->m_nt_ram + 0x800;
-	state->m_nt_page[3] = state->m_nt_ram + 0xc00;
+	m_nt_ram = auto_alloc_array(machine(), UINT8, 0x1000);
+	m_nt_page[0] = m_nt_ram;
+	m_nt_page[1] = m_nt_ram + 0x400;
+	m_nt_page[2] = m_nt_ram + 0x800;
+	m_nt_page[3] = m_nt_ram + 0xc00;
 
 	/* and read/write handlers */
-	machine.device("ppu")->memory().space(AS_PROGRAM)->install_legacy_readwrite_handler(0x2000, 0x3eff, FUNC(nt_r), FUNC(nt_w));
+	machine().device("ppu")->memory().space(AS_PROGRAM).install_readwrite_handler(0x2000, 0x3eff,read8_delegate(FUNC(cham24_state::nt_r), this), write8_delegate(FUNC(cham24_state::nt_w), this));
 }
 
-static DRIVER_INIT( cham24 )
+DRIVER_INIT_MEMBER(cham24_state,cham24)
 {
 }
 
@@ -331,22 +349,17 @@ static MACHINE_CONFIG_START( cham24, cham24_state )
 	MCFG_CPU_ADD("maincpu", N2A03, N2A03_DEFAULTCLOCK)
 	MCFG_CPU_PROGRAM_MAP(cham24_map)
 
-	MCFG_MACHINE_RESET( cham24 )
-	MCFG_MACHINE_START( cham24 )
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 262)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 0*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(cham24)
+	MCFG_SCREEN_UPDATE_DRIVER(cham24_state, screen_update_cham24)
 
 	MCFG_GFXDECODE(cham24)
 	MCFG_PALETTE_LENGTH(8*4*16)
 
-	MCFG_PALETTE_INIT(cham24)
-	MCFG_VIDEO_START(cham24)
 
 	MCFG_PPU2C04_ADD("ppu", ppu_interface)
 
@@ -357,7 +370,7 @@ static MACHINE_CONFIG_START( cham24, cham24_state )
 	MCFG_SOUND_CONFIG(cham24_interface_1)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 
-	MCFG_SOUND_ADD("dac", DAC, 0)
+	MCFG_DAC_ADD("dac")
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 MACHINE_CONFIG_END
 
@@ -374,4 +387,4 @@ ROM_START( cham24 )
 	ROM_LOAD( "24-3.u3", 0x0000, 0x10000, CRC(e97955fa) SHA1(6d686c5d0967c9c2f40dbd8e6a0c0907606f2c7d) ) // unknown rom
 ROM_END
 
-GAME( 2002, cham24, 0, cham24, cham24, cham24, ROT0, "bootleg", "Chameleon 24", GAME_NOT_WORKING )
+GAME( 2002, cham24, 0, cham24, cham24, cham24_state, cham24, ROT0, "bootleg", "Chameleon 24", GAME_NOT_WORKING )

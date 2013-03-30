@@ -141,7 +141,7 @@ Note: press Z to show some info on each sprite (debug builds only)
 #endif
 
 
-static void ssv_drawgfx(	bitmap_t *bitmap, const rectangle *cliprect, const gfx_element *gfx,
+static void ssv_drawgfx(    bitmap_ind16 &bitmap, const rectangle &cliprect, gfx_element *gfx,
 					UINT32 code,UINT32 color,int flipx,int flipy,int x0,int y0,
 					int shadow )
 {
@@ -152,33 +152,33 @@ static void ssv_drawgfx(	bitmap_t *bitmap, const rectangle *cliprect, const gfx_
 	int sx, x1, dx;
 	int sy, y1, dy;
 
-	addr	=	gfx_element_get_data(gfx, code  % gfx->total_elements);
-	color	=	gfx->color_granularity * (color % gfx->total_colors);
+	addr    =   gfx->get_data(code  % gfx->elements());
+	color   =   gfx->granularity() * (color % gfx->colors());
 
-	if ( flipx )	{	x1 = x0-1;				x0 += gfx->width-1;		dx = -1;	}
-	else			{	x1 = x0 + gfx->width;							dx =  1;	}
+	if ( flipx )    {   x1 = x0-1;              x0 += gfx->width()-1;       dx = -1;    }
+	else            {   x1 = x0 + gfx->width();                         dx =  1;    }
 
-	if ( flipy )	{	y1 = y0-1;				y0 += gfx->height-1;	dy = -1;	}
-	else			{	y1 = y0 + gfx->height;							dy =  1;	}
+	if ( flipy )    {   y1 = y0-1;              y0 += gfx->height()-1;  dy = -1;    }
+	else            {   y1 = y0 + gfx->height();                            dy =  1;    }
 
-#define SSV_DRAWGFX(SETPIXELCOLOR)												\
-	for ( sy = y0; sy != y1; sy += dy )											\
-	{																			\
-		if ( sy >= cliprect->min_y && sy <= cliprect->max_y )					\
-		{																		\
-			source	=	addr;													\
-			dest	=	BITMAP_ADDR16(bitmap, sy, 0);							\
+#define SSV_DRAWGFX(SETPIXELCOLOR)                                              \
+	for ( sy = y0; sy != y1; sy += dy )                                         \
+	{                                                                           \
+		if ( sy >= cliprect.min_y && sy <= cliprect.max_y )                 \
+		{                                                                       \
+			source  =   addr;                                                   \
+			dest    =   &bitmap.pix16(sy);                          \
 																				\
-			for ( sx = x0; sx != x1; sx += dx )									\
-			{																	\
-				pen = *source++;												\
+			for ( sx = x0; sx != x1; sx += dx )                                 \
+			{                                                                   \
+				pen = *source++;                                                \
 																				\
-				if ( pen && sx >= cliprect->min_x && sx <= cliprect->max_x )	\
-					SETPIXELCOLOR												\
-			}																	\
-		}																		\
+				if ( pen && sx >= cliprect.min_x && sx <= cliprect.max_x )  \
+					SETPIXELCOLOR                                               \
+			}                                                                   \
+		}                                                                       \
 																				\
-		addr	+=	gfx->line_modulo;											\
+		addr    +=  gfx->rowbytes();                                            \
 	}
 
 	if (shadow)
@@ -192,53 +192,44 @@ static void ssv_drawgfx(	bitmap_t *bitmap, const rectangle *cliprect, const gfx_
 }
 
 
-VIDEO_START( ssv )
+void ssv_state::video_start()
 {
-	machine.gfx[0]->color_granularity = 64; /* 256 colour sprites with palette selectable on 64 colour boundaries */
+	machine().gfx[0]->set_granularity(64); /* 256 colour sprites with palette selectable on 64 colour boundaries */
 }
 
-VIDEO_START( eaglshot )
+VIDEO_START_MEMBER(ssv_state,eaglshot)
 {
-	ssv_state *state = machine.driver_data<ssv_state>();
-	VIDEO_START_CALL(ssv);
+	ssv_state::video_start();
 
-	state->m_eaglshot_gfxram		=	auto_alloc_array(machine, UINT16, 16 * 0x40000 / 2);
+	m_eaglshot_gfxram       =   auto_alloc_array(machine(), UINT16, 16 * 0x40000 / 2);
 
-	gfx_element_set_source(machine.gfx[0], (UINT8 *)state->m_eaglshot_gfxram);
-	gfx_element_set_source(machine.gfx[1], (UINT8 *)state->m_eaglshot_gfxram);
+	machine().gfx[0]->set_source((UINT8 *)m_eaglshot_gfxram);
+	machine().gfx[1]->set_source((UINT8 *)m_eaglshot_gfxram);
 }
 
-static TILE_GET_INFO( get_tile_info_0 )
+TILE_GET_INFO_MEMBER(ssv_state::get_tile_info_0)
 {
-	ssv_state *state = machine.driver_data<ssv_state>();
-	UINT16 tile = state->m_gdfs_tmapram[tile_index];
+	UINT16 tile = m_gdfs_tmapram[tile_index];
 
-	SET_TILE_INFO(3, tile, 0, TILE_FLIPXY( tile >> 14 ));
+	SET_TILE_INFO_MEMBER(2, tile, 0, TILE_FLIPXY( tile >> 14 ));
 }
 
-WRITE16_HANDLER( gdfs_tmapram_w )
+WRITE16_MEMBER(ssv_state::gdfs_tmapram_w)
 {
-	ssv_state *state = space->machine().driver_data<ssv_state>();
 
-	COMBINE_DATA(&state->m_gdfs_tmapram[offset]);
-	tilemap_mark_tile_dirty(state->m_gdfs_tmap, offset);
+	COMBINE_DATA(&m_gdfs_tmapram[offset]);
+	m_gdfs_tmap->mark_tile_dirty(offset);
 }
 
-VIDEO_START( gdfs )
+VIDEO_START_MEMBER(ssv_state,gdfs)
 {
-	ssv_state *state = machine.driver_data<ssv_state>();
 
-	VIDEO_START_CALL(ssv);
+	ssv_state::video_start();
 
-	state->m_eaglshot_gfxram		=	auto_alloc_array(machine, UINT16, 4 * 0x100000 / 2);
 
-	machine.gfx[2]->color_granularity = 64; /* 256 colour sprites with palette selectable on 64 colour boundaries */
-	gfx_element_set_source(machine.gfx[2], (UINT8 *)state->m_eaglshot_gfxram);
+	m_gdfs_tmap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(ssv_state::get_tile_info_0),this), TILEMAP_SCAN_ROWS, 16,16, 0x100,0x100);
 
-	state->m_gdfs_tmap			=	tilemap_create(	machine, get_tile_info_0, tilemap_scan_rows,
-											 16,16, 0x100,0x100	);
-
-	tilemap_set_transparent_pen(state->m_gdfs_tmap, 0);
+	m_gdfs_tmap->set_transparent_pen(0);
 }
 
 /***************************************************************************
@@ -380,42 +371,40 @@ VIDEO_START( gdfs )
 
 ***************************************************************************/
 
-READ16_HANDLER( ssv_vblank_r )
+READ16_MEMBER(ssv_state::ssv_vblank_r)
 {
-	if (space->machine().primary_screen->vblank())
+	if (machine().primary_screen->vblank())
 		return 0x2000 | 0x1000;
 	else
 		return 0x0000;
 }
 
-WRITE16_HANDLER( ssv_scroll_w )
+WRITE16_MEMBER(ssv_state::ssv_scroll_w)
 {
-	ssv_state *state = space->machine().driver_data<ssv_state>();
 
-	COMBINE_DATA(state->m_scroll + offset);
+	COMBINE_DATA(m_scroll + offset);
 
 /*  offsets 60-7f: CRT Controller   */
 
 }
 
-WRITE16_HANDLER( paletteram16_xrgb_swap_word_w )
+WRITE16_MEMBER(ssv_state::paletteram16_xrgb_swap_word_w)
 {
-	ssv_state *state = space->machine().driver_data<ssv_state>();
 	int r, g, b;
 	UINT16 data0, data1;
 
-	COMBINE_DATA(state->m_paletteram + offset);
+	COMBINE_DATA(m_paletteram + offset);
 
 	offset &= ~1;
 
-	data0 = state->m_paletteram[offset + 1];
-	data1 = state->m_paletteram[offset];
+	data0 = m_paletteram[offset + 1];
+	data1 = m_paletteram[offset];
 
 	r = data0 & 0xff;
 	g = data1 >> 8;
 	b = data1 & 0xff;
 
-	palette_set_color(space->machine(), offset>>1, MAKE_RGB(r, g, b));
+	palette_set_color(machine(), offset>>1, MAKE_RGB(r, g, b));
 }
 
 /***************************************************************************
@@ -606,7 +595,7 @@ From the above some noteworthy cases are:
 
 /* Draw a tilemap sprite */
 
-static void draw_row(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, int sx, int sy, int scroll)
+static void draw_row(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, int sx, int sy, int scroll)
 {
 	ssv_state *state = machine.driver_data<ssv_state>();
 	UINT16 *spriteram16 = state->m_spriteram;
@@ -617,10 +606,10 @@ static void draw_row(running_machine &machine, bitmap_t *bitmap, const rectangle
 	int y, y1, sy1, flipy, ynum, ystart, yend, yinc;
 	UINT16 *s3;
 
-	xnum = 0x20;		// width in tiles (screen-wide)
-	ynum = 0x8;			// height in tiles (always 64 pixels?)
+	xnum = 0x20;        // width in tiles (screen-wide)
+	ynum = 0x8;         // height in tiles (always 64 pixels?)
 
-	scroll &= 0x7;		// scroll register index
+	scroll &= 0x7;      // scroll register index
 
 	/* Sign extend the position */
 	sx = 0;
@@ -628,30 +617,27 @@ static void draw_row(running_machine &machine, bitmap_t *bitmap, const rectangle
 
 	/* Set up a clipping region for the tilemap slice .. */
 
-	clip.min_x = sx;
-	clip.max_x = sx + xnum * 0x10 - 1;
-	clip.min_y = sy;
-	clip.max_y = sy + ynum * 0x8  - 1;
+	clip.set(sx, sx + xnum * 0x10 - 1, sy, sy + ynum * 0x8  - 1);
 
 	/* .. and clip it against the visible screen */
 
-	if (clip.min_x > cliprect->max_x)	return;
-	if (clip.min_y > cliprect->max_y)	return;
+	if (clip.min_x > cliprect.max_x)    return;
+	if (clip.min_y > cliprect.max_y)    return;
 
-	if (clip.max_x < cliprect->min_x)	return;
-	if (clip.max_y < cliprect->min_y)	return;
+	if (clip.max_x < cliprect.min_x)    return;
+	if (clip.max_y < cliprect.min_y)    return;
 
-	if (clip.min_x < cliprect->min_x)	clip.min_x = cliprect->min_x;
-	if (clip.max_x > cliprect->max_x)	clip.max_x = cliprect->max_x;
+	if (clip.min_x < cliprect.min_x)    clip.min_x = cliprect.min_x;
+	if (clip.max_x > cliprect.max_x)    clip.max_x = cliprect.max_x;
 
-	if (clip.min_y < cliprect->min_y)	clip.min_y = cliprect->min_y;
-	if (clip.max_y > cliprect->max_y)	clip.max_y = cliprect->max_y;
+	if (clip.min_y < cliprect.min_y)    clip.min_y = cliprect.min_y;
+	if (clip.max_y > cliprect.max_y)    clip.max_y = cliprect.max_y;
 
 	/* Get the scroll data */
-	x    = ssv_scroll[ scroll * 4 + 0 ];	// x scroll
-	y    = ssv_scroll[ scroll * 4 + 1 ];	// y scroll
+	x    = ssv_scroll[ scroll * 4 + 0 ];    // x scroll
+	y    = ssv_scroll[ scroll * 4 + 1 ];    // y scroll
 	//     ssv_scroll[ scroll * 4 + 2 ];    // ???
-	mode = ssv_scroll[ scroll * 4 + 3 ];	// layer disabled, shadow, depth etc.
+	mode = ssv_scroll[ scroll * 4 + 3 ];    // layer disabled, shadow, depth etc.
 
 	/* Background layer disabled */
 	if ((mode & 0xe000) == 0)
@@ -660,8 +646,8 @@ static void draw_row(running_machine &machine, bitmap_t *bitmap, const rectangle
 	shadow = (mode & 0x0800);
 
 	/* Decide the actual size of the tilemap */
-	size	=	1 << (8 + ((mode & 0xe000) >> 13));
-	page	=	(x & 0x7fff) / size;
+	size    =   1 << (8 + ((mode & 0xe000) >> 13));
+	page    =   (x & 0x7fff) / size;
 
 	/* Given a fixed scroll value, the portion of tilemap displayed changes with the sprite position */
 	x += sx;
@@ -687,17 +673,17 @@ static void draw_row(running_machine &machine, bitmap_t *bitmap, const rectangle
 		{
 			int tx, ty, gfx;
 
-			s3	=	&spriteram16[	page * (size * ((0x1000/0x200)/2))	+
-									((x & ((size -1) & ~0xf)) << 2)	+
-									((y & ((0x200-1) & ~0xf)) >> 3)		];
+			s3  =   &spriteram16[   page * (size * ((0x1000/0x200)/2))  +
+									((x & ((size -1) & ~0xf)) << 2) +
+									((y & ((0x200-1) & ~0xf)) >> 3)     ];
 
-			code	=	s3[0];	// code high bits
-			attr	=	s3[1];	// code low  bits + color
+			code    =   s3[0];  // code high bits
+			attr    =   s3[1];  // code low  bits + color
 
 			/* Code's high bits are scrambled */
-			code	+=	state->m_tile_code[(attr & 0x3c00)>>10];
-			flipy	=	(attr & 0x4000);
-			flipx	=	(attr & 0x8000);
+			code    +=  state->m_tile_code[(attr & 0x3c00)>>10];
+			flipy   =   (attr & 0x4000);
+			flipx   =   (attr & 0x8000);
 
 			if ((ssv_scroll[0x74/2] & 0x1000) && ((ssv_scroll[0x74/2] & 0x2000) == 0))
 			{
@@ -708,29 +694,29 @@ static void draw_row(running_machine &machine, bitmap_t *bitmap, const rectangle
 				if (flipy == 0) flipy = 1; else flipy = 0;
 			}
 
-			color	=	attr;
+			color   =   attr;
 
 			/* Select 256 or 64 color tiles */
-			gfx	=	((mode & 0x0100) ? 0 : 1);
+			gfx =   ((mode & 0x0100) ? 0 : 1);
 
 			/* Force 16x16 tiles ? */
-			if (flipx)	{ xstart = 1-1;  xend = -1; xinc = -1; }
-			else		{ xstart = 0;    xend = 1;  xinc = +1; }
+			if (flipx)  { xstart = 1-1;  xend = -1; xinc = -1; }
+			else        { xstart = 0;    xend = 1;  xinc = +1; }
 
-			if (flipy)	{ ystart = 2-1;  yend = -1; yinc = -1; }
-			else		{ ystart = 0;    yend = 2;  yinc = +1; }
+			if (flipy)  { ystart = 2-1;  yend = -1; yinc = -1; }
+			else        { ystart = 0;    yend = 2;  yinc = +1; }
 
 			/* Draw a tile (16x16) */
 			for (tx = xstart; tx != xend; tx += xinc)
 			{
 				for (ty = ystart; ty != yend; ty += yinc)
 				{
-					ssv_drawgfx( bitmap, &clip, machine.gfx[gfx],
+					ssv_drawgfx( bitmap, clip, machine.gfx[gfx],
 											code++,
 											color,
 											flipx, flipy,
 											sx + tx * 16, sy + ty * 8,
-											shadow	);
+											shadow  );
 				} /* ty */
 			} /* tx */
 
@@ -741,7 +727,7 @@ static void draw_row(running_machine &machine, bitmap_t *bitmap, const rectangle
 
 /* Draw the "background layer" using multiple tilemap sprites */
 
-static void draw_layer(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, int  nr)
+static void draw_layer(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, int  nr)
 {
 	int sy;
 	for ( sy = 0; sy <= machine.primary_screen->visible_area().max_y; sy += 0x40 )
@@ -750,16 +736,16 @@ static void draw_layer(running_machine &machine, bitmap_t *bitmap, const rectang
 
 /* Draw sprites in the sprites list */
 
-static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect)
+static void draw_sprites(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	/* Sprites list */
 	ssv_state *state = machine.driver_data<ssv_state>();
 	UINT16 *ssv_scroll = state->m_scroll;
 	UINT16 *spriteram16 = state->m_spriteram;
 
-	UINT16 *s1	=	spriteram16;
-	UINT16 *end1	=	spriteram16 + 0x02000/2;
-	UINT16 *end2	=	spriteram16 + 0x40000/2;
+	UINT16 *s1  =   spriteram16;
+	UINT16 *end1    =   spriteram16 + 0x02000/2;
+	UINT16 *end2    =   spriteram16 + 0x40000/2;
 	UINT16 *s2;
 
 	for ( ; s1 < end1; s1+=4 )
@@ -782,41 +768,41 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 		tilemaps_offsy = ((s2[3] & 0x1ff) - (s2[3] & 0x200));
 
 		/* Every single sprite is offset by x & yoffs, and additionally
-        by one of the 8 x & y offsets in the 1c0040-1c005f area   */
+		by one of the 8 x & y offsets in the 1c0040-1c005f area   */
 
-		xoffs	+=		ssv_scroll[((mode & 0x00e0) >> 4) + 0x40/2];
-		yoffs	+=		ssv_scroll[((mode & 0x00e0) >> 4) + 0x42/2];
+		xoffs   +=      ssv_scroll[((mode & 0x00e0) >> 4) + 0x40/2];
+		yoffs   +=      ssv_scroll[((mode & 0x00e0) >> 4) + 0x42/2];
 
 		/* Number of single-sprites (1-32) */
-		num				=	(mode & 0x001f) + 1;
-		global_ynum		=	(mode & 0x0300) << 2;
-		global_xnum		=	(mode & 0x0c00);
-		global_depth	=	(mode & 0xf000);
+		num             =   (mode & 0x001f) + 1;
+		global_ynum     =   (mode & 0x0300) << 2;
+		global_xnum     =   (mode & 0x0c00);
+		global_depth    =   (mode & 0xf000);
 
 		for( ; num > 0; num--,s2+=4 )
 		{
 			int depth, local_depth, local_xnum, local_ynum;
 
-			if (s2 >= end2)	break;
+			if (s2 >= end2) break;
 
-			sx		=		s2[ 2 ];
-			sy		=		s2[ 3 ];
+			sx      =       s2[ 2 ];
+			sy      =       s2[ 3 ];
 
-			local_depth		=	sx & 0xf000;
-			local_xnum		=	sx & 0x0c00;
-			local_ynum		=	sy & 0x0c00;
+			local_depth     =   sx & 0xf000;
+			local_xnum      =   sx & 0x0c00;
+			local_ynum      =   sy & 0x0c00;
 
 			if (ssv_scroll[0x76/2] & 0x4000)
 			{
-				xnum	=	local_xnum;
-				ynum	=	local_ynum;
-				depth	=	local_depth;
+				xnum    =   local_xnum;
+				ynum    =   local_ynum;
+				depth   =   local_depth;
 			}
 			else
 			{
-				xnum	=	global_xnum;
-				ynum	=	global_ynum;
-				depth	=	global_depth;
+				xnum    =   global_xnum;
+				ynum    =   global_ynum;
+				depth   =   global_depth;
 			}
 
 			if ( s2[0] <= 7 && s2[1] == 0 && xnum == 0 && ynum == 0x0c00)
@@ -824,17 +810,17 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 				// Tilemap Sprite
 				int scroll;
 
-				scroll	=	s2[ 0 ];	// scroll index
+				scroll  =   s2[ 0 ];    // scroll index
 
 				if (ssv_scroll[0x76/2] & 0x1000)
-					sy -= 0x20;						// eaglshot
+					sy -= 0x20;                     // eaglshot
 				else
 				{
 					if (ssv_scroll[0x7a/2] & 0x0800)
 					{
-						if (ssv_scroll[0x7a/2] & 0x1000)	// drifto94, dynagear, keithlcy, mslider, stmblade, gdfs, ultrax, twineag2
+						if (ssv_scroll[0x7a/2] & 0x1000)    // drifto94, dynagear, keithlcy, mslider, stmblade, gdfs, ultrax, twineag2
 							sy -= tilemaps_offsy;
-						else						// srmp4
+						else                        // srmp4
 							sy += tilemaps_offsy;
 					}
 				}
@@ -855,15 +841,15 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 */
 
 				int shadow, gfx;
-				if (s2 >= end2)	break;
+				if (s2 >= end2) break;
 
-				code	=	s2[0];	// code high bits
-				attr	=	s2[1];	// code low  bits + color
+				code    =   s2[0];  // code high bits
+				attr    =   s2[1];  // code low  bits + color
 
 				/* Code's high bits are scrambled */
-				code	+=	state->m_tile_code[(attr & 0x3c00)>>10];
-				flipy	=	(attr & 0x4000);
-				flipx	=	(attr & 0x8000);
+				code    +=  state->m_tile_code[(attr & 0x3c00)>>10];
+				flipy   =   (attr & 0x4000);
+				flipx   =   (attr & 0x8000);
 
 				if ((ssv_scroll[0x74/2] & 0x1000) && ((ssv_scroll[0x74/2] & 0x2000) == 0))
 				{
@@ -874,29 +860,29 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 					if (flipy == 0) flipy = 1; else flipy = 0;
 				}
 
-				color	=	attr;
+				color   =   attr;
 
 				/* Select 256 or 64 color tiles */
-				gfx		=	(depth & 0x1000) ? 0 : 1;
-				shadow	=	(depth & 0x8000);
+				gfx     =   (depth & 0x1000) ? 0 : 1;
+				shadow  =   (depth & 0x8000);
 
 				/* Single-sprite tile size */
-				xnum = 1 << (xnum >> 10);	// 1, 2, 4 or 8 tiles
-				ynum = 1 << (ynum >> 10);	// 1, 2, 4 tiles (8 means tilemap sprite?)
+				xnum = 1 << (xnum >> 10);   // 1, 2, 4 or 8 tiles
+				ynum = 1 << (ynum >> 10);   // 1, 2, 4 tiles (8 means tilemap sprite?)
 
-				if (flipx)	{ xstart = xnum-1;  xend = -1;    xinc = -1; }
-				else		{ xstart = 0;       xend = xnum;  xinc = +1; }
+				if (flipx)  { xstart = xnum-1;  xend = -1;    xinc = -1; }
+				else        { xstart = 0;       xend = xnum;  xinc = +1; }
 
-				if (flipy)	{ ystart = ynum-1;  yend = -1;    yinc = -1; }
-				else		{ ystart = 0;       yend = ynum;  yinc = +1; }
+				if (flipy)  { ystart = ynum-1;  yend = -1;    yinc = -1; }
+				else        { ystart = 0;       yend = ynum;  yinc = +1; }
 
 				/* Apply global offsets */
-				sx	+=	xoffs;
-				sy	+=	yoffs;
+				sx  +=  xoffs;
+				sy  +=  yoffs;
 
 				/* Sign extend the position */
-				sx	=	(sx & 0x1ff) - (sx & 0x200);
-				sy	=	(sy & 0x1ff) - (sy & 0x200);
+				sx  =   (sx & 0x1ff) - (sx & 0x200);
+				sy  =   (sy & 0x1ff) - (sy & 0x200);
 
 				sprites_offsx =  ((ssv_scroll[0x74/2] & 0x7f) - (ssv_scroll[0x74/2] & 0x80));
 
@@ -906,9 +892,9 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 				{
 					sy = -sy;
 					if (ssv_scroll[0x74/2] & 0x8000)
-						sy += 0x00;			//
+						sy += 0x00;         //
 					else
-						sy -= 0x10;			// vasara (hack)
+						sy -= 0x10;         // vasara (hack)
 				}
 
 				if (ssv_scroll[0x74/2] & 0x1000) // flipscreen x
@@ -921,20 +907,20 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 				if (ssv_scroll[0x7a/2] == 0x7140)
 				{
 					// srmp7
-					sx	=	sprites_offsx + sx;
-					sy	=	sprites_offsy - sy;
+					sx  =   sprites_offsx + sx;
+					sy  =   sprites_offsy - sy;
 				}
 				else if (ssv_scroll[0x7a/2] & 0x0800)
 				{
 					// dynagear, drifto94, eaglshot, keithlcy, mslider, srmp4, stmblade, twineag2, ultrax
-					sx	=	sprites_offsx + sx - (xnum * 8)    ;
-					sy	=	sprites_offsy - sy - (ynum * 8) / 2;
+					sx  =   sprites_offsx + sx - (xnum * 8)    ;
+					sy  =   sprites_offsy - sy - (ynum * 8) / 2;
 				}
 				else
 				{
 					// hypreact, hypreac2, janjans1, meosism, ryorioh, survarts, sxyreact, sxyreac2, vasara, vasara2
-					sx	=	sprites_offsx + sx;
-					sy	=	sprites_offsy - sy - (ynum * 8);
+					sx  =   sprites_offsx + sx;
+					sy  =   sprites_offsy - sy - (ynum * 8);
 				}
 
 
@@ -961,18 +947,18 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 				}
 
 				#ifdef MAME_DEBUG
-				if (input_code_pressed(machine, KEYCODE_Z))	/* Display some info on each sprite */
-				{	char buf[30];
+				if (machine.input().code_pressed(KEYCODE_Z))    /* Display some info on each sprite */
+				{   char buf[30];
 					sprintf(buf, "%02X",/*(s2[2] & ~0x3ff)>>8*/mode>>8);
 					ui_draw_text(&machine.render().ui_container(), buf, sx, sy);
 				}
 				#endif
 
-			}		/* sprite type */
+			}       /* sprite type */
 
-		}	/* single-sprites */
+		}   /* single-sprites */
 
-	}	/* sprites list */
+	}   /* sprites list */
 }
 
 
@@ -984,200 +970,22 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 
 ***************************************************************************/
 
-SCREEN_UPDATE( eaglshot )
+UINT32 ssv_state::screen_update_eaglshot(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	return SCREEN_UPDATE_CALL(ssv);
+	return screen_update_ssv(screen, bitmap, cliprect);
 }
 
-/*
-    Sprites RAM is 0x80000 bytes long. The first 0x2000? bytes hold a list
-    of sprites to display (the list can be made shorter using an end-of-list
-    marker).
-
-    Each entry in the list (16 bytes) is a multi-sprite (e.g it tells the
-    hardware to display several single-sprites).
-
-    The list looks like this:
-
-    Offset:     Bits:                   Value:
-
-        0.h     fedc ba-- ---- ----
-                ---- --98 7654 3210     X displacement
-
-        2.h     fedc ba-- ---- ----
-                ---- --98 7654 3210     Y displacement
-
-        4.h     f--- ---- ---- ----     List end
-                -edc ba98 7654 3210     Offset of the single-sprite(s) data
-
-        0.h                             Number of single-sprites (how many bits?)
-
-    A single-sprite is:
-
-    Offset:     Bits:                   Value:
-
-        0.h                             Code
-
-        2.h     f--- ---- ---- ----     Flip X
-                -e-- ---- ---- ----     Flip Y
-                ---- -a-- ---- ----     0 = 256 color steps, 1 = 64 color steps
-                ---- --98 7654 3210     Color code
-
-        4.h     fedc ba-- ---- ----
-                ---- --98 7654 3210     X displacement
-
-        6.h     fedc ba-- ---- ----
-                ---- --98 7654 3210     Y displacement
-
-        8.h     fedc ba98 ---- ----     Y Size
-                ---- ---- 7654 3210     X Size
-
-        A.h     fedc ba98 ---- ----
-                ---- ---- 7654 ----     Priority
-                ---- ---- ---- 32--     Y Tiles (1,2,4,8)
-                ---- ---- ---- --10     X Tiles (1,2,4,8)
-
-        C.h                             Unused
-
-        E.h                             Unused
-
-*/
-static void gdfs_draw_zooming_sprites(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, int priority)
+UINT32 ssv_state::screen_update_gdfs(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	/* Sprites list */
 
-	ssv_state *state = machine.driver_data<ssv_state>();
-	UINT16 *spriteram16_2 = state->m_spriteram2;
-	UINT16 *s1	=	spriteram16_2;
-	UINT16 *end1	=	spriteram16_2 + 0x02000/2;
-	UINT16 *s2;
+	screen_update_ssv(screen, bitmap, cliprect);
 
-	priority <<= 4;
+	// draw zooming sprites
+	m_gdfs_st0020->st0020_draw_all(machine(), bitmap, cliprect);
 
-	for ( ; s1 < end1; s1+=8/2 )
-	{
-		int attr, code, color, num, sprite, zoom, size;
-		int sx, x, xoffs, flipx, xnum, xstart, xend, xinc, xdim, xscale;
-		int sy, y, yoffs, flipy, ynum, ystart, yend, yinc, ydim, yscale;
-
-		xoffs	=		s1[ 0 ];
-		yoffs	=		s1[ 1 ];
-		sprite	=		s1[ 2 ];
-		num		=		s1[ 3 ] % 0x101;
-
-		/* Last sprite */
-		if (sprite & 0x8000) break;
-
-		/* Single-sprite address */
-		s2		=		&spriteram16_2[ (sprite & 0x7fff) * 16/2 ];
-
-		for( ; num > 0; num--,s2+=16/2 )
-		{
-			code	=	s2[ 0 ];
-			attr	=	s2[ 1 ];
-			sx		=	s2[ 2 ];
-			sy		=	s2[ 3 ];
-			zoom	=	s2[ 4 ];
-			size	=	s2[ 5 ];
-
-			if (priority != (size & 0xf0))
-				break;
-
-			flipx	=	(attr & 0x8000);
-			flipy	=	(attr & 0x4000);
-
-/*
-            if ((ssv_scroll[0x74/2] & 0x1000) && ((ssv_scroll[0x74/2] & 0x2000) == 0))
-            {
-                if (flipx == 0) flipx = 1; else flipx = 0;
-            }
-            if ((ssv_scroll[0x74/2] & 0x4000) && ((ssv_scroll[0x74/2] & 0x2000) == 0))
-            {
-                if (flipy == 0) flipy = 1; else flipy = 0;
-            }
-*/
-
-			color	=	(attr & 0x0400) ? attr : attr * 4;
-
-			/* Single-sprite tile size */
-			xnum = 1 << ((size >> 0) & 3);
-			ynum = 1 << ((size >> 2) & 3);
-
-			xnum = (xnum + 1) / 2;
-
-			if (flipx)	{ xstart = xnum-1;  xend = -1;    xinc = -1; }
-			else		{ xstart = 0;       xend = xnum;  xinc = +1; }
-
-			if (flipy)	{ ystart = ynum-1;  yend = -1;    yinc = -1; }
-			else		{ ystart = 0;       yend = ynum;  yinc = +1; }
-
-			/* Apply global offsets */
-			sx	+=	xoffs;
-			sy	+=	yoffs;
-
-			/* Sign extend the position */
-			sx	=	(sx & 0x1ff) - (sx & 0x200);
-			sy	=	(sy & 0x1ff) - (sy & 0x200);
-
-			sy	=	-sy;
-
-			/* Use fixed point values (16.16), for accuracy */
-			sx <<= 16;
-			sy <<= 16;
-
-			xdim	=	( ( ((zoom >> 0) & 0xff) + 1) << 16 ) / xnum;
-			ydim	=	( ( ((zoom >> 8) & 0xff) + 1) << 16 ) / ynum;
-
-			xscale	=	xdim / 16;
-			yscale	=	ydim / 8;
-
-			/* Let's approximate to the nearest greater integer value
-               to avoid holes in between tiles */
-			if (xscale & 0xffff)	xscale += (1<<16) / 16;
-			if (yscale & 0xffff)	yscale += (1<<16) / 8;
-
-			/* Draw the tiles */
-
-			for (x = xstart; x != xend; x += xinc)
-			{
-				for (y = ystart; y != yend; y += yinc)
-				{
-					drawgfxzoom_transpen( bitmap, cliprect, machine.gfx[2],
-									code++,
-									color,
-									flipx, flipy,
-									(sx + x * xdim) / 0x10000, (sy + y * ydim) / 0x10000,
-									xscale, yscale, 0
-					);
-				}
-			}
-
-			#ifdef MAME_DEBUG
-			if (input_code_pressed(machine, KEYCODE_Z))	/* Display some info on each sprite */
-			{
-				char buf[10];
-				sprintf(buf, "%X",size);
-				ui_draw_text(&machine.render().ui_container(), buf, sx / 0x10000, sy / 0x10000);
-			}
-			#endif
-		}	/* single-sprites */
-
-	}	/* sprites list */
-}
-
-SCREEN_UPDATE( gdfs )
-{
-	ssv_state *state = screen->machine().driver_data<ssv_state>();
-	int pri;
-
-	SCREEN_UPDATE_CALL(ssv);
-
-	for (pri = 0; pri <= 0xf; pri++)
-		gdfs_draw_zooming_sprites(screen->machine(), bitmap, cliprect, pri);
-
-	tilemap_set_scrollx(state->m_gdfs_tmap, 0, state->m_gdfs_tmapscroll[0x0c/2]);
-	tilemap_set_scrolly(state->m_gdfs_tmap, 0, state->m_gdfs_tmapscroll[0x10/2]);
-	tilemap_draw(bitmap,cliprect, state->m_gdfs_tmap, 0, 0);
+	m_gdfs_tmap->set_scrollx(0, m_gdfs_tmapscroll[0x0c/2]);
+	m_gdfs_tmap->set_scrolly(0, m_gdfs_tmapscroll[0x10/2]);
+	m_gdfs_tmap->draw(bitmap, cliprect, 0, 0);
 
 	return 0;
 }
@@ -1189,52 +997,51 @@ void ssv_enable_video(running_machine &machine, int enable)
 	state->m_enable_video = enable;
 }
 
-SCREEN_UPDATE( ssv )
+UINT32 ssv_state::screen_update_ssv(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	rectangle clip = { 0, 0, 0, 0 };
+	rectangle clip;
 
-	ssv_state *state = screen->machine().driver_data<ssv_state>();
 
 	// Shadow
-	if (state->m_scroll[0x76/2] & 0x0080)
+	if (m_scroll[0x76/2] & 0x0080)
 	{
 		// 4 bit shadows (mslider, stmblade)
-		state->m_shadow_pen_shift = 15-4;
+		m_shadow_pen_shift = 15-4;
 	}
 	else
 	{
 		// 2 bit shadows
-		state->m_shadow_pen_shift = 15-2;
+		m_shadow_pen_shift = 15-2;
 	}
-	state->m_shadow_pen_mask = (1 << state->m_shadow_pen_shift) - 1;
+	m_shadow_pen_mask = (1 << m_shadow_pen_shift) - 1;
 
 	/* The background color is the first one in the palette */
-	bitmap_fill(bitmap,cliprect, 0);
+	bitmap.fill(0, cliprect);
 
 	// used by twineag2 and ultrax
-	clip.min_x = (cliprect->max_x / 2 + state->m_scroll[0x62/2]) * 2 - state->m_scroll[0x64/2] * 2 + 2;
-	clip.max_x = (cliprect->max_x / 2 + state->m_scroll[0x62/2]) * 2 - state->m_scroll[0x62/2] * 2 + 1;
-	clip.min_y = (cliprect->max_y     + state->m_scroll[0x6a/2])     - state->m_scroll[0x6c/2]     + 1;
-	clip.max_y = (cliprect->max_y     + state->m_scroll[0x6a/2])     - state->m_scroll[0x6a/2]        ;
+	clip.min_x = (cliprect.max_x / 2 + m_scroll[0x62/2]) * 2 - m_scroll[0x64/2] * 2 + 2;
+	clip.max_x = (cliprect.max_x / 2 + m_scroll[0x62/2]) * 2 - m_scroll[0x62/2] * 2 + 1;
+	clip.min_y = (cliprect.max_y     + m_scroll[0x6a/2])     - m_scroll[0x6c/2]     + 1;
+	clip.max_y = (cliprect.max_y     + m_scroll[0x6a/2])     - m_scroll[0x6a/2]        ;
 
 //  printf("%04x %04x %04x %04x\n",clip.min_x, clip.max_x, clip.min_y, clip.max_y);
 
 	if (clip.min_x < 0) clip.min_x = 0;
 	if (clip.min_y < 0) clip.min_y = 0;
-	if (clip.max_x > cliprect->max_x) clip.max_x = cliprect->max_x;
-	if (clip.max_y > cliprect->max_y) clip.max_y = cliprect->max_y;
+	if (clip.max_x > cliprect.max_x) clip.max_x = cliprect.max_x;
+	if (clip.max_y > cliprect.max_y) clip.max_y = cliprect.max_y;
 
 	if (clip.min_x > clip.max_x)
 		clip.min_x = clip.max_x;
 	if (clip.min_y > clip.max_y)
 		clip.min_y = clip.max_y;
 
-	if (!state->m_enable_video)
+	if (!m_enable_video)
 		return 0;
 
-	draw_layer(screen->machine(), bitmap, &clip, 0);	// "background layer"
+	draw_layer(machine(), bitmap, clip, 0); // "background layer"
 
-	draw_sprites(screen->machine(), bitmap, &clip);	// sprites list
+	draw_sprites(machine(), bitmap, clip);  // sprites list
 
 
 	return 0;

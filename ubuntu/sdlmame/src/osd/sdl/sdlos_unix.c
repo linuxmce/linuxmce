@@ -16,8 +16,7 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 
-#include <SDL/SDL.h>
-#include <SDL/SDL_syswm.h>
+#include "sdlinc.h"
 
 // MAME headers
 #include "osdcore.h"
@@ -68,7 +67,7 @@ void osd_sleep(osd_ticks_t duration)
 //  osd_num_processors
 //============================================================
 
-int osd_num_processors(void)
+int osd_get_num_processors(void)
 {
 	int processors = 1;
 
@@ -83,6 +82,20 @@ int osd_num_processors(void)
 //============================================================
 
 void *osd_malloc(size_t size)
+{
+#ifndef MALLOC_DEBUG
+	return malloc(size);
+#else
+#error "MALLOC_DEBUG not yet supported"
+#endif
+}
+
+
+//============================================================
+//  osd_malloc_array
+//============================================================
+
+void *osd_malloc_array(size_t size)
 {
 #ifndef MALLOC_DEBUG
 	return malloc(size);
@@ -124,7 +137,27 @@ int osd_setenv(const char *name, const char *value, int overwrite)
 	return setenv(name, value, overwrite);
 }
 
-#if defined(SDL_VIDEO_DRIVER_X11) && defined(SDLMAME_X11)
+#if (SDLMAME_SDL2)
+
+//============================================================
+//  osd_get_clipboard_text
+//============================================================
+
+char *osd_get_clipboard_text(void)
+{
+	char *result = NULL;
+
+	if (SDL_HasClipboardText())
+	{
+		char *temp = SDL_GetClipboardText();
+		result = (char *) osd_malloc_array(strlen(temp) + 1);
+		strcpy(result, temp);
+		SDL_free(temp);
+	}
+	return result;
+}
+
+#elif defined(SDL_VIDEO_DRIVER_X11) && defined(SDLMAME_X11)
 
 //============================================================
 //  osd_get_clipboard_text
@@ -153,17 +186,11 @@ char *osd_get_clipboard_text(void)
 		return NULL;
 	if ( info.subsystem != SDL_SYSWM_X11 )
 		return NULL;
-#if (SDL_VERSION_ATLEAST(1,3,0))
 	if ( (display = info.info.x11.display) == NULL )
 		return NULL;
 	if ( (our_win = info.info.x11.window) == None )
 		return NULL;
-#else
-	if ( (display = info.info.x11.display) == NULL )
-		return NULL;
-	if ( (our_win = info.info.x11.window) == None )
-		return NULL;
-#endif
+
 	/* request data to owner */
 	selection_win = XGetSelectionOwner( display, XA_PRIMARY );
 	if ( selection_win == None )
@@ -193,8 +220,8 @@ char *osd_get_clipboard_text(void)
 
 		/* get property & check its type */
 		if ( XGetWindowProperty( display, our_win, types[i], 0, 65536, False, types[i],
-					 &data_type, &data_format, &nitems, &bytes_remaining, &prop )
-		     != Success )
+						&data_type, &data_format, &nitems, &bytes_remaining, &prop )
+				!= Success )
 			continue;
 		if ( ! prop )
 			continue;
@@ -207,7 +234,7 @@ char *osd_get_clipboard_text(void)
 		/* return a copy & free original */
 		if (prop != NULL)
 		{
-			result = (char *) osd_malloc(strlen((char *)prop)+1);
+			result = (char *) osd_malloc_array(strlen((char *)prop)+1);
 			strcpy(result, (char *)prop);
 		}
 		else
@@ -256,7 +283,7 @@ osd_directory_entry *osd_stat(const char *path)
 
 	// create an osd_directory_entry; be sure to make sure that the caller can
 	// free all resources by just freeing the resulting osd_directory_entry
-	result = (osd_directory_entry *) osd_malloc(sizeof(*result) + strlen(path) + 1);
+	result = (osd_directory_entry *) osd_malloc_array(sizeof(*result) + strlen(path) + 1);
 	strcpy(((char *) result) + sizeof(*result), path);
 	result->name = ((char *) result) + sizeof(*result);
 	result->type = S_ISDIR(st.st_mode) ? ENTTYPE_DIR : ENTTYPE_FILE;
@@ -273,6 +300,15 @@ const char *osd_get_volume_name(int idx)
 {
 	if (idx!=0) return NULL;
 	return "/";
+}
+
+//============================================================
+//  osd_get_slider_list
+//============================================================
+
+const void *osd_get_slider_list()
+{
+	return NULL;
 }
 
 //============================================================
@@ -293,7 +329,7 @@ file_error osd_get_full_path(char **dst, const char *path)
 	}
 	else
 	{
-		*dst = (char *)osd_malloc(strlen(path_buffer)+strlen(path)+3);
+		*dst = (char *)osd_malloc_array(strlen(path_buffer)+strlen(path)+3);
 
 		// if it's already a full path, just pass it through
 		if (path[0] == '/')

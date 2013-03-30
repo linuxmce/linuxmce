@@ -4,28 +4,30 @@
 
   Written by Mathis Rosenhauer
 
+  TODO:
+  - what's really wrong with the sound? Any reference available?
+
 */
 
 #include "emu.h"
-#include "deprecat.h"
 #include "machine/6522via.h"
 #include "cpu/m6809/m6809.h"
 #include "sound/dac.h"
 #include "includes/beezer.h"
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0xbfff) AM_RAM AM_BASE_MEMBER(beezer_state, m_videoram)
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, beezer_state )
+	AM_RANGE(0x0000, 0xbfff) AM_RAM AM_SHARE("videoram")
 	AM_RANGE(0xc000, 0xcfff) AM_ROMBANK("bank1")
 	AM_RANGE(0xd000, 0xdfff) AM_ROM AM_WRITE(beezer_bankswitch_w) // ROM at G1, bankswitch
 	AM_RANGE(0xe000, 0xffff) AM_ROM // ROMS at G3, G5
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, beezer_state )
 	AM_RANGE(0x0000, 0x07ff) AM_RAM // RAM at 0D
 	AM_RANGE(0x0800, 0x0fff) AM_RAM // optional RAM at 2D (can be rom here instead)
-	AM_RANGE(0x1000, 0x1007) AM_MIRROR(0x07F8) AM_DEVREADWRITE("custom", beezer_sh6840_r, beezer_sh6840_w)
-	AM_RANGE(0x1800, 0x180F) AM_MIRROR(0x07F0) AM_DEVREADWRITE_MODERN("via6522_1", via6522_device, read, write)
-	AM_RANGE(0x8000, 0x8003) AM_MIRROR(0x1FFC) AM_DEVWRITE("custom", beezer_sfxctrl_w)
+	AM_RANGE(0x1000, 0x1007) AM_MIRROR(0x07f8) AM_DEVREADWRITE_LEGACY("custom", beezer_sh6840_r, beezer_sh6840_w)
+	AM_RANGE(0x1800, 0x180F) AM_MIRROR(0x07f0) AM_DEVREADWRITE("via6522_1", via6522_device, read, write)
+	AM_RANGE(0x8000, 0x8003) AM_MIRROR(0x1ffc) AM_DEVWRITE_LEGACY("custom", beezer_sfxctrl_w)
 	//AM_RANGE(0xa000, 0xbfff) AM_ROM // ROM at 2D (can be ram here instead), unpopulated
 	//AM_RANGE(0xc000, 0xdfff) AM_ROM // ROM at 4D, unpopulated
 	AM_RANGE(0xe000, 0xffff) AM_ROM // ROM at 6D
@@ -53,34 +55,40 @@ static INPUT_PORTS_START( beezer )
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("DSWB")
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coinage ) )		PORT_DIPLOCATION("SWB:1,2")
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coinage ) )      PORT_DIPLOCATION("SWB:1,2")
 	PORT_DIPSETTING(    0x02, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x03, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
-	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Lives ) )		PORT_DIPLOCATION("SWB:3")
+	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Lives ) )        PORT_DIPLOCATION("SWB:3")
 	PORT_DIPSETTING(    0x04, "3" )
 	PORT_DIPSETTING(    0x00, "4" )
-	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Demo_Sounds ) )	PORT_DIPLOCATION("SWB:4")
+	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SWB:4")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( On ) )
-	PORT_DIPNAME( 0x30, 0x10, DEF_STR( Bonus_Life ) )	PORT_DIPLOCATION("SWB:5,6")
+	PORT_DIPNAME( 0x30, 0x10, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION("SWB:5,6")
 	PORT_DIPSETTING(    0x20, "30000" )
 	PORT_DIPSETTING(    0x10, "60000" )
 	PORT_DIPSETTING(    0x00, "90000" )
 	PORT_DIPSETTING(    0x30, DEF_STR( No ) )
-	PORT_DIPNAME( 0xc0, 0xc0, DEF_STR( Difficulty ) )	PORT_DIPLOCATION("SWB:7,8")
+	PORT_DIPNAME( 0xc0, 0xc0, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("SWB:7,8")
 	PORT_DIPSETTING(    0xc0, DEF_STR( Easy ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( Medium ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( Hard ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) )
 INPUT_PORTS_END
 
+void beezer_state::machine_start()
+{
+
+	m_maincpu = machine().device<cpu_device>("maincpu");
+}
+
 static MACHINE_CONFIG_START( beezer, beezer_state )
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6809, 1000000)        /* 1 MHz */
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT_HACK(beezer_interrupt,128)
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("scantimer", beezer_state, beezer_interrupt, "screen", 0, 1)
 
 	MCFG_CPU_ADD("audiocpu", M6809, 1000000)        /* 1 MHz */
 	MCFG_CPU_PROGRAM_MAP(sound_map)
@@ -89,17 +97,17 @@ static MACHINE_CONFIG_START( beezer, beezer_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
-	MCFG_SCREEN_SIZE(256, 384)
-	MCFG_SCREEN_VISIBLE_AREA(0, 256-1, 16, 303)
-	MCFG_SCREEN_UPDATE(beezer)
+	MCFG_SCREEN_SIZE(384, 256)
+	MCFG_SCREEN_VISIBLE_AREA(16, 304-1, 0, 240-1) // 288 x 240, correct?
+	MCFG_SCREEN_UPDATE_DRIVER(beezer_state, screen_update_beezer)
 
 	MCFG_PALETTE_LENGTH(16)
+
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	//MCFG_SOUND_ADD("dac", DAC, 0)
+	//MCFG_DAC_ADD("dac")
 	//MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 	MCFG_SOUND_ADD("custom", BEEZER, 0)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.00)
@@ -159,5 +167,5 @@ ROM_START( beezer1 )
 	ROM_LOAD( "e1.cpu", 0x100, 0x0100, CRC(3c775c5e) SHA1(ac86f45938c0c9d5fec1245bf86718442baf445b) )
 ROM_END
 
-GAME( 1982, beezer,  0,      beezer, beezer, beezer, ORIENTATION_FLIP_X, "Tong Electronic", "Beezer (set 1)", GAME_IMPERFECT_SOUND )
-GAME( 1982, beezer1, beezer, beezer, beezer, beezer, ORIENTATION_FLIP_X, "Tong Electronic", "Beezer (set 2)", GAME_IMPERFECT_SOUND )
+GAME( 1982, beezer,  0,      beezer, beezer, beezer_state, beezer, ROT90, "Tong Electronic", "Beezer (set 1)", GAME_IMPERFECT_SOUND )
+GAME( 1982, beezer1, beezer, beezer, beezer, beezer_state, beezer, ROT90, "Tong Electronic", "Beezer (set 2)", GAME_IMPERFECT_SOUND )

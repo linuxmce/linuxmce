@@ -1,28 +1,41 @@
+/***************************************************************************
+
+    Burger Time hardware
+
+***************************************************************************/
 
 class btime_state : public driver_device
 {
 public:
-	btime_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	btime_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+		m_rambase(*this, "rambase"),
+		m_videoram(*this, "videoram"),
+		m_colorram(*this, "colorram"),
+		m_paletteram(*this, "paletteram"),
+		m_bnj_backgroundram(*this, "bnj_bgram"),
+		m_zoar_scrollram(*this, "zoar_scrollram"),
+		m_lnc_charbank(*this, "lnc_charbank"),
+		m_deco_charram(*this, "deco_charram"),
+		m_spriteram(*this, "spriteram"),
+		m_audio_rambase(*this, "audio_rambase")
+	{ }
 
 	/* memory pointers */
-	UINT8 *  m_videoram;
-	UINT8 *  m_colorram;
-//  UINT8 *  m_paletteram;    // currently this uses generic palette handling
-	UINT8 *  m_lnc_charbank;
-	UINT8 *  m_bnj_backgroundram;
-	UINT8 *  m_zoar_scrollram;
-	UINT8 *  m_deco_charram;
-	UINT8 *  m_spriteram;	// used by disco
+	optional_shared_ptr<UINT8> m_rambase;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_colorram;
+	optional_shared_ptr<UINT8> m_paletteram;
+	optional_shared_ptr<UINT8> m_bnj_backgroundram;
+	optional_shared_ptr<UINT8> m_zoar_scrollram;
+	optional_shared_ptr<UINT8> m_lnc_charbank;
+	optional_shared_ptr<UINT8> m_deco_charram;
+	optional_shared_ptr<UINT8> m_spriteram;     // used by disco
 //  UINT8 *  m_decrypted;
-	UINT8 *  m_rambase;
-	UINT8 *  m_audio_rambase;
-	size_t   m_videoram_size;
-	size_t   m_spriteram_size;
-	size_t   m_bnj_backgroundram_size;
+	optional_shared_ptr<UINT8> m_audio_rambase;
 
 	/* video-related */
-	bitmap_t *m_background_bitmap;
+	bitmap_ind16 *m_background_bitmap;
 	UINT8    m_btime_palette;
 	UINT8    m_bnj_scroll1;
 	UINT8    m_bnj_scroll2;
@@ -40,46 +53,67 @@ public:
 	int      m_protection_ret;
 
 	/* devices */
-	device_t *m_maincpu;
-	device_t *m_audiocpu;
+	cpu_device *m_maincpu;
+	cpu_device *m_audiocpu;
+
+	DECLARE_WRITE8_MEMBER(audio_nmi_enable_w);
+	DECLARE_WRITE8_MEMBER(lnc_w);
+	DECLARE_WRITE8_MEMBER(mmonkey_w);
+	DECLARE_WRITE8_MEMBER(btime_w);
+	DECLARE_WRITE8_MEMBER(tisland_w);
+	DECLARE_WRITE8_MEMBER(zoar_w);
+	DECLARE_WRITE8_MEMBER(disco_w);
+	DECLARE_WRITE8_MEMBER(audio_command_w);
+	DECLARE_READ8_MEMBER(audio_command_r);
+	DECLARE_READ8_MEMBER(zoar_dsw1_read);
+	DECLARE_READ8_MEMBER(wtennis_reset_hack_r);
+	DECLARE_READ8_MEMBER(mmonkey_protection_r);
+	DECLARE_WRITE8_MEMBER(mmonkey_protection_w);
+	DECLARE_WRITE8_MEMBER(btime_paletteram_w);
+	DECLARE_WRITE8_MEMBER(lnc_videoram_w);
+	DECLARE_READ8_MEMBER(btime_mirrorvideoram_r);
+	DECLARE_READ8_MEMBER(btime_mirrorcolorram_r);
+	DECLARE_WRITE8_MEMBER(btime_mirrorvideoram_w);
+	DECLARE_WRITE8_MEMBER(lnc_mirrorvideoram_w);
+	DECLARE_WRITE8_MEMBER(btime_mirrorcolorram_w);
+	DECLARE_WRITE8_MEMBER(deco_charram_w);
+	DECLARE_WRITE8_MEMBER(bnj_background_w);
+	DECLARE_WRITE8_MEMBER(bnj_scroll1_w);
+	DECLARE_WRITE8_MEMBER(bnj_scroll2_w);
+	DECLARE_WRITE8_MEMBER(btime_video_control_w);
+	DECLARE_WRITE8_MEMBER(bnj_video_control_w);
+	DECLARE_WRITE8_MEMBER(zoar_video_control_w);
+	DECLARE_WRITE8_MEMBER(disco_video_control_w);
+	DECLARE_INPUT_CHANGED_MEMBER(coin_inserted_irq_hi);
+	DECLARE_INPUT_CHANGED_MEMBER(coin_inserted_irq_lo);
+	DECLARE_INPUT_CHANGED_MEMBER(coin_inserted_nmi_lo);
+	DECLARE_WRITE8_MEMBER(ay_audio_nmi_enable_w);
+
+	DECLARE_DRIVER_INIT(btime);
+	DECLARE_DRIVER_INIT(tisland);
+	DECLARE_DRIVER_INIT(cookrace);
+	DECLARE_DRIVER_INIT(zoar);
+	DECLARE_DRIVER_INIT(sdtennis);
+	DECLARE_DRIVER_INIT(wtennis);
+	DECLARE_DRIVER_INIT(bnj);
+	DECLARE_DRIVER_INIT(protennb);
+	DECLARE_DRIVER_INIT(disco);
+	DECLARE_DRIVER_INIT(lnc);
+	DECLARE_MACHINE_START(btime);
+	DECLARE_MACHINE_RESET(btime);
+	DECLARE_VIDEO_START(btime);
+	DECLARE_PALETTE_INIT(btime);
+	DECLARE_MACHINE_RESET(lnc);
+	DECLARE_PALETTE_INIT(lnc);
+	DECLARE_MACHINE_START(mmonkey);
+	DECLARE_MACHINE_RESET(mmonkey);
+	DECLARE_VIDEO_START(bnj);
+	UINT32 screen_update_btime(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_cookrace(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_lnc(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_eggs(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_bnj(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_zoar(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_disco(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	TIMER_DEVICE_CALLBACK_MEMBER(audio_nmi_gen);
 };
-
-
-/*----------- defined in machine/btime.c -----------*/
-
-READ8_HANDLER( mmonkey_protection_r );
-WRITE8_HANDLER( mmonkey_protection_w );
-
-
-/*----------- defined in video/btime.c -----------*/
-
-PALETTE_INIT( btime );
-PALETTE_INIT( lnc );
-
-VIDEO_START( btime );
-VIDEO_START( bnj );
-
-SCREEN_UPDATE( btime );
-SCREEN_UPDATE( cookrace );
-SCREEN_UPDATE( bnj );
-SCREEN_UPDATE( lnc );
-SCREEN_UPDATE( zoar );
-SCREEN_UPDATE( disco );
-SCREEN_UPDATE( eggs );
-
-WRITE8_HANDLER( btime_paletteram_w );
-WRITE8_HANDLER( bnj_background_w );
-WRITE8_HANDLER( bnj_scroll1_w );
-WRITE8_HANDLER( bnj_scroll2_w );
-READ8_HANDLER( btime_mirrorvideoram_r );
-WRITE8_HANDLER( btime_mirrorvideoram_w );
-READ8_HANDLER( btime_mirrorcolorram_r );
-WRITE8_HANDLER( btime_mirrorcolorram_w );
-WRITE8_HANDLER( lnc_videoram_w );
-WRITE8_HANDLER( lnc_mirrorvideoram_w );
-WRITE8_HANDLER( deco_charram_w );
-
-WRITE8_HANDLER( zoar_video_control_w );
-WRITE8_HANDLER( btime_video_control_w );
-WRITE8_HANDLER( bnj_video_control_w );
-WRITE8_HANDLER( disco_video_control_w );

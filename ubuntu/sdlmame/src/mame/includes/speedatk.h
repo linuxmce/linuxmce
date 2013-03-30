@@ -1,11 +1,13 @@
 class speedatk_state : public driver_device
 {
 public:
-	speedatk_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	speedatk_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"),
+		m_colorram(*this, "colorram"){ }
 
-	UINT8 *m_videoram;
-	UINT8 *m_colorram;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_colorram;
 	UINT8 m_crtc_vreg[0x100];
 	UINT8 m_crtc_index;
 	UINT8 m_flip_scr;
@@ -14,14 +16,15 @@ public:
 	UINT8 m_km_status;
 	UINT8 m_coin_settings;
 	UINT8 m_coin_impulse;
+	DECLARE_READ8_MEMBER(key_matrix_r);
+	DECLARE_WRITE8_MEMBER(key_matrix_w);
+	DECLARE_READ8_MEMBER(key_matrix_status_r);
+	DECLARE_WRITE8_MEMBER(key_matrix_status_w);
+	DECLARE_WRITE8_MEMBER(speedatk_videoram_w);
+	DECLARE_WRITE8_MEMBER(speedatk_colorram_w);
+	DECLARE_WRITE8_MEMBER(speedatk_6845_w);
+	DECLARE_WRITE8_MEMBER(speedatk_output_w);
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_speedatk(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
-
-
-/*----------- defined in video/speedatk.c -----------*/
-
-WRITE8_HANDLER( speedatk_videoram_w );
-WRITE8_HANDLER( speedatk_colorram_w );
-WRITE8_HANDLER( speedatk_6845_w );
-PALETTE_INIT( speedatk );
-VIDEO_START( speedatk );
-SCREEN_UPDATE( speedatk );

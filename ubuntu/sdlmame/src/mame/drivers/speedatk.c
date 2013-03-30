@@ -94,7 +94,7 @@ static UINT8 iox_key_matrix_calc(running_machine &machine, UINT8 p_side)
 
 		for (t = 0 ; t < 8 ; t ++)
 		{
-			if (!(input_port_read(machine, keynames[j+p_side]) & ( 1 << t )))
+			if (!(machine.root_device().ioport(keynames[j+p_side])->read() & ( 1 << t )))
 			{
 				return (i + t) | (p_side ? 0x20 : 0x00);
 			}
@@ -104,31 +104,30 @@ static UINT8 iox_key_matrix_calc(running_machine &machine, UINT8 p_side)
 	return 0;
 }
 
-static READ8_HANDLER( key_matrix_r )
+READ8_MEMBER(speedatk_state::key_matrix_r)
 {
-	speedatk_state *state = space->machine().driver_data<speedatk_state>();
 
-	if(state->m_coin_impulse > 0)
+	if(m_coin_impulse > 0)
 	{
-		state->m_coin_impulse--;
+		m_coin_impulse--;
 		return 0x80;
 	}
 
-	if((input_port_read(space->machine(),"COINS") & 1) || (input_port_read(space->machine(),"COINS") & 2))
+	if((ioport("COINS")->read() & 1) || (ioport("COINS")->read() & 2))
 	{
-		state->m_coin_impulse = state->m_coin_settings;
-		state->m_coin_impulse--;
+		m_coin_impulse = m_coin_settings;
+		m_coin_impulse--;
 		return 0x80;
 	}
 
-	if(state->m_mux_data != 1 && state->m_mux_data != 2 && state->m_mux_data != 4)
+	if(m_mux_data != 1 && m_mux_data != 2 && m_mux_data != 4)
 		return 0xff; //unknown command
 
 	/* both side checks */
-	if(state->m_mux_data == 1)
+	if(m_mux_data == 1)
 	{
-		UINT8 p1_side = iox_key_matrix_calc(space->machine(),0);
-		UINT8 p2_side = iox_key_matrix_calc(space->machine(),2);
+		UINT8 p1_side = iox_key_matrix_calc(machine(),0);
+		UINT8 p2_side = iox_key_matrix_calc(machine(),2);
 
 		if(p1_side != 0)
 			return p1_side;
@@ -137,23 +136,21 @@ static READ8_HANDLER( key_matrix_r )
 	}
 
 	/* check individual input side */
-	return iox_key_matrix_calc(space->machine(),(state->m_mux_data == 2) ? 0 : 2);
+	return iox_key_matrix_calc(machine(),(m_mux_data == 2) ? 0 : 2);
 }
 
-static WRITE8_HANDLER( key_matrix_w )
+WRITE8_MEMBER(speedatk_state::key_matrix_w)
 {
-	speedatk_state *state = space->machine().driver_data<speedatk_state>();
 
-	state->m_mux_data = data;
+	m_mux_data = data;
 }
 
 /* Key matrix status,used for coin settings and I don't know what else... */
-static READ8_HANDLER( key_matrix_status_r )
+READ8_MEMBER(speedatk_state::key_matrix_status_r)
 {
-	speedatk_state *state = space->machine().driver_data<speedatk_state>();
 
 	/* bit 0: busy flag,active low */
-	return (state->m_km_status & 0xfe) | 1;
+	return (m_km_status & 0xfe) | 1;
 }
 
 /*
@@ -167,31 +164,30 @@ My guess is that the other commands configs the key matrix, it probably needs so
 8x coinage setting command
 a1
 */
-static WRITE8_HANDLER( key_matrix_status_w )
+WRITE8_MEMBER(speedatk_state::key_matrix_status_w)
 {
-	speedatk_state *state = space->machine().driver_data<speedatk_state>();
 
-	state->m_km_status = data;
-	if((state->m_km_status & 0xf0) == 0x80) //coinage setting command
-		state->m_coin_settings = state->m_km_status & 0xf;
+	m_km_status = data;
+	if((m_km_status & 0xf0) == 0x80) //coinage setting command
+		m_coin_settings = m_km_status & 0xf;
 }
 
-static ADDRESS_MAP_START( speedatk_mem, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( speedatk_mem, AS_PROGRAM, 8, speedatk_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x8000) AM_READWRITE(key_matrix_r,key_matrix_w)
 	AM_RANGE(0x8001, 0x8001) AM_READWRITE(key_matrix_status_r,key_matrix_status_w)
 	AM_RANGE(0x8800, 0x8fff) AM_RAM
-	AM_RANGE(0xa000, 0xa3ff) AM_RAM_WRITE(speedatk_videoram_w) AM_BASE_MEMBER(speedatk_state, m_videoram)
-	AM_RANGE(0xb000, 0xb3ff) AM_RAM_WRITE(speedatk_colorram_w) AM_BASE_MEMBER(speedatk_state, m_colorram)
+	AM_RANGE(0xa000, 0xa3ff) AM_RAM_WRITE(speedatk_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0xb000, 0xb3ff) AM_RAM_WRITE(speedatk_colorram_w) AM_SHARE("colorram")
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( speedatk_io, AS_IO, 8 )
+static ADDRESS_MAP_START( speedatk_io, AS_IO, 8, speedatk_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0x01) AM_WRITE(speedatk_6845_w) //h46505 address / data routing
 	AM_RANGE(0x24, 0x24) AM_WRITE(watchdog_reset_w)
-	AM_RANGE(0x40, 0x40) AM_DEVREAD("aysnd", ay8910_r)
-	AM_RANGE(0x40, 0x41) AM_DEVWRITE("aysnd", ay8910_address_data_w)
+	AM_RANGE(0x40, 0x40) AM_DEVREAD_LEGACY("aysnd", ay8910_r)
+	AM_RANGE(0x40, 0x41) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_data_w)
 	//what's 60-6f for? Seems used only in attract mode and read back when a 2p play ends ...
 ADDRESS_MAP_END
 
@@ -293,23 +289,22 @@ GFXDECODE_END
 
 static const mc6845_interface mc6845_intf =
 {
-	"screen",	/* screen we are acting on */
-	8,			/* number of pixels per video memory address */
-	NULL,		/* before pixel update callback */
-	NULL,		/* row update callback */
-	NULL,		/* after pixel update callback */
-	DEVCB_NULL,	/* callback for display state changes */
-	DEVCB_NULL,	/* callback for cursor state changes */
-	DEVCB_NULL,	/* HSYNC callback */
-	DEVCB_NULL,	/* VSYNC callback */
-	NULL		/* update address callback */
+	"screen",   /* screen we are acting on */
+	8,          /* number of pixels per video memory address */
+	NULL,       /* before pixel update callback */
+	NULL,       /* row update callback */
+	NULL,       /* after pixel update callback */
+	DEVCB_NULL, /* callback for display state changes */
+	DEVCB_NULL, /* callback for cursor state changes */
+	DEVCB_NULL, /* HSYNC callback */
+	DEVCB_NULL, /* VSYNC callback */
+	NULL        /* update address callback */
 };
 
-static WRITE8_DEVICE_HANDLER( speedatk_output_w )
+WRITE8_MEMBER(speedatk_state::speedatk_output_w)
 {
-	speedatk_state *state = device->machine().driver_data<speedatk_state>();
 
-	state->m_flip_scr = data & 0x80;
+	m_flip_scr = data & 0x80;
 
 	if((data & 0x7f) != 0x7f)
 		logerror("%02x\n",data);
@@ -321,7 +316,7 @@ static const ay8910_interface ay8910_config =
 	AY8910_DEFAULT_LOADS,
 	DEVCB_NULL,
 	DEVCB_INPUT_PORT("DSW"),
-	DEVCB_HANDLER(speedatk_output_w),
+	DEVCB_DRIVER_MEMBER(speedatk_state,speedatk_output_w),
 	DEVCB_NULL
 };
 
@@ -330,7 +325,7 @@ static MACHINE_CONFIG_START( speedatk, speedatk_state )
 	MCFG_CPU_ADD("maincpu", Z80,MASTER_CLOCK/2) //divider is unknown
 	MCFG_CPU_PROGRAM_MAP(speedatk_mem)
 	MCFG_CPU_IO_MAP(speedatk_io)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", speedatk_state,  irq0_line_hold)
 
 	MCFG_WATCHDOG_VBLANK_INIT(8) // timing is unknown
 
@@ -338,18 +333,15 @@ static MACHINE_CONFIG_START( speedatk, speedatk_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(320, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 0*8, 32*8-1)
-	MCFG_SCREEN_UPDATE(speedatk)
+	MCFG_SCREEN_UPDATE_DRIVER(speedatk_state, screen_update_speedatk)
 
-	MCFG_MC6845_ADD("crtc", H46505, MASTER_CLOCK/16, mc6845_intf)	/* hand tuned to get ~60 fps */
+	MCFG_MC6845_ADD("crtc", H46505, MASTER_CLOCK/16, mc6845_intf)   /* hand tuned to get ~60 fps */
 
 	MCFG_GFXDECODE(speedatk)
 	MCFG_PALETTE_LENGTH(0x100)
-	MCFG_PALETTE_INIT(speedatk)
 
-	MCFG_VIDEO_START(speedatk)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -372,13 +364,12 @@ ROM_START( speedatk )
 	ROM_REGION( 0x6000, "gfx2", 0 )
 	ROM_LOAD( "cb0-5",        0x0000, 0x2000, CRC(47a966e7) SHA1(fdaa0f88656afc431bae367679ce6298fa962e0f) )
 	ROM_LOAD( "cb0-6",        0x2000, 0x2000, CRC(cc1da937) SHA1(1697bb008bfa5c33a282bd470ac39c324eea7509) )
-	ROM_COPY( "gfx2",   	  0x0000, 0x4000, 0x1000 ) /* Fill the blank space with cards gfx */
-	ROM_COPY( "gfx1",   	  0x1000, 0x5000, 0x1000 ) /* Gfx from cb0-7 */
+	ROM_COPY( "gfx2",         0x0000, 0x4000, 0x1000 ) /* Fill the blank space with cards gfx */
+	ROM_COPY( "gfx1",         0x1000, 0x5000, 0x1000 ) /* Gfx from cb0-7 */
 
 	ROM_REGION( 0x0120, "proms", 0 )
 	ROM_LOAD( "cb1.bpr",      0x0000, 0x0020, CRC(a0176c23) SHA1(133fb9eef8a6595cac2dcd7edce4789899a59e84) ) /* color PROM */
 	ROM_LOAD( "cb2.bpr",      0x0020, 0x0100, CRC(a604cf96) SHA1(a4ef6e77dcd3abe4c27e8e636222a5ee711a51f5) ) /* lookup table */
 ROM_END
 
-GAME( 1984, speedatk, 0, speedatk, speedatk, 0, ROT0, "Seta Kikaku Corp.", "Speed Attack! (Japan)", 0 )
-
+GAME( 1984, speedatk, 0, speedatk, speedatk, driver_device, 0, ROT0, "Seta Kikaku Corp.", "Speed Attack! (Japan)", 0 )

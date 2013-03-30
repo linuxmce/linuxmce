@@ -12,7 +12,6 @@
 ***************************************************************************/
 
 #include "emu.h"
-#include "deprecat.h"
 #include "cpu/m6502/m6502.h"
 #include "sound/ay8910.h"
 #include "includes/bogeyman.h"
@@ -22,40 +21,38 @@
 
 // Sound section is copied from Mysterious Stones driver by Nicola, Mike, Brad
 
-static WRITE8_HANDLER( bogeyman_8910_latch_w )
+WRITE8_MEMBER(bogeyman_state::bogeyman_8910_latch_w)
 {
-	bogeyman_state *state = space->machine().driver_data<bogeyman_state>();
-	state->m_psg_latch = data;
+	m_psg_latch = data;
 }
 
-static WRITE8_HANDLER( bogeyman_8910_control_w )
+WRITE8_MEMBER(bogeyman_state::bogeyman_8910_control_w)
 {
-	bogeyman_state *state = space->machine().driver_data<bogeyman_state>();
 
 	// bit 0 is flipscreen
-	flip_screen_set(space->machine(), data & 0x01);
+	flip_screen_set(data & 0x01);
 
 	// bit 5 goes to 8910 #0 BDIR pin
-	if ((state->m_last_write & 0x20) == 0x20 && (data & 0x20) == 0x00)
-		ay8910_data_address_w(space->machine().device("ay1"), state->m_last_write >> 4, state->m_psg_latch);
+	if ((m_last_write & 0x20) == 0x20 && (data & 0x20) == 0x00)
+		ay8910_data_address_w(machine().device("ay1"), space, m_last_write >> 4, m_psg_latch);
 
 	// bit 7 goes to 8910 #1 BDIR pin
-	if ((state->m_last_write & 0x80) == 0x80 && (data & 0x80) == 0x00)
-		ay8910_data_address_w(space->machine().device("ay2"), state->m_last_write >> 6, state->m_psg_latch);
+	if ((m_last_write & 0x80) == 0x80 && (data & 0x80) == 0x00)
+		ay8910_data_address_w(machine().device("ay2"), space, m_last_write >> 6, m_psg_latch);
 
-	state->m_last_write = data;
+	m_last_write = data;
 }
 
 /* Memory Map */
 
-static ADDRESS_MAP_START( bogeyman_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( bogeyman_map, AS_PROGRAM, 8, bogeyman_state )
 	AM_RANGE(0x0000, 0x17ff) AM_RAM
-	AM_RANGE(0x1800, 0x1bff) AM_RAM_WRITE(bogeyman_videoram2_w) AM_BASE_MEMBER(bogeyman_state, m_videoram2)
-	AM_RANGE(0x1c00, 0x1fff) AM_RAM_WRITE(bogeyman_colorram2_w) AM_BASE_MEMBER(bogeyman_state, m_colorram2)
-	AM_RANGE(0x2000, 0x20ff) AM_RAM_WRITE(bogeyman_videoram_w) AM_BASE_MEMBER(bogeyman_state, m_videoram)
-	AM_RANGE(0x2100, 0x21ff) AM_RAM_WRITE(bogeyman_colorram_w) AM_BASE_MEMBER(bogeyman_state, m_colorram)
-	AM_RANGE(0x2800, 0x2bff) AM_RAM AM_BASE_SIZE_MEMBER(bogeyman_state, m_spriteram, m_spriteram_size)
-	AM_RANGE(0x3000, 0x300f) AM_RAM_WRITE(bogeyman_paletteram_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x1800, 0x1bff) AM_RAM_WRITE(bogeyman_videoram2_w) AM_SHARE("videoram2")
+	AM_RANGE(0x1c00, 0x1fff) AM_RAM_WRITE(bogeyman_colorram2_w) AM_SHARE("colorram2")
+	AM_RANGE(0x2000, 0x20ff) AM_RAM_WRITE(bogeyman_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0x2100, 0x21ff) AM_RAM_WRITE(bogeyman_colorram_w) AM_SHARE("colorram")
+	AM_RANGE(0x2800, 0x2bff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0x3000, 0x300f) AM_RAM_WRITE(bogeyman_paletteram_w) AM_SHARE("paletteram")
 	AM_RANGE(0x3800, 0x3800) AM_READ_PORT("P1") AM_WRITE(bogeyman_8910_control_w)
 	AM_RANGE(0x3801, 0x3801) AM_READ_PORT("P2") AM_WRITE(bogeyman_8910_latch_w)
 	AM_RANGE(0x3802, 0x3802) AM_READ_PORT("DSW1")
@@ -84,7 +81,7 @@ static INPUT_PORTS_START( bogeyman )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  ) PORT_8WAY PORT_COCKTAIL
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_COCKTAIL
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_VBLANK )
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 
 	PORT_START("DSW1")
 	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coin_A ) ) PORT_DIPLOCATION("SW1:1,2")
@@ -157,9 +154,9 @@ static const gfx_layout tiles1a =
 	3,
 	{ 0x8000*8+4, 0, 4 },
 	{ 1024*8*8+3, 1024*8*8+2, 1024*8*8+1, 1024*8*8+0, 3, 2, 1, 0,
-	  1024*8*8+3+64, 1024*8*8+2+64, 1024*8*8+1+64, 1024*8*8+0+64, 3+64,2+64,1+64,0+64 },
+		1024*8*8+3+64, 1024*8*8+2+64, 1024*8*8+1+64, 1024*8*8+0+64, 3+64,2+64,1+64,0+64 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-	  0*8+16*8, 1*8+16*8, 2*8+16*8, 3*8+16*8, 4*8+16*8, 5*8+16*8, 6*8+16*8, 7*8+16*8 },
+		0*8+16*8, 1*8+16*8, 2*8+16*8, 3*8+16*8, 4*8+16*8, 5*8+16*8, 6*8+16*8, 7*8+16*8 },
 	32*8
 };
 
@@ -170,9 +167,9 @@ static const gfx_layout tiles1b =
 	3,
 	{ 0x8000*8+0, 0+0x1000*8+0, 4+0x1000*8 },
 	{ 1024*8*8+3, 1024*8*8+2, 1024*8*8+1, 1024*8*8+0, 3, 2, 1, 0,
-	  1024*8*8+3+64, 1024*8*8+2+64, 1024*8*8+1+64, 1024*8*8+0+64, 3+64,2+64, 1+64,0+64 },
+		1024*8*8+3+64, 1024*8*8+2+64, 1024*8*8+1+64, 1024*8*8+0+64, 3+64,2+64, 1+64,0+64 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-	  0*8+16*8, 1*8+16*8, 2*8+16*8, 3*8+16*8, 4*8+16*8, 5*8+16*8, 6*8+16*8, 7*8+16*8 },
+		0*8+16*8, 1*8+16*8, 2*8+16*8, 3*8+16*8, 4*8+16*8, 5*8+16*8, 6*8+16*8, 7*8+16*8 },
 	32*8
 };
 
@@ -183,9 +180,9 @@ static const gfx_layout sprites =
 	3,
 	{ 0x8000*8, 0x4000*8, 0 },
 	{ 16*8, 1+(16*8), 2+(16*8), 3+(16*8), 4+(16*8), 5+(16*8), 6+(16*8), 7+(16*8),
-	  0, 1, 2, 3, 4, 5, 6, 7 },
+		0, 1, 2, 3, 4, 5, 6, 7 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-	  8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8 },
+		8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8 },
 	16*16
 };
 
@@ -205,30 +202,27 @@ GFXDECODE_END
 
 /* Machine Driver */
 
-static MACHINE_START( bogeyman )
+void bogeyman_state::machine_start()
 {
-	bogeyman_state *state = machine.driver_data<bogeyman_state>();
 
-	state->save_item(NAME(state->m_psg_latch));
-	state->save_item(NAME(state->m_last_write));
+	save_item(NAME(m_psg_latch));
+	save_item(NAME(m_last_write));
 }
 
-static MACHINE_RESET( bogeyman )
+void bogeyman_state::machine_reset()
 {
-	bogeyman_state *state = machine.driver_data<bogeyman_state>();
 
-	state->m_psg_latch = 0;
-	state->m_last_write = 0;
+	m_psg_latch = 0;
+	m_last_write = 0;
 }
 
-static WRITE8_DEVICE_HANDLER( bogeyman_colbank_w )
+WRITE8_MEMBER(bogeyman_state::bogeyman_colbank_w)
 {
-	bogeyman_state *state = device->machine().driver_data<bogeyman_state>();
 
-	if((data & 1) != (state->m_colbank & 1))
+	if((data & 1) != (m_colbank & 1))
 	{
-		state->m_colbank = data & 1;
-		tilemap_mark_all_tiles_dirty(state->m_fg_tilemap);
+		m_colbank = data & 1;
+		m_fg_tilemap->mark_all_dirty();
 	}
 }
 
@@ -238,19 +232,17 @@ static const ay8910_interface ay8910_config =
 	AY8910_DEFAULT_LOADS,
 	DEVCB_NULL,
 	DEVCB_NULL,
-	DEVCB_HANDLER(bogeyman_colbank_w),
+	DEVCB_DRIVER_MEMBER(bogeyman_state,bogeyman_colbank_w),
 	DEVCB_NULL
 };
 
 static MACHINE_CONFIG_START( bogeyman, bogeyman_state )
 
 	// basic machine hardware
-	MCFG_CPU_ADD("maincpu", M6502, 1500000)	/* Verified */
+	MCFG_CPU_ADD("maincpu", M6502, 1500000) /* Verified */
 	MCFG_CPU_PROGRAM_MAP(bogeyman_map)
-	MCFG_CPU_VBLANK_INT_HACK(irq0_line_hold, 16) // Controls sound
+	MCFG_CPU_PERIODIC_INT_DRIVER(bogeyman_state, irq0_line_hold,  16*60) // Controls sound
 
-	MCFG_MACHINE_START(bogeyman)
-	MCFG_MACHINE_RESET(bogeyman)
 
 	// video hardware
 	MCFG_VIDEO_ATTRIBUTES(VIDEO_UPDATE_BEFORE_VBLANK)
@@ -258,25 +250,22 @@ static MACHINE_CONFIG_START( bogeyman, bogeyman_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 1*8, 31*8-1)
-	MCFG_SCREEN_UPDATE(bogeyman)
+	MCFG_SCREEN_UPDATE_DRIVER(bogeyman_state, screen_update_bogeyman)
 
 	MCFG_GFXDECODE(bogeyman)
 	MCFG_PALETTE_LENGTH(16+256)
 
-	MCFG_PALETTE_INIT(bogeyman)
-	MCFG_VIDEO_START(bogeyman)
 
 	// sound hardware
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("ay1", AY8910, 1500000)	/* Verified */
+	MCFG_SOUND_ADD("ay1", AY8910, 1500000)  /* Verified */
 	MCFG_SOUND_CONFIG(ay8910_config)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.30)
 
-	MCFG_SOUND_ADD("ay2", AY8910, 1500000)	/* Verified */
+	MCFG_SOUND_ADD("ay2", AY8910, 1500000)  /* Verified */
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.30)
 MACHINE_CONFIG_END
 
@@ -289,17 +278,17 @@ ROM_START( bogeyman )
 	ROM_LOAD( "j00.c17",  0x0c000, 0x04000, CRC(5d486de9) SHA1(40ea14a4a25f8f38d33a8844f627ba42503e1280) )
 
 	ROM_REGION( 0x10000, "gfx1", 0 )
-	ROM_LOAD( "j70.h15",  0x00000, 0x04000, CRC(fdc787bf) SHA1(1f185a1927fff6ce793d673ebd882a852ac547e4) )	/* Characters */
+	ROM_LOAD( "j70.h15",  0x00000, 0x04000, CRC(fdc787bf) SHA1(1f185a1927fff6ce793d673ebd882a852ac547e4) )  /* Characters */
 	ROM_LOAD( "j60.c17",  0x08000, 0x01000, CRC(cc03ceb2) SHA1(0149eacac2c1469be6e19f7a43c13d1fe8790f2c) )
 	ROM_CONTINUE(         0x0a000, 0x01000 )
 
 	ROM_REGION( 0x0c000, "gfx2", 0 )
-	ROM_LOAD( "j30.c9",   0x00000, 0x04000, CRC(41af81c0) SHA1(d8465622cdf16bc906818641d7988fc412454a45) )	/* Sprites */
+	ROM_LOAD( "j30.c9",   0x00000, 0x04000, CRC(41af81c0) SHA1(d8465622cdf16bc906818641d7988fc412454a45) )  /* Sprites */
 	ROM_LOAD( "j40.c7",   0x04000, 0x04000, CRC(8b438421) SHA1(295806c119f4ddc01afc15550e1ff397fbf5d862) )
 	ROM_LOAD( "j50.c5",   0x08000, 0x04000, CRC(b507157f) SHA1(471f67eb5e7aedef52353581405d9613d2a86898) )
 
 	ROM_REGION( 0x10000, "gfx3", 0 )
-	ROM_LOAD( "j90.h12",  0x00000, 0x04000, CRC(46b2d4d0) SHA1(35cd320d4db7aa6a89f83ba4d9ff88925357d640) )	/* Tiles */
+	ROM_LOAD( "j90.h12",  0x00000, 0x04000, CRC(46b2d4d0) SHA1(35cd320d4db7aa6a89f83ba4d9ff88925357d640) )  /* Tiles */
 	ROM_LOAD( "j80.h13",  0x04000, 0x04000, CRC(77ebd0a4) SHA1(c6921ee59633eeeda97c73cb7833578fa8a84fa3) )
 	ROM_LOAD( "ja0.h10",  0x08000, 0x01000, CRC(f2aa05ed) SHA1(e6df96e4128eff6de7e6483254608dd8a7b258b9) )
 	ROM_CONTINUE(         0x0a000, 0x01000 )
@@ -307,10 +296,10 @@ ROM_START( bogeyman )
 	ROM_CONTINUE(         0x0e000, 0x01000 )
 
 	ROM_REGION( 0x0200, "proms", 0 )
-	ROM_LOAD( "82s129.5k",  0x0000, 0x0100, CRC(4a7c5367) SHA1(a67f5b90c18238cbfb1507230b4614191d37eef4) )	/* Colour prom 1 */
-	ROM_LOAD( "82s129.6k",  0x0100, 0x0100, CRC(b6127713) SHA1(5bd8627453916ac6605af7d1193f79c748eab981) )	/* Colour prom 2 */
+	ROM_LOAD( "82s129.5k",  0x0000, 0x0100, CRC(4a7c5367) SHA1(a67f5b90c18238cbfb1507230b4614191d37eef4) )  /* Colour prom 1 */
+	ROM_LOAD( "82s129.6k",  0x0100, 0x0100, CRC(b6127713) SHA1(5bd8627453916ac6605af7d1193f79c748eab981) )  /* Colour prom 2 */
 ROM_END
 
 /* Game Driver */
 
-GAME( 1985, bogeyman, 0, bogeyman, bogeyman, 0, ROT0, "Technos Japan", "Bogey Manor", GAME_IMPERFECT_COLORS | GAME_SUPPORTS_SAVE )
+GAME( 1985, bogeyman, 0, bogeyman, bogeyman, driver_device, 0, ROT0, "Technos Japan", "Bogey Manor", GAME_IMPERFECT_COLORS | GAME_SUPPORTS_SAVE )

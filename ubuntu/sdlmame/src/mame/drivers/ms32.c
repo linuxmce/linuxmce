@@ -5,6 +5,9 @@
 Used by Jaleco in the Mid-90's this system, based on the V70 processor consisted
 of a two board set up, the first a standard mainboard and the second a 'cartridge'
 
+The actual Mega System 32 PCB mobo only outputs mono sound.  There is a connector on
+the PCB for a second speaker but it is still only in mono (no stereo effects in the music).
+
 -- Hardware Information (from Guru) --
 
 MS32 Motherboard
@@ -166,7 +169,6 @@ Super Strong Warriors
 #include "emu.h"
 #include "cpu/z80/z80.h"
 #include "cpu/v60/v60.h"
-#include "deprecat.h"
 #include "sound/ymf271.h"
 #include "machine/jalcrpt.h"
 #include "includes/ms32.h"
@@ -174,27 +176,26 @@ Super Strong Warriors
 
 /********** READ INPUTS **********/
 
-static CUSTOM_INPUT( mahjong_ctrl_r )
+CUSTOM_INPUT_MEMBER(ms32_state::mahjong_ctrl_r)
 {
-	ms32_state *state = field->port->machine().driver_data<ms32_state>();
 	UINT32 mj_input;
 
-	switch (state->m_mahjong_input_select[0])
+	switch (m_mahjong_input_select[0])
 	{
 		case 0x01:
-			mj_input = input_port_read(field->port->machine(), "MJ0");
+			mj_input = ioport("MJ0")->read();
 			break;
 		case 0x02:
-			mj_input = input_port_read(field->port->machine(), "MJ1");
+			mj_input = ioport("MJ1")->read();
 			break;
 		case 0x04:
-			mj_input = input_port_read(field->port->machine(), "MJ2");
+			mj_input = ioport("MJ2")->read();
 			break;
 		case 0x08:
-			mj_input = input_port_read(field->port->machine(), "MJ3");
+			mj_input = ioport("MJ3")->read();
 			break;
 		case 0x10:
-			mj_input = input_port_read(field->port->machine(), "MJ4");
+			mj_input = ioport("MJ4")->read();
 			break;
 		default:
 			mj_input = 0;
@@ -205,35 +206,34 @@ static CUSTOM_INPUT( mahjong_ctrl_r )
 }
 
 
-static READ32_HANDLER( ms32_read_inputs3 )
+READ32_MEMBER(ms32_state::ms32_read_inputs3)
 {
 	int a,b,c,d;
-	a = input_port_read(space->machine(), "AN2?"); // unused?
-	b = input_port_read(space->machine(), "AN2?"); // unused?
-	c = input_port_read(space->machine(), "AN1");
-	d = (input_port_read(space->machine(), "AN0") - 0xb0) & 0xff;
+	a = ioport("AN2?")->read(); // unused?
+	b = ioport("AN2?")->read(); // unused?
+	c = ioport("AN1")->read();
+	d = (ioport("AN0")->read() - 0xb0) & 0xff;
 	return a << 24 | b << 16 | c << 8 | d << 0;
 }
 
 
-static WRITE32_HANDLER( ms32_sound_w )
+WRITE32_MEMBER(ms32_state::ms32_sound_w)
 {
-	soundlatch_w(space, 0, data & 0xff);
-	cputag_set_input_line(space->machine(), "audiocpu", INPUT_LINE_NMI, ASSERT_LINE);
+	soundlatch_byte_w(space, 0, data & 0xff);
+	machine().device("audiocpu")->execute().set_input_line(INPUT_LINE_NMI, ASSERT_LINE);
 
 	// give the Z80 time to respond
-	device_spin_until_time(&space->device(), attotime::from_usec(40));
+	space.device().execute().spin_until_time(attotime::from_usec(40));
 }
 
-static READ32_HANDLER( ms32_sound_r )
+READ32_MEMBER(ms32_state::ms32_sound_r)
 {
-	ms32_state *state = space->machine().driver_data<ms32_state>();
-	return state->m_to_main^0xff;
+	return m_to_main^0xff;
 }
 
-static WRITE32_HANDLER( reset_sub_w )
+WRITE32_MEMBER(ms32_state::reset_sub_w)
 {
-	if(data) cputag_set_input_line(space->machine(), "audiocpu", INPUT_LINE_RESET, PULSE_LINE); // 0 too ?
+	if(data) machine().device("audiocpu")->execute().set_input_line(INPUT_LINE_RESET, PULSE_LINE); // 0 too ?
 }
 
 
@@ -242,121 +242,104 @@ static WRITE32_HANDLER( reset_sub_w )
 /********** MEMORY MAP **********/
 
 
-static READ8_HANDLER(   ms32_nvram_r8 )
+READ8_MEMBER(ms32_state::ms32_nvram_r8)
 {
-	ms32_state *state = space->machine().driver_data<ms32_state>();
-	return state->m_nvram_8[offset];
+	return m_nvram_8[offset];
 }
 
-static WRITE8_HANDLER(  ms32_nvram_w8 )
+WRITE8_MEMBER(ms32_state::ms32_nvram_w8)
 {
-	ms32_state *state = space->machine().driver_data<ms32_state>();
-	state->m_nvram_8[offset] = data;
+	m_nvram_8[offset] = data;
 }
 
-static READ8_HANDLER(   ms32_priram_r8 )
+READ8_MEMBER(ms32_state::ms32_priram_r8)
 {
-	ms32_state *state = space->machine().driver_data<ms32_state>();
-	return state->m_priram_8[offset];
+	return m_priram_8[offset];
 }
 
-static WRITE8_HANDLER(  ms32_priram_w8 )
+WRITE8_MEMBER(ms32_state::ms32_priram_w8)
 {
-	ms32_state *state = space->machine().driver_data<ms32_state>();
-	state->m_priram_8[offset] = data;
+	m_priram_8[offset] = data;
 }
 
-static READ16_HANDLER(  ms32_palram_r16 )
+READ16_MEMBER(ms32_state::ms32_palram_r16)
 {
-	ms32_state *state = space->machine().driver_data<ms32_state>();
-	return state->m_palram_16[offset];
+	return m_palram_16[offset];
 }
 
-static WRITE16_HANDLER( ms32_palram_w16 )
+WRITE16_MEMBER(ms32_state::ms32_palram_w16)
 {
-	ms32_state *state = space->machine().driver_data<ms32_state>();
-	COMBINE_DATA(&state->m_palram_16[offset]);
+	COMBINE_DATA(&m_palram_16[offset]);
 }
 
-static READ16_HANDLER(  ms32_rozram_r16 )
+READ16_MEMBER(ms32_state::ms32_rozram_r16)
 {
-	ms32_state *state = space->machine().driver_data<ms32_state>();
-	return state->m_rozram_16[offset];
+	return m_rozram_16[offset];
 }
 
-static WRITE16_HANDLER( ms32_rozram_w16 )
+WRITE16_MEMBER(ms32_state::ms32_rozram_w16)
 {
-	ms32_state *state = space->machine().driver_data<ms32_state>();
-	COMBINE_DATA(&state->m_rozram_16[offset]);
-	tilemap_mark_tile_dirty(state->m_roz_tilemap,offset/2);
+	COMBINE_DATA(&m_rozram_16[offset]);
+	m_roz_tilemap->mark_tile_dirty(offset/2);
 }
 
-static READ16_HANDLER(  ms32_lineram_r16 )
+READ16_MEMBER(ms32_state::ms32_lineram_r16)
 {
-	ms32_state *state = space->machine().driver_data<ms32_state>();
-	return state->m_lineram_16[offset];
+	return m_lineram_16[offset];
 }
 
-static WRITE16_HANDLER( ms32_lineram_w16 )
+WRITE16_MEMBER(ms32_state::ms32_lineram_w16)
 {
-	ms32_state *state = space->machine().driver_data<ms32_state>();
-	COMBINE_DATA(&state->m_lineram_16[offset]);
+	COMBINE_DATA(&m_lineram_16[offset]);
 }
 
-static READ16_HANDLER(  ms32_sprram_r16 )
+READ16_MEMBER(ms32_state::ms32_sprram_r16)
 {
-	ms32_state *state = space->machine().driver_data<ms32_state>();
-	return state->m_sprram_16[offset];
+	return m_sprram_16[offset];
 }
 
-static WRITE16_HANDLER( ms32_sprram_w16 )
+WRITE16_MEMBER(ms32_state::ms32_sprram_w16)
 {
-	ms32_state *state = space->machine().driver_data<ms32_state>();
-	COMBINE_DATA(&state->m_sprram_16[offset]);
+	COMBINE_DATA(&m_sprram_16[offset]);
 }
 
-static READ16_HANDLER(  ms32_txram_r16 )
+READ16_MEMBER(ms32_state::ms32_txram_r16)
 {
-	ms32_state *state = space->machine().driver_data<ms32_state>();
-	return state->m_txram_16[offset];
+	return m_txram_16[offset];
 }
 
-static WRITE16_HANDLER( ms32_txram_w16 )
+WRITE16_MEMBER(ms32_state::ms32_txram_w16)
 {
-	ms32_state *state = space->machine().driver_data<ms32_state>();
-	COMBINE_DATA(&state->m_txram_16[offset]);
-	tilemap_mark_tile_dirty(state->m_tx_tilemap,offset/2);
+	COMBINE_DATA(&m_txram_16[offset]);
+	m_tx_tilemap->mark_tile_dirty(offset/2);
 }
 
-static READ16_HANDLER(  ms32_bgram_r16 )
+READ16_MEMBER(ms32_state::ms32_bgram_r16)
 {
-	ms32_state *state = space->machine().driver_data<ms32_state>();
-	return state->m_bgram_16[offset];
+	return m_bgram_16[offset];
 }
 
-static WRITE16_HANDLER( ms32_bgram_w16 )
+WRITE16_MEMBER(ms32_state::ms32_bgram_w16)
 {
-	ms32_state *state = space->machine().driver_data<ms32_state>();
-	COMBINE_DATA(&state->m_bgram_16[offset]);
-	tilemap_mark_tile_dirty(state->m_bg_tilemap,offset/2);
-	tilemap_mark_tile_dirty(state->m_bg_tilemap_alt,offset/2);
+	COMBINE_DATA(&m_bgram_16[offset]);
+	m_bg_tilemap->mark_tile_dirty(offset/2);
+	m_bg_tilemap_alt->mark_tile_dirty(offset/2);
 }
 
-static WRITE32_HANDLER( pip_w )
+WRITE32_MEMBER(ms32_state::pip_w)
 {
-	ms32_state *state = space->machine().driver_data<ms32_state>();
-	state->m_tilemaplayoutcontrol = data;
+	m_tilemaplayoutcontrol = data;
 
 	if ((data) && (data != 1))
 		popmessage("fce00a7c = %02x",data);
 }
 
 
-static ADDRESS_MAP_START( ms32_map, AS_PROGRAM, 32 )
+static ADDRESS_MAP_START( ms32_map, AS_PROGRAM, 32, ms32_state )
 	/* RAM areas verified by testing on real hw - usually accessed at the 0xfc000000 + mirror */
-	AM_RANGE(0xc0000000, 0xc0007fff) AM_READWRITE8 (ms32_nvram_r8,   ms32_nvram_w8,   0x000000ff) AM_MIRROR(0x3c1fe000)	// nvram is 8-bit wide, 0x2000 in size */
+	AM_RANGE(0xc0000000, 0xc0007fff) AM_READWRITE8(ms32_nvram_r8,   ms32_nvram_w8,   0x000000ff) AM_MIRROR(0x3c1fe000)  // nvram is 8-bit wide, 0x2000 in size */
 /*  AM_RANGE(0xc0008000, 0xc01fffff) // mirrors of nvramram, handled above */
-	AM_RANGE(0xc1180000, 0xc1187fff) AM_READWRITE8 (ms32_priram_r8,  ms32_priram_w8,  0x000000ff) AM_MIRROR(0x3c038000) /* priram is 8-bit wide, 0x2000 in size */
+	AM_RANGE(0xc1180000, 0xc1187fff) AM_READWRITE8(ms32_priram_r8,  ms32_priram_w8,  0x000000ff) AM_MIRROR(0x3c038000) /* priram is 8-bit wide, 0x2000 in size */
 /*  AM_RANGE(0xc1188000, 0xc11bffff) // mirrors of priram, handled above */
 	AM_RANGE(0xc1400000, 0xc143ffff) AM_READWRITE16(ms32_palram_r16, ms32_palram_w16, 0x0000ffff) AM_MIRROR(0x3c1c0000) /* palram is 16-bit wide, 0x20000 in size */
 /*  AM_RANGE(0xc1440000, 0xc145ffff) // mirrors of palram, handled above */
@@ -369,58 +352,56 @@ static ADDRESS_MAP_START( ms32_map, AS_PROGRAM, 32 )
 	AM_RANGE(0xc2c00000, 0xc2c07fff) AM_READWRITE16(ms32_txram_r16,  ms32_txram_w16,  0x0000ffff) AM_MIRROR(0x3c1f0000) /* txram is 16-bit wide, 0x4000 in size */
 	AM_RANGE(0xc2c08000, 0xc2c0ffff) AM_READWRITE16(ms32_bgram_r16,  ms32_bgram_w16,  0x0000ffff) AM_MIRROR(0x3c1f0000) /* bgram is 16-bit wide, 0x4000 in size */
 /*  AM_RANGE(0xc2c10000, 0xc2dfffff) // mirrors of txram / bg, handled above */
-	AM_RANGE(0xc2e00000, 0xc2e1ffff) AM_RAM AM_BASE_MEMBER(ms32_state, m_mainram)                                AM_MIRROR(0x3c0e0000) /* mainram is 32-bit wide, 0x20000 in size */
+	AM_RANGE(0xc2e00000, 0xc2e1ffff) AM_RAM AM_SHARE("mainram")                                AM_MIRROR(0x3c0e0000) /* mainram is 32-bit wide, 0x20000 in size */
 	AM_RANGE(0xc3e00000, 0xc3ffffff) AM_ROMBANK("bank1")                                                AM_MIRROR(0x3c000000) // ROM is 32-bit wide, 0x200000 in size */
 
 	/* todo: clean up the mapping of these */
-	AM_RANGE(0xfc800000, 0xfc800003) AM_READNOP	/* sound? */
+	AM_RANGE(0xfc800000, 0xfc800003) AM_READNOP /* sound? */
 	AM_RANGE(0xfc800000, 0xfc800003) AM_WRITE(ms32_sound_w) /* sound? */
 	AM_RANGE(0xfcc00004, 0xfcc00007) AM_READ_PORT("INPUTS")
 	AM_RANGE(0xfcc00010, 0xfcc00013) AM_READ_PORT("DSW")
 	AM_RANGE(0xfce00034, 0xfce00037) AM_WRITENOP // irq ack?
 	AM_RANGE(0xfce00038, 0xfce0003b) AM_WRITE(reset_sub_w)
-	AM_RANGE(0xfce00050, 0xfce0005f) AM_WRITENOP	// watchdog? I haven't investigated
-//  AM_RANGE(0xfce00000, 0xfce0007f) AM_WRITEONLY AM_BASE(&ms32_fce00000) /* registers not ram? */
-	AM_RANGE(0xfce00000, 0xfce00003) AM_WRITE(ms32_gfxctrl_w)	/* flip screen + other unknown bits */
-	AM_RANGE(0xfce00280, 0xfce0028f) AM_WRITE(ms32_brightness_w)	// global brightness control
-/**/AM_RANGE(0xfce00600, 0xfce0065f) AM_RAM AM_BASE_MEMBER(ms32_state, m_roz_ctrl)		/* roz control registers */
-/**/AM_RANGE(0xfce00a00, 0xfce00a17) AM_RAM AM_BASE_MEMBER(ms32_state, m_tx_scroll)	/* tx layer scroll */
-/**/AM_RANGE(0xfce00a20, 0xfce00a37) AM_RAM AM_BASE_MEMBER(ms32_state, m_bg_scroll)	/* bg layer scroll */
-	AM_RANGE(0xfce00a7c, 0xfce00a7f) AM_WRITE(pip_w)	// ??? layer related? seems to be always 0
+	AM_RANGE(0xfce00050, 0xfce0005f) AM_WRITENOP    // watchdog? I haven't investigated
+//  AM_RANGE(0xfce00000, 0xfce0007f) AM_WRITEONLY AM_SHARE("ms32_fce00000") /* registers not ram? */
+	AM_RANGE(0xfce00000, 0xfce00003) AM_WRITE(ms32_gfxctrl_w)   /* flip screen + other unknown bits */
+	AM_RANGE(0xfce00280, 0xfce0028f) AM_WRITE(ms32_brightness_w)    // global brightness control
+/**/AM_RANGE(0xfce00600, 0xfce0065f) AM_RAM AM_SHARE("roz_ctrl")        /* roz control registers */
+/**/AM_RANGE(0xfce00a00, 0xfce00a17) AM_RAM AM_SHARE("tx_scroll")   /* tx layer scroll */
+/**/AM_RANGE(0xfce00a20, 0xfce00a37) AM_RAM AM_SHARE("bg_scroll")   /* bg layer scroll */
+	AM_RANGE(0xfce00a7c, 0xfce00a7f) AM_WRITE(pip_w)    // ??? layer related? seems to be always 0
 //  AM_RANGE(0xfce00e00, 0xfce00e03)    coin counters + something else
 	AM_RANGE(0xfd000000, 0xfd000003) AM_READ(ms32_sound_r)
-	AM_RANGE(0xfd1c0000, 0xfd1c0003) AM_WRITEONLY AM_BASE_MEMBER(ms32_state, m_mahjong_input_select)
+	AM_RANGE(0xfd1c0000, 0xfd1c0003) AM_WRITEONLY AM_SHARE("mahjong_select")
 ADDRESS_MAP_END
 
 
 /* F1 Super Battle has an extra linemap for the road, and am unknown maths chip (mcu?) handling perspective calculations for the road / corners etc. */
 /* it should use it's own memory map */
 
-static WRITE16_HANDLER( ms32_extra_w16 )
+WRITE16_MEMBER(ms32_state::ms32_extra_w16)
 {
-	ms32_state *state = space->machine().driver_data<ms32_state>();
-	COMBINE_DATA(&state->m_f1superb_extraram_16[offset]);
-	tilemap_mark_tile_dirty(state->m_extra_tilemap,offset/2);
+	COMBINE_DATA(&m_f1superb_extraram_16[offset]);
+	m_extra_tilemap->mark_tile_dirty(offset/2);
 }
-static READ16_HANDLER( ms32_extra_r16 )
+READ16_MEMBER(ms32_state::ms32_extra_r16)
 {
-	ms32_state *state = space->machine().driver_data<ms32_state>();
-	return state->m_f1superb_extraram_16[offset];
+	return m_f1superb_extraram_16[offset];
 }
 
 static void irq_raise(running_machine &machine, int level);
 
-static WRITE32_HANDLER( ms32_irq2_guess_w )
+WRITE32_MEMBER(ms32_state::ms32_irq2_guess_w)
 {
-	irq_raise(space->machine(), 2);
+	irq_raise(machine(), 2);
 }
 
-static WRITE32_HANDLER( ms32_irq5_guess_w )
+WRITE32_MEMBER(ms32_state::ms32_irq5_guess_w)
 {
-	irq_raise(space->machine(), 5);
+	irq_raise(machine(), 5);
 }
 
-static ADDRESS_MAP_START( f1superb_map, AS_PROGRAM, 32 )
+static ADDRESS_MAP_START( f1superb_map, AS_PROGRAM, 32, ms32_state )
 	AM_RANGE(0xfd0e0000, 0xfd0e0003) AM_READ(ms32_read_inputs3)
 
 	AM_RANGE(0xfce00004, 0xfce00023) AM_RAM // regs?
@@ -428,7 +409,7 @@ static ADDRESS_MAP_START( f1superb_map, AS_PROGRAM, 32 )
 	AM_RANGE(0xfce00800, 0xfce0085f) AM_RAM // regs?
 
 	/* these two are almost certainly wrong, they just let you see what
-       happens if you generate the FPU ints without breaking other games */
+	   happens if you generate the FPU ints without breaking other games */
 	AM_RANGE(0xfce00e00, 0xfce00e03) AM_WRITE(ms32_irq5_guess_w)
 	AM_RANGE(0xfd0f0000, 0xfd0f0003) AM_WRITE(ms32_irq2_guess_w)
 
@@ -635,21 +616,21 @@ static INPUT_PORTS_START( ms32 )
 	PORT_DIPUNUSED_DIPLOC( 0x00200000, 0x00200000, "SW3:3" )
 	PORT_DIPUNUSED_DIPLOC( 0x00400000, 0x00400000, "SW3:2" )
 	PORT_DIPUNUSED_DIPLOC( 0x00800000, 0x00800000, "SW3:1" )
-	PORT_BIT( 0xff000000, IP_ACTIVE_LOW, IPT_UNUSED )	// Unused?
+	PORT_BIT( 0xff000000, IP_ACTIVE_LOW, IPT_UNUSED )   // Unused?
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( ms32_mahjong )
 	PORT_INCLUDE( ms32 )
 
 	PORT_MODIFY("INPUTS")
-	PORT_BIT( 0x000000ff, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(mahjong_ctrl_r, NULL)	// here we read mahjong keys
+	PORT_BIT( 0x000000ff, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, ms32_state,mahjong_ctrl_r, NULL)    // here we read mahjong keys
 	PORT_BIT( 0x0000ff00, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x00010000, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x00020000, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x00040000, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_BIT( 0x00080000, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME(DEF_STR( Test )) PORT_CODE(KEYCODE_F1)
-	PORT_BIT( 0x00100000, IP_ACTIVE_LOW, IPT_UNUSED )	/* Start 1 is already mapped in mahjong inputs */
-	PORT_BIT( 0x00200000, IP_ACTIVE_LOW, IPT_UNUSED )	/* ms32.c mahjongs don't have P2 inputs -> no Start 2*/
+	PORT_BIT( 0x00100000, IP_ACTIVE_LOW, IPT_UNUSED )   /* Start 1 is already mapped in mahjong inputs */
+	PORT_BIT( 0x00200000, IP_ACTIVE_LOW, IPT_UNUSED )   /* ms32.c mahjongs don't have P2 inputs -> no Start 2*/
 	PORT_BIT( 0x00400000, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x00800000, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
@@ -831,7 +812,7 @@ static INPUT_PORTS_START( tetrisp )
 	PORT_INCLUDE( ms32 )
 
 	/* There are inputs for players 3 and 4 in the "test mode",
-             but NO addresses are read to check them ! */
+	         but NO addresses are read to check them ! */
 
 	PORT_MODIFY("DSW")
 	PORT_DIPNAME( 0x00000001, 0x00000001, DEF_STR( Flip_Screen ) ) PORT_DIPLOCATION("SW2:8")
@@ -1005,15 +986,15 @@ static INPUT_PORTS_START( hayaosi2 )
 	PORT_BIT( 0x00000008, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
 	PORT_BIT( 0x00000010, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(3)
 	PORT_BIT( 0x00000020, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(3)
-	PORT_BIT( 0x00000040, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_PLAYER(1)	// "Buzzer" (input 0 in "test mode")
-	PORT_BIT( 0x00000080, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_PLAYER(3)	// "Buzzer" (input 0 in "test mode")
+	PORT_BIT( 0x00000040, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_PLAYER(1)   // "Buzzer" (input 0 in "test mode")
+	PORT_BIT( 0x00000080, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_PLAYER(3)   // "Buzzer" (input 0 in "test mode")
 	PORT_BIT( 0x00000100, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
 	PORT_BIT( 0x00000200, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(1)
 	PORT_BIT( 0x00000400, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
 	PORT_BIT( 0x00000800, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(2)
 	PORT_BIT( 0x00001000, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(3)
 	PORT_BIT( 0x00002000, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(3)
-	PORT_BIT( 0x00004000, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_PLAYER(2)	// "Buzzer" (input 0 in "test mode")
+	PORT_BIT( 0x00004000, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_PLAYER(2)   // "Buzzer" (input 0 in "test mode")
 	PORT_BIT( 0x00008000, IP_ACTIVE_LOW, IPT_START3 )
 
 	PORT_BIT( 0x00400000, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -1031,7 +1012,7 @@ static INPUT_PORTS_START( hayaosi2 )
 	PORT_DIPSETTING(          0x00000004, DEF_STR( On ) )
 	/* Round   Default    More */
 	/*   1       10        15  */
-	PORT_DIPNAME( 0x00000008, 0x00000008, "Questions (VS Mode)" ) PORT_DIPLOCATION("SW2:5")	// TO DO : check all rounds
+	PORT_DIPNAME( 0x00000008, 0x00000008, "Questions (VS Mode)" ) PORT_DIPLOCATION("SW2:5") // TO DO : check all rounds
 	PORT_DIPSETTING(          0x00000008, "Default" )
 	PORT_DIPSETTING(          0x00000000, "More" )
 	/*  Lap    Time    Questions */
@@ -1063,7 +1044,7 @@ static INPUT_PORTS_START( hayaosi3 )
 	PORT_DIPUNKNOWN_DIPLOC( 0x00000004, 0x00000004, "SW2:6" )
 INPUT_PORTS_END
 
-static INPUT_PORTS_START( kirarast )	// player 1 inputs done? others?
+static INPUT_PORTS_START( kirarast )    // player 1 inputs done? others?
 	PORT_INCLUDE( ms32_mahjong )
 
 	PORT_MODIFY("DSW")
@@ -1103,11 +1084,11 @@ static INPUT_PORTS_START( kirarast )	// player 1 inputs done? others?
 	PORT_DIPSETTING(          0x00000020, DEF_STR( Hardest ) )
 INPUT_PORTS_END
 
-static INPUT_PORTS_START( 47pie2 )	// player 1 inputs done? others?
+static INPUT_PORTS_START( 47pie2 )  // player 1 inputs done? others?
 	PORT_INCLUDE( kirarast )
 
 	PORT_MODIFY("INPUTS")
-	PORT_BIT( 0x00020000, IP_ACTIVE_LOW, IPT_UNUSED )	 /* coin 2 is unused */
+	PORT_BIT( 0x00020000, IP_ACTIVE_LOW, IPT_UNUSED )    /* coin 2 is unused */
 
 	PORT_MODIFY("DSW")
 	PORT_DIPNAME( 0x00000400, 0x00000400, "Campaign Mode" ) PORT_DIPLOCATION("SW1:6")
@@ -1185,7 +1166,7 @@ static INPUT_PORTS_START( wpksocv2 )
 INPUT_PORTS_END
 
 
-static INPUT_PORTS_START( f1superb )	// Mostly wrong !
+static INPUT_PORTS_START( f1superb )    // Mostly wrong !
 	PORT_INCLUDE( ms32 )
 
 	PORT_MODIFY("INPUTS")
@@ -1225,14 +1206,14 @@ static INPUT_PORTS_START( f1superb )	// Mostly wrong !
 	PORT_DIPUNKNOWN_DIPLOC( 0x00400000, 0x00400000, "SW3:2" )
 	PORT_DIPUNKNOWN_DIPLOC( 0x00800000, 0x00800000, "SW3:1" )
 
-	PORT_START("AN0")	// Acceleration (wrong?)
+	PORT_START("AN0")   // Acceleration (wrong?)
 	PORT_BIT( 0xff, 0x00, IPT_AD_STICK_Y ) PORT_SENSITIVITY(50) PORT_KEYDELTA(15) PORT_REVERSE PORT_PLAYER(1)
 
 
-	PORT_START("AN1")	// Steering
+	PORT_START("AN1")   // Steering
 	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_X ) PORT_SENSITIVITY(50) PORT_KEYDELTA(15) PORT_PLAYER(1)
 
-	PORT_START("AN2?")	// Shift + Brake
+	PORT_START("AN2?")  // Shift + Brake
 	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -1263,11 +1244,11 @@ INPUT_PORTS_END
 /********** GFX DECODE **********/
 
 /* sprites are contained in 256x256 "tiles" */
-static GFXLAYOUT_RAW( spritelayout, 8, 256, 256, 256*8, 256*256*8 )
-static GFXLAYOUT_RAW( bglayout, 8, 16, 16, 16*8, 16*16*8 )
-static GFXLAYOUT_RAW( txlayout, 8, 8, 8, 8*8, 8*8*8 )
+static GFXLAYOUT_RAW( spritelayout, 256, 256, 256*8, 256*256*8 )
+static GFXLAYOUT_RAW( bglayout, 16, 16, 16*8, 16*16*8 )
+static GFXLAYOUT_RAW( txlayout, 8, 8, 8*8, 8*8*8 )
 
-static GFXLAYOUT_RAW( f1layout, 8, 2048, 1, 2048*8, 2048*8 )
+static GFXLAYOUT_RAW( f1layout, 2048, 1, 2048*8, 2048*8 )
 
 
 static GFXDECODE_START( ms32 )
@@ -1303,7 +1284,7 @@ static IRQ_CALLBACK(irq_callback)
 	for(i=15; i>=0 && !(state->m_irqreq & (1<<i)); i--);
 	state->m_irqreq &= ~(1<<i);
 	if(!state->m_irqreq)
-		device_set_input_line(device, 0, CLEAR_LINE);
+		device->execute().set_input_line(0, CLEAR_LINE);
 	return i;
 }
 
@@ -1311,31 +1292,34 @@ static void irq_init(running_machine &machine)
 {
 	ms32_state *state = machine.driver_data<ms32_state>();
 	state->m_irqreq = 0;
-	cputag_set_input_line(machine, "maincpu", 0, CLEAR_LINE);
-	device_set_irq_callback(machine.device("maincpu"), irq_callback);
+	machine.device("maincpu")->execute().set_input_line(0, CLEAR_LINE);
+	machine.device("maincpu")->execute().set_irq_acknowledge_callback(irq_callback);
 }
 
 static void irq_raise(running_machine &machine, int level)
 {
 	ms32_state *state = machine.driver_data<ms32_state>();
 	state->m_irqreq |= (1<<level);
-	cputag_set_input_line(machine, "maincpu", 0, ASSERT_LINE);
+	machine.device("maincpu")->execute().set_input_line(0, ASSERT_LINE);
 }
 
-static INTERRUPT_GEN(ms32_interrupt)
+/* TODO: fix this arrangement (derived from old deprecat lib) */
+TIMER_DEVICE_CALLBACK_MEMBER(ms32_state::ms32_interrupt)
 {
-	if( cpu_getiloops(device) == 0 ) irq_raise(device->machine(), 10);
-	if( cpu_getiloops(device) == 1 ) irq_raise(device->machine(), 9);
-	/* hayaosi2 needs at least 12 IRQ 0 per frame to work (see code at FFE02289)
-       kirarast needs it too, at least 8 per frame, but waits for a variable amount
-       47pi2 needs ?? per frame (otherwise it hangs when you lose)
-       in different points. Could this be a raster interrupt?
-       Other games using it but not needing it to work:
-       desertwr
-       p47aces
-       */
-	if( cpu_getiloops(device) >= 3 && cpu_getiloops(device) <= 32 ) irq_raise(device->machine(), 0);
+	int scanline = param;
+	if( scanline == 0) irq_raise(machine(), 10);
+	if( scanline == 8) irq_raise(machine(), 9);
+	/* hayaosi1 needs at least 12 IRQ 0 per frame to work (see code at FFE02289)
+	   kirarast needs it too, at least 8 per frame, but waits for a variable amount
+	   47pi2 needs ?? per frame (otherwise it hangs when you lose)
+	   in different points. Could this be a raster interrupt?
+	   Other games using it but not needing it to work:
+	   desertwr
+	   p47aces
+	   */
+	if( (scanline % 8) == 0 && scanline <= 224 ) irq_raise(machine(), 0);
 }
+
 
 /********** SOUND **********/
 
@@ -1360,28 +1344,27 @@ static INTERRUPT_GEN(ms32_interrupt)
  code at $38 reads the 2nd command latch ??
 */
 
-static READ8_HANDLER( latch_r )
+READ8_MEMBER(ms32_state::latch_r)
 {
-	cputag_set_input_line(space->machine(), "audiocpu", INPUT_LINE_NMI, CLEAR_LINE);
-	return soundlatch_r(space,0)^0xff;
+	machine().device("audiocpu")->execute().set_input_line(INPUT_LINE_NMI, CLEAR_LINE);
+	return soundlatch_byte_r(space,0)^0xff;
 }
 
-static WRITE8_HANDLER( ms32_snd_bank_w )
+WRITE8_MEMBER(ms32_state::ms32_snd_bank_w)
 {
-	memory_set_bank(space->machine(), "bank4", (data >> 0) & 0x0F);
-	memory_set_bank(space->machine(), "bank5", (data >> 4) & 0x0F);
+	membank("bank4")->set_entry((data >> 0) & 0x0F);
+	membank("bank5")->set_entry((data >> 4) & 0x0F);
 }
 
-static WRITE8_HANDLER( to_main_w )
+WRITE8_MEMBER(ms32_state::to_main_w)
 {
-	ms32_state *state = space->machine().driver_data<ms32_state>();
-	state->m_to_main=data;
-	irq_raise(space->machine(), 1);
+	m_to_main=data;
+	irq_raise(machine(), 1);
 }
 
-static ADDRESS_MAP_START( ms32_sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( ms32_sound_map, AS_PROGRAM, 8, ms32_state )
 	AM_RANGE(0x0000, 0x3eff) AM_ROM
-	AM_RANGE(0x3f00, 0x3f0f) AM_DEVREADWRITE("ymf", ymf271_r,ymf271_w)
+	AM_RANGE(0x3f00, 0x3f0f) AM_DEVREADWRITE_LEGACY("ymf", ymf271_r,ymf271_w)
 	AM_RANGE(0x3f10, 0x3f10) AM_READWRITE(latch_r,to_main_w)
 	AM_RANGE(0x3f20, 0x3f20) AM_READNOP /* 2nd latch ? */
 	AM_RANGE(0x3f20, 0x3f20) AM_WRITENOP /* to_main2_w  ? */
@@ -1396,12 +1379,12 @@ ADDRESS_MAP_END
 
 /********** MACHINE INIT **********/
 
-static MACHINE_RESET( ms32 )
+void ms32_state::machine_reset()
 {
-	memory_set_bankptr(machine, "bank1", machine.region("maincpu")->base());
-	memory_set_bank(machine, "bank4", 0);
-	memory_set_bank(machine, "bank5", 1);
-	irq_init(machine);
+	machine().root_device().membank("bank1")->set_base(machine().root_device().memregion("maincpu")->base());
+	machine().root_device().membank("bank4")->set_entry(0);
+	machine().root_device().membank("bank5")->set_entry(1);
+	irq_init(machine());
 }
 
 /********** MACHINE DRIVER **********/
@@ -1411,35 +1394,32 @@ static MACHINE_CONFIG_START( ms32, ms32_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", V70, 20000000) // 20MHz
 	MCFG_CPU_PROGRAM_MAP(ms32_map)
-	MCFG_CPU_VBLANK_INT_HACK(ms32_interrupt,32)
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("scantimer", ms32_state, ms32_interrupt, "screen", 0, 1)
 
 	MCFG_CPU_ADD("audiocpu", Z80, 4000000)
 	MCFG_CPU_PROGRAM_MAP(ms32_sound_map)
 
 	MCFG_QUANTUM_TIME(attotime::from_hz(60000))
 
-	MCFG_MACHINE_RESET(ms32)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
 	MCFG_SCREEN_SIZE(40*8, 28*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 40*8-1, 0*8, 28*8-1)
-	MCFG_SCREEN_UPDATE(ms32)
+	MCFG_SCREEN_UPDATE_DRIVER(ms32_state, screen_update_ms32)
 
 	MCFG_GFXDECODE(ms32)
 	MCFG_PALETTE_LENGTH(0x10000)
 
-	MCFG_VIDEO_START(ms32)
 
 	/* sound hardware */
-	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
+	MCFG_SPEAKER_STANDARD_MONO("mono")
 
 	MCFG_SOUND_ADD("ymf", YMF271, 16934400)
-	MCFG_SOUND_ROUTE(0, "lspeaker", 1.0)
-	MCFG_SOUND_ROUTE(1, "rspeaker", 1.0)
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
+
 MACHINE_CONFIG_END
 
 static MACHINE_CONFIG_DERIVED( f1superb, ms32 )
@@ -1449,7 +1429,7 @@ static MACHINE_CONFIG_DERIVED( f1superb, ms32 )
 
 	MCFG_GFXDECODE(f1superb)
 
-	MCFG_VIDEO_START(f1superb)
+	MCFG_VIDEO_START_OVERRIDE(ms32_state,f1superb)
 MACHINE_CONFIG_END
 
 
@@ -1463,7 +1443,7 @@ ROM_START( bbbxing )
 	ROM_LOAD32_BYTE( "bbbx29.bin", 0x000001, 0x80000, CRC(85bbbe79) SHA1(bc5ebb96491762e6a0d202ddf7faeb57c66211b4) )
 	ROM_LOAD32_BYTE( "bbbx31.bin", 0x000000, 0x80000, CRC(e0c865ed) SHA1(f21e8dc174c50d7afdd3f82c1c66dfcc002bdd07) )
 
-	ROM_REGION( 0x1100000, "gfx1", 0 ) /* sprites, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x1100000, "gfx1", 0 ) /* sprites */
 	ROM_LOAD32_WORD( "bbbx1.bin",   0x0000002, 0x200000, CRC(c1c10c3b) SHA1(e1f739f38e148c4d7aff6b81b3e42131c5c6c3dd) )
 	ROM_LOAD32_WORD( "bbbx13.bin",  0x0000000, 0x200000, CRC(4b8c1574) SHA1(c389c70b532d54528a175f460ca3f329b34cf67c) )
 	ROM_LOAD32_WORD( "bbbx2.bin",   0x0400002, 0x200000, CRC(03b77c1e) SHA1(f156ae6a4f2a8ae99815eb5a7b28425d273c1c3e) )
@@ -1475,13 +1455,13 @@ ROM_START( bbbxing )
 	ROM_LOAD32_WORD( "bbbx5.bin",   0x1000002, 0x080000, CRC(64989edf) SHA1(033eab0e8a53607b2bb420f6356804b2cfa1544c) )
 	ROM_LOAD32_WORD( "bbbx17.bin",  0x1000000, 0x080000, CRC(1d7ebaf0) SHA1(5aac7cb01013ce3be206318678aced5812bff9a9) )
 
-	ROM_REGION( 0x200000, "gfx2", 0 ) /* roz tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x200000, "gfx2", 0 ) /* roz tiles */
 	ROM_LOAD( "bbbx9.bin",   0x000000, 0x200000, CRC(a41cb650) SHA1(1c55a4afe55c1250806f2d93c25842dc3fb7f987) )
 
-	ROM_REGION( 0x200000, "gfx3", 0 ) /* bg tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x200000, "gfx3", 0 ) /* bg tiles */
 	ROM_LOAD( "bbbx11.bin",  0x000000, 0x200000, CRC(85238ca9) SHA1(1ce32d585fe66764d621c11882ef9d2abaea6256) )
 
-	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles */
 	ROM_LOAD( "bbbx32-2.bin",0x000000, 0x080000, CRC(3ffdae75) SHA1(2b837d28f7ecdd49e8525bd5c249e83021d5fe9f) )
 
 	ROM_REGION( 0x50000, "audiocpu", 0 ) /* z80 program */
@@ -1492,8 +1472,8 @@ ROM_START( bbbxing )
 	ROM_LOAD( "bbbx22.bin",  0x000000, 0x200000, CRC(0fa26f65) SHA1(e92b14862fbce33ea4ab4567ec48199bfcbbdd84) ) // common samples
 	ROM_LOAD( "bbbx23.bin",  0x200000, 0x200000, CRC(b7875a23) SHA1(62bb4c1318f98ea68894658d92ce08e84d386d0c) )
 
-    ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
-    ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
+	ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
+	ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
 ROM_END
 
 ROM_START( 47pie2 )
@@ -1503,7 +1483,7 @@ ROM_START( 47pie2 )
 	ROM_LOAD32_BYTE( "93166-28.v11", 0x000001, 0x80000, CRC(aa49eec2) SHA1(173afc596caa1c464fc3247cb64d36c1d97a1520) )
 	ROM_LOAD32_BYTE( "93166-29.v11", 0x000000, 0x80000, CRC(92763e41) SHA1(eb593bbb586661c4c4e8728d845b146974d0bdf8) )
 
-	ROM_REGION( 0x1000000, "gfx1", 0 ) /* sprites, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x1000000, "gfx1", 0 ) /* sprites */
 	ROM_LOAD32_WORD( "94019-02.1",  0x000002, 0x200000, CRC(f9d692f2) SHA1(666df55d26e00be39073173fa3616ac9dafbe615) )
 	ROM_LOAD32_WORD( "94019-01.13", 0x000000, 0x200000, CRC(1ddfe825) SHA1(27fbf492fdb4f0b4b8db18330e840c130213e15e) )
 	ROM_LOAD32_WORD( "94019-04.2",  0x400002, 0x200000, CRC(24ca77ec) SHA1(a5c575224ab276cbed5785f40fc0d35dd2748e74) )
@@ -1513,13 +1493,13 @@ ROM_START( 47pie2 )
 	ROM_LOAD32_WORD( "94019-08.4",  0xc00002, 0x200000, CRC(4b07edc9) SHA1(22aaa923a94a7bec997d2adabc8ec2c7696c33a5) )
 	ROM_LOAD32_WORD( "94019-07.16", 0xc00000, 0x200000, CRC(34f471a8) SHA1(4c9c358a9bfdb436a211caa14d085e631609681d) )
 
-	ROM_REGION( 0x200000, "gfx2", 0 ) /* roz tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x200000, "gfx2", 0 ) /* roz tiles */
 	ROM_LOAD( "94019-09.11", 0x000000, 0x200000, CRC(cde7bb6f) SHA1(47454dac4ce67ce8d7e0c5ef3a732477ac8170a7) )
 
-	ROM_REGION( 0x100000, "gfx3", 0 ) /* bg tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x100000, "gfx3", 0 ) /* bg tiles */
 	ROM_LOAD( "94019-12.10", 0x000000, 0x100000, CRC(15ae05d9) SHA1(ac00d3766c42ccba4585b9acfacc81bcb940ac26) )
 
-	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles */
 	ROM_LOAD( "93166-30.bin", 0x000000, 0x080000, CRC(0c738883) SHA1(e552c1842d759e5e617eb9c6cc178620a461b4dd) )
 
 	ROM_REGION( 0x50000, "audiocpu", 0 ) /* z80 program */
@@ -1530,8 +1510,8 @@ ROM_START( 47pie2 )
 	ROM_LOAD( "94019-10.22", 0x000000, 0x200000, CRC(745d41ec) SHA1(9118d0f27b65c9d37970326ccf86fdccb81d32f5) )
 	ROM_LOAD( "94019-11.23", 0x200000, 0x200000, CRC(021dc350) SHA1(c71936091f86440201fdbdc94b0d1d22c4018188) )
 
-    ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
-    ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
+	ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
+	ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
 ROM_END
 
 ROM_START( 47pie2o )
@@ -1541,7 +1521,7 @@ ROM_START( 47pie2o )
 	ROM_LOAD32_BYTE( "93166-28.v10", 0x000001, 0x80000, CRC(b1261d51) SHA1(3f393aeb7a076c4d2d2cc7f22ead05f405186d80) )
 	ROM_LOAD32_BYTE( "93166-29.v10", 0x000000, 0x80000, CRC(9211c82a) SHA1(0aa3f93293b81e0f66b985046eb5e91708693959) )
 
-	ROM_REGION( 0x1000000, "gfx1", 0 ) /* sprites, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x1000000, "gfx1", 0 ) /* sprites */
 	ROM_LOAD32_WORD( "94019-02.1",  0x000002, 0x200000, CRC(f9d692f2) SHA1(666df55d26e00be39073173fa3616ac9dafbe615) )
 	ROM_LOAD32_WORD( "94019-01.13", 0x000000, 0x200000, CRC(1ddfe825) SHA1(27fbf492fdb4f0b4b8db18330e840c130213e15e) )
 	ROM_LOAD32_WORD( "94019-04.2",  0x400002, 0x200000, CRC(24ca77ec) SHA1(a5c575224ab276cbed5785f40fc0d35dd2748e74) )
@@ -1551,13 +1531,13 @@ ROM_START( 47pie2o )
 	ROM_LOAD32_WORD( "94019-08.4",  0xc00002, 0x200000, CRC(4b07edc9) SHA1(22aaa923a94a7bec997d2adabc8ec2c7696c33a5) )
 	ROM_LOAD32_WORD( "94019-07.16", 0xc00000, 0x200000, CRC(34f471a8) SHA1(4c9c358a9bfdb436a211caa14d085e631609681d) )
 
-	ROM_REGION( 0x200000, "gfx2", 0 ) /* roz tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x200000, "gfx2", 0 ) /* roz tiles */
 	ROM_LOAD( "94019-09.11", 0x000000, 0x200000, CRC(cde7bb6f) SHA1(47454dac4ce67ce8d7e0c5ef3a732477ac8170a7) )
 
-	ROM_REGION( 0x100000, "gfx3", 0 ) /* bg tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x100000, "gfx3", 0 ) /* bg tiles */
 	ROM_LOAD( "94019-12.10", 0x000000, 0x100000, CRC(15ae05d9) SHA1(ac00d3766c42ccba4585b9acfacc81bcb940ac26) )
 
-	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles */
 	ROM_LOAD( "93166-30.bin", 0x000000, 0x080000, CRC(0c738883) SHA1(e552c1842d759e5e617eb9c6cc178620a461b4dd) )
 
 	ROM_REGION( 0x50000, "audiocpu", 0 ) /* z80 program */
@@ -1568,8 +1548,8 @@ ROM_START( 47pie2o )
 	ROM_LOAD( "94019-10.22", 0x000000, 0x200000, CRC(745d41ec) SHA1(9118d0f27b65c9d37970326ccf86fdccb81d32f5) )
 	ROM_LOAD( "94019-11.23", 0x200000, 0x200000, CRC(021dc350) SHA1(c71936091f86440201fdbdc94b0d1d22c4018188) )
 
-    ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
-    ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
+	ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
+	ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
 ROM_END
 
 ROM_START( desertwr )
@@ -1579,7 +1559,7 @@ ROM_START( desertwr )
 	ROM_LOAD32_BYTE( "93166-28.39", 0x000001, 0x80000, CRC(0de40efb) SHA1(c49c3b27939e428dec1f642b7fdb9a1ff760289a) )
 	ROM_LOAD32_BYTE( "93166-29.40", 0x000000, 0x80000, CRC(fc25eae2) SHA1(a4d47fcb4d4c3285cf67d77d8a21478f344b98ca) )
 
-	ROM_REGION( 0x1000000, "gfx1", 0 ) /* sprites, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x1000000, "gfx1", 0 ) /* sprites */
 	ROM_LOAD32_WORD( "94038-01.20", 0x000000, 0x200000, CRC(f11f83e2) SHA1(e3c99e6583003210483163c79182cb14aa334702) )
 	ROM_LOAD32_WORD( "94038-02.3",  0x000002, 0x200000, CRC(3d1fa710) SHA1(5fae3e8c714cca88e22e432dd7275c6898c631a8) )
 	ROM_LOAD32_WORD( "94038-03.21", 0x400000, 0x200000, CRC(84fd5790) SHA1(6187ff32a63f3b4105ea875f52237f0d4314f8b6) )
@@ -1589,15 +1569,15 @@ ROM_START( desertwr )
 	ROM_LOAD32_WORD( "94038-07.23", 0xc00000, 0x200000, CRC(426f4193) SHA1(98a16a70c225d7cd061fcd6e88992d393e6ef9fd) )
 	ROM_LOAD32_WORD( "94038-08.6",  0xc00002, 0x200000, CRC(f4088399) SHA1(9d53880996f85776815840bca1f8c3958de4c275) )
 
-	ROM_REGION( 0x400000, "gfx2", 0 ) /* roz tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x400000, "gfx2", 0 ) /* roz tiles */
 	ROM_LOAD( "94038-11.13", 0x000000, 0x200000, CRC(bf2ec3a3) SHA1(904cd5ab2e855bdb94bc70efa6db42af672337d7) )
 	ROM_LOAD( "94038-12.14", 0x200000, 0x200000, CRC(d0e113da) SHA1(57f27cbd58421a0afe724fec5628c4a29aad8868) )
 
-	ROM_REGION( 0x400000, "gfx3", 0 ) /* bg tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x400000, "gfx3", 0 ) /* bg tiles */
 	ROM_LOAD( "94038-09.12", 0x000000, 0x200000, CRC(72ec1ce7) SHA1(88bd9ca3aa7a6410e8fcf6fd70304f12724653bb) )
 	ROM_LOAD( "94038-10.11", 0x200000, 0x200000, CRC(1e17f2a9) SHA1(19e6be1daa157593fbab84149f1f739dd39c9226) )
 
-	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles */
 	ROM_LOAD( "93166-30.41", 0x000000, 0x080000, CRC(980ab89c) SHA1(8468fc13a5988e25750e8d99ff464f46e86ab412) )
 
 	ROM_REGION( 0x50000, "audiocpu", 0 ) /* z80 program */
@@ -1608,8 +1588,8 @@ ROM_START( desertwr )
 	ROM_LOAD( "92042-01.33", 0x000000, 0x200000, CRC(0fa26f65) SHA1(e92b14862fbce33ea4ab4567ec48199bfcbbdd84) ) // common samples
 	ROM_LOAD( "94038-13.34", 0x200000, 0x200000, CRC(b0cac8f2) SHA1(f7d2e32d9c2f301341f7c02678c2c1e09ce655ba) )
 
-    ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
-    ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
+	ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
+	ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
 ROM_END
 
 ROM_START( f1superb )
@@ -1637,16 +1617,16 @@ ROM_START( f1superb )
 	ROM_LOAD32_WORD( "f1sb8.bin",  0x1c00002, 0x200000, CRC(ba3f1533) SHA1(3ff1c4cca8358fc8daf0d2c381672569085ac9ae) )
 	ROM_LOAD32_WORD( "f1sb20.bin", 0x1c00000, 0x200000, CRC(fa349897) SHA1(31e08aa2821e409057e3094333b9ecbe04a6a38a) )
 
-	ROM_REGION( 0x800000, "gfx2", 0 ) /* roz tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x800000, "gfx2", 0 ) /* roz tiles */
 	ROM_LOAD( "f1sb9.bin",  0x000000, 0x200000, CRC(66b12e1f) SHA1(4dc3f162a5116403cc0c491af335208672c8e9af) )
 	ROM_LOAD( "f1sb10.bin", 0x200000, 0x200000, CRC(893d7f4b) SHA1(b2734f20f703a0dcf8b1fdaebf2b6198b2fb0f51) )
 	ROM_LOAD( "f1sb11.bin", 0x400000, 0x200000, CRC(0b848bb5) SHA1(e4c0e434add151112352d6068e5de1a7098e6346) )
 	ROM_LOAD( "f1sb12.bin", 0x600000, 0x200000, CRC(edecd5f4) SHA1(9b86802d08e5c8ec1a6dcea75dc8f050d3e96970) )
 
-	ROM_REGION( 0x200000, "gfx3", 0 ) /* bg tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x200000, "gfx3", 0 ) /* bg tiles */
 	ROM_LOAD( "f1sb31.bin", 0x000000, 0x200000, CRC(1d0d2efd) SHA1(e6446ef9c71be9316c286157f71e0043347c6a5c) )
 
-	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles */
 	ROM_LOAD( "f1sb32.bin", 0x000000, 0x080000, CRC(1b31fcce) SHA1(354cc6f43cd3bf3ba921ac8c5631ab993bedf563) )
 
 	ROM_REGION( 0x800000, "gfx5", 0 ) /* extra data? doesn't seem to be tiles */
@@ -1663,8 +1643,8 @@ ROM_START( f1superb )
 	ROM_LOAD( "f1sb24.bin", 0x000000, 0x200000, CRC(0fa26f65) SHA1(e92b14862fbce33ea4ab4567ec48199bfcbbdd84) ) // common samples
 	ROM_LOAD( "f1sb23.bin", 0x200000, 0x200000, CRC(bfefa3ab) SHA1(7770cc9b091e258ede7f2780df61a592cc008dd7) )
 
-    ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
-    ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
+	ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
+	ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
 ROM_END
 
 ROM_START( gratia )
@@ -1674,7 +1654,7 @@ ROM_START( gratia )
 	ROM_LOAD32_BYTE( "94019.028", 0x000001, 0x80000, CRC(e0762e89) SHA1(a567c347e7f73f1ef1c753d14ac4f58311380fac) )
 	ROM_LOAD32_BYTE( "94019.029", 0x000000, 0x80000, CRC(8059800b) SHA1(7548d01b6ea15e962353b3585db6515e5819e5ce) )
 
-	ROM_REGION( 0x0c00000, "gfx1", 0 ) /* sprites, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x0c00000, "gfx1", 0 ) /* sprites */
 	ROM_LOAD32_WORD( "94019.01", 0x000000, 0x200000, CRC(92d8ae9b) SHA1(02b36e6e14b28a9830e07fd328772dbb20b76889) )
 	ROM_LOAD32_WORD( "94019.02", 0x000002, 0x200000, CRC(f7bd9cc4) SHA1(5658bfb4081439ab06c6ade2531581aa60d1c6be) )
 	ROM_LOAD32_WORD( "94019.03", 0x400000, 0x200000, CRC(62a69590) SHA1(d95cc1e1ec85161ee6cd1ae77b405cf8ef81217a) )
@@ -1682,14 +1662,14 @@ ROM_START( gratia )
 	ROM_LOAD32_WORD( "94019.05", 0x800000, 0x200000, CRC(a16994df) SHA1(9170b1fd9252d7a9601c3b2e6b1ba86686730b86) )
 	ROM_LOAD32_WORD( "94019.06", 0x800002, 0x200000, CRC(01d52ef1) SHA1(1585c7eb3729bab78467f627b7b671d619451a74) )
 
-	ROM_REGION( 0x400000, "gfx2", 0 ) /* roz tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x400000, "gfx2", 0 ) /* roz tiles */
 	ROM_LOAD( "94019.08", 0x000000, 0x200000, CRC(abd124e0) SHA1(2da1d818c909e4abbb79ed03f3dbf15d744439ce) )
 	ROM_LOAD( "94019.09", 0x200000, 0x200000, CRC(711ab08b) SHA1(185b80b965ac3aba4857b4f83637008c2c1cc6ff) )
 
-	ROM_REGION( 0x200000, "gfx3", 0 ) /* bg tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x200000, "gfx3", 0 ) /* bg tiles */
 	ROM_LOAD( "94019_2.07", 0x000000, 0x200000, CRC(043f969b) SHA1(ad10339e561c1a65451a2e9a8e79ceda3787674a) )
 
-	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles */
 	ROM_LOAD( "94019_2.030",0x000000, 0x080000, CRC(f9543fcf) SHA1(8466c7893bc6c43e2a80b8f91a776fd0a345ea6c) )
 
 	ROM_REGION( 0x50000, "audiocpu", 0 ) /* z80 program */
@@ -1700,8 +1680,8 @@ ROM_START( gratia )
 	ROM_LOAD( "92042.01", 0x000000, 0x200000, CRC(0fa26f65) SHA1(e92b14862fbce33ea4ab4567ec48199bfcbbdd84) ) // common rom?
 	ROM_LOAD( "94019.10", 0x200000, 0x200000, CRC(a751e316) SHA1(3d658370c71b83582fd132b3da441089df9bfd05) )
 
-    ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
-    ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
+	ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
+	ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
 ROM_END
 
 ROM_START( gratiaa )
@@ -1711,7 +1691,7 @@ ROM_START( gratiaa )
 	ROM_LOAD32_BYTE( "94019.028", 0x000001, 0x80000, CRC(e0762e89) SHA1(a567c347e7f73f1ef1c753d14ac4f58311380fac) )
 	ROM_LOAD32_BYTE( "94019.029", 0x000000, 0x80000, CRC(8059800b) SHA1(7548d01b6ea15e962353b3585db6515e5819e5ce) )
 
-	ROM_REGION( 0x0c00000, "gfx1", 0 ) /* sprites, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x0c00000, "gfx1", 0 ) /* sprites */
 	ROM_LOAD32_WORD( "94019.01", 0x000000, 0x200000, CRC(92d8ae9b) SHA1(02b36e6e14b28a9830e07fd328772dbb20b76889) )
 	ROM_LOAD32_WORD( "94019.02", 0x000002, 0x200000, CRC(f7bd9cc4) SHA1(5658bfb4081439ab06c6ade2531581aa60d1c6be) )
 	ROM_LOAD32_WORD( "94019.03", 0x400000, 0x200000, CRC(62a69590) SHA1(d95cc1e1ec85161ee6cd1ae77b405cf8ef81217a) )
@@ -1719,14 +1699,14 @@ ROM_START( gratiaa )
 	ROM_LOAD32_WORD( "94019.05", 0x800000, 0x200000, CRC(a16994df) SHA1(9170b1fd9252d7a9601c3b2e6b1ba86686730b86) )
 	ROM_LOAD32_WORD( "94019.06", 0x800002, 0x200000, CRC(01d52ef1) SHA1(1585c7eb3729bab78467f627b7b671d619451a74) )
 
-	ROM_REGION( 0x400000, "gfx2", 0 ) /* roz tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x400000, "gfx2", 0 ) /* roz tiles */
 	ROM_LOAD( "94019.08", 0x000000, 0x200000, CRC(abd124e0) SHA1(2da1d818c909e4abbb79ed03f3dbf15d744439ce) )
 	ROM_LOAD( "94019.09", 0x200000, 0x200000, CRC(711ab08b) SHA1(185b80b965ac3aba4857b4f83637008c2c1cc6ff) )
 
-	ROM_REGION( 0x200000, "gfx3", 0 ) /* bg tiles, don't dispose since we use GFX_RAW */
-	ROM_LOAD( "94019.07", 0x000000, 0x200000, BAD_DUMP CRC(acb75824) SHA1(3b43e00a2d240761565042c8feead25a83ef0eb1)  )	// FIXED BITS (xxxxxxxx11111111)
+	ROM_REGION( 0x200000, "gfx3", 0 ) /* bg tiles */
+	ROM_LOAD( "94019.07", 0x000000, 0x200000, BAD_DUMP CRC(acb75824) SHA1(3b43e00a2d240761565042c8feead25a83ef0eb1)  )  // FIXED BITS (xxxxxxxx11111111)
 
-	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles */
 	ROM_LOAD( "94019.030",0x000000, 0x080000, CRC(026b5379) SHA1(b9237477f1bf8ae83174e8231492fe667e6d6a13) )
 
 	ROM_REGION( 0x50000, "audiocpu", 0 ) /* z80 program */
@@ -1737,8 +1717,8 @@ ROM_START( gratiaa )
 	ROM_LOAD( "92042.01", 0x000000, 0x200000, CRC(0fa26f65) SHA1(e92b14862fbce33ea4ab4567ec48199bfcbbdd84) ) // common rom?
 	ROM_LOAD( "94019.10", 0x200000, 0x200000, CRC(a751e316) SHA1(3d658370c71b83582fd132b3da441089df9bfd05) )
 
-    ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
-    ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
+	ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
+	ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
 ROM_END
 
 ROM_START( gametngk )
@@ -1748,7 +1728,7 @@ ROM_START( gametngk )
 	ROM_LOAD32_BYTE( "mr94041.28", 0x000001, 0x80000, CRC(b3738934) SHA1(cd07572e55e83807e76179cfc6b97e0410067911) )
 	ROM_LOAD32_BYTE( "mr94041.29", 0x000000, 0x80000, CRC(45154a45) SHA1(4c7c2c6738fdfe54ebe41a0ac6222cbfce5d7757) )
 
-	ROM_REGION( 0x1000000, "gfx1", 0 ) /* sprites, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x1000000, "gfx1", 0 ) /* sprites */
 	ROM_LOAD32_WORD( "mr94041.01", 0x0000000, 0x200000, CRC(3f99adf7) SHA1(cbb8d2fc253b0c58e7eb9286c66e6b36daf9d4af) )
 	ROM_LOAD32_WORD( "mr94041.02", 0x0000002, 0x200000, CRC(c3c5ae69) SHA1(5ed7f57a7139f87c680c68e44ea4022b917a9381) )
 	ROM_LOAD32_WORD( "mr94041.03", 0x0400000, 0x200000, CRC(d858b6de) SHA1(a06cf529c9508c8c8508894e2e004373edd9debf) )
@@ -1758,15 +1738,15 @@ ROM_START( gametngk )
 	ROM_LOAD32_WORD( "mr94041.07", 0x0c00000, 0x200000, CRC(a6966af5) SHA1(3a65824f3f325af39d8e9932357ce9f8878f0321) )
 	ROM_LOAD32_WORD( "mr94041.08", 0x0c00002, 0x200000, CRC(d7d2f73a) SHA1(0eb28f4cdea73aa8fed0b62cbac6cd7d7694c2ee) )
 
-	ROM_REGION( 0x400000, "gfx2", 0 ) /* roz tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x400000, "gfx2", 0 ) /* roz tiles */
 	ROM_LOAD( "mr94041.11", 0x000000, 0x200000, CRC(00dcdbc3) SHA1(f7e34bc9f714ea81fc9855d90db792dd1e99bae8) )
 	ROM_LOAD( "mr94041.12", 0x200000, 0x200000, CRC(0ce48329) SHA1(9c198cef998eb3b9c33123bd8cc02210498f82d9) )
 
-	ROM_REGION( 0x400000, "gfx3", 0 ) /* bg tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x400000, "gfx3", 0 ) /* bg tiles */
 	ROM_LOAD( "mr94041.09", 0x000000, 0x200000, CRC(a33e6051) SHA1(d6e34b022eb36dcfa8cfe6d6d1254f994b3b3dca) )
 	ROM_LOAD( "mr94041.10", 0x200000, 0x200000, CRC(b3497147) SHA1(df7d8ea7ec3e3df5e0c6658f14995df5479181bf) )
 
-	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles */
 	ROM_LOAD( "mr94041.30", 0x000000, 0x080000, CRC(c0f27b7f) SHA1(874fe80aa4b46520f844ef6efa61f28eabccbc4f) )
 
 	ROM_REGION( 0x50000, "audiocpu", 0 ) /* z80 program */
@@ -1777,8 +1757,8 @@ ROM_START( gametngk )
 	ROM_LOAD( "mr94041.13", 0x000000, 0x200000, CRC(fba84caf) SHA1(318270dbf825a8e0f315992c49a2dc34dd1df7c1) )
 	ROM_LOAD( "mr94041.14", 0x200000, 0x200000, CRC(2d6308bd) SHA1(600b6ccdbb976301075e0b287124a9fd5fe7fc1b) )
 
-    ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
-    ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
+	ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
+	ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
 ROM_END
 
 ROM_START( hayaosi2 )
@@ -1788,7 +1768,7 @@ ROM_START( hayaosi2 )
 	ROM_LOAD32_BYTE( "mb93138a.29", 0x000001, 0x80000, CRC(e6fe3d0d) SHA1(9a0caab82b160991b4f2ac993e7e4b4c5d3bb15e) )
 	ROM_LOAD32_BYTE( "mb93138a.31", 0x000000, 0x80000, CRC(d944bf8c) SHA1(ce93b5d2ebe886b38dc42b1e554b17dc951a51b4) )
 
-	ROM_REGION( 0x900000, "gfx1", 0 ) /* sprites, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x900000, "gfx1", 0 ) /* sprites */
 	ROM_LOAD32_WORD( "mr93038.04",  0x000000, 0x200000, CRC(ab5edb11) SHA1(b7742aefbce9efc512c3526714b6f20a6c03af60) )
 	ROM_LOAD32_WORD( "mr93038.05",  0x000002, 0x200000, CRC(274522f1) SHA1(717435d6bf1b2a2220a2f0a53b070bb81cc2ed2b) )
 	ROM_LOAD32_WORD( "mr93038.06",  0x400000, 0x200000, CRC(f9961ebf) SHA1(e91b160cb5a76e3f6044cc71681dadf2fbff7e8b) )
@@ -1796,13 +1776,13 @@ ROM_START( hayaosi2 )
 	ROM_LOAD32_WORD( "mb93138a.15", 0x800000, 0x080000, CRC(a5f64d87) SHA1(11bf017f700faba57a5a2edced7a5d81a581bc50) )
 	ROM_LOAD32_WORD( "mb93138a.3",  0x800002, 0x080000, CRC(a2ae2b21) SHA1(65cee4e5e0a9b8dcac578e34210e1af7d7b2e6f7) )
 
-	ROM_REGION( 0x200000, "gfx2", 0 ) /* roz tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x200000, "gfx2", 0 ) /* roz tiles */
 	ROM_LOAD( "mr93038.03",  0x000000, 0x200000, CRC(6999dec9) SHA1(eb4c6ba200cd08b41509314c659feb3af12117ee) )
 
-	ROM_REGION( 0x100000, "gfx3", 0 ) /* bg tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x100000, "gfx3", 0 ) /* bg tiles */
 	ROM_LOAD( "mr93038.08",  0x000000, 0x100000, CRC(21282cb0) SHA1(52ea94a6457f7684674783c362052bcc40086dd0) )
 
-	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles */
 	ROM_LOAD( "mb93138a.32", 0x000000, 0x080000, CRC(f563a144) SHA1(14d86e4992329811857e1faf282cd9ec530a364c) )
 
 	ROM_REGION( 0x50000, "audiocpu", 0 ) /* z80 program */
@@ -1813,8 +1793,8 @@ ROM_START( hayaosi2 )
 	ROM_LOAD( "mr92042.01",  0x000000, 0x200000, CRC(0fa26f65) SHA1(e92b14862fbce33ea4ab4567ec48199bfcbbdd84) ) // common samples
 	ROM_LOAD( "mr93038.01",  0x200000, 0x200000, CRC(b8a38bfc) SHA1(1aa7b69beebceb6f09a1ee006de054cb84002e94) )
 
-    ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
-    ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
+	ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
+	ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
 ROM_END
 
 /*
@@ -1891,7 +1871,7 @@ ROM_START( hayaosi3 )
 	ROM_LOAD32_BYTE( "mb93138.29", 0x000001, 0x80000, CRC(da891976) SHA1(27e8c395e92ca01b47bffdf766bc95a6c2150815) )
 	ROM_LOAD32_BYTE( "mb93138.31", 0x000000, 0x80000, CRC(2d17bb06) SHA1(623b603c4002734427c882424a1e0dc889cf7e02) )
 
-	ROM_REGION( 0x1000000, "gfx1", 0 ) /* sprites, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x1000000, "gfx1", 0 ) /* sprites */
 	ROM_LOAD32_WORD( "mr94027.01",  0x000000, 0x200000, CRC(c72e5c6e) SHA1(b98cd656c48c775953d00b5d8bafd4ffde76d8df) )
 	ROM_LOAD32_WORD( "mr94027.02",  0x000002, 0x200000, CRC(59976568) SHA1(a280c352d612913834c76b8e23d86c937fd21281) )
 	ROM_LOAD32_WORD( "mr94027.03",  0x400000, 0x200000, CRC(3ff68f4f) SHA1(1e367b92560c32c87e27fc0e99be3bdb5eb0510b) )
@@ -1901,13 +1881,13 @@ ROM_START( hayaosi3 )
 	ROM_LOAD32_WORD( "mr94027.07",  0xc00000, 0x200000, CRC(c66099c4) SHA1(5a6edffa39a98f38cc3cffbad9191fb2e794a812) )
 	ROM_LOAD32_WORD( "mr94027.08",  0xc00002, 0x200000, CRC(753b05e0) SHA1(0424e92b32a73c27ecb549e6e9449446ea938e40) )
 
-	ROM_REGION( 0x200000, "gfx2", 0 ) /* roz tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x200000, "gfx2", 0 ) /* roz tiles */
 	ROM_LOAD( "mr94027.09",  0x000000, 0x200000, CRC(32ead437) SHA1(b94175cf186b4ebcc180a4c092d2ffcdd9ff3b1d) )
 
-	ROM_REGION( 0x200000, "gfx3", 0 ) /* bg tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x200000, "gfx3", 0 ) /* bg tiles */
 	ROM_LOAD( "mr94027.11",  0x000000, 0x200000, CRC(b65d5096) SHA1(2c4e1e3e9f96be8369cb2de142a82f94506f85c0) )
 
-	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles */
 	ROM_LOAD( "mb93138.32", 0x000000, 0x080000, CRC(df5d00b4) SHA1(2bbbcd546d5b5170d81bf33b37b46b70b417c9c7) )
 
 	ROM_REGION( 0x50000, "audiocpu", 0 ) /* z80 program */
@@ -1918,8 +1898,8 @@ ROM_START( hayaosi3 )
 	ROM_LOAD( "mr92042.01",  0x000000, 0x200000, CRC(0fa26f65) SHA1(e92b14862fbce33ea4ab4567ec48199bfcbbdd84) ) // common samples
 	ROM_LOAD( "mr94027.10",  0x200000, 0x200000, CRC(e7cabe41) SHA1(5d903baed690a98856f7581319cf4dbfe1db47bb) )
 
-    ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
-    ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
+	ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
+	ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
 ROM_END
 
 ROM_START( kirarast )
@@ -1929,7 +1909,7 @@ ROM_START( kirarast )
 	ROM_LOAD32_BYTE( "mr95025.28", 0x000001, 0x80000, CRC(6df8c384) SHA1(3ad01d3d51cfc1f48029c16ee1cc74fc59d7603c) )
 	ROM_LOAD32_BYTE( "mr95025.29", 0x000000, 0x80000, CRC(3b6e681b) SHA1(148fa10631db53a4ad1dcdfb60b4f0654e077396) )
 
-	ROM_REGION( 0x1000000, "gfx1", 0 ) /* sprites, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x1000000, "gfx1", 0 ) /* sprites */
 	ROM_LOAD32_WORD( "mr95025.01",  0x000000, 0x200000, CRC(02279069) SHA1(fb3ce00701271d0163f72e4f2e56faa9f16d8fd0) )
 	ROM_LOAD32_WORD( "mr95025.02",  0x000002, 0x200000, CRC(885161d4) SHA1(1bc82de0b2759758d437db3ef9f0f7805f759b59) )
 	ROM_LOAD32_WORD( "mr95025.03",  0x400000, 0x200000, CRC(1ae06df9) SHA1(e1493a386fd8c54c88afab43d13d73869ae467ee) )
@@ -1939,14 +1919,14 @@ ROM_START( kirarast )
 	ROM_LOAD32_WORD( "mr95025.07",  0xc00000, 0x200000, CRC(0263a010) SHA1(b9c85647b406c89f0e839eac93eaf5d2e6963f7d) )
 	ROM_LOAD32_WORD( "mr95025.08",  0xc00002, 0x200000, CRC(8efc00d6) SHA1(f750e0e21310ceceeae3ad80eb2fe2920f5a0076) )
 
-	ROM_REGION( 0x400000, "gfx2", 0 ) /* roz tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x400000, "gfx2", 0 ) /* roz tiles */
 	ROM_LOAD( "mr95025.10",  0x000000, 0x200000, CRC(ba7ad413) SHA1(b1f1c218dea3217f21d5e2f44db3786055ed879a) )
 	ROM_LOAD( "mr95025.11",  0x200000, 0x200000, CRC(11557299) SHA1(6efa56f897ab026f965376a0d4032f7a0d20cafe) )
 
-	ROM_REGION( 0x200000, "gfx3", 0 ) /* bg tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x200000, "gfx3", 0 ) /* bg tiles */
 	ROM_LOAD( "mr95025.09",  0x000000, 0x200000, CRC(ca6cbd17) SHA1(9d16ef187b062590315066218e89bdf33cfd9865) )
 
-	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles */
 	ROM_LOAD( "mr95025.30",  0x000000, 0x080000, CRC(aee6e0c2) SHA1(dee985f7a9773ba7a4d31a3833a7775d778bbe5a) )
 
 	ROM_REGION( 0x50000, "audiocpu", 0 ) /* z80 program */
@@ -1957,8 +1937,8 @@ ROM_START( kirarast )
 	ROM_LOAD( "mr95025.12",  0x000000, 0x200000, CRC(1dd4f766) SHA1(455befd3a216f2197cd2e7e4899d4f1af7d20bf7) )
 	ROM_LOAD( "mr95025.13",  0x200000, 0x200000, CRC(0adfe5b8) SHA1(02309e5789b58896e5f68603502c76d4a917bd91) )
 
-    ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
-    ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
+	ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
+	ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
 ROM_END
 
 ROM_START( akiss )
@@ -1968,7 +1948,7 @@ ROM_START( akiss )
 	ROM_LOAD32_BYTE( "93166.28", 0x000001, 0x80000, CRC(20565478) SHA1(d532ab55be287f45d8d81317bb844c675eb1292c) )
 	ROM_LOAD32_BYTE( "93166.29", 0x000000, 0x80000, CRC(ff454f0d) SHA1(db81aaaf4160eb62badbe08fc01543463470ac97) )
 
-	ROM_REGION( 0x1000000, "gfx1", 0 ) /* sprites, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x1000000, "gfx1", 0 ) /* sprites */
 	ROM_LOAD32_WORD( "95008-01.13", 0x000000, 0x200000, CRC(1be66420) SHA1(9fc85e6108f230418e012ad05586010235139039))
 	ROM_LOAD32_WORD( "95008-02.1",  0x000002, 0x200000, CRC(1cc4808e) SHA1(70a19d66b4f187320c67760bc453b6afb7d66f9a) )
 	ROM_LOAD32_WORD( "95008-03.14", 0x400000, 0x200000, CRC(4045f0dc) SHA1(5ba9786618ecad9410dbdf3664f9dda848a754f7) )
@@ -1978,13 +1958,13 @@ ROM_START( akiss )
 	ROM_LOAD32_WORD( "95008-07.16", 0xc00000, 0x200000, CRC(bf47747e) SHA1(b97121953f41039182e25ea023802df4524cf9bd) )
 	ROM_LOAD32_WORD( "95008-08.4",  0xc00002, 0x200000, CRC(34829a09) SHA1(7229c56fee53a9d4d29cf0c9dec471b6cc4dc30b) )
 
-	ROM_REGION( 0x400000, "gfx2", 0 ) /* roz tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x400000, "gfx2", 0 ) /* roz tiles */
 	ROM_LOAD( "95008-10.11",  0x000000, 0x200000, CRC(52da2e9e) SHA1(d7a29bdd1c6801aa8d36bc098e75091c63ba0766) )
 
-	ROM_REGION( 0x200000, "gfx3", 0 ) /* bg tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x200000, "gfx3", 0 ) /* bg tiles */
 	ROM_LOAD( "95008-09.10",  0x000000, 0x200000,CRC(7236f6a0) SHA1(98dbb55f08d669ef3bf69394bb9739d0e6137fcb) )
 
-	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles */
 	ROM_LOAD( "93166.30",  0x000000, 0x080000, CRC(1807c1ea) SHA1(94696b8319c4982cb5d33423f56e2348f210cdb5) )
 
 	ROM_REGION( 0x50000, "audiocpu", 0 ) /* z80 program */
@@ -1995,8 +1975,8 @@ ROM_START( akiss )
 	ROM_LOAD( "95008-11.22",  0x000000, 0x200000, CRC(23b9af76) SHA1(98b4087c142500dc759bda94d71c77634452a7ad))
 	ROM_LOAD( "95008-12.23",  0x200000, 0x200000, CRC(780a2f45) SHA1(770cbf04e34ae7d72e6eb2304bcdfaff483cd8c1))
 
-    ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
-    ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
+	ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
+	ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
 ROM_END
 
 ROM_START( p47aces )
@@ -2006,7 +1986,7 @@ ROM_START( p47aces )
 	ROM_LOAD32_BYTE( "p47-28.bin", 0x000001, 0x80000, CRC(4742a5f7) SHA1(cd297aa150082c545647c9a755cf2cdbdc98c988) )
 	ROM_LOAD32_BYTE( "p47-29.bin", 0x000000, 0x80000, CRC(86e17d8b) SHA1(73004f243c6dfb86ce4cc61475dc7caaf452750e) )
 
-	ROM_REGION( 0xe00000, "gfx1", 0 ) /* sprites, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0xe00000, "gfx1", 0 ) /* sprites */
 	ROM_LOAD32_WORD( "p47-01.bin",  0x000002, 0x200000, CRC(28732d3c) SHA1(15b2687bcad31793fc7d6a9dc3eccb7ad9b5f659) )
 	ROM_LOAD32_WORD( "p47-13.bin",  0x000000, 0x200000, CRC(a6ccf999) SHA1(5d32fb6f6987ede6c125bec9581da4695ad64dff) )
 	ROM_LOAD32_WORD( "p47-02.bin",  0x400002, 0x200000, CRC(128db576) SHA1(f6561f54f6b95842a5f14d29682449bf0d837a85) )
@@ -2016,15 +1996,15 @@ ROM_START( p47aces )
 	ROM_LOAD32_WORD( "p47-04.bin",  0xc00002, 0x100000, CRC(4b3372be) SHA1(cdc7d7615b6b5d45ca071b2967980dc6c6294ac0) )
 	ROM_LOAD32_WORD( "p47-16.bin",  0xc00000, 0x100000, CRC(c23c5467) SHA1(5ff51ecb86ccbae2af160599890e13a7cc70072d) )
 
-	ROM_REGION( 0x400000, "gfx2", 0 ) /* roz tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x400000, "gfx2", 0 ) /* roz tiles */
 	ROM_LOAD( "p47-11.bin",  0x000000, 0x200000, CRC(c1fe16b3) SHA1(8b9d2483ba06ab8072676e73d949c696535b3d26) )
 	ROM_LOAD( "p47-12.bin",  0x200000, 0x200000, CRC(75871325) SHA1(9191263a52ec6ac325cf6130b35be7cdd1ec2f50) )
 
-	ROM_REGION( 0x400000, "gfx3", 0 ) /* bg tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x400000, "gfx3", 0 ) /* bg tiles */
 	ROM_LOAD( "p47-10.bin",  0x000000, 0x200000, CRC(a44e9e06) SHA1(ff51796e160d996e931b92049e6214982f270caa) )
 	ROM_LOAD( "p47-09.bin",  0x200000, 0x200000, CRC(226014a6) SHA1(090bdc1f6d2b9d33b431dbb49a457a4bb36cd3ad) )
 
-	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles */
 	ROM_LOAD( "p47-30.bin",  0x000000, 0x080000, CRC(7ba90fad) SHA1(c0a3d4458816f00b8f5eb4b6d4531d1abeaccbe5) )
 
 	ROM_REGION( 0x50000, "audiocpu", 0 ) /* z80 program */
@@ -2035,8 +2015,8 @@ ROM_START( p47aces )
 	ROM_LOAD( "p47-22.bin",  0x000000, 0x200000, CRC(0fa26f65) SHA1(e92b14862fbce33ea4ab4567ec48199bfcbbdd84) )
 	ROM_LOAD( "p47-23.bin",  0x200000, 0x200000, CRC(547fa4d4) SHA1(8a5ecb3300646762f63d37a27e643e1f6ce5e775) )
 
-    ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
-    ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
+	ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
+	ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
 ROM_END
 
 ROM_START( tetrisp )
@@ -2046,17 +2026,17 @@ ROM_START( tetrisp )
 	ROM_LOAD32_BYTE( "mr95024.28", 0x000001, 0x80000, CRC(87522e16) SHA1(4f0d8abec046884d89c559e3a4a5ac9e0e47a0dc) )
 	ROM_LOAD32_BYTE( "mr95024.29", 0x000000, 0x80000, CRC(43a61941) SHA1(a097c88c45d8486eb6ffdd13904b6eb2a3fa45b9) )
 
-	ROM_REGION( 0x400000, "gfx1", 0 ) /* sprites, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x400000, "gfx1", 0 ) /* sprites */
 	ROM_LOAD32_WORD( "mr95024.01", 0x000002, 0x200000, CRC(cb0e92b9) SHA1(179cc9e2d819d7f6238e924184e8a383d172aa72) )
 	ROM_LOAD32_WORD( "mr95024.13", 0x000000, 0x200000, CRC(4a825990) SHA1(f99ba9f88f5582259ba0e50480451d4e9d1d03b7) )
 
-	ROM_REGION( 0x200000, "gfx2", 0 ) /* roz tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x200000, "gfx2", 0 ) /* roz tiles */
 	ROM_LOAD( "mr95024.11", 0x000000, 0x200000, CRC(c0d5246f) SHA1(413285f6b40001281c4fcec1ce73400c3ae610ed) )
 
-	ROM_REGION( 0x200000, "gfx3", 0 ) /* bg tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x200000, "gfx3", 0 ) /* bg tiles */
 	ROM_LOAD( "mr95024.10", 0x000000, 0x200000, CRC(a03e4a8d) SHA1(d52c78d5e9d874dce514ffb035f2424409d8fb7a) )
 
-	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles */
 	ROM_LOAD( "mr95024.30", 0x000000, 0x080000, CRC(cea7002d) SHA1(5462edaeb9339790b95ed15a4bfaab8fae655b12) )
 
 	ROM_REGION( 0x50000, "audiocpu", 0 ) /* z80 program */
@@ -2067,8 +2047,8 @@ ROM_START( tetrisp )
 	ROM_LOAD( "mr95024.22", 0x000000, 0x200000, CRC(0fa26f65) SHA1(e92b14862fbce33ea4ab4567ec48199bfcbbdd84) ) // common samples
 	ROM_LOAD( "mr95024.23", 0x200000, 0x200000, CRC(57502a17) SHA1(ce880188854dc17d9ebbfa3c373469cf5e6858c2) )
 
-    ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
-    ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
+	ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
+	ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
 ROM_END
 
 ROM_START( tp2m32 )
@@ -2078,17 +2058,17 @@ ROM_START( tp2m32 )
 	ROM_LOAD32_BYTE( "tp2m3228.28", 0x000001, 0x80000, CRC(041aac23) SHA1(3f7863ffa897978493e98445fe020dccbe521752) )
 	ROM_LOAD32_BYTE( "tp2m3229.29", 0x000000, 0x80000, CRC(4e83b2ca) SHA1(2766793f050a6952f4f53a763686f95bd7544f3f) )
 
-	ROM_REGION( 0x800000, "gfx1", 0 ) /* sprites, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x800000, "gfx1", 0 ) /* sprites */
 	ROM_LOAD32_WORD( "96019-01.9", 0x000000, 0x400000, CRC(06f7dc64) SHA1(722c51b707b9854c0293afdff18b27ec7cae6719) )
 	ROM_LOAD32_WORD( "96019-02.8", 0x000002, 0x400000, CRC(3e613bed) SHA1(038b5e43fa3d69654107c8093126eeb2e8fa4ddc) )
 
-	ROM_REGION( 0x200000, "gfx2", 0 ) /* roz tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x200000, "gfx2", 0 ) /* roz tiles */
 	ROM_LOAD( "tp2m3204.11", 0x000000, 0x200000, CRC(b5a03129) SHA1(a50d8b70615c49216f647534d1658c1a6d58a783) )
 
-	ROM_REGION( 0x400000, "gfx3", 0 ) /* bg tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x400000, "gfx3", 0 ) /* bg tiles */
 	ROM_LOAD( "tp2m3203.10", 0x000000, 0x400000, CRC(94af8057) SHA1(e3bc6e02fe4c503ae51284770a76abbeff989147) )
 
-	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles */
 	ROM_LOAD( "tp2m3230.30", 0x000000, 0x080000, CRC(6845e476) SHA1(61c33714db2e2b5ccdcef0e0d3efdc391fe6aba2) )
 
 	ROM_REGION( 0x50000, "audiocpu", 0 ) /* z80 program */
@@ -2098,8 +2078,8 @@ ROM_START( tp2m32 )
 	ROM_REGION( 0x400000, "ymf", 0 ) /* samples */
 	ROM_LOAD( "tp2m3205.22", 0x000000, 0x200000, CRC(74aa5c31) SHA1(7e3f86198fb678244fab76bee9c72bbdfc818118) )
 
-    ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
-    ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
+	ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
+	ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
 ROM_END
 
 
@@ -2111,7 +2091,7 @@ ROM_START( bnstars ) /* ver 1.1 */
 	ROM_LOAD32_BYTE( "vsjanshi28.39", 0x000001, 0x80000, CRC(d075cfb6) SHA1(f70741e9f536d5c7604126d36c7aa8ed8f25c329) )
 	ROM_LOAD32_BYTE( "vsjanshi29.40", 0x000000, 0x80000, CRC(bc395b50) SHA1(84d7cc492a11a5a9402e929f0bd138ad63e3d079) )
 
-	ROM_REGION( 0x1000000, "gfx1", 0 ) /* sprites, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x1000000, "gfx1", 0 ) /* sprites */
 	ROM_LOAD32_WORD( "mr96004-01.13", 0x000000, 0x200000, CRC(3366d104) SHA1(2de0cabe2ead777b5b02cade7f2003ef7f90b75b) )
 	ROM_LOAD32_WORD( "mr96004-02.1",  0x000002, 0x200000, CRC(ad556664) SHA1(4b36f8d8d9efa37cf515af41d14433e7eafa27a2) )
 	ROM_LOAD32_WORD( "mr96004-03.14", 0x400000, 0x200000, CRC(b399e2b1) SHA1(9b6a00a219db8d66dcf592160b7b5f7a86b8f0c9) )
@@ -2121,13 +2101,13 @@ ROM_START( bnstars ) /* ver 1.1 */
 	ROM_LOAD32_WORD( "mr96004-07.16", 0xc00000, 0x200000, CRC(177e32fa) SHA1(3ca1f397dc28f1fa3a4136705b92c63e4e438f05) )
 	ROM_LOAD32_WORD( "mr96004-08.4",  0xc00002, 0x200000, CRC(f6df27b2) SHA1(60590976020d86bdccd4eaf57b349ea31bec6830) )
 
-	ROM_REGION( 0x400000, "gfx2", 0 ) /* roz tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x400000, "gfx2", 0 ) /* roz tiles */
 	ROM_LOAD( "mr96004-09.11",  0x000000, 0x400000, CRC(7f8ea9f0) SHA1(f1fe682dcb884f1aa4a5536e17ab94157a99f519) )
 
-	ROM_REGION( 0x200000, "gfx3", 0 ) /* bg tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x200000, "gfx3", 0 ) /* bg tiles */
 	ROM_LOAD( "mr96004-11.10", 0x000000, 0x200000,  CRC(e6da552c) SHA1(69a5af3015883793c7d1343243ccae23db9ef77c) )
 
-	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles */
 	ROM_LOAD( "vsjanshi30.41",  0x000000, 0x080000, CRC(fdbbac21) SHA1(c77d852e53126cc8ebfe1e79d1134e42b54d1aab) )
 
 	ROM_REGION( 0x50000, "audiocpu", 0 ) /* z80 program */
@@ -2137,8 +2117,8 @@ ROM_START( bnstars ) /* ver 1.1 */
 	ROM_REGION( 0x400000, "ymf", 0 ) /* samples - 8-bit signed PCM */
 	ROM_LOAD( "mr96004-10.22",  0x000000, 0x400000, CRC(83f4303a) SHA1(90ee010591afe1d35744925ef0e8d9a7e2ef3378) )
 
-    ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
-    ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
+	ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
+	ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
 ROM_END
 
 /*
@@ -2186,7 +2166,7 @@ ROM_START( wpksocv2 )
 	ROM_LOAD32_BYTE( "29", 0x000001, 0x80000, CRC(22acd835) SHA1(0fa96a6dfde737d541842f85dc257776044e15b5) )
 	ROM_LOAD32_BYTE( "31", 0x000000, 0x80000, CRC(f25e50f5) SHA1(b58722f11a8b94ef053caf531ac94a959350288a) )
 
-	ROM_REGION( 0xc00000, "gfx1", 0 ) /* sprites, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0xc00000, "gfx1", 0 ) /* sprites */
 	ROM_LOAD32_WORD( "mr95033-01.13", 0x000000, 0x200000, CRC(1f76ed57) SHA1(af9076b4b4c26b362825d892f46d2c04b4bb9d07) )
 	ROM_LOAD32_WORD( "mr95033-02.1",  0x000002, 0x200000, CRC(5b119910) SHA1(aff44e355227dd159e388ab85a5b6d48644ff421) )
 	ROM_LOAD32_WORD( "mr95033-03.14", 0x400000, 0x200000, CRC(8b6099ed) SHA1(c514cec1491aed00a5714c0b8d17c96e87ba50aa) )
@@ -2194,13 +2174,13 @@ ROM_START( wpksocv2 )
 	ROM_LOAD32_WORD( "mr95033-05.15", 0x800000, 0x200000, CRC(cc5b8d0b) SHA1(70a5b9db600fc168d13ad54653cf1c8d2a45d991) )
 	ROM_LOAD32_WORD( "mr95033-06.3",  0x800002, 0x200000, CRC(2f79942f) SHA1(73417d10f37bcd539b8081312226cf142a5a0d3d) )
 
-	ROM_REGION( 0x200000, "gfx2", 0 ) /* roz tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x200000, "gfx2", 0 ) /* roz tiles */
 	ROM_LOAD( "mr95033-07.9", 0x000000, 0x200000, CRC(76cd2e0b) SHA1(41aa18dfb4e06547d1f6d7ce49e5225027d16bbb) )
 
-	ROM_REGION( 0x200000, "gfx3", 0 ) /* bg tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x200000, "gfx3", 0 ) /* bg tiles */
 	ROM_LOAD( "mr95033-09.11", 0x000000, 0x200000, CRC(8a6dae81) SHA1(e235f2865a9a003330bff1e4d0a017e5d10efd2a) )
 
-	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles, don't dispose since we use GFX_RAW */
+	ROM_REGION( 0x080000, "gfx4", 0 ) /* tx tiles */
 	ROM_LOAD( "32", 0x000000, 0x080000, CRC(becc25c2) SHA1(4ae7665cd45ebd9586068e99327145194ba216fc) )
 
 	ROM_REGION( 0x50000, "audiocpu", 0 ) /* z80 program */
@@ -2211,8 +2191,8 @@ ROM_START( wpksocv2 )
 	ROM_LOAD( "mr92042-01.22", 0x000000, 0x200000, CRC(0fa26f65) SHA1(e92b14862fbce33ea4ab4567ec48199bfcbbdd84) )
 	ROM_LOAD( "mr95033-08.23", 0x200000, 0x200000, CRC(89a291fa) SHA1(7746a0490134fc902ce2dc7b0d33b455d792c105) )
 
-    ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
-    ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
+	ROM_REGION( 0x000001, "motherbrd_pals", 0) /* Motherboard PAL */
+	ROM_LOAD( "91022-01.ic83", 0x00000, 0x00001, NO_DUMP ) /* AMI 18CV8-15. */
 ROM_END
 
 
@@ -2220,73 +2200,72 @@ static void configure_banks(running_machine &machine)
 {
 	ms32_state *state = machine.driver_data<ms32_state>();
 	state_save_register_global(machine, state->m_to_main);
-	memory_configure_bank(machine, "bank4", 0, 16, machine.region("audiocpu")->base() + 0x14000, 0x4000);
-	memory_configure_bank(machine, "bank5", 0, 16, machine.region("audiocpu")->base() + 0x14000, 0x4000);
+	state->membank("bank4")->configure_entries(0, 16, state->memregion("audiocpu")->base() + 0x14000, 0x4000);
+	state->membank("bank5")->configure_entries(0, 16, state->memregion("audiocpu")->base() + 0x14000, 0x4000);
 }
 
-static DRIVER_INIT( ms32_common )
+DRIVER_INIT_MEMBER(ms32_state,ms32_common)
 {
-	ms32_state *state = machine.driver_data<ms32_state>();
-	state->m_nvram_8 = auto_alloc_array(machine, UINT8, 0x2000);
-	configure_banks(machine);
+	m_nvram_8 = auto_alloc_array(machine(), UINT8, 0x2000);
+	configure_banks(machine());
 }
 
 /* SS91022-10: desertwr, gratiaa, tp2m32, gametngk */
-static DRIVER_INIT (ss91022_10)
+DRIVER_INIT_MEMBER(ms32_state,ss91022_10)
 {
 	DRIVER_INIT_CALL(ms32_common);
-	ms32_rearrange_sprites(machine, "gfx1");
-	decrypt_ms32_tx(machine, 0x00000,0x35, "gfx4");
-	decrypt_ms32_bg(machine, 0x00000,0xa3, "gfx3");
+	ms32_rearrange_sprites(machine(), "gfx1");
+	decrypt_ms32_tx(machine(), 0x00000,0x35, "gfx4");
+	decrypt_ms32_bg(machine(), 0x00000,0xa3, "gfx3");
 }
 
 /* SS92046_01: bbbxing, f1superb, tetrisp, hayaosi2 */
-static DRIVER_INIT (ss92046_01)
+DRIVER_INIT_MEMBER(ms32_state,ss92046_01)
 {
 	DRIVER_INIT_CALL(ms32_common);
-	ms32_rearrange_sprites(machine, "gfx1");
-	decrypt_ms32_tx(machine, 0x00020,0x7e, "gfx4");
-	decrypt_ms32_bg(machine, 0x00001,0x9b, "gfx3");
+	ms32_rearrange_sprites(machine(), "gfx1");
+	decrypt_ms32_tx(machine(), 0x00020,0x7e, "gfx4");
+	decrypt_ms32_bg(machine(), 0x00001,0x9b, "gfx3");
 }
 
 /* SS92047-01: gratia, kirarast */
-static DRIVER_INIT (ss92047_01)
+DRIVER_INIT_MEMBER(ms32_state,ss92047_01)
 {
 	DRIVER_INIT_CALL(ms32_common);
-	ms32_rearrange_sprites(machine, "gfx1");
-	decrypt_ms32_tx(machine, 0x24000,0x18, "gfx4");
-	decrypt_ms32_bg(machine, 0x24000,0x55, "gfx3");
+	ms32_rearrange_sprites(machine(), "gfx1");
+	decrypt_ms32_tx(machine(), 0x24000,0x18, "gfx4");
+	decrypt_ms32_bg(machine(), 0x24000,0x55, "gfx3");
 }
 
 /* SS92048-01: p47aces, 47pie2, 47pie2o */
-static DRIVER_INIT (ss92048_01)
+DRIVER_INIT_MEMBER(ms32_state,ss92048_01)
 {
 	DRIVER_INIT_CALL(ms32_common);
-	ms32_rearrange_sprites(machine, "gfx1");
-	decrypt_ms32_tx(machine, 0x20400,0xd6, "gfx4");
-	decrypt_ms32_bg(machine, 0x20400,0xd4, "gfx3");
+	ms32_rearrange_sprites(machine(), "gfx1");
+	decrypt_ms32_tx(machine(), 0x20400,0xd6, "gfx4");
+	decrypt_ms32_bg(machine(), 0x20400,0xd4, "gfx3");
 }
 
-static DRIVER_INIT (kirarast)
+DRIVER_INIT_MEMBER(ms32_state,kirarast)
 {
 	DRIVER_INIT_CALL(ss92047_01);
 }
 
-static DRIVER_INIT (47pie2)
+DRIVER_INIT_MEMBER(ms32_state,47pie2)
 {
 	DRIVER_INIT_CALL(ss92048_01);
 }
 
-static DRIVER_INIT (f1superb)
+DRIVER_INIT_MEMBER(ms32_state,f1superb)
 {
 #if 0 // we shouldn't need this hack, something else is wrong, and the x offsets are never copied either, v70 problems??
-	UINT32 *pROM = (UINT32 *)machine.region("maincpu")->base();
+	UINT32 *pROM = (UINT32 *)machine().root_device().memregion("maincpu")->base();
 	pROM[0x19d04/4]=0x167a021a; // bne->br  : sprite Y offset table is always copied to RAM
 #endif
 	DRIVER_INIT_CALL(ss92046_01);
 }
 
-static DRIVER_INIT (bnstars)
+DRIVER_INIT_MEMBER(ms32_state,bnstars)
 {
 	DRIVER_INIT_CALL(ss92046_01);
 }
@@ -2295,26 +2274,26 @@ static DRIVER_INIT (bnstars)
 
 
 
-GAME( 1994, hayaosi2, 0,        ms32, hayaosi2, ss92046_01, ROT0,   "Jaleco", "Hayaoshi Quiz Grand Champion Taikai", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND )
-GAME( 1994, hayaosi3, 0,        ms32, hayaosi3, ss92046_01, ROT0,   "Jaleco", "Hayaoshi Quiz Nettou Namahousou", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND )
-GAME( 1994, bbbxing,  0,        ms32, bbbxing,  ss92046_01, ROT0,   "Jaleco", "Best Bout Boxing", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND )
-GAME( 1994, 47pie2,   0,        ms32, 47pie2,   47pie2,     ROT0,   "Jaleco", "Idol Janshi Su-Chi-Pie 2 (v1.1)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1994, 47pie2o,  47pie2,   ms32, 47pie2,   47pie2,     ROT0,   "Jaleco", "Idol Janshi Su-Chi-Pie 2 (v1.0)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1995, desertwr, 0,        ms32, desertwr, ss91022_10, ROT270, "Jaleco", "Desert War / Wangan Sensou", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1995, gametngk, 0,        ms32, gametngk, ss91022_10, ROT270, "Jaleco", "The Game Paradise - Master of Shooting! / Game Tengoku - The Game Paradise", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1995, tetrisp,  0,        ms32, tetrisp,  ss92046_01, ROT0,   "Jaleco / BPS", "Tetris Plus", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1995, p47aces,  0,        ms32, p47aces,  ss92048_01, ROT0,   "Jaleco", "P-47 Aces", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1995, akiss,    0,        ms32, 47pie2,   kirarast,   ROT0,   "Jaleco", "Mahjong Angel Kiss", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1996, gratia,   0,        ms32, gratia,   ss92047_01, ROT0,   "Jaleco", "Gratia - Second Earth (92047-01 version)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1996, gratiaa,  gratia,   ms32, gratia,   ss91022_10, ROT0,   "Jaleco", "Gratia - Second Earth (91022-10 version)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1996, kirarast, 0,        ms32, kirarast, kirarast,   ROT0,   "Jaleco", "Ryuusei Janshi Kirara Star", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1997, tp2m32,   tetrisp2, ms32, tp2m32,   ss91022_10, ROT0,   "Jaleco", "Tetris Plus 2 (MegaSystem 32 Version)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1997, bnstars,  bnstars1, ms32, 47pie2,   bnstars,    ROT0,   "Jaleco", "Vs. Janshi Brandnew Stars (MegaSystem32 Version)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
-GAME( 1996, wpksocv2, 0,        ms32, wpksocv2, ss92046_01, ROT0,   "Jaleco", "World PK Soccer V2 (ver 1.1)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1994, hayaosi2, 0,        ms32, hayaosi2, ms32_state, ss92046_01, ROT0,   "Jaleco", "Hayaoshi Quiz Grand Champion Taikai", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND )
+GAME( 1994, hayaosi3, 0,        ms32, hayaosi3, ms32_state, ss92046_01, ROT0,   "Jaleco", "Hayaoshi Quiz Nettou Namahousou", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND )
+GAME( 1994, bbbxing,  0,        ms32, bbbxing, ms32_state,  ss92046_01, ROT0,   "Jaleco", "Best Bout Boxing", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND )
+GAME( 1994, 47pie2,   0,        ms32, 47pie2, ms32_state,   47pie2,     ROT0,   "Jaleco", "Idol Janshi Su-Chi-Pie 2 (v1.1)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1994, 47pie2o,  47pie2,   ms32, 47pie2, ms32_state,   47pie2,     ROT0,   "Jaleco", "Idol Janshi Su-Chi-Pie 2 (v1.0)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1995, desertwr, 0,        ms32, desertwr, ms32_state, ss91022_10, ROT270, "Jaleco", "Desert War / Wangan Sensou", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1995, gametngk, 0,        ms32, gametngk, ms32_state, ss91022_10, ROT270, "Jaleco", "The Game Paradise - Master of Shooting! / Game Tengoku - The Game Paradise", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1995, tetrisp,  0,        ms32, tetrisp, ms32_state,  ss92046_01, ROT0,   "Jaleco / BPS", "Tetris Plus", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1995, p47aces,  0,        ms32, p47aces, ms32_state,  ss92048_01, ROT0,   "Jaleco", "P-47 Aces", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1995, akiss,    0,        ms32, 47pie2, ms32_state,   kirarast,   ROT0,   "Jaleco", "Mahjong Angel Kiss", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1996, gratia,   0,        ms32, gratia, ms32_state,   ss92047_01, ROT0,   "Jaleco", "Gratia - Second Earth (92047-01 version)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1996, gratiaa,  gratia,   ms32, gratia, ms32_state,   ss91022_10, ROT0,   "Jaleco", "Gratia - Second Earth (91022-10 version)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1996, kirarast, 0,        ms32, kirarast, ms32_state, kirarast,   ROT0,   "Jaleco", "Ryuusei Janshi Kirara Star", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1997, tp2m32,   tetrisp2, ms32, tp2m32, ms32_state,   ss91022_10, ROT0,   "Jaleco", "Tetris Plus 2 (MegaSystem 32 Version)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1997, bnstars,  bnstars1, ms32, 47pie2, ms32_state,   bnstars,    ROT0,   "Jaleco", "Vs. Janshi Brandnew Stars (MegaSystem32 Version)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1996, wpksocv2, 0,        ms32, wpksocv2, ms32_state, ss92046_01, ROT0,   "Jaleco", "World PK Soccer V2 (ver 1.1)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE )
 
 
 /* these boot and show something */
-GAME( 1994, f1superb, 0,        f1superb, f1superb, f1superb, ROT0,   "Jaleco", "F1 Super Battle", GAME_NOT_WORKING | GAME_NO_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1994, f1superb, 0,        f1superb, f1superb, ms32_state, f1superb, ROT0,   "Jaleco", "F1 Super Battle", GAME_NOT_WORKING | GAME_NO_SOUND | GAME_SUPPORTS_SAVE )
 
 /* Notes from Charles MacDonald
 

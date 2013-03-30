@@ -51,8 +51,8 @@
 	<view name="Shifter-R">
 		<screen index="0">
 			<bounds x="0" y="0" width="480" height="640" />
-		</screen>		
-		<bezel element="shifter" inputtag="SSIO.IP0" inputmask="0x10">
+		</screen>
+		<bezel element="shifter" inputtag="ssio:IP0" inputmask="0x10">
 			<bounds x="446" y="574" width="32" height="64" />
 			<color alpha="0.6" />
 		</bezel>
@@ -60,8 +60,8 @@
 	<view name="Shifter-L">
 		<screen index="0">
 			<bounds x="0" y="0" width="480" height="640" />
-		</screen>		
-		<bezel element="shifter" inputtag="SSIO.IP0" inputmask="0x10">
+		</screen>
+		<bezel element="shifter" inputtag="ssio:IP0" inputmask="0x10">
 			<bounds x="2" y="574" width="32" height="64" />
 			<color alpha="0.6" />
 		</bezel>

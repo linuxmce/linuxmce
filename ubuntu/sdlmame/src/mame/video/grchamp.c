@@ -9,21 +9,21 @@
 
 
 
-#define RGB_MAX		191
+#define RGB_MAX     191
 
 
-PALETTE_INIT( grchamp )
+void grchamp_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	static const int resistances[3] = { 100, 270, 470 };
 	double rweights[3], gweights[3], bweights[2];
-	grchamp_state *state = machine.driver_data<grchamp_state>();
 	int i;
 
 	/* compute the color output resistor weights */
-	compute_resistor_weights(0,	RGB_MAX, -1.0,
-			3,	&resistances[0], rweights, 0, 100,
-			3,	&resistances[0], gweights, 0, 100,
-			2,	&resistances[0], bweights, 0, 100);
+	compute_resistor_weights(0, RGB_MAX, -1.0,
+			3,  &resistances[0], rweights, 0, 100,
+			3,  &resistances[0], gweights, 0, 100,
+			2,  &resistances[0], bweights, 0, 100);
 
 	/* initialize the palette with these colors */
 	for (i = 0; i < 0x20; i++)
@@ -47,81 +47,73 @@ PALETTE_INIT( grchamp )
 		bit1 = (color_prom[i] >> 7) & 1;
 		b = combine_2_weights(bweights, bit0, bit1);
 
-		state->m_bgcolor[i] = MAKE_RGB(r, g, b);
+		m_bgcolor[i] = MAKE_RGB(r, g, b);
 	}
 }
 
 
-WRITE8_HANDLER( grchamp_left_w )
+WRITE8_MEMBER(grchamp_state::grchamp_left_w)
 {
-	grchamp_state *state = space->machine().driver_data<grchamp_state>();
-	state->m_leftram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_left_tilemap, offset);
+	m_leftram[offset] = data;
+	m_left_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( grchamp_center_w )
+WRITE8_MEMBER(grchamp_state::grchamp_center_w)
 {
-	grchamp_state *state = space->machine().driver_data<grchamp_state>();
-	state->m_centerram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_center_tilemap, offset);
+	m_centerram[offset] = data;
+	m_center_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( grchamp_right_w )
+WRITE8_MEMBER(grchamp_state::grchamp_right_w)
 {
-	grchamp_state *state = space->machine().driver_data<grchamp_state>();
-	state->m_rightram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_right_tilemap, offset);
+	m_rightram[offset] = data;
+	m_right_tilemap->mark_tile_dirty(offset);
 }
 
-static TILE_GET_INFO( get_text_tile_info )
+TILE_GET_INFO_MEMBER(grchamp_state::get_text_tile_info)
 {
-	grchamp_state *state = machine.driver_data<grchamp_state>();
-	SET_TILE_INFO(0, state->m_videoram[tile_index], 0, 0);
+	SET_TILE_INFO_MEMBER(0, m_videoram[tile_index], 0, 0);
 }
 
-static TILE_GET_INFO( get_left_tile_info )
+TILE_GET_INFO_MEMBER(grchamp_state::get_left_tile_info)
 {
-	grchamp_state *state = machine.driver_data<grchamp_state>();
-	SET_TILE_INFO(1, state->m_leftram[tile_index], 0, 0);
+	SET_TILE_INFO_MEMBER(1, m_leftram[tile_index], 0, 0);
 }
 
-static TILE_GET_INFO( get_right_tile_info )
+TILE_GET_INFO_MEMBER(grchamp_state::get_right_tile_info)
 {
-	grchamp_state *state = machine.driver_data<grchamp_state>();
-	SET_TILE_INFO(2, state->m_rightram[tile_index], 0, 0);
+	SET_TILE_INFO_MEMBER(2, m_rightram[tile_index], 0, 0);
 }
 
-static TILE_GET_INFO( get_center_tile_info )
+TILE_GET_INFO_MEMBER(grchamp_state::get_center_tile_info)
 {
-	grchamp_state *state = machine.driver_data<grchamp_state>();
-	SET_TILE_INFO(3, state->m_centerram[tile_index], 0, 0);
+	SET_TILE_INFO_MEMBER(3, m_centerram[tile_index], 0, 0);
 }
 
-static TILEMAP_MAPPER( get_memory_offset )
+TILEMAP_MAPPER_MEMBER(grchamp_state::get_memory_offset)
 {
 	return (col % 32) + row * 32 + (col / 32) * 32*32;
 }
 
 
-VIDEO_START( grchamp )
+void grchamp_state::video_start()
 {
-	grchamp_state *state = machine.driver_data<grchamp_state>();
 
-	state->m_work_bitmap = auto_bitmap_alloc(machine,32,32,machine.primary_screen->format());
+	m_work_bitmap.allocate(32,32);
 
 	/* allocate tilemaps for each of the three sections */
-	state->m_text_tilemap = tilemap_create(machine, get_text_tile_info, tilemap_scan_rows,  8,8, 32,32);
-	state->m_left_tilemap = tilemap_create(machine, get_left_tile_info, get_memory_offset,  8,8, 64,32);
-	state->m_right_tilemap = tilemap_create(machine, get_right_tile_info, get_memory_offset,  8,8, 64,32);
-	state->m_center_tilemap = tilemap_create(machine, get_center_tile_info, get_memory_offset,  8,8, 64,32);
+	m_text_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(grchamp_state::get_text_tile_info),this), TILEMAP_SCAN_ROWS,  8,8, 32,32);
+	m_left_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(grchamp_state::get_left_tile_info),this), tilemap_mapper_delegate(FUNC(grchamp_state::get_memory_offset),this),  8,8, 64,32);
+	m_right_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(grchamp_state::get_right_tile_info),this), tilemap_mapper_delegate(FUNC(grchamp_state::get_memory_offset),this),  8,8, 64,32);
+	m_center_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(grchamp_state::get_center_tile_info),this), tilemap_mapper_delegate(FUNC(grchamp_state::get_memory_offset),this),  8,8, 64,32);
 }
 
 #if 0
-static int collision_check(running_machine &machine, grchamp_state *state, bitmap_t *bitmap, int which )
+static int collision_check(running_machine &machine, grchamp_state *state, bitmap_ind16 &bitmap, int which )
 {
 	int bgcolor = machine.pens[0];
 	int sprite_transp = machine.pens[0x24];
-	const rectangle *visarea = machine.primary_screen->visible_area();
+	const rectangle &visarea = machine.primary_screen->visible_area();
 	int y0 = 240 - state->m_cpu0_out[3];
 	int x0 = 256 - state->m_cpu0_out[2];
 	int x,y,sx,sy;
@@ -132,7 +124,7 @@ static int collision_check(running_machine &machine, grchamp_state *state, bitma
 	{
 		/* draw the current player sprite into a work bitmap */
 		drawgfx_opaque( state->m_work_bitmap,
-			0,
+			state->m_work_bitmap.cliprect(),
 			machine.gfx[4],
 			state->m_cpu0_out[4]&0xf,
 			1, /* color */
@@ -144,31 +136,30 @@ static int collision_check(running_machine &machine, grchamp_state *state, bitma
 	{
 		for( x = 0; x<32; x++ )
 		{
-			pixel = *BITMAP_ADDR16(state->m_work_bitmap, y, x);
+			pixel = state->m_work_bitmap.pix16(y, x);
 			if( pixel != sprite_transp ){
 				sx = x+x0;
 				sy = y+y0;
-				if( (sx >= visarea->min_x) && (sx <= visarea->max_x) &&
-					(sy >= visarea->min_y) && (sy <= visarea->max_y) )
+				if(visarea->contains(sx, sy))
 				{
 					// Collision check uses only 16 pens!
-					pixel = *BITMAP_ADDR16(bitmap, sy, sx) % 16;
+					pixel = bitmap.pix16(sy, sx) % 16;
 					if( pixel != bgcolor )
 					{
 						result = 1; /* flag collision */
 						/*  wipe this pixel, so collision checks with the
-                        **  next layer work */
-						*BITMAP_ADDR16(bitmap, sy, sx) = bgcolor;
+						**  next layer work */
+						bitmap.pix16(sy, sx) = bgcolor;
 					}
 				}
 			}
 
-        }
+		}
 	}
 	return result?(1<<which):0;
 }
 
-static void draw_fog(grchamp_state *state, bitmap_t *bitmap, const rectangle *cliprect, int fog)
+static void draw_fog(grchamp_state *state, bitmap_ind16 &bitmap, const rectangle &cliprect, int fog)
 {
 	int x,y,offs;
 
@@ -180,14 +171,14 @@ static void draw_fog(grchamp_state *state, bitmap_t *bitmap, const rectangle *cl
 			offs = 0x40*(x-(100-FOG_SIZE-1));
 		for(y=16;y<240;y++)
 		{
-			*BITMAP_ADDR16(bitmap, y, x) = *BITMAP_ADDR16(bitmap, y, x) + offs;
+			bitmap.pix16(y, x) = bitmap.pix16(y, x) + offs;
 		}
 	}
 }
 
-static void draw_sprites(running_machine &machine, grchamp_state *state, bitmap_t *bitmap, const rectangle *cliprect)
+static void draw_sprites(running_machine &machine, grchamp_state *state, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	const gfx_element *gfx = machine.gfx[5];
+	gfx_element *gfx = machine.gfx[5];
 	int bank = (state->m_cpu0_out[0] & 0x20) ? 0x40 : 0x00;
 	const UINT8 *source = state->m_spriteram + 0x40;
 	const UINT8 *finish = source + 0x40;
@@ -248,8 +239,8 @@ static void draw_objects(running_machine &machine, grchamp_state *state, int y, 
 
 
 */
-	const UINT8 *prom = machine.region("proms")->base() + 0x20;
-	const gfx_element *gfx;
+	const UINT8 *prom = machine.root_device().memregion("proms")->base() + 0x20;
+	gfx_element *gfx;
 	int change = (state->m_cpu0_out[0] & 0x20) << 3;
 	int num;
 
@@ -261,12 +252,12 @@ static void draw_objects(running_machine &machine, grchamp_state *state, int y, 
 	for (num = 0; num < 16; num++)
 	{
 		/*
-            Each sprite is 4 bytes. The logic reads one byte every 2H:
-                5C,7D,5E,7F, 5C,5D,5E,5F, 58,79,5A,7B, 58,59,5A,5B,
-                54,75,56,77, 54,55,56,57, 50,71,52,73, 50,51,52,53,
-                4C,6D,4E,6F, 4C,4D,4E,4F, 48,69,4A,6B, 48,49,4A,4B,
-                44,65,46,67, 44,45,46,47, 40,61,42,63, 40,41,42,43,
-        */
+		    Each sprite is 4 bytes. The logic reads one byte every 2H:
+		        5C,7D,5E,7F, 5C,5D,5E,5F, 58,79,5A,7B, 58,59,5A,5B,
+		        54,75,56,77, 54,55,56,57, 50,71,52,73, 50,51,52,53,
+		        4C,6D,4E,6F, 4C,4D,4E,4F, 48,69,4A,6B, 48,49,4A,4B,
+		        44,65,46,67, 44,45,46,47, 40,61,42,63, 40,41,42,43,
+		*/
 		int dataoffs = ((~num & 0x0e) << 1) | ((~num & 0x01) << 5);
 
 		/* the first of the 4 bytes is the Y position; this is used to match the scanline */
@@ -281,7 +272,7 @@ static void draw_objects(running_machine &machine, grchamp_state *state, int y, 
 			int code = (codeflip & 0x3f) + (change >> 2);
 			int yflip = (codeflip & 0x80) ? 0x0f : 0x00;
 			int xflip = (codeflip & 0x40) ? 0x0f : 0x00;
-			const UINT8 *src = gfx_element_get_data(gfx, code) + ((dy ^ yflip) & 15) * gfx->line_modulo;
+			const UINT8 *src = gfx->get_data(code) + ((dy ^ yflip) & 15) * gfx->rowbytes();
 
 			/* the third byte is: color in bits 0-2 */
 			int color = (state->m_spriteram[0x42 + (dataoffs & ~0x20)] & 0x07) << 2;
@@ -313,19 +304,19 @@ static void draw_objects(running_machine &machine, grchamp_state *state, int y, 
 	for (num = 0; num < 32; num++)
 	{
 		/*
-            The logic reads one byte every 4H, 64 bytes total:
-                3E,3F,3C,3D, 3A,3B,38,39, 36,37,34,35, 32,33,30,31,
-                2E,2F,2C,2D, 2A,2B,28,29, 26,27,24,25, 22,23,20,21,
-                1E,1F,1C,1D, 1A,1B,18,19, 16,17,14,15, 12,13,10,11,
-                0E,0F,0C,0D, 0A,0B,08,09, 06,07,04,05, 02,03,00,01
-        */
+		    The logic reads one byte every 4H, 64 bytes total:
+		        3E,3F,3C,3D, 3A,3B,38,39, 36,37,34,35, 32,33,30,31,
+		        2E,2F,2C,2D, 2A,2B,28,29, 26,27,24,25, 22,23,20,21,
+		        1E,1F,1C,1D, 1A,1B,18,19, 16,17,14,15, 12,13,10,11,
+		        0E,0F,0C,0D, 0A,0B,08,09, 06,07,04,05, 02,03,00,01
+		*/
 		int hprime = num ^ 0x1f;
 		int dataoffs = hprime << 1;
 		int sy = state->m_spriteram[0x00 + dataoffs];
 		int dy = sy + ~y;
 		int color = (state->m_spriteram[0x01 + dataoffs] & 0x07) << 2;
 		int code = state->m_videoram[hprime | ((dy & 0xf8) << 2)] + change;
-		const UINT8 *src = gfx_element_get_data(gfx, code) + (dy & 7) * gfx->line_modulo;
+		const UINT8 *src = gfx->get_data(code) + (dy & 7) * gfx->rowbytes();
 		int x;
 
 		/* draw 8 pixels */
@@ -352,7 +343,7 @@ static void draw_objects(running_machine &machine, grchamp_state *state, int y, 
 }
 
 
-SCREEN_UPDATE( grchamp )
+UINT32 grchamp_state::screen_update_grchamp(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
 	static const rgb_t objpix_lookup[8] =
 	{
@@ -366,53 +357,52 @@ SCREEN_UPDATE( grchamp )
 		MAKE_RGB(RGB_MAX,RGB_MAX,RGB_MAX)
 	};
 
-	grchamp_state *state = screen->machine().driver_data<grchamp_state>();
-	const UINT8 *amedata = screen->machine().region("gfx5")->base();
-	const UINT8 *headdata = screen->machine().region("gfx6")->base();
-	const UINT8 *pldata = screen->machine().region("gfx7")->base();
-	bitmap_t *lpixmap = tilemap_get_pixmap(state->m_left_tilemap);
-	bitmap_t *rpixmap = tilemap_get_pixmap(state->m_right_tilemap);
-	bitmap_t *cpixmap = tilemap_get_pixmap(state->m_center_tilemap);
+	const UINT8 *amedata = machine().root_device().memregion("gfx5")->base();
+	const UINT8 *headdata = machine().root_device().memregion("gfx6")->base();
+	const UINT8 *pldata = memregion("gfx7")->base();
+	bitmap_ind16 &lpixmap = m_left_tilemap->pixmap();
+	bitmap_ind16 &rpixmap = m_right_tilemap->pixmap();
+	bitmap_ind16 &cpixmap = m_center_tilemap->pixmap();
 	int lrxscroll, cxscroll, lyscroll, ryscroll, cyscroll;
-	int bgcolor = state->m_cpu1_out[3] & 0x10;
-	int amebase = state->m_cpu0_out[4] >> 4;
-	int plbase = state->m_cpu0_out[4] & 0x0f;
+	int bgcolor = m_cpu1_out[3] & 0x10;
+	int amebase = m_cpu0_out[4] >> 4;
+	int plbase = m_cpu0_out[4] & 0x0f;
 	int cxmask;
 	int x, y;
 
 	/* ensure that the tilemaps are the same size */
-	assert(lpixmap->width == rpixmap->width && lpixmap->width == cpixmap->width);
-	assert(lpixmap->height == rpixmap->height && lpixmap->height == cpixmap->height);
+	assert(lpixmap.width() == rpixmap.width() && lpixmap.width() == cpixmap.width());
+	assert(lpixmap.height() == rpixmap.height() && lpixmap.height() == cpixmap.height());
 
 	/* extract background scroll values; left and right share the same X scroll */
-	lrxscroll = state->m_cpu1_out[0] + (state->m_cpu1_out[1] & 1) * 256;
-	lyscroll = state->m_cpu1_out[2];
-	ryscroll = state->m_cpu1_out[7];
-	cxscroll = state->m_cpu1_out[9] + (state->m_cpu1_out[10] & 1) * 256;
-	cyscroll = state->m_cpu1_out[11];
+	lrxscroll = m_cpu1_out[0] + (m_cpu1_out[1] & 1) * 256;
+	lyscroll = m_cpu1_out[2];
+	ryscroll = m_cpu1_out[7];
+	cxscroll = m_cpu1_out[9] + (m_cpu1_out[10] & 1) * 256;
+	cyscroll = m_cpu1_out[11];
 
 	/* determine the center background mask, controlled by attribute bit 0x20 */
-	cxmask = (state->m_cpu1_out[3] & 0x20) ? 0xff : 0x1ff;
+	cxmask = (m_cpu1_out[3] & 0x20) ? 0xff : 0x1ff;
 
 	/* iterate over scanlines */
-	for (y = cliprect->min_y; y <= cliprect->max_y; y++)
+	for (y = cliprect.min_y; y <= cliprect.max_y; y++)
 	{
 		/* select either left or right tilemaps based on Y */
-		bitmap_t *lrpixmap = (y < 128) ? lpixmap : rpixmap;
+		bitmap_ind16 &lrpixmap = (y < 128) ? lpixmap : rpixmap;
 		int lryscroll = (y < 128) ? lyscroll : ryscroll;
 
 		/* get source/dest pointers */
 		/* the Y counter starts counting when VBLANK goes to 0, which is at Y=16 */
-		UINT16 *lrsrc = (UINT16 *)lrpixmap->base + ((lryscroll + y - 16) & 0xff) * lrpixmap->rowpixels;
-		UINT16 *csrc = (UINT16 *)cpixmap->base + ((cyscroll + y - 16) & 0xff) * cpixmap->rowpixels;
-		UINT32 *dest = (UINT32 *)bitmap->base + y * bitmap->rowpixels;
+		UINT16 *lrsrc = &lrpixmap.pix16((lryscroll + y - 16) & 0xff);
+		UINT16 *csrc = &cpixmap.pix16((cyscroll + y - 16) & 0xff);
+		UINT32 *dest = &bitmap.pix32(y);
 		UINT8 objdata[256];
 
 		/* draw the objects for this scanline */
-		draw_objects(screen->machine(), state, y, objdata);
+		draw_objects(machine(), this, y, objdata);
 
 		/* iterate over columns */
-		for (x = cliprect->min_x; x <= cliprect->max_x; x++)
+		for (x = cliprect.min_x; x <= cliprect.max_x; x++)
 		{
 			rgb_t finalpix;
 			int headbit = 0;
@@ -432,20 +422,20 @@ SCREEN_UPDATE( grchamp )
 			objpix = objdata[x];
 
 			/* if the headlamp is visible, determine that now */
-			mydh = (state->m_cpu0_out[2] - x) & 0xff;
-			mydv = (state->m_cpu0_out[3] - (y - 16)) & 0xff;
-			if ((state->m_cpu0_out[0] & 0x10) && (mydh & 0xc0) == 0xc0 && ((mydv ^ (mydv >> 1)) & 0x40) == 0)
+			mydh = (m_cpu0_out[2] - x) & 0xff;
+			mydv = (m_cpu0_out[3] - (y - 16)) & 0xff;
+			if ((m_cpu0_out[0] & 0x10) && (mydh & 0xc0) == 0xc0 && ((mydv ^ (mydv >> 1)) & 0x40) == 0)
 			{
 				int bits = headdata[((mydh & 0x38) >> 3) |
 									((mydv & 0x3f) << 3) |
 									((~mydv & 0x40) << 3) |
-									((state->m_cpu0_out[0] & 0x10) << 6)];
+									((m_cpu0_out[0] & 0x10) << 6)];
 				headbit = (bits >> (~mydh & 0x07)) & 0x01;
 			}
 
 			/* if the headlamp is on and we're not in the headlamp area, */
 			/* and this isn't a character pixel, the /KILL switch is set */
-			if ((state->m_cpu0_out[0] & 0x10) && !headbit && !(objpix & 0x10))
+			if ((m_cpu0_out[0] & 0x10) && !headbit && !(objpix & 0x10))
 			{
 				kill = 1;
 				objpix &= ~7;
@@ -458,71 +448,71 @@ SCREEN_UPDATE( grchamp )
 				int bits = pldata[(mydh >> 2) | (mydv << 3) | (plbase << 8)] >> (~mydh & 0x03);
 				if (bits & 0x01)
 				{
-					objpix |= 4;	/* MYCAR(A) */
+					objpix |= 4;    /* MYCAR(A) */
 
 					/* handle collision detection between MYCARRED and MVID/OBJECT */
 
 					/* skip if the state is being held clear, or if we already have a collision */
-					if ((state->m_cpu0_out[0] & 0x02) && !(state->m_collide & 0x1000))
+					if ((m_cpu0_out[0] & 0x02) && !(m_collide & 0x1000))
 					{
 						if (objpix & 0x08)
 						{
 							mame_printf_debug("Collide car/object @ (%d,%d)\n", x, y);
-							state->m_collide = 0x1000 | 0x2000/* guess */ | ((~y & 0x80) << 3) | ((~y & 0xf8) << 2) | ((~x & 0xf8) >> 3);
+							m_collide = 0x1000 | 0x2000/* guess */ | ((~y & 0x80) << 3) | ((~y & 0xf8) << 2) | ((~x & 0xf8) >> 3);
 						}
 						else if ((mvid & 0x0f) != 0)
 						{
 							mame_printf_debug("Collide car/bg @ (%d,%d)\n", x, y);
-							state->m_collide = 0x1000 | 0x4000/* guess */ | ((~y & 0x80) << 3) | ((~y & 0xf8) << 2) | ((~x & 0xf8) >> 3);
+							m_collide = 0x1000 | 0x4000/* guess */ | ((~y & 0x80) << 3) | ((~y & 0xf8) << 2) | ((~x & 0xf8) >> 3);
 						}
 					}
 				}
 				if (bits & 0x10)
-					objpix |= 3;	/* MYCAR(B) */
+					objpix |= 3;    /* MYCAR(B) */
 			}
 
 			/* if rain is enabled, it ORs against the bits */
 			if (amebase != 0)
 			{
-				int effx = (state->m_cpu0_out[8] + x) & 0x0f;
-				int effy = (state->m_cpu0_out[7] - y) & 0x0f;
+				int effx = (m_cpu0_out[8] + x) & 0x0f;
+				int effy = (m_cpu0_out[7] - y) & 0x0f;
 				if ((amedata[(amebase << 5) | (effy << 1) | (effx >> 3)] >> (effx & 0x07)) & 0x01)
 					objpix |= 7;
 			}
 
 			/* if the radar is on, it ORs against the bits */
-			if (y >= 192 && (state->m_cpu0_out[0] & 0x80))
+			if (y >= 192 && (m_cpu0_out[0] & 0x80))
 			{
-				if ((state->m_radarram[((~y & 0x3e) << 4) | ((~x & 0xf8) >> 3)] >> (x & 0x07)) & 0x01)
+				if ((m_radarram[((~y & 0x3e) << 4) | ((~x & 0xf8) >> 3)] >> (x & 0x07)) & 0x01)
 					objpix |= 7;
 			}
 
 			/* handle collision detection between MVID and OBJECT */
-			if (!(state->m_collide & 0x1000) && (objpix & 0x08) && (mvid & 0x0f) != 0)
+			if (!(m_collide & 0x1000) && (objpix & 0x08) && (mvid & 0x0f) != 0)
 			{
 mame_printf_debug("Collide bg/object @ (%d,%d)\n", x, y);
-				state->m_collide = 0x1000 | 0x8000 | ((~y & 0x80) << 3) | ((~y & 0xf8) << 2) | ((~x & 0xf8) >> 3);
+				m_collide = 0x1000 | 0x8000 | ((~y & 0x80) << 3) | ((~y & 0xf8) << 2) | ((~x & 0xf8) >> 3);
 			}
 
 	/*
 
-    OBJECT LAYER:
+	OBJECT LAYER:
 
-        R = REDA | MYRADAR | MYCAR(A) | RADARVID | AMEOUT
-        G = GREENA | MYCAR(B) | RADARVID | AMEOUT
-        B = BLUEA | MYCAR(B) | RADARVID | AMEOUT
+	    R = REDA | MYRADAR | MYCAR(A) | RADARVID | AMEOUT
+	    G = GREENA | MYCAR(B) | RADARVID | AMEOUT
+	    B = BLUEA | MYCAR(B) | RADARVID | AMEOUT
 
-        if (R | G | B) display object,
-        else display background
-    */
+	    if (R | G | B) display object,
+	    else display background
+	*/
 
 
 	/* still to do:
-        collision detection
-        myradar
-        fog
-        real headlamp effect
-    */
+	    collision detection
+	    myradar
+	    fog
+	    real headlamp effect
+	*/
 
 			/* if the object data is non-zero, it gets priority */
 			if ((objpix & 7) != 0)
@@ -530,7 +520,7 @@ mame_printf_debug("Collide bg/object @ (%d,%d)\n", x, y);
 
 			/* otherwise, it's the background, unless it's been KILL'ed */
 			else if (!kill)
-				finalpix = state->m_bgcolor[mvid | bgcolor];
+				finalpix = m_bgcolor[mvid | bgcolor];
 
 			/* in which case it's black */
 			else

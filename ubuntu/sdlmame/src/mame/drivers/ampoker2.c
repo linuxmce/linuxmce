@@ -389,7 +389,7 @@
 *********************************************************************************/
 
 
-#define MASTER_CLOCK	XTAL_6MHz
+#define MASTER_CLOCK    XTAL_6MHz
 
 #include "emu.h"
 #include "cpu/z80/z80.h"
@@ -469,7 +469,7 @@
 
 */
 
-static WRITE8_HANDLER( ampoker2_port30_w )
+WRITE8_MEMBER(ampoker2_state::ampoker2_port30_w)
 /*-------------------------------------------------
     PORT_30 C000H         ;OUTPUT PORT 30H
 ---------------------------------------------------
@@ -483,7 +483,7 @@ static WRITE8_HANDLER( ampoker2_port30_w )
 }
 
 
-static WRITE8_HANDLER( ampoker2_port31_w )
+WRITE8_MEMBER(ampoker2_state::ampoker2_port31_w)
 /*-------------------------------------------------
     PORT_31 C001H         ;OUTPUT PORT 31H
 ---------------------------------------------------
@@ -494,14 +494,14 @@ static WRITE8_HANDLER( ampoker2_port31_w )
     BIT 4 = TWL_YELL      ;Tower Light YELLOW
 --------------------------------------------------*/
 {
-	output_set_lamp_value(1, ((data >> 1) & 1));	/* Lamp 1 - BET/RED */
-	output_set_lamp_value(6, ((data >> 2) & 1));	/* Lamp 6 - HOLD 4 */
-	output_set_lamp_value(4, ((data >> 3) & 1));	/* Lamp 4 - HOLD 2 */
-	output_set_lamp_value(8, ((data >> 4) & 1));	/* Lamp 8 - TWR.YELLOW */
+	output_set_lamp_value(1, ((data >> 1) & 1));    /* Lamp 1 - BET/RED */
+	output_set_lamp_value(6, ((data >> 2) & 1));    /* Lamp 6 - HOLD 4 */
+	output_set_lamp_value(4, ((data >> 3) & 1));    /* Lamp 4 - HOLD 2 */
+	output_set_lamp_value(8, ((data >> 4) & 1));    /* Lamp 8 - TWR.YELLOW */
 }
 
 
-static WRITE8_HANDLER( ampoker2_port32_w )
+WRITE8_MEMBER(ampoker2_state::ampoker2_port32_w)
 /*-------------------------------------------------
     PORT_32 C002H         ;OUTPUT PORT 32H
 ---------------------------------------------------
@@ -512,11 +512,11 @@ static WRITE8_HANDLER( ampoker2_port32_w )
     BIT 4 =
 --------------------------------------------------*/
 {
-	output_set_lamp_value(5, ((data >> 3) & 1));	/* Lamp 5 - HOLD 3 */
+	output_set_lamp_value(5, ((data >> 3) & 1));    /* Lamp 5 - HOLD 3 */
 }
 
 
-static WRITE8_HANDLER( ampoker2_port33_w )
+WRITE8_MEMBER(ampoker2_state::ampoker2_port33_w)
 /*-------------------------------------------------
     PORT_33 C003H         ;OUTPUT PORT 33H
 ---------------------------------------------------
@@ -530,7 +530,7 @@ static WRITE8_HANDLER( ampoker2_port33_w )
 }
 
 
-static WRITE8_HANDLER( ampoker2_port34_w )
+WRITE8_MEMBER(ampoker2_state::ampoker2_port34_w)
 /*-------------------------------------------------
     PORT_34 C004H         ;OUTPUT PORT 34H
 ---------------------------------------------------
@@ -541,11 +541,11 @@ static WRITE8_HANDLER( ampoker2_port34_w )
     BIT 4 = LAMP_2        ;Lamp 3  (BLACK)
 --------------------------------------------------*/
 {
-	output_set_lamp_value(2, ((data >> 4) & 1));	/* Lamp 2 - BLACK */
+	output_set_lamp_value(2, ((data >> 4) & 1));    /* Lamp 2 - BLACK */
 }
 
 
-static WRITE8_HANDLER( ampoker2_port35_w )
+WRITE8_MEMBER(ampoker2_state::ampoker2_port35_w)
 /*-------------------------------------------------
     PORT_35 C005H         ;OUTPUT PORT 35H
 ---------------------------------------------------
@@ -559,7 +559,7 @@ static WRITE8_HANDLER( ampoker2_port35_w )
 }
 
 
-static WRITE8_HANDLER( ampoker2_port36_w )
+WRITE8_MEMBER(ampoker2_state::ampoker2_port36_w)
 /*-------------------------------------------------
     PORT_36 C006H         ;OUTPUT PORT 36H
 ---------------------------------------------------
@@ -570,14 +570,14 @@ static WRITE8_HANDLER( ampoker2_port36_w )
     BIT 4 = LAMP_3        ;Lamp 3  (HOLD1)
 --------------------------------------------------*/
 {
-	output_set_lamp_value(9, (data & 1));			/* Lamp 9 - TWR.GREEN */
-	output_set_lamp_value(7, ((data >> 2) & 1));	/* Lamp 7 - HOLD 5 */
-	output_set_lamp_value(0, ((data >> 3) & 1));	/* Lamp 0 - DEAL */
-	output_set_lamp_value(3, ((data >> 4) & 1));	/* Lamp 3 - HOLD 1 */
+	output_set_lamp_value(9, (data & 1));           /* Lamp 9 - TWR.GREEN */
+	output_set_lamp_value(7, ((data >> 2) & 1));    /* Lamp 7 - HOLD 5 */
+	output_set_lamp_value(0, ((data >> 3) & 1));    /* Lamp 0 - DEAL */
+	output_set_lamp_value(3, ((data >> 4) & 1));    /* Lamp 3 - HOLD 1 */
 }
 
 
-static WRITE8_HANDLER( ampoker2_watchdog_reset_w )
+WRITE8_MEMBER(ampoker2_state::ampoker2_watchdog_reset_w)
 /*-------------------------------------------------
     PORT_37 C007H         ;OUTPUT PORT 37H
 ---------------------------------------------------
@@ -586,9 +586,9 @@ static WRITE8_HANDLER( ampoker2_watchdog_reset_w )
 {
 	/* watchdog sometimes stop to work */
 
-	if (((data >> 3) & 0x01) == 0)		/* check for refresh value (0x08) */
+	if (((data >> 3) & 0x01) == 0)      /* check for refresh value (0x08) */
 	{
-		watchdog_reset(space->machine());
+		machine().watchdog_reset();
 //      popmessage("%02x", data);
 	}
 	else
@@ -602,15 +602,15 @@ static WRITE8_HANDLER( ampoker2_watchdog_reset_w )
 * Memory map information *
 *************************/
 
-static ADDRESS_MAP_START( ampoker2_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( ampoker2_map, AS_PROGRAM, 8, ampoker2_state )
 	AM_RANGE(0x0000, 0xbfff) AM_ROM
 	AM_RANGE(0xc000, 0xcfff) AM_RAM AM_SHARE("nvram")
-	AM_RANGE(0xe000, 0xefff) AM_RAM_WRITE(ampoker2_videoram_w) AM_BASE_MEMBER(ampoker2_state, m_videoram)
+	AM_RANGE(0xe000, 0xefff) AM_RAM_WRITE(ampoker2_videoram_w) AM_SHARE("videoram")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( ampoker2_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( ampoker2_io_map, AS_IO, 8, ampoker2_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x08, 0x0f) AM_WRITENOP				/* inexistent in the real hardware */
+	AM_RANGE(0x08, 0x0f) AM_WRITENOP                /* inexistent in the real hardware */
 	AM_RANGE(0x10, 0x10) AM_READ_PORT("IN0")
 	AM_RANGE(0x11, 0x11) AM_READ_PORT("IN1")
 	AM_RANGE(0x12, 0x12) AM_READ_PORT("IN2")
@@ -620,23 +620,23 @@ static ADDRESS_MAP_START( ampoker2_io_map, AS_IO, 8 )
 	AM_RANGE(0x16, 0x16) AM_READ_PORT("IN6")
 	AM_RANGE(0x17, 0x17) AM_READ_PORT("IN7")
 //  AM_RANGE(0x21, 0x21) AM_WRITENOP                    /* undocumented, write 0x1a after each reset */
-	AM_RANGE(0x30, 0x30) AM_WRITE (ampoker2_port30_w)	/* see write handlers */
-	AM_RANGE(0x31, 0x31) AM_WRITE (ampoker2_port31_w)	/* see write handlers */
-	AM_RANGE(0x32, 0x32) AM_WRITE (ampoker2_port32_w)	/* see write handlers */
-	AM_RANGE(0x33, 0x33) AM_WRITE (ampoker2_port33_w)	/* see write handlers */
-	AM_RANGE(0x34, 0x34) AM_WRITE (ampoker2_port34_w)	/* see write handlers */
-	AM_RANGE(0x35, 0x35) AM_WRITE (ampoker2_port35_w)	/* see write handlers */
-	AM_RANGE(0x36, 0x36) AM_WRITE (ampoker2_port36_w)	/* see write handlers */
+	AM_RANGE(0x30, 0x30) AM_WRITE(ampoker2_port30_w)    /* see write handlers */
+	AM_RANGE(0x31, 0x31) AM_WRITE(ampoker2_port31_w)    /* see write handlers */
+	AM_RANGE(0x32, 0x32) AM_WRITE(ampoker2_port32_w)    /* see write handlers */
+	AM_RANGE(0x33, 0x33) AM_WRITE(ampoker2_port33_w)    /* see write handlers */
+	AM_RANGE(0x34, 0x34) AM_WRITE(ampoker2_port34_w)    /* see write handlers */
+	AM_RANGE(0x35, 0x35) AM_WRITE(ampoker2_port35_w)    /* see write handlers */
+	AM_RANGE(0x36, 0x36) AM_WRITE(ampoker2_port36_w)    /* see write handlers */
 	AM_RANGE(0x37, 0x37) AM_WRITE(ampoker2_watchdog_reset_w)
-	AM_RANGE(0x38, 0x39) AM_DEVWRITE("aysnd", ay8910_address_data_w)
-	AM_RANGE(0x3A, 0x3A) AM_DEVREAD("aysnd", ay8910_r)
+	AM_RANGE(0x38, 0x39) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_data_w)
+	AM_RANGE(0x3A, 0x3A) AM_DEVREAD_LEGACY("aysnd", ay8910_r)
 ADDRESS_MAP_END
 
 /*
 
   Rabbit Poker writes...
 
-  12dc W \ Writting to the PIC?... The program doesn't seems to poll it.
+  12dc W \ Writing to the PIC?... The program doesn't seems to poll it.
   12dd W /
 
   Something is going wrong here. 12xx is ROM space. Put a BP on 12e5 and
@@ -703,10 +703,10 @@ static INPUT_PORTS_START( ampoker2 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Hopper Out") PORT_CODE(KEYCODE_G)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Supervisor Key") PORT_TOGGLE PORT_CODE(KEYCODE_0)
 	PORT_DIPNAME( 0x08, 0x08, "Remote Credits" ) PORT_DIPLOCATION("SW1:1") /* DSW1 */
-	PORT_DIPSETTING(    0x08, "Cred x 100" ) PORT_CONDITION("IN1", 0x08, PORTCOND_EQUALS,0x08)
-	PORT_DIPSETTING(    0x00, "Cred x  50" ) PORT_CONDITION("IN1", 0x08, PORTCOND_EQUALS,0x08)
-	PORT_DIPSETTING(    0x08, "Cred x  20" ) PORT_CONDITION("IN1", 0x08, PORTCOND_EQUALS,0x00) /* x100 in ampkr95 */
-	PORT_DIPSETTING(    0x00, "Remote Off" ) PORT_CONDITION("IN1", 0x08, PORTCOND_EQUALS,0x00)
+	PORT_DIPSETTING(    0x08, "Cred x 100" ) PORT_CONDITION("IN1", 0x08, EQUALS,0x08)
+	PORT_DIPSETTING(    0x00, "Cred x  50" ) PORT_CONDITION("IN1", 0x08, EQUALS,0x08)
+	PORT_DIPSETTING(    0x08, "Cred x  20" ) PORT_CONDITION("IN1", 0x08, EQUALS,0x00) /* x100 in ampkr95 */
+	PORT_DIPSETTING(    0x00, "Remote Off" ) PORT_CONDITION("IN1", 0x08, EQUALS,0x00)
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_GAMBLE_LOW ) PORT_NAME("Black Card")
 
 	PORT_START("IN4")
@@ -788,10 +788,10 @@ static INPUT_PORTS_START( ampkr95 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Hopper Out") PORT_CODE(KEYCODE_G)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Supervisor Key") PORT_TOGGLE PORT_CODE(KEYCODE_0)
 	PORT_DIPNAME( 0x08, 0x08, "Remote Credits" ) PORT_DIPLOCATION("SW1:1") /* DSW1 */
-	PORT_DIPSETTING(    0x08, "Cred x 100" ) PORT_CONDITION("IN1",0x08,PORTCOND_EQUALS,0x08)
-	PORT_DIPSETTING(    0x00, "Cred x  50" ) PORT_CONDITION("IN1",0x08,PORTCOND_EQUALS,0x08)
-	PORT_DIPSETTING(    0x08, "Cred x 100" ) PORT_CONDITION("IN1",0x08,PORTCOND_EQUALS,0x00) /* x100 in ampkr95 */
-	PORT_DIPSETTING(    0x00, "Remote Off" ) PORT_CONDITION("IN1",0x08,PORTCOND_EQUALS,0x00)
+	PORT_DIPSETTING(    0x08, "Cred x 100" ) PORT_CONDITION("IN1",0x08,EQUALS,0x08)
+	PORT_DIPSETTING(    0x00, "Cred x  50" ) PORT_CONDITION("IN1",0x08,EQUALS,0x08)
+	PORT_DIPSETTING(    0x08, "Cred x 100" ) PORT_CONDITION("IN1",0x08,EQUALS,0x00) /* x100 in ampkr95 */
+	PORT_DIPSETTING(    0x00, "Remote Off" ) PORT_CONDITION("IN1",0x08,EQUALS,0x00)
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_GAMBLE_LOW ) PORT_NAME("Black Card")
 
 	PORT_START("IN4")
@@ -873,10 +873,10 @@ static INPUT_PORTS_START( sigmapkr )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Hopper Out") PORT_CODE(KEYCODE_G)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Supervisor Key") PORT_TOGGLE PORT_CODE(KEYCODE_0)
 	PORT_DIPNAME( 0x08, 0x08, "Remote Credits" ) PORT_DIPLOCATION("SW1:1") /* DSW1 */
-	PORT_DIPSETTING(    0x08, "Cred x 100" ) PORT_CONDITION("IN1",0x08,PORTCOND_EQUALS,0x08)
-	PORT_DIPSETTING(    0x00, "Cred x  50" ) PORT_CONDITION("IN1",0x08,PORTCOND_EQUALS,0x08)
-	PORT_DIPSETTING(    0x08, "Cred x 100" ) PORT_CONDITION("IN1",0x08,PORTCOND_EQUALS,0x00) /* x100 in ampkr95 */
-	PORT_DIPSETTING(    0x00, "Remote Off" ) PORT_CONDITION("IN1",0x08,PORTCOND_EQUALS,0x00)
+	PORT_DIPSETTING(    0x08, "Cred x 100" ) PORT_CONDITION("IN1",0x08,EQUALS,0x08)
+	PORT_DIPSETTING(    0x00, "Cred x  50" ) PORT_CONDITION("IN1",0x08,EQUALS,0x08)
+	PORT_DIPSETTING(    0x08, "Cred x 100" ) PORT_CONDITION("IN1",0x08,EQUALS,0x00) /* x100 in ampkr95 */
+	PORT_DIPSETTING(    0x00, "Remote Off" ) PORT_CONDITION("IN1",0x08,EQUALS,0x00)
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_NAME("Double") PORT_CODE(KEYCODE_S)
 
 	PORT_START("IN4")
@@ -1097,7 +1097,7 @@ static INPUT_PORTS_START( piccolop )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_IMPULSE(2)
 
 	PORT_START("IN7")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNKNOWN)	// lack of v-sync if low
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNKNOWN)    // lack of v-sync if low
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("IN7-2") PORT_CODE(KEYCODE_6_PAD)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("IN7-3") PORT_CODE(KEYCODE_7_PAD)
 	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )
@@ -1155,7 +1155,7 @@ static const ay8910_interface ay8910_config =
 {
 	AY8910_LEGACY_OUTPUT,
 	AY8910_DEFAULT_LOADS,
-	DEVCB_NULL, DEVCB_NULL, DEVCB_NULL, DEVCB_NULL	/* no ports used */
+	DEVCB_NULL, DEVCB_NULL, DEVCB_NULL, DEVCB_NULL  /* no ports used */
 };
 
 
@@ -1166,11 +1166,11 @@ static const ay8910_interface ay8910_config =
 static MACHINE_CONFIG_START( ampoker2, ampoker2_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, MASTER_CLOCK/2)		/* 3 MHz */
+	MCFG_CPU_ADD("maincpu", Z80, MASTER_CLOCK/2)        /* 3 MHz */
 	MCFG_CPU_PROGRAM_MAP(ampoker2_map)
 	MCFG_CPU_IO_MAP(ampoker2_io_map)
-	MCFG_CPU_PERIODIC_INT(nmi_line_pulse, 1536)
-	MCFG_WATCHDOG_TIME_INIT(attotime::from_msec(200))	/* 200 ms, measured */
+	MCFG_CPU_PERIODIC_INT_DRIVER(ampoker2_state, nmi_line_pulse,  1536)
+	MCFG_WATCHDOG_TIME_INIT(attotime::from_msec(200))   /* 200 ms, measured */
 
 	MCFG_NVRAM_ADD_0FILL("nvram")
 
@@ -1178,22 +1178,19 @@ static MACHINE_CONFIG_START( ampoker2, ampoker2_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	/*  if VBLANK is used, the watchdog timer stop to work.
-    MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-    */
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
+	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
+	*/
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(20*8, 56*8-1, 2*8, 32*8-1)
-	MCFG_SCREEN_UPDATE(ampoker2)
+	MCFG_SCREEN_UPDATE_DRIVER(ampoker2_state, screen_update_ampoker2)
 
 	MCFG_GFXDECODE(ampoker2)
 	MCFG_PALETTE_LENGTH(512)
 
-	MCFG_PALETTE_INIT(ampoker2)
-	MCFG_VIDEO_START(ampoker2)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
-	MCFG_SOUND_ADD("aysnd", AY8910,MASTER_CLOCK/4)	/* 1.5 MHz, measured */
+	MCFG_SOUND_ADD("aysnd", AY8910,MASTER_CLOCK/4)  /* 1.5 MHz, measured */
 	MCFG_SOUND_CONFIG(ay8910_config)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.30)
 MACHINE_CONFIG_END
@@ -1204,7 +1201,7 @@ static MACHINE_CONFIG_DERIVED( sigma2k, ampoker2 )
 
 	/* video hardware */
 	MCFG_GFXDECODE(sigma2k)
-	MCFG_VIDEO_START(sigma2k)
+	MCFG_VIDEO_START_OVERRIDE(ampoker2_state,sigma2k)
 MACHINE_CONFIG_END
 
 
@@ -1310,7 +1307,7 @@ ROM_END
 ROM_START( pkrdewin )
 	ROM_REGION( 0x14000, "maincpu", 0 )
 	ROM_LOAD( "poker7.001", 0x4000, 0x10000, CRC(eca16b9e) SHA1(5063d733721457ab3b08caafbe8d33b2cbe4f88b) )
-	ROM_COPY( "maincpu",	0x8000, 0x0000, 0x4000 ) /* poker7.001 contains the 1st and 2nd 16K quarters swapped */
+	ROM_COPY( "maincpu",    0x8000, 0x0000, 0x4000 ) /* poker7.001 contains the 1st and 2nd 16K quarters swapped */
 	ROM_COPY( "maincpu", 0x10000, 0x8000, 0x4000 ) /* poker7.001 contains the 1st and 2nd 16K quarters swapped */
 
 	ROM_REGION( 0x4000, "gfx1", 0 )
@@ -1320,7 +1317,7 @@ ROM_START( pkrdewin )
 	ROM_LOAD( "82s147an.u48", 0x0000, 0x0200, CRC(9bc8e543) SHA1(e4882868a43e21a509a180b9731600d1dd63b5cc) )
 ROM_END
 
-ROM_START( videomat )	/* polish bootleg */
+ROM_START( videomat )   /* polish bootleg */
 	ROM_REGION( 0x10000, "maincpu", 0 )
 	ROM_LOAD( "rom.bin", 0x0000, 0x10000, CRC(910cd941) SHA1(350ca70370c5082901343d0c0c1424729d77b006) )
 
@@ -1403,11 +1400,11 @@ ROM_END
 *      Driver Init       *
 *************************/
 
-static DRIVER_INIT( rabbitpk )
+DRIVER_INIT_MEMBER(ampoker2_state,rabbitpk)
 {
 
-	UINT8 *rom = machine.region("maincpu")->base();
-	int size = machine.region("maincpu")->bytes();
+	UINT8 *rom = machine().root_device().memregion("maincpu")->base();
+	int size = machine().root_device().memregion("maincpu")->bytes();
 	int start = 0;
 	int i;
 
@@ -1425,7 +1422,7 @@ static DRIVER_INIT( rabbitpk )
 	}
 }
 
-static DRIVER_INIT( piccolop )
+DRIVER_INIT_MEMBER(ampoker2_state,piccolop)
 {
 /*
   The protection is based on a stuck bit at RAM offset $C416.
@@ -1458,7 +1455,7 @@ static DRIVER_INIT( piccolop )
 
 */
 
-	UINT8 *rom = machine.region("maincpu")->base();
+	UINT8 *rom = machine().root_device().memregion("maincpu")->base();
 
 	/* NOP'ing the mortal jump... */
 	rom[0x154b] = 0x00;
@@ -1473,16 +1470,16 @@ static DRIVER_INIT( piccolop )
 *************************/
 
 /*     YEAR  NAME      PARENT    MACHINE   INPUT     INIT      ROT    COMPANY              FULLNAME                             FLAGS  LAYOUT      */
-GAMEL( 1990, ampoker2, 0,        ampoker2, ampoker2, 0,        ROT0, "Novomatic",         "American Poker II",                  GAME_SUPPORTS_SAVE,     layout_ampoker2 )
-GAMEL( 1990, ampkr2b1, ampoker2, ampoker2, ampoker2, 0,        ROT0, "bootleg",           "American Poker II (bootleg, set 1)", GAME_SUPPORTS_SAVE,     layout_ampoker2 )
-GAMEL( 1990, ampkr2b2, ampoker2, ampoker2, ampoker2, 0,        ROT0, "bootleg",           "American Poker II (bootleg, set 2)", GAME_SUPPORTS_SAVE,     layout_ampoker2 )
-GAMEL( 1994, ampkr2b3, ampoker2, ampoker2, ampoker2, 0,        ROT0, "bootleg",           "American Poker II (bootleg, set 3)", GAME_SUPPORTS_SAVE,     layout_ampoker2 )
-GAMEL( 1994, ampkr2b4, ampoker2, ampoker2, ampoker2, 0,        ROT0, "bootleg",           "American Poker II (bootleg, set 4)", GAME_SUPPORTS_SAVE,     layout_ampoker2 )
-GAMEL( 1994, ampkr228, ampoker2, ampoker2, ampoker2, 0,        ROT0, "bootleg?",          "American Poker II (iamp2 v28)",      GAME_SUPPORTS_SAVE,     layout_ampoker2 )
-GAMEL( 1995, ampkr95,  ampoker2, ampoker2, ampkr95,  0,        ROT0, "bootleg",           "American Poker 95",                  GAME_SUPPORTS_SAVE,     layout_ampoker2 )
-GAMEL( 1990, pkrdewin, ampoker2, ampoker2, ampoker2, 0,        ROT0, "bootleg",           "Poker De Win",                       GAME_SUPPORTS_SAVE,     layout_ampoker2 )
-GAMEL( 1990, videomat, ampoker2, ampoker2, ampoker2, 0,        ROT0, "bootleg",           "Videomat (Polish bootleg)",          GAME_SUPPORTS_SAVE,     layout_ampoker2 )
-GAMEL( 1990, rabbitpk, ampoker2, ampoker2, ampoker2, rabbitpk, ROT0, "bootleg",           "Rabbit Poker (Arizona Poker v1.1?)", GAME_SUPPORTS_SAVE,     layout_ampoker2 )
-GAMEL( 1995, sigmapkr, 0,        ampoker2, sigmapkr, 0,        ROT0, "Sigma Inc.",        "Sigma Poker",                        GAME_SUPPORTS_SAVE,     layout_sigmapkr )
-GAMEL( 1998, sigma2k,  0,        sigma2k,  sigma2k,  0,        ROT0, "Sigma Inc.",        "Sigma Poker 2000",                   GAME_SUPPORTS_SAVE,     layout_sigmapkr )
-GAME(  1990, piccolop, ampoker2, ampoker2, piccolop, piccolop, ROT0, "Admiral/Novomatic", "Piccolo Poker 100",                  GAME_SUPPORTS_SAVE )
+GAMEL( 1990, ampoker2, 0,        ampoker2, ampoker2, driver_device, 0,        ROT0, "Novomatic",         "American Poker II",                  GAME_SUPPORTS_SAVE,     layout_ampoker2 )
+GAMEL( 1990, ampkr2b1, ampoker2, ampoker2, ampoker2, driver_device, 0,        ROT0, "bootleg",           "American Poker II (bootleg, set 1)", GAME_SUPPORTS_SAVE,     layout_ampoker2 )
+GAMEL( 1990, ampkr2b2, ampoker2, ampoker2, ampoker2, driver_device, 0,        ROT0, "bootleg",           "American Poker II (bootleg, set 2)", GAME_SUPPORTS_SAVE,     layout_ampoker2 )
+GAMEL( 1994, ampkr2b3, ampoker2, ampoker2, ampoker2, driver_device, 0,        ROT0, "bootleg",           "American Poker II (bootleg, set 3)", GAME_SUPPORTS_SAVE,     layout_ampoker2 )
+GAMEL( 1994, ampkr2b4, ampoker2, ampoker2, ampoker2, driver_device, 0,        ROT0, "bootleg",           "American Poker II (bootleg, set 4)", GAME_SUPPORTS_SAVE,     layout_ampoker2 )
+GAMEL( 1994, ampkr228, ampoker2, ampoker2, ampoker2, driver_device, 0,        ROT0, "bootleg?",          "American Poker II (iamp2 v28)",      GAME_SUPPORTS_SAVE,     layout_ampoker2 )
+GAMEL( 1995, ampkr95,  ampoker2, ampoker2, ampkr95, driver_device,  0,        ROT0, "bootleg",           "American Poker 95",                  GAME_SUPPORTS_SAVE,     layout_ampoker2 )
+GAMEL( 1990, pkrdewin, ampoker2, ampoker2, ampoker2, driver_device, 0,        ROT0, "bootleg",           "Poker De Win",                       GAME_SUPPORTS_SAVE,     layout_ampoker2 )
+GAMEL( 1990, videomat, ampoker2, ampoker2, ampoker2, driver_device, 0,        ROT0, "bootleg",           "Videomat (Polish bootleg)",          GAME_SUPPORTS_SAVE,     layout_ampoker2 )
+GAMEL( 1990, rabbitpk, ampoker2, ampoker2, ampoker2, ampoker2_state, rabbitpk, ROT0, "bootleg",           "Rabbit Poker (Arizona Poker v1.1?)", GAME_SUPPORTS_SAVE,     layout_ampoker2 )
+GAMEL( 1995, sigmapkr, 0,        ampoker2, sigmapkr, driver_device, 0,        ROT0, "Sigma Inc.",        "Sigma Poker",                        GAME_SUPPORTS_SAVE,     layout_sigmapkr )
+GAMEL( 1998, sigma2k,  0,        sigma2k,  sigma2k, driver_device,  0,        ROT0, "Sigma Inc.",        "Sigma Poker 2000",                   GAME_SUPPORTS_SAVE,     layout_sigmapkr )
+GAME(  1990, piccolop, ampoker2, ampoker2, piccolop, ampoker2_state, piccolop, ROT0, "Admiral/Novomatic", "Piccolo Poker 100",                  GAME_SUPPORTS_SAVE )

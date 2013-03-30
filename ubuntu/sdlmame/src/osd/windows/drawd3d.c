@@ -53,14 +53,19 @@
 #include <tchar.h>
 #include <mmsystem.h>
 #include <d3d9.h>
+#include <d3dx9.h>
+#include <math.h>
 #undef interface
 
 // MAME headers
 #include "emu.h"
 #include "render.h"
+#include "ui.h"
 #include "rendutil.h"
 #include "options.h"
 #include "emuopts.h"
+#include "aviio.h"
+#include "png.h"
 
 // MAMEOS headers
 #include "d3dintf.h"
@@ -68,6 +73,8 @@
 #include "window.h"
 #include "config.h"
 #include "strconv.h"
+#include "d3dcomm.h"
+#include "drawd3d.h"
 
 
 
@@ -83,10 +90,7 @@ extern void mtlog_add(const char *event);
 //  CONSTANTS
 //============================================================
 
-#define ENABLE_BORDER_PIX	(1)
-
-#define VERTEX_FORMAT		(D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1)
-#define VERTEX_BUFFER_SIZE	(2048*4)
+#define ENABLE_BORDER_PIX   (1)
 
 enum
 {
@@ -106,119 +110,10 @@ enum
 
 
 //============================================================
-//  TYPE DEFINITIONS
-//============================================================
-
-/* texture_info holds information about a texture */
-typedef struct _texture_info texture_info;
-struct _texture_info
-{
-	texture_info *			next;						// next texture in the list
-	UINT32					hash;						// hash value for the texture
-	UINT32					flags;						// rendering flags
-	render_texinfo			texinfo;					// copy of the texture info
-	float					ustart, ustop;				// beginning/ending U coordinates
-	float					vstart, vstop;				// beginning/ending V coordinates
-	int						rawwidth, rawheight;		// raw width/height of the texture
-	int						type;						// what type of texture are we?
-	int						xborderpix;					// number of border pixels in X
-	int						yborderpix;					// number of border pixels in Y
-	int						xprescale;					// what is our X prescale factor?
-	int						yprescale;					// what is our Y prescale factor?
-	d3d_texture *			d3dtex;						// Direct3D texture pointer
-	d3d_surface *			d3dsurface;					// Direct3D offscreen plain surface pointer
-	d3d_texture *			d3dfinaltex;				// Direct3D final (post-scaled) texture
-};
-
-
-/* poly_info holds information about a single polygon/d3d primitive */
-typedef struct _poly_info poly_info;
-struct _poly_info
-{
-	 D3DPRIMITIVETYPE		type;						// type of primitive
-	 UINT32					count;						// total number of primitives
-	 UINT32					numverts;					// total number of vertices
-	 UINT32					flags;						// rendering flags
-	 DWORD					modmode;					// texture modulation mode
-	 texture_info *			texture;					// pointer to texture info
-};
-
-
-/* d3d_vertex describes a single vertex */
-typedef struct _d3d_vertex d3d_vertex;
-struct _d3d_vertex
-{
-	float					x, y, z;					// X,Y,Z coordinates
-	float					rhw;						// 1/W coordinate
-	D3DCOLOR				color;						// diffuse color
-	float					u0, v0;						// texture stage 0 coordinates
-};
-
-
-/* d3d_info is the information about Direct3D for the current screen */
-typedef struct _d3d_info d3d_info;
-struct _d3d_info
-{
-	int						adapter;					// ordinal adapter number
-	int						width, height;				// current width, height
-	int						refresh;					// current refresh rate
-	int						create_error_count;			// number of consecutive create errors
-
-	d3d_device *			device;						// pointer to the Direct3DDevice object
-	int						gamma_supported;			// is full screen gamma supported?
-	d3d_present_parameters	presentation;				// set of presentation parameters
-	D3DDISPLAYMODE			origmode;					// original display mode for the adapter
-	D3DFORMAT				pixformat;					// pixel format we are using
-
-	d3d_vertex_buffer *		vertexbuf;					// pointer to the vertex buffer object
-	d3d_vertex *			lockedbuf;					// pointer to the locked vertex buffer
-	int						numverts;					// number of accumulated vertices
-
-	poly_info				poly[VERTEX_BUFFER_SIZE / 3];// array to hold polygons as they are created
-	int						numpolys;					// number of accumulated polygons
-
-	texture_info *			texlist;					// list of active textures
-	int						dynamic_supported;			// are dynamic textures supported?
-	int						stretch_supported;			// is StretchRect with point filtering supported?
-	int						mod2x_supported;			// is D3DTOP_MODULATE2X supported?
-	int						mod4x_supported;			// is D3DTOP_MODULATE4X supported?
-	D3DFORMAT				screen_format;				// format to use for screen textures
-	D3DFORMAT				yuv_format;					// format to use for YUV textures
-
-	DWORD					texture_caps;				// textureCaps field
-	DWORD					texture_max_aspect;			// texture maximum aspect ratio
-	DWORD					texture_max_width;			// texture maximum width
-	DWORD					texture_max_height;			// texture maximum height
-
-	texture_info *			last_texture;				// previous texture
-	int						last_blendenable;			// previous blendmode
-	int						last_blendop;				// previous blendmode
-	int						last_blendsrc;				// previous blendmode
-	int						last_blenddst;				// previous blendmode
-	int						last_filter;				// previous texture filter
-	int						last_wrap;					// previous wrap state
-	DWORD					last_modmode;				// previous texture modulation
-
-	bitmap_t *				vector_bitmap;				// experimental: bitmap for vectors
-	texture_info *			vector_texture;				// experimental: texture for vectors
-};
-
-
-/* line_aa_step is used for drawing antialiased lines */
-typedef struct _line_aa_step line_aa_step;
-struct _line_aa_step
-{
-	float					xoffs, yoffs;				// X/Y deltas
-	float					weight;						// weight contribution
-};
-
-
-
-//============================================================
 //  GLOBALS
 //============================================================
 
-static d3d *				d3dintf;
+static d3d_base *               d3dintf; // FIX ME
 
 static const line_aa_step line_aa_1step[] =
 {
@@ -234,8 +129,6 @@ static const line_aa_step line_aa_4step[] =
 	{  0.00f,  0.25f,  0.25f  },
 	{ 0 }
 };
-
-
 
 //============================================================
 //  INLINES
@@ -272,26 +165,26 @@ INLINE UINT32 ycc_to_rgb(UINT8 y, UINT8 cb, UINT8 cr)
 {
 	/* original equations:
 
-        C = Y - 16
-        D = Cb - 128
-        E = Cr - 128
+	    C = Y - 16
+	    D = Cb - 128
+	    E = Cr - 128
 
-        R = clip(( 298 * C           + 409 * E + 128) >> 8)
-        G = clip(( 298 * C - 100 * D - 208 * E + 128) >> 8)
-        B = clip(( 298 * C + 516 * D           + 128) >> 8)
+	    R = clip(( 298 * C           + 409 * E + 128) >> 8)
+	    G = clip(( 298 * C - 100 * D - 208 * E + 128) >> 8)
+	    B = clip(( 298 * C + 516 * D           + 128) >> 8)
 
-        R = clip(( 298 * (Y - 16)                    + 409 * (Cr - 128) + 128) >> 8)
-        G = clip(( 298 * (Y - 16) - 100 * (Cb - 128) - 208 * (Cr - 128) + 128) >> 8)
-        B = clip(( 298 * (Y - 16) + 516 * (Cb - 128)                    + 128) >> 8)
+	    R = clip(( 298 * (Y - 16)                    + 409 * (Cr - 128) + 128) >> 8)
+	    G = clip(( 298 * (Y - 16) - 100 * (Cb - 128) - 208 * (Cr - 128) + 128) >> 8)
+	    B = clip(( 298 * (Y - 16) + 516 * (Cb - 128)                    + 128) >> 8)
 
-        R = clip(( 298 * Y - 298 * 16                        + 409 * Cr - 409 * 128 + 128) >> 8)
-        G = clip(( 298 * Y - 298 * 16 - 100 * Cb + 100 * 128 - 208 * Cr + 208 * 128 + 128) >> 8)
-        B = clip(( 298 * Y - 298 * 16 + 516 * Cb - 516 * 128                        + 128) >> 8)
+	    R = clip(( 298 * Y - 298 * 16                        + 409 * Cr - 409 * 128 + 128) >> 8)
+	    G = clip(( 298 * Y - 298 * 16 - 100 * Cb + 100 * 128 - 208 * Cr + 208 * 128 + 128) >> 8)
+	    B = clip(( 298 * Y - 298 * 16 + 516 * Cb - 516 * 128                        + 128) >> 8)
 
-        R = clip(( 298 * Y - 298 * 16                        + 409 * Cr - 409 * 128 + 128) >> 8)
-        G = clip(( 298 * Y - 298 * 16 - 100 * Cb + 100 * 128 - 208 * Cr + 208 * 128 + 128) >> 8)
-        B = clip(( 298 * Y - 298 * 16 + 516 * Cb - 516 * 128                        + 128) >> 8)
-    */
+	    R = clip(( 298 * Y - 298 * 16                        + 409 * Cr - 409 * 128 + 128) >> 8)
+	    G = clip(( 298 * Y - 298 * 16 - 100 * Cb + 100 * 128 - 208 * Cr + 208 * 128 + 128) >> 8)
+	    B = clip(( 298 * Y - 298 * 16 + 516 * Cb - 516 * 128                        + 128) >> 8)
+	*/
 	int r, g, b, common;
 
 	common = 298 * y - 298 * 16;
@@ -316,13 +209,16 @@ INLINE UINT32 texture_compute_hash(const render_texinfo *texture, UINT32 flags)
 }
 
 
-INLINE void set_texture(d3d_info *d3d, texture_info *texture)
+INLINE void set_texture(d3d_info *d3d, d3d_texture_info *texture)
 {
 	HRESULT result;
 	if (texture != d3d->last_texture)
 	{
 		d3d->last_texture = texture;
-		result = (*d3dintf->device.set_texture)(d3d->device, 0, (texture == NULL) ? NULL : texture->d3dfinaltex);
+		d3d->last_texture_flags = (texture == NULL ? 0 : texture->flags);
+		result = (*d3dintf->device.set_texture)(d3d->device, 0, (texture == NULL) ? d3d->default_texture->d3dfinaltex : texture->d3dfinaltex);
+		if (d3d->hlsl != NULL)
+			d3d->hlsl->set_texture(texture);
 		if (result != D3D_OK) mame_printf_verbose("Direct3D: Error %08X during device set_texture call\n", (int)result);
 	}
 }
@@ -338,6 +234,10 @@ INLINE void set_filter(d3d_info *d3d, int filter)
 		if (result != D3D_OK) mame_printf_verbose("Direct3D: Error %08X during device set_texture_stage_state call\n", (int)result);
 		result = (*d3dintf->device.set_texture_stage_state)(d3d->device, 0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MAGFILTER, filter ? D3DTEXF_LINEAR : D3DTEXF_POINT);
 		if (result != D3D_OK) mame_printf_verbose("Direct3D: Error %08X during device set_texture_stage_state call\n", (int)result);
+		result = (*d3dintf->device.set_texture_stage_state)(d3d->device, 1, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MINFILTER, filter ? D3DTEXF_LINEAR : D3DTEXF_POINT);
+		if (result != D3D_OK) mame_printf_verbose("Direct3D: Error %08X during device set_texture_stage_state call\n", (int)result);
+		result = (*d3dintf->device.set_texture_stage_state)(d3d->device, 1, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MAGFILTER, filter ? D3DTEXF_LINEAR : D3DTEXF_POINT);
+		if (result != D3D_OK) mame_printf_verbose("Direct3D: Error %08X during device set_texture_stage_state call\n", (int)result);
 	}
 }
 
@@ -352,6 +252,10 @@ INLINE void set_wrap(d3d_info *d3d, int wrap)
 		if (result != D3D_OK) mame_printf_verbose("Direct3D: Error %08X during device set_texture_stage_state call\n", (int)result);
 		result = (*d3dintf->device.set_texture_stage_state)(d3d->device, 0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_ADDRESSV, wrap ? D3DTADDRESS_WRAP : D3DTADDRESS_CLAMP);
 		if (result != D3D_OK) mame_printf_verbose("Direct3D: Error %08X during device set_texture_stage_state call\n", (int)result);
+		result = (*d3dintf->device.set_texture_stage_state)(d3d->device, 1, (D3DTEXTURESTAGESTATETYPE)D3DTSS_ADDRESSU, wrap ? D3DTADDRESS_WRAP : D3DTADDRESS_CLAMP);
+		if (result != D3D_OK) mame_printf_verbose("Direct3D: Error %08X during device set_texture_stage_state call\n", (int)result);
+		result = (*d3dintf->device.set_texture_stage_state)(d3d->device, 1, (D3DTEXTURESTAGESTATETYPE)D3DTSS_ADDRESSV, wrap ? D3DTADDRESS_WRAP : D3DTADDRESS_CLAMP);
+		if (result != D3D_OK) mame_printf_verbose("Direct3D: Error %08X during device set_texture_stage_state call\n", (int)result);
 	}
 }
 
@@ -363,6 +267,8 @@ INLINE void set_modmode(d3d_info *d3d, DWORD modmode)
 	{
 		d3d->last_modmode = modmode;
 		result = (*d3dintf->device.set_texture_stage_state)(d3d->device, 0, D3DTSS_COLOROP, modmode);
+		if (result != D3D_OK) mame_printf_verbose("Direct3D: Error %08X during device set_texture_stage_state call\n", (int)result);
+		result = (*d3dintf->device.set_texture_stage_state)(d3d->device, 1, D3DTSS_COLOROP, modmode);
 		if (result != D3D_OK) mame_printf_verbose("Direct3D: Error %08X during device set_texture_stage_state call\n", (int)result);
 	}
 }
@@ -380,10 +286,10 @@ INLINE void set_blendmode(d3d_info *d3d, int blendmode)
 	switch (blendmode)
 	{
 		default:
-		case BLENDMODE_NONE:			blendenable = FALSE;	blendop = D3DBLENDOP_ADD;	blendsrc = D3DBLEND_SRCALPHA;	blenddst = D3DBLEND_INVSRCALPHA;	break;
-		case BLENDMODE_ALPHA:			blendenable = TRUE;		blendop = D3DBLENDOP_ADD;	blendsrc = D3DBLEND_SRCALPHA;	blenddst = D3DBLEND_INVSRCALPHA;	break;
-		case BLENDMODE_RGB_MULTIPLY:	blendenable = TRUE;		blendop = D3DBLENDOP_ADD;	blendsrc = D3DBLEND_DESTCOLOR;	blenddst = D3DBLEND_ZERO;			break;
-		case BLENDMODE_ADD:				blendenable = TRUE;		blendop = D3DBLENDOP_ADD;	blendsrc = D3DBLEND_SRCALPHA;	blenddst = D3DBLEND_ONE;			break;
+		case BLENDMODE_NONE:            blendenable = FALSE;    blendop = D3DBLENDOP_ADD;   blendsrc = D3DBLEND_SRCALPHA;   blenddst = D3DBLEND_INVSRCALPHA;    break;
+		case BLENDMODE_ALPHA:           blendenable = TRUE;     blendop = D3DBLENDOP_ADD;   blendsrc = D3DBLEND_SRCALPHA;   blenddst = D3DBLEND_INVSRCALPHA;    break;
+		case BLENDMODE_RGB_MULTIPLY:    blendenable = TRUE;     blendop = D3DBLENDOP_ADD;   blendsrc = D3DBLEND_DESTCOLOR;  blenddst = D3DBLEND_ZERO;           break;
+		case BLENDMODE_ADD:             blendenable = TRUE;     blendop = D3DBLENDOP_ADD;   blendsrc = D3DBLEND_SRCALPHA;   blenddst = D3DBLEND_ONE;            break;
 	}
 
 	// adjust the bits that changed
@@ -420,7 +326,7 @@ INLINE void set_blendmode(d3d_info *d3d, int blendmode)
 INLINE void reset_render_states(d3d_info *d3d)
 {
 	// this ensures subsequent calls to the above setters will force-update the data
-	d3d->last_texture = (texture_info *)~0;
+	d3d->last_texture = (d3d_texture_info *)~0;
 	d3d->last_filter = -1;
 	d3d->last_blendenable = -1;
 	d3d->last_blendop = -1;
@@ -440,6 +346,8 @@ static void drawd3d_exit(void);
 static int drawd3d_window_init(win_window_info *window);
 static void drawd3d_window_destroy(win_window_info *window);
 static render_primitive_list *drawd3d_window_get_primitives(win_window_info *window);
+static void drawd3d_window_save(win_window_info *window);
+static void drawd3d_window_record(win_window_info *window);
 static int drawd3d_window_draw(win_window_info *window, HDC dc, int update);
 
 // devices
@@ -447,7 +355,7 @@ static int device_create(win_window_info *window);
 static int device_create_resources(d3d_info *d3d);
 static void device_delete(d3d_info *d3d);
 static void device_delete_resources(d3d_info *d3d);
-static int device_verify_caps(d3d_info *d3d);
+static int device_verify_caps(d3d_info *d3d, win_window_info *window);
 static int device_test_cooperative(d3d_info *d3d);
 
 // video modes
@@ -465,14 +373,11 @@ static d3d_vertex *primitive_alloc(d3d_info *d3d, int numverts);
 static void primitive_flush_pending(d3d_info *d3d);
 
 // textures
-static texture_info *texture_create(d3d_info *d3d, const render_texinfo *texsource, UINT32 flags);
-static void texture_compute_size(d3d_info *d3d, int texwidth, int texheight, texture_info *texture);
-static void texture_set_data(d3d_info *d3d, texture_info *texture, const render_texinfo *texsource, UINT32 flags);
-static void texture_prescale(d3d_info *d3d, texture_info *texture);
-static texture_info *texture_find(d3d_info *d3d, const render_primitive *prim);
+static void texture_compute_size(d3d_info *d3d, int texwidth, int texheight, d3d_texture_info *texture);
+static void texture_set_data(d3d_info *d3d, d3d_texture_info *texture, const render_texinfo *texsource, UINT32 flags);
+static void texture_prescale(d3d_info *d3d, d3d_texture_info *texture);
+static d3d_texture_info *texture_find(d3d_info *d3d, const render_primitive *prim);
 static void texture_update(d3d_info *d3d, const render_primitive *prim);
-
-
 
 //============================================================
 //  drawd3d_init
@@ -505,6 +410,8 @@ int drawd3d_init(running_machine &machine, win_draw_callbacks *callbacks)
 	callbacks->window_init = drawd3d_window_init;
 	callbacks->window_get_primitives = drawd3d_window_get_primitives;
 	callbacks->window_draw = drawd3d_window_draw;
+	callbacks->window_save = drawd3d_window_save;
+	callbacks->window_record = drawd3d_window_record;
 	callbacks->window_destroy = drawd3d_window_destroy;
 	return 0;
 }
@@ -534,16 +441,21 @@ static int drawd3d_window_init(win_window_info *window)
 	// allocate memory for our structures
 	d3d = global_alloc_clear(d3d_info);
 	window->drawdata = d3d;
+	d3d->window = window;
+	d3d->hlsl = NULL;
 
 	// experimental: load a PNG to use for vector rendering; it is treated
 	// as a brightness map
 	emu_file file(window->machine().options().art_path(), OPEN_FLAG_READ);
-	d3d->vector_bitmap = render_load_png(file, NULL, "vector.png", NULL, NULL);
-	if (d3d->vector_bitmap != NULL)
+	render_load_png(d3d->vector_bitmap, file, NULL, "vector.png");
+	if (d3d->vector_bitmap.valid())
 	{
-		bitmap_fill(d3d->vector_bitmap, NULL, MAKE_ARGB(0xff,0xff,0xff,0xff));
-		d3d->vector_bitmap = render_load_png(file, NULL, "vector.png", d3d->vector_bitmap, NULL);
+		d3d->vector_bitmap.fill(MAKE_ARGB(0xff,0xff,0xff,0xff));
+		render_load_png(d3d->vector_bitmap, file, NULL, "vector.png", true);
 	}
+
+	d3d->default_bitmap.allocate(8, 8);
+	d3d->default_bitmap.fill(MAKE_ARGB(0xff,0xff,0xff,0xff));
 
 	// configure the adapter for the mode we want
 	if (config_adapter_mode(window))
@@ -563,6 +475,23 @@ error:
 
 
 
+static void drawd3d_window_record(win_window_info *window)
+{
+	d3d_info *d3d = (d3d_info *)window->drawdata;
+
+	if (d3d->hlsl != NULL)
+		d3d->hlsl->window_record();
+}
+
+static void drawd3d_window_save(win_window_info *window)
+{
+	d3d_info *d3d = (d3d_info *)window->drawdata;
+
+	if (d3d->hlsl != NULL)
+		d3d->hlsl->window_save();
+}
+
+
 //============================================================
 //  drawd3d_window_destroy
 //============================================================
@@ -575,11 +504,11 @@ static void drawd3d_window_destroy(win_window_info *window)
 	if (d3d == NULL)
 		return;
 
+	if (d3d->hlsl->recording())
+		d3d->hlsl->window_record();
+
 	// delete the device
 	device_delete(d3d);
-
-	// experimental: free the vector PNG
-	global_free(d3d->vector_bitmap);
 
 	// free the memory in the window
 	global_free(d3d);
@@ -618,6 +547,10 @@ static int drawd3d_window_draw(win_window_info *window, HDC dc, int update)
 	render_primitive *prim;
 	HRESULT result;
 
+	// if we're in the middle of resizing, leave things alone
+	if (window->resize_state == RESIZE_STATE_RESIZING)
+		return 0;
+
 	// if we haven't been created, just punt
 	if (d3d == NULL)
 		return 1;
@@ -643,12 +576,27 @@ static int drawd3d_window_draw(win_window_info *window, HDC dc, int update)
 	}
 
 mtlog_add("drawd3d_window_draw: begin");
+	result = (*d3dintf->device.clear)(d3d->device, 0, NULL, D3DCLEAR_TARGET, D3DCOLOR_ARGB(0,0,0,0), 0, 0);
+	if (result != D3D_OK) mame_printf_verbose("Direct3D: Error %08X during device clear call\n", (int)result);
+
+	d3d->hlsl->record_texture();
 
 	// first update any textures
 	window->primlist->acquire_lock();
 	for (prim = window->primlist->first(); prim != NULL; prim = prim->next())
+	{
 		if (prim->texture.base != NULL)
+		{
 			texture_update(d3d, prim);
+		}
+		else if(d3d->hlsl->vector_enabled() && PRIMFLAG_GET_VECTORBUF(prim->flags))
+		{
+			if (!d3d->hlsl->get_vector_target(d3d))
+			{
+				d3d->hlsl->create_vector_target(d3d, prim);
+			}
+		}
+	}
 
 	// begin the scene
 mtlog_add("drawd3d_window_draw: begin_scene");
@@ -658,6 +606,12 @@ mtlog_add("drawd3d_window_draw: begin_scene");
 	d3d->lockedbuf = NULL;
 
 	// loop over primitives
+	if(d3d->hlsl->enabled())
+	{
+		d3d->hlsl_buf = (void*)primitive_alloc(d3d, 6);
+		d3d->hlsl->init_fsfx_quad(d3d->hlsl_buf);
+	}
+
 mtlog_add("drawd3d_window_draw: primitive loop begin");
 	for (prim = window->primlist->first(); prim != NULL; prim = prim->next())
 		switch (prim->type)
@@ -692,6 +646,9 @@ mtlog_add("drawd3d_window_draw: present begin");
 	result = (*d3dintf->device.present)(d3d->device, NULL, NULL, NULL, NULL, 0);
 mtlog_add("drawd3d_window_draw: present end");
 	if (result != D3D_OK) mame_printf_verbose("Direct3D: Error %08X during device present call\n", (int)result);
+
+	d3d->hlsl->frame_complete();
+
 	return 0;
 }
 
@@ -712,7 +669,7 @@ static int device_create(win_window_info *window)
 		device_delete(d3d);
 
 	// verify the caps
-	verify = device_verify_caps(d3d);
+	verify = device_verify_caps(d3d, window);
 	if (verify == 2)
 	{
 		mame_printf_error("Error: Device does not meet minimum requirements for Direct3D rendering\n");
@@ -764,20 +721,21 @@ try_again:
 
 	// initialize the D3D presentation parameters
 	memset(&d3d->presentation, 0, sizeof(d3d->presentation));
-	d3d->presentation.BackBufferWidth				= d3d->width;
-	d3d->presentation.BackBufferHeight				= d3d->height;
-	d3d->presentation.BackBufferFormat				= d3d->pixformat;
-	d3d->presentation.BackBufferCount				= video_config.triplebuf ? 2 : 1;
-	d3d->presentation.MultiSampleType				= D3DMULTISAMPLE_NONE;
-	d3d->presentation.SwapEffect					= D3DSWAPEFFECT_DISCARD;
-	d3d->presentation.hDeviceWindow					= window->hwnd;
-	d3d->presentation.Windowed						= !window->fullscreen || win_has_menu(window);
-	d3d->presentation.EnableAutoDepthStencil		= FALSE;
-	d3d->presentation.AutoDepthStencilFormat		= D3DFMT_D16;
-	d3d->presentation.Flags							= 0;
-	d3d->presentation.FullScreen_RefreshRateInHz	= d3d->refresh;
-	d3d->presentation.PresentationInterval			= ((video_config.triplebuf && window->fullscreen) || video_config.waitvsync || video_config.syncrefresh) ?
+	d3d->presentation.BackBufferWidth               = d3d->width;
+	d3d->presentation.BackBufferHeight              = d3d->height;
+	d3d->presentation.BackBufferFormat              = d3d->pixformat;
+	d3d->presentation.BackBufferCount               = video_config.triplebuf ? 2 : 1;
+	d3d->presentation.MultiSampleType               = D3DMULTISAMPLE_NONE;
+	d3d->presentation.SwapEffect                    = D3DSWAPEFFECT_DISCARD;
+	d3d->presentation.hDeviceWindow                 = window->hwnd;
+	d3d->presentation.Windowed                      = !window->fullscreen || win_has_menu(window);
+	d3d->presentation.EnableAutoDepthStencil        = FALSE;
+	d3d->presentation.AutoDepthStencilFormat        = D3DFMT_D16;
+	d3d->presentation.Flags                         = 0;
+	d3d->presentation.FullScreen_RefreshRateInHz    = d3d->refresh;
+	d3d->presentation.PresentationInterval          = ((video_config.triplebuf && window->fullscreen) || video_config.waitvsync || video_config.syncrefresh) ?
 														D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
+
 	// create the D3D device
 	result = (*d3dintf->d3d.create_device)(d3dintf, d3d->adapter, D3DDEVTYPE_HAL, win_window_list->hwnd,
 					D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_FPU_PRESERVE, &d3d->presentation, &d3d->device);
@@ -829,6 +787,10 @@ try_again:
 		}
 	}
 
+	int ret = d3d->hlsl->create_resources(false);
+	if (ret != 0)
+		return ret;
+
 	return device_create_resources(d3d);
 }
 
@@ -846,7 +808,7 @@ static int device_create_resources(d3d_info *d3d)
 	result = (*d3dintf->device.create_vertex_buffer)(d3d->device,
 				sizeof(d3d_vertex) * VERTEX_BUFFER_SIZE,
 				D3DUSAGE_DYNAMIC | D3DUSAGE_SOFTWAREPROCESSING | D3DUSAGE_WRITEONLY,
-				VERTEX_FORMAT, D3DPOOL_DEFAULT, &d3d->vertexbuf);
+				VERTEX_BASE_FORMAT | ((d3d->hlsl->enabled() && d3dintf->post_fx_available) ? D3DFVF_XYZW : D3DFVF_XYZRHW), D3DPOOL_DEFAULT, &d3d->vertexbuf);
 	if (result != D3D_OK)
 	{
 		mame_printf_error("Error creating vertex buffer (%08X)", (UINT32)result);
@@ -854,10 +816,10 @@ static int device_create_resources(d3d_info *d3d)
 	}
 
 	// set the vertex format
-	result = (*d3dintf->device.set_vertex_shader)(d3d->device, (D3DFORMAT)VERTEX_FORMAT);
+	result = (*d3dintf->device.set_vertex_format)(d3d->device, (D3DFORMAT)(VERTEX_BASE_FORMAT | ((d3d->hlsl->enabled() && d3dintf->post_fx_available) ? D3DFVF_XYZW : D3DFVF_XYZRHW)));
 	if (result != D3D_OK)
 	{
-		mame_printf_error("Error setting vertex shader (%08X)", (UINT32)result);
+		mame_printf_error("Error setting vertex format (%08X)", (UINT32)result);
 		return 1;
 	}
 
@@ -883,6 +845,8 @@ static int device_create_resources(d3d_info *d3d)
 
 	result = (*d3dintf->device.set_texture_stage_state)(d3d->device, 0, D3DTSS_COLOROP, D3DTOP_MODULATE);
 	result = (*d3dintf->device.set_texture_stage_state)(d3d->device, 0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+	result = (*d3dintf->device.set_texture_stage_state)(d3d->device, 1, D3DTSS_COLOROP, D3DTOP_MODULATE);
+	result = (*d3dintf->device.set_texture_stage_state)(d3d->device, 1, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
 
 	// reset the local states to force updates
 	reset_render_states(d3d);
@@ -891,16 +855,32 @@ static int device_create_resources(d3d_info *d3d)
 	result = (*d3dintf->device.clear)(d3d->device, 0, NULL, D3DCLEAR_TARGET, D3DCOLOR_ARGB(0,0,0,0), 0, 0);
 	result = (*d3dintf->device.present)(d3d->device, NULL, NULL, NULL, NULL, 0);
 
-	// experimental: if we have a vector bitmap, create a texture for it
-	if (d3d->vector_bitmap != NULL)
+	if (d3d->default_bitmap.valid())
 	{
 		render_texinfo texture;
 
 		// fake in the basic data so it looks like it came from render.c
-		texture.base = d3d->vector_bitmap->base;
-		texture.rowpixels = d3d->vector_bitmap->rowpixels;
-		texture.width = d3d->vector_bitmap->width;
-		texture.height = d3d->vector_bitmap->height;
+		texture.base = d3d->default_bitmap.raw_pixptr(0);
+		texture.rowpixels = d3d->default_bitmap.rowpixels();
+		texture.width = d3d->default_bitmap.width();
+		texture.height = d3d->default_bitmap.height();
+		texture.palette = NULL;
+		texture.seqid = 0;
+
+		// now create it
+		d3d->default_texture = texture_create(d3d, &texture, PRIMFLAG_BLENDMODE(BLENDMODE_ALPHA) | PRIMFLAG_TEXFORMAT(TEXFORMAT_ARGB32));
+	}
+
+	// experimental: if we have a vector bitmap, create a texture for it
+	if (d3d->vector_bitmap.valid())
+	{
+		render_texinfo texture;
+
+		// fake in the basic data so it looks like it came from render.c
+		texture.base = &d3d->vector_bitmap.pix32(0);
+		texture.rowpixels = d3d->vector_bitmap.rowpixels();
+		texture.width = d3d->vector_bitmap.width();
+		texture.height = d3d->vector_bitmap.height();
 		texture.palette = NULL;
 		texture.seqid = 0;
 
@@ -919,7 +899,13 @@ static int device_create_resources(d3d_info *d3d)
 
 static void device_delete(d3d_info *d3d)
 {
-	// free resources
+	// free our effects
+	d3d->hlsl->delete_resources(false);
+
+	// delete the HLSL interface
+	global_free(d3d->hlsl);
+
+	// free our base resources
 	device_delete_resources(d3d);
 
 	// free the device itself
@@ -939,14 +925,24 @@ static void device_delete_resources(d3d_info *d3d)
 	// free all textures
 	while (d3d->texlist != NULL)
 	{
-		texture_info *tex = d3d->texlist;
+		d3d_texture_info *tex = d3d->texlist;
 		d3d->texlist = tex->next;
 		if (tex->d3dfinaltex != NULL)
+		{
+			if (tex->d3dtex == tex->d3dfinaltex) tex->d3dtex = NULL;
 			(*d3dintf->texture.release)(tex->d3dfinaltex);
-		if (tex->d3dtex != NULL && tex->d3dtex != tex->d3dfinaltex)
+			tex->d3dfinaltex = NULL;
+		}
+		if (tex->d3dtex != NULL)
+		{
 			(*d3dintf->texture.release)(tex->d3dtex);
+			tex->d3dtex = NULL;
+		}
 		if (tex->d3dsurface != NULL)
+		{
 			(*d3dintf->surface.release)(tex->d3dsurface);
+			tex->d3dsurface = NULL;
+		}
 		global_free(tex);
 	}
 
@@ -954,6 +950,9 @@ static void device_delete_resources(d3d_info *d3d)
 	if (d3d->vertexbuf != NULL)
 		(*d3dintf->vertexbuf.release)(d3d->vertexbuf);
 	d3d->vertexbuf = NULL;
+
+	global_free(d3d->default_texture);
+	d3d->default_texture = NULL;
 }
 
 
@@ -962,7 +961,7 @@ static void device_delete_resources(d3d_info *d3d)
 //  device_verify_caps
 //============================================================
 
-static int device_verify_caps(d3d_info *d3d)
+static int device_verify_caps(d3d_info *d3d, win_window_info *window)
 {
 	int retval = 0;
 	HRESULT result;
@@ -977,6 +976,17 @@ static int device_verify_caps(d3d_info *d3d)
 	if (result != D3D_OK) mame_printf_verbose("Direct3D: Error %08X during get_caps_dword call\n", (int)result);
 	result = (*d3dintf->d3d.get_caps_dword)(d3dintf, d3d->adapter, D3DDEVTYPE_HAL, CAPS_MAX_TEXTURE_HEIGHT, &d3d->texture_max_height);
 	if (result != D3D_OK) mame_printf_verbose("Direct3D: Error %08X during get_caps_dword call\n", (int)result);
+
+	d3d->hlsl = global_alloc_clear(hlsl_info);
+	d3d->hlsl->init(d3dintf, window);
+
+	result = (*d3dintf->d3d.get_caps_dword)(d3dintf, d3d->adapter, D3DDEVTYPE_HAL, CAPS_MAX_PS30_INSN_SLOTS, &tempcaps);
+	if (result != D3D_OK) mame_printf_verbose("Direct3D Error %08X during get_caps_dword call\n", (int)result);
+	if(tempcaps < 512)
+	{
+		mame_printf_verbose("Direct3D: Warning - Device does not support Pixel Shader 3.0, falling back to non-PS rendering\n");
+		d3dintf->post_fx_available = false;
+	}
 
 	// verify presentation capabilities
 	result = (*d3dintf->d3d.get_caps_dword)(d3dintf, d3d->adapter, D3DDEVTYPE_HAL, CAPS_PRESENTATION_INTERVALS, &tempcaps);
@@ -1135,16 +1145,27 @@ static int device_test_cooperative(d3d_info *d3d)
 
 		// free all existing resources and call reset on the device
 		device_delete_resources(d3d);
+		d3d->hlsl->delete_resources(true);
 		result = (*d3dintf->device.reset)(d3d->device, &d3d->presentation);
 
 		// if it didn't work, punt to GDI
 		if (result != D3D_OK)
+		{
+			printf("Unable to reset, result %08x\n", (UINT32)result);
 			return 1;
+		}
 
 		// try to create the resources again; if that didn't work, delete the whole thing
 		if (device_create_resources(d3d))
 		{
 			mame_printf_verbose("Direct3D: failed to recreate resources for device; failing permanently\n");
+			device_delete(d3d);
+			return 1;
+		}
+
+		if (d3d->hlsl->create_resources(true))
+		{
+			mame_printf_verbose("Direct3D: failed to recreate HLSL resources for device; failing permanently\n");
 			device_delete(d3d);
 			return 1;
 		}
@@ -1285,9 +1306,9 @@ static void pick_best_mode(win_window_info *window)
 	int modenum;
 
 	// determine the refresh rate of the primary screen
-	const screen_device_config *primary_screen = window->machine().config().first_screen();
+	const screen_device *primary_screen = window->machine().config().first_screen();
 	if (primary_screen != NULL)
-		target_refresh = ATTOSECONDS_TO_HZ(primary_screen->refresh());
+		target_refresh = ATTOSECONDS_TO_HZ(primary_screen->refresh_attoseconds());
 
 	// determine the minimum width/height for the selected target
 	// note: technically we should not be calling this from an alternate window
@@ -1412,7 +1433,7 @@ static void draw_line(d3d_info *d3d, const render_primitive *prim)
 	render_bounds b0, b1;
 	d3d_vertex *vertex;
 	INT32 r, g, b, a;
-	poly_info *poly;
+	d3d_poly_info *poly;
 	float effwidth;
 	DWORD color;
 	int i;
@@ -1475,6 +1496,20 @@ static void draw_line(d3d_info *d3d, const render_primitive *prim)
 			vertex[3].u0 = d3d->vector_texture->ustop;
 			vertex[3].v0 = d3d->vector_texture->vstop;
 		}
+		else if(d3d->default_texture != NULL)
+		{
+			vertex[0].u0 = d3d->default_texture->ustart;
+			vertex[0].v0 = d3d->default_texture->vstart;
+
+			vertex[2].u0 = d3d->default_texture->ustart;
+			vertex[2].v0 = d3d->default_texture->vstart;
+
+			vertex[1].u0 = d3d->default_texture->ustart;
+			vertex[1].v0 = d3d->default_texture->vstart;
+
+			vertex[3].u0 = d3d->default_texture->ustart;
+			vertex[3].v0 = d3d->default_texture->vstart;
+		}
 
 		// set the color, Z parameters to standard values
 		for (i = 0; i < 4; i++)
@@ -1503,12 +1538,14 @@ static void draw_line(d3d_info *d3d, const render_primitive *prim)
 
 static void draw_quad(d3d_info *d3d, const render_primitive *prim)
 {
-	texture_info *texture = texture_find(d3d, prim);
+	d3d_texture_info *texture = texture_find(d3d, prim);
 	DWORD color, modmode;
 	d3d_vertex *vertex;
 	INT32 r, g, b, a;
-	poly_info *poly;
+	d3d_poly_info *poly;
 	int i;
+
+	texture = texture != NULL ? texture : d3d->default_texture;
 
 	// get a pointer to the vertex buffer
 	vertex = primitive_alloc(d3d, 4);
@@ -1526,7 +1563,7 @@ static void draw_quad(d3d_info *d3d, const render_primitive *prim)
 	vertex[3].y = prim->bounds.y1 - 0.5f;
 
 	// set the texture coordinates
-	if (texture != NULL)
+	if(texture != NULL)
 	{
 		float du = texture->ustop - texture->ustart;
 		float dv = texture->vstop - texture->vstart;
@@ -1587,7 +1624,6 @@ static void draw_quad(d3d_info *d3d, const render_primitive *prim)
 }
 
 
-
 //============================================================
 //  primitive_alloc
 //============================================================
@@ -1643,10 +1679,22 @@ static void primitive_flush_pending(d3d_info *d3d)
 	result = (*d3dintf->device.set_stream_source)(d3d->device, 0, d3d->vertexbuf, sizeof(d3d_vertex));
 	if (result != D3D_OK) mame_printf_verbose("Direct3D: Error %08X during device set_stream_source call\n", (int)result);
 
-	// now do the polys
-	for (polynum = vertnum = 0; polynum < d3d->numpolys; polynum++)
+	d3d->hlsl->begin();
+
+	// first remember the original render target in case we need to set a new one
+	if(d3d->hlsl->enabled() && d3dintf->post_fx_available)
 	{
-		poly_info *poly = &d3d->poly[polynum];
+		vertnum = 6;
+	}
+	else
+	{
+		vertnum = 0;
+	}
+
+	// now do the polys
+	for (polynum = 0; polynum < d3d->numpolys; polynum++)
+	{
+		d3d_poly_info *poly = &d3d->poly[polynum];
 		int newfilter;
 
 		// set the texture if different
@@ -1661,17 +1709,32 @@ static void primitive_flush_pending(d3d_info *d3d)
 			set_filter(d3d, newfilter);
 			set_wrap(d3d, PRIMFLAG_GET_TEXWRAP(poly->flags));
 			set_modmode(d3d, poly->modmode);
+
+			d3d->hlsl->init_effect_info(poly);
 		}
 
 		// set the blendmode if different
 		set_blendmode(d3d, PRIMFLAG_GET_BLENDMODE(poly->flags));
 
-		// add the primitives
-		assert(vertnum + poly->numverts <= d3d->numverts);
-		result = (*d3dintf->device.draw_primitive)(d3d->device, poly->type, vertnum, poly->count);
-		if (result != D3D_OK) mame_printf_verbose("Direct3D: Error %08X during device draw_primitive call\n", (int)result);
+		if(d3d->hlsl->enabled() && d3dintf->post_fx_available)
+		{
+			assert(vertnum + poly->numverts <= d3d->numverts);
+
+			d3d->hlsl->render_quad(poly, vertnum);
+		}
+		else
+		{
+			assert(vertnum + poly->numverts <= d3d->numverts);
+
+			// add the primitives
+			result = (*d3dintf->device.draw_primitive)(d3d->device, poly->type, vertnum, poly->count);
+			if (result != D3D_OK) mame_printf_verbose("Direct3D: Error %08X during device draw_primitive call\n", (int)result);
+		}
+
 		vertnum += poly->numverts;
 	}
+
+	d3d->hlsl->end();
 
 	// reset the vertex count
 	d3d->numverts = 0;
@@ -1679,18 +1742,21 @@ static void primitive_flush_pending(d3d_info *d3d)
 }
 
 
+void texture_destroy(d3d_info *d3d, d3d_texture_info *info)
+{
+}
 
 //============================================================
 //  texture_create
 //============================================================
 
-static texture_info *texture_create(d3d_info *d3d, const render_texinfo *texsource, UINT32 flags)
+d3d_texture_info *texture_create(d3d_info *d3d, const render_texinfo *texsource, UINT32 flags)
 {
-	texture_info *texture;
+	d3d_texture_info *texture;
 	HRESULT result;
 
 	// allocate a new texture
-	texture = global_alloc_clear(texture_info);
+	texture = global_alloc_clear(d3d_texture_info);
 
 	// fill in the core data
 	texture->hash = texture_compute_hash(texsource, flags);
@@ -1757,6 +1823,12 @@ static texture_info *texture_create(d3d_info *d3d, const render_texinfo *texsour
 				{
 					texture->d3dfinaltex = texture->d3dtex;
 					texture->type = d3d->dynamic_supported ? TEXTURE_TYPE_DYNAMIC : TEXTURE_TYPE_PLAIN;
+
+					if (d3d->hlsl->enabled() && !d3d->hlsl->register_texture(texture))
+					{
+						goto error;
+					}
+
 					break;
 				}
 			}
@@ -1794,7 +1866,13 @@ static texture_info *texture_create(d3d_info *d3d, const render_texinfo *texsour
 				finalfmt = (format != d3d->yuv_format) ? format : D3DFMT_A8R8G8B8;
 				result = (*d3dintf->device.create_texture)(d3d->device, scwidth, scheight, 1, D3DUSAGE_RENDERTARGET, finalfmt, D3DPOOL_DEFAULT, &texture->d3dfinaltex);
 				if (result == D3D_OK)
+				{
+					if (d3d->hlsl->enabled() && !d3d->hlsl->register_prescaled_texture(texture))
+					{
+						goto error;
+					}
 					break;
+				}
 				(*d3dintf->texture.release)(texture->d3dtex);
 				texture->d3dtex = NULL;
 			}
@@ -1805,11 +1883,16 @@ static texture_info *texture_create(d3d_info *d3d, const render_texinfo *texsour
 	texture_set_data(d3d, texture, texsource, flags);
 
 	// add us to the texture list
+	if(d3d->texlist != NULL)
+		d3d->texlist->prev = texture;
+	texture->prev = NULL;
 	texture->next = d3d->texlist;
 	d3d->texlist = texture;
 	return texture;
 
 error:
+	d3dintf->post_fx_available = false;
+	printf("Direct3D: Critical warning: A texture failed to allocate. Expect things to get bad quickly.\n");
 	if (texture->d3dsurface != NULL)
 		(*d3dintf->surface.release)(texture->d3dsurface);
 	if (texture->d3dtex != NULL)
@@ -1824,7 +1907,7 @@ error:
 //  texture_compute_size
 //============================================================
 
-static void texture_compute_size(d3d_info *d3d, int texwidth, int texheight, texture_info *texture)
+static void texture_compute_size(d3d_info *d3d, int texwidth, int texheight, d3d_texture_info *texture)
 {
 	int finalheight = texheight;
 	int finalwidth = texwidth;
@@ -1947,62 +2030,6 @@ INLINE void copyline_palettea16(UINT32 *dst, const UINT16 *src, int width, const
 		*dst++ = palette[*src++];
 	if (xborderpix)
 		*dst++ = palette[*--src];
-}
-
-
-
-//============================================================
-//  copyline_rgb15
-//============================================================
-
-INLINE void copyline_rgb15(UINT32 *dst, const UINT16 *src, int width, const rgb_t *palette, int xborderpix)
-{
-	int x;
-
-	assert(xborderpix == 0 || xborderpix == 1);
-
-	// palette (really RGB map) case
-	if (palette != NULL)
-	{
-		if (xborderpix)
-		{
-			UINT16 pix = *src;
-			*dst++ = 0xff000000 | palette[0x40 + ((pix >> 10) & 0x1f)] | palette[0x20 + ((pix >> 5) & 0x1f)] | palette[0x00 + ((pix >> 0) & 0x1f)];
-		}
-		for (x = 0; x < width; x++)
-		{
-			UINT16 pix = *src++;
-			*dst++ = 0xff000000 | palette[0x40 + ((pix >> 10) & 0x1f)] | palette[0x20 + ((pix >> 5) & 0x1f)] | palette[0x00 + ((pix >> 0) & 0x1f)];
-		}
-		if (xborderpix)
-		{
-			UINT16 pix = *--src;
-			*dst++ = 0xff000000 | palette[0x40 + ((pix >> 10) & 0x1f)] | palette[0x20 + ((pix >> 5) & 0x1f)] | palette[0x00 + ((pix >> 0) & 0x1f)];
-		}
-	}
-
-	// direct case
-	else
-	{
-		if (xborderpix)
-		{
-			UINT16 pix = *src;
-			UINT32 color = ((pix & 0x7c00) << 9) | ((pix & 0x03e0) << 6) | ((pix & 0x001f) << 3);
-			*dst++ = 0xff000000 | color | ((color >> 5) & 0x070707);
-		}
-		for (x = 0; x < width; x++)
-		{
-			UINT16 pix = *src++;
-			UINT32 color = ((pix & 0x7c00) << 9) | ((pix & 0x03e0) << 6) | ((pix & 0x001f) << 3);
-			*dst++ = 0xff000000 | color | ((color >> 5) & 0x070707);
-		}
-		if (xborderpix)
-		{
-			UINT16 pix = *--src;
-			UINT32 color = ((pix & 0x7c00) << 9) | ((pix & 0x03e0) << 6) | ((pix & 0x001f) << 3);
-			*dst++ = 0xff000000 | color | ((color >> 5) & 0x070707);
-		}
-	}
 }
 
 
@@ -2307,7 +2334,7 @@ INLINE void copyline_yuy16_to_argb(UINT32 *dst, const UINT16 *src, int width, co
 //  texture_set_data
 //============================================================
 
-static void texture_set_data(d3d_info *d3d, texture_info *texture, const render_texinfo *texsource, UINT32 flags)
+static void texture_set_data(d3d_info *d3d, d3d_texture_info *texture, const render_texinfo *texsource, UINT32 flags)
 {
 	D3DLOCKED_RECT rect;
 	HRESULT result;
@@ -2318,9 +2345,9 @@ static void texture_set_data(d3d_info *d3d, texture_info *texture, const render_
 	switch (texture->type)
 	{
 		default:
-		case TEXTURE_TYPE_PLAIN:	result = (*d3dintf->texture.lock_rect)(texture->d3dtex, 0, &rect, NULL, 0);					break;
-		case TEXTURE_TYPE_DYNAMIC:	result = (*d3dintf->texture.lock_rect)(texture->d3dtex, 0, &rect, NULL, D3DLOCK_DISCARD);	break;
-		case TEXTURE_TYPE_SURFACE:	result = (*d3dintf->surface.lock_rect)(texture->d3dsurface, &rect, NULL, D3DLOCK_DISCARD);	break;
+		case TEXTURE_TYPE_PLAIN:    result = (*d3dintf->texture.lock_rect)(texture->d3dtex, 0, &rect, NULL, 0);                 break;
+		case TEXTURE_TYPE_DYNAMIC:  result = (*d3dintf->texture.lock_rect)(texture->d3dtex, 0, &rect, NULL, D3DLOCK_DISCARD);   break;
+		case TEXTURE_TYPE_SURFACE:  result = (*d3dintf->surface.lock_rect)(texture->d3dsurface, &rect, NULL, D3DLOCK_DISCARD);  break;
 	}
 	if (result != D3D_OK)
 		return;
@@ -2342,10 +2369,6 @@ static void texture_set_data(d3d_info *d3d, texture_info *texture, const render_
 
 			case TEXFORMAT_PALETTEA16:
 				copyline_palettea16((UINT32 *)dst, (UINT16 *)texsource->base + srcy * texsource->rowpixels, texsource->width, texsource->palette, texture->xborderpix);
-				break;
-
-			case TEXFORMAT_RGB15:
-				copyline_rgb15((UINT32 *)dst, (UINT16 *)texsource->base + srcy * texsource->rowpixels, texsource->width, texsource->palette, texture->xborderpix);
 				break;
 
 			case TEXFORMAT_RGB32:
@@ -2375,9 +2398,9 @@ static void texture_set_data(d3d_info *d3d, texture_info *texture, const render_
 	switch (texture->type)
 	{
 		default:
-		case TEXTURE_TYPE_PLAIN:	result = (*d3dintf->texture.unlock_rect)(texture->d3dtex, 0);	break;
-		case TEXTURE_TYPE_DYNAMIC:	result = (*d3dintf->texture.unlock_rect)(texture->d3dtex, 0);	break;
-		case TEXTURE_TYPE_SURFACE:	result = (*d3dintf->surface.unlock_rect)(texture->d3dsurface);	break;
+		case TEXTURE_TYPE_PLAIN:    result = (*d3dintf->texture.unlock_rect)(texture->d3dtex, 0);   break;
+		case TEXTURE_TYPE_DYNAMIC:  result = (*d3dintf->texture.unlock_rect)(texture->d3dtex, 0);   break;
+		case TEXTURE_TYPE_SURFACE:  result = (*d3dintf->surface.unlock_rect)(texture->d3dsurface);  break;
 	}
 	if (result != D3D_OK) mame_printf_verbose("Direct3D: Error %08X during texture unlock_rect call\n", (int)result);
 
@@ -2391,7 +2414,7 @@ static void texture_set_data(d3d_info *d3d, texture_info *texture, const render_
 //  texture_prescale
 //============================================================
 
-static void texture_prescale(d3d_info *d3d, texture_info *texture)
+static void texture_prescale(d3d_info *d3d, d3d_texture_info *texture)
 {
 	d3d_surface *surface;
 	HRESULT result;
@@ -2438,7 +2461,7 @@ static void texture_prescale(d3d_info *d3d, texture_info *texture)
 		result = (*d3dintf->device.get_render_target)(d3d->device, 0, &backbuffer);
 		if (result != D3D_OK) mame_printf_verbose("Direct3D: Error %08X during device get_render_target call\n", (int)result);
 		result = (*d3dintf->device.set_render_target)(d3d->device, 0, surface);
-		if (result != D3D_OK) mame_printf_verbose("Direct3D: Error %08X during device set_render_target call\n", (int)result);
+		if (result != D3D_OK) mame_printf_verbose("Direct3D: Error %08X during device set_render_target call 1\n", (int)result);
 		reset_render_states(d3d);
 
 		// start the scene
@@ -2500,7 +2523,7 @@ static void texture_prescale(d3d_info *d3d, texture_info *texture)
 
 		// reset the render target and release our reference to the backbuffer
 		result = (*d3dintf->device.set_render_target)(d3d->device, 0, backbuffer);
-		if (result != D3D_OK) mame_printf_verbose("Direct3D: Error %08X during device set_render_target call\n", (int)result);
+		if (result != D3D_OK) mame_printf_verbose("Direct3D: Error %08X during device set_render_target call 2\n", (int)result);
 		(*d3dintf->surface.release)(backbuffer);
 		reset_render_states(d3d);
 	}
@@ -2515,24 +2538,78 @@ static void texture_prescale(d3d_info *d3d, texture_info *texture)
 //  texture_find
 //============================================================
 
-static texture_info *texture_find(d3d_info *d3d, const render_primitive *prim)
+static d3d_texture_info *texture_find(d3d_info *d3d, const render_primitive *prim)
 {
 	UINT32 texhash = texture_compute_hash(&prim->texture, prim->flags);
-	texture_info *texture;
+	d3d_texture_info *texture;
 
 	// find a match
 	for (texture = d3d->texlist; texture != NULL; texture = texture->next)
+	{
+		UINT32 test_screen = (UINT32)texture->texinfo.osddata >> 1;
+		UINT32 test_page = (UINT32)texture->texinfo.osddata & 1;
+		UINT32 prim_screen = (UINT32)prim->texture.osddata >> 1;
+		UINT32 prim_page = (UINT32)prim->texture.osddata & 1;
+		if (test_screen != prim_screen || test_page != prim_page)
+		{
+			continue;
+		}
+
 		if (texture->hash == texhash &&
 			texture->texinfo.base == prim->texture.base &&
 			texture->texinfo.width == prim->texture.width &&
 			texture->texinfo.height == prim->texture.height &&
 			((texture->flags ^ prim->flags) & (PRIMFLAG_BLENDMODE_MASK | PRIMFLAG_TEXFORMAT_MASK)) == 0)
-			return texture;
+		{
+			// Reject a texture if it belongs to an out-of-date render target, so as to cause the HLSL system to re-cache
+			if (d3d->hlsl->enabled() && prim->texture.width != 0 && prim->texture.height != 0 && (prim->flags & PRIMFLAG_SCREENTEX_MASK) != 0)
+			{
+				if (d3d->hlsl->find_render_target(texture) != NULL)
+				{
+					return texture;
+				}
+			}
+			else
+			{
+				return texture;
+			}
+		}
+	}
 
-	// nothing found
+	// nothing found, check if we need to unregister something with hlsl
+	if (d3d->hlsl->enabled())
+	{
+		if (prim->texture.width == 0 || prim->texture.height == 0)
+		{
+			return NULL;
+		}
+
+		UINT32 prim_screen = (UINT32)prim->texture.osddata >> 1;
+		UINT32 prim_page = (UINT32)prim->texture.osddata & 1;
+
+		for (texture = d3d->texlist; texture != NULL; texture = texture->next)
+		{
+			UINT32 test_screen = (UINT32)texture->texinfo.osddata >> 1;
+			UINT32 test_page = (UINT32)texture->texinfo.osddata & 1;
+			if (test_screen != prim_screen || test_page != prim_page)
+			{
+				continue;
+			}
+
+			// Clear our old texture reference
+			if (texture->hash == texhash &&
+				texture->texinfo.base == prim->texture.base &&
+				((texture->flags ^ prim->flags) & (PRIMFLAG_BLENDMODE_MASK | PRIMFLAG_TEXFORMAT_MASK)) == 0 &&
+				(texture->texinfo.width != prim->texture.width ||
+					texture->texinfo.height != prim->texture.height))
+			{
+				d3d->hlsl->remove_render_target(texture);
+				break;
+			}
+		}
+	}
 	return NULL;
 }
-
 
 
 //============================================================
@@ -2541,11 +2618,13 @@ static texture_info *texture_find(d3d_info *d3d, const render_primitive *prim)
 
 static void texture_update(d3d_info *d3d, const render_primitive *prim)
 {
-	texture_info *texture = texture_find(d3d, prim);
+	d3d_texture_info *texture = texture_find(d3d, prim);
 
 	// if we didn't find one, create a new texture
 	if (texture == NULL)
+	{
 		texture = texture_create(d3d, &prim->texture, prim->flags);
+	}
 
 	// if we found it, but with a different seqid, copy the data
 	if (texture->texinfo.seqid != prim->texture.seqid)
@@ -2553,4 +2632,129 @@ static void texture_update(d3d_info *d3d, const render_primitive *prim)
 		texture_set_data(d3d, texture, &prim->texture, prim->flags);
 		texture->texinfo.seqid = prim->texture.seqid;
 	}
+}
+
+
+//============================================================
+//  d3d_cache_target::~d3d_cache_target
+//============================================================
+
+d3d_cache_target::~d3d_cache_target()
+{
+	if (last_texture != NULL)
+	{
+		(*d3dintf->texture.release)(last_texture);
+		last_texture = NULL;
+	}
+	if (last_target != NULL)
+	{
+		(*d3dintf->surface.release)(last_target);
+		last_target = NULL;
+	}
+}
+
+
+//============================================================
+//  d3d_cache_target::init - initializes a target cache
+//============================================================
+
+bool d3d_cache_target::init(d3d_info *d3d, d3d_base *d3dintf, int width, int height, int prescale_x, int prescale_y)
+{
+	HRESULT result = (*d3dintf->device.create_texture)(d3d->device, width * prescale_x, height * prescale_y, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &last_texture);
+	if (result != D3D_OK)
+		return false;
+	(*d3dintf->texture.get_surface_level)(last_texture, 0, &last_target);
+
+	return true;
+}
+
+//============================================================
+//  d3d_render_target::~d3d_render_target
+//============================================================
+
+d3d_render_target::~d3d_render_target()
+{
+	for (int index = 0; index < 5; index++)
+	{
+		if (texture[index] != NULL)
+		{
+			(*d3dintf->texture.release)(texture[index]);
+			texture[index] = NULL;
+		}
+		if (target[index] != NULL)
+		{
+			(*d3dintf->surface.release)(target[index]);
+			target[index] = NULL;
+		}
+	}
+
+	if (prescaletexture != NULL)
+	{
+		(*d3dintf->texture.release)(prescaletexture);
+		prescaletexture = NULL;
+	}
+	if (prescaletarget != NULL)
+	{
+		(*d3dintf->surface.release)(prescaletarget);
+		prescaletarget = NULL;
+	}
+
+	if (smalltexture != NULL)
+	{
+		(*d3dintf->texture.release)(smalltexture);
+		smalltexture = NULL;
+	}
+	if (smalltarget != NULL)
+	{
+		(*d3dintf->surface.release)(smalltarget);
+		smalltarget = NULL;
+	}
+}
+
+
+//============================================================
+//  d3d_render_target::init - initializes a render target
+//============================================================
+
+bool d3d_render_target::init(d3d_info *d3d, d3d_base *d3dintf, int width, int height, int prescale_x, int prescale_y)
+{
+	HRESULT result = (*d3dintf->device.create_texture)(d3d->device, width * prescale_x, height * prescale_y, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture[0]);
+	if (result != D3D_OK)
+		return false;
+	(*d3dintf->texture.get_surface_level)(texture[0], 0, &target[0]);
+
+	result = (*d3dintf->device.create_texture)(d3d->device, width * prescale_x, height * prescale_y, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture[1]);
+	if (result != D3D_OK)
+		return false;
+	(*d3dintf->texture.get_surface_level)(texture[1], 0, &target[1]);
+
+	result = (*d3dintf->device.create_texture)(d3d->device, width * prescale_x, height * prescale_y, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture[2]);
+	if (result != D3D_OK)
+		return false;
+	(*d3dintf->texture.get_surface_level)(texture[2], 0, &target[2]);
+
+	result = (*d3dintf->device.create_texture)(d3d->device, width * prescale_x, height * prescale_y, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture[3]);
+	if (result != D3D_OK)
+		return false;
+	(*d3dintf->texture.get_surface_level)(texture[3], 0, &target[3]);
+
+	result = (*d3dintf->device.create_texture)(d3d->device, width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture[4]);
+	if (result != D3D_OK)
+		return false;
+	(*d3dintf->texture.get_surface_level)(texture[4], 0, &target[4]);
+
+	result = (*d3dintf->device.create_texture)(d3d->device, width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &smalltexture);
+	if (result != D3D_OK)
+		return false;
+	(*d3dintf->texture.get_surface_level)(smalltexture, 0, &smalltarget);
+
+	result = (*d3dintf->device.create_texture)(d3d->device, width * prescale_x, height * prescale_y, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &prescaletexture);
+	if (result != D3D_OK)
+		return false;
+	(*d3dintf->texture.get_surface_level)(prescaletexture, 0, &prescaletarget);
+
+	target_width = width * prescale_x;
+	target_height = height * prescale_y;
+
+	return true;
 }

@@ -110,34 +110,47 @@ Notes:
 #include "includes/st0016.h"
 
 
-class speglsht_state : public driver_device
+class speglsht_state : public st0016_state
 {
 public:
-	speglsht_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	speglsht_state(const machine_config &mconfig, device_type type, const char *tag)
+		: st0016_state(mconfig, type, tag),
+			m_shared(*this, "shared"),
+			m_framebuffer(*this, "framebuffer"),
+			m_cop_ram(*this, "cop_ram") { }
 
-	UINT8 *m_shared;
-	UINT32 *m_framebuffer;
+	required_shared_ptr<UINT8> m_shared;
+	required_shared_ptr<UINT32> m_framebuffer;
 	UINT32 m_videoreg;
-	bitmap_t *m_bitmap;
-	UINT32 *m_cop_ram;
+	bitmap_ind16 *m_bitmap;
+	required_shared_ptr<UINT32> m_cop_ram;
+	DECLARE_READ32_MEMBER(shared_r);
+	DECLARE_WRITE32_MEMBER(shared_w);
+	DECLARE_WRITE32_MEMBER(videoreg_w);
+	DECLARE_WRITE32_MEMBER(cop_w);
+	DECLARE_READ32_MEMBER(cop_r);
+	DECLARE_READ32_MEMBER(irq_ack_clear);
+	DECLARE_DRIVER_INIT(speglsht);
+	DECLARE_MACHINE_RESET(speglsht);
+	DECLARE_VIDEO_START(speglsht);
+	UINT32 screen_update_speglsht(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
 };
 
 
-static ADDRESS_MAP_START( st0016_mem, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( st0016_mem, AS_PROGRAM, 8, speglsht_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0xbfff) AM_ROMBANK("bank1")
 	AM_RANGE(0xc000, 0xcfff) AM_READ(st0016_sprite_ram_r) AM_WRITE(st0016_sprite_ram_w)
 	AM_RANGE(0xd000, 0xdfff) AM_READ(st0016_sprite2_ram_r) AM_WRITE(st0016_sprite2_ram_w)
 	AM_RANGE(0xe000, 0xe7ff) AM_RAM
 	AM_RANGE(0xe800, 0xe87f) AM_RAM
-	AM_RANGE(0xe900, 0xe9ff) AM_DEVREADWRITE("stsnd", st0016_snd_r, st0016_snd_w)
+	AM_RANGE(0xe900, 0xe9ff) AM_DEVREADWRITE_LEGACY("stsnd", st0016_snd_r, st0016_snd_w)
 	AM_RANGE(0xea00, 0xebff) AM_READ(st0016_palette_ram_r) AM_WRITE(st0016_palette_ram_w)
 	AM_RANGE(0xec00, 0xec1f) AM_READ(st0016_character_ram_r) AM_WRITE(st0016_character_ram_w)
-	AM_RANGE(0xf000, 0xffff) AM_RAM AM_BASE_MEMBER(speglsht_state, m_shared)
+	AM_RANGE(0xf000, 0xffff) AM_RAM AM_SHARE("shared")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( st0016_io, AS_IO, 8 )
+static ADDRESS_MAP_START( st0016_io, AS_IO, 8, speglsht_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0xbf) AM_READ(st0016_vregs_r) AM_WRITE(st0016_vregs_w)
 	AM_RANGE(0xe1, 0xe1) AM_WRITE(st0016_rom_bank_w)
@@ -149,41 +162,36 @@ static ADDRESS_MAP_START( st0016_io, AS_IO, 8 )
 	AM_RANGE(0xf0, 0xf0) AM_READ(st0016_dma_r)
 ADDRESS_MAP_END
 
-static READ32_HANDLER(shared_r)
+READ32_MEMBER(speglsht_state::shared_r)
 {
-	speglsht_state *state = space->machine().driver_data<speglsht_state>();
-	return state->m_shared[offset];
+	return m_shared[offset];
 }
 
-static WRITE32_HANDLER(shared_w)
+WRITE32_MEMBER(speglsht_state::shared_w)
 {
-	speglsht_state *state = space->machine().driver_data<speglsht_state>();
-	state->m_shared[offset]=data&0xff;
+	m_shared[offset]=data&0xff;
 }
 
-static WRITE32_HANDLER(videoreg_w)
+WRITE32_MEMBER(speglsht_state::videoreg_w)
 {
-	speglsht_state *state = space->machine().driver_data<speglsht_state>();
-	COMBINE_DATA(&state->m_videoreg);
+	COMBINE_DATA(&m_videoreg);
 }
 
 
-static WRITE32_HANDLER(cop_w)
+WRITE32_MEMBER(speglsht_state::cop_w)
 {
-	speglsht_state *state = space->machine().driver_data<speglsht_state>();
-	COMBINE_DATA(&state->m_cop_ram[offset]);
+	COMBINE_DATA(&m_cop_ram[offset]);
 
-	if(state->m_cop_ram[offset]&0x8000) //fix (sign)
+	if(m_cop_ram[offset]&0x8000) //fix (sign)
 	{
-		state->m_cop_ram[offset]|=0xffff0000;
+		m_cop_ram[offset]|=0xffff0000;
 	}
 }
 
 //matrix * vector
-static READ32_HANDLER(cop_r)
+READ32_MEMBER(speglsht_state::cop_r)
 {
-	speglsht_state *state = space->machine().driver_data<speglsht_state>();
-	INT32 *cop=(INT32*)&state->m_cop_ram[0];
+	INT32 *cop=(INT32*)&m_cop_ram[0];
 
 	union
 	{
@@ -215,20 +223,20 @@ static READ32_HANDLER(cop_r)
 	return 0;
 }
 
-static READ32_HANDLER(irq_ack_clear)
+READ32_MEMBER(speglsht_state::irq_ack_clear)
 {
-	cputag_set_input_line(space->machine(), "sub", R3000_IRQ4, CLEAR_LINE);
+	machine().device("sub")->execute().set_input_line(R3000_IRQ4, CLEAR_LINE);
 	return 0;
 }
 
-static ADDRESS_MAP_START( speglsht_mem, AS_PROGRAM, 32 )
+static ADDRESS_MAP_START( speglsht_mem, AS_PROGRAM, 32, speglsht_state )
 	AM_RANGE(0x00000000, 0x000fffff) AM_RAM
 	AM_RANGE(0x01000000, 0x01007fff) AM_RAM //tested - STATIC RAM
-	AM_RANGE(0x01600000, 0x0160004f) AM_READWRITE(cop_r, cop_w) AM_BASE_MEMBER(speglsht_state, m_cop_ram)
+	AM_RANGE(0x01600000, 0x0160004f) AM_READWRITE(cop_r, cop_w) AM_SHARE("cop_ram")
 	AM_RANGE(0x01800200, 0x01800203) AM_WRITE(videoreg_w)
 	AM_RANGE(0x01800300, 0x01800303) AM_READ_PORT("IN0")
 	AM_RANGE(0x01800400, 0x01800403) AM_READ_PORT("IN1")
-	AM_RANGE(0x01a00000, 0x01afffff) AM_RAM AM_BASE_MEMBER(speglsht_state, m_framebuffer)
+	AM_RANGE(0x01a00000, 0x01afffff) AM_RAM AM_SHARE("framebuffer")
 	AM_RANGE(0x01b00000, 0x01b07fff) AM_RAM //cleared ...  video related ?
 	AM_RANGE(0x01c00000, 0x01dfffff) AM_ROM AM_REGION("user2", 0)
 	AM_RANGE(0x0a000000, 0x0a003fff) AM_READWRITE(shared_r, shared_w)
@@ -252,7 +260,7 @@ static INPUT_PORTS_START( speglsht )
 	PORT_BIT( 0xffff0000, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("IN1")
-	PORT_DIPNAME( 0x00000007, 0x00000007, DEF_STR( Coin_A ) )
+	PORT_DIPNAME( 0x00000007, 0x00000007, DEF_STR( Coin_A ) )   PORT_DIPLOCATION("SW1:1,2,3")
 	PORT_DIPSETTING(          0x00000003, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(          0x00000004, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(          0x00000007, DEF_STR( 1C_1C ) )
@@ -261,7 +269,7 @@ static INPUT_PORTS_START( speglsht )
 	PORT_DIPSETTING(          0x00000006, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(          0x00000005, DEF_STR( 1C_3C ) )
 	PORT_DIPSETTING(          0x00000000, "2C Start/1C Continue" )
-	PORT_DIPNAME( 0x00000038, 0x00000038, DEF_STR( Coin_B ) )
+	PORT_DIPNAME( 0x00000038, 0x00000038, DEF_STR( Coin_B ) )   PORT_DIPLOCATION("SW1:4,5,6")
 	PORT_DIPSETTING(          0x00000018, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(          0x00000020, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(          0x00000038, DEF_STR( 1C_1C ) )
@@ -270,32 +278,30 @@ static INPUT_PORTS_START( speglsht )
 	PORT_DIPSETTING(          0x00000030, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(          0x00000028, DEF_STR( 1C_3C ) )
 	PORT_DIPSETTING(          0x00000000, "2C Start/1C Continue" )
-	PORT_DIPNAME( 0x00000040, 0x00000040, "Unknown / Unused" )
-	PORT_DIPSETTING(          0x00000040, DEF_STR( Off ) )
-	PORT_DIPSETTING(          0x00000000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x00000080, 0x00000080, "Bonus for PAR Play" )
+	PORT_DIPUNUSED_DIPLOC( 0x00000040, 0x00000040, "SW1:7" )
+	PORT_DIPNAME( 0x00000080, 0x00000080, "Bonus for PAR Play" )    PORT_DIPLOCATION("SW1:8")
 	PORT_DIPSETTING(          0x00000080, DEF_STR( None ) )
 	PORT_DIPSETTING(          0x00000000, "Extra Hole" )
-	PORT_DIPNAME( 0x00000300, 0x00000300, DEF_STR( Difficulty ) )
+	PORT_DIPNAME( 0x00000300, 0x00000300, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("SW2:1,2")
 	PORT_DIPSETTING(          0x00000300, DEF_STR( Normal ) )
 	PORT_DIPSETTING(          0x00000200, DEF_STR( Easy ) )
 	PORT_DIPSETTING(          0x00000100, DEF_STR( Hard ) )
 	PORT_DIPSETTING(          0x00000000, DEF_STR( Very_Hard ) )
-	PORT_DIPNAME( 0x00000c00, 0x00000c00, "Number of Players" )
+	PORT_DIPNAME( 0x00000c00, 0x00000c00, "Number of Players" ) PORT_DIPLOCATION("SW2:3,4")
 	PORT_DIPSETTING(          0x00000c00, "3" )
 	PORT_DIPSETTING(          0x00000800, "4" )
 	PORT_DIPSETTING(          0x00000400, "2" )
 	PORT_DIPSETTING(          0x00000000, "1" )
-	PORT_DIPNAME( 0x00001000, 0x00000000, DEF_STR( Demo_Sounds ) )
+	PORT_DIPNAME( 0x00001000, 0x00000000, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW2:5")
 	PORT_DIPSETTING(          0x00001000, DEF_STR( Off ) )
 	PORT_DIPSETTING(          0x00000000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x00002000, 0x00000000, "Control Panel" )
+	PORT_DIPNAME( 0x00002000, 0x00000000, "Control Panel" )     PORT_DIPLOCATION("SW2:6")
 	PORT_DIPSETTING(          0x00002000, "Double" )
 	PORT_DIPSETTING(          0x00000000, DEF_STR( Single ) )
-	PORT_DIPNAME( 0x00004000, 0x00004000, "Country" )
+	PORT_DIPNAME( 0x00004000, 0x00000000, "Country" )       PORT_DIPLOCATION("SW2:7")
 	PORT_DIPSETTING(          0x00004000, DEF_STR( Japan ) )
 	PORT_DIPSETTING(          0x00000000, DEF_STR( USA ) )
-	PORT_BIT( 0x00008000, IP_ACTIVE_LOW, IPT_UNUSED )
+	PORT_DIPUNUSED_DIPLOC( 0x00008000, 0x00008000, "SW2:8" )
 	PORT_SERVICE_NO_TOGGLE( 0x00010000, IP_ACTIVE_HIGH )
 	PORT_BIT( 0x00020000, IP_ACTIVE_LOW, IPT_TILT )
 	PORT_BIT( 0x00040000, IP_ACTIVE_LOW, IPT_COIN1 )
@@ -323,57 +329,54 @@ static const st0016_interface st0016_config =
 static const r3000_cpu_core r3000_config =
 {
 	0,
-	4096,	/* code cache size */
-	2048	/* data cache size */
+	4096,   /* code cache size */
+	2048    /* data cache size */
 };
 
-static MACHINE_RESET(speglsht)
+MACHINE_RESET_MEMBER(speglsht_state,speglsht)
 {
-	speglsht_state *state = machine.driver_data<speglsht_state>();
-	memset(state->m_shared,0,0x1000);
+	memset(m_shared,0,0x1000);
 }
 
-static VIDEO_START(speglsht)
+VIDEO_START_MEMBER(speglsht_state,speglsht)
 {
-	speglsht_state *state = machine.driver_data<speglsht_state>();
-	state->m_bitmap = auto_bitmap_alloc(machine, 512, 5122, BITMAP_FORMAT_INDEXED16 );
-	VIDEO_START_CALL(st0016);
+	m_bitmap = auto_bitmap_ind16_alloc(machine(), 512, 5122 );
+	VIDEO_START_CALL_MEMBER(st0016);
 }
 
-#define PLOT_PIXEL_RGB(x,y,r,g,b)	if(y>=0 && x>=0 && x<512 && y<512) \
+#define PLOT_PIXEL_RGB(x,y,r,g,b)   if(y>=0 && x>=0 && x<512 && y<512) \
 { \
-		*BITMAP_ADDR32(bitmap, y, x) = (b) | ((g)<<8) | ((r)<<16); \
+		bitmap.pix32(y, x) = (b) | ((g)<<8) | ((r)<<16); \
 }
 
-static SCREEN_UPDATE(speglsht)
+UINT32 speglsht_state::screen_update_speglsht(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	speglsht_state *state = screen->machine().driver_data<speglsht_state>();
 	int x,y,dy;
 
-	dy=(state->m_videoreg&0x20)?(256*512):0; //visible frame
+	dy=(m_videoreg&0x20)?(256*512):0; //visible frame
 
 	for(y=0;y<256;y++)
 	{
 		for(x=0;x<512;x++)
 		{
 			int tmp=dy+y*512+x;
-			PLOT_PIXEL_RGB(x-67,y-5,(state->m_framebuffer[tmp]>>0)&0xff,(state->m_framebuffer[tmp]>>8)&0xff,(state->m_framebuffer[tmp]>>16)&0xff);
+			PLOT_PIXEL_RGB(x-67,y-5,(m_framebuffer[tmp]>>0)&0xff,(m_framebuffer[tmp]>>8)&0xff,(m_framebuffer[tmp]>>16)&0xff);
 		}
 	}
 
 	//draw st0016 gfx to temporary bitmap (indexed 16)
-	bitmap_fill(state->m_bitmap,NULL,0);
-	st0016_draw_screen(screen, state->m_bitmap, cliprect);
+	m_bitmap->fill(0);
+	st0016_draw_screen(screen, *m_bitmap, cliprect);
 
 	//copy temporary bitmap to rgb 32 bit bitmap
-	for(y=cliprect->min_y; y<cliprect->max_y;y++)
+	for(y=cliprect.min_y; y<cliprect.max_y;y++)
 	{
-		UINT16 *srcline = BITMAP_ADDR16(state->m_bitmap, y, 0);
-		for(x=cliprect->min_x; x<cliprect->max_x;x++)
+		UINT16 *srcline = &m_bitmap->pix16(y);
+		for(x=cliprect.min_x; x<cliprect.max_x;x++)
 		{
 			if(srcline[x])
 			{
-				rgb_t color=palette_get_color(screen->machine(), srcline[x]);
+				rgb_t color=palette_get_color(machine(), srcline[x]);
 				PLOT_PIXEL_RGB(x,y,RGB_RED(color),RGB_GREEN(color),RGB_BLUE(color));
 			}
 		}
@@ -388,29 +391,28 @@ static MACHINE_CONFIG_START( speglsht, speglsht_state )
 	MCFG_CPU_PROGRAM_MAP(st0016_mem)
 	MCFG_CPU_IO_MAP(st0016_io)
 
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", speglsht_state,  irq0_line_hold)
 
 	MCFG_CPU_ADD("sub", R3000LE, 25000000)
 	MCFG_CPU_CONFIG(r3000_config)
 	MCFG_CPU_PROGRAM_MAP(speglsht_mem)
-	MCFG_CPU_VBLANK_INT("screen", irq4_line_assert)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", speglsht_state,  irq4_line_assert)
 
 	MCFG_QUANTUM_TIME(attotime::from_hz(6000))
-	MCFG_MACHINE_RESET(speglsht)
+	MCFG_MACHINE_RESET_OVERRIDE(speglsht_state,speglsht)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
 	MCFG_SCREEN_SIZE(512, 512)
 	MCFG_SCREEN_VISIBLE_AREA(0, 319, 8, 239-8)
-	MCFG_SCREEN_UPDATE(speglsht)
+	MCFG_SCREEN_UPDATE_DRIVER(speglsht_state, screen_update_speglsht)
 
 	MCFG_GFXDECODE(speglsht)
 	MCFG_PALETTE_LENGTH(16*16*4+1)
 
-	MCFG_VIDEO_START(speglsht)
+	MCFG_VIDEO_START_OVERRIDE(speglsht_state,speglsht)
 
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
 
@@ -421,10 +423,9 @@ static MACHINE_CONFIG_START( speglsht, speglsht_state )
 MACHINE_CONFIG_END
 
 ROM_START( speglsht )
-	ROM_REGION( 0x210000, "maincpu", 0 )
-	ROM_LOAD( "sx004-07.u70", 0x010000, 0x200000, CRC(2d759cc4) SHA1(9fedd829190b2aab850b2f1088caaec91e8715dd) ) /* Noted as "ZPRO0" IE: Z80 (ST0016) Program 0 */
+	ROM_REGION( 0x400000, "maincpu", 0 )
+	ROM_LOAD( "sx004-07.u70", 0x000000, 0x200000, CRC(2d759cc4) SHA1(9fedd829190b2aab850b2f1088caaec91e8715dd) ) /* Noted as "ZPRO0" IE: Z80 (ST0016) Program 0 */
 	/* U71 unpopulated, Noted as ZPRO1 */
-	ROM_COPY( "maincpu",  0x10000, 0x00000, 0x08000 )
 
 	ROM_REGION32_BE( 0x200000, "user1", 0 )
 	ROM_LOAD32_BYTE( "sx004-04.u33", 0x00000, 0x80000, CRC(e46d2e57) SHA1(b1fb836ab2ce547dc2e8d1046d7ef835b87bb04e) ) /* Noted as "RPRO3" IE: R3000 Program 3 */
@@ -440,10 +441,10 @@ ROM_END
 
 
 
-static DRIVER_INIT(speglsht)
+DRIVER_INIT_MEMBER(speglsht_state,speglsht)
 {
 	st0016_game=3;
 }
 
 
-GAME( 1994, speglsht, 0, speglsht, speglsht, speglsht, ROT0, "Seta",  "Super Eagle Shot", GAME_IMPERFECT_GRAPHICS )
+GAME( 1994, speglsht, 0, speglsht, speglsht, speglsht_state, speglsht, ROT0, "Seta",  "Super Eagle Shot", GAME_IMPERFECT_GRAPHICS )

@@ -10,10 +10,10 @@
 #include "includes/20pacgal.h"
 
 
-#define SCREEN_HEIGHT	(224)
-#define SCREEN_WIDTH	(288)
-#define NUM_PENS		(0x1000)
-#define NUM_STAR_PENS	(64)
+#define SCREEN_HEIGHT   (224)
+#define SCREEN_WIDTH    (288)
+#define NUM_PENS        (0x1000)
+#define NUM_STAR_PENS   (64)
 
 
 /*************************************
@@ -25,7 +25,7 @@
 static void get_pens(running_machine &machine, const _20pacgal_state *state, pen_t *pens)
 {
 	offs_t offs;
-	UINT8 *color_prom = machine.region("proms")->base() + (NUM_PENS * state->m_game_selected);
+	UINT8 *color_prom = machine.root_device().memregion("proms")->base() + (NUM_PENS * state->m_game_selected);
 
 	for (offs = 0; offs < NUM_PENS ;offs++)
 	{
@@ -73,16 +73,16 @@ static void get_pens(running_machine &machine, const _20pacgal_state *state, pen
 }
 
 
-static void do_pen_lookup(running_machine &machine, const _20pacgal_state *state, bitmap_t *bitmap, const rectangle *cliprect)
+static void do_pen_lookup(running_machine &machine, const _20pacgal_state *state, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
 	int y, x;
 	pen_t pens[NUM_PENS + NUM_STAR_PENS];
 
 	get_pens(machine, state, pens);
 
-	for (y = cliprect->min_y; y <= cliprect->max_y; y++)
-		for(x = cliprect->min_x; x <= cliprect->max_x; x++)
-			*BITMAP_ADDR32(bitmap, y, x) = pens[*BITMAP_ADDR32(bitmap, y, x)];
+	for (y = cliprect.min_y; y <= cliprect.max_y; y++)
+		for(x = cliprect.min_x; x <= cliprect.max_x; x++)
+			bitmap.pix32(y, x) = pens[bitmap.pix32(y, x)];
 }
 
 
@@ -93,7 +93,7 @@ static void do_pen_lookup(running_machine &machine, const _20pacgal_state *state
  *
  *************************************/
 
-static void draw_sprite(running_machine& machine, const _20pacgal_state *state, bitmap_t *bitmap, int y, int x,
+static void draw_sprite(running_machine& machine, const _20pacgal_state *state, bitmap_rgb32 &bitmap, int y, int x,
 						UINT8 code, UINT8 color, int flip_y, int flip_x)
 {
 	int sy;
@@ -123,9 +123,9 @@ static void draw_sprite(running_machine& machine, const _20pacgal_state *state, 
 			gfx_offs = (gfx_offs & 0x1f83) | ((gfx_offs & 0x003c) << 1) | ((gfx_offs & 0x0040) >> 4);
 
 			data = (state->m_sprite_gfx_ram[gfx_offs + 0] << 24) |
-				   (state->m_sprite_gfx_ram[gfx_offs + 1] << 16) |
-				   (state->m_sprite_gfx_ram[gfx_offs + 2] << 8) |
-				   (state->m_sprite_gfx_ram[gfx_offs + 3] << 0);
+					(state->m_sprite_gfx_ram[gfx_offs + 1] << 16) |
+					(state->m_sprite_gfx_ram[gfx_offs + 2] << 8) |
+					(state->m_sprite_gfx_ram[gfx_offs + 3] << 0);
 
 			/* for each pixel in the row */
 			for (sx = 0; sx < 0x10; sx++)
@@ -139,7 +139,7 @@ static void draw_sprite(running_machine& machine, const _20pacgal_state *state, 
 
 					/* pen bits A0-A3 */
 					if (col)
-						*BITMAP_ADDR32(bitmap, y, x) = (*BITMAP_ADDR32(bitmap, y, x) & 0xff0) | col;
+						bitmap.pix32(y, x) = (bitmap.pix32(y, x) & 0xff0) | col;
 				}
 
 				/* next pixel */
@@ -163,7 +163,7 @@ static void draw_sprite(running_machine& machine, const _20pacgal_state *state, 
 }
 
 
-static void draw_sprites(running_machine& machine,const _20pacgal_state *state, bitmap_t *bitmap)
+static void draw_sprites(running_machine& machine,const _20pacgal_state *state, bitmap_rgb32 &bitmap)
 {
 	int offs;
 
@@ -188,7 +188,7 @@ static void draw_sprites(running_machine& machine,const _20pacgal_state *state, 
 		int size_y = (state->m_sprite_ram[offs + 0x100] & 0x08) >> 3;
 
 		sy = sy - (16 * size_y);
-		sy = (sy & 0xff) - 32;	/* fix wraparound */
+		sy = (sy & 0xff) - 32;  /* fix wraparound */
 
 		/* only Galaga appears to be effected by the global flip state */
 		if (state->m_game_selected && (state->m_flip[0] & 0x01))
@@ -215,7 +215,7 @@ static void draw_sprites(running_machine& machine,const _20pacgal_state *state, 
  *
  *************************************/
 
-static void draw_chars(const _20pacgal_state *state, bitmap_t *bitmap)
+static void draw_chars(const _20pacgal_state *state, bitmap_rgb32 &bitmap)
 {
 	offs_t offs;
 
@@ -227,7 +227,7 @@ static void draw_chars(const _20pacgal_state *state, bitmap_t *bitmap)
 		int sy;
 		int y, x;
 
-		UINT8 *gfx = &state->m_char_gfx_ram[state->m_video_ram[0x0000 | offs] << 4];
+		UINT8 *gfx = &state->m_char_gfx_ram.target()[state->m_video_ram[0x0000 | offs] << 4];
 		UINT32 color_base = (state->m_video_ram[0x0400 | offs] & 0x3f) << 2;
 
 		/* map the offset to (x, y) character coordinates */
@@ -274,7 +274,7 @@ static void draw_chars(const _20pacgal_state *state, bitmap_t *bitmap)
 
 				/* pen bits A4-A11 */
 				if ( col != 0 )
-					*BITMAP_ADDR32(bitmap, y, x) = (color_base | col) << 4;
+					bitmap.pix32(y, x) = (color_base | col) << 4;
 
 				/* next pixel */
 				if (flip)
@@ -349,7 +349,7 @@ static void draw_chars(const _20pacgal_state *state, bitmap_t *bitmap)
  *
  */
 
-static void draw_stars(_20pacgal_state *state, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_stars(_20pacgal_state *state, bitmap_rgb32 &bitmap, const rectangle &cliprect )
 {
 	if ( (state->m_stars_ctrl[0] >> 5) & 1 )
 	{
@@ -374,15 +374,15 @@ static void draw_stars(_20pacgal_state *state, bitmap_t *bitmap, const rectangle
 			y = clock / 288;
 
 			/* code at d616 translates into:
-             * carryout = lfsr & 1;
-             * lfsr = lfsr>>1;
-             * lfsr = (feedback << 15) | lfsr;
-             * feedback = (((lfsr>>4) & 1) ^ (carryout & 1)) ^ 1;
-             *
-             * and needs a Hack:
-             *  x = 288 - x;
-             *
-             */
+			 * carryout = lfsr & 1;
+			 * lfsr = lfsr>>1;
+			 * lfsr = (feedback << 15) | lfsr;
+			 * feedback = (((lfsr>>4) & 1) ^ (carryout & 1)) ^ 1;
+			 *
+			 * and needs a Hack:
+			 *  x = 288 - x;
+			 *
+			 */
 
 			/* code at d648 */
 			carryout = ((lfsr >> 4) ^ feedback ^ 1) & 1;
@@ -391,8 +391,8 @@ static void draw_stars(_20pacgal_state *state, bitmap_t *bitmap, const rectangle
 
 			if (((lfsr & 0xffc0) == star_seta) || ((lfsr & 0xffc0) == star_setb))
 			{
-				if (y >= cliprect->min_y && y <= cliprect->max_y)
-					*BITMAP_ADDR32(bitmap, y, x) = NUM_PENS + (lfsr & 0x3f);
+				if (y >= cliprect.min_y && y <= cliprect.max_y)
+					bitmap.pix32(y, x) = NUM_PENS + (lfsr & 0x3f);
 				cnt++;
 			}
 		}
@@ -406,15 +406,14 @@ static void draw_stars(_20pacgal_state *state, bitmap_t *bitmap, const rectangle
  *
  *************************************/
 
-static SCREEN_UPDATE( 20pacgal )
+UINT32 _20pacgal_state::screen_update_20pacgal(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	_20pacgal_state *state = screen->machine().driver_data<_20pacgal_state>();
 
-	bitmap_fill(bitmap,cliprect,0);
-	draw_stars(state, bitmap,cliprect);
-	draw_chars(state, bitmap);
-	draw_sprites(screen->machine(),state, bitmap);
-	do_pen_lookup(screen->machine(), state, bitmap, cliprect);
+	bitmap.fill(0, cliprect);
+	draw_stars(this, bitmap,cliprect);
+	draw_chars(this, bitmap);
+	draw_sprites(machine(),this, bitmap);
+	do_pen_lookup(machine(), this, bitmap, cliprect);
 
 	return 0;
 }
@@ -431,8 +430,7 @@ MACHINE_CONFIG_FRAGMENT( 20pacgal_video )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
 	MCFG_SCREEN_SIZE(SCREEN_WIDTH, SCREEN_HEIGHT)
 	MCFG_SCREEN_VISIBLE_AREA(0, SCREEN_WIDTH - 1, 0, SCREEN_HEIGHT - 1)
-	MCFG_SCREEN_UPDATE(20pacgal)
+	MCFG_SCREEN_UPDATE_DRIVER(_20pacgal_state, screen_update_20pacgal)
 MACHINE_CONFIG_END

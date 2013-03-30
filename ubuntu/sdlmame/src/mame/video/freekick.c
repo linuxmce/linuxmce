@@ -4,37 +4,34 @@
 #include "includes/freekick.h"
 
 
-static TILE_GET_INFO( get_freek_tile_info )
+TILE_GET_INFO_MEMBER(freekick_state::get_freek_tile_info)
 {
-	freekick_state *state = machine.driver_data<freekick_state>();
 	int tileno, palno;
 
-	tileno = state->m_videoram[tile_index] + ((state->m_videoram[tile_index + 0x400] & 0xe0) << 3);
-	palno = state->m_videoram[tile_index + 0x400] & 0x1f;
-	SET_TILE_INFO(0, tileno, palno, 0);
+	tileno = m_videoram[tile_index] + ((m_videoram[tile_index + 0x400] & 0xe0) << 3);
+	palno = m_videoram[tile_index + 0x400] & 0x1f;
+	SET_TILE_INFO_MEMBER(0, tileno, palno, 0);
 }
 
 
-VIDEO_START( freekick )
+void freekick_state::video_start()
 {
-	freekick_state *state = machine.driver_data<freekick_state>();
-	state->m_freek_tilemap = tilemap_create(machine, get_freek_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
+	m_freek_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(freekick_state::get_freek_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
 }
 
 
-WRITE8_HANDLER( freek_videoram_w )
+WRITE8_MEMBER(freekick_state::freek_videoram_w)
 {
-	freekick_state *state = space->machine().driver_data<freekick_state>();
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_freek_tilemap, offset & 0x3ff);
+	m_videoram[offset] = data;
+	m_freek_tilemap->mark_tile_dirty(offset & 0x3ff);
 }
 
-static void gigas_draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void gigas_draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	freekick_state *state = machine.driver_data<freekick_state>();
 	int offs;
 
-	for (offs = 0; offs < state->m_spriteram_size; offs += 4)
+	for (offs = 0; offs < state->m_spriteram.bytes(); offs += 4)
 	{
 		int xpos = state->m_spriteram[offs + 3];
 		int ypos = state->m_spriteram[offs + 2];
@@ -44,12 +41,12 @@ static void gigas_draw_sprites( running_machine &machine, bitmap_t *bitmap, cons
 		int flipy = 0;
 		int color = state->m_spriteram[offs + 1] & 0x1f;
 
-		if (flip_screen_x_get(machine))
+		if (state->flip_screen_x())
 		{
 			xpos = 240 - xpos;
 			flipx = !flipx;
 		}
-		if (flip_screen_y_get(machine))
+		if (state->flip_screen_y())
 		{
 			ypos = 256 - ypos;
 			flipy = !flipy;
@@ -64,12 +61,12 @@ static void gigas_draw_sprites( running_machine &machine, bitmap_t *bitmap, cons
 }
 
 
-static void pbillrd_draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void pbillrd_draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	freekick_state *state = machine.driver_data<freekick_state>();
 	int offs;
 
-	for (offs = 0; offs < state->m_spriteram_size; offs += 4)
+	for (offs = 0; offs < state->m_spriteram.bytes(); offs += 4)
 	{
 		int xpos = state->m_spriteram[offs + 3];
 		int ypos = state->m_spriteram[offs + 2];
@@ -79,12 +76,12 @@ static void pbillrd_draw_sprites( running_machine &machine, bitmap_t *bitmap, co
 		int flipy = 0;//state->m_spriteram[offs + 0] & 0x40;
 		int color = state->m_spriteram[offs + 1] & 0x0f;
 
-		if (flip_screen_x_get(machine))
+		if (state->flip_screen_x())
 		{
 			xpos = 240 - xpos;
 			flipx = !flipx;
 		}
-		if (flip_screen_y_get(machine))
+		if (state->flip_screen_y())
 		{
 			ypos = 256 - ypos;
 			flipy = !flipy;
@@ -100,27 +97,27 @@ static void pbillrd_draw_sprites( running_machine &machine, bitmap_t *bitmap, co
 
 
 
-static void freekick_draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void freekick_draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	freekick_state *state = machine.driver_data<freekick_state>();
 	int offs;
 
-	for (offs = 0; offs < state->m_spriteram_size; offs += 4)
+	for (offs = 0; offs < state->m_spriteram.bytes(); offs += 4)
 	{
 		int xpos = state->m_spriteram[offs + 3];
 		int ypos = state->m_spriteram[offs + 0];
 		int code = state->m_spriteram[offs + 1] + ((state->m_spriteram[offs + 2] & 0x20) << 3);
 
-		int flipx = state->m_spriteram[offs + 2] & 0x80;	//?? unused ?
+		int flipx = state->m_spriteram[offs + 2] & 0x80;    //?? unused ?
 		int flipy = state->m_spriteram[offs + 2] & 0x40;
 		int color = state->m_spriteram[offs + 2] & 0x1f;
 
-		if (flip_screen_x_get(machine))
+		if (state->flip_screen_x())
 		{
 			xpos = 240 - xpos;
 			flipx = !flipx;
 		}
-		if (flip_screen_y_get(machine))
+		if (state->flip_screen_y())
 		{
 			ypos = 256 - ypos;
 			flipy = !flipy;
@@ -134,26 +131,23 @@ static void freekick_draw_sprites( running_machine &machine, bitmap_t *bitmap, c
 	}
 }
 
-SCREEN_UPDATE( gigas )
+UINT32 freekick_state::screen_update_gigas(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	freekick_state *state = screen->machine().driver_data<freekick_state>();
-	tilemap_draw(bitmap, cliprect, state->m_freek_tilemap, 0, 0);
-	gigas_draw_sprites(screen->machine(), bitmap, cliprect);
+	m_freek_tilemap->draw(bitmap, cliprect, 0, 0);
+	gigas_draw_sprites(machine(), bitmap, cliprect);
 	return 0;
 }
 
-SCREEN_UPDATE( pbillrd )
+UINT32 freekick_state::screen_update_pbillrd(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	freekick_state *state = screen->machine().driver_data<freekick_state>();
-	tilemap_draw(bitmap, cliprect, state->m_freek_tilemap, 0, 0);
-	pbillrd_draw_sprites(screen->machine(), bitmap, cliprect);
+	m_freek_tilemap->draw(bitmap, cliprect, 0, 0);
+	pbillrd_draw_sprites(machine(), bitmap, cliprect);
 	return 0;
 }
 
-SCREEN_UPDATE( freekick )
+UINT32 freekick_state::screen_update_freekick(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	freekick_state *state = screen->machine().driver_data<freekick_state>();
-	tilemap_draw(bitmap, cliprect, state->m_freek_tilemap, 0, 0);
-	freekick_draw_sprites(screen->machine(), bitmap, cliprect);
+	m_freek_tilemap->draw(bitmap, cliprect, 0, 0);
+	freekick_draw_sprites(machine(), bitmap, cliprect);
 	return 0;
 }

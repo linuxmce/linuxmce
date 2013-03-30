@@ -20,21 +20,21 @@
 
 /***************************************************************************/
 
-static ADDRESS_MAP_START( dcon_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( dcon_map, AS_PROGRAM, 16, dcon_state )
 	AM_RANGE(0x00000, 0x7ffff) AM_ROM
 	AM_RANGE(0x80000, 0x8bfff) AM_RAM
 
-	AM_RANGE(0x8c000, 0x8c7ff) AM_RAM_WRITE(dcon_background_w) AM_BASE_MEMBER(dcon_state, m_back_data)
-	AM_RANGE(0x8c800, 0x8cfff) AM_RAM_WRITE(dcon_foreground_w) AM_BASE_MEMBER(dcon_state, m_fore_data)
-	AM_RANGE(0x8d000, 0x8d7ff) AM_RAM_WRITE(dcon_midground_w) AM_BASE_MEMBER(dcon_state, m_mid_data)
-	AM_RANGE(0x8d800, 0x8e7ff) AM_RAM_WRITE(dcon_text_w) AM_BASE_MEMBER(dcon_state, m_textram)
-	AM_RANGE(0x8e800, 0x8f7ff) AM_RAM_WRITE(paletteram16_xBBBBBGGGGGRRRRR_word_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0x8f800, 0x8ffff) AM_RAM AM_BASE_SIZE_MEMBER(dcon_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0x8c000, 0x8c7ff) AM_RAM_WRITE(dcon_background_w) AM_SHARE("back_data")
+	AM_RANGE(0x8c800, 0x8cfff) AM_RAM_WRITE(dcon_foreground_w) AM_SHARE("fore_data")
+	AM_RANGE(0x8d000, 0x8d7ff) AM_RAM_WRITE(dcon_midground_w) AM_SHARE("mid_data")
+	AM_RANGE(0x8d800, 0x8e7ff) AM_RAM_WRITE(dcon_text_w) AM_SHARE("textram")
+	AM_RANGE(0x8e800, 0x8f7ff) AM_RAM_WRITE(paletteram_xBBBBBGGGGGRRRRR_word_w) AM_SHARE("paletteram")
+	AM_RANGE(0x8f800, 0x8ffff) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0x9d000, 0x9d7ff) AM_WRITE(dcon_gfxbank_w)
 
-	AM_RANGE(0xa0000, 0xa000d) AM_READWRITE(seibu_main_word_r, seibu_main_word_w)
+	AM_RANGE(0xa0000, 0xa000d) AM_READWRITE_LEGACY(seibu_main_word_r, seibu_main_word_w)
 	AM_RANGE(0xc001c, 0xc001d) AM_READWRITE(dcon_control_r, dcon_control_w)
-	AM_RANGE(0xc0020, 0xc002f) AM_WRITEONLY AM_BASE_MEMBER(dcon_state, m_scroll_ram)
+	AM_RANGE(0xc0020, 0xc002f) AM_WRITEONLY AM_SHARE("scroll_ram")
 	AM_RANGE(0xc0080, 0xc0081) AM_WRITENOP
 	AM_RANGE(0xc00c0, 0xc00c1) AM_WRITENOP
 	AM_RANGE(0xe0000, 0xe0001) AM_READ_PORT("DSW")
@@ -45,7 +45,7 @@ ADDRESS_MAP_END
 /******************************************************************************/
 
 static INPUT_PORTS_START( common )
-	SEIBU_COIN_INPUTS	/* coin inputs read through sound cpu */
+	SEIBU_COIN_INPUTS   /* coin inputs read through sound cpu */
 
 	PORT_START("P1_P2")
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(1)
@@ -141,6 +141,9 @@ INPUT_PORTS_END
 static INPUT_PORTS_START( sdgndmps )
 	PORT_INCLUDE( common )
 
+	PORT_MODIFY("SYSTEM")
+	PORT_SERVICE_NO_TOGGLE( 0x0100, IP_ACTIVE_LOW )
+
 	PORT_START("DSW")
 	PORT_DIPNAME( 0x000f, 0x000f, DEF_STR( Coin_B ) )
 	PORT_DIPSETTING(      0x0004, DEF_STR( 4C_1C ) )
@@ -187,7 +190,7 @@ static INPUT_PORTS_START( sdgndmps )
 	PORT_DIPNAME( 0x0800, 0x0800, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(      0x0800, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x1000, 0x1000, DEF_STR( Unknown ) )
+	PORT_DIPNAME( 0x1000, 0x1000, DEF_STR( Unknown ) ) // plays a jingle at the game intro (why?)
 	PORT_DIPSETTING(      0x1000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 	PORT_DIPNAME( 0x2000, 0x0000, DEF_STR( Allow_Continue ) )
@@ -206,9 +209,9 @@ INPUT_PORTS_END
 
 static const gfx_layout dcon_charlayout =
 {
-	8,8,		/* 8*8 characters */
+	8,8,        /* 8*8 characters */
 	RGN_FRAC(1,2),
-	4,			/* 4 bits per pixel */
+	4,          /* 4 bits per pixel */
 	{ 0,4,(0x10000*8)+0,0x10000*8+4 },
 	{ 3,2,1,0, 11,10,9,8 },
 	{ 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16 },
@@ -217,9 +220,9 @@ static const gfx_layout dcon_charlayout =
 
 static const gfx_layout dcon_tilelayout =
 {
-	16,16,	/* 16*16 tiles */
+	16,16,  /* 16*16 tiles */
 	RGN_FRAC(1,1),
-	4,		/* 4 bits per pixel */
+	4,      /* 4 bits per pixel */
 	{ 8, 12, 0,4 },
 	{
 		3,2,1,0,19,18,17,16,
@@ -248,7 +251,7 @@ static MACHINE_CONFIG_START( dcon, dcon_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, 10000000)
 	MCFG_CPU_PROGRAM_MAP(dcon_map)
-	MCFG_CPU_VBLANK_INT("screen", irq4_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", dcon_state,  irq4_line_hold)
 
 	SEIBU_SOUND_SYSTEM_CPU(4000000) /* Perhaps 14318180/4? */
 
@@ -258,15 +261,13 @@ static MACHINE_CONFIG_START( dcon, dcon_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(40*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 40*8-1, 0*8, 28*8-1)
-	MCFG_SCREEN_UPDATE(dcon)
+	MCFG_SCREEN_UPDATE_DRIVER(dcon_state, screen_update_dcon)
 
 	MCFG_GFXDECODE(dcon)
 	MCFG_PALETTE_LENGTH(2048)
 
-	MCFG_VIDEO_START(dcon)
 
 	/* sound hardware */
 	SEIBU_SOUND_SYSTEM_YM3812_INTERFACE(4000000,1320000)
@@ -277,7 +278,7 @@ static MACHINE_CONFIG_START( sdgndmps, dcon_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, 10000000)
 	MCFG_CPU_PROGRAM_MAP(dcon_map)
-	MCFG_CPU_VBLANK_INT("screen", irq4_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", dcon_state,  irq4_line_hold)
 
 	SEIBU2_SOUND_SYSTEM_CPU(14318180/4)
 
@@ -287,15 +288,13 @@ static MACHINE_CONFIG_START( sdgndmps, dcon_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(40*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 40*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(sdgndmps)
+	MCFG_SCREEN_UPDATE_DRIVER(dcon_state, screen_update_sdgndmps)
 
 	MCFG_GFXDECODE(dcon)
 	MCFG_PALETTE_LENGTH(2048)
 
-	MCFG_VIDEO_START(dcon)
 
 	/* sound hardware */
 	SEIBU_SOUND_SYSTEM_YM2151_INTERFACE(14318180/4,1320000)
@@ -310,7 +309,7 @@ ROM_START( dcon )
 	ROM_LOAD16_BYTE("p1-0",   0x040000, 0x20000, CRC(3ec1ef7d) SHA1(6195f1402dba5b3d3913e97cd78ba1e8865f7692) )
 	ROM_LOAD16_BYTE("p1-1",   0x040001, 0x20000, CRC(4b8de320) SHA1(14a3ab347fc468869355951294c3e3a8f9211b6a) )
 
-	ROM_REGION( 0x20000, "audiocpu", 0 )	 /* 64k code for sound Z80 */
+	ROM_REGION( 0x20000, "audiocpu", 0 )     /* 64k code for sound Z80 */
 	ROM_LOAD( "fmsnd",           0x000000, 0x08000, CRC(50450faa) SHA1(d4add7d357951b51d53ed7f143ece7f3bde7f4cb) )
 	ROM_CONTINUE(             0x010000, 0x08000 )
 	ROM_COPY( "audiocpu", 0, 0x018000, 0x08000 )
@@ -334,24 +333,24 @@ ROM_START( dcon )
 	ROM_LOAD( "obj2",  0x100000, 0x80000, CRC(24e0b51c) SHA1(434b4d58f785eefb5380c08a0704c8dea6609268) )
 	ROM_LOAD( "obj3",  0x180000, 0x80000, CRC(5274f02d) SHA1(69b94363624177c92e1b3413244ce649c2e5a696) )
 
-	ROM_REGION( 0x40000, "oki", 0 )	 /* ADPCM samples */
+	ROM_REGION( 0x40000, "oki", 0 )  /* ADPCM samples */
 	ROM_LOAD( "pcm", 0x000000, 0x20000, CRC(d2133b85) SHA1(a2e61c9893da8a95c35c0b47e2c43c315b654de8) )
 ROM_END
 
 ROM_START( sdgndmps )
-	ROM_REGION( 0x80000, "maincpu", 0 )	/* 68000 code */
+	ROM_REGION( 0x80000, "maincpu", 0 ) /* 68000 code */
 	ROM_LOAD16_BYTE( "911-a01.25",   0x00000, 0x20000, CRC(3362915d) SHA1(d98e2d4de402ca549664e148c9a6fe94fccfd5e9) )
 	ROM_LOAD16_BYTE( "911-a02.29",   0x00001, 0x20000, CRC(fbc78285) SHA1(85d40b0e7bb923a0daacbd78ce7d5bb9c80b9ffc) )
 	ROM_LOAD16_BYTE( "911-a03.27",   0x40000, 0x20000, CRC(6c24b4f2) SHA1(e9fb82884f47694bebcad9254cb57a0b01dcd9c8) )
 	ROM_LOAD16_BYTE( "911-a04.28",   0x40001, 0x20000, CRC(6ff9d716) SHA1(303faec19a84afd6cbcf3ca5d4877693c11d406e) )
 
-	ROM_REGION( 0x20000, "audiocpu", 0 )	/* Z80 code, banked data */
+	ROM_REGION( 0x20000, "audiocpu", 0 )    /* Z80 code, banked data */
 	ROM_LOAD( "911-a05.010",   0x00000, 0x08000, CRC(90455406) SHA1(dd2c5b96ac4b51251a3d34d97cc9af360afaa38c) )
 	ROM_CONTINUE(              0x10000, 0x08000 )
 	ROM_COPY( "audiocpu", 0,  0x18000, 0x08000 )
 
 	ROM_REGION( 0x020000, "gfx1", 0 )
-	ROM_LOAD( "911-a08.66",   0x000000, 0x10000, CRC(e7e04823) SHA1(d9b1ace5cd8218d5a4767cf5adbc267dce7c0668) )	/* chars */
+	ROM_LOAD( "911-a08.66",   0x000000, 0x10000, CRC(e7e04823) SHA1(d9b1ace5cd8218d5a4767cf5adbc267dce7c0668) ) /* chars */
 	ROM_LOAD( "911-a07.73",   0x010000, 0x10000, CRC(6f40d4a9) SHA1(8abadb2dc07ac22081b2970358e9f92b90b174b0) )
 
 	ROM_REGION( 0x080000, "gfx2", 0 )
@@ -364,10 +363,10 @@ ROM_START( sdgndmps )
 	ROM_LOAD( "911-a13.64",   0x000000, 0x100000, CRC(f38a584a) SHA1(16dd8e7086949d14e9185c37313290024d6dafdc) )
 
 	ROM_REGION( 0x200000, "gfx5", 0 )
-	ROM_LOAD( "911-a10.73",   0x000000, 0x100000, CRC(80e341fb) SHA1(619e71aefd0b13a01a6a2ed5d8613fe56242d209) )	/* sprites */
+	ROM_LOAD( "911-a10.73",   0x000000, 0x100000, CRC(80e341fb) SHA1(619e71aefd0b13a01a6a2ed5d8613fe56242d209) )    /* sprites */
 	ROM_LOAD( "911-a09.74",   0x100000, 0x100000, CRC(98f34519) SHA1(20319d546df104485ee553ce0e58364f927d1135) )
 
-	ROM_REGION( 0x040000, "oki", 0 )	/* ADPCM samples */
+	ROM_REGION( 0x040000, "oki", 0 )    /* ADPCM samples */
 	ROM_LOAD( "911-a06.97",   0x00000, 0x40000, CRC(12c79440) SHA1(9e9987527f64dfd8a51a2ab49afc465e76c5e7ac) )
 
 	ROM_REGION( 512, "proms", 0 )
@@ -375,9 +374,9 @@ ROM_START( sdgndmps )
 ROM_END
 
 /***************************************************************************/
-static DRIVER_INIT( sdgndmps )
+DRIVER_INIT_MEMBER(dcon_state,sdgndmps)
 {
-	UINT16 *RAM = (UINT16 *)machine.region("maincpu")->base();
+	UINT16 *RAM = (UINT16 *)machine().root_device().memregion("maincpu")->base();
 	RAM[0x1356/2] = 0x4e71; /* beq -> nop */
 	RAM[0x1358/2] = 0x4e71;
 
@@ -387,5 +386,5 @@ static DRIVER_INIT( sdgndmps )
 }
 
 
-GAME( 1991, sdgndmps, 0, sdgndmps, sdgndmps, sdgndmps, ROT0, "Banpresto / Bandai", "SD Gundam Psycho Salamander no Kyoui", GAME_NO_COCKTAIL )
-GAME( 1992, dcon,     0, dcon,     dcon,     0,        ROT0, "Success",            "D-Con", GAME_NO_COCKTAIL )
+GAME( 1991, sdgndmps, 0, sdgndmps, sdgndmps, dcon_state, sdgndmps, ROT0, "Banpresto / Bandai", "SD Gundam Psycho Salamander no Kyoui", GAME_NO_COCKTAIL )
+GAME( 1992, dcon,     0, dcon,     dcon, driver_device,     0,        ROT0, "Success",            "D-Con", GAME_NO_COCKTAIL )

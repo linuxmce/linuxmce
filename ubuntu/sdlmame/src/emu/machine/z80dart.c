@@ -44,19 +44,6 @@
 
 
 //**************************************************************************
-//  DEVICE DEFINITIONS
-//**************************************************************************
-
-const device_type Z80DART = z80dart_device_config::static_alloc_device_config;
-const device_type Z80SIO0 = z80dart_device_config::static_alloc_device_config; // FIXME
-const device_type Z80SIO1 = z80dart_device_config::static_alloc_device_config; // FIXME
-const device_type Z80SIO2 = z80dart_device_config::static_alloc_device_config; // FIXME
-const device_type Z80SIO3 = z80dart_device_config::static_alloc_device_config; // FIXME
-const device_type Z80SIO4 = z80dart_device_config::static_alloc_device_config; // FIXME
-
-
-
-//**************************************************************************
 //  CONSTANTS
 //**************************************************************************
 
@@ -83,91 +70,91 @@ enum
 	INT_SPECIAL
 };
 
-const int RR0_RX_CHAR_AVAILABLE		= 0x01;
-const int RR0_INTERRUPT_PENDING		= 0x02;
-const int RR0_TX_BUFFER_EMPTY		= 0x04;
-const int RR0_DCD					= 0x08;
-const int RR0_RI					= 0x10;
-const int RR0_SYNC_HUNT				= 0x10; // not supported
-const int RR0_CTS					= 0x20;
-const int RR0_TX_UNDERRUN			= 0x40; // not supported
-const int RR0_BREAK_ABORT			= 0x80; // not supported
+const int RR0_RX_CHAR_AVAILABLE     = 0x01;
+const int RR0_INTERRUPT_PENDING     = 0x02;
+const int RR0_TX_BUFFER_EMPTY       = 0x04;
+const int RR0_DCD                   = 0x08;
+const int RR0_RI                    = 0x10;
+const int RR0_SYNC_HUNT             = 0x10; // not supported
+const int RR0_CTS                   = 0x20;
+const int RR0_TX_UNDERRUN           = 0x40; // not supported
+const int RR0_BREAK_ABORT           = 0x80; // not supported
 
-const int RR1_ALL_SENT				= 0x01;
-const int RR1_RESIDUE_CODE_MASK		= 0x0e; // not supported
-const int RR1_PARITY_ERROR			= 0x10;
-const int RR1_RX_OVERRUN_ERROR		= 0x20;
-const int RR1_CRC_FRAMING_ERROR		= 0x40;
-const int RR1_END_OF_FRAME			= 0x80; // not supported
+const int RR1_ALL_SENT              = 0x01;
+const int RR1_RESIDUE_CODE_MASK     = 0x0e; // not supported
+const int RR1_PARITY_ERROR          = 0x10;
+const int RR1_RX_OVERRUN_ERROR      = 0x20;
+const int RR1_CRC_FRAMING_ERROR     = 0x40;
+const int RR1_END_OF_FRAME          = 0x80; // not supported
 
-const int WR0_REGISTER_MASK			= 0x07;
-const int WR0_COMMAND_MASK			= 0x38;
-const int WR0_NULL					= 0x00;
-const int WR0_SEND_ABORT			= 0x08; // not supported
-const int WR0_RESET_EXT_STATUS		= 0x10;
-const int WR0_CHANNEL_RESET			= 0x18;
-const int WR0_ENABLE_INT_NEXT_RX	= 0x20;
-const int WR0_RESET_TX_INT			= 0x28; // not supported
-const int WR0_ERROR_RESET			= 0x30;
-const int WR0_RETURN_FROM_INT		= 0x38; // not supported
-const int WR0_CRC_RESET_CODE_MASK	= 0xc0; // not supported
-const int WR0_CRC_RESET_NULL		= 0x00; // not supported
-const int WR0_CRC_RESET_RX			= 0x40; // not supported
-const int WR0_CRC_RESET_TX			= 0x80; // not supported
-const int WR0_CRC_RESET_TX_UNDERRUN	= 0xc0; // not supported
+const int WR0_REGISTER_MASK         = 0x07;
+const int WR0_COMMAND_MASK          = 0x38;
+const int WR0_NULL                  = 0x00;
+const int WR0_SEND_ABORT            = 0x08; // not supported
+const int WR0_RESET_EXT_STATUS      = 0x10;
+const int WR0_CHANNEL_RESET         = 0x18;
+const int WR0_ENABLE_INT_NEXT_RX    = 0x20;
+const int WR0_RESET_TX_INT          = 0x28; // not supported
+const int WR0_ERROR_RESET           = 0x30;
+const int WR0_RETURN_FROM_INT       = 0x38; // not supported
+const int WR0_CRC_RESET_CODE_MASK   = 0xc0; // not supported
+const int WR0_CRC_RESET_NULL        = 0x00; // not supported
+const int WR0_CRC_RESET_RX          = 0x40; // not supported
+const int WR0_CRC_RESET_TX          = 0x80; // not supported
+const int WR0_CRC_RESET_TX_UNDERRUN = 0xc0; // not supported
 
-const int WR1_EXT_INT_ENABLE		= 0x01;
-const int WR1_TX_INT_ENABLE			= 0x02;
-const int WR1_STATUS_VECTOR			= 0x04;
-const int WR1_RX_INT_MODE_MASK		= 0x18;
-const int WR1_RX_INT_DISABLE		= 0x00;
-const int WR1_RX_INT_FIRST			= 0x08;
-const int WR1_RX_INT_ALL_PARITY		= 0x10; // not supported
-const int WR1_RX_INT_ALL			= 0x18;
-const int WR1_WRDY_ON_RX_TX			= 0x20; // not supported
-const int WR1_WRDY_FUNCTION			= 0x40; // not supported
-const int WR1_WRDY_ENABLE			= 0x80; // not supported
+const int WR1_EXT_INT_ENABLE        = 0x01;
+const int WR1_TX_INT_ENABLE         = 0x02;
+const int WR1_STATUS_VECTOR         = 0x04;
+const int WR1_RX_INT_MODE_MASK      = 0x18;
+const int WR1_RX_INT_DISABLE        = 0x00;
+const int WR1_RX_INT_FIRST          = 0x08;
+const int WR1_RX_INT_ALL_PARITY     = 0x10; // not supported
+const int WR1_RX_INT_ALL            = 0x18;
+const int WR1_WRDY_ON_RX_TX         = 0x20; // not supported
+const int WR1_WRDY_FUNCTION         = 0x40; // not supported
+const int WR1_WRDY_ENABLE           = 0x80; // not supported
 
-const int WR3_RX_ENABLE				= 0x01;
+const int WR3_RX_ENABLE             = 0x01;
 const int WR3_SYNC_CHAR_LOAD_INHIBIT= 0x02; // not supported
-const int WR3_ADDRESS_SEARCH_MODE	= 0x04; // not supported
-const int WR3_RX_CRC_ENABLE			= 0x08; // not supported
-const int WR3_ENTER_HUNT_PHASE		= 0x10; // not supported
-const int WR3_AUTO_ENABLES			= 0x20;
-const int WR3_RX_WORD_LENGTH_MASK	= 0xc0;
-const int WR3_RX_WORD_LENGTH_5		= 0x00;
-const int WR3_RX_WORD_LENGTH_7		= 0x40;
-const int WR3_RX_WORD_LENGTH_6		= 0x80;
-const int WR3_RX_WORD_LENGTH_8		= 0xc0;
+const int WR3_ADDRESS_SEARCH_MODE   = 0x04; // not supported
+const int WR3_RX_CRC_ENABLE         = 0x08; // not supported
+const int WR3_ENTER_HUNT_PHASE      = 0x10; // not supported
+const int WR3_AUTO_ENABLES          = 0x20;
+const int WR3_RX_WORD_LENGTH_MASK   = 0xc0;
+const int WR3_RX_WORD_LENGTH_5      = 0x00;
+const int WR3_RX_WORD_LENGTH_7      = 0x40;
+const int WR3_RX_WORD_LENGTH_6      = 0x80;
+const int WR3_RX_WORD_LENGTH_8      = 0xc0;
 
-const int WR4_PARITY_ENABLE			= 0x01; // not supported
-const int WR4_PARITY_EVEN			= 0x02; // not supported
-const int WR4_STOP_BITS_MASK		= 0x0c;
-const int WR4_STOP_BITS_1			= 0x04;
-const int WR4_STOP_BITS_1_5			= 0x08; // not supported
-const int WR4_STOP_BITS_2			= 0x0c;
-const int WR4_SYNC_MODE_MASK		= 0x30; // not supported
-const int WR4_SYNC_MODE_8_BIT		= 0x00; // not supported
-const int WR4_SYNC_MODE_16_BIT		= 0x10; // not supported
-const int WR4_SYNC_MODE_SDLC		= 0x20; // not supported
-const int WR4_SYNC_MODE_EXT			= 0x30; // not supported
-const int WR4_CLOCK_RATE_MASK		= 0xc0;
-const int WR4_CLOCK_RATE_X1			= 0x00;
-const int WR4_CLOCK_RATE_X16		= 0x40;
-const int WR4_CLOCK_RATE_X32		= 0x80;
-const int WR4_CLOCK_RATE_X64		= 0xc0;
+const int WR4_PARITY_ENABLE         = 0x01; // not supported
+const int WR4_PARITY_EVEN           = 0x02; // not supported
+const int WR4_STOP_BITS_MASK        = 0x0c;
+const int WR4_STOP_BITS_1           = 0x04;
+const int WR4_STOP_BITS_1_5         = 0x08; // not supported
+const int WR4_STOP_BITS_2           = 0x0c;
+const int WR4_SYNC_MODE_MASK        = 0x30; // not supported
+const int WR4_SYNC_MODE_8_BIT       = 0x00; // not supported
+const int WR4_SYNC_MODE_16_BIT      = 0x10; // not supported
+const int WR4_SYNC_MODE_SDLC        = 0x20; // not supported
+const int WR4_SYNC_MODE_EXT         = 0x30; // not supported
+const int WR4_CLOCK_RATE_MASK       = 0xc0;
+const int WR4_CLOCK_RATE_X1         = 0x00;
+const int WR4_CLOCK_RATE_X16        = 0x40;
+const int WR4_CLOCK_RATE_X32        = 0x80;
+const int WR4_CLOCK_RATE_X64        = 0xc0;
 
-const int WR5_TX_CRC_ENABLE			= 0x01; // not supported
-const int WR5_RTS					= 0x02;
-const int WR5_CRC16					= 0x04; // not supported
-const int WR5_TX_ENABLE				= 0x08;
-const int WR5_SEND_BREAK			= 0x10;
-const int WR5_TX_WORD_LENGTH_MASK	= 0x60;
-const int WR5_TX_WORD_LENGTH_5		= 0x00;
-const int WR5_TX_WORD_LENGTH_6		= 0x40;
-const int WR5_TX_WORD_LENGTH_7		= 0x20;
-const int WR5_TX_WORD_LENGTH_8		= 0x60;
-const int WR5_DTR					= 0x80;
+const int WR5_TX_CRC_ENABLE         = 0x01; // not supported
+const int WR5_RTS                   = 0x02;
+const int WR5_CRC16                 = 0x04; // not supported
+const int WR5_TX_ENABLE             = 0x08;
+const int WR5_SEND_BREAK            = 0x10;
+const int WR5_TX_WORD_LENGTH_MASK   = 0x60;
+const int WR5_TX_WORD_LENGTH_5      = 0x00;
+const int WR5_TX_WORD_LENGTH_6      = 0x40;
+const int WR5_TX_WORD_LENGTH_7      = 0x20;
+const int WR5_TX_WORD_LENGTH_8      = 0x60;
+const int WR5_DTR                   = 0x80;
 
 
 
@@ -176,52 +163,41 @@ const int WR5_DTR					= 0x80;
 //**************************************************************************
 
 #define RXD \
-	devcb_call_read_line(&m_in_rxd_func)
+	m_in_rxd_func()
 
 #define TXD(_state) \
-	devcb_call_write_line(&m_out_txd_func, _state)
+	m_out_txd_func(_state)
 
 #define RTS(_state) \
-	devcb_call_write_line(&m_out_rts_func, _state)
+	m_out_rts_func(_state)
 
 #define DTR(_state) \
-	devcb_call_write_line(&m_out_dtr_func, _state)
+	m_out_dtr_func(_state)
 
 
 
 //**************************************************************************
-//  DEVICE CONFIGURATION
+//  LIVE DEVICE
 //**************************************************************************
 
+// device type definition
+const device_type Z80DART = &device_creator<z80dart_device>;
+const device_type Z80SIO0 = &device_creator<z80dart_device>;
+const device_type Z80SIO1 = &device_creator<z80dart_device>;
+const device_type Z80SIO2 = &device_creator<z80dart_device>;
+const device_type Z80SIO3 = &device_creator<z80dart_device>;
+const device_type Z80SIO4 = &device_creator<z80dart_device>;
+
 //-------------------------------------------------
-//  z80dart_device_config - constructor
+//  z80dart_device - constructor
 //-------------------------------------------------
 
-z80dart_device_config::z80dart_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock)
-	: device_config(mconfig, static_alloc_device_config, "Zilog Z80 DART", tag, owner, clock),
-	  device_config_z80daisy_interface(mconfig, *this)
+z80dart_device::z80dart_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, Z80DART, "Zilog Z80 DART", tag, owner, clock),
+		device_z80daisy_interface(mconfig, *this)
 {
-}
-
-
-//-------------------------------------------------
-//  static_alloc_device_config - allocate a new
-//  configuration object
-//-------------------------------------------------
-
-device_config *z80dart_device_config::static_alloc_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock)
-{
-	return global_alloc(z80dart_device_config(mconfig, tag, owner, clock));
-}
-
-
-//-------------------------------------------------
-//  alloc_device - allocate a new device object
-//-------------------------------------------------
-
-device_t *z80dart_device_config::alloc_device(running_machine &machine) const
-{
-	return auto_alloc(machine, z80dart_device(machine, *this));
+	for (int i = 0; i < 8; i++)
+		m_int_state[i] = 0;
 }
 
 
@@ -231,7 +207,7 @@ device_t *z80dart_device_config::alloc_device(running_machine &machine) const
 //  complete
 //-------------------------------------------------
 
-void z80dart_device_config::device_config_complete()
+void z80dart_device::device_config_complete()
 {
 	// inherit a copy of the static data
 	const z80dart_interface *intf = reinterpret_cast<const z80dart_interface *>(static_config());
@@ -242,39 +218,20 @@ void z80dart_device_config::device_config_complete()
 	else
 	{
 		m_rx_clock_a = m_tx_clock_a = m_rx_clock_b = m_tx_clock_b = 0;
-		memset(&m_in_rxda_func, 0, sizeof(m_in_rxda_func));
-		memset(&m_out_txda_func, 0, sizeof(m_out_txda_func));
-		memset(&m_out_dtra_func, 0, sizeof(m_out_dtra_func));
-		memset(&m_out_rtsa_func, 0, sizeof(m_out_rtsa_func));
-		memset(&m_out_wrdya_func, 0, sizeof(m_out_wrdya_func));
-		memset(&m_out_synca_func, 0, sizeof(m_out_synca_func));
-		memset(&m_in_rxdb_func, 0, sizeof(m_in_rxdb_func));
-		memset(&m_out_txdb_func, 0, sizeof(m_out_txdb_func));
-		memset(&m_out_dtrb_func, 0, sizeof(m_out_dtrb_func));
-		memset(&m_out_rtsb_func, 0, sizeof(m_out_rtsb_func));
-		memset(&m_out_wrdyb_func, 0, sizeof(m_out_wrdyb_func));
-		memset(&m_out_syncb_func, 0, sizeof(m_out_syncb_func));
-		memset(&m_out_int_func, 0, sizeof(m_out_int_func));
+		memset(&m_in_rxda_cb, 0, sizeof(m_in_rxda_cb));
+		memset(&m_out_txda_cb, 0, sizeof(m_out_txda_cb));
+		memset(&m_out_dtra_cb, 0, sizeof(m_out_dtra_cb));
+		memset(&m_out_rtsa_cb, 0, sizeof(m_out_rtsa_cb));
+		memset(&m_out_wrdya_cb, 0, sizeof(m_out_wrdya_cb));
+		memset(&m_out_synca_cb, 0, sizeof(m_out_synca_cb));
+		memset(&m_in_rxdb_cb, 0, sizeof(m_in_rxdb_cb));
+		memset(&m_out_txdb_cb, 0, sizeof(m_out_txdb_cb));
+		memset(&m_out_dtrb_cb, 0, sizeof(m_out_dtrb_cb));
+		memset(&m_out_rtsb_cb, 0, sizeof(m_out_rtsb_cb));
+		memset(&m_out_wrdyb_cb, 0, sizeof(m_out_wrdyb_cb));
+		memset(&m_out_syncb_cb, 0, sizeof(m_out_syncb_cb));
+		memset(&m_out_int_cb, 0, sizeof(m_out_int_cb));
 	}
-}
-
-
-
-//**************************************************************************
-//  LIVE DEVICE
-//**************************************************************************
-
-//-------------------------------------------------
-//  z80dart_device - constructor
-//-------------------------------------------------
-
-z80dart_device::z80dart_device(running_machine &_machine, const z80dart_device_config &config)
-	: device_t(_machine, config),
-	  device_z80daisy_interface(_machine, config, *this),
-	  m_config(config)
-{
-	for (int i = 0; i < 8; i++)
-		m_int_state[i] = 0;
 }
 
 
@@ -285,37 +242,37 @@ z80dart_device::z80dart_device(running_machine &_machine, const z80dart_device_c
 void z80dart_device::device_start()
 {
 	// resolve callbacks
-	devcb_resolve_write_line(&m_out_int_func, &m_config.m_out_int_func, this);
+	m_out_int_func.resolve(m_out_int_cb, *this);
 
-	m_channel[CHANNEL_A].start(this, CHANNEL_A, m_config.m_in_rxda_func, m_config.m_out_txda_func, m_config.m_out_dtra_func, m_config.m_out_rtsa_func, m_config.m_out_wrdya_func, m_config.m_out_synca_func);
-	m_channel[CHANNEL_B].start(this, CHANNEL_B, m_config.m_in_rxdb_func, m_config.m_out_txdb_func, m_config.m_out_dtrb_func, m_config.m_out_rtsb_func, m_config.m_out_wrdyb_func, m_config.m_out_syncb_func);
+	m_channel[CHANNEL_A].start(this, CHANNEL_A, m_in_rxda_cb, m_out_txda_cb, m_out_dtra_cb, m_out_rtsa_cb, m_out_wrdya_cb, m_out_synca_cb);
+	m_channel[CHANNEL_B].start(this, CHANNEL_B, m_in_rxdb_cb, m_out_txdb_cb, m_out_dtrb_cb, m_out_rtsb_cb, m_out_wrdyb_cb, m_out_syncb_cb);
 
-	if (m_config.m_rx_clock_a != 0)
+	if (m_rx_clock_a != 0)
 	{
 		// allocate channel A receive timer
-		m_rxca_timer = m_machine.scheduler().timer_alloc(FUNC(dart_channel::static_rxc_tick), (void *)&m_channel[CHANNEL_A]);
-		m_rxca_timer->adjust(attotime::zero, 0, attotime::from_hz(m_config.m_rx_clock_a));
+		m_rxca_timer = machine().scheduler().timer_alloc(FUNC(dart_channel::static_rxc_tick), (void *)&m_channel[CHANNEL_A]);
+		m_rxca_timer->adjust(attotime::zero, 0, attotime::from_hz(m_rx_clock_a));
 	}
 
-	if (m_config.m_tx_clock_a != 0)
+	if (m_tx_clock_a != 0)
 	{
 		// allocate channel A transmit timer
-		m_txca_timer = m_machine.scheduler().timer_alloc(FUNC(dart_channel::static_txc_tick), (void *)&m_channel[CHANNEL_A]);
-		m_txca_timer->adjust(attotime::zero, 0, attotime::from_hz(m_config.m_tx_clock_a));
+		m_txca_timer = machine().scheduler().timer_alloc(FUNC(dart_channel::static_txc_tick), (void *)&m_channel[CHANNEL_A]);
+		m_txca_timer->adjust(attotime::zero, 0, attotime::from_hz(m_tx_clock_a));
 	}
 
-	if (m_config.m_rx_clock_b != 0)
+	if (m_rx_clock_b != 0)
 	{
 		// allocate channel B receive timer
-		m_rxcb_timer = m_machine.scheduler().timer_alloc(FUNC(dart_channel::static_rxc_tick), (void *)&m_channel[CHANNEL_B]);
-		m_rxcb_timer->adjust(attotime::zero, 0, attotime::from_hz(m_config.m_rx_clock_b));
+		m_rxcb_timer = machine().scheduler().timer_alloc(FUNC(dart_channel::static_rxc_tick), (void *)&m_channel[CHANNEL_B]);
+		m_rxcb_timer->adjust(attotime::zero, 0, attotime::from_hz(m_rx_clock_b));
 	}
 
-	if (m_config.m_tx_clock_b != 0)
+	if (m_tx_clock_b != 0)
 	{
 		// allocate channel B transmit timer
-		m_txcb_timer = m_machine.scheduler().timer_alloc(FUNC(dart_channel::static_txc_tick), (void *)&m_channel[CHANNEL_B]);
-		m_txcb_timer->adjust(attotime::zero, 0, attotime::from_hz(m_config.m_tx_clock_b));
+		m_txcb_timer = machine().scheduler().timer_alloc(FUNC(dart_channel::static_txc_tick), (void *)&m_channel[CHANNEL_B]);
+		m_txcb_timer->adjust(attotime::zero, 0, attotime::from_hz(m_tx_clock_b));
 	}
 
 	save_item(NAME(m_int_state));
@@ -447,7 +404,7 @@ void z80dart_device::z80daisy_irq_reti()
 void z80dart_device::check_interrupts()
 {
 	int state = (z80daisy_irq_state() & Z80_DAISY_INT) ? ASSERT_LINE : CLEAR_LINE;
-	devcb_call_write_line(&m_out_int_func, state);
+	m_out_int_func(state);
 }
 
 
@@ -465,6 +422,16 @@ void z80dart_device::take_interrupt(int priority)
 }
 
 
+//-------------------------------------------------
+//  m1_r - interrupt acknowledge
+//-------------------------------------------------
+
+int z80dart_device::m1_r()
+{
+	return z80daisy_irq_ack();
+}
+
+
 
 //**************************************************************************
 //  DART CHANNEL
@@ -476,27 +443,27 @@ void z80dart_device::take_interrupt(int priority)
 
 z80dart_device::dart_channel::dart_channel()
 	: m_rx_shift(0),
-	  m_rx_error(0),
-	  m_rx_fifo(0),
-	  m_rx_clock(0),
-	  m_rx_state(0),
-	  m_rx_bits(0),
-	  m_rx_first(0),
-	  m_rx_parity(0),
-	  m_rx_break(0),
-	  m_rx_rr0_latch(0),
-	  m_ri(0),
-	  m_cts(0),
-	  m_dcd(0),
-	  m_tx_data(0),
-	  m_tx_shift(0),
-	  m_tx_clock(0),
-	  m_tx_state(0),
-	  m_tx_bits(0),
-	  m_tx_parity(0),
-	  m_dtr(0),
-	  m_rts(0),
-	  m_sync(0)
+		m_rx_error(0),
+		m_rx_fifo(-1),
+		m_rx_clock(0),
+		m_rx_state(0),
+		m_rx_bits(0),
+		m_rx_first(0),
+		m_rx_parity(0),
+		m_rx_break(0),
+		m_rx_rr0_latch(0),
+		m_ri(0),
+		m_cts(0),
+		m_dcd(0),
+		m_tx_data(0),
+		m_tx_shift(0),
+		m_tx_clock(0),
+		m_tx_state(0),
+		m_tx_bits(0),
+		m_tx_parity(0),
+		m_dtr(0),
+		m_rts(0),
+		m_sync(0)
 {
 	memset(&m_in_rxd_func, 0, sizeof(m_in_rxd_func));
 	memset(&m_out_txd_func, 0, sizeof(m_out_txd_func));
@@ -519,12 +486,12 @@ void z80dart_device::dart_channel::start(z80dart_device *device, int index, cons
 	m_index = index;
 	m_device = device;
 
-	devcb_resolve_read_line(&m_in_rxd_func, &in_rxd, m_device);
-	devcb_resolve_write_line(&m_out_txd_func, &out_txd, m_device);
-	devcb_resolve_write_line(&m_out_dtr_func, &out_dtr, m_device);
-	devcb_resolve_write_line(&m_out_rts_func, &out_rts, m_device);
-	devcb_resolve_write_line(&m_out_wrdy_func, &out_wrdy, m_device);
-	devcb_resolve_write_line(&m_out_sync_func, &out_sync, m_device);
+	m_in_rxd_func.resolve(in_rxd, *m_device);
+	m_out_txd_func.resolve(out_txd, *m_device);
+	m_out_dtr_func.resolve(out_dtr, *m_device);
+	m_out_rts_func.resolve(out_rts, *m_device);
+	m_out_wrdy_func.resolve(out_wrdy, *m_device);
+	m_out_sync_func.resolve(out_sync, *m_device);
 
 	m_device->save_item(NAME(m_rr), m_index);
 	m_device->save_item(NAME(m_wr), m_index);
@@ -590,10 +557,10 @@ int z80dart_device::dart_channel::get_clock_mode()
 
 	switch (m_wr[4] & WR4_CLOCK_RATE_MASK)
 	{
-	case WR4_CLOCK_RATE_X1:		clocks = 1;		break;
-	case WR4_CLOCK_RATE_X16:	clocks = 16;	break;
-	case WR4_CLOCK_RATE_X32:	clocks = 32;	break;
-	case WR4_CLOCK_RATE_X64:	clocks = 64;	break;
+	case WR4_CLOCK_RATE_X1:     clocks = 1;     break;
+	case WR4_CLOCK_RATE_X16:    clocks = 16;    break;
+	case WR4_CLOCK_RATE_X32:    clocks = 32;    break;
+	case WR4_CLOCK_RATE_X64:    clocks = 64;    break;
 	}
 
 	return clocks;
@@ -610,9 +577,9 @@ float z80dart_device::dart_channel::get_stop_bits()
 
 	switch (m_wr[4] & WR4_STOP_BITS_MASK)
 	{
-	case WR4_STOP_BITS_1:		bits = 1;		break;
-	case WR4_STOP_BITS_1_5:		bits = 1.5;		break;
-	case WR4_STOP_BITS_2:		bits = 2;		break;
+	case WR4_STOP_BITS_1:       bits = 1;       break;
+	case WR4_STOP_BITS_1_5:     bits = 1.5;     break;
+	case WR4_STOP_BITS_2:       bits = 2;       break;
 	}
 
 	return bits;
@@ -629,10 +596,10 @@ int z80dart_device::dart_channel::get_rx_word_length()
 
 	switch (m_wr[3] & WR3_RX_WORD_LENGTH_MASK)
 	{
-	case WR3_RX_WORD_LENGTH_5:	bits = 5;		break;
-	case WR3_RX_WORD_LENGTH_6:	bits = 6;		break;
-	case WR3_RX_WORD_LENGTH_7:	bits = 7;		break;
-	case WR3_RX_WORD_LENGTH_8:	bits = 8;		break;
+	case WR3_RX_WORD_LENGTH_5:  bits = 5;       break;
+	case WR3_RX_WORD_LENGTH_6:  bits = 6;       break;
+	case WR3_RX_WORD_LENGTH_7:  bits = 7;       break;
+	case WR3_RX_WORD_LENGTH_8:  bits = 8;       break;
 	}
 
 	return bits;
@@ -649,10 +616,10 @@ int z80dart_device::dart_channel::get_tx_word_length()
 
 	switch (m_wr[5] & WR5_TX_WORD_LENGTH_MASK)
 	{
-	case WR5_TX_WORD_LENGTH_5:	bits = 5;	break;
-	case WR5_TX_WORD_LENGTH_6:	bits = 6;	break;
-	case WR5_TX_WORD_LENGTH_7:	bits = 7;	break;
-	case WR5_TX_WORD_LENGTH_8:	bits = 8;	break;
+	case WR5_TX_WORD_LENGTH_5:  bits = 5;   break;
+	case WR5_TX_WORD_LENGTH_6:  bits = 6;   break;
+	case WR5_TX_WORD_LENGTH_7:  bits = 7;   break;
+	case WR5_TX_WORD_LENGTH_8:  bits = 8;   break;
 	}
 
 	return bits;
@@ -672,6 +639,7 @@ void z80dart_device::dart_channel::reset()
 	// disable transmitter
 	m_wr[5] &= ~WR5_TX_ENABLE;
 	m_tx_state = STATE_START;
+	m_rr[0] |= RR0_TX_BUFFER_EMPTY;
 
 	// reset external lines
 	RTS(1);
@@ -1485,22 +1453,22 @@ WRITE_LINE_DEVICE_HANDLER( z80dart_rxtxcb_w ) { downcast<z80dart_device *>(devic
 
 READ8_DEVICE_HANDLER( z80dart_cd_ba_r )
 {
-	return (offset & 2) ? z80dart_c_r(device, offset & 1) : z80dart_d_r(device, offset & 1);
+	return (offset & 2) ? z80dart_c_r(device, space, offset & 1) : z80dart_d_r(device, space, offset & 1);
 }
 
 WRITE8_DEVICE_HANDLER( z80dart_cd_ba_w )
 {
 	if (offset & 2)
-		z80dart_c_w(device, offset & 1, data);
+		z80dart_c_w(device, space, offset & 1, data);
 	else
-		z80dart_d_w(device, offset & 1, data);
+		z80dart_d_w(device, space, offset & 1, data);
 }
 
 READ8_DEVICE_HANDLER( z80dart_ba_cd_r )
 {
 	int channel = BIT(offset, 1);
 
-	return (offset & 1) ? z80dart_c_r(device, channel) : z80dart_d_r(device, channel);
+	return (offset & 1) ? z80dart_c_r(device, space, channel) : z80dart_d_r(device, space, channel);
 }
 
 WRITE8_DEVICE_HANDLER( z80dart_ba_cd_w )
@@ -1508,7 +1476,7 @@ WRITE8_DEVICE_HANDLER( z80dart_ba_cd_w )
 	int channel = BIT(offset, 1);
 
 	if (offset & 1)
-		z80dart_c_w(device, channel, data);
+		z80dart_c_w(device, space, channel, data);
 	else
-		z80dart_d_w(device, channel, data);
+		z80dart_d_w(device, space, channel, data);
 }

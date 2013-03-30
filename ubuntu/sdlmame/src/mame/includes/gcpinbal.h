@@ -5,18 +5,26 @@
 class gcpinbal_state : public driver_device
 {
 public:
-	gcpinbal_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config),
-		  m_maincpu(*this, "maincpu"),
-		  m_oki(*this, "oki"),
-		  m_msm(*this, "msm") { }
+	gcpinbal_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+		m_maincpu(*this, "maincpu"),
+		m_oki(*this, "oki"),
+		m_msm(*this, "msm"),
+		m_tilemapram(*this, "tilemapram"),
+		m_spriteram(*this, "spriteram"),
+		m_ioc_ram(*this, "ioc_ram")
+	{ }
+
+	/* devices */
+	required_device<cpu_device> m_maincpu;
+	required_device<okim6295_device> m_oki;
+	required_device<msm6585_device> m_msm;
 
 	/* memory pointers */
-	UINT16 *    m_tilemapram;
-	UINT16 *    m_ioc_ram;
-	UINT16 *    m_spriteram;
+	required_shared_ptr<UINT16> m_tilemapram;
+	required_shared_ptr<UINT16> m_spriteram;
+	required_shared_ptr<UINT16> m_ioc_ram;
 //  UINT16 *    m_paletteram; // currently this uses generic palette handling
-	size_t      m_spriteram_size;
 
 	/* video-related */
 	tilemap_t     *m_tilemap[3];
@@ -38,17 +46,20 @@ public:
 	UINT8       m_adpcm_trigger;
 	UINT8       m_adpcm_data;
 
-	/* devices */
-	required_device<cpu_device> m_maincpu;
-	required_device<okim6295_device> m_oki;
-	required_device<msm5205_device> m_msm;
+	DECLARE_READ16_MEMBER(ioc_r);
+	DECLARE_WRITE16_MEMBER(ioc_w);
+	DECLARE_READ16_MEMBER(gcpinbal_tilemaps_word_r);
+	DECLARE_WRITE16_MEMBER(gcpinbal_tilemaps_word_w);
+	DECLARE_READ16_MEMBER(gcpinbal_ctrl_word_r);
+	DECLARE_WRITE16_MEMBER(gcpinbal_ctrl_word_w);
+	TILE_GET_INFO_MEMBER(get_bg0_tile_info);
+	TILE_GET_INFO_MEMBER(get_bg1_tile_info);
+	TILE_GET_INFO_MEMBER(get_fg_tile_info);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	UINT32 screen_update_gcpinbal(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(gcpinbal_interrupt);
+	TIMER_CALLBACK_MEMBER(gcpinbal_interrupt1);
+	TIMER_CALLBACK_MEMBER(gcpinbal_interrupt3);
 };
-
-
-/*----------- defined in video/gcpinbal.c -----------*/
-
-VIDEO_START( gcpinbal );
-SCREEN_UPDATE( gcpinbal );
-
-READ16_HANDLER ( gcpinbal_tilemaps_word_r );
-WRITE16_HANDLER( gcpinbal_tilemaps_word_w );

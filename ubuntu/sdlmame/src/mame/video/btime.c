@@ -28,8 +28,9 @@
 
 ***************************************************************************/
 
-PALETTE_INIT( btime )
+PALETTE_INIT_MEMBER(btime_state,btime)
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 
 
@@ -37,7 +38,7 @@ PALETTE_INIT( btime )
 	/* This function is also used by Eggs. */
 	if (color_prom == 0) return;
 
-	for (i = 0; i < machine.total_colors(); i++)
+	for (i = 0; i < machine().total_colors(); i++)
 	{
 		int bit0, bit1, bit2, r, g, b;
 
@@ -57,7 +58,7 @@ PALETTE_INIT( btime )
 		bit2 = (color_prom[i] >> 7) & 0x01;
 		b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 
-		palette_set_color(machine, i, MAKE_RGB(r,g,b));
+		palette_set_color(machine(), i, MAKE_RGB(r,g,b));
 	}
 }
 
@@ -78,11 +79,12 @@ PALETTE_INIT( btime )
 
 ***************************************************************************/
 
-PALETTE_INIT( lnc )
+PALETTE_INIT_MEMBER(btime_state,lnc)
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 
-	for (i = 0; i < machine.total_colors(); i++)
+	for (i = 0; i < machine().total_colors(); i++)
 	{
 		int bit0, bit1, bit2, r, g, b;
 
@@ -102,7 +104,7 @@ PALETTE_INIT( lnc )
 		bit2 = (color_prom[i] >> 0) & 0x01;
 		b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 
-		palette_set_color(machine, i, MAKE_RGB(r,g,b));
+		palette_set_color(machine(), i, MAKE_RGB(r,g,b));
 	}
 }
 
@@ -112,48 +114,44 @@ Start the video hardware emulation.
 
 ***************************************************************************/
 
-VIDEO_START( btime )
+VIDEO_START_MEMBER(btime_state,btime)
 {
-	btime_state *state = machine.driver_data<btime_state>();
 
-	if (machine.gfx[0]->srcdata == NULL)
-		gfx_element_set_source(machine.gfx[0], state->m_deco_charram);
-	if (machine.gfx[1]->srcdata == NULL)
-		gfx_element_set_source(machine.gfx[1], state->m_deco_charram);
+	if (machine().gfx[0]->srcdata() == NULL)
+		machine().gfx[0]->set_source(m_deco_charram);
+	if (machine().gfx[1]->srcdata() == NULL)
+		machine().gfx[1]->set_source(m_deco_charram);
 }
 
 
-VIDEO_START( bnj )
+VIDEO_START_MEMBER(btime_state,bnj)
 {
-	btime_state *state = machine.driver_data<btime_state>();
 	/* the background area is twice as wide as the screen */
 	int width = 256;
 	int height = 256;
-	bitmap_format format = machine.primary_screen->format();
-	state->m_background_bitmap = auto_bitmap_alloc(machine, 2 * width, height, format);
+	m_background_bitmap = auto_bitmap_ind16_alloc(machine(), 2 * width, height);
 
-	state->save_item(NAME(*state->m_background_bitmap));
+	save_item(NAME(*m_background_bitmap));
 
-	VIDEO_START_CALL(btime);
+	VIDEO_START_CALL_MEMBER(btime);
 }
 
 
-WRITE8_HANDLER( btime_paletteram_w )
+WRITE8_MEMBER(btime_state::btime_paletteram_w)
 {
+	m_paletteram[offset] = data;
 	/* RGB output is inverted */
-	paletteram_BBGGGRRR_w(space, offset, ~data);
+	paletteram_BBGGGRRR_byte_w(space, offset, ~data);
 }
 
-WRITE8_HANDLER( lnc_videoram_w )
+WRITE8_MEMBER(btime_state::lnc_videoram_w)
 {
-	btime_state *state = space->machine().driver_data<btime_state>();
-	state->m_videoram[offset] = data;
-	state->m_colorram[offset] = *state->m_lnc_charbank;
+	m_videoram[offset] = data;
+	m_colorram[offset] = *m_lnc_charbank;
 }
 
-READ8_HANDLER( btime_mirrorvideoram_r )
+READ8_MEMBER(btime_state::btime_mirrorvideoram_r)
 {
-	btime_state *state = space->machine().driver_data<btime_state>();
 	int x, y;
 
 	/* swap x and y coordinates */
@@ -161,12 +159,11 @@ READ8_HANDLER( btime_mirrorvideoram_r )
 	y = offset % 32;
 	offset = 32 * y + x;
 
-	return state->m_videoram[offset];
+	return m_videoram[offset];
 }
 
-READ8_HANDLER( btime_mirrorcolorram_r )
+READ8_MEMBER(btime_state::btime_mirrorcolorram_r)
 {
-	btime_state *state = space->machine().driver_data<btime_state>();
 	int x, y;
 
 	/* swap x and y coordinates */
@@ -174,12 +171,11 @@ READ8_HANDLER( btime_mirrorcolorram_r )
 	y = offset % 32;
 	offset = 32 * y + x;
 
-	return state->m_colorram[offset];
+	return m_colorram[offset];
 }
 
-WRITE8_HANDLER( btime_mirrorvideoram_w )
+WRITE8_MEMBER(btime_state::btime_mirrorvideoram_w)
 {
-	btime_state *state = space->machine().driver_data<btime_state>();
 	int x, y;
 
 	/* swap x and y coordinates */
@@ -187,10 +183,10 @@ WRITE8_HANDLER( btime_mirrorvideoram_w )
 	y = offset % 32;
 	offset = 32 * y + x;
 
-	state->m_videoram[offset] = data;
+	m_videoram[offset] = data;
 }
 
-WRITE8_HANDLER( lnc_mirrorvideoram_w )
+WRITE8_MEMBER(btime_state::lnc_mirrorvideoram_w)
 {
 	int x, y;
 
@@ -202,9 +198,8 @@ WRITE8_HANDLER( lnc_mirrorvideoram_w )
 	lnc_videoram_w(space, offset, data);
 }
 
-WRITE8_HANDLER( btime_mirrorcolorram_w )
+WRITE8_MEMBER(btime_state::btime_mirrorcolorram_w)
 {
-	btime_state *state = space->machine().driver_data<btime_state>();
 	int x, y;
 
 	/* swap x and y coordinates */
@@ -212,55 +207,51 @@ WRITE8_HANDLER( btime_mirrorcolorram_w )
 	y = offset % 32;
 	offset = 32 * y + x;
 
-	state->m_colorram[offset] = data;
+	m_colorram[offset] = data;
 }
 
-WRITE8_HANDLER( deco_charram_w )
+WRITE8_MEMBER(btime_state::deco_charram_w)
 {
-	btime_state *state = space->machine().driver_data<btime_state>();
-	if (state->m_deco_charram[offset] == data)
+	if (m_deco_charram[offset] == data)
 		return;
 
-	state->m_deco_charram[offset] = data;
+	m_deco_charram[offset] = data;
 
 	offset &= 0x1fff;
 
 	/* dirty sprite */
-	gfx_element_mark_dirty(space->machine().gfx[1], offset >> 5);
+	machine().gfx[1]->mark_dirty(offset >> 5);
 
 	/* diry char */
-	gfx_element_mark_dirty(space->machine().gfx[0], offset >> 3);
+	machine().gfx[0]->mark_dirty(offset >> 3);
 }
 
-WRITE8_HANDLER( bnj_background_w )
+WRITE8_MEMBER(btime_state::bnj_background_w)
 {
-	btime_state *state = space->machine().driver_data<btime_state>();
-	state->m_bnj_backgroundram[offset] = data;
+	m_bnj_backgroundram[offset] = data;
 }
 
-WRITE8_HANDLER( bnj_scroll1_w )
+WRITE8_MEMBER(btime_state::bnj_scroll1_w)
 {
-	btime_state *state = space->machine().driver_data<btime_state>();
-	state->m_bnj_scroll1 = data;
+	m_bnj_scroll1 = data;
 }
 
-WRITE8_HANDLER( bnj_scroll2_w )
+WRITE8_MEMBER(btime_state::bnj_scroll2_w)
 {
-	btime_state *state = space->machine().driver_data<btime_state>();
-	state->m_bnj_scroll2 = data;
+	m_bnj_scroll2 = data;
 }
 
-WRITE8_HANDLER( btime_video_control_w )
+WRITE8_MEMBER(btime_state::btime_video_control_w)
 {
 	// Btime video control
 	//
 	// Bit 0   = Flip screen
 	// Bit 1-7 = Unknown
 
-	flip_screen_set(space->machine(), data & 0x01);
+	flip_screen_set(data & 0x01);
 }
 
-WRITE8_HANDLER( bnj_video_control_w )
+WRITE8_MEMBER(btime_state::bnj_video_control_w)
 {
 	/* Bnj/Lnc works a little differently than the btime/eggs (apparently). */
 	/* According to the information at: */
@@ -272,41 +263,39 @@ WRITE8_HANDLER( bnj_video_control_w )
 	/* For now we just check 0x40 in DSW1, and ignore the write if we */
 	/* are in upright controls mode. */
 
-	if (input_port_read(space->machine(), "DSW1") & 0x40) /* cocktail mode */
+	if (ioport("DSW1")->read() & 0x40) /* cocktail mode */
 		btime_video_control_w(space, offset, data);
 }
 
-WRITE8_HANDLER( zoar_video_control_w )
+WRITE8_MEMBER(btime_state::zoar_video_control_w)
 {
-	btime_state *state = space->machine().driver_data<btime_state>();
 	// Zoar video control
 	//
 	// Bit 0-2 = Unknown (always 0). Marked as MCOL on schematics
 	// Bit 3-4 = Palette
 	// Bit 7   = Flip Screen
 
-	state->m_btime_palette = (data & 0x30) >> 3;
+	m_btime_palette = (data & 0x30) >> 3;
 
-	if (input_port_read(space->machine(), "DSW1") & 0x40) /* cocktail mode */
-		flip_screen_set(space->machine(), data & 0x80);
+	if (ioport("DSW1")->read() & 0x40) /* cocktail mode */
+		flip_screen_set(data & 0x80);
 }
 
-WRITE8_HANDLER( disco_video_control_w )
+WRITE8_MEMBER(btime_state::disco_video_control_w)
 {
-	btime_state *state = space->machine().driver_data<btime_state>();
-	state->m_btime_palette = (data >> 2) & 0x03;
+	m_btime_palette = (data >> 2) & 0x03;
 
-	if (!(input_port_read(space->machine(), "DSW1") & 0x40)) /* cocktail mode */
-		flip_screen_set(space->machine(), data & 0x01);
+	if (!(ioport("DSW1")->read() & 0x40)) /* cocktail mode */
+		flip_screen_set(data & 0x01);
 }
 
 
-static void draw_chars( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, UINT8 transparency, UINT8 color, int priority )
+static void draw_chars( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, UINT8 transparency, UINT8 color, int priority )
 {
 	btime_state *state = machine.driver_data<btime_state>();
 	offs_t offs;
 
-	for (offs = 0; offs < state->m_videoram_size; offs++)
+	for (offs = 0; offs < state->m_videoram.bytes(); offs++)
 	{
 		UINT8 x = 31 - (offs / 32);
 		UINT8 y = offs % 32;
@@ -317,25 +306,26 @@ static void draw_chars( running_machine &machine, bitmap_t *bitmap, const rectan
 		if ((priority != -1) && (priority != ((code >> 7) & 0x01)))
 			continue;
 
-		if (flip_screen_get(machine))
+		if (state->flip_screen())
 		{
-			x = 31 - x;
+			x = 31 + 16 - x;
 			y = 33 - y;
 		}
 
 		drawgfx_transpen(bitmap,cliprect,machine.gfx[0],
 				code,
 				color,
-				flip_screen_get(machine),flip_screen_get(machine),
+				state->flip_screen(),state->flip_screen(),
 				8*x,8*y,
 				transparency ? 0 : -1);
 	}
 }
 
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, UINT8 color,
-						 UINT8 sprite_y_adjust, UINT8 sprite_y_adjust_flip_screen,
-						 UINT8 *sprite_ram, offs_t interleave )
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, UINT8 color,
+							UINT8 sprite_y_adjust, UINT8 sprite_y_adjust_flip_screen,
+							UINT8 *sprite_ram, offs_t interleave )
 {
+	btime_state *state = machine.driver_data<btime_state>();
 	int i;
 	offs_t offs;
 
@@ -353,9 +343,9 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 		flipx = sprite_ram[offs + 0] & 0x04;
 		flipy = sprite_ram[offs + 0] & 0x02;
 
-		if (flip_screen_get(machine))
+		if (state->flip_screen())
 		{
-			x = 240 - x;
+			x = 240 + 128 - x;
 			y = 256 - y + sprite_y_adjust_flip_screen;
 
 			flipx = !flipx;
@@ -370,7 +360,7 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 				flipx,flipy,
 				x, y,0);
 
-		y = y + (flip_screen_get(machine) ? -256 : 256);
+		y = y + (state->flip_screen() ? -256 : 256);
 
 		// Wrap around
 		drawgfx_transpen(bitmap,cliprect,machine.gfx[1],
@@ -382,11 +372,11 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 }
 
 
-static void draw_background( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, UINT8* tmap, UINT8 color )
+static void draw_background( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, UINT8* tmap, UINT8 color )
 {
 	btime_state *state = machine.driver_data<btime_state>();
 	int i;
-	const UINT8 *gfx = machine.region("bg_map")->base();
+	const UINT8 *gfx = state->memregion("bg_map")->base();
 	int scroll = -(state->m_bnj_scroll2 | ((state->m_bnj_scroll1 & 0x03) << 8));
 
 	// One extra iteration for wrap around
@@ -406,100 +396,95 @@ static void draw_background( running_machine &machine, bitmap_t *bitmap, const r
 			int x = 240 - (16 * (offs / 16) + scroll) - 1;
 			int y = 16 * (offs % 16);
 
-			if (flip_screen_get(machine))
+			if (state->flip_screen())
 			{
-				x = 240 - x;
+				x = 240 + 128 - x;
 				y = 256 - y;
 			}
 
 			drawgfx_opaque(bitmap, cliprect,machine.gfx[2],
 					gfx[tileoffset + offs],
 					color,
-					flip_screen_get(machine),flip_screen_get(machine),
+					state->flip_screen(),state->flip_screen(),
 					x,y);
 		}
 	}
 }
 
 
-SCREEN_UPDATE( btime )
+UINT32 btime_state::screen_update_btime(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	btime_state *state = screen->machine().driver_data<btime_state>();
-	if (state->m_bnj_scroll1 & 0x10)
+	if (m_bnj_scroll1 & 0x10)
 	{
 		int i, start;
 
 		// Generate tile map
-		if (flip_screen_get(screen->machine()))
+		if (flip_screen())
 			start = 0;
 		else
 			start = 1;
 
 		for (i = 0; i < 4; i++)
 		{
-			state->m_btime_tilemap[i] = start | (state->m_bnj_scroll1 & 0x04);
+			m_btime_tilemap[i] = start | (m_bnj_scroll1 & 0x04);
 			start = (start + 1) & 0x03;
 		}
 
-		draw_background(screen->machine(), bitmap, cliprect, state->m_btime_tilemap, 0);
-		draw_chars(screen->machine(), bitmap, cliprect, TRUE, 0, -1);
+		draw_background(machine(), bitmap, cliprect, m_btime_tilemap, 0);
+		draw_chars(machine(), bitmap, cliprect, TRUE, 0, -1);
 	}
 	else
-		draw_chars(screen->machine(), bitmap, cliprect, FALSE, 0, -1);
+		draw_chars(machine(), bitmap, cliprect, FALSE, 0, -1);
 
-	draw_sprites(screen->machine(), bitmap, cliprect, 0, 1, 0, state->m_videoram, 0x20);
-
-	return 0;
-}
-
-
-SCREEN_UPDATE( eggs )
-{
-	btime_state *state = screen->machine().driver_data<btime_state>();
-	draw_chars(screen->machine(), bitmap, cliprect, FALSE, 0, -1);
-	draw_sprites(screen->machine(), bitmap, cliprect, 0, 0, 0, state->m_videoram, 0x20);
+	draw_sprites(machine(), bitmap, cliprect, 0, 1, 0, m_videoram, 0x20);
 
 	return 0;
 }
 
 
-SCREEN_UPDATE( lnc )
+UINT32 btime_state::screen_update_eggs(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	btime_state *state = screen->machine().driver_data<btime_state>();
-	draw_chars(screen->machine(), bitmap, cliprect, FALSE, 0, -1);
-	draw_sprites(screen->machine(), bitmap, cliprect, 0, 1, 2, state->m_videoram, 0x20);
+	draw_chars(machine(), bitmap, cliprect, FALSE, 0, -1);
+	draw_sprites(machine(), bitmap, cliprect, 0, 0, 0, m_videoram, 0x20);
 
 	return 0;
 }
 
 
-SCREEN_UPDATE( zoar )
+UINT32 btime_state::screen_update_lnc(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	btime_state *state = screen->machine().driver_data<btime_state>();
-	if (state->m_bnj_scroll1 & 0x04)
+	draw_chars(machine(), bitmap, cliprect, FALSE, 0, -1);
+	draw_sprites(machine(), bitmap, cliprect, 0, 1, 2, m_videoram, 0x20);
+
+	return 0;
+}
+
+
+UINT32 btime_state::screen_update_zoar(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
+{
+	if (m_bnj_scroll1 & 0x04)
 	{
-		draw_background(screen->machine(), bitmap, cliprect, state->m_zoar_scrollram, state->m_btime_palette);
-		draw_chars(screen->machine(), bitmap, cliprect, TRUE, state->m_btime_palette + 1, -1);
+		draw_background(machine(), bitmap, cliprect, m_zoar_scrollram, m_btime_palette);
+		draw_chars(machine(), bitmap, cliprect, TRUE, m_btime_palette + 1, -1);
 	}
 	else
-		draw_chars(screen->machine(), bitmap, cliprect, FALSE, state->m_btime_palette + 1, -1);
+		draw_chars(machine(), bitmap, cliprect, FALSE, m_btime_palette + 1, -1);
 
 	/* The order is important for correct priorities */
-	draw_sprites(screen->machine(), bitmap, cliprect, state->m_btime_palette + 1, 1, 2, state->m_videoram + 0x1f, 0x20);
-	draw_sprites(screen->machine(), bitmap, cliprect, state->m_btime_palette + 1, 1, 2, state->m_videoram, 0x20);
+	draw_sprites(machine(), bitmap, cliprect, m_btime_palette + 1, 1, 2, m_videoram + 0x1f, 0x20);
+	draw_sprites(machine(), bitmap, cliprect, m_btime_palette + 1, 1, 2, m_videoram, 0x20);
 
 	return 0;
 }
 
 
-SCREEN_UPDATE( bnj )
+UINT32 btime_state::screen_update_bnj(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	btime_state *state = screen->machine().driver_data<btime_state>();
-	if (state->m_bnj_scroll1)
+	if (m_bnj_scroll1)
 	{
 		int scroll, offs;
 
-		for (offs = state->m_bnj_backgroundram_size - 1; offs >=0; offs--)
+		for (offs = m_bnj_backgroundram.bytes() - 1; offs >=0; offs--)
 		{
 			int sx, sy;
 
@@ -507,78 +492,76 @@ SCREEN_UPDATE( bnj )
 			sy = 16 * (((offs % 0x100) < 0x80) ? offs % 8 : (offs % 8) + 8);
 			sx = 496 - sx;
 
-			if (flip_screen_get(screen->machine()))
+			if (flip_screen())
 			{
 				sx = 496 - sx;
 				sy = 256 - sy;
 			}
 
-			drawgfx_opaque(state->m_background_bitmap, 0, screen->machine().gfx[2],
-					(state->m_bnj_backgroundram[offs] >> 4) + ((offs & 0x80) >> 3) + 32,
+			drawgfx_opaque(*m_background_bitmap, m_background_bitmap->cliprect(), machine().gfx[2],
+					(m_bnj_backgroundram[offs] >> 4) + ((offs & 0x80) >> 3) + 32,
 					0,
-					flip_screen_get(screen->machine()), flip_screen_get(screen->machine()),
+					flip_screen(), flip_screen(),
 					sx, sy);
 		}
 
 		/* copy the background bitmap to the screen */
-		scroll = (state->m_bnj_scroll1 & 0x02) * 128 + 511 - state->m_bnj_scroll2;
-		if (!flip_screen_get(screen->machine()))
+		scroll = (m_bnj_scroll1 & 0x02) * 128 + 511 - m_bnj_scroll2;
+		if (!flip_screen())
 			scroll = 767 - scroll;
-		copyscrollbitmap(bitmap, state->m_background_bitmap, 1, &scroll, 0, 0, cliprect);
+		copyscrollbitmap(bitmap, *m_background_bitmap, 1, &scroll, 0, 0, cliprect);
 
 		/* copy the low priority characters followed by the sprites
-           then the high priority characters */
-		draw_chars(screen->machine(), bitmap, cliprect, TRUE, 0, 1);
-		draw_sprites(screen->machine(), bitmap, cliprect, 0, 0, 0, state->m_videoram, 0x20);
-		draw_chars(screen->machine(), bitmap, cliprect, TRUE, 0, 0);
+		   then the high priority characters */
+		draw_chars(machine(), bitmap, cliprect, TRUE, 0, 1);
+		draw_sprites(machine(), bitmap, cliprect, 0, 0, 0, m_videoram, 0x20);
+		draw_chars(machine(), bitmap, cliprect, TRUE, 0, 0);
 	}
 	else
 	{
-		draw_chars(screen->machine(), bitmap, cliprect, FALSE, 0, -1);
-		draw_sprites(screen->machine(), bitmap, cliprect, 0, 0, 0, state->m_videoram, 0x20);
+		draw_chars(machine(), bitmap, cliprect, FALSE, 0, -1);
+		draw_sprites(machine(), bitmap, cliprect, 0, 0, 0, m_videoram, 0x20);
 	}
 
 	return 0;
 }
 
 
-SCREEN_UPDATE( cookrace )
+UINT32 btime_state::screen_update_cookrace(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	btime_state *state = screen->machine().driver_data<btime_state>();
 	int offs;
 
-	for (offs = state->m_bnj_backgroundram_size - 1; offs >=0; offs--)
+	for (offs = m_bnj_backgroundram.bytes() - 1; offs >=0; offs--)
 	{
 		int sx, sy;
 
 		sx = 31 - (offs / 32);
 		sy = offs % 32;
 
-		if (flip_screen_get(screen->machine()))
+		if (flip_screen())
 		{
 			sx = 31 - sx;
 			sy = 33 - sy;
 		}
 
-		drawgfx_opaque(bitmap, cliprect, screen->machine().gfx[2],
-				state->m_bnj_backgroundram[offs],
+		drawgfx_opaque(bitmap, cliprect, machine().gfx[2],
+				m_bnj_backgroundram[offs],
 				0,
-				flip_screen_get(screen->machine()), flip_screen_get(screen->machine()),
+				flip_screen(), flip_screen(),
 				8*sx,8*sy);
 	}
 
-	draw_chars(screen->machine(), bitmap, cliprect, TRUE, 0, -1);
-	draw_sprites(screen->machine(), bitmap, cliprect, 0, 1, 0, state->m_videoram, 0x20);
+	draw_chars(machine(), bitmap, cliprect, TRUE, 0, -1);
+	draw_sprites(machine(), bitmap, cliprect, 0, 1, 0, m_videoram, 0x20);
 
 	return 0;
 }
 
 
-SCREEN_UPDATE( disco )
+UINT32 btime_state::screen_update_disco(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	btime_state *state = screen->machine().driver_data<btime_state>();
-	draw_chars(screen->machine(), bitmap, cliprect, FALSE, state->m_btime_palette, -1);
-	draw_sprites(screen->machine(), bitmap, cliprect, state->m_btime_palette, 0, 0, state->m_spriteram, 1);
+	draw_chars(machine(), bitmap, cliprect, FALSE, m_btime_palette, -1);
+	draw_sprites(machine(), bitmap, cliprect, m_btime_palette, 0, 0, m_spriteram, 1);
 
 	return 0;
 }

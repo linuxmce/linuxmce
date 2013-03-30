@@ -45,8 +45,9 @@ static int intensity(int bits)
 }
 
 
-static PALETTE_INIT( fgoal )
+void fgoal_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 
 	/* for B/W screens PCB can be jumpered to use lower half of PROM */
@@ -54,39 +55,38 @@ static PALETTE_INIT( fgoal )
 	for (i = 0; i < 128; i++)
 	{
 		UINT8 color = color_prom[0x80 | i] & 63;
-		palette_set_color_rgb(machine, i, intensity(color >> 4), intensity(color >> 2), intensity(color >> 0));
+		palette_set_color_rgb(machine(), i, intensity(color >> 4), intensity(color >> 2), intensity(color >> 0));
 	}
 
 	for (i = 0; i < 8; i++)
 	{
-		palette_set_color(machine, 128 + 0*8 + i, MAKE_RGB(0x2e,0x80,0x2e));
-		palette_set_color(machine, 128 + 1*8 + i, MAKE_RGB(0x2e,0x2e,0x2e));
+		palette_set_color(machine(), 128 + 0*8 + i, MAKE_RGB(0x2e,0x80,0x2e));
+		palette_set_color(machine(), 128 + 1*8 + i, MAKE_RGB(0x2e,0x2e,0x2e));
 	}
 
 	/* ball is a fixed color */
-	palette_set_color_rgb(machine, 128 + 16, intensity(0x38 >> 4), intensity(0x38 >> 2), intensity(0x38 >> 0));
+	palette_set_color_rgb(machine(), 128 + 16, intensity(0x38 >> 4), intensity(0x38 >> 2), intensity(0x38 >> 0));
 }
 
 
-static TIMER_CALLBACK( interrupt_callback )
+TIMER_CALLBACK_MEMBER(fgoal_state::interrupt_callback)
 {
-	fgoal_state *state = machine.driver_data<fgoal_state>();
 	int scanline;
-	int coin = (input_port_read(machine, "IN1") & 2);
+	int coin = (ioport("IN1")->read() & 2);
 
-	device_set_input_line(state->m_maincpu, 0, ASSERT_LINE);
+	m_maincpu->set_input_line(0, ASSERT_LINE);
 
-	if (!coin && state->m_prev_coin)
-		device_set_input_line(state->m_maincpu, INPUT_LINE_NMI, ASSERT_LINE);
+	if (!coin && m_prev_coin)
+		m_maincpu->set_input_line(INPUT_LINE_NMI, ASSERT_LINE);
 
-	state->m_prev_coin = coin;
+	m_prev_coin = coin;
 
-	scanline = machine.primary_screen->vpos() + 128;
+	scanline = machine().primary_screen->vpos() + 128;
 
 	if (scanline > 256)
 		scanline = 0;
 
-	machine.scheduler().timer_set(machine.primary_screen->time_until_pos(scanline), FUNC(interrupt_callback));
+	machine().scheduler().timer_set(machine().primary_screen->time_until_pos(scanline), timer_expired_delegate(FUNC(fgoal_state::interrupt_callback),this));
 }
 
 
@@ -97,89 +97,81 @@ static unsigned video_ram_address( running_machine &machine )
 }
 
 
-static READ8_HANDLER( fgoal_analog_r )
+READ8_MEMBER(fgoal_state::fgoal_analog_r)
 {
-	fgoal_state *state = space->machine().driver_data<fgoal_state>();
-	return input_port_read(space->machine(), state->m_fgoal_player ? "PADDLE1" : "PADDLE0"); /* PCB can be jumpered to use a single dial */
+	return ioport(m_fgoal_player ? "PADDLE1" : "PADDLE0")->read(); /* PCB can be jumpered to use a single dial */
 }
 
 
-static CUSTOM_INPUT( fgoal_80_r )
+CUSTOM_INPUT_MEMBER(fgoal_state::fgoal_80_r)
 {
-	UINT8 ret = (field->port->machine().primary_screen->vpos() & 0x80) ? 1 : 0;
+	UINT8 ret = (machine().primary_screen->vpos() & 0x80) ? 1 : 0;
 
 	return ret;
 }
 
-static READ8_HANDLER( fgoal_nmi_reset_r )
+READ8_MEMBER(fgoal_state::fgoal_nmi_reset_r)
 {
-	fgoal_state *state = space->machine().driver_data<fgoal_state>();
-	device_set_input_line(state->m_maincpu, INPUT_LINE_NMI, CLEAR_LINE);
+	m_maincpu->set_input_line(INPUT_LINE_NMI, CLEAR_LINE);
 
 	return 0;
 }
 
 
-static READ8_HANDLER( fgoal_irq_reset_r )
+READ8_MEMBER(fgoal_state::fgoal_irq_reset_r)
 {
-	fgoal_state *state = space->machine().driver_data<fgoal_state>();
-	device_set_input_line(state->m_maincpu, 0, CLEAR_LINE);
+	m_maincpu->set_input_line(0, CLEAR_LINE);
 
 	return 0;
 }
 
 
-static READ8_HANDLER( fgoal_row_r )
+READ8_MEMBER(fgoal_state::fgoal_row_r)
 {
-	fgoal_state *state = space->machine().driver_data<fgoal_state>();
-	return state->m_row;
+	return m_row;
 }
 
 
-static WRITE8_HANDLER( fgoal_row_w )
+WRITE8_MEMBER(fgoal_state::fgoal_row_w)
 {
-	fgoal_state *state = space->machine().driver_data<fgoal_state>();
 
-	state->m_row = data;
-	mb14241_shift_data_w(state->m_mb14241, 0, 0);
+	m_row = data;
+	mb14241_shift_data_w(m_mb14241, space, 0, 0);
 }
 
-static WRITE8_HANDLER( fgoal_col_w )
+WRITE8_MEMBER(fgoal_state::fgoal_col_w)
 {
-	fgoal_state *state = space->machine().driver_data<fgoal_state>();
 
-	state->m_col = data;
-	mb14241_shift_count_w(state->m_mb14241, 0, data);
+	m_col = data;
+	mb14241_shift_count_w(m_mb14241, space, 0, data);
 }
 
-static READ8_HANDLER( fgoal_address_hi_r )
+READ8_MEMBER(fgoal_state::fgoal_address_hi_r)
 {
-	return video_ram_address(space->machine()) >> 8;
+	return video_ram_address(machine()) >> 8;
 }
 
-static READ8_HANDLER( fgoal_address_lo_r )
+READ8_MEMBER(fgoal_state::fgoal_address_lo_r)
 {
-	return video_ram_address(space->machine()) & 0xff;
+	return video_ram_address(machine()) & 0xff;
 }
 
-static READ8_HANDLER( fgoal_shifter_r )
+READ8_MEMBER(fgoal_state::fgoal_shifter_r)
 {
-	fgoal_state *state = space->machine().driver_data<fgoal_state>();
-	UINT8 v = mb14241_shift_result_r(state->m_mb14241, 0);
+	UINT8 v = mb14241_shift_result_r(m_mb14241, space, 0);
 
 	return BITSWAP8(v, 7, 6, 5, 4, 3, 2, 1, 0);
 }
 
-static READ8_HANDLER( fgoal_shifter_reverse_r )
+READ8_MEMBER(fgoal_state::fgoal_shifter_reverse_r)
 {
-	fgoal_state *state = space->machine().driver_data<fgoal_state>();
-	UINT8 v = mb14241_shift_result_r(state->m_mb14241, 0);
+	UINT8 v = mb14241_shift_result_r(m_mb14241, space, 0);
 
 	return BITSWAP8(v, 0, 1, 2, 3, 4, 5, 6, 7);
 }
 
 
-static WRITE8_HANDLER( fgoal_sound1_w )
+WRITE8_MEMBER(fgoal_state::fgoal_sound1_w)
 {
 	/* BIT0 => SX2 */
 	/* BIT1 => SX1 */
@@ -192,7 +184,7 @@ static WRITE8_HANDLER( fgoal_sound1_w )
 }
 
 
-static WRITE8_HANDLER( fgoal_sound2_w )
+WRITE8_MEMBER(fgoal_state::fgoal_sound2_w)
 {
 	/* BIT0 => CX0 */
 	/* BIT1 => SX6 */
@@ -200,12 +192,11 @@ static WRITE8_HANDLER( fgoal_sound2_w )
 	/* BIT3 => SX5 */
 	/* BIT4 => SX4 */
 	/* BIT5 => SX3 */
-	fgoal_state *state = space->machine().driver_data<fgoal_state>();
-	state->m_fgoal_player = data & 1;
+	m_fgoal_player = data & 1;
 }
 
 
-static ADDRESS_MAP_START( cpu_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( cpu_map, AS_PROGRAM, 8, fgoal_state )
 
 	AM_RANGE(0x0000, 0x00ef) AM_RAM
 
@@ -224,12 +215,12 @@ static ADDRESS_MAP_START( cpu_map, AS_PROGRAM, 8 )
 	AM_RANGE(0x00f1, 0x00f1) AM_WRITE(fgoal_col_w)
 	AM_RANGE(0x00f2, 0x00f2) AM_WRITE(fgoal_row_w)
 	AM_RANGE(0x00f3, 0x00f3) AM_WRITE(fgoal_col_w)
-	AM_RANGE(0x00f4, 0x00f7) AM_DEVWRITE("mb14241", mb14241_shift_data_w)
+	AM_RANGE(0x00f4, 0x00f7) AM_DEVWRITE_LEGACY("mb14241", mb14241_shift_data_w)
 	AM_RANGE(0x00f8, 0x00fb) AM_WRITE(fgoal_sound1_w)
 	AM_RANGE(0x00fc, 0x00ff) AM_WRITE(fgoal_sound2_w)
 
 	AM_RANGE(0x0100, 0x03ff) AM_RAM
-	AM_RANGE(0x4000, 0x7fff) AM_RAM AM_BASE_MEMBER(fgoal_state, m_video_ram)
+	AM_RANGE(0x4000, 0x7fff) AM_RAM AM_SHARE("video_ram")
 
 	AM_RANGE(0x8000, 0x8000) AM_WRITE(fgoal_ypos_w)
 	AM_RANGE(0x8001, 0x8001) AM_WRITE(fgoal_xpos_w)
@@ -266,7 +257,7 @@ static INPUT_PORTS_START( fgoal )
 	/* extra credit score changes depending on player's performance */
 
 	PORT_START("IN1")
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(fgoal_80_r, NULL) /* 128V */
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, fgoal_state,fgoal_80_r, NULL) /* 128V */
 	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Cabinet ))
 	PORT_DIPSETTING(    0x00, DEF_STR( Upright ))
 	PORT_DIPSETTING(    0x40, DEF_STR( Cocktail ))
@@ -336,35 +327,33 @@ GFXDECODE_END
 
 
 
-static MACHINE_START( fgoal )
+void fgoal_state::machine_start()
 {
-	fgoal_state *state = machine.driver_data<fgoal_state>();
 
-	state->m_maincpu = machine.device("maincpu");
-	state->m_mb14241 = machine.device("mb14241");
+	m_maincpu = machine().device<cpu_device>("maincpu");
+	m_mb14241 = machine().device("mb14241");
 
-	state->save_item(NAME(state->m_xpos));
-	state->save_item(NAME(state->m_ypos));
-	state->save_item(NAME(state->m_current_color));
-	state->save_item(NAME(state->m_fgoal_player));
-	state->save_item(NAME(state->m_row));
-	state->save_item(NAME(state->m_col));
-	state->save_item(NAME(state->m_prev_coin));
+	save_item(NAME(m_xpos));
+	save_item(NAME(m_ypos));
+	save_item(NAME(m_current_color));
+	save_item(NAME(m_fgoal_player));
+	save_item(NAME(m_row));
+	save_item(NAME(m_col));
+	save_item(NAME(m_prev_coin));
 }
 
-static MACHINE_RESET( fgoal )
+void fgoal_state::machine_reset()
 {
-	fgoal_state *state = machine.driver_data<fgoal_state>();
 
-	machine.scheduler().timer_set(machine.primary_screen->time_until_pos(0), FUNC(interrupt_callback));
+	machine().scheduler().timer_set(machine().primary_screen->time_until_pos(0), timer_expired_delegate(FUNC(fgoal_state::interrupt_callback),this));
 
-	state->m_xpos = 0;
-	state->m_ypos = 0;
-	state->m_current_color = 0;
-	state->m_fgoal_player = 0;
-	state->m_row = 0;
-	state->m_col = 0;
-	state->m_prev_coin = 0;
+	m_xpos = 0;
+	m_ypos = 0;
+	m_current_color = 0;
+	m_fgoal_player = 0;
+	m_row = 0;
+	m_col = 0;
+	m_prev_coin = 0;
 }
 
 static MACHINE_CONFIG_START( fgoal, fgoal_state )
@@ -373,8 +362,6 @@ static MACHINE_CONFIG_START( fgoal, fgoal_state )
 	MCFG_CPU_ADD("maincpu", M6800, 10065000 / 10) /* ? */
 	MCFG_CPU_PROGRAM_MAP(cpu_map)
 
-	MCFG_MACHINE_START(fgoal)
-	MCFG_MACHINE_RESET(fgoal)
 
 	/* add shifter */
 	MCFG_MB14241_ADD("mb14241")
@@ -382,16 +369,13 @@ static MACHINE_CONFIG_START( fgoal, fgoal_state )
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(256, 263)
 	MCFG_SCREEN_VISIBLE_AREA(0, 255, 16, 255)
-	MCFG_SCREEN_UPDATE(fgoal)
+	MCFG_SCREEN_UPDATE_DRIVER(fgoal_state, screen_update_fgoal)
 
 	MCFG_GFXDECODE(fgoal)
 	MCFG_PALETTE_LENGTH(128 + 16 + 1)
 
-	MCFG_PALETTE_INIT(fgoal)
-	MCFG_VIDEO_START(fgoal)
 
 	/* sound hardware */
 MACHINE_CONFIG_END
@@ -444,5 +428,5 @@ ROM_START( fgoala )
 ROM_END
 
 
-GAME( 1979, fgoal,  0,     fgoal, fgoal, 0, ROT90, "Taito", "Field Goal", GAME_NO_SOUND )
-GAME( 1979, fgoala, fgoal, fgoal, fgoal, 0, ROT90, "Taito", "Field Goal (different)", GAME_NO_SOUND )
+GAME( 1979, fgoal,  0,     fgoal, fgoal, driver_device, 0, ROT90, "Taito", "Field Goal", GAME_NO_SOUND )
+GAME( 1979, fgoala, fgoal, fgoal, fgoal, driver_device, 0, ROT90, "Taito", "Field Goal (different)", GAME_NO_SOUND )

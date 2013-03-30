@@ -31,14 +31,44 @@ struct pit8253_config
 {
 	struct
 	{
-		double				clockin;		/* timer clock */
-		devcb_read_line		in_gate_func;	/* gate signal */
-		devcb_write_line	out_out_func;	/* out signal */
+		double              clockin;        /* timer clock */
+		devcb_read_line     in_gate_func;   /* gate signal */
+		devcb_write_line    out_out_func;   /* out signal */
 	} timer[3];
 };
 
-DECLARE_LEGACY_DEVICE(PIT8253, pit8253);
-DECLARE_LEGACY_DEVICE(PIT8254, pit8254);
+class pit8253_device : public device_t
+{
+public:
+	pit8253_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock);
+	pit8253_device(const machine_config &mconfig, device_type type, const char *name, const char *tag, device_t *owner, UINT32 clock);
+	~pit8253_device() { global_free(m_token); }
+
+	// access to legacy token
+	void *token() const { assert(m_token != NULL); return m_token; }
+protected:
+	// device-level overrides
+	virtual void device_config_complete();
+	virtual void device_start();
+	virtual void device_reset();
+private:
+	// internal state
+	void *m_token;
+};
+
+extern const device_type PIT8253;
+
+class pit8254_device : public pit8253_device
+{
+public:
+	pit8254_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock);
+protected:
+	// device-level overrides
+	virtual void device_start();
+};
+
+extern const device_type PIT8254;
+
 
 
 /***************************************************************************
@@ -55,8 +85,8 @@ DECLARE_LEGACY_DEVICE(PIT8254, pit8254);
 	MCFG_DEVICE_CONFIG(_intrf)
 
 
-READ8_DEVICE_HANDLER( pit8253_r );
-WRITE8_DEVICE_HANDLER( pit8253_w );
+DECLARE_READ8_DEVICE_HANDLER( pit8253_r );
+DECLARE_WRITE8_DEVICE_HANDLER( pit8253_w );
 
 WRITE_LINE_DEVICE_HANDLER( pit8253_clk0_w );
 WRITE_LINE_DEVICE_HANDLER( pit8253_clk1_w );
@@ -80,4 +110,4 @@ int pit8253_get_output(device_t *device, int timer);
 void pit8253_set_clockin(device_t *device, int timer, double new_clockin);
 
 
-#endif	/* __PIT8253_H__ */
+#endif  /* __PIT8253_H__ */

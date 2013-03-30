@@ -43,6 +43,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <d3d8.h>
+#define D3DXVECTOR4 void
 #undef interface
 
 // MAME headers
@@ -66,7 +67,7 @@ typedef IDirect3D8 *(WINAPI *direct3dcreate8_ptr)(UINT SDKVersion);
 //  PROTOTYPES
 //============================================================
 
-static void set_interfaces(d3d *d3dptr);
+static void set_interfaces(d3d_base *d3dptr);
 
 
 
@@ -101,12 +102,12 @@ INLINE void convert_present_params(const d3d_present_parameters *params, D3DPRES
 //  drawd3d8_init
 //============================================================
 
-d3d *drawd3d8_init(void)
+d3d_base *drawd3d8_init(void)
 {
 	direct3dcreate8_ptr direct3dcreate8;
 	HINSTANCE dllhandle;
 	IDirect3D8 *d3d8;
-	d3d *d3dptr;
+	d3d_base *d3dptr;
 
 	// dynamically grab the create function from d3d8.dll
 	dllhandle = LoadLibrary(TEXT("d3d8.dll"));
@@ -137,10 +138,11 @@ d3d *drawd3d8_init(void)
 	}
 
 	// allocate an object to hold our data
-	d3dptr = global_alloc(d3d);
+	d3dptr = global_alloc(d3d_base);
 	d3dptr->version = 8;
 	d3dptr->d3dobj = d3d8;
 	d3dptr->dllhandle = dllhandle;
+	d3dptr->post_fx_available = false;
 	set_interfaces(d3dptr);
 
 	mame_printf_verbose("Direct3D: Using Direct3D 8\n");
@@ -153,21 +155,21 @@ d3d *drawd3d8_init(void)
 //  Direct3D interfaces
 //============================================================
 
-static HRESULT d3d_check_device_format(d3d *d3dptr, UINT adapter, D3DDEVTYPE devtype, D3DFORMAT adapterformat, DWORD usage, D3DRESOURCETYPE restype, D3DFORMAT format)
+static HRESULT d3d_check_device_format(d3d_base *d3dptr, UINT adapter, D3DDEVTYPE devtype, D3DFORMAT adapterformat, DWORD usage, D3DRESOURCETYPE restype, D3DFORMAT format)
 {
 	IDirect3D8 *d3d8 = (IDirect3D8 *)d3dptr->d3dobj;
 	return IDirect3D8_CheckDeviceFormat(d3d8, adapter, devtype, adapterformat, usage, restype, format);
 }
 
 
-static HRESULT d3d_check_device_type(d3d *d3dptr, UINT adapter, D3DDEVTYPE devtype, D3DFORMAT format, D3DFORMAT backformat, BOOL windowed)
+static HRESULT d3d_check_device_type(d3d_base *d3dptr, UINT adapter, D3DDEVTYPE devtype, D3DFORMAT format, D3DFORMAT backformat, BOOL windowed)
 {
 	IDirect3D8 *d3d8 = (IDirect3D8 *)d3dptr->d3dobj;
 	return IDirect3D8_CheckDeviceType(d3d8, adapter, devtype, format, backformat, windowed);
 }
 
 
-static HRESULT d3d_create_device(d3d *d3dptr, UINT adapter, D3DDEVTYPE devtype, HWND focus, DWORD behavior, d3d_present_parameters *params, d3d_device **dev)
+static HRESULT d3d_create_device(d3d_base *d3dptr, UINT adapter, D3DDEVTYPE devtype, HWND focus, DWORD behavior, d3d_present_parameters *params, d3d_device **dev)
 {
 	IDirect3D8 *d3d8 = (IDirect3D8 *)d3dptr->d3dobj;
 	D3DPRESENT_PARAMETERS d3d8params;
@@ -176,28 +178,28 @@ static HRESULT d3d_create_device(d3d *d3dptr, UINT adapter, D3DDEVTYPE devtype, 
 }
 
 
-static HRESULT d3d_enum_adapter_modes(d3d *d3dptr, UINT adapter, D3DFORMAT format, UINT index, D3DDISPLAYMODE *mode)
+static HRESULT d3d_enum_adapter_modes(d3d_base *d3dptr, UINT adapter, D3DFORMAT format, UINT index, D3DDISPLAYMODE *mode)
 {
 	IDirect3D8 *d3d8 = (IDirect3D8 *)d3dptr->d3dobj;
 	return IDirect3D8_EnumAdapterModes(d3d8, adapter, index, mode);
 }
 
 
-static UINT d3d_get_adapter_count(d3d *d3dptr)
+static UINT d3d_get_adapter_count(d3d_base *d3dptr)
 {
 	IDirect3D8 *d3d8 = (IDirect3D8 *)d3dptr->d3dobj;
 	return IDirect3D8_GetAdapterCount(d3d8);
 }
 
 
-static HRESULT d3d_get_adapter_display_mode(d3d *d3dptr, UINT adapter, D3DDISPLAYMODE *mode)
+static HRESULT d3d_get_adapter_display_mode(d3d_base *d3dptr, UINT adapter, D3DDISPLAYMODE *mode)
 {
 	IDirect3D8 *d3d8 = (IDirect3D8 *)d3dptr->d3dobj;
 	return IDirect3D8_GetAdapterDisplayMode(d3d8, adapter, mode);
 }
 
 
-static HRESULT d3d_get_adapter_identifier(d3d *d3dptr, UINT adapter, DWORD flags, d3d_adapter_identifier *identifier)
+static HRESULT d3d_get_adapter_identifier(d3d_base *d3dptr, UINT adapter, DWORD flags, d3d_adapter_identifier *identifier)
 {
 	IDirect3D8 *d3d8 = (IDirect3D8 *)d3dptr->d3dobj;
 	D3DADAPTER_IDENTIFIER8 id;
@@ -215,46 +217,47 @@ static HRESULT d3d_get_adapter_identifier(d3d *d3dptr, UINT adapter, DWORD flags
 }
 
 
-static UINT d3d_get_adapter_mode_count(d3d *d3dptr, UINT adapter, D3DFORMAT format)
+static UINT d3d_get_adapter_mode_count(d3d_base *d3dptr, UINT adapter, D3DFORMAT format)
 {
 	IDirect3D8 *d3d8 = (IDirect3D8 *)d3dptr->d3dobj;
 	return IDirect3D8_GetAdapterModeCount(d3d8, adapter);
 }
 
 
-static HMONITOR d3d_get_adapter_monitor(d3d *d3dptr, UINT adapter)
+static HMONITOR d3d_get_adapter_monitor(d3d_base *d3dptr, UINT adapter)
 {
 	IDirect3D8 *d3d8 = (IDirect3D8 *)d3dptr->d3dobj;
 	return IDirect3D8_GetAdapterMonitor(d3d8, adapter);
 }
 
 
-static HRESULT d3d_get_caps_dword(d3d *d3dptr, UINT adapter, D3DDEVTYPE devtype, d3d_caps_index which, DWORD *value)
+static HRESULT d3d_get_caps_dword(d3d_base *d3dptr, UINT adapter, D3DDEVTYPE devtype, d3d_caps_index which, DWORD *value)
 {
 	IDirect3D8 *d3d8 = (IDirect3D8 *)d3dptr->d3dobj;
 	D3DCAPS8 caps;
 	HRESULT result = IDirect3D8_GetDeviceCaps(d3d8, adapter, devtype, &caps);
 	switch (which)
 	{
-		case CAPS_PRESENTATION_INTERVALS:	*value = caps.PresentationIntervals;	break;
-		case CAPS_CAPS2:					*value = caps.DevCaps;					break;
-		case CAPS_DEV_CAPS:					*value = caps.DevCaps;					break;
-		case CAPS_SRCBLEND_CAPS:			*value = caps.SrcBlendCaps;				break;
-		case CAPS_DSTBLEND_CAPS:			*value = caps.DestBlendCaps;			break;
-		case CAPS_TEXTURE_CAPS:				*value = caps.TextureCaps;				break;
-		case CAPS_TEXTURE_FILTER_CAPS:		*value = caps.TextureFilterCaps;		break;
-		case CAPS_TEXTURE_ADDRESS_CAPS:		*value = caps.TextureAddressCaps;		break;
-		case CAPS_TEXTURE_OP_CAPS:			*value = caps.TextureOpCaps;			break;
-		case CAPS_MAX_TEXTURE_ASPECT:		*value = caps.MaxTextureAspectRatio;	break;
-		case CAPS_MAX_TEXTURE_WIDTH:		*value = caps.MaxTextureWidth;			break;
-		case CAPS_MAX_TEXTURE_HEIGHT:		*value = caps.MaxTextureHeight;			break;
-		case CAPS_STRETCH_RECT_FILTER:		*value = 0;								break;
+		case CAPS_PRESENTATION_INTERVALS:   *value = caps.PresentationIntervals;    break;
+		case CAPS_CAPS2:                    *value = caps.DevCaps;                  break;
+		case CAPS_DEV_CAPS:                 *value = caps.DevCaps;                  break;
+		case CAPS_SRCBLEND_CAPS:            *value = caps.SrcBlendCaps;             break;
+		case CAPS_DSTBLEND_CAPS:            *value = caps.DestBlendCaps;            break;
+		case CAPS_TEXTURE_CAPS:             *value = caps.TextureCaps;              break;
+		case CAPS_TEXTURE_FILTER_CAPS:      *value = caps.TextureFilterCaps;        break;
+		case CAPS_TEXTURE_ADDRESS_CAPS:     *value = caps.TextureAddressCaps;       break;
+		case CAPS_TEXTURE_OP_CAPS:          *value = caps.TextureOpCaps;            break;
+		case CAPS_MAX_TEXTURE_ASPECT:       *value = caps.MaxTextureAspectRatio;    break;
+		case CAPS_MAX_TEXTURE_WIDTH:        *value = caps.MaxTextureWidth;          break;
+		case CAPS_MAX_TEXTURE_HEIGHT:       *value = caps.MaxTextureHeight;         break;
+		case CAPS_STRETCH_RECT_FILTER:      *value = 0;                             break;
+		case CAPS_MAX_PS30_INSN_SLOTS:      *value = 0;                             break;
 	}
 	return result;
 }
 
 
-static ULONG d3d_release(d3d *d3dptr)
+static ULONG d3d_release(d3d_base *d3dptr)
 {
 	IDirect3D8 *d3d8 = (IDirect3D8 *)d3dptr->d3dobj;
 	ULONG result = IDirect3D8_Release(d3d8);
@@ -306,6 +309,14 @@ static HRESULT d3d_device_create_offscreen_plain_surface(d3d_device *dev, UINT w
 }
 
 
+static HRESULT d3d_device_create_effect(d3d_device *dev, const WCHAR *name, d3d_effect **effect)
+{
+	assert(FALSE);
+	return D3D_OK;
+}
+
+
+
 static HRESULT d3d_device_create_texture(d3d_device *dev, UINT width, UINT height, UINT levels, DWORD usage, D3DFORMAT format, D3DPOOL pool, d3d_texture **texture)
 {
 	IDirect3DDevice8 *device = (IDirect3DDevice8 *)dev;
@@ -346,6 +357,13 @@ static HRESULT d3d_device_get_render_target(d3d_device *dev, DWORD index, d3d_su
 	IDirect3DDevice8 *device = (IDirect3DDevice8 *)dev;
 	assert(index == 0);
 	return IDirect3DDevice8_GetRenderTarget(device, (IDirect3DSurface8 **)surface);
+}
+
+
+static HRESULT d3d_device_get_render_target_data(d3d_device *dev, d3d_surface *rendertarget, d3d_surface *destsurface)
+{
+	assert(false);
+	return D3D_OK;
 }
 
 
@@ -395,6 +413,13 @@ static HRESULT d3d_device_set_render_target(d3d_device *dev, DWORD index, d3d_su
 }
 
 
+static HRESULT d3d_device_create_render_target(d3d_device *dev, UINT width, UINT height, D3DFORMAT format, d3d_surface **surface)
+{
+	assert(false);
+	return D3D_OK;
+}
+
+
 static HRESULT d3d_device_set_stream_source(d3d_device *dev, UINT number, d3d_vertex_buffer *vbuf, UINT stride)
 {
 	IDirect3DDevice8 *device = (IDirect3DDevice8 *)dev;
@@ -418,7 +443,7 @@ static HRESULT d3d_device_set_texture_stage_state(d3d_device *dev, DWORD stage, 
 }
 
 
-static HRESULT d3d_device_set_vertex_shader(d3d_device *dev, D3DFORMAT format)
+static HRESULT d3d_device_set_vertex_format(d3d_device *dev, D3DFORMAT format)
 {
 	IDirect3DDevice8 *device = (IDirect3DDevice8 *)dev;
 	return IDirect3DDevice8_SetVertexShader(device, format);
@@ -444,12 +469,15 @@ static const d3d_device_interface d3d8_device_interface =
 	d3d_device_begin_scene,
 	d3d_device_clear,
 	d3d_device_create_offscreen_plain_surface,
+	d3d_device_create_effect,
 	d3d_device_create_texture,
 	d3d_device_create_vertex_buffer,
+	d3d_device_create_render_target,
 	d3d_device_draw_primitive,
 	d3d_device_end_scene,
 	d3d_device_get_raster_status,
 	d3d_device_get_render_target,
+	d3d_device_get_render_target_data,
 	d3d_device_present,
 	d3d_device_release,
 	d3d_device_reset,
@@ -459,7 +487,7 @@ static const d3d_device_interface d3d8_device_interface =
 	d3d_device_set_stream_source,
 	d3d_device_set_texture,
 	d3d_device_set_texture_stage_state,
-	d3d_device_set_vertex_shader,
+	d3d_device_set_vertex_format,
 	d3d_device_stretch_rect,
 	d3d_device_test_cooperative_level
 };
@@ -577,14 +605,103 @@ static const d3d_vertex_buffer_interface d3d8_vertex_buffer_interface =
 
 
 //============================================================
+//  Direct3DEffect interfaces
+//============================================================
+
+static void d3d_effect_begin(d3d_effect *effect, UINT *passes, DWORD flags)
+{
+	assert(FALSE);
+}
+
+
+static void d3d_effect_end(d3d_effect *effect)
+{
+	assert(FALSE);
+}
+
+
+static void d3d_effect_begin_pass(d3d_effect *effect, UINT pass)
+{
+	assert(FALSE);
+}
+
+
+static void d3d_effect_end_pass(d3d_effect *effect)
+{
+	assert(FALSE);
+}
+
+
+static void d3d_effect_set_technique(d3d_effect *effect, const char *name)
+{
+	assert(FALSE);
+}
+
+
+static void d3d_effect_set_vector(d3d_effect *effect, const char *name, int count, float *vector)
+{
+	assert(FALSE);
+}
+
+
+static void d3d_effect_set_float(d3d_effect *effect, const char *name, float value)
+{
+	assert(FALSE);
+}
+
+
+static void d3d_effect_set_int(d3d_effect *effect, const char *name, int value)
+{
+	assert(FALSE);
+}
+
+
+static void d3d_effect_set_matrix(d3d_effect *effect, const char *name, d3d_matrix *matrix)
+{
+	assert(FALSE);
+}
+
+
+static void d3d_effect_set_texture(d3d_effect *effect, const char *name, d3d_texture *tex)
+{
+	assert(FALSE);
+}
+
+
+static ULONG d3d_effect_release(d3d_effect *effect)
+{
+	assert(FALSE);
+	return 0;
+}
+
+
+static const d3d_effect_interface d3d8_effect_interface =
+{
+	d3d_effect_begin,
+	d3d_effect_end,
+	d3d_effect_begin_pass,
+	d3d_effect_end_pass,
+	d3d_effect_set_technique,
+	d3d_effect_set_vector,
+	d3d_effect_set_float,
+	d3d_effect_set_int,
+	d3d_effect_set_matrix,
+	d3d_effect_set_texture,
+	d3d_effect_release
+};
+
+
+
+//============================================================
 //  set_interfaces
 //============================================================
 
-static void set_interfaces(d3d *d3dptr)
+static void set_interfaces(d3d_base *d3dptr)
 {
 	d3dptr->d3d = d3d8_interface;
 	d3dptr->device = d3d8_device_interface;
 	d3dptr->surface = d3d8_surface_interface;
 	d3dptr->texture = d3d8_texture_interface;
 	d3dptr->vertexbuf = d3d8_vertex_buffer_interface;
+	d3dptr->effect = d3d8_effect_interface;
 }

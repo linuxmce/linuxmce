@@ -79,39 +79,38 @@ Coin B is not used
 #include "sound/msm5205.h"
 #include "includes/ashnojoe.h"
 
-static READ16_HANDLER(fake_4a00a_r)
+READ16_MEMBER(ashnojoe_state::fake_4a00a_r)
 {
 	/* If it returns 1 there's no sound. Is it used to sync the game and sound?
-    or just a debug enable/disable register? */
+	or just a debug enable/disable register? */
 	return 0;
 }
 
-static WRITE16_HANDLER( ashnojoe_soundlatch_w )
+WRITE16_MEMBER(ashnojoe_state::ashnojoe_soundlatch_w)
 {
-	ashnojoe_state *state = space->machine().driver_data<ashnojoe_state>();
 	if (ACCESSING_BITS_0_7)
 	{
-		state->m_soundlatch_status = 1;
-		soundlatch_w(space, 0, data & 0xff);
+		m_soundlatch_status = 1;
+		soundlatch_byte_w(space, 0, data & 0xff);
 	}
 }
 
-static ADDRESS_MAP_START( ashnojoe_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( ashnojoe_map, AS_PROGRAM, 16, ashnojoe_state )
 	AM_RANGE(0x000000, 0x01ffff) AM_ROM
-	AM_RANGE(0x040000, 0x041fff) AM_RAM_WRITE(ashnojoe_tileram3_w) AM_BASE_MEMBER(ashnojoe_state, m_tileram_3)
-	AM_RANGE(0x042000, 0x043fff) AM_RAM_WRITE(ashnojoe_tileram4_w) AM_BASE_MEMBER(ashnojoe_state, m_tileram_4)
-	AM_RANGE(0x044000, 0x044fff) AM_RAM_WRITE(ashnojoe_tileram5_w) AM_BASE_MEMBER(ashnojoe_state, m_tileram_5)
-	AM_RANGE(0x045000, 0x045fff) AM_RAM_WRITE(ashnojoe_tileram2_w) AM_BASE_MEMBER(ashnojoe_state, m_tileram_2)
-	AM_RANGE(0x046000, 0x046fff) AM_RAM_WRITE(ashnojoe_tileram6_w) AM_BASE_MEMBER(ashnojoe_state, m_tileram_6)
-	AM_RANGE(0x047000, 0x047fff) AM_RAM_WRITE(ashnojoe_tileram7_w) AM_BASE_MEMBER(ashnojoe_state, m_tileram_7)
-	AM_RANGE(0x048000, 0x048fff) AM_RAM_WRITE(ashnojoe_tileram_w) AM_BASE_MEMBER(ashnojoe_state, m_tileram)
-	AM_RANGE(0x049000, 0x049fff) AM_RAM_WRITE(paletteram16_xRRRRRGGGGGBBBBB_word_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x040000, 0x041fff) AM_RAM_WRITE(ashnojoe_tileram3_w) AM_SHARE("tileram_3")
+	AM_RANGE(0x042000, 0x043fff) AM_RAM_WRITE(ashnojoe_tileram4_w) AM_SHARE("tileram_4")
+	AM_RANGE(0x044000, 0x044fff) AM_RAM_WRITE(ashnojoe_tileram5_w) AM_SHARE("tileram_5")
+	AM_RANGE(0x045000, 0x045fff) AM_RAM_WRITE(ashnojoe_tileram2_w) AM_SHARE("tileram_2")
+	AM_RANGE(0x046000, 0x046fff) AM_RAM_WRITE(ashnojoe_tileram6_w) AM_SHARE("tileram_6")
+	AM_RANGE(0x047000, 0x047fff) AM_RAM_WRITE(ashnojoe_tileram7_w) AM_SHARE("tileram_7")
+	AM_RANGE(0x048000, 0x048fff) AM_RAM_WRITE(ashnojoe_tileram_w) AM_SHARE("tileram")
+	AM_RANGE(0x049000, 0x049fff) AM_RAM_WRITE(paletteram_xRRRRRGGGGGBBBBB_word_w) AM_SHARE("paletteram")
 	AM_RANGE(0x04a000, 0x04a001) AM_READ_PORT("P1")
 	AM_RANGE(0x04a002, 0x04a003) AM_READ_PORT("P2")
 	AM_RANGE(0x04a004, 0x04a005) AM_READ_PORT("DSW")
-	AM_RANGE(0x04a006, 0x04a007) AM_WRITEONLY AM_BASE_MEMBER(ashnojoe_state, m_tilemap_reg)
+	AM_RANGE(0x04a006, 0x04a007) AM_WRITEONLY AM_SHARE("tilemap_reg")
 	AM_RANGE(0x04a008, 0x04a009) AM_WRITE(ashnojoe_soundlatch_w)
-	AM_RANGE(0x04a00a, 0x04a00b) AM_READ(fake_4a00a_r)	// ??
+	AM_RANGE(0x04a00a, 0x04a00b) AM_READ(fake_4a00a_r)  // ??
 	AM_RANGE(0x04a010, 0x04a019) AM_WRITE(joe_tilemaps_xscroll_w)
 	AM_RANGE(0x04a020, 0x04a029) AM_WRITE(joe_tilemaps_yscroll_w)
 	AM_RANGE(0x04c000, 0x04ffff) AM_RAM
@@ -119,34 +118,31 @@ static ADDRESS_MAP_START( ashnojoe_map, AS_PROGRAM, 16 )
 ADDRESS_MAP_END
 
 
-static WRITE8_HANDLER( adpcm_w )
+WRITE8_MEMBER(ashnojoe_state::adpcm_w)
 {
-	ashnojoe_state *state = space->machine().driver_data<ashnojoe_state>();
-	state->m_adpcm_byte = data;
+	m_adpcm_byte = data;
 }
 
-static READ8_HANDLER( sound_latch_r )
+READ8_MEMBER(ashnojoe_state::sound_latch_r)
 {
-	ashnojoe_state *state = space->machine().driver_data<ashnojoe_state>();
-	state->m_soundlatch_status = 0;
-	return soundlatch_r(space, 0);
+	m_soundlatch_status = 0;
+	return soundlatch_byte_r(space, 0);
 }
 
-static READ8_HANDLER( sound_latch_status_r )
+READ8_MEMBER(ashnojoe_state::sound_latch_status_r)
 {
-	ashnojoe_state *state = space->machine().driver_data<ashnojoe_state>();
-	return state->m_soundlatch_status;
+	return m_soundlatch_status;
 }
 
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, ashnojoe_state )
 	AM_RANGE(0x0000, 0x5fff) AM_ROM
 	AM_RANGE(0x6000, 0x7fff) AM_RAM
 	AM_RANGE(0x8000, 0xffff) AM_ROMBANK("bank4")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sound_portmap, AS_IO, 8 )
+static ADDRESS_MAP_START( sound_portmap, AS_IO, 8, ashnojoe_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x01) AM_DEVREADWRITE("ymsnd", ym2203_r, ym2203_w)
+	AM_RANGE(0x00, 0x01) AM_DEVREADWRITE_LEGACY("ymsnd", ym2203_r, ym2203_w)
 	AM_RANGE(0x02, 0x02) AM_WRITE(adpcm_w)
 	AM_RANGE(0x04, 0x04) AM_READ(sound_latch_r)
 	AM_RANGE(0x06, 0x06) AM_READ(sound_latch_status_r)
@@ -259,9 +255,9 @@ static const gfx_layout tiles16x16_layout =
 	4,
 	{ 0, 1, 2, 3 },
 	{ 0, 4, 8, 12, 16, 20, 24, 28,
-	 32,36,40, 44, 48, 52, 56, 60 },
+		32,36,40, 44, 48, 52, 56, 60 },
 	{ 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64,
-	  8*64, 9*64,10*64,11*64,12*64,13*64,14*64,15*64 },
+		8*64, 9*64,10*64,11*64,12*64,13*64,14*64,15*64 },
 	16*64
 };
 
@@ -277,11 +273,12 @@ GFXDECODE_END
 static void ym2203_irq_handler( device_t *device, int irq )
 {
 	ashnojoe_state *state = device->machine().driver_data<ashnojoe_state>();
-	device_set_input_line(state->m_audiocpu, 0, irq ? ASSERT_LINE : CLEAR_LINE);
+	state->m_audiocpu->set_input_line(0, irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
-static WRITE8_DEVICE_HANDLER( ym2203_write_a )
+WRITE8_MEMBER(ashnojoe_state::ym2203_write_a)
 {
+	device_t *device = machine().device("msm");
 	/* This gets called at 8910 startup with 0xff before the 5205 exists, causing a crash */
 	if (data == 0xff)
 		return;
@@ -289,9 +286,9 @@ static WRITE8_DEVICE_HANDLER( ym2203_write_a )
 	msm5205_reset_w(device, !(data & 0x01));
 }
 
-static WRITE8_DEVICE_HANDLER( ym2203_write_b )
+WRITE8_MEMBER(ashnojoe_state::ym2203_write_b)
 {
-	memory_set_bank(device->machine(), "bank4", data & 0x0f);
+	machine().root_device().membank("bank4")->set_entry(data & 0x0f);
 }
 
 static const ym2203_interface ym2203_config =
@@ -301,10 +298,10 @@ static const ym2203_interface ym2203_config =
 		AY8910_DEFAULT_LOADS,
 		DEVCB_NULL,
 		DEVCB_NULL,
-		DEVCB_DEVICE_HANDLER("msm", ym2203_write_a),
-		DEVCB_HANDLER(ym2203_write_b),
+		DEVCB_DRIVER_MEMBER(ashnojoe_state,ym2203_write_a),
+		DEVCB_DRIVER_MEMBER(ashnojoe_state,ym2203_write_b),
 	},
-	ym2203_irq_handler
+	DEVCB_LINE(ym2203_irq_handler)
 };
 
 static void ashnojoe_vclk_cb( device_t *device )
@@ -317,7 +314,7 @@ static void ashnojoe_vclk_cb( device_t *device )
 	else
 	{
 		msm5205_data_w(device, state->m_adpcm_byte & 0xf);
-		device_set_input_line(state->m_audiocpu, INPUT_LINE_NMI, PULSE_LINE);
+		state->m_audiocpu->set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 	}
 
 	state->m_msm5205_vclk_toggle ^= 1;
@@ -330,24 +327,22 @@ static const msm5205_interface msm5205_config =
 };
 
 
-static MACHINE_START( ashnojoe )
+void ashnojoe_state::machine_start()
 {
-	ashnojoe_state *state = machine.driver_data<ashnojoe_state>();
 
-	state->m_audiocpu = machine.device("audiocpu");
+	m_audiocpu = machine().device<cpu_device>("audiocpu");
 
-	state->save_item(NAME(state->m_adpcm_byte));
-	state->save_item(NAME(state->m_soundlatch_status));
-	state->save_item(NAME(state->m_msm5205_vclk_toggle));
+	save_item(NAME(m_adpcm_byte));
+	save_item(NAME(m_soundlatch_status));
+	save_item(NAME(m_msm5205_vclk_toggle));
 }
 
-static MACHINE_RESET( ashnojoe )
+void ashnojoe_state::machine_reset()
 {
-	ashnojoe_state *state = machine.driver_data<ashnojoe_state>();
 
-	state->m_adpcm_byte = 0;
-	state->m_soundlatch_status = 0;
-	state->m_msm5205_vclk_toggle = 0;
+	m_adpcm_byte = 0;
+	m_soundlatch_status = 0;
+	m_msm5205_vclk_toggle = 0;
 }
 
 
@@ -356,28 +351,24 @@ static MACHINE_CONFIG_START( ashnojoe, ashnojoe_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, 8000000)
 	MCFG_CPU_PROGRAM_MAP(ashnojoe_map)
-	MCFG_CPU_VBLANK_INT("screen", irq1_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", ashnojoe_state,  irq1_line_hold)
 
 	MCFG_CPU_ADD("audiocpu", Z80, 4000000)
 	MCFG_CPU_PROGRAM_MAP(sound_map)
 	MCFG_CPU_IO_MAP(sound_portmap)
 
-	MCFG_MACHINE_START(ashnojoe)
-	MCFG_MACHINE_RESET(ashnojoe)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(512, 512)
 	MCFG_SCREEN_VISIBLE_AREA(14*8, 50*8-1, 3*8, 29*8-1)
-	MCFG_SCREEN_UPDATE(ashnojoe)
+	MCFG_SCREEN_UPDATE_DRIVER(ashnojoe_state, screen_update_ashnojoe)
 
 	MCFG_GFXDECODE(ashnojoe)
 	MCFG_PALETTE_LENGTH(0x1000/2)
 
-	MCFG_VIDEO_START(ashnojoe)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -465,13 +456,13 @@ ROM_START( ashnojoe )
 	ROM_LOAD( "sj401-nw.10r", 0x00000, 0x80000, CRC(25dfab59) SHA1(7d50159204ba05323a2442778f35192e66117dda) )
 ROM_END
 
-static DRIVER_INIT( ashnojoe )
+DRIVER_INIT_MEMBER(ashnojoe_state,ashnojoe)
 {
-	UINT8 *ROM = machine.region("adpcm")->base();
-	memory_configure_bank(machine, "bank4", 0, 16, &ROM[0x00000], 0x8000);
+	UINT8 *ROM = machine().root_device().memregion("adpcm")->base();
+	machine().root_device().membank("bank4")->configure_entries(0, 16, &ROM[0x00000], 0x8000);
 
-	memory_set_bank(machine, "bank4", 0);
+	machine().root_device().membank("bank4")->set_entry(0);
 }
 
-GAME( 1990, scessjoe, 0,        ashnojoe, ashnojoe, ashnojoe, ROT0, "Wave / Taito Corporation", "Success Joe (World)",   GAME_SUPPORTS_SAVE )
-GAME( 1990, ashnojoe, scessjoe, ashnojoe, ashnojoe, ashnojoe, ROT0, "Wave / Taito Corporation", "Ashita no Joe (Japan)", GAME_SUPPORTS_SAVE )
+GAME( 1990, scessjoe, 0,        ashnojoe, ashnojoe, ashnojoe_state, ashnojoe, ROT0, "Wave / Taito Corporation", "Success Joe (World)",   GAME_SUPPORTS_SAVE )
+GAME( 1990, ashnojoe, scessjoe, ashnojoe, ashnojoe, ashnojoe_state, ashnojoe, ROT0, "Wave / Taito Corporation", "Ashita no Joe (Japan)", GAME_SUPPORTS_SAVE )

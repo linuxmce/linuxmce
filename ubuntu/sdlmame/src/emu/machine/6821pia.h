@@ -31,20 +31,20 @@
 ***************************************************************************/
 
 #define MCFG_PIA6821_ADD(_tag, _intrf) \
-    MCFG_DEVICE_ADD(_tag, PIA6821, 0) \
-    MCFG_DEVICE_CONFIG(_intrf)
+	MCFG_DEVICE_ADD(_tag, PIA6821, 0) \
+	pia6821_device::static_set_interface(*device, _intrf);
 
 #define MCFG_PIA6821_MODIFY(_tag, _intrf) \
-    MCFG_DEVICE_MODIFY(_tag) \
-    MCFG_DEVICE_CONFIG(_intrf)
+	MCFG_DEVICE_MODIFY(_tag) \
+	pia6821_device::static_set_interface(*device, _intrf);
 
 #define MCFG_PIA6822_ADD(_tag, _intrf) \
-    MCFG_DEVICE_ADD(_tag, PIA6822, 0) \
-    MCFG_DEVICE_CONFIG(_intrf)
+	MCFG_DEVICE_ADD(_tag, PIA6822, 0) \
+	pia6821_device::static_set_interface(*device, _intrf);
 
 #define MCFG_PIA6822_MODIFY(_tag, _intrf) \
-    MCFG_DEVICE_MODIFY(_tag) \
-    MCFG_DEVICE_CONFIG(_intrf)
+	MCFG_DEVICE_MODIFY(_tag) \
+	pia6821_device::static_set_interface(*device, _intrf);
 
 
 
@@ -57,237 +57,174 @@
 
 struct pia6821_interface
 {
-    devcb_read8 m_in_a_func;
-    devcb_read8 m_in_b_func;
-    devcb_read_line m_in_ca1_func;
-    devcb_read_line m_in_cb1_func;
-    devcb_read_line m_in_ca2_func;
-    devcb_read_line m_in_cb2_func;
-    devcb_write8 m_out_a_func;
-    devcb_write8 m_out_b_func;
-    devcb_write_line m_out_ca2_func;
-    devcb_write_line m_out_cb2_func;
-    devcb_write_line m_irq_a_func;
-    devcb_write_line m_irq_b_func;
-};
-
-
-
-// ======================> pia6821_device_config
-
-class pia6821_device_config : public device_config,
-                              public pia6821_interface
-{
-    friend class pia6821_device;
-
-    // construction/destruction
-    pia6821_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock);
-
-public:
-    // allocators
-    static device_config *static_alloc_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock);
-    virtual device_t *alloc_device(running_machine &machine) const;
-
-protected:
-    // device_config overrides
-    virtual void device_config_complete();
+	devcb_read8 m_in_a_cb;
+	devcb_read8 m_in_b_cb;
+	devcb_read_line m_in_ca1_cb;
+	devcb_read_line m_in_cb1_cb;
+	devcb_read_line m_in_ca2_cb;
+	devcb_read_line m_in_cb2_cb;
+	devcb_write8 m_out_a_cb;
+	devcb_write8 m_out_b_cb;
+	devcb_write_line m_out_ca2_cb;
+	devcb_write_line m_out_cb2_cb;
+	devcb_write_line m_irq_a_cb;
+	devcb_write_line m_irq_b_cb;
 };
 
 
 
 // ======================> pia6821_device
 
-class pia6821_device :  public device_t
+class pia6821_device :  public device_t,
+						public pia6821_interface
 {
-    friend class pia6821_device_config;
-
-    // construction/destruction
-    pia6821_device(running_machine &_machine, const pia6821_device_config &_config);
-
 public:
+	// construction/destruction
+	pia6821_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock);
 
-    UINT8 reg_r(UINT8 offset);
-    void reg_w(UINT8 offset, UINT8 data);
+	// static configuration helpers
+	static void static_set_interface(device_t &device, const pia6821_interface &interface);
 
-    UINT8 alt_r(UINT8 offset);
-    void alt_w(UINT8 offset, UINT8 data);
+	DECLARE_READ8_MEMBER( read ) { return reg_r(offset); }
+	DECLARE_WRITE8_MEMBER( write ) { reg_w(offset, data); }
+	DECLARE_READ8_MEMBER( read_alt ) { return reg_r(((offset << 1) & 0x02) | ((offset >> 1) & 0x01)); }
+	DECLARE_WRITE8_MEMBER( write_alt ) { reg_w(((offset << 1) & 0x02) | ((offset >> 1) & 0x01), data); }
 
-    UINT8 get_port_b_z_mask();          /* see first note in .c */
-    void set_port_a_z_mask(UINT8 data); /* see second note in .c */
+	UINT8 port_b_z_mask() const { return ~m_ddr_b; }          // see first note in .c
+	void set_port_a_z_mask(UINT8 data) { m_port_a_z_mask = data; }// see second note in .c
 
-    UINT8 porta_r();
-    void porta_w(UINT8 data);
-    void set_input_a(UINT8 data, UINT8 z_mask);
-    UINT8 get_output_a();
+	DECLARE_READ8_MEMBER( porta_r );
+	UINT8 porta_r() { return porta_r(machine().driver_data()->generic_space(), 0); }
+	DECLARE_WRITE8_MEMBER( porta_w );
+	void porta_w(UINT8 data) { porta_w(machine().driver_data()->generic_space(), 0, data); }
+	void set_a_input(UINT8 data, UINT8 z_mask);
+	UINT8 a_output();
 
-    UINT8 ca1_r();
-    void ca1_w(UINT8 state);
+	DECLARE_READ_LINE_MEMBER( ca1_r );
+	DECLARE_WRITE_LINE_MEMBER( ca1_w );
 
-    UINT8 ca2_r();
-    void ca2_w(UINT8 state);
-    int get_output_ca2();
-    int get_output_ca2_z();
+	DECLARE_READ_LINE_MEMBER( ca2_r );
+	DECLARE_WRITE_LINE_MEMBER( ca2_w );
+	int ca2_output();
+	int ca2_output_z();
 
-    UINT8 portb_r();
-    void portb_w(UINT8 data);
-    UINT8 get_output_b();
+	DECLARE_READ8_MEMBER( portb_r );
+	UINT8 portb_r() { return portb_r(machine().driver_data()->generic_space(), 0); }
+	DECLARE_WRITE8_MEMBER( portb_w );
+	void portb_w(UINT8 data) { portb_w(machine().driver_data()->generic_space(), 0, data); }
+	UINT8 b_output();
 
-    UINT8 cb1_r();
-    void cb1_w(UINT8 state);
+	DECLARE_READ_LINE_MEMBER( cb1_r );
+	DECLARE_WRITE_LINE_MEMBER( cb1_w );
 
-    UINT8 cb2_r();
-    void cb2_w(UINT8 state);
-    int get_output_cb2();
-    int get_output_cb2_z();
+	DECLARE_READ_LINE_MEMBER( cb2_r );
+	DECLARE_WRITE_LINE_MEMBER( cb2_w );
+	int cb2_output();
+	int cb2_output_z();
 
-    int get_irq_a();
-    int get_irq_b();
+	int irq_a_state() const { return m_irq_a_state; }
+	int irq_b_state() const { return m_irq_b_state; }
 
 protected:
-    // device-level overrides
-    virtual void device_start();
-    virtual void device_reset();
-    virtual void device_post_load() { }
-    virtual void device_clock_changed() { }
+	// device-level overrides
+	virtual void device_start();
+	virtual void device_reset();
 
 private:
+	UINT8 reg_r(UINT8 offset);
+	void reg_w(UINT8 offset, UINT8 data);
 
-    void update_interrupts();
+	void update_interrupts();
 
-    UINT8 get_in_a_value();
-    UINT8 get_in_b_value();
+	UINT8 get_in_a_value();
+	UINT8 get_in_b_value();
 
-    UINT8 get_out_a_value();
-    UINT8 get_out_b_value();
+	UINT8 get_out_a_value();
+	UINT8 get_out_b_value();
 
-    void set_out_ca2(int data);
-    void set_out_cb2(int data);
+	void set_out_ca2(int data);
+	void set_out_cb2(int data);
 
-    UINT8 port_a_r();
-    UINT8 ddr_a_r();
-    UINT8 control_a_r();
+	UINT8 port_a_r();
+	UINT8 ddr_a_r();
+	UINT8 control_a_r();
 
-    UINT8 port_b_r();
-    UINT8 ddr_b_r();
-    UINT8 control_b_r();
+	UINT8 port_b_r();
+	UINT8 ddr_b_r();
+	UINT8 control_b_r();
 
-    void send_to_out_a_func(const char* message);
-    void send_to_out_b_func(const char* message);
+	void send_to_out_a_func(const char* message);
+	void send_to_out_b_func(const char* message);
 
-    void port_a_w(UINT8 data);
-    void ddr_a_w(UINT8 data);
+	void port_a_w(UINT8 data);
+	void ddr_a_w(UINT8 data);
 
-    void port_b_w(UINT8 data);
-    void ddr_b_w(UINT8 data);
+	void port_b_w(UINT8 data);
+	void ddr_b_w(UINT8 data);
 
-    void control_a_w(UINT8 data);
-    void control_b_w(UINT8 data);
+	void control_a_w(UINT8 data);
+	void control_b_w(UINT8 data);
 
-    devcb_resolved_read8 m_in_a_func;
-    devcb_resolved_read8 m_in_b_func;
-    devcb_resolved_read_line m_in_ca1_func;
-    devcb_resolved_read_line m_in_cb1_func;
-    devcb_resolved_read_line m_in_ca2_func;
-    devcb_resolved_read_line m_in_cb2_func;
-    devcb_resolved_write8 m_out_a_func;
-    devcb_resolved_write8 m_out_b_func;
-    devcb_resolved_write_line m_out_ca2_func;
-    devcb_resolved_write_line m_out_cb2_func;
-    devcb_resolved_write_line m_irq_a_func;
-    devcb_resolved_write_line m_irq_b_func;
+	devcb_resolved_read8 m_in_a_func;
+	devcb_resolved_read8 m_in_b_func;
+	devcb_resolved_read_line m_in_ca1_func;
+	devcb_resolved_read_line m_in_cb1_func;
+	devcb_resolved_read_line m_in_ca2_func;
+	devcb_resolved_read_line m_in_cb2_func;
+	devcb_resolved_write8 m_out_a_func;
+	devcb_resolved_write8 m_out_b_func;
+	devcb_resolved_write_line m_out_ca2_func;
+	devcb_resolved_write_line m_out_cb2_func;
+	devcb_resolved_write_line m_irq_a_func;
+	devcb_resolved_write_line m_irq_b_func;
 
-    UINT8 m_in_a;
-    UINT8 m_in_ca1;
-    UINT8 m_in_ca2;
-    UINT8 m_out_a;
-    UINT8 m_out_ca2;
-    UINT8 m_port_a_z_mask;
-    UINT8 m_ddr_a;
-    UINT8 m_ctl_a;
-    UINT8 m_irq_a1;
-    UINT8 m_irq_a2;
-    UINT8 m_irq_a_state;
+	UINT8 m_in_a;
+	UINT8 m_in_ca1;
+	UINT8 m_in_ca2;
+	UINT8 m_out_a;
+	UINT8 m_out_ca2;
+	UINT8 m_port_a_z_mask;
+	UINT8 m_ddr_a;
+	UINT8 m_ctl_a;
+	UINT8 m_irq_a1;
+	UINT8 m_irq_a2;
+	UINT8 m_irq_a_state;
 
-    UINT8 m_in_b;
-    UINT8 m_in_cb1;
-    UINT8 m_in_cb2;
-    UINT8 m_out_b;
-    UINT8 m_out_cb2;
-    UINT8 m_last_out_cb2_z;
-    UINT8 m_ddr_b;
-    UINT8 m_ctl_b;
-    UINT8 m_irq_b1;
-    UINT8 m_irq_b2;
-    UINT8 m_irq_b_state;
+	UINT8 m_in_b;
+	UINT8 m_in_cb1;
+	UINT8 m_in_cb2;
+	UINT8 m_out_b;
+	UINT8 m_out_cb2;
+	UINT8 m_last_out_cb2_z;
+	UINT8 m_ddr_b;
+	UINT8 m_ctl_b;
+	UINT8 m_irq_b1;
+	UINT8 m_irq_b2;
+	UINT8 m_irq_b_state;
 
-    /* variables that indicate if access a line externally -
-       used to for logging purposes ONLY */
-    UINT8 m_in_a_pushed;
-    UINT8 m_out_a_needs_pulled;
-    UINT8 m_in_ca1_pushed;
-    UINT8 m_in_ca2_pushed;
-    UINT8 m_out_ca2_needs_pulled;
-    UINT8 m_in_b_pushed;
-    UINT8 m_out_b_needs_pulled;
-    UINT8 m_in_cb1_pushed;
-    UINT8 m_in_cb2_pushed;
-    UINT8 m_out_cb2_needs_pulled;
-    UINT8 m_logged_port_a_not_connected;
-    UINT8 m_logged_port_b_not_connected;
-    UINT8 m_logged_ca1_not_connected;
-    UINT8 m_logged_ca2_not_connected;
-    UINT8 m_logged_cb1_not_connected;
-    UINT8 m_logged_cb2_not_connected;
-
-    const pia6821_device_config &m_config;
+	// variables that indicate if access a line externally -
+	// used to for logging purposes ONLY
+	bool m_in_a_pushed;
+	bool m_out_a_needs_pulled;
+	bool m_in_ca1_pushed;
+	bool m_in_ca2_pushed;
+	bool m_out_ca2_needs_pulled;
+	bool m_in_b_pushed;
+	bool m_out_b_needs_pulled;
+	bool m_in_cb1_pushed;
+	bool m_in_cb2_pushed;
+	bool m_out_cb2_needs_pulled;
+	bool m_logged_port_a_not_connected;
+	bool m_logged_port_b_not_connected;
+	bool m_logged_ca1_not_connected;
+	bool m_logged_ca2_not_connected;
+	bool m_logged_cb1_not_connected;
+	bool m_logged_cb2_not_connected;
 };
 
 
 // device type definition
 extern const device_type PIA6821;
-
-
-
-/***************************************************************************
-    PROTOTYPES
-***************************************************************************/
-
-READ8_DEVICE_HANDLER( pia6821_r );
-WRITE8_DEVICE_HANDLER( pia6821_w );
-
-READ8_DEVICE_HANDLER( pia6821_alt_r );
-WRITE8_DEVICE_HANDLER( pia6821_alt_w );
-
-UINT8 pia6821_get_port_b_z_mask(device_t *device);  /* see first note */
-void pia6821_set_port_a_z_mask(device_t *device, UINT8 data);  /* see second note */
-
-READ8_DEVICE_HANDLER( pia6821_porta_r );
-WRITE8_DEVICE_HANDLER( pia6821_porta_w );
-void pia6821_set_input_a(device_t *device, UINT8 data, UINT8 z_mask);
-UINT8 pia6821_get_output_a(device_t *device);
-
-READ_LINE_DEVICE_HANDLER( pia6821_ca1_r );
-WRITE_LINE_DEVICE_HANDLER( pia6821_ca1_w );
-
-READ_LINE_DEVICE_HANDLER( pia6821_ca2_r );
-WRITE_LINE_DEVICE_HANDLER( pia6821_ca2_w );
-int pia6821_get_output_ca2(device_t *device);
-int pia6821_get_output_ca2_z(device_t *device);
-
-READ8_DEVICE_HANDLER( pia6821_portb_r );
-WRITE8_DEVICE_HANDLER( pia6821_portb_w );
-UINT8 pia6821_get_output_b(device_t *device);
-
-READ_LINE_DEVICE_HANDLER( pia6821_cb1_r );
-WRITE_LINE_DEVICE_HANDLER( pia6821_cb1_w );
-
-READ_LINE_DEVICE_HANDLER( pia6821_cb2_r );
-WRITE_LINE_DEVICE_HANDLER( pia6821_cb2_w );
-int pia6821_get_output_cb2(device_t *device);
-int pia6821_get_output_cb2_z(device_t *device);
-
-int pia6821_get_irq_a(device_t *device);
-int pia6821_get_irq_b(device_t *device);
 
 
 #endif /* __6821PIA_H__ */

@@ -47,7 +47,7 @@
 //**************************************************************************
 
 #define MCFG_DSP32C_CONFIG(_config) \
-	dsp32c_device_config::static_set_config(device, _config); \
+	dsp32c_device::static_set_config(*device, _config); \
 
 
 
@@ -56,11 +56,12 @@
 //**************************************************************************
 
 // IRQ sources
-const int DSP32_IRQ0		= 0;		// IRQ0
-const int DSP32_IRQ1		= 1;		// IRQ1
+const int DSP32_IRQ0        = 0;        // IRQ0
+const int DSP32_IRQ1        = 1;        // IRQ1
 
 // pin signal bits
-const int DSP32_OUTPUT_PIF = 0x01;
+const int DSP32_OUTPUT_PIF  = 0x01;
+const int DSP32_OUTPUT_PDF  = 0x02;
 
 // register enumeration
 enum
@@ -121,14 +122,6 @@ enum
 
 
 //**************************************************************************
-//  GLOBAL VARIABLES
-//**************************************************************************
-
-extern const device_type DSP32C;
-
-
-
-//**************************************************************************
 //  TYPE DEFINITIONS
 //**************************************************************************
 
@@ -139,58 +132,23 @@ class dsp32c_device;
 
 struct dsp32_config
 {
-	void (*m_output_pins_changed)(dsp32c_device &device, UINT32 pins);	// a change has occurred on an output pin
-};
-
-
-
-// ======================> dsp32c_device_config
-
-class dsp32c_device_config :	public cpu_device_config,
-								public dsp32_config
-{
-	friend class dsp32c_device;
-
-	// construction/destruction
-	dsp32c_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock);
-
-public:
-	// allocators
-	static device_config *static_alloc_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock);
-	virtual device_t *alloc_device(running_machine &machine) const;
-
-	// inline configuration helpers
-	static void static_set_config(device_config *device, const dsp32_config &config);
-
-protected:
-	// device_config_execute_interface overrides
-	virtual UINT32 execute_min_cycles() const;
-	virtual UINT32 execute_max_cycles() const;
-	virtual UINT32 execute_input_lines() const;
-
-	// device_config_memory_interface overrides
-	virtual const address_space_config *memory_space_config(address_spacenum spacenum = AS_0) const;
-
-	// device_config_disasm_interface overrides
-	virtual UINT32 disasm_min_opcode_bytes() const;
-	virtual UINT32 disasm_max_opcode_bytes() const;
-
-	// inline data
-	const address_space_config		m_program_config;
+	void (*m_output_pins_changed)(dsp32c_device &device, UINT32 pins);  // a change has occurred on an output pin
 };
 
 
 
 // ======================> dsp32c_device
 
-class dsp32c_device : public cpu_device
+class dsp32c_device : public cpu_device,
+						public dsp32_config
 {
-	friend class dsp32c_device_config;
-
-	// construction/destruction
-	dsp32c_device(running_machine &_machine, const dsp32c_device_config &config);
-
 public:
+	// construction/destruction
+	dsp32c_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock);
+
+	// inline configuration helpers
+	static void static_set_config(device_t &device, const dsp32_config &config);
+
 	// public interfaces
 	void pio_w(int reg, int data);
 	int pio_r(int reg);
@@ -201,8 +159,14 @@ protected:
 	virtual void device_reset();
 
 	// device_execute_interface overrides
+	virtual UINT32 execute_min_cycles() const;
+	virtual UINT32 execute_max_cycles() const;
+	virtual UINT32 execute_input_lines() const;
 	virtual void execute_run();
 	virtual void execute_set_input(int inputnum, int state);
+
+	// device_memory_interface overrides
+	virtual const address_space_config *memory_space_config(address_spacenum spacenum = AS_0) const;
 
 	// device_state_interface overrides
 	virtual void state_import(const device_state_entry &entry);
@@ -210,6 +174,8 @@ protected:
 	virtual void state_string_export(const device_state_entry &entry, astring &string);
 
 	// device_disasm_interface overrides
+	virtual UINT32 disasm_min_opcode_bytes() const;
+	virtual UINT32 disasm_max_opcode_bytes() const;
 	virtual offs_t disasm_disassemble(char *buffer, offs_t pc, const UINT8 *oprom, const UINT8 *opram, UINT32 options);
 
 	// memory accessors
@@ -226,6 +192,7 @@ protected:
 	void set_irq_line(int irqline, int state);
 
 	void update_pcr(UINT16 newval);
+	void update_pins(void);
 	void illegal(UINT32 op);
 	void unimplemented(UINT32 op);
 	void execute_one();
@@ -456,60 +423,64 @@ protected:
 	void dma_store();
 
 	// configuration
-	const dsp32c_device_config &m_config;
+	const address_space_config      m_program_config;
 
 	// internal state
-	UINT32			m_r[32];
-	UINT32			m_pin, m_pout;
-	UINT32			m_ivtp;
-	UINT32			m_nzcflags;
-	UINT32			m_vflags;
+	UINT32          m_r[32];
+	UINT32          m_pin, m_pout;
+	UINT32          m_ivtp;
+	UINT32          m_nzcflags;
+	UINT32          m_vflags;
 
-	double			m_a[6];
-	double			m_NZflags;
-	UINT8			m_VUflags;
+	double          m_a[6];
+	double          m_NZflags;
+	UINT8           m_VUflags;
 
-	double			m_abuf[4];
-	UINT8			m_abufreg[4];
-	UINT8			m_abufVUflags[4];
-	UINT8			m_abufNZflags[4];
-	int				m_abufcycle[4];
-	int				m_abuf_index;
+	double          m_abuf[4];
+	UINT8           m_abufreg[4];
+	UINT8           m_abufVUflags[4];
+	UINT8           m_abufNZflags[4];
+	int             m_abufcycle[4];
+	int             m_abuf_index;
 
-	INT32			m_mbufaddr[4];
-	UINT32			m_mbufdata[4];
-	int				m_mbuf_index;
+	INT32           m_mbufaddr[4];
+	UINT32          m_mbufdata[4];
+	int             m_mbuf_index;
 
-	UINT16			m_par;
-	UINT8			m_pare;
-	UINT16			m_pdr;
-	UINT16			m_pdr2;
-	UINT16			m_pir;
-	UINT16			m_pcr;
-	UINT16			m_emr;
-	UINT8			m_esr;
-	UINT16			m_pcw;
-	UINT8			m_piop;
+	UINT16          m_par;
+	UINT8           m_pare;
+	UINT16          m_pdr;
+	UINT16          m_pdr2;
+	UINT16          m_pir;
+	UINT16          m_pcr;
+	UINT16          m_emr;
+	UINT8           m_esr;
+	UINT16          m_pcw;
+	UINT8           m_piop;
 
-	UINT32			m_ibuf;
-	UINT32			m_isr;
-	UINT32			m_obuf;
-	UINT32			m_osr;
+	UINT32          m_ibuf;
+	UINT32          m_isr;
+	UINT32          m_obuf;
+	UINT32          m_osr;
 
-	UINT32			m_iotemp;
+	UINT32          m_iotemp;
 
 	// internal stuff
-	int 			m_lastp;
-	int				m_icount;
-	UINT8			m_lastpins;
-	UINT32			m_ppc;
-	address_space *	m_program;
+	int             m_lastp;
+	int             m_icount;
+	UINT8           m_lastpins;
+	UINT32          m_ppc;
+	address_space * m_program;
 	direct_read_data *m_direct;
 
 	// tables
 	static void (dsp32c_device::*const s_dsp32ops[])(UINT32 op);
 	static const UINT32 s_regmap[4][16];
 };
+
+
+extern const device_type DSP32C;
+
 
 
 #endif /* __DSP32_H__ */

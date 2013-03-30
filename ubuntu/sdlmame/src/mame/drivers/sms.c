@@ -78,7 +78,7 @@ resistors or other PWM fun) it should be possible to get:
      mc1488 to shift to rs232 voltage levels)
 
 * The 8255 PPI at U13 (connected to the 8088) is connected to 75451
-  drivers on all pins EXCEPT pins PC3 thru PC0.
+  drivers on all pins EXCEPT pins PC3 through PC0.
   (schematic page 3)
   PA7 - Display Light 1
   PA6 - Display Light 2
@@ -216,20 +216,36 @@ U145        1Brown          PAL14H4CN
 #include "cpu/i86/i86.h"
 #include "cpu/z80/z80.h"
 #include "sound/ay8910.h"
-#include "machine/8255ppi.h"
+#include "machine/i8255.h"
 #include "machine/nvram.h"
 
 
-class sms_state : public driver_device
+class smsmfg_state : public driver_device
 {
 public:
-	sms_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	smsmfg_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) { }
 
 	UINT8 m_communication_port[4];
 	UINT8 m_communication_port_status;
-	bitmap_t *m_bitmap;
+	bitmap_ind16 m_bitmap;
 	UINT8 m_vid_regs[7];
+	DECLARE_WRITE8_MEMBER(bankswitch_w);
+	DECLARE_READ8_MEMBER(link_r);
+	DECLARE_WRITE8_MEMBER(link_w);
+	DECLARE_READ8_MEMBER(z80_8088_r);
+	DECLARE_READ8_MEMBER(p03_r);
+	DECLARE_WRITE8_MEMBER(p03_w);
+	DECLARE_WRITE8_MEMBER(video_w);
+	DECLARE_READ8_MEMBER(ppi0_c_r);
+	DECLARE_WRITE8_MEMBER(ppi0_a_w);
+	DECLARE_WRITE8_MEMBER(ppi0_b_w);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	virtual void palette_init();
+	DECLARE_MACHINE_START(sureshot);
+	UINT32 screen_update_sms(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
@@ -239,9 +255,9 @@ public:
  *
  *************************************/
 
-static WRITE8_HANDLER(bankswitch_w)
+WRITE8_MEMBER(smsmfg_state::bankswitch_w)
 {
-	memory_set_bank(space->machine(), "bank1", data);
+	membank("bank1")->set_entry(data);
 }
 
 /*************************************
@@ -250,72 +266,67 @@ static WRITE8_HANDLER(bankswitch_w)
  *
  *************************************/
 
-static READ8_HANDLER(link_r)
+READ8_MEMBER(smsmfg_state::link_r)
 {
-	sms_state *state = space->machine().driver_data<sms_state>();
 	switch(offset)
 	{
 		case 0:
-			state->m_communication_port_status &= ~0x01;
-			return state->m_communication_port[0];
+			m_communication_port_status &= ~0x01;
+			return m_communication_port[0];
 		case 1:
-			state->m_communication_port_status &= ~0x02;
-			return state->m_communication_port[1];
+			m_communication_port_status &= ~0x02;
+			return m_communication_port[1];
 		case 2:
-			return state->m_communication_port_status;
+			return m_communication_port_status;
 	}
 	return 0;
 };
 
-static WRITE8_HANDLER(link_w)
+WRITE8_MEMBER(smsmfg_state::link_w)
 {
-	sms_state *state = space->machine().driver_data<sms_state>();
 	switch(offset)
 	{
 		case 0:
-			state->m_communication_port_status |= 0x08;
-			state->m_communication_port[3] = data;
+			m_communication_port_status |= 0x08;
+			m_communication_port[3] = data;
 			break;
 		case 1:
-			state->m_communication_port_status |= 0x04;
-			state->m_communication_port[2] = data;
+			m_communication_port_status |= 0x04;
+			m_communication_port[2] = data;
 			break;
 	}
 }
 
-static READ8_HANDLER(z80_8088_r)
+READ8_MEMBER(smsmfg_state::z80_8088_r)
 {
-	sms_state *state = space->machine().driver_data<sms_state>();
-	return state->m_communication_port_status;
+	return m_communication_port_status;
 }
 
-static READ8_HANDLER(p03_r)
+READ8_MEMBER(smsmfg_state::p03_r)
 {
-	sms_state *state = space->machine().driver_data<sms_state>();
 	switch(offset)
 	{
 		case 0:
-			state->m_communication_port_status &= ~0x08;
-			return state->m_communication_port[3];
+			m_communication_port_status &= ~0x08;
+			return m_communication_port[3];
 		case 1:
-			state->m_communication_port_status &= ~0x04;
-			return state->m_communication_port[2];
+			m_communication_port_status &= ~0x04;
+			return m_communication_port[2];
 	}
 	return 0;
 }
 
-static WRITE8_HANDLER(p03_w)
+WRITE8_MEMBER(smsmfg_state::p03_w)
 {
-	sms_state *state = space->machine().driver_data<sms_state>();
 	switch(offset)
 	{
 		case 0:
-			state->m_communication_port_status |= 0x01;
-			state->m_communication_port[0] = data;
+			m_communication_port_status |= 0x01;
+			m_communication_port[0] = data;
 			break;
 		case 1:
-			state->m_communication_port_status |= 0x02;
-			state->m_communication_port[1] = data;
+			m_communication_port_status |= 0x02;
+			m_communication_port[1] = data;
 			break;
 	}
 }
@@ -329,27 +340,27 @@ static WRITE8_HANDLER(p03_w)
 
 static INPUT_PORTS_START(sms)
 	PORT_START("IN0")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON8 ) PORT_NAME("Draw")	/* Draw Button */
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON7 ) PORT_NAME("Deal")	/* Deal Button */
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON6 ) PORT_NAME("Bet")	/* Bet Button */
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON5 )	/* Lighted Button 5 */
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON4 )	/* Lighted Button 4 */
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON3 )	/* Lighted Button 3 */
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 )	/* Lighted Button 2 */
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 )	/* Lighted Button 1 */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON8 ) PORT_NAME("Draw")  /* Draw Button */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON7 ) PORT_NAME("Deal")  /* Deal Button */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON6 ) PORT_NAME("Bet")   /* Bet Button */
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON5 )    /* Lighted Button 5 */
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON4 )    /* Lighted Button 4 */
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON3 )    /* Lighted Button 3 */
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 )    /* Lighted Button 2 */
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 )    /* Lighted Button 1 */
 
 	PORT_START("IN1")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* Coin Error reset */
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE )	/* Operator Mode */
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* Remote Knockoff */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )    /* Coin Error reset */
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE )    /* Operator Mode */
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )    /* Remote Knockoff */
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 ) PORT_IMPULSE(1)
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON10 ) PORT_NAME("Cancel")	/* Cancel Button */
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON9 ) PORT_NAME("Stand")		/* Stand Button */
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON10 ) PORT_NAME("Cancel")   /* Cancel Button */
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON9 ) PORT_NAME("Stand")     /* Stand Button */
 
 	PORT_START("IN2")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )	PORT_IMPULSE(1) /* Coin */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )  PORT_IMPULSE(1) /* Coin */
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -365,7 +376,7 @@ INPUT_PORTS_END
  *
  *************************************/
 
-static READ8_DEVICE_HANDLER(ppi0_c_r)
+READ8_MEMBER(smsmfg_state::ppi0_c_r)
 {
 /*
   PC7 - unused
@@ -383,10 +394,10 @@ static READ8_DEVICE_HANDLER(ppi0_c_r)
 	return 0;
 }
 
-static WRITE8_DEVICE_HANDLER(ppi0_a_w)
+WRITE8_MEMBER(smsmfg_state::ppi0_a_w)
 {
 	//popmessage("Lamps: %d %d %d %d %d %d %d", BIT(data,7), BIT(data,6), BIT(data,5), BIT(data,4), BIT(data,3), BIT(data,2), BIT(data,1) );
-	output_set_lamp_value(0, !BIT(data,7));	/* Display Light 1 */
+	output_set_lamp_value(0, !BIT(data,7)); /* Display Light 1 */
 	output_set_lamp_value(1, !BIT(data,6)); /* Display Light 2 */
 	output_set_lamp_value(2, !BIT(data,5)); /* Display Light 3 */
 	output_set_lamp_value(3, !BIT(data,4)); /* Display Light 4 */
@@ -396,35 +407,36 @@ static WRITE8_DEVICE_HANDLER(ppi0_a_w)
 	output_set_lamp_value(7, !BIT(data,0)); /* Draw Light */
 }
 
-static WRITE8_DEVICE_HANDLER(ppi0_b_w)
+WRITE8_MEMBER(smsmfg_state::ppi0_b_w)
 {
 	output_set_lamp_value(8, !BIT(data,7)); /* Stand Light */
 	output_set_lamp_value(9, !BIT(data,6)); /* Cancel Light */
 
-	coin_counter_w(device->machine(), 0, BIT(data,1));
-	coin_lockout_w(device->machine(), 0, BIT(data,5));
-	coin_lockout_w(device->machine(), 1, BIT(data,4));
+	coin_counter_w(machine(), 0, BIT(data,1));
+	coin_lockout_w(machine(), 0, BIT(data,5));
+	coin_lockout_w(machine(), 1, BIT(data,4));
 }
 
-static const ppi8255_interface ppi8255_intf[2] =
+static I8255A_INTERFACE( ppi8255_0_intf )
 {
-	{
-		DEVCB_NULL,					/* Port A read */
-		DEVCB_NULL,					/* Port B read */
-		DEVCB_HANDLER(ppi0_c_r),	/* Port C read */
-		DEVCB_HANDLER(ppi0_a_w),	/* Port A write */
-		DEVCB_HANDLER(ppi0_b_w),	/* Port B write */
-		DEVCB_NULL					/* Port C write */
-	},
-	{
-		DEVCB_INPUT_PORT("IN0"),	/* Port A read */
-		DEVCB_INPUT_PORT("IN1"),	/* Port B read */
-		DEVCB_INPUT_PORT("IN2"),	/* Port C read */
-		DEVCB_NULL,					/* Port A write */
-		DEVCB_NULL,					/* Port B write */
-		DEVCB_NULL					/* Port C write */
-	}
+	DEVCB_NULL,                         /* Port A read */
+	DEVCB_DRIVER_MEMBER(smsmfg_state,ppi0_a_w),         /* Port A write */
+	DEVCB_NULL,                         /* Port B read */
+	DEVCB_DRIVER_MEMBER(smsmfg_state,ppi0_b_w),         /* Port B write */
+	DEVCB_DRIVER_MEMBER(smsmfg_state,ppi0_c_r),         /* Port C read */
+	DEVCB_NULL                          /* Port C write */
 };
+
+static I8255A_INTERFACE( ppi8255_1_intf )
+{
+	DEVCB_INPUT_PORT("IN0"),            /* Port A read */
+	DEVCB_NULL,                         /* Port A write */
+	DEVCB_INPUT_PORT("IN1"),            /* Port B read */
+	DEVCB_NULL,                         /* Port B write */
+	DEVCB_INPUT_PORT("IN2"),            /* Port C read */
+	DEVCB_NULL                          /* Port C write */
+};
+
 
 /*************************************
  *
@@ -432,18 +444,17 @@ static const ppi8255_interface ppi8255_intf[2] =
  *
  *************************************/
 
-static WRITE8_HANDLER(video_w)
+WRITE8_MEMBER(smsmfg_state::video_w)
 {
-	sms_state *state = space->machine().driver_data<sms_state>();
-	state->m_vid_regs[offset] = data;
+	m_vid_regs[offset] = data;
 	if ( offset == 5 )
 	{
 		int x,y;
-		int xstart = state->m_vid_regs[0] + state->m_vid_regs[1]*256;
-		int width = state->m_vid_regs[2];
-		int ystart = state->m_vid_regs[3];
-		int height = state->m_vid_regs[4];
-		int color = state->m_vid_regs[5];
+		int xstart = m_vid_regs[0] + m_vid_regs[1]*256;
+		int width = m_vid_regs[2];
+		int ystart = m_vid_regs[3];
+		int height = m_vid_regs[4];
+		int color = m_vid_regs[5];
 
 		if ( height == 0 )
 			height = 256;
@@ -456,35 +467,33 @@ static WRITE8_HANDLER(video_w)
 			for ( x = xstart; x < xstart + width; x++ )
 			{
 				if ( y < 256 )
-				*BITMAP_ADDR16(state->m_bitmap, y, x) = color;
+				m_bitmap.pix16(y, x) = color;
 			}
 		}
 	}
 }
 
-static VIDEO_START( sms )
+void smsmfg_state::video_start()
 {
-	sms_state *state = machine.driver_data<sms_state>();
-	state->m_bitmap = machine.primary_screen->alloc_compatible_bitmap();
+	machine().primary_screen->register_screen_bitmap(m_bitmap);
 
-	state_save_register_global_array(machine, state->m_vid_regs);
-	state_save_register_global_bitmap(machine, state->m_bitmap);
+	state_save_register_global_array(machine(), m_vid_regs);
+	state_save_register_global_bitmap(machine(), &m_bitmap);
 }
 
-static SCREEN_UPDATE( sms )
+UINT32 smsmfg_state::screen_update_sms(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	sms_state *state = screen->machine().driver_data<sms_state>();
-	copybitmap(bitmap, state->m_bitmap, 0, 0, 0, 0, cliprect);
+	copybitmap(bitmap, m_bitmap, 0, 0, 0, 0, cliprect);
 	return 0;
 }
 
-static PALETTE_INIT( sms )
+void smsmfg_state::palette_init()
 {
 	int i;
 
 	for (i = 0; i < 8; i++ )
 	{
-		palette_set_color(machine, i, MAKE_RGB(pal1bit(i >> 2), pal1bit(i >> 1), pal1bit(i)));
+		palette_set_color(machine(), i, MAKE_RGB(pal1bit(i >> 2), pal1bit(i >> 1), pal1bit(i)));
 	}
 }
 
@@ -494,9 +503,9 @@ static PALETTE_INIT( sms )
  *
  *************************************/
 
-static ADDRESS_MAP_START( sms_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sms_map, AS_PROGRAM, 8, smsmfg_state )
 	AM_RANGE(0x00000, 0x007ff) AM_RAM AM_SHARE("nvram")
-	AM_RANGE(0x00800, 0x00803) AM_DEVREADWRITE("ppi8255_0", ppi8255_r, ppi8255_w)
+	AM_RANGE(0x00800, 0x00803) AM_DEVREADWRITE("ppi8255_0", i8255_device, read, write)
 	AM_RANGE(0x01000, 0x01007) AM_WRITE(video_w)
 	AM_RANGE(0x01800, 0x01803) AM_READWRITE(link_r, link_w)
 	AM_RANGE(0x04000, 0x07fff) AM_ROMBANK("bank1")
@@ -505,20 +514,20 @@ static ADDRESS_MAP_START( sms_map, AS_PROGRAM, 8 )
 	AM_RANGE(0xf8000, 0xfffff) AM_ROM // mirror for vectors
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sureshot_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sureshot_map, AS_PROGRAM, 8, smsmfg_state )
 	AM_RANGE(0x00000, 0x007ff) AM_RAM AM_SHARE("nvram")
 	AM_RANGE(0x02000, 0x02007) AM_WRITE(video_w)
-	AM_RANGE(0x03000, 0x03003) AM_DEVREADWRITE("ppi8255_0", ppi8255_r, ppi8255_w)
+	AM_RANGE(0x03000, 0x03003) AM_DEVREADWRITE("ppi8255_0", i8255_device, read, write)
 	AM_RANGE(0x03800, 0x03803) AM_READWRITE(link_r, link_w)
 	AM_RANGE(0x08000, 0x0ffff) AM_ROM
 	AM_RANGE(0xf8000, 0xfffff) AM_ROM // mirror for vectors
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sub_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sub_map, AS_PROGRAM, 8, smsmfg_state )
 	AM_RANGE(0x0000, 0x1fff) AM_ROM
 	AM_RANGE(0x2000, 0x27ff) AM_RAM
-	AM_RANGE(0x3100, 0x3103) AM_DEVREADWRITE("ppi8255_1", ppi8255_r, ppi8255_w)
-	AM_RANGE(0x3381, 0x3382) AM_DEVWRITE("aysnd", ay8910_data_address_w)
+	AM_RANGE(0x3100, 0x3103) AM_DEVREADWRITE("ppi8255_1", i8255_device, read, write)
+	AM_RANGE(0x3381, 0x3382) AM_DEVWRITE_LEGACY("aysnd", ay8910_data_address_w)
 	AM_RANGE(0x3400, 0x3400) AM_READ(z80_8088_r)
 	AM_RANGE(0x3500, 0x3501) AM_READWRITE(p03_r, p03_w)
 ADDRESS_MAP_END
@@ -529,29 +538,26 @@ ADDRESS_MAP_END
  *
  *************************************/
 
-static MACHINE_START( sms )
+void smsmfg_state::machine_start()
 {
-	sms_state *state = machine.driver_data<sms_state>();
-	memory_configure_bank(machine, "bank1", 0, 16, machine.region("questions")->base(), 0x4000);
+	membank("bank1")->configure_entries(0, 16, memregion("questions")->base(), 0x4000);
 
-	state_save_register_global(machine, state->m_communication_port_status);
-	state_save_register_global_array(machine, state->m_communication_port);
+	state_save_register_global(machine(), m_communication_port_status);
+	state_save_register_global_array(machine(), m_communication_port);
 }
 
-static MACHINE_START( sureshot )
+MACHINE_START_MEMBER(smsmfg_state,sureshot)
 {
-	sms_state *state = machine.driver_data<sms_state>();
-	state_save_register_global(machine, state->m_communication_port_status);
-	state_save_register_global_array(machine, state->m_communication_port);
+	state_save_register_global(machine(), m_communication_port_status);
+	state_save_register_global_array(machine(), m_communication_port);
 }
 
-static MACHINE_RESET( sms )
+void smsmfg_state::machine_reset()
 {
-	sms_state *state = machine.driver_data<sms_state>();
-	state->m_communication_port_status = 0;
+	m_communication_port_status = 0;
 }
 
-static MACHINE_CONFIG_START( sms, sms_state )
+static MACHINE_CONFIG_START( sms, smsmfg_state )
 	MCFG_CPU_ADD("maincpu", I8088, XTAL_24MHz/8)
 	MCFG_CPU_PROGRAM_MAP(sms_map)
 
@@ -560,11 +566,9 @@ static MACHINE_CONFIG_START( sms, sms_state )
 
 	MCFG_QUANTUM_TIME(attotime::from_hz(6000))
 
-	MCFG_MACHINE_START(sms)
-	MCFG_MACHINE_RESET(sms)
 
-	MCFG_PPI8255_ADD( "ppi8255_0", ppi8255_intf[0] )
-	MCFG_PPI8255_ADD( "ppi8255_1", ppi8255_intf[1] )
+	MCFG_I8255A_ADD( "ppi8255_0", ppi8255_0_intf )
+	MCFG_I8255A_ADD( "ppi8255_1", ppi8255_1_intf )
 
 	MCFG_NVRAM_ADD_0FILL("nvram")
 
@@ -572,15 +576,12 @@ static MACHINE_CONFIG_START( sms, sms_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(0x1b0, 0x100)
 	MCFG_SCREEN_VISIBLE_AREA(0, 0x1af, 0, 0xff)
-	MCFG_SCREEN_UPDATE(sms)
+	MCFG_SCREEN_UPDATE_DRIVER(smsmfg_state, screen_update_sms)
 
 	MCFG_PALETTE_LENGTH(8)
 
-	MCFG_PALETTE_INIT(sms)
-	MCFG_VIDEO_START(sms)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -594,7 +595,7 @@ static MACHINE_CONFIG_DERIVED( sureshot, sms )
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_PROGRAM_MAP(sureshot_map)
 
-	MCFG_MACHINE_START(sureshot)
+	MCFG_MACHINE_START_OVERRIDE(smsmfg_state,sureshot)
 MACHINE_CONFIG_END
 
 /*************************************
@@ -926,7 +927,7 @@ ROM_START( secondch )
 	ROM_RELOAD(           0x1000, 0x1000 )
 ROM_END
 
-GAME( 1984, trvhang,  0, sms,      sms, 0, ROT0, "SMS Manufacturing Corp.", "Trivia Hangup (question set 1)", GAME_SUPPORTS_SAVE ) /* Version Trivia-1-050185 */
-GAME( 1984, trvhanga, 0, sms,      sms, 0, ROT0, "SMS Manufacturing Corp.", "Trivia Hangup (question set 2)", GAME_NOT_WORKING ) /* Version Trivia-2-011586 */
-GAME( 1985, sureshot, 0, sureshot, sms, 0, ROT0, "SMS Manufacturing Corp.", "Sure Shot", GAME_SUPPORTS_SAVE )
-GAME( 1985, secondch, 0, sureshot, sms, 0, ROT0, "SMS Manufacturing Corp.", "Second Chance", GAME_SUPPORTS_SAVE )
+GAME( 1984, trvhang,  0, sms,      sms, driver_device, 0, ROT0, "SMS Manufacturing Corp.", "Trivia Hangup (question set 1)", GAME_SUPPORTS_SAVE ) /* Version Trivia-1-050185 */
+GAME( 1984, trvhanga, 0, sms,      sms, driver_device, 0, ROT0, "SMS Manufacturing Corp.", "Trivia Hangup (question set 2)", GAME_NOT_WORKING ) /* Version Trivia-2-011586 */
+GAME( 1985, sureshot, 0, sureshot, sms, driver_device, 0, ROT0, "SMS Manufacturing Corp.", "Sure Shot", GAME_SUPPORTS_SAVE )
+GAME( 1985, secondch, 0, sureshot, sms, driver_device, 0, ROT0, "SMS Manufacturing Corp.", "Second Chance", GAME_SUPPORTS_SAVE )

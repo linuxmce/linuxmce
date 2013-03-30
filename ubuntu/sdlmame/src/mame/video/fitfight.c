@@ -4,10 +4,10 @@
 #include "includes/fitfight.h"
 
 
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, int layer )
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, int layer )
 {
 	fitfight_state *state = machine.driver_data<fitfight_state>();
-	const gfx_element *gfx = machine.gfx[3];
+	gfx_element *gfx = machine.gfx[3];
 	UINT16 *source = state->m_spriteram;
 	UINT16 *finish = source + 0x800 / 2;
 
@@ -41,132 +41,124 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 	}
 }
 
-static TILE_GET_INFO( get_fof_bak_tile_info )
+TILE_GET_INFO_MEMBER(fitfight_state::get_fof_bak_tile_info)
 {
-	fitfight_state *state = machine.driver_data<fitfight_state>();
-	int code = state->m_fof_bak_tileram[tile_index * 2 + 1];
-	int colr = state->m_fof_bak_tileram[tile_index * 2] & 0x1f;
-	int xflip = (state->m_fof_bak_tileram[tile_index * 2] & 0x0020) >> 5;
+	int code = m_fof_bak_tileram[tile_index * 2 + 1];
+	int colr = m_fof_bak_tileram[tile_index * 2] & 0x1f;
+	int xflip = (m_fof_bak_tileram[tile_index * 2] & 0x0020) >> 5;
 	xflip ^= 1;
 
-	SET_TILE_INFO(2, code, colr, TILE_FLIPYX(xflip));
+	SET_TILE_INFO_MEMBER(2, code, colr, TILE_FLIPYX(xflip));
 }
 
-WRITE16_HANDLER(  fof_bak_tileram_w )
+WRITE16_MEMBER(fitfight_state::fof_bak_tileram_w)
 {
-	fitfight_state *state = space->machine().driver_data<fitfight_state>();
 
-	COMBINE_DATA(&state->m_fof_bak_tileram[offset]);
-	tilemap_mark_tile_dirty(state->m_fof_bak_tilemap, offset / 2);
+	COMBINE_DATA(&m_fof_bak_tileram[offset]);
+	m_fof_bak_tilemap->mark_tile_dirty(offset / 2);
 }
 
 
-static TILE_GET_INFO( get_fof_mid_tile_info )
+TILE_GET_INFO_MEMBER(fitfight_state::get_fof_mid_tile_info)
 {
-	fitfight_state *state = machine.driver_data<fitfight_state>();
-	int code = state->m_fof_mid_tileram[tile_index * 2 + 1];
-	int colr = state->m_fof_mid_tileram[tile_index * 2] & 0x1f;
-	int xflip = (state->m_fof_mid_tileram[tile_index * 2] & 0x0020) >> 5;
+	int code = m_fof_mid_tileram[tile_index * 2 + 1];
+	int colr = m_fof_mid_tileram[tile_index * 2] & 0x1f;
+	int xflip = (m_fof_mid_tileram[tile_index * 2] & 0x0020) >> 5;
 	xflip ^= 1;
 
-	SET_TILE_INFO(1, code, colr, TILE_FLIPYX(xflip));
+	SET_TILE_INFO_MEMBER(1, code, colr, TILE_FLIPYX(xflip));
 }
 
-WRITE16_HANDLER( fof_mid_tileram_w )
+WRITE16_MEMBER(fitfight_state::fof_mid_tileram_w)
 {
-	fitfight_state *state = space->machine().driver_data<fitfight_state>();
 
-	COMBINE_DATA(&state->m_fof_mid_tileram[offset]);
-	tilemap_mark_tile_dirty(state->m_fof_mid_tilemap, offset / 2);
+	COMBINE_DATA(&m_fof_mid_tileram[offset]);
+	m_fof_mid_tilemap->mark_tile_dirty(offset / 2);
 }
 
-static TILE_GET_INFO( get_fof_txt_tile_info )
+TILE_GET_INFO_MEMBER(fitfight_state::get_fof_txt_tile_info)
 {
-	fitfight_state *state = machine.driver_data<fitfight_state>();
-	int code = state->m_fof_txt_tileram[tile_index * 2 + 1];
-	int colr = state->m_fof_txt_tileram[tile_index * 2] & 0x1f;
-	int xflip = (state->m_fof_txt_tileram[tile_index * 2] & 0x0020) >> 5;
+	int code = m_fof_txt_tileram[tile_index * 2 + 1];
+	int colr = m_fof_txt_tileram[tile_index * 2] & 0x1f;
+	int xflip = (m_fof_txt_tileram[tile_index * 2] & 0x0020) >> 5;
 	xflip ^= 1;
 
-	SET_TILE_INFO(0, code, colr, TILE_FLIPYX(xflip));
+	SET_TILE_INFO_MEMBER(0, code, colr, TILE_FLIPYX(xflip));
 }
 
-WRITE16_HANDLER( fof_txt_tileram_w )
+WRITE16_MEMBER(fitfight_state::fof_txt_tileram_w)
 {
-	fitfight_state *state = space->machine().driver_data<fitfight_state>();
 
-	COMBINE_DATA(&state->m_fof_txt_tileram[offset]);
-	tilemap_mark_tile_dirty(state->m_fof_txt_tilemap, offset / 2);
+	COMBINE_DATA(&m_fof_txt_tileram[offset]);
+	m_fof_txt_tilemap->mark_tile_dirty(offset / 2);
 }
 
 /* video start / update */
 
-VIDEO_START(fitfight)
+void fitfight_state::video_start()
 {
-	fitfight_state *state = machine.driver_data<fitfight_state>();
-	state->m_fof_bak_tilemap = tilemap_create(machine, get_fof_bak_tile_info, tilemap_scan_cols, 8, 8, 128, 32);
+	m_fof_bak_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(fitfight_state::get_fof_bak_tile_info),this), TILEMAP_SCAN_COLS, 8, 8, 128, 32);
 	/* opaque */
 
-	state->m_fof_mid_tilemap = tilemap_create(machine, get_fof_mid_tile_info, tilemap_scan_cols, 8, 8, 128, 32);
-	tilemap_set_transparent_pen(state->m_fof_mid_tilemap, 0);
+	m_fof_mid_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(fitfight_state::get_fof_mid_tile_info),this), TILEMAP_SCAN_COLS, 8, 8, 128, 32);
+	m_fof_mid_tilemap->set_transparent_pen(0);
 
-	state->m_fof_txt_tilemap = tilemap_create(machine, get_fof_txt_tile_info, tilemap_scan_cols, 8, 8, 128, 32);
-	tilemap_set_transparent_pen(state->m_fof_txt_tilemap, 0);
+	m_fof_txt_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(fitfight_state::get_fof_txt_tile_info),this), TILEMAP_SCAN_COLS, 8, 8, 128, 32);
+	m_fof_txt_tilemap->set_transparent_pen(0);
 }
 
-SCREEN_UPDATE(fitfight)
+UINT32 fitfight_state::screen_update_fitfight(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	fitfight_state *state = screen->machine().driver_data<fitfight_state>();
 
 	/* scroll isn't right */
 
 	int vblank;
 	int scrollbak, scrollmid;
 
-	vblank = (state->m_fof_700000[0] & 0x8000);
+	vblank = (m_fof_700000[0] & 0x8000);
 
 	if (vblank > 0)
-		bitmap_fill(bitmap, cliprect, get_black_pen(screen->machine()));
+		bitmap.fill(get_black_pen(machine()), cliprect);
 	else {
-//      if (input_code_pressed(screen->machine(), KEYCODE_Q))
-//          scrollbak = ((state->m_fof_a00000[0] & 0xff00) >> 5) - ((state->m_fof_700000[0] & 0x0038) >> 3);
-//      else if (input_code_pressed(screen->machine(), KEYCODE_W))
-//          scrollbak = ((state->m_fof_a00000[0] & 0xff00) >> 5) + ((state->m_fof_700000[0] & 0x01c0) >> 6);
-//      else if (input_code_pressed(screen->machine(), KEYCODE_E))
-//          scrollbak = ((state->m_fof_a00000[0] & 0xff00) >> 5) - ((state->m_fof_700000[0] & 0x01c0) >> 6);
-//      else if (input_code_pressed(screen->machine(), KEYCODE_R))
-//          scrollbak = ((state->m_fof_a00000[0] & 0xff00) >> 5) + ((state->m_fof_700000[0] & 0x0038) >> 3);
+//      if (machine().input().code_pressed(KEYCODE_Q))
+//          scrollbak = ((m_fof_a00000[0] & 0xff00) >> 5) - ((m_fof_700000[0] & 0x0038) >> 3);
+//      else if (machine().input().code_pressed(KEYCODE_W))
+//          scrollbak = ((m_fof_a00000[0] & 0xff00) >> 5) + ((m_fof_700000[0] & 0x01c0) >> 6);
+//      else if (machine().input().code_pressed(KEYCODE_E))
+//          scrollbak = ((m_fof_a00000[0] & 0xff00) >> 5) - ((m_fof_700000[0] & 0x01c0) >> 6);
+//      else if (machine().input().code_pressed(KEYCODE_R))
+//          scrollbak = ((m_fof_a00000[0] & 0xff00) >> 5) + ((m_fof_700000[0] & 0x0038) >> 3);
 //      else
-		scrollbak = ((state->m_fof_a00000[0] & 0xff00) >> 5);
-		tilemap_set_scrollx(state->m_fof_bak_tilemap,0, scrollbak );
-		tilemap_set_scrolly(state->m_fof_bak_tilemap,0, state->m_fof_a00000[0] & 0xff);
-		tilemap_draw(bitmap, cliprect, state->m_fof_bak_tilemap, 0, 0);
+		scrollbak = ((m_fof_a00000[0] & 0xffe0) >> 5);
+		m_fof_bak_tilemap->set_scrollx(0, scrollbak );
+		m_fof_bak_tilemap->set_scrolly(0, m_fof_a00000[0] & 0xff);
+		m_fof_bak_tilemap->draw(bitmap, cliprect, 0, 0);
 
-		draw_sprites(screen->machine(), bitmap, cliprect, 0);
+		draw_sprites(machine(), bitmap, cliprect, 0);
 
-//      if (input_code_pressed(screen->machine(), KEYCODE_A))
-//          scrollmid = ((state->m_fof_900000[0] & 0xff00) >> 5) - ((state->m_fof_700000[0] & 0x01c0) >> 6);
-//      else if (input_code_pressed(screen->machine(), KEYCODE_S))
-//          scrollmid = ((state->m_fof_900000[0] & 0xff00) >> 5) + ((state->m_fof_700000[0] & 0x0038) >> 3);
-//      else if (input_code_pressed(screen->machine(), KEYCODE_D))
-//          scrollmid = ((state->m_fof_900000[0] & 0xff00) >> 5) - ((state->m_fof_700000[0] & 0x0038) >> 3);
-//      else if (input_code_pressed(screen->machine(), KEYCODE_F))
-//          scrollmid = ((state->m_fof_900000[0] & 0xff00) >> 5) + ((state->m_fof_700000[0] & 0x01c0) >> 6);
+//      if (machine().input().code_pressed(KEYCODE_A))
+//          scrollmid = ((m_fof_900000[0] & 0xff00) >> 5) - ((m_fof_700000[0] & 0x01c0) >> 6);
+//      else if (machine().input().code_pressed(KEYCODE_S))
+//          scrollmid = ((m_fof_900000[0] & 0xff00) >> 5) + ((m_fof_700000[0] & 0x0038) >> 3);
+//      else if (machine().input().code_pressed(KEYCODE_D))
+//          scrollmid = ((m_fof_900000[0] & 0xff00) >> 5) - ((m_fof_700000[0] & 0x0038) >> 3);
+//      else if (machine().input().code_pressed(KEYCODE_F))
+//          scrollmid = ((m_fof_900000[0] & 0xff00) >> 5) + ((m_fof_700000[0] & 0x01c0) >> 6);
 //      else
-		scrollmid = ((state->m_fof_900000[0] & 0xff00) >> 5);
-		tilemap_set_scrollx(state->m_fof_mid_tilemap, 0, scrollmid );
-		tilemap_set_scrolly(state->m_fof_mid_tilemap, 0, state->m_fof_900000[0] & 0xff);
-//      if (!input_code_pressed(screen->machine(), KEYCODE_F))
-		tilemap_draw(bitmap, cliprect, state->m_fof_mid_tilemap, 0, 0);
+		scrollmid = ((m_fof_900000[0] & 0xffe0) >> 5);
+		m_fof_mid_tilemap->set_scrollx(0, scrollmid );
+		m_fof_mid_tilemap->set_scrolly(0, m_fof_900000[0] & 0xff);
+//      if (!machine().input().code_pressed(KEYCODE_F))
+		m_fof_mid_tilemap->draw(bitmap, cliprect, 0, 0);
 
-		draw_sprites(screen->machine(), bitmap, cliprect, 1);
+		draw_sprites(machine(), bitmap, cliprect, 1);
 
-		tilemap_draw(bitmap, cliprect, state->m_fof_txt_tilemap, 0, 0);
+		m_fof_txt_tilemap->draw(bitmap, cliprect, 0, 0);
 	}
 /*  popmessage ("Regs %04x %04x %04x %04x %04x %04x",
-            state->m_fof_100000[0], state->m_fof_600000[0], state->m_fof_700000[0],
-            state->m_fof_800000[0], state->m_fof_900000[0],
-            state->m_fof_a00000[0] );
+            m_fof_100000[0], m_fof_600000[0], m_fof_700000[0],
+            m_fof_800000[0], m_fof_900000[0],
+            m_fof_a00000[0] );
 */
 	return 0;
 }

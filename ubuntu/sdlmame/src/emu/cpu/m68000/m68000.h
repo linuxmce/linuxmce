@@ -4,6 +4,16 @@
 #define __M68000_H__
 
 
+#include "68307sim.h"
+#include "68307bus.h"
+#include "68307ser.h"
+#include "68307tmu.h"
+
+#include "68340sim.h"
+#include "68340dma.h"
+#include "68340ser.h"
+#include "68340tmu.h"
+
 /* There are 7 levels of interrupt to the 68K.
  * A transition from < 7 to 7 will cause a non-maskable interrupt (NMI).
  */
@@ -15,6 +25,9 @@
 #define M68K_IRQ_5    5
 #define M68K_IRQ_6    6
 #define M68K_IRQ_7    7
+
+// special input lines
+#define M68K_LINE_BUSERROR 16
 
 /* CPU types for use in m68k_set_cpu_type() */
 enum
@@ -30,7 +43,9 @@ enum
 	M68K_CPU_TYPE_68EC040,
 	M68K_CPU_TYPE_68LC040,
 	M68K_CPU_TYPE_68040,
-	M68K_CPU_TYPE_SCC68070
+	M68K_CPU_TYPE_SCC68070,
+	M68K_CPU_TYPE_68340,
+	M68K_CPU_TYPE_COLDFIRE
 };
 
 // function codes
@@ -44,9 +59,9 @@ enum
 };
 
 /* HMMU enable types for use with m68k_set_hmmu_enable() */
-#define M68K_HMMU_DISABLE	0	/* no translation */
-#define M68K_HMMU_ENABLE_II	1	/* Mac II style fixed translation */
-#define M68K_HMMU_ENABLE_LC	2	/* Mac LC style fixed translation */
+#define M68K_HMMU_DISABLE   0   /* no translation */
+#define M68K_HMMU_ENABLE_II 1   /* Mac II style fixed translation */
+#define M68K_HMMU_ENABLE_LC 2   /* Mac LC style fixed translation */
 
 /* Special interrupt acknowledge values.
  * Use these as special returns from the interrupt acknowledge callback
@@ -86,9 +101,18 @@ typedef void (*m68k_cmpild_func)(device_t *device, UINT32 data, UINT8 reg);
 typedef void (*m68k_rte_func)(device_t *device);
 typedef int (*m68k_tas_func)(device_t *device);
 
+typedef UINT8 (*m68307_porta_read_callback)(address_space &space, bool dedicated, UINT8 line_mask);
+typedef void (*m68307_porta_write_callback)(address_space &space, bool dedicated, UINT8 data, UINT8 line_mask);
+typedef UINT16 (*m68307_portb_read_callback)(address_space &space, bool dedicated, UINT16 line_mask);
+typedef void (*m68307_portb_write_callback)(address_space &space, bool dedicated, UINT16 data, UINT16 line_mask);
+
+
 
 DECLARE_LEGACY_CPU_DEVICE(M68000, m68000);
+DECLARE_LEGACY_CPU_DEVICE(M68301, m68301);
+DECLARE_LEGACY_CPU_DEVICE(M68307, m68307);
 DECLARE_LEGACY_CPU_DEVICE(M68008, m68008);
+DECLARE_LEGACY_CPU_DEVICE(M68008PLCC, m68008plcc);
 DECLARE_LEGACY_CPU_DEVICE(M68010, m68010);
 DECLARE_LEGACY_CPU_DEVICE(M68EC020, m68ec020);
 DECLARE_LEGACY_CPU_DEVICE(M68020, m68020);
@@ -100,6 +124,8 @@ DECLARE_LEGACY_CPU_DEVICE(M68EC040, m68ec040);
 DECLARE_LEGACY_CPU_DEVICE(M68LC040, m68lc040);
 DECLARE_LEGACY_CPU_DEVICE(M68040, m68040);
 DECLARE_LEGACY_CPU_DEVICE(SCC68070, scc68070);
+DECLARE_LEGACY_CPU_DEVICE(M68340, m68340);
+DECLARE_LEGACY_CPU_DEVICE(MCF5206E, mcf5206e);
 
 
 void m68k_set_encrypted_opcode_range(device_t *device, offs_t start, offs_t end);
@@ -113,5 +139,21 @@ void m68k_set_cmpild_callback(device_t *device, m68k_cmpild_func callback);
 void m68k_set_rte_callback(device_t *device, m68k_rte_func callback);
 void m68k_set_tas_callback(device_t *device, m68k_tas_func callback);
 UINT16 m68k_get_fc(device_t *device);
+
+void m68307_set_port_callbacks(device_t *device, m68307_porta_read_callback porta_r, m68307_porta_write_callback m_m68307_porta_w, m68307_portb_read_callback portb_r, m68307_portb_write_callback m_m68307_portb_w);
+UINT16 m68307_get_cs(device_t *device, offs_t address);
+UINT16 m68340_get_cs(device_t *device, offs_t address);
+void m68307_set_interrupt(device_t *device, int level, int vector);
+void m68307_timer0_interrupt(legacy_cpu_device *cpudev);
+void m68307_timer1_interrupt(legacy_cpu_device *cpudev);
+void m68307_serial_interrupt(legacy_cpu_device *cpudev, int vector);
+void m68307_mbus_interrupt(legacy_cpu_device *cpudev);
+void m68307_licr2_interrupt(legacy_cpu_device *cpudev);
+
+void m68307_set_duart68681(device_t* cpudev, device_t* duart68681);
+
+typedef int (*instruction_hook_t)(device_t *device, offs_t curpc);
+void m68k_set_instruction_hook(device_t *device, instruction_hook_t ihook);
+
 
 #endif /* __M68000_H__ */

@@ -4,32 +4,56 @@
 
 *************************************************************************/
 
+#include "sound/discrete.h"
+
 class gyruss_state : public driver_device
 {
 public:
-	gyruss_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	gyruss_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+		m_maincpu(*this, "maincpu"),
+		m_subcpu(*this, "sub"),
+		m_audiocpu(*this, "audiocpu"),
+		m_audiocpu_2(*this, "audio2"),
+		m_discrete(*this, "discrete"),
+		m_colorram(*this, "colorram"),
+		m_videoram(*this, "videoram"),
+		m_flipscreen(*this, "flipscreen"),
+		m_spriteram(*this, "spriteram")
+	{ }
 
-	/* memory pointers */
-	UINT8 *    m_videoram;
-	UINT8 *    m_colorram;
-	UINT8 *    m_spriteram;
-	UINT8 *    m_flipscreen;
+	/* devices/memory pointers */
+	required_device<cpu_device> m_maincpu;
+	required_device<cpu_device> m_subcpu;
+	required_device<cpu_device> m_audiocpu;
+	required_device<cpu_device> m_audiocpu_2;
+	required_device<discrete_device> m_discrete;
+	required_shared_ptr<UINT8> m_colorram;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_flipscreen;
+	required_shared_ptr<UINT8> m_spriteram;
 
-	/* video-related */
-	tilemap_t    *m_tilemap;
+	tilemap_t *m_tilemap;
+	UINT8 m_master_nmi_mask;
+	UINT8 m_slave_irq_mask;
 
-	/* devices */
-	cpu_device *m_audiocpu;
-	cpu_device *m_audiocpu_2;
+	DECLARE_WRITE8_MEMBER(gyruss_irq_clear_w);
+	DECLARE_WRITE8_MEMBER(gyruss_sh_irqtrigger_w);
+	DECLARE_WRITE8_MEMBER(gyruss_i8039_irq_w);
+	DECLARE_WRITE8_MEMBER(master_nmi_mask_w);
+	DECLARE_WRITE8_MEMBER(slave_irq_mask_w);
+	DECLARE_WRITE8_MEMBER(gyruss_spriteram_w);
+	DECLARE_READ8_MEMBER(gyruss_scanline_r);
+	DECLARE_READ8_MEMBER(gyruss_portA_r);
+	DECLARE_WRITE8_MEMBER(gyruss_dac_w);
+	DECLARE_WRITE8_MEMBER(gyruss_filter0_w);
+	DECLARE_WRITE8_MEMBER(gyruss_filter1_w);
+	DECLARE_DRIVER_INIT(gyruss);
+	TILE_GET_INFO_MEMBER(gyruss_get_tile_info);
+	virtual void machine_start();
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_gyruss(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(master_vblank_irq);
+	INTERRUPT_GEN_MEMBER(slave_vblank_irq);
 };
-
-
-/*----------- defined in video/gyruss.c -----------*/
-
-WRITE8_HANDLER( gyruss_spriteram_w );
-READ8_HANDLER( gyruss_scanline_r );
-
-PALETTE_INIT( gyruss );
-VIDEO_START( gyruss );
-SCREEN_UPDATE( gyruss );

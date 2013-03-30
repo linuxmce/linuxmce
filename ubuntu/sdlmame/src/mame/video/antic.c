@@ -16,7 +16,7 @@
 #define VERBOSE 0
 #endif
 
-#define LOG(x)	do { if (VERBOSE) logerror x; } while (0)
+#define LOG(x)  do { if (VERBOSE) logerror x; } while (0)
 
 ANTIC antic;
 
@@ -42,10 +42,10 @@ void antic_reset(void)
 	antic.r.antic08 = 0xff;
 	antic.r.antic09 = 0xff;
 	antic.r.antic0a = 0xff;
-	antic.r.penh	= 0x00;
-	antic.r.penv	= 0x00;
+	antic.r.penh    = 0x00;
+	antic.r.penv    = 0x00;
 	antic.r.antic0e = 0xff;
-	antic.r.nmist	= 0x1f;
+	antic.r.nmist   = 0x1f;
 }
 
 /**************************************************************
@@ -90,7 +90,7 @@ READ8_HANDLER ( atari_antic_r )
 		data = antic.r.antic09;
 		break;
 	case 10: /* WSYNC read */
-		device_spin_until_trigger(space->machine().device("maincpu"), TRIGGER_HSYNC);
+		space.machine().device("maincpu")->execute().spin_until_trigger(TRIGGER_HSYNC);
 		antic.w.wsync = 1;
 		data = antic.r.antic0a;
 		break;
@@ -200,7 +200,7 @@ WRITE8_HANDLER ( atari_antic_w )
 		break;
 	case 10: /* WSYNC write */
 		LOG(("ANTIC 0A write WSYNC  $%02X\n", data));
-		device_spin_until_trigger(space->machine().device("maincpu"), TRIGGER_HSYNC);
+		space.machine().device("maincpu")->execute().spin_until_trigger(TRIGGER_HSYNC);
 		antic.w.wsync = 1;
 		break;
 	case 11:
@@ -585,4 +585,3 @@ ANTIC_RENDERER( antic_mode_f_48 )
 	REP48(MODEF);
 	POST_GFX(48);
 }
-

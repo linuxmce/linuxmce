@@ -92,25 +92,27 @@ enum { BANK_GROUP_A, BANK_GROUP_B, INVALID_BANK_GROUP };
 
 static const eeprom_interface eeprom_intf =
 {
-	7,				/* address bits */
-	8,				/* data bits */
-	"011000",		/* read command */
-	"010100",		/* write command */
+	7,              /* address bits */
+	8,              /* data bits */
+	"011000",       /* read command */
+	"010100",       /* write command */
 	"0100100000000",/* erase command */
 	"0100000000000",/* lock command */
 	"0100110000000" /* unlock command */
 };
 
-static READ32_DEVICE_HANDLER( polygonet_eeprom_r )
+READ32_MEMBER(polygonet_state::polygonet_eeprom_r)
 {
+	device_t *device = machine().device("eeprom");
 	if (ACCESSING_BITS_0_15)
 	{
-		return 0x0200 | (eeprom_read_bit(device) << 8);
+		eeprom_device *eeprom = downcast<eeprom_device *>(device);
+		return 0x0200 | (eeprom->read_bit() << 8);
 	}
 	else
 	{
-		UINT8 lowInputBits = input_port_read(device->machine(), "IN1");
-		UINT8 highInputBits = input_port_read(device->machine(), "IN0");
+		UINT8 lowInputBits = machine().root_device().ioport("IN1")->read();
+		UINT8 highInputBits = machine().root_device().ioport("IN0")->read();
 		return ((highInputBits << 24) | (lowInputBits << 16));
 	}
 
@@ -119,11 +121,11 @@ static READ32_DEVICE_HANDLER( polygonet_eeprom_r )
 }
 
 
-static WRITE32_HANDLER( polygonet_eeprom_w )
+WRITE32_MEMBER(polygonet_state::polygonet_eeprom_w)
 {
 	if (ACCESSING_BITS_24_31)
 	{
-		input_port_write(space->machine(), "EEPROMOUT", data, 0xffffffff);
+		ioport("EEPROMOUT")->write(data, 0xffffffff);
 		return;
 	}
 
@@ -131,19 +133,19 @@ static WRITE32_HANDLER( polygonet_eeprom_w )
 }
 
 /* TTL tile readback for ROM test */
-static READ32_HANDLER( ttl_rom_r )
+READ32_MEMBER(polygonet_state::ttl_rom_r)
 {
 	UINT32 *ROM;
-	ROM = (UINT32 *)space->machine().region("gfx1")->base();
+	ROM = (UINT32 *)machine().root_device().memregion("gfx1")->base();
 
 	return ROM[offset];
 }
 
 /* PSAC2 tile readback for ROM test */
-static READ32_HANDLER( psac_rom_r )
+READ32_MEMBER(polygonet_state::psac_rom_r)
 {
 	UINT32 *ROM;
-	ROM = (UINT32 *)space->machine().region("gfx2")->base();
+	ROM = (UINT32 *)machine().root_device().memregion("gfx2")->base();
 
 	return ROM[offset];
 }
@@ -152,99 +154,98 @@ static READ32_HANDLER( psac_rom_r )
 /* irq 3 is network.  don't generate if you don't emulate the network h/w! */
 /* irq 5 is vblank */
 /* irq 7 does nothing (it jsrs to a rts and then rte) */
-static INTERRUPT_GEN(polygonet_interrupt)
+INTERRUPT_GEN_MEMBER(polygonet_state::polygonet_interrupt)
 {
-	device_set_input_line(device, M68K_IRQ_5, HOLD_LINE);
+	device.execute().set_input_line(M68K_IRQ_5, HOLD_LINE);
 }
 
 /* sound CPU communications */
-static READ32_HANDLER( sound_r )
+READ32_MEMBER(polygonet_state::sound_r)
 {
-	int latch = soundlatch3_r(space, 0);
+	int latch = soundlatch3_byte_r(space, 0);
 
-	if ((latch == 0xd) || (latch == 0xe)) latch = 0xf;	/* hack: until 54539 NMI disable found */
+	if ((latch == 0xd) || (latch == 0xe)) latch = 0xf;  /* hack: until 54539 NMI disable found */
 
 	return latch<<8;
 }
 
-static WRITE32_HANDLER( sound_w )
+WRITE32_MEMBER(polygonet_state::sound_w)
 {
 	if (ACCESSING_BITS_8_15)
 	{
-		soundlatch_w(space, 0, (data>>8)&0xff);
+		soundlatch_byte_w(space, 0, (data>>8)&0xff);
 	}
 	else
 	{
-		soundlatch2_w(space, 0, data&0xff);
+		soundlatch2_byte_w(space, 0, data&0xff);
 	}
 }
 
-static WRITE32_HANDLER( sound_irq_w )
+WRITE32_MEMBER(polygonet_state::sound_irq_w)
 {
-	cputag_set_input_line(space->machine(), "soundcpu", 0, HOLD_LINE);
+	machine().device("soundcpu")->execute().set_input_line(0, HOLD_LINE);
 }
 
 /* DSP communications */
-static READ32_HANDLER( dsp_host_interface_r )
+READ32_MEMBER(polygonet_state::dsp_host_interface_r)
 {
 	UINT32 value;
 	UINT8 hi_addr = offset << 1;
 
-	if (mem_mask == 0x0000ff00)	{ hi_addr++; }	/* Low byte */
-	if (mem_mask == 0xff000000) {}				/* High byte */
+	if (mem_mask == 0x0000ff00) { hi_addr++; }  /* Low byte */
+	if (mem_mask == 0xff000000) {}              /* High byte */
 
-	value = dsp56k_host_interface_read(space->machine().device("dsp"), hi_addr);
+	value = dsp56k_host_interface_read(machine().device("dsp"), hi_addr);
 
-	if (mem_mask == 0x0000ff00)	{ value <<= 8;  }
+	if (mem_mask == 0x0000ff00) { value <<= 8;  }
 	if (mem_mask == 0xff000000) { value <<= 24; }
 
-	logerror("Dsp HI Read (host-side) %08x (HI %04x) = %08x (@%x)\n", mem_mask, hi_addr, value, cpu_get_pc(&space->device()));
+	logerror("Dsp HI Read (host-side) %08x (HI %04x) = %08x (@%x)\n", mem_mask, hi_addr, value, space.device().safe_pc());
 
 	return value;
 }
 
-static WRITE32_HANDLER( shared_ram_write )
+WRITE32_MEMBER(polygonet_state::shared_ram_write)
 {
-	polygonet_state *state = space->machine().driver_data<polygonet_state>();
 
-	COMBINE_DATA(&state->m_shared_ram[offset]) ;
+	COMBINE_DATA(&m_shared_ram[offset]) ;
 
 	if (mem_mask == 0xffff0000)
 	{
-		logerror("68k WRITING %04x to shared ram %x (@%x)\n", (state->m_shared_ram[offset] & 0xffff0000) >> 16,
-															   0xc000 + (offset<<1),
-															   cpu_get_pc(&space->device()));
+		logerror("68k WRITING %04x to shared ram %x (@%x)\n", (m_shared_ram[offset] & 0xffff0000) >> 16,
+																0xc000 + (offset<<1),
+																space.device().safe_pc());
 	}
 	else if (mem_mask == 0x0000ffff)
 	{
-		logerror("68k WRITING %04x to shared ram %x (@%x)\n", (state->m_shared_ram[offset] & 0x0000ffff),
-															   0xc000 +((offset<<1)+1),
-															   cpu_get_pc(&space->device()));
+		logerror("68k WRITING %04x to shared ram %x (@%x)\n", (m_shared_ram[offset] & 0x0000ffff),
+																0xc000 +((offset<<1)+1),
+																space.device().safe_pc());
 	}
 	else
 	{
-		logerror("68k WRITING %04x & %04x to shared ram %x & %x [%08x] (@%x)\n", (state->m_shared_ram[offset] & 0xffff0000) >> 16,
-																				 (state->m_shared_ram[offset] & 0x0000ffff),
-																				  0xc000 + (offset<<1),
-																				  0xc000 +((offset<<1)+1),
-																				  mem_mask,
-																				  cpu_get_pc(&space->device()));
+		logerror("68k WRITING %04x & %04x to shared ram %x & %x [%08x] (@%x)\n", (m_shared_ram[offset] & 0xffff0000) >> 16,
+																					(m_shared_ram[offset] & 0x0000ffff),
+																					0xc000 + (offset<<1),
+																					0xc000 +((offset<<1)+1),
+																					mem_mask,
+																					space.device().safe_pc());
 	}
 
 	/* write to the current dsp56k word */
 	if (mem_mask | (0xffff0000))
 	{
-		state->m_dsp56k_shared_ram_16[(offset<<1)] = (state->m_shared_ram[offset] & 0xffff0000) >> 16 ;
+		m_dsp56k_shared_ram_16[(offset<<1)] = (m_shared_ram[offset] & 0xffff0000) >> 16 ;
 	}
 
 	/* write to the next dsp56k word */
 	if (mem_mask | (0x0000ffff))
 	{
-		state->m_dsp56k_shared_ram_16[(offset<<1)+1] = (state->m_shared_ram[offset] & 0x0000ffff) ;
+		m_dsp56k_shared_ram_16[(offset<<1)+1] = (m_shared_ram[offset] & 0x0000ffff) ;
 	}
 }
 
-static WRITE32_HANDLER( dsp_w_lines )
+WRITE32_MEMBER(polygonet_state::dsp_w_lines)
 {
 	logerror("2w %08x %08x %08x\n", offset, mem_mask, data);
 
@@ -252,54 +253,54 @@ static WRITE32_HANDLER( dsp_w_lines )
 	if ((data >> 24) & 0x01)
 	{
 //      logerror("RESET CLEARED\n");
-		cputag_set_input_line(space->machine(), "dsp", DSP56K_IRQ_RESET, CLEAR_LINE);
+		machine().device("dsp")->execute().set_input_line(DSP56K_IRQ_RESET, CLEAR_LINE);
 	}
 	else
 	{
 //      logerror("RESET ASSERTED\n");
-		cputag_set_input_line(space->machine(), "dsp", DSP56K_IRQ_RESET, ASSERT_LINE);
+		machine().device("dsp")->execute().set_input_line(DSP56K_IRQ_RESET, ASSERT_LINE);
 
 		/* A little hacky - I can't seem to set these lines anywhere else where reset is asserted, so i do it here */
-		cputag_set_input_line(space->machine(), "dsp", DSP56K_IRQ_MODA, ASSERT_LINE);
-		cputag_set_input_line(space->machine(), "dsp", DSP56K_IRQ_MODB, CLEAR_LINE);
+		machine().device("dsp")->execute().set_input_line(DSP56K_IRQ_MODA, ASSERT_LINE);
+		machine().device("dsp")->execute().set_input_line(DSP56K_IRQ_MODB, CLEAR_LINE);
 	}
 
 	/* 0x04000000 is the COMBNK line - it switches who has access to the shared RAM - the dsp or the 68020 */
 }
 
-static WRITE32_HANDLER( dsp_host_interface_w )
+WRITE32_MEMBER(polygonet_state::dsp_host_interface_w)
 {
 	UINT8 hi_data = 0x00;
 	UINT8 hi_addr = offset << 1;
 
-	if (mem_mask == 0x0000ff00)	{ hi_addr++; }	/* Low byte */
-	if (mem_mask == 0xff000000) {}				/* High byte */
+	if (mem_mask == 0x0000ff00) { hi_addr++; }  /* Low byte */
+	if (mem_mask == 0xff000000) {}              /* High byte */
 
-	if (mem_mask == 0x0000ff00)	{ hi_data = (data & 0x0000ff00) >> 8;  }
+	if (mem_mask == 0x0000ff00) { hi_data = (data & 0x0000ff00) >> 8;  }
 	if (mem_mask == 0xff000000) { hi_data = (data & 0xff000000) >> 24; }
 
 	logerror("write (host-side) %08x %08x %08x (HI %04x)\n", offset, mem_mask, data, hi_addr);
-	dsp56k_host_interface_write(space->machine().device("dsp"), hi_addr, hi_data);
+	dsp56k_host_interface_write(machine().device("dsp"), hi_addr, hi_data);
 }
 
 
-static READ32_HANDLER( network_r )
+READ32_MEMBER(polygonet_state::network_r)
 {
 	return 0x08000000;
 }
 
 
-static WRITE32_HANDLER( plygonet_palette_w )
+WRITE32_MEMBER(polygonet_state::plygonet_palette_w)
 {
 	int r,g,b;
 
-	COMBINE_DATA(&space->machine().generic.paletteram.u32[offset]);
+	COMBINE_DATA(&m_generic_paletteram_32[offset]);
 
-	r = (space->machine().generic.paletteram.u32[offset] >>16) & 0xff;
-	g = (space->machine().generic.paletteram.u32[offset] >> 8) & 0xff;
-	b = (space->machine().generic.paletteram.u32[offset] >> 0) & 0xff;
+	r = (m_generic_paletteram_32[offset] >>16) & 0xff;
+	g = (m_generic_paletteram_32[offset] >> 8) & 0xff;
+	b = (m_generic_paletteram_32[offset] >> 0) & 0xff;
 
-	palette_set_color(space->machine(),offset,MAKE_RGB(r,g,b));
+	palette_set_color(machine(),offset,MAKE_RGB(r,g,b));
 }
 
 
@@ -308,31 +309,29 @@ static WRITE32_HANDLER( plygonet_palette_w )
 /**********************************************************************************/
 
 /* It's believed this is hard-wired to return (at least) bit 15 as 0 - causes a host interface bootup */
-static READ16_HANDLER( dsp56k_bootload_r )
+READ16_MEMBER(polygonet_state::dsp56k_bootload_r)
 {
 	return 0x7fff;
 }
 
-DIRECT_UPDATE_HANDLER( plygonet_dsp56k_direct_handler )
+DIRECT_UPDATE_MEMBER(polygonet_state::plygonet_dsp56k_direct_handler)
 {
-	polygonet_state *state = machine->driver_data<polygonet_state>();
-
 	/* Call the dsp's update handler first */
-	if (!state->m_dsp56k_update_handler.isnull())
+	if (!m_dsp56k_update_handler.isnull())
 	{
-		if (state->m_dsp56k_update_handler(direct, address) == ~0)
+		if (m_dsp56k_update_handler(direct, address) == ~0)
 			return ~0;
 	}
 
 	/* If the requested region wasn't in there, see if it needs to be caught driver-side */
 	if (address >= (0x7000<<1) && address <= (0x7fff<<1))
 	{
-		direct.explicit_configure(0x7000<<1, 0x7fff<<1, (0xfff<<1) | 1, state->m_dsp56k_p_mirror);
+		direct.explicit_configure(0x7000<<1, 0x7fff<<1, (0xfff<<1) | 1, m_dsp56k_p_mirror);
 		return ~0;
 	}
 	else if (address >= (0x8000<<1) && address <= (0x87ff<<1))
 	{
-		direct.explicit_configure(0x8000<<1, 0x87ff<<1, (0x7ff<<1) | 1, state->m_dsp56k_p_8000);
+		direct.explicit_configure(0x8000<<1, 0x87ff<<1, (0x7ff<<1) | 1, m_dsp56k_p_8000);
 		return ~0;
 	}
 
@@ -393,139 +392,129 @@ static UINT8 dsp56k_bank_num(device_t* cpu, UINT8 bank_group)
 
 
 /* BANK HANDLERS */
-static READ16_HANDLER( dsp56k_ram_bank00_read )
+READ16_MEMBER(polygonet_state::dsp56k_ram_bank00_read)
 {
-	polygonet_state *state = space->machine().driver_data<polygonet_state>();
-	UINT8 en_group = dsp56k_bank_group(&space->device());
-	UINT8 bank_num = dsp56k_bank_num(&space->device(), en_group);
+	UINT8 en_group = dsp56k_bank_group(&space.device());
+	UINT8 bank_num = dsp56k_bank_num(&space.device(), en_group);
 	UINT32 driver_bank_offset = (en_group * dsp56k_bank00_size * 8) + (bank_num * dsp56k_bank00_size);
 
-	return state->m_dsp56k_bank00_ram[driver_bank_offset + offset];
+	return m_dsp56k_bank00_ram[driver_bank_offset + offset];
 }
 
-static WRITE16_HANDLER( dsp56k_ram_bank00_write )
+WRITE16_MEMBER(polygonet_state::dsp56k_ram_bank00_write)
 {
-	polygonet_state *state = space->machine().driver_data<polygonet_state>();
-	UINT8 en_group = dsp56k_bank_group(&space->device());
-	UINT8 bank_num = dsp56k_bank_num(&space->device(), en_group);
+	UINT8 en_group = dsp56k_bank_group(&space.device());
+	UINT8 bank_num = dsp56k_bank_num(&space.device(), en_group);
 	UINT32 driver_bank_offset = (en_group * dsp56k_bank00_size * 8) + (bank_num * dsp56k_bank00_size);
 
-	COMBINE_DATA(&state->m_dsp56k_bank00_ram[driver_bank_offset + offset]);
+	COMBINE_DATA(&m_dsp56k_bank00_ram[driver_bank_offset + offset]);
 }
 
 
-static READ16_HANDLER( dsp56k_ram_bank01_read )
+READ16_MEMBER(polygonet_state::dsp56k_ram_bank01_read)
 {
-	polygonet_state *state = space->machine().driver_data<polygonet_state>();
-	UINT8 en_group = dsp56k_bank_group(&space->device());
-	UINT8 bank_num = dsp56k_bank_num(&space->device(), en_group);
+	UINT8 en_group = dsp56k_bank_group(&space.device());
+	UINT8 bank_num = dsp56k_bank_num(&space.device(), en_group);
 	UINT32 driver_bank_offset = (en_group * dsp56k_bank01_size * 8) + (bank_num * dsp56k_bank01_size);
 
-	return state->m_dsp56k_bank01_ram[driver_bank_offset + offset];
+	return m_dsp56k_bank01_ram[driver_bank_offset + offset];
 }
 
-static WRITE16_HANDLER( dsp56k_ram_bank01_write )
+WRITE16_MEMBER(polygonet_state::dsp56k_ram_bank01_write)
 {
-	polygonet_state *state = space->machine().driver_data<polygonet_state>();
-	UINT8 en_group = dsp56k_bank_group(&space->device());
-	UINT8 bank_num = dsp56k_bank_num(&space->device(), en_group);
+	UINT8 en_group = dsp56k_bank_group(&space.device());
+	UINT8 bank_num = dsp56k_bank_num(&space.device(), en_group);
 	UINT32 driver_bank_offset = (en_group * dsp56k_bank01_size * 8) + (bank_num * dsp56k_bank01_size);
 
-	COMBINE_DATA(&state->m_dsp56k_bank01_ram[driver_bank_offset + offset]);
+	COMBINE_DATA(&m_dsp56k_bank01_ram[driver_bank_offset + offset]);
 
 	/* For now, *always* combine P:0x7000-0x7fff with bank01 with no regard to the banking hardware. */
-	state->m_dsp56k_p_mirror[offset] = data;
+	m_dsp56k_p_mirror[offset] = data;
 }
 
 
-static READ16_HANDLER( dsp56k_ram_bank02_read )
+READ16_MEMBER(polygonet_state::dsp56k_ram_bank02_read)
 {
-	polygonet_state *state = space->machine().driver_data<polygonet_state>();
-	UINT8 en_group = dsp56k_bank_group(&space->device());
-	UINT8 bank_num = dsp56k_bank_num(&space->device(), en_group);
+	UINT8 en_group = dsp56k_bank_group(&space.device());
+	UINT8 bank_num = dsp56k_bank_num(&space.device(), en_group);
 	UINT32 driver_bank_offset = (en_group * dsp56k_bank02_size * 8) + (bank_num * dsp56k_bank02_size);
 
-	return state->m_dsp56k_bank02_ram[driver_bank_offset + offset];
+	return m_dsp56k_bank02_ram[driver_bank_offset + offset];
 }
 
-static WRITE16_HANDLER( dsp56k_ram_bank02_write )
+WRITE16_MEMBER(polygonet_state::dsp56k_ram_bank02_write)
 {
-	polygonet_state *state = space->machine().driver_data<polygonet_state>();
-	UINT8 en_group = dsp56k_bank_group(&space->device());
-	UINT8 bank_num = dsp56k_bank_num(&space->device(), en_group);
+	UINT8 en_group = dsp56k_bank_group(&space.device());
+	UINT8 bank_num = dsp56k_bank_num(&space.device(), en_group);
 	UINT32 driver_bank_offset = (en_group * dsp56k_bank02_size * 8) + (bank_num * dsp56k_bank02_size);
 
-	COMBINE_DATA(&state->m_dsp56k_bank02_ram[driver_bank_offset + offset]);
+	COMBINE_DATA(&m_dsp56k_bank02_ram[driver_bank_offset + offset]);
 }
 
 
-static READ16_HANDLER( dsp56k_shared_ram_read )
+READ16_MEMBER(polygonet_state::dsp56k_shared_ram_read)
 {
-	polygonet_state *state = space->machine().driver_data<polygonet_state>();
-	UINT8 en_group = dsp56k_bank_group(&space->device());
-	UINT8 bank_num = dsp56k_bank_num(&space->device(), en_group);
+	UINT8 en_group = dsp56k_bank_group(&space.device());
+	UINT8 bank_num = dsp56k_bank_num(&space.device(), en_group);
 	UINT32 driver_bank_offset = (en_group * dsp56k_shared_ram_16_size * 8) + (bank_num * dsp56k_shared_ram_16_size);
 
-	return state->m_dsp56k_shared_ram_16[driver_bank_offset + offset];
+	return m_dsp56k_shared_ram_16[driver_bank_offset + offset];
 }
 
-static WRITE16_HANDLER( dsp56k_shared_ram_write )
+WRITE16_MEMBER(polygonet_state::dsp56k_shared_ram_write)
 {
-	polygonet_state *state = space->machine().driver_data<polygonet_state>();
-	UINT8 en_group = dsp56k_bank_group(&space->device());
-	UINT8 bank_num = dsp56k_bank_num(&space->device(), en_group);
+	UINT8 en_group = dsp56k_bank_group(&space.device());
+	UINT8 bank_num = dsp56k_bank_num(&space.device(), en_group);
 	UINT32 driver_bank_offset = (en_group * dsp56k_shared_ram_16_size * 8) + (bank_num * dsp56k_shared_ram_16_size);
 
-	COMBINE_DATA(&state->m_dsp56k_shared_ram_16[driver_bank_offset + offset]);
+	COMBINE_DATA(&m_dsp56k_shared_ram_16[driver_bank_offset + offset]);
 
 	/* Bank group A with offset 0 is believed to be the shared region */
 	if (en_group == BANK_GROUP_A && bank_num == 0)
 	{
 		if (offset % 2)
-			state->m_shared_ram[offset>>1] = ((state->m_dsp56k_shared_ram_16[offset-1]) << 16) | state->m_dsp56k_shared_ram_16[offset];
+			m_shared_ram[offset>>1] = ((m_dsp56k_shared_ram_16[offset-1]) << 16) | m_dsp56k_shared_ram_16[offset];
 		else
-			state->m_shared_ram[offset>>1] = ((state->m_dsp56k_shared_ram_16[offset])   << 16) | state->m_dsp56k_shared_ram_16[offset+1];
+			m_shared_ram[offset>>1] = ((m_dsp56k_shared_ram_16[offset])   << 16) | m_dsp56k_shared_ram_16[offset+1];
 	}
 }
 
 
-static READ16_HANDLER( dsp56k_ram_bank04_read )
+READ16_MEMBER(polygonet_state::dsp56k_ram_bank04_read)
 {
-	polygonet_state *state = space->machine().driver_data<polygonet_state>();
-	UINT8 en_group = dsp56k_bank_group(&space->device());
-	UINT8 bank_num = dsp56k_bank_num(&space->device(), en_group);
+	UINT8 en_group = dsp56k_bank_group(&space.device());
+	UINT8 bank_num = dsp56k_bank_num(&space.device(), en_group);
 	UINT32 driver_bank_offset = (en_group * dsp56k_bank04_size * 8) + (bank_num * dsp56k_bank04_size);
 
-	return state->m_dsp56k_bank04_ram[driver_bank_offset + offset];
+	return m_dsp56k_bank04_ram[driver_bank_offset + offset];
 }
 
-static WRITE16_HANDLER( dsp56k_ram_bank04_write )
+WRITE16_MEMBER(polygonet_state::dsp56k_ram_bank04_write)
 {
-	polygonet_state *state = space->machine().driver_data<polygonet_state>();
-	UINT8 en_group = dsp56k_bank_group(&space->device());
-	UINT8 bank_num = dsp56k_bank_num(&space->device(), en_group);
+	UINT8 en_group = dsp56k_bank_group(&space.device());
+	UINT8 bank_num = dsp56k_bank_num(&space.device(), en_group);
 	UINT32 driver_bank_offset = (en_group * dsp56k_bank04_size * 8) + (bank_num * dsp56k_bank04_size);
 
-	COMBINE_DATA(&state->m_dsp56k_bank04_ram[driver_bank_offset + offset]);
+	COMBINE_DATA(&m_dsp56k_bank04_ram[driver_bank_offset + offset]);
 }
 
 
 /**********************************************************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 32 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 32, polygonet_state )
 	AM_RANGE(0x000000, 0x1fffff) AM_ROM
-	AM_RANGE(0x200000, 0x21ffff) AM_RAM_WRITE(plygonet_palette_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0x400000, 0x40001f) AM_DEVREADWRITE16("k053936", k053936_ctrl_r, k053936_ctrl_w, 0xffffffff)
+	AM_RANGE(0x200000, 0x21ffff) AM_RAM_WRITE(plygonet_palette_w) AM_SHARE("paletteram")
+	AM_RANGE(0x400000, 0x40001f) AM_DEVREADWRITE16_LEGACY("k053936", k053936_ctrl_r, k053936_ctrl_w, 0xffffffff)
 	AM_RANGE(0x440000, 0x440fff) AM_READWRITE(polygonet_roz_ram_r, polygonet_roz_ram_w)
-	AM_RANGE(0x480000, 0x4bffff) AM_DEVREAD("eeprom", polygonet_eeprom_r)
+	AM_RANGE(0x480000, 0x4bffff) AM_READ(polygonet_eeprom_r)
 	AM_RANGE(0x4C0000, 0x4fffff) AM_WRITE(polygonet_eeprom_w)
-	AM_RANGE(0x500000, 0x503fff) AM_RAM_WRITE(shared_ram_write) AM_BASE_MEMBER(polygonet_state, m_shared_ram)
+	AM_RANGE(0x500000, 0x503fff) AM_RAM_WRITE(shared_ram_write) AM_SHARE("shared_ram")
 	AM_RANGE(0x504000, 0x504003) AM_WRITE(dsp_w_lines)
 	AM_RANGE(0x506000, 0x50600f) AM_READWRITE(dsp_host_interface_r, dsp_host_interface_w)
 	AM_RANGE(0x540000, 0x540fff) AM_READWRITE(polygonet_ttl_ram_r, polygonet_ttl_ram_w)
 	AM_RANGE(0x541000, 0x54101f) AM_RAM
 	AM_RANGE(0x580000, 0x5807ff) AM_RAM
-	AM_RANGE(0x580800, 0x580803) AM_READ(network_r) AM_WRITENOP	/* network RAM | registers? */
+	AM_RANGE(0x580800, 0x580803) AM_READ(network_r) AM_WRITENOP /* network RAM | registers? */
 	AM_RANGE(0x600004, 0x600007) AM_WRITE(sound_w)
 	AM_RANGE(0x600008, 0x60000b) AM_READ(sound_r)
 	AM_RANGE(0x640000, 0x640003) AM_WRITE(sound_irq_w)
@@ -537,16 +526,16 @@ ADDRESS_MAP_END
 
 /**********************************************************************************/
 
-static ADDRESS_MAP_START( dsp_program_map, AS_PROGRAM, 16 )
-	AM_RANGE(0x7000, 0x7fff) AM_RAM AM_BASE_MEMBER(polygonet_state, m_dsp56k_p_mirror)	/* Unsure of size, but 0x1000 matches bank01 */
-	AM_RANGE(0x8000, 0x87ff) AM_RAM AM_BASE_MEMBER(polygonet_state, m_dsp56k_p_8000)
+static ADDRESS_MAP_START( dsp_program_map, AS_PROGRAM, 16, polygonet_state )
+	AM_RANGE(0x7000, 0x7fff) AM_RAM AM_SHARE("dsp56k_p_mirror") /* Unsure of size, but 0x1000 matches bank01 */
+	AM_RANGE(0x8000, 0x87ff) AM_RAM AM_SHARE("dsp56k_p_8000")
 	AM_RANGE(0xc000, 0xc000) AM_READ(dsp56k_bootload_r)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( dsp_data_map, AS_DATA, 16 )
+static ADDRESS_MAP_START( dsp_data_map, AS_DATA, 16, polygonet_state )
 	AM_RANGE(0x0800, 0x5fff) AM_RAM      /* Appears to not be affected by banking? */
 	AM_RANGE(0x6000, 0x6fff) AM_READWRITE(dsp56k_ram_bank00_read, dsp56k_ram_bank00_write)
-	AM_RANGE(0x7000, 0x7fff) AM_READWRITE(dsp56k_ram_bank01_read, dsp56k_ram_bank01_write)	/* Mirrored in program space @ 0x7000 */
+	AM_RANGE(0x7000, 0x7fff) AM_READWRITE(dsp56k_ram_bank01_read, dsp56k_ram_bank01_write)  /* Mirrored in program space @ 0x7000 */
 	AM_RANGE(0x8000, 0xbfff) AM_READWRITE(dsp56k_ram_bank02_read, dsp56k_ram_bank02_write)
 	AM_RANGE(0xc000, 0xdfff) AM_READWRITE(dsp56k_shared_ram_read, dsp56k_shared_ram_write)
 	AM_RANGE(0xe000, 0xffbf) AM_READWRITE(dsp56k_ram_bank04_read, dsp56k_ram_bank04_write)
@@ -557,33 +546,32 @@ ADDRESS_MAP_END
 static void reset_sound_region(running_machine &machine)
 {
 	polygonet_state *state = machine.driver_data<polygonet_state>();
-	memory_set_bankptr(machine, "bank2", machine.region("soundcpu")->base() + 0x10000 + state->m_cur_sound_region*0x4000);
+	state->membank("bank2")->set_base(state->memregion("soundcpu")->base() + 0x10000 + state->m_cur_sound_region*0x4000);
 }
 
-static WRITE8_HANDLER( sound_bankswitch_w )
+WRITE8_MEMBER(polygonet_state::sound_bankswitch_w)
 {
-	polygonet_state *state = space->machine().driver_data<polygonet_state>();
-	state->m_cur_sound_region = (data & 0x1f);
-	reset_sound_region(space->machine());
+	m_cur_sound_region = (data & 0x1f);
+	reset_sound_region(machine());
 }
 
-static INTERRUPT_GEN(audio_interrupt)
+INTERRUPT_GEN_MEMBER(polygonet_state::audio_interrupt)
 {
-	device_set_input_line(device, INPUT_LINE_NMI, PULSE_LINE);
+	device.execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 }
 
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, polygonet_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0xbfff) AM_ROMBANK("bank2")
 	AM_RANGE(0x0000, 0xbfff) AM_WRITENOP
 	AM_RANGE(0xc000, 0xdfff) AM_RAM
-	AM_RANGE(0xe000, 0xe22f) AM_DEVREADWRITE("konami1", k054539_r, k054539_w)
+	AM_RANGE(0xe000, 0xe22f) AM_DEVREADWRITE("konami1", k054539_device, read, write)
 	AM_RANGE(0xe230, 0xe3ff) AM_RAM
-	AM_RANGE(0xe400, 0xe62f) AM_DEVREADWRITE("konami2", k054539_r, k054539_w)
+	AM_RANGE(0xe400, 0xe62f) AM_DEVREADWRITE("konami2", k054539_device, read, write)
 	AM_RANGE(0xe630, 0xe7ff) AM_RAM
-	AM_RANGE(0xf000, 0xf000) AM_WRITE(soundlatch3_w)
-	AM_RANGE(0xf002, 0xf002) AM_READ(soundlatch_r)
-	AM_RANGE(0xf003, 0xf003) AM_READ(soundlatch2_r)
+	AM_RANGE(0xf000, 0xf000) AM_WRITE(soundlatch3_byte_w)
+	AM_RANGE(0xf002, 0xf002) AM_READ(soundlatch_byte_r)
+	AM_RANGE(0xf003, 0xf003) AM_READ(soundlatch2_byte_r)
 	AM_RANGE(0xf800, 0xf800) AM_WRITE(sound_bankswitch_w)
 	AM_RANGE(0xfff1, 0xfff3) AM_WRITENOP
 ADDRESS_MAP_END
@@ -601,50 +589,49 @@ static const gfx_layout bglayout =
 	4,
 	{ 0, 1, 2, 3 },
 	{ 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64,
-	  8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64 },
+		8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64 },
 	{ 0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4, 8*4,
-	  9*4, 10*4, 11*4, 12*4, 13*4, 14*4, 15*4 },
+		9*4, 10*4, 11*4, 12*4, 13*4, 14*4, 15*4 },
 
-	  128*8
+		128*8
 };
 
 static GFXDECODE_START( plygonet )
 	GFXDECODE_ENTRY( "gfx2", 0, bglayout, 0x0000, 64 )
 GFXDECODE_END
 
-static MACHINE_START(polygonet)
+void polygonet_state::machine_start()
 {
 	logerror("Polygonet machine start\n");
 
 	/* Set the dsp56k lines */
 	/* It's presumed the hardware has hard-wired operating mode 1 (MODA = 1, MODB = 0) */
 	/* TODO: This should work, but the MAME core appears to do something funny.
-             Not a big deal - it's hacked in dsp_w_lines. */
-	//cputag_set_input_line(machine, "dsp", INPUT_LINE_RESET, ASSERT_LINE);
-	//cputag_set_input_line(machine, "dsp", DSP56K_IRQ_MODA, ASSERT_LINE);
-	//cputag_set_input_line(machine, "dsp", DSP56K_IRQ_MODB, CLEAR_LINE);
+	         Not a big deal - it's hacked in dsp_w_lines. */
+	//machine().device("dsp")->execute().set_input_line(INPUT_LINE_RESET, ASSERT_LINE);
+	//machine().device("dsp")->execute().set_input_line(DSP56K_IRQ_MODA, ASSERT_LINE);
+	//machine().device("dsp")->execute().set_input_line(DSP56K_IRQ_MODB, CLEAR_LINE);
 }
 
 static const k053936_interface polygonet_k053936_intf =
 {
-	0, 0, 0	/* wrap, xoff, yoff */
+	0, 0, 0 /* wrap, xoff, yoff */
 };
 
 static MACHINE_CONFIG_START( plygonet, polygonet_state )
 
-	MCFG_CPU_ADD("maincpu", M68EC020, 16000000)	/* 16 MHz (xtal is 32.0 MHz) */
+	MCFG_CPU_ADD("maincpu", M68EC020, 16000000) /* 16 MHz (xtal is 32.0 MHz) */
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT("screen", polygonet_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", polygonet_state,  polygonet_interrupt)
 
-	MCFG_CPU_ADD("dsp", DSP56156, 40000000)		/* xtal is 40.0 MHz, DSP has an internal divide-by-2 */
+	MCFG_CPU_ADD("dsp", DSP56156, 40000000)     /* xtal is 40.0 MHz, DSP has an internal divide-by-2 */
 	MCFG_CPU_PROGRAM_MAP(dsp_program_map)
 	MCFG_CPU_DATA_MAP(dsp_data_map)
 
 	MCFG_CPU_ADD("soundcpu", Z80, 8000000)
 	MCFG_CPU_PROGRAM_MAP(sound_map)
-	MCFG_CPU_PERIODIC_INT(audio_interrupt, 480)
+	MCFG_CPU_PERIODIC_INT_DRIVER(polygonet_state, audio_interrupt,  480)
 
-	MCFG_MACHINE_START(polygonet)
 
 	MCFG_GFXDECODE(plygonet)
 
@@ -657,27 +644,23 @@ static MACHINE_CONFIG_START( plygonet, polygonet_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(64, 64+368-1, 0, 32*8-1)
-	MCFG_SCREEN_UPDATE(polygonet)
+	MCFG_SCREEN_UPDATE_DRIVER(polygonet_state, screen_update_polygonet)
 
 	MCFG_PALETTE_LENGTH(32768)
 
-	MCFG_VIDEO_START(polygonet)
 
 	MCFG_K053936_ADD("k053936", polygonet_k053936_intf)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
 
-	MCFG_SOUND_ADD("konami1", K054539, 48000)
-	MCFG_SOUND_CONFIG(k054539_config)
+	MCFG_K054539_ADD("konami1", 48000, k054539_config)
 	MCFG_SOUND_ROUTE(0, "lspeaker", 0.75)
 	MCFG_SOUND_ROUTE(1, "rspeaker", 0.75)
 
-	MCFG_SOUND_ADD("konami2", K054539, 48000)
-	MCFG_SOUND_CONFIG(k054539_config)
+	MCFG_K054539_ADD("konami2", 48000, k054539_config)
 	MCFG_SOUND_ROUTE(0, "lspeaker", 0.75)
 	MCFG_SOUND_ROUTE(1, "rspeaker", 0.75)
 MACHINE_CONFIG_END
@@ -690,25 +673,25 @@ static INPUT_PORTS_START( polygonet )
 	PORT_SERVICE_NO_TOGGLE( 0x02, IP_ACTIVE_LOW )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON3 )	/* SW1 (changes player color).  It's mapped on the JAMMA connector and plugs into an external switch mech. */
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON4 )	/* SW2 (changes player color).  It's mapped on the JAMMA connector and plugs into an external switch mech. */
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON3 )    /* SW1 (changes player color).  It's mapped on the JAMMA connector and plugs into an external switch mech. */
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON4 )    /* SW2 (changes player color).  It's mapped on the JAMMA connector and plugs into an external switch mech. */
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START("IN1")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_UP )	PORT_PLAYER(1)
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_DOWN )	PORT_PLAYER(1)
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_UP )	PORT_PLAYER(1)
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_DOWN )	PORT_PLAYER(1)
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_UP )   PORT_PLAYER(1)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_DOWN ) PORT_PLAYER(1)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_UP )    PORT_PLAYER(1)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_DOWN )  PORT_PLAYER(1)
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START( "EEPROMOUT" )
-	PORT_BIT( 0x01000000, IP_ACTIVE_HIGH, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE("eeprom", eeprom_write_bit)
-	PORT_BIT( 0x02000000, IP_ACTIVE_LOW, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE("eeprom", eeprom_set_cs_line)
-	PORT_BIT( 0x04000000, IP_ACTIVE_HIGH, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE("eeprom", eeprom_set_clock_line)
+	PORT_BIT( 0x01000000, IP_ACTIVE_HIGH, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE_MEMBER("eeprom", eeprom_device, write_bit)
+	PORT_BIT( 0x02000000, IP_ACTIVE_LOW, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE_MEMBER("eeprom", eeprom_device, set_cs_line)
+	PORT_BIT( 0x04000000, IP_ACTIVE_HIGH, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE_MEMBER("eeprom", eeprom_device, set_clock_line)
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( polynetw )
@@ -717,55 +700,54 @@ static INPUT_PORTS_START( polynetw )
 	PORT_SERVICE_NO_TOGGLE( 0x02, IP_ACTIVE_LOW )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2 )	/* SW1 (changes player color).  It's mapped on the JAMMA connector and plugs into an external switch mech. */
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON3 )	/* SW2 (changes player color).  It's mapped on the JAMMA connector and plugs into an external switch mech. */
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2 )    /* SW1 (changes player color).  It's mapped on the JAMMA connector and plugs into an external switch mech. */
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON3 )    /* SW2 (changes player color).  It's mapped on the JAMMA connector and plugs into an external switch mech. */
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START("IN1")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT )	PORT_PLAYER(1)
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT )	PORT_PLAYER(1)
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP )	PORT_PLAYER(1)
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN )	PORT_PLAYER(1)
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT )  PORT_PLAYER(1)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(1)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP )    PORT_PLAYER(1)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN )  PORT_PLAYER(1)
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN ) PORT_PLAYER(1)
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START( "EEPROMOUT" )
-	PORT_BIT( 0x01000000, IP_ACTIVE_HIGH, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE("eeprom", eeprom_write_bit)
-	PORT_BIT( 0x02000000, IP_ACTIVE_LOW, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE("eeprom", eeprom_set_cs_line)
-	PORT_BIT( 0x04000000, IP_ACTIVE_HIGH, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE("eeprom", eeprom_set_clock_line)
+	PORT_BIT( 0x01000000, IP_ACTIVE_HIGH, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE_MEMBER("eeprom", eeprom_device, write_bit)
+	PORT_BIT( 0x02000000, IP_ACTIVE_LOW, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE_MEMBER("eeprom", eeprom_device, set_cs_line)
+	PORT_BIT( 0x04000000, IP_ACTIVE_HIGH, IPT_OUTPUT ) PORT_WRITE_LINE_DEVICE_MEMBER("eeprom", eeprom_device, set_clock_line)
 INPUT_PORTS_END
 
 
 /**********************************************************************************/
-static DRIVER_INIT(polygonet)
+DRIVER_INIT_MEMBER(polygonet_state,polygonet)
 {
-	polygonet_state *state = machine.driver_data<polygonet_state>();
 
 	/* Set default bankswitch */
-	state->m_cur_sound_region = 2;
-	reset_sound_region(machine);
+	m_cur_sound_region = 2;
+	reset_sound_region(machine());
 
 	/* Allocate space for the dsp56k banking */
-	memset(state->m_dsp56k_bank00_ram, 0, sizeof(state->m_dsp56k_bank00_ram));
-	memset(state->m_dsp56k_bank01_ram, 0, sizeof(state->m_dsp56k_bank01_ram));
-	memset(state->m_dsp56k_bank02_ram, 0, sizeof(state->m_dsp56k_bank02_ram));
-	memset(state->m_dsp56k_shared_ram_16, 0, sizeof(state->m_dsp56k_shared_ram_16));
-	memset(state->m_dsp56k_bank04_ram, 0, sizeof(state->m_dsp56k_bank04_ram));
+	memset(m_dsp56k_bank00_ram, 0, sizeof(m_dsp56k_bank00_ram));
+	memset(m_dsp56k_bank01_ram, 0, sizeof(m_dsp56k_bank01_ram));
+	memset(m_dsp56k_bank02_ram, 0, sizeof(m_dsp56k_bank02_ram));
+	memset(m_dsp56k_shared_ram_16, 0, sizeof(m_dsp56k_shared_ram_16));
+	memset(m_dsp56k_bank04_ram, 0, sizeof(m_dsp56k_bank04_ram));
 
 	/* The dsp56k occasionally executes out of mapped memory */
-	address_space *space = machine.device<dsp56k_device>("dsp")->space(AS_PROGRAM);
-	state->m_dsp56k_update_handler = space->set_direct_update_handler(direct_update_delegate_create_static(plygonet_dsp56k_direct_handler, machine));
+	address_space &space = machine().device<dsp56k_device>("dsp")->space(AS_PROGRAM);
+	m_dsp56k_update_handler = space.set_direct_update_handler(direct_update_delegate(FUNC(polygonet_state::plygonet_dsp56k_direct_handler), this));
 
-    /* save states */
-	state->save_item(NAME(state->m_dsp56k_bank00_ram));
-	state->save_item(NAME(state->m_dsp56k_bank01_ram));
-	state->save_item(NAME(state->m_dsp56k_bank02_ram));
-	state->save_item(NAME(state->m_dsp56k_shared_ram_16));
-	state->save_item(NAME(state->m_dsp56k_bank04_ram));
-	state->save_item(NAME(state->m_cur_sound_region));
+	/* save states */
+	save_item(NAME(m_dsp56k_bank00_ram));
+	save_item(NAME(m_dsp56k_bank01_ram));
+	save_item(NAME(m_dsp56k_bank02_ram));
+	save_item(NAME(m_dsp56k_shared_ram_16));
+	save_item(NAME(m_dsp56k_bank04_ram));
+	save_item(NAME(m_cur_sound_region));
 }
 
 
@@ -830,6 +812,5 @@ ROM_START( polynetw )
 ROM_END
 
 /*          ROM       parent   machine   inp        init */
-GAME( 1993, plygonet, 0,       plygonet, polygonet, polygonet, ROT90, "Konami", "Polygonet Commanders (ver UAA)", GAME_NOT_WORKING | GAME_SUPPORTS_SAVE )
-GAME( 1993, polynetw, 0,       plygonet, polynetw,  polygonet, ROT90, "Konami", "Poly-Net Warriors (ver JAA)", GAME_NOT_WORKING | GAME_SUPPORTS_SAVE )
-
+GAME( 1993, plygonet, 0,       plygonet, polygonet, polygonet_state, polygonet, ROT90, "Konami", "Polygonet Commanders (ver UAA)", GAME_NOT_WORKING | GAME_SUPPORTS_SAVE )
+GAME( 1993, polynetw, 0,       plygonet, polynetw, polygonet_state,  polygonet, ROT90, "Konami", "Poly-Net Warriors (ver JAA)", GAME_NOT_WORKING | GAME_SUPPORTS_SAVE )

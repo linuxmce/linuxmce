@@ -8,115 +8,102 @@ Atari Wolf Pack (prototype) video emulation
 #include "includes/wolfpack.h"
 
 
-PALETTE_INIT( wolfpack )
+void wolfpack_state::palette_init()
 {
 	int i;
 
 	/* allocate the colortable */
-	machine.colortable = colortable_alloc(machine, 8);
+	machine().colortable = colortable_alloc(machine(), 8);
 
-	colortable_palette_set_color(machine.colortable, 0, MAKE_RGB(0x00, 0x00, 0x00));
-	colortable_palette_set_color(machine.colortable, 1, MAKE_RGB(0xc1, 0xc1, 0xc1));
-	colortable_palette_set_color(machine.colortable, 2, MAKE_RGB(0x81, 0x81, 0x81));
-	colortable_palette_set_color(machine.colortable, 3, MAKE_RGB(0x48, 0x48, 0x48));
+	colortable_palette_set_color(machine().colortable, 0, MAKE_RGB(0x00, 0x00, 0x00));
+	colortable_palette_set_color(machine().colortable, 1, MAKE_RGB(0xc1, 0xc1, 0xc1));
+	colortable_palette_set_color(machine().colortable, 2, MAKE_RGB(0x81, 0x81, 0x81));
+	colortable_palette_set_color(machine().colortable, 3, MAKE_RGB(0x48, 0x48, 0x48));
 
 	for (i = 0; i < 4; i++)
 	{
-		rgb_t color = colortable_palette_get_color(machine.colortable, i);
+		rgb_t color = colortable_palette_get_color(machine().colortable, i);
 
-		colortable_palette_set_color(machine.colortable, 4 + i,
-									 MAKE_RGB(RGB_RED(color)   < 0xb8 ? RGB_RED(color)   + 0x48 : 0xff,
-											  RGB_GREEN(color) < 0xb8 ? RGB_GREEN(color) + 0x48 : 0xff,
-											  RGB_BLUE(color)  < 0xb8 ? RGB_BLUE(color)  + 0x48 : 0xff));
+		colortable_palette_set_color(machine().colortable, 4 + i,
+										MAKE_RGB(RGB_RED(color)   < 0xb8 ? RGB_RED(color)   + 0x48 : 0xff,
+												RGB_GREEN(color) < 0xb8 ? RGB_GREEN(color) + 0x48 : 0xff,
+												RGB_BLUE(color)  < 0xb8 ? RGB_BLUE(color)  + 0x48 : 0xff));
 	}
 
-	colortable_entry_set_value(machine.colortable, 0x00, 0);
-	colortable_entry_set_value(machine.colortable, 0x01, 1);
-	colortable_entry_set_value(machine.colortable, 0x02, 1);
-	colortable_entry_set_value(machine.colortable, 0x03, 0);
-	colortable_entry_set_value(machine.colortable, 0x04, 0);
-	colortable_entry_set_value(machine.colortable, 0x05, 2);
-	colortable_entry_set_value(machine.colortable, 0x06, 0);
-	colortable_entry_set_value(machine.colortable, 0x07, 3);
-	colortable_entry_set_value(machine.colortable, 0x08, 4);
-	colortable_entry_set_value(machine.colortable, 0x09, 5);
-	colortable_entry_set_value(machine.colortable, 0x0a, 6);
-	colortable_entry_set_value(machine.colortable, 0x0b, 7);
+	colortable_entry_set_value(machine().colortable, 0x00, 0);
+	colortable_entry_set_value(machine().colortable, 0x01, 1);
+	colortable_entry_set_value(machine().colortable, 0x02, 1);
+	colortable_entry_set_value(machine().colortable, 0x03, 0);
+	colortable_entry_set_value(machine().colortable, 0x04, 0);
+	colortable_entry_set_value(machine().colortable, 0x05, 2);
+	colortable_entry_set_value(machine().colortable, 0x06, 0);
+	colortable_entry_set_value(machine().colortable, 0x07, 3);
+	colortable_entry_set_value(machine().colortable, 0x08, 4);
+	colortable_entry_set_value(machine().colortable, 0x09, 5);
+	colortable_entry_set_value(machine().colortable, 0x0a, 6);
+	colortable_entry_set_value(machine().colortable, 0x0b, 7);
 }
 
 
-WRITE8_HANDLER( wolfpack_ship_size_w )
+WRITE8_MEMBER(wolfpack_state::wolfpack_ship_size_w)
 {
-	wolfpack_state *state = space->machine().driver_data<wolfpack_state>();
-	state->m_ship_size = data;
+	m_ship_size = data;
 }
-WRITE8_HANDLER( wolfpack_video_invert_w )
+WRITE8_MEMBER(wolfpack_state::wolfpack_video_invert_w)
 {
-	wolfpack_state *state = space->machine().driver_data<wolfpack_state>();
-	state->m_video_invert = data & 1;
+	m_video_invert = data & 1;
 }
-WRITE8_HANDLER( wolfpack_ship_reflect_w )
+WRITE8_MEMBER(wolfpack_state::wolfpack_ship_reflect_w)
 {
-	wolfpack_state *state = space->machine().driver_data<wolfpack_state>();
-	state->m_ship_reflect = data & 1;
+	m_ship_reflect = data & 1;
 }
-WRITE8_HANDLER( wolfpack_pt_pos_select_w )
+WRITE8_MEMBER(wolfpack_state::wolfpack_pt_pos_select_w)
 {
-	wolfpack_state *state = space->machine().driver_data<wolfpack_state>();
-	state->m_pt_pos_select = data & 1;
+	m_pt_pos_select = data & 1;
 }
-WRITE8_HANDLER( wolfpack_pt_horz_w )
+WRITE8_MEMBER(wolfpack_state::wolfpack_pt_horz_w)
 {
-	wolfpack_state *state = space->machine().driver_data<wolfpack_state>();
-	state->m_pt_horz = data;
+	m_pt_horz = data;
 }
-WRITE8_HANDLER( wolfpack_pt_pic_w )
+WRITE8_MEMBER(wolfpack_state::wolfpack_pt_pic_w)
 {
-	wolfpack_state *state = space->machine().driver_data<wolfpack_state>();
-	state->m_pt_pic = data & 0x3f;
+	m_pt_pic = data & 0x3f;
 }
-WRITE8_HANDLER( wolfpack_ship_h_w )
+WRITE8_MEMBER(wolfpack_state::wolfpack_ship_h_w)
 {
-	wolfpack_state *state = space->machine().driver_data<wolfpack_state>();
-	state->m_ship_h = data;
+	m_ship_h = data;
 }
-WRITE8_HANDLER( wolfpack_torpedo_pic_w )
+WRITE8_MEMBER(wolfpack_state::wolfpack_torpedo_pic_w)
 {
-	wolfpack_state *state = space->machine().driver_data<wolfpack_state>();
-	state->m_torpedo_pic = data;
+	m_torpedo_pic = data;
 }
-WRITE8_HANDLER( wolfpack_ship_h_precess_w )
+WRITE8_MEMBER(wolfpack_state::wolfpack_ship_h_precess_w)
 {
-	wolfpack_state *state = space->machine().driver_data<wolfpack_state>();
-	state->m_ship_h_precess = data & 0x3f;
+	m_ship_h_precess = data & 0x3f;
 }
-WRITE8_HANDLER( wolfpack_ship_pic_w )
+WRITE8_MEMBER(wolfpack_state::wolfpack_ship_pic_w)
 {
-	wolfpack_state *state = space->machine().driver_data<wolfpack_state>();
-	state->m_ship_pic = data & 0x0f;
+	m_ship_pic = data & 0x0f;
 }
-WRITE8_HANDLER( wolfpack_torpedo_h_w )
+WRITE8_MEMBER(wolfpack_state::wolfpack_torpedo_h_w)
 {
-	wolfpack_state *state = space->machine().driver_data<wolfpack_state>();
-	state->m_torpedo_h = data;
+	m_torpedo_h = data;
 }
-WRITE8_HANDLER( wolfpack_torpedo_v_w )
+WRITE8_MEMBER(wolfpack_state::wolfpack_torpedo_v_w)
 {
-	wolfpack_state *state = space->machine().driver_data<wolfpack_state>();
-	state->m_torpedo_v = data;
+	m_torpedo_v = data;
 }
 
 
-VIDEO_START( wolfpack )
+void wolfpack_state::video_start()
 {
-	wolfpack_state *state = machine.driver_data<wolfpack_state>();
 	UINT16 val = 0;
 
 	int i;
 
-	state->m_LFSR = auto_alloc_array(machine, UINT8, 0x8000);
+	m_LFSR = auto_alloc_array(machine(), UINT8, 0x8000);
 
-	state->m_helper = machine.primary_screen->alloc_compatible_bitmap();
+	machine().primary_screen->register_screen_bitmap(m_helper);
 
 	for (i = 0; i < 0x8000; i++)
 	{
@@ -124,14 +111,14 @@ VIDEO_START( wolfpack )
 
 		val = (val << 1) | (bit & 1);
 
-		state->m_LFSR[i] = (val & 0xc00) == 0xc00;
+		m_LFSR[i] = (val & 0xc00) == 0xc00;
 	}
 
-	state->m_current_index = 0x80;
+	m_current_index = 0x80;
 }
 
 
-static void draw_ship(running_machine &machine, bitmap_t* bitmap, const rectangle* cliprect)
+static void draw_ship(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	wolfpack_state *state = machine.driver_data<wolfpack_state>();
 	static const UINT32 scaler[] =
@@ -167,7 +154,7 @@ static void draw_ship(running_machine &machine, bitmap_t* bitmap, const rectangl
 }
 
 
-static void draw_torpedo(running_machine &machine, bitmap_t* bitmap, const rectangle* cliprect)
+static void draw_torpedo(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	wolfpack_state *state = machine.driver_data<wolfpack_state>();
 	int count = 0;
@@ -196,15 +183,15 @@ static void draw_torpedo(running_machine &machine, bitmap_t* bitmap, const recta
 
 		for (x = 2 * x1; x < 2 * x2; x++)
 			if (state->m_LFSR[(state->m_current_index + 0x300 * y + x) % 0x8000])
-				*BITMAP_ADDR16(bitmap, y, x) = 1;
+				bitmap.pix16(y, x) = 1;
 	}
 }
 
 
-static void draw_pt(running_machine &machine, bitmap_t* bitmap, const rectangle* cliprect)
+static void draw_pt(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	wolfpack_state *state = machine.driver_data<wolfpack_state>();
-	rectangle rect = *cliprect;
+	rectangle rect = cliprect;
 
 	if (!(state->m_pt_pic & 0x20))
 		rect.min_x = 256;
@@ -212,7 +199,7 @@ static void draw_pt(running_machine &machine, bitmap_t* bitmap, const rectangle*
 	if (!(state->m_pt_pic & 0x10))
 		rect.max_x = 255;
 
-	drawgfx_transpen(bitmap, &rect,
+	drawgfx_transpen(bitmap, rect,
 		machine.gfx[2],
 		state->m_pt_pic,
 		0,
@@ -220,7 +207,7 @@ static void draw_pt(running_machine &machine, bitmap_t* bitmap, const rectangle*
 		2 * state->m_pt_horz,
 		state->m_pt_pos_select ? 0x70 : 0xA0, 0);
 
-	drawgfx_transpen(bitmap, &rect,
+	drawgfx_transpen(bitmap, rect,
 		machine.gfx[2],
 		state->m_pt_pic,
 		0,
@@ -230,9 +217,9 @@ static void draw_pt(running_machine &machine, bitmap_t* bitmap, const rectangle*
 }
 
 
-static void draw_water(colortable_t *colortable, bitmap_t* bitmap, const rectangle* cliprect)
+static void draw_water(colortable_t *colortable, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	rectangle rect = *cliprect;
+	rectangle rect = cliprect;
 
 	int x;
 	int y;
@@ -242,7 +229,7 @@ static void draw_water(colortable_t *colortable, bitmap_t* bitmap, const rectang
 
 	for (y = rect.min_y; y <= rect.max_y; y++)
 	{
-		UINT16* p = BITMAP_ADDR16(bitmap, y, 0);
+		UINT16* p = &bitmap.pix16(y);
 
 		for (x = rect.min_x; x <= rect.max_x; x++)
 			p[x] = colortable_entry_get_value(colortable, p[x]) | 0x08;
@@ -250,80 +237,76 @@ static void draw_water(colortable_t *colortable, bitmap_t* bitmap, const rectang
 }
 
 
-SCREEN_UPDATE( wolfpack )
+UINT32 wolfpack_state::screen_update_wolfpack(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	wolfpack_state *state = screen->machine().driver_data<wolfpack_state>();
 	int i;
 	int j;
 
 	UINT8 color = 0x48;
-	if (state->m_ship_size & 0x10) color += 0x13;
-	if (state->m_ship_size & 0x20) color += 0x22;
-	if (state->m_ship_size & 0x40) color += 0x3a;
-	if (state->m_ship_size & 0x80) color += 0x48;
+	if (m_ship_size & 0x10) color += 0x13;
+	if (m_ship_size & 0x20) color += 0x22;
+	if (m_ship_size & 0x40) color += 0x3a;
+	if (m_ship_size & 0x80) color += 0x48;
 
-	colortable_palette_set_color(screen->machine().colortable, 3, MAKE_RGB(color,color,color));
-	colortable_palette_set_color(screen->machine().colortable, 7, MAKE_RGB(color < 0xb8 ? color + 0x48 : 0xff,
-																		  color < 0xb8 ? color + 0x48 : 0xff,
-																		  color < 0xb8 ? color + 0x48 : 0xff));
+	colortable_palette_set_color(machine().colortable, 3, MAKE_RGB(color,color,color));
+	colortable_palette_set_color(machine().colortable, 7, MAKE_RGB(color < 0xb8 ? color + 0x48 : 0xff,
+																			color < 0xb8 ? color + 0x48 : 0xff,
+																			color < 0xb8 ? color + 0x48 : 0xff));
 
-	bitmap_fill(bitmap, cliprect, state->m_video_invert);
+	bitmap.fill(m_video_invert, cliprect);
 
 	for (i = 0; i < 8; i++)
 		for (j = 0; j < 32; j++)
 		{
-			int code = state->m_alpha_num_ram[32 * i + j];
+			int code = m_alpha_num_ram[32 * i + j];
 
 			drawgfx_opaque(bitmap, cliprect,
-				screen->machine().gfx[0],
+				machine().gfx[0],
 				code,
-				state->m_video_invert,
+				m_video_invert,
 				0, 0,
 				16 * j,
 				192 + 8 * i);
 		}
 
-	draw_pt(screen->machine(), bitmap, cliprect);
-	draw_ship(screen->machine(), bitmap, cliprect);
-	draw_torpedo(screen->machine(), bitmap, cliprect);
-	draw_water(screen->machine().colortable, bitmap, cliprect);
+	draw_pt(machine(), bitmap, cliprect);
+	draw_ship(machine(), bitmap, cliprect);
+	draw_torpedo(machine(), bitmap, cliprect);
+	draw_water(machine().colortable, bitmap, cliprect);
 	return 0;
 }
 
 
-SCREEN_EOF( wolfpack )
+void wolfpack_state::screen_eof_wolfpack(screen_device &screen, bool state)
 {
-	wolfpack_state *state = machine.driver_data<wolfpack_state>();
-	rectangle rect;
-
-	int x;
-	int y;
-
-	rect.min_x = 0;
-	rect.min_y = 0;
-	rect.max_x = state->m_helper->width - 1;
-	rect.max_y = state->m_helper->height - 1;
-
-	bitmap_fill(state->m_helper, &rect, 0);
-
-	draw_ship(machine, state->m_helper, &rect);
-
-	for (y = 128; y < 224 - state->m_torpedo_v; y++)
+	// rising edge
+	if (state)
 	{
-		int x1 = 248 - state->m_torpedo_h - 1;
-		int x2 = 248 - state->m_torpedo_h + 1;
 
-		for (x = 2 * x1; x < 2 * x2; x++)
+		int x;
+		int y;
+
+		m_helper.fill(0);
+
+		draw_ship(machine(), m_helper, m_helper.cliprect());
+
+		for (y = 128; y < 224 - m_torpedo_v; y++)
 		{
-			if (x < 0 || x >= state->m_helper->width)
-				continue;
-			if (y < 0 || y >= state->m_helper->height)
-				continue;
+			int x1 = 248 - m_torpedo_h - 1;
+			int x2 = 248 - m_torpedo_h + 1;
 
-			if (*BITMAP_ADDR16(state->m_helper, y, x))
-				state->m_collision = 1;
+			for (x = 2 * x1; x < 2 * x2; x++)
+			{
+				if (x < 0 || x >= m_helper.width())
+					continue;
+				if (y < 0 || y >= m_helper.height())
+					continue;
+
+				if (m_helper.pix16(y, x))
+					m_collision = 1;
+			}
 		}
-	}
 
-	state->m_current_index += 0x300 * 262;
+		m_current_index += 0x300 * 262;
+	}
 }

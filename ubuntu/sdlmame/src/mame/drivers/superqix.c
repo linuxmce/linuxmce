@@ -33,11 +33,6 @@ Notes:
   - pullout plunger for shot power (there's no on-screen power indicator in the game)
   - dial for aiming
   - button (fire M powerup, high score initials)
-  They are mapped a bit differently in MAME. BUTTON1 simlates pulling out the
-  plunger and releasing it. The plunger strength is controlled by an analog input
-  (by default mapped to up/down arrows) and shown on screen. The dial is mapped
-  as expected. The button is mapped on BUTTON2. BUTTON3 is also recognized by the
-  game when entering initials, but was probably not present in the cabinet.
 
 
 TODO:
@@ -106,7 +101,6 @@ DSW2 stored @ $f237
 
 #include "emu.h"
 #include "cpu/z80/z80.h"
-#include "deprecat.h"
 #include "cpu/m6805/m6805.h"
 #include "cpu/mcs51/mcs51.h"
 #include "sound/ay8910.h"
@@ -116,10 +110,10 @@ DSW2 stored @ $f237
 
 static SAMPLES_START( pbillian_sh_start )
 {
-	superqix_state *state = device->machine().driver_data<superqix_state>();
-	running_machine &machine = device->machine();
-	UINT8 *src = machine.region("samples")->base();
-	int i, len = machine.region("samples")->bytes();
+	superqix_state *state = device.machine().driver_data<superqix_state>();
+	running_machine &machine = device.machine();
+	UINT8 *src = state->memregion("samples")->base();
+	int i, len = state->memregion("samples")->bytes();
 
 	/* convert 8-bit unsigned samples to 8-bit signed */
 	state->m_samplebuf = auto_alloc_array(machine, INT16, len);
@@ -127,12 +121,11 @@ static SAMPLES_START( pbillian_sh_start )
 		state->m_samplebuf[i] = (INT8)(src[i] ^ 0x80) * 256;
 }
 
-static WRITE8_HANDLER( pbillian_sample_trigger_w )
+WRITE8_MEMBER(superqix_state::pbillian_sample_trigger_w)
 {
-	superqix_state *state = space->machine().driver_data<superqix_state>();
-	device_t *samples = space->machine().device("samples");
-	UINT8 *src = space->machine().region("samples")->base();
-	int len = space->machine().region("samples")->bytes();
+	samples_device *samples = machine().device<samples_device>("samples");
+	UINT8 *src = memregion("samples")->base();
+	int len = memregion("samples")->bytes();
 	int start,end;
 
 	start = data << 7;
@@ -141,7 +134,7 @@ static WRITE8_HANDLER( pbillian_sample_trigger_w )
 	while (end < len && src[end] != 0xff)
 		end++;
 
-	sample_start_raw(samples, 0, state->m_samplebuf + start, end - start, 5000, 0); // 5khz ?
+	samples->start_raw(0, m_samplebuf + start, end - start, 5000); // 5khz ?
 }
 
 
@@ -177,173 +170,163 @@ The MCU acts this way:
 **************************************************************************/
 
 
-static READ8_DEVICE_HANDLER( in4_mcu_r )
+READ8_MEMBER(superqix_state::in4_mcu_r)
 {
-	superqix_state *state = device->machine().driver_data<superqix_state>();
-//  logerror("%04x: in4_mcu_r\n",cpu_get_pc(&space->device()));
-	return input_port_read(device->machine(), "P2") | (state->m_from_mcu_pending << 6) | (state->m_from_z80_pending << 7);
+//  logerror("%04x: in4_mcu_r\n",space.device().safe_pc());
+	return ioport("P2")->read() | (m_from_mcu_pending << 6) | (m_from_z80_pending << 7);
 }
 
-static READ8_DEVICE_HANDLER( sqix_from_mcu_r )
+READ8_MEMBER(superqix_state::sqix_from_mcu_r)
 {
-	superqix_state *state = device->machine().driver_data<superqix_state>();
-//  logerror("%04x: read mcu answer (%02x)\n",cpu_get_pc(&space->device()),state->m_from_mcu);
-	return state->m_from_mcu;
+//  logerror("%04x: read mcu answer (%02x)\n",space.device().safe_pc(),m_from_mcu);
+	return m_from_mcu;
 }
 
-static TIMER_CALLBACK( mcu_acknowledge_callback )
+TIMER_CALLBACK_MEMBER(superqix_state::mcu_acknowledge_callback)
 {
-	superqix_state *state = machine.driver_data<superqix_state>();
-	state->m_from_z80_pending = 1;
-	state->m_from_z80 = state->m_portb;
-//  logerror("Z80->MCU %02x\n",state->m_from_z80);
+	m_from_z80_pending = 1;
+	m_from_z80 = m_portb;
+//  logerror("Z80->MCU %02x\n",m_from_z80);
 }
 
-static READ8_HANDLER( mcu_acknowledge_r )
+READ8_MEMBER(superqix_state::mcu_acknowledge_r)
 {
-	space->machine().scheduler().synchronize(FUNC(mcu_acknowledge_callback));
+	machine().scheduler().synchronize(timer_expired_delegate(FUNC(superqix_state::mcu_acknowledge_callback),this));
 	return 0;
 }
 
-static WRITE8_DEVICE_HANDLER( sqix_z80_mcu_w )
+WRITE8_MEMBER(superqix_state::sqix_z80_mcu_w)
 {
-	superqix_state *state = device->machine().driver_data<superqix_state>();
-//  logerror("%04x: sqix_z80_mcu_w %02x\n",cpu_get_pc(&space->device()),data);
-	state->m_portb = data;
+//  logerror("%04x: sqix_z80_mcu_w %02x\n",space.device().safe_pc(),data);
+	m_portb = data;
 }
 
-static WRITE8_HANDLER( bootleg_mcu_p1_w )
+WRITE8_MEMBER(superqix_state::bootleg_mcu_p1_w)
 {
-	superqix_state *state = space->machine().driver_data<superqix_state>();
 	switch ((data & 0x0e) >> 1)
 	{
 		case 0:
 			// ???
 			break;
 		case 1:
-			coin_counter_w(space->machine(), 0,data & 1);
+			coin_counter_w(machine(), 0,data & 1);
 			break;
 		case 2:
-			coin_counter_w(space->machine(), 1,data & 1);
+			coin_counter_w(machine(), 1,data & 1);
 			break;
 		case 3:
-			coin_lockout_global_w(space->machine(), (data & 1) ^ state->m_invert_coin_lockout);
+			coin_lockout_global_w(machine(), (data & 1) ^ m_invert_coin_lockout);
 			break;
 		case 4:
-			flip_screen_set(space->machine(), data & 1);
+			flip_screen_set(data & 1);
 			break;
 		case 5:
-			state->m_port1 = data;
-			if ((state->m_port1 & 0x80) == 0)
+			m_port1 = data;
+			if ((m_port1 & 0x80) == 0)
 			{
-				state->m_port3_latch = state->m_port3;
+				m_port3_latch = m_port3;
 			}
 			break;
 		case 6:
-			state->m_from_mcu_pending = 0;	// ????
+			m_from_mcu_pending = 0; // ????
 			break;
 		case 7:
 			if ((data & 1) == 0)
 			{
-//              logerror("%04x: MCU -> Z80 %02x\n",cpu_get_pc(&space->device()),state->m_port3);
-				state->m_from_mcu = state->m_port3_latch;
-				state->m_from_mcu_pending = 1;
-				state->m_from_z80_pending = 0;	// ????
+//              logerror("%04x: MCU -> Z80 %02x\n",space.device().safe_pc(),m_port3);
+				m_from_mcu = m_port3_latch;
+				m_from_mcu_pending = 1;
+				m_from_z80_pending = 0; // ????
 			}
 			break;
 	}
 }
 
-static WRITE8_HANDLER( mcu_p3_w )
+WRITE8_MEMBER(superqix_state::mcu_p3_w)
 {
-	superqix_state *state = space->machine().driver_data<superqix_state>();
-	state->m_port3 = data;
+	m_port3 = data;
 }
 
-static READ8_HANDLER( bootleg_mcu_p3_r )
+READ8_MEMBER(superqix_state::bootleg_mcu_p3_r)
 {
-	superqix_state *state = space->machine().driver_data<superqix_state>();
-	if ((state->m_port1 & 0x10) == 0)
+	if ((m_port1 & 0x10) == 0)
 	{
-		return input_port_read(space->machine(), "DSW1");
+		return ioport("DSW1")->read();
 	}
-	else if ((state->m_port1 & 0x20) == 0)
+	else if ((m_port1 & 0x20) == 0)
 	{
-		return input_port_read(space->machine(), "SYSTEM") | (state->m_from_mcu_pending << 6) | (state->m_from_z80_pending << 7);
+		return sqix_system_status_r(space, 0);
 	}
-	else if ((state->m_port1 & 0x40) == 0)
+	else if ((m_port1 & 0x40) == 0)
 	{
-//      logerror("%04x: read Z80 command %02x\n",cpu_get_pc(&space->device()),state->m_from_z80);
-		state->m_from_z80_pending = 0;
-		return state->m_from_z80;
+//      logerror("%04x: read Z80 command %02x\n",space.device().safe_pc(),m_from_z80);
+		m_from_z80_pending = 0;
+		return m_from_z80;
 	}
 	return 0;
 }
 
-static READ8_HANDLER( sqixu_mcu_p0_r )
+READ8_MEMBER(superqix_state::sqix_system_status_r)
 {
-	superqix_state *state = space->machine().driver_data<superqix_state>();
-	return input_port_read(space->machine(), "SYSTEM") | (state->m_from_mcu_pending << 6) | (state->m_from_z80_pending << 7);
+	return ioport("SYSTEM")->read() | (m_from_mcu_pending << 6) | (m_from_z80_pending << 7);
 }
 
-static WRITE8_HANDLER( sqixu_mcu_p2_w )
+WRITE8_MEMBER(superqix_state::sqixu_mcu_p2_w)
 {
-	superqix_state *state = space->machine().driver_data<superqix_state>();
 	// bit 0 = unknown (clocked often)
 
 	// bit 1 = coin cointer 1
-	coin_counter_w(space->machine(), 0,data & 2);
+	coin_counter_w(machine(), 0,data & 2);
 
 	// bit 2 = coin counter 2
-	coin_counter_w(space->machine(), 1,data & 4);
+	coin_counter_w(machine(), 1,data & 4);
 
 	// bit 3 = coin lockout
-	coin_lockout_global_w(space->machine(), ~data & 8);
+	coin_lockout_global_w(machine(), ~data & 8);
 
 	// bit 4 = flip screen
-	flip_screen_set(space->machine(), data & 0x10);
+	flip_screen_set(data & 0x10);
 
 	// bit 5 = unknown (set on startup)
 
 	// bit 6 = unknown
 	if ((data & 0x40) == 0)
-		state->m_from_mcu_pending = 0;	// ????
+		m_from_mcu_pending = 0; // ????
 
 	// bit 7 = clock latch from port 3 to Z80
-	if ((state->m_port2 & 0x80) != 0 && (data & 0x80) == 0)
+	if ((m_port2 & 0x80) != 0 && (data & 0x80) == 0)
 	{
-//              logerror("%04x: MCU -> Z80 %02x\n",cpu_get_pc(&space->device()),state->m_port3);
-		state->m_from_mcu = state->m_port3;
-		state->m_from_mcu_pending = 1;
-		state->m_from_z80_pending = 0;	// ????
+//      logerror("%04x: MCU -> Z80 %02x\n",space.device().safe_pc(),m_port3);
+		m_from_mcu = m_port3;
+		m_from_mcu_pending = 1;
+		m_from_z80_pending = 0; // ????
 	}
 
-	state->m_port2 = data;
+	m_port2 = data;
 }
 
-static READ8_HANDLER( sqixu_mcu_p3_r )
+READ8_MEMBER(superqix_state::sqixu_mcu_p3_r)
 {
-	superqix_state *state = space->machine().driver_data<superqix_state>();
-//      logerror("%04x: read Z80 command %02x\n",cpu_get_pc(&space->device()),state->m_from_z80);
-	state->m_from_z80_pending = 0;
-	return state->m_from_z80;
+//  logerror("%04x: read Z80 command %02x\n",space.device().safe_pc(),m_from_z80);
+	m_from_z80_pending = 0;
+	return m_from_z80;
 }
 
 
-static READ8_HANDLER( nmi_ack_r )
+READ8_MEMBER(superqix_state::nmi_ack_r)
 {
-	cputag_set_input_line(space->machine(), "maincpu", INPUT_LINE_NMI, CLEAR_LINE);
-	return 0;
+	machine().device("maincpu")->execute().set_input_line(INPUT_LINE_NMI, CLEAR_LINE);
+	return sqix_system_status_r(space, 0);
 }
 
-static READ8_DEVICE_HANDLER( bootleg_in0_r )
+READ8_MEMBER(superqix_state::bootleg_in0_r)
 {
-	return BITSWAP8(input_port_read(device->machine(), "DSW1"), 0,1,2,3,4,5,6,7);
+	return BITSWAP8(machine().root_device().ioport("DSW1")->read(), 0,1,2,3,4,5,6,7);
 }
 
-static WRITE8_HANDLER( bootleg_flipscreen_w )
+WRITE8_MEMBER(superqix_state::bootleg_flipscreen_w)
 {
-	flip_screen_set(space->machine(), ~data & 1);
+	flip_screen_set(~data & 1);
 }
 
 
@@ -365,7 +348,7 @@ static int read_dial(running_machine &machine, int player)
 	int newpos;
 
 	/* get the new position and adjust the result */
-	newpos = input_port_read(machine, player ? "DIAL2" : "DIAL1");
+	newpos = state->ioport(player ? "DIAL2" : "DIAL1")->read();
 	if (newpos != state->m_oldpos[player])
 	{
 		state->m_sign[player] = ((newpos - state->m_oldpos[player]) & 0x80) >> 7;
@@ -374,28 +357,26 @@ static int read_dial(running_machine &machine, int player)
 
 	if (player == 0)
 		return ((state->m_oldpos[player] & 1) << 2) | (state->m_sign[player] << 3);
-	else	// player == 1
+	else    // player == 1
 		return ((state->m_oldpos[player] & 1) << 3) | (state->m_sign[player] << 2);
 }
 
 
 
-static TIMER_CALLBACK( delayed_z80_mcu_w )
+TIMER_CALLBACK_MEMBER(superqix_state::delayed_z80_mcu_w)
 {
-	superqix_state *state = machine.driver_data<superqix_state>();
-logerror("Z80 sends command %02x\n",param);
-	state->m_from_z80 = param;
-	state->m_from_mcu_pending = 0;
-	cputag_set_input_line(machine, "mcu", 0, HOLD_LINE);
-	machine.scheduler().boost_interleave(attotime::zero, attotime::from_usec(200));
+//  logerror("Z80 sends command %02x\n",param);
+	m_from_z80 = param;
+	m_from_mcu_pending = 0;
+	machine().device("mcu")->execute().set_input_line(0, HOLD_LINE);
+	machine().scheduler().boost_interleave(attotime::zero, attotime::from_usec(200));
 }
 
-static TIMER_CALLBACK( delayed_mcu_z80_w )
+TIMER_CALLBACK_MEMBER(superqix_state::delayed_mcu_z80_w)
 {
-	superqix_state *state = machine.driver_data<superqix_state>();
-logerror("68705 sends answer %02x\n",param);
-	state->m_from_mcu = param;
-	state->m_from_mcu_pending = 1;
+//  logerror("68705 sends answer %02x\n",param);
+	m_from_mcu = param;
+	m_from_mcu_pending = 1;
 }
 
 
@@ -417,86 +398,80 @@ logerror("68705 sends answer %02x\n",param);
  */
 
 
-static READ8_HANDLER( hotsmash_68705_portA_r )
+READ8_MEMBER(superqix_state::hotsmash_68705_portA_r)
 {
-	superqix_state *state = space->machine().driver_data<superqix_state>();
-//logerror("%04x: 68705 reads port A = %02x\n",cpu_get_pc(&space->device()),state->m_portA_in);
-	return state->m_portA_in;
+//  logerror("%04x: 68705 reads port A = %02x\n",space.device().safe_pc(),m_portA_in);
+	return m_portA_in;
 }
 
-static WRITE8_HANDLER( hotsmash_68705_portB_w )
+WRITE8_MEMBER(superqix_state::hotsmash_68705_portB_w)
 {
-	superqix_state *state = space->machine().driver_data<superqix_state>();
-	state->m_portB_out = data;
+	m_portB_out = data;
 }
 
-static READ8_HANDLER( hotsmash_68705_portC_r )
+READ8_MEMBER(superqix_state::hotsmash_68705_portC_r)
 {
-	superqix_state *state = space->machine().driver_data<superqix_state>();
-	return state->m_portC;
+	return m_portC;
 }
 
-static WRITE8_HANDLER( hotsmash_68705_portC_w )
+WRITE8_MEMBER(superqix_state::hotsmash_68705_portC_w)
 {
-	superqix_state *state = space->machine().driver_data<superqix_state>();
-	state->m_portC = data;
+	m_portC = data;
 
 	if ((data & 0x08) == 0)
 	{
 		switch (data & 0x07)
 		{
-			case 0x0:	// dsw A
-				state->m_portA_in = input_port_read(space->machine(), "DSW1");
+			case 0x0:   // dsw A
+				m_portA_in = ioport("DSW1")->read();
 				break;
 
-			case 0x1:	// dsw B
-				state->m_portA_in = input_port_read(space->machine(), "DSW2");
+			case 0x1:   // dsw B
+				m_portA_in = ioport("DSW2")->read();
 				break;
 
 			case 0x2:
 				break;
 
-			case 0x3:	// command from Z80
-				state->m_portA_in = state->m_from_z80;
-logerror("%04x: z80 reads command %02x\n",cpu_get_pc(&space->device()),state->m_from_z80);
+			case 0x3:   // command from Z80
+				m_portA_in = m_from_z80;
+//              logerror("%04x: z80 reads command %02x\n",space.device().safe_pc(),m_from_z80);
 				break;
 
 			case 0x4:
 				break;
 
-			case 0x5:	// answer to Z80
-				space->machine().scheduler().synchronize(FUNC(delayed_mcu_z80_w), state->m_portB_out);
+			case 0x5:   // answer to Z80
+				machine().scheduler().synchronize(timer_expired_delegate(FUNC(superqix_state::delayed_mcu_z80_w),this), m_portB_out);
 				break;
 
 			case 0x6:
-				state->m_portA_in = read_dial(space->machine(), 0);
+				m_portA_in = read_dial(machine(), 0);
 				break;
 
 			case 0x7:
-				state->m_portA_in = read_dial(space->machine(), 1);
+				m_portA_in = read_dial(machine(), 1);
 				break;
 		}
 	}
 }
 
-static WRITE8_HANDLER( hotsmash_z80_mcu_w )
+WRITE8_MEMBER(superqix_state::hotsmash_z80_mcu_w)
 {
-	space->machine().scheduler().synchronize(FUNC(delayed_z80_mcu_w), data);
+	machine().scheduler().synchronize(timer_expired_delegate(FUNC(superqix_state::delayed_z80_mcu_w),this), data);
 }
 
-static READ8_HANDLER(hotsmash_from_mcu_r)
+READ8_MEMBER(superqix_state::hotsmash_from_mcu_r)
 {
-	superqix_state *state = space->machine().driver_data<superqix_state>();
-logerror("%04x: z80 reads answer %02x\n",cpu_get_pc(&space->device()),state->m_from_mcu);
-	state->m_from_mcu_pending = 0;
-	return state->m_from_mcu;
+//  logerror("%04x: z80 reads answer %02x\n",space.device().safe_pc(),m_from_mcu);
+	m_from_mcu_pending = 0;
+	return m_from_mcu;
 }
 
-static READ8_DEVICE_HANDLER(hotsmash_ay_port_a_r)
+READ8_MEMBER(superqix_state::hotsmash_ay_port_a_r)
 {
-	superqix_state *state = device->machine().driver_data<superqix_state>();
-//logerror("%04x: ay_port_a_r and mcu_pending is %d\n",cpu_get_pc(&space->device()),state->m_from_mcu_pending);
-	return input_port_read(device->machine(), "SYSTEM") | ((state->m_from_mcu_pending^1) << 7);
+//  logerror("%04x: ay_port_a_r and mcu_pending is %d\n",space.device().safe_pc(),m_from_mcu_pending);
+	return ioport("SYSTEM")->read() | 0x40 | ((m_from_mcu_pending^1) << 7);
 }
 
 /**************************************************************************
@@ -505,35 +480,41 @@ pbillian MCU simulation
 
 **************************************************************************/
 
-static WRITE8_HANDLER( pbillian_z80_mcu_w )
+WRITE8_MEMBER(superqix_state::pbillian_z80_mcu_w)
 {
-	superqix_state *state = space->machine().driver_data<superqix_state>();
-	state->m_from_z80 = data;
+	m_from_z80 = data;
 }
 
-static READ8_HANDLER(pbillian_from_mcu_r)
+READ8_MEMBER(superqix_state::pbillian_from_mcu_r)
 {
-	superqix_state *state = space->machine().driver_data<superqix_state>();
 
-	switch (state->m_from_z80)
+	switch (m_from_z80)
 	{
-		case 0x01: return input_port_read(space->machine(), state->m_curr_player ? "PADDLE2" : "PADDLE1");
-		case 0x02: return input_port_read(space->machine(), state->m_curr_player ? "DIAL2" : "DIAL1");
-		case 0x04: return input_port_read(space->machine(), "DSW1");
-		case 0x08: return input_port_read(space->machine(), "DSW2");
-		case 0x80: state->m_curr_player = 0; return 0;
-		case 0x81: state->m_curr_player = 1; return 0;
+		case 0x01:
+		{
+			UINT8 p = ioport(m_curr_player ? "PLUNGER2" : "PLUNGER1")->read() & 0xbf;
+			if ((p & 0x3f) == 0) p |= 0x40;
+			return p;
+		}
+
+		case 0x02: return ioport(m_curr_player ? "DIAL2" : "DIAL1")->read();
+
+		case 0x04: return ioport("DSW1")->read();
+		case 0x08: return ioport("DSW2")->read();
+
+		case 0x80: m_curr_player = 0; return 0;
+		case 0x81: m_curr_player = 1; return 0;
 	}
 
-	logerror("408[%x] r at %x\n",state->m_from_z80,cpu_get_pc(&space->device()));
+//  logerror("408[%x] r at %x\n",m_from_z80,space.device().safe_pc());
 	return 0;
 }
 
-static READ8_DEVICE_HANDLER(pbillian_ay_port_a_r)
+READ8_MEMBER(superqix_state::pbillian_ay_port_a_r)
 {
-//  logerror("%04x: ay_port_a_r\n",cpu_get_pc(&space->device()));
-	 /* bits 76------  MCU status bits */
-	return (device->machine().rand() & 0xc0) | input_port_read(device->machine(), "BUTTONS");
+//  logerror("%04x: ay_port_a_r\n",space.device().safe_pc());
+	/* bits 76------  MCU status bits */
+	return (machine().rand() & 0xc0) | machine().root_device().ioport("BUTTONS")->read();
 }
 
 
@@ -557,36 +538,36 @@ static void machine_init_common(running_machine &machine)
 	state->save_item(NAME(state->m_portC));
 }
 
-static MACHINE_START( superqix )
+MACHINE_START_MEMBER(superqix_state,superqix)
 {
 	/* configure the banks */
-	memory_configure_bank(machine, "bank1", 0, 4, machine.region("maincpu")->base() + 0x10000, 0x4000);
+	machine().root_device().membank("bank1")->configure_entries(0, 4, machine().root_device().memregion("maincpu")->base() + 0x10000, 0x4000);
 
-	machine_init_common(machine);
+	machine_init_common(machine());
 }
 
-static MACHINE_START( pbillian )
+MACHINE_START_MEMBER(superqix_state,pbillian)
 {
 	/* configure the banks */
-	memory_configure_bank(machine, "bank1", 0, 2, machine.region("maincpu")->base() + 0x10000, 0x4000);
+	machine().root_device().membank("bank1")->configure_entries(0, 2, machine().root_device().memregion("maincpu")->base() + 0x10000, 0x4000);
 
-	machine_init_common(machine);
+	machine_init_common(machine());
 }
 
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, superqix_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0xbfff) AM_ROMBANK("bank1")
-	AM_RANGE(0xe000, 0xe0ff) AM_RAM AM_BASE_SIZE_MEMBER(superqix_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0xe000, 0xe0ff) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0xe100, 0xe7ff) AM_RAM
-	AM_RANGE(0xe800, 0xefff) AM_RAM_WRITE(superqix_videoram_w) AM_BASE_MEMBER(superqix_state, m_videoram)
+	AM_RANGE(0xe800, 0xefff) AM_RAM_WRITE(superqix_videoram_w) AM_SHARE("videoram")
 	AM_RANGE(0xf000, 0xffff) AM_RAM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( pbillian_port_map, AS_IO, 8 )
-	AM_RANGE(0x0000, 0x01ff) AM_RAM_WRITE(paletteram_BBGGRRII_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0x0401, 0x0401) AM_DEVREAD("aysnd", ay8910_r)
-	AM_RANGE(0x0402, 0x0403) AM_DEVWRITE("aysnd", ay8910_data_address_w)
+static ADDRESS_MAP_START( pbillian_port_map, AS_IO, 8, superqix_state )
+	AM_RANGE(0x0000, 0x01ff) AM_RAM_WRITE(paletteram_BBGGRRII_byte_w) AM_SHARE("paletteram")
+	AM_RANGE(0x0401, 0x0401) AM_DEVREAD_LEGACY("aysnd", ay8910_r)
+	AM_RANGE(0x0402, 0x0403) AM_DEVWRITE_LEGACY("aysnd", ay8910_data_address_w)
 	AM_RANGE(0x0408, 0x0408) AM_READ(pbillian_from_mcu_r)
 	AM_RANGE(0x0408, 0x0408) AM_WRITE(pbillian_z80_mcu_w)
 	AM_RANGE(0x0410, 0x0410) AM_WRITE(pbillian_0410_w)
@@ -596,10 +577,10 @@ static ADDRESS_MAP_START( pbillian_port_map, AS_IO, 8 )
 	AM_RANGE(0x041b, 0x041b) AM_READNOP  // input related? but probably not used
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( hotsmash_port_map, AS_IO, 8 )
-	AM_RANGE(0x0000, 0x01ff) AM_RAM_WRITE(paletteram_BBGGRRII_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0x0401, 0x0401) AM_DEVREAD("aysnd", ay8910_r)
-	AM_RANGE(0x0402, 0x0403) AM_DEVWRITE("aysnd", ay8910_data_address_w)
+static ADDRESS_MAP_START( hotsmash_port_map, AS_IO, 8, superqix_state )
+	AM_RANGE(0x0000, 0x01ff) AM_RAM_WRITE(paletteram_BBGGRRII_byte_w) AM_SHARE("paletteram")
+	AM_RANGE(0x0401, 0x0401) AM_DEVREAD_LEGACY("aysnd", ay8910_r)
+	AM_RANGE(0x0402, 0x0403) AM_DEVWRITE_LEGACY("aysnd", ay8910_data_address_w)
 	AM_RANGE(0x0408, 0x0408) AM_READ(hotsmash_from_mcu_r)
 	AM_RANGE(0x0408, 0x0408) AM_WRITE(hotsmash_z80_mcu_w)
 	AM_RANGE(0x0410, 0x0410) AM_WRITE(pbillian_0410_w)
@@ -609,34 +590,21 @@ static ADDRESS_MAP_START( hotsmash_port_map, AS_IO, 8 )
 	AM_RANGE(0x041b, 0x041b) AM_READNOP  // input related? but probably not used
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sqix_port_map, AS_IO, 8 )
-	AM_RANGE(0x0000, 0x00ff) AM_RAM_WRITE(paletteram_BBGGRRII_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0x0401, 0x0401) AM_DEVREAD("ay1", ay8910_r)
-	AM_RANGE(0x0402, 0x0403) AM_DEVWRITE("ay1", ay8910_data_address_w)
-	AM_RANGE(0x0405, 0x0405) AM_DEVREAD("ay2", ay8910_r)
-	AM_RANGE(0x0406, 0x0407) AM_DEVWRITE("ay2", ay8910_data_address_w)
+static ADDRESS_MAP_START( sqix_port_map, AS_IO, 8, superqix_state )
+	AM_RANGE(0x0000, 0x00ff) AM_RAM_WRITE(paletteram_BBGGRRII_byte_w) AM_SHARE("paletteram")
+	AM_RANGE(0x0401, 0x0401) AM_DEVREAD_LEGACY("ay1", ay8910_r)
+	AM_RANGE(0x0402, 0x0403) AM_DEVWRITE_LEGACY("ay1", ay8910_data_address_w)
+	AM_RANGE(0x0405, 0x0405) AM_DEVREAD_LEGACY("ay2", ay8910_r)
+	AM_RANGE(0x0406, 0x0407) AM_DEVWRITE_LEGACY("ay2", ay8910_data_address_w)
 	AM_RANGE(0x0408, 0x0408) AM_READ(mcu_acknowledge_r)
-	AM_RANGE(0x0410, 0x0410) AM_WRITE(superqix_0410_w)	/* ROM bank, NMI enable, tile bank */
+	AM_RANGE(0x0410, 0x0410) AM_WRITE(superqix_0410_w)  /* ROM bank, NMI enable, tile bank */
 	AM_RANGE(0x0418, 0x0418) AM_READ(nmi_ack_r)
-	AM_RANGE(0x0800, 0x77ff) AM_RAM_WRITE(superqix_bitmapram_w) AM_BASE_MEMBER(superqix_state, m_bitmapram)
-	AM_RANGE(0x8800, 0xf7ff) AM_RAM_WRITE(superqix_bitmapram2_w) AM_BASE_MEMBER(superqix_state, m_bitmapram2)
-ADDRESS_MAP_END
-
-static ADDRESS_MAP_START( bootleg_port_map, AS_IO, 8 )
-	AM_RANGE(0x0000, 0x00ff) AM_RAM_WRITE(paletteram_BBGGRRII_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0x0401, 0x0401) AM_DEVREAD("ay1", ay8910_r)
-	AM_RANGE(0x0402, 0x0403) AM_DEVWRITE("ay1", ay8910_data_address_w)
-	AM_RANGE(0x0405, 0x0405) AM_DEVREAD("ay2", ay8910_r)
-	AM_RANGE(0x0406, 0x0407) AM_DEVWRITE("ay2", ay8910_data_address_w)
-	AM_RANGE(0x0408, 0x0408) AM_WRITE(bootleg_flipscreen_w)
-	AM_RANGE(0x0410, 0x0410) AM_WRITE(superqix_0410_w)	/* ROM bank, NMI enable, tile bank */
-	AM_RANGE(0x0418, 0x0418) AM_READ_PORT("SYSTEM")
-	AM_RANGE(0x0800, 0x77ff) AM_RAM_WRITE(superqix_bitmapram_w) AM_BASE_MEMBER(superqix_state, m_bitmapram)
-	AM_RANGE(0x8800, 0xf7ff) AM_RAM_WRITE(superqix_bitmapram2_w) AM_BASE_MEMBER(superqix_state, m_bitmapram2)
+	AM_RANGE(0x0800, 0x77ff) AM_RAM_WRITE(superqix_bitmapram_w) AM_SHARE("bitmapram")
+	AM_RANGE(0x8800, 0xf7ff) AM_RAM_WRITE(superqix_bitmapram2_w) AM_SHARE("bitmapram2")
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( m68705_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( m68705_map, AS_PROGRAM, 8, superqix_state )
 	ADDRESS_MAP_GLOBAL_MASK(0x7ff)
 	AM_RANGE(0x0000, 0x0000) AM_READ(hotsmash_68705_portA_r)
 	AM_RANGE(0x0001, 0x0001) AM_WRITE(hotsmash_68705_portB_w)
@@ -648,13 +616,13 @@ ADDRESS_MAP_END
 
 /* I8751 memory handlers */
 
-static ADDRESS_MAP_START( bootleg_mcu_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( bootleg_mcu_io_map, AS_IO, 8, superqix_state )
 	AM_RANGE(MCS51_PORT_P1, MCS51_PORT_P1) AM_WRITE(bootleg_mcu_p1_w)
 	AM_RANGE(MCS51_PORT_P3, MCS51_PORT_P3) AM_READWRITE(bootleg_mcu_p3_r, mcu_p3_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sqixu_mcu_io_map, AS_IO, 8 )
-	AM_RANGE(MCS51_PORT_P0, MCS51_PORT_P0) AM_READ(sqixu_mcu_p0_r)
+static ADDRESS_MAP_START( sqixu_mcu_io_map, AS_IO, 8, superqix_state )
+	AM_RANGE(MCS51_PORT_P0, MCS51_PORT_P0) AM_READ(sqix_system_status_r)
 	AM_RANGE(MCS51_PORT_P1, MCS51_PORT_P1) AM_READ_PORT("DSW1")
 	AM_RANGE(MCS51_PORT_P2, MCS51_PORT_P2) AM_WRITE(sqixu_mcu_p2_w)
 	AM_RANGE(MCS51_PORT_P3, MCS51_PORT_P3) AM_READWRITE(sqixu_mcu_p3_r, mcu_p3_w)
@@ -664,53 +632,53 @@ ADDRESS_MAP_END
 
 static INPUT_PORTS_START( pbillian )
 	PORT_START("DSW1")
-	PORT_DIPNAME( 0x07, 0x07, DEF_STR( Coin_A ) )
-	PORT_DIPSETTING(	0x03, DEF_STR( 5C_1C ) )
-	PORT_DIPSETTING(	0x04, DEF_STR( 4C_1C ) )
-	PORT_DIPSETTING(	0x05, DEF_STR( 3C_1C ) )
-	PORT_DIPSETTING(	0x06, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0x07, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( 2C_3C ) )
-	PORT_DIPSETTING(	0x02, DEF_STR( 1C_2C ) )
-	PORT_DIPSETTING(	0x01, DEF_STR( 1C_3C ) )
-	PORT_DIPNAME( 0x38, 0x38, DEF_STR( Coin_B ) )
-	PORT_DIPSETTING(	0x18, DEF_STR( 5C_1C ) )
-	PORT_DIPSETTING(	0x20, DEF_STR( 4C_1C ) )
-	PORT_DIPSETTING(	0x28, DEF_STR( 3C_1C ) )
-	PORT_DIPSETTING(	0x30, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0x38, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( 2C_3C ) )
-	PORT_DIPSETTING(	0x10, DEF_STR( 1C_2C ) )
-	PORT_DIPSETTING(	0x08, DEF_STR( 1C_3C ) )
-	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Allow_Continue ) )
-	PORT_DIPSETTING(	0x40, DEF_STR( No ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Yes ) )
-	PORT_DIPNAME( 0x80, 0x80, "Freeze" )
-	PORT_DIPSETTING(	0x80, DEF_STR( No ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Yes ) )
+	PORT_DIPNAME( 0x07, 0x07, DEF_STR( Coin_A ) )           PORT_DIPLOCATION("SW1:1,2,3")
+	PORT_DIPSETTING(    0x03, DEF_STR( 5C_1C ) )
+	PORT_DIPSETTING(    0x04, DEF_STR( 4C_1C ) )
+	PORT_DIPSETTING(    0x05, DEF_STR( 3C_1C ) )
+	PORT_DIPSETTING(    0x06, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x07, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 2C_3C ) )
+	PORT_DIPSETTING(    0x02, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(    0x01, DEF_STR( 1C_3C ) )
+	PORT_DIPNAME( 0x38, 0x38, DEF_STR( Coin_B ) )           PORT_DIPLOCATION("SW1:4,5,6")
+	PORT_DIPSETTING(    0x18, DEF_STR( 5C_1C ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( 4C_1C ) )
+	PORT_DIPSETTING(    0x28, DEF_STR( 3C_1C ) )
+	PORT_DIPSETTING(    0x30, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x38, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 2C_3C ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(    0x08, DEF_STR( 1C_3C ) )
+	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Allow_Continue ) )   PORT_DIPLOCATION("SW1:7")
+	PORT_DIPSETTING(    0x40, DEF_STR( No ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
+	PORT_DIPNAME( 0x80, 0x80, "Freeze" )                    PORT_DIPLOCATION("SW1:8")
+	PORT_DIPSETTING(    0x80, DEF_STR( No ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
 
 	PORT_START("DSW2")
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Lives ) )
-	PORT_DIPSETTING(	0x03, "2" )
-	PORT_DIPSETTING(	0x02, "3" )
-	PORT_DIPSETTING(	0x01, "4" )
-	PORT_DIPSETTING(	0x00, "5" )
-	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Bonus_Life ) )
-	PORT_DIPSETTING(	0x0c, "10/20/300K Points" )
-	PORT_DIPSETTING(	0x00, "10/30/500K Points" )
-	PORT_DIPSETTING(	0x08, "20/30/400K Points" )
-	PORT_DIPSETTING(	0x04, "30/40/500K Points" )
-	PORT_DIPNAME( 0x30, 0x10, DEF_STR( Difficulty ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Easy ) )
-	PORT_DIPSETTING(	0x10, DEF_STR( Normal ) )
-	PORT_DIPSETTING(	0x20, DEF_STR( Hard ) )
-	PORT_DIPSETTING(	0x30, DEF_STR( Very_Hard ) )
-	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Cabinet ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Upright ) )
-	PORT_DIPSETTING(	0x40, DEF_STR( Cocktail ) )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Flip_Screen ) )
-	PORT_DIPSETTING(	0x80, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Lives ) )            PORT_DIPLOCATION("SW2:1,2")
+	PORT_DIPSETTING(    0x03, "2" )
+	PORT_DIPSETTING(    0x02, "3" )
+	PORT_DIPSETTING(    0x01, "4" )
+	PORT_DIPSETTING(    0x00, "5" )
+	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Bonus_Life ) )       PORT_DIPLOCATION("SW2:3,4")
+	PORT_DIPSETTING(    0x0c, "10/20/300K Points" )
+	PORT_DIPSETTING(    0x00, "10/30/500K Points" )
+	PORT_DIPSETTING(    0x08, "20/30/400K Points" )
+	PORT_DIPSETTING(    0x04, "30/40/500K Points" )
+	PORT_DIPNAME( 0x30, 0x10, DEF_STR( Difficulty ) )       PORT_DIPLOCATION("SW2:5,6")
+	PORT_DIPSETTING(    0x00, DEF_STR( Easy ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( Normal ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( Hard ) )
+	PORT_DIPSETTING(    0x30, DEF_STR( Very_Hard ) )
+	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Cabinet ) )          PORT_DIPLOCATION("SW2:7")
+	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( Cocktail ) )
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Flip_Screen ) )      PORT_DIPLOCATION("SW2:8")
+	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -719,82 +687,82 @@ static INPUT_PORTS_START( pbillian )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_SPECIAL )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL )
 
 	PORT_START("BUTTONS")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON3 )	// high score initials
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 )	// fire (M powerup) + high score initials
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_COCKTAIL	// high score initials
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL	// fire (M powerup) + high score initials
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )     // N/C
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 )    // P1 fire (M powerup) + high score initials
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )     // N/C
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL  // P2 fire (M powerup) + high score initials
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_SPECIAL )	// mcu status (pending mcu->z80)
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL )	// mcu status (pending z80->mcu)
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_SPECIAL )   // mcu status (pending mcu->z80)
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL )   // mcu status (pending z80->mcu)
 
-	PORT_START("PADDLE1")
-	PORT_BIT( 0x3f, 0x00, IPT_PADDLE_V  ) PORT_MINMAX(0,0x3f) PORT_SENSITIVITY(30) PORT_KEYDELTA(3) PORT_CENTERDELTA(0) PORT_REVERSE
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON1 )
+	PORT_START("PLUNGER1")  // plunger mechanism for shot (BUTTON1 and PEDAL mapped to the same key in MAME)
+	PORT_BIT( 0x3f, 0x00, IPT_PEDAL ) PORT_MINMAX(0x00, 0x3f) PORT_SENSITIVITY(100) PORT_KEYDELTA(1)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 )
 
 	PORT_START("DIAL1")
-	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_SENSITIVITY(20) PORT_KEYDELTA(10)
+	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_SENSITIVITY(20) PORT_KEYDELTA(8)
 
-	PORT_START("PADDLE2")
-	PORT_BIT( 0x3f, 0x00, IPT_PADDLE_V  ) PORT_MINMAX(0,0x3f) PORT_SENSITIVITY(30) PORT_KEYDELTA(3) PORT_CENTERDELTA(0) PORT_REVERSE  PORT_COCKTAIL
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_START("PLUNGER2")
+	PORT_BIT( 0x3f, 0x00, IPT_PEDAL ) PORT_MINMAX(0x00, 0x3f) PORT_SENSITIVITY(100) PORT_KEYDELTA(1) PORT_COCKTAIL
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
 
 	PORT_START("DIAL2")
-	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_SENSITIVITY(20) PORT_KEYDELTA(10) PORT_COCKTAIL
+	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_SENSITIVITY(20) PORT_KEYDELTA(8) PORT_COCKTAIL
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( hotsmash )
 	PORT_START("DSW1")
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(	0x01, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Flip_Screen ) )
-	PORT_DIPSETTING(	0x02, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(	0x04, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Demo_Sounds ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x08, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x08, DEF_STR( On ) )
 	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Coin_A ) )
-	PORT_DIPSETTING(	0x10, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0x30, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( 2C_3C ) )
-	PORT_DIPSETTING(	0x20, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x30, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 2C_3C ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( 1C_2C ) )
 	PORT_DIPNAME( 0xc0, 0xc0, DEF_STR( Coin_B ) )
-	PORT_DIPSETTING(	0x40, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0xc0, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( 2C_3C ) )
-	PORT_DIPSETTING(	0x80, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0xc0, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 2C_3C ) )
+	PORT_DIPSETTING(    0x80, DEF_STR( 1C_2C ) )
 
 	PORT_START("DSW2")
 	PORT_DIPNAME( 0x03, 0x03, "Difficulty vs. CPU" )
-	PORT_DIPSETTING(	0x02, DEF_STR( Easy ) )
-	PORT_DIPSETTING(	0x03, DEF_STR( Normal ) )
-	PORT_DIPSETTING(	0x01, DEF_STR( Hard ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Hardest ) )
+	PORT_DIPSETTING(    0x02, DEF_STR( Easy ) )
+	PORT_DIPSETTING(    0x03, DEF_STR( Normal ) )
+	PORT_DIPSETTING(    0x01, DEF_STR( Hard ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) )
 	PORT_DIPNAME( 0x0c, 0x0c, "Difficulty vs. 2P" )
-	PORT_DIPSETTING(	0x08, DEF_STR( Easy ) )
-	PORT_DIPSETTING(	0x0c, DEF_STR( Normal ) )
-	PORT_DIPSETTING(	0x04, DEF_STR( Hard ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Hardest ) )
+	PORT_DIPSETTING(    0x08, DEF_STR( Easy ) )
+	PORT_DIPSETTING(    0x0c, DEF_STR( Normal ) )
+	PORT_DIPSETTING(    0x04, DEF_STR( Hard ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) )
 	PORT_DIPNAME( 0x10, 0x10, "Points per game" )
-	PORT_DIPSETTING(	0x00, "3" )
-	PORT_DIPSETTING(	0x10, "4" )
+	PORT_DIPSETTING(    0x00, "3" )
+	PORT_DIPSETTING(    0x10, "4" )
 	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(	0x20, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(	0x40, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(	0x80, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -803,8 +771,8 @@ static INPUT_PORTS_START( hotsmash )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_COIN2 )//$49c
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )//$42d
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL )	// mcu status (0 = pending mcu->z80)
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_SPECIAL )   // ?
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL )   // mcu status (0 = pending mcu->z80)
 
 	PORT_START("DIAL1")
 	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_SENSITIVITY(15) PORT_KEYDELTA(30) PORT_CENTERDELTA(0) PORT_PLAYER(1)
@@ -816,61 +784,61 @@ INPUT_PORTS_END
 
 
 static INPUT_PORTS_START( superqix )
-	PORT_START("DSW1")	/* DSW1 */
-	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Cabinet ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Upright ) )
-	PORT_DIPSETTING(	0x01, DEF_STR( Cocktail ) )
-	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Flip_Screen ) )
-	PORT_DIPSETTING(	0x02, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x04, 0x04, "Freeze" )
-	PORT_DIPSETTING(	0x04, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Allow_Continue ) )
-	PORT_DIPSETTING(	0x08, DEF_STR( No ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Yes ) )
-	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Coin_A ) )
-	PORT_DIPSETTING(	0x10, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0x30, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( 2C_3C ))
-	PORT_DIPSETTING(	0x20, DEF_STR( 1C_2C ) )
-	PORT_DIPNAME( 0xc0, 0xc0, DEF_STR( Coin_B ) )
-	PORT_DIPSETTING(	0x40, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0xc0, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( 2C_3C ))
-	PORT_DIPSETTING(	0x80, DEF_STR( 1C_2C ) )
+	PORT_START("DSW1")  /* DSW1 */
+	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Cabinet ) )          PORT_DIPLOCATION("SW1:1")
+	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
+	PORT_DIPSETTING(    0x01, DEF_STR( Cocktail ) )
+	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Flip_Screen ) )      PORT_DIPLOCATION("SW1:2")
+	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x04, 0x04, "Freeze" )                    PORT_DIPLOCATION("SW1:3")
+	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Allow_Continue ) )   PORT_DIPLOCATION("SW1:4")
+	PORT_DIPSETTING(    0x08, DEF_STR( No ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
+	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Coin_A ) )           PORT_DIPLOCATION("SW1:5,6")
+	PORT_DIPSETTING(    0x10, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x30, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 2C_3C ))
+	PORT_DIPSETTING(    0x20, DEF_STR( 1C_2C ) )
+	PORT_DIPNAME( 0xc0, 0xc0, DEF_STR( Coin_B ) )           PORT_DIPLOCATION("SW1:7,8")
+	PORT_DIPSETTING(    0x40, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0xc0, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 2C_3C ))
+	PORT_DIPSETTING(    0x80, DEF_STR( 1C_2C ) )
 
-	PORT_START("DSW2")	/* DSW2 */
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Difficulty ) )
-	PORT_DIPSETTING(	0x02, DEF_STR( Easy ) )
-	PORT_DIPSETTING(	0x03, DEF_STR( Normal ) )
-	PORT_DIPSETTING(	0x01, DEF_STR( Hard ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Hardest ) )
-	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Bonus_Life ) )
-	PORT_DIPSETTING(	0x08, "20000 50000" )
-	PORT_DIPSETTING(	0x0c, "30000 100000" )
-	PORT_DIPSETTING(	0x04, "50000 100000" )
-	PORT_DIPSETTING(	0x00, DEF_STR( None ) )
-	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Lives ) )
-	PORT_DIPSETTING(	0x20, "2" )
-	PORT_DIPSETTING(	0x30, "3" )
-	PORT_DIPSETTING(	0x10, "4" )
-	PORT_DIPSETTING(	0x00, "5" )
-	PORT_DIPNAME( 0xc0, 0xc0, "Fill Area" )
-	PORT_DIPSETTING(	0x80, "70%" )
-	PORT_DIPSETTING(	0xc0, "75%" )
-	PORT_DIPSETTING(	0x40, "80%" )
-	PORT_DIPSETTING(	0x00, "85%" )
+	PORT_START("DSW2")  /* DSW2 */
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Difficulty ) )       PORT_DIPLOCATION("SW2:1,2")
+	PORT_DIPSETTING(    0x02, DEF_STR( Easy ) )
+	PORT_DIPSETTING(    0x03, DEF_STR( Normal ) )
+	PORT_DIPSETTING(    0x01, DEF_STR( Hard ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) )
+	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Bonus_Life ) )       PORT_DIPLOCATION("SW2:3,4")
+	PORT_DIPSETTING(    0x08, "20000 50000" )
+	PORT_DIPSETTING(    0x0c, "30000 100000" )
+	PORT_DIPSETTING(    0x04, "50000 100000" )
+	PORT_DIPSETTING(    0x00, DEF_STR( None ) )
+	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Lives ) )            PORT_DIPLOCATION("SW2:5,6")
+	PORT_DIPSETTING(    0x20, "2" )
+	PORT_DIPSETTING(    0x30, "3" )
+	PORT_DIPSETTING(    0x10, "4" )
+	PORT_DIPSETTING(    0x00, "5" )
+	PORT_DIPNAME( 0xc0, 0xc0, "Fill Area" )                 PORT_DIPLOCATION("SW2:7,8")
+	PORT_DIPSETTING(    0x80, "70%" )
+	PORT_DIPSETTING(    0xc0, "75%" )
+	PORT_DIPSETTING(    0x40, "80%" )
+	PORT_DIPSETTING(    0x00, "85%" )
 
 	PORT_START("SYSTEM")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START2 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE1 )	// doesn't work in bootleg
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE1 )   // doesn't work in bootleg
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL )	// Z80 status (pending z80->mcu)
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_SPECIAL )   // Z80 status (pending mcu->z80)
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL )   // Z80 status (pending z80->mcu)
 
 	PORT_START("P1")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_4WAY
@@ -879,7 +847,7 @@ static INPUT_PORTS_START( superqix )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_4WAY
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_VBLANK )	/* ??? */
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")   /* ??? */
 	PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
 
 	PORT_START("P2")
@@ -889,8 +857,8 @@ static INPUT_PORTS_START( superqix )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_4WAY PORT_COCKTAIL
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_SPECIAL )	// mcu status (pending mcu->z80)
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL )	// mcu status (pending z80->mcu)
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_SPECIAL )   // mcu status (pending mcu->z80)
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL )   // mcu status (pending z80->mcu)
 INPUT_PORTS_END
 
 
@@ -898,7 +866,7 @@ INPUT_PORTS_END
 static const gfx_layout pbillian_charlayout =
 {
 	8,8,
-	0x800,	/* doesn't use the whole ROM space */
+	0x800,  /* doesn't use the whole ROM space */
 	4,
 	{ 0, 1, 2, 3 },
 	{ 0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4 },
@@ -937,9 +905,9 @@ static GFXDECODE_START( pbillian )
 GFXDECODE_END
 
 static GFXDECODE_START( sqix )
-	GFXDECODE_ENTRY( "gfx1", 0x00000, sqix_charlayout,   0, 16 )	/* Chars */
-	GFXDECODE_ENTRY( "gfx2", 0x00000, sqix_charlayout,   0, 16 )	/* Background tiles */
-	GFXDECODE_ENTRY( "gfx3", 0x00000, spritelayout,      0, 16 )	/* Sprites */
+	GFXDECODE_ENTRY( "gfx1", 0x00000, sqix_charlayout,   0, 16 )    /* Chars */
+	GFXDECODE_ENTRY( "gfx2", 0x00000, sqix_charlayout,   0, 16 )    /* Background tiles */
+	GFXDECODE_ENTRY( "gfx3", 0x00000, spritelayout,      0, 16 )    /* Sprites */
 GFXDECODE_END
 
 
@@ -955,7 +923,7 @@ static const ay8910_interface pbillian_ay8910_interface =
 {
 	AY8910_LEGACY_OUTPUT,
 	AY8910_DEFAULT_LOADS,
-	DEVCB_HANDLER(pbillian_ay_port_a_r),			/* port Aread */
+	DEVCB_DRIVER_MEMBER(superqix_state,pbillian_ay_port_a_r),   /* port Aread */
 	DEVCB_INPUT_PORT("SYSTEM"),
 	DEVCB_NULL,
 	DEVCB_NULL
@@ -965,7 +933,7 @@ static const ay8910_interface hotsmash_ay8910_interface =
 {
 	AY8910_LEGACY_OUTPUT,
 	AY8910_DEFAULT_LOADS,
-	DEVCB_HANDLER(hotsmash_ay_port_a_r),			/* port Aread */
+	DEVCB_DRIVER_MEMBER(superqix_state,hotsmash_ay_port_a_r),   /* port Aread */
 	DEVCB_INPUT_PORT("SYSTEM"),
 	DEVCB_NULL,
 	DEVCB_NULL
@@ -976,7 +944,7 @@ static const ay8910_interface sqix_ay8910_interface_1 =
 	AY8910_LEGACY_OUTPUT,
 	AY8910_DEFAULT_LOADS,
 	DEVCB_INPUT_PORT("P1"),
-	DEVCB_HANDLER(in4_mcu_r),		/* port Bread */
+	DEVCB_DRIVER_MEMBER(superqix_state,in4_mcu_r),      /* port Bread */
 	DEVCB_NULL,
 	DEVCB_NULL
 };
@@ -986,9 +954,9 @@ static const ay8910_interface sqix_ay8910_interface_2 =
 	AY8910_LEGACY_OUTPUT,
 	AY8910_DEFAULT_LOADS,
 	DEVCB_INPUT_PORT("DSW2"),
-	DEVCB_HANDLER(sqix_from_mcu_r),	/* port Bread */
-	DEVCB_NULL,				/* port Awrite */
-	DEVCB_HANDLER(sqix_z80_mcu_w)		/* port Bwrite */
+	DEVCB_DRIVER_MEMBER(superqix_state,sqix_from_mcu_r),    /* port Bread */
+	DEVCB_NULL,                     /* port Awrite */
+	DEVCB_DRIVER_MEMBER(superqix_state,sqix_z80_mcu_w)  /* port Bwrite */
 };
 
 static const ay8910_interface bootleg_ay8910_interface_1 =
@@ -1006,50 +974,47 @@ static const ay8910_interface bootleg_ay8910_interface_2 =
 	AY8910_LEGACY_OUTPUT,
 	AY8910_DEFAULT_LOADS,
 	DEVCB_INPUT_PORT("DSW2"),
-	DEVCB_HANDLER(bootleg_in0_r),		/* port Bread */
+	DEVCB_DRIVER_MEMBER(superqix_state,bootleg_in0_r),  /* port Bread */
 	DEVCB_NULL,
 	DEVCB_NULL
 };
 
-
-
-static INTERRUPT_GEN( sqix_interrupt )
+INTERRUPT_GEN_MEMBER(superqix_state::vblank_irq)
 {
-	/* highly suspicious... */
-	if (cpu_getiloops(device) <= 3)
-		nmi_line_assert(device);
+
+	if(m_nmi_mask)
+		device.execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 }
 
-static INTERRUPT_GEN( bootleg_interrupt )
+INTERRUPT_GEN_MEMBER(superqix_state::sqix_timer_irq)
 {
-	/* highly suspicious... */
-	if (cpu_getiloops(device) <= 3)
-		nmi_line_pulse(device);
+
+	if (m_nmi_mask)
+		device.execute().set_input_line(INPUT_LINE_NMI, ASSERT_LINE);
 }
 
 
 
 static MACHINE_CONFIG_START( pbillian, superqix_state )
-	MCFG_CPU_ADD("maincpu", Z80,12000000/2)		 /* 6 MHz */
+	MCFG_CPU_ADD("maincpu", Z80,12000000/2)      /* 6 MHz */
 	MCFG_CPU_PROGRAM_MAP(main_map)
 	MCFG_CPU_IO_MAP(pbillian_port_map)
-	MCFG_CPU_VBLANK_INT("screen", nmi_line_pulse)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", superqix_state,  vblank_irq)
 
-	MCFG_MACHINE_START(pbillian)
+	MCFG_MACHINE_START_OVERRIDE(superqix_state,pbillian)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(256, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(pbillian)
+	MCFG_SCREEN_UPDATE_DRIVER(superqix_state, screen_update_pbillian)
 
 	MCFG_GFXDECODE(pbillian)
 	MCFG_PALETTE_LENGTH(512)
 
-	MCFG_VIDEO_START(pbillian)
+	MCFG_VIDEO_START_OVERRIDE(superqix_state,pbillian)
 
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
@@ -1057,35 +1022,33 @@ static MACHINE_CONFIG_START( pbillian, superqix_state )
 	MCFG_SOUND_CONFIG(pbillian_ay8910_interface)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.30)
 
-	MCFG_SOUND_ADD("samples", SAMPLES, 0)
-	MCFG_SOUND_CONFIG(pbillian_samples_interface)
+	MCFG_SAMPLES_ADD("samples", pbillian_samples_interface)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 MACHINE_CONFIG_END
 
 static MACHINE_CONFIG_START( hotsmash, superqix_state )
-	MCFG_CPU_ADD("maincpu", Z80,12000000/2)		 /* 6 MHz */
+	MCFG_CPU_ADD("maincpu", Z80,12000000/2)      /* 6 MHz */
 	MCFG_CPU_PROGRAM_MAP(main_map)
 	MCFG_CPU_IO_MAP(hotsmash_port_map)
-	MCFG_CPU_VBLANK_INT("screen", nmi_line_pulse)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", superqix_state,  vblank_irq)
 
 	MCFG_CPU_ADD("mcu", M68705, 4000000) /* ???? */
 	MCFG_CPU_PROGRAM_MAP(m68705_map)
 
-	MCFG_MACHINE_START(pbillian)
+	MCFG_MACHINE_START_OVERRIDE(superqix_state,pbillian)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(256, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(pbillian)
+	MCFG_SCREEN_UPDATE_DRIVER(superqix_state, screen_update_pbillian)
 
 	MCFG_GFXDECODE(pbillian)
 	MCFG_PALETTE_LENGTH(512)
 
-	MCFG_VIDEO_START(pbillian)
+	MCFG_VIDEO_START_OVERRIDE(superqix_state,pbillian)
 
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
@@ -1093,39 +1056,37 @@ static MACHINE_CONFIG_START( hotsmash, superqix_state )
 	MCFG_SOUND_CONFIG(hotsmash_ay8910_interface)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.30)
 
-	MCFG_SOUND_ADD("samples", SAMPLES, 0)
-	MCFG_SOUND_CONFIG(pbillian_samples_interface)
+	MCFG_SAMPLES_ADD("samples", pbillian_samples_interface)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 MACHINE_CONFIG_END
 
 static MACHINE_CONFIG_START( sqix, superqix_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, 12000000/2)	/* 6 MHz */
+	MCFG_CPU_ADD("maincpu", Z80, 12000000/2)    /* 6 MHz */
 	MCFG_CPU_PROGRAM_MAP(main_map)
 	MCFG_CPU_IO_MAP(sqix_port_map)
-	MCFG_CPU_VBLANK_INT_HACK(sqix_interrupt,6)	/* ??? */
+	MCFG_CPU_PERIODIC_INT_DRIVER(superqix_state, sqix_timer_irq,  4*60) /* ??? */
 
-	MCFG_CPU_ADD("mcu", I8751, 12000000/3)	/* ??? */
+	MCFG_CPU_ADD("mcu", I8751, 12000000/3)  /* ??? */
 	MCFG_CPU_IO_MAP(bootleg_mcu_io_map)
 
-	MCFG_QUANTUM_TIME(attotime::from_hz(30000))
+	MCFG_QUANTUM_PERFECT_CPU("maincpu")
 
-	MCFG_MACHINE_START(superqix)
+	MCFG_MACHINE_START_OVERRIDE(superqix_state,superqix)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(superqix)
+	MCFG_SCREEN_UPDATE_DRIVER(superqix_state, screen_update_superqix)
 
 	MCFG_GFXDECODE(sqix)
 	MCFG_PALETTE_LENGTH(256)
 
-	MCFG_VIDEO_START(superqix)
+	MCFG_VIDEO_START_OVERRIDE(superqix_state,superqix)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -1150,26 +1111,25 @@ MACHINE_CONFIG_END
 static MACHINE_CONFIG_START( sqixbl, superqix_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, 12000000/2)	/* 6 MHz */
+	MCFG_CPU_ADD("maincpu", Z80, 12000000/2)    /* 6 MHz */
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_IO_MAP(bootleg_port_map)
-	MCFG_CPU_VBLANK_INT_HACK(bootleg_interrupt,6)	/* ??? */
+	MCFG_CPU_IO_MAP(sqix_port_map)
+	MCFG_CPU_PERIODIC_INT_DRIVER(superqix_state, sqix_timer_irq,  4*60) /* ??? */
 
-	MCFG_MACHINE_START(superqix)
+	MCFG_MACHINE_START_OVERRIDE(superqix_state,superqix)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(superqix)
+	MCFG_SCREEN_UPDATE_DRIVER(superqix_state, screen_update_superqix)
 
 	MCFG_GFXDECODE(sqix)
 	MCFG_PALETTE_LENGTH(256)
 
-	MCFG_VIDEO_START(superqix)
+	MCFG_VIDEO_START_OVERRIDE(superqix_state,superqix)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -1229,7 +1189,7 @@ ROM_START( sqix )
 	ROM_LOAD( "b03-01-2.f3",   0x00000, 0x08000, CRC(5ded636b) SHA1(827954001b4617b3bd439be75094d8dca06ea32b) )
 	ROM_LOAD( "b03-02.h3",     0x10000, 0x10000, CRC(9c23cb64) SHA1(7e04cb18cabdc0031621162cbc228cd95875a022) )
 
-	ROM_REGION( 0x1000, "mcu", 0 )	/* I8751 code */
+	ROM_REGION( 0x1000, "mcu", 0 )  /* I8751 code */
 	ROM_LOAD( "b03-03.l2",    0x00000, 0x1000, NO_DUMP ) /* Original Taito ID code for this set's MCU */
 	/* sq07.108 is from the sqixb1 set, it will be removed once the actual MCU code from b03-03.l2 is decapped / dumped */
 	ROM_LOAD( "sq07.108",     0x00000, 0x1000, BAD_DUMP CRC(d11411fb) SHA1(31183f433596c4d2503c01f6dc8d91024f2cf5de) )
@@ -1249,7 +1209,7 @@ ROM_START( sqixr1 )
 	ROM_LOAD( "b03-01-1.f3",   0x00000, 0x08000, CRC(ad614117) SHA1(c461f00a2aecde1bc3860c15a3c31091b14665a2) )
 	ROM_LOAD( "b03-02.h3",     0x10000, 0x10000, CRC(9c23cb64) SHA1(7e04cb18cabdc0031621162cbc228cd95875a022) )
 
-	ROM_REGION( 0x1000, "mcu", 0 )	/* I8751 code */
+	ROM_REGION( 0x1000, "mcu", 0 )  /* I8751 code */
 	ROM_LOAD( "b03-03.l2",    0x00000, 0x1000, NO_DUMP ) /* Original Taito ID code for this set's MCU */
 	/* sq07.108 is from the sqixb1 set, it will be removed once the actual MCU code from b03-03.l2 is decapped / dumped */
 	ROM_LOAD( "sq07.108",     0x00000, 0x1000, BAD_DUMP CRC(d11411fb) SHA1(31183f433596c4d2503c01f6dc8d91024f2cf5de) )
@@ -1269,7 +1229,7 @@ ROM_START( sqixu )
 	ROM_LOAD( "b03-06.f3",    0x00000, 0x08000, CRC(4f59f7af) SHA1(6ea627ea8505cf8d1a5a1350258180c61fbd1ed9) )
 	ROM_LOAD( "b03-07.h3",    0x10000, 0x10000, CRC(4c417d4a) SHA1(de46551da1b27312dca40240a210e77595cf9dbd) )
 
-	ROM_REGION( 0x1000, "mcu", 0 )	/* I8751 code */
+	ROM_REGION( 0x1000, "mcu", 0 )  /* I8751 code */
 	ROM_LOAD( "b03-08.l2",    0x00000, 0x01000, CRC(7c338c0f) SHA1(b91468c881641f807067835b2dd490cd3e3c577e) )
 
 	ROM_REGION( 0x08000, "gfx1", 0 )
@@ -1287,7 +1247,7 @@ ROM_START( sqixb1 ) /* this was probably a bootleg */
 	ROM_LOAD( "sq01.97",       0x00000, 0x08000, CRC(0888b7de) SHA1(de3e4637436de185f43d2ad4186d4cfdcd4d33d9) )
 	ROM_LOAD( "b03-02.h3",     0x10000, 0x10000, CRC(9c23cb64) SHA1(7e04cb18cabdc0031621162cbc228cd95875a022) )
 
-	ROM_REGION( 0x10000, "mcu", 0 )	/* I8751 code */
+	ROM_REGION( 0x10000, "mcu", 0 ) /* I8751 code */
 	ROM_LOAD( "sq07.108",     0x00000, 0x1000, BAD_DUMP CRC(d11411fb) SHA1(31183f433596c4d2503c01f6dc8d91024f2cf5de) )
 
 	ROM_REGION( 0x08000, "gfx1", 0 )
@@ -1349,31 +1309,17 @@ ROM_END
 
 
 
-static DRIVER_INIT( pbillian )
+DRIVER_INIT_MEMBER(superqix_state,sqix)
 {
-	superqix_state *state = machine.driver_data<superqix_state>();
-	state->m_pbillian_show_power = 1;
+	m_invert_coin_lockout = 1;
 }
 
-static DRIVER_INIT( hotsmash )
+DRIVER_INIT_MEMBER(superqix_state,sqixa)
 {
-	superqix_state *state = machine.driver_data<superqix_state>();
-	state->m_pbillian_show_power = 0;
+	m_invert_coin_lockout = 0;
 }
 
-static DRIVER_INIT( sqix )
-{
-	superqix_state *state = machine.driver_data<superqix_state>();
-	state->m_invert_coin_lockout = 1;
-}
-
-static DRIVER_INIT( sqixa )
-{
-	superqix_state *state = machine.driver_data<superqix_state>();
-	state->m_invert_coin_lockout = 0;
-}
-
-static DRIVER_INIT( perestro )
+DRIVER_INIT_MEMBER(superqix_state,perestro)
 {
 	UINT8 *src;
 	int len;
@@ -1381,8 +1327,8 @@ static DRIVER_INIT( perestro )
 	int i,j;
 
 	/* decrypt program code; the address lines are shuffled around in a non-trivial way */
-	src = machine.region("maincpu")->base();
-	len = machine.region("maincpu")->bytes();
+	src = machine().root_device().memregion("maincpu")->base();
+	len = machine().root_device().memregion("maincpu")->bytes();
 	for (i = 0;i < len;i += 16)
 	{
 		memcpy(temp,&src[i],16);
@@ -1401,8 +1347,8 @@ static DRIVER_INIT( perestro )
 	}
 
 	/* decrypt gfx ROMs; simple bit swap on the address lines */
-	src = machine.region("gfx1")->base();
-	len = machine.region("gfx1")->bytes();
+	src = machine().root_device().memregion("gfx1")->base();
+	len = machine().root_device().memregion("gfx1")->bytes();
 	for (i = 0;i < len;i += 16)
 	{
 		memcpy(temp,&src[i],16);
@@ -1412,8 +1358,8 @@ static DRIVER_INIT( perestro )
 		}
 	}
 
-	src = machine.region("gfx2")->base();
-	len = machine.region("gfx2")->bytes();
+	src = machine().root_device().memregion("gfx2")->base();
+	len = machine().root_device().memregion("gfx2")->bytes();
 	for (i = 0;i < len;i += 16)
 	{
 		memcpy(temp,&src[i],16);
@@ -1423,8 +1369,8 @@ static DRIVER_INIT( perestro )
 		}
 	}
 
-	src = machine.region("gfx3")->base();
-	len = machine.region("gfx3")->bytes();
+	src = machine().root_device().memregion("gfx3")->base();
+	len = machine().root_device().memregion("gfx3")->bytes();
 	for (i = 0;i < len;i += 16)
 	{
 		memcpy(temp,&src[i],16);
@@ -1437,12 +1383,12 @@ static DRIVER_INIT( perestro )
 
 
 
-GAME( 1986, pbillian, 0,        pbillian, pbillian, pbillian, ROT0,  "Taito", "Prebillian", GAME_SUPPORTS_SAVE )
-GAME( 1987, hotsmash, 0,        hotsmash, hotsmash, hotsmash, ROT90, "Taito", "Vs. Hot Smash", GAME_SUPPORTS_SAVE )
-GAME( 1987, sqix,     0,        sqix,     superqix, sqix,     ROT90, "Taito", "Super Qix (World, Rev 2)", GAME_SUPPORTS_SAVE )
-GAME( 1987, sqixr1,   sqix,     sqix,     superqix, sqix,     ROT90, "Taito", "Super Qix (World, Rev 1)", GAME_SUPPORTS_SAVE )
-GAME( 1987, sqixu,    sqix,     sqixu,    superqix, 0,        ROT90, "Taito (Romstar License)", "Super Qix (US)", GAME_SUPPORTS_SAVE )
-GAME( 1987, sqixb1,   sqix,     sqix,     superqix, sqixa,    ROT90, "bootleg", "Super Qix (bootleg set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1987, sqixb2,   sqix,     sqixbl,   superqix, 0,        ROT90, "bootleg", "Super Qix (bootleg set 2)", GAME_SUPPORTS_SAVE )
-GAME( 1994, perestro, 0,        sqixbl,   superqix, perestro, ROT90, "Promat", "Perestroika Girls", GAME_SUPPORTS_SAVE )
-GAME( 1993, perestrof,perestro, sqixbl,   superqix, perestro, ROT90, "Promat (Fuuki license)", "Perestroika Girls (Fuuki license)", GAME_SUPPORTS_SAVE )
+GAME( 1986, pbillian, 0,        pbillian, pbillian, driver_device, 0,        ROT0,  "Kaneko / Taito", "Prebillian", GAME_SUPPORTS_SAVE )
+GAME( 1987, hotsmash, 0,        hotsmash, hotsmash, driver_device, 0,        ROT90, "Kaneko / Taito", "Vs. Hot Smash", GAME_SUPPORTS_SAVE )
+GAME( 1987, sqix,     0,        sqix,     superqix, superqix_state, sqix,     ROT90, "Kaneko / Taito", "Super Qix (World, Rev 2)", GAME_SUPPORTS_SAVE )
+GAME( 1987, sqixr1,   sqix,     sqix,     superqix, superqix_state, sqix,     ROT90, "Kaneko / Taito", "Super Qix (World, Rev 1)", GAME_SUPPORTS_SAVE )
+GAME( 1987, sqixu,    sqix,     sqixu,    superqix, driver_device, 0,        ROT90, "Kaneko / Taito (Romstar License)", "Super Qix (US)", GAME_SUPPORTS_SAVE )
+GAME( 1987, sqixb1,   sqix,     sqix,     superqix, superqix_state, sqixa,    ROT90, "bootleg", "Super Qix (bootleg set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1987, sqixb2,   sqix,     sqixbl,   superqix, driver_device, 0,        ROT90, "bootleg", "Super Qix (bootleg set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1994, perestro, 0,        sqixbl,   superqix, superqix_state, perestro, ROT90, "Promat", "Perestroika Girls", GAME_SUPPORTS_SAVE )
+GAME( 1993, perestrof,perestro, sqixbl,   superqix, superqix_state, perestro, ROT90, "Promat (Fuuki license)", "Perestroika Girls (Fuuki license)", GAME_SUPPORTS_SAVE )

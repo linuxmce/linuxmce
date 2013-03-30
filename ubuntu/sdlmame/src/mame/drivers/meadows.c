@@ -124,6 +124,7 @@
 
 #include "deadeye.lh"
 #include "gypsyjug.lh"
+#include "minferno.lh"
 
 #define MASTER_CLOCK XTAL_5MHz
 
@@ -135,23 +136,23 @@
  *
  *************************************/
 
-static READ8_HANDLER( hsync_chain_r )
+READ8_MEMBER(meadows_state::hsync_chain_r)
 {
-	UINT8 val = space->machine().primary_screen->hpos();
+	UINT8 val = machine().primary_screen->hpos();
 	return BITSWAP8(val,0,1,2,3,4,5,6,7);
 }
 
 
-static READ8_HANDLER( vsync_chain_hi_r )
+READ8_MEMBER(meadows_state::vsync_chain_hi_r)
 {
-	UINT8 val = space->machine().primary_screen->vpos();
+	UINT8 val = machine().primary_screen->vpos();
 	return ((val >> 1) & 0x08) | ((val >> 3) & 0x04) | ((val >> 5) & 0x02) | (val >> 7);
 }
 
 
-static READ8_HANDLER( vsync_chain_lo_r )
+READ8_MEMBER(meadows_state::vsync_chain_lo_r)
 {
-	UINT8 val = space->machine().primary_screen->vpos();
+	UINT8 val = machine().primary_screen->vpos();
 	return val & 0x0f;
 }
 
@@ -163,25 +164,24 @@ static READ8_HANDLER( vsync_chain_lo_r )
  *
  *************************************/
 
-static WRITE8_HANDLER( meadows_audio_w )
+WRITE8_MEMBER(meadows_state::meadows_audio_w)
 {
-	meadows_state *state = space->machine().driver_data<meadows_state>();
 	switch (offset)
 	{
 		case 0:
-			if (state->m_0c00 == data)
+			if (m_0c00 == data)
 				break;
 			logerror("meadows_audio_w %d $%02x\n", offset, data);
-			state->m_0c00 = data;
-            break;
+			m_0c00 = data;
+			break;
 
 		case 1:
 			logerror("meadows_audio_w %d $%02x\n", offset, data);
-            break;
+			break;
 
-        case 2:
+		case 2:
 			logerror("meadows_audio_w %d $%02x\n", offset, data);
-            break;
+			break;
 
 		case 3:
 /*          S2650_Clear_Pending_Interrupts(); */
@@ -197,9 +197,9 @@ static WRITE8_HANDLER( meadows_audio_w )
  *
  *************************************/
 
-static INPUT_CHANGED( coin_inserted )
+INPUT_CHANGED_MEMBER(meadows_state::coin_inserted)
 {
-	cputag_set_input_line_and_vector(field->port->machine(), "maincpu", 0, (newval ? ASSERT_LINE : CLEAR_LINE), 0x82);
+	machine().device("maincpu")->execute().set_input_line_and_vector(0, (newval ? ASSERT_LINE : CLEAR_LINE), 0x82);
 }
 
 
@@ -210,12 +210,11 @@ static INPUT_CHANGED( coin_inserted )
  *
  *************************************/
 
-static INTERRUPT_GEN( meadows_interrupt )
+INTERRUPT_GEN_MEMBER(meadows_state::meadows_interrupt)
 {
-	meadows_state *state = device->machine().driver_data<meadows_state>();
-    /* fake something toggling the sense input line of the S2650 */
-	state->m_main_sense_state ^= 1;
-	device_set_input_line(device, 1, state->m_main_sense_state ? ASSERT_LINE : CLEAR_LINE);
+	/* fake something toggling the sense input line of the S2650 */
+	m_main_sense_state ^= 1;
+	device.execute().set_input_line(1, m_main_sense_state ? ASSERT_LINE : CLEAR_LINE);
 }
 
 
@@ -226,11 +225,10 @@ static INTERRUPT_GEN( meadows_interrupt )
  *
  *************************************/
 
-static INTERRUPT_GEN( minferno_interrupt )
+INTERRUPT_GEN_MEMBER(meadows_state::minferno_interrupt)
 {
-	meadows_state *state = device->machine().driver_data<meadows_state>();
-	state->m_main_sense_state++;
-	device_set_input_line(device, 1, (state->m_main_sense_state & 0x40) ? ASSERT_LINE : CLEAR_LINE );
+	m_main_sense_state++;
+	device.execute().set_input_line(1, (m_main_sense_state & 0x40) ? ASSERT_LINE : CLEAR_LINE );
 }
 
 
@@ -241,38 +239,37 @@ static INTERRUPT_GEN( minferno_interrupt )
  *
  *************************************/
 
-static WRITE8_HANDLER( audio_hardware_w )
+WRITE8_MEMBER(meadows_state::audio_hardware_w)
 {
-	meadows_state *state = space->machine().driver_data<meadows_state>();
 	switch (offset & 3)
 	{
 		case 0: /* DAC */
-			meadows_sh_dac_w(space->machine(), data ^ 0xff);
-            break;
+			meadows_sh_dac_w(machine(), data ^ 0xff);
+			break;
 
 		case 1: /* counter clk 5 MHz / 256 */
-			if (data == state->m_0c01)
+			if (data == m_0c01)
 				break;
 			logerror("audio_w ctr1 preset $%x amp %d\n", data & 15, data >> 4);
-			state->m_0c01 = data;
-			meadows_sh_update(space->machine());
+			m_0c01 = data;
+			meadows_sh_update(machine());
 			break;
 
 		case 2: /* counter clk 5 MHz / 32 (/ 2 or / 4) */
-			if (data == state->m_0c02)
-                break;
+			if (data == m_0c02)
+				break;
 			logerror("audio_w ctr2 preset $%02x\n", data);
-			state->m_0c02 = data;
-			meadows_sh_update(space->machine());
-            break;
+			m_0c02 = data;
+			meadows_sh_update(machine());
+			break;
 
 		case 3: /* audio enable */
-			if (data == state->m_0c03)
-                break;
+			if (data == m_0c03)
+				break;
 			logerror("audio_w enable ctr2/2:%d ctr2:%d dac:%d ctr1:%d\n", data&1, (data>>1)&1, (data>>2)&1, (data>>3)&1);
-			state->m_0c03 = data;
-			meadows_sh_update(space->machine());
-            break;
+			m_0c03 = data;
+			meadows_sh_update(machine());
+			break;
 	}
 }
 
@@ -284,22 +281,21 @@ static WRITE8_HANDLER( audio_hardware_w )
  *
  *************************************/
 
-static READ8_HANDLER( audio_hardware_r )
+READ8_MEMBER(meadows_state::audio_hardware_r)
 {
-	meadows_state *state = space->machine().driver_data<meadows_state>();
 	int data = 0;
 
 	switch (offset)
 	{
 		case 0:
-			data = state->m_0c00;
-            break;
+			data = m_0c00;
+			break;
 
 		case 1: break;
 		case 2: break;
 		case 3: break;
 	}
-    return data;
+	return data;
 }
 
 
@@ -310,12 +306,11 @@ static READ8_HANDLER( audio_hardware_r )
  *
  *************************************/
 
-static INTERRUPT_GEN( audio_interrupt )
+INTERRUPT_GEN_MEMBER(meadows_state::audio_interrupt)
 {
-	meadows_state *state = device->machine().driver_data<meadows_state>();
-    /* fake something toggling the sense input line of the S2650 */
-	state->m_audio_sense_state ^= 1;
-	device_set_input_line(device, 1, state->m_audio_sense_state ? ASSERT_LINE : CLEAR_LINE);
+	/* fake something toggling the sense input line of the S2650 */
+	m_audio_sense_state ^= 1;
+	device.execute().set_input_line(1, m_audio_sense_state ? ASSERT_LINE : CLEAR_LINE);
 }
 
 
@@ -326,10 +321,10 @@ static INTERRUPT_GEN( audio_interrupt )
  *
  *************************************/
 
-static PALETTE_INIT( meadows )
+void meadows_state::palette_init()
 {
-	palette_set_color(machine, 0, RGB_BLACK);
-	palette_set_color(machine, 1, RGB_WHITE);
+	palette_set_color(machine(), 0, RGB_BLACK);
+	palette_set_color(machine(), 1, RGB_WHITE);
 }
 
 
@@ -339,35 +334,35 @@ static PALETTE_INIT( meadows )
  *
  *************************************/
 
-static ADDRESS_MAP_START( meadows_main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( meadows_main_map, AS_PROGRAM, 8, meadows_state )
 	AM_RANGE(0x0000, 0x0bff) AM_ROM
 	AM_RANGE(0x0c00, 0x0c00) AM_READ_PORT("INPUTS")
 	AM_RANGE(0x0c01, 0x0c01) AM_READ_PORT("STICK")
 	AM_RANGE(0x0c02, 0x0c02) AM_READ(hsync_chain_r)
 	AM_RANGE(0x0c03, 0x0c03) AM_READ_PORT("DSW")
 	AM_RANGE(0x0c00, 0x0c03) AM_WRITE(meadows_audio_w)
-	AM_RANGE(0x0d00, 0x0d0f) AM_WRITE(meadows_spriteram_w) AM_BASE_MEMBER(meadows_state, m_spriteram)
+	AM_RANGE(0x0d00, 0x0d0f) AM_WRITE(meadows_spriteram_w) AM_SHARE("spriteram")
 	AM_RANGE(0x0e00, 0x0eff) AM_RAM
 	AM_RANGE(0x1000, 0x1bff) AM_ROM
-	AM_RANGE(0x1c00, 0x1fff) AM_RAM_WRITE(meadows_videoram_w) AM_BASE_MEMBER(meadows_state, m_videoram)
+	AM_RANGE(0x1c00, 0x1fff) AM_RAM_WRITE(meadows_videoram_w) AM_SHARE("videoram")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( bowl3d_main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( bowl3d_main_map, AS_PROGRAM, 8, meadows_state )
 	AM_RANGE(0x0000, 0x0bff) AM_ROM
 	AM_RANGE(0x0c00, 0x0c00) AM_READ_PORT("INPUTS1")
 	AM_RANGE(0x0c01, 0x0c01) AM_READ_PORT("INPUTS2")
 	AM_RANGE(0x0c02, 0x0c02) AM_READ(hsync_chain_r)
 	AM_RANGE(0x0c03, 0x0c03) AM_READ_PORT("DSW")
 	AM_RANGE(0x0c00, 0x0c03) AM_WRITE(meadows_audio_w)
-	AM_RANGE(0x0d00, 0x0d0f) AM_WRITE(meadows_spriteram_w) AM_BASE_MEMBER(meadows_state, m_spriteram)
+	AM_RANGE(0x0d00, 0x0d0f) AM_WRITE(meadows_spriteram_w) AM_SHARE("spriteram")
 	AM_RANGE(0x0e00, 0x0eff) AM_RAM
 	AM_RANGE(0x1000, 0x1bff) AM_ROM
-	AM_RANGE(0x1c00, 0x1fff) AM_RAM_WRITE(meadows_videoram_w) AM_BASE_MEMBER(meadows_state, m_videoram)
+	AM_RANGE(0x1c00, 0x1fff) AM_RAM_WRITE(meadows_videoram_w) AM_SHARE("videoram")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( minferno_main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( minferno_main_map, AS_PROGRAM, 8, meadows_state )
 	AM_RANGE(0x0000, 0x0bff) AM_ROM
-	AM_RANGE(0x1c00, 0x1eff) AM_RAM_WRITE(meadows_videoram_w) AM_BASE_MEMBER(meadows_state, m_videoram)
+	AM_RANGE(0x1c00, 0x1eff) AM_RAM_WRITE(meadows_videoram_w) AM_SHARE("videoram")
 	AM_RANGE(0x1f00, 0x1f00) AM_READ_PORT("JOY1")
 	AM_RANGE(0x1f01, 0x1f01) AM_READ_PORT("JOY2")
 	AM_RANGE(0x1f02, 0x1f02) AM_READ_PORT("BUTTONS")
@@ -378,7 +373,7 @@ static ADDRESS_MAP_START( minferno_main_map, AS_PROGRAM, 8 )
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( minferno_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( minferno_io_map, AS_IO, 8, meadows_state )
 	AM_RANGE(S2650_DATA_PORT, S2650_DATA_PORT) AM_READ_PORT("DSW2")
 ADDRESS_MAP_END
 
@@ -390,7 +385,7 @@ ADDRESS_MAP_END
  *
  *************************************/
 
-static ADDRESS_MAP_START( audio_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( audio_map, AS_PROGRAM, 8, meadows_state )
 	AM_RANGE(0x0000, 0x0bff) AM_ROM
 	AM_RANGE(0x0c00, 0x0c03) AM_READWRITE(audio_hardware_r, audio_hardware_w)
 	AM_RANGE(0x0e00, 0x0eff) AM_RAM
@@ -444,7 +439,7 @@ static INPUT_PORTS_START( meadows )
 	PORT_DIPSETTING(    0x00, DEF_STR( None ))
 
 	PORT_START("FAKE")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_CHANGED(coin_inserted, 0)
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_CHANGED_MEMBER(DEVICE_SELF, meadows_state,coin_inserted, 0)
 	PORT_BIT( 0x8e, IP_ACTIVE_LOW, IPT_UNUSED )
 INPUT_PORTS_END
 
@@ -496,7 +491,7 @@ static INPUT_PORTS_START( bowl3d )
 	PORT_DIPSETTING(    0x80, DEF_STR( On ) )
 
 	PORT_START("FAKE")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_CHANGED(coin_inserted, 0)
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_CHANGED_MEMBER(DEVICE_SELF, meadows_state,coin_inserted, 0)
 	PORT_BIT( 0x8e, IP_ACTIVE_LOW, IPT_UNUSED )
 INPUT_PORTS_END
 
@@ -563,36 +558,36 @@ INPUT_PORTS_END
 
 static const gfx_layout charlayout =
 {
-	8,8,							/* 8*8 characters */
-	128,							/* 128 characters ? */
-	1,								/* 1 bit per pixel */
-	{ 0 },							/* no bitplanes */
-	{ 0, 1, 2, 3, 4, 5, 6, 7 }, 	/* pretty straight layout */
+	8,8,                            /* 8*8 characters */
+	128,                            /* 128 characters ? */
+	1,                              /* 1 bit per pixel */
+	{ 0 },                          /* no bitplanes */
+	{ 0, 1, 2, 3, 4, 5, 6, 7 },     /* pretty straight layout */
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
-	8*8 							/* every char takes 8 bytes */
+	8*8                             /* every char takes 8 bytes */
 };
 
 
 static const gfx_layout spritelayout =
 {
-	16,16,							/* 16*16 sprites ?  */
-	32, 							/* 32 sprites  */
-	1,								/* 1 bits per pixel */
-	{ 0 },							/* 1 bitplane */
+	16,16,                          /* 16*16 sprites ?  */
+	32,                             /* 32 sprites  */
+	1,                              /* 1 bits per pixel */
+	{ 0 },                          /* 1 bitplane */
 	{ 0, 1, 2, 3, 4, 5, 6, 7,
-	8, 9,10,11,12,13,14,15 },	  /* pretty straight layout */
+	8, 9,10,11,12,13,14,15 },     /* pretty straight layout */
 	{ 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
 	8*16, 9*16,10*16,11*16,12*16,13*16,14*16,15*16 },
-	16*2*8							/* every sprite takes 32 bytes */
+	16*2*8                          /* every sprite takes 32 bytes */
 };
 
 
 static GFXDECODE_START( meadows )
-	GFXDECODE_ENTRY( "gfx1", 0, charlayout,	 0, 1 )		/* character generator */
-	GFXDECODE_ENTRY( "gfx2", 0, spritelayout, 0, 1 )		/* sprite prom 1 */
-	GFXDECODE_ENTRY( "gfx3", 0, spritelayout, 0, 1 )		/* sprite prom 2 */
-	GFXDECODE_ENTRY( "gfx4", 0, spritelayout, 0, 1 )		/* sprite prom 3 (unused) */
-	GFXDECODE_ENTRY( "gfx5", 0, spritelayout, 0, 1 )		/* sprite prom 4 (unused) */
+	GFXDECODE_ENTRY( "gfx1", 0, charlayout,  0, 1 )     /* character generator */
+	GFXDECODE_ENTRY( "gfx2", 0, spritelayout, 0, 1 )        /* sprite prom 1 */
+	GFXDECODE_ENTRY( "gfx3", 0, spritelayout, 0, 1 )        /* sprite prom 2 */
+	GFXDECODE_ENTRY( "gfx4", 0, spritelayout, 0, 1 )        /* sprite prom 3 (unused) */
+	GFXDECODE_ENTRY( "gfx5", 0, spritelayout, 0, 1 )        /* sprite prom 4 (unused) */
 GFXDECODE_END
 
 
@@ -611,13 +606,13 @@ GFXDECODE_END
 static const char *const bowl3d_sample_names[] =
 {
 	"*bowl3d",
-	"roll.wav",     /* "roll" */
-	"rollback.wav", /* "roll back" */
-	"sweep.wav",    /* "sweep" */
-	"footstep.wav", /* "foot sweep" */
-	"crash.wav",    /* "crash" */
-	"cheering.wav", /* "cheering" */
-    0
+	"roll",     /* "roll" */
+	"rollback", /* "roll back" */
+	"sweep",    /* "sweep" */
+	"footstep", /* "foot sweep" */
+	"crash",    /* "crash" */
+	"cheering", /* "cheering" */
+	0
 };
 
 
@@ -646,38 +641,33 @@ static const samples_interface bowl3d_samples_interface =
 static MACHINE_CONFIG_START( meadows, meadows_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", S2650, MASTER_CLOCK/8)	/* 5MHz / 8 = 625 kHz */
+	MCFG_CPU_ADD("maincpu", S2650, MASTER_CLOCK/8)  /* 5MHz / 8 = 625 kHz */
 	MCFG_CPU_PROGRAM_MAP(meadows_main_map)
-	MCFG_CPU_VBLANK_INT("screen", meadows_interrupt)	/* one interrupt per frame!? */
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", meadows_state,  meadows_interrupt) /* one interrupt per frame!? */
 
-	MCFG_CPU_ADD("audiocpu", S2650, MASTER_CLOCK/8) 	/* 5MHz / 8 = 625 kHz */
+	MCFG_CPU_ADD("audiocpu", S2650, MASTER_CLOCK/8)     /* 5MHz / 8 = 625 kHz */
 	MCFG_CPU_PROGRAM_MAP(audio_map)
-	MCFG_CPU_PERIODIC_INT(audio_interrupt, (double)5000000/131072)
+	MCFG_CPU_PERIODIC_INT_DRIVER(meadows_state, audio_interrupt,  (double)5000000/131072)
 
 	MCFG_QUANTUM_TIME(attotime::from_hz(600))
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 30*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(meadows)
+	MCFG_SCREEN_UPDATE_DRIVER(meadows_state, screen_update_meadows)
 
 	MCFG_GFXDECODE(meadows)
 	MCFG_PALETTE_LENGTH(2)
 
-	MCFG_PALETTE_INIT(meadows)
-	MCFG_VIDEO_START(meadows)
-
 	/* audio hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("dac", DAC, 0)
+	MCFG_DAC_ADD("dac")
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 
-	MCFG_SOUND_ADD("samples", SAMPLES, 0)
-	MCFG_SOUND_CONFIG(meadows_samples_interface)
+	MCFG_SAMPLES_ADD("samples", meadows_samples_interface)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 MACHINE_CONFIG_END
 
@@ -685,68 +675,59 @@ MACHINE_CONFIG_END
 static MACHINE_CONFIG_START( minferno, meadows_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", S2650, MASTER_CLOCK/24) 	/* 5MHz / 8 / 3 = 208.33 kHz */
+	MCFG_CPU_ADD("maincpu", S2650, MASTER_CLOCK/24)     /* 5MHz / 8 / 3 = 208.33 kHz */
 	MCFG_CPU_PROGRAM_MAP(minferno_main_map)
 	MCFG_CPU_IO_MAP(minferno_io_map)
-	MCFG_CPU_VBLANK_INT("screen", minferno_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", meadows_state,  minferno_interrupt)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 1*8, 24*8-1)
-	MCFG_SCREEN_UPDATE(meadows)
+	MCFG_SCREEN_UPDATE_DRIVER(meadows_state, screen_update_meadows)
 
 	MCFG_GFXDECODE(minferno)
 	MCFG_PALETTE_LENGTH(2)
 
-	MCFG_PALETTE_INIT(meadows)
-	MCFG_VIDEO_START(meadows)
-
 	/* audio hardware */
+	// TODO
 MACHINE_CONFIG_END
 
 
 static MACHINE_CONFIG_START( bowl3d, meadows_state )
-	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", S2650, MASTER_CLOCK/8)	/* 5MHz / 8 = 625 kHz */
-	MCFG_CPU_PROGRAM_MAP(bowl3d_main_map)
-	MCFG_CPU_VBLANK_INT("screen", meadows_interrupt)	/* one interrupt per frame!? */
 
-	MCFG_CPU_ADD("audiocpu", S2650, MASTER_CLOCK/8) 	/* 5MHz / 8 = 625 kHz */
+	/* basic machine hardware */
+	MCFG_CPU_ADD("maincpu", S2650, MASTER_CLOCK/8)  /* 5MHz / 8 = 625 kHz */
+	MCFG_CPU_PROGRAM_MAP(bowl3d_main_map)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", meadows_state,  meadows_interrupt) /* one interrupt per frame!? */
+
+	MCFG_CPU_ADD("audiocpu", S2650, MASTER_CLOCK/8)     /* 5MHz / 8 = 625 kHz */
 	MCFG_CPU_PROGRAM_MAP(audio_map)
-	MCFG_CPU_PERIODIC_INT(audio_interrupt, (double)5000000/131072)
+	MCFG_CPU_PERIODIC_INT_DRIVER(meadows_state, audio_interrupt,  (double)5000000/131072)
 
 	MCFG_QUANTUM_TIME(attotime::from_hz(600))
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 30*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(meadows)
+	MCFG_SCREEN_UPDATE_DRIVER(meadows_state, screen_update_meadows)
 
 	MCFG_GFXDECODE(meadows)
 	MCFG_PALETTE_LENGTH(2)
 
-	MCFG_PALETTE_INIT(meadows)
-	MCFG_VIDEO_START(meadows)
-
 	/* audio hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("dac", DAC, 0)
+	MCFG_DAC_ADD("dac")
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 
-	MCFG_SOUND_ADD("samples", SAMPLES, 0)
-	MCFG_SOUND_CONFIG(meadows_samples_interface)
+	MCFG_SAMPLES_ADD("samples", meadows_samples_interface)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 
-	/* audio hardware */
-	MCFG_SOUND_ADD("samples2", SAMPLES, 0)
-	MCFG_SOUND_CONFIG(bowl3d_samples_interface)
+	MCFG_SAMPLES_ADD("samples2", bowl3d_samples_interface)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 MACHINE_CONFIG_END
 
@@ -795,8 +776,8 @@ ROM_START( bowl3d )
 	ROM_LOAD( "b3d.h12",      0x1400, 0x0400, CRC(80a149d6) SHA1(ab4ca76d9f5aa5e02b9d5bf909af9548fe62f475) )
 	// h13 empty
 
-    /* Universal Game Logic according to schematics  */
-    ROM_REGION( 0x08000, "audiocpu", 0 )	/* 2650 CPU at j8 */
+	/* Universal Game Logic according to schematics  */
+	ROM_REGION( 0x08000, "audiocpu", 0 )    /* 2650 CPU at j8 */
 	ROM_LOAD( "82s115.a6",    0x0000, 0x0001, NO_DUMP ) /* 82s115 eprom */
 	ROM_LOAD( "82s115.c6",    0x0000, 0x0001, NO_DUMP ) /* 82s115 eprom */
 
@@ -837,10 +818,10 @@ ROM_START( gypsyjug )
 	/* empty (copied from 2) */
 
 	ROM_REGION( 0x0400, "gfx4", 0 )
-	ROM_LOAD( "gj.x",         0x0000, 0x0400, NO_DUMP )		/* missing */
+	ROM_LOAD( "gj.x",         0x0000, 0x0400, NO_DUMP )     /* missing */
 
 	ROM_REGION( 0x0400, "gfx5", 0 )
-	ROM_LOAD( "gj.y",         0x0000, 0x0400, NO_DUMP )		/* missing */
+	ROM_LOAD( "gj.y",         0x0000, 0x0400, NO_DUMP )     /* missing */
 
 	ROM_REGION( 0x08000, "audiocpu", 0 )
 	ROM_LOAD( "gj.a4s",       0x0000, 0x0400, CRC(17a116bc) SHA1(797ba0b292afa3ba7eec985b533014acc00ed47d) )
@@ -851,15 +832,15 @@ ROM_END
 
 ROM_START( minferno )
 	ROM_REGION( 0x08000, "maincpu", ROMREGION_INVERT )
-	ROM_LOAD_NIB_LOW ( "inferno.f5",	0x0000, 0x0400, CRC(58472a73) SHA1(7f8b9502c3db11219d6b765dec7b6ff3f62d6c8b) )
-	ROM_LOAD_NIB_HIGH( "inferno.e5",	0x0000, 0x0400, CRC(451942af) SHA1(0a03d74c1b98771d2170c76ca41e972300c34c3a) )
-	ROM_LOAD_NIB_LOW ( "inferno.f6",	0x0400, 0x0400, CRC(d85a195b) SHA1(8250f8e80a9bf196d7bf122af9aad0ae00dedd26) )
-	ROM_LOAD_NIB_HIGH( "inferno.e6",	0x0400, 0x0400, CRC(788ccfac) SHA1(dfa99745db1c3866bf568fad289485aa0850875a) )
-	ROM_LOAD_NIB_LOW ( "inferno.f7",	0x0800, 0x0400, CRC(73b4e9a3) SHA1(d9de88748a3009f3fc1f90c96bfc9732dc6a4a22) )
-	ROM_LOAD_NIB_HIGH( "inferno.e7",	0x0800, 0x0400, CRC(902d9b78) SHA1(3bebbba6c7d00bea2c687b965f59a9e55b430dfa) )
+	ROM_LOAD_NIB_LOW ( "inferno.f5",    0x0000, 0x0400, CRC(58472a73) SHA1(7f8b9502c3db11219d6b765dec7b6ff3f62d6c8b) )
+	ROM_LOAD_NIB_HIGH( "inferno.e5",    0x0000, 0x0400, CRC(451942af) SHA1(0a03d74c1b98771d2170c76ca41e972300c34c3a) )
+	ROM_LOAD_NIB_LOW ( "inferno.f6",    0x0400, 0x0400, CRC(d85a195b) SHA1(8250f8e80a9bf196d7bf122af9aad0ae00dedd26) )
+	ROM_LOAD_NIB_HIGH( "inferno.e6",    0x0400, 0x0400, CRC(788ccfac) SHA1(dfa99745db1c3866bf568fad289485aa0850875a) )
+	ROM_LOAD_NIB_LOW ( "inferno.f7",    0x0800, 0x0400, CRC(73b4e9a3) SHA1(d9de88748a3009f3fc1f90c96bfc9732dc6a4a22) )
+	ROM_LOAD_NIB_HIGH( "inferno.e7",    0x0800, 0x0400, CRC(902d9b78) SHA1(3bebbba6c7d00bea2c687b965f59a9e55b430dfa) )
 
 	ROM_REGION( 0x00400, "gfx1", 0 )
-	ROM_LOAD( "inferno.b8",		0x0200, 0x0200, CRC(1b06466b) SHA1(aef13ab84526ee7493837eef7f48d9ede65b8e62) )
+	ROM_LOAD( "inferno.b8",     0x0200, 0x0200, CRC(1b06466b) SHA1(aef13ab84526ee7493837eef7f48d9ede65b8e62) )
 ROM_END
 
 
@@ -871,7 +852,7 @@ ROM_END
  *************************************/
 
 /* A fake for the missing ball sprites #3 and #4 */
-static DRIVER_INIT( gypsyjug )
+DRIVER_INIT_MEMBER(meadows_state,gypsyjug)
 {
 	static const UINT8 ball[16*2] =
 	{
@@ -881,12 +862,12 @@ static DRIVER_INIT( gypsyjug )
 		0x01,0x80, 0x03,0xc0, 0x03,0xc0, 0x01,0x80
 	};
 	int i;
-	UINT8 *gfx2 = machine.region("gfx2")->base();
-	UINT8 *gfx3 = machine.region("gfx3")->base();
-	UINT8 *gfx4 = machine.region("gfx4")->base();
-	UINT8 *gfx5 = machine.region("gfx5")->base();
-	int len3 = machine.region("gfx3")->bytes();
-	int len4 = machine.region("gfx4")->bytes();
+	UINT8 *gfx2 = machine().root_device().memregion("gfx2")->base();
+	UINT8 *gfx3 = machine().root_device().memregion("gfx3")->base();
+	UINT8 *gfx4 = machine().root_device().memregion("gfx4")->base();
+	UINT8 *gfx5 = machine().root_device().memregion("gfx5")->base();
+	int len3 = machine().root_device().memregion("gfx3")->bytes();
+	int len4 = machine().root_device().memregion("gfx4")->bytes();
 
 	memcpy(gfx3,gfx2,len3);
 
@@ -899,14 +880,14 @@ static DRIVER_INIT( gypsyjug )
 
 
 /* A fake for inverting the data bus */
-static DRIVER_INIT( minferno )
+DRIVER_INIT_MEMBER(meadows_state,minferno)
 {
 	int i, length;
 	UINT8 *mem;
 
 	/* create an inverted copy of the graphics data */
-	mem = machine.region("gfx1")->base();
-	length = machine.region("gfx1")->bytes();
+	mem = machine().root_device().memregion("gfx1")->base();
+	length = machine().root_device().memregion("gfx1")->bytes();
 	for (i = 0; i < length/2; i++)
 		mem[i] = ~mem[i + length/2];
 }
@@ -919,7 +900,7 @@ static DRIVER_INIT( minferno )
  *
  *************************************/
 
-GAMEL( 1978, deadeye,  0, meadows,  meadows,  0,        ROT0,  "Meadows Games, Inc.", "Dead Eye", 0, layout_deadeye )
-GAME ( 1978, bowl3d,   0, bowl3d,   bowl3d,   0,        ROT90, "Meadows Games, Inc.", "3-D Bowling", GAME_NO_SOUND )
-GAMEL( 1978, gypsyjug, 0, meadows,  meadows,  gypsyjug, ROT0,  "Meadows Games, Inc.", "Gypsy Juggler", GAME_IMPERFECT_GRAPHICS, layout_gypsyjug )
-GAME ( 1978, minferno, 0, minferno, minferno, minferno, ROT0,  "Meadows Games, Inc.", "Inferno (Meadows)", GAME_NO_SOUND )
+GAMEL( 1978, deadeye,  0, meadows,  meadows, driver_device,  0,        ROT0,  "Meadows Games, Inc.", "Dead Eye", 0, layout_deadeye )
+GAME ( 1978, bowl3d,   0, bowl3d,   bowl3d, driver_device,   0,        ROT90, "Meadows Games, Inc.", "3-D Bowling", GAME_NO_SOUND )
+GAMEL( 1978, gypsyjug, 0, meadows,  meadows, meadows_state,  gypsyjug, ROT0,  "Meadows Games, Inc.", "Gypsy Juggler", GAME_IMPERFECT_GRAPHICS, layout_gypsyjug )
+GAMEL( 1978, minferno, 0, minferno, minferno, meadows_state, minferno, ROT0,  "Meadows Games, Inc.", "Inferno (Meadows)", GAME_NO_SOUND, layout_minferno )

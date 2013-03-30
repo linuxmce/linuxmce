@@ -38,20 +38,18 @@ static void setcolor( running_machine &machine, int color, int rgb )
 	palette_set_color(machine, color, MAKE_RGB(r,g,b));
 }
 
-WRITE16_HANDLER( blockout_paletteram_w )
+WRITE16_MEMBER(blockout_state::blockout_paletteram_w)
 {
-	blockout_state *state = space->machine().driver_data<blockout_state>();
 
-	COMBINE_DATA(&state->m_paletteram[offset]);
-	setcolor(space->machine(), offset, state->m_paletteram[offset]);
+	COMBINE_DATA(&m_paletteram[offset]);
+	setcolor(machine(), offset, m_paletteram[offset]);
 }
 
-WRITE16_HANDLER( blockout_frontcolor_w )
+WRITE16_MEMBER(blockout_state::blockout_frontcolor_w)
 {
-	blockout_state *state = space->machine().driver_data<blockout_state>();
 
-	COMBINE_DATA(&state->m_color);
-	setcolor(space->machine(), 512, state->m_color);
+	COMBINE_DATA(&m_color);
+	setcolor(machine(), 512, m_color);
 }
 
 
@@ -61,13 +59,12 @@ WRITE16_HANDLER( blockout_frontcolor_w )
   Start the video hardware emulation.
 
 ***************************************************************************/
-VIDEO_START( blockout )
+void blockout_state::video_start()
 {
-	blockout_state *state = machine.driver_data<blockout_state>();
 
 	/* Allocate temporary bitmaps */
-	state->m_tmpbitmap = machine.primary_screen->alloc_compatible_bitmap();
-	state->save_item(NAME(*state->m_tmpbitmap));
+	machine().primary_screen->register_screen_bitmap(m_tmpbitmap);
+	save_item(NAME(m_tmpbitmap));
 }
 
 static void update_pixels( running_machine &machine, int x, int y )
@@ -77,7 +74,7 @@ static void update_pixels( running_machine &machine, int x, int y )
 	int color;
 	const rectangle &visarea = machine.primary_screen->visible_area();
 
-	if (x < visarea.min_x || x > visarea.max_x || y < visarea.min_y || y > visarea.max_y)
+	if (!visarea.contains(x, y))
 		return;
 
 	front = state->m_videoram[y * 256 + x / 2];
@@ -88,52 +85,50 @@ static void update_pixels( running_machine &machine, int x, int y )
 	else
 		color = (back >> 8) + 256;
 
-	*BITMAP_ADDR16(state->m_tmpbitmap, y, x) = color;
+	state->m_tmpbitmap.pix16(y, x) = color;
 
 	if (front & 0xff)
 		color = front & 0xff;
 	else
 		color = (back & 0xff) + 256;
 
-	*BITMAP_ADDR16(state->m_tmpbitmap, y, x + 1) = color;
+	state->m_tmpbitmap.pix16(y, x + 1) = color;
 }
 
 
 
-WRITE16_HANDLER( blockout_videoram_w )
+WRITE16_MEMBER(blockout_state::blockout_videoram_w)
 {
-	blockout_state *state = space->machine().driver_data<blockout_state>();
 
-	COMBINE_DATA(&state->m_videoram[offset]);
-	update_pixels(space->machine(), (offset % 256) * 2, (offset / 256) % 256);
+	COMBINE_DATA(&m_videoram[offset]);
+	update_pixels(machine(), (offset % 256) * 2, (offset / 256) % 256);
 }
 
 
 
-SCREEN_UPDATE( blockout )
+UINT32 blockout_state::screen_update_blockout(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	blockout_state *state = screen->machine().driver_data<blockout_state>();
 	int x, y;
 	pen_t color = 512;
 
-	copybitmap(bitmap, state->m_tmpbitmap, 0, 0, 0, 0, cliprect);
+	copybitmap(bitmap, m_tmpbitmap, 0, 0, 0, 0, cliprect);
 
 	for (y = 0; y < 256; y++)
 	{
 		for (x = 0; x < 320; x += 8)
 		{
-			int d = state->m_frontvideoram[y * 64 + (x / 8)];
+			int d = m_frontvideoram[y * 64 + (x / 8)];
 
 			if (d)
 			{
-				if (d & 0x80) *BITMAP_ADDR16(bitmap, y, x + 0) = color;
-				if (d & 0x40) *BITMAP_ADDR16(bitmap, y, x + 1) = color;
-				if (d & 0x20) *BITMAP_ADDR16(bitmap, y, x + 2) = color;
-				if (d & 0x10) *BITMAP_ADDR16(bitmap, y, x + 3) = color;
-				if (d & 0x08) *BITMAP_ADDR16(bitmap, y, x + 4) = color;
-				if (d & 0x04) *BITMAP_ADDR16(bitmap, y, x + 5) = color;
-				if (d & 0x02) *BITMAP_ADDR16(bitmap, y, x + 6) = color;
-				if (d & 0x01) *BITMAP_ADDR16(bitmap, y, x + 7) = color;
+				if (d & 0x80) bitmap.pix16(y, x + 0) = color;
+				if (d & 0x40) bitmap.pix16(y, x + 1) = color;
+				if (d & 0x20) bitmap.pix16(y, x + 2) = color;
+				if (d & 0x10) bitmap.pix16(y, x + 3) = color;
+				if (d & 0x08) bitmap.pix16(y, x + 4) = color;
+				if (d & 0x04) bitmap.pix16(y, x + 5) = color;
+				if (d & 0x02) bitmap.pix16(y, x + 6) = color;
+				if (d & 0x01) bitmap.pix16(y, x + 7) = color;
 			}
 		}
 	}

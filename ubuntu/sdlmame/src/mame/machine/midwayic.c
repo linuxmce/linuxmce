@@ -12,11 +12,11 @@
 #include "audio/dcs.h"
 
 
-#define LOG_NVRAM			(0)
+#define LOG_NVRAM           (0)
 
-#define PRINTF_DEBUG		(0)
-#define LOG_IOASIC			(0)
-#define LOG_FIFO			(0)
+#define PRINTF_DEBUG        (0)
+#define LOG_IOASIC          (0)
+#define LOG_FIFO            (0)
 
 
 /*************************************
@@ -25,8 +25,8 @@
  *
  *************************************/
 
-#define PIC_NVRAM_SIZE		0x100
-#define FIFO_SIZE			512
+#define PIC_NVRAM_SIZE      0x100
+#define FIFO_SIZE           512
 
 
 
@@ -38,52 +38,52 @@
 
 struct serial_state
 {
-	UINT8	data[16];
-	UINT8	buffer;
-	UINT8	index;
-	UINT8	status;
-	UINT8	bits;
-	UINT8	ormask;
+	UINT8   data[16];
+	UINT8   buffer;
+	UINT8   index;
+	UINT8   status;
+	UINT8   bits;
+	UINT8   ormask;
 };
 
 struct pic_state
 {
-	UINT16	latch;
+	UINT16  latch;
 	attotime latch_expire_time;
-	UINT8	state;
-	UINT8	index;
-	UINT8	total;
-	UINT8	nvram_addr;
-	UINT8	buffer[0x10];
-	UINT8	nvram[PIC_NVRAM_SIZE];
-	UINT8	default_nvram[PIC_NVRAM_SIZE];
-	UINT8	time_buf[8];
-	UINT8	time_index;
-	UINT8	time_just_written;
-	UINT16	yearoffs;
+	UINT8   state;
+	UINT8   index;
+	UINT8   total;
+	UINT8   nvram_addr;
+	UINT8   buffer[0x10];
+	UINT8   nvram[PIC_NVRAM_SIZE];
+	UINT8   default_nvram[PIC_NVRAM_SIZE];
+	UINT8   time_buf[8];
+	UINT8   time_index;
+	UINT8   time_just_written;
+	UINT16  yearoffs;
 	emu_timer *time_write_timer;
 };
 
 struct ioasic_state
 {
-	UINT32	reg[16];
-	UINT8	has_dcs;
-	UINT8	has_cage;
+	UINT32  reg[16];
+	UINT8   has_dcs;
+	UINT8   has_cage;
 	device_t *dcs_cpu;
-	UINT8	shuffle_type;
-	UINT8	shuffle_active;
-	const UINT8 *	shuffle_map;
-	void	(*irq_callback)(running_machine &, int);
-	UINT8	irq_state;
-	UINT16	sound_irq_state;
-	UINT8	auto_ack;
-	UINT8	force_fifo_full;
+	UINT8   shuffle_type;
+	UINT8   shuffle_active;
+	const UINT8 *   shuffle_map;
+	void    (*irq_callback)(running_machine &, int);
+	UINT8   irq_state;
+	UINT16  sound_irq_state;
+	UINT8   auto_ack;
+	UINT8   force_fifo_full;
 
-	UINT16	fifo[FIFO_SIZE];
-	UINT16	fifo_in;
-	UINT16	fifo_out;
-	UINT16	fifo_bytes;
-	offs_t	fifo_force_buffer_empty_pc;
+	UINT16  fifo[FIFO_SIZE];
+	UINT16  fifo_in;
+	UINT16  fifo_out;
+	UINT16  fifo_bytes;
+	offs_t  fifo_force_buffer_empty_pc;
 };
 
 
@@ -205,17 +205,17 @@ UINT8 midway_serial_pic_status_r(void)
 }
 
 
-UINT8 midway_serial_pic_r(address_space *space)
+UINT8 midway_serial_pic_r(address_space &space)
 {
-	logerror("%s:security R = %04X\n", space->machine().describe_context(), serial.buffer);
+	logerror("%s:security R = %04X\n", space.machine().describe_context(), serial.buffer);
 	serial.status = 1;
 	return serial.buffer;
 }
 
 
-void midway_serial_pic_w(address_space *space, UINT8 data)
+void midway_serial_pic_w(address_space &space, UINT8 data)
 {
-	logerror("%s:security W = %04X\n", space->machine().describe_context(), data);
+	logerror("%s:security W = %04X\n", space.machine().describe_context(), data);
 
 	/* status seems to reflect the clock bit */
 	serial.status = (data >> 4) & 1;
@@ -292,31 +292,31 @@ void midway_serial_pic2_set_default_nvram(const UINT8 *nvram)
 }
 
 
-UINT8 midway_serial_pic2_status_r(address_space *space)
+UINT8 midway_serial_pic2_status_r(address_space &space)
 {
 	UINT8 result = 0;
 
 	/* if we're still holding the data ready bit high, do it */
 	if (pic.latch & 0xf00)
 	{
-		if (space->machine().time() > pic.latch_expire_time)
+		if (space.machine().time() > pic.latch_expire_time)
 			pic.latch &= 0xff;
 		else
 			pic.latch -= 0x100;
 		result = 1;
 	}
 
-	logerror("%s:PIC status %d\n", space->machine().describe_context(), result);
+	logerror("%s:PIC status %d\n", space.machine().describe_context(), result);
 	return result;
 }
 
 
-UINT8 midway_serial_pic2_r(address_space *space)
+UINT8 midway_serial_pic2_r(address_space &space)
 {
 	UINT8 result = 0;
 
 	/* PIC data register */
-	logerror("%s:PIC data read (index=%d total=%d latch=%03X) =", space->machine().describe_context(), pic.index, pic.total, pic.latch);
+	logerror("%s:PIC data read (index=%d total=%d latch=%03X) =", space.machine().describe_context(), pic.index, pic.total, pic.latch);
 
 	/* return the current result */
 	if (pic.latch & 0xf00)
@@ -331,9 +331,9 @@ UINT8 midway_serial_pic2_r(address_space *space)
 }
 
 
-void midway_serial_pic2_w(address_space *space, UINT8 data)
+void midway_serial_pic2_w(address_space &space, UINT8 data)
 {
-	running_machine &machine = space->machine();
+	running_machine &machine = space.machine();
 	static FILE *nvramlog;
 	if (LOG_NVRAM && !nvramlog)
 		nvramlog = fopen("nvram.log", "w");
@@ -539,22 +539,22 @@ NVRAM_HANDLER( midway_serial_pic2 )
 
 enum
 {
-	IOASIC_PORT0,		/* 0: input port 0 */
-	IOASIC_PORT1,		/* 1: input port 1 */
-	IOASIC_PORT2,		/* 2: input port 2 */
-	IOASIC_PORT3,		/* 3: input port 3 */
-	IOASIC_UARTCONTROL,	/* 4: controls some UART behavior */
-	IOASIC_UARTOUT,		/* 5: UART output */
-	IOASIC_UARTIN,		/* 6: UART input */
-	IOASIC_UNKNOWN7,	/* 7: ??? */
-	IOASIC_SOUNDCTL,	/* 8: sound communications control */
-	IOASIC_SOUNDOUT,	/* 9: sound output port */
-	IOASIC_SOUNDSTAT,	/* a: sound status port */
-	IOASIC_SOUNDIN,		/* b: sound input port */
-	IOASIC_PICOUT,		/* c: PIC output port */
-	IOASIC_PICIN,		/* d: PIC input port */
-	IOASIC_INTSTAT,		/* e: interrupt status */
-	IOASIC_INTCTL		/* f: interrupt control */
+	IOASIC_PORT0,       /* 0: input port 0 */
+	IOASIC_PORT1,       /* 1: input port 1 */
+	IOASIC_PORT2,       /* 2: input port 2 */
+	IOASIC_PORT3,       /* 3: input port 3 */
+	IOASIC_UARTCONTROL, /* 4: controls some UART behavior */
+	IOASIC_UARTOUT,     /* 5: UART output */
+	IOASIC_UARTIN,      /* 6: UART input */
+	IOASIC_UNKNOWN7,    /* 7: ??? */
+	IOASIC_SOUNDCTL,    /* 8: sound communications control */
+	IOASIC_SOUNDOUT,    /* 9: sound output port */
+	IOASIC_SOUNDSTAT,   /* a: sound status port */
+	IOASIC_SOUNDIN,     /* b: sound input port */
+	IOASIC_PICOUT,      /* c: PIC output port */
+	IOASIC_PICIN,       /* d: PIC input port */
+	IOASIC_INTSTAT,     /* e: interrupt status */
+	IOASIC_INTCTL       /* f: interrupt control */
 };
 
 static UINT16 ioasic_fifo_r(device_t *device);
@@ -585,15 +585,15 @@ void midway_ioasic_init(running_machine &machine, int shuffle, int upper, int ye
 {
 	static const UINT8 shuffle_maps[][16] =
 	{
-		{ 0x0,0x1,0x2,0x3,0x4,0x5,0x6,0x7,0x8,0x9,0xa,0xb,0xc,0xd,0xe,0xf },	/* WarGods, WG3DH, SFRush, MK4 */
-		{ 0x4,0x5,0x6,0x7,0xb,0xa,0x9,0x8,0x3,0x2,0x1,0x0,0xf,0xe,0xd,0xc },	/* Blitz, Blitz99 */
-		{ 0x7,0x3,0x2,0x0,0x1,0xc,0xd,0xe,0xf,0x4,0x5,0x6,0x8,0x9,0xa,0xb },	/* Carnevil */
-		{ 0x8,0x9,0xa,0xb,0x0,0x1,0x2,0x3,0xf,0xe,0xc,0xd,0x4,0x5,0x6,0x7 },	/* Calspeed, Gauntlet Legends */
-		{ 0xf,0xe,0xd,0xc,0x4,0x5,0x6,0x7,0x9,0x8,0xa,0xb,0x2,0x3,0x1,0x0 },	/* Mace */
-		{ 0xc,0xd,0xe,0xf,0x0,0x1,0x2,0x3,0x7,0x8,0x9,0xb,0xa,0x5,0x6,0x4 },	/* Gauntlet Dark Legacy */
-		{ 0x7,0x4,0x5,0x6,0x2,0x0,0x1,0x3,0x8,0x9,0xa,0xb,0xd,0xc,0xe,0xf },	/* Vapor TRX */
-		{ 0x7,0x4,0x5,0x6,0x2,0x0,0x1,0x3,0x8,0x9,0xa,0xb,0xd,0xc,0xe,0xf },	/* San Francisco Rush: The Rock */
-		{ 0x1,0x2,0x3,0x0,0x4,0x5,0x6,0x7,0xa,0xb,0x8,0x9,0xc,0xd,0xe,0xf },	/* Hyperdrive */
+		{ 0x0,0x1,0x2,0x3,0x4,0x5,0x6,0x7,0x8,0x9,0xa,0xb,0xc,0xd,0xe,0xf },    /* WarGods, WG3DH, SFRush, MK4 */
+		{ 0x4,0x5,0x6,0x7,0xb,0xa,0x9,0x8,0x3,0x2,0x1,0x0,0xf,0xe,0xd,0xc },    /* Blitz, Blitz99 */
+		{ 0x7,0x3,0x2,0x0,0x1,0xc,0xd,0xe,0xf,0x4,0x5,0x6,0x8,0x9,0xa,0xb },    /* Carnevil */
+		{ 0x8,0x9,0xa,0xb,0x0,0x1,0x2,0x3,0xf,0xe,0xc,0xd,0x4,0x5,0x6,0x7 },    /* Calspeed, Gauntlet Legends */
+		{ 0xf,0xe,0xd,0xc,0x4,0x5,0x6,0x7,0x9,0x8,0xa,0xb,0x2,0x3,0x1,0x0 },    /* Mace */
+		{ 0xc,0xd,0xe,0xf,0x0,0x1,0x2,0x3,0x7,0x8,0x9,0xb,0xa,0x5,0x6,0x4 },    /* Gauntlet Dark Legacy */
+		{ 0x7,0x4,0x5,0x6,0x2,0x0,0x1,0x3,0x8,0x9,0xa,0xb,0xd,0xc,0xe,0xf },    /* Vapor TRX */
+		{ 0x7,0x4,0x5,0x6,0x2,0x0,0x1,0x3,0x8,0x9,0xa,0xb,0xd,0xc,0xe,0xf },    /* San Francisco Rush: The Rock */
+		{ 0x1,0x2,0x3,0x0,0x4,0x5,0x6,0x7,0xa,0xb,0x8,0x9,0xc,0xd,0xe,0xf },    /* Hyperdrive */
 	};
 
 	ioasic_register_state(machine);
@@ -744,7 +744,7 @@ static UINT16 ioasic_fifo_r(device_t *device)
 		/* main CPU is handling the I/O ASIC interrupt */
 		if (ioasic.fifo_bytes == 0 && ioasic.has_dcs)
 		{
-			ioasic.fifo_force_buffer_empty_pc = cpu_get_pc(ioasic.dcs_cpu);
+			ioasic.fifo_force_buffer_empty_pc = ioasic.dcs_cpu->safe_pc();
 			if (LOG_FIFO)
 				logerror("fifo_r(%04X): FIFO empty, PC = %04X\n", result, ioasic.fifo_force_buffer_empty_pc);
 		}
@@ -774,7 +774,7 @@ static UINT16 ioasic_fifo_status_r(device_t *device)
 	/* sure the FIFO clear bit is set */
 	if (ioasic.fifo_force_buffer_empty_pc && device == ioasic.dcs_cpu)
 	{
-		offs_t currpc = cpu_get_pc(ioasic.dcs_cpu);
+		offs_t currpc = ioasic.dcs_cpu->safe_pc();
 		if (currpc >= ioasic.fifo_force_buffer_empty_pc && currpc < ioasic.fifo_force_buffer_empty_pc + 0x10)
 		{
 			ioasic.fifo_force_buffer_empty_pc = 0;
@@ -820,7 +820,7 @@ void midway_ioasic_fifo_w(running_machine &machine, UINT16 data)
 		if (LOG_FIFO)
 			logerror("fifo_w(%04X): out of space!\n", data);
 	}
-	dcs_fifo_notify(ioasic.fifo_bytes, FIFO_SIZE);
+	dcs_fifo_notify(machine, ioasic.fifo_bytes, FIFO_SIZE);
 }
 
 
@@ -830,7 +830,7 @@ void midway_ioasic_fifo_full_w(running_machine &machine, UINT16 data)
 		logerror("fifo_full_w(%04X)\n", data);
 	ioasic.force_fifo_full = 1;
 	update_ioasic_irq(machine);
-	dcs_fifo_notify(ioasic.fifo_bytes, FIFO_SIZE);
+	dcs_fifo_notify(machine, ioasic.fifo_bytes, FIFO_SIZE);
 }
 
 
@@ -862,7 +862,7 @@ READ32_HANDLER( midway_ioasic_r )
 	switch (offset)
 	{
 		case IOASIC_PORT0:
-			result = input_port_read(space->machine(), "DIPS");
+			result = space.machine().root_device().ioport("DIPS")->read();
 			/* bit 0 seems to be a ready flag before shuffling happens */
 			if (!ioasic.shuffle_active)
 			{
@@ -874,15 +874,15 @@ READ32_HANDLER( midway_ioasic_r )
 			break;
 
 		case IOASIC_PORT1:
-			result = input_port_read(space->machine(), "SYSTEM");
+			result = space.machine().root_device().ioport("SYSTEM")->read();
 			break;
 
 		case IOASIC_PORT2:
-			result = input_port_read(space->machine(), "IN1");
+			result = space.machine().root_device().ioport("IN1")->read();
 			break;
 
 		case IOASIC_PORT3:
-			result = input_port_read(space->machine(), "IN2");
+			result = space.machine().root_device().ioport("IN2")->read();
 			break;
 
 		case IOASIC_UARTIN:
@@ -894,13 +894,13 @@ READ32_HANDLER( midway_ioasic_r )
 			result = 0;
 			if (ioasic.has_dcs)
 			{
-				result |= ((dcs_control_r() >> 4) ^ 0x40) & 0x00c0;
-				result |= ioasic_fifo_status_r(&space->device()) & 0x0038;
-				result |= dcs_data2_r() & 0xff00;
+				result |= ((dcs_control_r(space.machine()) >> 4) ^ 0x40) & 0x00c0;
+				result |= ioasic_fifo_status_r(&space.device()) & 0x0038;
+				result |= dcs_data2_r(space.machine()) & 0xff00;
 			}
 			else if (ioasic.has_cage)
 			{
-				result |= (cage_control_r() << 6) ^ 0x80;
+				result |= (cage_control_r(space.machine()) << 6) ^ 0x80;
 			}
 			else
 				result |= 0x48;
@@ -910,12 +910,12 @@ READ32_HANDLER( midway_ioasic_r )
 			result = 0;
 			if (ioasic.has_dcs)
 			{
-				result = dcs_data_r();
+				result = dcs_data_r(space.machine());
 				if (ioasic.auto_ack)
-					dcs_ack_w();
+					dcs_ack_w(space.machine());
 			}
 			else if (ioasic.has_cage)
-				result = main_from_cage_r(space);
+				result = cage_main_r(space);
 			else
 			{
 				static UINT16 val = 0;
@@ -932,7 +932,7 @@ READ32_HANDLER( midway_ioasic_r )
 	}
 
 	if (LOG_IOASIC && offset != IOASIC_SOUNDSTAT && offset != IOASIC_SOUNDIN)
-		logerror("%06X:ioasic_r(%d) = %08X\n", cpu_get_pc(&space->device()), offset, result);
+		logerror("%06X:ioasic_r(%d) = %08X\n", space.device().safe_pc(), offset, result);
 
 	return result;
 }
@@ -957,7 +957,7 @@ WRITE32_HANDLER( midway_ioasic_w )
 	newreg = ioasic.reg[offset];
 
 	if (LOG_IOASIC && offset != IOASIC_SOUNDOUT)
-		logerror("%06X:ioasic_w(%d) = %08X\n", cpu_get_pc(&space->device()), offset, data);
+		logerror("%06X:ioasic_w(%d) = %08X\n", space.device().safe_pc(), offset, data);
 
 	switch (offset)
 	{
@@ -968,7 +968,7 @@ WRITE32_HANDLER( midway_ioasic_w )
 				ioasic.shuffle_active = 1;
 				logerror("*** I/O ASIC shuffling enabled!\n");
 				ioasic.reg[IOASIC_INTCTL] = 0;
-				ioasic.reg[IOASIC_UARTCONTROL] = 0;	/* bug in 10th Degree assumes this */
+				ioasic.reg[IOASIC_UARTCONTROL] = 0; /* bug in 10th Degree assumes this */
 			}
 			break;
 
@@ -984,7 +984,7 @@ WRITE32_HANDLER( midway_ioasic_w )
 			{
 				/* we're in loopback mode -- copy to the input */
 				ioasic.reg[IOASIC_UARTIN] = (newreg & 0x00ff) | 0x1000;
-				update_ioasic_irq(space->machine());
+				update_ioasic_irq(space.machine());
 			}
 			else if (PRINTF_DEBUG)
 				mame_printf_debug("%c", data & 0xff);
@@ -994,31 +994,31 @@ WRITE32_HANDLER( midway_ioasic_w )
 			/* sound reset? */
 			if (ioasic.has_dcs)
 			{
-				dcs_reset_w(~newreg & 1);
+				dcs_reset_w(space.machine(), ~newreg & 1);
 			}
 			else if (ioasic.has_cage)
 			{
 				if ((oldreg ^ newreg) & 1)
 				{
-					cage_control_w(space->machine(), 0);
+					cage_control_w(space.machine(), 0);
 					if (!(~newreg & 1))
-						cage_control_w(space->machine(), 3);
+						cage_control_w(space.machine(), 3);
 				}
 			}
 
 			/* FIFO reset? */
-			midway_ioasic_fifo_reset_w(space->machine(), ~newreg & 4);
+			midway_ioasic_fifo_reset_w(space.machine(), ~newreg & 4);
 			break;
 
 		case IOASIC_SOUNDOUT:
 			if (ioasic.has_dcs)
-				dcs_data_w(newreg);
+				dcs_data_w(space.machine(), newreg);
 			else if (ioasic.has_cage)
-				main_to_cage_w(newreg);
+				cage_main_w(space, newreg);
 			break;
 
 		case IOASIC_SOUNDIN:
-			dcs_ack_w();
+			dcs_ack_w(space.machine());
 			/* acknowledge data read */
 			break;
 
@@ -1040,7 +1040,7 @@ WRITE32_HANDLER( midway_ioasic_w )
 			/* bit 14 = LED? */
 			if ((oldreg ^ newreg) & 0x3ff6)
 				logerror("IOASIC int control = %04X\n", data);
-			update_ioasic_irq(space->machine());
+			update_ioasic_irq(space.machine());
 			break;
 
 		default:
@@ -1067,11 +1067,11 @@ READ32_DEVICE_HANDLER( midway_ide_asic_r )
 
 	/* offset 0 is a special case */
 	if (offset == 0)
-		result = ide_controller32_r(device, ideoffs, 0x0000ffff);
+		result = ide_controller32_r(device, space, ideoffs, 0x0000ffff);
 
 	/* everything else is byte-sized */
 	else
-		result = ide_controller32_r(device, ideoffs, 0xff << shift) >> shift;
+		result = ide_controller32_r(device, space, ideoffs, 0xff << shift) >> shift;
 	return result;
 }
 
@@ -1084,9 +1084,9 @@ WRITE32_DEVICE_HANDLER( midway_ide_asic_w )
 
 	/* offset 0 is a special case */
 	if (offset == 0)
-		ide_controller32_w(device, ideoffs, data, 0x0000ffff);
+		ide_controller32_w(device, space, ideoffs, data, 0x0000ffff);
 
 	/* everything else is byte-sized */
 	else
-		ide_controller32_w(device, ideoffs, data << shift, 0xff << shift);
+		ide_controller32_w(device, space, ideoffs, data << shift, 0xff << shift);
 }

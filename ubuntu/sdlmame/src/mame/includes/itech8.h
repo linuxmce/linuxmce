@@ -7,22 +7,24 @@
 
 #include "video/tms34061.h"
 
-#define YBUFFER_COUNT	15
+#define YBUFFER_COUNT   15
 
 class itech8_state : public driver_device
 {
 public:
-	itech8_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	itech8_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+			m_visarea(0, 0, 0, 0){ }
 
-	UINT8 *m_grom_bank;
+	rectangle m_visarea;
+	UINT8 m_grom_bank;
+
 	UINT8 m_blitter_int;
 	UINT8 m_tms34061_int;
 	UINT8 m_periodic_int;
 	UINT8 m_sound_data;
 	UINT8 m_pia_porta_data;
 	UINT8 m_pia_portb_data;
-	const rectangle *m_visarea;
 	UINT8 m_z80_ctrl;
 	UINT8 m_z80_port_val;
 	UINT8 m_z80_clear_to_send;
@@ -52,6 +54,52 @@ public:
 	UINT8 m_grmatch_palcontrol;
 	UINT8 m_grmatch_xscroll;
 	rgb_t m_grmatch_palette[2][16];
+	DECLARE_WRITE8_MEMBER(itech8_nmi_ack_w);
+	DECLARE_WRITE8_MEMBER(blitter_w);
+	DECLARE_WRITE8_MEMBER(rimrockn_bank_w);
+	DECLARE_WRITE8_MEMBER(pia_portb_out);
+	DECLARE_WRITE8_MEMBER(sound_data_w);
+	DECLARE_WRITE8_MEMBER(gtg2_sound_data_w);
+	DECLARE_READ8_MEMBER(sound_data_r);
+	DECLARE_WRITE8_MEMBER(grom_bank_w);
+	DECLARE_WRITE16_MEMBER(grom_bank16_w);
+	DECLARE_WRITE16_MEMBER(display_page16_w);
+	DECLARE_WRITE16_MEMBER(palette16_w);
+	DECLARE_WRITE8_MEMBER(itech8_palette_w);
+	DECLARE_WRITE8_MEMBER(itech8_page_w);
+	DECLARE_READ8_MEMBER(itech8_blitter_r);
+	DECLARE_WRITE8_MEMBER(itech8_blitter_w);
+	DECLARE_WRITE8_MEMBER(itech8_tms34061_w);
+	DECLARE_READ8_MEMBER(itech8_tms34061_r);
+	DECLARE_WRITE8_MEMBER(grmatch_palette_w);
+	DECLARE_WRITE8_MEMBER(grmatch_xscroll_w);
+	DECLARE_CUSTOM_INPUT_MEMBER(special_r);
+	DECLARE_CUSTOM_INPUT_MEMBER(gtg_mux);
+	DECLARE_WRITE8_MEMBER(pia_porta_out);
+	DECLARE_WRITE8_MEMBER(ym2203_portb_out);
+	DECLARE_DRIVER_INIT(rimrockn);
+	DECLARE_DRIVER_INIT(grmatch);
+	DECLARE_DRIVER_INIT(peggle);
+	DECLARE_DRIVER_INIT(slikshot);
+	DECLARE_DRIVER_INIT(neckneck);
+	DECLARE_DRIVER_INIT(arligntn);
+	DECLARE_DRIVER_INIT(hstennis);
+	DECLARE_DRIVER_INIT(sstrike);
+	virtual void machine_reset();
+	virtual void video_start();
+	DECLARE_VIDEO_START(slikshot);
+	DECLARE_MACHINE_START(sstrike);
+	UINT32 screen_update_itech8_2layer(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_itech8_grmatch(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_slikshot(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_itech8_2page(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_itech8_2page_large(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(generate_nmi);
+	TIMER_CALLBACK_MEMBER(irq_off);
+	TIMER_CALLBACK_MEMBER(behind_the_beam_update);
+	TIMER_CALLBACK_MEMBER(delayed_sound_data_w);
+	TIMER_CALLBACK_MEMBER(blitter_done);
+	TIMER_DEVICE_CALLBACK_MEMBER(grmatch_palette_update);
 };
 
 
@@ -62,36 +110,9 @@ void itech8_update_interrupts(running_machine &machine, int periodic, int tms340
 
 /*----------- defined in machine/slikshot.c -----------*/
 
-READ8_HANDLER( slikz80_port_r );
-WRITE8_HANDLER( slikz80_port_w );
+DECLARE_READ8_HANDLER( slikz80_port_r );
+DECLARE_WRITE8_HANDLER( slikz80_port_w );
 
-READ8_HANDLER( slikshot_z80_r );
-READ8_HANDLER( slikshot_z80_control_r );
-WRITE8_HANDLER( slikshot_z80_control_w );
-
-VIDEO_START( slikshot );
-SCREEN_UPDATE( slikshot );
-
-
-/*----------- defined in video/itech8.c -----------*/
-
-VIDEO_START( itech8 );
-
-WRITE8_HANDLER( itech8_page_w );
-
-WRITE8_HANDLER( itech8_palette_w );
-
-READ8_HANDLER( itech8_blitter_r );
-WRITE8_HANDLER( itech8_blitter_w );
-
-WRITE8_HANDLER( itech8_tms34061_w );
-READ8_HANDLER( itech8_tms34061_r );
-
-WRITE8_HANDLER( grmatch_palette_w );
-WRITE8_HANDLER( grmatch_xscroll_w );
-TIMER_DEVICE_CALLBACK( grmatch_palette_update );
-
-SCREEN_UPDATE( itech8_2layer );
-SCREEN_UPDATE( itech8_grmatch );
-SCREEN_UPDATE( itech8_2page );
-SCREEN_UPDATE( itech8_2page_large );
+DECLARE_READ8_HANDLER( slikshot_z80_r );
+DECLARE_READ8_HANDLER( slikshot_z80_control_r );
+DECLARE_WRITE8_HANDLER( slikshot_z80_control_w );

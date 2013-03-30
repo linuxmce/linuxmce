@@ -37,7 +37,31 @@ TODO:
     Main processor  - Z80
     Sound           - AY-3-8910
 
-    ---
+    ----------------------------------------
+    Casino Royal by Dyna Electronics CO. LTD
+    ----------------------------------------
+
+    PCB No. D-2608208A1-1 (Has angled corner cut on the pcb next to this identifier.)
+
+    Brief hardware overview
+    -----------------------
+
+    Xtal            - 6.000 MHz @ 13L
+    Main processor  - Z80A
+    Sound           - AY-3-8910
+
+    ----------------------------------------
+    Casino Royal by Dyna Electronics CO. LTD
+    ----------------------------------------
+
+    PCB No. D-2608208A1-1 (Labeled with Nagoya Japan)
+
+    Brief hardware overview
+    -----------------------
+
+    Xtal            - 6.000 MHz @ 2G
+    Main processor  - Z80A
+    Sound           - AY-3-8910
 
 *******************************************************************************************/
 
@@ -50,67 +74,75 @@ TODO:
 class caswin_state : public driver_device
 {
 public:
-	caswin_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	caswin_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_sc0_vram(*this, "sc0_vram"),
+		m_sc0_attr(*this, "sc0_attr"){ }
 
-	UINT8 *m_sc0_vram;
-	UINT8 *m_sc0_attr;
+	required_shared_ptr<UINT8> m_sc0_vram;
+	required_shared_ptr<UINT8> m_sc0_attr;
 	tilemap_t *m_sc0_tilemap;
+	DECLARE_WRITE8_MEMBER(sc0_vram_w);
+	DECLARE_WRITE8_MEMBER(sc0_attr_w);
+	DECLARE_WRITE8_MEMBER(vvillage_scroll_w);
+	DECLARE_WRITE8_MEMBER(vvillage_vregs_w);
+	DECLARE_READ8_MEMBER(vvillage_rng_r);
+	DECLARE_WRITE8_MEMBER(vvillage_output_w);
+	DECLARE_WRITE8_MEMBER(vvillage_lamps_w);
+	TILE_GET_INFO_MEMBER(get_sc0_tile_info);
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_vvillage(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
 
-static TILE_GET_INFO( get_sc0_tile_info )
+TILE_GET_INFO_MEMBER(caswin_state::get_sc0_tile_info)
 {
-	caswin_state *state = machine.driver_data<caswin_state>();
-	int tile = (state->m_sc0_vram[tile_index] | ((state->m_sc0_attr[tile_index] & 0x70)<<4)) & 0x7ff;
-	int colour = state->m_sc0_attr[tile_index] & 0xf;
+	int tile = (m_sc0_vram[tile_index] | ((m_sc0_attr[tile_index] & 0x70)<<4)) & 0x7ff;
+	int colour = m_sc0_attr[tile_index] & 0xf;
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			0,
 			tile,
 			colour,
 			0);
 }
 
-static VIDEO_START(vvillage)
+void caswin_state::video_start()
 {
-	caswin_state *state = machine.driver_data<caswin_state>();
-	state->m_sc0_tilemap = tilemap_create(machine, get_sc0_tile_info,tilemap_scan_rows,8,8,32,32);
+	m_sc0_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(caswin_state::get_sc0_tile_info),this),TILEMAP_SCAN_ROWS,8,8,32,32);
 }
 
-static SCREEN_UPDATE(vvillage)
+UINT32 caswin_state::screen_update_vvillage(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	caswin_state *state = screen->machine().driver_data<caswin_state>();
-	tilemap_draw(bitmap,cliprect,state->m_sc0_tilemap,0,0);
+	m_sc0_tilemap->draw(bitmap, cliprect, 0,0);
 	return 0;
 }
 
-static WRITE8_HANDLER( sc0_vram_w )
+WRITE8_MEMBER(caswin_state::sc0_vram_w)
 {
-	caswin_state *state = space->machine().driver_data<caswin_state>();
-	state->m_sc0_vram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_sc0_tilemap,offset);
+	m_sc0_vram[offset] = data;
+	m_sc0_tilemap->mark_tile_dirty(offset);
 }
 
-static WRITE8_HANDLER( sc0_attr_w )
+WRITE8_MEMBER(caswin_state::sc0_attr_w)
 {
-	caswin_state *state = space->machine().driver_data<caswin_state>();
-	state->m_sc0_attr[offset] = data;
-	tilemap_mark_tile_dirty(state->m_sc0_tilemap,offset);
+	m_sc0_attr[offset] = data;
+	m_sc0_tilemap->mark_tile_dirty(offset);
 }
 
 /*These two are tested during the two cherry sub-games.I really don't know what is supposed to do...*/
-static WRITE8_HANDLER( vvillage_scroll_w )
+WRITE8_MEMBER(caswin_state::vvillage_scroll_w)
 {
 	//...
 }
 
 /*---- --x- window effect? */
 /*---- ---x flip screen */
-static WRITE8_HANDLER( vvillage_vregs_w )
+WRITE8_MEMBER(caswin_state::vvillage_vregs_w)
 {
-	flip_screen_set(space->machine(), data & 1);
+	flip_screen_set(data & 1);
 }
 
 /**********************
@@ -119,48 +151,48 @@ static WRITE8_HANDLER( vvillage_vregs_w )
 *
 **********************/
 
-static READ8_HANDLER( vvillage_rng_r )
+READ8_MEMBER(caswin_state::vvillage_rng_r)
 {
-	return space->machine().rand();
+	return machine().rand();
 }
 
-static WRITE8_HANDLER( vvillage_output_w )
+WRITE8_MEMBER(caswin_state::vvillage_output_w)
 {
-	coin_counter_w(space->machine(), 0,data & 1);
-	coin_counter_w(space->machine(), 1,data & 1);
+	coin_counter_w(machine(), 0,data & 1);
+	coin_counter_w(machine(), 1,data & 1);
 	// data & 4 payout counter
-	coin_lockout_w(space->machine(), 0,data & 0x20);
-	coin_lockout_w(space->machine(), 1,data & 0x20);
+	coin_lockout_w(machine(), 0,data & 0x20);
+	coin_lockout_w(machine(), 1,data & 0x20);
 }
 
-static WRITE8_HANDLER( vvillage_lamps_w )
+WRITE8_MEMBER(caswin_state::vvillage_lamps_w)
 {
 	/*
-    ---x ---- lamp button 5
-    ---- x--- lamp button 4
-    ---- -x-- lamp button 3
-    ---- --x- lamp button 2
-    ---- ---x lamp button 1
-    */
-	set_led_status(space->machine(), 0, data & 0x01);
-	set_led_status(space->machine(), 1, data & 0x02);
-	set_led_status(space->machine(), 2, data & 0x04);
-	set_led_status(space->machine(), 3, data & 0x08);
-	set_led_status(space->machine(), 4, data & 0x10);
+	---x ---- lamp button 5
+	---- x--- lamp button 4
+	---- -x-- lamp button 3
+	---- --x- lamp button 2
+	---- ---x lamp button 1
+	*/
+	set_led_status(machine(), 0, data & 0x01);
+	set_led_status(machine(), 1, data & 0x02);
+	set_led_status(machine(), 2, data & 0x04);
+	set_led_status(machine(), 3, data & 0x08);
+	set_led_status(machine(), 4, data & 0x10);
 }
 
-static ADDRESS_MAP_START( vvillage_mem, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( vvillage_mem, AS_PROGRAM, 8, caswin_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0xa000, 0xa000) AM_READ(vvillage_rng_r) //accessed by caswin only
 	AM_RANGE(0xe000, 0xe7ff) AM_RAM AM_SHARE("nvram")
-	AM_RANGE(0xf000, 0xf3ff) AM_RAM_WRITE(sc0_vram_w) AM_BASE_MEMBER(caswin_state, m_sc0_vram)
-	AM_RANGE(0xf800, 0xfbff) AM_RAM_WRITE(sc0_attr_w) AM_BASE_MEMBER(caswin_state, m_sc0_attr)
+	AM_RANGE(0xf000, 0xf3ff) AM_RAM_WRITE(sc0_vram_w) AM_SHARE("sc0_vram")
+	AM_RANGE(0xf800, 0xfbff) AM_RAM_WRITE(sc0_attr_w) AM_SHARE("sc0_attr")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( vvillage_io, AS_IO, 8 )
+static ADDRESS_MAP_START( vvillage_io, AS_IO, 8, caswin_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x01,0x01) AM_DEVREAD("aysnd", ay8910_r)
-	AM_RANGE(0x02,0x03) AM_DEVWRITE("aysnd", ay8910_data_address_w)
+	AM_RANGE(0x01,0x01) AM_DEVREAD_LEGACY("aysnd", ay8910_r)
+	AM_RANGE(0x02,0x03) AM_DEVWRITE_LEGACY("aysnd", ay8910_data_address_w)
 	AM_RANGE(0x10,0x10) AM_READ_PORT("IN0")
 	AM_RANGE(0x11,0x11) AM_READ_PORT("IN1")
 	AM_RANGE(0x10,0x10) AM_WRITE(vvillage_scroll_w)
@@ -265,10 +297,11 @@ static const ay8910_interface ay8910_config =
 	DEVCB_NULL
 };
 
-static PALETTE_INIT( caswin )
+void caswin_state::palette_init()
 {
-	int	bit0, bit1, bit2 , r, g, b;
-	int	i;
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
+	int bit0, bit1, bit2 , r, g, b;
+	int i;
 
 	for (i = 0; i < 0x40; ++i)
 	{
@@ -285,7 +318,7 @@ static PALETTE_INIT( caswin )
 		bit2 = (color_prom[0] >> 7) & 0x01;
 		r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 
-		palette_set_color(machine, i, MAKE_RGB(r, g, b));
+		palette_set_color(machine(), i, MAKE_RGB(r, g, b));
 		color_prom++;
 	}
 }
@@ -293,27 +326,24 @@ static PALETTE_INIT( caswin )
 
 static MACHINE_CONFIG_START( vvillage, caswin_state )
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80,4000000)		 /* ? MHz */
+	MCFG_CPU_ADD("maincpu", Z80,4000000)         /* ? MHz */
 	MCFG_CPU_PROGRAM_MAP(vvillage_mem)
 	MCFG_CPU_IO_MAP(vvillage_io)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold )
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", caswin_state,  irq0_line_hold)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(256, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 256-1, 16, 256-16-1)
-	MCFG_SCREEN_UPDATE(vvillage)
+	MCFG_SCREEN_UPDATE_DRIVER(caswin_state, screen_update_vvillage)
 
 	MCFG_NVRAM_ADD_0FILL("nvram")
 
 	MCFG_GFXDECODE(vvillage)
 	MCFG_PALETTE_LENGTH(0x40)
-	MCFG_PALETTE_INIT(caswin)
 
-	MCFG_VIDEO_START(vvillage)
 
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
@@ -353,5 +383,41 @@ ROM_START( rcasino )
 	ROM_LOAD( "prom2.8e",  0x0020, 0x0020, CRC(2b5c7826) SHA1(c0de392aebd6982e5846c12aeb2e871358be60d7) )
 ROM_END
 
-GAME( 1984, rcasino, 0,        vvillage, vvillage, 0, ROT270, "Dyna Electronics", "Royal Casino", GAME_IMPERFECT_GRAPHICS )
-GAME( 1985, caswin,  rcasino,  vvillage, vvillage, 0, ROT270, "Aristocrat",  "Casino Winner", GAME_IMPERFECT_GRAPHICS )
+ROM_START( rcasino1 )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "mrdu1.f1",  0x0000, 0x2000, CRC(ed105d69) SHA1(951697e1050f72967f0710155aa8ff72db73fce1) )
+	ROM_LOAD( "mrdu2.f2",  0x2000, 0x2000, CRC(a1a80b33) SHA1(2f969713cae288de1985d7baa70cad50c4148970) )
+	ROM_LOAD( "mrdu3.f4",  0x4000, 0x1000, CRC(acf77a36) SHA1(599470e461a261130e942d174051648459f37a37) )
+
+	ROM_REGION( 0x6000, "gfx1", 0 )
+	ROM_LOAD( "6.e11",     0x0000, 0x2000, CRC(b2dd4e1e) SHA1(323dcfb26653c17951db65ce2ced3325d35489e4) )
+	ROM_LOAD( "v7.e13",    0x2000, 0x1000, CRC(c7ff4ce3) SHA1(51d4bafddcaef355571bd32b16753b1cee54368d) )
+	ROM_LOAD( "h.e9",      0x3000, 0x2000, CRC(645c7cbf) SHA1(5790422b86a59531764233dd3c9488fdbad476bc) )
+	ROM_LOAD( "mrdu4.e10", 0x5000, 0x1000, CRC(7ca0e78c) SHA1(163cfd1f76ecbd14219146963d1abc4c09c0ac8c) )
+
+	ROM_REGION( 0x40, "proms", 0 )
+	ROM_LOAD( "v1.a11",    0x0000, 0x0020, CRC(93312432) SHA1(3c7abc165e6bc7e0c56ca97d89b0b5e06323b82e) ) /* TBP18S030 */
+	ROM_LOAD( "v2.a12",    0x0020, 0x0020, CRC(2b5c7826) SHA1(c0de392aebd6982e5846c12aeb2e871358be60d7) ) /* TBP18S030 */
+ROM_END
+
+ROM_START( rcasinoo )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "mrdu1.b18", 0x0000, 0x2000, CRC(ed105d69) SHA1(951697e1050f72967f0710155aa8ff72db73fce1) )
+	ROM_LOAD( "mrdu2.b16", 0x2000, 0x2000, CRC(a1a80b33) SHA1(2f969713cae288de1985d7baa70cad50c4148970) )
+	ROM_LOAD( "mrdu3.b15", 0x4000, 0x1000, CRC(acf77a36) SHA1(599470e461a261130e942d174051648459f37a37) )
+
+	ROM_REGION( 0x6000, "gfx1", 0 )
+	ROM_LOAD( "5.b8",      0x0000, 0x2000, CRC(b2dd4e1e) SHA1(323dcfb26653c17951db65ce2ced3325d35489e4) )
+	ROM_LOAD( "6.b6",      0x2000, 0x1000, CRC(c7ff4ce3) SHA1(51d4bafddcaef355571bd32b16753b1cee54368d) )
+	ROM_LOAD( "3.b9",      0x3000, 0x2000, CRC(81d20577) SHA1(50a1e0231400c106539ffa78deb3e0e6c8afc3f5) )
+	ROM_LOAD( "mrdu4.b11", 0x5000, 0x1000, CRC(7ca0e78c) SHA1(163cfd1f76ecbd14219146963d1abc4c09c0ac8c) )
+
+	ROM_REGION( 0x40, "proms", 0 )
+	ROM_LOAD( "prom2.e9",  0x0000, 0x0020, CRC(93312432) SHA1(3c7abc165e6bc7e0c56ca97d89b0b5e06323b82e) ) /* MB7051 */
+	ROM_LOAD( "prom1.e8",  0x0020, 0x0020, CRC(2b5c7826) SHA1(c0de392aebd6982e5846c12aeb2e871358be60d7) ) /* MB7051 */
+ROM_END
+
+GAME( 1984, rcasino,  0,       vvillage, vvillage, driver_device, 0, ROT270, "Dyna Electronics", "Royal Casino (D-2608208A1-2)",                GAME_IMPERFECT_GRAPHICS )
+GAME( 1984, rcasino1, rcasino, vvillage, vvillage, driver_device, 0, ROT270, "Dyna Electronics", "Royal Casino (D-2608208A1-1, Larger Board)",  GAME_IMPERFECT_GRAPHICS )
+GAME( 1984, rcasinoo, rcasino, vvillage, vvillage, driver_device, 0, ROT270, "Dyna Electronics", "Royal Casino (D-2608208A1-1, Smaller Board)", GAME_IMPERFECT_GRAPHICS )
+GAME( 1985, caswin,   rcasino, vvillage, vvillage, driver_device, 0, ROT270, "Aristocrat",       "Casino Winner",                               GAME_IMPERFECT_GRAPHICS )

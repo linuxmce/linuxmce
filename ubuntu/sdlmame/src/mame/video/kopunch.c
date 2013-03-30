@@ -2,12 +2,13 @@
 #include "includes/kopunch.h"
 
 
-PALETTE_INIT( kopunch )
+void kopunch_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 
-	color_prom += 24;	/* first 24 colors are black */
-	for (i = 0; i < machine.total_colors(); i++)
+	color_prom += 24;   /* first 24 colors are black */
+	for (i = 0; i < machine().total_colors(); i++)
 	{
 		int bit0, bit1, bit2, r, g, b;
 
@@ -27,82 +28,73 @@ PALETTE_INIT( kopunch )
 		bit2 = (*color_prom >> 7) & 0x01;
 		b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 
-		palette_set_color(machine, i, MAKE_RGB(r, g, b));
+		palette_set_color(machine(), i, MAKE_RGB(r, g, b));
 		color_prom++;
 	}
 }
 
-WRITE8_HANDLER( kopunch_videoram_w )
+WRITE8_MEMBER(kopunch_state::kopunch_videoram_w)
 {
-	kopunch_state *state = space->machine().driver_data<kopunch_state>();
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_fg_tilemap, offset);
+	m_videoram[offset] = data;
+	m_fg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( kopunch_videoram2_w )
+WRITE8_MEMBER(kopunch_state::kopunch_videoram2_w)
 {
-	kopunch_state *state = space->machine().driver_data<kopunch_state>();
-	state->m_videoram2[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_videoram2[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( kopunch_scroll_x_w )
+WRITE8_MEMBER(kopunch_state::kopunch_scroll_x_w)
 {
-	kopunch_state *state = space->machine().driver_data<kopunch_state>();
-	tilemap_set_scrollx(state->m_bg_tilemap, 0, data);
+	m_bg_tilemap->set_scrollx(0, data);
 }
 
-WRITE8_HANDLER( kopunch_scroll_y_w )
+WRITE8_MEMBER(kopunch_state::kopunch_scroll_y_w)
 {
-	kopunch_state *state = space->machine().driver_data<kopunch_state>();
-	tilemap_set_scrolly(state->m_bg_tilemap, 0, data);
+	m_bg_tilemap->set_scrolly(0, data);
 }
 
-WRITE8_HANDLER( kopunch_gfxbank_w )
+WRITE8_MEMBER(kopunch_state::kopunch_gfxbank_w)
 {
-	kopunch_state *state = space->machine().driver_data<kopunch_state>();
-	if (state->m_gfxbank != (data & 0x07))
+	if (m_gfxbank != (data & 0x07))
 	{
-		state->m_gfxbank = data & 0x07;
-		tilemap_mark_all_tiles_dirty(state->m_bg_tilemap);
+		m_gfxbank = data & 0x07;
+		m_bg_tilemap->mark_all_dirty();
 	}
 
-	tilemap_set_flip(state->m_bg_tilemap, (data & 0x08) ? TILEMAP_FLIPY : 0);
+	m_bg_tilemap->set_flip((data & 0x08) ? TILEMAP_FLIPY : 0);
 }
 
-static TILE_GET_INFO( get_fg_tile_info )
+TILE_GET_INFO_MEMBER(kopunch_state::get_fg_tile_info)
 {
-	kopunch_state *state = machine.driver_data<kopunch_state>();
-	int code = state->m_videoram[tile_index];
+	int code = m_videoram[tile_index];
 
-	SET_TILE_INFO(0, code, 0, 0);
+	SET_TILE_INFO_MEMBER(0, code, 0, 0);
 }
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(kopunch_state::get_bg_tile_info)
 {
-	kopunch_state *state = machine.driver_data<kopunch_state>();
-	int code = (state->m_videoram2[tile_index] & 0x7f) + 128 * state->m_gfxbank;
+	int code = (m_videoram2[tile_index] & 0x7f) + 128 * m_gfxbank;
 
-	SET_TILE_INFO(1, code, 0, 0);
+	SET_TILE_INFO_MEMBER(1, code, 0, 0);
 }
 
-VIDEO_START( kopunch )
+void kopunch_state::video_start()
 {
-	kopunch_state *state = machine.driver_data<kopunch_state>();
-	state->m_fg_tilemap = tilemap_create(machine, get_fg_tile_info, tilemap_scan_rows,  8,  8, 32, 32);
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_rows, 16, 16, 16, 16);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(kopunch_state::get_fg_tile_info),this), TILEMAP_SCAN_ROWS,  8,  8, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(kopunch_state::get_bg_tile_info),this), TILEMAP_SCAN_ROWS, 16, 16, 16, 16);
 
-	tilemap_set_transparent_pen(state->m_fg_tilemap, 0);
+	m_fg_tilemap->set_transparent_pen(0);
 
-	tilemap_set_scrolldx(state->m_bg_tilemap, 16, 16);
+	m_bg_tilemap->set_scrolldx(16, 16);
 }
 
-SCREEN_UPDATE( kopunch )
+UINT32 kopunch_state::screen_update_kopunch(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	kopunch_state *state = screen->machine().driver_data<kopunch_state>();
 
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
-	tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, 0, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
+	m_fg_tilemap->draw(bitmap, cliprect, 0, 0);
 
 	return 0;
 }

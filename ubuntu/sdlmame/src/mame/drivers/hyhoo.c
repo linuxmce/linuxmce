@@ -29,47 +29,40 @@ Memo:
 #include "includes/hyhoo.h"
 #include "machine/nvram.h"
 
-#define	SIGNED_DAC	0		// 0:unsigned DAC, 1:signed DAC
-#if SIGNED_DAC
-#define DAC_WRITE	dac_signed_w
-#else
-#define DAC_WRITE	dac_w
-#endif
 
-
-static DRIVER_INIT( hyhoo )
+DRIVER_INIT_MEMBER(hyhoo_state,hyhoo)
 {
 	nb1413m3_type = NB1413M3_HYHOO;
 }
 
-static DRIVER_INIT( hyhoo2 )
+DRIVER_INIT_MEMBER(hyhoo_state,hyhoo2)
 {
 	nb1413m3_type = NB1413M3_HYHOO2;
 }
 
 
-static ADDRESS_MAP_START( hyhoo_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( hyhoo_map, AS_PROGRAM, 8, hyhoo_state )
 	AM_RANGE(0x0000, 0xefff) AM_ROM
 	AM_RANGE(0xf000, 0xffff) AM_RAM AM_SHARE("nvram")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( hyhoo_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( hyhoo_io_map, AS_IO, 8, hyhoo_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-//  AM_RANGE(0x00, 0x00) AM_WRITE(nb1413m3_nmi_clock_w)
-	AM_RANGE(0x00, 0x7f) AM_READ(nb1413m3_sndrom_r)
-	AM_RANGE(0x81, 0x81) AM_DEVREAD("aysnd", ay8910_r)
-	AM_RANGE(0x82, 0x83) AM_DEVWRITE("aysnd", ay8910_data_address_w)
+//  AM_RANGE(0x00, 0x00) AM_WRITE_LEGACY(nb1413m3_nmi_clock_w)
+	AM_RANGE(0x00, 0x7f) AM_READ_LEGACY(nb1413m3_sndrom_r)
+	AM_RANGE(0x81, 0x81) AM_DEVREAD_LEGACY("aysnd", ay8910_r)
+	AM_RANGE(0x82, 0x83) AM_DEVWRITE_LEGACY("aysnd", ay8910_data_address_w)
 	AM_RANGE(0x90, 0x90) AM_READ_PORT("SYSTEM")
 	AM_RANGE(0x90, 0x97) AM_WRITE(hyhoo_blitter_w)
-	AM_RANGE(0xa0, 0xa0) AM_READWRITE(nb1413m3_inputport1_r, nb1413m3_inputportsel_w)
-	AM_RANGE(0xb0, 0xb0) AM_READWRITE(nb1413m3_inputport2_r, nb1413m3_sndrombank1_w)
-	AM_RANGE(0xc0, 0xcf) AM_WRITEONLY AM_BASE_MEMBER(hyhoo_state, m_clut)
-	AM_RANGE(0xd0, 0xd0) AM_READNOP AM_DEVWRITE("dac", DAC_WRITE)		// unknown read
+	AM_RANGE(0xa0, 0xa0) AM_READWRITE_LEGACY(nb1413m3_inputport1_r, nb1413m3_inputportsel_w)
+	AM_RANGE(0xb0, 0xb0) AM_READWRITE_LEGACY(nb1413m3_inputport2_r, nb1413m3_sndrombank1_w)
+	AM_RANGE(0xc0, 0xcf) AM_WRITEONLY AM_SHARE("clut")
+	AM_RANGE(0xd0, 0xd0) AM_READNOP AM_DEVWRITE("dac", dac_device, write_unsigned8)     // unknown read
 	AM_RANGE(0xe0, 0xe0) AM_WRITE(hyhoo_romsel_w)
-	AM_RANGE(0xe0, 0xe1) AM_READ(nb1413m3_gfxrom_r)
-	AM_RANGE(0xf0, 0xf0) AM_READ(nb1413m3_dipsw1_r)
+	AM_RANGE(0xe0, 0xe1) AM_READ_LEGACY(nb1413m3_gfxrom_r)
+	AM_RANGE(0xf0, 0xf0) AM_READ_LEGACY(nb1413m3_dipsw1_r)
 //  AM_RANGE(0xf0, 0xf0) AM_WRITENOP
-	AM_RANGE(0xf1, 0xf1) AM_READ(nb1413m3_dipsw2_r)
+	AM_RANGE(0xf1, 0xf1) AM_READ_LEGACY(nb1413m3_dipsw2_r)
 ADDRESS_MAP_END
 
 static INPUT_PORTS_START( hyhoo )
@@ -118,14 +111,14 @@ static INPUT_PORTS_START( hyhoo )
 	PORT_DIPSETTING(    0x00, "95%" )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			// NOT USED
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE1 )		// SERVICE
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 ) PORT_NAME("Memory Reset")		// MEMORY RESET
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )			// NOT USED
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )			// COIN2
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         // NOT USED
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE1 )       // SERVICE
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 ) PORT_NAME("Memory Reset")     // MEMORY RESET
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )         // NOT USED
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )          // COIN2
 
 	PORT_START("IN0")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
@@ -193,14 +186,14 @@ static INPUT_PORTS_START( hyhoo2 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			// NOT USED
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE1 )		// SERVICE
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 ) PORT_NAME("Memory Reset")		// MEMORY RESET
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )			// NOT USED
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )			// COIN2
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         // NOT USED
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE1 )       // SERVICE
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 ) PORT_NAME("Memory Reset")     // MEMORY RESET
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )         // NOT USED
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )          // COIN2
 
 	PORT_START("IN0")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
@@ -248,11 +241,12 @@ static const ay8910_interface ay8910_config =
 static MACHINE_CONFIG_START( hyhoo, hyhoo_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, 5000000)	/* 5.00 MHz ?? */
+	MCFG_CPU_ADD("maincpu", Z80, 5000000)   /* 5.00 MHz ?? */
 	MCFG_CPU_PROGRAM_MAP(hyhoo_map)
 	MCFG_CPU_IO_MAP(hyhoo_io_map)
 	MCFG_CPU_VBLANK_INT("screen", nb1413m3_interrupt)
 
+	MCFG_MACHINE_START(nb1413m3)
 	MCFG_MACHINE_RESET(nb1413m3)
 	MCFG_NVRAM_ADD_0FILL("nvram")
 
@@ -260,12 +254,10 @@ static MACHINE_CONFIG_START( hyhoo, hyhoo_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
 	MCFG_SCREEN_SIZE(512, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 512-1, 16, 240-1)
-	MCFG_SCREEN_UPDATE(hyhoo)
+	MCFG_SCREEN_UPDATE_DRIVER(hyhoo_state, screen_update_hyhoo)
 
-	MCFG_VIDEO_START(hyhoo)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -274,7 +266,7 @@ static MACHINE_CONFIG_START( hyhoo, hyhoo_state )
 	MCFG_SOUND_CONFIG(ay8910_config)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.35)
 
-	MCFG_SOUND_ADD("dac", DAC, 0)
+	MCFG_DAC_ADD("dac")
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 MACHINE_CONFIG_END
 
@@ -322,6 +314,5 @@ ROM_START( hyhoo2 )
 ROM_END
 
 
-GAME( 1987, hyhoo,  0, hyhoo,  hyhoo,  hyhoo,  ROT90, "Nichibutsu", "Taisen Quiz HYHOO (Japan)", 0 )
-GAME( 1987, hyhoo2, 0, hyhoo,  hyhoo2, hyhoo2, ROT90, "Nichibutsu", "Taisen Quiz HYHOO 2 (Japan)", 0 )
-
+GAME( 1987, hyhoo,  0, hyhoo,  hyhoo, hyhoo_state,  hyhoo,  ROT90, "Nichibutsu", "Hayaoshi Taisen Quiz Hyhoo (Japan)", 0 )
+GAME( 1987, hyhoo2, 0, hyhoo,  hyhoo2, hyhoo_state, hyhoo2, ROT90, "Nichibutsu", "Hayaoshi Taisen Quiz Hyhoo 2 (Japan)", 0 )

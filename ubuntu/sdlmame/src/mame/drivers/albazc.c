@@ -17,22 +17,34 @@ TODO:
 class albazc_state : public driver_device
 {
 public:
-	albazc_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	albazc_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_spriteram1(*this, "spriteram1"),
+		m_spriteram2(*this, "spriteram2"),
+		m_spriteram3(*this, "spriteram3"){ }
 
 	/* video-related */
-	UINT8 *  m_spriteram1;
-	UINT8 *  m_spriteram2;
-	UINT8 *  m_spriteram3;
+	required_shared_ptr<UINT8> m_spriteram1;
+	required_shared_ptr<UINT8> m_spriteram2;
+	required_shared_ptr<UINT8> m_spriteram3;
 	UINT8 m_flip_bit;
+	DECLARE_WRITE8_MEMBER(hanaroku_out_0_w);
+	DECLARE_WRITE8_MEMBER(hanaroku_out_1_w);
+	DECLARE_WRITE8_MEMBER(hanaroku_out_2_w);
+	DECLARE_WRITE8_MEMBER(albazc_vregs_w);
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_hanaroku(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	void draw_sprites(bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
 
 /* video */
 
-static PALETTE_INIT( hanaroku )
+void albazc_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 	int r, g, b;
 
@@ -42,94 +54,92 @@ static PALETTE_INIT( hanaroku )
 		g = ((color_prom[i * 2 + 1] & 0xe0) | ((color_prom[i * 2 + 0]& 0x03) <<8)) >> 5;
 		r = (color_prom[i * 2 + 0] & 0x7c) >> 2;
 
-		palette_set_color_rgb(machine, i, pal5bit(r), pal5bit(g), pal5bit(b));
+		palette_set_color_rgb(machine(), i, pal5bit(r), pal5bit(g), pal5bit(b));
 	}
 }
 
 
-static VIDEO_START( hanaroku )
+void albazc_state::video_start()
 {
 }
 
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+void albazc_state::draw_sprites(bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	albazc_state *state = machine.driver_data<albazc_state>();
 	int i;
 
 	for (i = 511; i >= 0; i--)
 	{
-		int code = state->m_spriteram1[i] | (state->m_spriteram2[i] << 8);
-		int color = (state->m_spriteram2[i + 0x200] & 0xf8) >> 3;
+		int code = m_spriteram1[i] | (m_spriteram2[i] << 8);
+		int color = (m_spriteram2[i + 0x200] & 0xf8) >> 3;
 		int flipx = 0;
 		int flipy = 0;
-		int sx = state->m_spriteram1[i + 0x200] | ((state->m_spriteram2[i + 0x200] & 0x07) << 8);
-		int sy = 242 - state->m_spriteram3[i];
+		int sx = m_spriteram1[i + 0x200] | ((m_spriteram2[i + 0x200] & 0x07) << 8);
+		int sy = 242 - m_spriteram3[i];
 
-		if (state->m_flip_bit)
+		if (m_flip_bit)
 		{
 			sy = 242 - sy;
 			flipx = !flipx;
 			flipy = !flipy;
 		}
 
-		drawgfx_transpen(bitmap, cliprect, machine.gfx[0], code, color, flipx, flipy,
+		drawgfx_transpen(bitmap, cliprect, machine().gfx[0], code, color, flipx, flipy,
 			sx, sy, 0);
 	}
 }
 
-static SCREEN_UPDATE(hanaroku)
+UINT32 albazc_state::screen_update_hanaroku(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	bitmap_fill(bitmap, cliprect, 0x1f0);	// ???
-	draw_sprites(screen->machine(), bitmap, cliprect);
+	bitmap.fill(0x1f0, cliprect);   // ???
+	draw_sprites(bitmap, cliprect);
 	return 0;
 }
 
-static WRITE8_HANDLER( hanaroku_out_0_w )
+WRITE8_MEMBER(albazc_state::hanaroku_out_0_w)
 {
 	/*
-        bit     description
+	    bit     description
 
-         0      meter1 (coin1)
-         1      meter2 (coin2)
-         2      meter3 (1/2 d-up)
-         3      meter4
-         4      call out (meter)
-         5      lockout (key)
-         6      hopper2 (play)
-         7      meter5 (start)
-    */
+	     0      meter1 (coin1)
+	     1      meter2 (coin2)
+	     2      meter3 (1/2 d-up)
+	     3      meter4
+	     4      call out (meter)
+	     5      lockout (key)
+	     6      hopper2 (play)
+	     7      meter5 (start)
+	*/
 
-	coin_counter_w(space->machine(), 0, data & 0x01);
-	coin_counter_w(space->machine(), 1, data & 0x02);
-	coin_counter_w(space->machine(), 2, data & 0x04);
-	coin_counter_w(space->machine(), 3, data & 0x08);
-	coin_counter_w(space->machine(), 4, data & 0x80);
+	coin_counter_w(machine(), 0, data & 0x01);
+	coin_counter_w(machine(), 1, data & 0x02);
+	coin_counter_w(machine(), 2, data & 0x04);
+	coin_counter_w(machine(), 3, data & 0x08);
+	coin_counter_w(machine(), 4, data & 0x80);
 }
 
-static WRITE8_HANDLER( hanaroku_out_1_w )
+WRITE8_MEMBER(albazc_state::hanaroku_out_1_w)
 {
 	/*
-        bit     description
+	    bit     description
 
-         0      hopper1 (data clear)
-         1      dis dat
-         2      dis clk
-         3      pay out
-         4      ext in 1
-         5      ext in 2
-         6      ?
-         7      ?
-    */
+	     0      hopper1 (data clear)
+	     1      dis dat
+	     2      dis clk
+	     3      pay out
+	     4      ext in 1
+	     5      ext in 2
+	     6      ?
+	     7      ?
+	*/
 }
 
-static WRITE8_HANDLER( hanaroku_out_2_w )
+WRITE8_MEMBER(albazc_state::hanaroku_out_2_w)
 {
 	// unused
 }
 
-static WRITE8_HANDLER( albazc_vregs_w )
+WRITE8_MEMBER(albazc_state::albazc_vregs_w)
 {
-	albazc_state *state = space->machine().driver_data<albazc_state>();
 
 	#ifdef UNUSED_FUNCTION
 	{
@@ -142,25 +152,25 @@ static WRITE8_HANDLER( albazc_vregs_w )
 	if(offset == 0)
 	{
 		/* core bug with this? */
-		//flip_screen_set(space->machine(), (data & 0x40) >> 6);
-		state->m_flip_bit = (data & 0x40) >> 6;
+		//flip_screen_set((data & 0x40) >> 6);
+		m_flip_bit = (data & 0x40) >> 6;
 	}
 }
 
 /* main cpu */
 
-static ADDRESS_MAP_START( hanaroku_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( hanaroku_map, AS_PROGRAM, 8, albazc_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
-	AM_RANGE(0x8000, 0x87ff) AM_RAM AM_BASE_MEMBER(albazc_state, m_spriteram1)
-	AM_RANGE(0x9000, 0x97ff) AM_RAM AM_BASE_MEMBER(albazc_state, m_spriteram2)
-	AM_RANGE(0xa000, 0xa1ff) AM_RAM AM_BASE_MEMBER(albazc_state, m_spriteram3)
-	AM_RANGE(0xa200, 0xa2ff) AM_WRITENOP	// ??? written once during P.O.S.T.
-	AM_RANGE(0xa300, 0xa304) AM_WRITE(albazc_vregs_w)	// ???
-	AM_RANGE(0xb000, 0xb000) AM_WRITENOP	// ??? always 0x40
-	AM_RANGE(0xc000, 0xc3ff) AM_RAM			// main ram
-	AM_RANGE(0xc400, 0xc4ff) AM_RAM			// ???
-	AM_RANGE(0xd000, 0xd000) AM_DEVREAD("aysnd", ay8910_r)
-	AM_RANGE(0xd000, 0xd001) AM_DEVWRITE("aysnd", ay8910_address_data_w)
+	AM_RANGE(0x8000, 0x87ff) AM_RAM AM_SHARE("spriteram1")
+	AM_RANGE(0x9000, 0x97ff) AM_RAM AM_SHARE("spriteram2")
+	AM_RANGE(0xa000, 0xa1ff) AM_RAM AM_SHARE("spriteram3")
+	AM_RANGE(0xa200, 0xa2ff) AM_WRITENOP    // ??? written once during P.O.S.T.
+	AM_RANGE(0xa300, 0xa304) AM_WRITE(albazc_vregs_w)   // ???
+	AM_RANGE(0xb000, 0xb000) AM_WRITENOP    // ??? always 0x40
+	AM_RANGE(0xc000, 0xc3ff) AM_RAM         // main ram
+	AM_RANGE(0xc400, 0xc4ff) AM_RAM         // ???
+	AM_RANGE(0xd000, 0xd000) AM_DEVREAD_LEGACY("aysnd", ay8910_r)
+	AM_RANGE(0xd000, 0xd001) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_data_w)
 	AM_RANGE(0xe000, 0xe000) AM_READ_PORT("IN0") AM_WRITE(hanaroku_out_0_w)
 	AM_RANGE(0xe001, 0xe001) AM_READ_PORT("IN1")
 	AM_RANGE(0xe002, 0xe002) AM_READ_PORT("IN2") AM_WRITE(hanaroku_out_1_w)
@@ -169,9 +179,9 @@ ADDRESS_MAP_END
 
 
 static INPUT_PORTS_START( hanaroku )
-	PORT_START("IN0")	/* 0xe000 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )		// adds n credits depending on "Coinage" Dip Switch
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )		// adds 5 credits
+	PORT_START("IN0")   /* 0xe000 */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )      // adds n credits depending on "Coinage" Dip Switch
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )      // adds 5 credits
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME("1/2 D-Up") PORT_CODE(KEYCODE_H)
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME("Reset") PORT_CODE(KEYCODE_R)
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME("Meter") PORT_CODE(KEYCODE_M)
@@ -179,7 +189,7 @@ static INPUT_PORTS_START( hanaroku )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START2 ) PORT_NAME("Play")
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START1 ) PORT_NAME("Start")
 
-	PORT_START("IN1")	/* 0xe001 */
+	PORT_START("IN1")   /* 0xe001 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_HANAFUDA_A )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_HANAFUDA_B )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_HANAFUDA_C )
@@ -189,7 +199,7 @@ static INPUT_PORTS_START( hanaroku )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_HANAFUDA_YES )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_HANAFUDA_NO )
 
-	PORT_START("IN2")	/* 0xe002 */
+	PORT_START("IN2")   /* 0xe002 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_SERVICE3 ) PORT_NAME("Data Clear")
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_TILT )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON9 ) PORT_NAME("Medal In") PORT_CODE(KEYCODE_I)
@@ -198,29 +208,29 @@ static INPUT_PORTS_START( hanaroku )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE2 ) PORT_NAME("Ext In 2")
 	PORT_BIT( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("DSW1")	/* 0xd000 - Port A */
+	PORT_START("DSW1")  /* 0xd000 - Port A */
 	PORT_BIT(  0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("DSW2")	/* 0xd000 - Port B */
+	PORT_START("DSW2")  /* 0xd000 - Port B */
 	PORT_BIT(  0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("DSW3")	/* 0xe004 */
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coinage ) )		// Stored at 0xc028
+	PORT_START("DSW3")  /* 0xe004 */
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coinage ) )      // Stored at 0xc028
 	PORT_DIPSETTING(    0x03, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( 1C_5C ) )
 	PORT_DIPSETTING(    0x00, "1 Coin/10 Credits" )
-	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Flip_Screen ) )	// Stored at 0xc03a
+	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Flip_Screen ) )  // Stored at 0xc03a
 	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )		// Stored at 0xc078
+	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )      // Stored at 0xc078
 	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x30, 0x20, "Game Mode" )				// Stored at 0xc02e
-	PORT_DIPSETTING(    0x30, "Mode 0" )				// Collect OFF
-	PORT_DIPSETTING(    0x20, "Mode 1" )				// Collect ON (code at 0x36ea)
-	PORT_DIPSETTING(    0x10, "Mode 2" )				// Collect ON (code at 0x3728)
-	PORT_DIPSETTING(    0x00, "Mode 3" )				// No credit counter
+	PORT_DIPNAME( 0x30, 0x20, "Game Mode" )             // Stored at 0xc02e
+	PORT_DIPSETTING(    0x30, "Mode 0" )                // Collect OFF
+	PORT_DIPSETTING(    0x20, "Mode 1" )                // Collect ON (code at 0x36ea)
+	PORT_DIPSETTING(    0x10, "Mode 2" )                // Collect ON (code at 0x3728)
+	PORT_DIPSETTING(    0x00, "Mode 3" )                // No credit counter
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
 INPUT_PORTS_END
@@ -259,24 +269,21 @@ static const ay8910_interface ay8910_config =
 
 static MACHINE_CONFIG_START( hanaroku, albazc_state )
 
-	MCFG_CPU_ADD("maincpu", Z80,6000000)		 /* ? MHz */
+	MCFG_CPU_ADD("maincpu", Z80,6000000)         /* ? MHz */
 	MCFG_CPU_PROGRAM_MAP(hanaroku_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", albazc_state,  irq0_line_hold)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 64*8)
 	MCFG_SCREEN_VISIBLE_AREA(0, 48*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(hanaroku)
+	MCFG_SCREEN_UPDATE_DRIVER(albazc_state, screen_update_hanaroku)
 
 	MCFG_GFXDECODE(hanaroku)
 	MCFG_PALETTE_LENGTH(0x200)
 
-	MCFG_PALETTE_INIT(hanaroku)
-	MCFG_VIDEO_START(hanaroku)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -303,4 +310,4 @@ ROM_START( hanaroku )
 ROM_END
 
 
-GAME( 1988, hanaroku, 0,        hanaroku, hanaroku, 0, ROT0, "Alba", "Hanaroku", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_COLORS | GAME_SUPPORTS_SAVE )
+GAME( 1988, hanaroku, 0,        hanaroku, hanaroku, driver_device, 0, ROT0, "Alba", "Hanaroku", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_COLORS | GAME_SUPPORTS_SAVE )

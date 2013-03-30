@@ -6,64 +6,58 @@
 #include "includes/drgnmst.h"
 
 
-static TILE_GET_INFO( get_drgnmst_fg_tile_info )
+TILE_GET_INFO_MEMBER(drgnmst_state::get_drgnmst_fg_tile_info)
 {
-	drgnmst_state *state = machine.driver_data<drgnmst_state>();
 	int tileno, colour, flipyx;
-	tileno = state->m_fg_videoram[tile_index * 2] & 0xfff;
-	colour = state->m_fg_videoram[tile_index * 2 + 1] & 0x1f;
-	flipyx = (state->m_fg_videoram[tile_index * 2 + 1] & 0x60)>>5;
+	tileno = m_fg_videoram[tile_index * 2] & 0xfff;
+	colour = m_fg_videoram[tile_index * 2 + 1] & 0x1f;
+	flipyx = (m_fg_videoram[tile_index * 2 + 1] & 0x60)>>5;
 
-	SET_TILE_INFO(1, tileno, colour, TILE_FLIPYX(flipyx));
+	SET_TILE_INFO_MEMBER(1, tileno, colour, TILE_FLIPYX(flipyx));
 }
 
-WRITE16_HANDLER( drgnmst_fg_videoram_w )
+WRITE16_MEMBER(drgnmst_state::drgnmst_fg_videoram_w)
 {
-	drgnmst_state *state = space->machine().driver_data<drgnmst_state>();
-	COMBINE_DATA(&state->m_fg_videoram[offset]);
-	tilemap_mark_tile_dirty(state->m_fg_tilemap, offset / 2);
+	COMBINE_DATA(&m_fg_videoram[offset]);
+	m_fg_tilemap->mark_tile_dirty(offset / 2);
 }
 
-static TILE_GET_INFO( get_drgnmst_bg_tile_info )
+TILE_GET_INFO_MEMBER(drgnmst_state::get_drgnmst_bg_tile_info)
 {
-	drgnmst_state *state = machine.driver_data<drgnmst_state>();
 	int tileno, colour, flipyx;
-	tileno = (state->m_bg_videoram[tile_index * 2]& 0x1fff) + 0x800;
-	colour = state->m_bg_videoram[tile_index * 2 + 1] & 0x1f;
-	flipyx = (state->m_bg_videoram[tile_index * 2 + 1] & 0x60) >> 5;
+	tileno = (m_bg_videoram[tile_index * 2]& 0x1fff) + 0x800;
+	colour = m_bg_videoram[tile_index * 2 + 1] & 0x1f;
+	flipyx = (m_bg_videoram[tile_index * 2 + 1] & 0x60) >> 5;
 
-	SET_TILE_INFO(3, tileno, colour, TILE_FLIPYX(flipyx));
+	SET_TILE_INFO_MEMBER(3, tileno, colour, TILE_FLIPYX(flipyx));
 }
 
-WRITE16_HANDLER( drgnmst_bg_videoram_w )
+WRITE16_MEMBER(drgnmst_state::drgnmst_bg_videoram_w)
 {
-	drgnmst_state *state = space->machine().driver_data<drgnmst_state>();
-	COMBINE_DATA(&state->m_bg_videoram[offset]);
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset / 2);
+	COMBINE_DATA(&m_bg_videoram[offset]);
+	m_bg_tilemap->mark_tile_dirty(offset / 2);
 }
 
-static TILE_GET_INFO( get_drgnmst_md_tile_info )
+TILE_GET_INFO_MEMBER(drgnmst_state::get_drgnmst_md_tile_info)
 {
-	drgnmst_state *state = machine.driver_data<drgnmst_state>();
 	int tileno, colour, flipyx;
-	tileno = (state->m_md_videoram[tile_index * 2] & 0x7fff) - 0x2000;
-	colour = state->m_md_videoram[tile_index * 2 + 1] & 0x1f;
-	flipyx = (state->m_md_videoram[tile_index * 2 + 1] & 0x60) >> 5;
+	tileno = (m_md_videoram[tile_index * 2] & 0x7fff) - 0x2000;
+	colour = m_md_videoram[tile_index * 2 + 1] & 0x1f;
+	flipyx = (m_md_videoram[tile_index * 2 + 1] & 0x60) >> 5;
 
-	SET_TILE_INFO(2, tileno, colour, TILE_FLIPYX(flipyx));
+	SET_TILE_INFO_MEMBER(2, tileno, colour, TILE_FLIPYX(flipyx));
 }
 
-WRITE16_HANDLER( drgnmst_md_videoram_w )
+WRITE16_MEMBER(drgnmst_state::drgnmst_md_videoram_w)
 {
-	drgnmst_state *state = space->machine().driver_data<drgnmst_state>();
-	COMBINE_DATA(&state->m_md_videoram[offset]);
-	tilemap_mark_tile_dirty(state->m_md_tilemap, offset / 2);
+	COMBINE_DATA(&m_md_videoram[offset]);
+	m_md_tilemap->mark_tile_dirty(offset / 2);
 }
 
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap,const rectangle *cliprect )
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap,const rectangle &cliprect )
 {
 	drgnmst_state *state = machine.driver_data<drgnmst_state>();
-	const gfx_element *gfx = machine.gfx[0];
+	gfx_element *gfx = machine.gfx[0];
 	UINT16 *source = state->m_spriteram;
 	UINT16 *finish = source + 0x800 / 2;
 
@@ -108,96 +102,94 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap,const recta
 }
 
 
-static TILEMAP_MAPPER( drgnmst_fg_tilemap_scan_cols )
+TILEMAP_MAPPER_MEMBER(drgnmst_state::drgnmst_fg_tilemap_scan_cols)
 {
 	return (col * 32) + (row & 0x1f) + ((row & 0xe0) >> 5) * 2048;
 }
 
-static TILEMAP_MAPPER( drgnmst_md_tilemap_scan_cols )
+TILEMAP_MAPPER_MEMBER(drgnmst_state::drgnmst_md_tilemap_scan_cols)
 {
 	return (col * 16) + (row & 0x0f) + ((row & 0xf0) >> 4) * 1024;
 }
 
-static TILEMAP_MAPPER( drgnmst_bg_tilemap_scan_cols )
+TILEMAP_MAPPER_MEMBER(drgnmst_state::drgnmst_bg_tilemap_scan_cols)
 {
 	return (col * 8) + (row & 0x07) + ((row & 0xf8) >> 3) * 512;
 }
 
-VIDEO_START(drgnmst)
+void drgnmst_state::video_start()
 {
-	drgnmst_state *state = machine.driver_data<drgnmst_state>();
-	state->m_fg_tilemap = tilemap_create(machine, get_drgnmst_fg_tile_info, drgnmst_fg_tilemap_scan_cols, 8, 8, 64,64);
-	tilemap_set_transparent_pen(state->m_fg_tilemap, 15);
+	m_fg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(drgnmst_state::get_drgnmst_fg_tile_info),this), tilemap_mapper_delegate(FUNC(drgnmst_state::drgnmst_fg_tilemap_scan_cols),this), 8, 8, 64,64);
+	m_fg_tilemap->set_transparent_pen(15);
 
-	state->m_md_tilemap = tilemap_create(machine, get_drgnmst_md_tile_info, drgnmst_md_tilemap_scan_cols, 16, 16, 64,64);
-	tilemap_set_transparent_pen(state->m_md_tilemap, 15);
+	m_md_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(drgnmst_state::get_drgnmst_md_tile_info),this), tilemap_mapper_delegate(FUNC(drgnmst_state::drgnmst_md_tilemap_scan_cols),this), 16, 16, 64,64);
+	m_md_tilemap->set_transparent_pen(15);
 
-	state->m_bg_tilemap = tilemap_create(machine, get_drgnmst_bg_tile_info, drgnmst_bg_tilemap_scan_cols, 32, 32, 64,64);
-	tilemap_set_transparent_pen(state->m_bg_tilemap, 15);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(drgnmst_state::get_drgnmst_bg_tile_info),this), tilemap_mapper_delegate(FUNC(drgnmst_state::drgnmst_bg_tilemap_scan_cols),this), 32, 32, 64,64);
+	m_bg_tilemap->set_transparent_pen(15);
 
 	// do the other tilemaps have rowscroll too? probably not ..
-	tilemap_set_scroll_rows(state->m_md_tilemap, 1024);
+	m_md_tilemap->set_scroll_rows(1024);
 }
 
-SCREEN_UPDATE(drgnmst)
+UINT32 drgnmst_state::screen_update_drgnmst(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	drgnmst_state *state = screen->machine().driver_data<drgnmst_state>();
 	int y, rowscroll_bank;
 
-	tilemap_set_scrollx(state->m_bg_tilemap, 0, state->m_vidregs[10] - 18); // verify
-	tilemap_set_scrolly(state->m_bg_tilemap, 0, state->m_vidregs[11]); // verify
+	m_bg_tilemap->set_scrollx(0, m_vidregs[10] - 18); // verify
+	m_bg_tilemap->set_scrolly(0, m_vidregs[11]); // verify
 
-//  tilemap_set_scrollx(state->m_md_tilemap,0, state->m_vidregs[8] - 16); // rowscrolled
-	tilemap_set_scrolly(state->m_md_tilemap,0, state->m_vidregs[9]); // verify
+//  m_md_tilemap->set_scrollx(0, m_vidregs[8] - 16); // rowscrolled
+	m_md_tilemap->set_scrolly(0, m_vidregs[9]); // verify
 
-	tilemap_set_scrollx(state->m_fg_tilemap,0, state->m_vidregs[6] - 18); // verify (test mode colour test needs it)
-	tilemap_set_scrolly(state->m_fg_tilemap,0, state->m_vidregs[7]); // verify
+	m_fg_tilemap->set_scrollx(0, m_vidregs[6] - 18); // verify (test mode colour test needs it)
+	m_fg_tilemap->set_scrolly(0, m_vidregs[7]); // verify
 
-	rowscroll_bank = (state->m_vidregs[4] & 0x30) >> 4;
+	rowscroll_bank = (m_vidregs[4] & 0x30) >> 4;
 
 	for (y = 0; y < 1024; y++)
-		tilemap_set_scrollx(state->m_md_tilemap, y, state->m_vidregs[8] - 16 + state->m_rowscrollram[y + 0x800 * rowscroll_bank]);
+		m_md_tilemap->set_scrollx(y, m_vidregs[8] - 16 + m_rowscrollram[y + 0x800 * rowscroll_bank]);
 
 	// todo: figure out which bits relate to the order
-	switch (state->m_vidregs2[0])
+	switch (m_vidregs2[0])
 	{
 		case 0x2451: // fg unsure
 		case 0x2d9a: // fg unsure
 		case 0x2440: // all ok
 		case 0x245a: // fg unsure, title screen
-			tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, TILEMAP_DRAW_OPAQUE, 0);
-			tilemap_draw(bitmap, cliprect, state->m_md_tilemap, 0, 0);
-			tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
+			m_fg_tilemap->draw(bitmap, cliprect, TILEMAP_DRAW_OPAQUE, 0);
+			m_md_tilemap->draw(bitmap, cliprect, 0, 0);
+			m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
 			break;
 		case 0x23c0: // all ok
-			tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, TILEMAP_DRAW_OPAQUE, 0);
-			tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, 0, 0);
-			tilemap_draw(bitmap, cliprect, state->m_md_tilemap, 0, 0);
+			m_bg_tilemap->draw(bitmap, cliprect, TILEMAP_DRAW_OPAQUE, 0);
+			m_fg_tilemap->draw(bitmap, cliprect, 0, 0);
+			m_md_tilemap->draw(bitmap, cliprect, 0, 0);
 			break;
 		case 0x38da: // fg unsure
 		case 0x215a: // fg unsure
 		case 0x2140: // all ok
-			tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, TILEMAP_DRAW_OPAQUE, 0);
-			tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
-			tilemap_draw(bitmap, cliprect, state->m_md_tilemap, 0, 0);
+			m_fg_tilemap->draw(bitmap, cliprect, TILEMAP_DRAW_OPAQUE, 0);
+			m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
+			m_md_tilemap->draw(bitmap, cliprect, 0, 0);
 			break;
 		case 0x2d80: // all ok
-			tilemap_draw(bitmap, cliprect, state->m_md_tilemap, TILEMAP_DRAW_OPAQUE, 0);
-			tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
-			tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, 0, 0);
+			m_md_tilemap->draw(bitmap, cliprect, TILEMAP_DRAW_OPAQUE, 0);
+			m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
+			m_fg_tilemap->draw(bitmap, cliprect, 0, 0);
 			break;
 		default:
-			tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, TILEMAP_DRAW_OPAQUE, 0);
-			tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, 0, 0);
-			tilemap_draw(bitmap, cliprect, state->m_md_tilemap, 0, 0);
-			logerror ("unknown video priority regs %04x\n", state->m_vidregs2[0]);
+			m_bg_tilemap->draw(bitmap, cliprect, TILEMAP_DRAW_OPAQUE, 0);
+			m_fg_tilemap->draw(bitmap, cliprect, 0, 0);
+			m_md_tilemap->draw(bitmap, cliprect, 0, 0);
+			logerror ("unknown video priority regs %04x\n", m_vidregs2[0]);
 
 	}
 
-	draw_sprites(screen->machine(),bitmap,cliprect);
+	draw_sprites(machine(),bitmap,cliprect);
 
-//  popmessage ("x %04x x %04x x %04x x %04x x %04x", state->m_vidregs2[0], state->m_vidregs[12], state->m_vidregs[13], state->m_vidregs[14], state->m_vidregs[15]);
-//  popmessage ("x %04x x %04x y %04x y %04x z %04x z %04x",state->m_vidregs[0],state->m_vidregs[1],state->m_vidregs[2],state->m_vidregs[3],state->m_vidregs[4],state->m_vidregs[5]);
+//  popmessage ("x %04x x %04x x %04x x %04x x %04x", m_vidregs2[0], m_vidregs[12], m_vidregs[13], m_vidregs[14], m_vidregs[15]);
+//  popmessage ("x %04x x %04x y %04x y %04x z %04x z %04x",m_vidregs[0],m_vidregs[1],m_vidregs[2],m_vidregs[3],m_vidregs[4],m_vidregs[5]);
 
 	return 0;
 }

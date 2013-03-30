@@ -19,8 +19,9 @@
 
 #include "emu.h"
 #include "cpu/m68000/m68000.h"
-#include "includes/shuuz.h"
 #include "sound/okim6295.h"
+#include "video/atarimo.h"
+#include "includes/shuuz.h"
 
 
 
@@ -30,10 +31,9 @@
  *
  *************************************/
 
-static void update_interrupts(running_machine &machine)
+void shuuz_state::update_interrupts()
 {
-	shuuz_state *state = machine.driver_data<shuuz_state>();
-	cputag_set_input_line(machine, "maincpu", 4, state->m_scanline_int_state ? ASSERT_LINE : CLEAR_LINE);
+	subdevice("maincpu")->execute().set_input_line(4, m_scanline_int_state ? ASSERT_LINE : CLEAR_LINE);
 }
 
 
@@ -44,15 +44,15 @@ static void update_interrupts(running_machine &machine)
  *
  *************************************/
 
-static READ16_HANDLER( shuuz_atarivc_r )
+READ16_MEMBER(shuuz_state::shuuz_atarivc_r)
 {
-	return atarivc_r(*space->machine().primary_screen, offset);
+	return atarivc_r(*machine().primary_screen, offset);
 }
 
 
-static WRITE16_HANDLER( shuuz_atarivc_w )
+WRITE16_MEMBER(shuuz_state::shuuz_atarivc_w)
 {
-	atarivc_w(*space->machine().primary_screen, offset, data, mem_mask);
+	atarivc_w(*machine().primary_screen, offset, data, mem_mask);
 }
 
 
@@ -63,23 +63,14 @@ static WRITE16_HANDLER( shuuz_atarivc_w )
  *
  *************************************/
 
-static MACHINE_START( shuuz )
+MACHINE_RESET_MEMBER(shuuz_state,shuuz)
 {
-	atarigen_init(machine);
+	atarigen_state::machine_reset();
+	atarivc_reset(*machine().primary_screen, m_atarivc_eof_data, 1);
 }
 
 
-static MACHINE_RESET( shuuz )
-{
-	shuuz_state *state = machine.driver_data<shuuz_state>();
-
-	atarigen_eeprom_reset(state);
-	atarigen_interrupt_reset(state, update_interrupts);
-	atarivc_reset(*machine.primary_screen, state->m_atarivc_eof_data, 1);
-}
-
-
-static WRITE16_HANDLER( latch_w )
+WRITE16_MEMBER(shuuz_state::latch_w)
 {
 }
 
@@ -91,24 +82,23 @@ static WRITE16_HANDLER( latch_w )
  *
  *************************************/
 
-static READ16_HANDLER( leta_r )
+READ16_MEMBER(shuuz_state::leta_r)
 {
-	shuuz_state *state = space->machine().driver_data<shuuz_state>();
 	/* trackball -- rotated 45 degrees? */
 	int which = offset & 1;
 
 	/* when reading the even ports, do a real analog port update */
 	if (which == 0)
 	{
-		int dx = (INT8)input_port_read(space->machine(), "TRACKX");
-		int dy = (INT8)input_port_read(space->machine(), "TRACKY");
+		int dx = (INT8)ioport("TRACKX")->read();
+		int dy = (INT8)ioport("TRACKY")->read();
 
-		state->m_cur[0] = dx + dy;
-		state->m_cur[1] = dx - dy;
+		m_cur[0] = dx + dy;
+		m_cur[1] = dx - dy;
 	}
 
 	/* clip the result to -0x3f to +0x3f to remove directional ambiguities */
-	return state->m_cur[which];
+	return m_cur[which];
 }
 
 
@@ -119,11 +109,11 @@ static READ16_HANDLER( leta_r )
  *
  *************************************/
 
-static READ16_HANDLER( special_port0_r )
+READ16_MEMBER(shuuz_state::special_port0_r)
 {
-	int result = input_port_read(space->machine(), "SYSTEM");
+	int result = ioport("SYSTEM")->read();
 
-	if ((result & 0x0800) && atarigen_get_hblank(*space->machine().primary_screen))
+	if ((result & 0x0800) && get_hblank(*machine().primary_screen))
 		result &= ~0x0800;
 
 	return result;
@@ -137,24 +127,24 @@ static READ16_HANDLER( special_port0_r )
  *
  *************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16, shuuz_state )
 	AM_RANGE(0x000000, 0x03ffff) AM_ROM
-	AM_RANGE(0x100000, 0x100fff) AM_READWRITE(atarigen_eeprom_r, atarigen_eeprom_w) AM_SHARE("eeprom")
-	AM_RANGE(0x101000, 0x101fff) AM_WRITE(atarigen_eeprom_enable_w)
+	AM_RANGE(0x100000, 0x100fff) AM_READWRITE(eeprom_r, eeprom_w) AM_SHARE("eeprom")
+	AM_RANGE(0x101000, 0x101fff) AM_WRITE(eeprom_enable_w)
 	AM_RANGE(0x102000, 0x102001) AM_WRITE(watchdog_reset16_w)
 	AM_RANGE(0x103000, 0x103003) AM_READ(leta_r)
 	AM_RANGE(0x105000, 0x105001) AM_READWRITE(special_port0_r, latch_w)
 	AM_RANGE(0x105002, 0x105003) AM_READ_PORT("BUTTONS")
-	AM_RANGE(0x106000, 0x106001) AM_DEVREADWRITE8_MODERN("oki", okim6295_device, read, write, 0x00ff)
+	AM_RANGE(0x106000, 0x106001) AM_DEVREADWRITE8("oki", okim6295_device, read, write, 0x00ff)
 	AM_RANGE(0x107000, 0x107007) AM_NOP
-	AM_RANGE(0x3e0000, 0x3e087f) AM_RAM_WRITE(atarigen_666_paletteram_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0x3effc0, 0x3effff) AM_READWRITE(shuuz_atarivc_r, shuuz_atarivc_w) AM_BASE_MEMBER(shuuz_state, m_atarivc_data)
-	AM_RANGE(0x3f4000, 0x3f5eff) AM_RAM_WRITE(atarigen_playfield_latched_msb_w) AM_BASE_MEMBER(shuuz_state, m_playfield)
-	AM_RANGE(0x3f5f00, 0x3f5f7f) AM_RAM AM_BASE_MEMBER(shuuz_state, m_atarivc_eof_data)
-	AM_RANGE(0x3f5f80, 0x3f5fff) AM_RAM_WRITE(atarimo_0_slipram_w) AM_BASE(&atarimo_0_slipram)
-	AM_RANGE(0x3f6000, 0x3f7fff) AM_RAM_WRITE(atarigen_playfield_upper_w) AM_BASE_MEMBER(shuuz_state, m_playfield_upper)
+	AM_RANGE(0x3e0000, 0x3e087f) AM_RAM_WRITE(paletteram_666_w) AM_SHARE("paletteram")
+	AM_RANGE(0x3effc0, 0x3effff) AM_READWRITE(shuuz_atarivc_r, shuuz_atarivc_w) AM_SHARE("atarivc_data")
+	AM_RANGE(0x3f4000, 0x3f5eff) AM_RAM_WRITE(playfield_latched_msb_w) AM_SHARE("playfield")
+	AM_RANGE(0x3f5f00, 0x3f5f7f) AM_RAM AM_SHARE("atarivc_eof")
+	AM_RANGE(0x3f5f80, 0x3f5fff) AM_READWRITE_LEGACY(atarimo_0_slipram_r, atarimo_0_slipram_w)
+	AM_RANGE(0x3f6000, 0x3f7fff) AM_RAM_WRITE(playfield_upper_w) AM_SHARE("playfield_up")
 	AM_RANGE(0x3f8000, 0x3fcfff) AM_RAM
-	AM_RANGE(0x3fd000, 0x3fd3ff) AM_RAM_WRITE(atarimo_0_spriteram_w) AM_BASE(&atarimo_0_spriteram)
+	AM_RANGE(0x3fd000, 0x3fd3ff) AM_READWRITE_LEGACY(atarimo_0_spriteram_r, atarimo_0_spriteram_w)
 	AM_RANGE(0x3fd400, 0x3fffff) AM_RAM
 ADDRESS_MAP_END
 
@@ -171,7 +161,7 @@ static INPUT_PORTS_START( shuuz )
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x07fc, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_BIT( 0xf000, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("BUTTONS")
@@ -182,11 +172,11 @@ static INPUT_PORTS_START( shuuz )
 	PORT_BIT( 0xf000, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("TRACKX")
-    PORT_BIT( 0xff, 0, IPT_TRACKBALL_X ) PORT_SENSITIVITY(50) PORT_KEYDELTA(30) PORT_PLAYER(1)
+	PORT_BIT( 0xff, 0, IPT_TRACKBALL_X ) PORT_SENSITIVITY(50) PORT_KEYDELTA(30) PORT_PLAYER(1)
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("TRACKY")
-    PORT_BIT( 0xff, 0, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(50) PORT_KEYDELTA(30) PORT_REVERSE PORT_PLAYER(1)
+	PORT_BIT( 0xff, 0, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(50) PORT_KEYDELTA(30) PORT_REVERSE PORT_PLAYER(1)
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 INPUT_PORTS_END
 
@@ -198,7 +188,7 @@ static INPUT_PORTS_START( shuuz2 )
 	PORT_BIT( 0x00fc, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Step Debug SW") PORT_CODE(KEYCODE_S)
 	PORT_BIT( 0x0600, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Playfield Debug SW") PORT_CODE(KEYCODE_Y)
 	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Reset Debug SW") PORT_CODE(KEYCODE_E)
 	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Crosshair Debug SW") PORT_CODE(KEYCODE_C)
@@ -217,11 +207,11 @@ static INPUT_PORTS_START( shuuz2 )
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(1)
 
 	PORT_START("TRACKX")
-    PORT_BIT( 0xff, 0, IPT_TRACKBALL_X ) PORT_SENSITIVITY(50) PORT_KEYDELTA(30) PORT_PLAYER(1)
+	PORT_BIT( 0xff, 0, IPT_TRACKBALL_X ) PORT_SENSITIVITY(50) PORT_KEYDELTA(30) PORT_PLAYER(1)
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("TRACKY")
-    PORT_BIT( 0xff, 0, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(50) PORT_KEYDELTA(30) PORT_REVERSE PORT_PLAYER(1)
+	PORT_BIT( 0xff, 0, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(50) PORT_KEYDELTA(30) PORT_REVERSE PORT_PLAYER(1)
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 INPUT_PORTS_END
 
@@ -246,8 +236,8 @@ static const gfx_layout pfmolayout =
 
 
 static GFXDECODE_START( shuuz )
-	GFXDECODE_ENTRY( "gfx1", 0, pfmolayout,  256, 16 )		/* sprites & playfield */
-	GFXDECODE_ENTRY( "gfx2", 0, pfmolayout,    0, 16 )		/* sprites & playfield */
+	GFXDECODE_ENTRY( "gfx1", 0, pfmolayout,  256, 16 )      /* sprites & playfield */
+	GFXDECODE_ENTRY( "gfx2", 0, pfmolayout,    0, 16 )      /* sprites & playfield */
 GFXDECODE_END
 
 
@@ -264,8 +254,7 @@ static MACHINE_CONFIG_START( shuuz, shuuz_state )
 	MCFG_CPU_ADD("maincpu", M68000, ATARI_CLOCK_14MHz/2)
 	MCFG_CPU_PROGRAM_MAP(main_map)
 
-	MCFG_MACHINE_START(shuuz)
-	MCFG_MACHINE_RESET(shuuz)
+	MCFG_MACHINE_RESET_OVERRIDE(shuuz_state,shuuz)
 	MCFG_NVRAM_ADD_1FILL("eeprom")
 
 	/* video hardware */
@@ -274,13 +263,12 @@ static MACHINE_CONFIG_START( shuuz, shuuz_state )
 	MCFG_PALETTE_LENGTH(1024)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	/* note: these parameters are from published specs, not derived */
 	/* the board uses a VAD chip to generate video signals */
 	MCFG_SCREEN_RAW_PARAMS(ATARI_CLOCK_14MHz/2, 456, 0, 336, 262, 0, 240)
-	MCFG_SCREEN_UPDATE(shuuz)
+	MCFG_SCREEN_UPDATE_DRIVER(shuuz_state, screen_update_shuuz)
 
-	MCFG_VIDEO_START(shuuz)
+	MCFG_VIDEO_START_OVERRIDE(shuuz_state,shuuz)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -298,7 +286,7 @@ MACHINE_CONFIG_END
  *************************************/
 
 ROM_START( shuuz )
-	ROM_REGION( 0x40000, "maincpu", 0 )	/* 4*64k for 68000 code */
+	ROM_REGION( 0x40000, "maincpu", 0 ) /* 4*64k for 68000 code */
 	ROM_LOAD16_BYTE( "136083-4010.23p",     0x00000, 0x20000, CRC(1c2459f8) SHA1(4b8daf196e3ba17cf958a3c1af4e4dacfb79b9e7) )
 	ROM_LOAD16_BYTE( "136083-4011.13p",     0x00001, 0x20000, CRC(6db53a85) SHA1(7f9b3ea78fa65221931bfdab1aa5f1913ffed753) )
 
@@ -318,21 +306,21 @@ ROM_START( shuuz )
 	ROM_LOAD( "136083-1025.87m", 0x0c0000, 0x20000, CRC(f7b20a64) SHA1(667c539fa809d3ae4a1c127e2044dd3a4e533266) )
 	ROM_LOAD( "136083-1027.65m", 0x0e0000, 0x20000, CRC(55d54952) SHA1(73e1a388ea48bab567bde8958ee228432ebfbf67) )
 
-	ROM_REGION( 0x40000, "oki", 0 )	/* ADPCM data */
+	ROM_REGION( 0x40000, "oki", 0 ) /* ADPCM data */
 	ROM_LOAD( "136083-1040.75b", 0x00000, 0x20000, CRC(0896702b) SHA1(d826bb4812d393889584c7c656c317fd5745a05f) )
 	ROM_LOAD( "136083-1041.65b", 0x20000, 0x20000, CRC(b3b07ce9) SHA1(f1128a143b72867c16b9803b0beb0188420cbfb5) )
 
-    ROM_REGION( 0x0005, "pals", 0 )
-    ROM_LOAD( "136083-1050.55c", 0x0000, 0x0001, NO_DUMP ) /* GAL16V8A-25LP */
-    ROM_LOAD( "136083-1051.45e", 0x0000, 0x0001, NO_DUMP ) /* GAL16V8A-25LP */
+	ROM_REGION( 0x0005, "pals", 0 )
+	ROM_LOAD( "136083-1050.55c", 0x0000, 0x0001, NO_DUMP ) /* GAL16V8A-25LP */
+	ROM_LOAD( "136083-1051.45e", 0x0000, 0x0001, NO_DUMP ) /* GAL16V8A-25LP */
 	ROM_LOAD( "136083-1052.32l", 0x0000, 0x0001, NO_DUMP ) /* GAL16V8A-25LP */
-    ROM_LOAD( "136083-1053.85n", 0x0000, 0x0001, NO_DUMP ) /* GAL16V8A-25LP */
-    ROM_LOAD( "136083-1054.97n", 0x0000, 0x0001, NO_DUMP ) /* GAL16V8A-25LP */
+	ROM_LOAD( "136083-1053.85n", 0x0000, 0x0001, NO_DUMP ) /* GAL16V8A-25LP */
+	ROM_LOAD( "136083-1054.97n", 0x0000, 0x0001, NO_DUMP ) /* GAL16V8A-25LP */
 ROM_END
 
 
 ROM_START( shuuz2 )
-	ROM_REGION( 0x40000, "maincpu", 0 )	/* 4*64k for 68000 code */
+	ROM_REGION( 0x40000, "maincpu", 0 ) /* 4*64k for 68000 code */
 	ROM_LOAD16_BYTE( "136083-23p.rom",     0x00000, 0x20000, CRC(98aec4e7) SHA1(8cbe6e7835ecf0ef74a2de723ef970a63d3bddd1) )
 	ROM_LOAD16_BYTE( "136083-13p.rom",     0x00001, 0x20000, CRC(dd9d5d5c) SHA1(0bde6be55532c232b1d27824c2ce61f33501cbb0) )
 
@@ -352,16 +340,16 @@ ROM_START( shuuz2 )
 	ROM_LOAD( "136083-1025.87m", 0x0c0000, 0x20000, CRC(f7b20a64) SHA1(667c539fa809d3ae4a1c127e2044dd3a4e533266) )
 	ROM_LOAD( "136083-1027.65m", 0x0e0000, 0x20000, CRC(55d54952) SHA1(73e1a388ea48bab567bde8958ee228432ebfbf67) )
 
-	ROM_REGION( 0x40000, "oki", 0 )	/* ADPCM data */
+	ROM_REGION( 0x40000, "oki", 0 ) /* ADPCM data */
 	ROM_LOAD( "136083-1040.75b", 0x00000, 0x20000, CRC(0896702b) SHA1(d826bb4812d393889584c7c656c317fd5745a05f) )
 	ROM_LOAD( "136083-1041.65b", 0x20000, 0x20000, CRC(b3b07ce9) SHA1(f1128a143b72867c16b9803b0beb0188420cbfb5) )
 
-    ROM_REGION( 0x0005, "pals", 0 )
-    ROM_LOAD( "136083-1050.55c", 0x0000, 0x0001, NO_DUMP ) /* GAL16V8A-25LP */
-    ROM_LOAD( "136083-1051.45e", 0x0000, 0x0001, NO_DUMP ) /* GAL16V8A-25LP */
+	ROM_REGION( 0x0005, "pals", 0 )
+	ROM_LOAD( "136083-1050.55c", 0x0000, 0x0001, NO_DUMP ) /* GAL16V8A-25LP */
+	ROM_LOAD( "136083-1051.45e", 0x0000, 0x0001, NO_DUMP ) /* GAL16V8A-25LP */
 	ROM_LOAD( "136083-1052.32l", 0x0000, 0x0001, NO_DUMP ) /* GAL16V8A-25LP */
-    ROM_LOAD( "136083-1053.85n", 0x0000, 0x0001, NO_DUMP ) /* GAL16V8A-25LP */
-    ROM_LOAD( "136083-1054.97n", 0x0000, 0x0001, NO_DUMP ) /* GAL16V8A-25LP */
+	ROM_LOAD( "136083-1053.85n", 0x0000, 0x0001, NO_DUMP ) /* GAL16V8A-25LP */
+	ROM_LOAD( "136083-1054.97n", 0x0000, 0x0001, NO_DUMP ) /* GAL16V8A-25LP */
 ROM_END
 
 
@@ -372,5 +360,5 @@ ROM_END
  *
  *************************************/
 
-GAME( 1990, shuuz,  0,     shuuz, shuuz,  0, ROT0, "Atari Games", "Shuuz (version 8.0)", 0 )
-GAME( 1990, shuuz2, shuuz, shuuz, shuuz2, 0, ROT0, "Atari Games", "Shuuz (version 7.1)", 0 )
+GAME( 1990, shuuz,  0,     shuuz, shuuz, driver_device,  0, ROT0, "Atari Games", "Shuuz (version 8.0)", 0 )
+GAME( 1990, shuuz2, shuuz, shuuz, shuuz2, driver_device, 0, ROT0, "Atari Games", "Shuuz (version 7.1)", 0 )

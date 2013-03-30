@@ -198,9 +198,9 @@
 #include "machine/nvram.h"
 
 
-#define MAIN_CPU_MASTER_CLOCK	(11200000)
-#define PIXEL_CLOCK				(MAIN_CPU_MASTER_CLOCK / 2)
-#define CRTC_CLOCK				(MAIN_CPU_MASTER_CLOCK / 16)
+#define MAIN_CPU_MASTER_CLOCK   (11200000)
+#define PIXEL_CLOCK             (MAIN_CPU_MASTER_CLOCK / 2)
+#define CRTC_CLOCK              (MAIN_CPU_MASTER_CLOCK / 16)
 
 
 /*************************************
@@ -209,9 +209,9 @@
  *
  *************************************/
 
-static WRITE_LINE_DEVICE_HANDLER( flipscreen_w );
-static WRITE8_DEVICE_HANDLER( gfx_rom_intf_w );
-static READ8_DEVICE_HANDLER( gfx_rom_r );
+
+
+
 
 
 
@@ -221,28 +221,28 @@ static READ8_DEVICE_HANDLER( gfx_rom_r );
  *
  *************************************/
 
-static WRITE_LINE_DEVICE_HANDLER( main_cpu_irq )
+WRITE_LINE_MEMBER(spiders_state::main_cpu_irq)
 {
-	device_t *pia1 = device->machine().device("pia1");
-	device_t *pia2 = device->machine().device("pia2");
-	device_t *pia3 = device->machine().device("pia3");
-	int combined_state = pia6821_get_irq_a(pia1) | pia6821_get_irq_b(pia1) |
-											      pia6821_get_irq_b(pia2) |
-						 pia6821_get_irq_a(pia3) | pia6821_get_irq_b(pia3);
+	pia6821_device *pia1 = machine().device<pia6821_device>("pia1");
+	pia6821_device *pia2 = machine().device<pia6821_device>("pia2");
+	pia6821_device *pia3 = machine().device<pia6821_device>("pia3");
+	int combined_state = pia1->irq_a_state() | pia1->irq_b_state() |
+													pia2->irq_b_state() |
+							pia3->irq_a_state() | pia3->irq_b_state();
 
-	cputag_set_input_line(device->machine(), "maincpu", M6809_IRQ_LINE, combined_state ? ASSERT_LINE : CLEAR_LINE);
+	machine().device("maincpu")->execute().set_input_line(M6809_IRQ_LINE, combined_state ? ASSERT_LINE : CLEAR_LINE);
 }
 
 
-static WRITE_LINE_DEVICE_HANDLER( main_cpu_firq )
+WRITE_LINE_MEMBER(spiders_state::main_cpu_firq)
 {
-	cputag_set_input_line(device->machine(), "maincpu", M6809_FIRQ_LINE, state ? ASSERT_LINE : CLEAR_LINE);
+	machine().device("maincpu")->execute().set_input_line(M6809_FIRQ_LINE, state ? ASSERT_LINE : CLEAR_LINE);
 }
 
 
-static WRITE_LINE_DEVICE_HANDLER( audio_cpu_irq )
+WRITE_LINE_MEMBER(spiders_state::audio_cpu_irq)
 {
-	cputag_set_input_line(device->machine(), "audiocpu", M6800_IRQ_LINE, state ? ASSERT_LINE : CLEAR_LINE);
+	machine().device("audiocpu")->execute().set_input_line(M6800_IRQ_LINE, state ? ASSERT_LINE : CLEAR_LINE);
 }
 
 
@@ -255,33 +255,33 @@ static WRITE_LINE_DEVICE_HANDLER( audio_cpu_irq )
 
 static const pia6821_interface pia_1_intf =
 {
-	DEVCB_INPUT_PORT("IN0"),		/* port A in */
-	DEVCB_INPUT_PORT("IN1"),		/* port B in */
-	DEVCB_NULL,		/* line CA1 in */
-	DEVCB_NULL,		/* line CB1 in */
-	DEVCB_NULL,		/* line CA2 in */
-	DEVCB_NULL,		/* line CB2 in */
-	DEVCB_NULL,		/* port A out */
-	DEVCB_NULL,		/* port B out */
-	DEVCB_NULL,		/* line CA2 out */
-	DEVCB_NULL,		/* port CB2 out */
-	DEVCB_LINE(main_cpu_irq),		/* IRQA */
-	DEVCB_LINE(main_cpu_irq)		/* IRQB */
+	DEVCB_INPUT_PORT("IN0"),        /* port A in */
+	DEVCB_INPUT_PORT("IN1"),        /* port B in */
+	DEVCB_NULL,     /* line CA1 in */
+	DEVCB_NULL,     /* line CB1 in */
+	DEVCB_NULL,     /* line CA2 in */
+	DEVCB_NULL,     /* line CB2 in */
+	DEVCB_NULL,     /* port A out */
+	DEVCB_NULL,     /* port B out */
+	DEVCB_NULL,     /* line CA2 out */
+	DEVCB_NULL,     /* port CB2 out */
+	DEVCB_DRIVER_LINE_MEMBER(spiders_state,main_cpu_irq),       /* IRQA */
+	DEVCB_DRIVER_LINE_MEMBER(spiders_state,main_cpu_irq)        /* IRQB */
 };
 
-static INTERRUPT_GEN( update_pia_1 )
+INTERRUPT_GEN_MEMBER(spiders_state::update_pia_1)
 {
-	device_t *pia1 = device->machine().device("pia1");
+	pia6821_device *pia1 = machine().device<pia6821_device>("pia1");
 	/* update the different PIA pins from the input ports */
 
 	/* CA1 - copy of PA1 (COIN1) */
-	pia6821_ca1_w(pia1, input_port_read(device->machine(), "IN0") & 0x02);
+	pia1->ca1_w(machine().root_device().ioport("IN0")->read() & 0x02);
 
 	/* CA2 - copy of PA0 (SERVICE1) */
-	pia6821_ca2_w(pia1, input_port_read(device->machine(), "IN0") & 0x01);
+	pia1->ca2_w(machine().root_device().ioport("IN0")->read() & 0x01);
 
 	/* CB1 - (crosshatch) */
-	pia6821_cb1_w(pia1, input_port_read(device->machine(), "XHATCH"));
+	pia1->cb1_w(machine().root_device().ioport("XHATCH")->read());
 
 	/* CB2 - NOT CONNECTED */
 }
@@ -296,18 +296,18 @@ static INTERRUPT_GEN( update_pia_1 )
 
 static const pia6821_interface pia_2_intf =
 {
-	DEVCB_HANDLER(gfx_rom_r),		/* port A in */
-	DEVCB_NULL,		/* port B in */
-	DEVCB_NULL,		/* line CA1 in */
-	DEVCB_NULL,		/* line CB1 in */
-	DEVCB_NULL,		/* line CA2 in */
-	DEVCB_NULL,		/* line CB2 in */
-	DEVCB_NULL,		/* port A out */
-	DEVCB_HANDLER(gfx_rom_intf_w),		/* port B out */
-	DEVCB_NULL,		/* line CA2 out */
-	DEVCB_LINE(flipscreen_w),		/* port CB2 out */
-	DEVCB_LINE(main_cpu_firq),		/* IRQA */
-	DEVCB_LINE(main_cpu_irq)		/* IRQB */
+	DEVCB_DRIVER_MEMBER(spiders_state,gfx_rom_r),       /* port A in */
+	DEVCB_NULL,     /* port B in */
+	DEVCB_NULL,     /* line CA1 in */
+	DEVCB_NULL,     /* line CB1 in */
+	DEVCB_NULL,     /* line CA2 in */
+	DEVCB_NULL,     /* line CB2 in */
+	DEVCB_NULL,     /* port A out */
+	DEVCB_DRIVER_MEMBER(spiders_state,gfx_rom_intf_w),      /* port B out */
+	DEVCB_NULL,     /* line CA2 out */
+	DEVCB_DRIVER_LINE_MEMBER(spiders_state,flipscreen_w),       /* port CB2 out */
+	DEVCB_DRIVER_LINE_MEMBER(spiders_state,main_cpu_firq),      /* IRQA */
+	DEVCB_DRIVER_LINE_MEMBER(spiders_state,main_cpu_irq)        /* IRQB */
 };
 
 
@@ -320,18 +320,18 @@ static const pia6821_interface pia_2_intf =
 
 static const pia6821_interface pia_3_intf =
 {
-	DEVCB_NULL,		/* port A in */
-	DEVCB_NULL,		/* port B in */
-	DEVCB_NULL,		/* line CA1 in */
-	DEVCB_NULL,		/* line CB1 in */
-	DEVCB_NULL,		/* line CA2 in */
-	DEVCB_NULL,		/* line CB2 in */
-	DEVCB_DEVICE_HANDLER("discrete", spiders_audio_ctrl_w),		/* port A out */
-	DEVCB_DEVICE_HANDLER("pia4", spiders_audio_command_w),		/* port B out */
-	DEVCB_NULL,		/* line CA2 out */
-	DEVCB_NULL,		/* port CB2 out */
-	DEVCB_LINE(main_cpu_irq),		/* IRQA */
-	DEVCB_LINE(main_cpu_irq)		/* IRQB */
+	DEVCB_NULL,     /* port A in */
+	DEVCB_NULL,     /* port B in */
+	DEVCB_NULL,     /* line CA1 in */
+	DEVCB_NULL,     /* line CB1 in */
+	DEVCB_NULL,     /* line CA2 in */
+	DEVCB_NULL,     /* line CB2 in */
+	DEVCB_DRIVER_MEMBER(spiders_state, spiders_audio_ctrl_w),       /* port A out */
+	DEVCB_DRIVER_MEMBER(spiders_state, spiders_audio_command_w),        /* port B out */
+	DEVCB_NULL,     /* line CA2 out */
+	DEVCB_NULL,     /* port CB2 out */
+	DEVCB_DRIVER_LINE_MEMBER(spiders_state,main_cpu_irq),       /* IRQA */
+	DEVCB_DRIVER_LINE_MEMBER(spiders_state,main_cpu_irq)        /* IRQB */
 };
 
 
@@ -344,18 +344,18 @@ static const pia6821_interface pia_3_intf =
 
 static const pia6821_interface pia_4_intf =
 {
-	DEVCB_NULL,		/* port A in */
-	DEVCB_NULL,		/* port B in */
-	DEVCB_NULL,		/* line CA1 in */
-	DEVCB_NULL,		/* line CB1 in */
-	DEVCB_NULL,		/* line CA2 in */
-	DEVCB_NULL,		/* line CB2 in */
-	DEVCB_DEVICE_HANDLER("discrete", spiders_audio_a_w),		/* port A out */
-	DEVCB_DEVICE_HANDLER("discrete", spiders_audio_b_w),		/* port B out */
-	DEVCB_NULL,		/* line CA2 out */
-	DEVCB_NULL,		/* port CB2 out */
-	DEVCB_LINE(audio_cpu_irq),		/* IRQA */
-	DEVCB_NULL		/* IRQB */
+	DEVCB_NULL,     /* port A in */
+	DEVCB_NULL,     /* port B in */
+	DEVCB_NULL,     /* line CA1 in */
+	DEVCB_NULL,     /* line CB1 in */
+	DEVCB_NULL,     /* line CA2 in */
+	DEVCB_NULL,     /* line CB2 in */
+	DEVCB_DRIVER_MEMBER(spiders_state, spiders_audio_a_w),      /* port A out */
+	DEVCB_DRIVER_MEMBER(spiders_state, spiders_audio_b_w),      /* port B out */
+	DEVCB_NULL,     /* line CA2 out */
+	DEVCB_NULL,     /* port CB2 out */
+	DEVCB_DRIVER_LINE_MEMBER(spiders_state,audio_cpu_irq),      /* IRQA */
+	DEVCB_NULL      /* IRQB */
 };
 
 
@@ -372,22 +372,22 @@ static const pia6821_interface pia_4_intf =
  *
  *************************************/
 
-static WRITE8_DEVICE_HANDLER( ic60_74123_output_changed)
+WRITE8_MEMBER(spiders_state::ic60_74123_output_changed)
 {
-	device_t *pia2 = device->machine().device("pia2");
-	pia6821_ca1_w(pia2, data);
+	pia6821_device *pia2 = machine().device<pia6821_device>("pia2");
+	pia2->ca1_w(data);
 }
 
 
 static const ttl74123_interface ic60_intf =
 {
-	TTL74123_GROUNDED,	/* the hook up type */
-	RES_K(22),			/* resistor connected to RCext */
-	CAP_U(0.01),		/* capacitor connected to Cext and RCext */
-	1,					/* A pin - driven by the CRTC */
-	1,					/* B pin - pulled high */
-	1,					/* Clear pin - pulled high */
-	ic60_74123_output_changed
+	TTL74123_GROUNDED,  /* the hook up type */
+	RES_K(22),          /* resistor connected to RCext */
+	CAP_U(0.01),        /* capacitor connected to Cext and RCext */
+	1,                  /* A pin - driven by the CRTC */
+	1,                  /* B pin - pulled high */
+	1,                  /* Clear pin - pulled high */
+	DEVCB_DRIVER_MEMBER(spiders_state,ic60_74123_output_changed)
 };
 
 
@@ -398,15 +398,14 @@ static const ttl74123_interface ic60_intf =
  *
  *************************************/
 
-static MACHINE_START( spiders )
+void spiders_state::machine_start()
 {
-	spiders_state *state = machine.driver_data<spiders_state>();
 	/* setup for save states */
-	state_save_register_global(machine, state->m_flipscreen);
-	state_save_register_global(machine, state->m_gfx_rom_address);
-	state_save_register_global(machine, state->m_gfx_rom_ctrl_mode);
-	state_save_register_global(machine, state->m_gfx_rom_ctrl_latch);
-	state_save_register_global(machine, state->m_gfx_rom_ctrl_data);
+	state_save_register_global(machine(), m_flipscreen);
+	state_save_register_global(machine(), m_gfx_rom_address);
+	state_save_register_global(machine(), m_gfx_rom_ctrl_mode);
+	state_save_register_global(machine(), m_gfx_rom_ctrl_latch);
+	state_save_register_global(machine(), m_gfx_rom_ctrl_data);
 }
 
 
@@ -418,10 +417,9 @@ static MACHINE_START( spiders )
  *************************************/
 
 
-static WRITE_LINE_DEVICE_HANDLER( flipscreen_w )
+WRITE_LINE_MEMBER(spiders_state::flipscreen_w)
 {
-	spiders_state *drvstate = device->machine().driver_data<spiders_state>();
-	drvstate->m_flipscreen = state;
+	m_flipscreen = state;
 }
 
 
@@ -455,8 +453,8 @@ static MC6845_UPDATE_ROW( update_row )
 
 		/* the memory is hooked up to the MA, RA lines this way */
 		offs_t offs = ((ma << 3) & 0x3f00) |
-					  ((ra << 5) & 0x00e0) |
-					  ((ma << 0) & 0x001f);
+						((ra << 5) & 0x00e0) |
+						((ma << 0) & 0x001f);
 
 		if (state->m_flipscreen)
 			offs = offs ^ 0x3fff;
@@ -490,7 +488,7 @@ static MC6845_UPDATE_ROW( update_row )
 				data3 = data3 >> 1;
 			}
 
-			*BITMAP_ADDR32(bitmap, y, x) = pens[color];
+			bitmap.pix32(y, x) = pens[color];
 
 			x = x + 1;
 		}
@@ -500,34 +498,26 @@ static MC6845_UPDATE_ROW( update_row )
 }
 
 
-static WRITE_LINE_DEVICE_HANDLER( display_enable_changed )
+WRITE_LINE_MEMBER(spiders_state::display_enable_changed)
 {
-	ttl74123_a_w(device->machine().device("ic60"), 0, state);
+	address_space &space = generic_space();
+	ttl74123_a_w(machine().device("ic60"), space, 0, state);
 }
 
 
 static const mc6845_interface mc6845_intf =
 {
-	"screen",				/* screen we are acting on */
-	8,						/* number of pixels per video memory address */
-	begin_update,			/* before pixel update callback */
-	update_row,				/* row update callback */
-	NULL,					/* after pixel update callback */
-	DEVCB_LINE(display_enable_changed),	/* callback for display state changes */
-	DEVCB_NULL,				/* callback for cursor state changes */
-	DEVCB_NULL,				/* HSYNC callback */
-	DEVCB_NULL,				/* VSYNC callback */
-	NULL					/* update address callback */
+	"screen",               /* screen we are acting on */
+	8,                      /* number of pixels per video memory address */
+	begin_update,           /* before pixel update callback */
+	update_row,             /* row update callback */
+	NULL,                   /* after pixel update callback */
+	DEVCB_DRIVER_LINE_MEMBER(spiders_state,display_enable_changed), /* callback for display state changes */
+	DEVCB_NULL,             /* callback for cursor state changes */
+	DEVCB_NULL,             /* HSYNC callback */
+	DEVCB_NULL,             /* VSYNC callback */
+	NULL                    /* update address callback */
 };
-
-
-static SCREEN_UPDATE( spiders )
-{
-	device_t *mc6845 = screen->machine().device("crtc");
-	mc6845_update(mc6845, bitmap, cliprect);
-
-	return 0;
-}
 
 
 
@@ -538,32 +528,30 @@ static SCREEN_UPDATE( spiders )
  *
  *************************************/
 
-static WRITE8_DEVICE_HANDLER( gfx_rom_intf_w )
+WRITE8_MEMBER(spiders_state::gfx_rom_intf_w)
 {
-	spiders_state *state = device->machine().driver_data<spiders_state>();
-	state->m_gfx_rom_ctrl_mode  = ( data >> 7) & 0x01;
-	state->m_gfx_rom_ctrl_latch = ( data >> 4) & 0x03;
-	state->m_gfx_rom_ctrl_data  = (~data >> 0) & 0x0f;
+	m_gfx_rom_ctrl_mode  = ( data >> 7) & 0x01;
+	m_gfx_rom_ctrl_latch = ( data >> 4) & 0x03;
+	m_gfx_rom_ctrl_data  = (~data >> 0) & 0x0f;
 }
 
 
-static READ8_DEVICE_HANDLER( gfx_rom_r )
+READ8_MEMBER(spiders_state::gfx_rom_r)
 {
-	spiders_state *state = device->machine().driver_data<spiders_state>();
 	UINT8 ret;
 
-	if (state->m_gfx_rom_ctrl_mode)
+	if (m_gfx_rom_ctrl_mode)
 	{
-		UINT8 *rom = device->machine().region("gfx1")->base();
+		UINT8 *rom = memregion("gfx1")->base();
 
-		ret = rom[state->m_gfx_rom_address];
+		ret = rom[m_gfx_rom_address];
 
-		state->m_gfx_rom_address = state->m_gfx_rom_address + 1;
+		m_gfx_rom_address = m_gfx_rom_address + 1;
 	}
 	else
 	{
-		UINT8 shift_count = state->m_gfx_rom_ctrl_latch << 2;
-		state->m_gfx_rom_address = (state->m_gfx_rom_address & ~(0x0f << shift_count)) | (state->m_gfx_rom_ctrl_data << shift_count);
+		UINT8 shift_count = m_gfx_rom_ctrl_latch << 2;
+		m_gfx_rom_address = (m_gfx_rom_address & ~(0x0f << shift_count)) | (m_gfx_rom_ctrl_data << shift_count);
 
 		ret = 0;
 	}
@@ -579,14 +567,14 @@ static READ8_DEVICE_HANDLER( gfx_rom_r )
  *
  *************************************/
 
-static ADDRESS_MAP_START( spiders_main_map, AS_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0xbfff) AM_RAM AM_BASE_MEMBER(spiders_state, m_ram)
-	AM_RANGE(0xc000, 0xc000) AM_DEVWRITE("crtc", mc6845_address_w)
-	AM_RANGE(0xc001, 0xc001) AM_DEVREADWRITE("crtc", mc6845_register_r, mc6845_register_w)
+static ADDRESS_MAP_START( spiders_main_map, AS_PROGRAM, 8, spiders_state )
+	AM_RANGE(0x0000, 0xbfff) AM_RAM AM_SHARE("ram")
+	AM_RANGE(0xc000, 0xc000) AM_DEVWRITE("crtc", mc6845_device, address_w)
+	AM_RANGE(0xc001, 0xc001) AM_DEVREADWRITE("crtc", mc6845_device, register_r, register_w)
 	AM_RANGE(0xc020, 0xc027) AM_RAM AM_SHARE("nvram")
-	AM_RANGE(0xc044, 0xc047) AM_DEVREADWRITE("pia1", pia6821_r, pia6821_w)
-	AM_RANGE(0xc048, 0xc04b) AM_DEVREADWRITE("pia2", pia6821_alt_r, pia6821_alt_w)
-	AM_RANGE(0xc050, 0xc053) AM_DEVREADWRITE("pia3", pia6821_r, pia6821_w)
+	AM_RANGE(0xc044, 0xc047) AM_DEVREADWRITE("pia1", pia6821_device, read, write)
+	AM_RANGE(0xc048, 0xc04b) AM_DEVREADWRITE("pia2", pia6821_device, read_alt, write_alt)
+	AM_RANGE(0xc050, 0xc053) AM_DEVREADWRITE("pia3", pia6821_device, read, write)
 	AM_RANGE(0xc060, 0xc060) AM_READ_PORT("DSW1")
 	AM_RANGE(0xc080, 0xc080) AM_READ_PORT("DSW2")
 	AM_RANGE(0xc0a0, 0xc0a0) AM_READ_PORT("DSW3")
@@ -594,9 +582,9 @@ static ADDRESS_MAP_START( spiders_main_map, AS_PROGRAM, 8 )
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( spiders_audio_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( spiders_audio_map, AS_PROGRAM, 8, spiders_state )
 	AM_RANGE(0x0000, 0x007f) AM_RAM
-	AM_RANGE(0x0080, 0x0083) AM_DEVREADWRITE("pia4", pia6821_r, pia6821_w)
+	AM_RANGE(0x0080, 0x0083) AM_DEVREADWRITE("pia4", pia6821_device, read, write)
 	AM_RANGE(0xf800, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
@@ -609,86 +597,86 @@ ADDRESS_MAP_END
  *************************************/
 
 static INPUT_PORTS_START( spiders )
-    /* PIA1 PA0 - PA7 */
-    PORT_START("IN0")	/* IN0 */
+	/* PIA1 PA0 - PA7 */
+	PORT_START("IN0")   /* IN0 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SERVICE1 )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_COIN1 )
 	PORT_SERVICE_NO_TOGGLE( 0x04, IP_ACTIVE_HIGH )
-    PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(1)
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(1)
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(2)
-    PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_START1 )
-    PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_START2 )
-    PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SERVICE2 )
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_START1 )
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_START2 )
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SERVICE2 )
 
 	/* PIA1 PB0 - PB7 */
-    PORT_START("IN1")	/* IN1 */
+	PORT_START("IN1")   /* IN1 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT  ) PORT_2WAY PORT_PLAYER(2)
-    PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_PLAYER(2)
-    PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_PLAYER(1)
-    PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_PLAYER(1)
-    PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_UNUSED )
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_PLAYER(2)
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_PLAYER(1)
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_PLAYER(1)
+	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_UNUSED )
 
-    PORT_START("DSW1")	/* IN2, DSW1 */
-    PORT_DIPNAME( 0x07, 0x07, DEF_STR( Coinage ) )	PORT_DIPLOCATION("SW1:1,2,3")
-    PORT_DIPSETTING(    0x01, DEF_STR( 2C_1C ) )
-    PORT_DIPSETTING(    0x07, DEF_STR( 1C_1C ) )
-    PORT_DIPSETTING(    0x06, DEF_STR( 4C_5C ) )
-    PORT_DIPSETTING(    0x04, DEF_STR( 1C_2C ) )
-    PORT_DIPSETTING(    0x02, DEF_STR( 1C_3C ) )
-    PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
-    PORT_BIT( 0xf8, IP_ACTIVE_LOW, IPT_UNUSED )
+	PORT_START("DSW1")  /* IN2, DSW1 */
+	PORT_DIPNAME( 0x07, 0x07, DEF_STR( Coinage ) )  PORT_DIPLOCATION("SW1:1,2,3")
+	PORT_DIPSETTING(    0x01, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x07, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x06, DEF_STR( 4C_5C ) )
+	PORT_DIPSETTING(    0x04, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(    0x02, DEF_STR( 1C_3C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
+	PORT_BIT( 0xf8, IP_ACTIVE_LOW, IPT_UNUSED )
 
-    PORT_START("DSW2")	/* IN3, DSW2 */
-    PORT_DIPNAME( 0x03, 0x03, "Play Mode" ) PORT_DIPLOCATION("SW2:1,2")
-    PORT_DIPSETTING(    0x00, "A A'" )
-    PORT_DIPSETTING(    0x01, "A B'" )
-    PORT_DIPSETTING(    0x02, "B A'" )
-    PORT_DIPSETTING(    0x03, "B B'" )
-    PORT_DIPNAME( 0x0c, 0x0c, "Spiders to Complete Belt" ) PORT_DIPLOCATION("SW2:3,4")
-    PORT_DIPSETTING(    0x00, "14" )
-    PORT_DIPSETTING(    0x0c, "16" )
-    PORT_DIPSETTING(    0x04, "20" )
-    PORT_DIPSETTING(    0x08, "26" )
-    PORT_DIPNAME( 0x10, 0x10, DEF_STR( Lives ) ) PORT_DIPLOCATION("SW2:5")
-    PORT_DIPSETTING(    0x10, "3" )
-    PORT_DIPSETTING(    0x00, "4" )
-    PORT_DIPNAME( 0x60, 0x60, DEF_STR( Bonus_Life ) ) PORT_DIPLOCATION("SW2:6,7")
-    PORT_DIPSETTING(    0x00, DEF_STR( None ) )
-    PORT_DIPSETTING(    0x60, "15K" )
-    PORT_DIPSETTING(    0x20, "20K" )
-    PORT_DIPSETTING(    0x40, "25K" )
-    PORT_DIPNAME( 0x80, 0x00, "Giant Spiders" ) PORT_DIPLOCATION("SW2:8")
-    PORT_DIPSETTING(    0x00, "First Screen" )
-    PORT_DIPSETTING(    0x80, "Every Screen" )
+	PORT_START("DSW2")  /* IN3, DSW2 */
+	PORT_DIPNAME( 0x03, 0x03, "Play Mode" ) PORT_DIPLOCATION("SW2:1,2")
+	PORT_DIPSETTING(    0x00, "A A'" )
+	PORT_DIPSETTING(    0x01, "A B'" )
+	PORT_DIPSETTING(    0x02, "B A'" )
+	PORT_DIPSETTING(    0x03, "B B'" )
+	PORT_DIPNAME( 0x0c, 0x0c, "Spiders to Complete Belt" ) PORT_DIPLOCATION("SW2:3,4")
+	PORT_DIPSETTING(    0x00, "14" )
+	PORT_DIPSETTING(    0x0c, "16" )
+	PORT_DIPSETTING(    0x04, "20" )
+	PORT_DIPSETTING(    0x08, "26" )
+	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Lives ) ) PORT_DIPLOCATION("SW2:5")
+	PORT_DIPSETTING(    0x10, "3" )
+	PORT_DIPSETTING(    0x00, "4" )
+	PORT_DIPNAME( 0x60, 0x60, DEF_STR( Bonus_Life ) ) PORT_DIPLOCATION("SW2:6,7")
+	PORT_DIPSETTING(    0x00, DEF_STR( None ) )
+	PORT_DIPSETTING(    0x60, "15K" )
+	PORT_DIPSETTING(    0x20, "20K" )
+	PORT_DIPSETTING(    0x40, "25K" )
+	PORT_DIPNAME( 0x80, 0x00, "Giant Spiders" ) PORT_DIPLOCATION("SW2:8")
+	PORT_DIPSETTING(    0x00, "First Screen" )
+	PORT_DIPSETTING(    0x80, "Every Screen" )
 
-    PORT_START("DSW3")	/* IN4, DSW3 */
-    PORT_DIPNAME( 0x01, 0x00, DEF_STR( Flip_Screen ) ) PORT_DIPLOCATION("SW3:1")
-    PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-    PORT_DIPSETTING(    0x01, DEF_STR( On ) )
-    PORT_DIPNAME( 0x02, 0x00, DEF_STR( Cabinet ) ) PORT_DIPLOCATION("SW3:2")
-    PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
-    PORT_DIPSETTING(    0x02, DEF_STR( Cocktail ) )
-    PORT_DIPNAME( 0x1c, 0x00, "Vertical Adjust" ) PORT_DIPLOCATION("SW3:3,4,5")
-    PORT_DIPSETTING(    0x00, "0" )
-    PORT_DIPSETTING(    0x04, "1" )
-    PORT_DIPSETTING(    0x08, "2" )
-    PORT_DIPSETTING(    0x0c, "3" )
-    PORT_DIPSETTING(    0x10, "4" )
-    PORT_DIPSETTING(    0x14, "5" )
-    PORT_DIPSETTING(    0x18, "6" )
-    PORT_DIPSETTING(    0x1c, "7" )
-    PORT_DIPNAME( 0xe0, 0x00, "Horizontal Adjust" ) PORT_DIPLOCATION("SW3:6,7,8")
-    PORT_DIPSETTING(    0x00, "0" )
-    PORT_DIPSETTING(    0x20, "1" )
-    PORT_DIPSETTING(    0x40, "2" )
-    PORT_DIPSETTING(    0x60, "3" )
-    PORT_DIPSETTING(    0x80, "4" )
-    PORT_DIPSETTING(    0xa0, "5" )
-    PORT_DIPSETTING(    0xc0, "6" )
-    PORT_DIPSETTING(    0xe0, "7" )
+	PORT_START("DSW3")  /* IN4, DSW3 */
+	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Flip_Screen ) ) PORT_DIPLOCATION("SW3:1")
+	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x01, DEF_STR( On ) )
+	PORT_DIPNAME( 0x02, 0x00, DEF_STR( Cabinet ) ) PORT_DIPLOCATION("SW3:2")
+	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
+	PORT_DIPSETTING(    0x02, DEF_STR( Cocktail ) )
+	PORT_DIPNAME( 0x1c, 0x00, "Vertical Adjust" ) PORT_DIPLOCATION("SW3:3,4,5")
+	PORT_DIPSETTING(    0x00, "0" )
+	PORT_DIPSETTING(    0x04, "1" )
+	PORT_DIPSETTING(    0x08, "2" )
+	PORT_DIPSETTING(    0x0c, "3" )
+	PORT_DIPSETTING(    0x10, "4" )
+	PORT_DIPSETTING(    0x14, "5" )
+	PORT_DIPSETTING(    0x18, "6" )
+	PORT_DIPSETTING(    0x1c, "7" )
+	PORT_DIPNAME( 0xe0, 0x00, "Horizontal Adjust" ) PORT_DIPLOCATION("SW3:6,7,8")
+	PORT_DIPSETTING(    0x00, "0" )
+	PORT_DIPSETTING(    0x20, "1" )
+	PORT_DIPSETTING(    0x40, "2" )
+	PORT_DIPSETTING(    0x60, "3" )
+	PORT_DIPSETTING(    0x80, "4" )
+	PORT_DIPSETTING(    0xa0, "5" )
+	PORT_DIPSETTING(    0xc0, "6" )
+	PORT_DIPSETTING(    0xe0, "7" )
 
-    PORT_START("XHATCH")	/* connected to PIA1 CB1 input */
-    PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("PS1 (Crosshatch)") PORT_CODE(KEYCODE_F1)
+	PORT_START("XHATCH")    /* connected to PIA1 CB1 input */
+	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("PS1 (Crosshatch)") PORT_CODE(KEYCODE_F1)
 
 INPUT_PORTS_END
 
@@ -705,19 +693,17 @@ static MACHINE_CONFIG_START( spiders, spiders_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6809, 2800000)
 	MCFG_CPU_PROGRAM_MAP(spiders_main_map)
-	MCFG_CPU_PERIODIC_INT(update_pia_1, 25)
+	MCFG_CPU_PERIODIC_INT_DRIVER(spiders_state, update_pia_1,  25)
 
 	MCFG_CPU_ADD("audiocpu", M6802, 3000000)
 	MCFG_CPU_PROGRAM_MAP(spiders_audio_map)
 
-	MCFG_MACHINE_START(spiders)
 	MCFG_NVRAM_ADD_0FILL("nvram")
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
-	MCFG_SCREEN_RAW_PARAMS(PIXEL_CLOCK, 256, 0, 256, 256, 0, 256)	/* temporary, CRTC will configure screen */
-	MCFG_SCREEN_UPDATE(spiders)
+	MCFG_SCREEN_RAW_PARAMS(PIXEL_CLOCK, 256, 0, 256, 256, 0, 256)   /* temporary, CRTC will configure screen */
+	MCFG_SCREEN_UPDATE_DEVICE("crtc", mc6845_device, screen_update)
 
 	MCFG_MC6845_ADD("crtc", MC6845, CRTC_CLOCK, mc6845_intf)
 
@@ -833,7 +819,7 @@ ROM_END
  *************************************/
 
 /* this is a newer version with just one bug fix */
-GAME( 1981, spiders,  0,       spiders, spiders, 0, ROT270, "Sigma Enterprises Inc.", "Spiders (set 1)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE)
-GAME( 1981, spiders2, spiders, spiders, spiders, 0, ROT270, "Sigma Enterprises Inc.", "Spiders (set 2)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE)
-GAME( 1981, spiders3, spiders, spiders, spiders, 0, ROT270, "Sigma Enterprises Inc.", "Spiders (set 3)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE)
-GAME( 1981, spinner,  spiders, spiders, spiders, 0, ROT270, "bootleg",				  "Spinner", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE)
+GAME( 1981, spiders,  0,       spiders, spiders, driver_device, 0, ROT270, "Sigma Enterprises Inc.", "Spiders (set 1)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE)
+GAME( 1981, spiders2, spiders, spiders, spiders, driver_device, 0, ROT270, "Sigma Enterprises Inc.", "Spiders (set 2)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE)
+GAME( 1981, spiders3, spiders, spiders, spiders, driver_device, 0, ROT270, "Sigma Enterprises Inc.", "Spiders (set 3)", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE)
+GAME( 1981, spinner,  spiders, spiders, spiders, driver_device, 0, ROT270, "bootleg",                 "Spinner", GAME_IMPERFECT_SOUND | GAME_SUPPORTS_SAVE)

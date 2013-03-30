@@ -46,11 +46,11 @@ Note:   if MAME_DEBUG is defined, pressing Z with:
 ***************************************************************************/
 
 // xxxxBBBBGGGGRRRR, but repeat ecah color for each priority code (since we stuff it in the high bits of the pen)
-WRITE16_HANDLER( lordgun_paletteram_w )
+WRITE16_MEMBER(lordgun_state::lordgun_paletteram_w)
 {
-	COMBINE_DATA(&space->machine().generic.paletteram.u16[offset]);
+	COMBINE_DATA(&m_generic_paletteram_16[offset]);
 	for (int pri = 0; pri < 8; pri++)
-		palette_set_color_rgb(space->machine(), offset+0x800*pri, pal4bit(data >> 0), pal4bit(data >> 4), pal4bit(data >> 8));
+		palette_set_color_rgb(machine(), offset+0x800*pri, pal4bit(data >> 0), pal4bit(data >> 4), pal4bit(data >> 8));
 }
 
 
@@ -61,69 +61,31 @@ WRITE16_HANDLER( lordgun_paletteram_w )
 ***************************************************************************/
 
 
-static TILE_GET_INFO( get_tile_info_0 )
+INLINE void get_tile_info(running_machine &machine, tile_data &tileinfo, tilemap_memory_index tile_index, int _N_)
 {
 	lordgun_state *state = machine.driver_data<lordgun_state>();
-	UINT16 attr = state->m_vram_0[ tile_index * 2 + 0 ];
-	UINT16 code = state->m_vram_0[ tile_index * 2 + 1 ];
+	UINT16 attr = state->m_vram[_N_][tile_index * 2 + 0 ];
+	UINT16 code = state->m_vram[_N_][ tile_index * 2 + 1 ];
 	UINT16 pri  = (attr & 0x0e00) >> 9;
-	SET_TILE_INFO( 0, code, ((attr & 0x0030) >> 4)+0x500/0x40+pri*0x800/0x40, TILE_FLIPXY(attr >> 14));
+	SET_TILE_INFO( _N_, code, ((attr & 0x0030) >> 4) + 0x10 + 0x4 * ((_N_ + 1) & 3) + pri*0x800/0x40, TILE_FLIPXY(attr >> 14));
 }
 
-static TILE_GET_INFO( get_tile_info_1 )
+TILE_GET_INFO_MEMBER(lordgun_state::get_tile_info_0){ get_tile_info(machine(), tileinfo, tile_index, 0); }
+TILE_GET_INFO_MEMBER(lordgun_state::get_tile_info_1){ get_tile_info(machine(), tileinfo, tile_index, 1); }
+TILE_GET_INFO_MEMBER(lordgun_state::get_tile_info_2){ get_tile_info(machine(), tileinfo, tile_index, 2); }
+TILE_GET_INFO_MEMBER(lordgun_state::get_tile_info_3){ get_tile_info(machine(), tileinfo, tile_index, 3); }
+
+INLINE void lordgun_vram_w(address_space &space, offs_t offset, UINT16 data, UINT16 mem_mask, int _N_)
 {
-	lordgun_state *state = machine.driver_data<lordgun_state>();
-	UINT16 attr = state->m_vram_1[ tile_index * 2 + 0 ];
-	UINT16 code = state->m_vram_1[ tile_index * 2 + 1 ];
-	UINT16 pri  = (attr & 0x0e00) >> 9;
-	SET_TILE_INFO( 1, code, ((attr & 0x0070) >> 4)+0x600/0x40+pri*0x800/0x40, TILE_FLIPXY(attr >> 14));
+	lordgun_state *state = space.machine().driver_data<lordgun_state>();
+	COMBINE_DATA(&state->m_vram[_N_][offset]);
+	state->m_tilemap[_N_]->mark_tile_dirty(offset/2);
 }
 
-static TILE_GET_INFO( get_tile_info_2 )
-{
-	lordgun_state *state = machine.driver_data<lordgun_state>();
-	UINT16 attr = state->m_vram_2[ tile_index * 2 + 0 ];
-	UINT16 code = state->m_vram_2[ tile_index * 2 + 1 ];
-	UINT16 pri  = (attr & 0x0e00) >> 9;
-	SET_TILE_INFO( 2, code, ((attr & 0x0030) >> 4)+0x700/0x40+pri*0x800/0x40, TILE_FLIPXY(attr >> 14));
-}
-
-static TILE_GET_INFO( get_tile_info_3 )
-{
-	lordgun_state *state = machine.driver_data<lordgun_state>();
-	UINT16 attr = state->m_vram_3[ tile_index * 2 + 0 ];
-	UINT16 code = state->m_vram_3[ tile_index * 2 + 1 ];
-	UINT16 pri  = (attr & 0x0e00) >> 9;
-	SET_TILE_INFO( 3, code, ((attr & 0x00f0) >> 4)+0x400/0x40+pri*0x800/0x40, TILE_FLIPXY(attr >> 14));
-}
-
-WRITE16_HANDLER( lordgun_vram_0_w )
-{
-	lordgun_state *state = space->machine().driver_data<lordgun_state>();
-	COMBINE_DATA(&state->m_vram_0[offset]);
-	tilemap_mark_tile_dirty(state->m_tilemap_0, offset/2);
-}
-
-WRITE16_HANDLER( lordgun_vram_1_w )
-{
-	lordgun_state *state = space->machine().driver_data<lordgun_state>();
-	COMBINE_DATA(&state->m_vram_1[offset]);
-	tilemap_mark_tile_dirty(state->m_tilemap_1, offset/2);
-}
-
-WRITE16_HANDLER( lordgun_vram_2_w )
-{
-	lordgun_state *state = space->machine().driver_data<lordgun_state>();
-	COMBINE_DATA(&state->m_vram_2[offset]);
-	tilemap_mark_tile_dirty(state->m_tilemap_2, offset/2);
-}
-
-WRITE16_HANDLER( lordgun_vram_3_w )
-{
-	lordgun_state *state = space->machine().driver_data<lordgun_state>();
-	COMBINE_DATA(&state->m_vram_3[offset]);
-	tilemap_mark_tile_dirty(state->m_tilemap_3, offset/2);
-}
+WRITE16_MEMBER(lordgun_state::lordgun_vram_0_w){ lordgun_vram_w(space, offset, data, mem_mask, 0); }
+WRITE16_MEMBER(lordgun_state::lordgun_vram_1_w){ lordgun_vram_w(space, offset, data, mem_mask, 1); }
+WRITE16_MEMBER(lordgun_state::lordgun_vram_2_w){ lordgun_vram_w(space, offset, data, mem_mask, 2); }
+WRITE16_MEMBER(lordgun_state::lordgun_vram_3_w){ lordgun_vram_w(space, offset, data, mem_mask, 3); }
 
 /***************************************************************************
 
@@ -132,49 +94,44 @@ WRITE16_HANDLER( lordgun_vram_3_w )
 ***************************************************************************/
 
 
-VIDEO_START( lordgun )
+void lordgun_state::video_start()
 {
-	lordgun_state *state = machine.driver_data<lordgun_state>();
 	int i;
-	int w = machine.primary_screen->width();
-	int h = machine.primary_screen->height();
+	int w = machine().primary_screen->width();
+	int h = machine().primary_screen->height();
 
 	// 0x800 x 200
-	state->m_tilemap_0 = tilemap_create(	machine, get_tile_info_0, tilemap_scan_rows,
-								 8,8, 0x100, 0x40 );
+	m_tilemap[0] = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(lordgun_state::get_tile_info_0),this), TILEMAP_SCAN_ROWS,8,8, 0x100, 0x40 );
 
 	// 0x800 x 200
-	state->m_tilemap_1 = tilemap_create(	machine, get_tile_info_1, tilemap_scan_rows,
-								 16,16, 0x80,0x20 );
+	m_tilemap[1] = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(lordgun_state::get_tile_info_1),this), TILEMAP_SCAN_ROWS,16,16, 0x80,0x20 );
 
 	// 0x800 x 200
-	state->m_tilemap_2 = tilemap_create(	machine, get_tile_info_2, tilemap_scan_rows,
-								 32,32, 0x40,0x10 );
+	m_tilemap[2] = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(lordgun_state::get_tile_info_2),this), TILEMAP_SCAN_ROWS,32,32, 0x40,0x10 );
 
 	// 0x200 x 100
-	state->m_tilemap_3 = tilemap_create(	machine, get_tile_info_3, tilemap_scan_rows,
-								 8,8, 0x40,0x20 );
+	m_tilemap[3] = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(lordgun_state::get_tile_info_3),this), TILEMAP_SCAN_ROWS,8,8, 0x40,0x20 );
 
-	tilemap_set_scroll_rows(state->m_tilemap_0,1);
-	tilemap_set_scroll_cols(state->m_tilemap_0,1);
-	tilemap_set_transparent_pen(state->m_tilemap_0,0x3f);
+	m_tilemap[0]->set_scroll_rows(1);
+	m_tilemap[0]->set_scroll_cols(1);
+	m_tilemap[0]->set_transparent_pen(0x3f);
 
 	// Has line scroll
-	tilemap_set_scroll_rows(state->m_tilemap_1,0x200);
-	tilemap_set_scroll_cols(state->m_tilemap_1,1);
-	tilemap_set_transparent_pen(state->m_tilemap_1,0x3f);
+	m_tilemap[1]->set_scroll_rows(0x200);
+	m_tilemap[1]->set_scroll_cols(1);
+	m_tilemap[1]->set_transparent_pen(0x3f);
 
-	tilemap_set_scroll_rows(state->m_tilemap_2,1);
-	tilemap_set_scroll_cols(state->m_tilemap_2,1);
-	tilemap_set_transparent_pen(state->m_tilemap_2,0x3f);
+	m_tilemap[2]->set_scroll_rows(1);
+	m_tilemap[2]->set_scroll_cols(1);
+	m_tilemap[2]->set_transparent_pen(0x3f);
 
-	tilemap_set_scroll_rows(state->m_tilemap_3,1);
-	tilemap_set_scroll_cols(state->m_tilemap_3,1);
-	tilemap_set_transparent_pen(state->m_tilemap_3,0x3f);
+	m_tilemap[3]->set_scroll_rows(1);
+	m_tilemap[3]->set_scroll_cols(1);
+	m_tilemap[3]->set_transparent_pen(0x3f);
 
-	// Buffer state->m_bitmaps for 4 tilemaps (0-3) + sprites (4)
+	// Buffer bitmaps for 4 tilemaps (0-3) + sprites (4)
 	for (i = 0; i < 5; i++)
-		state->m_bitmaps[i] = auto_bitmap_alloc(machine, w, h, BITMAP_FORMAT_INDEXED16);
+		m_bitmaps[i] = auto_bitmap_ind16_alloc(machine(), w, h);
 }
 
 /***************************************************************************
@@ -215,7 +172,7 @@ static const int lordgun_gun_x_table[] =
 
 static const char *const gunnames[] = { "LIGHT0_X", "LIGHT1_X", "LIGHT0_Y", "LIGHT1_Y" };
 
-float lordgun_crosshair_mapper(const input_field_config *field, float linear_value)
+float lordgun_crosshair_mapper(ioport_field *field, float linear_value)
 {
 	int x = linear_value - 0x3c;
 
@@ -228,15 +185,15 @@ float lordgun_crosshair_mapper(const input_field_config *field, float linear_val
 static void lorddgun_calc_gun_scr(running_machine &machine, int i)
 {
 	lordgun_state *state = machine.driver_data<lordgun_state>();
-//  popmessage("%03x, %02x", input_port_read(machine, "LIGHT0_X"), input_port_read(machine, "LIGHT0_Y"));
+//  popmessage("%03x, %02x", machine, "LIGHT0_X"), state->ioport("LIGHT0_Y")->read());
 
-	int x = input_port_read(machine, gunnames[i]) - 0x3c;
+	int x = state->ioport(gunnames[i])->read() - 0x3c;
 
 	if ( (x < 0) || (x > sizeof(lordgun_gun_x_table)/sizeof(lordgun_gun_x_table[0])) )
 		x = 0;
 
 	state->m_gun[i].scr_x = lordgun_gun_x_table[x];
-	state->m_gun[i].scr_y = input_port_read(machine, gunnames[i+2]);
+	state->m_gun[i].scr_y = state->ioport(gunnames[i+2])->read();
 }
 
 void lordgun_update_gun(running_machine &machine, int i)
@@ -244,15 +201,12 @@ void lordgun_update_gun(running_machine &machine, int i)
 	lordgun_state *state = machine.driver_data<lordgun_state>();
 	const rectangle &visarea = machine.primary_screen->visible_area();
 
-	state->m_gun[i].hw_x = input_port_read(machine, gunnames[i]);
-	state->m_gun[i].hw_y = input_port_read(machine, gunnames[i+2]);
+	state->m_gun[i].hw_x = state->ioport(gunnames[i])->read();
+	state->m_gun[i].hw_y = state->ioport(gunnames[i+2])->read();
 
 	lorddgun_calc_gun_scr(machine, i);
 
-	if (	(state->m_gun[i].scr_x < visarea.min_x)	||
-			(state->m_gun[i].scr_x > visarea.max_x)	||
-			(state->m_gun[i].scr_y < visarea.min_y)	||
-			(state->m_gun[i].scr_y > visarea.max_y)	)
+	if (!visarea.contains(state->m_gun[i].scr_x, state->m_gun[i].scr_y))
 		state->m_gun[i].hw_x = state->m_gun[i].hw_y = 0;
 }
 
@@ -281,11 +235,11 @@ void lordgun_update_gun(running_machine &machine, int i)
 
 ***************************************************************************/
 
-static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect)
+static void draw_sprites(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	lordgun_state *state = machine.driver_data<lordgun_state>();
-	UINT16 *s		=	state->m_spriteram;
-	UINT16 *end		=	state->m_spriteram + state->m_spriteram_size/2;
+	UINT16 *s       =   state->m_spriteram;
+	UINT16 *end     =   state->m_spriteram + state->m_spriteram.bytes()/2;
 
 	for ( ; s < end; s += 8/2 )
 	{
@@ -293,42 +247,42 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 		int sx, nx, x, x0, x1, dx, flipx;
 		int sy, ny, y, y0, y1, dy, flipy;
 
-		sy		=		s[ 0 ];
-		attr	=		s[ 1 ];
-		code	=		s[ 2 ];
-		sx		=		s[ 3 ];
+		sy      =       s[ 0 ];
+		attr    =       s[ 1 ];
+		code    =       s[ 2 ];
+		sx      =       s[ 3 ];
 
 		// End of sprite list
 		if (attr & 0x0100)
 			break;
 
-		flipx	=	 attr & 0x8000;
-		flipy	=	 attr & 0x4000;
-		pri		=	(attr & 0x0e00) >> 9;
-		color	=	(attr & 0x00f0) >> 4;
-		nx		=	(attr & 0x000f) + 1;
+		flipx   =    attr & 0x8000;
+		flipy   =    attr & 0x4000;
+		pri     =   (attr & 0x0e00) >> 9;
+		color   =   (attr & 0x00f0) >> 4;
+		nx      =   (attr & 0x000f) + 1;
 
-		ny		=	((sy & 0xf000) >> 12) + 1;
+		ny      =   ((sy & 0xf000) >> 12) + 1;
 
-		if ( flipx )	{	x0 = nx - 1;	x1 = -1;	dx = -1;	}
-		else			{	x0 = 0;			x1 = nx;	dx = +1;	}
+		if ( flipx )    {   x0 = nx - 1;    x1 = -1;    dx = -1;    }
+		else            {   x0 = 0;         x1 = nx;    dx = +1;    }
 
-		if ( flipy )	{	y0 = ny - 1;	y1 = -1;	dy = -1;	}
-		else			{	y0 = 0;			y1 = ny;	dy = +1;	}
+		if ( flipy )    {   y0 = ny - 1;    y1 = -1;    dy = -1;    }
+		else            {   y0 = 0;         y1 = ny;    dy = +1;    }
 
 		// Sign extend the position
-		sx	-=	0x18;
-		sy	=	(sy & 0x7ff) - (sy & 0x800);
+		sx  -=  0x18;
+		sy  =   (sy & 0x7ff) - (sy & 0x800);
 
 		for (y = y0; y != y1; y += dy)
 		{
 			for (x = x0; x != x1; x += dx)
 			{
-				drawgfx_transpen(	bitmap,	cliprect, machine.gfx[4],
+				drawgfx_transpen(   bitmap, cliprect, machine.gfx[4],
 									code, color + pri * 0x800/0x40,
 									flipx, flipy,
 									sx + x * 0x10, sy + y * 0x10,
-									0x3f	);
+									0x3f    );
 				code += 0x10;
 			}
 
@@ -363,28 +317,27 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 
 ***************************************************************************/
 
-SCREEN_UPDATE( lordgun )
+UINT32 lordgun_state::screen_update_lordgun(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	lordgun_state *state = screen->machine().driver_data<lordgun_state>();
 	int layers_ctrl = -1;
 
 #ifdef MAME_DEBUG
-	if (input_code_pressed(screen->machine(), KEYCODE_Z))
+	if (machine().input().code_pressed(KEYCODE_Z))
 	{
 		int msk = 0;
 
-		if (input_code_pressed(screen->machine(), KEYCODE_Q))	msk |= 1;
-		if (input_code_pressed(screen->machine(), KEYCODE_W))	msk |= 2;
-		if (input_code_pressed(screen->machine(), KEYCODE_E))	msk |= 4;
-		if (input_code_pressed(screen->machine(), KEYCODE_R))	msk |= 8;
-		if (input_code_pressed(screen->machine(), KEYCODE_A))	msk |= 16;
+		if (machine().input().code_pressed(KEYCODE_Q))  msk |= 1;
+		if (machine().input().code_pressed(KEYCODE_W))  msk |= 2;
+		if (machine().input().code_pressed(KEYCODE_E))  msk |= 4;
+		if (machine().input().code_pressed(KEYCODE_R))  msk |= 8;
+		if (machine().input().code_pressed(KEYCODE_A))  msk |= 16;
 		if (msk != 0) layers_ctrl &= msk;
 	}
 #endif
 
-	if (state->m_whitescreen)
+	if (m_whitescreen)
 	{
-		bitmap_fill(bitmap, cliprect, get_white_pen(screen->machine()));
+		bitmap.fill(get_white_pen(machine()), cliprect);
 		return 0;
 	}
 
@@ -392,35 +345,35 @@ SCREEN_UPDATE( lordgun )
 
 	int x, y;
 
-	tilemap_set_scrollx( state->m_tilemap_0, 0, *state->m_scroll_x_0 );
-	tilemap_set_scrolly( state->m_tilemap_0, 0, *state->m_scroll_y_0 );
+	m_tilemap[0]->set_scrollx(0, *m_scroll_x[0] );
+	m_tilemap[0]->set_scrolly(0, *m_scroll_y[0] );
 
 	for (y = 0; y < 0x200; y++)
-		tilemap_set_scrollx( state->m_tilemap_1, y, (*state->m_scroll_x_1) + state->m_scrollram[y * 4/2 + 2/2]);
-	tilemap_set_scrolly( state->m_tilemap_1, 0, *state->m_scroll_y_1 );
+		m_tilemap[1]->set_scrollx(y, (*m_scroll_x[1]) + m_scrollram[y * 4/2 + 2/2]);
+	m_tilemap[1]->set_scrolly(0, *m_scroll_y[1] );
 
-	tilemap_set_scrollx( state->m_tilemap_2, 0, *state->m_scroll_x_2 );
-	tilemap_set_scrolly( state->m_tilemap_2, 0, *state->m_scroll_y_2 );
+	m_tilemap[2]->set_scrollx(0, *m_scroll_x[2] );
+	m_tilemap[2]->set_scrolly(0, *m_scroll_y[2] );
 
-	tilemap_set_scrollx( state->m_tilemap_3, 0, *state->m_scroll_x_3 );
-	tilemap_set_scrolly( state->m_tilemap_3, 0, *state->m_scroll_y_3 );
+	m_tilemap[3]->set_scrollx(0, *m_scroll_x[3] );
+	m_tilemap[3]->set_scrolly(0, *m_scroll_y[3] );
 
 	// Rendering:
 
 	// render each layer (0-3 tilemaps, 4 sprites) into a buffer bitmap.
 	// The priority code of each pixel will be stored into the high 3 bits of the pen
 
-	pen_t trans_pen = 0 * 0x800 + 0x3f;	// pri = 0, pen = 3f (transparent)
+	pen_t trans_pen = 0 * 0x800 + 0x3f; // pri = 0, pen = 3f (transparent)
 
 	int l;
 	for (l = 0; l < 5; l++)
-		bitmap_fill(state->m_bitmaps[l], cliprect, trans_pen);
+		m_bitmaps[l]->fill(trans_pen, cliprect);
 
-	if (layers_ctrl & 1)	tilemap_draw(state->m_bitmaps[0], cliprect, state->m_tilemap_0, 0, 0);
-	if (layers_ctrl & 2)	tilemap_draw(state->m_bitmaps[1], cliprect, state->m_tilemap_1, 0, 0);
-	if (layers_ctrl & 4)	tilemap_draw(state->m_bitmaps[2], cliprect, state->m_tilemap_2, 0, 0);
-	if (layers_ctrl & 8)	tilemap_draw(state->m_bitmaps[3], cliprect, state->m_tilemap_3, 0, 0);
-	if (layers_ctrl & 16)	draw_sprites(screen->machine(), state->m_bitmaps[4], cliprect);
+	if (layers_ctrl & 1)    m_tilemap[0]->draw(*m_bitmaps[0], cliprect, 0, 0);
+	if (layers_ctrl & 2)    m_tilemap[1]->draw(*m_bitmaps[1], cliprect, 0, 0);
+	if (layers_ctrl & 4)    m_tilemap[2]->draw(*m_bitmaps[2], cliprect, 0, 0);
+	if (layers_ctrl & 8)    m_tilemap[3]->draw(*m_bitmaps[3], cliprect, 0, 0);
+	if (layers_ctrl & 16)   draw_sprites(machine(), *m_bitmaps[4], cliprect);
 
 	// copy to screen bitmap
 
@@ -429,9 +382,9 @@ SCREEN_UPDATE( lordgun )
 	// layer index (0-3, 4 for sprites) -> priority address bit
 	const int layer2bit[5] = {0,1,2,4,3};
 
-	for (y = cliprect->min_y; y <= cliprect->max_y; y++)
+	for (y = cliprect.min_y; y <= cliprect.max_y; y++)
 	{
-		for (x = cliprect->min_x; x <= cliprect->max_x; x++)
+		for (x = cliprect.min_x; x <= cliprect.max_x; x++)
 		{
 			UINT16 pens[5];
 
@@ -440,7 +393,7 @@ SCREEN_UPDATE( lordgun )
 			// bits 0-4: layer transparency
 			for (l = 0; l < 5; l++)
 			{
-				pens[l] = *BITMAP_ADDR16(state->m_bitmaps[l], y, x);
+				pens[l] = m_bitmaps[l]->pix16(y, x);
 				if (pens[l] == trans_pen)
 					pri_addr |= 1 << layer2bit[l];
 			}
@@ -456,9 +409,9 @@ SCREEN_UPDATE( lordgun )
 
 			pri_addr &= 0x7fff;
 
-			l	=	pri2layer[state->m_priority_ram[pri_addr] & 7];
+			l   =   pri2layer[m_priority_ram[pri_addr] & 7];
 
-			*BITMAP_ADDR16(bitmap, y, x) = pens[l];
+			bitmap.pix16(y, x) = pens[l];
 		}
 	}
 

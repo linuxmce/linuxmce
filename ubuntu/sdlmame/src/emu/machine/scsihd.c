@@ -5,117 +5,163 @@
 ***************************************************************************/
 
 #include "emu.h"
-#include "scsidev.h"
+#include "machine/scsihle.h"
 #include "harddisk.h"
 #include "imagedev/harddriv.h"
 #include "scsihd.h"
 
-typedef struct
+// device type definition
+const device_type SCSIHD = &device_creator<scsihd_device>;
+
+scsihd_device::scsihd_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: scsihle_device(mconfig, SCSIHD, "SCSIHD", tag, owner, clock)
 {
-	UINT32 lba;
-	UINT32 blocks;
-	hard_disk_file *disk;
-	bool is_file;
-} SCSIHd;
+}
 
-
-// scsihd_exec_command
-
-static int scsihd_exec_command( SCSIInstance *scsiInstance, UINT8 *statusCode )
+scsihd_device::scsihd_device(const machine_config &mconfig, device_type type, const char *name, const char *tag, device_t *owner, UINT32 clock) :
+	scsihle_device(mconfig, type, name, tag, owner, clock)
 {
-	UINT8 *command;
-	int commandLength;
-	SCSIHd *our_this = (SCSIHd *)SCSIThis( &SCSIClassHARDDISK, scsiInstance );
-	SCSIGetCommand( scsiInstance, &command, &commandLength );
+}
 
-	switch ( command[0] )
+void scsihd_device::device_start()
+{
+	scsihle_device::device_start();
+
+	save_item( NAME( lba ) );
+	save_item( NAME( blocks ) );
+}
+
+void scsihd_device::device_reset()
+{
+	scsihle_device::device_reset();
+
+	lba = 0;
+	blocks = 0;
+	sectorbytes = 512;
+
+	disk = subdevice<harddisk_image_device>("image")->get_hard_disk_file();
+	if (!disk)
 	{
-		case 0x03: // REQUEST SENSE
-			SCSISetPhase( scsiInstance, SCSI_PHASE_DATAIN );
-			return SCSILengthFromUINT8( &command[ 4 ] );
-
-		case 0x04: // FORMAT UNIT
-			SCSISetPhase( scsiInstance, SCSI_PHASE_STATUS );
-			return 0;
-
-		case 0x08: // READ(6)
-			our_this->lba = (command[1]&0x1f)<<16 | command[2]<<8 | command[3];
-			our_this->blocks = SCSILengthFromUINT8( &command[4] );
-
-			logerror("SCSIHD: READ at LBA %x for %x blocks\n", our_this->lba, our_this->blocks);
-
-			SCSISetPhase( scsiInstance, SCSI_PHASE_DATAIN );
-			return our_this->blocks * 512;
-
-		case 0x0a: // WRITE(6)
-			our_this->lba = (command[1]&0x1f)<<16 | command[2]<<8 | command[3];
-			our_this->blocks = SCSILengthFromUINT8( &command[4] );
-
-			logerror("SCSIHD: WRITE to LBA %x for %x blocks\n", our_this->lba, our_this->blocks);
-
-			SCSISetPhase( scsiInstance, SCSI_PHASE_DATAOUT );
-			return our_this->blocks * 512;
-
-		case 0x12: // INQUIRY
-			SCSISetPhase( scsiInstance, SCSI_PHASE_DATAIN );
-			return SCSILengthFromUINT8( &command[ 4 ] );
-
-		case 0x15: // MODE SELECT (used to set CDDA volume)
-			logerror("SCSIHD: MODE SELECT length %x control %x\n", command[4], command[5]);
-			SCSISetPhase( scsiInstance, SCSI_PHASE_DATAOUT );
-			return SCSILengthFromUINT8( &command[ 4 ] );
-
-		case 0x1a: // MODE SENSE(6)
-			SCSISetPhase( scsiInstance, SCSI_PHASE_DATAIN );
-			return SCSILengthFromUINT8( &command[ 4 ] );
-
-		case 0x25: // READ CAPACITY
-			SCSISetPhase( scsiInstance, SCSI_PHASE_DATAIN );
-			return 8;
-
-		case 0x28: // READ(10)
-			our_this->lba = command[2]<<24 | command[3]<<16 | command[4]<<8 | command[5];
-			our_this->blocks = SCSILengthFromUINT16( &command[7] );
-
-			logerror("SCSIHD: READ at LBA %x for %x blocks\n", our_this->lba, our_this->blocks);
-
-			SCSISetPhase( scsiInstance, SCSI_PHASE_DATAIN );
-			return our_this->blocks * 512;
-
-		case 0x2a: // WRITE (10)
-			our_this->lba = command[2]<<24 | command[3]<<16 | command[4]<<8 | command[5];
-			our_this->blocks = SCSILengthFromUINT16( &command[7] );
-
-			logerror("SCSIHD: WRITE to LBA %x for %x blocks\n", our_this->lba, our_this->blocks);
-
-			SCSISetPhase( scsiInstance, SCSI_PHASE_DATAOUT );
-
-			return our_this->blocks * 512;
-
-		case 0xa8: // READ(12)
-			our_this->lba = command[2]<<24 | command[3]<<16 | command[4]<<8 | command[5];
-			our_this->blocks = command[6]<<24 | command[7]<<16 | command[8]<<8 | command[9];
-
-			logerror("SCSIHD: READ at LBA %x for %x blocks\n", our_this->lba, our_this->blocks);
-
-			SCSISetPhase( scsiInstance, SCSI_PHASE_DATAIN );
-			return our_this->blocks * 512;
-
-		default:
-			return SCSIBase( &SCSIClassHARDDISK, SCSIOP_EXEC_COMMAND, scsiInstance, 0, NULL );
+		logerror("%s SCSIHD: no HD found!\n", tag());
+	}
+	else
+	{
+		// get hard disk sector size from CHD metadata
+		const hard_disk_info *hdinfo = hard_disk_get_info(disk);
+		sectorbytes = hdinfo->sectorbytes;
 	}
 }
 
-static void scsihd_read_data( SCSIInstance *scsiInstance, UINT8 *data, int dataLength )
+harddisk_interface scsihd_device::hd_intf = { NULL, NULL, "scsi_hdd", NULL };
+
+static MACHINE_CONFIG_FRAGMENT(scsi_harddisk)
+	MCFG_HARDDISK_CONFIG_ADD("image", scsihd_device::hd_intf)
+MACHINE_CONFIG_END
+
+machine_config_constructor scsihd_device::device_mconfig_additions() const
+{
+	return MACHINE_CONFIG_NAME(scsi_harddisk);
+}
+
+// scsihd_exec_command
+void scsihd_device::ExecCommand( int *transferLength )
+{
+	switch ( command[0] )
+	{
+		case 0x03: // REQUEST SENSE
+			SetPhase( SCSI_PHASE_DATAIN );
+			*transferLength = SCSILengthFromUINT8( &command[ 4 ] );
+			break;
+
+		case 0x04: // FORMAT UNIT
+			SetPhase( SCSI_PHASE_STATUS );
+			*transferLength = 0;
+			break;
+
+		case 0x08: // READ(6)
+			lba = (command[1]&0x1f)<<16 | command[2]<<8 | command[3];
+			blocks = SCSILengthFromUINT8( &command[4] );
+
+			logerror("SCSIHD: READ at LBA %x for %x blocks\n", lba, blocks);
+
+			SetPhase( SCSI_PHASE_DATAIN );
+			*transferLength = blocks * sectorbytes;
+			break;
+
+		case 0x0a: // WRITE(6)
+			lba = (command[1]&0x1f)<<16 | command[2]<<8 | command[3];
+			blocks = SCSILengthFromUINT8( &command[4] );
+
+			logerror("SCSIHD: WRITE to LBA %x for %x blocks\n", lba, blocks);
+
+			SetPhase( SCSI_PHASE_DATAOUT );
+			*transferLength = blocks * sectorbytes;
+			break;
+
+		case 0x12: // INQUIRY
+			SetPhase( SCSI_PHASE_DATAIN );
+			*transferLength = SCSILengthFromUINT8( &command[ 4 ] );
+			break;
+
+		case 0x15: // MODE SELECT (used to set CDDA volume)
+			logerror("SCSIHD: MODE SELECT length %x control %x\n", command[4], command[5]);
+			SetPhase( SCSI_PHASE_DATAOUT );
+			*transferLength = SCSILengthFromUINT8( &command[ 4 ] );
+			break;
+
+		case 0x1a: // MODE SENSE(6)
+			SetPhase( SCSI_PHASE_DATAIN );
+			*transferLength = SCSILengthFromUINT8( &command[ 4 ] );
+			break;
+
+		case 0x25: // READ CAPACITY
+			SetPhase( SCSI_PHASE_DATAIN );
+			*transferLength = 8;
+			break;
+
+		case 0x28: // READ(10)
+			lba = command[2]<<24 | command[3]<<16 | command[4]<<8 | command[5];
+			blocks = SCSILengthFromUINT16( &command[7] );
+
+			logerror("SCSIHD: READ at LBA %x for %x blocks\n", lba, blocks);
+
+			SetPhase( SCSI_PHASE_DATAIN );
+			*transferLength = blocks * sectorbytes;
+			break;
+
+		case 0x2a: // WRITE (10)
+			lba = command[2]<<24 | command[3]<<16 | command[4]<<8 | command[5];
+			blocks = SCSILengthFromUINT16( &command[7] );
+
+			logerror("SCSIHD: WRITE to LBA %x for %x blocks\n", lba, blocks);
+
+			SetPhase( SCSI_PHASE_DATAOUT );
+
+			*transferLength = blocks * sectorbytes;
+			break;
+
+		case 0xa8: // READ(12)
+			lba = command[2]<<24 | command[3]<<16 | command[4]<<8 | command[5];
+			blocks = command[6]<<24 | command[7]<<16 | command[8]<<8 | command[9];
+
+			logerror("SCSIHD: READ at LBA %x for %x blocks\n", lba, blocks);
+
+			SetPhase( SCSI_PHASE_DATAIN );
+			*transferLength = blocks * sectorbytes;
+			break;
+
+		default:
+			scsihle_device::ExecCommand( transferLength );
+			break;
+	}
+}
+
+void scsihd_device::ReadData( UINT8 *data, int dataLength )
 {
 	int i;
-	UINT8 *command;
-	int commandLength;
-	SCSIHd *our_this = (SCSIHd *)SCSIThis( &SCSIClassHARDDISK, scsiInstance );
-	SCSIGetCommand( scsiInstance, &command, &commandLength );
 
 	// if we're a drive without a disk, return all zeroes
-	if (!our_this->disk)
+	if (!disk)
 	{
 		memset(data, 0, dataLength);
 		return;
@@ -123,15 +169,15 @@ static void scsihd_read_data( SCSIInstance *scsiInstance, UINT8 *data, int dataL
 
 	switch ( command[0] )
 	{
-		case 0x03:	// REQUEST SENSE
-			data[0] = 0x80;	// valid sense
+		case 0x03:  // REQUEST SENSE
+			data[0] = 0x80; // valid sense
 			for (i = 1; i < 12; i++)
 			{
 				data[i] = 0;
 			}
 			break;
 
-		case 0x12:	// INQUIRY
+		case 0x12:  // INQUIRY
 			memset( data, 0, dataLength );
 			data[0] = 0x00; // device is direct-access (e.g. hard disk)
 			data[1] = 0x00; // media is not removable
@@ -143,7 +189,7 @@ static void scsihd_read_data( SCSIInstance *scsiInstance, UINT8 *data, int dataL
 			strcpy((char *)&data[32], "1.0");
 			break;
 
-		case 0x1a:	// MODE SENSE (6 byte)
+		case 0x1a:  // MODE SENSE (6 byte)
 			// special Apple ID page.  this is a vendor-specific page,
 			// so unless collisions occur there should be no need
 			// to change it.
@@ -158,18 +204,18 @@ static void scsihd_read_data( SCSIInstance *scsiInstance, UINT8 *data, int dataL
 		case 0x08: // READ(6)
 		case 0x28: // READ(10)
 		case 0xa8: // READ(12)
-			if ((our_this->disk) && (our_this->blocks))
+			if ((disk) && (blocks))
 			{
 				while (dataLength > 0)
 				{
-					if (!hard_disk_read(our_this->disk, our_this->lba,  data))
+					if (!hard_disk_read(disk, lba,  data))
 					{
 						logerror("SCSIHD: HD read error!\n");
 					}
-					our_this->lba++;
-					our_this->blocks--;
-					dataLength -= 512;
-					data += 512;
+					lba++;
+					blocks--;
+					dataLength -= sectorbytes;
+					data += sectorbytes;
 				}
 			}
 			break;
@@ -180,7 +226,7 @@ static void scsihd_read_data( SCSIInstance *scsiInstance, UINT8 *data, int dataL
 				hard_disk_info *info;
 				UINT32 temp;
 
-				info = hard_disk_get_info(our_this->disk);
+				info = hard_disk_get_info(disk);
 
 				logerror("SCSIHD: READ CAPACITY\n");
 
@@ -200,19 +246,14 @@ static void scsihd_read_data( SCSIInstance *scsiInstance, UINT8 *data, int dataL
 			break;
 
 		default:
-			SCSIBase( &SCSIClassHARDDISK, SCSIOP_READ_DATA, scsiInstance, dataLength, data );
+			scsihle_device::ReadData( data, dataLength );
 			break;
 	}
 }
 
-static void scsihd_write_data( SCSIInstance *scsiInstance, UINT8 *data, int dataLength )
+void scsihd_device::WriteData( UINT8 *data, int dataLength )
 {
-	UINT8 *command;
-	int commandLength;
-	SCSIHd *our_this = (SCSIHd *)SCSIThis( &SCSIClassHARDDISK, scsiInstance );
-	SCSIGetCommand( scsiInstance, &command, &commandLength );
-
-	if (!our_this->disk)
+	if (!disk)
 	{
 		return;
 	}
@@ -221,118 +262,40 @@ static void scsihd_write_data( SCSIInstance *scsiInstance, UINT8 *data, int data
 	{
 		case 0x0a: // WRITE(6)
 		case 0x2a: // WRITE(10)
-			if ((our_this->disk) && (our_this->blocks))
+			if ((disk) && (blocks))
 			{
 				while (dataLength > 0)
 				{
-					if (!hard_disk_write(our_this->disk, our_this->lba, data))
+					if (!hard_disk_write(disk, lba, data))
 					{
 						logerror("SCSIHD: HD write error!\n");
 					}
-					our_this->lba++;
-					our_this->blocks--;
-					dataLength -= 512;
-					data += 512;
+					lba++;
+					blocks--;
+					dataLength -= sectorbytes;
+					data += sectorbytes;
 				}
 			}
 			break;
 
 		default:
-			SCSIBase( &SCSIClassHARDDISK, SCSIOP_WRITE_DATA, scsiInstance, dataLength, data );
+			scsihle_device::WriteData( data, dataLength );
 			break;
 	}
 }
 
-static void scsihd_alloc_instance( SCSIInstance *scsiInstance, const char *diskregion )
+
+void scsihd_device::GetDevice( void **_disk )
 {
-	running_machine &machine = scsiInstance->machine();
-	SCSIHd *our_this = (SCSIHd *)SCSIThis( &SCSIClassHARDDISK, scsiInstance );
-
-	our_this->lba = 0;
-	our_this->blocks = 0;
-
-	state_save_register_item( machine, "scsihd", diskregion, 0, our_this->lba );
-	state_save_register_item( machine, "scsihd", diskregion, 0, our_this->blocks );
-
-	if (machine.device( diskregion )) {
-		our_this->is_file = TRUE;
-		our_this->disk = hd_get_hard_disk_file( machine.device( diskregion ) );
-	} else {
-		our_this->is_file = FALSE;
-		our_this->disk = hard_disk_open(get_disk_handle( machine, diskregion ));
-	}
-
-	if (!our_this->disk)
-	{
-		logerror("SCSIHD: no HD found!\n");
-	}
+	*(hard_disk_file **)_disk = disk;
 }
 
-static void scsihd_delete_instance( SCSIInstance *scsiInstance )
+void scsihd_device::SetDevice( void *_disk )
 {
-	SCSIHd *our_this = (SCSIHd *)SCSIThis( &SCSIClassHARDDISK, scsiInstance );
-	if (!our_this->is_file) {
-		if( our_this->disk )
-		{
-			hard_disk_close( our_this->disk );
-		}
-	}
+	disk = (hard_disk_file *)_disk;
 }
 
-static void scsihd_get_device( SCSIInstance *scsiInstance, hard_disk_file **disk )
+int scsihd_device::GetSectorBytes()
 {
-	SCSIHd *our_this = (SCSIHd *)SCSIThis( &SCSIClassHARDDISK, scsiInstance );
-	*disk = our_this->disk;
+	return sectorbytes;
 }
-
-static void scsihd_set_device( SCSIInstance *scsiInstance, hard_disk_file *disk )
-{
-	SCSIHd *our_this = (SCSIHd *)SCSIThis( &SCSIClassHARDDISK, scsiInstance );
-	our_this->disk = disk;
-}
-
-static int scsihd_dispatch(int operation, void *file, INT64 intparm, void *ptrparm)
-{
-	SCSIAllocInstanceParams *params;
-
-	switch (operation)
-	{
-		case SCSIOP_EXEC_COMMAND:
-			return scsihd_exec_command( (SCSIInstance *)file, (UINT8 *)ptrparm );
-
-		case SCSIOP_READ_DATA:
-			scsihd_read_data( (SCSIInstance *)file, (UINT8 *)ptrparm, intparm );
-			return 0;
-
-		case SCSIOP_WRITE_DATA:
-			scsihd_write_data( (SCSIInstance *)file, (UINT8 *)ptrparm, intparm );
-			return 0;
-
-		case SCSIOP_ALLOC_INSTANCE:
-			params = (SCSIAllocInstanceParams *)ptrparm;
-			SCSIBase( &SCSIClassHARDDISK, operation, (SCSIInstance *)file, intparm, (UINT8 *)ptrparm );
-			scsihd_alloc_instance( params->instance, params->diskregion );
-			return 0;
-
-		case SCSIOP_DELETE_INSTANCE:
-			scsihd_delete_instance( (SCSIInstance *)file );
-			break;
-
-		case SCSIOP_GET_DEVICE:
-			scsihd_get_device( (SCSIInstance *)file, (hard_disk_file **)ptrparm );
-			return 0;
-
-		case SCSIOP_SET_DEVICE:
-			scsihd_set_device( (SCSIInstance *)file, (hard_disk_file *)ptrparm );
-			return 0;
-	}
-
-	return SCSIBase( &SCSIClassHARDDISK, operation, (SCSIInstance *)file, intparm, (UINT8 *)ptrparm );
-}
-
-const SCSIClass SCSIClassHARDDISK =
-{
-	&SCSIClassDevice,
-	scsihd_dispatch,
-	sizeof( SCSIHd )
-};

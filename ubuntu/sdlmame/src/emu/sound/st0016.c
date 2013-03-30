@@ -9,8 +9,7 @@
 #define VERBOSE (0)
 #define LOG(x) do { if (VERBOSE) logerror x; } while (0)
 
-typedef struct _st0016_state st0016_state;
-struct _st0016_state
+struct st0016_device_state
 {
 	sound_stream * stream;
 	UINT8 **sound_ram;
@@ -18,23 +17,23 @@ struct _st0016_state
 	UINT8 regs[0x100];
 };
 
-INLINE st0016_state *get_safe_token(device_t *device)
+INLINE st0016_device_state *get_safe_token(device_t *device)
 {
 	assert(device != NULL);
 	assert(device->type() == ST0016);
-	return (st0016_state *)downcast<legacy_device_base *>(device)->token();
+	return (st0016_device_state *)downcast<st0016_device *>(device)->token();
 }
 
 
 READ8_DEVICE_HANDLER( st0016_snd_r )
 {
-	st0016_state *info = get_safe_token(device);
+	st0016_device_state *info = get_safe_token(device);
 	return info->regs[offset];
 }
 
 WRITE8_DEVICE_HANDLER( st0016_snd_w )
 {
-	st0016_state *info = get_safe_token(device);
+	st0016_device_state *info = get_safe_token(device);
 	int voice = offset/32;
 	int reg = offset & 0x1f;
 	int oldreg = info->regs[offset];
@@ -61,7 +60,7 @@ WRITE8_DEVICE_HANDLER( st0016_snd_w )
 
 static STREAM_UPDATE( st0016_update )
 {
-	st0016_state *info = (st0016_state *)param;
+	st0016_device_state *info = (st0016_device_state *)param;
 	UINT8 *sound_ram = *info->sound_ram;
 	int v, i, snum;
 	unsigned char *slot;
@@ -111,7 +110,7 @@ static STREAM_UPDATE( st0016_update )
 					// not looped yet, check sample end
 					if ((info->vpos[v] + sptr) >= eptr)
 					{
-						if (slot[0x16] & 0x01)	// loop?
+						if (slot[0x16] & 0x01)  // loop?
 						{
 							info->vpos[v] = (lsptr - sptr);
 							info->lponce[v] = 1;
@@ -137,40 +136,48 @@ static STREAM_UPDATE( st0016_update )
 
 static DEVICE_START( st0016 )
 {
-	const st0016_interface *intf = (const st0016_interface *)device->baseconfig().static_config();
-	st0016_state *info = get_safe_token(device);
+	const st0016_interface *intf = (const st0016_interface *)device->static_config();
+	st0016_device_state *info = get_safe_token(device);
 
 	info->sound_ram = intf->p_soundram;
 
 	info->stream = device->machine().sound().stream_alloc(*device, 0, 2, 44100, info, st0016_update);
 }
 
+const device_type ST0016 = &device_creator<st0016_device>;
 
-
-/**************************************************************************
- * Generic get_info
- **************************************************************************/
-
-DEVICE_GET_INFO( st0016 )
+st0016_device::st0016_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, ST0016, "ST0016", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
 {
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(st0016_state); 			break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME( st0016 );			break;
-		case DEVINFO_FCT_STOP:							/* Nothing */									break;
-		case DEVINFO_FCT_RESET:							/* Nothing */									break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "ST0016");						break;
-		case DEVINFO_STR_FAMILY:					strcpy(info->s, "Seta custom");					break;
-		case DEVINFO_STR_VERSION:					strcpy(info->s, "1.0");							break;
-		case DEVINFO_STR_SOURCE_FILE:						strcpy(info->s, __FILE__);						break;
-		case DEVINFO_STR_CREDITS:					strcpy(info->s, "Copyright Nicola Salmoria and the MAME Team"); break;
-	}
+	m_token = global_alloc_clear(st0016_device_state);
 }
 
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
 
-DEFINE_LEGACY_SOUND_DEVICE(ST0016, st0016);
+void st0016_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void st0016_device::device_start()
+{
+	DEVICE_START_NAME( st0016 )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void st0016_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}

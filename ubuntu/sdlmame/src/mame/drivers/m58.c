@@ -15,7 +15,7 @@
 #include "includes/iremipt.h"
 #include "includes/m58.h"
 
-#define MASTER_CLOCK		XTAL_18_432MHz
+#define MASTER_CLOCK        XTAL_18_432MHz
 
 
 /*************************************
@@ -24,17 +24,17 @@
  *
  *************************************/
 
-static ADDRESS_MAP_START( yard_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( yard_map, AS_PROGRAM, 8, m58_state )
 	AM_RANGE(0x0000, 0x5fff) AM_ROM
-	AM_RANGE(0x8000, 0x8fff) AM_RAM_WRITE(yard_videoram_w) AM_BASE_MEMBER(m58_state, m_videoram)
+	AM_RANGE(0x8000, 0x8fff) AM_RAM_WRITE(yard_videoram_w) AM_SHARE("videoram")
 	AM_RANGE(0x9000, 0x9fff) AM_WRITE(yard_scroll_panel_w)
-	AM_RANGE(0xc820, 0xc87f) AM_RAM AM_BASE_SIZE_MEMBER(m58_state, m_spriteram, m_spriteram_size)
-	AM_RANGE(0xa000, 0xa000) AM_RAM AM_BASE_MEMBER(m58_state, m_yard_scroll_x_low)
-	AM_RANGE(0xa200, 0xa200) AM_RAM AM_BASE_MEMBER(m58_state, m_yard_scroll_x_high)
-	AM_RANGE(0xa400, 0xa400) AM_RAM AM_BASE_MEMBER(m58_state, m_yard_scroll_y_low)
-	AM_RANGE(0xa800, 0xa800) AM_RAM AM_BASE_MEMBER(m58_state, m_yard_score_panel_disabled)
-	AM_RANGE(0xd000, 0xd000) AM_WRITE(irem_sound_cmd_w)
-	AM_RANGE(0xd001, 0xd001) AM_WRITE(yard_flipscreen_w)	/* + coin counters */
+	AM_RANGE(0xc820, 0xc87f) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0xa000, 0xa000) AM_RAM AM_SHARE("scroll_x_low")
+	AM_RANGE(0xa200, 0xa200) AM_RAM AM_SHARE("scroll_x_high")
+	AM_RANGE(0xa400, 0xa400) AM_RAM AM_SHARE("scroll_y_low")
+	AM_RANGE(0xa800, 0xa800) AM_RAM AM_SHARE("score_disable")
+	AM_RANGE(0xd000, 0xd000) AM_WRITE_LEGACY(irem_sound_cmd_w)
+	AM_RANGE(0xd001, 0xd001) AM_WRITE(yard_flipscreen_w)    /* + coin counters */
 	AM_RANGE(0xd000, 0xd000) AM_READ_PORT("IN0")
 	AM_RANGE(0xd001, 0xd001) AM_READ_PORT("IN1")
 	AM_RANGE(0xd002, 0xd002) AM_READ_PORT("IN2")
@@ -55,7 +55,7 @@ ADDRESS_MAP_END
 static INPUT_PORTS_START( m58 )
 	PORT_START("IN0")
 	/* Start 1 & 2 also restarts and freezes the game with stop mode on
-       and are used in test mode to enter and esc the various tests */
+	   and are used in test mode to enter and esc the various tests */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START2 )
 	/* coin input must be active for 19 frames to be consistently recognized */
@@ -144,8 +144,8 @@ static INPUT_PORTS_START( vs10yarj )
 	PORT_DIPSETTING( 0x01, DEF_STR( No ) )
 	PORT_DIPSETTING( 0x00, DEF_STR( Yes ) )
 	PORT_DIPNAME( 0x02, 0x02, "Defensive Man Pause" ) PORT_DIPLOCATION("SW1:2") /* Listed as "Unused" */
-	PORT_DIPSETTING(	0x02, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( vs10yard )
@@ -193,7 +193,7 @@ static MACHINE_CONFIG_START( yard, m58_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", Z80, MASTER_CLOCK/3/2)
 	MCFG_CPU_PROGRAM_MAP(yard_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", m58_state,  irq0_line_hold)
 
 	/* video hardware */
 	MCFG_GFXDECODE(yard)
@@ -201,11 +201,8 @@ static MACHINE_CONFIG_START( yard, m58_state )
 
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_RAW_PARAMS(MASTER_CLOCK/3, 384, 0, 256, 282, 42, 266)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
-	MCFG_SCREEN_UPDATE(yard)
+	MCFG_SCREEN_UPDATE_DRIVER(m58_state, screen_update_yard)
 
-	MCFG_PALETTE_INIT(yard)
-	MCFG_VIDEO_START(yard)
 
 	/* sound hardware */
 	MCFG_FRAGMENT_ADD(m52_large_audio)
@@ -233,12 +230,12 @@ ROM_START( 10yard )
 	ROM_LOAD( "yf-s.1a",      0xe000, 0x2000, CRC(2490d4c3) SHA1(e4da7b01e8ad075b7e3c8beb6668faff72db9aa2) )
 
 	ROM_REGION( 0x06000, "gfx1", 0 )
-	ROM_LOAD( "yf-a.3e",      0x00000, 0x2000, CRC(77e9e9cc) SHA1(90b0226fc125713dbee2804aeceeb5aa2c8e275e) )	/* chars */
+	ROM_LOAD( "yf-a.3e",      0x00000, 0x2000, CRC(77e9e9cc) SHA1(90b0226fc125713dbee2804aeceeb5aa2c8e275e) )   /* chars */
 	ROM_LOAD( "yf-a.3d",      0x02000, 0x2000, CRC(854d5ff4) SHA1(9ba09bfabf159facb57faecfe73a6258fa48d152) )
 	ROM_LOAD( "yf-a.3c",      0x04000, 0x2000, CRC(0cd8ffad) SHA1(bd1262de3823c34f7394b718477fb5bc58a6e293) )
 
 	ROM_REGION( 0x0c000, "gfx2", 0 )
-	ROM_LOAD( "yf-b.5b",      0x00000, 0x2000, CRC(1299ae30) SHA1(07d47f827d8bc78a41011ec02ab64036fb8a7a18) )	/* sprites */
+	ROM_LOAD( "yf-b.5b",      0x00000, 0x2000, CRC(1299ae30) SHA1(07d47f827d8bc78a41011ec02ab64036fb8a7a18) )   /* sprites */
 	ROM_LOAD( "yf-b.5c",      0x02000, 0x2000, CRC(8708b888) SHA1(8c4f305a339f23ec8ed40dfd72fac0f62ee65378) )
 	ROM_LOAD( "yf-b.5f",      0x04000, 0x2000, CRC(d9bb8ab8) SHA1(1325308b4c85355298fec4aa3e5fec1b4b13ad86) )
 	ROM_LOAD( "yf-b.5e",      0x06000, 0x2000, CRC(47077e8d) SHA1(5f78b15fb360e9926ef11841d5d86f2bd9af04d1) )
@@ -267,12 +264,12 @@ ROM_START( 10yardj )
 	ROM_LOAD( "yf-s.1a",      0xe000, 0x2000, CRC(2490d4c3) SHA1(e4da7b01e8ad075b7e3c8beb6668faff72db9aa2) )
 
 	ROM_REGION( 0x06000, "gfx1", 0 )
-	ROM_LOAD( "yf-a.3e",      0x00000, 0x2000, CRC(77e9e9cc) SHA1(90b0226fc125713dbee2804aeceeb5aa2c8e275e) )	/* chars */
+	ROM_LOAD( "yf-a.3e",      0x00000, 0x2000, CRC(77e9e9cc) SHA1(90b0226fc125713dbee2804aeceeb5aa2c8e275e) )   /* chars */
 	ROM_LOAD( "yf-a.3d",      0x02000, 0x2000, CRC(854d5ff4) SHA1(9ba09bfabf159facb57faecfe73a6258fa48d152) )
 	ROM_LOAD( "yf-a.3c",      0x04000, 0x2000, CRC(0cd8ffad) SHA1(bd1262de3823c34f7394b718477fb5bc58a6e293) )
 
 	ROM_REGION( 0x0c000, "gfx2", 0 )
-	ROM_LOAD( "yf-b.5b",      0x00000, 0x2000, CRC(1299ae30) SHA1(07d47f827d8bc78a41011ec02ab64036fb8a7a18) )	/* sprites */
+	ROM_LOAD( "yf-b.5b",      0x00000, 0x2000, CRC(1299ae30) SHA1(07d47f827d8bc78a41011ec02ab64036fb8a7a18) )   /* sprites */
 	ROM_LOAD( "yf-b.5c",      0x02000, 0x2000, CRC(8708b888) SHA1(8c4f305a339f23ec8ed40dfd72fac0f62ee65378) )
 	ROM_LOAD( "yf-b.5f",      0x04000, 0x2000, CRC(d9bb8ab8) SHA1(1325308b4c85355298fec4aa3e5fec1b4b13ad86) )
 	ROM_LOAD( "yf-b.5e",      0x06000, 0x2000, CRC(47077e8d) SHA1(5f78b15fb360e9926ef11841d5d86f2bd9af04d1) )
@@ -301,12 +298,12 @@ ROM_START( vs10yard )
 	ROM_LOAD( "yf-s.1a",      0xe000, 0x2000, CRC(2490d4c3) SHA1(e4da7b01e8ad075b7e3c8beb6668faff72db9aa2) )
 
 	ROM_REGION( 0x06000, "gfx1", 0 )
-	ROM_LOAD( "vyf-a.3a",     0x00000, 0x2000, CRC(354d7330) SHA1(0dac87e502d5e9089c4e5ca87c7626940a17e9b2) )	/* chars */
+	ROM_LOAD( "vyf-a.3a",     0x00000, 0x2000, CRC(354d7330) SHA1(0dac87e502d5e9089c4e5ca87c7626940a17e9b2) )   /* chars */
 	ROM_LOAD( "vyf-a.3c",     0x02000, 0x2000, CRC(f48eedca) SHA1(6aef3208de8b1dd4078de20c0b5ce96219c79d40) )
 	ROM_LOAD( "vyf-a.3d",     0x04000, 0x2000, CRC(7d1b4d93) SHA1(9389de1230b93f529c492af6fb911c00280cae8a) )
 
 	ROM_REGION( 0x0c000, "gfx2", 0 )
-	ROM_LOAD( "yf-b.5b",      0x00000, 0x2000, CRC(1299ae30) SHA1(07d47f827d8bc78a41011ec02ab64036fb8a7a18) )	/* sprites */
+	ROM_LOAD( "yf-b.5b",      0x00000, 0x2000, CRC(1299ae30) SHA1(07d47f827d8bc78a41011ec02ab64036fb8a7a18) )   /* sprites */
 	ROM_LOAD( "yf-b.5c",      0x02000, 0x2000, CRC(8708b888) SHA1(8c4f305a339f23ec8ed40dfd72fac0f62ee65378) )
 	ROM_LOAD( "yf-b.5f",      0x04000, 0x2000, CRC(d9bb8ab8) SHA1(1325308b4c85355298fec4aa3e5fec1b4b13ad86) )
 	ROM_LOAD( "yf-b.5e",      0x06000, 0x2000, CRC(47077e8d) SHA1(5f78b15fb360e9926ef11841d5d86f2bd9af04d1) )
@@ -335,12 +332,12 @@ ROM_START( vs10yardj )
 	ROM_LOAD( "yf-s.1a",      0xe000, 0x2000, CRC(2490d4c3) SHA1(e4da7b01e8ad075b7e3c8beb6668faff72db9aa2) )
 
 	ROM_REGION( 0x06000, "gfx1", 0 )
-	ROM_LOAD( "vyf-a.3a",     0x00000, 0x2000, CRC(354d7330) SHA1(0dac87e502d5e9089c4e5ca87c7626940a17e9b2) )	/* chars */
+	ROM_LOAD( "vyf-a.3a",     0x00000, 0x2000, CRC(354d7330) SHA1(0dac87e502d5e9089c4e5ca87c7626940a17e9b2) )   /* chars */
 	ROM_LOAD( "vyf-a.3c",     0x02000, 0x2000, CRC(f48eedca) SHA1(6aef3208de8b1dd4078de20c0b5ce96219c79d40) )
 	ROM_LOAD( "vyf-a.3d",     0x04000, 0x2000, CRC(7d1b4d93) SHA1(9389de1230b93f529c492af6fb911c00280cae8a) )
 
 	ROM_REGION( 0x0c000, "gfx2", 0 )
-	ROM_LOAD( "yf-b.5b",      0x00000, 0x2000, CRC(1299ae30) SHA1(07d47f827d8bc78a41011ec02ab64036fb8a7a18) )	/* sprites */
+	ROM_LOAD( "yf-b.5b",      0x00000, 0x2000, CRC(1299ae30) SHA1(07d47f827d8bc78a41011ec02ab64036fb8a7a18) )   /* sprites */
 	ROM_LOAD( "yf-b.5c",      0x02000, 0x2000, CRC(8708b888) SHA1(8c4f305a339f23ec8ed40dfd72fac0f62ee65378) )
 	ROM_LOAD( "yf-b.5f",      0x04000, 0x2000, CRC(d9bb8ab8) SHA1(1325308b4c85355298fec4aa3e5fec1b4b13ad86) )
 	ROM_LOAD( "yf-b.5e",      0x06000, 0x2000, CRC(47077e8d) SHA1(5f78b15fb360e9926ef11841d5d86f2bd9af04d1) )
@@ -369,12 +366,12 @@ ROM_START( vs10yardu )
 	ROM_LOAD( "yf-s-1a.1a",      0xe000, 0x2000, CRC(2490d4c3) SHA1(e4da7b01e8ad075b7e3c8beb6668faff72db9aa2) )
 
 	ROM_REGION( 0x06000, "gfx1", 0 )
-	ROM_LOAD( "yf-a-3e-h-vs.3e",     0x00000, 0x2000, CRC(354d7330) SHA1(0dac87e502d5e9089c4e5ca87c7626940a17e9b2) )	/* chars */
+	ROM_LOAD( "yf-a-3e-h-vs.3e",     0x00000, 0x2000, CRC(354d7330) SHA1(0dac87e502d5e9089c4e5ca87c7626940a17e9b2) )    /* chars */
 	ROM_LOAD( "yf-a-3c-h-vs.3c",     0x02000, 0x2000, CRC(f48eedca) SHA1(6aef3208de8b1dd4078de20c0b5ce96219c79d40) )
 	ROM_LOAD( "yf-a-3d-h-vs.3d",     0x04000, 0x2000, CRC(7d1b4d93) SHA1(9389de1230b93f529c492af6fb911c00280cae8a) )
 
 	ROM_REGION( 0x0c000, "gfx2", 0 )
-	ROM_LOAD( "yf-b-5b.5b",      0x00000, 0x2000, CRC(1299ae30) SHA1(07d47f827d8bc78a41011ec02ab64036fb8a7a18) )	/* sprites */
+	ROM_LOAD( "yf-b-5b.5b",      0x00000, 0x2000, CRC(1299ae30) SHA1(07d47f827d8bc78a41011ec02ab64036fb8a7a18) )    /* sprites */
 	ROM_LOAD( "yf-b-5c.5c",      0x02000, 0x2000, CRC(8708b888) SHA1(8c4f305a339f23ec8ed40dfd72fac0f62ee65378) )
 	ROM_LOAD( "yf-b-5f.5f",      0x04000, 0x2000, CRC(d9bb8ab8) SHA1(1325308b4c85355298fec4aa3e5fec1b4b13ad86) )
 	ROM_LOAD( "yf-b-5e.5e",      0x06000, 0x2000, CRC(47077e8d) SHA1(5f78b15fb360e9926ef11841d5d86f2bd9af04d1) )
@@ -403,12 +400,12 @@ ROM_START( 10yard85 )
 	ROM_LOAD( "yf-s-1a.1a",      0xe000, 0x2000, CRC(2490d4c3) SHA1(e4da7b01e8ad075b7e3c8beb6668faff72db9aa2) )
 
 	ROM_REGION( 0x06000, "gfx1", 0 )
-	ROM_LOAD( "yf-a-3e-h.3e",     0x00000, 0x2000, CRC(5fba9074) SHA1(aa9881315850e86b49712a4afb551778ee57ae75) )	/* chars */ // this rom changes to give the '85 text
+	ROM_LOAD( "yf-a-3e-h.3e",     0x00000, 0x2000, CRC(5fba9074) SHA1(aa9881315850e86b49712a4afb551778ee57ae75) )   /* chars */ // this rom changes to give the '85 text
 	ROM_LOAD( "yf-a-3c-h.3c",     0x02000, 0x2000, CRC(f48eedca) SHA1(6aef3208de8b1dd4078de20c0b5ce96219c79d40) )
 	ROM_LOAD( "yf-a-3d-h.3d",     0x04000, 0x2000, CRC(7d1b4d93) SHA1(9389de1230b93f529c492af6fb911c00280cae8a) )
 
 	ROM_REGION( 0x0c000, "gfx2", 0 )
-	ROM_LOAD( "yf-b-5b.5b",      0x00000, 0x2000, CRC(1299ae30) SHA1(07d47f827d8bc78a41011ec02ab64036fb8a7a18) )	/* sprites */
+	ROM_LOAD( "yf-b-5b.5b",      0x00000, 0x2000, CRC(1299ae30) SHA1(07d47f827d8bc78a41011ec02ab64036fb8a7a18) )    /* sprites */
 	ROM_LOAD( "yf-b-5c.5c",      0x02000, 0x2000, CRC(8708b888) SHA1(8c4f305a339f23ec8ed40dfd72fac0f62ee65378) )
 	ROM_LOAD( "yf-b-5f.5f",      0x04000, 0x2000, CRC(d9bb8ab8) SHA1(1325308b4c85355298fec4aa3e5fec1b4b13ad86) )
 	ROM_LOAD( "yf-b-5e.5e",      0x06000, 0x2000, CRC(47077e8d) SHA1(5f78b15fb360e9926ef11841d5d86f2bd9af04d1) )
@@ -430,12 +427,12 @@ ROM_END
  *
  *************************************/
 
-static DRIVER_INIT( yard85 )
+DRIVER_INIT_MEMBER(m58_state,yard85)
 {
 	// on these sets the content of the sprite color PROM needs reversing
 	//  are the proms on the other sets from bootleg boards, or hand modified?
-	UINT8* buffer = auto_alloc_array(machine, UINT8, 0x10);
-	UINT8* region = machine.region("proms")->base();
+	UINT8* buffer = auto_alloc_array(machine(), UINT8, 0x10);
+	UINT8* region = machine().root_device().memregion("proms")->base();
 	int i;
 
 	for (i=0;i<0x10;i++)
@@ -445,10 +442,9 @@ static DRIVER_INIT( yard85 )
 	memcpy(region+0x200, buffer, 0x10);
 }
 
-GAME( 1983, 10yard,   0,        yard,     yard,     0, ROT0, "Irem", "10-Yard Fight (World, set 1)", GAME_SUPPORTS_SAVE ) // no copyright
-GAME( 1983, 10yardj,  10yard,   yard,     yard,     0, ROT0, "Irem", "10-Yard Fight (Japan)", GAME_SUPPORTS_SAVE )
-GAME( 1984, vs10yard, 10yard,   yard,     vs10yard, 0, ROT0, "Irem", "Vs 10-Yard Fight (World, 11/05/84)", GAME_SUPPORTS_SAVE )
-GAME( 1984, vs10yardj,10yard,   yard,     vs10yarj, 0, ROT0, "Irem", "Vs 10-Yard Fight (Japan)", GAME_SUPPORTS_SAVE )
-GAME( 1984, vs10yardu,10yard,   yard,     vs10yard, yard85, ROT0, "Irem (Taito license)", "Vs 10-Yard Fight (US, Taito license)", GAME_SUPPORTS_SAVE ) // had '85 stickers, but doesn't have '85 on the title screen like the set below
-GAME( 1985, 10yard85, 10yard,   yard,     yard,     yard85, ROT0, "Irem (Taito license)", "10-Yard Fight '85 (US, Taito license)", GAME_SUPPORTS_SAVE )
-
+GAME( 1983, 10yard,   0,        yard,     yard, driver_device,     0, ROT0, "Irem", "10-Yard Fight (World, set 1)", GAME_SUPPORTS_SAVE ) // no copyright
+GAME( 1983, 10yardj,  10yard,   yard,     yard, driver_device,     0, ROT0, "Irem", "10-Yard Fight (Japan)", GAME_SUPPORTS_SAVE )
+GAME( 1984, vs10yard, 10yard,   yard,     vs10yard, driver_device, 0, ROT0, "Irem", "Vs 10-Yard Fight (World, 11/05/84)", GAME_SUPPORTS_SAVE )
+GAME( 1984, vs10yardj,10yard,   yard,     vs10yarj, driver_device, 0, ROT0, "Irem", "Vs 10-Yard Fight (Japan)", GAME_SUPPORTS_SAVE )
+GAME( 1984, vs10yardu,10yard,   yard,     vs10yard, m58_state, yard85, ROT0, "Irem (Taito license)", "Vs 10-Yard Fight (US, Taito license)", GAME_SUPPORTS_SAVE ) // had '85 stickers, but doesn't have '85 on the title screen like the set below
+GAME( 1985, 10yard85, 10yard,   yard,     yard, m58_state,     yard85, ROT0, "Irem (Taito license)", "10-Yard Fight '85 (US, Taito license)", GAME_SUPPORTS_SAVE )

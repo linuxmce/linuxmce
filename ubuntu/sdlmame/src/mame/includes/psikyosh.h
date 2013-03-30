@@ -1,5 +1,6 @@
+#include "video/bufsprite.h"
 
-#define MASTER_CLOCK 57272700	// main oscillator frequency
+#define MASTER_CLOCK 57272700   // main oscillator frequency
 
 /* Psikyo PS6406B */
 #define FLIPSCREEN (((state->m_vidregs[3] & 0x0000c000) == 0x0000c000) ? 1:0)
@@ -19,34 +20,51 @@
 class psikyosh_state : public driver_device
 {
 public:
-	psikyosh_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	psikyosh_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+			m_spriteram(*this, "spriteram") ,
+		m_bgram(*this, "bgram"),
+		m_paletteram(*this, "paletteram"),
+		m_zoomram(*this, "zoomram"),
+		m_vidregs(*this, "vidregs"),
+		m_ram(*this, "ram"){ }
 
 	/* memory pointers */
-	UINT32 *       m_bgram;
-	UINT32 *       m_zoomram;
-	UINT32 *       m_vidregs;
-	UINT32 *       m_ram;
-	UINT32 *       m_paletteram;
-//  UINT32 *       m_spriteram;   // currently this uses generic buffered spriteram
-//  size_t         m_spriteram_size;
+	required_device<buffered_spriteram32_device> m_spriteram;
+	required_shared_ptr<UINT32> m_bgram;
+	required_shared_ptr<UINT32> m_paletteram;
+	required_shared_ptr<UINT32> m_zoomram;
+	required_shared_ptr<UINT32> m_vidregs;
+	required_shared_ptr<UINT32> m_ram;
 
 	/* video-related */
-	bitmap_t       *m_zoom_bitmap;
-	bitmap_t       *m_z_bitmap;
-	bitmap_t       *m_bg_bitmap;
+	bitmap_ind8 m_zoom_bitmap;
+	bitmap_ind16 m_z_bitmap;
+	bitmap_rgb32   m_bg_bitmap;
 	UINT16         *m_bg_zoom;
-//  UINT8          *m_alphatable;
-
-	/* misc */
-	UINT32         m_sample_offs;	// only used if ROMTEST = 1
+	UINT8          m_alphatable[256];
 
 	/* devices */
-	device_t *m_maincpu;
+	cpu_device *m_maincpu;
+
+	DECLARE_WRITE32_MEMBER(psikyosh_irqctrl_w);
+	DECLARE_WRITE32_MEMBER(paletteram32_RRRRRRRRGGGGGGGGBBBBBBBBxxxxxxxx_dword_w);
+	DECLARE_WRITE32_MEMBER(psikyosh_vidregs_w);
+	DECLARE_READ32_MEMBER(mjgtaste_input_r);
+	DECLARE_WRITE32_MEMBER(psh_eeprom_w);
+	DECLARE_READ32_MEMBER(psh_eeprom_r);
+	DECLARE_DRIVER_INIT(gnbarich);
+	DECLARE_DRIVER_INIT(daraku);
+	DECLARE_DRIVER_INIT(soldivid);
+	DECLARE_DRIVER_INIT(s1945iii);
+	DECLARE_DRIVER_INIT(mjgtaste);
+	DECLARE_DRIVER_INIT(tgm2);
+	DECLARE_DRIVER_INIT(sbomberb);
+	DECLARE_DRIVER_INIT(dragnblz);
+	DECLARE_DRIVER_INIT(gunbird2);
+	DECLARE_DRIVER_INIT(s1945ii);
+	virtual void machine_start();
+	virtual void video_start();
+	UINT32 screen_update_psikyosh(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(psikyosh_interrupt);
 };
-
-/*----------- defined in video/psikyosh.c -----------*/
-
-VIDEO_START( psikyosh );
-SCREEN_UPDATE( psikyosh );
-SCREEN_EOF( psikyosh );

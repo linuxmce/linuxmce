@@ -10,18 +10,23 @@
 #include "cpu/z80/z80.h"
 #include "sound/2203intf.h"
 #include "machine/nvram.h"
+#include "machine/i8255.h"
 
-#define MCLK 10000000
+#define MCLK XTAL_10MHz
 
 
 class mayumi_state : public driver_device
 {
 public:
-	mayumi_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	mayumi_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"),
+		m_i8255(*this, "i8255")
+		{ }
 
 	/* memory pointers */
-	UINT8 *    m_videoram;
+	required_shared_ptr<UINT8> m_videoram;
+	required_device<i8255_device> m_i8255;
 //  UINT8 *    m_nvram;       // this currently uses generic nvram handlers
 
 	/* video-related */
@@ -30,6 +35,18 @@ public:
 	/* misc */
 	int m_int_enable;
 	int m_input_sel;
+	UINT8 key_matrix_r(UINT8 offset);
+	DECLARE_WRITE8_MEMBER(mayumi_videoram_w);
+	DECLARE_WRITE8_MEMBER(bank_sel_w);
+	DECLARE_WRITE8_MEMBER(input_sel_w);
+	DECLARE_READ8_MEMBER(key_matrix_1p_r);
+	DECLARE_READ8_MEMBER(key_matrix_2p_r);
+	TILE_GET_INFO_MEMBER(get_tile_info);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	UINT32 screen_update_mayumi(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(mayumi_interrupt);
 };
 
 
@@ -39,32 +56,28 @@ public:
  *
  *************************************/
 
-static TILE_GET_INFO( get_tile_info )
+TILE_GET_INFO_MEMBER(mayumi_state::get_tile_info)
 {
-	mayumi_state *state = machine.driver_data<mayumi_state>();
-	int code = state->m_videoram[tile_index] + (state->m_videoram[tile_index + 0x800] & 0x1f) * 0x100;
-	int col = (state->m_videoram[tile_index + 0x1000] >> 3) & 0x1f;
+	int code = m_videoram[tile_index] + (m_videoram[tile_index + 0x800] & 0x1f) * 0x100;
+	int col = (m_videoram[tile_index + 0x1000] >> 3) & 0x1f;
 
-	SET_TILE_INFO(0, code, col, 0);
+	SET_TILE_INFO_MEMBER(0, code, col, 0);
 }
 
-static VIDEO_START( mayumi )
+void mayumi_state::video_start()
 {
-	mayumi_state *state = machine.driver_data<mayumi_state>();
-	state->m_tilemap = tilemap_create(machine, get_tile_info, tilemap_scan_rows, 8, 8, 64, 32);
+	m_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(mayumi_state::get_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 64, 32);
 }
 
-static WRITE8_HANDLER( mayumi_videoram_w )
+WRITE8_MEMBER(mayumi_state::mayumi_videoram_w)
 {
-	mayumi_state *state = space->machine().driver_data<mayumi_state>();
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_tilemap, offset & 0x7ff);
+	m_videoram[offset] = data;
+	m_tilemap->mark_tile_dirty(offset & 0x7ff);
 }
 
-static SCREEN_UPDATE( mayumi )
+UINT32 mayumi_state::screen_update_mayumi(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	mayumi_state *state = screen->machine().driver_data<mayumi_state>();
-	tilemap_draw(bitmap, cliprect, state->m_tilemap, 0, 0);
+	m_tilemap->draw(bitmap, cliprect, 0, 0);
 	return 0;
 }
 
@@ -74,12 +87,11 @@ static SCREEN_UPDATE( mayumi )
  *
  *************************************/
 
-static INTERRUPT_GEN( mayumi_interrupt )
+INTERRUPT_GEN_MEMBER(mayumi_state::mayumi_interrupt)
 {
-	mayumi_state *state = device->machine().driver_data<mayumi_state>();
 
-	if (state->m_int_enable)
-		 device_set_input_line(device, 0, HOLD_LINE);
+	if (m_int_enable)
+			device.execute().set_input_line(0, HOLD_LINE);
 }
 
 /*************************************
@@ -88,45 +100,15 @@ static INTERRUPT_GEN( mayumi_interrupt )
  *
  *************************************/
 
-static WRITE8_HANDLER( bank_sel_w )
+WRITE8_MEMBER(mayumi_state::bank_sel_w)
 {
-	mayumi_state *state = space->machine().driver_data<mayumi_state>();
 	int bank = BIT(data, 7) | (BIT(data, 6) << 1);
 
-	memory_set_bank(space->machine(), "bank1", bank);
+	membank("bank1")->set_entry(bank);
 
-	state->m_int_enable = data & 1;
+	m_int_enable = data & 1;
 
-	flip_screen_set(space->machine(), data & 2);
-}
-
-static WRITE8_HANDLER( input_sel_w )
-{
-	mayumi_state *state = space->machine().driver_data<mayumi_state>();
-	state->m_input_sel = data;
-}
-
-static READ8_HANDLER( key_matrix_r )
-{
-	mayumi_state *state = space->machine().driver_data<mayumi_state>();
-	int p, i, ret;
-	static const char *const keynames[2][5] =
-			{
-				{ "KEY5", "KEY6", "KEY7", "KEY8", "KEY9" },
-				{ "KEY0", "KEY1", "KEY2", "KEY3", "KEY4" }
-			};
-
-	ret = 0xff;
-
-	p = ~state->m_input_sel & 0x1f;
-
-	for (i = 0; i < 5; i++)
-	{
-		if (BIT(p, i))
-			ret &= input_port_read(space->machine(), keynames[offset][i]);
-	}
-
-	return ret;
+	flip_screen_set(data & 2);
 }
 
 /*************************************
@@ -135,21 +117,19 @@ static READ8_HANDLER( key_matrix_r )
  *
  *************************************/
 
-static ADDRESS_MAP_START( mayumi_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( mayumi_map, AS_PROGRAM, 8, mayumi_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0xbfff) AM_ROMBANK("bank1")
 	AM_RANGE(0xc000, 0xdfff) AM_RAM AM_SHARE("nvram")
-	AM_RANGE(0xe000, 0xf7ff) AM_RAM_WRITE(mayumi_videoram_w) AM_BASE_MEMBER(mayumi_state, m_videoram)
+	AM_RANGE(0xe000, 0xf7ff) AM_RAM_WRITE(mayumi_videoram_w) AM_SHARE("videoram")
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( mayumi_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( mayumi_io_map, AS_IO, 8, mayumi_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x30, 0x30) AM_READ_PORT("IN0") AM_WRITE(bank_sel_w)
-	AM_RANGE(0xc0, 0xc0) AM_WRITE(input_sel_w)
-	AM_RANGE(0xc1, 0xc2) AM_READ(key_matrix_r)	// 0xc0-c3 8255ppi
-	AM_RANGE(0xc3, 0xc3) AM_WRITENOP		// 0xc0-c3 8255ppi
-	AM_RANGE(0xd0, 0xd1) AM_DEVREADWRITE("ymsnd", ym2203_r, ym2203_w)
+	AM_RANGE(0xc0, 0xc3) AM_DEVREADWRITE("i8255", i8255_device, read, write)
+	AM_RANGE(0xd0, 0xd1) AM_DEVREADWRITE_LEGACY("ymsnd", ym2203_r, ym2203_w)
 ADDRESS_MAP_END
 
 /*************************************
@@ -301,6 +281,54 @@ static INPUT_PORTS_START( mayumi )
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SERVICE4 ) // memory reset
 INPUT_PORTS_END
 
+WRITE8_MEMBER(mayumi_state::input_sel_w)
+{
+	m_input_sel = data;
+}
+
+UINT8 mayumi_state::key_matrix_r(UINT8 offset)
+{
+	int p, i, ret;
+	static const char *const keynames[2][5] =
+			{
+				{ "KEY0", "KEY1", "KEY2", "KEY3", "KEY4" },
+				{ "KEY5", "KEY6", "KEY7", "KEY8", "KEY9" }
+			};
+
+	ret = 0xff;
+
+	p = ~m_input_sel & 0x1f;
+
+	for (i = 0; i < 5; i++)
+	{
+		if (BIT(p, i))
+			ret &= ioport(keynames[offset][i])->read();
+	}
+
+	return ret;
+}
+
+READ8_MEMBER(mayumi_state::key_matrix_1p_r)
+{
+	return key_matrix_r(0);
+}
+
+READ8_MEMBER(mayumi_state::key_matrix_2p_r)
+{
+	return key_matrix_r(1);
+}
+
+
+static I8255_INTERFACE(mayumi_i8255_intf)
+{
+	DEVCB_NULL,
+	DEVCB_DRIVER_MEMBER(mayumi_state,input_sel_w),
+	DEVCB_DRIVER_MEMBER(mayumi_state,key_matrix_2p_r),
+	DEVCB_NULL,
+	DEVCB_DRIVER_MEMBER(mayumi_state,key_matrix_1p_r),
+	DEVCB_NULL,
+};
+
 /*************************************
  *
  *  Graphics definitions
@@ -310,11 +338,11 @@ INPUT_PORTS_END
 static const gfx_layout charlayout =
 {
 	8,8,    /* 8*8 characters */
-	8192,   /* 8192 characters */
+	RGN_FRAC(1,3),   /* 8192 characters */
 	3,      /* 3 bits per pixel */
-	{0x20000*8,0x10000*8,0},
-	{STEP8(0,1)},
-	{STEP8(0,8)},
+	{ RGN_FRAC(0,3),RGN_FRAC(1,3),RGN_FRAC(2,3) },
+	{ STEP8(0,1) },
+	{ STEP8(0,8) },
 	8*8
 };
 
@@ -338,7 +366,7 @@ static const ym2203_interface ym2203_config =
 		DEVCB_NULL,
 		DEVCB_NULL
 	},
-	NULL
+	DEVCB_NULL
 };
 
 /*************************************
@@ -347,24 +375,22 @@ static const ym2203_interface ym2203_config =
  *
  *************************************/
 
-static MACHINE_START( mayumi )
+void mayumi_state::machine_start()
 {
-	mayumi_state *state = machine.driver_data<mayumi_state>();
-	UINT8 *ROM = machine.region("maincpu")->base();
+	UINT8 *ROM = memregion("maincpu")->base();
 
-	memory_configure_bank(machine, "bank1", 0, 4, &ROM[0x10000], 0x4000);
-	memory_set_bank(machine, "bank1", 0);
+	membank("bank1")->configure_entries(0, 4, &ROM[0x8000], 0x4000);
+	membank("bank1")->set_entry(0);
 
-	state->save_item(NAME(state->m_int_enable));
-	state->save_item(NAME(state->m_input_sel));
+	save_item(NAME(m_int_enable));
+	save_item(NAME(m_input_sel));
 }
 
-static MACHINE_RESET( mayumi )
+void mayumi_state::machine_reset()
 {
-	mayumi_state *state = machine.driver_data<mayumi_state>();
 
-	state->m_int_enable = 0;
-	state->m_input_sel = 0;
+	m_int_enable = 0;
+	m_input_sel = 0;
 }
 
 static MACHINE_CONFIG_START( mayumi, mayumi_state )
@@ -373,25 +399,23 @@ static MACHINE_CONFIG_START( mayumi, mayumi_state )
 	MCFG_CPU_ADD("maincpu", Z80, MCLK/2) /* 5.000 MHz ? */
 	MCFG_CPU_PROGRAM_MAP(mayumi_map)
 	MCFG_CPU_IO_MAP(mayumi_io_map)
-	MCFG_CPU_VBLANK_INT("screen", mayumi_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", mayumi_state,  mayumi_interrupt)
 
-	MCFG_MACHINE_START( mayumi )
-	MCFG_MACHINE_RESET( mayumi )
+
+	MCFG_I8255_ADD( "i8255", mayumi_i8255_intf )
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(2*8, 62*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(mayumi)
+	MCFG_SCREEN_UPDATE_DRIVER(mayumi_state, screen_update_mayumi)
 
 	MCFG_GFXDECODE(mayumi)
 	MCFG_PALETTE_LENGTH(256)
 
 	MCFG_PALETTE_INIT(RRRR_GGGG_BBBB)
-	MCFG_VIDEO_START(mayumi)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -414,15 +438,14 @@ MACHINE_CONFIG_END
  *************************************/
 
 ROM_START( mayumi )
-	ROM_REGION( 0x20000, "maincpu", 0 ) /* CPU */
+	ROM_REGION( 0x18000, "maincpu", 0 ) /* CPU */
 	ROM_LOAD( "my00.bin",  0x00000, 0x08000, CRC(33189e37) SHA1(cbf75f56360ef7da5b7b1207b58cd0d72bcaf207) )
-	ROM_LOAD( "my01.bin",  0x10000, 0x10000, CRC(5280fb39) SHA1(cee7653f4353031701ec1608881b37073b178d9f) ) // Banked
-	ROM_COPY( "maincpu", 0x10000, 0x08000, 0x4000 )
+	ROM_LOAD( "my01.bin",  0x08000, 0x10000, CRC(5280fb39) SHA1(cee7653f4353031701ec1608881b37073b178d9f) ) // Banked
 
 	ROM_REGION( 0x30000, "gfx1", 0 ) /* gfx */
-	ROM_LOAD( "my10.bin", 0x00000, 0x10000, CRC(3b4f4f97) SHA1(50bda1484e965f15630bd2e05861d74ddeb0d88e) )
+	ROM_LOAD( "my30.bin", 0x00000, 0x10000, CRC(7f22d53f) SHA1(f8e5874ba0fa003ba0d6a504b2169acdf1491484) )
 	ROM_LOAD( "my20.bin", 0x10000, 0x10000, CRC(18544029) SHA1(74bd8bb422db33bd7af08afbf9b801bd31a3f199) )
-	ROM_LOAD( "my30.bin", 0x20000, 0x10000, CRC(7f22d53f) SHA1(f8e5874ba0fa003ba0d6a504b2169acdf1491484) )
+	ROM_LOAD( "my10.bin", 0x20000, 0x10000, CRC(3b4f4f97) SHA1(50bda1484e965f15630bd2e05861d74ddeb0d88e) )
 
 	ROM_REGION( 0x0300, "proms", 0 ) /* color PROMs */
 	ROM_LOAD( "my-9m.bin", 0x0000,  0x0100, CRC(b18fd669) SHA1(e2b1477c1bc49994b0b652d63a2205363aab9a74) ) // R
@@ -436,4 +459,4 @@ ROM_END
  *
  *************************************/
 
-GAME( 1988, mayumi, 0, mayumi, mayumi, 0, ROT0, "Sanritsu / Victory L.L.C.",  "Kikiippatsu Mayumi-chan (Japan)", GAME_SUPPORTS_SAVE )
+GAME( 1988, mayumi, 0, mayumi, mayumi, driver_device, 0, ROT0, "Sanritsu / Victory L.L.C.",  "Kikiippatsu Mayumi-chan (Japan)", GAME_SUPPORTS_SAVE )

@@ -1,6 +1,6 @@
 /**********************************************************************
 
-    E05-16 Real Time Clock emulation
+    Microelectronic-Marin E050-16 Real Time Clock emulation
 
     Copyright MESS Team.
     Visit http://mamedev.org for licensing and usage restrictions.
@@ -9,7 +9,6 @@
 
 #include "emu.h"
 #include "e0516.h"
-#include "machine/devhelpr.h"
 
 
 
@@ -17,7 +16,7 @@
 //  MACROS / CONSTANTS
 //**************************************************************************
 
-#define LOG 1
+#define LOG 0
 
 
 // states
@@ -28,54 +27,21 @@ enum
 };
 
 
-// registers
-enum
-{
-	SECOND = 0,
-	MINUTE,
-	HOUR,
-	DAY,
-	MONTH,
-	DAY_OF_WEEK,
-	YEAR,
-	ALL
-};
-
-
-
-//**************************************************************************
-//  DEVICE DEFINITIONS
-//**************************************************************************
-
-const device_type E0516 = e0516_device_config::static_alloc_device_config;
-
-
-
-//**************************************************************************
-//  DEVICE CONFIGURATION
-//**************************************************************************
-
-GENERIC_DEVICE_CONFIG_SETUP(e0516, "E05-16")
-
-
-
-//**************************************************************************
-//  INLINE HELPERS
-//**************************************************************************
-
-
 
 //**************************************************************************
 //  LIVE DEVICE
 //**************************************************************************
 
+// device type definition
+const device_type E0516 = &device_creator<e0516_device>;
+
 //-------------------------------------------------
 //  e0516_device - constructor
 //-------------------------------------------------
 
-e0516_device::e0516_device(running_machine &_machine, const e0516_device_config &config)
-    : device_t(_machine, config),
-      m_config(config)
+e0516_device::e0516_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, E0516, "E05-16", tag, owner, clock),
+		device_rtc_interface(mconfig, *this)
 {
 }
 
@@ -99,16 +65,16 @@ void e0516_device::device_start()
 	save_item(NAME(m_state));
 	save_item(NAME(m_bits));
 	save_item(NAME(m_dio));
-	save_item(NAME(m_register));
 }
 
 
 //-------------------------------------------------
-//  device_start - device-specific reset
+//  device_reset - device-specific reset
 //-------------------------------------------------
 
 void e0516_device::device_reset()
 {
+	set_current_time(machine());
 }
 
 
@@ -118,43 +84,7 @@ void e0516_device::device_reset()
 
 void e0516_device::device_timer(emu_timer &timer, device_timer_id id, int param, void *ptr)
 {
-	m_register[SECOND]++;
-
-	if (m_register[SECOND] == 60)
-	{
-		m_register[SECOND] = 0;
-		m_register[MINUTE]++;
-	}
-
-	if (m_register[MINUTE] == 60)
-	{
-		m_register[MINUTE] = 0;
-		m_register[HOUR]++;
-	}
-
-	if (m_register[HOUR] == 24)
-	{
-		m_register[HOUR] = 0;
-		m_register[DAY]++;
-		m_register[DAY_OF_WEEK]++;
-	}
-
-	if (m_register[DAY_OF_WEEK] == 8)
-	{
-		m_register[DAY_OF_WEEK] = 1;
-	}
-
-	if (m_register[DAY] == 32)
-	{
-		m_register[DAY] = 1;
-		m_register[MONTH]++;
-	}
-
-	if (m_register[MONTH] == 13)
-	{
-		m_register[MONTH] = 1;
-		m_register[YEAR]++;
-	}
+	advance_seconds();
 }
 
 
@@ -164,6 +94,8 @@ void e0516_device::device_timer(emu_timer &timer, device_timer_id id, int param,
 
 WRITE_LINE_MEMBER( e0516_device::cs_w )
 {
+	if (LOG) logerror("E05-16 '%s' CS %u\n", tag(), state);
+
 	m_cs = state;
 
 	if (m_cs)
@@ -182,6 +114,8 @@ WRITE_LINE_MEMBER( e0516_device::cs_w )
 
 WRITE_LINE_MEMBER( e0516_device::clk_w )
 {
+	if (LOG) logerror("E05-16 '%s' CLK %u\n", tag(), state);
+
 	m_clk = state;
 
 	if (m_cs || m_clk) return;
@@ -204,7 +138,7 @@ WRITE_LINE_MEMBER( e0516_device::clk_w )
 			if (BIT(m_reg_latch, 0))
 			{
 				// load register value to data latch
-				m_data_latch = m_register[m_reg_latch >> 1];
+				m_data_latch = convert_to_bcd(get_clock_register(m_reg_latch >> 1));
 			}
 		}
 	}
@@ -236,7 +170,7 @@ WRITE_LINE_MEMBER( e0516_device::clk_w )
 			if (!BIT(m_reg_latch, 0))
 			{
 				// write latched data to register
-				m_register[m_reg_latch >> 1] = m_data_latch;
+				set_clock_register(m_reg_latch >> 1, bcd_to_integer(m_data_latch));
 			}
 		}
 	}
@@ -249,6 +183,8 @@ WRITE_LINE_MEMBER( e0516_device::clk_w )
 
 WRITE_LINE_MEMBER( e0516_device::dio_w )
 {
+	if (LOG) logerror("E05-16 '%s' DIO %u\n", tag(), state);
+
 	m_dio = state;
 }
 

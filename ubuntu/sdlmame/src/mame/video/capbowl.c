@@ -19,15 +19,15 @@
 static void generate_interrupt( running_machine &machine, int state )
 {
 	capbowl_state *driver = machine.driver_data<capbowl_state>();
-	device_set_input_line(driver->m_maincpu, M6809_FIRQ_LINE, state);
+	driver->m_maincpu->set_input_line(M6809_FIRQ_LINE, state);
 }
 
 static const struct tms34061_interface tms34061intf =
 {
-	"screen",				/* the screen we are acting on */
-	8,						/* VRAM address is (row << rowshift) | col */
-	0x10000,				/* size of video RAM */
-	generate_interrupt		/* interrupt gen callback */
+	"screen",               /* the screen we are acting on */
+	8,                      /* VRAM address is (row << rowshift) | col */
+	0x10000,                /* size of video RAM */
+	generate_interrupt      /* interrupt gen callback */
 };
 
 
@@ -38,10 +38,10 @@ static const struct tms34061_interface tms34061intf =
  *
  *************************************/
 
-VIDEO_START( capbowl )
+void capbowl_state::video_start()
 {
 	/* initialize TMS34061 emulation */
-    tms34061_start(machine, &tms34061intf);
+	tms34061_start(machine(), &tms34061intf);
 }
 
 
@@ -52,35 +52,33 @@ VIDEO_START( capbowl )
  *
  *************************************/
 
-WRITE8_HANDLER( capbowl_tms34061_w )
+WRITE8_MEMBER(capbowl_state::capbowl_tms34061_w)
 {
-	capbowl_state *state = space->machine().driver_data<capbowl_state>();
 	int func = (offset >> 8) & 3;
 	int col = offset & 0xff;
 
 	/* Column address (CA0-CA8) is hooked up the A0-A7, with A1 being inverted
-       during register access. CA8 is ignored */
+	   during register access. CA8 is ignored */
 	if (func == 0 || func == 2)
 		col ^= 2;
 
 	/* Row address (RA0-RA8) is not dependent on the offset */
-	tms34061_w(space, col, *state->m_rowaddress, func, data);
+	tms34061_w(space, col, *m_rowaddress, func, data);
 }
 
 
-READ8_HANDLER( capbowl_tms34061_r )
+READ8_MEMBER(capbowl_state::capbowl_tms34061_r)
 {
-	capbowl_state *state = space->machine().driver_data<capbowl_state>();
 	int func = (offset >> 8) & 3;
 	int col = offset & 0xff;
 
 	/* Column address (CA0-CA8) is hooked up the A0-A7, with A1 being inverted
-       during register access. CA8 is ignored */
+	   during register access. CA8 is ignored */
 	if (func == 0 || func == 2)
 		col ^= 2;
 
 	/* Row address (RA0-RA8) is not dependent on the offset */
-	return tms34061_r(space, col, *state->m_rowaddress, func);
+	return tms34061_r(space, col, *m_rowaddress, func);
 }
 
 
@@ -91,58 +89,56 @@ READ8_HANDLER( capbowl_tms34061_r )
  *
  *************************************/
 
-WRITE8_HANDLER( bowlrama_blitter_w )
+WRITE8_MEMBER(capbowl_state::bowlrama_blitter_w)
 {
-	capbowl_state *state = space->machine().driver_data<capbowl_state>();
 
 	switch (offset)
 	{
-		case 0x08:	  /* Write address high byte (only 2 bits used) */
-			state->m_blitter_addr = (state->m_blitter_addr & ~0xff0000) | (data << 16);
+		case 0x08:    /* Write address high byte (only 2 bits used) */
+			m_blitter_addr = (m_blitter_addr & ~0xff0000) | (data << 16);
 			break;
 
 		case 0x17:    /* Write address mid byte (8 bits)   */
-			state->m_blitter_addr = (state->m_blitter_addr & ~0x00ff00) | (data << 8);
+			m_blitter_addr = (m_blitter_addr & ~0x00ff00) | (data << 8);
 			break;
 
-		case 0x18:	  /* Write Address low byte (8 bits)   */
-			state->m_blitter_addr = (state->m_blitter_addr & ~0x0000ff) | (data << 0);
+		case 0x18:    /* Write Address low byte (8 bits)   */
+			m_blitter_addr = (m_blitter_addr & ~0x0000ff) | (data << 0);
 			break;
 
 		default:
-			logerror("PC=%04X Write to unsupported blitter address %02X Data=%02X\n", cpu_get_pc(&space->device()), offset, data);
+			logerror("PC=%04X Write to unsupported blitter address %02X Data=%02X\n", space.device().safe_pc(), offset, data);
 			break;
 	}
 }
 
 
-READ8_HANDLER( bowlrama_blitter_r )
+READ8_MEMBER(capbowl_state::bowlrama_blitter_r)
 {
-	capbowl_state *state = space->machine().driver_data<capbowl_state>();
-	UINT8 data = space->machine().region("gfx1")->base()[state->m_blitter_addr];
+	UINT8 data = memregion("gfx1")->base()[m_blitter_addr];
 	UINT8 result = 0;
 
 	switch (offset)
 	{
 		/* Read Mask: Graphics data are 4bpp (2 pixels per byte).
-            This function returns 0's for new pixel data.
-            This allows data to be read as a mask, AND the mask with
-            the screen data, then OR new data read by read data command. */
+		    This function returns 0's for new pixel data.
+		    This allows data to be read as a mask, AND the mask with
+		    the screen data, then OR new data read by read data command. */
 		case 0:
 			if (!(data & 0xf0))
-				result |= 0xf0;		/* High nibble is transparent */
+				result |= 0xf0;     /* High nibble is transparent */
 			if (!(data & 0x0f))
-				result |= 0x0f;		/* Low nibble is transparent */
+				result |= 0x0f;     /* Low nibble is transparent */
 			break;
 
 		/* Read data and increment address */
 		case 4:
 			result = data;
-			state->m_blitter_addr = (state->m_blitter_addr + 1) & 0x3ffff;
+			m_blitter_addr = (m_blitter_addr + 1) & 0x3ffff;
 			break;
 
 		default:
-			logerror("PC=%04X Read from unsupported blitter address %02X\n", cpu_get_pc(&space->device()), offset);
+			logerror("PC=%04X Read from unsupported blitter address %02X\n", space.device().safe_pc(), offset);
 			break;
 	}
 
@@ -165,7 +161,7 @@ INLINE rgb_t pen_for_pixel( UINT8 *src, UINT8 pix )
 }
 
 
-SCREEN_UPDATE( capbowl )
+UINT32 capbowl_state::screen_update_capbowl(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
 	struct tms34061_display state;
 	int x, y;
@@ -176,17 +172,17 @@ SCREEN_UPDATE( capbowl )
 	/* if we're blanked, just fill with black */
 	if (state.blanked)
 	{
-		bitmap_fill(bitmap, cliprect, get_black_pen(screen->machine()));
+		bitmap.fill(get_black_pen(machine()), cliprect);
 		return 0;
 	}
 
 	/* now regenerate the bitmap */
-	for (y = cliprect->min_y; y <= cliprect->max_y; y++)
+	for (y = cliprect.min_y; y <= cliprect.max_y; y++)
 	{
 		UINT8 *src = &state.vram[256 * y];
-		UINT32 *dest = BITMAP_ADDR32(bitmap, y, 0);
+		UINT32 *dest = &bitmap.pix32(y);
 
-		for (x = cliprect->min_x & ~1; x <= cliprect->max_x; x += 2)
+		for (x = cliprect.min_x & ~1; x <= cliprect.max_x; x += 2)
 		{
 			UINT8 pix = src[32 + (x / 2)];
 			*dest++ = pen_for_pixel(src, pix >> 4);

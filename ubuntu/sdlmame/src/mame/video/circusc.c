@@ -30,21 +30,22 @@
 
 ***************************************************************************/
 
-PALETTE_INIT( circusc )
+void circusc_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	static const int resistances_rg[3] = { 1000, 470, 220 };
 	static const int resistances_b [2] = { 470, 220 };
 	double rweights[3], gweights[3], bweights[2];
 	int i;
 
 	/* compute the color output resistor weights */
-	compute_resistor_weights(0,	255, -1.0,
+	compute_resistor_weights(0, 255, -1.0,
 			3, &resistances_rg[0], rweights, 0, 0,
 			3, &resistances_rg[0], gweights, 0, 0,
 			2, &resistances_b[0],  bweights, 0, 0);
 
 	/* allocate the colortable */
-	machine.colortable = colortable_alloc(machine, 32);
+	machine().colortable = colortable_alloc(machine(), 32);
 
 	/* create a lookup table for the palette */
 	for (i = 0; i < 0x20; i++)
@@ -69,7 +70,7 @@ PALETTE_INIT( circusc )
 		bit1 = (color_prom[i] >> 7) & 0x01;
 		b = combine_2_weights(bweights, bit0, bit1);
 
-		colortable_palette_set_color(machine.colortable, i, MAKE_RGB(r, g, b));
+		colortable_palette_set_color(machine().colortable, i, MAKE_RGB(r, g, b));
 	}
 
 	/* color_prom now points to the beginning of the lookup table */
@@ -79,14 +80,14 @@ PALETTE_INIT( circusc )
 	for (i = 0; i < 0x100; i++)
 	{
 		UINT8 ctabentry = color_prom[i] & 0x0f;
-		colortable_entry_set_value(machine.colortable, i, ctabentry + 0x10);
+		colortable_entry_set_value(machine().colortable, i, ctabentry + 0x10);
 	}
 
 	/* sprites map to the lower 16 palette entries */
 	for (i = 0x100; i < 0x200; i++)
 	{
 		UINT8 ctabentry = color_prom[i] & 0x0f;
-		colortable_entry_set_value(machine.colortable, i, ctabentry);
+		colortable_entry_set_value(machine().colortable, i, ctabentry);
 	}
 }
 
@@ -98,16 +99,15 @@ PALETTE_INIT( circusc )
 
 ***************************************************************************/
 
-static TILE_GET_INFO( get_tile_info )
+TILE_GET_INFO_MEMBER(circusc_state::get_tile_info)
 {
-	circusc_state *state = machine.driver_data<circusc_state>();
-	UINT8 attr = state->m_colorram[tile_index];
-	tileinfo->category = (attr & 0x10) >> 4;
+	UINT8 attr = m_colorram[tile_index];
+	tileinfo.category = (attr & 0x10) >> 4;
 
-	SET_TILE_INFO(0,
-				  state->m_videoram[tile_index] + ((attr & 0x20) << 3),
-				  attr & 0x0f,
-				  TILE_FLIPYX((attr & 0xc0) >> 6));
+	SET_TILE_INFO_MEMBER(0,
+					m_videoram[tile_index] + ((attr & 0x20) << 3),
+					attr & 0x0f,
+					TILE_FLIPYX((attr & 0xc0) >> 6));
 }
 
 
@@ -118,12 +118,11 @@ static TILE_GET_INFO( get_tile_info )
 
 ***************************************************************************/
 
-VIDEO_START( circusc )
+void circusc_state::video_start()
 {
-	circusc_state *state = machine.driver_data<circusc_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(circusc_state::get_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
 
-	tilemap_set_scroll_cols(state->m_bg_tilemap, 32);
+	m_bg_tilemap->set_scroll_cols(32);
 }
 
 
@@ -134,23 +133,21 @@ VIDEO_START( circusc )
 
 ***************************************************************************/
 
-WRITE8_HANDLER( circusc_videoram_w )
+WRITE8_MEMBER(circusc_state::circusc_videoram_w)
 {
-	circusc_state *state = space->machine().driver_data<circusc_state>();
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_videoram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( circusc_colorram_w )
+WRITE8_MEMBER(circusc_state::circusc_colorram_w)
 {
-	circusc_state *state = space->machine().driver_data<circusc_state>();
-	state->m_colorram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_colorram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( circusc_flipscreen_w )
+WRITE8_MEMBER(circusc_state::circusc_flipscreen_w)
 {
-	flip_screen_set(space->machine(), data & 1);
+	flip_screen_set(data & 1);
 }
 
 
@@ -161,7 +158,7 @@ WRITE8_HANDLER( circusc_flipscreen_w )
 
 ***************************************************************************/
 
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	circusc_state *state = machine.driver_data<circusc_state>();
 	int offs;
@@ -172,7 +169,7 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 	else
 		sr = state->m_spriteram_2;
 
-	for (offs = 0; offs < state->m_spriteram_size; offs += 4)
+	for (offs = 0; offs < state->m_spriteram.bytes(); offs += 4)
 	{
 		int code = sr[offs + 0] + 8 * (sr[offs + 1] & 0x20);
 		int color = sr[offs + 1] & 0x0f;
@@ -181,7 +178,7 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 		int flipx = sr[offs + 1] & 0x40;
 		int flipy = sr[offs + 1] & 0x80;
 
-		if (flip_screen_get(machine))
+		if (state->flip_screen())
 		{
 			sx = 240 - sx;
 			sy = 240 - sy;
@@ -198,19 +195,18 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 	}
 }
 
-SCREEN_UPDATE( circusc )
+UINT32 circusc_state::screen_update_circusc(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	circusc_state *state = screen->machine().driver_data<circusc_state>();
 	int i;
 
 	for (i = 0; i < 10; i++)
-		tilemap_set_scrolly(state->m_bg_tilemap, i, 0);
+		m_bg_tilemap->set_scrolly(i, 0);
 	for (i = 10; i < 32; i++)
-		tilemap_set_scrolly(state->m_bg_tilemap, i, *state->m_scroll);
+		m_bg_tilemap->set_scrolly(i, *m_scroll);
 
-	bitmap_fill(bitmap, cliprect, 0);
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 1, 0);
-	draw_sprites(screen->machine(), bitmap, cliprect);
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
+	bitmap.fill(0, cliprect);
+	m_bg_tilemap->draw(bitmap, cliprect, 1, 0);
+	draw_sprites(machine(), bitmap, cliprect);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
 	return 0;
 }

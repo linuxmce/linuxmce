@@ -131,9 +131,9 @@
 ***************************************************************************/
 
 
-PALETTE_INIT( tubep )
+PALETTE_INIT_MEMBER(tubep_state,tubep)
 {
-	tubep_state *state = machine.driver_data<tubep_state>();
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i,r,g,b;
 
 	/* background/sprites palette variables */
@@ -163,10 +163,10 @@ PALETTE_INIT( tubep )
 	memset(weights_g, 0, sizeof(weights_g));
 	memset(weights_b, 0, sizeof(weights_b));
 
-	compute_resistor_weights(0,	255,	-1.0,
-			3,	resistors_txt_rg,	weights_txt_rg,	470,	0,
-			2,	resistors_txt_b,	weights_txt_b,	470,	0,
-			0,	0,	0,	0,	0	);
+	compute_resistor_weights(0, 255,    -1.0,
+			3,  resistors_txt_rg,   weights_txt_rg, 470,    0,
+			2,  resistors_txt_b,    weights_txt_b,  470,    0,
+			0,  0,  0,  0,  0   );
 
 	/* create text palette */
 
@@ -189,7 +189,7 @@ PALETTE_INIT( tubep )
 		bit1 = (*color_prom >> 7) & 0x01;
 		b = combine_2_weights(weights_txt_b, bit0, bit1);
 
-		palette_set_color(machine,i, MAKE_RGB(r,g,b));
+		palette_set_color(machine(),i, MAKE_RGB(r,g,b));
 
 		color_prom++;
 	}
@@ -197,7 +197,7 @@ PALETTE_INIT( tubep )
 	/* sprites use the second PROM to control 8 x LS368. We copy content of this PROM over here */
 	for (i = 0; i < 32; i++)
 	{
-		state->m_prom2[i] = *color_prom;
+		m_prom2[i] = *color_prom;
 		color_prom++;
 	}
 
@@ -206,8 +206,8 @@ PALETTE_INIT( tubep )
 	/* create background/sprites palette */
 
 	/* find the output scaler
-       in order to do this we need to calculate the output with everything enabled.
-    */
+	   in order to do this we need to calculate the output with everything enabled.
+	*/
 
 	/* red component */
 	for (i=0; i<6; i++) active_resistors_r[ 0+i] = resistors_0[i];
@@ -222,10 +222,10 @@ PALETTE_INIT( tubep )
 	for (i=0; i<6; i++) active_resistors_b[ 6+i] = resistors_2[i];
 
 	/* calculate and store the scaler */
-    /*output_scaler = */compute_resistor_weights(0, 255,    -1.0,
-                3*6,    active_resistors_r, weights_r,  470,    0,
-                3*6,    active_resistors_g, weights_g,  470,    0,
-                2*6,    active_resistors_b, weights_b,  470,    0);
+	/*output_scaler = */compute_resistor_weights(0, 255,    -1.0,
+				3*6,    active_resistors_r, weights_r,  470,    0,
+				3*6,    active_resistors_g, weights_g,  470,    0,
+				2*6,    active_resistors_b, weights_b,  470,    0);
 
 /*  compute_resistor_weights(0, 255,    output_scaler,
                 3*6,    active_resistors_r, weights_r,  470,    0,
@@ -240,8 +240,8 @@ PALETTE_INIT( tubep )
 
 		for (sh=0; sh<0x40; sh++)
 		{
-			int j     = i;			/* active low */
-			int shade = sh^0x3f;	/* negated outputs */
+			int j     = i;          /* active low */
+			int shade = sh^0x3f;    /* negated outputs */
 
 			int bits_r[3*6];
 			int bits_g[3*6];
@@ -270,178 +270,171 @@ PALETTE_INIT( tubep )
 			//j &= 0x7; /* only red; debug */
 
 			/* red component */
-			if ((j >> 0) & 0x01)	/* if LS368 @E9  is disabled */
+			if ((j >> 0) & 0x01)    /* if LS368 @E9  is disabled */
 			{
 				for (c=0; c<6; c++) bits_r[0 +c] = 0;
 				//active_r-=6;
 			}
-			if ((j >> 1) & 0x01)	/* if LS368 @E10 is disabled */
+			if ((j >> 1) & 0x01)    /* if LS368 @E10 is disabled */
 			{
 				for (c=0; c<6; c++) bits_r[6 +c] = 0;
 				//active_r-=6;
 			}
-			if ((j >> 2) & 0x01)	/* if LS368 @E11 is disabled */
+			if ((j >> 2) & 0x01)    /* if LS368 @E11 is disabled */
 			{
 				for (c=0; c<6; c++) bits_r[12 +c] = 0;
 				//active_r-=6;
 			}
 
 			/* green component */
-			if ((j >> 3) & 0x01)	/* if LS368 @E12 is disabled */
+			if ((j >> 3) & 0x01)    /* if LS368 @E12 is disabled */
 			{
 				for (c=0; c<6; c++) bits_g[0 +c] = 0;
 				//active_g-=6;
 			}
-			if ((j >> 4) & 0x01)	/* if LS368 @E13 is disabled */
+			if ((j >> 4) & 0x01)    /* if LS368 @E13 is disabled */
 			{
 				for (c=0; c<6; c++) bits_g[6 +c] = 0;
 				//active_g-=6;
 			}
-			if ((j >> 5) & 0x01)	/* if LS368 @E14 is disabled */
+			if ((j >> 5) & 0x01)    /* if LS368 @E14 is disabled */
 			{
 				for (c=0; c<6; c++) bits_g[12+c] = 0;
 				//active_g-=6;
 			}
 
 			/* blue component */
-			if ((j >> 6) & 0x01)	/* if LS368 @E15 is disabled */
+			if ((j >> 6) & 0x01)    /* if LS368 @E15 is disabled */
 			{
 				for (c=0; c<6; c++) bits_b[0 +c] = 0;
 				//active_b-=6;
 			}
-			if ((j >> 7) & 0x01)	/* if LS368 @E16 is disabled */
+			if ((j >> 7) & 0x01)    /* if LS368 @E16 is disabled */
 			{
 				for (c=0; c<6; c++) bits_b[6 +c] = 0;
 				//active_b-=6;
 			}
 
 			out = 0.0;
-			for (c=0; c<3*6; c++)	out += weights_r[c] * bits_r[c];
+			for (c=0; c<3*6; c++)   out += weights_r[c] * bits_r[c];
 			r = (int)(out + 0.5);
 
 			out = 0.0;
-			for (c=0; c<3*6; c++)	out += weights_g[c] * bits_g[c];
+			for (c=0; c<3*6; c++)   out += weights_g[c] * bits_g[c];
 			g = (int)(out + 0.5);
 
 			out = 0.0;
-			for (c=0; c<2*6; c++)	out += weights_b[c] * bits_b[c];
+			for (c=0; c<2*6; c++)   out += weights_b[c] * bits_b[c];
 			b = (int)(out + 0.5);
 
 			/*logerror("Calculate [%x:%x] (active resistors:r=%i g=%i b=%i) = ", i, shade, active_r, active_g, active_b);*/
 			/*logerror("r:%3i g:%3i b:%3i\n",r,g,b );*/
 
-			palette_set_color(machine,32+i*0x40+sh, MAKE_RGB(r,g,b));
+			palette_set_color(machine(),32+i*0x40+sh, MAKE_RGB(r,g,b));
 		}
 	}
 }
 
 
-VIDEO_START( tubep )
+VIDEO_START_MEMBER(tubep_state,tubep)
 {
-	tubep_state *state = machine.driver_data<tubep_state>();
-	state->m_spritemap = auto_alloc_array(machine, UINT8, 256*256*2);
+	m_spritemap = auto_alloc_array(machine(), UINT8, 256*256*2);
 
 	/* Set up save state */
-	state_save_register_global(machine, state->m_romD_addr);
-	state_save_register_global(machine, state->m_romEF_addr);
-	state_save_register_global(machine, state->m_E16_add_b);
-	state_save_register_global(machine, state->m_HINV);
-	state_save_register_global(machine, state->m_VINV);
-	state_save_register_global(machine, state->m_XSize);
-	state_save_register_global(machine, state->m_YSize);
-	state_save_register_global(machine, state->m_mark_1);
-	state_save_register_global(machine, state->m_mark_2);
-	state_save_register_global(machine, state->m_colorram_addr_hi);
-	state_save_register_global(machine, state->m_ls273_g6);
-	state_save_register_global(machine, state->m_ls273_j6);
-	state_save_register_global(machine, state->m_romHI_addr_mid);
-	state_save_register_global(machine, state->m_romHI_addr_msb);
-	state_save_register_global(machine, state->m_DISP);
-	state_save_register_global(machine, state->m_background_romsel);
-	state_save_register_global(machine, state->m_color_A4);
-	state_save_register_global(machine, state->m_ls175_b7);
-	state_save_register_global(machine, state->m_ls175_e8);
-	state_save_register_global(machine, state->m_ls377_data);
-	state_save_register_global(machine, state->m_page);
+	state_save_register_global(machine(), m_romD_addr);
+	state_save_register_global(machine(), m_romEF_addr);
+	state_save_register_global(machine(), m_E16_add_b);
+	state_save_register_global(machine(), m_HINV);
+	state_save_register_global(machine(), m_VINV);
+	state_save_register_global(machine(), m_XSize);
+	state_save_register_global(machine(), m_YSize);
+	state_save_register_global(machine(), m_mark_1);
+	state_save_register_global(machine(), m_mark_2);
+	state_save_register_global(machine(), m_colorram_addr_hi);
+	state_save_register_global(machine(), m_ls273_g6);
+	state_save_register_global(machine(), m_ls273_j6);
+	state_save_register_global(machine(), m_romHI_addr_mid);
+	state_save_register_global(machine(), m_romHI_addr_msb);
+	state_save_register_global(machine(), m_DISP);
+	state_save_register_global(machine(), m_background_romsel);
+	state_save_register_global(machine(), m_color_A4);
+	state_save_register_global(machine(), m_ls175_b7);
+	state_save_register_global(machine(), m_ls175_e8);
+	state_save_register_global(machine(), m_ls377_data);
+	state_save_register_global(machine(), m_page);
 }
 
 
-VIDEO_RESET( tubep )
+VIDEO_RESET_MEMBER(tubep_state,tubep)
 {
-	tubep_state *state = machine.driver_data<tubep_state>();
-	memset(state->m_spritemap,0,256*256*2);
+	memset(m_spritemap,0,256*256*2);
 
-	state->m_romD_addr = 0;
-	state->m_romEF_addr = 0;
-	state->m_E16_add_b = 0;
-	state->m_HINV = 0;
-	state->m_VINV = 0;
-	state->m_XSize = 0;
-	state->m_YSize = 0;
-	state->m_mark_1 = 0;
-	state->m_mark_2 = 0;
-	state->m_colorram_addr_hi = 0;
-	state->m_ls273_g6 = 0;
-	state->m_ls273_j6 = 0;
-	state->m_romHI_addr_mid = 0;
-	state->m_romHI_addr_msb = 0;
-	state->m_DISP = 0;
-	state->m_background_romsel = 0;
-	state->m_color_A4 = 0;
-	state->m_ls175_b7 = 0x0f | 0xf0;
-	state->m_ls175_e8 = 0x0f;
-	state->m_ls377_data = 0;
-	state->m_page = 0;
+	m_romD_addr = 0;
+	m_romEF_addr = 0;
+	m_E16_add_b = 0;
+	m_HINV = 0;
+	m_VINV = 0;
+	m_XSize = 0;
+	m_YSize = 0;
+	m_mark_1 = 0;
+	m_mark_2 = 0;
+	m_colorram_addr_hi = 0;
+	m_ls273_g6 = 0;
+	m_ls273_j6 = 0;
+	m_romHI_addr_mid = 0;
+	m_romHI_addr_msb = 0;
+	m_DISP = 0;
+	m_background_romsel = 0;
+	m_color_A4 = 0;
+	m_ls175_b7 = 0x0f | 0xf0;
+	m_ls175_e8 = 0x0f;
+	m_ls377_data = 0;
+	m_page = 0;
 }
 
 
-WRITE8_HANDLER( tubep_textram_w )
+WRITE8_MEMBER(tubep_state::tubep_textram_w)
 {
-	tubep_state *state = space->machine().driver_data<tubep_state>();
-	state->m_textram[offset] = data;
+	m_textram[offset] = data;
 }
 
 
-WRITE8_HANDLER( tubep_background_romselect_w )
+WRITE8_MEMBER(tubep_state::tubep_background_romselect_w)
 {
-	tubep_state *state = space->machine().driver_data<tubep_state>();
-	state->m_background_romsel = data & 1;
+	m_background_romsel = data & 1;
 }
 
 
-WRITE8_HANDLER( tubep_colorproms_A4_line_w )
+WRITE8_MEMBER(tubep_state::tubep_colorproms_A4_line_w)
 {
-	tubep_state *state = space->machine().driver_data<tubep_state>();
-	state->m_color_A4 = (data & 1)<<4;
+	m_color_A4 = (data & 1)<<4;
 }
 
 
-WRITE8_HANDLER( tubep_background_a000_w )
+WRITE8_MEMBER(tubep_state::tubep_background_a000_w)
 {
-	tubep_state *state = space->machine().driver_data<tubep_state>();
-	state->m_ls175_b7 = ((data & 0x0f) ^ 0x0f) | 0xf0;
+	m_ls175_b7 = ((data & 0x0f) ^ 0x0f) | 0xf0;
 }
 
 
-WRITE8_HANDLER( tubep_background_c000_w )
+WRITE8_MEMBER(tubep_state::tubep_background_c000_w)
 {
-	tubep_state *state = space->machine().driver_data<tubep_state>();
-	state->m_ls175_e8 = ((data & 0x0f) ^ 0x0f);
+	m_ls175_e8 = ((data & 0x0f) ^ 0x0f);
 }
 
 
-static TIMER_CALLBACK( sprite_timer_callback )
+TIMER_CALLBACK_MEMBER(tubep_state::sprite_timer_callback)
 {
-	cputag_set_input_line(machine, "mcu", 0, ASSERT_LINE);
+	machine().device("mcu")->execute().set_input_line(0, ASSERT_LINE);
 }
 
 
 static void draw_sprite(running_machine &machine)
 {
 	tubep_state *state = machine.driver_data<tubep_state>();
-	UINT32	XDOT;
-	UINT32	YDOT;
-	UINT8 * romCxx  = machine.region("user2")->base()+0x00000;
+	UINT32  XDOT;
+	UINT32  YDOT;
+	UINT8 * romCxx  = state->memregion("user2")->base()+0x00000;
 	UINT8 * romD10  = romCxx+0x10000;
 	UINT8 * romEF13 = romCxx+0x12000;
 	UINT8 * romHI2  = romCxx+0x14000;
@@ -453,7 +446,7 @@ static void draw_sprite(running_machine &machine)
 		UINT32 ls273_e12 = romD10[ state->m_romD_addr | YDOT ] & 0x7f;
 		UINT32 romEF_addr_now = state->m_romEF_addr | ls273_e12;
 		UINT32 E16_add_a = romEF13[ romEF_addr_now ] |
-						 ((romEF13[0x1000 + romEF_addr_now ]&0x0f)<<8);
+							((romEF13[0x1000 + romEF_addr_now ]&0x0f)<<8);
 		UINT32 F16_add_b = E16_add_a + state->m_E16_add_b;
 
 	/* lower part of the schematic */
@@ -506,70 +499,69 @@ static void draw_sprite(running_machine &machine)
 }
 
 
-WRITE8_HANDLER( tubep_sprite_control_w )
+WRITE8_MEMBER(tubep_state::tubep_sprite_control_w)
 {
-	tubep_state *state = space->machine().driver_data<tubep_state>();
 	if (offset < 10)
 	{
 		/*graph_ctrl[offset] = data;*/
 		switch(offset)
 		{
-		case 0:	/*a*/
-			state->m_romEF_addr = (0x010 | (data & 0x0f))<<7; /*roms @F13, @E13 have A11 lines connected to +5V directly */
-			state->m_HINV = (data & 0x10) ? 0xff: 0x00;
-			state->m_VINV = (data & 0x20) ? 0xff: 0x00;
+		case 0: /*a*/
+			m_romEF_addr = (0x010 | (data & 0x0f))<<7; /*roms @F13, @E13 have A11 lines connected to +5V directly */
+			m_HINV = (data & 0x10) ? 0xff: 0x00;
+			m_VINV = (data & 0x20) ? 0xff: 0x00;
 			break;
 
-		case 1:	/*b: XSize-1 */
-			state->m_XSize = data & 0x7f;
-			state->m_mark_2 = (data&0x80)<<1;
+		case 1: /*b: XSize-1 */
+			m_XSize = data & 0x7f;
+			m_mark_2 = (data&0x80)<<1;
 			break;
 
-		case 2:	/*c: YSize-1 */
-			state->m_YSize = data & 0x7f;
-			state->m_mark_1 = (data&0x80)<<1;
+		case 2: /*c: YSize-1 */
+			m_YSize = data & 0x7f;
+			m_mark_1 = (data&0x80)<<1;
 			break;
 
-		case 3:	/*d*/
-			state->m_ls273_g6 = (data & 0xff);
+		case 3: /*d*/
+			m_ls273_g6 = (data & 0xff);
 			break;
 
-		case 4:	/*e*/
-			state->m_ls273_j6 = (data & 0xff);
+		case 4: /*e*/
+			m_ls273_j6 = (data & 0xff);
 			break;
 
-		case 5:	/*f*/
-			state->m_romHI_addr_mid = (data & 0x0f)<<7;
-			state->m_romHI_addr_msb = (data & 0x30)<<7;
+		case 5: /*f*/
+			m_romHI_addr_mid = (data & 0x0f)<<7;
+			m_romHI_addr_msb = (data & 0x30)<<7;
 			break;
 
-		case 6:	/*g*/
-			state->m_romD_addr = (data & 0x3f)<<7;
+		case 6: /*g*/
+			m_romD_addr = (data & 0x3f)<<7;
 			break;
 
-		case 7:	/*h: adder input LSB*/
-			state->m_E16_add_b = ((data & 0xff) << 0) | (state->m_E16_add_b & 0xff00);
+		case 7: /*h: adder input LSB*/
+			m_E16_add_b = ((data & 0xff) << 0) | (m_E16_add_b & 0xff00);
 			break;
 
-		case 8:	/*J: adder input MSB*/
-			state->m_E16_add_b = ((data & 0xff) << 8) | (state->m_E16_add_b & 0x00ff);
+		case 8: /*J: adder input MSB*/
+			m_E16_add_b = ((data & 0xff) << 8) | (m_E16_add_b & 0x00ff);
 			break;
 
-		case 9:	/*K*/
+		case 9: /*K*/
 			/*write to: LS174 @J3 to set color bank (hi address lines to 2114 colorram @J1 ) */
-			state->m_colorram_addr_hi = (data & 0x3f) << 4;
+			m_colorram_addr_hi = (data & 0x3f) << 4;
 
 			/*write to: LS74 @D13 to clear the interrupt line /SINT
-            /SINT line will be reasserted in state->m_XSize * state->m_YSize cycles (RH0 signal cycles)
-            */
+			/SINT line will be reasserted in m_XSize * m_YSize cycles (RH0 signal cycles)
+			*/
 			/* 1.clear the /SINT interrupt line */
-			cputag_set_input_line(space->machine(), "mcu", 0, CLEAR_LINE);
+			machine().device("mcu")->execute().set_input_line(0, CLEAR_LINE);
 
 			/* 2.assert /SINT again after this time */
-			space->machine().scheduler().timer_set( attotime::from_hz(19968000/8) * ((state->m_XSize+1)*(state->m_YSize+1)), FUNC(sprite_timer_callback));
+			machine().scheduler().timer_set( attotime::from_hz(19968000/8) * ((m_XSize+1)*(m_YSize+1)), timer_expired_delegate(FUNC(tubep_state::sprite_timer_callback),this));
 
 			/* 3.clear of /SINT starts sprite drawing circuit */
-			draw_sprite(space->machine());
+			draw_sprite(machine());
 			break;
 		}
 	}
@@ -585,20 +577,19 @@ void tubep_vblank_end(running_machine &machine)
 }
 
 
-SCREEN_UPDATE( tubep )
+UINT32 tubep_state::screen_update_tubep(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	tubep_state *state = screen->machine().driver_data<tubep_state>();
-	int DISP_ = state->m_DISP^1;
+	int DISP_ = m_DISP^1;
 
 	pen_t pen_base = 32; //change it later
 
 	UINT32 v;
-	UINT8 *text_gfx_base = screen->machine().region("gfx1")->base();
-	UINT8 *romBxx = screen->machine().region("user1")->base() + 0x2000*state->m_background_romsel;
+	UINT8 *text_gfx_base = machine().root_device().memregion("gfx1")->base();
+	UINT8 *romBxx = memregion("user1")->base() + 0x2000*m_background_romsel;
 
-	/* logerror(" update: from DISP=%i y_min=%3i y_max=%3i\n", DISP_, cliprect->min_y, cliprect->max_y+1); */
+	/* logerror(" update: from DISP=%i y_min=%3i y_max=%3i\n", DISP_, cliprect.min_y, cliprect.max_y+1); */
 
-	for (v = cliprect->min_y; v <= cliprect->max_y; v++)	/* only for current scanline */
+	for (v = cliprect.min_y; v <= cliprect.max_y; v++)  /* only for current scanline */
 	{
 		UINT32 h;
 		UINT32 sp_data0=0,sp_data1=0,sp_data2=0;
@@ -610,14 +601,14 @@ SCREEN_UPDATE( tubep )
 
 			sp_data2 = sp_data1;
 			sp_data1 = sp_data0;
-			sp_data0 = state->m_spritemap[ h + v*256 +(DISP_*256*256) ];
+			sp_data0 = m_spritemap[ h + v*256 +(DISP_*256*256) ];
 
 			text_offs = ((v >> 3) << 6) | ((h >> 3) << 1);
-			text_code = state->m_textram[text_offs];
+			text_code = m_textram[text_offs];
 			text_gfx_data = text_gfx_base[(text_code << 3) | (v & 0x07)];
 
 			if (text_gfx_data & (0x80 >> (h & 0x07)))
-				*BITMAP_ADDR16(bitmap, v, h) = (state->m_textram[text_offs + 1] & 0x0f) | state->m_color_A4;
+				bitmap.pix16(v, h) = (m_textram[text_offs + 1] & 0x0f) | m_color_A4;
 			else
 			{
 				UINT32 bg_data;
@@ -631,10 +622,10 @@ SCREEN_UPDATE( tubep )
 				UINT8 romB_data_h = romBxx[ 0x4000 + 0x4000*rom_select + romB_addr ];
 				/* romB_data_h = output of LS374 @B3 or @B4 */
 
-				UINT32 VR_addr = ((romB_data_h + state->m_ls175_b7) & 0xfe) << 2;
+				UINT32 VR_addr = ((romB_data_h + m_ls175_b7) & 0xfe) << 2;
 				/* VR_addr = output of LS157s @B1 and @B6 */
 
-				UINT8 xor_logic = (((h^v)&0x80)>>7) ^ (state->m_background_romsel & (((v&0x80)>>7)^1));
+				UINT8 xor_logic = (((h^v)&0x80)>>7) ^ (m_background_romsel & (((v&0x80)>>7)^1));
 
 				/* read from ROMs: B1/2 */
 				UINT8 romB_data_l = romBxx[ romB_addr ] ^ (xor_logic?0xff:0x00);
@@ -642,11 +633,11 @@ SCREEN_UPDATE( tubep )
 
 				UINT8 ls157_b11 = (romB_data_l >> ((rom_select==0)?4:0))&0x0f;
 
-				UINT8 ls283_b12 = (ls157_b11 + state->m_ls175_e8) & 0x0f;
+				UINT8 ls283_b12 = (ls157_b11 + m_ls175_e8) & 0x0f;
 
 				VR_addr |= (ls283_b12>>1);
 
-				bg_data = state->m_backgroundram[ VR_addr ];
+				bg_data = m_backgroundram[ VR_addr ];
 
 				romB_data_h>>=2;
 
@@ -656,9 +647,9 @@ SCREEN_UPDATE( tubep )
 					sp_data = sp_data1;
 
 				if (sp_data != 0x0f)
-					bg_data = state->m_prom2[sp_data | state->m_color_A4];
+					bg_data = m_prom2[sp_data | m_color_A4];
 
-				*BITMAP_ADDR16(bitmap, v, h) = pen_base + bg_data*64 + romB_data_h;
+				bitmap.pix16(v, h) = pen_base + bg_data*64 + romB_data_h;
 			}
 		}
 	}
@@ -689,8 +680,9 @@ SCREEN_UPDATE( tubep )
 
 ***************************************************************************/
 
-PALETTE_INIT( rjammer )
+PALETTE_INIT_MEMBER(tubep_state,rjammer)
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 
 	static const int resistors_rg[3] = { 1000, 470, 220 };
@@ -698,12 +690,12 @@ PALETTE_INIT( rjammer )
 	double weights_rg[3];
 	double weights_b[2];
 
-	compute_resistor_weights(0,	255,	-1.0,
-			3,	resistors_rg,	weights_rg,	470,	0,
-			2,	resistors_b,	weights_b,	470,	0,
-			0,	0,	0,	0,	0	);
+	compute_resistor_weights(0, 255,    -1.0,
+			3,  resistors_rg,   weights_rg, 470,    0,
+			2,  resistors_b,    weights_b,  470,    0,
+			0,  0,  0,  0,  0   );
 
-	for (i = 0;i < machine.total_colors();i++)
+	for (i = 0;i < machine().total_colors();i++)
 	{
 		int bit0,bit1,bit2,r,g,b;
 
@@ -722,35 +714,32 @@ PALETTE_INIT( rjammer )
 		bit1 = (*color_prom >> 7) & 0x01;
 		b = combine_2_weights(weights_b, bit0, bit1);
 
-		palette_set_color(machine,i, MAKE_RGB(r,g,b));
+		palette_set_color(machine(),i, MAKE_RGB(r,g,b));
 
 		color_prom++;
 	}
 }
 
 
-WRITE8_HANDLER( rjammer_background_LS377_w )
+WRITE8_MEMBER(tubep_state::rjammer_background_LS377_w)
 {
-	tubep_state *state = space->machine().driver_data<tubep_state>();
-	state->m_ls377_data = data & 0xff;
+	m_ls377_data = data & 0xff;
 }
 
 
-WRITE8_HANDLER( rjammer_background_page_w )
+WRITE8_MEMBER(tubep_state::rjammer_background_page_w)
 {
-	tubep_state *state = space->machine().driver_data<tubep_state>();
-	state->m_page = (data & 1) * 0x200;
+	m_page = (data & 1) * 0x200;
 }
 
 
-SCREEN_UPDATE( rjammer )
+UINT32 tubep_state::screen_update_rjammer(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	tubep_state *state = screen->machine().driver_data<tubep_state>();
-	int DISP_ = state->m_DISP^1;
+	int DISP_ = m_DISP^1;
 
 	UINT32 v;
-	UINT8 *text_gfx_base = screen->machine().region("gfx1")->base();
-	UINT8 *rom13D  = screen->machine().region("user1")->base();
+	UINT8 *text_gfx_base = machine().root_device().memregion("gfx1")->base();
+	UINT8 *rom13D  = memregion("user1")->base();
 	UINT8 *rom11BD = rom13D+0x1000;
 	UINT8 *rom19C  = rom13D+0x5000;
 
@@ -758,7 +747,7 @@ SCREEN_UPDATE( rjammer )
 	/* especially read from ROM19C can be done once per 8 pixels*/
 	/* and the data could be bitswapped beforehand */
 
-	for (v = cliprect->min_y; v <= cliprect->max_y; v++)	/* only for current scanline */
+	for (v = cliprect.min_y; v <= cliprect.max_y; v++)  /* only for current scanline */
 	{
 		UINT32 h;
 		UINT32 sp_data0=0,sp_data1=0,sp_data2=0;
@@ -766,10 +755,10 @@ SCREEN_UPDATE( rjammer )
 		UINT8 pal14h4_pin18;
 		UINT8 pal14h4_pin13;
 
-		UINT32 addr = (v*2) | state->m_page;
-		UINT32 ram_data = state->m_rjammer_backgroundram[ addr ] + 256*(state->m_rjammer_backgroundram[ addr+1 ]&0x2f);
+		UINT32 addr = (v*2) | m_page;
+		UINT32 ram_data = m_rjammer_backgroundram[ addr ] + 256*(m_rjammer_backgroundram[ addr+1 ]&0x2f);
 
-		addr = (v>>3) | ((state->m_ls377_data&0x1f)<<5);
+		addr = (v>>3) | ((m_ls377_data&0x1f)<<5);
 		pal14h4_pin13 = (rom19C[addr] >> ((v&7)^7) ) &1;
 		pal14h4_pin19 = (ram_data>>13) & 1;
 
@@ -781,14 +770,14 @@ SCREEN_UPDATE( rjammer )
 
 			sp_data2 = sp_data1;
 			sp_data1 = sp_data0;
-			sp_data0 = state->m_spritemap[ h + v*256 +(DISP_*256*256) ];
+			sp_data0 = m_spritemap[ h + v*256 +(DISP_*256*256) ];
 
 			text_offs = ((v >> 3) << 6) | ((h >> 3) << 1);
-			text_code = state->m_textram[text_offs];
+			text_code = m_textram[text_offs];
 			text_gfx_data = text_gfx_base[(text_code << 3) | (v & 0x07)];
 
 			if (text_gfx_data & (0x80 >> (h & 0x07)))
-				*BITMAP_ADDR16(bitmap, v, h) = 0x10 | (state->m_textram[text_offs + 1] & 0x0f);
+				bitmap.pix16(v, h) = 0x10 | (m_textram[text_offs + 1] & 0x0f);
 			else
 			{
 				UINT32 sp_data;
@@ -799,7 +788,7 @@ SCREEN_UPDATE( rjammer )
 					sp_data = sp_data1;
 
 				if (sp_data != 0x0f)
-					*BITMAP_ADDR16(bitmap, v, h) = 0x00 + sp_data;
+					bitmap.pix16(v, h) = 0x00 + sp_data;
 				else
 				{
 					UINT32 bg_data;
@@ -823,36 +812,36 @@ SCREEN_UPDATE( rjammer )
 					else
 						bg_data = (rom11_data>>4) & 0x0f;
 
-					addr = (h>>3) | (state->m_ls377_data<<5);
+					addr = (h>>3) | (m_ls377_data<<5);
 					pal14h4_pin18 = (rom19C[addr] >> ((h&7)^7) ) &1;
 
 					/*
-                        PAL14H4 @15A funct
+					    PAL14H4 @15A funct
 
-                        PIN6 = disable color on offscreen area
-                        PIN19,PIN18,PIN13 = arguments for PIN17 function
-                        PIN17 = background color bank (goes to A4 line on PROM @16A)
-                                formula for PIN17 is:
+					    PIN6 = disable color on offscreen area
+					    PIN19,PIN18,PIN13 = arguments for PIN17 function
+					    PIN17 = background color bank (goes to A4 line on PROM @16A)
+					            formula for PIN17 is:
 
-                                PIN17 =  ( PIN13 & PIN8 & PIN9 & !PIN11 &  PIN12 )
-                                       | ( PIN18 & PIN8 & PIN9 &  PIN11 & !PIN12 )
-                                       | ( PIN19 )
-                                where:
-                                PIN 8 = bit 3 of bg_data
-                                PIN 9 = bit 2 of bg_data
-                                PIN 11= bit 1 of bg_data
-                                PIN 12= bit 0 of bg_data
+					            PIN17 =  ( PIN13 & PIN8 & PIN9 & !PIN11 &  PIN12 )
+					                   | ( PIN18 & PIN8 & PIN9 &  PIN11 & !PIN12 )
+					                   | ( PIN19 )
+					            where:
+					            PIN 8 = bit 3 of bg_data
+					            PIN 9 = bit 2 of bg_data
+					            PIN 11= bit 1 of bg_data
+					            PIN 12= bit 0 of bg_data
 
-                        not used by now, but for the record:
+					    not used by now, but for the record:
 
-                        PIN15 = select prom @16B (active low)
-                        PIN16 = select prom @16A (active low)
-                        PINs: 1,2,3,4,5 and 7,14 are used for priority system
-                    */
+					    PIN15 = select prom @16B (active low)
+					    PIN16 = select prom @16A (active low)
+					    PINs: 1,2,3,4,5 and 7,14 are used for priority system
+					*/
 					color_bank =  (pal14h4_pin13 & ((bg_data&0x08)>>3) & ((bg_data&0x04)>>2) & (((bg_data&0x02)>>1)^1) &  (bg_data&0x01)    )
 								| (pal14h4_pin18 & ((bg_data&0x08)>>3) & ((bg_data&0x04)>>2) &  ((bg_data&0x02)>>1)    & ((bg_data&0x01)^1) )
 								| (pal14h4_pin19);
-					*BITMAP_ADDR16(bitmap, v, h) = 0x20 + color_bank*0x10 + bg_data;
+					bitmap.pix16(v, h) = 0x20 + color_bank*0x10 + bg_data;
 				}
 			}
 		}

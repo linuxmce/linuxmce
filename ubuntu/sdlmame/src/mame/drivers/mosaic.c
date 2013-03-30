@@ -12,14 +12,13 @@
 #include "sound/2203intf.h"
 #include "includes/mosaic.h"
 
-static WRITE8_HANDLER( protection_w )
+WRITE8_MEMBER(mosaic_state::protection_w)
 {
-	mosaic_state *state = space->machine().driver_data<mosaic_state>();
 
 	if (!BIT(data, 7))
 	{
 		/* simply increment given value */
-		state->m_prot_val = (data + 1) << 8;
+		m_prot_val = (data + 1) << 8;
 	}
 	else
 	{
@@ -34,27 +33,25 @@ static WRITE8_HANDLER( protection_w )
 			0x411f, 0x473f
 		};
 
-		state->m_prot_val = jumptable[data & 0x7f];
+		m_prot_val = jumptable[data & 0x7f];
 	}
 }
 
-static READ8_HANDLER( protection_r )
+READ8_MEMBER(mosaic_state::protection_r)
 {
-	mosaic_state *state = space->machine().driver_data<mosaic_state>();
-	int res = (state->m_prot_val >> 8) & 0xff;
+	int res = (m_prot_val >> 8) & 0xff;
 
-	logerror("%06x: protection_r %02x\n", cpu_get_pc(&space->device()), res);
+	logerror("%06x: protection_r %02x\n", space.device().safe_pc(), res);
 
-	state->m_prot_val <<= 8;
+	m_prot_val <<= 8;
 
 	return res;
 }
 
-static WRITE8_HANDLER( gfire2_protection_w )
+WRITE8_MEMBER(mosaic_state::gfire2_protection_w)
 {
-	mosaic_state *state = space->machine().driver_data<mosaic_state>();
 
-	logerror("%06x: protection_w %02x\n", cpu_get_pc(&space->device()), data);
+	logerror("%06x: protection_w %02x\n", space.device().safe_pc(), data);
 
 	switch(data)
 	{
@@ -62,66 +59,65 @@ static WRITE8_HANDLER( gfire2_protection_w )
 			/* written repeatedly; no effect?? */
 			break;
 		case 0x02:
-			state->m_prot_val = 0x0a10;
+			m_prot_val = 0x0a10;
 			break;
 		case 0x04:
-			state->m_prot_val = 0x0a15;
+			m_prot_val = 0x0a15;
 			break;
 		case 0x06:
-			state->m_prot_val = 0x80e3;
+			m_prot_val = 0x80e3;
 			break;
 		case 0x08:
-			state->m_prot_val = 0x0965;
+			m_prot_val = 0x0965;
 			break;
 		case 0x0a:
-			state->m_prot_val = 0x04b4;
+			m_prot_val = 0x04b4;
 			break;
 	}
 }
 
-static READ8_HANDLER( gfire2_protection_r )
+READ8_MEMBER(mosaic_state::gfire2_protection_r)
 {
-	mosaic_state *state = space->machine().driver_data<mosaic_state>();
-	int res = state->m_prot_val & 0xff;
+	int res = m_prot_val & 0xff;
 
-	state->m_prot_val >>= 8;
+	m_prot_val >>= 8;
 
 	return res;
 }
 
 
 
-static ADDRESS_MAP_START( mosaic_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( mosaic_map, AS_PROGRAM, 8, mosaic_state )
 	AM_RANGE(0x00000, 0x0ffff) AM_ROM
 	AM_RANGE(0x20000, 0x21fff) AM_RAM
-	AM_RANGE(0x22000, 0x22fff) AM_RAM_WRITE(mosaic_bgvideoram_w) AM_BASE_MEMBER(mosaic_state, m_bgvideoram)
-	AM_RANGE(0x23000, 0x23fff) AM_RAM_WRITE(mosaic_fgvideoram_w) AM_BASE_MEMBER(mosaic_state, m_fgvideoram)
-	AM_RANGE(0x24000, 0x241ff) AM_RAM_WRITE(paletteram_xRRRRRGGGGGBBBBB_le_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x22000, 0x22fff) AM_RAM_WRITE(mosaic_bgvideoram_w) AM_SHARE("bgvideoram")
+	AM_RANGE(0x23000, 0x23fff) AM_RAM_WRITE(mosaic_fgvideoram_w) AM_SHARE("fgvideoram")
+	AM_RANGE(0x24000, 0x241ff) AM_RAM_WRITE(paletteram_xRRRRRGGGGGBBBBB_byte_le_w) AM_SHARE("paletteram")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( gfire2_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( gfire2_map, AS_PROGRAM, 8, mosaic_state )
 	AM_RANGE(0x00000, 0x0ffff) AM_ROM
 	AM_RANGE(0x10000, 0x17fff) AM_RAM
-	AM_RANGE(0x22000, 0x22fff) AM_RAM_WRITE(mosaic_bgvideoram_w) AM_BASE_MEMBER(mosaic_state, m_bgvideoram)
-	AM_RANGE(0x23000, 0x23fff) AM_RAM_WRITE(mosaic_fgvideoram_w) AM_BASE_MEMBER(mosaic_state, m_fgvideoram)
-	AM_RANGE(0x24000, 0x241ff) AM_RAM_WRITE(paletteram_xRRRRRGGGGGBBBBB_le_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x22000, 0x22fff) AM_RAM_WRITE(mosaic_bgvideoram_w) AM_SHARE("bgvideoram")
+	AM_RANGE(0x23000, 0x23fff) AM_RAM_WRITE(mosaic_fgvideoram_w) AM_SHARE("fgvideoram")
+	AM_RANGE(0x24000, 0x241ff) AM_RAM_WRITE(paletteram_xRRRRRGGGGGBBBBB_byte_le_w) AM_SHARE("paletteram")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( mosaic_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( mosaic_io_map, AS_IO, 8, mosaic_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x3f) AM_WRITENOP	/* Z180 internal registers */
-	AM_RANGE(0x30, 0x30) AM_READNOP	/* Z180 internal registers */
-	AM_RANGE(0x70, 0x71) AM_DEVREADWRITE("ymsnd", ym2203_r, ym2203_w)
+	AM_RANGE(0x00, 0x3f) AM_WRITENOP    /* Z180 internal registers */
+	AM_RANGE(0x30, 0x30) AM_READNOP /* Z180 internal registers */
+	AM_RANGE(0x70, 0x71) AM_DEVREADWRITE_LEGACY("ymsnd", ym2203_r, ym2203_w)
 	AM_RANGE(0x72, 0x72) AM_READWRITE(protection_r, protection_w)
 	AM_RANGE(0x74, 0x74) AM_READ_PORT("P1")
 	AM_RANGE(0x76, 0x76) AM_READ_PORT("P2")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( gfire2_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( gfire2_io_map, AS_IO, 8, mosaic_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x3f) AM_WRITENOP	/* Z180 internal registers */
-	AM_RANGE(0x30, 0x30) AM_READNOP	/* Z180 internal registers */
-	AM_RANGE(0x70, 0x71) AM_DEVREADWRITE("ymsnd", ym2203_r, ym2203_w)
+	AM_RANGE(0x00, 0x3f) AM_WRITENOP    /* Z180 internal registers */
+	AM_RANGE(0x30, 0x30) AM_READNOP /* Z180 internal registers */
+	AM_RANGE(0x70, 0x71) AM_DEVREADWRITE_LEGACY("ymsnd", ym2203_r, ym2203_w)
 	AM_RANGE(0x72, 0x72) AM_READWRITE(gfire2_protection_r, gfire2_protection_w)
 	AM_RANGE(0x74, 0x74) AM_READ_PORT("P1")
 	AM_RANGE(0x76, 0x76) AM_READ_PORT("P2")
@@ -197,7 +193,7 @@ static INPUT_PORTS_START( gfire2 )
 	PORT_START("DSW")
 	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Language ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( English ) )
-	PORT_DIPSETTING(    0x80, "Korean" )
+	PORT_DIPSETTING(    0x80, DEF_STR( Korean ) )
 	PORT_DIPNAME( 0x60, 0x60, DEF_STR( Coinage ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( 2C_1C ) )
@@ -225,7 +221,7 @@ static const gfx_layout charlayout =
 	RGN_FRAC(1,4),
 	8,
 	{ 0, 1, 2, 3, 4, 5, 6, 7 },
-	{	RGN_FRAC(3,4)+0, RGN_FRAC(2,4)+0, RGN_FRAC(1,4)+0, RGN_FRAC(0,4)+0,
+	{   RGN_FRAC(3,4)+0, RGN_FRAC(2,4)+0, RGN_FRAC(1,4)+0, RGN_FRAC(0,4)+0,
 		RGN_FRAC(3,4)+8, RGN_FRAC(2,4)+8, RGN_FRAC(1,4)+8, RGN_FRAC(0,4)+8 },
 	{ 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16 },
 	16*8
@@ -248,49 +244,43 @@ static const ym2203_interface ym2203_config =
 		DEVCB_NULL,
 		DEVCB_NULL
 	},
-	NULL
+	DEVCB_NULL
 };
 
 
 
-static MACHINE_START( mosaic )
+void mosaic_state::machine_start()
 {
-	mosaic_state *state = machine.driver_data<mosaic_state>();
 
-	state->save_item(NAME(state->m_prot_val));
+	save_item(NAME(m_prot_val));
 }
 
-static MACHINE_RESET( mosaic )
+void mosaic_state::machine_reset()
 {
-	mosaic_state *state = machine.driver_data<mosaic_state>();
 
-	state->m_prot_val = 0;
+	m_prot_val = 0;
 }
 
 static MACHINE_CONFIG_START( mosaic, mosaic_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z180, 7000000)	/* ??? */
+	MCFG_CPU_ADD("maincpu", Z180, 7000000)  /* ??? */
 	MCFG_CPU_PROGRAM_MAP(mosaic_map)
 	MCFG_CPU_IO_MAP(mosaic_io_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", mosaic_state,  irq0_line_hold)
 
-	MCFG_MACHINE_START(mosaic)
-	MCFG_MACHINE_RESET(mosaic)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(8*8, 48*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(mosaic)
+	MCFG_SCREEN_UPDATE_DRIVER(mosaic_state, screen_update_mosaic)
 
 	MCFG_GFXDECODE(mosaic)
 	MCFG_PALETTE_LENGTH(256)
 
-	MCFG_VIDEO_START(mosaic)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -315,7 +305,7 @@ MACHINE_CONFIG_END
 ***************************************************************************/
 
 ROM_START( mosaic )
-	ROM_REGION( 0x100000, "maincpu", 0 )	/* 1024k for Z180 address space */
+	ROM_REGION( 0x100000, "maincpu", 0 )    /* 1024k for Z180 address space */
 	ROM_LOAD( "mosaic.9", 0x00000, 0x10000, CRC(5794dd39) SHA1(28784371f4ca561e3c0fb74d1f0a204f58ccdd3a) )
 
 	ROM_REGION( 0x40000, "gfx1", 0 )
@@ -332,7 +322,7 @@ ROM_START( mosaic )
 ROM_END
 
 ROM_START( mosaica )
-	ROM_REGION( 0x100000, "maincpu", 0 )	/* 1024k for Z180 address space */
+	ROM_REGION( 0x100000, "maincpu", 0 )    /* 1024k for Z180 address space */
 	ROM_LOAD( "mosaic_9.a02", 0x00000, 0x10000, CRC(ecb4f8aa) SHA1(e45c074bac92d1d079cf1bcc0a6a081beb3dbb8e) )
 
 	ROM_REGION( 0x40000, "gfx1", 0 )
@@ -349,7 +339,7 @@ ROM_START( mosaica )
 ROM_END
 
 ROM_START( gfire2 )
-	ROM_REGION( 0x100000, "maincpu", 0 )	/* 1024k for Z180 address space */
+	ROM_REGION( 0x100000, "maincpu", 0 )    /* 1024k for Z180 address space */
 	ROM_LOAD( "goldf2_i.7e",         0x00000, 0x10000, CRC(a102f7d0) SHA1(cfde51d0e9e69e9653fdfd70d4e4f4649b662005) )
 
 	ROM_REGION( 0x100000, "gfx1", 0 )
@@ -367,7 +357,6 @@ ROM_END
 
 
 
-GAME( 1990, mosaic,  0,      mosaic, mosaic, 0, ROT0, "Space", "Mosaic", 0 )
-GAME( 1990, mosaica, mosaic, mosaic, mosaic, 0, ROT0, "Space (Fuuki license)", "Mosaic (Fuuki)", 0 )
-GAME( 1992, gfire2,  0,      gfire2, gfire2, 0, ROT0, "Topis Corp", "Golden Fire II", 0 )
-
+GAME( 1990, mosaic,  0,      mosaic, mosaic, driver_device, 0, ROT0, "Space", "Mosaic", 0 )
+GAME( 1990, mosaica, mosaic, mosaic, mosaic, driver_device, 0, ROT0, "Space (Fuuki license)", "Mosaic (Fuuki)", 0 )
+GAME( 1992, gfire2,  0,      gfire2, gfire2, driver_device, 0, ROT0, "Topis Corp", "Golden Fire II", 0 )

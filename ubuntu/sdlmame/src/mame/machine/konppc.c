@@ -6,7 +6,7 @@
 #include "video/voodoo.h"
 #include "konppc.h"
 
-#define MAX_CG_BOARDS	2
+#define MAX_CG_BOARDS   2
 
 static UINT32 dsp_comm_ppc[MAX_CG_BOARDS][2];
 static UINT32 dsp_comm_sharc[MAX_CG_BOARDS][2];
@@ -18,8 +18,8 @@ static INT32 num_cgboards;
 
 static UINT32 *dsp_shared_ram[MAX_CG_BOARDS];
 
-#define DSP_BANK_SIZE			0x10000
-#define DSP_BANK_SIZE_WORD		(DSP_BANK_SIZE / 4)
+#define DSP_BANK_SIZE           0x10000
+#define DSP_BANK_SIZE_WORD      (DSP_BANK_SIZE / 4)
 
 static UINT32 dsp_state[MAX_CG_BOARDS];
 static UINT32 nwk_device_sel[MAX_CG_BOARDS];
@@ -118,7 +118,7 @@ void set_cgboard_texture_bank(running_machine &machine, int board, const char *b
 {
 	texture_bank[board] = bank;
 
-	memory_configure_bank(machine, bank, 0, 2, rom, 0x800000);
+	machine.root_device().membank(bank)->configure_entries(0, 2, rom, 0x800000);
 }
 
 /*****************************************************************************/
@@ -129,7 +129,7 @@ READ32_HANDLER( cgboard_dsp_comm_r_ppc )
 {
 	if (cgboard_id < MAX_CG_BOARDS)
 	{
-//      mame_printf_debug("dsp_cmd_r: (board %d) %08X, %08X at %08X\n", cgboard_id, offset, mem_mask, cpu_get_pc(&space->device()));
+//      mame_printf_debug("dsp_cmd_r: (board %d) %08X, %08X at %08X\n", cgboard_id, offset, mem_mask, space.device().safe_pc());
 		return dsp_comm_sharc[cgboard_id][offset] | (dsp_state[cgboard_id] << 16);
 	}
 	else
@@ -142,9 +142,9 @@ WRITE32_HANDLER( cgboard_dsp_comm_w_ppc )
 {
 	const char *dsptag = (cgboard_id == 0) ? "dsp" : "dsp2";
 	const char *pcitag = (cgboard_id == 0) ? "k033906_1" : "k033906_2";
-	device_t *dsp = space->machine().device(dsptag);
-	device_t *k033906 = space->machine().device(pcitag);
-//  mame_printf_debug("dsp_cmd_w: (board %d) %08X, %08X, %08X at %08X\n", cgboard_id, data, offset, mem_mask, cpu_get_pc(&space->device()));
+	device_t *dsp = space.machine().device(dsptag);
+	device_t *k033906 = space.machine().device(pcitag);
+//  mame_printf_debug("dsp_cmd_w: (board %d) %08X, %08X, %08X at %08X\n", cgboard_id, data, offset, mem_mask, space.device().safe_pc());
 
 	if (cgboard_id < MAX_CG_BOARDS)
 	{
@@ -157,19 +157,19 @@ WRITE32_HANDLER( cgboard_dsp_comm_w_ppc )
 				if (data & 0x80000000)
 					dsp_state[cgboard_id] |= 0x10;
 
-				if (k033906 != NULL)	/* zr107.c has no PCI and some games only have one PCI Bridge */
+				if (k033906 != NULL)    /* zr107.c has no PCI and some games only have one PCI Bridge */
 					k033906_set_reg(k033906, (data & 0x20000000) ? 1 : 0);
 
 				if (data & 0x10000000)
-					device_set_input_line(dsp, INPUT_LINE_RESET, CLEAR_LINE);
+					dsp->execute().set_input_line(INPUT_LINE_RESET, CLEAR_LINE);
 				else
-					device_set_input_line(dsp, INPUT_LINE_RESET, ASSERT_LINE);
+					dsp->execute().set_input_line(INPUT_LINE_RESET, ASSERT_LINE);
 
 				if (data & 0x02000000)
-					device_set_input_line(dsp, INPUT_LINE_IRQ0, ASSERT_LINE);
+					dsp->execute().set_input_line(INPUT_LINE_IRQ0, ASSERT_LINE);
 
 				if (data & 0x04000000)
-					device_set_input_line(dsp, INPUT_LINE_IRQ1, ASSERT_LINE);
+					dsp->execute().set_input_line(INPUT_LINE_IRQ1, ASSERT_LINE);
 			}
 
 			if (ACCESSING_BITS_0_7)
@@ -198,7 +198,7 @@ WRITE32_HANDLER( cgboard_dsp_shared_w_ppc )
 {
 	if (cgboard_id < MAX_CG_BOARDS)
 	{
-		space->machine().scheduler().trigger(10000);		// Remove the timeout (a part of the GTI Club FIFO test workaround)
+		space.machine().scheduler().trigger(10000);     // Remove the timeout (a part of the GTI Club FIFO test workaround)
 		COMBINE_DATA(dsp_shared_ram[cgboard_id] + (offset + (dsp_shared_ram_bank[cgboard_id] * DSP_BANK_SIZE_WORD)));
 	}
 }
@@ -212,11 +212,11 @@ static UINT32 dsp_comm_sharc_r(int board, int offset)
 	return dsp_comm_ppc[board][offset];
 }
 
-static void dsp_comm_sharc_w(address_space *space, int board, int offset, UINT32 data)
+static void dsp_comm_sharc_w(address_space &space, int board, int offset, UINT32 data)
 {
 	if (offset >= 2)
 	{
-		fatalerror("dsp_comm_w: %08X, %08X", data, offset);
+		fatalerror("dsp_comm_w: %08X, %08X\n", data, offset);
 	}
 
 	switch (cgboard_type)
@@ -224,13 +224,13 @@ static void dsp_comm_sharc_w(address_space *space, int board, int offset, UINT32
 		case CGBOARD_TYPE_ZR107:
 		case CGBOARD_TYPE_GTICLUB:
 		{
-			//cputag_set_input_line(machine, "dsp", SHARC_INPUT_FLAG0, ASSERT_LINE);
-			sharc_set_flag_input(space->machine().device("dsp"), 0, ASSERT_LINE);
+			//machine.device("dsp")->execute().set_input_line(SHARC_INPUT_FLAG0, ASSERT_LINE);
+			sharc_set_flag_input(space.machine().device("dsp"), 0, ASSERT_LINE);
 
 			if (offset == 1)
 			{
 				if (data & 0x03)
-					cputag_set_input_line(space->machine(), "dsp", INPUT_LINE_IRQ2, ASSERT_LINE);
+					space.machine().device("dsp")->execute().set_input_line(INPUT_LINE_IRQ2, ASSERT_LINE);
 			}
 			break;
 		}
@@ -239,7 +239,7 @@ static void dsp_comm_sharc_w(address_space *space, int board, int offset, UINT32
 		case CGBOARD_TYPE_HANGPLT:
 		{
 			const char *dsptag = (board == 0) ? "dsp" : "dsp2";
-			device_t *device = space->machine().device(dsptag);
+			device_t *device = space.machine().device(dsptag);
 
 			if (offset == 1)
 			{
@@ -254,7 +254,7 @@ static void dsp_comm_sharc_w(address_space *space, int board, int offset, UINT32
 				{
 					int offset = (data & 0x08) ? 1 : 0;
 
-					memory_set_bank(space->machine(), texture_bank[board], offset);
+					space.machine().root_device().membank(texture_bank[board])->set_entry(offset);
 				}
 			}
 			break;
@@ -268,14 +268,14 @@ static void dsp_comm_sharc_w(address_space *space, int board, int offset, UINT32
 				{
 					int offset = (data & 0x08) ? 1 : 0;
 
-					memory_set_bank(space->machine(), texture_bank[board], offset);
+					space.machine().root_device().membank(texture_bank[board])->set_entry(offset);
 				}
 			}
 			break;
 		}
 	}
 
-//  printf("%s:cgboard_dsp_comm_w_sharc: %08X, %08X, %08X\n", space->machine().describe_context(), data, offset, mem_mask);
+//  printf("%s:cgboard_dsp_comm_w_sharc: %08X, %08X, %08X\n", space.machine().describe_context(), data, offset, mem_mask);
 
 	dsp_comm_sharc[board][offset] = data;
 }
@@ -351,10 +351,10 @@ WRITE32_HANDLER( cgboard_1_shared_sharc_w )
 
 /*****************************************************************************/
 
-static UINT32 nwk_fifo_r(address_space *space, int board)
+static UINT32 nwk_fifo_r(address_space &space, int board)
 {
 	const char *dsptag = (board == 0) ? "dsp" : "dsp2";
-	device_t *device = space->machine().device(dsptag);
+	device_t *device = space.machine().device(dsptag);
 	UINT32 data;
 
 	if (nwk_fifo_read_ptr[board] < nwk_fifo_half_full_r)
@@ -409,32 +409,32 @@ static void nwk_fifo_w(running_machine &machine, int board, UINT32 data)
 
 READ32_HANDLER( K033906_0_r )
 {
-	device_t *k033906_1 = space->machine().device("k033906_1");
+	device_t *k033906_1 = space.machine().device("k033906_1");
 	if (nwk_device_sel[0] & 0x01)
 		return nwk_fifo_r(space, 0);
 	else
-		return k033906_r(k033906_1, offset, mem_mask);
+		return k033906_r(k033906_1, space, offset, mem_mask);
 }
 
 WRITE32_HANDLER( K033906_0_w )
 {
-	device_t *k033906_1 = space->machine().device("k033906_1");
-	k033906_w(k033906_1, offset, data, mem_mask);
+	device_t *k033906_1 = space.machine().device("k033906_1");
+	k033906_w(k033906_1, space, offset, data, mem_mask);
 }
 
 READ32_HANDLER( K033906_1_r )
 {
-	device_t *k033906_2 = space->machine().device("k033906_2");
+	device_t *k033906_2 = space.machine().device("k033906_2");
 	if (nwk_device_sel[1] & 0x01)
 		return nwk_fifo_r(space, 1);
 	else
-		return k033906_r(k033906_2, offset, mem_mask);
+		return k033906_r(k033906_2, space, offset, mem_mask);
 }
 
 WRITE32_HANDLER(K033906_1_w)
 {
-	device_t *k033906_2 = space->machine().device("k033906_2");
-	k033906_w(k033906_2, offset, data, mem_mask);
+	device_t *k033906_2 = space.machine().device("k033906_2");
+	k033906_w(k033906_2, space, offset, data, mem_mask);
 }
 
 /*****************************************************************************/
@@ -443,7 +443,7 @@ WRITE32_DEVICE_HANDLER(nwk_fifo_0_w)
 {
 	if (nwk_device_sel[0] & 0x01)
 	{
-		nwk_fifo_w(device->machine(), 0, data);
+		nwk_fifo_w(space.machine(), 0, data);
 	}
 	else if (nwk_device_sel[0] & 0x02)
 	{
@@ -452,7 +452,7 @@ WRITE32_DEVICE_HANDLER(nwk_fifo_0_w)
 	}
 	else
 	{
-		voodoo_w(device, offset ^ 0x80000, data, mem_mask);
+		voodoo_w(device, space, offset ^ 0x80000, data, mem_mask);
 	}
 }
 
@@ -460,7 +460,7 @@ WRITE32_DEVICE_HANDLER(nwk_fifo_1_w)
 {
 	if (nwk_device_sel[1] & 0x01)
 	{
-		nwk_fifo_w(device->machine(), 1, data);
+		nwk_fifo_w(space.machine(), 1, data);
 	}
 	else if (nwk_device_sel[1] & 0x02)
 	{
@@ -469,7 +469,7 @@ WRITE32_DEVICE_HANDLER(nwk_fifo_1_w)
 	}
 	else
 	{
-		voodoo_w(device, offset ^ 0x80000, data, mem_mask);
+		voodoo_w(device, space, offset ^ 0x80000, data, mem_mask);
 	}
 }
 
@@ -481,7 +481,7 @@ READ32_DEVICE_HANDLER(nwk_voodoo_0_r)
 	}
 	else
 	{
-		return voodoo_r(device, offset, mem_mask);
+		return voodoo_r(device, space, offset, mem_mask);
 	}
 }
 
@@ -493,7 +493,7 @@ READ32_DEVICE_HANDLER(nwk_voodoo_1_r)
 	}
 	else
 	{
-		return voodoo_r(device, offset, mem_mask);
+		return voodoo_r(device, space, offset, mem_mask);
 	}
 }
 
@@ -501,7 +501,7 @@ WRITE32_DEVICE_HANDLER(nwk_voodoo_0_w)
 {
 	if (nwk_device_sel[0] & 0x01)
 	{
-		nwk_fifo_w(device->machine(), 0, data);
+		nwk_fifo_w(space.machine(), 0, data);
 	}
 	else if (nwk_device_sel[0] & 0x02)
 	{
@@ -510,7 +510,7 @@ WRITE32_DEVICE_HANDLER(nwk_voodoo_0_w)
 	}
 	else
 	{
-		voodoo_w(device, offset, data, mem_mask);
+		voodoo_w(device, space, offset, data, mem_mask);
 	}
 }
 
@@ -518,7 +518,7 @@ WRITE32_DEVICE_HANDLER(nwk_voodoo_1_w)
 {
 	if (nwk_device_sel[1] & 0x01)
 	{
-		nwk_fifo_w(device->machine(), 1, data);
+		nwk_fifo_w(space.machine(), 1, data);
 	}
 	else if (nwk_device_sel[1] & 0x02)
 	{
@@ -527,49 +527,49 @@ WRITE32_DEVICE_HANDLER(nwk_voodoo_1_w)
 	}
 	else
 	{
-		voodoo_w(device, offset, data, mem_mask);
+		voodoo_w(device, space, offset, data, mem_mask);
 	}
 }
 
 /*****************************************************************************/
 
-#define LED_ON		0xff00ff00
+#define LED_ON      0xff00ff00
 
-void draw_7segment_led(bitmap_t *bitmap, int x, int y, UINT8 value)
+void draw_7segment_led(bitmap_rgb32 &bitmap, int x, int y, UINT8 value)
 {
 	if ((value & 0x7f) == 0x7f)
 	{
 		return;
 	}
 
-	plot_box(bitmap, x-1, y-1, 7, 11, 0x00000000);
+	bitmap.plot_box(x-1, y-1, 7, 11, 0x00000000);
 
 	/* Top */
 	if( (value & 0x40) == 0 ) {
-		plot_box(bitmap, x+1, y+0, 3, 1, LED_ON);
+		bitmap.plot_box(x+1, y+0, 3, 1, LED_ON);
 	}
 	/* Middle */
 	if( (value & 0x01) == 0 ) {
-		plot_box(bitmap, x+1, y+4, 3, 1, LED_ON);
+		bitmap.plot_box(x+1, y+4, 3, 1, LED_ON);
 	}
 	/* Bottom */
 	if( (value & 0x08) == 0 ) {
-		plot_box(bitmap, x+1, y+8, 3, 1, LED_ON);
+		bitmap.plot_box(x+1, y+8, 3, 1, LED_ON);
 	}
 	/* Top Left */
 	if( (value & 0x02) == 0 ) {
-		plot_box(bitmap, x+0, y+1, 1, 3, LED_ON);
+		bitmap.plot_box(x+0, y+1, 1, 3, LED_ON);
 	}
 	/* Top Right */
 	if( (value & 0x20) == 0 ) {
-		plot_box(bitmap, x+4, y+1, 1, 3, LED_ON);
+		bitmap.plot_box(x+4, y+1, 1, 3, LED_ON);
 	}
 	/* Bottom Left */
 	if( (value & 0x04) == 0 ) {
-		plot_box(bitmap, x+0, y+5, 1, 3, LED_ON);
+		bitmap.plot_box(x+0, y+5, 1, 3, LED_ON);
 	}
 	/* Bottom Right */
 	if( (value & 0x10) == 0 ) {
-		plot_box(bitmap, x+4, y+5, 1, 3, LED_ON);
+		bitmap.plot_box(x+4, y+5, 1, 3, LED_ON);
 	}
 }

@@ -17,15 +17,23 @@
 
 #ifdef __SSE2__
 #include <stdlib.h>
-#include <mmintrin.h>	/* MMX */
-#include <xmmintrin.h>	/* SSE */
-#include <emmintrin.h>	/* SSE2 */
+#include <mmintrin.h>   /* MMX */
+#include <xmmintrin.h>  /* SSE */
+#include <emmintrin.h>  /* SSE2 */
 #endif
 
 
 /***************************************************************************
     INLINE MATH FUNCTIONS
 ***************************************************************************/
+
+union _x86_union
+{
+	UINT64 u64;
+	struct {
+		UINT32 l, h;
+	} u32;
+};
 
 /*-------------------------------------------------
     mul_32x32 - perform a signed 32 bit x 32 bit
@@ -41,10 +49,10 @@ _mul_32x32(INT32 a, INT32 b)
 
 	__asm__ (
 		" imull  %[b] ;"
-		: [result] "=A" (result)	/* result in edx:eax */
-		: [a]      "%a"  (a)		/* 'a' should also be in eax on entry */
-		, [b]      "rm"  (b)		/* 'b' can be memory or register */
-		: "%cc"						/* Clobbers condition codes */
+		: [result] "=A" (result)    /* result in edx:eax */
+		: [a]      "%a"  (a)        /* 'a' should also be in eax on entry */
+		, [b]      "rm"  (b)        /* 'b' can be memory or register */
+		: "cc"                      /* Clobbers condition codes */
 	);
 
 	return result;
@@ -67,10 +75,10 @@ _mulu_32x32(UINT32 a, UINT32 b)
 
 	__asm__ (
 		" mull  %[b] ;"
-		: [result] "=A" (result)	/* result in edx:eax */
-		: [a]      "%a"  (a)		/* 'a' should also be in eax on entry */
-		, [b]      "rm"  (b)		/* 'b' can be memory or register */
-		: "%cc"						/* Clobbers condition codes */
+		: [result] "=A" (result)    /* result in edx:eax */
+		: [a]      "%a"  (a)        /* 'a' should also be in eax on entry */
+		, [b]      "rm"  (b)        /* 'b' can be memory or register */
+		: "cc"                      /* Clobbers condition codes */
 	);
 
 	return result;
@@ -88,15 +96,15 @@ _mulu_32x32(UINT32 a, UINT32 b)
 INLINE INT32 ATTR_CONST ATTR_FORCE_INLINE
 _mul_32x32_hi(INT32 a, INT32 b)
 {
-    register INT32 result, temp;
+	register INT32 result, temp;
 
 	__asm__ (
 		" imull  %[b] ;"
-		: [result] "=d"  (result)	/* result in edx */
-        , [temp]   "=a"  (temp)     /* This is effectively a clobber */
-        : [a]      "a"  (a)        /* 'a' should be in eax on entry */
-        , [b]      "rm"  (b)        /* 'b' can be memory or register */
-		: "%cc"						/* Clobbers condition codes */
+		: [result] "=d"  (result)   /* result in edx */
+		, [temp]   "=a"  (temp)     /* This is effectively a clobber */
+		: [a]      "a"  (a)        /* 'a' should be in eax on entry */
+		, [b]      "rm"  (b)        /* 'b' can be memory or register */
+		: "cc"                      /* Clobbers condition codes */
 	);
 
 	return result;
@@ -113,15 +121,15 @@ _mul_32x32_hi(INT32 a, INT32 b)
 INLINE UINT32 ATTR_CONST ATTR_FORCE_INLINE
 _mulu_32x32_hi(UINT32 a, UINT32 b)
 {
-    register UINT32 result, temp;
+	register UINT32 result, temp;
 
 	__asm__ (
 		" mull  %[b] ;"
-		: [result] "=d"  (result)	/* result in edx */
-        , [temp]   "=a"  (temp)     /* This is effectively a clobber */
-        : [a]      "a"   (a)        /* 'a' should be in eax on entry */
-        , [b]      "rm"  (b)        /* 'b' can be memory or register */
-		: "%cc"						/* Clobbers condition codes */
+		: [result] "=d"  (result)   /* result in edx */
+		, [temp]   "=a"  (temp)     /* This is effectively a clobber */
+		: [a]      "a"   (a)        /* 'a' should be in eax on entry */
+		, [b]      "rm"  (b)        /* 'b' can be memory or register */
+		: "cc"                      /* Clobbers condition codes */
 	);
 
 	return result;
@@ -146,11 +154,11 @@ _mul_32x32_shift(INT32 a, INT32 b, UINT8 shift)
 	__asm__ (
 		" imull  %[b]                       ;"
 		" shrdl  %[shift], %%edx, %[result] ;"
-		: [result] "=a" (result)	/* result ends up in eax */
-		: [a]      "%0" (a)			/* 'a' should also be in eax on entry */
-		, [b]      "rm" (b)			/* 'b' can be memory or register */
-		, [shift]  "Ic" (shift)		/* 'shift' must be constant in 0-31 range or in cl */
-		: "%edx", "%cc"				/* clobbers edx and condition codes */
+		: [result] "=a" (result)    /* result ends up in eax */
+		: [a]      "%0" (a)         /* 'a' should also be in eax on entry */
+		, [b]      "rm" (b)         /* 'b' can be memory or register */
+		, [shift]  "Ic" (shift)     /* 'shift' must be constant in 0-31 range or in cl */
+		: "%edx", "cc"              /* clobbers edx and condition codes */
 	);
 
 	return result;
@@ -176,11 +184,11 @@ _mulu_32x32_shift(UINT32 a, UINT32 b, UINT8 shift)
 	__asm__ (
 		" mull   %[b]                       ;"
 		" shrdl  %[shift], %%edx, %[result] ;"
-		: [result] "=a" (result)	/* result ends up in eax */
-		: [a]      "%0" (a)			/* 'a' should also be in eax on entry */
-		, [b]      "rm" (b)			/* 'b' can be memory or register */
-		, [shift]  "Ic" (shift)		/* 'shift' must be constant in 0-31 range or in cl */
-		: "%edx", "%cc"				/* clobbers edx and condition codes */
+		: [result] "=a" (result)    /* result ends up in eax */
+		: [a]      "%0" (a)         /* 'a' should also be in eax on entry */
+		, [b]      "rm" (b)         /* 'b' can be memory or register */
+		, [shift]  "Ic" (shift)     /* 'shift' must be constant in 0-31 range or in cl */
+		: "%edx", "cc"              /* clobbers edx and condition codes */
 	);
 
 	return result;
@@ -203,11 +211,11 @@ _div_64x32(INT64 a, INT32 b)
 	/* Throws arithmetic exception if result doesn't fit in 32 bits */
 	__asm__ (
 		" idivl  %[b] ;"
-		: [result] "=a" (result)	/* Result ends up in eax */
-		, [temp]   "=d" (temp)		/* This is effectively a clobber */
-		: [a]      "A"  (a)			/* 'a' in edx:eax */
-		, [b]      "rm" (b)			/* 'b' in register or memory */
-		: "%cc"						/* Clobbers condition codes */
+		: [result] "=a" (result)    /* Result ends up in eax */
+		, [temp]   "=d" (temp)      /* This is effectively a clobber */
+		: [a]      "A"  (a)         /* 'a' in edx:eax */
+		, [b]      "rm" (b)         /* 'b' in register or memory */
+		: "cc"                      /* Clobbers condition codes */
 	);
 
 	return result;
@@ -230,11 +238,11 @@ _divu_64x32(UINT64 a, UINT32 b)
 	/* Throws arithmetic exception if result doesn't fit in 32 bits */
 	__asm__ (
 		" divl  %[b] ;"
-		: [result] "=a" (result)	/* Result ends up in eax */
-		, [temp]   "=d" (temp)		/* This is effectively a clobber */
-		: [a]      "A"  (a)			/* 'a' in edx:eax */
-		, [b]      "rm" (b)			/* 'b' in register or memory */
-		: "%cc"						/* Clobbers condition codes */
+		: [result] "=a" (result)    /* Result ends up in eax */
+		, [temp]   "=d" (temp)      /* This is effectively a clobber */
+		: [a]      "A"  (a)         /* 'a' in edx:eax */
+		, [b]      "rm" (b)         /* 'b' in register or memory */
+		: "cc"                      /* Clobbers condition codes */
 	);
 
 	return result;
@@ -258,11 +266,11 @@ _div_64x32_rem(INT64 dividend, INT32 divisor, INT32 *remainder)
 	/* Throws arithmetic exception if result doesn't fit in 32 bits */
 	__asm__ (
 		" idivl  %[divisor] ;"
-		: [result]    "=a" (quotient)	/* Quotient ends up in eax */
-		, [remainder] "=d" (*remainder)	/* Remainder ends up in edx */
-		: [dividend]  "A"  (dividend)	/* 'dividend' in edx:eax */
-		, [divisor]   "rm" (divisor)	/* 'divisor' in register or memory */
-		: "%cc"							/* Clobbers condition codes */
+		: [result]    "=a" (quotient)   /* Quotient ends up in eax */
+		, [remainder] "=d" (*remainder) /* Remainder ends up in edx */
+		: [dividend]  "A"  (dividend)   /* 'dividend' in edx:eax */
+		, [divisor]   "rm" (divisor)    /* 'divisor' in register or memory */
+		: "cc"                          /* Clobbers condition codes */
 	);
 
 	return quotient;
@@ -286,11 +294,34 @@ _divu_64x32_rem(UINT64 dividend, UINT32 divisor, UINT32 *remainder)
 	/* Throws arithmetic exception if result doesn't fit in 32 bits */
 	__asm__ (
 		" divl  %[divisor] ;"
-		: [result]    "=a" (quotient)	/* Quotient ends up in eax */
-		, [remainder] "=d" (*remainder)	/* Remainder ends up in edx */
-		: [dividend]  "A"  (dividend)	/* 'dividend' in edx:eax */
-		, [divisor]   "rm" (divisor)	/* 'divisor' in register or memory */
-		: "%cc"							/* Clobbers condition codes */
+		: [result]    "=a" (quotient)   /* Quotient ends up in eax */
+		, [remainder] "=d" (*remainder) /* Remainder ends up in edx */
+		: [dividend]  "A"  (dividend)   /* 'dividend' in edx:eax */
+		, [divisor]   "rm" (divisor)    /* 'divisor' in register or memory */
+		: "cc"                          /* Clobbers condition codes */
+	);
+
+	return quotient;
+}
+#else
+#define divu_64x32_rem _divu_64x32_rem
+INLINE UINT32 ATTR_FORCE_INLINE
+_divu_64x32_rem(UINT64 dividend, UINT32 divisor, UINT32 *remainder)
+{
+	register UINT32 quotient;
+	register _x86_union r;
+
+	r.u64 = dividend;
+
+	/* Throws arithmetic exception if result doesn't fit in 32 bits */
+	__asm__ (
+		" divl  %[divisor] ;"
+		: [result]    "=a" (quotient)   /* Quotient ends up in eax */
+		, [remainder] "=d" (*remainder) /* Remainder ends up in edx */
+		: [divl]  "a"  (r.u32.l)        /* 'dividend' in edx:eax */
+		, [divh]  "d"  (r.u32.h)
+		, [divisor]   "rm" (divisor)    /* 'divisor' in register or memory */
+		: "cc"                          /* Clobbers condition codes */
 	);
 
 	return quotient;
@@ -314,15 +345,15 @@ _div_32x32_shift(INT32 a, INT32 b, UINT8 shift)
 	/* Valid for (0 <= shift <= 31) */
 	/* Throws arithmetic exception if result doesn't fit in 32 bits */
 	__asm__ (
-	    " cdq                          ;"
-	    " shldl  %[shift], %[a], %%edx ;"
+		" cdq                          ;"
+		" shldl  %[shift], %[a], %%edx ;"
 		" shll   %[shift], %[a]        ;"
 		" idivl  %[b]                  ;"
-		: [result] "=&a" (result)	/* result ends up in eax */
-		: [a]      "0"   (a)		/* 'a' should also be in eax on entry */
-        , [b]      "rm"  (b)		/* 'b' can be memory or register */
-        , [shift]  "Ic"  (shift)	/* 'shift' must be constant in 0-31 range or in cl */
-		: "%edx", "%cc"				/* clobbers edx and condition codes */
+		: [result] "=&a" (result)   /* result ends up in eax */
+		: [a]      "0"   (a)        /* 'a' should also be in eax on entry */
+		, [b]      "rm"  (b)        /* 'b' can be memory or register */
+		, [shift]  "Ic"  (shift)    /* 'shift' must be constant in 0-31 range or in cl */
+		: "%edx", "cc"              /* clobbers edx and condition codes */
 	);
 
 	return result;
@@ -346,15 +377,15 @@ _divu_32x32_shift(UINT32 a, UINT32 b, UINT8 shift)
 	/* Valid for (0 <= shift <= 31) */
 	/* Throws arithmetic exception if result doesn't fit in 32 bits */
 	__asm__ (
-	    " clr    %%edx                 ;"
-	    " shldl  %[shift], %[a], %%edx ;"
+		" clr    %%edx                 ;"
+		" shldl  %[shift], %[a], %%edx ;"
 		" shll   %[shift], %[a]        ;"
 		" divl   %[b]                  ;"
-		: [result] "=&a" (result)	/* result ends up in eax */
-		: [a]      "0"   (a)		/* 'a' should also be in eax on entry */
-        , [b]      "rm"  (b)		/* 'b' can be memory or register */
-        , [shift]  "Ic"  (shift)	/* 'shift' must be constant in 0-31 range or in cl */
-		: "%edx", "%cc"				/* clobbers edx and condition codes */
+		: [result] "=&a" (result)   /* result ends up in eax */
+		: [a]      "0"   (a)        /* 'a' should also be in eax on entry */
+		, [b]      "rm"  (b)        /* 'b' can be memory or register */
+		, [shift]  "Ic"  (shift)    /* 'shift' must be constant in 0-31 range or in cl */
+		: "%edx", "cc"              /* clobbers edx and condition codes */
 	);
 
 	return result;
@@ -377,11 +408,11 @@ _mod_64x32(INT64 a, INT32 b)
 	/* Throws arithmetic exception if quotient doesn't fit in 32 bits */
 	__asm__ (
 		" idivl  %[b] ;"
-		: [result] "=d" (result)	/* Result ends up in edx */
-		, [temp]   "=a" (temp)		/* This is effectively a clobber */
-		: [a]      "A"  (a)			/* 'a' in edx:eax */
-		, [b]      "rm" (b)			/* 'b' in register or memory */
-		: "%cc"						/* Clobbers condition codes */
+		: [result] "=d" (result)    /* Result ends up in edx */
+		, [temp]   "=a" (temp)      /* This is effectively a clobber */
+		: [a]      "A"  (a)         /* 'a' in edx:eax */
+		, [b]      "rm" (b)         /* 'b' in register or memory */
+		: "cc"                      /* Clobbers condition codes */
 	);
 
 	return result;
@@ -404,11 +435,11 @@ _modu_64x32(UINT64 a, UINT32 b)
 	/* Throws arithmetic exception if quotient doesn't fit in 32 bits */
 	__asm__ (
 		" divl  %[b] ;"
-		: [result] "=d" (result)	/* Result ends up in edx */
-		, [temp]   "=a" (temp)		/* This is effectively a clobber */
-		: [a]      "A"  (a)			/* 'a' in edx:eax */
-		, [b]      "rm" (b)			/* 'b' in register or memory */
-		: "%cc"						/* Clobbers condition codes */
+		: [result] "=d" (result)    /* Result ends up in edx */
+		, [temp]   "=a" (temp)      /* This is effectively a clobber */
+		: [a]      "A"  (a)         /* 'a' in edx:eax */
+		, [b]      "rm" (b)         /* 'b' in register or memory */
+		: "cc"                      /* Clobbers condition codes */
 	);
 
 	return result;
@@ -456,9 +487,9 @@ _count_leading_zeros(UINT32 value)
 		"   jnz   1f                  ;"
 		"   movl  $63, %[result]      ;"
 		"1: xorl  $31, %[result]      ;"
-		: [result] "=r" (result)	/* result can be in any register */
-		: [value]  "rm" (value)		/* 'value' can be register or memory */
-		: "%cc"						/* clobbers condition codes */
+		: [result] "=r" (result)    /* result can be in any register */
+		: [value]  "rm" (value)     /* 'value' can be register or memory */
+		: "cc"                      /* clobbers condition codes */
 	);
 
 	return result;
@@ -483,9 +514,9 @@ _count_leading_ones(UINT32 value)
 		"   jnz   1f                   ;"
 		"   movl  $63, %[result]       ;"
 		"1: xorl  $31, %[result]       ;"
-		: [result] "=r"  (result)	/* result can be in any register */
-		: [value]  "rmi" (value)	/* 'value' can be register, memory or immediate */
-		: "%cc"						/* clobbers condition codes */
+		: [result] "=r"  (result)   /* result can be in any register */
+		: [value]  "rmi" (value)    /* 'value' can be register, memory or immediate */
+		: "cc"                      /* clobbers condition codes */
 	);
 
 	return result;
@@ -512,11 +543,11 @@ _compare_exchange32(INT32 volatile *ptr, INT32 compare, INT32 exchange)
 
 	__asm__ __volatile__ (
 		" lock ; cmpxchgl  %[exchange], %[ptr] ;"
-	  : [ptr]      "+m" (*ptr)
-	  , [result]   "=a" (result)
-	  : [compare]  "1"  (compare)
-	  , [exchange] "q"  (exchange)
-	  : "%cc"
+		: [ptr]      "+m" (*ptr)
+		, [result]   "=a" (result)
+		: [compare]  "1"  (compare)
+		, [exchange] "q"  (exchange)
+		: "cc"
 	);
 
 	return result;
@@ -539,11 +570,11 @@ _compare_exchange64(INT64 volatile *ptr, INT64 compare, INT64 exchange)
 
 	__asm__ __volatile__ (
 		" lock ; cmpxchgq  %[exchange], %[ptr] ;"
-	  : [ptr]      "+m" (*ptr)
-	  , [result]   "=a" (result)
-	  : [compare]  "1"  (compare)
-	  , [exchange] "q"  (exchange)
-	  : "%cc"
+		: [ptr]      "+m" (*ptr)
+		, [result]   "=a" (result)
+		: [compare]  "1"  (compare)
+		, [exchange] "q"  (exchange)
+		: "cc"
 	);
 
 	return result;
@@ -588,10 +619,10 @@ _atomic_add32(INT32 volatile *ptr, INT32 delta)
 
 	__asm__ __volatile__ (
 		" lock ; xaddl  %[result], %[ptr] ;"
-	  : [ptr]    "+m" (*ptr)
-	  , [result] "+r" (result)
-	  :
-	  : "%cc"
+		: [ptr]    "+m" (*ptr)
+		, [result] "+r" (result)
+		:
+		: "cc"
 	);
 
 	return result + delta;
@@ -612,10 +643,10 @@ _atomic_increment32(INT32 volatile *ptr)
 
 	__asm__ __volatile__ (
 		" lock ; xaddl  %[result], %[ptr] ;"
-	  : [ptr]    "+m" (*ptr)
-	  , [result] "+r" (result)
-	  :
-	  : "%cc"
+		: [ptr]    "+m" (*ptr)
+		, [result] "+r" (result)
+		:
+		: "cc"
 	);
 
 	return result + 1;
@@ -636,10 +667,10 @@ _atomic_decrement32(INT32 volatile *ptr)
 
 	__asm__ __volatile__ (
 		" lock ; xaddl  %[result], %[ptr] ;"
-	  : [ptr]    "+m" (*ptr)
-	  , [result] "+r" (result)
-	  :
-	  : "%cc"
+		: [ptr]    "+m" (*ptr)
+		, [result] "+r" (result)
+		:
+		: "cc"
 	);
 
 	return result - 1;
@@ -661,27 +692,25 @@ _atomic_decrement32(INT32 volatile *ptr)
 #define get_profile_ticks _get_profile_ticks
 
 #ifndef __x86_64__
-INLINE INT64 ATTR_UNUSED ATTR_FORCE_INLINE _get_profile_ticks(void)
-{
-    UINT64 result;
-    __asm__ __volatile__ (
-            "rdtsc"
-            : "=A" (result)
-    );
-    return (INT64) (result & U64(0x7fffffffffffffff));
-}
-#else
-INLINE INT64 ATTR_UNUSED ATTR_FORCE_INLINE _get_profile_ticks(void)
+INLINE UINT64 ATTR_UNUSED ATTR_FORCE_INLINE _get_profile_ticks(void)
 {
 	UINT64 result;
-    UINT32 r1, r2;
-    __asm__ __volatile__ (
-            "rdtsc"
-            : "=a" (r1), "=d" (r2)
-    );
+	__asm__ __volatile__ (
+			"rdtsc"
+			: "=A" (result)
+	);
+	return result;
+}
+#else
+INLINE UINT64 ATTR_UNUSED ATTR_FORCE_INLINE _get_profile_ticks(void)
+{
+	_x86_union r;
+	__asm__ __volatile__ (
+			"rdtsc"
+			: "=a" (r.u32.l), "=d" (r.u32.h)
+	);
 
-    result = ((UINT64)r2<<32) | (UINT64)r1;
-    return (INT64) (result & U64(0x7fffffffffffffff));
+	return (UINT64) r.u64;
 }
 #endif
 

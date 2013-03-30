@@ -53,7 +53,7 @@
 ***************************************************************************/
 
 
-#define MASTER_CLOCK		XTAL_21_4772MHz		/* Dumper notes poorly refers to a 21.?727 Xtal. */
+#define MASTER_CLOCK        XTAL_21_4772MHz     /* Dumper notes poorly refers to a 21.?727 Xtal. */
 
 
 #include "emu.h"
@@ -61,16 +61,21 @@
 #include "sound/ay8910.h"
 #include "video/v9938.h"
 #include "machine/nvram.h"
-#include "deprecat.h"
 
 
 class big10_state : public driver_device
 {
 public:
-	big10_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	big10_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+			m_v9938(*this, "v9938") { }
 
+	required_device<v9938_device> m_v9938;
 	UINT8 m_mux_data;
+	DECLARE_READ8_MEMBER(mux_r);
+	DECLARE_WRITE8_MEMBER(mux_w);
+	virtual void machine_reset();
+	TIMER_DEVICE_CALLBACK_MEMBER(big10_interrupt);
 };
 
 
@@ -81,22 +86,14 @@ public:
 *      Interrupt handling & Video      *
 ***************************************/
 
-static void big10_vdp_interrupt(running_machine &machine, int i)
+static void big10_vdp_interrupt(device_t *, v99x8_device &device, int i)
 {
-	cputag_set_input_line (machine, "maincpu", 0, (i ? ASSERT_LINE : CLEAR_LINE));
+	device.machine().device("maincpu")->execute().set_input_line(0, (i ? ASSERT_LINE : CLEAR_LINE));
 }
 
-static INTERRUPT_GEN( big10_interrupt )
+TIMER_DEVICE_CALLBACK_MEMBER(big10_state::big10_interrupt)
 {
-	v9938_interrupt(device->machine(), 0);
-}
-
-
-static VIDEO_START( big10 )
-{
-	VIDEO_START_CALL(generic_bitmapped);
-	v9938_init (machine, 0, *machine.primary_screen, machine.generic.tmpbitmap, MODEL_V9938, VDP_MEM, big10_vdp_interrupt);
-	v9938_reset(0);
+	m_v9938->interrupt();
 }
 
 
@@ -104,9 +101,8 @@ static VIDEO_START( big10 )
 *           Machine Reset            *
 *************************************/
 
-static MACHINE_RESET(big10)
+void big10_state::machine_reset()
 {
-	v9938_reset(0);
 }
 
 
@@ -115,23 +111,21 @@ static MACHINE_RESET(big10)
 ****************************************/
 
 
-static WRITE8_DEVICE_HANDLER( mux_w )
+WRITE8_MEMBER(big10_state::mux_w)
 {
-	big10_state *state = device->machine().driver_data<big10_state>();
-	state->m_mux_data = ~data;
+	m_mux_data = ~data;
 }
 
-static READ8_HANDLER( mux_r )
+READ8_MEMBER(big10_state::mux_r)
 {
-	big10_state *state = space->machine().driver_data<big10_state>();
-	switch(state->m_mux_data)
+	switch(m_mux_data)
 	{
-		case 1: return input_port_read(space->machine(), "IN1");
-		case 2: return input_port_read(space->machine(), "IN2");
-		case 4: return input_port_read(space->machine(), "IN3");
+		case 1: return ioport("IN1")->read();
+		case 2: return ioport("IN2")->read();
+		case 4: return ioport("IN3")->read();
 	}
 
-	return state->m_mux_data;
+	return m_mux_data;
 }
 
 
@@ -139,22 +133,19 @@ static READ8_HANDLER( mux_r )
 *             Memory Map              *
 **************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, big10_state )
 	AM_RANGE(0x0000, 0xbfff) AM_ROM
 	AM_RANGE(0xc000, 0xdfff) AM_RAM AM_SHARE("nvram")
 	AM_RANGE(0xf000, 0xffff) AM_RAM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( main_io, AS_IO, 8 )
+static ADDRESS_MAP_START( main_io, AS_IO, 8, big10_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x00) AM_READ(mux_r)			/* present in test mode */
-	AM_RANGE(0x02, 0x02) AM_READ_PORT("SYSTEM")	/* coins and service */
-	AM_RANGE(0x98, 0x98) AM_WRITE(v9938_0_vram_w) AM_READ(v9938_0_vram_r)
-	AM_RANGE(0x99, 0x99) AM_WRITE(v9938_0_command_w) AM_READ(v9938_0_status_r)
-	AM_RANGE(0x9a, 0x9a) AM_WRITE(v9938_0_palette_w)
-	AM_RANGE(0x9b, 0x9b) AM_WRITE(v9938_0_register_w)
-	AM_RANGE(0xa0, 0xa1) AM_DEVWRITE("aysnd", ay8910_address_data_w)
-	AM_RANGE(0xa2, 0xa2) AM_DEVREAD("aysnd", ay8910_r) /* Dip-Switches routes here. */
+	AM_RANGE(0x00, 0x00) AM_READ(mux_r)         /* present in test mode */
+	AM_RANGE(0x02, 0x02) AM_READ_PORT("SYSTEM") /* coins and service */
+	AM_RANGE(0x98, 0x9b) AM_DEVREADWRITE("v9938", v9938_device, read, write)
+	AM_RANGE(0xa0, 0xa1) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_data_w)
+	AM_RANGE(0xa2, 0xa2) AM_DEVREAD_LEGACY("aysnd", ay8910_r) /* Dip-Switches routes here. */
 ADDRESS_MAP_END
 
 
@@ -165,7 +156,7 @@ ADDRESS_MAP_END
 static INPUT_PORTS_START( big10 )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_TOGGLE	/* Service Mode */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_TOGGLE    /* Service Mode */
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_CODE(KEYCODE_R) PORT_NAME("Reset")
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_OTHER )   PORT_CODE(KEYCODE_W) PORT_NAME("Payout")
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN1 )   PORT_IMPULSE(2)
@@ -202,24 +193,24 @@ static INPUT_PORTS_START( big10 )
 	PORT_BIT( 0xf0, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("DSW1")
-	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )			PORT_DIPLOCATION("DSW1:8")
+	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )          PORT_DIPLOCATION("DSW1:8")
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unknown ) )			PORT_DIPLOCATION("DSW1:7")
+	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unknown ) )          PORT_DIPLOCATION("DSW1:7")
 	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )			PORT_DIPLOCATION("DSW1:6")
+	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )          PORT_DIPLOCATION("DSW1:6")
 	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )			PORT_DIPLOCATION("DSW1:5")
+	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )          PORT_DIPLOCATION("DSW1:5")
 	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x30, 0x00, "Main Game Rate" )			PORT_DIPLOCATION("DSW1:3,4")
+	PORT_DIPNAME( 0x30, 0x30, "Main Game Rate" )            PORT_DIPLOCATION("DSW1:4,3")
 	PORT_DIPSETTING(    0x00, "60%" )
 	PORT_DIPSETTING(    0x10, "70%" )
 	PORT_DIPSETTING(    0x20, "80%" )
 	PORT_DIPSETTING(    0x30, "90%" )
-	PORT_DIPNAME( 0xC0, 0x00, "Coinage (A=1; B=5; C=10)" )	PORT_DIPLOCATION("DSW1:1,2")
+	PORT_DIPNAME( 0xC0, 0xc0, "Coinage (A=1; B=5; C=10)" )  PORT_DIPLOCATION("DSW1:2,1")
 	PORT_DIPSETTING(    0x00, "x1" )
 	PORT_DIPSETTING(    0x40, "x2" )
 	PORT_DIPSETTING(    0x80, "x5" )
@@ -241,7 +232,7 @@ static const ay8910_interface ay8910_config =
 	AY8910_DEFAULT_LOADS,
 	DEVCB_INPUT_PORT("DSW2"),
 	DEVCB_INPUT_PORT("DSW1"),
-	DEVCB_HANDLER(mux_w),
+	DEVCB_DRIVER_MEMBER(big10_state,mux_w),
 	DEVCB_NULL
 };
 
@@ -253,31 +244,31 @@ static const ay8910_interface ay8910_config =
 static MACHINE_CONFIG_START( big10, big10_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, MASTER_CLOCK/6)	/* guess */
+	MCFG_CPU_ADD("maincpu", Z80, MASTER_CLOCK/6)    /* guess */
 	MCFG_CPU_PROGRAM_MAP(main_map)
 	MCFG_CPU_IO_MAP(main_io)
-	MCFG_CPU_VBLANK_INT_HACK(big10_interrupt, 262)
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("scantimer", big10_state, big10_interrupt, "screen", 0, 1)
 
-	MCFG_MACHINE_RESET(big10)
 
 	MCFG_NVRAM_ADD_0FILL("nvram")
 
 	/* video hardware */
+	MCFG_V9938_ADD("v9938", "screen", VDP_MEM)
+	MCFG_V99X8_INTERRUPT_CALLBACK_STATIC(big10_vdp_interrupt)
+
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
+	MCFG_SCREEN_UPDATE_DEVICE("v9938", v9938_device, screen_update)
 	MCFG_SCREEN_SIZE(512 + 32, (212 + 28) * 2)
 	MCFG_SCREEN_VISIBLE_AREA(0, 512 + 32 - 1, 0, (212 + 28) * 2 - 1)
-	MCFG_SCREEN_UPDATE(generic_bitmapped)
 
 	MCFG_PALETTE_LENGTH(512)
 	MCFG_PALETTE_INIT(v9938)
-	MCFG_VIDEO_START(big10)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
-	MCFG_SOUND_ADD("aysnd", AY8910, MASTER_CLOCK/12)	/* guess */
+	MCFG_SOUND_ADD("aysnd", AY8910, MASTER_CLOCK/12)    /* guess */
 	MCFG_SOUND_CONFIG(ay8910_config)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.30)
 MACHINE_CONFIG_END
@@ -300,4 +291,4 @@ ROM_END
 **************************************/
 
 /*    YEAR  NAME      PARENT  MACHINE   INPUT     INIT   ROT    COMPANY    FULLNAME   FLAGS  */
-GAME( 198?, big10,    0,      big10,    big10,    0,     ROT0, "<unknown>", "Big 10",   0 )
+GAME( 198?, big10,    0,      big10,    big10, driver_device,    0,     ROT0, "<unknown>", "Big 10",   0 )

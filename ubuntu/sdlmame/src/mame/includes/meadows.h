@@ -9,10 +9,13 @@
 class meadows_state : public driver_device
 {
 public:
-	meadows_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	meadows_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_spriteram(*this, "spriteram"),
+		m_videoram(*this, "videoram"){ }
 
-	UINT8 *m_videoram;
+	optional_shared_ptr<UINT8> m_spriteram;
+	required_shared_ptr<UINT8> m_videoram;
 	UINT8 m_dac;
 	int m_dac_enable;
 	int m_channel;
@@ -28,7 +31,24 @@ public:
 	UINT8 m_0c02;
 	UINT8 m_0c03;
 	tilemap_t *m_bg_tilemap;
-	UINT8 *m_spriteram;
+	DECLARE_READ8_MEMBER(hsync_chain_r);
+	DECLARE_READ8_MEMBER(vsync_chain_hi_r);
+	DECLARE_READ8_MEMBER(vsync_chain_lo_r);
+	DECLARE_WRITE8_MEMBER(meadows_audio_w);
+	DECLARE_WRITE8_MEMBER(audio_hardware_w);
+	DECLARE_READ8_MEMBER(audio_hardware_r);
+	DECLARE_WRITE8_MEMBER(meadows_videoram_w);
+	DECLARE_WRITE8_MEMBER(meadows_spriteram_w);
+	DECLARE_INPUT_CHANGED_MEMBER(coin_inserted);
+	DECLARE_DRIVER_INIT(minferno);
+	DECLARE_DRIVER_INIT(gypsyjug);
+	TILE_GET_INFO_MEMBER(get_tile_info);
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_meadows(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(meadows_interrupt);
+	INTERRUPT_GEN_MEMBER(minferno_interrupt);
+	INTERRUPT_GEN_MEMBER(audio_interrupt);
 };
 
 
@@ -37,12 +57,3 @@ public:
 SAMPLES_START( meadows_sh_start );
 void meadows_sh_dac_w(running_machine &machine, int data);
 void meadows_sh_update(running_machine &machine);
-
-
-/*----------- defined in video/meadows.c -----------*/
-
-VIDEO_START( meadows );
-SCREEN_UPDATE( meadows );
-WRITE8_HANDLER( meadows_videoram_w );
-WRITE8_HANDLER( meadows_spriteram_w );
-

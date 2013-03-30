@@ -14,39 +14,38 @@ Dip locations added from dip listing at crazykong.com
 #include "includes/citycon.h"
 
 
-static READ8_HANDLER( citycon_in_r )
+READ8_MEMBER(citycon_state::citycon_in_r)
 {
-	return input_port_read(space->machine(), flip_screen_get(space->machine()) ? "P2" : "P1");
+	return ioport(flip_screen() ? "P2" : "P1")->read();
 }
 
-static READ8_HANDLER( citycon_irq_ack_r )
+READ8_MEMBER(citycon_state::citycon_irq_ack_r)
 {
-	citycon_state *state = space->machine().driver_data<citycon_state>();
-	device_set_input_line(state->m_maincpu, 0, CLEAR_LINE);
+	m_maincpu->set_input_line(0, CLEAR_LINE);
 
 	return 0;
 }
 
-static ADDRESS_MAP_START( citycon_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( citycon_map, AS_PROGRAM, 8, citycon_state )
 	AM_RANGE(0x0000, 0x0fff) AM_RAM
-	AM_RANGE(0x1000, 0x1fff) AM_RAM_WRITE(citycon_videoram_w) AM_BASE_MEMBER(citycon_state, m_videoram)
-	AM_RANGE(0x2000, 0x20ff) AM_RAM_WRITE(citycon_linecolor_w) AM_BASE_MEMBER(citycon_state, m_linecolor)
-	AM_RANGE(0x2800, 0x28ff) AM_RAM AM_BASE_SIZE_MEMBER(citycon_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0x1000, 0x1fff) AM_RAM_WRITE(citycon_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0x2000, 0x20ff) AM_RAM_WRITE(citycon_linecolor_w) AM_SHARE("linecolor")
+	AM_RANGE(0x2800, 0x28ff) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0x2800, 0x2fff) AM_NOP //0x2900-0x2fff cleared at post but unused
-	AM_RANGE(0x3000, 0x3000) AM_READWRITE(citycon_in_r, citycon_background_w)	/* player 1 & 2 inputs multiplexed */
-	AM_RANGE(0x3001, 0x3001) AM_READ_PORT("DSW1") AM_WRITE(soundlatch_w)
-	AM_RANGE(0x3002, 0x3002) AM_READ_PORT("DSW2") AM_WRITE(soundlatch2_w)
-	AM_RANGE(0x3004, 0x3005) AM_READNOP AM_WRITEONLY AM_BASE_MEMBER(citycon_state, m_scroll)
+	AM_RANGE(0x3000, 0x3000) AM_READ(citycon_in_r) AM_WRITE(citycon_background_w)   /* player 1 & 2 inputs multiplexed */
+	AM_RANGE(0x3001, 0x3001) AM_READ_PORT("DSW1") AM_WRITE(soundlatch_byte_w)
+	AM_RANGE(0x3002, 0x3002) AM_READ_PORT("DSW2") AM_WRITE(soundlatch2_byte_w)
+	AM_RANGE(0x3004, 0x3005) AM_READNOP AM_WRITEONLY AM_SHARE("scroll")
 	AM_RANGE(0x3007, 0x3007) AM_READ(citycon_irq_ack_r)
-	AM_RANGE(0x3800, 0x3cff) AM_RAM_WRITE(paletteram_RRRRGGGGBBBBxxxx_be_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x3800, 0x3cff) AM_RAM_WRITE(paletteram_RRRRGGGGBBBBxxxx_byte_be_w) AM_SHARE("paletteram")
 	AM_RANGE(0x4000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, citycon_state )
 	AM_RANGE(0x0000, 0x0fff) AM_RAM
-	AM_RANGE(0x4000, 0x4001) AM_DEVWRITE("aysnd", ay8910_address_data_w)
-//  AM_RANGE(0x4002, 0x4002) AM_DEVREAD("aysnd", ay8910_r)  /* ?? */
-	AM_RANGE(0x6000, 0x6001) AM_DEVREADWRITE("ymsnd", ym2203_r, ym2203_w)
+	AM_RANGE(0x4000, 0x4001) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_data_w)
+//  AM_RANGE(0x4002, 0x4002) AM_DEVREAD_LEGACY("aysnd", ay8910_r)  /* ?? */
+	AM_RANGE(0x6000, 0x6001) AM_DEVREADWRITE_LEGACY("ymsnd", ym2203_r, ym2203_w)
 	AM_RANGE(0x8000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
@@ -129,34 +128,34 @@ static const gfx_layout charlayout =
 
 static const gfx_layout tilelayout =
 {
-	8,8,	/* 8*8 characters */
-	256,	/* 256 characters */
-	4,	/* 4 bits per pixel */
+	8,8,    /* 8*8 characters */
+	256,    /* 256 characters */
+	4,  /* 4 bits per pixel */
 	{ 4, 0, 0xc000*8+4, 0xc000*8+0 },
 	{ 0, 1, 2, 3, 256*8*8+0, 256*8*8+1, 256*8*8+2, 256*8*8+3 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
-	8*8	/* every char takes 8 consecutive bytes */
+	8*8 /* every char takes 8 consecutive bytes */
 };
 
 static const gfx_layout spritelayout =
 {
-	8,16,	/* 8*16 sprites */
-	128,	/* 128 sprites */
-	4,	/* 4 bits per pixel */
+	8,16,   /* 8*16 sprites */
+	128,    /* 128 sprites */
+	4,  /* 4 bits per pixel */
 	{ 4, 0, 0x2000*8+4, 0x2000*8+0 },
 	{ 0, 1, 2, 3, 128*16*8+0, 128*16*8+1, 128*16*8+2, 128*16*8+3 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-            8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8 },
-	16*8	/* every sprite takes 16 consecutive bytes */
+			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8 },
+	16*8    /* every sprite takes 16 consecutive bytes */
 };
 
 
 static GFXDECODE_START( citycon )
 //  GFXDECODE_ENTRY( "gfx1", 0x00000, charlayout, 512, 32 ) /* colors 512-639 */
-	GFXDECODE_ENTRY( "gfx1", 0x00000, charlayout, 640, 32 )	/* colors 512-639 */
-	GFXDECODE_ENTRY( "gfx2", 0x00000, spritelayout, 0, 16 )	/* colors 0-255 */
+	GFXDECODE_ENTRY( "gfx1", 0x00000, charlayout, 640, 32 ) /* colors 512-639 */
+	GFXDECODE_ENTRY( "gfx2", 0x00000, spritelayout, 0, 16 ) /* colors 0-255 */
 	GFXDECODE_ENTRY( "gfx2", 0x01000, spritelayout, 0, 16 )
-	GFXDECODE_ENTRY( "gfx3", 0x00000, tilelayout, 256, 16 )	/* colors 256-511 */
+	GFXDECODE_ENTRY( "gfx3", 0x00000, tilelayout, 256, 16 ) /* colors 256-511 */
 	GFXDECODE_ENTRY( "gfx3", 0x01000, tilelayout, 256, 16 )
 	GFXDECODE_ENTRY( "gfx3", 0x02000, tilelayout, 256, 16 )
 	GFXDECODE_ENTRY( "gfx3", 0x03000, tilelayout, 256, 16 )
@@ -177,30 +176,28 @@ static const ym2203_interface ym2203_config =
 	{
 		AY8910_LEGACY_OUTPUT,
 		AY8910_DEFAULT_LOADS,
-		DEVCB_MEMORY_HANDLER("audiocpu", PROGRAM, soundlatch_r),
-		DEVCB_MEMORY_HANDLER("audiocpu", PROGRAM, soundlatch2_r),
+		DEVCB_DRIVER_MEMBER(driver_device, soundlatch_byte_r),
+		DEVCB_DRIVER_MEMBER(driver_device, soundlatch2_byte_r),
 		DEVCB_NULL,
 		DEVCB_NULL
 	},
-	NULL
+	DEVCB_NULL
 };
 
 
 
-static MACHINE_START( citycon )
+void citycon_state::machine_start()
 {
-	citycon_state *state = machine.driver_data<citycon_state>();
 
-	state->m_maincpu = machine.device("maincpu");
+	m_maincpu = machine().device<cpu_device>("maincpu");
 
-	state->save_item(NAME(state->m_bg_image));
+	save_item(NAME(m_bg_image));
 }
 
-static MACHINE_RESET( citycon )
+void citycon_state::machine_reset()
 {
-	citycon_state *state = machine.driver_data<citycon_state>();
 
-	state->m_bg_image = 0;
+	m_bg_image = 0;
 }
 
 
@@ -209,29 +206,25 @@ static MACHINE_CONFIG_START( citycon, citycon_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6809, 2048000)        /* 2.048 MHz ??? */
 	MCFG_CPU_PROGRAM_MAP(citycon_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_assert)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", citycon_state,  irq0_line_assert)
 
 	MCFG_CPU_ADD("audiocpu", M6809, 640000)       /* 0.640 MHz ??? */
 	MCFG_CPU_PROGRAM_MAP(sound_map)
-//  MCFG_CPU_VBLANK_INT("screen", irq0_line_hold) //actually unused, probably it was during development
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", citycon_state,  irq0_line_hold) //actually unused, probably it was during development
 
-	MCFG_MACHINE_START(citycon)
-	MCFG_MACHINE_RESET(citycon)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(1*8, 31*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(citycon)
+	MCFG_SCREEN_UPDATE_DRIVER(citycon_state, screen_update_citycon)
 
 	MCFG_GFXDECODE(citycon)
-	MCFG_PALETTE_LENGTH(640+1024)	/* 640 real palette + 1024 virtual palette */
+	MCFG_PALETTE_LENGTH(640+1024)   /* 640 real palette + 1024 virtual palette */
 	MCFG_PALETTE_INIT(all_black) /* guess */
 
-	MCFG_VIDEO_START(citycon)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -264,22 +257,22 @@ ROM_START( citycon )
 	ROM_LOAD( "c1",           0x8000, 0x8000, CRC(1fad7589) SHA1(2e626bbbab8cffe11ee7de3e56aa1871c29d5fa9) )
 
 	ROM_REGION( 0x03000, "gfx1", 0 )
-	ROM_LOAD( "c4",           0x00000, 0x2000, CRC(a6b32fc6) SHA1(d99d5a527440e9a91525c1084b95b213e3b760ec) )	/* Characters */
+	ROM_LOAD( "c4",           0x00000, 0x2000, CRC(a6b32fc6) SHA1(d99d5a527440e9a91525c1084b95b213e3b760ec) )   /* Characters */
 
 	ROM_REGION( 0x04000, "gfx2", 0 )
-	ROM_LOAD( "c12",          0x00000, 0x2000, CRC(08eaaccd) SHA1(a970381e3ba22bcdea6df2d31cd8a10c4b2bc413) )	/* Sprites    */
+	ROM_LOAD( "c12",          0x00000, 0x2000, CRC(08eaaccd) SHA1(a970381e3ba22bcdea6df2d31cd8a10c4b2bc413) )   /* Sprites    */
 	ROM_LOAD( "c13",          0x02000, 0x2000, CRC(1819aafb) SHA1(8a5ffcd8866e09c5568879257384767d61796111) )
 
 	ROM_REGION( 0x18000, "gfx3", 0 )
-	ROM_LOAD( "c9",           0x00000, 0x8000, CRC(8aeb47e6) SHA1(bb09dbe6b37e1bd02abf3024ac4d954c8f0e70f2) )	/* Background tiles */
+	ROM_LOAD( "c9",           0x00000, 0x8000, CRC(8aeb47e6) SHA1(bb09dbe6b37e1bd02abf3024ac4d954c8f0e70f2) )   /* Background tiles */
 	ROM_LOAD( "c8",           0x08000, 0x4000, CRC(0d7a1eeb) SHA1(60b8d4124ce857a248d3c41fdb050f11be58549f) )
 	ROM_LOAD( "c6",           0x0c000, 0x8000, CRC(2246fe9d) SHA1(f7f8708d499bcbd1a583e1092b54425ad1105f94) )
 	ROM_LOAD( "c7",           0x14000, 0x4000, CRC(e8b97de9) SHA1(f4d1b7075f47ab4522c36281b97eaa02fe383814) )
 
-	ROM_REGION( 0xe000, "gfx4", 0 )	/* background tilemaps */
-	ROM_LOAD( "c2",           0x0000, 0x8000, CRC(f2da4f23) SHA1(5ea1a51c3ac283796f7eafb6719d88356767340d) )	/* background maps */
+	ROM_REGION( 0xe000, "gfx4", 0 ) /* background tilemaps */
+	ROM_LOAD( "c2",           0x0000, 0x8000, CRC(f2da4f23) SHA1(5ea1a51c3ac283796f7eafb6719d88356767340d) )    /* background maps */
 	ROM_LOAD( "c3",           0x8000, 0x4000, CRC(7ef3ac1b) SHA1(8a0497c4e4733f9c50d576f632210b82497a5e1c) )
-	ROM_LOAD( "c5",           0xc000, 0x2000, CRC(c03d8b1b) SHA1(641c1eba334d36ea64b9293a20320b31c7c88858) )	/* color codes for the background */
+	ROM_LOAD( "c5",           0xc000, 0x2000, CRC(c03d8b1b) SHA1(641c1eba334d36ea64b9293a20320b31c7c88858) )    /* color codes for the background */
 ROM_END
 
 ROM_START( citycona )
@@ -291,22 +284,22 @@ ROM_START( citycona )
 	ROM_LOAD( "c1",           0x8000, 0x8000, CRC(1fad7589) SHA1(2e626bbbab8cffe11ee7de3e56aa1871c29d5fa9) )
 
 	ROM_REGION( 0x03000, "gfx1", 0 )
-	ROM_LOAD( "c4",           0x00000, 0x2000, CRC(a6b32fc6) SHA1(d99d5a527440e9a91525c1084b95b213e3b760ec) )	/* Characters */
+	ROM_LOAD( "c4",           0x00000, 0x2000, CRC(a6b32fc6) SHA1(d99d5a527440e9a91525c1084b95b213e3b760ec) )   /* Characters */
 
 	ROM_REGION( 0x04000, "gfx2", 0 )
-	ROM_LOAD( "c12",          0x00000, 0x2000, CRC(08eaaccd) SHA1(a970381e3ba22bcdea6df2d31cd8a10c4b2bc413) )	/* Sprites    */
+	ROM_LOAD( "c12",          0x00000, 0x2000, CRC(08eaaccd) SHA1(a970381e3ba22bcdea6df2d31cd8a10c4b2bc413) )   /* Sprites    */
 	ROM_LOAD( "c13",          0x02000, 0x2000, CRC(1819aafb) SHA1(8a5ffcd8866e09c5568879257384767d61796111) )
 
 	ROM_REGION( 0x18000, "gfx3", 0 )
-	ROM_LOAD( "c9",           0x00000, 0x8000, CRC(8aeb47e6) SHA1(bb09dbe6b37e1bd02abf3024ac4d954c8f0e70f2) )	/* Background tiles */
+	ROM_LOAD( "c9",           0x00000, 0x8000, CRC(8aeb47e6) SHA1(bb09dbe6b37e1bd02abf3024ac4d954c8f0e70f2) )   /* Background tiles */
 	ROM_LOAD( "c8",           0x08000, 0x4000, CRC(0d7a1eeb) SHA1(60b8d4124ce857a248d3c41fdb050f11be58549f) )
 	ROM_LOAD( "c6",           0x0c000, 0x8000, CRC(2246fe9d) SHA1(f7f8708d499bcbd1a583e1092b54425ad1105f94) )
 	ROM_LOAD( "c7",           0x14000, 0x4000, CRC(e8b97de9) SHA1(f4d1b7075f47ab4522c36281b97eaa02fe383814) )
 
-	ROM_REGION( 0xe000, "gfx4", 0 )	/* background tilemaps */
-	ROM_LOAD( "c2",           0x0000, 0x8000, CRC(f2da4f23) SHA1(5ea1a51c3ac283796f7eafb6719d88356767340d) )	/* background maps */
+	ROM_REGION( 0xe000, "gfx4", 0 ) /* background tilemaps */
+	ROM_LOAD( "c2",           0x0000, 0x8000, CRC(f2da4f23) SHA1(5ea1a51c3ac283796f7eafb6719d88356767340d) )    /* background maps */
 	ROM_LOAD( "c3",           0x8000, 0x4000, CRC(7ef3ac1b) SHA1(8a0497c4e4733f9c50d576f632210b82497a5e1c) )
-	ROM_LOAD( "c5",           0xc000, 0x2000, CRC(c03d8b1b) SHA1(641c1eba334d36ea64b9293a20320b31c7c88858) )	/* color codes for the background */
+	ROM_LOAD( "c5",           0xc000, 0x2000, CRC(c03d8b1b) SHA1(641c1eba334d36ea64b9293a20320b31c7c88858) )    /* color codes for the background */
 ROM_END
 
 ROM_START( cruisin )
@@ -318,37 +311,37 @@ ROM_START( cruisin )
 	ROM_LOAD( "c1",           0x8000, 0x8000, CRC(1fad7589) SHA1(2e626bbbab8cffe11ee7de3e56aa1871c29d5fa9) )
 
 	ROM_REGION( 0x03000, "gfx1", 0 )
-	ROM_LOAD( "cr4",          0x00000, 0x2000, CRC(8cd0308e) SHA1(7303b9e074bda557d64b39e04cef0f965a756be6) )	/* Characters */
+	ROM_LOAD( "cr4",          0x00000, 0x2000, CRC(8cd0308e) SHA1(7303b9e074bda557d64b39e04cef0f965a756be6) )   /* Characters */
 
 	ROM_REGION( 0x04000, "gfx2", 0 )
-	ROM_LOAD( "c12",          0x00000, 0x2000, CRC(08eaaccd) SHA1(a970381e3ba22bcdea6df2d31cd8a10c4b2bc413) )	/* Sprites    */
+	ROM_LOAD( "c12",          0x00000, 0x2000, CRC(08eaaccd) SHA1(a970381e3ba22bcdea6df2d31cd8a10c4b2bc413) )   /* Sprites    */
 	ROM_LOAD( "c13",          0x02000, 0x2000, CRC(1819aafb) SHA1(8a5ffcd8866e09c5568879257384767d61796111) )
 
 	ROM_REGION( 0x18000, "gfx3", 0 )
-	ROM_LOAD( "c9",           0x00000, 0x8000, CRC(8aeb47e6) SHA1(bb09dbe6b37e1bd02abf3024ac4d954c8f0e70f2) )	/* Background tiles */
+	ROM_LOAD( "c9",           0x00000, 0x8000, CRC(8aeb47e6) SHA1(bb09dbe6b37e1bd02abf3024ac4d954c8f0e70f2) )   /* Background tiles */
 	ROM_LOAD( "c8",           0x08000, 0x4000, CRC(0d7a1eeb) SHA1(60b8d4124ce857a248d3c41fdb050f11be58549f) )
 	ROM_LOAD( "c6",           0x0c000, 0x8000, CRC(2246fe9d) SHA1(f7f8708d499bcbd1a583e1092b54425ad1105f94) )
 	ROM_LOAD( "c7",           0x14000, 0x4000, CRC(e8b97de9) SHA1(f4d1b7075f47ab4522c36281b97eaa02fe383814) )
 
-	ROM_REGION( 0xe000, "gfx4", 0 )	/* background tilemaps */
-	ROM_LOAD( "c2",           0x0000, 0x8000, CRC(f2da4f23) SHA1(5ea1a51c3ac283796f7eafb6719d88356767340d) )	/* background maps */
+	ROM_REGION( 0xe000, "gfx4", 0 ) /* background tilemaps */
+	ROM_LOAD( "c2",           0x0000, 0x8000, CRC(f2da4f23) SHA1(5ea1a51c3ac283796f7eafb6719d88356767340d) )    /* background maps */
 	ROM_LOAD( "c3",           0x8000, 0x4000, CRC(7ef3ac1b) SHA1(8a0497c4e4733f9c50d576f632210b82497a5e1c) )
-	ROM_LOAD( "c5",           0xc000, 0x2000, CRC(c03d8b1b) SHA1(641c1eba334d36ea64b9293a20320b31c7c88858) )	/* color codes for the background */
+	ROM_LOAD( "c5",           0xc000, 0x2000, CRC(c03d8b1b) SHA1(641c1eba334d36ea64b9293a20320b31c7c88858) )    /* color codes for the background */
 ROM_END
 
 
 
-static DRIVER_INIT( citycon )
+DRIVER_INIT_MEMBER(citycon_state,citycon)
 {
-	UINT8 *rom = machine.region("gfx1")->base();
+	UINT8 *rom = machine().root_device().memregion("gfx1")->base();
 	int i;
 
 	/*
-      City Connection controls the text color code for each _scanline_, not
-      for each character as happens in most games. To handle that conveniently,
-      I convert the 2bpp char data into 5bpp, and create a virtual palette so
-      characters can still be drawn in one pass.
-      */
+	  City Connection controls the text color code for each _scanline_, not
+	  for each character as happens in most games. To handle that conveniently,
+	  I convert the 2bpp char data into 5bpp, and create a virtual palette so
+	  characters can still be drawn in one pass.
+	  */
 	for (i = 0x0fff; i >= 0; i--)
 	{
 		int mask;
@@ -365,6 +358,6 @@ static DRIVER_INIT( citycon )
 
 
 
-GAME( 1985, citycon,  0,       citycon, citycon, citycon, ROT0, "Jaleco", "City Connection (set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1985, citycona, citycon, citycon, citycon, citycon, ROT0, "Jaleco", "City Connection (set 2)", GAME_SUPPORTS_SAVE )
-GAME( 1985, cruisin,  citycon, citycon, citycon, citycon, ROT0, "Jaleco (Kitkorp license)", "Cruisin", GAME_SUPPORTS_SAVE )
+GAME( 1985, citycon,  0,       citycon, citycon, citycon_state, citycon, ROT0, "Jaleco", "City Connection (set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1985, citycona, citycon, citycon, citycon, citycon_state, citycon, ROT0, "Jaleco", "City Connection (set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1985, cruisin,  citycon, citycon, citycon, citycon_state, citycon, ROT0, "Jaleco (Kitkorp license)", "Cruisin", GAME_SUPPORTS_SAVE )

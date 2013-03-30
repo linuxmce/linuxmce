@@ -67,7 +67,7 @@ Notes:
 
       ROMs
       ----
-      32J1 thru 32J8  - 16M mask ROM (DIP42)
+      32J1 to 32J8    - 16M mask ROM (DIP42)
       32A12/13/14/J15 - 27C2001 EPROM (DIP32)
       32J9            - 4M mask ROM (DIP32)
       32J10           - 27C512 EPROM (DIP28)
@@ -145,13 +145,13 @@ lev 7 : 0x7c : 0000 11d0 - just rte
 #include "includes/shadfrce.h"
 
 
-#define MASTER_CLOCK		XTAL_28MHz
-#define CPU_CLOCK			MASTER_CLOCK / 2
-#define PIXEL_CLOCK		MASTER_CLOCK / 4
+#define MASTER_CLOCK        XTAL_28MHz
+#define CPU_CLOCK           MASTER_CLOCK / 2
+#define PIXEL_CLOCK     MASTER_CLOCK / 4
 
-static WRITE16_HANDLER( shadfrce_flip_screen )
+WRITE16_MEMBER(shadfrce_state::shadfrce_flip_screen)
 {
-	flip_screen_set(space->machine(), data & 0x01);
+	flip_screen_set(data & 0x01);
 }
 
 
@@ -234,24 +234,23 @@ static WRITE16_HANDLER( shadfrce_flip_screen )
 */
 
 
-static READ16_HANDLER( shadfrce_input_ports_r )
+READ16_MEMBER(shadfrce_state::shadfrce_input_ports_r)
 {
-	shadfrce_state *state = space->machine().driver_data<shadfrce_state>();
 	UINT16 data = 0xffff;
 
 	switch (offset)
 	{
 		case 0 :
-			data = (input_port_read(space->machine(), "P1") & 0xff) | ((input_port_read(space->machine(), "DSW2") & 0xc0) << 6) | ((input_port_read(space->machine(), "SYSTEM") & 0x0f) << 8);
+			data = (ioport("P1")->read() & 0xff) | ((ioport("DSW2")->read() & 0xc0) << 6) | ((ioport("SYSTEM")->read() & 0x0f) << 8);
 			break;
 		case 1 :
-			data = (input_port_read(space->machine(), "P2") & 0xff) | ((input_port_read(space->machine(), "DSW2") & 0x3f) << 8);
+			data = (ioport("P2")->read() & 0xff) | ((ioport("DSW2")->read() & 0x3f) << 8);
 			break;
 		case 2 :
-			data = (input_port_read(space->machine(), "EXTRA") & 0xff) | ((input_port_read(space->machine(), "DSW1") & 0x3f) << 8);
+			data = (ioport("EXTRA")->read() & 0xff) | ((ioport("DSW1")->read() & 0x3f) << 8);
 			break;
 		case 3 :
-			data = (input_port_read(space->machine(), "OTHER") & 0xff) | ((input_port_read(space->machine(), "DSW1") & 0xc0) << 2) | ((input_port_read(space->machine(), "MISC") & 0x38) << 8) | (state->m_vblank << 8);
+			data = (ioport("OTHER")->read() & 0xff) | ((ioport("DSW1")->read() & 0xc0) << 2) | ((ioport("MISC")->read() & 0x38) << 8) | (m_vblank << 8);
 			break;
 	}
 
@@ -259,12 +258,12 @@ static READ16_HANDLER( shadfrce_input_ports_r )
 }
 
 
-static WRITE16_HANDLER ( shadfrce_sound_brt_w )
+WRITE16_MEMBER(shadfrce_state::shadfrce_sound_brt_w)
 {
 	if (ACCESSING_BITS_8_15)
 	{
-		soundlatch_w(space, 1, data >> 8);
-		cputag_set_input_line(space->machine(), "audiocpu", INPUT_LINE_NMI, PULSE_LINE );
+		soundlatch_byte_w(space, 1, data >> 8);
+		machine().device("audiocpu")->execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE );
 	}
 	else
 	{
@@ -272,90 +271,87 @@ static WRITE16_HANDLER ( shadfrce_sound_brt_w )
 		double brt = (data & 0xff) / 255.0;
 
 		for (i = 0; i < 0x4000; i++)
-			palette_set_pen_contrast(space->machine(), i, brt);
+			palette_set_pen_contrast(machine(), i, brt);
 	}
 }
 
-static WRITE16_HANDLER( shadfrce_irq_ack_w )
+WRITE16_MEMBER(shadfrce_state::shadfrce_irq_ack_w)
 {
-	cputag_set_input_line(space->machine(), "maincpu", offset ^ 3, CLEAR_LINE);
+	machine().device("maincpu")->execute().set_input_line(offset ^ 3, CLEAR_LINE);
 }
 
-static WRITE16_HANDLER( shadfrce_irq_w )
+WRITE16_MEMBER(shadfrce_state::shadfrce_irq_w)
 {
-	shadfrce_state *state = space->machine().driver_data<shadfrce_state>();
 
-	state->m_irqs_enable = data & 1;	/* maybe, it's set/unset inside every trap instruction which is executed */
-	state->m_video_enable = data & 8;	/* probably */
+	m_irqs_enable = data & 1;   /* maybe, it's set/unset inside every trap instruction which is executed */
+	m_video_enable = data & 8;  /* probably */
 
 	/* check if there's a high transition to enable the raster IRQ */
-	if((~state->m_prev_value & 4) && (data & 4))
+	if((~m_prev_value & 4) && (data & 4))
 	{
-		state->m_raster_irq_enable = 1;
+		m_raster_irq_enable = 1;
 	}
 
 	/* check if there's a low transition to disable the raster IRQ */
-	if((state->m_prev_value & 4) && (~data & 4))
+	if((m_prev_value & 4) && (~data & 4))
 	{
-		state->m_raster_irq_enable = 0;
+		m_raster_irq_enable = 0;
 	}
 
-	state->m_prev_value = data;
+	m_prev_value = data;
 }
 
-static WRITE16_HANDLER( shadfrce_scanline_w )
+WRITE16_MEMBER(shadfrce_state::shadfrce_scanline_w)
 {
-	shadfrce_state *state = space->machine().driver_data<shadfrce_state>();
 
-	state->m_raster_scanline = data;	/* guess, 0 is always written */
+	m_raster_scanline = data;   /* guess, 0 is always written */
 }
 
-static TIMER_DEVICE_CALLBACK( shadfrce_scanline )
+TIMER_DEVICE_CALLBACK_MEMBER(shadfrce_state::shadfrce_scanline)
 {
-	shadfrce_state *state = timer.machine().driver_data<shadfrce_state>();
 	int scanline = param;
 
 	/* Vblank is lowered on scanline 0 */
 	if (scanline == 0)
 	{
-		state->m_vblank = 0;
+		m_vblank = 0;
 	}
 	/* Hack */
-	else if (scanline == (248-1))		/* -1 is an hack needed to avoid deadlocks */
+	else if (scanline == (248-1))       /* -1 is an hack needed to avoid deadlocks */
 	{
-		state->m_vblank = 4;
+		m_vblank = 4;
 	}
 
 	/* Raster interrupt - Perform raster effect on given scanline */
-	if (state->m_raster_irq_enable)
+	if (m_raster_irq_enable)
 	{
-		if (scanline == state->m_raster_scanline)
+		if (scanline == m_raster_scanline)
 		{
-			state->m_raster_scanline = (state->m_raster_scanline + 1) % 240;
-			if (state->m_raster_scanline > 0)
-				timer.machine().primary_screen->update_partial(state->m_raster_scanline - 1);
-			cputag_set_input_line(timer.machine(), "maincpu", 1, ASSERT_LINE);
+			m_raster_scanline = (m_raster_scanline + 1) % 240;
+			if (m_raster_scanline > 0)
+				machine().primary_screen->update_partial(m_raster_scanline - 1);
+			machine().device("maincpu")->execute().set_input_line(1, ASSERT_LINE);
 		}
 	}
 
 	/* An interrupt is generated every 16 scanlines */
-	if (state->m_irqs_enable)
+	if (m_irqs_enable)
 	{
 		if (scanline % 16 == 0)
 		{
 			if (scanline > 0)
-				timer.machine().primary_screen->update_partial(scanline - 1);
-			cputag_set_input_line(timer.machine(), "maincpu", 2, ASSERT_LINE);
+				machine().primary_screen->update_partial(scanline - 1);
+			machine().device("maincpu")->execute().set_input_line(2, ASSERT_LINE);
 		}
 	}
 
 	/* Vblank is raised on scanline 248 */
-	if (state->m_irqs_enable)
+	if (m_irqs_enable)
 	{
 		if (scanline == 248)
 		{
-			timer.machine().primary_screen->update_partial(scanline - 1);
-			cputag_set_input_line(timer.machine(), "maincpu", 3, ASSERT_LINE);
+			machine().primary_screen->update_partial(scanline - 1);
+			machine().device("maincpu")->execute().set_input_line(3, ASSERT_LINE);
 		}
 	}
 }
@@ -364,15 +360,15 @@ static TIMER_DEVICE_CALLBACK( shadfrce_scanline )
 
 /* Memory Maps */
 
-static ADDRESS_MAP_START( shadfrce_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( shadfrce_map, AS_PROGRAM, 16, shadfrce_state )
 	AM_RANGE(0x000000, 0x0fffff) AM_ROM
-	AM_RANGE(0x100000, 0x100fff) AM_RAM_WRITE(shadfrce_bg0videoram_w) AM_BASE_MEMBER(shadfrce_state,m_bg0videoram) /* video */
+	AM_RANGE(0x100000, 0x100fff) AM_RAM_WRITE(shadfrce_bg0videoram_w) AM_SHARE("bg0videoram") /* video */
 	AM_RANGE(0x101000, 0x101fff) AM_RAM
-	AM_RANGE(0x102000, 0x1027ff) AM_RAM_WRITE(shadfrce_bg1videoram_w) AM_BASE_MEMBER(shadfrce_state,m_bg1videoram) /* bg 2 */
+	AM_RANGE(0x102000, 0x1027ff) AM_RAM_WRITE(shadfrce_bg1videoram_w) AM_SHARE("bg1videoram") /* bg 2 */
 	AM_RANGE(0x102800, 0x103fff) AM_RAM
-	AM_RANGE(0x140000, 0x141fff) AM_RAM_WRITE(shadfrce_fgvideoram_w) AM_BASE_MEMBER(shadfrce_state,m_fgvideoram)
-	AM_RANGE(0x142000, 0x143fff) AM_RAM AM_BASE_MEMBER(shadfrce_state,m_spvideoram) AM_SIZE_MEMBER(shadfrce_state,m_spvideoram_size) /* sprites */
-	AM_RANGE(0x180000, 0x187fff) AM_RAM_WRITE(paletteram16_xBBBBBGGGGGRRRRR_word_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x140000, 0x141fff) AM_RAM_WRITE(shadfrce_fgvideoram_w) AM_SHARE("fgvideoram")
+	AM_RANGE(0x142000, 0x143fff) AM_RAM AM_SHARE("spvideoram") /* sprites */
+	AM_RANGE(0x180000, 0x187fff) AM_RAM_WRITE(paletteram_xBBBBBGGGGGRRRRR_word_w) AM_SHARE("paletteram")
 	AM_RANGE(0x1c0000, 0x1c0001) AM_WRITE(shadfrce_bg0scrollx_w) /* SCROLL X */
 	AM_RANGE(0x1c0002, 0x1c0003) AM_WRITE(shadfrce_bg0scrolly_w) /* SCROLL Y */
 	AM_RANGE(0x1c0004, 0x1c0005) AM_WRITE(shadfrce_bg1scrollx_w) /* SCROLL X */
@@ -383,7 +379,7 @@ static ADDRESS_MAP_START( shadfrce_map, AS_PROGRAM, 16 )
 	AM_RANGE(0x1d0000, 0x1d0005) AM_WRITE(shadfrce_irq_ack_w)
 	AM_RANGE(0x1d0006, 0x1d0007) AM_WRITE(shadfrce_irq_w)
 	AM_RANGE(0x1d0008, 0x1d0009) AM_WRITE(shadfrce_scanline_w)
-	AM_RANGE(0x1d000c, 0x1d000d) AM_READNOP AM_WRITE(shadfrce_sound_brt_w)	/* sound command + screen brightness */
+	AM_RANGE(0x1d000c, 0x1d000d) AM_READNOP AM_WRITE(shadfrce_sound_brt_w)  /* sound command + screen brightness */
 	AM_RANGE(0x1d0010, 0x1d0011) AM_WRITENOP /* ?? */
 	AM_RANGE(0x1d0012, 0x1d0013) AM_WRITENOP /* ?? */
 	AM_RANGE(0x1d0014, 0x1d0015) AM_WRITENOP /* ?? */
@@ -394,18 +390,19 @@ ADDRESS_MAP_END
 
 /* and the sound cpu */
 
-static WRITE8_DEVICE_HANDLER( oki_bankswitch_w )
+WRITE8_MEMBER(shadfrce_state::oki_bankswitch_w)
 {
+	device_t *device = machine().device("oki");
 	downcast<okim6295_device *>(device)->set_bank_base((data & 1) * 0x40000);
 }
 
-static ADDRESS_MAP_START( shadfrce_sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( shadfrce_sound_map, AS_PROGRAM, 8, shadfrce_state )
 	AM_RANGE(0x0000, 0xbfff) AM_ROM
 	AM_RANGE(0xc000, 0xc7ff) AM_RAM
-	AM_RANGE(0xc800, 0xc801) AM_DEVREADWRITE("ymsnd", ym2151_r, ym2151_w)
-	AM_RANGE(0xd800, 0xd800) AM_DEVREADWRITE_MODERN("oki", okim6295_device, read, write)
-	AM_RANGE(0xe000, 0xe000) AM_READ(soundlatch_r)
-	AM_RANGE(0xe800, 0xe800) AM_DEVWRITE("oki", oki_bankswitch_w)
+	AM_RANGE(0xc800, 0xc801) AM_DEVREADWRITE("ymsnd", ym2151_device, read, write)
+	AM_RANGE(0xd800, 0xd800) AM_DEVREADWRITE("oki", okim6295_device, read, write)
+	AM_RANGE(0xe000, 0xe000) AM_READ(soundlatch_byte_r)
+	AM_RANGE(0xe800, 0xe800) AM_WRITE(oki_bankswitch_w)
 	AM_RANGE(0xf000, 0xffff) AM_RAM
 ADDRESS_MAP_END
 
@@ -425,13 +422,13 @@ ADDRESS_MAP_END
 
 
 static INPUT_PORTS_START( shadfrce )
-	PORT_START("P1")		/* Fake IN0 (player 1 inputs) */
+	PORT_START("P1")        /* Fake IN0 (player 1 inputs) */
 	SHADFRCE_PLAYER_INPUT( 1, IPT_START1 )
 
-	PORT_START("P2")		/* Fake IN1 (player 2 inputs) */
+	PORT_START("P2")        /* Fake IN1 (player 2 inputs) */
 	SHADFRCE_PLAYER_INPUT( 2, IPT_START2 )
 
-	PORT_START("EXTRA")	/* Fake IN2 (players 1 & 2 extra inputs */
+	PORT_START("EXTRA") /* Fake IN2 (players 1 & 2 extra inputs */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(1)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_PLAYER(1)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON6 ) PORT_PLAYER(1)
@@ -441,21 +438,21 @@ static INPUT_PORTS_START( shadfrce )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("OTHER")	/* Fake IN3 (other extra inputs ?) */
+	PORT_START("OTHER") /* Fake IN3 (other extra inputs ?) */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("SYSTEM")	/* Fake IN4 (system inputs) */
+	PORT_START("SYSTEM")    /* Fake IN4 (system inputs) */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )			/* only in "test mode" ? */
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE1 )			/* only in "test mode" ? */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )          /* only in "test mode" ? */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE1 )           /* only in "test mode" ? */
 	PORT_BIT( 0xf8, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("MISC")	/* Fake IN5 (misc) */
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SPECIAL )			/* guess */
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )			/* must be ACTIVE_LOW or 'shadfrcj' jumps to the end (code at 0x04902e) */
+	PORT_START("MISC")  /* Fake IN5 (misc) */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SPECIAL )            /* guess */
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )            /* must be ACTIVE_LOW or 'shadfrcj' jumps to the end (code at 0x04902e) */
 	PORT_BIT( 0xeb, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("DSW1")	/* Fake IN6 (DIP1) */
+	PORT_START("DSW1")  /* Fake IN6 (DIP1) */
 	PORT_DIPNAME( 0x01, 0x01, "Unused DIP 1-1" )
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -478,7 +475,7 @@ static INPUT_PORTS_START( shadfrce )
 	PORT_DIPSETTING(    0x40, DEF_STR( On ) )
 	PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
 
-	PORT_START("DSW2")	/* Fake IN7 (DIP2) */
+	PORT_START("DSW2")  /* Fake IN7 (DIP2) */
 	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Difficulty ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Easy ) )
 	PORT_DIPSETTING(    0x03, DEF_STR( Normal ) )
@@ -546,45 +543,33 @@ GFXDECODE_END
 
 /* Machine Driver Bits */
 
-static void irq_handler(device_t *device, int irq)
-{
-	cputag_set_input_line(device->machine(), "audiocpu", 0, irq ? ASSERT_LINE : CLEAR_LINE );
-}
-
-static const ym2151_interface ym2151_config =
-{
-	irq_handler
-};
-
 static MACHINE_CONFIG_START( shadfrce, shadfrce_state )
 
-	MCFG_CPU_ADD("maincpu", M68000, CPU_CLOCK)			/* verified on pcb */
+	MCFG_CPU_ADD("maincpu", M68000, CPU_CLOCK)          /* verified on pcb */
 	MCFG_CPU_PROGRAM_MAP(shadfrce_map)
-	MCFG_TIMER_ADD_SCANLINE("scantimer", shadfrce_scanline, "screen", 0, 1)
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("scantimer", shadfrce_state, shadfrce_scanline, "screen", 0, 1)
 
-	MCFG_CPU_ADD("audiocpu", Z80, XTAL_3_579545MHz)			/* verified on pcb */
+	MCFG_CPU_ADD("audiocpu", Z80, XTAL_3_579545MHz)         /* verified on pcb */
 	MCFG_CPU_PROGRAM_MAP(shadfrce_sound_map)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
-	MCFG_SCREEN_RAW_PARAMS(PIXEL_CLOCK, 432, 0, 320, 272, 8, 248)	/* HTOTAL and VTOTAL are guessed */
-	MCFG_SCREEN_UPDATE(shadfrce)
-	MCFG_SCREEN_EOF(shadfrce)
+	MCFG_SCREEN_RAW_PARAMS(PIXEL_CLOCK, 432, 0, 320, 272, 8, 248)   /* HTOTAL and VTOTAL are guessed */
+	MCFG_SCREEN_UPDATE_DRIVER(shadfrce_state, screen_update_shadfrce)
+	MCFG_SCREEN_VBLANK_DRIVER(shadfrce_state, screen_eof_shadfrce)
 
 	MCFG_GFXDECODE(shadfrce)
 	MCFG_PALETTE_LENGTH(0x4000)
 
-	MCFG_VIDEO_START(shadfrce)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
 
-	MCFG_SOUND_ADD("ymsnd", YM2151, XTAL_3_579545MHz)		/* verified on pcb */
-	MCFG_SOUND_CONFIG(ym2151_config)
+	MCFG_YM2151_ADD("ymsnd", XTAL_3_579545MHz)      /* verified on pcb */
+	MCFG_YM2151_IRQ_HANDLER(INPUTLINE("audiocpu", 0))
 	MCFG_SOUND_ROUTE(0, "lspeaker", 0.50)
 	MCFG_SOUND_ROUTE(1, "rspeaker", 0.50)
 
-	MCFG_OKIM6295_ADD("oki", XTAL_13_4952MHz/8, OKIM6295_PIN7_HIGH)	/* verified on pcb */
+	MCFG_OKIM6295_ADD("oki", XTAL_13_4952MHz/8, OKIM6295_PIN7_HIGH) /* verified on pcb */
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "lspeaker", 0.50)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "rspeaker", 0.50)
 MACHINE_CONFIG_END
@@ -679,6 +664,6 @@ ROM_START( shadfrcejv2 )
 ROM_END
 
 
-GAME( 1993, shadfrce,    0,        shadfrce, shadfrce, 0, ROT0, "Technos Japan", "Shadow Force (US Version 2)", GAME_NO_COCKTAIL )
-GAME( 1993, shadfrcej,   shadfrce, shadfrce, shadfrce, 0, ROT0, "Technos Japan", "Shadow Force (Japan Version 3)", GAME_NO_COCKTAIL )
-GAME( 1993, shadfrcejv2, shadfrce, shadfrce, shadfrce, 0, ROT0, "Technos Japan", "Shadow Force (Japan Version 2)", GAME_NO_COCKTAIL )
+GAME( 1993, shadfrce,    0,        shadfrce, shadfrce, driver_device, 0, ROT0, "Technos Japan", "Shadow Force (US Version 2)", GAME_NO_COCKTAIL )
+GAME( 1993, shadfrcej,   shadfrce, shadfrce, shadfrce, driver_device, 0, ROT0, "Technos Japan", "Shadow Force (Japan Version 3)", GAME_NO_COCKTAIL )
+GAME( 1993, shadfrcejv2, shadfrce, shadfrce, shadfrce, driver_device, 0, ROT0, "Technos Japan", "Shadow Force (Japan Version 2)", GAME_NO_COCKTAIL )

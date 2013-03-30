@@ -57,8 +57,9 @@ tilt the mirror up and down, and the monitor left and right.
  *
  *************************************/
 
-static PALETTE_INIT( stactics )
+PALETTE_INIT_MEMBER(stactics_state,stactics)
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 
 	for (i = 0; i < 0x400; i++)
@@ -77,7 +78,7 @@ static PALETTE_INIT( stactics )
 		/* blue component */
 		int b = 0xff * bit2;
 
-		palette_set_color(machine, i, MAKE_RGB(r, g, b));
+		palette_set_color(machine(), i, MAKE_RGB(r, g, b));
 	}
 }
 
@@ -89,17 +90,16 @@ static PALETTE_INIT( stactics )
  *
  *************************************/
 
-WRITE8_HANDLER( stactics_scroll_ram_w )
+WRITE8_MEMBER(stactics_state::stactics_scroll_ram_w)
 {
-	stactics_state *state = space->machine().driver_data<stactics_state>();
 
 	if (data & 0x01)
 	{
 		switch (offset >> 8)
 		{
-			case 4: state->m_y_scroll_d = offset & 0xff; break;
-			case 5: state->m_y_scroll_e = offset & 0xff; break;
-			case 6: state->m_y_scroll_f = offset & 0xff; break;
+			case 4: m_y_scroll_d = offset & 0xff; break;
+			case 5: m_y_scroll_e = offset & 0xff; break;
+			case 6: m_y_scroll_f = offset & 0xff; break;
 		}
 	}
 }
@@ -112,11 +112,10 @@ WRITE8_HANDLER( stactics_scroll_ram_w )
  *
  *************************************/
 
-CUSTOM_INPUT( stactics_get_frame_count_d3 )
+CUSTOM_INPUT_MEMBER(stactics_state::stactics_get_frame_count_d3)
 {
-	stactics_state *state = field->port->machine().driver_data<stactics_state>();
 
-	return (state->m_frame_count >> 3) & 0x01;
+	return (m_frame_count >> 3) & 0x01;
 }
 
 
@@ -127,9 +126,8 @@ CUSTOM_INPUT( stactics_get_frame_count_d3 )
  *
  *************************************/
 
-WRITE8_HANDLER( stactics_speed_latch_w )
+WRITE8_MEMBER(stactics_state::stactics_speed_latch_w)
 {
-	stactics_state *state = space->machine().driver_data<stactics_state>();
 
 	/* This writes to a shift register which is clocked by   */
 	/* a 555 oscillator.  This value determines the speed of */
@@ -150,39 +148,35 @@ WRITE8_HANDLER( stactics_speed_latch_w )
 			num_rising_edges++;
 	}
 
-	state->m_beam_states_per_frame = num_rising_edges*19/8;
+	m_beam_states_per_frame = num_rising_edges*19/8;
 }
 
 
-WRITE8_HANDLER( stactics_shot_trigger_w )
+WRITE8_MEMBER(stactics_state::stactics_shot_trigger_w)
 {
-	stactics_state *state = space->machine().driver_data<stactics_state>();
 
-	state->m_shot_standby = 0;
+	m_shot_standby = 0;
 }
 
 
-WRITE8_HANDLER( stactics_shot_flag_clear_w )
+WRITE8_MEMBER(stactics_state::stactics_shot_flag_clear_w)
 {
-	stactics_state *state = space->machine().driver_data<stactics_state>();
 
-	state->m_shot_arrive = 0;
+	m_shot_arrive = 0;
 }
 
 
-CUSTOM_INPUT( stactics_get_shot_standby )
+CUSTOM_INPUT_MEMBER(stactics_state::stactics_get_shot_standby)
 {
-	stactics_state *state = field->port->machine().driver_data<stactics_state>();
 
-	return state->m_shot_standby;
+	return m_shot_standby;
 }
 
 
-CUSTOM_INPUT( stactics_get_not_shot_arrive )
+CUSTOM_INPUT_MEMBER(stactics_state::stactics_get_not_shot_arrive)
 {
-	stactics_state *state = field->port->machine().driver_data<stactics_state>();
 
-	return !state->m_shot_arrive;
+	return !m_shot_arrive;
 }
 
 
@@ -236,11 +230,11 @@ INLINE int get_pixel_on_plane(UINT8 *videoram, UINT8 y, UINT8 x, UINT8 y_scroll)
 }
 
 
-static void draw_background(stactics_state *state, bitmap_t *bitmap, const rectangle *cliprect)
+static void draw_background(stactics_state *state, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	int y;
 
-	bitmap_fill(bitmap, cliprect, 0);
+	bitmap.fill(0, cliprect);
 
 	/* for every row */
 	for (y = 0; y < 0x100; y++)
@@ -261,21 +255,21 @@ static void draw_background(stactics_state *state, bitmap_t *bitmap, const recta
 
 			/* assemble the pen index */
 			int pen = color |
-					  (pixel_b << 4) |
-					  (pixel_f << 5) |
-					  (pixel_e << 6) |
-					  (pixel_d << 7) |
-					  ((state->m_palette[0] & 0x01) << 8) |
-					  ((state->m_palette[1] & 0x01) << 9);
+						(pixel_b << 4) |
+						(pixel_f << 5) |
+						(pixel_e << 6) |
+						(pixel_d << 7) |
+						((state->m_palette[0] & 0x01) << 8) |
+						((state->m_palette[1] & 0x01) << 9);
 
 			/* compute the effective pixel coordinate after adjusting for the
-               mirror movement - this is mechanical on the real machine */
+			   mirror movement - this is mechanical on the real machine */
 			int sy = y + state->m_vert_pos;
 			int sx = x - state->m_horiz_pos;
 
 			/* plot if visible */
 			if ((sy >= 0) && (sy < 0x100) && (sx >= 0) && (sx < 0x100))
-				*BITMAP_ADDR16(bitmap, sy, sx) = pen;
+				bitmap.pix16(sy, sx) = pen;
 		}
 	}
 }
@@ -312,7 +306,7 @@ static void set_indicator_leds(int data, const char *output_name, int base_index
 static void update_artwork(running_machine &machine, stactics_state *state)
 {
 	int i;
-	UINT8 *beam_region = machine.region("user1")->base();
+	UINT8 *beam_region = machine.root_device().memregion("user1")->base();
 
 	/* set the lamps first */
 	output_set_indexed_value("base_lamp", 4, state->m_lamps[0] & 0x01);
@@ -365,19 +359,18 @@ static void update_artwork(running_machine &machine, stactics_state *state)
  *
  *************************************/
 
-static VIDEO_START( stactics )
+VIDEO_START_MEMBER(stactics_state,stactics)
 {
-	stactics_state *state = machine.driver_data<stactics_state>();
 
-	state->m_y_scroll_d = 0;
-	state->m_y_scroll_e = 0;
-	state->m_y_scroll_f = 0;
+	m_y_scroll_d = 0;
+	m_y_scroll_e = 0;
+	m_y_scroll_f = 0;
 
-	state->m_frame_count = 0;
-	state->m_shot_standby = 1;
-	state->m_shot_arrive = 0;
-	state->m_beam_state = 0;
-	state->m_old_beam_state = 0;
+	m_frame_count = 0;
+	m_shot_standby = 1;
+	m_shot_arrive = 0;
+	m_beam_state = 0;
+	m_old_beam_state = 0;
 }
 
 
@@ -388,15 +381,14 @@ static VIDEO_START( stactics )
  *
  *************************************/
 
-static SCREEN_UPDATE( stactics )
+UINT32 stactics_state::screen_update_stactics(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	stactics_state *state = screen->machine().driver_data<stactics_state>();
 
-	update_beam(state);
-	draw_background(state, bitmap, cliprect);
-	update_artwork(screen->machine(), state);
+	update_beam(this);
+	draw_background(this, bitmap, cliprect);
+	update_artwork(machine(), this);
 
-	state->m_frame_count = (state->m_frame_count + 1) & 0x0f;
+	m_frame_count = (m_frame_count + 1) & 0x0f;
 
 	return 0;
 }
@@ -416,13 +408,12 @@ MACHINE_CONFIG_FRAGMENT( stactics_video )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 0*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(stactics)
+	MCFG_SCREEN_UPDATE_DRIVER(stactics_state, screen_update_stactics)
 
 	MCFG_PALETTE_LENGTH(0x400)
 
-	MCFG_PALETTE_INIT(stactics)
-	MCFG_VIDEO_START(stactics)
+	MCFG_PALETTE_INIT_OVERRIDE(stactics_state,stactics)
+	MCFG_VIDEO_START_OVERRIDE(stactics_state,stactics)
 MACHINE_CONFIG_END

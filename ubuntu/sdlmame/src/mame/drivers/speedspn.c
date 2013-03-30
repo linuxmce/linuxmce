@@ -7,7 +7,6 @@ Notes:
   e.g. BUTTON 1.
 
 TODO:
-- A couple of garbage sprites on the player selection screen
 - Unknown Port Writes:
   cpu #0 (PC=00000D88): unmapped port byte write to 00000001 = 02
   cpu #0 (PC=00006974): unmapped port byte write to 00000010 = 10
@@ -55,18 +54,18 @@ TCH-SS9.u34     "     /               AB2Bh
 
 ******************************************************************************/
 
-static READ8_HANDLER(speedspn_irq_ack_r)
+READ8_MEMBER(speedspn_state::speedspn_irq_ack_r)
 {
 	// I think this simply acknowledges the IRQ #0, it's read within the handler and the
 	//  value is discarded
 	return 0;
 }
 
-static WRITE8_HANDLER(speedspn_banked_rom_change)
+WRITE8_MEMBER(speedspn_state::speedspn_banked_rom_change)
 {
 	/* is this weird banking some form of protection? */
 
-	UINT8 *rom = space->machine().region("maincpu")->base();
+	UINT8 *rom = memregion("maincpu")->base();
 	int addr;
 
 	switch (data)
@@ -86,19 +85,20 @@ static WRITE8_HANDLER(speedspn_banked_rom_change)
 			break;
 	}
 
-	memory_set_bankptr(space->machine(), "bank1",&rom[addr + 0x8000]);
+	membank("bank1")->set_base(&rom[addr + 0x8000]);
 }
 
 /*** SOUND RELATED ***********************************************************/
 
-static WRITE8_HANDLER(speedspn_sound_w)
+WRITE8_MEMBER(speedspn_state::speedspn_sound_w)
 {
-	soundlatch_w(space, 1, data);
-	cputag_set_input_line(space->machine(), "audiocpu", 0, HOLD_LINE);
+	soundlatch_byte_w(space, 1, data);
+	machine().device("audiocpu")->execute().set_input_line(0, HOLD_LINE);
 }
 
-static WRITE8_DEVICE_HANDLER( oki_banking_w )
+WRITE8_MEMBER(speedspn_state::oki_banking_w)
 {
+	device_t *device = machine().device("oki");
 	downcast<okim6295_device *>(device)->set_bank_base(0x40000 * (data & 3));
 }
 
@@ -106,18 +106,18 @@ static WRITE8_DEVICE_HANDLER( oki_banking_w )
 
 /* main cpu */
 
-static ADDRESS_MAP_START( speedspn_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( speedspn_map, AS_PROGRAM, 8, speedspn_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
-	AM_RANGE(0x8000, 0x87ff) AM_RAM_WRITE(paletteram_xxxxRRRRGGGGBBBB_le_w) AM_BASE_GENERIC(paletteram)	/* RAM COLOUR */
-	AM_RANGE(0x8800, 0x8fff) AM_RAM_WRITE(speedspn_attram_w) AM_BASE_MEMBER(speedspn_state, m_attram)
-	AM_RANGE(0x9000, 0x9fff) AM_READWRITE(speedspn_vidram_r,speedspn_vidram_w)	/* RAM FIX / RAM OBJECTS (selected by bit 0 of port 17) */
+	AM_RANGE(0x8000, 0x87ff) AM_RAM_WRITE(paletteram_xxxxRRRRGGGGBBBB_byte_le_w) AM_SHARE("paletteram") /* RAM COLOUR */
+	AM_RANGE(0x8800, 0x8fff) AM_RAM_WRITE(speedspn_attram_w) AM_SHARE("attram")
+	AM_RANGE(0x9000, 0x9fff) AM_READWRITE(speedspn_vidram_r,speedspn_vidram_w)  /* RAM FIX / RAM OBJECTS (selected by bit 0 of port 17) */
 	AM_RANGE(0xa000, 0xa7ff) AM_RAM
 	AM_RANGE(0xa800, 0xafff) AM_RAM
-	AM_RANGE(0xb000, 0xbfff) AM_RAM 											/* RAM PROGRAM */
-	AM_RANGE(0xc000, 0xffff) AM_ROMBANK("bank1")										/* banked ROM */
+	AM_RANGE(0xb000, 0xbfff) AM_RAM                                             /* RAM PROGRAM */
+	AM_RANGE(0xc000, 0xffff) AM_ROMBANK("bank1")                                        /* banked ROM */
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( speedspn_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( speedspn_io_map, AS_IO, 8, speedspn_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x07, 0x07) AM_WRITE(speedspn_global_display_w)
 	AM_RANGE(0x10, 0x10) AM_READ_PORT("SYSTEM")
@@ -131,12 +131,12 @@ ADDRESS_MAP_END
 
 /* sound cpu */
 
-static ADDRESS_MAP_START( speedspn_sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( speedspn_sound_map, AS_PROGRAM, 8, speedspn_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x87ff) AM_RAM
-	AM_RANGE(0x9000, 0x9000) AM_DEVWRITE("oki", oki_banking_w)
-	AM_RANGE(0x9800, 0x9800) AM_DEVREADWRITE_MODERN("oki", okim6295_device, read, write)
-	AM_RANGE(0xa000, 0xa000) AM_READ(soundlatch_r)
+	AM_RANGE(0x9000, 0x9000) AM_WRITE(oki_banking_w)
+	AM_RANGE(0x9800, 0x9800) AM_DEVREADWRITE("oki", okim6295_device, read, write)
+	AM_RANGE(0xa000, 0xa000) AM_READ(soundlatch_byte_r)
 ADDRESS_MAP_END
 
 
@@ -174,7 +174,7 @@ static INPUT_PORTS_START( speedspn )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(2)
 
 	PORT_START("DSW1")
-	PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( Coin_A ) )
+	PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( Coin_A ) )   PORT_DIPLOCATION("SW1:8,7,6,5")
 	PORT_DIPSETTING(    0x01, DEF_STR( 5C_1C ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( 4C_1C ) )
 	PORT_DIPSETTING(    0x07, DEF_STR( 3C_1C ) )
@@ -191,7 +191,7 @@ static INPUT_PORTS_START( speedspn )
 	PORT_DIPSETTING(    0x0d, DEF_STR( 1C_3C ) )
 	PORT_DIPSETTING(    0x0c, DEF_STR( 1C_4C ) )
 	PORT_DIPSETTING(    0x0b, DEF_STR( 1C_5C ) )
-	PORT_DIPNAME( 0xf0, 0xf0, DEF_STR( Coin_B ) )
+	PORT_DIPNAME( 0xf0, 0xf0, DEF_STR( Coin_B ) )   PORT_DIPLOCATION("SW1:4,3,2,1")
 	PORT_DIPSETTING(    0x10, DEF_STR( 5C_1C ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( 4C_1C ) )
 	PORT_DIPSETTING(    0x70, DEF_STR( 3C_1C ) )
@@ -210,26 +210,26 @@ static INPUT_PORTS_START( speedspn )
 	PORT_DIPSETTING(    0xb0, DEF_STR( 1C_5C ) )
 
 	PORT_START("DSW2")
-	PORT_DIPNAME( 0x01, 0x01, "World Cup" )
+	PORT_DIPNAME( 0x01, 0x01, "World Cup" )         PORT_DIPLOCATION("SW2:8")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( On ) )
-	PORT_DIPNAME( 0x02, 0x02, "Backhand" )
+	PORT_DIPNAME( 0x02, 0x02, "Backhand" )          PORT_DIPLOCATION("SW2:7")
 	PORT_DIPSETTING(    0x02, "Automatic" )
 	PORT_DIPSETTING(    0x00, "Manual" )
-	PORT_DIPNAME( 0x0c, 0x0c, "Points to Win" )
+	PORT_DIPNAME( 0x0c, 0x0c, "Points to Win" )     PORT_DIPLOCATION("SW2:6,5")
 	PORT_DIPSETTING(    0x0c, "11 Points and 1 Advantage" )
 	PORT_DIPSETTING(    0x08, "11 Points and 2 Advantage" )
 	PORT_DIPSETTING(    0x04, "21 Points and 1 Advantage" )
 	PORT_DIPSETTING(    0x00, "21 Points and 2 Advantage" )
-	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Difficulty ) )
+	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("SW2:4,3")
 	PORT_DIPSETTING(    0x20, DEF_STR( Easy ) )
 	PORT_DIPSETTING(    0x30, DEF_STR( Normal ) )
 	PORT_DIPSETTING(    0x10, DEF_STR( Hard ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) )
-	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Demo_Sounds ) )
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW2:2")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( On ) )
-	PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
+	PORT_SERVICE_DIPLOC(  0x080, IP_ACTIVE_LOW, "SW2:1" )
 INPUT_PORTS_END
 
 /*** GFX DECODE **************************************************************/
@@ -252,9 +252,9 @@ static const gfx_layout speedspn_spritelayout =
 	4,
 	{ 4, 0, RGN_FRAC(1,2)+4, RGN_FRAC(1,2)+0 },
 	{ 16*16+11, 16*16+10, 16*16+9, 16*16+8, 16*16+3, 16*16+2, 16*16+1, 16*16+0,
-	        11,       10,       9,       8,       3,       2,       1,       0  },
+			11,       10,       9,       8,       3,       2,       1,       0  },
 	{ 8*16+7*16, 8*16+6*16, 8*16+5*16, 8*16+4*16, 8*16+3*16, 8*16+2*16, 8*16+1*16, 8*16+0*16,
-	       7*16,      6*16,      5*16,      4*16,      3*16,      2*16,      1*16,      0*16  },
+			7*16,      6*16,      5*16,      4*16,      3*16,      2*16,      1*16,      0*16  },
 	32*16
 };
 
@@ -270,27 +270,25 @@ GFXDECODE_END
 static MACHINE_CONFIG_START( speedspn, speedspn_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu",Z80,6000000)		 /* 6 MHz */
+	MCFG_CPU_ADD("maincpu",Z80,6000000)      /* 6 MHz */
 	MCFG_CPU_PROGRAM_MAP(speedspn_map)
 	MCFG_CPU_IO_MAP(speedspn_io_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", speedspn_state,  irq0_line_hold)
 
-	MCFG_CPU_ADD("audiocpu", Z80,6000000)		 /* 6 MHz */
+	MCFG_CPU_ADD("audiocpu", Z80,6000000)        /* 6 MHz */
 	MCFG_CPU_PROGRAM_MAP(speedspn_sound_map)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(8*8, 56*8-1, 1*8, 31*8-1)
-	MCFG_SCREEN_UPDATE(speedspn)
+	MCFG_SCREEN_UPDATE_DRIVER(speedspn_state, screen_update_speedspn)
 
 	MCFG_GFXDECODE(speedspn)
 	MCFG_PALETTE_LENGTH(0x400)
 
-	MCFG_VIDEO_START(speedspn)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -302,15 +300,15 @@ MACHINE_CONFIG_END
 /*** ROM LOADING *************************************************************/
 
 ROM_START( speedspn )
-	ROM_REGION( 0x088000, "maincpu", 0 )	/* CPU1 code */
+	ROM_REGION( 0x088000, "maincpu", 0 )    /* CPU1 code */
 	/* most of this is probably actually banked */
 	ROM_LOAD( "tch-ss1.u78", 0x00000, 0x008000, CRC(41b6b45b) SHA1(d969119959db4cc3be50f188bfa41e4b4896eaca) ) /* fixed code */
 	ROM_CONTINUE(            0x10000, 0x078000 ) /* banked data */
 
-	ROM_REGION( 0x10000, "audiocpu", 0 )	/* CPU2 code */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* CPU2 code */
 	ROM_LOAD( "tch-ss2.u96", 0x00000, 0x10000, CRC(4611fd0c) SHA1(b49ad6a8be6ccfef0b2ed187fb3b008fb7eeb2b5) ) // FIRST AND SECOND HALF IDENTICAL
 
-	ROM_REGION( 0x080000, "user1", 0 )	/* Samples */
+	ROM_REGION( 0x080000, "user1", 0 )  /* Samples */
 	ROM_LOAD( "tch-ss3.u95", 0x00000, 0x080000, CRC(1c9deb5e) SHA1(89f01a8e8bdb0eee47e9195b312d2e65d41d3548) )
 
 	/* $00000-$20000 stays the same in all sound banks, */
@@ -325,13 +323,13 @@ ROM_START( speedspn )
 	ROM_COPY( "user1", 0x000000, 0x0c0000, 0x020000)
 	ROM_COPY( "user1", 0x060000, 0x0e0000, 0x020000)
 
-	ROM_REGION( 0x80000, "gfx1", ROMREGION_INVERT )	/* GFX */
+	ROM_REGION( 0x80000, "gfx1", ROMREGION_INVERT ) /* GFX */
 	ROM_LOAD( "tch-ss4.u70", 0x00000, 0x020000, CRC(41517859) SHA1(3c5102e41c5a70e02ed88ea43ca63edf13f4c1b9) )
 	ROM_LOAD( "tch-ss5.u69", 0x20000, 0x020000, CRC(832b2f34) SHA1(7a3060869a9698c9ed4187b239a70e273de64e3c) )
 	ROM_LOAD( "tch-ss6.u60", 0x40000, 0x020000, CRC(f1fd7289) SHA1(8950ef58efdffc45d68152257ca36aedf5ddf677) )
 	ROM_LOAD( "tch-ss7.u59", 0x60000, 0x020000, CRC(c4958543) SHA1(c959b440801707c30a8968a1f44abe5442d03eff) )
 
-	ROM_REGION( 0x40000, "gfx2", ROMREGION_INVERT )	/* GFX */
+	ROM_REGION( 0x40000, "gfx2", ROMREGION_INVERT ) /* GFX */
 	ROM_LOAD( "tch-ss8.u39", 0x00000, 0x020000, CRC(2f27b16d) SHA1(7cc017fa08573f8a9d94d017abb987f8288bcd29) )
 	ROM_LOAD( "tch-ss9.u34", 0x20000, 0x020000, CRC(c372f8ec) SHA1(514bef0859c0adfd9cdd22864230fc83e9b1962d) )
 ROM_END
@@ -340,4 +338,4 @@ ROM_END
 
 /*** GAME DRIVERS ************************************************************/
 
-GAME( 1994, speedspn, 0, speedspn, speedspn, 0, ROT180, "TCH", "Speed Spin", GAME_IMPERFECT_GRAPHICS )
+GAME( 1994, speedspn, 0, speedspn, speedspn, driver_device, 0, ROT180, "TCH", "Speed Spin", 0 )

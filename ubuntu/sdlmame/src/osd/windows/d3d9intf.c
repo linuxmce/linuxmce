@@ -43,6 +43,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <d3d9.h>
+#include <d3dx9.h>
 #undef interface
 
 // MAME headers
@@ -60,15 +61,15 @@
 
 typedef IDirect3D9 *(WINAPI *direct3dcreate9_ptr)(UINT SDKVersion);
 
+typedef HRESULT (WINAPI *direct3dx9_loadeffect_ptr)(LPDIRECT3DDEVICE9 pDevice, LPCTSTR pSrcFile, const D3DXMACRO *pDefines, LPD3DXINCLUDE pInclude, DWORD Flags, LPD3DXEFFECTPOOL pPool, LPD3DXEFFECT *ppEffect, LPD3DXBUFFER *ppCompilationErrors);
+static direct3dx9_loadeffect_ptr g_load_effect = NULL;
 
 
 //============================================================
 //  PROTOTYPES
 //============================================================
 
-static void set_interfaces(d3d *d3dptr);
-
-
+static void set_interfaces(d3d_base *d3dptr);
 
 //============================================================
 //  INLINES
@@ -99,12 +100,13 @@ INLINE void convert_present_params(const d3d_present_parameters *params, D3DPRES
 //  drawd3d9_init
 //============================================================
 
-d3d *drawd3d9_init(void)
+d3d_base *drawd3d9_init(void)
 {
 	direct3dcreate9_ptr direct3dcreate9;
 	HINSTANCE dllhandle;
 	IDirect3D9 *d3d9;
-	d3d *d3dptr;
+	d3d_base *d3dptr;
+	bool post_available = true;
 
 	// dynamically grab the create function from d3d9.dll
 	dllhandle = LoadLibrary(TEXT("d3d9.dll"));
@@ -134,11 +136,40 @@ d3d *drawd3d9_init(void)
 		return NULL;
 	}
 
+	// dynamically grab the shader load function from d3dx9.dll
+	HINSTANCE fxhandle = LoadLibrary(TEXT("d3dx9_43.dll"));
+	if (fxhandle == NULL)
+	{
+		post_available = false;
+		mame_printf_verbose("Direct3D: Warning - Unable to access d3dx9_43.dll; disabling post-effect rendering\n");
+	}
+
+	// import the create function
+	if(post_available)
+	{
+		g_load_effect = (direct3dx9_loadeffect_ptr)GetProcAddress(fxhandle, "D3DXCreateEffectFromFileW");
+		if (g_load_effect == NULL)
+		{
+			printf("Direct3D: Unable to find D3DXCreateEffectFromFileW\n");
+			FreeLibrary(dllhandle);
+			fxhandle = NULL;
+			dllhandle = NULL;
+			return NULL;
+		}
+	}
+	else
+	{
+		g_load_effect = NULL;
+		post_available = false;
+		mame_printf_verbose("Direct3D: Warning - Unable to get a handle to D3DXCreateEffectFromFileW; disabling post-effect rendering\n");
+	}
+
 	// allocate an object to hold our data
-	d3dptr = global_alloc(d3d);
+	d3dptr = global_alloc(d3d_base);
 	d3dptr->version = 9;
 	d3dptr->d3dobj = d3d9;
 	d3dptr->dllhandle = dllhandle;
+	d3dptr->post_fx_available = post_available;
 	set_interfaces(d3dptr);
 
 	mame_printf_verbose("Direct3D: Using Direct3D 9\n");
@@ -151,21 +182,20 @@ d3d *drawd3d9_init(void)
 //  Direct3D interfaces
 //============================================================
 
-static HRESULT d3d_check_device_format(d3d *d3dptr, UINT adapter, D3DDEVTYPE devtype, D3DFORMAT adapterformat, DWORD usage, D3DRESOURCETYPE restype, D3DFORMAT format)
+static HRESULT d3d_check_device_format(d3d_base *d3dptr, UINT adapter, D3DDEVTYPE devtype, D3DFORMAT adapterformat, DWORD usage, D3DRESOURCETYPE restype, D3DFORMAT format)
 {
 	IDirect3D9 *d3d9 = (IDirect3D9 *)d3dptr->d3dobj;
 	return IDirect3D9_CheckDeviceFormat(d3d9, adapter, devtype, adapterformat, usage, restype, format);
 }
 
 
-static HRESULT d3d_check_device_type(d3d *d3dptr, UINT adapter, D3DDEVTYPE devtype, D3DFORMAT format, D3DFORMAT backformat, BOOL windowed)
+static HRESULT d3d_check_device_type(d3d_base *d3dptr, UINT adapter, D3DDEVTYPE devtype, D3DFORMAT format, D3DFORMAT backformat, BOOL windowed)
 {
 	IDirect3D9 *d3d9 = (IDirect3D9 *)d3dptr->d3dobj;
 	return IDirect3D9_CheckDeviceType(d3d9, adapter, devtype, format, backformat, windowed);
 }
 
-
-static HRESULT d3d_create_device(d3d *d3dptr, UINT adapter, D3DDEVTYPE devtype, HWND focus, DWORD behavior, d3d_present_parameters *params, d3d_device **dev)
+static HRESULT d3d_create_device(d3d_base *d3dptr, UINT adapter, D3DDEVTYPE devtype, HWND focus, DWORD behavior, d3d_present_parameters *params, d3d_device **dev)
 {
 	IDirect3D9 *d3d9 = (IDirect3D9 *)d3dptr->d3dobj;
 	D3DPRESENT_PARAMETERS d3d9params;
@@ -173,29 +203,28 @@ static HRESULT d3d_create_device(d3d *d3dptr, UINT adapter, D3DDEVTYPE devtype, 
 	return IDirect3D9_CreateDevice(d3d9, adapter, devtype, focus, behavior, &d3d9params, (IDirect3DDevice9 **)dev);
 }
 
-
-static HRESULT d3d_enum_adapter_modes(d3d *d3dptr, UINT adapter, D3DFORMAT format, UINT index, D3DDISPLAYMODE *mode)
+static HRESULT d3d_enum_adapter_modes(d3d_base *d3dptr, UINT adapter, D3DFORMAT format, UINT index, D3DDISPLAYMODE *mode)
 {
 	IDirect3D9 *d3d9 = (IDirect3D9 *)d3dptr->d3dobj;
 	return IDirect3D9_EnumAdapterModes(d3d9, adapter, format, index, mode);
 }
 
 
-static UINT d3d_get_adapter_count(d3d *d3dptr)
+static UINT d3d_get_adapter_count(d3d_base *d3dptr)
 {
 	IDirect3D9 *d3d9 = (IDirect3D9 *)d3dptr->d3dobj;
 	return IDirect3D9_GetAdapterCount(d3d9);
 }
 
 
-static HRESULT d3d_get_adapter_display_mode(d3d *d3dptr, UINT adapter, D3DDISPLAYMODE *mode)
+static HRESULT d3d_get_adapter_display_mode(d3d_base *d3dptr, UINT adapter, D3DDISPLAYMODE *mode)
 {
 	IDirect3D9 *d3d9 = (IDirect3D9 *)d3dptr->d3dobj;
 	return IDirect3D9_GetAdapterDisplayMode(d3d9, adapter, mode);
 }
 
 
-static HRESULT d3d_get_adapter_identifier(d3d *d3dptr, UINT adapter, DWORD flags, d3d_adapter_identifier *identifier)
+static HRESULT d3d_get_adapter_identifier(d3d_base *d3dptr, UINT adapter, DWORD flags, d3d_adapter_identifier *identifier)
 {
 	IDirect3D9 *d3d9 = (IDirect3D9 *)d3dptr->d3dobj;
 	D3DADAPTER_IDENTIFIER9 id;
@@ -213,46 +242,47 @@ static HRESULT d3d_get_adapter_identifier(d3d *d3dptr, UINT adapter, DWORD flags
 }
 
 
-static UINT d3d_get_adapter_mode_count(d3d *d3dptr, UINT adapter, D3DFORMAT format)
+static UINT d3d_get_adapter_mode_count(d3d_base *d3dptr, UINT adapter, D3DFORMAT format)
 {
 	IDirect3D9 *d3d9 = (IDirect3D9 *)d3dptr->d3dobj;
 	return IDirect3D9_GetAdapterModeCount(d3d9, adapter, format);
 }
 
 
-static HMONITOR d3d_get_adapter_monitor(d3d *d3dptr, UINT adapter)
+static HMONITOR d3d_get_adapter_monitor(d3d_base *d3dptr, UINT adapter)
 {
 	IDirect3D9 *d3d9 = (IDirect3D9 *)d3dptr->d3dobj;
 	return IDirect3D9_GetAdapterMonitor(d3d9, adapter);
 }
 
 
-static HRESULT d3d_get_caps_dword(d3d *d3dptr, UINT adapter, D3DDEVTYPE devtype, d3d_caps_index which, DWORD *value)
+static HRESULT d3d_get_caps_dword(d3d_base *d3dptr, UINT adapter, D3DDEVTYPE devtype, d3d_caps_index which, DWORD *value)
 {
 	IDirect3D9 *d3d9 = (IDirect3D9 *)d3dptr->d3dobj;
 	D3DCAPS9 caps;
 	HRESULT result = IDirect3D9_GetDeviceCaps(d3d9, adapter, devtype, &caps);
 	switch (which)
 	{
-		case CAPS_PRESENTATION_INTERVALS:	*value = caps.PresentationIntervals;	break;
-		case CAPS_CAPS2:					*value = caps.Caps2;					break;
-		case CAPS_DEV_CAPS:					*value = caps.DevCaps;					break;
-		case CAPS_SRCBLEND_CAPS:			*value = caps.SrcBlendCaps;				break;
-		case CAPS_DSTBLEND_CAPS:			*value = caps.DestBlendCaps;			break;
-		case CAPS_TEXTURE_CAPS:				*value = caps.TextureCaps;				break;
-		case CAPS_TEXTURE_FILTER_CAPS:		*value = caps.TextureFilterCaps;		break;
-		case CAPS_TEXTURE_ADDRESS_CAPS:		*value = caps.TextureAddressCaps;		break;
-		case CAPS_TEXTURE_OP_CAPS:			*value = caps.TextureOpCaps;			break;
-		case CAPS_MAX_TEXTURE_ASPECT:		*value = caps.MaxTextureAspectRatio;	break;
-		case CAPS_MAX_TEXTURE_WIDTH:		*value = caps.MaxTextureWidth;			break;
-		case CAPS_MAX_TEXTURE_HEIGHT:		*value = caps.MaxTextureHeight;			break;
-		case CAPS_STRETCH_RECT_FILTER:		*value = caps.StretchRectFilterCaps;	break;
+		case CAPS_PRESENTATION_INTERVALS:   *value = caps.PresentationIntervals;    break;
+		case CAPS_CAPS2:                    *value = caps.Caps2;                    break;
+		case CAPS_DEV_CAPS:                 *value = caps.DevCaps;                  break;
+		case CAPS_SRCBLEND_CAPS:            *value = caps.SrcBlendCaps;             break;
+		case CAPS_DSTBLEND_CAPS:            *value = caps.DestBlendCaps;            break;
+		case CAPS_TEXTURE_CAPS:             *value = caps.TextureCaps;              break;
+		case CAPS_TEXTURE_FILTER_CAPS:      *value = caps.TextureFilterCaps;        break;
+		case CAPS_TEXTURE_ADDRESS_CAPS:     *value = caps.TextureAddressCaps;       break;
+		case CAPS_TEXTURE_OP_CAPS:          *value = caps.TextureOpCaps;            break;
+		case CAPS_MAX_TEXTURE_ASPECT:       *value = caps.MaxTextureAspectRatio;    break;
+		case CAPS_MAX_TEXTURE_WIDTH:        *value = caps.MaxTextureWidth;          break;
+		case CAPS_MAX_TEXTURE_HEIGHT:       *value = caps.MaxTextureHeight;         break;
+		case CAPS_STRETCH_RECT_FILTER:      *value = caps.StretchRectFilterCaps;    break;
+		case CAPS_MAX_PS30_INSN_SLOTS:      *value = caps.MaxPixelShader30InstructionSlots; break;
 	}
 	return result;
 }
 
 
-static ULONG d3d_release(d3d *d3dptr)
+static ULONG d3d_release(d3d_base *d3dptr)
 {
 	IDirect3D9 *d3d9 = (IDirect3D9 *)d3dptr->d3dobj;
 	ULONG result = IDirect3D9_Release(d3d9);
@@ -289,7 +319,6 @@ static HRESULT d3d_device_begin_scene(d3d_device *dev)
 	return IDirect3DDevice9_BeginScene(device);
 }
 
-
 static HRESULT d3d_device_clear(d3d_device *dev, DWORD count, const D3DRECT *rects, DWORD flags, D3DCOLOR color, float z, DWORD stencil)
 {
 	IDirect3DDevice9 *device = (IDirect3DDevice9 *)dev;
@@ -301,6 +330,29 @@ static HRESULT d3d_device_create_offscreen_plain_surface(d3d_device *dev, UINT w
 {
 	IDirect3DDevice9 *device = (IDirect3DDevice9 *)dev;
 	return IDirect3DDevice9_CreateOffscreenPlainSurface(device, width, height, format, pool, (IDirect3DSurface9 **)surface, NULL);
+}
+
+
+static HRESULT d3d_device_create_effect(d3d_device *dev, const WCHAR *name, d3d_effect **effect)
+{
+	IDirect3DDevice9 *device = (IDirect3DDevice9 *)dev;
+
+	LPD3DXBUFFER buffer_errors = NULL;
+	HRESULT hr = (*g_load_effect)(device, name, NULL, NULL, 0, NULL, (ID3DXEffect**)effect, &buffer_errors);
+	if(FAILED(hr))
+	{
+		if(buffer_errors != NULL)
+		{
+			LPVOID compile_errors = buffer_errors->GetBufferPointer();
+			printf("Unable to compile shader: %s\n", (const char*)compile_errors);
+		}
+		else
+		{
+			printf("Unable to compile shader (unspecified reason)\n");
+		}
+	}
+
+	return hr;
 }
 
 
@@ -343,6 +395,13 @@ static HRESULT d3d_device_get_render_target(d3d_device *dev, DWORD index, d3d_su
 {
 	IDirect3DDevice9 *device = (IDirect3DDevice9 *)dev;
 	return IDirect3DDevice9_GetRenderTarget(device, index, (IDirect3DSurface9 **)surface);
+}
+
+
+static HRESULT d3d_device_get_render_target_data(d3d_device *dev, d3d_surface *rendertarget, d3d_surface *destsurface)
+{
+	IDirect3DDevice9 *device = (IDirect3DDevice9 *)dev;
+	return IDirect3DDevice9_GetRenderTargetData(device, (IDirect3DSurface9 *)rendertarget, (IDirect3DSurface9 *)destsurface);
 }
 
 
@@ -402,6 +461,13 @@ static HRESULT d3d_device_set_render_target(d3d_device *dev, DWORD index, d3d_su
 }
 
 
+static HRESULT d3d_device_create_render_target(d3d_device *dev, UINT width, UINT height, D3DFORMAT format, d3d_surface **surface)
+{
+	IDirect3DDevice9 *device = (IDirect3DDevice9 *)dev;
+	return IDirect3DDevice9_CreateRenderTarget(device, width, height, format, D3DMULTISAMPLE_NONE, 0, false, (IDirect3DSurface9 **)surface, NULL);
+}
+
+
 static HRESULT d3d_device_set_stream_source(d3d_device *dev, UINT number, d3d_vertex_buffer *vbuf, UINT stride)
 {
 	IDirect3DDevice9 *device = (IDirect3DDevice9 *)dev;
@@ -449,7 +515,7 @@ static HRESULT d3d_device_set_texture_stage_state(d3d_device *dev, DWORD stage, 
 }
 
 
-static HRESULT d3d_device_set_vertex_shader(d3d_device *dev, D3DFORMAT format)
+static HRESULT d3d_device_set_vertex_format(d3d_device *dev, D3DFORMAT format)
 {
 	IDirect3DDevice9 *device = (IDirect3DDevice9 *)dev;
 	return IDirect3DDevice9_SetFVF(device, format);
@@ -477,12 +543,15 @@ static const d3d_device_interface d3d9_device_interface =
 	d3d_device_begin_scene,
 	d3d_device_clear,
 	d3d_device_create_offscreen_plain_surface,
+	d3d_device_create_effect,
 	d3d_device_create_texture,
 	d3d_device_create_vertex_buffer,
+	d3d_device_create_render_target,
 	d3d_device_draw_primitive,
 	d3d_device_end_scene,
 	d3d_device_get_raster_status,
 	d3d_device_get_render_target,
+	d3d_device_get_render_target_data,
 	d3d_device_present,
 	d3d_device_release,
 	d3d_device_reset,
@@ -492,7 +561,7 @@ static const d3d_device_interface d3d9_device_interface =
 	d3d_device_set_stream_source,
 	d3d_device_set_texture,
 	d3d_device_set_texture_stage_state,
-	d3d_device_set_vertex_shader,
+	d3d_device_set_vertex_format,
 	d3d_device_stretch_rect,
 	d3d_device_test_cooperative_level
 };
@@ -610,14 +679,122 @@ static const d3d_vertex_buffer_interface d3d9_vertex_buffer_interface =
 
 
 //============================================================
+//  Direct3DEffect interfaces
+//============================================================
+
+static void d3d_effect_begin(d3d_effect *effect, UINT *passes, DWORD flags)
+{
+	ID3DXEffect *d3dfx = (ID3DXEffect*)effect;
+	d3dfx->Begin(passes, flags);
+}
+
+
+static void d3d_effect_end(d3d_effect *effect)
+{
+	ID3DXEffect *d3dfx = (ID3DXEffect*)effect;
+	d3dfx->End();
+}
+
+
+static void d3d_effect_begin_pass(d3d_effect *effect, UINT pass)
+{
+	ID3DXEffect *d3dfx = (ID3DXEffect*)effect;
+	d3dfx->BeginPass(pass);
+}
+
+
+static void d3d_effect_end_pass(d3d_effect *effect)
+{
+	ID3DXEffect *d3dfx = (ID3DXEffect*)effect;
+	d3dfx->EndPass();
+}
+
+
+static void d3d_effect_set_technique(d3d_effect *effect, const char *name)
+{
+	ID3DXEffect *d3dfx = (ID3DXEffect*)effect;
+	d3dfx->SetTechnique(name);
+}
+
+
+static void d3d_effect_set_vector(d3d_effect *effect, const char *name, int count, float *vector)
+{
+	static D3DXVECTOR4 out_vector;
+	ID3DXEffect *d3dfx = (ID3DXEffect*)effect;
+	if (count > 0)
+		out_vector.x = vector[0];
+	if (count > 1)
+		out_vector.y = vector[1];
+	if (count > 2)
+		out_vector.z = vector[2];
+	if (count > 3)
+		out_vector.w = vector[3];
+	d3dfx->SetVector(name, &out_vector);
+}
+
+
+static void d3d_effect_set_float(d3d_effect *effect, const char *name, float value)
+{
+	ID3DXEffect *d3dfx = (ID3DXEffect*)effect;
+	d3dfx->SetFloat(name, value);
+}
+
+
+static void d3d_effect_set_int(d3d_effect *effect, const char *name, int value)
+{
+	ID3DXEffect *d3dfx = (ID3DXEffect*)effect;
+	d3dfx->SetInt(name, value);
+}
+
+
+static void d3d_effect_set_matrix(d3d_effect *effect, const char *name, d3d_matrix *matrix)
+{
+	ID3DXEffect *d3dfx = (ID3DXEffect*)effect;
+	d3dfx->SetMatrix(name, (D3DXMATRIX*)matrix);
+}
+
+
+static void d3d_effect_set_texture(d3d_effect *effect, const char *name, d3d_texture *tex)
+{
+	ID3DXEffect *d3dfx = (ID3DXEffect*)effect;
+	d3dfx->SetTexture(name, (IDirect3DTexture9*)tex);
+}
+
+
+static ULONG d3d_effect_release(d3d_effect *effect)
+{
+	ID3DXEffect *d3dfx = (ID3DXEffect*)effect;
+	return d3dfx->Release();
+}
+
+
+static const d3d_effect_interface d3d9_effect_interface =
+{
+	d3d_effect_begin,
+	d3d_effect_end,
+	d3d_effect_begin_pass,
+	d3d_effect_end_pass,
+	d3d_effect_set_technique,
+	d3d_effect_set_vector,
+	d3d_effect_set_float,
+	d3d_effect_set_int,
+	d3d_effect_set_matrix,
+	d3d_effect_set_texture,
+	d3d_effect_release
+};
+
+
+
+//============================================================
 //  set_interfaces
 //============================================================
 
-static void set_interfaces(d3d *d3dptr)
+static void set_interfaces(d3d_base *d3dptr)
 {
 	d3dptr->d3d = d3d9_interface;
 	d3dptr->device = d3d9_device_interface;
 	d3dptr->surface = d3d9_surface_interface;
 	d3dptr->texture = d3d9_texture_interface;
 	d3dptr->vertexbuf = d3d9_vertex_buffer_interface;
+	d3dptr->effect = d3d9_effect_interface;
 }

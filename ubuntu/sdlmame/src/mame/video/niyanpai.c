@@ -18,22 +18,20 @@ static void niyanpai_gfxdraw(running_machine &machine, int vram);
 
 
 ******************************************************************************/
-READ16_HANDLER( niyanpai_palette_r )
+READ16_MEMBER(niyanpai_state::niyanpai_palette_r)
 {
-	niyanpai_state *state = space->machine().driver_data<niyanpai_state>();
-	return state->m_palette[offset];
+	return m_palette[offset];
 }
 
-WRITE16_HANDLER( niyanpai_palette_w )
+WRITE16_MEMBER(niyanpai_state::niyanpai_palette_w)
 {
-	niyanpai_state *state = space->machine().driver_data<niyanpai_state>();
 	int r, g, b;
 	int offs_h, offs_l;
-	UINT16 oldword = state->m_palette[offset];
+	UINT16 oldword = m_palette[offset];
 	UINT16 newword;
 
-	COMBINE_DATA(&state->m_palette[offset]);
-	newword = state->m_palette[offset];
+	COMBINE_DATA(&m_palette[offset]);
+	newword = m_palette[offset];
 
 	if (oldword != newword)
 	{
@@ -42,20 +40,20 @@ WRITE16_HANDLER( niyanpai_palette_w )
 
 		if (ACCESSING_BITS_8_15)
 		{
-			r  = ((state->m_palette[(0x000 + (offs_h * 0x180) + offs_l)] & 0xff00) >> 8);
-			g  = ((state->m_palette[(0x080 + (offs_h * 0x180) + offs_l)] & 0xff00) >> 8);
-			b  = ((state->m_palette[(0x100 + (offs_h * 0x180) + offs_l)] & 0xff00) >> 8);
+			r  = ((m_palette[(0x000 + (offs_h * 0x180) + offs_l)] & 0xff00) >> 8);
+			g  = ((m_palette[(0x080 + (offs_h * 0x180) + offs_l)] & 0xff00) >> 8);
+			b  = ((m_palette[(0x100 + (offs_h * 0x180) + offs_l)] & 0xff00) >> 8);
 
-			palette_set_color(space->machine(), ((offs_h << 8) + (offs_l << 1) + 0), MAKE_RGB(r, g, b));
+			palette_set_color(machine(), ((offs_h << 8) + (offs_l << 1) + 0), MAKE_RGB(r, g, b));
 		}
 
 		if (ACCESSING_BITS_0_7)
 		{
-			r  = ((state->m_palette[(0x000 + (offs_h * 0x180) + offs_l)] & 0x00ff) >> 0);
-			g  = ((state->m_palette[(0x080 + (offs_h * 0x180) + offs_l)] & 0x00ff) >> 0);
-			b  = ((state->m_palette[(0x100 + (offs_h * 0x180) + offs_l)] & 0x00ff) >> 0);
+			r  = ((m_palette[(0x000 + (offs_h * 0x180) + offs_l)] & 0x00ff) >> 0);
+			g  = ((m_palette[(0x080 + (offs_h * 0x180) + offs_l)] & 0x00ff) >> 0);
+			b  = ((m_palette[(0x100 + (offs_h * 0x180) + offs_l)] & 0x00ff) >> 0);
 
-			palette_set_color(space->machine(), ((offs_h << 8) + (offs_l << 1) + 1), MAKE_RGB(r, g, b));
+			palette_set_color(machine(), ((offs_h << 8) + (offs_l << 1) + 1), MAKE_RGB(r, g, b));
 		}
 	}
 }
@@ -68,13 +66,13 @@ static int niyanpai_blitter_r(running_machine &machine, int vram, int offset)
 {
 	niyanpai_state *state = machine.driver_data<niyanpai_state>();
 	int ret;
-	UINT8 *GFXROM = machine.region("gfx1")->base();
+	UINT8 *GFXROM = state->memregion("gfx1")->base();
 
 	switch (offset)
 	{
-		case 0x00:	ret = 0xfe | ((state->m_nb19010_busyflag & 0x01) ^ 0x01); break;	// NB19010 Busy Flag
-		case 0x01:	ret = GFXROM[state->m_blitter_src_addr[vram]]; break;			// NB19010 GFX-ROM Read
-		default:	ret = 0xff; break;
+		case 0x00:  ret = 0xfe | ((state->m_nb19010_busyflag & 0x01) ^ 0x01); break;    // NB19010 Busy Flag
+		case 0x01:  ret = GFXROM[state->m_blitter_src_addr[vram]]; break;           // NB19010 GFX-ROM Read
+		default:    ret = 0xff; break;
 	}
 
 	return ret;
@@ -85,7 +83,7 @@ static void niyanpai_blitter_w(running_machine &machine, int vram, int offset, i
 	niyanpai_state *state = machine.driver_data<niyanpai_state>();
 	switch (offset)
 	{
-		case 0x00:	state->m_blitter_direction_x[vram] = (data & 0x01) ? 1 : 0;
+		case 0x00:  state->m_blitter_direction_x[vram] = (data & 0x01) ? 1 : 0;
 					state->m_blitter_direction_y[vram] = (data & 0x02) ? 1 : 0;
 					state->m_clutmode[vram] = (data & 0x04) ? 1 : 0;
 				//  if (data & 0x08) popmessage("Unknown GFX Flag!! (0x08)");
@@ -95,22 +93,22 @@ static void niyanpai_blitter_w(running_machine &machine, int vram, int offset, i
 					state->m_dispflag[vram] = (data & 0x80) ? 1 : 0;
 					niyanpai_vramflip(machine, vram);
 					break;
-		case 0x01:	state->m_scrollx[vram] = (state->m_scrollx[vram] & 0x0100) | data; break;
-		case 0x02:	state->m_scrollx[vram] = (state->m_scrollx[vram] & 0x00ff) | ((data << 8) & 0x0100); break;
-		case 0x03:	state->m_scrolly[vram] = (state->m_scrolly[vram] & 0x0100) | data; break;
-		case 0x04:	state->m_scrolly[vram] = (state->m_scrolly[vram] & 0x00ff) | ((data << 8) & 0x0100); break;
-		case 0x05:	state->m_blitter_src_addr[vram] = (state->m_blitter_src_addr[vram] & 0xffff00) | data; break;
-		case 0x06:	state->m_blitter_src_addr[vram] = (state->m_blitter_src_addr[vram] & 0xff00ff) | (data << 8); break;
-		case 0x07:	state->m_blitter_src_addr[vram] = (state->m_blitter_src_addr[vram] & 0x00ffff) | (data << 16); break;
-		case 0x08:	state->m_blitter_sizex[vram] = data; break;
-		case 0x09:	state->m_blitter_sizey[vram] = data; break;
-		case 0x0a:	state->m_blitter_destx[vram] = (state->m_blitter_destx[vram]  & 0xff00) | data; break;
-		case 0x0b:	state->m_blitter_destx[vram] = (state->m_blitter_destx[vram]  & 0x00ff) | (data << 8); break;
-		case 0x0c:	state->m_blitter_desty[vram] = (state->m_blitter_desty[vram]  & 0xff00) | data; break;
-		case 0x0d:	state->m_blitter_desty[vram] = (state->m_blitter_desty[vram]  & 0x00ff) | (data << 8);
+		case 0x01:  state->m_scrollx[vram] = (state->m_scrollx[vram] & 0x0100) | data; break;
+		case 0x02:  state->m_scrollx[vram] = (state->m_scrollx[vram] & 0x00ff) | ((data << 8) & 0x0100); break;
+		case 0x03:  state->m_scrolly[vram] = (state->m_scrolly[vram] & 0x0100) | data; break;
+		case 0x04:  state->m_scrolly[vram] = (state->m_scrolly[vram] & 0x00ff) | ((data << 8) & 0x0100); break;
+		case 0x05:  state->m_blitter_src_addr[vram] = (state->m_blitter_src_addr[vram] & 0xffff00) | data; break;
+		case 0x06:  state->m_blitter_src_addr[vram] = (state->m_blitter_src_addr[vram] & 0xff00ff) | (data << 8); break;
+		case 0x07:  state->m_blitter_src_addr[vram] = (state->m_blitter_src_addr[vram] & 0x00ffff) | (data << 16); break;
+		case 0x08:  state->m_blitter_sizex[vram] = data; break;
+		case 0x09:  state->m_blitter_sizey[vram] = data; break;
+		case 0x0a:  state->m_blitter_destx[vram] = (state->m_blitter_destx[vram]  & 0xff00) | data; break;
+		case 0x0b:  state->m_blitter_destx[vram] = (state->m_blitter_destx[vram]  & 0x00ff) | (data << 8); break;
+		case 0x0c:  state->m_blitter_desty[vram] = (state->m_blitter_desty[vram]  & 0xff00) | data; break;
+		case 0x0d:  state->m_blitter_desty[vram] = (state->m_blitter_desty[vram]  & 0x00ff) | (data << 8);
 					niyanpai_gfxdraw(machine, vram);
 					break;
-		default:	break;
+		default:    break;
 	}
 }
 
@@ -170,19 +168,18 @@ static void update_pixel(running_machine &machine, int vram, int x, int y)
 {
 	niyanpai_state *state = machine.driver_data<niyanpai_state>();
 	UINT16 color = state->m_videoram[vram][(y * machine.primary_screen->width()) + x];
-	*BITMAP_ADDR16(state->m_tmpbitmap[vram], y, x) = color;
+	state->m_tmpbitmap[vram].pix16(y, x) = color;
 }
 
-static TIMER_CALLBACK( blitter_timer_callback )
+TIMER_CALLBACK_MEMBER(niyanpai_state::blitter_timer_callback)
 {
-	niyanpai_state *state = machine.driver_data<niyanpai_state>();
-	state->m_nb19010_busyflag = 1;
+	m_nb19010_busyflag = 1;
 }
 
 static void niyanpai_gfxdraw(running_machine &machine, int vram)
 {
 	niyanpai_state *state = machine.driver_data<niyanpai_state>();
-	UINT8 *GFX = machine.region("gfx1")->base();
+	UINT8 *GFX = state->memregion("gfx1")->base();
 	int width = machine.primary_screen->width();
 
 	int x, y;
@@ -229,7 +226,7 @@ static void niyanpai_gfxdraw(running_machine &machine, int vram)
 		skipy = -1;
 	}
 
-	gfxlen = machine.region("gfx1")->bytes();
+	gfxlen = machine.root_device().memregion("gfx1")->bytes();
 	gfxaddr = ((state->m_blitter_src_addr[vram] + 2) & 0x00ffffff);
 
 	for (y = starty, ctry = sizey; ctry >= 0; y += skipy, ctry--)
@@ -332,106 +329,104 @@ static void niyanpai_gfxdraw(running_machine &machine, int vram)
 	}
 
 	state->m_nb19010_busyflag = 0;
-	machine.scheduler().timer_set(attotime::from_nsec(1650 * state->m_nb19010_busyctr), FUNC(blitter_timer_callback));
+	machine.scheduler().timer_set(attotime::from_nsec(1000 * state->m_nb19010_busyctr), timer_expired_delegate(FUNC(niyanpai_state::blitter_timer_callback),state));
 }
 
 /******************************************************************************
 
 
 ******************************************************************************/
-WRITE16_HANDLER( niyanpai_blitter_0_w )	{ niyanpai_blitter_w(space->machine(), 0, offset, data); }
-WRITE16_HANDLER( niyanpai_blitter_1_w )	{ niyanpai_blitter_w(space->machine(), 1, offset, data); }
-WRITE16_HANDLER( niyanpai_blitter_2_w )	{ niyanpai_blitter_w(space->machine(), 2, offset, data); }
+WRITE16_MEMBER(niyanpai_state::niyanpai_blitter_0_w){ niyanpai_blitter_w(machine(), 0, offset, data); }
+WRITE16_MEMBER(niyanpai_state::niyanpai_blitter_1_w){ niyanpai_blitter_w(machine(), 1, offset, data); }
+WRITE16_MEMBER(niyanpai_state::niyanpai_blitter_2_w){ niyanpai_blitter_w(machine(), 2, offset, data); }
 
-READ16_HANDLER( niyanpai_blitter_0_r )	{ return niyanpai_blitter_r(space->machine(), 0, offset); }
-READ16_HANDLER( niyanpai_blitter_1_r )	{ return niyanpai_blitter_r(space->machine(), 1, offset); }
-READ16_HANDLER( niyanpai_blitter_2_r )	{ return niyanpai_blitter_r(space->machine(), 2, offset); }
+READ16_MEMBER(niyanpai_state::niyanpai_blitter_0_r){ return niyanpai_blitter_r(machine(), 0, offset); }
+READ16_MEMBER(niyanpai_state::niyanpai_blitter_1_r){ return niyanpai_blitter_r(machine(), 1, offset); }
+READ16_MEMBER(niyanpai_state::niyanpai_blitter_2_r){ return niyanpai_blitter_r(machine(), 2, offset); }
 
-WRITE16_HANDLER( niyanpai_clut_0_w )	{ niyanpai_clut_w(space->machine(), 0, offset, data); }
-WRITE16_HANDLER( niyanpai_clut_1_w )	{ niyanpai_clut_w(space->machine(), 1, offset, data); }
-WRITE16_HANDLER( niyanpai_clut_2_w )	{ niyanpai_clut_w(space->machine(), 2, offset, data); }
+WRITE16_MEMBER(niyanpai_state::niyanpai_clut_0_w){ niyanpai_clut_w(machine(), 0, offset, data); }
+WRITE16_MEMBER(niyanpai_state::niyanpai_clut_1_w){ niyanpai_clut_w(machine(), 1, offset, data); }
+WRITE16_MEMBER(niyanpai_state::niyanpai_clut_2_w){ niyanpai_clut_w(machine(), 2, offset, data); }
 
-WRITE16_HANDLER( niyanpai_clutsel_0_w )	{ niyanpai_clutsel_w(space->machine(), 0, data); }
-WRITE16_HANDLER( niyanpai_clutsel_1_w )	{ niyanpai_clutsel_w(space->machine(), 1, data); }
-WRITE16_HANDLER( niyanpai_clutsel_2_w )	{ niyanpai_clutsel_w(space->machine(), 2, data); }
+WRITE16_MEMBER(niyanpai_state::niyanpai_clutsel_0_w){ niyanpai_clutsel_w(machine(), 0, data); }
+WRITE16_MEMBER(niyanpai_state::niyanpai_clutsel_1_w){ niyanpai_clutsel_w(machine(), 1, data); }
+WRITE16_MEMBER(niyanpai_state::niyanpai_clutsel_2_w){ niyanpai_clutsel_w(machine(), 2, data); }
 
 /******************************************************************************
 
 
 ******************************************************************************/
-VIDEO_START( niyanpai )
+void niyanpai_state::video_start()
 {
-	niyanpai_state *state = machine.driver_data<niyanpai_state>();
-	int width = machine.primary_screen->width();
-	int height = machine.primary_screen->height();
+	int width = machine().primary_screen->width();
+	int height = machine().primary_screen->height();
 
-	state->m_tmpbitmap[0] = machine.primary_screen->alloc_compatible_bitmap();
-	state->m_tmpbitmap[1] = machine.primary_screen->alloc_compatible_bitmap();
-	state->m_tmpbitmap[2] = machine.primary_screen->alloc_compatible_bitmap();
-	state->m_videoram[0] = auto_alloc_array_clear(machine, UINT16, width * height);
-	state->m_videoram[1] = auto_alloc_array_clear(machine, UINT16, width * height);
-	state->m_videoram[2] = auto_alloc_array_clear(machine, UINT16, width * height);
-	state->m_videoworkram[0] = auto_alloc_array_clear(machine, UINT16, width * height);
-	state->m_videoworkram[1] = auto_alloc_array_clear(machine, UINT16, width * height);
-	state->m_videoworkram[2] = auto_alloc_array_clear(machine, UINT16, width * height);
-	state->m_palette = auto_alloc_array(machine, UINT16, 0x480);
-	state->m_clut[0] = auto_alloc_array(machine, UINT8, 0x1000);
-	state->m_clut[1] = auto_alloc_array(machine, UINT8, 0x1000);
-	state->m_clut[2] = auto_alloc_array(machine, UINT8, 0x1000);
-	state->m_nb19010_busyflag = 1;
+	machine().primary_screen->register_screen_bitmap(m_tmpbitmap[0]);
+	machine().primary_screen->register_screen_bitmap(m_tmpbitmap[1]);
+	machine().primary_screen->register_screen_bitmap(m_tmpbitmap[2]);
+	m_videoram[0] = auto_alloc_array_clear(machine(), UINT16, width * height);
+	m_videoram[1] = auto_alloc_array_clear(machine(), UINT16, width * height);
+	m_videoram[2] = auto_alloc_array_clear(machine(), UINT16, width * height);
+	m_videoworkram[0] = auto_alloc_array_clear(machine(), UINT16, width * height);
+	m_videoworkram[1] = auto_alloc_array_clear(machine(), UINT16, width * height);
+	m_videoworkram[2] = auto_alloc_array_clear(machine(), UINT16, width * height);
+	m_palette = auto_alloc_array(machine(), UINT16, 0x480);
+	m_clut[0] = auto_alloc_array(machine(), UINT8, 0x1000);
+	m_clut[1] = auto_alloc_array(machine(), UINT8, 0x1000);
+	m_clut[2] = auto_alloc_array(machine(), UINT8, 0x1000);
+	m_nb19010_busyflag = 1;
 }
 
 /******************************************************************************
 
 
 ******************************************************************************/
-SCREEN_UPDATE( niyanpai )
+UINT32 niyanpai_state::screen_update_niyanpai(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	niyanpai_state *state = screen->machine().driver_data<niyanpai_state>();
 	int i;
 	int x, y;
 	int scrollx[3], scrolly[3];
 
-	if (state->m_screen_refresh)
+	if (m_screen_refresh)
 	{
-		int width = screen->width();
-		int height = screen->height();
+		int width = screen.width();
+		int height = screen.height();
 
-		state->m_screen_refresh = 0;
+		m_screen_refresh = 0;
 
 		for (y = 0; y < height; y++)
 			for (x = 0; x < width; x++)
 			{
-				update_pixel(screen->machine(), 0, x, y);
-				update_pixel(screen->machine(), 1, x, y);
-				update_pixel(screen->machine(), 2, x, y);
+				update_pixel(machine(), 0, x, y);
+				update_pixel(machine(), 1, x, y);
+				update_pixel(machine(), 2, x, y);
 			}
 	}
 
 	for (i = 0; i < 3; i++)
 	{
-		if (state->m_flipscreen[i])
+		if (m_flipscreen[i])
 		{
-			scrollx[i] = (((-state->m_scrollx[i]) - 0x4e)  & 0x1ff) << 1;
-			scrolly[i] = (-state->m_scrolly[i]) & 0x1ff;
+			scrollx[i] = (((-m_scrollx[i]) - 0x4e)  & 0x1ff) << 1;
+			scrolly[i] = (-m_scrolly[i]) & 0x1ff;
 		}
 		else
 		{
-			scrollx[i] = (((-state->m_scrollx[i]) - 0x4e)  & 0x1ff) << 1;
-			scrolly[i] = state->m_scrolly[i] & 0x1ff;
+			scrollx[i] = (((-m_scrollx[i]) - 0x4e)  & 0x1ff) << 1;
+			scrolly[i] = m_scrolly[i] & 0x1ff;
 		}
 	}
 
-	if (state->m_dispflag[0])
-		copyscrollbitmap(bitmap, state->m_tmpbitmap[0], 1, &scrollx[0], 1, &scrolly[0], cliprect);
+	if (m_dispflag[0])
+		copyscrollbitmap(bitmap, m_tmpbitmap[0], 1, &scrollx[0], 1, &scrolly[0], cliprect);
 	else
-		bitmap_fill(bitmap, 0, 0x00ff);
+		bitmap.fill(0x00ff);
 
-	if (state->m_dispflag[1])
-		copyscrollbitmap_trans(bitmap, state->m_tmpbitmap[1], 1, &scrollx[1], 1, &scrolly[1], cliprect, 0x01ff);
+	if (m_dispflag[1])
+		copyscrollbitmap_trans(bitmap, m_tmpbitmap[1], 1, &scrollx[1], 1, &scrolly[1], cliprect, 0x01ff);
 
-	if (state->m_dispflag[2])
-		copyscrollbitmap_trans(bitmap, state->m_tmpbitmap[2], 1, &scrollx[2], 1, &scrolly[2], cliprect, 0x02ff);
+	if (m_dispflag[2])
+		copyscrollbitmap_trans(bitmap, m_tmpbitmap[2], 1, &scrollx[2], 1, &scrolly[2], cliprect, 0x02ff);
 
 	return 0;
 }

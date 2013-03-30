@@ -1,19 +1,22 @@
 class shadfrce_state : public driver_device
 {
 public:
-	shadfrce_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	shadfrce_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_fgvideoram(*this, "fgvideoram"),
+		m_bg0videoram(*this, "bg0videoram"),
+		m_bg1videoram(*this, "bg1videoram"),
+		m_spvideoram(*this, "spvideoram"){ }
 
 	tilemap_t *m_fgtilemap;
 	tilemap_t *m_bg0tilemap;
 	tilemap_t *m_bg1tilemap;
 
-	UINT16 *m_fgvideoram;
-	UINT16 *m_bg0videoram;
-	UINT16 *m_bg1videoram;
-	UINT16 *m_spvideoram;
+	required_shared_ptr<UINT16> m_fgvideoram;
+	required_shared_ptr<UINT16> m_bg0videoram;
+	required_shared_ptr<UINT16> m_bg1videoram;
+	required_shared_ptr<UINT16> m_spvideoram;
 	UINT16 *m_spvideoram_old;
-	size_t m_spvideoram_size;
 
 	int m_video_enable;
 	int m_irqs_enable;
@@ -21,18 +24,25 @@ public:
 	int m_raster_irq_enable;
 	int m_vblank;
 	int m_prev_value;
+	DECLARE_WRITE16_MEMBER(shadfrce_flip_screen);
+	DECLARE_READ16_MEMBER(shadfrce_input_ports_r);
+	DECLARE_WRITE16_MEMBER(shadfrce_sound_brt_w);
+	DECLARE_WRITE16_MEMBER(shadfrce_irq_ack_w);
+	DECLARE_WRITE16_MEMBER(shadfrce_irq_w);
+	DECLARE_WRITE16_MEMBER(shadfrce_scanline_w);
+	DECLARE_WRITE16_MEMBER(shadfrce_fgvideoram_w);
+	DECLARE_WRITE16_MEMBER(shadfrce_bg0videoram_w);
+	DECLARE_WRITE16_MEMBER(shadfrce_bg1videoram_w);
+	DECLARE_WRITE16_MEMBER(shadfrce_bg0scrollx_w);
+	DECLARE_WRITE16_MEMBER(shadfrce_bg0scrolly_w);
+	DECLARE_WRITE16_MEMBER(shadfrce_bg1scrollx_w);
+	DECLARE_WRITE16_MEMBER(shadfrce_bg1scrolly_w);
+	DECLARE_WRITE8_MEMBER(oki_bankswitch_w);
+	TILE_GET_INFO_MEMBER(get_shadfrce_fgtile_info);
+	TILE_GET_INFO_MEMBER(get_shadfrce_bg0tile_info);
+	TILE_GET_INFO_MEMBER(get_shadfrce_bg1tile_info);
+	virtual void video_start();
+	UINT32 screen_update_shadfrce(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	void screen_eof_shadfrce(screen_device &screen, bool state);
+	TIMER_DEVICE_CALLBACK_MEMBER(shadfrce_scanline);
 };
-
-
-/*----------- defined in video/shadfrce.c -----------*/
-
-WRITE16_HANDLER ( shadfrce_bg0scrollx_w );
-WRITE16_HANDLER ( shadfrce_bg1scrollx_w );
-WRITE16_HANDLER ( shadfrce_bg0scrolly_w );
-WRITE16_HANDLER ( shadfrce_bg1scrolly_w );
-VIDEO_START( shadfrce );
-SCREEN_EOF(shadfrce);
-SCREEN_UPDATE( shadfrce );
-WRITE16_HANDLER( shadfrce_fgvideoram_w );
-WRITE16_HANDLER( shadfrce_bg0videoram_w );
-WRITE16_HANDLER( shadfrce_bg1videoram_w );

@@ -110,31 +110,41 @@ PCB2  (Top board, CPU board)
 #include "cpu/z80/z80.h"
 #include "sound/ay8910.h"
 
-#define MASTER_CLOCK			XTAL_18_432MHz
+#define MASTER_CLOCK            XTAL_18_432MHz
 
 class sub_state : public driver_device
 {
 public:
-	sub_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	sub_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_attr(*this, "attr"),
+		m_vid(*this, "vid"),
+		m_spriteram(*this, "spriteram"),
+		m_spriteram2(*this, "spriteram2"),
+		m_scrolly(*this, "scrolly"){ }
 
-	UINT8* m_vid;
-	UINT8* m_attr;
-	UINT8* m_scrolly;
-	UINT8* m_spriteram;
-	UINT8* m_spriteram2;
+	required_shared_ptr<UINT8> m_attr;
+	required_shared_ptr<UINT8> m_vid;
+	required_shared_ptr<UINT8> m_spriteram;
+	required_shared_ptr<UINT8> m_spriteram2;
+	required_shared_ptr<UINT8> m_scrolly;
 	UINT8 m_nmi_en;
+	DECLARE_WRITE8_MEMBER(subm_to_sound_w);
+	DECLARE_WRITE8_MEMBER(nmi_mask_w);
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_sub(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(subm_sound_irq);
 };
 
-static VIDEO_START(sub)
+void sub_state::video_start()
 {
 }
 
-static SCREEN_UPDATE(sub)
+UINT32 sub_state::screen_update_sub(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	sub_state *state = screen->machine().driver_data<sub_state>();
-	const gfx_element *gfx = screen->machine().gfx[0];
-	const gfx_element *gfx_1 = screen->machine().gfx[1];
+	gfx_element *gfx = machine().gfx[0];
+	gfx_element *gfx_1 = machine().gfx[1];
 	int y,x;
 	int count = 0;
 
@@ -142,12 +152,12 @@ static SCREEN_UPDATE(sub)
 	{
 		for (x=0;x<32;x++)
 		{
-			UINT16 tile = state->m_vid[count];
+			UINT16 tile = m_vid[count];
 			UINT8 col;
-			UINT8 y_offs = state->m_scrolly[x];
+			UINT8 y_offs = m_scrolly[x];
 
-			tile += (state->m_attr[count]&0xe0)<<3;
-			col = (state->m_attr[count]&0x1f);
+			tile += (m_attr[count]&0xe0)<<3;
+			col = (m_attr[count]&0x1f);
 
 			drawgfx_opaque(bitmap,cliprect,gfx,tile,col+0x40,0,0,x*8,(y*8)-y_offs);
 			drawgfx_opaque(bitmap,cliprect,gfx,tile,col+0x40,0,0,x*8,(y*8)-y_offs+256);
@@ -158,18 +168,18 @@ static SCREEN_UPDATE(sub)
 
 
 	/*
-    sprite bank 1
-    0 xxxx xxxx X offset
-    1 tttt tttt tile offset
-    sprite bank 2
-    0 yyyy yyyy Y offset
-    1 f--- ---- flips the X offset
-    1 -f-- ---- flip y, inverted
-    1 --cc cccc color
-    */
+	sprite bank 1
+	0 xxxx xxxx X offset
+	1 tttt tttt tile offset
+	sprite bank 2
+	0 yyyy yyyy Y offset
+	1 f--- ---- flips the X offset
+	1 -f-- ---- flip y, inverted
+	1 --cc cccc color
+	*/
 	{
-		UINT8 *spriteram = state->m_spriteram;
-		UINT8 *spriteram_2 = state->m_spriteram2;
+		UINT8 *spriteram = m_spriteram;
+		UINT8 *spriteram_2 = m_spriteram2;
 		UINT8 x,y,spr_offs,i,col,fx,fy;
 
 		for(i=0;i<0x40;i+=2)
@@ -193,12 +203,12 @@ static SCREEN_UPDATE(sub)
 	{
 		for (x=0;x<32;x++)
 		{
-			UINT16 tile = state->m_vid[count];
+			UINT16 tile = m_vid[count];
 			UINT8 col;
-			UINT8 y_offs = state->m_scrolly[x];
+			UINT8 y_offs = m_scrolly[x];
 
-			tile += (state->m_attr[count]&0xe0)<<3;
-			col = (state->m_attr[count]&0x1f);
+			tile += (m_attr[count]&0xe0)<<3;
+			col = (m_attr[count]&0x1f);
 
 			if(x >= 28)
 			{
@@ -213,14 +223,14 @@ static SCREEN_UPDATE(sub)
 	return 0;
 }
 
-static ADDRESS_MAP_START( subm_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( subm_map, AS_PROGRAM, 8, sub_state )
 	AM_RANGE(0x0000, 0xafff) AM_ROM
 	AM_RANGE(0xb000, 0xbfff) AM_RAM
-	AM_RANGE(0xc000, 0xc3ff) AM_RAM AM_BASE_MEMBER(sub_state,m_attr)
-	AM_RANGE(0xc400, 0xc7ff) AM_RAM AM_BASE_MEMBER(sub_state,m_vid)
-	AM_RANGE(0xd000, 0xd03f) AM_RAM AM_BASE_MEMBER(sub_state,m_spriteram)
-	AM_RANGE(0xd800, 0xd83f) AM_RAM AM_BASE_MEMBER(sub_state,m_spriteram2)
-	AM_RANGE(0xd840, 0xd85f) AM_RAM AM_BASE_MEMBER(sub_state,m_scrolly)
+	AM_RANGE(0xc000, 0xc3ff) AM_RAM AM_SHARE("attr")
+	AM_RANGE(0xc400, 0xc7ff) AM_RAM AM_SHARE("vid")
+	AM_RANGE(0xd000, 0xd03f) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0xd800, 0xd83f) AM_RAM AM_SHARE("spriteram2")
+	AM_RANGE(0xd840, 0xd85f) AM_RAM AM_SHARE("scrolly")
 
 	AM_RANGE(0xe000, 0xe000) AM_NOP
 	AM_RANGE(0xe800, 0xe800) AM_NOP
@@ -235,35 +245,34 @@ static ADDRESS_MAP_START( subm_map, AS_PROGRAM, 8 )
 	AM_RANGE(0xf060, 0xf060) AM_READ_PORT("IN0")
 ADDRESS_MAP_END
 
-static WRITE8_HANDLER( subm_to_sound_w )
+WRITE8_MEMBER(sub_state::subm_to_sound_w)
 {
-	soundlatch_w(space, 0, data & 0xff);
-	cputag_set_input_line(space->machine(), "soundcpu", 0, HOLD_LINE);
+	soundlatch_byte_w(space, 0, data & 0xff);
+	machine().device("soundcpu")->execute().set_input_line(0, HOLD_LINE);
 }
 
-static WRITE8_HANDLER( nmi_mask_w )
+WRITE8_MEMBER(sub_state::nmi_mask_w)
 {
-	sub_state *state = space->machine().driver_data<sub_state>();
 
-	state->m_nmi_en = data & 1;
+	m_nmi_en = data & 1;
 }
 
-static ADDRESS_MAP_START( subm_io, AS_IO, 8 )
+static ADDRESS_MAP_START( subm_io, AS_IO, 8, sub_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x00) AM_READWRITE(soundlatch2_r, subm_to_sound_w) // to/from sound CPU
+	AM_RANGE(0x00, 0x00) AM_READ(soundlatch2_byte_r) AM_WRITE(subm_to_sound_w) // to/from sound CPU
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( subm_sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( subm_sound_map, AS_PROGRAM, 8, sub_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
 	AM_RANGE(0x4000, 0x47ff) AM_RAM
 	AM_RANGE(0x6000, 0x6000) AM_WRITE(nmi_mask_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( subm_sound_io, AS_IO, 8 )
+static ADDRESS_MAP_START( subm_sound_io, AS_IO, 8, sub_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x00) AM_READWRITE(soundlatch_r, soundlatch2_w) // to/from main CPU
-	AM_RANGE(0x40, 0x41) AM_DEVREADWRITE("ay1", ay8910_r, ay8910_address_data_w)
-	AM_RANGE(0x80, 0x81) AM_DEVREADWRITE("ay2", ay8910_r, ay8910_address_data_w)
+	AM_RANGE(0x00, 0x00) AM_READWRITE(soundlatch_byte_r, soundlatch2_byte_w) // to/from main CPU
+	AM_RANGE(0x40, 0x41) AM_DEVREADWRITE_LEGACY("ay1", ay8910_r, ay8910_address_data_w)
+	AM_RANGE(0x80, 0x81) AM_DEVREADWRITE_LEGACY("ay2", ay8910_r, ay8910_address_data_w)
 ADDRESS_MAP_END
 
 
@@ -336,7 +345,7 @@ static INPUT_PORTS_START( sub )
 	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Cabinet ) )
-	PORT_DIPSETTING(    0x20, DEF_STR( Upright ) )	/* Seperate controls for each player */
+	PORT_DIPSETTING(    0x20, DEF_STR( Upright ) )  /* separate controls for each player */
 	PORT_DIPSETTING(    0x00, DEF_STR( Cocktail ) ) /* Controls via player 1 for both, but need to get x/y screen flip working to fully test */
 	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Demo_Sounds ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
@@ -366,9 +375,9 @@ static const gfx_layout tiles16x32_layout = {
 	{ RGN_FRAC(2,3), RGN_FRAC(1,3), RGN_FRAC(0,3) },
 	{ 64+0, 64+1, 64+2, 64+3, 64+4, 64+5, 64+6, 64+7, 0, 1, 2, 3, 4, 5, 6, 7 },
 	{ 55*8, 54*8, 53*8, 52*8, 51*8, 50*8, 49*8, 48*8,
-	  39*8, 38*8, 37*8, 36*8, 35*8, 34*8, 33*8, 32*8,
-	  23*8, 22*8, 21*8, 20*8, 19*8, 18*8, 17*8, 16*8,
-	   7*8,  6*8,  5*8,  4*8,  3*8,  2*8,  1*8,  0*8
+		39*8, 38*8, 37*8, 36*8, 35*8, 34*8, 33*8, 32*8,
+		23*8, 22*8, 21*8, 20*8, 19*8, 18*8, 17*8, 16*8,
+		7*8,  6*8,  5*8,  4*8,  3*8,  2*8,  1*8,  0*8
 	},
 	64*8
 };
@@ -378,13 +387,14 @@ static GFXDECODE_START( sub )
 	GFXDECODE_ENTRY( "gfx2", 0, tiles16x32_layout, 0, 0x80 )
 GFXDECODE_END
 
-static PALETTE_INIT( sub )
+void sub_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
-	UINT8* lookup = machine.region("proms2")->base();
+	UINT8* lookup = machine().root_device().memregion("proms2")->base();
 
 	/* allocate the colortable */
-	machine.colortable = colortable_alloc(machine, 0x100);
+	machine().colortable = colortable_alloc(machine(), 0x100);
 
 	for (i = 0;i < 0x100;i++)
 	{
@@ -393,8 +403,8 @@ static PALETTE_INIT( sub )
 		g = (color_prom[0x100] >> 0);
 		b = (color_prom[0x200] >> 0);
 
-		//colortable_palette_set_color(machine.colortable, i, MAKE_RGB(r, g, b));
-		colortable_palette_set_color(machine.colortable, i, MAKE_RGB(pal4bit(r), pal4bit(g), pal4bit(b)));
+		//colortable_palette_set_color(machine().colortable, i, MAKE_RGB(r, g, b));
+		colortable_palette_set_color(machine().colortable, i, MAKE_RGB(pal4bit(r), pal4bit(g), pal4bit(b)));
 
 		color_prom++;
 	}
@@ -403,48 +413,44 @@ static PALETTE_INIT( sub )
 	for (i = 0;i < 0x400;i++)
 	{
 		UINT8 ctabentry = lookup[i+0x400] | (lookup[i+0x000] << 4);
-		colortable_entry_set_value(machine.colortable, i, ctabentry);
+		colortable_entry_set_value(machine().colortable, i, ctabentry);
 	}
 
 }
 
 
-static INTERRUPT_GEN( subm_sound_irq )
+INTERRUPT_GEN_MEMBER(sub_state::subm_sound_irq)
 {
-	sub_state *state = device->machine().driver_data<sub_state>();
 
-	if(state->m_nmi_en)
-		cputag_set_input_line(device->machine(), "soundcpu", INPUT_LINE_NMI, PULSE_LINE);
+	if(m_nmi_en)
+		machine().device("soundcpu")->execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 }
 
 static MACHINE_CONFIG_START( sub, sub_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80,MASTER_CLOCK/6)		 /* ? MHz */
+	MCFG_CPU_ADD("maincpu", Z80,MASTER_CLOCK/6)      /* ? MHz */
 	MCFG_CPU_PROGRAM_MAP(subm_map)
 	MCFG_CPU_IO_MAP(subm_io)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", sub_state,  irq0_line_hold)
 
-	MCFG_CPU_ADD("soundcpu", Z80,MASTER_CLOCK/6)		 /* ? MHz */
+	MCFG_CPU_ADD("soundcpu", Z80,MASTER_CLOCK/6)         /* ? MHz */
 	MCFG_CPU_PROGRAM_MAP(subm_sound_map)
 	MCFG_CPU_IO_MAP(subm_sound_io)
-	MCFG_CPU_PERIODIC_INT(subm_sound_irq, 120) //???
+	MCFG_CPU_PERIODIC_INT_DRIVER(sub_state, subm_sound_irq,  120) //???
 
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(256, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 256-1, 16, 256-16-1)
-	MCFG_SCREEN_UPDATE(sub)
+	MCFG_SCREEN_UPDATE_DRIVER(sub_state, screen_update_sub)
 
 	MCFG_GFXDECODE(sub)
 	MCFG_PALETTE_LENGTH(0x400)
-	MCFG_PALETTE_INIT(sub)
 
-	MCFG_VIDEO_START(sub)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -459,34 +465,34 @@ MACHINE_CONFIG_END
 
 ROM_START( sub )
 	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD( "temp 1 pos b6 27128.bin",	  0x0000, 0x4000, CRC(6875b31d) SHA1(e7607e53687f1331cc97de939de144a7954ca3c3) )
-	ROM_LOAD( "temp 2 pos c6 27128.bin",	  0x4000, 0x4000, CRC(bc7f8f43) SHA1(088156a66acb2214c638d9d1ad18e9836b27eff0) )
-	ROM_LOAD( "temp 3 pos d6 2764.bin",	  0x8000, 0x2000, CRC(3546c226) SHA1(35e53c0db75c89e8e222d2139b841e77f5cc282c) )
+	ROM_LOAD( "temp 1 pos b6 27128.bin",      0x0000, 0x4000, CRC(6875b31d) SHA1(e7607e53687f1331cc97de939de144a7954ca3c3) )
+	ROM_LOAD( "temp 2 pos c6 27128.bin",      0x4000, 0x4000, CRC(bc7f8f43) SHA1(088156a66acb2214c638d9d1ad18e9836b27eff0) )
+	ROM_LOAD( "temp 3 pos d6 2764.bin",   0x8000, 0x2000, CRC(3546c226) SHA1(35e53c0db75c89e8e222d2139b841e77f5cc282c) )
 
 	ROM_REGION( 0x10000, "soundcpu", 0 )
-	ROM_LOAD( "m sound pos f14 2764.bin",	  0x0000, 0x2000, CRC(61536a97) SHA1(84effc2251bf7c91e0bb670a651117503de8940d) )
+	ROM_LOAD( "m sound pos f14 2764.bin",     0x0000, 0x2000, CRC(61536a97) SHA1(84effc2251bf7c91e0bb670a651117503de8940d) )
 	ROM_RELOAD( 0x2000, 0x2000 )
 
 	ROM_REGION( 0xc000, "gfx1", 0)
-	ROM_LOAD( "vram 1 pos f12 27128  version3.bin",	  0x0000, 0x4000, CRC(8d176ba0) SHA1(b0bf4af97e991545d6b38e8159eb909376e6df35) )
-	ROM_LOAD( "vram 2 pos f14 27128  version3.bin",	  0x4000, 0x4000, CRC(0677cf3a) SHA1(072e9391f6a230b78124e820da0f0d27ffa45dc3) )
-	ROM_LOAD( "vram 3 pos f15 27128  version3.bin",	  0x8000, 0x4000, CRC(9a4cd1a0) SHA1(a321b88386424d73d7d73a7f321317b0f21d2eb6) )
+	ROM_LOAD( "vram 1 pos f12 27128  version3.bin",   0x0000, 0x4000, CRC(8d176ba0) SHA1(b0bf4af97e991545d6b38e8159eb909376e6df35) )
+	ROM_LOAD( "vram 2 pos f14 27128  version3.bin",   0x4000, 0x4000, CRC(0677cf3a) SHA1(072e9391f6a230b78124e820da0f0d27ffa45dc3) )
+	ROM_LOAD( "vram 3 pos f15 27128  version3.bin",   0x8000, 0x4000, CRC(9a4cd1a0) SHA1(a321b88386424d73d7d73a7f321317b0f21d2eb6) )
 
 	ROM_REGION( 0xc000, "gfx2", 0 )
-	ROM_LOAD( "obj 1 pos h1 27128  version3.bin",	  0x0000, 0x4000, CRC(63173e65) SHA1(2be3776c0e08d2c876cfce842e02345389e1fba0) )
-	ROM_LOAD( "obj 2 pos h3 27128  version3.bin",	  0x4000, 0x4000, CRC(3898d1a8) SHA1(acd3d7695a0fe9faa5e4315032c65e131d24a3ce) )
-	ROM_LOAD( "obj 3 pos h4 27128  version3.bin",	  0x8000, 0x4000, CRC(304e2145) SHA1(d4eb49b5502872718d64e53f02acd2150f6bf713) )
+	ROM_LOAD( "obj 1 pos h1 27128  version3.bin",     0x0000, 0x4000, CRC(63173e65) SHA1(2be3776c0e08d2c876cfce842e02345389e1fba0) )
+	ROM_LOAD( "obj 2 pos h3 27128  version3.bin",     0x4000, 0x4000, CRC(3898d1a8) SHA1(acd3d7695a0fe9faa5e4315032c65e131d24a3ce) )
+	ROM_LOAD( "obj 3 pos h4 27128  version3.bin",     0x8000, 0x4000, CRC(304e2145) SHA1(d4eb49b5502872718d64e53f02acd2150f6bf713) )
 
 	ROM_REGION( 0x300, "proms", 0 ) // color proms
-	ROM_LOAD( "prom pos a9 n82s129",	  0x0200, 0x100, CRC(8df9cefe) SHA1(86320eb8135932d79c4478929b9fd90ffba55712) )
-	ROM_LOAD( "prom pos a10 n82s129",	  0x0100, 0x100, CRC(3c834094) SHA1(4d681431376a8ed071566d74d4accc737bf965dd) )
-	ROM_LOAD( "prom pos a11 n82s129",	  0x0000, 0x100, CRC(339afa95) SHA1(ff4ff712960f41c26419a681e8dcceaeef75d2e3) )
+	ROM_LOAD( "prom pos a9 n82s129",      0x0200, 0x100, CRC(8df9cefe) SHA1(86320eb8135932d79c4478929b9fd90ffba55712) )
+	ROM_LOAD( "prom pos a10 n82s129",     0x0100, 0x100, CRC(3c834094) SHA1(4d681431376a8ed071566d74d4accc737bf965dd) )
+	ROM_LOAD( "prom pos a11 n82s129",     0x0000, 0x100, CRC(339afa95) SHA1(ff4ff712960f41c26419a681e8dcceaeef75d2e3) )
 
 	ROM_REGION( 0x800, "proms2", 0 ) // look-up tables
-	ROM_LOAD( "prom pos e5 n82s131",	  0x0000, 0x200, CRC(0024b5dd) SHA1(7d623f8e8964336d643820850cef0fb641e52e22) )
-	ROM_LOAD( "prom pos c7 n82s129",	  0x0200, 0x100, CRC(9072d259) SHA1(9679fa01372d14a866836c9193204ff6e33cf67c) )
-	ROM_LOAD( "prom pos e4 n82s131",	  0x0400, 0x200, CRC(307aa2cf) SHA1(839eccf1d34adaf9a5006bfb30e3524bc19a9b41) )
-	ROM_LOAD( "prom pos c8 n82s129",	  0x0600, 0x100, CRC(351e1ef8) SHA1(530c9012ff5abda1c4ba9787ca999ca1ae1a893d) )
+	ROM_LOAD( "prom pos e5 n82s131",      0x0000, 0x200, CRC(0024b5dd) SHA1(7d623f8e8964336d643820850cef0fb641e52e22) )
+	ROM_LOAD( "prom pos c7 n82s129",      0x0200, 0x100, CRC(9072d259) SHA1(9679fa01372d14a866836c9193204ff6e33cf67c) )
+	ROM_LOAD( "prom pos e4 n82s131",      0x0400, 0x200, CRC(307aa2cf) SHA1(839eccf1d34adaf9a5006bfb30e3524bc19a9b41) )
+	ROM_LOAD( "prom pos c8 n82s129",      0x0600, 0x100, CRC(351e1ef8) SHA1(530c9012ff5abda1c4ba9787ca999ca1ae1a893d) )
 ROM_END
 
-GAME( 1985, sub,  0,    sub, sub,  0, ROT270, "Sigma Enterprises Inc.", "Submarine", GAME_NO_COCKTAIL )
+GAME( 1985, sub,  0,    sub, sub, driver_device,  0, ROT270, "Sigma Enterprises Inc.", "Submarine", GAME_NO_COCKTAIL )

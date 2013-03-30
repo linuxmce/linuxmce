@@ -43,6 +43,34 @@ Notes:
            GP_ROM4.525 / SOP44 32M MASK, Graphics
 
            GP_ROM5.622   SOP44 32M MASK, OKI samples
+
+
+AX51101 gfx chip:
+
+Axell Corporation is a Japanese company that specialises in Sound and Graphics (Amusement Graphics) LSI.
+The AG-1 is a sprite system controller meant for the amusement industry, such as pachi-slot machines,
+it has reached end-of-life in about 2005.
+These are the specifications of the Axell AG-1 AX51102A, it should be very similar to the AX51101.
+(excuse the strange grammar, it is a JP->EN translation)
+
+Drawing technique:               Sprite system
+Buffer drawing method:           Double frame buffer
+Configuration of the character:  Configured from 2 or more cells, a cell can be set in units of each dot a horizontal, vertical from 1 to 256 dots
+Maximum character size:          4096 x 4096 dot
+Display the number of sprite:    Up to 127 sheets (register 2KB)
+Maximum drawing speed:           Dot sec / 2500-35000000 highest
+Color depth:                     32,768 colors (5 bits for each RGB)
+Color scheme:                    Cell character unit can be specified in 256 colors of palettes, and 16 colors
+Scaling:                         256 times the resolution of 1/64 to 4 cell character unit
+Semi-transparent processing:     Gradation in the unit cell or 32 character
+Intensity modulation:            Gradation in the unit cell or 32 character
+Other Features:                  Rotation, DMA, BitBLT, Built-in flip
+Display resolution:              100 to 600 dots horizontal, 120 to 800 dots vertical
+Virtual screen size:             Up to 4096 x 4096 dot
+CGRAM space:                     4M-bit minimum, 32M-bit maximum
+Operating frequency:             Up to 76MHz
+Release:                         November 1999
+
 */
 
 #include "emu.h"
@@ -54,24 +82,31 @@ Notes:
 class gunpey_state : public driver_device
 {
 public:
-	gunpey_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	gunpey_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) { }
 
 	UINT16 *m_blit_buffer;
 	UINT16 m_blit_ram[0x10];
+	DECLARE_WRITE8_MEMBER(gunpey_status_w);
+	DECLARE_READ8_MEMBER(gunpey_status_r);
+	DECLARE_READ8_MEMBER(gunpey_inputs_r);
+	DECLARE_WRITE8_MEMBER(gunpey_blitter_w);
+	DECLARE_DRIVER_INIT(gunpey);
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_gunpey(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(gunpey_interrupt);
 };
 
 
-static VIDEO_START( gunpey )
+void gunpey_state::video_start()
 {
-	gunpey_state *state = machine.driver_data<gunpey_state>();
-	state->m_blit_buffer = auto_alloc_array(machine, UINT16, 512*512);
+	m_blit_buffer = auto_alloc_array(machine(), UINT16, 512*512);
 }
 
-static SCREEN_UPDATE( gunpey )
+UINT32 gunpey_state::screen_update_gunpey(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	gunpey_state *state = screen->machine().driver_data<gunpey_state>();
-	UINT16 *blit_buffer = state->m_blit_buffer;
+	UINT16 *blit_buffer = m_blit_buffer;
 	int x,y;
 	int count;
 
@@ -89,8 +124,8 @@ static SCREEN_UPDATE( gunpey )
 			g = (color & 0x03e0) >> 2;
 			r = (color & 0x7c00) >> 7;
 
-			if(x<screen->visible_area().max_x && y<screen->visible_area().max_y)
-				*BITMAP_ADDR32(bitmap, y, x) = b | (g<<8) | (r<<16);
+			if(cliprect.contains(x, y))
+				bitmap.pix32(y, x) = b | (g<<8) | (r<<16);
 
 
 			count++;
@@ -100,11 +135,11 @@ static SCREEN_UPDATE( gunpey )
 	return 0;
 }
 
-static WRITE8_HANDLER( gunpey_status_w )
+WRITE8_MEMBER(gunpey_state::gunpey_status_w)
 {
 }
 
-static READ8_HANDLER( gunpey_status_r )
+READ8_MEMBER(gunpey_state::gunpey_status_r)
 {
 	if(offset == 1)
 		return 0x54;
@@ -112,26 +147,25 @@ static READ8_HANDLER( gunpey_status_r )
 	return 0x00;
 }
 
-static READ8_HANDLER( gunpey_inputs_r )
+READ8_MEMBER(gunpey_state::gunpey_inputs_r)
 {
 	switch(offset+0x7f40)
 	{
-		case 0x7f40: return input_port_read(space->machine(), "DSW1");
-		case 0x7f41: return input_port_read(space->machine(), "DSW2");
-		case 0x7f42: return input_port_read(space->machine(), "P1");
-		case 0x7f43: return input_port_read(space->machine(), "P2");
-		case 0x7f44: return input_port_read(space->machine(), "SYSTEM");
+		case 0x7f40: return ioport("DSW1")->read();
+		case 0x7f41: return ioport("DSW2")->read();
+		case 0x7f42: return ioport("P1")->read();
+		case 0x7f43: return ioport("P2")->read();
+		case 0x7f44: return ioport("SYSTEM")->read();
 	}
 
 	return 0xff;
 }
 
-static WRITE8_HANDLER( gunpey_blitter_w )
+WRITE8_MEMBER(gunpey_state::gunpey_blitter_w)
 {
-	gunpey_state *state = space->machine().driver_data<gunpey_state>();
-	UINT16 *blit_buffer = state->m_blit_buffer;
-	UINT16 *blit_ram = state->m_blit_ram;
-	UINT8 *blit_rom = space->machine().region("blit_data")->base();
+	UINT16 *blit_buffer = m_blit_buffer;
+	UINT16 *blit_ram = m_blit_ram;
+	UINT8 *blit_rom = memregion("blit_data")->base();
 	int x,y;
 
 	blit_ram[offset] = data;
@@ -181,23 +215,23 @@ static WRITE8_HANDLER( gunpey_blitter_w )
 
 /***************************************************************************************/
 
-static ADDRESS_MAP_START( mem_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( mem_map, AS_PROGRAM, 16, gunpey_state )
 	AM_RANGE(0x00000, 0x0ffff) AM_RAM
 //  AM_RANGE(0x50000, 0x500ff) AM_RAM
 //  AM_RANGE(0x50100, 0x502ff) AM_NOP
 	AM_RANGE(0x80000, 0xfffff) AM_ROM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( io_map, AS_IO, 16 )
+static ADDRESS_MAP_START( io_map, AS_IO, 16, gunpey_state )
 	AM_RANGE(0x7f40, 0x7f45) AM_READ8(gunpey_inputs_r,0xffff)
 
-//  AM_RANGE(0x7f48, 0x7f48) AM_WRITE(output_w)
-	AM_RANGE(0x7f80, 0x7f81) AM_DEVREADWRITE8("ymz", ymz280b_r, ymz280b_w, 0xffff)
+//  AM_RANGE(0x7f48, 0x7f48) AM_WRITE_LEGACY(output_w)
+	AM_RANGE(0x7f80, 0x7f81) AM_DEVREADWRITE8_LEGACY("ymz", ymz280b_r, ymz280b_w, 0xffff)
 
-	AM_RANGE(0x7f88, 0x7f89) AM_DEVREADWRITE8_MODERN("oki", okim6295_device, read, write, 0xff00)
+	AM_RANGE(0x7f88, 0x7f89) AM_DEVREADWRITE8("oki", okim6295_device, read, write, 0xff00)
 
-	AM_RANGE(0x7fc8, 0x7fc9) AM_READWRITE8( gunpey_status_r,  gunpey_status_w, 0xffff )
-	AM_RANGE(0x7fd0, 0x7fdf) AM_WRITE8( gunpey_blitter_w, 0xffff )
+	AM_RANGE(0x7fc8, 0x7fc9) AM_READWRITE8(gunpey_status_r,  gunpey_status_w, 0xffff )
+	AM_RANGE(0x7fd0, 0x7fdf) AM_WRITE8(gunpey_blitter_w, 0xffff )
 ADDRESS_MAP_END
 
 
@@ -218,31 +252,31 @@ static const ymz280b_interface ymz280b_intf =
 /***************************************************************************************/
 
 static INPUT_PORTS_START( gunpey )
-	PORT_START("DSW1")	// IN0 - 7f40
-	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Difficulty ) )
+	PORT_START("DSW1")  // IN0 - 7f40
+	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("SW1:1,2")
 	PORT_DIPSETTING(    0x01, DEF_STR( Easy ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Normal ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( Hard ) )
 	PORT_DIPSETTING(    0x03, DEF_STR( Hardest ) )
-	PORT_DIPNAME( 0x0c, 0x00, "Difficulty (vs. mode)" )
+	PORT_DIPNAME( 0x0c, 0x00, "Difficulty (vs. mode)" ) PORT_DIPLOCATION("SW1:3,4")
 	PORT_DIPSETTING(    0x04, DEF_STR( Easy ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Normal ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( Hard ) )
 	PORT_DIPSETTING(    0x0c, DEF_STR( Hardest ) )
-	PORT_DIPNAME( 0x30, 0x00, "Matches (vs. mode)?" )
+	PORT_DIPNAME( 0x30, 0x00, "Matches (vs. mode)?" )   PORT_DIPLOCATION("SW1:5,6")
 	PORT_DIPSETTING(    0x00, "1" )
 	PORT_DIPSETTING(    0x10, "2" )
 	PORT_DIPSETTING(    0x20, "3" )
 	PORT_DIPSETTING(    0x30, "5" )
-	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Demo_Sounds ) )
+	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW1:7")
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Flip_Screen ) )
+	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Flip_Screen ) )  PORT_DIPLOCATION("SW1:8")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( On ) )
 
-	PORT_START("DSW2")	// IN1 - 7f41
-	PORT_DIPNAME( 0x07, 0x00, DEF_STR( Coin_A ) )
+	PORT_START("DSW2")  // IN1 - 7f41
+	PORT_DIPNAME( 0x07, 0x00, DEF_STR( Coin_A ) )   PORT_DIPLOCATION("SW2:1,2,3")
 	PORT_DIPSETTING(    0x07, DEF_STR( 4C_1C ) )
 	PORT_DIPSETTING(    0x05, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(    0x03, DEF_STR( 2C_1C ) )
@@ -251,7 +285,7 @@ static INPUT_PORTS_START( gunpey )
 	PORT_DIPSETTING(    0x04, DEF_STR( 2C_3C ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( 1C_3C ) )
-	PORT_DIPNAME( 0x38, 0x00, DEF_STR( Coin_B ) )
+	PORT_DIPNAME( 0x38, 0x00, DEF_STR( Coin_B ) )   PORT_DIPLOCATION("SW2:4,5,6")
 	PORT_DIPSETTING(    0x38, DEF_STR( 4C_1C ) )
 	PORT_DIPSETTING(    0x28, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(    0x18, DEF_STR( 2C_1C ) )
@@ -260,14 +294,14 @@ static INPUT_PORTS_START( gunpey )
 	PORT_DIPSETTING(    0x20, DEF_STR( 2C_3C ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(    0x10, DEF_STR( 1C_3C ) )
-	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Free_Play ) )
+	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Free_Play ) )    PORT_DIPLOCATION("SW2:7")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Allow_Continue ) )
+	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Allow_Continue ) )   PORT_DIPLOCATION("SW2:8")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( On ) )
 
-	PORT_START("P1")	// IN2 - 7f42
+	PORT_START("P1")    // IN2 - 7f42
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    ) PORT_PLAYER(1)
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  ) PORT_PLAYER(1)
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  ) PORT_PLAYER(1)
@@ -277,7 +311,7 @@ static INPUT_PORTS_START( gunpey )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON3        ) PORT_PLAYER(1)
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 
-	PORT_START("P2")	// IN3 - 7f43
+	PORT_START("P2")    // IN3 - 7f43
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    ) PORT_PLAYER(2)
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  ) PORT_PLAYER(2)
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  ) PORT_PLAYER(2)
@@ -287,10 +321,10 @@ static INPUT_PORTS_START( gunpey )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON3        ) PORT_PLAYER(2)
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 
-	PORT_START("SYSTEM")	// IN4 - 7f44
+	PORT_START("SYSTEM")    // IN4 - 7f44
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_START1 ) PORT_IMPULSE(1)	// TEST!!
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_START1 ) PORT_IMPULSE(1)    // TEST!!
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_COIN2 )
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_START2 )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_SERVICE1 )
@@ -301,10 +335,10 @@ INPUT_PORTS_END
 /***************************************************************************************/
 
 /* test hack */
-static PALETTE_INIT( gunpey )
+void gunpey_state::palette_init()
 {
 	int i,r,g,b,val;
-	UINT8 *blit_rom = machine.region("blit_data")->base();
+	UINT8 *blit_rom = machine().root_device().memregion("blit_data")->base();
 
 	for (i = 0; i < 512; i+=2)
 	{
@@ -317,14 +351,14 @@ static PALETTE_INIT( gunpey )
 		r = (val & 0x7c00) >> 10;
 		r<<=3;
 
-		palette_set_color(machine, i/2, MAKE_RGB(r, g, b));
+		palette_set_color(machine(), i/2, MAKE_RGB(r, g, b));
 	}
 
 }
 
-static INTERRUPT_GEN( gunpey_interrupt )
+INTERRUPT_GEN_MEMBER(gunpey_state::gunpey_interrupt)
 {
-	device_set_input_line_and_vector(device,0,HOLD_LINE,0x200/4);
+	device.execute().set_input_line_and_vector(0,HOLD_LINE,0x200/4);
 }
 
 /***************************************************************************************/
@@ -334,25 +368,22 @@ static MACHINE_CONFIG_START( gunpey, gunpey_state )
 	MCFG_CPU_ADD("maincpu", V30, 57242400 / 4)
 	MCFG_CPU_PROGRAM_MAP(mem_map)
 	MCFG_CPU_IO_MAP(io_map)
-	MCFG_CPU_VBLANK_INT("screen", gunpey_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", gunpey_state,  gunpey_interrupt)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
 	MCFG_SCREEN_SIZE(512, 512)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 512-1, 0*8, 512-1)
-	MCFG_SCREEN_UPDATE(gunpey)
+	MCFG_SCREEN_UPDATE_DRIVER(gunpey_state, screen_update_gunpey)
 
 	MCFG_PALETTE_LENGTH(0x800)
-	MCFG_PALETTE_INIT(gunpey)
 
-	MCFG_VIDEO_START(gunpey)
 
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker","rspeaker")
 
-	MCFG_OKIM6295_ADD("oki", XTAL_16_9344MHz / 8 / 165, OKIM6295_PIN7_HIGH)
+	MCFG_OKIM6295_ADD("oki", XTAL_16_9344MHz / 8, OKIM6295_PIN7_LOW)
 	MCFG_SOUND_ROUTE(0, "lspeaker", 0.25)
 	MCFG_SOUND_ROUTE(1, "rspeaker", 0.25)
 
@@ -380,9 +411,9 @@ ROM_START( gunpey )
 	ROM_LOAD( "gp_rom5.622",  0x000000, 0x400000,  CRC(f79903e0) SHA1(4fd50b4138e64a48ec1504eb8cd172a229e0e965)) // 1xxxxxxxxxxxxxxxxxxxxx = 0xFF
 ROM_END
 
-static DRIVER_INIT( gunpey )
+DRIVER_INIT_MEMBER(gunpey_state,gunpey)
 {
-	UINT8 *rom = machine.region("maincpu")->base();
+	UINT8 *rom = machine().root_device().memregion("maincpu")->base();
 
 	/* patch SLOOOOW cycle checks ... */
 	rom[0x848b5] = 0x7e;
@@ -392,4 +423,4 @@ static DRIVER_INIT( gunpey )
 
 }
 
-GAME( 2000, gunpey, 0, gunpey, gunpey, gunpey,	ROT0, "Banpresto", "Gunpey",GAME_NOT_WORKING)
+GAME( 2000, gunpey, 0, gunpey, gunpey, gunpey_state, gunpey,    ROT0, "Banpresto", "Gunpey",GAME_NOT_WORKING)

@@ -3,7 +3,7 @@
 #   tiny.mak
 #
 #   Small driver-specific example makefile
-#	Use make SUBTARGET=tiny to build
+#   Use make SUBTARGET=tiny to build
 #
 #   Copyright Nicola Salmoria and the MAME Team.
 #   Visit  http://mamedev.org for licensing and usage restrictions.
@@ -71,7 +71,6 @@ SOUNDS += CEM3394
 #-------------------------------------------------
 
 DRVLIBS = \
-	$(MAMEOBJ)/tiny.o \
 	$(EMUDRIVERS)/emudummy.o \
 	$(MACHINE)/ticket.o \
 	$(DRIVERS)/carpolo.o $(MACHINE)/carpolo.o $(VIDEO)/carpolo.o \
@@ -98,7 +97,9 @@ DRVLIBS = \
 # layout dependencies
 #-------------------------------------------------
 
-$(DRIVERS)/astrocde.o:	$(LAYOUT)/gorf.lh \
+$(DRIVERS)/astrocde.o:  $(LAYOUT)/gorf.lh \
+						$(LAYOUT)/seawolf2.lh \
+						$(LAYOUT)/spacezap.lh \
 						$(LAYOUT)/tenpindx.lh
-$(DRIVERS)/circus.o:	$(LAYOUT)/circus.lh \
+$(DRIVERS)/circus.o:    $(LAYOUT)/circus.lh \
 						$(LAYOUT)/crash.lh

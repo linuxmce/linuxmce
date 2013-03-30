@@ -2,13 +2,17 @@
 class lkage_state : public driver_device
 {
 public:
-	lkage_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	lkage_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_vreg(*this, "vreg"),
+		m_scroll(*this, "scroll"),
+		m_spriteram(*this, "spriteram"),
+		m_videoram(*this, "videoram"){ }
 
-	UINT8 *      m_scroll;
-	UINT8 *      m_vreg;
-	UINT8 *      m_videoram;
-	UINT8 *      m_spriteram;
+	required_shared_ptr<UINT8> m_vreg;
+	required_shared_ptr<UINT8> m_scroll;
+	required_shared_ptr<UINT8> m_spriteram;
+	required_shared_ptr<UINT8> m_videoram;
 //  UINT8 *    m_paletteram;    // currently this uses generic palette handling
 
 	/* video-related */
@@ -42,33 +46,42 @@ public:
 
 	/* lkageb fake mcu */
 	UINT8 m_mcu_val;
-	int m_mcu_ready;	/* cpu data/mcu ready status */
+	int m_mcu_ready;    /* cpu data/mcu ready status */
 
 	/* devices */
-	device_t *m_maincpu;
-	device_t *m_audiocpu;
+	cpu_device *m_maincpu;
+	cpu_device *m_audiocpu;
 	device_t *m_mcu;
+	DECLARE_WRITE8_MEMBER(lkage_sound_command_w);
+	DECLARE_WRITE8_MEMBER(lkage_sh_nmi_disable_w);
+	DECLARE_WRITE8_MEMBER(lkage_sh_nmi_enable_w);
+	DECLARE_READ8_MEMBER(sound_status_r);
+	DECLARE_READ8_MEMBER(port_fetch_r);
+	DECLARE_READ8_MEMBER(fake_mcu_r);
+	DECLARE_WRITE8_MEMBER(fake_mcu_w);
+	DECLARE_READ8_MEMBER(fake_status_r);
+	DECLARE_READ8_MEMBER(lkage_68705_port_a_r);
+	DECLARE_WRITE8_MEMBER(lkage_68705_port_a_w);
+	DECLARE_WRITE8_MEMBER(lkage_68705_ddr_a_w);
+	DECLARE_READ8_MEMBER(lkage_68705_port_b_r);
+	DECLARE_WRITE8_MEMBER(lkage_68705_port_b_w);
+	DECLARE_WRITE8_MEMBER(lkage_68705_ddr_b_w);
+	DECLARE_READ8_MEMBER(lkage_68705_port_c_r);
+	DECLARE_WRITE8_MEMBER(lkage_68705_port_c_w);
+	DECLARE_WRITE8_MEMBER(lkage_68705_ddr_c_w);
+	DECLARE_WRITE8_MEMBER(lkage_mcu_w);
+	DECLARE_READ8_MEMBER(lkage_mcu_r);
+	DECLARE_READ8_MEMBER(lkage_mcu_status_r);
+	DECLARE_WRITE8_MEMBER(lkage_videoram_w);
+	DECLARE_DRIVER_INIT(bygone);
+	DECLARE_DRIVER_INIT(lkage);
+	DECLARE_DRIVER_INIT(lkageb);
+	TILE_GET_INFO_MEMBER(get_bg_tile_info);
+	TILE_GET_INFO_MEMBER(get_fg_tile_info);
+	TILE_GET_INFO_MEMBER(get_tx_tile_info);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	UINT32 screen_update_lkage(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	TIMER_CALLBACK_MEMBER(nmi_callback);
 };
-
-/*----------- defined in machine/lkage.c -----------*/
-
-READ8_HANDLER( lkage_68705_port_a_r );
-WRITE8_HANDLER( lkage_68705_port_a_w );
-READ8_HANDLER( lkage_68705_port_b_r );
-WRITE8_HANDLER( lkage_68705_port_b_w );
-READ8_HANDLER( lkage_68705_port_c_r );
-WRITE8_HANDLER( lkage_68705_port_c_w );
-WRITE8_HANDLER( lkage_68705_ddr_a_w );
-WRITE8_HANDLER( lkage_68705_ddr_b_w );
-WRITE8_HANDLER( lkage_68705_ddr_c_w );
-WRITE8_HANDLER( lkage_mcu_w );
-READ8_HANDLER( lkage_mcu_r );
-READ8_HANDLER( lkage_mcu_status_r );
-
-
-/*----------- defined in video/lkage.c -----------*/
-
-WRITE8_HANDLER( lkage_videoram_w );
-VIDEO_START( lkage );
-SCREEN_UPDATE( lkage );
-

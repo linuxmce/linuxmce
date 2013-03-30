@@ -43,28 +43,23 @@
 //  GLOBAL VARIABLES
 //**************************************************************************
 
-// devices
-const device_type OKIM6295 = okim6295_device_config::static_alloc_device_config;
-
-// ADPCM state and tables
-bool adpcm_state::s_tables_computed = false;
-const INT8 adpcm_state::s_index_shift[8] = { -1, -1, -1, -1, 2, 4, 6, 8 };
-int adpcm_state::s_diff_lookup[49*16];
+// device type definition
+const device_type OKIM6295 = &device_creator<okim6295_device>;
 
 // volume lookup table. The manual lists only 9 steps, ~3dB per step. Given the dB values,
 // that seems to map to a 5-bit volume control. Any volume parameter beyond the 9th index
 // results in silent playback.
 const UINT8 okim6295_device::s_volume_table[16] =
 {
-	0x20,	//   0 dB
-	0x16,	//  -3.2 dB
-	0x10,	//  -6.0 dB
-	0x0b,	//  -9.2 dB
-	0x08,	// -12.0 dB
-	0x06,	// -14.5 dB
-	0x04,	// -18.0 dB
-	0x03,	// -20.5 dB
-	0x02,	// -24.0 dB
+	0x20,   //   0 dB
+	0x16,   //  -3.2 dB
+	0x10,   //  -6.0 dB
+	0x0b,   //  -9.2 dB
+	0x08,   // -12.0 dB
+	0x06,   // -14.5 dB
+	0x04,   // -18.0 dB
+	0x03,   // -20.5 dB
+	0x02,   // -24.0 dB
 	0x00,
 	0x00,
 	0x00,
@@ -75,71 +70,9 @@ const UINT8 okim6295_device::s_volume_table[16] =
 };
 
 // default address map
-static ADDRESS_MAP_START( okim6295, AS_0, 8 )
+static ADDRESS_MAP_START( okim6295, AS_0, 8, okim6295_device )
 	AM_RANGE(0x00000, 0x3ffff) AM_ROM
 ADDRESS_MAP_END
-
-
-
-//**************************************************************************
-//  DEVICE CONFIGURATION
-//**************************************************************************
-
-//-------------------------------------------------
-//  okim6295_device_config - constructor
-//-------------------------------------------------
-
-okim6295_device_config::okim6295_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock)
-	: device_config(mconfig, static_alloc_device_config, "OKI6295", tag, owner, clock),
-	  device_config_sound_interface(mconfig, *this),
-	  device_config_memory_interface(mconfig, *this),
-	  m_space_config("samples", ENDIANNESS_LITTLE, 8, 18, 0, NULL, *ADDRESS_MAP_NAME(okim6295))
-{
-}
-
-
-//-------------------------------------------------
-//  static_alloc_device_config - allocate a new
-//  configuration object
-//-------------------------------------------------
-
-device_config *okim6295_device_config::static_alloc_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock)
-{
-	return global_alloc(okim6295_device_config(mconfig, tag, owner, clock));
-}
-
-
-//-------------------------------------------------
-//  alloc_device - allocate a new device object
-//-------------------------------------------------
-
-device_t *okim6295_device_config::alloc_device(running_machine &machine) const
-{
-	return auto_alloc(machine, okim6295_device(machine, *this));
-}
-
-
-//-------------------------------------------------
-//  static_set_pin7 - configuration helper to set
-//  the pin 7 state
-//-------------------------------------------------
-
-void okim6295_device_config::static_set_pin7(device_config *device, int pin7)
-{
-	okim6295_device_config *okim6295 = downcast<okim6295_device_config *>(device);
-	okim6295->m_pin7 = pin7;
-}
-
-
-//-------------------------------------------------
-//  memory_space_config - return a description of
-//  any address spaces owned by this device
-//-------------------------------------------------
-
-const address_space_config *okim6295_device_config::memory_space_config(address_spacenum spacenum) const
-{
-	return (spacenum == 0) ? &m_space_config : NULL;
-}
 
 
 
@@ -151,18 +84,30 @@ const address_space_config *okim6295_device_config::memory_space_config(address_
 //  okim6295_device - constructor
 //-------------------------------------------------
 
-okim6295_device::okim6295_device(running_machine &_machine, const okim6295_device_config &config)
-	: device_t(_machine, config),
-	  device_sound_interface(_machine, config, *this),
-	  device_memory_interface(_machine, config, *this),
-	  m_config(config),
-	  m_command(-1),
-	  m_bank_installed(false),
-	  m_bank_offs(0),
-	  m_stream(NULL),
-	  m_pin7_state(m_config.m_pin7),
-	  m_direct(NULL)
+okim6295_device::okim6295_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, OKIM6295, "OKI6295", tag, owner, clock),
+		device_sound_interface(mconfig, *this),
+		device_memory_interface(mconfig, *this),
+		m_space_config("samples", ENDIANNESS_LITTLE, 8, 18, 0, NULL, *ADDRESS_MAP_NAME(okim6295)),
+		m_command(-1),
+		m_bank_installed(false),
+		m_bank_offs(0),
+		m_stream(NULL),
+		m_pin7_state(0),
+		m_direct(NULL)
 {
+}
+
+
+//-------------------------------------------------
+//  static_set_pin7 - configuration helper to set
+//  the pin 7 state
+//-------------------------------------------------
+
+void okim6295_device::static_set_pin7(device_t &device, int pin7)
+{
+	okim6295_device &okim6295 = downcast<okim6295_device &>(device);
+	okim6295.m_pin7_state = pin7;
 }
 
 
@@ -173,14 +118,16 @@ okim6295_device::okim6295_device(running_machine &_machine, const okim6295_devic
 void okim6295_device::device_start()
 {
 	// find our direct access
-	m_direct = &space()->direct();
+	m_direct = &space().direct();
 
 	// create the stream
-	int divisor = m_config.m_pin7 ? 132 : 165;
-	m_stream = m_machine.sound().stream_alloc(*this, 0, 1, clock() / divisor);
+	int divisor = m_pin7_state ? 132 : 165;
+	m_stream = machine().sound().stream_alloc(*this, 0, 1, clock() / divisor);
 
 	save_item(NAME(m_command));
 	save_item(NAME(m_bank_offs));
+	save_item(NAME(m_pin7_state));
+
 	for (int voicenum = 0; voicenum < OKIM6295_VOICES; voicenum++)
 	{
 		save_item(NAME(m_voice[voicenum].m_playing), voicenum);
@@ -212,7 +159,8 @@ void okim6295_device::device_reset()
 
 void okim6295_device::device_post_load()
 {
-	set_bank_base(m_bank_offs);
+	set_bank_base(m_bank_offs, true);
+	device_clock_changed();
 }
 
 
@@ -225,6 +173,17 @@ void okim6295_device::device_clock_changed()
 {
 	int divisor = m_pin7_state ? 132 : 165;
 	m_stream->set_sample_rate(clock() / divisor);
+}
+
+
+//-------------------------------------------------
+//  memory_space_config - return a description of
+//  any address spaces owned by this device
+//-------------------------------------------------
+
+const address_space_config *okim6295_device::memory_space_config(address_spacenum spacenum) const
+{
+	return (spacenum == 0) ? &m_space_config : NULL;
 }
 
 
@@ -249,16 +208,19 @@ void okim6295_device::sound_stream_update(sound_stream &stream, stream_sample_t 
 //  assumes multiple 256k banks
 //-------------------------------------------------
 
-void okim6295_device::set_bank_base(offs_t base)
+void okim6295_device::set_bank_base(offs_t base, bool bDontUpdateStream)
 {
-	// flush out anything pending
-	m_stream->update();
+	// flush out anything pending (but not on e.g. a state load)
+	if (!bDontUpdateStream)
+	{
+		m_stream->update();
+	}
 
 	// if we are setting a non-zero base, and we have no bank, allocate one
 	if (!m_bank_installed && base != 0)
 	{
 		// override our memory map with a bank
-		space()->install_read_bank(0x00000, 0x3ffff, tag());
+		space().install_read_bank(0x00000, 0x3ffff, tag());
 		m_bank_installed = true;
 	}
 
@@ -266,7 +228,7 @@ void okim6295_device::set_bank_base(offs_t base)
 	if (m_bank_installed)
 	{
 		m_bank_offs = base;
-		memory_set_bankptr(m_machine, tag(), m_region->base() + base);
+		membank(tag())->set_base(m_region->base() + base);
 	}
 }
 
@@ -289,7 +251,7 @@ void okim6295_device::set_pin7(int pin7)
 
 UINT8 okim6295_device::read_status()
 {
-	UINT8 result = 0xf0;	// naname expects bits 4-7 to be 1
+	UINT8 result = 0xf0;    // naname expects bits 4-7 to be 1
 
 	// set the bit to 1 if something is playing on a given channel
 	m_stream->update();
@@ -334,24 +296,24 @@ void okim6295_device::write_command(UINT8 command)
 			{
 				okim_voice &voice = m_voice[voicenum];
 
-				// determine the start/stop positions
-				offs_t base = m_command * 8;
-
-				offs_t start = m_direct->read_raw_byte(base + 0) << 16;
-				start |= m_direct->read_raw_byte(base + 1) << 8;
-				start |= m_direct->read_raw_byte(base + 2) << 0;
-				start &= 0x3ffff;
-
-				offs_t stop = m_direct->read_raw_byte(base + 3) << 16;
-				stop |= m_direct->read_raw_byte(base + 4) << 8;
-				stop |= m_direct->read_raw_byte(base + 5) << 0;
-				stop &= 0x3ffff;
-
-				// set up the voice to play this sample
-				if (start < stop)
+				if (!voice.m_playing) // fixes Got-cha and Steel Force
 				{
-					if (!voice.m_playing) // fixes Got-cha and Steel Force
+					// determine the start/stop positions
+					offs_t base = m_command * 8;
+
+					offs_t start = m_direct->read_raw_byte(base + 0) << 16;
+					start |= m_direct->read_raw_byte(base + 1) << 8;
+					start |= m_direct->read_raw_byte(base + 2) << 0;
+					start &= 0x3ffff;
+
+					offs_t stop = m_direct->read_raw_byte(base + 3) << 16;
+					stop |= m_direct->read_raw_byte(base + 4) << 8;
+					stop |= m_direct->read_raw_byte(base + 5) << 0;
+					stop &= 0x3ffff;
+
+					if (start < stop)
 					{
+						// set up the voice to play this sample
 						voice.m_playing = true;
 						voice.m_base_offset = start;
 						voice.m_sample = 0;
@@ -361,15 +323,16 @@ void okim6295_device::write_command(UINT8 command)
 						voice.m_adpcm.reset();
 						voice.m_volume = s_volume_table[command & 0x0f];
 					}
-					else
-						logerror("OKIM6295:'%s' requested to play sample %02x on non-stopped voice\n",tag(),m_command);
-				}
 
-				// invalid samples go here
+					// invalid samples go here
+					else
+					{
+						logerror("OKIM6295:'%s' requested to play invalid sample %02x\n",tag(),m_command);
+					}
+				}
 				else
 				{
-					logerror("OKIM6295:'%s' requested to play invalid sample %02x\n",tag(),m_command);
-					voice.m_playing = false;
+					logerror("OKIM6295:'%s' requested to play sample %02x on non-stopped voice\n",tag(),m_command);
 				}
 			}
 
@@ -417,10 +380,10 @@ WRITE8_MEMBER( okim6295_device::write )
 
 okim6295_device::okim_voice::okim_voice()
 	: m_playing(false),
-	  m_base_offset(0),
-	  m_sample(0),
-	  m_count(0),
-	  m_volume(0)
+		m_base_offset(0),
+		m_sample(0),
+		m_count(0),
+		m_volume(0)
 {
 }
 
@@ -451,91 +414,6 @@ void okim6295_device::okim_voice::generate_adpcm(direct_read_data &direct, strea
 		{
 			m_playing = false;
 			break;
-		}
-	}
-}
-
-
-
-//**************************************************************************
-//  ADPCM STATE HELPER
-//**************************************************************************
-
-//-------------------------------------------------
-//  reset - reset the ADPCM state
-//-------------------------------------------------
-
-void adpcm_state::reset()
-{
-	// reset the signal/step
-	m_signal = -2;
-	m_step = 0;
-}
-
-
-//-------------------------------------------------
-//  device_clock_changed - called if the clock
-//  changes
-//-------------------------------------------------
-
-INT16 adpcm_state::clock(UINT8 nibble)
-{
-	// update the signal
-	m_signal += s_diff_lookup[m_step * 16 + (nibble & 15)];
-
-	// clamp to the maximum
-	if (m_signal > 2047)
-		m_signal = 2047;
-	else if (m_signal < -2048)
-		m_signal = -2048;
-
-	// adjust the step size and clamp
-	m_step += s_index_shift[nibble & 7];
-	if (m_step > 48)
-		m_step = 48;
-	else if (m_step < 0)
-		m_step = 0;
-
-	// return the signal
-	return m_signal;
-}
-
-
-//-------------------------------------------------
-//  compute_tables - precompute tables for faster
-//  sound generation
-//-------------------------------------------------
-
-void adpcm_state::compute_tables()
-{
-	// skip if we already did it
-	if (s_tables_computed)
-		return;
-	s_tables_computed = true;
-
-	// nibble to bit map
-	static const INT8 nbl2bit[16][4] =
-	{
-		{ 1, 0, 0, 0}, { 1, 0, 0, 1}, { 1, 0, 1, 0}, { 1, 0, 1, 1},
-		{ 1, 1, 0, 0}, { 1, 1, 0, 1}, { 1, 1, 1, 0}, { 1, 1, 1, 1},
-		{-1, 0, 0, 0}, {-1, 0, 0, 1}, {-1, 0, 1, 0}, {-1, 0, 1, 1},
-		{-1, 1, 0, 0}, {-1, 1, 0, 1}, {-1, 1, 1, 0}, {-1, 1, 1, 1}
-	};
-
-	// loop over all possible steps
-	for (int step = 0; step <= 48; step++)
-	{
-		// compute the step value
-		int stepval = floor(16.0 * pow(11.0 / 10.0, (double)step));
-
-		// loop over all nibbles and compute the difference
-		for (int nib = 0; nib < 16; nib++)
-		{
-			s_diff_lookup[step*16 + nib] = nbl2bit[nib][0] *
-				(stepval   * nbl2bit[nib][1] +
-				 stepval/2 * nbl2bit[nib][2] +
-				 stepval/4 * nbl2bit[nib][3] +
-				 stepval/8);
 		}
 	}
 }

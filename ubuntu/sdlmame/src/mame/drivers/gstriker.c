@@ -180,48 +180,44 @@ Frequencies: 68k is XTAL_32MHZ/2
 
 /*** MISC READ / WRITE HANDLERS **********************************************/
 
-static READ16_HANDLER(dmmy_8f)
+READ16_MEMBER(gstriker_state::dmmy_8f)
 {
-	gstriker_state *state = space->machine().driver_data<gstriker_state>();
-	state->m_dmmy_8f_ret = ~state->m_dmmy_8f_ret;
-	return state->m_dmmy_8f_ret;
+	m_dmmy_8f_ret = ~m_dmmy_8f_ret;
+	return m_dmmy_8f_ret;
 }
 
 /*** SOUND RELATED ***********************************************************/
 
 
-static WRITE16_HANDLER( sound_command_w )
+WRITE16_MEMBER(gstriker_state::sound_command_w)
 {
-	gstriker_state *state = space->machine().driver_data<gstriker_state>();
 	if (ACCESSING_BITS_0_7)
 	{
-		state->m_pending_command = 1;
-		soundlatch_w(space, offset, data & 0xff);
-		cputag_set_input_line(space->machine(), "audiocpu", INPUT_LINE_NMI, PULSE_LINE);
+		m_pending_command = 1;
+		soundlatch_byte_w(space, offset, data & 0xff);
+		machine().device("audiocpu")->execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 	}
 }
 
 #if 0
-static READ16_HANDLER( pending_command_r )
+READ16_MEMBER(gstriker_state::pending_command_r)
 {
-	gstriker_state *state = space->machine().driver_data<gstriker_state>();
-	return state->m_pending_command;
+	return m_pending_command;
 }
 #endif
 
-static WRITE8_HANDLER( gs_sh_pending_command_clear_w )
+WRITE8_MEMBER(gstriker_state::gs_sh_pending_command_clear_w)
 {
-	gstriker_state *state = space->machine().driver_data<gstriker_state>();
-	state->m_pending_command = 0;
+	m_pending_command = 0;
 }
 
-static WRITE8_HANDLER( gs_sh_bankswitch_w )
+WRITE8_MEMBER(gstriker_state::gs_sh_bankswitch_w)
 {
-	UINT8 *RAM = space->machine().region("audiocpu")->base();
+	UINT8 *RAM = memregion("audiocpu")->base();
 	int bankaddress;
 
-	bankaddress = 0x10000 + (data & 0x03) * 0x8000;
-	memory_set_bankptr(space->machine(), "bank1",&RAM[bankaddress]);
+	bankaddress = (data & 0x07) * 0x8000;
+	membank("bank1")->set_base(&RAM[bankaddress]);
 }
 
 /*** GFX DECODE **************************************************************/
@@ -249,7 +245,7 @@ static const gfx_layout gs_16x16x4_layout =
 	},
 
 	{ 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64,
-	 8*64,9*64,10*64,11*64,12*64,13*64,14*64,15*64
+		8*64,9*64,10*64,11*64,12*64,13*64,14*64,15*64
 	},
 	16*64
 };
@@ -266,9 +262,9 @@ GFXDECODE_END
 static void gs_ym2610_irq(device_t *device, int irq)
 {
 	if (irq)
-		cputag_set_input_line(device->machine(), "audiocpu", 0, ASSERT_LINE);
+		device->machine().device("audiocpu")->execute().set_input_line(0, ASSERT_LINE);
 	else
-		cputag_set_input_line(device->machine(), "audiocpu", 0, CLEAR_LINE);
+		device->machine().device("audiocpu")->execute().set_input_line(0, CLEAR_LINE);
 }
 
 static const ym2610_interface ym2610_config =
@@ -280,16 +276,16 @@ static const ym2610_interface ym2610_config =
 
 
 
-static ADDRESS_MAP_START( gstriker_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( gstriker_map, AS_PROGRAM, 16, gstriker_state )
 	AM_RANGE(0x000000, 0x0fffff) AM_ROM
-	AM_RANGE(0x100000, 0x103fff) AM_RAM_WRITE(MB60553_0_vram_w) AM_BASE_MEMBER(gstriker_state, m_MB60553[0].vram)
-	AM_RANGE(0x140000, 0x141fff) AM_RAM AM_BASE_MEMBER(gstriker_state, m_CG10103[0].vram)
-	AM_RANGE(0x180000, 0x180fff) AM_RAM_WRITE(VS920A_0_vram_w) AM_BASE_MEMBER(gstriker_state, m_VS920A[0].vram)
-	AM_RANGE(0x181000, 0x181fff) AM_RAM AM_BASE_MEMBER(gstriker_state, m_lineram)
-	AM_RANGE(0x1c0000, 0x1c0fff) AM_RAM_WRITE(paletteram16_xRRRRRGGGGGBBBBB_word_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x100000, 0x103fff) AM_RAM_WRITE(MB60553_0_vram_w) AM_SHARE("mb60553_vram")
+	AM_RANGE(0x140000, 0x141fff) AM_RAM AM_SHARE("cg10103_vram")
+	AM_RANGE(0x180000, 0x180fff) AM_RAM_WRITE(VS920A_0_vram_w) AM_SHARE("vs920a_vram")
+	AM_RANGE(0x181000, 0x181fff) AM_RAM AM_SHARE("lineram")
+	AM_RANGE(0x1c0000, 0x1c0fff) AM_RAM_WRITE(paletteram_xRRRRRGGGGGBBBBB_word_w) AM_SHARE("paletteram")
 
 	AM_RANGE(0x200000, 0x20000f) AM_RAM_WRITE(MB60553_0_regs_w)
-	AM_RANGE(0x200040, 0x20005f) AM_RAM //AM_BASE(&gs_mixer_regs)
+	AM_RANGE(0x200040, 0x20005f) AM_RAM
 	AM_RANGE(0x200060, 0x20007f) AM_RAM
 	AM_RANGE(0x200080, 0x200081) AM_READ_PORT("P1")
 	AM_RANGE(0x200082, 0x200083) AM_READ_PORT("P2")
@@ -299,33 +295,33 @@ static ADDRESS_MAP_START( gstriker_map, AS_PROGRAM, 16 )
 	AM_RANGE(0x20008e, 0x20008f) AM_READ(dmmy_8f)
 	AM_RANGE(0x2000a0, 0x2000a1) AM_WRITE(sound_command_w)
 
-	AM_RANGE(0xffc000, 0xffffff) AM_RAM AM_BASE_MEMBER(gstriker_state, m_work_ram)
+	AM_RANGE(0xffc000, 0xffffff) AM_RAM AM_SHARE("work_ram")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, gstriker_state )
 	AM_RANGE(0x0000, 0x77ff) AM_ROM
 	AM_RANGE(0x7800, 0x7fff) AM_RAM
 	AM_RANGE(0x8000, 0xffff) AM_ROMBANK("bank1")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sound_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( sound_io_map, AS_IO, 8, gstriker_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x03) AM_DEVREADWRITE("ymsnd", ym2610_r, ym2610_w)
+	AM_RANGE(0x00, 0x03) AM_DEVREADWRITE_LEGACY("ymsnd", ym2610_r, ym2610_w)
 	AM_RANGE(0x04, 0x04) AM_WRITE(gs_sh_bankswitch_w)
 	AM_RANGE(0x08, 0x08) AM_WRITE(gs_sh_pending_command_clear_w)
-	AM_RANGE(0x0c, 0x0c) AM_READ(soundlatch_r)
+	AM_RANGE(0x0c, 0x0c) AM_READ(soundlatch_byte_r)
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( vgoal_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( vgoal_map, AS_PROGRAM, 16, gstriker_state )
 	AM_RANGE(0x000000, 0x0fffff) AM_ROM
-	AM_RANGE(0x100000, 0x103fff) AM_RAM_WRITE(MB60553_0_vram_w) AM_BASE_MEMBER(gstriker_state, m_MB60553[0].vram)
-	AM_RANGE(0x140000, 0x141fff) AM_RAM AM_BASE_MEMBER(gstriker_state, m_CG10103[0].vram)
-	AM_RANGE(0x180000, 0x180fff) AM_RAM_WRITE(VS920A_0_vram_w) AM_BASE_MEMBER(gstriker_state, m_VS920A[0].vram)
-	AM_RANGE(0x181000, 0x181fff) AM_RAM AM_BASE_MEMBER(gstriker_state, m_lineram)
-	AM_RANGE(0x1c0000, 0x1c4fff) AM_RAM_WRITE(paletteram16_xRRRRRGGGGGBBBBB_word_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x100000, 0x103fff) AM_RAM_WRITE(MB60553_0_vram_w) AM_SHARE("mb60553_vram")
+	AM_RANGE(0x140000, 0x141fff) AM_RAM AM_SHARE("cg10103_vram")
+	AM_RANGE(0x180000, 0x180fff) AM_RAM_WRITE(VS920A_0_vram_w) AM_SHARE("vs920a_vram")
+	AM_RANGE(0x181000, 0x181fff) AM_RAM AM_SHARE("lineram")
+	AM_RANGE(0x1c0000, 0x1c4fff) AM_RAM_WRITE(paletteram_xRRRRRGGGGGBBBBB_word_w) AM_SHARE("paletteram")
 	AM_RANGE(0x200000, 0x20000f) AM_RAM_WRITE(MB60553_0_regs_w)
-	AM_RANGE(0x200040, 0x20005f) AM_RAM //AM_BASE(&gs_mixer_regs)
+	AM_RANGE(0x200040, 0x20005f) AM_RAM
 
 	AM_RANGE(0x200080, 0x200081) AM_READ_PORT("P1")
 	AM_RANGE(0x200082, 0x200083) AM_READ_PORT("P2")
@@ -335,7 +331,7 @@ static ADDRESS_MAP_START( vgoal_map, AS_PROGRAM, 16 )
 	AM_RANGE(0x20008e, 0x20008f) AM_READ(dmmy_8f)
 
 	AM_RANGE(0x2000a0, 0x2000a1) AM_WRITE(sound_command_w)
-	AM_RANGE(0xffc000, 0xffffff) AM_RAM AM_BASE_MEMBER(gstriker_state, m_work_ram)
+	AM_RANGE(0xffc000, 0xffffff) AM_RAM AM_SHARE("work_ram")
 ADDRESS_MAP_END
 
 /*** INPUT PORTS *************************************************************/
@@ -346,7 +342,7 @@ static INPUT_PORTS_START( gstriker_generic )
 	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_START2 )
-	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_SERVICE2 )				// "Test"
+	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_SERVICE2 )             // "Test"
 	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_TILT )
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_UNKNOWN) // vbl?
@@ -360,7 +356,7 @@ static INPUT_PORTS_START( gstriker_generic )
 	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
 	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(1)
-	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(1)	// "Spare"
+	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(1)   // "Spare"
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNKNOWN ) /* probably unused */
 
 	PORT_START("P2")
@@ -371,7 +367,7 @@ static INPUT_PORTS_START( gstriker_generic )
 	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
-	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(2)	// "Spare"
+	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(2)   // "Spare"
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNKNOWN ) /* probably unused */
 INPUT_PORTS_END
 
@@ -389,16 +385,16 @@ static INPUT_PORTS_START( gstriker )
 	PORT_DIPSETTING(      0x0008, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(      0x000c, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( 1C_2C ) )
-	PORT_DIPNAME( 0x0010, 0x0000, "2 Players VS CPU Game" )		// "Cooperation Coin"
+	PORT_DIPNAME( 0x0010, 0x0000, "2 Players VS CPU Game" )     // "Cooperation Coin"
 	PORT_DIPSETTING(      0x0010, "1 Credit" )
 	PORT_DIPSETTING(      0x0000, "2 Credits" )
-	PORT_DIPNAME( 0x0020, 0x0000, "Player VS Player Game" )		// "Competitive Coin"
+	PORT_DIPNAME( 0x0020, 0x0000, "Player VS Player Game" )     // "Competitive Coin"
 	PORT_DIPSETTING(      0x0020, "1 Credit" )
 	PORT_DIPSETTING(      0x0000, "2 Credits" )
-	PORT_DIPNAME( 0x0040, 0x0040, "New Challenger" )			/* unknown purpose */
+	PORT_DIPNAME( 0x0040, 0x0040, "New Challenger" )            /* unknown purpose */
 	PORT_DIPSETTING(      0x0040, DEF_STR( No ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( Yes ) )
-	PORT_DIPNAME( 0x0080, 0x0080, "Maximum Players" )			// "Cabinet Type"
+	PORT_DIPNAME( 0x0080, 0x0080, "Maximum Players" )           // "Cabinet Type"
 	PORT_DIPSETTING(      0x0000, "1" )
 	PORT_DIPSETTING(      0x0080, "2" )
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNKNOWN ) /* probably unused */
@@ -407,23 +403,23 @@ static INPUT_PORTS_START( gstriker )
 	PORT_DIPNAME( 0x0001, 0x0001, DEF_STR( Difficulty ) )
 	PORT_DIPSETTING(      0x0001, DEF_STR( Normal ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( Hard ) )
-	PORT_DIPNAME( 0x0006, 0x0006, "Player(s) VS CPU Time" )		// "Tournament  Time"
+	PORT_DIPNAME( 0x0006, 0x0006, "Player(s) VS CPU Time" )     // "Tournament  Time"
 	PORT_DIPSETTING(      0x0006, "1:30" )
 	PORT_DIPSETTING(      0x0004, "2:00" )
 	PORT_DIPSETTING(      0x0002, "3:00" )
 	PORT_DIPSETTING(      0x0000, "4:00" )
-	PORT_DIPNAME( 0x0018, 0x0018, "Player VS Player Time" )		// "Competitive Time"
+	PORT_DIPNAME( 0x0018, 0x0018, "Player VS Player Time" )     // "Competitive Time"
 	PORT_DIPSETTING(      0x0018, "2:00" )
 	PORT_DIPSETTING(      0x0010, "3:00" )
 	PORT_DIPSETTING(      0x0008, "4:00" )
 	PORT_DIPSETTING(      0x0000, "5:00" )
-	PORT_DIPNAME( 0x0020, 0x0000, DEF_STR( Demo_Sounds ) )		// "Demo Sound"
+	PORT_DIPNAME( 0x0020, 0x0000, DEF_STR( Demo_Sounds ) )      // "Demo Sound"
 	PORT_DIPSETTING(      0x0020, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0040, 0x0040, "Communication Mode" )			// "Master/Slave"
+	PORT_DIPNAME( 0x0040, 0x0040, "Communication Mode" )            // "Master/Slave"
 	PORT_DIPSETTING(      0x0040, "Master" )
 	PORT_DIPSETTING(      0x0000, "Slave" )
-	PORT_SERVICE( 0x0080, IP_ACTIVE_LOW )					// "Self Test Mode"
+	PORT_SERVICE( 0x0080, IP_ACTIVE_LOW )                   // "Self Test Mode"
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNKNOWN ) /* probably unused */
 INPUT_PORTS_END
 
@@ -532,7 +528,7 @@ static INPUT_PORTS_START( vgoalsoc )
 	PORT_DIPNAME( 0x0020, 0x0000, DEF_STR( Demo_Sounds ) )
 	PORT_DIPSETTING(      0x0020, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0040, 0x0040, "DWS2:6" )		// hangs at POST
+	PORT_DIPNAME( 0x0040, 0x0040, "DWS2:6" )        // hangs at POST
 	PORT_DIPSETTING(      0x0040, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 	PORT_DIPNAME( 0x0080, 0x0080, "Start credit" )
@@ -546,9 +542,9 @@ INPUT_PORTS_END
 static MACHINE_CONFIG_START( gstriker, gstriker_state )
 	MCFG_CPU_ADD("maincpu", M68000, 10000000)
 	MCFG_CPU_PROGRAM_MAP(gstriker_map)
-	MCFG_CPU_VBLANK_INT("screen", irq1_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", gstriker_state,  irq1_line_hold)
 
-	MCFG_CPU_ADD("audiocpu", Z80,8000000/2)	/* 4 MHz ??? */
+	MCFG_CPU_ADD("audiocpu", Z80,8000000/2) /* 4 MHz ??? */
 	MCFG_CPU_PROGRAM_MAP(sound_map)
 	MCFG_CPU_IO_MAP(sound_io_map)
 
@@ -557,15 +553,20 @@ static MACHINE_CONFIG_START( gstriker, gstriker_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(5000) /* hand-tuned, it needs a bit */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 64*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 40*8-1, 0*8, 28*8-1)
-	MCFG_SCREEN_UPDATE(gstriker)
+	MCFG_SCREEN_UPDATE_DRIVER(gstriker_state, screen_update_gstriker)
 
 	MCFG_GFXDECODE(gstriker)
 	MCFG_PALETTE_LENGTH(0x800)
 
-	MCFG_VIDEO_START(gstriker)
+	MCFG_DEVICE_ADD("vsystem_spr", VSYSTEM_SPR, 0)
+	MCFG_VSYSTEM_SPR_SET_GFXREGION(2)
+	MCFG_VSYSTEM_SPR_SET_PALBASE(0x10)
+	MCFG_VSYSTEM_SPR_SET_PALMASK(0x1f)
+	MCFG_VSYSTEM_SPR_SET_TRANSPEN(0)
+
+	MCFG_VIDEO_START_OVERRIDE(gstriker_state,gstriker)
 
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
 
@@ -578,16 +579,20 @@ static MACHINE_CONFIG_START( gstriker, gstriker_state )
 MACHINE_CONFIG_END
 
 static MACHINE_CONFIG_DERIVED( twrldc94, gstriker )
-	MCFG_VIDEO_START( twrldc94 )
+	MCFG_VIDEO_START_OVERRIDE(gstriker_state, twrldc94 )
+
+	MCFG_DEVICE_MODIFY("vsystem_spr")
+	MCFG_VSYSTEM_SPR_SET_PALBASE(0x60)
+
 MACHINE_CONFIG_END
 
 
 static MACHINE_CONFIG_START( vgoal, gstriker_state )
 	MCFG_CPU_ADD("maincpu", M68000, 16000000)
 	MCFG_CPU_PROGRAM_MAP(vgoal_map)
-	MCFG_CPU_VBLANK_INT("screen", irq1_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", gstriker_state,  irq1_line_hold)
 
-	MCFG_CPU_ADD("audiocpu", Z80,8000000/2)	/* 4 MHz ??? */
+	MCFG_CPU_ADD("audiocpu", Z80,8000000/2) /* 4 MHz ??? */
 	MCFG_CPU_PROGRAM_MAP(sound_map)
 	MCFG_CPU_IO_MAP(sound_io_map)
 
@@ -596,15 +601,18 @@ static MACHINE_CONFIG_START( vgoal, gstriker_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(5000) /* hand-tuned, it needs a bit */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 64*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 40*8-1, 0*8, 28*8-1)
-	MCFG_SCREEN_UPDATE(gstriker)
+	MCFG_SCREEN_UPDATE_DRIVER(gstriker_state, screen_update_gstriker)
 
 	MCFG_GFXDECODE(gstriker)
 	MCFG_PALETTE_LENGTH(0x2000)
 
-	MCFG_VIDEO_START(vgoalsoc)
+	MCFG_DEVICE_ADD("vsystem_spr", VSYSTEM_SPR, 0)
+	MCFG_VSYSTEM_SPR_SET_GFXREGION(2)
+	MCFG_VSYSTEM_SPR_SET_PALBASE(0x00)
+
+	MCFG_VIDEO_START_OVERRIDE(gstriker_state,vgoalsoc)
 
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
 
@@ -627,7 +635,6 @@ ROM_START( gstriker )
 
 	ROM_REGION( 0x40000, "audiocpu", 0 )
 	ROM_LOAD( "human-3_27c1001.u87",  0x00000, 0x20000, CRC(2f28c01e) SHA1(63829ad7969d197b2f2c87cb88bdb9e9880ed2d6) )
-	ROM_RELOAD(               0x10000, 0x20000 )
 
 	ROM_REGION( 0x20000, "gfx1", 0 ) // score tilemap
 	ROM_LOAD( "human-2_27c1024.u79",  0x00000, 0x20000, CRC(a981993b) SHA1(ed92c7581d2b84a8628744dd5f8a2266c45dcd5b) )
@@ -663,7 +670,6 @@ ROM_START( gstrikera )
 
 	ROM_REGION( 0x40000, "audiocpu", 0 )
 	ROM_LOAD( "human-3_27c1001.u87",  0x00000, 0x20000, CRC(2f28c01e) SHA1(63829ad7969d197b2f2c87cb88bdb9e9880ed2d6) )
-	ROM_RELOAD(               0x10000, 0x20000 )
 
 	ROM_REGION( 0x20000, "gfx1", 0 ) // score tilemap
 	ROM_LOAD( "human-2_27c1024.u79",  0x00000, 0x20000, CRC(a981993b) SHA1(ed92c7581d2b84a8628744dd5f8a2266c45dcd5b) )
@@ -685,7 +691,7 @@ ROM_START( gstrikera )
 	ROM_REGION( 0x100000, "ymsnd", 0 )
 	ROM_LOAD( "scrgs107.u99", 0x00000, 0x100000, CRC(ecc0a01b) SHA1(239e832b7d22925460a8f44eb82e782cd13aba49) )
 
-      /* PALs were protected on this version, used the ones from the "gstriker" set */
+		/* PALs were protected on this version, used the ones from the "gstriker" set */
 	ROM_REGION( 0x1000, "plds", 0 )
 	ROM_LOAD( "pal16l8.s201a.u52",   0x0000, 0x0104, CRC(724faf0f) SHA1(755fad09d188af58efce733a9f1256b1abc7c360) )
 	ROM_LOAD( "pal16l8.s202a.u74",   0x0200, 0x0104, CRC(ad5c4722) SHA1(0aad71b73c6674e15596b7de59160a5156a4118d) )
@@ -831,74 +837,72 @@ state->m_work_ram[0x000/2] = (_num_ & 0xffff0000) >> 16;\
 state->m_work_ram[0x002/2] = (_num_ & 0x0000ffff) >> 0;
 
 
-static WRITE16_HANDLER( twrldc94_mcu_w )
+WRITE16_MEMBER(gstriker_state::twrldc94_mcu_w)
 {
-	gstriker_state *state = space->machine().driver_data<gstriker_state>();
-	state->m_mcu_data = data;
+	m_mcu_data = data;
 }
 
-static READ16_HANDLER( twrldc94_mcu_r )
+READ16_MEMBER(gstriker_state::twrldc94_mcu_r)
 {
-	gstriker_state *state = space->machine().driver_data<gstriker_state>();
-	return state->m_mcu_data;
+	return m_mcu_data;
 }
 
-static WRITE16_HANDLER( twrldc94_prot_reg_w )
+WRITE16_MEMBER(gstriker_state::twrldc94_prot_reg_w)
 {
-	gstriker_state *state = space->machine().driver_data<gstriker_state>();
-	state->m_prot_reg[1] = state->m_prot_reg[0];
-	state->m_prot_reg[0] = data;
+	gstriker_state *state = machine().driver_data<gstriker_state>();
+	m_prot_reg[1] = m_prot_reg[0];
+	m_prot_reg[0] = data;
 
-	if( ((state->m_prot_reg[1] & 2) == 2) && ((state->m_prot_reg[0] & 2) == 0) )
+	if( ((m_prot_reg[1] & 2) == 2) && ((m_prot_reg[0] & 2) == 0) )
 	{
-		switch( state->m_gametype )
+		switch( m_gametype )
 		{
 			case 1:
-				switch(state->m_mcu_data)
+				switch(m_mcu_data)
 				{
 					#define NULL_SUB 0x0000828E
 					case 0x53: PC(0x0000a4c); break; // boot -> main loop
 
 					/*
-                        68 and 62 could be sprite or sound changes, or ?
-                        68(),61()
-                        if( !carry )
-                        {
-                            68(),65()
-                        }
-                        else
-                        {
-                            62(),72()
-                        }
-                    */
+					    68 and 62 could be sprite or sound changes, or ?
+					    68(),61()
+					    if( !carry )
+					    {
+					        68(),65()
+					    }
+					    else
+					    {
+					        62(),72()
+					    }
+					*/
 					case 0x68: PC(NULL_SUB); break; // time up doesn't block long enough for pk shootout
 					case 0x61: PC(0x0003AF4); break; // after time up, pk shootout???
 					case 0x65: PC(0x0003F26); break;
 
 					// 62->72
-					case 0x62: PC(NULL_SUB); break;	// after lose shootout, continue ???
+					case 0x62: PC(NULL_SUB); break; // after lose shootout, continue ???
 					case 0x72: PC(0x000409E); break; // game over
 
 					/*
-                        Attract mode is pre programmed loop called from main
-                        that runs through top11->demoplay
-                        (NOTE: sprites for demo play are being drawn at 0x141000,
-                        this address is used in a few places, and there's some activity
-                        further up around 0x1410b0.)
+					    Attract mode is pre programmed loop called from main
+					    that runs through top11->demoplay
+					    (NOTE: sprites for demo play are being drawn at 0x141000,
+					    this address is used in a few places, and there's some activity
+					    further up around 0x1410b0.)
 
-                        The loop begins with three prot calls:
-                        one always present (may be diversion to 0x0010DC8 unreachable code
-                        and prot cases 6a,79,6f) and two alternating calls.
-                        The loop is 6e -> [6b|69] -> top11 -> (4 segment)playdemo
+					    The loop begins with three prot calls:
+					    one always present (may be diversion to 0x0010DC8 unreachable code
+					    and prot cases 6a,79,6f) and two alternating calls.
+					    The loop is 6e -> [6b|69] -> top11 -> (4 segment)playdemo
 
-                        These are the likely suspects for attract mode:
-                        0x0010E28 red tecmo on black
-                        0x0010EEC bouncing ball and player with game title
-                        0x00117A2 single segment demo play with player sprites at 0x140000
-                        0x001120A sliding display of player photos
-                        0x0010DC8 unreachable code at end of attract loop with cases 6a,79,6f
+					    These are the likely suspects for attract mode:
+					    0x0010E28 red tecmo on black
+					    0x0010EEC bouncing ball and player with game title
+					    0x00117A2 single segment demo play with player sprites at 0x140000
+					    0x001120A sliding display of player photos
+					    0x0010DC8 unreachable code at end of attract loop with cases 6a,79,6f
 
-                    */
+					*/
 					case 0x6e: PC(0x0010E28); break; // loop
 					case 0x6b: PC(0x0010EEC); break; // attract even
 					case 0x69: PC(0x001120A); break; // attract odd
@@ -914,19 +918,19 @@ static WRITE16_HANDLER( twrldc94_prot_reg_w )
 					case 0x6f: PC(NULL_SUB); break;
 
 					default:
-						popmessage("Unknown MCU CMD %04x",state->m_mcu_data);
+						popmessage("Unknown MCU CMD %04x",m_mcu_data);
 						PC(NULL_SUB);
 						break;
 				}
 				break;
 
 			case 2:
-				switch(state->m_mcu_data)
+				switch(m_mcu_data)
 				{
 					case 0x53: PC(0x00000a5c); break; // POST
 
 					default:
-						popmessage("Unknown MCU CMD %04x",state->m_mcu_data);
+						popmessage("Unknown MCU CMD %04x",m_mcu_data);
 						PC(NULL_SUB);
 						break;
 				}
@@ -934,7 +938,7 @@ static WRITE16_HANDLER( twrldc94_prot_reg_w )
 
 
 			case 3:
-				switch(state->m_mcu_data)
+				switch(m_mcu_data)
 				{
 					case 0x33: PC(0x00063416); break; // *after game over, is this right?
 					case 0x3d: PC(0x0006275C); break; // after sprite ram init, team select
@@ -947,7 +951,7 @@ static WRITE16_HANDLER( twrldc94_prot_reg_w )
 					case 0x79: PC(0x0006072E); break; // after select, start match
 
 					default:
-						popmessage("Unknown MCU CMD %04x",state->m_mcu_data);
+						popmessage("Unknown MCU CMD %04x",m_mcu_data);
 						PC(0x00000586); // rts
 						break;
 				}
@@ -956,14 +960,13 @@ static WRITE16_HANDLER( twrldc94_prot_reg_w )
 	}
 }
 
-static READ16_HANDLER( twrldc94_prot_reg_r )
+READ16_MEMBER(gstriker_state::twrldc94_prot_reg_r)
 {
-	gstriker_state *state = space->machine().driver_data<gstriker_state>();
 	// bit 0 is for debugging vgoalsoc?
 	// Setting it results in a hang with a digit displayed on screen
 	// For twrldc94, it just disables sound.
 
-	return state->m_prot_reg[0];
+	return m_prot_reg[0];
 }
 
 /*
@@ -986,17 +989,17 @@ static READ16_HANDLER( twrldc94_prot_reg_r )
 #define TICKCOUNT_3 state->m_work_ram[0x290e/2]
 #define COUNTER_1 state->m_work_ram[0x2928/2]
 #define COUNTER_2 state->m_work_ram[0x292a/2]
-static READ16_HANDLER( vbl_toggle_r )
+READ16_MEMBER(gstriker_state::vbl_toggle_r)
 {
 	return 0xff;
 }
 
-static WRITE16_HANDLER( vbl_toggle_w )
+WRITE16_MEMBER(gstriker_state::vbl_toggle_w)
 {
-	gstriker_state *state = space->machine().driver_data<gstriker_state>();
+	gstriker_state *state = machine().driver_data<gstriker_state>();
 	if( COUNTER1_ENABLE == 1 )
 	{
-		TICK_1 = (TICK_1 - 1) & 0xff;	// 8bit
+		TICK_1 = (TICK_1 - 1) & 0xff;   // 8bit
 		if( TICK_1 <= 0 )
 		{
 			TICK_1 = TICKCOUNT_1;
@@ -1022,45 +1025,42 @@ static void mcu_init( running_machine &machine )
 	state->m_pending_command = 0;
 	state->m_mcu_data = 0;
 
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x20008a, 0x20008b, FUNC(twrldc94_mcu_w));
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x20008a, 0x20008b, FUNC(twrldc94_mcu_r));
+	machine.device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0x20008a, 0x20008b, write16_delegate(FUNC(gstriker_state::twrldc94_mcu_w),state));
+	machine.device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(0x20008a, 0x20008b, read16_delegate(FUNC(gstriker_state::twrldc94_mcu_r),state));
 
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x20008e, 0x20008f, FUNC(twrldc94_prot_reg_w));
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x20008e, 0x20008f, FUNC(twrldc94_prot_reg_r));
+	machine.device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0x20008e, 0x20008f, write16_delegate(FUNC(gstriker_state::twrldc94_prot_reg_w),state));
+	machine.device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(0x20008e, 0x20008f, read16_delegate(FUNC(gstriker_state::twrldc94_prot_reg_r),state));
 }
 
-static DRIVER_INIT( twrldc94 )
+DRIVER_INIT_MEMBER(gstriker_state,twrldc94)
 {
-	gstriker_state *state = machine.driver_data<gstriker_state>();
-	state->m_gametype = 1;
-	mcu_init( machine );
+	m_gametype = 1;
+	mcu_init( machine() );
 }
 
-static DRIVER_INIT( twrldc94a )
+DRIVER_INIT_MEMBER(gstriker_state,twrldc94a)
 {
-	gstriker_state *state = machine.driver_data<gstriker_state>();
-	state->m_gametype = 2;
-	mcu_init( machine );
+	m_gametype = 2;
+	mcu_init( machine() );
 }
 
-static DRIVER_INIT( vgoalsoc )
+DRIVER_INIT_MEMBER(gstriker_state,vgoalsoc)
 {
-	gstriker_state *state = machine.driver_data<gstriker_state>();
-	state->m_gametype = 3;
-	mcu_init( machine );
+	m_gametype = 3;
+	mcu_init( machine() );
 
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x200090, 0x200091, FUNC(vbl_toggle_w)); // vblank toggle
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x200090, 0x200091, FUNC(vbl_toggle_r));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0x200090, 0x200091, write16_delegate(FUNC(gstriker_state::vbl_toggle_w),this)); // vblank toggle
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(0x200090, 0x200091, read16_delegate(FUNC(gstriker_state::vbl_toggle_r),this));
 }
 
 /*** GAME DRIVERS ************************************************************/
 
-GAME( 1993, gstriker, 0,        gstriker, gstriker, 0,        ROT0, "Human", "Grand Striker", GAME_IMPERFECT_GRAPHICS )
-GAME( 1993, gstrikera, gstriker, gstriker, gstriker, 0,        ROT0, "Human", "Grand Striker (Americas)", GAME_IMPERFECT_GRAPHICS )
+GAME( 1993, gstriker, 0,        gstriker, gstriker, driver_device, 0,        ROT0, "Human", "Grand Striker", GAME_IMPERFECT_GRAPHICS )
+GAME( 1993, gstrikera, gstriker, gstriker, gstriker, driver_device, 0,        ROT0, "Human", "Grand Striker (Americas)", GAME_IMPERFECT_GRAPHICS )
 
 
 /* Similar, but not identical hardware, appear to be protected by an MCU :-( */
-GAME( 1994, vgoalsoc, 0,        vgoal,    vgoalsoc, vgoalsoc,   ROT0, "Tecmo", "V Goal Soccer (set 1)", GAME_NOT_WORKING )
-GAME( 1994, vgoalsca, vgoalsoc, vgoal,    vgoalsoc, vgoalsoc,   ROT0, "Tecmo", "V Goal Soccer (set 2)", GAME_NOT_WORKING )
-GAME( 1994, twrldc94, 0,        twrldc94, twrldc94, twrldc94,   ROT0, "Tecmo", "Tecmo World Cup '94 (set 1)", GAME_NOT_WORKING | GAME_UNEMULATED_PROTECTION | GAME_IMPERFECT_GRAPHICS )
-GAME( 1994, twrldc94a,twrldc94, twrldc94, twrldc94, twrldc94a,  ROT0, "Tecmo", "Tecmo World Cup '94 (set 2)", GAME_NOT_WORKING | GAME_UNEMULATED_PROTECTION | GAME_IMPERFECT_GRAPHICS )
+GAME( 1994, vgoalsoc, 0,        vgoal,    vgoalsoc, gstriker_state, vgoalsoc,   ROT0, "Tecmo", "V Goal Soccer (set 1)", GAME_NOT_WORKING )
+GAME( 1994, vgoalsca, vgoalsoc, vgoal,    vgoalsoc, gstriker_state, vgoalsoc,   ROT0, "Tecmo", "V Goal Soccer (set 2)", GAME_NOT_WORKING )
+GAME( 1994, twrldc94, 0,        twrldc94, twrldc94, gstriker_state, twrldc94,   ROT0, "Tecmo", "Tecmo World Cup '94 (set 1)", GAME_NOT_WORKING | GAME_UNEMULATED_PROTECTION | GAME_IMPERFECT_GRAPHICS )
+GAME( 1994, twrldc94a,twrldc94, twrldc94, twrldc94, gstriker_state, twrldc94a,  ROT0, "Tecmo", "Tecmo World Cup '94 (set 2)", GAME_NOT_WORKING | GAME_UNEMULATED_PROTECTION | GAME_IMPERFECT_GRAPHICS )

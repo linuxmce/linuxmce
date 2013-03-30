@@ -14,75 +14,73 @@ Atari Starship 1 driver
 
 
 
-static INTERRUPT_GEN( starshp1_interrupt )
+INTERRUPT_GEN_MEMBER(starshp1_state::starshp1_interrupt)
 {
-	if ((input_port_read(device->machine(), "SYSTEM") & 0x90) != 0x90)
-		generic_pulse_irq_line(device, 0);
+	if ((machine().root_device().ioport("SYSTEM")->read() & 0x90) != 0x90)
+		generic_pulse_irq_line(device.execute(), 0, 1);
 }
 
 
-static WRITE8_DEVICE_HANDLER( starshp1_audio_w )
+WRITE8_MEMBER(starshp1_state::starshp1_audio_w)
 {
-	starshp1_state *state = device->machine().driver_data<starshp1_state>();
+	device_t *device = machine().device("discrete");
 	data &= 1;
 
 	switch (offset & 7)
 	{
 	case 0:
-		state->m_attract = data;
-		discrete_sound_w(device, STARSHP1_ATTRACT, data);
+		m_attract = data;
+		discrete_sound_w(device, space, STARSHP1_ATTRACT, data);
 		break;
 	case 1:
-		state->m_phasor = data;
-		discrete_sound_w(device, STARSHP1_PHASOR_ON, data);
+		m_phasor = data;
+		discrete_sound_w(device, space, STARSHP1_PHASOR_ON, data);
 		break;
 	case 2:
-		discrete_sound_w(device, STARSHP1_KICKER, data);
+		discrete_sound_w(device, space, STARSHP1_KICKER, data);
 		break;
 	case 3:
-		discrete_sound_w(device, STARSHP1_SL1, data);
+		discrete_sound_w(device, space, STARSHP1_SL1, data);
 		break;
 	case 4:
-		discrete_sound_w(device, STARSHP1_SL2, data);
+		discrete_sound_w(device, space, STARSHP1_SL2, data);
 		break;
 	case 5:
-		discrete_sound_w(device, STARSHP1_MOLVL, data);
+		discrete_sound_w(device, space, STARSHP1_MOLVL, data);
 		break;
 	case 6:
-		discrete_sound_w(device, STARSHP1_NOISE_FREQ, data);
+		discrete_sound_w(device, space, STARSHP1_NOISE_FREQ, data);
 		break;
 	}
 
-	coin_lockout_w(device->machine(), 0, !state->m_attract);
-	coin_lockout_w(device->machine(), 1, !state->m_attract);
+	coin_lockout_w(machine(), 0, !m_attract);
+	coin_lockout_w(machine(), 1, !m_attract);
 }
 
 
-static WRITE8_HANDLER( starshp1_collision_reset_w )
+WRITE8_MEMBER(starshp1_state::starshp1_collision_reset_w)
 {
-	starshp1_state *state = space->machine().driver_data<starshp1_state>();
-	state->m_collision_latch = 0;
+	m_collision_latch = 0;
 }
 
 
-static CUSTOM_INPUT( starshp1_analog_r )
+CUSTOM_INPUT_MEMBER(starshp1_state::starshp1_analog_r)
 {
-	starshp1_state *state = field->port->machine().driver_data<starshp1_state>();
 	int val = 0;
 
-	switch (state->m_analog_in_select)
+	switch (m_analog_in_select)
 	{
 	case 0:
-		val = input_port_read(field->port->machine(), "STICKY");
+		val = ioport("STICKY")->read();
 		break;
 	case 1:
-		val = input_port_read(field->port->machine(), "STICKX");
+		val = ioport("STICKX")->read();
 		break;
 	case 2:
 		val = 0x20; /* DAC feedback, not used */
 		break;
 	case 3:
-		val = input_port_read(field->port->machine(), "PLAYTIME");
+		val = ioport("PLAYTIME")->read();
 		break;
 	}
 
@@ -90,86 +88,83 @@ static CUSTOM_INPUT( starshp1_analog_r )
 }
 
 
-static CUSTOM_INPUT( collision_latch_r )
+CUSTOM_INPUT_MEMBER(starshp1_state::collision_latch_r)
 {
-	starshp1_state *state = field->port->machine().driver_data<starshp1_state>();
-	return state->m_collision_latch & 0x0f;
+	return m_collision_latch & 0x0f;
 }
 
 
-static WRITE8_HANDLER( starshp1_analog_in_w )
+WRITE8_MEMBER(starshp1_state::starshp1_analog_in_w)
 {
-	starshp1_state *state = space->machine().driver_data<starshp1_state>();
-	state->m_analog_in_select = offset & 3;
+	m_analog_in_select = offset & 3;
 }
 
 
-static WRITE8_DEVICE_HANDLER( starshp1_analog_out_w )
+WRITE8_MEMBER(starshp1_state::starshp1_analog_out_w)
 {
-	starshp1_state *state = device->machine().driver_data<starshp1_state>();
+	device_t *device = machine().device("discrete");
 	switch (offset & 7)
 	{
 	case 1:
-		state->m_ship_size = data;
+		m_ship_size = data;
 		break;
 	case 2:
-		discrete_sound_w(device, STARSHP1_NOISE_AMPLITUDE, data);
+		discrete_sound_w(device, space, STARSHP1_NOISE_AMPLITUDE, data);
 		break;
 	case 3:
-		discrete_sound_w(device, STARSHP1_TONE_PITCH, data);
+		discrete_sound_w(device, space, STARSHP1_TONE_PITCH, data);
 		break;
 	case 4:
-		discrete_sound_w(device, STARSHP1_MOTOR_SPEED, data);
+		discrete_sound_w(device, space, STARSHP1_MOTOR_SPEED, data);
 		break;
 	case 5:
-		state->m_circle_hpos = data;
+		m_circle_hpos = data;
 		break;
 	case 6:
-		state->m_circle_vpos = data;
+		m_circle_vpos = data;
 		break;
 	case 7:
-		state->m_circle_size = data;
+		m_circle_size = data;
 		break;
 	}
 }
 
 
-static WRITE8_HANDLER( starshp1_misc_w )
+WRITE8_MEMBER(starshp1_state::starshp1_misc_w)
 {
-	starshp1_state *state = space->machine().driver_data<starshp1_state>();
 	data &= 1;
 
 	switch (offset & 7)
 	{
 	case 0:
-		state->m_ship_explode = data;
+		m_ship_explode = data;
 		break;
 	case 1:
-		state->m_circle_mod = data;
+		m_circle_mod = data;
 		break;
 	case 2:
-		state->m_circle_kill = !data;
+		m_circle_kill = !data;
 		break;
 	case 3:
-		state->m_starfield_kill = data;
+		m_starfield_kill = data;
 		break;
 	case 4:
-		state->m_inverse = data;
+		m_inverse = data;
 		break;
 	case 5:
 		/* BLACK HOLE, not used */
 		break;
 	case 6:
-		state->m_mux = data;
+		m_mux = data;
 		break;
 	case 7:
-		set_led_status(space->machine(), 0, !data);
+		set_led_status(machine(), 0, !data);
 		break;
 	}
 }
 
 
-static ADDRESS_MAP_START( starshp1_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( starshp1_map, AS_PROGRAM, 8, starshp1_state )
 	AM_RANGE(0x0000, 0x00ff) AM_RAM AM_MIRROR(0x100)
 	AM_RANGE(0x2c00, 0x3fff) AM_ROM
 	AM_RANGE(0xa000, 0xa000) AM_READ_PORT("SYSTEM")
@@ -177,16 +172,16 @@ static ADDRESS_MAP_START( starshp1_map, AS_PROGRAM, 8 )
 	AM_RANGE(0xc300, 0xc3ff) AM_WRITE(starshp1_sspic_w) /* spaceship picture */
 	AM_RANGE(0xc400, 0xc400) AM_READ_PORT("COINAGE")
 	AM_RANGE(0xc400, 0xc4ff) AM_WRITE(starshp1_ssadd_w) /* spaceship address */
-	AM_RANGE(0xc800, 0xc9ff) AM_RAM_WRITE(starshp1_playfield_w) AM_BASE_MEMBER(starshp1_state, m_playfield_ram)
-	AM_RANGE(0xcc00, 0xcc0f) AM_WRITEONLY AM_BASE_MEMBER(starshp1_state, m_hpos_ram)
-	AM_RANGE(0xd000, 0xd00f) AM_WRITEONLY AM_BASE_MEMBER(starshp1_state, m_vpos_ram)
-	AM_RANGE(0xd400, 0xd40f) AM_WRITEONLY AM_BASE_MEMBER(starshp1_state, m_obj_ram)
+	AM_RANGE(0xc800, 0xc9ff) AM_RAM_WRITE(starshp1_playfield_w) AM_SHARE("playfield_ram")
+	AM_RANGE(0xcc00, 0xcc0f) AM_WRITEONLY AM_SHARE("hpos_ram")
+	AM_RANGE(0xd000, 0xd00f) AM_WRITEONLY AM_SHARE("vpos_ram")
+	AM_RANGE(0xd400, 0xd40f) AM_WRITEONLY AM_SHARE("obj_ram")
 	AM_RANGE(0xd800, 0xd800) AM_READ(starshp1_rng_r)
 	AM_RANGE(0xd800, 0xd80f) AM_WRITE(starshp1_collision_reset_w)
 	AM_RANGE(0xdc00, 0xdc0f) AM_WRITE(starshp1_misc_w)
 	AM_RANGE(0xdd00, 0xdd0f) AM_WRITE(starshp1_analog_in_w)
-	AM_RANGE(0xde00, 0xde0f) AM_DEVWRITE("discrete", starshp1_audio_w)
-	AM_RANGE(0xdf00, 0xdf0f) AM_DEVWRITE("discrete", starshp1_analog_out_w)
+	AM_RANGE(0xde00, 0xde0f) AM_WRITE(starshp1_audio_w)
+	AM_RANGE(0xdf00, 0xdf0f) AM_WRITE(starshp1_analog_out_w)
 	AM_RANGE(0xf000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
@@ -199,29 +194,29 @@ static INPUT_PORTS_START( starshp1 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_DIPNAME( 0x20, 0x20, "Extended Play" )
-	PORT_DIPSETTING(	0x00, DEF_STR( No ) )
-	PORT_DIPSETTING(	0x20, DEF_STR( Yes ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( No ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( Yes ) )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_TOGGLE
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )
 
 	PORT_START("VBLANK")
-	PORT_BIT( 0x3f, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(starshp1_analog_r, NULL)	/* analog in */
+	PORT_BIT( 0x3f, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, starshp1_state,starshp1_analog_r, NULL)   /* analog in */
 	PORT_SERVICE( 0x40, IP_ACTIVE_LOW )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_VBLANK )
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 
 	PORT_START("COINAGE")
-	PORT_BIT( 0x0f, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(collision_latch_r, NULL)	/* collision latch */
+	PORT_BIT( 0x0f, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, starshp1_state,collision_latch_r, NULL)   /* collision latch */
 	PORT_DIPNAME( 0x70, 0x20, DEF_STR( Coinage ) )
-	PORT_DIPSETTING(	0x10, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0x20, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0x40, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( 1C_2C ) )
 	PORT_BIT(0x80, IP_ACTIVE_HIGH, IPT_UNUSED ) /* ground */
 
 	PORT_START("PLAYTIME")
 	PORT_DIPNAME( 0x3f, 0x20, "Play Time" ) /* potentiometer */
-	PORT_DIPSETTING(	0x00, "60 Seconds" )
-	PORT_DIPSETTING(	0x20, "90 Seconds" )
-	PORT_DIPSETTING(	0x3f, "120 Seconds" )
+	PORT_DIPSETTING(    0x00, "60 Seconds" )
+	PORT_DIPSETTING(    0x20, "90 Seconds" )
+	PORT_DIPSETTING(    0x3f, "120 Seconds" )
 
 	PORT_START("STICKY")
 	PORT_BIT( 0x3f, 0x20, IPT_AD_STICK_Y ) PORT_MINMAX(0,63) PORT_SENSITIVITY(10) PORT_KEYDELTA(10) PORT_REVERSE
@@ -245,7 +240,7 @@ static const gfx_layout tilelayout =
 		0x0000, 0x0400, 0x0800, 0x0c00,
 		0x1000, 0x1400, 0x1800, 0x1c00
 	},
-	8	    /* step */
+	8       /* step */
 };
 
 
@@ -262,7 +257,7 @@ static const gfx_layout spritelayout =
 	{
 		0x00, 0x20, 0x40, 0x60, 0x80, 0xa0, 0xc0, 0xe0
 	},
-	0x100	/* step */
+	0x100   /* step */
 };
 
 static const UINT32 shiplayout_xoffset[64] =
@@ -304,22 +299,19 @@ static MACHINE_CONFIG_START( starshp1, starshp1_state )
 
 	MCFG_CPU_ADD("maincpu", M6502, STARSHP1_CPU_CLOCK)
 	MCFG_CPU_PROGRAM_MAP(starshp1_map)
-	MCFG_CPU_VBLANK_INT("screen", starshp1_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", starshp1_state,  starshp1_interrupt)
 
 	/* video hardware */
 
 
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_RAW_PARAMS(STARSHP1_PIXEL_CLOCK, STARSHP1_HTOTAL, STARSHP1_HBEND, STARSHP1_HBSTART, STARSHP1_VTOTAL, STARSHP1_VBEND, STARSHP1_VBSTART)
-	MCFG_SCREEN_UPDATE(starshp1)
-	MCFG_SCREEN_EOF(starshp1)
+	MCFG_SCREEN_UPDATE_DRIVER(starshp1_state, screen_update_starshp1)
+	MCFG_SCREEN_VBLANK_DRIVER(starshp1_state, screen_eof_starshp1)
 
 	MCFG_GFXDECODE(starshp1)
 	MCFG_PALETTE_LENGTH(19)
-	MCFG_PALETTE_INIT(starshp1)
 
-	MCFG_VIDEO_START(starshp1)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -346,14 +338,14 @@ ROM_START( starshp1 )
 	ROM_RELOAD(                      0xf800, 0x0800 )
 
 	ROM_REGION( 0x0400, "gfx1", 0 )
-	ROM_LOAD( "7513-01.n7",	 0x0000, 0x0400, CRC(8fb0045d) SHA1(fb311c6977dec6e2a04179406e9ffdb920989a47) )
+	ROM_LOAD( "7513-01.n7",  0x0000, 0x0400, CRC(8fb0045d) SHA1(fb311c6977dec6e2a04179406e9ffdb920989a47) )
 
 	ROM_REGION( 0x0100, "gfx2", 0 )
-	ROM_LOAD( "7515-01.j5",	 0x0000, 0x0100, CRC(fcbcbf2e) SHA1(adf3cc43b77ad18eddbe39ee11625e552d1abab9) )
+	ROM_LOAD( "7515-01.j5",  0x0000, 0x0100, CRC(fcbcbf2e) SHA1(adf3cc43b77ad18eddbe39ee11625e552d1abab9) )
 
 	ROM_REGION( 0x0800, "gfx3", 0 )
-	ROM_LOAD( "7517-01.r1",	 0x0000, 0x0400, CRC(1531f85f) SHA1(291822614fc6d3a71bf56607c796e18779f8cfc9) )
-	ROM_LOAD( "7516-01.p1",	 0x0400, 0x0400, CRC(64fbfe4c) SHA1(b2dfdcc1c9927c693fe43b2e1411d0f14375fdeb) )
+	ROM_LOAD( "7517-01.r1",  0x0000, 0x0400, CRC(1531f85f) SHA1(291822614fc6d3a71bf56607c796e18779f8cfc9) )
+	ROM_LOAD( "7516-01.p1",  0x0400, 0x0400, CRC(64fbfe4c) SHA1(b2dfdcc1c9927c693fe43b2e1411d0f14375fdeb) )
 
 	ROM_REGION( 0x0220, "proms", 0 )
 	ROM_LOAD( "7518-01.r10", 0x0000, 0x0100, CRC(80877f7e) SHA1(8b28f48936a4247c583ca6713bfbaf4772c7a4f5) ) /* video output */
@@ -399,5 +391,5 @@ ROM_START( starshpp )
 ROM_END
 
 
-GAME( 1977, starshp1, 0,        starshp1, starshp1, 0, ORIENTATION_FLIP_X, "Atari", "Starship 1",              GAME_IMPERFECT_SOUND )
-GAME( 1977, starshpp, starshp1, starshp1, starshp1, 0, ORIENTATION_FLIP_X, "Atari", "Starship 1 (prototype?)", GAME_IMPERFECT_SOUND )
+GAME( 1977, starshp1, 0,        starshp1, starshp1, driver_device, 0, ORIENTATION_FLIP_X, "Atari", "Starship 1",              GAME_IMPERFECT_SOUND )
+GAME( 1977, starshpp, starshp1, starshp1, starshp1, driver_device, 0, ORIENTATION_FLIP_X, "Atari", "Starship 1 (prototype?)", GAME_IMPERFECT_SOUND )

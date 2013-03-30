@@ -237,85 +237,80 @@ Country :
 
 /******************************************************************************/
 
-static READ16_HANDLER( sound_status_r )
+READ16_MEMBER(bbusters_state::sound_status_r)
 {
-	bbusters_state *state = space->machine().driver_data<bbusters_state>();
 
-	return state->m_sound_status;
+	return m_sound_status;
 }
 
-static WRITE8_HANDLER( sound_status_w )
+WRITE8_MEMBER(bbusters_state::sound_status_w)
 {
-	bbusters_state *state = space->machine().driver_data<bbusters_state>();
 
-	state->m_sound_status = data;
+	m_sound_status = data;
 }
 
-static WRITE16_HANDLER( sound_cpu_w )
+WRITE16_MEMBER(bbusters_state::sound_cpu_w)
 {
 	if (ACCESSING_BITS_0_7)
 	{
-		soundlatch_w(space, 0, data&0xff);
-		cputag_set_input_line(space->machine(), "audiocpu", INPUT_LINE_NMI, PULSE_LINE);
+		soundlatch_byte_w(space, 0, data&0xff);
+		machine().device("audiocpu")->execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 	}
 }
 
 /* Eprom is byte wide, top half of word _must_ be 0xff */
-static READ16_HANDLER( eprom_r )
+READ16_MEMBER(bbusters_state::eprom_r)
 {
-	bbusters_state *state = space->machine().driver_data<bbusters_state>();
 
-	return (state->m_eprom_data[offset]&0xff) | 0xff00;
+	return (m_eprom_data[offset]&0xff) | 0xff00;
 }
 
-static READ16_HANDLER( control_3_r )
+READ16_MEMBER(bbusters_state::control_3_r)
 {
-	bbusters_state *state = space->machine().driver_data<bbusters_state>();
 	static const char *const port[] = { "GUNX1", "GUNY1", "GUNX2", "GUNY2", "GUNX3", "GUNY3" };
 
-	UINT16 retdata = input_port_read(space->machine(), port[state->m_gun_select]);
+	UINT16 retdata = ioport(port[m_gun_select])->read();
 
 	retdata >>=1; // by lowering the precision of the gun reading hardware the game seems to work better
 
 	return retdata;
 }
 
-static WRITE16_HANDLER( gun_select_w )
+WRITE16_MEMBER(bbusters_state::gun_select_w)
 {
-	bbusters_state *state = space->machine().driver_data<bbusters_state>();
 
-	logerror("%08x: gun r\n",cpu_get_pc(&space->device()));
+	logerror("%08x: gun r\n",space.device().safe_pc());
 
-	device_set_input_line(&space->device(), 2, HOLD_LINE);
+	space.device().execute().set_input_line(2, HOLD_LINE);
 
-	state->m_gun_select = data & 0xff;
+	m_gun_select = data & 0xff;
 }
 
-static WRITE16_HANDLER( two_gun_output_w )
+WRITE16_MEMBER(bbusters_state::two_gun_output_w)
 {
 	output_set_value("Player1_Gun_Recoil",(data & 0x01));
 	output_set_value("Player2_Gun_Recoil",(data & 0x02)>>1);
 }
 
-static WRITE16_HANDLER( three_gun_output_w )
+WRITE16_MEMBER(bbusters_state::three_gun_output_w)
 {
 	output_set_value("Player1_Gun_Recoil",(data & 0x01));
 	output_set_value("Player2_Gun_Recoil",(data & 0x02)>>1);
 	output_set_value("Player3_Gun_Recoil",(data & 0x04)>>2);
 }
 
-static READ16_HANDLER( kludge_r )
+READ16_MEMBER(bbusters_state::kludge_r)
 {
 	// might latch the gun value?
 	return 0x0000;
 }
 
-static READ16_HANDLER( mechatt_gun_r )
+READ16_MEMBER(bbusters_state::mechatt_gun_r)
 {
 	int x, y;
 
-	x = input_port_read(space->machine(), offset ? "GUNX2" : "GUNX1");
-	y = input_port_read(space->machine(), offset ? "GUNY2" : "GUNY1");
+	x = ioport(offset ? "GUNX2" : "GUNX1")->read();
+	y = ioport(offset ? "GUNY2" : "GUNY1")->read();
 
 	/* Todo - does the hardware really clamp like this? */
 	x += 0x18;
@@ -327,25 +322,25 @@ static READ16_HANDLER( mechatt_gun_r )
 
 /*******************************************************************************/
 
-static ADDRESS_MAP_START( bbusters_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( bbusters_map, AS_PROGRAM, 16, bbusters_state )
 	AM_RANGE(0x000000, 0x07ffff) AM_ROM
-	AM_RANGE(0x080000, 0x08ffff) AM_RAM AM_BASE_MEMBER(bbusters_state, m_ram)
-	AM_RANGE(0x090000, 0x090fff) AM_RAM_WRITE(bbusters_video_w) AM_BASE_MEMBER(bbusters_state, m_videoram)
-	AM_RANGE(0x0a0000, 0x0a0fff) AM_RAM AM_BASE_SIZE_GENERIC(spriteram)
-	AM_RANGE(0x0a1000, 0x0a7fff) AM_RAM		/* service mode */
-	AM_RANGE(0x0a8000, 0x0a8fff) AM_RAM AM_BASE_SIZE_GENERIC(spriteram2)
-	AM_RANGE(0x0a9000, 0x0affff) AM_RAM		/* service mode */
-	AM_RANGE(0x0b0000, 0x0b1fff) AM_RAM_WRITE(bbusters_pf1_w) AM_BASE_MEMBER(bbusters_state, m_pf1_data)
-	AM_RANGE(0x0b2000, 0x0b3fff) AM_RAM_WRITE(bbusters_pf2_w) AM_BASE_MEMBER(bbusters_state, m_pf2_data)
-	AM_RANGE(0x0b4000, 0x0b5fff) AM_RAM		/* service mode */
-	AM_RANGE(0x0b8000, 0x0b8003) AM_WRITEONLY AM_BASE_MEMBER(bbusters_state, m_pf1_scroll_data)
-	AM_RANGE(0x0b8008, 0x0b800b) AM_WRITEONLY AM_BASE_MEMBER(bbusters_state, m_pf2_scroll_data)
-	AM_RANGE(0x0d0000, 0x0d0fff) AM_RAM_WRITE(paletteram16_RRRRGGGGBBBBxxxx_word_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0x0e0000, 0x0e0001) AM_READ_PORT("COINS")	/* Coins */
-	AM_RANGE(0x0e0002, 0x0e0003) AM_READ_PORT("IN0")	/* Player 1 & 2 */
-	AM_RANGE(0x0e0004, 0x0e0005) AM_READ_PORT("IN1")	/* Player 3 */
-	AM_RANGE(0x0e0008, 0x0e0009) AM_READ_PORT("DSW1")	/* Dip 1 */
-	AM_RANGE(0x0e000a, 0x0e000b) AM_READ_PORT("DSW2")	/* Dip 2 */
+	AM_RANGE(0x080000, 0x08ffff) AM_RAM AM_SHARE("ram")
+	AM_RANGE(0x090000, 0x090fff) AM_RAM_WRITE(bbusters_video_w) AM_SHARE("videoram")
+	AM_RANGE(0x0a0000, 0x0a0fff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0x0a1000, 0x0a7fff) AM_RAM     /* service mode */
+	AM_RANGE(0x0a8000, 0x0a8fff) AM_RAM AM_SHARE("spriteram2")
+	AM_RANGE(0x0a9000, 0x0affff) AM_RAM     /* service mode */
+	AM_RANGE(0x0b0000, 0x0b1fff) AM_RAM_WRITE(bbusters_pf1_w) AM_SHARE("pf1_data")
+	AM_RANGE(0x0b2000, 0x0b3fff) AM_RAM_WRITE(bbusters_pf2_w) AM_SHARE("pf2_data")
+	AM_RANGE(0x0b4000, 0x0b5fff) AM_RAM     /* service mode */
+	AM_RANGE(0x0b8000, 0x0b8003) AM_WRITEONLY AM_SHARE("pf1_scroll_data")
+	AM_RANGE(0x0b8008, 0x0b800b) AM_WRITEONLY AM_SHARE("pf2_scroll_data")
+	AM_RANGE(0x0d0000, 0x0d0fff) AM_RAM_WRITE(paletteram_RRRRGGGGBBBBxxxx_word_w) AM_SHARE("paletteram")
+	AM_RANGE(0x0e0000, 0x0e0001) AM_READ_PORT("COINS")  /* Coins */
+	AM_RANGE(0x0e0002, 0x0e0003) AM_READ_PORT("IN0")    /* Player 1 & 2 */
+	AM_RANGE(0x0e0004, 0x0e0005) AM_READ_PORT("IN1")    /* Player 3 */
+	AM_RANGE(0x0e0008, 0x0e0009) AM_READ_PORT("DSW1")   /* Dip 1 */
+	AM_RANGE(0x0e000a, 0x0e000b) AM_READ_PORT("DSW2")   /* Dip 2 */
 	AM_RANGE(0x0e0018, 0x0e0019) AM_READ(sound_status_r)
 	AM_RANGE(0x0e8000, 0x0e8001) AM_READWRITE(kludge_r, gun_select_w)
 	AM_RANGE(0x0e8002, 0x0e8003) AM_READ(control_3_r)
@@ -357,17 +352,17 @@ ADDRESS_MAP_END
 
 /*******************************************************************************/
 
-static ADDRESS_MAP_START( mechatt_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( mechatt_map, AS_PROGRAM, 16, bbusters_state )
 	AM_RANGE(0x000000, 0x06ffff) AM_ROM
-	AM_RANGE(0x070000, 0x07ffff) AM_RAM AM_BASE_MEMBER(bbusters_state, m_ram)
-	AM_RANGE(0x090000, 0x090fff) AM_RAM_WRITE(bbusters_video_w) AM_BASE_MEMBER(bbusters_state, m_videoram)
-	AM_RANGE(0x0a0000, 0x0a0fff) AM_RAM AM_BASE_SIZE_GENERIC(spriteram)
+	AM_RANGE(0x070000, 0x07ffff) AM_RAM AM_SHARE("ram")
+	AM_RANGE(0x090000, 0x090fff) AM_RAM_WRITE(bbusters_video_w) AM_SHARE("videoram")
+	AM_RANGE(0x0a0000, 0x0a0fff) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0x0a1000, 0x0a7fff) AM_WRITENOP
-	AM_RANGE(0x0b0000, 0x0b3fff) AM_RAM_WRITE(bbusters_pf1_w) AM_BASE_MEMBER(bbusters_state, m_pf1_data)
-	AM_RANGE(0x0b8000, 0x0b8003) AM_WRITEONLY AM_BASE_MEMBER(bbusters_state, m_pf1_scroll_data)
-	AM_RANGE(0x0c0000, 0x0c3fff) AM_RAM_WRITE(bbusters_pf2_w) AM_BASE_MEMBER(bbusters_state, m_pf2_data)
-	AM_RANGE(0x0c8000, 0x0c8003) AM_WRITEONLY AM_BASE_MEMBER(bbusters_state, m_pf2_scroll_data)
-	AM_RANGE(0x0d0000, 0x0d07ff) AM_RAM_WRITE(paletteram16_RRRRGGGGBBBBxxxx_word_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x0b0000, 0x0b3fff) AM_RAM_WRITE(bbusters_pf1_w) AM_SHARE("pf1_data")
+	AM_RANGE(0x0b8000, 0x0b8003) AM_WRITEONLY AM_SHARE("pf1_scroll_data")
+	AM_RANGE(0x0c0000, 0x0c3fff) AM_RAM_WRITE(bbusters_pf2_w) AM_SHARE("pf2_data")
+	AM_RANGE(0x0c8000, 0x0c8003) AM_WRITEONLY AM_SHARE("pf2_scroll_data")
+	AM_RANGE(0x0d0000, 0x0d07ff) AM_RAM_WRITE(paletteram_RRRRGGGGBBBBxxxx_word_w) AM_SHARE("paletteram")
 	AM_RANGE(0x0e0000, 0x0e0001) AM_READ_PORT("IN0")
 	AM_RANGE(0x0e0002, 0x0e0003) AM_READ_PORT("DSW1")
 	AM_RANGE(0x0e0004, 0x0e0007) AM_READ(mechatt_gun_r)
@@ -378,21 +373,21 @@ ADDRESS_MAP_END
 
 /******************************************************************************/
 
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, bbusters_state )
 	AM_RANGE(0x0000, 0xefff) AM_ROM
 	AM_RANGE(0xf000, 0xf7ff) AM_RAM
-	AM_RANGE(0xf800, 0xf800) AM_READWRITE(soundlatch_r, sound_status_w)
+	AM_RANGE(0xf800, 0xf800) AM_READ(soundlatch_byte_r) AM_WRITE(sound_status_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sound_portmap, AS_IO, 8 )
+static ADDRESS_MAP_START( sound_portmap, AS_IO, 8, bbusters_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x03) AM_DEVREADWRITE("ymsnd", ym2610_r, ym2610_w)
+	AM_RANGE(0x00, 0x03) AM_DEVREADWRITE_LEGACY("ymsnd", ym2610_r, ym2610_w)
 	AM_RANGE(0xc0, 0xc1) AM_WRITENOP /* -> Main CPU */
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( sounda_portmap, AS_IO, 8 )
+static ADDRESS_MAP_START( sounda_portmap, AS_IO, 8, bbusters_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x03) AM_DEVREADWRITE("ymsnd", ym2608_r, ym2608_w)
+	AM_RANGE(0x00, 0x03) AM_DEVREADWRITE_LEGACY("ymsnd", ym2608_r, ym2608_w)
 	AM_RANGE(0xc0, 0xc1) AM_WRITENOP /* -> Main CPU */
 ADDRESS_MAP_END
 
@@ -401,18 +396,18 @@ ADDRESS_MAP_END
 static INPUT_PORTS_START( bbusters )
 	PORT_START("IN0")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_START1 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)	PORT_NAME("P1 Fire")	// "Fire"
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)	PORT_NAME("P1 Grenade")	// "Grenade"
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1) PORT_NAME("P1 Fire")    // "Fire"
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1) PORT_NAME("P1 Grenade") // "Grenade"
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_START2 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)	PORT_NAME("P2 Fire")	// "Fire"
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)	PORT_NAME("P2 Grenade")	// "Grenade"
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2) PORT_NAME("P2 Fire")    // "Fire"
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2) PORT_NAME("P2 Grenade") // "Grenade"
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("IN1")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_START3 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(3)	PORT_NAME("P3 Fire")	// "Fire"
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(3)	PORT_NAME("P3 Grenade")	// "Grenade"
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(3) PORT_NAME("P3 Fire")    // "Fire"
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(3) PORT_NAME("P3 Grenade") // "Grenade"
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -426,59 +421,59 @@ static INPUT_PORTS_START( bbusters )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN4 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_COIN5 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN6 )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE1 )		// See notes
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE1 )       // See notes
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START("DSW1")
-	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Allow_Continue ) )	PORT_DIPLOCATION("SW1:1")
+	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Allow_Continue ) )   PORT_DIPLOCATION("SW1:1")
 	PORT_DIPSETTING(    0x00, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Yes ) )
-	PORT_DIPNAME( 0x06, 0x06, "Magazine / Grenade" )		PORT_DIPLOCATION("SW1:2,3")
+	PORT_DIPNAME( 0x06, 0x06, "Magazine / Grenade" )        PORT_DIPLOCATION("SW1:2,3")
 	PORT_DIPSETTING(    0x04, "5 / 2" )
 	PORT_DIPSETTING(    0x06, "7 / 3" )
 	PORT_DIPSETTING(    0x02, "9 / 4" )
 	PORT_DIPSETTING(    0x00, "12 / 5" )
 	/* Manual (from a different revision/region?) says:
-                        SW1:4   SW1:5   SW1:6
-    1C_1C 1 To continue OFF     OFF     OFF
-    2C_1C 1 To continue ON      OFF     OFF
-    1C_2C 1 To continue OFF     ON      OFF
-    2C_1C 2 To continue ON      ON      OFF
-    3C_1C 1 To continue OFF     OFF     ON
-    3C_1C 2 To continue ON      OFF     ON
-    4C_3C 1 To continue OFF     ON      ON
-    Free Play Mode      OFF     OFF     OFF
+	                    SW1:4   SW1:5   SW1:6
+	1C_1C 1 To continue OFF     OFF     OFF
+	2C_1C 1 To continue ON      OFF     OFF
+	1C_2C 1 To continue OFF     ON      OFF
+	2C_1C 2 To continue ON      ON      OFF
+	3C_1C 1 To continue OFF     OFF     ON
+	3C_1C 2 To continue ON      OFF     ON
+	4C_3C 1 To continue OFF     ON      ON
+	Free Play Mode      OFF     OFF     OFF
 
-    SW1:7 Unused
-    SW1:8 Blood color: ON=green OFF=red */
-	PORT_DIPNAME( 0x18, 0x18, DEF_STR( Coin_A ) )			PORT_DIPLOCATION("SW1:4,5")
+	SW1:7 Unused
+	SW1:8 Blood color: ON=green OFF=red */
+	PORT_DIPNAME( 0x18, 0x18, DEF_STR( Coin_A ) )           PORT_DIPLOCATION("SW1:4,5")
 	PORT_DIPSETTING(    0x00, DEF_STR( 4C_1C ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(    0x10, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x18, DEF_STR( 1C_1C ) )
-	PORT_DIPNAME( 0x60, 0x60, DEF_STR( Coin_B ) )			PORT_DIPLOCATION("SW1:6,7")
+	PORT_DIPNAME( 0x60, 0x60, DEF_STR( Coin_B ) )           PORT_DIPLOCATION("SW1:6,7")
 	PORT_DIPSETTING(    0x60, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( 1C_3C ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( 1C_4C ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( 1C_6C ) )
-	PORT_DIPNAME( 0x80, 0x80, "Coin Slots" )				PORT_DIPLOCATION("SW1:8") // See notes
+	PORT_DIPNAME( 0x80, 0x80, "Coin Slots" )                PORT_DIPLOCATION("SW1:8") // See notes
 	PORT_DIPSETTING(    0x80, "Common" )
 	PORT_DIPSETTING(    0x00, "Individual" )
 
 	PORT_START("DSW2")
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Difficulty ) )		PORT_DIPLOCATION("SW2:1,2")
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Difficulty ) )       PORT_DIPLOCATION("SW2:1,2")
 	PORT_DIPSETTING(    0x02, DEF_STR( Easy ) )
 	PORT_DIPSETTING(    0x03, DEF_STR( Normal ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Hard ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Hardest ) )
-	PORT_DIPNAME( 0x0c, 0x0c, "Game Mode" )					PORT_DIPLOCATION("SW2:3,4")
+	PORT_DIPNAME( 0x0c, 0x0c, "Game Mode" )                 PORT_DIPLOCATION("SW2:3,4")
 	PORT_DIPSETTING(    0x08, "Demo Sounds Off" )
 	PORT_DIPSETTING(    0x0c, "Demo Sounds On" )
 	PORT_DIPSETTING(    0x04, "Infinite Energy (Cheat)")
 	PORT_DIPSETTING(    0x00, "Freeze" )
-	PORT_DIPUNUSED_DIPLOC( 0x10, 0x10, "SW2:5" )			/* Listed as "Unused" */
-	PORT_DIPUNUSED_DIPLOC( 0x20, 0x20, "SW2:6" )			/* Listed as "Unused" */
-	PORT_DIPUNUSED_DIPLOC( 0x40, 0x40, "SW2:7" )			/* Listed as "Unused" */
+	PORT_DIPUNUSED_DIPLOC( 0x10, 0x10, "SW2:5" )            /* Listed as "Unused" */
+	PORT_DIPUNUSED_DIPLOC( 0x20, 0x20, "SW2:6" )            /* Listed as "Unused" */
+	PORT_DIPUNUSED_DIPLOC( 0x40, 0x40, "SW2:7" )            /* Listed as "Unused" */
 	PORT_SERVICE_DIPLOC(0x80, IP_ACTIVE_LOW, "SW2:8" )
 
 	PORT_START("GUNX1")
@@ -501,56 +496,56 @@ static INPUT_PORTS_START( mechatt )
 	PORT_START("IN0")
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_COIN2 )
-	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_SERVICE1 )		// See notes
+	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_SERVICE1 )     // See notes
 	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_COIN3 )
 	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_COIN4 )
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_START1 )
-	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1) PORT_NAME("P1 Fire")	// "Fire"
-	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1) PORT_NAME("P1 Grenade")	// "Grenade"
+	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1) PORT_NAME("P1 Fire")  // "Fire"
+	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1) PORT_NAME("P1 Grenade")   // "Grenade"
 	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_START2 )
-	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2) PORT_NAME("P2 Fire")	// "Fire"
-	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2) PORT_NAME("P2 Grenade")	// "Grenade"
+	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2) PORT_NAME("P2 Fire")  // "Fire"
+	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2) PORT_NAME("P2 Grenade")   // "Grenade"
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("DSW1")
-	PORT_DIPNAME( 0x0001, 0x0001, "Coin Slots" )				PORT_DIPLOCATION("SW1:1") // Listed as "Unused" (manual from different revision/region?), See notes
+	PORT_DIPNAME( 0x0001, 0x0001, "Coin Slots" )                PORT_DIPLOCATION("SW1:1") // Listed as "Unused" (manual from different revision/region?), See notes
 	PORT_DIPSETTING(      0x0001, "Common" )
 	PORT_DIPSETTING(      0x0000, "Individual" )
-	PORT_DIPNAME( 0x0002, 0x0002, DEF_STR( Allow_Continue ) )	PORT_DIPLOCATION("SW1:2")
+	PORT_DIPNAME( 0x0002, 0x0002, DEF_STR( Allow_Continue ) )   PORT_DIPLOCATION("SW1:2")
 	PORT_DIPSETTING(      0x0000, DEF_STR( No ) )
 	PORT_DIPSETTING(      0x0002, DEF_STR( Yes ) )
-	PORT_DIPNAME( 0x000c, 0x000c, "Magazine / Grenade" )		PORT_DIPLOCATION("SW1:3,4")
+	PORT_DIPNAME( 0x000c, 0x000c, "Magazine / Grenade" )        PORT_DIPLOCATION("SW1:3,4")
 	PORT_DIPSETTING(      0x0008, "5 / 2" )
 	PORT_DIPSETTING(      0x000c, "6 / 3" )
 	PORT_DIPSETTING(      0x0004, "7 / 4" )
 	PORT_DIPSETTING(      0x0000, "8 / 5" )
-	PORT_DIPNAME( 0x0030, 0x0030, DEF_STR( Coin_A ) )			PORT_DIPLOCATION("SW1:5,6") // See notes
+	PORT_DIPNAME( 0x0030, 0x0030, DEF_STR( Coin_A ) )           PORT_DIPLOCATION("SW1:5,6") // See notes
 	PORT_DIPSETTING(      0x0000, DEF_STR( 4C_1C ) )
 	PORT_DIPSETTING(      0x0010, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(      0x0020, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(      0x0030, DEF_STR( 1C_1C ) )
-	PORT_DIPNAME( 0x00c0, 0x00c0, DEF_STR( Coin_B ) )			PORT_DIPLOCATION("SW1:7,8") // Listed as "Unused" (manual from different revision/region?), See notes
+	PORT_DIPNAME( 0x00c0, 0x00c0, DEF_STR( Coin_B ) )           PORT_DIPLOCATION("SW1:7,8") // Listed as "Unused" (manual from different revision/region?), See notes
 	PORT_DIPSETTING(      0x00c0, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(      0x0080, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(      0x0040, DEF_STR( 1C_3C ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( 1C_4C ) )
-	PORT_DIPNAME( 0x0300, 0x0300, DEF_STR( Difficulty ) )		PORT_DIPLOCATION("SW2:1,2")
+	PORT_DIPNAME( 0x0300, 0x0300, DEF_STR( Difficulty ) )       PORT_DIPLOCATION("SW2:1,2")
 	PORT_DIPSETTING(      0x0200, DEF_STR( Easy ) )
 	PORT_DIPSETTING(      0x0300, DEF_STR( Normal ) )
 	PORT_DIPSETTING(      0x0100, DEF_STR( Hard ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( Hardest ) )
-	PORT_DIPNAME( 0x0c00, 0x0c00, "Game Mode" )					PORT_DIPLOCATION("SW2:3,4")
+	PORT_DIPNAME( 0x0c00, 0x0c00, "Game Mode" )                 PORT_DIPLOCATION("SW2:3,4")
 	PORT_DIPSETTING(      0x0800, "Demo Sounds Off" )
 	PORT_DIPSETTING(      0x0c00, "Demo Sounds On" )
 	PORT_DIPSETTING(      0x0400, "Infinite Energy (Cheat)")
 	PORT_DIPSETTING(      0x0000, "Freeze" )
-	PORT_DIPUNUSED_DIPLOC(0x1000, 0x1000, "SW2:5" )			/* Listed as "Unused" */
-	PORT_DIPUNUSED_DIPLOC(0x2000, 0x2000, "SW2:6" )			/* Listed as "Unused" */
-	PORT_DIPUNUSED_DIPLOC(0x4000, 0x4000, "SW2:7" )			/* Listed as "Unused" */
+	PORT_DIPUNUSED_DIPLOC(0x1000, 0x1000, "SW2:5" )         /* Listed as "Unused" */
+	PORT_DIPUNUSED_DIPLOC(0x2000, 0x2000, "SW2:6" )         /* Listed as "Unused" */
+	PORT_DIPUNUSED_DIPLOC(0x4000, 0x4000, "SW2:7" )         /* Listed as "Unused" */
 	PORT_SERVICE_DIPLOC(  0x8000, IP_ACTIVE_LOW, "SW2:8" )
 
 	PORT_START("GUNX1")
@@ -569,7 +564,7 @@ static INPUT_PORTS_START( mechattu )
 
 	PORT_MODIFY("DSW1")
 	PORT_DIPUNUSED_DIPLOC( 0x0001, 0x0001, "SW1:1" )
-	PORT_DIPNAME( 0x0030, 0x0030, DEF_STR( Coinage ) )			PORT_DIPLOCATION("SW1:5,6")
+	PORT_DIPNAME( 0x0030, 0x0030, DEF_STR( Coinage ) )          PORT_DIPLOCATION("SW1:5,6")
 	PORT_DIPSETTING(      0x0000, DEF_STR( Free_Play ) )
 	PORT_DIPSETTING(      0x0010, "1 Coin/2 Credits first, then 1 Coin/1 Credit" )
 	PORT_DIPSETTING(      0x0020, "2 Coins/1 Credit first, then 1 Coin/1 Credit" )
@@ -611,9 +606,9 @@ static const gfx_layout spritelayout =
 
 static const gfx_layout tilelayout =
 {
-	16,16,	/* 16*16 sprites */
+	16,16,  /* 16*16 sprites */
 	RGN_FRAC(1,1),
-	4,	/* 4 bits per pixel */
+	4,  /* 4 bits per pixel */
 	{ 0, 1, 2, 3 },
 	{ 0, 4, 8, 12, 16, 20, 24, 28,
 		0+64*8, 4+64*8, 8+64*8, 12+64*8,
@@ -644,7 +639,7 @@ GFXDECODE_END
 
 static void sound_irq( device_t *device, int irq )
 {
-	cputag_set_input_line(device->machine(), "audiocpu", 0, irq ? ASSERT_LINE : CLEAR_LINE);
+	device->machine().device("audiocpu")->execute().set_input_line(0, irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static const ym2608_interface ym2608_config =
@@ -664,18 +659,10 @@ static const ym2610_interface ym2610_config =
 
 /******************************************************************************/
 
-static SCREEN_EOF( bbuster )
+void bbusters_state::screen_eof_bbuster(screen_device &screen, bool state)
 {
-	address_space *space = machine.device("maincpu")->memory().space(AS_PROGRAM);
-
-	buffer_spriteram16_w(space,0,0,0xffff);
-	buffer_spriteram16_2_w(space,0,0,0xffff);
-}
-
-static SCREEN_EOF( mechatt )
-{
-	address_space *space = machine.device("maincpu")->memory().space(AS_PROGRAM);
-	buffer_spriteram16_w(space,0,0,0xffff);
+	m_spriteram->vblank_copy_rising(screen, state);
+	m_spriteram2->vblank_copy_rising(screen, state);
 }
 
 static MACHINE_CONFIG_START( bbusters, bbusters_state )
@@ -683,7 +670,7 @@ static MACHINE_CONFIG_START( bbusters, bbusters_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, 12000000)
 	MCFG_CPU_PROGRAM_MAP(bbusters_map)
-	MCFG_CPU_VBLANK_INT("screen", irq6_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", bbusters_state,  irq6_line_hold)
 
 	MCFG_CPU_ADD("audiocpu", Z80,4000000) /* Accurate */
 	MCFG_CPU_PROGRAM_MAP(sound_map)
@@ -692,20 +679,20 @@ static MACHINE_CONFIG_START( bbusters, bbusters_state )
 	MCFG_NVRAM_ADD_0FILL("eeprom")
 
 	/* video hardware */
-	MCFG_VIDEO_ATTRIBUTES(VIDEO_BUFFERS_SPRITERAM)
-
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(bbuster)
-	MCFG_SCREEN_EOF(bbuster)
+	MCFG_SCREEN_UPDATE_DRIVER(bbusters_state, screen_update_bbuster)
+	MCFG_SCREEN_VBLANK_DRIVER(bbusters_state, screen_eof_bbuster)
 
 	MCFG_GFXDECODE(bbusters)
 	MCFG_PALETTE_LENGTH(2048)
 
-	MCFG_VIDEO_START(bbuster)
+	MCFG_VIDEO_START_OVERRIDE(bbusters_state,bbuster)
+
+	MCFG_BUFFERED_SPRITERAM16_ADD("spriteram")
+	MCFG_BUFFERED_SPRITERAM16_ADD("spriteram2")
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
@@ -723,27 +710,26 @@ static MACHINE_CONFIG_START( mechatt, bbusters_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, 12000000)
 	MCFG_CPU_PROGRAM_MAP(mechatt_map)
-	MCFG_CPU_VBLANK_INT("screen", irq4_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", bbusters_state,  irq4_line_hold)
 
 	MCFG_CPU_ADD("audiocpu", Z80,4000000) /* Accurate */
 	MCFG_CPU_PROGRAM_MAP(sound_map)
 	MCFG_CPU_IO_MAP(sounda_portmap)
 
 	/* video hardware */
-	MCFG_VIDEO_ATTRIBUTES(VIDEO_BUFFERS_SPRITERAM)
-
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(mechatt)
-	MCFG_SCREEN_EOF(mechatt)
+	MCFG_SCREEN_UPDATE_DRIVER(bbusters_state, screen_update_mechatt)
+	MCFG_SCREEN_VBLANK_DEVICE("spriteram", buffered_spriteram16_device, vblank_copy_rising)
 
 	MCFG_GFXDECODE(mechatt)
 	MCFG_PALETTE_LENGTH(1024)
 
-	MCFG_VIDEO_START(mechatt)
+	MCFG_VIDEO_START_OVERRIDE(bbusters_state,mechatt)
+
+	MCFG_BUFFERED_SPRITERAM16_ADD("spriteram")
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
@@ -928,12 +914,69 @@ ROM_START( mechattu )
 	ROM_LOAD( "ma9.bin",       0x000000, 0x10000, CRC(61f3de03) SHA1(736f9634fe054ea68a2aa90a743bd0dc320f23c9) ) /* identical to ma8 */
 ROM_END
 
+/* official SNK boards, but NOT using MaskROMs like the above sets */
+/* does Ver1 on the roms mean it's a revision, the first version, or used because it's the single player version? */
+ROM_START( mechattu1 )
+	ROM_REGION( 0x80000, "maincpu", 0 )
+	ROM_LOAD16_BYTE( "ma_ver1_u5_a8002-1.n12",   0x000000, 0x20000, CRC(dcd2e971) SHA1(e292b251c429b6990e97233e86360e5d43f573f2) )
+	ROM_LOAD16_BYTE( "ma_ver1_u4_a8002-1.l12",   0x000001, 0x20000, CRC(69c8a85b) SHA1(07c6d395772a5e096e3ac42c5248eadccc146ad1) )
+	ROM_LOAD16_BYTE( "ma_u7_a8002-1.n13",   0x040000, 0x20000, CRC(f45b2c70) SHA1(65523d202d378bab890f1f7bffdde152dd246d4a) ) // == ma7u.bin
+	ROM_LOAD16_BYTE( "ma_u6_a8002-1.l13",   0x040001, 0x20000, CRC(d5d68ce6) SHA1(16057d882781015f6d1c7bb659e0812a8459c3f0) ) // == ma6u.bin
+
+	ROM_REGION( 0x10000, "audiocpu", 0 )
+	ROM_LOAD( "ma3.bin",       0x000000, 0x10000, CRC(c06cc8e1) SHA1(65f5f1901120d633f7c3ba07432a188fd7fd7272) ) // == ma3.bin
+
+	ROM_REGION( 0x020000, "gfx1", 0 )
+	ROM_LOAD( "ma_1_a8002-1.l2",       0x000000, 0x10000, CRC(24766917) SHA1(9082a8ae849605ce65b5a0493ae69cfe282f7e7b) ) // == ma1.bin
+
+	ROM_REGION( 0x200000, "gfx2", 0 )
+	ROM_LOAD16_BYTE( "s_9_a8002-6.a1",   0x000000, 0x20000, CRC(6e8e194c) SHA1(02bbd573a322a3f7f8e92ccceebffdd598b5489e) ) // these 4 == mao89p13.bin
+	ROM_LOAD16_BYTE( "s_1_a8002-6.b1",   0x000001, 0x20000, CRC(fd9161ed) SHA1(b3e2434dd9cb1cafe1022774b863b5f1a008a9d2) )
+	ROM_LOAD16_BYTE( "s_10_a8002-6.a2",  0x040000, 0x20000, CRC(fad6a1ab) SHA1(5347b4493c8004dc8cedc0b37aba494f203142b8) )
+	ROM_LOAD16_BYTE( "s_2_a8002-6.b2",   0x040001, 0x20000, CRC(549056f0) SHA1(f515aa98ab25f3735dbfdefcb8d55ba3b2075b70) )
+	ROM_LOAD16_BYTE( "s_11_a8002-6.a3",  0x080000, 0x20000, CRC(3887a382) SHA1(b40861fc1414b2fa299772e76a78cb8dc00b71b7) ) // these 4 == ma189p15.bin
+	ROM_LOAD16_BYTE( "s_3_a8002-6.b3",   0x080001, 0x20000, CRC(cb99f565) SHA1(9ed1b21f4a33b9a614bca38610378857560cdaba) )
+	ROM_LOAD16_BYTE( "s_12_a8002-6.a4",  0x0c0000, 0x20000, CRC(63417b49) SHA1(786249fa7e8770de5b5882debdc2913d58e9170e) )
+	ROM_LOAD16_BYTE( "s_4_a8002-6.b4",   0x0c0001, 0x20000, CRC(d739d48a) SHA1(04d2ecea72b6e651b815865946c9c9cfae4e5c4d) )
+	ROM_LOAD16_BYTE( "s_13_a8002-6.a5",  0x100000, 0x20000, CRC(eccd47b6) SHA1(6b9c63fee97a7568114f227a89a1effd6b04806a) ) // these 4 == ma289p17.bin
+	ROM_LOAD16_BYTE( "s_5_a8002-6.b5",   0x100001, 0x20000, CRC(e15244da) SHA1(ebf3072565c53d0098d373b5093ba6918c4eddae) )
+	ROM_LOAD16_BYTE( "s_14_a8002-6.a6",  0x140000, 0x20000, CRC(bbbf0461) SHA1(c5299ab1d45f685a5d160492247cf1303ef6937a) )
+	ROM_LOAD16_BYTE( "s_6_a8002-6.b6",   0x140001, 0x20000, CRC(4ee89f75) SHA1(bda0e9095da2d424faac341fd934000a621796eb) )
+	ROM_LOAD16_BYTE( "s_15_a8002-6.a7",  0x180000, 0x20000, CRC(cde29bad) SHA1(24c1b43c6d717eaaf7c01ec7de89837947334224) ) // these 4 == ma389m15.bin
+	ROM_LOAD16_BYTE( "s_7_a8002-6.b7",   0x180001, 0x20000, CRC(065ed221) SHA1(c03ca5b4d1198939a57b5fccf6a79d70afe1faaf) )
+	ROM_LOAD16_BYTE( "s_16_a8002-6.a8",  0x1c0000, 0x20000, CRC(70f28040) SHA1(91012728953563fcc576725337e6ba7e1b49d1ba) )
+	ROM_LOAD16_BYTE( "s_8_a8002-6.b8",   0x1c0001, 0x20000, CRC(a6f8574f) SHA1(87c041669b2eaec495ae10a6f45b6668accb92bf) )
+
+	ROM_REGION( 0x10000, "gfx3", ROMREGION_ERASEFF )
+	/* Unused */
+
+	ROM_REGION( 0x80000, "gfx4", 0 ) // these 4 == mab189a2.bin
+	ROM_LOAD( "s_21_a8002-5.b3",  0x000000, 0x20000, CRC(701a0072) SHA1(b03b6fa18e0cfcd5c7c541025fa2d3632d2f8387) )
+	ROM_LOAD( "s_22_a8002-5.b4",  0x020000, 0x20000, CRC(34e6225c) SHA1(f6335084f4f4c7a4b6528e6ad74962b88f81e3bc) )
+	ROM_LOAD( "s_23_a8002-5.b5",  0x040000, 0x20000, CRC(9a7399d3) SHA1(04e0327b0da75f621b51e1831cbdc4537082e32b) )
+	ROM_LOAD( "s_24_a8002-5.b6",  0x060000, 0x20000, CRC(f097459d) SHA1(466364677f048519eb2894ddecf76f5c52f6afe9) )
+
+	ROM_REGION( 0x80000, "gfx5", 0 ) // these 4 == mab289c2.bin
+	ROM_LOAD( "s_17_a8002-5.a3",  0x000000, 0x20000, CRC(cc47c4a3) SHA1(140f53b671b4eaed6fcc516c4018f07a6d7c2290) )
+	ROM_LOAD( "s_18_a8002-5.a4",  0x020000, 0x20000, CRC(a04377e8) SHA1(841c6c3073b137f6a5c875db32039186c014f785) )
+	ROM_LOAD( "s_19_a8002-5.a5",  0x040000, 0x20000, CRC(b07f5289) SHA1(8817bd225edf9b0fa439b220617f925365e39253) )
+	ROM_LOAD( "s_20_a8002-5.a6",  0x060000, 0x20000, CRC(a9bb4fa9) SHA1(ccede784671a864667b92a8101d686c26c78d76f) )
+
+	ROM_REGION( 0x20000, "ymsnd", 0 )
+	ROM_LOAD( "ma_2_a8002-1.d10",       0x000000, 0x20000, CRC(ea4cc30d) SHA1(d8f089fc0ce76309411706a8110ad907f93dc97e) ) // == ma2.bin
+
+	ROM_REGION( 0x20000, "user1", 0 ) /* Zoom table */
+	ROM_LOAD( "ma_8_a8002-2.e10",       0x000000, 0x10000, CRC(61f3de03) SHA1(736f9634fe054ea68a2aa90a743bd0dc320f23c9) ) // == ma8.bin / ma9.bin
+	ROM_LOAD( "ma_9_a8002-2.e12",       0x000000, 0x10000, CRC(61f3de03) SHA1(736f9634fe054ea68a2aa90a743bd0dc320f23c9) ) /* identical to ma8 */
+ROM_END
+
 
 /******************************************************************************/
 
 // as soon as you calibrate the guns in test mode the game refuses to boot
-GAME( 1989, bbusters, 0,        bbusters, bbusters, 0, ROT0,  "SNK", "Beast Busters (World)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND )
-GAME( 1989, bbustersu,bbusters, bbusters, bbusters, 0, ROT0,  "SNK", "Beast Busters (US, Version 2)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND )
+GAME( 1989, bbusters, 0,        bbusters, bbusters, driver_device, 0, ROT0,  "SNK", "Beast Busters (World)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND )
+GAME( 1989, bbustersu,bbusters, bbusters, bbusters, driver_device, 0, ROT0,  "SNK", "Beast Busters (US, Version 2)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND )
 
-GAME( 1989, mechatt,  0,        mechatt,  mechatt,  0, ROT0,  "SNK", "Mechanized Attack (World)", 0 )
-GAME( 1989, mechattu, mechatt,  mechatt,  mechattu, 0, ROT0,  "SNK", "Mechanized Attack (US)", 0 )
+GAME( 1989, mechatt,  0,        mechatt,  mechatt, driver_device,  0, ROT0,  "SNK", "Mechanized Attack (World)", 0 )
+GAME( 1989, mechattu, mechatt,  mechatt,  mechattu, driver_device, 0, ROT0,  "SNK", "Mechanized Attack (US)", 0 )
+GAME( 1989, mechattu1,mechatt,  mechatt,  mechattu, driver_device, 0, ROT0,  "SNK", "Mechanized Attack (US, Single Player)", 0 )

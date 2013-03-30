@@ -2,13 +2,13 @@
 #include "includes/galspnbl.h"
 
 
-PALETTE_INIT( galspnbl )
+void galspnbl_state::palette_init()
 {
 	int i;
 
 	/* initialize 555 RGB lookup */
 	for (i = 0; i < 32768; i++)
-		palette_set_color_rgb(machine, i + 1024, pal5bit(i >> 5), pal5bit(i >> 10), pal5bit(i >> 0));
+		palette_set_color_rgb(machine(), i + 1024, pal5bit(i >> 5), pal5bit(i >> 10), pal5bit(i >> 0));
 }
 
 
@@ -29,7 +29,7 @@ PALETTE_INIT( galspnbl )
  *    4    | xxxxxxxxxxxxxxxx | x position
  *    5,6,7|                  | unused
  */
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, int priority )
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, int priority )
 {
 	galspnbl_state *state = machine.driver_data<galspnbl_state>();
 	UINT16 *spriteram = state->m_spriteram;
@@ -46,7 +46,7 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 		{42,43,46,47,58,59,62,63}
 	};
 
-	for (offs = (state->m_spriteram_size - 16) / 2; offs >= 0; offs -= 8)
+	for (offs = (state->m_spriteram.bytes() - 16) / 2; offs >= 0; offs -= 8)
 	{
 		int sx, sy, code, color, size, attr, flipx, flipy;
 		int col, row;
@@ -84,7 +84,7 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 }
 
 
-static void draw_background( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_background( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	galspnbl_state *state = machine.driver_data<galspnbl_state>();
 	offs_t offs;
@@ -96,26 +96,25 @@ static void draw_background( running_machine &machine, bitmap_t *bitmap, const r
 		int y = offs >> 9;
 		int x = offs & 0x1ff;
 
-		*BITMAP_ADDR16(bitmap, y, x) = 1024 + (state->m_bgvideoram[offs] >> 1);
+		bitmap.pix16(y, x) = 1024 + (state->m_bgvideoram[offs] >> 1);
 	}
 }
 
 
-SCREEN_UPDATE( galspnbl )
+UINT32 galspnbl_state::screen_update_galspnbl(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	galspnbl_state *state = screen->machine().driver_data<galspnbl_state>();
 	int offs;
 
-	draw_background(screen->machine(), bitmap, cliprect);
+	draw_background(machine(), bitmap, cliprect);
 
-	draw_sprites(screen->machine(), bitmap, cliprect, 0);
+	draw_sprites(machine(), bitmap, cliprect, 0);
 
 	for (offs = 0; offs < 0x1000 / 2; offs++)
 	{
 		int sx, sy, code, attr, color;
 
-		code = state->m_videoram[offs];
-		attr = state->m_colorram[offs];
+		code = m_videoram[offs];
+		attr = m_colorram[offs];
 		color = (attr & 0x00f0) >> 4;
 		sx = offs % 64;
 		sy = offs / 64;
@@ -123,7 +122,7 @@ SCREEN_UPDATE( galspnbl )
 		/* What is this? A priority/half transparency marker? */
 		if (!(attr & 0x0008))
 		{
-			drawgfx_transpen(bitmap,cliprect,screen->machine().gfx[0],
+			drawgfx_transpen(bitmap,cliprect,machine().gfx[0],
 					code,
 					color,
 					0,0,
@@ -132,6 +131,6 @@ SCREEN_UPDATE( galspnbl )
 		}
 	}
 
-	draw_sprites(screen->machine(), bitmap, cliprect, 1);
+	draw_sprites(machine(), bitmap, cliprect, 1);
 	return 0;
 }

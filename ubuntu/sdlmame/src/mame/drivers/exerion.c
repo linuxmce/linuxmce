@@ -38,7 +38,7 @@ Stephh's notes (based on the games Z80 code and some tests) :
     If checksum doesn't match the hardcoded value (0xb5), you get one more credit
     and you are allowed to continue the game with an extra life (score, charge and
     level are not reset to original values).
-  - At the begining of each life of each player, a checksum is computed from 0x4100
+  - At the beginning of each life of each player, a checksum is computed from 0x4100
     to 0x4dff (code at 0x07d8) if 1st score in the high-score table is >= 80000.
     If checksum doesn't match the hardcoded value (0x63), you get 255 credits !
     Notice that the displayed number of credits won't be correct as the game
@@ -63,7 +63,7 @@ Stephh's notes (based on the games Z80 code and some tests) :
     match, its only effect is to set lives to 0, which is always the case when the
     game is over, so it doesn't seem to have any real effect.
     Was it supposed to be called at another time ?
-  - The routine at 0x5f90 writes to adresses 0x6008-0x600c values read from AY port A
+  - The routine at 0x5f90 writes to addresses 0x6008-0x600c values read from AY port A
     (one write after one read). This routine is called by the 2 unknown routines.
 
 2) 'exeriont'
@@ -112,7 +112,7 @@ Stephh's notes (based on the games Z80 code and some tests) :
   - The first unknown routine at 0x5f70 has been patched, so the game can't reset.
   - The second unknown routine at 0x414e has been patched, so lives can't be set to 0.
   - The routine at 0x5f90 is completely different : it reads values from AY port A,
-    but nothing is written to adresses 0x6008-0x600c, and there are lots of writes
+    but nothing is written to addresses 0x6008-0x600c, and there are lots of writes
     to AY port B (0xd001) due to extra code at 0x0050 and extra data at 0x0040.
 
 ***************************************************************************/
@@ -130,19 +130,17 @@ Stephh's notes (based on the games Z80 code and some tests) :
  *************************************/
 
 /* Players inputs are muxed at 0xa000 */
-static CUSTOM_INPUT( exerion_controls_r )
+CUSTOM_INPUT_MEMBER(exerion_state::exerion_controls_r)
 {
 	static const char *const inname[2] = { "P1", "P2" };
-	exerion_state *state = field->port->machine().driver_data<exerion_state>();
-	return input_port_read(field->port->machine(), inname[state->m_cocktail_flip]) & 0x3f;
+	return ioport(inname[m_cocktail_flip])->read() & 0x3f;
 }
 
 
-static INPUT_CHANGED( coin_inserted )
+INPUT_CHANGED_MEMBER(exerion_state::coin_inserted)
 {
-	exerion_state *state = field->port->machine().driver_data<exerion_state>();
 	/* coin insertion causes an NMI */
-	device_set_input_line(state->m_maincpu, INPUT_LINE_NMI, newval ? CLEAR_LINE : ASSERT_LINE);
+	m_maincpu->set_input_line(INPUT_LINE_NMI, newval ? CLEAR_LINE : ASSERT_LINE);
 }
 
 
@@ -155,32 +153,29 @@ static INPUT_CHANGED( coin_inserted )
 
 /* This is the first of many Exerion "features". No clue if it's */
 /* protection or some sort of timer. */
-static READ8_DEVICE_HANDLER( exerion_porta_r )
+READ8_MEMBER(exerion_state::exerion_porta_r)
 {
-	exerion_state *state = device->machine().driver_data<exerion_state>();
-	state->m_porta ^= 0x40;
-	return state->m_porta;
+	m_porta ^= 0x40;
+	return m_porta;
 }
 
 
-static WRITE8_DEVICE_HANDLER( exerion_portb_w )
+WRITE8_MEMBER(exerion_state::exerion_portb_w)
 {
-	exerion_state *state = device->machine().driver_data<exerion_state>();
 	/* pull the expected value from the ROM */
-	state->m_porta = device->machine().region("maincpu")->base()[0x5f76];
-	state->m_portb = data;
+	m_porta = memregion("maincpu")->base()[0x5f76];
+	m_portb = data;
 
 	logerror("Port B = %02X\n", data);
 }
 
 
-static READ8_HANDLER( exerion_protection_r )
+READ8_MEMBER(exerion_state::exerion_protection_r)
 {
-	exerion_state *state = space->machine().driver_data<exerion_state>();
-	if (cpu_get_pc(&space->device()) == 0x4143)
-		return space->machine().region("maincpu")->base()[0x33c0 + (state->m_main_ram[0xd] << 2) + offset];
+	if (space.device().safe_pc() == 0x4143)
+		return memregion("maincpu")->base()[0x33c0 + (m_main_ram[0xd] << 2) + offset];
 	else
-		return state->m_main_ram[0x8 + offset];
+		return m_main_ram[0x8 + offset];
 }
 
 
@@ -191,21 +186,21 @@ static READ8_HANDLER( exerion_protection_r )
  *
  *************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, exerion_state )
 	AM_RANGE(0x0000, 0x5fff) AM_ROM
 	AM_RANGE(0x6008, 0x600b) AM_READ(exerion_protection_r)
-	AM_RANGE(0x6000, 0x67ff) AM_RAM AM_BASE_MEMBER(exerion_state, m_main_ram)
-	AM_RANGE(0x8000, 0x87ff) AM_RAM AM_BASE_SIZE_MEMBER(exerion_state, m_videoram, m_videoram_size)
-	AM_RANGE(0x8800, 0x887f) AM_RAM AM_BASE_SIZE_MEMBER(exerion_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0x6000, 0x67ff) AM_RAM AM_SHARE("main_ram")
+	AM_RANGE(0x8000, 0x87ff) AM_RAM AM_SHARE("videoram")
+	AM_RANGE(0x8800, 0x887f) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0x8800, 0x8bff) AM_RAM
 	AM_RANGE(0xa000, 0xa000) AM_READ_PORT("IN0")
 	AM_RANGE(0xa800, 0xa800) AM_READ_PORT("DSW0")
 	AM_RANGE(0xb000, 0xb000) AM_READ_PORT("DSW1")
 	AM_RANGE(0xc000, 0xc000) AM_WRITE(exerion_videoreg_w)
-	AM_RANGE(0xc800, 0xc800) AM_WRITE(soundlatch_w)
-	AM_RANGE(0xd000, 0xd001) AM_DEVWRITE("ay1", ay8910_address_data_w)
-	AM_RANGE(0xd800, 0xd801) AM_DEVWRITE("ay2", ay8910_address_data_w)
-	AM_RANGE(0xd802, 0xd802) AM_DEVREAD("ay2", ay8910_r)
+	AM_RANGE(0xc800, 0xc800) AM_WRITE(soundlatch_byte_w)
+	AM_RANGE(0xd000, 0xd001) AM_DEVWRITE_LEGACY("ay1", ay8910_address_data_w)
+	AM_RANGE(0xd800, 0xd801) AM_DEVWRITE_LEGACY("ay2", ay8910_address_data_w)
+	AM_RANGE(0xd802, 0xd802) AM_DEVREAD_LEGACY("ay2", ay8910_r)
 ADDRESS_MAP_END
 
 
@@ -216,10 +211,10 @@ ADDRESS_MAP_END
  *
  *************************************/
 
-static ADDRESS_MAP_START( sub_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sub_map, AS_PROGRAM, 8, exerion_state )
 	AM_RANGE(0x0000, 0x1fff) AM_ROM
 	AM_RANGE(0x4000, 0x47ff) AM_RAM
-	AM_RANGE(0x6000, 0x6000) AM_READ(soundlatch_r)
+	AM_RANGE(0x6000, 0x6000) AM_READ(soundlatch_byte_r)
 	AM_RANGE(0x8000, 0x800c) AM_WRITE(exerion_video_latch_w)
 	AM_RANGE(0xa000, 0xa000) AM_READ(exerion_video_timing_r)
 ADDRESS_MAP_END
@@ -235,7 +230,7 @@ ADDRESS_MAP_END
 /* verified from Z80 code */
 static INPUT_PORTS_START( exerion )
 	PORT_START("IN0")
-	PORT_BIT( 0x3f, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(exerion_controls_r, (void *)0)
+	PORT_BIT( 0x3f, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, exerion_state,exerion_controls_r, (void *)0)
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 )
 
@@ -264,7 +259,7 @@ static INPUT_PORTS_START( exerion )
 	PORT_DIPSETTING(    0x80, DEF_STR( Cocktail ) )
 
 	PORT_START("DSW1")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_VBLANK )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_DIPNAME( 0x0e, 0x00, DEF_STR( Coinage ) )          /* see notes */
 	PORT_DIPSETTING(    0x0e, DEF_STR( 5C_1C ) )
 	PORT_DIPSETTING(    0x0a, DEF_STR( 4C_1C ) )
@@ -277,7 +272,7 @@ static INPUT_PORTS_START( exerion )
 	PORT_BIT( 0xf0, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("COIN")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_CHANGED(coin_inserted, 0)
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_CHANGED_MEMBER(DEVICE_SELF, exerion_state,coin_inserted, 0)
 
 	PORT_START("P1")          /* fake input port */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP )    PORT_8WAY
@@ -368,10 +363,10 @@ static const ay8910_interface ay8910_config =
 {
 	AY8910_LEGACY_OUTPUT,
 	AY8910_DEFAULT_LOADS,
-	DEVCB_HANDLER(exerion_porta_r),
+	DEVCB_DRIVER_MEMBER(exerion_state,exerion_porta_r),
 	DEVCB_NULL,
 	DEVCB_NULL,
-	DEVCB_HANDLER(exerion_portb_w)
+	DEVCB_DRIVER_MEMBER(exerion_state,exerion_portb_w)
 };
 
 
@@ -382,35 +377,33 @@ static const ay8910_interface ay8910_config =
  *
  *************************************/
 
-static MACHINE_START( exerion )
+void exerion_state::machine_start()
 {
-	exerion_state *state = machine.driver_data<exerion_state>();
 
-	state->m_maincpu = machine.device("maincpu");
+	m_maincpu = machine().device<cpu_device>("maincpu");
 
-	state->save_item(NAME(state->m_porta));
-	state->save_item(NAME(state->m_portb));
-	state->save_item(NAME(state->m_cocktail_flip));
-	state->save_item(NAME(state->m_char_palette));
-	state->save_item(NAME(state->m_sprite_palette));
-	state->save_item(NAME(state->m_char_bank));
-	state->save_item(NAME(state->m_background_latches));
+	save_item(NAME(m_porta));
+	save_item(NAME(m_portb));
+	save_item(NAME(m_cocktail_flip));
+	save_item(NAME(m_char_palette));
+	save_item(NAME(m_sprite_palette));
+	save_item(NAME(m_char_bank));
+	save_item(NAME(m_background_latches));
 }
 
-static MACHINE_RESET( exerion )
+void exerion_state::machine_reset()
 {
-	exerion_state *state = machine.driver_data<exerion_state>();
 	int i;
 
-	state->m_porta = 0;
-	state->m_portb = 0;
-	state->m_cocktail_flip = 0;
-	state->m_char_palette = 0;
-	state->m_sprite_palette = 0;
-	state->m_char_bank = 0;
+	m_porta = 0;
+	m_portb = 0;
+	m_cocktail_flip = 0;
+	m_char_palette = 0;
+	m_sprite_palette = 0;
+	m_char_bank = 0;
 
 	for (i = 0; i < 13; i++)
-		state->m_background_latches[i] = 0;
+		m_background_latches[i] = 0;
 }
 
 static MACHINE_CONFIG_START( exerion, exerion_state )
@@ -421,20 +414,15 @@ static MACHINE_CONFIG_START( exerion, exerion_state )
 	MCFG_CPU_ADD("sub", Z80, EXERION_CPU_CLOCK)
 	MCFG_CPU_PROGRAM_MAP(sub_map)
 
-	MCFG_MACHINE_START(exerion)
-	MCFG_MACHINE_RESET(exerion)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_RAW_PARAMS(EXERION_PIXEL_CLOCK, EXERION_HTOTAL, EXERION_HBEND, EXERION_HBSTART, EXERION_VTOTAL, EXERION_VBEND, EXERION_VBSTART)
-	MCFG_SCREEN_UPDATE(exerion)
+	MCFG_SCREEN_UPDATE_DRIVER(exerion_state, screen_update_exerion)
 
 	MCFG_GFXDECODE(exerion)
 	MCFG_PALETTE_LENGTH(256*3)
 
-	MCFG_PALETTE_INIT(exerion)
-	MCFG_VIDEO_START(exerion)
 
 	/* audio hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -552,18 +540,18 @@ ROM_END
  *
  *************************************/
 
-static DRIVER_INIT( exerion )
+DRIVER_INIT_MEMBER(exerion_state,exerion)
 {
 	UINT32 oldaddr, newaddr, length;
 	UINT8 *src, *dst, *temp;
 
 	/* allocate some temporary space */
-	temp = auto_alloc_array(machine, UINT8, 0x10000);
+	temp = auto_alloc_array(machine(), UINT8, 0x10000);
 
 	/* make a temporary copy of the character data */
 	src = temp;
-	dst = machine.region("gfx1")->base();
-	length = machine.region("gfx1")->bytes();
+	dst = machine().root_device().memregion("gfx1")->base();
+	length = machine().root_device().memregion("gfx1")->bytes();
 	memcpy(src, dst, length);
 
 	/* decode the characters */
@@ -572,16 +560,16 @@ static DRIVER_INIT( exerion )
 	for (oldaddr = 0; oldaddr < length; oldaddr++)
 	{
 		newaddr = ((oldaddr     ) & 0x1f00) |       /* keep n8-n4 */
-		          ((oldaddr << 3) & 0x00f0) |       /* move n3-n0 */
-		          ((oldaddr >> 4) & 0x000e) |       /* move v2-v0 */
-		          ((oldaddr     ) & 0x0001);        /* keep h2 */
+					((oldaddr << 3) & 0x00f0) |       /* move n3-n0 */
+					((oldaddr >> 4) & 0x000e) |       /* move v2-v0 */
+					((oldaddr     ) & 0x0001);        /* keep h2 */
 		dst[newaddr] = src[oldaddr];
 	}
 
 	/* make a temporary copy of the sprite data */
 	src = temp;
-	dst = machine.region("gfx2")->base();
-	length = machine.region("gfx2")->bytes();
+	dst = machine().root_device().memregion("gfx2")->base();
+	length = machine().root_device().memregion("gfx2")->bytes();
 	memcpy(src, dst, length);
 
 	/* decode the sprites */
@@ -590,20 +578,20 @@ static DRIVER_INIT( exerion )
 	for (oldaddr = 0; oldaddr < length; oldaddr++)
 	{
 		newaddr = ((oldaddr << 1) & 0x3c00) |       /* move n7-n4 */
-		          ((oldaddr >> 4) & 0x0200) |       /* move n3 */
-		          ((oldaddr << 4) & 0x01c0) |       /* move n2-n0 */
-		          ((oldaddr >> 3) & 0x003c) |       /* move v3-v0 */
-		          ((oldaddr     ) & 0xc003);        /* keep n9-n8 h3-h2 */
+					((oldaddr >> 4) & 0x0200) |       /* move n3 */
+					((oldaddr << 4) & 0x01c0) |       /* move n2-n0 */
+					((oldaddr >> 3) & 0x003c) |       /* move v3-v0 */
+					((oldaddr     ) & 0xc003);        /* keep n9-n8 h3-h2 */
 		dst[newaddr] = src[oldaddr];
 	}
 
-	auto_free(machine, temp);
+	auto_free(machine(), temp);
 }
 
 
-static DRIVER_INIT( exerionb )
+DRIVER_INIT_MEMBER(exerion_state,exerionb)
 {
-	UINT8 *ram = machine.region("maincpu")->base();
+	UINT8 *ram = machine().root_device().memregion("maincpu")->base();
 	int addr;
 
 	/* the program ROMs have data lines D1 and D2 swapped. Decode them. */
@@ -622,6 +610,6 @@ static DRIVER_INIT( exerionb )
  *
  *************************************/
 
-GAME( 1983, exerion,  0,       exerion, exerion, exerion,  ROT90, "Jaleco", "Exerion", GAME_SUPPORTS_SAVE )
-GAME( 1983, exeriont, exerion, exerion, exerion, exerion,  ROT90, "Jaleco (Taito America license)", "Exerion (Taito)", GAME_SUPPORTS_SAVE )
-GAME( 1983, exerionb, exerion, exerion, exerion, exerionb, ROT90, "bootleg", "Exerion (bootleg)", GAME_SUPPORTS_SAVE )
+GAME( 1983, exerion,  0,       exerion, exerion, exerion_state, exerion,  ROT90, "Jaleco", "Exerion", GAME_SUPPORTS_SAVE )
+GAME( 1983, exeriont, exerion, exerion, exerion, exerion_state, exerion,  ROT90, "Jaleco (Taito America license)", "Exerion (Taito)", GAME_SUPPORTS_SAVE )
+GAME( 1983, exerionb, exerion, exerion, exerion, exerion_state, exerionb, ROT90, "bootleg", "Exerion (bootleg)", GAME_SUPPORTS_SAVE )

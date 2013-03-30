@@ -2,6 +2,37 @@
 
     Atari "Stella on Steroids" hardware
 
+****************************************************************************
+
+    Copyright Aaron Giles
+    All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions are
+    met:
+
+        * Redistributions of source code must retain the above copyright
+          notice, this list of conditions and the following disclaimer.
+        * Redistributions in binary form must reproduce the above copyright
+          notice, this list of conditions and the following disclaimer in
+          the documentation and/or other materials provided with the
+          distribution.
+        * Neither the name 'MAME' nor the names of its contributors may be
+          used to endorse or promote products derived from this software
+          without specific prior written permission.
+
+    THIS SOFTWARE IS PROVIDED BY AARON GILES ''AS IS'' AND ANY EXPRESS OR
+    IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+    WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+    DISCLAIMED. IN NO EVENT SHALL AARON GILES BE LIABLE FOR ANY DIRECT,
+    INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+    (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+    SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+    STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+    IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+    POSSIBILITY OF SUCH DAMAGE.
+
 ****************************************************************************/
 
 #include "emu.h"
@@ -17,11 +48,11 @@
 
 void beathead_state::video_start()
 {
-	state_save_register_global(m_machine, m_finescroll);
-	state_save_register_global(m_machine, m_vram_latch_offset);
-	state_save_register_global(m_machine, m_hsyncram_offset);
-	state_save_register_global(m_machine, m_hsyncram_start);
-	state_save_register_global_array(m_machine, m_hsyncram);
+	state_save_register_global(machine(), m_finescroll);
+	state_save_register_global(machine(), m_vram_latch_offset);
+	state_save_register_global(machine(), m_hsyncram_offset);
+	state_save_register_global(machine(), m_hsyncram_start);
+	state_save_register_global_array(machine(), m_hsyncram);
 }
 
 
@@ -89,7 +120,7 @@ WRITE32_MEMBER( beathead_state::finescroll_w )
 	if ((oldword & 8) && !(newword & 8) && space.machine().primary_screen->vpos() != 261)
 	{
 		logerror("Suspending time! (scanline = %d)\n", space.machine().primary_screen->vpos());
-		cputag_set_input_line(space.machine(), "maincpu", INPUT_LINE_HALT, ASSERT_LINE);
+		space.machine().device("maincpu")->execute().set_input_line(INPUT_LINE_HALT, ASSERT_LINE);
 	}
 }
 
@@ -122,7 +153,7 @@ READ32_MEMBER( beathead_state::hsync_ram_r )
 {
 	/* offset 0 is probably write-only */
 	if (offset == 0)
-		logerror("%08X:Unexpected HSYNC RAM read at offset 0\n", cpu_get_previouspc(&space.device()));
+		logerror("%08X:Unexpected HSYNC RAM read at offset 0\n", space.device().safe_pcbase());
 
 	/* offset 1 reads the data */
 	else
@@ -154,9 +185,9 @@ WRITE32_MEMBER( beathead_state::hsync_ram_w )
  *
  *************************************/
 
-bool beathead_state::screen_update(screen_device &screen, bitmap_t &bitmap, const rectangle &cliprect)
+UINT32 beathead_state::screen_update(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	UINT8 *videoram = reinterpret_cast<UINT8 *>(m_videoram);
+	UINT8 *videoram = reinterpret_cast<UINT8 *>(m_videoram.target());
 	int x, y;
 
 	/* generate the final screen */
@@ -182,7 +213,7 @@ bool beathead_state::screen_update(screen_device &screen, bitmap_t &bitmap, cons
 		}
 
 		/* then draw it */
-		draw_scanline16(&bitmap, cliprect.min_x, y, cliprect.max_x - cliprect.min_x + 1, &scanline[cliprect.min_x], NULL);
+		draw_scanline16(bitmap, cliprect.min_x, y, cliprect.width(), &scanline[cliprect.min_x], NULL);
 	}
 	return 0;
 }

@@ -24,11 +24,11 @@
 
 /* ----- render utilities ----- */
 
-void render_resample_argb_bitmap_hq(void *dest, UINT32 drowpixels, UINT32 dwidth, UINT32 dheight, const bitmap_t *source, const rectangle *sbounds, const render_color *color);
+void render_resample_argb_bitmap_hq(bitmap_argb32 &dest, bitmap_argb32 &source, const render_color &color);
 int render_clip_line(render_bounds *bounds, const render_bounds *clip);
 int render_clip_quad(render_bounds *bounds, const render_bounds *clip, render_quad_texuv *texcoords);
 void render_line_to_quad(const render_bounds *bounds, float width, render_bounds *bounds0, render_bounds *bounds1);
-bitmap_t *render_load_png(emu_file &file, const char *dirname, const char *filename, bitmap_t *alphadest, bool *hasalpha);
+bool render_load_png(bitmap_argb32 &bitmap, emu_file &file, const char *dirname, const char *filename, bool load_as_alpha_to_existing = false);
 
 
 
@@ -124,8 +124,8 @@ INLINE void set_render_color(render_color *color, float a, float r, float g, flo
 INLINE int orientation_swap_flips(int orientation)
 {
 	return (orientation & ORIENTATION_SWAP_XY) |
-	       ((orientation & ORIENTATION_FLIP_X) ? ORIENTATION_FLIP_Y : 0) |
-	       ((orientation & ORIENTATION_FLIP_Y) ? ORIENTATION_FLIP_X : 0);
+			((orientation & ORIENTATION_FLIP_X) ? ORIENTATION_FLIP_Y : 0) |
+			((orientation & ORIENTATION_FLIP_Y) ? ORIENTATION_FLIP_X : 0);
 }
 
 
@@ -200,4 +200,4 @@ INLINE UINT8 apply_brightness_contrast_gamma(UINT8 src, float brightness, float 
 }
 
 
-#endif	/* __RENDUTIL_H__ */
+#endif  /* __RENDUTIL_H__ */

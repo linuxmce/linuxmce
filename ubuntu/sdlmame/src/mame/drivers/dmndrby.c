@@ -59,63 +59,75 @@ DD10 DD14  DD18     H5            DD21
 class dmndrby_state : public driver_device
 {
 public:
-	dmndrby_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	dmndrby_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_scroll_ram(*this, "scroll_ram"),
+		m_sprite_ram(*this, "sprite_ram"),
+		m_dderby_vidchars(*this, "vidchars"),
+		m_dderby_vidattribs(*this, "vidattribs"){ }
 
-	UINT8* m_dderby_vidchars;
-	UINT8* m_scroll_ram;
-	UINT8* m_dderby_vidattribs;
-	UINT8* m_sprite_ram;
+	required_shared_ptr<UINT8> m_scroll_ram;
+	required_shared_ptr<UINT8> m_sprite_ram;
+	required_shared_ptr<UINT8> m_dderby_vidchars;
+	required_shared_ptr<UINT8> m_dderby_vidattribs;
 	UINT8 *m_racetrack_tilemap_rom;
 	tilemap_t *m_racetrack_tilemap;
 	UINT8 m_io_port[8];
 	int m_bg;
+	DECLARE_WRITE8_MEMBER(dderby_sound_w);
+	DECLARE_READ8_MEMBER(input_r);
+	DECLARE_WRITE8_MEMBER(output_w);
+	TILE_GET_INFO_MEMBER(get_dmndrby_tile_info);
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_dderby(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(dderby_irq);
+	INTERRUPT_GEN_MEMBER(dderby_timer_irq);
 };
 
 
-static WRITE8_HANDLER( dderby_sound_w )
+WRITE8_MEMBER(dmndrby_state::dderby_sound_w)
 {
-	soundlatch_w(space,0,data);
-	cputag_set_input_line(space->machine(), "audiocpu", 0, HOLD_LINE);
+	soundlatch_byte_w(space,0,data);
+	machine().device("audiocpu")->execute().set_input_line(0, HOLD_LINE);
 }
 
 
-static READ8_HANDLER( input_r )
+READ8_MEMBER(dmndrby_state::input_r)
 {
 	switch(offset & 7)
 	{
-		case 0: return input_port_read(space->machine(), "IN0");
-		case 1: return input_port_read(space->machine(), "IN1");
-		case 2: return input_port_read(space->machine(), "IN2");
-		case 3: return input_port_read(space->machine(), "IN3");
-		case 4: return input_port_read(space->machine(), "IN4");
-		case 5: return input_port_read(space->machine(), "IN5");
-		case 6: return input_port_read(space->machine(), "IN6");
-		case 7: return input_port_read(space->machine(), "IN7");
+		case 0: return ioport("IN0")->read();
+		case 1: return ioport("IN1")->read();
+		case 2: return ioport("IN2")->read();
+		case 3: return ioport("IN3")->read();
+		case 4: return ioport("IN4")->read();
+		case 5: return ioport("IN5")->read();
+		case 6: return ioport("IN6")->read();
+		case 7: return ioport("IN7")->read();
 	}
 
 	return 0xff;
 }
 
-static WRITE8_HANDLER( output_w )
+WRITE8_MEMBER(dmndrby_state::output_w)
 {
-	dmndrby_state *state = space->machine().driver_data<dmndrby_state>();
 	/*
-    ---- x--- refill meter [4]
-    ---- x--- token out meter [5]
-    ---- x--- token in meter [6]
-    ---- x--- cash out meter [7]
-    ---- -x-- coin out (meter) [0-3]
-    ---- -x-- coin lockout token [4]
-    ---- -x-- coin counter (meter) [5]
-    ---- --x- coin lockout [0-3]
-    ---- ---x lamp [0-6]
-    */
-	state->m_io_port[offset] = data;
-//  popmessage("%02x|%02x|%02x|%02x|%02x|%02x|%02x|%02x|",state->m_io_port[0],state->m_io_port[1],state->m_io_port[2],state->m_io_port[3],state->m_io_port[4],state->m_io_port[5],state->m_io_port[6],state->m_io_port[7]);
+	---- x--- refill meter [4]
+	---- x--- token out meter [5]
+	---- x--- token in meter [6]
+	---- x--- cash out meter [7]
+	---- -x-- coin out (meter) [0-3]
+	---- -x-- coin lockout token [4]
+	---- -x-- coin counter (meter) [5]
+	---- --x- coin lockout [0-3]
+	---- ---x lamp [0-6]
+	*/
+	m_io_port[offset] = data;
+//  popmessage("%02x|%02x|%02x|%02x|%02x|%02x|%02x|%02x|",m_io_port[0],m_io_port[1],m_io_port[2],m_io_port[3],m_io_port[4],m_io_port[5],m_io_port[6],m_io_port[7]);
 }
 
-static ADDRESS_MAP_START( memmap, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( memmap, AS_PROGRAM, 8, dmndrby_state )
 	AM_RANGE(0x0000, 0x5fff) AM_ROM
 	AM_RANGE(0x8000, 0x8fff) AM_RAM AM_SHARE("nvram")
 	AM_RANGE(0xc000, 0xc007) AM_READ(input_r)
@@ -126,23 +138,23 @@ static ADDRESS_MAP_START( memmap, AS_PROGRAM, 8 )
 	AM_RANGE(0xca01, 0xca01) AM_WRITENOP //watchdog
 	AM_RANGE(0xca02, 0xca02) AM_RAM_WRITE(dderby_sound_w)
 	AM_RANGE(0xca03, 0xca03) AM_WRITENOP//(timer_irq_w) //???
-	AM_RANGE(0xcc00, 0xcc05) AM_RAM AM_BASE_MEMBER(dmndrby_state, m_scroll_ram)
-	AM_RANGE(0xce08, 0xce1f) AM_RAM AM_BASE_MEMBER(dmndrby_state, m_sprite_ram) // horse sprites
-	AM_RANGE(0xd000, 0xd3ff) AM_RAM AM_BASE_MEMBER(dmndrby_state, m_dderby_vidchars) // char ram
-	AM_RANGE(0xd400, 0xd7ff) AM_RAM AM_BASE_MEMBER(dmndrby_state, m_dderby_vidattribs) // colours/ attrib ram
+	AM_RANGE(0xcc00, 0xcc05) AM_RAM AM_SHARE("scroll_ram")
+	AM_RANGE(0xce08, 0xce1f) AM_RAM AM_SHARE("sprite_ram") // horse sprites
+	AM_RANGE(0xd000, 0xd3ff) AM_RAM AM_SHARE("vidchars") // char ram
+	AM_RANGE(0xd400, 0xd7ff) AM_RAM AM_SHARE("vidattribs") // colours/ attrib ram
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( dderby_sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( dderby_sound_map, AS_PROGRAM, 8, dmndrby_state )
 	AM_RANGE(0x0000, 0x0fff) AM_ROM
 	AM_RANGE(0x1000, 0x1000) AM_RAM //???
-	AM_RANGE(0x4000, 0x4001) AM_DEVWRITE("ay1", ay8910_address_data_w)
-	AM_RANGE(0x4000, 0x4000) AM_READ(soundlatch_r)
-	AM_RANGE(0x4001, 0x4001) AM_DEVREAD("ay1", ay8910_r)
+	AM_RANGE(0x4000, 0x4001) AM_DEVWRITE_LEGACY("ay1", ay8910_address_data_w)
+	AM_RANGE(0x4000, 0x4000) AM_READ(soundlatch_byte_r)
+	AM_RANGE(0x4001, 0x4001) AM_DEVREAD_LEGACY("ay1", ay8910_r)
 	AM_RANGE(0x6000, 0x67ff) AM_RAM
 ADDRESS_MAP_END
 
 static INPUT_PORTS_START( dderby )
-    PORT_START("IN0")
+	PORT_START("IN0")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN4 )
 	PORT_DIPNAME( 0x0002, 0x0002, "Out Coin 1" )//out coin 1
 	PORT_DIPSETTING(      0x0002, DEF_STR( Off ) )
@@ -150,7 +162,7 @@ static INPUT_PORTS_START( dderby )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_NAME("BET Horse 5")  PORT_CODE(KEYCODE_B)
 	PORT_BIT( 0xf4, IP_ACTIVE_LOW, IPT_UNUSED )
 
-    PORT_START("IN1")
+	PORT_START("IN1")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN3 )
 	PORT_DIPNAME( 0x0002, 0x0002, "Out Coin 2" )//out coin 2
 	PORT_DIPSETTING(      0x0002, DEF_STR( Off ) )
@@ -158,7 +170,7 @@ static INPUT_PORTS_START( dderby )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON6 ) PORT_NAME("BET Horse 6")  PORT_CODE(KEYCODE_N)
 	PORT_BIT( 0xf4, IP_ACTIVE_LOW, IPT_UNUSED )
 
-    PORT_START("IN2")
+	PORT_START("IN2")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_DIPNAME( 0x0002, 0x0002, "Out Coin 3" )//out coin 3
 	PORT_DIPSETTING(      0x0002, DEF_STR( Off ) )
@@ -166,26 +178,26 @@ static INPUT_PORTS_START( dderby )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE1 ) PORT_NAME("Collect")  PORT_CODE(KEYCODE_2_PAD) //to get coins
 	PORT_BIT( 0xf4, IP_ACTIVE_LOW, IPT_UNUSED )
 
-    PORT_START("IN3")
+	PORT_START("IN3")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0xfe, IP_ACTIVE_LOW, IPT_UNUSED )
 
-    PORT_START("IN4")
+	PORT_START("IN4")
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_SERVICE2 ) PORT_NAME("Refill Key")  PORT_CODE(KEYCODE_1_PAD)
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_NAME("BET Horse 4")  PORT_CODE(KEYCODE_V)
 	PORT_BIT( 0xf5, IP_ACTIVE_LOW, IPT_UNUSED )
 
-    PORT_START("IN5")
+	PORT_START("IN5")
 	PORT_SERVICE_NO_TOGGLE( 0x02, IP_ACTIVE_LOW )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_NAME("BET Horse 3")  PORT_CODE(KEYCODE_C)
 	PORT_BIT( 0xf5, IP_ACTIVE_LOW, IPT_UNUSED )
 
-    PORT_START("IN6")
+	PORT_START("IN6")
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_SERVICE3 ) PORT_NAME("Back Door")  PORT_CODE(KEYCODE_3_PAD)
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_NAME("BET Horse 2")  PORT_CODE(KEYCODE_X)
 	PORT_BIT( 0xf5, IP_ACTIVE_LOW, IPT_UNUSED )
 
-    PORT_START("IN7")
+	PORT_START("IN7")
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Token Coin")  PORT_CODE(KEYCODE_0)
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_NAME("BET Horse 1")  PORT_CODE(KEYCODE_Z)
 	PORT_BIT( 0xf5, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -203,21 +215,21 @@ static INPUT_PORTS_START( dderby )
 	PORT_DIPSETTING(    0x04, "480p (cash + tokens)" )
 	PORT_DIPSETTING(    0x00, "600p (cash + tokens)" )
 	PORT_DIPNAME( 0x30, 0x00, "Percentage Payout" )
-	PORT_DIPSETTING(    0x00, "76%" )	PORT_CONDITION("DSW1", 0xc0, PORTCOND_LESSTHAN, 0x80)
-	PORT_DIPSETTING(    0x10, "80%" )	PORT_CONDITION("DSW1", 0xc0, PORTCOND_LESSTHAN, 0x80)
-	PORT_DIPSETTING(    0x20, "86%" )	PORT_CONDITION("DSW1", 0xc0, PORTCOND_LESSTHAN, 0x80)
-	PORT_DIPSETTING(    0x30, "88%" )	PORT_CONDITION("DSW1", 0xc0, PORTCOND_LESSTHAN, 0x80)
-	PORT_DIPSETTING(    0x00, "78%" )	PORT_CONDITION("DSW1", 0xc0, PORTCOND_NOTLESSTHAN, 0x80)
-	PORT_DIPSETTING(    0x10, "82%" )	PORT_CONDITION("DSW1", 0xc0, PORTCOND_NOTLESSTHAN, 0x80)
-	PORT_DIPSETTING(    0x20, "86%" )	PORT_CONDITION("DSW1", 0xc0, PORTCOND_NOTLESSTHAN, 0x80)
-	PORT_DIPSETTING(    0x30, "90%" )	PORT_CONDITION("DSW1", 0xc0, PORTCOND_NOTLESSTHAN, 0x80)
+	PORT_DIPSETTING(    0x00, "76%" )   PORT_CONDITION("DSW1", 0xc0, LESSTHAN, 0x80)
+	PORT_DIPSETTING(    0x10, "80%" )   PORT_CONDITION("DSW1", 0xc0, LESSTHAN, 0x80)
+	PORT_DIPSETTING(    0x20, "86%" )   PORT_CONDITION("DSW1", 0xc0, LESSTHAN, 0x80)
+	PORT_DIPSETTING(    0x30, "88%" )   PORT_CONDITION("DSW1", 0xc0, LESSTHAN, 0x80)
+	PORT_DIPSETTING(    0x00, "78%" )   PORT_CONDITION("DSW1", 0xc0, NOTLESSTHAN, 0x80)
+	PORT_DIPSETTING(    0x10, "82%" )   PORT_CONDITION("DSW1", 0xc0, NOTLESSTHAN, 0x80)
+	PORT_DIPSETTING(    0x20, "86%" )   PORT_CONDITION("DSW1", 0xc0, NOTLESSTHAN, 0x80)
+	PORT_DIPSETTING(    0x30, "90%" )   PORT_CONDITION("DSW1", 0xc0, NOTLESSTHAN, 0x80)
 	PORT_DIPNAME( 0xc0, 0x80, "Price Per Game" )
 	PORT_DIPSETTING(    0x00, "2p" )
 	PORT_DIPSETTING(    0x40, "5p" )
 	PORT_DIPSETTING(    0x80, "10p" )
 	PORT_DIPSETTING(    0xc0, "20p" )
 
-	PORT_START("DSW2")	/* 8bit */
+	PORT_START("DSW2")  /* 8bit */
 	PORT_DIPNAME( 0x01, 0x01, "Show Results")
 	PORT_DIPSETTING(    0x01, "Last Race" )
 	PORT_DIPSETTING(    0x00, "Last 6 Races" )
@@ -246,7 +258,7 @@ INPUT_PORTS_END
 
 static INPUT_PORTS_START( dderbya )
 	PORT_INCLUDE( dderby )
-	PORT_MODIFY("DSW1")	/* 8bit */
+	PORT_MODIFY("DSW1") /* 8bit */
 	PORT_DIPNAME( 0x01, 0x01, "Price Per Play")
 	PORT_DIPSETTING(    0x01, "5p" )
 	PORT_DIPSETTING(    0x00, "10p" )
@@ -284,13 +296,13 @@ static const gfx_layout tiles8x8_layout =
 
 static const gfx_layout tiles16x16_layout =
 {
-	16,16,	/* 16*16 sprites */
-	RGN_FRAC(1,3),	/* 256 sprites */
-	3,		/* 3 bits per pixel */
-	{ 0, RGN_FRAC(1,3), RGN_FRAC(2,3) },	// the three bitplanes are separated
+	16,16,  /* 16*16 sprites */
+	RGN_FRAC(1,3),  /* 256 sprites */
+	3,      /* 3 bits per pixel */
+	{ 0, RGN_FRAC(1,3), RGN_FRAC(2,3) },    // the three bitplanes are separated
 	{ 0, 1, 2, 3, 4, 5, 6, 7,  16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8, 8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8 },
-	32*8	// every sprite takes 32 consecutive bytes
+	32*8    // every sprite takes 32 consecutive bytes
 
 };
 
@@ -311,17 +323,16 @@ static GFXDECODE_START( dmndrby )
 	GFXDECODE_ENTRY( "gfx3", 0, tiles16x16_layout, 16*16, 32 )
 GFXDECODE_END
 
-static TILE_GET_INFO( get_dmndrby_tile_info )
+TILE_GET_INFO_MEMBER(dmndrby_state::get_dmndrby_tile_info)
 {
-	dmndrby_state *state = machine.driver_data<dmndrby_state>();
-	int code = state->m_racetrack_tilemap_rom[tile_index];
-	int attr = state->m_racetrack_tilemap_rom[tile_index+0x2000];
+	int code = m_racetrack_tilemap_rom[tile_index];
+	int attr = m_racetrack_tilemap_rom[tile_index+0x2000];
 
 	int col = attr&0x1f;
 	int flipx = (attr&0x40)>>6;
 
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			2,
 			code,
 			col,
@@ -329,25 +340,23 @@ static TILE_GET_INFO( get_dmndrby_tile_info )
 }
 
 
-static VIDEO_START(dderby)
+void dmndrby_state::video_start()
 {
-	dmndrby_state *state = machine.driver_data<dmndrby_state>();
-	state->m_racetrack_tilemap_rom = machine.region("user1")->base();
-	state->m_racetrack_tilemap = tilemap_create(machine,get_dmndrby_tile_info,tilemap_scan_rows,16,16, 16, 512);
-	tilemap_mark_all_tiles_dirty(state->m_racetrack_tilemap);
+	m_racetrack_tilemap_rom = memregion("user1")->base();
+	m_racetrack_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(dmndrby_state::get_dmndrby_tile_info),this),TILEMAP_SCAN_ROWS,16,16, 16, 512);
+	m_racetrack_tilemap->mark_all_dirty();
 
 }
 
-static SCREEN_UPDATE(dderby)
+UINT32 dmndrby_state::screen_update_dderby(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	dmndrby_state *state = screen->machine().driver_data<dmndrby_state>();
 	int x,y,count;
 	int off,scrolly;
-	const gfx_element *gfx = screen->machine().gfx[0];
-	const gfx_element *sprites = screen->machine().gfx[1];
-	const gfx_element *track = screen->machine().gfx[2];
+	gfx_element *gfx = machine().gfx[0];
+	gfx_element *sprites = machine().gfx[1];
+	gfx_element *track = machine().gfx[2];
 
-	bitmap_fill(bitmap, cliprect, get_black_pen(screen->machine()));
+	bitmap.fill(get_black_pen(machine()), cliprect);
 
 
 /* Draw racetrack
@@ -356,22 +365,22 @@ racetrack seems to be stored in 4th and 5th prom.
 can we draw it with the tilemap? maybe not, the layout is a litle strange
 
 */
-//  base = state->m_scroll_ram[0];
+//  base = m_scroll_ram[0];
 
-	off=0x1900-(state->m_bg*0x100)+(state->m_scroll_ram[1])*0x100;
-	scrolly = 0xff-(state->m_scroll_ram[0]);
-	if(state->m_scroll_ram[1]==0xff) off=0x1800;
+	off=0x1900-(m_bg*0x100)+(m_scroll_ram[1])*0x100;
+	scrolly = 0xff-(m_scroll_ram[0]);
+	if(m_scroll_ram[1]==0xff) off=0x1800;
 	for(x=0;x<16;x++) {
 		for(y=0;y<16;y++) {
-			int chr = state->m_racetrack_tilemap_rom[off];
-			int col = state->m_racetrack_tilemap_rom[off+0x2000]&0x1f;
-			int flipx = state->m_racetrack_tilemap_rom[off+0x2000]&0x40;
+			int chr = m_racetrack_tilemap_rom[off];
+			int col = m_racetrack_tilemap_rom[off+0x2000]&0x1f;
+			int flipx = m_racetrack_tilemap_rom[off+0x2000]&0x40;
 			drawgfx_opaque(bitmap,cliprect,track,chr,col,flipx,0,y*16+scrolly,x*16);
 			// draw another bit of track
 			// a rubbish way of doing it
-			chr = state->m_racetrack_tilemap_rom[off-0x100];
-			col = state->m_racetrack_tilemap_rom[off+0x1f00]&0x1f;
-			flipx = state->m_racetrack_tilemap_rom[off+0x1f00]&0x40;
+			chr = m_racetrack_tilemap_rom[off-0x100];
+			col = m_racetrack_tilemap_rom[off+0x1f00]&0x1f;
+			flipx = m_racetrack_tilemap_rom[off+0x1f00]&0x40;
 			drawgfx_opaque(bitmap,cliprect,track,chr,col,flipx,0,y*16-256+scrolly,x*16);
 			off++;
 		}
@@ -392,12 +401,12 @@ wouldnt like to say its the most effective way though...
 		int a=0;
 		int b=0;
 		int base = count*4;
-		int sprx=state->m_sprite_ram[base+3];
-		int spry=state->m_sprite_ram[base+2];
-		//state->m_sprite_ram[base+1];
-		int col = (state->m_sprite_ram[base+1]&0x1f);
-		int anim = (state->m_sprite_ram[base]&0x3)*0x40; // animation frame - probably wrong but seems right
-		int horse = (state->m_sprite_ram[base+1]&0x7)*8+7;  // horse label from 1 - 6
+		int sprx=m_sprite_ram[base+3];
+		int spry=m_sprite_ram[base+2];
+		//m_sprite_ram[base+1];
+		int col = (m_sprite_ram[base+1]&0x1f);
+		int anim = (m_sprite_ram[base]&0x3)*0x40; // animation frame - probably wrong but seems right
+		int horse = (m_sprite_ram[base+1]&0x7)*8+7;  // horse label from 1 - 6
 
 		for (a=0;a<8 ;a++)
 		{
@@ -420,10 +429,10 @@ wouldnt like to say its the most effective way though...
 		for(x=0;x<32;x++)
 		{
 			int tileno,bank,color;
-			tileno=state->m_dderby_vidchars[count];
-			bank=(state->m_dderby_vidattribs[count]&0x20)>>5;
+			tileno=m_dderby_vidchars[count];
+			bank=(m_dderby_vidattribs[count]&0x20)>>5;
 			tileno|=(bank<<8);
-			color=((state->m_dderby_vidattribs[count])&0x1f);
+			color=((m_dderby_vidattribs[count])&0x1f);
 
 			drawgfx_transpen(bitmap,cliprect,gfx,tileno,color,0,0,x*8,y*8,(tileno == 0x38) ? 0 : -1);
 
@@ -436,21 +445,22 @@ wouldnt like to say its the most effective way though...
 }
 
 // copied from elsewhere. surely incorrect
-static PALETTE_INIT( dmnderby )
+void dmndrby_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	static const int resistances_rg[3] = { 1000, 470, 220 };
 	static const int resistances_b [2] = { 470, 220 };
 	double rweights[3], gweights[3], bweights[2];
 	int i;
 
 	/* compute the color output resistor weights */
-	compute_resistor_weights(0,	255, -1.0,
+	compute_resistor_weights(0, 255, -1.0,
 			3, &resistances_rg[0], rweights, 470, 0,
 			3, &resistances_rg[0], gweights, 470, 0,
 			2, &resistances_b[0],  bweights, 470, 0);
 
 	/* allocate the colortable */
-	machine.colortable = colortable_alloc(machine, 0x20);
+	machine().colortable = colortable_alloc(machine(), 0x20);
 
 	/* create a lookup table for the palette */
 	for (i = 0; i < 0x20; i++)
@@ -475,39 +485,39 @@ static PALETTE_INIT( dmnderby )
 		bit1 = (color_prom[i] >> 7) & 0x01;
 		b = combine_2_weights(bweights, bit0, bit1);
 
-		colortable_palette_set_color(machine.colortable, i, MAKE_RGB(r, g, b));
+		colortable_palette_set_color(machine().colortable, i, MAKE_RGB(r, g, b));
 	}
 
 	/* color_prom now points to the beginning of the lookup table */
-	color_prom = machine.region("proms2")->base();
+	color_prom = machine().root_device().memregion("proms2")->base();
 
 	/* normal tiles use colors 0-15 */
 	for (i = 0x000; i < 0x300; i++)
 	{
 		UINT8 ctabentry = color_prom[i];
-		colortable_entry_set_value(machine.colortable, i, ctabentry);
+		colortable_entry_set_value(machine().colortable, i, ctabentry);
 	}
 }
 
 /*Main Z80 is IM 0,HW-latched irqs. */
-static INTERRUPT_GEN( dderby_irq )
+INTERRUPT_GEN_MEMBER(dmndrby_state::dderby_irq)
 {
-	cputag_set_input_line_and_vector(device->machine(), "maincpu", 0, HOLD_LINE, 0xd7); /* RST 10h */
+	machine().device("maincpu")->execute().set_input_line_and_vector(0, HOLD_LINE, 0xd7); /* RST 10h */
 }
 
-static INTERRUPT_GEN( dderby_timer_irq )
+INTERRUPT_GEN_MEMBER(dmndrby_state::dderby_timer_irq)
 {
-	cputag_set_input_line_and_vector(device->machine(), "maincpu", 0, HOLD_LINE, 0xcf); /* RST 08h */
+	machine().device("maincpu")->execute().set_input_line_and_vector(0, HOLD_LINE, 0xcf); /* RST 08h */
 }
 
 static MACHINE_CONFIG_START( dderby, dmndrby_state )
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80,4000000)		 /* ? MHz */
+	MCFG_CPU_ADD("maincpu", Z80,4000000)         /* ? MHz */
 	MCFG_CPU_PROGRAM_MAP(memmap)
-	MCFG_CPU_VBLANK_INT("screen", dderby_irq)
-	MCFG_CPU_PERIODIC_INT(dderby_timer_irq, 244/2)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", dmndrby_state,  dderby_irq)
+	MCFG_CPU_PERIODIC_INT_DRIVER(dmndrby_state, dderby_timer_irq,  244/2)
 
-	MCFG_CPU_ADD("audiocpu", Z80, 4000000)	/* verified on schematics */
+	MCFG_CPU_ADD("audiocpu", Z80, 4000000)  /* verified on schematics */
 	MCFG_CPU_PROGRAM_MAP(dderby_sound_map)
 
 	MCFG_QUANTUM_TIME(attotime::from_hz(6000))
@@ -517,16 +527,13 @@ static MACHINE_CONFIG_START( dderby, dmndrby_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(256, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 256-1, 16, 256-16-1)
-	MCFG_SCREEN_UPDATE(dderby)
+	MCFG_SCREEN_UPDATE_DRIVER(dmndrby_state, screen_update_dderby)
 
 	MCFG_GFXDECODE(dmndrby)
 	MCFG_PALETTE_LENGTH(0x300)
-	MCFG_PALETTE_INIT(dmnderby)
 
-	MCFG_VIDEO_START(dderby)
 
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
@@ -635,5 +642,5 @@ ROM_END
 
 
 /*    YEAR, NAME,    PARENT,   MACHINE, INPUT,   INIT,    MONITOR, COMPANY,   FULLNAME */
-GAME( 1994, dmndrby,  0,       dderby, dderby,  0, ROT0, "Electrocoin", "Diamond Derby (Newer)",GAME_IMPERFECT_GRAPHICS|GAME_IMPERFECT_COLORS|GAME_NOT_WORKING ) // hack?
-GAME( 1986, dmndrbya, dmndrby, dderby, dderbya, 0, ROT0, "Electrocoin", "Diamond Derby (Original)",GAME_IMPERFECT_GRAPHICS|GAME_IMPERFECT_COLORS|GAME_NOT_WORKING )
+GAME( 1994, dmndrby,  0,       dderby, dderby, driver_device,  0, ROT0, "Electrocoin", "Diamond Derby (Newer)",GAME_IMPERFECT_GRAPHICS|GAME_IMPERFECT_COLORS|GAME_NOT_WORKING ) // hack?
+GAME( 1986, dmndrbya, dmndrby, dderby, dderbya, driver_device, 0, ROT0, "Electrocoin", "Diamond Derby (Original)",GAME_IMPERFECT_GRAPHICS|GAME_IMPERFECT_COLORS|GAME_NOT_WORKING )

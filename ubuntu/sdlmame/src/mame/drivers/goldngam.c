@@ -229,8 +229,8 @@
 *******************************************************************************/
 
 
-#define MASTER_CLOCK	XTAL_8MHz	/* from CPU Board */
-#define SECONDARY_CLOCK	XTAL_6MHz	/* from GFX Board */
+#define MASTER_CLOCK    XTAL_8MHz   /* from CPU Board */
+#define SECONDARY_CLOCK XTAL_6MHz   /* from GFX Board */
 
 #include "emu.h"
 #include "cpu/m68000/m68000.h"
@@ -240,10 +240,15 @@
 class goldngam_state : public driver_device
 {
 public:
-	goldngam_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	goldngam_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"){ }
 
-	UINT16 *m_videoram;
+	required_shared_ptr<UINT16> m_videoram;
+	DECLARE_READ16_MEMBER(unk_r);
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_goldngam(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
@@ -251,25 +256,25 @@ public:
 *     Video Hardware     *
 *************************/
 
-static VIDEO_START( goldngam )
+void goldngam_state::video_start()
 {
 
 }
 
-static SCREEN_UPDATE( goldngam )
+UINT32 goldngam_state::screen_update_goldngam(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	goldngam_state *state = screen->machine().driver_data<goldngam_state>();
 
 	int x, y;
 
-	UINT8 *tmp = (UINT8 *) state->m_videoram;
+	// ERROR: This cast is NOT endian-safe without the use of BYTE/WORD/DWORD_XOR_* macros!
+	UINT8 *tmp = reinterpret_cast<UINT8 *>(m_videoram.target());
 	int index = 0;
 
 	for(y = 0; y < 512; ++y)
 	{
 		for(x = 0; x < 384; ++x)
 		{
-		  *BITMAP_ADDR16(bitmap, y, x) = tmp[index ^ 1]; /* swapped bytes in 16 bit word */
+			bitmap.pix16(y, x) = tmp[index ^ 1]; /* swapped bytes in 16 bit word */
 			++index;
 		}
 	}
@@ -278,7 +283,7 @@ static SCREEN_UPDATE( goldngam )
 }
 
 
-static PALETTE_INIT( goldngam )
+void goldngam_state::palette_init()
 {
 
 }
@@ -289,24 +294,24 @@ static PALETTE_INIT( goldngam )
 * Memory Map Information *
 *************************/
 
-static READ16_HANDLER(unk_r)
+READ16_MEMBER(goldngam_state::unk_r)
 {
-    int test1 = (space->machine().rand() & 0xae00);
+	int test1 = (machine().rand() & 0xae00);
 //  popmessage("VAL = %02x", test1);
 
 	return test1;
 }
 
-static ADDRESS_MAP_START( swisspkr_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( swisspkr_map, AS_PROGRAM, 16, goldngam_state )
 	AM_RANGE(0x000000, 0x03ffff) AM_ROM
 	AM_RANGE(0x200000, 0x20ffff) AM_RAM
 	AM_RANGE(0x400002, 0x400003) AM_NOP // hopper status read ?
 	AM_RANGE(0x40000c, 0x40000d) AM_READ(unk_r)
-	AM_RANGE(0x40000e, 0x40000f) AM_READ_PORT("DSW2")	// not sure...
-	AM_RANGE(0x402000, 0x402001) AM_DEVREAD8("aysnd", ay8910_r, 0x00ff)
-	AM_RANGE(0x402000, 0x402003) AM_DEVWRITE8("aysnd", ay8910_address_data_w, 0x00ff) //wrong
+	AM_RANGE(0x40000e, 0x40000f) AM_READ_PORT("DSW2")   // not sure...
+	AM_RANGE(0x402000, 0x402001) AM_DEVREAD8_LEGACY("aysnd", ay8910_r, 0x00ff)
+	AM_RANGE(0x402000, 0x402003) AM_DEVWRITE8_LEGACY("aysnd", ay8910_address_data_w, 0x00ff) //wrong
 
-	AM_RANGE(0xc00000, 0xc3ffff) AM_RAM AM_BASE_MEMBER(goldngam_state, m_videoram)
+	AM_RANGE(0xc00000, 0xc3ffff) AM_RAM AM_SHARE("videoram")
 	AM_RANGE(0x500200, 0x50020f) AM_RAM //?
 	AM_RANGE(0x503000, 0x503001) AM_RAM //int ack ?
 	AM_RANGE(0x503002, 0x503003) AM_RAM //int ack ?
@@ -347,10 +352,10 @@ ADDRESS_MAP_END
 
 */
 
-static ADDRESS_MAP_START( moviecrd_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( moviecrd_map, AS_PROGRAM, 16, goldngam_state )
 	AM_RANGE(0x000000, 0x07ffff) AM_ROM
 	AM_RANGE(0x200000, 0x20ffff) AM_RAM
-	AM_RANGE(0xc00000, 0xc3ffff) AM_RAM AM_BASE_MEMBER(goldngam_state, m_videoram)
+	AM_RANGE(0xc00000, 0xc3ffff) AM_RAM AM_SHARE("videoram")
 	AM_RANGE(0x503000, 0x5031ff) AM_RAM //int ack ?
 ADDRESS_MAP_END
 
@@ -522,7 +527,7 @@ static const gfx_layout charlayout =
 	{ 0 },
 	{ 0, 1, 2, 3, 4, 5, 6, 7 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
-	8*8	/* every char takes 8 consecutive bytes */
+	8*8 /* every char takes 8 consecutive bytes */
 };
 
 
@@ -555,23 +560,20 @@ static MACHINE_CONFIG_START( swisspkr, goldngam_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, MASTER_CLOCK)
 	MCFG_CPU_PROGRAM_MAP(swisspkr_map)
-	MCFG_CPU_VBLANK_INT("screen", irq2_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", goldngam_state,  irq2_line_hold)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 64*8)
-	MCFG_SCREEN_VISIBLE_AREA(4*8, 43*8-1, 1*8, 37*8-1)	// 312x288
-	MCFG_SCREEN_UPDATE(goldngam)
+	MCFG_SCREEN_VISIBLE_AREA(4*8, 43*8-1, 1*8, 37*8-1)  // 312x288
+	MCFG_SCREEN_UPDATE_DRIVER(goldngam_state, screen_update_goldngam)
 
 	MCFG_GFXDECODE(goldngam)
 
-	MCFG_PALETTE_INIT(goldngam)
 	MCFG_PALETTE_LENGTH(512)
 
-	MCFG_VIDEO_START(goldngam)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -599,7 +601,7 @@ ROM_START( swisspkr )
 	ROM_LOAD16_BYTE( "v2.5_hi.pr", 0x00000, 0x10000, CRC(a7f85661) SHA1(aa307bcfe0dfb07120b9711d65916b8689626b00) )
 	ROM_LOAD16_BYTE( "v2.5_lo.pr", 0x00001, 0x10000, CRC(142db5d0) SHA1(cc6481a206ed1b0f19cccaab7d6158e81e483c9b) )
 
-	ROM_REGION( 0x40000, "gfx1", 0 )	/* The following ROMs have code for 'Super Cherry' */
+	ROM_REGION( 0x40000, "gfx1", 0 )    /* The following ROMs have code for 'Super Cherry' */
 	ROM_LOAD16_BYTE( "v1.0_hi.gr", 0x20000, 0x10000, CRC(ea750ab1) SHA1(d1284e7f2628c3aa3de9246e475d45e6be48890e) )
 	ROM_LOAD16_BYTE( "v1.0_lo.gr", 0x20001, 0x10000, CRC(d885b965) SHA1(5f2ae3e21cf4e0d20c99cec2dfd3a6f72358535a) )
 ROM_END
@@ -622,5 +624,5 @@ ROM_END
 *************************/
 
 /*    YEAR  NAME      PARENT    MACHINE    INPUT      INIT  ROT    COMPANY                           FULLNAME                          FLAGS */
-GAME( 1990, swisspkr, 0,        swisspkr,  goldngam,  0,    ROT0, "Golden Games / C+M Technics AG", "Swiss Poker ('50 SG-.10', V2.5)", GAME_NO_SOUND | GAME_NOT_WORKING )
-GAME( 1998, moviecrd, 0,        moviecrd,  goldngam,  0,    ROT0, "Golden Games / C+M Technics AG", "Movie Card",                      GAME_NO_SOUND | GAME_NOT_WORKING )
+GAME( 1990, swisspkr, 0,        swisspkr,  goldngam, driver_device,  0,    ROT0, "Golden Games / C+M Technics AG", "Swiss Poker ('50 SG-.10', V2.5)", GAME_NO_SOUND | GAME_NOT_WORKING )
+GAME( 1998, moviecrd, 0,        moviecrd,  goldngam, driver_device,  0,    ROT0, "Golden Games / C+M Technics AG", "Movie Card",                      GAME_NO_SOUND | GAME_NOT_WORKING )

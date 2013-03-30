@@ -7,18 +7,21 @@
 class metlclsh_state : public driver_device
 {
 public:
-	metlclsh_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	metlclsh_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_fgram(*this, "fgram"),
+		m_spriteram(*this, "spriteram"),
+		m_bgram(*this, "bgram"),
+		m_scrollx(*this, "scrollx"){ }
 
 	/* memory pointers */
-	UINT8 *        m_bgram;
-	UINT8 *        m_fgram;
-	UINT8 *        m_scrollx;
+	required_shared_ptr<UINT8> m_fgram;
+	required_shared_ptr<UINT8> m_spriteram;
+	required_shared_ptr<UINT8> m_bgram;
+	required_shared_ptr<UINT8> m_scrollx;
 	UINT8 *        m_otherram;
 //      UINT8 *        m_paletteram;    // currently this uses generic palette handling
 //      UINT8 *        m_paletteram2;    // currently this uses generic palette handling
-	UINT8 *        m_spriteram;
-	size_t         m_spriteram_size;
 
 	/* video-related */
 	tilemap_t      *m_bg_tilemap;
@@ -27,17 +30,24 @@ public:
 	UINT8          m_gfxbank;
 
 	/* devices */
-	device_t *m_maincpu;
-	device_t *m_subcpu;
+	cpu_device *m_maincpu;
+	cpu_device *m_subcpu;
+	DECLARE_WRITE8_MEMBER(metlclsh_cause_irq);
+	DECLARE_WRITE8_MEMBER(metlclsh_ack_nmi);
+	DECLARE_WRITE8_MEMBER(metlclsh_cause_nmi2);
+	DECLARE_WRITE8_MEMBER(metlclsh_ack_irq2);
+	DECLARE_WRITE8_MEMBER(metlclsh_ack_nmi2);
+	DECLARE_WRITE8_MEMBER(metlclsh_flipscreen_w);
+	DECLARE_WRITE8_MEMBER(metlclsh_rambank_w);
+	DECLARE_WRITE8_MEMBER(metlclsh_gfxbank_w);
+	DECLARE_WRITE8_MEMBER(metlclsh_bgram_w);
+	DECLARE_WRITE8_MEMBER(metlclsh_fgram_w);
+	DECLARE_INPUT_CHANGED_MEMBER(coin_inserted);
+	TILEMAP_MAPPER_MEMBER(metlclsh_bgtilemap_scan);
+	TILE_GET_INFO_MEMBER(get_bg_tile_info);
+	TILE_GET_INFO_MEMBER(get_fg_tile_info);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	UINT32 screen_update_metlclsh(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
-
-
-/*----------- defined in video/metlclsh.c -----------*/
-
-WRITE8_HANDLER( metlclsh_bgram_w );
-WRITE8_HANDLER( metlclsh_fgram_w );
-WRITE8_HANDLER( metlclsh_gfxbank_w );
-WRITE8_HANDLER( metlclsh_rambank_w );
-
-VIDEO_START( metlclsh );
-SCREEN_UPDATE( metlclsh );

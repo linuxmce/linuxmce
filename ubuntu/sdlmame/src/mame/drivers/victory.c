@@ -108,12 +108,12 @@
  *
  *************************************/
 
-static WRITE8_HANDLER( lamp_control_w )
+WRITE8_MEMBER(victory_state::lamp_control_w)
 {
-	set_led_status(space->machine(), 0, data & 0x80);
-	set_led_status(space->machine(), 1, data & 0x40);
-	set_led_status(space->machine(), 2, data & 0x20);
-	set_led_status(space->machine(), 3, data & 0x10);
+	set_led_status(machine(), 0, data & 0x80);
+	set_led_status(machine(), 1, data & 0x40);
+	set_led_status(machine(), 2, data & 0x20);
+	set_led_status(machine(), 3, data & 0x10);
 }
 
 
@@ -124,21 +124,21 @@ static WRITE8_HANDLER( lamp_control_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, victory_state )
 	AM_RANGE(0x0000, 0xbfff) AM_ROM
 	AM_RANGE(0xc000, 0xc0ff) AM_READ(victory_video_control_r)
 	AM_RANGE(0xc100, 0xc1ff) AM_WRITE(victory_video_control_w)
 	AM_RANGE(0xc200, 0xc3ff) AM_WRITE(victory_paletteram_w)
-	AM_RANGE(0xc400, 0xc7ff) AM_RAM AM_BASE_MEMBER(victory_state, m_videoram)
-	AM_RANGE(0xc800, 0xdfff) AM_RAM AM_BASE_MEMBER(victory_state, m_charram)
+	AM_RANGE(0xc400, 0xc7ff) AM_RAM AM_SHARE("videoram")
+	AM_RANGE(0xc800, 0xdfff) AM_RAM AM_SHARE("charram")
 	AM_RANGE(0xe000, 0xefff) AM_RAM
 	AM_RANGE(0xf000, 0xf7ff) AM_RAM AM_SHARE("nvram")
-	AM_RANGE(0xf800, 0xf800) AM_MIRROR(0x07fc) AM_DEVREADWRITE("custom", victory_sound_response_r, victory_sound_command_w)
-	AM_RANGE(0xf801, 0xf801) AM_MIRROR(0x07fc) AM_DEVREAD("custom", victory_sound_status_r)
+	AM_RANGE(0xf800, 0xf800) AM_MIRROR(0x07fc) AM_DEVREADWRITE_LEGACY("custom", victory_sound_response_r, victory_sound_command_w)
+	AM_RANGE(0xf801, 0xf801) AM_MIRROR(0x07fc) AM_DEVREAD_LEGACY("custom", victory_sound_status_r)
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( main_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( main_io_map, AS_IO, 8, victory_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0x00) AM_MIRROR(0x03) AM_READ_PORT("SW2")
 	AM_RANGE(0x04, 0x04) AM_MIRROR(0x03) AM_READ_PORT("SW1")
@@ -159,7 +159,7 @@ ADDRESS_MAP_END
  *************************************/
 
 static INPUT_PORTS_START( victory )
-	PORT_START("SW2")	/* $00-$03 = SW2 */
+	PORT_START("SW2")   /* $00-$03 = SW2 */
 	PORT_DIPNAME( 0x07, 0x00, "????" )
 	PORT_DIPSETTING(    0x00, "0" )
 	PORT_DIPSETTING(    0x01, "1" )
@@ -174,19 +174,19 @@ static INPUT_PORTS_START( victory )
 	PORT_DIPSETTING(    0x00, "60 Hz" )
 	PORT_DIPSETTING(    0x80, "50 Hz" )
 
-	PORT_START("SW1")	/* $04-$07 = SW1 */
+	PORT_START("SW1")   /* $04-$07 = SW1 */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("DIAL")	/* $08-$09 = PIO K8 port A */
+	PORT_START("DIAL")  /* $08-$09 = PIO K8 port A */
 	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_SENSITIVITY(25) PORT_KEYDELTA(10) PORT_REVERSE
 
-	PORT_START("COIN")	/* $0A-$0B = PIO K8 port B */
+	PORT_START("COIN")  /* $0A-$0B = PIO K8 port B */
 	PORT_BIT( 0xf8, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN3 )
 
-	PORT_START("BUTTONS")	/* $0C-$0D = PIO L8 port A */
+	PORT_START("BUTTONS")   /* $0C-$0D = PIO L8 port A */
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON4 )
@@ -196,7 +196,7 @@ static INPUT_PORTS_START( victory )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("UNUSED")	/* $0E-$0F = PIO L8 port B */
+	PORT_START("UNUSED")    /* $0E-$0F = PIO L8 port B */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 INPUT_PORTS_END
 
@@ -214,7 +214,7 @@ static MACHINE_CONFIG_START( victory, victory_state )
 	MCFG_CPU_ADD("maincpu", Z80, VICTORY_MAIN_CPU_CLOCK)
 	MCFG_CPU_PROGRAM_MAP(main_map)
 	MCFG_CPU_IO_MAP(main_io_map)
-	MCFG_CPU_VBLANK_INT("screen", victory_vblank_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", victory_state,  victory_vblank_interrupt)
 
 	MCFG_NVRAM_ADD_0FILL("nvram")
 
@@ -222,14 +222,12 @@ static MACHINE_CONFIG_START( victory, victory_state )
 	MCFG_VIDEO_ATTRIBUTES(VIDEO_UPDATE_BEFORE_VBLANK | VIDEO_ALWAYS_UPDATE)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	/* using the standard Exidy video parameters for now, needs to be confirmed */
 	MCFG_SCREEN_RAW_PARAMS(VICTORY_PIXEL_CLOCK, VICTORY_HTOTAL, VICTORY_HBEND, VICTORY_HBSTART, VICTORY_VTOTAL, VICTORY_VBEND, VICTORY_VBSTART)
-	MCFG_SCREEN_UPDATE(victory)
+	MCFG_SCREEN_UPDATE_DRIVER(victory_state, screen_update_victory)
 
 	MCFG_PALETTE_LENGTH(64)
 
-	MCFG_VIDEO_START(victory)
 
 	/* audio hardware */
 	MCFG_FRAGMENT_ADD(victory_audio)
@@ -317,5 +315,5 @@ ROM_END
  *
  *************************************/
 
-GAME( 1982, victory,  0,       victory, victory, 0, ROT0, "Exidy", "Victory", 0 )
-GAME( 1982, victorba, victory, victory, victory, 0, ROT0, "Exidy", "Victor Banana", 0 )
+GAME( 1982, victory,  0,       victory, victory, driver_device, 0, ROT0, "Exidy", "Victory", 0 )
+GAME( 1982, victorba, victory, victory, victory, driver_device, 0, ROT0, "Exidy", "Victor Banana", 0 )

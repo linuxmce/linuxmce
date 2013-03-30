@@ -6,6 +6,7 @@
 
 #include "emu.h"
 #include "machine/atarigen.h"
+#include "video/atarimo.h"
 #include "includes/relief.h"
 
 
@@ -16,25 +17,23 @@
  *
  *************************************/
 
-static TILE_GET_INFO( get_playfield_tile_info )
+TILE_GET_INFO_MEMBER(relief_state::get_playfield_tile_info)
 {
-	relief_state *state = machine.driver_data<relief_state>();
-	UINT16 data1 = state->m_playfield[tile_index];
-	UINT16 data2 = state->m_playfield_upper[tile_index] & 0xff;
+	UINT16 data1 = m_playfield[tile_index];
+	UINT16 data2 = m_playfield_upper[tile_index] & 0xff;
 	int code = data1 & 0x7fff;
 	int color = 0x20 + (data2 & 0x0f);
-	SET_TILE_INFO(0, code, color, (data1 >> 15) & 1);
+	SET_TILE_INFO_MEMBER(0, code, color, (data1 >> 15) & 1);
 }
 
 
-static TILE_GET_INFO( get_playfield2_tile_info )
+TILE_GET_INFO_MEMBER(relief_state::get_playfield2_tile_info)
 {
-	relief_state *state = machine.driver_data<relief_state>();
-	UINT16 data1 = state->m_playfield2[tile_index];
-	UINT16 data2 = state->m_playfield_upper[tile_index] >> 8;
+	UINT16 data1 = m_playfield2[tile_index];
+	UINT16 data2 = m_playfield_upper[tile_index] >> 8;
 	int code = data1 & 0x7fff;
 	int color = data2 & 0x0f;
-	SET_TILE_INFO(0, code, color, (data1 >> 15) & 1);
+	SET_TILE_INFO_MEMBER(0, code, color, (data1 >> 15) & 1);
 }
 
 
@@ -45,58 +44,57 @@ static TILE_GET_INFO( get_playfield2_tile_info )
  *
  *************************************/
 
-VIDEO_START( relief )
+VIDEO_START_MEMBER(relief_state,relief)
 {
 	static const atarimo_desc modesc =
 	{
-		1,					/* index to which gfx system */
-		1,					/* number of motion object banks */
-		1,					/* are the entries linked? */
-		0,					/* are the entries split? */
-		0,					/* render in reverse order? */
-		0,					/* render in swapped X/Y order? */
-		0,					/* does the neighbor bit affect the next object? */
-		8,					/* pixels per SLIP entry (0 for no-slip) */
-		0,					/* pixel offset for SLIPs */
-		0,					/* maximum number of links to visit/scanline (0=all) */
+		1,                  /* index to which gfx system */
+		1,                  /* number of motion object banks */
+		1,                  /* are the entries linked? */
+		0,                  /* are the entries split? */
+		0,                  /* render in reverse order? */
+		0,                  /* render in swapped X/Y order? */
+		0,                  /* does the neighbor bit affect the next object? */
+		8,                  /* pixels per SLIP entry (0 for no-slip) */
+		0,                  /* pixel offset for SLIPs */
+		0,                  /* maximum number of links to visit/scanline (0=all) */
 
-		0x100,				/* base palette entry */
-		0x100,				/* maximum number of colors */
-		0,					/* transparent pen index */
+		0x100,              /* base palette entry */
+		0x100,              /* maximum number of colors */
+		0,                  /* transparent pen index */
 
-		{{ 0x00ff,0,0,0 }},	/* mask for the link */
-		{{ 0 }},			/* mask for the graphics bank */
-		{{ 0,0x7fff,0,0 }},	/* mask for the code index */
-		{{ 0 }},			/* mask for the upper code index */
-		{{ 0,0,0x000f,0 }},	/* mask for the color */
-		{{ 0,0,0xff80,0 }},	/* mask for the X position */
-		{{ 0,0,0,0xff80 }},	/* mask for the Y position */
-		{{ 0,0,0,0x0070 }},	/* mask for the width, in tiles*/
-		{{ 0,0,0,0x0007 }},	/* mask for the height, in tiles */
-		{{ 0,0x8000,0,0 }},	/* mask for the horizontal flip */
-		{{ 0 }},			/* mask for the vertical flip */
-		{{ 0 }},			/* mask for the priority */
-		{{ 0 }},			/* mask for the neighbor */
-		{{ 0 }},			/* mask for absolute coordinates */
+		{{ 0x00ff,0,0,0 }}, /* mask for the link */
+		{{ 0 }},            /* mask for the graphics bank */
+		{{ 0,0x7fff,0,0 }}, /* mask for the code index */
+		{{ 0 }},            /* mask for the upper code index */
+		{{ 0,0,0x000f,0 }}, /* mask for the color */
+		{{ 0,0,0xff80,0 }}, /* mask for the X position */
+		{{ 0,0,0,0xff80 }}, /* mask for the Y position */
+		{{ 0,0,0,0x0070 }}, /* mask for the width, in tiles*/
+		{{ 0,0,0,0x0007 }}, /* mask for the height, in tiles */
+		{{ 0,0x8000,0,0 }}, /* mask for the horizontal flip */
+		{{ 0 }},            /* mask for the vertical flip */
+		{{ 0 }},            /* mask for the priority */
+		{{ 0 }},            /* mask for the neighbor */
+		{{ 0 }},            /* mask for absolute coordinates */
 
-		{{ 0 }},			/* mask for the special value */
-		0,					/* resulting value to indicate "special" */
-		0					/* callback routine for special entries */
+		{{ 0 }},            /* mask for the special value */
+		0,                  /* resulting value to indicate "special" */
+		0                   /* callback routine for special entries */
 	};
-	relief_state *state = machine.driver_data<relief_state>();
 
 	/* MOs are 5bpp but with a 4-bit color granularity */
-	machine.gfx[1]->color_granularity = 16;
+	machine().gfx[1]->set_granularity(16);
 
 	/* initialize the playfield */
-	state->m_playfield_tilemap = tilemap_create(machine, get_playfield_tile_info, tilemap_scan_cols,  8,8, 64,64);
+	m_playfield_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(relief_state::get_playfield_tile_info),this), TILEMAP_SCAN_COLS,  8,8, 64,64);
 
 	/* initialize the second playfield */
-	state->m_playfield2_tilemap = tilemap_create(machine, get_playfield2_tile_info, tilemap_scan_cols,  8,8, 64,64);
-	tilemap_set_transparent_pen(state->m_playfield2_tilemap, 0);
+	m_playfield2_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(relief_state::get_playfield2_tile_info),this), TILEMAP_SCAN_COLS,  8,8, 64,64);
+	m_playfield2_tilemap->set_transparent_pen(0);
 
 	/* initialize the motion objects */
-	atarimo_init(machine, 0, &modesc);
+	atarimo_init(machine(), 0, &modesc);
 }
 
 
@@ -107,52 +105,51 @@ VIDEO_START( relief )
  *
  *************************************/
 
-SCREEN_UPDATE( relief )
+UINT32 relief_state::screen_update_relief(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	relief_state *state = screen->machine().driver_data<relief_state>();
-	bitmap_t *priority_bitmap = screen->machine().priority_bitmap;
+	bitmap_ind8 &priority_bitmap = machine().priority_bitmap;
 	atarimo_rect_list rectlist;
-	bitmap_t *mobitmap;
+	bitmap_ind16 *mobitmap;
 	int x, y, r;
 
 	/* draw the playfield */
-	bitmap_fill(priority_bitmap, cliprect, 0);
-	tilemap_draw(bitmap, cliprect, state->m_playfield_tilemap, 0, 0);
-	tilemap_draw(bitmap, cliprect, state->m_playfield2_tilemap, 0, 1);
+	priority_bitmap.fill(0, cliprect);
+	m_playfield_tilemap->draw(bitmap, cliprect, 0, 0);
+	m_playfield2_tilemap->draw(bitmap, cliprect, 0, 1);
 
 	/* draw and merge the MO */
 	mobitmap = atarimo_render(0, cliprect, &rectlist);
 	for (r = 0; r < rectlist.numrects; r++, rectlist.rect++)
 		for (y = rectlist.rect->min_y; y <= rectlist.rect->max_y; y++)
 		{
-			UINT16 *mo = (UINT16 *)mobitmap->base + mobitmap->rowpixels * y;
-			UINT16 *pf = (UINT16 *)bitmap->base + bitmap->rowpixels * y;
-			UINT8 *pri = (UINT8 *)priority_bitmap->base + priority_bitmap->rowpixels * y;
+			UINT16 *mo = &mobitmap->pix16(y);
+			UINT16 *pf = &bitmap.pix16(y);
+			UINT8 *pri = &priority_bitmap.pix8(y);
 			for (x = rectlist.rect->min_x; x <= rectlist.rect->max_x; x++)
 				if (mo[x])
 				{
 					/* verified from the GALs on the real PCB; equations follow
-                     *
-                     *      --- PF/M is 1 if playfield has priority, or 0 if MOs have priority
-                     *      PF/M = PFXS
-                     *
-                     *      --- CS0 is set to 1 if the MO is transparent
-                     *      CS0=!MPX0*!MPX1*!MPX2*!MPX3
-                     *
-                     *      --- CS1 is 1 to select playfield pixels or 0 to select MO pixels
-                     *      !CS1=MPX5*MPX6*MPX7*!CS0
-                     *          +!MPX4*MPX5*MPX6*MPX7
-                     *          +PFXS*!CS0
-                     *          +!MPX4*PFXS
-                     *
-                     *      --- CRA10 is the 0x200 bit of the color RAM index; set for the top playfield only
-                     *      CRA10:=CS1*PFXS
-                     *
-                     *      --- CRA9 is the 0x100 bit of the color RAM index; set for MOs only
-                     *      !CA9:=CS1
-                     *
-                     *      --- CRA8-1 are the low 8 bits of the color RAM index; set as expected
-                     */
+					 *
+					 *      --- PF/M is 1 if playfield has priority, or 0 if MOs have priority
+					 *      PF/M = PFXS
+					 *
+					 *      --- CS0 is set to 1 if the MO is transparent
+					 *      CS0=!MPX0*!MPX1*!MPX2*!MPX3
+					 *
+					 *      --- CS1 is 1 to select playfield pixels or 0 to select MO pixels
+					 *      !CS1=MPX5*MPX6*MPX7*!CS0
+					 *          +!MPX4*MPX5*MPX6*MPX7
+					 *          +PFXS*!CS0
+					 *          +!MPX4*PFXS
+					 *
+					 *      --- CRA10 is the 0x200 bit of the color RAM index; set for the top playfield only
+					 *      CRA10:=CS1*PFXS
+					 *
+					 *      --- CRA9 is the 0x100 bit of the color RAM index; set for MOs only
+					 *      !CA9:=CS1
+					 *
+					 *      --- CRA8-1 are the low 8 bits of the color RAM index; set as expected
+					 */
 					int cs0 = 0;
 					int cs1 = 1;
 

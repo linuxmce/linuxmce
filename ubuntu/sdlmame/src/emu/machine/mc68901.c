@@ -19,17 +19,21 @@
         However the fact that they indeed happen in the ST is quite interesting.
 
         The MFP will generate a spurious interrupt if interrupts are disabled (by changing the IERA/IERB registers)
-        at the ???precise point???. The precise point would be after the system (but not necessarily the CPU, see below)
+        at the 'precise point'. The precise point would be after the system (but not necessarily the CPU, see below)
         triggered an MFP interrupt, and before the CPU drives the interrupt acknowledge cycle.
 
-        If the MFP was connected directly to the CPU, spurious interrupts probably couldn???t happen. However in the
+        If the MFP was connected directly to the CPU, spurious interrupts probably couldn't happen. However in the
         ST, GLUE seats in the middle and handles all the interrupt timing. It is possible that GLUE introduces a
         delay between detecting a change in the MFP interrupt request signal and actually propagating the change to
         the CPU IPL signals (it is even possible that GLUE make some kind of latching). This would create a window
-        long enough for the ???precise point??? described above.
+        long enough for the 'precise point' described above.
 
         "yes, the spurious interrupt occurs when i mask a timer. i did not notice an occurance of the SPI when changing data and control registers.
         if i kill interrupts with the status reg before masking the timer interrupt, then the SPI occurs as soon as the status register is set to re-enable interrupts."
+
+        Well, more experiments show that it's somewhat incorrect, and
+        the GLUE is essentially invisible w.r.t IPL.  The CPU and the
+        MFP manage to add the delays all by themselves.
 
     - divide serial clock by 16
     - synchronous mode
@@ -43,8 +47,10 @@
 #include "emu.h"
 #include "mc68901.h"
 #include "cpu/m68000/m68000.h"
-#include "machine/devhelpr.h"
 
+
+// device type definition
+const device_type MC68901 = &device_creator<mc68901_device>;
 
 
 //**************************************************************************
@@ -146,93 +152,93 @@ enum
 };
 
 
-#define AER_GPIP_0				0x01
-#define AER_GPIP_1				0x02
-#define AER_GPIP_2				0x04
-#define AER_GPIP_3				0x08
-#define AER_GPIP_4				0x10
-#define AER_GPIP_5				0x20
-#define AER_GPIP_6				0x40
-#define AER_GPIP_7				0x80
+#define AER_GPIP_0              0x01
+#define AER_GPIP_1              0x02
+#define AER_GPIP_2              0x04
+#define AER_GPIP_3              0x08
+#define AER_GPIP_4              0x10
+#define AER_GPIP_5              0x20
+#define AER_GPIP_6              0x40
+#define AER_GPIP_7              0x80
 
 
-#define VR_S					0x08
+#define VR_S                    0x08
 
 
-#define IR_GPIP_0				0x0001
-#define IR_GPIP_1				0x0002
-#define IR_GPIP_2				0x0004
-#define IR_GPIP_3				0x0008
-#define IR_TIMER_D				0x0010
-#define IR_TIMER_C				0x0020
-#define IR_GPIP_4				0x0040
-#define IR_GPIP_5				0x0080
-#define IR_TIMER_B				0x0100
-#define IR_XMIT_ERROR			0x0200
-#define IR_XMIT_BUFFER_EMPTY	0x0400
-#define IR_RCV_ERROR			0x0800
-#define IR_RCV_BUFFER_FULL		0x1000
-#define IR_TIMER_A				0x2000
-#define IR_GPIP_6				0x4000
-#define IR_GPIP_7				0x8000
+#define IR_GPIP_0               0x0001
+#define IR_GPIP_1               0x0002
+#define IR_GPIP_2               0x0004
+#define IR_GPIP_3               0x0008
+#define IR_TIMER_D              0x0010
+#define IR_TIMER_C              0x0020
+#define IR_GPIP_4               0x0040
+#define IR_GPIP_5               0x0080
+#define IR_TIMER_B              0x0100
+#define IR_XMIT_ERROR           0x0200
+#define IR_XMIT_BUFFER_EMPTY    0x0400
+#define IR_RCV_ERROR            0x0800
+#define IR_RCV_BUFFER_FULL      0x1000
+#define IR_TIMER_A              0x2000
+#define IR_GPIP_6               0x4000
+#define IR_GPIP_7               0x8000
 
 
-#define TCR_TIMER_STOPPED		0x00
-#define TCR_TIMER_DELAY_4		0x01
-#define TCR_TIMER_DELAY_10		0x02
-#define TCR_TIMER_DELAY_16		0x03
-#define TCR_TIMER_DELAY_50		0x04
-#define TCR_TIMER_DELAY_64		0x05
-#define TCR_TIMER_DELAY_100		0x06
-#define TCR_TIMER_DELAY_200		0x07
-#define TCR_TIMER_EVENT			0x08
-#define TCR_TIMER_PULSE_4		0x09
-#define TCR_TIMER_PULSE_10		0x0a
-#define TCR_TIMER_PULSE_16		0x0b
-#define TCR_TIMER_PULSE_50		0x0c
-#define TCR_TIMER_PULSE_64		0x0d
-#define TCR_TIMER_PULSE_100		0x0e
-#define TCR_TIMER_PULSE_200		0x0f
-#define TCR_TIMER_RESET			0x10
+#define TCR_TIMER_STOPPED       0x00
+#define TCR_TIMER_DELAY_4       0x01
+#define TCR_TIMER_DELAY_10      0x02
+#define TCR_TIMER_DELAY_16      0x03
+#define TCR_TIMER_DELAY_50      0x04
+#define TCR_TIMER_DELAY_64      0x05
+#define TCR_TIMER_DELAY_100     0x06
+#define TCR_TIMER_DELAY_200     0x07
+#define TCR_TIMER_EVENT         0x08
+#define TCR_TIMER_PULSE_4       0x09
+#define TCR_TIMER_PULSE_10      0x0a
+#define TCR_TIMER_PULSE_16      0x0b
+#define TCR_TIMER_PULSE_50      0x0c
+#define TCR_TIMER_PULSE_64      0x0d
+#define TCR_TIMER_PULSE_100     0x0e
+#define TCR_TIMER_PULSE_200     0x0f
+#define TCR_TIMER_RESET         0x10
 
 
-#define UCR_PARITY_ENABLED		0x04
-#define UCR_PARITY_EVEN			0x02
-#define UCR_PARITY_ODD			0x00
-#define UCR_WORD_LENGTH_8		0x00
-#define UCR_WORD_LENGTH_7		0x20
-#define UCR_WORD_LENGTH_6		0x40
-#define UCR_WORD_LENGTH_5		0x60
-#define UCR_START_STOP_0_0		0x00
-#define UCR_START_STOP_1_1		0x08
-#define UCR_START_STOP_1_15		0x10
-#define UCR_START_STOP_1_2		0x18
-#define UCR_CLOCK_DIVIDE_16		0x80
-#define UCR_CLOCK_DIVIDE_1		0x00
+#define UCR_PARITY_ENABLED      0x04
+#define UCR_PARITY_EVEN         0x02
+#define UCR_PARITY_ODD          0x00
+#define UCR_WORD_LENGTH_8       0x00
+#define UCR_WORD_LENGTH_7       0x20
+#define UCR_WORD_LENGTH_6       0x40
+#define UCR_WORD_LENGTH_5       0x60
+#define UCR_START_STOP_0_0      0x00
+#define UCR_START_STOP_1_1      0x08
+#define UCR_START_STOP_1_15     0x10
+#define UCR_START_STOP_1_2      0x18
+#define UCR_CLOCK_DIVIDE_16     0x80
+#define UCR_CLOCK_DIVIDE_1      0x00
 
 
-#define RSR_RCV_ENABLE			0x01
-#define RSR_SYNC_STRIP_ENABLE	0x02
-#define RSR_MATCH				0x04
-#define RSR_CHAR_IN_PROGRESS	0x04
-#define RSR_FOUND_SEARCH		0x08
-#define RSR_BREAK				0x08
-#define RSR_FRAME_ERROR			0x10
-#define RSR_PARITY_ERROR		0x20
-#define RSR_OVERRUN_ERROR		0x40
-#define RSR_BUFFER_FULL			0x80
+#define RSR_RCV_ENABLE          0x01
+#define RSR_SYNC_STRIP_ENABLE   0x02
+#define RSR_MATCH               0x04
+#define RSR_CHAR_IN_PROGRESS    0x04
+#define RSR_FOUND_SEARCH        0x08
+#define RSR_BREAK               0x08
+#define RSR_FRAME_ERROR         0x10
+#define RSR_PARITY_ERROR        0x20
+#define RSR_OVERRUN_ERROR       0x40
+#define RSR_BUFFER_FULL         0x80
 
-#define TSR_XMIT_ENABLE			0x01
-#define TSR_OUTPUT_HI_Z			0x00
-#define TSR_OUTPUT_LOW			0x02
-#define TSR_OUTPUT_HIGH			0x04
-#define TSR_OUTPUT_LOOP			0x06
-#define TSR_OUTPUT_MASK			0x06
-#define TSR_BREAK				0x08
-#define TSR_END_OF_XMIT			0x10
-#define TSR_AUTO_TURNAROUND		0x20
-#define TSR_UNDERRUN_ERROR		0x40
-#define TSR_BUFFER_EMPTY		0x80
+#define TSR_XMIT_ENABLE         0x01
+#define TSR_OUTPUT_HI_Z         0x00
+#define TSR_OUTPUT_LOW          0x02
+#define TSR_OUTPUT_HIGH         0x04
+#define TSR_OUTPUT_LOOP         0x06
+#define TSR_OUTPUT_MASK         0x06
+#define TSR_BREAK               0x08
+#define TSR_END_OF_XMIT         0x10
+#define TSR_AUTO_TURNAROUND     0x20
+#define TSR_UNDERRUN_ERROR      0x40
+#define TSR_BUFFER_EMPTY        0x80
 
 
 static const int INT_MASK_GPIO[] =
@@ -257,45 +263,7 @@ static const int GPIO_TIMER[] =
 static const int PRESCALER[] = { 0, 4, 10, 16, 50, 64, 100, 200 };
 
 
-#define TXD(_data) devcb_call_write_line(&m_out_so_func, _data);
-
-
-//**************************************************************************
-//  GLOBAL VARIABLES
-//**************************************************************************
-
-// devices
-const device_type MC68901 = mc68901_device_config::static_alloc_device_config;
-
-
-
-//**************************************************************************
-//  DEVICE CONFIGURATION
-//**************************************************************************
-
-GENERIC_DEVICE_CONFIG_SETUP(mc68901, "Motorola MC68901")
-
-
-//-------------------------------------------------
-//  device_config_complete - perform any
-//  operations now that the configuration is
-//  complete
-//-------------------------------------------------
-
-void mc68901_device_config::device_config_complete()
-{
-	// inherit a copy of the static data
-	const mc68901_interface *intf = reinterpret_cast<const mc68901_interface *>(static_config());
-	if (intf != NULL)
-		*static_cast<mc68901_interface *>(this) = *intf;
-
-	// or initialize to defaults if none provided
-	else
-	{
-//      memset(&in_pa_func, 0, sizeof(in_pa_func));
-	}
-}
-
+#define TXD(_data) m_out_so_func(_data);
 
 
 //**************************************************************************
@@ -306,11 +274,11 @@ inline void mc68901_device::check_interrupts()
 {
 	if (m_ipr & m_imr)
 	{
-		devcb_call_write_line(&m_out_irq_func, ASSERT_LINE);
+		m_out_irq_func(ASSERT_LINE);
 	}
 	else
 	{
-		devcb_call_write_line(&m_out_irq_func, CLEAR_LINE);
+		m_out_irq_func(CLEAR_LINE);
 	}
 }
 
@@ -375,7 +343,7 @@ inline void mc68901_device::serial_receive()
 
 	if (!(m_rsr & RSR_RCV_ENABLE)) return;
 
-	rxd = devcb_call_read_line(&m_in_si_func);
+	rxd = m_in_si_func();
 
 	switch (m_rx_state)
 	{
@@ -663,10 +631,10 @@ inline void mc68901_device::serial_transmit()
 {
 	switch (m_xmit_state)
 	{
-	case XMIT_OFF:		tx_disabled();	break;
-	case XMIT_STARTING:	tx_starting();	break;
-	case XMIT_BREAK:	tx_break();		break;
-	case XMIT_ON:		tx_enabled();	break;
+	case XMIT_OFF:      tx_disabled();  break;
+	case XMIT_STARTING: tx_starting();  break;
+	case XMIT_BREAK:    tx_break();     break;
+	case XMIT_ON:       tx_enabled();   break;
 	}
 }
 
@@ -680,10 +648,10 @@ inline void mc68901_device::timer_count(int index)
 
 		switch (index)
 		{
-		case TIMER_A:	devcb_call_write_line(&m_out_tao_func, m_to[index]);	break;
-		case TIMER_B:	devcb_call_write_line(&m_out_tbo_func, m_to[index]);	break;
-		case TIMER_C:	devcb_call_write_line(&m_out_tco_func, m_to[index]);	break;
-		case TIMER_D:	devcb_call_write_line(&m_out_tdo_func, m_to[index]);	break;
+		case TIMER_A:   m_out_tao_func(m_to[index]);    break;
+		case TIMER_B:   m_out_tbo_func(m_to[index]);    break;
+		case TIMER_C:   m_out_tco_func(m_to[index]);    break;
+		case TIMER_D:   m_out_tdo_func(m_to[index]);    break;
 		}
 
 		if (m_ier & INT_MASK_TIMER[index])
@@ -771,12 +739,32 @@ inline void mc68901_device::gpio_input(int bit, int state)
 //  mc68901_device - constructor
 //-------------------------------------------------
 
-mc68901_device::mc68901_device(running_machine &_machine, const mc68901_device_config &config)
-    : device_t(_machine, config),
-	  m_gpip(0),
-	  m_tsr(TSR_BUFFER_EMPTY),
-      m_config(config)
+mc68901_device::mc68901_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, MC68901, "Motorola MC68901", tag, owner, clock),
+		m_gpip(0),
+		m_tsr(TSR_BUFFER_EMPTY)
 {
+}
+
+
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
+
+void mc68901_device::device_config_complete()
+{
+	// inherit a copy of the static data
+	const mc68901_interface *intf = reinterpret_cast<const mc68901_interface *>(static_config());
+	if (intf != NULL)
+		*static_cast<mc68901_interface *>(this) = *intf;
+
+	// or initialize to defaults if none provided
+	else
+	{
+//      memset(&in_pa_cb, 0, sizeof(in_pa_cb));
+	}
 }
 
 
@@ -787,18 +775,15 @@ mc68901_device::mc68901_device(running_machine &_machine, const mc68901_device_c
 void mc68901_device::device_start()
 {
 	/* resolve callbacks */
-	devcb_resolve_read8(&m_in_gpio_func, &m_config.in_gpio_func, this);
-	devcb_resolve_write8(&m_out_gpio_func, &m_config.out_gpio_func, this);
-	devcb_resolve_read_line(&m_in_si_func, &m_config.in_si_func, this);
-	devcb_resolve_write_line(&m_out_so_func, &m_config.out_so_func, this);
-	devcb_resolve_write_line(&m_out_tao_func, &m_config.out_tao_func, this);
-	devcb_resolve_write_line(&m_out_tbo_func, &m_config.out_tbo_func, this);
-	devcb_resolve_write_line(&m_out_tco_func, &m_config.out_tco_func, this);
-	devcb_resolve_write_line(&m_out_tdo_func, &m_config.out_tdo_func, this);
-	devcb_resolve_write_line(&m_out_irq_func, &m_config.out_irq_func, this);
-
-	/* set initial values */
-	m_timer_clock = m_config.timer_clock;
+	m_in_gpio_func.resolve(m_in_gpio_cb, *this);
+	m_out_gpio_func.resolve(m_out_gpio_cb, *this);
+	m_in_si_func.resolve(m_in_si_cb, *this);
+	m_out_so_func.resolve(m_out_so_cb, *this);
+	m_out_tao_func.resolve(m_out_tao_cb, *this);
+	m_out_tbo_func.resolve(m_out_tbo_cb, *this);
+	m_out_tco_func.resolve(m_out_tco_cb, *this);
+	m_out_tdo_func.resolve(m_out_tdo_cb, *this);
+	m_out_irq_func.resolve(m_out_irq_cb, *this);
 
 	/* create the timers */
 	m_timer[TIMER_A] = timer_alloc(TIMER_A);
@@ -806,16 +791,16 @@ void mc68901_device::device_start()
 	m_timer[TIMER_C] = timer_alloc(TIMER_C);
 	m_timer[TIMER_D] = timer_alloc(TIMER_D);
 
-	if (m_config.rx_clock > 0)
+	if (m_rx_clock > 0)
 	{
 		m_rx_timer = timer_alloc(TIMER_RX);
-		m_rx_timer->adjust(attotime::zero, 0, attotime::from_hz(m_config.rx_clock));
+		m_rx_timer->adjust(attotime::zero, 0, attotime::from_hz(m_rx_clock));
 	}
 
-	if (m_config.tx_clock > 0)
+	if (m_tx_clock > 0)
 	{
 		m_tx_timer = timer_alloc(TIMER_TX);
-		m_tx_timer->adjust(attotime::zero, 0, attotime::from_hz(m_config.tx_clock));
+		m_tx_timer->adjust(attotime::zero, 0, attotime::from_hz(m_tx_clock));
 	}
 
 	/* register for state saving */
@@ -862,6 +847,14 @@ void mc68901_device::device_start()
 
 void mc68901_device::device_reset()
 {
+	m_xmit_state = XMIT_OFF;
+	m_rx_state = SERIAL_STOP;
+	m_rx_buffer = 0;
+	m_tx_buffer = 0;
+
+	// Avoid read-before-write
+	m_ipr = m_imr = 0;
+
 	register_w(REGISTER_GPIP, 0);
 	register_w(REGISTER_AER, 0);
 	register_w(REGISTER_DDR, 0);
@@ -912,7 +905,7 @@ READ8_MEMBER( mc68901_device::read )
 	switch (offset)
 	{
 	case REGISTER_GPIP:
-		m_gpip = devcb_call_read8(&m_in_gpio_func, 0);
+		m_gpip = m_in_gpio_func(0);
 		return m_gpip;
 
 	case REGISTER_AER:   return m_aer;
@@ -964,7 +957,7 @@ READ8_MEMBER( mc68901_device::read )
 
 		return m_udr;
 
-	default:					  return 0;
+	default:                      return 0;
 	}
 }
 
@@ -979,7 +972,7 @@ void mc68901_device::register_w(offs_t offset, UINT8 data)
 		if (LOG) logerror("MC68901 '%s' General Purpose I/O : %x\n", tag(), data);
 		m_gpip = data & m_ddr;
 
-		devcb_call_write8(&m_out_gpio_func, 0, m_gpip);
+		m_out_gpio_func(0, m_gpip);
 		break;
 
 	case REGISTER_AER:
@@ -1110,7 +1103,7 @@ void mc68901_device::register_w(offs_t offset, UINT8 data)
 
 			m_to[TIMER_A] = 0;
 
-			devcb_call_write_line(&m_out_tao_func, m_to[TIMER_A]);
+			m_out_tao_func(m_to[TIMER_A]);
 		}
 		break;
 
@@ -1165,7 +1158,7 @@ void mc68901_device::register_w(offs_t offset, UINT8 data)
 
 			m_to[TIMER_B] = 0;
 
-			devcb_call_write_line(&m_out_tbo_func, m_to[TIMER_B]);
+			m_out_tbo_func(m_to[TIMER_B]);
 		}
 		break;
 
@@ -1446,14 +1439,14 @@ int mc68901_device::get_vector()
 	return M68K_INT_ACK_SPURIOUS;
 }
 
-WRITE_LINE_MEMBER( mc68901_device::i0_w ) {	gpio_input(0, state); }
-WRITE_LINE_MEMBER( mc68901_device::i1_w ) {	gpio_input(1, state); }
-WRITE_LINE_MEMBER( mc68901_device::i2_w ) {	gpio_input(2, state); }
-WRITE_LINE_MEMBER( mc68901_device::i3_w ) {	gpio_input(3, state); }
-WRITE_LINE_MEMBER( mc68901_device::i4_w ) {	gpio_input(4, state); }
-WRITE_LINE_MEMBER( mc68901_device::i5_w ) {	gpio_input(5, state); }
-WRITE_LINE_MEMBER( mc68901_device::i6_w ) {	gpio_input(6, state); }
-WRITE_LINE_MEMBER( mc68901_device::i7_w ) {	gpio_input(7, state); }
+WRITE_LINE_MEMBER( mc68901_device::i0_w ) { gpio_input(0, state); }
+WRITE_LINE_MEMBER( mc68901_device::i1_w ) { gpio_input(1, state); }
+WRITE_LINE_MEMBER( mc68901_device::i2_w ) { gpio_input(2, state); }
+WRITE_LINE_MEMBER( mc68901_device::i3_w ) { gpio_input(3, state); }
+WRITE_LINE_MEMBER( mc68901_device::i4_w ) { gpio_input(4, state); }
+WRITE_LINE_MEMBER( mc68901_device::i5_w ) { gpio_input(5, state); }
+WRITE_LINE_MEMBER( mc68901_device::i6_w ) { gpio_input(6, state); }
+WRITE_LINE_MEMBER( mc68901_device::i7_w ) { gpio_input(7, state); }
 
 
 WRITE_LINE_MEMBER( mc68901_device::tai_w )

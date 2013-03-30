@@ -21,9 +21,10 @@
 #include "cpu/m68000/m68000.h"
 #include "machine/atarigen.h"
 #include "audio/atarijsa.h"
+#include "video/atarimo.h"
 #include "includes/toobin.h"
 
-#define MASTER_CLOCK		XTAL_32MHz
+#define MASTER_CLOCK        XTAL_32MHz
 
 
 
@@ -33,28 +34,18 @@
  *
  *************************************/
 
-static void update_interrupts(running_machine &machine)
+void toobin_state::update_interrupts()
 {
-	toobin_state *state = machine.driver_data<toobin_state>();
-	cputag_set_input_line(machine, "maincpu", 1, state->m_scanline_int_state ? ASSERT_LINE : CLEAR_LINE);
-	cputag_set_input_line(machine, "maincpu", 2, state->m_sound_int_state ? ASSERT_LINE : CLEAR_LINE);
-	cputag_set_input_line(machine, "maincpu", 3, state->m_scanline_int_state && state->m_sound_int_state ? ASSERT_LINE : CLEAR_LINE);
+	subdevice("maincpu")->execute().set_input_line(1, m_scanline_int_state ? ASSERT_LINE : CLEAR_LINE);
+	subdevice("maincpu")->execute().set_input_line(2, m_sound_int_state ? ASSERT_LINE : CLEAR_LINE);
+	subdevice("maincpu")->execute().set_input_line(3, m_scanline_int_state && m_sound_int_state ? ASSERT_LINE : CLEAR_LINE);
 }
 
 
-static MACHINE_START( toobin )
+MACHINE_RESET_MEMBER(toobin_state,toobin)
 {
-	atarigen_init(machine);
-}
-
-
-static MACHINE_RESET( toobin )
-{
-	toobin_state *state = machine.driver_data<toobin_state>();
-
-	atarigen_eeprom_reset(state);
-	atarigen_interrupt_reset(state, update_interrupts);
-	atarijsa_reset();
+	atarigen_state::machine_reset();
+	atarijsa_reset(machine());
 }
 
 
@@ -65,18 +56,17 @@ static MACHINE_RESET( toobin )
  *
  *************************************/
 
-static WRITE16_HANDLER( interrupt_scan_w )
+WRITE16_MEMBER(toobin_state::interrupt_scan_w)
 {
-	toobin_state *state = space->machine().driver_data<toobin_state>();
-	int oldword = state->m_interrupt_scan[offset];
+	int oldword = m_interrupt_scan[offset];
 	int newword = oldword;
 	COMBINE_DATA(&newword);
 
 	/* if something changed, update the word in memory */
 	if (oldword != newword)
 	{
-		state->m_interrupt_scan[offset] = newword;
-		atarigen_scanline_int_set(*space->machine().primary_screen, newword & 0x1ff);
+		m_interrupt_scan[offset] = newword;
+		scanline_int_set(*machine().primary_screen, newword & 0x1ff);
 	}
 }
 
@@ -88,12 +78,11 @@ static WRITE16_HANDLER( interrupt_scan_w )
  *
  *************************************/
 
-static READ16_HANDLER( special_port1_r )
+READ16_MEMBER(toobin_state::special_port1_r)
 {
-	toobin_state *state = space->machine().driver_data<toobin_state>();
-	int result = input_port_read(space->machine(), "FF9000");
-	if (atarigen_get_hblank(*space->machine().primary_screen)) result ^= 0x8000;
-	if (state->m_cpu_to_sound_ready) result ^= 0x2000;
+	int result = ioport("FF9000")->read();
+	if (get_hblank(*machine().primary_screen)) result ^= 0x8000;
+	if (m_cpu_to_sound_ready) result ^= 0x2000;
 	return result;
 }
 
@@ -106,28 +95,28 @@ static READ16_HANDLER( special_port1_r )
  *************************************/
 
 /* full address map decoded from schematics */
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16, toobin_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xc7ffff)
 	AM_RANGE(0x000000, 0x07ffff) AM_ROM
-	AM_RANGE(0xc00000, 0xc07fff) AM_RAM_WRITE(atarigen_playfield_large_w) AM_BASE_MEMBER(toobin_state, m_playfield)
-	AM_RANGE(0xc08000, 0xc097ff) AM_MIRROR(0x046000) AM_RAM_WRITE(atarigen_alpha_w) AM_BASE_MEMBER(toobin_state, m_alpha)
-	AM_RANGE(0xc09800, 0xc09fff) AM_MIRROR(0x046000) AM_RAM_WRITE(atarimo_0_spriteram_w) AM_BASE(&atarimo_0_spriteram)
-	AM_RANGE(0xc10000, 0xc107ff) AM_MIRROR(0x047800) AM_RAM_WRITE(toobin_paletteram_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0xff6000, 0xff6001) AM_READNOP		/* who knows? read at controls time */
+	AM_RANGE(0xc00000, 0xc07fff) AM_RAM_WRITE(playfield_large_w) AM_SHARE("playfield")
+	AM_RANGE(0xc08000, 0xc097ff) AM_MIRROR(0x046000) AM_RAM_WRITE(alpha_w) AM_SHARE("alpha")
+	AM_RANGE(0xc09800, 0xc09fff) AM_MIRROR(0x046000) AM_READWRITE_LEGACY(atarimo_0_spriteram_r, atarimo_0_spriteram_w)
+	AM_RANGE(0xc10000, 0xc107ff) AM_MIRROR(0x047800) AM_RAM_WRITE_LEGACY(toobin_paletteram_w) AM_SHARE("paletteram")
+	AM_RANGE(0xff6000, 0xff6001) AM_READNOP     /* who knows? read at controls time */
 	AM_RANGE(0xff8000, 0xff8001) AM_MIRROR(0x4500fe) AM_WRITE(watchdog_reset16_w)
-	AM_RANGE(0xff8100, 0xff8101) AM_MIRROR(0x4500fe) AM_WRITE(atarigen_sound_w)
-	AM_RANGE(0xff8300, 0xff8301) AM_MIRROR(0x45003e) AM_WRITE(toobin_intensity_w)
-	AM_RANGE(0xff8340, 0xff8341) AM_MIRROR(0x45003e) AM_WRITE(interrupt_scan_w) AM_BASE_MEMBER(toobin_state, m_interrupt_scan)
-	AM_RANGE(0xff8380, 0xff8381) AM_MIRROR(0x45003e) AM_WRITE(toobin_slip_w) AM_BASE(&atarimo_0_slipram)
-	AM_RANGE(0xff83c0, 0xff83c1) AM_MIRROR(0x45003e) AM_WRITE(atarigen_scanline_int_ack_w)
-	AM_RANGE(0xff8400, 0xff8401) AM_MIRROR(0x4500fe) AM_WRITE(atarigen_sound_reset_w)
-	AM_RANGE(0xff8500, 0xff8501) AM_MIRROR(0x4500fe) AM_WRITE(atarigen_eeprom_enable_w)
-	AM_RANGE(0xff8600, 0xff8601) AM_MIRROR(0x4500fe) AM_WRITE(toobin_xscroll_w) AM_BASE_MEMBER(toobin_state, m_xscroll)
-	AM_RANGE(0xff8700, 0xff8701) AM_MIRROR(0x4500fe) AM_WRITE(toobin_yscroll_w) AM_BASE_MEMBER(toobin_state, m_yscroll)
+	AM_RANGE(0xff8100, 0xff8101) AM_MIRROR(0x4500fe) AM_WRITE8(sound_w, 0x00ff)
+	AM_RANGE(0xff8300, 0xff8301) AM_MIRROR(0x45003e) AM_WRITE_LEGACY(toobin_intensity_w)
+	AM_RANGE(0xff8340, 0xff8341) AM_MIRROR(0x45003e) AM_WRITE(interrupt_scan_w) AM_SHARE("interrupt_scan")
+	AM_RANGE(0xff8380, 0xff8381) AM_MIRROR(0x45003e) AM_READWRITE_LEGACY(atarimo_0_slipram_r, toobin_slip_w)
+	AM_RANGE(0xff83c0, 0xff83c1) AM_MIRROR(0x45003e) AM_WRITE(scanline_int_ack_w)
+	AM_RANGE(0xff8400, 0xff8401) AM_MIRROR(0x4500fe) AM_WRITE(sound_reset_w)
+	AM_RANGE(0xff8500, 0xff8501) AM_MIRROR(0x4500fe) AM_WRITE(eeprom_enable_w)
+	AM_RANGE(0xff8600, 0xff8601) AM_MIRROR(0x4500fe) AM_WRITE_LEGACY(toobin_xscroll_w) AM_SHARE("xscroll")
+	AM_RANGE(0xff8700, 0xff8701) AM_MIRROR(0x4500fe) AM_WRITE_LEGACY(toobin_yscroll_w) AM_SHARE("yscroll")
 	AM_RANGE(0xff8800, 0xff8801) AM_MIRROR(0x4507fe) AM_READ_PORT("FF8800")
 	AM_RANGE(0xff9000, 0xff9001) AM_MIRROR(0x4507fe) AM_READ(special_port1_r)
-	AM_RANGE(0xff9800, 0xff9801) AM_MIRROR(0x4507fe) AM_READ(atarigen_sound_r)
-	AM_RANGE(0xffa000, 0xffafff) AM_MIRROR(0x451000) AM_READWRITE(atarigen_eeprom_r, atarigen_eeprom_w) AM_SHARE("eeprom")
+	AM_RANGE(0xff9800, 0xff9801) AM_MIRROR(0x4507fe) AM_READ8(sound_r, 0x00ff)
+	AM_RANGE(0xffa000, 0xffafff) AM_MIRROR(0x451000) AM_READWRITE(eeprom_r, eeprom_w) AM_SHARE("eeprom")
 	AM_RANGE(0xffc000, 0xffffff) AM_MIRROR(0x450000) AM_RAM
 ADDRESS_MAP_END
 
@@ -159,10 +148,10 @@ static INPUT_PORTS_START( toobin )
 	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_SERVICE( 0x1000, IP_ACTIVE_LOW )
 	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_INCLUDE( atarijsa_i )		/* audio port */
+	PORT_INCLUDE( atarijsa_i )      /* audio port */
 INPUT_PORTS_END
 
 
@@ -229,8 +218,7 @@ static MACHINE_CONFIG_START( toobin, toobin_state )
 	MCFG_CPU_ADD("maincpu", M68010, MASTER_CLOCK/4)
 	MCFG_CPU_PROGRAM_MAP(main_map)
 
-	MCFG_MACHINE_START(toobin)
-	MCFG_MACHINE_RESET(toobin)
+	MCFG_MACHINE_RESET_OVERRIDE(toobin_state,toobin)
 	MCFG_NVRAM_ADD_1FILL("eeprom")
 	MCFG_WATCHDOG_VBLANK_INIT(8)
 
@@ -239,13 +227,12 @@ static MACHINE_CONFIG_START( toobin, toobin_state )
 
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_RAW_PARAMS(MASTER_CLOCK/2, 640, 0, 512, 416, 0, 384)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
-	MCFG_SCREEN_UPDATE(toobin)
+	MCFG_SCREEN_UPDATE_DRIVER(toobin_state, screen_update_toobin)
 
 	MCFG_GFXDECODE(toobin)
 	MCFG_PALETTE_LENGTH(1024)
 
-	MCFG_VIDEO_START(toobin)
+	MCFG_VIDEO_START_OVERRIDE(toobin_state,toobin)
 
 	/* sound hardware */
 	MCFG_FRAGMENT_ADD(jsa_i_stereo_pokey)
@@ -260,7 +247,7 @@ MACHINE_CONFIG_END
  *************************************/
 
 ROM_START( toobin )
-	ROM_REGION( 0x80000, "maincpu", 0 )	/* 8*64k for 68000 code */
+	ROM_REGION( 0x80000, "maincpu", 0 ) /* 8*64k for 68000 code */
 	ROM_LOAD16_BYTE( "3133-1j.061",  0x000000, 0x010000, CRC(79a92d02) SHA1(72eebb96a3963f94558bb204e0afe08f2b4c1864) )
 	ROM_LOAD16_BYTE( "3137-1f.061",  0x000001, 0x010000, CRC(e389ef60) SHA1(24861fe5eb49de852987993a905fefe4dd43b204) )
 	ROM_LOAD16_BYTE( "3134-2j.061",  0x020000, 0x010000, CRC(3dbe9a48) SHA1(37fe2534fed5708a63995e53ea0cb1d2d23fc1b9) )
@@ -270,7 +257,7 @@ ROM_START( toobin )
 	ROM_LOAD16_BYTE( "1136-5j.061",  0x060000, 0x010000, CRC(5ae3eeac) SHA1(583b6c3f61e8ad4d98449205fedecf3e21ee993c) )
 	ROM_LOAD16_BYTE( "1140-5f.061",  0x060001, 0x010000, CRC(dacbbd94) SHA1(0e3a93f439ff9f3dd57ee13604be02e9c74c8eec) )
 
-	ROM_REGION( 0x14000, "jsa", 0 )	/* 64k for 6502 code */
+	ROM_REGION( 0x14000, "jsa", 0 ) /* 64k for 6502 code */
 	ROM_LOAD( "1141-2k.061",  0x010000, 0x004000, CRC(c0dcce1a) SHA1(285c13f08020cf5827eca2afcc2fa8a3a0a073e0) )
 	ROM_CONTINUE(             0x004000, 0x00c000 )
 
@@ -316,7 +303,7 @@ ROM_END
 
 
 ROM_START( toobine )
-	ROM_REGION( 0x80000, "maincpu", 0 )	/* 8*64k for 68000 code */
+	ROM_REGION( 0x80000, "maincpu", 0 ) /* 8*64k for 68000 code */
 	ROM_LOAD16_BYTE( "3733-1j.061",  0x000000, 0x010000, CRC(286c7fad) SHA1(1f06168327bdc356f1bc4cf9a951f914932c491a) )
 	ROM_LOAD16_BYTE( "3737-1f.061",  0x000001, 0x010000, CRC(965c161d) SHA1(30d959a945cb7dc7f00ad4ca9db027a377024030) )
 	ROM_LOAD16_BYTE( "3134-2j.061",  0x020000, 0x010000, CRC(3dbe9a48) SHA1(37fe2534fed5708a63995e53ea0cb1d2d23fc1b9) )
@@ -326,7 +313,7 @@ ROM_START( toobine )
 	ROM_LOAD16_BYTE( "1136-5j.061",  0x060000, 0x010000, CRC(5ae3eeac) SHA1(583b6c3f61e8ad4d98449205fedecf3e21ee993c) )
 	ROM_LOAD16_BYTE( "1140-5f.061",  0x060001, 0x010000, CRC(dacbbd94) SHA1(0e3a93f439ff9f3dd57ee13604be02e9c74c8eec) )
 
-	ROM_REGION( 0x14000, "jsa", 0 )	/* 64k for 6502 code */
+	ROM_REGION( 0x14000, "jsa", 0 ) /* 64k for 6502 code */
 	ROM_LOAD( "1141-2k.061",  0x010000, 0x004000, CRC(c0dcce1a) SHA1(285c13f08020cf5827eca2afcc2fa8a3a0a073e0) )
 	ROM_CONTINUE(             0x004000, 0x00c000 )
 
@@ -372,7 +359,7 @@ ROM_END
 
 
 ROM_START( toobing )
-	ROM_REGION( 0x80000, "maincpu", 0 )	/* 8*64k for 68000 code */
+	ROM_REGION( 0x80000, "maincpu", 0 ) /* 8*64k for 68000 code */
 	ROM_LOAD16_BYTE( "3233-1j.061",  0x000000, 0x010000, CRC(b04eb760) SHA1(760525b4f72fad47cfc457e14db70ade30a9ddac) )
 	ROM_LOAD16_BYTE( "3237-1f.061",  0x000001, 0x010000, CRC(4e41a470) SHA1(3a4c9b0d93cf4cff80978c0568bb9ef9eeb878dd) )
 	ROM_LOAD16_BYTE( "3234-2j.061",  0x020000, 0x010000, CRC(8c60f1b4) SHA1(0ff3f4fede83410d73027b6e7445e83044e4b21e) )
@@ -382,7 +369,7 @@ ROM_START( toobing )
 	ROM_LOAD16_BYTE( "1136-5j.061",  0x060000, 0x010000, CRC(5ae3eeac) SHA1(583b6c3f61e8ad4d98449205fedecf3e21ee993c) )
 	ROM_LOAD16_BYTE( "1140-5f.061",  0x060001, 0x010000, CRC(dacbbd94) SHA1(0e3a93f439ff9f3dd57ee13604be02e9c74c8eec) )
 
-	ROM_REGION( 0x14000, "jsa", 0 )	/* 64k for 6502 code */
+	ROM_REGION( 0x14000, "jsa", 0 ) /* 64k for 6502 code */
 	ROM_LOAD( "1141-2k.061",  0x010000, 0x004000, CRC(c0dcce1a) SHA1(285c13f08020cf5827eca2afcc2fa8a3a0a073e0) )
 	ROM_CONTINUE(             0x004000, 0x00c000 )
 
@@ -428,7 +415,7 @@ ROM_END
 
 
 ROM_START( toobin2e )
-	ROM_REGION( 0x80000, "maincpu", 0 )	/* 8*64k for 68000 code */
+	ROM_REGION( 0x80000, "maincpu", 0 ) /* 8*64k for 68000 code */
 	ROM_LOAD16_BYTE( "2733-1j.061",  0x000000, 0x010000, CRC(a6334cf7) SHA1(39e540619c24af65bda44160a5bdaebf3600b64b) )
 	ROM_LOAD16_BYTE( "2737-1f.061",  0x000001, 0x010000, CRC(9a52dd20) SHA1(a370ae3e4c7af55ea61b57a203a900f2be3ce6b9) )
 	ROM_LOAD16_BYTE( "2134-2j.061",  0x020000, 0x010000, CRC(2b8164c8) SHA1(aeeaff9df9fda23b295b59efadf52160f084d256) )
@@ -438,7 +425,7 @@ ROM_START( toobin2e )
 	ROM_LOAD16_BYTE( "1136-5j.061",  0x060000, 0x010000, CRC(5ae3eeac) SHA1(583b6c3f61e8ad4d98449205fedecf3e21ee993c) )
 	ROM_LOAD16_BYTE( "1140-5f.061",  0x060001, 0x010000, CRC(dacbbd94) SHA1(0e3a93f439ff9f3dd57ee13604be02e9c74c8eec) )
 
-	ROM_REGION( 0x14000, "jsa", 0 )	/* 64k for 6502 code */
+	ROM_REGION( 0x14000, "jsa", 0 ) /* 64k for 6502 code */
 	ROM_LOAD( "1141-2k.061",  0x010000, 0x004000, CRC(c0dcce1a) SHA1(285c13f08020cf5827eca2afcc2fa8a3a0a073e0) )
 	ROM_CONTINUE(             0x004000, 0x00c000 )
 
@@ -484,7 +471,7 @@ ROM_END
 
 
 ROM_START( toobin2 )
-	ROM_REGION( 0x80000, "maincpu", 0 )	/* 8*64k for 68000 code */
+	ROM_REGION( 0x80000, "maincpu", 0 ) /* 8*64k for 68000 code */
 	ROM_LOAD16_BYTE( "2133-1j.061",  0x000000, 0x010000, CRC(2c3382e4) SHA1(39919e9b5b586b630e0581adabfe25d83b2bfaef) )
 	ROM_LOAD16_BYTE( "2137-1f.061",  0x000001, 0x010000, CRC(891c74b1) SHA1(2f39d0e4934ccf48bb5fc0737f34fc5a65cfd903) )
 	ROM_LOAD16_BYTE( "2134-2j.061",  0x020000, 0x010000, CRC(2b8164c8) SHA1(aeeaff9df9fda23b295b59efadf52160f084d256) )
@@ -494,7 +481,7 @@ ROM_START( toobin2 )
 	ROM_LOAD16_BYTE( "1136-5j.061",  0x060000, 0x010000, CRC(5ae3eeac) SHA1(583b6c3f61e8ad4d98449205fedecf3e21ee993c) )
 	ROM_LOAD16_BYTE( "1140-5f.061",  0x060001, 0x010000, CRC(dacbbd94) SHA1(0e3a93f439ff9f3dd57ee13604be02e9c74c8eec) )
 
-	ROM_REGION( 0x14000, "jsa", 0 )	/* 64k for 6502 code */
+	ROM_REGION( 0x14000, "jsa", 0 ) /* 64k for 6502 code */
 	ROM_LOAD( "1141-2k.061",  0x010000, 0x004000, CRC(c0dcce1a) SHA1(285c13f08020cf5827eca2afcc2fa8a3a0a073e0) )
 	ROM_CONTINUE(             0x004000, 0x00c000 )
 
@@ -540,7 +527,7 @@ ROM_END
 
 
 ROM_START( toobin1 )
-	ROM_REGION( 0x80000, "maincpu", 0 )	/* 8*64k for 68000 code */
+	ROM_REGION( 0x80000, "maincpu", 0 ) /* 8*64k for 68000 code */
 	ROM_LOAD16_BYTE( "1133-1j.061",  0x000000, 0x010000, CRC(caeb5d1b) SHA1(8036871a04b5206fd383ac0fd9a9d3218128088b) )
 	ROM_LOAD16_BYTE( "1137-1f.061",  0x000001, 0x010000, CRC(9713d9d3) SHA1(55791150312de201bdd330bfd4cbb132cb3959e4) )
 	ROM_LOAD16_BYTE( "1134-2j.061",  0x020000, 0x010000, CRC(119f5d7b) SHA1(edd0b1ab29bb9c15c3b80037635c3b6d5fb434dc) )
@@ -550,7 +537,7 @@ ROM_START( toobin1 )
 	ROM_LOAD16_BYTE( "1136-5j.061",  0x060000, 0x010000, CRC(5ae3eeac) SHA1(583b6c3f61e8ad4d98449205fedecf3e21ee993c) )
 	ROM_LOAD16_BYTE( "1140-5f.061",  0x060001, 0x010000, CRC(dacbbd94) SHA1(0e3a93f439ff9f3dd57ee13604be02e9c74c8eec) )
 
-	ROM_REGION( 0x14000, "jsa", 0 )	/* 64k for 6502 code */
+	ROM_REGION( 0x14000, "jsa", 0 ) /* 64k for 6502 code */
 	ROM_LOAD( "1141-2k.061",  0x010000, 0x004000, CRC(c0dcce1a) SHA1(285c13f08020cf5827eca2afcc2fa8a3a0a073e0) )
 	ROM_CONTINUE(             0x004000, 0x00c000 )
 
@@ -602,9 +589,9 @@ ROM_END
  *
  *************************************/
 
-static DRIVER_INIT( toobin )
+DRIVER_INIT_MEMBER(toobin_state,toobin)
 {
-	atarijsa_init(machine, "FF9000", 0x1000);
+	atarijsa_init(machine(), "FF9000", 0x1000);
 }
 
 
@@ -615,9 +602,9 @@ static DRIVER_INIT( toobin )
  *
  *************************************/
 
-GAME( 1988, toobin,   0,      toobin, toobin, toobin, ROT270, "Atari Games", "Toobin' (rev 3)", 0 )
-GAME( 1988, toobine,  toobin, toobin, toobin, toobin, ROT270, "Atari Games", "Toobin' (Europe, rev 3)", 0 )
-GAME( 1988, toobing,  toobin, toobin, toobin, toobin, ROT270, "Atari Games", "Toobin' (German, rev 3)", 0 )
-GAME( 1988, toobin2,  toobin, toobin, toobin, toobin, ROT270, "Atari Games", "Toobin' (rev 2)", 0 )
-GAME( 1988, toobin2e, toobin, toobin, toobin, toobin, ROT270, "Atari Games", "Toobin' (Europe, rev 2)", 0 )
-GAME( 1988, toobin1,  toobin, toobin, toobin, toobin, ROT270, "Atari Games", "Toobin' (rev 1)", 0 )
+GAME( 1988, toobin,   0,      toobin, toobin, toobin_state, toobin, ROT270, "Atari Games", "Toobin' (rev 3)", 0 )
+GAME( 1988, toobine,  toobin, toobin, toobin, toobin_state, toobin, ROT270, "Atari Games", "Toobin' (Europe, rev 3)", 0 )
+GAME( 1988, toobing,  toobin, toobin, toobin, toobin_state, toobin, ROT270, "Atari Games", "Toobin' (German, rev 3)", 0 )
+GAME( 1988, toobin2,  toobin, toobin, toobin, toobin_state, toobin, ROT270, "Atari Games", "Toobin' (rev 2)", 0 )
+GAME( 1988, toobin2e, toobin, toobin, toobin, toobin_state, toobin, ROT270, "Atari Games", "Toobin' (Europe, rev 2)", 0 )
+GAME( 1988, toobin1,  toobin, toobin, toobin, toobin_state, toobin, ROT270, "Atari Games", "Toobin' (rev 1)", 0 )

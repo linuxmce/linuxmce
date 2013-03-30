@@ -5,75 +5,68 @@
 
 
 /* bg tilemap */
-static TILE_GET_INFO( get_oneshot_bg_tile_info )
+TILE_GET_INFO_MEMBER(oneshot_state::get_oneshot_bg_tile_info)
 {
-	oneshot_state *state = machine.driver_data<oneshot_state>();
-	int tileno = state->m_bg_videoram[tile_index * 2 + 1];
+	int tileno = m_bg_videoram[tile_index * 2 + 1];
 
-	SET_TILE_INFO(0, tileno, 0, 0);
+	SET_TILE_INFO_MEMBER(0, tileno, 0, 0);
 }
 
-WRITE16_HANDLER( oneshot_bg_videoram_w )
+WRITE16_MEMBER(oneshot_state::oneshot_bg_videoram_w)
 {
-	oneshot_state *state = space->machine().driver_data<oneshot_state>();
-	COMBINE_DATA(&state->m_bg_videoram[offset]);
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset / 2);
+	COMBINE_DATA(&m_bg_videoram[offset]);
+	m_bg_tilemap->mark_tile_dirty(offset / 2);
 }
 
 /* mid tilemap */
-static TILE_GET_INFO( get_oneshot_mid_tile_info )
+TILE_GET_INFO_MEMBER(oneshot_state::get_oneshot_mid_tile_info)
 {
-	oneshot_state *state = machine.driver_data<oneshot_state>();
-	int tileno = state->m_mid_videoram[tile_index * 2 + 1];
+	int tileno = m_mid_videoram[tile_index * 2 + 1];
 
-	SET_TILE_INFO(0, tileno, 2, 0);
+	SET_TILE_INFO_MEMBER(0, tileno, 2, 0);
 }
 
-WRITE16_HANDLER( oneshot_mid_videoram_w )
+WRITE16_MEMBER(oneshot_state::oneshot_mid_videoram_w)
 {
-	oneshot_state *state = space->machine().driver_data<oneshot_state>();
-	COMBINE_DATA(&state->m_mid_videoram[offset]);
-	tilemap_mark_tile_dirty(state->m_mid_tilemap, offset / 2);
+	COMBINE_DATA(&m_mid_videoram[offset]);
+	m_mid_tilemap->mark_tile_dirty(offset / 2);
 }
 
 
 /* fg tilemap */
-static TILE_GET_INFO( get_oneshot_fg_tile_info )
+TILE_GET_INFO_MEMBER(oneshot_state::get_oneshot_fg_tile_info)
 {
-	oneshot_state *state = machine.driver_data<oneshot_state>();
-	int tileno = state->m_fg_videoram[tile_index * 2 + 1];
+	int tileno = m_fg_videoram[tile_index * 2 + 1];
 
-	SET_TILE_INFO(0, tileno, 3, 0);
+	SET_TILE_INFO_MEMBER(0, tileno, 3, 0);
 }
 
-WRITE16_HANDLER( oneshot_fg_videoram_w )
+WRITE16_MEMBER(oneshot_state::oneshot_fg_videoram_w)
 {
-	oneshot_state *state = space->machine().driver_data<oneshot_state>();
-	COMBINE_DATA(&state->m_fg_videoram[offset]);
-	tilemap_mark_tile_dirty(state->m_fg_tilemap, offset / 2);
+	COMBINE_DATA(&m_fg_videoram[offset]);
+	m_fg_tilemap->mark_tile_dirty(offset / 2);
 }
 
-VIDEO_START( oneshot )
+void oneshot_state::video_start()
 {
-	oneshot_state *state = machine.driver_data<oneshot_state>();
 
-	state->m_bg_tilemap =  tilemap_create(machine, get_oneshot_bg_tile_info,  tilemap_scan_rows, 16, 16, 32, 32);
-	state->m_mid_tilemap = tilemap_create(machine, get_oneshot_mid_tile_info, tilemap_scan_rows, 16, 16, 32, 32);
-	state->m_fg_tilemap =  tilemap_create(machine, get_oneshot_fg_tile_info,  tilemap_scan_rows, 16, 16, 32, 32);
+	m_bg_tilemap =  &machine().tilemap().create(tilemap_get_info_delegate(FUNC(oneshot_state::get_oneshot_bg_tile_info),this),  TILEMAP_SCAN_ROWS, 16, 16, 32, 32);
+	m_mid_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(oneshot_state::get_oneshot_mid_tile_info),this), TILEMAP_SCAN_ROWS, 16, 16, 32, 32);
+	m_fg_tilemap =  &machine().tilemap().create(tilemap_get_info_delegate(FUNC(oneshot_state::get_oneshot_fg_tile_info),this),  TILEMAP_SCAN_ROWS, 16, 16, 32, 32);
 
-	tilemap_set_transparent_pen(state->m_bg_tilemap,  0);
-	tilemap_set_transparent_pen(state->m_mid_tilemap, 0);
-	tilemap_set_transparent_pen(state->m_fg_tilemap,  0);
+	m_bg_tilemap->set_transparent_pen(0);
+	m_mid_tilemap->set_transparent_pen(0);
+	m_fg_tilemap->set_transparent_pen(0);
 }
 
-static void draw_crosshairs( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_crosshairs( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	oneshot_state *state = machine.driver_data<oneshot_state>();
 	//int xpos,ypos;
 
 	/* get gun raw coordinates (player 1) */
-	state->m_gun_x_p1 = (input_port_read(machine, "LIGHT0_X") & 0xff) * 320 / 256;
-	state->m_gun_y_p1 = (input_port_read(machine, "LIGHT0_Y") & 0xff) * 240 / 256;
+	state->m_gun_x_p1 = (state->ioport("LIGHT0_X")->read() & 0xff) * 320 / 256;
+	state->m_gun_y_p1 = (state->ioport("LIGHT0_Y")->read() & 0xff) * 240 / 256;
 
 	/* compute the coordinates for drawing (from routine at 0x009ab0) */
 	//xpos = state->m_gun_x_p1;
@@ -87,8 +80,8 @@ static void draw_crosshairs( running_machine &machine, bitmap_t *bitmap, const r
 
 
 	/* get gun raw coordinates (player 2) */
-	state->m_gun_x_p2 = (input_port_read(machine, "LIGHT1_X") & 0xff) * 320 / 256;
-	state->m_gun_y_p2 = (input_port_read(machine, "LIGHT1_Y") & 0xff) * 240 / 256;
+	state->m_gun_x_p2 = (state->ioport("LIGHT1_X")->read() & 0xff) * 320 / 256;
+	state->m_gun_y_p2 = (state->ioport("LIGHT1_Y")->read() & 0xff) * 240 / 256;
 
 	/* compute the coordinates for drawing (from routine at 0x009b6e) */
 	//xpos = state->m_gun_x_p2;
@@ -99,12 +92,12 @@ static void draw_crosshairs( running_machine &machine, bitmap_t *bitmap, const r
 		state->m_gun_x_p2 = 0;
 }
 
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	oneshot_state *state = machine.driver_data<oneshot_state>();
 	const UINT16 *source = state->m_sprites;
 	const UINT16 *finish = source + (0x1000 / 2);
-	const gfx_element *gfx = machine.gfx[1];
+	gfx_element *gfx = machine.gfx[1];
 
 	int xpos, ypos;
 
@@ -156,36 +149,34 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 
 }
 
-SCREEN_UPDATE( oneshot )
+UINT32 oneshot_state::screen_update_oneshot(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	oneshot_state *state = screen->machine().driver_data<oneshot_state>();
 
-	bitmap_fill(bitmap, cliprect, get_black_pen(screen->machine()));
+	bitmap.fill(get_black_pen(machine()), cliprect);
 
-	tilemap_set_scrollx(state->m_mid_tilemap, 0, state->m_scroll[0] - 0x1f5);
-	tilemap_set_scrolly(state->m_mid_tilemap, 0, state->m_scroll[1]);
+	m_mid_tilemap->set_scrollx(0, m_scroll[0] - 0x1f5);
+	m_mid_tilemap->set_scrolly(0, m_scroll[1]);
 
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
-	tilemap_draw(bitmap, cliprect, state->m_mid_tilemap, 0, 0);
-	draw_sprites(screen->machine(), bitmap, cliprect);
-	tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, 0, 0);
-	draw_crosshairs(screen->machine(), bitmap, cliprect);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
+	m_mid_tilemap->draw(bitmap, cliprect, 0, 0);
+	draw_sprites(machine(), bitmap, cliprect);
+	m_fg_tilemap->draw(bitmap, cliprect, 0, 0);
+	draw_crosshairs(machine(), bitmap, cliprect);
 	return 0;
 }
 
-SCREEN_UPDATE( maddonna )
+UINT32 oneshot_state::screen_update_maddonna(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	oneshot_state *state = screen->machine().driver_data<oneshot_state>();
 
-	bitmap_fill(bitmap, cliprect, get_black_pen(screen->machine()));
+	bitmap.fill(get_black_pen(machine()), cliprect);
 
-	tilemap_set_scrolly(state->m_mid_tilemap, 0, state->m_scroll[1]); // other registers aren't used so we don't know which layers they relate to
+	m_mid_tilemap->set_scrolly(0, m_scroll[1]); // other registers aren't used so we don't know which layers they relate to
 
-	tilemap_draw(bitmap, cliprect, state->m_mid_tilemap, 0, 0);
-	tilemap_draw(bitmap, cliprect, state->m_fg_tilemap, 0, 0);
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
-	draw_sprites(screen->machine(), bitmap, cliprect);
+	m_mid_tilemap->draw(bitmap, cliprect, 0, 0);
+	m_fg_tilemap->draw(bitmap, cliprect, 0, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
+	draw_sprites(machine(), bitmap, cliprect);
 
-//  popmessage ("%04x %04x %04x %04x %04x %04x %04x %04x", state->m_scroll[0], state->m_scroll[1], state->m_scroll[2], state->m_scroll[3], state->m_scroll[4], state->m_scroll[5], state->m_scroll[6], state->m_scroll[7]);
+//  popmessage ("%04x %04x %04x %04x %04x %04x %04x %04x", m_scroll[0], m_scroll[1], m_scroll[2], m_scroll[3], m_scroll[4], m_scroll[5], m_scroll[6], m_scroll[7]);
 	return 0;
 }

@@ -13,14 +13,14 @@ enum {
 class arkanoid_state : public driver_device
 {
 public:
-	arkanoid_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	arkanoid_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+		m_videoram(*this,"videoram"),
+		m_spriteram(*this,"spriteram") { }
 
 	/* memory pointers */
-	UINT8 *  m_videoram;
-	UINT8 *  m_spriteram;
-	size_t   m_spriteram_size;
-	size_t   m_videoram_size;
+	required_shared_ptr<UINT8> m_videoram;
+	optional_shared_ptr<UINT8> m_spriteram;
 
 	/* video-related */
 	tilemap_t  *m_bg_tilemap;
@@ -45,40 +45,39 @@ public:
 
 	/* devices */
 	device_t *m_mcu;
+	DECLARE_READ8_MEMBER(arkanoid_Z80_mcu_r);
+	DECLARE_WRITE8_MEMBER(arkanoid_Z80_mcu_w);
+	DECLARE_READ8_MEMBER(arkanoid_68705_port_a_r);
+	DECLARE_WRITE8_MEMBER(arkanoid_68705_port_a_w);
+	DECLARE_WRITE8_MEMBER(arkanoid_68705_ddr_a_w);
+	DECLARE_READ8_MEMBER(arkanoid_68705_port_c_r);
+	DECLARE_WRITE8_MEMBER(arkanoid_68705_port_c_w);
+	DECLARE_WRITE8_MEMBER(arkanoid_68705_ddr_c_w);
+	DECLARE_READ8_MEMBER(arkanoid_bootleg_f000_r);
+	DECLARE_READ8_MEMBER(arkanoid_bootleg_f002_r);
+	DECLARE_WRITE8_MEMBER(arkanoid_bootleg_d018_w);
+	DECLARE_READ8_MEMBER(block2_bootleg_f000_r);
+	DECLARE_READ8_MEMBER(arkanoid_bootleg_d008_r);
+	DECLARE_WRITE8_MEMBER(arkanoid_videoram_w);
+	DECLARE_WRITE8_MEMBER(arkanoid_d008_w);
+	DECLARE_WRITE8_MEMBER(tetrsark_d008_w);
+	DECLARE_WRITE8_MEMBER(hexa_d008_w);
+	DECLARE_CUSTOM_INPUT_MEMBER(arkanoid_68705_input_r);
+	DECLARE_CUSTOM_INPUT_MEMBER(arkanoid_input_mux);
+	DECLARE_DRIVER_INIT(block2);
+	DECLARE_DRIVER_INIT(arkblock);
+	DECLARE_DRIVER_INIT(hexa);
+	DECLARE_DRIVER_INIT(paddle2);
+	DECLARE_DRIVER_INIT(tetrsark);
+	DECLARE_DRIVER_INIT(arkgcbl);
+	DECLARE_DRIVER_INIT(arkangc2);
+	DECLARE_DRIVER_INIT(arkbloc2);
+	DECLARE_DRIVER_INIT(arkangc);
+	TILE_GET_INFO_MEMBER(get_bg_tile_info);
+	DECLARE_MACHINE_START(arkanoid);
+	DECLARE_MACHINE_RESET(arkanoid);
+	DECLARE_VIDEO_START(arkanoid);
+	UINT32 screen_update_arkanoid(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_hexa(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	TIMER_CALLBACK_MEMBER(test);
 };
-
-
-
-/*----------- defined in video/arkanoid.c -----------*/
-
-extern WRITE8_HANDLER( arkanoid_videoram_w );
-
-extern WRITE8_HANDLER( arkanoid_d008_w );
-extern WRITE8_HANDLER( tetrsark_d008_w );
-extern WRITE8_HANDLER( hexa_d008_w );
-
-extern VIDEO_START( arkanoid );
-extern SCREEN_UPDATE( arkanoid );
-extern SCREEN_UPDATE( hexa );
-
-
-/*----------- defined in machine/arkanoid.c -----------*/
-
-extern READ8_HANDLER( arkanoid_Z80_mcu_r );
-extern WRITE8_HANDLER( arkanoid_Z80_mcu_w );
-
-extern READ8_HANDLER( arkanoid_68705_port_a_r );
-extern WRITE8_HANDLER( arkanoid_68705_port_a_w );
-extern WRITE8_HANDLER( arkanoid_68705_ddr_a_w );
-
-extern READ8_HANDLER( arkanoid_68705_port_c_r );
-extern WRITE8_HANDLER( arkanoid_68705_port_c_w );
-extern WRITE8_HANDLER( arkanoid_68705_ddr_c_w );
-
-extern CUSTOM_INPUT( arkanoid_68705_input_r );
-extern CUSTOM_INPUT( arkanoid_input_mux );
-
-extern READ8_HANDLER( arkanoid_bootleg_f000_r );
-extern READ8_HANDLER( arkanoid_bootleg_f002_r );
-extern WRITE8_HANDLER( arkanoid_bootleg_d018_w );
-extern READ8_HANDLER( arkanoid_bootleg_d008_r );

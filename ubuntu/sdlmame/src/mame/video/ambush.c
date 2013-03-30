@@ -18,11 +18,12 @@
 
 ***************************************************************************/
 
-PALETTE_INIT( ambush )
+void ambush_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 
-	for (i = 0; i < machine.total_colors(); i++)
+	for (i = 0; i < machine().total_colors(); i++)
 	{
 		int bit0, bit1, bit2, r, g, b;
 
@@ -42,19 +43,19 @@ PALETTE_INIT( ambush )
 		bit2 = (color_prom[i] >> 7) & 0x01;
 		b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 
-		palette_set_color(machine, i, MAKE_RGB(r,g,b));
+		palette_set_color(machine(), i, MAKE_RGB(r,g,b));
 	}
 }
 
 
-static void draw_chars( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, int priority )
+static void draw_chars( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, int priority )
 {
 	ambush_state *state = machine.driver_data<ambush_state>();
 	int offs, transpen;
 
 	transpen = (priority == 0) ? -1 : 0;
 
-	for (offs = 0; offs < state->m_videoram_size; offs++)
+	for (offs = 0; offs < state->m_videoram.bytes(); offs++)
 	{
 		int code, sx, sy, col;
 		UINT8 scroll;
@@ -71,7 +72,7 @@ static void draw_chars( running_machine &machine, bitmap_t *bitmap, const rectan
 
 		code = state->m_videoram[offs] | ((col & 0x60) << 3);
 
-		if (flip_screen_get(machine))
+		if (state->flip_screen())
 		{
 			sx = 31 - sx;
 			sy = 31 - sy;
@@ -81,45 +82,44 @@ static void draw_chars( running_machine &machine, bitmap_t *bitmap, const rectan
 		drawgfx_transpen(bitmap,cliprect,machine.gfx[0],
 			code,
 			(col & 0x0f) | ((*state->m_colorbank & 0x03) << 4),
-			flip_screen_get(machine), flip_screen_get(machine),
+			state->flip_screen(), state->flip_screen(),
 			8 * sx, (8 * sy + scroll) & 0xff, transpen);
 	}
 }
 
 
-SCREEN_UPDATE( ambush )
+UINT32 ambush_state::screen_update_ambush(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	ambush_state *state = screen->machine().driver_data<ambush_state>();
 	int offs;
 
-	bitmap_fill(bitmap, cliprect, 0);
+	bitmap.fill(0, cliprect);
 
 	/* Draw the characters */
-	draw_chars(screen->machine(), bitmap, cliprect, 0x00);
+	draw_chars(machine(), bitmap, cliprect, 0x00);
 
 	/* Draw the sprites. */
-	for (offs = state->m_spriteram_size - 4; offs >= 0; offs -= 4)
+	for (offs = m_spriteram.bytes() - 4; offs >= 0; offs -= 4)
 	{
 		int code, col, sx, sy, flipx, flipy, gfx;
 
-		sy = state->m_spriteram[offs + 0];
-		sx = state->m_spriteram[offs + 3];
+		sy = m_spriteram[offs + 0];
+		sx = m_spriteram[offs + 3];
 
 		if ( (sy == 0) ||
-			 (sy == 0xff) ||
-			((sx <  0x40) && (  state->m_spriteram[offs + 2] & 0x10)) ||
-			((sx >= 0xc0) && (!(state->m_spriteram[offs + 2] & 0x10))))
+				(sy == 0xff) ||
+			((sx <  0x40) && (  m_spriteram[offs + 2] & 0x10)) ||
+			((sx >= 0xc0) && (!(m_spriteram[offs + 2] & 0x10))))
 			continue;  /* prevent wraparound */
 
 
-		code = (state->m_spriteram[offs + 1] & 0x3f) | ((state->m_spriteram[offs + 2] & 0x60) << 1);
+		code = (m_spriteram[offs + 1] & 0x3f) | ((m_spriteram[offs + 2] & 0x60) << 1);
 
-		if (state->m_spriteram[offs + 2] & 0x80)
+		if (m_spriteram[offs + 2] & 0x80)
 		{
 			/* 16x16 sprites */
 			gfx = 1;
 
-			if (!flip_screen_get(screen->machine()))
+			if (!flip_screen())
 				sy = 240 - sy;
 			else
 				sx = 240 - sx;
@@ -130,29 +130,29 @@ SCREEN_UPDATE( ambush )
 			gfx = 0;
 			code <<= 2;
 
-			if (!flip_screen_get(screen->machine()))
+			if (!flip_screen())
 				sy = 248 - sy;
 			else
 				sx = 248 - sx;
 		}
 
-		col   = state->m_spriteram[offs + 2] & 0x0f;
-		flipx = state->m_spriteram[offs + 1] & 0x40;
-		flipy = state->m_spriteram[offs + 1] & 0x80;
+		col   = m_spriteram[offs + 2] & 0x0f;
+		flipx = m_spriteram[offs + 1] & 0x40;
+		flipy = m_spriteram[offs + 1] & 0x80;
 
-		if (flip_screen_get(screen->machine()))
+		if (flip_screen())
 		{
 			flipx = !flipx;
 			flipy = !flipy;
 		}
 
-		drawgfx_transpen(bitmap,cliprect,screen->machine().gfx[gfx],
-				code, col | ((*state->m_colorbank & 0x03) << 4),
+		drawgfx_transpen(bitmap,cliprect,machine().gfx[gfx],
+				code, col | ((*m_colorbank & 0x03) << 4),
 				flipx, flipy,
 				sx,sy,0);
 	}
 
 	/* Draw the foreground priority characters over the sprites */
-	draw_chars(screen->machine(), bitmap, cliprect, 0x10);
+	draw_chars(machine(), bitmap, cliprect, 0x10);
 	return 0;
 }

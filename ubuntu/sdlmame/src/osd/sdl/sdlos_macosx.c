@@ -10,14 +10,14 @@
 //============================================================
 
 // standard sdl header
-#include <SDL/SDL.h>
-
 #include <sys/stat.h>
 #include <unistd.h>
 
 #include <mach/mach.h>
 #include <mach/mach_time.h>
 #include <Carbon/Carbon.h>
+
+#include "sdlinc.h"
 
 // MAME headers
 #include "osdcore.h"
@@ -33,9 +33,9 @@ static osd_ticks_t mach_cycle_counter(void);
 //  STATIC VARIABLES
 //============================================================
 
-static osd_ticks_t		(*cycle_counter)(void) = init_cycle_counter;
-static osd_ticks_t		(*ticks_counter)(void) = init_cycle_counter;
-static osd_ticks_t		ticks_per_second;
+static osd_ticks_t      (*cycle_counter)(void) = init_cycle_counter;
+static osd_ticks_t      (*ticks_counter)(void) = init_cycle_counter;
+static osd_ticks_t      ticks_per_second;
 
 //============================================================
 //  init_cycle_counter
@@ -107,7 +107,7 @@ osd_ticks_t osd_ticks_per_second(void)
 {
 	if (ticks_per_second == 0)
 	{
-		return 1;	// this isn't correct, but it prevents the crash
+		return 1;   // this isn't correct, but it prevents the crash
 	}
 	return ticks_per_second;
 }
@@ -142,7 +142,7 @@ void osd_sleep(osd_ticks_t duration)
 //  osd_num_processors
 //============================================================
 
-int osd_num_processors(void)
+int osd_get_num_processors(void)
 {
 	int processors = 1;
 
@@ -167,6 +167,20 @@ int osd_num_processors(void)
 //============================================================
 
 void *osd_malloc(size_t size)
+{
+#ifndef MALLOC_DEBUG
+	return malloc(size);
+#else
+#error "MALLOC_DEBUG not yet supported"
+#endif
+}
+
+
+//============================================================
+//  osd_malloc_array
+//============================================================
+
+void *osd_malloc_array(size_t size)
 {
 #ifndef MALLOC_DEBUG
 	return malloc(size);
@@ -224,7 +238,7 @@ char *osd_get_clipboard_text(void)
 	CFIndex flavor_index;
 	ItemCount item_count;
 	UInt32 item_index;
-	Boolean	success = false;
+	Boolean success = false;
 
 	err = PasteboardCreate(kPasteboardClipboard, &pasteboard_ref);
 
@@ -277,7 +291,7 @@ char *osd_get_clipboard_text(void)
 							length = CFDataGetLength (data_ref);
 							range = CFRangeMake (0,length);
 
-							result = (char *)osd_malloc (length+1);
+							result = (char *)osd_malloc_array (length+1);
 							if (result != NULL)
 							{
 								CFDataGetBytes (data_ref, range, (unsigned char *)result);
@@ -330,7 +344,7 @@ osd_directory_entry *osd_stat(const char *path)
 
 	// create an osd_directory_entry; be sure to make sure that the caller can
 	// free all resources by just freeing the resulting osd_directory_entry
-	result = (osd_directory_entry *) osd_malloc(sizeof(*result) + strlen(path) + 1);
+	result = (osd_directory_entry *) osd_malloc_array(sizeof(*result) + strlen(path) + 1);
 	strcpy(((char *) result) + sizeof(*result), path);
 	result->name = ((char *) result) + sizeof(*result);
 	result->type = S_ISDIR(st.st_mode) ? ENTTYPE_DIR : ENTTYPE_FILE;
@@ -347,6 +361,15 @@ const char *osd_get_volume_name(int idx)
 {
 	if (idx!=0) return NULL;
 	return "/";
+}
+
+//============================================================
+//  osd_get_slider_list
+//============================================================
+
+const void *osd_get_slider_list()
+{
+	return NULL;
 }
 
 //============================================================
@@ -367,7 +390,7 @@ file_error osd_get_full_path(char **dst, const char *path)
 	}
 	else
 	{
-		*dst = (char *)osd_malloc(strlen(path_buffer)+strlen(path)+3);
+		*dst = (char *)osd_malloc_array(strlen(path_buffer)+strlen(path)+3);
 
 		// if it's already a full path, just pass it through
 		if (path[0] == '/')

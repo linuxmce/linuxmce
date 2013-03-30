@@ -108,46 +108,45 @@
 
 ***************************************************************************/
 
-WRITE16_HANDLER( seta2_vregs_w )
+WRITE16_MEMBER(seta2_state::seta2_vregs_w)
 {
 	/* 02/04 = horizontal display start/end
-               mj4simai = 0065/01E5 (0180 visible area)
-               myangel =  005D/01D5 (0178 visible area)
-               pzlbowl =  0058/01D8 (0180 visible area)
-               penbros =  0065/01A5 (0140 visible area)
-               grdians =  0059/0188 (012f visible area)
-       06    = horizontal total?
-               mj4simai = 0204
-               myangel =  0200
-               pzlbowl =  0204
-               penbros =  01c0
-               grdians =  019a
-    */
+	           mj4simai = 0065/01E5 (0180 visible area)
+	           myangel =  005D/01D5 (0178 visible area)
+	           pzlbowl =  0058/01D8 (0180 visible area)
+	           penbros =  0065/01A5 (0140 visible area)
+	           grdians =  0059/0188 (012f visible area)
+	   06    = horizontal total?
+	           mj4simai = 0204
+	           myangel =  0200
+	           pzlbowl =  0204
+	           penbros =  01c0
+	           grdians =  019a
+	*/
 
-	seta2_state *state = space->machine().driver_data<seta2_state>();
-	UINT16 olddata = state->m_vregs[offset];
+	UINT16 olddata = m_vregs[offset];
 
-	COMBINE_DATA(&state->m_vregs[offset]);
-	if ( state->m_vregs[offset] != olddata )
-		logerror("CPU #0 PC %06X: Video Reg %02X <- %04X\n",cpu_get_pc(&space->device()),offset*2,data);
+	COMBINE_DATA(&m_vregs[offset]);
+	if ( m_vregs[offset] != olddata )
+		logerror("CPU #0 PC %06X: Video Reg %02X <- %04X\n",space.device().safe_pc(),offset*2,data);
 
 	switch( offset*2 )
 	{
-	case 0x1c:	// FLIP SCREEN (myangel)    <- this is actually zoom
-		flip_screen_set(space->machine(),  data & 1 );
-		if (data & ~1)	logerror("CPU #0 PC %06X: flip screen unknown bits %04X\n",cpu_get_pc(&space->device()),data);
+	case 0x1c:  // FLIP SCREEN (myangel)    <- this is actually zoom
+		flip_screen_set(data & 1 );
+		if (data & ~1)  logerror("CPU #0 PC %06X: flip screen unknown bits %04X\n",space.device().safe_pc(),data);
 		break;
-	case 0x2a:	// FLIP X (pzlbowl)
-		flip_screen_x_set(space->machine(),  data & 1 );
-		if (data & ~1)	logerror("CPU #0 PC %06X: flipx unknown bits %04X\n",cpu_get_pc(&space->device()),data);
+	case 0x2a:  // FLIP X (pzlbowl)
+		flip_screen_x_set(data & 1 );
+		if (data & ~1)  logerror("CPU #0 PC %06X: flipx unknown bits %04X\n",space.device().safe_pc(),data);
 		break;
-	case 0x2c:	// FLIP Y (pzlbowl)
-		flip_screen_y_set(space->machine(),  data & 1 );
-		if (data & ~1)	logerror("CPU #0 PC %06X: flipy unknown bits %04X\n",cpu_get_pc(&space->device()),data);
+	case 0x2c:  // FLIP Y (pzlbowl)
+		flip_screen_y_set(data & 1 );
+		if (data & ~1)  logerror("CPU #0 PC %06X: flipy unknown bits %04X\n",space.device().safe_pc(),data);
 		break;
 
-	case 0x30:	// BLANK SCREEN (pzlbowl, myangel)
-		if (data & ~1)	logerror("CPU #0 PC %06X: blank unknown bits %04X\n",cpu_get_pc(&space->device()),data);
+	case 0x30:  // BLANK SCREEN (pzlbowl, myangel)
+		if (data & ~1)  logerror("CPU #0 PC %06X: blank unknown bits %04X\n",space.device().safe_pc(),data);
 		break;
 	}
 }
@@ -161,7 +160,7 @@ WRITE16_HANDLER( seta2_vregs_w )
 
 ***************************************************************************/
 
-static void seta_drawgfx(	bitmap_t *bitmap, const rectangle *cliprect, const gfx_element *gfx,
+static void seta_drawgfx(   bitmap_ind16 &bitmap, const rectangle &cliprect, gfx_element *gfx,
 							UINT32 code,UINT32 color,int flipx,int flipy,int x0,int y0,
 							int shadow_depth )
 {
@@ -171,33 +170,33 @@ static void seta_drawgfx(	bitmap_t *bitmap, const rectangle *cliprect, const gfx
 	int sx, x1, dx;
 	int sy, y1, dy;
 
-	addr	=	gfx_element_get_data(gfx, code  % gfx->total_elements);
-	color	=	gfx->color_granularity * (color % gfx->total_colors);
+	addr    =   gfx->get_data(code  % gfx->elements());
+	color   =   gfx->granularity() * (color % gfx->colors());
 
-	if ( flipx )	{	x1 = x0-1;				x0 += gfx->width-1;		dx = -1;	}
-	else			{	x1 = x0 + gfx->width;							dx =  1;	}
+	if ( flipx )    {   x1 = x0-1;              x0 += gfx->width()-1;       dx = -1;    }
+	else            {   x1 = x0 + gfx->width();                         dx =  1;    }
 
-	if ( flipy )	{	y1 = y0-1;				y0 += gfx->height-1;	dy = -1;	}
-	else			{	y1 = y0 + gfx->height;							dy =  1;	}
+	if ( flipy )    {   y1 = y0-1;              y0 += gfx->height()-1;  dy = -1;    }
+	else            {   y1 = y0 + gfx->height();                            dy =  1;    }
 
-#define SETA_DRAWGFX(SETPIXELCOLOR)												\
-	for ( sy = y0; sy != y1; sy += dy )											\
-	{																			\
-		if ( sy >= cliprect->min_y && sy <= cliprect->max_y )					\
-		{																		\
-			source	=	addr;													\
-			dest	=	BITMAP_ADDR16(bitmap, sy, 0);							\
+#define SETA_DRAWGFX(SETPIXELCOLOR)                                             \
+	for ( sy = y0; sy != y1; sy += dy )                                         \
+	{                                                                           \
+		if ( sy >= cliprect.min_y && sy <= cliprect.max_y )                 \
+		{                                                                       \
+			source  =   addr;                                                   \
+			dest    =   &bitmap.pix16(sy);                          \
 																				\
-			for ( sx = x0; sx != x1; sx += dx )									\
-			{																	\
-				pen = *source++;												\
+			for ( sx = x0; sx != x1; sx += dx )                                 \
+			{                                                                   \
+				pen = *source++;                                                \
 																				\
-				if ( pen && sx >= cliprect->min_x && sx <= cliprect->max_x )	\
-					SETPIXELCOLOR												\
-			}																	\
-		}																		\
+				if ( pen && sx >= cliprect.min_x && sx <= cliprect.max_x )  \
+					SETPIXELCOLOR                                               \
+			}                                                                   \
+		}                                                                       \
 																				\
-		addr	+=	gfx->line_modulo;											\
+		addr    +=  gfx->rowbytes();                                            \
 	}
 
 	if (shadow_depth)
@@ -212,7 +211,7 @@ static void seta_drawgfx(	bitmap_t *bitmap, const rectangle *cliprect, const gfx
 	}
 }
 
-static void draw_sprites(running_machine &machine, bitmap_t *bitmap,const rectangle *cliprect)
+static void draw_sprites(running_machine &machine, bitmap_ind16 &bitmap,const rectangle &cliprect)
 {
 	// Sprites list
 
@@ -220,15 +219,16 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap,const rectan
 	// When debugging, use state->m_spriteram here, and run mame -update_in_pause
 	UINT16 *buffered_spriteram16 = state->m_buffered_spriteram;
 	UINT16 *s1  = buffered_spriteram16 + 0x3000/2;
-	UINT16 *end = &buffered_spriteram16[state->m_spriteram_size/2];
+	UINT16 *end = &buffered_spriteram16[state->m_spriteram.bytes()/2];
 
-	for ( ; s1 < end; s1+=4 )
+//  for ( ; s1 < end; s1+=4 )
+	for ( ; s1 < buffered_spriteram16 + 0x4000/2; s1+=4 )   // more reasonable (and it cures MAME lockup in e.g. funcube3 boot)
 	{
-		const gfx_element *gfx;
-		int num		= s1[0];
-		int xoffs	= s1[1];
-		int yoffs	= s1[2];
-		int sprite	= s1[3];
+		gfx_element *gfx;
+		int num     = s1[0];
+		int xoffs   = s1[1];
+		int yoffs   = s1[2];
+		int sprite  = s1[3];
 
 		// Single-sprite address
 		UINT16 *s2 = &buffered_spriteram16[(sprite & 0x7fff) * 4];
@@ -237,8 +237,8 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap,const rectan
 		int global_sizex = xoffs & 0xfc00;
 		int global_sizey = yoffs & 0xfc00;
 
-		int use_global_size	=	num & 0x1000;
-		int use_shadow		=	num & 0x0800;
+		int use_global_size =   num & 0x1000;
+		int use_shadow      =   num & 0x0800;
 
 		xoffs &= 0x3ff;
 		yoffs &= 0x3ff;
@@ -252,34 +252,34 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap,const rectan
 				shadow_depth = 0;
 				gfx = machine.gfx[machine.rand()&3];
 				break;
-			case 0x0700:			// 8bpp tiles (76543210)
-				shadow_depth = 8;	// ?
+			case 0x0700:            // 8bpp tiles (76543210)
+				shadow_depth = 8;   // ?
 				gfx = machine.gfx[3];
 				break;
-			case 0x0600:			// 6bpp tiles (--543210) (myangel sliding blocks test)
-				shadow_depth = 6;	// ?
+			case 0x0600:            // 6bpp tiles (--543210) (myangel sliding blocks test)
+				shadow_depth = 6;   // ?
 				gfx = machine.gfx[2];
 				break;
-			case 0x0500:			// 4bpp tiles (3210----)
-				shadow_depth = 4;	// ?
+			case 0x0500:            // 4bpp tiles (3210----)
+				shadow_depth = 4;   // ?
 				gfx = machine.gfx[1];
 				break;
-			case 0x0400:			// 4bpp tiles (----3210)
-				shadow_depth = 3;	// reelquak
+			case 0x0400:            // 4bpp tiles (----3210)
+				shadow_depth = 3;   // reelquak
 				gfx = machine.gfx[0];
 				break;
 //          case 0x0300:
 //              unknown
-			case 0x0200:			// 3bpp tiles?  (-----210) (myangel "Graduate Tests")
-				shadow_depth = 3;	// ?
+			case 0x0200:            // 3bpp tiles?  (-----210) (myangel "Graduate Tests")
+				shadow_depth = 3;   // ?
 				gfx = machine.gfx[4];
 				break;
-			case 0x0100:			// 2bpp tiles??? (--10----) (myangel2 question bubble, myangel endgame)
-				shadow_depth = 2;	// myangel2
+			case 0x0100:            // 2bpp tiles??? (--10----) (myangel2 question bubble, myangel endgame)
+				shadow_depth = 2;   // myangel2
 				gfx = machine.gfx[5];
 				break;
-			case 0x0000:			// no idea!
-				shadow_depth = 4;	// ?
+			case 0x0000:            // no idea!
+				shadow_depth = 4;   // ?
 				gfx = machine.gfx[0];
 				break;
 		}
@@ -291,7 +291,7 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap,const rectan
 
 		for( ; num > 0; num--,s2+=4 )
 		{
-			if (s2 >= end)	break;
+			if (s2 >= end)  break;
 
 // "tilemap" sprite
 
@@ -311,7 +311,7 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap,const rectan
 				int width    = use_global_size ? global_sizex : sx;
 				int height   = use_global_size ? global_sizey : sy;
 				height = ((height & 0xfc00) >> 10) + 1;
-				width  = ((width  & 0xfc00) >> 10)/* + 1*/;	// reelquak reels
+				width  = ((width  & 0xfc00) >> 10)/* + 1*/; // reelquak reels
 				if (!width)
 					continue;
 
@@ -327,19 +327,19 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap,const rectan
 				clip.min_x = (clip.min_x & 0x1ff) - (clip.min_x & 0x200);
 				clip.max_x = clip.min_x + width * 0x10 - 1;
 
-				if (clip.min_x > cliprect->max_x)	continue;
-				if (clip.max_x < cliprect->min_x)	continue;
-				if (clip.min_x < cliprect->min_x)	clip.min_x = cliprect->min_x;
-				if (clip.max_x > cliprect->max_x)	clip.max_x = cliprect->max_x;
+				if (clip.min_x > cliprect.max_x)    continue;
+				if (clip.max_x < cliprect.min_x)    continue;
+				if (clip.min_x < cliprect.min_x)    clip.min_x = cliprect.min_x;
+				if (clip.max_x > cliprect.max_x)    clip.max_x = cliprect.max_x;
 
 				// sprite clipping region (y)
 				clip.min_y = ((sy + yoffs) & 0x1ff) - state->m_yoffset;
 				clip.max_y = clip.min_y + height * 0x10 - 1;
 
-				if (clip.min_y > cliprect->max_y)	continue;
-				if (clip.max_y < cliprect->min_y)	continue;
-				if (clip.min_y < cliprect->min_y)	clip.min_y = cliprect->min_y;
-				if (clip.max_y > cliprect->max_y)	clip.max_y = cliprect->max_y;
+				if (clip.min_y > cliprect.max_y)    continue;
+				if (clip.max_y < cliprect.min_y)    continue;
+				if (clip.min_y < cliprect.min_y)    clip.min_y = cliprect.min_y;
+				if (clip.max_y > cliprect.max_y)    clip.max_y = cliprect.max_y;
 
 				dx = sx + (scrollx & 0x3ff) + xoffs + 0x10;
 
@@ -355,7 +355,7 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap,const rectan
 						int attr, code, color;
 						UINT16 *s3;
 
-						s3	=	&buffered_spriteram16[2 * ((page * 0x2000/4) + ((y & 0x1f) << 6) + (x & 0x03f))];
+						s3  =   &buffered_spriteram16[2 * ((page * 0x2000/4) + ((y & 0x1f) << 6) + (x & 0x03f))];
 
 						attr  = s3[0];
 						code  = s3[1] + ((attr & 0x0007) << 16);
@@ -374,7 +374,7 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap,const rectan
 
 								dst_x = (dst_x & 0x1ff) - (dst_x & 0x200);
 
-								seta_drawgfx(bitmap, &clip, gfx,
+								seta_drawgfx(bitmap, clip, gfx,
 										code ^ tx ^ (ty<<1),
 										color,
 										flipx, flipy,
@@ -412,7 +412,7 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap,const rectan
 				sy &= 0x1ff;
 				sy -= state->m_yoffset;
 
-				code &= ~((sizex+1) * (sizey+1) - 1);	// see myangel, myangel2 and grdians
+				code &= ~((sizex+1) * (sizey+1) - 1);   // see myangel, myangel2 and grdians
 
 				for (y = 0; y <= sizey; y++)
 				{
@@ -429,8 +429,8 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap,const rectan
 			}
 		}
 
-		if (s1[0] & 0x8000) break;	// end of list marker
-	}	// sprite list
+		if (s1[0] & 0x8000) break;  // end of list marker
+	}   // sprite list
 }
 
 
@@ -442,58 +442,58 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap,const rectan
 
 ***************************************************************************/
 
-VIDEO_START( seta2 )
+VIDEO_START_MEMBER(seta2_state,seta2)
 {
-	seta2_state *state = machine.driver_data<seta2_state>();
 
-	machine.gfx[2]->color_granularity = 16;
-	machine.gfx[3]->color_granularity = 16;
-	machine.gfx[4]->color_granularity = 16;
-	machine.gfx[5]->color_granularity = 16;
+	machine().gfx[2]->set_granularity(16);
+	machine().gfx[3]->set_granularity(16);
+	machine().gfx[4]->set_granularity(16);
+	machine().gfx[5]->set_granularity(16);
 
-	state->m_buffered_spriteram = auto_alloc_array(machine, UINT16, state->m_spriteram_size/2);
+	m_buffered_spriteram = auto_alloc_array(machine(), UINT16, m_spriteram.bytes()/2);
 
-	state->m_xoffset = 0;
-	state->m_yoffset = 0;
+	m_xoffset = 0;
+	m_yoffset = 0;
 
-    state_save_register_global_pointer(machine, state->m_vregs, 0x40);
+	//TODO:FIX
+	//state_save_register_global_pointer(machine(), m_vregs, 0x40);
 }
 
-VIDEO_START( seta2_xoffset )
+VIDEO_START_MEMBER(seta2_state,seta2_xoffset)
 {
-	seta2_state *state = machine.driver_data<seta2_state>();
 
-	VIDEO_START_CALL(seta2);
+	VIDEO_START_CALL_MEMBER(seta2);
 
-	state->m_xoffset = 0x200;
+	m_xoffset = 0x200;
 }
 
-VIDEO_START( seta2_yoffset )
+VIDEO_START_MEMBER(seta2_state,seta2_yoffset)
 {
-	seta2_state *state = machine.driver_data<seta2_state>();
 
-	VIDEO_START_CALL(seta2);
+	VIDEO_START_CALL_MEMBER(seta2);
 
-	state->m_yoffset = 0x10;
+	m_yoffset = 0x10;
 }
 
-SCREEN_UPDATE( seta2 )
+UINT32 seta2_state::screen_update_seta2(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	seta2_state *state = screen->machine().driver_data<seta2_state>();
 
 	// Black or pen 0?
-	bitmap_fill(bitmap, cliprect, screen->machine().pens[0]);
+	bitmap.fill(machine().pens[0], cliprect);
 
-	if ( (state->m_vregs[0x30/2] & 1) == 0 )	// 1 = BLANK SCREEN
-		draw_sprites(screen->machine(), bitmap, cliprect);
+	if ( (m_vregs[0x30/2] & 1) == 0 )   // 1 = BLANK SCREEN
+		draw_sprites(machine(), bitmap, cliprect);
 
 	return 0;
 }
 
-SCREEN_EOF( seta2 )
+void seta2_state::screen_eof_seta2(screen_device &screen, bool state)
 {
-	seta2_state *state = machine.driver_data<seta2_state>();
+	// rising edge
+	if (state)
+	{
 
-	// Buffer sprites by 1 frame
-	memcpy(state->m_buffered_spriteram, state->m_spriteram, state->m_spriteram_size);
+		// Buffer sprites by 1 frame
+		memcpy(m_buffered_spriteram, m_spriteram, m_spriteram.bytes());
+	}
 }

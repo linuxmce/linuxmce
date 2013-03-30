@@ -4,33 +4,17 @@
 #include "emu.h"
 #include "deckarn.h"
 
-deco_karnovsprites_device_config::deco_karnovsprites_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock)
-	: device_config(mconfig, static_alloc_device_config, "karnovsprites_device", tag, owner, clock)
+void deco_karnovsprites_device::set_gfx_region(device_t &device, int region)
 {
-	m_gfxregion = 0;
+	deco_karnovsprites_device &dev = downcast<deco_karnovsprites_device &>(device);
+	dev.m_gfxregion = region;
 }
 
-device_config *deco_karnovsprites_device_config::static_alloc_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock)
-{
-	return global_alloc(deco_karnovsprites_device_config(mconfig, tag, owner, clock));
-}
+const device_type DECO_KARNOVSPRITES = &device_creator<deco_karnovsprites_device>;
 
-device_t *deco_karnovsprites_device_config::alloc_device(running_machine &machine) const
-{
-	return auto_alloc(machine, deco_karnovsprites_device(machine, *this));
-}
-
-void deco_karnovsprites_device_config::set_gfx_region(device_config *device, int region)
-{
-	deco_karnovsprites_device_config *dev = downcast<deco_karnovsprites_device_config *>(device);
-	dev->m_gfxregion = region;
-}
-
-
-deco_karnovsprites_device::deco_karnovsprites_device(running_machine &_machine, const deco_karnovsprites_device_config &config)
-	: device_t(_machine, config),
-	  m_config(config),
-	  m_gfxregion(m_config.m_gfxregion)
+deco_karnovsprites_device::deco_karnovsprites_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, DECO_KARNOVSPRITES, "karnovsprites_device", tag, owner, clock),
+		m_gfxregion(0)
 {
 }
 
@@ -44,7 +28,7 @@ void deco_karnovsprites_device::device_reset()
 
 }
 
-void deco_karnovsprites_device::draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, UINT16* spriteram, int size, int priority )
+void deco_karnovsprites_device::draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect, UINT16* spriteram, int size, int priority )
 {
 	int offs;
 
@@ -68,8 +52,9 @@ void deco_karnovsprites_device::draw_sprites( running_machine &machine, bitmap_t
 
 		fx = spriteram[offs + 1];
 
-		// the 8-bit implementation had this, why?
-		//if ((fx & 0x1) == 0) continue;
+		/* the 8-bit implementation had this.
+		           illustrated by enemy projectile explosions in Shackled being left on screen. */
+		if ((fx & 0x1) == 0) continue;
 
 		extra = (fx & 0x10) ? 1 : 0;
 		fy = fx & 0x2;
@@ -86,7 +71,7 @@ void deco_karnovsprites_device::draw_sprites( running_machine &machine, bitmap_t
 		y = (y + 16) % 0x200;
 		x = 256 - x;
 		y = 256 - y;
-		if (flip_screen_get(machine))
+		if (machine.driver_data()->flip_screen())
 		{
 			y = 240 - y;
 			x = 240 - x;
@@ -108,9 +93,9 @@ void deco_karnovsprites_device::draw_sprites( running_machine &machine, bitmap_t
 				sprite,
 				colour,fx,fy,x,y,0);
 
-    	/* 1 more sprite drawn underneath */
-    	if (extra)
-    		drawgfx_transpen(bitmap,cliprect,machine.gfx[m_gfxregion],
+		/* 1 more sprite drawn underneath */
+		if (extra)
+			drawgfx_transpen(bitmap,cliprect,machine.gfx[m_gfxregion],
 				sprite2,
 				colour,fx,fy,x,y+16,0);
 	}

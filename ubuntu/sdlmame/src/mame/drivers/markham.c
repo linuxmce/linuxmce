@@ -14,19 +14,19 @@
 #include "includes/markham.h"
 
 
-static READ8_HANDLER( markham_e004_r )
+READ8_MEMBER(markham_state::markham_e004_r)
 {
 	return 0;
 }
 
 /****************************************************************************/
 
-static ADDRESS_MAP_START( markham_master_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( markham_master_map, AS_PROGRAM, 8, markham_state )
 	AM_RANGE(0x0000, 0x5fff) AM_ROM
 
 	AM_RANGE(0xc000, 0xc7ff) AM_RAM
-	AM_RANGE(0xc800, 0xcfff) AM_RAM AM_BASE_SIZE_MEMBER(markham_state, m_spriteram, m_spriteram_size)
-	AM_RANGE(0xd000, 0xd7ff) AM_RAM_WRITE(markham_videoram_w) AM_BASE_MEMBER(markham_state, m_videoram)
+	AM_RANGE(0xc800, 0xcfff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0xd000, 0xd7ff) AM_RAM_WRITE(markham_videoram_w) AM_SHARE("videoram")
 	AM_RANGE(0xd800, 0xdfff) AM_RAM AM_SHARE("share1")
 
 	AM_RANGE(0xe000, 0xe000) AM_READ_PORT("DSW2")
@@ -41,16 +41,16 @@ static ADDRESS_MAP_START( markham_master_map, AS_PROGRAM, 8 )
 	AM_RANGE(0xe008, 0xe008) AM_WRITENOP /* coin counter? */
 	AM_RANGE(0xe009, 0xe009) AM_WRITENOP /* to CPU2 busreq */
 
-	AM_RANGE(0xe00c, 0xe00d) AM_WRITEONLY AM_BASE_MEMBER(markham_state, m_xscroll)
+	AM_RANGE(0xe00c, 0xe00d) AM_WRITEONLY AM_SHARE("xscroll")
 	AM_RANGE(0xe00e, 0xe00e) AM_WRITE(markham_flipscreen_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( markham_slave_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( markham_slave_map, AS_PROGRAM, 8, markham_state )
 	AM_RANGE(0x0000, 0x5fff) AM_ROM
 	AM_RANGE(0x8000, 0x87ff) AM_RAM AM_SHARE("share1")
 
-	AM_RANGE(0xc000, 0xc000) AM_DEVWRITE("sn1", sn76496_w)
-	AM_RANGE(0xc001, 0xc001) AM_DEVWRITE("sn2", sn76496_w)
+	AM_RANGE(0xc000, 0xc000) AM_DEVWRITE("sn1", sn76496_device, write)
+	AM_RANGE(0xc001, 0xc001) AM_DEVWRITE("sn2", sn76496_device, write)
 
 	AM_RANGE(0xc002, 0xc002) AM_WRITENOP /* unknown */
 	AM_RANGE(0xc003, 0xc003) AM_WRITENOP /* unknown */
@@ -100,7 +100,7 @@ static INPUT_PORTS_START( markham )
 	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Demo_Sounds ) ) PORT_DIPLOCATION("SW2:3")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( On ) )
-	PORT_DIPUNUSED_DIPLOC( 0x08, 0x08, "SW2:4" )	/*  These next five dips are unused according to the manual */
+	PORT_DIPUNUSED_DIPLOC( 0x08, 0x08, "SW2:4" )    /*  These next five dips are unused according to the manual */
 	PORT_DIPUNUSED_DIPLOC( 0x10, 0x10, "SW2:5" )
 	PORT_DIPUNUSED_DIPLOC( 0x20, 0x20, "SW2:6" )
 	PORT_DIPUNUSED_DIPLOC( 0x40, 0x40, "SW2:7" )
@@ -108,7 +108,7 @@ static INPUT_PORTS_START( markham )
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( On ) )
 
-	PORT_START("P1")		/* e002 */
+	PORT_START("P1")        /* e002 */
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON2 )
@@ -118,7 +118,7 @@ static INPUT_PORTS_START( markham )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_8WAY
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_8WAY
 
-	PORT_START("P2")		/* e003 */
+	PORT_START("P2")        /* e003 */
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_COCKTAIL
@@ -128,7 +128,7 @@ static INPUT_PORTS_START( markham )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_COCKTAIL
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_COCKTAIL
 
-	PORT_START("SYSTEM")	/* e005 */
+	PORT_START("SYSTEM")    /* e005 */
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SERVICE1 )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN )
@@ -172,16 +172,33 @@ static GFXDECODE_START( markham )
 GFXDECODE_END
 
 
+/*************************************
+ *
+ *  Sound interface
+ *
+ *************************************/
+
+
+//-------------------------------------------------
+//  sn76496_config psg_intf
+//-------------------------------------------------
+
+static const sn76496_config psg_intf =
+{
+	DEVCB_NULL
+};
+
+
 static MACHINE_CONFIG_START( markham, markham_state )
 
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", Z80,8000000/2) /* 4.000MHz */
 	MCFG_CPU_PROGRAM_MAP(markham_master_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", markham_state,  irq0_line_hold)
 
 	MCFG_CPU_ADD("sub", Z80,8000000/2) /* 4.000MHz */
 	MCFG_CPU_PROGRAM_MAP(markham_slave_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", markham_state,  irq0_line_hold)
 
 	MCFG_QUANTUM_TIME(attotime::from_hz(6000))
 
@@ -189,25 +206,24 @@ static MACHINE_CONFIG_START( markham, markham_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(1*8, 31*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(markham)
+	MCFG_SCREEN_UPDATE_DRIVER(markham_state, screen_update_markham)
 
 	MCFG_GFXDECODE(markham)
 	MCFG_PALETTE_LENGTH(1024)
 
-	MCFG_PALETTE_INIT(markham)
-	MCFG_VIDEO_START(markham)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
 	MCFG_SOUND_ADD("sn1", SN76496, 8000000/2)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.75)
+	MCFG_SOUND_CONFIG(psg_intf)
 
 	MCFG_SOUND_ADD("sn2", SN76496, 8000000/2)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.75)
+	MCFG_SOUND_CONFIG(psg_intf)
 MACHINE_CONFIG_END
 
 /****************************************************************************/
@@ -241,4 +257,4 @@ ROM_START( markham )
 ROM_END
 
 
-GAME( 1983, markham, 0, markham, markham, 0, ROT0, "Sun Electronics", "Markham", GAME_SUPPORTS_SAVE )
+GAME( 1983, markham, 0, markham, markham, driver_device, 0, ROT0, "Sun Electronics", "Markham", GAME_SUPPORTS_SAVE )

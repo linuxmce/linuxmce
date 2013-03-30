@@ -1,4 +1,4 @@
-/* IGS ARM7 (IGS027A) based Mahjong platform
+/* IGS ARM7 (IGS027A) based Mahjong / Gambling platform(s)
  Driver by Xing Xing
 
  These games use the IGS027A processor.
@@ -10,7 +10,12 @@
  games make use of that feature.
 
  To emulate these games the Internal ROM will need dumping
- There are at least 5 other games on the platform.
+ There are at least 20 other games on this and similar platforms.
+
+ Many of these also seem to have a 80C51 based MCU, also covered by
+ a holographic sticker, this appears to be unprotected but has only been
+ read for a few sets, it probably either acts as a secondary protection
+ device or as a main CPU instructing the ARM.
 
 */
 
@@ -18,21 +23,52 @@
 #include "cpu/arm7/arm7.h"
 #include "cpu/arm7/arm7core.h"
 #include "machine/nvram.h"
+#include "machine/pgmcrypt.h"
+#include "sound/ics2115.h"
 
 
 class igs_m027_state : public driver_device
 {
 public:
-	igs_m027_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	igs_m027_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+		m_igs_mainram(*this, "igs_mainram"),
+		m_igs_cg_videoram(*this, "igs_cg_videoram"),
+		m_igs_palette32(*this, "igs_palette32"),
+		m_igs_tx_videoram(*this, "igs_tx_videoram"),
+		m_igs_bg_videoram(*this, "igs_bg_videoram")
+	{ }
 
-	UINT32 *m_igs_mainram;
-	UINT32 *m_igs_cg_videoram;
-	UINT32 *m_igs_tx_videoram;
-	UINT32 *m_igs_bg_videoram;
-	UINT32 *m_igs_pallete32;
+	required_shared_ptr<UINT32> m_igs_mainram;
+	required_shared_ptr<UINT32> m_igs_cg_videoram;
+	required_shared_ptr<UINT32> m_igs_palette32;
+	required_shared_ptr<UINT32> m_igs_tx_videoram;
+	required_shared_ptr<UINT32> m_igs_bg_videoram;
+
 	tilemap_t *m_igs_tx_tilemap;
 	tilemap_t *m_igs_bg_tilemap;
+
+	DECLARE_WRITE32_MEMBER(igs_cg_videoram_w);
+	DECLARE_WRITE32_MEMBER(igs_tx_videoram_w);
+	DECLARE_WRITE32_MEMBER(igs_bg_videoram_w);
+	DECLARE_WRITE32_MEMBER(igs_palette32_w);
+	DECLARE_DRIVER_INIT(sdwx);
+	DECLARE_DRIVER_INIT(chessc2);
+	DECLARE_DRIVER_INIT(lhzb4);
+	DECLARE_DRIVER_INIT(mgfx);
+	DECLARE_DRIVER_INIT(lhzb3);
+	DECLARE_DRIVER_INIT(gonefsh2);
+	DECLARE_DRIVER_INIT(sddz);
+	DECLARE_DRIVER_INIT(hauntedh);
+	DECLARE_DRIVER_INIT(bigd2);
+	DECLARE_DRIVER_INIT(klxyj);
+	DECLARE_DRIVER_INIT(fearless);
+	TILE_GET_INFO_MEMBER(get_tx_tilemap_tile_info);
+	TILE_GET_INFO_MEMBER(get_bg_tilemap_tile_info);
+	virtual void video_start();
+	UINT32 screen_update_igs_majhong(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_fearless(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(igs_majhong_interrupt);
 };
 
 
@@ -42,7 +78,7 @@ public:
     Video
 
     0x38001000, 0x380017ff          CG_CONTROL,8 byte per object, 0x100 in total
-    0x38001800, 0x380019ff      PALLETE RAM,2 byte per color, 0x100 in total
+    0x38001800, 0x380019ff      PALETTE RAM,2 byte per color, 0x100 in total
     0x38004000, 0x38005FFF      TX Video RAM????????1E00??????512x240??????
     0x38006000, 0x38007FFF      BG Video RAM????????1E00??????512x240??????
 
@@ -52,43 +88,42 @@ public:
 
 
 /* CGLayer */
-static WRITE32_HANDLER( igs_cg_videoram_w )
+WRITE32_MEMBER(igs_m027_state::igs_cg_videoram_w)
 {
-	igs_m027_state *state = space->machine().driver_data<igs_m027_state>();
-	COMBINE_DATA(&state->m_igs_cg_videoram[offset]);
+	COMBINE_DATA(&m_igs_cg_videoram[offset]);
 	//if(data!=0)
-	logerror("PC(%08X) CG @%x = %x!\n",cpu_get_pc(&space->device()),offset ,state->m_igs_cg_videoram[offset]);
+	logerror("PC(%08X) CG @%x = %x!\n",space.device().safe_pc(),offset ,m_igs_cg_videoram[offset]);
 
 
 
 
 	/*
-    ROM:08020520                 DCW 0x3E                                           ddd1        y
-    ROM:08020522                 DCW 0x29                                           ddd2        x
-    ROM:08020524                 DCD 0x190BB6                                   ddd3        n
-    ROM:08020528                 DCW 0xC                                            ddd4        Y
-    ROM:0802052A                 DCW 0xA6                                           ddd5        X
+	ROM:08020520                 DCW 0x3E                                           ddd1        y
+	ROM:08020522                 DCW 0x29                                           ddd2        x
+	ROM:08020524                 DCD 0x190BB6                                   ddd3        n
+	ROM:08020528                 DCW 0xC                                            ddd4        Y
+	ROM:0802052A                 DCW 0xA6                                           ddd5        X
 
-    (ddd5+?)??10bit
-    ddd2??9bit
-    (ddd4+?)??11bit
-    ddd1??8bit
-    ddd3??10bit
+	(ddd5+?)??10bit
+	ddd2??9bit
+	(ddd4+?)??11bit
+	ddd1??8bit
+	ddd3??10bit
 
-    8060a4a6 2642ed8f
-    A6A46080 8FED4226
+	8060a4a6 2642ed8f
+	A6A46080 8FED4226
 
-    XXXX-XXXX
-    XXxx-xxxx
-    xxxY-YYYY
-    YYYY-YYyy
+	XXXX-XXXX
+	XXxx-xxxx
+	xxxY-YYYY
+	YYYY-YYyy
 
-    yyyy-yynn
-    nnnn-nnnn
+	yyyy-yynn
+	nnnn-nnnn
 
 
 
-    */
+	*/
 
 
 
@@ -96,87 +131,85 @@ static WRITE32_HANDLER( igs_cg_videoram_w )
 
 
 /* TX Layer */
-static WRITE32_HANDLER( igs_tx_videoram_w )
+WRITE32_MEMBER(igs_m027_state::igs_tx_videoram_w)
 {
-	igs_m027_state *state = space->machine().driver_data<igs_m027_state>();
-	COMBINE_DATA(&state->m_igs_tx_videoram[offset]);
-	tilemap_mark_tile_dirty(state->m_igs_tx_tilemap,offset);
+	COMBINE_DATA(&m_igs_tx_videoram[offset]);
+	m_igs_tx_tilemap->mark_tile_dirty(offset);
 	//if(data!=0)
-	//logerror( "TX VIDEO RAM OFFSET %x ,data %x!\n",offset ,state->m_igs_tx_videoram[offset]);
+	//logerror( "TX VIDEO RAM OFFSET %x ,data %x!\n",offset ,m_igs_tx_videoram[offset]);
 }
 
-static TILE_GET_INFO( get_tx_tilemap_tile_info )
+TILE_GET_INFO_MEMBER(igs_m027_state::get_tx_tilemap_tile_info)
 {
-	igs_m027_state *state = machine.driver_data<igs_m027_state>();
 	//ppppppppNNNNNNNN
 	int tileno,colour;
-	tileno = state->m_igs_tx_videoram[tile_index] & 0xffff;
-	colour = (state->m_igs_tx_videoram[tile_index]>>0x10) & 0xffff;
+	tileno = m_igs_tx_videoram[tile_index] & 0xffff;
+	colour = (m_igs_tx_videoram[tile_index]>>0x10) & 0xffff;
 
-	SET_TILE_INFO(0,tileno,colour,0);
+	SET_TILE_INFO_MEMBER(0,tileno,colour,0);
 }
 
 /* BG Layer */
-static WRITE32_HANDLER( igs_bg_videoram_w )
+WRITE32_MEMBER(igs_m027_state::igs_bg_videoram_w)
 {
-	igs_m027_state *state = space->machine().driver_data<igs_m027_state>();
-	COMBINE_DATA(&state->m_igs_bg_videoram[offset]);
-	tilemap_mark_tile_dirty(state->m_igs_bg_tilemap,offset);
+	COMBINE_DATA(&m_igs_bg_videoram[offset]);
+	m_igs_bg_tilemap->mark_tile_dirty(offset);
 	//if(data!=0)
-	logerror("BG VIDEO RAM OFFSET %x ,data %x!\n",offset ,state->m_igs_bg_videoram[offset]);
+	logerror("BG VIDEO RAM OFFSET %x ,data %x!\n",offset ,m_igs_bg_videoram[offset]);
 }
 
-static TILE_GET_INFO( get_bg_tilemap_tile_info )
+TILE_GET_INFO_MEMBER(igs_m027_state::get_bg_tilemap_tile_info)
 {
-	igs_m027_state *state = machine.driver_data<igs_m027_state>();
 	//ppppppppNNNNNNNN
 	int tileno,colour;
-	tileno = state->m_igs_bg_videoram[tile_index] & 0xffff;
-	colour = (state->m_igs_bg_videoram[tile_index]>>0x10) & 0xffff;
+	tileno = m_igs_bg_videoram[tile_index] & 0xffff;
+	colour = (m_igs_bg_videoram[tile_index]>>0x10) & 0xffff;
 
-	SET_TILE_INFO(0,tileno,colour,0);
+	SET_TILE_INFO_MEMBER(0,tileno,colour,0);
 }
 
 
-/* Pallete Layer */
-static WRITE32_HANDLER( igs_pallete32_w )
+/* Palette Layer */
+WRITE32_MEMBER(igs_m027_state::igs_palette32_w)
 {
-	igs_m027_state *state = space->machine().driver_data<igs_m027_state>();
-	space->machine().generic.paletteram.u16=(UINT16 *)state->m_igs_pallete32;
-	COMBINE_DATA(&state->m_igs_pallete32[offset]);
-	//paletteram16_xGGGGGRRRRRBBBBB_word_w(offset*2,space->machine().generic.paletteram.u16[offset*2],0);
-	//paletteram16_xGGGGGRRRRRBBBBB_word_w(offset*2+1,space->machine().generic.paletteram.u16[offset*2+1],0);
+	m_generic_paletteram_16.set_target(reinterpret_cast<UINT16 *>(m_igs_palette32.target()), 0x800);
+	COMBINE_DATA(&m_igs_palette32[offset]);
+	//paletteram_xGGGGGRRRRRBBBBB_word_w(offset*2,m_generic_paletteram_16[offset*2],0);
+	//paletteram_xGGGGGRRRRRBBBBB_word_w(offset*2+1,m_generic_paletteram_16[offset*2+1],0);
 	//if(data!=0)
-	//fprintf(stdout,"PALLETE RAM OFFSET %x ,data %x!\n",offset ,state->m_igs_pallete32[offset]);
+	//fprintf(stdout,"PALETTE RAM OFFSET %x ,data %x!\n",offset ,m_igs_palette32[offset]);
 }
 
 
 
-static VIDEO_START(igs_majhong)
+void igs_m027_state::video_start()
 {
-	igs_m027_state *state = machine.driver_data<igs_m027_state>();
-	state->m_igs_tx_tilemap= tilemap_create(machine, get_tx_tilemap_tile_info,tilemap_scan_rows, 8, 8,64,32);
-	tilemap_set_transparent_pen(state->m_igs_tx_tilemap,15);
-	state->m_igs_bg_tilemap= tilemap_create(machine, get_bg_tilemap_tile_info,tilemap_scan_rows, 8, 8,64,32);
-	//state->m_igs_bg_tilemap= tilemap_create(machine, get_bg_tilemap_tile_info,tilemap_scan_rows, 8, 8,64,32);
-	//tilemap_set_transparent_pen(state->m_igs_bg_tilemap,15);
+	m_igs_tx_tilemap= &machine().tilemap().create(tilemap_get_info_delegate(FUNC(igs_m027_state::get_tx_tilemap_tile_info),this),TILEMAP_SCAN_ROWS, 8, 8,64,32);
+	m_igs_tx_tilemap->set_transparent_pen(15);
+	m_igs_bg_tilemap= &machine().tilemap().create(tilemap_get_info_delegate(FUNC(igs_m027_state::get_bg_tilemap_tile_info),this),TILEMAP_SCAN_ROWS, 8, 8,64,32);
+	//m_igs_bg_tilemap= &machine().tilemap().create(tilemap_get_info_delegate(FUNC(igs_m027_state::get_bg_tilemap_tile_info),this),TILEMAP_SCAN_ROWS, 8, 8,64,32);
+	//m_igs_bg_tilemap->set_transparent_pen(15);
 	logerror("Video START OK!\n");
 }
 
-static SCREEN_UPDATE(igs_majhong)
+UINT32 igs_m027_state::screen_update_igs_majhong(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	igs_m027_state *state = screen->machine().driver_data<igs_m027_state>();
 	//??????????
-	bitmap_fill(bitmap,cliprect,get_black_pen(screen->machine()));
+	bitmap.fill(get_black_pen(machine()), cliprect);
 
 	//??????
-	tilemap_draw(bitmap,cliprect,state->m_igs_bg_tilemap,0,0);
+	m_igs_bg_tilemap->draw(bitmap, cliprect, 0,0);
 
 	//CG??????
 
 	//??????
-	tilemap_draw(bitmap,cliprect,state->m_igs_tx_tilemap,0,0);
+	m_igs_tx_tilemap->draw(bitmap, cliprect, 0,0);
 	//fprintf(stdout,"Video UPDATE OK!\n");
+	return 0;
+}
+
+UINT32 igs_m027_state::screen_update_fearless(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
+{
 	return 0;
 }
 
@@ -191,22 +224,22 @@ static SCREEN_UPDATE(igs_majhong)
 
 ***************************************************************************/
 
-static ADDRESS_MAP_START( igs_majhong_map, AS_PROGRAM, 32 )
+static ADDRESS_MAP_START( igs_majhong_map, AS_PROGRAM, 32, igs_m027_state )
 	AM_RANGE(0x00000000, 0x00003fff) AM_ROM /* Internal ROM */
 	AM_RANGE(0x08000000, 0x0807ffff) AM_ROM AM_REGION("user1", 0)/* Game ROM */
-	AM_RANGE(0x10000000, 0x100003ff) AM_RAM AM_BASE_MEMBER(igs_m027_state, m_igs_mainram)// main ram for asic?
+	AM_RANGE(0x10000000, 0x100003ff) AM_RAM AM_SHARE("igs_mainram")// main ram for asic?
 	AM_RANGE(0x18000000, 0x18007fff) AM_RAM
 
-	AM_RANGE(0x38001000, 0x380017ff) AM_RAM_WRITE(igs_cg_videoram_w) AM_BASE_MEMBER(igs_m027_state, m_igs_cg_videoram)		//0x200 * 1   CG PALLETE?
-	AM_RANGE(0x38001800, 0x38001fff) AM_RAM_WRITE(igs_pallete32_w) AM_BASE_MEMBER(igs_m027_state, m_igs_pallete32)		//0x200 * 1
+	AM_RANGE(0x38001000, 0x380017ff) AM_RAM_WRITE(igs_cg_videoram_w) AM_SHARE("igs_cg_videoram")        //0x200 * 1   CG PALETTE?
+	AM_RANGE(0x38001800, 0x38001fff) AM_RAM_WRITE(igs_palette32_w) AM_SHARE("igs_palette32")        //0x200 * 1
 
-	AM_RANGE(0x38004000, 0x38005FFF) AM_RAM_WRITE(igs_tx_videoram_w) AM_BASE_MEMBER(igs_m027_state, m_igs_tx_videoram) /* Text Layer */
-	AM_RANGE(0x38006000, 0x38007FFF) AM_RAM_WRITE(igs_bg_videoram_w) AM_BASE_MEMBER(igs_m027_state, m_igs_bg_videoram) /* CG Layer */
+	AM_RANGE(0x38004000, 0x38005FFF) AM_RAM_WRITE(igs_tx_videoram_w) AM_SHARE("igs_tx_videoram") /* Text Layer */
+	AM_RANGE(0x38006000, 0x38007FFF) AM_RAM_WRITE(igs_bg_videoram_w) AM_SHARE("igs_bg_videoram") /* CG Layer */
 
 
-	AM_RANGE(0x38002010, 0x38002017) AM_RAM		//??????????????
-	AM_RANGE(0x38009000, 0x38009003) AM_RAM		//??????????????
-	AM_RANGE(0x70000200, 0x70000203) AM_RAM		//??????????????
+	AM_RANGE(0x38002010, 0x38002017) AM_RAM     //??????????????
+	AM_RANGE(0x38009000, 0x38009003) AM_RAM     //??????????????
+	AM_RANGE(0x70000200, 0x70000203) AM_RAM     //??????????????
 	AM_RANGE(0x50000000, 0x500003ff) AM_WRITENOP // uploads xor table to external rom here
 	AM_RANGE(0xf0000000, 0xF000000f) AM_WRITENOP // magic registers
 ADDRESS_MAP_END
@@ -242,48 +275,6 @@ static const UINT8 sdwx_tab[] =
 	0x12,0x56,0x97,0x26,0x1D,0x5F,0xA7,0xF8,0x89,0x3F,0x14,0x36,0x72,0x3B,0x48,0x7B,
 	0xF1,0xED,0x72,0xB7,0x7A,0x56,0x05,0xDE,0x7B,0x27,0x6D,0xCF,0x33,0x4C,0x14,0x86,
 };
-static void sdwx_decrypt(running_machine &machine)
-{
-
-	int i;
-	UINT16 *src = (UINT16 *) machine.region("user1")->base();
-
-	int rom_size = 0x80000;
-
-	for(i=0; i<rom_size/2; i++) {
-		UINT16 x = src[i];
-
-    if((i & 0x00480) != 0x00080)
-      x ^= 0x0001;
-
-
-    if((i & 0x004008) == 0x004008)
-      x ^= 0x0002;
-
-
- //   if((i & 0x000030) == 0x000010)
- //     x ^= 0x0004;
-
-    if((i & 0x000242) != 0x000042)
-      x ^= 0x0008;
-
-    if((i & 0x08100) == 0x08000)
-      x ^= 0x0010;
-
-    if((i & 0x022004) != 0x000004)
-      x ^= 0x0020;
-
-    if((i & 0x11800) != 0x10000)
-      x ^= 0x0040;
-
-    if((i & 0x004820) == 0x004820)
-      x ^= 0x0080;
-
-    x ^= sdwx_tab[(i >> 1) & 0xff] << 8;
-
-		src[i] = x;
-	}
-}
 
 
 
@@ -291,11 +282,11 @@ static void sdwx_gfx_decrypt(running_machine &machine)
 {
 	int i;
 	unsigned rom_size = 0x80000;
-	UINT8 *src = (UINT8 *) (machine.region("gfx1")->base());
+	UINT8 *src = (UINT8 *) (machine.root_device().memregion("gfx1")->base());
 	UINT8 *result_data = auto_alloc_array(machine, UINT8, rom_size);
 
 	for (i=0; i<rom_size; i++)
-    	result_data[i] = src[BITSWAP24(i, 23,22,21,20,19,18,17,16,15,14,13,12,11,8,7,6,10,9,5,4,3,2,1,0)];
+		result_data[i] = src[BITSWAP24(i, 23,22,21,20,19,18,17,16,15,14,13,12,11,8,7,6,10,9,5,4,3,2,1,0)];
 
 	for (i=0; i<rom_size; i+=0x200)
 	{
@@ -340,50 +331,50 @@ INPUT_PORTS_END
 #if 0
 static const gfx_layout charlayout =
 {
-	8,8,			/* 8 x 8 chars */
+	8,8,            /* 8 x 8 chars */
 	RGN_FRAC(1,1),
-	4,				/* 4 bits per pixel */
+	4,              /* 4 bits per pixel */
 	{ 0, 1, 2, 3 },    /* planes are packed in a nibble */
 	{ 33*4, 32*4, 49*4, 48*4, 1*4, 0*4, 17*4, 16*4 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
-	32*8	/* 32 bytes per char */
+	32*8    /* 32 bytes per char */
 };
 #endif
 
 static const gfx_layout gfxlayout_8x8x4 =
 {
-    8,8,
-    RGN_FRAC(1,1),
-    4,
-    //{ STEP4(0,8) },
-    { 24,8,16,0 },
+	8,8,
+	RGN_FRAC(1,1),
+	4,
+	//{ STEP4(0,8) },
+	{ 24,8,16,0 },
 		{ STEP8(7,-1) },
-    { STEP8(0,4*8) },
-    8*8*4
+	{ STEP8(0,4*8) },
+	8*8*4
 };
 
 #if 0
 static const gfx_layout gfxlayout_16x16x16 =
 {
-    16,16,
-    RGN_FRAC(1,1),
-    16,
-    { STEP16(0,0) },	// >8planes not supported
-    { STEP16(15,-1) },
-    { STEP16(0,16*1) },
-    16*16*16
+	16,16,
+	RGN_FRAC(1,1),
+	16,
+	{ STEP16(0,0) },    // >8planes not supported
+	{ STEP16(15,-1) },
+	{ STEP16(0,16*1) },
+	16*16*16
 };
 #endif
 
 static GFXDECODE_START( igs_m027 )
-    GFXDECODE_ENTRY( "gfx1", 0, gfxlayout_8x8x4,   0, 16  )
-   // GFXDECODE_ENTRY( "gfx2", 0, gfxlayout_16x16x16, 0, 16  )
+	GFXDECODE_ENTRY( "gfx1", 0, gfxlayout_8x8x4,   0, 16  )
+	// GFXDECODE_ENTRY( "gfx2", 0, gfxlayout_16x16x16, 0, 16  )
 GFXDECODE_END
 
 
-static INTERRUPT_GEN( igs_majhong_interrupt )
+INTERRUPT_GEN_MEMBER(igs_m027_state::igs_majhong_interrupt)
 {
-	generic_pulse_irq_line(device, ARM7_FIRQ_LINE);
+	generic_pulse_irq_line(device.execute(), ARM7_FIRQ_LINE, 1);
 }
 
 
@@ -392,7 +383,7 @@ static MACHINE_CONFIG_START( igs_majhong, igs_m027_state )
 
 	MCFG_CPU_PROGRAM_MAP(igs_majhong_map)
 
-	MCFG_CPU_VBLANK_INT("screen", igs_majhong_interrupt)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", igs_m027_state,  igs_majhong_interrupt)
 	//MCFG_NVRAM_ADD_0FILL("nvram")
 
 	MCFG_GFXDECODE(igs_m027)
@@ -401,28 +392,45 @@ static MACHINE_CONFIG_START( igs_majhong, igs_m027_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(512, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 512-1, 0, 256-1)
-	MCFG_SCREEN_UPDATE( igs_majhong )
+	MCFG_SCREEN_UPDATE_DRIVER(igs_m027_state, screen_update_igs_majhong)
 
 	MCFG_PALETTE_LENGTH(0x200)
 
-	MCFG_VIDEO_START( igs_majhong )
 
 	/* sound hardware */
 
 MACHINE_CONFIG_END
 
 
-
-
-static DRIVER_INIT( sdwx )
+static void sound_irq( device_t *device, int level )
 {
-	sdwx_decrypt(machine);
-	sdwx_gfx_decrypt(machine);
-	logerror("init OK!\n");
 }
+
+
+static MACHINE_CONFIG_START( fearless, igs_m027_state )
+	MCFG_CPU_ADD("maincpu",ARM7, 50000000/2)
+	MCFG_CPU_PROGRAM_MAP(igs_majhong_map)
+
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", igs_m027_state,  igs_majhong_interrupt)
+
+	MCFG_SCREEN_ADD("screen", RASTER)
+	MCFG_SCREEN_REFRESH_RATE(60)
+	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
+	MCFG_SCREEN_SIZE(512, 256)
+	MCFG_SCREEN_VISIBLE_AREA(0, 512-1, 0, 256-1)
+	MCFG_SCREEN_UPDATE_DRIVER(igs_m027_state, screen_update_fearless)
+
+	MCFG_PALETTE_LENGTH(0x200)
+
+	/* sound hardware */
+	MCFG_SPEAKER_STANDARD_MONO("mono")
+	MCFG_ICS2115_ADD("ics", 0, sound_irq)
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 5.0)
+
+MACHINE_CONFIG_END
+
 
 
 
@@ -613,6 +621,334 @@ ROM_START( bigd2 )
 	ROM_LOAD( "s2602.u14", 0x00000, 0x100000, CRC(f137028c) SHA1(0e4114222820bca2f7026fa653e2b96a489a0183) )
 ROM_END
 
+/*
+
+
+Gone Fishing II
+IGS PCB-0388-05-FW
+
+   +--------------------------------------------+
++--+               8-Liner Connecter            +---+
+|                                                   |
+|    +---------------+                            +-+
+|    |   IGS 0027A   |     +------+               |
++-+  |    Plug-in    |     | IGS  |               +-+
+  |  |   Daughter    |     | 025  |                P|
++-+  |     Card      |     +------+                r|
+|    +---------------+ +---+                       i|
+|J                     |   |                       n|
+|A   +---+ +---+ +---+ |   |                       t|
+|M   |   | |   | |   | | U |                      +-+
+|M   |   | |   | |   | | 1 |                +---+ |
+|A   | U | | U | | U | | 2 |                |   | +-+
+|    | 1 | | 1 | | 1 | |   |         +----+ | U |   |
+|C   | 5 | | 7 | | 4 | |   |         |Oki | | 1 |   |
+|o   |   | |   | | * | |   |         |6295| | 3 |   |
+|n   |   | |   | |   | +---+         +----+ |   |   |
+|n   |   | |   | |   |                      +---+   |
+|e   +---+ |   | +---+                              |
+|c         +---+                                    |
+|t                        62257                     |
+|e                                                  |
+|r       +-------+                                  |
+|        |       |                                  |
+|        |  IGS  |                                  |
+|        |  031  |     61256                        |
++-+      |       |          PAL     V3021           |
+  |      +-------+                                  |
++-+                                      X1    SW4  |
+|                                                   |
+| JP11                        SW3 SW2 SW1      BT1  |
+|                                                   |
++---------------------------------------------------+
+
+
+U12 - Program rom   - 27C4096
+U15 - Text graphics - 27C4096
+U17 - Char graphics - 27C160
+U23 - Sound samples - 27C040
+
+SW1-SW3 are unpopulated
+U14* Not used (27C4096) or else it's U16 and 27C160 type EPROM
+
+   X1 - 32.768kHZ OSC
+V3021 - Micro Electronic Ultra Low Power 1-Bit 32kHz RTC (Real Time Clock)
+  PAL - ATF22V10C at U26 labeled FW U26
+  BT1 - 3.6V battery
+  SW4 - Toggle switch
+ JP11 - 4 Pin header (HD4-156)
+
+IGS 025  - Custom programmed A8B1723(?)
+IGS 0027 - Custom programmed ARM9
+
+*/
+
+
+
+ROM_START( gonefsh2 )
+	ROM_REGION( 0x04000, "maincpu", 0 )
+	/* Internal rom of IGS027A ARM based MCU */
+	ROM_LOAD( "gonefsh2_igs027a", 0x00000, 0x4000, NO_DUMP )
+
+	ROM_REGION( 0x80000, "user1", 0 ) // external ARM data / prg
+	ROM_LOAD( "gfii_v-904uso.u12", 0x000000, 0x80000, CRC(ef0f6735) SHA1(0add92599b0989f3e50dc64e32ce234b4bd87d33) )
+
+	ROM_REGION( 0x80000, "gfx1", 0 )
+	ROM_LOAD( "gfii_text.u15", 0x000000, 0x80000, CRC(b48118fd) SHA1(e718d23ce5f7f41ab94df2d05cdd3adbf27eef89) )
+
+	ROM_REGION( 0x400000, "gfx2", 0 )
+	ROM_LOAD( "gfii_cg.u17", 0x000000, 0x200000, CRC(2568359c) SHA1(f1f240246e53496bf624c84f7cae3edb9675579f) )
+
+	ROM_REGION( 0x200000, "oki", 0 )
+	ROM_LOAD( "gfii_sp.u13", 0x00000, 0x080000, CRC(61da1d58) SHA1(0a79578f0daf15f0efe2b0eeac59a60d8372a644) )
+ROM_END
+
+/*
+
+
+Chess Challenge II
+
+IGS PCB-0388-04-FW
+
+   +--------------------------------------------+
++--+               8-Liner Connecter            +---+
+|                                                   |
+|    +---------------+                            +-+
+|    |   IGS 0027A   |     +------+               |
++-+  |    Plug-in    |     | IGS  |               +-+
+  |  |   Daughter    |     | 025  |                P|
++-+  |     Card      |     +------+                r|
+|    +---------------+ +---+                       i|
+|J                     |   |                       n|
+|A   +---+ +---+ +---+ |   |                       t|
+|M   |   | |   | |   | | U |                      +-+
+|M   |   | |   | |   | | 1 |                +---+ |
+|A   | U | | U | | U | | 2 |                |   | +-+
+|    | 1 | | 1 | | 1 | |   |         +----+ | U |   |
+|C   | 5 | | 7 | | 4 | |   |         |Oki | | 1 |   |
+|o   |   | |   | | * | |   |         |6295| | 3 |   |
+|n   |   | |   | |   | +---+         +----+ |   |   |
+|n   |   | |   | |   |                      +---+   |
+|e   +---+ |   | +---+                              |
+|c         +---+                                    |
+|t                        62257                     |
+|e                                                  |
+|r       +-------+                                  |
+|        |       |                                  |
+|        |  IGS  |                                  |
+|        |  031  |     61256                        |
++-+      |       |          PAL     V3021           |
+  |      +-------+                                  |
++-+                                      X1    SW4  |
+|                                                   |
+| JP11                        SW3 SW2 SW1      BT1  |
+|                                                   |
++---------------------------------------------------+
+
+
+U12 - Program rom   - 27C4096
+U15 - Text graphics - 27C4096
+U17 - Char graphics - 27C160
+U23 - Sound samples - 27C040
+
+SW1-SW3 are unpopulated
+U14* Not used (27C4096) or else it's U16 and 27C160 type EPROM
+
+   X1 - 32.768K OSC
+V3021 - Micro Electronic Ultra Low Power 1-Bit 32kHz RTC (Real Time Clock)
+  PAL - ATF22V10C at U26 labeled FW U26
+  BT1 - 3.6V battery
+  SW4 - Toggle switch
+ JP11 - 4 Pin header (HD4-156)
+
+IGS 025  - Custom programmed A8B1723(?)
+IGS 0027 - Custom programmed ARM9
+
+*/
+
+ROM_START( chessc2 )
+	ROM_REGION( 0x04000, "maincpu", 0 )
+	/* Internal rom of IGS027A ARM based MCU */
+	ROM_LOAD( "chessc2_igs027a", 0x00000, 0x4000, NO_DUMP )
+
+	ROM_REGION( 0x80000, "user1", 0 ) // external ARM data / prg
+	ROM_LOAD( "ccii_v-707uso.u12", 0x000000, 0x80000, CRC(5937b67b) SHA1(967b3adf6f5bf92d63ec460d595e473898a78372) )
+
+	ROM_REGION( 0x80000, "gfx1", 0 )
+	ROM_LOAD( "ccii_text.u15", 0x000000, 0x80000, CRC(25fed033) SHA1(b321c4994f609906597c3f7d5cdfc2dca63cd340) )
+
+	ROM_REGION( 0x400000, "gfx2", 0 )
+	ROM_LOAD( "ccii_cg.u17", 0x000000, 0x200000, CRC(47e45157) SHA1(4459799a4a6c30a2d0a3ad9ac54e92b62221e10b) )
+
+	ROM_REGION( 0x200000, "oki", 0 )
+	ROM_LOAD( "ccii_sp.u13", 0x00000, 0x080000,  CRC(220a7b71) SHA1(7dab7baa97c20b83763cf46ef0a6e5e8c4d6a348) )
+ROM_END
+
+
+
+
+
+ROM_START( haunthig )
+	ROM_REGION( 0x04000, "maincpu", 0 )
+	/* Internal rom of IGS027A ARM based MCU */
+	ROM_LOAD( "haunthig_igs027a", 0x00000, 0x4000, NO_DUMP ) // sticker marked 'H2'
+
+	ROM_REGION( 0x80000, "user1", 0 ) // external ARM data / prg
+	ROM_LOAD( "hauntedhouse_ver-101us.u34", 0x000000, 0x80000, CRC(4bf045d4) SHA1(78c848fd69961df8d9b75f92ad57c3534fbf08db) )
+
+	ROM_REGION( 0x10000, "plcc", 0 )
+	ROM_LOAD( "hauntedhouse.u17", 0x000000, 0x10000, CRC(3c76b157) SHA1(d8d3a434fd649577a30d5855e3fb34998041f4e5) ) // MX10EXAQC (80C51 XA based MCU) marked J9, not read protected?
+
+	ROM_REGION( 0x80000, "gfx1", 0 )
+	ROM_LOAD( "haunted-h_text.u15", 0x000000, 0x80000, CRC(c23f48c8) SHA1(0cb1b6c61611a081ae4a3c0be51812045ff632fe) )
+
+	// are these PGM-like sprites?
+	ROM_REGION( 0x400000, "gfx2", 0 )
+	ROM_LOAD( "haunted-h_cg.u32", 0x000000, 0x400000, CRC(e0ea10e6) SHA1(e81be78fea93e72d4b1f4c0b58560bda46cf7948) )
+	ROM_REGION( 0x400000, "gfx3", 0 )
+	ROM_LOAD( "haunted-h_ext.u12", 0x000000, 0x400000, CRC(662eb883) SHA1(831ebe29e1e7a8b2c2fff7fbc608975771c3486c) )
+
+
+	ROM_REGION( 0x200000, "oki", 0 )
+	ROM_LOAD( "haunted-h_sp.u3", 0x00000, 0x200000,  CRC(fe3fcddf) SHA1(ac57ab6d4e4883747c093bd19d0025cf6588cb2c) )
+ROM_END
+
+// seems to be a bigger game with different video system
+ROM_START( fearless )
+	ROM_REGION( 0x04000, "maincpu", 0 )
+	/* Internal rom of IGS027A ARM based MCU */
+	ROM_LOAD( "fearless_igs027a", 0x00000, 0x4000, NO_DUMP ) // sticker marked 'F1'
+
+	ROM_REGION( 0x80000, "user1", 0 ) // external ARM data / prg
+	ROM_LOAD( "fearlessp_v-101us.u37", 0x000000, 0x80000, CRC(2522873c) SHA1(8db709877311b6d2796353fc9a44a820937e35c2) )
+
+	ROM_REGION( 0x10000, "plcc", 0 )
+	ROM_LOAD( "fearlessp_07.u33", 0x000000, 0x10000, CRC(7dae4900) SHA1(bbf7ba7c9e95ff2ffeb1dc0fc7ccedd4da274d01) ) // MX10EXAQC (80C51 XA based MCU) marked 07, not read protected?
+
+	ROM_REGION( 0x800000, "gfx1", 0 ) // these all report FIXED BITS (0xxxxxxx), possibly just 7-bit colour data
+	ROM_LOAD( "fearlessp_u6_cg-0h.u6",   0x000000, 0x800000, CRC(02d8bbbf) SHA1(7cf36c909a5d76096a725ffe0a697bcbafbcf985) )
+	ROM_LOAD( "fearlessp_u7_cg-0l.u7",   0x000000, 0x800000, CRC(ca254db4) SHA1(f5670c2ff0720c84c9aff3cea95b118b6044e469) )
+	ROM_LOAD( "fearlessp_u13_cg-1h.u13", 0x000000, 0x800000, CRC(c9d2a56d) SHA1(91d1665623bca743f68f15a27bbf433e2ffc0808) )
+	ROM_LOAD( "fearlessp_u14_cg-1l.u14", 0x000000, 0x800000, CRC(7fe312d2) SHA1(c0add22d9fc4c0e32a03922cb709b947bfff429d) )
+	ROM_LOAD( "fearlessp_u17_cg-2h.u17", 0x000000, 0x800000, CRC(756fe1f2) SHA1(48ee81c5fa4808406b57b2521b836db3ff5a7fa9) )
+	ROM_LOAD( "fearlessp_u18_cg-2l.u18", 0x000000, 0x800000, CRC(07623d66) SHA1(041d5e44917bc16caa720ea98bdc0a4f5fb4b8e0) )
+
+	ROM_REGION( 0x800000, "ics", 0 )
+	ROM_LOAD( "fearlessp_u25_music0.u25", 0x000000, 0x400000, CRC(a015b9b1) SHA1(7b129c59acd523dec82e58a75d873bbc5341fb28) )
+	ROM_LOAD( "fearlessp_u26_music1.u26", 0x400000, 0x400000, CRC(9d5f18da) SHA1(42e5224c1af0898cc2e02b2e051ea8b629d5fb6d) )
+ROM_END
+
+
+
+static void pgm_create_dummy_internal_arm_region(running_machine &machine)
+{
+	UINT16 *temp16 = (UINT16 *)machine.root_device().memregion("maincpu")->base();
+
+	// fill with RX 14
+	int i;
+	for (i=0;i<0x4000/2;i+=2)
+	{
+		temp16[i] = 0xff1e;
+		temp16[i+1] = 0xe12f;
+
+	}
+
+	// jump straight to external area
+	temp16[(0x0000)/2] = 0xd088;
+	temp16[(0x0002)/2] = 0xe59f;
+	temp16[(0x0004)/2] = 0x0680;
+	temp16[(0x0006)/2] = 0xe3a0;
+	temp16[(0x0008)/2] = 0xff10;
+	temp16[(0x000a)/2] = 0xe12f;
+	temp16[(0x0090)/2] = 0x0400;
+	temp16[(0x0092)/2] = 0x1000;
+}
+
+
+/*
+DRIVER_INIT_MEMBER(igs_m027_state,igs_m027)
+{
+    pgm_create_dummy_internal_arm_region(machine());
+}
+*/
+
+DRIVER_INIT_MEMBER(igs_m027_state,sdwx)
+{
+	sdwx_decrypt(machine());
+	sdwx_gfx_decrypt(machine());
+	pgm_create_dummy_internal_arm_region(machine());
+}
+
+DRIVER_INIT_MEMBER(igs_m027_state,klxyj)
+{
+	klxyj_decrypt(machine());
+	//sdwx_gfx_decrypt(machine());
+	pgm_create_dummy_internal_arm_region(machine());
+}
+
+DRIVER_INIT_MEMBER(igs_m027_state,chessc2)
+{
+	chessc2_decrypt(machine());
+	//sdwx_gfx_decrypt(machine());
+	pgm_create_dummy_internal_arm_region(machine());
+}
+
+DRIVER_INIT_MEMBER(igs_m027_state,hauntedh)
+{
+	hauntedh_decrypt(machine());
+	//sdwx_gfx_decrypt(machine());
+	pgm_create_dummy_internal_arm_region(machine());
+}
+
+DRIVER_INIT_MEMBER(igs_m027_state,fearless)
+{
+	fearless_decrypt(machine());
+	//sdwx_gfx_decrypt(machine());
+	pgm_create_dummy_internal_arm_region(machine());
+}
+
+
+DRIVER_INIT_MEMBER(igs_m027_state,lhzb4)
+{
+	lhzb4_decrypt(machine());
+	//sdwx_gfx_decrypt(machine());
+	pgm_create_dummy_internal_arm_region(machine());
+}
+
+DRIVER_INIT_MEMBER(igs_m027_state,mgfx)
+{
+	mgfx_decrypt(machine());
+	//sdwx_gfx_decrypt(machine());
+	pgm_create_dummy_internal_arm_region(machine());
+}
+
+DRIVER_INIT_MEMBER(igs_m027_state,lhzb3)
+{
+	lhzb3_decrypt(machine());
+	//sdwx_gfx_decrypt(machine());
+	pgm_create_dummy_internal_arm_region(machine());
+}
+
+DRIVER_INIT_MEMBER(igs_m027_state,sddz)
+{
+	sddz_decrypt(machine());
+	//sdwx_gfx_decrypt(machine());
+	pgm_create_dummy_internal_arm_region(machine());
+}
+
+DRIVER_INIT_MEMBER(igs_m027_state,gonefsh2)
+{
+	gonefsh2_decrypt(machine());
+	//sdwx_gfx_decrypt(machine());
+	pgm_create_dummy_internal_arm_region(machine());
+}
+
+DRIVER_INIT_MEMBER(igs_m027_state,bigd2)
+{
+	big2_decrypt(machine());
+	//sdwx_gfx_decrypt(machine());
+	pgm_create_dummy_internal_arm_region(machine());
+}
 
 /***************************************************************************
 
@@ -620,10 +956,14 @@ ROM_END
 
 ***************************************************************************/
 
-GAME( 2002,  sdwx, 0, igs_majhong, sdwx, sdwx, ROT0, "IGS", "Sheng Dan Wu Xian", GAME_NO_SOUND | GAME_NOT_WORKING ) // aka Christmas 5 Line?
-GAME( 200?,  sddz, 0, igs_majhong, sdwx, 0,    ROT0, "IGS", "Super Dou Di Zhu",  GAME_NO_SOUND | GAME_NOT_WORKING )
-GAME( 2000,  bigd2,0, igs_majhong, sdwx, 0,    ROT0, "IGS", "Big D2",  GAME_NO_SOUND | GAME_NOT_WORKING )
-GAME( 200?,  lhzb3,0, igs_majhong, sdwx, 0,    ROT0, "IGS", "Long Hu Zheng Ba 3", GAME_NO_SOUND | GAME_NOT_WORKING ) // ????????3
-GAME( 200?,  lhzb4,0, igs_majhong, sdwx, 0,    ROT0, "IGS", "Long Hu Zheng Ba 4", GAME_NO_SOUND | GAME_NOT_WORKING ) // ????????4
-GAME( 200?,  klxyj,0, igs_majhong, sdwx, 0,    ROT0, "IGS", "Kuai Le Xi You Ji",  GAME_NO_SOUND | GAME_NOT_WORKING ) // ??????????
-GAME( 2000,  mgfx, 0, igs_majhong, sdwx, 0,    ROT0, "IGS", "Man Guan Fu Xing",   GAME_NO_SOUND | GAME_NOT_WORKING ) // ????????
+GAME( 2002,  sdwx,      0, igs_majhong, sdwx, igs_m027_state, sdwx,        ROT0, "IGS", "Sheng Dan Wu Xian", GAME_IS_SKELETON ) // aka Christmas 5 Line?
+GAME( 200?,  sddz,      0, igs_majhong, sdwx, igs_m027_state, sddz,        ROT0, "IGS", "Super Dou Di Zhu",  GAME_IS_SKELETON )
+GAME( 2000,  bigd2,     0, igs_majhong, sdwx, igs_m027_state, bigd2,       ROT0, "IGS", "Big D2",  GAME_IS_SKELETON )
+GAME( 200?,  lhzb3,     0, igs_majhong, sdwx, igs_m027_state, lhzb3,       ROT0, "IGS", "Long Hu Zheng Ba 3", GAME_IS_SKELETON )
+GAME( 200?,  lhzb4,     0, igs_majhong, sdwx, igs_m027_state, lhzb4,       ROT0, "IGS", "Long Hu Zheng Ba 4", GAME_IS_SKELETON )
+GAME( 200?,  klxyj,     0, igs_majhong, sdwx, igs_m027_state, klxyj,       ROT0, "IGS", "Kuai Le Xi You Ji",  GAME_IS_SKELETON )
+GAME( 2000,  mgfx,      0, igs_majhong, sdwx, igs_m027_state, mgfx,        ROT0, "IGS", "Man Guan Fu Xing",   GAME_IS_SKELETON )
+GAME( 200?,  gonefsh2,  0, igs_majhong, sdwx, igs_m027_state, gonefsh2,    ROT0, "IGS", "Gone Fishing 2",   GAME_IS_SKELETON )
+GAME( 200?,  chessc2,   0, igs_majhong, sdwx, igs_m027_state, chessc2,     ROT0, "IGS", "Chess Challenge 2",   GAME_IS_SKELETON )
+GAME( 200?,  haunthig,  0, igs_majhong, sdwx, igs_m027_state, hauntedh,    ROT0, "IGS", "Haunted House (IGS)",   GAME_IS_SKELETON )
+GAME( 2006,  fearless,  0, fearless,    sdwx, igs_m027_state, fearless,    ROT0, "IGS", "Fearless Pinocchio (V101US)",   GAME_IS_SKELETON )

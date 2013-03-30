@@ -176,13 +176,21 @@ Notes:
 class spaceg_state : public driver_device
 {
 public:
-	spaceg_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	spaceg_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_colorram(*this, "colorram"),
+		m_videoram(*this, "videoram"),
+		m_io9400(*this, "io9400"),
+		m_io9401(*this, "io9401"){ }
 
-	UINT8 *  m_videoram;
-	UINT8 *  m_colorram;
-	UINT8 *  m_io9400;
-	UINT8 *  m_io9401;
+	required_shared_ptr<UINT8> m_colorram;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_io9400;
+	required_shared_ptr<UINT8> m_io9401;
+	DECLARE_WRITE8_MEMBER(zvideoram_w);
+	DECLARE_READ8_MEMBER(spaceg_colorram_r);
+	virtual void palette_init();
+	UINT32 screen_update_spaceg(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 /*************************************
@@ -191,46 +199,45 @@ public:
  *
  *************************************/
 
-static PALETTE_INIT( spaceg )
+void spaceg_state::palette_init()
 {
 	int i;
 
 	for (i = 0; i < 128; i++)
-		palette_set_color (machine, i, MAKE_RGB(0x00,0x00,0x00));
+		palette_set_color (machine(), i, MAKE_RGB(0x00,0x00,0x00));
 
 	// proms are currently undumped...
-	palette_set_color (machine, 0, MAKE_RGB(0x00,0x00,0x00));	//ok czarny
-	palette_set_color (machine, 1, MAKE_RGB(0x7f,0x00,0x00));//???
-	palette_set_color (machine, 2, MAKE_RGB(0xff,0xff,0xff));	//ok+ bialy
-	palette_set_color (machine, 3, MAKE_RGB(0xff,0x00,0x00));	//ok j.czerw.
-	palette_set_color (machine, 4, MAKE_RGB(0x3f,0x3f,0xff));	//ok j.niebieski
-	palette_set_color (machine, 5, MAKE_RGB(0x3f,0xff,0x3f));	//ok j.zielony
-	palette_set_color (machine, 6, MAKE_RGB(0xff,0xbf,0xbf));	//ok+ 'majtki'
-	palette_set_color (machine, 7, MAKE_RGB(0xff,0xff,0x00));	//ok+ zolty
+	palette_set_color (machine(), 0, MAKE_RGB(0x00,0x00,0x00)); //ok czarny
+	palette_set_color (machine(), 1, MAKE_RGB(0x7f,0x00,0x00));//???
+	palette_set_color (machine(), 2, MAKE_RGB(0xff,0xff,0xff)); //ok+ bialy
+	palette_set_color (machine(), 3, MAKE_RGB(0xff,0x00,0x00)); //ok j.czerw.
+	palette_set_color (machine(), 4, MAKE_RGB(0x3f,0x3f,0xff)); //ok j.niebieski
+	palette_set_color (machine(), 5, MAKE_RGB(0x3f,0xff,0x3f)); //ok j.zielony
+	palette_set_color (machine(), 6, MAKE_RGB(0xff,0xbf,0xbf)); //ok+ 'majtki'
+	palette_set_color (machine(), 7, MAKE_RGB(0xff,0xff,0x00)); //ok+ zolty
 
-	palette_set_color (machine, 8, MAKE_RGB(0xff,0x7f,0x00));	//ok+ pomaranczowy
-	palette_set_color (machine, 9, MAKE_RGB(0x3f,0xbf,0xff));	//ok j.niebieski (ciemniejszy od 13)
-	palette_set_color (machine, 10, MAKE_RGB(0x3f,0xbf,0x3f));	//ok+ c.zielony
-	palette_set_color (machine, 11, MAKE_RGB(0x00,0xff,0x00));	//ok j.zielony
-	palette_set_color (machine, 12, MAKE_RGB(0x7f,0x00,0x00));	//ok brazowy (c.czerw)
-	palette_set_color (machine, 13, MAKE_RGB(0x7f,0xbf,0xff));	//ok j.niebieski (jasniejszy od 9)
-	palette_set_color (machine, 14, MAKE_RGB(0x00,0xff,0xff));//???
-	palette_set_color (machine, 15, MAKE_RGB(0x7f,0x7f,0x7f));//???
+	palette_set_color (machine(), 8, MAKE_RGB(0xff,0x7f,0x00)); //ok+ pomaranczowy
+	palette_set_color (machine(), 9, MAKE_RGB(0x3f,0xbf,0xff)); //ok j.niebieski (ciemniejszy od 13)
+	palette_set_color (machine(), 10, MAKE_RGB(0x3f,0xbf,0x3f));    //ok+ c.zielony
+	palette_set_color (machine(), 11, MAKE_RGB(0x00,0xff,0x00));    //ok j.zielony
+	palette_set_color (machine(), 12, MAKE_RGB(0x7f,0x00,0x00));    //ok brazowy (c.czerw)
+	palette_set_color (machine(), 13, MAKE_RGB(0x7f,0xbf,0xff));    //ok j.niebieski (jasniejszy od 9)
+	palette_set_color (machine(), 14, MAKE_RGB(0x00,0xff,0xff));//???
+	palette_set_color (machine(), 15, MAKE_RGB(0x7f,0x7f,0x7f));//???
 }
 
-static WRITE8_HANDLER( zvideoram_w )
+WRITE8_MEMBER(spaceg_state::zvideoram_w)
 {
-	spaceg_state *state = space->machine().driver_data<spaceg_state>();
-	int col = state->m_colorram[0x400];
-	int xoff = *state->m_io9400 >> 5 & 7;
+	int col = m_colorram[0x400];
+	int xoff = *m_io9400 >> 5 & 7;
 	UINT16 offset2 = (offset + 0x100) & 0x1fff;
 	UINT16 sdata = data << (8 - xoff);
-	UINT16 vram_data = state->m_videoram[offset] << 8 | (state->m_videoram[offset2]);
+	UINT16 vram_data = m_videoram[offset] << 8 | (m_videoram[offset2]);
 
 	if (col > 0x0f) popmessage("color > 0x0f = %2d", col);
 	col &= 0x0f;
 
-	switch (*state->m_io9401)
+	switch (*m_io9401)
 	{
 		// draw
 		case 0:
@@ -240,8 +247,8 @@ static WRITE8_HANDLER( zvideoram_w )
 			vram_data |= sdata;
 
 			// update colorram
-			if (sdata&0xff00) state->m_colorram[offset] = col;
-			if (sdata&0x00ff) state->m_colorram[offset2] = col;
+			if (sdata&0xff00) m_colorram[offset] = col;
+			if (sdata&0x00ff) m_colorram[offset2] = col;
 			break;
 
 		// erase
@@ -250,63 +257,61 @@ static WRITE8_HANDLER( zvideoram_w )
 			break;
 
 		default:
-			logerror("mode = %02x pc = %04x\n", *state->m_io9401, cpu_get_pc(&space->device()));
-			popmessage("mode = %02x pc = %04x\n", *state->m_io9401, cpu_get_pc(&space->device()));
+			logerror("mode = %02x pc = %04x\n", *m_io9401, space.device().safe_pc());
+			popmessage("mode = %02x pc = %04x\n", *m_io9401, space.device().safe_pc());
 			return;
 	}
 
-	state->m_videoram[offset]=vram_data>>8;
-	state->m_videoram[offset2]=vram_data&0xff;
+	m_videoram[offset]=vram_data>>8;
+	m_videoram[offset2]=vram_data&0xff;
 }
 
 
-static READ8_HANDLER(spaceg_colorram_r)
+READ8_MEMBER(spaceg_state::spaceg_colorram_r)
 {
-	spaceg_state *state = space->machine().driver_data<spaceg_state>();
 	int rgbcolor;
 
 	if (offset < 0x400)
 	{
-		rgbcolor = (state->m_colorram[offset] << 1) | ((offset &0x100) >> 8);
+		rgbcolor = (m_colorram[offset] << 1) | ((offset &0x100) >> 8);
 
 		if ((offset >= 0x200) && (offset < 0x220)) /* 0xa200- 0xa21f */
 		{
 			/* palette 1 */
 			int col_ind = offset & 0x1f;
-			palette_set_color_rgb(space->machine(), 0x10 + 0x00 + col_ind, pal3bit(rgbcolor >> 0), pal3bit(rgbcolor >> 6), pal3bit(rgbcolor >> 3));
+			palette_set_color_rgb(machine(), 0x10 + 0x00 + col_ind, pal3bit(rgbcolor >> 0), pal3bit(rgbcolor >> 6), pal3bit(rgbcolor >> 3));
 		}
 		else if ((offset >= 0x300) && (offset < 0x320)) /* 0xa300- 0xa31f */
 		{
 			/* palette 2 */
 			int col_ind = offset & 0x1f;
-			palette_set_color_rgb(space->machine(), 0x10 + 0x00 + col_ind, pal3bit(rgbcolor >> 0), pal3bit(rgbcolor >> 6), pal3bit(rgbcolor >> 3));
+			palette_set_color_rgb(machine(), 0x10 + 0x00 + col_ind, pal3bit(rgbcolor >> 0), pal3bit(rgbcolor >> 6), pal3bit(rgbcolor >> 3));
 		}
 		else
 			logerror("palette? read from colorram offset = %04x\n",offset);
 	}
 
-	if (*state->m_io9401 != 0x40)
-		logerror("colorram read in mode: 9401 = %02x (offset = %04x)\n", *state->m_io9401, offset);
+	if (*m_io9401 != 0x40)
+		logerror("colorram read in mode: 9401 = %02x (offset = %04x)\n", *m_io9401, offset);
 
-	return state->m_colorram[offset];
+	return m_colorram[offset];
 }
 
 
-static SCREEN_UPDATE( spaceg )
+UINT32 spaceg_state::screen_update_spaceg(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	spaceg_state *state = screen->machine().driver_data<spaceg_state>();
 	offs_t offs;
 
 	for (offs = 0; offs < 0x2000; offs++)
 	{
 		int i;
-		UINT8 data = state->m_videoram[offs];
+		UINT8 data = m_videoram[offs];
 		int y = offs & 0xff;
 		int x = (offs >> 8) << 3;
 
 		for (i = 0; i < 8; i++)
 		{
-			*BITMAP_ADDR16(bitmap, y, x) = (data & 0x80) ? state->m_colorram[offs] : 0;
+			bitmap.pix16(y, x) = (data & 0x80) ? m_colorram[offs] : 0;
 
 			x++;
 			data <<= 1;
@@ -323,22 +328,22 @@ static SCREEN_UPDATE( spaceg )
  *
  *************************************/
 
-static ADDRESS_MAP_START( spaceg_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( spaceg_map, AS_PROGRAM, 8, spaceg_state )
 	AM_RANGE(0x0000, 0x1fff) AM_ROM
 	AM_RANGE(0x3000, 0x3fff) AM_ROM
 	AM_RANGE(0x7000, 0x77ff) AM_RAM
 
-	AM_RANGE(0xa000, 0xbfff) AM_RAM_READ(spaceg_colorram_r) AM_BASE_MEMBER(spaceg_state, m_colorram)
-	AM_RANGE(0xc000, 0xdfff) AM_RAM_WRITE(zvideoram_w) AM_BASE_MEMBER(spaceg_state, m_videoram)
+	AM_RANGE(0xa000, 0xbfff) AM_RAM_READ(spaceg_colorram_r) AM_SHARE("colorram")
+	AM_RANGE(0xc000, 0xdfff) AM_RAM_WRITE(zvideoram_w) AM_SHARE("videoram")
 
-	AM_RANGE(0x9400, 0x9400) AM_WRITEONLY AM_BASE_MEMBER(spaceg_state, m_io9400) /* gfx ctrl */
-	AM_RANGE(0x9401, 0x9401) AM_WRITEONLY AM_BASE_MEMBER(spaceg_state, m_io9401) /* gfx ctrl */
+	AM_RANGE(0x9400, 0x9400) AM_WRITEONLY AM_SHARE("io9400") /* gfx ctrl */
+	AM_RANGE(0x9401, 0x9401) AM_WRITEONLY AM_SHARE("io9401") /* gfx ctrl */
 	/* 9402 -
-        bits 0 and 1 probably control the lamps under the player 1 and player 2 start buttons
-        bit 2 - unknown -
-        bit 3 is probably a flip screen
-        bit 7 - unknown - set to 1 during the gameplay (coinlock ?)
-    */
+	    bits 0 and 1 probably control the lamps under the player 1 and player 2 start buttons
+	    bit 2 - unknown -
+	    bit 3 is probably a flip screen
+	    bit 7 - unknown - set to 1 during the gameplay (coinlock ?)
+	*/
 	AM_RANGE(0x9402, 0x9407) AM_RAM     /* surely wrong */
 
 	AM_RANGE(0x9800, 0x9800) AM_READ_PORT("9800")
@@ -397,6 +402,23 @@ INPUT_PORTS_END
 
 /*************************************
  *
+ *  Sound interface
+ *
+ *************************************/
+
+
+//-------------------------------------------------
+//  sn76496_config psg_intf
+//-------------------------------------------------
+
+//static const sn76496_config psg_intf =
+//{
+//    DEVCB_NULL
+//};
+
+
+/*************************************
+ *
  *  Machine config
  *
  *************************************/
@@ -404,35 +426,36 @@ INPUT_PORTS_END
 static MACHINE_CONFIG_START( spaceg, spaceg_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80,2500000)		 /* 2.5 MHz */
+	MCFG_CPU_ADD("maincpu", Z80,2500000)         /* 2.5 MHz */
 	MCFG_CPU_PROGRAM_MAP(spaceg_map)
-	MCFG_CPU_VBLANK_INT("screen", nmi_line_pulse)	/* 60 Hz NMIs (verified) */
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", spaceg_state,  nmi_line_pulse) /* 60 Hz NMIs (verified) */
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500)) /* not accurate */
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(256, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 255, 32, 255)
-	MCFG_SCREEN_UPDATE( spaceg )
+	MCFG_SCREEN_UPDATE_DRIVER(spaceg_state, screen_update_spaceg)
 
 	MCFG_PALETTE_LENGTH(16+128-16)
-	MCFG_PALETTE_INIT( spaceg )
 
 	/* sound hardware */
 //  MCFG_SPEAKER_STANDARD_MONO("mono")
 
 //  MCFG_SOUND_ADD("sn1", SN76496, 15468480/4)
 //  MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
+//  MCFG_SOUND_CONFIG(psg_intf)
 
 //  MCFG_SOUND_ADD("sn2", SN76496, 15468480/4)
 //  MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
+//  MCFG_SOUND_CONFIG(psg_intf)
 
 //  MCFG_SOUND_ADD("sn3", SN76496, 15468480/4)
 //  MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
+//  MCFG_SOUND_CONFIG(psg_intf)
 
-//  MCFG_SOUND_ADD("dac", DAC, 0)
+//  MCFG_DAC_ADD("dac")
 //  MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 MACHINE_CONFIG_END
 
@@ -470,4 +493,4 @@ ROM_END
  *
  *************************************/
 
-GAME( 1979, spaceg, 0, spaceg, spaceg, 0, ROT270, "Omori Electric Co., Ltd.", "Space Guerrilla", GAME_IMPERFECT_GRAPHICS | GAME_NO_SOUND | GAME_SUPPORTS_SAVE )
+GAME( 1979, spaceg, 0, spaceg, spaceg, driver_device, 0, ROT270, "Omori Electric Co., Ltd.", "Space Guerrilla", GAME_IMPERFECT_GRAPHICS | GAME_NO_SOUND | GAME_SUPPORTS_SAVE )

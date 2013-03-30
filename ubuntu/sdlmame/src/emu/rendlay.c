@@ -81,15 +81,18 @@
 #include "rendfont.h"
 #include "rendlay.h"
 #include "rendutil.h"
-#include "output.h"
 #include "xmlfile.h"
 #include "png.h"
+#include "ui.h"
 
 
 
 /***************************************************************************
     STANDARD LAYOUTS
 ***************************************************************************/
+
+// screenless layouts
+#include "noscreens.lh"
 
 // single screen layouts
 #include "horizont.lh"
@@ -103,19 +106,13 @@
 // triple screen layouts
 #include "triphsxs.lh"
 
-// generic color overlay layouts
-#include "ho20ffff.lh"
-#include "ho2eff2e.lh"
-#include "ho4f893d.lh"
-#include "ho88ffff.lh"
-#include "hoa0a0ff.lh"
-#include "hoffe457.lh"
-#include "voffff20.lh"
-#include "hoffff20.lh"
+// quad screen layouts
+#include "quadhsxs.lh"
 
 // LCD screen layouts
 #include "lcd.lh"
 #include "lcd_rot.lh"
+
 
 
 //**************************************************************************
@@ -196,16 +193,16 @@ static int get_variable_value(running_machine &machine, const char *string, char
 	char temp[100];
 
 	// screen 0 parameters
-	for (const screen_device_config *devconfig = machine.config().first_screen(); devconfig != NULL; devconfig = devconfig->next_screen())
+	screen_device_iterator iter(machine.root_device());
+	int scrnum = 0;
+	for (const screen_device *device = iter.first(); device != NULL; device = iter.next(), scrnum++)
 	{
-		int scrnum = machine.config().m_devicelist.indexof(SCREEN, devconfig->tag());
-
 		// native X aspect factor
 		sprintf(temp, "~scr%dnativexaspect~", scrnum);
 		if (!strncmp(string, temp, strlen(temp)))
 		{
-			int num = devconfig->visible_area().max_x + 1 - devconfig->visible_area().min_x;
-			int den = devconfig->visible_area().max_y + 1 - devconfig->visible_area().min_y;
+			int num = device->visible_area().width();
+			int den = device->visible_area().height();
 			reduce_fraction(num, den);
 			*outputptr += sprintf(*outputptr, "%d", num);
 			return strlen(temp);
@@ -215,8 +212,8 @@ static int get_variable_value(running_machine &machine, const char *string, char
 		sprintf(temp, "~scr%dnativeyaspect~", scrnum);
 		if (!strncmp(string, temp, strlen(temp)))
 		{
-			int num = devconfig->visible_area().max_x + 1 - devconfig->visible_area().min_x;
-			int den = devconfig->visible_area().max_y + 1 - devconfig->visible_area().min_y;
+			int num = device->visible_area().width();
+			int den = device->visible_area().height();
 			reduce_fraction(num, den);
 			*outputptr += sprintf(*outputptr, "%d", den);
 			return strlen(temp);
@@ -226,7 +223,7 @@ static int get_variable_value(running_machine &machine, const char *string, char
 		sprintf(temp, "~scr%dwidth~", scrnum);
 		if (!strncmp(string, temp, strlen(temp)))
 		{
-			*outputptr += sprintf(*outputptr, "%d", devconfig->visible_area().max_x + 1 - devconfig->visible_area().min_x);
+			*outputptr += sprintf(*outputptr, "%d", device->visible_area().width());
 			return strlen(temp);
 		}
 
@@ -234,7 +231,7 @@ static int get_variable_value(running_machine &machine, const char *string, char
 		sprintf(temp, "~scr%dheight~", scrnum);
 		if (!strncmp(string, temp, strlen(temp)))
 		{
-			*outputptr += sprintf(*outputptr, "%d", devconfig->visible_area().max_y + 1 - devconfig->visible_area().min_y);
+			*outputptr += sprintf(*outputptr, "%d", device->visible_area().height());
 			return strlen(temp);
 		}
 	}
@@ -407,11 +404,11 @@ static void parse_orientation(running_machine &machine, xml_data_node *orientnod
 	int rotate = xml_get_attribute_int_with_subst(machine, *orientnode, "rotate", 0);
 	switch (rotate)
 	{
-		case 0:		orientation = ROT0;		break;
-		case 90:	orientation = ROT90;	break;
-		case 180:	orientation = ROT180;	break;
-		case 270:	orientation = ROT270;	break;
-		default:	throw emu_fatalerror("Invalid rotation in XML orientation node: %d", rotate); break;
+		case 0:     orientation = ROT0;     break;
+		case 90:    orientation = ROT90;    break;
+		case 180:   orientation = ROT180;   break;
+		case 270:   orientation = ROT270;   break;
+		default:    throw emu_fatalerror("Invalid rotation in XML orientation node: %d", rotate);
 	}
 	if (strcmp("yes", xml_get_attribute_string_with_subst(machine, *orientnode, "swapxy", "no")) == 0)
 		orientation ^= ORIENTATION_SWAP_XY;
@@ -433,11 +430,11 @@ static void parse_orientation(running_machine &machine, xml_data_node *orientnod
 
 layout_element::layout_element(running_machine &machine, xml_data_node &elemnode, const char *dirname)
 	: m_next(NULL),
-	  m_machine(machine),
-	  m_complist(machine.respool()),
-	  m_defstate(0),
-	  m_maxstate(0),
-	  m_elemtex(NULL)
+		m_machine(machine),
+		m_complist(machine.respool()),
+		m_defstate(0),
+		m_maxstate(0),
+		m_elemtex(NULL)
 {
 	// extract the name
 	const char *name = xml_get_attribute_string_with_subst(machine, elemnode, "name", NULL);
@@ -476,6 +473,14 @@ layout_element::layout_element(running_machine &machine, xml_data_node &elemnode
 			m_maxstate = 262143;
 		if (newcomp.m_type == component::CTYPE_DOTMATRIX)
 			m_maxstate = 255;
+		if (newcomp.m_type == component::CTYPE_DOTMATRIX5DOT)
+			m_maxstate = 31;
+		if (newcomp.m_type == component::CTYPE_DOTMATRIXDOT)
+			m_maxstate = 1;
+		if (newcomp.m_type == component::CTYPE_SIMPLECOUNTER)
+			m_maxstate = xml_get_attribute_int_with_subst(machine, *compnode, "maxstate", 999);
+		if (newcomp.m_type == component::CTYPE_REEL)
+			m_maxstate = 65536;
 	}
 
 	// determine the scale/offset for normalization
@@ -505,7 +510,7 @@ layout_element::layout_element(running_machine &machine, xml_data_node &elemnode
 layout_element::~layout_element()
 {
 	// loop over all states and free their textures
-	auto_free(m_machine, m_elemtex);
+	auto_free(machine(), m_elemtex);
 }
 
 
@@ -522,7 +527,7 @@ render_texture *layout_element::state_texture(int state)
 	{
 		m_elemtex[state].m_element = this;
 		m_elemtex[state].m_state = state;
-		m_elemtex[state].m_texture = m_machine.render().texture_alloc(element_scale, &m_elemtex[state]);
+		m_elemtex[state].m_texture = machine().render().texture_alloc(element_scale, &m_elemtex[state]);
 	}
 	return m_elemtex[state].m_texture;
 }
@@ -534,7 +539,7 @@ render_texture *layout_element::state_texture(int state)
 //  resolution
 //-------------------------------------------------
 
-void layout_element::element_scale(bitmap_t &dest, const bitmap_t &source, const rectangle &sbounds, void *param)
+void layout_element::element_scale(bitmap_argb32 &dest, bitmap_argb32 &source, const rectangle &sbounds, void *param)
 {
 	texture *elemtex = (texture *)param;
 
@@ -544,13 +549,14 @@ void layout_element::element_scale(bitmap_t &dest, const bitmap_t &source, const
 		{
 			// get the local scaled bounds
 			rectangle bounds;
-			bounds.min_x = render_round_nearest(curcomp->bounds().x0 * dest.width);
-			bounds.min_y = render_round_nearest(curcomp->bounds().y0 * dest.height);
-			bounds.max_x = render_round_nearest(curcomp->bounds().x1 * dest.width);
-			bounds.max_y = render_round_nearest(curcomp->bounds().y1 * dest.height);
+			bounds.min_x = render_round_nearest(curcomp->bounds().x0 * dest.width());
+			bounds.min_y = render_round_nearest(curcomp->bounds().y0 * dest.height());
+			bounds.max_x = render_round_nearest(curcomp->bounds().x1 * dest.width());
+			bounds.max_y = render_round_nearest(curcomp->bounds().y1 * dest.height());
+			bounds &= dest.cliprect();
 
 			// based on the component type, add to the texture
-			curcomp->draw(elemtex->m_element->m_machine, dest, bounds, elemtex->m_state);
+			curcomp->draw(elemtex->m_element->machine(), dest, bounds, elemtex->m_state);
 		}
 }
 
@@ -565,8 +571,8 @@ void layout_element::element_scale(bitmap_t &dest, const bitmap_t &source, const
 
 layout_element::texture::texture()
 	: m_element(NULL),
-	  m_texture(NULL),
-	  m_state(0)
+		m_texture(NULL),
+		m_state(0)
 {
 }
 
@@ -578,7 +584,7 @@ layout_element::texture::texture()
 layout_element::texture::~texture()
 {
 	if (m_element != NULL)
-		m_element->m_machine.render().texture_free(m_texture);
+		m_element->machine().render().texture_free(m_texture);
 }
 
 
@@ -593,12 +599,15 @@ layout_element::texture::~texture()
 
 layout_element::component::component(running_machine &machine, xml_data_node &compnode, const char *dirname)
 	: m_next(NULL),
-	  m_type(CTYPE_INVALID),
-	  m_state(0),
-	  m_bitmap(NULL),
-	  m_file(NULL),
-	  m_hasalpha(false)
+		m_type(CTYPE_INVALID),
+		m_state(0)
 {
+	for (int i=0;i<MAX_BITMAPS;i++)
+	{
+		m_hasalpha[i] = false;
+		m_file[i] = NULL;
+	}
+
 	// fetch common data
 	m_state = xml_get_attribute_int_with_subst(machine, compnode, "state", -1);
 	parse_bounds(machine, xml_get_sibling(compnode.child, "bounds"), m_bounds);
@@ -608,10 +617,11 @@ layout_element::component::component(running_machine &machine, xml_data_node &co
 	if (strcmp(compnode.name, "image") == 0)
 	{
 		m_type = CTYPE_IMAGE;
-		m_dirname = dirname;
-		m_imagefile = xml_get_attribute_string_with_subst(machine, compnode, "file", "");
-		m_alphafile = xml_get_attribute_string_with_subst(machine, compnode, "alphafile", "");
-		m_file = global_alloc(emu_file(machine.options().art_path(), OPEN_FLAG_READ));
+		if (dirname != NULL)
+			m_dirname = dirname;
+		m_imagefile[0] = xml_get_attribute_string_with_subst(machine, compnode, "file", "");
+		m_alphafile[0] = xml_get_attribute_string_with_subst(machine, compnode, "alphafile", "");
+		m_file[0] = global_alloc(emu_file(machine.options().art_path(), OPEN_FLAG_READ));
 	}
 
 	// text nodes
@@ -619,11 +629,80 @@ layout_element::component::component(running_machine &machine, xml_data_node &co
 	{
 		m_type = CTYPE_TEXT;
 		m_string = xml_get_attribute_string_with_subst(machine, compnode, "string", "");
+		m_textalign = xml_get_attribute_int_with_subst(machine, compnode, "align", 0);
 	}
 
 	// dotmatrix nodes
 	else if (strcmp(compnode.name, "dotmatrix") == 0)
+	{
 		m_type = CTYPE_DOTMATRIX;
+	}
+	else if (strcmp(compnode.name, "dotmatrix5dot") == 0)
+	{
+		m_type = CTYPE_DOTMATRIX5DOT;
+	}
+	else if (strcmp(compnode.name, "dotmatrixdot") == 0)
+	{
+		m_type = CTYPE_DOTMATRIXDOT;
+	}
+
+	// simplecounter nodes
+	else if (strcmp(compnode.name, "simplecounter") == 0)
+	{
+		m_type = CTYPE_SIMPLECOUNTER;
+		m_digits = xml_get_attribute_int_with_subst(machine, compnode, "digits", 2);
+		m_textalign = xml_get_attribute_int_with_subst(machine, compnode, "align", 0);
+	}
+
+	// fruit machine reels
+	else if (strcmp(compnode.name, "reel") == 0)
+	{
+		m_type = CTYPE_REEL;
+
+		astring symbollist = xml_get_attribute_string_with_subst(machine, compnode, "symbollist", "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15");
+
+		// split out position names from string and figure out our number of symbols
+		int location = -1;
+		m_numstops = 0;
+		location=symbollist.find(0,",");
+		while (location!=-1)
+		{
+			m_stopnames[m_numstops] = symbollist;
+			m_stopnames[m_numstops].substr(0, location);
+			symbollist.substr(location+1, symbollist.len()-(location-1));
+			m_numstops++;
+			location=symbollist.find(0,",");
+		}
+		m_stopnames[m_numstops++] = symbollist;
+
+		// careful, dirname is NULL if we're coming from internal layout, and our string assignment doesn't like that
+		if (dirname != NULL)
+			m_dirname = dirname;
+
+		for (int i=0;i<m_numstops;i++)
+		{
+			location=m_stopnames[i].find(0,":");
+			if (location!=-1)
+			{
+				m_imagefile[i] = m_stopnames[i];
+				m_stopnames[i].substr(0, location);
+				m_imagefile[i].substr(location+1, m_imagefile[i].len()-(location-1));
+
+				//m_alphafile[i] =
+				m_file[i] = global_alloc(emu_file(machine.options().art_path(), OPEN_FLAG_READ));
+			}
+			else
+			{
+				//m_imagefile[i] = 0;
+				//m_alphafile[i] = 0;
+				m_file[i] = 0;
+			}
+		}
+
+		m_stateoffset = xml_get_attribute_int_with_subst(machine, compnode, "stateoffset", 0);
+		m_numsymbolsvisible = xml_get_attribute_int_with_subst(machine, compnode, "numsymbolsvisible", 3);
+		m_reelreversed = xml_get_attribute_int_with_subst(machine, compnode, "reelreversed", 0);
+	}
 
 	// led7seg nodes
 	else if (strcmp(compnode.name, "led7seg") == 0)
@@ -665,8 +744,10 @@ layout_element::component::component(running_machine &machine, xml_data_node &co
 
 layout_element::component::~component()
 {
-	global_free(m_file);
-	global_free(m_bitmap);
+	for (int i=0;i<MAX_BITMAPS;i++)
+	{
+		global_free(m_file[i]);
+	}
 }
 
 
@@ -674,19 +755,17 @@ layout_element::component::~component()
 //  draw - draw a component
 //-------------------------------------------------
 
-void layout_element::component::draw(running_machine &machine, bitmap_t &dest, const rectangle &bounds, int state)
+void layout_element::component::draw(running_machine &machine, bitmap_argb32 &dest, const rectangle &bounds, int state)
 {
 	switch (m_type)
 	{
 		case CTYPE_IMAGE:
-			if (m_bitmap == NULL)
-				m_bitmap = load_bitmap();
-			render_resample_argb_bitmap_hq(
-					BITMAP_ADDR32(&dest, bounds.min_y, bounds.min_x),
-					dest.rowpixels,
-					bounds.max_x - bounds.min_x,
-					bounds.max_y - bounds.min_y,
-					m_bitmap, NULL, &m_color);
+			if (!m_bitmap[0].valid())
+				load_bitmap();
+			{
+				bitmap_argb32 destsub(dest, bounds);
+				render_resample_argb_bitmap_hq(destsub, m_bitmap[0], m_color);
+			}
 			break;
 
 		case CTYPE_RECT:
@@ -722,7 +801,23 @@ void layout_element::component::draw(running_machine &machine, bitmap_t &dest, c
 			break;
 
 		case CTYPE_DOTMATRIX:
-			draw_dotmatrix(dest, bounds, state);
+			draw_dotmatrix(8, dest, bounds, state);
+			break;
+
+		case CTYPE_DOTMATRIX5DOT:
+			draw_dotmatrix(5, dest, bounds, state);
+			break;
+
+		case CTYPE_DOTMATRIXDOT:
+			draw_dotmatrix(1, dest, bounds, state);
+			break;
+
+		case CTYPE_SIMPLECOUNTER:
+			draw_simplecounter(machine, dest, bounds, state);
+			break;
+
+		case CTYPE_REEL:
+			draw_reel(machine, dest, bounds, state);
 			break;
 
 		default:
@@ -736,7 +831,7 @@ void layout_element::component::draw(running_machine &machine, bitmap_t &dest, c
 //  color
 //-------------------------------------------------
 
-void layout_element::component::draw_rect(bitmap_t &dest, const rectangle &bounds)
+void layout_element::component::draw_rect(bitmap_argb32 &dest, const rectangle &bounds)
 {
 	// compute premultiplied colors
 	UINT32 r = m_color.r * m_color.a * 255.0;
@@ -745,8 +840,9 @@ void layout_element::component::draw_rect(bitmap_t &dest, const rectangle &bound
 	UINT32 inva = (1.0f - m_color.a) * 255.0;
 
 	// iterate over X and Y
-	for (UINT32 y = bounds.min_y; y < bounds.max_y; y++)
-		for (UINT32 x = bounds.min_x; x < bounds.max_x; x++)
+	for (UINT32 y = bounds.min_y; y <= bounds.max_y; y++)
+	{
+		for (UINT32 x = bounds.min_x; x <= bounds.max_x; x++)
 		{
 			UINT32 finalr = r;
 			UINT32 finalg = g;
@@ -755,15 +851,16 @@ void layout_element::component::draw_rect(bitmap_t &dest, const rectangle &bound
 			// if we're translucent, add in the destination pixel contribution
 			if (inva > 0)
 			{
-				UINT32 dpix = *BITMAP_ADDR32(&dest, y, x);
+				UINT32 dpix = dest.pix32(y, x);
 				finalr += (RGB_RED(dpix) * inva) >> 8;
 				finalg += (RGB_GREEN(dpix) * inva) >> 8;
 				finalb += (RGB_BLUE(dpix) * inva) >> 8;
 			}
 
 			// store the target pixel, dividing the RGBA values by the overall scale factor
-			*BITMAP_ADDR32(&dest, y, x) = MAKE_ARGB(0xff, finalr, finalg, finalb);
+			dest.pix32(y, x) = MAKE_ARGB(0xff, finalr, finalg, finalb);
 		}
+	}
 }
 
 
@@ -772,7 +869,7 @@ void layout_element::component::draw_rect(bitmap_t &dest, const rectangle &bound
 //  color
 //-------------------------------------------------
 
-void layout_element::component::draw_disk(bitmap_t &dest, const rectangle &bounds)
+void layout_element::component::draw_disk(bitmap_argb32 &dest, const rectangle &bounds)
 {
 	// compute premultiplied colors
 	UINT32 r = m_color.r * m_color.a * 255.0;
@@ -781,14 +878,14 @@ void layout_element::component::draw_disk(bitmap_t &dest, const rectangle &bound
 	UINT32 inva = (1.0f - m_color.a) * 255.0;
 
 	// find the center
-	float xcenter = (float)(bounds.min_x + bounds.max_x) * 0.5f;
-	float ycenter = (float)(bounds.min_y + bounds.max_y) * 0.5f;
-	float xradius = (float)(bounds.max_x - bounds.min_x) * 0.5f;
-	float yradius = (float)(bounds.max_y - bounds.min_y) * 0.5f;
+	float xcenter = float(bounds.xcenter());
+	float ycenter = float(bounds.ycenter());
+	float xradius = float(bounds.width()) * 0.5f;
+	float yradius = float(bounds.height()) * 0.5f;
 	float ooyradius2 = 1.0f / (yradius * yradius);
 
 	// iterate over y
-	for (UINT32 y = bounds.min_y; y < bounds.max_y; y++)
+	for (UINT32 y = bounds.min_y; y <= bounds.max_y; y++)
 	{
 		float ycoord = ycenter - ((float)y + 0.5f);
 		float xval = xradius * sqrt(1.0f - (ycoord * ycoord) * ooyradius2);
@@ -807,14 +904,14 @@ void layout_element::component::draw_disk(bitmap_t &dest, const rectangle &bound
 			// if we're translucent, add in the destination pixel contribution
 			if (inva > 0)
 			{
-				UINT32 dpix = *BITMAP_ADDR32(&dest, y, x);
+				UINT32 dpix = dest.pix32(y, x);
 				finalr += (RGB_RED(dpix) * inva) >> 8;
 				finalg += (RGB_GREEN(dpix) * inva) >> 8;
 				finalb += (RGB_BLUE(dpix) * inva) >> 8;
 			}
 
 			// store the target pixel, dividing the RGBA values by the overall scale factor
-			*BITMAP_ADDR32(&dest, y, x) = MAKE_ARGB(0xff, finalr, finalg, finalb);
+			dest.pix32(y, x) = MAKE_ARGB(0xff, finalr, finalg, finalb);
 		}
 	}
 }
@@ -824,7 +921,7 @@ void layout_element::component::draw_disk(bitmap_t &dest, const rectangle &bound
 //  draw_text - draw text in the specified color
 //-------------------------------------------------
 
-void layout_element::component::draw_text(running_machine &machine, bitmap_t &dest, const rectangle &bounds)
+void layout_element::component::draw_text(running_machine &machine, bitmap_argb32 &dest, const rectangle &bounds)
 {
 	// compute premultiplied colors
 	UINT32 r = m_color.r * 255.0;
@@ -836,34 +933,56 @@ void layout_element::component::draw_text(running_machine &machine, bitmap_t &de
 	render_font *font = machine.render().font_alloc("default");
 	float aspect = 1.0f;
 	INT32 width;
+
+
 	while (1)
 	{
-		width = font->string_width(bounds.max_y - bounds.min_y, aspect, m_string);
-		if (width < bounds.max_x - bounds.min_x)
+		width = font->string_width(bounds.height(), aspect, m_string);
+		if (width < bounds.width())
 			break;
 		aspect *= 0.9f;
 	}
-	INT32 curx = bounds.min_x + (bounds.max_x - bounds.min_x - width) / 2;
+
+
+	// get alignment
+	INT32 curx;
+	switch (m_textalign)
+	{
+		// left
+		case 1:
+			curx = bounds.min_x;
+			break;
+
+		// right
+		case 2:
+			curx = bounds.max_x - width;
+			break;
+
+		// default to center
+		default:
+			curx = bounds.min_x + (bounds.width() - width) / 2;
+			break;
+	}
 
 	// allocate a temporary bitmap
-	bitmap_t *tempbitmap = global_alloc(bitmap_t(dest.width, dest.height, BITMAP_FORMAT_ARGB32));
+	bitmap_argb32 tempbitmap(dest.width(), dest.height());
 
 	// loop over characters
 	for (const char *s = m_string; *s != 0; s++)
 	{
 		// get the font bitmap
 		rectangle chbounds;
-		font->get_scaled_bitmap_and_bounds(*tempbitmap, bounds.max_y - bounds.min_y, aspect, *s, chbounds);
+		font->get_scaled_bitmap_and_bounds(tempbitmap, bounds.height(), aspect, *s, chbounds);
 
 		// copy the data into the target
-		for (int y = 0; y < chbounds.max_y - chbounds.min_y; y++)
+		for (int y = 0; y < chbounds.height(); y++)
 		{
 			int effy = bounds.min_y + y;
 			if (effy >= bounds.min_y && effy <= bounds.max_y)
 			{
-				UINT32 *src = BITMAP_ADDR32(tempbitmap, y, 0);
-				UINT32 *d = BITMAP_ADDR32(&dest, effy, 0);
-				for (int x = 0; x < chbounds.max_x - chbounds.min_x; x++)
+				UINT32 *src = &tempbitmap.pix32(y);
+				UINT32 *d = &dest.pix32(effy);
+				for (int x = 0; x < chbounds.width(); x++)
 				{
 					int effx = curx + x + chbounds.min_x;
 					if (effx >= bounds.min_x && effx <= bounds.max_x)
@@ -884,13 +1003,176 @@ void layout_element::component::draw_text(running_machine &machine, bitmap_t &de
 		}
 
 		// advance in the X direction
-		curx += font->char_width(bounds.max_y - bounds.min_y, aspect, *s);
+		curx += font->char_width(bounds.height(), aspect, *s);
 	}
 
 	// free the temporary bitmap and font
-	global_free(tempbitmap);
 	machine.render().font_free(font);
 }
+
+void layout_element::component::draw_simplecounter(running_machine &machine, bitmap_argb32 &dest, const rectangle &bounds, int state)
+{
+	char temp[256];
+	sprintf(temp, "%0*d", m_digits, state);
+	m_string = astring(temp);
+	draw_text(machine, dest, bounds);
+}
+
+/* state is a normalized value between 0 and 65536 so that we don't need to worry about how many motor steps here or in the .lay, only the number of symbols */
+void layout_element::component::draw_reel(running_machine &machine, bitmap_argb32 &dest, const rectangle &bounds, int state)
+{
+	const int max_state_used = 0x10000;
+
+	// shift the reels a bit based on this param, allows fine tuning
+	int use_state = (state + m_stateoffset) % max_state_used;
+
+	// compute premultiplied colors
+	UINT32 r = m_color.r * 255.0;
+	UINT32 g = m_color.g * 255.0;
+	UINT32 b = m_color.b * 255.0;
+	UINT32 a = m_color.a * 255.0;
+
+	// get the width of the string
+	render_font *font = machine.render().font_alloc("default");
+	float aspect = 1.0f;
+	INT32 width;
+	int curry = 0;
+	int num_shown = m_numsymbolsvisible;
+
+	int ourheight = bounds.height();
+
+	for (int fruit = 0;fruit<m_numstops;fruit++)
+	{
+		int basey;
+
+		if (m_reelreversed==1)
+		{
+			basey = bounds.min_y + ((use_state)*(ourheight/num_shown)/(max_state_used/m_numstops)) + curry;
+		}
+		else
+		{
+			basey = bounds.min_y - ((use_state)*(ourheight/num_shown)/(max_state_used/m_numstops)) + curry;
+		}
+
+		// wrap around...
+		if (basey < bounds.min_y)
+			basey += ((max_state_used)*(ourheight/num_shown)/(max_state_used/m_numstops));
+		if (basey > bounds.max_y)
+			basey -= ((max_state_used)*(ourheight/num_shown)/(max_state_used/m_numstops));
+
+		int endpos = basey+ourheight/num_shown;
+
+		// only render the symbol / text if it's atually in view because the code is SLOW
+		if ((endpos >= bounds.min_y) && (basey <= bounds.max_y))
+		{
+
+			while (1)
+			{
+				width = font->string_width(ourheight/num_shown, aspect, m_stopnames[fruit]);
+				if (width < bounds.width())
+					break;
+				aspect *= 0.9f;
+			}
+
+			INT32 curx;
+			curx = bounds.min_x + (bounds.width() - width) / 2;
+
+			if (m_file[fruit])
+				if (!m_bitmap[fruit].valid())
+					load_reel_bitmap(fruit);
+
+			if (m_file[fruit]) // render gfx
+			{
+				bitmap_argb32 tempbitmap2(dest.width(), ourheight/num_shown);
+
+				if (m_bitmap[fruit].valid())
+				{
+					render_resample_argb_bitmap_hq(tempbitmap2, m_bitmap[fruit], m_color);
+
+					for (int y = 0; y < ourheight/num_shown; y++)
+					{
+						int effy = basey + y;
+
+						if (effy >= bounds.min_y && effy <= bounds.max_y)
+						{
+							UINT32 *src = &tempbitmap2.pix32(y);
+							UINT32 *d = &dest.pix32(effy);
+							for (int x = 0; x < dest.width(); x++)
+							{
+								int effx = x;
+								if (effx >= bounds.min_x && effx <= bounds.max_x)
+								{
+
+									UINT32 spix = RGB_ALPHA(src[x]);
+									if (spix != 0)
+									{
+										d[effx] = src[x];
+									}
+								}
+							}
+						}
+
+					}
+				}
+			}
+			else // render text (fallback)
+			{
+				// allocate a temporary bitmap
+				bitmap_argb32 tempbitmap(dest.width(), dest.height());
+
+				// loop over characters
+				for (const char *s = m_stopnames[fruit]; *s != 0; s++)
+				{
+					// get the font bitmap
+					rectangle chbounds;
+					font->get_scaled_bitmap_and_bounds(tempbitmap, ourheight/num_shown, aspect, *s, chbounds);
+
+					// copy the data into the target
+					for (int y = 0; y < chbounds.height(); y++)
+					{
+						int effy = basey + y;
+
+						if (effy >= bounds.min_y && effy <= bounds.max_y)
+						{
+							UINT32 *src = &tempbitmap.pix32(y);
+							UINT32 *d = &dest.pix32(effy);
+							for (int x = 0; x < chbounds.width(); x++)
+							{
+								int effx = curx + x + chbounds.min_x;
+								if (effx >= bounds.min_x && effx <= bounds.max_x)
+								{
+
+									UINT32 spix = RGB_ALPHA(src[x]);
+									if (spix != 0)
+									{
+										UINT32 dpix = d[effx];
+										UINT32 ta = (a * (spix + 1)) >> 8;
+										UINT32 tr = (r * ta + RGB_RED(dpix) * (0x100 - ta)) >> 8;
+										UINT32 tg = (g * ta + RGB_GREEN(dpix) * (0x100 - ta)) >> 8;
+										UINT32 tb = (b * ta + RGB_BLUE(dpix) * (0x100 - ta)) >> 8;
+										d[effx] = MAKE_ARGB(0xff, tr, tg, tb);
+									}
+								}
+							}
+						}
+					}
+
+					// advance in the X direction
+					curx += font->char_width(ourheight/num_shown, aspect, *s);
+
+				}
+
+			}
+		}
+
+		curry += ourheight/num_shown;
+	}
+
+	// free the temporary bitmap and font
+	machine.render().font_free(font);
+}
+
+
 
 
 //-------------------------------------------------
@@ -898,46 +1180,63 @@ void layout_element::component::draw_text(running_machine &machine, bitmap_t &de
 //  a component
 //-------------------------------------------------
 
-bitmap_t *layout_element::component::load_bitmap()
+void layout_element::component::load_bitmap()
 {
 	// load the basic bitmap
-	assert(m_file != NULL);
-	bitmap_t *bitmap = render_load_png(*m_file, m_dirname, m_imagefile, NULL, &m_hasalpha);
-	if (bitmap != NULL && m_alphafile)
+	assert(m_file[0] != NULL);
+	m_hasalpha[0] = render_load_png(m_bitmap[0], *m_file[0], m_dirname, m_imagefile[0]);
 
-		// load the alpha bitmap if specified
-		if (render_load_png(*m_file, m_dirname, m_alphafile, bitmap, &m_hasalpha) == NULL)
-		{
-			global_free(bitmap);
-			bitmap = NULL;
-		}
+	// load the alpha bitmap if specified
+	if (m_bitmap[0].valid() && m_alphafile[0])
+		render_load_png(m_bitmap[0], *m_file[0], m_dirname, m_alphafile[0], true);
 
 	// if we can't load the bitmap, allocate a dummy one and report an error
-	if (bitmap == NULL)
+	if (!m_bitmap[0].valid())
 	{
 		// draw some stripes in the bitmap
-		bitmap = global_alloc(bitmap_t(100, 100, BITMAP_FORMAT_ARGB32));
-		bitmap_fill(bitmap, NULL, 0);
+		m_bitmap[0].allocate(100, 100);
+		m_bitmap[0].fill(0);
 		for (int step = 0; step < 100; step += 25)
 			for (int line = 0; line < 100; line++)
-				*BITMAP_ADDR32(bitmap, (step + line) % 100, line % 100) = MAKE_ARGB(0xff,0xff,0xff,0xff);
+				m_bitmap[0].pix32((step + line) % 100, line % 100) = MAKE_ARGB(0xff,0xff,0xff,0xff);
 
 		// log an error
-		if (!m_alphafile)
-			mame_printf_warning("Unable to load component bitmap '%s'", m_imagefile.cstr());
+		if (!m_alphafile[0])
+			mame_printf_warning("Unable to load component bitmap '%s'", m_imagefile[0].cstr());
 		else
-			mame_printf_warning("Unable to load component bitmap '%s'/'%s'", m_imagefile.cstr(), m_alphafile.cstr());
+			mame_printf_warning("Unable to load component bitmap '%s'/'%s'", m_imagefile[0].cstr(), m_alphafile[0].cstr());
+	}
+}
+
+
+void layout_element::component::load_reel_bitmap(int number)
+{
+
+	// load the basic bitmap
+	assert(m_file != NULL);
+	/*m_hasalpha[number] = */ render_load_png(m_bitmap[number], *m_file[number], m_dirname, m_imagefile[number]);
+
+	// load the alpha bitmap if specified
+	//if (m_bitmap[number].valid() && m_alphafile[number])
+	//  render_load_png(m_bitmap[number], *m_file[number], m_dirname, m_alphafile[number], true);
+
+	// if we can't load the bitmap just use text rendering
+	if (!m_bitmap[number].valid())
+	{
+		// fallback to text rendering
+		global_free(m_file[number]);
+		m_file[number] = NULL;
 	}
 
-	return bitmap;
 }
+
 
 
 //-------------------------------------------------
 //  draw_led7seg - draw a 7-segment LCD
 //-------------------------------------------------
 
-void layout_element::component::draw_led7seg(bitmap_t &dest, const rectangle &bounds, int pattern)
+void layout_element::component::draw_led7seg(bitmap_argb32 &dest, const rectangle &bounds, int pattern)
 {
 	const rgb_t onpen = MAKE_ARGB(0xff,0xff,0xff,0xff);
 	const rgb_t offpen = MAKE_ARGB(0xff,0x20,0x20,0x20);
@@ -949,40 +1248,38 @@ void layout_element::component::draw_led7seg(bitmap_t &dest, const rectangle &bo
 	int skewwidth = 40;
 
 	// allocate a temporary bitmap for drawing
-	bitmap_t *tempbitmap = global_alloc(bitmap_t(bmwidth + skewwidth, bmheight, BITMAP_FORMAT_ARGB32));
-	bitmap_fill(tempbitmap, NULL, MAKE_ARGB(0xff,0x00,0x00,0x00));
+	bitmap_argb32 tempbitmap(bmwidth + skewwidth, bmheight);
+	tempbitmap.fill(MAKE_ARGB(0xff,0x00,0x00,0x00));
 
 	// top bar
-	draw_segment_horizontal(*tempbitmap, 0 + 2*segwidth/3, bmwidth - 2*segwidth/3, 0 + segwidth/2, segwidth, (pattern & (1 << 0)) ? onpen : offpen);
+	draw_segment_horizontal(tempbitmap, 0 + 2*segwidth/3, bmwidth - 2*segwidth/3, 0 + segwidth/2, segwidth, (pattern & (1 << 0)) ? onpen : offpen);
 
 	// top-right bar
-	draw_segment_vertical(*tempbitmap, 0 + 2*segwidth/3, bmheight/2 - segwidth/3, bmwidth - segwidth/2, segwidth, (pattern & (1 << 1)) ? onpen : offpen);
+	draw_segment_vertical(tempbitmap, 0 + 2*segwidth/3, bmheight/2 - segwidth/3, bmwidth - segwidth/2, segwidth, (pattern & (1 << 1)) ? onpen : offpen);
 
 	// bottom-right bar
-	draw_segment_vertical(*tempbitmap, bmheight/2 + segwidth/3, bmheight - 2*segwidth/3, bmwidth - segwidth/2, segwidth, (pattern & (1 << 2)) ? onpen : offpen);
+	draw_segment_vertical(tempbitmap, bmheight/2 + segwidth/3, bmheight - 2*segwidth/3, bmwidth - segwidth/2, segwidth, (pattern & (1 << 2)) ? onpen : offpen);
 
 	// bottom bar
-	draw_segment_horizontal(*tempbitmap, 0 + 2*segwidth/3, bmwidth - 2*segwidth/3, bmheight - segwidth/2, segwidth, (pattern & (1 << 3)) ? onpen : offpen);
+	draw_segment_horizontal(tempbitmap, 0 + 2*segwidth/3, bmwidth - 2*segwidth/3, bmheight - segwidth/2, segwidth, (pattern & (1 << 3)) ? onpen : offpen);
 
 	// bottom-left bar
-	draw_segment_vertical(*tempbitmap, bmheight/2 + segwidth/3, bmheight - 2*segwidth/3, 0 + segwidth/2, segwidth, (pattern & (1 << 4)) ? onpen : offpen);
+	draw_segment_vertical(tempbitmap, bmheight/2 + segwidth/3, bmheight - 2*segwidth/3, 0 + segwidth/2, segwidth, (pattern & (1 << 4)) ? onpen : offpen);
 
 	// top-left bar
-	draw_segment_vertical(*tempbitmap, 0 + 2*segwidth/3, bmheight/2 - segwidth/3, 0 + segwidth/2, segwidth, (pattern & (1 << 5)) ? onpen : offpen);
+	draw_segment_vertical(tempbitmap, 0 + 2*segwidth/3, bmheight/2 - segwidth/3, 0 + segwidth/2, segwidth, (pattern & (1 << 5)) ? onpen : offpen);
 
 	// middle bar
-	draw_segment_horizontal(*tempbitmap, 0 + 2*segwidth/3, bmwidth - 2*segwidth/3, bmheight/2, segwidth, (pattern & (1 << 6)) ? onpen : offpen);
+	draw_segment_horizontal(tempbitmap, 0 + 2*segwidth/3, bmwidth - 2*segwidth/3, bmheight/2, segwidth, (pattern & (1 << 6)) ? onpen : offpen);
 
 	// apply skew
-	apply_skew(*tempbitmap, 40);
+	apply_skew(tempbitmap, 40);
 
 	// decimal point
-	draw_segment_decimal(*tempbitmap, bmwidth + segwidth/2, bmheight - segwidth/2, segwidth, (pattern & (1 << 7)) ? onpen : offpen);
+	draw_segment_decimal(tempbitmap, bmwidth + segwidth/2, bmheight - segwidth/2, segwidth, (pattern & (1 << 7)) ? onpen : offpen);
 
 	// resample to the target size
-	render_resample_argb_bitmap_hq(dest.base, dest.rowpixels, dest.width, dest.height, tempbitmap, NULL, &m_color);
-
-	global_free(tempbitmap);
+	render_resample_argb_bitmap_hq(dest, tempbitmap, m_color);
 }
 
 
@@ -990,7 +1287,7 @@ void layout_element::component::draw_led7seg(bitmap_t &dest, const rectangle &bo
 //  draw_led14seg - draw a 14-segment LCD
 //-------------------------------------------------
 
-void layout_element::component::draw_led14seg(bitmap_t &dest, const rectangle &bounds, int pattern)
+void layout_element::component::draw_led14seg(bitmap_argb32 &dest, const rectangle &bounds, int pattern)
 {
 	const rgb_t onpen = MAKE_ARGB(0xff, 0xff, 0xff, 0xff);
 	const rgb_t offpen = MAKE_ARGB(0xff, 0x20, 0x20, 0x20);
@@ -1002,90 +1299,88 @@ void layout_element::component::draw_led14seg(bitmap_t &dest, const rectangle &b
 	int skewwidth = 40;
 
 	// allocate a temporary bitmap for drawing
-	bitmap_t *tempbitmap = global_alloc(bitmap_t(bmwidth + skewwidth, bmheight, BITMAP_FORMAT_ARGB32));
-	bitmap_fill(tempbitmap, NULL, MAKE_ARGB(0xff, 0x00, 0x00, 0x00));
+	bitmap_argb32 tempbitmap(bmwidth + skewwidth, bmheight);
+	tempbitmap.fill(MAKE_ARGB(0xff, 0x00, 0x00, 0x00));
 
 	// top bar
-	draw_segment_horizontal(*tempbitmap,
+	draw_segment_horizontal(tempbitmap,
 		0 + 2*segwidth/3, bmwidth - 2*segwidth/3, 0 + segwidth/2,
 		segwidth, (pattern & (1 << 0)) ? onpen : offpen);
 
 	// right-top bar
-	draw_segment_vertical(*tempbitmap,
+	draw_segment_vertical(tempbitmap,
 		0 + 2*segwidth/3, bmheight/2 - segwidth/3, bmwidth - segwidth/2,
 		segwidth, (pattern & (1 << 1)) ? onpen : offpen);
 
 	// right-bottom bar
-	draw_segment_vertical(*tempbitmap,
+	draw_segment_vertical(tempbitmap,
 		bmheight/2 + segwidth/3, bmheight - 2*segwidth/3, bmwidth - segwidth/2,
 		segwidth, (pattern & (1 << 2)) ? onpen : offpen);
 
 	// bottom bar
-	draw_segment_horizontal(*tempbitmap,
+	draw_segment_horizontal(tempbitmap,
 		0 + 2*segwidth/3, bmwidth - 2*segwidth/3, bmheight - segwidth/2,
 		segwidth, (pattern & (1 << 3)) ? onpen : offpen);
 
 	// left-bottom bar
-	draw_segment_vertical(*tempbitmap,
+	draw_segment_vertical(tempbitmap,
 		bmheight/2 + segwidth/3, bmheight - 2*segwidth/3, 0 + segwidth/2,
 		segwidth, (pattern & (1 << 4)) ? onpen : offpen);
 
 	// left-top bar
-	draw_segment_vertical(*tempbitmap,
+	draw_segment_vertical(tempbitmap,
 		0 + 2*segwidth/3, bmheight/2 - segwidth/3, 0 + segwidth/2,
 		segwidth, (pattern & (1 << 5)) ? onpen : offpen);
 
 	// horizontal-middle-left bar
-	draw_segment_horizontal_caps(*tempbitmap,
+	draw_segment_horizontal_caps(tempbitmap,
 		0 + 2*segwidth/3, bmwidth/2 - segwidth/10, bmheight/2,
 		segwidth, LINE_CAP_START, (pattern & (1 << 6)) ? onpen : offpen);
 
 	// horizontal-middle-right bar
-	draw_segment_horizontal_caps(*tempbitmap,
+	draw_segment_horizontal_caps(tempbitmap,
 		0 + bmwidth/2 + segwidth/10, bmwidth - 2*segwidth/3, bmheight/2,
 		segwidth, LINE_CAP_END, (pattern & (1 << 7)) ? onpen : offpen);
 
 	// vertical-middle-top bar
-	draw_segment_vertical_caps(*tempbitmap,
+	draw_segment_vertical_caps(tempbitmap,
 		0 + segwidth + segwidth/3, bmheight/2 - segwidth/2 - segwidth/3, bmwidth/2,
 		segwidth, LINE_CAP_NONE, (pattern & (1 << 8)) ? onpen : offpen);
 
 	// vertical-middle-bottom bar
-	draw_segment_vertical_caps(*tempbitmap,
+	draw_segment_vertical_caps(tempbitmap,
 		bmheight/2 + segwidth/2 + segwidth/3, bmheight - segwidth - segwidth/3, bmwidth/2,
 		segwidth, LINE_CAP_NONE, (pattern & (1 << 9)) ? onpen : offpen);
 
 	// diagonal-left-bottom bar
-	draw_segment_diagonal_1(*tempbitmap,
+	draw_segment_diagonal_1(tempbitmap,
 		0 + segwidth + segwidth/5, bmwidth/2 - segwidth/2 - segwidth/5,
 		bmheight/2 + segwidth/2 + segwidth/3, bmheight - segwidth - segwidth/3,
 		segwidth, (pattern & (1 << 10)) ? onpen : offpen);
 
 	// diagonal-left-top bar
-	draw_segment_diagonal_2(*tempbitmap,
+	draw_segment_diagonal_2(tempbitmap,
 		0 + segwidth + segwidth/5, bmwidth/2 - segwidth/2 - segwidth/5,
 		0 + segwidth + segwidth/3, bmheight/2 - segwidth/2 - segwidth/3,
 		segwidth, (pattern & (1 << 11)) ? onpen : offpen);
 
 	// diagonal-right-top bar
-	draw_segment_diagonal_1(*tempbitmap,
+	draw_segment_diagonal_1(tempbitmap,
 		bmwidth/2 + segwidth/2 + segwidth/5, bmwidth - segwidth - segwidth/5,
 		0 + segwidth + segwidth/3, bmheight/2 - segwidth/2 - segwidth/3,
 		segwidth, (pattern & (1 << 12)) ? onpen : offpen);
 
 	// diagonal-right-bottom bar
-	draw_segment_diagonal_2(*tempbitmap,
+	draw_segment_diagonal_2(tempbitmap,
 		bmwidth/2 + segwidth/2 + segwidth/5, bmwidth - segwidth - segwidth/5,
 		bmheight/2 + segwidth/2 + segwidth/3, bmheight - segwidth - segwidth/3,
 		segwidth, (pattern & (1 << 13)) ? onpen : offpen);
 
 	// apply skew
-	apply_skew(*tempbitmap, 40);
+	apply_skew(tempbitmap, 40);
 
 	// resample to the target size
-	render_resample_argb_bitmap_hq(dest.base, dest.rowpixels, dest.width, dest.height, tempbitmap, NULL, &m_color);
-
-	global_free(tempbitmap);
+	render_resample_argb_bitmap_hq(dest, tempbitmap, m_color);
 }
 
 
@@ -1094,7 +1389,7 @@ void layout_element::component::draw_led14seg(bitmap_t &dest, const rectangle &b
 //  semicolon (2 extra segments)
 //-------------------------------------------------
 
-void layout_element::component::draw_led14segsc(bitmap_t &dest, const rectangle &bounds, int pattern)
+void layout_element::component::draw_led14segsc(bitmap_argb32 &dest, const rectangle &bounds, int pattern)
 {
 	const rgb_t onpen = MAKE_ARGB(0xff, 0xff, 0xff, 0xff);
 	const rgb_t offpen = MAKE_ARGB(0xff, 0x20, 0x20, 0x20);
@@ -1106,99 +1401,97 @@ void layout_element::component::draw_led14segsc(bitmap_t &dest, const rectangle 
 	int skewwidth = 40;
 
 	// allocate a temporary bitmap for drawing, adding some extra space for the tail
-	bitmap_t *tempbitmap = global_alloc(bitmap_t(bmwidth + skewwidth, bmheight + segwidth, BITMAP_FORMAT_ARGB32));
-	bitmap_fill(tempbitmap, NULL, MAKE_ARGB(0xff, 0x00, 0x00, 0x00));
+	bitmap_argb32 tempbitmap(bmwidth + skewwidth, bmheight + segwidth);
+	tempbitmap.fill(MAKE_ARGB(0xff, 0x00, 0x00, 0x00));
 
 	// top bar
-	draw_segment_horizontal(*tempbitmap,
+	draw_segment_horizontal(tempbitmap,
 		0 + 2*segwidth/3, bmwidth - 2*segwidth/3, 0 + segwidth/2,
 		segwidth, (pattern & (1 << 0)) ? onpen : offpen);
 
 	// right-top bar
-	draw_segment_vertical(*tempbitmap,
+	draw_segment_vertical(tempbitmap,
 		0 + 2*segwidth/3, bmheight/2 - segwidth/3, bmwidth - segwidth/2,
 		segwidth, (pattern & (1 << 1)) ? onpen : offpen);
 
 	// right-bottom bar
-	draw_segment_vertical(*tempbitmap,
+	draw_segment_vertical(tempbitmap,
 		bmheight/2 + segwidth/3, bmheight - 2*segwidth/3, bmwidth - segwidth/2,
 		segwidth, (pattern & (1 << 2)) ? onpen : offpen);
 
 	// bottom bar
-	draw_segment_horizontal(*tempbitmap,
+	draw_segment_horizontal(tempbitmap,
 		0 + 2*segwidth/3, bmwidth - 2*segwidth/3, bmheight - segwidth/2,
 		segwidth, (pattern & (1 << 3)) ? onpen : offpen);
 
 	// left-bottom bar
-	draw_segment_vertical(*tempbitmap,
+	draw_segment_vertical(tempbitmap,
 		bmheight/2 + segwidth/3, bmheight - 2*segwidth/3, 0 + segwidth/2,
 		segwidth, (pattern & (1 << 4)) ? onpen : offpen);
 
 	// left-top bar
-	draw_segment_vertical(*tempbitmap,
+	draw_segment_vertical(tempbitmap,
 		0 + 2*segwidth/3, bmheight/2 - segwidth/3, 0 + segwidth/2,
 		segwidth, (pattern & (1 << 5)) ? onpen : offpen);
 
 	// horizontal-middle-left bar
-	draw_segment_horizontal_caps(*tempbitmap,
+	draw_segment_horizontal_caps(tempbitmap,
 		0 + 2*segwidth/3, bmwidth/2 - segwidth/10, bmheight/2,
 		segwidth, LINE_CAP_START, (pattern & (1 << 6)) ? onpen : offpen);
 
 	// horizontal-middle-right bar
-	draw_segment_horizontal_caps(*tempbitmap,
+	draw_segment_horizontal_caps(tempbitmap,
 		0 + bmwidth/2 + segwidth/10, bmwidth - 2*segwidth/3, bmheight/2,
 		segwidth, LINE_CAP_END, (pattern & (1 << 7)) ? onpen : offpen);
 
 	// vertical-middle-top bar
-	draw_segment_vertical_caps(*tempbitmap,
+	draw_segment_vertical_caps(tempbitmap,
 		0 + segwidth + segwidth/3, bmheight/2 - segwidth/2 - segwidth/3, bmwidth/2,
 		segwidth, LINE_CAP_NONE, (pattern & (1 << 8)) ? onpen : offpen);
 
 	// vertical-middle-bottom bar
-	draw_segment_vertical_caps(*tempbitmap,
+	draw_segment_vertical_caps(tempbitmap,
 		bmheight/2 + segwidth/2 + segwidth/3, bmheight - segwidth - segwidth/3, bmwidth/2,
 		segwidth, LINE_CAP_NONE, (pattern & (1 << 9)) ? onpen : offpen);
 
 	// diagonal-left-bottom bar
-	draw_segment_diagonal_1(*tempbitmap,
+	draw_segment_diagonal_1(tempbitmap,
 		0 + segwidth + segwidth/5, bmwidth/2 - segwidth/2 - segwidth/5,
 		bmheight/2 + segwidth/2 + segwidth/3, bmheight - segwidth - segwidth/3,
 		segwidth, (pattern & (1 << 10)) ? onpen : offpen);
 
 	// diagonal-left-top bar
-	draw_segment_diagonal_2(*tempbitmap,
+	draw_segment_diagonal_2(tempbitmap,
 		0 + segwidth + segwidth/5, bmwidth/2 - segwidth/2 - segwidth/5,
 		0 + segwidth + segwidth/3, bmheight/2 - segwidth/2 - segwidth/3,
 		segwidth, (pattern & (1 << 11)) ? onpen : offpen);
 
 	// diagonal-right-top bar
-	draw_segment_diagonal_1(*tempbitmap,
+	draw_segment_diagonal_1(tempbitmap,
 		bmwidth/2 + segwidth/2 + segwidth/5, bmwidth - segwidth - segwidth/5,
 		0 + segwidth + segwidth/3, bmheight/2 - segwidth/2 - segwidth/3,
 		segwidth, (pattern & (1 << 12)) ? onpen : offpen);
 
 	// diagonal-right-bottom bar
-	draw_segment_diagonal_2(*tempbitmap,
+	draw_segment_diagonal_2(tempbitmap,
 		bmwidth/2 + segwidth/2 + segwidth/5, bmwidth - segwidth - segwidth/5,
 		bmheight/2 + segwidth/2 + segwidth/3, bmheight - segwidth - segwidth/3,
 		segwidth, (pattern & (1 << 13)) ? onpen : offpen);
 
 	// apply skew
-	apply_skew(*tempbitmap, 40);
-
-	// decimal point
-	draw_segment_decimal(*tempbitmap, bmwidth + segwidth/2, bmheight - segwidth/2, segwidth, (pattern & (1 << 14)) ? onpen : offpen);
+	apply_skew(tempbitmap, 40);
 
 	// comma tail
-	draw_segment_diagonal_1(*tempbitmap,
+	draw_segment_diagonal_1(tempbitmap,
 		bmwidth - (segwidth/2), bmwidth + segwidth,
 		bmheight - (segwidth), bmheight + segwidth*1.5,
 		segwidth/2, (pattern & (1 << 15)) ? onpen : offpen);
 
-	// resample to the target size
-	render_resample_argb_bitmap_hq(dest.base, dest.rowpixels, dest.width, dest.height, tempbitmap, NULL, &m_color);
+	// decimal point
+	draw_segment_decimal(tempbitmap, bmwidth + segwidth/2, bmheight - segwidth/2, segwidth, (pattern & (1 << 14)) ? onpen : offpen);
 
-	global_free(tempbitmap);
+	// resample to the target size
+	render_resample_argb_bitmap_hq(dest, tempbitmap, m_color);
 }
 
 
@@ -1206,7 +1499,7 @@ void layout_element::component::draw_led14segsc(bitmap_t &dest, const rectangle 
 //  draw_led16seg - draw a 16-segment LCD
 //-------------------------------------------------
 
-void layout_element::component::draw_led16seg(bitmap_t &dest, const rectangle &bounds, int pattern)
+void layout_element::component::draw_led16seg(bitmap_argb32 &dest, const rectangle &bounds, int pattern)
 {
 	const rgb_t onpen = MAKE_ARGB(0xff, 0xff, 0xff, 0xff);
 	const rgb_t offpen = MAKE_ARGB(0xff, 0x20, 0x20, 0x20);
@@ -1218,100 +1511,98 @@ void layout_element::component::draw_led16seg(bitmap_t &dest, const rectangle &b
 	int skewwidth = 40;
 
 	// allocate a temporary bitmap for drawing
-	bitmap_t *tempbitmap = global_alloc(bitmap_t(bmwidth + skewwidth, bmheight, BITMAP_FORMAT_ARGB32));
-	bitmap_fill(tempbitmap, NULL, MAKE_ARGB(0xff, 0x00, 0x00, 0x00));
+	bitmap_argb32 tempbitmap(bmwidth + skewwidth, bmheight);
+	tempbitmap.fill(MAKE_ARGB(0xff, 0x00, 0x00, 0x00));
 
 	// top-left bar
-	draw_segment_horizontal_caps(*tempbitmap,
+	draw_segment_horizontal_caps(tempbitmap,
 		0 + 2*segwidth/3, bmwidth/2 - segwidth/10, 0 + segwidth/2,
 		segwidth, LINE_CAP_START, (pattern & (1 << 0)) ? onpen : offpen);
 
 	// top-right bar
-	draw_segment_horizontal_caps(*tempbitmap,
+	draw_segment_horizontal_caps(tempbitmap,
 		0 + bmwidth/2 + segwidth/10, bmwidth - 2*segwidth/3, 0 + segwidth/2,
 		segwidth, LINE_CAP_END, (pattern & (1 << 1)) ? onpen : offpen);
 
 	// right-top bar
-	draw_segment_vertical(*tempbitmap,
+	draw_segment_vertical(tempbitmap,
 		0 + 2*segwidth/3, bmheight/2 - segwidth/3, bmwidth - segwidth/2,
 		segwidth, (pattern & (1 << 2)) ? onpen : offpen);
 
 	// right-bottom bar
-	draw_segment_vertical(*tempbitmap,
+	draw_segment_vertical(tempbitmap,
 		bmheight/2 + segwidth/3, bmheight - 2*segwidth/3, bmwidth - segwidth/2,
 		segwidth, (pattern & (1 << 3)) ? onpen : offpen);
 
 	// bottom-right bar
-	draw_segment_horizontal_caps(*tempbitmap,
+	draw_segment_horizontal_caps(tempbitmap,
 		0 + bmwidth/2 + segwidth/10, bmwidth - 2*segwidth/3, bmheight - segwidth/2,
 		segwidth, LINE_CAP_END, (pattern & (1 << 4)) ? onpen : offpen);
 
 	// bottom-left bar
-	draw_segment_horizontal_caps(*tempbitmap,
+	draw_segment_horizontal_caps(tempbitmap,
 		0 + 2*segwidth/3, bmwidth/2 - segwidth/10, bmheight - segwidth/2,
 		segwidth, LINE_CAP_START, (pattern & (1 << 5)) ? onpen : offpen);
 
 	// left-bottom bar
-	draw_segment_vertical(*tempbitmap,
+	draw_segment_vertical(tempbitmap,
 		bmheight/2 + segwidth/3, bmheight - 2*segwidth/3, 0 + segwidth/2,
 		segwidth, (pattern & (1 << 6)) ? onpen : offpen);
 
 	// left-top bar
-	draw_segment_vertical(*tempbitmap,
+	draw_segment_vertical(tempbitmap,
 		0 + 2*segwidth/3, bmheight/2 - segwidth/3, 0 + segwidth/2,
 		segwidth, (pattern & (1 << 7)) ? onpen : offpen);
 
 	// horizontal-middle-left bar
-	draw_segment_horizontal_caps(*tempbitmap,
+	draw_segment_horizontal_caps(tempbitmap,
 		0 + 2*segwidth/3, bmwidth/2 - segwidth/10, bmheight/2,
 		segwidth, LINE_CAP_START, (pattern & (1 << 8)) ? onpen : offpen);
 
 	// horizontal-middle-right bar
-	draw_segment_horizontal_caps(*tempbitmap,
+	draw_segment_horizontal_caps(tempbitmap,
 		0 + bmwidth/2 + segwidth/10, bmwidth - 2*segwidth/3, bmheight/2,
 		segwidth, LINE_CAP_END, (pattern & (1 << 9)) ? onpen : offpen);
 
 	// vertical-middle-top bar
-	draw_segment_vertical_caps(*tempbitmap,
+	draw_segment_vertical_caps(tempbitmap,
 		0 + segwidth + segwidth/3, bmheight/2 - segwidth/2 - segwidth/3, bmwidth/2,
 		segwidth, LINE_CAP_NONE, (pattern & (1 << 10)) ? onpen : offpen);
 
 	// vertical-middle-bottom bar
-	draw_segment_vertical_caps(*tempbitmap,
+	draw_segment_vertical_caps(tempbitmap,
 		bmheight/2 + segwidth/2 + segwidth/3, bmheight - segwidth - segwidth/3, bmwidth/2,
 		segwidth, LINE_CAP_NONE, (pattern & (1 << 11)) ? onpen : offpen);
 
 	// diagonal-left-bottom bar
-	draw_segment_diagonal_1(*tempbitmap,
+	draw_segment_diagonal_1(tempbitmap,
 		0 + segwidth + segwidth/5, bmwidth/2 - segwidth/2 - segwidth/5,
 		bmheight/2 + segwidth/2 + segwidth/3, bmheight - segwidth - segwidth/3,
 		segwidth, (pattern & (1 << 12)) ? onpen : offpen);
 
 	// diagonal-left-top bar
-	draw_segment_diagonal_2(*tempbitmap,
+	draw_segment_diagonal_2(tempbitmap,
 		0 + segwidth + segwidth/5, bmwidth/2 - segwidth/2 - segwidth/5,
 		0 + segwidth + segwidth/3, bmheight/2 - segwidth/2 - segwidth/3,
 		segwidth, (pattern & (1 << 13)) ? onpen : offpen);
 
 	// diagonal-right-top bar
-	draw_segment_diagonal_1(*tempbitmap,
+	draw_segment_diagonal_1(tempbitmap,
 		bmwidth/2 + segwidth/2 + segwidth/5, bmwidth - segwidth - segwidth/5,
 		0 + segwidth + segwidth/3, bmheight/2 - segwidth/2 - segwidth/3,
 		segwidth, (pattern & (1 << 14)) ? onpen : offpen);
 
 	// diagonal-right-bottom bar
-	draw_segment_diagonal_2(*tempbitmap,
+	draw_segment_diagonal_2(tempbitmap,
 		bmwidth/2 + segwidth/2 + segwidth/5, bmwidth - segwidth - segwidth/5,
 		bmheight/2 + segwidth/2 + segwidth/3, bmheight - segwidth - segwidth/3,
 		segwidth, (pattern & (1 << 15)) ? onpen : offpen);
 
 	// apply skew
-	apply_skew(*tempbitmap, 40);
+	apply_skew(tempbitmap, 40);
 
 	// resample to the target size
-	render_resample_argb_bitmap_hq(dest.base, dest.rowpixels, dest.width, dest.height, tempbitmap, NULL, &m_color);
-
-	global_free(tempbitmap);
+	render_resample_argb_bitmap_hq(dest, tempbitmap, m_color);
 }
 
 
@@ -1320,7 +1611,7 @@ void layout_element::component::draw_led16seg(bitmap_t &dest, const rectangle &b
 //  semicolon (2 extra segments)
 //-------------------------------------------------
 
-void layout_element::component::draw_led16segsc(bitmap_t &dest, const rectangle &bounds, int pattern)
+void layout_element::component::draw_led16segsc(bitmap_argb32 &dest, const rectangle &bounds, int pattern)
 {
 	const rgb_t onpen = MAKE_ARGB(0xff, 0xff, 0xff, 0xff);
 	const rgb_t offpen = MAKE_ARGB(0xff, 0x20, 0x20, 0x20);
@@ -1332,138 +1623,133 @@ void layout_element::component::draw_led16segsc(bitmap_t &dest, const rectangle 
 	int skewwidth = 40;
 
 	// allocate a temporary bitmap for drawing
-	bitmap_t *tempbitmap = global_alloc(bitmap_t(bmwidth + skewwidth, bmheight + segwidth, BITMAP_FORMAT_ARGB32));
-	bitmap_fill(tempbitmap, NULL, MAKE_ARGB(0xff, 0x00, 0x00, 0x00));
+	bitmap_argb32 tempbitmap(bmwidth + skewwidth, bmheight + segwidth);
+	tempbitmap.fill(MAKE_ARGB(0xff, 0x00, 0x00, 0x00));
 
 	// top-left bar
-	draw_segment_horizontal_caps(*tempbitmap,
+	draw_segment_horizontal_caps(tempbitmap,
 		0 + 2*segwidth/3, bmwidth/2 - segwidth/10, 0 + segwidth/2,
 		segwidth, LINE_CAP_START, (pattern & (1 << 0)) ? onpen : offpen);
 
 	// top-right bar
-	draw_segment_horizontal_caps(*tempbitmap,
+	draw_segment_horizontal_caps(tempbitmap,
 		0 + bmwidth/2 + segwidth/10, bmwidth - 2*segwidth/3, 0 + segwidth/2,
 		segwidth, LINE_CAP_END, (pattern & (1 << 1)) ? onpen : offpen);
 
 	// right-top bar
-	draw_segment_vertical(*tempbitmap,
+	draw_segment_vertical(tempbitmap,
 		0 + 2*segwidth/3, bmheight/2 - segwidth/3, bmwidth - segwidth/2,
 		segwidth, (pattern & (1 << 2)) ? onpen : offpen);
 
 	// right-bottom bar
-	draw_segment_vertical(*tempbitmap,
+	draw_segment_vertical(tempbitmap,
 		bmheight/2 + segwidth/3, bmheight - 2*segwidth/3, bmwidth - segwidth/2,
 		segwidth, (pattern & (1 << 3)) ? onpen : offpen);
 
 	// bottom-right bar
-	draw_segment_horizontal_caps(*tempbitmap,
+	draw_segment_horizontal_caps(tempbitmap,
 		0 + bmwidth/2 + segwidth/10, bmwidth - 2*segwidth/3, bmheight - segwidth/2,
 		segwidth, LINE_CAP_END, (pattern & (1 << 4)) ? onpen : offpen);
 
 	// bottom-left bar
-	draw_segment_horizontal_caps(*tempbitmap,
+	draw_segment_horizontal_caps(tempbitmap,
 		0 + 2*segwidth/3, bmwidth/2 - segwidth/10, bmheight - segwidth/2,
 		segwidth, LINE_CAP_START, (pattern & (1 << 5)) ? onpen : offpen);
 
 	// left-bottom bar
-	draw_segment_vertical(*tempbitmap,
+	draw_segment_vertical(tempbitmap,
 		bmheight/2 + segwidth/3, bmheight - 2*segwidth/3, 0 + segwidth/2,
 		segwidth, (pattern & (1 << 6)) ? onpen : offpen);
 
 	// left-top bar
-	draw_segment_vertical(*tempbitmap,
+	draw_segment_vertical(tempbitmap,
 		0 + 2*segwidth/3, bmheight/2 - segwidth/3, 0 + segwidth/2,
 		segwidth, (pattern & (1 << 7)) ? onpen : offpen);
 
 	// horizontal-middle-left bar
-	draw_segment_horizontal_caps(*tempbitmap,
+	draw_segment_horizontal_caps(tempbitmap,
 		0 + 2*segwidth/3, bmwidth/2 - segwidth/10, bmheight/2,
 		segwidth, LINE_CAP_START, (pattern & (1 << 8)) ? onpen : offpen);
 
 	// horizontal-middle-right bar
-	draw_segment_horizontal_caps(*tempbitmap,
+	draw_segment_horizontal_caps(tempbitmap,
 		0 + bmwidth/2 + segwidth/10, bmwidth - 2*segwidth/3, bmheight/2,
 		segwidth, LINE_CAP_END, (pattern & (1 << 9)) ? onpen : offpen);
 
 	// vertical-middle-top bar
-	draw_segment_vertical_caps(*tempbitmap,
+	draw_segment_vertical_caps(tempbitmap,
 		0 + segwidth + segwidth/3, bmheight/2 - segwidth/2 - segwidth/3, bmwidth/2,
 		segwidth, LINE_CAP_NONE, (pattern & (1 << 10)) ? onpen : offpen);
 
 	// vertical-middle-bottom bar
-	draw_segment_vertical_caps(*tempbitmap,
+	draw_segment_vertical_caps(tempbitmap,
 		bmheight/2 + segwidth/2 + segwidth/3, bmheight - segwidth - segwidth/3, bmwidth/2,
 		segwidth, LINE_CAP_NONE, (pattern & (1 << 11)) ? onpen : offpen);
 
 	// diagonal-left-bottom bar
-	draw_segment_diagonal_1(*tempbitmap,
+	draw_segment_diagonal_1(tempbitmap,
 		0 + segwidth + segwidth/5, bmwidth/2 - segwidth/2 - segwidth/5,
 		bmheight/2 + segwidth/2 + segwidth/3, bmheight - segwidth - segwidth/3,
 		segwidth, (pattern & (1 << 12)) ? onpen : offpen);
 
 	// diagonal-left-top bar
-	draw_segment_diagonal_2(*tempbitmap,
+	draw_segment_diagonal_2(tempbitmap,
 		0 + segwidth + segwidth/5, bmwidth/2 - segwidth/2 - segwidth/5,
 		0 + segwidth + segwidth/3, bmheight/2 - segwidth/2 - segwidth/3,
 		segwidth, (pattern & (1 << 13)) ? onpen : offpen);
 
 	// diagonal-right-top bar
-	draw_segment_diagonal_1(*tempbitmap,
+	draw_segment_diagonal_1(tempbitmap,
 		bmwidth/2 + segwidth/2 + segwidth/5, bmwidth - segwidth - segwidth/5,
 		0 + segwidth + segwidth/3, bmheight/2 - segwidth/2 - segwidth/3,
 		segwidth, (pattern & (1 << 14)) ? onpen : offpen);
 
 	// diagonal-right-bottom bar
-	draw_segment_diagonal_2(*tempbitmap,
+	draw_segment_diagonal_2(tempbitmap,
 		bmwidth/2 + segwidth/2 + segwidth/5, bmwidth - segwidth - segwidth/5,
 		bmheight/2 + segwidth/2 + segwidth/3, bmheight - segwidth - segwidth/3,
 		segwidth, (pattern & (1 << 15)) ? onpen : offpen);
 
-	// decimal point
-	draw_segment_decimal(*tempbitmap, bmwidth + segwidth/2, bmheight - segwidth/2, segwidth, (pattern & (1 << 16)) ? onpen : offpen);
-
 	// comma tail
-	draw_segment_diagonal_1(*tempbitmap,
+	draw_segment_diagonal_1(tempbitmap,
 		bmwidth - (segwidth/2), bmwidth + segwidth,
 		bmheight - (segwidth), bmheight + segwidth*1.5,
 		segwidth/2, (pattern & (1 << 17)) ? onpen : offpen);
 
+	// decimal point (draw last for priority)
+	draw_segment_decimal(tempbitmap, bmwidth + segwidth/2, bmheight - segwidth/2, segwidth, (pattern & (1 << 16)) ? onpen : offpen);
+
 	// apply skew
-	apply_skew(*tempbitmap, 40);
+	apply_skew(tempbitmap, 40);
 
 	// resample to the target size
-	render_resample_argb_bitmap_hq(dest.base, dest.rowpixels, dest.width, dest.height, tempbitmap, NULL, &m_color);
-
-	global_free(tempbitmap);
+	render_resample_argb_bitmap_hq(dest, tempbitmap, m_color);
 }
 
 
 //-------------------------------------------------
-//  draw_dotmatrix - draw a row of 8 dots for a
+//  draw_dotmatrix - draw a row of dots for a
 //  dotmatrix
 //-------------------------------------------------
 
-void layout_element::component::draw_dotmatrix(bitmap_t &dest, const rectangle &bounds, int pattern)
+void layout_element::component::draw_dotmatrix(int dots, bitmap_argb32 &dest, const rectangle &bounds, int pattern)
 {
 	const rgb_t onpen = MAKE_ARGB(0xff, 0xff, 0xff, 0xff);
 	const rgb_t offpen = MAKE_ARGB(0xff, 0x20, 0x20, 0x20);
 
 	// sizes for computation
-	int bmwidth = 2000;
 	int bmheight = 300;
 	int dotwidth = 250;
 
 	// allocate a temporary bitmap for drawing
-	bitmap_t *tempbitmap = global_alloc(bitmap_t(bmwidth, bmheight, BITMAP_FORMAT_ARGB32));
-	bitmap_fill(tempbitmap, NULL, MAKE_ARGB(0xff, 0x00, 0x00, 0x00));
+	bitmap_argb32 tempbitmap(dotwidth*dots, bmheight);
+	tempbitmap.fill(MAKE_ARGB(0xff, 0x00, 0x00, 0x00));
 
-	for (int i = 0; i < 8; i++)
-		draw_segment_decimal(*tempbitmap, ((dotwidth/2 )+ (i * dotwidth)), bmheight/2, dotwidth, (pattern & (1 << i))?onpen:offpen);
+	for (int i = 0; i < dots; i++)
+		draw_segment_decimal(tempbitmap, ((dotwidth/2 )+ (i * dotwidth)), bmheight/2, dotwidth, (pattern & (1 << i))?onpen:offpen);
 
 	// resample to the target size
-	render_resample_argb_bitmap_hq(dest.base, dest.rowpixels, dest.width, dest.height, tempbitmap, NULL, &m_color);
-
-	global_free(tempbitmap);
+	render_resample_argb_bitmap_hq(dest, tempbitmap, m_color);
 }
 
 
@@ -1473,13 +1759,13 @@ void layout_element::component::draw_dotmatrix(bitmap_t &dest, const rectangle &
 //  and start points
 //-------------------------------------------------
 
-void layout_element::component::draw_segment_horizontal_caps(bitmap_t &dest, int minx, int maxx, int midy, int width, int caps, rgb_t color)
+void layout_element::component::draw_segment_horizontal_caps(bitmap_argb32 &dest, int minx, int maxx, int midy, int width, int caps, rgb_t color)
 {
 	// loop over the width of the segment
 	for (int y = 0; y < width / 2; y++)
 	{
-		UINT32 *d0 = BITMAP_ADDR32(&dest, midy - y, 0);
-		UINT32 *d1 = BITMAP_ADDR32(&dest, midy + y, 0);
+		UINT32 *d0 = &dest.pix32(midy - y);
+		UINT32 *d1 = &dest.pix32(midy + y);
 		int ty = (y < width / 8) ? width / 8 : y;
 
 		// loop over the length of the segment
@@ -1494,7 +1780,7 @@ void layout_element::component::draw_segment_horizontal_caps(bitmap_t &dest, int
 //  LED segment
 //-------------------------------------------------
 
-void layout_element::component::draw_segment_horizontal(bitmap_t &dest, int minx, int maxx, int midy, int width, rgb_t color)
+void layout_element::component::draw_segment_horizontal(bitmap_argb32 &dest, int minx, int maxx, int midy, int width, rgb_t color)
 {
 	draw_segment_horizontal_caps(dest, minx, maxx, midy, width, LINE_CAP_START | LINE_CAP_END, color);
 }
@@ -1506,18 +1792,18 @@ void layout_element::component::draw_segment_horizontal(bitmap_t &dest, int minx
 //  and start points
 //-------------------------------------------------
 
-void layout_element::component::draw_segment_vertical_caps(bitmap_t &dest, int miny, int maxy, int midx, int width, int caps, rgb_t color)
+void layout_element::component::draw_segment_vertical_caps(bitmap_argb32 &dest, int miny, int maxy, int midx, int width, int caps, rgb_t color)
 {
 	// loop over the width of the segment
 	for (int x = 0; x < width / 2; x++)
 	{
-		UINT32 *d0 = BITMAP_ADDR32(&dest, 0, midx - x);
-		UINT32 *d1 = BITMAP_ADDR32(&dest, 0, midx + x);
+		UINT32 *d0 = &dest.pix32(0, midx - x);
+		UINT32 *d1 = &dest.pix32(0, midx + x);
 		int tx = (x < width / 8) ? width / 8 : x;
 
 		// loop over the length of the segment
 		for (int y = miny + ((caps & LINE_CAP_START) ? tx : 0); y < maxy - ((caps & LINE_CAP_END) ? tx : 0); y++)
-			d0[y * dest.rowpixels] = d1[y * dest.rowpixels] = color;
+			d0[y * dest.rowpixels()] = d1[y * dest.rowpixels()] = color;
 	}
 }
 
@@ -1527,7 +1813,7 @@ void layout_element::component::draw_segment_vertical_caps(bitmap_t &dest, int m
 //  LED segment
 //-------------------------------------------------
 
-void layout_element::component::draw_segment_vertical(bitmap_t &dest, int miny, int maxy, int midx, int width, rgb_t color)
+void layout_element::component::draw_segment_vertical(bitmap_argb32 &dest, int miny, int maxy, int midx, int width, rgb_t color)
 {
 	draw_segment_vertical_caps(dest, miny, maxy, midx, width, LINE_CAP_START | LINE_CAP_END, color);
 }
@@ -1535,10 +1821,10 @@ void layout_element::component::draw_segment_vertical(bitmap_t &dest, int miny, 
 
 //-------------------------------------------------
 //  draw_segment_diagonal_1 - draw a diagonal
-//  LED segment that looks like this: /
+//  LED segment that looks like a backslash
 //-------------------------------------------------
 
-void layout_element::component::draw_segment_diagonal_1(bitmap_t &dest, int minx, int maxx, int miny, int maxy, int width, rgb_t color)
+void layout_element::component::draw_segment_diagonal_1(bitmap_argb32 &dest, int minx, int maxx, int miny, int maxy, int width, rgb_t color)
 {
 	// compute parameters
 	width *= 1.5;
@@ -1546,24 +1832,24 @@ void layout_element::component::draw_segment_diagonal_1(bitmap_t &dest, int minx
 
 	// draw line
 	for (int x = minx; x < maxx; x++)
-		if (x >= 0 && x < dest.width)
+		if (x >= 0 && x < dest.width())
 		{
-			UINT32 *d = BITMAP_ADDR32(&dest, 0, x);
+			UINT32 *d = &dest.pix32(0, x);
 			int step = (x - minx) * ratio;
 
 			for (int y = maxy - width - step; y < maxy - step; y++)
-				if (y >= 0 && y < dest.height)
-					d[y * dest.rowpixels] = color;
+				if (y >= 0 && y < dest.height())
+					d[y * dest.rowpixels()] = color;
 		}
 }
 
 
 //-------------------------------------------------
 //  draw_segment_diagonal_2 - draw a diagonal
-//  LED segment that looks like this:
+//  LED segment that looks like a forward slash
 //-------------------------------------------------
 
-void layout_element::component::draw_segment_diagonal_2(bitmap_t &dest, int minx, int maxx, int miny, int maxy, int width, rgb_t color)
+void layout_element::component::draw_segment_diagonal_2(bitmap_argb32 &dest, int minx, int maxx, int miny, int maxy, int width, rgb_t color)
 {
 	// compute parameters
 	width *= 1.5;
@@ -1571,14 +1857,14 @@ void layout_element::component::draw_segment_diagonal_2(bitmap_t &dest, int minx
 
 	// draw line
 	for (int x = minx; x < maxx; x++)
-		if (x >= 0 && x < dest.width)
+		if (x >= 0 && x < dest.width())
 		{
-			UINT32 *d = BITMAP_ADDR32(&dest, 0, x);
+			UINT32 *d = &dest.pix32(0, x);
 			int step = (x - minx) * ratio;
 
 			for (int y = miny + step; y < miny + step + width; y++)
-				if (y >= 0 && y < dest.height)
-					d[y * dest.rowpixels] = color;
+				if (y >= 0 && y < dest.height())
+					d[y * dest.rowpixels()] = color;
 		}
 }
 
@@ -1587,7 +1873,7 @@ void layout_element::component::draw_segment_diagonal_2(bitmap_t &dest, int minx
 //  draw_segment_decimal - draw a decimal point
 //-------------------------------------------------
 
-void layout_element::component::draw_segment_decimal(bitmap_t &dest, int midx, int midy, int width, rgb_t color)
+void layout_element::component::draw_segment_decimal(bitmap_argb32 &dest, int midx, int midy, int width, rgb_t color)
 {
 	// compute parameters
 	width /= 2;
@@ -1596,8 +1882,8 @@ void layout_element::component::draw_segment_decimal(bitmap_t &dest, int midx, i
 	// iterate over y
 	for (UINT32 y = 0; y <= width; y++)
 	{
-		UINT32 *d0 = BITMAP_ADDR32(&dest, midy - y, 0);
-		UINT32 *d1 = BITMAP_ADDR32(&dest, midy + y, 0);
+		UINT32 *d0 = &dest.pix32(midy - y);
+		UINT32 *d1 = &dest.pix32(midy + y);
 		float xval = width * sqrt(1.0f - (float)(y * y) * ooradius2);
 		INT32 left, right;
 
@@ -1616,7 +1902,7 @@ void layout_element::component::draw_segment_decimal(bitmap_t &dest, int midx, i
 //  draw_segment_comma - draw a comma tail
 //-------------------------------------------------
 
-void layout_element::component::draw_segment_comma(bitmap_t &dest, int minx, int maxx, int miny, int maxy, int width, rgb_t color)
+void layout_element::component::draw_segment_comma(bitmap_argb32 &dest, int minx, int maxx, int miny, int maxy, int width, rgb_t color)
 {
 	// compute parameters
 	width *= 1.5;
@@ -1625,26 +1911,26 @@ void layout_element::component::draw_segment_comma(bitmap_t &dest, int minx, int
 	// draw line
 	for (int x = minx; x < maxx; x++)
 	{
-		UINT32 *d = BITMAP_ADDR32(&dest, 0, x);
+		UINT32 *d = &dest.pix32(0, x);
 		int step = (x - minx) * ratio;
 
 		for (int y = maxy; y < maxy  - width - step; y--)
-			d[y * dest.rowpixels] = color;
+			d[y * dest.rowpixels()] = color;
 	}
 }
 
 
 //-------------------------------------------------
-//  apply_skew - apply skew to a bitmap_t
+//  apply_skew - apply skew to a bitmap
 //-------------------------------------------------
 
-void layout_element::component::apply_skew(bitmap_t &dest, int skewwidth)
+void layout_element::component::apply_skew(bitmap_argb32 &dest, int skewwidth)
 {
-	for (int y = 0; y < dest.height; y++)
+	for (int y = 0; y < dest.height(); y++)
 	{
-		UINT32 *destrow = BITMAP_ADDR32(&dest, y, 0);
-		int offs = skewwidth * (dest.height - y) / dest.height;
-		for (int x = dest.width - skewwidth - 1; x >= 0; x--)
+		UINT32 *destrow = &dest.pix32(y);
+		int offs = skewwidth * (dest.height() - y) / dest.height();
+		for (int x = dest.width() - skewwidth - 1; x >= 0; x--)
 			destrow[x + offs] = destrow[x];
 		for (int x = 0; x < offs; x++)
 			destrow[x] = 0;
@@ -1663,13 +1949,15 @@ void layout_element::component::apply_skew(bitmap_t &dest, int skewwidth)
 
 layout_view::layout_view(running_machine &machine, xml_data_node &viewnode, simple_list<layout_element> &elemlist)
 	: m_next(NULL),
-	  m_aspect(1.0f),
-	  m_scraspect(1.0f),
-	  m_screens(machine.respool()),
-	  m_backdrop_list(machine.respool()),
-	  m_screen_list(machine.respool()),
-	  m_overlay_list(machine.respool()),
-	  m_bezel_list(machine.respool())
+		m_aspect(1.0f),
+		m_scraspect(1.0f),
+		m_screens(machine.respool()),
+		m_backdrop_list(machine.respool()),
+		m_screen_list(machine.respool()),
+		m_overlay_list(machine.respool()),
+		m_bezel_list(machine.respool()),
+		m_cpanel_list(machine.respool()),
+		m_marquee_list(machine.respool())
 {
 	// allocate a copy of the name
 	m_name = xml_get_attribute_string_with_subst(machine, viewnode, "name", "");
@@ -1696,6 +1984,14 @@ layout_view::layout_view(running_machine &machine, xml_data_node &viewnode, simp
 	for (xml_data_node *itemnode = xml_get_sibling(viewnode.child, "bezel"); itemnode != NULL; itemnode = xml_get_sibling(itemnode->next, "bezel"))
 		m_bezel_list.append(*auto_alloc(machine, item(machine, *itemnode, elemlist)));
 
+	// load cpanel items
+	for (xml_data_node *itemnode = xml_get_sibling(viewnode.child, "cpanel"); itemnode != NULL; itemnode = xml_get_sibling(itemnode->next, "cpanel"))
+		m_cpanel_list.append(*auto_alloc(machine, item(machine, *itemnode, elemlist)));
+
+	// load marquee items
+	for (xml_data_node *itemnode = xml_get_sibling(viewnode.child, "marquee"); itemnode != NULL; itemnode = xml_get_sibling(itemnode->next, "marquee"))
+		m_marquee_list.append(*auto_alloc(machine, item(machine, *itemnode, elemlist)));
+
 	// recompute the data for the view based on a default layer config
 	recompute(render_layer_config());
 }
@@ -1719,11 +2015,13 @@ layout_view::item *layout_view::first_item(item_layer layer) const
 {
 	switch (layer)
 	{
-		case ITEM_LAYER_BACKDROP:	return m_backdrop_list.first();
-		case ITEM_LAYER_SCREEN:		return m_screen_list.first();
-		case ITEM_LAYER_OVERLAY:	return m_overlay_list.first();
-		case ITEM_LAYER_BEZEL:		return m_bezel_list.first();
-		default:					return NULL;
+		case ITEM_LAYER_BACKDROP:   return m_backdrop_list.first();
+		case ITEM_LAYER_SCREEN:     return m_screen_list.first();
+		case ITEM_LAYER_OVERLAY:    return m_overlay_list.first();
+		case ITEM_LAYER_BEZEL:      return m_bezel_list.first();
+		case ITEM_LAYER_CPANEL:     return m_cpanel_list.first();
+		case ITEM_LAYER_MARQUEE:    return m_marquee_list.first();
+		default:                    return NULL;
 	}
 }
 
@@ -1748,10 +2046,12 @@ void layout_view::recompute(render_layer_config layerconfig)
 		// determine if this layer should be visible
 		switch (layer)
 		{
-			case ITEM_LAYER_BACKDROP:	m_layenabled[layer] = layerconfig.backdrops_enabled();	break;
-			case ITEM_LAYER_OVERLAY:	m_layenabled[layer] = layerconfig.overlays_enabled();	break;
-			case ITEM_LAYER_BEZEL:		m_layenabled[layer] = layerconfig.bezels_enabled();		break;
-			default:					m_layenabled[layer] = true;								break;
+			case ITEM_LAYER_BACKDROP:   m_layenabled[layer] = layerconfig.backdrops_enabled();  break;
+			case ITEM_LAYER_OVERLAY:    m_layenabled[layer] = layerconfig.overlays_enabled();   break;
+			case ITEM_LAYER_BEZEL:      m_layenabled[layer] = layerconfig.bezels_enabled();     break;
+			case ITEM_LAYER_CPANEL:     m_layenabled[layer] = layerconfig.cpanels_enabled();    break;
+			case ITEM_LAYER_MARQUEE:    m_layenabled[layer] = layerconfig.marquees_enabled();   break;
+			default:                    m_layenabled[layer] = true;                             break;
 		}
 
 		// only do it if requested
@@ -1836,10 +2136,10 @@ void layout_view::recompute(render_layer_config layerconfig)
 
 layout_view::item::item(running_machine &machine, xml_data_node &itemnode, simple_list<layout_element> &elemlist)
 	: m_next(NULL),
-	  m_element(NULL),
-	  m_input_mask(0),
-	  m_screen(NULL),
-	  m_orientation(ROT0)
+		m_element(NULL),
+		m_input_mask(0),
+		m_screen(NULL),
+		m_orientation(ROT0)
 {
 	// allocate a copy of the output name
 	m_output_name = xml_get_attribute_string_with_subst(machine, itemnode, "name", "");
@@ -1864,7 +2164,10 @@ layout_view::item::item(running_machine &machine, xml_data_node &itemnode, simpl
 	// fetch common data
 	int index = xml_get_attribute_int_with_subst(machine, itemnode, "index", -1);
 	if (index != -1)
-		m_screen = downcast<screen_device *>(machine.m_devicelist.find(SCREEN, index));
+	{
+		screen_device_iterator iter(machine.root_device());
+		m_screen = iter.byindex(index);
+	}
 	m_input_mask = xml_get_attribute_int_with_subst(machine, itemnode, "inputmask", 0);
 	if (m_output_name[0] != 0 && m_element != NULL)
 		output_set_value(m_output_name, m_element->default_state());
@@ -1912,9 +2215,13 @@ int layout_view::item::state() const
 	// if configured to an input, fetch the input value
 	else if (m_input_tag[0] != 0)
 	{
-		const input_field_config *field = input_field_by_tag_and_mask(m_element->machine().m_portlist, m_input_tag, m_input_mask);
-		if (field != NULL)
-			state = ((input_port_read_safe(m_element->machine(), m_input_tag, 0) ^ field->defvalue) & m_input_mask) ? 1 : 0;
+		ioport_port *port = m_element->machine().root_device().ioport(m_input_tag);
+		if (port != NULL)
+		{
+			ioport_field *field = port->field(m_input_mask);
+			if (field != NULL)
+				state = ((port->read() ^ field->defvalue()) & m_input_mask) ? 1 : 0;
+		}
 	}
 	return state;
 }
@@ -1931,8 +2238,8 @@ int layout_view::item::state() const
 
 layout_file::layout_file(running_machine &machine, xml_data_node &rootnode, const char *dirname)
 	: m_next(NULL),
-	  m_elemlist(machine.respool()),
-	  m_viewlist(machine.respool())
+		m_elemlist(machine.respool()),
+		m_viewlist(machine.respool())
 {
 	// find the layout node
 	xml_data_node *mamelayoutnode = xml_get_sibling(rootnode.child, "mamelayout");

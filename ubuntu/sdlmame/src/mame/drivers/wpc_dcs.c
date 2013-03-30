@@ -1,28 +1,39 @@
+
 #include "emu.h"
 #include "cpu/m6809/m6809.h"
-
-extern const char layout_pinball[];
 
 class wpc_dcs_state : public driver_device
 {
 public:
-	wpc_dcs_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	wpc_dcs_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+			m_maincpu(*this, "maincpu")
+	{ }
+
+protected:
+
+	// devices
+	required_device<cpu_device> m_maincpu;
+
+	// driver_device overrides
+	virtual void machine_reset();
+public:
+	DECLARE_DRIVER_INIT(wpc_dcs);
 };
 
 
-static ADDRESS_MAP_START( wpc_dcs_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( wpc_dcs_map, AS_PROGRAM, 8, wpc_dcs_state )
 	AM_RANGE(0x0000, 0xffff) AM_NOP
 ADDRESS_MAP_END
 
 static INPUT_PORTS_START( wpc_dcs )
 INPUT_PORTS_END
 
-static MACHINE_RESET( wpc_dcs )
+void wpc_dcs_state::machine_reset()
 {
 }
 
-static DRIVER_INIT( wpc_dcs )
+DRIVER_INIT_MEMBER(wpc_dcs_state,wpc_dcs)
 {
 }
 
@@ -30,11 +41,6 @@ static MACHINE_CONFIG_START( wpc_dcs, wpc_dcs_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6809, 2000000)
 	MCFG_CPU_PROGRAM_MAP(wpc_dcs_map)
-
-	MCFG_MACHINE_RESET( wpc_dcs )
-
-	/* video hardware */
-	MCFG_DEFAULT_LAYOUT(layout_pinball)
 MACHINE_CONFIG_END
 
 /*-------------
@@ -61,6 +67,7 @@ ROM_START(dm_pa2)
 	ROM_LOAD("dmsndp4.u7", 0x500000, 0x080000, CRC(8760ed90) SHA1(cf8808f7cd347c47fa12e73a6bb5a54303fb7c49))
 	ROM_RELOAD(0x500000+0x080000, 0x080000)
 ROM_END
+
 ROM_START(dm_px5)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
 	ROM_REGION(0x2000, "user1", ROMREGION_ERASEFF)
@@ -82,6 +89,7 @@ ROM_START(dm_px5)
 	ROM_LOAD("dmsndp4.u7", 0x500000, 0x080000, CRC(8760ed90) SHA1(cf8808f7cd347c47fa12e73a6bb5a54303fb7c49))
 	ROM_RELOAD(0x500000+0x080000, 0x080000)
 ROM_END
+
 ROM_START(dm_la1)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
 	ROM_REGION(0x2000, "user1", ROMREGION_ERASEFF)
@@ -103,6 +111,7 @@ ROM_START(dm_la1)
 	ROM_LOAD("dm_u7_s.l2", 0x500000, 0x080000, CRC(75066af1) SHA1(4d70bce8a96343afcf02c89240b11faf19e11f02))
 	ROM_RELOAD(0x500000+0x080000, 0x080000)
 ROM_END
+
 ROM_START(dm_lx3)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
 	ROM_REGION(0x2000, "user1", ROMREGION_ERASEFF)
@@ -124,6 +133,7 @@ ROM_START(dm_lx3)
 	ROM_LOAD("dm_u7_s.l2", 0x500000, 0x080000, CRC(75066af1) SHA1(4d70bce8a96343afcf02c89240b11faf19e11f02))
 	ROM_RELOAD(0x500000+0x080000, 0x080000)
 ROM_END
+
 ROM_START(dm_lx4)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
 	ROM_REGION(0x2000, "user1", ROMREGION_ERASEFF)
@@ -145,6 +155,7 @@ ROM_START(dm_lx4)
 	ROM_LOAD("dm_u7_s.l2", 0x500000, 0x080000, CRC(75066af1) SHA1(4d70bce8a96343afcf02c89240b11faf19e11f02))
 	ROM_RELOAD(0x500000+0x080000, 0x080000)
 ROM_END
+
 ROM_START(dm_h5)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
 	ROM_REGION(0x2000, "user1", ROMREGION_ERASEFF)
@@ -170,6 +181,7 @@ ROM_START(dm_h5)
 	ROM_LOAD("dm.9", 0x700000, 0x080000, CRC(4c1a34e8) SHA1(3eacc3c63b2d9db57fc86447f1408635b987ef69))
 	ROM_RELOAD(0x700000+0x080000, 0x080000)
 ROM_END
+
 ROM_START(dm_h6)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
 	ROM_REGION(0x2000, "user1", ROMREGION_ERASEFF)
@@ -222,6 +234,7 @@ ROM_START(ij_l7)
 	ROM_LOAD("ijsnd_l3.u8", 0x600000, 0x080000, CRC(45e35bd7) SHA1(782b406be341d55d22a96acb8c2459f3058940df))
 	ROM_RELOAD(0x600000+0x080000, 0x080000)
 ROM_END
+
 ROM_START(ij_lg7)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
 	ROM_REGION(0x2000, "user1", ROMREGION_ERASEFF)
@@ -245,6 +258,7 @@ ROM_START(ij_lg7)
 	ROM_LOAD("ijsnd_l3.u8", 0x600000, 0x080000, CRC(45e35bd7) SHA1(782b406be341d55d22a96acb8c2459f3058940df))
 	ROM_RELOAD(0x600000+0x080000, 0x080000)
 ROM_END
+
 ROM_START(ij_l6)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
 	ROM_REGION(0x2000, "user1", ROMREGION_ERASEFF)
@@ -268,6 +282,7 @@ ROM_START(ij_l6)
 	ROM_LOAD("ijsnd_l3.u8", 0x600000, 0x080000, CRC(45e35bd7) SHA1(782b406be341d55d22a96acb8c2459f3058940df))
 	ROM_RELOAD(0x600000+0x080000, 0x080000)
 ROM_END
+
 ROM_START(ij_l5)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
 	ROM_REGION(0x2000, "user1", ROMREGION_ERASEFF)
@@ -291,6 +306,7 @@ ROM_START(ij_l5)
 	ROM_LOAD("ijsnd_l3.u8", 0x600000, 0x080000, CRC(45e35bd7) SHA1(782b406be341d55d22a96acb8c2459f3058940df))
 	ROM_RELOAD(0x600000+0x080000, 0x080000)
 ROM_END
+
 ROM_START(ij_l4)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
 	ROM_REGION(0x2000, "user1", ROMREGION_ERASEFF)
@@ -314,6 +330,7 @@ ROM_START(ij_l4)
 	ROM_LOAD("ijsnd_l3.u8", 0x600000, 0x080000, CRC(45e35bd7) SHA1(782b406be341d55d22a96acb8c2459f3058940df))
 	ROM_RELOAD(0x600000+0x080000, 0x080000)
 ROM_END
+
 ROM_START(ij_l3)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
 	ROM_REGION(0x2000, "user1", ROMREGION_ERASEFF)
@@ -366,6 +383,7 @@ ROM_START(jd_l7)
 	ROM_LOAD("jdsnd_u9.bin", 0x700000, 0x080000, CRC(885b7c70) SHA1(be3bb42aeda3020a72c527f52c5330d0bafa9966))
 	ROM_RELOAD(0x700000+0x080000, 0x080000)
 ROM_END
+
 ROM_START(jd_l1)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
 	ROM_REGION(0x2000, "user1", ROMREGION_ERASEFF)
@@ -391,6 +409,7 @@ ROM_START(jd_l1)
 	ROM_LOAD("jdsnd_u9.bin", 0x700000, 0x080000, CRC(885b7c70) SHA1(be3bb42aeda3020a72c527f52c5330d0bafa9966))
 	ROM_RELOAD(0x700000+0x080000, 0x080000)
 ROM_END
+
 ROM_START(jd_l6)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
 	ROM_REGION(0x2000, "user1", ROMREGION_ERASEFF)
@@ -489,6 +508,7 @@ ROM_START(sttng_l7)
 	ROM_LOAD("ng_u8_s.l1", 0x600000, 0x080000, CRC(c9fb065e) SHA1(c148178ee0ea787acc88078db01d17073e75fdc7))
 	ROM_RELOAD(0x600000+0x080000, 0x080000)
 ROM_END
+
 ROM_START(sttng_x7)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
 	ROM_REGION(0x2000, "user1", ROMREGION_ERASEFF)
@@ -512,6 +532,7 @@ ROM_START(sttng_x7)
 	ROM_LOAD("ng_u8_s.l1", 0x600000, 0x080000, CRC(c9fb065e) SHA1(c148178ee0ea787acc88078db01d17073e75fdc7))
 	ROM_RELOAD(0x600000+0x080000, 0x080000)
 ROM_END
+
 ROM_START(sttng_s7)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
 	ROM_REGION(0x2000, "user1", ROMREGION_ERASEFF)
@@ -535,6 +556,7 @@ ROM_START(sttng_s7)
 	ROM_LOAD("ng_u8_s.l1", 0x600000, 0x080000, CRC(c9fb065e) SHA1(c148178ee0ea787acc88078db01d17073e75fdc7))
 	ROM_RELOAD(0x600000+0x080000, 0x080000)
 ROM_END
+
 ROM_START(sttng_p5)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
 	ROM_REGION(0x2000, "user1", ROMREGION_ERASEFF)
@@ -558,6 +580,7 @@ ROM_START(sttng_p5)
 	ROM_LOAD("ng_u8_s.l1", 0x600000, 0x080000, CRC(c9fb065e) SHA1(c148178ee0ea787acc88078db01d17073e75fdc7))
 	ROM_RELOAD(0x600000+0x080000, 0x080000)
 ROM_END
+
 ROM_START(sttng_g7)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
 	ROM_REGION(0x2000, "user1", ROMREGION_ERASEFF)
@@ -581,6 +604,7 @@ ROM_START(sttng_g7)
 	ROM_LOAD("ng_u8_s.l1", 0x600000, 0x080000, CRC(c9fb065e) SHA1(c148178ee0ea787acc88078db01d17073e75fdc7))
 	ROM_RELOAD(0x600000+0x080000, 0x080000)
 ROM_END
+
 ROM_START(sttng_l1)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
 	ROM_REGION(0x2000, "user1", ROMREGION_ERASEFF)
@@ -604,6 +628,7 @@ ROM_START(sttng_l1)
 	ROM_LOAD("ng_u8_s.l1", 0x600000, 0x080000, CRC(c9fb065e) SHA1(c148178ee0ea787acc88078db01d17073e75fdc7))
 	ROM_RELOAD(0x600000+0x080000, 0x080000)
 ROM_END
+
 ROM_START(sttng_l2)
 	ROM_REGION(0x10000, "maincpu", ROMREGION_ERASEFF)
 	ROM_REGION(0x2000, "user1", ROMREGION_ERASEFF)
@@ -643,30 +668,29 @@ ROM_START(afv_l4)
 	ROM_RELOAD(0x000000+0x080000, 0x080000)
 ROM_END
 
-GAME(1994,	dm_lx4,		0,			wpc_dcs,	wpc_dcs,	wpc_dcs,	ROT0,	"Williams",				"Demolition Man (LX-4)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1994,	dm_pa2,		dm_lx4,		wpc_dcs,	wpc_dcs,	wpc_dcs,	ROT0,	"Williams",				"Demolition Man (PA-2)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1994,	dm_px5,		dm_lx4,		wpc_dcs,	wpc_dcs,	wpc_dcs,	ROT0,	"Williams",				"Demolition Man (PX-5)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1994,	dm_la1,		dm_lx4,		wpc_dcs,	wpc_dcs,	wpc_dcs,	ROT0,	"Williams",				"Demolition Man (LA-1)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1994,	dm_lx3,		dm_lx4,		wpc_dcs,	wpc_dcs,	wpc_dcs,	ROT0,	"Williams",				"Demolition Man (LX-3)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1995,	dm_h5,		dm_lx4,		wpc_dcs,	wpc_dcs,	wpc_dcs,	ROT0,	"Williams",				"Demolition Man (H-5)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1995,	dm_h6,		dm_lx4,		wpc_dcs,	wpc_dcs,	wpc_dcs,	ROT0,	"Williams",				"Demolition Man (H-6)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1993,	ij_l7,		0,			wpc_dcs,	wpc_dcs,	wpc_dcs,	ROT0,	"Williams",				"Indiana Jones (L-7)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1993,	ij_lg7,		ij_l7,		wpc_dcs,	wpc_dcs,	wpc_dcs,	ROT0,	"Williams",				"Indiana Jones (LG-7)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1993,	ij_l6,		ij_l7,		wpc_dcs,	wpc_dcs,	wpc_dcs,	ROT0,	"Williams",				"Indiana Jones (L-6)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1993,	ij_l5,		ij_l7,		wpc_dcs,	wpc_dcs,	wpc_dcs,	ROT0,	"Williams",				"Indiana Jones (L-5)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1993,	ij_l4,		ij_l7,		wpc_dcs,	wpc_dcs,	wpc_dcs,	ROT0,	"Williams",				"Indiana Jones (L-4)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1993,	ij_l3,		ij_l7,		wpc_dcs,	wpc_dcs,	wpc_dcs,	ROT0,	"Williams",				"Indiana Jones (L-3)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1993,	jd_l7,		0,			wpc_dcs,	wpc_dcs,	wpc_dcs,	ROT0,	"Bally",				"Judge Dredd (L-7)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1993,	jd_l1,		jd_l7,		wpc_dcs,	wpc_dcs,	wpc_dcs,	ROT0,	"Bally",				"Judge Dredd (L-1)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1993,	jd_l6,		jd_l7,		wpc_dcs,	wpc_dcs,	wpc_dcs,	ROT0,	"Bally",				"Judge Dredd (L-6)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1994,	pop_lx5,	0,			wpc_dcs,	wpc_dcs,	wpc_dcs,	ROT0,	"Bally",				"Popeye Saves The Earth (LX-5)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1994,	pop_pa3,	pop_lx5,	wpc_dcs,	wpc_dcs,	wpc_dcs,	ROT0,	"Bally",				"Popeye Saves The Earth (PA-3)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1994,	sttng_l7,	0,			wpc_dcs,	wpc_dcs,	wpc_dcs,	ROT0,	"Williams",				"Star Trek: The Next Generation (LX-7)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1994,	sttng_x7,	sttng_l7,	wpc_dcs,	wpc_dcs,	wpc_dcs,	ROT0,	"Williams",				"Star Trek: The Next Generation (LX-7 Special)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1993,	sttng_p5,	sttng_l7,	wpc_dcs,	wpc_dcs,	wpc_dcs,	ROT0,	"Williams",				"Star Trek: The Next Generation (P-5)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1994,	sttng_s7,	sttng_l7,	wpc_dcs,	wpc_dcs,	wpc_dcs,	ROT0,	"Williams",				"Star Trek: The Next Generation (LX-7) SP1",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1994,	sttng_g7,	sttng_l7,	wpc_dcs,	wpc_dcs,	wpc_dcs,	ROT0,	"Williams",				"Star Trek: The Next Generation (LG-7)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1993,	sttng_l1,	sttng_l7,	wpc_dcs,	wpc_dcs,	wpc_dcs,	ROT0,	"Williams",				"Star Trek: The Next Generation (LX-1)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1993,	sttng_l2,	sttng_l7,	wpc_dcs,	wpc_dcs,	wpc_dcs,	ROT0,	"Williams",				"Star Trek: The Next Generation (LX-2)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(1993,	afv_l4,		0,			wpc_dcs,	wpc_dcs,	wpc_dcs,	ROT0,	"Williams",				"Addams Family Values (Coin Dropper L-4)",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-
+GAME(1994,  dm_lx4,     0,          wpc_dcs,    wpc_dcs, wpc_dcs_state, wpc_dcs,    ROT0,   "Williams",             "Demolition Man (LX-4)",                GAME_IS_SKELETON_MECHANICAL)
+GAME(1994,  dm_pa2,     dm_lx4,     wpc_dcs,    wpc_dcs, wpc_dcs_state, wpc_dcs,    ROT0,   "Williams",             "Demolition Man (PA-2)",                GAME_IS_SKELETON_MECHANICAL)
+GAME(1994,  dm_px5,     dm_lx4,     wpc_dcs,    wpc_dcs, wpc_dcs_state, wpc_dcs,    ROT0,   "Williams",             "Demolition Man (PX-5)",                GAME_IS_SKELETON_MECHANICAL)
+GAME(1994,  dm_la1,     dm_lx4,     wpc_dcs,    wpc_dcs, wpc_dcs_state, wpc_dcs,    ROT0,   "Williams",             "Demolition Man (LA-1)",                GAME_IS_SKELETON_MECHANICAL)
+GAME(1994,  dm_lx3,     dm_lx4,     wpc_dcs,    wpc_dcs, wpc_dcs_state, wpc_dcs,    ROT0,   "Williams",             "Demolition Man (LX-3)",                GAME_IS_SKELETON_MECHANICAL)
+GAME(1995,  dm_h5,      dm_lx4,     wpc_dcs,    wpc_dcs, wpc_dcs_state, wpc_dcs,    ROT0,   "Williams",             "Demolition Man (H-5)",             GAME_IS_SKELETON_MECHANICAL)
+GAME(1995,  dm_h6,      dm_lx4,     wpc_dcs,    wpc_dcs, wpc_dcs_state, wpc_dcs,    ROT0,   "Williams",             "Demolition Man (H-6)",             GAME_IS_SKELETON_MECHANICAL)
+GAME(1993,  ij_l7,      0,          wpc_dcs,    wpc_dcs, wpc_dcs_state, wpc_dcs,    ROT0,   "Williams",             "Indiana Jones (L-7)",              GAME_IS_SKELETON_MECHANICAL)
+GAME(1993,  ij_lg7,     ij_l7,      wpc_dcs,    wpc_dcs, wpc_dcs_state, wpc_dcs,    ROT0,   "Williams",             "Indiana Jones (LG-7)",             GAME_IS_SKELETON_MECHANICAL)
+GAME(1993,  ij_l6,      ij_l7,      wpc_dcs,    wpc_dcs, wpc_dcs_state, wpc_dcs,    ROT0,   "Williams",             "Indiana Jones (L-6)",              GAME_IS_SKELETON_MECHANICAL)
+GAME(1993,  ij_l5,      ij_l7,      wpc_dcs,    wpc_dcs, wpc_dcs_state, wpc_dcs,    ROT0,   "Williams",             "Indiana Jones (L-5)",              GAME_IS_SKELETON_MECHANICAL)
+GAME(1993,  ij_l4,      ij_l7,      wpc_dcs,    wpc_dcs, wpc_dcs_state, wpc_dcs,    ROT0,   "Williams",             "Indiana Jones (L-4)",              GAME_IS_SKELETON_MECHANICAL)
+GAME(1993,  ij_l3,      ij_l7,      wpc_dcs,    wpc_dcs, wpc_dcs_state, wpc_dcs,    ROT0,   "Williams",             "Indiana Jones (L-3)",              GAME_IS_SKELETON_MECHANICAL)
+GAME(1993,  jd_l7,      0,          wpc_dcs,    wpc_dcs, wpc_dcs_state, wpc_dcs,    ROT0,   "Bally",                "Judge Dredd (L-7)",                GAME_IS_SKELETON_MECHANICAL)
+GAME(1993,  jd_l1,      jd_l7,      wpc_dcs,    wpc_dcs, wpc_dcs_state, wpc_dcs,    ROT0,   "Bally",                "Judge Dredd (L-1)",                GAME_IS_SKELETON_MECHANICAL)
+GAME(1993,  jd_l6,      jd_l7,      wpc_dcs,    wpc_dcs, wpc_dcs_state, wpc_dcs,    ROT0,   "Bally",                "Judge Dredd (L-6)",                GAME_IS_SKELETON_MECHANICAL)
+GAME(1994,  pop_lx5,    0,          wpc_dcs,    wpc_dcs, wpc_dcs_state, wpc_dcs,    ROT0,   "Bally",                "Popeye Saves The Earth (LX-5)",                GAME_IS_SKELETON_MECHANICAL)
+GAME(1994,  pop_pa3,    pop_lx5,    wpc_dcs,    wpc_dcs, wpc_dcs_state, wpc_dcs,    ROT0,   "Bally",                "Popeye Saves The Earth (PA-3)",                GAME_IS_SKELETON_MECHANICAL)
+GAME(1994,  sttng_l7,   0,          wpc_dcs,    wpc_dcs, wpc_dcs_state, wpc_dcs,    ROT0,   "Williams",             "Star Trek: The Next Generation (LX-7)",                GAME_IS_SKELETON_MECHANICAL)
+GAME(1994,  sttng_x7,   sttng_l7,   wpc_dcs,    wpc_dcs, wpc_dcs_state, wpc_dcs,    ROT0,   "Williams",             "Star Trek: The Next Generation (LX-7 Special)",                GAME_IS_SKELETON_MECHANICAL)
+GAME(1993,  sttng_p5,   sttng_l7,   wpc_dcs,    wpc_dcs, wpc_dcs_state, wpc_dcs,    ROT0,   "Williams",             "Star Trek: The Next Generation (P-5)",             GAME_IS_SKELETON_MECHANICAL)
+GAME(1994,  sttng_s7,   sttng_l7,   wpc_dcs,    wpc_dcs, wpc_dcs_state, wpc_dcs,    ROT0,   "Williams",             "Star Trek: The Next Generation (LX-7) SP1",                GAME_IS_SKELETON_MECHANICAL)
+GAME(1994,  sttng_g7,   sttng_l7,   wpc_dcs,    wpc_dcs, wpc_dcs_state, wpc_dcs,    ROT0,   "Williams",             "Star Trek: The Next Generation (LG-7)",                GAME_IS_SKELETON_MECHANICAL)
+GAME(1993,  sttng_l1,   sttng_l7,   wpc_dcs,    wpc_dcs, wpc_dcs_state, wpc_dcs,    ROT0,   "Williams",             "Star Trek: The Next Generation (LX-1)",                GAME_IS_SKELETON_MECHANICAL)
+GAME(1993,  sttng_l2,   sttng_l7,   wpc_dcs,    wpc_dcs, wpc_dcs_state, wpc_dcs,    ROT0,   "Williams",             "Star Trek: The Next Generation (LX-2)",                GAME_IS_SKELETON_MECHANICAL)
+GAME(1993,  afv_l4,     0,          wpc_dcs,    wpc_dcs, wpc_dcs_state, wpc_dcs,    ROT0,   "Williams",             "Addams Family Values (Coin Dropper L-4)",              GAME_IS_SKELETON_MECHANICAL)

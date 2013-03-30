@@ -10,10 +10,22 @@
 
 
 //**************************************************************************
-//  DEVICE CONFIGURATION
+//  LIVE DEVICE
 //**************************************************************************
 
-GENERIC_DEVICE_CONFIG_SETUP(k056230, "Konami 056230")
+// device type definition
+const device_type K056230 = &device_creator<k056230_device>;
+
+//-------------------------------------------------
+//  k056230_device - constructor
+//-------------------------------------------------
+
+k056230_device::k056230_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, K056230, "Konami 056230", tag, owner, clock)
+{
+
+}
+
 
 //-------------------------------------------------
 //  device_config_complete - perform any
@@ -21,7 +33,7 @@ GENERIC_DEVICE_CONFIG_SETUP(k056230, "Konami 056230")
 //  complete
 //-------------------------------------------------
 
-void k056230_device_config::device_config_complete()
+void k056230_device::device_config_complete()
 {
 	// inherit a copy of the static data
 	const k056230_interface *intf = reinterpret_cast<const k056230_interface *>(static_config());
@@ -33,29 +45,11 @@ void k056230_device_config::device_config_complete()
 	// or initialize to defaults if none provided
 	else
 	{
-		m_cpu = NULL;
-		m_is_thunderh = 0;
+		m_cpu_tag = NULL;
+		m_is_thunderh = false;
 	}
 }
 
-
-
-//**************************************************************************
-//  LIVE DEVICE
-//**************************************************************************
-
-const device_type K0506230 = k056230_device_config::static_alloc_device_config;
-
-//-------------------------------------------------
-//  k056230_device - constructor
-//-------------------------------------------------
-
-k056230_device::k056230_device(running_machine &_machine, const k056230_device_config &config)
-    : device_t(_machine, config),
-      m_config(config)
-{
-
-}
 
 //-------------------------------------------------
 //  device_start - device-specific startup
@@ -63,18 +57,16 @@ k056230_device::k056230_device(running_machine &_machine, const k056230_device_c
 
 void k056230_device::device_start()
 {
-	if(m_config.m_cpu)
+	if(m_cpu_tag)
 	{
-		m_cpu = m_machine.device(m_config.m_cpu);
+		m_cpu = machine().device(m_cpu_tag);
 	}
 	else
 	{
 		m_cpu = NULL;
 	}
 
-	m_is_thunderh = m_config.m_is_thunderh;
-
-	m_ram = auto_alloc_array(m_machine, UINT32, 0x2000);
+	m_ram = auto_alloc_array(machine(), UINT32, 0x2000);
 
 	save_pointer(NAME(m_ram), 0x2000);
 }
@@ -84,13 +76,13 @@ READ8_DEVICE_HANDLER_TRAMPOLINE(k056230, k056230_r)
 {
 	switch (offset)
 	{
-		case 0:		// Status register
+		case 0:     // Status register
 		{
 			return 0x08;
 		}
 	}
 
-//  mame_printf_debug("k056230_r: %d at %08X\n", offset, cpu_get_pc(&space->device()));
+//  mame_printf_debug("k056230_r: %d at %08X\n", offset, space.device().safe_pc());
 
 	return 0;
 }
@@ -104,7 +96,7 @@ void k056230_device::network_irq_clear()
 {
 	if(m_cpu)
 	{
-		device_set_input_line(m_cpu, INPUT_LINE_IRQ2, CLEAR_LINE);
+		m_cpu->execute().set_input_line(INPUT_LINE_IRQ2, CLEAR_LINE);
 	}
 }
 
@@ -113,11 +105,11 @@ WRITE8_DEVICE_HANDLER_TRAMPOLINE(k056230, k056230_w)
 {
 	switch(offset)
 	{
-		case 0:		// Mode register
+		case 0:     // Mode register
 		{
 			break;
 		}
-		case 1:		// Control register
+		case 1:     // Control register
 		{
 			if(data & 0x20)
 			{
@@ -126,31 +118,31 @@ WRITE8_DEVICE_HANDLER_TRAMPOLINE(k056230, k056230_w)
 				{
 					if(m_cpu)
 					{
-						device_set_input_line(m_cpu, INPUT_LINE_IRQ2, ASSERT_LINE);
+						m_cpu->execute().set_input_line(INPUT_LINE_IRQ2, ASSERT_LINE);
 					}
-					m_machine.scheduler().timer_set(attotime::from_usec(10), FUNC(network_irq_clear_callback), 0, (void*)this);
+					machine().scheduler().timer_set(attotime::from_usec(10), FUNC(network_irq_clear_callback), 0, (void*)this);
 				}
 			}
 //          else
-//              device_set_input_line(k056230->cpu, INPUT_LINE_IRQ2, CLEAR_LINE);
+//              k056230->cpu->execute().set_input_line(INPUT_LINE_IRQ2, CLEAR_LINE);
 			break;
 		}
-		case 2:		// Sub ID register
+		case 2:     // Sub ID register
 		{
 			break;
 		}
 	}
-//  mame_printf_debug("k056230_w: %d, %02X at %08X\n", offset, data, cpu_get_pc(&space->device()));
+//  mame_printf_debug("k056230_w: %d, %02X at %08X\n", offset, data, space.device().safe_pc());
 }
 
 READ32_DEVICE_HANDLER_TRAMPOLINE(k056230, lanc_ram_r)
 {
-	//mame_printf_debug("LANC_RAM_r: %08X, %08X at %08X\n", offset, mem_mask, cpu_get_pc(&space->device()));
+	//mame_printf_debug("LANC_RAM_r: %08X, %08X at %08X\n", offset, mem_mask, space.device().safe_pc());
 	return m_ram[offset & 0x7ff];
 }
 
 WRITE32_DEVICE_HANDLER_TRAMPOLINE(k056230, lanc_ram_w)
 {
-	//mame_printf_debug("LANC_RAM_w: %08X, %08X, %08X at %08X\n", data, offset, mem_mask, cpu_get_pc(&space->device()));
+	//mame_printf_debug("LANC_RAM_w: %08X, %08X, %08X at %08X\n", data, offset, mem_mask, space.device().safe_pc());
 	COMBINE_DATA(m_ram + (offset & 0x7ff));
 }

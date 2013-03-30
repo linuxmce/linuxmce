@@ -31,17 +31,6 @@
 
 
 //**************************************************************************
-//  CONSTANTS
-//**************************************************************************
-
-const int NOTIMER_0 = (1<<0);
-const int NOTIMER_1 = (1<<1);
-const int NOTIMER_2 = (1<<2);
-const int NOTIMER_3 = (1<<3);
-
-
-
-//**************************************************************************
 //  DEVICE CONFIGURATION MACROS
 //**************************************************************************
 
@@ -64,49 +53,24 @@ const int NOTIMER_3 = (1<<3);
 
 struct z80ctc_interface
 {
-	UINT8				m_notimer;	// timer disabler mask
-	devcb_write_line	m_intr;		// callback when change interrupt status
-	devcb_write_line	m_zc0;		// ZC/TO0 callback
-	devcb_write_line	m_zc1;		// ZC/TO1 callback
-	devcb_write_line	m_zc2;		// ZC/TO2 callback
-};
-
-
-
-// ======================> z80ctc_device_config
-
-class z80ctc_device_config :	public device_config,
-								public device_config_z80daisy_interface,
-								public z80ctc_interface
-{
-	friend class z80ctc_device;
-
-	// construction/destruction
-	z80ctc_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock);
-
-public:
-	// allocators
-	static device_config *static_alloc_device_config(const machine_config &mconfig, const char *tag, const device_config *owner, UINT32 clock);
-	virtual device_t *alloc_device(running_machine &machine) const;
-
-protected:
-	// device_config overrides
-	virtual void device_config_complete();
+	devcb_write_line    m_intr_cb;  // callback when change interrupt status
+	devcb_write_line    m_zc0_cb;   // ZC/TO0 callback
+	devcb_write_line    m_zc1_cb;   // ZC/TO1 callback
+	devcb_write_line    m_zc2_cb;   // ZC/TO2 callback
 };
 
 
 
 // ======================> z80ctc_device
 
-class z80ctc_device :	public device_t,
-						public device_z80daisy_interface
+class z80ctc_device :   public device_t,
+						public device_z80daisy_interface,
+						public z80ctc_interface
 {
-	friend class z80ctc_device_config;
-
-	// construction/destruction
-	z80ctc_device(running_machine &_machine, const z80ctc_device_config &_config);
-
 public:
+	// construction/destruction
+	z80ctc_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock);
+
 	// state getters
 	attotime period(int ch) const { return m_channel[ch].period(); }
 
@@ -115,8 +79,17 @@ public:
 	void write(int ch, UINT8 data) { m_channel[ch].write(data); }
 	void trigger(int ch, UINT8 data) { m_channel[ch].trigger(data); }
 
+	// read/write handlers
+	DECLARE_READ8_MEMBER( read );
+	DECLARE_WRITE8_MEMBER( write );
+	DECLARE_WRITE_LINE_MEMBER( trg0 );
+	DECLARE_WRITE_LINE_MEMBER( trg1 );
+	DECLARE_WRITE_LINE_MEMBER( trg2 );
+	DECLARE_WRITE_LINE_MEMBER( trg3 );
+
 private:
 	// device-level overrides
+	virtual void device_config_complete();
 	virtual void device_start();
 	virtual void device_reset();
 
@@ -135,7 +108,7 @@ private:
 	public:
 		ctc_channel();
 
-		void start(z80ctc_device *device, int index, bool notimer, const devcb_write_line *write_line);
+		void start(z80ctc_device *device, int index, const devcb_write_line &write_line);
 		void reset();
 
 		UINT8 read();
@@ -145,48 +118,32 @@ private:
 		void trigger(UINT8 data);
 		void timer_callback();
 
-		z80ctc_device *	m_device;				// pointer back to our device
-		int				m_index;				// our channel index
-		devcb_resolved_write_line m_zc;			// zero crossing callbacks
-		bool			m_notimer;				// timer disabled?
-		UINT16			m_mode;					// current mode
-		UINT16			m_tconst;				// time constant
-		UINT16			m_down;					// down counter (clock mode only)
-		UINT8			m_extclk;				// current signal from the external clock
-		emu_timer *		m_timer;				// array of active timers
-		UINT8			m_int_state;			// interrupt status (for daisy chain)
+		z80ctc_device * m_device;               // pointer back to our device
+		int             m_index;                // our channel index
+		devcb_resolved_write_line m_zc;         // zero crossing callbacks
+		UINT16          m_mode;                 // current mode
+		UINT16          m_tconst;               // time constant
+		UINT16          m_down;                 // down counter (clock mode only)
+		UINT8           m_extclk;               // current signal from the external clock
+		emu_timer *     m_timer;                // array of active timers
+		UINT8           m_int_state;            // interrupt status (for daisy chain)
 
 	private:
 		static TIMER_CALLBACK( static_timer_callback ) { reinterpret_cast<z80ctc_device::ctc_channel *>(ptr)->timer_callback(); }
 	};
 
 	// internal state
-	const z80ctc_device_config &m_config;
-	devcb_resolved_write_line m_intr;			// interrupt callback
+	devcb_resolved_write_line m_intr;           // interrupt callback
 
-	UINT8				m_vector;				// interrupt vector
-	attotime			m_period16;				// 16/system clock
-	attotime			m_period256;			// 256/system clock
-	ctc_channel			m_channel[4];			// data for each channel
+	UINT8               m_vector;               // interrupt vector
+	attotime            m_period16;             // 16/system clock
+	attotime            m_period256;            // 256/system clock
+	ctc_channel         m_channel[4];           // data for each channel
 };
 
 
 // device type definition
 extern const device_type Z80CTC;
-
-
-
-//**************************************************************************
-//  READ/WRITE HANDLERS
-//**************************************************************************
-
-WRITE8_DEVICE_HANDLER( z80ctc_w );
-READ8_DEVICE_HANDLER( z80ctc_r );
-
-WRITE_LINE_DEVICE_HANDLER( z80ctc_trg0_w );
-WRITE_LINE_DEVICE_HANDLER( z80ctc_trg1_w );
-WRITE_LINE_DEVICE_HANDLER( z80ctc_trg2_w );
-WRITE_LINE_DEVICE_HANDLER( z80ctc_trg3_w );
 
 
 #endif

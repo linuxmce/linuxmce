@@ -13,7 +13,7 @@
 
 #define VERBOSE 0
 
-#define LOG(x)	do { if (VERBOSE) logerror x; } while (0)
+#define LOG(x)  do { if (VERBOSE) logerror x; } while (0)
 
 #ifdef USE_SH2DRC
 #define GET_SH2(dev) *(sh2_state **)downcast<legacy_cpu_device *>(dev)->token()
@@ -27,7 +27,7 @@ static const int div_tab[4] = { 3, 5, 7, 0 };
 INLINE UINT32 RL(sh2_state *sh2, offs_t A)
 {
 	if (A >= 0xe0000000)
-		return sh2_internal_r(sh2->internal, (A & 0x1fc)>>2, 0xffffffff);
+		return sh2_internal_r(*sh2->internal, (A & 0x1fc)>>2, 0xffffffff);
 
 	if (A >= 0xc0000000)
 		return sh2->program->read_dword(A);
@@ -35,14 +35,14 @@ INLINE UINT32 RL(sh2_state *sh2, offs_t A)
 	if (A >= 0x40000000)
 		return 0xa5a5a5a5;
 
-  return sh2->program->read_dword(A & AM);
+	return sh2->program->read_dword(A & AM);
 }
 
 INLINE void WL(sh2_state *sh2, offs_t A, UINT32 V)
 {
 	if (A >= 0xe0000000)
 	{
-		sh2_internal_w(sh2->internal, (A & 0x1fc)>>2, V, 0xffffffff);
+		sh2_internal_w(*sh2->internal, (A & 0x1fc)>>2, V, 0xffffffff);
 		return;
 	}
 
@@ -62,10 +62,15 @@ static void sh2_timer_resync(sh2_state *sh2)
 {
 	int divider = div_tab[(sh2->m[5] >> 8) & 3];
 	UINT64 cur_time = sh2->device->total_cycles();
+	UINT64 add = (cur_time - sh2->frc_base) >> divider;
 
-	if(divider)
-		sh2->frc += (cur_time - sh2->frc_base) >> divider;
-	sh2->frc_base = cur_time;
+	if (add > 0)
+	{
+		if(divider)
+			sh2->frc += add;
+
+		sh2->frc_base = cur_time;
+	}
 }
 
 static void sh2_timer_activate(sh2_state *sh2)
@@ -220,7 +225,7 @@ void sh2_do_dma(sh2_state *sh2, int dma)
 				}
 
 				#ifdef USE_TIMER_FOR_DMA
-				 //schedule next DMA callback
+					//schedule next DMA callback
 				sh2->dma_current_active_timer[dma]->adjust(sh2->device->cycles_to_attotime(2), dma);
 				#endif
 
@@ -268,12 +273,12 @@ void sh2_do_dma(sh2_state *sh2, int dma)
 				}
 
 				#ifdef USE_TIMER_FOR_DMA
-				 //schedule next DMA callback
+					//schedule next DMA callback
 				sh2->dma_current_active_timer[dma]->adjust(sh2->device->cycles_to_attotime(2), dma);
 				#endif
 
 				// check: should this really be using read_word_32 / write_word_32?
-				dmadata	= sh2->program->read_word(tempsrc);
+				dmadata = sh2->program->read_word(tempsrc);
 				if (sh2->dma_callback_kludge) dmadata = sh2->dma_callback_kludge(sh2->device, tempsrc, tempdst, dmadata, sh2->active_dma_size[dma]);
 				sh2->program->write_word(tempdst, dmadata);
 
@@ -315,11 +320,11 @@ void sh2_do_dma(sh2_state *sh2, int dma)
 				}
 
 				#ifdef USE_TIMER_FOR_DMA
-				 //schedule next DMA callback
+					//schedule next DMA callback
 				sh2->dma_current_active_timer[dma]->adjust(sh2->device->cycles_to_attotime(2), dma);
 				#endif
 
-				dmadata	= sh2->program->read_dword(tempsrc);
+				dmadata = sh2->program->read_dword(tempsrc);
 				if (sh2->dma_callback_kludge) dmadata = sh2->dma_callback_kludge(sh2->device, tempsrc, tempdst, dmadata, sh2->active_dma_size[dma]);
 				sh2->program->write_dword(tempdst, dmadata);
 
@@ -355,12 +360,12 @@ void sh2_do_dma(sh2_state *sh2, int dma)
 					{
 						//printf("dma stalled\n");
 						sh2->dma_timer_active[dma]=2;// mark as stalled
-						fatalerror("SH2 dma_callback_fifo_data_available == 0 in unsupported mode");
+						fatalerror("SH2 dma_callback_fifo_data_available == 0 in unsupported mode\n");
 					}
 				}
 
 				#ifdef USE_TIMER_FOR_DMA
-				 //schedule next DMA callback
+					//schedule next DMA callback
 				sh2->dma_current_active_timer[dma]->adjust(sh2->device->cycles_to_attotime(2), dma);
 				#endif
 
@@ -503,7 +508,7 @@ static void sh2_dmac_check(sh2_state *sh2, int dma)
 
 WRITE32_HANDLER( sh2_internal_w )
 {
-	sh2_state *sh2 = GET_SH2(&space->device());
+	sh2_state *sh2 = GET_SH2(&space.device());
 	UINT32 old;
 
 #ifdef USE_SH2DRC
@@ -517,14 +522,16 @@ WRITE32_HANDLER( sh2_internal_w )
 	//      logerror("sh2_internal_w:  Write %08x (%x), %08x @ %08x\n", 0xfffffe00+offset*4, offset, data, mem_mask);
 
 //    if(offset != 0x20)
-//        printf("sh2_internal_w:  Write %08x (%x), %08x @ %08x (PC %x)\n", 0xfffffe00+offset*4, offset, data, mem_mask, cpu_get_pc(&space->device()));
+//        printf("sh2_internal_w:  Write %08x (%x), %08x @ %08x (PC %x)\n", 0xfffffe00+offset*4, offset, data, mem_mask, space.device().safe_pc());
 
 	switch( offset )
 	{
 		// Timers
 	case 0x04: // TIER, FTCSR, FRC
 		if((mem_mask & 0x00ffffff) != 0)
+		{
 			sh2_timer_resync(sh2);
+		}
 //      printf("SH2.%s: TIER write %04x @ %04x\n", sh2->device->tag(), data >> 16, mem_mask>>16);
 		sh2->m[4] = (sh2->m[4] & ~(ICF|OCFA|OCFB|OVF)) | (old & sh2->m[4] & (ICF|OCFA|OCFB|OVF));
 		COMBINE_DATA(&sh2->frc);
@@ -681,18 +688,22 @@ WRITE32_HANDLER( sh2_internal_w )
 
 READ32_HANDLER( sh2_internal_r )
 {
-	sh2_state *sh2 = GET_SH2(&space->device());
+	sh2_state *sh2 = GET_SH2(&space.device());
 
 #ifdef USE_SH2DRC
 	offset &= 0x7f;
 #endif
-	//  logerror("sh2_internal_r:  Read %08x (%x) @ %08x\n", 0xfffffe00+offset*4, offset, mem_mask);
+//  logerror("sh2_internal_r:  Read %08x (%x) @ %08x\n", 0xfffffe00+offset*4, offset, mem_mask);
 	switch( offset )
 	{
 	case 0x04: // TIER, FTCSR, FRC
 		if ( mem_mask == 0x00ff0000 )
+		{
 			if ( sh2->ftcsr_read_callback != NULL )
+			{
 				sh2->ftcsr_read_callback( (sh2->m[4] & 0xffff0000) | sh2->frc );
+			}
+		}
 		sh2_timer_resync(sh2);
 		return (sh2->m[4] & 0xffff0000) | sh2->frc;
 	case 0x05: // OCRx, TCR, TOCR
@@ -755,7 +766,7 @@ void sh2_set_frt_input(device_t *device, int state)
 	sh2_timer_resync(sh2);
 	sh2->icr = sh2->frc;
 	sh2->m[4] |= ICF;
-	logerror("SH2.%s: ICF activated (%x)\n", sh2->device->tag(), sh2->pc & AM);
+	//logerror("SH2.%s: ICF activated (%x)\n", sh2->device->tag(), sh2->pc & AM);
 	sh2_recalc_irq(sh2);
 }
 
@@ -903,9 +914,9 @@ void sh2_exception(sh2_state *sh2, const char *message, int irqline)
 //  printf("sh2_exception [%s] irqline %x evec %x save SR %x new SR %x\n", message, irqline, sh2->evec, sh2->irqsr, sh2->sr);
 	#else
 	sh2->r[15] -= 4;
-	WL( sh2, sh2->r[15], sh2->sr );		/* push SR onto stack */
+	WL( sh2, sh2->r[15], sh2->sr );     /* push SR onto stack */
 	sh2->r[15] -= 4;
-	WL( sh2, sh2->r[15], sh2->pc );		/* push PC onto stack */
+	WL( sh2, sh2->r[15], sh2->pc );     /* push PC onto stack */
 
 	/* set I flags in SR */
 	if (irqline > SH2_INT_15)
@@ -918,9 +929,9 @@ void sh2_exception(sh2_state *sh2, const char *message, int irqline)
 	#endif
 }
 
-void sh2_common_init(sh2_state *sh2, legacy_cpu_device *device, device_irq_callback irqcallback)
+void sh2_common_init(sh2_state *sh2, legacy_cpu_device *device, device_irq_acknowledge_callback irqcallback)
 {
-	const sh2_cpu_core *conf = (const sh2_cpu_core *)device->baseconfig().static_config();
+	const sh2_cpu_core *conf = (const sh2_cpu_core *)device->static_config();
 	int i;
 
 	sh2->timer = device->machine().scheduler().timer_alloc(FUNC(sh2_timer_callback), sh2);
@@ -950,9 +961,9 @@ void sh2_common_init(sh2_state *sh2, legacy_cpu_device *device, device_irq_callb
 	}
 	sh2->irq_callback = irqcallback;
 	sh2->device = device;
-	sh2->program = device->space(AS_PROGRAM);
+	sh2->program = &device->space(AS_PROGRAM);
 	sh2->direct = &sh2->program->direct();
-	sh2->internal = device->space(AS_PROGRAM);
+	sh2->internal = &device->space(AS_PROGRAM);
 
 	device->save_item(NAME(sh2->pc));
 	device->save_item(NAME(sh2->sr));
@@ -997,4 +1008,3 @@ void sh2_common_init(sh2_state *sh2, legacy_cpu_device *device, device_irq_callb
 	device->save_item(NAME(sh2->internal_irq_vector));
 	device->save_item(NAME(sh2->dma_timer_active));
 }
-

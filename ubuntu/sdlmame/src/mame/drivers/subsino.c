@@ -212,10 +212,12 @@
 
 #include "emu.h"
 #include "cpu/z180/z180.h"
-#include "machine/8255ppi.h"
+#include "machine/i8255.h"
+#include "machine/subsino.h"
 #include "sound/okim6295.h"
 #include "sound/2413intf.h"
 #include "sound/3812intf.h"
+
 #include "victor5.lh"
 #include "victor21.lh"
 #include "crsbingo.lh"
@@ -229,22 +231,31 @@
 class subsino_state : public driver_device
 {
 public:
-	subsino_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	subsino_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_colorram(*this, "colorram"),
+		m_videoram(*this, "videoram"),
+		m_reel3_scroll(*this, "reel3_scroll"),
+		m_reel2_scroll(*this, "reel2_scroll"),
+		m_reel1_scroll(*this, "reel1_scroll"),
+		m_reel1_ram(*this, "reel1_ram"),
+		m_reel2_ram(*this, "reel2_ram"),
+		m_reel3_ram(*this, "reel3_ram"){ }
 
-	UINT8 *m_videoram;
-	UINT8 *m_colorram;
+	required_shared_ptr<UINT8> m_colorram;
+	required_shared_ptr<UINT8> m_videoram;
+	optional_shared_ptr<UINT8> m_reel3_scroll;
+	optional_shared_ptr<UINT8> m_reel2_scroll;
+	optional_shared_ptr<UINT8> m_reel1_scroll;
+	optional_shared_ptr<UINT8> m_reel1_ram;
+	optional_shared_ptr<UINT8> m_reel2_ram;
+	optional_shared_ptr<UINT8> m_reel3_ram;
+
 	tilemap_t *m_tmap;
 	tilemap_t *m_reel1_tilemap;
 	tilemap_t *m_reel2_tilemap;
 	tilemap_t *m_reel3_tilemap;
 	int m_tiles_offset;
-	UINT8* m_reel1_ram;
-	UINT8* m_reel2_ram;
-	UINT8* m_reel3_ram;
-	UINT8* m_reel1_scroll;
-	UINT8* m_reel2_scroll;
-	UINT8* m_reel3_scroll;
 	UINT8 m_out_c;
 	UINT8* m_reel1_attr;
 	UINT8* m_reel2_attr;
@@ -255,6 +266,49 @@ public:
 	int m_colordac_offs;
 	UINT8* m_stisub_colorram;
 	UINT8 m_stisub_outc;
+	DECLARE_WRITE8_MEMBER(subsino_tiles_offset_w);
+	DECLARE_WRITE8_MEMBER(subsino_videoram_w);
+	DECLARE_WRITE8_MEMBER(subsino_colorram_w);
+	DECLARE_WRITE8_MEMBER(subsino_reel1_ram_w);
+	DECLARE_WRITE8_MEMBER(subsino_reel2_ram_w);
+	DECLARE_WRITE8_MEMBER(subsino_reel3_ram_w);
+	DECLARE_WRITE8_MEMBER(subsino_out_a_w);
+	DECLARE_WRITE8_MEMBER(subsino_out_b_w);
+	DECLARE_READ8_MEMBER(flash_r);
+	DECLARE_WRITE8_MEMBER(flash_w);
+	DECLARE_READ8_MEMBER(hwcheck_r);
+	DECLARE_WRITE8_MEMBER(subsino_out_c_w);
+	DECLARE_WRITE8_MEMBER(colordac_w);
+	DECLARE_WRITE8_MEMBER(stisub_out_c_w);
+	DECLARE_WRITE8_MEMBER(reel_scrollattr_w);
+	DECLARE_READ8_MEMBER(reel_scrollattr_r);
+	DECLARE_DRIVER_INIT(stisub);
+	DECLARE_DRIVER_INIT(smoto20);
+	DECLARE_DRIVER_INIT(sharkpy);
+	DECLARE_DRIVER_INIT(smoto16);
+	DECLARE_DRIVER_INIT(crsbingo);
+	DECLARE_DRIVER_INIT(victor21);
+	DECLARE_DRIVER_INIT(victor5);
+	DECLARE_DRIVER_INIT(tisuba);
+	DECLARE_DRIVER_INIT(sharkpye);
+	DECLARE_DRIVER_INIT(tisub);
+	DECLARE_DRIVER_INIT(mtrainnv);
+	TILE_GET_INFO_MEMBER(get_tile_info);
+	TILE_GET_INFO_MEMBER(get_stisub_tile_info);
+	TILE_GET_INFO_MEMBER(get_subsino_reel1_tile_info);
+	TILE_GET_INFO_MEMBER(get_stisub_reel1_tile_info);
+	TILE_GET_INFO_MEMBER(get_subsino_reel2_tile_info);
+	TILE_GET_INFO_MEMBER(get_stisub_reel2_tile_info);
+	TILE_GET_INFO_MEMBER(get_subsino_reel3_tile_info);
+	TILE_GET_INFO_MEMBER(get_stisub_reel3_tile_info);
+	DECLARE_VIDEO_START(subsino);
+	DECLARE_PALETTE_INIT(subsino_2proms);
+	DECLARE_PALETTE_INIT(subsino_3proms);
+	DECLARE_VIDEO_START(subsino_reels);
+	DECLARE_VIDEO_START(stisub);
+	UINT32 screen_update_subsino(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_subsino_reels(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_stisub_reels(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
@@ -264,84 +318,75 @@ public:
 ***************************************************************************/
 
 
-static WRITE8_HANDLER( subsino_tiles_offset_w )
+WRITE8_MEMBER(subsino_state::subsino_tiles_offset_w)
 {
-	subsino_state *state = space->machine().driver_data<subsino_state>();
-	state->m_tiles_offset = (data & 1) ? 0x1000: 0;
-	tilemap_mark_tile_dirty(state->m_tmap, offset);
+	m_tiles_offset = (data & 1) ? 0x1000: 0;
+	m_tmap->mark_tile_dirty(offset);
 //  popmessage("gfx %02x",data);
 }
 
-static WRITE8_HANDLER( subsino_videoram_w )
+WRITE8_MEMBER(subsino_state::subsino_videoram_w)
 {
-	subsino_state *state = space->machine().driver_data<subsino_state>();
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_tmap, offset);
+	m_videoram[offset] = data;
+	m_tmap->mark_tile_dirty(offset);
 }
 
-static WRITE8_HANDLER( subsino_colorram_w )
+WRITE8_MEMBER(subsino_state::subsino_colorram_w)
 {
-	subsino_state *state = space->machine().driver_data<subsino_state>();
-	state->m_colorram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_tmap, offset);
+	m_colorram[offset] = data;
+	m_tmap->mark_tile_dirty(offset);
 }
 
-static TILE_GET_INFO( get_tile_info )
+TILE_GET_INFO_MEMBER(subsino_state::get_tile_info)
 {
-	subsino_state *state = machine.driver_data<subsino_state>();
-	UINT16 code = state->m_videoram[ tile_index ] + (state->m_colorram[ tile_index ] << 8);
+	UINT16 code = m_videoram[ tile_index ] + (m_colorram[ tile_index ] << 8);
 	UINT16 color = (code >> 8) & 0x0f;
 	code = ((code & 0xf000) >> 4) + ((code & 0xff) >> 0);
-	code += state->m_tiles_offset;
-	SET_TILE_INFO(0, code, color, 0);
+	code += m_tiles_offset;
+	SET_TILE_INFO_MEMBER(0, code, color, 0);
 }
 
-static TILE_GET_INFO( get_stisub_tile_info )
+TILE_GET_INFO_MEMBER(subsino_state::get_stisub_tile_info)
 {
-	subsino_state *state = machine.driver_data<subsino_state>();
-	UINT16 code = state->m_videoram[ tile_index ] + (state->m_colorram[ tile_index ] << 8);
+	UINT16 code = m_videoram[ tile_index ] + (m_colorram[ tile_index ] << 8);
 	code&= 0x3fff;
-	SET_TILE_INFO(0, code, 0, 0);
+	SET_TILE_INFO_MEMBER(0, code, 0, 0);
 }
 
 
-static VIDEO_START( subsino )
+VIDEO_START_MEMBER(subsino_state,subsino)
 {
-	subsino_state *state = machine.driver_data<subsino_state>();
-	state->m_tmap = tilemap_create(	machine, get_tile_info, tilemap_scan_rows, 8,8, 0x40,0x20 );
-	tilemap_set_transparent_pen( state->m_tmap, 0 );
-	state->m_tiles_offset = 0;
+	m_tmap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(subsino_state::get_tile_info),this), TILEMAP_SCAN_ROWS, 8,8, 0x40,0x20 );
+	m_tmap->set_transparent_pen(0 );
+	m_tiles_offset = 0;
 }
 
 
 
-static WRITE8_HANDLER( subsino_reel1_ram_w )
+WRITE8_MEMBER(subsino_state::subsino_reel1_ram_w)
 {
-	subsino_state *state = space->machine().driver_data<subsino_state>();
-	state->m_reel1_ram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_reel1_tilemap,offset);
+	m_reel1_ram[offset] = data;
+	m_reel1_tilemap->mark_tile_dirty(offset);
 }
 
-static TILE_GET_INFO( get_subsino_reel1_tile_info )
+TILE_GET_INFO_MEMBER(subsino_state::get_subsino_reel1_tile_info)
 {
-	subsino_state *state = machine.driver_data<subsino_state>();
-	int code = state->m_reel1_ram[tile_index];
-	int colour = (state->m_out_c&0x7) + 8;
+	int code = m_reel1_ram[tile_index];
+	int colour = (m_out_c&0x7) + 8;
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			1,
 			code,
 			colour,
 			0);
 }
 
-static TILE_GET_INFO( get_stisub_reel1_tile_info )
+TILE_GET_INFO_MEMBER(subsino_state::get_stisub_reel1_tile_info)
 {
-	subsino_state *state = machine.driver_data<subsino_state>();
-	int code = state->m_reel1_ram[tile_index];
-	int attr = state->m_reel1_attr[tile_index];
+	int code = m_reel1_ram[tile_index];
+	int attr = m_reel1_attr[tile_index];
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			1,
 			code | (attr << 8),
 			0,
@@ -349,66 +394,60 @@ static TILE_GET_INFO( get_stisub_reel1_tile_info )
 }
 
 
-static WRITE8_HANDLER( subsino_reel2_ram_w )
+WRITE8_MEMBER(subsino_state::subsino_reel2_ram_w)
 {
-	subsino_state *state = space->machine().driver_data<subsino_state>();
-	state->m_reel2_ram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_reel2_tilemap,offset);
+	m_reel2_ram[offset] = data;
+	m_reel2_tilemap->mark_tile_dirty(offset);
 }
 
-static TILE_GET_INFO( get_subsino_reel2_tile_info )
+TILE_GET_INFO_MEMBER(subsino_state::get_subsino_reel2_tile_info)
 {
-	subsino_state *state = machine.driver_data<subsino_state>();
-	int code = state->m_reel2_ram[tile_index];
-	int colour = (state->m_out_c&0x7) + 8;
+	int code = m_reel2_ram[tile_index];
+	int colour = (m_out_c&0x7) + 8;
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			1,
 			code,
 			colour,
 			0);
 }
 
-static TILE_GET_INFO( get_stisub_reel2_tile_info )
+TILE_GET_INFO_MEMBER(subsino_state::get_stisub_reel2_tile_info)
 {
-	subsino_state *state = machine.driver_data<subsino_state>();
-	int code = state->m_reel2_ram[tile_index];
-	int attr = state->m_reel2_attr[tile_index];
+	int code = m_reel2_ram[tile_index];
+	int attr = m_reel2_attr[tile_index];
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			1,
 			code | (attr << 8),
 			0,
 			0);
 }
 
-static WRITE8_HANDLER( subsino_reel3_ram_w )
+WRITE8_MEMBER(subsino_state::subsino_reel3_ram_w)
 {
-	subsino_state *state = space->machine().driver_data<subsino_state>();
-	state->m_reel3_ram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_reel3_tilemap,offset);
+	m_reel3_ram[offset] = data;
+	m_reel3_tilemap->mark_tile_dirty(offset);
 }
 
-static TILE_GET_INFO( get_subsino_reel3_tile_info )
+TILE_GET_INFO_MEMBER(subsino_state::get_subsino_reel3_tile_info)
 {
-	subsino_state *state = machine.driver_data<subsino_state>();
-	int code = state->m_reel3_ram[tile_index];
-	int colour = (state->m_out_c&0x7) + 8;
+	int code = m_reel3_ram[tile_index];
+	int colour = (m_out_c&0x7) + 8;
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			1,
 			code,
 			colour,
 			0);
 }
 
-static TILE_GET_INFO( get_stisub_reel3_tile_info )
+TILE_GET_INFO_MEMBER(subsino_state::get_stisub_reel3_tile_info)
 {
-	subsino_state *state = machine.driver_data<subsino_state>();
-	int code = state->m_reel3_ram[tile_index];
-	int attr = state->m_reel3_attr[tile_index];
+	int code = m_reel3_ram[tile_index];
+	int attr = m_reel3_attr[tile_index];
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			1,
 			code | (attr << 8),
 			0,
@@ -416,117 +455,113 @@ static TILE_GET_INFO( get_stisub_reel3_tile_info )
 }
 
 
-static VIDEO_START( subsino_reels )
+VIDEO_START_MEMBER(subsino_state,subsino_reels)
 {
-	subsino_state *state = machine.driver_data<subsino_state>();
-	VIDEO_START_CALL( subsino );
+	VIDEO_START_CALL_MEMBER( subsino );
 
-	state->m_reel1_tilemap = tilemap_create(machine,get_subsino_reel1_tile_info,tilemap_scan_rows, 8, 32, 64, 8);
-	state->m_reel2_tilemap = tilemap_create(machine,get_subsino_reel2_tile_info,tilemap_scan_rows, 8, 32, 64, 8);
-	state->m_reel3_tilemap = tilemap_create(machine,get_subsino_reel3_tile_info,tilemap_scan_rows, 8, 32, 64, 8);
+	m_reel1_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(subsino_state::get_subsino_reel1_tile_info),this),TILEMAP_SCAN_ROWS, 8, 32, 64, 8);
+	m_reel2_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(subsino_state::get_subsino_reel2_tile_info),this),TILEMAP_SCAN_ROWS, 8, 32, 64, 8);
+	m_reel3_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(subsino_state::get_subsino_reel3_tile_info),this),TILEMAP_SCAN_ROWS, 8, 32, 64, 8);
 
-	tilemap_set_scroll_cols(state->m_reel1_tilemap, 64);
-	tilemap_set_scroll_cols(state->m_reel2_tilemap, 64);
-	tilemap_set_scroll_cols(state->m_reel3_tilemap, 64);
+	m_reel1_tilemap->set_scroll_cols(64);
+	m_reel2_tilemap->set_scroll_cols(64);
+	m_reel3_tilemap->set_scroll_cols(64);
 
 }
 
-static VIDEO_START( stisub )
+VIDEO_START_MEMBER(subsino_state,stisub)
 {
-	subsino_state *state = machine.driver_data<subsino_state>();
-	state->m_tmap = tilemap_create(	machine, get_stisub_tile_info, tilemap_scan_rows, 8,8, 0x40,0x20 );
-	tilemap_set_transparent_pen( state->m_tmap, 0 );
+	m_tmap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(subsino_state::get_stisub_tile_info),this), TILEMAP_SCAN_ROWS, 8,8, 0x40,0x20 );
+	m_tmap->set_transparent_pen(0 );
 
-	state->m_reel1_tilemap = tilemap_create(machine,get_stisub_reel1_tile_info,tilemap_scan_rows, 8, 32, 64, 8);
-	state->m_reel2_tilemap = tilemap_create(machine,get_stisub_reel2_tile_info,tilemap_scan_rows, 8, 32, 64, 8);
-	state->m_reel3_tilemap = tilemap_create(machine,get_stisub_reel3_tile_info,tilemap_scan_rows, 8, 32, 64, 8);
+	m_reel1_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(subsino_state::get_stisub_reel1_tile_info),this),TILEMAP_SCAN_ROWS, 8, 32, 64, 8);
+	m_reel2_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(subsino_state::get_stisub_reel2_tile_info),this),TILEMAP_SCAN_ROWS, 8, 32, 64, 8);
+	m_reel3_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(subsino_state::get_stisub_reel3_tile_info),this),TILEMAP_SCAN_ROWS, 8, 32, 64, 8);
 
-	tilemap_set_scroll_cols(state->m_reel1_tilemap, 64);
-	tilemap_set_scroll_cols(state->m_reel2_tilemap, 64);
-	tilemap_set_scroll_cols(state->m_reel3_tilemap, 64);
+	m_reel1_tilemap->set_scroll_cols(64);
+	m_reel2_tilemap->set_scroll_cols(64);
+	m_reel3_tilemap->set_scroll_cols(64);
 
-	state->m_out_c = 0x08;
+	m_out_c = 0x08;
 }
 
 
-static SCREEN_UPDATE( subsino )
+UINT32 subsino_state::screen_update_subsino(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	subsino_state *state = screen->machine().driver_data<subsino_state>();
-	bitmap_fill(bitmap,cliprect,0);
-	tilemap_draw(bitmap,cliprect, state->m_tmap, 0, 0);
+	bitmap.fill(0, cliprect);
+	m_tmap->draw(bitmap, cliprect, 0, 0);
 	return 0;
 }
 
-// are these hardcoded, or registers?
-static const rectangle visible1 = { 0*8, (14+48)*8-1,  4*8,  (4+7)*8-1 };
-static const rectangle visible2 = { 0*8, (14+48)*8-1, 10*8, (10+7)*8-1 };
-static const rectangle visible3 = { 0*8, (14+48)*8-1, 18*8, (18+7)*8-1 };
-
-static SCREEN_UPDATE( subsino_reels )
+UINT32 subsino_state::screen_update_subsino_reels(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	subsino_state *state = screen->machine().driver_data<subsino_state>();
 	int i;
-	bitmap_fill(bitmap,cliprect,0);
+	bitmap.fill(0, cliprect);
 
 	for (i= 0;i < 64;i++)
 	{
-		tilemap_set_scrolly(state->m_reel1_tilemap, i, state->m_reel1_scroll[i]);
-		tilemap_set_scrolly(state->m_reel2_tilemap, i, state->m_reel2_scroll[i]);
-		tilemap_set_scrolly(state->m_reel3_tilemap, i, state->m_reel3_scroll[i]);
+		m_reel1_tilemap->set_scrolly(i, m_reel1_scroll[i]);
+		m_reel2_tilemap->set_scrolly(i, m_reel2_scroll[i]);
+		m_reel3_tilemap->set_scrolly(i, m_reel3_scroll[i]);
 	}
 
-	if (state->m_out_c&0x08)
+	if (m_out_c&0x08)
 	{
-		tilemap_draw(bitmap, &visible1, state->m_reel1_tilemap, 0, 0);
-		tilemap_draw(bitmap, &visible2, state->m_reel2_tilemap, 0, 0);
-		tilemap_draw(bitmap, &visible3, state->m_reel3_tilemap, 0, 0);
+		// are these hardcoded, or registers?
+		const rectangle visible1(0*8, (14+48)*8-1,  4*8,  (4+7)*8-1);
+		const rectangle visible2(0*8, (14+48)*8-1, 10*8, (10+7)*8-1);
+		const rectangle visible3(0*8, (14+48)*8-1, 18*8, (18+7)*8-1);
+
+		m_reel1_tilemap->draw(bitmap, visible1, 0, 0);
+		m_reel2_tilemap->draw(bitmap, visible2, 0, 0);
+		m_reel3_tilemap->draw(bitmap, visible3, 0, 0);
 	}
 
-	tilemap_draw(bitmap,cliprect, state->m_tmap, 0, 0);
+	m_tmap->draw(bitmap, cliprect, 0, 0);
 	return 0;
 }
 
-// areas based on d-up game in attract mode
-static const rectangle stisub_visible1 = { 0, 511,  0,  87 };
-static const rectangle stisub_visible2 = { 0, 511,  88, 143 };
-static const rectangle stisub_visible3 = { 0, 511,  144, 223 };
 
-
-static SCREEN_UPDATE( stisub_reels )
+UINT32 subsino_state::screen_update_stisub_reels(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	subsino_state *state = screen->machine().driver_data<subsino_state>();
 	int i;
-	bitmap_fill(bitmap,cliprect,0);
+	bitmap.fill(0, cliprect);
 
-	if (state->m_reel1_attr)
+	if (m_reel1_attr)
 	{
-		tilemap_mark_all_tiles_dirty (state->m_reel1_tilemap);
-		tilemap_mark_all_tiles_dirty (state->m_reel2_tilemap);
-		tilemap_mark_all_tiles_dirty (state->m_reel3_tilemap);
+		m_reel1_tilemap->mark_all_dirty();
+		m_reel2_tilemap->mark_all_dirty();
+		m_reel3_tilemap->mark_all_dirty();
 	}
 
 	for (i= 0;i < 64;i++)
 	{
-		tilemap_set_scrolly(state->m_reel1_tilemap, i, state->m_reel1_scroll[i]);
-		tilemap_set_scrolly(state->m_reel2_tilemap, i, state->m_reel2_scroll[i]);
-		tilemap_set_scrolly(state->m_reel3_tilemap, i, state->m_reel3_scroll[i]);
+		m_reel1_tilemap->set_scrolly(i, m_reel1_scroll[i]);
+		m_reel2_tilemap->set_scrolly(i, m_reel2_scroll[i]);
+		m_reel3_tilemap->set_scrolly(i, m_reel3_scroll[i]);
 	}
 
-	if (state->m_out_c&0x08)
+	if (m_out_c&0x08)
 	{
-		tilemap_draw(bitmap, &stisub_visible1, state->m_reel1_tilemap, 0, 0);
-		tilemap_draw(bitmap, &stisub_visible2, state->m_reel2_tilemap, 0, 0);
-		tilemap_draw(bitmap, &stisub_visible3, state->m_reel3_tilemap, 0, 0);
+		// areas based on d-up game in attract mode
+		const rectangle visible1(0, 511,  0,  87);
+		const rectangle visible2(0, 511,  88, 143);
+		const rectangle visible3(0, 511,  144, 223);
+
+		m_reel1_tilemap->draw(bitmap, visible1, 0, 0);
+		m_reel2_tilemap->draw(bitmap, visible2, 0, 0);
+		m_reel3_tilemap->draw(bitmap, visible3, 0, 0);
 	}
 
-	tilemap_draw(bitmap,cliprect, state->m_tmap, 0, 0);
+	m_tmap->draw(bitmap, cliprect, 0, 0);
 	return 0;
 }
 
 
 
-static PALETTE_INIT( subsino_2proms )
+PALETTE_INIT_MEMBER(subsino_state,subsino_2proms)
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i,r,g,b,val;
 	int bit0,bit1,bit2;
 
@@ -547,12 +582,13 @@ static PALETTE_INIT( subsino_2proms )
 		bit2 = (val >> 2) & 0x01;
 		r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 
-		palette_set_color(machine, i, MAKE_RGB(r, g, b));
+		palette_set_color(machine(), i, MAKE_RGB(r, g, b));
 	}
 }
 
-static PALETTE_INIT( subsino_3proms )
+PALETTE_INIT_MEMBER(subsino_state,subsino_3proms)
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i,r,g,b,val;
 	int bit0,bit1,bit2;
 
@@ -573,7 +609,7 @@ static PALETTE_INIT( subsino_3proms )
 		bit2 = (val >> 0) & 0x01;
 		r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 
-		palette_set_color(machine, i, MAKE_RGB(r, g, b));
+		palette_set_color(machine(), i, MAKE_RGB(r, g, b));
 	}
 }
 
@@ -582,9 +618,8 @@ static PALETTE_INIT( subsino_3proms )
 *                          Lamps & other outputs.                          *
 ***************************************************************************/
 
-static WRITE8_HANDLER( subsino_out_a_w )
+WRITE8_MEMBER(subsino_state::subsino_out_a_w)
 {
-
 /***** COIN PULSE: *****
 
 
@@ -614,25 +649,25 @@ static WRITE8_HANDLER( subsino_out_a_w )
 
 */
 
-	output_set_lamp_value(8, (data) & 1);		/* Lamp 8 */
-	output_set_lamp_value(9, (data >> 1) & 1);	/* Lamp 9 */
-	output_set_lamp_value(10, (data >> 2) & 1);	/* Lamp 10 */
-	output_set_lamp_value(11, (data >> 3) & 1);	/* Lamp 11 */
-	output_set_lamp_value(12, (data >> 4) & 1);	/* Lamp 12 */
-	output_set_lamp_value(13, (data >> 5) & 1);	/* Lamp 13 */
-	output_set_lamp_value(14, (data >> 6) & 1);	/* Lamp 14 */
-	output_set_lamp_value(15, (data >> 7) & 1);	/* Lamp 15 */
+	output_set_lamp_value(8, (data) & 1);       /* Lamp 8 */
+	output_set_lamp_value(9, (data >> 1) & 1);  /* Lamp 9 */
+	output_set_lamp_value(10, (data >> 2) & 1); /* Lamp 10 */
+	output_set_lamp_value(11, (data >> 3) & 1); /* Lamp 11 */
+	output_set_lamp_value(12, (data >> 4) & 1); /* Lamp 12 */
+	output_set_lamp_value(13, (data >> 5) & 1); /* Lamp 13 */
+	output_set_lamp_value(14, (data >> 6) & 1); /* Lamp 14 */
+	output_set_lamp_value(15, (data >> 7) & 1); /* Lamp 15 */
 
-	coin_counter_w( space->machine(), 0, data & 0x01 );	/* coin / keyin */
-	coin_counter_w( space->machine(), 1, data & 0x02 );	/* keyin / coin */
-	coin_counter_w( space->machine(), 2, data & 0x10 );	/* keyout */
-	coin_counter_w( space->machine(), 3, data & 0x20 );	/* payout */
+	coin_counter_w( machine(), 0, data & 0x01 );    /* coin / keyin */
+	coin_counter_w( machine(), 1, data & 0x02 );    /* keyin / coin */
+	coin_counter_w( machine(), 2, data & 0x10 );    /* keyout */
+	coin_counter_w( machine(), 3, data & 0x20 );    /* payout */
 
 //  popmessage("Out A %02x",data);
 
 }
 
-static WRITE8_HANDLER( subsino_out_b_w )
+WRITE8_MEMBER(subsino_state::subsino_out_b_w)
 {
 /***** LAMPS: *****
 
@@ -755,14 +790,14 @@ static WRITE8_HANDLER( subsino_out_b_w )
 
 */
 
-	output_set_lamp_value(0, (data) & 1);		/* Lamp 0 */
-	output_set_lamp_value(1, (data >> 1) & 1);	/* Lamp 1 */
-	output_set_lamp_value(2, (data >> 2) & 1);	/* Lamp 2 */
-	output_set_lamp_value(3, (data >> 3) & 1);	/* Lamp 3 */
-	output_set_lamp_value(4, (data >> 4) & 1);	/* Lamp 4 */
-	output_set_lamp_value(5, (data >> 5) & 1);	/* Lamp 5 */
-	output_set_lamp_value(6, (data >> 6) & 1);	/* Lamp 6 */
-	output_set_lamp_value(7, (data >> 7) & 1);	/* Lamp 7 */
+	output_set_lamp_value(0, (data) & 1);       /* Lamp 0 */
+	output_set_lamp_value(1, (data >> 1) & 1);  /* Lamp 1 */
+	output_set_lamp_value(2, (data >> 2) & 1);  /* Lamp 2 */
+	output_set_lamp_value(3, (data >> 3) & 1);  /* Lamp 3 */
+	output_set_lamp_value(4, (data >> 4) & 1);  /* Lamp 4 */
+	output_set_lamp_value(5, (data >> 5) & 1);  /* Lamp 5 */
+	output_set_lamp_value(6, (data >> 6) & 1);  /* Lamp 6 */
+	output_set_lamp_value(7, (data >> 7) & 1);  /* Lamp 7 */
 
 //  popmessage("Out B %02x",data);
 }
@@ -772,7 +807,7 @@ static WRITE8_HANDLER( subsino_out_b_w )
 *                              Memory Maps                                 *
 ***************************************************************************/
 
-static ADDRESS_MAP_START( srider_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( srider_map, AS_PROGRAM, 8, subsino_state )
 	AM_RANGE( 0x00000, 0x0bfff ) AM_ROM
 
 	AM_RANGE( 0x0c000, 0x0cfff ) AM_RAM
@@ -785,23 +820,23 @@ static ADDRESS_MAP_START( srider_map, AS_PROGRAM, 8 )
 	AM_RANGE( 0x0d005, 0x0d005 ) AM_READ_PORT( "INA" )
 	AM_RANGE( 0x0d006, 0x0d006 ) AM_READ_PORT( "INB" )
 
-	AM_RANGE( 0x0d009, 0x0d009 ) AM_WRITE( subsino_out_b_w )
-	AM_RANGE( 0x0d00a, 0x0d00a ) AM_WRITE( subsino_out_a_w )
+	AM_RANGE( 0x0d009, 0x0d009 ) AM_WRITE(subsino_out_b_w )
+	AM_RANGE( 0x0d00a, 0x0d00a ) AM_WRITE(subsino_out_a_w )
 
 	AM_RANGE( 0x0d00c, 0x0d00c ) AM_READ_PORT( "INC" )
 
-	AM_RANGE( 0x0d016, 0x0d017 ) AM_DEVWRITE( "ymsnd", ym3812_w )
+	AM_RANGE( 0x0d016, 0x0d017 ) AM_DEVWRITE_LEGACY("ymsnd", ym3812_w )
 
-	AM_RANGE( 0x0d018, 0x0d018 ) AM_DEVWRITE_MODERN("oki", okim6295_device, write)
+	AM_RANGE( 0x0d018, 0x0d018 ) AM_DEVWRITE("oki", okim6295_device, write)
 
-	AM_RANGE( 0x0d01b, 0x0d01b ) AM_WRITE( subsino_tiles_offset_w )
+	AM_RANGE( 0x0d01b, 0x0d01b ) AM_WRITE(subsino_tiles_offset_w )
 
-	AM_RANGE( 0x0e000, 0x0e7ff ) AM_RAM_WRITE( subsino_colorram_w ) AM_BASE_MEMBER(subsino_state, m_colorram )
-	AM_RANGE( 0x0e800, 0x0efff ) AM_RAM_WRITE( subsino_videoram_w ) AM_BASE_MEMBER(subsino_state, m_videoram )
+	AM_RANGE( 0x0e000, 0x0e7ff ) AM_RAM_WRITE(subsino_colorram_w ) AM_SHARE("colorram")
+	AM_RANGE( 0x0e800, 0x0efff ) AM_RAM_WRITE(subsino_videoram_w ) AM_SHARE("videoram")
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( sharkpy_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sharkpy_map, AS_PROGRAM, 8, subsino_state )
 	AM_RANGE( 0x09800, 0x09fff ) AM_RAM
 
 	AM_RANGE( 0x09000, 0x09000 ) AM_READ_PORT( "SW1" )
@@ -812,20 +847,20 @@ static ADDRESS_MAP_START( sharkpy_map, AS_PROGRAM, 8 )
 	AM_RANGE( 0x09005, 0x09005 ) AM_READ_PORT( "INA" )
 	AM_RANGE( 0x09006, 0x09006 ) AM_READ_PORT( "INB" )
 
-	AM_RANGE( 0x09009, 0x09009 ) AM_WRITE( subsino_out_b_w )
-	AM_RANGE( 0x0900a, 0x0900a ) AM_WRITE( subsino_out_a_w )
+	AM_RANGE( 0x09009, 0x09009 ) AM_WRITE(subsino_out_b_w )
+	AM_RANGE( 0x0900a, 0x0900a ) AM_WRITE(subsino_out_a_w )
 
 	AM_RANGE( 0x0900c, 0x0900c ) AM_READ_PORT( "INC" )
 
-	AM_RANGE( 0x09016, 0x09017 ) AM_DEVWRITE( "ymsnd", ym3812_w )
+	AM_RANGE( 0x09016, 0x09017 ) AM_DEVWRITE_LEGACY("ymsnd", ym3812_w )
 
-	AM_RANGE( 0x09018, 0x09018 ) AM_DEVWRITE_MODERN("oki", okim6295_device, write)
+	AM_RANGE( 0x09018, 0x09018 ) AM_DEVWRITE("oki", okim6295_device, write)
 
-	AM_RANGE( 0x0901b, 0x0901b ) AM_WRITE( subsino_tiles_offset_w )
+	AM_RANGE( 0x0901b, 0x0901b ) AM_WRITE(subsino_tiles_offset_w )
 
 	AM_RANGE( 0x07800, 0x07fff ) AM_RAM
-	AM_RANGE( 0x08000, 0x087ff ) AM_RAM_WRITE( subsino_colorram_w ) AM_BASE_MEMBER(subsino_state, m_colorram )
-	AM_RANGE( 0x08800, 0x08fff ) AM_RAM_WRITE( subsino_videoram_w ) AM_BASE_MEMBER(subsino_state, m_videoram )
+	AM_RANGE( 0x08000, 0x087ff ) AM_RAM_WRITE(subsino_colorram_w ) AM_SHARE("colorram")
+	AM_RANGE( 0x08800, 0x08fff ) AM_RAM_WRITE(subsino_videoram_w ) AM_SHARE("videoram")
 
 	AM_RANGE( 0x00000, 0x13fff ) AM_ROM //overlap unmapped regions
 ADDRESS_MAP_END
@@ -836,11 +871,11 @@ that announces to the player that the card deck changes. If the protection check
 this event makes the game to reset without any money in the bank.
 */
 
-static ADDRESS_MAP_START( victor21_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( victor21_map, AS_PROGRAM, 8, subsino_state )
 	AM_RANGE( 0x09800, 0x09fff ) AM_RAM
 
-	AM_RANGE( 0x09000, 0x09000 ) AM_WRITE( subsino_out_a_w )
-	AM_RANGE( 0x09001, 0x09001 ) AM_WRITE( subsino_out_b_w )
+	AM_RANGE( 0x09000, 0x09000 ) AM_WRITE(subsino_out_a_w )
+	AM_RANGE( 0x09001, 0x09001 ) AM_WRITE(subsino_out_b_w )
 	AM_RANGE( 0x09002, 0x09002 ) AM_READ_PORT( "INC" )
 	AM_RANGE( 0x09004, 0x09004 ) AM_READ_PORT( "INA" )
 	AM_RANGE( 0x09005, 0x09005 ) AM_READ_PORT( "INB" )
@@ -851,15 +886,15 @@ static ADDRESS_MAP_START( victor21_map, AS_PROGRAM, 8 )
 
 	AM_RANGE( 0x0900b, 0x0900b ) AM_RAM //protection
 
-//  AM_RANGE( 0x0900c, 0x0900c ) AM_DEVWRITE_MODERN("oki", okim6295_device, write)
+//  AM_RANGE( 0x0900c, 0x0900c ) AM_DEVWRITE("oki", okim6295_device, write)
 
-	AM_RANGE( 0x0900e, 0x0900f ) AM_DEVWRITE( "ymsnd", ym2413_w )
+	AM_RANGE( 0x0900e, 0x0900f ) AM_DEVWRITE_LEGACY("ymsnd", ym2413_w )
 
-	AM_RANGE( 0x0900d, 0x0900d ) AM_WRITE( subsino_tiles_offset_w )
+	AM_RANGE( 0x0900d, 0x0900d ) AM_WRITE(subsino_tiles_offset_w )
 
 	AM_RANGE( 0x07800, 0x07fff ) AM_RAM
-	AM_RANGE( 0x08000, 0x087ff ) AM_RAM_WRITE( subsino_videoram_w ) AM_BASE_MEMBER(subsino_state, m_videoram )
-	AM_RANGE( 0x08800, 0x08fff ) AM_RAM_WRITE( subsino_colorram_w ) AM_BASE_MEMBER(subsino_state, m_colorram )
+	AM_RANGE( 0x08000, 0x087ff ) AM_RAM_WRITE(subsino_videoram_w ) AM_SHARE("videoram")
+	AM_RANGE( 0x08800, 0x08fff ) AM_RAM_WRITE(subsino_colorram_w ) AM_SHARE("colorram")
 
 	AM_RANGE( 0x00000, 0x08fff ) AM_ROM //overlap unmapped regions
 	AM_RANGE( 0x10000, 0x13fff ) AM_ROM
@@ -884,55 +919,53 @@ what it is exactly and what it can possibly do.
 */
 
 
-static READ8_HANDLER( flash_r )
+READ8_MEMBER(subsino_state::flash_r)
 {
-	subsino_state *state = space->machine().driver_data<subsino_state>();
-//  printf("R %02x\n",state->m_flash_val);
+//  printf("R %02x\n",m_flash_val);
 
-	if(state->m_flash_val == 0xff)
+	if(m_flash_val == 0xff)
 		return 0xd9;
-	else if(state->m_flash_val <= 0xa)
-		return state->m_flash_val;
-	else if(state->m_flash_val == 0x92)
+	else if(m_flash_val <= 0xa)
+		return m_flash_val;
+	else if(m_flash_val == 0x92)
 		return 0xeb; //protected GFXs in Cross Bingo
 	else
 		return 0xd9;
 }
 
-static WRITE8_HANDLER( flash_w )
+WRITE8_MEMBER(subsino_state::flash_w)
 {
-	subsino_state *state = space->machine().driver_data<subsino_state>();
-	switch(state->m_flash_packet_start)
+	switch(m_flash_packet_start)
 	{
 		case 0:
-			state->m_flash_packet = data;
-			if((state->m_flash_packet & 0xf8) == 0xd0)
-				state->m_flash_packet_start = 1; //start of packet
+			m_flash_packet = data;
+			if((m_flash_packet & 0xf8) == 0xd0)
+				m_flash_packet_start = 1; //start of packet
 			break;
 		case 1:
-			state->m_flash_packet = data;
-			if((state->m_flash_packet & 0xf8) == 0xe0)
-				state->m_flash_packet_start = 0; //end of packet
+			m_flash_packet = data;
+			if((m_flash_packet & 0xf8) == 0xe0)
+				m_flash_packet_start = 0; //end of packet
 			else
-				state->m_flash_val = data;
+				m_flash_val = data;
 			break;
 	}
 }
 
-static ADDRESS_MAP_START( victor5_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( victor5_map, AS_PROGRAM, 8, subsino_state )
 	AM_IMPORT_FROM( victor21_map )
-	AM_RANGE( 0x0900a, 0x0900a ) AM_READWRITE( flash_r, flash_w )
+	AM_RANGE( 0x0900a, 0x0900a ) AM_READWRITE(flash_r, flash_w )
 	AM_RANGE( 0x0900b, 0x0900b ) AM_READNOP //"flash" status, bit 0
 ADDRESS_MAP_END
 
 
-static READ8_HANDLER( hwcheck_r )
+READ8_MEMBER(subsino_state::hwcheck_r)
 {
 	/* Wants this at POST otherwise an "Hardware Error" occurs. */
 	return 0x55;
 }
 
-static ADDRESS_MAP_START( crsbingo_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( crsbingo_map, AS_PROGRAM, 8, subsino_state )
 	AM_RANGE( 0x09800, 0x09fff ) AM_RAM
 
 	AM_RANGE( 0x09000, 0x09000 ) AM_READ_PORT( "SW1" )
@@ -940,24 +973,24 @@ static ADDRESS_MAP_START( crsbingo_map, AS_PROGRAM, 8 )
 	AM_RANGE( 0x09002, 0x09002 ) AM_READ_PORT( "INA" )
 	AM_RANGE( 0x09003, 0x09003 ) AM_READ_PORT( "INB" )
 	AM_RANGE( 0x09004, 0x09004 ) AM_READ_PORT( "INC" )
-	AM_RANGE( 0x09005, 0x09005 ) AM_WRITE( subsino_out_a_w )
+	AM_RANGE( 0x09005, 0x09005 ) AM_WRITE(subsino_out_a_w )
 
 	AM_RANGE( 0x09008, 0x09008 ) AM_READ_PORT( "SW4" )
-	AM_RANGE( 0x09009, 0x09009 ) AM_READ_PORT( "SW3" )	// AM_WRITE( subsino_out_a_w )
-	AM_RANGE( 0x0900a, 0x0900a ) AM_READWRITE( hwcheck_r, subsino_out_b_w )
+	AM_RANGE( 0x09009, 0x09009 ) AM_READ_PORT( "SW3" )  // AM_WRITE(subsino_out_a_w )
+	AM_RANGE( 0x0900a, 0x0900a ) AM_READWRITE(hwcheck_r, subsino_out_b_w )
 
-	AM_RANGE( 0x09010, 0x09010 ) AM_READWRITE( flash_r, flash_w )
+	AM_RANGE( 0x09010, 0x09010 ) AM_READWRITE(flash_r, flash_w )
 //  AM_RANGE( 0x09011, 0x09011 ) //"flash" status, bit 0
 //  AM_RANGE( 0x0900c, 0x0900c ) AM_READ_PORT( "INC" )
-	AM_RANGE( 0x0900c, 0x0900d ) AM_DEVWRITE( "ymsnd", ym2413_w )
+	AM_RANGE( 0x0900c, 0x0900d ) AM_DEVWRITE_LEGACY("ymsnd", ym2413_w )
 
-//  AM_RANGE( 0x09018, 0x09018 ) AM_DEVWRITE_MODERN("oki", okim6295_device, write)
+//  AM_RANGE( 0x09018, 0x09018 ) AM_DEVWRITE("oki", okim6295_device, write)
 
-//  AM_RANGE( 0x0900d, 0x0900d ) AM_WRITE( subsino_tiles_offset_w )
+//  AM_RANGE( 0x0900d, 0x0900d ) AM_WRITE(subsino_tiles_offset_w )
 
 	AM_RANGE( 0x07800, 0x07fff ) AM_RAM
-	AM_RANGE( 0x08000, 0x087ff ) AM_RAM_WRITE( subsino_videoram_w ) AM_BASE_MEMBER(subsino_state, m_videoram )
-	AM_RANGE( 0x08800, 0x08fff ) AM_RAM_WRITE( subsino_colorram_w ) AM_BASE_MEMBER(subsino_state, m_colorram )
+	AM_RANGE( 0x08000, 0x087ff ) AM_RAM_WRITE(subsino_videoram_w ) AM_SHARE("videoram")
+	AM_RANGE( 0x08800, 0x08fff ) AM_RAM_WRITE(subsino_colorram_w ) AM_SHARE("colorram")
 
 	AM_RANGE( 0x00000, 0x8fff ) AM_ROM //overlap unmapped regions
 
@@ -965,23 +998,22 @@ static ADDRESS_MAP_START( crsbingo_map, AS_PROGRAM, 8 )
 
 ADDRESS_MAP_END
 
-static WRITE8_HANDLER( subsino_out_c_w )
+WRITE8_MEMBER(subsino_state::subsino_out_c_w)
 {
-	subsino_state *state = space->machine().driver_data<subsino_state>();
 	// not 100% sure on this
 
 	// ???? eccc
 	// e = enable reels?
 	// c = reel colour bank?
-	state->m_out_c = data;
+	m_out_c = data;
 
-	tilemap_mark_all_tiles_dirty (state->m_reel1_tilemap);
-	tilemap_mark_all_tiles_dirty (state->m_reel2_tilemap);
-	tilemap_mark_all_tiles_dirty (state->m_reel3_tilemap);
+	m_reel1_tilemap->mark_all_dirty();
+	m_reel2_tilemap->mark_all_dirty();
+	m_reel3_tilemap->mark_all_dirty();
 //  popmessage("data %02x\n",data);
 }
 
-static ADDRESS_MAP_START( tisub_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( tisub_map, AS_PROGRAM, 8, subsino_state )
 	AM_RANGE( 0x09800, 0x09fff ) AM_RAM
 
 	AM_RANGE( 0x09000, 0x09000 ) AM_READ_PORT( "SW1" )
@@ -993,53 +1025,52 @@ static ADDRESS_MAP_START( tisub_map, AS_PROGRAM, 8 )
 	AM_RANGE( 0x09006, 0x09006 ) AM_READ_PORT( "INB" )
 
 	/* 0x09008: is marked as OUTPUT C in the test mode. */
-	AM_RANGE( 0x09008, 0x09008 ) AM_WRITE( subsino_out_c_w )
-	AM_RANGE( 0x09009, 0x09009 ) AM_WRITE( subsino_out_b_w )
-	AM_RANGE( 0x0900a, 0x0900a ) AM_WRITE( subsino_out_a_w )
+	AM_RANGE( 0x09008, 0x09008 ) AM_WRITE(subsino_out_c_w )
+	AM_RANGE( 0x09009, 0x09009 ) AM_WRITE(subsino_out_b_w )
+	AM_RANGE( 0x0900a, 0x0900a ) AM_WRITE(subsino_out_a_w )
 
 	AM_RANGE( 0x0900c, 0x0900c ) AM_READ_PORT( "INC" )
 
-	AM_RANGE( 0x09016, 0x09017 ) AM_DEVWRITE( "ymsnd", ym3812_w )
+	AM_RANGE( 0x09016, 0x09017 ) AM_DEVWRITE_LEGACY("ymsnd", ym3812_w )
 
-//  AM_RANGE( 0x0900c, 0x0900c ) AM_DEVWRITE_MODERN("oki", okim6295_device, write)
+//  AM_RANGE( 0x0900c, 0x0900c ) AM_DEVWRITE("oki", okim6295_device, write)
 
-	AM_RANGE( 0x0901b, 0x0901b ) AM_WRITE( subsino_tiles_offset_w )
+	AM_RANGE( 0x0901b, 0x0901b ) AM_WRITE(subsino_tiles_offset_w )
 
 	AM_RANGE( 0x07800, 0x07fff ) AM_RAM
-	AM_RANGE( 0x08800, 0x08fff ) AM_RAM_WRITE( subsino_videoram_w ) AM_BASE_MEMBER(subsino_state, m_videoram )
-	AM_RANGE( 0x08000, 0x087ff ) AM_RAM_WRITE( subsino_colorram_w ) AM_BASE_MEMBER(subsino_state, m_colorram )
+	AM_RANGE( 0x08800, 0x08fff ) AM_RAM_WRITE(subsino_videoram_w ) AM_SHARE("videoram")
+	AM_RANGE( 0x08000, 0x087ff ) AM_RAM_WRITE(subsino_colorram_w ) AM_SHARE("colorram")
 
 	AM_RANGE( 0x00000, 0x0bfff ) AM_ROM // overlap unmapped regions
 	AM_RANGE( 0x10000, 0x13fff ) AM_ROM
 	AM_RANGE( 0x14000, 0x14fff ) AM_ROM // reads the card face data here (see rom copy in rom loading)
 
-	AM_RANGE( 0x150c0, 0x150ff ) AM_RAM AM_BASE_MEMBER(subsino_state, m_reel3_scroll)
-	AM_RANGE( 0x15140, 0x1517f ) AM_RAM AM_BASE_MEMBER(subsino_state, m_reel2_scroll)
-	AM_RANGE( 0x15180, 0x151bf ) AM_RAM AM_BASE_MEMBER(subsino_state, m_reel1_scroll)
+	AM_RANGE( 0x150c0, 0x150ff ) AM_RAM AM_SHARE("reel3_scroll")
+	AM_RANGE( 0x15140, 0x1517f ) AM_RAM AM_SHARE("reel2_scroll")
+	AM_RANGE( 0x15180, 0x151bf ) AM_RAM AM_SHARE("reel1_scroll")
 
-	AM_RANGE( 0x15800, 0x159ff ) AM_RAM_WRITE(subsino_reel1_ram_w) AM_BASE_MEMBER(subsino_state, m_reel1_ram)
-	AM_RANGE( 0x15a00, 0x15bff ) AM_RAM_WRITE(subsino_reel2_ram_w) AM_BASE_MEMBER(subsino_state, m_reel2_ram)
-	AM_RANGE( 0x15c00, 0x15dff ) AM_RAM_WRITE(subsino_reel3_ram_w) AM_BASE_MEMBER(subsino_state, m_reel3_ram)
+	AM_RANGE( 0x15800, 0x159ff ) AM_RAM_WRITE(subsino_reel1_ram_w) AM_SHARE("reel1_ram")
+	AM_RANGE( 0x15a00, 0x15bff ) AM_RAM_WRITE(subsino_reel2_ram_w) AM_SHARE("reel2_ram")
+	AM_RANGE( 0x15c00, 0x15dff ) AM_RAM_WRITE(subsino_reel3_ram_w) AM_SHARE("reel3_ram")
 ADDRESS_MAP_END
 
 
-static WRITE8_HANDLER(colordac_w)
+WRITE8_MEMBER(subsino_state::colordac_w)
 {
-	subsino_state *state = space->machine().driver_data<subsino_state>();
 	switch ( offset )
 	{
 		case 0:
-			state->m_colordac_offs = data * 3;
+			m_colordac_offs = data * 3;
 			break;
 
 		case 1:
-			state->m_stisub_colorram[state->m_colordac_offs] = data;
-			palette_set_color_rgb(space->machine(), state->m_colordac_offs/3,
-				pal6bit(state->m_stisub_colorram[(state->m_colordac_offs/3)*3+0]),
-				pal6bit(state->m_stisub_colorram[(state->m_colordac_offs/3)*3+1]),
-				pal6bit(state->m_stisub_colorram[(state->m_colordac_offs/3)*3+2])
+			m_stisub_colorram[m_colordac_offs] = data;
+			palette_set_color_rgb(machine(), m_colordac_offs/3,
+				pal6bit(m_stisub_colorram[(m_colordac_offs/3)*3+0]),
+				pal6bit(m_stisub_colorram[(m_colordac_offs/3)*3+1]),
+				pal6bit(m_stisub_colorram[(m_colordac_offs/3)*3+2])
 			);
-			state->m_colordac_offs = (state->m_colordac_offs+1) % (256*3);
+			m_colordac_offs = (m_colordac_offs+1) % (256*3);
 			break;
 
 		case 2:
@@ -1052,31 +1083,29 @@ static WRITE8_HANDLER(colordac_w)
 }
 
 
-static WRITE8_HANDLER( stisub_out_c_w )
+WRITE8_MEMBER(subsino_state::stisub_out_c_w)
 {
-	subsino_state *state = space->machine().driver_data<subsino_state>();
-	state->m_stisub_outc = data;
+	m_stisub_outc = data;
 
 }
 
 // this stuff is banked..
 // not 100% sure on the bank bits.. other bits are also set
-static WRITE8_HANDLER( reel_scrollattr_w )
+WRITE8_MEMBER(subsino_state::reel_scrollattr_w)
 {
-	subsino_state *state = space->machine().driver_data<subsino_state>();
-	if (state->m_stisub_outc&0x20)
+	if (m_stisub_outc&0x20)
 	{
 		if (offset<0x200)
 		{
-			state->m_reel1_attr[offset&0x1ff] = data;
+			m_reel1_attr[offset&0x1ff] = data;
 		}
 		else if (offset<0x400)
 		{
-			state->m_reel2_attr[offset&0x1ff] = data;
+			m_reel2_attr[offset&0x1ff] = data;
 		}
 		else if (offset<0x600)
 		{
-			state->m_reel3_attr[offset&0x1ff] = data;
+			m_reel3_attr[offset&0x1ff] = data;
 		}
 		else
 		{
@@ -1093,26 +1122,25 @@ static WRITE8_HANDLER( reel_scrollattr_w )
 		}
 		else if (offset<0x80)
 		{
-			state->m_reel2_scroll[offset&0x3f] = data;
+			m_reel2_scroll[offset&0x3f] = data;
 		}
 		else if (offset<0xc0)
 		{
-			state->m_reel1_scroll[offset&0x3f] = data;
+			m_reel1_scroll[offset&0x3f] = data;
 		}
 		else
 		{
-			state->m_reel3_scroll[offset&0x3f] = data;
+			m_reel3_scroll[offset&0x3f] = data;
 		}
 	}
 }
 
-static READ8_HANDLER( reel_scrollattr_r )
+READ8_MEMBER(subsino_state::reel_scrollattr_r)
 {
-	subsino_state *state = space->machine().driver_data<subsino_state>();
-	return state->m_reel1_attr[offset];
+	return m_reel1_attr[offset];
 }
 
-static ADDRESS_MAP_START( stisub_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( stisub_map, AS_PROGRAM, 8, subsino_state )
 	AM_RANGE( 0x00000, 0x0bfff ) AM_ROM
 
 	AM_RANGE( 0x0c000, 0x0cfff ) AM_RAM
@@ -1125,27 +1153,27 @@ static ADDRESS_MAP_START( stisub_map, AS_PROGRAM, 8 )
 	AM_RANGE( 0x0d005, 0x0d005 ) AM_READ_PORT( "INB" )
 	AM_RANGE( 0x0d006, 0x0d006 ) AM_READ_PORT( "INA" )
 
-	AM_RANGE( 0x0d008, 0x0d008 ) AM_WRITE( stisub_out_c_w )
+	AM_RANGE( 0x0d008, 0x0d008 ) AM_WRITE(stisub_out_c_w )
 
-	AM_RANGE( 0x0d009, 0x0d009 ) AM_WRITE( subsino_out_b_w )
-	AM_RANGE( 0x0d00a, 0x0d00a ) AM_WRITE( subsino_out_a_w )
+	AM_RANGE( 0x0d009, 0x0d009 ) AM_WRITE(subsino_out_b_w )
+	AM_RANGE( 0x0d00a, 0x0d00a ) AM_WRITE(subsino_out_a_w )
 
 	AM_RANGE( 0x0d00c, 0x0d00c ) AM_READ_PORT( "INC" )
 
 	AM_RANGE( 0x0d010, 0x0d013 ) AM_WRITE(colordac_w)
 
-	AM_RANGE( 0x0d016, 0x0d017 ) AM_DEVWRITE( "ymsnd", ym3812_w )
+	AM_RANGE( 0x0d016, 0x0d017 ) AM_DEVWRITE_LEGACY("ymsnd", ym3812_w )
 
-//  AM_RANGE( 0x0d01b, 0x0d01b ) AM_WRITE( subsino_tiles_offset_w )
+//  AM_RANGE( 0x0d01b, 0x0d01b ) AM_WRITE(subsino_tiles_offset_w )
 
-	AM_RANGE( 0x0e000, 0x0e7ff ) AM_RAM_WRITE( subsino_colorram_w ) AM_BASE_MEMBER(subsino_state, m_colorram )
-	AM_RANGE( 0x0e800, 0x0efff ) AM_RAM_WRITE( subsino_videoram_w ) AM_BASE_MEMBER(subsino_state, m_videoram )
+	AM_RANGE( 0x0e000, 0x0e7ff ) AM_RAM_WRITE(subsino_colorram_w ) AM_SHARE("colorram")
+	AM_RANGE( 0x0e800, 0x0efff ) AM_RAM_WRITE(subsino_videoram_w ) AM_SHARE("videoram")
 
 	AM_RANGE( 0xf000, 0xf7ff ) AM_READWRITE(reel_scrollattr_r, reel_scrollattr_w)
 
-	AM_RANGE( 0xf800, 0xf9ff ) AM_RAM_WRITE(subsino_reel1_ram_w) AM_BASE_MEMBER(subsino_state, m_reel1_ram)
-	AM_RANGE( 0xfa00, 0xfbff ) AM_RAM_WRITE(subsino_reel2_ram_w) AM_BASE_MEMBER(subsino_state, m_reel2_ram)
-	AM_RANGE( 0xfc00, 0xfdff ) AM_RAM_WRITE(subsino_reel3_ram_w) AM_BASE_MEMBER(subsino_state, m_reel3_ram)
+	AM_RANGE( 0xf800, 0xf9ff ) AM_RAM_WRITE(subsino_reel1_ram_w) AM_SHARE("reel1_ram")
+	AM_RANGE( 0xfa00, 0xfbff ) AM_RAM_WRITE(subsino_reel2_ram_w) AM_SHARE("reel2_ram")
+	AM_RANGE( 0xfc00, 0xfdff ) AM_RAM_WRITE(subsino_reel3_ram_w) AM_SHARE("reel3_ram")
 ADDRESS_MAP_END
 
 
@@ -1153,7 +1181,7 @@ ADDRESS_MAP_END
                         Magic Train (Clear NVRAM ROM?)
 ***************************************************************************/
 
-static ADDRESS_MAP_START( mtrainnv_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( mtrainnv_map, AS_PROGRAM, 8, subsino_state )
 	AM_RANGE( 0x00000, 0x0bfff ) AM_ROM
 
 	AM_RANGE( 0x0c000, 0x0cfff ) AM_RAM
@@ -1175,22 +1203,22 @@ static ADDRESS_MAP_START( mtrainnv_map, AS_PROGRAM, 8 )
 
 //  AM_RANGE( 0x0d012, 0x0d012 ) AM_WRITE
 
-	AM_RANGE( 0x0d016, 0x0d017 ) AM_DEVWRITE( "ymsnd", ym3812_w )
+	AM_RANGE( 0x0d016, 0x0d017 ) AM_DEVWRITE_LEGACY("ymsnd", ym3812_w )
 
-//  AM_RANGE( 0x0d018, 0x0d018 ) AM_DEVREADWRITE_MODERN("oki", okim6295_device, read, write)
+//  AM_RANGE( 0x0d018, 0x0d018 ) AM_DEVREADWRITE("oki", okim6295_device, read, write)
 
-	AM_RANGE( 0x0e000, 0x0e7ff ) AM_RAM_WRITE( subsino_colorram_w ) AM_BASE_MEMBER(subsino_state, m_colorram )
-	AM_RANGE( 0x0e800, 0x0efff ) AM_RAM_WRITE( subsino_videoram_w ) AM_BASE_MEMBER(subsino_state, m_videoram )
+	AM_RANGE( 0x0e000, 0x0e7ff ) AM_RAM_WRITE(subsino_colorram_w ) AM_SHARE("colorram")
+	AM_RANGE( 0x0e800, 0x0efff ) AM_RAM_WRITE(subsino_videoram_w ) AM_SHARE("videoram")
 
 	AM_RANGE( 0xf000, 0xf7ff ) AM_READWRITE(reel_scrollattr_r, reel_scrollattr_w)
 
-	AM_RANGE( 0xf800, 0xf9ff ) AM_RAM_WRITE(subsino_reel1_ram_w) AM_BASE_MEMBER(subsino_state, m_reel1_ram)
-	AM_RANGE( 0xfa00, 0xfbff ) AM_RAM_WRITE(subsino_reel2_ram_w) AM_BASE_MEMBER(subsino_state, m_reel2_ram)
-	AM_RANGE( 0xfc00, 0xfdff ) AM_RAM_WRITE(subsino_reel3_ram_w) AM_BASE_MEMBER(subsino_state, m_reel3_ram)
+	AM_RANGE( 0xf800, 0xf9ff ) AM_RAM_WRITE(subsino_reel1_ram_w) AM_SHARE("reel1_ram")
+	AM_RANGE( 0xfa00, 0xfbff ) AM_RAM_WRITE(subsino_reel2_ram_w) AM_SHARE("reel2_ram")
+	AM_RANGE( 0xfc00, 0xfdff ) AM_RAM_WRITE(subsino_reel3_ram_w) AM_SHARE("reel3_ram")
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( subsino_iomap, AS_IO, 8 )
+static ADDRESS_MAP_START( subsino_iomap, AS_IO, 8, subsino_state )
 	AM_RANGE( 0x0000, 0x003f ) AM_RAM // internal regs
 ADDRESS_MAP_END
 
@@ -1279,28 +1307,28 @@ static INPUT_PORTS_START( victor21 )
 
 	PORT_START( "INA" )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 )		PORT_CODE(KEYCODE_V)	PORT_NAME("Split")
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 )        PORT_CODE(KEYCODE_V)    PORT_NAME("Split")
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_GAMBLE_DEAL )	PORT_CODE(KEYCODE_Z)	PORT_NAME("Deal / Hit")
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_POKER_BET )		PORT_IMPULSE(3)
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_GAMBLE_STAND )	PORT_CODE(KEYCODE_X)
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 )		PORT_CODE(KEYCODE_A)	PORT_NAME("Bet x10")	// multibet
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_GAMBLE_D_UP )	PORT_CODE(KEYCODE_C)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_GAMBLE_DEAL )    PORT_CODE(KEYCODE_Z)    PORT_NAME("Deal / Hit")
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_POKER_BET )      PORT_IMPULSE(3)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_GAMBLE_STAND )   PORT_CODE(KEYCODE_X)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 )        PORT_CODE(KEYCODE_A)    PORT_NAME("Bet x10")    // multibet
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_GAMBLE_D_UP )    PORT_CODE(KEYCODE_C)
 
 	PORT_START( "INB" )
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )			PORT_IMPULSE(3)	// coin 1
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_GAMBLE_KEYIN )	// key in
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN2 )			PORT_IMPULSE(3)	// coin 2
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN3 )			PORT_IMPULSE(3)	// coin 3
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_9)	PORT_NAME("Stats")	// Bookkeeping.
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_0)	PORT_NAME("Settings")	// Game Rate.
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_GAMBLE_PAYOUT )	// no payout?
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_GAMBLE_KEYOUT )	// key out
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )          PORT_IMPULSE(3) // coin 1
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_GAMBLE_KEYIN )   // key in
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN2 )          PORT_IMPULSE(3) // coin 2
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN3 )          PORT_IMPULSE(3) // coin 3
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_9)    PORT_NAME("Stats")  // Bookkeeping.
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_0)    PORT_NAME("Settings")   // Game Rate.
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_GAMBLE_PAYOUT )  // no payout?
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_GAMBLE_KEYOUT )  // key out
 
 	PORT_START( "INC" )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_R)	PORT_NAME("Reset")	// hard reset
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_R)    PORT_NAME("Reset")  // hard reset
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -1388,27 +1416,27 @@ static INPUT_PORTS_START( victor5 )
 	PORT_START( "INA" )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_POKER_HOLD1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_POKER_HOLD2 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_POKER_HOLD3 )	PORT_NAME("Hold 3 / Half Take")
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_POKER_HOLD4 )	PORT_NAME("Hold 4 / Big")
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_POKER_HOLD5 )	PORT_NAME("Hold 5 / Small")
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_GAMBLE_DEAL )	PORT_NAME("Deal / Take")
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_POKER_BET )		PORT_IMPULSE(3)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_POKER_HOLD3 )    PORT_NAME("Hold 3 / Half Take")
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_POKER_HOLD4 )    PORT_NAME("Hold 4 / Big")
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_POKER_HOLD5 )    PORT_NAME("Hold 5 / Small")
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_GAMBLE_DEAL )    PORT_NAME("Deal / Take")
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_POKER_BET )      PORT_IMPULSE(3)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START( "INB" )
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )			PORT_IMPULSE(3)	// coin
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_GAMBLE_KEYIN )	// key in
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )          PORT_IMPULSE(3) // coin
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_GAMBLE_KEYIN )   // key in
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_9)	PORT_NAME("Stats")	// Bookkeeping.
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_0)	PORT_NAME("Settings")	// Game Rate & others.
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_GAMBLE_PAYOUT )	// payout
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_GAMBLE_KEYOUT )	// key out
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_9)    PORT_NAME("Stats")  // Bookkeeping.
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_0)    PORT_NAME("Settings")   // Game Rate & others.
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_GAMBLE_PAYOUT )  // payout
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_GAMBLE_KEYOUT )  // key out
 
 	PORT_START( "INC" )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_R)	PORT_NAME("Reset")	// hard reset
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_R)    PORT_NAME("Reset")  // hard reset
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -1420,7 +1448,7 @@ INPUT_PORTS_END
 static INPUT_PORTS_START( tisub )
 
 	PORT_START( "SW1" )
-	PORT_DIPNAME( 0x07, 0x07, DEF_STR( Coinage ) )		PORT_DIPLOCATION("SW1:1,2,3")	// SW1-123
+	PORT_DIPNAME( 0x07, 0x07, DEF_STR( Coinage ) )      PORT_DIPLOCATION("SW1:1,2,3")   // SW1-123
 	PORT_DIPSETTING(    0x06, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(    0x05, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( 1C_5C ) )
@@ -1429,7 +1457,7 @@ static INPUT_PORTS_START( tisub )
 	PORT_DIPSETTING(    0x02, "1 Coin / 25 Credits" )
 	PORT_DIPSETTING(    0x01, "1 Coin / 50 Credits" )
 	PORT_DIPSETTING(    0x00, "1 Coin / 100 Credits" )
-	PORT_DIPNAME( 0x38, 0x38, "Key In" )				PORT_DIPLOCATION("SW1:4,5,6")	// SW1-456
+	PORT_DIPNAME( 0x38, 0x38, "Key In" )                PORT_DIPLOCATION("SW1:4,5,6")   // SW1-456
 	PORT_DIPSETTING(    0x30, "4 Points/Pulse" )
 	PORT_DIPSETTING(    0x28, "8 Points/Pulse" )
 	PORT_DIPSETTING(    0x20, "20 Points/Pulse" )
@@ -1438,39 +1466,39 @@ static INPUT_PORTS_START( tisub )
 	PORT_DIPSETTING(    0x10, "100 Points/Pulse" )
 	PORT_DIPSETTING(    0x08, "200 Points/Pulse" )
 	PORT_DIPSETTING(    0x00, "400 Points/Pulse" )
-	PORT_DIPNAME( 0x40, 0x40, "Payout Mode" )			PORT_DIPLOCATION("SW1:7")	// SW1-7
+	PORT_DIPNAME( 0x40, 0x40, "Payout Mode" )           PORT_DIPLOCATION("SW1:7")   // SW1-7
 	PORT_DIPSETTING(    0x40, "Coin Value" )
 	PORT_DIPSETTING(    0x00, "Key In Value" )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )		PORT_DIPLOCATION("SW1:8")
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW1:8")
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START( "SW2" )
-	PORT_DIPNAME( 0x03, 0x03, "Minimum Bet" )			PORT_DIPLOCATION("SW2:1,2")	// SW2-12
+	PORT_DIPNAME( 0x03, 0x03, "Minimum Bet" )           PORT_DIPLOCATION("SW2:1,2") // SW2-12
 	PORT_DIPSETTING(    0x03, "1" )
 	PORT_DIPSETTING(    0x02, "8" )
 	PORT_DIPSETTING(    0x01, "16" )
 	PORT_DIPSETTING(    0x00, "32" )
-	PORT_DIPNAME( 0x0c, 0x08, "Max Bet" )				PORT_DIPLOCATION("SW2:3,4")	// SW2-34
+	PORT_DIPNAME( 0x0c, 0x08, "Max Bet" )               PORT_DIPLOCATION("SW2:3,4") // SW2-34
 	PORT_DIPSETTING(    0x0c, "2" )
 	PORT_DIPSETTING(    0x00, "8" )
 	PORT_DIPSETTING(    0x04, "16" )
 	PORT_DIPSETTING(    0x08, "32" )
-	PORT_DIPNAME( 0x10, 0x00, DEF_STR( Demo_Sounds ) )	PORT_DIPLOCATION("SW2:5")	// Not in test mode.
+	PORT_DIPNAME( 0x10, 0x00, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW2:5")   // Not in test mode.
 	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x20, 0x20, "Game Limit" )			PORT_DIPLOCATION("SW2:6")	// SW2-6
+	PORT_DIPNAME( 0x20, 0x20, "Game Limit" )            PORT_DIPLOCATION("SW2:6")   // SW2-6
 	PORT_DIPSETTING(    0x20, "20000" )
 	PORT_DIPSETTING(    0x00, "30000" )
-	PORT_DIPNAME( 0x40, 0x40, "Auto Take" )				PORT_DIPLOCATION("SW2:7")	// SW2-7
+	PORT_DIPNAME( 0x40, 0x40, "Auto Take" )             PORT_DIPLOCATION("SW2:7")   // SW2-7
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )		PORT_DIPLOCATION("SW2:8")
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW2:8")
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START( "SW3" )
-	PORT_DIPNAME( 0x07, 0x07, "Main Game Rate" )		PORT_DIPLOCATION("SW3:1,2,3")	// SW3-123
+	PORT_DIPNAME( 0x07, 0x07, "Main Game Rate" )        PORT_DIPLOCATION("SW3:1,2,3")   // SW3-123
 	PORT_DIPSETTING(    0x00, "77%" )
 	PORT_DIPSETTING(    0x01, "80%" )
 	PORT_DIPSETTING(    0x02, "83%" )
@@ -1479,24 +1507,24 @@ static INPUT_PORTS_START( tisub )
 	PORT_DIPSETTING(    0x07, "92%" )
 	PORT_DIPSETTING(    0x05, "95%" )
 	PORT_DIPSETTING(    0x06, "98%" )
-	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )		PORT_DIPLOCATION("SW3:4")
+	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW3:4")
 	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )		PORT_DIPLOCATION("SW3:5")
+	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW3:5")
 	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )		PORT_DIPLOCATION("SW3:6")
+	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW3:6")
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )		PORT_DIPLOCATION("SW3:7")
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW3:7")
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )		PORT_DIPLOCATION("SW3:8")
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW3:8")
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START( "SW4" )
-	PORT_DIPNAME( 0x07, 0x07, "Double-Up Rate" )		PORT_DIPLOCATION("SW4:1,2,3")	// SW4-123
+	PORT_DIPNAME( 0x07, 0x07, "Double-Up Rate" )        PORT_DIPLOCATION("SW4:1,2,3")   // SW4-123
 	PORT_DIPSETTING(    0x00, "70%" )
 	PORT_DIPSETTING(    0x01, "74%" )
 	PORT_DIPSETTING(    0x02, "78%" )
@@ -1505,46 +1533,46 @@ static INPUT_PORTS_START( tisub )
 	PORT_DIPSETTING(    0x07, "90%" )
 	PORT_DIPSETTING(    0x05, "94%" )
 	PORT_DIPSETTING(    0x06, "98%" )
-	PORT_DIPNAME( 0x08, 0x08, "Double-Up Limit" )		PORT_DIPLOCATION("SW4:4")	// SW4-4
+	PORT_DIPNAME( 0x08, 0x08, "Double-Up Limit" )       PORT_DIPLOCATION("SW4:4")   // SW4-4
 	PORT_DIPSETTING(    0x08, "5000" )
 	PORT_DIPSETTING(    0x00, "10000" )
-	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )		PORT_DIPLOCATION("SW4:5")
+	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW4:5")
 	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )		PORT_DIPLOCATION("SW4:6")
+	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW4:6")
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )		PORT_DIPLOCATION("SW4:7")
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW4:7")
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )		PORT_DIPLOCATION("SW4:8")
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW4:8")
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START( "INA" )
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_GAMBLE_D_UP )	PORT_NAME("Double / Info")
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_POKER_HOLD1 )	PORT_NAME("Hold 1")
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_POKER_HOLD2 )	PORT_NAME("Hold 2 / Big")
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_POKER_HOLD3 )	PORT_NAME("Hold 3 / Small")
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_GAMBLE_D_UP )    PORT_NAME("Double / Info")
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_POKER_HOLD1 )    PORT_NAME("Hold 1")
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_POKER_HOLD2 )    PORT_NAME("Hold 2 / Big")
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_POKER_HOLD3 )    PORT_NAME("Hold 3 / Small")
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_GAMBLE_DEAL )	PORT_NAME("Start / Take")
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_POKER_BET )		PORT_IMPULSE(3)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_GAMBLE_DEAL )    PORT_NAME("Start / Take")
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_POKER_BET )      PORT_IMPULSE(3)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START( "INB" )
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )			PORT_IMPULSE(3)	// coin
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_GAMBLE_KEYIN )	// key in
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )          PORT_IMPULSE(3) // coin
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_GAMBLE_KEYIN )   // key in
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_9)	PORT_NAME("Stats / Test")	// Bookkeeping.
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_0)	PORT_NAME("Settings")		// Current settings.
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_GAMBLE_PAYOUT )	// payout
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_GAMBLE_KEYOUT )	// key out
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_9)    PORT_NAME("Stats / Test")   // Bookkeeping.
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_0)    PORT_NAME("Settings")       // Current settings.
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_GAMBLE_PAYOUT )  // payout
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_GAMBLE_KEYOUT )  // key out
 
 	PORT_START( "INC" )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_R)	PORT_NAME("Reset")	// hard reset
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_R)    PORT_NAME("Reset")  // hard reset
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -1555,7 +1583,7 @@ INPUT_PORTS_END
 
 static INPUT_PORTS_START( stisub )
 	PORT_START("SW1")
-	PORT_DIPNAME( 0x07, 0x07, DEF_STR( Coinage ) )		PORT_DIPLOCATION("SW1:1,2,3")
+	PORT_DIPNAME( 0x07, 0x07, DEF_STR( Coinage ) )      PORT_DIPLOCATION("SW1:1,2,3")
 	PORT_DIPSETTING(    0x06, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(    0x05, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( 1C_5C ) )
@@ -1564,7 +1592,7 @@ static INPUT_PORTS_START( stisub )
 	PORT_DIPSETTING(    0x02, "1 Coin / 25 Credits" )
 	PORT_DIPSETTING(    0x01, "1 Coin / 50 Credits" )
 	PORT_DIPSETTING(    0x00, "1 Coin / 100 Credits" )
-	PORT_DIPNAME( 0x38, 0x00, "Remote Credits" )		PORT_DIPLOCATION("SW1:4,5,6")
+	PORT_DIPNAME( 0x38, 0x00, "Remote Credits" )        PORT_DIPLOCATION("SW1:4,5,6")
 	PORT_DIPSETTING(    0x30, "1 Pulse / 1 Credits" )
 	PORT_DIPSETTING(    0x28, "1 Pulse / 2 Credits" )
 	PORT_DIPSETTING(    0x20, "1 Pulse / 5 Credits" )
@@ -1573,64 +1601,64 @@ static INPUT_PORTS_START( stisub )
 	PORT_DIPSETTING(    0x10, "1 Pulse / 25 Credits" )
 	PORT_DIPSETTING(    0x08, "1 Pulse / 50 Credits" )
 	PORT_DIPSETTING(    0x00, "1 Pulse / 100 Credits" )
-	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )		PORT_DIPLOCATION("SW1:7")
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW1:7")
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )		PORT_DIPLOCATION("SW1:8")
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW1:8")
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SW2")
-	PORT_DIPNAME( 0x03, 0x03, "Minimum Bet" )			PORT_DIPLOCATION("SW2:1,2")
+	PORT_DIPNAME( 0x03, 0x03, "Minimum Bet" )           PORT_DIPLOCATION("SW2:1,2")
 	PORT_DIPSETTING(    0x02, "1" )
 	PORT_DIPSETTING(    0x03, "8" )
 	PORT_DIPSETTING(    0x01, "16" )
 	PORT_DIPSETTING(    0x00, "32" )
-	PORT_DIPNAME( 0x0c, 0x0c, "Max Bet" )				PORT_DIPLOCATION("SW2:3,4")
+	PORT_DIPNAME( 0x0c, 0x0c, "Max Bet" )               PORT_DIPLOCATION("SW2:3,4")
 	PORT_DIPSETTING(    0x04, "16" )
 	PORT_DIPSETTING(    0x08, "32" )
 	PORT_DIPSETTING(    0x0c, "64" )
 	PORT_DIPSETTING(    0x00, "80" )
-	PORT_DIPNAME( 0x10, 0x00, DEF_STR( Demo_Sounds ) )	PORT_DIPLOCATION("SW2:5")
+	PORT_DIPNAME( 0x10, 0x00, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW2:5")
 	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x60, 0x60, "Game Limit" )			PORT_DIPLOCATION("SW2:6,7")
+	PORT_DIPNAME( 0x60, 0x60, "Game Limit" )            PORT_DIPLOCATION("SW2:6,7")
 	PORT_DIPSETTING(    0x40, "10000" )
 	PORT_DIPSETTING(    0x60, "20000" )
 	PORT_DIPSETTING(    0x20, "30000" )
 	PORT_DIPSETTING(    0x00, "60000" )
-	PORT_DIPNAME( 0x80, 0x80, "Double Up" )				PORT_DIPLOCATION("SW2:8")
+	PORT_DIPNAME( 0x80, 0x80, "Double Up" )             PORT_DIPLOCATION("SW2:8")
 	PORT_DIPSETTING(    0x00, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( Yes ) )
 
 	PORT_START( "SW3" )
-	PORT_DIPNAME( 0x07, 0x07, "Win Rate" )		PORT_DIPLOCATION("SW3:1,2,3")
+	PORT_DIPNAME( 0x07, 0x07, "Win Rate" )      PORT_DIPLOCATION("SW3:1,2,3")
 	PORT_DIPSETTING(    0x00, "84%" )
-	PORT_DIPSETTING(    0x01, "84%" )	// yes, again!
+	PORT_DIPSETTING(    0x01, "84%" )   // yes, again!
 	PORT_DIPSETTING(    0x02, "86%" )
 	PORT_DIPSETTING(    0x03, "88%" )
 	PORT_DIPSETTING(    0x04, "90%" )
 	PORT_DIPSETTING(    0x07, "92%" )
 	PORT_DIPSETTING(    0x05, "94%" )
 	PORT_DIPSETTING(    0x06, "96%" )
-	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )		PORT_DIPLOCATION("SW3:4")
+	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW3:4")
 	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )		PORT_DIPLOCATION("SW3:5")
+	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW3:5")
 	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )		PORT_DIPLOCATION("SW3:6")
+	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW3:6")
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )		PORT_DIPLOCATION("SW3:7")
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW3:7")
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )		PORT_DIPLOCATION("SW3:8")
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW3:8")
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START( "SW4" )
-	PORT_DIPNAME( 0x07, 0x07, "Double-Up Level" )		PORT_DIPLOCATION("SW4:1,2,3")
+	PORT_DIPNAME( 0x07, 0x07, "Double-Up Level" )       PORT_DIPLOCATION("SW4:1,2,3")
 	PORT_DIPSETTING(    0x00, "0" )
 	PORT_DIPSETTING(    0x01, "1" )
 	PORT_DIPSETTING(    0x02, "2" )
@@ -1639,19 +1667,19 @@ static INPUT_PORTS_START( stisub )
 	PORT_DIPSETTING(    0x05, "5" )
 	PORT_DIPSETTING(    0x06, "6" )
 	PORT_DIPSETTING(    0x07, "7" )
-	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )		PORT_DIPLOCATION("SW4:4")
+	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW4:4")
 	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x10, 0x10, "Double-Up Game" )		PORT_DIPLOCATION("SW4:5")
+	PORT_DIPNAME( 0x10, 0x10, "Double-Up Game" )        PORT_DIPLOCATION("SW4:5")
 	PORT_DIPSETTING(    0x10, "Dancers / Panties Colors" )
 	PORT_DIPSETTING(    0x00, "Cards / Seven-Bingo" )
-	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )		PORT_DIPLOCATION("SW4:6")
+	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW4:6")
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )		PORT_DIPLOCATION("SW4:7")
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW4:7")
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )		PORT_DIPLOCATION("SW4:8")
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW4:8")
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
@@ -1659,30 +1687,30 @@ static INPUT_PORTS_START( stisub )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START )			PORT_CODE(KEYCODE_N)	PORT_NAME("Start / Stop All")
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_POKER_BET )		PORT_CODE(KEYCODE_C)	PORT_NAME("Bet / Stop 2")
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_GAMBLE_D_UP )	PORT_CODE(KEYCODE_Z)	PORT_NAME("Double / Info")
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START )          PORT_CODE(KEYCODE_N)    PORT_NAME("Start / Stop All")
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_POKER_BET )      PORT_CODE(KEYCODE_C)    PORT_NAME("Bet / Stop 2")
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_GAMBLE_D_UP )    PORT_CODE(KEYCODE_Z)    PORT_NAME("Double / Info")
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START( "INB" )
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )			PORT_IMPULSE(3)	// coin
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_GAMBLE_KEYIN )	// key in
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )          PORT_IMPULSE(3) // coin
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_GAMBLE_KEYIN )   // key in
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_9)	PORT_NAME("Stats / Test")	// Bookkeeping.
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_0)	PORT_NAME("Settings")		// Current settings.
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_GAMBLE_PAYOUT )	// payout
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_GAMBLE_KEYOUT )	// key out
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_9)    PORT_NAME("Stats / Test")   // Bookkeeping.
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_0)    PORT_NAME("Settings")       // Current settings.
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_GAMBLE_PAYOUT )  // payout
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_GAMBLE_KEYOUT )  // key out
 
 	PORT_START("INC")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_GAMBLE_LOW )		PORT_CODE(KEYCODE_V)	PORT_NAME("Small / Black / Stop 3")
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_GAMBLE_LOW )     PORT_CODE(KEYCODE_V)    PORT_NAME("Small / Black / Stop 3")
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_R)	PORT_NAME("Reset")	// hard reset
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_GAMBLE_HIGH )	PORT_CODE(KEYCODE_B)	PORT_NAME("Big / Red")
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_R)    PORT_NAME("Reset")  // hard reset
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_GAMBLE_HIGH )    PORT_CODE(KEYCODE_B)    PORT_NAME("Big / Red")
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_GAMBLE_TAKE )	PORT_CODE(KEYCODE_X)	PORT_NAME("Take / Stop 1")
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_GAMBLE_TAKE )    PORT_CODE(KEYCODE_X)    PORT_NAME("Take / Stop 1")
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 INPUT_PORTS_END
 
@@ -1792,28 +1820,28 @@ static INPUT_PORTS_START( crsbingo )
 
 	PORT_START( "INA" )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_POKER_HOLD1 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_POKER_HOLD2 )	PORT_NAME("Hold 2 / Double")
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_POKER_HOLD3 )	PORT_NAME("Hold 3 / Change")
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_POKER_HOLD4 )	PORT_NAME("Hold 4 / Big")
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_POKER_HOLD5 )	PORT_NAME("Hold 5 / Small")
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_GAMBLE_DEAL )	PORT_NAME("Deal / Take")
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_POKER_BET )		PORT_IMPULSE(3)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_POKER_HOLD2 )    PORT_NAME("Hold 2 / Double")
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_POKER_HOLD3 )    PORT_NAME("Hold 3 / Change")
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_POKER_HOLD4 )    PORT_NAME("Hold 4 / Big")
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_POKER_HOLD5 )    PORT_NAME("Hold 5 / Small")
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_GAMBLE_DEAL )    PORT_NAME("Deal / Take")
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_POKER_BET )      PORT_IMPULSE(3)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START( "INB" )
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )			PORT_IMPULSE(3)	// coin
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_GAMBLE_KEYIN )	// key in
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )          PORT_IMPULSE(3) // coin
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_GAMBLE_KEYIN )   // key in
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_9)	PORT_NAME("Stats")		// Bookkeeping.
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_0)	PORT_NAME("Settings")	// Game Rate & others.
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_GAMBLE_PAYOUT )	// payout
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_GAMBLE_KEYOUT )	// key out
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_9)    PORT_NAME("Stats")      // Bookkeeping.
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_0)    PORT_NAME("Settings")   // Game Rate & others.
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_GAMBLE_PAYOUT )  // payout
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_GAMBLE_KEYOUT )  // key out
 
 	PORT_START( "INC" )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_R)	PORT_NAME("Reset")	// hard reset
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_R)    PORT_NAME("Reset")  // hard reset
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -1883,29 +1911,29 @@ static INPUT_PORTS_START( sharkpy )
 	PORT_DIPUNKNOWN( 0x80, 0x80 )
 
 	PORT_START( "INA" )
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_POKER_HOLD1 )	PORT_NAME("Hold 1 / Double (Select)")
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_POKER_HOLD1 )    PORT_NAME("Hold 1 / Double (Select)")
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_POKER_HOLD2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_POKER_HOLD3 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_POKER_HOLD4 )	PORT_NAME("Hold 4 / Big")
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_POKER_HOLD5 )	PORT_NAME("Hold 5 / Small")
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_GAMBLE_DEAL )	PORT_NAME("Deal / Take")
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_POKER_BET )		PORT_NAME("Bet")	PORT_IMPULSE(3)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_POKER_HOLD4 )    PORT_NAME("Hold 4 / Big")
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_POKER_HOLD5 )    PORT_NAME("Hold 5 / Small")
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_GAMBLE_DEAL )    PORT_NAME("Deal / Take")
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_POKER_BET )      PORT_NAME("Bet")    PORT_IMPULSE(3)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START( "INB" )
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )			PORT_IMPULSE(3)	// coin
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )          PORT_IMPULSE(3) // coin
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_9)	PORT_NAME("Stats / Test")	// Bookkeeping.
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_0)	PORT_NAME("Settings")	// Game Rate & others.
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_GAMBLE_PAYOUT )	// payout?
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_GAMBLE_KEYOUT )	// key out?
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_9)    PORT_NAME("Stats / Test")   // Bookkeeping.
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_0)    PORT_NAME("Settings")   // Game Rate & others.
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_GAMBLE_PAYOUT )  // payout?
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_GAMBLE_KEYOUT )  // key out?
 
 	PORT_START( "INC" )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_R)	PORT_NAME("Reset")	// hard reset
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_R)    PORT_NAME("Reset")  // hard reset
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -1994,30 +2022,30 @@ static INPUT_PORTS_START( sharkpye )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_GAMBLE_DEAL )	PORT_NAME("Start")
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_POKER_HOLD1 )	PORT_NAME("Hold 1 / Bet")
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_POKER_HOLD3 )	PORT_NAME("Hold 3 / Double-Up")
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_GAMBLE_DEAL )    PORT_NAME("Start")
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_POKER_HOLD1 )    PORT_NAME("Hold 1 / Bet")
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_POKER_HOLD3 )    PORT_NAME("Hold 3 / Double-Up")
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START( "INB" )
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )			PORT_IMPULSE(3)	// coin
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )          PORT_IMPULSE(3) // coin
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_GAMBLE_KEYIN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_9)	PORT_NAME("Stats / Test")	// Bookkeeping.
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_0)	PORT_NAME("Settings")	// Game Rate & others.
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_9)    PORT_NAME("Stats / Test")   // Bookkeeping.
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_0)    PORT_NAME("Settings")   // Game Rate & others.
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_GAMBLE_KEYOUT )
 
 	PORT_START( "INC" )
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_POKER_HOLD4 )	PORT_NAME("Hold 4 / Small")
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_POKER_HOLD4 )    PORT_NAME("Hold 4 / Small")
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_R)	PORT_NAME("Reset Switch")	// hard reset
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_POKER_HOLD5 )	PORT_NAME("Hold 5 / Big")
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_R)    PORT_NAME("Reset Switch")   // hard reset
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_POKER_HOLD5 )    PORT_NAME("Hold 5 / Big")
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_POKER_HOLD2 )	PORT_NAME("Hold 2 / Take")
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_POKER_HOLD2 )    PORT_NAME("Hold 2 / Take")
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 INPUT_PORTS_END
 
@@ -2085,29 +2113,29 @@ static INPUT_PORTS_START( smoto16 )
 	PORT_DIPUNKNOWN( 0x80, 0x80 )
 
 	PORT_START( "INA" )
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_POKER_HOLD1 )	PORT_NAME("Hold 1 / Double (Select)")
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_POKER_HOLD2 )	PORT_NAME("Hold 2 / Right")
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_POKER_HOLD3 )	PORT_NAME("Hold 3 / Left")
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_POKER_HOLD4 )	PORT_NAME("Hold 4 / Select")
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_POKER_HOLD1 )    PORT_NAME("Hold 1 / Double (Select)")
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_POKER_HOLD2 )    PORT_NAME("Hold 2 / Right")
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_POKER_HOLD3 )    PORT_NAME("Hold 3 / Left")
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_POKER_HOLD4 )    PORT_NAME("Hold 4 / Select")
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_POKER_HOLD5 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_GAMBLE_DEAL )	PORT_NAME("Deal / Take")
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_POKER_BET )		PORT_NAME("Bet / Speed")	PORT_IMPULSE(3)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_GAMBLE_DEAL )    PORT_NAME("Deal / Take")
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_POKER_BET )      PORT_NAME("Bet / Speed")    PORT_IMPULSE(3)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START( "INB" )
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )			PORT_IMPULSE(3)	// coin
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )          PORT_IMPULSE(3) // coin
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_9)	PORT_NAME("Stats / Test")	// Bookkeeping.
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_0)	PORT_NAME("Settings")	// Game Rate & others.
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_GAMBLE_PAYOUT )	// payout?
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_GAMBLE_KEYOUT )	// key out?
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_9)    PORT_NAME("Stats / Test")   // Bookkeeping.
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_0)    PORT_NAME("Settings")   // Game Rate & others.
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_GAMBLE_PAYOUT )  // payout?
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_GAMBLE_KEYOUT )  // key out?
 
 	PORT_START( "INC" )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_R)	PORT_NAME("Reset")	// hard reset
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_R)    PORT_NAME("Reset")  // hard reset
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -2179,29 +2207,29 @@ static INPUT_PORTS_START( smoto20 )
 	PORT_DIPUNKNOWN( 0x80, 0x80 )
 
 	PORT_START( "INA" )
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_POKER_HOLD1 )	PORT_NAME("Hold 1 / Double (Select)")
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_POKER_HOLD2 )	PORT_NAME("Hold 2 / Right")
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_POKER_HOLD3 )	PORT_NAME("Hold 3 / Left")
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_POKER_HOLD4 )	PORT_NAME("Hold 4 / Select")
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_POKER_HOLD1 )    PORT_NAME("Hold 1 / Double (Select)")
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_POKER_HOLD2 )    PORT_NAME("Hold 2 / Right")
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_POKER_HOLD3 )    PORT_NAME("Hold 3 / Left")
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_POKER_HOLD4 )    PORT_NAME("Hold 4 / Select")
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_POKER_HOLD5 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_GAMBLE_DEAL )	PORT_NAME("Deal / Take")
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_POKER_BET )		PORT_NAME("Bet / Speed")	PORT_IMPULSE(3)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_GAMBLE_DEAL )    PORT_NAME("Deal / Take")
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_POKER_BET )      PORT_NAME("Bet / Speed")    PORT_IMPULSE(3)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START( "INB" )
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )			PORT_IMPULSE(3)	// coin
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )          PORT_IMPULSE(3) // coin
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_9)	PORT_NAME("Stats / Test")	// Bookkeeping.
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_0)	PORT_NAME("Settings")	// Game Rate & others.
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_GAMBLE_PAYOUT )	// payout?
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_GAMBLE_KEYOUT )	// key out?
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_9)    PORT_NAME("Stats / Test")   // Bookkeeping.
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_0)    PORT_NAME("Settings")   // Game Rate & others.
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_GAMBLE_PAYOUT )  // payout?
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_GAMBLE_KEYOUT )  // key out?
 
 	PORT_START( "INC" )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_R)	PORT_NAME("Reset")	// hard reset
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_R)    PORT_NAME("Reset")  // hard reset
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -2290,30 +2318,30 @@ static INPUT_PORTS_START( victor6 )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_GAMBLE_DEAL )	PORT_NAME("Start")
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_POKER_HOLD1 )	PORT_NAME("Hold 1 / Bet")
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_POKER_HOLD3 )	PORT_NAME("Hold 3 / Double-Up")
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_GAMBLE_DEAL )    PORT_NAME("Start")
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_POKER_HOLD1 )    PORT_NAME("Hold 1 / Bet")
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_POKER_HOLD3 )    PORT_NAME("Hold 3 / Double-Up")
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START( "INB" )
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )			PORT_IMPULSE(3)	// coin
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )          PORT_IMPULSE(3) // coin
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_GAMBLE_KEYIN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_9)	PORT_NAME("Stats / Test")	// Bookkeeping.
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_0)	PORT_NAME("Settings")	// Game Rate & others.
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_9)    PORT_NAME("Stats / Test")   // Bookkeeping.
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_0)    PORT_NAME("Settings")   // Game Rate & others.
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_GAMBLE_KEYOUT )
 
 	PORT_START( "INC" )
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_POKER_HOLD4 )	PORT_NAME("Hold 4 / Small")
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_POKER_HOLD4 )    PORT_NAME("Hold 4 / Small")
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_R)	PORT_NAME("Reset Switch")	// hard reset
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_POKER_HOLD5 )	PORT_NAME("Hold 5 / Big")
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_R)    PORT_NAME("Reset Switch")   // hard reset
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_POKER_HOLD5 )    PORT_NAME("Hold 5 / Big")
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_POKER_HOLD2 )	PORT_NAME("Hold 2 / Take")
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_POKER_HOLD2 )    PORT_NAME("Hold 2 / Take")
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 INPUT_PORTS_END
 
@@ -2398,30 +2426,30 @@ static INPUT_PORTS_START( victor6a )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_GAMBLE_DEAL )	PORT_NAME("Start")
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_POKER_HOLD1 )	PORT_NAME("Hold 1 / Bet")
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_POKER_HOLD3 )	PORT_NAME("Hold 3 / Double-Up")
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_GAMBLE_DEAL )    PORT_NAME("Start")
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_POKER_HOLD1 )    PORT_NAME("Hold 1 / Bet")
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_POKER_HOLD3 )    PORT_NAME("Hold 3 / Double-Up")
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START( "INB" )
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )			PORT_IMPULSE(3)	// coin
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )          PORT_IMPULSE(3) // coin
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_GAMBLE_KEYIN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_9)	PORT_NAME("Stats / Test")	// Bookkeeping.
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_0)	PORT_NAME("Settings")	// Game Rate & others.
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_9)    PORT_NAME("Stats / Test")   // Bookkeeping.
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_0)    PORT_NAME("Settings")   // Game Rate & others.
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_GAMBLE_KEYOUT )
 
 	PORT_START( "INC" )
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_POKER_HOLD4 )	PORT_NAME("Hold 4 / Small")
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_POKER_HOLD4 )    PORT_NAME("Hold 4 / Small")
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_R)	PORT_NAME("Reset Switch")	// hard reset
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_POKER_HOLD5 )	PORT_NAME("Hold 5 / Big")
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_R)    PORT_NAME("Reset Switch")   // hard reset
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_POKER_HOLD5 )    PORT_NAME("Hold 5 / Big")
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_POKER_HOLD2 )	PORT_NAME("Hold 2 / Take")
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_POKER_HOLD2 )    PORT_NAME("Hold 2 / Take")
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 INPUT_PORTS_END
 
@@ -2506,30 +2534,30 @@ static INPUT_PORTS_START( victor6b )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_GAMBLE_DEAL )	PORT_NAME("Start")
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_POKER_HOLD1 )	PORT_NAME("Hold 1 / Bet")
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_POKER_HOLD3 )	PORT_NAME("Hold 3 / Double-Up")
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_GAMBLE_DEAL )    PORT_NAME("Start")
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_POKER_HOLD1 )    PORT_NAME("Hold 1 / Bet")
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_POKER_HOLD3 )    PORT_NAME("Hold 3 / Double-Up")
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START( "INB" )
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )			PORT_IMPULSE(3)	// coin
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )          PORT_IMPULSE(3) // coin
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_GAMBLE_KEYIN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_9)	PORT_NAME("Stats / Test")	// Bookkeeping.
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_0)	PORT_NAME("Settings")	// Game Rate & others.
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_9)    PORT_NAME("Stats / Test")   // Bookkeeping.
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_0)    PORT_NAME("Settings")   // Game Rate & others.
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_GAMBLE_KEYOUT )
 
 	PORT_START( "INC" )
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_POKER_HOLD4 )	PORT_NAME("Hold 4 / Small")
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_POKER_HOLD4 )    PORT_NAME("Hold 4 / Small")
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE )		PORT_CODE(KEYCODE_R)	PORT_NAME("Reset Switch")	// hard reset
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_POKER_HOLD5 )	PORT_NAME("Hold 5 / Big")
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE )        PORT_CODE(KEYCODE_R)    PORT_NAME("Reset Switch")   // hard reset
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_POKER_HOLD5 )    PORT_NAME("Hold 5 / Big")
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_POKER_HOLD2 )	PORT_NAME("Hold 2 / Take")
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_POKER_HOLD2 )    PORT_NAME("Hold 2 / Take")
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 INPUT_PORTS_END
 
@@ -2590,7 +2618,7 @@ static const gfx_layout layout_8x32x8 =
 	{ 0,1,2,3,4,5,6,7 },
 	{ RGN_FRAC(0,4), RGN_FRAC(1,4), RGN_FRAC(2,4), RGN_FRAC(3,4), RGN_FRAC(0,4)+8, RGN_FRAC(1,4)+8, RGN_FRAC(2,4)+8, RGN_FRAC(3,4)+8 },
 	{ 0*16,1*16,2*16,3*16,4*16,5*16,6*16,7*16, 8*16,9*16,10*16,11*16,12*16,13*16,14*16,15*16,
-	 16*16,17*16,18*16,19*16,20*16,21*16,22*16,23*16,24*16,25*16,26*16,27*16,28*16,29*16,30*16,31*16},
+		16*16,17*16,18*16,19*16,20*16,21*16,22*16,23*16,24*16,25*16,26*16,27*16,28*16,29*16,30*16,31*16},
 	32*16
 };
 
@@ -2619,7 +2647,7 @@ GFXDECODE_END
 
 static MACHINE_CONFIG_START( victor21, subsino_state )
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z180, XTAL_12MHz / 8)	/* Unknown clock */
+	MCFG_CPU_ADD("maincpu", Z180, XTAL_12MHz / 8)   /* Unknown clock */
 	MCFG_CPU_PROGRAM_MAP(victor21_map)
 	MCFG_CPU_IO_MAP(subsino_iomap)
 
@@ -2627,17 +2655,16 @@ static MACHINE_CONFIG_START( victor21, subsino_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(512, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 512-1, 0+16, 256-16-1)
-	MCFG_SCREEN_UPDATE(subsino)
+	MCFG_SCREEN_UPDATE_DRIVER(subsino_state, screen_update_subsino)
 
 	MCFG_GFXDECODE(subsino_depth3)
 
 	MCFG_PALETTE_LENGTH(0x100)
-	MCFG_PALETTE_INIT(subsino_2proms)
+	MCFG_PALETTE_INIT_OVERRIDE(subsino_state,subsino_2proms)
 
-	MCFG_VIDEO_START(subsino)
+	MCFG_VIDEO_START_OVERRIDE(subsino_state,subsino)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -2645,7 +2672,7 @@ static MACHINE_CONFIG_START( victor21, subsino_state )
 	MCFG_SOUND_ADD("ymsnd", YM2413, XTAL_3_579545MHz)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 
-	MCFG_OKIM6295_ADD("oki", XTAL_4_433619MHz / 4, OKIM6295_PIN7_HIGH)	/* Clock frequency & pin 7 not verified */
+	MCFG_OKIM6295_ADD("oki", XTAL_4_433619MHz / 4, OKIM6295_PIN7_HIGH)  /* Clock frequency & pin 7 not verified */
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 MACHINE_CONFIG_END
 
@@ -2660,7 +2687,7 @@ MACHINE_CONFIG_END
 
 static MACHINE_CONFIG_START( crsbingo, subsino_state )
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z180, XTAL_12MHz / 8)	/* Unknown CPU and clock */
+	MCFG_CPU_ADD("maincpu", Z180, XTAL_12MHz / 8)   /* Unknown CPU and clock */
 	MCFG_CPU_PROGRAM_MAP(crsbingo_map)
 	MCFG_CPU_IO_MAP(subsino_iomap)
 
@@ -2668,29 +2695,28 @@ static MACHINE_CONFIG_START( crsbingo, subsino_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(512, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 512-1, 0+16, 256-16-1)
-	MCFG_SCREEN_UPDATE(subsino)
+	MCFG_SCREEN_UPDATE_DRIVER(subsino_state, screen_update_subsino)
 
 	MCFG_GFXDECODE(subsino_depth4)
 
 	MCFG_PALETTE_LENGTH(0x100)
-	MCFG_PALETTE_INIT(subsino_2proms)
+	MCFG_PALETTE_INIT_OVERRIDE(subsino_state,subsino_2proms)
 
-	MCFG_VIDEO_START(subsino)
+	MCFG_VIDEO_START_OVERRIDE(subsino_state,subsino)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("ymsnd", YM2413, XTAL_3_579545MHz)	/* Unknown clock */
+	MCFG_SOUND_ADD("ymsnd", YM2413, XTAL_3_579545MHz)   /* Unknown clock */
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 MACHINE_CONFIG_END
 
 
 static MACHINE_CONFIG_START( srider, subsino_state )
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z180, XTAL_12MHz / 8)	/* Unknown clock */
+	MCFG_CPU_ADD("maincpu", Z180, XTAL_12MHz / 8)   /* Unknown clock */
 	MCFG_CPU_PROGRAM_MAP(srider_map)
 	MCFG_CPU_IO_MAP(subsino_iomap)
 
@@ -2698,17 +2724,16 @@ static MACHINE_CONFIG_START( srider, subsino_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(512, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 512-1, 0+16, 256-16-1)
-	MCFG_SCREEN_UPDATE(subsino)
+	MCFG_SCREEN_UPDATE_DRIVER(subsino_state, screen_update_subsino)
 
 	MCFG_GFXDECODE(subsino_depth4)
 
 	MCFG_PALETTE_LENGTH(0x100)
-	MCFG_PALETTE_INIT(subsino_3proms)
+	MCFG_PALETTE_INIT_OVERRIDE(subsino_state,subsino_3proms)
 
-	MCFG_VIDEO_START(subsino)
+	MCFG_VIDEO_START_OVERRIDE(subsino_state,subsino)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -2716,7 +2741,7 @@ static MACHINE_CONFIG_START( srider, subsino_state )
 	MCFG_SOUND_ADD("ymsnd", YM3812, XTAL_3_579545MHz)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 
-	MCFG_OKIM6295_ADD("oki", XTAL_4_433619MHz / 4, OKIM6295_PIN7_HIGH)	/* Clock frequency & pin 7 not verified */
+	MCFG_OKIM6295_ADD("oki", XTAL_4_433619MHz / 4, OKIM6295_PIN7_HIGH)  /* Clock frequency & pin 7 not verified */
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 MACHINE_CONFIG_END
 
@@ -2730,7 +2755,7 @@ MACHINE_CONFIG_END
 
 static MACHINE_CONFIG_START( tisub, subsino_state )
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z180, XTAL_12MHz / 8)	/* Unknown CPU and clock */
+	MCFG_CPU_ADD("maincpu", Z180, XTAL_12MHz / 8)   /* Unknown CPU and clock */
 	MCFG_CPU_PROGRAM_MAP(tisub_map)
 	MCFG_CPU_IO_MAP(subsino_iomap)
 
@@ -2738,28 +2763,27 @@ static MACHINE_CONFIG_START( tisub, subsino_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(512, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 512-1, 0+16, 256-16-1)
-	MCFG_SCREEN_UPDATE(subsino_reels)
+	MCFG_SCREEN_UPDATE_DRIVER(subsino_state, screen_update_subsino_reels)
 
 	MCFG_GFXDECODE(subsino_depth4_reels)
 
 	MCFG_PALETTE_LENGTH(0x100)
-	MCFG_PALETTE_INIT(subsino_3proms)
+	MCFG_PALETTE_INIT_OVERRIDE(subsino_state,subsino_3proms)
 
-	MCFG_VIDEO_START(subsino_reels)
+	MCFG_VIDEO_START_OVERRIDE(subsino_state,subsino_reels)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("ymsnd", YM3812, XTAL_3_579545MHz)	/* Unknown clock */
+	MCFG_SOUND_ADD("ymsnd", YM3812, XTAL_3_579545MHz)   /* Unknown clock */
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.0)
 MACHINE_CONFIG_END
 
 static MACHINE_CONFIG_START( stisub, subsino_state )
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z180, XTAL_12MHz / 8)	/* Unknown clock */
+	MCFG_CPU_ADD("maincpu", Z180, XTAL_12MHz / 8)   /* Unknown clock */
 	MCFG_CPU_PROGRAM_MAP(stisub_map)
 	MCFG_CPU_IO_MAP(subsino_iomap)
 
@@ -2767,17 +2791,16 @@ static MACHINE_CONFIG_START( stisub, subsino_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(512, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 512-1, 0+16, 256-16-1)
-	MCFG_SCREEN_UPDATE(stisub_reels)
+	MCFG_SCREEN_UPDATE_DRIVER(subsino_state, screen_update_stisub_reels)
 
 	MCFG_GFXDECODE(subsino_stisub)
 
 	MCFG_PALETTE_LENGTH(0x100)
-	//MCFG_PALETTE_INIT(subsino_3proms)
+	//MCFG_PALETTE_INIT_OVERRIDE(subsino_state,subsino_3proms)
 
-	MCFG_VIDEO_START(stisub)
+	MCFG_VIDEO_START_OVERRIDE(subsino_state,stisub)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -3350,10 +3373,10 @@ ROM_START( smoto16 )
 	ROM_LOAD( "prom-n82s129an.u13", 0x200, 0x100, CRC(9cb4a5c0) SHA1(0e0a368329c6d1cb685ed655d699a4894988fdb1) )
 ROM_END
 
-static DRIVER_INIT( smoto16 )
+DRIVER_INIT_MEMBER(subsino_state,smoto16)
 {
-	UINT8 *rom = machine.region( "maincpu" )->base();
-	rom[0x12d0] = 0x20;	// "ERROR 951010"
+	UINT8 *rom = machine().root_device().memregion( "maincpu" )->base();
+	rom[0x12d0] = 0x20; // "ERROR 951010"
 }
 
 /***************************************************************************
@@ -3464,10 +3487,10 @@ ROM_START( mtrainnv )
 	ROM_LOAD( "mtrain_settings.bin", 0x00000, 0x10000, CRC(584af1b5) SHA1(91d966d282823dddfdc455bb03728fcdf3713dd7) )
 
 	ROM_REGION( 0x10000, "tilemap", 0 )
-	ROM_COPY( "maincpu", 0x0000, 0x00000, 0x10000 )	// just to show something
+	ROM_COPY( "maincpu", 0x0000, 0x00000, 0x10000 ) // just to show something
 
 	ROM_REGION( 0x10000, "reels", 0 )
-	ROM_COPY( "maincpu", 0x0000, 0x00000, 0x10000 )	// just to show something
+	ROM_COPY( "maincpu", 0x0000, 0x00000, 0x10000 ) // just to show something
 ROM_END
 
 
@@ -3475,134 +3498,40 @@ ROM_END
 *                        Driver Init / Decryption                          *
 ***************************************************************************/
 
-#if 0
-void dump_decrypted(running_machine& machine, UINT8* decrypt)
+DRIVER_INIT_MEMBER(subsino_state,victor5)
 {
-    FILE *fp;
-    char filename[256];
-    sprintf(filename,"dat_%s", machine.system().name);
-    fp=fopen(filename, "w+b");
-    if (fp)
-    {
-        fwrite(decrypt, 0x10000, 1, fp);
-        fclose(fp);
-    }
-}
-#endif
-
-static const unsigned char victor5_xors[8] =  { 0x99, 0x99, 0x33, 0x44, 0xbb, 0x88, 0x88, 0xbb };
-static const unsigned char victor21_xors[8] = { 0x44, 0xbb, 0x66, 0x44, 0xaa, 0x55, 0x88, 0x22 };
-static const unsigned char crsbingo_xors[8] = { 0xbb, 0xcc, 0xcc, 0xdd, 0xaa, 0x11, 0x44, 0xee };
-static const unsigned char sharkpy_xors[8] =  { 0xcc, 0xaa, 0x66, 0xaa, 0xee, 0x33, 0xff, 0xff };
-
-
-static void victor5_bitswaps(UINT8* decrypt, int i)
-{
-	if ((i&7) == 0) decrypt[i] = BITSWAP8(decrypt[i],7,2,5,4,3,6,1,0);
-	if ((i&7) == 1) decrypt[i] = BITSWAP8(decrypt[i],7,6,5,0,3,2,1,4);
-	if ((i&7) == 2) decrypt[i] = BITSWAP8(decrypt[i],7,2,1,0,3,6,5,4);
-	if ((i&7) == 3) decrypt[i] = BITSWAP8(decrypt[i],7,2,1,0,3,6,5,4);
-	if ((i&7) == 4) decrypt[i] = BITSWAP8(decrypt[i],3,2,1,0,7,6,5,4);
-	if ((i&7) == 5) decrypt[i] = BITSWAP8(decrypt[i],7,6,5,0,3,2,1,4);
-	if ((i&7) == 6) decrypt[i] = BITSWAP8(decrypt[i],3,6,1,0,7,2,5,4);
-	if ((i&7) == 7) decrypt[i] = BITSWAP8(decrypt[i],7,2,1,4,3,6,5,0);
+	subsino_decrypt(machine(), victor5_bitswaps, victor5_xors, 0xc000);
 }
 
-
-static void victor21_bitswaps(UINT8* decrypt, int i)
+DRIVER_INIT_MEMBER(subsino_state,victor21)
 {
-	if ((i&7) == 0) decrypt[i] = BITSWAP8(decrypt[i],7,2,1,0,3,6,5,4);
-	if ((i&7) == 1) decrypt[i] = BITSWAP8(decrypt[i],3,6,1,4,7,2,5,0);
-	if ((i&7) == 2) decrypt[i] = BITSWAP8(decrypt[i],3,2,1,4,7,6,5,0);
-	if ((i&7) == 3) decrypt[i] = BITSWAP8(decrypt[i],7,2,5,4,3,6,1,0);
-	if ((i&7) == 4) decrypt[i] = BITSWAP8(decrypt[i],7,2,5,4,3,6,1,0);
-	if ((i&7) == 5) decrypt[i] = BITSWAP8(decrypt[i],3,6,5,0,7,2,1,4);
-	if ((i&7) == 6) decrypt[i] = BITSWAP8(decrypt[i],7,6,5,4,3,2,1,0);
-	if ((i&7) == 7) decrypt[i] = BITSWAP8(decrypt[i],3,2,1,4,7,6,5,0);
+	subsino_decrypt(machine(), victor21_bitswaps, victor21_xors, 0xc000);
 }
 
-static void crsbingo_bitswaps(UINT8* decrypt, int i)
+DRIVER_INIT_MEMBER(subsino_state,crsbingo)
 {
-	if ((i&7) == 0) decrypt[i] = BITSWAP8(decrypt[i],7,2,5,4,3,6,1,0);
-	if ((i&7) == 1) decrypt[i] = BITSWAP8(decrypt[i],7,2,1,0,3,6,5,4);
-	if ((i&7) == 2) decrypt[i] = BITSWAP8(decrypt[i],3,2,5,0,7,6,1,4);
-	if ((i&7) == 3) decrypt[i] = BITSWAP8(decrypt[i],7,2,5,0,3,6,1,4);
-	if ((i&7) == 4) decrypt[i] = BITSWAP8(decrypt[i],7,6,5,0,3,2,1,4);
-	if ((i&7) == 5) decrypt[i] = BITSWAP8(decrypt[i],7,2,1,4,3,6,5,0);
-	if ((i&7) == 6) decrypt[i] = BITSWAP8(decrypt[i],7,2,1,0,3,6,5,4);
-	if ((i&7) == 7) decrypt[i] = BITSWAP8(decrypt[i],3,2,1,0,7,6,5,4);
+	subsino_decrypt(machine(), crsbingo_bitswaps, crsbingo_xors, 0xc000);
 }
 
-static void sharkpy_bitswaps(UINT8* decrypt, int i)
+DRIVER_INIT_MEMBER(subsino_state,sharkpy)
 {
-	if ((i&7) == 0) decrypt[i] = BITSWAP8(decrypt[i],3,2,1,0,7,6,5,4);
-	if ((i&7) == 1) decrypt[i] = BITSWAP8(decrypt[i],7,2,5,4,3,6,1,0);
-	if ((i&7) == 2) decrypt[i] = BITSWAP8(decrypt[i],7,2,1,4,3,6,5,0);
-	if ((i&7) == 3) decrypt[i] = BITSWAP8(decrypt[i],3,6,1,0,7,2,5,4);
-	if ((i&7) == 4) decrypt[i] = BITSWAP8(decrypt[i],7,2,5,4,3,6,1,0);
-	if ((i&7) == 5) decrypt[i] = BITSWAP8(decrypt[i],3,2,5,4,7,6,1,0);
-	if ((i&7) == 6) decrypt[i] = BITSWAP8(decrypt[i],7,6,1,4,3,2,5,0);
-	if ((i&7) == 7) decrypt[i] = BITSWAP8(decrypt[i],3,6,1,4,7,2,5,0);
+	subsino_decrypt(machine(), sharkpy_bitswaps, sharkpy_xors, 0xa000);
 }
 
-static void subsino_decrypt(running_machine& machine, void (*bitswaps)(UINT8* decrypt, int i), const UINT8* xors, int size)
+DRIVER_INIT_MEMBER(subsino_state,sharkpye)
 {
-	int i;
-	UINT8 *decrypt = auto_alloc_array(machine, UINT8, 0x10000);
-	UINT8* region = machine.region("maincpu")->base();
-
-	for (i=0;i<0x10000;i++)
-	{
-		if (i<size)
-		{
-			decrypt[i] = region[i]^xors[i&7];
-			bitswaps(decrypt, i);
-		}
-		else
-		{
-			decrypt[i] = region[i];
-		}
-	}
-//  dump_decrypted(machine, decrypt);
-	memcpy(region, decrypt, 0x10000);
+	subsino_decrypt(machine(), victor5_bitswaps, victor5_xors, 0xa000);
 }
 
-
-
-static DRIVER_INIT( victor5 )
+DRIVER_INIT_MEMBER(subsino_state,smoto20)
 {
-	subsino_decrypt(machine, victor5_bitswaps, victor5_xors, 0xc000);
+	UINT8 *rom = machine().root_device().memregion( "maincpu" )->base();
+	rom[0x12e1] = 0x20; // "ERROR 951010"
 }
 
-static DRIVER_INIT( victor21 )
+DRIVER_INIT_MEMBER(subsino_state,tisub)
 {
-	subsino_decrypt(machine, victor21_bitswaps, victor21_xors, 0xc000);
-}
-
-static DRIVER_INIT( crsbingo )
-{
-	subsino_decrypt(machine, crsbingo_bitswaps, crsbingo_xors, 0xc000);
-}
-
-static DRIVER_INIT( sharkpy )
-{
-	subsino_decrypt(machine, sharkpy_bitswaps, sharkpy_xors, 0xa000);
-}
-
-static DRIVER_INIT( sharkpye )
-{
-	subsino_decrypt(machine, victor5_bitswaps, victor5_xors, 0xa000);
-}
-
-static DRIVER_INIT( smoto20 )
-{
-	UINT8 *rom = machine.region( "maincpu" )->base();
-	rom[0x12e1] = 0x20;	// "ERROR 951010"
-}
-
-static DRIVER_INIT( tisub )
-{
-	UINT8 *rom = machine.region( "maincpu" )->base();
+	UINT8 *rom = machine().root_device().memregion( "maincpu" )->base();
 
 	DRIVER_INIT_CALL(victor5);
 
@@ -3615,9 +3544,9 @@ static DRIVER_INIT( tisub )
 	rom[0x64cf] = 0x00;
 }
 
-static DRIVER_INIT( tisuba )
+DRIVER_INIT_MEMBER(subsino_state,tisuba)
 {
-	UINT8 *rom = machine.region( "maincpu" )->base();
+	UINT8 *rom = machine().root_device().memregion( "maincpu" )->base();
 
 	DRIVER_INIT_CALL(victor5);
 
@@ -3630,36 +3559,34 @@ static DRIVER_INIT( tisuba )
 	rom[0x6498] = 0x00;
 }
 
-static DRIVER_INIT( stisub )
+DRIVER_INIT_MEMBER(subsino_state,stisub)
 {
-	subsino_state *state = machine.driver_data<subsino_state>();
-	UINT8 *rom = machine.region( "maincpu" )->base();
+	UINT8 *rom = memregion( "maincpu" )->base();
 	rom[0x1005] = 0x1d; //patch protection check
 	rom[0x7ab] = 0x18; //patch "winning protection" check
 	rom[0x957] = 0x18; //patch "losing protection" check
-	state->m_stisub_colorram = auto_alloc_array(machine, UINT8, 256*3);
+	m_stisub_colorram = auto_alloc_array(machine(), UINT8, 256*3);
 
-	state->m_reel1_scroll = auto_alloc_array(machine, UINT8, 0x40);
-	state->m_reel2_scroll = auto_alloc_array(machine, UINT8, 0x40);
-	state->m_reel3_scroll = auto_alloc_array(machine, UINT8, 0x40);
+	m_reel1_scroll.allocate(0x40);
+	m_reel2_scroll.allocate(0x40);
+	m_reel3_scroll.allocate(0x40);
 
-	state->m_reel1_attr = auto_alloc_array(machine, UINT8, 0x200);
-	state->m_reel2_attr = auto_alloc_array(machine, UINT8, 0x200);
-	state->m_reel3_attr = auto_alloc_array(machine, UINT8, 0x200);
+	m_reel1_attr = auto_alloc_array(machine(), UINT8, 0x200);
+	m_reel2_attr = auto_alloc_array(machine(), UINT8, 0x200);
+	m_reel3_attr = auto_alloc_array(machine(), UINT8, 0x200);
 }
 
-static DRIVER_INIT( mtrainnv )
+DRIVER_INIT_MEMBER(subsino_state,mtrainnv)
 {
-	subsino_state *state = machine.driver_data<subsino_state>();
-	state->m_stisub_colorram = auto_alloc_array(machine, UINT8, 256*3);
+	m_stisub_colorram = auto_alloc_array(machine(), UINT8, 256*3);
 
-	state->m_reel1_scroll = auto_alloc_array(machine, UINT8, 0x40);
-	state->m_reel2_scroll = auto_alloc_array(machine, UINT8, 0x40);
-	state->m_reel3_scroll = auto_alloc_array(machine, UINT8, 0x40);
+	m_reel1_scroll.allocate(0x40);
+	m_reel2_scroll.allocate(0x40);
+	m_reel3_scroll.allocate(0x40);
 
-	state->m_reel1_attr = auto_alloc_array(machine, UINT8, 0x200);
-	state->m_reel2_attr = auto_alloc_array(machine, UINT8, 0x200);
-	state->m_reel3_attr = auto_alloc_array(machine, UINT8, 0x200);
+	m_reel1_attr = auto_alloc_array(machine(), UINT8, 0x200);
+	m_reel2_attr = auto_alloc_array(machine(), UINT8, 0x200);
+	m_reel3_attr = auto_alloc_array(machine(), UINT8, 0x200);
 }
 
 
@@ -3668,18 +3595,18 @@ static DRIVER_INIT( mtrainnv )
 ***************************************************************************/
 
 //     YEAR  NAME      PARENT    MACHINE   INPUT     INIT      ROT    COMPANY            FULLNAME                                FLAGS            LAYOUT
-GAMEL( 1990, victor21,  0,        victor21, victor21, victor21, ROT0, "Subsino / Buffy", "Victor 21",                            0,               layout_victor21 )
-GAMEL( 1991, victor5,   0,        victor5,  victor5,  victor5,  ROT0, "Subsino",         "G.E.A.",                               0,               layout_victor5  )	// PCB black-box was marked 'victor 5' - in-game says G.E.A with no manufacturer info?
-GAMEL( 1992, tisub,     0,        tisub,    tisub,    tisub,    ROT0, "Subsino",         "Treasure Island (Subsino, set 1)",     0,               layout_tisub    )
-GAMEL( 1992, tisuba,    tisub,    tisub,    tisub,    tisuba,   ROT0, "Subsino",         "Treasure Island (Subsino, set 2)",     0,               layout_tisub    )
-GAMEL( 1991, crsbingo,  0,        crsbingo, crsbingo, crsbingo, ROT0, "Subsino",         "Poker Carnival",                       0,               layout_crsbingo )
-GAMEL( 1995, stisub,    0,        stisub,   stisub,   stisub,   ROT0, "American Alpha",  "Treasure Bonus (Subsino)",             0,               layout_stisub   )	// board CPU module marked 'Super Treasure Island' (alt title?)
-GAMEL( 1996, sharkpy,   0,        sharkpy,  sharkpy,  sharkpy,  ROT0, "Subsino",         "Shark Party (Italy, v1.3)",            0,               layout_sharkpy  )	// missing POST messages?
-GAMEL( 1996, sharkpya,  sharkpy,  sharkpy,  sharkpy,  sharkpy,  ROT0, "Subsino",         "Shark Party (Italy, v1.6)",            0,               layout_sharkpy  )	// missing POST messages?
-GAMEL( 1995, sharkpye,  sharkpy,  sharkpy,  sharkpye, sharkpye, ROT0, "American Alpha",  "Shark Party (English, Alpha license)", 0,               layout_sharkpye )	// PCB black-box was marked 'victor 6'
-GAMEL( 1995, victor6,   0,        sharkpy,  victor6,  sharkpye, ROT0, "American Alpha",  "Victor 6 (v2.3N)",                     0,               layout_sharkpye )	// ^^
-GAMEL( 1995, victor6a,  victor6,  sharkpy,  victor6a, sharkpye, ROT0, "American Alpha",  "Victor 6 (v2.3)",                      0,               layout_sharkpye )	// ^^
-GAMEL( 1995, victor6b,  victor6,  sharkpy,  victor6b, sharkpye, ROT0, "American Alpha",  "Victor 6 (v1.2)",                      0,               layout_sharkpye )	// ^^ Version # according to label, not displayed
-GAMEL( 1996, smoto20,   0,        srider,   smoto20,  smoto20,  ROT0, "Subsino",         "Super Rider (Italy, v2.0)",            0,               layout_smoto    )
-GAMEL( 1996, smoto16,   smoto20,  srider,   smoto16,  smoto16,  ROT0, "Subsino",         "Super Moto (Italy, v1.6)",             0,               layout_smoto    )
-GAME ( 1996, mtrainnv,  mtrain,   mtrainnv, stisub,   mtrainnv, ROT0, "Subsino",         "Magic Train (Clear NVRAM ROM?)",       GAME_NOT_WORKING )
+GAMEL( 1990, victor21,  0,        victor21, victor21, subsino_state, victor21, ROT0, "Subsino / Buffy", "Victor 21",                            0,               layout_victor21 )
+GAMEL( 1991, victor5,   0,        victor5,  victor5, subsino_state,  victor5,  ROT0, "Subsino",         "G.E.A.",                               0,               layout_victor5  )  // PCB black-box was marked 'victor 5' - in-game says G.E.A with no manufacturer info?
+GAMEL( 1992, tisub,     0,        tisub,    tisub, subsino_state,    tisub,    ROT0, "Subsino",         "Treasure Island (Subsino, set 1)",     0,               layout_tisub    )
+GAMEL( 1992, tisuba,    tisub,    tisub,    tisub, subsino_state,    tisuba,   ROT0, "Subsino",         "Treasure Island (Subsino, set 2)",     0,               layout_tisub    )
+GAMEL( 1991, crsbingo,  0,        crsbingo, crsbingo, subsino_state, crsbingo, ROT0, "Subsino",         "Poker Carnival",                       0,               layout_crsbingo )
+GAMEL( 1995, stisub,    0,        stisub,   stisub, subsino_state,   stisub,   ROT0, "American Alpha",  "Treasure Bonus (Subsino)",             0,               layout_stisub   )  // board CPU module marked 'Super Treasure Island' (alt title?)
+GAMEL( 1996, sharkpy,   0,        sharkpy,  sharkpy, subsino_state,  sharkpy,  ROT0, "Subsino",         "Shark Party (Italy, v1.3)",            0,               layout_sharkpy  )  // missing POST messages?
+GAMEL( 1996, sharkpya,  sharkpy,  sharkpy,  sharkpy, subsino_state,  sharkpy,  ROT0, "Subsino",         "Shark Party (Italy, v1.6)",            0,               layout_sharkpy  )  // missing POST messages?
+GAMEL( 1995, sharkpye,  sharkpy,  sharkpy,  sharkpye, subsino_state, sharkpye, ROT0, "American Alpha",  "Shark Party (English, Alpha license)", 0,               layout_sharkpye )  // PCB black-box was marked 'victor 6'
+GAMEL( 1995, victor6,   0,        sharkpy,  victor6, subsino_state,  sharkpye, ROT0, "American Alpha",  "Victor 6 (v2.3N)",                     0,               layout_sharkpye )  // ^^
+GAMEL( 1995, victor6a,  victor6,  sharkpy,  victor6a, subsino_state, sharkpye, ROT0, "American Alpha",  "Victor 6 (v2.3)",                      0,               layout_sharkpye )  // ^^
+GAMEL( 1995, victor6b,  victor6,  sharkpy,  victor6b, subsino_state, sharkpye, ROT0, "American Alpha",  "Victor 6 (v1.2)",                      0,               layout_sharkpye )  // ^^ Version # according to label, not displayed
+GAMEL( 1996, smoto20,   0,        srider,   smoto20, subsino_state,  smoto20,  ROT0, "Subsino",         "Super Rider (Italy, v2.0)",            0,               layout_smoto    )
+GAMEL( 1996, smoto16,   smoto20,  srider,   smoto16, subsino_state,  smoto16,  ROT0, "Subsino",         "Super Moto (Italy, v1.6)",             0,               layout_smoto    )
+GAME ( 1996, mtrainnv,  mtrain,   mtrainnv, stisub, subsino_state,   mtrainnv, ROT0, "Subsino",         "Magic Train (Clear NVRAM ROM?)",       GAME_NOT_WORKING )

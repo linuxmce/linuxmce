@@ -6,8 +6,8 @@
  TODO:
  - colors (missing proms?)
  - dips
- - proper video hw emulation
  - controls (is there START button ?)
+ - when a car sprite goes outside of the screen it gets stuck for a split frame on top of screen
 
 HW info :
 
@@ -34,39 +34,37 @@ HW info :
 #include "sound/ay8910.h"
 #include "includes/ssrj.h"
 
-static MACHINE_RESET(ssrj)
+void ssrj_state::machine_reset()
 {
-	ssrj_state *state = machine.driver_data<ssrj_state>();
-	UINT8 *rom = machine.region("maincpu")->base();
+	UINT8 *rom = memregion("maincpu")->base();
 
 	memset(&rom[0xc000], 0 ,0x3fff); /* req for some control types */
-	state->m_oldport = 0x80;
+	m_oldport = 0x80;
 }
 
-static READ8_HANDLER(ssrj_wheel_r)
+READ8_MEMBER(ssrj_state::ssrj_wheel_r)
 {
-	ssrj_state *state = space->machine().driver_data<ssrj_state>();
-	int port = input_port_read(space->machine(), "IN1") - 0x80;
-	int retval = port - state->m_oldport;
+	int port = ioport("IN1")->read() - 0x80;
+	int retval = port - m_oldport;
 
-	state->m_oldport = port;
+	m_oldport = port;
 	return retval;
 }
 
-static ADDRESS_MAP_START( ssrj_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( ssrj_map, AS_PROGRAM, 8, ssrj_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
-	AM_RANGE(0xc000, 0xc7ff) AM_RAM_WRITE(ssrj_vram1_w) AM_BASE_MEMBER(ssrj_state, m_vram1)
-	AM_RANGE(0xc800, 0xcfff) AM_RAM_WRITE(ssrj_vram2_w) AM_BASE_MEMBER(ssrj_state, m_vram2)
-	AM_RANGE(0xd000, 0xd7ff) AM_RAM AM_BASE_MEMBER(ssrj_state, m_vram3)
-	AM_RANGE(0xd800, 0xdfff) AM_RAM_WRITE(ssrj_vram4_w) AM_BASE_MEMBER(ssrj_state, m_vram4)
+	AM_RANGE(0xc000, 0xc7ff) AM_RAM_WRITE(ssrj_vram1_w) AM_SHARE("vram1")
+	AM_RANGE(0xc800, 0xcfff) AM_RAM_WRITE(ssrj_vram2_w) AM_SHARE("vram2")
+	AM_RANGE(0xd000, 0xd7ff) AM_RAM AM_SHARE("vram3")
+	AM_RANGE(0xd800, 0xdfff) AM_RAM_WRITE(ssrj_vram4_w) AM_SHARE("vram4")
 	AM_RANGE(0xe000, 0xe7ff) AM_RAM
-	AM_RANGE(0xe800, 0xefff) AM_RAM AM_BASE_MEMBER(ssrj_state, m_scrollram)
+	AM_RANGE(0xe800, 0xefff) AM_RAM AM_SHARE("scrollram")
 	AM_RANGE(0xf000, 0xf000) AM_READ_PORT("IN0")
 	AM_RANGE(0xf001, 0xf001) AM_READ(ssrj_wheel_r)
 	AM_RANGE(0xf002, 0xf002) AM_READ_PORT("IN2")
 	AM_RANGE(0xf003, 0xf003) AM_WRITENOP /* unknown */
-	AM_RANGE(0xf401, 0xf401) AM_DEVREAD("aysnd", ay8910_r)
-	AM_RANGE(0xf400, 0xf401) AM_DEVWRITE("aysnd", ay8910_address_data_w)
+	AM_RANGE(0xf401, 0xf401) AM_DEVREAD_LEGACY("aysnd", ay8910_r)
+	AM_RANGE(0xf400, 0xf401) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_data_w)
 	AM_RANGE(0xf800, 0xf800) AM_WRITENOP /* wheel ? */
 	AM_RANGE(0xfc00, 0xfc00) AM_WRITENOP /* unknown */
 ADDRESS_MAP_END
@@ -84,46 +82,46 @@ static INPUT_PORTS_START( ssrj )
 	PORT_START("IN2")
 	PORT_BIT( 0xf, IP_ACTIVE_LOW, IPT_BUTTON2  )  /* code @ $eef  , tested when controls = type4 */
 	PORT_DIPNAME( 0x30, 0x00, DEF_STR( Difficulty ) ) /* ??? code @ $62c */
-	PORT_DIPSETTING(	0x10, DEF_STR( Easy ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Normal ) )
-	PORT_DIPSETTING(	0x20, DEF_STR( Difficult ) )
-	PORT_DIPSETTING(	0x30, DEF_STR( Very_Difficult ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( Easy ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Normal ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( Difficult ) )
+	PORT_DIPSETTING(    0x30, DEF_STR( Very_Difficult ) )
 	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Free_Play ) )
-	PORT_DIPSETTING(	0x40, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x80, 0x80, "No Hit" )
-	PORT_DIPSETTING(	0x80, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("IN3")
 	PORT_DIPNAME( 0x07, 0x00, DEF_STR( Coinage ) )
-	PORT_DIPSETTING(	0x07, DEF_STR( 4C_1C ) )
-	PORT_DIPSETTING(	0x06, DEF_STR( 3C_1C ) )
-	PORT_DIPSETTING(	0x05, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0x01, DEF_STR( 1C_2C ) )
-	PORT_DIPSETTING(	0x02, DEF_STR( 1C_3C ) )
-	PORT_DIPSETTING(	0x03, DEF_STR( 1C_4C ) )
+	PORT_DIPSETTING(    0x07, DEF_STR( 4C_1C ) )
+	PORT_DIPSETTING(    0x06, DEF_STR( 3C_1C ) )
+	PORT_DIPSETTING(    0x05, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x01, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(    0x02, DEF_STR( 1C_3C ) )
+	PORT_DIPSETTING(    0x03, DEF_STR( 1C_4C ) )
 	PORT_DIPNAME( 0x08, 0x08, "Freeze" )
-	PORT_DIPSETTING(	0x08, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x30, 0x00, DEF_STR( Controls ) ) /* 'press button to start' message, and wait for button2 */
-	PORT_DIPSETTING(	0x00, "Type 1" )
-	PORT_DIPSETTING(	0x10, "Type 2" )
-	PORT_DIPSETTING(	0x20, "Type 3" )
-	PORT_DIPSETTING(	0x30, "Type 4" )
+	PORT_DIPSETTING(    0x00, "Type 1" )
+	PORT_DIPSETTING(    0x10, "Type 2" )
+	PORT_DIPSETTING(    0x20, "Type 3" )
+	PORT_DIPSETTING(    0x30, "Type 4" )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN ) /* sometimes hangs after game over ($69b) */
 INPUT_PORTS_END
 
 static const gfx_layout charlayout =
 {
-	8,8,	/* 8*8 characters */
-	RGN_FRAC(1,3),	/* 1024 characters */
-	3,	/* 3 bits per pixel */
-	{ 0, RGN_FRAC(2,3), RGN_FRAC(1,3) },	/* the bitplanes are separated */
-	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
+	8,8,    /* 8*8 characters */
+	RGN_FRAC(1,3),  /* 1024 characters */
+	3,  /* 3 bits per pixel */
+	{ 0, RGN_FRAC(2,3), RGN_FRAC(1,3) },    /* the bitplanes are separated */
 	{ 0, 1, 2, 3, 4, 5, 6, 7 },
-	8*8	/* every char takes 8 consecutive bytes */
+	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
+	8*8 /* every char takes 8 consecutive bytes */
 };
 
 static GFXDECODE_START( ssrj )
@@ -146,25 +144,21 @@ static MACHINE_CONFIG_START( ssrj, ssrj_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", Z80,8000000/2)
 	MCFG_CPU_PROGRAM_MAP(ssrj_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", ssrj_state,  irq0_line_hold)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
-	MCFG_SCREEN_SIZE(32*8, 32*8)
-	MCFG_SCREEN_VISIBLE_AREA(2*8, 30*8-1, 3*8, 32*8-1)
-	MCFG_SCREEN_UPDATE(ssrj)
+	MCFG_SCREEN_SIZE(40*8, 32*8)
+	MCFG_SCREEN_VISIBLE_AREA(0*8, 34*8-1, 1*8, 31*8-1) // unknown res
+	MCFG_SCREEN_UPDATE_DRIVER(ssrj_state, screen_update_ssrj)
+	MCFG_SCREEN_VBLANK_DRIVER(ssrj_state, screen_eof_ssrj)
 
 	MCFG_GFXDECODE(ssrj)
 	MCFG_PALETTE_LENGTH(128)
-	MCFG_PALETTE_INIT(ssrj)
 
-	MCFG_VIDEO_START(ssrj)
-//  MCFG_ASPECT_RATIO(3,4)
 
-	MCFG_MACHINE_RESET(ssrj)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -195,4 +189,4 @@ ROM_START( ssrj )
 
 ROM_END
 
-GAME( 1985, ssrj,  0,       ssrj,  ssrj,  0, ORIENTATION_FLIP_X, "Taito Corporation", "Super Speed Race Junior (Japan)",GAME_WRONG_COLORS|GAME_IMPERFECT_GRAPHICS )
+GAME( 1985, ssrj,  0,       ssrj,  ssrj, driver_device,  0, ROT90, "Taito Corporation", "Super Speed Race Junior (Japan)",GAME_WRONG_COLORS|GAME_IMPERFECT_GRAPHICS )

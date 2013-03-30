@@ -50,16 +50,15 @@
 #include "emu.h"
 #include "video/kan_pand.h"
 
-typedef struct _kaneko_pandora_state  kaneko_pandora_state;
-struct _kaneko_pandora_state
+struct kaneko_pandora_state
 {
 	screen_device *screen;
 	UINT8 *      spriteram;
-	bitmap_t     *sprites_bitmap; /* bitmap to render sprites to, Pandora seems to be frame'buffered' */
+	bitmap_ind16     *sprites_bitmap; /* bitmap to render sprites to, Pandora seems to be frame'buffered' */
 	int          clear_bitmap;
 	UINT8        region;
 	int          xoffset, yoffset;
-	int			 bg_pen; // might work some other way..
+	int          bg_pen; // might work some other way..
 };
 
 /*****************************************************************************
@@ -71,14 +70,14 @@ INLINE kaneko_pandora_state *get_safe_token( device_t *device )
 	assert(device != NULL);
 	assert(device->type() == KANEKO_PANDORA);
 
-	return (kaneko_pandora_state *)downcast<legacy_device_base *>(device)->token();
+	return (kaneko_pandora_state *)downcast<kaneko_pandora_device *>(device)->token();
 }
 
 INLINE const kaneko_pandora_interface *get_interface( device_t *device )
 {
 	assert(device != NULL);
 	assert((device->type() == KANEKO_PANDORA));
-	return (const kaneko_pandora_interface *) device->baseconfig().static_config();
+	return (const kaneko_pandora_interface *) device->static_config();
 }
 
 /*****************************************************************************
@@ -97,7 +96,7 @@ void pandora_set_clear_bitmap( device_t *device, int clear )
 	pandora->clear_bitmap = clear;
 }
 
-void pandora_update( device_t *device, bitmap_t *bitmap, const rectangle *cliprect )
+void pandora_update( device_t *device, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	kaneko_pandora_state *pandora = get_safe_token(device);
 
@@ -107,34 +106,34 @@ void pandora_update( device_t *device, bitmap_t *bitmap, const rectangle *clipre
 		return;
 	}
 
-	copybitmap_trans(bitmap, pandora->sprites_bitmap, 0, 0, 0, 0, cliprect, 0);
+	copybitmap_trans(bitmap, *pandora->sprites_bitmap, 0, 0, 0, 0, cliprect, 0);
 }
 
 
-static void pandora_draw( device_t *device, bitmap_t *bitmap, const rectangle *cliprect )
+static void pandora_draw( device_t *device, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	kaneko_pandora_state *pandora = get_safe_token(device);
 	int sx = 0, sy = 0, x = 0, y = 0, offs;
 
 
 	/*
-     * Sprite Tile Format
-     * ------------------
-     *
-     * Byte | Bit(s)   | Use
-     * -----+-76543210-+----------------
-     *  0-2 | -------- | unused
-     *  3   | xxxx.... | Palette Bank
-     *  3   | .......x | XPos - Sign Bit
-     *  3   | ......x. | YPos - Sign Bit
-     *  3   | .....x.. | Use Relative offsets
-     *  4   | xxxxxxxx | XPos
-     *  5   | xxxxxxxx | YPos
-     *  6   | xxxxxxxx | Sprite Number (low 8 bits)
-     *  7   | ....xxxx | Sprite Number (high 4 bits)
-     *  7   | x....... | Flip Sprite Y-Axis
-     *  7   | .x...... | Flip Sprite X-Axis
-     */
+	 * Sprite Tile Format
+	 * ------------------
+	 *
+	 * Byte | Bit(s)   | Use
+	 * -----+-76543210-+----------------
+	 *  0-2 | -------- | unused
+	 *  3   | xxxx.... | Palette Bank
+	 *  3   | .......x | XPos - Sign Bit
+	 *  3   | ......x. | YPos - Sign Bit
+	 *  3   | .....x.. | Use Relative offsets
+	 *  4   | xxxxxxxx | XPos
+	 *  5   | xxxxxxxx | YPos
+	 *  6   | xxxxxxxx | Sprite Number (low 8 bits)
+	 *  7   | ....xxxx | Sprite Number (high 4 bits)
+	 *  7   | x....... | Flip Sprite Y-Axis
+	 *  7   | .x...... | Flip Sprite X-Axis
+	 */
 
 	for (offs = 0; offs < 0x1000; offs += 8)
 	{
@@ -162,7 +161,7 @@ static void pandora_draw( device_t *device, bitmap_t *bitmap, const rectangle *c
 			y = dy;
 		}
 
-		if (flip_screen_get(device->machine()))
+		if (device->machine().driver_data()->flip_screen())
 		{
 			sx = 240 - x;
 			sy = 240 - y;
@@ -202,9 +201,9 @@ void pandora_eof( device_t *device )
 
 	// the games can disable the clearing of the sprite bitmap, to leave sprite trails
 	if (pandora->clear_bitmap)
-		bitmap_fill(pandora->sprites_bitmap, &pandora->screen->visible_area(), pandora->bg_pen);
+		pandora->sprites_bitmap->fill(pandora->bg_pen, pandora->screen->visible_area());
 
-	pandora_draw(device, pandora->sprites_bitmap, &pandora->screen->visible_area());
+	pandora_draw(device, *pandora->sprites_bitmap, pandora->screen->visible_area());
 }
 
 /*****************************************************************************
@@ -309,7 +308,7 @@ static DEVICE_START( kaneko_pandora )
 
 	pandora->spriteram = auto_alloc_array(device->machine(), UINT8, 0x1000);
 
-	pandora->sprites_bitmap = pandora->screen->alloc_compatible_bitmap();
+	pandora->sprites_bitmap = auto_bitmap_ind16_alloc(device->machine(), pandora->screen->width(), pandora->screen->height());
 
 	device->save_item(NAME(pandora->clear_bitmap));
 	device->save_pointer(NAME(pandora->spriteram), 0x1000);
@@ -325,13 +324,38 @@ static DEVICE_RESET( kaneko_pandora )
 	pandora->clear_bitmap = 1;
 }
 
-static const char DEVTEMPLATE_SOURCE[] = __FILE__;
+const device_type KANEKO_PANDORA = &device_creator<kaneko_pandora_device>;
 
-#define DEVTEMPLATE_ID( p, s )	p##kaneko_pandora##s
-#define DEVTEMPLATE_FEATURES	DT_HAS_START | DT_HAS_RESET
-#define DEVTEMPLATE_NAME		"Kaneko Pandora - PX79C480FP-3"
-#define DEVTEMPLATE_FAMILY		"Kaneko Video Chips"
-#include "devtempl.h"
+kaneko_pandora_device::kaneko_pandora_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, KANEKO_PANDORA, "Kaneko Pandora - PX79C480FP-3", tag, owner, clock)
+{
+	m_token = global_alloc_clear(kaneko_pandora_state);
+}
 
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
 
-DEFINE_LEGACY_DEVICE(KANEKO_PANDORA, kaneko_pandora);
+void kaneko_pandora_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void kaneko_pandora_device::device_start()
+{
+	DEVICE_START_NAME( kaneko_pandora )(this);
+}
+
+//-------------------------------------------------
+//  device_reset - device-specific reset
+//-------------------------------------------------
+
+void kaneko_pandora_device::device_reset()
+{
+	DEVICE_RESET_NAME( kaneko_pandora )(this);
+}

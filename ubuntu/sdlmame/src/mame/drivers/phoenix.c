@@ -38,37 +38,37 @@ Pleiads:
 #include "includes/phoenix.h"
 
 
-static ADDRESS_MAP_START( phoenix_memory_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( phoenix_memory_map, AS_PROGRAM, 8, phoenix_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
-	AM_RANGE(0x4000, 0x4fff) AM_READ_BANK("bank1") AM_WRITE(phoenix_videoram_w)	/* 2 pages selected by bit 0 of the video register */
+	AM_RANGE(0x4000, 0x4fff) AM_READ_BANK("bank1") AM_WRITE(phoenix_videoram_w) /* 2 pages selected by bit 0 of the video register */
 	AM_RANGE(0x5000, 0x53ff) AM_WRITE(phoenix_videoreg_w)
 	AM_RANGE(0x5800, 0x5bff) AM_WRITE(phoenix_scroll_w)
-	AM_RANGE(0x6000, 0x63ff) AM_DEVWRITE("cust", phoenix_sound_control_a_w)
-	AM_RANGE(0x6800, 0x6bff) AM_DEVWRITE("cust", phoenix_sound_control_b_w)
-	AM_RANGE(0x7000, 0x73ff) AM_READ_PORT("IN0")							/* IN0 or IN1 */
-	AM_RANGE(0x7800, 0x7bff) AM_READ_PORT("DSW0")							/* DSW */
+	AM_RANGE(0x6000, 0x63ff) AM_DEVWRITE_LEGACY("cust", phoenix_sound_control_a_w)
+	AM_RANGE(0x6800, 0x6bff) AM_DEVWRITE_LEGACY("cust", phoenix_sound_control_b_w)
+	AM_RANGE(0x7000, 0x73ff) AM_READ_PORT("IN0")                            /* IN0 or IN1 */
+	AM_RANGE(0x7800, 0x7bff) AM_READ_PORT("DSW0")                           /* DSW */
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( pleiads_memory_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( pleiads_memory_map, AS_PROGRAM, 8, phoenix_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
-	AM_RANGE(0x4000, 0x4fff) AM_READ_BANK("bank1") AM_WRITE(phoenix_videoram_w)	/* 2 pages selected by bit 0 of the video register */
+	AM_RANGE(0x4000, 0x4fff) AM_READ_BANK("bank1") AM_WRITE(phoenix_videoram_w) /* 2 pages selected by bit 0 of the video register */
 	AM_RANGE(0x5000, 0x53ff) AM_WRITE(pleiads_videoreg_w)
 	AM_RANGE(0x5800, 0x5bff) AM_WRITE(phoenix_scroll_w)
-	AM_RANGE(0x6000, 0x63ff) AM_DEVWRITE("cust", pleiads_sound_control_a_w)
-	AM_RANGE(0x6800, 0x6bff) AM_DEVWRITE("cust", pleiads_sound_control_b_w)
-	AM_RANGE(0x7000, 0x73ff) AM_READ_PORT("IN0")							/* IN0 or IN1 + protection */
-	AM_RANGE(0x7800, 0x7bff) AM_READ_PORT("DSW0")							/* DSW */
+	AM_RANGE(0x6000, 0x63ff) AM_DEVWRITE_LEGACY("cust", pleiads_sound_control_a_w)
+	AM_RANGE(0x6800, 0x6bff) AM_DEVWRITE_LEGACY("cust", pleiads_sound_control_b_w)
+	AM_RANGE(0x7000, 0x73ff) AM_READ_PORT("IN0")                            /* IN0 or IN1 + protection */
+	AM_RANGE(0x7800, 0x7bff) AM_READ_PORT("DSW0")                           /* DSW */
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( survival_memory_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( survival_memory_map, AS_PROGRAM, 8, phoenix_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
-	AM_RANGE(0x4000, 0x4fff) AM_READ_BANK("bank1") AM_WRITE(phoenix_videoram_w)	/* 2 pages selected by bit 0 of the video register */
+	AM_RANGE(0x4000, 0x4fff) AM_READ_BANK("bank1") AM_WRITE(phoenix_videoram_w) /* 2 pages selected by bit 0 of the video register */
 	AM_RANGE(0x5000, 0x53ff) AM_WRITE(phoenix_videoreg_w)
 	AM_RANGE(0x5800, 0x5bff) AM_WRITE(phoenix_scroll_w)
-	AM_RANGE(0x6800, 0x68ff) AM_DEVWRITE("aysnd", ay8910_address_w)
-	AM_RANGE(0x6900, 0x69ff) AM_DEVREADWRITE("aysnd", ay8910_r, ay8910_data_w)
-	AM_RANGE(0x7000, 0x73ff) AM_READ(survival_input_port_0_r)				/* IN0 or IN1 */
-	AM_RANGE(0x7800, 0x7bff) AM_READ_PORT("DSW0")							/* DSW */
+	AM_RANGE(0x6800, 0x68ff) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_w)
+	AM_RANGE(0x6900, 0x69ff) AM_DEVREADWRITE_LEGACY("aysnd", ay8910_r, ay8910_data_w)
+	AM_RANGE(0x7000, 0x73ff) AM_READ(survival_input_port_0_r)               /* IN0 or IN1 */
+	AM_RANGE(0x7800, 0x7bff) AM_READ_PORT("DSW0")                           /* DSW */
 ADDRESS_MAP_END
 
 
@@ -79,44 +79,44 @@ static INPUT_PORTS_START( phoenix )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(player_input_r, NULL)
+	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, phoenix_state,player_input_r, NULL)
 
 	PORT_START("DSW0")
 	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Lives ) )            PORT_DIPLOCATION( "SW1:1,2" )
-	PORT_DIPSETTING(	0x00, "3" )
-	PORT_DIPSETTING(	0x01, "4" )
-	PORT_DIPSETTING(	0x02, "5" )
-	PORT_DIPSETTING(	0x03, "6" )
+	PORT_DIPSETTING(    0x00, "3" )
+	PORT_DIPSETTING(    0x01, "4" )
+	PORT_DIPSETTING(    0x02, "5" )
+	PORT_DIPSETTING(    0x03, "6" )
 	PORT_DIPNAME( 0x0c, 0x00, DEF_STR( Bonus_Life ) )       PORT_DIPLOCATION( "SW1:3,4" )
-	PORT_DIPSETTING(	0x00, "3K 30K" )
-	PORT_DIPSETTING(	0x04, "4K 40K" )
-	PORT_DIPSETTING(	0x08, "5K 50K" )
-	PORT_DIPSETTING(	0x0c, "6K 60K" )
+	PORT_DIPSETTING(    0x00, "3K 30K" )
+	PORT_DIPSETTING(    0x04, "4K 40K" )
+	PORT_DIPSETTING(    0x08, "5K 50K" )
+	PORT_DIPSETTING(    0x0c, "6K 60K" )
 	PORT_DIPNAME( 0x10, 0x00, DEF_STR( Coinage ) )          PORT_DIPLOCATION( "SW1:5" )
-	PORT_DIPSETTING(	0x10, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
 	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )          PORT_DIPLOCATION( "SW1:6" )
-	PORT_DIPSETTING(	0x20, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )          PORT_DIPLOCATION( "SW1:7" )
-	PORT_DIPSETTING(	0x40, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 
-	PORT_START("CAB")		/* fake port for non-memory mapped dip switch */
+	PORT_START("CAB")       /* fake port for non-memory mapped dip switch */
 	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Cabinet ) )          PORT_DIPLOCATION( "SW1:!8" )
 	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Cocktail ) )
 
-	PORT_START("CTRL")		/* fake port for multiplexed controls */
+	PORT_START("CTRL")      /* fake port for multiplexed controls */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_2WAY
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  ) PORT_2WAY
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON2 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL                  PORT_CONDITION("CAB",0x01,PORTCOND_EQUALS,0x01)
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_COCKTAIL PORT_CONDITION("CAB",0x01,PORTCOND_EQUALS,0x01)
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  ) PORT_2WAY PORT_COCKTAIL PORT_CONDITION("CAB",0x01,PORTCOND_EQUALS,0x01)
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL                  PORT_CONDITION("CAB",0x01,PORTCOND_EQUALS,0x01)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL                  PORT_CONDITION("CAB",0x01,EQUALS,0x01)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_COCKTAIL PORT_CONDITION("CAB",0x01,EQUALS,0x01)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  ) PORT_2WAY PORT_COCKTAIL PORT_CONDITION("CAB",0x01,EQUALS,0x01)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL                  PORT_CONDITION("CAB",0x01,EQUALS,0x01)
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( phoenixa )
@@ -125,8 +125,8 @@ static INPUT_PORTS_START( phoenixa )
 	PORT_MODIFY("DSW0")
 	/* Coinage is backwards from phoenix (Amstar) */
 	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Coinage ) )          PORT_DIPLOCATION( "SW1:5" )
-	PORT_DIPSETTING(	0x00, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0x10, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( 1C_1C ) )
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( phoenixt )
@@ -134,8 +134,8 @@ static INPUT_PORTS_START( phoenixt )
 
 	PORT_MODIFY("DSW0")
 	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )          PORT_DIPLOCATION( "SW1:5" )
-	PORT_DIPSETTING(	0x10, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( phoenix3 )
@@ -146,14 +146,14 @@ static INPUT_PORTS_START( phoenix3 )
 
 	PORT_MODIFY("DSW0")
 	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )          PORT_DIPLOCATION( "SW1:5" )
-	PORT_DIPSETTING(	0x10, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )          PORT_DIPLOCATION( "SW1:6" )
-	PORT_DIPSETTING(	0x20, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Coinage ) )          PORT_DIPLOCATION( "SW1:7" )
-	PORT_DIPSETTING(	0x40, "A - 2C/1C B - 1C/3C" )
-	PORT_DIPSETTING(	0x00, "A - 1C/1C B - 1C/6C" )
+	PORT_DIPSETTING(    0x40, "A - 2C/1C B - 1C/3C" )
+	PORT_DIPSETTING(    0x00, "A - 1C/1C B - 1C/6C" )
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( condor )
@@ -162,29 +162,29 @@ static INPUT_PORTS_START( condor )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_START1 )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_START2 )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_COIN2 )
-	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(player_input_r, NULL)
+	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, phoenix_state,player_input_r, NULL)
 
 	PORT_START("DSW0")
 	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Lives ) )            PORT_DIPLOCATION( "SW1:1,2" )
-	PORT_DIPSETTING(	0x00, "2" )
-	PORT_DIPSETTING(	0x01, "3" )
-	PORT_DIPSETTING(	0x02, "4" )
-	PORT_DIPSETTING(	0x03, "5" )
+	PORT_DIPSETTING(    0x00, "2" )
+	PORT_DIPSETTING(    0x01, "3" )
+	PORT_DIPSETTING(    0x02, "4" )
+	PORT_DIPSETTING(    0x03, "5" )
 	PORT_DIPNAME( 0x0c, 0x00, DEF_STR( Bonus_Life ) )       PORT_DIPLOCATION( "SW1:3,4" )
-	PORT_DIPSETTING(	0x00, "Every 6000" )
-	PORT_DIPSETTING(	0x08, "Every 10000" )
-	PORT_DIPSETTING(	0x04, "Every 14000" )
-	PORT_DIPSETTING(	0x0c, "Every 18000" )
+	PORT_DIPSETTING(    0x00, "Every 6000" )
+	PORT_DIPSETTING(    0x08, "Every 10000" )
+	PORT_DIPSETTING(    0x04, "Every 14000" )
+	PORT_DIPSETTING(    0x0c, "Every 18000" )
 	PORT_DIPNAME( 0x70, 0x30, "Fuel Consumption" )          PORT_DIPLOCATION( "SW1:5,6,7" )
-	PORT_DIPSETTING(	0x00, "Slowest" )
-	PORT_DIPSETTING(	0x10, "Slower" )
-	PORT_DIPSETTING(	0x20, "Slow" )
-	PORT_DIPSETTING(	0x30, "Bit Slow" )
-	PORT_DIPSETTING(	0x40, "Bit Fast" )
-	PORT_DIPSETTING(	0x50, "Fast" )
-	PORT_DIPSETTING(	0x60, "Faster" )
-	PORT_DIPSETTING(	0x70, "Fastest" )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_DIPSETTING(    0x00, "Slowest" )
+	PORT_DIPSETTING(    0x10, "Slower" )
+	PORT_DIPSETTING(    0x20, "Slow" )
+	PORT_DIPSETTING(    0x30, "Bit Slow" )
+	PORT_DIPSETTING(    0x40, "Bit Fast" )
+	PORT_DIPSETTING(    0x50, "Fast" )
+	PORT_DIPSETTING(    0x60, "Faster" )
+	PORT_DIPSETTING(    0x70, "Fastest" )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 
 	PORT_START("DSW1")
 	PORT_DIPNAME( 0x0f, 0x00, DEF_STR( Coin_B ) )           PORT_DIPLOCATION( "SW2:1,2,3,4" )
@@ -222,20 +222,20 @@ static INPUT_PORTS_START( condor )
 	PORT_DIPSETTING(    0x60, DEF_STR( 1C_7C ) )
 	PORT_DIPSETTING(    0x70, DEF_STR( 1C_8C ) )
 
-	PORT_START("CAB")		/* fake port for non-memory mapped dip switch */
+	PORT_START("CAB")       /* fake port for non-memory mapped dip switch */
 	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Cabinet ) )          PORT_DIPLOCATION( "SW1:!8" )
 	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Cocktail ) )
 
-	PORT_START("CTRL")		/* fake port for multiplexed controls */
+	PORT_START("CTRL")      /* fake port for multiplexed controls */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1 )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  ) PORT_2WAY
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_BUTTON2 )
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_COCKTAIL                  PORT_CONDITION("CAB",0x01,PORTCOND_EQUALS,0x01)
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_COCKTAIL PORT_CONDITION("CAB",0x01,PORTCOND_EQUALS,0x01)
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  ) PORT_2WAY PORT_COCKTAIL PORT_CONDITION("CAB",0x01,PORTCOND_EQUALS,0x01)
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_COCKTAIL                  PORT_CONDITION("CAB",0x01,PORTCOND_EQUALS,0x01)
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_COCKTAIL                  PORT_CONDITION("CAB",0x01,EQUALS,0x01)
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_COCKTAIL PORT_CONDITION("CAB",0x01,EQUALS,0x01)
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  ) PORT_2WAY PORT_COCKTAIL PORT_CONDITION("CAB",0x01,EQUALS,0x01)
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_COCKTAIL                  PORT_CONDITION("CAB",0x01,EQUALS,0x01)
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( falconz )
@@ -243,24 +243,24 @@ static INPUT_PORTS_START( falconz )
 
 	PORT_MODIFY("DSW0")
 	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Lives ) )            PORT_DIPLOCATION( "SW1:1,2" )
-	PORT_DIPSETTING(	0x00, "2" )
-	PORT_DIPSETTING(	0x01, "3" )
-	PORT_DIPSETTING(	0x02, "4" )
-	PORT_DIPSETTING(	0x03, "5" )
+	PORT_DIPSETTING(    0x00, "2" )
+	PORT_DIPSETTING(    0x01, "3" )
+	PORT_DIPSETTING(    0x02, "4" )
+	PORT_DIPSETTING(    0x03, "5" )
 	PORT_DIPNAME( 0x0c, 0x00, DEF_STR( Bonus_Life ) )       PORT_DIPLOCATION( "SW1:3,4" )
-	PORT_DIPSETTING(	0x00, "3K 30K" )
-	PORT_DIPSETTING(	0x04, "4K 40K" )
-	PORT_DIPSETTING(	0x08, "5K 50K" )
-	PORT_DIPSETTING(	0x0c, "6K 60K" )
+	PORT_DIPSETTING(    0x00, "3K 30K" )
+	PORT_DIPSETTING(    0x04, "4K 40K" )
+	PORT_DIPSETTING(    0x08, "5K 50K" )
+	PORT_DIPSETTING(    0x0c, "6K 60K" )
 	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )          PORT_DIPLOCATION( "SW1:5" )
-	PORT_DIPSETTING(	0x10, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )          PORT_DIPLOCATION( "SW1:6" )
-	PORT_DIPSETTING(	0x20, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Coinage ) )          PORT_DIPLOCATION( "SW1:7" )
-	PORT_DIPSETTING(	0x00, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0x40, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( 1C_1C ) )
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( nextfase )
@@ -268,23 +268,23 @@ static INPUT_PORTS_START( nextfase )
 
 	PORT_MODIFY("DSW0")
 	PORT_DIPNAME( 0x03, 0x02, DEF_STR( Lives ) )            PORT_DIPLOCATION( "SW1:1,2" )
-	PORT_DIPSETTING(	0x00, "1" )
-	PORT_DIPSETTING(	0x01, "2" )
-	PORT_DIPSETTING(	0x02, "3" )
-	PORT_DIPSETTING(	0x03, "4" )
+	PORT_DIPSETTING(    0x00, "1" )
+	PORT_DIPSETTING(    0x01, "2" )
+	PORT_DIPSETTING(    0x02, "3" )
+	PORT_DIPSETTING(    0x03, "4" )
 	PORT_DIPNAME( 0x0c, 0x00, DEF_STR( Bonus_Life ) )       PORT_DIPLOCATION( "SW1:3,4" )
-	PORT_DIPSETTING(	0x00, "3K 30K" )
-	PORT_DIPSETTING(	0x04, "4K 40K" )
-	PORT_DIPSETTING(	0x08, "5K 50K" )
-	PORT_DIPSETTING(	0x0c, "6K 60K" )
+	PORT_DIPSETTING(    0x00, "3K 30K" )
+	PORT_DIPSETTING(    0x04, "4K 40K" )
+	PORT_DIPSETTING(    0x08, "5K 50K" )
+	PORT_DIPSETTING(    0x0c, "6K 60K" )
 	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )          PORT_DIPLOCATION( "SW1:5" )
-	PORT_DIPSETTING(	0x10, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x60, 0x00, DEF_STR( Coinage ) )          PORT_DIPLOCATION( "SW1:6,7" )
-	PORT_DIPSETTING(	0x00, "A - 1C/1C B - 1C/2C" )
-	PORT_DIPSETTING(	0x20, "A - 2C/3C B - 1C/3C" )
-	PORT_DIPSETTING(	0x40, "A - 1C/2C B - 1C/4C" )
-	PORT_DIPSETTING(	0x60, "A - 2C/5C B - 1C/5C" )
+	PORT_DIPSETTING(    0x00, "A - 1C/1C B - 1C/2C" )
+	PORT_DIPSETTING(    0x20, "A - 2C/3C B - 1C/3C" )
+	PORT_DIPSETTING(    0x40, "A - 1C/2C B - 1C/4C" )
+	PORT_DIPSETTING(    0x60, "A - 2C/5C B - 1C/5C" )
 INPUT_PORTS_END
 
 
@@ -292,35 +292,35 @@ static INPUT_PORTS_START( pleiads )
 	PORT_INCLUDE( phoenix )
 
 	PORT_MODIFY("IN0")
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SPECIAL ) PORT_CUSTOM(pleiads_protection_r, NULL)     /* Protection. See 0x0552 */
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, phoenix_state,pleiads_protection_r, NULL)     /* Protection. See 0x0552 */
 
 	PORT_MODIFY("DSW0")
 	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Demo_Sounds ) )      PORT_DIPLOCATION( "SW1:7" )
-	PORT_DIPSETTING(	0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x40, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( On ) )
 
 	/* Based on various sources, no Button 2 was present in Pleiads */
-	PORT_MODIFY("CTRL")		/* fake port for multiplexed controls */
+	PORT_MODIFY("CTRL")     /* fake port for multiplexed controls */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_2WAY
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  ) PORT_2WAY
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL					PORT_CONDITION("CAB",0x01,PORTCOND_EQUALS,0x01)
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_COCKTAIL PORT_CONDITION("CAB",0x01,PORTCOND_EQUALS,0x01)
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  ) PORT_2WAY PORT_COCKTAIL	PORT_CONDITION("CAB",0x01,PORTCOND_EQUALS,0x01)
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )									PORT_CONDITION("CAB",0x01,PORTCOND_EQUALS,0x01)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL                  PORT_CONDITION("CAB",0x01,EQUALS,0x01)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_COCKTAIL PORT_CONDITION("CAB",0x01,EQUALS,0x01)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  ) PORT_2WAY PORT_COCKTAIL PORT_CONDITION("CAB",0x01,EQUALS,0x01)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )                                 PORT_CONDITION("CAB",0x01,EQUALS,0x01)
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( pleiadbl )
 	PORT_INCLUDE( phoenix )
 
 	PORT_MODIFY("IN0")
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SPECIAL ) PORT_CUSTOM(pleiads_protection_r, NULL)     /* Protection. See 0x0552 */
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, phoenix_state,pleiads_protection_r, NULL)     /* Protection. See 0x0552 */
 
 	PORT_MODIFY("DSW0")
 	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Demo_Sounds ) )      PORT_DIPLOCATION( "SW1:7" )
-	PORT_DIPSETTING(	0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x40, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( On ) )
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( pleiadce )
@@ -328,10 +328,10 @@ static INPUT_PORTS_START( pleiadce )
 
 	PORT_MODIFY("DSW0")
 	PORT_DIPNAME( 0x0c, 0x00, DEF_STR( Bonus_Life ) )       PORT_DIPLOCATION( "SW1:3,4" )
-	PORT_DIPSETTING(	0x00, "7K 70K" )
-	PORT_DIPSETTING(	0x04, "8K 80K" )
-	PORT_DIPSETTING(	0x08, "9K 90K" )
-  /*PORT_DIPSETTING(    0x0c, "INVALID" )                   Sets bonus to A000 */
+	PORT_DIPSETTING(    0x00, "7K 70K" )
+	PORT_DIPSETTING(    0x04, "8K 80K" )
+	PORT_DIPSETTING(    0x08, "9K 90K" )
+	/*PORT_DIPSETTING(    0x0c, "INVALID" )                   Sets bonus to A000 */
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( capitol )
@@ -354,36 +354,36 @@ static INPUT_PORTS_START( survival )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT    )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  )
 
-	PORT_START("IN1")		/* IN1 */
-	PORT_BIT( 0x07, IP_ACTIVE_LOW, IPT_SPECIAL )	/* comes from IN0 0-2 */
+	PORT_START("IN1")       /* IN1 */
+	PORT_BIT( 0x07, IP_ACTIVE_LOW, IPT_SPECIAL )    /* comes from IN0 0-2 */
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_COCKTAIL
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_COCKTAIL
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT) PORT_COCKTAIL
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN     ) PORT_COCKTAIL
 
-    PORT_START("DSW0")
+	PORT_START("DSW0")
 	PORT_DIPNAME( 0x03, 0x02, DEF_STR( Lives ) )
-	PORT_DIPSETTING(	0x03, "2" )
-	PORT_DIPSETTING(	0x02, "3" )
-	PORT_DIPSETTING(	0x01, "4" )
-	PORT_DIPSETTING(	0x00, "5" )
+	PORT_DIPSETTING(    0x03, "2" )
+	PORT_DIPSETTING(    0x02, "3" )
+	PORT_DIPSETTING(    0x01, "4" )
+	PORT_DIPSETTING(    0x00, "5" )
 	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Bonus_Life ) )
-	PORT_DIPSETTING(	0x0c, "25000" )
-	PORT_DIPSETTING(	0x08, "35000" )
-	PORT_DIPSETTING(	0x04, "45000" )
-	PORT_DIPSETTING(	0x00, "55000" )
+	PORT_DIPSETTING(    0x0c, "25000" )
+	PORT_DIPSETTING(    0x08, "35000" )
+	PORT_DIPSETTING(    0x04, "45000" )
+	PORT_DIPSETTING(    0x00, "55000" )
 	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Free_Play ) )
-	PORT_DIPSETTING(	0x10, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x60, 0x60, DEF_STR( Coinage ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( 5C_1C ) )
-	PORT_DIPSETTING(	0x20, DEF_STR( 3C_1C ) )
-	PORT_DIPSETTING(	0x40, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0x60, DEF_STR( 1C_1C ) )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_DIPSETTING(    0x00, DEF_STR( 5C_1C ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( 3C_1C ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x60, DEF_STR( 1C_1C ) )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 
-	PORT_START("CAB")		/* fake port for non-memory mapped dip switch */
+	PORT_START("CAB")       /* fake port for non-memory mapped dip switch */
 	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Cabinet ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Cocktail ) )
@@ -393,9 +393,9 @@ INPUT_PORTS_END
 
 static const gfx_layout charlayout =
 {
-	8,8,	/* 8*8 characters */
-	256,	/* 256 characters */
-	2,	/* 2 bits per pixel */
+	8,8,    /* 8*8 characters */
+	256,    /* 256 characters */
+	2,  /* 2 bits per pixel */
 	{ 256*8*8, 0 }, /* the two bitplanes are separated */
 	{ 7, 6, 5, 4, 3, 2, 1, 0 }, /* pretty straightforward layout */
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
@@ -415,20 +415,20 @@ GFXDECODE_END
 
 static const tms36xx_interface phoenix_tms36xx_interface =
 {
-	MM6221AA,	/* TMS36xx subtype(s) */
+	MM6221AA,   /* TMS36xx subtype(s) */
 	{0.50,0,0,1.05,0,0}, /* decay times of voices */
-    0.21       /* tune speed (time between beats) */
+	0.21       /* tune speed (time between beats) */
 };
 
 static const tms36xx_interface pleiads_tms36xx_interface =
 {
-	TMS3615,	/* TMS36xx subtype(s) */
+	TMS3615,    /* TMS36xx subtype(s) */
 	/*
-     * Decay times of the voices; NOTE: it's unknown if
-     * the the TMS3615 mixes more than one voice internally.
-     * A wav taken from Pop Flamer sounds like there
-     * are at least no 'odd' harmonics (5 1/3' and 2 2/3')
-     */
+	 * Decay times of the voices; NOTE: it's unknown if
+	 * the the TMS3615 mixes more than one voice internally.
+	 * A wav taken from Pop Flamer sounds like there
+	 * are at least no 'odd' harmonics (5 1/3' and 2 2/3')
+	 */
 	{0.33,0.33,0,0.33,0,0.33}
 };
 
@@ -437,38 +437,37 @@ static const ay8910_interface survival_ay8910_interface =
 	AY8910_LEGACY_OUTPUT,
 	AY8910_DEFAULT_LOADS,
 	DEVCB_NULL,
-	DEVCB_HANDLER(survival_protection_r),
+	DEVCB_DRIVER_MEMBER(phoenix_state, survival_protection_r),
 	DEVCB_NULL,
 	DEVCB_NULL
 };
 
 
 
-static MACHINE_RESET( phoenix )
+MACHINE_RESET_MEMBER(phoenix_state,phoenix)
 {
-	memory_set_bankptr(machine, "bank1", machine.region("maincpu")->base() + 0x4000);
+	machine().root_device().membank("bank1")->set_base(machine().root_device().memregion("maincpu")->base() + 0x4000);
 }
 
 
 static MACHINE_CONFIG_START( phoenix, phoenix_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", I8085A, CPU_CLOCK)	/* 2.75 MHz */
+	MCFG_CPU_ADD("maincpu", I8085A, CPU_CLOCK)  /* 2.75 MHz */
 	MCFG_CPU_PROGRAM_MAP(phoenix_memory_map)
 
-	MCFG_MACHINE_RESET(phoenix)
+	MCFG_MACHINE_RESET_OVERRIDE(phoenix_state,phoenix)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_RAW_PARAMS(PIXEL_CLOCK, HTOTAL, HBEND, HBSTART, VTOTAL, VBEND, VBSTART)
-	MCFG_SCREEN_UPDATE(phoenix)
+	MCFG_SCREEN_UPDATE_DRIVER(phoenix_state, screen_update_phoenix)
 
 	MCFG_GFXDECODE(phoenix)
 	MCFG_PALETTE_LENGTH(256)
 
-	MCFG_PALETTE_INIT(phoenix)
-	MCFG_VIDEO_START(phoenix)
+	MCFG_PALETTE_INIT_OVERRIDE(phoenix_state,phoenix)
+	MCFG_VIDEO_START_OVERRIDE(phoenix_state,phoenix)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -495,7 +494,7 @@ static MACHINE_CONFIG_DERIVED( pleiads, phoenix )
 	/* video hardware */
 	MCFG_GFXDECODE(pleiads)
 
-	MCFG_PALETTE_INIT(pleiads)
+	MCFG_PALETTE_INIT_OVERRIDE(phoenix_state,pleiads)
 
 	/* sound hardware */
 	MCFG_SOUND_REPLACE("tms", TMS36XX, 247)
@@ -513,36 +512,35 @@ MACHINE_CONFIG_END
 
 static I8085_CONFIG( survival_i8085_config )
 {
-	DEVCB_NULL,							/* STATUS changed callback */
-	DEVCB_NULL,							/* INTE changed callback */
-	DEVCB_LINE(survival_sid_callback),	/* SID changed callback (8085A only) */
-	DEVCB_NULL							/* SOD changed callback (8085A only) */
+	DEVCB_NULL,                         /* STATUS changed callback */
+	DEVCB_NULL,                         /* INTE changed callback */
+	DEVCB_DRIVER_LINE_MEMBER(phoenix_state, survival_sid_callback), /* SID changed callback (8085A only) */
+	DEVCB_NULL                          /* SOD changed callback (8085A only) */
 };
 
 static MACHINE_CONFIG_START( survival, phoenix_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", I8085A, CPU_CLOCK)	/* 5.50 MHz */
+	MCFG_CPU_ADD("maincpu", I8085A, CPU_CLOCK)  /* 5.50 MHz */
 	MCFG_CPU_CONFIG(survival_i8085_config)
 	MCFG_CPU_PROGRAM_MAP(survival_memory_map)
 
-	MCFG_MACHINE_RESET(phoenix)
+	MCFG_MACHINE_RESET_OVERRIDE(phoenix_state,phoenix)
 
 	/* video hardware */
 
 	/* schematics fairly identical to phoenix, however the interesting
-     * page is missing
-     */
+	 * page is missing
+	 */
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_RAW_PARAMS(PIXEL_CLOCK, HTOTAL, HBEND, HBSTART, VTOTAL, VBEND, VBSTART)
-	MCFG_SCREEN_UPDATE(phoenix)
+	MCFG_SCREEN_UPDATE_DRIVER(phoenix_state, screen_update_phoenix)
 
 	MCFG_GFXDECODE(phoenix)
 	MCFG_PALETTE_LENGTH(256)
 
-	MCFG_PALETTE_INIT(survival)
-	MCFG_VIDEO_START(phoenix)
+	MCFG_PALETTE_INIT_OVERRIDE(phoenix_state,survival)
+	MCFG_VIDEO_START_OVERRIDE(phoenix_state,phoenix)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -559,7 +557,7 @@ static MACHINE_CONFIG_DERIVED( condor, phoenix )
 
 	/* basic machine hardware */
 	/* FIXME: Verify clock. This is most likely 11MHz/2 */
-	MCFG_CPU_REPLACE("maincpu", Z80, 11000000/4)	/* 2.75 MHz??? */
+	MCFG_CPU_REPLACE("maincpu", Z80, 11000000/4)    /* 2.75 MHz??? */
 	MCFG_CPU_PROGRAM_MAP(phoenix_memory_map)
 MACHINE_CONFIG_END
 
@@ -738,6 +736,83 @@ ROM_START( phoenixc )
 	ROM_LOAD( "mmi6301.ic41",   0x0100, 0x0100, CRC(e176b768) SHA1(e2184dd495ed579f10b6da0b78379e02d7a6229f) )  /* palette high bits */
 ROM_END
 
+ROM_START( phoenixc2 )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "phoenix.45",   0x0000, 0x0800, CRC(5b8c55a8) SHA1(839c1ca9766f730ec3accd48db70f6429a9c3362) ) // 01.ic45
+	ROM_LOAD( "phoenix.46",   0x0800, 0x0800, CRC(dbc942fa) SHA1(9fe224e6ced407289dfa571468259a021d942b7d) ) // 01.ic46
+	ROM_LOAD( "phoenix.47",   0x1000, 0x0800, CRC(cbbb8839) SHA1(b7f449374cac111081559e39646f973e7e99fd64) ) // 01.ic47
+	ROM_LOAD( "01.ic48",      0x1800, 0x0800, CRC(f28e16d8) SHA1(65a7592f9589bcd094ffc9b2b44ca3257bcf5e5c) )
+	ROM_LOAD( "phoenixc.49",  0x2000, 0x0800, CRC(1a1ce0d0) SHA1(c2825eef5d461e16ca2172daff94b3751be2f4dc) ) // 01.1c49
+	ROM_LOAD( "h6-ic50.6a",   0x2800, 0x0800, CRC(ac5e9ec1) SHA1(0402e5241d99759d804291998efd43f37ce99917) ) // 01.ic50
+	ROM_LOAD( "h7-ic51.7a",   0x3000, 0x0800, CRC(2eab35b4) SHA1(849bf8273317cc869bdd67e50c68399ee8ece81d) ) // 01.ic51
+	ROM_LOAD( "phoenixc.52",  0x3800, 0x0800, CRC(8424d7c4) SHA1(1b5fa7d8be9e8750a4148dfefc17e96c86ed084d) ) // 01.ic52
+
+	ROM_REGION( 0x1000, "gfx1", 0 )
+	ROM_LOAD( "ic23.3d",      0x0000, 0x0800, CRC(3c7e623f) SHA1(e7ff5fc371664af44785c079e92eeb2d8530187b) ) // 01.ic23
+	ROM_LOAD( "ic24.4d",      0x0800, 0x0800, CRC(59916d3b) SHA1(71aec70a8e096ed1f0c2297b3ae7dca1b8ecc38d) ) // 01.ic24
+
+	ROM_REGION( 0x1000, "gfx2", 0 )
+	ROM_LOAD( "phoenixc.39",  0x0000, 0x0800, CRC(bb0525ed) SHA1(86db1c7584fb3846bfd47535e1585eeb7fbbb1fe) ) // 01.ic39
+	ROM_LOAD( "phoenixc.40",  0x0800, 0x0800, CRC(4178aa4f) SHA1(5350f8f62cc7c223c38008bc83140b7a19147d81) ) // 01.ic40
+
+	ROM_REGION( 0x0200, "proms", 0 )
+	ROM_LOAD( "mmi6301.ic40",   0x0000, 0x0100, CRC(79350b25) SHA1(57411be4c1d89677f7919ae295446da90612c8a8) )  /* palette low bits - 01.ic40 */
+	ROM_LOAD( "mmi6301.ic41",   0x0100, 0x0100, CRC(e176b768) SHA1(e2184dd495ed579f10b6da0b78379e02d7a6229f) )  /* palette high bits - 01.ic41 */
+
+	ROM_REGION( 0x0300, "plds", 0 )
+	ROM_LOAD( "tbp24sa10n.183.bin",   0x0000, 0x0100, CRC(47f5e887) SHA1(786d5a599b919ce6f06fe5c568ab6fa6c87b1002) )
+	ROM_LOAD( "tbp24sa10n.184.bin",   0x0100, 0x0100, CRC(931f3292) SHA1(94b0d65e909389a2c0c0aac2e16a55e60b14f3bc) )
+	ROM_LOAD( "tbp24sa10n.185.bin",   0x0200, 0x0100, CRC(0a06bd1b) SHA1(8c5debc5502e88af8019266fedcbe4bad1e2e214) )
+ROM_END
+
+ROM_START( phoenixc3 )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "phoenix.45",   0x0000, 0x0800, CRC(5b8c55a8) SHA1(839c1ca9766f730ec3accd48db70f6429a9c3362) )
+	ROM_LOAD( "phoenix.46",   0x0800, 0x0800, CRC(dbc942fa) SHA1(9fe224e6ced407289dfa571468259a021d942b7d) )
+	ROM_LOAD( "phoenix.47",   0x1000, 0x0800, CRC(cbbb8839) SHA1(b7f449374cac111081559e39646f973e7e99fd64) )
+	ROM_LOAD( "4.a4",         0x1800, 0x0800, CRC(61514bed) SHA1(142d44fc0602e1de7dc93d7759d4c3ee99890f97) )
+	ROM_LOAD( "phoenixc.49",  0x2000, 0x0800, CRC(1a1ce0d0) SHA1(c2825eef5d461e16ca2172daff94b3751be2f4dc) )
+	ROM_LOAD( "h6-ic50.6a",   0x2800, 0x0800, CRC(ac5e9ec1) SHA1(0402e5241d99759d804291998efd43f37ce99917) )
+	ROM_LOAD( "h7-ic51.7a",   0x3000, 0x0800, CRC(2eab35b4) SHA1(849bf8273317cc869bdd67e50c68399ee8ece81d) )
+	ROM_LOAD( "phoenixc.52",  0x3800, 0x0800, CRC(8424d7c4) SHA1(1b5fa7d8be9e8750a4148dfefc17e96c86ed084d) )
+
+	ROM_REGION( 0x1000, "gfx1", 0 )
+	ROM_LOAD( "ic23.3d",      0x0000, 0x0800, CRC(3c7e623f) SHA1(e7ff5fc371664af44785c079e92eeb2d8530187b) )
+	ROM_LOAD( "ic24.4d",      0x0800, 0x0800, CRC(59916d3b) SHA1(71aec70a8e096ed1f0c2297b3ae7dca1b8ecc38d) )
+
+	ROM_REGION( 0x1000, "gfx2", 0 )
+	ROM_LOAD( "phoenixc.39",  0x0000, 0x0800, CRC(bb0525ed) SHA1(86db1c7584fb3846bfd47535e1585eeb7fbbb1fe) )
+	ROM_LOAD( "phoenixc.40",  0x0800, 0x0800, CRC(4178aa4f) SHA1(5350f8f62cc7c223c38008bc83140b7a19147d81) )
+
+	ROM_REGION( 0x0200, "proms", 0 )
+	ROM_LOAD( "mmi6301.ic40",   0x0000, 0x0100, CRC(79350b25) SHA1(57411be4c1d89677f7919ae295446da90612c8a8) )  /* palette low bits */
+	ROM_LOAD( "mmi6301.ic41",   0x0100, 0x0100, CRC(e176b768) SHA1(e2184dd495ed579f10b6da0b78379e02d7a6229f) )  /* palette high bits */
+ROM_END
+
+ROM_START( phoenixc4 )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "phoenix.45",   0x0000, 0x0800, CRC(5b8c55a8) SHA1(839c1ca9766f730ec3accd48db70f6429a9c3362) )
+	ROM_LOAD( "phoenix.46",   0x0800, 0x0800, CRC(dbc942fa) SHA1(9fe224e6ced407289dfa571468259a021d942b7d) )
+	ROM_LOAD( "phoenix.47",   0x1000, 0x0800, CRC(cbbb8839) SHA1(b7f449374cac111081559e39646f973e7e99fd64) )
+	ROM_LOAD( "phoenixd.48",  0x1800, 0x0800, CRC(6e51f009) SHA1(f91ed67543a675be9337f2a73c179f3fbea2c33e) )
+	ROM_LOAD( "phoenixc.49",  0x2000, 0x0800, CRC(1a1ce0d0) SHA1(c2825eef5d461e16ca2172daff94b3751be2f4dc) )
+	ROM_LOAD( "cond06c.bin",  0x2800, 0x0800, CRC(8c83bff7) SHA1(3dfb090d7e3a9ae8da882b06e166c48555eaf77c) )
+	ROM_LOAD( "vautor07.1m",  0x3000, 0x0800, CRC(079ac364) SHA1(55b17c069b191cd1752e78068ef683b33c094e56) )
+	ROM_LOAD( "phoenixc.52",  0x3800, 0x0800, CRC(8424d7c4) SHA1(1b5fa7d8be9e8750a4148dfefc17e96c86ed084d) )
+
+	ROM_REGION( 0x1000, "gfx1", 0 )
+	ROM_LOAD( "ic23.3d",      0x0000, 0x0800, CRC(3c7e623f) SHA1(e7ff5fc371664af44785c079e92eeb2d8530187b) )
+	ROM_LOAD( "ic24.4d",      0x0800, 0x0800, CRC(59916d3b) SHA1(71aec70a8e096ed1f0c2297b3ae7dca1b8ecc38d) )
+
+	ROM_REGION( 0x1000, "gfx2", 0 )
+	ROM_LOAD( "phoenixd.3b",  0x0000, 0x0800, BAD_DUMP CRC(31c06c22) SHA1(41e13e2e14f098ef0c6985dbcd2d85f83eb3b44f) )
+	ROM_LOAD( "phoenixc.40",  0x0800, 0x0800, CRC(4178aa4f) SHA1(5350f8f62cc7c223c38008bc83140b7a19147d81) )
+
+	ROM_REGION( 0x0200, "proms", 0 )
+	ROM_LOAD( "mmi6301.ic41", 0x0100, 0x0100, CRC(e176b768) SHA1(e2184dd495ed579f10b6da0b78379e02d7a6229f) )
+	ROM_RELOAD(               0x0000, 0x0100 )  /* the dump had 2 identical proms with different names */
+ROM_END
+
 ROM_START( condor )
 	ROM_REGION( 0x10000, "maincpu", 0 )
 	ROM_LOAD( "cond01c.bin",  0x0000, 0x0800, CRC(c0f73929) SHA1(3cecf8341a5674165d2cae9b22ea5db26a9597de) )
@@ -860,22 +935,22 @@ ROM_END
 
 ROM_START( fenix )
 	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD( "0.1e",         0x0000, 0x0800, NO_DUMP )	// socket at location '1e' is empty.
-	ROM_LOAD( "1.1f",         0x0800, 0x0800, CRC(3699b11a) SHA1(7122685cbfcd75898eaa68f8c5bf87c11df59a3b) )	// 1.1f
-	ROM_LOAD( "2.1h",         0x1000, 0x0800, CRC(750b059b) SHA1(6fbaa2ef4c7eef6f731a73b2d33a02fff21b318a) )	// 2.1h
-	ROM_LOAD( "3.1j",         0x1800, 0x0800, CRC(61b8a41b) SHA1(6dc7b23cee607042183ac13a0ecf408d88057513) )	//          96.386719%
-	ROM_LOAD( "4.1k",         0x2000, 0x0800, CRC(1ff3a982) SHA1(66fb39e7abdf7a9c6e2eb01d41cfe9429781d6aa) )	// 4.1k
-	ROM_LOAD( "5.1l",         0x2800, 0x0800, CRC(a210fe51) SHA1(0487d5bc835549cf2bfb8f26f665019490f643b7) )	//          82.812500%
-	ROM_LOAD( "6.1m",         0x3000, 0x0800, CRC(805ec2e8) SHA1(7e56fc9990eb99512078e2b1e2874fb33b0aa05c) )	// 6.1m
-	ROM_LOAD( "7.1n",         0x3800, 0x0800, CRC(1edebb45) SHA1(2fdf061ee600e27a6ed512ea61a8d78307a7fb8a) )	// 7.1n
+	ROM_LOAD( "0.1e",         0x0000, 0x0800, NO_DUMP ) // socket at location '1e' is empty.
+	ROM_LOAD( "1.1f",         0x0800, 0x0800, CRC(3699b11a) SHA1(7122685cbfcd75898eaa68f8c5bf87c11df59a3b) )    // 1.1f
+	ROM_LOAD( "2.1h",         0x1000, 0x0800, CRC(750b059b) SHA1(6fbaa2ef4c7eef6f731a73b2d33a02fff21b318a) )    // 2.1h
+	ROM_LOAD( "3.1j",         0x1800, 0x0800, CRC(61b8a41b) SHA1(6dc7b23cee607042183ac13a0ecf408d88057513) )    //          96.386719%
+	ROM_LOAD( "4.1k",         0x2000, 0x0800, CRC(1ff3a982) SHA1(66fb39e7abdf7a9c6e2eb01d41cfe9429781d6aa) )    // 4.1k
+	ROM_LOAD( "5.1l",         0x2800, 0x0800, CRC(a210fe51) SHA1(0487d5bc835549cf2bfb8f26f665019490f643b7) )    //          82.812500%
+	ROM_LOAD( "6.1m",         0x3000, 0x0800, CRC(805ec2e8) SHA1(7e56fc9990eb99512078e2b1e2874fb33b0aa05c) )    // 6.1m
+	ROM_LOAD( "7.1n",         0x3800, 0x0800, CRC(1edebb45) SHA1(2fdf061ee600e27a6ed512ea61a8d78307a7fb8a) )    // 7.1n
 
 	ROM_REGION( 0x1000, "gfx1", 0 )
-	ROM_LOAD( "9.2h",         0x0000, 0x0800, CRC(3c7e623f) SHA1(e7ff5fc371664af44785c079e92eeb2d8530187b) )	// 9.2h
-	ROM_LOAD( "8.2j",         0x0800, 0x0800, CRC(59916d3b) SHA1(71aec70a8e096ed1f0c2297b3ae7dca1b8ecc38d) )	// 8.2j
+	ROM_LOAD( "9.2h",         0x0000, 0x0800, CRC(3c7e623f) SHA1(e7ff5fc371664af44785c079e92eeb2d8530187b) )    // 9.2h
+	ROM_LOAD( "8.2j",         0x0800, 0x0800, CRC(59916d3b) SHA1(71aec70a8e096ed1f0c2297b3ae7dca1b8ecc38d) )    // 8.2j
 
 	ROM_REGION( 0x1000, "gfx2", 0 )
-	ROM_LOAD( "11.3h",        0x0000, 0x0800, CRC(8eff75c9) SHA1(d38a0e0c02ba680984dd8748a3c45ac55f81f127) )	// 11.3h
-	ROM_LOAD( "10.3j",        0x0800, 0x0800, CRC(369e7476) SHA1(599d2fc3b298060d746e95c20a089ad37f685d5b) )	// 10.3j
+	ROM_LOAD( "11.3h",        0x0000, 0x0800, CRC(8eff75c9) SHA1(d38a0e0c02ba680984dd8748a3c45ac55f81f127) )    // 11.3h
+	ROM_LOAD( "10.3j",        0x0800, 0x0800, CRC(369e7476) SHA1(599d2fc3b298060d746e95c20a089ad37f685d5b) )    // 10.3j
 
 	ROM_REGION( 0x0200, "proms", 0 )
 	ROM_LOAD( "mmi6301.ic40",   0x0000, 0x0100, CRC(79350b25) SHA1(57411be4c1d89677f7919ae295446da90612c8a8) )  /* palette low bits */
@@ -954,6 +1029,30 @@ ROM_START( pleiads )
 	ROM_REGION( 0x0200, "proms", 0 )
 	ROM_LOAD( "7611-5.33",    0x0000, 0x0100, CRC(e38eeb83) SHA1(252880d80425b2e697146e76efdc6cb9f3ba0378) )   /* palette low bits */
 	ROM_LOAD( "7611-5.26",    0x0100, 0x0100, CRC(7a1bcb1e) SHA1(bdfab316ea26e2063879e7aa78b6ae2b55eb95c8) )   /* palette high bits */
+ROM_END
+
+ROM_START( pleiadsb2 )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "ic47.r1",      0x0000, 0x0800, CRC(fa98cb73) SHA1(d01138536e90a0a92d3e356fe354648e431a106c) )
+	ROM_LOAD( "ic48.r2",      0x0800, 0x0800, CRC(b254217c) SHA1(312a33cca09d5d2d18992f28eb051230a90db6e3) )
+	ROM_LOAD( "ic47.bin",     0x1000, 0x0800, CRC(0951829e) SHA1(03c0598dfe248ce14683ff18e59adb2e72731336) )
+	ROM_LOAD( "ic48.bin",     0x1800, 0x0800, CRC(4972f5ce) SHA1(9175cc924c335d01ee47f3771276cdc90028fcc5) )
+	ROM_LOAD( "ic51.r5",      0x2000, 0x0800, CRC(49c629bc) SHA1(fd7937d0c114c8d9c1efaa9918ae3df2af41f032) )
+	ROM_LOAD( "ic50.bin",     0x2800, 0x0800, CRC(f1a8a00d) SHA1(5c183e3a73fa882ffec3cb9219fb5619e625591a) )
+	ROM_LOAD( "ic53.r7",      0x3000, 0x0800, CRC(037b319c) SHA1(2ff7a7777a63326e2abca2d1881df33a8e3f8561) )
+	ROM_LOAD( "ic52.bin",     0x3800, 0x0800, CRC(b3db08c2) SHA1(d5b1b77dcf2d76498f30d5f880635f5acfac7dfd) )
+
+	ROM_REGION( 0x1000, "gfx1", 0 )
+	ROM_LOAD( "ic23.bin",     0x0000, 0x0800, CRC(4e30f9e7) SHA1(da023a94725dc40107cd97e4decfd4dc0f9f00ee) )
+	ROM_LOAD( "ic24.bin",     0x0800, 0x0800, CRC(5188fc29) SHA1(421dedc674c6dde7abf01412df035a8eb8e6db9b) )
+
+	ROM_REGION( 0x1000, "gfx2", 0 )
+	ROM_LOAD( "ic39.bin",     0x0000, 0x0800, CRC(85866607) SHA1(cd240bd056f761b2f9e2142049434f02cae3e315) )
+	ROM_LOAD( "ic40.bin",     0x0800, 0x0800, CRC(a841d511) SHA1(8349008ab1d8ef08775b54170c37deb1d391fffc) )
+
+	ROM_REGION( 0x0200, "proms", 0 )
+	ROM_LOAD( "7611-5.26",    0x0000, 0x0100, CRC(7a1bcb1e) SHA1(bdfab316ea26e2063879e7aa78b6ae2b55eb95c8) )   /* palette low bits */
+	ROM_LOAD( "7611-5.33",    0x0100, 0x0100, CRC(e38eeb83) SHA1(252880d80425b2e697146e76efdc6cb9f3ba0378) )   /* palette high bits */
 ROM_END
 
 ROM_START( pleiadbl )
@@ -1053,36 +1152,40 @@ ROM_START( survival )
 ROM_END
 
 
-static DRIVER_INIT( condor )
+DRIVER_INIT_MEMBER(phoenix_state,condor)
 {
 	/* additional inputs for coinage */
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_read_port(0x5000, 0x5000, "DSW1");
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_port(0x5000, 0x5000, "DSW1");
 }
 
 
 
-GAME( 1980, phoenix,  0,        phoenix,  phoenix,  0,        ROT90, "Amstar", "Phoenix (Amstar)", GAME_SUPPORTS_SAVE )
-GAME( 1980, phoenixa, phoenix,  phoenix,  phoenixa, 0,        ROT90, "Amstar (Centuri license)", "Phoenix (Centuri, set 1)", GAME_SUPPORTS_SAVE )
-GAME( 1980, phoenixb, phoenix,  phoenix,  phoenixa, 0,        ROT90, "Amstar (Centuri license)", "Phoenix (Centuri, set 2)", GAME_SUPPORTS_SAVE )
-GAME( 1980, phoenixt, phoenix,  phoenix,  phoenixt, 0,        ROT90, "Amstar (Taito license)", "Phoenix (Taito)", GAME_SUPPORTS_SAVE )
-GAME( 1980, phoenixj, phoenix,  phoenix,  phoenixt, 0,        ROT90, "Amstar (Taito Japan license)", "Phoenix (Taito Japan)", GAME_SUPPORTS_SAVE )
-GAME( 1980, phoenix3, phoenix,  phoenix,  phoenix3, 0,        ROT90, "bootleg (T.P.N.)",   "Phoenix (T.P.N.)", GAME_SUPPORTS_SAVE )
-GAME( 1981, phoenixc, phoenix,  phoenix,  phoenixt, 0,        ROT90, "bootleg? (Irecsa / G.G.I Corp)",  "Phoenix (Irecsa / G.G.I Corp)", GAME_SUPPORTS_SAVE )
-GAME( 1981, condor,   phoenix,  condor,   condor,   condor,   ROT90, "bootleg",   "Condor (bootleg of Phoenix)", GAME_SUPPORTS_SAVE )
+GAME( 1980, phoenix,  0,        phoenix,  phoenix, driver_device,  0,        ROT90, "Amstar", "Phoenix (Amstar)", GAME_SUPPORTS_SAVE )
+GAME( 1980, phoenixa, phoenix,  phoenix,  phoenixa, driver_device, 0,        ROT90, "Amstar (Centuri license)", "Phoenix (Centuri, set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1980, phoenixb, phoenix,  phoenix,  phoenixa, driver_device, 0,        ROT90, "Amstar (Centuri license)", "Phoenix (Centuri, set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1980, phoenixt, phoenix,  phoenix,  phoenixt, driver_device, 0,        ROT90, "Amstar (Taito license)", "Phoenix (Taito)", GAME_SUPPORTS_SAVE )
+GAME( 1980, phoenixj, phoenix,  phoenix,  phoenixt, driver_device, 0,        ROT90, "Amstar (Taito Japan license)", "Phoenix (Taito Japan)", GAME_SUPPORTS_SAVE )
+GAME( 1980, phoenix3, phoenix,  phoenix,  phoenix3, driver_device, 0,        ROT90, "bootleg (T.P.N.)",   "Phoenix (T.P.N.)", GAME_SUPPORTS_SAVE )
+GAME( 1981, phoenixc, phoenix,  phoenix,  phoenixt, driver_device, 0,        ROT90, "bootleg? (Irecsa / G.G.I Corp)", "Phoenix (Irecsa / G.G.I Corp, set 1)", GAME_SUPPORTS_SAVE )
+GAME( 1981, phoenixc2,phoenix,  phoenix,  phoenixt, driver_device, 0,        ROT90, "bootleg? (Irecsa / G.G.I Corp)", "Phoenix (Irecsa / G.G.I Corp, set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1981, phoenixc3,phoenix,  phoenix,  phoenixt, driver_device, 0,        ROT90, "bootleg? (Irecsa / G.G.I Corp)", "Phoenix (Irecsa / G.G.I Corp, set 3)", GAME_SUPPORTS_SAVE )
+GAME( 1981, phoenixc4,phoenix,  phoenix,  phoenix , driver_device, 0,        ROT90, "bootleg? (Irecsa / G.G.I Corp)", "Phoenix (Irecsa / G.G.I Corp, set 4)", GAME_SUPPORTS_SAVE )
+GAME( 1981, condor,   phoenix,  condor,   condor, phoenix_state,   condor,   ROT90, "bootleg", "Condor (bootleg of Phoenix)", GAME_SUPPORTS_SAVE )
 // the following 2 were common bootlegs in england & france respectively
-GAME( 1980, falcon,   phoenix,  phoenix,  phoenixt, 0,        ROT90, "bootleg",   "Falcon (bootleg of Phoenix) (8085A CPU)", GAME_SUPPORTS_SAVE )
-GAME( 1980, vautour,  phoenix,  phoenix,  phoenixt, 0,        ROT90, "bootleg (Jeutel)", "Vautour (bootleg of Phoenix) (8085A CPU)", GAME_SUPPORTS_SAVE )
-GAME( 1980, falconz,  phoenix,  condor,   falconz,  0,        ROT90, "bootleg",   "Falcon (bootleg of Phoenix) (Z80 CPU)", GAME_SUPPORTS_SAVE )
-GAME( 1980, vautourz, phoenix,  condor,   condor,   condor,   ROT90, "bootleg",   "Vautour (bootleg of Phoenix) (Z80 CPU)", GAME_SUPPORTS_SAVE )
+GAME( 1980, falcon,   phoenix,  phoenix,  phoenixt, driver_device, 0,        ROT90, "bootleg", "Falcon (bootleg of Phoenix) (8085A CPU)", GAME_SUPPORTS_SAVE )
+GAME( 1980, vautour,  phoenix,  phoenix,  phoenixt, driver_device, 0,        ROT90, "bootleg (Jeutel)", "Vautour (bootleg of Phoenix) (8085A CPU)", GAME_SUPPORTS_SAVE )
+GAME( 1980, falconz,  phoenix,  condor,   falconz, driver_device,  0,        ROT90, "bootleg", "Falcon (bootleg of Phoenix) (Z80 CPU)", GAME_SUPPORTS_SAVE )
+GAME( 1980, vautourz, phoenix,  condor,   condor, phoenix_state,   condor,   ROT90, "bootleg", "Vautour (bootleg of Phoenix) (Z80 CPU)", GAME_SUPPORTS_SAVE )
 // fenix is an italian bootleg based on vautourz
-GAME( 1980, fenix,    phoenix,  condor,   condor,   condor,   ROT90, "bootleg",   "Fenix (bootleg of Phoenix)", GAME_NOT_WORKING | GAME_SUPPORTS_SAVE )
-GAME( 1980, griffon,  phoenix,  condor,   condor,   condor,   ROT90, "bootleg (Videotron)",   "Griffon (bootleg of Phoenix)", GAME_SUPPORTS_SAVE )
+GAME( 1980, fenix,    phoenix,  condor,   condor, phoenix_state,   condor,   ROT90, "bootleg", "Fenix (bootleg of Phoenix)", GAME_NOT_WORKING | GAME_SUPPORTS_SAVE )
+GAME( 1980, griffon,  phoenix,  condor,   condor, phoenix_state,   condor,   ROT90, "bootleg (Videotron)", "Griffon (bootleg of Phoenix)", GAME_SUPPORTS_SAVE )
 // nextfase is a spanish bootleg
-GAME( 1981, nextfase, phoenix,  phoenix,  nextfase, 0,        ROT90, "bootleg (Petaco S.A.)", "Next Fase (bootleg of Phoenix)", GAME_SUPPORTS_SAVE )
+GAME( 1981, nextfase, phoenix,  phoenix,  nextfase, driver_device, 0,        ROT90, "bootleg (Petaco S.A.)", "Next Fase (bootleg of Phoenix)", GAME_SUPPORTS_SAVE )
 
-GAME( 1981, pleiads,  0,        pleiads,  pleiads,  0,        ROT90, "Tehkan", "Pleiads (Tehkan)", GAME_IMPERFECT_COLORS )
-GAME( 1981, pleiadbl, pleiads,  pleiads,  pleiadbl, 0,        ROT90, "bootleg", "Pleiads (bootleg)", GAME_IMPERFECT_COLORS )
-GAME( 1981, pleiadce, pleiads,  pleiads,  pleiadce, 0,        ROT90, "Tehkan (Centuri license)", "Pleiads (Centuri)", GAME_IMPERFECT_COLORS )
-GAME( 1981, capitol,  pleiads,  phoenix,  capitol,  0,        ROT90, "bootleg? (Universal Video Spiel)", "Capitol", GAME_IMPERFECT_COLORS )
+GAME( 1981, pleiads,  0,        pleiads,  pleiads, driver_device,  0,        ROT90, "Tehkan", "Pleiads (Tehkan)", GAME_IMPERFECT_COLORS )
+GAME( 1981, pleiadsb2,pleiads,  pleiads,  pleiads, driver_device,  0,        ROT90, "bootleg (ESG)", "Pleiads (bootleg set 2)", GAME_SUPPORTS_SAVE )
+GAME( 1981, pleiadbl, pleiads,  pleiads,  pleiadbl, driver_device, 0,        ROT90, "bootleg", "Pleiads (bootleg set 1)", GAME_IMPERFECT_COLORS )
+GAME( 1981, pleiadce, pleiads,  pleiads,  pleiadce, driver_device, 0,        ROT90, "Tehkan (Centuri license)", "Pleiads (Centuri)", GAME_IMPERFECT_COLORS )
+GAME( 1981, capitol,  pleiads,  phoenix,  capitol, driver_device,  0,        ROT90, "bootleg? (Universal Video Spiel)", "Capitol", GAME_IMPERFECT_COLORS )
 
-GAME( 1982, survival, 0,        survival, survival, 0,        ROT90, "Rock-Ola", "Survival", GAME_IMPERFECT_COLORS )
+GAME( 1982, survival, 0,        survival, survival, driver_device, 0,        ROT90, "Rock-Ola", "Survival", GAME_IMPERFECT_COLORS )

@@ -26,79 +26,83 @@
 class cardline_state : public driver_device
 {
 public:
-	cardline_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	cardline_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"),
+		m_colorram(*this, "colorram"){ }
 
 	int m_video;
-	UINT8 *m_videoram;
-	UINT8 *m_colorram;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_colorram;
 	int m_var;
+	DECLARE_WRITE8_MEMBER(vram_w);
+	DECLARE_WRITE8_MEMBER(attr_w);
+	DECLARE_WRITE8_MEMBER(video_w);
+	DECLARE_READ8_MEMBER(unk_r);
+	DECLARE_WRITE8_MEMBER(lamps_w);
+	virtual void palette_init();
+	UINT32 screen_update_cardline(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
 
 #define DRAW_TILE(machine, offset, transparency) drawgfx_transpen(bitmap, cliprect, (machine).gfx[0],\
-					(state->m_videoram[index+offset] | (state->m_colorram[index+offset]<<8))&0x3fff,\
-					(state->m_colorram[index+offset]&0x80)>>7,\
+					(m_videoram[index+offset] | (m_colorram[index+offset]<<8))&0x3fff,\
+					(m_colorram[index+offset]&0x80)>>7,\
 					0,0,\
 					x<<3, y<<3,\
 					transparency?transparency:(UINT32)-1);
 
-static SCREEN_UPDATE( cardline )
+UINT32 cardline_state::screen_update_cardline(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	cardline_state *state = screen->machine().driver_data<cardline_state>();
 	int x,y;
-	bitmap_fill(bitmap,cliprect,0);
+	bitmap.fill(0, cliprect);
 	for(y=0;y<32;y++)
 	{
 		for(x=0;x<64;x++)
 		{
 			int index=y*64+x;
-			if(state->m_video&1)
+			if(m_video&1)
 			{
-				DRAW_TILE(screen->machine(),0,0);
-				DRAW_TILE(screen->machine(),0x800,1);
+				DRAW_TILE(machine(),0,0);
+				DRAW_TILE(machine(),0x800,1);
 			}
 
-			if(state->m_video&2)
+			if(m_video&2)
 			{
-				DRAW_TILE(screen->machine(),0x1000,0);
-				DRAW_TILE(screen->machine(),0x1800,1);
+				DRAW_TILE(machine(),0x1000,0);
+				DRAW_TILE(machine(),0x1800,1);
 			}
 		}
 	}
 	return 0;
 }
 
-static WRITE8_HANDLER(vram_w)
+WRITE8_MEMBER(cardline_state::vram_w)
 {
-	cardline_state *state = space->machine().driver_data<cardline_state>();
-	offset+=0x1000*((state->m_video&2)>>1);
-	state->m_videoram[offset]=data;
+	offset+=0x1000*((m_video&2)>>1);
+	m_videoram[offset]=data;
 }
 
-static WRITE8_HANDLER(attr_w)
+WRITE8_MEMBER(cardline_state::attr_w)
 {
-	cardline_state *state = space->machine().driver_data<cardline_state>();
-	offset+=0x1000*((state->m_video&2)>>1);
-	state->m_colorram[offset]=data;
+	offset+=0x1000*((m_video&2)>>1);
+	m_colorram[offset]=data;
 }
 
-static WRITE8_HANDLER(video_w)
+WRITE8_MEMBER(cardline_state::video_w)
 {
-	cardline_state *state = space->machine().driver_data<cardline_state>();
-	state->m_video=data;
+	m_video=data;
 }
 
-static READ8_HANDLER(unk_r)
+READ8_MEMBER(cardline_state::unk_r)
 {
-	cardline_state *state = space->machine().driver_data<cardline_state>();
-	state->m_var^=0x10;
-	//printf("var %d\n",state->m_var);
-	return state->m_var;
+	m_var^=0x10;
+	//printf("var %d\n",m_var);
+	return m_var;
 }
 
-static WRITE8_HANDLER(lamps_w)
+WRITE8_MEMBER(cardline_state::lamps_w)
 {
 	/* button lamps 1-8 (collect, card 1-5, bet, start) */
 	output_set_lamp_value(5,(data >> 0) & 1);
@@ -111,11 +115,11 @@ static WRITE8_HANDLER(lamps_w)
 	output_set_lamp_value(7,(data >> 7) & 1);
 }
 
-static ADDRESS_MAP_START( mem_prg, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( mem_prg, AS_PROGRAM, 8, cardline_state )
 	AM_RANGE(0x0000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( mem_io, AS_IO, 8 )
+static ADDRESS_MAP_START( mem_io, AS_IO, 8, cardline_state )
 	AM_RANGE(0x0000, 0x1fff) AM_RAM
 	AM_RANGE(0x2003, 0x2003) AM_READ_PORT("IN0")
 	AM_RANGE(0x2005, 0x2005) AM_READ_PORT("IN1")
@@ -123,13 +127,13 @@ static ADDRESS_MAP_START( mem_io, AS_IO, 8 )
 	AM_RANGE(0x2007, 0x2007) AM_WRITE(lamps_w)
 	AM_RANGE(0x2008, 0x2008) AM_NOP
 	AM_RANGE(0x2080, 0x213f) AM_NOP
-	AM_RANGE(0x2400, 0x2400) AM_DEVREADWRITE_MODERN("oki", okim6295_device, read, write)
+	AM_RANGE(0x2400, 0x2400) AM_DEVREADWRITE("oki", okim6295_device, read, write)
 	AM_RANGE(0x2800, 0x2801) AM_NOP
 	AM_RANGE(0x2840, 0x2840) AM_NOP
 	AM_RANGE(0x2880, 0x2880) AM_NOP
 	AM_RANGE(0x3003, 0x3003) AM_NOP
-	AM_RANGE(0xc000, 0xdfff) AM_WRITE(vram_w) AM_BASE_MEMBER(cardline_state, m_videoram)
-	AM_RANGE(0xe000, 0xffff) AM_WRITE(attr_w) AM_BASE_MEMBER(cardline_state, m_colorram)
+	AM_RANGE(0xc000, 0xdfff) AM_WRITE(vram_w) AM_SHARE("videoram")
+	AM_RANGE(0xe000, 0xffff) AM_WRITE(attr_w) AM_SHARE("colorram")
 	/* Ports */
 	AM_RANGE(MCS51_PORT_P1, MCS51_PORT_P1) AM_READWRITE(unk_r, video_w)
 ADDRESS_MAP_END
@@ -181,11 +185,12 @@ static GFXDECODE_START( cardline )
 	GFXDECODE_ENTRY( "gfx1", 0, charlayout,     0, 2 )
 GFXDECODE_END
 
-static PALETTE_INIT(cardline)
+void cardline_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i,r,g,b,data;
 	int bit0,bit1,bit2;
-	for (i = 0;i < machine.total_colors();i++)
+	for (i = 0;i < machine().total_colors();i++)
 	{
 		data=color_prom[i];
 
@@ -203,7 +208,7 @@ static PALETTE_INIT(cardline)
 		bit0 = (data >> 0) & 0x01;
 		bit1 = (data >> 1) & 0x01;
 		b = 0x55 * bit0 + 0xaa * bit1;
-		palette_set_color(machine,i,MAKE_RGB(r,g,b));
+		palette_set_color(machine(),i,MAKE_RGB(r,g,b));
 	}
 }
 
@@ -213,20 +218,18 @@ static MACHINE_CONFIG_START( cardline, cardline_state )
 	MCFG_CPU_ADD("maincpu", I80C32,12000000)
 	MCFG_CPU_PROGRAM_MAP(mem_prg)
 	MCFG_CPU_IO_MAP(mem_io)
-	//MCFG_CPU_VBLANK_INT("screen", irq1_line_hold)
+	//MCFG_CPU_VBLANK_INT_DRIVER("screen", cardline_state,  irq1_line_hold)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 35*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 64*8-1, 0*8, 32*8-1)
-	MCFG_SCREEN_UPDATE(cardline)
+	MCFG_SCREEN_UPDATE_DRIVER(cardline_state, screen_update_cardline)
 
 	MCFG_GFXDECODE(cardline)
 	MCFG_PALETTE_LENGTH(512)
-	MCFG_PALETTE_INIT(cardline)
 
 	MCFG_DEFAULT_LAYOUT(layout_cardline)
 
@@ -261,4 +264,4 @@ ROM_START( cardline )
 
 ROM_END
 
-GAME( 199?, cardline,  0,       cardline,  cardline,  0, ROT0, "Veltmeijer", "Card Line" , 0)
+GAME( 199?, cardline,  0,       cardline,  cardline, driver_device,  0, ROT0, "Veltmeijer", "Card Line" , 0)

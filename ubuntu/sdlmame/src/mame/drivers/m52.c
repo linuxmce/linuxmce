@@ -49,7 +49,7 @@
 #include "includes/m52.h"
 
 
-#define MASTER_CLOCK		XTAL_18_432MHz
+#define MASTER_CLOCK        XTAL_18_432MHz
 
 
 /*************************************
@@ -58,14 +58,14 @@
  *
  *************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, m52_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
-	AM_RANGE(0x8000, 0x83ff) AM_RAM_WRITE(m52_videoram_w) AM_BASE_MEMBER(m52_state, m_videoram)
-	AM_RANGE(0x8400, 0x87ff) AM_RAM_WRITE(m52_colorram_w) AM_BASE_MEMBER(m52_state, m_colorram)
+	AM_RANGE(0x8000, 0x83ff) AM_RAM_WRITE(m52_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0x8400, 0x87ff) AM_RAM_WRITE(m52_colorram_w) AM_SHARE("colorram")
 	AM_RANGE(0x8800, 0x8800) AM_MIRROR(0x07ff) AM_READ(m52_protection_r)
-	AM_RANGE(0xc800, 0xcbff) AM_MIRROR(0x0400) AM_WRITEONLY AM_BASE_SIZE_MEMBER(m52_state, m_spriteram, m_spriteram_size)
-	AM_RANGE(0xd000, 0xd000) AM_MIRROR(0x07fc) AM_WRITE(irem_sound_cmd_w)
-	AM_RANGE(0xd001, 0xd001) AM_MIRROR(0x07fc) AM_WRITE(m52_flipscreen_w)	/* + coin counters */
+	AM_RANGE(0xc800, 0xcbff) AM_MIRROR(0x0400) AM_WRITEONLY AM_SHARE("spriteram")
+	AM_RANGE(0xd000, 0xd000) AM_MIRROR(0x07fc) AM_WRITE_LEGACY(irem_sound_cmd_w)
+	AM_RANGE(0xd001, 0xd001) AM_MIRROR(0x07fc) AM_WRITE(m52_flipscreen_w)   /* + coin counters */
 	AM_RANGE(0xd000, 0xd000) AM_MIRROR(0x07f8) AM_READ_PORT("IN0")
 	AM_RANGE(0xd001, 0xd001) AM_MIRROR(0x07f8) AM_READ_PORT("IN1")
 	AM_RANGE(0xd002, 0xd002) AM_MIRROR(0x07f8) AM_READ_PORT("IN2")
@@ -75,12 +75,12 @@ static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( alpha1v_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( alpha1v_map, AS_PROGRAM, 8, m52_state )
 	AM_RANGE(0x0000, 0x6fff) AM_ROM
-	AM_RANGE(0x8000, 0x83ff) AM_RAM_WRITE(m52_videoram_w) AM_BASE_MEMBER(m52_state, m_videoram)
-	AM_RANGE(0x8400, 0x87ff) AM_RAM_WRITE(m52_colorram_w) AM_BASE_MEMBER(m52_state, m_colorram)
-	AM_RANGE(0xc800, 0xc9ff) AM_WRITEONLY AM_BASE_SIZE_MEMBER(m52_state, m_spriteram, m_spriteram_size) AM_SHARE("share1") // bigger or mirrored?
-	AM_RANGE(0xd000, 0xd000) AM_READ_PORT("IN0") AM_WRITE(irem_sound_cmd_w)
+	AM_RANGE(0x8000, 0x83ff) AM_RAM_WRITE(m52_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0x8400, 0x87ff) AM_RAM_WRITE(m52_colorram_w) AM_SHARE("colorram")
+	AM_RANGE(0xc800, 0xc9ff) AM_WRITEONLY AM_SHARE("spriteram") // bigger or mirrored?
+	AM_RANGE(0xd000, 0xd000) AM_READ_PORT("IN0") AM_WRITE_LEGACY(irem_sound_cmd_w)
 	AM_RANGE(0xd001, 0xd001) AM_READ_PORT("IN1") AM_WRITE(alpha1v_flipscreen_w)
 	AM_RANGE(0xd002, 0xd002) AM_READ_PORT("IN2")
 	AM_RANGE(0xd003, 0xd003) AM_READ_PORT("DSW1")
@@ -89,7 +89,7 @@ static ADDRESS_MAP_START( alpha1v_map, AS_PROGRAM, 8 )
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( main_portmap, AS_IO, 8 )
+static ADDRESS_MAP_START( main_portmap, AS_IO, 8, m52_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0x00) AM_MIRROR(0x1f) AM_WRITE(m52_scroll_w)
 	AM_RANGE(0x40, 0x40) AM_MIRROR(0x1f) AM_WRITE(m52_bg1xpos_w)
@@ -111,7 +111,7 @@ ADDRESS_MAP_END
 static INPUT_PORTS_START( m52 )
 	PORT_START("IN0")
 	/* Start 1 & 2 also restarts and freezes the game with stop mode on
-       and are used in test mode to enter and esc the various tests */
+	   and are used in test mode to enter and esc the various tests */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START2 )
 	/* coin input must be active for 19 frames to be consistently recognized */
@@ -380,15 +380,13 @@ GFXDECODE_END
  *
  *************************************/
 
-static MACHINE_RESET( m52 )
+void m52_state::machine_reset()
 {
-	m52_state *state = machine.driver_data<m52_state>();
-
-	state->m_bg1xpos = 0;
-	state->m_bg1ypos = 0;
-	state->m_bg2xpos = 0;
-	state->m_bg2ypos = 0;
-	state->m_bgcontrol = 0;
+	m_bg1xpos = 0;
+	m_bg1ypos = 0;
+	m_bg2xpos = 0;
+	m_bg2ypos = 0;
+	m_bgcontrol = 0;
 }
 
 static MACHINE_CONFIG_START( m52, m52_state )
@@ -397,9 +395,7 @@ static MACHINE_CONFIG_START( m52, m52_state )
 	MCFG_CPU_ADD("maincpu", Z80, MASTER_CLOCK/6)
 	MCFG_CPU_PROGRAM_MAP(main_map)
 	MCFG_CPU_IO_MAP(main_portmap)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
-
-	MCFG_MACHINE_RESET(m52)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", m52_state,  irq0_line_hold)
 
 	/* video hardware */
 	MCFG_GFXDECODE(m52)
@@ -407,11 +403,7 @@ static MACHINE_CONFIG_START( m52, m52_state )
 
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_RAW_PARAMS(MASTER_CLOCK/3, 384, 136, 376, 282, 22, 274)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
-	MCFG_SCREEN_UPDATE(m52)
-
-	MCFG_PALETTE_INIT(m52)
-	MCFG_VIDEO_START(m52)
+	MCFG_SCREEN_UPDATE_DRIVER(m52_state, screen_update_m52)
 
 	/* sound hardware */
 	MCFG_FRAGMENT_ADD(m52_sound_c_audio)
@@ -501,6 +493,40 @@ ROM_START( mpatrolw )
 	ROM_LOAD( "mpc-2.2h",     0x0240, 0x0100, CRC(7ae4cd97) SHA1(bc0662fac82ffe65f02092d912b2c2b0c7a8ac2b) ) /* sprite lookup table */
 ROM_END
 
+ROM_START( mranger )
+	ROM_REGION( 0x10000, "maincpu", 0 )
+	ROM_LOAD( "mpa-1.3m",      0x0000, 0x1000, CRC(5873a860) SHA1(8c03726d6e049c3edbc277440184e31679f78258) )
+	ROM_LOAD( "mra-2.3l",      0x1000, 0x1000, CRC(217dd431) SHA1(7b81f854209afc1fd3df11b7375f36de6bc4a7c3) )
+	ROM_LOAD( "mra-3.3k",      0x2000, 0x1000, CRC(9f0af7b2) SHA1(3daaec15b0d3bc30723ebb14b50f66f288f0d096) )
+	ROM_LOAD( "mra-4.3j",      0x3000, 0x1000, CRC(7fe8e2cd) SHA1(4ffad9c7a9360999b213b790c6c76cc79c8e49d5) )
+
+	ROM_REGION( 0x8000, "iremsound", 0 )
+	ROM_LOAD( "mp-s1.1a",     0x7000, 0x1000, CRC(561d3108) SHA1(4998c68a9e9a8002251fa8f07aa1082444a9dc80) )
+
+	ROM_REGION( 0x2000, "gfx1", 0 )
+	ROM_LOAD( "mpe-5.3e",     0x0000, 0x1000, CRC(e3ee7f75) SHA1(b03d0d56150d3e9da4a4c871338097b4f450b649) )       /* chars */
+	ROM_LOAD( "mpe-4.3f",     0x1000, 0x1000, CRC(cca6d023) SHA1(fecb3059fb09897a096add9452b50aec55c07545) )
+
+	ROM_REGION( 0x2000, "gfx2", 0 )
+	ROM_LOAD( "mpb-2.3m",     0x0000, 0x1000, CRC(707ace5e) SHA1(93c682e13e74bce29ced3a87bffb29569c114c3b) )       /* sprites */
+	ROM_LOAD( "mpb-1.3n",     0x1000, 0x1000, CRC(9b72133a) SHA1(1393ef92ae1ad58a4b62ca1660c0793d30a8b5e2) )
+
+	ROM_REGION( 0x1000, "gfx3", 0 )
+	ROM_LOAD( "mpe-1.3l",     0x0000, 0x1000, CRC(c46a7f72) SHA1(8bb7c9acaf6833fb6c0575b015991b873a305a84) )       /* background graphics */
+
+	ROM_REGION( 0x1000, "gfx4", 0 )
+	ROM_LOAD( "mpe-2.3k",     0x0000, 0x1000, CRC(c7aa1fb0) SHA1(14c6c76e1d0db2c0745e5d6d33ea6945fac8e9ee) )
+
+	ROM_REGION( 0x1000, "gfx5", 0 )
+	ROM_LOAD( "mpe-3.3h",     0x0000, 0x1000, CRC(a0919392) SHA1(8a090cb8d483a3d67c7360058e3fdd70e151cd62) )
+
+	ROM_REGION( 0x0340, "proms", 0 )
+	ROM_LOAD( "mpc-4.2a",     0x0000, 0x0200, CRC(07f99284) SHA1(dfc52958f2520e1ce4446dd4c84c91413bbacf76) )
+	ROM_LOAD( "mpc-3.1m",     0x0200, 0x0020, CRC(6a57eff2) SHA1(2d1c12dab5915da2ccd466e39436c88be434d634) ) /* background palette */
+	ROM_LOAD( "mpc-1.1f",     0x0220, 0x0020, CRC(26979b13) SHA1(8c41a8cce4f3384c392a9f7a223a50d7be0e14a5) ) /* sprite palette */
+	ROM_LOAD( "mpc-2.2h",     0x0240, 0x0100, CRC(7ae4cd97) SHA1(bc0662fac82ffe65f02092d912b2c2b0c7a8ac2b) ) /* sprite lookup table */
+ROM_END
+
 
 ROM_START( alpha1v )
 	ROM_REGION( 0x10000, "maincpu", 0 )
@@ -550,6 +576,7 @@ ROM_END
  *
  *************************************/
 
-GAME( 1982, mpatrol,  0,        m52,      mpatrol,  0, ROT0, "Irem", "Moon Patrol", GAME_SUPPORTS_SAVE )
-GAME( 1982, mpatrolw, mpatrol,  m52,      mpatrolw, 0, ROT0, "Irem (Williams license)", "Moon Patrol (Williams)", GAME_SUPPORTS_SAVE )
-GAME( 1988, alpha1v,  0,        alpha1v,  alpha1v,  0, ROT0, "Vision Electronics", "Alpha One (Vision Electronics / Kyle Hodgetts)", GAME_NOT_WORKING|GAME_NO_SOUND|GAME_SUPPORTS_SAVE )
+GAME( 1982, mpatrol,  0,        m52,      mpatrol,  driver_device,  0, ROT0, "Irem", "Moon Patrol", GAME_SUPPORTS_SAVE )
+GAME( 1982, mpatrolw, mpatrol,  m52,      mpatrolw, driver_device,  0, ROT0, "Irem (Williams license)", "Moon Patrol (Williams)", GAME_SUPPORTS_SAVE ) // USA
+GAME( 1982, mranger,  mpatrol,  m52,      mpatrol,  driver_device,  0, ROT0, "bootleg", "Moon Ranger (bootleg of Moon Patrol)", GAME_SUPPORTS_SAVE ) // Italy
+GAME( 1988, alpha1v,  0,        alpha1v,  alpha1v,  driver_device,  0, ROT0, "Vision Electronics", "Alpha One (Vision Electronics)", GAME_NOT_WORKING| GAME_NO_SOUND| GAME_SUPPORTS_SAVE )

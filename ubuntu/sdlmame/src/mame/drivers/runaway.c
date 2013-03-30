@@ -17,44 +17,41 @@
 #include "includes/runaway.h"
 
 
-static TIMER_CALLBACK( interrupt_callback )
+TIMER_CALLBACK_MEMBER(runaway_state::interrupt_callback)
 {
-	runaway_state *state = machine.driver_data<runaway_state>();
 	/* assume Centipede-style interrupt timing */
 	int scanline = param;
 
-	cputag_set_input_line(machine, "maincpu", 0, (scanline & 32) ? ASSERT_LINE : CLEAR_LINE);
+	machine().device("maincpu")->execute().set_input_line(0, (scanline & 32) ? ASSERT_LINE : CLEAR_LINE);
 
 	scanline += 32;
 
 	if (scanline >= 263)
 		scanline = 16;
 
-	state->m_interrupt_timer->adjust(machine.primary_screen->time_until_pos(scanline), scanline);
+	m_interrupt_timer->adjust(machine().primary_screen->time_until_pos(scanline), scanline);
 }
 
-static MACHINE_START( runaway )
+void runaway_state::machine_start()
 {
-	runaway_state *state = machine.driver_data<runaway_state>();
-	state->m_interrupt_timer = machine.scheduler().timer_alloc(FUNC(interrupt_callback));
+	m_interrupt_timer = machine().scheduler().timer_alloc(timer_expired_delegate(FUNC(runaway_state::interrupt_callback),this));
 }
 
-static MACHINE_RESET( runaway )
+void runaway_state::machine_reset()
 {
-	runaway_state *state = machine.driver_data<runaway_state>();
-	state->m_interrupt_timer->adjust(machine.primary_screen->time_until_pos(16), 16);
+	m_interrupt_timer->adjust(machine().primary_screen->time_until_pos(16), 16);
 }
 
 
-static READ8_HANDLER( runaway_input_r )
+READ8_MEMBER(runaway_state::runaway_input_r)
 {
 	UINT8 val = 0;
 
-	if (input_port_read(space->machine(), "3000D7") & (1 << offset))
+	if (ioport("3000D7")->read() & (1 << offset))
 	{
 		val |= 0x80;
 	}
-	if (input_port_read(space->machine(), "3000D6") & (1 << offset))
+	if (ioport("3000D6")->read() & (1 << offset))
 	{
 		val |= 0x40;
 	}
@@ -63,31 +60,31 @@ static READ8_HANDLER( runaway_input_r )
 }
 
 
-static READ8_DEVICE_HANDLER( runaway_pot_r )
+READ8_MEMBER(runaway_state::runaway_pot_r)
 {
-	return (input_port_read(device->machine(), "7000") << (7 - offset)) & 0x80;
+	return (machine().root_device().ioport("7000")->read() << (7 - offset)) & 0x80;
 }
 
 
-static WRITE8_HANDLER( runaway_led_w )
+WRITE8_MEMBER(runaway_state::runaway_led_w)
 {
-	set_led_status(space->machine(), offset, ~data & 1);
+	set_led_status(machine(), offset, ~data & 1);
 }
 
 
-static WRITE8_HANDLER( runaway_irq_ack_w )
+WRITE8_MEMBER(runaway_state::runaway_irq_ack_w)
 {
-	cputag_set_input_line(space->machine(), "maincpu", 0, CLEAR_LINE);
+	machine().device("maincpu")->execute().set_input_line(0, CLEAR_LINE);
 }
 
 
-static ADDRESS_MAP_START( runaway_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( runaway_map, AS_PROGRAM, 8, runaway_state )
 	AM_RANGE(0x0000, 0x03ff) AM_RAM
-	AM_RANGE(0x0400, 0x07bf) AM_RAM_WRITE(runaway_video_ram_w) AM_BASE_MEMBER(runaway_state, m_video_ram)
-	AM_RANGE(0x07c0, 0x07ff) AM_RAM AM_BASE_MEMBER(runaway_state, m_sprite_ram)
+	AM_RANGE(0x0400, 0x07bf) AM_RAM_WRITE(runaway_video_ram_w) AM_SHARE("video_ram")
+	AM_RANGE(0x07c0, 0x07ff) AM_RAM AM_SHARE("sprite_ram")
 	AM_RANGE(0x1000, 0x1000) AM_WRITE(runaway_irq_ack_w)
-	AM_RANGE(0x1400, 0x143f) AM_DEVWRITE("earom", atari_vg_earom_w)
-	AM_RANGE(0x1800, 0x1800) AM_DEVWRITE("earom", atari_vg_earom_ctrl_w)
+	AM_RANGE(0x1400, 0x143f) AM_DEVWRITE("earom", atari_vg_earom_device, write)
+	AM_RANGE(0x1800, 0x1800) AM_DEVWRITE("earom", atari_vg_earom_device, ctrl_w)
 	AM_RANGE(0x1c00, 0x1c0f) AM_WRITE(runaway_paletteram_w)
 	AM_RANGE(0x2000, 0x2000) AM_WRITENOP /* coin counter? */
 	AM_RANGE(0x2001, 0x2001) AM_WRITENOP /* coin counter? */
@@ -96,18 +93,18 @@ static ADDRESS_MAP_START( runaway_map, AS_PROGRAM, 8 )
 
 	AM_RANGE(0x3000, 0x3007) AM_READ(runaway_input_r)
 	AM_RANGE(0x4000, 0x4000) AM_READ_PORT("4000")
-	AM_RANGE(0x5000, 0x5000) AM_DEVREAD("earom", atari_vg_earom_r)
-	AM_RANGE(0x6000, 0x600f) AM_DEVREADWRITE("pokey1", pokey_r,pokey_w)
-	AM_RANGE(0x7000, 0x700f) AM_DEVREADWRITE("pokey2", pokey_r,pokey_w)
+	AM_RANGE(0x5000, 0x5000) AM_DEVREAD("earom", atari_vg_earom_device, read)
+	AM_RANGE(0x6000, 0x600f) AM_DEVREADWRITE("pokey1", pokey_device, read, write)
+	AM_RANGE(0x7000, 0x700f) AM_DEVREADWRITE("pokey2", pokey_device, read, write)
 	AM_RANGE(0x8000, 0xcfff) AM_ROM
-	AM_RANGE(0xf000, 0xffff) AM_ROM	/* for the interrupt vectors */
+	AM_RANGE(0xf000, 0xffff) AM_ROM /* for the interrupt vectors */
 ADDRESS_MAP_END
 
 
 static INPUT_PORTS_START( qwak )
-	PORT_START("3000D7")	/* 3000 D7 */
+	PORT_START("3000D7")    /* 3000 D7 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_VBLANK )
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -115,7 +112,7 @@ static INPUT_PORTS_START( qwak )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN3 )
 
-	PORT_START("3000D6")	/* 3000 D6 */
+	PORT_START("3000D6")    /* 3000 D6 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT )
@@ -125,7 +122,7 @@ static INPUT_PORTS_START( qwak )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("4000")	/* 4000 */
+	PORT_START("4000")  /* 4000 */
 	PORT_DIPNAME( 0x01, 0x00, "DIP 1" )
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ))
 	PORT_DIPSETTING(    0x00, DEF_STR( On ))
@@ -159,7 +156,7 @@ INPUT_PORTS_END
 static INPUT_PORTS_START( runaway )
 	PORT_START("3000D7") /* 3000 D7 */
 	PORT_BIT ( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT ( 0x02, IP_ACTIVE_HIGH, IPT_VBLANK )
+	PORT_BIT ( 0x02, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_BIT ( 0x04, IP_ACTIVE_LOW, IPT_TILT )
 	PORT_BIT ( 0x08, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )
@@ -172,7 +169,7 @@ static INPUT_PORTS_START( runaway )
 	PORT_BIT ( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT ( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT ( 0x08, IP_ACTIVE_LOW, IPT_BUTTON2 )
-	PORT_BIT ( 0x10, IP_ACTIVE_LOW, IPT_START1 )	/* also level skip if invincibility is on */
+	PORT_BIT ( 0x10, IP_ACTIVE_LOW, IPT_START1 )    /* also level skip if invincibility is on */
 	PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT ( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT ( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -335,14 +332,14 @@ static const pokey_interface pokey_interface_1 =
 static const pokey_interface pokey_interface_2 =
 {
 	{
-		DEVCB_HANDLER(runaway_pot_r),
-		DEVCB_HANDLER(runaway_pot_r),
-		DEVCB_HANDLER(runaway_pot_r),
-		DEVCB_HANDLER(runaway_pot_r),
-		DEVCB_HANDLER(runaway_pot_r),
-		DEVCB_HANDLER(runaway_pot_r),
-		DEVCB_HANDLER(runaway_pot_r),
-		DEVCB_HANDLER(runaway_pot_r)
+		DEVCB_DRIVER_MEMBER(runaway_state,runaway_pot_r),
+		DEVCB_DRIVER_MEMBER(runaway_state,runaway_pot_r),
+		DEVCB_DRIVER_MEMBER(runaway_state,runaway_pot_r),
+		DEVCB_DRIVER_MEMBER(runaway_state,runaway_pot_r),
+		DEVCB_DRIVER_MEMBER(runaway_state,runaway_pot_r),
+		DEVCB_DRIVER_MEMBER(runaway_state,runaway_pot_r),
+		DEVCB_DRIVER_MEMBER(runaway_state,runaway_pot_r),
+		DEVCB_DRIVER_MEMBER(runaway_state,runaway_pot_r)
 	}
 };
 
@@ -353,33 +350,29 @@ static MACHINE_CONFIG_START( runaway, runaway_state )
 	MCFG_CPU_ADD("maincpu", M6502, 12096000 / 8) /* ? */
 	MCFG_CPU_PROGRAM_MAP(runaway_map)
 
-	MCFG_MACHINE_START(runaway)
-	MCFG_MACHINE_RESET(runaway)
 
 	MCFG_ATARIVGEAROM_ADD("earom")
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(256, 263)
 	MCFG_SCREEN_VISIBLE_AREA(0, 255, 0, 239)
-	MCFG_SCREEN_UPDATE(runaway)
+	MCFG_SCREEN_UPDATE_DRIVER(runaway_state, screen_update_runaway)
 
 	MCFG_GFXDECODE(runaway)
 	MCFG_PALETTE_LENGTH(16)
 
-	MCFG_VIDEO_START(runaway)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("pokey1", POKEY, 12096000 / 8)
-	MCFG_SOUND_CONFIG(pokey_interface_1)
+	MCFG_POKEY_ADD("pokey1", 12096000 / 8)
+	MCFG_POKEY_CONFIG(pokey_interface_1)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 
-	MCFG_SOUND_ADD("pokey2", POKEY, 12096000 / 8)
-	MCFG_SOUND_CONFIG(pokey_interface_2)
+	MCFG_POKEY_ADD("pokey2", 12096000 / 8)
+	MCFG_POKEY_CONFIG(pokey_interface_2)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
 MACHINE_CONFIG_END
 
@@ -391,9 +384,9 @@ static MACHINE_CONFIG_DERIVED( qwak, runaway )
 	/* video hardware */
 	MCFG_GFXDECODE(qwak)
 
-	MCFG_VIDEO_START(qwak)
+	MCFG_VIDEO_START_OVERRIDE(runaway_state,qwak)
 	MCFG_SCREEN_MODIFY("screen")
-	MCFG_SCREEN_UPDATE(qwak)
+	MCFG_SCREEN_UPDATE_DRIVER(runaway_state, screen_update_qwak)
 
 MACHINE_CONFIG_END
 
@@ -430,5 +423,5 @@ ROM_START( qwak )
 ROM_END
 
 
-GAME( 1982, qwak,    0, qwak,    qwak,    0, ROT270, "Atari", "Qwak (prototype)", GAME_SUPPORTS_SAVE )
-GAME( 1982, runaway, 0, runaway, runaway, 0, ROT0,   "Atari", "Runaway (prototype)", GAME_SUPPORTS_SAVE )
+GAME( 1982, qwak,    0, qwak,    qwak, driver_device,    0, ROT270, "Atari", "Qwak (prototype)", GAME_SUPPORTS_SAVE )
+GAME( 1982, runaway, 0, runaway, runaway, driver_device, 0, ROT0,   "Atari", "Runaway (prototype)", GAME_SUPPORTS_SAVE )

@@ -23,42 +23,41 @@
     TYPE DEFINITIONS
 ***************************************************************************/
 
-typedef struct _ui_gfx_state ui_gfx_state;
-struct _ui_gfx_state
+struct ui_gfx_state
 {
-	UINT8			mode;				/* which mode are we in? */
+	UINT8           mode;               /* which mode are we in? */
 
 	/* intermediate bitmaps */
-	UINT8			bitmap_dirty;		/* is the bitmap dirty? */
-	bitmap_t *		bitmap;				/* bitmap for drawing gfx and tilemaps */
-	render_texture *texture;			/* texture for rendering the above bitmap */
+	UINT8           bitmap_dirty;       /* is the bitmap dirty? */
+	bitmap_rgb32 *  bitmap;             /* bitmap for drawing gfx and tilemaps */
+	render_texture *texture;            /* texture for rendering the above bitmap */
 
 	/* palette-specific data */
 	struct
 	{
-		int		which;					/* which subset (palette or colortable)? */
-		int		offset;					/* current offset of top,left item */
-		int		count;					/* number of items per row */
+		int     which;                  /* which subset (palette or colortable)? */
+		int     offset;                 /* current offset of top,left item */
+		int     count;                  /* number of items per row */
 	} palette;
 
 	/* graphics-viewer-specific data */
 	struct
 	{
-		int		set;					/* which set is visible */
-		int		offset[MAX_GFX_ELEMENTS]; /* current offset of top,left item */
-		int		color[MAX_GFX_ELEMENTS]; /* current color selected */
-		int		count[MAX_GFX_ELEMENTS]; /* number of items per row */
-		UINT8	rotate[MAX_GFX_ELEMENTS]; /* current rotation (orientation) value */
+		int     set;                    /* which set is visible */
+		int     offset[MAX_GFX_ELEMENTS]; /* current offset of top,left item */
+		int     color[MAX_GFX_ELEMENTS]; /* current color selected */
+		int     count[MAX_GFX_ELEMENTS]; /* number of items per row */
+		UINT8   rotate[MAX_GFX_ELEMENTS]; /* current rotation (orientation) value */
 	} gfxset;
 
 	/* tilemap-viewer-specific data */
 	struct
 	{
-		int		which;					/* which tilemap are we viewing? */
-		int		xoffs;					/* current X offset */
-		int		yoffs;					/* current Y offset */
-		int		zoom;					/* zoom factor */
-		UINT8	rotate;					/* current rotation (orientation) value */
+		int     which;                  /* which tilemap are we viewing? */
+		int     xoffs;                  /* current X offset */
+		int     yoffs;                  /* current Y offset */
+		int     zoom;                   /* zoom factor */
+		UINT8   rotate;                 /* current rotation (orientation) value */
 	} tilemap;
 };
 
@@ -84,7 +83,7 @@ static void palette_handler(running_machine &machine, render_container *containe
 
 /* graphics set handling */
 static void gfxset_handle_keys(running_machine &machine, ui_gfx_state *state, int xcells, int ycells);
-static void gfxset_draw_item(running_machine &machine, const gfx_element *gfx, int index, bitmap_t *bitmap, int dstx, int dsty, int color, int rotate);
+static void gfxset_draw_item(running_machine &machine, gfx_element *gfx, int index, bitmap_rgb32 &bitmap, int dstx, int dsty, int color, int rotate);
 static void gfxset_update_bitmap(running_machine &machine, ui_gfx_state *state, int xcells, int ycells, gfx_element *gfx);
 static void gfxset_handler(running_machine &machine, render_container *container, ui_gfx_state *state);
 
@@ -109,7 +108,7 @@ void ui_gfx_init(running_machine &machine)
 	int gfx;
 
 	/* make sure we clean up after ourselves */
-	machine.add_notifier(MACHINE_NOTIFY_EXIT, ui_gfx_exit);
+	machine.add_notifier(MACHINE_NOTIFY_EXIT, machine_notify_delegate(FUNC(ui_gfx_exit), &machine));
 
 	/* initialize our global state */
 	memset(state, 0, sizeof(*state));
@@ -154,7 +153,7 @@ UINT32 ui_gfx_ui_handler(running_machine &machine, render_container *container, 
 	ui_gfx_state *state = &ui_gfx;
 
 	/* if we have nothing, implicitly cancel */
-	if (machine.total_colors() == 0 && machine.colortable == NULL && machine.gfx[0] == NULL && tilemap_count(machine) == 0)
+	if (machine.total_colors() == 0 && machine.colortable == NULL && machine.gfx[0] == NULL && machine.tilemap().count() == 0)
 		goto cancel;
 
 	/* if we're not paused, mark the bitmap dirty */
@@ -189,7 +188,7 @@ again:
 
 		case 2:
 			/* if we have tilemaps, display them */
-			if (tilemap_count(machine) > 0)
+			if (machine.tilemap().count() > 0)
 			{
 				tilemap_handler(machine, container, state);
 				break;
@@ -473,8 +472,8 @@ static void gfxset_handler(running_machine &machine, render_container *container
 	cellboxheight = (cellboxbounds.y1 - cellboxbounds.y0) * (float)targheight;
 
 	/* compute the number of source pixels in a cell */
-	cellxpix = 1 + ((state->gfxset.rotate[state->gfxset.set] & ORIENTATION_SWAP_XY) ? gfx->height : gfx->width);
-	cellypix = 1 + ((state->gfxset.rotate[state->gfxset.set] & ORIENTATION_SWAP_XY) ? gfx->width : gfx->height);
+	cellxpix = 1 + ((state->gfxset.rotate[state->gfxset.set] & ORIENTATION_SWAP_XY) ? gfx->height() : gfx->width());
+	cellypix = 1 + ((state->gfxset.rotate[state->gfxset.set] & ORIENTATION_SWAP_XY) ? gfx->width() : gfx->height());
 
 	/* compute the largest pixel scale factor that still fits */
 	xcells = state->gfxset.count[set];
@@ -513,7 +512,7 @@ static void gfxset_handler(running_machine &machine, render_container *container
 
 	/* figure out the title and expand the outer box to fit */
 	for (x = 0; x < MAX_GFX_ELEMENTS && machine.gfx[x] != NULL; x++) ;
-	sprintf(title, "GFX %d/%d %dx%d COLOR %X", state->gfxset.set, x - 1, gfx->width, gfx->height, state->gfxset.color[set]);
+	sprintf(title, "GFX %d/%d %dx%d COLOR %X", state->gfxset.set, x - 1, gfx->width(), gfx->height(), state->gfxset.color[set]);
 	titlewidth = ui_font->string_width(chheight, machine.render().ui_aspect(), title);
 	x0 = 0.0f;
 	if (boxbounds.x1 - boxbounds.x0 < titlewidth + chwidth)
@@ -550,7 +549,7 @@ static void gfxset_handler(running_machine &machine, render_container *container
 	for (y = 0; y < ycells; y += 1 + skip)
 
 		/* only display if there is data to show */
-		if (state->gfxset.offset[set] + y * xcells < gfx->total_elements)
+		if (state->gfxset.offset[set] + y * xcells < gfx->elements())
 		{
 			char buffer[10];
 
@@ -645,11 +644,11 @@ static void gfxset_handle_keys(running_machine &machine, ui_gfx_state *state, in
 	if (ui_input_pressed_repeat(machine, IPT_UI_HOME, 4))
 		state->gfxset.offset[set] = 0;
 	if (ui_input_pressed_repeat(machine, IPT_UI_END, 4))
-		state->gfxset.offset[set] = gfx->total_elements;
+		state->gfxset.offset[set] = gfx->elements();
 
 	/* clamp within range */
-	if (state->gfxset.offset[set] + xcells * ycells > ((gfx->total_elements + xcells - 1) / xcells) * xcells)
-		state->gfxset.offset[set] = ((gfx->total_elements + xcells - 1) / xcells) * xcells - xcells * ycells;
+	if (state->gfxset.offset[set] + xcells * ycells > ((gfx->elements() + xcells - 1) / xcells) * xcells)
+		state->gfxset.offset[set] = ((gfx->elements() + xcells - 1) / xcells) * xcells - xcells * ycells;
 	if (state->gfxset.offset[set] < 0)
 		state->gfxset.offset[set] = 0;
 
@@ -660,8 +659,8 @@ static void gfxset_handle_keys(running_machine &machine, ui_gfx_state *state, in
 		state->gfxset.color[set] += 1;
 
 	/* clamp within range */
-	if (state->gfxset.color[set] >= (int)gfx->total_colors)
-		state->gfxset.color[set] = gfx->total_colors - 1;
+	if (state->gfxset.color[set] >= (int)gfx->colors())
+		state->gfxset.color[set] = gfx->colors() - 1;
 	if (state->gfxset.color[set] < 0)
 		state->gfxset.color[set] = 0;
 
@@ -689,20 +688,20 @@ static void gfxset_update_bitmap(running_machine &machine, ui_gfx_state *state, 
 	int x, y;
 
 	/* compute the number of source pixels in a cell */
-	cellxpix = 1 + ((state->gfxset.rotate[set] & ORIENTATION_SWAP_XY) ? gfx->height : gfx->width);
-	cellypix = 1 + ((state->gfxset.rotate[set] & ORIENTATION_SWAP_XY) ? gfx->width : gfx->height);
+	cellxpix = 1 + ((state->gfxset.rotate[set] & ORIENTATION_SWAP_XY) ? gfx->height() : gfx->width());
+	cellypix = 1 + ((state->gfxset.rotate[set] & ORIENTATION_SWAP_XY) ? gfx->width() : gfx->height());
 
 	/* realloc the bitmap if it is too small */
-	if (state->bitmap == NULL || state->texture == NULL || state->bitmap->bpp != 32 || state->bitmap->width != cellxpix * xcells || state->bitmap->height != cellypix * ycells)
+	if (state->bitmap == NULL || state->texture == NULL || state->bitmap->bpp() != 32 || state->bitmap->width() != cellxpix * xcells || state->bitmap->height() != cellypix * ycells)
 	{
 		/* free the old stuff */
 		machine.render().texture_free(state->texture);
 		global_free(state->bitmap);
 
 		/* allocate new stuff */
-		state->bitmap = global_alloc(bitmap_t(cellxpix * xcells, cellypix * ycells, BITMAP_FORMAT_ARGB32));
+		state->bitmap = global_alloc(bitmap_rgb32(cellxpix * xcells, cellypix * ycells));
 		state->texture = machine.render().texture_alloc();
-		state->texture->set_bitmap(state->bitmap, NULL, TEXFORMAT_ARGB32);
+		state->texture->set_bitmap(*state->bitmap, state->bitmap->cliprect(), TEXFORMAT_ARGB32);
 
 		/* force a redraw */
 		state->bitmap_dirty = TRUE;
@@ -717,13 +716,10 @@ static void gfxset_update_bitmap(running_machine &machine, ui_gfx_state *state, 
 			rectangle cellbounds;
 
 			/* make a rect that covers this row */
-			cellbounds.min_x = 0;
-			cellbounds.max_x = state->bitmap->width - 1;
-			cellbounds.min_y = y * cellypix;
-			cellbounds.max_y = (y + 1) * cellypix - 1;
+			cellbounds.set(0, state->bitmap->width() - 1, y * cellypix, (y + 1) * cellypix - 1);
 
 			/* only display if there is data to show */
-			if (state->gfxset.offset[set] + y * xcells < gfx->total_elements)
+			if (state->gfxset.offset[set] + y * xcells < gfx->elements())
 			{
 				/* draw the individual cells */
 				for (x = 0; x < xcells; x++)
@@ -735,22 +731,22 @@ static void gfxset_update_bitmap(running_machine &machine, ui_gfx_state *state, 
 					cellbounds.max_x = (x + 1) * cellxpix - 1;
 
 					/* only render if there is data */
-					if (index < gfx->total_elements)
-						gfxset_draw_item(machine, gfx, index, state->bitmap, cellbounds.min_x, cellbounds.min_y, state->gfxset.color[set], state->gfxset.rotate[set]);
+					if (index < gfx->elements())
+						gfxset_draw_item(machine, gfx, index, *state->bitmap, cellbounds.min_x, cellbounds.min_y, state->gfxset.color[set], state->gfxset.rotate[set]);
 
 					/* otherwise, fill with transparency */
 					else
-						bitmap_fill(state->bitmap, &cellbounds, 0);
+						state->bitmap->fill(0, cellbounds);
 				}
 			}
 
 			/* otherwise, fill with transparency */
 			else
-				bitmap_fill(state->bitmap, &cellbounds, 0);
+				state->bitmap->fill(0, cellbounds);
 		}
 
 		/* reset the texture to force an update */
-		state->texture->set_bitmap(state->bitmap, NULL, TEXFORMAT_ARGB32);
+		state->texture->set_bitmap(*state->bitmap, state->bitmap->cliprect(), TEXFORMAT_ARGB32);
 		state->bitmap_dirty = FALSE;
 	}
 }
@@ -761,22 +757,21 @@ static void gfxset_update_bitmap(running_machine &machine, ui_gfx_state *state, 
     the view
 -------------------------------------------------*/
 
-static void gfxset_draw_item(running_machine &machine, const gfx_element *gfx, int index, bitmap_t *bitmap, int dstx, int dsty, int color, int rotate)
+static void gfxset_draw_item(running_machine &machine, gfx_element *gfx, int index, bitmap_rgb32 &bitmap, int dstx, int dsty, int color, int rotate)
 {
 	static const pen_t default_palette[] =
 	{
 		MAKE_RGB(0,0,0), MAKE_RGB(0,0,255), MAKE_RGB(0,255,0), MAKE_RGB(0,255,255),
 		MAKE_RGB(255,0,0), MAKE_RGB(255,0,255), MAKE_RGB(255,255,0), MAKE_RGB(255,255,255)
 	};
-	int width = (rotate & ORIENTATION_SWAP_XY) ? gfx->height : gfx->width;
-	int height = (rotate & ORIENTATION_SWAP_XY) ? gfx->width : gfx->height;
+	int width = (rotate & ORIENTATION_SWAP_XY) ? gfx->height() : gfx->width();
+	int height = (rotate & ORIENTATION_SWAP_XY) ? gfx->width() : gfx->height();
 	const rgb_t *palette = (machine.total_colors() != 0) ? palette_entry_list_raw(machine.palette) : NULL;
-	UINT32 rowpixels = bitmap->rowpixels;
 	UINT32 palette_mask = ~0;
 	int x, y;
 
 	if (palette != NULL)
-		palette += gfx->color_base + color * gfx->color_granularity;
+		palette += gfx->colorbase() + color * gfx->granularity();
 	else
 	{
 		palette = default_palette;
@@ -786,43 +781,38 @@ static void gfxset_draw_item(running_machine &machine, const gfx_element *gfx, i
 	/* loop over rows in the cell */
 	for (y = 0; y < height; y++)
 	{
-		UINT32 *dest = (UINT32 *)bitmap->base + (dsty + y) * rowpixels + dstx;
-		const UINT8 *src = gfx_element_get_data(gfx, index);
+		UINT32 *dest = &bitmap.pix32(dsty + y, dstx);
+		const UINT8 *src = gfx->get_data(index);
 
 		/* loop over columns in the cell */
 		for (x = 0; x < width; x++)
 		{
 			int effx = x, effy = y;
-			rgb_t pixel;
 			const UINT8 *s;
 
 			/* compute effective x,y values after rotation */
 			if (!(rotate & ORIENTATION_SWAP_XY))
 			{
 				if (rotate & ORIENTATION_FLIP_X)
-					effx = gfx->width - 1 - effx;
+					effx = gfx->width() - 1 - effx;
 				if (rotate & ORIENTATION_FLIP_Y)
-					effy = gfx->height - 1 - effy;
+					effy = gfx->height() - 1 - effy;
 			}
 			else
 			{
 				int temp;
 				if (rotate & ORIENTATION_FLIP_X)
-					effx = gfx->height - 1 - effx;
+					effx = gfx->height() - 1 - effx;
 				if (rotate & ORIENTATION_FLIP_Y)
-					effy = gfx->width - 1 - effy;
+					effy = gfx->width() - 1 - effy;
 				temp = effx; effx = effy; effy = temp;
 			}
 
 			/* get a pointer to the start of this source row */
-			s = src + effy * gfx->line_modulo;
+			s = src + effy * gfx->rowbytes();
 
 			/* extract the pixel */
-			if (gfx->flags & GFX_ELEMENT_PACKED)
-				pixel = (s[effx/2] >> ((effx & 1) * 4)) & 0xf;
-			else
-				pixel = s[effx];
-			*dest++ = 0xff000000 | palette[pixel & palette_mask];
+			*dest++ = 0xff000000 | palette[s[effx] & palette_mask];
 		}
 	}
 }
@@ -855,7 +845,9 @@ static void tilemap_handler(running_machine &machine, render_container *containe
 	char title[100];
 
 	/* get the size of the tilemap itself */
-	tilemap_size_by_index(machine, state->tilemap.which, &mapwidth, &mapheight);
+	tilemap_t *tilemap = machine.tilemap().find(state->tilemap.which);
+	mapwidth = tilemap->width();
+	mapheight = tilemap->height();
 	if (state->tilemap.rotate & ORIENTATION_SWAP_XY)
 		{ UINT32 temp = mapwidth; mapwidth = mapheight; mapheight = temp; }
 
@@ -907,7 +899,7 @@ static void tilemap_handler(running_machine &machine, render_container *containe
 	boxbounds.y1 = mapboxbounds.y1 + 0.5f * chheight;
 
 	/* figure out the title and expand the outer box to fit */
-	sprintf(title, "TMAP %d/%d %dx%d OFFS %d,%d", state->tilemap.which, tilemap_count(machine) - 1, mapwidth, mapheight, state->tilemap.xoffs, state->tilemap.yoffs);
+	sprintf(title, "TMAP %d/%d %dx%d OFFS %d,%d", state->tilemap.which, machine.tilemap().count() - 1, mapwidth, mapheight, state->tilemap.xoffs, state->tilemap.yoffs);
 	titlewidth = ui_font->string_width(chheight, machine.render().ui_aspect(), title);
 	if (boxbounds.x1 - boxbounds.x0 < titlewidth + chwidth)
 	{
@@ -961,11 +953,13 @@ static void tilemap_handle_keys(running_machine &machine, ui_gfx_state *state, i
 	/* clamp within range */
 	if (state->tilemap.which < 0)
 		state->tilemap.which = 0;
-	if (state->tilemap.which >= tilemap_count(machine))
-		state->tilemap.which = tilemap_count(machine) - 1;
+	if (state->tilemap.which >= machine.tilemap().count())
+		state->tilemap.which = machine.tilemap().count() - 1;
 
 	/* cache some info in locals */
-	tilemap_size_by_index(machine, state->tilemap.which, &mapwidth, &mapheight);
+	tilemap_t *tilemap = machine.tilemap().find(state->tilemap.which);
+	mapwidth = tilemap->width();
+	mapheight = tilemap->height();
 
 	/* handle zoom (minus,plus) */
 	if (ui_input_pressed(machine, IPT_UI_ZOOM_OUT))
@@ -992,8 +986,8 @@ static void tilemap_handle_keys(running_machine &machine, ui_gfx_state *state, i
 
 	/* handle navigation (up,down,left,right) */
 	step = 8;
-	if (input_code_pressed(machine, KEYCODE_LSHIFT)) step = 1;
-	if (input_code_pressed(machine, KEYCODE_LCONTROL)) step = 64;
+	if (machine.input().code_pressed(KEYCODE_LSHIFT)) step = 1;
+	if (machine.input().code_pressed(KEYCODE_LCONTROL)) step = 64;
 	if (ui_input_pressed_repeat(machine, IPT_UI_UP, 4))
 		state->tilemap.yoffs -= step;
 	if (ui_input_pressed_repeat(machine, IPT_UI_DOWN, 4))
@@ -1031,34 +1025,22 @@ static void tilemap_handle_keys(running_machine &machine, ui_gfx_state *state, i
 
 static void tilemap_update_bitmap(running_machine &machine, ui_gfx_state *state, int width, int height)
 {
-	bitmap_format screen_format = machine.primary_screen->format();
-	palette_t *palette = NULL;
-	int screen_texformat;
-
-	/* convert the screen format to a texture format */
-	switch (screen_format)
-	{
-		case BITMAP_FORMAT_INDEXED16:	screen_texformat = TEXFORMAT_PALETTE16;	palette = machine.palette;	break;
-		case BITMAP_FORMAT_RGB15:		screen_texformat = TEXFORMAT_RGB15;		palette = NULL;				break;
-		case BITMAP_FORMAT_RGB32:		screen_texformat = TEXFORMAT_RGB32;		palette = NULL;				break;
-		default:						fatalerror("Invalid bitmap format!");								break;
-	}
-
 	/* swap the coordinates back if they were talking about a rotated surface */
 	if (state->tilemap.rotate & ORIENTATION_SWAP_XY)
 		{ UINT32 temp = width; width = height; height = temp; }
 
 	/* realloc the bitmap if it is too small */
-	if (state->bitmap == NULL || state->texture == NULL || state->bitmap->format != screen_format || state->bitmap->width != width || state->bitmap->height != height)
+	if (state->bitmap == NULL || state->texture == NULL || state->bitmap->width() != width || state->bitmap->height() != height)
 	{
 		/* free the old stuff */
 		machine.render().texture_free(state->texture);
 		global_free(state->bitmap);
 
 		/* allocate new stuff */
-		state->bitmap = global_alloc(bitmap_t(width, height, screen_format));
+		state->bitmap = global_alloc(bitmap_rgb32(width, height));
+		state->bitmap->set_palette(machine.palette);
 		state->texture = machine.render().texture_alloc();
-		state->texture->set_bitmap(state->bitmap, NULL, screen_texformat, palette);
+		state->texture->set_bitmap(*state->bitmap, state->bitmap->cliprect(), TEXFORMAT_RGB32);
 
 		/* force a redraw */
 		state->bitmap_dirty = TRUE;
@@ -1067,10 +1049,11 @@ static void tilemap_update_bitmap(running_machine &machine, ui_gfx_state *state,
 	/* handle the redraw */
 	if (state->bitmap_dirty)
 	{
-		tilemap_draw_by_index(machine, state->bitmap, state->tilemap.which, state->tilemap.xoffs, state->tilemap.yoffs);
+		tilemap_t *tilemap = machine.tilemap().find(state->tilemap.which);
+		tilemap->draw_debug(*state->bitmap, state->tilemap.xoffs, state->tilemap.yoffs);
 
 		/* reset the texture to force an update */
-		state->texture->set_bitmap(state->bitmap, NULL, screen_texformat, palette);
+		state->texture->set_bitmap(*state->bitmap, state->bitmap->cliprect(), TEXFORMAT_RGB32);
 		state->bitmap_dirty = FALSE;
 	}
 }

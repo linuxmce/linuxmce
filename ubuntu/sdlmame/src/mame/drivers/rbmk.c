@@ -60,60 +60,72 @@ Notes:
 class rbmk_state : public driver_device
 {
 public:
-	rbmk_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	rbmk_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_gms_vidram2(*this, "gms_vidram2"),
+		m_gms_vidram(*this, "gms_vidram"){ }
 
-	UINT16 *m_gms_vidram;
-	UINT16 *m_gms_vidram2;
+	required_shared_ptr<UINT16> m_gms_vidram2;
+	required_shared_ptr<UINT16> m_gms_vidram;
 	UINT16 m_tilebank;
 	UINT8 m_mux_data;
+	DECLARE_READ16_MEMBER(gms_read);
+	DECLARE_WRITE16_MEMBER(gms_write1);
+	DECLARE_WRITE16_MEMBER(gms_write2);
+	DECLARE_WRITE16_MEMBER(gms_write3);
+	DECLARE_READ8_MEMBER(rbmk_mcu_io_r);
+	DECLARE_WRITE8_MEMBER(rbmk_mcu_io_w);
+	DECLARE_WRITE8_MEMBER(mcu_io_mux_w);
+	DECLARE_WRITE16_MEMBER(eeprom_w);
+	virtual void video_start();
+	UINT32 screen_update_rbmk(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(mcu_irq);
 };
 
 
-static READ16_HANDLER( gms_read )
+READ16_MEMBER(rbmk_state::gms_read)
 {
-	return space->machine().rand();
+	return machine().rand();
 }
 
 
-static WRITE16_HANDLER( gms_write1 )
+WRITE16_MEMBER(rbmk_state::gms_write1)
 {
-
 }
 
-static WRITE16_HANDLER( gms_write2 )
+WRITE16_MEMBER(rbmk_state::gms_write2)
 {
-	rbmk_state *state = space->machine().driver_data<rbmk_state>();
-	state->m_tilebank=data;
+	m_tilebank=data;
 }
 
-static WRITE16_HANDLER( gms_write3 )
+WRITE16_MEMBER(rbmk_state::gms_write3)
 {
-
 }
 
-static WRITE16_DEVICE_HANDLER( eeprom_w )
+WRITE16_MEMBER(rbmk_state::eeprom_w)
 {
+	device_t *device = machine().device("eeprom");
 	//bad ?
 	if( ACCESSING_BITS_0_7 )
 	{
-		eeprom_write_bit(device, data & 0x04);
-		eeprom_set_cs_line(device, (data & 0x01) ? CLEAR_LINE:ASSERT_LINE );
+		eeprom_device *eeprom = downcast<eeprom_device *>(device);
+		eeprom->write_bit(data & 0x04);
+		eeprom->set_cs_line((data & 0x01) ? CLEAR_LINE:ASSERT_LINE );
 
-		eeprom_set_clock_line(device, (data & 0x02) ? ASSERT_LINE : CLEAR_LINE );
+		eeprom->set_clock_line((data & 0x02) ? ASSERT_LINE : CLEAR_LINE );
 	}
 }
 
 
-static ADDRESS_MAP_START( rbmk_mem, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( rbmk_mem, AS_PROGRAM, 16, rbmk_state )
 	AM_RANGE(0x000000, 0x07ffff) AM_ROM
 	AM_RANGE(0x100000, 0x10ffff) AM_RAM
 	AM_RANGE(0x500000, 0x50ffff) AM_RAM
-	AM_RANGE(0x940000, 0x940fff) AM_RAM AM_BASE_MEMBER(rbmk_state, m_gms_vidram2)
+	AM_RANGE(0x940000, 0x940fff) AM_RAM AM_SHARE("gms_vidram2")
 	AM_RANGE(0x980300, 0x983fff) AM_RAM // 0x2048  words ???, byte access
-	AM_RANGE(0x900000, 0x900fff) AM_RAM_WRITE(paletteram16_xBBBBBGGGGGRRRRR_word_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0x9c0000, 0x9c0fff) AM_RAM AM_BASE_MEMBER(rbmk_state, m_gms_vidram)
-	AM_RANGE(0xb00000, 0xb00001) AM_DEVWRITE("eeprom", eeprom_w)
+	AM_RANGE(0x900000, 0x900fff) AM_RAM_WRITE(paletteram_xBBBBBGGGGGRRRRR_word_w) AM_SHARE("paletteram")
+	AM_RANGE(0x9c0000, 0x9c0fff) AM_RAM AM_SHARE("gms_vidram")
+	AM_RANGE(0xb00000, 0xb00001) AM_WRITE(eeprom_w)
 	AM_RANGE(0xC00000, 0xC00001) AM_READ_PORT("IN0") AM_WRITE(gms_write1)
 	AM_RANGE(0xC08000, 0xC08001) AM_READ_PORT("IN1") AM_WRITE(gms_write2)
 	AM_RANGE(0xC10000, 0xC10001) AM_READ_PORT("IN3")
@@ -123,52 +135,49 @@ static ADDRESS_MAP_START( rbmk_mem, AS_PROGRAM, 16 )
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( rbmk_mcu_mem, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( rbmk_mcu_mem, AS_PROGRAM, 8, rbmk_state )
 //  AM_RANGE(0x0000, 0x0fff) AM_ROM
 ADDRESS_MAP_END
 
-static READ8_HANDLER( rbmk_mcu_io_r )
+READ8_MEMBER(rbmk_state::rbmk_mcu_io_r)
 {
-	rbmk_state *state = space->machine().driver_data<rbmk_state>();
-	if(state->m_mux_data & 8)
+	if(m_mux_data & 8)
 	{
-		return ym2151_r(space->machine().device("ymsnd"), offset & 1);
+		return machine().device<ym2151_device>("ymsnd")->read(space, offset & 1);
 	}
-	else if(state->m_mux_data & 4)
+	else if(m_mux_data & 4)
 	{
 		//printf("%02x R\n",offset);
 		// ...
 		return 0xff;
 	}
 	else
-		printf("Warning: mux data R = %02x",state->m_mux_data);
+		printf("Warning: mux data R = %02x",m_mux_data);
 
 	return 0xff;
 }
 
-static WRITE8_HANDLER( rbmk_mcu_io_w )
+WRITE8_MEMBER(rbmk_state::rbmk_mcu_io_w)
 {
-	rbmk_state *state = space->machine().driver_data<rbmk_state>();
-	if(state->m_mux_data & 8) { ym2151_w(space->machine().device("ymsnd"), offset & 1, data); }
-	else if(state->m_mux_data & 4)
+	if(m_mux_data & 8) { machine().device<ym2151_device>("ymsnd")->write(space, offset & 1, data); }
+	else if(m_mux_data & 4)
 	{
 		//printf("%02x %02x W\n",offset,data);
 		// ...
 	}
 	else
-		printf("Warning: mux data W = %02x",state->m_mux_data);
+		printf("Warning: mux data W = %02x",m_mux_data);
 }
 
-static WRITE8_HANDLER( mcu_io_mux_w )
+WRITE8_MEMBER(rbmk_state::mcu_io_mux_w)
 {
-	rbmk_state *state = space->machine().driver_data<rbmk_state>();
-	state->m_mux_data = ~data;
+	m_mux_data = ~data;
 }
 
-static ADDRESS_MAP_START( rbmk_mcu_io, AS_IO, 8 )
-	AM_RANGE(0x0ff00, 0x0ffff) AM_READWRITE( rbmk_mcu_io_r, rbmk_mcu_io_w )
+static ADDRESS_MAP_START( rbmk_mcu_io, AS_IO, 8, rbmk_state )
+	AM_RANGE(0x0ff00, 0x0ffff) AM_READWRITE(rbmk_mcu_io_r, rbmk_mcu_io_w )
 
-	AM_RANGE(MCS51_PORT_P3, MCS51_PORT_P3) AM_WRITE( mcu_io_mux_w )
+	AM_RANGE(MCS51_PORT_P3, MCS51_PORT_P3) AM_WRITE(mcu_io_mux_w )
 ADDRESS_MAP_END
 
 static INPUT_PORTS_START( rbmk )
@@ -223,7 +232,7 @@ static INPUT_PORTS_START( rbmk )
 	PORT_DIPSETTING(      0x8000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 
-	PORT_START("IN1")	/* 16bit */
+	PORT_START("IN1")   /* 16bit */
 	PORT_DIPNAME( 0x0001, 0x0001, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(      0x0001, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
@@ -256,7 +265,7 @@ static INPUT_PORTS_START( rbmk )
 	PORT_DIPSETTING(      0x8000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 
-	PORT_START("IN2")	/* 16bit */
+	PORT_START("IN2")   /* 16bit */
 	PORT_DIPNAME( 0x0001, 0x0001, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(      0x0001, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
@@ -307,7 +316,7 @@ static INPUT_PORTS_START( rbmk )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 
 
-	PORT_START("IN3")	/* 16bit */
+	PORT_START("IN3")   /* 16bit */
 	PORT_DIPNAME( 0x0001, 0x0001, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(      0x0001, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
@@ -353,9 +362,9 @@ static INPUT_PORTS_START( rbmk )
 	PORT_DIPNAME( 0x4000, 0x4000, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(      0x4000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_BIT( 0x8000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE("eeprom", eeprom_read_bit)
+	PORT_BIT( 0x8000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_READ_LINE_DEVICE_MEMBER("eeprom", eeprom_device, read_bit)
 
-	PORT_START("IN4")	/* 16bit */
+	PORT_START("IN4")   /* 16bit */
 	PORT_DIPNAME( 0x0001, 0x0001, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(      0x0001, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
@@ -405,7 +414,7 @@ static INPUT_PORTS_START( rbmk )
 	PORT_DIPSETTING(      0x8000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 
-	PORT_START("IN5")	/* 16bit */
+	PORT_START("IN5")   /* 16bit */
 	PORT_DIPNAME( 0x0001, 0x0001, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(      0x0001, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
@@ -465,7 +474,7 @@ static const gfx_layout rbmk32_layout =
 	{ 0,1,2,3 },
 	{ 4,0,12,8,20,16,28,24},
 	{ 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32, 8*32, 9*32, 10*32, 11*32, 12*32, 13*32, 14*32, 15*32,
-	 16*32, 17*32, 18*32, 19*32, 20*32, 21*32, 22*32, 23*32, 24*32, 25*32, 26*32, 27*32, 28*32, 29*32, 30*32, 31*32 },
+		16*32, 17*32, 18*32, 19*32, 20*32, 21*32, 22*32, 23*32, 24*32, 25*32, 26*32, 27*32, 28*32, 29*32, 30*32, 31*32 },
 	32*32
 };
 
@@ -486,13 +495,12 @@ static GFXDECODE_START( rbmk )
 	GFXDECODE_ENTRY( "gfx2", 0, rbmk8_layout,   0x100, 16  )
 GFXDECODE_END
 
-static VIDEO_START(rbmk)
+void rbmk_state::video_start()
 {
 }
 
-static SCREEN_UPDATE(rbmk)
+UINT32 rbmk_state::screen_update_rbmk(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	rbmk_state *state = screen->machine().driver_data<rbmk_state>();
 	int x,y;
 	int count = 0;
 
@@ -500,8 +508,8 @@ static SCREEN_UPDATE(rbmk)
 	{
 		for (x=0;x<64;x++)
 		{
-			int tile = state->m_gms_vidram2[count+0x600];
-			drawgfx_opaque(bitmap,cliprect,screen->machine().gfx[0],(tile&0xfff)+((state->m_tilebank&0x10)>>4)*0x1000,tile>>12,0,0,x*8,y*32);
+			int tile = m_gms_vidram2[count+0x600];
+			drawgfx_opaque(bitmap,cliprect,machine().gfx[0],(tile&0xfff)+((m_tilebank&0x10)>>4)*0x1000,tile>>12,0,0,x*8,y*32);
 			count++;
 		}
 	}
@@ -512,28 +520,28 @@ static SCREEN_UPDATE(rbmk)
 	{
 		for (x=0;x<64;x++)
 		{
-			int tile = state->m_gms_vidram[count];
-			drawgfx_transpen(bitmap,cliprect,screen->machine().gfx[1],(tile&0xfff)+((state->m_tilebank>>1)&3)*0x1000,tile>>12,0,0,x*8,y*8,0);
+			int tile = m_gms_vidram[count];
+			drawgfx_transpen(bitmap,cliprect,machine().gfx[1],(tile&0xfff)+((m_tilebank>>1)&3)*0x1000,tile>>12,0,0,x*8,y*8,0);
 			count++;
 		}
 	}
 	return 0;
 }
 
-static INTERRUPT_GEN( mcu_irq )
+INTERRUPT_GEN_MEMBER(rbmk_state::mcu_irq)
 {
-	cputag_set_input_line(device->machine(), "mcu", INPUT_LINE_NMI, PULSE_LINE);
+	machine().device("mcu")->execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 }
 
 static MACHINE_CONFIG_START( rbmk, rbmk_state )
 	MCFG_CPU_ADD("maincpu", M68000, 22000000 /2)
 	MCFG_CPU_PROGRAM_MAP(rbmk_mem)
-	MCFG_CPU_VBLANK_INT("screen", irq1_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", rbmk_state,  irq1_line_hold)
 
 	MCFG_CPU_ADD("mcu", AT89C4051, 22000000 / 4) // frequency isn't right
 	MCFG_CPU_PROGRAM_MAP(rbmk_mcu_mem)
 	MCFG_CPU_IO_MAP(rbmk_mcu_io)
-	MCFG_CPU_VBLANK_INT("screen", mcu_irq)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", rbmk_state,  mcu_irq)
 
 	MCFG_GFXDECODE(rbmk)
 
@@ -541,14 +549,12 @@ static MACHINE_CONFIG_START( rbmk, rbmk_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(58)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 64*8-1, 0*8, 32*8-1)
-	MCFG_SCREEN_UPDATE(rbmk)
+	MCFG_SCREEN_UPDATE_DRIVER(rbmk_state, screen_update_rbmk)
 
 	MCFG_PALETTE_LENGTH(0x800)
 
-	MCFG_VIDEO_START(rbmk)
 
 	MCFG_EEPROM_93C46_ADD("eeprom")
 
@@ -559,7 +565,7 @@ static MACHINE_CONFIG_START( rbmk, rbmk_state )
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "lspeaker", 0.47)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "rspeaker", 0.47)
 
-	MCFG_SOUND_ADD("ymsnd", YM2151, 22000000 / 8)
+	MCFG_YM2151_ADD("ymsnd", 22000000 / 8)
 //  MCFG_SOUND_CONFIG(ym2151_config)
 	MCFG_SOUND_ROUTE(0, "lspeaker", 0.60)
 	MCFG_SOUND_ROUTE(1, "rspeaker", 0.60)
@@ -589,4 +595,4 @@ ROM_START( rbmk )
 ROM_END
 
 
-GAME( 1998, rbmk, 0, rbmk, rbmk,0, ROT0,  "GMS", "Real Battle Mahjong King", GAME_NOT_WORKING )
+GAME( 1998, rbmk, 0, rbmk, rbmk, driver_device,0, ROT0,  "GMS", "Real Battle Mahjong King", GAME_NOT_WORKING )

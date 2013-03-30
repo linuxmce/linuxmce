@@ -108,56 +108,56 @@
 
 
 /* todo: check all memory regions actually readable / read from */
-static ADDRESS_MAP_START( pass_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( pass_map, AS_PROGRAM, 16, pass_state )
 	AM_RANGE(0x000000, 0x03ffff) AM_ROM
 	AM_RANGE(0x080000, 0x083fff) AM_RAM
-	AM_RANGE(0x200000, 0x200fff) AM_RAM_WRITE(pass_bg_videoram_w) AM_BASE_MEMBER(pass_state, m_bg_videoram) // Background
-	AM_RANGE(0x210000, 0x213fff) AM_RAM_WRITE(pass_fg_videoram_w) AM_BASE_MEMBER(pass_state, m_fg_videoram) // Foreground
-	AM_RANGE(0x220000, 0x2203ff) AM_RAM_WRITE(paletteram16_xRRRRRGGGGGBBBBB_word_w) AM_BASE_GENERIC(paletteram)
+	AM_RANGE(0x200000, 0x200fff) AM_RAM_WRITE(pass_bg_videoram_w) AM_SHARE("bg_videoram") // Background
+	AM_RANGE(0x210000, 0x213fff) AM_RAM_WRITE(pass_fg_videoram_w) AM_SHARE("fg_videoram") // Foreground
+	AM_RANGE(0x220000, 0x2203ff) AM_RAM_WRITE(paletteram_xRRRRRGGGGGBBBBB_word_w) AM_SHARE("paletteram")
 	AM_RANGE(0x230000, 0x230001) AM_WRITE(soundlatch_word_w)
 	AM_RANGE(0x230100, 0x230101) AM_READ_PORT("DSW")
 	AM_RANGE(0x230200, 0x230201) AM_READ_PORT("INPUTS")
 ADDRESS_MAP_END
 
 /* sound cpu */
-static ADDRESS_MAP_START( pass_sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( pass_sound_map, AS_PROGRAM, 8, pass_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0xf800, 0xffff) AM_RAM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( pass_sound_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( pass_sound_io_map, AS_IO, 8, pass_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x00) AM_READ(soundlatch_r)
-	AM_RANGE(0x70, 0x71) AM_DEVREADWRITE("ymsnd", ym2203_r, ym2203_w)
-	AM_RANGE(0x80, 0x80) AM_DEVWRITE_MODERN("oki", okim6295_device, write)
-	AM_RANGE(0xc0, 0xc0) AM_WRITE(soundlatch_clear_w)
+	AM_RANGE(0x00, 0x00) AM_READ(soundlatch_byte_r)
+	AM_RANGE(0x70, 0x71) AM_DEVREADWRITE_LEGACY("ymsnd", ym2203_r, ym2203_w)
+	AM_RANGE(0x80, 0x80) AM_DEVWRITE("oki", okim6295_device, write)
+	AM_RANGE(0xc0, 0xc0) AM_WRITE(soundlatch_clear_byte_w)
 ADDRESS_MAP_END
 
 /* todo : work out function of unknown but used dsw */
 static INPUT_PORTS_START( pass )
 	PORT_START("DSW")
-	PORT_DIPNAME( 0x0001, 0x0001, "Unknown SW 0-0" )	// USED ! Check code at 0x0046ea
+	PORT_DIPNAME( 0x0001, 0x0001, "Unknown SW 0-0" )    // USED ! Check code at 0x0046ea
 	PORT_DIPSETTING(      0x0001, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0002, 0x0002, "Unused SW 0-1" )		// Unused ?
+	PORT_DIPNAME( 0x0002, 0x0002, "Unused SW 0-1" )     // Unused ?
 	PORT_DIPSETTING(      0x0002, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0004, 0x0004, "Unused SW 0-2" )		// Unused ?
+	PORT_DIPNAME( 0x0004, 0x0004, "Unused SW 0-2" )     // Unused ?
 	PORT_DIPSETTING(      0x0004, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0008, 0x0008, "Unused SW 0-3" )		// Unused ?
+	PORT_DIPNAME( 0x0008, 0x0008, "Unused SW 0-3" )     // Unused ?
 	PORT_DIPSETTING(      0x0008, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0010, 0x0010, "Unused SW 0-4" )		// Unused ?
+	PORT_DIPNAME( 0x0010, 0x0010, "Unused SW 0-4" )     // Unused ?
 	PORT_DIPSETTING(      0x0010, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0020, 0x0020, "Unused SW 0-5" )		// Unused ?
+	PORT_DIPNAME( 0x0020, 0x0020, "Unused SW 0-5" )     // Unused ?
 	PORT_DIPSETTING(      0x0020, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0040, 0x0040, "Unused SW 0-6" )		// Unused ?
+	PORT_DIPNAME( 0x0040, 0x0040, "Unused SW 0-6" )     // Unused ?
 	PORT_DIPSETTING(      0x0040, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0080, 0x0080, "Unused SW 0-7" )		// Unused ?
+	PORT_DIPNAME( 0x0080, 0x0080, "Unused SW 0-7" )     // Unused ?
 	PORT_DIPSETTING(      0x0080, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 	PORT_DIPNAME( 0x0300, 0x0300, DEF_STR( Lives ) )
@@ -165,14 +165,14 @@ static INPUT_PORTS_START( pass )
 	PORT_DIPSETTING(      0x0300, "3" )
 	PORT_DIPSETTING(      0x0100, "4" )
 	PORT_DIPSETTING(      0x0200, "5" )
-	PORT_DIPNAME( 0x0400, 0x0400, "Unused SW 0-10" )	// Unused ?
+	PORT_DIPNAME( 0x0400, 0x0400, "Unused SW 0-10" )    // Unused ?
 	PORT_DIPSETTING(      0x0400, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 	PORT_DIPNAME( 0x1800, 0x0000, DEF_STR( Difficulty ) )
-	PORT_DIPSETTING(      0x0000, DEF_STR( Easy ) )			// Time = 99
-	PORT_DIPSETTING(      0x1800, DEF_STR( Normal ) )			// Time = 88
-	PORT_DIPSETTING(      0x0800, DEF_STR( Hard ) )			// Time = 77
-	PORT_DIPSETTING(      0x1000, DEF_STR( Hardest ) )			// Time = 66
+	PORT_DIPSETTING(      0x0000, DEF_STR( Easy ) )         // Time = 99
+	PORT_DIPSETTING(      0x1800, DEF_STR( Normal ) )           // Time = 88
+	PORT_DIPSETTING(      0x0800, DEF_STR( Hard ) )         // Time = 77
+	PORT_DIPSETTING(      0x1000, DEF_STR( Hardest ) )          // Time = 66
 	PORT_DIPNAME( 0xe000, 0xe000, DEF_STR( Coinage ) )
 //  PORT_DIPSETTING(      0x0000, DEF_STR( 4C_1C ) )
 	PORT_DIPSETTING(      0x8000, DEF_STR( 4C_1C ) )
@@ -236,26 +236,24 @@ static MACHINE_CONFIG_START( pass, pass_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, 14318180/2 )
 	MCFG_CPU_PROGRAM_MAP(pass_map)
-	MCFG_CPU_VBLANK_INT("screen", irq1_line_hold) /* all the same */
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", pass_state,  irq1_line_hold) /* all the same */
 
 	MCFG_CPU_ADD("audiocpu", Z80, 14318180/4 )
 	MCFG_CPU_PROGRAM_MAP(pass_sound_map)
 	MCFG_CPU_IO_MAP(pass_sound_io_map)
-	MCFG_CPU_PERIODIC_INT(irq0_line_hold,60) /* probably not accurate, unknown timing and generation (ym2203 sound chip?). */
+	MCFG_CPU_PERIODIC_INT_DRIVER(pass_state, irq0_line_hold, 60) /* probably not accurate, unknown timing and generation (ym2203 sound chip?). */
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(8*8, 48*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(pass)
+	MCFG_SCREEN_UPDATE_DRIVER(pass_state, screen_update_pass)
 
 	MCFG_PALETTE_LENGTH(0x200)
 	MCFG_GFXDECODE(pass)
 
-	MCFG_VIDEO_START(pass)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -291,4 +289,4 @@ ROM_START( pass )
 ROM_END
 
 
-GAME( 1992, pass, 0, pass, pass, 0, ROT0, "Oksan", "Pass", GAME_SUPPORTS_SAVE )
+GAME( 1992, pass, 0, pass, pass, driver_device, 0, ROT0, "Oksan", "Pass", GAME_SUPPORTS_SAVE )

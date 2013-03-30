@@ -15,12 +15,13 @@
 
 ***************************************************************************/
 
-PALETTE_INIT( hanaawas )
+void hanaawas_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 
 	/* allocate the colortable */
-	machine.colortable = colortable_alloc(machine, 0x10);
+	machine().colortable = colortable_alloc(machine(), 0x10);
 
 	/* create a lookup table for the palette */
 	for (i = 0; i < 0x10; i++)
@@ -46,71 +47,66 @@ PALETTE_INIT( hanaawas )
 		bit2 = (color_prom[i] >> 7) & 0x01;
 		b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 
-		colortable_palette_set_color(machine.colortable, i, MAKE_RGB(r, g, b));
+		colortable_palette_set_color(machine().colortable, i, MAKE_RGB(r, g, b));
 	}
 
 	/* color_prom now points to the beginning of the lookup table */
 	color_prom += 0x20;
 
 	/* character lookup table.  The 1bpp tiles really only use colors 0-0x0f and the
-       3bpp ones 0x10-0x1f */
+	   3bpp ones 0x10-0x1f */
 	for (i = 0; i < 0x100; i++)
 	{
 		int swapped_i = BITSWAP8(i,2,7,6,5,4,3,1,0);
 		UINT8 ctabentry = color_prom[swapped_i] & 0x0f;
-		colortable_entry_set_value(machine.colortable, i, ctabentry);
+		colortable_entry_set_value(machine().colortable, i, ctabentry);
 	}
 }
 
-WRITE8_HANDLER( hanaawas_videoram_w )
+WRITE8_MEMBER(hanaawas_state::hanaawas_videoram_w)
 {
-	hanaawas_state *state = space->machine().driver_data<hanaawas_state>();
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
+	m_videoram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset);
 }
 
-WRITE8_HANDLER( hanaawas_colorram_w )
+WRITE8_MEMBER(hanaawas_state::hanaawas_colorram_w)
 {
-	hanaawas_state *state = space->machine().driver_data<hanaawas_state>();
-	state->m_colorram[offset] = data;
+	m_colorram[offset] = data;
 
 	/* dirty both current and next offsets */
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset);
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, (offset + (flip_screen_get(space->machine()) ? -1 : 1)) & 0x03ff);
+	m_bg_tilemap->mark_tile_dirty(offset);
+	m_bg_tilemap->mark_tile_dirty((offset + (flip_screen() ? -1 : 1)) & 0x03ff);
 }
 
-WRITE8_DEVICE_HANDLER( hanaawas_portB_w )
+WRITE8_MEMBER(hanaawas_state::hanaawas_portB_w)
 {
 	/* bit 7 is flip screen */
-	if (flip_screen_get(device->machine()) != (~data & 0x80))
+	if (flip_screen() != (~data & 0x80))
 	{
-		flip_screen_set(device->machine(), ~data & 0x80);
-		tilemap_mark_all_tiles_dirty_all(device->machine());
+		flip_screen_set(~data & 0x80);
+		machine().tilemap().mark_all_dirty();
 	}
 }
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(hanaawas_state::get_bg_tile_info)
 {
-	hanaawas_state *state = machine.driver_data<hanaawas_state>();
 	/* the color is determined by the current color byte, but the bank is via the previous one!!! */
-	int offset = (tile_index + (flip_screen_get(machine) ? 1 : -1)) & 0x3ff;
-	int attr = state->m_colorram[offset];
+	int offset = (tile_index + (flip_screen() ? 1 : -1)) & 0x3ff;
+	int attr = m_colorram[offset];
 	int gfxbank = (attr & 0x40) >> 6;
-	int code = state->m_videoram[tile_index] + ((attr & 0x20) << 3);
-	int color = state->m_colorram[tile_index] & 0x1f;
+	int code = m_videoram[tile_index] + ((attr & 0x20) << 3);
+	int color = m_colorram[tile_index] & 0x1f;
 
-	SET_TILE_INFO(gfxbank, code, color, 0);
+	SET_TILE_INFO_MEMBER(gfxbank, code, color, 0);
 }
 
-VIDEO_START( hanaawas )
+void hanaawas_state::video_start()
 {
-	hanaawas_state *state = machine.driver_data<hanaawas_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(hanaawas_state::get_bg_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
 }
 
-SCREEN_UPDATE( hanaawas )
+UINT32 hanaawas_state::screen_update_hanaawas(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	hanaawas_state *state = screen->machine().driver_data<hanaawas_state>();
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
 	return 0;
 }

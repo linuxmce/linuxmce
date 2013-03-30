@@ -7,24 +7,23 @@
 class mrjong_state : public driver_device
 {
 public:
-	mrjong_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	mrjong_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"),
+		m_colorram(*this, "colorram"){ }
 
 	/* memory pointers */
-	UINT8 *    m_videoram;
-	UINT8 *    m_colorram;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_colorram;
 
 	/* video-related */
 	tilemap_t *m_bg_tilemap;
+	DECLARE_READ8_MEMBER(io_0x03_r);
+	DECLARE_WRITE8_MEMBER(mrjong_videoram_w);
+	DECLARE_WRITE8_MEMBER(mrjong_colorram_w);
+	DECLARE_WRITE8_MEMBER(mrjong_flipscreen_w);
+	TILE_GET_INFO_MEMBER(get_bg_tile_info);
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_mrjong(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
-
-
-/*----------- defined in video/mrjong.c -----------*/
-
-WRITE8_HANDLER( mrjong_videoram_w );
-WRITE8_HANDLER( mrjong_colorram_w );
-WRITE8_HANDLER( mrjong_flipscreen_w );
-
-PALETTE_INIT( mrjong );
-VIDEO_START( mrjong );
-SCREEN_UPDATE( mrjong );

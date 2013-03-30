@@ -3,12 +3,13 @@
 #include "includes/fastlane.h"
 
 
-PALETTE_INIT( fastlane )
+void fastlane_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int pal;
 
 	/* allocate the colortable */
-	machine.colortable = colortable_alloc(machine, 0x400);
+	machine().colortable = colortable_alloc(machine(), 0x400);
 
 	for (pal = 0; pal < 0x10; pal++)
 	{
@@ -17,7 +18,7 @@ PALETTE_INIT( fastlane )
 		for (i = 0; i < 0x400; i++)
 		{
 			UINT8 ctabentry = (i & 0x3f0) | color_prom[(pal << 4) | (i & 0x0f)];
-			colortable_entry_set_value(machine.colortable, (pal << 10) | i, ctabentry);
+			colortable_entry_set_value(machine().colortable, (pal << 10) | i, ctabentry);
 		}
 	}
 }
@@ -46,14 +47,13 @@ static void set_pens( running_machine &machine )
 
 ***************************************************************************/
 
-static TILE_GET_INFO( get_tile_info0 )
+TILE_GET_INFO_MEMBER(fastlane_state::get_tile_info0)
 {
-	fastlane_state *state = machine.driver_data<fastlane_state>();
-	UINT8 ctrl_3 = k007121_ctrlram_r(state->m_k007121, 3);
-	UINT8 ctrl_4 = k007121_ctrlram_r(state->m_k007121, 4);
-	UINT8 ctrl_5 = k007121_ctrlram_r(state->m_k007121, 5);
-	int attr = state->m_videoram1[tile_index];
-	int code = state->m_videoram1[tile_index + 0x400];
+	UINT8 ctrl_3 = k007121_ctrlram_r(m_k007121, generic_space(), 3);
+	UINT8 ctrl_4 = k007121_ctrlram_r(m_k007121, generic_space(), 4);
+	UINT8 ctrl_5 = k007121_ctrlram_r(m_k007121, generic_space(), 5);
+	int attr = m_videoram1[tile_index];
+	int code = m_videoram1[tile_index + 0x400];
 	int bit0 = (ctrl_5 >> 0) & 0x03;
 	int bit1 = (ctrl_5 >> 2) & 0x03;
 	int bit2 = (ctrl_5 >> 4) & 0x03;
@@ -68,21 +68,20 @@ static TILE_GET_INFO( get_tile_info0 )
 
 	bank = (bank & ~(mask << 1)) | ((ctrl_4 & mask) << 1);
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			0,
 			code+bank*256,
 			1 + 64 * (attr & 0x0f),
 			0);
 }
 
-static TILE_GET_INFO( get_tile_info1 )
+TILE_GET_INFO_MEMBER(fastlane_state::get_tile_info1)
 {
-	fastlane_state *state = machine.driver_data<fastlane_state>();
-	UINT8 ctrl_3 = k007121_ctrlram_r(state->m_k007121, 3);
-	UINT8 ctrl_4 = k007121_ctrlram_r(state->m_k007121, 4);
-	UINT8 ctrl_5 = k007121_ctrlram_r(state->m_k007121, 5);
-	int attr = state->m_videoram2[tile_index];
-	int code = state->m_videoram2[tile_index + 0x400];
+	UINT8 ctrl_3 = k007121_ctrlram_r(m_k007121, generic_space(), 3);
+	UINT8 ctrl_4 = k007121_ctrlram_r(m_k007121, generic_space(), 4);
+	UINT8 ctrl_5 = k007121_ctrlram_r(m_k007121, generic_space(), 5);
+	int attr = m_videoram2[tile_index];
+	int code = m_videoram2[tile_index + 0x400];
 	int bit0 = (ctrl_5 >> 0) & 0x03;
 	int bit1 = (ctrl_5 >> 2) & 0x03;
 	int bit2 = (ctrl_5 >> 4) & 0x03;
@@ -97,7 +96,7 @@ static TILE_GET_INFO( get_tile_info1 )
 
 	bank = (bank & ~(mask << 1)) | ((ctrl_4 & mask) << 1);
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			0,
 			code+bank*256,
 			0 + 64 * (attr & 0x0f),
@@ -110,21 +109,20 @@ static TILE_GET_INFO( get_tile_info1 )
 
 ***************************************************************************/
 
-VIDEO_START( fastlane )
+void fastlane_state::video_start()
 {
-	fastlane_state *state = machine.driver_data<fastlane_state>();
 
-	state->m_layer0 = tilemap_create(machine, get_tile_info0, tilemap_scan_rows, 8, 8, 32, 32);
-	state->m_layer1 = tilemap_create(machine, get_tile_info1, tilemap_scan_rows, 8, 8, 32, 32);
+	m_layer0 = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(fastlane_state::get_tile_info0),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
+	m_layer1 = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(fastlane_state::get_tile_info1),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
 
-	tilemap_set_scroll_rows(state->m_layer0, 32);
+	m_layer0->set_scroll_rows(32);
 
-	state->m_clip0 = machine.primary_screen->visible_area();
-	state->m_clip0.min_x += 40;
+	m_clip0 = machine().primary_screen->visible_area();
+	m_clip0.min_x += 40;
 
-	state->m_clip1 = machine.primary_screen->visible_area();
-	state->m_clip1.max_x = 39;
-	state->m_clip1.min_x = 0;
+	m_clip1 = machine().primary_screen->visible_area();
+	m_clip1.max_x = 39;
+	m_clip1.min_x = 0;
 }
 
 /***************************************************************************
@@ -133,18 +131,16 @@ VIDEO_START( fastlane )
 
 ***************************************************************************/
 
-WRITE8_HANDLER( fastlane_vram1_w )
+WRITE8_MEMBER(fastlane_state::fastlane_vram1_w)
 {
-	fastlane_state *state = space->machine().driver_data<fastlane_state>();
-	state->m_videoram1[offset] = data;
-	tilemap_mark_tile_dirty(state->m_layer0, offset & 0x3ff);
+	m_videoram1[offset] = data;
+	m_layer0->mark_tile_dirty(offset & 0x3ff);
 }
 
-WRITE8_HANDLER( fastlane_vram2_w )
+WRITE8_MEMBER(fastlane_state::fastlane_vram2_w)
 {
-	fastlane_state *state = space->machine().driver_data<fastlane_state>();
-	state->m_videoram2[offset] = data;
-	tilemap_mark_tile_dirty(state->m_layer1, offset & 0x3ff);
+	m_videoram2[offset] = data;
+	m_layer1->mark_tile_dirty(offset & 0x3ff);
 }
 
 
@@ -155,26 +151,26 @@ WRITE8_HANDLER( fastlane_vram2_w )
 
 ***************************************************************************/
 
-SCREEN_UPDATE( fastlane )
+UINT32 fastlane_state::screen_update_fastlane(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	fastlane_state *state = screen->machine().driver_data<fastlane_state>();
-	rectangle finalclip0 = state->m_clip0, finalclip1 = state->m_clip1;
+	rectangle finalclip0 = m_clip0, finalclip1 = m_clip1;
 	int i, xoffs;
 
-	sect_rect(&finalclip0, cliprect);
-	sect_rect(&finalclip1, cliprect);
+	finalclip0 &= cliprect;
+	finalclip1 &= cliprect;
 
-	set_pens(screen->machine());
+	set_pens(machine());
 
 	/* set scroll registers */
-	xoffs = k007121_ctrlram_r(state->m_k007121, 0);
+	address_space &space = machine().driver_data()->generic_space();
+	xoffs = k007121_ctrlram_r(m_k007121, space, 0);
 	for (i = 0; i < 32; i++)
-		tilemap_set_scrollx(state->m_layer0, i, state->m_k007121_regs[0x20 + i] + xoffs - 40);
+		m_layer0->set_scrollx(i, m_k007121_regs[0x20 + i] + xoffs - 40);
 
-	tilemap_set_scrolly(state->m_layer0, 0, k007121_ctrlram_r(state->m_k007121, 2));
+	m_layer0->set_scrolly(0, k007121_ctrlram_r(m_k007121, space, 2));
 
-	tilemap_draw(bitmap, &finalclip0, state->m_layer0, 0, 0);
-	k007121_sprites_draw(state->m_k007121, bitmap, cliprect, screen->machine().gfx[0], screen->machine().colortable, state->m_spriteram, 0, 40, 0, (UINT32)-1);
-	tilemap_draw(bitmap, &finalclip1, state->m_layer1, 0, 0);
+	m_layer0->draw(bitmap, finalclip0, 0, 0);
+	k007121_sprites_draw(m_k007121, bitmap, cliprect, machine().gfx[0], machine().colortable, m_spriteram, 0, 40, 0, (UINT32)-1);
+	m_layer1->draw(bitmap, finalclip1, 0, 0);
 	return 0;
 }

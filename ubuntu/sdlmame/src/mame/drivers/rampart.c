@@ -24,12 +24,13 @@
 
 #include "emu.h"
 #include "cpu/m68000/m68000.h"
-#include "includes/rampart.h"
 #include "sound/okim6295.h"
 #include "sound/2413intf.h"
+#include "video/atarimo.h"
+#include "includes/rampart.h"
 
 
-#define MASTER_CLOCK		XTAL_14_31818MHz
+#define MASTER_CLOCK        XTAL_14_31818MHz
 
 
 /*************************************
@@ -38,18 +39,17 @@
  *
  *************************************/
 
-static void update_interrupts(running_machine &machine)
+void rampart_state::update_interrupts()
 {
-	rampart_state *state = machine.driver_data<rampart_state>();
-	cputag_set_input_line(machine, "maincpu", 4, state->m_scanline_int_state ? ASSERT_LINE : CLEAR_LINE);
+	subdevice("maincpu")->execute().set_input_line(4, m_scanline_int_state ? ASSERT_LINE : CLEAR_LINE);
 }
 
 
-static void scanline_update(screen_device &screen, int scanline)
+void rampart_state::scanline_update(screen_device &screen, int scanline)
 {
 	/* generate 32V signals */
 	if ((scanline & 32) == 0)
-		atarigen_scanline_int_gen(screen.machine().device("maincpu"));
+		scanline_int_gen(*subdevice("maincpu"));
 }
 
 
@@ -60,20 +60,10 @@ static void scanline_update(screen_device &screen, int scanline)
  *
  *************************************/
 
-static MACHINE_START( rampart )
+MACHINE_RESET_MEMBER(rampart_state,rampart)
 {
-	atarigen_init(machine);
-}
-
-
-static MACHINE_RESET( rampart )
-{
-	rampart_state *state = machine.driver_data<rampart_state>();
-
-	atarigen_eeprom_reset(state);
-	atarigen_slapstic_reset(state);
-	atarigen_interrupt_reset(state, update_interrupts);
-	atarigen_scanline_timer_reset(*machine.primary_screen, scanline_update, 32);
+	atarigen_state::machine_reset();
+	scanline_timer_reset(*machine().primary_screen, 32);
 }
 
 
@@ -84,42 +74,42 @@ static MACHINE_RESET( rampart )
  *
  *************************************/
 
-static WRITE16_HANDLER( latch_w )
+WRITE16_MEMBER(rampart_state::latch_w)
 {
 	/* bit layout in this register:
 
-        0x8000 == VCR ???
-        0x2000 == LETAMODE1 (controls right trackball)
-        0x1000 == CBANK (color bank -- is it ever set to non-zero?)
-        0x0800 == LETAMODE0 (controls center and left trackballs)
-        0x0400 == LETARES (reset LETA analog control reader)
-        0x0200 == COINCTRL
-        0x0100 == COINCTRR
+	    0x8000 == VCR ???
+	    0x2000 == LETAMODE1 (controls right trackball)
+	    0x1000 == CBANK (color bank -- is it ever set to non-zero?)
+	    0x0800 == LETAMODE0 (controls center and left trackballs)
+	    0x0400 == LETARES (reset LETA analog control reader)
+	    0x0200 == COINCTRL
+	    0x0100 == COINCTRR
 
-        0x0020 == PMIX0 (ADPCM mixer level)
-        0x0010 == /PCMRES (ADPCM reset)
-        0x000E == YMIX2-0 (YM2413 mixer level)
-        0x0001 == /YAMRES (YM2413 reset)
-    */
+	    0x0020 == PMIX0 (ADPCM mixer level)
+	    0x0010 == /PCMRES (ADPCM reset)
+	    0x000E == YMIX2-0 (YM2413 mixer level)
+	    0x0001 == /YAMRES (YM2413 reset)
+	*/
 
 	/* upper byte being modified? */
 	if (ACCESSING_BITS_8_15)
 	{
 		if (data & 0x1000)
 			logerror("Color bank set to 1!\n");
-		coin_counter_w(space->machine(), 0, (data >> 9) & 1);
-		coin_counter_w(space->machine(), 1, (data >> 8) & 1);
+		coin_counter_w(machine(), 0, (data >> 9) & 1);
+		coin_counter_w(machine(), 1, (data >> 8) & 1);
 	}
 
 	/* lower byte being modified? */
 	if (ACCESSING_BITS_0_7)
 	{
-		atarigen_set_oki6295_vol(space->machine(), (data & 0x0020) ? 100 : 0);
+		set_oki6295_volume((data & 0x0020) ? 100 : 0);
 		if (!(data & 0x0010))
-			devtag_reset(space->machine(), "oki");
-		atarigen_set_ym2413_vol(space->machine(), ((data >> 1) & 7) * 100 / 7);
+			machine().device("oki")->reset();
+		set_ym2413_volume(((data >> 1) & 7) * 100 / 7);
 		if (!(data & 0x0001))
-			devtag_reset(space->machine(), "ymsnd");
+			machine().device("ymsnd")->reset();
 	}
 }
 
@@ -132,21 +122,21 @@ static WRITE16_HANDLER( latch_w )
  *************************************/
 
 /* full memory map deduced from schematics and GALs */
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16, rampart_state )
 	ADDRESS_MAP_GLOBAL_MASK(0x7fffff)
 	AM_RANGE(0x000000, 0x0fffff) AM_ROM
 	AM_RANGE(0x140000, 0x147fff) AM_MIRROR(0x438000) AM_ROM /* slapstic goes here */
-	AM_RANGE(0x200000, 0x21ffff) AM_RAM AM_BASE_MEMBER(rampart_state, m_bitmap)
-	AM_RANGE(0x220000, 0x3bffff) AM_WRITENOP	/* the code blasts right through this when initializing */
-	AM_RANGE(0x3c0000, 0x3c07ff) AM_MIRROR(0x019800) AM_RAM_WRITE(atarigen_expanded_666_paletteram_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0x3e0000, 0x3e07ff) AM_MIRROR(0x010000) AM_RAM_WRITE(atarimo_0_spriteram_w) AM_BASE(&atarimo_0_spriteram)
+	AM_RANGE(0x200000, 0x21ffff) AM_RAM AM_SHARE("bitmap")
+	AM_RANGE(0x220000, 0x3bffff) AM_WRITENOP    /* the code blasts right through this when initializing */
+	AM_RANGE(0x3c0000, 0x3c07ff) AM_MIRROR(0x019800) AM_RAM_WRITE(expanded_paletteram_666_w) AM_SHARE("paletteram")
+	AM_RANGE(0x3e0000, 0x3e07ff) AM_MIRROR(0x010000) AM_READWRITE_LEGACY(atarimo_0_spriteram_r, atarimo_0_spriteram_w)
 	AM_RANGE(0x3e0800, 0x3e3f3f) AM_MIRROR(0x010000) AM_RAM
-	AM_RANGE(0x3e3f40, 0x3e3f7f) AM_MIRROR(0x010000) AM_RAM_WRITE(atarimo_0_slipram_w) AM_BASE(&atarimo_0_slipram)
+	AM_RANGE(0x3e3f40, 0x3e3f7f) AM_MIRROR(0x010000) AM_READWRITE_LEGACY(atarimo_0_slipram_r, atarimo_0_slipram_w)
 	AM_RANGE(0x3e3f80, 0x3effff) AM_MIRROR(0x010000) AM_RAM
-	AM_RANGE(0x460000, 0x460001) AM_MIRROR(0x019ffe) AM_DEVREADWRITE8_MODERN("oki", okim6295_device, read, write, 0xff00)
-	AM_RANGE(0x480000, 0x480003) AM_MIRROR(0x019ffc) AM_DEVWRITE8("ymsnd", ym2413_w, 0xff00)
-	AM_RANGE(0x500000, 0x500fff) AM_MIRROR(0x019000) AM_READWRITE(atarigen_eeprom_r, atarigen_eeprom_w) AM_SHARE("eeprom")
-	AM_RANGE(0x5a6000, 0x5a6001) AM_MIRROR(0x019ffe) AM_WRITE(atarigen_eeprom_enable_w)
+	AM_RANGE(0x460000, 0x460001) AM_MIRROR(0x019ffe) AM_DEVREADWRITE8("oki", okim6295_device, read, write, 0xff00)
+	AM_RANGE(0x480000, 0x480003) AM_MIRROR(0x019ffc) AM_DEVWRITE8_LEGACY("ymsnd", ym2413_w, 0xff00)
+	AM_RANGE(0x500000, 0x500fff) AM_MIRROR(0x019000) AM_READWRITE(eeprom_r, eeprom_w) AM_SHARE("eeprom")
+	AM_RANGE(0x5a6000, 0x5a6001) AM_MIRROR(0x019ffe) AM_WRITE(eeprom_enable_w)
 	AM_RANGE(0x640000, 0x640001) AM_MIRROR(0x019ffe) AM_WRITE(latch_w)
 	AM_RANGE(0x640000, 0x640001) AM_MIRROR(0x019ffc) AM_READ_PORT("IN0")
 	AM_RANGE(0x640002, 0x640003) AM_MIRROR(0x019ffc) AM_READ_PORT("IN1")
@@ -155,7 +145,7 @@ static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16 )
 	AM_RANGE(0x6c0004, 0x6c0005) AM_MIRROR(0x019ff8) AM_READ_PORT("TRACK2")
 	AM_RANGE(0x6c0006, 0x6c0007) AM_MIRROR(0x019ff8) AM_READ_PORT("TRACK3")
 	AM_RANGE(0x726000, 0x726001) AM_MIRROR(0x019ffe) AM_WRITE(watchdog_reset16_w)
-	AM_RANGE(0x7e6000, 0x7e6001) AM_MIRROR(0x019ffe) AM_WRITE(atarigen_scanline_int_ack_w)
+	AM_RANGE(0x7e6000, 0x7e6001) AM_MIRROR(0x019ffe) AM_WRITE(scanline_int_ack_w)
 ADDRESS_MAP_END
 
 
@@ -176,7 +166,7 @@ static INPUT_PORTS_START( rampart )
 	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
 	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(3)
-	PORT_BIT( 0x0800, IP_ACTIVE_HIGH, IPT_VBLANK )
+	PORT_BIT( 0x0800, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_BIT( 0xf000, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("IN1")
@@ -191,19 +181,19 @@ static INPUT_PORTS_START( rampart )
 	PORT_BIT( 0xf000, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("TRACK0")
-    PORT_BIT( 0x00ff, 0, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(100) PORT_KEYDELTA(30) PORT_REVERSE PORT_PLAYER(2)
-    PORT_BIT( 0xff00, 0, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(100) PORT_KEYDELTA(30) PORT_REVERSE PORT_PLAYER(3)
+	PORT_BIT( 0x00ff, 0, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(100) PORT_KEYDELTA(30) PORT_REVERSE PORT_PLAYER(2)
+	PORT_BIT( 0xff00, 0, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(100) PORT_KEYDELTA(30) PORT_REVERSE PORT_PLAYER(3)
 
 	PORT_START("TRACK1")
-    PORT_BIT( 0x00ff, 0, IPT_TRACKBALL_X ) PORT_SENSITIVITY(100) PORT_KEYDELTA(30) PORT_REVERSE PORT_PLAYER(2)
-    PORT_BIT( 0xff00, 0, IPT_TRACKBALL_X ) PORT_SENSITIVITY(100) PORT_KEYDELTA(30) PORT_REVERSE PORT_PLAYER(3)
+	PORT_BIT( 0x00ff, 0, IPT_TRACKBALL_X ) PORT_SENSITIVITY(100) PORT_KEYDELTA(30) PORT_REVERSE PORT_PLAYER(2)
+	PORT_BIT( 0xff00, 0, IPT_TRACKBALL_X ) PORT_SENSITIVITY(100) PORT_KEYDELTA(30) PORT_REVERSE PORT_PLAYER(3)
 
 	PORT_START("TRACK2")
-    PORT_BIT( 0x00ff, 0, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(100) PORT_KEYDELTA(30) PORT_REVERSE PORT_PLAYER(1)
+	PORT_BIT( 0x00ff, 0, IPT_TRACKBALL_Y ) PORT_SENSITIVITY(100) PORT_KEYDELTA(30) PORT_REVERSE PORT_PLAYER(1)
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("TRACK3")
-    PORT_BIT( 0x00ff, 0, IPT_TRACKBALL_X ) PORT_SENSITIVITY(100) PORT_KEYDELTA(30) PORT_REVERSE PORT_PLAYER(1)
+	PORT_BIT( 0x00ff, 0, IPT_TRACKBALL_X ) PORT_SENSITIVITY(100) PORT_KEYDELTA(30) PORT_REVERSE PORT_PLAYER(1)
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 INPUT_PORTS_END
 
@@ -220,7 +210,7 @@ static INPUT_PORTS_START( ramprt2p )
 	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
 	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(3)
-	PORT_BIT( 0x0800, IP_ACTIVE_HIGH, IPT_VBLANK )
+	PORT_BIT( 0x0800, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_BIT( 0xf000, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("IN1")
@@ -270,7 +260,7 @@ static INPUT_PORTS_START( rampartj )
 	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
-	PORT_BIT( 0x0800, IP_ACTIVE_HIGH, IPT_VBLANK )
+	PORT_BIT( 0x0800, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_BIT( 0xf000, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("IN1")
@@ -346,10 +336,9 @@ static MACHINE_CONFIG_START( rampart, rampart_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, MASTER_CLOCK/2)
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT("screen", atarigen_video_int_gen)
+	MCFG_DEVICE_VBLANK_INT_DRIVER("screen", atarigen_state, video_int_gen)
 
-	MCFG_MACHINE_START(rampart)
-	MCFG_MACHINE_RESET(rampart)
+	MCFG_MACHINE_RESET_OVERRIDE(rampart_state,rampart)
 	MCFG_NVRAM_ADD_1FILL("eeprom")
 	MCFG_WATCHDOG_VBLANK_INIT(8)
 
@@ -359,13 +348,12 @@ static MACHINE_CONFIG_START( rampart, rampart_state )
 	MCFG_PALETTE_LENGTH(512)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	/* note: these parameters are from published specs, not derived */
 	/* the board uses an SOS-2 chip to generate video signals */
 	MCFG_SCREEN_RAW_PARAMS(MASTER_CLOCK/2, 456, 0+12, 336+12, 262, 0, 240)
-	MCFG_SCREEN_UPDATE(rampart)
+	MCFG_SCREEN_UPDATE_DRIVER(rampart_state, screen_update_rampart)
 
-	MCFG_VIDEO_START(rampart)
+	MCFG_VIDEO_START_OVERRIDE(rampart_state,rampart)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -395,7 +383,7 @@ ROM_START( rampart )
 	ROM_REGION( 0x20000, "gfx1", ROMREGION_INVERT )
 	ROM_LOAD( "136082-1009.2n",   0x000000, 0x20000, CRC(23b95f59) SHA1(cec8523eaf83d4c9bb0055f34024a6e9c52c4c0c) )
 
-	ROM_REGION( 0x40000, "oki", 0 )	/* ADPCM data */
+	ROM_REGION( 0x40000, "oki", 0 ) /* ADPCM data */
 	ROM_LOAD( "136082-1007.2d", 0x00000, 0x20000, CRC(c96a0fc3) SHA1(6e7e242d0afa4714ca31d77ccbf8ee487bbdb1e4) )
 	ROM_LOAD( "136082-1008.1d", 0x20000, 0x20000, CRC(518218d9) SHA1(edf1b11579dcfa9a872fa4bd866dc2f95fac767d) )
 
@@ -422,7 +410,7 @@ ROM_START( rampart2p )
 	ROM_REGION( 0x20000, "gfx1", ROMREGION_INVERT )
 	ROM_LOAD( "136082-1019.2n",   0x000000, 0x20000, CRC(efa38bef) SHA1(d38448138134e7a0be2a75c3cd6ab0729da5b83b) )
 
-	ROM_REGION( 0x40000, "oki", 0 )	/* ADPCM data */
+	ROM_REGION( 0x40000, "oki", 0 ) /* ADPCM data */
 	ROM_LOAD( "136082-1007.2d", 0x00000, 0x20000, CRC(c96a0fc3) SHA1(6e7e242d0afa4714ca31d77ccbf8ee487bbdb1e4) )
 	ROM_LOAD( "136082-1008.1d", 0x20000, 0x20000, CRC(518218d9) SHA1(edf1b11579dcfa9a872fa4bd866dc2f95fac767d) )
 
@@ -453,7 +441,7 @@ ROM_START( rampartj )
 	ROM_REGION( 0x20000, "gfx1", ROMREGION_INVERT )
 	ROM_LOAD( "136082-2419.bin",   0x000000, 0x20000, CRC(456a8aae) SHA1(f35a3dc2069e20493661cf35fc0d4f4c4e11e420) )
 
-	ROM_REGION( 0x40000, "oki", 0 )	/* ADPCM data */
+	ROM_REGION( 0x40000, "oki", 0 ) /* ADPCM data */
 	ROM_LOAD( "136082-1007.2d", 0x00000, 0x20000, CRC(c96a0fc3) SHA1(6e7e242d0afa4714ca31d77ccbf8ee487bbdb1e4) )
 	ROM_LOAD( "136082-1008.1d", 0x20000, 0x20000, CRC(518218d9) SHA1(edf1b11579dcfa9a872fa4bd866dc2f95fac767d) )
 
@@ -477,12 +465,12 @@ ROM_END
  *
  *************************************/
 
-static DRIVER_INIT( rampart )
+DRIVER_INIT_MEMBER(rampart_state,rampart)
 {
-	UINT8 *rom = machine.region("maincpu")->base();
+	UINT8 *rom = machine().root_device().memregion("maincpu")->base();
 
 	memcpy(&rom[0x140000], &rom[0x40000], 0x8000);
-	atarigen_slapstic_init(machine.device("maincpu"), 0x140000, 0x438000, 118);
+	slapstic_configure(*machine().device<cpu_device>("maincpu"), 0x140000, 0x438000, 118);
 }
 
 
@@ -493,6 +481,6 @@ static DRIVER_INIT( rampart )
  *
  *************************************/
 
-GAME( 1990, rampart,  0,       rampart, rampart,  rampart, ROT0, "Atari Games", "Rampart (Trackball)", GAME_SUPPORTS_SAVE )
-GAME( 1990, rampart2p,rampart, rampart, ramprt2p, rampart, ROT0, "Atari Games", "Rampart (Joystick)", GAME_SUPPORTS_SAVE )
-GAME( 1990, rampartj, rampart, rampart, rampartj, rampart, ROT0, "Atari Games", "Rampart (Japan, Joystick)", GAME_SUPPORTS_SAVE )
+GAME( 1990, rampart,  0,       rampart, rampart, rampart_state,  rampart, ROT0, "Atari Games", "Rampart (Trackball)", GAME_SUPPORTS_SAVE )
+GAME( 1990, rampart2p,rampart, rampart, ramprt2p, rampart_state, rampart, ROT0, "Atari Games", "Rampart (Joystick)", GAME_SUPPORTS_SAVE )
+GAME( 1990, rampartj, rampart, rampart, rampartj, rampart_state, rampart, ROT0, "Atari Games", "Rampart (Japan, Joystick)", GAME_SUPPORTS_SAVE )

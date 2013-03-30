@@ -8,23 +8,23 @@ Atari Sprint 8 video emulation
 #include "includes/sprint8.h"
 
 
-PALETTE_INIT( sprint8 )
+void sprint8_state::palette_init()
 {
 	int i;
 
 	/* allocate the colortable */
-	machine.colortable = colortable_alloc(machine, 0x12);
+	machine().colortable = colortable_alloc(machine(), 0x12);
 
 	for (i = 0; i < 0x10; i++)
 	{
-		colortable_entry_set_value(machine.colortable, 2 * i + 0, 0x10);
-		colortable_entry_set_value(machine.colortable, 2 * i + 1, i);
+		colortable_entry_set_value(machine().colortable, 2 * i + 0, 0x10);
+		colortable_entry_set_value(machine().colortable, 2 * i + 1, i);
 	}
 
-	colortable_entry_set_value(machine.colortable, 0x20, 0x10);
-	colortable_entry_set_value(machine.colortable, 0x21, 0x10);
-	colortable_entry_set_value(machine.colortable, 0x22, 0x10);
-	colortable_entry_set_value(machine.colortable, 0x23, 0x11);
+	colortable_entry_set_value(machine().colortable, 0x20, 0x10);
+	colortable_entry_set_value(machine().colortable, 0x21, 0x10);
+	colortable_entry_set_value(machine().colortable, 0x22, 0x10);
+	colortable_entry_set_value(machine().colortable, 0x23, 0x11);
 }
 
 
@@ -63,10 +63,9 @@ static void set_pens(sprint8_state *state, colortable_t *colortable)
 }
 
 
-static TILE_GET_INFO( get_tile_info1 )
+TILE_GET_INFO_MEMBER(sprint8_state::get_tile_info1)
 {
-	sprint8_state *state = machine.driver_data<sprint8_state>();
-	UINT8 code = state->m_video_ram[tile_index];
+	UINT8 code = m_video_ram[tile_index];
 
 	int color = 0;
 
@@ -85,14 +84,13 @@ static TILE_GET_INFO( get_tile_info1 )
 
 	}
 
-	SET_TILE_INFO(code >> 7, code, color, (code & 0x40) ? (TILE_FLIPX | TILE_FLIPY) : 0);
+	SET_TILE_INFO_MEMBER(code >> 7, code, color, (code & 0x40) ? (TILE_FLIPX | TILE_FLIPY) : 0);
 }
 
 
-static TILE_GET_INFO( get_tile_info2 )
+TILE_GET_INFO_MEMBER(sprint8_state::get_tile_info2)
 {
-	sprint8_state *state = machine.driver_data<sprint8_state>();
-	UINT8 code = state->m_video_ram[tile_index];
+	UINT8 code = m_video_ram[tile_index];
 
 	int color = 0;
 
@@ -101,34 +99,32 @@ static TILE_GET_INFO( get_tile_info2 )
 	else
 		color = 17;
 
-	SET_TILE_INFO(code >> 7, code, color, (code & 0x40) ? (TILE_FLIPX | TILE_FLIPY) : 0);
+	SET_TILE_INFO_MEMBER(code >> 7, code, color, (code & 0x40) ? (TILE_FLIPX | TILE_FLIPY) : 0);
 }
 
 
-WRITE8_HANDLER( sprint8_video_ram_w )
+WRITE8_MEMBER(sprint8_state::sprint8_video_ram_w)
 {
-	sprint8_state *state = space->machine().driver_data<sprint8_state>();
-	state->m_video_ram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_tilemap1, offset);
-	tilemap_mark_tile_dirty(state->m_tilemap2, offset);
+	m_video_ram[offset] = data;
+	m_tilemap1->mark_tile_dirty(offset);
+	m_tilemap2->mark_tile_dirty(offset);
 }
 
 
-VIDEO_START( sprint8 )
+void sprint8_state::video_start()
 {
-	sprint8_state *state = machine.driver_data<sprint8_state>();
-	state->m_helper1 = machine.primary_screen->alloc_compatible_bitmap();
-	state->m_helper2 = machine.primary_screen->alloc_compatible_bitmap();
+	machine().primary_screen->register_screen_bitmap(m_helper1);
+	machine().primary_screen->register_screen_bitmap(m_helper2);
 
-	state->m_tilemap1 = tilemap_create(machine, get_tile_info1, tilemap_scan_rows, 16, 8, 32, 32);
-	state->m_tilemap2 = tilemap_create(machine, get_tile_info2, tilemap_scan_rows, 16, 8, 32, 32);
+	m_tilemap1 = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(sprint8_state::get_tile_info1),this), TILEMAP_SCAN_ROWS, 16, 8, 32, 32);
+	m_tilemap2 = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(sprint8_state::get_tile_info2),this), TILEMAP_SCAN_ROWS, 16, 8, 32, 32);
 
-	tilemap_set_scrolly(state->m_tilemap1, 0, +24);
-	tilemap_set_scrolly(state->m_tilemap2, 0, +24);
+	m_tilemap1->set_scrolly(0, +24);
+	m_tilemap2->set_scrolly(0, +24);
 }
 
 
-static void draw_sprites(running_machine &machine, bitmap_t* bitmap, const rectangle *cliprect)
+static void draw_sprites(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	sprint8_state *state = machine.driver_data<sprint8_state>();
 	int i;
@@ -152,44 +148,46 @@ static void draw_sprites(running_machine &machine, bitmap_t* bitmap, const recta
 }
 
 
-static TIMER_CALLBACK( sprint8_collision_callback )
+TIMER_CALLBACK_MEMBER(sprint8_state::sprint8_collision_callback)
 {
-	sprint8_set_collision(machine, param);
+	sprint8_set_collision(machine(), param);
 }
 
 
-SCREEN_UPDATE( sprint8 )
+UINT32 sprint8_state::screen_update_sprint8(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	sprint8_state *state = screen->machine().driver_data<sprint8_state>();
-	set_pens(state, screen->machine().colortable);
-	tilemap_draw(bitmap, cliprect, state->m_tilemap1, 0, 0);
-	draw_sprites(screen->machine(), bitmap, cliprect);
+	set_pens(this, machine().colortable);
+	m_tilemap1->draw(bitmap, cliprect, 0, 0);
+	draw_sprites(machine(), bitmap, cliprect);
 	return 0;
 }
 
 
-SCREEN_EOF( sprint8 )
+void sprint8_state::screen_eof_sprint8(screen_device &screen, bool state)
 {
-	sprint8_state *state = machine.driver_data<sprint8_state>();
-	int x;
-	int y;
-	const rectangle &visarea = machine.primary_screen->visible_area();
-
-	tilemap_draw(state->m_helper2, &visarea, state->m_tilemap2, 0, 0);
-
-	bitmap_fill(state->m_helper1, &visarea, 0x20);
-
-	draw_sprites(machine, state->m_helper1, &visarea);
-
-	for (y = visarea.min_y; y <= visarea.max_y; y++)
+	// rising edge
+	if (state)
 	{
-		const UINT16* p1 = BITMAP_ADDR16(state->m_helper1, y, 0);
-		const UINT16* p2 = BITMAP_ADDR16(state->m_helper2, y, 0);
+		int x;
+		int y;
+		const rectangle &visarea = machine().primary_screen->visible_area();
 
-		for (x = visarea.min_x; x <= visarea.max_x; x++)
-			if (p1[x] != 0x20 && p2[x] == 0x23)
-				machine.scheduler().timer_set(machine.primary_screen->time_until_pos(y + 24, x),
-						FUNC(sprint8_collision_callback),
-						colortable_entry_get_value(machine.colortable, p1[x]));
+		m_tilemap2->draw(m_helper2, visarea, 0, 0);
+
+		m_helper1.fill(0x20, visarea);
+
+		draw_sprites(machine(), m_helper1, visarea);
+
+		for (y = visarea.min_y; y <= visarea.max_y; y++)
+		{
+			const UINT16* p1 = &m_helper1.pix16(y);
+			const UINT16* p2 = &m_helper2.pix16(y);
+
+			for (x = visarea.min_x; x <= visarea.max_x; x++)
+				if (p1[x] != 0x20 && p2[x] == 0x23)
+					machine().scheduler().timer_set(machine().primary_screen->time_until_pos(y + 24, x),
+							timer_expired_delegate(FUNC(sprint8_state::sprint8_collision_callback),this),
+							colortable_entry_get_value(machine().colortable, p1[x]));
+		}
 	}
 }

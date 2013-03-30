@@ -42,28 +42,31 @@ Notes:
 
 #include "emu.h"
 #include "cpu/z80/z80.h"
-#include "machine/8255ppi.h"
+#include "machine/i8255.h"
 #include "sound/ay8910.h"
 
 
 class tcl_state : public driver_device
 {
 public:
-	tcl_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	tcl_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) { }
 
+	DECLARE_DRIVER_INIT(tcl);
+	virtual void video_start();
+	UINT32 screen_update_tcl(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
-static VIDEO_START( tcl )
+void tcl_state::video_start()
 {
 }
-static SCREEN_UPDATE( tcl )
+UINT32 tcl_state::screen_update_tcl(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
 	return 0;
 }
 
-static ADDRESS_MAP_START( tcl_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( tcl_map, AS_PROGRAM, 8, tcl_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM  /* bfff ? */
 ADDRESS_MAP_END
 
@@ -100,24 +103,24 @@ static GFXDECODE_START( tcl )
 	GFXDECODE_ENTRY( "gfx2", 0, charlayout2,     0, 16 ) /* wrong */
 GFXDECODE_END
 
-static const ppi8255_interface ppi8255_intf[2] =
+static I8255A_INTERFACE( ppi8255_0_intf )
 {
-	{
-		DEVCB_NULL,
-		DEVCB_NULL,
-		DEVCB_NULL,
-		DEVCB_NULL,
-		DEVCB_NULL,
-		DEVCB_NULL
-	},
-	{
-		DEVCB_NULL,
-		DEVCB_NULL,
-		DEVCB_NULL,
-		DEVCB_NULL,
-		DEVCB_NULL,
-		DEVCB_NULL
-	}
+	DEVCB_NULL,                         /* Port A read */
+	DEVCB_NULL,                         /* Port A write */
+	DEVCB_NULL,                         /* Port B read */
+	DEVCB_NULL,                         /* Port B write */
+	DEVCB_NULL,                         /* Port C read */
+	DEVCB_NULL,                         /* Port C write */
+};
+
+static I8255A_INTERFACE( ppi8255_1_intf )
+{
+	DEVCB_NULL,                         /* Port A read */
+	DEVCB_NULL,                         /* Port A write */
+	DEVCB_NULL,                         /* Port B read */
+	DEVCB_NULL,                         /* Port B write */
+	DEVCB_NULL,                         /* Port C read */
+	DEVCB_NULL,                         /* Port C write */
 };
 
 
@@ -131,18 +134,16 @@ static MACHINE_CONFIG_START( tcl, tcl_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(tcl)
+	MCFG_SCREEN_UPDATE_DRIVER(tcl_state, screen_update_tcl)
 
 	MCFG_GFXDECODE(tcl)
 	MCFG_PALETTE_LENGTH(16*16)
 
-	MCFG_VIDEO_START(tcl)
 
-	MCFG_PPI8255_ADD( "ppi8255_0", ppi8255_intf[0] )
-	MCFG_PPI8255_ADD( "ppi8255_1", ppi8255_intf[1] )
+	MCFG_I8255A_ADD( "ppi8255_0", ppi8255_0_intf )
+	MCFG_I8255A_ADD( "ppi8255_1", ppi8255_1_intf )
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -181,18 +182,18 @@ ROM_END
 #define ROL(x,n) (BITSWAP8((x),(7+8-n)&7,(6+8-n)&7,(5+8-n)&7,(4+8-n)&7,(3+8-n)&7,(2+8-n)&7,(1+8-n)&7,(0+8-n)&7))
 
 #define WRITEDEST( n ) \
-		dest[idx]=n;	\
-		dest[idx+0x10000]=(n)^0xff;	\
+		dest[idx]=n;    \
+		dest[idx+0x10000]=(n)^0xff; \
 		idx++;
 
-static DRIVER_INIT(tcl)
+DRIVER_INIT_MEMBER(tcl_state,tcl)
 {
 	/* only the first part is decrypted (and verified)*/
 
-	address_space *space = machine.device("maincpu")->memory().space(AS_PROGRAM);
-	UINT8 *dest = machine.region("maincpu")->base();
-	int len = machine.region("maincpu")->bytes();
-	UINT8 *src = auto_alloc_array(machine, UINT8, len);
+	address_space &space = machine().device("maincpu")->memory().space(AS_PROGRAM);
+	UINT8 *dest = machine().root_device().memregion("maincpu")->base();
+	int len = machine().root_device().memregion("maincpu")->bytes();
+	UINT8 *src = auto_alloc_array(machine(), UINT8, len);
 
 	int i,idx=0;
 	memcpy(src, dest, len);
@@ -213,9 +214,9 @@ static DRIVER_INIT(tcl)
 			WRITEDEST((src[idx]^0x11)^0xf0); // abcdefgh -> ABCdefgH
 		}
 	}
-	auto_free(machine, src);
+	auto_free(machine(), src);
 
-	space->set_decrypted_region(0x0000, 0x7fff, dest+0x10000);
+	space.set_decrypted_region(0x0000, 0x7fff, dest+0x10000);
 }
 
-GAME( 1995, tcl,  0,       tcl,  tcl,  tcl, ROT0, "Uniwang", "Taiwan Chess Legend", GAME_NOT_WORKING )
+GAME( 1995, tcl,  0,       tcl,  tcl, tcl_state,  tcl, ROT0, "Uniwang", "Taiwan Chess Legend", GAME_NOT_WORKING )

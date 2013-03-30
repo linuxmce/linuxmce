@@ -135,21 +135,30 @@ TODO:
 #include "navarone.lh"
 #include "sos.lh"
 
-#define MASTER_CLOCK		XTAL_18_432MHz
+#define MASTER_CLOCK        XTAL_18_432MHz
 
 
-static READ8_HANDLER( geebee_in_r )
+/* Interrupt Gen */
+INTERRUPT_GEN_MEMBER(warpwarp_state::vblank_irq)
 {
-	warpwarp_state *state = space->machine().driver_data<warpwarp_state>();
+
+	if(m_ball_on)
+		device.execute().set_input_line(0, ASSERT_LINE);
+}
+
+
+/* B&W Games I/O */
+READ8_MEMBER(warpwarp_state::geebee_in_r)
+{
 	int res;
-	static const char *const portnames[] = { "SW0", "SW1", "DSW2", "PLACEHOLDER" };	// "IN1" & "IN2" are read separately when offset==3
+	static const char *const portnames[] = { "SW0", "SW1", "DSW2", "PLACEHOLDER" }; // "IN1" & "IN2" are read separately when offset==3
 
 	offset &= 3;
-	res = input_port_read_safe(space->machine(), portnames[offset], 0);
+	res = ioport(portnames[offset])->read_safe(0);
 	if (offset == 3)
 	{
-		res = input_port_read(space->machine(), (flip_screen_get(space->machine()) & 1) ? "IN2" : "IN1");	// read player 2 input in cocktail mode
-		if (state->m_handle_joystick)
+		res = ioport((flip_screen() & 1) ? "IN2" : "IN1")->read();  // read player 2 input in cocktail mode
+		if (m_handle_joystick)
 		{
 			/* map digital two-way joystick to two fixed VOLIN values */
 			if (res & 2) return 0x9f;
@@ -160,82 +169,83 @@ static READ8_HANDLER( geebee_in_r )
 	return res;
 }
 
-static WRITE8_HANDLER( geebee_out6_w )
+WRITE8_MEMBER(warpwarp_state::geebee_out6_w)
 {
-	warpwarp_state *state = space->machine().driver_data<warpwarp_state>();
 	switch (offset & 3)
 	{
 		case 0:
-			state->m_ball_h = data;
+			m_ball_h = data;
 			break;
 		case 1:
-			state->m_ball_v = data;
+			m_ball_v = data;
 			break;
 		case 2:
 			/* n.c. */
 			break;
 		case 3:
-			geebee_sound_w(space->machine().device("geebee"),0,data);
+			geebee_sound_w(machine().device("geebee"),space,0,data);
 			break;
 	}
 }
 
-static WRITE8_HANDLER( geebee_out7_w )
+WRITE8_MEMBER(warpwarp_state::geebee_out7_w)
 {
-	warpwarp_state *state = space->machine().driver_data<warpwarp_state>();
 	switch (offset & 7)
 	{
 		case 0:
-			set_led_status(space->machine(), 0,data & 1);
+			set_led_status(machine(), 0,data & 1);
 			break;
 		case 1:
-			set_led_status(space->machine(), 1,data & 1);
+			set_led_status(machine(), 1,data & 1);
 			break;
 		case 2:
-			set_led_status(space->machine(), 2,data & 1);
+			set_led_status(machine(), 2,data & 1);
 			break;
 		case 3:
-			coin_counter_w(space->machine(), 0,data & 1);
+			coin_counter_w(machine(), 0,data & 1);
 			break;
 		case 4:
-			if (strcmp(space->machine().system().name, "geebeeb"))
-				coin_lockout_global_w(space->machine(), ~data & 1);
+			if (strcmp(machine().system().name, "geebeeb"))
+				coin_lockout_global_w(machine(), ~data & 1);
 			break;
 		case 5:
-			if( state->m_geebee_bgw != (data & 1) )
-				tilemap_mark_all_tiles_dirty_all(space->machine());
-			state->m_geebee_bgw = data & 1;
+			if( m_geebee_bgw != (data & 1) )
+				machine().tilemap().mark_all_dirty();
+			m_geebee_bgw = data & 1;
 			break;
 		case 6:
-			state->m_ball_on = data & 1;
+			m_ball_on = data & 1;
+			if (~data & 1)
+				machine().device("maincpu")->execute().set_input_line(0, CLEAR_LINE);
 			break;
 		case 7:
-			flip_screen_set(space->machine(), data & 1);
+			flip_screen_set(data & 1);
 			break;
 	}
 }
 
 
+/* Color Games I/O */
+
 /* Read Switch Inputs */
-static READ8_HANDLER( warpwarp_sw_r )
+READ8_MEMBER(warpwarp_state::warpwarp_sw_r)
 {
-	return (input_port_read(space->machine(), "IN0") >> (offset & 7)) & 1;
+	return (ioport("IN0")->read() >> (offset & 7)) & 1;
 }
 
 /* Read Dipswitches */
-static READ8_DEVICE_HANDLER( warpwarp_dsw1_r )
+READ8_MEMBER(warpwarp_state::warpwarp_dsw1_r)
 {
-	return (input_port_read(device->machine(), "DSW1") >> (offset & 7)) & 1;
+	return (machine().root_device().ioport("DSW1")->read() >> (offset & 7)) & 1;
 }
 
 /* Read mux Controller Inputs */
-static READ8_DEVICE_HANDLER( warpwarp_vol_r )
+READ8_MEMBER(warpwarp_state::warpwarp_vol_r)
 {
-	warpwarp_state *state = device->machine().driver_data<warpwarp_state>();
 	int res;
 
-	res = input_port_read(device->machine(), (flip_screen_get(device->machine()) & 1) ? "VOLIN2" : "VOLIN1");
-	if (state->m_handle_joystick)
+	res = ioport((flip_screen() & 1) ? "VOLIN2" : "VOLIN1")->read();
+	if (m_handle_joystick)
 	{
 		if (res & 1) return 0x0f;
 		if (res & 2) return 0x3f;
@@ -246,19 +256,18 @@ static READ8_DEVICE_HANDLER( warpwarp_vol_r )
 	return res;
 }
 
-static WRITE8_HANDLER( warpwarp_out0_w )
+WRITE8_MEMBER(warpwarp_state::warpwarp_out0_w)
 {
-	warpwarp_state *state = space->machine().driver_data<warpwarp_state>();
 	switch (offset & 3)
 	{
 		case 0:
-			state->m_ball_h = data;
+			m_ball_h = data;
 			break;
 		case 1:
-			state->m_ball_v = data;
+			m_ball_v = data;
 			break;
 		case 2:
-			warpwarp_sound_w(space->machine().device("warpwarp"),0,data);
+			warpwarp_sound_w(machine().device("warpwarp"),space,0,data);
 			break;
 		case 3:
 			watchdog_reset_w(space,0,data);
@@ -266,81 +275,80 @@ static WRITE8_HANDLER( warpwarp_out0_w )
 	}
 }
 
-static WRITE8_HANDLER( warpwarp_out3_w )
+WRITE8_MEMBER(warpwarp_state::warpwarp_out3_w)
 {
-	warpwarp_state *state = space->machine().driver_data<warpwarp_state>();
 	switch (offset & 7)
 	{
 		case 0:
-			set_led_status(space->machine(), 0,data & 1);
+			set_led_status(machine(), 0,data & 1);
 			break;
 		case 1:
-			set_led_status(space->machine(), 1,data & 1);
+			set_led_status(machine(), 1,data & 1);
 			break;
 		case 2:
-			set_led_status(space->machine(), 2,data & 1);
+			set_led_status(machine(), 2,data & 1);
 			break;
 		case 3:
 			/* n.c. */
 			break;
 		case 4:
-			coin_lockout_global_w(space->machine(), ~data & 1);
+			coin_lockout_global_w(machine(), ~data & 1);
 			break;
 		case 5:
-			coin_counter_w(space->machine(), 0,data & 1);
+			coin_counter_w(machine(), 0,data & 1);
 			break;
 		case 6:
-			state->m_ball_on = data & 1;
-			cpu_interrupt_enable(space->machine().device("maincpu"), data & 1);
+			m_ball_on = data & 1;
 			if (~data & 1)
-				cputag_set_input_line(space->machine(), "maincpu", 0, CLEAR_LINE);
+				machine().device("maincpu")->execute().set_input_line(0, CLEAR_LINE);
 			break;
 		case 7:
-			flip_screen_set(space->machine(), data & 1);
+			flip_screen_set(data & 1);
 			break;
 	}
 }
 
 
 
-static ADDRESS_MAP_START( geebee_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( geebee_map, AS_PROGRAM, 8, warpwarp_state )
 	AM_RANGE(0x0000, 0x1fff) AM_ROM
-	AM_RANGE(0x2000, 0x23ff) AM_MIRROR(0x400) AM_RAM_WRITE(geebee_videoram_w) AM_BASE_MEMBER(warpwarp_state, m_geebee_videoram) // mirror used by kaitei due to a bug
-	AM_RANGE(0x3000, 0x37ff) AM_ROM	AM_REGION("gfx1", 0) // 3000-33ff in geebee
-    AM_RANGE(0x4000, 0x40ff) AM_RAM
+	AM_RANGE(0x2000, 0x23ff) AM_MIRROR(0x400) AM_RAM_WRITE(geebee_videoram_w) AM_SHARE("geebee_videoram") // mirror used by kaitei due to a bug
+	AM_RANGE(0x3000, 0x37ff) AM_ROM AM_REGION("gfx1", 0) // 3000-33ff in geebee
+	AM_RANGE(0x4000, 0x40ff) AM_RAM
 	AM_RANGE(0x5000, 0x53ff) AM_READ(geebee_in_r)
 	AM_RANGE(0x6000, 0x6fff) AM_WRITE(geebee_out6_w)
 	AM_RANGE(0x7000, 0x7fff) AM_WRITE(geebee_out7_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( geebee_port_map, AS_IO, 8 )
+static ADDRESS_MAP_START( geebee_port_map, AS_IO, 8, warpwarp_state )
 	AM_RANGE(0x50, 0x53) AM_READ(geebee_in_r)
 	AM_RANGE(0x60, 0x6f) AM_WRITE(geebee_out6_w)
 	AM_RANGE(0x70, 0x7f) AM_WRITE(geebee_out7_w)
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( bombbee_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( bombbee_map, AS_PROGRAM, 8, warpwarp_state )
 	AM_RANGE(0x0000, 0x1fff) AM_ROM
 	AM_RANGE(0x2000, 0x23ff) AM_RAM
-	AM_RANGE(0x4000, 0x47ff) AM_RAM_WRITE(warpwarp_videoram_w) AM_BASE_MEMBER(warpwarp_state, m_videoram)
+	AM_RANGE(0x4000, 0x47ff) AM_RAM_WRITE(warpwarp_videoram_w) AM_SHARE("videoram")
 	AM_RANGE(0x4800, 0x4fff) AM_ROM AM_REGION("gfx1", 0)
 	AM_RANGE(0x6000, 0x600f) AM_READWRITE(warpwarp_sw_r, warpwarp_out0_w)
-	AM_RANGE(0x6010, 0x601f) AM_DEVREADWRITE("warpwarp", warpwarp_vol_r, warpwarp_music1_w)
-	AM_RANGE(0x6020, 0x602f) AM_DEVREADWRITE("warpwarp", warpwarp_dsw1_r, warpwarp_music2_w)
+	AM_RANGE(0x6010, 0x601f) AM_READ(warpwarp_vol_r) AM_DEVWRITE_LEGACY("warpwarp", warpwarp_music1_w)
+	AM_RANGE(0x6020, 0x602f) AM_READ(warpwarp_dsw1_r) AM_DEVWRITE_LEGACY("warpwarp", warpwarp_music2_w)
 	AM_RANGE(0x6030, 0x603f) AM_WRITE(warpwarp_out3_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( warpwarp_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( warpwarp_map, AS_PROGRAM, 8, warpwarp_state )
 	AM_RANGE(0x0000, 0x3fff) AM_ROM
 	AM_RANGE(0x8000, 0x83ff) AM_RAM
-	AM_RANGE(0x4000, 0x47ff) AM_RAM_WRITE(warpwarp_videoram_w) AM_BASE_MEMBER(warpwarp_state, m_videoram)
+	AM_RANGE(0x4000, 0x47ff) AM_RAM_WRITE(warpwarp_videoram_w) AM_SHARE("videoram")
 	AM_RANGE(0x4800, 0x4fff) AM_ROM AM_REGION("gfx1", 0)
 	AM_RANGE(0xc000, 0xc00f) AM_READWRITE(warpwarp_sw_r, warpwarp_out0_w)
-	AM_RANGE(0xc010, 0xc01f) AM_DEVREADWRITE("warpwarp", warpwarp_vol_r, warpwarp_music1_w)
-	AM_RANGE(0xc020, 0xc02f) AM_DEVREADWRITE("warpwarp", warpwarp_dsw1_r, warpwarp_music2_w)
+	AM_RANGE(0xc010, 0xc01f) AM_READ(warpwarp_vol_r) AM_DEVWRITE_LEGACY("warpwarp", warpwarp_music1_w)
+	AM_RANGE(0xc020, 0xc02f) AM_READ(warpwarp_dsw1_r) AM_DEVWRITE_LEGACY("warpwarp", warpwarp_music2_w)
 	AM_RANGE(0xc030, 0xc03f) AM_WRITE(warpwarp_out3_w)
 ADDRESS_MAP_END
+
 
 
 static INPUT_PORTS_START( geebee )
@@ -357,32 +365,32 @@ static INPUT_PORTS_START( geebee )
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("DSW2")
-	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Cabinet ) )
+	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Cabinet ) )  PORT_DIPLOCATION("DSW2:1")
 	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Cocktail) )
-	PORT_DIPNAME( 0x02, 0x00, DEF_STR( Lives ) )
-	PORT_DIPSETTING(	0x00, "3" )
-	PORT_DIPSETTING(	0x02, "5" )
-	PORT_DIPNAME( 0x0c, 0x00, DEF_STR( Coinage ) )
+	PORT_DIPNAME( 0x02, 0x00, DEF_STR( Lives ) )    PORT_DIPLOCATION("DSW2:2")
+	PORT_DIPSETTING(    0x00, "3" )
+	PORT_DIPSETTING(    0x02, "5" )
+	PORT_DIPNAME( 0x0c, 0x00, DEF_STR( Coinage ) )  PORT_DIPLOCATION("DSW2:3,4")
 	PORT_DIPSETTING(    0x08, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(    0x0c, DEF_STR( Free_Play ) )
-	PORT_DIPNAME( 0x30, 0x10, "Replay" )		// awards 1 credit
-	PORT_DIPSETTING(    0x10, "40k 80k" )		PORT_CONDITION("DSW2", 0x02, PORTCOND_EQUALS, 0x00)
-	PORT_DIPSETTING(    0x20, "70k 140k" )		PORT_CONDITION("DSW2", 0x02, PORTCOND_EQUALS, 0x00)
-	PORT_DIPSETTING(    0x30, "100k 200k" )		PORT_CONDITION("DSW2", 0x02, PORTCOND_EQUALS, 0x00)
-	PORT_DIPSETTING(    0x00, DEF_STR( None ) )	PORT_CONDITION("DSW2", 0x02, PORTCOND_EQUALS, 0x00)
-	PORT_DIPSETTING(    0x10, "60k 120k" )		PORT_CONDITION("DSW2", 0x02, PORTCOND_EQUALS, 0x02)
-	PORT_DIPSETTING(    0x20, "100k 200k" )		PORT_CONDITION("DSW2", 0x02, PORTCOND_EQUALS, 0x02)
-	PORT_DIPSETTING(    0x30, "150k 300k" )		PORT_CONDITION("DSW2", 0x02, PORTCOND_EQUALS, 0x02)
-	PORT_DIPSETTING(    0x00, DEF_STR( None ) )	PORT_CONDITION("DSW2", 0x02, PORTCOND_EQUALS, 0x02)
+	PORT_DIPNAME( 0x30, 0x10, "Replay" )        PORT_DIPLOCATION("DSW2:5,6")    // awards 1 credit
+	PORT_DIPSETTING(    0x10, "40k 80k" )       PORT_CONDITION("DSW2", 0x02, EQUALS, 0x00)
+	PORT_DIPSETTING(    0x20, "70k 140k" )      PORT_CONDITION("DSW2", 0x02, EQUALS, 0x00)
+	PORT_DIPSETTING(    0x30, "100k 200k" )     PORT_CONDITION("DSW2", 0x02, EQUALS, 0x00)
+	PORT_DIPSETTING(    0x00, DEF_STR( None ) ) PORT_CONDITION("DSW2", 0x02, EQUALS, 0x00)
+	PORT_DIPSETTING(    0x10, "60k 120k" )      PORT_CONDITION("DSW2", 0x02, EQUALS, 0x02)
+	PORT_DIPSETTING(    0x20, "100k 200k" )     PORT_CONDITION("DSW2", 0x02, EQUALS, 0x02)
+	PORT_DIPSETTING(    0x30, "150k 300k" )     PORT_CONDITION("DSW2", 0x02, EQUALS, 0x02)
+	PORT_DIPSETTING(    0x00, DEF_STR( None ) ) PORT_CONDITION("DSW2", 0x02, EQUALS, 0x02)
 	PORT_BIT( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("IN1")
 	PORT_BIT( 0xff, 0x58, IPT_PADDLE ) PORT_MINMAX(0x10,0xa0) PORT_SENSITIVITY(30) PORT_KEYDELTA(15) PORT_CENTERDELTA(0) PORT_REVERSE
 
-	PORT_START("IN2")	/* Cocktail */
+	PORT_START("IN2")   /* Cocktail */
 	PORT_BIT( 0xff, 0x58, IPT_PADDLE ) PORT_MINMAX(0x10,0xa0) PORT_SENSITIVITY(30) PORT_KEYDELTA(15) PORT_CENTERDELTA(0) PORT_REVERSE PORT_COCKTAIL
 INPUT_PORTS_END
 
@@ -390,15 +398,15 @@ static INPUT_PORTS_START( geebeeb )
 	PORT_INCLUDE( geebee )
 
 	PORT_MODIFY("DSW2")
-	PORT_DIPNAME( 0x30, 0x10, "Replay" )		// awards 1 credit
-	PORT_DIPSETTING(    0x10, "40k" )			PORT_CONDITION("DSW2", 0x02, PORTCOND_EQUALS, 0x00)
-	PORT_DIPSETTING(    0x20, "70k" )			PORT_CONDITION("DSW2", 0x02, PORTCOND_EQUALS, 0x00)
-	PORT_DIPSETTING(    0x30, "100k" )			PORT_CONDITION("DSW2", 0x02, PORTCOND_EQUALS, 0x00)
-	PORT_DIPSETTING(    0x00, DEF_STR( None ) )	PORT_CONDITION("DSW2", 0x02, PORTCOND_EQUALS, 0x00)
-	PORT_DIPSETTING(    0x10, "60k" )			PORT_CONDITION("DSW2", 0x02, PORTCOND_EQUALS, 0x02)
-	PORT_DIPSETTING(    0x20, "100k" )			PORT_CONDITION("DSW2", 0x02, PORTCOND_EQUALS, 0x02)
-	PORT_DIPSETTING(    0x30, "150k" )			PORT_CONDITION("DSW2", 0x02, PORTCOND_EQUALS, 0x02)
-	PORT_DIPSETTING(    0x00, DEF_STR( None ) )	PORT_CONDITION("DSW2", 0x02, PORTCOND_EQUALS, 0x02)
+	PORT_DIPNAME( 0x30, 0x10, "Replay" )        // awards 1 credit
+	PORT_DIPSETTING(    0x10, "40k" )           PORT_CONDITION("DSW2", 0x02, EQUALS, 0x00)
+	PORT_DIPSETTING(    0x20, "70k" )           PORT_CONDITION("DSW2", 0x02, EQUALS, 0x00)
+	PORT_DIPSETTING(    0x30, "100k" )          PORT_CONDITION("DSW2", 0x02, EQUALS, 0x00)
+	PORT_DIPSETTING(    0x00, DEF_STR( None ) ) PORT_CONDITION("DSW2", 0x02, EQUALS, 0x00)
+	PORT_DIPSETTING(    0x10, "60k" )           PORT_CONDITION("DSW2", 0x02, EQUALS, 0x02)
+	PORT_DIPSETTING(    0x20, "100k" )          PORT_CONDITION("DSW2", 0x02, EQUALS, 0x02)
+	PORT_DIPSETTING(    0x30, "150k" )          PORT_CONDITION("DSW2", 0x02, EQUALS, 0x02)
+	PORT_DIPSETTING(    0x00, DEF_STR( None ) ) PORT_CONDITION("DSW2", 0x02, EQUALS, 0x02)
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( navarone )
@@ -415,119 +423,117 @@ static INPUT_PORTS_START( navarone )
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("DSW2")
-	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Cabinet ) )
+	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Cabinet ) )      PORT_DIPLOCATION("DSW2:1")
 	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Cocktail) )
-	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Lives ) )
-	PORT_DIPSETTING(	0x00, "2" )
-	PORT_DIPSETTING(	0x02, "3" )
-	PORT_DIPNAME( 0x0c, 0x04, DEF_STR( Bonus_Life ) )
-	PORT_DIPSETTING(    0x04, "5000" )			PORT_CONDITION("DSW2", 0x02, PORTCOND_EQUALS, 0x00)
-	PORT_DIPSETTING(    0x08, "6000" )			PORT_CONDITION("DSW2", 0x02, PORTCOND_EQUALS, 0x00)
-	PORT_DIPSETTING(    0x0c, "7000" )			PORT_CONDITION("DSW2", 0x02, PORTCOND_EQUALS, 0x00)
-	PORT_DIPSETTING(    0x00, DEF_STR( None ) )	PORT_CONDITION("DSW2", 0x02, PORTCOND_EQUALS, 0x00)
-	PORT_DIPSETTING(    0x04, "6000" )			PORT_CONDITION("DSW2", 0x02, PORTCOND_EQUALS, 0x02)
-	PORT_DIPSETTING(    0x08, "7000" )			PORT_CONDITION("DSW2", 0x02, PORTCOND_EQUALS, 0x02)
-	PORT_DIPSETTING(    0x0c, "8000" )			PORT_CONDITION("DSW2", 0x02, PORTCOND_EQUALS, 0x02)
-	PORT_DIPSETTING(    0x00, DEF_STR( None ) )	PORT_CONDITION("DSW2", 0x02, PORTCOND_EQUALS, 0x02)
-	PORT_DIPNAME( 0x30, 0x10, DEF_STR( Coinage ) )
-	PORT_DIPSETTING(	0x30, DEF_STR( 2C_1C ) )
+	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Lives ) )        PORT_DIPLOCATION("DSW2:2")
+	PORT_DIPSETTING(    0x00, "2" )
+	PORT_DIPSETTING(    0x02, "3" )
+	PORT_DIPNAME( 0x0c, 0x04, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION("DSW2:3,4")
+	PORT_DIPSETTING(    0x04, "5000" )          PORT_CONDITION("DSW2", 0x02, EQUALS, 0x00)
+	PORT_DIPSETTING(    0x08, "6000" )          PORT_CONDITION("DSW2", 0x02, EQUALS, 0x00)
+	PORT_DIPSETTING(    0x0c, "7000" )          PORT_CONDITION("DSW2", 0x02, EQUALS, 0x00)
+	PORT_DIPSETTING(    0x00, DEF_STR( None ) ) PORT_CONDITION("DSW2", 0x02, EQUALS, 0x00)
+	PORT_DIPSETTING(    0x04, "6000" )          PORT_CONDITION("DSW2", 0x02, EQUALS, 0x02)
+	PORT_DIPSETTING(    0x08, "7000" )          PORT_CONDITION("DSW2", 0x02, EQUALS, 0x02)
+	PORT_DIPSETTING(    0x0c, "8000" )          PORT_CONDITION("DSW2", 0x02, EQUALS, 0x02)
+	PORT_DIPSETTING(    0x00, DEF_STR( None ) ) PORT_CONDITION("DSW2", 0x02, EQUALS, 0x02)
+	PORT_DIPNAME( 0x30, 0x10, DEF_STR( Coinage ) )      PORT_DIPLOCATION("DSW2:5,6")
+	PORT_DIPSETTING(    0x30, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x10, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0x20, DEF_STR( 1C_2C ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Free_Play ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
 	PORT_BIT( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("IN1")	/* Fake input port to support digital joystick */
+	PORT_START("IN1")   /* Fake input port to support digital joystick */
 	PORT_BIT( 0x01, 0x00, IPT_JOYSTICK_RIGHT )
 	PORT_BIT( 0x02, 0x00, IPT_JOYSTICK_LEFT )
 
-	PORT_START("IN2")	/* Fake input port to support digital joystick */
+	PORT_START("IN2")   /* Fake input port to support digital joystick */
 	PORT_BIT( 0x01, 0x00, IPT_JOYSTICK_RIGHT ) PORT_COCKTAIL
 	PORT_BIT( 0x02, 0x00, IPT_JOYSTICK_LEFT ) PORT_COCKTAIL
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( kaitein )
 	PORT_START("SW0")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW,	IPT_COIN1 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW,	IPT_BUTTON1 ) PORT_COCKTAIL
-	PORT_BIT( 0x04, IP_ACTIVE_LOW,	IPT_START1 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW,	IPT_START2 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW,	IPT_BUTTON1 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW,	IPT_SERVICE1 )
-	PORT_BIT( 0xc0, IP_ACTIVE_LOW,	IPT_UNUSED )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_COIN1 )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_START1 )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_START2 )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_BUTTON1 )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_SERVICE1 )
+	PORT_BIT( 0xc0, IP_ACTIVE_LOW,  IPT_UNUSED )
 
 	PORT_START("SW1")
-	PORT_BIT( 0xff, IP_ACTIVE_LOW,	IPT_UNUSED )
+	PORT_BIT( 0xff, IP_ACTIVE_LOW,  IPT_UNUSED )
 
 	PORT_START("DSW2")
-	PORT_DIPNAME( 0x03, 0x01, DEF_STR( Lives ) )
-	PORT_DIPSETTING(	0x00, "2" )
-	PORT_DIPSETTING(	0x01, "3" )
-	PORT_DIPSETTING(	0x02, "4" )
-	PORT_DIPSETTING(	0x03, "5" )
-	PORT_DIPNAME( 0x0c, 0x04, DEF_STR( Bonus_Life ) )
+	PORT_DIPNAME( 0x03, 0x01, DEF_STR( Lives ) )        PORT_DIPLOCATION("DSW2:1,2")
+	PORT_DIPSETTING(    0x00, "2" )
+	PORT_DIPSETTING(    0x01, "3" )
+	PORT_DIPSETTING(    0x02, "4" )
+	PORT_DIPSETTING(    0x03, "5" )
+	PORT_DIPNAME( 0x0c, 0x04, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION("DSW2:3,4")
 	PORT_DIPSETTING(    0x04, "2000" )
 	PORT_DIPSETTING(    0x08, "4000" )
 	PORT_DIPSETTING(    0x0c, "6000" )
 	PORT_DIPSETTING(    0x00, DEF_STR( None ) )
-	PORT_DIPNAME( 0x30, 0x10, DEF_STR( Coinage ) )
-	PORT_DIPSETTING(	0x30, DEF_STR( 2C_1C ) )
+	PORT_DIPNAME( 0x30, 0x10, DEF_STR( Coinage ) )      PORT_DIPLOCATION("DSW2:5,6")
+	PORT_DIPSETTING(    0x30, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x10, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0x20, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
-	PORT_BIT( 0xc0, IP_ACTIVE_LOW,	IPT_UNUSED )
+	PORT_BIT( 0xc0, IP_ACTIVE_LOW,  IPT_UNUSED )
 
-	PORT_START("IN1")	/* Fake input port to support digital joystick */
+	PORT_START("IN1")   /* Fake input port to support digital joystick */
 	PORT_BIT( 0x01, 0x00, IPT_JOYSTICK_RIGHT )
 	PORT_BIT( 0x02, 0x00, IPT_JOYSTICK_LEFT )
 
-	PORT_START("IN2")	/* Fake input port to support digital joystick */
+	PORT_START("IN2")   /* Fake input port to support digital joystick */
 	PORT_BIT( 0x01, 0x00, IPT_JOYSTICK_RIGHT ) PORT_COCKTAIL
 	PORT_BIT( 0x02, 0x00, IPT_JOYSTICK_LEFT ) PORT_COCKTAIL
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( kaitei )
 	PORT_START("SW0")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW,	IPT_COIN1 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW,	IPT_START1 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW,	IPT_START2 )
-	PORT_BIT( 0xf2, 0xa0, IPT_UNKNOWN )	// game verifies these bits and freezes if they don't match
+	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_COIN1 )
+	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_START1 )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_START2 )
+	PORT_BIT( 0xf2, 0xa0, IPT_UNKNOWN ) // game verifies these bits and freezes if they don't match
 
 	PORT_START("SW1")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW,	IPT_JOYSTICK_RIGHT )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW,	IPT_JOYSTICK_LEFT )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW,	IPT_BUTTON1 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW,	IPT_JOYSTICK_RIGHT ) PORT_COCKTAIL
-	PORT_BIT( 0x10, IP_ACTIVE_LOW,	IPT_JOYSTICK_LEFT ) PORT_COCKTAIL
-	PORT_BIT( 0x20, IP_ACTIVE_LOW,	IPT_BUTTON1 ) PORT_COCKTAIL
-	PORT_BIT( 0xc0, 0x80, IPT_UNKNOWN )	// game verifies these two bits and freezes if they don't match
+	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_JOYSTICK_RIGHT )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_JOYSTICK_LEFT )
+	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_BUTTON1 )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_JOYSTICK_RIGHT ) PORT_COCKTAIL
+	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_JOYSTICK_LEFT ) PORT_COCKTAIL
+	PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_BIT( 0xc0, 0x80, IPT_UNKNOWN ) // game verifies these two bits and freezes if they don't match
 
 	PORT_START("DSW2")
-	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Cabinet ) )
-	PORT_DIPSETTING(	0x01, DEF_STR( Upright ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Cocktail ) )
-	PORT_DIPNAME( 0x06, 0x06, DEF_STR( Lives ) )
-	PORT_DIPSETTING(	0x06, "4" )
+	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Cabinet ) )      PORT_DIPLOCATION("DSW2:1")
+	PORT_DIPSETTING(    0x01, DEF_STR( Upright ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Cocktail ) )
+	PORT_DIPNAME( 0x06, 0x06, DEF_STR( Lives ) )        PORT_DIPLOCATION("DSW2:2,3")
+	PORT_DIPSETTING(    0x06, "4" )
 	PORT_DIPSETTING(    0x04, "5" )
-	PORT_DIPSETTING(	0x02, "6" )
+	PORT_DIPSETTING(    0x02, "6" )
 	PORT_DIPSETTING(    0x00, "7" )
-	PORT_DIPNAME( 0x18, 0x18, DEF_STR( Bonus_Life ) )
+	PORT_DIPNAME( 0x18, 0x18, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION("DSW2:4,5")
 	PORT_DIPSETTING(    0x18, "4000" )
 	PORT_DIPSETTING(    0x10, "6000" )
 	PORT_DIPSETTING(    0x08, "8000" )
 	PORT_DIPSETTING(    0x00, "10000" )
-	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Unused ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x20, DEF_STR( On ) )
-	PORT_BIT( 0xc0, 0x80, IPT_UNKNOWN )	// game verifies these two bits and freezes if they don't match
+	PORT_DIPUNUSED_DIPLOC( 0x20, 0x20, "DSW2:6" )
+	PORT_BIT( 0xc0, 0x80, IPT_UNKNOWN ) // game verifies these two bits and freezes if they don't match
 
 	PORT_START("IN1")
 	PORT_BIT( 0x3f, 0x00, IPT_UNKNOWN )
-	PORT_BIT( 0xc0, 0x80, IPT_UNKNOWN )	// game verifies these two bits and freezes if they don't match
+	PORT_BIT( 0xc0, 0x80, IPT_UNKNOWN ) // game verifies these two bits and freezes if they don't match
 
 	PORT_START("IN2")
 	PORT_BIT( 0x3f, 0x00, IPT_UNKNOWN )
-	PORT_BIT( 0xc0, 0x80, IPT_UNKNOWN )	// game verifies these two bits and freezes if they don't match
+	PORT_BIT( 0xc0, 0x80, IPT_UNKNOWN ) // game verifies these two bits and freezes if they don't match
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( sos )
@@ -544,29 +550,29 @@ static INPUT_PORTS_START( sos )
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("DSW2")
-	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Cabinet ) )
+	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Cabinet ) )  PORT_DIPLOCATION("DSW2:1")
 	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Cocktail) )
-	PORT_DIPNAME( 0x06, 0x02, DEF_STR( Lives ) )
+	PORT_DIPNAME( 0x06, 0x02, DEF_STR( Lives ) )    PORT_DIPLOCATION("DSW2:2,3")
 	PORT_DIPSETTING(    0x00, "2" )
 	PORT_DIPSETTING(    0x02, "3" )
 	PORT_DIPSETTING(    0x04, "4" )
 	PORT_DIPSETTING(    0x06, "5" )
-	PORT_DIPNAME( 0x18, 0x08, DEF_STR( Coinage ) )
-	PORT_DIPSETTING(	0x18, DEF_STR( 2C_1C ) )
+	PORT_DIPNAME( 0x18, 0x08, DEF_STR( Coinage ) )  PORT_DIPLOCATION("DSW2:4,5")
+	PORT_DIPSETTING(    0x18, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0x10, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
-	PORT_DIPNAME( 0x20, 0x20, "Nudity" )
+	PORT_DIPNAME( 0x20, 0x20, "Nudity" )        PORT_DIPLOCATION("DSW2:6")
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( On ) )
 	PORT_BIT( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("IN1")	/* Fake input port to support digital joystick */
+	PORT_START("IN1")   /* Fake input port to support digital joystick */
 	PORT_BIT( 0x01, 0x00, IPT_JOYSTICK_RIGHT )
 	PORT_BIT( 0x02, 0x00, IPT_JOYSTICK_LEFT )
 
-	PORT_START("IN2")	/* Fake input port to support digital joystick */
+	PORT_START("IN2")   /* Fake input port to support digital joystick */
 	PORT_BIT( 0x01, 0x00, IPT_JOYSTICK_RIGHT ) PORT_COCKTAIL
 	PORT_BIT( 0x02, 0x00, IPT_JOYSTICK_LEFT ) PORT_COCKTAIL
 INPUT_PORTS_END
@@ -580,38 +586,36 @@ static INPUT_PORTS_START( bombbee )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_SERVICE( 0x20, IP_ACTIVE_LOW )
 	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Cabinet ) )
-	PORT_DIPSETTING(	0x40, DEF_STR( Upright ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Cocktail ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( Upright ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Cocktail ) )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )
 
 	PORT_START("DSW1")
-	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coinage ) )
-	PORT_DIPSETTING(	0x02, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0x03, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0x01, DEF_STR( 1C_2C ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Free_Play ) )
-	PORT_DIPNAME( 0x0c, 0x00, DEF_STR( Lives ) )
-	PORT_DIPSETTING(	0x00, "3" )
-	PORT_DIPSETTING(	0x04, "4" )
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coinage ) )  PORT_DIPLOCATION("DSW1:1,2")
+	PORT_DIPSETTING(    0x02, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x03, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x01, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
+	PORT_DIPNAME( 0x0c, 0x00, DEF_STR( Lives ) )    PORT_DIPLOCATION("DSW1:3,4")
+	PORT_DIPSETTING(    0x00, "3" )
+	PORT_DIPSETTING(    0x04, "4" )
 //  PORT_DIPSETTING(    0x08, "4" )             // duplicated setting
-	PORT_DIPSETTING(	0x0c, "5" )
-	PORT_DIPNAME( 0x10, 0x00, DEF_STR( Unused ) )
-	PORT_DIPSETTING(	0x10, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0xe0, 0x00, "Replay" )		// awards 1 credit
-	PORT_DIPSETTING(	0x00, "50000" )
-	PORT_DIPSETTING(	0x20, "60000" )
-	PORT_DIPSETTING(	0x40, "70000" )
-	PORT_DIPSETTING(	0x60, "80000" )
-	PORT_DIPSETTING(	0x80, "100000" )
-	PORT_DIPSETTING(	0xa0, "120000" )
-	PORT_DIPSETTING(	0xc0, "150000" )
-	PORT_DIPSETTING(	0xe0, DEF_STR( None ) )
+	PORT_DIPSETTING(    0x0c, "5" )
+	PORT_DIPUNUSED_DIPLOC( 0x10, 0x10, "DSW1:5" )
+	PORT_DIPNAME( 0xe0, 0x00, "Replay" )        PORT_DIPLOCATION("DSW1:6,7,8")  // awards 1 credit
+	PORT_DIPSETTING(    0x00, "50000" )
+	PORT_DIPSETTING(    0x20, "60000" )
+	PORT_DIPSETTING(    0x40, "70000" )
+	PORT_DIPSETTING(    0x60, "80000" )
+	PORT_DIPSETTING(    0x80, "100000" )
+	PORT_DIPSETTING(    0xa0, "120000" )
+	PORT_DIPSETTING(    0xc0, "150000" )
+	PORT_DIPSETTING(    0xe0, DEF_STR( None ) )
 
-	PORT_START("VOLIN1")	/* Mux input - player 1 controller - handled by warpwarp_vol_r */
+	PORT_START("VOLIN1")    /* Mux input - player 1 controller - handled by warpwarp_vol_r */
 	PORT_BIT( 0xff, 0x60, IPT_PADDLE ) PORT_MINMAX(0x14,0xac) PORT_SENSITIVITY(30) PORT_KEYDELTA(10) PORT_CENTERDELTA(0) PORT_REVERSE
 
-	PORT_START("VOLIN2")	/* Mux input - player 2 controller - handled by warpwarp_vol_r */
+	PORT_START("VOLIN2")    /* Mux input - player 2 controller - handled by warpwarp_vol_r */
 	PORT_BIT( 0xff, 0x60, IPT_PADDLE ) PORT_MINMAX(0x14,0xac) PORT_SENSITIVITY(30) PORT_KEYDELTA(10) PORT_CENTERDELTA(0) PORT_REVERSE PORT_COCKTAIL
 INPUT_PORTS_END
 
@@ -619,15 +623,15 @@ static INPUT_PORTS_START( cutieq )
 	PORT_INCLUDE( bombbee )
 
 	PORT_MODIFY("DSW1")
-	PORT_DIPNAME( 0xe0, 0x00, DEF_STR( Bonus_Life ) )
-	PORT_DIPSETTING(	0x00, "50000" )
-	PORT_DIPSETTING(	0x20, "60000" )
-	PORT_DIPSETTING(	0x40, "80000" )
-	PORT_DIPSETTING(	0x60, "100000" )
-	PORT_DIPSETTING(	0x80, "120000" )
-	PORT_DIPSETTING(	0xa0, "150000" )
-	PORT_DIPSETTING(	0xc0, "200000" )
-	PORT_DIPSETTING(	0xe0, DEF_STR( None ) )
+	PORT_DIPNAME( 0xe0, 0x00, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION("DSW1:6,7,8")
+	PORT_DIPSETTING(    0x00, "50000" )
+	PORT_DIPSETTING(    0x20, "60000" )
+	PORT_DIPSETTING(    0x40, "80000" )
+	PORT_DIPSETTING(    0x60, "100000" )
+	PORT_DIPSETTING(    0x80, "120000" )
+	PORT_DIPSETTING(    0xa0, "150000" )
+	PORT_DIPSETTING(    0xc0, "200000" )
+	PORT_DIPSETTING(    0xe0, DEF_STR( None ) )
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( warpwarp )
@@ -639,45 +643,45 @@ static INPUT_PORTS_START( warpwarp )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_SERVICE( 0x20, IP_ACTIVE_LOW )
 	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Cabinet ) )
-	PORT_DIPSETTING(	0x40, DEF_STR( Upright ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Cocktail ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( Upright ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Cocktail ) )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )
 
 	PORT_START("DSW1")
-	PORT_DIPNAME( 0x03, 0x01, DEF_STR( Coinage ) )
-	PORT_DIPSETTING(	0x03, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0x01, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0x02, DEF_STR( 1C_2C ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Free_Play ) )
-	PORT_DIPNAME( 0x0c, 0x04, DEF_STR( Lives ) )
-	PORT_DIPSETTING(	0x00, "2" )
-	PORT_DIPSETTING(	0x04, "3" )
-	PORT_DIPSETTING(	0x08, "4" )
-	PORT_DIPSETTING(	0x0c, "5" )
-	PORT_DIPNAME( 0x30, 0x00, DEF_STR( Bonus_Life ) )
-	PORT_DIPSETTING(	0x00, "8k 30k 30k+" )	PORT_CONDITION("DSW1", 0x0c, PORTCOND_NOTEQUALS, 0x0c)
-	PORT_DIPSETTING(	0x10, "10k 40k 40k+" )	PORT_CONDITION("DSW1", 0x0c, PORTCOND_NOTEQUALS, 0x0c)
-	PORT_DIPSETTING(	0x20, "15k 60k 60k+" )	PORT_CONDITION("DSW1", 0x0c, PORTCOND_NOTEQUALS, 0x0c)
-	PORT_DIPSETTING(	0x30, DEF_STR( None ) )	PORT_CONDITION("DSW1", 0x0c, PORTCOND_NOTEQUALS, 0x0c)
-    PORT_DIPSETTING(    0x00, "30k" )			PORT_CONDITION("DSW1", 0x0c, PORTCOND_EQUALS, 0x0c)
-    PORT_DIPSETTING(    0x10, "40k" )			PORT_CONDITION("DSW1", 0x0c, PORTCOND_EQUALS, 0x0c)
-    PORT_DIPSETTING(    0x20, "60k" )			PORT_CONDITION("DSW1", 0x0c, PORTCOND_EQUALS, 0x0c)
-    PORT_DIPSETTING(    0x30, DEF_STR( None ) )	PORT_CONDITION("DSW1", 0x0c, PORTCOND_EQUALS, 0x0c)
-	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Demo_Sounds ) )
-	PORT_DIPSETTING(	0x40, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x03, 0x01, DEF_STR( Coinage ) )      PORT_DIPLOCATION("DSW1:1,2")
+	PORT_DIPSETTING(    0x03, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x01, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x02, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
+	PORT_DIPNAME( 0x0c, 0x04, DEF_STR( Lives ) )        PORT_DIPLOCATION("DSW1:3,4")
+	PORT_DIPSETTING(    0x00, "2" )
+	PORT_DIPSETTING(    0x04, "3" )
+	PORT_DIPSETTING(    0x08, "4" )
+	PORT_DIPSETTING(    0x0c, "5" )
+	PORT_DIPNAME( 0x30, 0x00, DEF_STR( Bonus_Life ) )   PORT_DIPLOCATION("DSW1:5,6")
+	PORT_DIPSETTING(    0x00, "8k 30k 30k+" )   PORT_CONDITION("DSW1", 0x0c, NOTEQUALS, 0x0c)
+	PORT_DIPSETTING(    0x10, "10k 40k 40k+" )  PORT_CONDITION("DSW1", 0x0c, NOTEQUALS, 0x0c)
+	PORT_DIPSETTING(    0x20, "15k 60k 60k+" )  PORT_CONDITION("DSW1", 0x0c, NOTEQUALS, 0x0c)
+	PORT_DIPSETTING(0x30, DEF_STR( None ) ) PORT_CONDITION("DSW1", 0x0c, NOTEQUALS, 0x0c)
+	PORT_DIPSETTING(    0x00, "30k" )           PORT_CONDITION("DSW1", 0x0c, EQUALS, 0x0c)
+	PORT_DIPSETTING(    0x10, "40k" )           PORT_CONDITION("DSW1", 0x0c, EQUALS, 0x0c)
+	PORT_DIPSETTING(    0x20, "60k" )           PORT_CONDITION("DSW1", 0x0c, EQUALS, 0x0c)
+	PORT_DIPSETTING(    0x30, DEF_STR( None ) ) PORT_CONDITION("DSW1", 0x0c, EQUALS, 0x0c)
+	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("DSW1:7")
+	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	/* when level selection is On, press 1 to increase level */
-	PORT_DIPNAME( 0x80, 0x80, "Level Selection (Cheat)")
-	PORT_DIPSETTING(	0x80, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x80, 0x80, "Level Selection (Cheat)")    PORT_DIPLOCATION("DSW1:8")
+	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-	PORT_START("VOLIN1")	/* FAKE - input port to simulate an analog stick - handled by warpwarp_vol_r */
+	PORT_START("VOLIN1")    /* FAKE - input port to simulate an analog stick - handled by warpwarp_vol_r */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_4WAY
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_4WAY
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_4WAY
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_4WAY
 
-	PORT_START("VOLIN2")	/* FAKE - input port to simulate an analog stick - handled by warpwarp_vol_r */
+	PORT_START("VOLIN2")    /* FAKE - input port to simulate an analog stick - handled by warpwarp_vol_r */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_4WAY PORT_COCKTAIL
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_4WAY PORT_COCKTAIL
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_4WAY PORT_COCKTAIL
@@ -689,9 +693,9 @@ static INPUT_PORTS_START( warpwarpr )
 	PORT_INCLUDE( warpwarp )
 
 	PORT_MODIFY("DSW1")
-	PORT_DIPNAME( 0x80, 0x00, "High Score Initials" )
-	PORT_DIPSETTING(	0x80, DEF_STR( No ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Yes ) )
+	PORT_DIPNAME( 0x80, 0x00, "High Score Initials" )   PORT_DIPLOCATION("DSW1:8")
+	PORT_DIPSETTING(    0x80, DEF_STR( No ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
 INPUT_PORTS_END
 
 
@@ -727,19 +731,18 @@ static MACHINE_CONFIG_START( geebee, warpwarp_state )
 	MCFG_CPU_ADD("maincpu", I8080, MASTER_CLOCK/9) /* verified on pcb */
 	MCFG_CPU_PROGRAM_MAP(geebee_map)
 	MCFG_CPU_IO_MAP(geebee_port_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", warpwarp_state,  vblank_irq)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_RAW_PARAMS(MASTER_CLOCK/3, 384, 0, 272, 264, 0, 224)
-	MCFG_SCREEN_UPDATE(geebee)
+	MCFG_SCREEN_UPDATE_DRIVER(warpwarp_state, screen_update_geebee)
 
 	MCFG_GFXDECODE(1k)
 	MCFG_PALETTE_LENGTH(4*2)
 
-	MCFG_PALETTE_INIT(geebee)
-	MCFG_VIDEO_START(geebee)
+	MCFG_PALETTE_INIT_OVERRIDE(warpwarp_state,geebee)
+	MCFG_VIDEO_START_OVERRIDE(warpwarp_state,geebee)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -754,28 +757,27 @@ static MACHINE_CONFIG_DERIVED( navarone, geebee )
 	MCFG_GFXDECODE(2k)
 	MCFG_PALETTE_LENGTH(2*2)
 
-	MCFG_PALETTE_INIT(navarone)
-	MCFG_VIDEO_START(navarone)
+	MCFG_PALETTE_INIT_OVERRIDE(warpwarp_state,navarone)
+	MCFG_VIDEO_START_OVERRIDE(warpwarp_state,navarone)
 MACHINE_CONFIG_END
 
 static MACHINE_CONFIG_START( bombbee, warpwarp_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", I8080, MASTER_CLOCK/9)		/* 18.432 MHz / 9 */
+	MCFG_CPU_ADD("maincpu", I8080, MASTER_CLOCK/9)      /* 18.432 MHz / 9 */
 	MCFG_CPU_PROGRAM_MAP(bombbee_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_assert)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", warpwarp_state,  vblank_irq)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_RAW_PARAMS(MASTER_CLOCK/3, 384, 0, 272, 264, 0, 224)
-	MCFG_SCREEN_UPDATE(geebee)
+	MCFG_SCREEN_UPDATE_DRIVER(warpwarp_state, screen_update_geebee)
 
 	MCFG_GFXDECODE(color)
 	MCFG_PALETTE_LENGTH(2*256+1)
 
-	MCFG_PALETTE_INIT(warpwarp)
-	MCFG_VIDEO_START(warpwarp)
+	MCFG_PALETTE_INIT_OVERRIDE(warpwarp_state,warpwarp)
+	MCFG_VIDEO_START_OVERRIDE(warpwarp_state,warpwarp)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -850,7 +852,7 @@ ROM_START( kaitei )
 	ROM_REGION( 0x10000, "maincpu", 0 )
 	ROM_LOAD( "kaitei_7.1k",  0x0000, 0x0800, CRC(32f70d48) SHA1(c5ae606df1d0e513daea909f5474309a176096c1) )
 	ROM_RELOAD(               0x0800, 0x0800 )
-    ROM_LOAD( "kaitei_1.1m",  0x1000, 0x0400, CRC(9a7ab3b9) SHA1(94a82ba66e51c8203ec61c9320edbddbb6462d33) )
+	ROM_LOAD( "kaitei_1.1m",  0x1000, 0x0400, CRC(9a7ab3b9) SHA1(94a82ba66e51c8203ec61c9320edbddbb6462d33) )
 	ROM_LOAD( "kaitei_2.1p",  0x1400, 0x0400, CRC(5eeb0fff) SHA1(91cb84a9af8e4df4e6c896e7655199328b7da30b) )
 	ROM_LOAD( "kaitei_3.1s",  0x1800, 0x0400, CRC(5dff4df7) SHA1(c179c93a559a0d18db3092c842634de02f3f03ea) )
 	ROM_LOAD( "kaitei_4.1t",  0x1c00, 0x0400, CRC(e5f303d6) SHA1(6dd57e0b17f51d101c6c5dbfeadb7418098cc440) )
@@ -919,90 +921,83 @@ ROM_END
 
 
 
-static DRIVER_INIT( geebee )
+DRIVER_INIT_MEMBER(warpwarp_state,geebee)
 {
-	warpwarp_state *state = machine.driver_data<warpwarp_state>();
-	state->m_handle_joystick = 0;
+	m_handle_joystick = 0;
 
-	state->m_ball_pen = 1;
-	state->m_ball_sizex = 4;
-	state->m_ball_sizey = 4;
+	m_ball_pen = 1;
+	m_ball_sizex = 4;
+	m_ball_sizey = 4;
 }
 
-static DRIVER_INIT( navarone )
+DRIVER_INIT_MEMBER(warpwarp_state,navarone)
 {
-	warpwarp_state *state = machine.driver_data<warpwarp_state>();
-	state->m_handle_joystick = 1;
+	m_handle_joystick = 1;
 
-	state->m_ball_pen = 1;
-	state->m_ball_sizex = 4;
-	state->m_ball_sizey = 4;
+	m_ball_pen = 1;
+	m_ball_sizex = 4;
+	m_ball_sizey = 4;
 }
 
-static DRIVER_INIT( kaitein )
+DRIVER_INIT_MEMBER(warpwarp_state,kaitein)
 {
-	warpwarp_state *state = machine.driver_data<warpwarp_state>();
-	state->m_handle_joystick = 1;
+	m_handle_joystick = 1;
 
-	state->m_ball_pen = 1;
-	state->m_ball_sizex = 1;
-	state->m_ball_sizey = 16;
+	m_ball_pen = 1;
+	m_ball_sizex = 1;
+	m_ball_sizey = 16;
 }
 
-static DRIVER_INIT( kaitei )
+DRIVER_INIT_MEMBER(warpwarp_state,kaitei)
 {
-	warpwarp_state *state = machine.driver_data<warpwarp_state>();
-	state->m_handle_joystick = 0;
+	m_handle_joystick = 0;
 
-	state->m_ball_pen = 1;
-	state->m_ball_sizex = 1;
-	state->m_ball_sizey = 16;
+	m_ball_pen = 1;
+	m_ball_sizex = 1;
+	m_ball_sizey = 16;
 }
 
-static DRIVER_INIT( sos )
+DRIVER_INIT_MEMBER(warpwarp_state,sos)
 {
-	warpwarp_state *state = machine.driver_data<warpwarp_state>();
-	state->m_handle_joystick = 1;
+	m_handle_joystick = 1;
 
-	state->m_ball_pen = 0;
-	state->m_ball_sizex = 4;
-	state->m_ball_sizey = 2;
+	m_ball_pen = 0;
+	m_ball_sizex = 4;
+	m_ball_sizey = 2;
 }
 
-static DRIVER_INIT( bombbee )
+DRIVER_INIT_MEMBER(warpwarp_state,bombbee)
 {
-	warpwarp_state *state = machine.driver_data<warpwarp_state>();
-	state->m_handle_joystick = 0;
+	m_handle_joystick = 0;
 
-	state->m_ball_pen = 0x200;
-	state->m_ball_sizex = 4;
-	state->m_ball_sizey = 4;
+	m_ball_pen = 0x200;
+	m_ball_sizex = 4;
+	m_ball_sizey = 4;
 }
 
-static DRIVER_INIT( warpwarp )
+DRIVER_INIT_MEMBER(warpwarp_state,warpwarp)
 {
-	warpwarp_state *state = machine.driver_data<warpwarp_state>();
-	state->m_handle_joystick = 1;
+	m_handle_joystick = 1;
 
-	state->m_ball_pen = 0x200;
-	state->m_ball_sizex = 4;
-	state->m_ball_sizey = 4;
+	m_ball_pen = 0x200;
+	m_ball_sizex = 4;
+	m_ball_sizey = 4;
 }
 
 
 /* B & W games */
-GAMEL(1978, geebee,   0,        geebee,   geebee,   geebee,   ROT90, "Namco", "Gee Bee (Japan)", 0, layout_geebee )
-GAMEL(1978, geebeeb,  geebee,   geebee,   geebeeb,  geebee,   ROT90, "Namco (F.lli Bertolino license)", "Gee Bee (Europe)", 0, layout_geebee ) // Fratelli Bertolino
-GAMEL(1978, geebeeg,  geebee,   geebee,   geebee,   geebee,   ROT90, "Namco (Gremlin license)", "Gee Bee (US)", 0, layout_geebee )
+GAMEL(1978, geebee,   0,        geebee,   geebee, warpwarp_state,   geebee,   ROT90, "Namco", "Gee Bee (Japan)", 0, layout_geebee )
+GAMEL(1978, geebeeb,  geebee,   geebee,   geebeeb, warpwarp_state,  geebee,   ROT90, "Namco (F.lli Bertolino license)", "Gee Bee (Europe)", 0, layout_geebee ) // Fratelli Bertolino
+GAMEL(1978, geebeeg,  geebee,   geebee,   geebee, warpwarp_state,   geebee,   ROT90, "Namco (Gremlin license)", "Gee Bee (US)", 0, layout_geebee )
 
-GAMEL(1980, navarone, 0,        navarone, navarone, navarone, ROT90, "Namco", "Navarone", GAME_IMPERFECT_SOUND, layout_navarone )
-GAME( 1980, kaitein,  kaitei,   navarone, kaitein,  kaitein,  ROT90, "K.K. Tokki (Namco license)", "Kaitei Takara Sagashi (Namco license)", 0 ) // pretty sure it didn't have a color overlay
-GAME( 1980, kaitei,   0,        navarone, kaitei,   kaitei,   ROT90, "K.K. Tokki", "Kaitei Takara Sagashi", 0 ) // "
-GAMEL(1980, sos,      0,        navarone, sos,      sos,      ROT90, "Namco", "SOS", GAME_IMPERFECT_SOUND, layout_sos ) // developed by Shoei?
+GAMEL(1980, navarone, 0,        navarone, navarone, warpwarp_state, navarone, ROT90, "Namco", "Navarone", GAME_IMPERFECT_SOUND, layout_navarone )
+GAME( 1980, kaitein,  kaitei,   navarone, kaitein, warpwarp_state,  kaitein,  ROT90, "K.K. Tokki (Namco license)", "Kaitei Takara Sagashi (Namco license)", 0 ) // pretty sure it didn't have a color overlay
+GAME( 1980, kaitei,   0,        navarone, kaitei, warpwarp_state,   kaitei,   ROT90, "K.K. Tokki", "Kaitei Takara Sagashi", 0 ) // "
+GAMEL(1980, sos,      0,        navarone, sos, warpwarp_state,      sos,      ROT90, "Namco", "SOS", GAME_IMPERFECT_SOUND, layout_sos ) // developed by Shoei?
 
 /* Color games */
-GAME( 1979, bombbee,    0,        bombbee,  bombbee,  bombbee,  ROT90, "Namco", "Bomb Bee", 0 )
-GAME( 1979, cutieq,     0,        bombbee,  cutieq,   bombbee,  ROT90, "Namco", "Cutie Q", 0 )
-GAME( 1981, warpwarp,   0,        warpwarp, warpwarp, warpwarp, ROT90, "Namco", "Warp & Warp", 0 )
-GAME( 1981, warpwarpr,  warpwarp, warpwarp, warpwarpr,warpwarp, ROT90, "Namco (Rock-Ola license)", "Warp Warp (Rock-Ola set 1)", 0 )
-GAME( 1981, warpwarpr2, warpwarp, warpwarp, warpwarpr,warpwarp, ROT90, "Namco (Rock-Ola license)", "Warp Warp (Rock-Ola set 2)", 0 )
+GAME( 1979, bombbee,    0,        bombbee,  bombbee, warpwarp_state,  bombbee,  ROT90, "Namco", "Bomb Bee", 0 )
+GAME( 1979, cutieq,     0,        bombbee,  cutieq, warpwarp_state,   bombbee,  ROT90, "Namco", "Cutie Q", 0 )
+GAME( 1981, warpwarp,   0,        warpwarp, warpwarp, warpwarp_state, warpwarp, ROT90, "Namco", "Warp & Warp", 0 )
+GAME( 1981, warpwarpr,  warpwarp, warpwarp, warpwarpr, warpwarp_state,warpwarp, ROT90, "Namco (Rock-Ola license)", "Warp Warp (Rock-Ola set 1)", 0 )
+GAME( 1981, warpwarpr2, warpwarp, warpwarp, warpwarpr, warpwarp_state,warpwarp, ROT90, "Namco (Rock-Ola license)", "Warp Warp (Rock-Ola set 2)", 0 )

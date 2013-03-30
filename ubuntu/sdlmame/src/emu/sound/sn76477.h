@@ -49,8 +49,7 @@
  *
  *****************************************************************************/
 
-typedef struct _sn76477_interface sn76477_interface;
-struct _sn76477_interface
+struct sn76477_interface
 {
 	double noise_clock_res;
 	double noise_filter_res;
@@ -86,14 +85,14 @@ struct _sn76477_interface
  *****************************************************************************/
 
 /* these functions take 0 or 1 as a logic input */
-void sn76477_enable_w(device_t *device, UINT32 data);		/* active LO, 0 = enabled, 1 = disabled */
-void sn76477_mixer_a_w(device_t *device, UINT32 data);
-void sn76477_mixer_b_w(device_t *device, UINT32 data);
-void sn76477_mixer_c_w(device_t *device, UINT32 data);
-void sn76477_envelope_1_w(device_t *device, UINT32 data);
-void sn76477_envelope_2_w(device_t *device, UINT32 data);
-void sn76477_vco_w(device_t *device, UINT32 data);			/* 0 = external, 1 = controlled by SLF */
-void sn76477_noise_clock_w(device_t *device, UINT32 data);  /* noise clock write, if noise_clock_res = 0 */
+WRITE_LINE_DEVICE_HANDLER( sn76477_enable_w );      /* active LO, 0 = enabled, 1 = disabled */
+WRITE_LINE_DEVICE_HANDLER( sn76477_mixer_a_w );
+WRITE_LINE_DEVICE_HANDLER( sn76477_mixer_b_w );
+WRITE_LINE_DEVICE_HANDLER( sn76477_mixer_c_w );
+WRITE_LINE_DEVICE_HANDLER( sn76477_envelope_1_w );
+WRITE_LINE_DEVICE_HANDLER( sn76477_envelope_2_w );
+WRITE_LINE_DEVICE_HANDLER( sn76477_vco_w );         /* 0 = external, 1 = controlled by SLF */
+WRITE_LINE_DEVICE_HANDLER( sn76477_noise_clock_w ); /* noise clock write, if noise_clock_res = 0 */
 
 /* these functions take a resistor value in Ohms */
 void sn76477_one_shot_res_w(device_t *device, double data);
@@ -107,7 +106,7 @@ void sn76477_amplitude_res_w(device_t *device, double data);
 void sn76477_feedback_res_w(device_t *device, double data);
 
 /* these functions take a capacitor value in Farads or the voltage on it in Volts */
-#define SN76477_EXTERNAL_VOLTAGE_DISCONNECT   (-1.0)	/* indicates that the voltage is internally computed,
+#define SN76477_EXTERNAL_VOLTAGE_DISCONNECT   (-1.0)    /* indicates that the voltage is internally computed,
                                                            can be used in all the functions that take a
                                                            voltage on a capacitor */
 void sn76477_one_shot_cap_w(device_t *device, double data);
@@ -125,6 +124,29 @@ void sn76477_attack_decay_cap_voltage_w(device_t *device, double data);
 void sn76477_vco_voltage_w(device_t *device, double data);
 void sn76477_pitch_voltage_w(device_t *device, double data);
 
-DECLARE_LEGACY_SOUND_DEVICE(SN76477, sn76477);
+class sn76477_device : public device_t,
+									public device_sound_interface
+{
+public:
+	sn76477_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock);
+	~sn76477_device() { global_free(m_token); }
+
+	// access to legacy token
+	void *token() const { assert(m_token != NULL); return m_token; }
+protected:
+	// device-level overrides
+	virtual void device_config_complete();
+	virtual void device_start();
+	virtual void device_stop();
+
+	// sound stream update overrides
+	virtual void sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples);
+private:
+	// internal state
+	void *m_token;
+};
+
+extern const device_type SN76477;
+
 
 #endif/* __SN76477_H__ */

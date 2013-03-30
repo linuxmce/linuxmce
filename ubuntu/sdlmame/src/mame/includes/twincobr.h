@@ -3,19 +3,26 @@
         -----------------------------------------------------------
 ****************************************************************************/
 
-
 #include "video/mc6845.h"
+#include "video/bufsprite.h"
 
 
 class twincobr_state : public driver_device
 {
 public:
-	twincobr_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	twincobr_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+		m_sharedram(*this, "sharedram"),
+		m_spriteram8(*this, "spriteram8"),
+		m_spriteram16(*this, "spriteram16")
+	{ }
+
+	optional_shared_ptr<UINT8> m_sharedram;
+	optional_device<buffered_spriteram8_device> m_spriteram8;
+	optional_device<buffered_spriteram16_device> m_spriteram16;
 
 	int m_toaplan_main_cpu;
 	int m_wardner_membank;
-	UINT8 *m_sharedram;
 	INT32 m_fg_rom_bank;
 	INT32 m_bg_ram_bank;
 	INT32 m_wardner_sprite_hack;
@@ -48,78 +55,66 @@ public:
 	tilemap_t *m_bg_tilemap;
 	tilemap_t *m_fg_tilemap;
 	tilemap_t *m_tx_tilemap;
+
+	DECLARE_WRITE16_MEMBER(twincobr_dsp_addrsel_w);
+	DECLARE_READ16_MEMBER(twincobr_dsp_r);
+	DECLARE_WRITE16_MEMBER(twincobr_dsp_w);
+	DECLARE_WRITE16_MEMBER(wardner_dsp_addrsel_w);
+	DECLARE_READ16_MEMBER(wardner_dsp_r);
+	DECLARE_WRITE16_MEMBER(wardner_dsp_w);
+	DECLARE_WRITE16_MEMBER(twincobr_dsp_bio_w);
+	DECLARE_READ16_MEMBER(fsharkbt_dsp_r);
+	DECLARE_WRITE16_MEMBER(fsharkbt_dsp_w);
+	DECLARE_READ16_MEMBER(twincobr_BIO_r);
+	DECLARE_WRITE16_MEMBER(twincobr_control_w);
+	DECLARE_WRITE8_MEMBER(wardner_control_w);
+	DECLARE_READ16_MEMBER(twincobr_sharedram_r);
+	DECLARE_WRITE16_MEMBER(twincobr_sharedram_w);
+	DECLARE_WRITE16_MEMBER(fshark_coin_dsp_w);
+	DECLARE_WRITE8_MEMBER(twincobr_coin_w);
+	DECLARE_WRITE8_MEMBER(wardner_coin_dsp_w);
+	DECLARE_WRITE16_MEMBER(twincobr_txoffs_w);
+	DECLARE_READ16_MEMBER(twincobr_txram_r);
+	DECLARE_WRITE16_MEMBER(twincobr_txram_w);
+	DECLARE_WRITE16_MEMBER(twincobr_bgoffs_w);
+	DECLARE_READ16_MEMBER(twincobr_bgram_r);
+	DECLARE_WRITE16_MEMBER(twincobr_bgram_w);
+	DECLARE_WRITE16_MEMBER(twincobr_fgoffs_w);
+	DECLARE_READ16_MEMBER(twincobr_fgram_r);
+	DECLARE_WRITE16_MEMBER(twincobr_fgram_w);
+	DECLARE_WRITE16_MEMBER(twincobr_txscroll_w);
+	DECLARE_WRITE16_MEMBER(twincobr_bgscroll_w);
+	DECLARE_WRITE16_MEMBER(twincobr_fgscroll_w);
+	DECLARE_WRITE16_MEMBER(twincobr_exscroll_w);
+	DECLARE_WRITE8_MEMBER(wardner_txlayer_w);
+	DECLARE_WRITE8_MEMBER(wardner_bglayer_w);
+	DECLARE_WRITE8_MEMBER(wardner_fglayer_w);
+	DECLARE_WRITE8_MEMBER(wardner_txscroll_w);
+	DECLARE_WRITE8_MEMBER(wardner_bgscroll_w);
+	DECLARE_WRITE8_MEMBER(wardner_fgscroll_w);
+	DECLARE_WRITE8_MEMBER(wardner_exscroll_w);
+	DECLARE_READ8_MEMBER(wardner_videoram_r);
+	DECLARE_WRITE8_MEMBER(wardner_videoram_w);
+	DECLARE_READ8_MEMBER(wardner_sprite_r);
+	DECLARE_WRITE8_MEMBER(wardner_sprite_w);
+	DECLARE_DRIVER_INIT(twincobr);
+	TILE_GET_INFO_MEMBER(get_bg_tile_info);
+	TILE_GET_INFO_MEMBER(get_fg_tile_info);
+	TILE_GET_INFO_MEMBER(get_tx_tile_info);
+	DECLARE_MACHINE_RESET(twincobr);
+	DECLARE_VIDEO_START(toaplan0);
+	DECLARE_MACHINE_RESET(wardner);
+	UINT32 screen_update_toaplan0(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(twincobr_interrupt);
+	INTERRUPT_GEN_MEMBER(wardner_interrupt);
 };
 
 
-/*----------- defined in drivers/wardner.c -----------*/
-
-STATE_POSTLOAD( wardner_restore_bank );
-
 /*----------- defined in machine/twincobr.c -----------*/
-
-INTERRUPT_GEN( twincobr_interrupt );
-INTERRUPT_GEN( wardner_interrupt );
-
-WRITE16_HANDLER( twincobr_dsp_addrsel_w );
-READ16_HANDLER(  twincobr_dsp_r );
-WRITE16_HANDLER( twincobr_dsp_w );
-WRITE16_HANDLER( twincobr_dsp_bio_w );
-READ16_HANDLER ( twincobr_BIO_r );
-WRITE16_HANDLER( twincobr_control_w );
-READ16_HANDLER(  twincobr_sharedram_r );
-WRITE16_HANDLER( twincobr_sharedram_w );
-WRITE8_HANDLER(   twincobr_coin_w );
-READ16_HANDLER(  fsharkbt_dsp_r );
-WRITE16_HANDLER( fsharkbt_dsp_w );
-WRITE16_HANDLER( fshark_coin_dsp_w );
-WRITE16_HANDLER( wardner_dsp_addrsel_w );
-READ16_HANDLER(  wardner_dsp_r );
-WRITE16_HANDLER( wardner_dsp_w );
-WRITE8_HANDLER(   wardner_control_w );
-WRITE8_HANDLER(   wardner_coin_dsp_w );
-
-MACHINE_RESET( twincobr );
-MACHINE_RESET( fsharkbt );
-MACHINE_RESET( wardner );
-
 extern void twincobr_driver_savestate(running_machine &machine);
-extern void wardner_driver_savestate(running_machine &machine);
-
-
-
 
 /*----------- defined in video/twincobr.c -----------*/
-extern const mc6845_interface twincobr_mc6845_intf;
 
+extern const mc6845_interface twincobr_mc6845_intf;
 extern void twincobr_flipscreen(running_machine &machine, int flip);
 extern void twincobr_display(running_machine &machine, int enable);
-
-READ16_HANDLER(  twincobr_txram_r );
-READ16_HANDLER(  twincobr_bgram_r );
-READ16_HANDLER(  twincobr_fgram_r );
-WRITE16_HANDLER( twincobr_txram_w );
-WRITE16_HANDLER( twincobr_bgram_w );
-WRITE16_HANDLER( twincobr_fgram_w );
-WRITE16_HANDLER( twincobr_txscroll_w );
-WRITE16_HANDLER( twincobr_bgscroll_w );
-WRITE16_HANDLER( twincobr_fgscroll_w );
-WRITE16_HANDLER( twincobr_exscroll_w );
-WRITE16_HANDLER( twincobr_txoffs_w );
-WRITE16_HANDLER( twincobr_bgoffs_w );
-WRITE16_HANDLER( twincobr_fgoffs_w );
-WRITE8_HANDLER( wardner_videoram_w );
-READ8_HANDLER(  wardner_videoram_r );
-WRITE8_HANDLER( wardner_bglayer_w );
-WRITE8_HANDLER( wardner_fglayer_w );
-WRITE8_HANDLER( wardner_txlayer_w );
-WRITE8_HANDLER( wardner_bgscroll_w );
-WRITE8_HANDLER( wardner_fgscroll_w );
-WRITE8_HANDLER( wardner_txscroll_w );
-WRITE8_HANDLER( wardner_exscroll_w );
-READ8_HANDLER(  wardner_sprite_r );
-WRITE8_HANDLER( wardner_sprite_w );
-
-
-VIDEO_START( toaplan0 );
-SCREEN_UPDATE( toaplan0 );
-SCREEN_EOF( toaplan0 );

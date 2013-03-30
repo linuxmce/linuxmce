@@ -8,8 +8,9 @@
 class cinemat_state : public driver_device
 {
 public:
-	cinemat_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	cinemat_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_rambase(*this, "rambase"){ }
 
 	UINT8 m_sound_control;
 	void (*m_sound_handler)(running_machine &,UINT8 sound_val, UINT8 bits_changed);
@@ -24,7 +25,7 @@ public:
 	UINT8 m_last_portb_write;
 	float m_target_volume;
 	float m_current_volume;
-	UINT16 *m_rambase;
+	optional_shared_ptr<UINT16> m_rambase;
 	UINT8 m_coin_detected;
 	UINT8 m_coin_last_reset;
 	UINT8 m_mux_select;
@@ -36,18 +37,42 @@ public:
 	UINT8 m_last_control;
 	int m_qb3_lastx;
 	int m_qb3_lasty;
+	DECLARE_READ8_MEMBER(inputs_r);
+	DECLARE_READ8_MEMBER(switches_r);
+	DECLARE_READ8_MEMBER(coin_input_r);
+	DECLARE_WRITE8_MEMBER(coin_reset_w);
+	DECLARE_WRITE8_MEMBER(mux_select_w);
+	DECLARE_READ8_MEMBER(speedfrk_wheel_r);
+	DECLARE_READ8_MEMBER(speedfrk_gear_r);
+	DECLARE_READ8_MEMBER(sundance_inputs_r);
+	DECLARE_READ8_MEMBER(boxingb_dial_r);
+	DECLARE_READ8_MEMBER(qb3_frame_r);
+	DECLARE_WRITE8_MEMBER(qb3_ram_bank_w);
+	DECLARE_WRITE8_MEMBER(cinemat_vector_control_w);
+	DECLARE_WRITE8_MEMBER(cinemat_sound_control_w);
+	DECLARE_WRITE8_MEMBER(qb3_sound_w);
+	DECLARE_INPUT_CHANGED_MEMBER(coin_inserted);
+	DECLARE_DRIVER_INIT(speedfrk);
+	DECLARE_DRIVER_INIT(boxingb);
+	DECLARE_DRIVER_INIT(tailg);
+	DECLARE_DRIVER_INIT(sundance);
+	DECLARE_DRIVER_INIT(qb3);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	DECLARE_VIDEO_START(cinemat_16level);
+	DECLARE_VIDEO_START(cinemat_64level);
+	DECLARE_VIDEO_START(cinemat_color);
+	DECLARE_VIDEO_START(cinemat_qb3color);
+	UINT32 screen_update_cinemat(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_spacewar(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
+	DECLARE_READ8_MEMBER(sound_porta_r);
+	DECLARE_READ8_MEMBER(sound_portb_r);
+	DECLARE_WRITE8_MEMBER(sound_portb_w);
+	DECLARE_WRITE8_MEMBER(sound_output_w);
 };
 
-
-/*----------- defined in drivers/cinemat.c -----------*/
-
-MACHINE_RESET( cinemat );
-
-
 /*----------- defined in audio/cinemat.c -----------*/
-
-WRITE8_HANDLER( cinemat_sound_control_w );
-
 MACHINE_CONFIG_EXTERN( spacewar_sound );
 MACHINE_CONFIG_EXTERN( barrier_sound );
 MACHINE_CONFIG_EXTERN( speedfrk_sound );
@@ -65,17 +90,6 @@ MACHINE_CONFIG_EXTERN( wotwc_sound );
 MACHINE_CONFIG_EXTERN( demon_sound );
 MACHINE_CONFIG_EXTERN( qb3_sound );
 
-
 /*----------- defined in video/cinemat.c -----------*/
 
 void cinemat_vector_callback(device_t *device, INT16 sx, INT16 sy, INT16 ex, INT16 ey, UINT8 shift);
-WRITE8_HANDLER( cinemat_vector_control_w );
-
-VIDEO_START( cinemat_bilevel );
-VIDEO_START( cinemat_16level );
-VIDEO_START( cinemat_64level );
-VIDEO_START( cinemat_color );
-VIDEO_START( cinemat_qb3color );
-SCREEN_UPDATE( cinemat );
-
-SCREEN_UPDATE( spacewar );

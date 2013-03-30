@@ -42,40 +42,32 @@ TODO:
 #include "machine/nvram.h"
 
 
-#define SIGNED_DAC	0		// 0:unsigned DAC, 1:signed DAC
-#if SIGNED_DAC
-#define DAC_WRITE	dac_signed_w
-#else
-#define DAC_WRITE	dac_w
-#endif
-
-
-static DRIVER_INIT( mjsikaku )
+DRIVER_INIT_MEMBER(nbmj8688_state,mjsikaku)
 {
 	nb1413m3_type = NB1413M3_MJSIKAKU;
 }
 
-static DRIVER_INIT( mmsikaku )
+DRIVER_INIT_MEMBER(nbmj8688_state,mmsikaku)
 {
 	nb1413m3_type = NB1413M3_MMSIKAKU;
 }
 
-static DRIVER_INIT( otonano )
+DRIVER_INIT_MEMBER(nbmj8688_state,otonano)
 {
 	nb1413m3_type = NB1413M3_OTONANO;
 }
 
-static DRIVER_INIT( mjcamera )
+DRIVER_INIT_MEMBER(nbmj8688_state,mjcamera)
 {
-	UINT8 *rom = machine.region("voice")->base() + 0x20000;
-	UINT8 *prot = machine.region("user1")->base();
+	UINT8 *rom = machine().root_device().memregion("voice")->base() + 0x20000;
+	UINT8 *prot = machine().root_device().memregion("user1")->base();
 	int i;
 
 	/* this is one possible way to rearrange the protection ROM data to get the
-       expected 0x5894 checksum. It's probably completely wrong! But since the
-       game doesn't do anything else with that ROM, this is more than enough. I
-       could just fill this are with fake data, the only thing that matters is
-       the checksum. */
+	   expected 0x5894 checksum. It's probably completely wrong! But since the
+	   game doesn't do anything else with that ROM, this is more than enough. I
+	   could just fill this are with fake data, the only thing that matters is
+	   the checksum. */
 	for (i = 0;i < 0x10000;i++)
 	{
 		rom[i] = BITSWAP8(prot[i],1,6,0,4,2,3,5,7);
@@ -84,10 +76,10 @@ static DRIVER_INIT( mjcamera )
 	nb1413m3_type = NB1413M3_MJCAMERA;
 }
 
-static DRIVER_INIT( kanatuen )
+DRIVER_INIT_MEMBER(nbmj8688_state,kanatuen)
 {
 	/* uses the same protection data as mjcamer, but a different check */
-	UINT8 *rom = machine.region("voice")->base() + 0x30000;
+	UINT8 *rom = machine().root_device().memregion("voice")->base() + 0x30000;
 
 	rom[0x0004] = 0x09;
 	rom[0x0103] = 0x0e;
@@ -97,11 +89,11 @@ static DRIVER_INIT( kanatuen )
 	nb1413m3_type = NB1413M3_KANATUEN;
 }
 
-static DRIVER_INIT( kyuhito )
+DRIVER_INIT_MEMBER(nbmj8688_state,kyuhito)
 {
 #if 1
 	/* uses the same protection data as ????, but a different check */
-	UINT8 *rom = machine.region("maincpu")->base();
+	UINT8 *rom = machine().root_device().memregion("maincpu")->base();
 
 	rom[0x0149] = 0x00;
 	rom[0x014a] = 0x00;
@@ -111,17 +103,17 @@ static DRIVER_INIT( kyuhito )
 	nb1413m3_type = NB1413M3_KYUHITO;
 }
 
-static DRIVER_INIT( idhimitu )
+DRIVER_INIT_MEMBER(nbmj8688_state,idhimitu)
 {
-	UINT8 *rom = machine.region("voice")->base() + 0x20000;
-	UINT8 *prot = machine.region("user1")->base();
+	UINT8 *rom = machine().root_device().memregion("voice")->base() + 0x20000;
+	UINT8 *prot = machine().root_device().memregion("user1")->base();
 	int i;
 
 	/* this is one possible way to rearrange the protection ROM data to get the
-       expected 0x9944 checksum. It's probably completely wrong! But since the
-       game doesn't do anything else with that ROM, this is more than enough. I
-       could just fill this are with fake data, the only thing that matters is
-       the checksum. */
+	   expected 0x9944 checksum. It's probably completely wrong! But since the
+	   game doesn't do anything else with that ROM, this is more than enough. I
+	   could just fill this are with fake data, the only thing that matters is
+	   the checksum. */
 	for (i = 0;i < 0x10000;i++)
 	{
 		rom[i] = BITSWAP8(prot[i + 0x10000],4,6,2,1,7,0,3,5);
@@ -130,23 +122,23 @@ static DRIVER_INIT( idhimitu )
 	nb1413m3_type = NB1413M3_IDHIMITU;
 }
 
-static DRIVER_INIT( kaguya )
+DRIVER_INIT_MEMBER(nbmj8688_state,kaguya)
 {
 	nb1413m3_type = NB1413M3_KAGUYA;
 
 }
 
-static DRIVER_INIT( kaguya2 )
+DRIVER_INIT_MEMBER(nbmj8688_state,kaguya2)
 {
-	UINT8 *rom = machine.region("voice")->base() + 0x20000;
-	UINT8 *prot = machine.region("user1")->base();
+	UINT8 *rom = machine().root_device().memregion("voice")->base() + 0x20000;
+	UINT8 *prot = machine().root_device().memregion("user1")->base();
 	int i;
 
 	/* this is one possible way to rearrange the protection ROM data to get the
-       expected 0x5894 checksum. It's probably completely wrong! But since the
-       game doesn't do anything else with that ROM, this is more than enough. I
-       could just fill this are with fake data, the only thing that matters is
-       the checksum. */
+	   expected 0x5894 checksum. It's probably completely wrong! But since the
+	   game doesn't do anything else with that ROM, this is more than enough. I
+	   could just fill this are with fake data, the only thing that matters is
+	   the checksum. */
 	for (i = 0;i < 0x10000;i++)
 	{
 		rom[i] = BITSWAP8(prot[i],1,6,0,4,2,3,5,7);
@@ -155,385 +147,385 @@ static DRIVER_INIT( kaguya2 )
 	nb1413m3_type = NB1413M3_KAGUYA2;
 }
 
-static DRIVER_INIT( secolove )
+DRIVER_INIT_MEMBER(nbmj8688_state,secolove)
 {
 	nb1413m3_type = NB1413M3_SECOLOVE;
 }
 
-static DRIVER_INIT( citylove )
+DRIVER_INIT_MEMBER(nbmj8688_state,citylove)
 {
 	nb1413m3_type = NB1413M3_CITYLOVE;
 }
 
-static DRIVER_INIT( mcitylov )
+DRIVER_INIT_MEMBER(nbmj8688_state,mcitylov)
 {
 	nb1413m3_type = NB1413M3_MCITYLOV;
 }
 
-static DRIVER_INIT( seiha )
+DRIVER_INIT_MEMBER(nbmj8688_state,seiha)
 {
 	nb1413m3_type = NB1413M3_SEIHA;
 }
 
-static DRIVER_INIT( seiham )
+DRIVER_INIT_MEMBER(nbmj8688_state,seiham)
 {
 	nb1413m3_type = NB1413M3_SEIHAM;
 }
 
-static DRIVER_INIT( korinai )
+DRIVER_INIT_MEMBER(nbmj8688_state,korinai)
 {
 	nb1413m3_type = NB1413M3_KORINAI;
 }
 
-static DRIVER_INIT( korinaim )
+DRIVER_INIT_MEMBER(nbmj8688_state,korinaim)
 {
 	nb1413m3_type = NB1413M3_KORINAIM;
 }
 
-static DRIVER_INIT( iemoto )
+DRIVER_INIT_MEMBER(nbmj8688_state,iemoto)
 {
 	nb1413m3_type = NB1413M3_IEMOTO;
 }
 
-static DRIVER_INIT( iemotom )
+DRIVER_INIT_MEMBER(nbmj8688_state,iemotom)
 {
 	nb1413m3_type = NB1413M3_IEMOTOM;
 }
 
-static DRIVER_INIT( ryuuha )
+DRIVER_INIT_MEMBER(nbmj8688_state,ryuuha)
 {
 	nb1413m3_type = NB1413M3_RYUUHA;
 }
 
-static DRIVER_INIT( ojousan )
+DRIVER_INIT_MEMBER(nbmj8688_state,ojousan)
 {
 	nb1413m3_type = NB1413M3_OJOUSAN;
 }
 
-static DRIVER_INIT( ojousanm )
+DRIVER_INIT_MEMBER(nbmj8688_state,ojousanm)
 {
 	nb1413m3_type = NB1413M3_OJOUSANM;
 }
 
-static DRIVER_INIT( bijokkoy )
+DRIVER_INIT_MEMBER(nbmj8688_state,bijokkoy)
 {
 	nb1413m3_type = NB1413M3_BIJOKKOY;
 }
 
-static DRIVER_INIT( bijokkog )
+DRIVER_INIT_MEMBER(nbmj8688_state,bijokkog)
 {
 	nb1413m3_type = NB1413M3_BIJOKKOG;
 }
 
-static DRIVER_INIT( housemnq )
+DRIVER_INIT_MEMBER(nbmj8688_state,housemnq)
 {
 	nb1413m3_type = NB1413M3_HOUSEMNQ;
 }
 
-static DRIVER_INIT( housemn2 )
+DRIVER_INIT_MEMBER(nbmj8688_state,housemn2)
 {
 	nb1413m3_type = NB1413M3_HOUSEMN2;
 }
 
-static DRIVER_INIT( orangec )
+DRIVER_INIT_MEMBER(nbmj8688_state,orangec)
 {
 	nb1413m3_type = NB1413M3_ORANGEC;
 }
 
-static DRIVER_INIT( orangeci )
+DRIVER_INIT_MEMBER(nbmj8688_state,orangeci)
 {
 	nb1413m3_type = NB1413M3_ORANGECI;
 }
 
-static DRIVER_INIT( vipclub )
+DRIVER_INIT_MEMBER(nbmj8688_state,vipclub)
 {
 	nb1413m3_type = NB1413M3_VIPCLUB;
 }
 
-static DRIVER_INIT( livegal )
+DRIVER_INIT_MEMBER(nbmj8688_state,livegal)
 {
 	nb1413m3_type = NB1413M3_LIVEGAL;
 }
 
-static DRIVER_INIT( crystalg )
+DRIVER_INIT_MEMBER(nbmj8688_state,crystalg)
 {
 	nb1413m3_type = NB1413M3_CRYSTALG;
 }
 
-static DRIVER_INIT( crystal2 )
+DRIVER_INIT_MEMBER(nbmj8688_state,crystal2)
 {
 	nb1413m3_type = NB1413M3_CRYSTAL2;
 }
 
-static DRIVER_INIT( apparel )
+DRIVER_INIT_MEMBER(nbmj8688_state,apparel)
 {
 	nb1413m3_type = NB1413M3_APPAREL;
 }
 
-static DRIVER_INIT( nightlov )
+DRIVER_INIT_MEMBER(nbmj8688_state,nightlov)
 {
 	nb1413m3_type = NB1413M3_NIGHTLOV;
 }
 
-static DRIVER_INIT( barline )
+DRIVER_INIT_MEMBER(nbmj8688_state,barline)
 {
 	nb1413m3_type = NB1413M3_BARLINE;
 }
 
-static ADDRESS_MAP_START( mjsikaku_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( mjsikaku_map, AS_PROGRAM, 8, nbmj8688_state )
 	AM_RANGE(0x0000, 0xf7ff) AM_ROM
 	AM_RANGE(0xf800, 0xffff) AM_RAM AM_SHARE("nvram")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( secolove_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( secolove_map, AS_PROGRAM, 8, nbmj8688_state )
 	AM_RANGE(0x0000, 0xefff) AM_ROM
 	AM_RANGE(0xf000, 0xf7ff) AM_RAM AM_SHARE("nvram")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( ojousan_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( ojousan_map, AS_PROGRAM, 8, nbmj8688_state )
 	AM_RANGE(0x0000, 0x6fff) AM_ROM
 	AM_RANGE(0x7000, 0x7fff) AM_RAM AM_SHARE("nvram")
 	AM_RANGE(0x8000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
 
-static READ8_HANDLER( ff_r )
+READ8_MEMBER(nbmj8688_state::ff_r)
 {
 	/* possibly because of a bug, reads from port 0xd0 must return 0xff
-       otherwise apparel doesn't clear the background when you insert a coin */
+	   otherwise apparel doesn't clear the background when you insert a coin */
 	return 0xff;
 }
 
-static ADDRESS_MAP_START( secolove_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( secolove_io_map, AS_IO, 8, nbmj8688_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x7f) AM_READ(nb1413m3_sndrom_r)
-	AM_RANGE(0x00, 0x00) AM_WRITE(nb1413m3_nmi_clock_w)
-	AM_RANGE(0x81, 0x81) AM_DEVREAD("psg", ay8910_r)
-	AM_RANGE(0x82, 0x83) AM_DEVWRITE("psg", ay8910_data_address_w)
-	AM_RANGE(0x90, 0x90) AM_READ(nb1413m3_inputport0_r)
+	AM_RANGE(0x00, 0x7f) AM_READ_LEGACY(nb1413m3_sndrom_r)
+	AM_RANGE(0x00, 0x00) AM_WRITE_LEGACY(nb1413m3_nmi_clock_w)
+	AM_RANGE(0x81, 0x81) AM_DEVREAD_LEGACY("psg", ay8910_r)
+	AM_RANGE(0x82, 0x83) AM_DEVWRITE_LEGACY("psg", ay8910_data_address_w)
+	AM_RANGE(0x90, 0x90) AM_READ_LEGACY(nb1413m3_inputport0_r)
 	AM_RANGE(0x90, 0x97) AM_WRITE(nbmj8688_blitter_w)
-	AM_RANGE(0xa0, 0xa0) AM_READWRITE(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
-	AM_RANGE(0xb0, 0xb0) AM_READWRITE(nb1413m3_inputport2_r,nb1413m3_sndrombank1_w)
+	AM_RANGE(0xa0, 0xa0) AM_READWRITE_LEGACY(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
+	AM_RANGE(0xb0, 0xb0) AM_READWRITE_LEGACY(nb1413m3_inputport2_r,nb1413m3_sndrombank1_w)
 	AM_RANGE(0xc0, 0xcf) AM_WRITE(nbmj8688_clut_w)
-	AM_RANGE(0xd0, 0xd0) AM_READ(ff_r)	// irq ack? watchdog?
-	AM_RANGE(0xd0, 0xd0) AM_DEVWRITE("dac", DAC_WRITE)
+	AM_RANGE(0xd0, 0xd0) AM_READ(ff_r)  // irq ack? watchdog?
+	AM_RANGE(0xd0, 0xd0) AM_DEVWRITE("dac", dac_device, write_unsigned8)
 	AM_RANGE(0xe0, 0xe0) AM_WRITE(secolove_romsel_w)
-//  AM_RANGE(0xf0, 0xf0) AM_READ(nb1413m3_dipsw1_r)
-//  AM_RANGE(0xf1, 0xf1) AM_READ(nb1413m3_dipsw2_r)
+//  AM_RANGE(0xf0, 0xf0) AM_READ_LEGACY(nb1413m3_dipsw1_r)
+//  AM_RANGE(0xf1, 0xf1) AM_READ_LEGACY(nb1413m3_dipsw2_r)
 	AM_RANGE(0xf0, 0xf0) AM_WRITE(mjsikaku_scrolly_w)
 ADDRESS_MAP_END
 
-static WRITE8_HANDLER( barline_output_w )
+WRITE8_MEMBER(nbmj8688_state::barline_output_w)
 {
-	coin_lockout_w(space->machine(), 0,~data & 0x80);
-	coin_counter_w(space->machine(), 0,data & 0x02);
+	coin_lockout_w(machine(), 0,~data & 0x80);
+	coin_counter_w(machine(), 0,data & 0x02);
 }
 
-static ADDRESS_MAP_START( barline_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( barline_io_map, AS_IO, 8, nbmj8688_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-//  AM_RANGE(0x00, 0x7f) AM_READ(nb1413m3_sndrom_r)
-	AM_RANGE(0x00, 0x00) AM_WRITE(nb1413m3_sndrombank1_w)
-	AM_RANGE(0x70, 0x70) AM_WRITE(nb1413m3_nmi_clock_w)
-	AM_RANGE(0x80, 0x81) AM_DEVREADWRITE("psg", ym3812_r,ym3812_w)
-	AM_RANGE(0x90, 0x90) AM_READ(nb1413m3_inputport0_r)
+//  AM_RANGE(0x00, 0x7f) AM_READ_LEGACY(nb1413m3_sndrom_r)
+	AM_RANGE(0x00, 0x00) AM_WRITE_LEGACY(nb1413m3_sndrombank1_w)
+	AM_RANGE(0x70, 0x70) AM_WRITE_LEGACY(nb1413m3_nmi_clock_w)
+	AM_RANGE(0x80, 0x81) AM_DEVREADWRITE_LEGACY("psg", ym3812_r,ym3812_w)
+	AM_RANGE(0x90, 0x90) AM_READ_LEGACY(nb1413m3_inputport0_r)
 	AM_RANGE(0x90, 0x97) AM_WRITE(nbmj8688_blitter_w)
-	AM_RANGE(0xa0, 0xa0) AM_READWRITE(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
-	AM_RANGE(0xb0, 0xb0) AM_READWRITE(nb1413m3_inputport2_r,barline_output_w)
+	AM_RANGE(0xa0, 0xa0) AM_READWRITE_LEGACY(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
+	AM_RANGE(0xb0, 0xb0) AM_READ_LEGACY(nb1413m3_inputport2_r) AM_WRITE(barline_output_w)
 	AM_RANGE(0xc0, 0xcf) AM_WRITE(nbmj8688_clut_w)
-	AM_RANGE(0xd0, 0xd0) AM_READ(ff_r)	// irq ack? watchdog?
-//  AM_RANGE(0xd0, 0xd0) AM_DEVWRITE("dac", DAC_WRITE) //not used
+	AM_RANGE(0xd0, 0xd0) AM_READ(ff_r)  // irq ack? watchdog?
+//  AM_RANGE(0xd0, 0xd0) AM_DEVWRITE("dac", dac_device, write_unsigned8) //not used
 	AM_RANGE(0xe0, 0xe0) AM_WRITE(secolove_romsel_w)
-	AM_RANGE(0xf0, 0xf0) AM_READ(nb1413m3_dipsw1_r) AM_WRITE(mjsikaku_scrolly_w)
-	AM_RANGE(0xf1, 0xf1) AM_READ(nb1413m3_dipsw2_r)
+	AM_RANGE(0xf0, 0xf0) AM_READ_LEGACY(nb1413m3_dipsw1_r) AM_WRITE(mjsikaku_scrolly_w)
+	AM_RANGE(0xf1, 0xf1) AM_READ_LEGACY(nb1413m3_dipsw2_r)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( crystalg_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( crystalg_io_map, AS_IO, 8, nbmj8688_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x7f) AM_READ(nb1413m3_sndrom_r)
-	AM_RANGE(0x00, 0x00) AM_WRITE(nb1413m3_nmi_clock_w)
-	AM_RANGE(0x81, 0x81) AM_DEVREAD("psg", ay8910_r)
-	AM_RANGE(0x82, 0x83) AM_DEVWRITE("psg", ay8910_data_address_w)
-	AM_RANGE(0x90, 0x90) AM_READ(nb1413m3_inputport0_r)
+	AM_RANGE(0x00, 0x7f) AM_READ_LEGACY(nb1413m3_sndrom_r)
+	AM_RANGE(0x00, 0x00) AM_WRITE_LEGACY(nb1413m3_nmi_clock_w)
+	AM_RANGE(0x81, 0x81) AM_DEVREAD_LEGACY("psg", ay8910_r)
+	AM_RANGE(0x82, 0x83) AM_DEVWRITE_LEGACY("psg", ay8910_data_address_w)
+	AM_RANGE(0x90, 0x90) AM_READ_LEGACY(nb1413m3_inputport0_r)
 	AM_RANGE(0x90, 0x97) AM_WRITE(nbmj8688_blitter_w)
-	AM_RANGE(0xa0, 0xa0) AM_READWRITE(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
-	AM_RANGE(0xb0, 0xb0) AM_READWRITE(nb1413m3_inputport2_r,nb1413m3_sndrombank1_w)
+	AM_RANGE(0xa0, 0xa0) AM_READWRITE_LEGACY(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
+	AM_RANGE(0xb0, 0xb0) AM_READWRITE_LEGACY(nb1413m3_inputport2_r,nb1413m3_sndrombank1_w)
 	AM_RANGE(0xc0, 0xcf) AM_WRITE(nbmj8688_clut_w)
-	AM_RANGE(0xd0, 0xd0) AM_READ(ff_r)	// irq ack? watchdog?
-	AM_RANGE(0xd0, 0xd0) AM_DEVWRITE("dac", DAC_WRITE)
+	AM_RANGE(0xd0, 0xd0) AM_READ(ff_r)  // irq ack? watchdog?
+	AM_RANGE(0xd0, 0xd0) AM_DEVWRITE("dac", dac_device, write_unsigned8)
 	AM_RANGE(0xe0, 0xe0) AM_WRITE(crystalg_romsel_w)
-//  AM_RANGE(0xf0, 0xf0) AM_READ(nb1413m3_dipsw1_r)
+//  AM_RANGE(0xf0, 0xf0) AM_READ_LEGACY(nb1413m3_dipsw1_r)
 //  AM_RANGE(0xf0, 0xf0) AM_WRITENOP
-//  AM_RANGE(0xf1, 0xf1) AM_READ(nb1413m3_dipsw2_r)
+//  AM_RANGE(0xf1, 0xf1) AM_READ_LEGACY(nb1413m3_dipsw2_r)
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( otonano_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( otonano_io_map, AS_IO, 8, nbmj8688_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x7f) AM_READ(nb1413m3_sndrom_r)
-	AM_RANGE(0x00, 0x00) AM_WRITE(nb1413m3_nmi_clock_w)
+	AM_RANGE(0x00, 0x7f) AM_READ_LEGACY(nb1413m3_sndrom_r)
+	AM_RANGE(0x00, 0x00) AM_WRITE_LEGACY(nb1413m3_nmi_clock_w)
 	AM_RANGE(0x20, 0x3f) AM_WRITE(nbmj8688_clut_w)
 	AM_RANGE(0x50, 0x50) AM_WRITE(mjsikaku_romsel_w)
 	AM_RANGE(0x70, 0x77) AM_WRITE(nbmj8688_blitter_w)
-	AM_RANGE(0x80, 0x81) AM_DEVREADWRITE("psg", ym3812_r,ym3812_w)
-	AM_RANGE(0x90, 0x90) AM_READ(nb1413m3_inputport0_r)
-	AM_RANGE(0xa0, 0xa0) AM_READWRITE(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
-	AM_RANGE(0xb0, 0xb0) AM_READWRITE(nb1413m3_inputport2_r,nb1413m3_sndrombank1_w)
-	AM_RANGE(0xd0, 0xd0) AM_READ(ff_r)	// irq ack? watchdog?
-	AM_RANGE(0xd0, 0xd0) AM_DEVWRITE("dac", DAC_WRITE)
+	AM_RANGE(0x80, 0x81) AM_DEVREADWRITE_LEGACY("psg", ym3812_r,ym3812_w)
+	AM_RANGE(0x90, 0x90) AM_READ_LEGACY(nb1413m3_inputport0_r)
+	AM_RANGE(0xa0, 0xa0) AM_READWRITE_LEGACY(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
+	AM_RANGE(0xb0, 0xb0) AM_READWRITE_LEGACY(nb1413m3_inputport2_r,nb1413m3_sndrombank1_w)
+	AM_RANGE(0xd0, 0xd0) AM_READ(ff_r)  // irq ack? watchdog?
+	AM_RANGE(0xd0, 0xd0) AM_DEVWRITE("dac", dac_device, write_unsigned8)
 	AM_RANGE(0xe0, 0xe0) AM_WRITE(mjsikaku_gfxflag2_w)
-	AM_RANGE(0xf0, 0xf0) AM_READWRITE(nb1413m3_dipsw1_r,mjsikaku_scrolly_w)
-	AM_RANGE(0xf1, 0xf1) AM_READ(nb1413m3_dipsw2_r)
+	AM_RANGE(0xf0, 0xf0) AM_READ_LEGACY(nb1413m3_dipsw1_r) AM_WRITE(mjsikaku_scrolly_w)
+	AM_RANGE(0xf1, 0xf1) AM_READ_LEGACY(nb1413m3_dipsw2_r)
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( kaguya_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( kaguya_io_map, AS_IO, 8, nbmj8688_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x7f) AM_READ(nb1413m3_sndrom_r)
-	AM_RANGE(0x00, 0x00) AM_WRITE(nb1413m3_nmi_clock_w)
+	AM_RANGE(0x00, 0x7f) AM_READ_LEGACY(nb1413m3_sndrom_r)
+	AM_RANGE(0x00, 0x00) AM_WRITE_LEGACY(nb1413m3_nmi_clock_w)
 	AM_RANGE(0x20, 0x3f) AM_WRITE(nbmj8688_clut_w)
 	AM_RANGE(0x50, 0x50) AM_WRITE(mjsikaku_romsel_w)
 	AM_RANGE(0x70, 0x77) AM_WRITE(nbmj8688_blitter_w)
-	AM_RANGE(0x81, 0x81) AM_DEVREAD("psg", ay8910_r)
-	AM_RANGE(0x82, 0x83) AM_DEVWRITE("psg", ay8910_data_address_w)
-	AM_RANGE(0x90, 0x90) AM_READ(nb1413m3_inputport0_r)
-	AM_RANGE(0xa0, 0xa0) AM_READWRITE(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
-	AM_RANGE(0xb0, 0xb0) AM_READWRITE(nb1413m3_inputport2_r,nb1413m3_sndrombank1_w)
-	AM_RANGE(0xd0, 0xd0) AM_READ(ff_r)	// irq ack? watchdog?
-	AM_RANGE(0xd0, 0xd0) AM_DEVWRITE("dac", DAC_WRITE)
+	AM_RANGE(0x81, 0x81) AM_DEVREAD_LEGACY("psg", ay8910_r)
+	AM_RANGE(0x82, 0x83) AM_DEVWRITE_LEGACY("psg", ay8910_data_address_w)
+	AM_RANGE(0x90, 0x90) AM_READ_LEGACY(nb1413m3_inputport0_r)
+	AM_RANGE(0xa0, 0xa0) AM_READWRITE_LEGACY(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
+	AM_RANGE(0xb0, 0xb0) AM_READWRITE_LEGACY(nb1413m3_inputport2_r,nb1413m3_sndrombank1_w)
+	AM_RANGE(0xd0, 0xd0) AM_READ(ff_r)  // irq ack? watchdog?
+	AM_RANGE(0xd0, 0xd0) AM_DEVWRITE("dac", dac_device, write_unsigned8)
 	AM_RANGE(0xe0, 0xe0) AM_WRITE(mjsikaku_gfxflag2_w)
-    AM_RANGE(0xf0, 0xf0) AM_READWRITE(nb1413m3_dipsw1_r,mjsikaku_scrolly_w)
-	AM_RANGE(0xf1, 0xf1) AM_READ(nb1413m3_dipsw2_r)
+	AM_RANGE(0xf0, 0xf0) AM_READ_LEGACY(nb1413m3_dipsw1_r) AM_WRITE(mjsikaku_scrolly_w)
+	AM_RANGE(0xf1, 0xf1) AM_READ_LEGACY(nb1413m3_dipsw2_r)
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( iemoto_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( iemoto_io_map, AS_IO, 8, nbmj8688_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x7f) AM_READ(nb1413m3_sndrom_r)
-	AM_RANGE(0x00, 0x00) AM_WRITE(nb1413m3_nmi_clock_w)
-	AM_RANGE(0x10, 0x10) AM_WRITE(nb1413m3_sndrombank2_w)
+	AM_RANGE(0x00, 0x7f) AM_READ_LEGACY(nb1413m3_sndrom_r)
+	AM_RANGE(0x00, 0x00) AM_WRITE_LEGACY(nb1413m3_nmi_clock_w)
+	AM_RANGE(0x10, 0x10) AM_WRITE_LEGACY(nb1413m3_sndrombank2_w)
 	AM_RANGE(0x20, 0x3f) AM_WRITE(nbmj8688_clut_w)
 	AM_RANGE(0x40, 0x47) AM_WRITE(nbmj8688_blitter_w)
 	AM_RANGE(0x50, 0x50) AM_WRITE(seiha_romsel_w)
-	AM_RANGE(0x81, 0x81) AM_DEVREAD("psg", ay8910_r)
-	AM_RANGE(0x82, 0x83) AM_DEVWRITE("psg", ay8910_data_address_w)
-	AM_RANGE(0x90, 0x90) AM_READ(nb1413m3_inputport0_r)
-	AM_RANGE(0xa0, 0xa0) AM_READWRITE(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
-	AM_RANGE(0xb0, 0xb0) AM_READWRITE(nb1413m3_inputport2_r,nb1413m3_sndrombank1_w)
-	AM_RANGE(0xd0, 0xd0) AM_READ(ff_r)	// irq ack? watchdog?
-	AM_RANGE(0xd0, 0xd0) AM_DEVWRITE("dac", DAC_WRITE)
+	AM_RANGE(0x81, 0x81) AM_DEVREAD_LEGACY("psg", ay8910_r)
+	AM_RANGE(0x82, 0x83) AM_DEVWRITE_LEGACY("psg", ay8910_data_address_w)
+	AM_RANGE(0x90, 0x90) AM_READ_LEGACY(nb1413m3_inputport0_r)
+	AM_RANGE(0xa0, 0xa0) AM_READWRITE_LEGACY(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
+	AM_RANGE(0xb0, 0xb0) AM_READWRITE_LEGACY(nb1413m3_inputport2_r,nb1413m3_sndrombank1_w)
+	AM_RANGE(0xd0, 0xd0) AM_READ(ff_r)  // irq ack? watchdog?
+	AM_RANGE(0xd0, 0xd0) AM_DEVWRITE("dac", dac_device, write_unsigned8)
 	AM_RANGE(0xe0, 0xe0) AM_WRITE(mjsikaku_gfxflag2_w)
-//  AM_RANGE(0xf0, 0xf0) AM_READ(nb1413m3_dipsw1_r)
-//  AM_RANGE(0xf1, 0xf1) AM_READ(nb1413m3_dipsw2_r)
+//  AM_RANGE(0xf0, 0xf0) AM_READ_LEGACY(nb1413m3_dipsw1_r)
+//  AM_RANGE(0xf1, 0xf1) AM_READ_LEGACY(nb1413m3_dipsw2_r)
 	AM_RANGE(0xf0, 0xf0) AM_WRITE(mjsikaku_scrolly_w)
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( seiha_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( seiha_io_map, AS_IO, 8, nbmj8688_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x7f) AM_READ(nb1413m3_sndrom_r)
-	AM_RANGE(0x00, 0x00) AM_WRITE(nb1413m3_nmi_clock_w)
-	AM_RANGE(0x10, 0x10) AM_WRITE(nb1413m3_sndrombank2_w)
+	AM_RANGE(0x00, 0x7f) AM_READ_LEGACY(nb1413m3_sndrom_r)
+	AM_RANGE(0x00, 0x00) AM_WRITE_LEGACY(nb1413m3_nmi_clock_w)
+	AM_RANGE(0x10, 0x10) AM_WRITE_LEGACY(nb1413m3_sndrombank2_w)
 	AM_RANGE(0x20, 0x3f) AM_WRITE(nbmj8688_clut_w)
 	AM_RANGE(0x50, 0x50) AM_WRITE(seiha_romsel_w)
-	AM_RANGE(0x81, 0x81) AM_DEVREAD("psg", ay8910_r)
-	AM_RANGE(0x82, 0x83) AM_DEVWRITE("psg", ay8910_data_address_w)
-	AM_RANGE(0x90, 0x90) AM_READ(nb1413m3_inputport0_r)
+	AM_RANGE(0x81, 0x81) AM_DEVREAD_LEGACY("psg", ay8910_r)
+	AM_RANGE(0x82, 0x83) AM_DEVWRITE_LEGACY("psg", ay8910_data_address_w)
+	AM_RANGE(0x90, 0x90) AM_READ_LEGACY(nb1413m3_inputport0_r)
 	AM_RANGE(0x90, 0x97) AM_WRITE(nbmj8688_blitter_w)
-	AM_RANGE(0xa0, 0xa0) AM_READWRITE(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
-	AM_RANGE(0xb0, 0xb0) AM_READWRITE(nb1413m3_inputport2_r,nb1413m3_sndrombank1_w)
-	AM_RANGE(0xd0, 0xd0) AM_READ(ff_r)	// irq ack? watchdog?
-	AM_RANGE(0xd0, 0xd0) AM_DEVWRITE("dac", DAC_WRITE)
+	AM_RANGE(0xa0, 0xa0) AM_READWRITE_LEGACY(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
+	AM_RANGE(0xb0, 0xb0) AM_READWRITE_LEGACY(nb1413m3_inputport2_r,nb1413m3_sndrombank1_w)
+	AM_RANGE(0xd0, 0xd0) AM_READ(ff_r)  // irq ack? watchdog?
+	AM_RANGE(0xd0, 0xd0) AM_DEVWRITE("dac", dac_device, write_unsigned8)
 	AM_RANGE(0xe0, 0xe0) AM_WRITE(mjsikaku_gfxflag2_w)
-//  AM_RANGE(0xf0, 0xf0) AM_READ(nb1413m3_dipsw1_r)
-//  AM_RANGE(0xf1, 0xf1) AM_READ(nb1413m3_dipsw2_r)
+//  AM_RANGE(0xf0, 0xf0) AM_READ_LEGACY(nb1413m3_dipsw1_r)
+//  AM_RANGE(0xf1, 0xf1) AM_READ_LEGACY(nb1413m3_dipsw2_r)
 	AM_RANGE(0xf0, 0xf0) AM_WRITE(mjsikaku_scrolly_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( mjgaiden_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( mjgaiden_io_map, AS_IO, 8, nbmj8688_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x7f) AM_READ(nb1413m3_sndrom_r)
-	AM_RANGE(0x00, 0x00) AM_WRITE(nb1413m3_nmi_clock_w)
+	AM_RANGE(0x00, 0x7f) AM_READ_LEGACY(nb1413m3_sndrom_r)
+	AM_RANGE(0x00, 0x00) AM_WRITE_LEGACY(nb1413m3_nmi_clock_w)
 	AM_RANGE(0x20, 0x3f) AM_WRITE(nbmj8688_clut_w)
 	AM_RANGE(0x50, 0x50) AM_WRITE(mjsikaku_romsel_w)
-	AM_RANGE(0x81, 0x81) AM_DEVREAD("psg", ay8910_r)
-	AM_RANGE(0x82, 0x83) AM_DEVWRITE("psg", ay8910_data_address_w)
-	AM_RANGE(0x90, 0x90) AM_READ(nb1413m3_inputport0_r)
+	AM_RANGE(0x81, 0x81) AM_DEVREAD_LEGACY("psg", ay8910_r)
+	AM_RANGE(0x82, 0x83) AM_DEVWRITE_LEGACY("psg", ay8910_data_address_w)
+	AM_RANGE(0x90, 0x90) AM_READ_LEGACY(nb1413m3_inputport0_r)
 	AM_RANGE(0x90, 0x97) AM_WRITE(nbmj8688_blitter_w)
-	AM_RANGE(0xa0, 0xa0) AM_READWRITE(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
-	AM_RANGE(0xb0, 0xb0) AM_READWRITE(nb1413m3_inputport2_r,nb1413m3_sndrombank1_w)
-	AM_RANGE(0xd0, 0xd0) AM_READ(ff_r)	// irq ack? watchdog?
-	AM_RANGE(0xd0, 0xd0) AM_DEVWRITE("dac", DAC_WRITE)
+	AM_RANGE(0xa0, 0xa0) AM_READWRITE_LEGACY(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
+	AM_RANGE(0xb0, 0xb0) AM_READWRITE_LEGACY(nb1413m3_inputport2_r,nb1413m3_sndrombank1_w)
+	AM_RANGE(0xd0, 0xd0) AM_READ(ff_r)  // irq ack? watchdog?
+	AM_RANGE(0xd0, 0xd0) AM_DEVWRITE("dac", dac_device, write_unsigned8)
 	AM_RANGE(0xe0, 0xe0) AM_WRITE(mjsikaku_gfxflag2_w)
-//  AM_RANGE(0xf0, 0xf0) AM_READ(nb1413m3_dipsw1_r)
-//  AM_RANGE(0xf1, 0xf1) AM_READ(nb1413m3_dipsw2_r)
+//  AM_RANGE(0xf0, 0xf0) AM_READ_LEGACY(nb1413m3_dipsw1_r)
+//  AM_RANGE(0xf1, 0xf1) AM_READ_LEGACY(nb1413m3_dipsw2_r)
 	AM_RANGE(0xf0, 0xf0) AM_WRITE(mjsikaku_scrolly_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( p16bit_LCD_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( p16bit_LCD_io_map, AS_IO, 8, nbmj8688_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x7f) AM_READ(nb1413m3_sndrom_r)
-	AM_RANGE(0x00, 0x00) AM_WRITE(nb1413m3_nmi_clock_w)
+	AM_RANGE(0x00, 0x7f) AM_READ_LEGACY(nb1413m3_sndrom_r)
+	AM_RANGE(0x00, 0x00) AM_WRITE_LEGACY(nb1413m3_nmi_clock_w)
 	AM_RANGE(0x42, 0x42) AM_WRITE(nbmj8688_HD61830B_0_data_w)
 	AM_RANGE(0x43, 0x43) AM_WRITE(nbmj8688_HD61830B_0_instr_w)
 	AM_RANGE(0x44, 0x44) AM_WRITE(nbmj8688_HD61830B_1_data_w)
 	AM_RANGE(0x45, 0x45) AM_WRITE(nbmj8688_HD61830B_1_instr_w)
 	AM_RANGE(0x46, 0x46) AM_WRITE(nbmj8688_HD61830B_both_data_w)
 	AM_RANGE(0x47, 0x47) AM_WRITE(nbmj8688_HD61830B_both_instr_w)
-	AM_RANGE(0x81, 0x81) AM_DEVREAD("psg", ay8910_r)
-	AM_RANGE(0x82, 0x83) AM_DEVWRITE("psg", ay8910_data_address_w)
-	AM_RANGE(0x90, 0x90) AM_READ(nb1413m3_inputport0_r)
+	AM_RANGE(0x81, 0x81) AM_DEVREAD_LEGACY("psg", ay8910_r)
+	AM_RANGE(0x82, 0x83) AM_DEVWRITE_LEGACY("psg", ay8910_data_address_w)
+	AM_RANGE(0x90, 0x90) AM_READ_LEGACY(nb1413m3_inputport0_r)
 	AM_RANGE(0x90, 0x97) AM_WRITE(nbmj8688_blitter_w)
-	AM_RANGE(0xa0, 0xa0) AM_READWRITE(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
-	AM_RANGE(0xb0, 0xb0) AM_READWRITE(nb1413m3_inputport2_r,nb1413m3_sndrombank1_w)
+	AM_RANGE(0xa0, 0xa0) AM_READWRITE_LEGACY(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
+	AM_RANGE(0xb0, 0xb0) AM_READWRITE_LEGACY(nb1413m3_inputport2_r,nb1413m3_sndrombank1_w)
 	AM_RANGE(0xc0, 0xcf) AM_WRITE(nbmj8688_clut_w)
-	AM_RANGE(0xd0, 0xd0) AM_READ(ff_r)	// irq ack? watchdog?
-	AM_RANGE(0xd0, 0xd0) AM_DEVWRITE("dac", DAC_WRITE)
+	AM_RANGE(0xd0, 0xd0) AM_READ(ff_r)  // irq ack? watchdog?
+	AM_RANGE(0xd0, 0xd0) AM_DEVWRITE("dac", dac_device, write_unsigned8)
 	AM_RANGE(0xe0, 0xe0) AM_WRITE(secolove_romsel_w)
-//  AM_RANGE(0xf0, 0xf0) AM_READ(nb1413m3_dipsw1_r)
-//  AM_RANGE(0xf1, 0xf1) AM_READ(nb1413m3_dipsw2_r)
+//  AM_RANGE(0xf0, 0xf0) AM_READ_LEGACY(nb1413m3_dipsw1_r)
+//  AM_RANGE(0xf1, 0xf1) AM_READ_LEGACY(nb1413m3_dipsw2_r)
 	AM_RANGE(0xf0, 0xf0) AM_WRITE(mjsikaku_scrolly_w)
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( mjsikaku_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( mjsikaku_io_map, AS_IO, 8, nbmj8688_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x7f) AM_READ(nb1413m3_sndrom_r)
-	AM_RANGE(0x00, 0x00) AM_WRITE(nb1413m3_nmi_clock_w)
-	AM_RANGE(0x10, 0x10) AM_WRITE(nb1413m3_sndrombank2_w)
+	AM_RANGE(0x00, 0x7f) AM_READ_LEGACY(nb1413m3_sndrom_r)
+	AM_RANGE(0x00, 0x00) AM_WRITE_LEGACY(nb1413m3_nmi_clock_w)
+	AM_RANGE(0x10, 0x10) AM_WRITE_LEGACY(nb1413m3_sndrombank2_w)
 	AM_RANGE(0x20, 0x3f) AM_WRITE(nbmj8688_clut_w)
 	AM_RANGE(0x50, 0x50) AM_WRITE(mjsikaku_romsel_w)
 	AM_RANGE(0x60, 0x67) AM_WRITE(nbmj8688_blitter_w)
-	AM_RANGE(0x80, 0x81) AM_DEVREADWRITE("psg", ym3812_r, ym3812_w)
-	AM_RANGE(0x90, 0x90) AM_READ(nb1413m3_inputport0_r)
-	AM_RANGE(0xa0, 0xa0) AM_READWRITE(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
-	AM_RANGE(0xb0, 0xb0) AM_READWRITE(nb1413m3_inputport2_r,nb1413m3_sndrombank1_w)
-	AM_RANGE(0xd0, 0xd0) AM_READ(ff_r)	// irq ack? watchdog?
-	AM_RANGE(0xd0, 0xd0) AM_DEVWRITE("dac", DAC_WRITE)
+	AM_RANGE(0x80, 0x81) AM_DEVREADWRITE_LEGACY("psg", ym3812_r, ym3812_w)
+	AM_RANGE(0x90, 0x90) AM_READ_LEGACY(nb1413m3_inputport0_r)
+	AM_RANGE(0xa0, 0xa0) AM_READWRITE_LEGACY(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
+	AM_RANGE(0xb0, 0xb0) AM_READWRITE_LEGACY(nb1413m3_inputport2_r,nb1413m3_sndrombank1_w)
+	AM_RANGE(0xd0, 0xd0) AM_READ(ff_r)  // irq ack? watchdog?
+	AM_RANGE(0xd0, 0xd0) AM_DEVWRITE("dac", dac_device, write_unsigned8)
 	AM_RANGE(0xe0, 0xe0) AM_WRITE(mjsikaku_gfxflag2_w)
-	AM_RANGE(0xf0, 0xf0) AM_READ(nb1413m3_dipsw1_r)
-	AM_RANGE(0xf1, 0xf1) AM_READ(nb1413m3_dipsw2_r)
+	AM_RANGE(0xf0, 0xf0) AM_READ_LEGACY(nb1413m3_dipsw1_r)
+	AM_RANGE(0xf1, 0xf1) AM_READ_LEGACY(nb1413m3_dipsw2_r)
 	AM_RANGE(0xf0, 0xf0) AM_WRITE(mjsikaku_scrolly_w)
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( mmsikaku_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( mmsikaku_io_map, AS_IO, 8, nbmj8688_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x7f) AM_READ(nb1413m3_sndrom_r)
-	AM_RANGE(0x00, 0x00) AM_WRITE(nb1413m3_nmi_clock_w)
-	AM_RANGE(0x10, 0x10) AM_WRITE(nb1413m3_sndrombank2_w)
+	AM_RANGE(0x00, 0x7f) AM_READ_LEGACY(nb1413m3_sndrom_r)
+	AM_RANGE(0x00, 0x00) AM_WRITE_LEGACY(nb1413m3_nmi_clock_w)
+	AM_RANGE(0x10, 0x10) AM_WRITE_LEGACY(nb1413m3_sndrombank2_w)
 	AM_RANGE(0x20, 0x3f) AM_WRITE(nbmj8688_clut_w)
 	AM_RANGE(0x40, 0x47) AM_WRITE(nbmj8688_blitter_w)
 	AM_RANGE(0x50, 0x50) AM_WRITE(mjsikaku_romsel_w)
-	AM_RANGE(0x81, 0x81) AM_DEVREAD("psg", ay8910_r)
-	AM_RANGE(0x82, 0x83) AM_DEVWRITE("psg", ay8910_data_address_w)
-	AM_RANGE(0x90, 0x90) AM_READ(nb1413m3_inputport0_r)
-	AM_RANGE(0xa0, 0xa0) AM_READWRITE(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
-	AM_RANGE(0xb0, 0xb0) AM_READWRITE(nb1413m3_inputport2_r,nb1413m3_sndrombank1_w)
-	AM_RANGE(0xd0, 0xd0) AM_READ(ff_r)	// irq ack? watchdog?
-	AM_RANGE(0xd0, 0xd0) AM_DEVWRITE("dac", DAC_WRITE)
+	AM_RANGE(0x81, 0x81) AM_DEVREAD_LEGACY("psg", ay8910_r)
+	AM_RANGE(0x82, 0x83) AM_DEVWRITE_LEGACY("psg", ay8910_data_address_w)
+	AM_RANGE(0x90, 0x90) AM_READ_LEGACY(nb1413m3_inputport0_r)
+	AM_RANGE(0xa0, 0xa0) AM_READWRITE_LEGACY(nb1413m3_inputport1_r,nb1413m3_inputportsel_w)
+	AM_RANGE(0xb0, 0xb0) AM_READWRITE_LEGACY(nb1413m3_inputport2_r,nb1413m3_sndrombank1_w)
+	AM_RANGE(0xd0, 0xd0) AM_READ(ff_r)  // irq ack? watchdog?
+	AM_RANGE(0xd0, 0xd0) AM_DEVWRITE("dac", dac_device, write_unsigned8)
 	AM_RANGE(0xe0, 0xe0) AM_WRITE(mjsikaku_gfxflag2_w)
-//  AM_RANGE(0xf0, 0xf0) AM_READ(nb1413m3_dipsw1_r)
-//  AM_RANGE(0xf1, 0xf1) AM_READ(nb1413m3_dipsw2_r)
+//  AM_RANGE(0xf0, 0xf0) AM_READ_LEGACY(nb1413m3_dipsw1_r)
+//  AM_RANGE(0xf1, 0xf1) AM_READ_LEGACY(nb1413m3_dipsw2_r)
 	AM_RANGE(0xf0, 0xf0) AM_WRITE(mjsikaku_scrolly_w)
 ADDRESS_MAP_END
 
@@ -592,14 +584,14 @@ static INPUT_PORTS_START( mjsikaku )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )			// COIN2
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )          // COIN2
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -697,14 +689,14 @@ static INPUT_PORTS_START( mmsikaku )
 #endif
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )			// COIN2
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )          // COIN2
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -763,14 +755,14 @@ static INPUT_PORTS_START( otonano )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )			// COIN2
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )          // COIN2
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -829,14 +821,14 @@ static INPUT_PORTS_START( mjcamera )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )			// COIN2
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )          // COIN2
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -892,15 +884,15 @@ static INPUT_PORTS_START( kaguya )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
 //  PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_SERVICE1 )		//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_SERVICE1 )       //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )			// COIN2
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )          // COIN2
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -959,15 +951,15 @@ static INPUT_PORTS_START( kaguya2 )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
 //  PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_SERVICE1 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )			// COIN2
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )          // COIN2
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -1026,15 +1018,15 @@ static INPUT_PORTS_START( kanatuen )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
 //  PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_SERVICE1 )		//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_SERVICE1 )       //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )			// COIN2
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )          // COIN2
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -1093,15 +1085,15 @@ static INPUT_PORTS_START( kyuhito )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
 //  PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_SERVICE1 )		//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_SERVICE1 )       //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )			// COIN2
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )          // COIN2
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -1160,15 +1152,15 @@ static INPUT_PORTS_START( idhimitu )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
 //  PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_SERVICE1 )		//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_SERVICE1 )       //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )			// COIN2
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )          // COIN2
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -1226,14 +1218,14 @@ static INPUT_PORTS_START( secolove )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )		// SERVICE
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )       // SERVICE
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -1291,14 +1283,14 @@ static INPUT_PORTS_START( barline )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Hopper Key") PORT_CODE(KEYCODE_H)
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )		// SERVICE
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )       // SERVICE
 
 	PORT_START("KEY0")
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_SLOT_STOP1 )
@@ -1344,7 +1336,6 @@ static INPUT_PORTS_START( barline )
 	PORT_START("KEY9")
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 INPUT_PORTS_END
-
 
 static INPUT_PORTS_START( citylove )
 	PORT_START("DSWA")
@@ -1402,14 +1393,14 @@ static INPUT_PORTS_START( citylove )
 	PORT_DIPSETTING(    0x00, "HAIPAI" )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )		// SERVICE
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )       // SERVICE
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -1507,14 +1498,14 @@ static INPUT_PORTS_START( mcitylov )
 #endif
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )			// COIN2
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )          // COIN2
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -1573,14 +1564,14 @@ static INPUT_PORTS_START( seiha )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )			// COIN2
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )          // COIN2
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -1637,14 +1628,14 @@ static INPUT_PORTS_START( seiham )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )			// COIN2
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )          // COIN2
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -1703,14 +1694,14 @@ static INPUT_PORTS_START( iemoto )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )			// COIN2
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )          // COIN2
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -1769,14 +1760,14 @@ static INPUT_PORTS_START( iemotom )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )			// COIN2
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )          // COIN2
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -1835,14 +1826,14 @@ static INPUT_PORTS_START( ryuuha )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )			// COIN2
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )          // COIN2
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -1900,14 +1891,14 @@ static INPUT_PORTS_START( bijokkoy )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )			// COIN2
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )          // COIN2
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -1964,14 +1955,14 @@ static INPUT_PORTS_START( bijokkog )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )			// COIN2
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )          // COIN2
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -2028,14 +2019,14 @@ static INPUT_PORTS_START( housemnq )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )			// COIN2
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )          // COIN2
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -2091,42 +2082,42 @@ static INPUT_PORTS_START( housemn2 )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )			// COIN2
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )          // COIN2
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( orangec )
 	PORT_START("DSWA")
-	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x07, 0x07, DEF_STR( Difficulty ) )
+	PORT_DIPSETTING(    0x07, "1 (Easy)" )
+	PORT_DIPSETTING(    0x06, "2" )
+	PORT_DIPSETTING(    0x05, "3" )
+	PORT_DIPSETTING(    0x04, "4" )
+	PORT_DIPSETTING(    0x03, "5" )
+	PORT_DIPSETTING(    0x02, "6" )
+	PORT_DIPSETTING(    0x01, "7" )
+	PORT_DIPSETTING(    0x00, "8 (Hard)" )
 	PORT_DIPNAME( 0x08, 0x00, "Select Girl" )
 	PORT_DIPSETTING(    0x08, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
-	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )
+	PORT_DIPNAME( 0x10, 0x00, "Extend TSUMO" )
 	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Coinage ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 1C_2C ) )
 	PORT_DIPNAME( 0x40, 0x40, "Character Display Test" )
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )
+	PORT_DIPNAME( 0x80, 0x80, "DIPSW 1-8" )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
@@ -2157,12 +2148,12 @@ static INPUT_PORTS_START( orangec )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN2
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN2
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
 
@@ -2223,12 +2214,12 @@ static INPUT_PORTS_START( orangeci )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN2
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN2
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
 
@@ -2289,12 +2280,12 @@ static INPUT_PORTS_START( vipclub )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN2
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN2
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
 
@@ -2355,14 +2346,14 @@ static INPUT_PORTS_START( livegal )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )			// COIN2
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )          // COIN2
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 
 	PORT_INCLUDE( nbmjcontrols )
 
@@ -2433,14 +2424,14 @@ static INPUT_PORTS_START( ojousan )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )			// COIN2
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )          // COIN2
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -2499,14 +2490,14 @@ static INPUT_PORTS_START( ojousanm )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )			// COIN2
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )          // COIN2
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -2565,14 +2556,14 @@ static INPUT_PORTS_START( korinai )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )			// COIN2
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )          // COIN2
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -2631,14 +2622,14 @@ static INPUT_PORTS_START( korinaim )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )			// COIN2
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )          // COIN2
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -2697,14 +2688,14 @@ static INPUT_PORTS_START( crystalg )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )			// OPTION (?)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )         // OPTION (?)
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -2759,14 +2750,14 @@ static INPUT_PORTS_START( crystal2 )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )			// OPTION (?)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )         // OPTION (?)
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -2825,14 +2816,14 @@ static INPUT_PORTS_START( apparel )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )		// SERVICE
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )       // SERVICE
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -2891,14 +2882,14 @@ static INPUT_PORTS_START( nightlov )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SYSTEM")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)	// DRAW BUSY
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )			//
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )					// TEST
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )			// COIN1
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(nb1413m3_busyflag_r, NULL)    // DRAW BUSY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )         //
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE3 )       // MEMORY RESET
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )       // ANALYZER
+	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )                 // TEST
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 )          // COIN1
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_OTHER ) PORT_NAME("Credit Clear") PORT_CODE(KEYCODE_4) // CREDIT CLEAR
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )		// SERVICE
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )       // SERVICE
 
 	PORT_INCLUDE( nbmjcontrols )
 INPUT_PORTS_END
@@ -2908,20 +2899,20 @@ static const ay8910_interface ay8910_config =
 {
 	AY8910_LEGACY_OUTPUT,
 	AY8910_DEFAULT_LOADS,
-	DEVCB_MEMORY_HANDLER("maincpu", IO, nb1413m3_dipsw1_r),		// DIPSW-A read
-	DEVCB_MEMORY_HANDLER("maincpu", IO, nb1413m3_dipsw2_r),		// DIPSW-B read
+	DEVCB_MEMORY_HANDLER("maincpu", IO, nb1413m3_dipsw1_r),     // DIPSW-A read
+	DEVCB_MEMORY_HANDLER("maincpu", IO, nb1413m3_dipsw2_r),     // DIPSW-B read
 	DEVCB_NULL,
 	DEVCB_NULL
 };
 
 
-
 static MACHINE_CONFIG_START( NBMJDRV_4096, nbmj8688_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, 5000000)	/* 5.00 MHz */
+	MCFG_CPU_ADD("maincpu", Z80, 5000000)   /* 5.00 MHz */
 	MCFG_CPU_VBLANK_INT("screen", nb1413m3_interrupt)
 
+	MCFG_MACHINE_START(nb1413m3)
 	MCFG_MACHINE_RESET(nb1413m3)
 	MCFG_NVRAM_ADD_0FILL("nvram")
 
@@ -2929,15 +2920,14 @@ static MACHINE_CONFIG_START( NBMJDRV_4096, nbmj8688_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(512, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 512-1, 16, 240-1)
-	MCFG_SCREEN_UPDATE(mbmj8688)
+	MCFG_SCREEN_UPDATE_DRIVER(nbmj8688_state, screen_update_mbmj8688)
 
 	MCFG_PALETTE_LENGTH(4096)
 
-	MCFG_PALETTE_INIT(mbmj8688_12bit)
-	MCFG_VIDEO_START(mbmj8688_pure_12bit)
+	MCFG_PALETTE_INIT_OVERRIDE(nbmj8688_state,mbmj8688_12bit)
+	MCFG_VIDEO_START_OVERRIDE(nbmj8688_state,mbmj8688_pure_12bit)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -2946,10 +2936,9 @@ static MACHINE_CONFIG_START( NBMJDRV_4096, nbmj8688_state )
 	MCFG_SOUND_CONFIG(ay8910_config)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.35)
 
-	MCFG_SOUND_ADD("dac", DAC, 0)
-	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
+	MCFG_DAC_ADD("dac")
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.00)
 MACHINE_CONFIG_END
-
 
 static MACHINE_CONFIG_DERIVED( NBMJDRV_256, NBMJDRV_4096 )
 
@@ -2958,10 +2947,9 @@ static MACHINE_CONFIG_DERIVED( NBMJDRV_256, NBMJDRV_4096 )
 	/* video hardware */
 	MCFG_PALETTE_LENGTH(256)
 
-	MCFG_PALETTE_INIT(mbmj8688_8bit)
-	MCFG_VIDEO_START(mbmj8688_8bit)
+	MCFG_PALETTE_INIT_OVERRIDE(nbmj8688_state,mbmj8688_8bit)
+	MCFG_VIDEO_START_OVERRIDE(nbmj8688_state,mbmj8688_8bit)
 MACHINE_CONFIG_END
-
 
 static MACHINE_CONFIG_DERIVED( NBMJDRV_65536, NBMJDRV_4096 )
 
@@ -2969,13 +2957,11 @@ static MACHINE_CONFIG_DERIVED( NBMJDRV_65536, NBMJDRV_4096 )
 
 	/* video hardware */
 	MCFG_SCREEN_MODIFY("screen")
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_PALETTE_LENGTH(65536)
 
-	MCFG_PALETTE_INIT(mbmj8688_16bit)
-	MCFG_VIDEO_START(mbmj8688_hybrid_16bit)
+	MCFG_PALETTE_INIT_OVERRIDE(nbmj8688_state,mbmj8688_16bit)
+	MCFG_VIDEO_START_OVERRIDE(nbmj8688_state,mbmj8688_hybrid_16bit)
 MACHINE_CONFIG_END
-
 
 // --------------------------------------------------------------------------------
 
@@ -2985,9 +2971,7 @@ static MACHINE_CONFIG_DERIVED( crystalg, NBMJDRV_256 )
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_PROGRAM_MAP(secolove_map)
 	MCFG_CPU_IO_MAP(crystalg_io_map)
-//  MCFG_CPU_VBLANK_INT_HACK(nb1413m3_interrupt, 96) // nmiclock = 2f
 MACHINE_CONFIG_END
-
 
 static MACHINE_CONFIG_DERIVED( apparel, NBMJDRV_256 )
 
@@ -2995,9 +2979,7 @@ static MACHINE_CONFIG_DERIVED( apparel, NBMJDRV_256 )
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_PROGRAM_MAP(secolove_map)
 	MCFG_CPU_IO_MAP(secolove_io_map)
-//  MCFG_CPU_VBLANK_INT_HACK(nb1413m3_interrupt, 128)    // nmiclock = 60
 MACHINE_CONFIG_END
-
 
 static MACHINE_CONFIG_DERIVED( mbmj_h12bit, NBMJDRV_4096 )
 
@@ -3005,10 +2987,9 @@ static MACHINE_CONFIG_DERIVED( mbmj_h12bit, NBMJDRV_4096 )
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_PROGRAM_MAP(secolove_map)
 	MCFG_CPU_IO_MAP(secolove_io_map)
-//  MCFG_CPU_VBLANK_INT_HACK(nb1413m3_interrupt, 128)    // nmiclock = 60
 
 	/* video hardware */
-	MCFG_VIDEO_START(mbmj8688_hybrid_12bit)
+	MCFG_VIDEO_START_OVERRIDE(nbmj8688_state,mbmj8688_hybrid_12bit)
 MACHINE_CONFIG_END
 
 /*Same as h12bit HW with different sound HW + NMI enable bit*/
@@ -3017,10 +2998,9 @@ static MACHINE_CONFIG_DERIVED( barline, mbmj_h12bit )
 	/* basic machine hardware */
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_IO_MAP(barline_io_map)
-//  MCFG_CPU_VBLANK_INT_HACK(nb1413m3_interrupt, 128)    // nmiclock = 60
 
 	MCFG_SOUND_REPLACE("psg", YM3812, 20000000/8)
-	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.70)
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.35)
 
 	MCFG_DEVICE_REMOVE("dac")
 MACHINE_CONFIG_END
@@ -3031,55 +3011,51 @@ static MACHINE_CONFIG_DERIVED( mbmj_p16bit, NBMJDRV_65536 )
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_PROGRAM_MAP(secolove_map)
 	MCFG_CPU_IO_MAP(secolove_io_map)
-//  MCFG_CPU_VBLANK_INT_HACK(nb1413m3_interrupt, 128)    // nmiclock = 60/40
 
 	/* video hardware */
-	MCFG_VIDEO_START(mbmj8688_pure_16bit)
+	MCFG_VIDEO_START_OVERRIDE(nbmj8688_state,mbmj8688_pure_16bit)
 MACHINE_CONFIG_END
-
 
 static MACHINE_CONFIG_START( mbmj_p16bit_LCD, nbmj8688_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, 5000000)	/* 5.00 MHz */
+	MCFG_CPU_ADD("maincpu", Z80, 5000000)   /* 5.00 MHz */
 	MCFG_CPU_VBLANK_INT("screen", nb1413m3_interrupt)
 	MCFG_CPU_PROGRAM_MAP(secolove_map)
 	MCFG_CPU_IO_MAP(secolove_io_map)
 	MCFG_CPU_IO_MAP(p16bit_LCD_io_map)
 
+	MCFG_MACHINE_START(nb1413m3)
 	MCFG_MACHINE_RESET(nb1413m3)
 	MCFG_NVRAM_ADD_0FILL("nvram")
 
 	/* video hardware */
 	MCFG_PALETTE_LENGTH(65536)
-	MCFG_PALETTE_INIT(mbmj8688_16bit)
+	MCFG_PALETTE_INIT_OVERRIDE(nbmj8688_state,mbmj8688_16bit)
 	MCFG_DEFAULT_LAYOUT(layout_nbmj8688)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
 	MCFG_SCREEN_SIZE(512, 256)
 	MCFG_SCREEN_VISIBLE_AREA(0, 512-1, 16, 240-1)
-	MCFG_SCREEN_UPDATE(mbmj8688)
+	MCFG_SCREEN_UPDATE_DRIVER(nbmj8688_state, screen_update_mbmj8688)
 
 	MCFG_SCREEN_ADD("lcd0", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
 	MCFG_SCREEN_SIZE(480, 64)
 	MCFG_SCREEN_VISIBLE_AREA(0, 480-1, 0, 64-1)
-	MCFG_SCREEN_UPDATE(mbmj8688_lcd0)
+	MCFG_SCREEN_UPDATE_DRIVER(nbmj8688_state, screen_update_mbmj8688_lcd0)
 
 	MCFG_SCREEN_ADD("lcd1", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
 	MCFG_SCREEN_SIZE(480, 64)
 	MCFG_SCREEN_VISIBLE_AREA(0, 480-1, 0, 64-1)
-	MCFG_SCREEN_UPDATE(mbmj8688_lcd1)
+	MCFG_SCREEN_UPDATE_DRIVER(nbmj8688_state, screen_update_mbmj8688_lcd1)
 
-	MCFG_VIDEO_START(mbmj8688_pure_16bit_LCD)
+	MCFG_VIDEO_START_OVERRIDE(nbmj8688_state,mbmj8688_pure_16bit_LCD)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -3088,10 +3064,9 @@ static MACHINE_CONFIG_START( mbmj_p16bit_LCD, nbmj8688_state )
 	MCFG_SOUND_CONFIG(ay8910_config)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.35)
 
-	MCFG_SOUND_ADD("dac", DAC, 0)
-	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
+	MCFG_DAC_ADD("dac")
+	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 1.00)
 MACHINE_CONFIG_END
-
 
 static MACHINE_CONFIG_DERIVED( seiha, NBMJDRV_65536 )
 
@@ -3099,7 +3074,6 @@ static MACHINE_CONFIG_DERIVED( seiha, NBMJDRV_65536 )
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_PROGRAM_MAP(secolove_map)
 	MCFG_CPU_IO_MAP(seiha_io_map)
-//  MCFG_CPU_VBLANK_INT_HACK(nb1413m3_interrupt, 128)    // nmiclock = 60
 MACHINE_CONFIG_END
 
 static MACHINE_CONFIG_DERIVED( mjgaiden, NBMJDRV_4096 )
@@ -3117,9 +3091,7 @@ static MACHINE_CONFIG_DERIVED( iemoto, NBMJDRV_65536 )
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_PROGRAM_MAP(secolove_map)
 	MCFG_CPU_IO_MAP(iemoto_io_map)
-//  MCFG_CPU_VBLANK_INT_HACK(nb1413m3_interrupt, 128)    // nmiclock = 60
 MACHINE_CONFIG_END
-
 
 static MACHINE_CONFIG_DERIVED( ojousan, NBMJDRV_65536 )
 
@@ -3127,7 +3099,6 @@ static MACHINE_CONFIG_DERIVED( ojousan, NBMJDRV_65536 )
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_PROGRAM_MAP(ojousan_map)
 	MCFG_CPU_IO_MAP(iemoto_io_map)
-//  MCFG_CPU_VBLANK_INT_HACK(nb1413m3_interrupt, 128)    // nmiclock = 60
 MACHINE_CONFIG_END
 
 static MACHINE_CONFIG_DERIVED( mbmj_p12bit, NBMJDRV_4096 )
@@ -3136,9 +3107,7 @@ static MACHINE_CONFIG_DERIVED( mbmj_p12bit, NBMJDRV_4096 )
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_PROGRAM_MAP(mjsikaku_map)
 	MCFG_CPU_IO_MAP(kaguya_io_map)
-//  MCFG_CPU_VBLANK_INT_HACK(nb1413m3_interrupt, 128)
 MACHINE_CONFIG_END
-
 
 static MACHINE_CONFIG_DERIVED( mjsikaku, NBMJDRV_4096 )
 
@@ -3146,13 +3115,11 @@ static MACHINE_CONFIG_DERIVED( mjsikaku, NBMJDRV_4096 )
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_PROGRAM_MAP(mjsikaku_map)
 	MCFG_CPU_IO_MAP(mjsikaku_io_map)
-//  MCFG_CPU_VBLANK_INT_HACK(nb1413m3_interrupt, 144)    // nmiclock = 70
 
 	/* sound hardware */
 	MCFG_SOUND_REPLACE("psg", YM3812, 20000000/8)
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.70)
 MACHINE_CONFIG_END
-
 
 static MACHINE_CONFIG_DERIVED( mmsikaku, NBMJDRV_4096 )
 
@@ -3160,9 +3127,7 @@ static MACHINE_CONFIG_DERIVED( mmsikaku, NBMJDRV_4096 )
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_PROGRAM_MAP(secolove_map)
 	MCFG_CPU_IO_MAP(mmsikaku_io_map)
-//  MCFG_CPU_VBLANK_INT_HACK(nb1413m3_interrupt, 128)
 MACHINE_CONFIG_END
-
 
 static MACHINE_CONFIG_DERIVED( otonano, mjsikaku )
 
@@ -3170,8 +3135,6 @@ static MACHINE_CONFIG_DERIVED( otonano, mjsikaku )
 	MCFG_CPU_MODIFY("maincpu")
 	MCFG_CPU_IO_MAP(otonano_io_map)
 MACHINE_CONFIG_END
-
-
 
 
 ROM_START( crystalg )
@@ -3208,7 +3171,7 @@ ROM_START( crystal2 )
 	// not used
 
 	ROM_REGION( 0x080000, "gfx1", 0 ) /* gfx */
-	ROM_LOAD( "cgl2_01s.bin", 0x000000, 0x08000, CRC(99b982ea) SHA1(0c9f76dd30d722bd359b24320fabb62944f6e841) )	// crystalg/ft1.1h
+	ROM_LOAD( "cgl2_01s.bin", 0x000000, 0x08000, CRC(99b982ea) SHA1(0c9f76dd30d722bd359b24320fabb62944f6e841) ) // crystalg/ft1.1h
 	ROM_LOAD( "cgl2_01m.bin", 0x008000, 0x08000, CRC(7c7a0416) SHA1(2dade3d7c2045ba84ea4bddd21264a2d1fd328f3) )
 	ROM_LOAD( "cgl2_02m.bin", 0x010000, 0x08000, CRC(8511ddcd) SHA1(001f9cea0320eedb42736ed29c746642eec2b460) )
 	ROM_LOAD( "cgl2_03m.bin", 0x018000, 0x08000, CRC(f594e3bc) SHA1(96bb0b5397934038a7a57fce77f5ee0ca09a8992) )
@@ -3299,13 +3262,13 @@ ROM_START( mcitylov )
 
 	ROM_REGION( 0xa0000, "gfx1", 0 ) /* gfx */
 	ROM_LOAD( "m1.1h",   0x00000, 0x10000, CRC(94dd69ac) SHA1(6f1043752e24e3b874276e79ecc2a9cdbe751856) )
-	ROM_LOAD( "m2.3h",   0x10000, 0x10000, CRC(206f4d2c) SHA1(53a05a92ded54e90eb59c55376434fa0203f96e9) )	// apparel/2.bin
-	ROM_LOAD( "m3.4h",   0x20000, 0x10000, CRC(5d8a732b) SHA1(a478af0dc3b9042fcc9ce8338226d5a378b05491) )	// apparel/3.bin
-	ROM_LOAD( "m4.5h",   0x30000, 0x10000, CRC(c40e4435) SHA1(b66c654a75be6759fa030e51b6484af7c37fca12) )	// apparel/4.bin
-	ROM_LOAD( "m5.7h",   0x40000, 0x10000, CRC(e5bde704) SHA1(6fd0d5defe0d2072a1f9efd21e2a003b9212847b) )	// apparel/5.bin
-	ROM_LOAD( "m6.1f",   0x50000, 0x10000, CRC(263673bc) SHA1(fa713101f2bf6874080c3c8db7cb55c9c084d502) )	// apparel/6.bin
-	ROM_LOAD( "m7.3f",   0x60000, 0x10000, CRC(c502dc5a) SHA1(99ae8db3f06395ab5ca0828aad6e679090008aab) )	// apparel/7.bin
-	ROM_LOAD( "m8.4f",   0x70000, 0x10000, CRC(c0af5f0f) SHA1(3e2c7c6a28540cd04366ff02d12ad566fd9d277d) )	// apparel/8.bin
+	ROM_LOAD( "m2.3h",   0x10000, 0x10000, CRC(206f4d2c) SHA1(53a05a92ded54e90eb59c55376434fa0203f96e9) )   // apparel/2.bin
+	ROM_LOAD( "m3.4h",   0x20000, 0x10000, CRC(5d8a732b) SHA1(a478af0dc3b9042fcc9ce8338226d5a378b05491) )   // apparel/3.bin
+	ROM_LOAD( "m4.5h",   0x30000, 0x10000, CRC(c40e4435) SHA1(b66c654a75be6759fa030e51b6484af7c37fca12) )   // apparel/4.bin
+	ROM_LOAD( "m5.7h",   0x40000, 0x10000, CRC(e5bde704) SHA1(6fd0d5defe0d2072a1f9efd21e2a003b9212847b) )   // apparel/5.bin
+	ROM_LOAD( "m6.1f",   0x50000, 0x10000, CRC(263673bc) SHA1(fa713101f2bf6874080c3c8db7cb55c9c084d502) )   // apparel/6.bin
+	ROM_LOAD( "m7.3f",   0x60000, 0x10000, CRC(c502dc5a) SHA1(99ae8db3f06395ab5ca0828aad6e679090008aab) )   // apparel/7.bin
+	ROM_LOAD( "m8.4f",   0x70000, 0x10000, CRC(c0af5f0f) SHA1(3e2c7c6a28540cd04366ff02d12ad566fd9d277d) )   // apparel/8.bin
 	ROM_LOAD( "m9.5f",   0x80000, 0x10000, CRC(e2c6f70a) SHA1(6723ac5c954f9080cfd9e2d7e5d972d2e464f9b1) )
 	ROM_LOAD( "m10.7f",  0x90000, 0x10000, CRC(3b2280c1) SHA1(5d0588d33b42e72cf7baf92f97a44333a3b7fb44) )
 ROM_END
@@ -3371,11 +3334,11 @@ ROM_START( housemn2 )
 	ROM_LOAD( "hmq2_03.bin", 0x00000, 0x10000, CRC(c08081d8) SHA1(335e9fe25c076d159daed07c01d6d559691d5db3) )
 
 	ROM_REGION( 0x140000, "gfx1", 0 ) /* gfx */
-	ROM_LOAD( "hmq2_c5.bin", 0x000000, 0x40000, CRC(0263ff75) SHA1(16a18dfaf732ab94dec70fd8e955d6179525115c) )	// livegal/ic1i.bin
-	ROM_LOAD( "hmq2_c1.bin", 0x040000, 0x40000, CRC(788cd3ca) SHA1(955a520e122aaee30e080d0a784556b69ba3de36) )	// livegal/ic2i.bin
-	ROM_LOAD( "hmq2_c2.bin", 0x080000, 0x40000, CRC(a3175a8f) SHA1(8214fdefa1186dd96bc55a30b64a24a486750f05) )	// livegal/ic3i.bin
-	ROM_LOAD( "hmq2_c3.bin", 0x0c0000, 0x40000, CRC(da46163e) SHA1(c6e5f59fe813915f94d81ff28526614c943b7082) )	// livegal/ic4i.bin
-	ROM_LOAD( "hmq2_c4.bin", 0x100000, 0x40000, CRC(ea2b78b3) SHA1(38ec10a29f32cbb6b270fa10ade815cf3e0a54c2) )	// livegal/ic5i.bin
+	ROM_LOAD( "hmq2_c5.bin", 0x000000, 0x40000, CRC(0263ff75) SHA1(16a18dfaf732ab94dec70fd8e955d6179525115c) )  // livegal/ic1i.bin
+	ROM_LOAD( "hmq2_c1.bin", 0x040000, 0x40000, CRC(788cd3ca) SHA1(955a520e122aaee30e080d0a784556b69ba3de36) )  // livegal/ic2i.bin
+	ROM_LOAD( "hmq2_c2.bin", 0x080000, 0x40000, CRC(a3175a8f) SHA1(8214fdefa1186dd96bc55a30b64a24a486750f05) )  // livegal/ic3i.bin
+	ROM_LOAD( "hmq2_c3.bin", 0x0c0000, 0x40000, CRC(da46163e) SHA1(c6e5f59fe813915f94d81ff28526614c943b7082) )  // livegal/ic4i.bin
+	ROM_LOAD( "hmq2_c4.bin", 0x100000, 0x40000, CRC(ea2b78b3) SHA1(38ec10a29f32cbb6b270fa10ade815cf3e0a54c2) )  // livegal/ic5i.bin
 ROM_END
 
 ROM_START( seiha )
@@ -3405,20 +3368,20 @@ ROM_START( seiham )
 	ROM_LOAD( "seih_02m.bin", 0x08000, 0x08000, CRC(a32cdb9a) SHA1(249efb16bd40a63d201a210b449b3121310ca600) )
 
 	ROM_REGION( 0x30000, "voice", 0 ) /* voice */
-	ROM_LOAD( "seiha03.3i",   0x00000, 0x10000, CRC(2bcf3d87) SHA1(e768d112d7c314d1252c41793352bdca7a86f92e) )	// seiah/seiha03.3i
-	ROM_LOAD( "seiha04.2i",   0x10000, 0x10000, CRC(2fc905d0) SHA1(add824681979c2eba42b199280a99f7ea063b18e) )	// seiha/seiha04.2i
-	ROM_LOAD( "seiha05.1i",   0x20000, 0x10000, CRC(8eace19c) SHA1(bc715b17aa13e986dd7c6a8255bff3efdc4a8a01) )	// seiha/seiha05.1i
+	ROM_LOAD( "seiha03.3i",   0x00000, 0x10000, CRC(2bcf3d87) SHA1(e768d112d7c314d1252c41793352bdca7a86f92e) )  // seiah/seiha03.3i
+	ROM_LOAD( "seiha04.2i",   0x10000, 0x10000, CRC(2fc905d0) SHA1(add824681979c2eba42b199280a99f7ea063b18e) )  // seiha/seiha04.2i
+	ROM_LOAD( "seiha05.1i",   0x20000, 0x10000, CRC(8eace19c) SHA1(bc715b17aa13e986dd7c6a8255bff3efdc4a8a01) )  // seiha/seiha05.1i
 
 	ROM_REGION( 0x280000, "gfx1", 0 ) /* gfx */
-	ROM_LOAD( "seiha19.1a",   0x000000, 0x40000, CRC(788cd3ca) SHA1(955a520e122aaee30e080d0a784556b69ba3de36) )	// seiha/seiha19.1a
-	ROM_LOAD( "seiha20.2a",   0x040000, 0x40000, CRC(a3175a8f) SHA1(8214fdefa1186dd96bc55a30b64a24a486750f05) )	// seiha/seiha20.2a
-	ROM_LOAD( "seiha21.3a",   0x080000, 0x40000, CRC(da46163e) SHA1(c6e5f59fe813915f94d81ff28526614c943b7082) )	// seiha/seiha21.3a
-	ROM_LOAD( "seiha22.4a",   0x0c0000, 0x40000, CRC(ea2b78b3) SHA1(38ec10a29f32cbb6b270fa10ade815cf3e0a54c2) )	// seiha/seiha22.4a
-	ROM_LOAD( "seiha23.5a",   0x100000, 0x40000, CRC(0263ff75) SHA1(16a18dfaf732ab94dec70fd8e955d6179525115c) )	// seiha/seiha23.5a
-	ROM_LOAD( "seiha06.8a",   0x180000, 0x10000, CRC(9fefe2ca) SHA1(7b638a739640e9d311ee15c0e7b4f3f2dfdd3589) )	// seiha/seiha06.8a
-	ROM_LOAD( "seiha07.9a",   0x190000, 0x10000, CRC(a7d438ec) SHA1(5d145bab0ffc76fd77582ea5495ca4496210d41a) )	// seiha/seiha07.9a
+	ROM_LOAD( "seiha19.1a",   0x000000, 0x40000, CRC(788cd3ca) SHA1(955a520e122aaee30e080d0a784556b69ba3de36) ) // seiha/seiha19.1a
+	ROM_LOAD( "seiha20.2a",   0x040000, 0x40000, CRC(a3175a8f) SHA1(8214fdefa1186dd96bc55a30b64a24a486750f05) ) // seiha/seiha20.2a
+	ROM_LOAD( "seiha21.3a",   0x080000, 0x40000, CRC(da46163e) SHA1(c6e5f59fe813915f94d81ff28526614c943b7082) ) // seiha/seiha21.3a
+	ROM_LOAD( "seiha22.4a",   0x0c0000, 0x40000, CRC(ea2b78b3) SHA1(38ec10a29f32cbb6b270fa10ade815cf3e0a54c2) ) // seiha/seiha22.4a
+	ROM_LOAD( "seiha23.5a",   0x100000, 0x40000, CRC(0263ff75) SHA1(16a18dfaf732ab94dec70fd8e955d6179525115c) ) // seiha/seiha23.5a
+	ROM_LOAD( "seiha06.8a",   0x180000, 0x10000, CRC(9fefe2ca) SHA1(7b638a739640e9d311ee15c0e7b4f3f2dfdd3589) ) // seiha/seiha06.8a
+	ROM_LOAD( "seiha07.9a",   0x190000, 0x10000, CRC(a7d438ec) SHA1(5d145bab0ffc76fd77582ea5495ca4496210d41a) ) // seiha/seiha07.9a
 	ROM_LOAD( "seih_08m.bin", 0x1a0000, 0x10000, CRC(e8e61e48) SHA1(e1d0e64b39bad3e294b061fb6f02ece2f2ee4bca) )
-	ROM_LOAD( "se1507.6a",    0x200000, 0x80000, CRC(f1e9555e) SHA1(a34ffcff2b2d6ba40a8a453b89970d636515a8ad) )	// seiha/se1507.6a
+	ROM_LOAD( "se1507.6a",    0x200000, 0x80000, CRC(f1e9555e) SHA1(a34ffcff2b2d6ba40a8a453b89970d636515a8ad) ) // seiha/se1507.6a
 ROM_END
 
 /*
@@ -3460,27 +3423,27 @@ Is this a hack of Seiha or an officially licensed game? There are Seiha referenc
 it shares some gfx roms...
 */
 ROM_START( mjgaiden )
-    ROM_REGION( 0x30000, "maincpu", 0 ) /* program */
-    ROM_LOAD( "1.4g",      0x00000, 0x08000, CRC(6f54ab3d) SHA1(08fe565616de2e06141407c56b6de23014cfc56c) )
-    ROM_LOAD( "2.3g",      0x08000, 0x08000, CRC(b4fed864) SHA1(a48300e586cb160fff903fb4203ee66418a81b3d) )
+	ROM_REGION( 0x30000, "maincpu", 0 ) /* program */
+	ROM_LOAD( "1.4g",      0x00000, 0x08000, CRC(6f54ab3d) SHA1(08fe565616de2e06141407c56b6de23014cfc56c) )
+	ROM_LOAD( "2.3g",      0x08000, 0x08000, CRC(b4fed864) SHA1(a48300e586cb160fff903fb4203ee66418a81b3d) )
 
-    ROM_REGION( 0x40000, "voice", 0 ) /* voice */
-    ROM_LOAD( "3.3i",   0x00000, 0x10000, CRC(2bcf3d87) SHA1(e768d112d7c314d1252c41793352bdca7a86f92e) )
-    ROM_LOAD( "4.2i",   0x10000, 0x10000, CRC(2fc905d0) SHA1(add824681979c2eba42b199280a99f7ea063b18e) )
+	ROM_REGION( 0x40000, "voice", 0 ) /* voice */
+	ROM_LOAD( "3.3i",   0x00000, 0x10000, CRC(2bcf3d87) SHA1(e768d112d7c314d1252c41793352bdca7a86f92e) )
+	ROM_LOAD( "4.2i",   0x10000, 0x10000, CRC(2fc905d0) SHA1(add824681979c2eba42b199280a99f7ea063b18e) )
 
 	/*TODO: check if the w labeled roms are correctly mapped.*/
-    ROM_REGION( 0x400000, "gfx1", 0 ) /* gfx */
-    ROM_LOAD( "se1507.6a",0x000000, 0x80000, CRC(f1e9555e) SHA1(a34ffcff2b2d6ba40a8a453b89970d636515a8ad) ) // seiha/se1507.6a
-    ROM_LOAD( "w19.1a",   0x080000, 0x40000, CRC(788cd3ca) SHA1(955a520e122aaee30e080d0a784556b69ba3de36) )
-    ROM_LOAD( "w20.2a",   0x0c0000, 0x40000, CRC(a3175a8f) SHA1(8214fdefa1186dd96bc55a30b64a24a486750f05) )
-    ROM_LOAD( "w21.3a",   0x100000, 0x40000, CRC(da46163e) SHA1(c6e5f59fe813915f94d81ff28526614c943b7082) )
-    ROM_LOAD( "6.2a",     0x180000, 0x10000, CRC(9fefe2ca) SHA1(7b638a739640e9d311ee15c0e7b4f3f2dfdd3589) ) // seiha/seiha06.8a
-    ROM_LOAD( "7.3a",     0x190000, 0x10000, CRC(a7d438ec) SHA1(5d145bab0ffc76fd77582ea5495ca4496210d41a) )            // seiha/seiha07.9a
-    ROM_LOAD( "8.4a",     0x1a0000, 0x10000, CRC(e8e61e48) SHA1(e1d0e64b39bad3e294b061fb6f02ece2f2ee4bca) )
-    ROM_LOAD( "9.2b",     0x1b0000, 0x10000, CRC(541f6e9f) SHA1(946a9c9cc8e6985098af4dd035f80ecc50e800ec) )            // seiha/seiha05.1i
-    ROM_LOAD( "10.3b",    0x1c0000, 0x10000, CRC(a4144f78) SHA1(316ebe91aa604f1d4a0f1942df9d87de487c977a) )
-    ROM_LOAD( "w22.4a",   0x200000, 0x40000, CRC(ea2b78b3) SHA1(38ec10a29f32cbb6b270fa10ade815cf3e0a54c2) )
-    ROM_LOAD( "w23.5a",   0x240000, 0x40000, CRC(0263ff75) SHA1(16a18dfaf732ab94dec70fd8e955d6179525115c) )
+	ROM_REGION( 0x400000, "gfx1", 0 ) /* gfx */
+	ROM_LOAD( "se1507.6a",0x000000, 0x80000, CRC(f1e9555e) SHA1(a34ffcff2b2d6ba40a8a453b89970d636515a8ad) ) // seiha/se1507.6a
+	ROM_LOAD( "w19.1a",   0x080000, 0x40000, CRC(788cd3ca) SHA1(955a520e122aaee30e080d0a784556b69ba3de36) )
+	ROM_LOAD( "w20.2a",   0x0c0000, 0x40000, CRC(a3175a8f) SHA1(8214fdefa1186dd96bc55a30b64a24a486750f05) )
+	ROM_LOAD( "w21.3a",   0x100000, 0x40000, CRC(da46163e) SHA1(c6e5f59fe813915f94d81ff28526614c943b7082) )
+	ROM_LOAD( "6.2a",     0x180000, 0x10000, CRC(9fefe2ca) SHA1(7b638a739640e9d311ee15c0e7b4f3f2dfdd3589) ) // seiha/seiha06.8a
+	ROM_LOAD( "7.3a",     0x190000, 0x10000, CRC(a7d438ec) SHA1(5d145bab0ffc76fd77582ea5495ca4496210d41a) ) // seiha/seiha07.9a
+	ROM_LOAD( "8.4a",     0x1a0000, 0x10000, CRC(e8e61e48) SHA1(e1d0e64b39bad3e294b061fb6f02ece2f2ee4bca) )
+	ROM_LOAD( "9.2b",     0x1b0000, 0x10000, CRC(541f6e9f) SHA1(946a9c9cc8e6985098af4dd035f80ecc50e800ec) ) // seiha/seiha05.1i
+	ROM_LOAD( "10.3b",    0x1c0000, 0x10000, CRC(a4144f78) SHA1(316ebe91aa604f1d4a0f1942df9d87de487c977a) )
+	ROM_LOAD( "w22.4a",   0x200000, 0x40000, CRC(ea2b78b3) SHA1(38ec10a29f32cbb6b270fa10ade815cf3e0a54c2) )
+	ROM_LOAD( "w23.5a",   0x240000, 0x40000, CRC(0263ff75) SHA1(16a18dfaf732ab94dec70fd8e955d6179525115c) )
 ROM_END
 
 ROM_START( bijokkoy )
@@ -3525,15 +3488,15 @@ ROM_START( iemotom )
 	ROM_LOAD( "2.3g",        0x08000, 0x08000, CRC(6778cf82) SHA1(f3eec7dcda00ebf5097df0111908029337a15032) )
 
 	ROM_REGION( 0x30000, "voice", 0 ) /* voice */
-	ROM_LOAD( "3.3i",        0x00000, 0x10000, CRC(32d71ff9) SHA1(eefe53c6ad95d5e1f116162bbb30f8ec7e7ad005) )	// iemoto/iemoto3.3i
-	ROM_LOAD( "4.2i",        0x10000, 0x10000, CRC(06f8e505) SHA1(dfca4999df2c9cb98204e3d2c3bd37ea561f3604) )	// iemoto/iemoto4.2i
-	ROM_LOAD( "5.1i",        0x20000, 0x10000, CRC(261eb61a) SHA1(8d03a190b9a5fbda318e475f64d0c94a3d4ed362) )	// iemoto/iemoto5.1i
+	ROM_LOAD( "3.3i",        0x00000, 0x10000, CRC(32d71ff9) SHA1(eefe53c6ad95d5e1f116162bbb30f8ec7e7ad005) )   // iemoto/iemoto3.3i
+	ROM_LOAD( "4.2i",        0x10000, 0x10000, CRC(06f8e505) SHA1(dfca4999df2c9cb98204e3d2c3bd37ea561f3604) )   // iemoto/iemoto4.2i
+	ROM_LOAD( "5.1i",        0x20000, 0x10000, CRC(261eb61a) SHA1(8d03a190b9a5fbda318e475f64d0c94a3d4ed362) )   // iemoto/iemoto5.1i
 
 	ROM_REGION( 0x120000, "gfx1", 0 ) /* gfx */
-	ROM_LOAD( "iemoto31.1a", 0x000000, 0x40000, CRC(ba005a3a) SHA1(305041f764b5ba9ffa882c1a69555a38a53b1556) )	// iemoto/iemoto31.1a
-	ROM_LOAD( "iemoto32.2a", 0x040000, 0x40000, CRC(fa9a74ae) SHA1(08dd0cd07aeb8d77152e93c76db44e9034aa3954) )	// iemoto/iemoto32.2a
-	ROM_LOAD( "iemoto33.3a", 0x080000, 0x40000, CRC(efb13b61) SHA1(61d100b52d01e447dd599cc9ff06b97dd7a4ae0b) )	// iemoto/iemoto33.3a
-	ROM_LOAD( "iemoto44.4a", 0x0c0000, 0x40000, CRC(9acc54fa) SHA1(7975370e1dd32ecd98d7f2e32f14feb88e0cdb43) )	// iemoto/iemoto44.4a
+	ROM_LOAD( "iemoto31.1a", 0x000000, 0x40000, CRC(ba005a3a) SHA1(305041f764b5ba9ffa882c1a69555a38a53b1556) )  // iemoto/iemoto31.1a
+	ROM_LOAD( "iemoto32.2a", 0x040000, 0x40000, CRC(fa9a74ae) SHA1(08dd0cd07aeb8d77152e93c76db44e9034aa3954) )  // iemoto/iemoto32.2a
+	ROM_LOAD( "iemoto33.3a", 0x080000, 0x40000, CRC(efb13b61) SHA1(61d100b52d01e447dd599cc9ff06b97dd7a4ae0b) )  // iemoto/iemoto33.3a
+	ROM_LOAD( "iemoto44.4a", 0x0c0000, 0x40000, CRC(9acc54fa) SHA1(7975370e1dd32ecd98d7f2e32f14feb88e0cdb43) )  // iemoto/iemoto44.4a
 	ROM_LOAD( "6.6a",        0x110000, 0x10000, CRC(9eae7c9e) SHA1(dbc6c8b31f6e484078d880914b96133a41cd3f14) )
 ROM_END
 
@@ -3543,17 +3506,17 @@ ROM_START( ryuuha )
 	ROM_LOAD( "2.3ga",        0x08000, 0x08000, CRC(0787d707) SHA1(4d0df545cc3892690593216afbee4a5529afddfe) )
 
 	ROM_REGION( 0x30000, "voice", 0 ) /* voice */
-	ROM_LOAD( "3.3i",        0x00000, 0x10000, CRC(32d71ff9) SHA1(eefe53c6ad95d5e1f116162bbb30f8ec7e7ad005) )	// iemoto/iemoto3.3i
-	ROM_LOAD( "4.2i",        0x10000, 0x10000, CRC(06f8e505) SHA1(dfca4999df2c9cb98204e3d2c3bd37ea561f3604) )	// iemoto/iemoto4.2i
-	ROM_LOAD( "5.1i",        0x20000, 0x10000, CRC(261eb61a) SHA1(8d03a190b9a5fbda318e475f64d0c94a3d4ed362) )	// iemoto/iemoto5.1i
+	ROM_LOAD( "3.3i",        0x00000, 0x10000, CRC(32d71ff9) SHA1(eefe53c6ad95d5e1f116162bbb30f8ec7e7ad005) )   // iemoto/iemoto3.3i
+	ROM_LOAD( "4.2i",        0x10000, 0x10000, CRC(06f8e505) SHA1(dfca4999df2c9cb98204e3d2c3bd37ea561f3604) )   // iemoto/iemoto4.2i
+	ROM_LOAD( "5.1i",        0x20000, 0x10000, CRC(261eb61a) SHA1(8d03a190b9a5fbda318e475f64d0c94a3d4ed362) )   // iemoto/iemoto5.1i
 
 	ROM_REGION( 0x120000, "gfx1", 0 ) /* gfx */
-	ROM_LOAD( "iemoto31.1a", 0x000000, 0x40000, CRC(ba005a3a) SHA1(305041f764b5ba9ffa882c1a69555a38a53b1556) )	// iemoto/iemoto31.1a
-	ROM_LOAD( "iemoto32.2a", 0x040000, 0x40000, CRC(fa9a74ae) SHA1(08dd0cd07aeb8d77152e93c76db44e9034aa3954) )	// iemoto/iemoto32.2a
-	ROM_LOAD( "iemoto33.3a", 0x080000, 0x40000, CRC(efb13b61) SHA1(61d100b52d01e447dd599cc9ff06b97dd7a4ae0b) )	// iemoto/iemoto33.3a
-	ROM_LOAD( "iemoto44.4a", 0x0c0000, 0x40000, CRC(9acc54fa) SHA1(7975370e1dd32ecd98d7f2e32f14feb88e0cdb43) )	// iemoto/iemoto44.4a
+	ROM_LOAD( "iemoto31.1a", 0x000000, 0x40000, CRC(ba005a3a) SHA1(305041f764b5ba9ffa882c1a69555a38a53b1556) )  // iemoto/iemoto31.1a
+	ROM_LOAD( "iemoto32.2a", 0x040000, 0x40000, CRC(fa9a74ae) SHA1(08dd0cd07aeb8d77152e93c76db44e9034aa3954) )  // iemoto/iemoto32.2a
+	ROM_LOAD( "iemoto33.3a", 0x080000, 0x40000, CRC(efb13b61) SHA1(61d100b52d01e447dd599cc9ff06b97dd7a4ae0b) )  // iemoto/iemoto33.3a
+	ROM_LOAD( "iemoto44.4a", 0x0c0000, 0x40000, CRC(9acc54fa) SHA1(7975370e1dd32ecd98d7f2e32f14feb88e0cdb43) )  // iemoto/iemoto44.4a
 	ROM_LOAD( "6.5a",        0x100000, 0x10000, CRC(48710ae3) SHA1(d32fa1de44390d84f4c3141b70034119ca79a19b) )
-	ROM_LOAD( "7.6a" ,       0x110000, 0x10000, CRC(9eae7c9e) SHA1(dbc6c8b31f6e484078d880914b96133a41cd3f14) )	// iemotom/6.6a
+	ROM_LOAD( "7.6a" ,       0x110000, 0x10000, CRC(9eae7c9e) SHA1(dbc6c8b31f6e484078d880914b96133a41cd3f14) )  // iemotom/6.6a
 ROM_END
 
 ROM_START( ojousan )
@@ -3582,17 +3545,17 @@ ROM_START( ojousanm )
 	ROM_LOAD( "2.3ga", 0x08000, 0x08000, CRC(26a093fa) SHA1(b5bdc9b5f21655e8fe47c09c0bb3bb211d555f52) )
 
 	ROM_REGION( 0x30000, "voice", 0 ) /* voice */
-	ROM_LOAD( "3.3i", 0x00000, 0x10000, CRC(59f355eb) SHA1(24826f5a89d8dfc64bc327982b4e9b5afd43368e) )	// ojousan/mask.3i
-	ROM_LOAD( "4.2i", 0x10000, 0x10000, CRC(6f750500) SHA1(0f958cfb1f3c1846f2f7ae94465b54207c7312ac) )	// ojousan/mask.2i
-	ROM_LOAD( "5.1i", 0x20000, 0x10000, CRC(4babcb40) SHA1(4940a9ef210ea2128d562564f251078fc6e28bed) )	// ojousan/mask.1i
+	ROM_LOAD( "3.3i", 0x00000, 0x10000, CRC(59f355eb) SHA1(24826f5a89d8dfc64bc327982b4e9b5afd43368e) )  // ojousan/mask.3i
+	ROM_LOAD( "4.2i", 0x10000, 0x10000, CRC(6f750500) SHA1(0f958cfb1f3c1846f2f7ae94465b54207c7312ac) )  // ojousan/mask.2i
+	ROM_LOAD( "5.1i", 0x20000, 0x10000, CRC(4babcb40) SHA1(4940a9ef210ea2128d562564f251078fc6e28bed) )  // ojousan/mask.1i
 
 	ROM_REGION( 0x0c0000, "gfx1", 0 ) /* gfx */
 	ROM_LOAD( "3.2a", 0x000000, 0x20000, CRC(5da11cc3) SHA1(95814d722d95a7ad7da53ac7de046470a176cda3) )
 	ROM_LOAD( "4.3a", 0x020000, 0x20000, CRC(d1cf2096) SHA1(b241eb0369a4d4101ccad894c48f8024ba288fe5) )
 	ROM_LOAD( "5.4a", 0x040000, 0x20000, CRC(935c765f) SHA1(fc3148e3ba354bf733a0962795122fda74e2ebfe) )
 	ROM_LOAD( "6.5a", 0x060000, 0x20000, CRC(57b6906c) SHA1(e808bef5a47361723a155b60dedb2f613df5e455) )
-	ROM_LOAD( "7.6a", 0x080000, 0x20000, CRC(c2428e95) SHA1(4bd35e3f0c6c7dece18e168d2c6261e64c051569) )	// ojousan/7.9a
-	ROM_LOAD( "8.7a", 0x0a0000, 0x20000, CRC(f04c6003) SHA1(2fd81cc1e1f91630ef5767ba20be3fac9e131370) )	// ojousan/8.10a
+	ROM_LOAD( "7.6a", 0x080000, 0x20000, CRC(c2428e95) SHA1(4bd35e3f0c6c7dece18e168d2c6261e64c051569) ) // ojousan/7.9a
+	ROM_LOAD( "8.7a", 0x0a0000, 0x20000, CRC(f04c6003) SHA1(2fd81cc1e1f91630ef5767ba20be3fac9e131370) ) // ojousan/8.10a
 ROM_END
 
 ROM_START( bijokkog )
@@ -3640,14 +3603,15 @@ ROM_START( orangec )
 	ROM_LOAD( "ic2.bin",  0x140000, 0x40000, CRC(da46163e) SHA1(c6e5f59fe813915f94d81ff28526614c943b7082) )
 	ROM_LOAD( "ic3.bin",  0x180000, 0x40000, CRC(efb13b61) SHA1(61d100b52d01e447dd599cc9ff06b97dd7a4ae0b) )
 	ROM_LOAD( "ic4.bin",  0x1c0000, 0x40000, CRC(9acc54fa) SHA1(7975370e1dd32ecd98d7f2e32f14feb88e0cdb43) )
-	ROM_LOAD( "ic6i.bin", 0x0f0000, 0x10000, CRC(94bf4847) SHA1(a1ff0a5b1918b9f1a0f608ad341d091512988c1a) )
-	ROM_LOAD( "ic7i.bin", 0x110000, 0x10000, CRC(284f5648) SHA1(f0a734744901313f5052ea1727815e11a93e1811) )	// overlaps ic1!
+	ROM_LOAD( "ic6i.bin", 0x0f0000, 0x10000, CRC(94bf4847) SHA1(a1ff0a5b1918b9f1a0f608ad341d091512988c1a) ) // orangec/ic6i.bin
+	ROM_LOAD( "ic7i.bin", 0x100000, 0x10000, CRC(284f5648) SHA1(f0a734744901313f5052ea1727815e11a93e1811) ) // orangec/ic7i.bin overlaps ic1!
+	ROM_LOAD( "ic7i.bin", 0x110000, 0x10000, CRC(284f5648) SHA1(f0a734744901313f5052ea1727815e11a93e1811) ) // orangec/ic7i.bin overlaps ic1!
 ROM_END
 
 ROM_START( orangeci )
 	ROM_REGION( 0x10000, "maincpu", 0 ) /* program */
 	ROM_LOAD( "2.bin",    0x00000, 0x08000, CRC(8599bf78) SHA1(1c2c14205dcd2fc0160d31c0839404168b59ee3f) )
-	ROM_LOAD( "1.bin",	  0x08000, 0x08000, CRC(adc9b0ab) SHA1(0fbb7b419f645b4715407e45c8e564b7bf334a9d) )
+	ROM_LOAD( "1.bin",    0x08000, 0x08000, CRC(adc9b0ab) SHA1(0fbb7b419f645b4715407e45c8e564b7bf334a9d) )
 
 	ROM_REGION( 0x10000, "voice", 0 ) /* voice */
 	ROM_LOAD( "ft3.5c",   0x00000, 0x10000, CRC(2390a28b) SHA1(7bced9e7680d0cc98e30ab82da1c4ab0c4ef37b4) )
@@ -3663,8 +3627,9 @@ ROM_START( orangeci )
 	ROM_LOAD( "ic2.bin",  0x140000, 0x40000, CRC(da46163e) SHA1(c6e5f59fe813915f94d81ff28526614c943b7082) )
 	ROM_LOAD( "ic3.bin",  0x180000, 0x40000, CRC(efb13b61) SHA1(61d100b52d01e447dd599cc9ff06b97dd7a4ae0b) )
 	ROM_LOAD( "ic4.bin",  0x1c0000, 0x40000, CRC(9acc54fa) SHA1(7975370e1dd32ecd98d7f2e32f14feb88e0cdb43) )
-	ROM_LOAD( "ic6i.bin", 0x0f0000, 0x10000, CRC(94bf4847) SHA1(a1ff0a5b1918b9f1a0f608ad341d091512988c1a) )
-	ROM_LOAD( "ic7i.bin", 0x110000, 0x10000, CRC(284f5648) SHA1(f0a734744901313f5052ea1727815e11a93e1811) )	// overlaps ic1!
+	ROM_LOAD( "ic6i.bin", 0x0f0000, 0x10000, CRC(94bf4847) SHA1(a1ff0a5b1918b9f1a0f608ad341d091512988c1a) ) // orangec/ic6i.bin
+	ROM_LOAD( "ic7i.bin", 0x100000, 0x10000, CRC(284f5648) SHA1(f0a734744901313f5052ea1727815e11a93e1811) ) // orangec/ic7i.bin overlaps ic1!
+	ROM_LOAD( "ic7i.bin", 0x110000, 0x10000, CRC(284f5648) SHA1(f0a734744901313f5052ea1727815e11a93e1811) ) // orangec/ic7i.bin overlaps ic1!
 ROM_END
 
 ROM_START( vipclub )
@@ -3673,21 +3638,22 @@ ROM_START( vipclub )
 	ROM_LOAD( "1.2c",     0x08000, 0x08000, CRC(42101925) SHA1(b3e1b4a3c905e0c5ad85fd1276b221440937719e) )
 
 	ROM_REGION( 0x10000, "voice", 0 ) /* voice */
-	ROM_LOAD( "ft3.5c",   0x00000, 0x10000, CRC(2390a28b) SHA1(7bced9e7680d0cc98e30ab82da1c4ab0c4ef37b4) )	// orangec/ft3.5c
+	ROM_LOAD( "ft3.5c",   0x00000, 0x10000, CRC(2390a28b) SHA1(7bced9e7680d0cc98e30ab82da1c4ab0c4ef37b4) )
 
 	ROM_REGION( 0x200000, "gfx1", 0 ) /* gfx */
-	ROM_LOAD( "ic5.bin",  0x000000, 0x10000, CRC(e6fe4540) SHA1(00625ea017305b2622ac31ad2e6e4c928ee0cfcd) )	// orangec/ic5.bin
-	ROM_LOAD( "ic6.bin",  0x010000, 0x10000, CRC(343664f4) SHA1(fb817f5c2174c823b3aedc806c63338bd97b8346) )	// orangec/ic6.bin
+	ROM_LOAD( "ic5.bin",  0x000000, 0x10000, CRC(e6fe4540) SHA1(00625ea017305b2622ac31ad2e6e4c928ee0cfcd) ) // orangec/ic5.bin
+	ROM_LOAD( "ic6.bin",  0x010000, 0x10000, CRC(343664f4) SHA1(fb817f5c2174c823b3aedc806c63338bd97b8346) ) // orangec/ic6.bin
 	ROM_LOAD( "ic7_bin",  0x020000, 0x10000, CRC(4811e122) SHA1(1f40c5ef94732554e458ccdbae847fff5aa3b316) )
-	ROM_LOAD( "ic8.bin",  0x030000, 0x10000, CRC(80ec6473) SHA1(b2c2b146470ee9ec6914c9b0c7d36539bb6e6536) )	// orangec/ic8.bin
-	ROM_LOAD( "ic9.bin",  0x040000, 0x10000, CRC(30648437) SHA1(521c20c648720cffe334b4168aebaca8f8863242) )	// orangec/ic9.bin
-	ROM_LOAD( "ic10.bin", 0x050000, 0x10000, CRC(30e74967) SHA1(824ddc3a8c91517f3ec8a6386226eb548a1d4b39) )	// orangec/10.bin
-	ROM_LOAD( "ic1.bin",  0x100000, 0x40000, CRC(a3175a8f) SHA1(8214fdefa1186dd96bc55a30b64a24a486750f05) )	// orangec/ic1.bin
-	ROM_LOAD( "ic2.bin",  0x140000, 0x40000, CRC(da46163e) SHA1(c6e5f59fe813915f94d81ff28526614c943b7082) )	// orangec/ic2.bin
-	ROM_LOAD( "ic3.bin",  0x180000, 0x40000, CRC(efb13b61) SHA1(61d100b52d01e447dd599cc9ff06b97dd7a4ae0b) )	// orangec/ic3.bin
-	ROM_LOAD( "ic4.bin",  0x1c0000, 0x40000, CRC(9acc54fa) SHA1(7975370e1dd32ecd98d7f2e32f14feb88e0cdb43) )	// orangec/ic4.bin
-	ROM_LOAD( "ic6i.bin", 0x0f0000, 0x10000, CRC(94bf4847) SHA1(a1ff0a5b1918b9f1a0f608ad341d091512988c1a) )	// orangec/ic6i.bin
-	ROM_LOAD( "ic7i.bin", 0x110000, 0x10000, CRC(284f5648) SHA1(f0a734744901313f5052ea1727815e11a93e1811) )	// orangec/ic7i.bin overlaps ic1!
+	ROM_LOAD( "ic8.bin",  0x030000, 0x10000, CRC(80ec6473) SHA1(b2c2b146470ee9ec6914c9b0c7d36539bb6e6536) ) // orangec/ic8.bin
+	ROM_LOAD( "ic9.bin",  0x040000, 0x10000, CRC(30648437) SHA1(521c20c648720cffe334b4168aebaca8f8863242) ) // orangec/ic9.bin
+	ROM_LOAD( "ic10.bin", 0x050000, 0x10000, CRC(30e74967) SHA1(824ddc3a8c91517f3ec8a6386226eb548a1d4b39) ) // orangec/10.bin
+	ROM_LOAD( "ic1.bin",  0x100000, 0x40000, CRC(a3175a8f) SHA1(8214fdefa1186dd96bc55a30b64a24a486750f05) ) // orangec/ic1.bin
+	ROM_LOAD( "ic2.bin",  0x140000, 0x40000, CRC(da46163e) SHA1(c6e5f59fe813915f94d81ff28526614c943b7082) ) // orangec/ic2.bin
+	ROM_LOAD( "ic3.bin",  0x180000, 0x40000, CRC(efb13b61) SHA1(61d100b52d01e447dd599cc9ff06b97dd7a4ae0b) ) // orangec/ic3.bin
+	ROM_LOAD( "ic4.bin",  0x1c0000, 0x40000, CRC(9acc54fa) SHA1(7975370e1dd32ecd98d7f2e32f14feb88e0cdb43) ) // orangec/ic4.bin
+	ROM_LOAD( "ic6i.bin", 0x0f0000, 0x10000, CRC(94bf4847) SHA1(a1ff0a5b1918b9f1a0f608ad341d091512988c1a) ) // orangec/ic6i.bin
+	ROM_LOAD( "ic7i.bin", 0x100000, 0x10000, CRC(284f5648) SHA1(f0a734744901313f5052ea1727815e11a93e1811) ) // orangec/ic7i.bin overlaps ic1!
+	ROM_LOAD( "ic7i.bin", 0x110000, 0x10000, CRC(284f5648) SHA1(f0a734744901313f5052ea1727815e11a93e1811) ) // orangec/ic7i.bin overlaps ic1!
 ROM_END
 
 ROM_START( korinai )
@@ -3718,21 +3684,21 @@ ROM_START( korinaim )
 	ROM_LOAD( "12.3g",      0x08000, 0x08000, CRC(10cf7144) SHA1(467fb8f11266cc0add5beb6faf2f7b7bc8fadc17) )
 
 	ROM_REGION( 0x20000, "voice", 0 ) /* voice */
-	ROM_LOAD( "3.3i",       0x00000, 0x10000, CRC(d6fb023f) SHA1(cca290cdbcedee5222788fb33568238bc66c29af) )	// korinai/3.3i
-	ROM_LOAD( "4.2i",       0x10000, 0x10000, CRC(460917cf) SHA1(c845a012f7a8758cf7bbfc01a95780d1dd7d48b4) )	// korinai/4.2i
+	ROM_LOAD( "3.3i",       0x00000, 0x10000, CRC(d6fb023f) SHA1(cca290cdbcedee5222788fb33568238bc66c29af) )    // korinai/3.3i
+	ROM_LOAD( "4.2i",       0x10000, 0x10000, CRC(460917cf) SHA1(c845a012f7a8758cf7bbfc01a95780d1dd7d48b4) )    // korinai/4.2i
 
 	ROM_REGION( 0x200000, "gfx1", 0 ) /* gfx */
 	ROM_LOAD( "15.2a",      0x000000, 0x20000, CRC(6a9dae99) SHA1(639a56a2e84803f5e07cf799c51b15f813f993d6) )
-	ROM_LOAD( "6.3a",       0x020000, 0x20000, CRC(2b1da51e) SHA1(7083e9ee8eb82d1f562aba2183c8d532d73c3686) )	// korinai/6.3a
-	ROM_LOAD( "7.4a",       0x040000, 0x20000, CRC(85c260b9) SHA1(d1813329c66419bb4f19d9bba948d6662fc1142b) )	// korinai/7.4a
-	ROM_LOAD( "8.5a",       0x060000, 0x20000, CRC(6a2763e1) SHA1(0718238a7b1cd3b1409824355f04f3c4ba73a8d5) )	// korinai/8.5a
-	ROM_LOAD( "9.6a",       0x080000, 0x20000, CRC(81287588) SHA1(57784e8b62df68963592cffe0028dcc0118d44fd) )	// korinai/9.6a
-	ROM_LOAD( "10.7a",      0x0a0000, 0x20000, CRC(9506d9cc) SHA1(8312e595b176ec43f0e77c26be165416ba43da4d) )	// korinai/10.7a
-	ROM_LOAD( "11.8a",      0x0c0000, 0x20000, CRC(680d882e) SHA1(3505c9b530fd388e35467fdc0e31d125332fbc00) )	// korinai/11.8a
-	ROM_LOAD( "12.9a",      0x0e0000, 0x20000, CRC(41a25dfe) SHA1(a71db0d896665f1943b92b7fa3c7ad9cd7ad8653) )	// korinai/12.9a
+	ROM_LOAD( "6.3a",       0x020000, 0x20000, CRC(2b1da51e) SHA1(7083e9ee8eb82d1f562aba2183c8d532d73c3686) )   // korinai/6.3a
+	ROM_LOAD( "7.4a",       0x040000, 0x20000, CRC(85c260b9) SHA1(d1813329c66419bb4f19d9bba948d6662fc1142b) )   // korinai/7.4a
+	ROM_LOAD( "8.5a",       0x060000, 0x20000, CRC(6a2763e1) SHA1(0718238a7b1cd3b1409824355f04f3c4ba73a8d5) )   // korinai/8.5a
+	ROM_LOAD( "9.6a",       0x080000, 0x20000, CRC(81287588) SHA1(57784e8b62df68963592cffe0028dcc0118d44fd) )   // korinai/9.6a
+	ROM_LOAD( "10.7a",      0x0a0000, 0x20000, CRC(9506d9cc) SHA1(8312e595b176ec43f0e77c26be165416ba43da4d) )   // korinai/10.7a
+	ROM_LOAD( "11.8a",      0x0c0000, 0x20000, CRC(680d882e) SHA1(3505c9b530fd388e35467fdc0e31d125332fbc00) )   // korinai/11.8a
+	ROM_LOAD( "12.9a",      0x0e0000, 0x20000, CRC(41a25dfe) SHA1(a71db0d896665f1943b92b7fa3c7ad9cd7ad8653) )   // korinai/12.9a
 	ROM_LOAD( "13.10aa",    0x100000, 0x20000, CRC(1b578345) SHA1(c5685074599eb3e6f124f92029418e686f1d0bba) )
 	ROM_LOAD( "14.11a",     0x120000, 0x20000, CRC(228c7a61) SHA1(0b5626cde26935f066cba33a125ed7fa00f2c295) )
-	ROM_LOAD( "se-1507.1a", 0x180000, 0x80000, CRC(f1e9555e) SHA1(a34ffcff2b2d6ba40a8a453b89970d636515a8ad) )	// korinai/se-1507.1a
+	ROM_LOAD( "se-1507.1a", 0x180000, 0x80000, CRC(f1e9555e) SHA1(a34ffcff2b2d6ba40a8a453b89970d636515a8ad) )   // korinai/se-1507.1a
 ROM_END
 
 ROM_START( kaguya )
@@ -3759,8 +3725,8 @@ ROM_START( kaguya2 )
 	ROM_LOAD( "1.3f",    0x00000, 0x10000, CRC(1a6ad8fd) SHA1(ebb1e3f08643e0602a0ec2e7401c3ee2fccff9f5) )
 
 	ROM_REGION( 0x40000, "voice", 0 ) /* voice */
-	ROM_LOAD( "2.3k",    0x00000, 0x10000, CRC(561dc656) SHA1(0c3ca794ec71202aabcb337bb7d972a6d69dbbc7) )	// kaguya/kaguya02.bin
-	ROM_LOAD( "3.4p",    0x10000, 0x10000, CRC(a09e9387) SHA1(c5f5e0f5d841671bc38cd240193f60ccf7ab0455) )	// kaguya/kaguya03.bin
+	ROM_LOAD( "2.3k",    0x00000, 0x10000, CRC(561dc656) SHA1(0c3ca794ec71202aabcb337bb7d972a6d69dbbc7) )   // kaguya/kaguya02.bin
+	ROM_LOAD( "3.4p",    0x10000, 0x10000, CRC(a09e9387) SHA1(c5f5e0f5d841671bc38cd240193f60ccf7ab0455) )   // kaguya/kaguya03.bin
 	/* protection data is mapped at 20000-2ffff */
 
 	ROM_REGION( 0x0a0000, "gfx1", 0 ) /* gfx */
@@ -3776,7 +3742,7 @@ ROM_START( kaguya2 )
 	ROM_LOAD( "13.6p",   0x090000, 0x10000, CRC(ecb9f670) SHA1(c58ef1b17841d292e11e8906f11e61124eef672d) )
 
 	ROM_REGION( 0x40000, "user1", 0 ) /* protection data */
-	ROM_LOAD( "ic4m.bin", 0x00000, 0x40000, CRC(f85c5b07) SHA1(0fc55e9b60ccc630a0d77862eb5e64a3ba366947) )	// same as housemnq/3i.bin gfx data
+	ROM_LOAD( "ic4m.bin", 0x00000, 0x40000, CRC(f85c5b07) SHA1(0fc55e9b60ccc630a0d77862eb5e64a3ba366947) )  // same as housemnq/3i.bin gfx data
 ROM_END
 
 ROM_START( kaguya2f )
@@ -3784,8 +3750,8 @@ ROM_START( kaguya2f )
 	ROM_LOAD( "1.3fa",   0x00000, 0x10000, CRC(8b5481a0) SHA1(268b0ec8a8871c7172533ff8fb9731f4603e57a9) )
 
 	ROM_REGION( 0x40000, "voice", 0 ) /* voice */
-	ROM_LOAD( "2.3k",    0x00000, 0x10000, CRC(561dc656) SHA1(0c3ca794ec71202aabcb337bb7d972a6d69dbbc7) )	// kaguya/kaguya02.bin
-	ROM_LOAD( "3.4p",    0x10000, 0x10000, CRC(a09e9387) SHA1(c5f5e0f5d841671bc38cd240193f60ccf7ab0455) )	// kaguya/kaguya03.bin
+	ROM_LOAD( "2.3k",    0x00000, 0x10000, CRC(561dc656) SHA1(0c3ca794ec71202aabcb337bb7d972a6d69dbbc7) )   // kaguya/kaguya02.bin
+	ROM_LOAD( "3.4p",    0x10000, 0x10000, CRC(a09e9387) SHA1(c5f5e0f5d841671bc38cd240193f60ccf7ab0455) )   // kaguya/kaguya03.bin
 	/* protection data is mapped at 20000-2ffff */
 
 	ROM_REGION( 0x0a0000, "gfx1", 0 ) /* gfx */
@@ -3825,7 +3791,7 @@ ROM_START( kanatuen )
 	ROM_LOAD( "10.6p", 0x0b0000, 0x10000, CRC(1447ed65) SHA1(6b0f4ef3aef4dffe235a63000103c53ccad1c94f) )
 
 	ROM_REGION( 0x40000, "user1", 0 ) /* protection data */
-	ROM_LOAD( "mask.bin", 0x00000, 0x40000, CRC(f85c5b07) SHA1(0fc55e9b60ccc630a0d77862eb5e64a3ba366947) )	// same as housemnq/3i.bin gfx data
+	ROM_LOAD( "mask.bin", 0x00000, 0x40000, CRC(f85c5b07) SHA1(0fc55e9b60ccc630a0d77862eb5e64a3ba366947) )  // same as housemnq/3i.bin gfx data
 ROM_END
 
 ROM_START( kyuhito )
@@ -3833,20 +3799,20 @@ ROM_START( kyuhito )
 	ROM_LOAD( "11.3fa", 0x00000, 0x10000, CRC(f3929245) SHA1(3654c6f167d643f0e24b44a1cfa44663b5b5ffbb) )
 
 	ROM_REGION( 0x40000, "voice", 0 ) /* voice */
-	ROM_LOAD( "12.3k", 0x00000, 0x10000, CRC(a4424adc) SHA1(caa4d607cb50ec2709c69f2f443e7cd7d0302aae) )		// kanatuen/12.3k
+	ROM_LOAD( "12.3k", 0x00000, 0x10000, CRC(a4424adc) SHA1(caa4d607cb50ec2709c69f2f443e7cd7d0302aae) )     // kanatuen/12.3k
 	/* protection data is mapped at 30000-3ffff */
 
 	ROM_REGION( 0x0c0000, "gfx1", 0 ) /* gfx */
-	ROM_LOAD( "1.6a",  0x000000, 0x20000, CRC(a62b5982) SHA1(2faf908ff2cb37e7274215e1664836c991ad168c) )	// kanatuen/1.6a
-	ROM_LOAD( "2.6bc", 0x020000, 0x20000, CRC(fd36dcae) SHA1(3e26503870c3554de02af26a85efc441b3724d0c) )	// kanatuen/2.6bc
-	ROM_LOAD( "3.6d",  0x040000, 0x10000, CRC(7636cbde) SHA1(d458dafcc56430a0f3628cc59307fae1f8b3e82a) )	// kanatuen/3.6d
-	ROM_LOAD( "4.6e",  0x050000, 0x10000, CRC(ed9c7744) SHA1(c5d47f0364c150235fdcb88ff7ff0c6a880b8e20) )	// kanatuen/4.6e
-	ROM_LOAD( "5.6f",  0x060000, 0x10000, CRC(d54cd45d) SHA1(82bc8f284db60553271dd0d1984636f2a087771f) )	// kanatuen/5.6f
-	ROM_LOAD( "6.6h",  0x070000, 0x10000, CRC(1a0fbf52) SHA1(d433e2e6266631b8ee96cc960e502d60162b64d9) )	// kanatuen/6.6h
-	ROM_LOAD( "7.6k",  0x080000, 0x10000, CRC(ea0c45f5) SHA1(ccdab9837fc70d1fab490500063712d5e6ade568) )	// kanatuen/7.6k
+	ROM_LOAD( "1.6a",  0x000000, 0x20000, CRC(a62b5982) SHA1(2faf908ff2cb37e7274215e1664836c991ad168c) )    // kanatuen/1.6a
+	ROM_LOAD( "2.6bc", 0x020000, 0x20000, CRC(fd36dcae) SHA1(3e26503870c3554de02af26a85efc441b3724d0c) )    // kanatuen/2.6bc
+	ROM_LOAD( "3.6d",  0x040000, 0x10000, CRC(7636cbde) SHA1(d458dafcc56430a0f3628cc59307fae1f8b3e82a) )    // kanatuen/3.6d
+	ROM_LOAD( "4.6e",  0x050000, 0x10000, CRC(ed9c7744) SHA1(c5d47f0364c150235fdcb88ff7ff0c6a880b8e20) )    // kanatuen/4.6e
+	ROM_LOAD( "5.6f",  0x060000, 0x10000, CRC(d54cd45d) SHA1(82bc8f284db60553271dd0d1984636f2a087771f) )    // kanatuen/5.6f
+	ROM_LOAD( "6.6h",  0x070000, 0x10000, CRC(1a0fbf52) SHA1(d433e2e6266631b8ee96cc960e502d60162b64d9) )    // kanatuen/6.6h
+	ROM_LOAD( "7.6k",  0x080000, 0x10000, CRC(ea0c45f5) SHA1(ccdab9837fc70d1fab490500063712d5e6ade568) )    // kanatuen/7.6k
 	ROM_LOAD( "8.6la", 0x090000, 0x10000, CRC(a8ce450a) SHA1(e009429e0c4ca5332b8f411fcce1189e53d98834) )
 	ROM_LOAD( "9.6ma", 0x0a0000, 0x10000, CRC(401c23fe) SHA1(ef3d484d4b2c640fbdb5b023d271ee98e1a85d1a) )
-	ROM_LOAD( "10.6p", 0x0b0000, 0x10000, CRC(1447ed65) SHA1(6b0f4ef3aef4dffe235a63000103c53ccad1c94f) )	// kanatuen/10.6p
+	ROM_LOAD( "10.6p", 0x0b0000, 0x10000, CRC(1447ed65) SHA1(6b0f4ef3aef4dffe235a63000103c53ccad1c94f) )    // kanatuen/10.6p
 
 	ROM_REGION( 0x40000, "user1", ROMREGION_ERASE00 ) /* protection data */
 //  ROM_LOAD( "mask.bin", 0x00000, 0x40000, CRC(f85c5b07) SHA1(0fc55e9b60ccc630a0d77862eb5e64a3ba366947) )  // same as housemnq/3i.bin gfx data
@@ -3878,16 +3844,16 @@ ROM_START( mjsikakb )
 	ROM_LOAD( "sikaku.1",    0x00000, 0x10000, CRC(66349663) SHA1(48cdf25a30e11c06b79f218f4744719199961429) )
 
 	ROM_REGION( 0x20000, "voice", 0 ) /* voice */
-	ROM_LOAD( "mjsk_02.bin", 0x00000, 0x10000, CRC(cc0262bb) SHA1(ce980bd83f8aec775a92f4ea21ff0cc2a9ed7886) )	// mjsikaku/mjsk_02.bin
-	ROM_LOAD( "mjsk_03.bin", 0x10000, 0x10000, CRC(7dedcd75) SHA1(60add3b00fb0c35e111d883e3bceee8c85840455) )	// mjsikaku/mjsk_03.bin
+	ROM_LOAD( "mjsk_02.bin", 0x00000, 0x10000, CRC(cc0262bb) SHA1(ce980bd83f8aec775a92f4ea21ff0cc2a9ed7886) )   // mjsikaku/mjsk_02.bin
+	ROM_LOAD( "mjsk_03.bin", 0x10000, 0x10000, CRC(7dedcd75) SHA1(60add3b00fb0c35e111d883e3bceee8c85840455) )   // mjsikaku/mjsk_03.bin
 
 	ROM_REGION( 0x100000, "gfx1", 0 ) /* gfx */
-	ROM_LOAD( "mjsk_04.bin", 0x000000, 0x20000, CRC(34d13d1e) SHA1(8d13b3d2dc89c092e2770440d3768ee887f49563) )	// mjsikaku/mjsk_04.bin
-	ROM_LOAD( "mjsk_05.bin", 0x020000, 0x20000, CRC(8c70aed5) SHA1(b97a1850f0ce421226818e59ca209f30f6a57b6f) )	// mjsikaku/mjsk_05.bin
-	ROM_LOAD( "mjsk_06.bin", 0x040000, 0x20000, CRC(1dad8355) SHA1(dd38793cc86b07b25fd110313b29c6cce8069cf6) )	// mjsikaku/mjsk_06.bin
-	ROM_LOAD( "mjsk_07.bin", 0x060000, 0x20000, CRC(8174a28a) SHA1(46e89a84675b2a61c4a0771e57edd8f31d6ba3c6) )	// mjsikaku/mjsk_07.bin
-	ROM_LOAD( "mjsk_08.bin", 0x080000, 0x20000, CRC(3e182aaa) SHA1(6fa4ee29a2e402872a4d3f54b5f99e4dfe02636a) )	// mjsikaku/mjsk_08.bin
-	ROM_LOAD( "mjsk_09.bin", 0x0a0000, 0x20000, CRC(a17a3328) SHA1(4bd8a4aba042fa2bd10d99e52360f6fe8cc0d3d3) )	// mjsikaku/mjsk_09.bin
+	ROM_LOAD( "mjsk_04.bin", 0x000000, 0x20000, CRC(34d13d1e) SHA1(8d13b3d2dc89c092e2770440d3768ee887f49563) )  // mjsikaku/mjsk_04.bin
+	ROM_LOAD( "mjsk_05.bin", 0x020000, 0x20000, CRC(8c70aed5) SHA1(b97a1850f0ce421226818e59ca209f30f6a57b6f) )  // mjsikaku/mjsk_05.bin
+	ROM_LOAD( "mjsk_06.bin", 0x040000, 0x20000, CRC(1dad8355) SHA1(dd38793cc86b07b25fd110313b29c6cce8069cf6) )  // mjsikaku/mjsk_06.bin
+	ROM_LOAD( "mjsk_07.bin", 0x060000, 0x20000, CRC(8174a28a) SHA1(46e89a84675b2a61c4a0771e57edd8f31d6ba3c6) )  // mjsikaku/mjsk_07.bin
+	ROM_LOAD( "mjsk_08.bin", 0x080000, 0x20000, CRC(3e182aaa) SHA1(6fa4ee29a2e402872a4d3f54b5f99e4dfe02636a) )  // mjsikaku/mjsk_08.bin
+	ROM_LOAD( "mjsk_09.bin", 0x0a0000, 0x20000, CRC(a17a3328) SHA1(4bd8a4aba042fa2bd10d99e52360f6fe8cc0d3d3) )  // mjsikaku/mjsk_09.bin
 	ROM_LOAD( "sikaku.10",   0x0c0000, 0x20000, CRC(f91757bc) SHA1(58fc1e9b291cbca0e169945bed375fb4438e96d4) )
 	ROM_LOAD( "sikaku.11",   0x0e0000, 0x20000, CRC(abd280b6) SHA1(46e1cb56a768467a8a802d58e2150a25cd0fb8bd) )
 ROM_END
@@ -3897,18 +3863,18 @@ ROM_START( mjsikakc )
 	ROM_LOAD( "1.bin",       0x00000, 0x10000, CRC(74e6e403) SHA1(975ea8792511d9962ccd41a2cc70bce9e97a187d) )
 
 	ROM_REGION( 0x20000, "voice", 0 ) /* voice */
-	ROM_LOAD( "mjsk_02.bin", 0x00000, 0x10000, CRC(cc0262bb) SHA1(ce980bd83f8aec775a92f4ea21ff0cc2a9ed7886) )	// mjsikaku/mjsk_02.bin
-	ROM_LOAD( "mjsk_03.bin", 0x10000, 0x10000, CRC(7dedcd75) SHA1(60add3b00fb0c35e111d883e3bceee8c85840455) )	// mjsikaku/mjsk_03.bin
+	ROM_LOAD( "mjsk_02.bin", 0x00000, 0x10000, CRC(cc0262bb) SHA1(ce980bd83f8aec775a92f4ea21ff0cc2a9ed7886) )   // mjsikaku/mjsk_02.bin
+	ROM_LOAD( "mjsk_03.bin", 0x10000, 0x10000, CRC(7dedcd75) SHA1(60add3b00fb0c35e111d883e3bceee8c85840455) )   // mjsikaku/mjsk_03.bin
 
 	ROM_REGION( 0x100000, "gfx1", 0 ) /* gfx */
-	ROM_LOAD( "mjsk_04.bin", 0x000000, 0x20000, CRC(34d13d1e) SHA1(8d13b3d2dc89c092e2770440d3768ee887f49563) )	// mjsikaku/mjsk_04.bin
-	ROM_LOAD( "mjsk_05.bin", 0x020000, 0x20000, CRC(8c70aed5) SHA1(b97a1850f0ce421226818e59ca209f30f6a57b6f) )	// mjsikaku/mjsk_05.bin
-	ROM_LOAD( "mjsk_06.bin", 0x040000, 0x20000, CRC(1dad8355) SHA1(dd38793cc86b07b25fd110313b29c6cce8069cf6) )	// mjsikaku/mjsk_06.bin
-	ROM_LOAD( "mjsk_07.bin", 0x060000, 0x20000, CRC(8174a28a) SHA1(46e89a84675b2a61c4a0771e57edd8f31d6ba3c6) )	// mjsikaku/mjsk_07.bin
-	ROM_LOAD( "mjsk_08.bin", 0x080000, 0x20000, CRC(3e182aaa) SHA1(6fa4ee29a2e402872a4d3f54b5f99e4dfe02636a) )	// mjsikaku/mjsk_08.bin
-	ROM_LOAD( "mjsk_09.bin", 0x0a0000, 0x20000, CRC(a17a3328) SHA1(4bd8a4aba042fa2bd10d99e52360f6fe8cc0d3d3) )	// mjsikaku/mjsk_09.bin
-	ROM_LOAD( "sikaku.10",   0x0c0000, 0x20000, CRC(f91757bc) SHA1(58fc1e9b291cbca0e169945bed375fb4438e96d4) )	// mjsikakb/sikaku.10
-	ROM_LOAD( "sikaku.11",   0x0e0000, 0x20000, CRC(abd280b6) SHA1(46e1cb56a768467a8a802d58e2150a25cd0fb8bd) )	// mjsikakb/sikaku.11
+	ROM_LOAD( "mjsk_04.bin", 0x000000, 0x20000, CRC(34d13d1e) SHA1(8d13b3d2dc89c092e2770440d3768ee887f49563) )  // mjsikaku/mjsk_04.bin
+	ROM_LOAD( "mjsk_05.bin", 0x020000, 0x20000, CRC(8c70aed5) SHA1(b97a1850f0ce421226818e59ca209f30f6a57b6f) )  // mjsikaku/mjsk_05.bin
+	ROM_LOAD( "mjsk_06.bin", 0x040000, 0x20000, CRC(1dad8355) SHA1(dd38793cc86b07b25fd110313b29c6cce8069cf6) )  // mjsikaku/mjsk_06.bin
+	ROM_LOAD( "mjsk_07.bin", 0x060000, 0x20000, CRC(8174a28a) SHA1(46e89a84675b2a61c4a0771e57edd8f31d6ba3c6) )  // mjsikaku/mjsk_07.bin
+	ROM_LOAD( "mjsk_08.bin", 0x080000, 0x20000, CRC(3e182aaa) SHA1(6fa4ee29a2e402872a4d3f54b5f99e4dfe02636a) )  // mjsikaku/mjsk_08.bin
+	ROM_LOAD( "mjsk_09.bin", 0x0a0000, 0x20000, CRC(a17a3328) SHA1(4bd8a4aba042fa2bd10d99e52360f6fe8cc0d3d3) )  // mjsikaku/mjsk_09.bin
+	ROM_LOAD( "sikaku.10",   0x0c0000, 0x20000, CRC(f91757bc) SHA1(58fc1e9b291cbca0e169945bed375fb4438e96d4) )  // mjsikakb/sikaku.10
+	ROM_LOAD( "sikaku.11",   0x0e0000, 0x20000, CRC(abd280b6) SHA1(46e1cb56a768467a8a802d58e2150a25cd0fb8bd) )  // mjsikakb/sikaku.11
 ROM_END
 
 ROM_START( mjsikakd )
@@ -3916,18 +3882,18 @@ ROM_START( mjsikakd )
 	ROM_LOAD( "11.bin",      0x00000, 0x10000, CRC(372474bd) SHA1(12ee6f3a49926d8120b46e36df4d7df628e86ac1) )
 
 	ROM_REGION( 0x20000, "voice", 0 ) /* voice */
-	ROM_LOAD( "mjsk_02.bin", 0x00000, 0x10000, CRC(cc0262bb) SHA1(ce980bd83f8aec775a92f4ea21ff0cc2a9ed7886) )	// mjsikaku/mjsk_02.bin
-	ROM_LOAD( "mjsk_03.bin", 0x10000, 0x10000, CRC(7dedcd75) SHA1(60add3b00fb0c35e111d883e3bceee8c85840455) )	// mjsikaku/mjsk_03.bin
+	ROM_LOAD( "mjsk_02.bin", 0x00000, 0x10000, CRC(cc0262bb) SHA1(ce980bd83f8aec775a92f4ea21ff0cc2a9ed7886) )   // mjsikaku/mjsk_02.bin
+	ROM_LOAD( "mjsk_03.bin", 0x10000, 0x10000, CRC(7dedcd75) SHA1(60add3b00fb0c35e111d883e3bceee8c85840455) )   // mjsikaku/mjsk_03.bin
 
 	ROM_REGION( 0x100000, "gfx1", 0 ) /* gfx */
-	ROM_LOAD( "mjsk_04.bin", 0x000000, 0x20000, CRC(34d13d1e) SHA1(8d13b3d2dc89c092e2770440d3768ee887f49563) )	// mjsikaku/mjsk_04.bin
-	ROM_LOAD( "mjsk_05.bin", 0x020000, 0x20000, CRC(8c70aed5) SHA1(b97a1850f0ce421226818e59ca209f30f6a57b6f) )	// mjsikaku/mjsk_05.bin
-	ROM_LOAD( "mjsk_06.bin", 0x040000, 0x20000, CRC(1dad8355) SHA1(dd38793cc86b07b25fd110313b29c6cce8069cf6) )	// mjsikaku/mjsk_06.bin
-	ROM_LOAD( "mjsk_07.bin", 0x060000, 0x20000, CRC(8174a28a) SHA1(46e89a84675b2a61c4a0771e57edd8f31d6ba3c6) )	// mjsikaku/mjsk_07.bin
-	ROM_LOAD( "mjsk_08.bin", 0x080000, 0x20000, CRC(3e182aaa) SHA1(6fa4ee29a2e402872a4d3f54b5f99e4dfe02636a) )	// mjsikaku/mjsk_08.bin
-	ROM_LOAD( "mjsk_09.bin", 0x0a0000, 0x20000, CRC(a17a3328) SHA1(4bd8a4aba042fa2bd10d99e52360f6fe8cc0d3d3) )	// mjsikaku/mjsk_09.bin
-	ROM_LOAD( "sikaku.10",   0x0c0000, 0x20000, CRC(f91757bc) SHA1(58fc1e9b291cbca0e169945bed375fb4438e96d4) )	// mjsikakb/sikaku.10
-	ROM_LOAD( "sikaku.11",   0x0e0000, 0x20000, CRC(abd280b6) SHA1(46e1cb56a768467a8a802d58e2150a25cd0fb8bd) )	// mjsikakb/sikaku.11
+	ROM_LOAD( "mjsk_04.bin", 0x000000, 0x20000, CRC(34d13d1e) SHA1(8d13b3d2dc89c092e2770440d3768ee887f49563) )  // mjsikaku/mjsk_04.bin
+	ROM_LOAD( "mjsk_05.bin", 0x020000, 0x20000, CRC(8c70aed5) SHA1(b97a1850f0ce421226818e59ca209f30f6a57b6f) )  // mjsikaku/mjsk_05.bin
+	ROM_LOAD( "mjsk_06.bin", 0x040000, 0x20000, CRC(1dad8355) SHA1(dd38793cc86b07b25fd110313b29c6cce8069cf6) )  // mjsikaku/mjsk_06.bin
+	ROM_LOAD( "mjsk_07.bin", 0x060000, 0x20000, CRC(8174a28a) SHA1(46e89a84675b2a61c4a0771e57edd8f31d6ba3c6) )  // mjsikaku/mjsk_07.bin
+	ROM_LOAD( "mjsk_08.bin", 0x080000, 0x20000, CRC(3e182aaa) SHA1(6fa4ee29a2e402872a4d3f54b5f99e4dfe02636a) )  // mjsikaku/mjsk_08.bin
+	ROM_LOAD( "mjsk_09.bin", 0x0a0000, 0x20000, CRC(a17a3328) SHA1(4bd8a4aba042fa2bd10d99e52360f6fe8cc0d3d3) )  // mjsikaku/mjsk_09.bin
+	ROM_LOAD( "sikaku.10",   0x0c0000, 0x20000, CRC(f91757bc) SHA1(58fc1e9b291cbca0e169945bed375fb4438e96d4) )  // mjsikakb/sikaku.10
+	ROM_LOAD( "sikaku.11",   0x0e0000, 0x20000, CRC(abd280b6) SHA1(46e1cb56a768467a8a802d58e2150a25cd0fb8bd) )  // mjsikakb/sikaku.11
 ROM_END
 
 ROM_START( mmsikaku )
@@ -3940,14 +3906,14 @@ ROM_START( mmsikaku )
 
 	ROM_REGION( 0x1c0000, "gfx1", 0 ) /* gfx */
 	ROM_LOAD( "1.2a",        0x000000, 0x20000, CRC(0024bce0) SHA1(669be183eecce8d4655884c8e3d744e9ccc63667) )
-	ROM_LOAD( "mjsk_05.bin", 0x020000, 0x20000, CRC(8c70aed5) SHA1(b97a1850f0ce421226818e59ca209f30f6a57b6f) )	// mjsikaku/mjsk_05.bin
-	ROM_LOAD( "mjsk_06.bin", 0x040000, 0x20000, CRC(1dad8355) SHA1(dd38793cc86b07b25fd110313b29c6cce8069cf6) )	// mjsikaku/mjsk_06.bin
-	ROM_LOAD( "mjsk_07.bin", 0x060000, 0x20000, CRC(8174a28a) SHA1(46e89a84675b2a61c4a0771e57edd8f31d6ba3c6) )	// mjsikaku/mjsk_07.bin
-	ROM_LOAD( "mjsk_08.bin", 0x080000, 0x20000, CRC(3e182aaa) SHA1(6fa4ee29a2e402872a4d3f54b5f99e4dfe02636a) )	// mjsikaku/mjsk_08.bin
-	ROM_LOAD( "mjsk_09.bin", 0x0a0000, 0x20000, CRC(a17a3328) SHA1(4bd8a4aba042fa2bd10d99e52360f6fe8cc0d3d3) )	// mjsikaku/mjsk_09.bin
-	ROM_LOAD( "7.8a",        0x0c0000, 0x20000, CRC(f91757bc) SHA1(58fc1e9b291cbca0e169945bed375fb4438e96d4) )	// mjsikakb/sikaku.10
+	ROM_LOAD( "mjsk_05.bin", 0x020000, 0x20000, CRC(8c70aed5) SHA1(b97a1850f0ce421226818e59ca209f30f6a57b6f) )  // mjsikaku/mjsk_05.bin
+	ROM_LOAD( "mjsk_06.bin", 0x040000, 0x20000, CRC(1dad8355) SHA1(dd38793cc86b07b25fd110313b29c6cce8069cf6) )  // mjsikaku/mjsk_06.bin
+	ROM_LOAD( "mjsk_07.bin", 0x060000, 0x20000, CRC(8174a28a) SHA1(46e89a84675b2a61c4a0771e57edd8f31d6ba3c6) )  // mjsikaku/mjsk_07.bin
+	ROM_LOAD( "mjsk_08.bin", 0x080000, 0x20000, CRC(3e182aaa) SHA1(6fa4ee29a2e402872a4d3f54b5f99e4dfe02636a) )  // mjsikaku/mjsk_08.bin
+	ROM_LOAD( "mjsk_09.bin", 0x0a0000, 0x20000, CRC(a17a3328) SHA1(4bd8a4aba042fa2bd10d99e52360f6fe8cc0d3d3) )  // mjsikaku/mjsk_09.bin
+	ROM_LOAD( "7.8a",        0x0c0000, 0x20000, CRC(f91757bc) SHA1(58fc1e9b291cbca0e169945bed375fb4438e96d4) )  // mjsikakb/sikaku.10
 	ROM_LOAD( "8.9a",        0x0e0000, 0x20000, CRC(d453a221) SHA1(7cdc96f7634d3c7b1c51588e4951719c0c016af1) )
-	ROM_LOAD( "ic1a.bin",    0x180000, 0x40000, CRC(2199e3e9) SHA1(965af4a29db4ff909dbeeebab1b828eb4f23f57e) )	// housemnq/1i.bin
+	ROM_LOAD( "ic1a.bin",    0x180000, 0x40000, CRC(2199e3e9) SHA1(965af4a29db4ff909dbeeebab1b828eb4f23f57e) )  // housemnq/1i.bin
 ROM_END
 
 ROM_START( otonano )
@@ -3998,7 +3964,7 @@ ROM_START( mjcamera )
 	ROM_LOAD( "mcam_18.bin", 0x0f0000, 0x10000, CRC(3a3da341) SHA1(198ea75aedff187b02a740d5a1cc49c76340831f) )
 
 	ROM_REGION( 0x40000, "user1", 0 ) /* protection data */
-	ROM_LOAD( "mcam_m1.bin", 0x00000, 0x40000, CRC(f85c5b07) SHA1(0fc55e9b60ccc630a0d77862eb5e64a3ba366947) )	// same as housemnq/3i.bin gfx data
+	ROM_LOAD( "mcam_m1.bin", 0x00000, 0x40000, CRC(f85c5b07) SHA1(0fc55e9b60ccc630a0d77862eb5e64a3ba366947) )   // same as housemnq/3i.bin gfx data
 ROM_END
 
 ROM_START( idhimitu )
@@ -4023,7 +3989,7 @@ ROM_START( idhimitu )
 	ROM_LOAD( "16.7e",    0x0d0000, 0x10000, CRC(0429ae8f) SHA1(e380e159b2dcafcbfd3e9991ee9e76b842189e37) )
 
 	ROM_REGION( 0x40000, "user1", 0 ) /* protection data */
-	ROM_LOAD( "ic3m.bin", 0x00000, 0x40000, CRC(ba005a3a) SHA1(305041f764b5ba9ffa882c1a69555a38a53b1556) )	// same as iemoto/iemoto31.1a gfx data
+	ROM_LOAD( "ic3m.bin", 0x00000, 0x40000, CRC(ba005a3a) SHA1(305041f764b5ba9ffa882c1a69555a38a53b1556) )  // same as iemoto/iemoto31.1a gfx data
 ROM_END
 
 ROM_START( barline )
@@ -4051,62 +4017,54 @@ ROM_START( barline )
 	ROM_LOAD( "16061.k7", 0x000, 0x104, CRC(d25ccac8) SHA1(cfad5a4cd9609ac2461314d77a5e0cecd326c63b) )
 ROM_END
 
+
 /* 8-bit palette */
-GAME( 1986, crystalg, 0,        crystalg,        crystalg, crystalg, ROT0, "Nichibutsu", "Crystal Gal (Japan 860512)", 0 )
-GAME( 1986, crystal2, 0,        crystalg,        crystal2, crystal2, ROT0, "Nichibutsu", "Crystal Gal 2 (Japan 860620)", 0 )
-GAME( 1986, nightlov, 0,        crystalg,        nightlov, nightlov, ROT0, "Central Denshi", "Night Love (Japan 860705)", GAME_NOT_WORKING )
-GAME( 1986, apparel,  0,        apparel,         apparel,  apparel,  ROT0, "Central Denshi", "Apparel Night (Japan 860929)", 0 )
+GAME( 1986, crystalg, 0,        crystalg,        crystalg, nbmj8688_state, crystalg, ROT0, "Nichibutsu", "Crystal Gal (Japan 860512)", 0 )
+GAME( 1986, crystal2, 0,        crystalg,        crystal2, nbmj8688_state, crystal2, ROT0, "Nichibutsu", "Crystal Gal 2 (Japan 860620)", 0 )
+GAME( 1986, nightlov, 0,        crystalg,        nightlov, nbmj8688_state, nightlov, ROT0, "Central Denshi", "Night Love (Japan 860705)", GAME_NOT_WORKING )
+GAME( 1986, apparel,  0,        apparel,         apparel, nbmj8688_state,  apparel,  ROT0, "Central Denshi", "Apparel Night (Japan 860929)", 0 )
 
 /* hybrid 12-bit palette */
-GAME( 1986, citylove, 0,        mbmj_h12bit,     citylove, citylove, ROT0, "Nichibutsu", "City Love (Japan 860908)", 0 )
-GAME( 1986, mcitylov, citylove, mbmj_h12bit,     mcitylov, mcitylov, ROT0, "Nichibutsu", "City Love [BET] (Japan 860904)", 0 )
-GAME( 1986, secolove, 0,        mbmj_h12bit,     secolove, secolove, ROT0, "Nichibutsu", "Second Love (Japan 861201)", 0 )
-GAME( 1988, barline,  0,    	barline,		 barline,  barline,  ROT180, "Nichibutsu", "Barline (Japan?)",  GAME_IMPERFECT_SOUND )
+GAME( 1986, citylove, 0,        mbmj_h12bit,     citylove, nbmj8688_state, citylove, ROT0, "Nichibutsu", "City Love (Japan 860908)", 0 )
+GAME( 1986, mcitylov, citylove, mbmj_h12bit,     mcitylov, nbmj8688_state, mcitylov, ROT0, "Nichibutsu", "City Love [BET] (Japan 860904)", 0 )
+GAME( 1986, secolove, 0,        mbmj_h12bit,     secolove, nbmj8688_state, secolove, ROT0, "Nichibutsu", "Second Love (Japan 861201)", 0 )
+GAME( 1988, barline,  0,        barline,         barline, nbmj8688_state,  barline,  ROT180, "Nichibutsu", "Barline (Japan?)",  GAME_IMPERFECT_SOUND )
 
 /* hybrid 16-bit palette */
-GAME( 1987, seiha,    0,        seiha,           seiha,    seiha,    ROT0, "Nichibutsu",	 "Seiha (Japan 870725)", 0 )
-GAME( 1987, seiham,   seiha,    seiha,           seiham,   seiham,   ROT0, "Nichibutsu",	 "Seiha [BET] (Japan 870723)", 0 )
-GAME( 1987, mjgaiden, 0,        mjgaiden,        ojousan,  ojousan,  ROT0, "Central Denshi", "Mahjong Gaiden [BET] (Japan 870803)", 0 )
-GAME( 1987, iemoto,   0,        iemoto,          iemoto,   iemoto,   ROT0, "Nichibutsu",	 "Iemoto (Japan 871020)", 0 )
-GAME( 1987, iemotom,  iemoto,   ojousan,         iemotom,  iemotom,  ROT0, "Nichibutsu",	 "Iemoto [BET] (Japan 871118)", 0 )
-GAME( 1987, ryuuha,   iemoto,   ojousan,         ryuuha,   ryuuha,   ROT0, "Central Denshi", "Ryuuha [BET] (Japan 871027)", 0 )
-GAME( 1987, ojousan,  0,        ojousan,         ojousan,  ojousan,  ROT0, "Nichibutsu",	 "Ojousan (Japan 871204)", 0 )
-GAME( 1987, ojousanm, ojousan,  ojousan,         ojousanm, ojousanm, ROT0, "Nichibutsu",	 "Ojousan [BET] (Japan 870108)", 0 )
-GAME( 1988, korinai,  0,        ojousan,         korinai,  korinai,  ROT0, "Nichibutsu",	 "Mahjong-zukino Korinai Menmen (Japan 880425)", 0 )
-GAME( 1988, korinaim, korinai,  ojousan,         korinaim, korinaim, ROT0, "Nichibutsu",	 "Mahjong-zukino Korinai Menmen [BET] (Japan 880920)", 0 )
+GAME( 1987, seiha,    0,        seiha,           seiha, nbmj8688_state,    seiha,    ROT0, "Nichibutsu",     "Seiha (Japan 870725)", 0 )
+GAME( 1987, seiham,   seiha,    seiha,           seiham, nbmj8688_state,   seiham,   ROT0, "Nichibutsu",     "Seiha [BET] (Japan 870723)", 0 )
+GAME( 1987, mjgaiden, 0,        mjgaiden,        ojousan, nbmj8688_state,  ojousan,  ROT0, "Central Denshi", "Mahjong Gaiden [BET] (Japan 870803)", 0 )
+GAME( 1987, iemoto,   0,        iemoto,          iemoto, nbmj8688_state,   iemoto,   ROT0, "Nichibutsu",     "Iemoto (Japan 871020)", 0 )
+GAME( 1987, iemotom,  iemoto,   ojousan,         iemotom, nbmj8688_state,  iemotom,  ROT0, "Nichibutsu",     "Iemoto [BET] (Japan 871118)", 0 )
+GAME( 1987, ryuuha,   iemoto,   ojousan,         ryuuha, nbmj8688_state,   ryuuha,   ROT0, "Central Denshi", "Ryuuha [BET] (Japan 871027)", 0 )
+GAME( 1987, ojousan,  0,        ojousan,         ojousan, nbmj8688_state,  ojousan,  ROT0, "Nichibutsu",     "Ojousan (Japan 871204)", 0 )
+GAME( 1987, ojousanm, ojousan,  ojousan,         ojousanm, nbmj8688_state, ojousanm, ROT0, "Nichibutsu",     "Ojousan [BET] (Japan 870108)", 0 )
+GAME( 1988, korinai,  0,        ojousan,         korinai, nbmj8688_state,  korinai,  ROT0, "Nichibutsu",     "Mahjong-zukino Korinai Menmen (Japan 880425)", 0 )
+GAME( 1988, korinaim, korinai,  ojousan,         korinaim, nbmj8688_state, korinaim, ROT0, "Nichibutsu",     "Mahjong-zukino Korinai Menmen [BET] (Japan 880920)", 0 )
 
 /* pure 16-bit palette (+ LCD in some) */
-GAME( 1987, housemnq, 0,        mbmj_p16bit_LCD, housemnq, housemnq, ROT0, "Nichibutsu", "House Mannequin (Japan 870217)", 0 )
-GAME( 1987, housemn2, 0,        mbmj_p16bit_LCD, housemn2, housemn2, ROT0, "Nichibutsu", "House Mannequin Roppongi Live hen (Japan 870418)", 0 )
-GAME( 1987, livegal,  0,        mbmj_p16bit_LCD, livegal,  livegal,  ROT0, "Central Denshi", "Live Gal (Japan 870530)", 0 )
-GAME( 1987, bijokkoy, 0,        mbmj_p16bit_LCD, bijokkoy, bijokkoy, ROT0, "Nichibutsu", "Bijokko Yume Monogatari (Japan 870925)", 0 )
-GAME( 1988, bijokkog, 0,        mbmj_p16bit_LCD, bijokkog, bijokkog, ROT0, "Nichibutsu", "Bijokko Gakuen (Japan 880116)", 0 )
-GAME( 1988, orangec,  0,        mbmj_p16bit,     orangec,  orangec,  ROT0, "Daiichi Denshi", "Orange Club - Maruhi Kagai Jugyou (Japan 880213)", GAME_IMPERFECT_GRAPHICS )
-GAME( 1988, orangeci, orangec,  mbmj_p16bit,     orangeci, orangeci, ROT0, "Daiichi Denshi", "Orange Club - Maru-hi Ippatsu Kaihou [BET] (Japan 880221)", GAME_IMPERFECT_GRAPHICS )
-GAME( 1988, vipclub,  orangec,  mbmj_p16bit,     vipclub,  vipclub,  ROT0, "Daiichi Denshi", "Vip Club - Maru-hi Ippatsu Kaihou [BET] (Japan 880310)", GAME_IMPERFECT_GRAPHICS )
+GAME( 1987, housemnq, 0,        mbmj_p16bit_LCD, housemnq, nbmj8688_state, housemnq, ROT0, "Nichibutsu", "House Mannequin (Japan 870217)", 0 )
+GAME( 1987, housemn2, 0,        mbmj_p16bit_LCD, housemn2, nbmj8688_state, housemn2, ROT0, "Nichibutsu", "House Mannequin Roppongi Live hen (Japan 870418)", 0 )
+GAME( 1987, livegal,  0,        mbmj_p16bit_LCD, livegal, nbmj8688_state,  livegal,  ROT0, "Central Denshi", "Live Gal (Japan 870530)", 0 )
+GAME( 1987, bijokkoy, 0,        mbmj_p16bit_LCD, bijokkoy, nbmj8688_state, bijokkoy, ROT0, "Nichibutsu", "Bijokko Yume Monogatari (Japan 870925)", 0 )
+GAME( 1988, bijokkog, 0,        mbmj_p16bit_LCD, bijokkog, nbmj8688_state, bijokkog, ROT0, "Nichibutsu", "Bijokko Gakuen (Japan 880116)", 0 )
+GAME( 1988, orangec,  0,        mbmj_p16bit,     orangec, nbmj8688_state,  orangec,  ROT0, "Daiichi Denshi", "Orange Club - Maruhi Kagai Jugyou (Japan 880213)", 0 )
+GAME( 1988, orangeci, orangec,  mbmj_p16bit,     orangeci, nbmj8688_state, orangeci, ROT0, "Daiichi Denshi", "Orange Club - Maru-hi Ippatsu Kaihou [BET] (Japan 880221)", 0 )
+GAME( 1988, vipclub,  orangec,  mbmj_p16bit,     vipclub, nbmj8688_state,  vipclub,  ROT0, "Daiichi Denshi", "Vip Club - Maru-hi Ippatsu Kaihou [BET] (Japan 880310)", 0 )
 
 /* pure 12-bit palette */
-GAME( 1988, kaguya,   0,        mbmj_p12bit,     kaguya,   kaguya,   ROT0, "Miki Syouji", "Mahjong Kaguyahime [BET] (Japan 880521)", 0 )
-GAME( 1989, kaguya2,  0,        mbmj_p12bit,     kaguya2,  kaguya2,  ROT0, "Miki Syouji", "Mahjong Kaguyahime Sono2 [BET] (Japan 890829)", 0 )
-GAME( 1989, kaguya2f, kaguya2,  mbmj_p12bit,     kaguya2,  kaguya2,  ROT0, "Miki Syouji", "Mahjong Kaguyahime Sono2 Fukkokuban [BET] (Japan 010808)", 0 )
-GAME( 1988, kanatuen, 0,        mbmj_p12bit,     kanatuen, kanatuen, ROT0, "Panac", "Kanatsuen no Onna [BET] (Japan 880905)", 0 )
-GAME( 1988, kyuhito,  kanatuen, mbmj_p12bit,     kyuhito,  kyuhito,  ROT0, "Roller Tron", "Kyukyoku no Hito [BET] (Japan 880824)", 0 )
-GAME( 1989, idhimitu, 0,        mbmj_p12bit,     idhimitu, idhimitu, ROT0, "Digital Soft", "Idol no Himitsu [BET] (Japan 890304)", 0 )
+GAME( 1988, kaguya,   0,        mbmj_p12bit,     kaguya, nbmj8688_state,   kaguya,   ROT0, "Miki Syouji", "Mahjong Kaguyahime [BET] (Japan 880521)", 0 )
+GAME( 1989, kaguya2,  0,        mbmj_p12bit,     kaguya2, nbmj8688_state,  kaguya2,  ROT0, "Miki Syouji", "Mahjong Kaguyahime Sono2 [BET] (Japan 890829)", 0 )
+GAME( 1989, kaguya2f, kaguya2,  mbmj_p12bit,     kaguya2, nbmj8688_state,  kaguya2,  ROT0, "Miki Syouji", "Mahjong Kaguyahime Sono2 Fukkokuban [BET] (Japan 010808)", 0 )
+GAME( 1988, kanatuen, 0,        mbmj_p12bit,     kanatuen, nbmj8688_state, kanatuen, ROT0, "Panac", "Kanatsuen no Onna [BET] (Japan 880905)", 0 )
+GAME( 1988, kyuhito,  kanatuen, mbmj_p12bit,     kyuhito, nbmj8688_state,  kyuhito,  ROT0, "Roller Tron", "Kyukyoku no Hito [BET] (Japan 880824)", 0 )
+GAME( 1989, idhimitu, 0,        mbmj_p12bit,     idhimitu, nbmj8688_state, idhimitu, ROT0, "Digital Soft", "Idol no Himitsu [BET] (Japan 890304)", 0 )
 
 /* pure 12-bit palette + YM3812 instead of AY-3-8910 */
-GAME( 1988, mjsikaku, 0,        mjsikaku,        mjsikaku, mjsikaku, ROT0, "Nichibutsu", "Mahjong Shikaku (Japan 880908)", 0 )
-GAME( 1988, mjsikakb, mjsikaku, mjsikaku,        mjsikaku, mjsikaku, ROT0, "Nichibutsu", "Mahjong Shikaku (Japan 880722)", 0 )
-GAME( 1988, mjsikakc, mjsikaku, mjsikaku,        mjsikaku, mjsikaku, ROT0, "Nichibutsu", "Mahjong Shikaku (Japan 880806)", 0 )
-GAME( 1988, mjsikakd, mjsikaku, mjsikaku,        mjsikaku, mjsikaku, ROT0, "Nichibutsu", "Mahjong Shikaku (Japan 880802)", 0 )
-GAME( 1988, mmsikaku, mjsikaku, mmsikaku,        mmsikaku, mmsikaku, ROT0, "Nichibutsu", "Mahjong Shikaku [BET] (Japan 880929)", 0 )
-GAME( 1988, otonano,  0,        otonano,         otonano,  otonano,  ROT0, "Apple", "Otona no Mahjong (Japan 880628)", 0 )
-GAME( 1988, mjcamera, 0,        otonano,         mjcamera, mjcamera, ROT0, "Miki Syouji", "Mahjong Camera Kozou (set 1) (Japan 881109)", 0 )
-
-
-/*
-
-iemotom     outcoin check
-ojousanm    outcoin check
-ryuuha      outcoin check
-
-*/
+GAME( 1988, mjsikaku, 0,        mjsikaku,        mjsikaku, nbmj8688_state, mjsikaku, ROT0, "Nichibutsu", "Mahjong Shikaku (Japan 880908)", 0 )
+GAME( 1988, mjsikakb, mjsikaku, mjsikaku,        mjsikaku, nbmj8688_state, mjsikaku, ROT0, "Nichibutsu", "Mahjong Shikaku (Japan 880722)", 0 )
+GAME( 1988, mjsikakc, mjsikaku, mjsikaku,        mjsikaku, nbmj8688_state, mjsikaku, ROT0, "Nichibutsu", "Mahjong Shikaku (Japan 880806)", 0 )
+GAME( 1988, mjsikakd, mjsikaku, mjsikaku,        mjsikaku, nbmj8688_state, mjsikaku, ROT0, "Nichibutsu", "Mahjong Shikaku (Japan 880802)", 0 )
+GAME( 1988, mmsikaku, mjsikaku, mmsikaku,        mmsikaku, nbmj8688_state, mmsikaku, ROT0, "Nichibutsu", "Mahjong Shikaku [BET] (Japan 880929)", 0 )
+GAME( 1988, otonano,  0,        otonano,         otonano, nbmj8688_state,  otonano,  ROT0, "Apple", "Otona no Mahjong (Japan 880628)", 0 )
+GAME( 1988, mjcamera, 0,        otonano,         mjcamera, nbmj8688_state, mjcamera, ROT0, "Miki Syouji", "Mahjong Camera Kozou (set 1) (Japan 881109)", 0 )

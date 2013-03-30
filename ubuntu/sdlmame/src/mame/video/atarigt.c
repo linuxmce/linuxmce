@@ -30,9 +30,9 @@
  *
  *************************************/
 
-#define RSHIFT		16
-#define GSHIFT		8
-#define BSHIFT		0
+#define RSHIFT      16
+#define GSHIFT      8
+#define BSHIFT      0
 
 
 
@@ -42,27 +42,25 @@
  *
  *************************************/
 
-static TILE_GET_INFO( get_alpha_tile_info )
+TILE_GET_INFO_MEMBER(atarigt_state::get_alpha_tile_info)
 {
-	atarigt_state *state = machine.driver_data<atarigt_state>();
-	UINT16 data = state->m_alpha32[tile_index / 2] >> (16 * (~tile_index & 1));
+	UINT16 data = m_alpha32[tile_index / 2] >> (16 * (~tile_index & 1));
 	int code = data & 0xfff;
 	int color = (data >> 12) & 0x0f;
-	SET_TILE_INFO(1, code, color, 0);
+	SET_TILE_INFO_MEMBER(1, code, color, 0);
 }
 
 
-static TILE_GET_INFO( get_playfield_tile_info )
+TILE_GET_INFO_MEMBER(atarigt_state::get_playfield_tile_info)
 {
-	atarigt_state *state = machine.driver_data<atarigt_state>();
-	UINT16 data = state->m_playfield32[tile_index / 2] >> (16 * (~tile_index & 1));
-	int code = (state->m_playfield_tile_bank << 12) | (data & 0xfff);
+	UINT16 data = m_playfield32[tile_index / 2] >> (16 * (~tile_index & 1));
+	int code = (m_playfield_tile_bank << 12) | (data & 0xfff);
 	int color = (data >> 12) & 7;
-	SET_TILE_INFO(0, code, color, (data >> 15) & 1);
+	SET_TILE_INFO_MEMBER(0, code, color, (data >> 15) & 1);
 }
 
 
-static TILEMAP_MAPPER( atarigt_playfield_scan )
+TILEMAP_MAPPER_MEMBER(atarigt_state::atarigt_playfield_scan)
 {
 	int bank = 1 - (col / (num_cols / 2));
 	return bank * (num_rows * num_cols / 2) + row * (num_cols / 2) + (col % (num_cols / 2));
@@ -76,47 +74,46 @@ static TILEMAP_MAPPER( atarigt_playfield_scan )
  *
  *************************************/
 
-VIDEO_START( atarigt )
+VIDEO_START_MEMBER(atarigt_state,atarigt)
 {
-	atarigt_state *state = machine.driver_data<atarigt_state>();
 	pen_t *substitute_pens;
 	int i, width, height;
 
 	/* blend the playfields and free the temporary one */
-	atarigen_blend_gfx(machine, 0, 2, 0x0f, 0x30);
+	blend_gfx(0, 2, 0x0f, 0x30);
 
 	/* initialize the playfield */
-	state->m_playfield_tilemap = tilemap_create(machine, get_playfield_tile_info, atarigt_playfield_scan,  8,8, 128,64);
+	m_playfield_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(atarigt_state::get_playfield_tile_info),this), tilemap_mapper_delegate(FUNC(atarigt_state::atarigt_playfield_scan),this),  8,8, 128,64);
 
 	/* initialize the motion objects */
-	state->m_rle = machine.device("rle");
+	m_rle = machine().device("rle");
 
 	/* initialize the alphanumerics */
-	state->m_alpha_tilemap = tilemap_create(machine, get_alpha_tile_info, tilemap_scan_rows,  8,8, 64,32);
+	m_alpha_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(atarigt_state::get_alpha_tile_info),this), TILEMAP_SCAN_ROWS,  8,8, 64,32);
 
 	/* allocate temp bitmaps */
-	width = machine.primary_screen->width();
-	height = machine.primary_screen->height();
+	width = machine().primary_screen->width();
+	height = machine().primary_screen->height();
 
-	state->m_pf_bitmap = auto_bitmap_alloc(machine, width, height, BITMAP_FORMAT_INDEXED16);
-	state->m_an_bitmap = auto_bitmap_alloc(machine, width, height, BITMAP_FORMAT_INDEXED16);
+	m_pf_bitmap = auto_bitmap_ind16_alloc(machine(), width, height);
+	m_an_bitmap = auto_bitmap_ind16_alloc(machine(), width, height);
 
 	/* map pens 1:1 */
-	substitute_pens = auto_alloc_array(machine, pen_t, 65536);
-	for (i = 0; i < machine.total_colors(); i++)
+	substitute_pens = auto_alloc_array(machine(), pen_t, 65536);
+	for (i = 0; i < machine().total_colors(); i++)
 		substitute_pens[i] = i;
-	machine.pens = substitute_pens;
+	machine().pens = substitute_pens;
 
 	/* reset statics */
-	memset(state->m_colorram, 0, 0x80000);
+	memset(m_colorram, 0, 0x80000);
 
 	/* save states */
-	state->save_item(NAME(state->m_playfield_tile_bank));
-	state->save_item(NAME(state->m_playfield_color_bank));
-	state->save_item(NAME(state->m_playfield_xscroll));
-	state->save_item(NAME(state->m_playfield_yscroll));
-	state->save_item(NAME(state->m_tram_checksum));
-	state->save_item(NAME(state->m_expanded_mram));
+	save_item(NAME(m_playfield_tile_bank));
+	save_item(NAME(m_playfield_color_bank));
+	save_item(NAME(m_playfield_xscroll));
+	save_item(NAME(m_playfield_yscroll));
+	save_item(NAME(m_tram_checksum));
+	save_item(NAME(m_expanded_mram));
 }
 
 
@@ -127,34 +124,34 @@ VIDEO_START( atarigt )
  *
  *************************************/
 
-void atarigt_colorram_w(atarigt_state *state, offs_t address, UINT16 data, UINT16 mem_mask)
+void atarigt_state::atarigt_colorram_w(offs_t address, UINT16 data, UINT16 mem_mask)
 {
 	UINT16 olddata;
 
 	/* update the raw data */
 	address = (address & 0x7ffff) / 2;
-	olddata = state->m_colorram[address];
-	COMBINE_DATA(&state->m_colorram[address]);
+	olddata = m_colorram[address];
+	COMBINE_DATA(&m_colorram[address]);
 
 	/* update the TRAM checksum */
 	if (address >= 0x10000 && address < 0x14000)
-		state->m_tram_checksum += state->m_colorram[address] - olddata;
+		m_tram_checksum += m_colorram[address] - olddata;
 
 	/* update expanded MRAM */
 	else if (address >= 0x20000 && address < 0x28000)
 	{
-		state->m_expanded_mram[0 * MRAM_ENTRIES + (address & 0x7fff)] = (state->m_colorram[address] >> 8) << RSHIFT;
-		state->m_expanded_mram[1 * MRAM_ENTRIES + (address & 0x7fff)] = (state->m_colorram[address] & 0xff) << GSHIFT;
+		m_expanded_mram[0 * MRAM_ENTRIES + (address & 0x7fff)] = (m_colorram[address] >> 8) << RSHIFT;
+		m_expanded_mram[1 * MRAM_ENTRIES + (address & 0x7fff)] = (m_colorram[address] & 0xff) << GSHIFT;
 	}
 	else if (address >= 0x30000 && address < 0x38000)
-		state->m_expanded_mram[2 * MRAM_ENTRIES + (address & 0x7fff)] = (state->m_colorram[address] & 0xff) << BSHIFT;
+		m_expanded_mram[2 * MRAM_ENTRIES + (address & 0x7fff)] = (m_colorram[address] & 0xff) << BSHIFT;
 }
 
 
-UINT16 atarigt_colorram_r(atarigt_state *state, offs_t address)
+UINT16 atarigt_state::atarigt_colorram_r(offs_t address)
 {
 	address &= 0x7ffff;
-	return state->m_colorram[address / 2];
+	return m_colorram[address / 2];
 }
 
 
@@ -165,14 +162,13 @@ UINT16 atarigt_colorram_r(atarigt_state *state, offs_t address)
  *
  *************************************/
 
-void atarigt_scanline_update(screen_device &screen, int scanline)
+void atarigt_state::scanline_update(screen_device &screen, int scanline)
 {
-	atarigt_state *state = screen.machine().driver_data<atarigt_state>();
-	UINT32 *base = &state->m_alpha32[(scanline / 8) * 32 + 24];
+	UINT32 *base = &m_alpha32[(scanline / 8) * 32 + 24];
 	int i;
 
 	/* keep in range */
-	if (base >= &state->m_alpha32[0x400])
+	if (base >= &m_alpha32[0x400])
 		return;
 
 	/* update the playfield scrolls */
@@ -184,19 +180,19 @@ void atarigt_scanline_update(screen_device &screen, int scanline)
 		{
 			int newscroll = (word >> 21) & 0x3ff;
 			int newbank = (word >> 16) & 0x1f;
-			if (newscroll != state->m_playfield_xscroll)
+			if (newscroll != m_playfield_xscroll)
 			{
 				if (scanline + i > 0)
 					screen.update_partial(scanline + i - 1);
-				tilemap_set_scrollx(state->m_playfield_tilemap, 0, newscroll);
-				state->m_playfield_xscroll = newscroll;
+				m_playfield_tilemap->set_scrollx(0, newscroll);
+				m_playfield_xscroll = newscroll;
 			}
-			if (newbank != state->m_playfield_color_bank)
+			if (newbank != m_playfield_color_bank)
 			{
 				if (scanline + i > 0)
 					screen.update_partial(scanline + i - 1);
-				tilemap_set_palette_offset(state->m_playfield_tilemap, (newbank & 0x1f) << 8);
-				state->m_playfield_color_bank = newbank;
+				m_playfield_tilemap->set_palette_offset((newbank & 0x1f) << 8);
+				m_playfield_color_bank = newbank;
 			}
 		}
 
@@ -204,19 +200,19 @@ void atarigt_scanline_update(screen_device &screen, int scanline)
 		{
 			int newscroll = ((word >> 6) - (scanline + i)) & 0x1ff;
 			int newbank = word & 15;
-			if (newscroll != state->m_playfield_yscroll)
+			if (newscroll != m_playfield_yscroll)
 			{
 				if (scanline + i > 0)
 					screen.update_partial(scanline + i - 1);
-				tilemap_set_scrolly(state->m_playfield_tilemap, 0, newscroll);
-				state->m_playfield_yscroll = newscroll;
+				m_playfield_tilemap->set_scrolly(0, newscroll);
+				m_playfield_yscroll = newscroll;
 			}
-			if (newbank != state->m_playfield_tile_bank)
+			if (newbank != m_playfield_tile_bank)
 			{
 				if (scanline + i > 0)
 					screen.update_partial(scanline + i - 1);
-				tilemap_mark_all_tiles_dirty(state->m_playfield_tilemap);
-				state->m_playfield_tile_bank = newbank;
+				m_playfield_tilemap->mark_all_dirty();
+				m_playfield_tile_bank = newbank;
 			}
 		}
 	}
@@ -506,41 +502,40 @@ PrimRage GALs:
 */
 
 
-SCREEN_UPDATE( atarigt )
+UINT32 atarigt_state::screen_update_atarigt(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	atarigt_state *state = screen->machine().driver_data<atarigt_state>();
-	bitmap_t *mo_bitmap = atarirle_get_vram(state->m_rle, 0);
-	bitmap_t *tm_bitmap = atarirle_get_vram(state->m_rle, 1);
+	bitmap_ind16 *mo_bitmap = atarirle_get_vram(m_rle, 0);
+	bitmap_ind16 *tm_bitmap = atarirle_get_vram(m_rle, 1);
 	UINT16 *cram, *tram;
 	int color_latch;
 	UINT32 *mram;
 	int x, y;
 
 	/* draw the playfield */
-	tilemap_draw(state->m_pf_bitmap, cliprect, state->m_playfield_tilemap, 0, 0);
+	m_playfield_tilemap->draw(*m_pf_bitmap, cliprect, 0, 0);
 
 	/* draw the alpha layer */
-	tilemap_draw(state->m_an_bitmap, cliprect, state->m_alpha_tilemap, 0, 0);
+	m_alpha_tilemap->draw(*m_an_bitmap, cliprect, 0, 0);
 
 	/* cache pointers */
-	color_latch = state->m_colorram[0x30000/2];
-	cram = (UINT16 *)&state->m_colorram[0x00000/2] + 0x2000 * ((color_latch >> 3) & 1);
-	tram = (UINT16 *)&state->m_colorram[0x20000/2] + 0x1000 * ((color_latch >> 4) & 3);
-	mram = state->m_expanded_mram + 0x2000 * ((color_latch >> 6) & 3);
+	color_latch = m_colorram[0x30000/2];
+	cram = (UINT16 *)&m_colorram[0x00000/2] + 0x2000 * ((color_latch >> 3) & 1);
+	tram = (UINT16 *)&m_colorram[0x20000/2] + 0x1000 * ((color_latch >> 4) & 3);
+	mram = m_expanded_mram + 0x2000 * ((color_latch >> 6) & 3);
 
 	/* now do the nasty blend */
-	for (y = cliprect->min_y; y <= cliprect->max_y; y++)
+	for (y = cliprect.min_y; y <= cliprect.max_y; y++)
 	{
-		UINT16 *an = (UINT16 *)state->m_an_bitmap->base + y * state->m_an_bitmap->rowpixels;
-		UINT16 *pf = (UINT16 *)state->m_pf_bitmap->base + y * state->m_pf_bitmap->rowpixels;
-		UINT16 *mo = (UINT16 *)mo_bitmap->base + y * mo_bitmap->rowpixels;
-		UINT16 *tm = (UINT16 *)tm_bitmap->base + y * tm_bitmap->rowpixels;
-		UINT32 *dst = (UINT32 *)bitmap->base + y * bitmap->rowpixels;
+		UINT16 *an = &m_an_bitmap->pix16(y);
+		UINT16 *pf = &m_pf_bitmap->pix16(y);
+		UINT16 *mo = &mo_bitmap->pix16(y);
+		UINT16 *tm = &tm_bitmap->pix16(y);
+		UINT32 *dst = &bitmap.pix32(y);
 
 		/* Primal Rage: no TRAM, slightly different priorities */
-		if (state->m_is_primrage)
+		if (m_is_primrage)
 		{
-			for (x = cliprect->min_x; x <= cliprect->max_x; x++)
+			for (x = cliprect.min_x; x <= cliprect.max_x; x++)
 			{
 				UINT8 pfpri = (pf[x] >> 10) & 7;
 				UINT8 mopri = mo[x] >> ATARIRLE_PRIORITY_SHIFT;
@@ -574,7 +569,7 @@ SCREEN_UPDATE( atarigt )
 		/* T-Mek: full TRAM and all effects */
 		else
 		{
-			for (x = cliprect->min_x; x <= cliprect->max_x; x++)
+			for (x = cliprect.min_x; x <= cliprect.max_x; x++)
 			{
 				UINT8 pfpri = (pf[x] >> 10) & 7;
 				UINT8 mopri = mo[x] >> ATARIRLE_PRIORITY_SHIFT;
@@ -632,9 +627,12 @@ SCREEN_UPDATE( atarigt )
 	return 0;
 }
 
-SCREEN_EOF( atarigt )
+void atarigt_state::screen_eof_atarigt(screen_device &screen, bool state)
 {
-	atarigt_state *state = machine.driver_data<atarigt_state>();
+	// rising edge
+	if (state)
+	{
 
-	atarirle_eof(state->m_rle);
+		atarirle_eof(m_rle);
+	}
 }

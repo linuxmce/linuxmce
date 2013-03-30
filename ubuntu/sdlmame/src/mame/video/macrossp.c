@@ -6,25 +6,23 @@
 
 /*** SCR A LAYER ***/
 
-WRITE32_HANDLER( macrossp_scra_videoram_w )
+WRITE32_MEMBER(macrossp_state::macrossp_scra_videoram_w)
 {
-	macrossp_state *state = space->machine().driver_data<macrossp_state>();
 
-	COMBINE_DATA(&state->m_scra_videoram[offset]);
+	COMBINE_DATA(&m_scra_videoram[offset]);
 
-	tilemap_mark_tile_dirty(state->m_scra_tilemap, offset);
+	m_scra_tilemap->mark_tile_dirty(offset);
 }
 
 
-static TILE_GET_INFO( get_macrossp_scra_tile_info )
+TILE_GET_INFO_MEMBER(macrossp_state::get_macrossp_scra_tile_info)
 {
-	macrossp_state *state = machine.driver_data<macrossp_state>();
 	UINT32 attr, tileno, color;
 
-	attr = state->m_scra_videoram[tile_index];
+	attr = m_scra_videoram[tile_index];
 	tileno = attr & 0x0000ffff;
 
-	switch (state->m_scra_videoregs[0] & 0x00000c00)
+	switch (m_scra_videoregs[0] & 0x00000c00)
 	{
 		case 0x00000800:
 			color = (attr & 0x000e0000) >> 15;
@@ -35,34 +33,32 @@ static TILE_GET_INFO( get_macrossp_scra_tile_info )
 			break;
 
 		default:
-			color = machine.rand() & 7;
+			color = machine().rand() & 7;
 			break;
 	}
 
-	SET_TILE_INFO(1, tileno, color, TILE_FLIPYX((attr & 0xc0000000) >> 30));
+	SET_TILE_INFO_MEMBER(1, tileno, color, TILE_FLIPYX((attr & 0xc0000000) >> 30));
 }
 
 /*** SCR B LAYER ***/
 
-WRITE32_HANDLER( macrossp_scrb_videoram_w )
+WRITE32_MEMBER(macrossp_state::macrossp_scrb_videoram_w)
 {
-	macrossp_state *state = space->machine().driver_data<macrossp_state>();
 
-	COMBINE_DATA(&state->m_scrb_videoram[offset]);
+	COMBINE_DATA(&m_scrb_videoram[offset]);
 
-	tilemap_mark_tile_dirty(state->m_scrb_tilemap, offset);
+	m_scrb_tilemap->mark_tile_dirty(offset);
 }
 
 
-static TILE_GET_INFO( get_macrossp_scrb_tile_info )
+TILE_GET_INFO_MEMBER(macrossp_state::get_macrossp_scrb_tile_info)
 {
-	macrossp_state *state = machine.driver_data<macrossp_state>();
 	UINT32 attr, tileno, color;
 
-	attr = state->m_scrb_videoram[tile_index];
+	attr = m_scrb_videoram[tile_index];
 	tileno = attr & 0x0000ffff;
 
-	switch (state->m_scrb_videoregs[0] & 0x00000c00)
+	switch (m_scrb_videoregs[0] & 0x00000c00)
 	{
 		case 0x00000800:
 			color = (attr & 0x000e0000) >> 15;
@@ -73,34 +69,32 @@ static TILE_GET_INFO( get_macrossp_scrb_tile_info )
 			break;
 
 		default:
-			color = machine.rand() & 7;
+			color = machine().rand() & 7;
 			break;
 	}
 
-	SET_TILE_INFO(2, tileno, color, TILE_FLIPYX((attr & 0xc0000000) >> 30));
+	SET_TILE_INFO_MEMBER(2, tileno, color, TILE_FLIPYX((attr & 0xc0000000) >> 30));
 }
 
 /*** SCR C LAYER ***/
 
-WRITE32_HANDLER( macrossp_scrc_videoram_w )
+WRITE32_MEMBER(macrossp_state::macrossp_scrc_videoram_w)
 {
-	macrossp_state *state = space->machine().driver_data<macrossp_state>();
 
-	COMBINE_DATA(&state->m_scrc_videoram[offset]);
+	COMBINE_DATA(&m_scrc_videoram[offset]);
 
-	tilemap_mark_tile_dirty(state->m_scrc_tilemap, offset);
+	m_scrc_tilemap->mark_tile_dirty(offset);
 }
 
 
-static TILE_GET_INFO( get_macrossp_scrc_tile_info )
+TILE_GET_INFO_MEMBER(macrossp_state::get_macrossp_scrc_tile_info)
 {
-	macrossp_state *state = machine.driver_data<macrossp_state>();
 	UINT32 attr, tileno, color;
 
-	attr = state->m_scrc_videoram[tile_index];
+	attr = m_scrc_videoram[tile_index];
 	tileno = attr & 0x0000ffff;
 
-	switch (state->m_scrc_videoregs[0] & 0x00000c00)
+	switch (m_scrc_videoregs[0] & 0x00000c00)
 	{
 		case 0x00000800:
 			color = (attr & 0x000e0000) >> 15;
@@ -111,88 +105,85 @@ static TILE_GET_INFO( get_macrossp_scrc_tile_info )
 			break;
 
 		default:
-			color = machine.rand() & 7;
+			color = machine().rand() & 7;
 			break;
 	}
 
-	SET_TILE_INFO(3, tileno, color, TILE_FLIPYX((attr & 0xc0000000) >> 30));
+	SET_TILE_INFO_MEMBER(3, tileno, color, TILE_FLIPYX((attr & 0xc0000000) >> 30));
 }
 
 /*** TEXT LAYER ***/
 
-WRITE32_HANDLER( macrossp_text_videoram_w )
+WRITE32_MEMBER(macrossp_state::macrossp_text_videoram_w)
 {
-	macrossp_state *state = space->machine().driver_data<macrossp_state>();
 
-	COMBINE_DATA(&state->m_text_videoram[offset]);
+	COMBINE_DATA(&m_text_videoram[offset]);
 
-	tilemap_mark_tile_dirty(state->m_text_tilemap, offset);
+	m_text_tilemap->mark_tile_dirty(offset);
 }
 
 
-static TILE_GET_INFO( get_macrossp_text_tile_info )
+TILE_GET_INFO_MEMBER(macrossp_state::get_macrossp_text_tile_info)
 {
-	macrossp_state *state = machine.driver_data<macrossp_state>();
 	UINT32 tileno, colour;
 
-	tileno = state->m_text_videoram[tile_index] & 0x0000ffff;
-	colour = (state->m_text_videoram[tile_index] & 0x00fe0000) >> 17;
+	tileno = m_text_videoram[tile_index] & 0x0000ffff;
+	colour = (m_text_videoram[tile_index] & 0x00fe0000) >> 17;
 
-	SET_TILE_INFO(4, tileno, colour, 0);
+	SET_TILE_INFO_MEMBER(4, tileno, colour, 0);
 }
 
 
 
 /*** VIDEO START / UPDATE ***/
 
-VIDEO_START( macrossp )
+void macrossp_state::video_start()
 {
-	macrossp_state *state = machine.driver_data<macrossp_state>();
 
-	state->m_spriteram_old = auto_alloc_array_clear(machine, UINT32, state->m_spriteram_size / 4);
-	state->m_spriteram_old2 = auto_alloc_array_clear(machine, UINT32, state->m_spriteram_size / 4);
+	m_spriteram_old = auto_alloc_array_clear(machine(), UINT32, m_spriteram.bytes() / 4);
+	m_spriteram_old2 = auto_alloc_array_clear(machine(), UINT32, m_spriteram.bytes() / 4);
 
-	state->m_text_tilemap = tilemap_create(machine, get_macrossp_text_tile_info, tilemap_scan_rows, 16, 16, 64, 64);
-	state->m_scra_tilemap = tilemap_create(machine, get_macrossp_scra_tile_info, tilemap_scan_rows, 16, 16, 64, 64);
-	state->m_scrb_tilemap = tilemap_create(machine, get_macrossp_scrb_tile_info, tilemap_scan_rows, 16, 16, 64, 64);
-	state->m_scrc_tilemap = tilemap_create(machine, get_macrossp_scrc_tile_info, tilemap_scan_rows, 16, 16, 64, 64);
+	m_text_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(macrossp_state::get_macrossp_text_tile_info),this), TILEMAP_SCAN_ROWS, 16, 16, 64, 64);
+	m_scra_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(macrossp_state::get_macrossp_scra_tile_info),this), TILEMAP_SCAN_ROWS, 16, 16, 64, 64);
+	m_scrb_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(macrossp_state::get_macrossp_scrb_tile_info),this), TILEMAP_SCAN_ROWS, 16, 16, 64, 64);
+	m_scrc_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(macrossp_state::get_macrossp_scrc_tile_info),this), TILEMAP_SCAN_ROWS, 16, 16, 64, 64);
 
-	tilemap_set_transparent_pen(state->m_text_tilemap, 0);
-	tilemap_set_transparent_pen(state->m_scra_tilemap, 0);
-	tilemap_set_transparent_pen(state->m_scrb_tilemap, 0);
-	tilemap_set_transparent_pen(state->m_scrc_tilemap, 0);
+	m_text_tilemap->set_transparent_pen(0);
+	m_scra_tilemap->set_transparent_pen(0);
+	m_scrb_tilemap->set_transparent_pen(0);
+	m_scrc_tilemap->set_transparent_pen(0);
 
-	machine.gfx[0]->color_granularity = 64;
-	machine.gfx[1]->color_granularity = 64;
-	machine.gfx[2]->color_granularity = 64;
-	machine.gfx[3]->color_granularity = 64;
+	machine().gfx[0]->set_granularity(64);
+	machine().gfx[1]->set_granularity(64);
+	machine().gfx[2]->set_granularity(64);
+	machine().gfx[3]->set_granularity(64);
 
-	state->save_pointer(NAME(state->m_spriteram_old), state->m_spriteram_size / 4);
-	state->save_pointer(NAME(state->m_spriteram_old2), state->m_spriteram_size / 4);
+	save_pointer(NAME(m_spriteram_old), m_spriteram.bytes() / 4);
+	save_pointer(NAME(m_spriteram_old2), m_spriteram.bytes() / 4);
 }
 
 
 
-static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, int priority )
+static void draw_sprites(running_machine &machine, bitmap_rgb32 &bitmap, const rectangle &cliprect, int priority )
 {
 	macrossp_state *state = machine.driver_data<macrossp_state>();
-	const gfx_element *gfx = machine.gfx[0];
+	gfx_element *gfx = machine.gfx[0];
 	//  UINT32 *source = state->m_spriteram;
 	UINT32 *source = state->m_spriteram_old2; /* buffers by two frames */
-	UINT32 *finish = source + state->m_spriteram_size / 4;
+	UINT32 *finish = source + state->m_spriteram.bytes() / 4;
 
 	while (source < finish)
 	{
 
 		/*
 
-         --hh hhyy yyyy yyyy   CCww wwxx xxxx xxxx
+		 --hh hhyy yyyy yyyy   CCww wwxx xxxx xxxx
 
-         ---- --zz zzzz zzzz   ---- --ZZ ZZZZ ZZZZ
+		 ---- --zz zzzz zzzz   ---- --ZZ ZZZZ ZZZZ
 
-         fFa- pp-- cccc c---   tttt tttt tttt tttt
+		 fFa- pp-- cccc c---   tttt tttt tttt tttt
 
-         */
+		 */
 
 
 		int wide = (source[0] & 0x00003c00) >> 10;
@@ -320,7 +311,7 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 }
 
 
-static void draw_layer( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect, int layer )
+static void draw_layer( running_machine &machine, bitmap_rgb32 &bitmap, const rectangle &cliprect, int layer )
 {
 	macrossp_state *state = machine.driver_data<macrossp_state>();
 	tilemap_t *tm;
@@ -345,7 +336,7 @@ static void draw_layer( running_machine &machine, bitmap_t *bitmap, const rectan
 			break;
 	}
 
-	if ((vr[2] & 0xf0000000) == 0xe0000000)	/* zoom enable (guess, surely wrong) */
+	if ((vr[2] & 0xf0000000) == 0xe0000000) /* zoom enable (guess, surely wrong) */
 	{
 		int startx, starty, inc;
 
@@ -358,16 +349,16 @@ static void draw_layer( running_machine &machine, bitmap_t *bitmap, const rectan
 		startx -= (368/2) * inc;
 		starty -= (240/2) * inc;
 
-		tilemap_draw_roz(bitmap,cliprect,tm,
+		tm->draw_roz(bitmap, cliprect,
 				startx,starty,inc,0,0,inc,
-				1,	/* wraparound */
+				1,  /* wraparound */
 				0,0);
 	}
 	else
 	{
-		tilemap_set_scrollx( tm, 0, ((vr[0] & 0x000003ff) >> 0 ) );
-		tilemap_set_scrolly( tm, 0, ((vr[0] & 0x03ff0000) >> 16) );
-		tilemap_draw(bitmap, cliprect, tm, 0, 0);
+		tm->set_scrollx(0, ((vr[0] & 0x000003ff) >> 0 ) );
+		tm->set_scrolly(0, ((vr[0] & 0x03ff0000) >> 16) );
+		tm->draw(bitmap, cliprect, 0, 0);
 	}
 }
 
@@ -387,53 +378,55 @@ static void sortlayers(int *layer,int *pri)
 	SWAP(1,2)
 }
 
-SCREEN_UPDATE( macrossp )
+UINT32 macrossp_state::screen_update_macrossp(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
-	macrossp_state *state = screen->machine().driver_data<macrossp_state>();
 	int layers[3],layerpri[3];
 
-	bitmap_fill(bitmap, cliprect, get_black_pen(screen->machine()));
+	bitmap.fill(get_black_pen(machine()), cliprect);
 
 	layers[0] = 0;
-	layerpri[0] = (state->m_scra_videoregs[0] & 0x0000c000) >> 14;
+	layerpri[0] = (m_scra_videoregs[0] & 0x0000c000) >> 14;
 	layers[1] = 1;
-	layerpri[1] = (state->m_scrb_videoregs[0] & 0x0000c000) >> 14;
+	layerpri[1] = (m_scrb_videoregs[0] & 0x0000c000) >> 14;
 	layers[2] = 2;
-	layerpri[2] = (state->m_scrc_videoregs[0] & 0x0000c000) >> 14;
+	layerpri[2] = (m_scrc_videoregs[0] & 0x0000c000) >> 14;
 
 	sortlayers(layers, layerpri);
 
-	draw_layer(screen->machine(), bitmap, cliprect, layers[0]);
-	draw_sprites(screen->machine(), bitmap, cliprect, 0);
-	draw_layer(screen->machine(), bitmap, cliprect, layers[1]);
-	draw_sprites(screen->machine(), bitmap, cliprect, 1);
-	draw_layer(screen->machine(), bitmap, cliprect, layers[2]);
-	draw_sprites(screen->machine(), bitmap, cliprect, 2);
-	draw_sprites(screen->machine(), bitmap, cliprect, 3);
-	tilemap_draw(bitmap, cliprect, state->m_text_tilemap, 0, 0);
+	draw_layer(machine(), bitmap, cliprect, layers[0]);
+	draw_sprites(machine(), bitmap, cliprect, 0);
+	draw_layer(machine(), bitmap, cliprect, layers[1]);
+	draw_sprites(machine(), bitmap, cliprect, 1);
+	draw_layer(machine(), bitmap, cliprect, layers[2]);
+	draw_sprites(machine(), bitmap, cliprect, 2);
+	draw_sprites(machine(), bitmap, cliprect, 3);
+	m_text_tilemap->draw(bitmap, cliprect, 0, 0);
 
 #if 0
-popmessage	("scra - %08x %08x %08x\nscrb - %08x %08x %08x\nscrc - %08x %08x %08x",
-state->m_scra_videoregs[0]&0xffff33ff, // yyyyxxxx
-state->m_scra_videoregs[1], // ??? more scrolling?
-state->m_scra_videoregs[2], // 08 - 0b
+popmessage  ("scra - %08x %08x %08x\nscrb - %08x %08x %08x\nscrc - %08x %08x %08x",
+m_scra_videoregs[0]&0xffff33ff, // yyyyxxxx
+m_scra_videoregs[1], // ??? more scrolling?
+m_scra_videoregs[2], // 08 - 0b
 
-state->m_scrb_videoregs[0]&0xffff33ff, // 00 - 03
-state->m_scrb_videoregs[1], // 04 - 07
-state->m_scrb_videoregs[2], // 08 - 0b
+m_scrb_videoregs[0]&0xffff33ff, // 00 - 03
+m_scrb_videoregs[1], // 04 - 07
+m_scrb_videoregs[2], // 08 - 0b
 
-state->m_scrc_videoregs[0]&0xffff33ff, // 00 - 03
-state->m_scrc_videoregs[1], // 04 - 07
-state->m_scrc_videoregs[2]);// 08 - 0b
+m_scrc_videoregs[0]&0xffff33ff, // 00 - 03
+m_scrc_videoregs[1], // 04 - 07
+m_scrc_videoregs[2]);// 08 - 0b
 #endif
 	return 0;
 }
 
-SCREEN_EOF( macrossp )
+void macrossp_state::screen_eof_macrossp(screen_device &screen, bool state)
 {
-	macrossp_state *state = machine.driver_data<macrossp_state>();
+	// rising edge
+	if (state)
+	{
 
-	/* looks like sprites are *two* frames ahead, like nmk16 */
-	memcpy(state->m_spriteram_old2, state->m_spriteram_old, state->m_spriteram_size);
-	memcpy(state->m_spriteram_old, state->m_spriteram, state->m_spriteram_size);
+		/* looks like sprites are *two* frames ahead, like nmk16 */
+		memcpy(m_spriteram_old2, m_spriteram_old, m_spriteram.bytes());
+		memcpy(m_spriteram_old, m_spriteram, m_spriteram.bytes());
+	}
 }

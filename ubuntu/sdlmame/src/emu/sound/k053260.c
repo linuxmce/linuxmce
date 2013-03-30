@@ -11,51 +11,49 @@
 
 #define LOG 0
 
-#define BASE_SHIFT	16
+#define BASE_SHIFT  16
 
-typedef struct _k053260_channel k053260_channel;
-struct _k053260_channel
+struct k053260_channel
 {
-	UINT32		rate;
-	UINT32		size;
-	UINT32		start;
-	UINT32		bank;
-	UINT32		volume;
-	int			play;
-	UINT32		pan;
-	UINT32		pos;
-	int			loop;
-	int			ppcm; /* packed PCM ( 4 bit signed ) */
-	int			ppcm_data;
+	UINT32      rate;
+	UINT32      size;
+	UINT32      start;
+	UINT32      bank;
+	UINT32      volume;
+	int         play;
+	UINT32      pan;
+	UINT32      pos;
+	int         loop;
+	int         ppcm; /* packed PCM ( 4 bit signed ) */
+	int         ppcm_data;
 };
 
-typedef struct _k053260_state k053260_state;
-struct _k053260_state
+struct k053260_state
 {
-	sound_stream *				channel;
-	int							mode;
-	int							regs[0x30];
-	UINT8						*rom;
-	int							rom_size;
-	UINT32						*delta_table;
-	k053260_channel				channels[4];
-	const k053260_interface		*intf;
-	device_t				*device;
+	sound_stream *              channel;
+	int                         mode;
+	int                         regs[0x30];
+	UINT8                       *rom;
+	int                         rom_size;
+	UINT32                      *delta_table;
+	k053260_channel             channels[4];
+	const k053260_interface     *intf;
+	device_t                *device;
 };
 
 INLINE k053260_state *get_safe_token(device_t *device)
 {
 	assert(device != NULL);
 	assert(device->type() == K053260);
-	return (k053260_state *)downcast<legacy_device_base *>(device)->token();
+	return (k053260_state *)downcast<k053260_device *>(device)->token();
 }
 
 
 static void InitDeltaTable( k053260_state *ic, int rate, int clock )
 {
-	int		i;
-	double	base = ( double )rate;
-	double	max = (double)(clock); /* Hz */
+	int     i;
+	double  base = ( double )rate;
+	double  max = (double)(clock); /* Hz */
 	UINT32 val;
 
 	for( i = 0; i < 0x1000; i++ ) {
@@ -217,11 +215,11 @@ static DEVICE_START( k053260 )
 
 	/* Initialize our chip structure */
 	ic->device = device;
-	ic->intf = (device->baseconfig().static_config() != NULL) ? (const k053260_interface *)device->baseconfig().static_config() : &defintrf;
+	ic->intf = (device->static_config() != NULL) ? (const k053260_interface *)device->static_config() : &defintrf;
 
 	ic->mode = 0;
 
-	const memory_region *region = (ic->intf->rgnoverride != NULL) ? device->machine().region(ic->intf->rgnoverride) : device->region();
+	memory_region *region = (ic->intf->rgnoverride != NULL) ? device->machine().root_device().memregion(ic->intf->rgnoverride) : device->region();
 
 	ic->rom = *region;
 	ic->rom_size = region->bytes();
@@ -258,7 +256,7 @@ static DEVICE_START( k053260 )
 
 	/* setup SH1 timer if necessary */
 	if ( ic->intf->irq )
-		device->machine().scheduler().timer_pulse( attotime::from_hz(device->clock()) * 32, FUNC(ic->intf->irq ));
+		device->machine().scheduler().timer_pulse( attotime::from_hz(device->clock()) * 32, ic->intf->irq, "ic->intf->irq" );
 }
 
 INLINE void check_bounds( k053260_state *ic, int channel )
@@ -296,7 +294,7 @@ WRITE8_DEVICE_HANDLER( k053260_w )
 		return;
 	}
 
-	 ic->channel->update();
+		ic->channel->update();
 
 	/* before we update the regs, we need to check for a latched reg */
 	if ( r == 0x28 ) {
@@ -437,30 +435,49 @@ READ8_DEVICE_HANDLER( k053260_r )
 	return ic->regs[offset];
 }
 
-/**************************************************************************
- * Generic get_info
- **************************************************************************/
+const device_type K053260 = &device_creator<k053260_device>;
 
-DEVICE_GET_INFO( k053260 )
+k053260_device::k053260_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, K053260, "K053260", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
 {
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(k053260_state);				break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME( k053260 );		break;
-		case DEVINFO_FCT_STOP:							/* nothing */									break;
-		case DEVINFO_FCT_RESET:							info->reset = DEVICE_RESET_NAME( k053260 );		break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "K053260");						break;
-		case DEVINFO_STR_FAMILY:						strcpy(info->s, "Konami custom");				break;
-		case DEVINFO_STR_VERSION:						strcpy(info->s, "1.0");							break;
-		case DEVINFO_STR_SOURCE_FILE:					strcpy(info->s, __FILE__);						break;
-		case DEVINFO_STR_CREDITS:						strcpy(info->s, "Copyright Nicola Salmoria and the MAME Team"); break;
-	}
+	m_token = global_alloc_clear(k053260_state);
 }
 
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
 
-DEFINE_LEGACY_SOUND_DEVICE(K053260, k053260);
+void k053260_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void k053260_device::device_start()
+{
+	DEVICE_START_NAME( k053260 )(this);
+}
+
+//-------------------------------------------------
+//  device_reset - device-specific reset
+//-------------------------------------------------
+
+void k053260_device::device_reset()
+{
+	DEVICE_RESET_NAME( k053260 )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void k053260_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}

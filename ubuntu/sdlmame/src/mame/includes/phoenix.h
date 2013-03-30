@@ -6,8 +6,8 @@
 class phoenix_state : public driver_device
 {
 public:
-	phoenix_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	phoenix_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) { }
 
 	UINT8 *m_videoram_pg[2];
 	UINT8 m_videoram_pg_index;
@@ -20,49 +20,66 @@ public:
 	tilemap_t *m_bg_tilemap;
 	UINT8 m_survival_input_latches[2];
 	UINT8 m_survival_input_readc;
+	DECLARE_WRITE8_MEMBER(phoenix_videoram_w);
+	DECLARE_WRITE8_MEMBER(phoenix_videoreg_w);
+	DECLARE_WRITE8_MEMBER(pleiads_videoreg_w);
+	DECLARE_WRITE8_MEMBER(phoenix_scroll_w);
+	DECLARE_READ8_MEMBER(survival_input_port_0_r);
+	DECLARE_CUSTOM_INPUT_MEMBER(player_input_r);
+	DECLARE_CUSTOM_INPUT_MEMBER(pleiads_protection_r);
+	DECLARE_DRIVER_INIT(condor);
+	TILE_GET_INFO_MEMBER(get_fg_tile_info);
+	TILE_GET_INFO_MEMBER(get_bg_tile_info);
+	DECLARE_MACHINE_RESET(phoenix);
+	DECLARE_VIDEO_START(phoenix);
+	DECLARE_PALETTE_INIT(phoenix);
+	DECLARE_PALETTE_INIT(survival);
+	DECLARE_PALETTE_INIT(pleiads);
+	UINT32 screen_update_phoenix(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	DECLARE_READ8_MEMBER(survival_protection_r);
+	DECLARE_READ_LINE_MEMBER(survival_sid_callback);
 };
 
 
 /*----------- video timing  -----------*/
 
-#define MASTER_CLOCK			XTAL_11MHz
+#define MASTER_CLOCK            XTAL_11MHz
 
-#define PIXEL_CLOCK				(MASTER_CLOCK/2)
-#define CPU_CLOCK				(PIXEL_CLOCK)
-#define HTOTAL					(512-160)
-#define HBSTART					(256)
-#define HBEND					(0)
-#define VTOTAL					(256)
-#define VBSTART					(208)
-#define VBEND					(0)
+#define PIXEL_CLOCK             (MASTER_CLOCK/2)
+#define CPU_CLOCK               (PIXEL_CLOCK)
+#define HTOTAL                  (512-160)
+#define HBSTART                 (256)
+#define HBEND                   (0)
+#define VTOTAL                  (256)
+#define VBSTART                 (208)
+#define VBEND                   (0)
 
 /*----------- defined in audio/phoenix.c -----------*/
 
 DISCRETE_SOUND_EXTERN( phoenix );
 
-WRITE8_DEVICE_HANDLER( phoenix_sound_control_a_w );
-WRITE8_DEVICE_HANDLER( phoenix_sound_control_b_w );
+DECLARE_WRITE8_DEVICE_HANDLER( phoenix_sound_control_a_w );
+DECLARE_WRITE8_DEVICE_HANDLER( phoenix_sound_control_b_w );
 
-DECLARE_LEGACY_SOUND_DEVICE(PHOENIX, phoenix_sound);
+class phoenix_sound_device : public device_t,
+									public device_sound_interface
+{
+public:
+	phoenix_sound_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock);
+	~phoenix_sound_device() { global_free(m_token); }
 
+	// access to legacy token
+	void *token() const { assert(m_token != NULL); return m_token; }
+protected:
+	// device-level overrides
+	virtual void device_config_complete();
+	virtual void device_start();
 
-/*----------- defined in video/phoenix.c -----------*/
+	// sound stream update overrides
+	virtual void sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples);
+private:
+	// internal state
+	void *m_token;
+};
 
-PALETTE_INIT( phoenix );
-PALETTE_INIT( survival );
-PALETTE_INIT( pleiads );
-VIDEO_START( phoenix );
-SCREEN_UPDATE( phoenix );
-
-WRITE8_HANDLER( phoenix_videoram_w );
-WRITE8_HANDLER( phoenix_videoreg_w );
-WRITE8_HANDLER( pleiads_videoreg_w );
-WRITE8_HANDLER( phoenix_scroll_w );
-
-CUSTOM_INPUT( player_input_r );
-CUSTOM_INPUT( pleiads_protection_r );
-READ8_HANDLER( survival_input_port_0_r );
-READ8_DEVICE_HANDLER( survival_protection_r );
-
-READ_LINE_DEVICE_HANDLER( survival_sid_callback );
-
+extern const device_type PHOENIX;

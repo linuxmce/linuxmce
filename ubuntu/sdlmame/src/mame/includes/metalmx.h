@@ -6,13 +6,16 @@
 class metalmx_state : public driver_device
 {
 public:
-	metalmx_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config),
-		  m_maincpu(*this, "maincpu"),
-		  m_gsp(*this, "gsp"),
-		  m_adsp(*this, "adsp"),
-		  m_dsp32c_1(*this, "dsp32c_1"),
-		  m_dsp32c_2(*this, "dsp32c_2") { }
+	metalmx_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+			m_maincpu(*this, "maincpu"),
+			m_gsp(*this, "gsp"),
+			m_adsp(*this, "adsp"),
+			m_dsp32c_1(*this, "dsp32c_1"),
+			m_dsp32c_2(*this, "dsp32c_2") ,
+		m_adsp_internal_program_ram(*this, "adsp_intprog"),
+		m_gsp_dram(*this, "gsp_dram"),
+		m_gsp_vram(*this, "gsp_vram"){ }
 
 	required_device<m68ec020_device> m_maincpu;
 	required_device<tms34020_device> m_gsp;
@@ -20,8 +23,30 @@ public:
 	required_device<dsp32c_device> m_dsp32c_1;
 	required_device<dsp32c_device> m_dsp32c_2;
 
-	UINT16				*m_gsp_dram;
-	UINT16				*m_gsp_vram;
+	required_shared_ptr<UINT32> m_adsp_internal_program_ram;
+	required_shared_ptr<UINT16> m_gsp_dram;
+	required_shared_ptr<UINT16> m_gsp_vram;
 
-	UINT32				*m_adsp_internal_program_ram;
+	DECLARE_READ32_MEMBER(unk_r);
+	DECLARE_READ32_MEMBER(watchdog_r);
+	DECLARE_WRITE32_MEMBER(shifter_w);
+	DECLARE_WRITE32_MEMBER(motor_w);
+	DECLARE_WRITE32_MEMBER(reset_w);
+	DECLARE_READ32_MEMBER(sound_data_r);
+	DECLARE_WRITE32_MEMBER(sound_data_w);
+	DECLARE_WRITE32_MEMBER(dsp32c_1_w);
+	DECLARE_READ32_MEMBER(dsp32c_1_r);
+	DECLARE_WRITE32_MEMBER(dsp32c_2_w);
+	DECLARE_READ32_MEMBER(dsp32c_2_r);
+	DECLARE_WRITE32_MEMBER(host_gsp_w);
+	DECLARE_READ32_MEMBER(host_gsp_r);
+	DECLARE_READ32_MEMBER(host_dram_r);
+	DECLARE_WRITE32_MEMBER(host_dram_w);
+	DECLARE_READ32_MEMBER(host_vram_r);
+	DECLARE_WRITE32_MEMBER(host_vram_w);
+	DECLARE_WRITE32_MEMBER(timer_w);
+	DECLARE_DRIVER_INIT(metalmx);
+	virtual void machine_reset();
+	virtual void video_start();
+	UINT32 screen_update_metalmx(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };

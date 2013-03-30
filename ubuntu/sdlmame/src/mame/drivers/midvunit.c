@@ -6,15 +6,22 @@
 
     Games supported:
         * Cruis'n USA (1994)        [3 sets]
-        * Cruis'n World (1996)      [4 sets]
-        * War Gods (1996)
-        * Off Road Challenge (1997) [4 sets]
+        * Cruis'n World (1996)      [7 sets]
+        * War Gods (1996)           [3 sets]
+        * Off Road Challenge (1997) [5 sets]
 
     Known bugs:
         * textures for automatic/manual selection get overwritten in Cruis'n World
         * rendering needs to be looked at a little more closely to fix some holes
         * in Cruis'n World attract mode, right side of sky looks like it has wrapped
         * Off Road Challenge has polygon sorting issues, among other problems
+        * Issues for the Wargods sets:
+           Sound D/RAM      ERROR EE (during boot diag)
+           Listen for Tone  ERROR E1 (during boot diag)
+           All sets report as Game Type: 452 (12/11/1995) [which is wrong for newer sets]
+
+Known to exist but not dumped:
+    Off Road Challenge v1.00 (Mon 07-28-97)
 
 **************************************************************************/
 
@@ -28,7 +35,7 @@
 #include "includes/midvunit.h"
 
 
-#define CPU_CLOCK		50000000
+#define CPU_CLOCK       50000000
 
 
 /*************************************
@@ -37,46 +44,43 @@
  *
  *************************************/
 
-static MACHINE_START( midvunit )
+void midvunit_state::machine_start()
 {
-	midvunit_state *state = machine.driver_data<midvunit_state>();
-	state_save_register_global(machine, state->m_cmos_protected);
-	state_save_register_global(machine, state->m_control_data);
-	state_save_register_global(machine, state->m_adc_data);
-	state_save_register_global(machine, state->m_adc_shift);
-	state_save_register_global(machine, state->m_last_port0);
-	state_save_register_global(machine, state->m_shifter_state);
-	state_save_register_global(machine, state->m_timer_rate);
+	state_save_register_global(machine(), m_cmos_protected);
+	state_save_register_global(machine(), m_control_data);
+	state_save_register_global(machine(), m_adc_data);
+	state_save_register_global(machine(), m_adc_shift);
+	state_save_register_global(machine(), m_last_port0);
+	state_save_register_global(machine(), m_shifter_state);
+	state_save_register_global(machine(), m_timer_rate);
 }
 
 
-static MACHINE_RESET( midvunit )
+void midvunit_state::machine_reset()
 {
-	midvunit_state *state = machine.driver_data<midvunit_state>();
-	dcs_reset_w(1);
-	dcs_reset_w(0);
+	dcs_reset_w(machine(), 1);
+	dcs_reset_w(machine(), 0);
 
-	memcpy(state->m_ram_base, machine.region("user1")->base(), 0x20000*4);
-	machine.device("maincpu")->reset();
+	memcpy(m_ram_base, memregion("user1")->base(), 0x20000*4);
+	machine().device("maincpu")->reset();
 
-	state->m_timer[0] = machine.device<timer_device>("timer0");
-	state->m_timer[1] = machine.device<timer_device>("timer1");
+	m_timer[0] = machine().device<timer_device>("timer0");
+	m_timer[1] = machine().device<timer_device>("timer1");
 }
 
 
-static MACHINE_RESET( midvplus )
+MACHINE_RESET_MEMBER(midvunit_state,midvplus)
 {
-	midvunit_state *state = machine.driver_data<midvunit_state>();
-	dcs_reset_w(1);
-	dcs_reset_w(0);
+	dcs_reset_w(machine(), 1);
+	dcs_reset_w(machine(), 0);
 
-	memcpy(state->m_ram_base, machine.region("user1")->base(), 0x20000*4);
-	machine.device("maincpu")->reset();
+	memcpy(m_ram_base, memregion("user1")->base(), 0x20000*4);
+	machine().device("maincpu")->reset();
 
-	state->m_timer[0] = machine.device<timer_device>("timer0");
-	state->m_timer[1] = machine.device<timer_device>("timer1");
+	m_timer[0] = machine().device<timer_device>("timer0");
+	m_timer[1] = machine().device<timer_device>("timer1");
 
-	devtag_reset(machine, "ide");
+	machine().device("ide")->reset();
 }
 
 
@@ -87,24 +91,23 @@ static MACHINE_RESET( midvplus )
  *
  *************************************/
 
-static READ32_HANDLER( port0_r )
+READ32_MEMBER(midvunit_state::port0_r)
 {
-	midvunit_state *state = space->machine().driver_data<midvunit_state>();
-	UINT16 val = input_port_read(space->machine(), "IN0");
-	UINT16 diff = val ^ state->m_last_port0;
+	UINT16 val = ioport("IN0")->read();
+	UINT16 diff = val ^ m_last_port0;
 
 	/* make sure the shift controls are mutually exclusive */
 	if ((diff & 0x0400) && !(val & 0x0400))
-		state->m_shifter_state = (state->m_shifter_state == 1) ? 0 : 1;
+		m_shifter_state = (m_shifter_state == 1) ? 0 : 1;
 	if ((diff & 0x0800) && !(val & 0x0800))
-		state->m_shifter_state = (state->m_shifter_state == 2) ? 0 : 2;
+		m_shifter_state = (m_shifter_state == 2) ? 0 : 2;
 	if ((diff & 0x1000) && !(val & 0x1000))
-		state->m_shifter_state = (state->m_shifter_state == 4) ? 0 : 4;
+		m_shifter_state = (m_shifter_state == 4) ? 0 : 4;
 	if ((diff & 0x2000) && !(val & 0x2000))
-		state->m_shifter_state = (state->m_shifter_state == 8) ? 0 : 8;
-	state->m_last_port0 = val;
+		m_shifter_state = (m_shifter_state == 8) ? 0 : 8;
+	m_last_port0 = val;
 
-	val = (val | 0x3c00) ^ (state->m_shifter_state << 10);
+	val = (val | 0x3c00) ^ (m_shifter_state << 10);
 
 	return (val << 16) | val;
 }
@@ -116,13 +119,12 @@ static READ32_HANDLER( port0_r )
  *
  *************************************/
 
-static READ32_HANDLER( midvunit_adc_r )
+READ32_MEMBER(midvunit_state::midvunit_adc_r)
 {
-	midvunit_state *state = space->machine().driver_data<midvunit_state>();
-	if (!(state->m_control_data & 0x40))
+	if (!(m_control_data & 0x40))
 	{
-		cputag_set_input_line(space->machine(), "maincpu", 3, CLEAR_LINE);
-		return state->m_adc_data << state->m_adc_shift;
+		machine().device("maincpu")->execute().set_input_line(3, CLEAR_LINE);
+		return m_adc_data << m_adc_shift;
 	}
 	else
 		logerror("adc_r without enabling reads!\n");
@@ -130,24 +132,23 @@ static READ32_HANDLER( midvunit_adc_r )
 }
 
 
-static TIMER_CALLBACK( adc_ready )
+TIMER_CALLBACK_MEMBER(midvunit_state::adc_ready)
 {
-	cputag_set_input_line(machine, "maincpu", 3, ASSERT_LINE);
+	machine().device("maincpu")->execute().set_input_line(3, ASSERT_LINE);
 }
 
 
-static WRITE32_HANDLER( midvunit_adc_w )
+WRITE32_MEMBER(midvunit_state::midvunit_adc_w)
 {
-	midvunit_state *state = space->machine().driver_data<midvunit_state>();
 	static const char *const adcnames[] = { "WHEEL", "ACCEL", "BRAKE" };
 
-	if (!(state->m_control_data & 0x20))
+	if (!(m_control_data & 0x20))
 	{
-		int which = (data >> state->m_adc_shift) - 4;
+		int which = (data >> m_adc_shift) - 4;
 		if (which < 0 || which > 2)
 			logerror("adc_w: unexpected which = %02X\n", which + 4);
-		state->m_adc_data = input_port_read_safe(space->machine(), adcnames[which], 0);
-		space->machine().scheduler().timer_set(attotime::from_msec(1), FUNC(adc_ready));
+		m_adc_data = ioport(adcnames[which])->read_safe(0);
+		machine().scheduler().timer_set(attotime::from_msec(1), timer_expired_delegate(FUNC(midvunit_state::adc_ready),this));
 	}
 	else
 		logerror("adc_w without enabling writes!\n");
@@ -161,25 +162,22 @@ static WRITE32_HANDLER( midvunit_adc_w )
  *
  *************************************/
 
-static WRITE32_HANDLER( midvunit_cmos_protect_w )
+WRITE32_MEMBER(midvunit_state::midvunit_cmos_protect_w)
 {
-	midvunit_state *state = space->machine().driver_data<midvunit_state>();
-	state->m_cmos_protected = ((data & 0xc00) != 0xc00);
+	m_cmos_protected = ((data & 0xc00) != 0xc00);
 }
 
 
-static WRITE32_HANDLER( midvunit_cmos_w )
+WRITE32_MEMBER(midvunit_state::midvunit_cmos_w)
 {
-	midvunit_state *state = space->machine().driver_data<midvunit_state>();
-	if (!state->m_cmos_protected)
-		COMBINE_DATA(state->m_nvram + offset);
+	if (!m_cmos_protected)
+		COMBINE_DATA(m_nvram + offset);
 }
 
 
-static READ32_HANDLER( midvunit_cmos_r )
+READ32_MEMBER(midvunit_state::midvunit_cmos_r)
 {
-	midvunit_state *state = space->machine().driver_data<midvunit_state>();
-	return state->m_nvram[offset];
+	return m_nvram[offset];
 }
 
 
@@ -190,52 +188,50 @@ static READ32_HANDLER( midvunit_cmos_r )
  *
  *************************************/
 
-static WRITE32_HANDLER( midvunit_control_w )
+WRITE32_MEMBER(midvunit_state::midvunit_control_w)
 {
-	midvunit_state *state = space->machine().driver_data<midvunit_state>();
-	UINT16 olddata = state->m_control_data;
-	COMBINE_DATA(&state->m_control_data);
+	UINT16 olddata = m_control_data;
+	COMBINE_DATA(&m_control_data);
 
 	/* bit 7 is the LED */
 
 	/* bit 3 is the watchdog */
-	if ((olddata ^ state->m_control_data) & 0x0008)
+	if ((olddata ^ m_control_data) & 0x0008)
 		watchdog_reset_w(space, 0, 0);
 
 	/* bit 1 is the DCS sound reset */
-	dcs_reset_w((~state->m_control_data >> 1) & 1);
+	dcs_reset_w(machine(), (~m_control_data >> 1) & 1);
 
 	/* log anything unusual */
-	if ((olddata ^ state->m_control_data) & ~0x00e8)
-		logerror("midvunit_control_w: old=%04X new=%04X diff=%04X\n", olddata, state->m_control_data, olddata ^ state->m_control_data);
+	if ((olddata ^ m_control_data) & ~0x00e8)
+		logerror("midvunit_control_w: old=%04X new=%04X diff=%04X\n", olddata, m_control_data, olddata ^ m_control_data);
 }
 
 
-static WRITE32_HANDLER( crusnwld_control_w )
+WRITE32_MEMBER(midvunit_state::crusnwld_control_w)
 {
-	midvunit_state *state = space->machine().driver_data<midvunit_state>();
-	UINT16 olddata = state->m_control_data;
-	COMBINE_DATA(&state->m_control_data);
+	UINT16 olddata = m_control_data;
+	COMBINE_DATA(&m_control_data);
 
 	/* bit 11 is the DCS sound reset */
-	dcs_reset_w((~state->m_control_data >> 11) & 1);
+	dcs_reset_w(machine(), (~m_control_data >> 11) & 1);
 
 	/* bit 9 is the watchdog */
-	if ((olddata ^ state->m_control_data) & 0x0200)
+	if ((olddata ^ m_control_data) & 0x0200)
 		watchdog_reset_w(space, 0, 0);
 
 	/* bit 8 is the LED */
 
 	/* log anything unusual */
-	if ((olddata ^ state->m_control_data) & ~0xe800)
-		logerror("crusnwld_control_w: old=%04X new=%04X diff=%04X\n", olddata, state->m_control_data, olddata ^ state->m_control_data);
+	if ((olddata ^ m_control_data) & ~0xe800)
+		logerror("crusnwld_control_w: old=%04X new=%04X diff=%04X\n", olddata, m_control_data, olddata ^ m_control_data);
 }
 
 
-static WRITE32_HANDLER( midvunit_sound_w )
+WRITE32_MEMBER(midvunit_state::midvunit_sound_w)
 {
 	logerror("Sound W = %02X\n", data);
-	dcs_data_w(data & 0xff);
+	dcs_data_w(machine(), data & 0xff);
 }
 
 
@@ -246,31 +242,29 @@ static WRITE32_HANDLER( midvunit_sound_w )
  *
  *************************************/
 
-static READ32_HANDLER( tms32031_control_r )
+READ32_MEMBER(midvunit_state::tms32031_control_r)
 {
-	midvunit_state *state = space->machine().driver_data<midvunit_state>();
 	/* watch for accesses to the timers */
 	if (offset == 0x24 || offset == 0x34)
 	{
 		/* timer is clocked at 100ns */
 		int which = (offset >> 4) & 1;
-		INT32 result = (state->m_timer[which]->time_elapsed() * state->m_timer_rate).as_double();
-//      logerror("%06X:tms32031_control_r(%02X) = %08X\n", cpu_get_pc(&space->device()), offset, result);
+		INT32 result = (m_timer[which]->time_elapsed() * m_timer_rate).as_double();
+//      logerror("%06X:tms32031_control_r(%02X) = %08X\n", space.device().safe_pc(), offset, result);
 		return result;
 	}
 
 	/* log anything else except the memory control register */
 	if (offset != 0x64)
-		logerror("%06X:tms32031_control_r(%02X)\n", cpu_get_pc(&space->device()), offset);
+		logerror("%06X:tms32031_control_r(%02X)\n", space.device().safe_pc(), offset);
 
-	return state->m_tms32031_control[offset];
+	return m_tms32031_control[offset];
 }
 
 
-static WRITE32_HANDLER( tms32031_control_w )
+WRITE32_MEMBER(midvunit_state::tms32031_control_w)
 {
-	midvunit_state *state = space->machine().driver_data<midvunit_state>();
-	COMBINE_DATA(&state->m_tms32031_control[offset]);
+	COMBINE_DATA(&m_tms32031_control[offset]);
 
 	/* ignore changes to the memory control register */
 	if (offset == 0x64)
@@ -280,18 +274,18 @@ static WRITE32_HANDLER( tms32031_control_w )
 	else if (offset == 0x20 || offset == 0x30)
 	{
 		int which = (offset >> 4) & 1;
-//  logerror("%06X:tms32031_control_w(%02X) = %08X\n", cpu_get_pc(&space->device()), offset, data);
+//  logerror("%06X:tms32031_control_w(%02X) = %08X\n", space.device().safe_pc(), offset, data);
 		if (data & 0x40)
-			state->m_timer[which]->reset();
+			m_timer[which]->reset();
 
 		/* bit 0x200 selects internal clocking, which is 1/2 the main CPU clock rate */
 		if (data & 0x200)
-			state->m_timer_rate = (double)(space->machine().device("maincpu")->unscaled_clock() * 0.5);
+			m_timer_rate = (double)(machine().device("maincpu")->unscaled_clock() * 0.5);
 		else
-			state->m_timer_rate = 10000000.;
+			m_timer_rate = 10000000.;
 	}
 	else
-		logerror("%06X:tms32031_control_w(%02X) = %08X\n", cpu_get_pc(&space->device()), offset, data);
+		logerror("%06X:tms32031_control_w(%02X) = %08X\n", space.device().safe_pc(), offset, data);
 }
 
 
@@ -303,20 +297,20 @@ static WRITE32_HANDLER( tms32031_control_w )
  *************************************/
 
 #if 0
-static READ32_HANDLER( crusnwld_serial_status_r )
+READ32_MEMBER(midvunit_state::crusnwld_serial_status_r)
 {
 	int status = midway_serial_pic_status_r();
-	return (input_port_read(space->machine(), "991030") & 0x7fff7fff) | (status << 31) | (status << 15);
+	return (ioport("991030")->read() & 0x7fff7fff) | (status << 31) | (status << 15);
 }
 
 
-static READ32_HANDLER( crusnwld_serial_data_r )
+READ32_MEMBER(midvunit_state::crusnwld_serial_data_r)
 {
 	return midway_serial_pic_r() << 16;
 }
 
 
-static WRITE32_HANDLER( crusnwld_serial_data_w )
+WRITE32_MEMBER(midvunit_state::crusnwld_serial_data_w)
 {
 	if ((data & 0xf0000) == 0x10000)
 	{
@@ -345,19 +339,17 @@ static const UINT32 bit_data[0x10] =
 };
 
 
-static READ32_HANDLER( bit_data_r )
+READ32_MEMBER(midvunit_state::bit_data_r)
 {
-	midvunit_state *state = space->machine().driver_data<midvunit_state>();
-	int bit = (bit_data[state->m_bit_index / 32] >> (31 - (state->m_bit_index % 32))) & 1;
-	state->m_bit_index = (state->m_bit_index + 1) % 512;
-	return bit ? state->m_nvram[offset] : ~state->m_nvram[offset];
+	int bit = (bit_data[m_bit_index / 32] >> (31 - (m_bit_index % 32))) & 1;
+	m_bit_index = (m_bit_index + 1) % 512;
+	return bit ? m_nvram[offset] : ~m_nvram[offset];
 }
 
 
-static WRITE32_HANDLER( bit_reset_w )
+WRITE32_MEMBER(midvunit_state::bit_reset_w)
 {
-	midvunit_state *state = space->machine().driver_data<midvunit_state>();
-	state->m_bit_index = 0;
+	m_bit_index = 0;
 }
 
 
@@ -368,20 +360,20 @@ static WRITE32_HANDLER( bit_reset_w )
  *
  *************************************/
 
-static READ32_HANDLER( offroadc_serial_status_r )
+READ32_MEMBER(midvunit_state::offroadc_serial_status_r)
 {
 	int status = midway_serial_pic2_status_r(space);
-	return (input_port_read(space->machine(), "991030")  & 0x7fff7fff) | (status << 31) | (status << 15);
+	return (ioport("991030")->read()  & 0x7fff7fff) | (status << 31) | (status << 15);
 }
 
 
-static READ32_HANDLER( offroadc_serial_data_r )
+READ32_MEMBER(midvunit_state::offroadc_serial_data_r)
 {
 	return midway_serial_pic2_r(space) << 16;
 }
 
 
-static WRITE32_HANDLER( offroadc_serial_data_w )
+WRITE32_MEMBER(midvunit_state::offroadc_serial_data_w)
 {
 	midway_serial_pic2_w(space, data >> 16);
 }
@@ -394,10 +386,9 @@ static WRITE32_HANDLER( offroadc_serial_data_w )
  *
  *************************************/
 
-static READ32_HANDLER( midvplus_misc_r )
+READ32_MEMBER(midvunit_state::midvplus_misc_r)
 {
-	midvunit_state *state = space->machine().driver_data<midvunit_state>();
-	UINT32 result = state->m_midvplus_misc[offset];
+	UINT32 result = m_midvplus_misc[offset];
 
 	switch (offset)
 	{
@@ -415,24 +406,23 @@ static READ32_HANDLER( midvplus_misc_r )
 	}
 
 	if (offset != 0 && offset != 3)
-		logerror("%06X:midvplus_misc_r(%d) = %08X\n", cpu_get_pc(&space->device()), offset, result);
+		logerror("%06X:midvplus_misc_r(%d) = %08X\n", space.device().safe_pc(), offset, result);
 	return result;
 }
 
 
-static WRITE32_HANDLER( midvplus_misc_w )
+WRITE32_MEMBER(midvunit_state::midvplus_misc_w)
 {
-	midvunit_state *state = space->machine().driver_data<midvunit_state>();
-	UINT32 olddata = state->m_midvplus_misc[offset];
+	UINT32 olddata = m_midvplus_misc[offset];
 	int logit = 1;
 
-	COMBINE_DATA(&state->m_midvplus_misc[offset]);
+	COMBINE_DATA(&m_midvplus_misc[offset]);
 
 	switch (offset)
 	{
 		case 0:
 			/* bit 0x10 resets watchdog */
-			if ((olddata ^ state->m_midvplus_misc[offset]) & 0x0010)
+			if ((olddata ^ m_midvplus_misc[offset]) & 0x0010)
 			{
 				watchdog_reset_w(space, 0, 0);
 				logit = 0;
@@ -445,7 +435,7 @@ static WRITE32_HANDLER( midvplus_misc_w )
 	}
 
 	if (logit)
-		logerror("%06X:midvplus_misc_w(%d) = %08X\n", cpu_get_pc(&space->device()), offset, data);
+		logerror("%06X:midvplus_misc_w(%d) = %08X\n", space.device().safe_pc(), offset, data);
 }
 
 
@@ -475,59 +465,59 @@ static void midvplus_xf1_w(tms3203x_device &device, UINT8 val)
  *
  *************************************/
 
-static ADDRESS_MAP_START( midvunit_map, AS_PROGRAM, 32 )
-	AM_RANGE(0x000000, 0x01ffff) AM_RAM AM_BASE_MEMBER(midvunit_state, m_ram_base)
+static ADDRESS_MAP_START( midvunit_map, AS_PROGRAM, 32, midvunit_state )
+	AM_RANGE(0x000000, 0x01ffff) AM_RAM AM_SHARE("ram_base")
 	AM_RANGE(0x400000, 0x41ffff) AM_RAM
 	AM_RANGE(0x600000, 0x600000) AM_WRITE(midvunit_dma_queue_w)
-	AM_RANGE(0x808000, 0x80807f) AM_READWRITE(tms32031_control_r, tms32031_control_w) AM_BASE_MEMBER(midvunit_state, m_tms32031_control)
+	AM_RANGE(0x808000, 0x80807f) AM_READWRITE(tms32031_control_r, tms32031_control_w) AM_SHARE("32031_control")
 	AM_RANGE(0x809800, 0x809fff) AM_RAM
-	AM_RANGE(0x900000, 0x97ffff) AM_READWRITE(midvunit_videoram_r, midvunit_videoram_w) AM_BASE_MEMBER(midvunit_state, m_videoram)
+	AM_RANGE(0x900000, 0x97ffff) AM_READWRITE(midvunit_videoram_r, midvunit_videoram_w) AM_SHARE("videoram")
 	AM_RANGE(0x980000, 0x980000) AM_READ(midvunit_dma_queue_entries_r)
 	AM_RANGE(0x980020, 0x980020) AM_READ(midvunit_scanline_r)
 	AM_RANGE(0x980020, 0x98002b) AM_WRITE(midvunit_video_control_w)
 	AM_RANGE(0x980040, 0x980040) AM_READWRITE(midvunit_page_control_r, midvunit_page_control_w)
 	AM_RANGE(0x980080, 0x980080) AM_NOP
 	AM_RANGE(0x980082, 0x980083) AM_READ(midvunit_dma_trigger_r)
-	AM_RANGE(0x990000, 0x990000) AM_READNOP	// link PAL (low 4 bits must == 4)
+	AM_RANGE(0x990000, 0x990000) AM_READNOP // link PAL (low 4 bits must == 4)
 	AM_RANGE(0x991030, 0x991030) AM_READ_PORT("991030")
 //  AM_RANGE(0x991050, 0x991050) AM_READONLY // seems to be another port
 	AM_RANGE(0x991060, 0x991060) AM_READ(port0_r)
 	AM_RANGE(0x992000, 0x992000) AM_READ_PORT("992000")
 	AM_RANGE(0x993000, 0x993000) AM_READWRITE(midvunit_adc_r, midvunit_adc_w)
 	AM_RANGE(0x994000, 0x994000) AM_WRITE(midvunit_control_w)
-	AM_RANGE(0x995000, 0x995000) AM_WRITENOP	// force feedback?
+	AM_RANGE(0x995000, 0x995000) AM_WRITENOP    // force feedback?
 	AM_RANGE(0x995020, 0x995020) AM_WRITE(midvunit_cmos_protect_w)
-	AM_RANGE(0x997000, 0x997000) AM_NOP	// communications
+	AM_RANGE(0x997000, 0x997000) AM_NOP // communications
 	AM_RANGE(0x9a0000, 0x9a0000) AM_WRITE(midvunit_sound_w)
 	AM_RANGE(0x9c0000, 0x9c1fff) AM_READWRITE(midvunit_cmos_r, midvunit_cmos_w) AM_SHARE("nvram")
-	AM_RANGE(0x9e0000, 0x9e7fff) AM_RAM_WRITE(midvunit_paletteram_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0xa00000, 0xbfffff) AM_READWRITE(midvunit_textureram_r, midvunit_textureram_w) AM_BASE_MEMBER(midvunit_state, m_textureram)
+	AM_RANGE(0x9e0000, 0x9e7fff) AM_RAM_WRITE(midvunit_paletteram_w) AM_SHARE("paletteram")
+	AM_RANGE(0xa00000, 0xbfffff) AM_READWRITE(midvunit_textureram_r, midvunit_textureram_w) AM_SHARE("textureram")
 	AM_RANGE(0xc00000, 0xffffff) AM_ROM AM_REGION("user1", 0)
 ADDRESS_MAP_END
 
 
-static const tms3203x_config midvplus_config = { 0, NULL, midvplus_xf1_w };
+static const tms3203x_config midvplus_config = { false, NULL, midvplus_xf1_w };
 
-static ADDRESS_MAP_START( midvplus_map, AS_PROGRAM, 32 )
-	AM_RANGE(0x000000, 0x01ffff) AM_RAM AM_BASE_MEMBER(midvunit_state, m_ram_base)
-	AM_RANGE(0x400000, 0x41ffff) AM_RAM AM_BASE_MEMBER(midvunit_state, m_fastram_base)
+static ADDRESS_MAP_START( midvplus_map, AS_PROGRAM, 32, midvunit_state )
+	AM_RANGE(0x000000, 0x01ffff) AM_RAM AM_SHARE("ram_base")
+	AM_RANGE(0x400000, 0x41ffff) AM_RAM AM_SHARE("fastram_base")
 	AM_RANGE(0x600000, 0x600000) AM_WRITE(midvunit_dma_queue_w)
-	AM_RANGE(0x808000, 0x80807f) AM_READWRITE(tms32031_control_r, tms32031_control_w) AM_BASE_MEMBER(midvunit_state, m_tms32031_control)
+	AM_RANGE(0x808000, 0x80807f) AM_READWRITE(tms32031_control_r, tms32031_control_w) AM_SHARE("32031_control")
 	AM_RANGE(0x809800, 0x809fff) AM_RAM
-	AM_RANGE(0x900000, 0x97ffff) AM_READWRITE(midvunit_videoram_r, midvunit_videoram_w) AM_BASE_MEMBER(midvunit_state, m_videoram)
+	AM_RANGE(0x900000, 0x97ffff) AM_READWRITE(midvunit_videoram_r, midvunit_videoram_w) AM_SHARE("videoram")
 	AM_RANGE(0x980000, 0x980000) AM_READ(midvunit_dma_queue_entries_r)
 	AM_RANGE(0x980020, 0x980020) AM_READ(midvunit_scanline_r)
 	AM_RANGE(0x980020, 0x98002b) AM_WRITE(midvunit_video_control_w)
 	AM_RANGE(0x980040, 0x980040) AM_READWRITE(midvunit_page_control_r, midvunit_page_control_w)
 	AM_RANGE(0x980080, 0x980080) AM_NOP
 	AM_RANGE(0x980082, 0x980083) AM_READ(midvunit_dma_trigger_r)
-	AM_RANGE(0x990000, 0x99000f) AM_READWRITE(midway_ioasic_r, midway_ioasic_w)
+	AM_RANGE(0x990000, 0x99000f) AM_READWRITE_LEGACY(midway_ioasic_r, midway_ioasic_w)
 	AM_RANGE(0x994000, 0x994000) AM_WRITE(midvunit_control_w)
 	AM_RANGE(0x995020, 0x995020) AM_WRITE(midvunit_cmos_protect_w)
-	AM_RANGE(0x9a0000, 0x9a0007) AM_DEVREADWRITE("ide", midway_ide_asic_r, midway_ide_asic_w)
-	AM_RANGE(0x9c0000, 0x9c7fff) AM_RAM_WRITE(midvunit_paletteram_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0x9d0000, 0x9d000f) AM_READWRITE(midvplus_misc_r, midvplus_misc_w) AM_BASE_MEMBER(midvunit_state, m_midvplus_misc)
-	AM_RANGE(0xa00000, 0xbfffff) AM_READWRITE(midvunit_textureram_r, midvunit_textureram_w) AM_BASE_MEMBER(midvunit_state, m_textureram)
+	AM_RANGE(0x9a0000, 0x9a0007) AM_DEVREADWRITE_LEGACY("ide", midway_ide_asic_r, midway_ide_asic_w)
+	AM_RANGE(0x9c0000, 0x9c7fff) AM_RAM_WRITE(midvunit_paletteram_w) AM_SHARE("paletteram")
+	AM_RANGE(0x9d0000, 0x9d000f) AM_READWRITE(midvplus_misc_r, midvplus_misc_w) AM_SHARE("midvplus_misc")
+	AM_RANGE(0xa00000, 0xbfffff) AM_READWRITE(midvunit_textureram_r, midvunit_textureram_w) AM_SHARE("textureram")
 	AM_RANGE(0xc00000, 0xcfffff) AM_RAM
 ADDRESS_MAP_END
 
@@ -541,12 +531,12 @@ ADDRESS_MAP_END
 
 static INPUT_PORTS_START( crusnusa )
 	PORT_START("991030")
-	PORT_BIT( 0x0000ffff, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(custom_port_read, "IN1")
-	PORT_BIT( 0xffff0000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(custom_port_read, "IN1")
+	PORT_BIT( 0x0000ffff, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, driver_device,custom_port_read, "IN1")
+	PORT_BIT( 0xffff0000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, driver_device,custom_port_read, "IN1")
 
 	PORT_START("992000")
-	PORT_BIT( 0x0000ffff, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(custom_port_read, "DSW")
-	PORT_BIT( 0xffff0000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(custom_port_read, "DSW")
+	PORT_BIT( 0x0000ffff, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, driver_device,custom_port_read, "DSW")
+	PORT_BIT( 0xffff0000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, driver_device,custom_port_read, "DSW")
 
 	PORT_START("IN0")
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_COIN1 )
@@ -559,51 +549,54 @@ static INPUT_PORTS_START( crusnusa )
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_COIN3 )
 	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_VOLUME_DOWN )
 	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_VOLUME_UP )
-	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON6 ) PORT_NAME("4th Gear")	/* 4th */
-	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_NAME("3rd Gear")	/* 3rd */
-	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_NAME("2nd Gear")	/* 2nd */
-	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_NAME("1st Gear")	/* 1st */
+	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON6 ) PORT_NAME("4th Gear")    /* 4th */
+	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_NAME("3rd Gear")    /* 3rd */
+	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_NAME("2nd Gear")    /* 2nd */
+	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_NAME("1st Gear")    /* 1st */
 	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_COIN4 )
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("IN1")
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_BUTTON7 ) PORT_NAME("Radio")	/* radio */
+	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_BUTTON7 ) PORT_NAME("Radio")   /* radio */
 	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON8 ) PORT_NAME("View 1")	/* view 1 */
-	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON9 ) PORT_NAME("View 2")	/* view 2 */
-	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON10 ) PORT_NAME("View 3")	/* view 3 */
-	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_BUTTON11 ) PORT_NAME("View 4")	/* view 4 */
+	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON8 ) PORT_NAME("View 1")  /* view 1 */
+	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON9 ) PORT_NAME("View 2")  /* view 2 */
+	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON10 ) PORT_NAME("View 3") /* view 3 */
+	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_BUTTON11 ) PORT_NAME("View 4") /* view 4 */
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("DSW")
-	PORT_DIPNAME( 0x0001, 0x0000, "Link Status" )
+	/* DSW2 at U97 */
+	PORT_DIPNAME( 0x0001, 0x0000, "Link Status" )       PORT_DIPLOCATION("SW2:8")
 	PORT_DIPSETTING(      0x0000, "Master" )
 	PORT_DIPSETTING(      0x0001, "Slave" )
-	PORT_DIPNAME( 0x0002, 0x0002, "Link???" )
+	PORT_DIPNAME( 0x0002, 0x0002, "Link???" )       PORT_DIPLOCATION("SW2:7") /* Listed as Not Used in the manual */
 	PORT_DIPSETTING(      0x0002, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0004, 0x0004, "Linking" )
+	PORT_DIPNAME( 0x0004, 0x0004, "Linking" )       PORT_DIPLOCATION("SW2:6")
 	PORT_DIPSETTING(      0x0004, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0008, 0x0008, DEF_STR( Unknown ) )
+	PORT_DIPNAME( 0x0008, 0x0008, DEF_STR( Unknown ) )  PORT_DIPLOCATION("SW2:5") /* Listed as Not Used in the manual */
 	PORT_DIPSETTING(      0x0008, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0010, 0x0010, "Freeze" )
+	PORT_DIPNAME( 0x0010, 0x0010, "Freeze" )        PORT_DIPLOCATION("SW2:4") /* Listed as Not Used in the manual */
 	PORT_DIPSETTING(      0x0010, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0020, 0x0020, DEF_STR( Cabinet ) )
+	PORT_DIPNAME( 0x0020, 0x0020, DEF_STR( Cabinet ) )  PORT_DIPLOCATION("SW2:3")
 	PORT_DIPSETTING(      0x0020, DEF_STR( Upright ) )
 	PORT_DIPSETTING(      0x0000, "Sitdown" )
-	PORT_DIPNAME( 0x0040, 0x0040, "Enable Motion" )
+	PORT_DIPNAME( 0x0040, 0x0040, "Enable Motion" )     PORT_DIPLOCATION("SW2:2")
 	PORT_DIPSETTING(      0x0040, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_SERVICE( 0x0080, IP_ACTIVE_LOW )
-	PORT_DIPNAME( 0x0100, 0x0100, "Coin Counters" )
+	PORT_SERVICE_DIPLOC(  0x0080, IP_ACTIVE_LOW, "SW2:1" ) /* Listed as Not Used in the manual */
+
+	/* DSW3 at U19 */
+	PORT_DIPNAME( 0x0100, 0x0100, "Coin Counters" )     PORT_DIPLOCATION("SW3:8")
 	PORT_DIPSETTING(      0x0100, "1" )
 	PORT_DIPSETTING(      0x0000, "2" )
-	PORT_DIPNAME( 0xfe00, 0xf800, DEF_STR( Coinage ) )
+	PORT_DIPNAME( 0xfe00, 0xf800, DEF_STR( Coinage ) )  PORT_DIPLOCATION("SW3:7,6,5,4,3,2,1")
 	PORT_DIPSETTING(      0xfe00, "USA-1" )
 	PORT_DIPSETTING(      0xfa00, "USA-3" )
 	PORT_DIPSETTING(      0xfc00, "USA-7" )
@@ -660,25 +653,25 @@ static INPUT_PORTS_START( crusnusa )
 	PORT_DIPSETTING(      0x1800, "Spain-4" )
 	PORT_DIPSETTING(      0x0e00, "Netherland-1" )
 
-	PORT_START("WHEEL")		/* wheel */
+	PORT_START("WHEEL")     /* wheel */
 	PORT_BIT( 0xff, 0x80, IPT_PADDLE ) PORT_MINMAX(0x10,0xf0) PORT_SENSITIVITY(25) PORT_KEYDELTA(20)
 
-	PORT_START("ACCEL")		/* gas pedal */
+	PORT_START("ACCEL")     /* gas pedal */
 	PORT_BIT( 0xff, 0x00, IPT_PEDAL ) PORT_SENSITIVITY(25) PORT_KEYDELTA(20)
 
-	PORT_START("BRAKE")		/* brake pedal */
+	PORT_START("BRAKE")     /* brake pedal */
 	PORT_BIT( 0xff, 0x00, IPT_PEDAL2 ) PORT_SENSITIVITY(25) PORT_KEYDELTA(20)
 INPUT_PORTS_END
 
 
 static INPUT_PORTS_START( crusnwld )
 	PORT_START("991030")
-	PORT_BIT( 0x0000ffff, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(custom_port_read, "IN1")
-	PORT_BIT( 0xffff0000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(custom_port_read, "IN1")
+	PORT_BIT( 0x0000ffff, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, driver_device,custom_port_read, "IN1")
+	PORT_BIT( 0xffff0000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, driver_device,custom_port_read, "IN1")
 
 	PORT_START("992000")
-	PORT_BIT( 0x0000ffff, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(custom_port_read, "DSW")
-	PORT_BIT( 0xffff0000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(custom_port_read, "DSW")
+	PORT_BIT( 0x0000ffff, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, driver_device,custom_port_read, "DSW")
+	PORT_BIT( 0xffff0000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, driver_device,custom_port_read, "DSW")
 
 	PORT_START("IN0")
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_COIN1 )
@@ -691,48 +684,49 @@ static INPUT_PORTS_START( crusnwld )
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_COIN3 )
 	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_VOLUME_DOWN )
 	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_VOLUME_UP )
-	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON6 ) PORT_NAME("4th Gear")	/* 4th */
-	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_NAME("3rd Gear")	/* 3rd */
-	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_NAME("2nd Gear")	/* 2nd */
-	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_NAME("1st Gear")	/* 1st */
+	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON6 ) PORT_NAME("4th Gear")    /* 4th */
+	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_NAME("3rd Gear")    /* 3rd */
+	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_NAME("2nd Gear")    /* 2nd */
+	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_NAME("1st Gear")    /* 1st */
 	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_COIN4 )
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("IN1")
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_BUTTON7 ) PORT_NAME("Radio")	/* radio */
+	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_BUTTON7 ) PORT_NAME("Radio")   /* radio */
 	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON8 ) PORT_NAME("View 1")	/* view 1 */
-	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON9 ) PORT_NAME("View 2")	/* view 2 */
-	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON10 ) PORT_NAME("View 3")	/* view 3 */
-	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_BUTTON11 ) PORT_NAME("View 4")	/* view 4 */
+	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON8 ) PORT_NAME("View 1")  /* view 1 */
+	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON9 ) PORT_NAME("View 2")  /* view 2 */
+	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON10 ) PORT_NAME("View 3") /* view 3 */
+	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_BUTTON11 ) PORT_NAME("View 4") /* view 4 */
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("DSW")
-	PORT_DIPNAME( 0x0003, 0x0000, "Link Number" )
+	/* DSW2 at U97 */
+	PORT_DIPNAME( 0x0003, 0x0000, "Link Number" )       PORT_DIPLOCATION("SW2:8,7")
 	PORT_DIPSETTING(      0x0000, "1" )
 	PORT_DIPSETTING(      0x0001, "2" )
 	PORT_DIPSETTING(      0x0002, "3" )
 	PORT_DIPSETTING(      0x0003, "4" )
-	PORT_DIPNAME( 0x0004, 0x0004, "Linking" )
+	PORT_DIPNAME( 0x0004, 0x0004, "Linking" )       PORT_DIPLOCATION("SW2:6")
 	PORT_DIPSETTING(      0x0004, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0018, 0x0008, "Games Linked" )
+	PORT_DIPNAME( 0x0018, 0x0008, "Games Linked" )      PORT_DIPLOCATION("SW2:5,4")
 	PORT_DIPSETTING(      0x0008, "2" )
 	PORT_DIPSETTING(      0x0010, "3" )
 	PORT_DIPSETTING(      0x0018, "4" )
-	PORT_DIPNAME( 0x0020, 0x0020, DEF_STR( Cabinet ) )
+	PORT_DIPNAME( 0x0020, 0x0020, DEF_STR( Cabinet ) )  PORT_DIPLOCATION("SW2:3")
 	PORT_DIPSETTING(      0x0020, DEF_STR( Upright ) )
 	PORT_DIPSETTING(      0x0000, "Sitdown" )
-	PORT_DIPNAME( 0x0040, 0x0040, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(      0x0040, DEF_STR( Off ) )
-	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_SERVICE( 0x0080, IP_ACTIVE_LOW )
-	PORT_DIPNAME( 0x0100, 0x0100, "Coin Counters" )
+	PORT_DIPUNUSED_DIPLOC( 0x0040, 0x0040, "SW2:2" )        /* Manual shows Not Used */
+	PORT_SERVICE_DIPLOC(  0x0080, IP_ACTIVE_LOW, "SW2:1" )
+
+	/* DSW3 at U19 */
+	PORT_DIPNAME( 0x0100, 0x0100, "Coin Counters" )     PORT_DIPLOCATION("SW3:8")
 	PORT_DIPSETTING(      0x0100, "1" )
 	PORT_DIPSETTING(      0x0000, "2" )
-	PORT_DIPNAME( 0xfe00, 0xf800, DEF_STR( Coinage ) )
+	PORT_DIPNAME( 0xfe00, 0xf800, DEF_STR( Coinage ) )  PORT_DIPLOCATION("SW3:7,6,5,4,3,2,1")
 	PORT_DIPSETTING(      0xfe00, "USA-1" )
 	PORT_DIPSETTING(      0xfa00, "USA-3" )
 	PORT_DIPSETTING(      0xfc00, "USA-7" )
@@ -789,25 +783,25 @@ static INPUT_PORTS_START( crusnwld )
 	PORT_DIPSETTING(      0x1800, "Spain-4" )
 	PORT_DIPSETTING(      0x0e00, "Netherland-1" )
 
-	PORT_START("WHEEL")		/* wheel */
+	PORT_START("WHEEL")     /* wheel */
 	PORT_BIT( 0xff, 0x80, IPT_PADDLE ) PORT_MINMAX(0x10,0xf0) PORT_SENSITIVITY(25) PORT_KEYDELTA(20)
 
-	PORT_START("ACCEL")		/* gas pedal */
+	PORT_START("ACCEL")     /* gas pedal */
 	PORT_BIT( 0xff, 0x00, IPT_PEDAL ) PORT_SENSITIVITY(25) PORT_KEYDELTA(20)
 
-	PORT_START("BRAKE")		/* brake pedal */
+	PORT_START("BRAKE")     /* brake pedal */
 	PORT_BIT( 0xff, 0x00, IPT_PEDAL2 ) PORT_SENSITIVITY(25) PORT_KEYDELTA(20)
 INPUT_PORTS_END
 
 
 static INPUT_PORTS_START( offroadc )
 	PORT_START("991030")
-	PORT_BIT( 0x0000ffff, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(custom_port_read, "IN1")
-	PORT_BIT( 0xffff0000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(custom_port_read, "IN1")
+	PORT_BIT( 0x0000ffff, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, driver_device,custom_port_read, "IN1")
+	PORT_BIT( 0xffff0000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, driver_device,custom_port_read, "IN1")
 
 	PORT_START("992000")
-	PORT_BIT( 0x0000ffff, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(custom_port_read, "DSW")
-	PORT_BIT( 0xffff0000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(custom_port_read, "DSW")
+	PORT_BIT( 0x0000ffff, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, driver_device,custom_port_read, "DSW")
+	PORT_BIT( 0xffff0000, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, driver_device,custom_port_read, "DSW")
 
 	PORT_START("IN0")
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_COIN1 )
@@ -820,58 +814,51 @@ static INPUT_PORTS_START( offroadc )
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_COIN3 )
 	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_VOLUME_DOWN )
 	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_VOLUME_UP )
-	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON6 ) PORT_NAME("4th Gear")	/* 4th */
-	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_NAME("3rd Gear")	/* 3rd */
-	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_NAME("2nd Gear")	/* 2nd */
-	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_NAME("1st Gear")	/* 1st */
+	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON6 ) PORT_NAME("4th Gear")    /* 4th */
+	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_NAME("3rd Gear")    /* 3rd */
+	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_NAME("2nd Gear")    /* 2nd */
+	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_NAME("1st Gear")    /* 1st */
 	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_COIN4 )
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("IN1")
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_BUTTON7 ) PORT_NAME("Radio")	/* radio */
+	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_BUTTON7 ) PORT_NAME("Radio")   /* radio */
 	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON8 ) PORT_NAME("View 1")	/* view 1 */
-	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON9 ) PORT_NAME("View 2")	/* view 2 */
-	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON10 ) PORT_NAME("View 3")	/* view 3 */
-	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_BUTTON11 ) PORT_NAME("View 4")	/* view 4 */
+	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON8 ) PORT_NAME("View 1")  /* view 1 */
+	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON9 ) PORT_NAME("View 2")  /* view 2 */
+	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON10 ) PORT_NAME("View 3") /* view 3 */
+	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_BUTTON11 ) PORT_NAME("View 4") /* view 4 */
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("DSW")
-	PORT_DIPNAME( 0x0001, 0x0001, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(      0x0001, DEF_STR( Off ) )
-	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0002, 0x0000, "Shifter" )
-	PORT_DIPSETTING(      0x0002, "Closed" )
-	PORT_DIPSETTING(      0x0000, "Open" )
-	PORT_DIPNAME( 0x0004, 0x0004, "Girls" )
-	PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
-	PORT_DIPSETTING(      0x0004, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0008, 0x0008, "Road Kill" )
-	PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
-	PORT_DIPSETTING(      0x0008, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0010, 0x0010, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(      0x0010, DEF_STR( Off ) )
-	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0020, 0x0020, "Link" )
+	/* DSW2 at U97 */
+	PORT_DIPUNUSED_DIPLOC( 0x0001, 0x0001, "SW2:8" )        /* Manual shows Not Used & "No Effect" for both On & Off */
+	PORT_DIPNAME( 0x0002, 0x0000, "Gear Shifter Switch" )       PORT_DIPLOCATION("SW2:7")
+	PORT_DIPSETTING(      0x0002, "Normally Closed" )
+	PORT_DIPSETTING(      0x0000, "Normally Open" )
+	PORT_DIPNAME( 0x0004, 0x0004, "Added Attractions" )     PORT_DIPLOCATION("SW2:6")
+	PORT_DIPSETTING(      0x0004, "Girls Present" )
+	PORT_DIPSETTING(      0x0000, "Girls Missing" )
+	PORT_DIPNAME( 0x0008, 0x0008, "Graphic Effects" )       PORT_DIPLOCATION("SW2:5")
+	PORT_DIPSETTING(      0x0008, "Roadkill Present" )
+	PORT_DIPSETTING(      0x0000, "Roadkill Missing" )
+	PORT_DIPUNUSED_DIPLOC( 0x0010, 0x0010, "SW2:4" )        /* Manual shows Not Used & "No Effect" for both On & Off */
+	PORT_DIPNAME( 0x0020, 0x0020, "Link" )              PORT_DIPLOCATION("SW2:3")
 	PORT_DIPSETTING(      0x0020, "Disabled" )
 	PORT_DIPSETTING(      0x0000, "Enabled" )
-	PORT_DIPNAME( 0x00c0, 0x00c0, "Link Machine" )
+	PORT_DIPNAME( 0x00c0, 0x00c0, "Link Machine" )          PORT_DIPLOCATION("SW2:2,1")
 	PORT_DIPSETTING(      0x00c0, "1" )
 	PORT_DIPSETTING(      0x0080, "2" )
 	PORT_DIPSETTING(      0x0040, "3" )
 	PORT_DIPSETTING(      0x0000, "4" )
-	PORT_DIPNAME( 0x0100, 0x0100, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(      0x0100, DEF_STR( Off ) )
-	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0200, 0x0200, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(      0x0200, DEF_STR( Off ) )
-	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0400, 0x0400, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(      0x0400, DEF_STR( Off ) )
-	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0xf800, 0xf800, DEF_STR( Coinage ) )
+
+	/* DSW3 at U19 */
+	PORT_DIPUNUSED_DIPLOC( 0x0100, 0x0100, "SW3:8" )    /* Manual states "Switches 6, 7 and 8 are not active. We recommend */
+	PORT_DIPUNUSED_DIPLOC( 0x0200, 0x0200, "SW3:7" )    /* they be set to the facorty default (OFF) positions."            */
+	PORT_DIPUNUSED_DIPLOC( 0x0400, 0x0400, "SW3:6" )
+	PORT_DIPNAME( 0xf800, 0xf800, DEF_STR( Coinage ) )      PORT_DIPLOCATION("SW3:5,4,3,2,1")
 	PORT_DIPSETTING(      0xf800, "USA 1" )
 	PORT_DIPSETTING(      0xf000, "German 1" )
 	PORT_DIPSETTING(      0xe800, "French 1" )
@@ -892,47 +879,47 @@ static INPUT_PORTS_START( offroadc )
 	PORT_DIPSETTING(      0x7000, "Denmark 1" )
 	PORT_DIPSETTING(      0x6800, "Hungary 1" )
 
-	PORT_START("WHEEL")		/* wheel */
+	PORT_START("WHEEL")     /* wheel */
 	PORT_BIT( 0xff, 0x80, IPT_PADDLE ) PORT_MINMAX(0x10,0xf0) PORT_SENSITIVITY(25) PORT_KEYDELTA(20)
 
-	PORT_START("ACCEL")		/* gas pedal */
+	PORT_START("ACCEL")     /* gas pedal */
 	PORT_BIT( 0xff, 0x00, IPT_PEDAL ) PORT_SENSITIVITY(25) PORT_KEYDELTA(20)
 
-	PORT_START("BRAKE")		/* brake pedal */
+	PORT_START("BRAKE")     /* brake pedal */
 	PORT_BIT( 0xff, 0x00, IPT_PEDAL2 ) PORT_SENSITIVITY(25) PORT_KEYDELTA(20)
 INPUT_PORTS_END
 
 
 static INPUT_PORTS_START( wargods )
 	PORT_START("DIPS")
-	PORT_DIPNAME( 0x0001, 0x0001, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(      0x0001, DEF_STR( Off ) )
-	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0002, 0x0002, DEF_STR( Unknown ) )
+	PORT_DIPNAME( 0x0001, 0x0001, "CRT Type / Resolution" )     PORT_DIPLOCATION("SW1:1") /* This only works for the Dual Res version */
+	PORT_DIPSETTING(      0x0001, "Medium Res (24Khz)" )
+	PORT_DIPSETTING(      0x0000, "Standard Res (15Khz)" )
+	PORT_DIPNAME( 0x0002, 0x0002, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW1:2") /* Manual shows Not Used (must be Off) */
 	PORT_DIPSETTING(      0x0002, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0004, 0x0004, DEF_STR( Unknown ) )
+	PORT_DIPNAME( 0x0004, 0x0004, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW1:3") /* Manual shows Not Used (must be Off) */
 	PORT_DIPSETTING(      0x0004, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0008, 0x0008, "Blood" )
+	PORT_DIPNAME( 0x0008, 0x0008, "Blood" )             PORT_DIPLOCATION("SW1:4")
 	PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0008, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0010, 0x0010, "Graphics" )
+	PORT_DIPNAME( 0x0010, 0x0010, "Graphics" )          PORT_DIPLOCATION("SW1:5")
 	PORT_DIPSETTING(      0x0010, DEF_STR( Normal ) )
 	PORT_DIPSETTING(      0x0000, "Family" )
-	PORT_DIPNAME( 0x0020, 0x0020, DEF_STR( Unknown ) )
+	PORT_DIPNAME( 0x0020, 0x0020, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW1:6") /* Manual shows Not Used */
 	PORT_DIPSETTING(      0x0020, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0040, 0x0040, DEF_STR( Unknown ) )
+	PORT_DIPNAME( 0x0040, 0x0040, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW1:7") /* Manual shows Not Used */
 	PORT_DIPSETTING(      0x0040, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( Unknown ) )
+	PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW1:8") /* Manual shows Not Used */
 	PORT_DIPSETTING(      0x0080, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0100, 0x0100, "Coinage Source" )
+	PORT_DIPNAME( 0x0100, 0x0100, "Coinage Source" )        PORT_DIPLOCATION("SW2:1")
 	PORT_DIPSETTING(      0x0100, "Dipswitch" )
 	PORT_DIPSETTING(      0x0000, "CMOS" )
-	PORT_DIPNAME( 0x3e00, 0x3e00, DEF_STR( Coinage ) )
+	PORT_DIPNAME( 0x3e00, 0x3e00, DEF_STR( Coinage ) )      PORT_DIPLOCATION("SW2:2,3,4,5,6")
 	PORT_DIPSETTING(      0x3e00, "USA-1" )
 	PORT_DIPSETTING(      0x3c00, "USA-2" )
 	PORT_DIPSETTING(      0x3a00, "USA-3" )
@@ -954,10 +941,10 @@ static INPUT_PORTS_START( wargods )
 	PORT_DIPSETTING(      0x1200, "French-12" )
 	PORT_DIPSETTING(      0x1600, "French-ECA" )
 	PORT_DIPSETTING(      0x3000, DEF_STR( Free_Play ) )
-	PORT_DIPNAME( 0x4000, 0x4000, DEF_STR( Unknown ) )
+	PORT_DIPNAME( 0x4000, 0x4000, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW2:7") /* Manual shows Not Used */
 	PORT_DIPSETTING(      0x4000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x8000, 0x8000, "Test Switch" )
+	PORT_DIPNAME( 0x8000, 0x8000, "Test Switch" )           PORT_DIPLOCATION("SW2:8")
 	PORT_DIPSETTING(      0x8000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 
@@ -965,7 +952,7 @@ static INPUT_PORTS_START( wargods )
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_START1 )
-	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_TILT )		/* Slam Switch */
+	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_TILT )     /* Slam Switch */
 	PORT_SERVICE_NO_TOGGLE( 0x0010, IP_ACTIVE_LOW )
 	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_SERVICE1 )
@@ -976,7 +963,7 @@ static INPUT_PORTS_START( wargods )
 	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_VOLUME_DOWN )
 	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_VOLUME_UP )
 	PORT_BIT( 0x6000, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_BILL1 )	/* Bill */
+	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_BILL1 )    /* Bill */
 
 	PORT_START("IN1")
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(1)
@@ -1007,6 +994,14 @@ static INPUT_PORTS_START( wargods )
 	PORT_BIT( 0xff80, IP_ACTIVE_LOW, IPT_UNUSED )
 INPUT_PORTS_END
 
+static INPUT_PORTS_START( wargodsa ) /* For Medium Res only versions */
+	PORT_INCLUDE(wargods)
+
+	PORT_MODIFY("DIPS")
+	PORT_DIPNAME( 0x0001, 0x0001, DEF_STR( Unknown ) )      PORT_DIPLOCATION("SW1:1") /* Manual shows Not Used (must be Off) */
+	PORT_DIPSETTING(      0x0001, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+INPUT_PORTS_END
 
 
 /*************************************
@@ -1021,22 +1016,18 @@ static MACHINE_CONFIG_START( midvcommon, midvunit_state )
 	MCFG_CPU_ADD("maincpu", TMS32031, CPU_CLOCK)
 	MCFG_CPU_PROGRAM_MAP(midvunit_map)
 
-	MCFG_MACHINE_START(midvunit)
-	MCFG_MACHINE_RESET(midvunit)
 	MCFG_NVRAM_ADD_1FILL("nvram")
 
-	MCFG_TIMER_ADD("timer0", NULL)
-	MCFG_TIMER_ADD("timer1", NULL)
+	MCFG_TIMER_ADD_NONE("timer0")
+	MCFG_TIMER_ADD_NONE("timer1")
 
 	/* video hardware */
 	MCFG_PALETTE_LENGTH(32768)
 
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_RAW_PARAMS(MIDVUNIT_VIDEO_CLOCK/2, 666, 0, 512, 432, 0, 400)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
-	MCFG_SCREEN_UPDATE(midvunit)
+	MCFG_SCREEN_UPDATE_DRIVER(midvunit_state, screen_update_midvunit)
 
-	MCFG_VIDEO_START(midvunit)
 MACHINE_CONFIG_END
 
 
@@ -1046,7 +1037,6 @@ static MACHINE_CONFIG_DERIVED( midvunit, midvcommon )
 	MCFG_FRAGMENT_ADD(dcs_audio_2k)
 MACHINE_CONFIG_END
 
-
 static MACHINE_CONFIG_DERIVED( midvplus, midvcommon )
 
 	/* basic machine hardware */
@@ -1054,11 +1044,11 @@ static MACHINE_CONFIG_DERIVED( midvplus, midvcommon )
 	MCFG_TMS3203X_CONFIG(midvplus_config)
 	MCFG_CPU_PROGRAM_MAP(midvplus_map)
 
-	MCFG_MACHINE_RESET(midvplus)
+	MCFG_MACHINE_RESET_OVERRIDE(midvunit_state,midvplus)
 	MCFG_DEVICE_REMOVE("nvram")
 	MCFG_NVRAM_HANDLER(midway_serial_pic2)
 
-	MCFG_IDE_CONTROLLER_ADD("ide", NULL)
+	MCFG_IDE_CONTROLLER_ADD("ide", ide_devices, "hdd", NULL, true)
 
 	/* sound hardware */
 	MCFG_FRAGMENT_ADD(dcs2_audio_2115)
@@ -1073,18 +1063,19 @@ MACHINE_CONFIG_END
  *************************************/
 
 /*
-Cruis'n USA
+Cruis'n USA & Offroad Challenge (Midway V-Unit)
 Midway, 1994
 
 PCB Layout
 ----------
 
-5770-14365-02 (C) 1994 NINTENDO
+5770-14365-02 (C) 1994 NINTENDO (for Cruisin USA)
+5770-14365-05 WILLIAMS ELECTRONICS GAMES INC. (for Offroad Challenge)
 |-------------------------------------------------------------------------------|
-|  SOUND.U5  SOUND.U9   BATTERY          GAME.U26  GAME.U27  GAME.U28  GAME.U29 |
+|  SOUND.U5  SOUND.U9   BATTERY  MAX691  GAME.U26  GAME.U27  GAME.U28  GAME.U29 |
 |  SOUND.U4  SOUND.U8                    GAME.U22  GAME.U23  GAME.U24  GAME.U25 |
 |  SOUND.U3  SOUND.U7   6264  RESET_SW   GAME.U18  GAME.U19  GAME.U20  GAME.U21 |
-|  SOUND.U2  SOUND.U6                    GAME.U14  GAME.U15  GAME.U16  GAME.U17 |
+|  SOUND.U2  SOUND.U6         PIC16C57   GAME.U14  GAME.U15  GAME.U16  GAME.U17 |
 |                                        GAME.U10  GAME.U11  GAME.U12  GAME.U13 |
 |            6116            PAL2              IDT7204      IDT7204             |
 |                                          LH521007 LH521007   LH521007 LH521007|
@@ -1113,25 +1104,39 @@ Notes:
       6264      - 8k x8 SRAM (battery-backed)
       6116      - 2k x8 SRAM
       AD1851    - Analog Devices AD1851 16 bit PCM Audio DAC
+      MAX691    - Maxim MAX691 Master Reset IC (DIP16)
       TDA2030   - ST TDA2030 Audio AMP
       TL084     - Texas Instruments TL084 JFET-Input Operational Amplifier
       ADC0844   - National Semiconductor ADC0844 8-Bit Microprocessor Compatible A/D Converter with Multiplexer Option
+      PIC16C57  - Microchip PIC16C57
+                    - not populated for Cruis'n USA
+                    - labelled 'Offroad 25" U904' for Offroad Challenge
       PAL1      - GAL20V8 labelled 'A-19668'
-      PAL2      - PALC22V10 (no label)
-      PAL3      - TIBPAL20L8 labelled 'A-19670'
-      PAL4      - TIBPAL22V10 labelled 'A-19671'
-      PAL5      - TIBPAL22V10 labelled 'A-19672'
-      PAL6      - TIBPAL22V10 labelled 'A-19673'
+      PAL2      - PALC22V10
+                    - no label for Cruisin USA
+                    - labelled 'A-21883 U38' for Offroad Challenge
+      PAL3      - TIBPAL20L8
+                    - labelled 'A-19670' for Cruis'n USA
+                    - labelled 'A-21170 U43' for Offroad Challenge
+      PAL4      - TIBPAL22V10
+                    - labelled 'A-19671' for Cruis'n USA
+                    - labelled 'A-21171 U54' for Offroad Challenge
+      PAL5      - TIBPAL22V10
+                    - labelled 'A-19672' for Cruis'n USA
+                    - labelled 'A-21884 U114' for Offroad Challenge
+      PAL6      - TIBPAL22V10
+                    - labelled 'A-19673' for Cruis'n USA
+                    - no label for Offroad Challenge
       P3 - P11  - various connectors for controls
       VSync     - 57.7090Hz  \
-      HSync     - 15.3544kHz / measured via EL4583
-      ROMs      - All ROMs 27C040
+      HSync     - 24.807kHz  / measured via EL4583
+      ROMs      - All ROMs 27C040 or 27C801
                   SOUND.Uxx - Sound ROMs
                   GAME.Uxx  - PROGRAM ROMs (including GFX)
 */
 
 ROM_START( crusnusa ) /* Version 4.1, Mon Feb 13 1995 - 16:53:40 */
-	ROM_REGION16_LE( 0x1000000, "dcs", ROMREGION_ERASEFF )	/* sound data */
+	ROM_REGION16_LE( 0x1000000, "dcs", ROMREGION_ERASEFF )  /* sound data */
 	ROM_LOAD16_BYTE( "cusa.u2",  0x000000, 0x80000, CRC(b9338332) SHA1(e5c420e63c4eba0010a68c7e0a57ef210e2c83d2) )
 	ROM_LOAD16_BYTE( "cusa.u3",  0x200000, 0x80000, CRC(cd8325d6) SHA1(d65d7263e056ca1d637adb44cafef523e0831a34) )
 	ROM_LOAD16_BYTE( "cusa.u4",  0x400000, 0x80000, CRC(fab457f3) SHA1(2b4b647838b7a8100afc25ca1ffdc74ed67ae00a) )
@@ -1164,17 +1169,17 @@ ROM_START( crusnusa ) /* Version 4.1, Mon Feb 13 1995 - 16:53:40 */
 	ROM_LOAD32_BYTE( "cusa.u29",     0x800003, 0x80000, CRC(cbe52c60) SHA1(3f309ce8ef1784c830f4160cfe76dc3a0b438cac) )
 
 	ROM_REGION( 0x0b33, "pals", 0 )
-    ROM_LOAD("a-19993.u38.bin",  0x0000, 0x02dd, CRC(b6323e94) SHA1(a84e04db8838b35ad9d30416b86aba65a29dcd87) ) /* TIBPAL22V10-15BCNT */
-    ROM_LOAD("a-19670.u43.bin",  0x0000, 0x0144, CRC(acafcc97) SHA1(b6f916838d08590a536fe925ec62d66e6ea3dcbc) ) /* TIBPAL20L8-10CNT */
-    ROM_LOAD("a-19668.u52.bin",  0x0000, 0x0157, CRC(7915134e) SHA1(aeb22e46abdc14a9e9b34cfe3b77da3e29b789fe) ) /* GAL20V8B */
-    ROM_LOAD("a-19671.u54.bin",  0x0000, 0x02dd, CRC(b9cce038) SHA1(8d1df026bdac66ea5493e9e51c23f8eb182b024e) ) /* TIBPAL22V10-15BCNT */
-    ROM_LOAD("a-19673.u111.bin", 0x0000, 0x02dd, CRC(8552977d) SHA1(a1a53d797697682b3f18893a90b6bef39ebb069e) ) /* TIBPAL22V10-15BCNT */
-    ROM_LOAD("a-19672.u114.bin", 0x0000, 0x0001, NO_DUMP ) /* TIBPAL22V10-15BCNT */
+	ROM_LOAD("a-19993.u38.bin",  0x0000, 0x02dd, CRC(b6323e94) SHA1(a84e04db8838b35ad9d30416b86aba65a29dcd87) ) /* TIBPAL22V10-15BCNT */
+	ROM_LOAD("a-19670.u43.bin",  0x0000, 0x0144, CRC(acafcc97) SHA1(b6f916838d08590a536fe925ec62d66e6ea3dcbc) ) /* TIBPAL20L8-10CNT */
+	ROM_LOAD("a-19668.u52.bin",  0x0000, 0x0157, CRC(7915134e) SHA1(aeb22e46abdc14a9e9b34cfe3b77da3e29b789fe) ) /* GAL20V8B */
+	ROM_LOAD("a-19671.u54.bin",  0x0000, 0x02dd, CRC(b9cce038) SHA1(8d1df026bdac66ea5493e9e51c23f8eb182b024e) ) /* TIBPAL22V10-15BCNT */
+	ROM_LOAD("a-19673.u111.bin", 0x0000, 0x02dd, CRC(8552977d) SHA1(a1a53d797697682b3f18893a90b6bef39ebb069e) ) /* TIBPAL22V10-15BCNT */
+	ROM_LOAD("a-19672.u114.bin", 0x0000, 0x0001, NO_DUMP ) /* TIBPAL22V10-15BCNT */
 ROM_END
 
 
 ROM_START( crusnusa40 ) /* Version 4.0, Wed Feb 08 1995 - 10:45:14 */
-	ROM_REGION16_LE( 0x1000000, "dcs", ROMREGION_ERASEFF )	/* sound data */
+	ROM_REGION16_LE( 0x1000000, "dcs", ROMREGION_ERASEFF )  /* sound data */
 	ROM_LOAD16_BYTE( "cusa.u2",  0x000000, 0x80000, CRC(b9338332) SHA1(e5c420e63c4eba0010a68c7e0a57ef210e2c83d2) )
 	ROM_LOAD16_BYTE( "cusa.u3",  0x200000, 0x80000, CRC(cd8325d6) SHA1(d65d7263e056ca1d637adb44cafef523e0831a34) )
 	ROM_LOAD16_BYTE( "cusa.u4",  0x400000, 0x80000, CRC(fab457f3) SHA1(2b4b647838b7a8100afc25ca1ffdc74ed67ae00a) )
@@ -1209,7 +1214,7 @@ ROM_END
 
 
 ROM_START( crusnusa21 ) /* Version 2.1, Wed Nov 09 1994 - 16:28:10 */
-	ROM_REGION16_LE( 0x1000000, "dcs", ROMREGION_ERASEFF )	/* sound data */
+	ROM_REGION16_LE( 0x1000000, "dcs", ROMREGION_ERASEFF )  /* sound data */
 	ROM_LOAD16_BYTE( "cusa.u2",  0x000000, 0x80000, CRC(b9338332) SHA1(e5c420e63c4eba0010a68c7e0a57ef210e2c83d2) )
 	ROM_LOAD16_BYTE( "cusa.u3",  0x200000, 0x80000, CRC(cd8325d6) SHA1(d65d7263e056ca1d637adb44cafef523e0831a34) )
 	ROM_LOAD16_BYTE( "cusa.u4",  0x400000, 0x80000, CRC(fab457f3) SHA1(2b4b647838b7a8100afc25ca1ffdc74ed67ae00a) )
@@ -1243,8 +1248,39 @@ ROM_START( crusnusa21 ) /* Version 2.1, Wed Nov 09 1994 - 16:28:10 */
 ROM_END
 
 
-ROM_START( crusnwld ) /* Version 2.4, Thu Feb 19 1998 - 13:43:26 */
-	ROM_REGION16_LE( 0x1000000, "dcs", ROMREGION_ERASEFF )	/* sound data */
+ROM_START( crusnwld ) /* Version 2.5, Wed Nov 04 1998 - 15:50:52 */
+	ROM_REGION16_LE( 0x1000000, "dcs", ROMREGION_ERASEFF )  /* sound data */
+	ROM_LOAD16_BYTE( "cwld.u2",  0x000000, 0x80000, CRC(7a233c89) SHA1(ecfad4bc48a69cd3399e3b3266c81574082e0169) )
+	ROM_LOAD16_BYTE( "cwld.u3",  0x200000, 0x80000, CRC(be9a5ff0) SHA1(98d69dbfa6aa8462cdd46772e991ee418b79c653) )
+	ROM_LOAD16_BYTE( "cwld.u4",  0x400000, 0x80000, CRC(69f02d84) SHA1(0fb4ff750de78505f241ae6cd18fccf3ddf4223f) )
+	ROM_LOAD16_BYTE( "cwld.u5",  0x600000, 0x80000, CRC(9d0b9071) SHA1(05edf9073399a942a9d0b969274a7ebf4ca677da) )
+	ROM_LOAD16_BYTE( "cwld.u6",  0x800000, 0x80000, CRC(df28f492) SHA1(c61f3870f59458b7bb5efbf93d697e3fa44a7830) )
+	ROM_LOAD16_BYTE( "cwld.u7",  0xa00000, 0x80000, CRC(0128913e) SHA1(c11bc115877310c17f9b57f72b29d19b0ad71afa) )
+	ROM_LOAD16_BYTE( "cwld.u8",  0xc00000, 0x80000, CRC(5127c08e) SHA1(4f0eae73817270fa156829100b66f0ff88fa422c) )
+	ROM_LOAD16_BYTE( "cwld.u9",  0xe00000, 0x80000, CRC(84cdc781) SHA1(62287aa72903698d1890908adde53c39f8bd200c) )
+
+	ROM_REGION32_LE( 0x1000000, "user1", 0 )
+	ROM_LOAD32_BYTE( "crusnw25.u10", 0x0000000, 0x100000, CRC(fd776872) SHA1(90df230b58b1c60d1ca7545ef177e5df30b4ea9d) ) /* Labeled 2.5 Cruis'n World Automatic U10 */
+	ROM_LOAD32_BYTE( "crusnw25.u11", 0x0000001, 0x100000, CRC(0c99a405) SHA1(14251187f00c198fbaa39817f8c95d1dbec80ec0) ) /* Labeled 2.5 Cruis'n World Automatic U11 */
+	ROM_LOAD32_BYTE( "crusnw25.u12", 0x0000002, 0x100000, CRC(3ba9fad8) SHA1(ac8d0dd4df3c1f1c28d93d615d7e24aed4a4a9b5) ) /* Labeled 2.5 Cruis'n World Automatic U12 */
+	ROM_LOAD32_BYTE( "crusnw25.u13", 0x0000003, 0x100000, CRC(21a79c9a) SHA1(e33f768c2309613e4936416ee5250d3b1690d11d) ) /* Labeled 2.5 Cruis'n World Automatic U13 */
+	ROM_LOAD32_BYTE( "cwld.u14",     0x0400000, 0x100000, CRC(ee815091) SHA1(fb8a99bae07f42966f76a3bb073d7d8280d8efcb) )
+	ROM_LOAD32_BYTE( "cwld.u15",     0x0400001, 0x100000, CRC(e2da7bf1) SHA1(9d9a80055ee62476f47c95e30ec9a989d5d0e25b) )
+	ROM_LOAD32_BYTE( "cwld.u16",     0x0400002, 0x100000, CRC(05a7ad2f) SHA1(4bdfde671379ecefa3f8ceb6fc06e8df5d70fc22) )
+	ROM_LOAD32_BYTE( "cwld.u17",     0x0400003, 0x100000, CRC(d6278c0c) SHA1(3e152d755d69903718a84d4154e442a31026f3d8) )
+	ROM_LOAD32_BYTE( "cwld.u18",     0x0800000, 0x100000, CRC(e2dc2733) SHA1(c277643548c03d831a3b091f1a311accac9d106b) )
+	ROM_LOAD32_BYTE( "cwld.u19",     0x0800001, 0x100000, CRC(5223a070) SHA1(90ce48b2308fa9e7cb636c4732b20b8e177aa9b1) )
+	ROM_LOAD32_BYTE( "cwld.u20",     0x0800002, 0x100000, CRC(db535625) SHA1(599ccd6bcfb155eb68ac131de4af524510ab35b7) )
+	ROM_LOAD32_BYTE( "cwld.u21",     0x0800003, 0x100000, CRC(92a080e8) SHA1(e5e0faf820b5870a81f121b6ad4c37a9081724e4) )
+	ROM_LOAD32_BYTE( "cwld.u22",     0x0c00000, 0x100000, CRC(77c56318) SHA1(52344038942c83f3ce82f3169a345ceb86e43dcb) )
+	ROM_LOAD32_BYTE( "cwld.u23",     0x0c00001, 0x100000, CRC(6b920fc7) SHA1(993da81181f24075e1aead7c4b374f36dd86a9c3) )
+	ROM_LOAD32_BYTE( "cwld.u24",     0x0c00002, 0x100000, CRC(83485401) SHA1(58407818a82a7a3657530dcda7e373e678b58ab2) )
+	ROM_LOAD32_BYTE( "cwld.u25",     0x0c00003, 0x100000, CRC(0dad97a9) SHA1(cdb0c02da35243b118e37ff1519aa6ee1a79d06d) )
+ROM_END
+
+
+ROM_START( crusnwld24 ) /* Version 2.4, Thu Feb 19 1998 - 13:43:26 */
+	ROM_REGION16_LE( 0x1000000, "dcs", ROMREGION_ERASEFF )  /* sound data */
 	ROM_LOAD16_BYTE( "cwld.u2",  0x000000, 0x80000, CRC(7a233c89) SHA1(ecfad4bc48a69cd3399e3b3266c81574082e0169) )
 	ROM_LOAD16_BYTE( "cwld.u3",  0x200000, 0x80000, CRC(be9a5ff0) SHA1(98d69dbfa6aa8462cdd46772e991ee418b79c653) )
 	ROM_LOAD16_BYTE( "cwld.u4",  0x400000, 0x80000, CRC(69f02d84) SHA1(0fb4ff750de78505f241ae6cd18fccf3ddf4223f) )
@@ -1275,7 +1311,7 @@ ROM_END
 
 
 ROM_START( crusnwld23 ) /* Version 2.3, Fri Jan 09 1998 - 10:25:49 */
-	ROM_REGION16_LE( 0x1000000, "dcs", ROMREGION_ERASEFF )	/* sound data */
+	ROM_REGION16_LE( 0x1000000, "dcs", ROMREGION_ERASEFF )  /* sound data */
 	ROM_LOAD16_BYTE( "cwld.u2",  0x000000, 0x80000, CRC(7a233c89) SHA1(ecfad4bc48a69cd3399e3b3266c81574082e0169) )
 	ROM_LOAD16_BYTE( "cwld.u3",  0x200000, 0x80000, CRC(be9a5ff0) SHA1(98d69dbfa6aa8462cdd46772e991ee418b79c653) )
 	ROM_LOAD16_BYTE( "cwld.u4",  0x400000, 0x80000, CRC(69f02d84) SHA1(0fb4ff750de78505f241ae6cd18fccf3ddf4223f) )
@@ -1306,7 +1342,7 @@ ROM_END
 
 
 ROM_START( crusnwld20 ) /* Version 2.0, Tue Mar 18 1997 - 12:32:57 */
-	ROM_REGION16_LE( 0x1000000, "dcs", ROMREGION_ERASEFF )	/* sound data */
+	ROM_REGION16_LE( 0x1000000, "dcs", ROMREGION_ERASEFF )  /* sound data */
 	ROM_LOAD16_BYTE( "cwld.u2",  0x000000, 0x80000, CRC(7a233c89) SHA1(ecfad4bc48a69cd3399e3b3266c81574082e0169) )
 	ROM_LOAD16_BYTE( "cwld.u3",  0x200000, 0x80000, CRC(be9a5ff0) SHA1(98d69dbfa6aa8462cdd46772e991ee418b79c653) )
 	ROM_LOAD16_BYTE( "cwld.u4",  0x400000, 0x80000, CRC(69f02d84) SHA1(0fb4ff750de78505f241ae6cd18fccf3ddf4223f) )
@@ -1336,8 +1372,39 @@ ROM_START( crusnwld20 ) /* Version 2.0, Tue Mar 18 1997 - 12:32:57 */
 ROM_END
 
 
+ROM_START( crusnwld19 ) /* Version 1.9, Sat Mar 08 1997 - 14:48:17 */
+	ROM_REGION16_LE( 0x1000000, "dcs", ROMREGION_ERASEFF )  /* sound data */
+	ROM_LOAD16_BYTE( "cwld.u2",  0x000000, 0x80000, CRC(7a233c89) SHA1(ecfad4bc48a69cd3399e3b3266c81574082e0169) )
+	ROM_LOAD16_BYTE( "cwld.u3",  0x200000, 0x80000, CRC(be9a5ff0) SHA1(98d69dbfa6aa8462cdd46772e991ee418b79c653) )
+	ROM_LOAD16_BYTE( "cwld.u4",  0x400000, 0x80000, CRC(69f02d84) SHA1(0fb4ff750de78505f241ae6cd18fccf3ddf4223f) )
+	ROM_LOAD16_BYTE( "cwld.u5",  0x600000, 0x80000, CRC(9d0b9071) SHA1(05edf9073399a942a9d0b969274a7ebf4ca677da) )
+	ROM_LOAD16_BYTE( "cwld.u6",  0x800000, 0x80000, CRC(df28f492) SHA1(c61f3870f59458b7bb5efbf93d697e3fa44a7830) )
+	ROM_LOAD16_BYTE( "cwld.u7",  0xa00000, 0x80000, CRC(0128913e) SHA1(c11bc115877310c17f9b57f72b29d19b0ad71afa) )
+	ROM_LOAD16_BYTE( "cwld.u8",  0xc00000, 0x80000, CRC(5127c08e) SHA1(4f0eae73817270fa156829100b66f0ff88fa422c) )
+	ROM_LOAD16_BYTE( "cwld.u9",  0xe00000, 0x80000, CRC(84cdc781) SHA1(62287aa72903698d1890908adde53c39f8bd200c) )
+
+	ROM_REGION32_LE( 0x1000000, "user1", 0 )
+	ROM_LOAD32_BYTE( "crusnw19.u10", 0x0000000, 0x100000, CRC(c5cf5316) SHA1(f9900526314c1ea2903fd9a01fcdb839609b1858) )
+	ROM_LOAD32_BYTE( "crusnw19.u11", 0x0000001, 0x100000, CRC(0b183a06) SHA1(06585662abebedc986b22c10fd4f489ed1d94e67) )
+	ROM_LOAD32_BYTE( "crusnw19.u12", 0x0000002, 0x100000, CRC(e32d1a8d) SHA1(ba5bbcee4fe67194e5e0bd99898116350450e83f) )
+	ROM_LOAD32_BYTE( "crusnw19.u13", 0x0000003, 0x100000, CRC(91fcae27) SHA1(a5c2942b01ed6c8a8f4187b4d08a5f1868cf3e2e) )
+	ROM_LOAD32_BYTE( "cwld.u14",     0x0400000, 0x100000, CRC(ee815091) SHA1(fb8a99bae07f42966f76a3bb073d7d8280d8efcb) )
+	ROM_LOAD32_BYTE( "cwld.u15",     0x0400001, 0x100000, CRC(e2da7bf1) SHA1(9d9a80055ee62476f47c95e30ec9a989d5d0e25b) )
+	ROM_LOAD32_BYTE( "cwld.u16",     0x0400002, 0x100000, CRC(05a7ad2f) SHA1(4bdfde671379ecefa3f8ceb6fc06e8df5d70fc22) )
+	ROM_LOAD32_BYTE( "cwld.u17",     0x0400003, 0x100000, CRC(d6278c0c) SHA1(3e152d755d69903718a84d4154e442a31026f3d8) )
+	ROM_LOAD32_BYTE( "cwld.u18",     0x0800000, 0x100000, CRC(e2dc2733) SHA1(c277643548c03d831a3b091f1a311accac9d106b) )
+	ROM_LOAD32_BYTE( "cwld.u19",     0x0800001, 0x100000, CRC(5223a070) SHA1(90ce48b2308fa9e7cb636c4732b20b8e177aa9b1) )
+	ROM_LOAD32_BYTE( "cwld.u20",     0x0800002, 0x100000, CRC(db535625) SHA1(599ccd6bcfb155eb68ac131de4af524510ab35b7) )
+	ROM_LOAD32_BYTE( "cwld.u21",     0x0800003, 0x100000, CRC(92a080e8) SHA1(e5e0faf820b5870a81f121b6ad4c37a9081724e4) )
+	ROM_LOAD32_BYTE( "cwld.u22",     0x0c00000, 0x100000, CRC(77c56318) SHA1(52344038942c83f3ce82f3169a345ceb86e43dcb) )
+	ROM_LOAD32_BYTE( "cwld.u23",     0x0c00001, 0x100000, CRC(6b920fc7) SHA1(993da81181f24075e1aead7c4b374f36dd86a9c3) )
+	ROM_LOAD32_BYTE( "cwld.u24",     0x0c00002, 0x100000, CRC(83485401) SHA1(58407818a82a7a3657530dcda7e373e678b58ab2) )
+	ROM_LOAD32_BYTE( "cwld.u25",     0x0c00003, 0x100000, CRC(0dad97a9) SHA1(cdb0c02da35243b118e37ff1519aa6ee1a79d06d) )
+ROM_END
+
+
 ROM_START( crusnwld17 ) /* Version 1.7, Fri Jan 24 1997 - 16:23:59 */
-	ROM_REGION16_LE( 0x1000000, "dcs", ROMREGION_ERASEFF )	/* sound data */
+	ROM_REGION16_LE( 0x1000000, "dcs", ROMREGION_ERASEFF )  /* sound data */
 	ROM_LOAD16_BYTE( "cwld.u2",  0x000000, 0x80000, CRC(7a233c89) SHA1(ecfad4bc48a69cd3399e3b3266c81574082e0169) )
 	ROM_LOAD16_BYTE( "cwld.u3",  0x200000, 0x80000, CRC(be9a5ff0) SHA1(98d69dbfa6aa8462cdd46772e991ee418b79c653) )
 	ROM_LOAD16_BYTE( "cwld.u4",  0x400000, 0x80000, CRC(69f02d84) SHA1(0fb4ff750de78505f241ae6cd18fccf3ddf4223f) )
@@ -1368,7 +1435,7 @@ ROM_END
 
 
 ROM_START( crusnwld13 ) /* Version 1.3, Mon Nov 25 1996 - 23:22:45 */
-	ROM_REGION16_LE( 0x1000000, "dcs", ROMREGION_ERASEFF )	/* sound data */
+	ROM_REGION16_LE( 0x1000000, "dcs", ROMREGION_ERASEFF )  /* sound data */
 	ROM_LOAD16_BYTE( "cwld.u2",  0x000000, 0x80000, CRC(7a233c89) SHA1(ecfad4bc48a69cd3399e3b3266c81574082e0169) )
 	ROM_LOAD16_BYTE( "cwld.u3",  0x200000, 0x80000, CRC(be9a5ff0) SHA1(98d69dbfa6aa8462cdd46772e991ee418b79c653) )
 	ROM_LOAD16_BYTE( "cwld.u4",  0x400000, 0x80000, CRC(69f02d84) SHA1(0fb4ff750de78505f241ae6cd18fccf3ddf4223f) )
@@ -1399,7 +1466,7 @@ ROM_END
 
 
 ROM_START( offroadc ) /* Version 1.63, Tue 03-03-98 */
-	ROM_REGION16_LE( 0x1000000, "dcs", ROMREGION_ERASEFF )	/* sound data */
+	ROM_REGION16_LE( 0x1000000, "dcs", ROMREGION_ERASEFF )  /* sound data */
 	ROM_LOAD16_BYTE( "offroadc.u2",  0x000000, 0x80000, CRC(69976e9d) SHA1(63c886ac2563c43a10840f49f929f8613cd94de2) )
 	ROM_LOAD16_BYTE( "offroadc.u3",  0x200000, 0x80000, CRC(2db9b548) SHA1(4f454a3e6a8851b0ef5d325dd28102d57ea11a11) )
 	ROM_LOAD16_BYTE( "offroadc.u4",  0x400000, 0x80000, CRC(42bdf9d0) SHA1(04add0f0ee7fa61de1913cc0b988345d3d430cde) )
@@ -1429,8 +1496,39 @@ ROM_START( offroadc ) /* Version 1.63, Tue 03-03-98 */
 ROM_END
 
 
+ROM_START( offroadc5 ) /* Version 1.50, Tue 10-21-97 */
+	ROM_REGION16_LE( 0x1000000, "dcs", ROMREGION_ERASEFF )  /* sound data */
+	ROM_LOAD16_BYTE( "offroadc.u2",  0x000000, 0x80000, CRC(69976e9d) SHA1(63c886ac2563c43a10840f49f929f8613cd94de2) )
+	ROM_LOAD16_BYTE( "offroadc.u3",  0x200000, 0x80000, CRC(2db9b548) SHA1(4f454a3e6a8851b0ef5d325dd28102d57ea11a11) )
+	ROM_LOAD16_BYTE( "offroadc.u4",  0x400000, 0x80000, CRC(42bdf9d0) SHA1(04add0f0ee7fa61de1913cc0b988345d3d430cde) )
+	ROM_LOAD16_BYTE( "offroadc.u5",  0x600000, 0x80000, CRC(569cc84b) SHA1(08b917cc41fae6b6a3e9d9461a783d3d2865e72a) )
+	ROM_LOAD16_BYTE( "offroadc.u6",  0x800000, 0x80000, CRC(0896f679) SHA1(dde39ef17834256909ef2c9fcd5b5fb9939d5178) )
+	ROM_LOAD16_BYTE( "offroadc.u7",  0xa00000, 0x80000, CRC(fe242d6a) SHA1(8fbac22ed23044841f309ce58c5b1affcdd5d114) )
+	ROM_LOAD16_BYTE( "offroadc.u8",  0xc00000, 0x80000, CRC(5da13f12) SHA1(2bb5e929e8bc6c70cb4475024a6b0bb07ac25244) )
+	ROM_LOAD16_BYTE( "offroadc.u9",  0xe00000, 0x80000, CRC(7ad27f69) SHA1(b33665d0593a95b58d529720aae49e90449bf714) )
+
+	ROM_REGION32_LE( 0x1000000, "user1", 0 )
+	ROM_LOAD32_BYTE( "orc-1_5.u10",  0x0000000, 0x100000, CRC(f464be4f) SHA1(da6c04ae49d033f92cdd62f997841365c4a08616) ) /* Version 1.50 program roms */
+	ROM_LOAD32_BYTE( "orc-1_5.u11",  0x0000001, 0x100000, CRC(eaddc9ac) SHA1(a6b810bf7460e3257bf6acdc3b79c532fb71ad68) )
+	ROM_LOAD32_BYTE( "orc-1_5.u12",  0x0000002, 0x100000, CRC(a2da68da) SHA1(b8dcc042b9926055bff9020599c1c218f08b1727) )
+	ROM_LOAD32_BYTE( "orc-1_5.u13",  0x0000003, 0x100000, CRC(b4755ee2) SHA1(1c4cde7ca60a6e8bff12aed348e7148e20a8caba) )
+	ROM_LOAD32_BYTE( "offroadc.u14", 0x0400000, 0x100000, CRC(1e41d14b) SHA1(3f7c5fae1f8b82ddd811720837fa298785a8dd27) )
+	ROM_LOAD32_BYTE( "offroadc.u15", 0x0400001, 0x100000, CRC(654d623d) SHA1(a944b8f8d71b099d7b5bbd7df6effb90afc3aec8) )
+	ROM_LOAD32_BYTE( "offroadc.u16", 0x0400002, 0x100000, CRC(259774d8) SHA1(90cdf659324b84b3c2c59497cc5611e8f12629a6) )
+	ROM_LOAD32_BYTE( "offroadc.u17", 0x0400003, 0x100000, CRC(50c61434) SHA1(52bc603101b4f88b7d892af683b7c8358cabbf4a) )
+	ROM_LOAD32_BYTE( "offroadc.u18", 0x0800000, 0x100000, CRC(015be91c) SHA1(1624537068c6bc5fa6235bf0b0343347c337e8d8) )
+	ROM_LOAD32_BYTE( "offroadc.u19", 0x0800001, 0x100000, CRC(cfc6b70e) SHA1(8c5ad84c50ca142726db0595153cf04caaabec9c) )
+	ROM_LOAD32_BYTE( "offroadc.u20", 0x0800002, 0x100000, CRC(f48d6e33) SHA1(8b9c205e24f217ac110cdd82388c056ebbbb09b0) )
+	ROM_LOAD32_BYTE( "offroadc.u21", 0x0800003, 0x100000, CRC(17794b56) SHA1(8bfd8f5b43056bfe7f62524bb8c3a8564a3a9413) )
+	ROM_LOAD32_BYTE( "offroadc.u22", 0x0c00000, 0x100000, CRC(f2a6e622) SHA1(a7d7004e95b058124cc02e8073dab8fbed8813c5) )
+	ROM_LOAD32_BYTE( "offroadc.u23", 0x0c00001, 0x100000, CRC(1cba6e20) SHA1(a7c9c58bfc4d26decb08979d83cccedb27528eb6) )
+	ROM_LOAD32_BYTE( "offroadc.u24", 0x0c00002, 0x100000, CRC(fd3ce11f) SHA1(78c65267712488784bc6dc14eef98a90494a9553) )
+	ROM_LOAD32_BYTE( "offroadc.u25", 0x0c00003, 0x100000, CRC(78f8e5db) SHA1(7ec2a5add27d66c43ba5cb7182554321007f5798) )
+ROM_END
+
+
 ROM_START( offroadc4 ) /* Version 1.40, Mon 10-06-97 */
-	ROM_REGION16_LE( 0x1000000, "dcs", ROMREGION_ERASEFF )	/* sound data */
+	ROM_REGION16_LE( 0x1000000, "dcs", ROMREGION_ERASEFF )  /* sound data */
 	ROM_LOAD16_BYTE( "offroadc.u2",  0x000000, 0x80000, CRC(69976e9d) SHA1(63c886ac2563c43a10840f49f929f8613cd94de2) )
 	ROM_LOAD16_BYTE( "offroadc.u3",  0x200000, 0x80000, CRC(2db9b548) SHA1(4f454a3e6a8851b0ef5d325dd28102d57ea11a11) )
 	ROM_LOAD16_BYTE( "offroadc.u4",  0x400000, 0x80000, CRC(42bdf9d0) SHA1(04add0f0ee7fa61de1913cc0b988345d3d430cde) )
@@ -1461,7 +1559,7 @@ ROM_END
 
 
 ROM_START( offroadc3 ) /* Version 1.30, Mon 09-15-97 */
-	ROM_REGION16_LE( 0x1000000, "dcs", ROMREGION_ERASEFF )	/* sound data */
+	ROM_REGION16_LE( 0x1000000, "dcs", ROMREGION_ERASEFF )  /* sound data */
 	ROM_LOAD16_BYTE( "offroadc.u2",  0x000000, 0x80000, CRC(69976e9d) SHA1(63c886ac2563c43a10840f49f929f8613cd94de2) )
 	ROM_LOAD16_BYTE( "offroadc.u3",  0x200000, 0x80000, CRC(2db9b548) SHA1(4f454a3e6a8851b0ef5d325dd28102d57ea11a11) )
 	ROM_LOAD16_BYTE( "offroadc.u4",  0x400000, 0x80000, CRC(42bdf9d0) SHA1(04add0f0ee7fa61de1913cc0b988345d3d430cde) )
@@ -1492,7 +1590,7 @@ ROM_END
 
 
 ROM_START( offroadc1 ) /* Version 1.10, Mon 08-18-97 */
-	ROM_REGION16_LE( 0x1000000, "dcs", ROMREGION_ERASEFF )	/* sound data */
+	ROM_REGION16_LE( 0x1000000, "dcs", ROMREGION_ERASEFF )  /* sound data */
 	ROM_LOAD16_BYTE( "offroadc.u2",  0x000000, 0x80000, CRC(69976e9d) SHA1(63c886ac2563c43a10840f49f929f8613cd94de2) )
 	ROM_LOAD16_BYTE( "offroadc.u3",  0x200000, 0x80000, CRC(2db9b548) SHA1(4f454a3e6a8851b0ef5d325dd28102d57ea11a11) )
 	ROM_LOAD16_BYTE( "offroadc.u4",  0x400000, 0x80000, CRC(42bdf9d0) SHA1(04add0f0ee7fa61de1913cc0b988345d3d430cde) )
@@ -1566,15 +1664,37 @@ PCB LAYOUT
 |-----------------------------|  |---------------------------------------|  |---------------------------------------|
 */
 
-ROM_START( wargods ) /* Boot EPROM Version 1.0, Game Type: 452 (12/11/1995) */
-	ROM_REGION16_LE( 0x10000, "dcs", 0 )	/* sound data */
+ROM_START( wargods ) /* Boot EPROM Version 1.0, Game Type: 452 (10/09/1996) */
+	ROM_REGION16_LE( 0x10000, "dcs", 0 )    /* sound data */
 	ROM_LOAD16_BYTE( "u2.rom",   0x000000, 0x8000, CRC(bec7d3ae) SHA1(db80aa4a645804a4574b07b9f34dec6b6b64190d) )
 
 	ROM_REGION32_LE( 0x1000000, "user1", 0 )
 	ROM_LOAD( "u41.rom", 0x000000, 0x20000, CRC(398c54cc) SHA1(6c4b5d6ec5c844dcbf181f9d86a9196a088ed2db) )
 
-	DISK_REGION( "ide" )
-	DISK_IMAGE( "wargods", 0, SHA1(141063f95867fdcc4b15c844e510696604a70c6a) )
+	DISK_REGION( "drive_0" )
+	DISK_IMAGE( "wargods_10-09-1996", 0, SHA1(7585bc65b1038589cb59d3e7c56e08ca9d7015b8) )
+ROM_END
+
+ROM_START( wargodsa ) /* Boot EPROM Version 1.0, Game Type: 452 (08/15/1996) */
+	ROM_REGION16_LE( 0x10000, "dcs", 0 )    /* sound data */
+	ROM_LOAD16_BYTE( "u2.rom",   0x000000, 0x8000, CRC(bec7d3ae) SHA1(db80aa4a645804a4574b07b9f34dec6b6b64190d) )
+
+	ROM_REGION32_LE( 0x1000000, "user1", 0 )
+	ROM_LOAD( "u41.rom", 0x000000, 0x20000, CRC(398c54cc) SHA1(6c4b5d6ec5c844dcbf181f9d86a9196a088ed2db) )
+
+	DISK_REGION( "drive_0" )
+	DISK_IMAGE( "wargods_08-15-1996", 0, SHA1(5dee00be40c315fbb1d6e3994dae8e498ab87fb2) )
+ROM_END
+
+ROM_START( wargodsb ) /* Boot EPROM Version 1.0, Game Type: 452 (12/11/1995) */
+	ROM_REGION16_LE( 0x10000, "dcs", 0 )    /* sound data */
+	ROM_LOAD16_BYTE( "u2.rom",   0x000000, 0x8000, CRC(bec7d3ae) SHA1(db80aa4a645804a4574b07b9f34dec6b6b64190d) )
+
+	ROM_REGION32_LE( 0x1000000, "user1", 0 )
+	ROM_LOAD( "u41.rom", 0x000000, 0x20000, CRC(398c54cc) SHA1(6c4b5d6ec5c844dcbf181f9d86a9196a088ed2db) )
+
+	DISK_REGION( "drive_0" )
+	DISK_IMAGE( "wargods_12-11-1995", 0, SHA1(141063f95867fdcc4b15c844e510696604a70c6a) )
 ROM_END
 
 
@@ -1585,85 +1705,80 @@ ROM_END
  *
  *************************************/
 
-static READ32_HANDLER( generic_speedup_r )
+READ32_MEMBER(midvunit_state::generic_speedup_r)
 {
-	midvunit_state *state = space->machine().driver_data<midvunit_state>();
-	device_eat_cycles(&space->device(), 100);
-	return state->m_generic_speedup[offset];
+	space.device().execute().eat_cycles(100);
+	return m_generic_speedup[offset];
 }
 
 
-static void init_crusnusa_common(running_machine &machine, offs_t speedup)
+void midvunit_state::init_crusnusa_common(offs_t speedup)
 {
-	midvunit_state *state = machine.driver_data<midvunit_state>();
-	dcs_init(machine);
-	state->m_adc_shift = 24;
+	dcs_init(machine());
+	m_adc_shift = 24;
 
 	/* speedups */
-	state->m_generic_speedup = machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(speedup, speedup + 1, FUNC(generic_speedup_r));
+	m_generic_speedup = machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(speedup, speedup + 1, read32_delegate(FUNC(midvunit_state::generic_speedup_r),this));
 }
-static DRIVER_INIT( crusnusa ) { init_crusnusa_common(machine, 0xc93e); }
-static DRIVER_INIT( crusnu40 ) { init_crusnusa_common(machine, 0xc957); }
-static DRIVER_INIT( crusnu21 ) { init_crusnusa_common(machine, 0xc051); }
+DRIVER_INIT_MEMBER(midvunit_state,crusnusa)  { init_crusnusa_common(0xc93e); }
+DRIVER_INIT_MEMBER(midvunit_state,crusnu40)  { init_crusnusa_common(0xc957); }
+DRIVER_INIT_MEMBER(midvunit_state,crusnu21)  { init_crusnusa_common(0xc051); }
 
 
-static void init_crusnwld_common(running_machine &machine, offs_t speedup)
+void midvunit_state::init_crusnwld_common(offs_t speedup)
 {
-	midvunit_state *state = machine.driver_data<midvunit_state>();
-	dcs_init(machine);
-	state->m_adc_shift = 16;
+	dcs_init(machine());
+	m_adc_shift = 16;
 
 	/* control register is different */
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x994000, 0x994000, FUNC(crusnwld_control_w));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0x994000, 0x994000, write32_delegate(FUNC(midvunit_state::crusnwld_control_w),this));
 
 	/* valid values are 450 or 460 */
-	midway_serial_pic_init(machine, 450);
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x991030, 0x991030, FUNC(offroadc_serial_status_r));
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x996000, 0x996000, FUNC(offroadc_serial_data_r));
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x996000, 0x996000, FUNC(offroadc_serial_data_w));
+	midway_serial_pic_init(machine(), 450);
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(0x991030, 0x991030, read32_delegate(FUNC(midvunit_state::offroadc_serial_status_r),this));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(0x996000, 0x996000, read32_delegate(FUNC(midvunit_state::offroadc_serial_data_r),this));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0x996000, 0x996000, write32_delegate(FUNC(midvunit_state::offroadc_serial_data_w),this));
 
 	/* install strange protection device */
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x9d0000, 0x9d1fff, FUNC(bit_data_r));
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x9d0000, 0x9d0000, FUNC(bit_reset_w));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(0x9d0000, 0x9d1fff, read32_delegate(FUNC(midvunit_state::bit_data_r),this));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0x9d0000, 0x9d0000, write32_delegate(FUNC(midvunit_state::bit_reset_w),this));
 
 	/* speedups */
 	if (speedup)
-		state->m_generic_speedup = machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(speedup, speedup + 1, FUNC(generic_speedup_r));
+		m_generic_speedup = machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(speedup, speedup + 1, read32_delegate(FUNC(midvunit_state::generic_speedup_r),this));
 }
-static DRIVER_INIT( crusnwld ) { init_crusnwld_common(machine, 0xd4c0); }
+DRIVER_INIT_MEMBER(midvunit_state,crusnwld)  { init_crusnwld_common(0xd4c0); }
 #if 0
-static DRIVER_INIT( crusnw20 ) { init_crusnwld_common(machine, 0xd49c); }
-static DRIVER_INIT( crusnw13 ) { init_crusnwld_common(machine, 0); }
+DRIVER_INIT_MEMBER(midvunit_state,crusnw20)  { init_crusnwld_common(0xd49c); }
+DRIVER_INIT_MEMBER(midvunit_state,crusnw13)  { init_crusnwld_common(0); }
 #endif
 
-static DRIVER_INIT( offroadc )
+DRIVER_INIT_MEMBER(midvunit_state,offroadc)
 {
-	midvunit_state *state = machine.driver_data<midvunit_state>();
-	dcs_init(machine);
-	state->m_adc_shift = 16;
+	dcs_init(machine());
+	m_adc_shift = 16;
 
 	/* control register is different */
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x994000, 0x994000, FUNC(crusnwld_control_w));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0x994000, 0x994000, write32_delegate(FUNC(midvunit_state::crusnwld_control_w),this));
 
 	/* valid values are 230 or 234 */
-	midway_serial_pic2_init(machine, 230, 94);
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x991030, 0x991030, FUNC(offroadc_serial_status_r));
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_readwrite_handler(0x996000, 0x996000, FUNC(offroadc_serial_data_r), FUNC(offroadc_serial_data_w));
+	midway_serial_pic2_init(machine(), 230, 94);
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(0x991030, 0x991030, read32_delegate(FUNC(midvunit_state::offroadc_serial_status_r),this));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_readwrite_handler(0x996000, 0x996000, read32_delegate(FUNC(midvunit_state::offroadc_serial_data_r),this), write32_delegate(FUNC(midvunit_state::offroadc_serial_data_w),this));
 
 	/* speedups */
-	state->m_generic_speedup = machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x195aa, 0x195aa, FUNC(generic_speedup_r));
+	m_generic_speedup = machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(0x195aa, 0x195aa, read32_delegate(FUNC(midvunit_state::generic_speedup_r),this));
 }
 
 
-static DRIVER_INIT( wargods )
+DRIVER_INIT_MEMBER(midvunit_state,wargods)
 {
-	midvunit_state *state = machine.driver_data<midvunit_state>();
 	UINT8 default_nvram[256];
 
 	/* initialize the subsystems */
-	dcs2_init(machine, 2, 0x3839);
-	midway_ioasic_init(machine, 0, 452/* no alternates */, 94, NULL);
-	state->m_adc_shift = 16;
+	dcs2_init(machine(), 2, 0x3839);
+	midway_ioasic_init(machine(), 0, 452/* no alternates */, 94, NULL);
+	m_adc_shift = 16;
 
 	/* we need proper VRAM */
 	memset(default_nvram, 0xff, sizeof(default_nvram));
@@ -1677,7 +1792,7 @@ static DRIVER_INIT( wargods )
 	midway_serial_pic2_set_default_nvram(default_nvram);
 
 	/* speedups */
-	state->m_generic_speedup = machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x2f4c, 0x2f4c, FUNC(generic_speedup_r));
+	m_generic_speedup = machine().device("maincpu")->memory().space(AS_PROGRAM).install_read_handler(0x2f4c, 0x2f4c, read32_delegate(FUNC(midvunit_state::generic_speedup_r),this));
 }
 
 
@@ -1688,19 +1803,24 @@ static DRIVER_INIT( wargods )
  *
  *************************************/
 
-GAME( 1994, crusnusa,   0,        midvunit, crusnusa, crusnusa, ROT0, "Midway", "Cruis'n USA (rev L4.1)", GAME_SUPPORTS_SAVE )
-GAME( 1994, crusnusa40, crusnusa, midvunit, crusnusa, crusnu40, ROT0, "Midway", "Cruis'n USA (rev L4.0)", GAME_SUPPORTS_SAVE )
-GAME( 1994, crusnusa21, crusnusa, midvunit, crusnusa, crusnu21, ROT0, "Midway", "Cruis'n USA (rev L2.1)", GAME_SUPPORTS_SAVE )
+GAME( 1994, crusnusa,   0,        midvunit, crusnusa, midvunit_state, crusnusa, ROT0, "Midway", "Cruis'n USA (rev L4.1)", GAME_SUPPORTS_SAVE )
+GAME( 1994, crusnusa40, crusnusa, midvunit, crusnusa, midvunit_state, crusnu40, ROT0, "Midway", "Cruis'n USA (rev L4.0)", GAME_SUPPORTS_SAVE )
+GAME( 1994, crusnusa21, crusnusa, midvunit, crusnusa, midvunit_state, crusnu21, ROT0, "Midway", "Cruis'n USA (rev L2.1)", GAME_SUPPORTS_SAVE )
 
-GAME( 1996, crusnwld,   0,        midvunit, crusnwld, crusnwld, ROT0, "Midway", "Cruis'n World (rev L2.4)", GAME_SUPPORTS_SAVE )
-GAME( 1996, crusnwld23, crusnwld, midvunit, crusnwld, crusnwld, ROT0, "Midway", "Cruis'n World (rev L2.3)", GAME_SUPPORTS_SAVE )
-GAME( 1996, crusnwld20, crusnwld, midvunit, crusnwld, crusnwld, ROT0, "Midway", "Cruis'n World (rev L2.0)", GAME_SUPPORTS_SAVE )
-GAME( 1996, crusnwld17, crusnwld, midvunit, crusnwld, crusnwld, ROT0, "Midway", "Cruis'n World (rev L1.7)", GAME_SUPPORTS_SAVE )
-GAME( 1996, crusnwld13, crusnwld, midvunit, crusnwld, crusnwld, ROT0, "Midway", "Cruis'n World (rev L1.3)", GAME_SUPPORTS_SAVE )
+GAME( 1996, crusnwld,   0,        midvunit, crusnwld, midvunit_state, crusnwld, ROT0, "Midway", "Cruis'n World (rev L2.5)", GAME_SUPPORTS_SAVE )
+GAME( 1996, crusnwld24, crusnwld, midvunit, crusnwld, midvunit_state, crusnwld, ROT0, "Midway", "Cruis'n World (rev L2.4)", GAME_SUPPORTS_SAVE )
+GAME( 1996, crusnwld23, crusnwld, midvunit, crusnwld, midvunit_state, crusnwld, ROT0, "Midway", "Cruis'n World (rev L2.3)", GAME_SUPPORTS_SAVE )
+GAME( 1996, crusnwld20, crusnwld, midvunit, crusnwld, midvunit_state, crusnwld, ROT0, "Midway", "Cruis'n World (rev L2.0)", GAME_SUPPORTS_SAVE )
+GAME( 1996, crusnwld19, crusnwld, midvunit, crusnwld, midvunit_state, crusnwld, ROT0, "Midway", "Cruis'n World (rev L1.9)", GAME_SUPPORTS_SAVE )
+GAME( 1996, crusnwld17, crusnwld, midvunit, crusnwld, midvunit_state, crusnwld, ROT0, "Midway", "Cruis'n World (rev L1.7)", GAME_SUPPORTS_SAVE )
+GAME( 1996, crusnwld13, crusnwld, midvunit, crusnwld, midvunit_state, crusnwld, ROT0, "Midway", "Cruis'n World (rev L1.3)", GAME_SUPPORTS_SAVE )
 
-GAME( 1997, offroadc,  0,        midvunit, offroadc, offroadc, ROT0, "Midway", "Off Road Challenge (v1.63)", GAME_NOT_WORKING | GAME_SUPPORTS_SAVE )
-GAME( 1997, offroadc4, offroadc, midvunit, offroadc, offroadc, ROT0, "Midway", "Off Road Challenge (v1.40)", GAME_NOT_WORKING | GAME_SUPPORTS_SAVE )
-GAME( 1997, offroadc3, offroadc, midvunit, offroadc, offroadc, ROT0, "Midway", "Off Road Challenge (v1.30)", GAME_NOT_WORKING | GAME_SUPPORTS_SAVE )
-GAME( 1997, offroadc1, offroadc, midvunit, offroadc, offroadc, ROT0, "Midway", "Off Road Challenge (v1.10)", GAME_NOT_WORKING | GAME_SUPPORTS_SAVE )
+GAME( 1997, offroadc,  0,        midvunit, offroadc, midvunit_state, offroadc, ROT0, "Midway", "Off Road Challenge (v1.63)", GAME_SUPPORTS_SAVE )
+GAME( 1997, offroadc5, offroadc, midvunit, offroadc, midvunit_state, offroadc, ROT0, "Midway", "Off Road Challenge (v1.50)", GAME_SUPPORTS_SAVE )
+GAME( 1997, offroadc4, offroadc, midvunit, offroadc, midvunit_state, offroadc, ROT0, "Midway", "Off Road Challenge (v1.40)", GAME_SUPPORTS_SAVE )
+GAME( 1997, offroadc3, offroadc, midvunit, offroadc, midvunit_state, offroadc, ROT0, "Midway", "Off Road Challenge (v1.30)", GAME_SUPPORTS_SAVE )
+GAME( 1997, offroadc1, offroadc, midvunit, offroadc, midvunit_state, offroadc, ROT0, "Midway", "Off Road Challenge (v1.10)", GAME_SUPPORTS_SAVE )
 
-GAME( 1995, wargods,  0,        midvplus, wargods,  wargods,  ROT0, "Midway", "War Gods", GAME_SUPPORTS_SAVE )
+GAME( 1995, wargods,   0,        midvplus, wargods, midvunit_state,  wargods,  ROT0, "Midway", "War Gods (HD 10/09/1996 - Dual Resolution)", GAME_SUPPORTS_SAVE )
+GAME( 1995, wargodsa,  wargods,  midvplus, wargodsa, midvunit_state, wargods,  ROT0, "Midway", "War Gods (HD 08/15/1996)", GAME_SUPPORTS_SAVE )
+GAME( 1995, wargodsb,  wargods,  midvplus, wargodsa, midvunit_state, wargods,  ROT0, "Midway", "War Gods (HD 12/11/1995)", GAME_SUPPORTS_SAVE )

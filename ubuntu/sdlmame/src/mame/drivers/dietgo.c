@@ -16,41 +16,41 @@
 #include "video/decospr.h"
 #include "video/decocomn.h"
 
-static ADDRESS_MAP_START( dietgo_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( dietgo_map, AS_PROGRAM, 16, dietgo_state )
 	AM_RANGE(0x000000, 0x07ffff) AM_ROM
-	AM_RANGE(0x200000, 0x20000f) AM_DEVWRITE("tilegen1", deco16ic_pf_control_w)
-	AM_RANGE(0x210000, 0x211fff) AM_DEVWRITE("tilegen1", deco16ic_pf1_data_w)
-	AM_RANGE(0x212000, 0x213fff) AM_DEVWRITE("tilegen1", deco16ic_pf2_data_w)
-	AM_RANGE(0x220000, 0x2207ff) AM_WRITEONLY AM_BASE_MEMBER(dietgo_state, m_pf1_rowscroll)
-	AM_RANGE(0x222000, 0x2227ff) AM_WRITEONLY AM_BASE_MEMBER(dietgo_state, m_pf2_rowscroll)
-	AM_RANGE(0x280000, 0x2807ff) AM_RAM AM_BASE_SIZE_MEMBER(dietgo_state, m_spriteram, m_spriteram_size)
-	AM_RANGE(0x300000, 0x300bff) AM_RAM_DEVWRITE("deco_common", decocomn_nonbuffered_palette_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0x340000, 0x3407ff) AM_READWRITE(dietgo_104_prot_r, dietgo_104_prot_w)
+	AM_RANGE(0x200000, 0x20000f) AM_DEVWRITE_LEGACY("tilegen1", deco16ic_pf_control_w)
+	AM_RANGE(0x210000, 0x211fff) AM_DEVWRITE_LEGACY("tilegen1", deco16ic_pf1_data_w)
+	AM_RANGE(0x212000, 0x213fff) AM_DEVWRITE_LEGACY("tilegen1", deco16ic_pf2_data_w)
+	AM_RANGE(0x220000, 0x2207ff) AM_WRITEONLY AM_SHARE("pf1_rowscroll")
+	AM_RANGE(0x222000, 0x2227ff) AM_WRITEONLY AM_SHARE("pf2_rowscroll")
+	AM_RANGE(0x280000, 0x2807ff) AM_RAM AM_SHARE("spriteram")
+	AM_RANGE(0x300000, 0x300bff) AM_RAM_DEVWRITE_LEGACY("deco_common", decocomn_nonbuffered_palette_w) AM_SHARE("paletteram")
+	AM_RANGE(0x340000, 0x3407ff) AM_READWRITE_LEGACY(dietgo_104_prot_r, dietgo_104_prot_w)
 	AM_RANGE(0x380000, 0x38ffff) AM_RAM // mainram
 ADDRESS_MAP_END
 
 
 /* Physical memory map (21 bits) */
-static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( sound_map, AS_PROGRAM, 8, dietgo_state )
 	AM_RANGE(0x000000, 0x00ffff) AM_ROM
-	AM_RANGE(0x100000, 0x100001) AM_NOP		/* YM2203 - this board doesn't have one */
-	AM_RANGE(0x110000, 0x110001) AM_DEVREADWRITE("ymsnd", ym2151_r, ym2151_w)
-	AM_RANGE(0x120000, 0x120001) AM_DEVREADWRITE_MODERN("oki", okim6295_device, read, write)
-	AM_RANGE(0x130000, 0x130001) AM_NOP		/* This board only has 1 oki chip */
-	AM_RANGE(0x140000, 0x140001) AM_READ(soundlatch_r)
+	AM_RANGE(0x100000, 0x100001) AM_NOP     /* YM2203 - this board doesn't have one */
+	AM_RANGE(0x110000, 0x110001) AM_DEVREADWRITE("ymsnd", ym2151_device, read, write)
+	AM_RANGE(0x120000, 0x120001) AM_DEVREADWRITE("oki", okim6295_device, read, write)
+	AM_RANGE(0x130000, 0x130001) AM_NOP     /* This board only has 1 oki chip */
+	AM_RANGE(0x140000, 0x140001) AM_READ(soundlatch_byte_r)
 	AM_RANGE(0x1f0000, 0x1f1fff) AM_RAMBANK("bank8")
-	AM_RANGE(0x1fec00, 0x1fec01) AM_WRITE(h6280_timer_w)
-	AM_RANGE(0x1ff400, 0x1ff403) AM_WRITE(h6280_irq_status_w)
+	AM_RANGE(0x1fec00, 0x1fec01) AM_DEVWRITE("audiocpu", h6280_device, timer_w)
+	AM_RANGE(0x1ff400, 0x1ff403) AM_DEVWRITE("audiocpu", h6280_device, irq_status_w)
 ADDRESS_MAP_END
 
 
 
 static INPUT_PORTS_START( dietgo )
-	PORT_START("IN0")	/* Verified as 4 bit input port only */
+	PORT_START("IN0")   /* Verified as 4 bit input port only */
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_SERVICE1 )
-	PORT_BIT( 0x0008, IP_ACTIVE_HIGH, IPT_VBLANK )
+	PORT_BIT( 0x0008, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 
 	PORT_START("IN1")
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(1)
@@ -150,27 +150,15 @@ static const gfx_layout spritelayout =
 	{ 24,8,16,0 },
 	{ 512,513,514,515,516,517,518,519, 0, 1, 2, 3, 4, 5, 6, 7 },
 	{ 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
-	  8*32, 9*32,10*32,11*32,12*32,13*32,14*32,15*32},
+		8*32, 9*32,10*32,11*32,12*32,13*32,14*32,15*32},
 	32*32
 };
 
 static GFXDECODE_START( dietgo )
-	GFXDECODE_ENTRY( "gfx1", 0, tile_8x8_layout,     0, 32 )	/* Tiles (8x8) */
-	GFXDECODE_ENTRY( "gfx1", 0, tile_16x16_layout,   0, 32 )	/* Tiles (16x16) */
-	GFXDECODE_ENTRY( "gfx2", 0, spritelayout,      512, 16 )	/* Sprites (16x16) */
+	GFXDECODE_ENTRY( "gfx1", 0, tile_8x8_layout,     0, 32 )    /* Tiles (8x8) */
+	GFXDECODE_ENTRY( "gfx1", 0, tile_16x16_layout,   0, 32 )    /* Tiles (16x16) */
+	GFXDECODE_ENTRY( "gfx2", 0, spritelayout,      512, 16 )    /* Sprites (16x16) */
 GFXDECODE_END
-
-static void sound_irq(device_t *device, int state)
-{
-	dietgo_state *driver_state = device->machine().driver_data<dietgo_state>();
-	device_set_input_line(driver_state->m_audiocpu, 1, state); /* IRQ 2 */
-}
-
-static const ym2151_interface ym2151_config =
-{
-	sound_irq
-};
-
 
 static int dietgo_bank_callback(const int bank)
 {
@@ -186,7 +174,7 @@ static const deco16ic_interface dietgo_deco16ic_tilegen1_intf =
 {
 	"screen",
 	0, 1,
-	0x0f, 0x0f,	/* trans masks (default values) */
+	0x0f, 0x0f, /* trans masks (default values) */
 	0, 16, /* color base (default values) */
 	0x0f, 0x0f, /* color masks (default values) */
 	dietgo_bank_callback,
@@ -195,13 +183,12 @@ static const deco16ic_interface dietgo_deco16ic_tilegen1_intf =
 };
 
 
-static MACHINE_START( dietgo )
+void dietgo_state::machine_start()
 {
-	dietgo_state *state = machine.driver_data<dietgo_state>();
 
-	state->m_maincpu = machine.device("maincpu");
-	state->m_audiocpu = machine.device("audiocpu");
-	state->m_deco_tilegen1 = machine.device("tilegen1");
+	m_maincpu = machine().device<cpu_device>("maincpu");
+	m_audiocpu = machine().device<cpu_device>("audiocpu");
+	m_deco_tilegen1 = machine().device("tilegen1");
 }
 
 static MACHINE_CONFIG_START( dietgo, dietgo_state )
@@ -209,21 +196,19 @@ static MACHINE_CONFIG_START( dietgo, dietgo_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, XTAL_28MHz/2) /* DE102 (verified on pcb) */
 	MCFG_CPU_PROGRAM_MAP(dietgo_map)
-	MCFG_CPU_VBLANK_INT("screen", irq6_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", dietgo_state,  irq6_line_hold)
 
-	MCFG_CPU_ADD("audiocpu", H6280, XTAL_32_22MHz/4/3)	/* Custom chip 45; XIN is 32.220MHZ/4, verified on pcb */
+	MCFG_CPU_ADD("audiocpu", H6280, XTAL_32_22MHz/4/3)  /* Custom chip 45; XIN is 32.220MHZ/4, verified on pcb */
 	MCFG_CPU_PROGRAM_MAP(sound_map)
 
-	MCFG_MACHINE_START(dietgo)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(58)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(40*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 40*8-1, 1*8, 31*8-1)
-	MCFG_SCREEN_UPDATE(dietgo)
+	MCFG_SCREEN_UPDATE_DRIVER(dietgo_state, screen_update_dietgo)
 
 	MCFG_PALETTE_LENGTH(1024)
 	MCFG_GFXDECODE(dietgo)
@@ -232,14 +217,14 @@ static MACHINE_CONFIG_START( dietgo, dietgo_state )
 
 	MCFG_DECO16IC_ADD("tilegen1", dietgo_deco16ic_tilegen1_intf)
 
-	MCFG_DEVICE_ADD("spritegen", decospr_, 0)
-	decospr_device_config::set_gfx_region(device, 2);
+	MCFG_DEVICE_ADD("spritegen", DECO_SPRITE, 0)
+	decospr_device::set_gfx_region(*device, 2);
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("ymsnd", YM2151, XTAL_32_22MHz/9) /* verified on pcb */
-	MCFG_SOUND_CONFIG(ym2151_config)
+	MCFG_YM2151_ADD("ymsnd", XTAL_32_22MHz/9) /* verified on pcb */
+	MCFG_YM2151_IRQ_HANDLER(INPUTLINE("audiocpu", 1)) /* IRQ 2 */
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.45)
 
 	MCFG_OKIM6295_ADD("oki", XTAL_32_22MHz/32, OKIM6295_PIN7_HIGH) /* verified on pcb */
@@ -367,13 +352,13 @@ ROM_START( dietgoj )
 ROM_END
 
 
-static DRIVER_INIT( dietgo )
+DRIVER_INIT_MEMBER(dietgo_state,dietgo)
 {
-	deco56_decrypt_gfx(machine, "gfx1");
-	deco102_decrypt_cpu(machine, "maincpu", 0xe9ba, 0x01, 0x19);
+	deco56_decrypt_gfx(machine(), "gfx1");
+	deco102_decrypt_cpu(machine(), "maincpu", 0xe9ba, 0x01, 0x19);
 }
 
-GAME( 1992, dietgo,   0,      dietgo, dietgo,  dietgo,    ROT0, "Data East Corporation", "Diet Go Go (Euro v1.1 1992.09.26)", GAME_SUPPORTS_SAVE )
-GAME( 1992, dietgoe,  dietgo, dietgo, dietgo,  dietgo,    ROT0, "Data East Corporation", "Diet Go Go (Euro v1.1 1992.08.04)" , GAME_SUPPORTS_SAVE ) // weird, still version 1.1 but different date
-GAME( 1992, dietgou,  dietgo, dietgo, dietgo,  dietgo,    ROT0, "Data East Corporation", "Diet Go Go (USA v1.1 1992.09.26)", GAME_SUPPORTS_SAVE )
-GAME( 1992, dietgoj,  dietgo, dietgo, dietgo,  dietgo,    ROT0, "Data East Corporation", "Diet Go Go (Japan v1.1 1992.09.26)", GAME_SUPPORTS_SAVE )
+GAME( 1992, dietgo,   0,      dietgo, dietgo, dietgo_state,  dietgo,    ROT0, "Data East Corporation", "Diet Go Go (Euro v1.1 1992.09.26)", GAME_SUPPORTS_SAVE )
+GAME( 1992, dietgoe,  dietgo, dietgo, dietgo, dietgo_state,  dietgo,    ROT0, "Data East Corporation", "Diet Go Go (Euro v1.1 1992.08.04)" , GAME_SUPPORTS_SAVE ) // weird, still version 1.1 but different date
+GAME( 1992, dietgou,  dietgo, dietgo, dietgo, dietgo_state,  dietgo,    ROT0, "Data East Corporation", "Diet Go Go (USA v1.1 1992.09.26)", GAME_SUPPORTS_SAVE )
+GAME( 1992, dietgoj,  dietgo, dietgo, dietgo, dietgo_state,  dietgo,    ROT0, "Data East Corporation", "Diet Go Go (Japan v1.1 1992.09.26)", GAME_SUPPORTS_SAVE )

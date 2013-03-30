@@ -51,6 +51,9 @@
 # uncomment next line to enable a build using Microsoft tools
 # MSVC_BUILD = 1
 
+# uncomment next line to enable code analysis using Microsoft tools
+# MSVC_ANALYSIS = 1
+
 # uncomment next line to use cygwin compiler
 # CYGWIN_BUILD = 1
 
@@ -59,7 +62,6 @@
 
 # set this to the minimum DirectInput version to support (7 or 8)
 # DIRECTINPUT = 8
-
 
 
 ###########################################################################
@@ -96,7 +98,7 @@ RCFLAGS = -O coff -I $(WINSRC) -I $(WINOBJ)
 
 ifdef CYGWIN_BUILD
 CCOMFLAGS += -mno-cygwin
-LDFLAGS	+= -mno-cygwin
+LDFLAGS += -mno-cygwin
 endif
 
 
@@ -140,6 +142,15 @@ CCOMFLAGS += /wd4267
 #LIBS += -lbufferoverflowu
 endif
 
+# enable basic run-time checks in non-optimized build
+ifeq ($(OPTIMIZE),0)
+CCOMFLAGS += /RTC1
+endif
+
+ifdef MSVC_ANALYSIS
+CCOMFLAGS += /analyze /wd6011 /wd6328 /wd6204 /wd6244 /wd6385 /wd6308 /wd6246 /wd6031 /wd6326 /analyze:stacksize384112
+endif
+
 # enable exception handling for C++
 CPPONLYFLAGS += /EHsc
 
@@ -155,14 +166,20 @@ CPPONLYFLAGS += /wd4800
 # disable better packing warning
 CPPONLYFLAGS += /wd4371
 
+# disable side effects warning in STL headers
+CPPONLYFLAGS += /wd4548
+
 # disable macro redefinition warning
 CCOMFLAGS += /wd4005
+
+# disable behavior change: 'member1' called instead of 'member2' warning
+CCOMFLAGS += /wd4350
 
 # explicitly set the entry point for UNICODE builds
 LDFLAGS += /ENTRY:wmainCRTStartup
 
 # add some VC++-specific defines
-DEFS += -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE -DXML_STATIC -Dsnprintf=_snprintf
+DEFS += -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE -DXML_STATIC -Dsnprintf=_snprintf -DWIN32
 
 OSDCLEAN = msvcclean
 
@@ -222,7 +239,7 @@ DEFS += -Dmain=utf8_main
 
 # debug build: enable guard pages on all memory allocations
 ifdef DEBUG
-#DEFS += -DMALLOC_DEBUG
+DEFS += -DMALLOC_DEBUG
 endif
 
 
@@ -234,16 +251,18 @@ endif
 # add our prefix files to the mix
 CCOMFLAGS += -include $(WINSRC)/winprefix.h
 
-# for 32-bit apps, add unicows for Unicode support on Win9x
-ifneq ($(PTR64),1)
-LIBS += -lunicows
-endif
-
 # ensure we statically link the gcc runtime lib
 LDFLAGS += -static-libgcc
-
+TEST_GCC = $(shell gcc --version)
+ifeq ($(findstring 4.4,$(TEST_GCC)),)
+	#if we use new tools
+	LDFLAGS += -static-libstdc++
+endif
+ifeq ($(findstring 4.7.,$(TEST_GCC)),4.7.)
+	CCOMFLAGS += -Wno-narrowing -Wno-attributes
+endif
 # add the windows libraries
-LIBS += -luser32 -lgdi32 -ldsound -ldxguid -lwinmm -ladvapi32 -lcomctl32 -lshlwapi -ldinput8
+LIBS += -luser32 -lgdi32 -ldsound -ldxguid -lwinmm -ladvapi32 -lcomctl32 -lshlwapi -lwsock32
 
 ifeq ($(DIRECTINPUT),8)
 LIBS += -ldinput8
@@ -253,15 +272,15 @@ LIBS += -ldinput
 CCOMFLAGS += -DDIRECTINPUT_VERSION=0x0700
 endif
 
-
+LIBS += -lcomdlg32
 
 #-------------------------------------------------
 # OSD core library
 #-------------------------------------------------
 
 OSDCOREOBJS = \
-	$(WINOBJ)/main.o	\
-	$(WINOBJ)/strconv.o	\
+	$(WINOBJ)/main.o    \
+	$(WINOBJ)/strconv.o \
 	$(WINOBJ)/windir.o \
 	$(WINOBJ)/winfile.o \
 	$(WINOBJ)/winmisc.o \
@@ -270,8 +289,10 @@ OSDCOREOBJS = \
 	$(WINOBJ)/winutf8.o \
 	$(WINOBJ)/winutil.o \
 	$(WINOBJ)/winclip.o \
-	$(WINOBJ)/winwork.o
-
+	$(WINOBJ)/winsocket.o \
+	$(WINOBJ)/winwork.o \
+	$(WINOBJ)/winptty.o \
+	$(WINOBJ)/winmidi.o
 
 
 #-------------------------------------------------
@@ -281,6 +302,7 @@ OSDCOREOBJS = \
 OSDOBJS = \
 	$(WINOBJ)/d3d9intf.o \
 	$(WINOBJ)/drawd3d.o \
+	$(WINOBJ)/d3dhlsl.o \
 	$(WINOBJ)/drawdd.o \
 	$(WINOBJ)/drawgdi.o \
 	$(WINOBJ)/drawnone.o \
@@ -292,6 +314,13 @@ OSDOBJS = \
 	$(WINOBJ)/winmenu.o \
 	$(WINOBJ)/winmain.o
 
+
+ifdef USE_NETWORK
+OSDOBJS += \
+	$(WINOBJ)/netdev.o \
+	$(WINOBJ)/netdev_pcap.o
+endif
+
 ifeq ($(DIRECT3D),9)
 CCOMFLAGS += -DDIRECT3D_VERSION=0x0900
 else
@@ -299,8 +328,9 @@ OSDOBJS += $(WINOBJ)/d3d8intf.o
 endif
 
 # extra dependencies
-$(WINOBJ)/drawdd.o :	$(SRC)/emu/rendersw.c
-$(WINOBJ)/drawgdi.o :	$(SRC)/emu/rendersw.c
+$(WINOBJ)/drawdd.o :    $(SRC)/emu/rendersw.c
+$(WINOBJ)/drawgdi.o :   $(SRC)/emu/rendersw.c
+$(WINOBJ)/winmidi.o:    $(SRC)/osd/portmedia/pmmidi.c
 
 # add debug-specific files
 OSDOBJS += \
@@ -355,4 +385,4 @@ $(RESFILE): $(WINSRC)/mame.rc $(WINOBJ)/mamevers.rc
 
 $(WINOBJ)/mamevers.rc: $(BUILDOUT)/verinfo$(BUILD_EXE) $(SRC)/version.c
 	@echo Emitting $@...
-	@"$(BUILDOUT)/verinfo$(BUILD_EXE)" -b windows $(SRC)/version.c > $@
+	@"$(BUILDOUT)/verinfo$(BUILD_EXE)" -b mame $(SRC)/version.c > $@

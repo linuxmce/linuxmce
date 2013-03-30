@@ -26,17 +26,18 @@ enum
 //  TYPE DEFINITIONS
 //============================================================
 
-struct _osd_file
+struct osd_file
 {
-	int	handle;
-	int	type;
-	char	filename[1];
+	int handle;
+	int type;
+	char    filename[1];
 };
 
 //============================================================
 //  PROTOTYPES
 //============================================================
 
+bool sdl_check_socket_path(const char *path);
 file_error sdl_open_socket(const char *path, UINT32 openflags, osd_file **file, UINT64 *filesize);
 file_error sdl_read_socket(osd_file *file, void *buffer, UINT64 offset, UINT32 count, UINT32 *actual);
 file_error sdl_write_socket(osd_file *file, const void *buffer, UINT64 offset, UINT32 count, UINT32 *actual);

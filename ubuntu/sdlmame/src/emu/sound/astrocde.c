@@ -43,29 +43,28 @@
 #include "astrocde.h"
 
 
-typedef struct _astrocade_state astrocade_state;
-struct _astrocade_state
+struct astrocade_state
 {
-	sound_stream *stream;		/* sound stream */
+	sound_stream *stream;       /* sound stream */
 
-	UINT8		reg[8];			/* 8 control registers */
+	UINT8       reg[8];         /* 8 control registers */
 
-	UINT8		master_count;	/* current master oscillator count */
-	UINT16		vibrato_clock;	/* current vibrato clock */
+	UINT8       master_count;   /* current master oscillator count */
+	UINT16      vibrato_clock;  /* current vibrato clock */
 
-	UINT8		noise_clock;	/* current noise generator clock */
-	UINT16		noise_state;	/* current noise LFSR state */
+	UINT8       noise_clock;    /* current noise generator clock */
+	UINT16      noise_state;    /* current noise LFSR state */
 
-	UINT8		a_count;		/* current tone generator A count */
-	UINT8		a_state;		/* current tone generator A state */
+	UINT8       a_count;        /* current tone generator A count */
+	UINT8       a_state;        /* current tone generator A state */
 
-	UINT8		b_count;		/* current tone generator B count */
-	UINT8		b_state;		/* current tone generator B state */
+	UINT8       b_count;        /* current tone generator B count */
+	UINT8       b_state;        /* current tone generator B state */
 
-	UINT8		c_count;		/* current tone generator C count */
-	UINT8		c_state;		/* current tone generator C state */
+	UINT8       c_count;        /* current tone generator C count */
+	UINT8       c_state;        /* current tone generator C state */
 
-	UINT8		bitswap[256];	/* bitswap table */
+	UINT8       bitswap[256];   /* bitswap table */
 };
 
 
@@ -73,7 +72,7 @@ INLINE astrocade_state *get_safe_token(device_t *device)
 {
 	assert(device != NULL);
 	assert(device->type() == ASTROCADE);
-	return (astrocade_state *)downcast<legacy_device_base *>(device)->token();
+	return (astrocade_state *)downcast<astrocade_device *>(device)->token();
 }
 
 
@@ -302,33 +301,49 @@ WRITE8_DEVICE_HANDLER( astrocade_sound_w )
 	chip->reg[offset & 7] = data;
 }
 
+const device_type ASTROCADE = &device_creator<astrocade_device>;
 
-
-/*************************************
- *
- *  Get/set info callbacks
- *
- *************************************/
-
-DEVICE_GET_INFO( astrocade )
+astrocade_device::astrocade_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, ASTROCADE, "Astrocade", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
 {
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(astrocade_state);					break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME( astrocade );		break;
-		case DEVINFO_FCT_RESET:							info->reset = DEVICE_RESET_NAME( astrocade );		break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "Astrocade");						break;
-		case DEVINFO_STR_FAMILY:					strcpy(info->s, "Bally");							break;
-		case DEVINFO_STR_VERSION:					strcpy(info->s, "2.0");								break;
-		case DEVINFO_STR_SOURCE_FILE:						strcpy(info->s, __FILE__);							break;
-		case DEVINFO_STR_CREDITS:					strcpy(info->s, "Copyright Nicola Salmoria and the MAME Team"); break;
-	}
+	m_token = global_alloc_clear(astrocade_state);
 }
 
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
 
-DEFINE_LEGACY_SOUND_DEVICE(ASTROCADE, astrocade);
+void astrocade_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void astrocade_device::device_start()
+{
+	DEVICE_START_NAME( astrocade )(this);
+}
+
+//-------------------------------------------------
+//  device_reset - device-specific reset
+//-------------------------------------------------
+
+void astrocade_device::device_reset()
+{
+	DEVICE_RESET_NAME( astrocade )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void astrocade_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}

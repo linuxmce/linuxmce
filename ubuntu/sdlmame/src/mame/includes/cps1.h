@@ -2,6 +2,7 @@
 #define _CPS1_H_
 
 #include "sound/msm5205.h"
+#include "sound/qsound.h"
 
 struct gfx_range
 {
@@ -62,38 +63,46 @@ struct CPS1config
 class cps_state : public driver_device
 {
 public:
-	cps_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	cps_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+		m_mainram(*this, "mainram"),
+		m_gfxram(*this, "gfxram"),
+		m_cps_a_regs(*this, "cps_a_regs"),
+		m_cps_b_regs(*this, "cps_b_regs"),
+		m_qsound_sharedram1(*this, "qsound_ram1"),
+		m_qsound_sharedram2(*this, "qsound_ram2"),
+		m_objram1(*this, "objram1"),
+		m_objram2(*this, "objram2"),
+		m_output(*this, "output")
+	{ }
 
 	/* memory pointers */
 	// cps1
-	UINT16 *     m_gfxram;
-	UINT16 *     m_cps_a_regs;
-	UINT16 *     m_cps_b_regs;
+	optional_shared_ptr<UINT16> m_mainram;
+	required_shared_ptr<UINT16> m_gfxram;
+	required_shared_ptr<UINT16> m_cps_a_regs;
+	required_shared_ptr<UINT16> m_cps_b_regs;
 	UINT16 *     m_scroll1;
 	UINT16 *     m_scroll2;
 	UINT16 *     m_scroll3;
 	UINT16 *     m_obj;
 	UINT16 *     m_other;
 	UINT16 *     m_buffered_obj;
-	UINT8  *     m_qsound_sharedram1;
-	UINT8  *     m_qsound_sharedram2;
-	size_t       m_gfxram_size;
+	optional_shared_ptr<UINT8> m_qsound_sharedram1;
+	optional_shared_ptr<UINT8> m_qsound_sharedram2;
 	// cps2
-	UINT16 *     m_objram1;
-	UINT16 *     m_objram2;
-	UINT16 *     m_output;
+	optional_shared_ptr<UINT16> m_objram1;
+	optional_shared_ptr<UINT16> m_objram2;
+	optional_shared_ptr<UINT16> m_output;
 	UINT16 *     m_cps2_buffered_obj;
-	size_t       m_output_size;
 	// game-specific
-	UINT16 *     m_gigamn2_dummyqsound_ram;
+	UINT16 *     m_gigaman2_dummyqsound_ram;
 
 	/* video-related */
 	tilemap_t      *m_bg_tilemap[3];
 	int          m_scanline1;
 	int          m_scanline2;
 	int          m_scancalls;
-	int          m_scancount;
 
 	int          m_scroll1x;
 	int          m_scroll1y;
@@ -102,20 +111,23 @@ public:
 	int          m_scroll3x;
 	int          m_scroll3y;
 
-	int          m_stars_enabled[2];		/* Layer enabled [Y/N] */
+	int          m_stars_enabled[2];        /* Layer enabled [Y/N] */
 	int          m_stars1x;
 	int          m_stars1y;
 	int          m_stars2x;
 	int          m_stars2y;
-	int          m_last_sprite_offset;		/* Offset of the last sprite */
-	int          m_cps2_last_sprite_offset;	/* Offset of the last sprite */
-	int          m_pri_ctrl;				/* Sprite layer priorities */
+	int          m_last_sprite_offset;      /* Offset of the last sprite */
+	int          m_cps2_last_sprite_offset; /* Offset of the last sprite */
+	int          m_pri_ctrl;                /* Sprite layer priorities */
 	int          m_objram_bank;
 
 	/* misc */
-	int          m_dial[2];		// forgottn
-	int          m_readpaddle;	// pzloop2
+	int          m_dial[2];     // forgottn
+	int          m_readpaddle;  // pzloop2
 	int          m_cps2networkpresent;
+	int          m_cps2digitalvolumelevel;
+	int          m_cps2disabledigitalvolume;
+	emu_timer    *m_digital_volume_timer;
 
 	/* fcrash sound hw */
 	int          m_sample_buffer1;
@@ -132,65 +144,133 @@ public:
 	int          m_palette_align;
 	int          m_palette_size;
 	int          m_stars_rom_size;
-	UINT8        m_empty_tile8x8[8*8];
-	UINT8        m_empty_tile[32*32/2];
+	UINT8        m_empty_tile[32*32];
 	int          m_cps_version;
 
+	/* fcrash video config */
+	UINT8        m_layer_enable_reg;
+	UINT8        m_layer_mask_reg[4];
+	int          m_layer_scroll1x_offset;
+	int          m_layer_scroll2x_offset;
+	int          m_layer_scroll3x_offset;
+	int          m_sprite_base;
+	int          m_sprite_list_end_marker;
+	int          m_sprite_x_offset;
+	UINT16       *m_bootleg_sprite_ram;
+	UINT16       *m_bootleg_work_ram;
+
 	/* devices */
-	device_t *m_maincpu;
-	device_t *m_audiocpu;
-	msm5205_device *m_msm_1;	// fcrash
-	msm5205_device *m_msm_2;	// fcrash
+	cpu_device *m_maincpu;
+	cpu_device *m_audiocpu;
+	msm5205_device *m_msm_1;    // fcrash
+	msm5205_device *m_msm_2;    // fcrash
+	DECLARE_READ16_MEMBER(cps1_hack_dsw_r);
+	DECLARE_READ16_MEMBER(forgottn_dial_0_r);
+	DECLARE_READ16_MEMBER(forgottn_dial_1_r);
+	DECLARE_WRITE16_MEMBER(forgottn_dial_0_reset_w);
+	DECLARE_WRITE16_MEMBER(forgottn_dial_1_reset_w);
+	DECLARE_WRITE8_MEMBER(cps1_snd_bankswitch_w);
+	DECLARE_WRITE16_MEMBER(cps1_soundlatch_w);
+	DECLARE_WRITE16_MEMBER(cps1_soundlatch2_w);
+	DECLARE_WRITE16_MEMBER(cpsq_coinctrl2_w);
+	DECLARE_READ16_MEMBER(qsound_rom_r);
+	DECLARE_READ16_MEMBER(qsound_sharedram2_r);
+	DECLARE_WRITE16_MEMBER(qsound_sharedram2_w);
+	DECLARE_WRITE8_MEMBER(qsound_banksw_w);
+	DECLARE_READ16_MEMBER(sf2rb_prot_r);
+	DECLARE_READ16_MEMBER(sf2rb2_prot_r);
+	DECLARE_READ16_MEMBER(cps1_dsw_r);
+	DECLARE_WRITE16_MEMBER(cps1_coinctrl_w);
+	DECLARE_READ16_MEMBER(qsound_sharedram1_r);
+	DECLARE_WRITE16_MEMBER(qsound_sharedram1_w);
+	DECLARE_READ16_MEMBER(ganbare_ram_r);
+	DECLARE_WRITE16_MEMBER(ganbare_ram_w);
+	DECLARE_WRITE16_MEMBER(cps1_cps_a_w);
+	DECLARE_READ16_MEMBER(cps1_cps_b_r);
+	DECLARE_WRITE16_MEMBER(cps1_cps_b_w);
+	DECLARE_WRITE16_MEMBER(cps1_gfxram_w);
+	DECLARE_WRITE16_MEMBER(cps2_objram_bank_w);
+	DECLARE_READ16_MEMBER(cps2_objram1_r);
+	DECLARE_READ16_MEMBER(cps2_objram2_r);
+	DECLARE_WRITE16_MEMBER(cps2_objram1_w);
+	DECLARE_WRITE16_MEMBER(cps2_objram2_w);
+	DECLARE_WRITE8_MEMBER(cps1_oki_pin7_w);
+	DECLARE_DRIVER_INIT(sf2rb);
+	DECLARE_DRIVER_INIT(sf2rb2);
+	DECLARE_DRIVER_INIT(sf2thndr);
+	DECLARE_DRIVER_INIT(dinohunt);
+	DECLARE_DRIVER_INIT(forgottn);
+	DECLARE_DRIVER_INIT(sf2hack);
+	DECLARE_DRIVER_INIT(slammast);
+	DECLARE_DRIVER_INIT(pang3b);
+	DECLARE_DRIVER_INIT(pang3);
+	DECLARE_DRIVER_INIT(sf2ee);
+	DECLARE_DRIVER_INIT(cps1);
+	DECLARE_DRIVER_INIT(dino);
+	DECLARE_DRIVER_INIT(punisher);
+	DECLARE_DRIVER_INIT(wof);
+	DECLARE_DRIVER_INIT(ganbare);
+	DECLARE_DRIVER_INIT(cps2_video);
+	DECLARE_DRIVER_INIT(cps2);
+	DECLARE_DRIVER_INIT(cps2crpt);
+	DECLARE_DRIVER_INIT(ssf2tb);
+	DECLARE_DRIVER_INIT(pzloop2);
+	DECLARE_DRIVER_INIT(singbrd);
+	DECLARE_DRIVER_INIT(gigaman2);
+	TILEMAP_MAPPER_MEMBER(tilemap0_scan);
+	TILEMAP_MAPPER_MEMBER(tilemap1_scan);
+	TILEMAP_MAPPER_MEMBER(tilemap2_scan);
+	TILE_GET_INFO_MEMBER(get_tile0_info);
+	TILE_GET_INFO_MEMBER(get_tile1_info);
+	TILE_GET_INFO_MEMBER(get_tile2_info);
+	DECLARE_MACHINE_START(cps1);
+	DECLARE_VIDEO_START(cps1);
+	DECLARE_MACHINE_START(common);
+	DECLARE_MACHINE_START(cps2);
+	DECLARE_VIDEO_START(cps2);
+	DECLARE_MACHINE_START(qsound);
+	DECLARE_MACHINE_START(ganbare);
+	DECLARE_MACHINE_RESET(cps);
+	DECLARE_VIDEO_START(cps);
+	UINT32 screen_update_cps1(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	void screen_eof_cps1(screen_device &screen, bool state);
+	INTERRUPT_GEN_MEMBER(cps1_interrupt);
+	TIMER_DEVICE_CALLBACK_MEMBER(ganbare_interrupt);
+	TIMER_DEVICE_CALLBACK_MEMBER(cps2_interrupt);
+	TIMER_CALLBACK_MEMBER(cps2_update_digital_volume);
+
+	/* fcrash handlers */
+	DECLARE_DRIVER_INIT(kodb);
+	DECLARE_DRIVER_INIT(cawingbl);
+	DECLARE_DRIVER_INIT(sf2mdt);
+	DECLARE_DRIVER_INIT(sf2mdta);
+	DECLARE_MACHINE_START(fcrash);
+	DECLARE_MACHINE_RESET(fcrash);
+	DECLARE_MACHINE_START(kodb);
+	DECLARE_MACHINE_START(cawingbl);
+	DECLARE_MACHINE_START(sf2mdt);
+	DECLARE_WRITE16_MEMBER(kodb_layer_w);
+	DECLARE_WRITE16_MEMBER(cawingbl_soundlatch_w);
+	DECLARE_WRITE16_MEMBER(sf2mdt_layer_w);
+	DECLARE_WRITE16_MEMBER(sf2mdta_layer_w);
+	UINT32 screen_update_fcrash(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 /*----------- defined in drivers/cps1.c -----------*/
 
 ADDRESS_MAP_EXTERN( qsound_sub_map, 8 );
 
-READ16_HANDLER( qsound_sharedram1_r );
-WRITE16_HANDLER( qsound_sharedram1_w );
-
-READ16_HANDLER( cps1_dsw_r );
-WRITE16_HANDLER( cps1_coinctrl_w );
-INTERRUPT_GEN( cps1_interrupt );
-
 GFXDECODE_EXTERN( cps1 );
 
 
 /*----------- defined in video/cps1.c -----------*/
-
-WRITE16_HANDLER( cps1_cps_a_w );
-WRITE16_HANDLER( cps1_cps_b_w );
-READ16_HANDLER( cps1_cps_b_r );
-WRITE16_HANDLER( cps1_gfxram_w );
-
-DRIVER_INIT( cps1 );
-DRIVER_INIT( cps2_video );
-
-WRITE16_HANDLER( cps2_objram_bank_w );
-READ16_HANDLER( cps2_objram1_r );
-READ16_HANDLER( cps2_objram2_r );
-WRITE16_HANDLER( cps2_objram1_w );
-WRITE16_HANDLER( cps2_objram2_w );
-
-VIDEO_START( cps1 );
-VIDEO_START( cps2 );
-SCREEN_UPDATE( cps1 );
-SCREEN_EOF( cps1 );
-
 void cps1_get_video_base(running_machine &machine);
 void cps2_set_sprite_priorities(running_machine &machine);
 void cps2_objram_latch(running_machine &machine);
 
-
 /*************************************
  *  Encryption
  *************************************/
-
-/*----------- defined in machine/cps2crpt.c -----------*/
-
-DRIVER_INIT( cps2crpt );
-
 
 /*----------- defined in machine/kabuki.c -----------*/
 

@@ -15,13 +15,13 @@
  *
  *************************************/
 
-PALETTE_INIT( exterm )
+void exterm_state::palette_init()
 {
 	int i;
 
 	/* initialize 555 RGB lookup */
 	for (i = 0; i < 32768; i++)
-		palette_set_color_rgb(machine, i + 0x800, pal5bit(i >> 10), pal5bit(i >> 5), pal5bit(i >> 0));
+		palette_set_color_rgb(machine(), i + 0x800, pal5bit(i >> 10), pal5bit(i >> 5), pal5bit(i >> 0));
 }
 
 
@@ -32,30 +32,30 @@ PALETTE_INIT( exterm )
  *
  *************************************/
 
-void exterm_to_shiftreg_master(address_space *space, UINT32 address, UINT16 *shiftreg)
+void exterm_to_shiftreg_master(address_space &space, UINT32 address, UINT16 *shiftreg)
 {
-	exterm_state *state = space->machine().driver_data<exterm_state>();
+	exterm_state *state = space.machine().driver_data<exterm_state>();
 	memcpy(shiftreg, &state->m_master_videoram[TOWORD(address)], 256 * sizeof(UINT16));
 }
 
 
-void exterm_from_shiftreg_master(address_space *space, UINT32 address, UINT16 *shiftreg)
+void exterm_from_shiftreg_master(address_space &space, UINT32 address, UINT16 *shiftreg)
 {
-	exterm_state *state = space->machine().driver_data<exterm_state>();
+	exterm_state *state = space.machine().driver_data<exterm_state>();
 	memcpy(&state->m_master_videoram[TOWORD(address)], shiftreg, 256 * sizeof(UINT16));
 }
 
 
-void exterm_to_shiftreg_slave(address_space *space, UINT32 address, UINT16 *shiftreg)
+void exterm_to_shiftreg_slave(address_space &space, UINT32 address, UINT16 *shiftreg)
 {
-	exterm_state *state = space->machine().driver_data<exterm_state>();
+	exterm_state *state = space.machine().driver_data<exterm_state>();
 	memcpy(shiftreg, &state->m_slave_videoram[TOWORD(address)], 256 * 2 * sizeof(UINT8));
 }
 
 
-void exterm_from_shiftreg_slave(address_space *space, UINT32 address, UINT16 *shiftreg)
+void exterm_from_shiftreg_slave(address_space &space, UINT32 address, UINT16 *shiftreg)
 {
-	exterm_state *state = space->machine().driver_data<exterm_state>();
+	exterm_state *state = space.machine().driver_data<exterm_state>();
 	memcpy(&state->m_slave_videoram[TOWORD(address)], shiftreg, 256 * 2 * sizeof(UINT8));
 }
 
@@ -67,12 +67,12 @@ void exterm_from_shiftreg_slave(address_space *space, UINT32 address, UINT16 *sh
  *
  *************************************/
 
-void exterm_scanline_update(screen_device &screen, bitmap_t *bitmap, int scanline, const tms34010_display_params *params)
+void exterm_scanline_update(screen_device &screen, bitmap_ind16 &bitmap, int scanline, const tms34010_display_params *params)
 {
 	exterm_state *state = screen.machine().driver_data<exterm_state>();
 	UINT16 *bgsrc = &state->m_master_videoram[(params->rowaddr << 8) & 0xff00];
 	UINT16 *fgsrc = NULL;
-	UINT16 *dest = BITMAP_ADDR16(bitmap, scanline, 0);
+	UINT16 *dest = &bitmap.pix16(scanline);
 	tms34010_display_params fgparams;
 	int coladdr = params->coladdr;
 	int fgcoladdr = 0;

@@ -21,58 +21,62 @@ etc.
 class ltcasino_state : public driver_device
 {
 public:
-	ltcasino_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	ltcasino_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_tile_num_ram(*this, "tile_nuram"),
+		m_tile_atr_ram(*this, "tile_atr_ram"){ }
 
-	UINT8 *m_tile_num_ram;
-	UINT8 *m_tile_atr_ram;
+	required_shared_ptr<UINT8> m_tile_num_ram;
+	required_shared_ptr<UINT8> m_tile_atr_ram;
 	tilemap_t *m_tilemap;
+	DECLARE_WRITE8_MEMBER(ltcasino_tile_num_w);
+	DECLARE_WRITE8_MEMBER(ltcasino_tile_atr_w);
+	DECLARE_DRIVER_INIT(mv4in1);
+	TILE_GET_INFO_MEMBER(get_ltcasino_tile_info);
+	virtual void video_start();
+	UINT32 screen_update_ltcasino(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
 
 /* Video */
 
-static TILE_GET_INFO( get_ltcasino_tile_info )
+TILE_GET_INFO_MEMBER(ltcasino_state::get_ltcasino_tile_info)
 {
-	ltcasino_state *state = machine.driver_data<ltcasino_state>();
 	int tileno, colour;
 
-	tileno = state->m_tile_num_ram[tile_index];
-	colour = state->m_tile_atr_ram[tile_index];
+	tileno = m_tile_num_ram[tile_index];
+	colour = m_tile_atr_ram[tile_index];
 
 	tileno += (colour & 0x80) << 1;
 
-	SET_TILE_INFO(0,tileno,0,0);
+	SET_TILE_INFO_MEMBER(0,tileno,0,0);
 }
 
-static VIDEO_START(ltcasino)
+void ltcasino_state::video_start()
 {
-	ltcasino_state *state = machine.driver_data<ltcasino_state>();
-	state->m_tilemap = tilemap_create(machine, get_ltcasino_tile_info,tilemap_scan_rows,8, 8,64,32);
+	m_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(ltcasino_state::get_ltcasino_tile_info),this),TILEMAP_SCAN_ROWS,8, 8,64,32);
 }
 
 
-static WRITE8_HANDLER( ltcasino_tile_num_w )
+WRITE8_MEMBER(ltcasino_state::ltcasino_tile_num_w)
 {
-	ltcasino_state *state = space->machine().driver_data<ltcasino_state>();
-	state->m_tile_num_ram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_tilemap,offset);
+	m_tile_num_ram[offset] = data;
+	m_tilemap->mark_tile_dirty(offset);
 }
 
-static WRITE8_HANDLER( ltcasino_tile_atr_w )
+WRITE8_MEMBER(ltcasino_state::ltcasino_tile_atr_w)
 {
-	ltcasino_state *state = space->machine().driver_data<ltcasino_state>();
-	state->m_tile_atr_ram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_tilemap,offset);
+	m_tile_atr_ram[offset] = data;
+	m_tilemap->mark_tile_dirty(offset);
 }
 
 
-static ADDRESS_MAP_START( ltcasino_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( ltcasino_map, AS_PROGRAM, 8, ltcasino_state )
 	AM_RANGE(0x0000, 0x7fff) AM_RAM
 	AM_RANGE(0x8000, 0xcfff) AM_ROM
-	AM_RANGE(0xd000, 0xd7ff) AM_RAM_WRITE(ltcasino_tile_num_w) AM_BASE_MEMBER(ltcasino_state, m_tile_num_ram)
+	AM_RANGE(0xd000, 0xd7ff) AM_RAM_WRITE(ltcasino_tile_num_w) AM_SHARE("tile_nuram")
 	AM_RANGE(0xd800, 0xdfff) AM_RAM
-	AM_RANGE(0xe000, 0xe7ff) AM_RAM_WRITE(ltcasino_tile_atr_w) AM_BASE_MEMBER(ltcasino_state, m_tile_atr_ram)
+	AM_RANGE(0xe000, 0xe7ff) AM_RAM_WRITE(ltcasino_tile_atr_w) AM_SHARE("tile_atr_ram")
 	AM_RANGE(0xe800, 0xebff) AM_RAM
 
 	AM_RANGE(0xec00, 0xec00) AM_READ_PORT("IN0")
@@ -82,9 +86,9 @@ static ADDRESS_MAP_START( ltcasino_map, AS_PROGRAM, 8 )
 	AM_RANGE(0xec10, 0xec10) AM_READ_PORT("IN4")
 	AM_RANGE(0xec12, 0xec12) AM_READ_PORT("IN5")
 
-	AM_RANGE(0xec20, 0xec20) AM_DEVREAD("aysnd", ay8910_r)
+	AM_RANGE(0xec20, 0xec20) AM_DEVREAD_LEGACY("aysnd", ay8910_r)
 	AM_RANGE(0xec21, 0xec21) AM_READ_PORT("BUTTONS") //ltcasino -> pc: F3F3 (A in service) and F3FD (B in service)
-	AM_RANGE(0xec20, 0xec21) AM_DEVWRITE("aysnd", ay8910_data_address_w)
+	AM_RANGE(0xec20, 0xec21) AM_DEVWRITE_LEGACY("aysnd", ay8910_data_address_w)
 	AM_RANGE(0xec3e, 0xec3e) AM_READNOP //not used
 	AM_RANGE(0xec30, 0xec3f) AM_RAM
 	AM_RANGE(0xf000, 0xffff) AM_ROM
@@ -632,33 +636,30 @@ static GFXDECODE_START( ltcasino )
 GFXDECODE_END
 
 
-static SCREEN_UPDATE(ltcasino)
+UINT32 ltcasino_state::screen_update_ltcasino(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	ltcasino_state *state = screen->machine().driver_data<ltcasino_state>();
-	tilemap_draw(bitmap,cliprect,state->m_tilemap,0,0);
+	m_tilemap->draw(bitmap, cliprect, 0,0);
 	return 0;
 }
 
 
 static MACHINE_CONFIG_START( ltcasino, ltcasino_state )
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", M6502,2000000)		 /* ? MHz */
+	MCFG_CPU_ADD("maincpu", M6502,2000000)       /* ? MHz */
 	MCFG_CPU_PROGRAM_MAP(ltcasino_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", ltcasino_state,  irq0_line_hold)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(6*8, 58*8-1, 0, 32*8-1)
-	MCFG_SCREEN_UPDATE(ltcasino)
+	MCFG_SCREEN_UPDATE_DRIVER(ltcasino_state, screen_update_ltcasino)
 
 	MCFG_GFXDECODE(ltcasino)
 	MCFG_PALETTE_LENGTH(0x100)
 
-	MCFG_VIDEO_START(ltcasino)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -670,15 +671,15 @@ MACHINE_CONFIG_END
 
 ROM_START( ltcasino )
 	ROM_REGION( 0x10000, "maincpu", 0 )
-	ROM_LOAD( "a",			0x8000, 0x1000, CRC(14909fee) SHA1(bf53fa65da7f013ea1ac6b4942cdfdb34ef16252) )
-	ROM_LOAD( "b",			0x9800, 0x0800, CRC(1473f854) SHA1(eadaec1f6d653e61458bc262945c20140f4530eb) )
-	ROM_LOAD( "c",			0xa800, 0x0800, CRC(7a07004b) SHA1(62bd0f3d12b7eada6fc271abea60569aca7262b0) )
-	ROM_LOAD( "d",			0xb800, 0x0800, CRC(5148cafc) SHA1(124039f48784bf032f612714db73fb67a216a1e7) )
-	ROM_LOAD( "e",			0xc800, 0x0800, CRC(5f9e103a) SHA1(b0e9ace4c3962c06e5250fac16a245dca711350f) )
-	ROM_LOAD( "f",			0xf000, 0x1000, CRC(7345aada) SHA1(6640f5eb1130c8f1cb197eb12b8e6403c7f8d34d) )
+	ROM_LOAD( "a",          0x8000, 0x1000, CRC(14909fee) SHA1(bf53fa65da7f013ea1ac6b4942cdfdb34ef16252) )
+	ROM_LOAD( "b",          0x9800, 0x0800, CRC(1473f854) SHA1(eadaec1f6d653e61458bc262945c20140f4530eb) )
+	ROM_LOAD( "c",          0xa800, 0x0800, CRC(7a07004b) SHA1(62bd0f3d12b7eada6fc271abea60569aca7262b0) )
+	ROM_LOAD( "d",          0xb800, 0x0800, CRC(5148cafc) SHA1(124039f48784bf032f612714db73fb67a216a1e7) )
+	ROM_LOAD( "e",          0xc800, 0x0800, CRC(5f9e103a) SHA1(b0e9ace4c3962c06e5250fac16a245dca711350f) )
+	ROM_LOAD( "f",          0xf000, 0x1000, CRC(7345aada) SHA1(6640f5eb1130c8f1cb197eb12b8e6403c7f8d34d) )
 
 	ROM_REGION( 0x0800, "gfx1", 0 )
-	ROM_LOAD( "v",			0x0000, 0x0800, CRC(f1f75675) SHA1(8f3777e6b2a3f824f94b28669cac501ec02bbf36) )
+	ROM_LOAD( "v",          0x0000, 0x0800, CRC(f1f75675) SHA1(8f3777e6b2a3f824f94b28669cac501ec02bbf36) )
 ROM_END
 
 
@@ -708,16 +709,16 @@ ROM_START( mv4in1 )
 	ROM_LOAD( "a.ic19",   0x0000, 0x1000, CRC(a25c125e) SHA1(e0ba83ccddbd82a2bf52585ae0accb9192cbb00e) )
 ROM_END
 
-static DRIVER_INIT(mv4in1)
+DRIVER_INIT_MEMBER(ltcasino_state,mv4in1)
 {
 	int i;
-	UINT8 *rom = machine.region("maincpu")->base();
+	UINT8 *rom = machine().root_device().memregion("maincpu")->base();
 	for(i=0;i<0x10000;i++)
 		rom[i]=BITSWAP8(rom[i],7,6,5,4,3,1,2,0);
 }
 
 
 
-GAME( 1982, ltcasino, 0, ltcasino, ltcasino, 0, ROT0, "Digital Controls Inc.", "Little Casino (older)", GAME_WRONG_COLORS | GAME_IMPERFECT_GRAPHICS  )
-GAME( 1983, mv4in1,  ltcasino,  ltcasino, mv4in1, mv4in1, ROT0, "Entertainment Enterprises", "Mini Vegas 4in1", GAME_WRONG_COLORS | GAME_IMPERFECT_GRAPHICS )
-GAME( 1984, ltcasinn, 0, ltcasino, ltcasinn, 0, ROT0, "Digital Controls Inc.", "Little Casino (newer)", GAME_NOT_WORKING )
+GAME( 1982, ltcasino, 0, ltcasino, ltcasino, driver_device, 0, ROT0, "Digital Controls Inc.", "Little Casino (older)", GAME_WRONG_COLORS | GAME_IMPERFECT_GRAPHICS  )
+GAME( 1983, mv4in1,  ltcasino,  ltcasino, mv4in1, ltcasino_state, mv4in1, ROT0, "Entertainment Enterprises, Ltd.", "Mini Vegas 4in1", GAME_WRONG_COLORS | GAME_IMPERFECT_GRAPHICS )
+GAME( 1984, ltcasinn, 0, ltcasino, ltcasinn, driver_device, 0, ROT0, "Digital Controls Inc.", "Little Casino (newer)", GAME_NOT_WORKING )

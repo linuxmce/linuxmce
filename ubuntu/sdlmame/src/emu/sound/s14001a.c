@@ -22,7 +22,7 @@
  1.31 fix a minor bug with the dac range. wolfpack clips again, and I'm almost sure its an encoding error on the original speech - LN (0.125u9)
  1.31a Add chip pinout and other notes - LN (0.128u4)
  1.31b slight update to notes to clarify input bus stuff, mostly finish the state map in the comments - LN
- 1.31c remove usage of deprecat.h - AtariAce (0.128u5)
+ 1.31c remove usage of deprecat lib - AtariAce (0.128u5)
  1.32 fix the squealing noise using a define; it isn't accurate to the chip exactly, but there are other issues which need to be fixed too. see TODO. - LN (0.136u2)
 
  TODO:
@@ -95,7 +95,7 @@ TTL/CMOS compatible voltage. The AUDIO OUT pin also outputs a voltage below GND,
 and the TEST pins may do so too.
 
 START is pulled high when a word is to be said and the word number is on the
-word select/speech address input lines. The Canon 'Canola' uses a seperate 'rom
+word select/speech address input lines. The Canon 'Canola' uses a separate 'rom
 strobe' signal independent of the chip to either enable or clock the speech rom.
 Its likely that they did this to be able to force the speech chip to stop talking,
 which is normally impossible. The later 'version 3' TSI speech board as featured in
@@ -237,7 +237,7 @@ and off as it normally does during speech). Once START has gone low-high-low, th
 #include "emu.h"
 #include "s14001a.h"
 
-typedef struct
+struct S14001AChip
 {
 	sound_stream * stream;
 
@@ -262,13 +262,13 @@ typedef struct
 	UINT8 *SpeechRom; // array to hold rom contents, mame will not need this, will use a pointer
 	INT16 filtervals[8];
 	UINT8 VSU1000_amp; // amplitude setting on VSU-1000 board
-} S14001AChip;
+};
 
 INLINE S14001AChip *get_safe_token(device_t *device)
 {
 	assert(device != NULL);
 	assert(device->type() == S14001A);
-	return (S14001AChip *)downcast<legacy_device_base *>(device)->token();
+	return (S14001AChip *)downcast<s14001a_device *>(device)->token();
 }
 
 
@@ -296,7 +296,7 @@ static const INT8 DeltaTable[4][4] =
 static INT16 audiofilter(S14001AChip *chip) /* rewrite me to better match the real filter! */
 {
 	UINT8 temp1;
-        INT16 temp2 = 0;
+		INT16 temp2 = 0;
 	/* mean averaging filter! 1/n exponential *would* be somewhat better, but I'm lazy... */
 	for (temp1 = 0; temp1 < 8; temp1++) { temp2 += chip->filtervals[temp1]; }
 	temp2 >>= 3;
@@ -408,8 +408,8 @@ static void s14001a_clock(S14001AChip *chip) /* called once per clock */
 	UINT8 CurDelta; // Current delta
 
 	/* on even clocks, audio output is floating, /romen is low so rom data bus is driven
-         * on odd clocks, audio output is driven, /romen is high, state machine 2 is clocked
-         */
+	     * on odd clocks, audio output is driven, /romen is high, state machine 2 is clocked
+	     */
 	chip->oddeven = !(chip->oddeven); // invert the clock
 	if (chip->oddeven == 0) // even clock
 	{
@@ -537,8 +537,8 @@ static void s14001a_clock(S14001AChip *chip) /* called once per clock */
 		chip->laststate = chip->machineState;
 		chip->machineState = chip->nextstate;
 
-	        /* the dac is 4 bits wide. if a delta step forced it outside of 4 bits, mask it back over here */
-	        chip->DACOutput &= 0xF;
+			/* the dac is 4 bits wide. if a delta step forced it outside of 4 bits, mask it back over here */
+			chip->DACOutput &= 0xF;
 	}
 }
 
@@ -548,14 +548,9 @@ static void s14001a_clock(S14001AChip *chip) /* called once per clock */
 
 static STREAM_UPDATE( s14001a_pcm_update )
 {
-	INT32 mix[48000];
-	//INT32 *mixp;
 	S14001AChip *chip = (S14001AChip *)param;
 	int i;
 
-	memset(mix, 0, sizeof(mix));
-
-	//mixp = &mix[0];
 	for (i = 0; i < samples; i++)
 	{
 		s14001a_clock(chip);
@@ -634,23 +629,40 @@ void s14001a_set_volume(device_t *device, int volume)
 	chip->VSU1000_amp = volume;
 }
 
-DEVICE_GET_INFO( s14001a )
+const device_type S14001A = &device_creator<s14001a_device>;
+
+s14001a_device::s14001a_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, S14001A, "S14001A", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
 {
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:				info->i = sizeof(S14001AChip);					break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:						info->start = DEVICE_START_NAME( s14001a );		break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:						strcpy(info->s, "S14001A");						break;
-		case DEVINFO_STR_FAMILY:				strcpy(info->s, "TSI S14001A");					break;
-		case DEVINFO_STR_VERSION:				strcpy(info->s, "1.32");						break;
-		case DEVINFO_STR_SOURCE_FILE:					strcpy(info->s, __FILE__);						break;
-		case DEVINFO_STR_CREDITS:				strcpy(info->s, "Copyright Jonathan Gevaryahu"); break;
-	}
+	m_token = global_alloc_clear(S14001AChip);
 }
 
-DEFINE_LEGACY_SOUND_DEVICE(S14001A, s14001a);
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
+
+void s14001a_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void s14001a_device::device_start()
+{
+	DEVICE_START_NAME( s14001a )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void s14001a_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}

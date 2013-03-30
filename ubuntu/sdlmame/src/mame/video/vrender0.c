@@ -20,10 +20,10 @@ Missing:
 
 **************/
 
-typedef struct
+struct QuadInfo
 {
 	UINT16 *Dest;
-	UINT32 Pitch;	//in UINT16s
+	UINT32 Pitch;   //in UINT16s
 	UINT32 w,h;
 	UINT32 Tx;
 	UINT32 Ty;
@@ -48,9 +48,9 @@ typedef struct
 	UINT32 SrcColor;
 	UINT8 DstAlpha;
 	UINT32 DstColor;
-} _Quad;
+};
 
-typedef struct
+struct RenderStateInfo
 {
 	UINT32 Tx;
 	UINT32 Ty;
@@ -72,17 +72,16 @@ typedef struct
 	UINT32 PixelFormat;
 	UINT32 Width;
 	UINT32 Height;
-} _RenderState;
+};
 
-typedef struct _vr0video_state  vr0video_state;
-struct _vr0video_state
+struct vr0video_state
 {
 	device_t *cpu;
 
 	UINT16 InternalPalette[256];
 	UINT32 LastPalUpdate;
 
-	_RenderState RenderState;
+	RenderStateInfo RenderState;
 };
 
 
@@ -95,14 +94,14 @@ INLINE vr0video_state *get_safe_token( device_t *device )
 	assert(device != NULL);
 	assert(device->type() == VIDEO_VRENDER0);
 
-	return (vr0video_state *)downcast<legacy_device_base *>(device)->token();
+	return (vr0video_state *)downcast<vr0video_device *>(device)->token();
 }
 
 INLINE const vr0video_interface *get_interface( device_t *device )
 {
 	assert(device != NULL);
 	assert(device->type() == VIDEO_VRENDER0);
-	return (const vr0video_interface *) device->baseconfig().static_config();
+	return (const vr0video_interface *) device->static_config();
 }
 
 /*****************************************************************************
@@ -114,7 +113,7 @@ Pick a rare enough color to disable transparency (that way I save a cmp per loop
 if I must draw transparent or not. The palette build will take this color in account so
 no color in the palette will have this value
 */
-#define NOTRANSCOLOR	0xecda
+#define NOTRANSCOLOR    0xecda
 
 #define RGB32(r,g,b) ((r << 16) | (g << 8) | (b << 0))
 #define RGB16(r,g,b) ((r & 0xf8) << 8) | ((g & 0xfc) << 3) | ((b & 0xf8) >> 3)
@@ -124,9 +123,9 @@ INLINE UINT16 RGB32TO16(UINT32 rgb)
 	return (((rgb >> (16 + 3)) & 0x1f) << 11) | (((rgb >> (8 + 2)) & 0x3f) << 5) | (((rgb >> (3)) & 0x1f) << 0);
 }
 
-#define EXTRACTR8(Src)	(((Src >> 11) << 3) & 0xff)
-#define EXTRACTG8(Src)	(((Src >>  5) << 2) & 0xff)
-#define EXTRACTB8(Src)	(((Src >>  0) << 3) & 0xff)
+#define EXTRACTR8(Src)  (((Src >> 11) << 3) & 0xff)
+#define EXTRACTG8(Src)  (((Src >>  5) << 2) & 0xff)
+#define EXTRACTB8(Src)  (((Src >>  0) << 3) & 0xff)
 
 INLINE UINT16 Shade(UINT16 Src, UINT32 Shade)
 {
@@ -136,7 +135,7 @@ INLINE UINT16 Shade(UINT16 Src, UINT32 Shade)
 	return RGB16(scr, scg, scb);
 }
 
-static UINT16 Alpha(_Quad *Quad, UINT16 Src, UINT16 Dst)
+static UINT16 Alpha(QuadInfo *Quad, UINT16 Src, UINT16 Dst)
 {
 	UINT32 scr = (EXTRACTR8(Src) * ((Quad->Shade >> 16) & 0xff)) >> 8;
 	UINT32 scg = (EXTRACTG8(Src) * ((Quad->Shade >>  8) & 0xff)) >> 8;
@@ -239,7 +238,7 @@ static UINT16 Alpha(_Quad *Quad, UINT16 Src, UINT16 Dst)
 }
 
 #define TILENAME(bpp, t, a) \
-static void DrawQuad##bpp##t##a(_Quad *Quad)
+static void DrawQuad##bpp##t##a(QuadInfo *Quad)
 
 //TRUST ON THE COMPILER OPTIMIZATIONS
 #define TILETEMPL(bpp, t, a) \
@@ -339,7 +338,7 @@ TILETEMPL(4,1,0) TILETEMPL(4,1,1) TILETEMPL(4,1,2)
 DrawQuad##bpp##t##a
 
 
-static void DrawQuadFill(_Quad *Quad)
+static void DrawQuadFill(QuadInfo *Quad)
 {
 	UINT32 x, y;
 	UINT16 *line = Quad->Dest;
@@ -359,7 +358,7 @@ static void DrawQuadFill(_Quad *Quad)
 	}
 }
 
-typedef void (*_DrawTemplate)(_Quad *);
+typedef void (*_DrawTemplate)(QuadInfo *);
 
 static const _DrawTemplate DrawImage[]=
 {
@@ -397,13 +396,13 @@ static const _DrawTemplate DrawTile[]=
 	TILENAME(16,1,2),
 };
 
-#define Packet(i) space->read_word(PacketPtr + 2 * i)
+#define Packet(i) space.read_word(PacketPtr + 2 * i)
 
 //Returns TRUE if the operation was a flip (sync or async)
 int vrender0_ProcessPacket(device_t *device, UINT32 PacketPtr, UINT16 *Dest, UINT8 *TEXTURE)
 {
 	vr0video_state *vr0 = get_safe_token(device);
-	address_space *space = vr0->cpu->memory().space(AS_PROGRAM);
+	address_space &space = vr0->cpu->memory().space(AS_PROGRAM);
 	UINT32 Dx = Packet(1) & 0x3ff;
 	UINT32 Dy = Packet(2) & 0x1ff;
 	UINT32 Endx = Packet(3) & 0x3ff;
@@ -411,9 +410,9 @@ int vrender0_ProcessPacket(device_t *device, UINT32 PacketPtr, UINT16 *Dest, UIN
 	UINT32 Mode = 0;
 	UINT16 Packet0 = Packet(0);
 
-	if (Packet0 & 0x81)	//Sync or ASync flip
+	if (Packet0 & 0x81) //Sync or ASync flip
 	{
-		vr0->LastPalUpdate = 0xffffffff;	//Force update palette next frame
+		vr0->LastPalUpdate = 0xffffffff;    //Force update palette next frame
 		return 1;
 	}
 
@@ -473,21 +472,21 @@ int vrender0_ProcessPacket(device_t *device, UINT32 PacketPtr, UINT16 *Dest, UIN
 		{
 			UINT32 p = Pal[i];
 			UINT16 v = RGB32TO16(p);
-			if ((v == Trans && p != vr0->RenderState.TransColor) || v == NOTRANSCOLOR)	//Error due to conversion. caused transparent
+			if ((v == Trans && p != vr0->RenderState.TransColor) || v == NOTRANSCOLOR)  //Error due to conversion. caused transparent
 			{
 				if ((v & 0x1f) != 0x1f)
-					v++;									//Make the color a bit different (blueish) so it's not
+					v++;                                    //Make the color a bit different (blueish) so it's not
 				else
 					v--;
 			}
-			vr0->InternalPalette[i] = v;						//made transparent by mistake
+			vr0->InternalPalette[i] = v;                        //made transparent by mistake
 		}
 		vr0->LastPalUpdate = vr0->RenderState.PalOffset;
 	}
 
 	if (Packet0 & 0x100)
 	{
-		_Quad Quad;
+		QuadInfo Quad;
 
 		Quad.Pitch = 512;
 
@@ -519,15 +518,15 @@ int vrender0_ProcessPacket(device_t *device, UINT32 PacketPtr, UINT16 *Dest, UIN
 		if (Packet0 & 0x10)
 		{
 			Quad.Shade = vr0->RenderState.ShadeColor;
-			if (!Mode)		//Alpha includes Shade
+			if (!Mode)      //Alpha includes Shade
 				Mode = 2;
 			/*
-            //simulate shade with alphablend (SLOW!!!)
-            if (!Quad.SrcAlpha && (Packet0 & 0x8))
-            {
-                Quad.SrcAlpha = 0x21; //1
-                Quad.DstAlpha = 0x01; //0
-            }*/
+			//simulate shade with alphablend (SLOW!!!)
+			if (!Quad.SrcAlpha && (Packet0 & 0x8))
+			{
+			    Quad.SrcAlpha = 0x21; //1
+			    Quad.DstAlpha = 0x01; //0
+			}*/
 		}
 		else
 			Quad.Shade = RGB32(255,255,255);
@@ -538,7 +537,7 @@ int vrender0_ProcessPacket(device_t *device, UINT32 PacketPtr, UINT16 *Dest, UIN
 		//Quad.Trans = 0;
 		Quad.Clamp = Packet0 & 0x20;
 
-		if (Packet0 & 0x8)	//Texture Enable
+		if (Packet0 & 0x8)  //Texture Enable
 		{
 			Quad.u.Imageb = TEXTURE + 128 * vr0->RenderState.FontOffset;
 			Quad.Tile = (UINT16*) (TEXTURE + 128 * vr0->RenderState.TileOffset);
@@ -546,7 +545,7 @@ int vrender0_ProcessPacket(device_t *device, UINT32 PacketPtr, UINT16 *Dest, UIN
 				Quad.Pal = vr0->InternalPalette + (vr0->RenderState.PaletteBank * 16);
 			else
 				Quad.Pal = vr0->InternalPalette;
-			if (vr0->RenderState.TextureMode)	//Tiled
+			if (vr0->RenderState.TextureMode)   //Tiled
 				DrawTile[vr0->RenderState.PixelFormat + 4 * Mode](&Quad);
 			else
 				DrawImage[vr0->RenderState.PixelFormat + 4 * Mode](&Quad);
@@ -601,13 +600,38 @@ static DEVICE_RESET( vr0video )
 	vr0->LastPalUpdate = 0xffffffff;
 }
 
-static const char DEVTEMPLATE_SOURCE[] = __FILE__;
+const device_type VIDEO_VRENDER0 = &device_creator<vr0video_device>;
 
-#define DEVTEMPLATE_ID( p, s )	p##vr0video##s
-#define DEVTEMPLATE_FEATURES	DT_HAS_START | DT_HAS_RESET
-#define DEVTEMPLATE_NAME		"VRender0"
-#define DEVTEMPLATE_FAMILY		"???"
-#include "devtempl.h"
+vr0video_device::vr0video_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, VIDEO_VRENDER0, "VRender0", tag, owner, clock)
+{
+	m_token = global_alloc_clear(vr0video_state);
+}
 
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
 
-DEFINE_LEGACY_DEVICE(VIDEO_VRENDER0, vr0video);
+void vr0video_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void vr0video_device::device_start()
+{
+	DEVICE_START_NAME( vr0video )(this);
+}
+
+//-------------------------------------------------
+//  device_reset - device-specific reset
+//-------------------------------------------------
+
+void vr0video_device::device_reset()
+{
+	DEVICE_RESET_NAME( vr0video )(this);
+}

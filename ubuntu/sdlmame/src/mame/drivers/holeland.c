@@ -18,34 +18,34 @@
 #include "includes/holeland.h"
 
 
-static ADDRESS_MAP_START( holeland_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( holeland_map, AS_PROGRAM, 8, holeland_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0x87ff) AM_RAM
 	AM_RANGE(0xa000, 0xbfff) AM_ROM
 	AM_RANGE(0xc000, 0xc001) AM_WRITE(holeland_pal_offs_w)
 	AM_RANGE(0xc006, 0xc007) AM_WRITE(holeland_flipscreen_w)
-	AM_RANGE(0xe000, 0xe3ff) AM_WRITE(holeland_colorram_w) AM_BASE_MEMBER(holeland_state, m_colorram)
-	AM_RANGE(0xe400, 0xe7ff) AM_WRITE(holeland_videoram_w) AM_BASE_SIZE_MEMBER(holeland_state, m_videoram, m_videoram_size)
-	AM_RANGE(0xf000, 0xf3ff) AM_RAM AM_BASE_SIZE_MEMBER(holeland_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0xe000, 0xe3ff) AM_WRITE(holeland_colorram_w) AM_SHARE("colorram")
+	AM_RANGE(0xe400, 0xe7ff) AM_WRITE(holeland_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0xf000, 0xf3ff) AM_RAM AM_SHARE("spriteram")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( crzrally_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( crzrally_map, AS_PROGRAM, 8, holeland_state )
 	AM_RANGE(0x0000, 0xbfff) AM_ROM
 	AM_RANGE(0xc000, 0xc7ff) AM_RAM AM_SHARE("nvram")
-	AM_RANGE(0xe000, 0xe3ff) AM_WRITE(holeland_colorram_w) AM_BASE_MEMBER(holeland_state, m_colorram)
-	AM_RANGE(0xe400, 0xe7ff) AM_WRITE(holeland_videoram_w) AM_BASE_SIZE_MEMBER(holeland_state, m_videoram, m_videoram_size)
-	AM_RANGE(0xe800, 0xebff) AM_RAM AM_BASE_SIZE_MEMBER(holeland_state, m_spriteram, m_spriteram_size)
+	AM_RANGE(0xe000, 0xe3ff) AM_WRITE(holeland_colorram_w) AM_SHARE("colorram")
+	AM_RANGE(0xe400, 0xe7ff) AM_WRITE(holeland_videoram_w) AM_SHARE("videoram")
+	AM_RANGE(0xe800, 0xebff) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0xf000, 0xf000) AM_WRITE(holeland_scroll_w)
 	AM_RANGE(0xf800, 0xf801) AM_WRITE(holeland_pal_offs_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( io_map, AS_IO, 8, holeland_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x01, 0x01) AM_READ(watchdog_reset_r)	/* ? */
-	AM_RANGE(0x04, 0x04) AM_DEVREAD("ay1", ay8910_r)
-	AM_RANGE(0x04, 0x05) AM_DEVWRITE("ay1", ay8910_address_data_w)
-	AM_RANGE(0x06, 0x06) AM_DEVREAD("ay2", ay8910_r)
-	AM_RANGE(0x06, 0x07) AM_DEVWRITE("ay2", ay8910_address_data_w)
+	AM_RANGE(0x01, 0x01) AM_READ(watchdog_reset_r)  /* ? */
+	AM_RANGE(0x04, 0x04) AM_DEVREAD_LEGACY("ay1", ay8910_r)
+	AM_RANGE(0x04, 0x05) AM_DEVWRITE_LEGACY("ay1", ay8910_address_data_w)
+	AM_RANGE(0x06, 0x06) AM_DEVREAD_LEGACY("ay2", ay8910_r)
+	AM_RANGE(0x06, 0x07) AM_DEVWRITE_LEGACY("ay2", ay8910_address_data_w)
 ADDRESS_MAP_END
 
 
@@ -233,7 +233,7 @@ static const gfx_layout crzrally_spritelayout =
 	{ 0, 1 },
 	{ 3*2, 2*2, 1*2, 0*2, 7*2, 6*2, 5*2, 4*2,
 			16+3*2, 16+2*2, 16+1*2, 16+0*2, 16+7*2, 16+6*2, 16+5*2, 16+4*2 },
-	{		RGN_FRAC(3,4)+0*16, RGN_FRAC(2,4)+0*16, RGN_FRAC(1,4)+0*16, RGN_FRAC(0,4)+0*16,
+	{       RGN_FRAC(3,4)+0*16, RGN_FRAC(2,4)+0*16, RGN_FRAC(1,4)+0*16, RGN_FRAC(0,4)+0*16,
 			RGN_FRAC(3,4)+2*16, RGN_FRAC(2,4)+2*16, RGN_FRAC(1,4)+2*16, RGN_FRAC(0,4)+2*16,
 			RGN_FRAC(3,4)+4*16, RGN_FRAC(2,4)+4*16, RGN_FRAC(1,4)+4*16, RGN_FRAC(0,4)+4*16,
 			RGN_FRAC(3,4)+6*16, RGN_FRAC(2,4)+6*16, RGN_FRAC(1,4)+6*16, RGN_FRAC(0,4)+6*16 },
@@ -280,22 +280,21 @@ static MACHINE_CONFIG_START( holeland, holeland_state )
 	MCFG_CPU_ADD("maincpu", Z80, 4000000)        /* 4 MHz ? */
 	MCFG_CPU_PROGRAM_MAP(holeland_map)
 	MCFG_CPU_IO_MAP(io_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", holeland_state,  irq0_line_hold)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*16, 32*16)
 	MCFG_SCREEN_VISIBLE_AREA(0*16, 32*16-1, 2*16, 30*16-1)
-	MCFG_SCREEN_UPDATE(holeland)
+	MCFG_SCREEN_UPDATE_DRIVER(holeland_state, screen_update_holeland)
 
 	MCFG_GFXDECODE(holeland)
 	MCFG_PALETTE_LENGTH(256)
 
 	MCFG_PALETTE_INIT(RRRR_GGGG_BBBB)
-	MCFG_VIDEO_START(holeland)
+	MCFG_VIDEO_START_OVERRIDE(holeland_state,holeland)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -349,7 +348,7 @@ static MACHINE_CONFIG_START( crzrally, holeland_state )
 	MCFG_CPU_ADD("maincpu", Z80, 20000000/4)        /* 5 MHz */
 	MCFG_CPU_PROGRAM_MAP(crzrally_map)
 	MCFG_CPU_IO_MAP(io_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", holeland_state,  irq0_line_hold)
 
 	MCFG_NVRAM_ADD_1FILL("nvram")
 
@@ -357,16 +356,15 @@ static MACHINE_CONFIG_START( crzrally, holeland_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(59)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(crzrally)
+	MCFG_SCREEN_UPDATE_DRIVER(holeland_state, screen_update_crzrally)
 
 	MCFG_GFXDECODE(crzrally)
 	MCFG_PALETTE_LENGTH(256)
 
 	MCFG_PALETTE_INIT(RRRR_GGGG_BBBB)
-	MCFG_VIDEO_START(crzrally)
+	MCFG_VIDEO_START_OVERRIDE(holeland_state,crzrally)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -500,7 +498,7 @@ ROM_START( crzrallyg )
 ROM_END
 
 
-GAME( 1984, holeland,  0,        holeland, holeland, 0, ROT0,   "Tecfri", "Hole Land",           GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
-GAME( 1985, crzrally,  0,        crzrally, crzrally, 0, ROT270, "Tecfri", "Crazy Rally (set 1)", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
-GAME( 1985, crzrallya, crzrally, crzrally, crzrally, 0, ROT270, "Tecfri", "Crazy Rally (set 2)", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
-GAME( 1985, crzrallyg, crzrally, crzrally, crzrally, 0, ROT270, "Tecfri (Gecas license)", "Crazy Rally (Gecas license)", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
+GAME( 1984, holeland,  0,        holeland, holeland, driver_device, 0, ROT0,   "Tecfri", "Hole Land",           GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
+GAME( 1985, crzrally,  0,        crzrally, crzrally, driver_device, 0, ROT270, "Tecfri", "Crazy Rally (set 1)", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
+GAME( 1985, crzrallya, crzrally, crzrally, crzrally, driver_device, 0, ROT270, "Tecfri", "Crazy Rally (set 2)", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
+GAME( 1985, crzrallyg, crzrally, crzrally, crzrally, driver_device, 0, ROT270, "Tecfri (Gecas license)", "Crazy Rally (Gecas license)", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )

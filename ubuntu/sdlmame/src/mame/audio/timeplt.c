@@ -19,8 +19,7 @@
 
 #define MASTER_CLOCK         XTAL_14_31818MHz
 
-typedef struct _timeplt_audio_state timeplt_audio_state;
-struct _timeplt_audio_state
+struct timeplt_audio_state
 {
 	UINT8    m_last_irq_state;
 	cpu_device *m_soundcpu;
@@ -38,7 +37,7 @@ INLINE timeplt_audio_state *get_safe_token( device_t *device )
 	assert(device != NULL);
 	assert(device->type() == TIMEPLT_AUDIO);
 
-	return (timeplt_audio_state *)downcast<legacy_device_base *>(device)->token();
+	return (timeplt_audio_state *)downcast<timeplt_audio_device *>(device)->token();
 }
 
 
@@ -115,9 +114,9 @@ static void filter_w( device_t *device, int data )
 	int C = 0;
 
 	if (data & 1)
-		C += 220000;	/* 220000pF = 0.220uF */
+		C += 220000;    /* 220000pF = 0.220uF */
 	if (data & 2)
-		C +=  47000;	/*  47000pF = 0.047uF */
+		C +=  47000;    /*  47000pF = 0.047uF */
 
 	filter_rc_set_RC(device, FLT_RC_LOWPASS, 1000, 5100, 0, CAP_P(C));
 }
@@ -145,13 +144,13 @@ static WRITE8_DEVICE_HANDLER( timeplt_filter_w )
 
 WRITE8_HANDLER( timeplt_sh_irqtrigger_w )
 {
-	device_t *audio = space->machine().device("timeplt_audio");
+	device_t *audio = space.machine().device("timeplt_audio");
 	timeplt_audio_state *state = get_safe_token(audio);
 
 	if (state->m_last_irq_state == 0 && data)
 	{
 		/* setting bit 0 low then high triggers IRQ on the sound CPU */
-		device_set_input_line_and_vector(state->m_soundcpu, 0, HOLD_LINE, 0xff);
+		state->m_soundcpu->set_input_line_and_vector(0, HOLD_LINE, 0xff);
 	}
 
 	state->m_last_irq_state = data;
@@ -165,25 +164,25 @@ WRITE8_HANDLER( timeplt_sh_irqtrigger_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( timeplt_sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( timeplt_sound_map, AS_PROGRAM, 8, driver_device )
 	AM_RANGE(0x0000, 0x2fff) AM_ROM
 	AM_RANGE(0x3000, 0x33ff) AM_MIRROR(0x0c00) AM_RAM
-	AM_RANGE(0x4000, 0x4000) AM_MIRROR(0x0fff) AM_DEVREADWRITE("ay1", ay8910_r, ay8910_data_w)
-	AM_RANGE(0x5000, 0x5000) AM_MIRROR(0x0fff) AM_DEVWRITE("ay1", ay8910_address_w)
-	AM_RANGE(0x6000, 0x6000) AM_MIRROR(0x0fff) AM_DEVREADWRITE("ay2", ay8910_r, ay8910_data_w)
-	AM_RANGE(0x7000, 0x7000) AM_MIRROR(0x0fff) AM_DEVWRITE("ay2", ay8910_address_w)
-	AM_RANGE(0x8000, 0xffff) AM_DEVWRITE("timeplt_audio", timeplt_filter_w)
+	AM_RANGE(0x4000, 0x4000) AM_MIRROR(0x0fff) AM_DEVREADWRITE_LEGACY("ay1", ay8910_r, ay8910_data_w)
+	AM_RANGE(0x5000, 0x5000) AM_MIRROR(0x0fff) AM_DEVWRITE_LEGACY("ay1", ay8910_address_w)
+	AM_RANGE(0x6000, 0x6000) AM_MIRROR(0x0fff) AM_DEVREADWRITE_LEGACY("ay2", ay8910_r, ay8910_data_w)
+	AM_RANGE(0x7000, 0x7000) AM_MIRROR(0x0fff) AM_DEVWRITE_LEGACY("ay2", ay8910_address_w)
+	AM_RANGE(0x8000, 0xffff) AM_DEVWRITE_LEGACY("timeplt_audio", timeplt_filter_w)
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( locomotn_sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( locomotn_sound_map, AS_PROGRAM, 8, driver_device )
 	AM_RANGE(0x0000, 0x1fff) AM_ROM
 	AM_RANGE(0x2000, 0x23ff) AM_MIRROR(0x0c00) AM_RAM
-	AM_RANGE(0x3000, 0x3fff) AM_DEVWRITE("timeplt_audio", timeplt_filter_w)
-	AM_RANGE(0x4000, 0x4000) AM_MIRROR(0x0fff) AM_DEVREADWRITE("ay1", ay8910_r, ay8910_data_w)
-	AM_RANGE(0x5000, 0x5000) AM_MIRROR(0x0fff) AM_DEVWRITE("ay1", ay8910_address_w)
-	AM_RANGE(0x6000, 0x6000) AM_MIRROR(0x0fff) AM_DEVREADWRITE("ay2", ay8910_r, ay8910_data_w)
-	AM_RANGE(0x7000, 0x7000) AM_MIRROR(0x0fff) AM_DEVWRITE("ay2", ay8910_address_w)
+	AM_RANGE(0x3000, 0x3fff) AM_DEVWRITE_LEGACY("timeplt_audio", timeplt_filter_w)
+	AM_RANGE(0x4000, 0x4000) AM_MIRROR(0x0fff) AM_DEVREADWRITE_LEGACY("ay1", ay8910_r, ay8910_data_w)
+	AM_RANGE(0x5000, 0x5000) AM_MIRROR(0x0fff) AM_DEVWRITE_LEGACY("ay1", ay8910_address_w)
+	AM_RANGE(0x6000, 0x6000) AM_MIRROR(0x0fff) AM_DEVREADWRITE_LEGACY("ay2", ay8910_r, ay8910_data_w)
+	AM_RANGE(0x7000, 0x7000) AM_MIRROR(0x0fff) AM_DEVWRITE_LEGACY("ay2", ay8910_address_w)
 ADDRESS_MAP_END
 
 
@@ -198,7 +197,7 @@ static const ay8910_interface timeplt_ay8910_interface =
 {
 	AY8910_LEGACY_OUTPUT,
 	AY8910_DEFAULT_LOADS,
-	DEVCB_MEMORY_HANDLER("tpsound", PROGRAM, soundlatch_r),
+	DEVCB_DRIVER_MEMBER(driver_device, soundlatch_byte_r),
 	DEVCB_DEVICE_HANDLER("timeplt_audio", timeplt_portB_r),
 	DEVCB_NULL,
 	DEVCB_NULL
@@ -261,14 +260,40 @@ MACHINE_CONFIG_END
     DEVICE DEFINITION
 *****************************************************************************/
 
+const device_type TIMEPLT_AUDIO = &device_creator<timeplt_audio_device>;
 
-static const char DEVTEMPLATE_SOURCE[] = __FILE__;
+timeplt_audio_device::timeplt_audio_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, TIMEPLT_AUDIO, "Time Pilot Audio", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
+{
+	m_token = global_alloc_clear(timeplt_audio_state);
+}
 
-#define DEVTEMPLATE_ID(p,s)				p##timeplt_audio##s
-#define DEVTEMPLATE_FEATURES			DT_HAS_START
-#define DEVTEMPLATE_NAME				"Time Pilot Audio"
-#define DEVTEMPLATE_FAMILY				"Time Pilot Audio IC"
-#include "devtempl.h"
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
 
-DEFINE_LEGACY_SOUND_DEVICE(TIMEPLT_AUDIO, timeplt_audio);
+void timeplt_audio_device::device_config_complete()
+{
+}
 
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void timeplt_audio_device::device_start()
+{
+	DEVICE_START_NAME( timeplt_audio )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void timeplt_audio_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}

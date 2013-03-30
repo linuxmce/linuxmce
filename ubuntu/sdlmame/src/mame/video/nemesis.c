@@ -21,13 +21,12 @@ sprite_data[8] =
 };
 
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(nemesis_state::get_bg_tile_info)
 {
-	nemesis_state *state = machine.driver_data<nemesis_state>();
 	int code, color, flags, mask, layer;
 
-	code = state->m_videoram2[tile_index];
-	color = state->m_colorram2[tile_index];
+	code = m_videoram2[tile_index];
+	color = m_colorram2[tile_index];
 	flags = 0;
 
 	if (color & 0x80)
@@ -37,16 +36,16 @@ static TILE_GET_INFO( get_bg_tile_info )
 		flags |= TILE_FLIPY;
 
 	if ((~code & 0x2000) || ((code & 0xc000) == 0x4000))
-		 flags |= TILE_FORCE_LAYER0;		/* no transparency */
+			flags |= TILE_FORCE_LAYER0;     /* no transparency */
 
 	if (code & 0xf800)
 	{
-		SET_TILE_INFO( 0, code & 0x7ff, color & 0x7f, flags );
+		SET_TILE_INFO_MEMBER( 0, code & 0x7ff, color & 0x7f, flags );
 	}
 	else
 	{
-		SET_TILE_INFO( 0, 0, 0x00, 0 );
-		tileinfo->pen_data = state->m_blank_tile;
+		SET_TILE_INFO_MEMBER( 0, 0, 0x00, 0 );
+		tileinfo.pen_data = m_blank_tile;
 	}
 
 	mask = (code & 0x1000) >> 12;
@@ -54,16 +53,15 @@ static TILE_GET_INFO( get_bg_tile_info )
 	if (mask && !layer)
 		layer = 1;
 
-	tileinfo->category = mask | (layer << 1);
+	tileinfo.category = mask | (layer << 1);
 }
 
-static TILE_GET_INFO( get_fg_tile_info )
+TILE_GET_INFO_MEMBER(nemesis_state::get_fg_tile_info)
 {
-	nemesis_state *state = machine.driver_data<nemesis_state>();
 	int code, color, flags, mask, layer;
 
-	code = state->m_videoram1[tile_index];
-	color = state->m_colorram1[tile_index];
+	code = m_videoram1[tile_index];
+	color = m_colorram1[tile_index];
 	flags = 0;
 
 	if (color & 0x80)
@@ -73,16 +71,16 @@ static TILE_GET_INFO( get_fg_tile_info )
 		flags |= TILE_FLIPY;
 
 	if ((~code & 0x2000) || ((code & 0xc000) == 0x4000))
-		 flags |= TILE_FORCE_LAYER0;		/* no transparency */
+			flags |= TILE_FORCE_LAYER0;     /* no transparency */
 
 	if (code & 0xf800)
 	{
-		SET_TILE_INFO( 0, code & 0x7ff, color & 0x7f, flags );
+		SET_TILE_INFO_MEMBER( 0, code & 0x7ff, color & 0x7f, flags );
 	}
 	else
 	{
-		SET_TILE_INFO( 0, 0, 0x00, 0 );
-		tileinfo->pen_data = state->m_blank_tile;
+		SET_TILE_INFO_MEMBER( 0, 0, 0x00, 0 );
+		tileinfo.pen_data = m_blank_tile;
 	}
 
 	mask = (code & 0x1000) >> 12;
@@ -90,107 +88,103 @@ static TILE_GET_INFO( get_fg_tile_info )
 	if (mask && !layer)
 		layer = 1;
 
-	tileinfo->category = mask | (layer << 1);
+	tileinfo.category = mask | (layer << 1);
 }
 
 
-WRITE16_HANDLER( nemesis_gfx_flipx_word_w )
+WRITE16_MEMBER(nemesis_state::nemesis_gfx_flipx_word_w)
 {
-	nemesis_state *state = space->machine().driver_data<nemesis_state>();
 
 	if (ACCESSING_BITS_0_7)
 	{
-		state->m_flipscreen = data & 0x01;
+		m_flipscreen = data & 0x01;
 
 		if (data & 0x01)
-			state->m_tilemap_flip |= TILEMAP_FLIPX;
+			m_tilemap_flip |= TILEMAP_FLIPX;
 		else
-			state->m_tilemap_flip &= ~TILEMAP_FLIPX;
+			m_tilemap_flip &= ~TILEMAP_FLIPX;
 
-		tilemap_set_flip_all(space->machine(), state->m_tilemap_flip);
+		machine().tilemap().set_flip_all(m_tilemap_flip);
 	}
 
 	if (ACCESSING_BITS_8_15)
 	{
 		if (data & 0x0100)
-			device_set_input_line_and_vector(state->m_audiocpu, 0, HOLD_LINE, 0xff);
+			m_audiocpu->set_input_line_and_vector(0, HOLD_LINE, 0xff);
 	}
 }
 
-WRITE16_HANDLER( nemesis_gfx_flipy_word_w )
+WRITE16_MEMBER(nemesis_state::nemesis_gfx_flipy_word_w)
 {
-	nemesis_state *state = space->machine().driver_data<nemesis_state>();
 
 	if (ACCESSING_BITS_0_7)
 	{
 		if (data & 0x01)
-			state->m_tilemap_flip |= TILEMAP_FLIPY;
+			m_tilemap_flip |= TILEMAP_FLIPY;
 		else
-			state->m_tilemap_flip &= ~TILEMAP_FLIPY;
+			m_tilemap_flip &= ~TILEMAP_FLIPY;
 
-		tilemap_set_flip_all(space->machine(), state->m_tilemap_flip);
+		machine().tilemap().set_flip_all(m_tilemap_flip);
 	}
 }
 
 
-WRITE16_HANDLER( salamand_control_port_word_w )
+WRITE16_MEMBER(nemesis_state::salamand_control_port_word_w)
 {
-	nemesis_state *state = space->machine().driver_data<nemesis_state>();
 
 	if (ACCESSING_BITS_0_7)
 	{
-		UINT8 accessing_bits = data ^ state->m_irq_port_last;
+		UINT8 accessing_bits = data ^ m_irq_port_last;
 
-		state->m_irq_on = data & 0x01;
-		state->m_irq2_on = data & 0x02;
-		state->m_flipscreen = data & 0x04;
+		m_irq_on = data & 0x01;
+		m_irq2_on = data & 0x02;
+		m_flipscreen = data & 0x04;
 
 		if (data & 0x04)
-			state->m_tilemap_flip |= TILEMAP_FLIPX;
+			m_tilemap_flip |= TILEMAP_FLIPX;
 		else
-			state->m_tilemap_flip &= ~TILEMAP_FLIPX;
+			m_tilemap_flip &= ~TILEMAP_FLIPX;
 
 		if (data & 0x08)
-			state->m_tilemap_flip |= TILEMAP_FLIPY;
+			m_tilemap_flip |= TILEMAP_FLIPY;
 		else
-			state->m_tilemap_flip &= ~TILEMAP_FLIPY;
+			m_tilemap_flip &= ~TILEMAP_FLIPY;
 
 		if (accessing_bits & 0x0c)
-			tilemap_set_flip_all(space->machine(), state->m_tilemap_flip);
+			machine().tilemap().set_flip_all(m_tilemap_flip);
 
-		state->m_irq_port_last = data;
+		m_irq_port_last = data;
 	}
 
 	if (ACCESSING_BITS_8_15)
 	{
-		coin_lockout_w(space->machine(), 0, data & 0x0200);
-		coin_lockout_w(space->machine(), 1, data & 0x0400);
+		coin_lockout_w(machine(), 0, data & 0x0200);
+		coin_lockout_w(machine(), 1, data & 0x0400);
 
 		if (data & 0x0800)
-			device_set_input_line(state->m_audiocpu, 0, HOLD_LINE);
+			m_audiocpu->set_input_line(0, HOLD_LINE);
 
-		state->m_selected_ip = (~data & 0x1000) >> 12;		/* citybomb steering & accel */
+		m_selected_ip = (~data & 0x1000) >> 12;     /* citybomb steering & accel */
 	}
 }
 
 
-WRITE16_HANDLER( nemesis_palette_word_w )
+WRITE16_MEMBER(nemesis_state::nemesis_palette_word_w)
 {
-	nemesis_state *state = space->machine().driver_data<nemesis_state>();
 	int r, g, b, bit1, bit2, bit3, bit4, bit5;
 
-	COMBINE_DATA(state->m_paletteram + offset);
-	data = state->m_paletteram[offset];
+	COMBINE_DATA(m_paletteram + offset);
+	data = m_paletteram[offset];
 
 	/* Mish, 30/11/99 - Schematics show the resistor values are:
-        300 Ohms
-        620 Ohms
-        1200 Ohms
-        2400 Ohms
-        4700 Ohms
+	    300 Ohms
+	    620 Ohms
+	    1200 Ohms
+	    2400 Ohms
+	    4700 Ohms
 
-        So the correct weights per bit are 8, 17, 33, 67, 130
-    */
+	    So the correct weights per bit are 8, 17, 33, 67, 130
+	*/
 
 	#define MULTIPLIER 8 * bit1 + 17 * bit2 + 33 * bit3 + 67 * bit4 + 130 * bit5
 
@@ -213,62 +207,56 @@ WRITE16_HANDLER( nemesis_palette_word_w )
 	bit5 = BIT(data, 14);
 	b = MULTIPLIER;
 
-	palette_set_color(space->machine(), offset, MAKE_RGB(r, g, b));
+	palette_set_color(machine(), offset, MAKE_RGB(r, g, b));
 }
 
-WRITE16_HANDLER( salamander_palette_word_w )
+WRITE16_MEMBER(nemesis_state::salamander_palette_word_w)
 {
-	nemesis_state *state = space->machine().driver_data<nemesis_state>();
 
-	COMBINE_DATA(state->m_paletteram + offset);
+	COMBINE_DATA(m_paletteram + offset);
 	offset &= ~1;
 
-	data = ((state->m_paletteram[offset] << 8) & 0xff00) | (state->m_paletteram[offset + 1] & 0xff);
-	palette_set_color_rgb(space->machine(), offset / 2, pal5bit(data >> 0), pal5bit(data >> 5), pal5bit(data >> 10));
+	data = ((m_paletteram[offset] << 8) & 0xff00) | (m_paletteram[offset + 1] & 0xff);
+	palette_set_color_rgb(machine(), offset / 2, pal5bit(data >> 0), pal5bit(data >> 5), pal5bit(data >> 10));
 }
 
 
-WRITE16_HANDLER( nemesis_videoram1_word_w )
+WRITE16_MEMBER(nemesis_state::nemesis_videoram1_word_w)
 {
-	nemesis_state *state = space->machine().driver_data<nemesis_state>();
 
-	COMBINE_DATA(state->m_videoram1 + offset);
-	tilemap_mark_tile_dirty(state->m_foreground, offset);
+	COMBINE_DATA(m_videoram1 + offset);
+	m_foreground->mark_tile_dirty(offset);
 }
 
-WRITE16_HANDLER( nemesis_videoram2_word_w )
+WRITE16_MEMBER(nemesis_state::nemesis_videoram2_word_w)
 {
-	nemesis_state *state = space->machine().driver_data<nemesis_state>();
 
-	COMBINE_DATA(state->m_videoram2 + offset);
-	tilemap_mark_tile_dirty(state->m_background, offset);
+	COMBINE_DATA(m_videoram2 + offset);
+	m_background->mark_tile_dirty(offset);
 }
 
-WRITE16_HANDLER( nemesis_colorram1_word_w )
+WRITE16_MEMBER(nemesis_state::nemesis_colorram1_word_w)
 {
-	nemesis_state *state = space->machine().driver_data<nemesis_state>();
 
-	COMBINE_DATA(state->m_colorram1 + offset);
-	tilemap_mark_tile_dirty(state->m_foreground, offset);
+	COMBINE_DATA(m_colorram1 + offset);
+	m_foreground->mark_tile_dirty(offset);
 }
 
-WRITE16_HANDLER( nemesis_colorram2_word_w )
+WRITE16_MEMBER(nemesis_state::nemesis_colorram2_word_w)
 {
-	nemesis_state *state = space->machine().driver_data<nemesis_state>();
 
-	COMBINE_DATA(state->m_colorram2 + offset);
-	tilemap_mark_tile_dirty(state->m_background, offset);
+	COMBINE_DATA(m_colorram2 + offset);
+	m_background->mark_tile_dirty(offset);
 }
 
 
 /* we have to straighten out the 16-bit word into bytes for gfxdecode() to work */
-WRITE16_HANDLER( nemesis_charram_word_w )
+WRITE16_MEMBER(nemesis_state::nemesis_charram_word_w)
 {
-	nemesis_state *state = space->machine().driver_data<nemesis_state>();
-	UINT16 oldword = state->m_charram[offset];
+	UINT16 oldword = m_charram[offset];
 
-	COMBINE_DATA(state->m_charram + offset);
-	data = state->m_charram[offset];
+	COMBINE_DATA(m_charram + offset);
+	data = m_charram[offset];
 
 	if (oldword != data)
 	{
@@ -277,87 +265,86 @@ WRITE16_HANDLER( nemesis_charram_word_w )
 		{
 			int w = sprite_data[i].width;
 			int h = sprite_data[i].height;
-			gfx_element_mark_dirty(space->machine().gfx[sprite_data[i].char_type], offset * 4 / (w * h));
+			machine().gfx[sprite_data[i].char_type]->mark_dirty(offset * 4 / (w * h));
 		}
 	}
 }
 
 
-static STATE_POSTLOAD( nemesis_postload )
+static void nemesis_postload(running_machine &machine)
 {
 	nemesis_state *state = machine.driver_data<nemesis_state>();
 	int i, offs;
 
-	for (offs = 0; offs < state->m_charram_size; offs++)
+	for (offs = 0; offs < state->m_charram.bytes(); offs++)
 	{
 		for (i = 0; i < 8; i++)
 		{
 			int w = sprite_data[i].width;
 			int h = sprite_data[i].height;
-			gfx_element_mark_dirty(machine.gfx[sprite_data[i].char_type], offs * 4 / (w * h));
+			machine.gfx[sprite_data[i].char_type]->mark_dirty(offs * 4 / (w * h));
 		}
 	}
-	tilemap_mark_all_tiles_dirty(state->m_background);
-	tilemap_mark_all_tiles_dirty(state->m_foreground);
+	state->m_background->mark_all_dirty();
+	state->m_foreground->mark_all_dirty();
 }
 
 
 /* claim a palette dirty array */
-VIDEO_START( nemesis )
+void nemesis_state::video_start()
 {
-	nemesis_state *state = machine.driver_data<nemesis_state>();
 
-	state->m_spriteram_words = state->m_spriteram_size / 2;
+	m_spriteram_words = m_spriteram.bytes() / 2;
 
-	state->m_background = tilemap_create(machine, get_bg_tile_info, tilemap_scan_rows,  8, 8, 64, 32);
-	state->m_foreground = tilemap_create(machine, get_fg_tile_info, tilemap_scan_rows,  8, 8, 64, 32);
+	m_background = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(nemesis_state::get_bg_tile_info),this), TILEMAP_SCAN_ROWS,  8, 8, 64, 32);
+	m_foreground = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(nemesis_state::get_fg_tile_info),this), TILEMAP_SCAN_ROWS,  8, 8, 64, 32);
 
-	tilemap_set_transparent_pen(state->m_background, 0);
-	tilemap_set_transparent_pen(state->m_foreground, 0);
-	tilemap_set_scroll_rows(state->m_background, 256);
-	tilemap_set_scroll_rows(state->m_foreground, 256);
+	m_background->set_transparent_pen(0);
+	m_foreground->set_transparent_pen(0);
+	m_background->set_scroll_rows(256);
+	m_foreground->set_scroll_rows(256);
 
-	memset(state->m_charram, 0, state->m_charram_size);
-	memset(state->m_blank_tile, 0, ARRAY_LENGTH(state->m_blank_tile));
+	memset(m_charram, 0, m_charram.bytes());
+	memset(m_blank_tile, 0, ARRAY_LENGTH(m_blank_tile));
 
-	gfx_element_set_source(machine.gfx[0], (UINT8 *)state->m_charram);
-	gfx_element_set_source(machine.gfx[1], (UINT8 *)state->m_charram);
-	gfx_element_set_source(machine.gfx[2], (UINT8 *)state->m_charram);
-	gfx_element_set_source(machine.gfx[3], (UINT8 *)state->m_charram);
-	gfx_element_set_source(machine.gfx[4], (UINT8 *)state->m_charram);
-	gfx_element_set_source(machine.gfx[5], (UINT8 *)state->m_charram);
-	gfx_element_set_source(machine.gfx[6], (UINT8 *)state->m_charram);
-	gfx_element_set_source(machine.gfx[7], (UINT8 *)state->m_charram);
+	machine().gfx[0]->set_source((UINT8 *)m_charram.target());
+	machine().gfx[1]->set_source((UINT8 *)m_charram.target());
+	machine().gfx[2]->set_source((UINT8 *)m_charram.target());
+	machine().gfx[3]->set_source((UINT8 *)m_charram.target());
+	machine().gfx[4]->set_source((UINT8 *)m_charram.target());
+	machine().gfx[5]->set_source((UINT8 *)m_charram.target());
+	machine().gfx[6]->set_source((UINT8 *)m_charram.target());
+	machine().gfx[7]->set_source((UINT8 *)m_charram.target());
 
 	/* Set up save state */
-	machine.state().register_postload(nemesis_postload, NULL);
+	machine().save().register_postload(save_prepost_delegate(FUNC(nemesis_postload), &machine()));
 }
 
 
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	/*
-     *  16 bytes per sprite, in memory from 56000-56fff
-     *
-     *  byte    0 : relative priority.
-     *  byte    2 : size (?) value #E0 means not used., bit 0x01 is flipx
-                    0xc0 is upper 2 bits of zoom.
-                    0x38 is size.
-     *  byte    4 : zoom = 0xff
-     *  byte    6 : low bits sprite code.
-     *  byte    8 : color + hi bits sprite code., bit 0x20 is flipy bit. bit 0x01 is high bit of X pos.
-     *  byte    A : X position.
-     *  byte    C : Y position.
-     *  byte    E : not used.
-     */
+	 *  16 bytes per sprite, in memory from 56000-56fff
+	 *
+	 *  byte    0 : relative priority.
+	 *  byte    2 : size (?) value #E0 means not used., bit 0x01 is flipx
+	                0xc0 is upper 2 bits of zoom.
+	                0x38 is size.
+	 *  byte    4 : zoom = 0xff
+	 *  byte    6 : low bits sprite code.
+	 *  byte    8 : color + hi bits sprite code., bit 0x20 is flipy bit. bit 0x01 is high bit of X pos.
+	 *  byte    A : X position.
+	 *  byte    C : Y position.
+	 *  byte    E : not used.
+	 */
 
 	nemesis_state *state = machine.driver_data<nemesis_state>();
 	UINT16 *spriteram = state->m_spriteram;
-	int adress;	/* start of sprite in spriteram */
-	int sx;	/* sprite X-pos */
-	int sy;	/* sprite Y-pos */
-	int code;	/* start of sprite in obj RAM */
-	int color;	/* color of the sprite */
+	int address;    /* start of sprite in spriteram */
+	int sx; /* sprite X-pos */
+	int sy; /* sprite Y-pos */
+	int code;   /* start of sprite in obj RAM */
+	int color;  /* color of the sprite */
 	int flipx,flipy;
 	int zoom;
 	int char_type;
@@ -368,30 +355,30 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 
 	for (priority = 256 - 1; priority >= 0; priority--)
 	{
-		for (adress = state->m_spriteram_words - 8; adress >= 0; adress -= 8)
+		for (address = state->m_spriteram_words - 8; address >= 0; address -= 8)
 		{
-			if((spriteram[adress] & 0xff) != priority)
+			if((spriteram[address] & 0xff) != priority)
 				continue;
 
-			zoom = spriteram[adress + 2] & 0xff;
-			if (!(spriteram[adress + 2] & 0xff00) && ((spriteram[adress + 3] & 0xff00) != 0xff00))
-				code = spriteram[adress + 3] + ((spriteram[adress + 4] & 0xc0) << 2);
+			zoom = spriteram[address + 2] & 0xff;
+			if (!(spriteram[address + 2] & 0xff00) && ((spriteram[address + 3] & 0xff00) != 0xff00))
+				code = spriteram[address + 3] + ((spriteram[address + 4] & 0xc0) << 2);
 			else
-				code = (spriteram[adress + 3] & 0xff) + ((spriteram[adress + 4] & 0xc0) << 2);
+				code = (spriteram[address + 3] & 0xff) + ((spriteram[address + 4] & 0xc0) << 2);
 
 			if (zoom != 0xff || code != 0)
 			{
-				size = spriteram[adress + 1];
+				size = spriteram[address + 1];
 				zoom += (size & 0xc0) << 2;
 
-				sx = spriteram[adress + 5] & 0xff;
-				sy = spriteram[adress + 6] & 0xff;
-				if (spriteram[adress + 4] & 0x01)
-					sx-=0x100;	/* fixes left side clip */
+				sx = spriteram[address + 5] & 0xff;
+				sy = spriteram[address + 6] & 0xff;
+				if (spriteram[address + 4] & 0x01)
+					sx-=0x100;  /* fixes left side clip */
 
-				color = (spriteram[adress + 4] & 0x1e) >> 1;
-				flipx = spriteram[adress + 1] & 0x01;
-				flipy = spriteram[adress + 4] & 0x20;
+				color = (spriteram[address + 4] & 0x1e) >> 1;
+				flipx = spriteram[address + 1] & 0x01;
+				flipy = spriteram[address + 4] & 0x20;
 
 				idx = (size >> 3) & 7;
 				w = sprite_data[idx].width;
@@ -425,35 +412,34 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 
 /******************************************************************************/
 
-SCREEN_UPDATE( nemesis )
+UINT32 nemesis_state::screen_update_nemesis(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	nemesis_state *state = screen->machine().driver_data<nemesis_state>();
 	int offs;
 	rectangle clip;
 
-	bitmap_fill(screen->machine().priority_bitmap, cliprect, 0);
-	bitmap_fill(bitmap, cliprect, 0);
+	machine().priority_bitmap.fill(0, cliprect);
+	bitmap.fill(0, cliprect);
 
 	clip.min_x = 0;
 	clip.max_x = 255;
 
-	tilemap_set_scroll_cols(state->m_background, 64);
-	tilemap_set_scroll_cols(state->m_foreground, 64);
-	tilemap_set_scroll_rows(state->m_background, 1);
-	tilemap_set_scroll_rows(state->m_foreground, 1);
+	m_background->set_scroll_cols(64);
+	m_foreground->set_scroll_cols(64);
+	m_background->set_scroll_rows(1);
+	m_foreground->set_scroll_rows(1);
 
 	for (offs = 0; offs < 64; offs++)
 	{
 		int offset_x = offs;
 
-		if (state->m_flipscreen)
+		if (m_flipscreen)
 			offset_x = (offs + 0x20) & 0x3f;
 
-		tilemap_set_scrolly(state->m_background, offs, state->m_yscroll2[offset_x]);
-		tilemap_set_scrolly(state->m_foreground, offs, state->m_yscroll1[offset_x]);
+		m_background->set_scrolly(offs, m_yscroll2[offset_x]);
+		m_foreground->set_scrolly(offs, m_yscroll1[offset_x]);
 	}
 
-	for (offs = cliprect->min_y; offs <= cliprect->max_y; offs++)
+	for (offs = cliprect.min_y; offs <= cliprect.max_y; offs++)
 	{
 		int i;
 		int offset_y = offs;
@@ -461,22 +447,22 @@ SCREEN_UPDATE( nemesis )
 		clip.min_y = offs;
 		clip.max_y = offs;
 
-		if (state->m_flipscreen)
+		if (m_flipscreen)
 			offset_y = 255 - offs;
 
-		tilemap_set_scrollx(state->m_background, 0, (state->m_xscroll2[offset_y] & 0xff) + ((state->m_xscroll2[0x100 + offset_y] & 0x01) << 8) - (state->m_flipscreen ? 0x107 : 0));
-		tilemap_set_scrollx(state->m_foreground, 0, (state->m_xscroll1[offset_y] & 0xff) + ((state->m_xscroll1[0x100 + offset_y] & 0x01) << 8) - (state->m_flipscreen ? 0x107 : 0));
+		m_background->set_scrollx(0, (m_xscroll2[offset_y] & 0xff) + ((m_xscroll2[0x100 + offset_y] & 0x01) << 8) - (m_flipscreen ? 0x107 : 0));
+		m_foreground->set_scrollx(0, (m_xscroll1[offset_y] & 0xff) + ((m_xscroll1[0x100 + offset_y] & 0x01) << 8) - (m_flipscreen ? 0x107 : 0));
 
 		for (i = 0; i < 4; i += 2)
 		{
-			tilemap_draw(bitmap, &clip, state->m_background, TILEMAP_DRAW_CATEGORY(i + 0), 1);
-			tilemap_draw(bitmap, &clip, state->m_background, TILEMAP_DRAW_CATEGORY(i + 1), 2);
-			tilemap_draw(bitmap, &clip, state->m_foreground, TILEMAP_DRAW_CATEGORY(i + 0), 1);
-			tilemap_draw(bitmap, &clip, state->m_foreground, TILEMAP_DRAW_CATEGORY(i + 1), 2);
+			m_background->draw(bitmap, clip, TILEMAP_DRAW_CATEGORY(i + 0), 1);
+			m_background->draw(bitmap, clip, TILEMAP_DRAW_CATEGORY(i + 1), 2);
+			m_foreground->draw(bitmap, clip, TILEMAP_DRAW_CATEGORY(i + 0), 1);
+			m_foreground->draw(bitmap, clip, TILEMAP_DRAW_CATEGORY(i + 1), 2);
 		}
 	}
 
-	draw_sprites(screen->machine(),bitmap,cliprect);
+	draw_sprites(machine(),bitmap,cliprect);
 
 	return 0;
 }

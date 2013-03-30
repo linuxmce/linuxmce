@@ -16,15 +16,15 @@
 #include "sound/dac.h"
 #include "video/gtia.h"
 
-#define VERBOSE_POKEY	0
-#define VERBOSE_SERIAL	0
-#define VERBOSE_TIMERS	0
+#define VERBOSE_POKEY   1
+#define VERBOSE_SERIAL  1
+#define VERBOSE_TIMERS  1
 
 static void a600xl_mmu(running_machine &machine, UINT8 new_mmu);
 
 static void pokey_reset(running_machine &machine);
 
-void atari_interrupt_cb(device_t *device, int mask)
+void atari_interrupt_cb(pokey_device *device, int mask)
 {
 
 	if (VERBOSE_POKEY)
@@ -53,7 +53,7 @@ void atari_interrupt_cb(device_t *device, int mask)
 			logerror("atari interrupt_cb TIMR1\n");
 	}
 
-	cputag_set_input_line(device->machine(), "maincpu", 0, HOLD_LINE);
+	device->machine().device("maincpu")->execute().set_input_line(0, HOLD_LINE);
 }
 
 /**************************************************************
@@ -64,32 +64,32 @@ void atari_interrupt_cb(device_t *device, int mask)
 
 READ8_DEVICE_HANDLER(atari_pia_pa_r)
 {
-	return atari_input_disabled(device->machine()) ? 0xFF : input_port_read_safe(device->machine(), "djoy_0_1", 0);
+	return space.machine().root_device().ioport("djoy_0_1")->read_safe(0);
 }
 
 READ8_DEVICE_HANDLER(atari_pia_pb_r)
 {
-	return atari_input_disabled(device->machine()) ? 0xFF : input_port_read_safe(device->machine(), "djoy_2_3", 0);
+	return space.machine().root_device().ioport("djoy_2_3")->read_safe(0);
 }
 
 WRITE8_DEVICE_HANDLER(a600xl_pia_pb_w) { a600xl_mmu(device->machine(), data); }
 
-static WRITE_LINE_DEVICE_HANDLER(atari_pia_cb2_w) { }	// This is used by Floppy drive on Atari 8bits Home Computers
+WRITE_LINE_DEVICE_HANDLER(atari_pia_cb2_w) { }  // This is used by Floppy drive on Atari 8bits Home Computers
 
 const pia6821_interface atarixl_pia_interface =
 {
-	DEVCB_HANDLER(atari_pia_pa_r),		/* port A in */
-	DEVCB_HANDLER(atari_pia_pb_r),	/* port B in */
-	DEVCB_NULL,		/* line CA1 in */
-	DEVCB_NULL,		/* line CB1 in */
-	DEVCB_NULL,		/* line CA2 in */
-	DEVCB_NULL,		/* line CB2 in */
-	DEVCB_NULL,		/* port A out */
-	DEVCB_HANDLER(a600xl_pia_pb_w),		/* port B out */
-	DEVCB_NULL,		/* line CA2 out */
-	DEVCB_LINE(atari_pia_cb2_w),		/* port CB2 out */
-	DEVCB_NULL,		/* IRQA */
-	DEVCB_NULL		/* IRQB */
+	DEVCB_HANDLER(atari_pia_pa_r),      /* port A in */
+	DEVCB_HANDLER(atari_pia_pb_r),  /* port B in */
+	DEVCB_NULL,     /* line CA1 in */
+	DEVCB_NULL,     /* line CB1 in */
+	DEVCB_NULL,     /* line CA2 in */
+	DEVCB_NULL,     /* line CB2 in */
+	DEVCB_NULL,     /* port A out */
+	DEVCB_HANDLER(a600xl_pia_pb_w),     /* port B out */
+	DEVCB_NULL,     /* line CA2 out */
+	DEVCB_LINE(atari_pia_cb2_w),        /* port CB2 out */
+	DEVCB_NULL,     /* IRQA */
+	DEVCB_NULL      /* IRQB */
 };
 
 
@@ -105,14 +105,14 @@ void a600xl_mmu(running_machine &machine, UINT8 new_mmu)
 	if ( new_mmu & 0x80 )
 	{
 		logerror("%s MMU SELFTEST RAM\n", machine.system().name);
-		machine.device("maincpu")->memory().space(AS_PROGRAM)->nop_readwrite(0x5000, 0x57ff);
+		machine.device("maincpu")->memory().space(AS_PROGRAM).nop_readwrite(0x5000, 0x57ff);
 	}
 	else
 	{
 		logerror("%s MMU SELFTEST ROM\n", machine.system().name);
-		machine.device("maincpu")->memory().space(AS_PROGRAM)->install_read_bank(0x5000, 0x57ff, "bank2");
-		machine.device("maincpu")->memory().space(AS_PROGRAM)->unmap_write(0x5000, 0x57ff);
-		memory_set_bankptr(machine, "bank2", machine.region("maincpu")->base() + 0x5000);
+		machine.device("maincpu")->memory().space(AS_PROGRAM).install_read_bank(0x5000, 0x57ff, "bank2");
+		machine.device("maincpu")->memory().space(AS_PROGRAM).unmap_write(0x5000, 0x57ff);
+		machine.root_device().membank("bank2")->set_base(machine.root_device().memregion("maincpu")->base() + 0x5000);
 	}
 }
 
@@ -124,8 +124,8 @@ void a600xl_mmu(running_machine &machine, UINT8 new_mmu)
  *
  **************************************************************/
 
-#define AKEY_BREAK		0x03	/* this not really a scancode */
-#define AKEY_NONE		0x09
+#define AKEY_BREAK      0x03    /* this not really a scancode */
+#define AKEY_NONE       0x09
 
 /**************************************************************
 
@@ -155,62 +155,43 @@ void a600xl_mmu(running_machine &machine, UINT8 new_mmu)
 
  **************************************************************/
 
-static int atari_last;
-
-void a800_handle_keyboard(running_machine &machine)
+POKEY_KEYBOARD_HANDLER(atari_a800_keyboard)
 {
-	device_t *pokey = machine.device("pokey");
-	int atari_code, count, ipt, i;
+	int ipt;
 	static const char *const tag[] = {
 		"keyboard_0", "keyboard_1", "keyboard_2", "keyboard_3",
 		"keyboard_4", "keyboard_5", "keyboard_6", "keyboard_7"
 	};
+	UINT8 ret = 0x00;
 
-	/* check keyboard */
-	for( i = 0; i < 8; i++ )
+	/* decode special */
+	switch (k543210)
 	{
-		ipt = input_port_read_safe(machine, tag[i], 0);
-
-		if( ipt )
-		{
-			count = 0;
-			while(ipt / 2)
-			{
-				ipt = ipt/2;
-				count++;
-			}
-
-			atari_code = i*8 + count;
-
-			/* SHIFT */
-			if(input_port_read_safe(machine, "fake", 0) & 0x01)
-				atari_code |= 0x40;
-
-			/* CTRL */
-			if(input_port_read_safe(machine, "fake", 0) & 0x02)
-				atari_code |= 0x80;
-
-			if( atari_code != AKEY_NONE )
-			{
-				if( atari_code == atari_last )
-					return;
-				atari_last = atari_code;
-
-				if( (atari_code & 0x3f) == AKEY_BREAK )
-				{
-					pokey_break_w(pokey, atari_code & 0x40);
-					return;
-				}
-
-				pokey_kbcode_w(pokey, atari_code, 1);
-				return;
-			}
-		}
-
+	case pokey_device::POK_KEY_BREAK:
+		/* special case ... */
+		ret |= ((device->machine().root_device().ioport(tag[0])->read_safe(0) & 0x04) ? 0x02 : 0x00);
+		break;
+	case pokey_device::POK_KEY_CTRL:
+		/* CTRL */
+		ret |= ((device->machine().root_device().ioport("fake")->read_safe(0) & 0x02) ? 0x02 : 0x00);
+		break;
+	case pokey_device::POK_KEY_SHIFT:
+		/* SHIFT */
+		ret |= ((device->machine().root_device().ioport("fake")->read_safe(0) & 0x01) ? 0x02 : 0x00);
+		break;
 	}
-	/* remove key pressed status bit from skstat */
-	pokey_kbcode_w(pokey, AKEY_NONE, 0);
-	atari_last = AKEY_NONE;
+
+	/* return on BREAK key now! */
+	if (k543210 == AKEY_BREAK || k543210 == AKEY_NONE)
+		return ret;
+
+	/* decode regular key */
+	ipt = device->machine().root_device().ioport(tag[k543210 >> 3])->read_safe(0);
+
+	if (ipt & (1 << (k543210 & 0x07)))
+		ret |= 0x01;
+
+	return ret;
 }
 
 /**************************************************************
@@ -242,60 +223,41 @@ void a800_handle_keyboard(running_machine &machine)
 
  **************************************************************/
 
-void a5200_handle_keypads(running_machine &machine)
+POKEY_KEYBOARD_HANDLER(atari_a5200_keypads)
 {
-	device_t *pokey = machine.device("pokey");
-	int atari_code, count, ipt, i;
+	int ipt;
 	static const char *const tag[] = { "keypad_0", "keypad_1", "keypad_2", "keypad_3" };
+	UINT8 ret = 0x00;
 
-	/* check keypad */
-	for( i = 0; i < 4; i++ )
+	/* decode special */
+	switch (k543210)
 	{
-		ipt = input_port_read_safe(machine, tag[i], 0);
-
-		if( ipt )
-		{
-			count = 0;
-			while(ipt / 2)
-			{
-				ipt = ipt/2;
-				count++;
-			}
-
-			atari_code = i*4 + count;
-
-			if( atari_code == atari_last )
-				return;
-			atari_last = atari_code;
-
-			if( atari_code == 0 )
-			{
-				pokey_break_w(pokey, atari_code & 0x40);
-				return;
-			}
-
-			pokey_kbcode_w(pokey, (atari_code << 1) | 0x21, 1);
-			return;
-		}
-
+	case pokey_device::POK_KEY_BREAK:
+		/* special case ... */
+		ret |= ((device->machine().root_device().ioport(tag[0])->read_safe(0) & 0x01) ? 0x02 : 0x00);
+		break;
+	case pokey_device::POK_KEY_CTRL:
+	case pokey_device::POK_KEY_SHIFT:
+		break;
 	}
 
-	/* check top button */
-	if ((input_port_read(machine, "djoy_b") & 0x10) == 0)
-	{
-		if (atari_last == 0xfe)
-			return;
-		pokey_kbcode_w(pokey, 0x61, 1);
-		//pokey_break_w(pokey, 0x40);
-		atari_last = 0xfe;
-		return;
-	}
-	else if (atari_last == 0xfe)
-		pokey_kbcode_w(pokey, 0x21, 1);
+	/* decode regular key */
+	/* if kr5 and kr0 not set just return */
+	if ((k543210 & 0x21) != 0x21)
+		return ret;
 
-	/* remove key pressed status bit from skstat */
-	pokey_kbcode_w(pokey, 0xff, 0);
-	atari_last = 0xff;
+	k543210 = (k543210 >> 1) & 0x0f;
+
+	/* return on BREAK key now! */
+	if (k543210 == 0)
+		return ret;
+
+	ipt = device->machine().root_device().ioport(tag[k543210 >> 2])->read_safe(0);
+
+	if (ipt & (1 <<(k543210 & 0x03)))
+		ret |= 0x01;
+
+	return ret;
 }
 
 
@@ -308,25 +270,24 @@ void a5200_handle_keypads(running_machine &machine)
 
 static void pokey_reset(running_machine &machine)
 {
-	device_t *pokey = machine.device("pokey");
-	pokey_w(pokey,15,0);
-	atari_last = 0xff;
+	pokey_device *pokey = downcast<pokey_device *>(machine.device("pokey"));
+	pokey->write(15,0);
 }
 
 
-static UINT8 console_read(address_space *space)
+static UINT8 console_read(address_space &space)
 {
-	return input_port_read(space->machine(), "console");
+	return space.machine().root_device().ioport("console")->read();
 }
 
 
-static void console_write(address_space *space, UINT8 data)
+static void console_write(address_space &space, UINT8 data)
 {
-	device_t *dac = space->machine().device("dac");
+	dac_device *dac = space.machine().device<dac_device>("dac");
 	if (data & 0x08)
-		dac_data_w(dac, (UINT8)-120);
+		dac->write_unsigned8((UINT8)-120);
 	else
-		dac_data_w(dac, +120);
+		dac->write_unsigned8(+120);
 }
 
 
@@ -342,17 +303,17 @@ void atari_machine_start(running_machine &machine)
 
 	/* GTIA */
 	memset(&gtia_intf, 0, sizeof(gtia_intf));
-	if (machine.port("console") != NULL)
+	if (machine.root_device().ioport("console") != NULL)
 		gtia_intf.console_read = console_read;
-	if (machine.device("dac") != NULL)
+	if (machine.device<dac_device>("dac") != NULL)
 		gtia_intf.console_write = console_write;
 	gtia_init(machine, &gtia_intf);
 
 	/* pokey */
-	machine.add_notifier(MACHINE_NOTIFY_RESET, pokey_reset);
+	machine.add_notifier(MACHINE_NOTIFY_RESET, machine_notify_delegate(FUNC(pokey_reset), &machine));
 
 	/* ANTIC */
-	machine.add_notifier(MACHINE_NOTIFY_RESET, _antic_reset);
+	machine.add_notifier(MACHINE_NOTIFY_RESET, machine_notify_delegate(FUNC(_antic_reset), &machine));
 
 	/* save states */
 	state_save_register_global_pointer(machine, ((UINT8 *) &antic.r), sizeof(antic.r));

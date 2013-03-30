@@ -52,91 +52,92 @@ Grndtour:
 #include "emu.h"
 #include "cpu/z80/z80.h"
 #include "cpu/z180/z180.h"
-#include "deprecat.h"
-#include "machine/8255ppi.h"
+#include "machine/i8255.h"
 #include "includes/iqblock.h"
 #include "sound/2413intf.h"
 
 
-static WRITE8_HANDLER( iqblock_prot_w )
+WRITE8_MEMBER(iqblock_state::iqblock_prot_w)
 {
-	iqblock_state *state = space->machine().driver_data<iqblock_state>();
-    state->m_rambase[0xe26] = data;
-    state->m_rambase[0xe27] = data;
-    state->m_rambase[0xe1c] = data;
+	m_rambase[0xe26] = data;
+	m_rambase[0xe27] = data;
+	m_rambase[0xe1c] = data;
 }
 
-static WRITE8_HANDLER( grndtour_prot_w )
+WRITE8_MEMBER(iqblock_state::grndtour_prot_w)
 {
-	iqblock_state *state = space->machine().driver_data<iqblock_state>();
-	state->m_rambase[0xe39] = data;
-    state->m_rambase[0xe3a] = data;
-    state->m_rambase[0xe2f] = data;
+	m_rambase[0xe39] = data;
+	m_rambase[0xe3a] = data;
+	m_rambase[0xe2f] = data;
 
-}
-
-
-static INTERRUPT_GEN( iqblock_interrupt )
-{
-	if (cpu_getiloops(device) & 1)
-		device_set_input_line(device, INPUT_LINE_NMI, PULSE_LINE);	/* ???? */
-	else
-		device_set_input_line(device, 0, ASSERT_LINE);			/* ???? */
-}
-
-static WRITE8_HANDLER( iqblock_irqack_w )
-{
-	cputag_set_input_line(space->machine(), "maincpu", 0, CLEAR_LINE);
-}
-
-static READ8_HANDLER( extrarom_r )
-{
-	return space->machine().region("user1")->base()[offset];
 }
 
 
-static WRITE8_DEVICE_HANDLER( port_C_w )
+TIMER_DEVICE_CALLBACK_MEMBER(iqblock_state::iqblock_irq)
 {
-	iqblock_state *state = device->machine().driver_data<iqblock_state>();
+	int scanline = param;
+
+	if((scanline % 16) != 0)
+		return;
+
+	if((scanline % 32) == 16)
+		m_maincpu->set_input_line(0, HOLD_LINE);
+	else if ((scanline % 32) == 0)
+		m_maincpu->set_input_line(INPUT_LINE_NMI, PULSE_LINE);
+}
+
+
+WRITE8_MEMBER(iqblock_state::iqblock_irqack_w)
+{
+	machine().device("maincpu")->execute().set_input_line(0, CLEAR_LINE);
+}
+
+READ8_MEMBER(iqblock_state::extrarom_r)
+{
+	return memregion("user1")->base()[offset];
+}
+
+
+WRITE8_MEMBER(iqblock_state::port_C_w)
+{
 	/* bit 4 unknown; it is pulsed at the end of every NMI */
 
 	/* bit 5 seems to be 0 during screen redraw */
-	state->m_videoenable = data & 0x20;
+	m_videoenable = data & 0x20;
 
 	/* bit 6 is coin counter */
-	coin_counter_w(device->machine(), 0,data & 0x40);
+	coin_counter_w(machine(), 0,data & 0x40);
 
 	/* bit 7 could be a second coin counter, but coin 2 doesn't seem to work... */
 }
 
-static const ppi8255_interface ppi8255_intf =
+static I8255A_INTERFACE( ppi8255_intf )
 {
-	DEVCB_INPUT_PORT("P1"),		/* Port A read */
-	DEVCB_INPUT_PORT("P2"),		/* Port B read */
-	DEVCB_INPUT_PORT("EXTRA"),	/* Port C read */
-	DEVCB_NULL,					/* Port A write */
-	DEVCB_NULL,					/* Port B write */
-	DEVCB_HANDLER(port_C_w)		/* Port C write */
+	DEVCB_INPUT_PORT("P1"),             /* Port A read */
+	DEVCB_NULL,                         /* Port A write */
+	DEVCB_INPUT_PORT("P2"),             /* Port B read */
+	DEVCB_NULL,                         /* Port B write */
+	DEVCB_INPUT_PORT("EXTRA"),          /* Port C read */
+	DEVCB_DRIVER_MEMBER(iqblock_state,port_C_w)             /* Port C write */
 };
 
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, iqblock_state )
 	AM_RANGE(0x0000, 0xefff) AM_ROM
-	AM_RANGE(0xf000, 0xffff) AM_RAM AM_BASE_MEMBER(iqblock_state, m_rambase)
+	AM_RANGE(0xf000, 0xffff) AM_RAM AM_SHARE("rambase")
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( main_portmap, AS_IO, 8 )
-	AM_RANGE(0x2000, 0x23ff) AM_WRITE(paletteram_xBBBBBGGGGGRRRRR_split1_w)
-	AM_RANGE(0x2800, 0x2bff) AM_WRITE(paletteram_xBBBBBGGGGGRRRRR_split2_w)
+static ADDRESS_MAP_START( main_portmap, AS_IO, 8, iqblock_state )
+	AM_RANGE(0x2000, 0x23ff) AM_WRITE(paletteram_xBBBBBGGGGGRRRRR_byte_split_lo_w)
+	AM_RANGE(0x2800, 0x2bff) AM_WRITE(paletteram_xBBBBBGGGGGRRRRR_byte_split_hi_w)
 	AM_RANGE(0x6000, 0x603f) AM_WRITE(iqblock_fgscroll_w)
-	AM_RANGE(0x6800, 0x69ff) AM_WRITE(iqblock_fgvideoram_w)	/* initialized up to 6fff... bug or larger tilemap? */
+	AM_RANGE(0x6800, 0x69ff) AM_WRITE(iqblock_fgvideoram_w) /* initialized up to 6fff... bug or larger tilemap? */
 	AM_RANGE(0x7000, 0x7fff) AM_WRITE(iqblock_bgvideoram_w)
-	AM_RANGE(0x5080, 0x5083) AM_DEVWRITE("ppi8255", ppi8255_w)
-	AM_RANGE(0x5080, 0x5083) AM_DEVREAD("ppi8255", ppi8255_r)
+	AM_RANGE(0x5080, 0x5083) AM_DEVREADWRITE("ppi8255", i8255_device, read, write)
 	AM_RANGE(0x5090, 0x5090) AM_READ_PORT("SW0")
 	AM_RANGE(0x50a0, 0x50a0) AM_READ_PORT("SW1")
-	AM_RANGE(0x50b0, 0x50b1) AM_DEVWRITE("ymsnd", ym2413_w) // UM3567_data_port_0_w
+	AM_RANGE(0x50b0, 0x50b1) AM_DEVWRITE_LEGACY("ymsnd", ym2413_w) // UM3567_data_port_0_w
 	AM_RANGE(0x50c0, 0x50c0) AM_WRITE(iqblock_irqack_w)
 	AM_RANGE(0x7000, 0x7fff) AM_READ(iqblock_bgvideoram_r)
 	AM_RANGE(0x8000, 0xffff) AM_READ(extrarom_r)
@@ -151,27 +152,27 @@ static INPUT_PORTS_START( iqblock )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON2 )				// "test mode" only
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON2 )                // "test mode" only
 
 	PORT_START("P2")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN2 )					// "test mode" only
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN2 )                  // "test mode" only
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_COCKTAIL
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_COCKTAIL
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_COCKTAIL
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_COCKTAIL
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL	// "test mode" only
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL  // "test mode" only
 
 	PORT_START("EXTRA")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON3 )				// "test mode" only
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON4 )				// "test mode" only
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_COCKTAIL	// "test mode" only
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_COCKTAIL	// "test mode" only
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON3 )                // "test mode" only
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON4 )                // "test mode" only
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_COCKTAIL  // "test mode" only
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_COCKTAIL  // "test mode" only
 	PORT_BIT( 0xf0, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("SW0")
-	PORT_DIPNAME( 0x03, 0x03, "Unknown SW 0-0&1" )	// Difficulty ? Read notes above
+	PORT_DIPNAME( 0x03, 0x03, "Unknown SW 0-0&1" )  // Difficulty ? Read notes above
 	PORT_DIPSETTING(    0x03, "0" )
 	PORT_DIPSETTING(    0x02, "1" )
 	PORT_DIPSETTING(    0x01, "2" )
@@ -195,7 +196,7 @@ static INPUT_PORTS_START( iqblock )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("SW1")
-	PORT_DIPNAME( 0x01, 0x00, "Demo Sounds?" )	// To be confirmed ! Read notes above
+	PORT_DIPNAME( 0x01, 0x00, "Demo Sounds?" )  // To be confirmed ! Read notes above
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Free_Play ) )
@@ -238,8 +239,8 @@ static const gfx_layout tilelayout2 =
 	RGN_FRAC(1,2),
 	4,
 	{ 8, 0, RGN_FRAC(1,2)+8, RGN_FRAC(1,2)+0 },
-	{	0, 1, 2, 3, 4, 5, 6, 7 },
-	{	0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+	{   0, 1, 2, 3, 4, 5, 6, 7 },
+	{   0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
 		8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16,
 		16*16, 17*16, 18*16, 19*16, 20*16, 21*16, 22*16, 23*16,
 		24*16, 25*16, 26*16, 27*16, 28*16, 29*16, 30*16, 31*16 },
@@ -252,8 +253,8 @@ static const gfx_layout tilelayout3 =
 	RGN_FRAC(1,3),
 	6,
 	{ 8, 0, RGN_FRAC(1,3)+8, RGN_FRAC(1,3)+0, RGN_FRAC(2,3)+8, RGN_FRAC(2,3)+0 },
-	{	0, 1, 2, 3, 4, 5, 6, 7 },
-	{	0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+	{   0, 1, 2, 3, 4, 5, 6, 7 },
+	{   0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
 		8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16,
 		16*16, 17*16, 18*16, 19*16, 20*16, 21*16, 22*16, 23*16,
 		24*16, 25*16, 26*16, 27*16, 28*16, 29*16, 30*16, 31*16 },
@@ -261,8 +262,8 @@ static const gfx_layout tilelayout3 =
 };
 
 static GFXDECODE_START( iqblock )
-	GFXDECODE_ENTRY( "gfx1", 0, tilelayout1, 0, 16 )	/* only odd color codes are used */
-	GFXDECODE_ENTRY( "gfx2", 0, tilelayout2, 0,  4 )	/* only color codes 0 and 3 used */
+	GFXDECODE_ENTRY( "gfx1", 0, tilelayout1, 0, 16 )    /* only odd color codes are used */
+	GFXDECODE_ENTRY( "gfx2", 0, tilelayout2, 0,  4 )    /* only color codes 0 and 3 used */
 GFXDECODE_END
 
 
@@ -270,26 +271,24 @@ GFXDECODE_END
 static MACHINE_CONFIG_START( iqblock, iqblock_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80,12000000/2)	/* 6 MHz */
+	MCFG_CPU_ADD("maincpu", Z80,12000000/2) /* 6 MHz */
 	MCFG_CPU_PROGRAM_MAP(main_map)
 	MCFG_CPU_IO_MAP(main_portmap)
-	MCFG_CPU_VBLANK_INT_HACK(iqblock_interrupt,16)
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("scantimer", iqblock_state, iqblock_irq, "screen", 0, 1)
 
-	MCFG_PPI8255_ADD( "ppi8255", ppi8255_intf )
+	MCFG_I8255A_ADD( "ppi8255", ppi8255_intf )
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 64*8-1, 0*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(iqblock)
+	MCFG_SCREEN_UPDATE_DRIVER(iqblock_state, screen_update_iqblock)
 
 	MCFG_GFXDECODE(iqblock)
 	MCFG_PALETTE_LENGTH(1024)
 
-	MCFG_VIDEO_START(iqblock)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -349,11 +348,11 @@ Notes:
 */
 
 ROM_START( iqblock )
-	ROM_REGION( 0x20000, "maincpu", 0 )	/* 64k for code + 64K for extra RAM */
+	ROM_REGION( 0x20000, "maincpu", 0 ) /* 64k for code + 64K for extra RAM */
 	ROM_LOAD( "u7.v5",        0x0000, 0x10000, CRC(811f306e) SHA1(d0aef80f1624002d05721276358f26a3ef69a3f6) )
 
 	ROM_REGION( 0x8000, "user1", 0 )
-	ROM_LOAD( "u8.6",         0x0000, 0x8000, CRC(2651bc27) SHA1(53e1d6ffd78c8a612863b29b0f8734e740d563c7) )	/* background maps, read by the CPU */
+	ROM_LOAD( "u8.6",         0x0000, 0x8000, CRC(2651bc27) SHA1(53e1d6ffd78c8a612863b29b0f8734e740d563c7) )    /* background maps, read by the CPU */
 
 	ROM_REGION( 0x60000, "gfx1", 0 )
 	ROM_LOAD( "u28.1",        0x00000, 0x20000, CRC(ec4b64b4) SHA1(000e9df0c0b5fcde5ead218dfcdc156bc4be909d) )
@@ -409,11 +408,11 @@ Notes:
 */
 
 ROM_START( grndtour )
-	ROM_REGION( 0x20000, "maincpu", 0 )	/* 64k for code + 64K for extra RAM */
+	ROM_REGION( 0x20000, "maincpu", 0 ) /* 64k for code + 64K for extra RAM */
 	ROM_LOAD( "grand7.u7",        0x0000, 0x10000, CRC(95cac31e) SHA1(47bbcce6981ea3d38e0aa49ccd3762a4529f3c96) )
 
 	ROM_REGION( 0x8000, "user1", 0 )
-	ROM_LOAD( "grand6.u8",         0x0000, 0x8000, CRC(4c634b86) SHA1(c36df147187bc526f2348bc2f4d4c4e35bb45f38) )	/* background maps, read by the CPU */
+	ROM_LOAD( "grand6.u8",         0x0000, 0x8000, CRC(4c634b86) SHA1(c36df147187bc526f2348bc2f4d4c4e35bb45f38) )   /* background maps, read by the CPU */
 
 	ROM_REGION( 0xc0000, "gfx1", 0 )
 	ROM_LOAD( "grand1.u28",        0x00000, 0x40000, CRC(de85c664) SHA1(3a4b0cac88a0fea1c80541fe49c799e3550bedee) )
@@ -425,10 +424,9 @@ ROM_START( grndtour )
 	ROM_LOAD( "grand5.u24",        0x4000, 0x4000, CRC(f896efb2) SHA1(8dc8546e363b4ff80983e3b8e2a19ebb7ff30c7b) )
 ROM_END
 
-static DRIVER_INIT( iqblock )
+DRIVER_INIT_MEMBER(iqblock_state,iqblock)
 {
-	iqblock_state *state = machine.driver_data<iqblock_state>();
-	UINT8 *rom = machine.region("maincpu")->base();
+	UINT8 *rom = memregion("maincpu")->base();
 	int i;
 
 	/* decrypt the program ROM */
@@ -440,18 +438,17 @@ static DRIVER_INIT( iqblock )
 	}
 
 	/* initialize pointers for I/O mapped RAM */
-	machine.generic.paletteram.u8         = rom + 0x12000;
-	machine.generic.paletteram2.u8       = rom + 0x12800;
-	state->m_fgvideoram = rom + 0x16800;
-	state->m_bgvideoram = rom + 0x17000;
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0xfe26, 0xfe26, FUNC(iqblock_prot_w));
-	state->m_video_type=1;
+	m_generic_paletteram_8.set_target(rom + 0x12000, 0x800);
+	m_generic_paletteram2_8.set_target(rom + 0x12800, 0x800);
+	m_fgvideoram = rom + 0x16800;
+	m_bgvideoram = rom + 0x17000;
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0xfe26, 0xfe26, write8_delegate(FUNC(iqblock_state::iqblock_prot_w),this));
+	m_video_type=1;
 }
 
-static DRIVER_INIT( grndtour )
+DRIVER_INIT_MEMBER(iqblock_state,grndtour)
 {
-	iqblock_state *state = machine.driver_data<iqblock_state>();
-	UINT8 *rom = machine.region("maincpu")->base();
+	UINT8 *rom = memregion("maincpu")->base();
 	int i;
 
 	/* decrypt the program ROM */
@@ -463,15 +460,15 @@ static DRIVER_INIT( grndtour )
 	}
 
 	/* initialize pointers for I/O mapped RAM */
-	machine.generic.paletteram.u8         = rom + 0x12000;
-	machine.generic.paletteram2.u8       = rom + 0x12800;
-	state->m_fgvideoram = rom + 0x16800;
-	state->m_bgvideoram = rom + 0x17000;
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0xfe39, 0xfe39, FUNC(grndtour_prot_w));
-	state->m_video_type=0;
+	m_generic_paletteram_8.set_target(rom + 0x12000, 0x800);
+	m_generic_paletteram2_8.set_target(rom + 0x12800, 0x800);
+	m_fgvideoram = rom + 0x16800;
+	m_bgvideoram = rom + 0x17000;
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0xfe39, 0xfe39, write8_delegate(FUNC(iqblock_state::grndtour_prot_w),this));
+	m_video_type=0;
 }
 
 
 
-GAME( 1993, iqblock,  0, iqblock,  iqblock, iqblock,  ROT0, "IGS", "IQ-Block", 0 )
-GAME( 1993, grndtour, 0, iqblock,  iqblock, grndtour, ROT0, "IGS", "Grand Tour", 0 )
+GAME( 1993, iqblock,  0, iqblock,  iqblock, iqblock_state, iqblock,  ROT0, "IGS", "IQ-Block", 0 )
+GAME( 1993, grndtour, 0, iqblock,  iqblock, iqblock_state, grndtour, ROT0, "IGS", "Grand Tour", 0 )

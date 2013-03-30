@@ -10,8 +10,9 @@
 #include "includes/mustache.h"
 
 
-PALETTE_INIT(mustache)
+void mustache_state::palette_init()
 {
+	const UINT8 *color_prom = machine().root_device().memregion("proms")->base();
 	int i;
 
 	for (i = 0;i < 256;i++)
@@ -39,77 +40,72 @@ PALETTE_INIT(mustache)
 		bit3 = (color_prom[i + 512] >> 3) & 0x01;
 		b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 
-		palette_set_color(machine,i,MAKE_RGB(r,g,b));
+		palette_set_color(machine(),i,MAKE_RGB(r,g,b));
 	}
 }
 
-WRITE8_HANDLER( mustache_videoram_w )
+WRITE8_MEMBER(mustache_state::mustache_videoram_w)
 {
-	mustache_state *state = space->machine().driver_data<mustache_state>();
-	UINT8 *videoram = state->m_videoram;
+	UINT8 *videoram = m_videoram;
 	videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset / 2);
+	m_bg_tilemap->mark_tile_dirty(offset / 2);
 }
 
-WRITE8_HANDLER (mustache_video_control_w)
+WRITE8_MEMBER(mustache_state::mustache_video_control_w)
 {
-	mustache_state *state = space->machine().driver_data<mustache_state>();
-	if (flip_screen_get(space->machine()) != (data & 0x01))
+	if (flip_screen() != (data & 0x01))
 	{
-		flip_screen_set(space->machine(), data & 0x01);
-		tilemap_mark_all_tiles_dirty_all(space->machine());
+		flip_screen_set(data & 0x01);
+		machine().tilemap().mark_all_dirty();
 	}
 
 	/* tile bank */
 
-	if ((state->m_control_byte ^ data) & 0x08)
+	if ((m_control_byte ^ data) & 0x08)
 	{
-		state->m_control_byte = data;
-		tilemap_mark_all_tiles_dirty_all(space->machine());
+		m_control_byte = data;
+		machine().tilemap().mark_all_dirty();
 	}
 }
 
-WRITE8_HANDLER( mustache_scroll_w )
+WRITE8_MEMBER(mustache_state::mustache_scroll_w)
 {
-	mustache_state *state = space->machine().driver_data<mustache_state>();
-	tilemap_set_scrollx(state->m_bg_tilemap, 0, 0x100 - data);
-	tilemap_set_scrollx(state->m_bg_tilemap, 1, 0x100 - data);
-	tilemap_set_scrollx(state->m_bg_tilemap, 2, 0x100 - data);
-	tilemap_set_scrollx(state->m_bg_tilemap, 3, 0x100);
+	m_bg_tilemap->set_scrollx(0, 0x100 - data);
+	m_bg_tilemap->set_scrollx(1, 0x100 - data);
+	m_bg_tilemap->set_scrollx(2, 0x100 - data);
+	m_bg_tilemap->set_scrollx(3, 0x100);
 }
 
-static TILE_GET_INFO( get_bg_tile_info )
+TILE_GET_INFO_MEMBER(mustache_state::get_bg_tile_info)
 {
-	mustache_state *state = machine.driver_data<mustache_state>();
-	UINT8 *videoram = state->m_videoram;
+	UINT8 *videoram = m_videoram;
 	int attr = videoram[2 * tile_index + 1];
-	int code = videoram[2 * tile_index] + ((attr & 0x60) << 3) + ((state->m_control_byte & 0x08) << 7);
+	int code = videoram[2 * tile_index] + ((attr & 0x60) << 3) + ((m_control_byte & 0x08) << 7);
 	int color = attr & 0x0f;
 
-	SET_TILE_INFO(0, code, color, ((attr & 0x10) ? TILE_FLIPX : 0) | ((attr & 0x80) ? TILE_FLIPY : 0)   );
+	SET_TILE_INFO_MEMBER(0, code, color, ((attr & 0x10) ? TILE_FLIPX : 0) | ((attr & 0x80) ? TILE_FLIPY : 0)   );
 
 
 }
 
-VIDEO_START( mustache )
+void mustache_state::video_start()
 {
-	mustache_state *state = machine.driver_data<mustache_state>();
-	state->m_bg_tilemap = tilemap_create(machine, get_bg_tile_info, tilemap_scan_rows_flip_x,
-		 8, 8, 64, 32);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(mustache_state::get_bg_tile_info),this), TILEMAP_SCAN_ROWS_FLIP_X,
+			8, 8, 64, 32);
 
-	tilemap_set_scroll_rows(state->m_bg_tilemap, 4);
+	m_bg_tilemap->set_scroll_rows(4);
 }
 
-static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_sprites(running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	mustache_state *state = machine.driver_data<mustache_state>();
-	rectangle clip = *cliprect;
-	const gfx_element *gfx = machine.gfx[1];
+	rectangle clip = cliprect;
+	gfx_element *gfx = machine.gfx[1];
 	const rectangle &visarea = machine.primary_screen->visible_area();
 	UINT8 *spriteram = state->m_spriteram;
 	int offs;
 
-	for (offs = 0;offs < state->m_spriteram_size;offs += 4)
+	for (offs = 0;offs < state->m_spriteram.bytes();offs += 4)
 	{
 		int sy = 240-spriteram[offs];
 		int sx = 240-spriteram[offs+3];
@@ -124,29 +120,28 @@ static void draw_sprites(running_machine &machine, bitmap_t *bitmap, const recta
 		if ((state->m_control_byte & 0xa))
 			clip.max_y = visarea.max_y;
 		else
-			if (flip_screen_get(machine))
+			if (state->flip_screen())
 				clip.min_y = visarea.min_y + 56;
 			else
 				clip.max_y = visarea.max_y - 56;
 
-		if (flip_screen_get(machine))
+		if (state->flip_screen())
 		{
 			sx = 240 - sx;
 			sy = 240 - sy;
 		}
 
-		drawgfx_transpen(bitmap,&clip,gfx,
+		drawgfx_transpen(bitmap,clip,gfx,
 				code,
 				color,
-				flip_screen_get(machine),flip_screen_get(machine),
+				state->flip_screen(),state->flip_screen(),
 				sx,sy,0);
 	}
 }
 
-SCREEN_UPDATE( mustache )
+UINT32 mustache_state::screen_update_mustache(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	mustache_state *state = screen->machine().driver_data<mustache_state>();
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
-	draw_sprites(screen->machine(), bitmap, cliprect);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
+	draw_sprites(machine(), bitmap, cliprect);
 	return 0;
 }

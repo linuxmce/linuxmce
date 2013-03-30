@@ -11,7 +11,6 @@
 
 #include "emu.h"
 #include "uiinput.h"
-#include "profiler.h"
 #include "render.h"
 
 
@@ -19,13 +18,13 @@
     CONSTANTS
 ***************************************************************************/
 
-#define EVENT_QUEUE_SIZE		128
+#define EVENT_QUEUE_SIZE        128
 
 enum
 {
-	SEQ_PRESSED_FALSE = 0,		/* not pressed */
-	SEQ_PRESSED_TRUE,			/* pressed */
-	SEQ_PRESSED_RESET			/* reset -- converted to FALSE once detected as not pressed */
+	SEQ_PRESSED_FALSE = 0,      /* not pressed */
+	SEQ_PRESSED_TRUE,           /* pressed */
+	SEQ_PRESSED_RESET           /* reset -- converted to FALSE once detected as not pressed */
 };
 
 
@@ -35,22 +34,22 @@ enum
 ***************************************************************************/
 
 /* private input port state */
-struct _ui_input_private
+struct ui_input_private
 {
 	/* pressed states; retrieved with ui_input_pressed() */
-	osd_ticks_t					next_repeat[__ipt_max];
-	UINT8						seqpressed[__ipt_max];
+	osd_ticks_t                 next_repeat[IPT_COUNT];
+	UINT8                       seqpressed[IPT_COUNT];
 
 	/* mouse position/info */
-	render_target *				current_mouse_target;
-	INT32						current_mouse_x;
-	INT32						current_mouse_y;
-	int							current_mouse_down;
+	render_target *             current_mouse_target;
+	INT32                       current_mouse_x;
+	INT32                       current_mouse_y;
+	int                         current_mouse_down;
 
 	/* popped states; ring buffer of ui_events */
-	ui_event					events[EVENT_QUEUE_SIZE];
-	int							events_start;
-	int							events_end;
+	ui_event                    events[EVENT_QUEUE_SIZE];
+	int                         events_start;
+	int                         events_end;
 };
 
 
@@ -80,7 +79,7 @@ void ui_input_init(running_machine &machine)
 	machine.ui_input_data->current_mouse_y = -1;
 
 	/* add a frame callback to poll inputs */
-	machine.add_notifier(MACHINE_NOTIFY_FRAME, ui_input_frame_update);
+	machine.add_notifier(MACHINE_NOTIFY_FRAME, machine_notify_delegate(FUNC(ui_input_frame_update), &machine));
 }
 
 
@@ -98,12 +97,11 @@ void ui_input_init(running_machine &machine)
 void ui_input_frame_update(running_machine &machine)
 {
 	ui_input_private *uidata = machine.ui_input_data;
-	int code;
 
 	/* update the state of all the UI keys */
-	for (code = __ipt_ui_start; code <= __ipt_ui_end; code++)
+	for (ioport_type code = ioport_type(IPT_UI_FIRST + 1); code < IPT_UI_LAST; code++)
 	{
-		int pressed = input_seq_pressed(machine, input_type_seq(machine, code, 0, SEQ_TYPE_STANDARD));
+		bool pressed = machine.ioport().type_pressed(code);
 		if (!pressed || uidata->seqpressed[code] != SEQ_PRESSED_RESET)
 			uidata->seqpressed[code] = pressed;
 	}
@@ -200,7 +198,7 @@ void ui_input_reset(running_machine &machine)
 
 	uidata->events_start = 0;
 	uidata->events_end = 0;
-	for (code = __ipt_ui_start; code <= __ipt_ui_end; code++)
+	for (code = IPT_UI_FIRST + 1; code < IPT_UI_LAST; code++)
 	{
 		uidata->seqpressed[code] = SEQ_PRESSED_RESET;
 		uidata->next_repeat[code] = 0;

@@ -38,7 +38,6 @@
 ***************************************************************************/
 
 #include "emu.h"
-#include "profiler.h"
 #include "debugger.h"
 
 
@@ -48,9 +47,9 @@
 
 #define VERBOSE 0
 
-#define LOG(x)	do { if (VERBOSE) logerror x; } while (0)
+#define LOG(x)  do { if (VERBOSE) logerror x; } while (0)
 
-#define TEMPLOG	0
+#define TEMPLOG 0
 
 
 
@@ -58,8 +57,8 @@
 //  CONSTANTS
 //**************************************************************************
 
-const int TRIGGER_INT			= -2000;
-const int TRIGGER_SUSPENDTIME	= -4000;
+const int TRIGGER_INT           = -2000;
+const int TRIGGER_SUSPENDTIME   = -4000;
 
 
 
@@ -68,26 +67,48 @@ const int TRIGGER_SUSPENDTIME	= -4000;
 //**************************************************************************
 
 //-------------------------------------------------
-//  device_config_execute_interface - constructor
+//  device_execute_interface - constructor
 //-------------------------------------------------
 
-device_config_execute_interface::device_config_execute_interface(const machine_config &mconfig, device_config &devconfig)
-	: device_config_interface(mconfig, devconfig),
-	  m_disabled(false),
-	  m_vblank_interrupt(NULL),
-	  m_vblank_interrupts_per_frame(0),
-	  m_vblank_interrupt_screen(NULL),
-	  m_timed_interrupt(NULL),
-	  m_timed_interrupt_period(attotime::zero)
+device_execute_interface::device_execute_interface(const machine_config &mconfig, device_t &device)
+	: device_interface(device),
+		m_disabled(false),
+		m_vblank_interrupt_legacy(NULL),
+		m_vblank_interrupt_screen(NULL),
+		m_timed_interrupt_legacy(NULL),
+		m_timed_interrupt_period(attotime::zero),
+		m_is_octal(false),
+		m_nextexec(NULL),
+		m_driver_irq(0),
+		m_timedint_timer(NULL),
+		m_profiler(PROFILER_IDLE),
+		m_icountptr(NULL),
+		m_cycles_running(0),
+		m_cycles_stolen(0),
+		m_suspend(0),
+		m_nextsuspend(0),
+		m_eatcycles(0),
+		m_nexteatcycles(0),
+		m_trigger(0),
+		m_inttrigger(0),
+		m_totalcycles(0),
+		m_divisor(0),
+		m_divshift(0),
+		m_cycles_per_second(0),
+		m_attoseconds_per_cycle(0)
 {
+	memset(&m_localtime, 0, sizeof(m_localtime));
+
+	// configure the fast accessor
+	device.m_execute = this;
 }
 
 
 //-------------------------------------------------
-//  device_config_execute_interface - destructor
+//  device_execute_interface - destructor
 //-------------------------------------------------
 
-device_config_execute_interface::~device_config_execute_interface()
+device_execute_interface::~device_execute_interface()
 {
 }
 
@@ -97,11 +118,11 @@ device_config_execute_interface::~device_config_execute_interface()
 //  set the disabled state of a device
 //-------------------------------------------------
 
-void device_config_execute_interface::static_set_disable(device_config *device)
+void device_execute_interface::static_set_disable(device_t &device)
 {
-	device_config_execute_interface *exec = dynamic_cast<device_config_execute_interface *>(device);
-	if (exec == NULL)
-		throw emu_fatalerror("MCFG_DEVICE_DISABLE called on device '%s' with no execute interface", device->tag());
+	device_execute_interface *exec;
+	if (!device.interface(exec))
+		throw emu_fatalerror("MCFG_DEVICE_DISABLE called on device '%s' with no execute interface", device.tag());
 	exec->m_disabled = true;
 }
 
@@ -111,13 +132,22 @@ void device_config_execute_interface::static_set_disable(device_config *device)
 //  to set up VBLANK interrupts on the device
 //-------------------------------------------------
 
-void device_config_execute_interface::static_set_vblank_int(device_config *device, device_interrupt_func function, const char *tag, int rate)
+void device_execute_interface::static_set_vblank_int(device_t &device, device_interrupt_func function, const char *tag, int rate)
 {
-	device_config_execute_interface *exec = dynamic_cast<device_config_execute_interface *>(device);
-	if (exec == NULL)
-		throw emu_fatalerror("MCFG_DEVICE_VBLANK_INT called on device '%s' with no execute interface", device->tag());
+	device_execute_interface *exec;
+	if (!device.interface(exec))
+		throw emu_fatalerror("MCFG_DEVICE_VBLANK_INT called on device '%s' with no execute interface", device.tag());
+	exec->m_vblank_interrupt_legacy = function;
+	exec->m_vblank_interrupt_screen = tag;
+}
+
+void device_execute_interface::static_set_vblank_int(device_t &device, device_interrupt_delegate function, const char *tag, int rate)
+{
+	device_execute_interface *exec;
+	if (!device.interface(exec))
+		throw emu_fatalerror("MCFG_DEVICE_VBLANK_INT called on device '%s' with no execute interface", device.tag());
 	exec->m_vblank_interrupt = function;
-	exec->m_vblank_interrupts_per_frame = rate;
+	exec->m_vblank_interrupt_legacy = NULL;
 	exec->m_vblank_interrupt_screen = tag;
 }
 
@@ -127,183 +157,23 @@ void device_config_execute_interface::static_set_vblank_int(device_config *devic
 //  to set up periodic interrupts on the device
 //-------------------------------------------------
 
-void device_config_execute_interface::static_set_periodic_int(device_config *device, device_interrupt_func function, attotime rate)
+void device_execute_interface::static_set_periodic_int(device_t &device, device_interrupt_func function, attotime rate)
 {
-	device_config_execute_interface *exec = dynamic_cast<device_config_execute_interface *>(device);
-	if (exec == NULL)
-		throw emu_fatalerror("MCFG_DEVICE_PERIODIC_INT called on device '%s' with no execute interface", device->tag());
-	exec->m_timed_interrupt = function;
+	device_execute_interface *exec;
+	if (!device.interface(exec))
+		throw emu_fatalerror("MCFG_DEVICE_PERIODIC_INT called on device '%s' with no execute interface", device.tag());
+	exec->m_timed_interrupt_legacy = function;
 	exec->m_timed_interrupt_period = rate;
 }
 
-
-//-------------------------------------------------
-//  execute_clocks_to_cycles - convert the number
-//  of clocks to cycles, rounding down if necessary
-//-------------------------------------------------
-
-UINT64 device_config_execute_interface::execute_clocks_to_cycles(UINT64 clocks) const
+void device_execute_interface::static_set_periodic_int(device_t &device, device_interrupt_delegate function, attotime rate)
 {
-	return clocks;
-}
-
-
-//-------------------------------------------------
-//  execute_cycles_to_clocks - convert the number
-//  of cycles to clocks, rounding down if necessary
-//-------------------------------------------------
-
-UINT64 device_config_execute_interface::execute_cycles_to_clocks(UINT64 cycles) const
-{
-	return cycles;
-}
-
-
-//-------------------------------------------------
-//  execute_min_cycles - return the smallest number
-//  of cycles that a single instruction or
-//  operation can take
-//-------------------------------------------------
-
-UINT32 device_config_execute_interface::execute_min_cycles() const
-{
-	return 1;
-}
-
-
-//-------------------------------------------------
-//  execute_max_cycles - return the maximum number
-//  of cycles that a single instruction or
-//  operation can take
-//-------------------------------------------------
-
-UINT32 device_config_execute_interface::execute_max_cycles() const
-{
-	return 1;
-}
-
-
-//-------------------------------------------------
-//  execute_input_lines - return the total number
-//  of input lines for the device
-//-------------------------------------------------
-
-UINT32 device_config_execute_interface::execute_input_lines() const
-{
-	return 0;
-}
-
-
-//-------------------------------------------------
-//  execute_default_irq_vector - return the default
-//  IRQ vector when an acknowledge is processed
-//-------------------------------------------------
-
-UINT32 device_config_execute_interface::execute_default_irq_vector() const
-{
-	return 0;
-}
-
-
-//-------------------------------------------------
-//  interface_validity_check - validation for a
-//  device after the configuration has been
-//  constructed
-//-------------------------------------------------
-
-bool device_config_execute_interface::interface_validity_check(emu_options &options, const game_driver &driver) const
-{
-	const device_config *devconfig = crosscast<const device_config *>(this);
-	bool error = false;
-
-	/* validate the interrupts */
-	if (m_vblank_interrupt != NULL)
-	{
-		if (m_machine_config.m_devicelist.count(SCREEN) == 0)
-		{
-			mame_printf_error("%s: %s device '%s' has a VBLANK interrupt, but the driver is screenless!\n", driver.source_file, driver.name, devconfig->tag());
-			error = true;
-		}
-		else if (m_vblank_interrupt_screen != NULL && m_vblank_interrupts_per_frame != 0)
-		{
-			mame_printf_error("%s: %s device '%s' has a new VBLANK interrupt handler with >1 interrupts!\n", driver.source_file, driver.name, devconfig->tag());
-			error = true;
-		}
-		else if (m_vblank_interrupt_screen != NULL && m_machine_config.m_devicelist.find(m_vblank_interrupt_screen) == NULL)
-		{
-			mame_printf_error("%s: %s device '%s' VBLANK interrupt with a non-existant screen tag (%s)!\n", driver.source_file, driver.name, devconfig->tag(), m_vblank_interrupt_screen);
-			error = true;
-		}
-		else if (m_vblank_interrupt_screen == NULL && m_vblank_interrupts_per_frame == 0)
-		{
-			mame_printf_error("%s: %s device '%s' has a VBLANK interrupt handler with 0 interrupts!\n", driver.source_file, driver.name, devconfig->tag());
-			error = true;
-		}
-	}
-	else if (m_vblank_interrupts_per_frame != 0)
-	{
-		mame_printf_error("%s: %s device '%s' has no VBLANK interrupt handler but a non-0 interrupt count is given!\n", driver.source_file, driver.name, devconfig->tag());
-		error = true;
-	}
-
-	if (m_timed_interrupt != NULL && m_timed_interrupt_period == attotime::zero)
-	{
-		mame_printf_error("%s: %s device '%s' has a timer interrupt handler with 0 period!\n", driver.source_file, driver.name, devconfig->tag());
-		error = true;
-	}
-	else if (m_timed_interrupt == NULL && m_timed_interrupt_period != attotime::zero)
-	{
-		mame_printf_error("%s: %s device '%s' has a no timer interrupt handler but has a non-0 period given!\n", driver.source_file, driver.name, devconfig->tag());
-		error = true;
-	}
-
-	return error;
-}
-
-
-
-//**************************************************************************
-//  EXECUTING DEVICE MANAGEMENT
-//**************************************************************************
-
-//-------------------------------------------------
-//  device_execute_interface - constructor
-//-------------------------------------------------
-
-device_execute_interface::device_execute_interface(running_machine &machine, const device_config &config, device_t &device)
-	: device_interface(machine, config, device),
-	  m_execute_config(dynamic_cast<const device_config_execute_interface &>(config)),
-	  m_nextexec(NULL),
-	  m_driver_irq(0),
-	  m_timedint_timer(NULL),
-	  m_iloops(0),
-	  m_partial_frame_timer(NULL),
-	  m_profiler(PROFILER_IDLE),
-	  m_icountptr(NULL),
-	  m_cycles_running(0),
-	  m_cycles_stolen(0),
-	  m_suspend(0),
-	  m_nextsuspend(0),
-	  m_eatcycles(0),
-	  m_nexteatcycles(0),
-	  m_trigger(0),
-	  m_inttrigger(0),
-	  m_totalcycles(0),
-	  m_divisor(0),
-	  m_divshift(0),
-	  m_cycles_per_second(0),
-	  m_attoseconds_per_cycle(0)
-{
-	memset(&m_localtime, 0, sizeof(m_localtime));
-}
-
-
-//-------------------------------------------------
-//  ~device_execute_interface - destructor
-//-------------------------------------------------
-
-device_execute_interface::~device_execute_interface()
-{
+	device_execute_interface *exec;
+	if (!device.interface(exec))
+		throw emu_fatalerror("MCFG_DEVICE_PERIODIC_INT called on device '%s' with no execute interface", device.tag());
+	exec->m_timed_interrupt = function;
+	exec->m_timed_interrupt_legacy = NULL;
+	exec->m_timed_interrupt_period = rate;
 }
 
 
@@ -387,11 +257,11 @@ void device_execute_interface::abort_timeslice()
 
 
 //-------------------------------------------------
-//  set_irq_callback - install a driver-specific
+//  set_irq_acknowledge_callback - install a driver-specific
 //  callback for IRQ acknowledge
 //-------------------------------------------------
 
-void device_execute_interface::set_irq_callback(device_irq_callback callback)
+void device_execute_interface::set_irq_acknowledge_callback(device_irq_acknowledge_callback callback)
 {
 	m_driver_irq = callback;
 }
@@ -430,7 +300,7 @@ if (TEMPLOG) printf("resume %s (%X)\n", device().tag(), reason);
 
 
 //-------------------------------------------------
-//  spinuntil_time - burn cycles for a specific
+//  spin_until_time - burn cycles for a specific
 //  period of time
 //-------------------------------------------------
 
@@ -517,6 +387,74 @@ UINT64 device_execute_interface::total_cycles() const
 
 
 //-------------------------------------------------
+//  execute_clocks_to_cycles - convert the number
+//  of clocks to cycles, rounding down if necessary
+//-------------------------------------------------
+
+UINT64 device_execute_interface::execute_clocks_to_cycles(UINT64 clocks) const
+{
+	return clocks;
+}
+
+
+//-------------------------------------------------
+//  execute_cycles_to_clocks - convert the number
+//  of cycles to clocks, rounding down if necessary
+//-------------------------------------------------
+
+UINT64 device_execute_interface::execute_cycles_to_clocks(UINT64 cycles) const
+{
+	return cycles;
+}
+
+
+//-------------------------------------------------
+//  execute_min_cycles - return the smallest number
+//  of cycles that a single instruction or
+//  operation can take
+//-------------------------------------------------
+
+UINT32 device_execute_interface::execute_min_cycles() const
+{
+	return 1;
+}
+
+
+//-------------------------------------------------
+//  execute_max_cycles - return the maximum number
+//  of cycles that a single instruction or
+//  operation can take
+//-------------------------------------------------
+
+UINT32 device_execute_interface::execute_max_cycles() const
+{
+	return 1;
+}
+
+
+//-------------------------------------------------
+//  execute_input_lines - return the total number
+//  of input lines for the device
+//-------------------------------------------------
+
+UINT32 device_execute_interface::execute_input_lines() const
+{
+	return 0;
+}
+
+
+//-------------------------------------------------
+//  execute_default_irq_vector - return the default
+//  IRQ vector when an acknowledge is processed
+//-------------------------------------------------
+
+UINT32 device_execute_interface::execute_default_irq_vector() const
+{
+	return 0;
+}
+
+
+//-------------------------------------------------
 //  execute_burn - called after we consume a bunch
 //  of cycles for artifical reasons (such as
 //  spinning devices for performance optimization)
@@ -540,14 +478,45 @@ void device_execute_interface::execute_set_input(int linenum, int state)
 
 
 //-------------------------------------------------
+//  interface_validity_check - validation for a
+//  device after the configuration has been
+//  constructed
+//-------------------------------------------------
+
+void device_execute_interface::interface_validity_check(validity_checker &valid) const
+{
+	// validate the interrupts
+	if (!m_vblank_interrupt.isnull() || m_vblank_interrupt_legacy != NULL)
+	{
+		screen_device_iterator iter(device().mconfig().root_device());
+		if (iter.first() == NULL)
+			mame_printf_error("VBLANK interrupt specified, but the driver is screenless\n");
+		else if (m_vblank_interrupt_screen != NULL && device().siblingdevice(m_vblank_interrupt_screen) == NULL)
+			mame_printf_error("VBLANK interrupt references a non-existant screen tag '%s'\n", m_vblank_interrupt_screen);
+	}
+
+	if ((!m_timed_interrupt.isnull() || m_timed_interrupt_legacy != NULL) && m_timed_interrupt_period == attotime::zero)
+		mame_printf_error("Timed interrupt handler specified with 0 period\n");
+	else if ((m_timed_interrupt.isnull() && m_timed_interrupt_legacy == NULL) && m_timed_interrupt_period != attotime::zero)
+		mame_printf_error("No timer interrupt handler specified, but has a non-0 period given\n");
+}
+
+
+//-------------------------------------------------
 //  interface_pre_start - work to be done prior to
 //  actually starting a device
 //-------------------------------------------------
 
 void device_execute_interface::interface_pre_start()
 {
+	// bind delegates
+	m_vblank_interrupt.bind_relative_to(device());
+	m_timed_interrupt.bind_relative_to(device());
+//  m_driver_irq.bind_relative_to(device());
+
 	// fill in the initial states
-	int index = device().machine().m_devicelist.indexof(m_device);
+	execute_interface_iterator iter(device().machine().root_device());
+	int index = iter.indexof(*this);
 	m_suspend = SUSPEND_REASON_RESET;
 	m_profiler = profile_type(index + PROFILER_DEVICE_FIRST);
 	m_inttrigger = index + TRIGGER_INT;
@@ -557,20 +526,17 @@ void device_execute_interface::interface_pre_start()
 		m_input[line].start(this, line);
 
 	// allocate timers if we need them
-	if (m_execute_config.m_vblank_interrupts_per_frame > 1)
-		m_partial_frame_timer = device().machine().scheduler().timer_alloc(FUNC(static_trigger_partial_frame_interrupt), (void *)this);
-	if (m_execute_config.m_timed_interrupt_period != attotime::zero)
+	if (m_timed_interrupt_period != attotime::zero)
 		m_timedint_timer = device().machine().scheduler().timer_alloc(FUNC(static_trigger_periodic_interrupt), (void *)this);
 
 	// register for save states
-	m_device.save_item(NAME(m_suspend));
-	m_device.save_item(NAME(m_nextsuspend));
-	m_device.save_item(NAME(m_eatcycles));
-	m_device.save_item(NAME(m_nexteatcycles));
-	m_device.save_item(NAME(m_trigger));
-	m_device.save_item(NAME(m_totalcycles));
-	m_device.save_item(NAME(m_localtime));
-	m_device.save_item(NAME(m_iloops));
+	device().save_item(NAME(m_suspend));
+	device().save_item(NAME(m_nextsuspend));
+	device().save_item(NAME(m_eatcycles));
+	device().save_item(NAME(m_nexteatcycles));
+	device().save_item(NAME(m_trigger));
+	device().save_item(NAME(m_totalcycles));
+	device().save_item(NAME(m_localtime));
 }
 
 
@@ -597,7 +563,7 @@ void device_execute_interface::interface_pre_reset()
 	m_totalcycles = 0;
 
 	// enable all devices (except for disabled devices)
-	if (!m_execute_config.disabled())
+	if (!disabled())
 		resume(SUSPEND_ANY_REASON);
 	else
 		suspend(SUSPEND_REASON_DISABLE, true);
@@ -616,27 +582,27 @@ void device_execute_interface::interface_post_reset()
 		m_input[line].reset();
 
 	// reconfingure VBLANK interrupts
-	if (m_execute_config.m_vblank_interrupts_per_frame > 0 || m_execute_config.m_vblank_interrupt_screen != NULL)
+	if (m_vblank_interrupt_screen != NULL)
 	{
 		// get the screen that will trigger the VBLANK
 
 		// new style - use screen tag directly
 		screen_device *screen;
-		if (m_execute_config.m_vblank_interrupt_screen != NULL)
-			screen = downcast<screen_device *>(device().machine().device(m_execute_config.m_vblank_interrupt_screen));
+		if (m_vblank_interrupt_screen != NULL)
+			screen = downcast<screen_device *>(device().machine().device(m_vblank_interrupt_screen));
 
 		// old style 'hack' setup - use screen #0
 		else
 			screen = device().machine().first_screen();
 
 		assert(screen != NULL);
-		screen->register_vblank_callback(static_on_vblank, NULL);
+		screen->register_vblank_callback(vblank_state_delegate(FUNC(device_execute_interface::on_vblank), this));
 	}
 
 	// reconfigure periodic interrupts
-	if (m_execute_config.m_timed_interrupt_period != attotime::zero)
+	if (m_timed_interrupt_period != attotime::zero)
 	{
-		attotime timedint_period = m_execute_config.m_timed_interrupt_period;
+		attotime timedint_period = m_timed_interrupt_period;
 		assert(m_timedint_timer != NULL);
 		m_timedint_timer->adjust(timedint_period, 0, timedint_period);
 	}
@@ -651,7 +617,7 @@ void device_execute_interface::interface_post_reset()
 void device_execute_interface::interface_clock_changed()
 {
 	// recompute cps and spc
-	m_cycles_per_second = clocks_to_cycles(m_device.clock());
+	m_cycles_per_second = clocks_to_cycles(device().clock());
 	m_attoseconds_per_cycle = HZ_TO_ATTOSECONDS(m_cycles_per_second);
 
 	// update the device's divisor
@@ -670,8 +636,35 @@ void device_execute_interface::interface_clock_changed()
 
 
 //-------------------------------------------------
-//  get_minimum_quantum - return the minimum
-//  quantum required for this device
+//  static_standard_irq_callback - IRQ acknowledge
+//  callback; handles HOLD_LINE case and signals
+//  to the debugger
+//-------------------------------------------------
+
+IRQ_CALLBACK( device_execute_interface::static_standard_irq_callback )
+{
+	return device->execute().standard_irq_callback(irqline);
+}
+
+int device_execute_interface::standard_irq_callback(int irqline)
+{
+	// get the default vector and acknowledge the interrupt if needed
+	int vector = m_input[irqline].default_irq_callback();
+	LOG(("static_standard_irq_callback('%s', %d) $%04x\n", device().tag(), irqline, vector));
+
+	// if there's a driver callback, run it to get the vector
+	if (m_driver_irq != NULL)
+		vector = (*m_driver_irq)(&device(), irqline);
+
+	// notify the debugger
+	debugger_interrupt_hook(&device(), irqline);
+	return vector;
+}
+
+
+//-------------------------------------------------
+//  minimum_quantum - return the minimum quantum
+//  required for this device
 //-------------------------------------------------
 
 attoseconds_t device_execute_interface::minimum_quantum() const
@@ -679,7 +672,7 @@ attoseconds_t device_execute_interface::minimum_quantum() const
 	// if we don't have that information, compute it
 	attoseconds_t basetick = m_attoseconds_per_cycle;
 	if (basetick == 0)
-		basetick = HZ_TO_ATTOSECONDS(clocks_to_cycles(m_device.clock()));
+		basetick = HZ_TO_ATTOSECONDS(clocks_to_cycles(device().clock()));
 
 	// apply the minimum cycle count
 	return basetick * min_cycles();
@@ -703,76 +696,20 @@ TIMER_CALLBACK( device_execute_interface::static_timed_trigger_callback )
 //  for this screen
 //-------------------------------------------------
 
-void device_execute_interface::static_on_vblank(screen_device &screen, void *param, bool vblank_state)
+void device_execute_interface::on_vblank(screen_device &screen, bool vblank_state)
 {
-	// VBLANK starting
-	if (vblank_state)
-	{
-		device_execute_interface *exec = NULL;
-		for (bool gotone = screen.machine().m_devicelist.first(exec); gotone; gotone = exec->next(exec))
-			exec->on_vblank_start(screen);
-	}
-}
+	// ignore VBLANK end
+	if (!vblank_state)
+		return;
 
-void device_execute_interface::on_vblank_start(screen_device &screen)
-{
-	// start the interrupt counter
-	if (!suspended(SUSPEND_REASON_DISABLE))
-		m_iloops = 0;
-	else
-		m_iloops = -1;
-
-	// the hack style VBLANK decleration always uses the first screen
-	bool interested = false;
-	if (m_execute_config.m_vblank_interrupts_per_frame > 1)
-		interested = true;
-
-	// for new style declaration, we need to compare the tags
-	else if (m_execute_config.m_vblank_interrupt_screen != NULL)
-		interested = (strcmp(screen.tag(), m_execute_config.m_vblank_interrupt_screen) == 0);
-
-	// if interested, call the interrupt handler
-	if (interested)
-	{
-		if (!suspended(SUSPEND_REASON_HALT | SUSPEND_REASON_RESET | SUSPEND_REASON_DISABLE))
-			(*m_execute_config.m_vblank_interrupt)(&m_device);
-
-		// if we have more than one interrupt per frame, start the timer now to trigger the rest of them
-		if (m_execute_config.m_vblank_interrupts_per_frame > 1 && !suspended(SUSPEND_REASON_DISABLE))
-		{
-			m_partial_frame_period = device().machine().primary_screen->frame_period() / m_execute_config.m_vblank_interrupts_per_frame;
-			m_partial_frame_timer->adjust(m_partial_frame_period);
-		}
-	}
-}
-
-
-//-------------------------------------------------
-//  static_trigger_partial_frame_interrupt -
-//  called to trigger a partial frame interrupt
-//-------------------------------------------------
-
-TIMER_CALLBACK( device_execute_interface::static_trigger_partial_frame_interrupt )
-{
-	reinterpret_cast<device_execute_interface *>(ptr)->trigger_partial_frame_interrupt();
-}
-
-void device_execute_interface::trigger_partial_frame_interrupt()
-{
-	// when we hit 0, reset to the total count
-	if (m_iloops == 0)
-		m_iloops = m_execute_config.m_vblank_interrupts_per_frame;
-
-	// count one more "iloop"
-	m_iloops--;
-
-	// call the interrupt handler if we're not suspended
+	// generate the interrupt callback
 	if (!suspended(SUSPEND_REASON_HALT | SUSPEND_REASON_RESET | SUSPEND_REASON_DISABLE))
-		(*m_execute_config.m_vblank_interrupt)(&m_device);
-
-	// set up to retrigger if there's more interrupts to generate
-	if (m_iloops > 1)
-		m_partial_frame_timer->adjust(m_partial_frame_period);
+	{
+		if (m_vblank_interrupt_legacy != NULL)
+			(*m_vblank_interrupt_legacy)(&device());
+		else if (!m_vblank_interrupt.isnull())
+			m_vblank_interrupt(device());
+	}
 }
 
 
@@ -789,35 +726,13 @@ TIMER_CALLBACK( device_execute_interface::static_trigger_periodic_interrupt )
 void device_execute_interface::trigger_periodic_interrupt()
 {
 	// bail if there is no routine
-	if (m_execute_config.m_timed_interrupt != NULL && !suspended(SUSPEND_REASON_HALT | SUSPEND_REASON_RESET | SUSPEND_REASON_DISABLE))
-		(*m_execute_config.m_timed_interrupt)(&m_device);
-}
-
-
-//-------------------------------------------------
-//  static_standard_irq_callback - IRQ acknowledge
-//  callback; handles HOLD_LINE case and signals
-//  to the debugger
-//-------------------------------------------------
-
-IRQ_CALLBACK( device_execute_interface::static_standard_irq_callback )
-{
-	return device_execute(device)->standard_irq_callback(irqline);
-}
-
-int device_execute_interface::standard_irq_callback(int irqline)
-{
-	// get the default vector and acknowledge the interrupt if needed
-	int vector = m_input[irqline].default_irq_callback();
-	LOG(("static_standard_irq_callback('%s', %d) $%04x\n", m_device.tag(), irqline, vector));
-
-	// if there's a driver callback, run it to get the vector
-	if (m_driver_irq != NULL)
-		vector = (*m_driver_irq)(&m_device, irqline);
-
-	// notify the debugger
-	debugger_interrupt_hook(&m_device, irqline);
-	return vector;
+	if (!suspended(SUSPEND_REASON_HALT | SUSPEND_REASON_RESET | SUSPEND_REASON_DISABLE))
+	{
+		if (m_timed_interrupt_legacy != NULL)
+			(*m_timed_interrupt_legacy)(&device());
+		else if (!m_timed_interrupt.isnull())
+			m_timed_interrupt(device());
+	}
 }
 
 
@@ -832,12 +747,12 @@ int device_execute_interface::standard_irq_callback(int irqline)
 
 device_execute_interface::device_input::device_input()
 	: m_execute(NULL),
-	  m_device(NULL),
-	  m_linenum(0),
-	  m_stored_vector(0),
-	  m_curvector(0),
-	  m_curstate(CLEAR_LINE),
-	  m_qindex(0)
+		m_device(NULL),
+		m_linenum(0),
+		m_stored_vector(0),
+		m_curvector(0),
+		m_curstate(CLEAR_LINE),
+		m_qindex(0)
 {
 	memset(m_queue, 0, sizeof(m_queue));
 }
@@ -851,7 +766,7 @@ device_execute_interface::device_input::device_input()
 void device_execute_interface::device_input::start(device_execute_interface *execute, int linenum)
 {
 	m_execute = execute;
-	m_device = &m_execute->m_device;
+	m_device = &m_execute->device();
 	m_linenum = linenum;
 
 	reset();

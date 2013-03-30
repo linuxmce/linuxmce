@@ -18,14 +18,14 @@
 
 
 
-static WRITE8_DEVICE_HANDLER(videopin_out1_w);
-static WRITE8_DEVICE_HANDLER(videopin_out2_w);
+
+
 
 
 static void update_plunger(running_machine &machine)
 {
 	videopin_state *state = machine.driver_data<videopin_state>();
-	UINT8 val = input_port_read(machine, "IN2");
+	UINT8 val = state->ioport("IN2")->read();
 
 	if (state->m_prev != val)
 	{
@@ -34,7 +34,7 @@ static void update_plunger(running_machine &machine)
 			state->m_time_released = machine.time();
 
 			if (!state->m_mask)
-				cputag_set_input_line(machine, "maincpu", INPUT_LINE_NMI, ASSERT_LINE);
+				machine.device("maincpu")->execute().set_input_line(INPUT_LINE_NMI, ASSERT_LINE);
 		}
 		else
 			state->m_time_pushed = machine.time();
@@ -44,33 +44,32 @@ static void update_plunger(running_machine &machine)
 }
 
 
-static TIMER_CALLBACK( interrupt_callback )
+TIMER_CALLBACK_MEMBER(videopin_state::interrupt_callback)
 {
 	int scanline = param;
 
-	update_plunger(machine);
+	update_plunger(machine());
 
-	cputag_set_input_line(machine, "maincpu", 0, ASSERT_LINE);
+	machine().device("maincpu")->execute().set_input_line(0, ASSERT_LINE);
 
 	scanline = scanline + 32;
 
 	if (scanline >= 263)
 		scanline = 32;
 
-	machine.scheduler().timer_set(machine.primary_screen->time_until_pos(scanline), FUNC(interrupt_callback), scanline);
+	machine().scheduler().timer_set(machine().primary_screen->time_until_pos(scanline), timer_expired_delegate(FUNC(videopin_state::interrupt_callback),this), scanline);
 }
 
 
-static MACHINE_RESET( videopin )
+void videopin_state::machine_reset()
 {
-	device_t *discrete = machine.device("discrete");
 
-	machine.scheduler().timer_set(machine.primary_screen->time_until_pos(32), FUNC(interrupt_callback), 32);
+	machine().scheduler().timer_set(machine().primary_screen->time_until_pos(32), timer_expired_delegate(FUNC(videopin_state::interrupt_callback),this), 32);
 
 	/* both output latches are cleared on reset */
 
-	videopin_out1_w(discrete, 0, 0);
-	videopin_out2_w(discrete, 0, 0);
+	videopin_out1_w(machine().driver_data()->generic_space(), 0, 0);
+	videopin_out2_w(machine().driver_data()->generic_space(), 0, 0);
 }
 
 
@@ -81,9 +80,9 @@ static double calc_plunger_pos(running_machine &machine)
 }
 
 
-static READ8_HANDLER( videopin_misc_r )
+READ8_MEMBER(videopin_state::videopin_misc_r)
 {
-	double plunger = calc_plunger_pos(space->machine());
+	double plunger = calc_plunger_pos(machine());
 
 	// The plunger of the ball shooter has a black piece of
 	// plastic (flag) attached to it. When the plunger flag passes
@@ -94,7 +93,7 @@ static READ8_HANDLER( videopin_misc_r )
 	// signals received. This results in the MPU displaying the
 	// ball being shot onto the playfield at a certain speed.
 
-	UINT8 val = input_port_read(space->machine(), "IN1");
+	UINT8 val = ioport("IN1")->read();
 
 	if (plunger >= 0.000 && plunger <= 0.001)
 	{
@@ -109,9 +108,9 @@ static READ8_HANDLER( videopin_misc_r )
 }
 
 
-static WRITE8_HANDLER( videopin_led_w )
+WRITE8_MEMBER(videopin_state::videopin_led_w)
 {
-	int i = (space->machine().primary_screen->vpos() >> 5) & 7;
+	int i = (machine().primary_screen->vpos() >> 5) & 7;
 	static const char *const matrix[8][4] =
 	{
 		{ "LED26", "LED18", "LED11", "LED13" },
@@ -130,15 +129,15 @@ static WRITE8_HANDLER( videopin_led_w )
 	output_set_value(matrix[i][3], (data >> 3) & 1);
 
 	if (i == 7)
-		set_led_status(space->machine(), 0, data & 8);   /* start button */
+		set_led_status(machine(), 0, data & 8);   /* start button */
 
-	cputag_set_input_line(space->machine(), "maincpu", 0, CLEAR_LINE);
+	machine().device("maincpu")->execute().set_input_line(0, CLEAR_LINE);
 }
 
 
-static WRITE8_DEVICE_HANDLER( videopin_out1_w )
+WRITE8_MEMBER(videopin_state::videopin_out1_w)
 {
-	videopin_state *state = device->machine().driver_data<videopin_state>();
+	device_t *device = machine().device("discrete");
 	/* D0 => OCTAVE0  */
 	/* D1 => OCTACE1  */
 	/* D2 => OCTAVE2  */
@@ -148,20 +147,21 @@ static WRITE8_DEVICE_HANDLER( videopin_out1_w )
 	/* D6 => NOT USED */
 	/* D7 => NOT USED */
 
-	state->m_mask = ~data & 0x10;
+	m_mask = ~data & 0x10;
 
-	if (state->m_mask)
-		cputag_set_input_line(device->machine(), "maincpu", INPUT_LINE_NMI, CLEAR_LINE);
+	if (m_mask)
+		machine().device("maincpu")->execute().set_input_line(INPUT_LINE_NMI, CLEAR_LINE);
 
-	coin_lockout_global_w(device->machine(), ~data & 0x08);
+	coin_lockout_global_w(machine(), ~data & 0x08);
 
 	/* Convert octave data to divide value and write to sound */
-	discrete_sound_w(device, VIDEOPIN_OCTAVE_DATA, (0x01 << (~data & 0x07)) & 0xfe);
+	discrete_sound_w(device, space, VIDEOPIN_OCTAVE_DATA, (0x01 << (~data & 0x07)) & 0xfe);
 }
 
 
-static WRITE8_DEVICE_HANDLER( videopin_out2_w )
+WRITE8_MEMBER(videopin_state::videopin_out2_w)
 {
+	device_t *device = machine().device("discrete");
 	/* D0 => VOL0      */
 	/* D1 => VOL1      */
 	/* D2 => VOL2      */
@@ -171,19 +171,20 @@ static WRITE8_DEVICE_HANDLER( videopin_out2_w )
 	/* D6 => BELL      */
 	/* D7 => ATTRACT   */
 
-	coin_counter_w(device->machine(), 0, data & 0x10);
+	coin_counter_w(machine(), 0, data & 0x10);
 
-	discrete_sound_w(device, VIDEOPIN_BELL_EN, data & 0x40);	// Bell
-	discrete_sound_w(device, VIDEOPIN_BONG_EN, data & 0x20);	// Bong
-	discrete_sound_w(device, VIDEOPIN_ATTRACT_EN, data & 0x80);	// Attract
-	discrete_sound_w(device, VIDEOPIN_VOL_DATA, data & 0x07);		// Vol0,1,2
+	discrete_sound_w(device, space, VIDEOPIN_BELL_EN, data & 0x40); // Bell
+	discrete_sound_w(device, space, VIDEOPIN_BONG_EN, data & 0x20); // Bong
+	discrete_sound_w(device, space, VIDEOPIN_ATTRACT_EN, data & 0x80);  // Attract
+	discrete_sound_w(device, space, VIDEOPIN_VOL_DATA, data & 0x07);        // Vol0,1,2
 }
 
 
-static WRITE8_DEVICE_HANDLER( videopin_note_dvsr_w )
+WRITE8_MEMBER(videopin_state::videopin_note_dvsr_w)
 {
+	device_t *device = machine().device("discrete");
 	/* note data */
-	discrete_sound_w(device, VIDEOPIN_NOTE_DATA, ~data &0xff);
+	discrete_sound_w(device, space, VIDEOPIN_NOTE_DATA, ~data &0xff);
 }
 
 
@@ -193,15 +194,15 @@ static WRITE8_DEVICE_HANDLER( videopin_note_dvsr_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, videopin_state )
 	AM_RANGE(0x0000, 0x01ff) AM_RAM
-	AM_RANGE(0x0200, 0x07ff) AM_RAM_WRITE(videopin_video_ram_w) AM_BASE_MEMBER(videopin_state, m_video_ram)
-	AM_RANGE(0x0800, 0x0800) AM_READ(videopin_misc_r) AM_DEVWRITE("discrete", videopin_note_dvsr_w)
+	AM_RANGE(0x0200, 0x07ff) AM_RAM_WRITE(videopin_video_ram_w) AM_SHARE("video_ram")
+	AM_RANGE(0x0800, 0x0800) AM_READ(videopin_misc_r) AM_WRITE(videopin_note_dvsr_w)
 	AM_RANGE(0x0801, 0x0801) AM_WRITE(videopin_led_w)
 	AM_RANGE(0x0802, 0x0802) AM_WRITE(watchdog_reset_w)
 	AM_RANGE(0x0804, 0x0804) AM_WRITE(videopin_ball_w)
-	AM_RANGE(0x0805, 0x0805) AM_DEVWRITE("discrete", videopin_out1_w)
-	AM_RANGE(0x0806, 0x0806) AM_DEVWRITE("discrete", videopin_out2_w)
+	AM_RANGE(0x0805, 0x0805) AM_WRITE(videopin_out1_w)
+	AM_RANGE(0x0806, 0x0806) AM_WRITE(videopin_out2_w)
 	AM_RANGE(0x1000, 0x1000) AM_READ_PORT("IN0")
 	AM_RANGE(0x1800, 0x1800) AM_READ_PORT("DSW")
 	AM_RANGE(0x2000, 0x3fff) AM_ROM
@@ -216,7 +217,7 @@ ADDRESS_MAP_END
  *************************************/
 
 static INPUT_PORTS_START( videopin )
-	PORT_START("IN0")	/* IN0 */
+	PORT_START("IN0")   /* IN0 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_NAME("Left Flipper") PORT_CODE(KEYCODE_LCONTROL)
@@ -226,31 +227,31 @@ static INPUT_PORTS_START( videopin )
 	PORT_SERVICE( 0x40, IP_ACTIVE_LOW )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START("DSW")	/* IN1 */
+	PORT_START("DSW")   /* IN1 */
 	PORT_DIPNAME( 0xc0, 0x80, DEF_STR( Coinage ) )
-	PORT_DIPSETTING(	0xc0, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(	0x80, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0x40, DEF_STR( 1C_2C ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( Free_Play ) )
+	PORT_DIPSETTING(    0xc0, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x80, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
 	PORT_DIPNAME( 0x30, 0x00, DEF_STR( Language ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( English ) )
-	PORT_DIPSETTING(	0x10, DEF_STR( German ) )
-	PORT_DIPSETTING(	0x20, DEF_STR( French ) )
-	PORT_DIPSETTING(	0x30, DEF_STR( Spanish ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( English ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( German ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( French ) )
+	PORT_DIPSETTING(    0x30, DEF_STR( Spanish ) )
 	PORT_DIPNAME( 0x08, 0x08, "Balls" )
-	PORT_DIPSETTING(	0x08, "3" )
-	PORT_DIPSETTING(	0x00, "5" )
+	PORT_DIPSETTING(    0x08, "3" )
+	PORT_DIPSETTING(    0x00, "5" )
 	PORT_DIPNAME( 0x04, 0x00, "Replay" )
-	PORT_DIPSETTING(	0x04, "Off (award 80000 points instead)" )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x04, "Off (award 80000 points instead)" )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x02, 0x00, "Extra Ball" )
-	PORT_DIPSETTING(	0x02, "Off (award 50000 points instead)" )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x02, "Off (award 50000 points instead)" )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x01, 0x01, "Replay Level" )
-	PORT_DIPSETTING(	0x00, "180000 (3 balls) / 300000 (5 balls)" )
-	PORT_DIPSETTING(	0x01, "210000 (3 balls) / 350000 (5 balls)" )
+	PORT_DIPSETTING(    0x00, "180000 (3 balls) / 300000 (5 balls)" )
+	PORT_DIPSETTING(    0x01, "210000 (3 balls) / 350000 (5 balls)" )
 
-	PORT_START("IN1")	/* IN2 */
+	PORT_START("IN1")   /* IN2 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_SPECIAL ) /* PLUNGER 1 */
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_SPECIAL ) /* PLUNGER 2 */
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -258,7 +259,7 @@ static INPUT_PORTS_START( videopin )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_NAME("Nudge") PORT_CODE(KEYCODE_SPACE)
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_VBLANK )
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 
 	PORT_START("IN2")
 	PORT_BIT( 0xff, IP_ACTIVE_HIGH, IPT_BUTTON4 ) PORT_NAME("Ball Shooter") PORT_CODE(KEYCODE_DOWN)
@@ -326,21 +327,18 @@ static MACHINE_CONFIG_START( videopin, videopin_state )
 	MCFG_CPU_ADD("maincpu", M6502, 12096000 / 16)
 	MCFG_CPU_PROGRAM_MAP(main_map)
 
-	MCFG_MACHINE_RESET(videopin)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(304, 263)
 	MCFG_SCREEN_VISIBLE_AREA(0, 303, 0, 255)
-	MCFG_SCREEN_UPDATE(videopin)
+	MCFG_SCREEN_UPDATE_DRIVER(videopin_state, screen_update_videopin)
 
 	MCFG_GFXDECODE(videopin)
 	MCFG_PALETTE_LENGTH(2)
 
 	MCFG_PALETTE_INIT(black_and_white)
-	MCFG_VIDEO_START(videopin)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -360,7 +358,7 @@ MACHINE_CONFIG_END
 
 ROM_START( videopin )
 	ROM_REGION( 0x10000, "maincpu", 0 )
-    ROM_LOAD_NIB_LOW ( "34242-01.e0", 0x2000, 0x0400, CRC(c6a83795) SHA1(73a65cca7c1e337b336b7d515eafc2981e669be8) )
+	ROM_LOAD_NIB_LOW ( "34242-01.e0", 0x2000, 0x0400, CRC(c6a83795) SHA1(73a65cca7c1e337b336b7d515eafc2981e669be8) )
 	ROM_LOAD_NIB_HIGH( "34237-01.k0", 0x2000, 0x0400, CRC(9b5ef087) SHA1(4ecf441742e7c39237cd544b0f0d9339943e1a2c) )
 	ROM_LOAD_NIB_LOW ( "34243-01.d0", 0x2400, 0x0400, CRC(dc87d023) SHA1(1ecec121067a60b91b3912bd28737caaae463167) )
 	ROM_LOAD_NIB_HIGH( "34238-01.j0", 0x2400, 0x0400, CRC(280d9e67) SHA1(229cc0448bb95f86fc7acbcb9594bc313f316580) )
@@ -379,11 +377,11 @@ ROM_START( videopin )
 	ROM_LOAD_NIB_HIGH( "34241-01.f0", 0x3c00, 0x0400, CRC(5bfb83da) SHA1(9f392b0d4a972b6ae15ec12913a7e66761f4175d) )
 	ROM_RELOAD(                       0xfc00, 0x0400 )
 
-	ROM_REGION( 0x0200, "gfx1", 0 )	/* tiles */
+	ROM_REGION( 0x0200, "gfx1", 0 ) /* tiles */
 	ROM_LOAD_NIB_LOW ( "34259-01.d5", 0x0000, 0x0200, CRC(6cd98c06) SHA1(48bf077b7abbd2f529a19bdf85700b93014f39f9) )
 	ROM_LOAD_NIB_HIGH( "34258-01.c5", 0x0000, 0x0200, CRC(91a5f117) SHA1(03ac6b0b3da0ed5faf1ba6695d16918d12ceeff5) )
 
-	ROM_REGION( 0x0020, "gfx2", 0 )	/* ball */
+	ROM_REGION( 0x0020, "gfx2", 0 ) /* ball */
 	ROM_LOAD( "34257-01.m1", 0x0000, 0x0020, CRC(50245866) SHA1(b0692bc8d44f127f6e7182a1ce75a785e22ac5b9) )
 
 	ROM_REGION( 0x0100, "proms", 0 )
@@ -398,4 +396,4 @@ ROM_END
  *
  *************************************/
 
-GAMEL( 1979, videopin, 0, videopin, videopin, 0, ROT270, "Atari", "Video Pinball", 0, layout_videopin )
+GAMEL( 1979, videopin, 0, videopin, videopin, driver_device, 0, ROT270, "Atari", "Video Pinball", 0, layout_videopin )

@@ -14,10 +14,10 @@
 
 #define ICLIP16(x) (x<-32768)?-32768:((x>32767)?32767:x)
 
-#define SHIFT	12
-#define FIX(v)	((UINT32) ((float) (1<<SHIFT)*(v)))
+#define SHIFT   12
+#define FIX(v)  ((UINT32) ((float) (1<<SHIFT)*(v)))
 
-#define EG_SHIFT	16
+#define EG_SHIFT    16
 
 // include the LFO handling code
 #include "aicalfo.c"
@@ -28,47 +28,47 @@
 */
 
 //SLOT PARAMETERS
-#define KEYONEX(slot)		((slot->udata.data[0x0]>>0x0)&0x8000)
-#define KEYONB(slot)		((slot->udata.data[0x0]>>0x0)&0x4000)
-#define SSCTL(slot)		((slot->udata.data[0x0]>>0xA)&0x0001)
-#define LPCTL(slot)		((slot->udata.data[0x0]>>0x9)&0x0001)
-#define PCMS(slot)		((slot->udata.data[0x0]>>0x7)&0x0003)
+#define KEYONEX(slot)       ((slot->udata.data[0x0]>>0x0)&0x8000)
+#define KEYONB(slot)        ((slot->udata.data[0x0]>>0x0)&0x4000)
+#define SSCTL(slot)     ((slot->udata.data[0x0]>>0xA)&0x0001)
+#define LPCTL(slot)     ((slot->udata.data[0x0]>>0x9)&0x0001)
+#define PCMS(slot)      ((slot->udata.data[0x0]>>0x7)&0x0003)
 
-#define SA(slot)		(((slot->udata.data[0x0]&0x7F)<<16)|(slot->udata.data[0x4/2]))
+#define SA(slot)        (((slot->udata.data[0x0]&0x7F)<<16)|(slot->udata.data[0x4/2]))
 
-#define LSA(slot)		(slot->udata.data[0x8/2])
+#define LSA(slot)       (slot->udata.data[0x8/2])
 
-#define LEA(slot)		(slot->udata.data[0xc/2])
+#define LEA(slot)       (slot->udata.data[0xc/2])
 
-#define D2R(slot)		((slot->udata.data[0x10/2]>>0xB)&0x001F)
-#define D1R(slot)		((slot->udata.data[0x10/2]>>0x6)&0x001F)
-#define AR(slot)		((slot->udata.data[0x10/2]>>0x0)&0x001F)
+#define D2R(slot)       ((slot->udata.data[0x10/2]>>0xB)&0x001F)
+#define D1R(slot)       ((slot->udata.data[0x10/2]>>0x6)&0x001F)
+#define AR(slot)        ((slot->udata.data[0x10/2]>>0x0)&0x001F)
 
-#define LPSLNK(slot)		((slot->udata.data[0x14/2]>>0x0)&0x4000)
-#define KRS(slot)		((slot->udata.data[0x14/2]>>0xA)&0x000F)
-#define DL(slot)		((slot->udata.data[0x14/2]>>0x5)&0x001F)
-#define RR(slot)		((slot->udata.data[0x14/2]>>0x0)&0x001F)
+#define LPSLNK(slot)        ((slot->udata.data[0x14/2]>>0x0)&0x4000)
+#define KRS(slot)       ((slot->udata.data[0x14/2]>>0xA)&0x000F)
+#define DL(slot)        ((slot->udata.data[0x14/2]>>0x5)&0x001F)
+#define RR(slot)        ((slot->udata.data[0x14/2]>>0x0)&0x001F)
 
-#define TL(slot)		((slot->udata.data[0x28/2]>>0x8)&0x00FF)
+#define TL(slot)        ((slot->udata.data[0x28/2]>>0x8)&0x00FF)
 
-#define OCT(slot)		((slot->udata.data[0x18/2]>>0xB)&0x000F)
-#define FNS(slot)		((slot->udata.data[0x18/2]>>0x0)&0x03FF)
+#define OCT(slot)       ((slot->udata.data[0x18/2]>>0xB)&0x000F)
+#define FNS(slot)       ((slot->udata.data[0x18/2]>>0x0)&0x03FF)
 
-#define LFORE(slot)		((slot->udata.data[0x1c/2]>>0x0)&0x8000)
-#define LFOF(slot)		((slot->udata.data[0x1c/2]>>0xA)&0x001F)
-#define PLFOWS(slot)		((slot->udata.data[0x1c/2]>>0x8)&0x0003)
-#define PLFOS(slot)		((slot->udata.data[0x1c/2]>>0x5)&0x0007)
-#define ALFOWS(slot)		((slot->udata.data[0x1c/2]>>0x3)&0x0003)
-#define ALFOS(slot)		((slot->udata.data[0x1c/2]>>0x0)&0x0007)
+#define LFORE(slot)     ((slot->udata.data[0x1c/2]>>0x0)&0x8000)
+#define LFOF(slot)      ((slot->udata.data[0x1c/2]>>0xA)&0x001F)
+#define PLFOWS(slot)        ((slot->udata.data[0x1c/2]>>0x8)&0x0003)
+#define PLFOS(slot)     ((slot->udata.data[0x1c/2]>>0x5)&0x0007)
+#define ALFOWS(slot)        ((slot->udata.data[0x1c/2]>>0x3)&0x0003)
+#define ALFOS(slot)     ((slot->udata.data[0x1c/2]>>0x0)&0x0007)
 
-#define ISEL(slot)		((slot->udata.data[0x20/2]>>0x0)&0x000F)
-#define IMXL(slot)		((slot->udata.data[0x20/2]>>0x4)&0x000F)
+#define ISEL(slot)      ((slot->udata.data[0x20/2]>>0x0)&0x000F)
+#define IMXL(slot)      ((slot->udata.data[0x20/2]>>0x4)&0x000F)
 
-#define DISDL(slot)		((slot->udata.data[0x24/2]>>0x8)&0x000F)
-#define DIPAN(slot)		((slot->udata.data[0x24/2]>>0x0)&0x001F)
+#define DISDL(slot)     ((slot->udata.data[0x24/2]>>0x8)&0x000F)
+#define DIPAN(slot)     ((slot->udata.data[0x24/2]>>0x0)&0x001F)
 
-#define EFSDL(slot)		((AICA->EFSPAN[slot*4]>>8)&0x000f)
-#define EFPAN(slot)		((AICA->EFSPAN[slot*4]>>0)&0x001f)
+#define EFSDL(slot)     ((AICA->EFSPAN[slot*4]>>8)&0x000f)
+#define EFPAN(slot)     ((AICA->EFSPAN[slot*4]>>0)&0x001f)
 
 //Envelope times in ms
 static const double ARTimes[64]={100000/*infinity*/,100000/*infinity*/,8100.0,6900.0,6000.0,4800.0,4000.0,3400.0,3000.0,2400.0,2000.0,1700.0,1500.0,
@@ -81,39 +81,39 @@ static const double DRTimes[64]={100000/*infinity*/,100000/*infinity*/,118200.0,
 					28.0,25.0,22.0,18.0,14.0,12.0,11.0,8.5,7.1,6.1,5.4,4.3,3.6,3.1};
 static INT32 EG_TABLE[0x400];
 
-typedef enum {ATTACK,DECAY1,DECAY2,RELEASE} _STATE;
-struct _EG
+enum STATE {ATTACK,DECAY1,DECAY2,RELEASE};
+struct EG_t
 {
-	int volume;	//
-	_STATE state;
+	int volume; //
+	STATE state;
 	int step;
 	//step vals
-	int AR;		//Attack
-	int D1R;	//Decay1
-	int D2R;	//Decay2
-	int RR;		//Release
+	int AR;     //Attack
+	int D1R;    //Decay1
+	int D2R;    //Decay2
+	int RR;     //Release
 
-	int DL;		//Decay level
+	int DL;     //Decay level
 	UINT8 LPLINK;
 };
 
-struct _SLOT
+struct SLOT
 {
 	union
 	{
-		UINT16 data[0x40];	//only 0x1a bytes used
+		UINT16 data[0x40];  //only 0x1a bytes used
 		UINT8 datab[0x80];
 	} udata;
-	UINT8 active;	//this slot is currently playing
-	UINT8 *base;		//samples base address
+	UINT8 active;   //this slot is currently playing
+	UINT8 *base;        //samples base address
 	UINT32 prv_addr;    // previous play address (for ADPCM)
-	UINT32 cur_addr;	//current play address (24.8)
-	UINT32 nxt_addr;	//next play address
-	UINT32 step;		//pitch step (24.8)
-	UINT8 Backwards;	//the wave is playing backwards
-	struct _EG EG;			//Envelope
-	struct _LFO PLFO;		//Phase LFO
-	struct _LFO ALFO;		//Amplitude LFO
+	UINT32 cur_addr;    //current play address (24.8)
+	UINT32 nxt_addr;    //next play address
+	UINT32 step;        //pitch step (24.8)
+	UINT8 Backwards;    //the wave is playing backwards
+	EG_t EG;            //Envelope
+	LFO_t PLFO;     //Phase LFO
+	LFO_t ALFO;     //Amplitude LFO
 	int slot;
 	int cur_sample;       //current ADPCM sample
 	int cur_quant;        //current ADPCM step
@@ -124,39 +124,38 @@ struct _SLOT
 };
 
 
-#define MEM4B(aica)		((aica->udata.data[0]>>0x0)&0x0200)
-#define DAC18B(aica)		((aica->udata.data[0]>>0x0)&0x0100)
-#define MVOL(aica)		((aica->udata.data[0]>>0x0)&0x000F)
-#define RBL(aica)		((aica->udata.data[2]>>0xD)&0x0003)
-#define RBP(aica)		((aica->udata.data[2]>>0x0)&0x0fff)
-#define MOFULL(aica)		((aica->udata.data[4]>>0x0)&0x1000)
-#define MOEMPTY(aica)		((aica->udata.data[4]>>0x0)&0x0800)
-#define MIOVF(aica)		((aica->udata.data[4]>>0x0)&0x0400)
-#define MIFULL(aica)		((aica->udata.data[4]>>0x0)&0x0200)
-#define MIEMPTY(aica)		((aica->udata.data[4]>>0x0)&0x0100)
+#define MEM4B(aica)     ((aica->udata.data[0]>>0x0)&0x0200)
+#define DAC18B(aica)        ((aica->udata.data[0]>>0x0)&0x0100)
+#define MVOL(aica)      ((aica->udata.data[0]>>0x0)&0x000F)
+#define RBL(aica)       ((aica->udata.data[2]>>0xD)&0x0003)
+#define RBP(aica)       ((aica->udata.data[2]>>0x0)&0x0fff)
+#define MOFULL(aica)        ((aica->udata.data[4]>>0x0)&0x1000)
+#define MOEMPTY(aica)       ((aica->udata.data[4]>>0x0)&0x0800)
+#define MIOVF(aica)     ((aica->udata.data[4]>>0x0)&0x0400)
+#define MIFULL(aica)        ((aica->udata.data[4]>>0x0)&0x0200)
+#define MIEMPTY(aica)       ((aica->udata.data[4]>>0x0)&0x0100)
 
-#define AFSEL(aica)		((aica->udata.data[0xc/2]>>0x0)&0x4000)
-#define MSLC(aica)		((aica->udata.data[0xc/2]>>0x8)&0x3F)
+#define AFSEL(aica)     ((aica->udata.data[0xc/2]>>0x0)&0x4000)
+#define MSLC(aica)      ((aica->udata.data[0xc/2]>>0x8)&0x3F)
 
-#define SCILV0(aica)    	((aica->udata.data[0xa8/2]>>0x0)&0xff)
-#define SCILV1(aica)    	((aica->udata.data[0xac/2]>>0x0)&0xff)
-#define SCILV2(aica)    	((aica->udata.data[0xb0/2]>>0x0)&0xff)
+#define SCILV0(aica)        ((aica->udata.data[0xa8/2]>>0x0)&0xff)
+#define SCILV1(aica)        ((aica->udata.data[0xac/2]>>0x0)&0xff)
+#define SCILV2(aica)        ((aica->udata.data[0xb0/2]>>0x0)&0xff)
 
-#define MCIEB(aica) 	((aica->udata.data[0xb4/2]>>0x0)&0xff)
-#define MCIPD(aica) 	((aica->udata.data[0xb8/2]>>0x0)&0xff)
-#define MCIRE(aica) 	((aica->udata.data[0xbc/2]>>0x0)&0xff)
+#define MCIEB(aica)     ((aica->udata.data[0xb4/2]>>0x0)&0xff)
+#define MCIPD(aica)     ((aica->udata.data[0xb8/2]>>0x0)&0xff)
+#define MCIRE(aica)     ((aica->udata.data[0xbc/2]>>0x0)&0xff)
 
-#define SCIEX0	0
-#define SCIEX1	1
-#define SCIEX2	2
-#define SCIMID	3
-#define SCIDMA	4
-#define SCIIRQ	5
-#define SCITMA	6
-#define SCITMB	7
+#define SCIEX0  0
+#define SCIEX1  1
+#define SCIEX2  2
+#define SCIMID  3
+#define SCIDMA  4
+#define SCIIRQ  5
+#define SCITMA  6
+#define SCITMB  7
 
-typedef struct _AICA aica_state;
-struct _AICA
+struct aica_state
 {
 	union
 	{
@@ -165,7 +164,7 @@ struct _AICA
 	} udata;
 	UINT16 IRQL, IRQR;
 	UINT16 EFSPAN[0x48];
-	struct _SLOT Slots[64];
+	SLOT Slots[64];
 	signed short RINGBUF[64];
 	unsigned char BUFPTR;
 	unsigned char *AICARAM;
@@ -200,7 +199,7 @@ struct _AICA
 
 	int ARTABLE[64], DRTABLE[64];
 
-	struct _AICADSP DSP;
+	AICADSP DSP;
 	device_t *device;
 };
 
@@ -211,13 +210,13 @@ static stream_sample_t *bufferr;
 
 static int length;
 
-static signed short *RBUFDST;	//this points to where the sample will be stored in the RingBuf
+static signed short *RBUFDST;   //this points to where the sample will be stored in the RingBuf
 
 INLINE aica_state *get_safe_token(device_t *device)
 {
 	assert(device != NULL);
 	assert(device->type() == AICA);
-	return (aica_state *)downcast<legacy_device_base *>(device)->token();
+	return (aica_state *)downcast<aica_device *>(device)->token();
 }
 
 static unsigned char DecodeSCI(aica_state *AICA, unsigned char irq)
@@ -320,7 +319,7 @@ static TIMER_CALLBACK( timerC_cb )
 static int Get_AR(aica_state *AICA,int base,int R)
 {
 	int Rate=base+(R<<1);
-	if(Rate>63)	Rate=63;
+	if(Rate>63) Rate=63;
 	if(Rate<0) Rate=0;
 	return AICA->ARTABLE[Rate];
 }
@@ -328,7 +327,7 @@ static int Get_AR(aica_state *AICA,int base,int R)
 static int Get_DR(aica_state *AICA,int base,int R)
 {
 	int Rate=base+(R<<1);
-	if(Rate>63)	Rate=63;
+	if(Rate>63) Rate=63;
 	if(Rate<0) Rate=0;
 	return AICA->DRTABLE[Rate];
 }
@@ -336,12 +335,12 @@ static int Get_DR(aica_state *AICA,int base,int R)
 static int Get_RR(aica_state *AICA,int base,int R)
 {
 	int Rate=base+(R<<1);
-	if(Rate>63)	Rate=63;
+	if(Rate>63) Rate=63;
 	if(Rate<0) Rate=0;
 	return AICA->DRTABLE[Rate];
 }
 
-static void Compute_EG(aica_state *AICA,struct _SLOT *slot)
+static void Compute_EG(aica_state *AICA,SLOT *slot)
 {
 	int octave=(OCT(slot)^8)-8;
 	int rate;
@@ -358,9 +357,9 @@ static void Compute_EG(aica_state *AICA,struct _SLOT *slot)
 	slot->EG.DL=0x1f-DL(slot);
 }
 
-static void AICA_StopSlot(struct _SLOT *slot,int keyoff);
+static void AICA_StopSlot(SLOT *slot,int keyoff);
 
-static int EG_Update(struct _SLOT *slot)
+static int EG_Update(SLOT *slot)
 {
 	switch(slot->EG.state)
 	{
@@ -408,7 +407,7 @@ static int EG_Update(struct _SLOT *slot)
 	return (slot->EG.volume>>EG_SHIFT)<<(SHIFT-10);
 }
 
-static UINT32 AICA_Step(struct _SLOT *slot)
+static UINT32 AICA_Step(SLOT *slot)
 {
 	int octave=(OCT(slot)^8)-8+SHIFT-10;
 	UINT32 Fn=FNS(slot) + (0x400);
@@ -420,7 +419,7 @@ static UINT32 AICA_Step(struct _SLOT *slot)
 }
 
 
-static void Compute_LFO(struct _SLOT *slot)
+static void Compute_LFO(SLOT *slot)
 {
 	if(PLFOS(slot)!=0)
 		AICALFO_ComputeStep(&(slot->PLFO),LFOF(slot),PLFOWS(slot),PLFOS(slot),0);
@@ -428,8 +427,8 @@ static void Compute_LFO(struct _SLOT *slot)
 		AICALFO_ComputeStep(&(slot->ALFO),LFOF(slot),ALFOWS(slot),ALFOS(slot),1);
 }
 
-#define ADPCMSHIFT	8
-#define ADFIX(f)	(int) ((float) f*(float) (1<<ADPCMSHIFT))
+#define ADPCMSHIFT  8
+#define ADFIX(f)    (int) ((float) f*(float) (1<<ADPCMSHIFT))
 
 static const int TableQuant[8]={ADFIX(0.8984375),ADFIX(0.8984375),ADFIX(0.8984375),ADFIX(0.8984375),ADFIX(1.19921875),ADFIX(1.59765625),ADFIX(2.0),ADFIX(2.3984375)};
 static const int quant_mul[16]= { 1, 3, 5, 7, 9, 11, 13, 15, -1, -3, -5, -7, -9, -11, -13, -15};
@@ -443,21 +442,21 @@ static void InitADPCM(int *PrevSignal, int *PrevQuant)
 INLINE signed short DecodeADPCM(int *PrevSignal, unsigned char Delta, int *PrevQuant)
 {
 	int x = *PrevQuant * quant_mul [Delta & 15];
-        x = *PrevSignal + ((int)(x + ((UINT32)x >> 29)) >> 3);
+		x = *PrevSignal + ((int)(x + ((UINT32)x >> 29)) >> 3);
 	*PrevSignal=ICLIP16(x);
 	*PrevQuant=(*PrevQuant*TableQuant[Delta&7])>>ADPCMSHIFT;
 	*PrevQuant=(*PrevQuant<0x7f)?0x7f:((*PrevQuant>0x6000)?0x6000:*PrevQuant);
 	return *PrevSignal;
 }
 
-static void AICA_StartSlot(aica_state *AICA, struct _SLOT *slot)
+static void AICA_StartSlot(aica_state *AICA, SLOT *slot)
 {
 	UINT64 start_offset;
 
 	slot->active=1;
 	slot->Backwards=0;
 	slot->cur_addr=0; slot->nxt_addr=1<<SHIFT; slot->prv_addr=-1;
-	start_offset = SA(slot);	// AICA can play 16-bit samples from any boundry
+	start_offset = SA(slot);    // AICA can play 16-bit samples from any boundry
 	slot->base=&AICA->AICARAM[start_offset];
 	slot->step=AICA_Step(slot);
 	Compute_EG(AICA,slot);
@@ -480,7 +479,7 @@ static void AICA_StartSlot(aica_state *AICA, struct _SLOT *slot)
 	}
 }
 
-static void AICA_StopSlot(struct _SLOT *slot,int keyoff)
+static void AICA_StopSlot(SLOT *slot,int keyoff)
 {
 	if(keyoff /*&& slot->EG.state!=RELEASE*/)
 	{
@@ -583,12 +582,12 @@ static void AICA_Init(device_t *device, aica_state *AICA, const aica_interface *
 		AICA->RPANTABLE[i]=FIX((4.0*RPAN*TL*fSDL));
 	}
 
-	AICA->ARTABLE[0]=AICA->DRTABLE[0]=0;	//Infinite time
-	AICA->ARTABLE[1]=AICA->DRTABLE[1]=0;	//Infinite time
+	AICA->ARTABLE[0]=AICA->DRTABLE[0]=0;    //Infinite time
+	AICA->ARTABLE[1]=AICA->DRTABLE[1]=0;    //Infinite time
 	for(i=2;i<64;++i)
 	{
 		double t,step,scale;
-		t=ARTimes[i];	//In ms
+		t=ARTimes[i];   //In ms
 		if(t!=0.0)
 		{
 			step=(1023*1000.0)/((float) 44100.0f*t);
@@ -598,7 +597,7 @@ static void AICA_Init(device_t *device, aica_state *AICA, const aica_interface *
 		else
 			AICA->ARTABLE[i]=1024<<EG_SHIFT;
 
-		t=DRTimes[i];	//In ms
+		t=DRTimes[i];   //In ms
 		step=(1023*1000.0)/((float) 44100.0f*t);
 		scale=(double) (1<<EG_SHIFT);
 		AICA->DRTABLE[i]=(int) (step*scale);
@@ -628,7 +627,7 @@ static void AICA_Init(device_t *device, aica_state *AICA, const aica_interface *
 
 static void AICA_UpdateSlotReg(aica_state *AICA,int s,int r)
 {
-	struct _SLOT *slot=AICA->Slots+s;
+	SLOT *slot=AICA->Slots+s;
 	int sl;
 	switch(r&0x7f)
 	{
@@ -638,7 +637,7 @@ static void AICA_UpdateSlotReg(aica_state *AICA,int s,int r)
 			{
 				for(sl=0;sl<64;++sl)
 				{
-					struct _SLOT *s2=AICA->Slots+sl;
+					SLOT *s2=AICA->Slots+sl;
 					{
 						if(KEYONB(s2) && s2->EG.state==RELEASE/*&& !s2->active*/)
 						{
@@ -682,7 +681,7 @@ static void AICA_UpdateSlotReg(aica_state *AICA,int s,int r)
 	}
 }
 
-static void AICA_UpdateReg(aica_state *AICA, int reg)
+static void AICA_UpdateReg(aica_state *AICA, address_space &space, int reg)
 {
 	switch(reg&0xff)
 	{
@@ -703,7 +702,7 @@ static void AICA_UpdateReg(aica_state *AICA, int reg)
 			break;
 		case 0x8:
 		case 0x9:
-			aica_midi_in(AICA->device, 0, AICA->udata.data[0x8/2]&0xff, 0xffff);
+			aica_midi_in(AICA->device, space, 0, AICA->udata.data[0x8/2]&0xff, 0xffff);
 			break;
 		case 0x12:
 		case 0x13:
@@ -769,7 +768,7 @@ static void AICA_UpdateReg(aica_state *AICA, int reg)
 				}
 			}
 			break;
-		case 0xa4:	//SCIRE
+		case 0xa4:  //SCIRE
 		case 0xa5:
 
 			if(AICA->Master)
@@ -824,7 +823,7 @@ static void AICA_UpdateSlotRegR(aica_state *AICA, int slot,int reg)
 
 }
 
-static void AICA_UpdateRegR(aica_state *AICA, int reg)
+static void AICA_UpdateRegR(aica_state *AICA, address_space &space, int reg)
 {
 	switch(reg&0xff)
 	{
@@ -834,7 +833,7 @@ static void AICA_UpdateRegR(aica_state *AICA, int reg)
 				unsigned short v=AICA->udata.data[0x8/2];
 				v&=0xff00;
 				v|=AICA->MidiStack[AICA->MidiR];
-				AICA->IntARMCB(AICA->device, 0);	// cancel the IRQ
+				AICA->IntARMCB(AICA->device, 0);    // cancel the IRQ
 				if(AICA->MidiR!=AICA->MidiW)
 				{
 					++AICA->MidiR;
@@ -844,11 +843,11 @@ static void AICA_UpdateRegR(aica_state *AICA, int reg)
 			}
 			break;
 
-		case 0x10:	// LP check
+		case 0x10:  // LP check
 		case 0x11:
 			{
 				int slotnum = MSLC(AICA);
-				struct _SLOT *slot=AICA->Slots + slotnum;
+				SLOT *slot=AICA->Slots + slotnum;
 				UINT16 LP = 0;
 				if (!(AFSEL(AICA)))
 				{
@@ -873,18 +872,18 @@ static void AICA_UpdateRegR(aica_state *AICA, int reg)
 			}
 			break;
 
-		case 0x14:	// CA (slot address)
+		case 0x14:  // CA (slot address)
 		case 0x15:
 			{
 				int slotnum = MSLC(AICA);
-				struct _SLOT *slot=AICA->Slots+slotnum;
+				SLOT *slot=AICA->Slots+slotnum;
 				unsigned int CA = 0;
 
-				if (PCMS(slot) == 0)	// 16-bit samples
+				if (PCMS(slot) == 0)    // 16-bit samples
 				{
 					CA = (slot->cur_addr>>(SHIFT-1))&AICA->RAM_MASK16;
 				}
-				else	// 8-bit PCM and 4-bit ADPCM
+				else    // 8-bit PCM and 4-bit ADPCM
 				{
 					CA = (slot->cur_addr>>SHIFT)&AICA->RAM_MASK;
 				}
@@ -895,7 +894,7 @@ static void AICA_UpdateRegR(aica_state *AICA, int reg)
 	}
 }
 
-static void AICA_w16(aica_state *AICA,unsigned int addr,unsigned short val)
+static void AICA_w16(aica_state *AICA,address_space &space,unsigned int addr,unsigned short val)
 {
 	addr&=0xffff;
 	if(addr<0x2000)
@@ -920,7 +919,7 @@ static void AICA_w16(aica_state *AICA,unsigned int addr,unsigned short val)
 		{
 //          printf("%x to AICA global @ %x\n", val, addr & 0xff);
 			*((unsigned short *) (AICA->udata.datab+((addr&0xff)))) = val;
-			AICA_UpdateReg(AICA, addr&0xff);
+			AICA_UpdateReg(AICA, space, addr&0xff);
 		}
 		else if (addr == 0x2d00)
 		{
@@ -939,7 +938,7 @@ static void AICA_w16(aica_state *AICA,unsigned int addr,unsigned short val)
 	else
 	{
 		//DSP
-		if(addr<0x3200)	//COEF
+		if(addr<0x3200) //COEF
 			*((unsigned short *) (AICA->DSP.COEF+(addr-0x3000)/2))=val;
 		else if(addr<0x3400)
 			*((unsigned short *) (AICA->DSP.MADRS+(addr-0x3200)/2))=val;
@@ -955,7 +954,7 @@ static void AICA_w16(aica_state *AICA,unsigned int addr,unsigned short val)
 	}
 }
 
-static unsigned short AICA_r16(aica_state *AICA, unsigned int addr)
+static unsigned short AICA_r16(aica_state *AICA, address_space &space, unsigned int addr)
 {
 	unsigned short v=0;
 	addr&=0xffff;
@@ -974,9 +973,9 @@ static unsigned short AICA_r16(aica_state *AICA, unsigned int addr)
 		}
 		else if (addr < 0x28be)
 		{
-			AICA_UpdateRegR(AICA, addr&0xff);
+			AICA_UpdateRegR(AICA, space, addr&0xff);
 			v= *((unsigned short *) (AICA->udata.datab+((addr&0xff))));
-			if((addr&0xfffe)==0x2810) AICA->udata.data[0x10/2] &= 0x7FFF;	// reset LP on read
+			if((addr&0xfffe)==0x2810) AICA->udata.data[0x10/2] &= 0x7FFF;   // reset LP on read
 		}
 		else if (addr == 0x2d00)
 		{
@@ -1036,7 +1035,7 @@ static void AICA_TimersAddTicks(aica_state *AICA, int ticks)
 }
 #endif
 
-INLINE INT32 AICA_UpdateSlot(aica_state *AICA, struct _SLOT *slot)
+INLINE INT32 AICA_UpdateSlot(aica_state *AICA, SLOT *slot)
 {
 	INT32 sample;
 	int step=slot->step;
@@ -1044,7 +1043,7 @@ INLINE INT32 AICA_UpdateSlot(aica_state *AICA, struct _SLOT *slot)
 	UINT32 *addr[2]      = {&addr1, &addr2};                          // used for linear interpolation
 	UINT32 *slot_addr[2] = {&(slot->cur_addr), &(slot->nxt_addr)};    //
 
-	if(SSCTL(slot)!=0)	//no FM or noise yet
+	if(SSCTL(slot)!=0)  //no FM or noise yet
 		return 0;
 
 	if(PLFOS(slot)!=0)
@@ -1069,7 +1068,7 @@ INLINE INT32 AICA_UpdateSlot(aica_state *AICA, struct _SLOT *slot)
 		addr2=slot->nxt_addr>>SHIFT;
 	}
 
-	if(PCMS(slot) == 1)	// 8-bit signed
+	if(PCMS(slot) == 1) // 8-bit signed
 	{
 		INT8 *p1=(signed char *) (AICA->AICARAM+(((SA(slot)+addr1))&AICA->RAM_MASK));
 		INT8 *p2=(signed char *) (AICA->AICARAM+(((SA(slot)+addr2))&AICA->RAM_MASK));
@@ -1078,7 +1077,7 @@ INLINE INT32 AICA_UpdateSlot(aica_state *AICA, struct _SLOT *slot)
 		s=(int) (p1[0]<<8)*((1<<SHIFT)-fpart)+(int) (p2[0]<<8)*fpart;
 		sample=(s>>SHIFT);
 	}
-	else if (PCMS(slot) == 0)	//16 bit signed
+	else if (PCMS(slot) == 0)   //16 bit signed
 	{
 		UINT8 *p1=(UINT8 *) (AICA->AICARAM+((SA(slot)+addr1)&AICA->RAM_MASK));
 		UINT8 *p2=(UINT8 *) (AICA->AICARAM+((SA(slot)+addr2)&AICA->RAM_MASK));
@@ -1087,7 +1086,7 @@ INLINE INT32 AICA_UpdateSlot(aica_state *AICA, struct _SLOT *slot)
 		s=(int) ((INT16)(p1[0] | (p1[1]<<8)))*((1<<SHIFT)-fpart)+(int) ((INT16)(p2[0] | (p2[1]<<8)))*fpart;
 		sample=(s>>SHIFT);
 	}
-	else	// 4-bit ADPCM
+	else    // 4-bit ADPCM
 	{
 		UINT8 *base= slot->adbase;
 		INT32 s;
@@ -1149,7 +1148,7 @@ INLINE INT32 AICA_UpdateSlot(aica_state *AICA, struct _SLOT *slot)
 		INT32 rem_addr;
 		switch(LPCTL(slot))
 		{
-		case 0:	//no loop
+		case 0: //no loop
 			if(*addr[addr_select]>=LSA(slot) && *addr[addr_select]>=LEA(slot))
 			{
 				AICA_StopSlot(slot,0);
@@ -1211,7 +1210,7 @@ static void AICA_DoMasterSamples(aica_state *AICA, int nsamples)
 		// mix slots' direct output
 		for(sl=0;sl<64;++sl)
 		{
-			struct _SLOT *slot=AICA->Slots+sl;
+			SLOT *slot=AICA->Slots+sl;
 			RBUFDST=AICA->RINGBUF+AICA->BUFPTR;
 			if(AICA->Slots[sl].active)
 			{
@@ -1274,7 +1273,7 @@ static DEVICE_START( aica )
 
 	aica_state *AICA = get_safe_token(device);
 
-	intf = (const aica_interface *)device->baseconfig().static_config();
+	intf = (const aica_interface *)device->static_config();
 
 	// init the emulation
 	AICA_Init(device, AICA, intf);
@@ -1284,6 +1283,22 @@ static DEVICE_START( aica )
 		AICA->IntARMCB = intf->irq_callback;
 
 		AICA->stream = device->machine().sound().stream_alloc(*device, 0, 2, 44100, AICA, AICA_Update);
+	}
+
+	// save state
+	{
+		device->save_item(NAME(AICA->IrqTimA));
+		device->save_item(NAME(AICA->IrqTimBC));
+		device->save_item(NAME(AICA->IrqMidi));
+		device->save_item(NAME(AICA->MidiOutW));
+		device->save_item(NAME(AICA->MidiOutR));
+		device->save_item(NAME(AICA->MidiStack),16);
+		device->save_item(NAME(AICA->MidiW));
+		device->save_item(NAME(AICA->MidiR));
+		device->save_item(NAME(AICA->LPANTABLE),0x20000);
+		device->save_item(NAME(AICA->RPANTABLE),0x20000);
+		device->save_item(NAME(AICA->TimPris),3);
+		device->save_item(NAME(AICA->TimCnt),3);
 	}
 }
 
@@ -1308,7 +1323,7 @@ void aica_set_ram_base(device_t *device, void *base, int size)
 READ16_DEVICE_HANDLER( aica_r )
 {
 	aica_state *AICA = get_safe_token(device);
-	return AICA_r16(AICA, offset*2);
+	return AICA_r16(AICA, space,offset*2);
 }
 
 WRITE16_DEVICE_HANDLER( aica_w )
@@ -1316,9 +1331,9 @@ WRITE16_DEVICE_HANDLER( aica_w )
 	aica_state *AICA = get_safe_token(device);
 	UINT16 tmp;
 
-	tmp = AICA_r16(AICA, offset*2);
+	tmp = AICA_r16(AICA, space, offset*2);
 	COMBINE_DATA(&tmp);
-	AICA_w16(AICA, offset*2, tmp);
+	AICA_w16(AICA, space, offset*2, tmp);
 }
 
 WRITE16_DEVICE_HANDLER( aica_midi_in )
@@ -1338,30 +1353,49 @@ READ16_DEVICE_HANDLER( aica_midi_out_r )
 	return val;
 }
 
-/**************************************************************************
- * Generic get_info
- **************************************************************************/
+const device_type AICA = &device_creator<aica_device>;
 
-DEVICE_GET_INFO( aica )
+aica_device::aica_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, AICA, "AICA", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
 {
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:				info->i = sizeof(aica_state);				break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:						info->start = DEVICE_START_NAME( aica );	break;
-		case DEVINFO_FCT_STOP:						info->start = DEVICE_STOP_NAME( aica );	break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:						strcpy(info->s, "AICA");					break;
-		case DEVINFO_STR_FAMILY:				strcpy(info->s, "Sega/Yamaha custom");		break;
-		case DEVINFO_STR_VERSION:				strcpy(info->s, "1.0.1");					break;
-		case DEVINFO_STR_SOURCE_FILE:					strcpy(info->s, __FILE__);					break;
-		case DEVINFO_STR_CREDITS:				strcpy(info->s, "Copyright Nicola Salmoria and the MAME Team"); break;
-	}
+	m_token = global_alloc_clear(aica_state);
 }
 
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
 
+void aica_device::device_config_complete()
+{
+}
 
-DEFINE_LEGACY_SOUND_DEVICE(AICA, aica);
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void aica_device::device_start()
+{
+	DEVICE_START_NAME( aica )(this);
+}
+
+//-------------------------------------------------
+//  device_stop - device-specific stop
+//-------------------------------------------------
+
+void aica_device::device_stop()
+{
+	DEVICE_STOP_NAME( aica )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void aica_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}

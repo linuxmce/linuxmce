@@ -62,7 +62,25 @@ and 1 SFX channel controlled by an 8039:
 #include "cpu/mcs48/mcs48.h"
 #include "sound/ay8910.h"
 #include "sound/discrete.h"
+#include "includes/konamipt.h"
 #include "includes/gyruss.h"
+
+
+#define MASTER_CLOCK    XTAL_18_432MHz
+#define SOUND_CLOCK     XTAL_14_31818MHz
+
+// Video timing
+// PCB measured: H = 15.50khz V = 60.56hz, +/- 0.01hz
+// --> VTOTAL should be OK, HTOTAL not 100% certain
+#define PIXEL_CLOCK     MASTER_CLOCK/3
+
+#define HTOTAL          396
+#define HBEND           0
+#define HBSTART         256
+
+#define VTOTAL          256
+#define VBEND           0+2*8
+#define VBSTART         224+2*8
 
 
 /* The timer clock which feeds the upper 4 bits of                      */
@@ -87,22 +105,20 @@ static const int gyruss_timer[10] =
 	0x00, 0x01, 0x02, 0x03, 0x04, 0x09, 0x0a, 0x0b, 0x0a, 0x0d
 };
 
-static READ8_DEVICE_HANDLER( gyruss_portA_r )
+READ8_MEMBER(gyruss_state::gyruss_portA_r)
 {
-	gyruss_state *state = device->machine().driver_data<gyruss_state>();
-	return gyruss_timer[(state->m_audiocpu->total_cycles() / 1024) % 10];
+	return gyruss_timer[(m_audiocpu->total_cycles() / 1024) % 10];
 }
 
 
-static WRITE8_DEVICE_HANDLER( gyruss_dac_w )
+WRITE8_MEMBER(gyruss_state::gyruss_dac_w)
 {
-	discrete_sound_w(device, NODE(16), data);
+	discrete_sound_w(m_discrete, space, NODE(16), data);
 }
 
-static WRITE8_HANDLER( gyruss_irq_clear_w )
+WRITE8_MEMBER(gyruss_state::gyruss_irq_clear_w)
 {
-	gyruss_state *state = space->machine().driver_data<gyruss_state>();
-	device_set_input_line(state->m_audiocpu_2, 0, CLEAR_LINE);
+	m_audiocpu_2->set_input_line(0, CLEAR_LINE);
 }
 
 static void filter_w( device_t *device, int chip, int data )
@@ -114,96 +130,104 @@ static void filter_w( device_t *device, int chip, int data )
 	{
 		/* low bit: 47000pF = 0.047uF */
 		/* high bit: 220000pF = 0.22uF */
-		discrete_sound_w(device, NODE(3 * chip + i + 21), data & 3);
+		address_space &space = device->machine().driver_data()->generic_space();
+		discrete_sound_w(device, space, NODE(3 * chip + i + 21), data & 3);
 		data >>= 2;
 	}
 }
 
-static WRITE8_DEVICE_HANDLER( gyruss_filter0_w )
+WRITE8_MEMBER(gyruss_state::gyruss_filter0_w)
 {
-	filter_w(device, 0, data);
+	filter_w(m_discrete, 0, data);
 }
 
-static WRITE8_DEVICE_HANDLER( gyruss_filter1_w )
+WRITE8_MEMBER(gyruss_state::gyruss_filter1_w)
 {
-	filter_w(device, 1, data);
+	filter_w(m_discrete, 1, data);
 }
 
 
-static WRITE8_HANDLER( gyruss_sh_irqtrigger_w )
+WRITE8_MEMBER(gyruss_state::gyruss_sh_irqtrigger_w)
 {
-	gyruss_state *state = space->machine().driver_data<gyruss_state>();
 	/* writing to this register triggers IRQ on the sound CPU */
-	device_set_input_line_and_vector(state->m_audiocpu, 0, HOLD_LINE, 0xff);
+	m_audiocpu->set_input_line_and_vector(0, HOLD_LINE, 0xff);
 }
 
-static WRITE8_HANDLER( gyruss_i8039_irq_w )
+WRITE8_MEMBER(gyruss_state::gyruss_i8039_irq_w)
 {
-	gyruss_state *state = space->machine().driver_data<gyruss_state>();
-	device_set_input_line(state->m_audiocpu_2, 0, ASSERT_LINE);
+	m_audiocpu_2->set_input_line(0, ASSERT_LINE);
 }
 
+WRITE8_MEMBER(gyruss_state::master_nmi_mask_w)
+{
+	m_master_nmi_mask = data & 1;
+}
 
-static ADDRESS_MAP_START( main_cpu1_map, AS_PROGRAM, 8 )
+WRITE8_MEMBER(gyruss_state::slave_irq_mask_w)
+{
+	m_slave_irq_mask = data & 1;
+}
+
+static ADDRESS_MAP_START( main_cpu1_map, AS_PROGRAM, 8, gyruss_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
-	AM_RANGE(0x8000, 0x83ff) AM_RAM AM_BASE_MEMBER(gyruss_state, m_colorram)
-	AM_RANGE(0x8400, 0x87ff) AM_RAM AM_BASE_MEMBER(gyruss_state, m_videoram)
+	AM_RANGE(0x8000, 0x83ff) AM_RAM AM_SHARE("colorram")
+	AM_RANGE(0x8400, 0x87ff) AM_RAM AM_SHARE("videoram")
 	AM_RANGE(0x9000, 0x9fff) AM_RAM
 	AM_RANGE(0xa000, 0xa7ff) AM_RAM AM_SHARE("share1")
-	AM_RANGE(0xc000, 0xc000) AM_READ_PORT("DSW2") AM_WRITENOP	/* watchdog reset */
+	AM_RANGE(0xc000, 0xc000) AM_READ_PORT("DSW2") AM_WRITENOP   /* watchdog reset */
 	AM_RANGE(0xc080, 0xc080) AM_READ_PORT("SYSTEM") AM_WRITE(gyruss_sh_irqtrigger_w)
 	AM_RANGE(0xc0a0, 0xc0a0) AM_READ_PORT("P1")
 	AM_RANGE(0xc0c0, 0xc0c0) AM_READ_PORT("P2")
 	AM_RANGE(0xc0e0, 0xc0e0) AM_READ_PORT("DSW1")
-	AM_RANGE(0xc100, 0xc100) AM_READ_PORT("DSW3") AM_WRITE(soundlatch_w)
-	AM_RANGE(0xc180, 0xc180) AM_WRITE(interrupt_enable_w)
-	AM_RANGE(0xc185, 0xc185) AM_WRITEONLY AM_BASE_MEMBER(gyruss_state, m_flipscreen)
+	AM_RANGE(0xc100, 0xc100) AM_READ_PORT("DSW3") AM_WRITE(soundlatch_byte_w)
+	AM_RANGE(0xc180, 0xc180) AM_WRITE(master_nmi_mask_w)
+	AM_RANGE(0xc185, 0xc185) AM_WRITEONLY AM_SHARE("flipscreen")
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( main_cpu2_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_cpu2_map, AS_PROGRAM, 8, gyruss_state )
 	AM_RANGE(0x0000, 0x0000) AM_READ(gyruss_scanline_r)
-	AM_RANGE(0x2000, 0x2000) AM_WRITE(interrupt_enable_w)
+	AM_RANGE(0x2000, 0x2000) AM_WRITE(slave_irq_mask_w) AM_READNOP
 	AM_RANGE(0x4000, 0x403f) AM_RAM
-	AM_RANGE(0x4040, 0x40ff) AM_RAM_WRITE(gyruss_spriteram_w) AM_BASE_MEMBER(gyruss_state, m_spriteram)
+	AM_RANGE(0x4040, 0x40ff) AM_RAM_WRITE(gyruss_spriteram_w) AM_SHARE("spriteram")
 	AM_RANGE(0x4100, 0x47ff) AM_RAM
 	AM_RANGE(0x6000, 0x67ff) AM_RAM AM_SHARE("share1")
 	AM_RANGE(0xe000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( audio_cpu1_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( audio_cpu1_map, AS_PROGRAM, 8, gyruss_state )
 	AM_RANGE(0x0000, 0x5fff) AM_ROM
 	AM_RANGE(0x6000, 0x63ff) AM_RAM
-	AM_RANGE(0x8000, 0x8000) AM_READ(soundlatch_r)
+	AM_RANGE(0x8000, 0x8000) AM_READ(soundlatch_byte_r)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( audio_cpu1_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( audio_cpu1_io_map, AS_IO, 8, gyruss_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
-	AM_RANGE(0x00, 0x00) AM_DEVWRITE("ay1", ay8910_address_w)
-	AM_RANGE(0x01, 0x01) AM_DEVREAD("ay1", ay8910_r)
-	AM_RANGE(0x02, 0x02) AM_DEVWRITE("ay1", ay8910_data_w)
-	AM_RANGE(0x04, 0x04) AM_DEVWRITE("ay2", ay8910_address_w)
-	AM_RANGE(0x05, 0x05) AM_DEVREAD("ay2", ay8910_r)
-	AM_RANGE(0x06, 0x06) AM_DEVWRITE("ay2", ay8910_data_w)
-	AM_RANGE(0x08, 0x08) AM_DEVWRITE("ay3", ay8910_address_w)
-	AM_RANGE(0x09, 0x09) AM_DEVREAD("ay3", ay8910_r)
-	AM_RANGE(0x0a, 0x0a) AM_DEVWRITE("ay3", ay8910_data_w)
-	AM_RANGE(0x0c, 0x0c) AM_DEVWRITE("ay4", ay8910_address_w)
-	AM_RANGE(0x0d, 0x0d) AM_DEVREAD("ay4", ay8910_r)
-	AM_RANGE(0x0e, 0x0e) AM_DEVWRITE("ay4", ay8910_data_w)
-	AM_RANGE(0x10, 0x10) AM_DEVWRITE("ay5", ay8910_address_w)
-	AM_RANGE(0x11, 0x11) AM_DEVREAD("ay5", ay8910_r)
-	AM_RANGE(0x12, 0x12) AM_DEVWRITE("ay5", ay8910_data_w)
+	AM_RANGE(0x00, 0x00) AM_DEVWRITE_LEGACY("ay1", ay8910_address_w)
+	AM_RANGE(0x01, 0x01) AM_DEVREAD_LEGACY("ay1", ay8910_r)
+	AM_RANGE(0x02, 0x02) AM_DEVWRITE_LEGACY("ay1", ay8910_data_w)
+	AM_RANGE(0x04, 0x04) AM_DEVWRITE_LEGACY("ay2", ay8910_address_w)
+	AM_RANGE(0x05, 0x05) AM_DEVREAD_LEGACY("ay2", ay8910_r)
+	AM_RANGE(0x06, 0x06) AM_DEVWRITE_LEGACY("ay2", ay8910_data_w)
+	AM_RANGE(0x08, 0x08) AM_DEVWRITE_LEGACY("ay3", ay8910_address_w)
+	AM_RANGE(0x09, 0x09) AM_DEVREAD_LEGACY("ay3", ay8910_r)
+	AM_RANGE(0x0a, 0x0a) AM_DEVWRITE_LEGACY("ay3", ay8910_data_w)
+	AM_RANGE(0x0c, 0x0c) AM_DEVWRITE_LEGACY("ay4", ay8910_address_w)
+	AM_RANGE(0x0d, 0x0d) AM_DEVREAD_LEGACY("ay4", ay8910_r)
+	AM_RANGE(0x0e, 0x0e) AM_DEVWRITE_LEGACY("ay4", ay8910_data_w)
+	AM_RANGE(0x10, 0x10) AM_DEVWRITE_LEGACY("ay5", ay8910_address_w)
+	AM_RANGE(0x11, 0x11) AM_DEVREAD_LEGACY("ay5", ay8910_r)
+	AM_RANGE(0x12, 0x12) AM_DEVWRITE_LEGACY("ay5", ay8910_data_w)
 	AM_RANGE(0x14, 0x14) AM_WRITE(gyruss_i8039_irq_w)
-	AM_RANGE(0x18, 0x18) AM_WRITE(soundlatch2_w)
+	AM_RANGE(0x18, 0x18) AM_WRITE(soundlatch2_byte_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( audio_cpu2_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( audio_cpu2_map, AS_PROGRAM, 8, gyruss_state )
 	AM_RANGE(0x0000, 0x0fff) AM_ROM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( audio_cpu2_io_map, AS_IO, 8 )
-	AM_RANGE(0x00, 0xff) AM_READ(soundlatch2_r)
-	AM_RANGE(MCS48_PORT_P1, MCS48_PORT_P1) AM_DEVWRITE("discrete", gyruss_dac_w)
+static ADDRESS_MAP_START( audio_cpu2_io_map, AS_IO, 8, gyruss_state )
+	AM_RANGE(0x00, 0xff) AM_READ(soundlatch2_byte_r)
+	AM_RANGE(MCS48_PORT_P1, MCS48_PORT_P1) AM_WRITE(gyruss_dac_w)
 	AM_RANGE(MCS48_PORT_P2, MCS48_PORT_P2) AM_WRITE(gyruss_irq_clear_w)
 ADDRESS_MAP_END
 
@@ -223,7 +247,7 @@ static INPUT_PORTS_START( gyruss )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP )    PORT_2WAY
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN )  PORT_2WAY
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* 1p shoot 2 - unused */
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )    /* 1p shoot 2 - unused */
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
@@ -233,45 +257,12 @@ static INPUT_PORTS_START( gyruss )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP )    PORT_2WAY PORT_COCKTAIL
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN )  PORT_2WAY PORT_COCKTAIL
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* 2p shoot 2 - unused */
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )    /* 2p shoot 2 - unused */
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("DSW1")
-	PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( Coin_A ) )           PORT_DIPLOCATION("SW1:1,2,3,4")
-	PORT_DIPSETTING(    0x02, DEF_STR( 4C_1C ) )
-	PORT_DIPSETTING(    0x05, DEF_STR( 3C_1C ) )
-	PORT_DIPSETTING(    0x08, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(    0x04, DEF_STR( 3C_2C ) )
-	PORT_DIPSETTING(    0x01, DEF_STR( 4C_3C ) )
-	PORT_DIPSETTING(    0x0f, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(    0x03, DEF_STR( 3C_4C ) )
-	PORT_DIPSETTING(    0x07, DEF_STR( 2C_3C ) )
-	PORT_DIPSETTING(    0x0e, DEF_STR( 1C_2C ) )
-	PORT_DIPSETTING(    0x06, DEF_STR( 2C_5C ) )
-	PORT_DIPSETTING(    0x0d, DEF_STR( 1C_3C ) )
-	PORT_DIPSETTING(    0x0c, DEF_STR( 1C_4C ) )
-	PORT_DIPSETTING(    0x0b, DEF_STR( 1C_5C ) )
-	PORT_DIPSETTING(    0x0a, DEF_STR( 1C_6C ) )
-	PORT_DIPSETTING(    0x09, DEF_STR( 1C_7C ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
-	PORT_DIPNAME( 0xf0, 0xf0, DEF_STR( Coin_B ) )           PORT_DIPLOCATION("SW1:5,6,7,8")
-	PORT_DIPSETTING(    0x20, DEF_STR( 4C_1C ) )
-	PORT_DIPSETTING(    0x50, DEF_STR( 3C_1C ) )
-	PORT_DIPSETTING(    0x80, DEF_STR( 2C_1C ) )
-	PORT_DIPSETTING(    0x40, DEF_STR( 3C_2C ) )
-	PORT_DIPSETTING(    0x10, DEF_STR( 4C_3C ) )
-	PORT_DIPSETTING(    0xf0, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(    0x30, DEF_STR( 3C_4C ) )
-	PORT_DIPSETTING(    0x70, DEF_STR( 2C_3C ) )
-	PORT_DIPSETTING(    0xe0, DEF_STR( 1C_2C ) )
-	PORT_DIPSETTING(    0x60, DEF_STR( 2C_5C ) )
-	PORT_DIPSETTING(    0xd0, DEF_STR( 1C_3C ) )
-	PORT_DIPSETTING(    0xc0, DEF_STR( 1C_4C ) )
-	PORT_DIPSETTING(    0xb0, DEF_STR( 1C_5C ) )
-	PORT_DIPSETTING(    0xa0, DEF_STR( 1C_6C ) )
-	PORT_DIPSETTING(    0x90, DEF_STR( 1C_7C ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
+	KONAMI_COINAGE_LOC(DEF_STR( Free_Play ), DEF_STR( Free_Play ), SW1)
 
 	PORT_START("DSW2")
 	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Lives ) )            PORT_DIPLOCATION("SW2:1,2")
@@ -302,6 +293,7 @@ static INPUT_PORTS_START( gyruss )
 	PORT_DIPNAME( 0x01, 0x00, "Demo Music" )                PORT_DIPLOCATION("SW3:1")
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_BIT( 0xfe, IP_ACTIVE_LOW, IPT_UNUSED )
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( gyrussce )
@@ -325,31 +317,31 @@ INPUT_PORTS_END
 
 static const gfx_layout charlayout =
 {
-	8,8,	/* 8*8 characters */
-	512,	/* 512 characters */
-	2,	/* 2 bits per pixel */
+	8,8,    /* 8*8 characters */
+	512,    /* 512 characters */
+	2,  /* 2 bits per pixel */
 	{ 4, 0 },
 	{ 0, 1, 2, 3, 8*8+0,8*8+1,8*8+2,8*8+3 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
-	16*8	/* every char takes 16 consecutive bytes */
+	16*8    /* every char takes 16 consecutive bytes */
 };
 
 static const gfx_layout spritelayout =
 {
-	8,16,	/* 8*16 sprites */
-	256,	/* 256 sprites */
-	4,	/* 4 bits per pixel */
+	8,16,   /* 8*16 sprites */
+	256,    /* 256 sprites */
+	4,  /* 4 bits per pixel */
 	{ 0x4000*8+4, 0x4000*8+0, 4, 0  },
 	{ 0, 1, 2, 3,  8*8, 8*8+1, 8*8+2, 8*8+3 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8 },
-	64*8	/* every sprite takes 64 consecutive bytes */
+	64*8    /* every sprite takes 64 consecutive bytes */
 };
 
 
 static GFXDECODE_START( gyruss )
-	GFXDECODE_ENTRY( "gfx1", 0x0000, spritelayout, 0, 16 )	/* upper half */
-	GFXDECODE_ENTRY( "gfx1", 0x0010, spritelayout, 0, 16 )	/* lower half */
+	GFXDECODE_ENTRY( "gfx1", 0x0000, spritelayout, 0, 16 )  /* upper half */
+	GFXDECODE_ENTRY( "gfx1", 0x0010, spritelayout, 0, 16 )  /* lower half */
 	GFXDECODE_ENTRY( "gfx2", 0x0000, charlayout,   16*16, 16 )
 GFXDECODE_END
 
@@ -361,7 +353,7 @@ static const ay8910_interface ay8910_interface_1 =
 	DEVCB_NULL,
 	DEVCB_NULL,
 	DEVCB_NULL,
-	DEVCB_DEVICE_HANDLER("discrete", gyruss_filter0_w)
+	DEVCB_DRIVER_MEMBER(gyruss_state,gyruss_filter0_w)
 };
 
 static const ay8910_interface ay8910_interface_2 =
@@ -371,14 +363,14 @@ static const ay8910_interface ay8910_interface_2 =
 	DEVCB_NULL,
 	DEVCB_NULL,
 	DEVCB_NULL,
-	DEVCB_DEVICE_HANDLER("discrete", gyruss_filter1_w)
+	DEVCB_DRIVER_MEMBER(gyruss_state,gyruss_filter1_w)
 };
 
 static const ay8910_interface ay8910_interface_3 =
 {
 	AY8910_DISCRETE_OUTPUT,
 	{ RES_K(3.3), RES_K(3.3), RES_K(3.3) },
-	DEVCB_HANDLER(gyruss_portA_r),
+	DEVCB_DRIVER_MEMBER(gyruss_state,gyruss_portA_r),
 	DEVCB_NULL,
 	DEVCB_NULL,
 	DEVCB_NULL
@@ -406,22 +398,22 @@ static const ay8910_interface ay8910_interface_5 =
 
 static const discrete_mixer_desc konami_right_mixer_desc =
 	{DISC_MIXER_IS_RESISTOR,
-		{RES_K(2.2), RES_K(2.2), RES_K(2.2), RES_K(3.3)/3, RES_K(3.3)/3 },
-		{0,0,0,0,0,0},	/* no variable resistors   */
-		{0,0,0,0,0,0},  /* no node capacitors      */
-		0, 200,
-		CAP_U(0.1),
-		CAP_U(1),		/* DC - Removal, not in schematics */
-		0, 1};
+	{RES_K(2.2), RES_K(2.2), RES_K(2.2), RES_K(3.3)/3, RES_K(3.3)/3 },
+	{0,0,0,0,0,0},  /* no variable resistors   */
+	{0,0,0,0,0,0},  /* no node capacitors      */
+	0, 200,
+	CAP_U(0.1),
+	CAP_U(1),       /* DC - Removal, not in schematics */
+	0, 1};
 
 static const discrete_mixer_desc konami_left_mixer_desc =
 	{DISC_MIXER_IS_RESISTOR,
 	{RES_K(2.2), RES_K(2.2), RES_K(2.2), RES_K(3.3)/3, RES_K(4.7) },
-	{0,0,0,0,0,0},	/* no variable resistors   */
+	{0,0,0,0,0,0},  /* no variable resistors   */
 	{0,0,0,0,0,0},  /* no node capacitors      */
 	0, 200,
 	CAP_U(0.1),
-	CAP_U(1),		/* DC - Removal, not in schematics */
+	CAP_U(1),       /* DC - Removal, not in schematics */
 	0, 1};
 
 static DISCRETE_SOUND_START( gyruss_sound )
@@ -438,8 +430,8 @@ static DISCRETE_SOUND_START( gyruss_sound )
 
 	/* Chip 3 right */
 	/* Outputs are tied together after 3.3k resistor on each channel.
-     * A/R + B/R + C/R = (A + B + C) / 3 * (1/(R/3))
-     */
+	 * A/R + B/R + C/R = (A + B + C) / 3 * (1/(R/3))
+	 */
 	DISCRETE_INPUTX_STREAM(NODE_07, 6, 0.33, 0)
 	DISCRETE_INPUTX_STREAM(NODE_08, 7, 0.33, 0)
 	DISCRETE_INPUTX_STREAM(NODE_09, 8, 0.33, 0)
@@ -456,7 +448,7 @@ static DISCRETE_SOUND_START( gyruss_sound )
 
 	/* DAC left */
 	/* Output voltage depends on load. Datasheet gives 2.4 as minimum.
-     * This is in line with TTL, so 4V with no load seems adequate */
+	 * This is in line with TTL, so 4V with no load seems adequate */
 	DISCRETE_INPUTX_DATA(NODE_16, 256.0 * 4.0 / 5.0, 0.0, 0.0)
 
 	/* Chip 1 Filter enable */
@@ -497,80 +489,86 @@ static DISCRETE_SOUND_START( gyruss_sound )
 DISCRETE_SOUND_END
 
 
-static MACHINE_START( gyruss )
+void gyruss_state::machine_start()
 {
-	gyruss_state *state = machine.driver_data<gyruss_state>();
 
-	state->m_audiocpu = machine.device<cpu_device>("audiocpu");
-	state->m_audiocpu_2 = machine.device<cpu_device>("audio2");
+	save_item(NAME(m_master_nmi_mask));
+	save_item(NAME(m_slave_irq_mask));
+}
+
+INTERRUPT_GEN_MEMBER(gyruss_state::master_vblank_irq)
+{
+
+	if (m_master_nmi_mask)
+		device.execute().set_input_line(INPUT_LINE_NMI, PULSE_LINE);
+}
+
+INTERRUPT_GEN_MEMBER(gyruss_state::slave_vblank_irq)
+{
+
+	if (m_slave_irq_mask)
+		device.execute().set_input_line(0, HOLD_LINE);
 }
 
 static MACHINE_CONFIG_START( gyruss, gyruss_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, 3072000)	/* 3.072 MHz (?) */
+	MCFG_CPU_ADD("maincpu", Z80, MASTER_CLOCK/6)    /* 3.072 MHz */
 	MCFG_CPU_PROGRAM_MAP(main_cpu1_map)
-	MCFG_CPU_VBLANK_INT("screen", nmi_line_pulse)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", gyruss_state,  master_vblank_irq)
 
-	MCFG_CPU_ADD("sub", M6809, 2000000)        /* 2 MHz ??? */
+	MCFG_CPU_ADD("sub", M6809, MASTER_CLOCK/12)     /* 1.536 MHz */
 	MCFG_CPU_PROGRAM_MAP(main_cpu2_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", gyruss_state,  slave_vblank_irq)
 
-	MCFG_CPU_ADD("audiocpu", Z80,14318180/4)	/* 3.579545 MHz */
+	MCFG_CPU_ADD("audiocpu", Z80, SOUND_CLOCK/4)    /* 3.579545 MHz */
 	MCFG_CPU_PROGRAM_MAP(audio_cpu1_map)
 	MCFG_CPU_IO_MAP(audio_cpu1_io_map)
 
-	MCFG_CPU_ADD("audio2", I8039,8000000)	/* 8MHz crystal */
+	MCFG_CPU_ADD("audio2", I8039, XTAL_8MHz)
 	MCFG_CPU_PROGRAM_MAP(audio_cpu2_map)
 	MCFG_CPU_IO_MAP(audio_cpu2_io_map)
 
 	MCFG_QUANTUM_TIME(attotime::from_hz(6000))
 
-	MCFG_MACHINE_START(gyruss)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_REFRESH_RATE(60)
-	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
-	MCFG_SCREEN_SIZE(32*8, 32*8)
-	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
-	MCFG_SCREEN_UPDATE(gyruss)
+	MCFG_SCREEN_RAW_PARAMS(PIXEL_CLOCK, HTOTAL, HBEND, HBSTART, VTOTAL, VBEND, VBSTART)
+	MCFG_SCREEN_UPDATE_DRIVER(gyruss_state, screen_update_gyruss)
 
 	MCFG_GFXDECODE(gyruss)
 	MCFG_PALETTE_LENGTH(16*4+16*16)
 
-	MCFG_PALETTE_INIT(gyruss)
-	MCFG_VIDEO_START(gyruss)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
 
-	MCFG_SOUND_ADD("ay1", AY8910, 14318180/8)
+	MCFG_SOUND_ADD("ay1", AY8910, SOUND_CLOCK/8)
 	MCFG_SOUND_CONFIG(ay8910_interface_1)
 	MCFG_SOUND_ROUTE_EX(0, "discrete", 1.0, 0)
 	MCFG_SOUND_ROUTE_EX(1, "discrete", 1.0, 1)
 	MCFG_SOUND_ROUTE_EX(2, "discrete", 1.0, 2)
 
-	MCFG_SOUND_ADD("ay2", AY8910, 14318180/8)
+	MCFG_SOUND_ADD("ay2", AY8910, SOUND_CLOCK/8)
 	MCFG_SOUND_CONFIG(ay8910_interface_2)
 	MCFG_SOUND_ROUTE_EX(0, "discrete", 1.0, 3)
 	MCFG_SOUND_ROUTE_EX(1, "discrete", 1.0, 4)
 	MCFG_SOUND_ROUTE_EX(2, "discrete", 1.0, 5)
 
-	MCFG_SOUND_ADD("ay3", AY8910, 14318180/8)
+	MCFG_SOUND_ADD("ay3", AY8910, SOUND_CLOCK/8)
 	MCFG_SOUND_CONFIG(ay8910_interface_3)
 	MCFG_SOUND_ROUTE_EX(0, "discrete", 1.0, 6)
 	MCFG_SOUND_ROUTE_EX(1, "discrete", 1.0, 7)
 	MCFG_SOUND_ROUTE_EX(2, "discrete", 1.0, 8)
 
-	MCFG_SOUND_ADD("ay4", AY8910, 14318180/8)
+	MCFG_SOUND_ADD("ay4", AY8910, SOUND_CLOCK/8)
 	MCFG_SOUND_CONFIG(ay8910_interface_4)
 	MCFG_SOUND_ROUTE_EX(0, "discrete", 1.0, 9)
 	MCFG_SOUND_ROUTE_EX(1, "discrete", 1.0, 10)
 	MCFG_SOUND_ROUTE_EX(2, "discrete", 1.0, 11)
 
-	MCFG_SOUND_ADD("ay5", AY8910, 14318180/8)
+	MCFG_SOUND_ADD("ay5", AY8910, SOUND_CLOCK/8)
 	MCFG_SOUND_CONFIG(ay8910_interface_5)
 	MCFG_SOUND_ROUTE_EX(0, "discrete", 1.0, 12)
 	MCFG_SOUND_ROUTE_EX(1, "discrete", 1.0, 13)
@@ -605,7 +603,7 @@ ROM_START( gyruss )
 	ROM_LOAD( "gyrussk.2a",   0x2000, 0x2000, CRC(ba498115) SHA1(9cd1f42898cc590f39ba7cb3c975b0b3d3062eba) )
 	/* the diagnostics ROM would go here */
 
-	ROM_REGION( 0x1000, "audio2", 0 )	/* 8039 */
+	ROM_REGION( 0x1000, "audio2", 0 )   /* 8039 */
 	ROM_LOAD( "gyrussk.3a",   0x0000, 0x1000, CRC(3f9b5dea) SHA1(6e807da02c2885b18e8cc2199f12f6be9040bf75) )
 
 	ROM_REGION( 0x8000, "gfx1", 0 )
@@ -618,9 +616,9 @@ ROM_START( gyruss )
 	ROM_LOAD( "gyrussk.4",    0x0000, 0x2000, CRC(27d8329b) SHA1(564ff945465a23d93a93137ad277298770dfa06a) )
 
 	ROM_REGION( 0x0220, "proms", 0 )
-	ROM_LOAD( "gyrussk.pr3",  0x0000, 0x0020, CRC(98782db3) SHA1(b891e43b25187faca8002919ccb44d744daa3594) )	/* palette */
-	ROM_LOAD( "gyrussk.pr1",  0x0020, 0x0100, CRC(7ed057de) SHA1(c04069ae1e2c62f9b3048844cd8cf5e1b03b7d3c) )	/* sprite lookup table */
-	ROM_LOAD( "gyrussk.pr2",  0x0120, 0x0100, CRC(de823a81) SHA1(1af94b2a6a319a89b238a5076a2867f1cfd279b0) )	/* character lookup table */
+	ROM_LOAD( "gyrussk.pr3",  0x0000, 0x0020, CRC(98782db3) SHA1(b891e43b25187faca8002919ccb44d744daa3594) )    /* palette */
+	ROM_LOAD( "gyrussk.pr1",  0x0020, 0x0100, CRC(7ed057de) SHA1(c04069ae1e2c62f9b3048844cd8cf5e1b03b7d3c) )    /* sprite lookup table */
+	ROM_LOAD( "gyrussk.pr2",  0x0120, 0x0100, CRC(de823a81) SHA1(1af94b2a6a319a89b238a5076a2867f1cfd279b0) )    /* character lookup table */
 ROM_END
 
 ROM_START( gyrussce )
@@ -638,7 +636,7 @@ ROM_START( gyrussce )
 	ROM_LOAD( "gyrussk.2a",   0x2000, 0x2000, CRC(ba498115) SHA1(9cd1f42898cc590f39ba7cb3c975b0b3d3062eba) )
 	/* the diagnostics ROM would go here */
 
-	ROM_REGION( 0x1000, "audio2", 0 )	/* 8039 */
+	ROM_REGION( 0x1000, "audio2", 0 )   /* 8039 */
 	ROM_LOAD( "gyrussk.3a",   0x0000, 0x1000, CRC(3f9b5dea) SHA1(6e807da02c2885b18e8cc2199f12f6be9040bf75) )
 
 	ROM_REGION( 0x8000, "gfx1", 0 )
@@ -651,9 +649,9 @@ ROM_START( gyrussce )
 	ROM_LOAD( "gyrussk.4",    0x0000, 0x2000, CRC(27d8329b) SHA1(564ff945465a23d93a93137ad277298770dfa06a) )
 
 	ROM_REGION( 0x0220, "proms", 0 )
-	ROM_LOAD( "gyrussk.pr3",  0x0000, 0x0020, CRC(98782db3) SHA1(b891e43b25187faca8002919ccb44d744daa3594) )	/* palette */
-	ROM_LOAD( "gyrussk.pr1",  0x0020, 0x0100, CRC(7ed057de) SHA1(c04069ae1e2c62f9b3048844cd8cf5e1b03b7d3c) )	/* sprite lookup table */
-	ROM_LOAD( "gyrussk.pr2",  0x0120, 0x0100, CRC(de823a81) SHA1(1af94b2a6a319a89b238a5076a2867f1cfd279b0) )	/* character lookup table */
+	ROM_LOAD( "gyrussk.pr3",  0x0000, 0x0020, CRC(98782db3) SHA1(b891e43b25187faca8002919ccb44d744daa3594) )    /* palette */
+	ROM_LOAD( "gyrussk.pr1",  0x0020, 0x0100, CRC(7ed057de) SHA1(c04069ae1e2c62f9b3048844cd8cf5e1b03b7d3c) )    /* sprite lookup table */
+	ROM_LOAD( "gyrussk.pr2",  0x0120, 0x0100, CRC(de823a81) SHA1(1af94b2a6a319a89b238a5076a2867f1cfd279b0) )    /* character lookup table */
 ROM_END
 
 ROM_START( gyrussb ) /* PCB has stickers stating "TAITO (NEW ZEALAND) LTD" */
@@ -671,7 +669,7 @@ ROM_START( gyrussb ) /* PCB has stickers stating "TAITO (NEW ZEALAND) LTD" */
 	ROM_LOAD( "gyrussk.2a",   0x2000, 0x2000, CRC(ba498115) SHA1(9cd1f42898cc590f39ba7cb3c975b0b3d3062eba) ) /* Labeled as "12" */
 	/* the diagnostics ROM would go here */
 
-	ROM_REGION( 0x1000, "audio2", 0 )	/* 8039 */
+	ROM_REGION( 0x1000, "audio2", 0 )   /* 8039 */
 	ROM_LOAD( "gyrussk.3a",   0x0000, 0x1000, CRC(3f9b5dea) SHA1(6e807da02c2885b18e8cc2199f12f6be9040bf75) ) /* Labeled as "13" */
 
 	ROM_REGION( 0x8000, "gfx1", 0 )
@@ -684,9 +682,9 @@ ROM_START( gyrussb ) /* PCB has stickers stating "TAITO (NEW ZEALAND) LTD" */
 	ROM_LOAD( "gyrussk.4",    0x0000, 0x2000, CRC(27d8329b) SHA1(564ff945465a23d93a93137ad277298770dfa06a) ) /* Labeled as "4" */
 
 	ROM_REGION( 0x0220, "proms", 0 )
-	ROM_LOAD( "gyrussk.pr3",  0x0000, 0x0020, CRC(98782db3) SHA1(b891e43b25187faca8002919ccb44d744daa3594) )	/* palette */
-	ROM_LOAD( "gyrussk.pr1",  0x0020, 0x0100, CRC(7ed057de) SHA1(c04069ae1e2c62f9b3048844cd8cf5e1b03b7d3c) )	/* sprite lookup table */
-	ROM_LOAD( "gyrussk.pr2",  0x0120, 0x0100, CRC(de823a81) SHA1(1af94b2a6a319a89b238a5076a2867f1cfd279b0) )	/* character lookup table */
+	ROM_LOAD( "gyrussk.pr3",  0x0000, 0x0020, CRC(98782db3) SHA1(b891e43b25187faca8002919ccb44d744daa3594) )    /* palette */
+	ROM_LOAD( "gyrussk.pr1",  0x0020, 0x0100, CRC(7ed057de) SHA1(c04069ae1e2c62f9b3048844cd8cf5e1b03b7d3c) )    /* sprite lookup table */
+	ROM_LOAD( "gyrussk.pr2",  0x0120, 0x0100, CRC(de823a81) SHA1(1af94b2a6a319a89b238a5076a2867f1cfd279b0) )    /* character lookup table */
 ROM_END
 
 ROM_START( venus )
@@ -704,7 +702,7 @@ ROM_START( venus )
 	ROM_LOAD( "gyrussk.2a",   0x2000, 0x2000, CRC(ba498115) SHA1(9cd1f42898cc590f39ba7cb3c975b0b3d3062eba) )
 	/* the diagnostics ROM would go here */
 
-	ROM_REGION( 0x1000, "audio2", 0 )	/* 8039 */
+	ROM_REGION( 0x1000, "audio2", 0 )   /* 8039 */
 	ROM_LOAD( "gyrussk.3a",   0x0000, 0x1000, CRC(3f9b5dea) SHA1(6e807da02c2885b18e8cc2199f12f6be9040bf75) )
 
 	ROM_REGION( 0x8000, "gfx1", 0 )
@@ -717,19 +715,19 @@ ROM_START( venus )
 	ROM_LOAD( "gyrussk.4",    0x0000, 0x2000, CRC(27d8329b) SHA1(564ff945465a23d93a93137ad277298770dfa06a) )
 
 	ROM_REGION( 0x0220, "proms", 0 )
-	ROM_LOAD( "gyrussk.pr3",  0x0000, 0x0020, CRC(98782db3) SHA1(b891e43b25187faca8002919ccb44d744daa3594) )	/* palette */
-	ROM_LOAD( "gyrussk.pr1",  0x0020, 0x0100, CRC(7ed057de) SHA1(c04069ae1e2c62f9b3048844cd8cf5e1b03b7d3c) )	/* sprite lookup table */
-	ROM_LOAD( "gyrussk.pr2",  0x0120, 0x0100, CRC(de823a81) SHA1(1af94b2a6a319a89b238a5076a2867f1cfd279b0) )	/* character lookup table */
+	ROM_LOAD( "gyrussk.pr3",  0x0000, 0x0020, CRC(98782db3) SHA1(b891e43b25187faca8002919ccb44d744daa3594) )    /* palette */
+	ROM_LOAD( "gyrussk.pr1",  0x0020, 0x0100, CRC(7ed057de) SHA1(c04069ae1e2c62f9b3048844cd8cf5e1b03b7d3c) )    /* sprite lookup table */
+	ROM_LOAD( "gyrussk.pr2",  0x0120, 0x0100, CRC(de823a81) SHA1(1af94b2a6a319a89b238a5076a2867f1cfd279b0) )    /* character lookup table */
 ROM_END
 
 
-static DRIVER_INIT( gyruss )
+DRIVER_INIT_MEMBER(gyruss_state,gyruss)
 {
-	konami1_decode(machine, "sub");
+	konami1_decode(machine(), "sub");
 }
 
 
-GAME( 1983, gyruss,   0,        gyruss,   gyruss,   gyruss, ROT90, "Konami", "Gyruss (Konami)", GAME_SUPPORTS_SAVE )
-GAME( 1983, gyrussce, gyruss,   gyruss,   gyrussce, gyruss, ROT90, "Konami (Centuri license)", "Gyruss (Centuri)", GAME_SUPPORTS_SAVE )
-GAME( 1983, gyrussb,  gyruss,   gyruss,   gyruss,   gyruss, ROT90, "bootleg", "Gyruss", GAME_SUPPORTS_SAVE ) /* Supposed Taito NZ license, but (c) Konami */
-GAME( 1983, venus,    gyruss,   gyruss,   gyruss,   gyruss, ROT90, "bootleg", "Venus", GAME_SUPPORTS_SAVE )
+GAME( 1983, gyruss,   0,        gyruss,   gyruss, gyruss_state,   gyruss, ROT90, "Konami", "Gyruss", GAME_SUPPORTS_SAVE )
+GAME( 1983, gyrussce, gyruss,   gyruss,   gyrussce, gyruss_state, gyruss, ROT90, "Konami (Centuri license)", "Gyruss (Centuri)", GAME_SUPPORTS_SAVE )
+GAME( 1983, gyrussb,  gyruss,   gyruss,   gyruss, gyruss_state,   gyruss, ROT90, "bootleg?", "Gyruss (bootleg?)", GAME_SUPPORTS_SAVE ) /* Supposed Taito NZ license, but (c) Konami */
+GAME( 1983, venus,    gyruss,   gyruss,   gyruss, gyruss_state,   gyruss, ROT90, "bootleg", "Venus (bootleg of Gyruss)", GAME_SUPPORTS_SAVE )

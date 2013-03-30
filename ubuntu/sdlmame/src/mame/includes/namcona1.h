@@ -19,11 +19,24 @@ enum
 class namcona1_state : public driver_device
 {
 public:
-	namcona1_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	namcona1_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+		m_maincpu(*this,"maincpu"),
+		m_mcu(*this,"mcu"),
+		m_videoram(*this,"videoram"),
+		m_spriteram(*this,"spriteram"),
+		m_workram(*this,"workram"),
+		m_vreg(*this,"vreg"),
+		m_scroll(*this,"scroll")
+		{ }
 
-	UINT16 *m_videoram;
-	UINT16 *m_spriteram;
+	required_device<cpu_device> m_maincpu;
+	required_device<cpu_device> m_mcu;
+	required_shared_ptr<UINT16> m_videoram;
+	required_shared_ptr<UINT16> m_spriteram;
+	required_shared_ptr<UINT16> m_workram;
+	required_shared_ptr<UINT16> m_vreg;
+	required_shared_ptr<UINT16> m_scroll;
 	UINT16 *m_mpBank0;
 	UINT16 *m_mpBank1;
 	int m_mEnableInterrupts;
@@ -36,9 +49,6 @@ public:
 	UINT8 m_mcu_port5;
 	UINT8 m_mcu_port6;
 	UINT8 m_mcu_port8;
-	UINT16 *m_workram;
-	UINT16 *m_vreg;
-	UINT16 *m_scroll;
 	UINT16 *m_shaperam;
 	UINT16 *m_cgram;
 	tilemap_t *m_roz_tilemap;
@@ -48,20 +58,59 @@ public:
 	int m_palette_is_dirty;
 	UINT8 m_mask_data[8];
 	UINT8 m_conv_data[9];
+
+	DECLARE_READ16_MEMBER(namcona1_nvram_r);
+	DECLARE_WRITE16_MEMBER(namcona1_nvram_w);
+	DECLARE_READ16_MEMBER(custom_key_r);
+	DECLARE_WRITE16_MEMBER(custom_key_w);
+	DECLARE_READ16_MEMBER(namcona1_vreg_r);
+	DECLARE_WRITE16_MEMBER(namcona1_vreg_w);
+	DECLARE_READ16_MEMBER(mcu_mailbox_r);
+	DECLARE_WRITE16_MEMBER(mcu_mailbox_w_68k);
+	DECLARE_WRITE16_MEMBER(mcu_mailbox_w_mcu);
+	DECLARE_READ16_MEMBER(na1mcu_shared_r);
+	DECLARE_WRITE16_MEMBER(na1mcu_shared_w);
+	DECLARE_READ8_MEMBER(port4_r);
+	DECLARE_WRITE8_MEMBER(port4_w);
+	DECLARE_READ8_MEMBER(port5_r);
+	DECLARE_WRITE8_MEMBER(port5_w);
+	DECLARE_READ8_MEMBER(port6_r);
+	DECLARE_WRITE8_MEMBER(port6_w);
+	DECLARE_READ8_MEMBER(port7_r);
+	DECLARE_WRITE8_MEMBER(port7_w);
+	DECLARE_READ8_MEMBER(port8_r);
+	DECLARE_WRITE8_MEMBER(port8_w);
+	DECLARE_READ8_MEMBER(portana_r);
+	void write_version_info();
+	DECLARE_WRITE16_MEMBER(namcona1_videoram_w);
+	DECLARE_READ16_MEMBER(namcona1_videoram_r);
+	DECLARE_READ16_MEMBER(namcona1_paletteram_r);
+	DECLARE_WRITE16_MEMBER(namcona1_paletteram_w);
+	DECLARE_READ16_MEMBER(namcona1_gfxram_r);
+	DECLARE_WRITE16_MEMBER(namcona1_gfxram_w);
+	DECLARE_READ16_MEMBER(snd_r);
+	DECLARE_WRITE16_MEMBER(snd_w);
+	DECLARE_DRIVER_INIT(bkrtmaq);
+	DECLARE_DRIVER_INIT(quiztou);
+	DECLARE_DRIVER_INIT(emeralda);
+	DECLARE_DRIVER_INIT(numanath);
+	DECLARE_DRIVER_INIT(fa);
+	DECLARE_DRIVER_INIT(cgangpzl);
+	DECLARE_DRIVER_INIT(tinklpit);
+	DECLARE_DRIVER_INIT(swcourt);
+	DECLARE_DRIVER_INIT(knckhead);
+	DECLARE_DRIVER_INIT(xday2);
+	DECLARE_DRIVER_INIT(exbania);
+	DECLARE_DRIVER_INIT(emeraldj);
+	TILE_GET_INFO_MEMBER(tilemap_get_info0);
+	TILE_GET_INFO_MEMBER(tilemap_get_info1);
+	TILE_GET_INFO_MEMBER(tilemap_get_info2);
+	TILE_GET_INFO_MEMBER(tilemap_get_info3);
+	TILE_GET_INFO_MEMBER(roz_get_info);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	UINT32 screen_update_namcona1(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	TIMER_DEVICE_CALLBACK_MEMBER(namcona1_interrupt);
+	TIMER_DEVICE_CALLBACK_MEMBER(mcu_interrupt);
 };
-
-
-/*----------- defined in video/namcona1.c -----------*/
-
-
-extern WRITE16_HANDLER( namcona1_videoram_w );
-extern READ16_HANDLER( namcona1_videoram_r );
-
-extern READ16_HANDLER( namcona1_gfxram_r );
-extern WRITE16_HANDLER( namcona1_gfxram_w );
-
-extern READ16_HANDLER( namcona1_paletteram_r );
-extern WRITE16_HANDLER( namcona1_paletteram_w );
-
-extern SCREEN_UPDATE( namcona1 );
-extern VIDEO_START( namcona1 );

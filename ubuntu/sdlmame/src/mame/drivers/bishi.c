@@ -84,88 +84,79 @@ Notes:
 ***************************************************************************/
 
 #include "emu.h"
-#include "deprecat.h"
 #include "video/konicdev.h"
 #include "cpu/m68000/m68000.h"
 #include "sound/ymz280b.h"
 #include "includes/bishi.h"
 
-static READ16_HANDLER( control_r )
+READ16_MEMBER(bishi_state::control_r)
 {
-	bishi_state *state = space->machine().driver_data<bishi_state>();
-	return state->m_cur_control;
+	return m_cur_control;
 }
 
-static WRITE16_HANDLER( control_w )
+WRITE16_MEMBER(bishi_state::control_w)
 {
 	// bit 8 = interrupt gate
-	bishi_state *state = space->machine().driver_data<bishi_state>();
-	COMBINE_DATA(&state->m_cur_control);
+	COMBINE_DATA(&m_cur_control);
 }
 
-static WRITE16_HANDLER( control2_w )
+WRITE16_MEMBER(bishi_state::control2_w)
 {
 	// bit 12 = part of the banking calculation for the K056832 ROM readback
-	bishi_state *state = space->machine().driver_data<bishi_state>();
-	COMBINE_DATA(&state->m_cur_control2);
+	COMBINE_DATA(&m_cur_control2);
 }
 
-static INTERRUPT_GEN(bishi_interrupt)
+TIMER_DEVICE_CALLBACK_MEMBER(bishi_state::bishi_scanline)
 {
-	bishi_state *state = device->machine().driver_data<bishi_state>();
-	if (state->m_cur_control & 0x800)
-	{
-		switch (cpu_getiloops(device))
-		{
-			case 0:
-				device_set_input_line(device, M68K_IRQ_3, HOLD_LINE);
-				break;
+	int scanline = param;
 
-			case 1:
-				device_set_input_line(device, M68K_IRQ_4, HOLD_LINE);
-				break;
-		}
+	if (m_cur_control & 0x800)
+	{
+		if(scanline == 240) // vblank-out irq
+			machine().device("maincpu")->execute().set_input_line(M68K_IRQ_3, HOLD_LINE);
+
+		if(scanline == 0) // vblank-in irq
+			machine().device("maincpu")->execute().set_input_line(M68K_IRQ_4, HOLD_LINE);
 	}
 }
 
 /* compensate for a bug in the ram/rom test */
-static READ16_HANDLER( bishi_mirror_r )
+READ16_MEMBER(bishi_state::bishi_mirror_r)
 {
-	return space->machine().generic.paletteram.u16[offset];
+	return m_generic_paletteram_16[offset];
 }
 
-static READ16_HANDLER( bishi_K056832_rom_r )
+READ16_MEMBER(bishi_state::bishi_K056832_rom_r)
 {
-	bishi_state *state = space->machine().driver_data<bishi_state>();
 	UINT16 ouroffs;
 
 	ouroffs = (offset >> 1) * 8;
 	if (offset & 1)
 		ouroffs++;
 
-	if (state->m_cur_control2 & 0x1000)
+	if (m_cur_control2 & 0x1000)
 		ouroffs += 4;
 
-	return k056832_bishi_rom_word_r(state->m_k056832, ouroffs, mem_mask);
+	return k056832_bishi_rom_word_r(m_k056832, space, ouroffs, mem_mask);
 }
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 16, bishi_state )
 	AM_RANGE(0x000000, 0x0fffff) AM_ROM
-	AM_RANGE(0x400000, 0x407fff) AM_RAM						// Work RAM
+	AM_RANGE(0x400000, 0x407fff) AM_RAM                     // Work RAM
 	AM_RANGE(0x800000, 0x800001) AM_READWRITE(control_r, control_w)
 	AM_RANGE(0x800004, 0x800005) AM_READ_PORT("DSW")
 	AM_RANGE(0x800006, 0x800007) AM_READ_PORT("SYSTEM")
 	AM_RANGE(0x800008, 0x800009) AM_READ_PORT("INPUTS")
-	AM_RANGE(0x810000, 0x810003) AM_WRITE(control2_w)		// bank switch for K056832 character ROM test
-	AM_RANGE(0x820000, 0x820001) AM_WRITENOP			// lamps (see lamp test in service menu)
-	AM_RANGE(0x830000, 0x83003f) AM_DEVWRITE("k056832", k056832_word_w)
-	AM_RANGE(0x840000, 0x840007) AM_DEVWRITE("k056832", k056832_b_word_w)	// VSCCS
-	AM_RANGE(0x850000, 0x85001f) AM_DEVWRITE("k054338", k054338_word_w)	// CLTC
-	AM_RANGE(0x870000, 0x8700ff) AM_DEVWRITE("k055555", k055555_word_w)	// PCU2
-	AM_RANGE(0x880000, 0x880003) AM_DEVREADWRITE8("ymz", ymz280b_r, ymz280b_w, 0xff00)
-	AM_RANGE(0xa00000, 0xa01fff) AM_DEVREADWRITE("k056832", k056832_ram_word_r, k056832_ram_word_w)	// Graphic planes
-	AM_RANGE(0xb00000, 0xb03fff) AM_RAM_WRITE(paletteram16_xbgr_word_be_w) AM_BASE_GENERIC(paletteram)
-	AM_RANGE(0xb04000, 0xb047ff) AM_READ(bishi_mirror_r)	// bug in the ram/rom test?
+	AM_RANGE(0x810000, 0x810003) AM_WRITE(control2_w)       // bank switch for K056832 character ROM test
+	AM_RANGE(0x820000, 0x820001) AM_WRITENOP            // lamps (see lamp test in service menu)
+	AM_RANGE(0x830000, 0x83003f) AM_DEVWRITE_LEGACY("k056832", k056832_word_w)
+	AM_RANGE(0x840000, 0x840007) AM_DEVWRITE_LEGACY("k056832", k056832_b_word_w)    // VSCCS
+	AM_RANGE(0x850000, 0x85001f) AM_DEVWRITE_LEGACY("k054338", k054338_word_w)  // CLTC
+	AM_RANGE(0x870000, 0x8700ff) AM_DEVWRITE_LEGACY("k055555", k055555_word_w)  // PCU2
+	AM_RANGE(0x880000, 0x880003) AM_DEVREADWRITE8_LEGACY("ymz", ymz280b_r, ymz280b_w, 0xff00)
+	AM_RANGE(0xa00000, 0xa01fff) AM_DEVREADWRITE_LEGACY("k056832", k056832_ram_word_r, k056832_ram_word_w)  // Graphic planes
+	AM_RANGE(0xb00000, 0xb03fff) AM_RAM_WRITE(paletteram_xbgr_word_be_w) AM_SHARE("paletteram")
+	AM_RANGE(0xb04000, 0xb047ff) AM_READ(bishi_mirror_r)    // bug in the ram/rom test?
 	AM_RANGE(0xc00000, 0xc01fff) AM_READ(bishi_K056832_rom_r)
 ADDRESS_MAP_END
 
@@ -370,10 +361,8 @@ INPUT_PORTS_END
 static void sound_irq_gen(device_t *device, int state)
 {
 	bishi_state *bishi = device->machine().driver_data<bishi_state>();
-	if (state)
-		device_set_input_line(bishi->m_maincpu, M68K_IRQ_1, ASSERT_LINE);
-	else
-		device_set_input_line(bishi->m_maincpu, M68K_IRQ_1, CLEAR_LINE);
+
+	bishi->m_maincpu->set_input_line(M68K_IRQ_1, (state) ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static const ymz280b_interface ymz280b_intf =
@@ -398,24 +387,22 @@ static const k054338_interface bishi_k054338_intf =
 	"none"
 };
 
-static MACHINE_START( bishi )
+void bishi_state::machine_start()
 {
-	bishi_state *state = machine.driver_data<bishi_state>();
 
-	state->m_maincpu = machine.device("maincpu");
-	state->m_k056832 = machine.device("k056832");
-	state->m_k054338 = machine.device("k054338");
-	state->m_k055555 = machine.device("k055555");
+	m_maincpu = machine().device<cpu_device>("maincpu");
+	m_k056832 = machine().device("k056832");
+	m_k054338 = machine().device("k054338");
+	m_k055555 = machine().device("k055555");
 
-	state->save_item(NAME(state->m_cur_control));
-	state->save_item(NAME(state->m_cur_control2));
+	save_item(NAME(m_cur_control));
+	save_item(NAME(m_cur_control2));
 }
 
-static MACHINE_RESET( bishi )
+void bishi_state::machine_reset()
 {
-	bishi_state *state = machine.driver_data<bishi_state>();
-	state->m_cur_control = 0;
-	state->m_cur_control2 = 0;
+	m_cur_control = 0;
+	m_cur_control2 = 0;
 }
 
 static MACHINE_CONFIG_START( bishi, bishi_state )
@@ -423,10 +410,8 @@ static MACHINE_CONFIG_START( bishi, bishi_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, CPU_CLOCK) /* 12MHz (24MHz OSC / 2 ) */
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT_HACK(bishi_interrupt, 2)
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("scantimer", bishi_state, bishi_scanline, "screen", 0, 1)
 
-	MCFG_MACHINE_START(bishi)
-	MCFG_MACHINE_RESET(bishi)
 
 	/* video hardware */
 	MCFG_VIDEO_ATTRIBUTES(VIDEO_HAS_SHADOWS | VIDEO_HAS_HIGHLIGHTS | VIDEO_UPDATE_AFTER_VBLANK)
@@ -434,14 +419,12 @@ static MACHINE_CONFIG_START( bishi, bishi_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(1200))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_RGB32)
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(29, 29+288-1, 16, 16+224-1)
-	MCFG_SCREEN_UPDATE(bishi)
+	MCFG_SCREEN_UPDATE_DRIVER(bishi_state, screen_update_bishi)
 
 	MCFG_PALETTE_LENGTH(4096)
 
-	MCFG_VIDEO_START(bishi)
 
 	MCFG_K056832_ADD("k056832", bishi_k056832_intf)
 	MCFG_K054338_ADD("k054338", bishi_k054338_intf)
@@ -523,6 +506,6 @@ ROM_START( sbishik )
 ROM_END
 
 
-GAME( 1996, bishi,    0,      bishi, bishi,   0, ROT0, "Konami", "Bishi Bashi Championship Mini Game Senshuken (ver JAA, 3 Players)", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
-GAME( 1998, sbishi,   0,      bishi, bishi2p, 0, ROT0, "Konami", "Super Bishi Bashi Championship (ver JAA, 2 Players)", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
-GAME( 1998, sbishik,  sbishi, bishi, bishi,   0, ROT0, "Konami", "Super Bishi Bashi Championship (ver KAA, 3 Players)", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
+GAME( 1996, bishi,    0,      bishi, bishi, driver_device,   0, ROT0, "Konami", "Bishi Bashi Championship Mini Game Senshuken (ver JAA, 3 Players)", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
+GAME( 1998, sbishi,   0,      bishi, bishi2p, driver_device, 0, ROT0, "Konami", "Super Bishi Bashi Championship (ver JAA, 2 Players)", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
+GAME( 1998, sbishik,  sbishi, bishi, bishi, driver_device,   0, ROT0, "Konami", "Super Bishi Bashi Championship (ver KAA, 3 Players)", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )

@@ -7,24 +7,34 @@
 class macrossp_state : public driver_device
 {
 public:
-	macrossp_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	macrossp_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_spriteram(*this, "spriteram"),
+		m_scra_videoram(*this, "scra_videoram"),
+		m_scra_videoregs(*this, "scra_videoregs"),
+		m_scrb_videoram(*this, "scrb_videoram"),
+		m_scrb_videoregs(*this, "scrb_videoregs"),
+		m_scrc_videoram(*this, "scrc_videoram"),
+		m_scrc_videoregs(*this, "scrc_videoregs"),
+		m_text_videoram(*this, "text_videoram"),
+		m_text_videoregs(*this, "text_videoregs"),
+		m_paletteram(*this, "paletteram"),
+		m_mainram(*this, "mainram"){ }
 
 	/* memory pointers */
-	UINT32 *         m_mainram;
-	UINT32 *         m_scra_videoram;
-	UINT32 *         m_scra_videoregs;
-	UINT32 *         m_scrb_videoram;
-	UINT32 *         m_scrb_videoregs;
-	UINT32 *         m_scrc_videoram;
-	UINT32 *         m_scrc_videoregs;
-	UINT32 *         m_text_videoram;
-	UINT32 *         m_text_videoregs;
-	UINT32 *         m_spriteram;
+	required_shared_ptr<UINT32> m_spriteram;
+	required_shared_ptr<UINT32> m_scra_videoram;
+	required_shared_ptr<UINT32> m_scra_videoregs;
+	required_shared_ptr<UINT32> m_scrb_videoram;
+	required_shared_ptr<UINT32> m_scrb_videoregs;
+	required_shared_ptr<UINT32> m_scrc_videoram;
+	required_shared_ptr<UINT32> m_scrc_videoregs;
+	required_shared_ptr<UINT32> m_text_videoram;
+	required_shared_ptr<UINT32> m_text_videoregs;
+	required_shared_ptr<UINT32> m_paletteram;
+	required_shared_ptr<UINT32> m_mainram;
 	UINT32 *         m_spriteram_old;
 	UINT32 *         m_spriteram_old2;
-	UINT32 *         m_paletteram;
-	size_t           m_spriteram_size;
 
 	/* video-related */
 	tilemap_t  *m_scra_tilemap;
@@ -36,20 +46,31 @@ public:
 	int              m_sndpending;
 	int              m_snd_toggle;
 	INT32            m_fade_effect;
-	INT32			 m_old_fade;
+	INT32            m_old_fade;
 
 	/* devices */
-	device_t *m_maincpu;
-	device_t *m_audiocpu;
+	cpu_device *m_maincpu;
+	cpu_device *m_audiocpu;
+	DECLARE_WRITE32_MEMBER(paletteram32_macrossp_w);
+	DECLARE_READ32_MEMBER(macrossp_soundstatus_r);
+	DECLARE_WRITE32_MEMBER(macrossp_soundcmd_w);
+	DECLARE_READ16_MEMBER(macrossp_soundcmd_r);
+	DECLARE_WRITE32_MEMBER(macrossp_palette_fade_w);
+	DECLARE_WRITE32_MEMBER(macrossp_speedup_w);
+	DECLARE_WRITE32_MEMBER(quizmoon_speedup_w);
+	DECLARE_WRITE32_MEMBER(macrossp_scra_videoram_w);
+	DECLARE_WRITE32_MEMBER(macrossp_scrb_videoram_w);
+	DECLARE_WRITE32_MEMBER(macrossp_scrc_videoram_w);
+	DECLARE_WRITE32_MEMBER(macrossp_text_videoram_w);
+	DECLARE_DRIVER_INIT(quizmoon);
+	DECLARE_DRIVER_INIT(macrossp);
+	TILE_GET_INFO_MEMBER(get_macrossp_scra_tile_info);
+	TILE_GET_INFO_MEMBER(get_macrossp_scrb_tile_info);
+	TILE_GET_INFO_MEMBER(get_macrossp_scrc_tile_info);
+	TILE_GET_INFO_MEMBER(get_macrossp_text_tile_info);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	UINT32 screen_update_macrossp(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
+	void screen_eof_macrossp(screen_device &screen, bool state);
 };
-
-/*----------- defined in video/macrossp.c -----------*/
-
-WRITE32_HANDLER( macrossp_scra_videoram_w );
-WRITE32_HANDLER( macrossp_scrb_videoram_w );
-WRITE32_HANDLER( macrossp_scrc_videoram_w );
-WRITE32_HANDLER( macrossp_text_videoram_w );
-
-VIDEO_START(macrossp);
-SCREEN_UPDATE(macrossp);
-SCREEN_EOF(macrossp);

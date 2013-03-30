@@ -51,94 +51,76 @@ Notes:
 */
 
 #include "emu.h"
-#include "deprecat.h"
-
-#include "video/konicdev.h"
 #include "cpu/m68000/m68000.h"
 #include "cpu/z80/z80.h"
 #include "sound/2151intf.h"
 #include "sound/okim6295.h"
 #include "includes/dbz.h"
+#include "video/konicdev.h"
+#include "machine/k053252.h"
 
 
-static INTERRUPT_GEN( dbz_interrupt )
+
+TIMER_DEVICE_CALLBACK_MEMBER(dbz_state::dbz_scanline)
 {
-	dbz_state *state = device->machine().driver_data<dbz_state>();
+	int scanline = param;
 
-	switch (cpu_getiloops(device))
-	{
-		case 0:
-			device_set_input_line(device, M68K_IRQ_2, HOLD_LINE);
-			break;
+	if(scanline == 256) // vblank-out irq
+		machine().device("maincpu")->execute().set_input_line(M68K_IRQ_2, ASSERT_LINE);
 
-		case 1:
-			if (k053246_is_irq_enabled(state->m_k053246))
-				device_set_input_line(device, M68K_IRQ_4, HOLD_LINE);
-			break;
-	}
+	if(scanline == 0 && k053246_is_irq_enabled(m_k053246)) // vblank-in irq
+		machine().device("maincpu")->execute().set_input_line(M68K_IRQ_4, HOLD_LINE); //auto-acks apparently
 }
 
 #if 0
-static READ16_HANDLER( dbzcontrol_r )
+READ16_MEMBER(dbz_state::dbzcontrol_r)
 {
-	dbz_state *state = space->machine().driver_data<dbz_state>();
-	return state->m_control;
+	return m_control;
 }
 #endif
 
-static WRITE16_HANDLER( dbzcontrol_w )
+WRITE16_MEMBER(dbz_state::dbzcontrol_w)
 {
-	dbz_state *state = space->machine().driver_data<dbz_state>();
 	/* bit 10 = enable '246 readback */
 
-	COMBINE_DATA(&state->m_control);
+	COMBINE_DATA(&m_control);
 
 	if (data & 0x400)
-		k053246_set_objcha_line(state->m_k053246, ASSERT_LINE);
+		k053246_set_objcha_line(m_k053246, ASSERT_LINE);
 	else
-		k053246_set_objcha_line(state->m_k053246, CLEAR_LINE);
+		k053246_set_objcha_line(m_k053246, CLEAR_LINE);
 
-	coin_counter_w(space->machine(), 0, data & 1);
-	coin_counter_w(space->machine(), 1, data & 2);
+	coin_counter_w(machine(), 0, data & 1);
+	coin_counter_w(machine(), 1, data & 2);
 }
 
-static WRITE16_HANDLER( dbz_sound_command_w )
+WRITE16_MEMBER(dbz_state::dbz_sound_command_w)
 {
-	soundlatch_w(space, 0, data >> 8);
+	soundlatch_byte_w(space, 0, data >> 8);
 }
 
-static WRITE16_HANDLER( dbz_sound_cause_nmi )
+WRITE16_MEMBER(dbz_state::dbz_sound_cause_nmi)
 {
-	dbz_state *state = space->machine().driver_data<dbz_state>();
-	device_set_input_line(state->m_audiocpu, INPUT_LINE_NMI, PULSE_LINE);
+	m_audiocpu->set_input_line(INPUT_LINE_NMI, PULSE_LINE);
 }
 
-static void dbz_sound_irq( device_t *device, int irq )
-{
-	dbz_state *state = device->machine().driver_data<dbz_state>();
 
-	if (irq)
-		device_set_input_line(state->m_audiocpu, 0, ASSERT_LINE);
-	else
-		device_set_input_line(state->m_audiocpu, 0, CLEAR_LINE);
-}
-
-static ADDRESS_MAP_START( dbz_map, AS_PROGRAM, 16 )
+static ADDRESS_MAP_START( dbz_map, AS_PROGRAM, 16, dbz_state )
 	AM_RANGE(0x000000, 0x0fffff) AM_ROM
 	AM_RANGE(0x480000, 0x48ffff) AM_RAM
-	AM_RANGE(0x490000, 0x491fff) AM_DEVREADWRITE("k056832", k056832_ram_word_r, k056832_ram_word_w)	// '157 RAM is mirrored twice
-	AM_RANGE(0x492000, 0x493fff) AM_DEVREADWRITE("k056832", k056832_ram_word_r, k056832_ram_word_w)
-	AM_RANGE(0x498000, 0x49ffff) AM_DEVREAD("k056832", k056832_rom_word_8000_r)	// code near a60 in dbz2, subroutine at 730 in dbz
-	AM_RANGE(0x4a0000, 0x4a0fff) AM_DEVREADWRITE("k053246", k053247_word_r, k053247_word_w)
+	AM_RANGE(0x490000, 0x491fff) AM_DEVREADWRITE_LEGACY("k056832", k056832_ram_word_r, k056832_ram_word_w)  // '157 RAM is mirrored twice
+	AM_RANGE(0x492000, 0x493fff) AM_DEVREADWRITE_LEGACY("k056832", k056832_ram_word_r, k056832_ram_word_w)
+	AM_RANGE(0x498000, 0x49ffff) AM_DEVREAD_LEGACY("k056832", k056832_rom_word_8000_r)  // code near a60 in dbz2, subroutine at 730 in dbz
+	AM_RANGE(0x4a0000, 0x4a0fff) AM_DEVREADWRITE_LEGACY("k053246", k053247_word_r, k053247_word_w)
 	AM_RANGE(0x4a1000, 0x4a3fff) AM_RAM
-	AM_RANGE(0x4a8000, 0x4abfff) AM_RAM_WRITE(paletteram16_xRRRRRGGGGGBBBBB_word_w) AM_BASE_GENERIC(paletteram) // palette
-	AM_RANGE(0x4c0000, 0x4c0001) AM_DEVREAD("k053246", k053246_word_r)
-	AM_RANGE(0x4c0000, 0x4c0007) AM_DEVWRITE("k053246", k053246_word_w)
-	AM_RANGE(0x4c4000, 0x4c4007) AM_DEVWRITE("k053246", k053246_word_w)
-	AM_RANGE(0x4c8000, 0x4c8007) AM_DEVWRITE("k056832", k056832_b_word_w)
-	AM_RANGE(0x4cc000, 0x4cc03f) AM_DEVWRITE("k056832", k056832_word_w)
-	AM_RANGE(0x4d0000, 0x4d001f) AM_DEVWRITE("k053936_1", k053936_ctrl_w)
-	AM_RANGE(0x4d4000, 0x4d401f) AM_DEVWRITE("k053936_2", k053936_ctrl_w)
+	AM_RANGE(0x4a8000, 0x4abfff) AM_RAM_WRITE(paletteram_xRRRRRGGGGGBBBBB_word_w) AM_SHARE("paletteram") // palette
+	AM_RANGE(0x4c0000, 0x4c0001) AM_DEVREAD_LEGACY("k053246", k053246_word_r)
+	AM_RANGE(0x4c0000, 0x4c0007) AM_DEVWRITE_LEGACY("k053246", k053246_word_w)
+	AM_RANGE(0x4c4000, 0x4c4007) AM_DEVWRITE_LEGACY("k053246", k053246_word_w)
+	AM_RANGE(0x4c8000, 0x4c8007) AM_DEVWRITE_LEGACY("k056832", k056832_b_word_w)
+	AM_RANGE(0x4cc000, 0x4cc03f) AM_DEVWRITE_LEGACY("k056832", k056832_word_w)
+	AM_RANGE(0x4d0000, 0x4d001f) AM_DEVWRITE_LEGACY("k053936_1", k053936_ctrl_w)
+	AM_RANGE(0x4d4000, 0x4d401f) AM_DEVWRITE_LEGACY("k053936_2", k053936_ctrl_w)
 	AM_RANGE(0x4e0000, 0x4e0001) AM_READ_PORT("P1_P2")
 	AM_RANGE(0x4e0002, 0x4e0003) AM_READ_PORT("SYSTEM_DSW1")
 	AM_RANGE(0x4e4000, 0x4e4001) AM_READ_PORT("DSW2")
@@ -146,29 +128,29 @@ static ADDRESS_MAP_START( dbz_map, AS_PROGRAM, 16 )
 	AM_RANGE(0x4ec000, 0x4ec001) AM_WRITE(dbzcontrol_w)
 	AM_RANGE(0x4f0000, 0x4f0001) AM_WRITE(dbz_sound_command_w)
 	AM_RANGE(0x4f4000, 0x4f4001) AM_WRITE(dbz_sound_cause_nmi)
-	AM_RANGE(0x4f8000, 0x4f801f) AM_WRITENOP		// 251 #1
-	AM_RANGE(0x4fc000, 0x4fc01f) AM_DEVWRITE("k053251", k053251_lsb_w)	// 251 #2
+	AM_RANGE(0x4f8000, 0x4f801f) AM_DEVREADWRITE8_LEGACY("k053252",k053252_r,k053252_w,0xff00)      // 251 #1
+	AM_RANGE(0x4fc000, 0x4fc01f) AM_DEVWRITE_LEGACY("k053251", k053251_lsb_w)   // 251 #2
 
-	AM_RANGE(0x500000, 0x501fff) AM_RAM_WRITE(dbz_bg2_videoram_w) AM_BASE_MEMBER(dbz_state, m_bg2_videoram)
-	AM_RANGE(0x508000, 0x509fff) AM_RAM_WRITE(dbz_bg1_videoram_w) AM_BASE_MEMBER(dbz_state, m_bg1_videoram)
-	AM_RANGE(0x510000, 0x513fff) AM_DEVREADWRITE("k053936_1", k053936_linectrl_r, k053936_linectrl_w) // ?? guess, it might not be
-	AM_RANGE(0x518000, 0x51bfff) AM_DEVREADWRITE("k053936_2", k053936_linectrl_r, k053936_linectrl_w) // ?? guess, it might not be
-	AM_RANGE(0x600000, 0x6fffff) AM_READNOP 			// PSAC 1 ROM readback window
-	AM_RANGE(0x700000, 0x7fffff) AM_READNOP 			// PSAC 2 ROM readback window
+	AM_RANGE(0x500000, 0x501fff) AM_RAM_WRITE(dbz_bg2_videoram_w) AM_SHARE("bg2_videoram")
+	AM_RANGE(0x508000, 0x509fff) AM_RAM_WRITE(dbz_bg1_videoram_w) AM_SHARE("bg1_videoram")
+	AM_RANGE(0x510000, 0x513fff) AM_DEVREADWRITE_LEGACY("k053936_1", k053936_linectrl_r, k053936_linectrl_w) // ?? guess, it might not be
+	AM_RANGE(0x518000, 0x51bfff) AM_DEVREADWRITE_LEGACY("k053936_2", k053936_linectrl_r, k053936_linectrl_w) // ?? guess, it might not be
+	AM_RANGE(0x600000, 0x6fffff) AM_READNOP             // PSAC 1 ROM readback window
+	AM_RANGE(0x700000, 0x7fffff) AM_READNOP             // PSAC 2 ROM readback window
 ADDRESS_MAP_END
 
 /* dbz sound */
 /* IRQ: from YM2151.  NMI: from 68000.  Port 0: write to ack NMI */
 
-static ADDRESS_MAP_START( dbz_sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( dbz_sound_map, AS_PROGRAM, 8, dbz_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0x8000, 0xbfff) AM_RAM
-	AM_RANGE(0xc000, 0xc001) AM_DEVREADWRITE("ymsnd", ym2151_r, ym2151_w)
-	AM_RANGE(0xd000, 0xd002) AM_DEVREADWRITE_MODERN("oki", okim6295_device, read, write)
-	AM_RANGE(0xe000, 0xe001) AM_READ(soundlatch_r)
+	AM_RANGE(0xc000, 0xc001) AM_DEVREADWRITE("ymsnd", ym2151_device, read, write)
+	AM_RANGE(0xd000, 0xd002) AM_DEVREADWRITE("oki", okim6295_device, read, write)
+	AM_RANGE(0xe000, 0xe001) AM_READ(soundlatch_byte_r)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( dbz_sound_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( dbz_sound_io_map, AS_IO, 8, dbz_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0x00) AM_WRITENOP
 ADDRESS_MAP_END
@@ -206,30 +188,30 @@ static INPUT_PORTS_START( dbz )
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(2)
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(1)
 
-	PORT_DIPNAME( 0x0300, 0x0300, DEF_STR( Difficulty ) )	// I think this is right, but can't stomach the game long enough to check
+	PORT_DIPNAME( 0x0300, 0x0300, DEF_STR( Difficulty ) )   PORT_DIPLOCATION("SW1:1,2") // I think this is right, but can't stomach the game long enough to check
 	PORT_DIPSETTING(      0x0100, DEF_STR( Easy ) )
 	PORT_DIPSETTING(      0x0300, DEF_STR( Normal ) )
 	PORT_DIPSETTING(      0x0200, DEF_STR( Hard ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( Hardest ) )
-	PORT_DIPUNKNOWN( 0x0400, 0x0400 )						// seems unused
-	PORT_DIPNAME( 0x0800, 0x0800, DEF_STR( Flip_Screen ) )	// Definitely correct
+	PORT_DIPUNKNOWN_DIPLOC( 0x0400, 0x0400, "SW1:3" )                       // seems unused
+	PORT_DIPNAME( 0x0800, 0x0800, DEF_STR( Flip_Screen ) )  PORT_DIPLOCATION("SW1:4")   // Definitely correct
 	PORT_DIPSETTING(      0x0800, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPUNKNOWN( 0x1000, 0x1000 )
-	PORT_SERVICE( 0x2000, 0x2000 )
-	PORT_DIPNAME( 0x4000, 0x0000, DEF_STR( Language ) )
+	PORT_DIPUNKNOWN_DIPLOC( 0x1000, 0x1000, "SW1:5" )
+	PORT_SERVICE_DIPLOC(  0x2000, IP_ACTIVE_LOW, "SW1:6" )
+	PORT_DIPNAME( 0x4000, 0x0000, DEF_STR( Language ) ) PORT_DIPLOCATION("SW1:7")
 	PORT_DIPSETTING(      0x0000, DEF_STR( English ) )
 	PORT_DIPSETTING(      0x4000, DEF_STR( Japanese ) )
-	PORT_DIPNAME( 0x8000, 0x0000, "Mask ROM Test" )			//NOP'd
+	PORT_DIPNAME( 0x8000, 0x0000, "Mask ROM Test" )     PORT_DIPLOCATION("SW1:8")           //NOP'd
 	PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x8000, DEF_STR( On ) )
 
 	PORT_START("DSW2")
-	PORT_BIT( 0x00ff, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(custom_port_read, "FAKE")
-	PORT_BIT( 0xff00, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(custom_port_read, "FAKE")
+	PORT_BIT( 0x00ff, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, driver_device,custom_port_read, "FAKE")
+	PORT_BIT( 0xff00, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, driver_device,custom_port_read, "FAKE")
 
 	PORT_START("FAKE")
-	PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( Coin_A ) )
+	PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( Coin_A ) )   PORT_DIPLOCATION("SW2:1,2,3,4")
 	PORT_DIPSETTING(    0x02, DEF_STR( 4C_1C ) )
 	PORT_DIPSETTING(    0x05, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( 2C_1C ) )
@@ -246,7 +228,7 @@ static INPUT_PORTS_START( dbz )
 	PORT_DIPSETTING(    0x0a, DEF_STR( 1C_6C ) )
 	PORT_DIPSETTING(    0x09, DEF_STR( 1C_7C ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
-	PORT_DIPNAME( 0xf0, 0xf0, DEF_STR( Coin_B ) )
+	PORT_DIPNAME( 0xf0, 0xf0, DEF_STR( Coin_B ) )   PORT_DIPLOCATION("SW2:5,6,7,8")
 	PORT_DIPSETTING(    0x20, DEF_STR( 4C_1C ) )
 	PORT_DIPSETTING(    0x50, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( 2C_1C ) )
@@ -266,27 +248,27 @@ static INPUT_PORTS_START( dbz )
 	/* "No Coin B" = coins produce sound, but no effect on coin counter */
 INPUT_PORTS_END
 
+static INPUT_PORTS_START( dbza )
+	PORT_INCLUDE( dbz )
+
+	PORT_MODIFY("SYSTEM_DSW1")
+	PORT_DIPUNKNOWN_DIPLOC( 0x8000, 0x8000, "SW1:8" )                       // tests are always performed at start
+INPUT_PORTS_END
+
 static INPUT_PORTS_START( dbz2 )
 	PORT_INCLUDE( dbz )
 
 	PORT_MODIFY("SYSTEM_DSW1")
-	PORT_DIPNAME( 0x0400, 0x0400, DEF_STR( Flip_Screen ) )
+	PORT_DIPNAME( 0x0400, 0x0400, DEF_STR( Flip_Screen ) )  PORT_DIPLOCATION("SW1:3")
 	PORT_DIPSETTING(      0x0400, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x0800, 0x0800, DEF_STR( Demo_Sounds ) )
+	PORT_DIPNAME( 0x0800, 0x0800, DEF_STR( Demo_Sounds ) )  PORT_DIPLOCATION("SW1:4")
 	PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0800, DEF_STR( On ) )
-	PORT_DIPNAME( 0x1000, 0x1000, DEF_STR( Level_Select ) )
+	PORT_DIPNAME( 0x1000, 0x1000, DEF_STR( Level_Select ) ) PORT_DIPLOCATION("SW1:5")
 	PORT_DIPSETTING(      0x1000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 INPUT_PORTS_END
-
-/**********************************************************************************/
-
-static const ym2151_interface ym2151_config =
-{
-	dbz_sound_irq
-};
 
 /**********************************************************************************/
 
@@ -297,7 +279,7 @@ static const gfx_layout bglayout =
 	4,
 	{ 0, 1, 2, 3 },
 	{ 0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4, 8*4,
-	  9*4, 10*4, 11*4, 12*4, 13*4, 14*4, 15*4 },
+		9*4, 10*4, 11*4, 12*4, 13*4, 14*4, 15*4 },
 	{ 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64,
 			8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64 },
 	128*8
@@ -335,38 +317,51 @@ static const k053936_interface dbz_k053936_intf =
 	1, -46, -16
 };
 
-
-static MACHINE_START( dbz )
+WRITE_LINE_MEMBER(dbz_state::dbz_irq2_ack_w)
 {
-	dbz_state *state = machine.driver_data<dbz_state>();
-
-	state->m_maincpu = machine.device("maincpu");
-	state->m_audiocpu = machine.device("audiocpu");
-	state->m_k053936_1 = machine.device("k053936_1");
-	state->m_k053936_2 = machine.device("k053936_2");
-	state->m_k056832 = machine.device("k056832");
-	state->m_k053246 = machine.device("k053246");
-	state->m_k053251 = machine.device("k053251");
-
-	state->save_item(NAME(state->m_control));
-	state->save_item(NAME(state->m_sprite_colorbase));
-	state->save_item(NAME(state->m_layerpri));
-	state->save_item(NAME(state->m_layer_colorbase));
+	machine().device("maincpu")->execute().set_input_line(M68K_IRQ_2, CLEAR_LINE);
 }
 
-static MACHINE_RESET( dbz )
+
+static const k053252_interface dbz_k053252_intf =
 {
-	dbz_state *state = machine.driver_data<dbz_state>();
+	"screen",
+	DEVCB_NULL,
+	DEVCB_NULL,
+	DEVCB_DRIVER_LINE_MEMBER(dbz_state,dbz_irq2_ack_w),
+	DEVCB_NULL,
+	0, 0
+};
+
+void dbz_state::machine_start()
+{
+
+	m_maincpu = machine().device<cpu_device>("maincpu");
+	m_audiocpu = machine().device<cpu_device>("audiocpu");
+	m_k053936_1 = machine().device("k053936_1");
+	m_k053936_2 = machine().device("k053936_2");
+	m_k056832 = machine().device("k056832");
+	m_k053246 = machine().device("k053246");
+	m_k053251 = machine().device("k053251");
+
+	save_item(NAME(m_control));
+	save_item(NAME(m_sprite_colorbase));
+	save_item(NAME(m_layerpri));
+	save_item(NAME(m_layer_colorbase));
+}
+
+void dbz_state::machine_reset()
+{
 	int i;
 
 	for (i = 0; i < 5; i++)
-		state->m_layerpri[i] = 0;
+		m_layerpri[i] = 0;
 
 	for (i = 0; i < 6; i++)
-		state->m_layer_colorbase[i] = 0;
+		m_layer_colorbase[i] = 0;
 
-	state->m_sprite_colorbase = 0;
-	state->m_control = 0;
+	m_sprite_colorbase = 0;
+	m_control = 0;
 }
 
 static MACHINE_CONFIG_START( dbz, dbz_state )
@@ -374,14 +369,12 @@ static MACHINE_CONFIG_START( dbz, dbz_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M68000, 16000000)
 	MCFG_CPU_PROGRAM_MAP(dbz_map)
-	MCFG_CPU_VBLANK_INT_HACK(dbz_interrupt,2)
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("scantimer", dbz_state, dbz_scanline, "screen", 0, 1)
 
 	MCFG_CPU_ADD("audiocpu", Z80, 4000000)
 	MCFG_CPU_PROGRAM_MAP(dbz_sound_map)
 	MCFG_CPU_IO_MAP(dbz_sound_io_map)
 
-	MCFG_MACHINE_START(dbz)
-	MCFG_MACHINE_RESET(dbz)
 
 	/* video hardware */
 	MCFG_VIDEO_ATTRIBUTES(VIDEO_HAS_SHADOWS)
@@ -389,14 +382,12 @@ static MACHINE_CONFIG_START( dbz, dbz_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(55)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
-	MCFG_SCREEN_SIZE(64*8, 32*8)
+	MCFG_SCREEN_SIZE(64*8, 40*8)
 	MCFG_SCREEN_VISIBLE_AREA(0, 48*8-1, 0, 32*8-1)
-	MCFG_SCREEN_UPDATE(dbz)
+	MCFG_SCREEN_UPDATE_DRIVER(dbz_state, screen_update_dbz)
 
 	MCFG_GFXDECODE(dbz)
 
-	MCFG_VIDEO_START(dbz)
 	MCFG_PALETTE_LENGTH(0x4000/2)
 
 	MCFG_K056832_ADD("k056832", dbz_k056832_intf)
@@ -404,12 +395,13 @@ static MACHINE_CONFIG_START( dbz, dbz_state )
 	MCFG_K053251_ADD("k053251")
 	MCFG_K053936_ADD("k053936_1", dbz_k053936_intf)
 	MCFG_K053936_ADD("k053936_2", dbz_k053936_intf)
+	MCFG_K053252_ADD("k053252", 16000000/2, dbz_k053252_intf)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_STEREO("lspeaker", "rspeaker")
 
-	MCFG_SOUND_ADD("ymsnd", YM2151, 4000000)
-	MCFG_SOUND_CONFIG(ym2151_config)
+	MCFG_YM2151_ADD("ymsnd", 4000000)
+	MCFG_YM2151_IRQ_HANDLER(INPUTLINE("audiocpu", 0))
 	MCFG_SOUND_ROUTE(0, "lspeaker", 1.0)
 	MCFG_SOUND_ROUTE(1, "rspeaker", 1.0)
 
@@ -423,10 +415,41 @@ MACHINE_CONFIG_END
 ROM_START( dbz )
 	/* main program */
 	ROM_REGION( 0x400000, "maincpu", 0)
-	ROM_LOAD16_BYTE( "222a11.9e", 0x000000, 0x80000, CRC(60c7d9b2) SHA1(718ef89e89b3943845e91bedfc5c1d26229f9fe5) )
-	ROM_LOAD16_BYTE( "222a12.9f", 0x000001, 0x80000, CRC(6ebc6853) SHA1(e9b2068246228968cc6b8554215563cacaa5ba9f) )
+	ROM_LOAD16_BYTE( "222b11.9e", 0x000000, 0x80000, CRC(4c6b75e9) SHA1(8b1d67f8c8b64bb38f824506eca4c6966215f233) )
+	ROM_LOAD16_BYTE( "222b12.9f", 0x000001, 0x80000, CRC(48637fce) SHA1(d3db0d56b70b9a4b20c645dda15327ec60e69d81) )
 
-	ROM_REGION( 0x400000, "user1", 0)
+	/* sound program */
+	ROM_REGION( 0x010000, "audiocpu", 0 )
+	ROM_LOAD("222a10.5e", 0x000000, 0x08000, CRC(1c93e30a) SHA1(8545a0ac5126b3c855e1901b186f57820699895d) )
+
+	/* tiles */
+	ROM_REGION( 0x400000, "gfx1", 0)
+	ROM_LOAD( "222a01.27c", 0x000000, 0x200000, CRC(9fce4ed4) SHA1(81e19375b351ee247f066434dd595149333d73c5) )
+	ROM_LOAD( "222a02.27e", 0x200000, 0x200000, CRC(651acaa5) SHA1(33942a90fb294b5da6a48e5bfb741b31babca188) )
+
+	/* sprites */
+	ROM_REGION( 0x800000, "gfx2", 0)
+	ROM_LOAD64_WORD( "222a04.3j", 0x000000, 0x200000, CRC(2533b95a) SHA1(35910836b6030130d742eae6c4bf1cdf1ff43fa4) )
+	ROM_LOAD64_WORD( "222a05.1j", 0x000002, 0x200000, CRC(731b7f93) SHA1(b676fff2ede5aa72c49fe12736cd60766462fe0b) )
+	ROM_LOAD64_WORD( "222a06.3l", 0x000004, 0x200000, CRC(97b767d3) SHA1(3d879c431586da2f88c632ab1a531b4a5ec96939) )
+	ROM_LOAD64_WORD( "222a07.1l", 0x000006, 0x200000, CRC(430bc873) SHA1(ea483195bb7f20ef3df7cfba153e5f6f8d53e5f9) )
+
+	/* K053536 PSAC-2 #1 */
+	ROM_REGION( 0x200000, "gfx3", 0)
+	ROM_LOAD( "222a08.25k", 0x000000, 0x200000, CRC(6410ee1b) SHA1(2296aafd3ba25f63a12130f7b58de53e88f14e92) )
+
+	/* K053536 PSAC-2 #2 */
+	ROM_REGION( 0x200000, "gfx4", 0)
+	ROM_LOAD( "222a09.25l", 0x000000, 0x200000, CRC(f7b3f070) SHA1(50ebd8cfcda292a3df5664de50f9212108d58923) )
+
+	/* sound data */
+	ROM_REGION( 0x40000, "oki", 0)
+	ROM_LOAD( "222a03.7c", 0x000000, 0x40000, CRC(1924467b) SHA1(57922090509bcc63b4783e8f2c5e95afd2090b87) )
+ROM_END
+
+ROM_START( dbza )
+	/* main program */
+	ROM_REGION( 0x400000, "maincpu", 0)
 	ROM_LOAD16_BYTE( "222a11.9e", 0x000000, 0x80000, CRC(60c7d9b2) SHA1(718ef89e89b3943845e91bedfc5c1d26229f9fe5) )
 	ROM_LOAD16_BYTE( "222a12.9f", 0x000001, 0x80000, CRC(6ebc6853) SHA1(e9b2068246228968cc6b8554215563cacaa5ba9f) )
 
@@ -496,26 +519,99 @@ ROM_START( dbz2 )
 	ROM_LOAD( "pcm.7c", 0x000000, 0x40000, CRC(b58c884a) SHA1(0e2a7267e9dff29c9af25558081ec9d56629bc43) )
 ROM_END
 
-static DRIVER_INIT( dbz )
+DRIVER_INIT_MEMBER(dbz_state,dbz)
 {
 	UINT16 *ROM;
 
-	ROM = (UINT16 *)machine.region("maincpu")->base();
+	ROM = (UINT16 *)machine().root_device().memregion("maincpu")->base();
+
+	// to avoid crash during loop at 0x00076e after D4 > 0x80 (reading tiles region out of bounds)
+	ROM[0x76c/2] = 0x007f;    /* 0x00ff */
+	// nop out dbz1's mask rom test
+	// tile ROM test
+	ROM[0x7b0/2] = 0x4e71;    /* 0x0c43 - cmpi.w  #-$1e0d, D3 */
+	ROM[0x7b2/2] = 0x4e71;    /* 0xe1f3 */
+	ROM[0x7b4/2] = 0x4e71;    /* 0x6600 - bne     $7d6 */
+	ROM[0x7b6/2] = 0x4e71;    /* 0x0020 */
+	ROM[0x7c0/2] = 0x4e71;    /* 0x0c45 - cmpi.w  #-$7aad, D5 */
+	ROM[0x7c2/2] = 0x4e71;    /* 0x8553 */
+	ROM[0x7c4/2] = 0x4e71;    /* 0x6600 - bne     $7d6 */
+	ROM[0x7c6/2] = 0x4e71;    /* 0x0010 */
+	// PSAC2 ROM test (A and B)
+	ROM[0x9a8/2] = 0x4e71;    /* 0x0c43 - cmpi.w  #$43c0, D3 */
+	ROM[0x9aa/2] = 0x4e71;    /* 0x43c0 */
+	ROM[0x9ac/2] = 0x4e71;    /* 0x6600 - bne     $a00 */
+	ROM[0x9ae/2] = 0x4e71;    /* 0x0052 */
+	ROM[0x9ea/2] = 0x4e71;    /* 0x0c44 - cmpi.w  #-$13de, D4 */
+	ROM[0x9ec/2] = 0x4e71;    /* 0xec22 */
+	ROM[0x9ee/2] = 0x4e71;    /* 0x6600 - bne     $a00 */
+	ROM[0x9f0/2] = 0x4e71;    /* 0x0010 */
+	// prog ROM test
+	ROM[0x80c/2] = 0x4e71;    /* 0xb650 - cmp.w   (A0), D3 */
+	ROM[0x80e/2] = 0x4e71;    /* 0x6600 - bne     $820 */
+	ROM[0x810/2] = 0x4e71;    /* 0x005e */
+}
+
+DRIVER_INIT_MEMBER(dbz_state,dbza)
+{
+	UINT16 *ROM;
+
+	ROM = (UINT16 *)machine().root_device().memregion("maincpu")->base();
 
 	// nop out dbz1's mask rom test
 	// tile ROM test
-	ROM[0x790/2] = 0x4e71;
-	ROM[0x792/2] = 0x4e71;
+	ROM[0x78c/2] = 0x4e71;    /* 0x0c43 - cmpi.w  #-$1236, D3 */
+	ROM[0x78e/2] = 0x4e71;    /* 0x0010 */
+	ROM[0x790/2] = 0x4e71;    /* 0x6600 - bne     $7a2 */
+	ROM[0x792/2] = 0x4e71;    /* 0x0010 */
 	// PSAC2 ROM test
-	ROM[0x982/2] = 0x4e71;
-	ROM[0x984/2] = 0x4e71;
-	ROM[0x986/2] = 0x4e71;
-	ROM[0x988/2] = 0x4e71;
-	ROM[0x98a/2] = 0x4e71;
-	ROM[0x98c/2] = 0x4e71;
-	ROM[0x98e/2] = 0x4e71;
-	ROM[0x990/2] = 0x4e71;
+	ROM[0x982/2] = 0x4e71;    /* 0x0c43 - cmpi.w  #$437e, D3 */
+	ROM[0x984/2] = 0x4e71;    /* 0x437e */
+	ROM[0x986/2] = 0x4e71;    /* 0x6600 - bne     $9a0 */
+	ROM[0x988/2] = 0x4e71;    /* 0x0018 */
+	ROM[0x98a/2] = 0x4e71;    /* 0x0c44 - cmpi.w  #$65e8, D4 */
+	ROM[0x98c/2] = 0x4e71;    /* 0x65e8 */
+	ROM[0x98e/2] = 0x4e71;    /* 0x6600 - bne     $9a0 */
+	ROM[0x990/2] = 0x4e71;    /* 0x0010 */
 }
 
-GAME( 1993, dbz,  0, dbz, dbz,  dbz,  ROT0, "Banpresto", "Dragonball Z", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
-GAME( 1994, dbz2, 0, dbz, dbz2, 0,    ROT0, "Banpresto", "Dragonball Z 2 - Super Battle", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
+DRIVER_INIT_MEMBER(dbz_state,dbz2)
+{
+	UINT16 *ROM;
+
+	ROM = (UINT16 *)machine().root_device().memregion("maincpu")->base();
+
+	// to avoid crash during loop at 0x000a4a after D4 > 0x80 (reading tiles region out of bounds)
+	ROM[0xa48/2] = 0x007f;    /* 0x00ff */
+	// nop out dbz1's mask rom test
+	// tile ROM test
+	ROM[0xa88/2] = 0x4e71;    /* 0x0c43 - cmpi.w  #$e58, D3 */
+	ROM[0xa8a/2] = 0x4e71;    /* 0x0e58 */
+	ROM[0xa8c/2] = 0x4e71;    /* 0x6600 - bne     $aae */
+	ROM[0xa8e/2] = 0x4e71;    /* 0x0020 */
+	ROM[0xa98/2] = 0x4e71;    /* 0x0c45 - cmpi.w  #-$3d20, D5 */
+	ROM[0xa9a/2] = 0x4e71;    /* 0xc2e0 */
+	ROM[0xa9c/2] = 0x4e71;    /* 0x6600 - bne     $aae */
+	ROM[0xa9e/2] = 0x4e71;    /* 0x0010 */
+	// PSAC2 ROM test (0 to 3)
+	ROM[0xc66/2] = 0x4e71;    /* 0xb549 - cmpm.w  (A1)+, (A2)+ */
+	ROM[0xc68/2] = 0x4e71;    /* 0x6600 - bne     $cc8 */
+	ROM[0xc6a/2] = 0x4e71;    /* 0x005e */
+	ROM[0xc7c/2] = 0x4e71;    /* 0xb549 - cmpm.w  (A1)+, (A2)+ */
+	ROM[0xc7e/2] = 0x4e71;    /* 0x6600 - bne     $cc8 */
+	ROM[0xc80/2] = 0x4e71;    /* 0x0048 */
+	ROM[0xc9e/2] = 0x4e71;    /* 0xb549 - cmpm.w  (A1)+, (A2)+ */
+	ROM[0xca0/2] = 0x4e71;    /* 0x6600 - bne     $cc8 */
+	ROM[0xca2/2] = 0x4e71;    /* 0x0026 */
+	ROM[0xcb4/2] = 0x4e71;    /* 0xb549 - cmpm.w  (A1)+, (A2)+ */
+	ROM[0xcb6/2] = 0x4e71;    /* 0x6600 - bne     $cc8 */
+	ROM[0xcb8/2] = 0x4e71;    /* 0x0010 */
+	// prog ROM test
+	ROM[0xae4/2] = 0x4e71;    /* 0xb650 - cmp.w   (A0), D3 */
+	ROM[0xae6/2] = 0x4e71;    /* 0x6600 - bne     $af8 */
+	ROM[0xae8/2] = 0x4e71;    /* 0x005e */
+}
+
+GAME( 1993, dbz,  0,   dbz, dbz, dbz_state,  dbz,  ROT0, "Banpresto", "Dragonball Z (rev B)", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE ) // crashes MAME in tile/PSAC2 ROM test
+GAME( 1993, dbza, dbz, dbz, dbza, dbz_state, dbza, ROT0, "Banpresto", "Dragonball Z (rev A)", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE )
+GAME( 1994, dbz2, 0,   dbz, dbz2, dbz_state, dbz2, ROT0, "Banpresto", "Dragonball Z 2 - Super Battle", GAME_IMPERFECT_GRAPHICS | GAME_SUPPORTS_SAVE ) // crashes MAME in tile/PSAC2 ROM test

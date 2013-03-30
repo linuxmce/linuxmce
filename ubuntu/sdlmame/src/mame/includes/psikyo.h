@@ -7,19 +7,23 @@
 class psikyo_state : public driver_device
 {
 public:
-	psikyo_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	psikyo_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_spriteram(*this, "spriteram"),
+		m_vram_0(*this, "vram_0"),
+		m_vram_1(*this, "vram_1"),
+		m_vregs(*this, "vregs"),
+		m_bootleg_spritebuffer(*this, "boot_spritebuf"){ }
 
 	/* memory pointers */
-	UINT32 *       m_vram_0;
-	UINT32 *       m_vram_1;
-	UINT32 *       m_vregs;
+	required_shared_ptr<UINT32> m_spriteram;
+	required_shared_ptr<UINT32> m_vram_0;
+	required_shared_ptr<UINT32> m_vram_1;
+	required_shared_ptr<UINT32> m_vregs;
+	optional_shared_ptr<UINT32> m_bootleg_spritebuffer;
 	UINT32 *       m_spritebuf1;
 	UINT32 *       m_spritebuf2;
-	UINT32 *       m_bootleg_spritebuffer;
 //      UINT32 *       m_paletteram;  // currently this uses generic palette handling
-//  UINT32 *       m_spriteram;   // currently this uses generic buffered spriteram
-//  size_t         m_spriteram_size;
 
 	/* video-related */
 	tilemap_t        *m_tilemap_0_size0;
@@ -33,8 +37,6 @@ public:
 	int            m_tilemap_0_bank;
 	int            m_tilemap_1_bank;
 	int            m_ka302c_banking;
-	UINT32 *m_spriteram;
-	size_t m_spriteram_size;
 
 	/* misc */
 	UINT8          m_soundlatch;
@@ -42,7 +44,7 @@ public:
 	int            m_mcu_status;
 
 	/* devices */
-	device_t *m_audiocpu;
+	cpu_device *m_audiocpu;
 
 	/* game-specific */
 	// 1945 MCU
@@ -56,18 +58,43 @@ public:
 	UINT8          m_s1945_mcu_control;
 	UINT8          m_s1945_mcu_bctrl;
 	const UINT8    *m_s1945_mcu_table;
+	DECLARE_READ32_MEMBER(sngkace_input_r);
+	DECLARE_READ32_MEMBER(gunbird_input_r);
+	DECLARE_WRITE32_MEMBER(psikyo_soundlatch_w);
+	DECLARE_WRITE32_MEMBER(s1945_soundlatch_w);
+	DECLARE_WRITE32_MEMBER(s1945_mcu_w);
+	DECLARE_READ32_MEMBER(s1945_mcu_r);
+	DECLARE_READ32_MEMBER(s1945_input_r);
+	DECLARE_READ32_MEMBER(s1945bl_oki_r);
+	DECLARE_WRITE32_MEMBER(s1945bl_oki_w);
+	DECLARE_READ8_MEMBER(psikyo_soundlatch_r);
+	DECLARE_WRITE8_MEMBER(psikyo_clear_nmi_w);
+	DECLARE_WRITE8_MEMBER(sngkace_sound_bankswitch_w);
+	DECLARE_WRITE8_MEMBER(gunbird_sound_bankswitch_w);
+	DECLARE_WRITE32_MEMBER(psikyo_vram_0_w);
+	DECLARE_WRITE32_MEMBER(psikyo_vram_1_w);
+	DECLARE_CUSTOM_INPUT_MEMBER(z80_nmi_r);
+	DECLARE_CUSTOM_INPUT_MEMBER(mcu_status_r);
+	DECLARE_DRIVER_INIT(s1945a);
+	DECLARE_DRIVER_INIT(s1945j);
+	DECLARE_DRIVER_INIT(sngkace);
+	DECLARE_DRIVER_INIT(s1945);
+	DECLARE_DRIVER_INIT(s1945bl);
+	DECLARE_DRIVER_INIT(tengai);
+	DECLARE_DRIVER_INIT(s1945jn);
+	DECLARE_DRIVER_INIT(gunbird);
+	TILE_GET_INFO_MEMBER(get_tile_info_0);
+	TILE_GET_INFO_MEMBER(get_tile_info_1);
+	virtual void machine_start();
+	virtual void machine_reset();
+	DECLARE_VIDEO_START(sngkace);
+	DECLARE_VIDEO_START(psikyo);
+	UINT32 screen_update_psikyo(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_psikyo_bootleg(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	void screen_eof_psikyo(screen_device &screen, bool state);
+	TIMER_CALLBACK_MEMBER(psikyo_soundlatch_callback);
 };
-
 
 /*----------- defined in video/psikyo.c -----------*/
 
 void psikyo_switch_banks(running_machine &machine, int tmap, int bank);
-
-WRITE32_HANDLER( psikyo_vram_0_w );
-WRITE32_HANDLER( psikyo_vram_1_w );
-
-VIDEO_START( sngkace );
-VIDEO_START( psikyo );
-SCREEN_UPDATE( psikyo );
-SCREEN_UPDATE( psikyo_bootleg );
-SCREEN_EOF( psikyo );

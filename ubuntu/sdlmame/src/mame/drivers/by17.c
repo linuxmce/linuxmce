@@ -1,20 +1,32 @@
 /*
     Bally MPU AS-2518-17
 */
+
+
 #include "emu.h"
 #include "cpu/m6800/m6800.h"
-
-extern const char layout_pinball[];
 
 class by17_state : public driver_device
 {
 public:
-	by17_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	by17_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+			m_maincpu(*this, "maincpu")
+	{ }
+
+protected:
+
+	// devices
+	required_device<cpu_device> m_maincpu;
+
+	// driver_device overrides
+	virtual void machine_reset();
+public:
+	DECLARE_DRIVER_INIT(by17);
 };
 
 
-static ADDRESS_MAP_START( by17_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( by17_map, AS_PROGRAM, 8, by17_state )
 	AM_RANGE(0x0000, 0xffff) AM_NOP
 	ADDRESS_MAP_GLOBAL_MASK(0x7fff)
 	AM_RANGE(0x0000, 0x007f) AM_RAM
@@ -25,11 +37,11 @@ ADDRESS_MAP_END
 static INPUT_PORTS_START( by17 )
 INPUT_PORTS_END
 
-static MACHINE_RESET( by17 )
+void by17_state::machine_reset()
 {
 }
 
-static DRIVER_INIT( by17 )
+DRIVER_INIT_MEMBER(by17_state,by17)
 {
 }
 
@@ -37,11 +49,6 @@ static MACHINE_CONFIG_START( by17, by17_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6800, 1000000)
 	MCFG_CPU_PROGRAM_MAP(by17_map)
-
-	MCFG_MACHINE_RESET( by17 )
-
-	/* video hardware */
-	MCFG_DEFAULT_LAYOUT(layout_pinball)
 MACHINE_CONFIG_END
 
 /*--------------------------------
@@ -122,7 +129,7 @@ ROM_END
 ROM_START(nightr20)
 	ROM_REGION(0x10000, "maincpu", 0)
 	ROM_LOAD( "721-21_1.716", 0x1000, 0x0800, CRC(237c4060) SHA1(4ce3dba9189fe7666fc76a2c8ee7fff9b12d4c00))
-	ROM_LOAD( "720-20_6.716", 0x1800, 0x0800, CRC(0c17aa4d) SHA1(729e61a29691857112579efcdb96a35e8e5b1279))
+	ROM_LOAD( "720-20_6(__rev20).716", 0x1800, 0x0800, CRC(0c17aa4d) SHA1(729e61a29691857112579efcdb96a35e8e5b1279))
 	ROM_RELOAD( 0xf800, 0x0800)
 ROM_END
 
@@ -150,13 +157,14 @@ ROM_START(stk_sprs)
 	ROM_RELOAD( 0xf800, 0x0800)
 ROM_END
 
-GAME( 1978, blackjck, 0,		by17, by17, by17, ROT0, "Bally","Black Jack (Pinball)", GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME( 1976, bowarrow, 0,		by17, by17, by17, ROT0, "Bally","Bow & Arrow (Prototype)", GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME( 1977, eightbll, 0,		by17, by17, by17, ROT0, "Bally","Eight Ball", GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME( 1977, evelknie, 0,		by17, by17, by17, ROT0, "Bally","Evel Knievel", GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME( 1977, freedom,  0,		by17, by17, by17, ROT0, "Bally","Freedom", GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME( 1978, matahari, 0,		by17, by17, by17, ROT0, "Bally","Mata Hari", GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME( 1977, nightrdr, 0,		by17, by17, by17, ROT0, "Bally","Night Rider (rev. 21)", GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME( 1977, nightr20, nightrdr,	by17, by17, by17, ROT0, "Bally","Night Rider (rev. 20)", GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME( 1978, pwerplay, 0,		by17, by17, by17, ROT0, "Bally","Power Play (Pinball)", GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME( 1978, stk_sprs, 0,		by17, by17, by17, ROT0, "Bally","Strikes and Spares", GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
+
+GAME( 1978, blackjck, 0,        by17, by17, by17_state, by17, ROT0, "Bally","Black Jack (Pinball)", GAME_IS_SKELETON_MECHANICAL)
+GAME( 1976, bowarrow, 0,        by17, by17, by17_state, by17, ROT0, "Bally","Bow & Arrow (Prototype)", GAME_IS_SKELETON_MECHANICAL)
+GAME( 1977, eightbll, 0,        by17, by17, by17_state, by17, ROT0, "Bally","Eight Ball", GAME_IS_SKELETON_MECHANICAL)
+GAME( 1977, evelknie, 0,        by17, by17, by17_state, by17, ROT0, "Bally","Evel Knievel", GAME_IS_SKELETON_MECHANICAL)
+GAME( 1977, freedom,  0,        by17, by17, by17_state, by17, ROT0, "Bally","Freedom", GAME_IS_SKELETON_MECHANICAL)
+GAME( 1978, matahari, 0,        by17, by17, by17_state, by17, ROT0, "Bally","Mata Hari", GAME_IS_SKELETON_MECHANICAL)
+GAME( 1977, nightrdr, 0,        by17, by17, by17_state, by17, ROT0, "Bally","Night Rider (rev. 21)", GAME_IS_SKELETON_MECHANICAL)
+GAME( 1977, nightr20, nightrdr, by17, by17, by17_state, by17, ROT0, "Bally","Night Rider (rev. 20)", GAME_IS_SKELETON_MECHANICAL)
+GAME( 1978, pwerplay, 0,        by17, by17, by17_state, by17, ROT0, "Bally","Power Play (Pinball)", GAME_IS_SKELETON_MECHANICAL)
+GAME( 1978, stk_sprs, 0,        by17, by17, by17_state, by17, ROT0, "Bally","Strikes and Spares", GAME_IS_SKELETON_MECHANICAL)

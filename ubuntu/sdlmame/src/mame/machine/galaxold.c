@@ -11,128 +11,127 @@
 #include "machine/7474.h"
 #include "includes/galaxold.h"
 
-static int irq_line;
-
-static UINT8 _4in1_bank;
 
 static IRQ_CALLBACK(hunchbkg_irq_callback)
 {
+	//galaxold_state *state = device->machine().driver_data<galaxold_state>();
 	/* for some reason a call to cputag_set_input_line
-     * is significantly delayed ....
-     *
-     * cputag_set_input_line(device->machine(), "maincpu", 0, CLEAR_LINE);
-     *
-     * Therefore we reset the line without any detour ....
-     */
-	device_set_input_line(device->machine().firstcpu, 0, CLEAR_LINE);
-	//cpu_set_info(device->machine().firstcpu, CPUINFO_INT_INPUT_STATE + irq_line, CLEAR_LINE);
+	 * is significantly delayed ....
+	 *
+	 * device->machine().device("maincpu")->set_input_line(0, CLEAR_LINE);
+	 *
+	 * Therefore we reset the line without any detour ....
+	 */
+	device->machine().firstcpu->set_input_line(0, CLEAR_LINE);
+	//cpu_set_info(device->machine().firstcpu, CPUINFO_INT_INPUT_STATE + state->m_irq_line, CLEAR_LINE);
 	return 0x03;
 }
 
 /* FIXME: remove trampoline */
-WRITE_LINE_DEVICE_HANDLER( galaxold_7474_9m_2_q_callback )
+WRITE_LINE_MEMBER(galaxold_state::galaxold_7474_9m_2_q_callback)
 {
 	/* Q bar clocks the other flip-flop,
-       Q is VBLANK (not visible to the CPU) */
-	ttl7474_clock_w(device, state);
+	   Q is VBLANK (not visible to the CPU) */
+	downcast<ttl7474_device *>(machine().device("7474_9m_1"))->clock_w(state);
 }
 
-WRITE_LINE_DEVICE_HANDLER( galaxold_7474_9m_1_callback )
+WRITE_LINE_MEMBER(galaxold_state::galaxold_7474_9m_1_callback)
 {
 	/* Q goes to the NMI line */
-	cputag_set_input_line(device->machine(), "maincpu", irq_line, state ? CLEAR_LINE : ASSERT_LINE);
+	machine().device("maincpu")->execute().set_input_line(m_irq_line, state ? CLEAR_LINE : ASSERT_LINE);
 }
 
-WRITE8_HANDLER( galaxold_nmi_enable_w )
+WRITE8_MEMBER(galaxold_state::galaxold_nmi_enable_w)
 {
-    device_t *target = space->machine().device("7474_9m_1");
-	ttl7474_preset_w(target, data ? 1 : 0);
+	ttl7474_device *target = machine().device<ttl7474_device>("7474_9m_1");
+	target->preset_w(data ? 1 : 0);
 }
 
 
-TIMER_DEVICE_CALLBACK( galaxold_interrupt_timer )
+TIMER_DEVICE_CALLBACK_MEMBER(galaxold_state::galaxold_interrupt_timer)
 {
-    device_t *target = timer.machine().device("7474_9m_2");
+	ttl7474_device *target = machine().device<ttl7474_device>("7474_9m_2");
 
 	/* 128V, 64V and 32V go to D */
-	ttl7474_d_w(target, ((param & 0xe0) != 0xe0) ? 1 : 0);
+	target->d_w(((param & 0xe0) != 0xe0) ? 1 : 0);
 
 	/* 16V clocks the flip-flop */
-	ttl7474_clock_w(target, ((param & 0x10) == 0x10) ? 1 : 0);
+	target->clock_w(((param & 0x10) == 0x10) ? 1 : 0);
 
 	param = (param + 0x10) & 0xff;
 
-	timer.adjust(timer.machine().primary_screen->time_until_pos(param), param);
+	timer.adjust(machine().primary_screen->time_until_pos(param), param);
 }
 
 
 static void machine_reset_common(running_machine &machine, int line)
 {
-    device_t *ttl7474_9m_1 = machine.device("7474_9m_1");
-    device_t *ttl7474_9m_2 = machine.device("7474_9m_2");
-	irq_line = line;
+	galaxold_state *state = machine.driver_data<galaxold_state>();
+	ttl7474_device *ttl7474_9m_1 = machine.device<ttl7474_device>("7474_9m_1");
+	ttl7474_device *ttl7474_9m_2 = machine.device<ttl7474_device>("7474_9m_2");
+	state->m_irq_line = line;
 
 	/* initalize main CPU interrupt generator flip-flops */
-	ttl7474_preset_w(ttl7474_9m_2, 1);
-	ttl7474_clear_w (ttl7474_9m_2, 1);
+	ttl7474_9m_2->preset_w(1);
+	ttl7474_9m_2->clear_w (1);
 
-	ttl7474_clear_w (ttl7474_9m_1, 1);
-	ttl7474_d_w     (ttl7474_9m_1, 0);
-	ttl7474_preset_w(ttl7474_9m_1, 0);
+	ttl7474_9m_1->clear_w (1);
+	ttl7474_9m_1->d_w     (0);
+	ttl7474_9m_1->preset_w(0);
 
 	/* start a timer to generate interrupts */
 	timer_device *int_timer = machine.device<timer_device>("int_timer");
 	int_timer->adjust(machine.primary_screen->time_until_pos(0));
 }
 
-MACHINE_RESET( galaxold )
+MACHINE_RESET_MEMBER(galaxold_state,galaxold)
 {
-	machine_reset_common(machine, INPUT_LINE_NMI);
+	machine_reset_common(machine(), INPUT_LINE_NMI);
 }
 
-MACHINE_RESET( devilfsg )
+MACHINE_RESET_MEMBER(galaxold_state,devilfsg)
 {
-	machine_reset_common(machine, 0);
+	machine_reset_common(machine(), 0);
 }
 
-MACHINE_RESET( hunchbkg )
+MACHINE_RESET_MEMBER(galaxold_state,hunchbkg)
 {
-	machine_reset_common(machine, 0);
-	device_set_irq_callback(machine.device("maincpu"), hunchbkg_irq_callback);
+	machine_reset_common(machine(), 0);
+	machine().device("maincpu")->execute().set_irq_acknowledge_callback(hunchbkg_irq_callback);
 }
 
-WRITE8_HANDLER( galaxold_coin_lockout_w )
+WRITE8_MEMBER(galaxold_state::galaxold_coin_lockout_w)
 {
-	coin_lockout_global_w(space->machine(), ~data & 1);
-}
-
-
-WRITE8_HANDLER( galaxold_coin_counter_w )
-{
-	coin_counter_w(space->machine(), offset, data & 0x01);
-}
-
-WRITE8_HANDLER( galaxold_coin_counter_1_w )
-{
-	coin_counter_w(space->machine(), 1, data & 0x01);
-}
-
-WRITE8_HANDLER( galaxold_coin_counter_2_w )
-{
-	coin_counter_w(space->machine(), 2, data & 0x01);
+	coin_lockout_global_w(machine(), ~data & 1);
 }
 
 
-WRITE8_HANDLER( galaxold_leds_w )
+WRITE8_MEMBER(galaxold_state::galaxold_coin_counter_w)
 {
-	set_led_status(space->machine(), offset,data & 1);
+	coin_counter_w(machine(), offset, data & 0x01);
+}
+
+WRITE8_MEMBER(galaxold_state::galaxold_coin_counter_1_w)
+{
+	coin_counter_w(machine(), 1, data & 0x01);
+}
+
+WRITE8_MEMBER(galaxold_state::galaxold_coin_counter_2_w)
+{
+	coin_counter_w(machine(), 2, data & 0x01);
+}
+
+
+WRITE8_MEMBER(galaxold_state::galaxold_leds_w)
+{
+	set_led_status(machine(), offset,data & 1);
 }
 
 
 #ifdef UNUSED_FUNCTION
-static READ8_HANDLER( checkmaj_protection_r )
+READ8_MEMBER(galaxold_state::checkmaj_protection_r)
 {
-	switch (cpu_get_pc(&space->device()))
+	switch (space.device().safe_pc())
 	{
 	case 0x0f15:  return 0xf5;
 	case 0x0f8f:  return 0x7c;
@@ -141,7 +140,7 @@ static READ8_HANDLER( checkmaj_protection_r )
 	case 0x10f1:  return 0xaa;
 	case 0x1402:  return 0xaa;
 	default:
-		logerror("Unknown protection read. PC=%04X\n",cpu_get_pc(&space->device()));
+		logerror("Unknown protection read. PC=%04X\n",space.device().safe_pc());
 	}
 
 	return 0;
@@ -149,52 +148,52 @@ static READ8_HANDLER( checkmaj_protection_r )
 
 
 /* Zig Zag can swap ROMs 2 and 3 as a form of copy protection */
-WRITE8_HANDLER( zigzag_sillyprotection_w )
+WRITE8_MEMBER(galaxold_state::zigzag_sillyprotection_w)
 {
 	if (data)
 	{
 		/* swap ROM 2 and 3! */
-		memory_set_bank(space->machine(), "bank1", 1);
-		memory_set_bank(space->machine(), "bank2", 0);
+		membank("bank1")->set_entry(1);
+		membank("bank2")->set_entry(0);
 	}
 	else
 	{
-		memory_set_bank(space->machine(), "bank1", 0);
-		memory_set_bank(space->machine(), "bank2", 1);
+		membank("bank1")->set_entry(0);
+		membank("bank2")->set_entry(1);
 	}
 }
 
-DRIVER_INIT( zigzag )
+DRIVER_INIT_MEMBER(galaxold_state,zigzag)
 {
-	UINT8 *RAM = machine.region("maincpu")->base();
-	memory_configure_bank(machine, "bank1", 0, 2, &RAM[0x2000], 0x1000);
-	memory_configure_bank(machine, "bank2", 0, 2, &RAM[0x2000], 0x1000);
-	memory_set_bank(machine, "bank1", 0);
-	memory_set_bank(machine, "bank2", 1);
+	UINT8 *RAM = machine().root_device().memregion("maincpu")->base();
+	machine().root_device().membank("bank1")->configure_entries(0, 2, &RAM[0x2000], 0x1000);
+	machine().root_device().membank("bank2")->configure_entries(0, 2, &RAM[0x2000], 0x1000);
+	machine().root_device().membank("bank1")->set_entry(0);
+	machine().root_device().membank("bank2")->set_entry(1);
 }
 
 
 
-static READ8_HANDLER( dingo_3000_r )
+READ8_MEMBER(galaxold_state::dingo_3000_r)
 {
 	return 0xaa;
 }
 
-static READ8_HANDLER( dingo_3035_r )
+READ8_MEMBER(galaxold_state::dingo_3035_r)
 {
 	return 0x8c;
 }
 
-static READ8_HANDLER( dingoe_3001_r )
+READ8_MEMBER(galaxold_state::dingoe_3001_r)
 {
 	return 0xaa;
 }
 
 
-DRIVER_INIT( dingoe )
+DRIVER_INIT_MEMBER(galaxold_state,dingoe)
 {
 	offs_t i;
-	UINT8 *rom = machine.region("maincpu")->base();
+	UINT8 *rom = machine().root_device().memregion("maincpu")->base();
 
 	for (i = 0; i < 0x3000; i++)
 	{
@@ -213,72 +212,72 @@ DRIVER_INIT( dingoe )
 
 
 		/* Swap bit0 with bit4 */
-		if ((i & 0x0f) == 0x02 || (i & 0x0f) == 0x0a || (i & 0x0f) == 0x03 || (i & 0x0f) == 0x0b || (i & 0x0f) == 0x06 || (i & 0x0f) == 0x0e || (i & 0x0f) == 0x07 || (i & 0x0f) == 0x0f)	/* Swap Bit 0 and 4 */
+		if ((i & 0x0f) == 0x02 || (i & 0x0f) == 0x0a || (i & 0x0f) == 0x03 || (i & 0x0f) == 0x0b || (i & 0x0f) == 0x06 || (i & 0x0f) == 0x0e || (i & 0x0f) == 0x07 || (i & 0x0f) == 0x0f)   /* Swap Bit 0 and 4 */
 			rom[i] = BITSWAP8(rom[i],7,6,5,0,3,2,1,4);
 	}
 
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x3001, 0x3001, FUNC(dingoe_3001_r));	/* Protection check */
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_legacy_read_handler(0x3001, 0x3001, FUNC(dingoe_3001_r));   /* Protection check */
 
 }
 #endif
 
 
-READ8_HANDLER( scramblb_protection_1_r )
+READ8_MEMBER(galaxold_state::scramblb_protection_1_r)
 {
-	switch (cpu_get_pc(&space->device()))
+	switch (space.device().safe_pc())
 	{
 	case 0x01da: return 0x80;
 	case 0x01e4: return 0x00;
 	default:
-		logerror("%04x: read protection 1\n",cpu_get_pc(&space->device()));
+		logerror("%04x: read protection 1\n",space.device().safe_pc());
 		return 0;
 	}
 }
 
-READ8_HANDLER( scramblb_protection_2_r )
+READ8_MEMBER(galaxold_state::scramblb_protection_2_r)
 {
-	switch (cpu_get_pc(&space->device()))
+	switch (space.device().safe_pc())
 	{
 	case 0x01ca: return 0x90;
 	default:
-		logerror("%04x: read protection 2\n",cpu_get_pc(&space->device()));
+		logerror("%04x: read protection 2\n",space.device().safe_pc());
 		return 0;
 	}
 }
 
 
-WRITE8_HANDLER( _4in1_bank_w )
+WRITE8_MEMBER(galaxold_state::_4in1_bank_w)
 {
-	_4in1_bank = data & 0x03;
-	galaxold_gfxbank_w(space, 0, _4in1_bank);
-	memory_set_bank(space->machine(), "bank1", _4in1_bank);
+	m__4in1_bank = data & 0x03;
+	galaxold_gfxbank_w(space, 0, m__4in1_bank);
+	membank("bank1")->set_entry(m__4in1_bank);
 }
 
-CUSTOM_INPUT( _4in1_fake_port_r )
+CUSTOM_INPUT_MEMBER(galaxold_state::_4in1_fake_port_r)
 {
 	static const char *const portnames[] = { "FAKE1", "FAKE2", "FAKE3", "FAKE4" };
 	int bit_mask = (FPTR)param;
 
-	return (input_port_read(field->port->machine(), portnames[_4in1_bank]) & bit_mask) ? 0x01 : 0x00;
+	return (ioport(portnames[m__4in1_bank])->read() & bit_mask) ? 0x01 : 0x00;
 }
 
 #ifdef UNUSED_FUNCTION
-DRIVER_INIT( pisces )
+DRIVER_INIT_MEMBER(galaxold_state,pisces)
 {
 	/* the coin lockout was replaced */
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x6002, 0x6002, FUNC(galaxold_gfxbank_w));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_legacy_write_handler(0x6002, 0x6002, FUNC(galaxold_gfxbank_w));
 }
 
-DRIVER_INIT( checkmaj )
+DRIVER_INIT_MEMBER(galaxold_state,checkmaj)
 {
 	/* for the title screen */
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x3800, 0x3800, FUNC(checkmaj_protection_r));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_legacy_read_handler(0x3800, 0x3800, FUNC(checkmaj_protection_r));
 }
 
-DRIVER_INIT( dingo )
+DRIVER_INIT_MEMBER(galaxold_state,dingo)
 {
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x3000, 0x3000, FUNC(dingo_3000_r));
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_read_handler(0x3035, 0x3035, FUNC(dingo_3035_r));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_legacy_read_handler(0x3000, 0x3000, FUNC(dingo_3000_r));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_legacy_read_handler(0x3035, 0x3035, FUNC(dingo_3035_r));
 }
 
 
@@ -294,15 +293,15 @@ static UINT8 decode_mooncrst(UINT8 data,offs_t addr)
 	return res;
 }
 
-DRIVER_INIT( mooncrsu )
+DRIVER_INIT_MEMBER(galaxold_state,mooncrsu)
 {
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0xa000, 0xa002, FUNC(galaxold_gfxbank_w));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_legacy_write_handler(0xa000, 0xa002, FUNC(galaxold_gfxbank_w));
 }
 
-DRIVER_INIT( mooncrst )
+DRIVER_INIT_MEMBER(galaxold_state,mooncrst)
 {
-	offs_t i, len = machine.region("maincpu")->bytes();
-	UINT8 *rom = machine.region("maincpu")->base();
+	offs_t i, len = machine().root_device().memregion("maincpu")->bytes();
+	UINT8 *rom = machine().root_device().memregion("maincpu")->base();
 
 
 	for (i = 0;i < len;i++)
@@ -311,25 +310,25 @@ DRIVER_INIT( mooncrst )
 	DRIVER_INIT_CALL(mooncrsu);
 }
 
-DRIVER_INIT( mooncrgx )
+DRIVER_INIT_MEMBER(galaxold_state,mooncrgx)
 {
-	machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x6000, 0x6002, FUNC(galaxold_gfxbank_w));
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_legacy_write_handler(0x6000, 0x6002, FUNC(galaxold_gfxbank_w));
 }
 
-DRIVER_INIT( moonqsr )
+DRIVER_INIT_MEMBER(galaxold_state,moonqsr)
 {
 	offs_t i;
-	address_space *space = machine.device("maincpu")->memory().space(AS_PROGRAM);
-	UINT8 *rom = machine.region("maincpu")->base();
-	UINT8 *decrypt = auto_alloc_array(machine, UINT8, 0x8000);
+	address_space &space = machine().device("maincpu")->memory().space(AS_PROGRAM);
+	UINT8 *rom = machine().root_device().memregion("maincpu")->base();
+	UINT8 *decrypt = auto_alloc_array(machine(), UINT8, 0x8000);
 
-	space->set_decrypted_region(0x0000, 0x7fff, decrypt);
+	space.set_decrypted_region(0x0000, 0x7fff, decrypt);
 
 	for (i = 0;i < 0x8000;i++)
 		decrypt[i] = decode_mooncrst(rom[i],i);
 }
 
-DRIVER_INIT( checkman )
+DRIVER_INIT_MEMBER(galaxold_state,checkman)
 {
 /*
                      Encryption Table
@@ -378,8 +377,8 @@ Pin layout is such that links can replace the PAL if encryption is not used.
 		{ 1,4,1,4 }
 	};
 
-	offs_t i, len = machine.region("maincpu")->bytes();
-	UINT8 *rom = machine.region("maincpu")->base();
+	offs_t i, len = machine().root_device().memregion("maincpu")->bytes();
+	UINT8 *rom = machine().root_device().memregion("maincpu")->base();
 
 
 	for (i = 0; i < len; i++)
@@ -388,38 +387,62 @@ Pin layout is such that links can replace the PAL if encryption is not used.
 		int line = i & 0x07;
 
 		data_xor = (BIT(rom[i],xortable[line][0]) << xortable[line][1]) |
-				   (BIT(rom[i],xortable[line][2]) << xortable[line][3]);
+					(BIT(rom[i],xortable[line][2]) << xortable[line][3]);
 
 		rom[i] ^= data_xor;
 	}
 }
 #endif
 
-DRIVER_INIT( 4in1 )
+DRIVER_INIT_MEMBER(galaxold_state,4in1)
 {
-	address_space *space = machine.device("maincpu")->memory().space(AS_PROGRAM);
-	offs_t i, len = machine.region("maincpu")->bytes();
-	UINT8 *RAM = machine.region("maincpu")->base();
+	address_space &space = machine().device("maincpu")->memory().space(AS_PROGRAM);
+	offs_t i, len = memregion("maincpu")->bytes();
+	UINT8 *RAM = memregion("maincpu")->base();
 
 	/* Decrypt Program Roms */
 	for (i = 0; i < len; i++)
 		RAM[i] = RAM[i] ^ (i & 0xff);
 
 	/* games are banked at 0x0000 - 0x3fff */
-	memory_configure_bank(machine, "bank1", 0, 4, &RAM[0x10000], 0x4000);
+	membank("bank1")->configure_entries(0, 4, &RAM[0x10000], 0x4000);
 
 	_4in1_bank_w(space, 0, 0); /* set the initial CPU bank */
 
-	state_save_register_global(machine, _4in1_bank);
+	state_save_register_global(machine(), m__4in1_bank);
 }
 
-INTERRUPT_GEN( hunchbks_vh_interrupt )
+INTERRUPT_GEN_MEMBER(galaxold_state::hunchbks_vh_interrupt)
 {
-	generic_pulse_irq_line_and_vector(device,0,0x03);
+	generic_pulse_irq_line_and_vector(device.execute(),0,0x03,1);
 }
 
-DRIVER_INIT( ladybugg )
+DRIVER_INIT_MEMBER(galaxold_state,ladybugg)
 {
-/* Doesn't actually use the bank, but it mustn't have a coin lock! */
-machine.device("maincpu")->memory().space(AS_PROGRAM)->install_legacy_write_handler(0x6002, 0x6002, FUNC(galaxold_gfxbank_w));
+	/* Doesn't actually use the bank, but it mustn't have a coin lock! */
+	machine().device("maincpu")->memory().space(AS_PROGRAM).install_write_handler(0x6002, 0x6002, write8_delegate(FUNC(galaxold_state::galaxold_gfxbank_w),this));
+}
+
+DRIVER_INIT_MEMBER(galaxold_state,bullsdrtg)
+{
+	int i;
+
+	// patch char supposed to be space
+	UINT8 *gfxrom = machine().root_device().memregion("gfx1")->base();
+	for (i = 0; i < 8; i++)
+	{
+		gfxrom[i] = 0;
+	}
+
+	// patch gfx for charset (seems to be 1bpp with bitplane data in correct rom)
+	for (i = 0*8; i < 27*8; i++)
+	{
+		gfxrom[0x1000 + i] = 0;
+	}
+
+	// patch gfx for digits (seems to be 1bpp with bitplane data in correct rom)
+	for (i = 48*8; i < (48+10)*8; i++ )
+	{
+		gfxrom[0x1000 + i] = 0;
+	}
 }

@@ -1,28 +1,61 @@
+/*******************************************************************************
+
+Pinball
+LTD
+
+After running for about 2 minutes, it totally freezes. Looks like a core bug.
+
+********************************************************************************/
+
 #include "emu.h"
 #include "cpu/m6800/m6800.h"
-
-extern const char layout_pinball[];
 
 class ltd_state : public driver_device
 {
 public:
-	ltd_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	ltd_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+	m_maincpu(*this, "maincpu")
+	{ }
+
+protected:
+
+	// devices
+	required_device<cpu_device> m_maincpu;
+
+	// driver_device overrides
+	virtual void machine_reset();
+public:
+	DECLARE_DRIVER_INIT(ltd);
 };
 
 
-static ADDRESS_MAP_START( ltd_map, AS_PROGRAM, 8 )
-	AM_RANGE(0x0000, 0xffff) AM_NOP
+static ADDRESS_MAP_START( ltd_map, AS_PROGRAM, 8, ltd_state )
+	AM_RANGE(0x0000, 0x01ff) AM_RAM
+	//AM_RANGE(0x0800, 0x0800) AM_WRITE(cycle_reset_w)
+	//AM_RANGE(0x0c00, 0x0c00) AM_WRITE(ay8910_1_reset)
+	//AM_RANGE(0x1000, 0x1000) AM_WRITE(ay8910_0_ctrl_w)
+	//AM_RANGE(0x1400, 0x1400) AM_WRITE(ay8910_0_reset)
+	//AM_RANGE(0x1800, 0x1800) AM_WRITE(ay8910_1_ctrl_w)
+	//AM_RANGE(0x2800, 0x2800) AM_WRITE(auxlamps_w)
+	//AM_RANGE(0x3000, 0x3000) AM_WRITE(ay8910_0_data_w)
+	//AM_RANGE(0x3800, 0x3800) AM_WRITE(ay8910_1_data_w)
+	AM_RANGE(0xc000, 0xffff) AM_ROM
+ADDRESS_MAP_END
+
+static ADDRESS_MAP_START( ltd_io, AS_IO, 8, ltd_state )
+	//AM_RANGE(0x0100, 0x0100) AM_READWRITE
+	//AM_RANGE(0x0101, 0x0101) AM_WRITE(
 ADDRESS_MAP_END
 
 static INPUT_PORTS_START( ltd )
 INPUT_PORTS_END
 
-static MACHINE_RESET( ltd )
+void ltd_state::machine_reset()
 {
 }
 
-static DRIVER_INIT( ltd )
+DRIVER_INIT_MEMBER(ltd_state,ltd)
 {
 }
 
@@ -30,11 +63,7 @@ static MACHINE_CONFIG_START( ltd, ltd_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6803, 1000000)
 	MCFG_CPU_PROGRAM_MAP(ltd_map)
-
-	MCFG_MACHINE_RESET( ltd )
-
-	/* video hardware */
-	MCFG_DEFAULT_LAYOUT(layout_pinball)
+	MCFG_CPU_IO_MAP(ltd_io)
 MACHINE_CONFIG_END
 
 /*-------------------------------------------------------------------
@@ -122,11 +151,11 @@ ROM_START(zephy)
 	ROM_RELOAD(0xf000, 0x1000)
 ROM_END
 
-GAME(198?,	alcapone,	0,		ltd,	ltd,	ltd,	ROT0,	"LTD",	"Al Capone",			GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(19??,	atla_ltd,	0,		ltd,	ltd,	ltd,	ROT0,	"LTD",	"Atlantis (LTD)",		GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(19??,	bhol_ltd,	0,		ltd,	ltd,	ltd,	ROT0,	"LTD",	"Black Hole (LTD)",		GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(198?,	columbia,	0,		ltd,	ltd,	ltd,	ROT0,	"LTD",	"Columbia",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(198?,	cowboy,		0,		ltd,	ltd,	ltd,	ROT0,	"LTD",	"Cowboy Eight Ball",	GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(198?,	pecmen,		0,		ltd,	ltd,	ltd,	ROT0,	"LTD",	"Mr. & Mrs. Pec-Men",	GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
-GAME(198?,	zephy,		0,		ltd,	ltd,	ltd,	ROT0,	"LTD",	"Zephy",				GAME_NOT_WORKING | GAME_NO_SOUND | GAME_MECHANICAL)
 
+GAME(198?, alcapone, 0,  ltd,  ltd,  ltd_state, ltd, ROT0, "LTD", "Al Capone",          GAME_IS_SKELETON_MECHANICAL)
+GAME(19??, atla_ltd, 0,  ltd,  ltd,  ltd_state, ltd, ROT0, "LTD", "Atlantis (LTD)",     GAME_IS_SKELETON_MECHANICAL)
+GAME(19??, bhol_ltd, 0,  ltd,  ltd,  ltd_state, ltd, ROT0, "LTD", "Black Hole (LTD)",   GAME_IS_SKELETON_MECHANICAL)
+GAME(198?, columbia, 0,  ltd,  ltd,  ltd_state, ltd, ROT0, "LTD", "Columbia",           GAME_IS_SKELETON_MECHANICAL)
+GAME(198?, cowboy,   0,  ltd,  ltd,  ltd_state, ltd, ROT0, "LTD", "Cowboy Eight Ball",  GAME_IS_SKELETON_MECHANICAL)
+GAME(198?, pecmen,   0,  ltd,  ltd,  ltd_state, ltd, ROT0, "LTD", "Mr. & Mrs. Pec-Men", GAME_IS_SKELETON_MECHANICAL)
+GAME(198?, zephy,    0,  ltd,  ltd,  ltd_state, ltd, ROT0, "LTD", "Zephy",              GAME_IS_SKELETON_MECHANICAL)

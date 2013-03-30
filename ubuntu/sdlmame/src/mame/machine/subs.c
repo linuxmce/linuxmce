@@ -11,23 +11,22 @@
 /***************************************************************************
 subs_init_machine
 ***************************************************************************/
-MACHINE_RESET( subs )
+void subs_state::machine_reset()
 {
-	subs_state *state = machine.driver_data<subs_state>();
-	state->m_steering_buf1 = 0;
-	state->m_steering_buf2 = 0;
-	state->m_steering_val1 = 0x00;
-	state->m_steering_val2 = 0x00;
+	m_steering_buf1 = 0;
+	m_steering_buf2 = 0;
+	m_steering_val1 = 0x00;
+	m_steering_val2 = 0x00;
 }
 
 /***************************************************************************
 subs_interrupt
 ***************************************************************************/
-INTERRUPT_GEN( subs_interrupt )
+INTERRUPT_GEN_MEMBER(subs_state::subs_interrupt)
 {
 	/* only do NMI interrupt if not in TEST mode */
-	if ((input_port_read(device->machine(), "IN1") & 0x40)==0x40)
-		device_set_input_line(device,INPUT_LINE_NMI,PULSE_LINE);
+	if ((machine().root_device().ioport("IN1")->read() & 0x40)==0x40)
+		device.execute().set_input_line(INPUT_LINE_NMI,PULSE_LINE);
 }
 
 /***************************************************************************
@@ -43,7 +42,7 @@ static int subs_steering_1(running_machine &machine)
 	int this_val;
 	int delta;
 
-	this_val=input_port_read(machine, "DIAL2");
+	this_val=state->ioport("DIAL2")->read();
 
 	delta=this_val-state->m_last_val_1;
 	state->m_last_val_1=this_val;
@@ -54,13 +53,13 @@ static int subs_steering_1(running_machine &machine)
 
 	if (state->m_steering_buf1>0)
 	{
-	      state->m_steering_buf1--;
-	      state->m_steering_val1=0xC0;
+			state->m_steering_buf1--;
+			state->m_steering_val1=0xC0;
 	}
 	else if (state->m_steering_buf1<0)
 	{
-	      state->m_steering_buf1++;
-	      state->m_steering_val1=0x80;
+			state->m_steering_buf1++;
+			state->m_steering_val1=0x80;
 	}
 
 	return state->m_steering_val1;
@@ -72,7 +71,7 @@ static int subs_steering_2(running_machine &machine)
 	int this_val;
 	int delta;
 
-	this_val=input_port_read(machine, "DIAL1");
+	this_val=state->ioport("DIAL1")->read();
 
 	delta=this_val-state->m_last_val_2;
 	state->m_last_val_2=this_val;
@@ -98,30 +97,29 @@ static int subs_steering_2(running_machine &machine)
 /***************************************************************************
 subs_steer_reset
 ***************************************************************************/
-WRITE8_HANDLER( subs_steer_reset_w )
+WRITE8_MEMBER(subs_state::subs_steer_reset_w)
 {
-	subs_state *state = space->machine().driver_data<subs_state>();
-	state->m_steering_val1 = 0x00;
-	state->m_steering_val2 = 0x00;
+	m_steering_val1 = 0x00;
+	m_steering_val2 = 0x00;
 }
 
 /***************************************************************************
 subs_control_r
 ***************************************************************************/
-READ8_HANDLER( subs_control_r )
+READ8_MEMBER(subs_state::subs_control_r)
 {
-	int inport = input_port_read(space->machine(), "IN0");
+	int inport = ioport("IN0")->read();
 
 	switch (offset & 0x07)
 	{
-		case 0x00:		return ((inport & 0x01) << 7);	/* diag step */
-		case 0x01:		return ((inport & 0x02) << 6);	/* diag hold */
-		case 0x02:		return ((inport & 0x04) << 5);	/* slam */
-		case 0x03:		return ((inport & 0x08) << 4);	/* spare */
-		case 0x04:		return ((subs_steering_1(space->machine()) & 0x40) << 1);	/* steer dir 1 */
-		case 0x05:		return ((subs_steering_1(space->machine()) & 0x80) << 0);	/* steer flag 1 */
-		case 0x06:		return ((subs_steering_2(space->machine()) & 0x40) << 1);	/* steer dir 2 */
-		case 0x07:		return ((subs_steering_2(space->machine()) & 0x80) << 0);	/* steer flag 2 */
+		case 0x00:      return ((inport & 0x01) << 7);  /* diag step */
+		case 0x01:      return ((inport & 0x02) << 6);  /* diag hold */
+		case 0x02:      return ((inport & 0x04) << 5);  /* slam */
+		case 0x03:      return ((inport & 0x08) << 4);  /* spare */
+		case 0x04:      return ((subs_steering_1(machine()) & 0x40) << 1);  /* steer dir 1 */
+		case 0x05:      return ((subs_steering_1(machine()) & 0x80) << 0);  /* steer flag 1 */
+		case 0x06:      return ((subs_steering_2(machine()) & 0x40) << 1);  /* steer dir 2 */
+		case 0x07:      return ((subs_steering_2(machine()) & 0x80) << 0);  /* steer flag 2 */
 	}
 
 	return 0;
@@ -130,20 +128,20 @@ READ8_HANDLER( subs_control_r )
 /***************************************************************************
 subs_coin_r
 ***************************************************************************/
-READ8_HANDLER( subs_coin_r )
+READ8_MEMBER(subs_state::subs_coin_r)
 {
-	int inport = input_port_read(space->machine(), "IN1");
+	int inport = ioport("IN1")->read();
 
 	switch (offset & 0x07)
 	{
-		case 0x00:		return ((inport & 0x01) << 7);	/* coin 1 */
-		case 0x01:		return ((inport & 0x02) << 6);	/* start 1 */
-		case 0x02:		return ((inport & 0x04) << 5);	/* coin 2 */
-		case 0x03:		return ((inport & 0x08) << 4);	/* start 2 */
-		case 0x04:		return ((inport & 0x10) << 3);	/* VBLANK */
-		case 0x05:		return ((inport & 0x20) << 2);	/* fire 1 */
-		case 0x06:		return ((inport & 0x40) << 1);	/* test */
-		case 0x07:		return ((inport & 0x80) << 0);	/* fire 2 */
+		case 0x00:      return ((inport & 0x01) << 7);  /* coin 1 */
+		case 0x01:      return ((inport & 0x02) << 6);  /* start 1 */
+		case 0x02:      return ((inport & 0x04) << 5);  /* coin 2 */
+		case 0x03:      return ((inport & 0x08) << 4);  /* start 2 */
+		case 0x04:      return ((inport & 0x10) << 3);  /* VBLANK */
+		case 0x05:      return ((inport & 0x20) << 2);  /* fire 1 */
+		case 0x06:      return ((inport & 0x40) << 1);  /* test */
+		case 0x07:      return ((inport & 0x80) << 0);  /* fire 2 */
 	}
 
 	return 0;
@@ -152,16 +150,16 @@ READ8_HANDLER( subs_coin_r )
 /***************************************************************************
 subs_options_r
 ***************************************************************************/
-READ8_HANDLER( subs_options_r )
+READ8_MEMBER(subs_state::subs_options_r)
 {
-	int opts = input_port_read(space->machine(), "DSW");
+	int opts = ioport("DSW")->read();
 
 	switch (offset & 0x03)
 	{
-		case 0x00:		return ((opts & 0xC0) >> 6);		/* language */
-		case 0x01:		return ((opts & 0x30) >> 4);		/* credits */
-		case 0x02:		return ((opts & 0x0C) >> 2);		/* game time */
-		case 0x03:		return ((opts & 0x03) >> 0);		/* extended time */
+		case 0x00:      return ((opts & 0xC0) >> 6);        /* language */
+		case 0x01:      return ((opts & 0x30) >> 4);        /* credits */
+		case 0x02:      return ((opts & 0x0C) >> 2);        /* game time */
+		case 0x03:      return ((opts & 0x03) >> 0);        /* extended time */
 	}
 
 	return 0;
@@ -170,15 +168,15 @@ READ8_HANDLER( subs_options_r )
 /***************************************************************************
 subs_lamp1_w
 ***************************************************************************/
-WRITE8_HANDLER( subs_lamp1_w )
+WRITE8_MEMBER(subs_state::subs_lamp1_w)
 {
-	set_led_status(space->machine(), 0,~offset & 1);
+	set_led_status(machine(), 0,~offset & 1);
 }
 
 /***************************************************************************
 subs_lamp2_w
 ***************************************************************************/
-WRITE8_HANDLER( subs_lamp2_w )
+WRITE8_MEMBER(subs_state::subs_lamp2_w)
 {
-	set_led_status(space->machine(), 1,~offset & 1);
+	set_led_status(machine(), 1,~offset & 1);
 }

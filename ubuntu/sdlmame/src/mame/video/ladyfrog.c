@@ -9,101 +9,90 @@
 #include "includes/ladyfrog.h"
 
 
-WRITE8_HANDLER(ladyfrog_spriteram_w)
+WRITE8_MEMBER(ladyfrog_state::ladyfrog_spriteram_w)
 {
-	ladyfrog_state *state = space->machine().driver_data<ladyfrog_state>();
-	state->m_spriteram[offset] = data;
+	m_spriteram[offset] = data;
 }
 
-READ8_HANDLER(ladyfrog_spriteram_r)
+READ8_MEMBER(ladyfrog_state::ladyfrog_spriteram_r)
 {
-	ladyfrog_state *state = space->machine().driver_data<ladyfrog_state>();
-	return state->m_spriteram[offset];
+	return m_spriteram[offset];
 }
 
-static TILE_GET_INFO( get_tile_info )
+TILE_GET_INFO_MEMBER(ladyfrog_state::get_tile_info)
 {
-	ladyfrog_state *state = machine.driver_data<ladyfrog_state>();
-	int pal = state->m_videoram[tile_index * 2 + 1] & 0x0f;
-	int tile = state->m_videoram[tile_index * 2] + ((state->m_videoram[tile_index * 2 + 1] & 0xc0) << 2)+ ((state->m_videoram[tile_index * 2 + 1] & 0x30) << 6);
-	SET_TILE_INFO(
+	int pal = m_videoram[tile_index * 2 + 1] & 0x0f;
+	int tile = m_videoram[tile_index * 2] + ((m_videoram[tile_index * 2 + 1] & 0xc0) << 2)+ ((m_videoram[tile_index * 2 + 1] & 0x30) << 6);
+	SET_TILE_INFO_MEMBER(
 			0,
-			tile + 0x1000 * state->m_tilebank,
+			tile + 0x1000 * m_tilebank,
 			pal,TILE_FLIPY
 			);
 }
 
-WRITE8_HANDLER( ladyfrog_videoram_w )
+WRITE8_MEMBER(ladyfrog_state::ladyfrog_videoram_w)
 {
-	ladyfrog_state *state = space->machine().driver_data<ladyfrog_state>();
-	state->m_videoram[offset] = data;
-	tilemap_mark_tile_dirty(state->m_bg_tilemap, offset >> 1);
+	m_videoram[offset] = data;
+	m_bg_tilemap->mark_tile_dirty(offset >> 1);
 }
 
-READ8_HANDLER( ladyfrog_videoram_r )
+READ8_MEMBER(ladyfrog_state::ladyfrog_videoram_r)
 {
-	ladyfrog_state *state = space->machine().driver_data<ladyfrog_state>();
-	return state->m_videoram[offset];
+	return m_videoram[offset];
 }
 
-WRITE8_HANDLER( ladyfrog_palette_w )
+WRITE8_MEMBER(ladyfrog_state::ladyfrog_palette_w)
 {
-	ladyfrog_state *state = space->machine().driver_data<ladyfrog_state>();
 
 	if (offset & 0x100)
-		paletteram_xxxxBBBBGGGGRRRR_split2_w(space, (offset & 0xff) + (state->m_palette_bank << 8), data);
+		paletteram_xxxxBBBBGGGGRRRR_byte_split_hi_w(space, (offset & 0xff) + (m_palette_bank << 8), data);
 	else
-		paletteram_xxxxBBBBGGGGRRRR_split1_w(space, (offset & 0xff) + (state->m_palette_bank << 8), data);
+		paletteram_xxxxBBBBGGGGRRRR_byte_split_lo_w(space, (offset & 0xff) + (m_palette_bank << 8), data);
 }
 
-READ8_HANDLER( ladyfrog_palette_r )
+READ8_MEMBER(ladyfrog_state::ladyfrog_palette_r)
 {
-	ladyfrog_state *state = space->machine().driver_data<ladyfrog_state>();
 
 	if (offset & 0x100)
-		return space->machine().generic.paletteram2.u8[(offset & 0xff) + (state->m_palette_bank << 8)];
+		return m_generic_paletteram2_8[(offset & 0xff) + (m_palette_bank << 8)];
 	else
-		return space->machine().generic.paletteram.u8[(offset & 0xff) + (state->m_palette_bank << 8)];
+		return m_generic_paletteram_8[(offset & 0xff) + (m_palette_bank << 8)];
 }
 
-WRITE8_HANDLER( ladyfrog_gfxctrl_w )
+WRITE8_MEMBER(ladyfrog_state::ladyfrog_gfxctrl_w)
 {
-	ladyfrog_state *state = space->machine().driver_data<ladyfrog_state>();
-	state->m_palette_bank = (data & 0x20) >> 5;
+	m_palette_bank = (data & 0x20) >> 5;
 }
 
-WRITE8_HANDLER( ladyfrog_gfxctrl2_w )
+WRITE8_MEMBER(ladyfrog_state::ladyfrog_gfxctrl2_w)
 {
-	ladyfrog_state *state = space->machine().driver_data<ladyfrog_state>();
-	state->m_tilebank = ((data & 0x18) >> 3) ^ 3;
-	tilemap_mark_all_tiles_dirty(state->m_bg_tilemap);
+	m_tilebank = ((data & 0x18) >> 3) ^ 3;
+	m_bg_tilemap->mark_all_dirty();
 }
 
 
 #ifdef UNUSED_FUNCTION
 int gfxctrl;
 
-READ8_HANDLER( ladyfrog_gfxctrl_r )
+READ8_MEMBER(ladyfrog_state::ladyfrog_gfxctrl_r)
 {
 	return gfxctrl;
 }
 #endif
 
-READ8_HANDLER( ladyfrog_scrlram_r )
+READ8_MEMBER(ladyfrog_state::ladyfrog_scrlram_r)
 {
-	ladyfrog_state *state = space->machine().driver_data<ladyfrog_state>();
-	return state->m_scrlram[offset];
+	return m_scrlram[offset];
 }
 
-WRITE8_HANDLER( ladyfrog_scrlram_w )
+WRITE8_MEMBER(ladyfrog_state::ladyfrog_scrlram_w)
 {
-	ladyfrog_state *state = space->machine().driver_data<ladyfrog_state>();
 
-	state->m_scrlram[offset] = data;
-	tilemap_set_scrolly(state->m_bg_tilemap, offset, data);
+	m_scrlram[offset] = data;
+	m_bg_tilemap->set_scrolly(offset, data);
 }
 
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	ladyfrog_state *state = machine.driver_data<ladyfrog_state>();
 	int i;
@@ -129,55 +118,49 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 			{
 				sx = (state->m_spriteram[offs + 3] - 256);
 				drawgfx_transpen(bitmap,cliprect,machine.gfx[1],
-        				code,
-				        pal,
-				        flipx,flipy,
-					      sx,sy,15);
+						code,
+						pal,
+						flipx,flipy,
+							sx,sy,15);
 			}
 		}
 	}
 }
 
-static VIDEO_START( ladyfrog_common )
+VIDEO_START_MEMBER(ladyfrog_state,ladyfrog_common)
 {
-	ladyfrog_state *state = machine.driver_data<ladyfrog_state>();
 
-	state->m_spriteram = auto_alloc_array(machine, UINT8, 160);
-	state->m_bg_tilemap = tilemap_create(machine, get_tile_info, tilemap_scan_rows, 8, 8, 32, 32);
+	m_spriteram = auto_alloc_array(machine(), UINT8, 160);
+	m_bg_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(ladyfrog_state::get_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 32, 32);
 
-	machine.generic.paletteram.u8 = auto_alloc_array(machine, UINT8, 0x200);
-	machine.generic.paletteram2.u8 = auto_alloc_array(machine, UINT8, 0x200);
-	tilemap_set_scroll_cols(state->m_bg_tilemap, 32);
-	tilemap_set_scrolldy(state->m_bg_tilemap, 15, 15);
+	m_generic_paletteram_8.allocate(0x200);
+	m_generic_paletteram2_8.allocate(0x200);
+	m_bg_tilemap->set_scroll_cols(32);
+	m_bg_tilemap->set_scrolldy(15, 15);
 
-	state_save_register_global_pointer(machine, machine.generic.paletteram.u8, 0x200);
-	state_save_register_global_pointer(machine, machine.generic.paletteram2.u8, 0x200);
-	state->save_pointer(NAME(state->m_spriteram), 160);
+	save_pointer(NAME(m_spriteram), 160);
 }
 
-VIDEO_START( ladyfrog )
+void ladyfrog_state::video_start()
 {
-	ladyfrog_state *state = machine.driver_data<ladyfrog_state>();
 
 	// weird, there are sprite tiles at 0x000 and 0x400, but they don't contain all the sprites!
-	state->m_spritetilebase = 0x800;
-	VIDEO_START_CALL(ladyfrog_common);
+	m_spritetilebase = 0x800;
+	VIDEO_START_CALL_MEMBER(ladyfrog_common);
 }
 
-VIDEO_START( toucheme )
+VIDEO_START_MEMBER(ladyfrog_state,toucheme)
 {
-	ladyfrog_state *state = machine.driver_data<ladyfrog_state>();
 
-	state->m_spritetilebase = 0x000;
-	VIDEO_START_CALL(ladyfrog_common);
+	m_spritetilebase = 0x000;
+	VIDEO_START_CALL_MEMBER(ladyfrog_common);
 }
 
 
-SCREEN_UPDATE( ladyfrog )
+UINT32 ladyfrog_state::screen_update_ladyfrog(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	ladyfrog_state *state = screen->machine().driver_data<ladyfrog_state>();
 
-	tilemap_draw(bitmap, cliprect, state->m_bg_tilemap, 0, 0);
-	draw_sprites(screen->machine(), bitmap, cliprect);
+	m_bg_tilemap->draw(bitmap, cliprect, 0, 0);
+	draw_sprites(machine(), bitmap, cliprect);
 	return 0;
 }

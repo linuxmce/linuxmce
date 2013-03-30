@@ -25,7 +25,6 @@
 
 #include "emu.h"
 #include "cpu/m6502/m6502.h"
-#include "deprecat.h"
 #include "includes/bsktball.h"
 #include "sound/discrete.h"
 
@@ -36,33 +35,33 @@
  *
  *************************************/
 
-static PALETTE_INIT( bsktball )
+void bsktball_state::palette_init()
 {
 	int i;
 
-	machine.colortable = colortable_alloc(machine, 4);
+	machine().colortable = colortable_alloc(machine(), 4);
 
-	colortable_palette_set_color(machine.colortable,0,MAKE_RGB(0x00,0x00,0x00)); /* BLACK */
-	colortable_palette_set_color(machine.colortable,1,MAKE_RGB(0x80,0x80,0x80)); /* LIGHT GREY */
-	colortable_palette_set_color(machine.colortable,2,MAKE_RGB(0x50,0x50,0x50)); /* DARK GREY */
-	colortable_palette_set_color(machine.colortable,3,MAKE_RGB(0xff,0xff,0xff)); /* WHITE */
+	colortable_palette_set_color(machine().colortable,0,MAKE_RGB(0x00,0x00,0x00)); /* BLACK */
+	colortable_palette_set_color(machine().colortable,1,MAKE_RGB(0x80,0x80,0x80)); /* LIGHT GREY */
+	colortable_palette_set_color(machine().colortable,2,MAKE_RGB(0x50,0x50,0x50)); /* DARK GREY */
+	colortable_palette_set_color(machine().colortable,3,MAKE_RGB(0xff,0xff,0xff)); /* WHITE */
 
 	/* playfield */
 	for (i = 0; i < 2; i++)
 	{
-		colortable_entry_set_value(machine.colortable, i*4 + 0, 1);
-		colortable_entry_set_value(machine.colortable, i*4 + 1, 3 * i);
-		colortable_entry_set_value(machine.colortable, i*4 + 2, 3 * i);
-		colortable_entry_set_value(machine.colortable, i*4 + 3, 3 * i);
+		colortable_entry_set_value(machine().colortable, i*4 + 0, 1);
+		colortable_entry_set_value(machine().colortable, i*4 + 1, 3 * i);
+		colortable_entry_set_value(machine().colortable, i*4 + 2, 3 * i);
+		colortable_entry_set_value(machine().colortable, i*4 + 3, 3 * i);
 	}
 
 	/* motion */
 	for (i = 0; i < 4*4*4; i++)
 	{
-		colortable_entry_set_value(machine.colortable, 2*4 + i*4 + 0, 1);
-		colortable_entry_set_value(machine.colortable, 2*4 + i*4 + 1, (i >> 2) & 3);
-		colortable_entry_set_value(machine.colortable, 2*4 + i*4 + 2, (i >> 0) & 3);
-		colortable_entry_set_value(machine.colortable, 2*4 + i*4 + 3, (i >> 4) & 3);
+		colortable_entry_set_value(machine().colortable, 2*4 + i*4 + 0, 1);
+		colortable_entry_set_value(machine().colortable, 2*4 + i*4 + 1, (i >> 2) & 3);
+		colortable_entry_set_value(machine().colortable, 2*4 + i*4 + 2, (i >> 0) & 3);
+		colortable_entry_set_value(machine().colortable, 2*4 + i*4 + 3, (i >> 4) & 3);
 	}
 }
 
@@ -74,24 +73,24 @@ static PALETTE_INIT( bsktball )
  *
  *************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, bsktball_state )
 	ADDRESS_MAP_GLOBAL_MASK(0x3fff)
 	AM_RANGE(0x0000, 0x01ff) AM_RAM /* Zero Page RAM */
 	AM_RANGE(0x0800, 0x0800) AM_READ(bsktball_in0_r)
 	AM_RANGE(0x0802, 0x0802) AM_READ_PORT("IN1")
 	AM_RANGE(0x0803, 0x0803) AM_READ_PORT("DSW")
 	AM_RANGE(0x1000, 0x1000) AM_WRITENOP /* Timer Reset */
-	AM_RANGE(0x1010, 0x1010) AM_DEVWRITE("discrete", bsktball_bounce_w) /* Crowd Amp / Bounce */
+	AM_RANGE(0x1010, 0x1010) AM_WRITE(bsktball_bounce_w) /* Crowd Amp / Bounce */
 	AM_RANGE(0x1022, 0x1023) AM_WRITENOP /* Coin Counter */
 	AM_RANGE(0x1024, 0x1025) AM_WRITE(bsktball_led1_w) /* LED 1 */
 	AM_RANGE(0x1026, 0x1027) AM_WRITE(bsktball_led2_w) /* LED 2 */
 	AM_RANGE(0x1028, 0x1029) AM_WRITE(bsktball_ld1_w) /* LD 1 */
 	AM_RANGE(0x102a, 0x102b) AM_WRITE(bsktball_ld2_w) /* LD 2 */
-	AM_RANGE(0x102c, 0x102d) AM_DEVWRITE("discrete", bsktball_noise_reset_w) /* Noise Reset */
+	AM_RANGE(0x102c, 0x102d) AM_WRITE(bsktball_noise_reset_w) /* Noise Reset */
 	AM_RANGE(0x102e, 0x102f) AM_WRITE(bsktball_nmion_w) /* NMI On */
-	AM_RANGE(0x1030, 0x1030) AM_DEVWRITE("discrete", bsktball_note_w) /* Music Ckt Note Dvsr */
-	AM_RANGE(0x1800, 0x1bbf) AM_RAM_WRITE(bsktball_videoram_w) AM_BASE_MEMBER(bsktball_state, m_videoram) /* DISPLAY */
-	AM_RANGE(0x1bc0, 0x1bff) AM_RAM AM_BASE_MEMBER(bsktball_state, m_motion)
+	AM_RANGE(0x1030, 0x1030) AM_WRITE(bsktball_note_w) /* Music Ckt Note Dvsr */
+	AM_RANGE(0x1800, 0x1bbf) AM_RAM_WRITE(bsktball_videoram_w) AM_SHARE("videoram") /* DISPLAY */
+	AM_RANGE(0x1bc0, 0x1bff) AM_RAM AM_SHARE("motion")
 	AM_RANGE(0x1c00, 0x1cff) AM_RAM
 	AM_RANGE(0x2000, 0x3fff) AM_ROM /* PROGRAM */
 ADDRESS_MAP_END
@@ -129,7 +128,7 @@ static INPUT_PORTS_START( bsktball )
 	/* 0x80 - DR3 = PL1 V DIR */
 
 	PORT_START("IN1")
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_VBLANK )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_TILT )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN ) /* SPARE */
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN ) /* TEST STEP */
@@ -140,27 +139,27 @@ static INPUT_PORTS_START( bsktball )
 
 	PORT_START("DSW")
 	PORT_DIPNAME( 0x07, 0x00, "Play Time per Credit" ) PORT_DIPLOCATION("SW:1,2,3")
-	PORT_DIPSETTING(	0x07, DEF_STR( Free_Play ) )
-	PORT_DIPSETTING(	0x06, "2:30" )
-	PORT_DIPSETTING(	0x05, "2:00" )
-	PORT_DIPSETTING(	0x04, "1:30" )
-	PORT_DIPSETTING(	0x03, "1:15" )
-	PORT_DIPSETTING(	0x02, "0:45" )
-	PORT_DIPSETTING(	0x01, "0:30" )
-	PORT_DIPSETTING(	0x00, "1:00" )
+	PORT_DIPSETTING(    0x07, DEF_STR( Free_Play ) )
+	PORT_DIPSETTING(    0x06, "2:30" )
+	PORT_DIPSETTING(    0x05, "2:00" )
+	PORT_DIPSETTING(    0x04, "1:30" )
+	PORT_DIPSETTING(    0x03, "1:15" )
+	PORT_DIPSETTING(    0x02, "0:45" )
+	PORT_DIPSETTING(    0x01, "0:30" )
+	PORT_DIPSETTING(    0x00, "1:00" )
 	PORT_DIPNAME( 0x18, 0x00, DEF_STR( Coinage ) ) PORT_DIPLOCATION("SW:4,5")
-	PORT_DIPSETTING(	0x00, DEF_STR( 1C_1C ) )
-	PORT_DIPSETTING(	0x10, DEF_STR( 1C_4C ) )
-	PORT_DIPSETTING(	0x08, DEF_STR( 1C_5C ) )
-	PORT_DIPSETTING(	0x18, DEF_STR( 1C_6C ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( 1C_4C ) )
+	PORT_DIPSETTING(    0x08, DEF_STR( 1C_5C ) )
+	PORT_DIPSETTING(    0x18, DEF_STR( 1C_6C ) )
 	PORT_DIPNAME( 0x20, 0x00, "Cost" ) PORT_DIPLOCATION("SW:6")
-	PORT_DIPSETTING(	0x20, "Two Coin Minimum" )
-	PORT_DIPSETTING(	0x00, "One Coin Minimum" )
+	PORT_DIPSETTING(    0x20, "Two Coin Minimum" )
+	PORT_DIPSETTING(    0x00, "One Coin Minimum" )
 	PORT_DIPNAME( 0xc0, 0x00, DEF_STR( Language ) ) PORT_DIPLOCATION("SW:7,8")
-	PORT_DIPSETTING(	0xc0, DEF_STR( German ) )
-	PORT_DIPSETTING(	0x80, DEF_STR( French ) )
-	PORT_DIPSETTING(	0x40, DEF_STR( Spanish ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( English ) )
+	PORT_DIPSETTING(    0xc0, DEF_STR( German ) )
+	PORT_DIPSETTING(    0x80, DEF_STR( French ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( Spanish ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( English ) )
 INPUT_PORTS_END
 
 
@@ -190,7 +189,7 @@ static const gfx_layout motionlayout =
 	2,
 	{ 0, 8*0x800 },
 	{ 0, 1, 2, 3, 4, 5, 6, 7 },
-	{	0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+	{   0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 		8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8,
 		16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8,
 		24*8, 25*8, 26*8, 27*8, 28*8, 29*8, 30*8, 31*8 },
@@ -210,40 +209,38 @@ GFXDECODE_END
  *
  *************************************/
 
-static MACHINE_START( bsktball )
+void bsktball_state::machine_start()
 {
-	bsktball_state *state = machine.driver_data<bsktball_state>();
 
-	state->save_item(NAME(state->m_nmi_on));
-	state->save_item(NAME(state->m_i256v));
-	state->save_item(NAME(state->m_ld1));
-	state->save_item(NAME(state->m_ld2));
-	state->save_item(NAME(state->m_dir0));
-	state->save_item(NAME(state->m_dir1));
-	state->save_item(NAME(state->m_dir2));
-	state->save_item(NAME(state->m_dir3));
-	state->save_item(NAME(state->m_last_p1_horiz));
-	state->save_item(NAME(state->m_last_p1_vert));
-	state->save_item(NAME(state->m_last_p2_horiz));
-	state->save_item(NAME(state->m_last_p2_vert));
+	save_item(NAME(m_nmi_on));
+//  save_item(NAME(m_i256v));
+	save_item(NAME(m_ld1));
+	save_item(NAME(m_ld2));
+	save_item(NAME(m_dir0));
+	save_item(NAME(m_dir1));
+	save_item(NAME(m_dir2));
+	save_item(NAME(m_dir3));
+	save_item(NAME(m_last_p1_horiz));
+	save_item(NAME(m_last_p1_vert));
+	save_item(NAME(m_last_p2_horiz));
+	save_item(NAME(m_last_p2_vert));
 }
 
-static MACHINE_RESET( bsktball )
+void bsktball_state::machine_reset()
 {
-	bsktball_state *state = machine.driver_data<bsktball_state>();
 
-	state->m_nmi_on = 0;
-	state->m_i256v = 0;
-	state->m_ld1 = 0;
-	state->m_ld2 = 0;
-	state->m_dir0 = 0;
-	state->m_dir1 = 0;
-	state->m_dir2 = 0;
-	state->m_dir3 = 0;
-	state->m_last_p1_horiz = 0;
-	state->m_last_p1_vert = 0;
-	state->m_last_p2_horiz = 0;
-	state->m_last_p2_vert = 0;
+	m_nmi_on = 0;
+//  m_i256v = 0;
+	m_ld1 = 0;
+	m_ld2 = 0;
+	m_dir0 = 0;
+	m_dir1 = 0;
+	m_dir2 = 0;
+	m_dir3 = 0;
+	m_last_p1_horiz = 0;
+	m_last_p1_vert = 0;
+	m_last_p2_horiz = 0;
+	m_last_p2_vert = 0;
 }
 
 
@@ -252,25 +249,20 @@ static MACHINE_CONFIG_START( bsktball, bsktball_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6502,750000)
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT_HACK(bsktball_interrupt,8)
+	MCFG_TIMER_DRIVER_ADD_SCANLINE("scantimer", bsktball_state, bsktball_scanline, "screen", 0, 1)
 
-	MCFG_MACHINE_START(bsktball)
-	MCFG_MACHINE_RESET(bsktball)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(32*8, 28*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 0*8, 28*8-1)
-	MCFG_SCREEN_UPDATE(bsktball)
+	MCFG_SCREEN_UPDATE_DRIVER(bsktball_state, screen_update_bsktball)
 
 	MCFG_GFXDECODE(bsktball)
 	MCFG_PALETTE_LENGTH(2*4 + 4*4*4*4)
 
-	MCFG_PALETTE_INIT(bsktball)
-	MCFG_VIDEO_START(bsktball)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -308,4 +300,4 @@ ROM_END
  *
  *************************************/
 
-GAME( 1979, bsktball, 0, bsktball, bsktball, 0, ROT0, "Atari", "Basketball", GAME_SUPPORTS_SAVE )
+GAME( 1979, bsktball, 0, bsktball, bsktball, driver_device, 0, ROT0, "Atari", "Basketball", GAME_SUPPORTS_SAVE )

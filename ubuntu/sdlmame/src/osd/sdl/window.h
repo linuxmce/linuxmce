@@ -12,7 +12,7 @@
 #ifndef __SDLWINDOW__
 #define __SDLWINDOW__
 
-#include <SDL/SDL.h>
+#include "sdlinc.h"
 #include "video.h"
 #include "render.h"
 #include "sdlsync.h"
@@ -32,15 +32,14 @@ typedef UINT32 HashT;
 //  TYPE DEFINITIONS
 //============================================================
 
-typedef struct _sdl_window_info sdl_window_info;
-struct _sdl_window_info
+struct sdl_window_info
 {
 	// Pointer to next window
-	sdl_window_info *	next;
+	sdl_window_info *   next;
 
 	// Pointer to machine
 	running_machine &machine() const { assert(m_machine != NULL); return *m_machine; }
-	running_machine *	m_machine;
+	running_machine *   m_machine;
 
 	// Draw Callbacks
 	int (*create)(sdl_window_info *window, int width, int height);
@@ -53,60 +52,55 @@ struct _sdl_window_info
 	void (*clear)(sdl_window_info *window);
 
 	// window handle and info
-	char				title[256];
+	char                title[256];
 
 	// monitor info
-	sdl_monitor_info *	monitor;
-	int					fullscreen;
-	int			index;
+	sdl_monitor_info *  monitor;
+	int                 fullscreen;
+	int         index;
 
 	// diverse flags
-	int					minwidth, minheight;
-	int					maxwidth, maxheight;
-	int					depth;
-	int					refresh;
-	int					windowed_width;
-	int					windowed_height;
-	int					startmaximized;
+	int                 minwidth, minheight;
+	int                 maxwidth, maxheight;
+	int                 depth;
+	int                 refresh;
+	int                 windowed_width;
+	int                 windowed_height;
+	int                 startmaximized;
 
 	// rendering info
-	osd_event *			rendered_event;
-	render_target *		target;
+	osd_event *         rendered_event;
+	render_target *     target;
 	render_primitive_list *primlist;
 
 	// drawing data
-	void *				dxdata;
+	void *              dxdata;
 
 	// cache of physical width and height
-	int					width;
-	int					height;
+	int                 width;
+	int                 height;
 
 	// current blitwidth and height
-	int					blitwidth;
-	int					blitheight;
+	int                 blitwidth;
+	int                 blitheight;
 
-	int					totalColors;		// total colors from machine/sdl_window_config
-	int					start_viewscreen;
-
-	// per window modes ...
-	int					scale_mode;
+	int                 totalColors;        // total colors from machine/sdl_window_config
+	int                 start_viewscreen;
 
 	// GL specific
-	int					prescale;
+	int                 prescale;
 
-#if (SDL_VERSION_ATLEAST(1,3,0))
+#if (SDLMAME_SDL2)
 	// Needs to be here as well so we can identify window
-	SDL_Window			*sdl_window;
-	SDL_Renderer		*sdl_renderer;
+	SDL_Window          *sdl_window;
 	// These are used in combine resizing events ... #if SDL13_COMBINE_RESIZE
-	int 				resize_width;
-	int					resize_height;
-	osd_ticks_t			last_resize;
+	int                 resize_width;
+	int                 resize_height;
+	osd_ticks_t         last_resize;
 #endif
 };
 
-typedef struct _sdl_draw_info sdl_draw_info;
-struct _sdl_draw_info
+struct sdl_draw_info
 {
 	void (*exit)(void);
 	void (*attach)(sdl_draw_info *info, sdl_window_info *window);

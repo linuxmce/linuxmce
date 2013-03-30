@@ -4,28 +4,26 @@
 
 #define BASE  0xb000
 
-READ8_HANDLER( mmonkey_protection_r )
+READ8_MEMBER(btime_state::mmonkey_protection_r)
 {
-	btime_state *state = space->machine().driver_data<btime_state>();
-	UINT8 *RAM = space->machine().region("maincpu")->base();
+	UINT8 *RAM = memregion("maincpu")->base();
 	int ret = 0;
 
 	if (offset == 0x0000)
-		ret = state->m_protection_status;
+		ret = m_protection_status;
 	else if (offset == 0x0e00)
-		ret = state->m_protection_ret;
+		ret = m_protection_ret;
 	else if (offset >= 0x0d00 && offset <= 0x0d02)
 		ret = RAM[BASE + offset];  /* addition result */
 	else
-		logerror("Unknown protection read.  PC=%04X  Offset=%04X\n", cpu_get_pc(&space->device()), offset);
+		logerror("Unknown protection read.  PC=%04X  Offset=%04X\n", space.device().safe_pc(), offset);
 
 	return ret;
 }
 
-WRITE8_HANDLER( mmonkey_protection_w )
+WRITE8_MEMBER(btime_state::mmonkey_protection_w)
 {
-	btime_state *state = space->machine().driver_data<btime_state>();
-	UINT8 *RAM = space->machine().region("maincpu")->base();
+	UINT8 *RAM = memregion("maincpu")->base();
 
 	if (offset == 0)
 	{
@@ -34,9 +32,9 @@ WRITE8_HANDLER( mmonkey_protection_w )
 		{
 			int i, s1, s2, r;
 
-			switch (state->m_protection_command)
+			switch (m_protection_command)
 			{
-			case 0:	/* score addition */
+			case 0: /* score addition */
 
 				s1 = (1 * (RAM[BASE + 0x0d00] & 0x0f)) + (10 * (RAM[BASE + 0x0d00] >> 4)) +
 					(100 * (RAM[BASE + 0x0d01] & 0x0f)) + (1000 * (RAM[BASE + 0x0d01] >> 4)) +
@@ -57,38 +55,37 @@ WRITE8_HANDLER( mmonkey_protection_w )
 
 				break;
 
-			case 1:	/* decryption */
+			case 1: /* decryption */
 
 				/* Compute return value by searching the decryption table. */
 				/* During the search the status should be 2, but we're done */
 				/* instanteniously in emulation time */
 				for (i = 0; i < 0x100; i++)
 				{
-					if (RAM[BASE + 0x0f00 + i] == state->m_protection_value)
+					if (RAM[BASE + 0x0f00 + i] == m_protection_value)
 					{
-						state->m_protection_ret = i;
+						m_protection_ret = i;
 						break;
 					}
 				}
 				break;
 
 			default:
-				logerror("Unemulated protection command=%02X.  PC=%04X\n", state->m_protection_command, cpu_get_pc(&space->device()));
+				logerror("Unemulated protection command=%02X.  PC=%04X\n", m_protection_command, space.device().safe_pc());
 				break;
 			}
 
-			state->m_protection_status = 0;
+			m_protection_status = 0;
 		}
 	}
 	else if (offset == 0x0c00)
-		state->m_protection_command = data;
+		m_protection_command = data;
 	else if (offset == 0x0e00)
-		state->m_protection_value = data;
+		m_protection_value = data;
 	else if (offset >= 0x0f00)
 		RAM[BASE + offset] = data;   /* decrypt table */
 	else if (offset >= 0x0d00 && offset <= 0x0d05)
 		RAM[BASE + offset] = data;   /* source table */
 	else
-		logerror("Unknown protection write=%02X.  PC=%04X  Offset=%04X\n", data, cpu_get_pc(&space->device()), offset);
+		logerror("Unknown protection write=%02X.  PC=%04X  Offset=%04X\n", data, space.device().safe_pc(), offset);
 }
-

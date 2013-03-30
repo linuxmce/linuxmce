@@ -15,22 +15,22 @@
  *
  *************************************/
 
-PALETTE_INIT( dribling )
+void dribling_state::palette_init()
 {
-	const UINT8 *prom = machine.region("proms")->base() + 0x400;
+	const UINT8 *prom = machine().root_device().memregion("proms")->base() + 0x400;
 	int i;
 
 	for (i = 0; i < 256; i++)
 	{
-		int r = (~prom[i] >> 0) & 1;	// 220
-		int g = (~prom[i] >> 1) & 3;	// 820 + 560 (332 max)
-		int b = (~prom[i] >> 3) & 1;	// 220
+		int r = (~prom[i] >> 0) & 1;    // 220
+		int g = (~prom[i] >> 1) & 3;    // 820 + 560 (332 max)
+		int b = (~prom[i] >> 3) & 1;    // 220
 
 		r *= 0xff;
 		g *= 0x55;
 		b *= 0xff;
 
-		palette_set_color(machine, i, MAKE_RGB(r,g,b));
+		palette_set_color(machine(), i, MAKE_RGB(r,g,b));
 	}
 }
 
@@ -42,12 +42,11 @@ PALETTE_INIT( dribling )
  *
  *************************************/
 
-WRITE8_HANDLER( dribling_colorram_w )
+WRITE8_MEMBER(dribling_state::dribling_colorram_w)
 {
-	dribling_state *state = space->machine().driver_data<dribling_state>();
 
 	/* it is very important that we mask off the two bits here */
-	state->m_colorram[offset & 0x1f9f] = data;
+	m_colorram[offset & 0x1f9f] = data;
 }
 
 
@@ -58,27 +57,26 @@ WRITE8_HANDLER( dribling_colorram_w )
  *
  *************************************/
 
-SCREEN_UPDATE( dribling )
+UINT32 dribling_state::screen_update_dribling(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	dribling_state *state = screen->machine().driver_data<dribling_state>();
-	UINT8 *prombase = screen->machine().region("proms")->base();
-	UINT8 *gfxbase = screen->machine().region("gfx1")->base();
+	UINT8 *prombase = machine().root_device().memregion("proms")->base();
+	UINT8 *gfxbase = memregion("gfx1")->base();
 	int x, y;
 
 	/* loop over rows */
-	for (y = cliprect->min_y; y <= cliprect->max_y; y++)
+	for (y = cliprect.min_y; y <= cliprect.max_y; y++)
 	{
-		UINT16 *dst = BITMAP_ADDR16(bitmap, y, 0);
+		UINT16 *dst = &bitmap.pix16(y);
 
 		/* loop over columns */
-		for (x = cliprect->min_x; x <= cliprect->max_x; x++)
+		for (x = cliprect.min_x; x <= cliprect.max_x; x++)
 		{
 			int b7 = prombase[(x >> 3) | ((y >> 3) << 5)] & 1;
-			int b6 = state->m_abca;
+			int b6 = m_abca;
 			int b5 = (x >> 3) & 1;
 			int b4 = (gfxbase[(x >> 3) | (y << 5)] >> (x & 7)) & 1;
-			int b3 = (state->m_videoram[(x >> 3) | (y << 5)] >> (x & 7)) & 1;
-			int b2_0 = state->m_colorram[(x >> 3) | ((y >> 2) << 7)] & 7;
+			int b3 = (m_videoram[(x >> 3) | (y << 5)] >> (x & 7)) & 1;
+			int b2_0 = m_colorram[(x >> 3) | ((y >> 2) << 7)] & 7;
 
 			/* assemble the various bits into a palette PROM index */
 			dst[x] = (b7 << 7) | (b6 << 6) | (b5 << 5) | (b4 << 4) | (b3 << 3) | b2_0;

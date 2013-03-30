@@ -16,7 +16,7 @@
  *
  *************************************/
 
-#define VERBOSE		0
+#define VERBOSE     0
 
 #define LOG(x) do { if (VERBOSE) logerror x; } while (0)
 
@@ -27,9 +27,9 @@
  *
  *************************************/
 
-#define DEFAULT_SAMPLE_RATE			(44100)
+#define DEFAULT_SAMPLE_RATE         (44100)
 
-#define BUFFER_SIZE					32768
+#define BUFFER_SIZE                 32768
 
 
 
@@ -39,19 +39,18 @@
  *
  *************************************/
 
-typedef struct _dmadac_state dmadac_state;
-struct _dmadac_state
+struct dmadac_state
 {
 	/* sound stream and buffers */
-	sound_stream *	channel;
-	INT16 *			buffer;
-	UINT32			bufin;
-	UINT32			bufout;
+	sound_stream *  channel;
+	INT16 *         buffer;
+	UINT32          bufin;
+	UINT32          bufout;
 
 	/* per-channel parameters */
-	INT16			volume;
-	UINT8			enabled;
-	double			frequency;
+	INT16           volume;
+	UINT8           enabled;
+	double          frequency;
 };
 
 
@@ -59,7 +58,7 @@ INLINE dmadac_state *get_safe_token(device_t *device)
 {
 	assert(device != NULL);
 	assert(device->type() == DMADAC);
-	return (dmadac_state *)downcast<legacy_device_base *>(device)->token();
+	return (dmadac_state *)downcast<dmadac_sound_device *>(device)->token();
 }
 
 
@@ -234,32 +233,40 @@ void dmadac_set_volume(dmadac_sound_device **devlist, UINT8 num_channels, UINT16
 	}
 }
 
+const device_type DMADAC = &device_creator<dmadac_sound_device>;
 
-
-/**************************************************************************
- * Generic get_info
- **************************************************************************/
-
-DEVICE_GET_INFO( dmadac_sound )
+dmadac_sound_device::dmadac_sound_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, DMADAC, "DMA-driven DAC", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
 {
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(dmadac_state);					break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME( dmadac );		break;
-		case DEVINFO_FCT_STOP:							/* nothing */									break;
-		case DEVINFO_FCT_RESET:							/* nothing */									break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "DMA-driven DAC");				break;
-		case DEVINFO_STR_FAMILY:					strcpy(info->s, "DAC");							break;
-		case DEVINFO_STR_VERSION:					strcpy(info->s, "1.0");							break;
-		case DEVINFO_STR_SOURCE_FILE:						strcpy(info->s, __FILE__);						break;
-		case DEVINFO_STR_CREDITS:					strcpy(info->s, "Copyright Nicola Salmoria and the MAME Team"); break;
-	}
+	m_token = global_alloc_clear(dmadac_state);
 }
 
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
 
-DEFINE_LEGACY_SOUND_DEVICE(DMADAC, dmadac_sound);
+void dmadac_sound_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void dmadac_sound_device::device_start()
+{
+	DEVICE_START_NAME( dmadac )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void dmadac_sound_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}

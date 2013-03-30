@@ -123,26 +123,25 @@
  *
  *************************************/
 
-static TIMER_CALLBACK( generate_interrupt )
+TIMER_CALLBACK_MEMBER(jedi_state::generate_interrupt)
 {
-	jedi_state *state = machine.driver_data<jedi_state>();
 	int scanline = param;
 
 	/* IRQ is set by /32V */
-	cputag_set_input_line(machine, "maincpu", M6502_IRQ_LINE, (scanline & 32) ? CLEAR_LINE : ASSERT_LINE);
-	cputag_set_input_line(machine, "audiocpu", M6502_IRQ_LINE, (scanline & 32) ? CLEAR_LINE : ASSERT_LINE);
+	machine().device("maincpu")->execute().set_input_line(M6502_IRQ_LINE, (scanline & 32) ? CLEAR_LINE : ASSERT_LINE);
+	machine().device("audiocpu")->execute().set_input_line(M6502_IRQ_LINE, (scanline & 32) ? CLEAR_LINE : ASSERT_LINE);
 
 	/* set up for the next */
 	scanline += 32;
 	if (scanline > 256)
 		scanline = 32;
-	state->m_interrupt_timer->adjust(machine.primary_screen->time_until_pos(scanline), scanline);
+	m_interrupt_timer->adjust(machine().primary_screen->time_until_pos(scanline), scanline);
 }
 
 
-static WRITE8_HANDLER( main_irq_ack_w )
+WRITE8_MEMBER(jedi_state::main_irq_ack_w)
 {
-	cputag_set_input_line(space->machine(), "maincpu", M6502_IRQ_LINE, CLEAR_LINE);
+	machine().device("maincpu")->execute().set_input_line(M6502_IRQ_LINE, CLEAR_LINE);
 }
 
 
@@ -153,19 +152,18 @@ static WRITE8_HANDLER( main_irq_ack_w )
  *
  *************************************/
 
-static MACHINE_START( jedi )
+void jedi_state::machine_start()
 {
-	jedi_state *state = machine.driver_data<jedi_state>();
 
 	/* set a timer to run the interrupts */
-	state->m_interrupt_timer = machine.scheduler().timer_alloc(FUNC(generate_interrupt));
-	state->m_interrupt_timer->adjust(machine.primary_screen->time_until_pos(32), 32);
+	m_interrupt_timer = machine().scheduler().timer_alloc(timer_expired_delegate(FUNC(jedi_state::generate_interrupt),this));
+	m_interrupt_timer->adjust(machine().primary_screen->time_until_pos(32), 32);
 
 	/* configure the banks */
-	memory_configure_bank(machine, "bank1", 0, 3, machine.region("maincpu")->base() + 0x10000, 0x4000);
+	membank("bank1")->configure_entries(0, 3, memregion("maincpu")->base() + 0x10000, 0x4000);
 
 	/* set up save state */
-	state->save_item(NAME(state->m_nvram_enabled));
+	save_item(NAME(m_nvram_enabled));
 }
 
 
@@ -176,13 +174,12 @@ static MACHINE_START( jedi )
  *
  *************************************/
 
-static MACHINE_RESET( jedi )
+void jedi_state::machine_reset()
 {
-	jedi_state *state = machine.driver_data<jedi_state>();
 
 	/* init globals */
-	state->m_a2d_select = 0;
-	state->m_nvram_enabled = 0;
+	m_a2d_select = 0;
+	m_nvram_enabled = 0;
 }
 
 
@@ -193,11 +190,11 @@ static MACHINE_RESET( jedi )
  *
  *************************************/
 
-static WRITE8_HANDLER( rom_banksel_w )
+WRITE8_MEMBER(jedi_state::rom_banksel_w)
 {
-	if (data & 0x01) memory_set_bank(space->machine(), "bank1", 0);
-	if (data & 0x02) memory_set_bank(space->machine(), "bank1", 1);
-	if (data & 0x04) memory_set_bank(space->machine(), "bank1", 2);
+	if (data & 0x01) membank("bank1")->set_entry(0);
+	if (data & 0x02) membank("bank1")->set_entry(1);
+	if (data & 0x04) membank("bank1")->set_entry(2);
 }
 
 
@@ -208,32 +205,30 @@ static WRITE8_HANDLER( rom_banksel_w )
  *
  *************************************/
 
-static READ8_HANDLER( a2d_data_r )
+READ8_MEMBER(jedi_state::a2d_data_r)
 {
-	jedi_state *state = space->machine().driver_data<jedi_state>();
 	UINT8 ret = 0;
 
-	switch (state->m_a2d_select)
+	switch (m_a2d_select)
 	{
-		case 0: ret = input_port_read(space->machine(), "STICKY"); break;
-		case 2: ret = input_port_read(space->machine(), "STICKX"); break;
+		case 0: ret = ioport("STICKY")->read(); break;
+		case 2: ret = ioport("STICKX")->read(); break;
 	}
 
 	return ret;
 }
 
 
-static WRITE8_HANDLER( a2d_select_w )
+WRITE8_MEMBER(jedi_state::a2d_select_w)
 {
-	jedi_state *state = space->machine().driver_data<jedi_state>();
 
-	state->m_a2d_select = offset;
+	m_a2d_select = offset;
 }
 
 
-static WRITE8_HANDLER( jedi_coin_counter_w )
+WRITE8_MEMBER(jedi_state::jedi_coin_counter_w)
 {
-	coin_counter_w(space->machine(), offset, data);
+	coin_counter_w(machine(), offset, data);
 }
 
 
@@ -244,20 +239,18 @@ static WRITE8_HANDLER( jedi_coin_counter_w )
  *
  *************************************/
 
-static WRITE8_HANDLER( nvram_data_w )
+WRITE8_MEMBER(jedi_state::nvram_data_w)
 {
-	jedi_state *state = space->machine().driver_data<jedi_state>();
 
-	if (state->m_nvram_enabled)
-		state->m_nvram[offset] = data;
+	if (m_nvram_enabled)
+		m_nvram[offset] = data;
 }
 
 
-static WRITE8_HANDLER( nvram_enable_w )
+WRITE8_MEMBER(jedi_state::nvram_enable_w)
 {
-	jedi_state *state = space->machine().driver_data<jedi_state>();
 
-	state->m_nvram_enabled = ~offset & 1;
+	m_nvram_enabled = ~offset & 1;
 }
 
 
@@ -268,7 +261,7 @@ static WRITE8_HANDLER( nvram_enable_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, jedi_state )
 	AM_RANGE(0x0000, 0x07ff) AM_RAM
 	AM_RANGE(0x0800, 0x08ff) AM_MIRROR(0x0300) AM_RAM_WRITE(nvram_data_w) AM_SHARE("nvram")
 	AM_RANGE(0x0c00, 0x0c00) AM_MIRROR(0x03fe) AM_READ_PORT("0c00") AM_WRITENOP
@@ -279,24 +272,24 @@ static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
 	AM_RANGE(0x1c00, 0x1c01) AM_MIRROR(0x007f) AM_READNOP AM_WRITE(nvram_enable_w)
 	AM_RANGE(0x1c80, 0x1c82) AM_MIRROR(0x0078) AM_READNOP AM_WRITE(a2d_select_w)
 	AM_RANGE(0x1c83, 0x1c87) AM_MIRROR(0x0078) AM_NOP
-	AM_RANGE(0x1d00, 0x1d00) AM_MIRROR(0x007f) AM_NOP	/* write: NVRAM store */
+	AM_RANGE(0x1d00, 0x1d00) AM_MIRROR(0x007f) AM_NOP   /* write: NVRAM store */
 	AM_RANGE(0x1d80, 0x1d80) AM_MIRROR(0x007f) AM_READNOP AM_WRITE(watchdog_reset_w)
 	AM_RANGE(0x1e00, 0x1e00) AM_MIRROR(0x007f) AM_READNOP AM_WRITE(main_irq_ack_w)
 	AM_RANGE(0x1e80, 0x1e81) AM_MIRROR(0x0078) AM_READNOP AM_WRITE(jedi_coin_counter_w)
-	AM_RANGE(0x1e82, 0x1e83) AM_MIRROR(0x0078) AM_NOP	/* write: LED control - not used */
-	AM_RANGE(0x1e84, 0x1e84) AM_MIRROR(0x0078) AM_READNOP AM_WRITEONLY AM_BASE_MEMBER(jedi_state, m_foreground_bank)
+	AM_RANGE(0x1e82, 0x1e83) AM_MIRROR(0x0078) AM_NOP   /* write: LED control - not used */
+	AM_RANGE(0x1e84, 0x1e84) AM_MIRROR(0x0078) AM_READNOP AM_WRITEONLY AM_SHARE("foreground_bank")
 	AM_RANGE(0x1e85, 0x1e85) AM_MIRROR(0x0078) AM_NOP
 	AM_RANGE(0x1e86, 0x1e86) AM_MIRROR(0x0078) AM_READNOP AM_WRITE(jedi_audio_reset_w)
-	AM_RANGE(0x1e87, 0x1e87) AM_MIRROR(0x0078) AM_READNOP AM_WRITEONLY AM_BASE_MEMBER(jedi_state, m_video_off)
+	AM_RANGE(0x1e87, 0x1e87) AM_MIRROR(0x0078) AM_READNOP AM_WRITEONLY AM_SHARE("video_off")
 	AM_RANGE(0x1f00, 0x1f00) AM_MIRROR(0x007f) AM_READNOP AM_WRITE(jedi_audio_latch_w)
 	AM_RANGE(0x1f80, 0x1f80) AM_MIRROR(0x007f) AM_READNOP AM_WRITE(rom_banksel_w)
-	AM_RANGE(0x2000, 0x27ff) AM_RAM AM_BASE_MEMBER(jedi_state, m_backgroundram)
-	AM_RANGE(0x2800, 0x2fff) AM_RAM AM_BASE_MEMBER(jedi_state, m_paletteram)
-	AM_RANGE(0x3000, 0x37bf) AM_RAM AM_BASE_MEMBER(jedi_state, m_foregroundram)
-	AM_RANGE(0x37c0, 0x3bff) AM_RAM AM_BASE_MEMBER(jedi_state, m_spriteram)
+	AM_RANGE(0x2000, 0x27ff) AM_RAM AM_SHARE("backgroundram")
+	AM_RANGE(0x2800, 0x2fff) AM_RAM AM_SHARE("paletteram")
+	AM_RANGE(0x3000, 0x37bf) AM_RAM AM_SHARE("foregroundram")
+	AM_RANGE(0x37c0, 0x3bff) AM_RAM AM_SHARE("spriteram")
 	AM_RANGE(0x3c00, 0x3c01) AM_MIRROR(0x00fe) AM_READNOP AM_WRITE(jedi_vscroll_w)
 	AM_RANGE(0x3d00, 0x3d01) AM_MIRROR(0x00fe) AM_READNOP AM_WRITE(jedi_hscroll_w)
-	AM_RANGE(0x3e00, 0x3e00) AM_MIRROR(0x01ff) AM_WRITEONLY AM_BASE_MEMBER(jedi_state, m_smoothing_table)
+	AM_RANGE(0x3e00, 0x3e00) AM_MIRROR(0x01ff) AM_WRITEONLY AM_SHARE("smoothing_table")
 	AM_RANGE(0x4000, 0x7fff) AM_ROMBANK("bank1")
 	AM_RANGE(0x8000, 0xffff) AM_ROM
 ADDRESS_MAP_END
@@ -324,13 +317,13 @@ static INPUT_PORTS_START( jedi )
 	PORT_BIT( 0x03, IP_ACTIVE_LOW,  IPT_UNUSED )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_TILT )
 	PORT_BIT( 0x18, IP_ACTIVE_LOW,  IPT_UNUSED )
-	PORT_BIT( 0x60, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM(jedi_audio_comm_stat_r, NULL)
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_VBLANK )
+	PORT_BIT( 0x60, IP_ACTIVE_HIGH, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF,jedi_state,jedi_audio_comm_stat_r, NULL)
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_CUSTOM ) PORT_VBLANK("screen")
 
-	PORT_START("STICKY")	/* analog Y */
+	PORT_START("STICKY")    /* analog Y */
 	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_Y ) PORT_SENSITIVITY(100) PORT_KEYDELTA(10)
 
-	PORT_START("STICKX")	/* analog X */
+	PORT_START("STICKX")    /* analog X */
 	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_X ) PORT_SENSITIVITY(100) PORT_KEYDELTA(10)
 INPUT_PORTS_END
 
@@ -350,8 +343,6 @@ static MACHINE_CONFIG_START( jedi, jedi_state )
 
 	MCFG_QUANTUM_TIME(attotime::from_hz(240))
 
-	MCFG_MACHINE_START(jedi)
-	MCFG_MACHINE_RESET(jedi)
 	MCFG_NVRAM_ADD_0FILL("nvram")
 
 	/* video hardware */
@@ -370,14 +361,14 @@ MACHINE_CONFIG_END
  *************************************/
 
 ROM_START( jedi )
-	ROM_REGION( 0x1C000, "maincpu", 0 )	/* 64k for code + 48k for banked ROMs */
+	ROM_REGION( 0x1C000, "maincpu", 0 ) /* 64k for code + 48k for banked ROMs */
 	ROM_LOAD( "136030-221.14f",  0x08000, 0x4000, CRC(414d05e3) SHA1(e5f5f8d85433467a13d6ca9e3889e07a62b00e52) )
 	ROM_LOAD( "136030-222.13f",  0x0c000, 0x4000, CRC(7b3f21be) SHA1(8fe62401f9b78c7a3e62b544c4b705b1bfa9b8f3) )
 	ROM_LOAD( "136030-123.13d",  0x10000, 0x4000, CRC(877f554a) SHA1(8b51109cabd84741b024052f892b3172fbe83223) ) /* Page 0 */
 	ROM_LOAD( "136030-124.13b",  0x14000, 0x4000, CRC(e72d41db) SHA1(1b3fcdc435f1e470e8d5b7241856e398a4c3910e) ) /* Page 1 */
 	ROM_LOAD( "136030-122.13a",  0x18000, 0x4000, CRC(cce7ced5) SHA1(bff031a637aefca713355dbf251dcb5c2cea0885) ) /* Page 2 */
 
-	ROM_REGION( 0x10000, "audiocpu", 0 )	/* space for the sound ROMs */
+	ROM_REGION( 0x10000, "audiocpu", 0 )    /* space for the sound ROMs */
 	ROM_LOAD( "136030-133.01c",  0x8000, 0x4000, CRC(6c601c69) SHA1(618b77800bbbb4db34a53ca974a71bdaf89b5930) )
 	ROM_LOAD( "136030-134.01a",  0xC000, 0x4000, CRC(5e36c564) SHA1(4b0afceb9a1d912f1d5c1f26928d244d5b14ea4a) )
 
@@ -394,7 +385,7 @@ ROM_START( jedi )
 	ROM_LOAD( "136030-128.01m",  0x10000, 0x8000, CRC(24663184) SHA1(5eba142ed926671ee131430944e59f21a55a5c57) )
 	ROM_LOAD( "136030-129.01k",  0x18000, 0x8000, CRC(ac86b98c) SHA1(9f86c8801a7293fa46e9432f1651dd85bf00f4b9) )
 
-	ROM_REGION( 0x1000, "proms", 0 )	/* background smoothing */
+	ROM_REGION( 0x1000, "proms", 0 )    /* background smoothing */
 	ROM_LOAD( "136030-117.bin",   0x0000, 0x0400, CRC(9831bd55) SHA1(12945ef2d1582914125b9ee591567034d71d6573) )
 	ROM_LOAD( "136030-118.bin",   0x0800, 0x0400, CRC(261fbfe7) SHA1(efc65a74a3718563a07b718e34d8a7aa23339a69) )
 ROM_END
@@ -407,4 +398,4 @@ ROM_END
  *
  *************************************/
 
-GAME( 1984, jedi, 0, jedi, jedi, 0, ROT0, "Atari", "Return of the Jedi", GAME_SUPPORTS_SAVE )
+GAME( 1984, jedi, 0, jedi, jedi, driver_device, 0, ROT0, "Atari", "Return of the Jedi", GAME_SUPPORTS_SAVE )

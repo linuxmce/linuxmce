@@ -4,9 +4,9 @@
 
 *************************************************************************/
 
-#define IR_TIMING				1		/* try to emulate MB and VG running time */
+#define IR_TIMING               1       /* try to emulate MB and VG running time */
 
-typedef struct irmb_ops
+struct irmb_ops
 {
 	const struct irmb_ops *nxtop;
 	UINT32 func;
@@ -18,18 +18,19 @@ typedef struct irmb_ops
 	UINT8 diren;
 	UINT8 flags;
 	UINT8 ramsel;
-} irmb_ops;
+};
 
 
 class irobot_state : public driver_device
 {
 public:
-	irobot_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config),
-		  m_nvram(*this, "nvram") { }
+	irobot_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag),
+			m_nvram(*this, "nvram") ,
+		m_videoram(*this, "videoram"){ }
 
-	required_shared_ptr<UINT8>	m_nvram;
-	UINT8 *m_videoram;
+	required_shared_ptr<UINT8>  m_nvram;
+	required_shared_ptr<UINT8> m_videoram;
 	UINT8 m_vg_clear;
 	UINT8 m_bufsel;
 	UINT8 m_alphamap;
@@ -60,33 +61,30 @@ public:
 	int m_ir_ymin;
 	int m_ir_xmax;
 	int m_ir_ymax;
+	DECLARE_WRITE8_MEMBER(irobot_nvram_w);
+	DECLARE_WRITE8_MEMBER(irobot_clearirq_w);
+	DECLARE_WRITE8_MEMBER(irobot_clearfirq_w);
+	DECLARE_READ8_MEMBER(irobot_sharedmem_r);
+	DECLARE_WRITE8_MEMBER(irobot_sharedmem_w);
+	DECLARE_WRITE8_MEMBER(irobot_statwr_w);
+	DECLARE_WRITE8_MEMBER(irobot_out0_w);
+	DECLARE_WRITE8_MEMBER(irobot_rom_banksel_w);
+	DECLARE_WRITE8_MEMBER(irobot_control_w);
+	DECLARE_READ8_MEMBER(irobot_control_r);
+	DECLARE_READ8_MEMBER(irobot_status_r);
+	DECLARE_WRITE8_MEMBER(irobot_paletteram_w);
+	DECLARE_READ8_MEMBER(quad_pokeyn_r);
+	DECLARE_WRITE8_MEMBER(quad_pokeyn_w);
+	DECLARE_DRIVER_INIT(irobot);
+	virtual void machine_reset();
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_irobot(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	TIMER_CALLBACK_MEMBER(scanline_callback);
+	TIMER_DEVICE_CALLBACK_MEMBER(irobot_irvg_done_callback);
+	TIMER_DEVICE_CALLBACK_MEMBER(irobot_irmb_done_callback);
 };
 
-/*----------- defined in machine/irobot.c -----------*/
-
-DRIVER_INIT( irobot );
-MACHINE_RESET( irobot );
-
-TIMER_DEVICE_CALLBACK( irobot_irvg_done_callback );
-TIMER_DEVICE_CALLBACK( irobot_irmb_done_callback );
-
-READ8_HANDLER( irobot_status_r );
-WRITE8_HANDLER( irobot_statwr_w );
-WRITE8_HANDLER( irobot_out0_w );
-WRITE8_HANDLER( irobot_rom_banksel_w );
-READ8_HANDLER( irobot_control_r );
-WRITE8_HANDLER( irobot_control_w );
-READ8_HANDLER( irobot_sharedmem_r );
-WRITE8_HANDLER( irobot_sharedmem_w );
-
-
 /*----------- defined in video/irobot.c -----------*/
-
-PALETTE_INIT( irobot );
-VIDEO_START( irobot );
-SCREEN_UPDATE( irobot );
-
-WRITE8_HANDLER( irobot_paletteram_w );
-
 void irobot_poly_clear(running_machine &machine);
 void irobot_run_video(running_machine &machine);

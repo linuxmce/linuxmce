@@ -51,16 +51,17 @@ TO DO:
 class mazerbla_state : public driver_device
 {
 public:
-	mazerbla_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	mazerbla_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"),
+		m_cfb_ram(*this, "cfb_ram"){ }
 
 	/* memory pointers */
-	UINT8 *   m_cfb_ram;
-	UINT8 *   m_videoram;
-	size_t    m_videoram_size;
+	required_shared_ptr<UINT8> m_videoram;
+	required_shared_ptr<UINT8> m_cfb_ram;
 
 	/* video-related */
-	bitmap_t * m_tmpbitmaps[4];
+	bitmap_ind16 m_tmpbitmaps[4];
 
 	UINT8 m_vcu_video_reg[4];
 	UINT32 m_vcu_gfx_addr;
@@ -68,7 +69,7 @@ public:
 
 	UINT8 m_bknd_col;
 	UINT8 m_port02_status;
-	UINT8 m_vbank;		/* video page select signal, likely for double buffering ?*/
+	UINT8 m_vbank;      /* video page select signal, likely for double buffering ?*/
 	UINT32 m_xpos;
 	UINT32 m_ypos;
 	UINT32 m_pix_xsize;
@@ -78,7 +79,7 @@ public:
 	UINT8 m_mode;
 	UINT8 m_plane;
 	UINT8 m_lookup_ram[0x100*4];
-	UINT32 m_gfx_rom_bank;	/* graphics ROMs are banked */
+	UINT32 m_gfx_rom_bank;  /* graphics ROMs are banked */
 
 	double m_weights_r[2];
 	double m_weights_g[3];
@@ -97,8 +98,8 @@ public:
 	UINT8 m_soundlatch;
 
 	/* devices */
-	device_t *m_maincpu;
-	device_t *m_subcpu;
+	cpu_device *m_maincpu;
+	cpu_device *m_subcpu;
 
 #if 0
 	int m_dbg_info;
@@ -109,6 +110,45 @@ public:
 
 	int m_planes_enabled[4];
 #endif
+	DECLARE_WRITE8_MEMBER(cfb_backgnd_color_w);
+	DECLARE_WRITE8_MEMBER(cfb_vbank_w);
+	DECLARE_WRITE8_MEMBER(cfb_rom_bank_sel_w);
+	DECLARE_WRITE8_MEMBER(cfb_rom_bank_sel_w_gg);
+	DECLARE_READ8_MEMBER(cfb_port_02_r);
+	DECLARE_WRITE8_MEMBER(vcu_video_reg_w);
+	DECLARE_READ8_MEMBER(vcu_set_cmd_param_r);
+	DECLARE_READ8_MEMBER(vcu_set_gfx_addr_r);
+	DECLARE_READ8_MEMBER(vcu_set_clr_addr_r);
+	DECLARE_WRITE8_MEMBER(cfb_zpu_int_req_set_w);
+	DECLARE_READ8_MEMBER(cfb_zpu_int_req_clr);
+	DECLARE_READ8_MEMBER(ls670_0_r);
+	DECLARE_WRITE8_MEMBER(ls670_0_w);
+	DECLARE_READ8_MEMBER(ls670_1_r);
+	DECLARE_WRITE8_MEMBER(ls670_1_w);
+	DECLARE_WRITE8_MEMBER(zpu_bcd_decoder_w);
+	DECLARE_READ8_MEMBER(zpu_inputs_r);
+	DECLARE_WRITE8_MEMBER(zpu_led_w);
+	DECLARE_WRITE8_MEMBER(zpu_lamps_w);
+	DECLARE_WRITE8_MEMBER(zpu_coin_counter_w);
+	DECLARE_WRITE8_MEMBER(cfb_led_w);
+	DECLARE_WRITE8_MEMBER(vsb_ls273_audio_control_w);
+	DECLARE_WRITE8_MEMBER(main_sound_w);
+	DECLARE_WRITE8_MEMBER(sound_int_clear_w);
+	DECLARE_WRITE8_MEMBER(sound_nmi_clear_w);
+	DECLARE_WRITE8_MEMBER(gg_led_ctrl_w);
+	DECLARE_READ8_MEMBER(soundcommand_r);
+	DECLARE_DRIVER_INIT(mazerbla);
+	DECLARE_DRIVER_INIT(greatgun);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	virtual void palette_init();
+	UINT32 screen_update_mazerbla(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	UINT32 screen_update_test_vcu(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
+	INTERRUPT_GEN_MEMBER(sound_interrupt);
+	TIMER_CALLBACK_MEMBER(deferred_ls670_0_w);
+	TIMER_CALLBACK_MEMBER(deferred_ls670_1_w);
+	TIMER_CALLBACK_MEMBER(delayed_sound_w);
 };
 
 
@@ -131,125 +171,122 @@ public:
 
 ***************************************************************************/
 
-static PALETTE_INIT( mazerbla )
+void mazerbla_state::palette_init()
 {
-	mazerbla_state *state = machine.driver_data<mazerbla_state>();
 	static const int resistances_r[2]  = { 4700, 2200 };
 	static const int resistances_gb[3] = { 10000, 4700, 2200 };
 
 	/* just to calculate coefficients for later use */
-	compute_resistor_weights(0,	255,	-1.0,
-			3,	resistances_gb,	state->m_weights_g,	3600,	0,
-			3,	resistances_gb,	state->m_weights_b,	3600,	0,
-			2,	resistances_r,	state->m_weights_r,	3600,	0);
+	compute_resistor_weights(0, 255,    -1.0,
+			3,  resistances_gb, m_weights_g,    3600,   0,
+			3,  resistances_gb, m_weights_b,    3600,   0,
+			2,  resistances_r,  m_weights_r,    3600,   0);
 
 }
 
-static VIDEO_START( mazerbla )
+void mazerbla_state::video_start()
 {
-	mazerbla_state *state = machine.driver_data<mazerbla_state>();
 
 #if 0
-	state->m_planes_enabled[0] = state->m_planes_enabled[1] = state->m_planes_enabled[2] = state->m_planes_enabled[3] = 1;
-	state->m_dbg_info = 1;
-	state->m_dbg_gfx_e = 1;
-	state->m_dbg_clr_e = 0;
-	state->m_dbg_vbank = 1;
-	state->m_dbg_lookup = 4;
+	m_planes_enabled[0] = m_planes_enabled[1] = m_planes_enabled[2] = m_planes_enabled[3] = 1;
+	m_dbg_info = 1;
+	m_dbg_gfx_e = 1;
+	m_dbg_clr_e = 0;
+	m_dbg_vbank = 1;
+	m_dbg_lookup = 4;
 #endif
 
-	state->m_tmpbitmaps[0] = machine.primary_screen->alloc_compatible_bitmap();
-	state->m_tmpbitmaps[1] = machine.primary_screen->alloc_compatible_bitmap();
-	state->m_tmpbitmaps[2] = machine.primary_screen->alloc_compatible_bitmap();
-	state->m_tmpbitmaps[3] = machine.primary_screen->alloc_compatible_bitmap();
+	machine().primary_screen->register_screen_bitmap(m_tmpbitmaps[0]);
+	machine().primary_screen->register_screen_bitmap(m_tmpbitmaps[1]);
+	machine().primary_screen->register_screen_bitmap(m_tmpbitmaps[2]);
+	machine().primary_screen->register_screen_bitmap(m_tmpbitmaps[3]);
 
-	state->save_item(NAME(*state->m_tmpbitmaps[0]));
-	state->save_item(NAME(*state->m_tmpbitmaps[1]));
-	state->save_item(NAME(*state->m_tmpbitmaps[2]));
-	state->save_item(NAME(*state->m_tmpbitmaps[3]));
+	save_item(NAME(m_tmpbitmaps[0]));
+	save_item(NAME(m_tmpbitmaps[1]));
+	save_item(NAME(m_tmpbitmaps[2]));
+	save_item(NAME(m_tmpbitmaps[3]));
 }
 
 #ifdef UNUSED_DEFINITION
 
-SCREEN_UPDATE( test_vcu )
+UINT32 mazerbla_state::screen_update_test_vcu(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	mazerbla_state *state = screen->machine().driver_data<mazerbla_state>();
-	int *planes_enabled = state->m_planes_enabled;
+	int *planes_enabled = m_planes_enabled;
 	char buf[128];
 
 	UINT32 color_base = 0;
 
-	if (state->m_game_id == MAZERBLA)
-		color_base = 0x80;	/* 0x80 constant: matches Mazer Blazer movie */
+	if (m_game_id == MAZERBLA)
+		color_base = 0x80;  /* 0x80 constant: matches Mazer Blazer movie */
 
-	if (state->m_game_id == GREATGUN)
+	if (m_game_id == GREATGUN)
 		color_base = 0x00;
 
-	bitmap_fill(bitmap, NULL, 0);
+	bitmap.fill(0);
 //  logerror("-->frame\n");
 
 	if (planes_enabled[3])
-		copybitmap(bitmap, state->m_tmpbitmaps[3], 0, 0, 0, 0, cliprect);
+		copybitmap(bitmap, m_tmpbitmaps[3], 0, 0, 0, 0, cliprect);
 
 	if (planes_enabled[2])
-		copybitmap_trans(bitmap, state->m_tmpbitmaps[2], 0, 0, 0, 0,cliprect, color_base);
+		copybitmap_trans(bitmap, m_tmpbitmaps[2], 0, 0, 0, 0,cliprect, color_base);
 
-	bitmap_fill(state->m_tmpbitmaps[2], NULL, color_base);
+	m_tmpbitmaps[2].fill(color_base);
 
 	if (planes_enabled[1])
-		copybitmap_trans(bitmap, state->m_tmpbitmaps[1], 0, 0, 0, 0,cliprect, color_base);
+		copybitmap_trans(bitmap, m_tmpbitmaps[1], 0, 0, 0, 0,cliprect, color_base);
 
-	bitmap_fill(state->m_tmpbitmaps[1], NULL, color_base);
+	m_tmpbitmaps[1].fill(color_base);
 
 	if (planes_enabled[0])
-		copybitmap_trans(bitmap, state->m_tmpbitmaps[0], 0, 0, 0, 0,cliprect, color_base);
+		copybitmap_trans(bitmap, m_tmpbitmaps[0], 0, 0, 0, 0,cliprect, color_base);
 
-	bitmap_fill(state->m_tmpbitmaps[0], NULL, color_base);
+	m_tmpbitmaps[0].fill(color_base);
 
-	if (input_code_pressed_once(screen->machine(), KEYCODE_1))	/* plane 1 */
+	if (machine().input().code_pressed_once(KEYCODE_1)) /* plane 1 */
 		planes_enabled[0] ^= 1;
 
-	if (input_code_pressed_once(screen->machine(), KEYCODE_2))	/* plane 2 */
+	if (machine().input().code_pressed_once(KEYCODE_2)) /* plane 2 */
 		planes_enabled[1] ^= 1;
 
-	if (input_code_pressed_once(screen->machine(), KEYCODE_3))	/* plane 3 */
+	if (machine().input().code_pressed_once(KEYCODE_3)) /* plane 3 */
 		planes_enabled[2] ^= 1;
 
-	if (input_code_pressed_once(screen->machine(), KEYCODE_4))	/* plane 4 */
+	if (machine().input().code_pressed_once(KEYCODE_4)) /* plane 4 */
 		planes_enabled[3] ^= 1;
 
-	if (input_code_pressed_once(screen->machine(), KEYCODE_I))	/* show/hide debug info */
-		state->m_dbg_info = !state->m_dbg_info;
+	if (machine().input().code_pressed_once(KEYCODE_I)) /* show/hide debug info */
+		m_dbg_info = !m_dbg_info;
 
-	if (input_code_pressed_once(screen->machine(), KEYCODE_G))	/* enable gfx area handling */
-		state->m_dbg_gfx_e = !state->m_dbg_gfx_e;
+	if (machine().input().code_pressed_once(KEYCODE_G)) /* enable gfx area handling */
+		m_dbg_gfx_e = !m_dbg_gfx_e;
 
-	if (input_code_pressed_once(screen->machine(), KEYCODE_C))	/* enable color area handling */
-		state->m_dbg_clr_e = !state->m_dbg_clr_e;
+	if (machine().input().code_pressed_once(KEYCODE_C)) /* enable color area handling */
+		m_dbg_clr_e = !m_dbg_clr_e;
 
-	if (input_code_pressed_once(screen->machine(), KEYCODE_V))	/* draw only when vbank==dbg_vbank */
-		state->m_dbg_vbank ^= 1;
+	if (machine().input().code_pressed_once(KEYCODE_V)) /* draw only when vbank==dbg_vbank */
+		m_dbg_vbank ^= 1;
 
-	if (input_code_pressed_once(screen->machine(), KEYCODE_L))	/* showlookup ram */
-		state->m_dbg_lookup = (state->m_dbg_lookup + 1) % 5;	//0,1,2,3, 4-off
+	if (machine().input().code_pressed_once(KEYCODE_L)) /* showlookup ram */
+		m_dbg_lookup = (m_dbg_lookup + 1) % 5;  //0,1,2,3, 4-off
 
 
-	if (state->m_dbg_info)
+	if (m_dbg_info)
 	{
 		sprintf(buf,"I-info, G-gfx, C-color, V-vbank, 1-4 enable planes");
-		ui_draw_text(buf, 10, 0 * ui_get_line_height(screen->machine()));
+		ui_draw_text(buf, 10, 0 * ui_get_line_height(machine()));
 
-		sprintf(buf,"g:%1i c:%1i v:%1i vbk=%1i  planes=%1i%1i%1i%1i  ", state->m_dbg_gfx_e&1, state->m_dbg_clr_e&1, state->m_dbg_vbank, vbank&1,
+		sprintf(buf,"g:%1i c:%1i v:%1i vbk=%1i  planes=%1i%1i%1i%1i  ", m_dbg_gfx_e&1, m_dbg_clr_e&1, m_dbg_vbank, vbank&1,
 			planes_enabled[0],
 			planes_enabled[1],
 			planes_enabled[2],
 			planes_enabled[3] );
 
-		ui_draw_text(buf, 10, 1 * ui_get_line_height(screen->machine()));
+		ui_draw_text(buf, 10, 1 * ui_get_line_height(machine()));
 
-		if (state->m_dbg_lookup!=4)
+		if (m_dbg_lookup!=4)
 		{
-			int lookup_offs = (state->m_dbg_lookup)*256; //=0,1,2,3*256
+			int lookup_offs = (m_dbg_lookup)*256; //=0,1,2,3*256
 			int y, x;
 
 			for (y = 0; y < 16; y++)
@@ -260,7 +297,7 @@ SCREEN_UPDATE( test_vcu )
 				{
 					sprintf(buf + strlen(buf), "%02x ", lookup_ram[lookup_offs + x + y * 16]);
 				}
-				ui_draw_text(buf, 0, (2 + y) * ui_get_line_height(screen->machine()));
+				ui_draw_text(buf, 0, (2 + y) * ui_get_line_height(machine()));
 			}
 		}
 	}
@@ -270,178 +307,169 @@ SCREEN_UPDATE( test_vcu )
 #endif
 
 
-static SCREEN_UPDATE( mazerbla )
+UINT32 mazerbla_state::screen_update_mazerbla(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	mazerbla_state *state = screen->machine().driver_data<mazerbla_state>();
-	UINT32 color_base = 0;
+//  UINT32 color_base = 0;
 
-	if (state->m_game_id == MAZERBLA)
-		color_base = 0x80;	/* 0x80 constant: matches Mazer Blazer movie */
+	if (m_game_id == MAZERBLA)
+//      color_base = 0x80;  /* 0x80 constant: matches Mazer Blazer movie */
 
-	if (state->m_game_id == GREATGUN)
-		color_base = 0x00;
+//  if (m_game_id == GREATGUN)
+//      color_base = 0x00;
 
-	//  bitmap_fill(bitmap, NULL, 0);
+	//  bitmap.fill(0);
 
-	copybitmap(bitmap, state->m_tmpbitmaps[3], 0, 0, 0, 0, cliprect);
-	copybitmap_trans(bitmap, state->m_tmpbitmaps[2], 0, 0, 0, 0, cliprect, 0);
-	copybitmap_trans(bitmap, state->m_tmpbitmaps[1], 0, 0, 0, 0, cliprect, 0);
-	copybitmap_trans(bitmap, state->m_tmpbitmaps[0], 0, 0, 0, 0, cliprect, 0);
+	copybitmap(bitmap, m_tmpbitmaps[3], 0, 0, 0, 0, cliprect);
+	copybitmap_trans(bitmap, m_tmpbitmaps[2], 0, 0, 0, 0, cliprect, 0);
+	copybitmap_trans(bitmap, m_tmpbitmaps[1], 0, 0, 0, 0, cliprect, 0);
+	copybitmap_trans(bitmap, m_tmpbitmaps[0], 0, 0, 0, 0, cliprect, 0);
 	return 0;
 }
 
 
-static WRITE8_HANDLER( cfb_backgnd_color_w )
+WRITE8_MEMBER(mazerbla_state::cfb_backgnd_color_w)
 {
-	mazerbla_state *state = space->machine().driver_data<mazerbla_state>();
 
-	if (state->m_bknd_col != data)
+	if (m_bknd_col != data)
 	{
 		int r, g, b, bit0, bit1, bit2;
 
-		state->m_bknd_col = data;
+		m_bknd_col = data;
 
 		/* red component */
 		bit1 = BIT(data, 7);
 		bit0 = BIT(data, 6);
-		r = combine_2_weights(state->m_weights_r, bit0, bit1);
+		r = combine_2_weights(m_weights_r, bit0, bit1);
 
 		/* green component */
 		bit2 = BIT(data, 5);
 		bit1 = BIT(data, 4);
 		bit0 = BIT(data, 3);
-		g = combine_3_weights(state->m_weights_g, bit0, bit1, bit2);
+		g = combine_3_weights(m_weights_g, bit0, bit1, bit2);
 
 		/* blue component */
 		bit2 = BIT(data, 2);
 		bit1 = BIT(data, 1);
 		bit0 = BIT(data, 0);
-		b = combine_3_weights(state->m_weights_b, bit0, bit1, bit2);
+		b = combine_3_weights(m_weights_b, bit0, bit1, bit2);
 
-		palette_set_color(space->machine(), 255, MAKE_RGB(r, g, b));
+		palette_set_color(machine(), 255, MAKE_RGB(r, g, b));
 		//logerror("background color (port 01) write=%02x\n",data);
 	}
 }
 
 
-static WRITE8_HANDLER( cfb_vbank_w )
+WRITE8_MEMBER(mazerbla_state::cfb_vbank_w)
 {
-	mazerbla_state *state = space->machine().driver_data<mazerbla_state>();
 
 	/* only bit 6 connected */
-	state->m_vbank = BIT(data, 6);
+	m_vbank = BIT(data, 6);
 }
 
 
-static WRITE8_HANDLER( cfb_rom_bank_sel_w )	/* mazer blazer */
+WRITE8_MEMBER(mazerbla_state::cfb_rom_bank_sel_w)/* mazer blazer */
 {
-	mazerbla_state *state = space->machine().driver_data<mazerbla_state>();
-	state->m_gfx_rom_bank = data;
+	m_gfx_rom_bank = data;
 
-	memory_set_bankptr(space->machine(),  "bank1", space->machine().region("sub2")->base() + (state->m_gfx_rom_bank * 0x2000) + 0x10000);
+	membank("bank1")->set_base(machine().root_device().memregion("sub2")->base() + (m_gfx_rom_bank * 0x2000) + 0x10000);
 }
 
-static WRITE8_HANDLER( cfb_rom_bank_sel_w_gg )	/* great guns */
+WRITE8_MEMBER(mazerbla_state::cfb_rom_bank_sel_w_gg)/* great guns */
 {
-	mazerbla_state *state = space->machine().driver_data<mazerbla_state>();
-	state->m_gfx_rom_bank = data >> 1;
+	m_gfx_rom_bank = data >> 1;
 
-	memory_set_bankptr(space->machine(),  "bank1", space->machine().region("sub2")->base() + (state->m_gfx_rom_bank * 0x2000) + 0x10000);
+	membank("bank1")->set_base(machine().root_device().memregion("sub2")->base() + (m_gfx_rom_bank * 0x2000) + 0x10000);
 }
 
 
 /* VCU status? */
-static READ8_HANDLER( cfb_port_02_r )
+READ8_MEMBER(mazerbla_state::cfb_port_02_r)
 {
-	mazerbla_state *state = space->machine().driver_data<mazerbla_state>();
-	state->m_port02_status ^= 0xff;
-	return state->m_port02_status;
+	m_port02_status ^= 0xff;
+	return m_port02_status;
 }
 
 
-static WRITE8_HANDLER( vcu_video_reg_w )
+WRITE8_MEMBER(mazerbla_state::vcu_video_reg_w)
 {
-	mazerbla_state *state = space->machine().driver_data<mazerbla_state>();
-	if (state->m_vcu_video_reg[offset] != data)
+	if (m_vcu_video_reg[offset] != data)
 	{
-		state->m_vcu_video_reg[offset] = data;
-		//popmessage("video_reg= %02x %02x %02x %02x", state->m_vcu_video_reg[0], state->m_vcu_video_reg[1], state->m_vcu_video_reg[2], state->m_vcu_video_reg[3]);
-		//logerror("video_reg= %02x %02x %02x %02x\n", state->m_vcu_video_reg[0], state->m_vcu_video_reg[1], state->m_vcu_video_reg[2], state->m_vcu_video_reg[3]);
+		m_vcu_video_reg[offset] = data;
+		//popmessage("video_reg= %02x %02x %02x %02x", m_vcu_video_reg[0], m_vcu_video_reg[1], m_vcu_video_reg[2], m_vcu_video_reg[3]);
+		//logerror("video_reg= %02x %02x %02x %02x\n", m_vcu_video_reg[0], m_vcu_video_reg[1], m_vcu_video_reg[2], m_vcu_video_reg[3]);
 	}
 }
 
-static READ8_HANDLER( vcu_set_cmd_param_r )
+READ8_MEMBER(mazerbla_state::vcu_set_cmd_param_r)
 {
-	mazerbla_state *state = space->machine().driver_data<mazerbla_state>();
-	state->m_vcu_gfx_param_addr = offset;
+	m_vcu_gfx_param_addr = offset;
 
 	/* offset  = 0 is not known */
-	state->m_xpos      = state->m_cfb_ram[state->m_vcu_gfx_param_addr + 1] | (state->m_cfb_ram[state->m_vcu_gfx_param_addr + 2]<<8);
-	state->m_ypos      = state->m_cfb_ram[state->m_vcu_gfx_param_addr + 3] | (state->m_cfb_ram[state->m_vcu_gfx_param_addr + 4]<<8);
-	state->m_color1    = state->m_cfb_ram[state->m_vcu_gfx_param_addr + 5];
-	state->m_color2    = state->m_cfb_ram[state->m_vcu_gfx_param_addr + 6];
-	state->m_mode      = state->m_cfb_ram[state->m_vcu_gfx_param_addr + 7];
-	state->m_pix_xsize = state->m_cfb_ram[state->m_vcu_gfx_param_addr + 8];
-	state->m_pix_ysize = state->m_cfb_ram[state->m_vcu_gfx_param_addr + 9];
+	m_xpos      = m_cfb_ram[m_vcu_gfx_param_addr + 1] | (m_cfb_ram[m_vcu_gfx_param_addr + 2]<<8);
+	m_ypos      = m_cfb_ram[m_vcu_gfx_param_addr + 3] | (m_cfb_ram[m_vcu_gfx_param_addr + 4]<<8);
+	m_color1    = m_cfb_ram[m_vcu_gfx_param_addr + 5];
+	m_color2    = m_cfb_ram[m_vcu_gfx_param_addr + 6];
+	m_mode      = m_cfb_ram[m_vcu_gfx_param_addr + 7];
+	m_pix_xsize = m_cfb_ram[m_vcu_gfx_param_addr + 8];
+	m_pix_ysize = m_cfb_ram[m_vcu_gfx_param_addr + 9];
 
-	state->m_plane = state->m_mode & 3;
+	m_plane = m_mode & 3;
 
 	return 0;
 }
 
 
-static READ8_HANDLER( vcu_set_gfx_addr_r )
+READ8_MEMBER(mazerbla_state::vcu_set_gfx_addr_r)
 {
-	mazerbla_state *state = space->machine().driver_data<mazerbla_state>();
-	UINT8 * rom = space->machine().region("sub2")->base() + (state->m_gfx_rom_bank * 0x2000) + 0x10000;
+	UINT8 * rom = memregion("sub2")->base() + (m_gfx_rom_bank * 0x2000) + 0x10000;
 	int offs;
 	int x, y;
 	int bits = 0;
 	UINT8 color_base = 0;
 
-	if (state->m_game_id == MAZERBLA)
-		color_base = 0x80;	/* 0x80 - good for Mazer Blazer: (only in game, CRT test mode is bad) */
+	if (m_game_id == MAZERBLA)
+		color_base = 0x80;  /* 0x80 - good for Mazer Blazer: (only in game, CRT test mode is bad) */
 
-	if (state->m_game_id == GREATGUN)
-		color_base = 0x00;	/* 0x00 - good for Great Guns: (both in game and CRT test mode) */
+	if (m_game_id == GREATGUN)
+		color_base = 0x00;  /* 0x00 - good for Great Guns: (both in game and CRT test mode) */
 /*
     if ((mode <= 0x07) || (mode >= 0x10))
     {
         logerror("paradr=");
-        logerror("%3x ", state->m_vcu_gfx_param_addr );
+        logerror("%3x ", m_vcu_gfx_param_addr );
 
-        logerror("%02x ", state->m_cfb_ram[vcu_gfx_param_addr + 0] );
-        logerror("x=%04x ", state->m_xpos );                 //1,2
-        logerror("y=%04x ", state->m_ypos );                 //3,4
-        logerror("color1=%02x ", state->m_color1);             //5
-        logerror("color2=%02x ", state->m_color2);           //6
-        logerror("mode=%02x ", state->m_mode );              //7
-        logerror("xpix=%02x ", state->m_pix_xsize );         //8
-        logerror("ypix=%02x ", state->m_pix_ysize );         //9
+        logerror("%02x ", m_cfb_ram[vcu_gfx_param_addr + 0] );
+        logerror("x=%04x ", m_xpos );                 //1,2
+        logerror("y=%04x ", m_ypos );                 //3,4
+        logerror("color1=%02x ", m_color1);             //5
+        logerror("color2=%02x ", m_color2);           //6
+        logerror("mode=%02x ", m_mode );              //7
+        logerror("xpix=%02x ", m_pix_xsize );         //8
+        logerror("ypix=%02x ", m_pix_ysize );         //9
 
-        logerror("addr=%4i bank=%1i\n", offset, state->m_gfx_rom_bank);
+        logerror("addr=%4i bank=%1i\n", offset, m_gfx_rom_bank);
     }
 */
 
-	state->m_vcu_gfx_addr = offset;
+	m_vcu_gfx_addr = offset;
 
 	/* draw */
-	offs = state->m_vcu_gfx_addr;
+	offs = m_vcu_gfx_addr;
 
-	switch(state->m_mode)
+	switch(m_mode)
 	{
 		/* 2 bits per pixel */
 		case 0x0f:
 		case 0x0e:
 		case 0x0d:
 		case 0x0c:
-//      if (state->m_dbg_gfx_e)
+//      if (m_dbg_gfx_e)
 //      {
-//          if (state->m_vbank == state->m_dbg_vbank)
+//          if (m_vbank == m_dbg_vbank)
 		{
-			for (y = 0; y <= state->m_pix_ysize; y++)
+			for (y = 0; y <= m_pix_ysize; y++)
 			{
-				for (x = 0; x <= state->m_pix_xsize; x++)
+				for (x = 0; x <= m_pix_xsize; x++)
 				{
 					UINT8 pixeldata = rom[(offs + (bits >> 3)) % 0x2000];
 					UINT8 data = (pixeldata >> (6 - (bits & 7))) & 3;
@@ -450,21 +478,21 @@ static READ8_HANDLER( vcu_set_gfx_addr_r )
 					switch(data)
 					{
 						case 0:
-							col = color_base | ((state->m_color1 & 0x0f));		//background PEN
+							col = color_base | ((m_color1 & 0x0f));     //background PEN
 							break;
 						case 1:
-							col = color_base | ((state->m_color1 & 0xf0) >> 4);	//foreground PEN
+							col = color_base | ((m_color1 & 0xf0) >> 4);    //foreground PEN
 							break;
 						case 2:
-							col = color_base | ((state->m_color2 & 0x0f));	//background PEN2
+							col = color_base | ((m_color2 & 0x0f)); //background PEN2
 							break;
 						case 3:
-							col = color_base | ((state->m_color2 & 0xf0) >> 4);	//foreground PEN2
+							col = color_base | ((m_color2 & 0xf0) >> 4);    //foreground PEN2
 							break;
 					}
 
-					if (((state->m_xpos + x) < 256) && ((state->m_ypos + y) < 256) )
-						*BITMAP_ADDR16(state->m_tmpbitmaps[state->m_plane], state->m_ypos + y, state->m_xpos + x) = col;
+					if (((m_xpos + x) < 256) && ((m_ypos + y) < 256) )
+						m_tmpbitmaps[m_plane].pix16(m_ypos + y, m_xpos + x) = col;
 
 					bits += 2;
 				}
@@ -478,22 +506,22 @@ static READ8_HANDLER( vcu_set_gfx_addr_r )
 		case 0x0a:/* verified - 1bpp */
 		case 0x09:/* verified - 1bpp: gun crosshair */
 		case 0x08:/* */
-//      if (state->m_dbg_gfx_e)
+//      if (m_dbg_gfx_e)
 //      {
-//          if (state->m_vbank == state->m_dbg_vbank)
+//          if (m_vbank == m_dbg_vbank)
 		{
 
-			for (y = 0; y <= state->m_pix_ysize; y++)
+			for (y = 0; y <= m_pix_ysize; y++)
 			{
-				for (x = 0; x <= state->m_pix_xsize; x++)
+				for (x = 0; x <= m_pix_xsize; x++)
 				{
 					UINT8 pixeldata = rom[(offs + (bits >> 3)) % 0x2000];
 					UINT8 data = (pixeldata >> (7 - (bits & 7))) & 1;
 
 					/* color = 4 MSB = front PEN, 4 LSB = background PEN */
 
-					if (((state->m_xpos + x) < 256) && ((state->m_ypos + y) < 256))
-						*BITMAP_ADDR16(state->m_tmpbitmaps[state->m_plane], state->m_ypos + y, state->m_xpos + x) = data ? color_base | ((state->m_color1 & 0xf0) >> 4): color_base | ((state->m_color1 & 0x0f));
+					if (((m_xpos + x) < 256) && ((m_ypos + y) < 256))
+						m_tmpbitmaps[m_plane].pix16(m_ypos + y, m_xpos + x) = data ? color_base | ((m_color1 & 0xf0) >> 4): color_base | ((m_color1 & 0x0f));
 
 					bits += 1;
 				}
@@ -506,13 +534,13 @@ static READ8_HANDLER( vcu_set_gfx_addr_r )
 		case 0x03:
 		case 0x01:
 		case 0x00:
-//      if (state->m_dbg_gfx_e)
+//      if (m_dbg_gfx_e)
 //      {
-//          if (state->m_vbank == state->m_dbg_vbank)
+//          if (m_vbank == m_dbg_vbank)
 		{
-			for (y = 0; y <= state->m_pix_ysize; y++)
+			for (y = 0; y <= m_pix_ysize; y++)
 			{
-				for (x = 0; x <= state->m_pix_xsize; x++)
+				for (x = 0; x <= m_pix_xsize; x++)
 				{
 					UINT8 pixeldata = rom[(offs + (bits >> 3)) % 0x2000];
 					UINT8 data = (pixeldata >> (4 - (bits & 7))) & 15;
@@ -520,8 +548,8 @@ static READ8_HANDLER( vcu_set_gfx_addr_r )
 
 					col = color_base | data;
 
-					if (((state->m_xpos + x) < 256) && ((state->m_ypos + y) < 256))
-						*BITMAP_ADDR16(state->m_tmpbitmaps[state->m_plane], state->m_ypos + y, state->m_xpos + x) = col;
+					if (((m_xpos + x) < 256) && ((m_ypos + y) < 256))
+						m_tmpbitmaps[m_plane].pix16(m_ypos + y, m_xpos + x) = col;
 
 					bits += 4;
 				}
@@ -530,17 +558,16 @@ static READ8_HANDLER( vcu_set_gfx_addr_r )
 //      }
 		break;
 	default:
-		popmessage("not supported VCU drawing mode=%2x", state->m_mode);
+		popmessage("not supported VCU drawing mode=%2x", m_mode);
 		break;
 	}
 
 	return 0;
 }
 
-static READ8_HANDLER( vcu_set_clr_addr_r )
+READ8_MEMBER(mazerbla_state::vcu_set_clr_addr_r)
 {
-	mazerbla_state *state = space->machine().driver_data<mazerbla_state>();
-	UINT8 * rom = space->machine().region("sub2")->base() + (state->m_gfx_rom_bank * 0x2000) + 0x10000;
+	UINT8 * rom = memregion("sub2")->base() + (m_gfx_rom_bank * 0x2000) + 0x10000;
 	int offs;
 	int x, y;
 	int bits = 0;
@@ -552,25 +579,25 @@ static READ8_HANDLER( vcu_set_clr_addr_r )
     //if (0) //(mode != 0x07)
     {
         logerror("paladr=");
-        logerror("%3x ", state->m_vcu_gfx_param_addr );
+        logerror("%3x ", m_vcu_gfx_param_addr );
 
-        logerror("%02x ", state->m_cfb_ram[state->m_vcu_gfx_param_addr + 0] );
-        logerror("x=%04x ", state->m_xpos );                 //1,2
-        logerror("y=%04x ", state->m_ypos );                 //3,4
-        logerror("color1=%02x ", state->m_color1);             //5
-        logerror("color2=%02x ", state->m_color2 );          //6
-        logerror("mode=%02x ", state->m_mode );              //7
-        logerror("xpix=%02x ", state->m_pix_xsize );         //8
-        logerror("ypix=%02x ", state->m_pix_ysize );         //9
+        logerror("%02x ", m_cfb_ram[m_vcu_gfx_param_addr + 0] );
+        logerror("x=%04x ", m_xpos );                 //1,2
+        logerror("y=%04x ", m_ypos );                 //3,4
+        logerror("color1=%02x ", m_color1);             //5
+        logerror("color2=%02x ", m_color2 );          //6
+        logerror("mode=%02x ", m_mode );              //7
+        logerror("xpix=%02x ", m_pix_xsize );         //8
+        logerror("ypix=%02x ", m_pix_ysize );         //9
 
-        logerror("addr=%4i bank=%1i\n", offset, state->m_gfx_rom_bank);
+        logerror("addr=%4i bank=%1i\n", offset, m_gfx_rom_bank);
 
         for (y = 0; y < 16; y++)
         {
             logerror("%04x: ", offset + y * 16);
             for (x = 0; x < 16; x++)
             {
-                logerror("%02x ", state->m_cfb_ram[offset + x + y * 16]);
+                logerror("%02x ", m_cfb_ram[offset + x + y * 16]);
             }
             logerror("\n");
         }
@@ -581,25 +608,25 @@ static READ8_HANDLER( vcu_set_clr_addr_r )
 /* copy palette / CLUT(???) */
 
 
-	switch (state->m_mode)
+	switch (m_mode)
 	{
 		case 0x13: /* draws sprites?? in mazer blazer and ... wrong sprite in place of targeting-cross and UFO laser */
 		case 0x03:
 		/* ... this may proove that there is really only one area and that
-           the draw command/palette selector is done via the 'mode' only ... */
-		//if (state->m_dbg_clr_e)
+		   the draw command/palette selector is done via the 'mode' only ... */
+		//if (m_dbg_clr_e)
 		{
-			offs = state->m_vcu_gfx_addr;
+			offs = m_vcu_gfx_addr;
 
-			if (state->m_game_id == MAZERBLA)
-				color_base = 0x80;	/* 0x80 constant: matches Mazer Blazer movie */
+			if (m_game_id == MAZERBLA)
+				color_base = 0x80;  /* 0x80 constant: matches Mazer Blazer movie */
 
-			if (state->m_game_id == GREATGUN)
+			if (m_game_id == GREATGUN)
 				color_base = 0x00;
 
-			for (y = 0; y <= state->m_pix_ysize; y++)
+			for (y = 0; y <= m_pix_ysize; y++)
 			{
-				for (x = 0; x <= state->m_pix_xsize; x++)
+				for (x = 0; x <= m_pix_xsize; x++)
 				{
 					UINT8 pixeldata = rom[(offs + (bits >> 3)) % 0x2000];
 					UINT8 data = (pixeldata >> (6 - (bits & 7))) & 3;
@@ -608,21 +635,21 @@ static READ8_HANDLER( vcu_set_clr_addr_r )
 					switch(data)
 					{
 						case 0:
-							col = color_base | ((state->m_color1 & 0x0f));		//background PEN
+							col = color_base | ((m_color1 & 0x0f));     //background PEN
 							break;
 						case 1:
-							col = color_base | ((state->m_color1 & 0xf0) >> 4);	//foreground PEN
+							col = color_base | ((m_color1 & 0xf0) >> 4);    //foreground PEN
 							break;
 						case 2:
-							col = color_base | ((state->m_color2 & 0x0f));	//background PEN2
+							col = color_base | ((m_color2 & 0x0f)); //background PEN2
 							break;
 						case 3:
-							col = color_base | ((state->m_color2 & 0xf0) >> 4);	//foreground PEN2
+							col = color_base | ((m_color2 & 0xf0) >> 4);    //foreground PEN2
 							break;
 					}
 
-					if (((state->m_xpos + x) < 256) && ((state->m_ypos + y) < 256))
-						*BITMAP_ADDR16(state->m_tmpbitmaps[state->m_plane], state->m_ypos + y, state->m_xpos + x) = col;
+					if (((m_xpos + x) < 256) && ((m_ypos + y) < 256))
+						m_tmpbitmaps[m_plane].pix16(m_ypos + y, m_xpos + x) = col;
 
 						bits += 2;
 				}
@@ -634,97 +661,97 @@ static READ8_HANDLER( vcu_set_clr_addr_r )
 		case 0x07:
 		offs = offset;
 
-		switch(state->m_ypos)
+		switch(m_ypos)
 		{
 			case 6: //seems to encode palette write
 			{
 				int r, g, b, bit0, bit1, bit2;
 
 				//pix_xsize and pix_ysize seem to be related to palette length ? (divide by 2)
-				int lookup_offs = (state->m_ypos >> 1) * 256; //=3*256
+				int lookup_offs = (m_ypos >> 1) * 256; //=3*256
 
 				for (y = 0; y < 16; y++)
 				{
 					for (x = 0; x < 16; x++)
 					{
-						UINT8 colour = state->m_cfb_ram[offs + x + y * 16];
+						UINT8 colour = m_cfb_ram[offs + x + y * 16];
 
 						/* red component */
 						bit1 = (colour >> 7) & 0x01;
 						bit0 = (colour >> 6) & 0x01;
-						r = combine_2_weights(state->m_weights_r, bit0, bit1);
+						r = combine_2_weights(m_weights_r, bit0, bit1);
 
 						/* green component */
 						bit2 = (colour >> 5) & 0x01;
 						bit1 = (colour >> 4) & 0x01;
 						bit0 = (colour >> 3) & 0x01;
-						g = combine_3_weights(state->m_weights_g, bit0, bit1, bit2);
+						g = combine_3_weights(m_weights_g, bit0, bit1, bit2);
 
 						/* blue component */
 						bit2 = (colour >> 2) & 0x01;
 						bit1 = (colour >> 1) & 0x01;
 						bit0 = (colour >> 0) & 0x01;
-						b = combine_3_weights(state->m_weights_b, bit0, bit1, bit2);
+						b = combine_3_weights(m_weights_b, bit0, bit1, bit2);
 
 						if ((x + y * 16) < 255)//keep color 255 free for use as background color
-							palette_set_color(space->machine(), x + y * 16, MAKE_RGB(r, g, b));
+							palette_set_color(machine(), x + y * 16, MAKE_RGB(r, g, b));
 
-						state->m_lookup_ram[lookup_offs + x + y * 16] = colour;
+						m_lookup_ram[lookup_offs + x + y * 16] = colour;
 					}
 				}
 			}
 			break;
 			case 4: //seems to encode lookup???? table write
 			{
-				int lookup_offs = (state->m_ypos >> 1) * 256; //=2*256
+				int lookup_offs = (m_ypos >> 1) * 256; //=2*256
 
 				for (y = 0; y < 16; y++)
 				{
 					for (x = 0; x < 16; x++)
 					{
-						UINT8 dat = state->m_cfb_ram[offs + x + y * 16];
-						state->m_lookup_ram[lookup_offs + x + y * 16] = dat;
+						UINT8 dat = m_cfb_ram[offs + x + y * 16];
+						m_lookup_ram[lookup_offs + x + y * 16] = dat;
 					}
 				}
 			}
 			break;
 			case 2: //seems to encode lookup???? table write
 			{
-				int lookup_offs = (state->m_ypos >> 1) * 256; //=1*256
+				int lookup_offs = (m_ypos >> 1) * 256; //=1*256
 
 				for (y = 0; y < 16; y++)
 				{
 					for (x = 0; x < 16; x++)
 					{
-						UINT8 dat = state->m_cfb_ram[offs + x + y * 16];
-						state->m_lookup_ram[lookup_offs + x + y * 16] = dat;
+						UINT8 dat = m_cfb_ram[offs + x + y * 16];
+						m_lookup_ram[lookup_offs + x + y * 16] = dat;
 					}
 				}
 			}
 			break;
 			case 0: //seems to encode lookup???? table write
 			{
-				int lookup_offs = (state->m_ypos >> 1) * 256; //=0*256
+				int lookup_offs = (m_ypos >> 1) * 256; //=0*256
 
 				for (y = 0; y < 16; y++)
 				{
 					for (x = 0; x < 16; x++)
 					{
-						UINT8 dat = state->m_cfb_ram[offs + x + y * 16];
-						state->m_lookup_ram[lookup_offs + x + y * 16] = dat;
+						UINT8 dat = m_cfb_ram[offs + x + y * 16];
+						m_lookup_ram[lookup_offs + x + y * 16] = dat;
 					}
 				}
 			}
 			break;
 
 			default:
-			popmessage("not supported lookup/color write mode=%2x", state->m_ypos);
+			popmessage("not supported lookup/color write mode=%2x", m_ypos);
 			break;
 		}
 		break;
 
 	default:
-		popmessage("not supported VCU color mode=%2x", state->m_mode);
+		popmessage("not supported VCU color mode=%2x", m_mode);
 		break;
 	}
 
@@ -737,76 +764,70 @@ static READ8_HANDLER( vcu_set_clr_addr_r )
  *
  *************************************/
 
-static WRITE8_HANDLER( cfb_zpu_int_req_set_w )
+WRITE8_MEMBER(mazerbla_state::cfb_zpu_int_req_set_w)
 {
-	mazerbla_state *state = space->machine().driver_data<mazerbla_state>();
 
-	state->m_zpu_int_vector &= ~2;	/* clear D1 on INTA (interrupt acknowledge) */
+	m_zpu_int_vector &= ~2; /* clear D1 on INTA (interrupt acknowledge) */
 
-	device_set_input_line(state->m_maincpu, 0, ASSERT_LINE);	/* main cpu interrupt (comes from CFB (generated at the start of INT routine on CFB) - vblank?) */
+	m_maincpu->set_input_line(0, ASSERT_LINE);  /* main cpu interrupt (comes from CFB (generated at the start of INT routine on CFB) - vblank?) */
 }
 
-static READ8_HANDLER( cfb_zpu_int_req_clr )
+READ8_MEMBER(mazerbla_state::cfb_zpu_int_req_clr)
 {
-	mazerbla_state *state = space->machine().driver_data<mazerbla_state>();
 
-	state->m_zpu_int_vector |= 2;
+	m_zpu_int_vector |= 2;
 
 	/* clear the INT line when there are no more interrupt requests */
-	if (state->m_zpu_int_vector == 0xff)
-		device_set_input_line(state->m_maincpu, 0, CLEAR_LINE);
+	if (m_zpu_int_vector == 0xff)
+		m_maincpu->set_input_line(0, CLEAR_LINE);
 
 	return 0;
 }
 
-static READ8_HANDLER( ls670_0_r )
+READ8_MEMBER(mazerbla_state::ls670_0_r)
 {
-	mazerbla_state *state = space->machine().driver_data<mazerbla_state>();
 
 	/* set a timer to force synchronization after the read */
-	space->machine().scheduler().synchronize();
+	machine().scheduler().synchronize();
 
-	return state->m_ls670_0[offset];
+	return m_ls670_0[offset];
 }
 
-static TIMER_CALLBACK( deferred_ls670_0_w )
+TIMER_CALLBACK_MEMBER(mazerbla_state::deferred_ls670_0_w)
 {
-	mazerbla_state *state = machine.driver_data<mazerbla_state>();
 	int offset = (param >> 8) & 255;
 	int data = param & 255;
 
-	state->m_ls670_0[offset] = data;
+	m_ls670_0[offset] = data;
 }
 
-static WRITE8_HANDLER( ls670_0_w )
+WRITE8_MEMBER(mazerbla_state::ls670_0_w)
 {
 	/* do this on a timer to let the CPUs synchronize */
-	space->machine().scheduler().synchronize(FUNC(deferred_ls670_0_w), (offset << 8) | data);
+	machine().scheduler().synchronize(timer_expired_delegate(FUNC(mazerbla_state::deferred_ls670_0_w),this), (offset << 8) | data);
 }
 
-static READ8_HANDLER( ls670_1_r )
+READ8_MEMBER(mazerbla_state::ls670_1_r)
 {
-	mazerbla_state *state = space->machine().driver_data<mazerbla_state>();
 
 	/* set a timer to force synchronization after the read */
-	space->machine().scheduler().synchronize();
+	machine().scheduler().synchronize();
 
-	return state->m_ls670_1[offset];
+	return m_ls670_1[offset];
 }
 
-static TIMER_CALLBACK( deferred_ls670_1_w )
+TIMER_CALLBACK_MEMBER(mazerbla_state::deferred_ls670_1_w)
 {
-	mazerbla_state *state = machine.driver_data<mazerbla_state>();
 	int offset = (param >> 8) & 255;
 	int data = param & 255;
 
-	state->m_ls670_1[offset] = data;
+	m_ls670_1[offset] = data;
 }
 
-static WRITE8_HANDLER( ls670_1_w )
+WRITE8_MEMBER(mazerbla_state::ls670_1_w)
 {
 	/* do this on a timer to let the CPUs synchronize */
-	space->machine().scheduler().synchronize(FUNC(deferred_ls670_1_w), (offset << 8) | data);
+	machine().scheduler().synchronize(timer_expired_delegate(FUNC(mazerbla_state::deferred_ls670_1_w),this), (offset << 8) | data);
 }
 
 
@@ -862,59 +883,57 @@ Vertical movement of gun is Strobe 9, Bits 0-7.
 
 */
 
-static WRITE8_HANDLER( zpu_bcd_decoder_w )
+WRITE8_MEMBER(mazerbla_state::zpu_bcd_decoder_w)
 {
-	mazerbla_state *state = space->machine().driver_data<mazerbla_state>();
 
 	/* bcd decoder used a input select (a mux) for reads from port 0x62 */
-	state->m_bcd_7445 = data & 0xf;
+	m_bcd_7445 = data & 0xf;
 }
 
-static READ8_HANDLER( zpu_inputs_r )
+READ8_MEMBER(mazerbla_state::zpu_inputs_r)
 {
-	mazerbla_state *state = space->machine().driver_data<mazerbla_state>();
 	static const char *const strobenames[] = { "ZPU", "DSW0", "DSW1", "DSW2", "DSW3", "BUTTONS", "STICK0_X", "STICK0_Y",
-	                                           "STICK1_X", "STICK1_Y", "UNUSED", "UNUSED", "UNUSED", "UNUSED", "UNUSED", "UNUSED" };
+												"STICK1_X", "STICK1_Y", "UNUSED", "UNUSED", "UNUSED", "UNUSED", "UNUSED", "UNUSED" };
 
 	UINT8 ret = 0;
 
-	ret = input_port_read(space->machine(), strobenames[state->m_bcd_7445]);
+	ret = ioport(strobenames[m_bcd_7445])->read();
 
 	return ret;
 }
 
-static WRITE8_HANDLER( zpu_led_w )
+WRITE8_MEMBER(mazerbla_state::zpu_led_w)
 {
 	/* 0x6e - reset (offset = 0)*/
 	/* 0x6f - set */
-	set_led_status(space->machine(), 0, offset & 1);
+	set_led_status(machine(), 0, offset & 1);
 }
 
-static WRITE8_HANDLER( zpu_lamps_w)
+WRITE8_MEMBER(mazerbla_state::zpu_lamps_w)
 {
 	/* bit 4 = /LAMP0 */
 	/* bit 5 = /LAMP1 */
 
-	/*set_led_status(space->machine(), 0, (data & 0x10) >> 4);*/
-	/*set_led_status(space->machine(), 1, (data & 0x20) >> 4);*/
+	/*set_led_status(machine(), 0, (data & 0x10) >> 4);*/
+	/*set_led_status(machine(), 1, (data & 0x20) >> 4);*/
 }
 
-static WRITE8_HANDLER( zpu_coin_counter_w )
+WRITE8_MEMBER(mazerbla_state::zpu_coin_counter_w)
 {
 	/* bit 6 = coin counter */
-	coin_counter_w(space->machine(), offset, BIT(data, 6));
+	coin_counter_w(machine(), offset, BIT(data, 6));
 }
 
-static WRITE8_HANDLER(cfb_led_w)
+WRITE8_MEMBER(mazerbla_state::cfb_led_w)
 {
 	/* bit 7 - led on */
-	set_led_status(space->machine(), 2, BIT(data, 7));
+	set_led_status(machine(), 2, BIT(data, 7));
 }
 
-static WRITE8_DEVICE_HANDLER( gg_led_ctrl_w )
+WRITE8_MEMBER(mazerbla_state::gg_led_ctrl_w)
 {
 	/* bit 0, bit 1 - led on */
-	set_led_status(device->machine(), 1, BIT(data, 0));
+	set_led_status(machine(), 1, BIT(data, 0));
 }
 
 
@@ -924,45 +943,40 @@ static WRITE8_DEVICE_HANDLER( gg_led_ctrl_w )
  *
  *************************************/
 
-static WRITE8_HANDLER( vsb_ls273_audio_control_w )
+WRITE8_MEMBER(mazerbla_state::vsb_ls273_audio_control_w)
 {
-	mazerbla_state *state = space->machine().driver_data<mazerbla_state>();
-	state->m_vsb_ls273 = data;
+	m_vsb_ls273 = data;
 
 	/* bit 5 - led on */
-	set_led_status(space->machine(), 1, BIT(data, 5));
+	set_led_status(machine(), 1, BIT(data, 5));
 }
 
-static READ8_DEVICE_HANDLER( soundcommand_r )
+READ8_MEMBER(mazerbla_state::soundcommand_r)
 {
-	mazerbla_state *state = device->machine().driver_data<mazerbla_state>();
-	return state->m_soundlatch;
+	return m_soundlatch;
 }
 
-static TIMER_CALLBACK( delayed_sound_w )
+TIMER_CALLBACK_MEMBER(mazerbla_state::delayed_sound_w)
 {
-	mazerbla_state *state = machine.driver_data<mazerbla_state>();
-	state->m_soundlatch = param;
+	m_soundlatch = param;
 
 	/* cause NMI on sound CPU */
-	device_set_input_line(state->m_subcpu, INPUT_LINE_NMI, ASSERT_LINE);
+	m_subcpu->set_input_line(INPUT_LINE_NMI, ASSERT_LINE);
 }
 
-static WRITE8_HANDLER( main_sound_w )
+WRITE8_MEMBER(mazerbla_state::main_sound_w)
 {
-	space->machine().scheduler().synchronize(FUNC(delayed_sound_w), data & 0xff);
+	machine().scheduler().synchronize(timer_expired_delegate(FUNC(mazerbla_state::delayed_sound_w),this), data & 0xff);
 }
 
-static WRITE8_HANDLER( sound_int_clear_w )
+WRITE8_MEMBER(mazerbla_state::sound_int_clear_w)
 {
-	mazerbla_state *state = space->machine().driver_data<mazerbla_state>();
-	device_set_input_line(state->m_subcpu, 0, CLEAR_LINE);
+	m_subcpu->set_input_line(0, CLEAR_LINE);
 }
 
-static WRITE8_HANDLER( sound_nmi_clear_w )
+WRITE8_MEMBER(mazerbla_state::sound_nmi_clear_w)
 {
-	mazerbla_state *state = space->machine().driver_data<mazerbla_state>();
-	device_set_input_line(state->m_subcpu, INPUT_LINE_NMI, CLEAR_LINE);
+	m_subcpu->set_input_line(INPUT_LINE_NMI, CLEAR_LINE);
 }
 
 
@@ -972,15 +986,15 @@ static WRITE8_HANDLER( sound_nmi_clear_w )
  *
  *************************************/
 
-static ADDRESS_MAP_START( mazerbla_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( mazerbla_map, AS_PROGRAM, 8, mazerbla_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
 	AM_RANGE(0xc000, 0xc7ff) AM_RAM AM_SHARE("share1")
 	AM_RANGE(0xd800, 0xd800) AM_READ(cfb_zpu_int_req_clr)
-	AM_RANGE(0xe000, 0xe7ff) AM_RAM AM_BASE_SIZE_MEMBER(mazerbla_state, m_videoram, m_videoram_size)
+	AM_RANGE(0xe000, 0xe7ff) AM_RAM AM_SHARE("videoram")
 	AM_RANGE(0xe800, 0xefff) AM_RAM
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( mazerbla_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( mazerbla_io_map, AS_IO, 8, mazerbla_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x4c, 0x4f) AM_READWRITE(ls670_1_r, ls670_0_w)
 	AM_RANGE(0x60, 0x60) AM_WRITE(zpu_bcd_decoder_w)
@@ -990,36 +1004,36 @@ static ADDRESS_MAP_START( mazerbla_io_map, AS_IO, 8 )
 	AM_RANGE(0x6e, 0x6f) AM_WRITE(zpu_led_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( mazerbla_cpu2_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( mazerbla_cpu2_map, AS_PROGRAM, 8, mazerbla_state )
 	AM_RANGE(0x0000, 0x1fff) AM_ROM
 	AM_RANGE(0x4000, 0x43ff) AM_RAM /* main RAM (stack) */
 	AM_RANGE(0x8000, 0x83ff) AM_RAM /* waveform ???*/
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( mazerbla_cpu2_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( mazerbla_cpu2_io_map, AS_IO, 8, mazerbla_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0x00) AM_WRITE(vsb_ls273_audio_control_w)
 	AM_RANGE(0x80, 0x83) AM_READWRITE(ls670_0_r, ls670_1_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( mazerbla_cpu3_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( mazerbla_cpu3_map, AS_PROGRAM, 8, mazerbla_state )
 	AM_RANGE(0x0000, 0x37ff) AM_ROM
 	AM_RANGE(0x3800, 0x3fff) AM_RAM AM_SHARE("share1")
-	AM_RANGE(0x4000, 0x5fff) AM_ROMBANK("bank1")					/* GFX roms */
+	AM_RANGE(0x4000, 0x5fff) AM_ROMBANK("bank1")                    /* GFX roms */
 	AM_RANGE(0x4000, 0x4003) AM_WRITE(vcu_video_reg_w)
-	AM_RANGE(0x6000, 0x67ff) AM_RAM AM_BASE_MEMBER(mazerbla_state, m_cfb_ram)		/* Color Frame Buffer PCB, a.k.a. RAM for VCU commands and parameters */
-	AM_RANGE(0xa000, 0xa7ff) AM_READ(vcu_set_cmd_param_r)	/* VCU command and parameters LOAD */
-	AM_RANGE(0xc000, 0xdfff) AM_READ(vcu_set_gfx_addr_r)	/* gfx LOAD (blit) */
-	AM_RANGE(0xe000, 0xffff) AM_READ(vcu_set_clr_addr_r)	/* palette? LOAD */
+	AM_RANGE(0x6000, 0x67ff) AM_RAM AM_SHARE("cfb_ram")     /* Color Frame Buffer PCB, a.k.a. RAM for VCU commands and parameters */
+	AM_RANGE(0xa000, 0xa7ff) AM_READ(vcu_set_cmd_param_r)   /* VCU command and parameters LOAD */
+	AM_RANGE(0xc000, 0xdfff) AM_READ(vcu_set_gfx_addr_r)    /* gfx LOAD (blit) */
+	AM_RANGE(0xe000, 0xffff) AM_READ(vcu_set_clr_addr_r)    /* palette? LOAD */
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( mazerbla_cpu3_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( mazerbla_cpu3_io_map, AS_IO, 8, mazerbla_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x01, 0x01) AM_WRITE(cfb_backgnd_color_w)
-	AM_RANGE(0x02, 0x02) AM_READWRITE(cfb_port_02_r, cfb_led_w)	/* Read = VCU status ? */
+	AM_RANGE(0x02, 0x02) AM_READWRITE(cfb_port_02_r, cfb_led_w) /* Read = VCU status ? */
 	AM_RANGE(0x03, 0x03) AM_WRITE(cfb_zpu_int_req_set_w)
 	AM_RANGE(0x04, 0x04) AM_WRITE(cfb_rom_bank_sel_w)
-	AM_RANGE(0x05, 0x05) AM_WRITE(cfb_vbank_w)	//visible/writable videopage select?
+	AM_RANGE(0x05, 0x05) AM_WRITE(cfb_vbank_w)  //visible/writable videopage select?
 ADDRESS_MAP_END
 
 
@@ -1029,7 +1043,7 @@ ADDRESS_MAP_END
  *
  *************************************/
 
-static ADDRESS_MAP_START( greatgun_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( greatgun_io_map, AS_IO, 8, mazerbla_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x4c, 0x4c) AM_WRITE(main_sound_w)
 	AM_RANGE(0x60, 0x60) AM_WRITE(zpu_bcd_decoder_w)
@@ -1040,22 +1054,22 @@ static ADDRESS_MAP_START( greatgun_io_map, AS_IO, 8 )
 ADDRESS_MAP_END
 
 /* Great Guns has a little different banking layout */
-static ADDRESS_MAP_START( greatgun_cpu3_io_map, AS_IO, 8 )
+static ADDRESS_MAP_START( greatgun_cpu3_io_map, AS_IO, 8, mazerbla_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x00, 0x00) AM_WRITENOP
 	AM_RANGE(0x01, 0x01) AM_WRITE(cfb_backgnd_color_w)
-	AM_RANGE(0x02, 0x02) AM_READWRITE(cfb_port_02_r, cfb_led_w)	/* Read = VCU status ? */
+	AM_RANGE(0x02, 0x02) AM_READWRITE(cfb_port_02_r, cfb_led_w) /* Read = VCU status ? */
 	AM_RANGE(0x03, 0x03) AM_WRITE(cfb_zpu_int_req_set_w)
 	AM_RANGE(0x04, 0x04) AM_WRITE(cfb_rom_bank_sel_w_gg)
-	AM_RANGE(0x05, 0x05) AM_WRITE(cfb_vbank_w)	//visible/writable videopage select?
+	AM_RANGE(0x05, 0x05) AM_WRITE(cfb_vbank_w)  //visible/writable videopage select?
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( greatgun_sound_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( greatgun_sound_map, AS_PROGRAM, 8, mazerbla_state )
 	AM_RANGE(0x0000, 0x1fff) AM_ROM
 	AM_RANGE(0x2000, 0x27ff) AM_RAM
-	AM_RANGE(0x4000, 0x4000) AM_DEVREAD("ay1", ay8910_r)
-	AM_RANGE(0x4000, 0x4001) AM_DEVWRITE("ay1", ay8910_address_data_w)
-	AM_RANGE(0x6000, 0x6001) AM_DEVWRITE("ay2", ay8910_address_data_w)
+	AM_RANGE(0x4000, 0x4000) AM_DEVREAD_LEGACY("ay1", ay8910_r)
+	AM_RANGE(0x4000, 0x4001) AM_DEVWRITE_LEGACY("ay1", ay8910_address_data_w)
+	AM_RANGE(0x6000, 0x6001) AM_DEVWRITE_LEGACY("ay2", ay8910_address_data_w)
 	AM_RANGE(0x8000, 0x8000) AM_WRITE(sound_int_clear_w)
 	AM_RANGE(0xa000, 0xa000) AM_WRITE(sound_nmi_clear_w)
 ADDRESS_MAP_END
@@ -1068,7 +1082,7 @@ ADDRESS_MAP_END
  *************************************/
 
 static INPUT_PORTS_START( mazerbla )
-	PORT_START("ZPU")	/* Strobe 0: ZPU Switches */
+	PORT_START("ZPU")   /* Strobe 0: ZPU Switches */
 	PORT_DIPNAME( 0x40, 0x40, "ZPU Switch 1" )
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -1076,29 +1090,29 @@ static INPUT_PORTS_START( mazerbla )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-	PORT_START("DSW0")	/* Strobe 1: Dip Switches 28-35*/
+	PORT_START("DSW0")  /* Strobe 1: Dip Switches 28-35*/
 	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Lives ) )
-	PORT_DIPSETTING(	0x03, "6" )
-	PORT_DIPSETTING(	0x02, "5" )
-	PORT_DIPSETTING(	0x01, "4" )
-	PORT_DIPSETTING(	0x00, "3" )
+	PORT_DIPSETTING(    0x03, "6" )
+	PORT_DIPSETTING(    0x02, "5" )
+	PORT_DIPSETTING(    0x01, "4" )
+	PORT_DIPSETTING(    0x00, "3" )
 	PORT_DIPNAME( 0x0c, 0x00, "Freeze Time" )
-	PORT_DIPSETTING(	0x0c, "1.5 seconds" )
-	PORT_DIPSETTING(	0x08, "2.0 seconds" )
-	PORT_DIPSETTING(	0x04, "2.5 seconds" )
-	PORT_DIPSETTING(	0x00, "3.0 seconds" )
+	PORT_DIPSETTING(    0x0c, "1.5 seconds" )
+	PORT_DIPSETTING(    0x08, "2.0 seconds" )
+	PORT_DIPSETTING(    0x04, "2.5 seconds" )
+	PORT_DIPSETTING(    0x00, "3.0 seconds" )
 	PORT_DIPNAME( 0x30, 0x00, "Number of points for extra frezze & first life" )
-	PORT_DIPSETTING(	0x30, "20000" )
-	PORT_DIPSETTING(	0x20, "25000" )
-	PORT_DIPSETTING(	0x10, "30000" )
-	PORT_DIPSETTING(	0x00, "35000" )
+	PORT_DIPSETTING(    0x30, "20000" )
+	PORT_DIPSETTING(    0x20, "25000" )
+	PORT_DIPSETTING(    0x10, "30000" )
+	PORT_DIPSETTING(    0x00, "35000" )
 	PORT_DIPNAME( 0xc0, 0x00, "Number of points for extra life other than first" )
-	PORT_DIPSETTING(	0xc0, "40000" )
-	PORT_DIPSETTING(	0x80, "50000" )
-	PORT_DIPSETTING(	0x40, "60000" )
-	PORT_DIPSETTING(	0x00, "70000" )
+	PORT_DIPSETTING(    0xc0, "40000" )
+	PORT_DIPSETTING(    0x80, "50000" )
+	PORT_DIPSETTING(    0x40, "60000" )
+	PORT_DIPSETTING(    0x00, "70000" )
 
-	PORT_START("DSW1")	/* Strobe 2: Dip Switches 20-27*/
+	PORT_START("DSW1")  /* Strobe 2: Dip Switches 20-27*/
 	PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( Coin_A ) )
 	PORT_DIPSETTING(    0x06, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( 4C_3C ) )
@@ -1135,7 +1149,7 @@ static INPUT_PORTS_START( mazerbla )
 	PORT_DIPSETTING(    0x80, "1 Coin/10 Credits" )
 	PORT_DIPSETTING(    0x70, "1 Coin/14 Credits" )
 
-	PORT_START("DSW2")	/* Strobe 3: Dip Switches 12-19*/
+	PORT_START("DSW2")  /* Strobe 3: Dip Switches 12-19*/
 	PORT_DIPNAME( 0x01, 0x01, "Service Index" )
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -1154,40 +1168,40 @@ static INPUT_PORTS_START( mazerbla )
 	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Demo_Sounds ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )	//probably unused
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )  //probably unused
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )	//probably unused
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )  //probably unused
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-	PORT_START("DSW3")	/* Strobe 4: Dip Switches 4-11 */
+	PORT_START("DSW3")  /* Strobe 4: Dip Switches 4-11 */
 	PORT_DIPNAME( 0x03, 0x02, "Number of Freezes" )
-	PORT_DIPSETTING(	0x03, "4" )
-	PORT_DIPSETTING(	0x02, "3" )
-	PORT_DIPSETTING(	0x01, "2" )
-	PORT_DIPSETTING(	0x00, "1" )
+	PORT_DIPSETTING(    0x03, "4" )
+	PORT_DIPSETTING(    0x02, "3" )
+	PORT_DIPSETTING(    0x01, "2" )
+	PORT_DIPSETTING(    0x00, "1" )
 	PORT_DIPNAME( 0x04, 0x04, "Gun Knocker" )
 	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	//dips 7-11 - not listed in manual
-	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )	//probably unused
+	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )  //probably unused
 	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )	//probably unused
+	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )  //probably unused
 	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )	//probably unused
+	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )  //probably unused
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )	//probably unused
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )  //probably unused
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )	//probably unused
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )  //probably unused
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-	PORT_START("BUTTONS")	/* Strobe 5: coin1&2, start1&2, fire */
+	PORT_START("BUTTONS")   /* Strobe 5: coin1&2, start1&2, fire */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 )
@@ -1197,15 +1211,15 @@ static INPUT_PORTS_START( mazerbla )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
-	PORT_START("STICK0_X")	/* Strobe 6: horizontal movement of gun */
+	PORT_START("STICK0_X")  /* Strobe 6: horizontal movement of gun */
 	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_X ) PORT_SENSITIVITY(25) PORT_KEYDELTA(7) PORT_REVERSE PORT_PLAYER(1)
-	PORT_START("STICK0_Y")	/* Strobe 7: vertical movement of gun */
+	PORT_START("STICK0_Y")  /* Strobe 7: vertical movement of gun */
 	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_Y ) PORT_SENSITIVITY(25) PORT_KEYDELTA(7) PORT_PLAYER(1)
 
 	/* Mazer Blazer cabinet has only one gun, really */
-	PORT_START("STICK1_X")	/* Strobe 8: horizontal movement of gun */
+	PORT_START("STICK1_X")  /* Strobe 8: horizontal movement of gun */
 	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_X ) PORT_SENSITIVITY(25) PORT_KEYDELTA(7) PORT_REVERSE PORT_PLAYER(2)
-	PORT_START("STICK1_Y")	/* Strobe 9: vertical movement of gun */
+	PORT_START("STICK1_Y")  /* Strobe 9: vertical movement of gun */
 	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_Y ) PORT_SENSITIVITY(25) PORT_KEYDELTA(7) PORT_PLAYER(2)
 
 	PORT_START("UNUSED")
@@ -1213,7 +1227,7 @@ static INPUT_PORTS_START( mazerbla )
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( greatgun )
-	PORT_START("ZPU")	/* Strobe 0: ZPU Switches */
+	PORT_START("ZPU")   /* Strobe 0: ZPU Switches */
 	PORT_DIPNAME( 0x40, 0x40, "ZPU Switch 1" )
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -1221,34 +1235,34 @@ static INPUT_PORTS_START( greatgun )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-	PORT_START("DSW0")	/* Strobe 1: Dip Switches 28-35*/
+	PORT_START("DSW0")  /* Strobe 1: Dip Switches 28-35*/
 	PORT_DIPNAME( 0x03, 0x00, "Starting Number of Bullets/Credit" )
-	PORT_DIPSETTING(	0x03, "60" )
-	PORT_DIPSETTING(	0x02, "70" )
-	PORT_DIPSETTING(	0x01, "80" )
-	PORT_DIPSETTING(	0x00, "90" )
+	PORT_DIPSETTING(    0x03, "60" )
+	PORT_DIPSETTING(    0x02, "70" )
+	PORT_DIPSETTING(    0x01, "80" )
+	PORT_DIPSETTING(    0x00, "90" )
 	PORT_DIPNAME( 0x0c, 0x00, "Target Size" )
-	PORT_DIPSETTING(	0x0c, "7 x 7" )
-	PORT_DIPSETTING(	0x08, "9 x 9" )
-	PORT_DIPSETTING(	0x04, "11x11" )
-	PORT_DIPSETTING(	0x00, "7 x 7" )
+	PORT_DIPSETTING(    0x0c, "7 x 7" )
+	PORT_DIPSETTING(    0x08, "9 x 9" )
+	PORT_DIPSETTING(    0x04, "11x11" )
+	PORT_DIPSETTING(    0x00, "7 x 7" )
 	PORT_DIPNAME( 0x70, 0x00, "Number of points for extra bullet" )
-	PORT_DIPSETTING(	0x70, "1000" )
-	PORT_DIPSETTING(	0x60, "2000" )
-	PORT_DIPSETTING(	0x50, "3000" )
-	PORT_DIPSETTING(	0x40, "4000" )
-	PORT_DIPSETTING(	0x30, "5000" )
-	PORT_DIPSETTING(	0x20, "6000" )
-	PORT_DIPSETTING(	0x10, "7000" )
-	PORT_DIPSETTING(	0x00, "8000" )
+	PORT_DIPSETTING(    0x70, "1000" )
+	PORT_DIPSETTING(    0x60, "2000" )
+	PORT_DIPSETTING(    0x50, "3000" )
+	PORT_DIPSETTING(    0x40, "4000" )
+	PORT_DIPSETTING(    0x30, "5000" )
+	PORT_DIPSETTING(    0x20, "6000" )
+	PORT_DIPSETTING(    0x10, "7000" )
+	PORT_DIPSETTING(    0x00, "8000" )
 	/* from manual:
-        "This switch is used when an optional coin return or ticket dispenser is used"
-    */
+	    "This switch is used when an optional coin return or ticket dispenser is used"
+	*/
 	PORT_DIPNAME( 0x80, 0x00, "Number of coins or tickets returned" )
-	PORT_DIPSETTING(	0x80, "1" )
-	PORT_DIPSETTING(	0x00, "2" )
+	PORT_DIPSETTING(    0x80, "1" )
+	PORT_DIPSETTING(    0x00, "2" )
 
-	PORT_START("DSW1")	/* Strobe 2: Dip Switches 20-27*/
+	PORT_START("DSW1")  /* Strobe 2: Dip Switches 20-27*/
 	PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( Coin_A ) )
 	PORT_DIPSETTING(    0x06, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( 4C_3C ) )
@@ -1285,7 +1299,7 @@ static INPUT_PORTS_START( greatgun )
 	PORT_DIPSETTING(    0x80, "1 Coin/10 Credits" )
 	PORT_DIPSETTING(    0x70, "1 Coin/14 Credits" )
 
-	PORT_START("DSW2")	/* Strobe 3: Dip Switches 12-19*/
+	PORT_START("DSW2")  /* Strobe 3: Dip Switches 12-19*/
 	PORT_DIPNAME( 0x01, 0x01, "Service Index" )
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -1304,21 +1318,21 @@ static INPUT_PORTS_START( greatgun )
 	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Demo_Sounds ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )	//probably unused
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )  //probably unused
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )	//probably unused
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )  //probably unused
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-	PORT_START("DSW3")	/* Strobe 4: Dip Switches 4-11 */
+	PORT_START("DSW3")  /* Strobe 4: Dip Switches 4-11 */
 	PORT_DIPNAME( 0x01, 0x01, "Free game/coin return" )
-	PORT_DIPSETTING(	0x01, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	//dips 5-11 - not listed in manual
 	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(	0x02, DEF_STR( Off ) )
-	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -1338,7 +1352,7 @@ static INPUT_PORTS_START( greatgun )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-	PORT_START("BUTTONS")	/* Strobe 5: coin1&2, start1&2, fire */
+	PORT_START("BUTTONS")   /* Strobe 5: coin1&2, start1&2, fire */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 )
@@ -1348,14 +1362,14 @@ static INPUT_PORTS_START( greatgun )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON4 )
 
-	PORT_START("STICK0_X")	/* Strobe 6: horizontal movement of gun */
+	PORT_START("STICK0_X")  /* Strobe 6: horizontal movement of gun */
 	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_X ) PORT_SENSITIVITY(25) PORT_KEYDELTA(7) PORT_PLAYER(1)
-	PORT_START("STICK0_Y")	/* Strobe 7: vertical movement of gun */
+	PORT_START("STICK0_Y")  /* Strobe 7: vertical movement of gun */
 	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_Y ) PORT_SENSITIVITY(25) PORT_KEYDELTA(7) PORT_PLAYER(1)
 
-	PORT_START("STICK1_X")	/* Strobe 8: horizontal movement of gun */
+	PORT_START("STICK1_X")  /* Strobe 8: horizontal movement of gun */
 	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_X ) PORT_SENSITIVITY(25) PORT_KEYDELTA(7) PORT_PLAYER(2)
-	PORT_START("STICK1_Y")	/* Strobe 9: vertical movement of gun */
+	PORT_START("STICK1_Y")  /* Strobe 9: vertical movement of gun */
 	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_Y ) PORT_SENSITIVITY(25) PORT_KEYDELTA(7) PORT_PLAYER(2)
 
 	PORT_START("UNUSED")
@@ -1374,7 +1388,7 @@ static const ay8910_interface ay8912_interface_1 =
 	AY8910_LEGACY_OUTPUT,
 	AY8910_DEFAULT_LOADS,
 	DEVCB_NULL,
-	DEVCB_HANDLER(soundcommand_r),
+	DEVCB_DRIVER_MEMBER(mazerbla_state,soundcommand_r),
 	DEVCB_NULL,
 	DEVCB_NULL
 };
@@ -1386,7 +1400,7 @@ static const ay8910_interface ay8912_interface_2 =
 	DEVCB_NULL,
 	DEVCB_NULL,
 	DEVCB_NULL,
-	DEVCB_HANDLER(gg_led_ctrl_w)
+	DEVCB_DRIVER_MEMBER(mazerbla_state,gg_led_ctrl_w)
 };
 
 static IRQ_CALLBACK(irq_callback)
@@ -1396,21 +1410,21 @@ static IRQ_CALLBACK(irq_callback)
 	/* D2 is set to GND when INT comes from ZPU board - from 6850 on schematics (RS232 controller) */
 
 	/* resulting vectors:
-    1111 11000 (0xf8)
-    1111 11010 (0xfa)
-    1111 11100 (0xfc)
+	1111 11000 (0xf8)
+	1111 11010 (0xfa)
+	1111 11100 (0xfc)
 
-    note:
-    1111 11110 (0xfe) - cannot happen and is not handled by game */
+	note:
+	1111 11110 (0xfe) - cannot happen and is not handled by game */
 
 	mazerbla_state *state = device->machine().driver_data<mazerbla_state>();
-	return (state->m_zpu_int_vector & ~1);	/* D0->GND is performed on CFB board */
+	return (state->m_zpu_int_vector & ~1);  /* D0->GND is performed on CFB board */
 }
 
 /* frequency is 14.318 MHz/16/16/16/16 */
-static INTERRUPT_GEN( sound_interrupt )
+INTERRUPT_GEN_MEMBER(mazerbla_state::sound_interrupt)
 {
-	device_set_input_line(device, 0, ASSERT_LINE);
+	device.execute().set_input_line(0, ASSERT_LINE);
 }
 
 
@@ -1420,119 +1434,112 @@ static INTERRUPT_GEN( sound_interrupt )
  *
  *************************************/
 
-static MACHINE_START( mazerbla )
+void mazerbla_state::machine_start()
 {
-	mazerbla_state *state = machine.driver_data<mazerbla_state>();
 
-	state->m_maincpu = machine.device("maincpu");
-	state->m_subcpu = machine.device("sub");
+	m_maincpu = machine().device<cpu_device>("maincpu");
+	m_subcpu = machine().device<cpu_device>("sub");
 
-	state->save_item(NAME(state->m_vcu_video_reg));
-	state->save_item(NAME(state->m_vcu_gfx_addr));
-	state->save_item(NAME(state->m_vcu_gfx_param_addr));
+	save_item(NAME(m_vcu_video_reg));
+	save_item(NAME(m_vcu_gfx_addr));
+	save_item(NAME(m_vcu_gfx_param_addr));
 
-	state->save_item(NAME(state->m_bknd_col));
-	state->save_item(NAME(state->m_port02_status));
-	state->save_item(NAME(state->m_vbank));
-	state->save_item(NAME(state->m_xpos));
-	state->save_item(NAME(state->m_ypos));
-	state->save_item(NAME(state->m_pix_xsize));
-	state->save_item(NAME(state->m_pix_ysize));
-	state->save_item(NAME(state->m_color1));
-	state->save_item(NAME(state->m_color2));
-	state->save_item(NAME(state->m_mode));
-	state->save_item(NAME(state->m_plane));
-	state->save_item(NAME(state->m_lookup_ram));
-	state->save_item(NAME(state->m_gfx_rom_bank));
+	save_item(NAME(m_bknd_col));
+	save_item(NAME(m_port02_status));
+	save_item(NAME(m_vbank));
+	save_item(NAME(m_xpos));
+	save_item(NAME(m_ypos));
+	save_item(NAME(m_pix_xsize));
+	save_item(NAME(m_pix_ysize));
+	save_item(NAME(m_color1));
+	save_item(NAME(m_color2));
+	save_item(NAME(m_mode));
+	save_item(NAME(m_plane));
+	save_item(NAME(m_lookup_ram));
+	save_item(NAME(m_gfx_rom_bank));
 
-	state->save_item(NAME(state->m_ls670_0));
-	state->save_item(NAME(state->m_ls670_1));
+	save_item(NAME(m_ls670_0));
+	save_item(NAME(m_ls670_1));
 
-	state->save_item(NAME(state->m_zpu_int_vector));
+	save_item(NAME(m_zpu_int_vector));
 
-	state->save_item(NAME(state->m_bcd_7445));
+	save_item(NAME(m_bcd_7445));
 
-	state->save_item(NAME(state->m_vsb_ls273));
-	state->save_item(NAME(state->m_soundlatch));
+	save_item(NAME(m_vsb_ls273));
+	save_item(NAME(m_soundlatch));
 }
 
-static MACHINE_RESET( mazerbla )
+void mazerbla_state::machine_reset()
 {
-	mazerbla_state *state = machine.driver_data<mazerbla_state>();
 	int i;
 
-	state->m_zpu_int_vector = 0xff;
+	m_zpu_int_vector = 0xff;
 
-	state->m_bknd_col = 0xaa;
-	state->m_gfx_rom_bank = 0xff;
+	m_bknd_col = 0xaa;
+	m_gfx_rom_bank = 0xff;
 
-	state->m_vcu_gfx_addr = 0;
-	state->m_vcu_gfx_param_addr = 0;
-	state->m_port02_status = 0;
-	state->m_vbank = 0;
-	state->m_xpos = 0;
-	state->m_ypos = 0;
-	state->m_pix_xsize = 0;
-	state->m_pix_ysize = 0;
-	state->m_color1 = 0;
-	state->m_color2 = 0;
-	state->m_mode = 0;
-	state->m_plane = 0;
-	state->m_bcd_7445 = 0;
-	state->m_vsb_ls273 = 0;
-	state->m_soundlatch = 0;
+	m_vcu_gfx_addr = 0;
+	m_vcu_gfx_param_addr = 0;
+	m_port02_status = 0;
+	m_vbank = 0;
+	m_xpos = 0;
+	m_ypos = 0;
+	m_pix_xsize = 0;
+	m_pix_ysize = 0;
+	m_color1 = 0;
+	m_color2 = 0;
+	m_mode = 0;
+	m_plane = 0;
+	m_bcd_7445 = 0;
+	m_vsb_ls273 = 0;
+	m_soundlatch = 0;
 
 	for (i = 0; i < 4; i++)
 	{
-		state->m_vcu_video_reg[i] = 0;
-		state->m_ls670_0[i] = 0;
-		state->m_ls670_1[i] = 0;
+		m_vcu_video_reg[i] = 0;
+		m_ls670_0[i] = 0;
+		m_ls670_1[i] = 0;
 	}
 
-	memset(state->m_lookup_ram, 0, ARRAY_LENGTH(state->m_lookup_ram));
+	memset(m_lookup_ram, 0, ARRAY_LENGTH(m_lookup_ram));
 
-	device_set_irq_callback(machine.device("maincpu"), irq_callback);
+	machine().device("maincpu")->execute().set_irq_acknowledge_callback(irq_callback);
 }
 
 
 static MACHINE_CONFIG_START( mazerbla, mazerbla_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, MASTER_CLOCK)	/* 4 MHz, no NMI, IM2 - vectors at 0xf8, 0xfa, 0xfc */
+	MCFG_CPU_ADD("maincpu", Z80, MASTER_CLOCK)  /* 4 MHz, no NMI, IM2 - vectors at 0xf8, 0xfa, 0xfc */
 	MCFG_CPU_PROGRAM_MAP(mazerbla_map)
 	MCFG_CPU_IO_MAP(mazerbla_io_map)
 
-	MCFG_CPU_ADD("sub", Z80, MASTER_CLOCK)	/* 4 MHz, NMI, IM1 INT */
+	MCFG_CPU_ADD("sub", Z80, MASTER_CLOCK)  /* 4 MHz, NMI, IM1 INT */
 	MCFG_CPU_PROGRAM_MAP(mazerbla_cpu2_map)
 	MCFG_CPU_IO_MAP(mazerbla_cpu2_io_map)
-//  MCFG_CPU_PERIODIC_INT(irq0_line_hold, 400 ) /* frequency in Hz */
+	MCFG_CPU_PERIODIC_INT_DRIVER(mazerbla_state, irq0_line_hold,  400) /* frequency in Hz */
 
-	MCFG_CPU_ADD("sub2", Z80, MASTER_CLOCK)	/* 4 MHz, no  NMI, IM1 INT */
+	MCFG_CPU_ADD("sub2", Z80, MASTER_CLOCK) /* 4 MHz, no  NMI, IM1 INT */
 	MCFG_CPU_PROGRAM_MAP(mazerbla_cpu3_map)
 	MCFG_CPU_IO_MAP(mazerbla_cpu3_io_map)
 /* (vblank related ??) int generated by a custom video processor
     and cleared on ANY port access.
     but handled differently for now
     */
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", mazerbla_state,  irq0_line_hold)
 
 	/* synchronization forced on the fly */
-	MCFG_MACHINE_START(mazerbla)
-	MCFG_MACHINE_RESET(mazerbla)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(40*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 0*8, 32*8-1)
-	MCFG_SCREEN_UPDATE(mazerbla)
+	MCFG_SCREEN_UPDATE_DRIVER(mazerbla_state, screen_update_mazerbla)
 
 	MCFG_PALETTE_LENGTH(256)
 
-	MCFG_PALETTE_INIT(mazerbla)
-	MCFG_VIDEO_START(mazerbla)
 
 	/* sound hardware */
 MACHINE_CONFIG_END
@@ -1541,39 +1548,34 @@ MACHINE_CONFIG_END
 static MACHINE_CONFIG_START( greatgun, mazerbla_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, MASTER_CLOCK)	/* 4 MHz, no NMI, IM2 - vectors at 0xf8, 0xfa, 0xfc */
+	MCFG_CPU_ADD("maincpu", Z80, MASTER_CLOCK)  /* 4 MHz, no NMI, IM2 - vectors at 0xf8, 0xfa, 0xfc */
 	MCFG_CPU_PROGRAM_MAP(mazerbla_map)
 	MCFG_CPU_IO_MAP(greatgun_io_map)
 
-	MCFG_CPU_ADD("sub", Z80, SOUND_CLOCK / 4)	/* 3.579500 MHz, NMI - caused by sound command write, periodic INT */
+	MCFG_CPU_ADD("sub", Z80, SOUND_CLOCK / 4)   /* 3.579500 MHz, NMI - caused by sound command write, periodic INT */
 	MCFG_CPU_PROGRAM_MAP(greatgun_sound_map)
-	MCFG_CPU_PERIODIC_INT(sound_interrupt, (double)14318180/16/16/16/16 )
+	MCFG_CPU_PERIODIC_INT_DRIVER(mazerbla_state, sound_interrupt,  (double)14318180/16/16/16/16 )
 
-	MCFG_CPU_ADD("sub2", Z80, MASTER_CLOCK)	/* 4 MHz, no  NMI, IM1 INT */
+	MCFG_CPU_ADD("sub2", Z80, MASTER_CLOCK) /* 4 MHz, no  NMI, IM1 INT */
 	MCFG_CPU_PROGRAM_MAP(mazerbla_cpu3_map)
 	MCFG_CPU_IO_MAP(greatgun_cpu3_io_map)
 /* (vblank related ??) int generated by a custom video processor
     and cleared on ANY port access.
     but handled differently for now
     */
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", mazerbla_state,  irq0_line_hold)
 
-	MCFG_MACHINE_START(mazerbla)
-	MCFG_MACHINE_RESET(mazerbla)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(40*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(0*8, 32*8-1, 0*8, 32*8-1)
-	MCFG_SCREEN_UPDATE(mazerbla)
+	MCFG_SCREEN_UPDATE_DRIVER(mazerbla_state, screen_update_mazerbla)
 
 	MCFG_PALETTE_LENGTH(256)
 
-	MCFG_PALETTE_INIT(mazerbla)
-	MCFG_VIDEO_START(mazerbla)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
@@ -1698,18 +1700,16 @@ ROM_START( greatgun )
 	ROM_LOAD( "psb19",0x36000,0x2000, CRC(68752e0d) SHA1(58a4921e4f774af5e1ef7af67f06e9b43643ffab) )
 ROM_END
 
-static DRIVER_INIT( mazerbla )
+DRIVER_INIT_MEMBER(mazerbla_state,mazerbla)
 {
-	mazerbla_state *state = machine.driver_data<mazerbla_state>();
-	state->m_game_id = MAZERBLA;
+	m_game_id = MAZERBLA;
 }
 
-static DRIVER_INIT( greatgun )
+DRIVER_INIT_MEMBER(mazerbla_state,greatgun)
 {
-	mazerbla_state *state = machine.driver_data<mazerbla_state>();
-	UINT8 *rom = machine.region("sub2")->base();
+	UINT8 *rom = memregion("sub2")->base();
 
-	state->m_game_id = GREATGUN;
+	m_game_id = GREATGUN;
 
 	//  patch VCU test
 	//  VCU test starts at PC=0x56f
@@ -1720,6 +1720,6 @@ static DRIVER_INIT( greatgun )
 	rom[0x0380] = 0;
 }
 
-GAME( 1983, mazerbla,  0,        mazerbla,  mazerbla, mazerbla, ROT0, "Stern Electronics", "Mazer Blazer (set 1)", GAME_IMPERFECT_GRAPHICS | GAME_NO_SOUND | GAME_NOT_WORKING | GAME_SUPPORTS_SAVE )
-GAME( 1983, mazerblaa, mazerbla, mazerbla,  mazerbla, mazerbla, ROT0, "Stern Electronics", "Mazer Blazer (set 2)", GAME_IMPERFECT_GRAPHICS | GAME_NO_SOUND | GAME_NOT_WORKING | GAME_SUPPORTS_SAVE )
-GAME( 1983, greatgun,  0,        greatgun,  greatgun, greatgun, ROT0, "Stern Electronics", "Great Guns", GAME_IMPERFECT_GRAPHICS | GAME_NOT_WORKING | GAME_SUPPORTS_SAVE )
+GAME( 1983, mazerbla,  0,        mazerbla,  mazerbla, mazerbla_state, mazerbla, ROT0, "Stern Electronics", "Mazer Blazer (set 1)", GAME_IMPERFECT_GRAPHICS | GAME_NO_SOUND | GAME_NOT_WORKING | GAME_SUPPORTS_SAVE )
+GAME( 1983, mazerblaa, mazerbla, mazerbla,  mazerbla, mazerbla_state, mazerbla, ROT0, "Stern Electronics", "Mazer Blazer (set 2)", GAME_IMPERFECT_GRAPHICS | GAME_NO_SOUND | GAME_NOT_WORKING | GAME_SUPPORTS_SAVE )
+GAME( 1983, greatgun,  0,        greatgun,  greatgun, mazerbla_state, greatgun, ROT0, "Stern Electronics", "Great Guns", GAME_IMPERFECT_GRAPHICS | GAME_NOT_WORKING | GAME_SUPPORTS_SAVE )

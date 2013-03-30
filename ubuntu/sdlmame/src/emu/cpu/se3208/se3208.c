@@ -10,8 +10,7 @@
 
 */
 
-typedef struct _se3208_state_t se3208_state_t;
-struct _se3208_state_t
+struct se3208_state_t
 {
 	//GPR
 	UINT32 R[8];
@@ -22,7 +21,7 @@ struct _se3208_state_t
 	UINT32 ER;
 	UINT32 PPC;
 
-	device_irq_callback irq_callback;
+	device_irq_acknowledge_callback irq_callback;
 	legacy_cpu_device *device;
 	address_space *program;
 	direct_read_data *direct;
@@ -32,27 +31,27 @@ struct _se3208_state_t
 	int icount;
 };
 
-#define FLAG_C		0x0080
-#define FLAG_V		0x0010
-#define FLAG_S		0x0020
-#define FLAG_Z		0x0040
+#define FLAG_C      0x0080
+#define FLAG_V      0x0010
+#define FLAG_S      0x0020
+#define FLAG_Z      0x0040
 
-#define FLAG_M		0x0200
-#define FLAG_E		0x0800
-#define FLAG_AUT	0x1000
-#define FLAG_ENI	0x2000
-#define FLAG_NMI	0x4000
+#define FLAG_M      0x0200
+#define FLAG_E      0x0800
+#define FLAG_AUT    0x1000
+#define FLAG_ENI    0x2000
+#define FLAG_NMI    0x4000
 
-#define CLRFLAG(f)	se3208_state->SR&=~(f);
-#define SETFLAG(f)	se3208_state->SR|=(f);
-#define TESTFLAG(f)	(se3208_state->SR&(f))
+#define CLRFLAG(f)  se3208_state->SR&=~(f);
+#define SETFLAG(f)  se3208_state->SR|=(f);
+#define TESTFLAG(f) (se3208_state->SR&(f))
 
-#define EXTRACT(val,sbit,ebit)	(((val)>>sbit)&((1<<((ebit-sbit)+1))-1))
-#define SEX8(val)	((val&0x80)?(val|0xFFFFFF00):(val&0xFF))
-#define SEX16(val)	((val&0x8000)?(val|0xFFFF0000):(val&0xFFFF))
-#define ZEX8(val)	((val)&0xFF)
-#define ZEX16(val)	((val)&0xFFFF)
-#define SEX(bits,val)	((val)&(1<<(bits-1))?((val)|(~((1<<bits)-1))):(val&((1<<bits)-1)))
+#define EXTRACT(val,sbit,ebit)  (((val)>>sbit)&((1<<((ebit-sbit)+1))-1))
+#define SEX8(val)   ((val&0x80)?(val|0xFFFFFF00):(val&0xFF))
+#define SEX16(val)  ((val&0x8000)?(val|0xFFFF0000):(val&0xFFFF))
+#define ZEX8(val)   ((val)&0xFF)
+#define ZEX16(val)  ((val)&0xFFFF)
+#define SEX(bits,val)   ((val)&(1<<(bits-1))?((val)|(~((1<<bits)-1))):(val&((1<<bits)-1)))
 
 //Precompute the instruction decoding in a big table
 typedef void (*_OP)(se3208_state_t *se3208_state, UINT16 Opcode);
@@ -66,47 +65,47 @@ INLINE se3208_state_t *get_safe_token(device_t *device)
 	return (se3208_state_t *)downcast<legacy_cpu_device *>(device)->token();
 }
 
-INLINE UINT32 read_dword_unaligned(address_space *space, UINT32 address)
+INLINE UINT32 read_dword_unaligned(address_space &space, UINT32 address)
 {
 	if (address & 3)
-		return space->read_byte(address) | space->read_byte(address+1)<<8 | space->read_byte(address+2)<<16 | space->read_byte(address+3)<<24;
+		return space.read_byte(address) | space.read_byte(address+1)<<8 | space.read_byte(address+2)<<16 | space.read_byte(address+3)<<24;
 	else
-		return space->read_dword(address);
+		return space.read_dword(address);
 }
 
-INLINE UINT16 read_word_unaligned(address_space *space, UINT32 address)
+INLINE UINT16 read_word_unaligned(address_space &space, UINT32 address)
 {
 	if (address & 1)
-		return space->read_byte(address) | space->read_byte(address+1)<<8;
+		return space.read_byte(address) | space.read_byte(address+1)<<8;
 	else
-		return space->read_word(address);
+		return space.read_word(address);
 }
 
-INLINE void write_dword_unaligned(address_space *space, UINT32 address, UINT32 data)
+INLINE void write_dword_unaligned(address_space &space, UINT32 address, UINT32 data)
 {
 	if (address & 3)
 	{
-		space->write_byte(address, data & 0xff);
-		space->write_byte(address+1, (data>>8)&0xff);
-		space->write_byte(address+2, (data>>16)&0xff);
-		space->write_byte(address+3, (data>>24)&0xff);
+		space.write_byte(address, data & 0xff);
+		space.write_byte(address+1, (data>>8)&0xff);
+		space.write_byte(address+2, (data>>16)&0xff);
+		space.write_byte(address+3, (data>>24)&0xff);
 	}
 	else
 	{
-		space->write_dword(address, data);
+		space.write_dword(address, data);
 	}
 }
 
-INLINE void write_word_unaligned(address_space *space, UINT32 address, UINT16 data)
+INLINE void write_word_unaligned(address_space &space, UINT32 address, UINT16 data)
 {
 	if (address & 1)
 	{
-		space->write_byte(address, data & 0xff);
-		space->write_byte(address+1, (data>>8)&0xff);
+		space.write_byte(address, data & 0xff);
+		space.write_byte(address+1, (data>>8)&0xff);
 	}
 	else
 	{
-		space->write_word(address, data);
+		space.write_word(address, data);
 	}
 }
 
@@ -118,12 +117,12 @@ INLINE UINT8 SE3208_Read8(se3208_state_t *se3208_state, UINT32 addr)
 
 INLINE UINT16 SE3208_Read16(se3208_state_t *se3208_state, UINT32 addr)
 {
-	return read_word_unaligned(se3208_state->program,addr);
+	return read_word_unaligned(*se3208_state->program,addr);
 }
 
 INLINE UINT32 SE3208_Read32(se3208_state_t *se3208_state, UINT32 addr)
 {
-	return read_dword_unaligned(se3208_state->program,addr);
+	return read_dword_unaligned(*se3208_state->program,addr);
 }
 
 INLINE void SE3208_Write8(se3208_state_t *se3208_state, UINT32 addr,UINT8 val)
@@ -133,12 +132,12 @@ INLINE void SE3208_Write8(se3208_state_t *se3208_state, UINT32 addr,UINT8 val)
 
 INLINE void SE3208_Write16(se3208_state_t *se3208_state, UINT32 addr,UINT16 val)
 {
-	write_word_unaligned(se3208_state->program,addr,val);
+	write_word_unaligned(*se3208_state->program,addr,val);
 }
 
 INLINE void SE3208_Write32(se3208_state_t *se3208_state, UINT32 addr,UINT32 val)
 {
-	write_dword_unaligned(se3208_state->program,addr,val);
+	write_dword_unaligned(*se3208_state->program,addr,val);
 }
 
 
@@ -158,7 +157,7 @@ INLINE UINT32 AddWithFlags(se3208_state_t *se3208_state, UINT32 a,UINT32 b)
 	return r;
 }
 
-INLINE UINT32 SubWithFlags(se3208_state_t *se3208_state, UINT32 a,UINT32 b)	//a-b
+INLINE UINT32 SubWithFlags(se3208_state_t *se3208_state, UINT32 a,UINT32 b) //a-b
 {
 	UINT32 r=a-b;
 	CLRFLAG(FLAG_Z|FLAG_C|FLAG_V|FLAG_S);
@@ -548,7 +547,7 @@ INST(POP)
 		se3208_state->SR=PopVal(se3208_state);
 	if(Set&(1<<10))
 	{
-		se3208_state->PC=PopVal(se3208_state)-2;		//PC automatically incresases by 2
+		se3208_state->PC=PopVal(se3208_state)-2;        //PC automatically incresases by 2
 	}
 }
 
@@ -1489,7 +1488,7 @@ static _OP DecodeOp(UINT16 Opcode)
 					case 5:
 					case 6:
 					case 7:
-					case 8:	//arith
+					case 8: //arith
 					case 9:
 					case 10:
 					case 11:
@@ -1566,7 +1565,7 @@ static _OP DecodeOp(UINT16 Opcode)
 							break;
 					}
 					break;
-				case 1:		//Jumps
+				case 1:     //Jumps
 					switch(EXTRACT(Opcode,8,11))
 					{
 						case 0x0:
@@ -1606,7 +1605,7 @@ static _OP DecodeOp(UINT16 Opcode)
 				case 2:
 					if(Opcode&(1<<11))
 						return LDI;
-					else	//SP Ops
+					else    //SP Ops
 					{
 						if(Opcode&(1<<10))
 						{
@@ -1714,11 +1713,11 @@ static CPU_RESET( se3208 )
 {
 	se3208_state_t *se3208_state = get_safe_token(device);
 
-	device_irq_callback save_irqcallback = se3208_state->irq_callback;
+	device_irq_acknowledge_callback save_irqcallback = se3208_state->irq_callback;
 	memset(se3208_state,0,sizeof(se3208_state_t));
 	se3208_state->irq_callback = save_irqcallback;
 	se3208_state->device = device;
-	se3208_state->program = device->space(AS_PROGRAM);
+	se3208_state->program = &device->space(AS_PROGRAM);
 	se3208_state->direct = &se3208_state->program->direct();
 	se3208_state->PC=SE3208_Read32(se3208_state, 0);
 	se3208_state->SR=0;
@@ -1789,7 +1788,7 @@ static CPU_INIT( se3208 )
 
 	se3208_state->irq_callback = irqcallback;
 	se3208_state->device = device;
-	se3208_state->program = device->space(AS_PROGRAM);
+	se3208_state->program = &device->space(AS_PROGRAM);
 	se3208_state->direct = &se3208_state->program->direct();
 }
 
@@ -1804,7 +1803,7 @@ static CPU_EXIT( se3208 )
 
 static void set_irq_line(se3208_state_t *se3208_state, int line,int state)
 {
-	if(line==INPUT_LINE_NMI)	//NMI
+	if(line==INPUT_LINE_NMI)    //NMI
 		se3208_state->NMI=state;
 	else
 		se3208_state->IRQ=state;
@@ -1818,23 +1817,23 @@ static CPU_SET_INFO( se3208 )
 	switch (state)
 	{
 		/* --- the following bits of info are set as 64-bit signed integers --- */
-		case CPUINFO_INT_INPUT_STATE + SE3208_INT:		set_irq_line(se3208_state, 0, info->i);				break;
-		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_NMI:	set_irq_line(se3208_state, INPUT_LINE_NMI, info->i);	break;
+		case CPUINFO_INT_INPUT_STATE + SE3208_INT:      set_irq_line(se3208_state, 0, info->i);             break;
+		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_NMI:  set_irq_line(se3208_state, INPUT_LINE_NMI, info->i);    break;
 
 		case CPUINFO_INT_REGISTER + SE3208_PC:
-		case CPUINFO_INT_PC:							se3208_state->PC = info->i;					break;
+		case CPUINFO_INT_PC:                            se3208_state->PC = info->i;                 break;
 		case CPUINFO_INT_REGISTER + SE3208_SP:
-		case CPUINFO_INT_SP:							se3208_state->SP = info->i; 				break;
-		case CPUINFO_INT_REGISTER + SE3208_ER:  		se3208_state->ER = info->i;					break;
-		case CPUINFO_INT_REGISTER + SE3208_SR:			se3208_state->SR = info->i;				    break;
-		case CPUINFO_INT_REGISTER + SE3208_R0:			se3208_state->R[ 0] = info->i;				break;
-		case CPUINFO_INT_REGISTER + SE3208_R1:			se3208_state->R[ 1] = info->i;				break;
-		case CPUINFO_INT_REGISTER + SE3208_R2:			se3208_state->R[ 2] = info->i;				break;
-		case CPUINFO_INT_REGISTER + SE3208_R3:			se3208_state->R[ 3] = info->i;				break;
-		case CPUINFO_INT_REGISTER + SE3208_R4:			se3208_state->R[ 4] = info->i;				break;
-		case CPUINFO_INT_REGISTER + SE3208_R5:			se3208_state->R[ 5] = info->i;				break;
-		case CPUINFO_INT_REGISTER + SE3208_R6:			se3208_state->R[ 6] = info->i;				break;
-		case CPUINFO_INT_REGISTER + SE3208_R7:			se3208_state->R[ 7] = info->i;				break;
+		case CPUINFO_INT_SP:                            se3208_state->SP = info->i;                 break;
+		case CPUINFO_INT_REGISTER + SE3208_ER:          se3208_state->ER = info->i;                 break;
+		case CPUINFO_INT_REGISTER + SE3208_SR:          se3208_state->SR = info->i;                 break;
+		case CPUINFO_INT_REGISTER + SE3208_R0:          se3208_state->R[ 0] = info->i;              break;
+		case CPUINFO_INT_REGISTER + SE3208_R1:          se3208_state->R[ 1] = info->i;              break;
+		case CPUINFO_INT_REGISTER + SE3208_R2:          se3208_state->R[ 2] = info->i;              break;
+		case CPUINFO_INT_REGISTER + SE3208_R3:          se3208_state->R[ 3] = info->i;              break;
+		case CPUINFO_INT_REGISTER + SE3208_R4:          se3208_state->R[ 4] = info->i;              break;
+		case CPUINFO_INT_REGISTER + SE3208_R5:          se3208_state->R[ 5] = info->i;              break;
+		case CPUINFO_INT_REGISTER + SE3208_R6:          se3208_state->R[ 6] = info->i;              break;
+		case CPUINFO_INT_REGISTER + SE3208_R7:          se3208_state->R[ 7] = info->i;              break;
 	}
 }
 
@@ -1846,63 +1845,63 @@ CPU_GET_INFO( se3208 )
 	switch (state)
 	{
 		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case CPUINFO_INT_CONTEXT_SIZE:					info->i = sizeof(se3208_state_t);				break;
-		case CPUINFO_INT_INPUT_LINES:					info->i = 1;							break;
-		case CPUINFO_INT_DEFAULT_IRQ_VECTOR:			info->i = 0;							break;
-		case DEVINFO_INT_ENDIANNESS:					info->i = ENDIANNESS_LITTLE;					break;
-		case CPUINFO_INT_CLOCK_MULTIPLIER:				info->i = 1;							break;
-		case CPUINFO_INT_CLOCK_DIVIDER:					info->i = 1;							break;
-		case CPUINFO_INT_MIN_INSTRUCTION_BYTES:			info->i = 2;							break;
-		case CPUINFO_INT_MAX_INSTRUCTION_BYTES:			info->i = 2;							break;
-		case CPUINFO_INT_MIN_CYCLES:					info->i = 1;							break;
-		case CPUINFO_INT_MAX_CYCLES:					info->i = 1;							break;
+		case CPUINFO_INT_CONTEXT_SIZE:                  info->i = sizeof(se3208_state_t);               break;
+		case CPUINFO_INT_INPUT_LINES:                   info->i = 1;                            break;
+		case CPUINFO_INT_DEFAULT_IRQ_VECTOR:            info->i = 0;                            break;
+		case CPUINFO_INT_ENDIANNESS:                    info->i = ENDIANNESS_LITTLE;                    break;
+		case CPUINFO_INT_CLOCK_MULTIPLIER:              info->i = 1;                            break;
+		case CPUINFO_INT_CLOCK_DIVIDER:                 info->i = 1;                            break;
+		case CPUINFO_INT_MIN_INSTRUCTION_BYTES:         info->i = 2;                            break;
+		case CPUINFO_INT_MAX_INSTRUCTION_BYTES:         info->i = 2;                            break;
+		case CPUINFO_INT_MIN_CYCLES:                    info->i = 1;                            break;
+		case CPUINFO_INT_MAX_CYCLES:                    info->i = 1;                            break;
 
-		case DEVINFO_INT_DATABUS_WIDTH + AS_PROGRAM:	info->i = 32;					break;
-		case DEVINFO_INT_ADDRBUS_WIDTH + AS_PROGRAM: info->i = 32;					break;
-		case DEVINFO_INT_ADDRBUS_SHIFT + AS_PROGRAM: info->i = 0;					break;
-		case DEVINFO_INT_DATABUS_WIDTH + AS_DATA:	info->i = 0;					break;
-		case DEVINFO_INT_ADDRBUS_WIDTH + AS_DATA:	info->i = 0;					break;
-		case DEVINFO_INT_ADDRBUS_SHIFT + AS_DATA:	info->i = 0;					break;
-		case DEVINFO_INT_DATABUS_WIDTH + AS_IO:		info->i = 0;					break;
-		case DEVINFO_INT_ADDRBUS_WIDTH + AS_IO:		info->i = 0;					break;
-		case DEVINFO_INT_ADDRBUS_SHIFT + AS_IO:		info->i = 0;					break;
+		case CPUINFO_INT_DATABUS_WIDTH + AS_PROGRAM:    info->i = 32;                   break;
+		case CPUINFO_INT_ADDRBUS_WIDTH + AS_PROGRAM: info->i = 32;                  break;
+		case CPUINFO_INT_ADDRBUS_SHIFT + AS_PROGRAM: info->i = 0;                   break;
+		case CPUINFO_INT_DATABUS_WIDTH + AS_DATA:   info->i = 0;                    break;
+		case CPUINFO_INT_ADDRBUS_WIDTH + AS_DATA:   info->i = 0;                    break;
+		case CPUINFO_INT_ADDRBUS_SHIFT + AS_DATA:   info->i = 0;                    break;
+		case CPUINFO_INT_DATABUS_WIDTH + AS_IO:     info->i = 0;                    break;
+		case CPUINFO_INT_ADDRBUS_WIDTH + AS_IO:     info->i = 0;                    break;
+		case CPUINFO_INT_ADDRBUS_SHIFT + AS_IO:     info->i = 0;                    break;
 
-		case CPUINFO_INT_INPUT_STATE + SE3208_INT:		info->i = se3208_state->IRQ;					break;
-		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_NMI:	info->i = se3208_state->NMI;					break;
+		case CPUINFO_INT_INPUT_STATE + SE3208_INT:      info->i = se3208_state->IRQ;                    break;
+		case CPUINFO_INT_INPUT_STATE + INPUT_LINE_NMI:  info->i = se3208_state->NMI;                    break;
 
-		case CPUINFO_INT_PREVIOUSPC:					info->i = se3208_state->PPC;					break;
+		case CPUINFO_INT_PREVIOUSPC:                    info->i = se3208_state->PPC;                    break;
 
 		case CPUINFO_INT_PC:
-		case CPUINFO_INT_REGISTER + SE3208_PC:			info->i = se3208_state->PC;					break;
+		case CPUINFO_INT_REGISTER + SE3208_PC:          info->i = se3208_state->PC;                 break;
 		case CPUINFO_INT_REGISTER + SE3208_SP:
-		case CPUINFO_INT_SP:							info->i = se3208_state->SP;					break;
-		case CPUINFO_INT_REGISTER + SE3208_SR:			info->i = se3208_state->SR;					break;
-		case CPUINFO_INT_REGISTER + SE3208_ER:			info->i = se3208_state->ER;					break;
-		case CPUINFO_INT_REGISTER + SE3208_R0:			info->i = se3208_state->R[ 0];				break;
-		case CPUINFO_INT_REGISTER + SE3208_R1:			info->i = se3208_state->R[ 1];				break;
-		case CPUINFO_INT_REGISTER + SE3208_R2:			info->i = se3208_state->R[ 2];				break;
-		case CPUINFO_INT_REGISTER + SE3208_R3:			info->i = se3208_state->R[ 3];				break;
-		case CPUINFO_INT_REGISTER + SE3208_R4:			info->i = se3208_state->R[ 4];				break;
-		case CPUINFO_INT_REGISTER + SE3208_R5:			info->i = se3208_state->R[ 5];				break;
-		case CPUINFO_INT_REGISTER + SE3208_R6:			info->i = se3208_state->R[ 6];				break;
-		case CPUINFO_INT_REGISTER + SE3208_R7:			info->i = se3208_state->R[ 7];				break;
+		case CPUINFO_INT_SP:                            info->i = se3208_state->SP;                 break;
+		case CPUINFO_INT_REGISTER + SE3208_SR:          info->i = se3208_state->SR;                 break;
+		case CPUINFO_INT_REGISTER + SE3208_ER:          info->i = se3208_state->ER;                 break;
+		case CPUINFO_INT_REGISTER + SE3208_R0:          info->i = se3208_state->R[ 0];              break;
+		case CPUINFO_INT_REGISTER + SE3208_R1:          info->i = se3208_state->R[ 1];              break;
+		case CPUINFO_INT_REGISTER + SE3208_R2:          info->i = se3208_state->R[ 2];              break;
+		case CPUINFO_INT_REGISTER + SE3208_R3:          info->i = se3208_state->R[ 3];              break;
+		case CPUINFO_INT_REGISTER + SE3208_R4:          info->i = se3208_state->R[ 4];              break;
+		case CPUINFO_INT_REGISTER + SE3208_R5:          info->i = se3208_state->R[ 5];              break;
+		case CPUINFO_INT_REGISTER + SE3208_R6:          info->i = se3208_state->R[ 6];              break;
+		case CPUINFO_INT_REGISTER + SE3208_R7:          info->i = se3208_state->R[ 7];              break;
 
 		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case CPUINFO_FCT_SET_INFO:						info->setinfo = CPU_SET_INFO_NAME(se3208);		break;
-		case CPUINFO_FCT_INIT:							info->init = CPU_INIT_NAME(se3208);		break;
-		case CPUINFO_FCT_RESET:							info->reset = CPU_RESET_NAME(se3208);	break;
-		case CPUINFO_FCT_EXIT:							info->exit = CPU_EXIT_NAME(se3208);		break;
-		case CPUINFO_FCT_EXECUTE:						info->execute = CPU_EXECUTE_NAME(se3208);break;
-		case CPUINFO_FCT_BURN:							info->burn = NULL;						break;
-		case CPUINFO_FCT_DISASSEMBLE:					info->disassemble = CPU_DISASSEMBLE_NAME(se3208);		break;
-		case CPUINFO_PTR_INSTRUCTION_COUNTER:			info->icount = &se3208_state->icount;			break;
+		case CPUINFO_FCT_SET_INFO:                      info->setinfo = CPU_SET_INFO_NAME(se3208);      break;
+		case CPUINFO_FCT_INIT:                          info->init = CPU_INIT_NAME(se3208);     break;
+		case CPUINFO_FCT_RESET:                         info->reset = CPU_RESET_NAME(se3208);   break;
+		case CPUINFO_FCT_EXIT:                          info->exit = CPU_EXIT_NAME(se3208);     break;
+		case CPUINFO_FCT_EXECUTE:                       info->execute = CPU_EXECUTE_NAME(se3208);break;
+		case CPUINFO_FCT_BURN:                          info->burn = NULL;                      break;
+		case CPUINFO_FCT_DISASSEMBLE:                   info->disassemble = CPU_DISASSEMBLE_NAME(se3208);       break;
+		case CPUINFO_PTR_INSTRUCTION_COUNTER:           info->icount = &se3208_state->icount;           break;
 
 		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "SE3208");				break;
-		case DEVINFO_STR_FAMILY:					strcpy(info->s, "Advanced Digital Chips Inc."); break;
-		case DEVINFO_STR_VERSION:					strcpy(info->s, "1.00");				break;
-		case DEVINFO_STR_SOURCE_FILE:						strcpy(info->s, __FILE__);				break;
-		case DEVINFO_STR_CREDITS:					strcpy(info->s, "Copyright Miguel Angel Horna, all rights reserved."); break;
+		case CPUINFO_STR_NAME:                          strcpy(info->s, "SE3208");              break;
+		case CPUINFO_STR_FAMILY:                    strcpy(info->s, "Advanced Digital Chips Inc."); break;
+		case CPUINFO_STR_VERSION:                   strcpy(info->s, "1.00");                break;
+		case CPUINFO_STR_SOURCE_FILE:                       strcpy(info->s, __FILE__);              break;
+		case CPUINFO_STR_CREDITS:                   strcpy(info->s, "Copyright Miguel Angel Horna, all rights reserved."); break;
 
 		case CPUINFO_STR_FLAGS:
 			sprintf(info->s, "%c%c%c%c %c%c%c%c%c",
@@ -1921,19 +1920,19 @@ CPU_GET_INFO( se3208 )
 
 			break;
 
-		case CPUINFO_STR_REGISTER + SE3208_PC:				sprintf(info->s, "PC  :%08X", se3208_state->PC); break;
-		case CPUINFO_STR_REGISTER + SE3208_SR:				sprintf(info->s, "SR  :%08X", se3208_state->SR); break;
-		case CPUINFO_STR_REGISTER + SE3208_ER:				sprintf(info->s, "ER  :%08X", se3208_state->ER); break;
-		case CPUINFO_STR_REGISTER + SE3208_SP:				sprintf(info->s, "SP  :%08X", se3208_state->SP); break;
-		case CPUINFO_STR_REGISTER + SE3208_R0:				sprintf(info->s, "R0  :%08X", se3208_state->R[ 0]); break;
-		case CPUINFO_STR_REGISTER + SE3208_R1:				sprintf(info->s, "R1  :%08X", se3208_state->R[ 1]); break;
-		case CPUINFO_STR_REGISTER + SE3208_R2:				sprintf(info->s, "R2  :%08X", se3208_state->R[ 2]); break;
-		case CPUINFO_STR_REGISTER + SE3208_R3:				sprintf(info->s, "R3  :%08X", se3208_state->R[ 3]); break;
-		case CPUINFO_STR_REGISTER + SE3208_R4:				sprintf(info->s, "R4  :%08X", se3208_state->R[ 4]); break;
-		case CPUINFO_STR_REGISTER + SE3208_R5:				sprintf(info->s, "R5  :%08X", se3208_state->R[ 5]); break;
-		case CPUINFO_STR_REGISTER + SE3208_R6:				sprintf(info->s, "R6  :%08X", se3208_state->R[ 6]); break;
-		case CPUINFO_STR_REGISTER + SE3208_R7:				sprintf(info->s, "R7  :%08X", se3208_state->R[ 7]); break;
-		case CPUINFO_STR_REGISTER + SE3208_PPC:				sprintf(info->s, "PPC  :%08X", se3208_state->PPC); break;
+		case CPUINFO_STR_REGISTER + SE3208_PC:              sprintf(info->s, "PC  :%08X", se3208_state->PC); break;
+		case CPUINFO_STR_REGISTER + SE3208_SR:              sprintf(info->s, "SR  :%08X", se3208_state->SR); break;
+		case CPUINFO_STR_REGISTER + SE3208_ER:              sprintf(info->s, "ER  :%08X", se3208_state->ER); break;
+		case CPUINFO_STR_REGISTER + SE3208_SP:              sprintf(info->s, "SP  :%08X", se3208_state->SP); break;
+		case CPUINFO_STR_REGISTER + SE3208_R0:              sprintf(info->s, "R0  :%08X", se3208_state->R[ 0]); break;
+		case CPUINFO_STR_REGISTER + SE3208_R1:              sprintf(info->s, "R1  :%08X", se3208_state->R[ 1]); break;
+		case CPUINFO_STR_REGISTER + SE3208_R2:              sprintf(info->s, "R2  :%08X", se3208_state->R[ 2]); break;
+		case CPUINFO_STR_REGISTER + SE3208_R3:              sprintf(info->s, "R3  :%08X", se3208_state->R[ 3]); break;
+		case CPUINFO_STR_REGISTER + SE3208_R4:              sprintf(info->s, "R4  :%08X", se3208_state->R[ 4]); break;
+		case CPUINFO_STR_REGISTER + SE3208_R5:              sprintf(info->s, "R5  :%08X", se3208_state->R[ 5]); break;
+		case CPUINFO_STR_REGISTER + SE3208_R6:              sprintf(info->s, "R6  :%08X", se3208_state->R[ 6]); break;
+		case CPUINFO_STR_REGISTER + SE3208_R7:              sprintf(info->s, "R7  :%08X", se3208_state->R[ 7]); break;
+		case CPUINFO_STR_REGISTER + SE3208_PPC:             sprintf(info->s, "PPC  :%08X", se3208_state->PPC); break;
 	}
 }
 

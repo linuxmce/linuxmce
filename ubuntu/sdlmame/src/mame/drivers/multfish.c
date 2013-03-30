@@ -92,9 +92,9 @@ Edge Connector is 36 count dual (IE: both sides) JAMMA-like connection (standard
 
   NOTE:
   Revision information comes from Igrosoft's website, not all of them can be
-  tested becuase some program rom revisions don't seem to be dumped.
+  tested because some program rom revisions don't seem to be dumped.
 
-  For sets where the program rom hasn't been verified, the MD5 hash is given
+  For sets where the program rom hasn't been verified, the SHA1 hash is given
   but not the CRC32 hash.
 
 Banking addresses are likely controlled via a GAL/PAL and was added at some
@@ -106,10 +106,10 @@ below are simply made to the banking address to run on other boards.
   Island 2           E1
   Gnome              E5
   Sweet Life 2       E8
-  Fruit Coctail 2    EA
+  Fruit Cocktail 2   EA
   Multi Fish         F8
   Crazy Monkey       F9
-  Fruit Coctail      F9
+  Fruit Cocktail     F9
   Garage             F9
   Resident           F9
   Lucky Hunter       F9
@@ -177,8 +177,8 @@ below are simply made to the banking address to run on other boards.
 class multfish_state : public driver_device
 {
 public:
-	multfish_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	multfish_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) { }
 
 	/* Video related */
 
@@ -197,111 +197,149 @@ public:
 	UINT8 m_hopper;
 
 	UINT8 m_vid[multfish_VIDRAM_SIZE];
+	DECLARE_WRITE8_MEMBER(multfish_vid_w);
+	DECLARE_WRITE8_MEMBER(multfish_bank_w);
+	DECLARE_READ8_MEMBER(bankedram_r);
+	DECLARE_WRITE8_MEMBER(bankedram_w);
+	DECLARE_WRITE8_MEMBER(multfish_rambank_w);
+	DECLARE_READ8_MEMBER(ray_r);
+	DECLARE_WRITE8_MEMBER(multfish_hopper_w);
+	DECLARE_WRITE8_MEMBER(rollfr_hopper_w);
+	DECLARE_WRITE8_MEMBER(multfish_lamps1_w);
+	DECLARE_WRITE8_MEMBER(multfish_lamps2_w);
+	DECLARE_WRITE8_MEMBER(multfish_lamps3_w);
+	DECLARE_WRITE8_MEMBER(multfish_counters_w);
+	DECLARE_WRITE8_MEMBER(multfish_f3_w);
+	DECLARE_WRITE8_MEMBER(multfish_dispenable_w);
+	DECLARE_CUSTOM_INPUT_MEMBER(multfish_hopper_r);
+	DECLARE_READ8_MEMBER(multfish_timekeeper_r);
+	DECLARE_WRITE8_MEMBER(multfish_timekeeper_w);
+	DECLARE_DRIVER_INIT(customl);
+	DECLARE_DRIVER_INIT(island2l);
+	DECLARE_DRIVER_INIT(keksl);
+	DECLARE_DRIVER_INIT(pirate2l);
+	DECLARE_DRIVER_INIT(fcockt2l);
+	DECLARE_DRIVER_INIT(sweetl2l);
+	DECLARE_DRIVER_INIT(gnomel);
+	DECLARE_DRIVER_INIT(crzmonent);
+	DECLARE_DRIVER_INIT(fcocktent);
+	DECLARE_DRIVER_INIT(garageent);
+	DECLARE_DRIVER_INIT(rclimbent);
+	DECLARE_DRIVER_INIT(sweetl2ent);
+	DECLARE_DRIVER_INIT(resdntent);
+	DECLARE_DRIVER_INIT(island2ent);
+	DECLARE_DRIVER_INIT(pirate2ent);
+	DECLARE_DRIVER_INIT(keksent);
+	DECLARE_DRIVER_INIT(gnomeent);
+	DECLARE_DRIVER_INIT(lhauntent);
+	DECLARE_DRIVER_INIT(fcockt2ent);
+	TILE_GET_INFO_MEMBER(get_multfish_tile_info);
+	TILE_GET_INFO_MEMBER(get_multfish_reel_tile_info);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	DECLARE_MACHINE_RESET(island2a);
+	UINT32 screen_update_multfish(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
 
-static TILE_GET_INFO( get_multfish_tile_info )
+TILE_GET_INFO_MEMBER(multfish_state::get_multfish_tile_info)
 {
-	multfish_state *state = machine.driver_data<multfish_state>();
-	int code = state->m_vid[tile_index*2+0x0000] | (state->m_vid[tile_index*2+0x0001] << 8);
-	int attr = state->m_vid[tile_index*2+0x1000] | (state->m_vid[tile_index*2+0x1001] << 8);
+	int code = m_vid[tile_index*2+0x0000] | (m_vid[tile_index*2+0x0001] << 8);
+	int attr = m_vid[tile_index*2+0x1000] | (m_vid[tile_index*2+0x1001] << 8);
 
-	tileinfo->category = (attr&0x100)>>8;
+	tileinfo.category = (attr&0x100)>>8;
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			0,
 			code&0x1fff,
 			attr&0x7,
 			0);
 }
 
-static TILE_GET_INFO( get_multfish_reel_tile_info )
+TILE_GET_INFO_MEMBER(multfish_state::get_multfish_reel_tile_info)
 {
-	multfish_state *state = machine.driver_data<multfish_state>();
-	int code = state->m_vid[tile_index*2+0x2000] | (state->m_vid[tile_index*2+0x2001] << 8);
+	int code = m_vid[tile_index*2+0x2000] | (m_vid[tile_index*2+0x2001] << 8);
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			0,
 			(code&0x1fff)+0x2000,
 			(code>>14)+0x8,
 			0);
 }
 
-static VIDEO_START(multfish)
+void multfish_state::video_start()
 {
-	multfish_state *state = machine.driver_data<multfish_state>();
 
-	memset(state->m_vid,0x00,sizeof(state->m_vid));
-	state->save_item(NAME(state->m_vid));
+	memset(m_vid,0x00,sizeof(m_vid));
+	save_item(NAME(m_vid));
 
-	state->m_tilemap = tilemap_create(machine,get_multfish_tile_info,tilemap_scan_rows,16,16, 64, 32);
-	tilemap_set_transparent_pen(state->m_tilemap,255);
+	m_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(multfish_state::get_multfish_tile_info),this),TILEMAP_SCAN_ROWS,16,16, 64, 32);
+	m_tilemap->set_transparent_pen(255);
 
-	state->m_reel_tilemap = tilemap_create(machine,get_multfish_reel_tile_info,tilemap_scan_rows,16,16, 64, 64);
-	tilemap_set_transparent_pen(state->m_reel_tilemap,255);
-	tilemap_set_scroll_cols(state->m_reel_tilemap, 64);
+	m_reel_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(multfish_state::get_multfish_reel_tile_info),this),TILEMAP_SCAN_ROWS,16,16, 64, 64);
+	m_reel_tilemap->set_transparent_pen(255);
+	m_reel_tilemap->set_scroll_cols(64);
 }
 
-static SCREEN_UPDATE(multfish)
+UINT32 multfish_state::screen_update_multfish(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	multfish_state *state = screen->machine().driver_data<multfish_state>();
 	int i;
 
-	bitmap_fill(bitmap, cliprect, get_black_pen(screen->machine()));
+	bitmap.fill(get_black_pen(machine()), cliprect);
 
-	if (!state->m_disp_enable) return 0;
+	if (!m_disp_enable) return 0;
 
 	/* Draw lower part of static tilemap (low pri tiles) */
-	tilemap_draw(bitmap,cliprect,state->m_tilemap,TILEMAP_DRAW_CATEGORY(1),0);
+	m_tilemap->draw(bitmap, cliprect, TILEMAP_DRAW_CATEGORY(1),0);
 
 	/* Setup the column scroll and draw the reels */
 	for (i=0;i<64;i++)
 	{
-		int colscroll = (state->m_vid[i*2] | state->m_vid[i*2+1] << 8);
-		tilemap_set_scrolly(state->m_reel_tilemap, i, colscroll );
+		int colscroll = (m_vid[i*2] | m_vid[i*2+1] << 8);
+		m_reel_tilemap->set_scrolly(i, colscroll );
 	}
-	tilemap_draw(bitmap,cliprect,state->m_reel_tilemap,0,0);
+	m_reel_tilemap->draw(bitmap, cliprect, 0,0);
 
 	/* Draw upper part of static tilemap (high pri tiles) */
-	tilemap_draw(bitmap,cliprect,state->m_tilemap,TILEMAP_DRAW_CATEGORY(0),0);
+	m_tilemap->draw(bitmap, cliprect, TILEMAP_DRAW_CATEGORY(0),0);
 
 	return 0;
 }
 
-static WRITE8_HANDLER( multfish_vid_w )
+WRITE8_MEMBER(multfish_state::multfish_vid_w)
 {
-	multfish_state *state = space->machine().driver_data<multfish_state>();
 
-	state->m_vid[offset]=data;
+	m_vid[offset]=data;
 
 	// 0x0000 - 0x1fff is normal tilemap
 	if (offset < 0x2000)
 	{
-		tilemap_mark_tile_dirty(state->m_tilemap,(offset&0xfff)/2);
+		m_tilemap->mark_tile_dirty((offset&0xfff)/2);
 
 	}
 	// 0x2000 - 0x2fff is for the reels
 	else if (offset < 0x4000)
 	{
-		tilemap_mark_tile_dirty(state->m_reel_tilemap,(offset&0x1fff)/2);
+		m_reel_tilemap->mark_tile_dirty((offset&0x1fff)/2);
 	}
 	else if (offset < 0x6000)
 	{
 		int r,g,b;
 		int coldat;
 
-		coldat = state->m_vid[(offset&0xfffe)] | (state->m_vid[(offset&0xfffe)^1] << 8);
+		coldat = m_vid[(offset&0xfffe)] | (m_vid[(offset&0xfffe)^1] << 8);
 
 		/* xor and bitswap palette */
-		switch (state->m_xor_paltype) {
+		switch (m_xor_paltype) {
 			case 1:
-				coldat ^= state->m_xor_palette;
+				coldat ^= m_xor_palette;
 				coldat ^= ((coldat&0x2) >>1) | ((coldat&0x80) >>3) ;
 				coldat = BITSWAP16(coldat,10,15,5,13,8,12,11,2,0,4,7,14,9,3,1,6);
 				break;
 			case 2:
-	                        coldat ^= state->m_xor_palette;
-        	                coldat ^= ((coldat&0x0001) <<1) ^ ((coldat&0x0010) <<1) ^ ((coldat&0x0010) <<2) ^ ((coldat&0x0020) <<1) ^ ((coldat&0x0080) >>1);
-                	        coldat = BITSWAP16(coldat,4,10,13,14,8,11,15,12,2,6,5,0,7,3,1,9);
+							coldat ^= m_xor_palette;
+							coldat ^= ((coldat&0x0001) <<1) ^ ((coldat&0x0010) <<1) ^ ((coldat&0x0010) <<2) ^ ((coldat&0x0020) <<1) ^ ((coldat&0x0080) >>1);
+							coldat = BITSWAP16(coldat,4,10,13,14,8,11,15,12,2,6,5,0,7,3,1,9);
 				break;
 		}
 		r = ( (coldat &0x001f)>> 0);
@@ -309,7 +347,7 @@ static WRITE8_HANDLER( multfish_vid_w )
 		b = ( (coldat &0x00e0)>> (5));
 		b|= ( (coldat &0xe000)>> (8+5-3));
 
-		palette_set_color_rgb(space->machine(), (offset-0x4000)/2, r<<3, g<<3, b<<2);
+		palette_set_color_rgb(machine(), (offset-0x4000)/2, r<<3, g<<3, b<<2);
 	}
 	else
 	{
@@ -317,73 +355,71 @@ static WRITE8_HANDLER( multfish_vid_w )
 	}
 }
 
-static WRITE8_HANDLER( multfish_bank_w )
+WRITE8_MEMBER(multfish_state::multfish_bank_w)
 {
-	memory_set_bank(space->machine(), "bank1", data & 0x0f);
+	membank("bank1")->set_entry(data & 0x0f);
 }
 
-static READ8_DEVICE_HANDLER( multfish_timekeeper_r )
+READ8_MEMBER(multfish_state::multfish_timekeeper_r)
 {
-	return timekeeper_r(device, offset + 0x6000);
+	device_t *device = machine().device("m48t35");
+	return timekeeper_r(device, space, offset + 0x6000);
 }
 
-static WRITE8_DEVICE_HANDLER( multfish_timekeeper_w )
+WRITE8_MEMBER(multfish_state::multfish_timekeeper_w)
 {
-	timekeeper_w(device, offset + 0x6000, data);
+	device_t *device = machine().device("m48t35");
+	timekeeper_w(device, space, offset + 0x6000, data);
 }
 
-static READ8_HANDLER( bankedram_r )
+READ8_MEMBER(multfish_state::bankedram_r)
 {
-	multfish_state *state = space->machine().driver_data<multfish_state>();
 
-	if ((state->m_rambk & 0x80) == 0x00)
+	if ((m_rambk & 0x80) == 0x00)
 	{
-		return timekeeper_r(space->machine().device("m48t35"), offset + 0x2000*(state->m_rambk & 0x03));
+		return timekeeper_r(machine().device("m48t35"), space, offset + 0x2000*(m_rambk & 0x03));
 	}
 	else
 	{
-		return state->m_vid[offset+0x2000*(state->m_rambk & 0x03)];
+		return m_vid[offset+0x2000*(m_rambk & 0x03)];
 	}
 
 }
 
-static WRITE8_HANDLER( bankedram_w )
+WRITE8_MEMBER(multfish_state::bankedram_w)
 {
-	multfish_state *state = space->machine().driver_data<multfish_state>();
 
-	if ((state->m_rambk & 0x80) == 0x00)
+	if ((m_rambk & 0x80) == 0x00)
 	{
-		timekeeper_w(space->machine().device("m48t35"), offset + 0x2000*(state->m_rambk & 0x03), data);
+		timekeeper_w(machine().device("m48t35"), space, offset + 0x2000*(m_rambk & 0x03), data);
 	}
 	else
 	{
-		multfish_vid_w(space, offset+0x2000*(state->m_rambk & 0x03), data);
+		multfish_vid_w(space, offset+0x2000*(m_rambk & 0x03), data);
 	}
 }
 
-static WRITE8_HANDLER( multfish_rambank_w )
+WRITE8_MEMBER(multfish_state::multfish_rambank_w)
 {
-	multfish_state *state = space->machine().driver_data<multfish_state>();
 
-	state->m_rambk = data;
+	m_rambk = data;
 }
 
 
-static READ8_HANDLER( ray_r )
+READ8_MEMBER(multfish_state::ray_r)
 {
 	// the games read the raster beam position as part of the hardware checks..
 	// with a 6mhz clock and 640x480 resolution this seems to give the right results.
-	return space->machine().primary_screen->vpos();
+	return machine().primary_screen->vpos();
 }
 
-static CUSTOM_INPUT( multfish_hopper_r )
+CUSTOM_INPUT_MEMBER(multfish_state::multfish_hopper_r)
 {
-	multfish_state *state = field->port->machine().driver_data<multfish_state>();
 
-	if ( state->m_hopper_motor != 0 )
+	if ( m_hopper_motor != 0 )
 	{
-			state->m_hopper++;
-			return state->m_hopper>>4;
+			m_hopper++;
+			return m_hopper>>4;
 	}
 	else
 	{
@@ -391,7 +427,7 @@ static CUSTOM_INPUT( multfish_hopper_r )
 	}
 }
 
-static WRITE8_HANDLER( multfish_hopper_w )
+WRITE8_MEMBER(multfish_state::multfish_hopper_w)
 {
 /*  Port 0x33
 
@@ -400,38 +436,38 @@ static WRITE8_HANDLER( multfish_hopper_w )
     ---- -X-- Bill Acceptor Lock 24B
     ---X ---- Hopper Motor 33B
 */
-	multfish_state *state = space->machine().driver_data<multfish_state>();
 
-	state->m_hopper_motor = data & 0x10;
-        coin_lockout_w(space->machine(), 0, data & 0x01);
-        coin_lockout_w(space->machine(), 1, data & 0x01);
-        coin_lockout_w(space->machine(), 2, data & 0x01);
-        coin_lockout_w(space->machine(), 3, data & 0x01);
-        coin_lockout_w(space->machine(), 4, data & 0x04);
-        coin_lockout_w(space->machine(), 5, data & 0x04);
-        coin_lockout_w(space->machine(), 6, data & 0x04);
-        coin_lockout_w(space->machine(), 7, data & 0x04);
+
+	m_hopper_motor = data & 0x10;
+		coin_lockout_w(machine(), 0, data & 0x01);
+		coin_lockout_w(machine(), 1, data & 0x01);
+		coin_lockout_w(machine(), 2, data & 0x01);
+		coin_lockout_w(machine(), 3, data & 0x01);
+		coin_lockout_w(machine(), 4, data & 0x04);
+		coin_lockout_w(machine(), 5, data & 0x04);
+		coin_lockout_w(machine(), 6, data & 0x04);
+		coin_lockout_w(machine(), 7, data & 0x04);
 }
 
-static WRITE8_HANDLER( rollfr_hopper_w )
+WRITE8_MEMBER(multfish_state::rollfr_hopper_w)
 {
 /*
     By default RollFruit use inverted coinlock bit.
 */
-	multfish_state *state = space->machine().driver_data<multfish_state>();
 
-	state->m_hopper_motor = data & 0x10;
-        coin_lockout_w(space->machine(), 0, !data & 0x01);
-        coin_lockout_w(space->machine(), 1, !data & 0x01);
-        coin_lockout_w(space->machine(), 2, !data & 0x01);
-        coin_lockout_w(space->machine(), 3, !data & 0x01);
-        coin_lockout_w(space->machine(), 4, data & 0x04);
-        coin_lockout_w(space->machine(), 5, data & 0x04);
-        coin_lockout_w(space->machine(), 6, data & 0x04);
-        coin_lockout_w(space->machine(), 7, data & 0x04);
+
+	m_hopper_motor = data & 0x10;
+		coin_lockout_w(machine(), 0,~data & 0x01);
+		coin_lockout_w(machine(), 1,~data & 0x01);
+		coin_lockout_w(machine(), 2,~data & 0x01);
+		coin_lockout_w(machine(), 3,~data & 0x01);
+		coin_lockout_w(machine(), 4, data & 0x04);
+		coin_lockout_w(machine(), 5, data & 0x04);
+		coin_lockout_w(machine(), 6, data & 0x04);
+		coin_lockout_w(machine(), 7, data & 0x04);
 }
 
-DRIVER_INIT( customl )
+DRIVER_INIT_MEMBER(multfish_state,customl)
 {
 /*
 rom 1
@@ -461,8 +497,8 @@ A12 <-> A13
 */
 
 	UINT32 i,j,jscr,romoffset;
-	UINT8 *multfish_gfx = machine.region("gfx")->base();
-	UINT8 *temprom = auto_alloc_array(machine, UINT8, multfish_ROM_SIZE);
+	UINT8 *multfish_gfx = machine().root_device().memregion("gfx")->base();
+	UINT8 *temprom = auto_alloc_array(machine(), UINT8, multfish_ROM_SIZE);
 
 
 	/* ROM 1 decode */
@@ -472,7 +508,7 @@ A12 <-> A13
 		jscr = ((i & 0x8000)>>15) | ((i & 0x4000)>>13) | ((i & 0x0080)>>5) | ((i & 0x0040)>>3);
 		multfish_gfx[romoffset+i] = (((0x0f & multfish_gfx[romoffset+i])<<4) | ((0xf0 & multfish_gfx[romoffset+i])>>4)) ^ jscr;
 	}
-        /* ROM 2 decode */
+		/* ROM 2 decode */
 	romoffset = 0x100000;
 	for (i = 0; i < multfish_ROM_SIZE; i++)
 	{
@@ -499,13 +535,13 @@ A12 <-> A13
 
 		for (j = 0; j < (multfish_ROM_SIZE/0x40); j++)
 		{
-		   jscr =  BITSWAP16(j,15,14,13,4,3,2,0,1,6,7,5,12,11,10,8,9);
-		   memcpy(&temprom[j*0x40],&multfish_gfx[romoffset+(jscr*0x40)],0x40);
+			jscr =  BITSWAP16(j,15,14,13,4,3,2,0,1,6,7,5,12,11,10,8,9);
+			memcpy(&temprom[j*0x40],&multfish_gfx[romoffset+(jscr*0x40)],0x40);
 
 		}
 		memcpy(&multfish_gfx[romoffset],temprom,multfish_ROM_SIZE);
-          }
-        auto_free(machine, temprom);
+			}
+		auto_free(machine(), temprom);
 }
 
 INLINE void rom_decodel(UINT8 *romptr, UINT8 *tmprom, UINT8 xor_data, UINT32 xor_add)
@@ -514,8 +550,8 @@ INLINE void rom_decodel(UINT8 *romptr, UINT8 *tmprom, UINT8 xor_data, UINT32 xor
 
 	for (i = 0; i < multfish_ROM_SIZE; i++)
 	{
-	   jscr =  BITSWAP24(i,23,22,21,20,19,17,14,18,16,15,12,13,11,9,6,10,8,7,4,5,3,2,1,0) ^ xor_add ^ 8;
-           tmprom[i] = romptr[jscr] ^ xor_data;
+		jscr =  BITSWAP24(i,23,22,21,20,19,17,14,18,16,15,12,13,11,9,6,10,8,7,4,5,3,2,1,0) ^ xor_add ^ 8;
+			tmprom[i] = romptr[jscr] ^ xor_data;
 	}
 	memcpy(romptr,tmprom,multfish_ROM_SIZE);
 }
@@ -525,15 +561,15 @@ INLINE void rom_decodeh(UINT8 *romptr, UINT8 *tmprom, UINT8 xor_data, UINT32 xor
 
 	for (i = 0; i < multfish_ROM_SIZE; i++)
 	{
-	   jscr =  BITSWAP24(i,23,22,21,20,19,17,14,18,16,15,12,13,11,9,6,10,8,7,4,5,2,3,1,0) ^ xor_add;
-           tmprom[i] = romptr[jscr] ^ xor_data;
+		jscr =  BITSWAP24(i,23,22,21,20,19,17,14,18,16,15,12,13,11,9,6,10,8,7,4,5,2,3,1,0) ^ xor_add;
+			tmprom[i] = romptr[jscr] ^ xor_data;
 	}
 	memcpy(romptr,tmprom,multfish_ROM_SIZE);
 }
 
 static void lottery_decode(running_machine &machine, UINT8 xor12, UINT8 xor34, UINT8 xor56, UINT8 xor78, UINT32 xor_addr)
 {
-	UINT8 *multfish_gfx = machine.region("gfx")->base();
+	UINT8 *multfish_gfx = machine.root_device().memregion("gfx")->base();
 	UINT8 *temprom = auto_alloc_array(machine, UINT8, multfish_ROM_SIZE);
 
 	/* ROMs decode */
@@ -546,7 +582,7 @@ static void lottery_decode(running_machine &machine, UINT8 xor12, UINT8 xor34, U
 	rom_decodeh(&multfish_gfx[0x280000], temprom, xor78, xor_addr);
 	rom_decodeh(&multfish_gfx[0x380000], temprom, xor78, xor_addr);
 
-        auto_free(machine, temprom);
+		auto_free(machine, temprom);
 }
 
 INLINE void roment_decodel(UINT8 *romptr, UINT8 *tmprom, UINT8 xor_data, UINT32 xor_add)
@@ -555,8 +591,8 @@ INLINE void roment_decodel(UINT8 *romptr, UINT8 *tmprom, UINT8 xor_data, UINT32 
 
 	for (i = 0; i < multfish_ROM_SIZE; i++)
 	{
-	   jscr =  BITSWAP24(i,23,22,21,20,19,16,18,17,14,15,12,13,11,8,10,9,6,7,4,5,3,2,1,0) ^ xor_add ^ 8;
-           tmprom[i] = romptr[jscr] ^ xor_data;
+		jscr =  BITSWAP24(i,23,22,21,20,19,16,18,17,14,15,12,13,11,8,10,9,6,7,4,5,3,2,1,0) ^ xor_add ^ 8;
+			tmprom[i] = romptr[jscr] ^ xor_data;
 	}
 	memcpy(romptr,tmprom,multfish_ROM_SIZE);
 }
@@ -566,15 +602,15 @@ INLINE void roment_decodeh(UINT8 *romptr, UINT8 *tmprom, UINT8 xor_data, UINT32 
 
 	for (i = 0; i < multfish_ROM_SIZE; i++)
 	{
-	   jscr =  BITSWAP24(i,23,22,21,20,19,16,18,17,14,15,12,13,11,8,10,9,6,7,4,5,2,3,1,0) ^ xor_add;
-           tmprom[i] = romptr[jscr] ^ xor_data;
+		jscr =  BITSWAP24(i,23,22,21,20,19,16,18,17,14,15,12,13,11,8,10,9,6,7,4,5,2,3,1,0) ^ xor_add;
+			tmprom[i] = romptr[jscr] ^ xor_data;
 	}
 	memcpy(romptr,tmprom,multfish_ROM_SIZE);
 }
 
 static void ent_decode(running_machine &machine, UINT8 xor12, UINT8 xor34, UINT8 xor56, UINT8 xor78, UINT32 xor_addr)
 {
-	UINT8 *multfish_gfx = machine.region("gfx")->base();
+	UINT8 *multfish_gfx = machine.root_device().memregion("gfx")->base();
 	UINT8 *temprom = auto_alloc_array(machine, UINT8, multfish_ROM_SIZE);
 
 	/* ROMs decode */
@@ -587,91 +623,123 @@ static void ent_decode(running_machine &machine, UINT8 xor12, UINT8 xor34, UINT8
 	roment_decodeh(&multfish_gfx[0x280000], temprom, xor78, xor_addr);
 	roment_decodeh(&multfish_gfx[0x380000], temprom, xor78, xor_addr);
 
-        auto_free(machine, temprom);
+		auto_free(machine, temprom);
 }
 
-DRIVER_INIT( island2l )
+DRIVER_INIT_MEMBER(multfish_state,island2l)
 {
-	multfish_state *state = machine.driver_data<multfish_state>();
-
-        state->m_xor_palette = 0x8bf7;
-        state->m_xor_paltype = 1;
-	lottery_decode(machine, 0xff, 0x11, 0x77, 0xee, 0x44c40);
+		m_xor_palette = 0x8bf7;
+		m_xor_paltype = 1;
+	lottery_decode(machine(), 0xff, 0x11, 0x77, 0xee, 0x44c40);
 }
-DRIVER_INIT( keksl )
+DRIVER_INIT_MEMBER(multfish_state,keksl)
 {
-	multfish_state *state = machine.driver_data<multfish_state>();
 
-        state->m_xor_palette = 0x41f3;
-        state->m_xor_paltype = 1;
-	lottery_decode(machine, 0xdd, 0xaa, 0x22, 0x55, 0x2cac0);
+		m_xor_palette = 0x41f3;
+		m_xor_paltype = 1;
+	lottery_decode(machine(), 0xdd, 0xaa, 0x22, 0x55, 0x2cac0);
 }
-DRIVER_INIT( pirate2l )
+DRIVER_INIT_MEMBER(multfish_state,pirate2l)
 {
-	multfish_state *state = machine.driver_data<multfish_state>();
-
-        state->m_xor_palette = 0x8bfb;
-        state->m_xor_paltype = 1;
-	lottery_decode(machine, 0xaa, 0x11, 0x22, 0xee, 0x48480);
+		m_xor_palette = 0x8bfb;
+		m_xor_paltype = 1;
+	lottery_decode(machine(), 0xaa, 0x11, 0x22, 0xee, 0x48480);
 }
-DRIVER_INIT( fcockt2l )
+DRIVER_INIT_MEMBER(multfish_state,fcockt2l)
 {
-	multfish_state *state = machine.driver_data<multfish_state>();
-
-        state->m_xor_palette = 0xedfb;
-        state->m_xor_paltype = 1;
-	lottery_decode(machine, 0x55, 0x11, 0xff, 0xee, 0x78780);
+		m_xor_palette = 0xedfb;
+		m_xor_paltype = 1;
+	lottery_decode(machine(), 0x55, 0x11, 0xff, 0xee, 0x78780);
 }
-DRIVER_INIT( sweetl2l )
+DRIVER_INIT_MEMBER(multfish_state,sweetl2l)
 {
-	multfish_state *state = machine.driver_data<multfish_state>();
-
-        state->m_xor_palette = 0x4bf7;
-        state->m_xor_paltype = 1;
-	lottery_decode(machine, 0xdd, 0x33, 0x33, 0x77, 0x00800);
+		m_xor_palette = 0x4bf7;
+		m_xor_paltype = 1;
+	lottery_decode(machine(), 0xdd, 0x33, 0x33, 0x77, 0x00800);
 }
-DRIVER_INIT( gnomel )
+DRIVER_INIT_MEMBER(multfish_state,gnomel)
 {
-	multfish_state *state = machine.driver_data<multfish_state>();
 
-        state->m_xor_palette = 0x49ff;
-        state->m_xor_paltype = 1;
-	lottery_decode(machine, 0xcc, 0x22, 0x33, 0x66, 0x14940);
+		m_xor_palette = 0x49ff;
+		m_xor_paltype = 1;
+	lottery_decode(machine(), 0xcc, 0x22, 0x33, 0x66, 0x14940);
 }
-DRIVER_INIT( crzmonent )
+DRIVER_INIT_MEMBER(multfish_state,crzmonent)
 {
-	multfish_state *state = machine.driver_data<multfish_state>();
-
-        state->m_xor_palette = 0x1cdb;
-        state->m_xor_paltype = 2;
+		m_xor_palette = 0x1cdb;
+		m_xor_paltype = 2;
+	ent_decode(machine(), 0xaa, 0x44, 0x55, 0x55, 0x1c9c0);
 }
-DRIVER_INIT( resdntent )
+DRIVER_INIT_MEMBER(multfish_state,fcocktent)
 {
-	multfish_state *state = machine.driver_data<multfish_state>();
-
-        state->m_xor_palette = 0x6edb;
-        state->m_xor_paltype = 2;
+		m_xor_palette = 0x2cdb;
+		m_xor_paltype = 2;
+	ent_decode(machine(), 0x77, 0x55, 0x22, 0x44, 0x18180);
 }
-DRIVER_INIT( gnomeent )
+DRIVER_INIT_MEMBER(multfish_state,garageent)
 {
-	multfish_state *state = machine.driver_data<multfish_state>();
-
-        state->m_xor_palette = 0x9edb;
-        state->m_xor_paltype = 2;
+		m_xor_palette = 0x7adb;
+		m_xor_paltype = 2;
+	ent_decode(machine(), 0x88, 0x66, 0x66, 0x99, 0x28280);
 }
-DRIVER_INIT( lhauntent )
+DRIVER_INIT_MEMBER(multfish_state,rclimbent)
 {
-	multfish_state *state = machine.driver_data<multfish_state>();
-
-        state->m_xor_palette = 0x1adb;
-        state->m_xor_paltype = 2;
-	ent_decode(machine, 0x22, 0x44, 0x44, 0xbb, 0x24240);
+		m_xor_palette = 0x5edb;
+		m_xor_paltype = 2;
+	ent_decode(machine(), 0x55, 0xaa, 0x44, 0xff, 0x74740);
 }
-
-static ADDRESS_MAP_START( multfish_map, AS_PROGRAM, 8 )
+DRIVER_INIT_MEMBER(multfish_state,sweetl2ent)
+{
+		m_xor_palette = 0xdcdb;
+		m_xor_paltype = 2;
+	ent_decode(machine(), 0xee, 0x77, 0x88, 0x11, 0x5c5c0);
+}
+DRIVER_INIT_MEMBER(multfish_state,resdntent)
+{
+		m_xor_palette = 0x6edb;
+		m_xor_paltype = 2;
+	ent_decode(machine(), 0xaa, 0xcc, 0xaa, 0xaa, 0x78780);
+}
+DRIVER_INIT_MEMBER(multfish_state,island2ent)
+{
+		m_xor_palette = 0xecdb;
+		m_xor_paltype = 2;
+	ent_decode(machine(), 0x88, 0x55, 0xff, 0x99, 0x58d80);
+}
+DRIVER_INIT_MEMBER(multfish_state,pirate2ent)
+{
+		m_xor_palette = 0xbadb;
+		m_xor_paltype = 2;
+	ent_decode(machine(), 0x33, 0xbb, 0x77, 0x55, 0x68e80);
+}
+DRIVER_INIT_MEMBER(multfish_state,keksent)
+{
+		m_xor_palette = 0xaedb;
+		m_xor_paltype = 2;
+	ent_decode(machine(), 0x55, 0xff, 0xaa, 0x22, 0x38b80);
+}
+DRIVER_INIT_MEMBER(multfish_state,gnomeent)
+{
+		m_xor_palette = 0x9edb;
+		m_xor_paltype = 2;
+	ent_decode(machine(), 0x22, 0x77, 0x11, 0xbb, 0x34b40);
+}
+DRIVER_INIT_MEMBER(multfish_state,lhauntent)
+{
+		m_xor_palette = 0x1adb;
+		m_xor_paltype = 2;
+	ent_decode(machine(), 0x22, 0x44, 0x44, 0xbb, 0x24240);
+}
+DRIVER_INIT_MEMBER(multfish_state,fcockt2ent)
+{
+		m_xor_palette = 0x7cdb;
+		m_xor_paltype = 2;
+	ent_decode(machine(), 0x33, 0xcc, 0xaa, 0x88, 0x14140);
+}
+static ADDRESS_MAP_START( multfish_map, AS_PROGRAM, 8, multfish_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM AM_WRITE(multfish_vid_w)
 	AM_RANGE(0x8000, 0xbfff) AM_ROMBANK("bank1")
-	AM_RANGE(0xc000, 0xdfff) AM_DEVREADWRITE("m48t35", multfish_timekeeper_r, multfish_timekeeper_w)
+	AM_RANGE(0xc000, 0xdfff) AM_READWRITE(multfish_timekeeper_r, multfish_timekeeper_w)
 	AM_RANGE(0xe000, 0xffff) AM_READWRITE(bankedram_r, bankedram_w)
 ADDRESS_MAP_END
 
@@ -694,7 +762,7 @@ static INPUT_PORTS_START( multfish )
 	PORT_BIT( 0xe0, IP_ACTIVE_LOW, IPT_UNUSED ) // unused?
 
 	PORT_START("IN1")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_SPECIAL ) PORT_CUSTOM ( multfish_hopper_r, NULL )// Hopper SW (22 B)
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, multfish_state,multfish_hopper_r, NULL )// Hopper SW (22 B)
 	PORT_DIPNAME(     0x02, 0x02, "BK Door (17 A)"  )
 	PORT_DIPSETTING(  0x02, DEF_STR( Off ) )
 	PORT_DIPSETTING(  0x00, DEF_STR( On ) )
@@ -787,7 +855,7 @@ static INPUT_PORTS_START( rollfr )
 	PORT_BIT( 0xfc, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START("IN1")
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_SPECIAL ) PORT_CUSTOM ( multfish_hopper_r, NULL )// Hopper SW (22 B)
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_SPECIAL ) PORT_CUSTOM_MEMBER(DEVICE_SELF, multfish_state,multfish_hopper_r, NULL )// Hopper SW (22 B)
 	PORT_DIPNAME(     0x02, 0x02, "BK Door (17 A)"  )
 	PORT_DIPSETTING(  0x02, DEF_STR( Off ) )
 	PORT_DIPSETTING(  0x00, DEF_STR( On ) )
@@ -820,7 +888,7 @@ static INPUT_PORTS_START( rollfr )
 INPUT_PORTS_END
 
 
-static WRITE8_HANDLER( multfish_lamps1_w )
+WRITE8_MEMBER(multfish_state::multfish_lamps1_w)
 {
 /*  Port 0x30
 
@@ -844,7 +912,7 @@ static WRITE8_HANDLER( multfish_lamps1_w )
 	output_set_lamp_value(0, ((data >> 7) & 1)); /* Bet/Double Lamp */
 }
 
-static WRITE8_HANDLER( multfish_lamps2_w )
+WRITE8_MEMBER(multfish_state::multfish_lamps2_w)
 {
 /*  Port 0x34
 
@@ -860,7 +928,7 @@ static WRITE8_HANDLER( multfish_lamps2_w )
 	output_set_lamp_value(10, ((data >> 4) & 1)); /* Upper Lamp Green */
 }
 
-static WRITE8_HANDLER( multfish_lamps3_w )
+WRITE8_MEMBER(multfish_state::multfish_lamps3_w)
 {
 /*  Port 0x35
 
@@ -870,7 +938,7 @@ static WRITE8_HANDLER( multfish_lamps3_w )
 	output_set_lamp_value(11, ((data >> 1) & 1)); /* Upper Lamp Red */
 }
 
-static WRITE8_HANDLER( multfish_counters_w )
+WRITE8_MEMBER(multfish_state::multfish_counters_w)
 {
 /*  Port 0x31
 
@@ -882,27 +950,26 @@ static WRITE8_HANDLER( multfish_counters_w )
     -X-- ---- Key Out Counter 27A
     X--- ---- Total Bet Counter 28B
 */
-        coin_counter_w(space->machine(), 0, data & 0x01);
-        coin_counter_w(space->machine(), 1, data & 0x02);
-        coin_counter_w(space->machine(), 2, data & 0x04);
-        coin_counter_w(space->machine(), 3, data & 0x10);
-        coin_counter_w(space->machine(), 4, data & 0x40);
-        coin_counter_w(space->machine(), 5, data & 0x80);
+		coin_counter_w(machine(), 0, data & 0x01);
+		coin_counter_w(machine(), 1, data & 0x02);
+		coin_counter_w(machine(), 2, data & 0x04);
+		coin_counter_w(machine(), 3, data & 0x10);
+		coin_counter_w(machine(), 4, data & 0x40);
+		coin_counter_w(machine(), 5, data & 0x80);
 }
 
-static WRITE8_HANDLER( multfish_f3_w )
+WRITE8_MEMBER(multfish_state::multfish_f3_w)
 {
 	//popmessage("multfish_f3_w %02x",data);
 }
 
-static WRITE8_HANDLER( multfish_dispenable_w )
+WRITE8_MEMBER(multfish_state::multfish_dispenable_w)
 {
-	multfish_state *state = space->machine().driver_data<multfish_state>();
 	//popmessage("multfish_f4_w %02x",data); // display enable?
-	state->m_disp_enable = data;
+	m_disp_enable = data;
 }
 
-static ADDRESS_MAP_START( multfish_portmap, AS_IO, 8 )
+static ADDRESS_MAP_START( multfish_portmap, AS_IO, 8, multfish_state )
 	ADDRESS_MAP_GLOBAL_MASK(0xff)
 	AM_RANGE(0x10, 0x10) AM_READ_PORT("IN0")
 	AM_RANGE(0x11, 0x11) AM_READ_PORT("IN1")
@@ -915,26 +982,35 @@ static ADDRESS_MAP_START( multfish_portmap, AS_IO, 8 )
 
 	/* Write ports not hooked up yet */
 	AM_RANGE(0x30, 0x30) AM_WRITE(multfish_lamps1_w)
-        AM_RANGE(0x31, 0x31) AM_WRITE(multfish_counters_w)
-//  AM_RANGE(0x32, 0x32) AM_WRITE(multfish_port32_w)
+		AM_RANGE(0x31, 0x31) AM_WRITE(multfish_counters_w)
+//  AM_RANGE(0x32, 0x32) AM_WRITE_LEGACY(multfish_port32_w)
 	AM_RANGE(0x33, 0x33) AM_WRITE(multfish_hopper_w)
 	AM_RANGE(0x34, 0x34) AM_WRITE(multfish_lamps2_w)
 	AM_RANGE(0x35, 0x35) AM_WRITE(multfish_lamps3_w)
-//  AM_RANGE(0x36, 0x36) AM_WRITE(multfish_port36_w)
+//  AM_RANGE(0x36, 0x36) AM_WRITE_LEGACY(multfish_port36_w)
 	AM_RANGE(0x37, 0x37) AM_WRITE(watchdog_reset_w)
-	AM_RANGE(0x38, 0x38) AM_DEVWRITE("aysnd", ay8910_address_w)
-	AM_RANGE(0x39, 0x39) AM_DEVWRITE("aysnd", ay8910_data_w)
-	AM_RANGE(0x3a, 0x3a) AM_DEVREAD("aysnd", ay8910_r)
+	AM_RANGE(0x38, 0x38) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_w)
+	AM_RANGE(0x39, 0x39) AM_DEVWRITE_LEGACY("aysnd", ay8910_data_w)
+	AM_RANGE(0x3a, 0x3a) AM_DEVREAD_LEGACY("aysnd", ay8910_r)
 
 	AM_RANGE(0x60, 0x60) AM_WRITE(multfish_dispenable_w) // display enable mirror for lottery sets
 
 	AM_RANGE(0x90, 0x90) AM_READ(ray_r)
 
 	AM_RANGE(0xa0, 0xa0)  AM_WRITE(multfish_bank_w) // Crazy Monkey 2 banking
+	AM_RANGE(0xa5, 0xa5)  AM_WRITE(multfish_bank_w) // Crazy Monkey 2 Ent banking
 	AM_RANGE(0xb0, 0xb0)  AM_WRITE(multfish_bank_w) // Fruit Cocktail 2 lottery banking
 	AM_RANGE(0xb1, 0xb1)  AM_WRITE(multfish_bank_w) // Crazy Monkey Ent banking
 	AM_RANGE(0xb2, 0xb2)  AM_WRITE(multfish_bank_w) // Lacky Haunter Ent banking
+	AM_RANGE(0xb3, 0xb3)  AM_WRITE(multfish_bank_w) // Fruit Cocktail Ent banking
+	AM_RANGE(0xb4, 0xb4)  AM_WRITE(multfish_bank_w) // Fruit Cocktail 2 Ent banking
+	AM_RANGE(0xb5, 0xb5)  AM_WRITE(multfish_bank_w) // Garage Ent banking
 	AM_RANGE(0xb6, 0xb6)  AM_WRITE(multfish_bank_w) // Resident Ent banking
+	AM_RANGE(0xb7, 0xb7)  AM_WRITE(multfish_bank_w) // Rock Climber Ent banking
+	AM_RANGE(0xb9, 0xb9)  AM_WRITE(multfish_bank_w) // Sweet Life 2 Ent banking
+	AM_RANGE(0xbb, 0xbb)  AM_WRITE(multfish_bank_w) // Island 2 Ent banking
+	AM_RANGE(0xbd, 0xbd)  AM_WRITE(multfish_bank_w) // Pirate 2 Ent banking
+	AM_RANGE(0xbe, 0xbe)  AM_WRITE(multfish_bank_w) // Keks Ent banking
 	AM_RANGE(0xbf, 0xbf)  AM_WRITE(multfish_bank_w) // Gnome Ent banking
 	AM_RANGE(0xc7, 0xc7)  AM_WRITE(multfish_bank_w) // Resident lottery banking
 	AM_RANGE(0xca, 0xca)  AM_WRITE(multfish_bank_w) // Gnome lottery banking
@@ -949,6 +1025,7 @@ static ADDRESS_MAP_START( multfish_portmap, AS_IO, 8 )
 	AM_RANGE(0xea, 0xea)  AM_WRITE(multfish_bank_w) // Fruit Cocktail 2 banking
 	AM_RANGE(0xec, 0xec)  AM_WRITE(multfish_bank_w) // Crazy Monkey lottery banking
 
+	AM_RANGE(0xf0, 0xf0)  AM_WRITE(multfish_bank_w) // Gold Fish banking
 	AM_RANGE(0xf1, 0xf1)  AM_WRITE(multfish_rambank_w)
 	AM_RANGE(0xf3, 0xf3)  AM_WRITE(multfish_f3_w) // from 00->01 at startup, irq enable maybe?
 	AM_RANGE(0xf4, 0xf4)  AM_WRITE(multfish_dispenable_w) // display enable
@@ -957,7 +1034,7 @@ static ADDRESS_MAP_START( multfish_portmap, AS_IO, 8 )
 	AM_RANGE(0xf8, 0xfd)  AM_WRITE(multfish_bank_w)
 ADDRESS_MAP_END
 
-static ADDRESS_MAP_START( rollfr_portmap, AS_IO, 8 )
+static ADDRESS_MAP_START( rollfr_portmap, AS_IO, 8, multfish_state )
 	AM_RANGE(0x33, 0x33) AM_WRITE(rollfr_hopper_w)
 	AM_IMPORT_FROM(multfish_portmap)
 ADDRESS_MAP_END
@@ -969,13 +1046,13 @@ static const gfx_layout tiles16x16_layout =
 	8,
 	{ RGN_FRAC(2,4)+0, RGN_FRAC(2,4)+1,RGN_FRAC(2,4)+2, RGN_FRAC(2,4)+3,0,1,2,3 },
 	{ 0,4,
-	  RGN_FRAC(1,4)+0, RGN_FRAC(1,4)+4,
-	  8, 12,
-	  RGN_FRAC(1,4)+8, RGN_FRAC(1,4)+12,
-	  16, 20,
-	  RGN_FRAC(1,4)+16, RGN_FRAC(1,4)+20,
-	  24, 28,
-	  RGN_FRAC(1,4)+24,RGN_FRAC(1,4)+28 },
+		RGN_FRAC(1,4)+0, RGN_FRAC(1,4)+4,
+		8, 12,
+		RGN_FRAC(1,4)+8, RGN_FRAC(1,4)+12,
+		16, 20,
+		RGN_FRAC(1,4)+16, RGN_FRAC(1,4)+20,
+		24, 28,
+		RGN_FRAC(1,4)+24,RGN_FRAC(1,4)+28 },
 	{ 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,8*32,9*32,10*32,11*32,12*32,13*32,14*32,15*32 },
 	8*64
 };
@@ -985,27 +1062,25 @@ static GFXDECODE_START( multfish )
 	GFXDECODE_ENTRY( "gfx", 0, tiles16x16_layout, 0, 16 )
 GFXDECODE_END
 
-static MACHINE_START( multfish )
+void multfish_state::machine_start()
 {
-	multfish_state *state = machine.driver_data<multfish_state>();
 
-	state->save_item(NAME(state->m_disp_enable));
-	state->save_item(NAME(state->m_rambk));
-	state->save_item(NAME(state->m_hopper_motor));
-	state->save_item(NAME(state->m_hopper));
+	save_item(NAME(m_disp_enable));
+	save_item(NAME(m_rambk));
+	save_item(NAME(m_hopper_motor));
+	save_item(NAME(m_hopper));
 }
 
-static MACHINE_RESET( multfish )
+void multfish_state::machine_reset()
 {
-	multfish_state *state = machine.driver_data<multfish_state>();
 
-	memory_configure_bank(machine, "bank1", 0, 16, machine.region("maincpu")->base(), 0x4000);
-	memory_set_bank(machine, "bank1", 0);
+	membank("bank1")->configure_entries(0, 16, memregion("maincpu")->base(), 0x4000);
+	membank("bank1")->set_entry(0);
 
-	state->m_disp_enable = 0;
-	state->m_rambk = 0;
-	state->m_hopper_motor = 0;
-	state->m_hopper = 0;
+	m_disp_enable = 0;
+	m_rambk = 0;
+	m_hopper_motor = 0;
+	m_hopper = 0;
 }
 
 static const ay8910_interface ay8910_config =
@@ -1024,23 +1099,19 @@ static MACHINE_CONFIG_START( multfish, multfish_state )
 	MCFG_CPU_ADD("maincpu", Z80, XTAL_24MHz/4)
 	MCFG_CPU_PROGRAM_MAP(multfish_map)
 	MCFG_CPU_IO_MAP(multfish_portmap)
-	MCFG_CPU_VBLANK_INT("screen",irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", multfish_state, irq0_line_hold)
 
-	MCFG_MACHINE_START( multfish )
-	MCFG_MACHINE_RESET( multfish )
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(0))
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*16, 32*16)
 	MCFG_SCREEN_VISIBLE_AREA(17*16, 1024-16*7-1, 1*16, 32*16-1*16-1)
-	MCFG_SCREEN_UPDATE(multfish)
+	MCFG_SCREEN_UPDATE_DRIVER(multfish_state, screen_update_multfish)
 	MCFG_GFXDECODE(multfish)
 	MCFG_PALETTE_LENGTH(0x1000)
 
-	MCFG_VIDEO_START(multfish)
 
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 	MCFG_SOUND_ADD("aysnd", AY8910, 6000000/4)
@@ -1055,18 +1126,18 @@ static MACHINE_CONFIG_DERIVED( rollfr, multfish )
 	MCFG_CPU_IO_MAP(rollfr_portmap)
 MACHINE_CONFIG_END
 
-static MACHINE_RESET( island2a )
+MACHINE_RESET_MEMBER(multfish_state,island2a)
 {
-	MACHINE_RESET_CALL(multfish);
+	multfish_state::machine_reset();
 
 	// this set needs preprogrammed data in timekeeper
-	timekeeper_w(machine.device("m48t35"), 0x2003 , 0x01);
-	timekeeper_w(machine.device("m48t35"), 0x4003 , 0x02);
+	timekeeper_w(machine().device("m48t35"), generic_space(), 0x2003 , 0x01);
+	timekeeper_w(machine().device("m48t35"), generic_space(), 0x4003 , 0x02);
 }
 static MACHINE_CONFIG_DERIVED( island2a, multfish )
 
 	/* basic machine hardware */
-	MCFG_MACHINE_RESET( island2a )
+	MCFG_MACHINE_RESET_OVERRIDE(multfish_state, island2a )
 MACHINE_CONFIG_END
 
 
@@ -1095,9 +1166,25 @@ xxxxxxxx_ent.00x    - entertainment sets
    Multifish
 **********************************************************/
 
+ROM_START( goldfish ) // Gold Fish 020903 prototype of Multi Fish
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "gf_020903.rom", 0x00000, 0x40000, CRC(705304fc) SHA1(f02336066ba2ff394ac153107e308d5356e99eca) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	/* did it really use these graphic ROMs? they include the screens used by the games not included in 'Gold Fish' */
+	ROM_LOAD( "multi_fish.001", 0x000000, 0x80000, CRC(2f2a7367) SHA1(ce7ee9ca4f374ec61edc3b89d4752f0edb64a910) )
+	ROM_LOAD( "multi_fish.002", 0x100000, 0x80000, CRC(606acd73) SHA1(ce5f7b1366dbb16d57fe4b7f395f08725e3cf756) )
+	ROM_LOAD( "multi_fish.003", 0x200000, 0x80000, CRC(33759c2a) SHA1(6afcee2e00a27542fc9751702abcc84cd7d3a2a8) )
+	ROM_LOAD( "multi_fish.004", 0x300000, 0x80000, CRC(d0053546) SHA1(01c69be0c594947d57648f491904a3b6938a5570) )
+	ROM_LOAD( "multi_fish.005", 0x080000, 0x80000, CRC(6f632872) SHA1(949661cb234855a9c86403e9893c5d9f465ddd79) )
+	ROM_LOAD( "multi_fish.006", 0x180000, 0x80000, CRC(023c1193) SHA1(98cf2732f9542b0bb3bee324611f6d3143ef1dc4) )
+	ROM_LOAD( "multi_fish.007", 0x280000, 0x80000, CRC(9afdc2d3) SHA1(b112fd2005354c9f97d77030bdb6f99d7b5c8050) )
+	ROM_LOAD( "multi_fish.008", 0x380000, 0x80000, CRC(29f1a326) SHA1(5e268411cab888c0727aaf8ae7d0b435d2efd189) )
+ROM_END
+
 ROM_START( mfish ) // 021120
 	ROM_REGION( 0x40000, "maincpu", 0 )
-	ROM_LOAD( "mf021120.rom", 0x00000, 0x40000, MD5(6021e2bfa67abdfc0beb7f291fdc9d9c) SHA1(eb7eb5aae00a77edcf328f460970eb180d86d058) )
+	ROM_LOAD( "mf021120.rom", 0x00000, 0x40000, SHA1(eb7eb5aae00a77edcf328f460970eb180d86d058) )
 
 	ROM_REGION( 0x400000, "gfx", 0 )
 	ROM_LOAD( "multi_fish.001", 0x000000, 0x80000, CRC(2f2a7367) SHA1(ce7ee9ca4f374ec61edc3b89d4752f0edb64a910) )
@@ -1112,7 +1199,7 @@ ROM_END
 
 ROM_START( mfish_2 ) // 021121
 	ROM_REGION( 0x40000, "maincpu", 0 )
-	ROM_LOAD( "mf021121.rom", 0x00000, 0x40000, MD5(727dc01459f6745caa2b19fbd4432055) SHA1(87a1fb81330cf4b66e17702c22fda694ebff58eb) )
+	ROM_LOAD( "mf021121.rom", 0x00000, 0x40000, SHA1(87a1fb81330cf4b66e17702c22fda694ebff58eb) )
 
 	ROM_REGION( 0x400000, "gfx", 0 )
 	ROM_LOAD( "multi_fish.001", 0x000000, 0x80000, CRC(2f2a7367) SHA1(ce7ee9ca4f374ec61edc3b89d4752f0edb64a910) )
@@ -1143,7 +1230,7 @@ ROM_END
 
 ROM_START( mfish_4 ) // 021219
 	ROM_REGION( 0x40000, "maincpu", 0 )
-	ROM_LOAD( "mf021219.rom", 0x00000, 0x40000, MD5(c8810d803d320d9fefa46588c8ef28c0) SHA1(887d456b2ba89560329457d9eaea26fb72223a38) )
+	ROM_LOAD( "mf021219.rom", 0x00000, 0x40000, SHA1(887d456b2ba89560329457d9eaea26fb72223a38) )
 
 	ROM_REGION( 0x400000, "gfx", 0 )
 	ROM_LOAD( "multi_fish.001", 0x000000, 0x80000, CRC(2f2a7367) SHA1(ce7ee9ca4f374ec61edc3b89d4752f0edb64a910) )
@@ -1158,7 +1245,7 @@ ROM_END
 
 ROM_START( mfish_5 ) // 021227
 	ROM_REGION( 0x40000, "maincpu", 0 )
-	ROM_LOAD( "mf021227.rom", 0x00000, 0x40000, MD5(1bbdff5bd2b89a0c9c474286c55d16db) SHA1(58b74c41a88a781da01dba52744dc74e41deae70) )
+	ROM_LOAD( "mf021227.rom", 0x00000, 0x40000, SHA1(58b74c41a88a781da01dba52744dc74e41deae70) )
 
 	ROM_REGION( 0x400000, "gfx", 0 )
 	ROM_LOAD( "multi_fish.001", 0x000000, 0x80000, CRC(2f2a7367) SHA1(ce7ee9ca4f374ec61edc3b89d4752f0edb64a910) )
@@ -1188,7 +1275,7 @@ ROM_END
 
 ROM_START( mfish_7 ) // 030511
 	ROM_REGION( 0x40000, "maincpu", 0 )
-	ROM_LOAD( "mf030511.rom", 0x00000, 0x40000, MD5(a910910ce7963a4385e31769789842f7) SHA1(06b3e3875f036782983e29e305f67a36f78a4f06) )
+	ROM_LOAD( "mf030511.rom", 0x00000, 0x40000, SHA1(06b3e3875f036782983e29e305f67a36f78a4f06) )
 
 	ROM_REGION( 0x400000, "gfx", 0 )
 	ROM_LOAD( "multi_fish.001", 0x000000, 0x80000, CRC(2f2a7367) SHA1(ce7ee9ca4f374ec61edc3b89d4752f0edb64a910) )
@@ -1203,7 +1290,7 @@ ROM_END
 
 ROM_START( mfish_8 ) // 030522
 	ROM_REGION( 0x40000, "maincpu", 0 )
-	ROM_LOAD( "mf030522.rom", 0x00000, 0x40000, MD5(17dc6bf0308a4ac53bdff0ade1216235) SHA1(fa80e12275b960374c84518bcaa1e32d0a4ff437) )
+	ROM_LOAD( "mf030522.rom", 0x00000, 0x40000, CRC(bff97c25) SHA1(fa80e12275b960374c84518bcaa1e32d0a4ff437) )
 
 	ROM_REGION( 0x400000, "gfx", 0 )
 	ROM_LOAD( "multi_fish.001", 0x000000, 0x80000, CRC(2f2a7367) SHA1(ce7ee9ca4f374ec61edc3b89d4752f0edb64a910) )
@@ -1218,7 +1305,7 @@ ROM_END
 
 ROM_START( mfish_9 ) // 031026
 	ROM_REGION( 0x40000, "maincpu", 0 )
-	ROM_LOAD( "mf031026.rom", 0x00000, 0x40000, MD5(a0a31829705ad78786f7c1bd36cee0cf) SHA1(451b390793f89188afe2b6e82fc02b474fb97a7c) )
+	ROM_LOAD( "mf031026.rom", 0x00000, 0x40000, SHA1(451b390793f89188afe2b6e82fc02b474fb97a7c) )
 
 	ROM_REGION( 0x400000, "gfx", 0 )
 	ROM_LOAD( "multi_fish.001", 0x000000, 0x80000, CRC(2f2a7367) SHA1(ce7ee9ca4f374ec61edc3b89d4752f0edb64a910) )
@@ -1233,7 +1320,7 @@ ROM_END
 
 ROM_START( mfish_10 ) // 031117
 	ROM_REGION( 0x40000, "maincpu", 0 )
-	ROM_LOAD( "mf031117.rom", 0x00000, 0x40000, MD5(531a3e63c46be33a151c06bdd9479655) SHA1(1d244a332af0fb6aa593a246211ff2b6d2c48a59) )
+	ROM_LOAD( "mf031117.rom", 0x00000, 0x40000, SHA1(1d244a332af0fb6aa593a246211ff2b6d2c48a59) )
 
 	ROM_REGION( 0x400000, "gfx", 0 )
 	ROM_LOAD( "multi_fish.001", 0x000000, 0x80000, CRC(2f2a7367) SHA1(ce7ee9ca4f374ec61edc3b89d4752f0edb64a910) )
@@ -1302,7 +1389,7 @@ ROM_END
 
 ROM_START( crzmon ) // 030217
 	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
-	ROM_LOAD( "cm_m_030217.rom", 0x00000, 0x40000, MD5(5e2e4eec4cb20437a3e389003f8e2bb7) SHA1(75787f32aa4c8e8ff7bc11c57a37ad5a65f71c52) )
+	ROM_LOAD( "cm_m_030217.rom", 0x00000, 0x40000, SHA1(75787f32aa4c8e8ff7bc11c57a37ad5a65f71c52) )
 
 	ROM_REGION( 0x400000, "gfx", 0 )
 	ROM_LOAD( "crazymonkey_m.001", 0x000000, 0x80000, CRC(683f2be3) SHA1(6fdba4ec07752bf049787a11638895352e9d5f10) )
@@ -1317,7 +1404,7 @@ ROM_END
 
 ROM_START( crzmon_2 ) // 030225
 	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
-	ROM_LOAD( "cm_m_030225.rom", 0x00000, 0x40000, MD5(8f8d0ca97b5a2ad255d36094a6b30e0e) SHA1(3627a3d6a4a50ed8544456d53ab5a489af389a19) )
+	ROM_LOAD( "cm_m_030225.rom", 0x00000, 0x40000, SHA1(3627a3d6a4a50ed8544456d53ab5a489af389a19) )
 
 	ROM_REGION( 0x400000, "gfx", 0 )
 	ROM_LOAD( "crazymonkey_m.001", 0x000000, 0x80000, CRC(683f2be3) SHA1(6fdba4ec07752bf049787a11638895352e9d5f10) )
@@ -1332,7 +1419,7 @@ ROM_END
 
 ROM_START( crzmon_3 ) // 030227
 	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
-	ROM_LOAD( "cm_m_030227.rom", 0x00000, 0x40000, MD5(e2704337640db28a92b9946209eec2b1) SHA1(4f8cd68dd2b6abeaabc9b45da18469cc6e7ac74d) )
+	ROM_LOAD( "cm_m_030227.rom", 0x00000, 0x40000, SHA1(4f8cd68dd2b6abeaabc9b45da18469cc6e7ac74d) )
 
 	ROM_REGION( 0x400000, "gfx", 0 )
 	ROM_LOAD( "crazymonkey_m.001", 0x000000, 0x80000, CRC(683f2be3) SHA1(6fdba4ec07752bf049787a11638895352e9d5f10) )
@@ -1347,7 +1434,7 @@ ROM_END
 
 ROM_START( crzmon_4 ) // 030404
 	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
-	ROM_LOAD( "cm_m_030404.rom", 0x00000, 0x40000, MD5(a3a9fce896f75cf9f8046c68a70a098d) SHA1(fd99caa2b6ef7218563db4f3b755e34dd551e05f) )
+	ROM_LOAD( "cm_m_030404.rom", 0x00000, 0x40000, SHA1(fd99caa2b6ef7218563db4f3b755e34dd551e05f) )
 
 	ROM_REGION( 0x400000, "gfx", 0 )
 	ROM_LOAD( "crazymonkey_m.001", 0x000000, 0x80000, CRC(683f2be3) SHA1(6fdba4ec07752bf049787a11638895352e9d5f10) )
@@ -1377,7 +1464,7 @@ ROM_END
 
 ROM_START( crzmon_6 ) // 031016
 	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
-	ROM_LOAD( "cm_m_031016.rom", 0x00000, 0x40000, MD5(36901e462cd3a9d221a9cefcdf377cbe) SHA1(2f2a5ecbb311ade75f8fdc322c6e63836d4119c3) )
+	ROM_LOAD( "cm_m_031016.rom", 0x00000, 0x40000, SHA1(2f2a5ecbb311ade75f8fdc322c6e63836d4119c3) )
 
 	ROM_REGION( 0x400000, "gfx", 0 )
 	ROM_LOAD( "crazymonkey_m.001", 0x000000, 0x80000, CRC(683f2be3) SHA1(6fdba4ec07752bf049787a11638895352e9d5f10) )
@@ -1435,6 +1522,50 @@ ROM_START( crzmon_9 ) // 070315
 	ROM_LOAD( "crazymonkey_m.008", 0x380000, 0x80000, CRC(6fdb6fd5) SHA1(f40916112365de258956ec033aff79aae1f58690) )
 ROM_END
 
+ROM_START( crzmon_10 ) // 081027 lottery
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "cm_l_081027.rom", 0x00000, 0x40000, SHA1(11a1523bc0ce5cf43534b34201f59784283693f0) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "crazymonkey_loto.001", 0x000000, 0x80000, SHA1(bf953dc53ec85f4841fe7ada7e480520b3bce1d7) )
+	ROM_LOAD( "crazymonkey_loto.002", 0x100000, 0x80000, SHA1(57db2212b690a8a92034ba4993526c34cbf48c09) )
+	ROM_LOAD( "crazymonkey_loto.003", 0x200000, 0x80000, SHA1(4551494b883f8076931bb22fd0541b193039dfdc) )
+	ROM_LOAD( "crazymonkey_loto.004", 0x300000, 0x80000, SHA1(b33d5007b649661a3d811139c2b40d036863343d) )
+	ROM_LOAD( "crazymonkey_m.005",    0x080000, 0x80000, CRC(9d4d2a94) SHA1(c714e110de628b343dfc7fff23befaa1276056a9) )
+	ROM_LOAD( "crazymonkey_m.006",    0x180000, 0x80000, CRC(a15f0fee) SHA1(3f06d5a1a41e1335bcc7586a5ea95b9b734155c0) )
+	ROM_LOAD( "crazymonkey_m.007",    0x280000, 0x80000, CRC(715a2528) SHA1(6c4c72592568ecbaa9518fb7271d2714dd22dbbb) )
+	ROM_LOAD( "crazymonkey_m.008",    0x380000, 0x80000, CRC(6fdb6fd5) SHA1(f40916112365de258956ec033aff79aae1f58690) )
+ROM_END
+
+ROM_START( crzmon_11 ) // 081113 lottery
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "cm_l_081113.rom", 0x00000, 0x40000, SHA1(7196c301691b47a572cefc090888db550f10998c) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "crazymonkey_loto.001", 0x000000, 0x80000, SHA1(bf953dc53ec85f4841fe7ada7e480520b3bce1d7) )
+	ROM_LOAD( "crazymonkey_loto.002", 0x100000, 0x80000, SHA1(57db2212b690a8a92034ba4993526c34cbf48c09) )
+	ROM_LOAD( "crazymonkey_loto.003", 0x200000, 0x80000, SHA1(4551494b883f8076931bb22fd0541b193039dfdc) )
+	ROM_LOAD( "crazymonkey_loto.004", 0x300000, 0x80000, SHA1(b33d5007b649661a3d811139c2b40d036863343d) )
+	ROM_LOAD( "crazymonkey_m.005",    0x080000, 0x80000, CRC(9d4d2a94) SHA1(c714e110de628b343dfc7fff23befaa1276056a9) )
+	ROM_LOAD( "crazymonkey_m.006",    0x180000, 0x80000, CRC(a15f0fee) SHA1(3f06d5a1a41e1335bcc7586a5ea95b9b734155c0) )
+	ROM_LOAD( "crazymonkey_m.007",    0x280000, 0x80000, CRC(715a2528) SHA1(6c4c72592568ecbaa9518fb7271d2714dd22dbbb) )
+	ROM_LOAD( "crazymonkey_m.008",    0x380000, 0x80000, CRC(6fdb6fd5) SHA1(f40916112365de258956ec033aff79aae1f58690) )
+ROM_END
+
+ROM_START( crzmon_12 ) // 090711 entertainment
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "cm_e_090711.rom", 0x00000, 0x40000, SHA1(4e15b53bcd0df6ef8859fb198311f41fd3c34310) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "crazymonkey_e.001", 0x000000, 0x80000, SHA1(987da4347dc97ca618ade6275357924a8badb5a2) )
+	ROM_LOAD( "crazymonkey_e.002", 0x100000, 0x80000, SHA1(b71917ebb0f39bdf949a1f7746031663edb72186) )
+	ROM_LOAD( "crazymonkey_e.003", 0x200000, 0x80000, SHA1(e42065218670a0b82d5dc91e92e81c7a89d6c6c1) )
+	ROM_LOAD( "crazymonkey_e.004", 0x300000, 0x80000, SHA1(e1af54e8ad0bf960fdde5360dc2230326a19ceb9) )
+	ROM_LOAD( "crazymonkey_e.005", 0x080000, 0x80000, SHA1(b9aa78ede6ace2e6fd24028851f0f750de7685de) )
+	ROM_LOAD( "crazymonkey_e.006", 0x180000, 0x80000, SHA1(e39cb83b800c40884b2934206f498429d990553d) )
+	ROM_LOAD( "crazymonkey_e.007", 0x280000, 0x80000, SHA1(7cc230ee431288e0c8a05a1a7d77973ba500d503) )
+	ROM_LOAD( "crazymonkey_e.008", 0x380000, 0x80000, SHA1(3466f41b494439b6c24687fa75cb11bfe124a59f) )
+ROM_END
 
 /*********************************************************
    Fruit Cocktail
@@ -1446,7 +1577,7 @@ ROM_END
 
 ROM_START( fcockt ) // 030505
 	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
-	ROM_LOAD( "fc_m_030505.rom", 0x00000, 0x40000, MD5(5ee5ad269498787e5eb69194874b6544) SHA1(cc65334e8dfae5ffef1d73bd5085e3555905e259) )
+	ROM_LOAD( "fc_m_030505.rom", 0x00000, 0x40000, SHA1(cc65334e8dfae5ffef1d73bd5085e3555905e259) )
 
 	ROM_REGION( 0x400000, "gfx", 0 )
 	ROM_LOAD( "fruitcocktail_m.001", 0x000000, 0x80000, CRC(da72c0bb) SHA1(41c9eebccce82520dfe41d6a3a574b2890945ffa) )
@@ -1461,7 +1592,7 @@ ROM_END
 
 ROM_START( fcockt_2 ) // 030512
 	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
-	ROM_LOAD( "fc_m_030512.rom", 0x00000, 0x40000, MD5(e94917c5935641601f17a3fe56dedb17) SHA1(c23ebcf64609a56a029f05101185f3adf73cdadd) )
+	ROM_LOAD( "fc_m_030512.rom", 0x00000, 0x40000, SHA1(c23ebcf64609a56a029f05101185f3adf73cdadd) )
 
 	ROM_REGION( 0x400000, "gfx", 0 )
 	ROM_LOAD( "fruitcocktail_m.001", 0x000000, 0x80000, CRC(da72c0bb) SHA1(41c9eebccce82520dfe41d6a3a574b2890945ffa) )
@@ -1491,7 +1622,7 @@ ROM_END
 
 ROM_START( fcockt_4 ) // 031028
 	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
-	ROM_LOAD( "fc_m_031028.rom", 0x00000, 0x40000, MD5(ffab543f86538d4717da7cf20d97e3d1) SHA1(18a0ac6e3c6f1d6ae7aeae5322e6b6617923cfdf) )
+	ROM_LOAD( "fc_m_031028.rom", 0x00000, 0x40000, SHA1(18a0ac6e3c6f1d6ae7aeae5322e6b6617923cfdf) )
 
 	ROM_REGION( 0x400000, "gfx", 0 )
 	ROM_LOAD( "fruitcocktail_m.001", 0x000000, 0x80000, CRC(da72c0bb) SHA1(41c9eebccce82520dfe41d6a3a574b2890945ffa) )
@@ -1624,6 +1755,36 @@ ROM_START( fcockt_12 ) // 070911
 	ROM_LOAD( "fruitcocktail.008",   0x380000, 0x80000, CRC(8384e4d4) SHA1(83d0bbbd7cca7328a66a69cf802632fd8d22d5b8) )
 ROM_END
 
+ROM_START( fcockt_13 ) // 081124 lottery
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "fc_l_081124.rom", 0x00000, 0x40000, SHA1(896252194f32842f784463668e6416cbfe9687a0) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "fruitcocktail_loto.001", 0x000000, 0x80000, SHA1(bb2b518dc166836f7cedd4ec443b50687e8927e1) ) /* Only this set is listed as official hashes */
+	ROM_LOAD( "fruitcocktail_loto.002", 0x100000, 0x80000, SHA1(2621e2644ebec3959c49905c54eb20a83d5a7bd6) )
+	ROM_LOAD( "fruitcocktail_loto.003", 0x200000, 0x80000, SHA1(ffe11deef6b3b86b4b78e2e4d96c30f820e77971) )
+	ROM_LOAD( "fruitcocktail_loto.004", 0x300000, 0x80000, SHA1(fa88d113721ce7c0b3418614cd6bb974c20df644) )
+	ROM_LOAD( "fruitcocktail_m.005",    0x080000, 0x80000, CRC(f0176b60) SHA1(f764aea00ed306a28cacc62f8d2db9cc42895db8) )
+	ROM_LOAD( "fruitcocktail_m.006",    0x180000, 0x80000, CRC(ef24f255) SHA1(6ff924627c179868a25f180f79cd57182b72d9d4) )
+	ROM_LOAD( "fruitcocktail_m.007",    0x280000, 0x80000, CRC(20f87a15) SHA1(cb60866a3543668f3592c270b445dee881d78128) )
+	ROM_LOAD( "fruitcocktail_m.008",    0x380000, 0x80000, CRC(d282e42e) SHA1(eac9c3eaef39b1805f863ade5da47d6274d20a55) )
+ROM_END
+
+ROM_START( fcockt_14 ) // 090708 entertainment
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "fc_e_090708.rom", 0x00000, 0x40000, CRC(92a64b62) SHA1(6fb5a82fa41e131f01f097b739f808b5f1f8c11b) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "fruitcocktail_ent.001", 0x000000, 0x80000, CRC(27c3f229) SHA1(06b19ff2134a4f419de71848f4764d7b3f9dfb1b) )
+	ROM_LOAD( "fruitcocktail_ent.002", 0x100000, 0x80000, CRC(04247991) SHA1(0684c8b1cba824fb083be119b4c190205b50c9ee) )
+	ROM_LOAD( "fruitcocktail_ent.003", 0x200000, 0x80000, CRC(be51802d) SHA1(95f3066c48c3018d3afdffcb2b109d25a00b2a64) )
+	ROM_LOAD( "fruitcocktail_ent.004", 0x300000, 0x80000, CRC(bcc5c524) SHA1(ec860c359ffa3907296ed7524a56131debb5575e) )
+	ROM_LOAD( "fruitcocktail_ent.005", 0x080000, 0x80000, CRC(b5c40862) SHA1(1a0890f9a3169ddf54fd702061c73bed84bc97b3) )
+	ROM_LOAD( "fruitcocktail_ent.006", 0x180000, 0x80000, CRC(0e46b961) SHA1(a4b30aed5f0ed0dc6fb0d56c028cf501b4b4fd38) )
+	ROM_LOAD( "fruitcocktail_ent.007", 0x280000, 0x80000, CRC(b189854b) SHA1(b1f53c6d48b7944bdbbbe06dc2ffd739635d2acb) )
+	ROM_LOAD( "fruitcocktail_ent.008", 0x380000, 0x80000, CRC(f4395057) SHA1(c60b270b485fe9710155a875ed58dd0b3a6df056) )
+ROM_END
+
 
 /*********************************************************
    Lucky Haunter
@@ -1635,7 +1796,7 @@ ROM_END
 
 ROM_START( lhaunt ) // 030707
 	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
-	ROM_LOAD( "lh_m_030707.rom", 0x00000, 0x40000, MD5(f2e42fb479888c21351e3029025e6700) SHA1(c7b8e1b98cd0aa665d62c1652716993539c9f3ef) )
+	ROM_LOAD( "lh_m_030707.rom", 0x00000, 0x40000, SHA1(c7b8e1b98cd0aa665d62c1652716993539c9f3ef) )
 
 	ROM_REGION( 0x400000, "gfx", 0 )
 	ROM_LOAD( "luckyhaunter_m.001", 0x000000, 0x80000, CRC(5f1000c6) SHA1(05154d786caf7f5fb9ed90c7d3391cec42e871f8) )
@@ -1665,7 +1826,7 @@ ROM_END
 
 ROM_START( lhaunt_3 ) // 031027
 	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
-	ROM_LOAD( "lh_m_031027.rom", 0x00000, 0x40000, MD5(49b1cf6f89d03b36c5f80d0ccfc23aa2) SHA1(caec736dde2878588ab197ba37801cf7a9ed975b) )
+	ROM_LOAD( "lh_m_031027.rom", 0x00000, 0x40000, SHA1(caec736dde2878588ab197ba37801cf7a9ed975b) )
 
 	ROM_REGION( 0x400000, "gfx", 0 )
 	ROM_LOAD( "luckyhaunter_m.001", 0x000000, 0x80000, CRC(5f1000c6) SHA1(05154d786caf7f5fb9ed90c7d3391cec42e871f8) )
@@ -1753,8 +1914,35 @@ ROM_START( lhaunt_8 ) // 070604
 	ROM_LOAD( "luckyhaunter_m.008", 0x380000, 0x80000, CRC(1bdf6252) SHA1(7b5ae82a95a744b236e109024d47b526dccf9c14) )
 ROM_END
 
+ROM_START( lhaunt_9 ) // 081208 lottery
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "lh_l_081208.rom", 0x00000, 0x40000, SHA1(4962bfc9c3aadd45fdb30bb159aaaed463e4d06b) )
 
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "luckyhaunter_loto.001",   0x000000, 0x80000, SHA1(961f832654f2cdb844e36a1a9034b87b5e3750f5) )
+	ROM_LOAD( "luckyhaunter_loto.002",   0x100000, 0x80000, SHA1(20ac980f4f8b502773845d2e1350b960ea707d83) )
+	ROM_LOAD( "luckyhaunter_loto.003",   0x200000, 0x80000, SHA1(e4cf08104e7717d9706105ad52ade6bf9a782d76) )
+	ROM_LOAD( "luckyhaunter_loto.004",   0x300000, 0x80000, SHA1(ceb4a5e9912f5d98483cb75e871c925dffbb8e72) )
+	ROM_LOAD( "luckyhaunter_m.005",      0x080000, 0x80000, CRC(b50c90a3) SHA1(74749f4ffb5b0630631b511fc3230c6e7b50dc3b) )
+	ROM_LOAD( "luckyhaunter_m.006",      0x180000, 0x80000, CRC(4eaaab64) SHA1(9fed16f8e0308200fd16c4b1e511e1bf6c22ae66) )
+	ROM_LOAD( "luckyhaunter_m.007",      0x280000, 0x80000, CRC(64d16ba9) SHA1(3b897183d6e0f1256be7657441f234fc72077682) )
+	ROM_LOAD( "luckyhaunter_m.008",      0x380000, 0x80000, CRC(1bdf6252) SHA1(7b5ae82a95a744b236e109024d47b526dccf9c14) )
+ROM_END
 
+ROM_START( lhaunt_10 ) // 090712 entertainment
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "lh_e_090712.rom", 0x00000, 0x40000, CRC(16a3d1f3) SHA1(a1350d957d06a679db7f27eb949ddb3befe178d8) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "lh_ent.001", 0x000000, 0x80000, CRC(66de9088) SHA1(b8287b4d9eeeb6502b656dc9d104048364c55326) )
+	ROM_LOAD( "lh_ent.002", 0x100000, 0x80000, CRC(04df45d7) SHA1(f74d72244fb3cefc3599b68af0fec01f9d1a17a1) )
+	ROM_LOAD( "lh_ent.003", 0x200000, 0x80000, CRC(c4706ef2) SHA1(6a27af2e3e5893c0e8c0ce753fe223ab52451bd5) )
+	ROM_LOAD( "lh_ent.004", 0x300000, 0x80000, CRC(4f91e005) SHA1(c65771ac4fd9affae7a9a4c5a5fb748fd0830b04) )
+	ROM_LOAD( "lh_ent.005", 0x080000, 0x80000, CRC(63fc8d37) SHA1(c38a359c6cea75c7981a004cc32e80b5fda4fa6c) )
+	ROM_LOAD( "lh_ent.006", 0x180000, 0x80000, CRC(3b1c0dcf) SHA1(2b31d145803a5500b070eabffccdc14e4e7540cf) )
+	ROM_LOAD( "lh_ent.007", 0x280000, 0x80000, CRC(8d6549f3) SHA1(c890d37bb99e23550fc264562b5230edbca0afe8) )
+	ROM_LOAD( "lh_ent.008", 0x380000, 0x80000, CRC(66ca6dac) SHA1(f8ffde6f1f0b5bb20cd8cbb51abaf92ff82b8217) )
+ROM_END
 /*********************************************************
    Garage
 
@@ -1765,7 +1953,7 @@ ROM_END
 
 ROM_START( garage ) // 040122
 	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
-	ROM_LOAD( "gg_m_040122.rom", 0x00000, 0x40000, MD5(b1fca0a1293d6891171b168ade2112c0) SHA1(327e55d1f4bdc0ad0556faa2fbdaa05b9a5f1c16) )
+	ROM_LOAD( "gg_m_040122.rom", 0x00000, 0x40000, SHA1(327e55d1f4bdc0ad0556faa2fbdaa05b9a5f1c16) )
 
 	ROM_REGION( 0x400000, "gfx", 0 )
 	ROM_LOAD( "garage_m.001", 0x000000, 0x80000, CRC(57acd4bc) SHA1(8796f463787c359cce6ac09c1b6895f871bbb7c9) )
@@ -1780,7 +1968,7 @@ ROM_END
 
 ROM_START( garage_2 ) // 040123
 	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
-	ROM_LOAD( "gg_m_040123.rom", 0x00000, 0x40000, MD5(7b66e7c7b9ddf74bd344a626c64fce5e) SHA1(3051c99d22cfe46b532fcc59a0b98eec186f4a76) )
+	ROM_LOAD( "gg_m_040123.rom", 0x00000, 0x40000, SHA1(3051c99d22cfe46b532fcc59a0b98eec186f4a76) )
 
 	ROM_REGION( 0x400000, "gfx", 0 )
 	ROM_LOAD( "garage_m.001", 0x000000, 0x80000, CRC(57acd4bc) SHA1(8796f463787c359cce6ac09c1b6895f871bbb7c9) )
@@ -1795,7 +1983,7 @@ ROM_END
 
 ROM_START( garage_3 ) // 040216
 	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
-	ROM_LOAD( "gg_m_040216.rom", 0x00000, 0x40000, MD5(9d89036118ece87c98bb9b64021014ff) SHA1(321c4106ce07e195a05eacdef6387d61d5e58bb9) )
+	ROM_LOAD( "gg_m_040216.rom", 0x00000, 0x40000, SHA1(321c4106ce07e195a05eacdef6387d61d5e58bb9) )
 
 	ROM_REGION( 0x400000, "gfx", 0 )
 	ROM_LOAD( "garage_m.001", 0x000000, 0x80000, CRC(57acd4bc) SHA1(8796f463787c359cce6ac09c1b6895f871bbb7c9) )
@@ -1868,6 +2056,36 @@ ROM_START( garage_7 ) // 070329
 	ROM_LOAD( "garage_m.008", 0x380000, 0x80000, CRC(90c5416b) SHA1(583bfb517bc2e30d7b7903aa19fc3b4b5188d7d2) )
 ROM_END
 
+ROM_START( garage_8 ) // 081229 lottery
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "gg_l_081229.rom", 0x00000, 0x40000, SHA1(6bc22aeb6d8d5ffbc556d9056a25e6506bb8f118) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "garage_loto.001", 0x000000, 0x80000, SHA1(50de46c4ae28f70c96da03391446cca0cb91f43b) )
+	ROM_LOAD( "garage_loto.002", 0x100000, 0x80000, SHA1(df5c1684f1a29f77a3fa79b35a9a0b9371c1b8a3) )
+	ROM_LOAD( "garage_loto.003", 0x200000, 0x80000, SHA1(47e81aa034c1ac717b1715c521cbaa8ff4d336c5) )
+	ROM_LOAD( "garage_loto.004", 0x300000, 0x80000, SHA1(71dbcd71ee5bddeda77a012c243981e0960e0c9e) )
+	ROM_LOAD( "garage_m.005",    0x080000, 0x80000, CRC(5bf85bc5) SHA1(ff9d2b9cbcd2af6f5fda972e387820d830c196a9) )
+	ROM_LOAD( "garage_m.006",    0x180000, 0x80000, CRC(e5082b26) SHA1(6547409d39dd51498ce8e3f82ff813a8ac3c6522) )
+	ROM_LOAD( "garage_m.007",    0x280000, 0x80000, CRC(dfa2ceb1) SHA1(ec7de8a8f6e7785a563df973841cc1f1603f79fc) )
+	ROM_LOAD( "garage_m.008",    0x380000, 0x80000, CRC(90c5416b) SHA1(583bfb517bc2e30d7b7903aa19fc3b4b5188d7d2) )
+ROM_END
+
+ROM_START( garage_9 ) // 090715 entertainment
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "gg_e_090715.rom", 0x00000, 0x40000, CRC(4e722a18) SHA1(cda2f605ffa321654d9179504558d66d081e53b4) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "garage_ent.001", 0x000000, 0x80000, CRC(9b8386af) SHA1(e0ae0af31799ce04c5a0cb868ef30e40f5ae23a4) )
+	ROM_LOAD( "garage_ent.002", 0x100000, 0x80000, CRC(803cc291) SHA1(5448b963bfbe3a20d118d8d4bf474a75a486e325) )
+	ROM_LOAD( "garage_ent.003", 0x200000, 0x80000, CRC(714c8051) SHA1(dbde0b70f032620a03a946032145a039d5faa4bd) )
+	ROM_LOAD( "garage_ent.004", 0x300000, 0x80000, CRC(7c4e515c) SHA1(bd6075bfab0a2df5305059c2a9d6fc26a58f6705) )
+	ROM_LOAD( "garage_ent.005", 0x080000, 0x80000, CRC(21bf0f76) SHA1(a20e3f9c055e6a68d1c58b1b54b25e532a6c5a97) )
+	ROM_LOAD( "garage_ent.006", 0x180000, 0x80000, CRC(f0f9d1ab) SHA1(8ef8f69e730137372279d6024ee59eda68463be9) )
+	ROM_LOAD( "garage_ent.007", 0x280000, 0x80000, CRC(a3b88049) SHA1(06b49bb333f3d303885bd41b052059de847cf1d8) )
+	ROM_LOAD( "garage_ent.008", 0x380000, 0x80000, CRC(4331a5e9) SHA1(1593dfd998c14a03aa3e66dc7a102b6a94d159d9) )
+ROM_END
+
 
 /*********************************************************
    Rock Climber
@@ -1894,7 +2112,7 @@ ROM_END
 
 ROM_START( rclimb_2 ) // 040823
 	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
-	ROM_LOAD( "rc_m_040823.rom", 0x00000, 0x40000, MD5(f3f5edf6f838f07f4848fbcf9e566a38) SHA1(31cf4d7f50102d35556817273893182e30c9a70c) )
+	ROM_LOAD( "rc_m_040823.rom", 0x00000, 0x40000, SHA1(31cf4d7f50102d35556817273893182e30c9a70c) )
 
 	ROM_REGION( 0x400000, "gfx", 0 )
 	ROM_LOAD( "rockclimber_m.001", 0x000000, 0x80000, CRC(934f18c7) SHA1(da3a7cddc68e104d415d947e89c0e7f0d067c056) )
@@ -1952,6 +2170,37 @@ ROM_START( rclimb_5 ) // 070621
 	ROM_LOAD( "rockclimber_m.008", 0x380000, 0x80000, CRC(8cf6b4c2) SHA1(4c36c217b83c82acfdd615f5547bf597af7b8833) )
 ROM_END
 
+ROM_START( rclimb_6 ) // 090217 lottery
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "rc_l_090217.rom", 0x00000, 0x40000, SHA1(587be46d846fa7288227179bacedcc1ad5c2cd67) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "rockclimber_loto.001", 0x000000, 0x80000, SHA1(50fd1548e9f6736c5bb34d75ebd36e233e8773c2) )
+	ROM_LOAD( "rockclimber_loto.002", 0x100000, 0x80000, SHA1(50b4807becf3386ce7f4492f71f833973bf764d0) )
+	ROM_LOAD( "rockclimber_loto.003", 0x200000, 0x80000, SHA1(ab3401f624fa6b5ef2fe0dcdd0dc94b7a0eabece) )
+	ROM_LOAD( "rockclimber_loto.004", 0x300000, 0x80000, SHA1(e34b17e323542b368f8613cf2bc42a0c3b98fd29) )
+	ROM_LOAD( "rockclimber_m.005",    0x080000, 0x80000, CRC(ea127c3d) SHA1(a6391eed69a4723b68d727f59b6baebe51633e66) )
+	ROM_LOAD( "rockclimber_m.006",    0x180000, 0x80000, CRC(277fa273) SHA1(6320e6c5b5e48dc451cc48189054c42d85e8ccc1) )
+	ROM_LOAD( "rockclimber_m.007",    0x280000, 0x80000, CRC(3ca7f69a) SHA1(878cca181d915dc3548d5285a4bbb51aef31a64e) )
+	ROM_LOAD( "rockclimber_m.008",    0x380000, 0x80000, CRC(8cf6b4c2) SHA1(4c36c217b83c82acfdd615f5547bf597af7b8833) )
+ROM_END
+
+ROM_START( rclimb_7 ) // 090716 entertainment
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "rc_e_090716.rom", 0x00000, 0x40000, CRC(35bd6e28) SHA1(ee99956131ecfe3c4f05acc11bcf20a8a10403bd) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "rc_ent.001", 0x000000, 0x80000, CRC(246db785) SHA1(348624c5534de72422be23da289ab63b3e4ba3f5) )
+	ROM_LOAD( "rc_ent.002", 0x100000, 0x80000, CRC(4ddf95c1) SHA1(b83d0239f9e877fc5ae1557fd01668c126334501) )
+	ROM_LOAD( "rc_ent.003", 0x200000, 0x80000, CRC(7230bb2e) SHA1(dbcd82961ff9ba7bc05f749f07ce1ef7e2107690) )
+	ROM_LOAD( "rc_ent.004", 0x300000, 0x80000, CRC(ad2850c8) SHA1(9ced6e35656b81c27bfb300383e2f61bd359a143) )
+	ROM_LOAD( "rc_ent.005", 0x080000, 0x80000, CRC(95f5fbb1) SHA1(ea91c72594c9cb6c42a005a11ad0ce899724c509) )
+	ROM_LOAD( "rc_ent.006", 0x180000, 0x80000, CRC(35c50330) SHA1(b9c6e6f84f6efe62b0c2eef5e366d2423612e01e) )
+	ROM_LOAD( "rc_ent.007", 0x280000, 0x80000, CRC(61bea923) SHA1(16b54a310de4a8af158c1381be464f601e22c825) )
+	ROM_LOAD( "rc_ent.008", 0x380000, 0x80000, CRC(f4601d40) SHA1(64bc63db23e934104a9d68b77a56322a5b0540b8) )
+ROM_END
+
+
 /*********************************************************
    Sweet Life
 **********************************************************/
@@ -2006,6 +2255,50 @@ ROM_START( sweetl2 ) // 071217
 	ROM_LOAD( "sweetlife2.008", 0x380000, 0x80000, CRC(c2ad2b74) SHA1(c78e3ca5d15acb17ee671d2205405f287ad9c464) )
 ROM_END
 
+ROM_START( sweetl2_2 ) // 080320
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "sl2_m_080320.rom", 0x00000, 0x40000, CRC(78669405) SHA1(149990bee56d0f94ce1bea17883cbf5545925eb7) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "sweetlife2.001", 0x000000, 0x80000, CRC(b1e6157c) SHA1(e042aaaf85b13865d56d1709be280f5a3d5c95e3) )
+	ROM_LOAD( "sweetlife2.002", 0x100000, 0x80000, CRC(8bc54047) SHA1(9179cf02376fec77ae50b5603de66754237698f8) )
+	ROM_LOAD( "sweetlife2.003", 0x200000, 0x80000, CRC(709c5d34) SHA1(d702576d70ebef667c77376effecc02abbaaa8cd) )
+	ROM_LOAD( "sweetlife2.004", 0x300000, 0x80000, CRC(7bcfa2ce) SHA1(8df894e9b7afa52e47e4dabd1802e878bbbeaa80) )
+	ROM_LOAD( "sweetlife2.005", 0x080000, 0x80000, CRC(5c385d43) SHA1(ddb362e5894d146ce90acbaafe9dd7aad2a7c242) )
+	ROM_LOAD( "sweetlife2.006", 0x180000, 0x80000, CRC(868fe1cb) SHA1(692679f8242950e009c30cc084c4ddc5d1963502) )
+	ROM_LOAD( "sweetlife2.007", 0x280000, 0x80000, CRC(6ce87282) SHA1(586e08994db4ca2b967d47b16ba5b458e240d30f) )
+	ROM_LOAD( "sweetlife2.008", 0x380000, 0x80000, CRC(c2ad2b74) SHA1(c78e3ca5d15acb17ee671d2205405f287ad9c464) )
+ROM_END
+
+ROM_START( sweetl2_3 ) // 090525 lottery
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "sl2_l_090525.rom", 0x00000, 0x40000, CRC(79f878b4) SHA1(a21dc4a7986dab7ec9236b2c612c43c1604b5588) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "sweetlife2_loto.001", 0x000000, 0x80000, CRC(01b8bc85) SHA1(9c6475e8e6e01717d61b5f15f95748a66ea958b7) )
+	ROM_LOAD( "sweetlife2_loto.002", 0x100000, 0x80000, CRC(e95f1ecb) SHA1(a538c6df004129ccf54a09ab6dae79d301ee6966) )
+	ROM_LOAD( "sweetlife2_loto.003", 0x200000, 0x80000, CRC(506c149a) SHA1(59f680cc5deabca32bee3bb5b46a4cda3e583dc7) )
+	ROM_LOAD( "sweetlife2_loto.004", 0x300000, 0x80000, CRC(512012b4) SHA1(ec9f4bb6f97cb0001335a75923dd640e239fdce6) )
+	ROM_LOAD( "sweetlife2_loto.005", 0x080000, 0x80000, CRC(4b600255) SHA1(e997e694bdc4b59e9e05ac87c6241b80f9745f43) )
+	ROM_LOAD( "sweetlife2_loto.006", 0x180000, 0x80000, CRC(679cd95b) SHA1(e3fa14d87fc25c863cfce313f7f76e0bcaabf070) )
+	ROM_LOAD( "sweetlife2_loto.007", 0x280000, 0x80000, CRC(4c325bdd) SHA1(b0a383787ff9211df2e9cc2e48f70e76a7ec9976) )
+	ROM_LOAD( "sweetlife2_loto.008", 0x380000, 0x80000, CRC(26d3cff2) SHA1(e8896e03c0bd8bf71dffcfc93785a144a5161e04) )
+ROM_END
+
+ROM_START( sweetl2_4 ) // 090812 entertainment
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "sl2_e_090812.rom", 0x00000, 0x40000, CRC(1ee6b0c9) SHA1(481ec72b87e0419aa435e3876404c1b802aed7dd) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "sweetlife2_ent.001", 0x000000, 0x80000, CRC(378c185d) SHA1(3486bc353c2947375e0f60b6e0f188e95fb7ebcb) )
+	ROM_LOAD( "sweetlife2_ent.002", 0x100000, 0x80000, CRC(3f92e579) SHA1(0b1ddd294c6a8d7bb353965a7117ea336c577ff5) )
+	ROM_LOAD( "sweetlife2_ent.003", 0x200000, 0x80000, CRC(fc831019) SHA1(46c1a68aa205fd5df9cca37b3b04ecfb6bf4f671) )
+	ROM_LOAD( "sweetlife2_ent.004", 0x300000, 0x80000, CRC(074dc8ca) SHA1(1ae8833c490bb8626cf5445fe380b09e2f91f6c0) )
+	ROM_LOAD( "sweetlife2_ent.005", 0x080000, 0x80000, CRC(8ead745f) SHA1(9b7e5ea90e7fdb400981fba83794ae85f85ba023) )
+	ROM_LOAD( "sweetlife2_ent.006", 0x180000, 0x80000, CRC(64b89085) SHA1(8b12c1679ec460ea4614000eea60fe958c4538ff) )
+	ROM_LOAD( "sweetlife2_ent.007", 0x280000, 0x80000, CRC(405df6a2) SHA1(fcdfcd34cfbcaaa4dd12ed795bea3fc257ba2435) )
+	ROM_LOAD( "sweetlife2_ent.008", 0x380000, 0x80000, CRC(6cfb55e9) SHA1(f08943cb6989d004ec80e8c7e032d1f471380a7f) )
+ROM_END
 
 
 /*********************************************************
@@ -2061,6 +2354,35 @@ ROM_START( resdnt_3 ) // 070222
 	ROM_LOAD( "resident_m.008", 0x380000, 0x80000, CRC(a9f55043) SHA1(4771df3d45bdc0a21b1c479f45e09ac5bab6c94f) )
 ROM_END
 
+ROM_START( resdnt_4 ) // 090129 lottery
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "rs_l_090129.rom", 0x00000, 0x40000, SHA1(5728b019241359d83abc117157ebf62a52457917) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "resident_loto.001", 0x000000, 0x80000, SHA1(acd8b424cab982e471c7d3a56ccd6e1720fd8ceb) )
+	ROM_LOAD( "resident_loto.002", 0x100000, 0x80000, SHA1(83b9cf3a28e93e31d3a5cff01e5d0b9356e112cf) )
+	ROM_LOAD( "resident_loto.003", 0x200000, 0x80000, SHA1(30ccd372f1a5ad9a600099cf1ac31d9b235f88b9) )
+	ROM_LOAD( "resident_loto.004", 0x300000, 0x80000, SHA1(acfec89793a591d32a90bb7ba82514d97b2652f8) )
+	ROM_LOAD( "resident_m.005",    0x080000, 0x80000, CRC(0cfe7d44) SHA1(9f0e4925e815ff9f79188f18e78c0a7b377daa3f) )
+	ROM_LOAD( "resident_m.006",    0x180000, 0x80000, CRC(7437904f) SHA1(630c79cd6a990ce7658a1ffabba5a27efba985a1) )
+	ROM_LOAD( "resident_m.007",    0x280000, 0x80000, CRC(6e94728a) SHA1(ab414879cb957d9bc8d653b5e3bb2bbf91139ec0) )
+	ROM_LOAD( "resident_m.008",    0x380000, 0x80000, CRC(a9f55043) SHA1(4771df3d45bdc0a21b1c479f45e09ac5bab6c94f) )
+ROM_END
+
+ROM_START( resdnt_5 ) // 090722 entertainment
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "rs_e_090722.rom", 0x00000, 0x40000, SHA1(c321f81cb3389daa3309c0849b50d0ba4e6b9fa1) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "resident_ent.001", 0x000000, 0x80000, CRC(c14a6d1d) SHA1(6bd077db1faf148a7bd480db7a8b23f0deea0e90) )
+	ROM_LOAD( "resident_ent.002", 0x100000, 0x80000, CRC(4b76311c) SHA1(6d945787a37ddff9a2157e1ecebffdf254c67f83) )
+	ROM_LOAD( "resident_ent.003", 0x200000, 0x80000, CRC(0f920bc6) SHA1(4058396a8ea2413c8e3f430130b5452a7466af45) )
+	ROM_LOAD( "resident_ent.004", 0x300000, 0x80000, CRC(2e175050) SHA1(49392578a0a6f472ce41dbf0a08c35b67dd9ca5a) )
+	ROM_LOAD( "resident_ent.005", 0x080000, 0x80000, CRC(c9360af3) SHA1(7c9a4ac4137b225e2cbebae7afdc4513c67ff9ec) )
+	ROM_LOAD( "resident_ent.006", 0x180000, 0x80000, CRC(69224185) SHA1(2016c976570727658a8dbdb7e8844df384143ca8) )
+	ROM_LOAD( "resident_ent.007", 0x280000, 0x80000, CRC(7e2eef27) SHA1(f2acc7fd8e5917523efa7028d60f737cc2330c71) )
+	ROM_LOAD( "resident_ent.008", 0x380000, 0x80000, CRC(d4924f74) SHA1(62f13413a8d7bbcfe833a6d7283e1c726ed06a52) )
+ROM_END
 
 
 /*********************************************************
@@ -2073,7 +2395,7 @@ ROM_END
 
 ROM_START( rollfr ) // 030821
 	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
-	ROM_LOAD( "rf5-030821.rom", 0x00000, 0x40000, MD5(ef4e9d1845676fe655d2f415ca7bd953) SHA1(5e9c2235ea4207086db23870993d8e28356c9eb8) )
+	ROM_LOAD( "rf5-030821.rom", 0x00000, 0x40000, SHA1(5e9c2235ea4207086db23870993d8e28356c9eb8) )
 
 	ROM_REGION( 0x400000, "gfx", 0 )
 	ROM_LOAD( "roll_fruit5.001",  0x000000, 0x80000, CRC(caeb1fc3) SHA1(14b9f99f892849faecb3327e572dc134e1065463) )
@@ -2100,6 +2422,37 @@ ROM_START( rollfr_2 ) // 040318
 	ROM_LOAD( "roll_fruit5.007",  0x280000, 0x80000, CRC(81e3480b) SHA1(c0f006cf2a4747359cb79f14976ac3411951af1c) )
 	ROM_LOAD( "roll_fruit5.008",  0x380000, 0x80000, CRC(ed3558b8) SHA1(8ec808069053f0c07d81c45090b2ba22ef8e9c32) )
 ROM_END
+
+ROM_START( rollfr_3 ) // 080327
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "rf1-080327.rom", 0x00000, 0x40000, CRC(ea0b402d) SHA1(cf1ae74c90ca1609cf911a2127130a9d56625db0) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "roll_fruit1.001", 0x000000, 0x80000, CRC(caeb1fc3) SHA1(14b9f99f892849faecb3327e572dc134e1065463) )
+	ROM_LOAD( "roll_fruit1.002", 0x100000, 0x80000, CRC(f017c200) SHA1(a247bbbd1c4ca99978dcc705bd62590815a891f2) )
+	ROM_LOAD( "roll_fruit1.003", 0x200000, 0x80000, CRC(a2d6df11) SHA1(c2553136252aebe3b3ce0b5c33e740d0e27fb7b2) )
+	ROM_LOAD( "roll_fruit1.004", 0x300000, 0x80000, CRC(cd3c928a) SHA1(4c50ce17bd5714149eae91279a0133059397b776) )
+	ROM_LOAD( "roll_fruit1.005", 0x080000, 0x80000, CRC(1711ab4d) SHA1(902854770bf5ae3de6c9e3100a31399c7ab40cbb) )
+	ROM_LOAD( "roll_fruit1.006", 0x180000, 0x80000, CRC(ef2639fb) SHA1(90c67916380f9c49e284aac42f899cae86982829) )
+	ROM_LOAD( "roll_fruit1.007", 0x280000, 0x80000, CRC(0305c231) SHA1(f5b25e8716f163eee1f40c737240a8db7059268f) )
+	ROM_LOAD( "roll_fruit1.008", 0x380000, 0x80000, CRC(437fe141) SHA1(96783757a0b1af560954f2658b940bec1a4610b2) )
+ROM_END
+
+ROM_START( rollfr_4 ) // 080331, bank D0
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "rf1-080331.rom", 0x00000, 0x40000, CRC(19b84292) SHA1(f01d907cc8b1716eecb5c28b93ee9712073e1e8d) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "roll_fruit1.001", 0x000000, 0x80000, CRC(caeb1fc3) SHA1(14b9f99f892849faecb3327e572dc134e1065463) )
+	ROM_LOAD( "roll_fruit1.002", 0x100000, 0x80000, CRC(f017c200) SHA1(a247bbbd1c4ca99978dcc705bd62590815a891f2) )
+	ROM_LOAD( "roll_fruit1.003", 0x200000, 0x80000, CRC(a2d6df11) SHA1(c2553136252aebe3b3ce0b5c33e740d0e27fb7b2) )
+	ROM_LOAD( "roll_fruit1.004", 0x300000, 0x80000, CRC(cd3c928a) SHA1(4c50ce17bd5714149eae91279a0133059397b776) )
+	ROM_LOAD( "roll_fruit1.005", 0x080000, 0x80000, CRC(1711ab4d) SHA1(902854770bf5ae3de6c9e3100a31399c7ab40cbb) )
+	ROM_LOAD( "roll_fruit1.006", 0x180000, 0x80000, CRC(ef2639fb) SHA1(90c67916380f9c49e284aac42f899cae86982829) )
+	ROM_LOAD( "roll_fruit1.007", 0x280000, 0x80000, CRC(0305c231) SHA1(f5b25e8716f163eee1f40c737240a8db7059268f) )
+	ROM_LOAD( "roll_fruit1.008", 0x380000, 0x80000, CRC(437fe141) SHA1(96783757a0b1af560954f2658b940bec1a4610b2) )
+ROM_END
+
 
 
 /*********************************************************
@@ -2158,7 +2511,7 @@ ROM_END
 
 ROM_START( island2_2 ) // 061214
 	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
-	ROM_LOAD( "is2_m_061214.rom", 0x00000, 0x40000, MD5(566eb61392eaf72e7c311dceb92cdb11) SHA1(dd416d831c3773f044b355efcb1121f7eb81932b) )
+	ROM_LOAD( "is2_m_061214.rom", 0x00000, 0x40000, SHA1(dd416d831c3773f044b355efcb1121f7eb81932b) )
 
 	ROM_REGION( 0x400000, "gfx", 0 )
 	ROM_LOAD( "island2.001", 0x000000, 0x80000, CRC(f8dd9fe9) SHA1(0cf67fbca107b255011fded6390507d12cbac514) )
@@ -2201,6 +2554,35 @@ ROM_START( island2_4 ) // 070205
 	ROM_LOAD( "island2.008", 0x380000, 0x80000, CRC(c336d608) SHA1(55391183c6d95ecea81354efa70641350860d1f5) )
 ROM_END
 
+ROM_START( island2_5 ) // 090528 lottery
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "is2_l_090528.rom", 0x00000, 0x40000, CRC(47490834) SHA1(82299ad59e5df3d681c46286681112b890745579) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "island2_loto.001", 0x000000, 0x80000, CRC(413e9a9d) SHA1(4ee525ff21dd7d87c37dcce9c226d1d0a749559d) )
+	ROM_LOAD( "island2_loto.002", 0x100000, 0x80000, CRC(af825eb6) SHA1(69772255593852b29e6b9e3065eb455578daf125) )
+	ROM_LOAD( "island2_loto.003", 0x200000, 0x80000, CRC(dede5375) SHA1(7c793b528a5b70def168a669ce838cc34a8d27e0) )
+	ROM_LOAD( "island2_loto.004", 0x300000, 0x80000, CRC(f12bef1a) SHA1(b87e3611258014c1ee83f0735c5242f431cdaca0) )
+	ROM_LOAD( "island2_loto.005", 0x080000, 0x80000, CRC(f458c588) SHA1(e7f4be7ddbb925bb8015eaab86733a33a13996f4) )
+	ROM_LOAD( "island2_loto.006", 0x180000, 0x80000, CRC(6275c382) SHA1(3e09f597edc7c2789dd8235f1b6c17bb92e8b0d3) )
+	ROM_LOAD( "island2_loto.007", 0x280000, 0x80000, CRC(1e20305d) SHA1(4f2386251dbae869a2862f884c509f854c4fb283) )
+	ROM_LOAD( "island2_loto.008", 0x380000, 0x80000, CRC(e4af286f) SHA1(439a151a26b8a1e5abe08f3bf6601107e516ee68) )
+ROM_END
+
+ROM_START( island2_6 ) // 090724 entertainment
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "is2e_090724.rom", 0x00000, 0x40000, CRC(4fabced1) SHA1(7617337238f6bf114189aae13a2b248634c7446a) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "island2_ent.001", 0x000000, 0x80000, CRC(e0b9a33b) SHA1(e4ee665a3e6bcce868605a2485817b502ce041ce) )
+	ROM_LOAD( "island2_ent.002", 0x100000, 0x80000, CRC(f349bbe6) SHA1(b15782a438f34b06a2e785948cfa39d87ae07112) )
+	ROM_LOAD( "island2_ent.003", 0x200000, 0x80000, CRC(68ba6e71) SHA1(d394f7043b8f92d61a6c17ae3ace641729a146df) )
+	ROM_LOAD( "island2_ent.004", 0x300000, 0x80000, CRC(98b446fb) SHA1(728e8eed785bb7c08bc62589993c26becc79b460) )
+	ROM_LOAD( "island2_ent.005", 0x080000, 0x80000, CRC(e8166a42) SHA1(baca76902a48a221ed342d25e430a6223d9e64fe) )
+	ROM_LOAD( "island2_ent.006", 0x180000, 0x80000, CRC(0e398ed6) SHA1(386bad1ba0cf33e150088dc99fad55ca3cf45cdb) )
+	ROM_LOAD( "island2_ent.007", 0x280000, 0x80000, CRC(b8af96a0) SHA1(5323d696609a4496e74083b73bdd132c13ab73b8) )
+	ROM_LOAD( "island2_ent.008", 0x380000, 0x80000, CRC(5e8cbbd8) SHA1(e50ef2e12ac52c007088e1e07ad41efec6c5d0ac) )
+ROM_END
 
 
 /*********************************************************
@@ -2209,7 +2591,7 @@ ROM_END
 
 ROM_START( pirate ) // 051229
 	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
-	ROM_LOAD( "pr_m_051229.rom", 0x00000, 0x40000, MD5(d813af59a7a356800470b109a41b978f) SHA1(d1286cba474ccbbff8358ba2fd6917d43d101674) )
+	ROM_LOAD( "pr_m_051229.rom", 0x00000, 0x40000, SHA1(d1286cba474ccbbff8358ba2fd6917d43d101674) )
 
 	ROM_REGION( 0x400000, "gfx", 0 )
 	ROM_LOAD( "pirate.001", 0x000000, 0x80000, CRC(d2199619) SHA1(8c67ef7d0e305ae0783302ba9a1cb56cdcf4bc09) )
@@ -2302,6 +2684,35 @@ ROM_START( pirate2_2 ) // 070126
 	ROM_LOAD( "pirate2.008", 0x380000, 0x80000, CRC(40c59448) SHA1(774af0f376864ec5948904df338bc7493eaed392) )
 ROM_END
 
+ROM_START( pirate2_3 ) // 090528 lottery
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "pr2_l_090528.rom", 0x00000, 0x40000, CRC(8c7195e9) SHA1(5a1210d66dcdeaddee5292b0ecdb37f00d56acb0) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "pirate2_loto.001", 0x000000, 0x80000, CRC(d59b5dc4) SHA1(3a9473be9b867b66960e9002f7f0834570954c17) )
+	ROM_LOAD( "pirate2_loto.002", 0x100000, 0x80000, CRC(8f14b97d) SHA1(f92a777b908537e347bbe17c8dbfd1e44dbee11b) )
+	ROM_LOAD( "pirate2_loto.003", 0x200000, 0x80000, CRC(a55f59f7) SHA1(c270f9d28d6a18bfccd0e550220707b5b2a6c2a6) )
+	ROM_LOAD( "pirate2_loto.004", 0x300000, 0x80000, CRC(b51ab6e7) SHA1(c0c3aec8ae2b5d8b6734158bc717994d86806a80) )
+	ROM_LOAD( "pirate2_loto.005", 0x080000, 0x80000, CRC(b9343b01) SHA1(d84852f0181f3a521df05ed2a79a8f78f8021023) )
+	ROM_LOAD( "pirate2_loto.006", 0x180000, 0x80000, CRC(8032a162) SHA1(31f87cb5d24e1776cb70a3163612427ef783fc78) )
+	ROM_LOAD( "pirate2_loto.007", 0x280000, 0x80000, CRC(e238a3cc) SHA1(9c7695d16e2b3a1ab721d0a6bd78203494a47a67) )
+	ROM_LOAD( "pirate2_loto.008", 0x380000, 0x80000, CRC(3ae18117) SHA1(2b71e09a39f00e8a665e1ac2205b79b0e476f0b2) )
+ROM_END
+
+ROM_START( pirate2_4 ) // 090730 entertainment
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "pr2e_090730.rom", 0x00000, 0x40000, CRC(debc96ea) SHA1(defd83d2bd44c7a1de893180f4dccad12f7410e2) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "pirate2_ent.001", 0x000000, 0x80000, CRC(e4e634c2) SHA1(710fdf76d186dfd9bb6c87ff56322245a50d00a3) )
+	ROM_LOAD( "pirate2_ent.002", 0x100000, 0x80000, CRC(22b2939d) SHA1(dfec07586cfc3a7fe2eb65bb46064d9ca590c2ec) )
+	ROM_LOAD( "pirate2_ent.003", 0x200000, 0x80000, CRC(eb8bdb4b) SHA1(3b4a4d95e141c9846465fc934432541e750c0f69) )
+	ROM_LOAD( "pirate2_ent.004", 0x300000, 0x80000, CRC(43a4fe47) SHA1(08d397ea06706a1be0dd1b87430638a67356b77a) )
+	ROM_LOAD( "pirate2_ent.005", 0x080000, 0x80000, CRC(62001d8e) SHA1(f986aa76ef92edc33b1ce6e4fa0644759d68cb96) )
+	ROM_LOAD( "pirate2_ent.006", 0x180000, 0x80000, CRC(56f4fad5) SHA1(f9d13d799637041bd1d29ed0828e5ef232af4f1c) )
+	ROM_LOAD( "pirate2_ent.007", 0x280000, 0x80000, CRC(87440119) SHA1(d6abbe144938acbefbabbf1b501dec784e9f98db) )
+	ROM_LOAD( "pirate2_ent.008", 0x380000, 0x80000, CRC(eddcbdbd) SHA1(5b4eccf7a821d98a27f195705c3a71d59cee008d) )
+ROM_END
 
 
 /*********************************************************
@@ -2358,6 +2769,35 @@ ROM_START( keks_3 ) // 070119
 	ROM_LOAD( "keks_m.008", 0x380000, 0x80000, CRC(f69b0831) SHA1(75392349ef02a39cf883206938e2c615445065fc) )
 ROM_END
 
+ROM_START( keks_4 ) // 090604 lottery
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "ks_l_090604.rom", 0x00000, 0x40000, CRC(5ab26391) SHA1(7a33707542368fc26df421c2dcdd874009d333da) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "keks_loto.001", 0x000000, 0x80000, CRC(cf43d372) SHA1(bb17fd16aa0afe2f1477c242d945cefd58d78dc6) )
+	ROM_LOAD( "keks_loto.002", 0x100000, 0x80000, CRC(5696bb7c) SHA1(c35cf77f7f58a62801e5a08a8034e93bfc207c01) )
+	ROM_LOAD( "keks_loto.003", 0x200000, 0x80000, CRC(2769b92b) SHA1(9bc5c062f3f1336d4419a9133535f7b0599be7b8) )
+	ROM_LOAD( "keks_loto.004", 0x300000, 0x80000, CRC(c82ce6a4) SHA1(76edc1582e474df8746e91e53e0575f696b3842f) )
+	ROM_LOAD( "keks_loto.005", 0x080000, 0x80000, CRC(666ebc1a) SHA1(4263da25b7394fe5557e3b1ca008896161c2ea2d) )
+	ROM_LOAD( "keks_loto.006", 0x180000, 0x80000, CRC(a559c07a) SHA1(37ea1bd2b4e2097a6f13b70aa94bf993fd629a94) )
+	ROM_LOAD( "keks_loto.007", 0x280000, 0x80000, CRC(99f3d881) SHA1(e355ebe4a1c61cb18d3794766b2a0198310a14be) )
+	ROM_LOAD( "keks_loto.008", 0x380000, 0x80000, CRC(7eaf1418) SHA1(420a39ba1f592a91b962101a1ac8fdaf8b3a81ab) )
+ROM_END
+
+ROM_START( keks_5 ) // 090727 entertainment
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "ks_e_090727.rom", 0x00000, 0x40000, CRC(378d94b0) SHA1(17865dbdaf31005b5c582af019ae508392a31eee) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "keks_ent.001", 0x000000, 0x80000, CRC(69a4dd8f) SHA1(9e5078bdf5c5c8188ddb11ede7b567eaf04fa6c4) )
+	ROM_LOAD( "keks_ent.002", 0x100000, 0x80000, CRC(fecb6769) SHA1(215799c496ebe63702b00c26deb58f0a4f020ebe) )
+	ROM_LOAD( "keks_ent.003", 0x200000, 0x80000, CRC(3608c175) SHA1(922e7209a6aab75c1a96fe4dc200358bd128a263) )
+	ROM_LOAD( "keks_ent.004", 0x300000, 0x80000, CRC(3f091d42) SHA1(f8d21e29ffa7048e4fa5fb01f4aed6d29df5181e) )
+	ROM_LOAD( "keks_ent.005", 0x080000, 0x80000, CRC(e027f675) SHA1(a92c6eb2563c136d055f1d92d2edbfa242aa75c2) )
+	ROM_LOAD( "keks_ent.006", 0x180000, 0x80000, CRC(946dc35b) SHA1(6ed88ac7142c1a0b962ba0b56756f4d68bbcf27a) )
+	ROM_LOAD( "keks_ent.007", 0x280000, 0x80000, CRC(9ed6bf1a) SHA1(e712a38b0e3718972e65d7dd73f505205ef4bd45) )
+	ROM_LOAD( "keks_ent.008", 0x380000, 0x80000, CRC(f5363166) SHA1(e743e8f7e32202c998dfcb20fef6003d61cae64a) )
+ROM_END
 
 
 /*********************************************************
@@ -2394,6 +2834,96 @@ ROM_START( gnome_2 ) // 071115
 	ROM_LOAD( "gnome.008", 0x380000, 0x80000, CRC(c86a1586) SHA1(e622bca8dc618ca8edc1a7daa9c8286383caebef) )
 ROM_END
 
+ROM_START( gnome_3 ) // 080303
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "gn_m_080303.rom", 0x00000, 0x40000, CRC(d0aec288) SHA1(5870fd0fe27b049b7945369b23b0dd00e0ccf3e1) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "gnome.001", 0x000000, 0x80000, CRC(6ed866d7) SHA1(68d75d24d98e6d533cb26ceac0a680203cb26069) )
+	ROM_LOAD( "gnome.002", 0x100000, 0x80000, CRC(f6e5e6f0) SHA1(9751e8df87f14a252595547d24b8dd865ee4f08d) )
+	ROM_LOAD( "gnome.003", 0x200000, 0x80000, CRC(f8beb972) SHA1(3afbca8ce7e69d2dadae05f69205a6fd9036cf6a) )
+	ROM_LOAD( "gnome.004", 0x300000, 0x80000, CRC(83357c38) SHA1(45cd31c4f02f9d7b1888701c2146d1e7229b6cb5) )
+	ROM_LOAD( "gnome.005", 0x080000, 0x80000, CRC(687ad3e3) SHA1(23941a4f40c45029b9a43451f78b04c03c3cd7da) )
+	ROM_LOAD( "gnome.006", 0x180000, 0x80000, CRC(7ef2b88a) SHA1(7e7de60fc6791731d7cfd6a50e2bc5af1bf5e4b2) )
+	ROM_LOAD( "gnome.007", 0x280000, 0x80000, CRC(71976bdf) SHA1(c44dbfa75a0f12893b3177907fc93b3d5e8ad390) )
+	ROM_LOAD( "gnome.008", 0x380000, 0x80000, CRC(c86a1586) SHA1(e622bca8dc618ca8edc1a7daa9c8286383caebef) )
+ROM_END
+
+ROM_START( gnome_4 ) // 090402
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "gn_090402.rom", 0x00000, 0x40000, CRC(645f4643) SHA1(6d9cdcb98bcb9a664c7c3e4197a093edfda6a9b8) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "gnome.001", 0x000000, 0x80000, CRC(6ed866d7) SHA1(68d75d24d98e6d533cb26ceac0a680203cb26069) )
+	ROM_LOAD( "gnome.002", 0x100000, 0x80000, CRC(f6e5e6f0) SHA1(9751e8df87f14a252595547d24b8dd865ee4f08d) )
+	ROM_LOAD( "gnome.003", 0x200000, 0x80000, CRC(f8beb972) SHA1(3afbca8ce7e69d2dadae05f69205a6fd9036cf6a) )
+	ROM_LOAD( "gnome.004", 0x300000, 0x80000, CRC(83357c38) SHA1(45cd31c4f02f9d7b1888701c2146d1e7229b6cb5) )
+	ROM_LOAD( "gnome.005", 0x080000, 0x80000, CRC(687ad3e3) SHA1(23941a4f40c45029b9a43451f78b04c03c3cd7da) )
+	ROM_LOAD( "gnome.006", 0x180000, 0x80000, CRC(7ef2b88a) SHA1(7e7de60fc6791731d7cfd6a50e2bc5af1bf5e4b2) )
+	ROM_LOAD( "gnome.007", 0x280000, 0x80000, CRC(71976bdf) SHA1(c44dbfa75a0f12893b3177907fc93b3d5e8ad390) )
+	ROM_LOAD( "gnome.008", 0x380000, 0x80000, CRC(c86a1586) SHA1(e622bca8dc618ca8edc1a7daa9c8286383caebef) )
+ROM_END
+
+ROM_START( gnome_5 ) // 090406
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "gn_m_090406.rom", 0x00000, 0x40000, CRC(e8a03650) SHA1(e4564e59c6c6836cd4013073549a019e8028ea0d) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "gnome.001", 0x000000, 0x80000, CRC(6ed866d7) SHA1(68d75d24d98e6d533cb26ceac0a680203cb26069) )
+	ROM_LOAD( "gnome.002", 0x100000, 0x80000, CRC(f6e5e6f0) SHA1(9751e8df87f14a252595547d24b8dd865ee4f08d) )
+	ROM_LOAD( "gnome.003", 0x200000, 0x80000, CRC(f8beb972) SHA1(3afbca8ce7e69d2dadae05f69205a6fd9036cf6a) )
+	ROM_LOAD( "gnome.004", 0x300000, 0x80000, CRC(83357c38) SHA1(45cd31c4f02f9d7b1888701c2146d1e7229b6cb5) )
+	ROM_LOAD( "gnome.005", 0x080000, 0x80000, CRC(687ad3e3) SHA1(23941a4f40c45029b9a43451f78b04c03c3cd7da) )
+	ROM_LOAD( "gnome.006", 0x180000, 0x80000, CRC(7ef2b88a) SHA1(7e7de60fc6791731d7cfd6a50e2bc5af1bf5e4b2) )
+	ROM_LOAD( "gnome.007", 0x280000, 0x80000, CRC(71976bdf) SHA1(c44dbfa75a0f12893b3177907fc93b3d5e8ad390) )
+	ROM_LOAD( "gnome.008", 0x380000, 0x80000, CRC(c86a1586) SHA1(e622bca8dc618ca8edc1a7daa9c8286383caebef) )
+ROM_END
+
+ROM_START( gnome_6 ) // 090604 lottery
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "gn_l_090604.rom", 0x00000, 0x40000, SHA1(5c736c974011980b343cf131b54f00aede5ef0ef) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "gnome_loto.001", 0x000000, 0x80000, CRC(15f75190) SHA1(85587a008889b5e34f5f79ceb1abfcd9a6c53cec) )
+	ROM_LOAD( "gnome_loto.002", 0x100000, 0x80000, CRC(26f9af6a) SHA1(131b26e035b4cfd9d36ab8a7f2957e77170a529d) )
+	ROM_LOAD( "gnome_loto.003", 0x200000, 0x80000, CRC(7d388bd5) SHA1(2f2eadc44f35033d61dbab390a4dbfec23f31c85) )
+	ROM_LOAD( "gnome_loto.004", 0x300000, 0x80000, CRC(7bad4ac5) SHA1(2cfac6462b666b4bb0d546932b6784a80cf8d0d4) )
+	ROM_LOAD( "gnome_loto.005", 0x080000, 0x80000, CRC(f86a7d02) SHA1(1e7da8ac89eb8b1d2c293d2cfead7a52524fc674) )
+	ROM_LOAD( "gnome_loto.006", 0x180000, 0x80000, CRC(d66f1ab8) SHA1(27b612ab42008f8673a0508a1b813c63a0e2ba4c) )
+	ROM_LOAD( "gnome_loto.007", 0x280000, 0x80000, CRC(99ae985c) SHA1(f0fe5a0dbc289a93246a825f32a726cf62ccb9aa) )
+	ROM_LOAD( "gnome_loto.008", 0x380000, 0x80000, CRC(4dc3f777) SHA1(3352170877c59daff63c056dfca00915f87b5795) )
+ROM_END
+
+ROM_START( gnome_7 ) // 090708 lottery
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "gn_l_090708.rom", 0x00000, 0x40000, CRC(ac212d25) SHA1(c45397204467f5cf8a56ffe0c84f30f388a51193) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "gnome_loto.001", 0x000000, 0x80000, CRC(15f75190) SHA1(85587a008889b5e34f5f79ceb1abfcd9a6c53cec) )
+	ROM_LOAD( "gnome_loto.002", 0x100000, 0x80000, CRC(26f9af6a) SHA1(131b26e035b4cfd9d36ab8a7f2957e77170a529d) )
+	ROM_LOAD( "gnome_loto.003", 0x200000, 0x80000, CRC(7d388bd5) SHA1(2f2eadc44f35033d61dbab390a4dbfec23f31c85) )
+	ROM_LOAD( "gnome_loto.004", 0x300000, 0x80000, CRC(7bad4ac5) SHA1(2cfac6462b666b4bb0d546932b6784a80cf8d0d4) )
+	ROM_LOAD( "gnome_loto.005", 0x080000, 0x80000, CRC(f86a7d02) SHA1(1e7da8ac89eb8b1d2c293d2cfead7a52524fc674) )
+	ROM_LOAD( "gnome_loto.006", 0x180000, 0x80000, CRC(d66f1ab8) SHA1(27b612ab42008f8673a0508a1b813c63a0e2ba4c) )
+	ROM_LOAD( "gnome_loto.007", 0x280000, 0x80000, CRC(99ae985c) SHA1(f0fe5a0dbc289a93246a825f32a726cf62ccb9aa) )
+	ROM_LOAD( "gnome_loto.008", 0x380000, 0x80000, CRC(4dc3f777) SHA1(3352170877c59daff63c056dfca00915f87b5795) )
+ROM_END
+
+ROM_START( gnome_8 ) // 090810 entertainment
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "gn_e_090810.rom", 0x00000, 0x40000, SHA1(99ae99e2d56f016e7376f75c6eddcf6150015205) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "gnome_ent.001", 0x000000, 0x80000, CRC(84c84c44) SHA1(09173c35667f1911fdc942aa82f62d7792d5da09) )
+	ROM_LOAD( "gnome_ent.002", 0x100000, 0x80000, CRC(5d92e36c) SHA1(d0ead5702ce9b6a9e28f2dab3b5fd6fe23789988) )
+	ROM_LOAD( "gnome_ent.003", 0x200000, 0x80000, CRC(1a2d3c3c) SHA1(9d519238891e95a0b25d7885d239dbcce422d042) )
+	ROM_LOAD( "gnome_ent.004", 0x300000, 0x80000, CRC(885e1885) SHA1(9c4b1e220602fc192cda62254d31cfa16419cdbd) )
+	ROM_LOAD( "gnome_ent.005", 0x080000, 0x80000, CRC(9a5ec2e1) SHA1(f0eca8d7912f0cd8fceb873bf37fc038584eff65) )
+	ROM_LOAD( "gnome_ent.006", 0x180000, 0x80000, CRC(6809fe49) SHA1(bce6d182552c2e590da4b5a56292be533cb69bc7) )
+	ROM_LOAD( "gnome_ent.007", 0x280000, 0x80000, CRC(09d6a157) SHA1(95a25c0ffb5d6d42323140bb66695cfed9c0daca) )
+	ROM_LOAD( "gnome_ent.008", 0x380000, 0x80000, CRC(cba3676e) SHA1(306a7d9c3d229e86d735a2b0a9a71d2f33929038) )
+ROM_END
+
 
 /*********************************************************
    Fruit Cocktail 2
@@ -2406,8 +2936,110 @@ ROM_END
 
 **********************************************************/
 
-/* no supported sets */
+ROM_START( fcockt2 ) // 080707
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "fc2_080707.rom", 0x00000, 0x40000, CRC(3a42f27d) SHA1(7ba91f52b1b0ac4513caebc2989f3b9d6f9dfde4) ) /* Not officially listed on Igrosoft's web site hash page */
 
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "fruitcocktail2.001",  0x000000, 0x80000, CRC(d1b9416d) SHA1(4d3cb0a6dbcf02bbd20d5c43df358882b2ad794d) )
+	ROM_LOAD( "fruitcocktail2.002",  0x100000, 0x80000, CRC(69236be1) SHA1(9a2e6c8f279714f79a606c0b118b6bf1d8442cda) )
+	ROM_LOAD( "fruitcocktail2.003",  0x200000, 0x80000, CRC(29aade8c) SHA1(bef42f8a25c90e3a1cccd13872a10eb8b2b2e276) )
+	ROM_LOAD( "fruitcocktail2.004",  0x300000, 0x80000, CRC(4b9646e7) SHA1(26548a018401f4e07383eb145f8f0847677f3272) )
+	ROM_LOAD( "fruitcocktail2_old.005", 0x080000, 0x80000, CRC(6b9e6b43) SHA1(c7fb17e91ec62b22da42f110d68b4f37e39de3ce) )
+	ROM_LOAD( "fruitcocktail2_old.006", 0x180000, 0x80000, CRC(2c9f712e) SHA1(c3118154eafca74b66b3325a2e07c85f86f3544d) )
+	ROM_LOAD( "fruitcocktail2_old.007", 0x280000, 0x80000, CRC(85ba9a86) SHA1(aa9b6170135e9e420509e8f7c1702c9896bc5d8e) )
+	ROM_LOAD( "fruitcocktail2_old.008", 0x380000, 0x80000, CRC(a27c49a2) SHA1(7c9ee0e01f76ca3ab6716579f5dde7036050970b) )
+ROM_END
+
+ROM_START( fcockt2_2 ) // 080904
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "fc2_080904.rom", 0x00000, 0x40000, SHA1(d8f1034753274aed874ee552ab78e660ddaba939) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "fruitcocktail2.001",  0x000000, 0x80000, CRC(d1b9416d) SHA1(4d3cb0a6dbcf02bbd20d5c43df358882b2ad794d) )
+	ROM_LOAD( "fruitcocktail2.002",  0x100000, 0x80000, CRC(69236be1) SHA1(9a2e6c8f279714f79a606c0b118b6bf1d8442cda) )
+	ROM_LOAD( "fruitcocktail2.003",  0x200000, 0x80000, CRC(29aade8c) SHA1(bef42f8a25c90e3a1cccd13872a10eb8b2b2e276) )
+	ROM_LOAD( "fruitcocktail2.004",  0x300000, 0x80000, CRC(4b9646e7) SHA1(26548a018401f4e07383eb145f8f0847677f3272) )
+	ROM_LOAD( "fruitcocktail2_old.005", 0x080000, 0x80000, CRC(6b9e6b43) SHA1(c7fb17e91ec62b22da42f110d68b4f37e39de3ce) )
+	ROM_LOAD( "fruitcocktail2_old.006", 0x180000, 0x80000, CRC(2c9f712e) SHA1(c3118154eafca74b66b3325a2e07c85f86f3544d) )
+	ROM_LOAD( "fruitcocktail2_old.007", 0x280000, 0x80000, CRC(85ba9a86) SHA1(aa9b6170135e9e420509e8f7c1702c9896bc5d8e) )
+	ROM_LOAD( "fruitcocktail2_old.008", 0x380000, 0x80000, CRC(a27c49a2) SHA1(7c9ee0e01f76ca3ab6716579f5dde7036050970b) )
+ROM_END
+
+ROM_START( fcockt2_3 ) // 080909
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "fc2_m_080909.rom", 0x00000, 0x40000, CRC(6de0353c) SHA1(7a827a172cdd593f8b37a7737304a5a2e145d52d) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "fruitcocktail2.001",  0x000000, 0x80000, CRC(d1b9416d) SHA1(4d3cb0a6dbcf02bbd20d5c43df358882b2ad794d) )
+	ROM_LOAD( "fruitcocktail2.002",  0x100000, 0x80000, CRC(69236be1) SHA1(9a2e6c8f279714f79a606c0b118b6bf1d8442cda) )
+	ROM_LOAD( "fruitcocktail2.003",  0x200000, 0x80000, CRC(29aade8c) SHA1(bef42f8a25c90e3a1cccd13872a10eb8b2b2e276) )
+	ROM_LOAD( "fruitcocktail2.004",  0x300000, 0x80000, CRC(4b9646e7) SHA1(26548a018401f4e07383eb145f8f0847677f3272) )
+	ROM_LOAD( "fruitcocktail2_old.005", 0x080000, 0x80000, CRC(6b9e6b43) SHA1(c7fb17e91ec62b22da42f110d68b4f37e39de3ce) )
+	ROM_LOAD( "fruitcocktail2_old.006", 0x180000, 0x80000, CRC(2c9f712e) SHA1(c3118154eafca74b66b3325a2e07c85f86f3544d) )
+	ROM_LOAD( "fruitcocktail2_old.007", 0x280000, 0x80000, CRC(85ba9a86) SHA1(aa9b6170135e9e420509e8f7c1702c9896bc5d8e) )
+	ROM_LOAD( "fruitcocktail2_old.008", 0x380000, 0x80000, CRC(a27c49a2) SHA1(7c9ee0e01f76ca3ab6716579f5dde7036050970b) )
+ROM_END
+
+ROM_START( fcockt2_4 ) // 081105
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "fc2_m_081105.rom", 0x00000, 0x40000,  CRC(2cc5313d) SHA1(b5e55acbb5936f49130758947ae22d1847800333) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "fruitcocktail2.001", 0x000000, 0x80000, CRC(d1b9416d) SHA1(4d3cb0a6dbcf02bbd20d5c43df358882b2ad794d) )
+	ROM_LOAD( "fruitcocktail2.002", 0x100000, 0x80000, CRC(69236be1) SHA1(9a2e6c8f279714f79a606c0b118b6bf1d8442cda) )
+	ROM_LOAD( "fruitcocktail2.003", 0x200000, 0x80000, CRC(29aade8c) SHA1(bef42f8a25c90e3a1cccd13872a10eb8b2b2e276) )
+	ROM_LOAD( "fruitcocktail2.004", 0x300000, 0x80000, CRC(4b9646e7) SHA1(26548a018401f4e07383eb145f8f0847677f3272) )
+	ROM_LOAD( "fruitcocktail2.005", 0x080000, 0x80000, CRC(3fc13d72) SHA1(ba0727138ef03d576d190cbce04b9eb0bba88a9a) )
+	ROM_LOAD( "fruitcocktail2.006", 0x180000, 0x80000, CRC(8fc75fd7) SHA1(3b7cd8a3e04ca9d4494b37c801e21d1293f094e8) )
+	ROM_LOAD( "fruitcocktail2.007", 0x280000, 0x80000, CRC(d37fcc0f) SHA1(57c2ea5dc747f16e2233305f2c73cb4b632aae2c) )
+	ROM_LOAD( "fruitcocktail2.008", 0x380000, 0x80000, CRC(e3a9442c) SHA1(cbaba182e858b0f158756118e5da873e3ddfc0b9) )
+ROM_END
+
+ROM_START( fcockt2_5 ) // 081106
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "fc2_081106.rom", 0x00000, 0x40000, CRC(d23347b3) SHA1(2d7d00af182c61fa166a8f3fd6fd830cf5eb78c6) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "fruitcocktail2.001", 0x000000, 0x80000, CRC(d1b9416d) SHA1(4d3cb0a6dbcf02bbd20d5c43df358882b2ad794d) )
+	ROM_LOAD( "fruitcocktail2.002", 0x100000, 0x80000, CRC(69236be1) SHA1(9a2e6c8f279714f79a606c0b118b6bf1d8442cda) )
+	ROM_LOAD( "fruitcocktail2.003", 0x200000, 0x80000, CRC(29aade8c) SHA1(bef42f8a25c90e3a1cccd13872a10eb8b2b2e276) )
+	ROM_LOAD( "fruitcocktail2.004", 0x300000, 0x80000, CRC(4b9646e7) SHA1(26548a018401f4e07383eb145f8f0847677f3272) )
+	ROM_LOAD( "fruitcocktail2.005", 0x080000, 0x80000, CRC(3fc13d72) SHA1(ba0727138ef03d576d190cbce04b9eb0bba88a9a) )
+	ROM_LOAD( "fruitcocktail2.006", 0x180000, 0x80000, CRC(8fc75fd7) SHA1(3b7cd8a3e04ca9d4494b37c801e21d1293f094e8) )
+	ROM_LOAD( "fruitcocktail2.007", 0x280000, 0x80000, CRC(d37fcc0f) SHA1(57c2ea5dc747f16e2233305f2c73cb4b632aae2c) )
+	ROM_LOAD( "fruitcocktail2.008", 0x380000, 0x80000, CRC(e3a9442c) SHA1(cbaba182e858b0f158756118e5da873e3ddfc0b9) )
+ROM_END
+
+ROM_START( fcockt2_6 ) // 090525 lottery
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "fc2_l_090525.rom", 0x00000, 0x40000, CRC(2fa86f1d) SHA1(f365f96750cdea56b024e87606303051b1bc725f) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "fruitcocktail2_loto.001", 0x000000, 0x80000, CRC(e01a356f) SHA1(838add7aed1f044a57770ff40611906f3aa13997) )
+	ROM_LOAD( "fruitcocktail2_loto.002", 0x100000, 0x80000, CRC(f2726212) SHA1(f3682b58776bca2858cfa51dd628c3bcd8b7d71d) )
+	ROM_LOAD( "fruitcocktail2_loto.003", 0x200000, 0x80000, CRC(a164b307) SHA1(8c6431aad5971b5a8a151ea289401cff81c7687f) )
+	ROM_LOAD( "fruitcocktail2_loto.004", 0x300000, 0x80000, CRC(42db8990) SHA1(7c7c4abd551eca2e9db916ab1b780adf131a0d46) )
+	ROM_LOAD( "fruitcocktail2_loto.005", 0x080000, 0x80000, CRC(800d29aa) SHA1(5ec4f342acdf113b5c3967909cdb2cfef4ef72a7) )
+	ROM_LOAD( "fruitcocktail2_loto.006", 0x180000, 0x80000, CRC(b9f21925) SHA1(f72c9654e89587f2ca050d7767a1db7c70024602) )
+	ROM_LOAD( "fruitcocktail2_loto.007", 0x280000, 0x80000, CRC(62514e5f) SHA1(d96a9d0ef4f2d8978757e6d71e3bed7a973efa80) )
+	ROM_LOAD( "fruitcocktail2_loto.008", 0x380000, 0x80000, CRC(3ba806fb) SHA1(dbc70c442061298bdb4ac8651429bdea678aebbf) )
+ROM_END
+
+ROM_START( fcockt2_7 ) // 090813 entertainment
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "fc2e_090813.rom", 0x00000, 0x40000, CRC(f81ae7f0) SHA1(40a0a15d887906667b245fc4a68421008f478d27) )
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "fruitcocktail2_ent.001", 0x000000, 0x80000, CRC(843d6a33) SHA1(dba5739288a0fddac928ee99c23b4186b17f01ee) )
+	ROM_LOAD( "fruitcocktail2_ent.002", 0x100000, 0x80000, CRC(4249ed51) SHA1(88884bc8685c8ef75cdb265a0fd7f7ebb416c2c7) )
+	ROM_LOAD( "fruitcocktail2_ent.003", 0x200000, 0x80000, CRC(3d8edb5e) SHA1(1615acd711ff5b28ea61d0c5fb33fb140114a091) )
+	ROM_LOAD( "fruitcocktail2_ent.004", 0x300000, 0x80000, CRC(caf02101) SHA1(02344f59a5b44c4ec5ca21bb9e14262f8503154c) )
+	ROM_LOAD( "fruitcocktail2_ent.005", 0x080000, 0x80000, CRC(8b7fa4ad) SHA1(d38c64cc27fedbd9213f51b4c9889dbe0a84dde6) )
+	ROM_LOAD( "fruitcocktail2_ent.006", 0x180000, 0x80000, CRC(e9d90f96) SHA1(b63dada78836d05166c6f2e81db23b4d91917151) )
+	ROM_LOAD( "fruitcocktail2_ent.007", 0x280000, 0x80000, CRC(e478766b) SHA1(ae951202d4cb52cc4a53c1bb5eafc5bbcf7c8088) )
+	ROM_LOAD( "fruitcocktail2_ent.008", 0x380000, 0x80000, CRC(9bbf362e) SHA1(156d2c90d8bde74f8938bdaddf3ccd31c67e05bb) )
+ROM_END
 
 
 /*********************************************************
@@ -2471,121 +3103,157 @@ Most games had a revision in early 2007 to meet the standards of the "Government
 */
 
 
-#define mfish_parent mfish_3
-//GAME( 2002, mfish,       mfish_parent,    multfish, multfish,  0,        ROT0, "Igrosoft", "Multi Fish (021120)", GAME_SUPPORTS_SAVE ) /* World */
-//GAME( 2002, mfish_2,     mfish_parent,    multfish, multfish,  0,        ROT0, "Igrosoft", "Multi Fish (021121)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2002, mfish_3,     0,               multfish, multfish,  0,        ROT0, "Igrosoft", "Multi Fish (021124)", GAME_SUPPORTS_SAVE ) /* World */
-//GAME( 2002, mfish_4,     mfish_parent,    multfish, multfish,  0,        ROT0, "Igrosoft", "Multi Fish (021219)", GAME_SUPPORTS_SAVE ) /* World */
-//GAME( 2002, mfish_5,     mfish_parent,    multfish, multfish,  0,        ROT0, "Igrosoft", "Multi Fish (021227)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2002, mfish_6,     mfish_parent,    multfish, multfish,  0,        ROT0, "Igrosoft", "Multi Fish (030124)", GAME_SUPPORTS_SAVE ) /* World */
-//GAME( 2002, mfish_7,     mfish_parent,    multfish, multfish,  0,        ROT0, "Igrosoft", "Multi Fish (030511)", GAME_SUPPORTS_SAVE ) /* World */
-//GAME( 2002, mfish_8,     mfish_parent,    multfish, multfish,  0,        ROT0, "Igrosoft", "Multi Fish (030522)", GAME_SUPPORTS_SAVE ) /* World */
-//GAME( 2002, mfish_9,     mfish_parent,    multfish, multfish,  0,        ROT0, "Igrosoft", "Multi Fish (031026)", GAME_SUPPORTS_SAVE ) /* World */
-//GAME( 2002, mfish_10,    mfish_parent,    multfish, multfish,  0,        ROT0, "Igrosoft", "Multi Fish (031117)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2002, mfish_11,    mfish_parent,    multfish, multfish,  0,        ROT0, "Igrosoft", "Multi Fish (031124)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2002, mfish_12,    mfish_parent,    multfish, multfish,  0,        ROT0, "Igrosoft", "Multi Fish (040308)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2002, mfish_13,    mfish_parent,    multfish, multfish,  0,        ROT0, "Igrosoft", "Multi Fish (040316)", GAME_SUPPORTS_SAVE ) /* World */
+#define mfish_parent mfish_13
+	GAME( 2002, goldfish,    mfish_parent,    multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Gold Fish (020903, prototype)", GAME_SUPPORTS_SAVE ) /* World */
+//GAME( 2002, mfish,       mfish_parent,    multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Multi Fish (021120)", GAME_SUPPORTS_SAVE ) /* World */
+//GAME( 2002, mfish_2,     mfish_parent,    multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Multi Fish (021121)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2002, mfish_3,     mfish_parent,    multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Multi Fish (021124)", GAME_SUPPORTS_SAVE ) /* World */
+//GAME( 2002, mfish_4,     mfish_parent,    multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Multi Fish (021219)", GAME_SUPPORTS_SAVE ) /* World */
+//GAME( 2002, mfish_5,     mfish_parent,    multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Multi Fish (021227)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2002, mfish_6,     mfish_parent,    multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Multi Fish (030124)", GAME_SUPPORTS_SAVE ) /* World */
+//GAME( 2002, mfish_7,     mfish_parent,    multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Multi Fish (030511)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2002, mfish_8,     mfish_parent,    multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Multi Fish (030522)", GAME_SUPPORTS_SAVE ) /* World */
+//GAME( 2002, mfish_9,     mfish_parent,    multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Multi Fish (031026)", GAME_SUPPORTS_SAVE ) /* World */
+//GAME( 2002, mfish_10,    mfish_parent,    multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Multi Fish (031117)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2002, mfish_11,    mfish_parent,    multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Multi Fish (031124)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2002, mfish_12,    mfish_parent,    multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Multi Fish (040308)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2002, mfish_13,    0,               multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Multi Fish (040316)", GAME_SUPPORTS_SAVE ) /* World */
 
-#define crzmon_parent crzmon_5
-//GAME( 2003, crzmon,      crzmon_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Crazy Monkey (030217 World)", GAME_SUPPORTS_SAVE ) /* World */
-//GAME( 2003, crzmon_2,    crzmon_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Crazy Monkey (030225 World)", GAME_SUPPORTS_SAVE ) /* World */
-//GAME( 2003, crzmon_3,    crzmon_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Crazy Monkey (030227 World)", GAME_SUPPORTS_SAVE ) /* World */
-//GAME( 2003, crzmon_4,    crzmon_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Crazy Monkey (030404 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2003, crzmon_5,    0,               multfish, multfish,  0,        ROT0, "Igrosoft", "Crazy Monkey (030421 World)", GAME_SUPPORTS_SAVE ) /* World */
-//GAME( 2003, crzmon_6,    crzmon_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Crazy Monkey (031016 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2003, crzmon_7,    crzmon_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Crazy Monkey (031110 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2003, crzmon_8,    crzmon_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Crazy Monkey (050120 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2003, crzmon_9,    crzmon_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Crazy Monkey (070315 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+#define crzmon_parent crzmon_8
+//GAME( 2003, crzmon,      crzmon_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Crazy Monkey (030217 World)", GAME_SUPPORTS_SAVE ) /* World */
+//GAME( 2003, crzmon_2,    crzmon_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Crazy Monkey (030225 World)", GAME_SUPPORTS_SAVE ) /* World */
+//GAME( 2003, crzmon_3,    crzmon_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Crazy Monkey (030227 World)", GAME_SUPPORTS_SAVE ) /* World */
+//GAME( 2003, crzmon_4,    crzmon_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Crazy Monkey (030404 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2003, crzmon_5,    crzmon_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Crazy Monkey (030421 World)", GAME_SUPPORTS_SAVE ) /* World */
+//GAME( 2003, crzmon_6,    crzmon_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Crazy Monkey (031016 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2003, crzmon_7,    crzmon_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Crazy Monkey (031110 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2003, crzmon_8,    0,               multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Crazy Monkey (050120 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2003, crzmon_9,    crzmon_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Crazy Monkey (070315 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+//GAME( 2003, crzmon_10,   crzmon_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Crazy Monkey (081027 Lottery)", GAME_SUPPORTS_SAVE ) /* Lottery */
+//GAME( 2003, crzmon_11,   crzmon_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Crazy Monkey (081113 Lottery)", GAME_SUPPORTS_SAVE ) /* Lottery */
+//GAME( 2003, crzmon_12,   crzmon_parent,   multfish, multfish, multfish_state, crzmonent,ROT0, "Igrosoft", "Crazy Monkey (090711 Entertainment)", GAME_SUPPORTS_SAVE ) /* Entertainment */
 
-#define fcockt_parent fcockt_3
-//GAME( 2003, fcockt,      fcockt_parent    multfish, multfish,  0,        ROT0, "Igrosoft", "Fruit Cocktail (030505 World)", GAME_SUPPORTS_SAVE ) /* World */
-//GAME( 2003, fcockt_2,    fcockt_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Fruit Cocktail (030512 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2003, fcockt_3,    0,               multfish, multfish,  0,        ROT0, "Igrosoft", "Fruit Cocktail (030623 World)", GAME_SUPPORTS_SAVE ) /* World */
-//GAME( 2003, fcockt_4,    fcockt_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Fruit Cocktail (031028 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2003, fcockt_5,    fcockt_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Fruit Cocktail (031111 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2003, fcockt_6,    fcockt_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Fruit Cocktail (040216 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2003, fcockt_7,    fcockt_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Fruit Cocktail (050118 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2003, fcockt_8,    fcockt_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Fruit Cocktail (060111 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2003, fcockt_9,    fcockt_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Fruit Cocktail (070305 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
-  GAME( 2003, fcockt_10,   fcockt_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Fruit Cocktail (070517 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
-  GAME( 2003, fcockt_11,   fcockt_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Fruit Cocktail (070822 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
-  GAME( 2003, fcockt_12,   fcockt_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Fruit Cocktail (070911 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+#define fcockt_parent fcockt_8
+//GAME( 2003, fcockt,      fcockt_parent    multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Fruit Cocktail (030505 World)", GAME_SUPPORTS_SAVE ) /* World */
+//GAME( 2003, fcockt_2,    fcockt_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Fruit Cocktail (030512 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2003, fcockt_3,    fcockt_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Fruit Cocktail (030623 World)", GAME_SUPPORTS_SAVE ) /* World */
+//GAME( 2003, fcockt_4,    fcockt_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Fruit Cocktail (031028 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2003, fcockt_5,    fcockt_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Fruit Cocktail (031111 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2003, fcockt_6,    fcockt_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Fruit Cocktail (040216 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2003, fcockt_7,    fcockt_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Fruit Cocktail (050118 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2003, fcockt_8,    0,               multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Fruit Cocktail (060111 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2003, fcockt_9,    fcockt_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Fruit Cocktail (070305 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+	GAME( 2003, fcockt_10,   fcockt_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Fruit Cocktail (070517 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+	GAME( 2003, fcockt_11,   fcockt_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Fruit Cocktail (070822 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+	GAME( 2003, fcockt_12,   fcockt_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Fruit Cocktail (070911 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+//GAME( 2003, fcockt_13,   fcockt_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Fruit Cocktail (081124 Lottery)", GAME_SUPPORTS_SAVE ) /* Lottery */
+	GAME( 2003, fcockt_14,   fcockt_parent,   multfish, multfish, multfish_state, fcocktent,ROT0, "Igrosoft", "Fruit Cocktail (090708 Entertainment)", GAME_SUPPORTS_SAVE ) /* Entertainment */
 
-#define lhaunt_parent lhaunt_2
-//GAME( 2003, lhaunt,      lhaunt_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Lucky Haunter (030707 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2003, lhaunt_2,    0,               multfish, multfish,  0,        ROT0, "Igrosoft", "Lucky Haunter (030804 World)", GAME_SUPPORTS_SAVE ) /* World */
-//GAME( 2003, lhaunt_3,    lhaunt_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Lucky Haunter (031027 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2003, lhaunt_4,    lhaunt_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Lucky Haunter (031111 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2003, lhaunt_5,    lhaunt_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Lucky Haunter (040216 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2003, lhaunt_6,    lhaunt_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Lucky Haunter (040825 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2003, lhaunt_7,    lhaunt_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Lucky Haunter (070402 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
-  GAME( 2003, lhaunt_8,    lhaunt_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Lucky Haunter (070604 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+#define lhaunt_parent lhaunt_6
+//GAME( 2003, lhaunt,      lhaunt_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Lucky Haunter (030707 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2003, lhaunt_2,    lhaunt_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Lucky Haunter (030804 World)", GAME_SUPPORTS_SAVE ) /* World */
+//GAME( 2003, lhaunt_3,    lhaunt_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Lucky Haunter (031027 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2003, lhaunt_4,    lhaunt_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Lucky Haunter (031111 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2003, lhaunt_5,    lhaunt_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Lucky Haunter (040216 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2003, lhaunt_6,    0,               multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Lucky Haunter (040825 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2003, lhaunt_7,    lhaunt_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Lucky Haunter (070402 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+	GAME( 2003, lhaunt_8,    lhaunt_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Lucky Haunter (070604 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+//GAME( 2003, lhaunt_9,    lhaunt_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Lucky Haunter (081208 Lottery)", GAME_SUPPORTS_SAVE ) /* Lottery */
+	GAME( 2003, lhaunt_10,   lhaunt_parent,   multfish, multfish, multfish_state, lhauntent,ROT0, "Igrosoft", "Lucky Haunter (090712 Entertainment)", GAME_SUPPORTS_SAVE ) /* Entertainment */
 
-#define rollfr_parent rollfr_2
-//GAME( 2003, rollfr,      rollfr_parent,   rollfr,   rollfr,    0,        ROT0, "Igrosoft", "Roll Fruit (030821)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2003, rollfr_2,    0,               rollfr,   rollfr,    0,        ROT0, "Igrosoft", "Roll Fruit (040318)", GAME_SUPPORTS_SAVE ) /* World */
+#define rollfr_parent rollfr_4
+//GAME( 2003, rollfr,      rollfr_parent,   rollfr,   rollfr, driver_device,    0,        ROT0, "Igrosoft", "Roll Fruit (030821)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2003, rollfr_2,    rollfr_parent,   rollfr,   rollfr, driver_device,    0,        ROT0, "Igrosoft", "Roll Fruit (040318)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2003, rollfr_3,    rollfr_parent,   rollfr,   rollfr, driver_device,    0,        ROT0, "Igrosoft", "Roll Fruit (080327)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2003, rollfr_4,    0,               rollfr,   rollfr, driver_device,    0,        ROT0, "Igrosoft", "Roll Fruit (080331)", GAME_SUPPORTS_SAVE ) /* World */
 
-#define garage_parent garage_4
-//GAME( 2004, garage,      garage_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Garage (040122 World)", GAME_SUPPORTS_SAVE ) /* World */
-//GAME( 2004, garage_2,    garage_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Garage (040123 World)", GAME_SUPPORTS_SAVE ) /* World */
-//GAME( 2004, garage_3,    garage_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Garage (040216 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2004, garage_4,    0,               multfish, multfish,  0,        ROT0, "Igrosoft", "Garage (040219 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2004, garage_5,    garage_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Garage (050311 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2004, garage_6,    garage_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Garage (070213 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
-  GAME( 2004, garage_7,    garage_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Garage (070329 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+#define garage_parent garage_5
+//GAME( 2004, garage,      garage_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Garage (040122 World)", GAME_SUPPORTS_SAVE ) /* World */
+//GAME( 2004, garage_2,    garage_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Garage (040123 World)", GAME_SUPPORTS_SAVE ) /* World */
+//GAME( 2004, garage_3,    garage_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Garage (040216 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2004, garage_4,    garage_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Garage (040219 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2004, garage_5,    0,               multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Garage (050311 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2004, garage_6,    garage_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Garage (070213 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+	GAME( 2004, garage_7,    garage_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Garage (070329 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+//GAME( 2004, garage_8,    garage_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Garage (081229 Lottery)", GAME_SUPPORTS_SAVE ) /* Lottery */
+	GAME( 2004, garage_9,    garage_parent,   multfish, multfish, multfish_state, garageent,ROT0, "Igrosoft", "Garage (090715 Entertainment)", GAME_SUPPORTS_SAVE ) /* Entertainment */
 
-#define rclimb_parent rclimb
-  GAME( 2004, rclimb,      0,               multfish, multfish,  0,        ROT0, "Igrosoft", "Rock Climber (040815 World)", GAME_SUPPORTS_SAVE ) /* World */
-//GAME( 2004, rclimb_2,    rclimb_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Rock Climber (040823 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2004, rclimb_3,    rclimb_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Rock Climber (040827 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2004, rclimb_4,    rclimb_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Rock Climber (070322 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
-  GAME( 2004, rclimb_5,    rclimb_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Rock Climber (070621 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
-
+#define rclimb_parent rclimb_3
+	GAME( 2004, rclimb,      rclimb_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Rock Climber (040815 World)", GAME_SUPPORTS_SAVE ) /* World */
+//GAME( 2004, rclimb_2,    rclimb_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Rock Climber (040823 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2004, rclimb_3,    0,               multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Rock Climber (040827 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2004, rclimb_4,    rclimb_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Rock Climber (070322 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+	GAME( 2004, rclimb_5,    rclimb_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Rock Climber (070621 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+//GAME( 2004, rclimb_6,    rclimb_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Rock Climber (090217 Lottery)", GAME_SUPPORTS_SAVE ) /* Lottery */
+	GAME( 2004, rclimb_7,    rclimb_parent,   multfish, multfish, multfish_state, rclimbent,ROT0, "Igrosoft", "Rock Climber (090716 Entertainment)", GAME_SUPPORTS_SAVE ) /* Entertainment */
 
 #define sweetl_parent sweetl
-  GAME( 2004, sweetl,      0,               multfish, multfish,  0,        ROT0, "Igrosoft", "Sweet Life (041220 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2004, sweetl_2,    sweetl_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Sweet Life (070412 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+	GAME( 2004, sweetl,      0,               multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Sweet Life (041220 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2004, sweetl_2,    sweetl_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Sweet Life (070412 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
 
-#define resdnt_parent resdnt
-  GAME( 2004, resdnt,      0,               multfish, multfish,  0,        ROT0, "Igrosoft", "Resident (040415 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2004, resdnt_2,    resdnt_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Resident (040513 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2004, resdnt_3,    resdnt_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Resident (070222 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+#define resdnt_parent resdnt_2
+	GAME( 2004, resdnt,      resdnt_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Resident (040415 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2004, resdnt_2,    0,               multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Resident (040513 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2004, resdnt_3,    resdnt_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Resident (070222 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+//GAME( 2004, resdnt_4,    resdnt_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Resident (090129 Lottery)", GAME_SUPPORTS_SAVE ) /* Lottery */
+//GAME( 2004, resdnt_5,    resdnt_parent,   multfish, multfish, multfish_state, resdntent,ROT0, "Igrosoft", "Resident (090722 Entertainment)", GAME_SUPPORTS_SAVE ) /* Entertainment */
 
 #define island_parent island
-  GAME( 2005, island,      0,               multfish, multfish,  0,        ROT0, "Igrosoft", "Island (050713 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2005, island_2,    island_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Island (070409 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+	GAME( 2005, island,      0,               multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Island (050713 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2005, island_2,    island_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Island (070409 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
 
-#define pirate_parent pirate_2
-//GAME( 2005, pirate,      pirate_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Pirate (051229 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2005, pirate_2,    0,               multfish, multfish,  0,        ROT0, "Igrosoft", "Pirate (060210 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2005, pirate_3,    pirate_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Pirate (060803 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2005, pirate_4,    pirate_parent,   multfish, multfish,  0,        ROT0, "Igrosoft", "Pirate (070412 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+#define pirate_parent pirate_3
+//GAME( 2005, pirate,      pirate_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Pirate (051229 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2005, pirate_2,    pirate_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Pirate (060210 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2005, pirate_3,    0,               multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Pirate (060803 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2005, pirate_4,    pirate_parent,   multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Pirate (070412 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
 
 #define island2_parent island2
-  GAME( 2006, island2,     0,               multfish, multfish,  0,        ROT0, "Igrosoft", "Island 2 (060529 World)", GAME_SUPPORTS_SAVE ) /* World */
-//GAME( 2006, island2_2,   island2_parent,  multfish, multfish,  0,        ROT0, "Igrosoft", "Island 2 (061214 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2006, island2_3,   island2_parent,  multfish, multfish,  0,        ROT0, "Igrosoft", "Island 2 (061218 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2006, island2_4,   island2_parent,  multfish, multfish,  0,        ROT0, "Igrosoft", "Island 2 (070205 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
-
+	GAME( 2006, island2,     0,               multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Island 2 (060529 World)", GAME_SUPPORTS_SAVE ) /* World */
+//GAME( 2006, island2_2,   island2_parent,  multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Island 2 (061214 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2006, island2_3,   island2_parent,  multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Island 2 (061218 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2006, island2_4,   island2_parent,  multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Island 2 (070205 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+	GAME( 2006, island2_5,   island2_parent,  multfish, multfish, multfish_state, island2l, ROT0, "Igrosoft", "Island 2 (090528 Lottery)", GAME_SUPPORTS_SAVE ) /* Lottery */
+	GAME( 2006, island2_6,   island2_parent,  multfish, multfish, multfish_state,island2ent,ROT0, "Igrosoft", "Island 2 (090724 Entertainment)", GAME_SUPPORTS_SAVE ) /* Entertainment */
 
 #define pirate2_parent pirate2
-  GAME( 2006, pirate2,     0,               multfish, multfish,  0,        ROT0, "Igrosoft", "Pirate 2 (061005 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2006, pirate2_2,   pirate2_parent,  multfish, multfish,  0,        ROT0, "Igrosoft", "Pirate 2 (070126 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+	GAME( 2006, pirate2,     0,               multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Pirate 2 (061005 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2006, pirate2_2,   pirate2_parent,  multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Pirate 2 (070126 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+	GAME( 2006, pirate2_3,   pirate2_parent,  multfish, multfish, multfish_state, pirate2l, ROT0, "Igrosoft", "Pirate 2 (090528 Lottery)", GAME_SUPPORTS_SAVE ) /* Lottery */
+	GAME( 2006, pirate2_4,   pirate2_parent,  multfish, multfish, multfish_state,pirate2ent,ROT0, "Igrosoft", "Pirate 2 (090730 Entertainment)", GAME_SUPPORTS_SAVE ) /* Entertainment */
 
+#define keks_parent keks_2
+	GAME( 2006, keks,        keks_parent,     multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Keks (060328 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2006, keks_2,      0,               multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Keks (060403 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2006, keks_3,      keks_parent,     multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Keks (070119 Russia)", GAME_SUPPORTS_SAVE )  /* Russia */
+	GAME( 2006, keks_4,      keks_parent,     multfish, multfish, multfish_state, keksl,    ROT0, "Igrosoft", "Keks (090604 Lottery)", GAME_SUPPORTS_SAVE )  /* Lottery */
+	GAME( 2006, keks_5,      keks_parent,     multfish, multfish, multfish_state, keksent,  ROT0, "Igrosoft", "Keks (090727 Entertainment)", GAME_SUPPORTS_SAVE )  /* Entertainment */
 
-#define keks_parent keks
-  GAME( 2006, keks,        0,               multfish, multfish,  0,        ROT0, "Igrosoft", "Keks (060328 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2006, keks_2,      keks_parent,     multfish, multfish,  0,        ROT0, "Igrosoft", "Keks (060403 World)", GAME_SUPPORTS_SAVE ) /* World */
-  GAME( 2006, keks_3,      keks_parent,     multfish, multfish,  0,        ROT0, "Igrosoft", "Keks (070119 Russia)", GAME_SUPPORTS_SAVE )  /* Russia */
-
-
-#define gnome_parent gnome
-  GAME( 2007, gnome,       0,               multfish, multfish,  0,        ROT0, "Igrosoft", "Gnome (070906 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
-  GAME( 2007, gnome_2,     gnome_parent,    multfish, multfish,  0,        ROT0, "Igrosoft", "Gnome (071115 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
-
+#define gnome_parent gnome_5
+	GAME( 2007, gnome,       gnome_parent,    multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Gnome (070906 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+	GAME( 2007, gnome_2,     gnome_parent,    multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Gnome (071115 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+	GAME( 2007, gnome_3,     gnome_parent,    multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Gnome (080303 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2007, gnome_4,     gnome_parent,    multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Gnome (090402 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+	GAME( 2007, gnome_5,     0,               multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Gnome (090406 World)", GAME_SUPPORTS_SAVE ) /* World */
+//GAME( 2007, gnome_6,     gnome_parent,    multfish, multfish, multfish_state, gnomel,   ROT0, "Igrosoft", "Gnome (090604 Lottery)", GAME_SUPPORTS_SAVE ) /* Lottery */
+	GAME( 2007, gnome_7,     gnome_parent,    multfish, multfish, multfish_state, gnomel,   ROT0, "Igrosoft", "Gnome (090708 Lottery)", GAME_SUPPORTS_SAVE ) /* Lottery */
+//GAME( 2007, gnome_8,     gnome_parent,    multfish, multfish, multfish_state, gnomeent, ROT0, "Igrosoft", "Gnome (090810 Entertainment)", GAME_SUPPORTS_SAVE ) /* Entertainment */
 
 #define sweetl2_parent sweetl2
-  GAME( 2007, sweetl2,     0,               multfish, multfish,  0,        ROT0, "Igrosoft", "Sweet Life 2 (071217 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+	GAME( 2007, sweetl2,     0,               multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Sweet Life 2 (071217 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+	GAME( 2007, sweetl2_2,   sweetl2_parent,  multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Sweet Life 2 (080320 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2007, sweetl2_3,   sweetl2_parent,  multfish, multfish, multfish_state, sweetl2l, ROT0, "Igrosoft", "Sweet Life 2 (090525 Lottery)", GAME_SUPPORTS_SAVE ) /* Lottery */
+	GAME( 2007, sweetl2_4,   sweetl2_parent,  multfish, multfish, multfish_state,sweetl2ent,ROT0, "Igrosoft", "Sweet Life 2 (090812 Entertainment)", GAME_SUPPORTS_SAVE ) /* Entertainment */
+
+#define fcockt2_parent fcockt2
+	GAME( 2008, fcockt2,     0,               multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Fruit Cocktail 2 (080707 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+//GAME( 2008, fcockt2_2,   fcockt2_parent,  multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Fruit Cocktail 2 (080904 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+	GAME( 2008, fcockt2_3,   fcockt2_parent,  multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Fruit Cocktail 2 (080909 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2008, fcockt2_4,   fcockt2_parent,  multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Fruit Cocktail 2 (081105 World)", GAME_SUPPORTS_SAVE ) /* World */
+	GAME( 2008, fcockt2_5,   fcockt2_parent,  multfish, multfish, driver_device,  0,        ROT0, "Igrosoft", "Fruit Cocktail 2 (081106 Russia)", GAME_SUPPORTS_SAVE ) /* Russia */
+	GAME( 2008, fcockt2_6,   fcockt2_parent,  multfish, multfish, multfish_state, fcockt2l, ROT0, "Igrosoft", "Fruit Cocktail 2 (090528 Lottery)", GAME_SUPPORTS_SAVE ) /* Lottery */
+	GAME( 2008, fcockt2_7,   fcockt2_parent,  multfish, multfish, multfish_state,fcockt2ent,ROT0, "Igrosoft", "Fruit Cocktail 2 (090813 Entertainment)", GAME_SUPPORTS_SAVE ) /* Entertainment */
+
 
 
 /*************************************************************************************************************************************************************/
@@ -3367,6 +4035,66 @@ ROM_START( sweetlb ) // 041220 bank F9, changed version text to 070412
 ROM_END
 
 
+ROM_START( sweetl2_2a ) // 080320 bank F9
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "bootleg_sl2_m_080320a.rom", 0x00000, 0x40000, CRC(425066e9) SHA1(f2b11c3c6e08cb59c7c6841ee3575503ed4abb80) ) /* Not officially listed on Igrosoft's web site hash page */
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "sweetlife2.001", 0x000000, 0x80000, CRC(b1e6157c) SHA1(e042aaaf85b13865d56d1709be280f5a3d5c95e3) )
+	ROM_LOAD( "sweetlife2.002", 0x100000, 0x80000, CRC(8bc54047) SHA1(9179cf02376fec77ae50b5603de66754237698f8) )
+	ROM_LOAD( "sweetlife2.003", 0x200000, 0x80000, CRC(709c5d34) SHA1(d702576d70ebef667c77376effecc02abbaaa8cd) )
+	ROM_LOAD( "sweetlife2.004", 0x300000, 0x80000, CRC(7bcfa2ce) SHA1(8df894e9b7afa52e47e4dabd1802e878bbbeaa80) )
+	ROM_LOAD( "sweetlife2.005", 0x080000, 0x80000, CRC(5c385d43) SHA1(ddb362e5894d146ce90acbaafe9dd7aad2a7c242) )
+	ROM_LOAD( "sweetlife2.006", 0x180000, 0x80000, CRC(868fe1cb) SHA1(692679f8242950e009c30cc084c4ddc5d1963502) )
+	ROM_LOAD( "sweetlife2.007", 0x280000, 0x80000, CRC(6ce87282) SHA1(586e08994db4ca2b967d47b16ba5b458e240d30f) )
+	ROM_LOAD( "sweetlife2.008", 0x380000, 0x80000, CRC(c2ad2b74) SHA1(c78e3ca5d15acb17ee671d2205405f287ad9c464) )
+ROM_END
+
+ROM_START( sweetl2_2b ) // 080320 bank F9, some fixes
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "bootleg_sl2_m_080320b.rom", 0x00000, 0x40000, CRC(faffe8c3) SHA1(66a8247fc4bc6d7fb2eefcec37d56eabb1fbca57) ) /* Not officially listed on Igrosoft's web site hash page */
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "sweetlife2.001", 0x000000, 0x80000, CRC(b1e6157c) SHA1(e042aaaf85b13865d56d1709be280f5a3d5c95e3) )
+	ROM_LOAD( "sweetlife2.002", 0x100000, 0x80000, CRC(8bc54047) SHA1(9179cf02376fec77ae50b5603de66754237698f8) )
+	ROM_LOAD( "sweetlife2.003", 0x200000, 0x80000, CRC(709c5d34) SHA1(d702576d70ebef667c77376effecc02abbaaa8cd) )
+	ROM_LOAD( "sweetlife2.004", 0x300000, 0x80000, CRC(7bcfa2ce) SHA1(8df894e9b7afa52e47e4dabd1802e878bbbeaa80) )
+	ROM_LOAD( "sweetlife2.005", 0x080000, 0x80000, CRC(5c385d43) SHA1(ddb362e5894d146ce90acbaafe9dd7aad2a7c242) )
+	ROM_LOAD( "sweetlife2.006", 0x180000, 0x80000, CRC(868fe1cb) SHA1(692679f8242950e009c30cc084c4ddc5d1963502) )
+	ROM_LOAD( "sweetlife2.007", 0x280000, 0x80000, CRC(6ce87282) SHA1(586e08994db4ca2b967d47b16ba5b458e240d30f) )
+	ROM_LOAD( "sweetlife2.008", 0x380000, 0x80000, CRC(c2ad2b74) SHA1(c78e3ca5d15acb17ee671d2205405f287ad9c464) )
+ROM_END
+
+ROM_START( sweetl2_2c ) // 080320 modified graphics, bank F9, changed version text to "VIDEO GAME-1 MD01"
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "bootleg_sl2_m_080320c.rom", 0x00000, 0x40000, CRC(d31d682d) SHA1(a8addbed8373f06d90648c01dc6fda584789f25c) ) /* Not officially listed on Igrosoft's web site hash page */
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "bootleg_1a", 0x000000, 0x80000, CRC(aa9e41f4) SHA1(50c4078581e902aab0dfd902c5ae82ba50f03e39) )
+	ROM_LOAD( "bootleg_2a", 0x100000, 0x80000, CRC(35a92e6b) SHA1(48a1856a8970383619dd5acd3026630ce8c2dfe9) )
+	ROM_LOAD( "bootleg_3a", 0x200000, 0x80000, CRC(b8bd46b4) SHA1(c4c9c6c94b7d6e2e6b02f61177407464b75c76bb) )
+	ROM_LOAD( "bootleg_4a", 0x300000, 0x80000, CRC(e4a8f35d) SHA1(f45dbdc5757bd86218e2c975f9c127c2b3077aef) )
+	ROM_LOAD( "bootleg_5a", 0x080000, 0x80000, CRC(7bc3d048) SHA1(4485c028757b4ade722f7a4d72ce87bc94c08a08) )
+	ROM_LOAD( "bootleg_6a", 0x180000, 0x80000, CRC(c334b279) SHA1(55bace43fe2aee54ab9cc787a955f382f05cb666) )
+	ROM_LOAD( "bootleg_7a", 0x280000, 0x80000, CRC(9e8cfe95) SHA1(2594c66d65ec4b23fe7760ed7f05761b95ec1bde) )
+	ROM_LOAD( "bootleg_8a", 0x380000, 0x80000, CRC(f4b48eee) SHA1(02af6ea807d003504a37c4dc7f9111b716cf78a5) )
+ROM_END
+
+ROM_START( sweetl2_2d ) // 080320 bank F9, modified graphics, changed version text to "MDS_is_the_best_ LOTTOGAME (I)"
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "bootleg_sl2_m_080320d.rom", 0x00000, 0x40000, CRC(03b26c85) SHA1(9c05e48f8d2e467da8b267021560b121538b8c3e) ) /* Not officially listed on Igrosoft's web site hash page */
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "bootleg_1b", 0x000000, 0x80000, CRC(a5119aca) SHA1(ed59477438ba2b5f17f7c3ab9fa769f5aa28ed69) )
+	ROM_LOAD( "bootleg_2b", 0x100000, 0x80000, CRC(689f09f5) SHA1(8bf13f453e51a0d1abbc00a2fc92e8f544cb176f) )
+	ROM_LOAD( "bootleg_3b", 0x200000, 0x80000, CRC(925abdcb) SHA1(93ffea087f754614e3ceaf43c00a94a3525f4ef8) )
+	ROM_LOAD( "bootleg_4b", 0x300000, 0x80000, CRC(94c525a3) SHA1(0c67fd937c85774c10d6671c7ea4b9733d760cdc) )
+	ROM_LOAD( "bootleg_5b", 0x080000, 0x80000, CRC(98d76993) SHA1(39dc0b650d5437f5fae70651ed67dc3f80ea45a4) )
+	ROM_LOAD( "bootleg_6b", 0x180000, 0x80000, CRC(f85255d9) SHA1(eb9e8de3775c9a1ddc1134c7b96e556ec2e87b1d) )
+	ROM_LOAD( "sweetlife2.007",  0x280000, 0x80000, CRC(6ce87282) SHA1(586e08994db4ca2b967d47b16ba5b458e240d30f) )
+	ROM_LOAD( "sweetlife2.008",  0x380000, 0x80000, CRC(c2ad2b74) SHA1(c78e3ca5d15acb17ee671d2205405f287ad9c464) )
+ROM_END
+
 
 
 ROM_START( resdnt_2a ) // 040513 backdoor 1,5 9,1 5,1 1,5  3,3  3,4
@@ -4010,110 +4738,362 @@ ROM_START( gnome_2a ) // 071115 bank F9
 ROM_END
 
 
+ROM_START( gnome_3a ) // 080303 bank F9
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "bootleg_gn_m_080303a.rom", 0x00000, 0x40000, CRC(86e3f741) SHA1(e5d9f897daa6cf58a7fb426c42810d71bf839294) ) /* Not officially listed on Igrosoft's web site hash page */
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "gnome.001", 0x000000, 0x80000, CRC(6ed866d7) SHA1(68d75d24d98e6d533cb26ceac0a680203cb26069) )
+	ROM_LOAD( "gnome.002", 0x100000, 0x80000, CRC(f6e5e6f0) SHA1(9751e8df87f14a252595547d24b8dd865ee4f08d) )
+	ROM_LOAD( "gnome.003", 0x200000, 0x80000, CRC(f8beb972) SHA1(3afbca8ce7e69d2dadae05f69205a6fd9036cf6a) )
+	ROM_LOAD( "gnome.004", 0x300000, 0x80000, CRC(83357c38) SHA1(45cd31c4f02f9d7b1888701c2146d1e7229b6cb5) )
+	ROM_LOAD( "gnome.005", 0x080000, 0x80000, CRC(687ad3e3) SHA1(23941a4f40c45029b9a43451f78b04c03c3cd7da) )
+	ROM_LOAD( "gnome.006", 0x180000, 0x80000, CRC(7ef2b88a) SHA1(7e7de60fc6791731d7cfd6a50e2bc5af1bf5e4b2) )
+	ROM_LOAD( "gnome.007", 0x280000, 0x80000, CRC(71976bdf) SHA1(c44dbfa75a0f12893b3177907fc93b3d5e8ad390) )
+	ROM_LOAD( "gnome.008", 0x380000, 0x80000, CRC(c86a1586) SHA1(e622bca8dc618ca8edc1a7daa9c8286383caebef) )
+ROM_END
+
+ROM_START( gnome_3b ) // 080303 bank F9, payout percentage 45%
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "bootleg_gn_m_080303b.rom", 0x00000, 0x40000, CRC(c01d2d38) SHA1(7743d46e2ebce24d88961e52b67a928b29a3aa0d) ) /* Not officially listed on Igrosoft's web site hash page */
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "gnome.001", 0x000000, 0x80000, CRC(6ed866d7) SHA1(68d75d24d98e6d533cb26ceac0a680203cb26069) )
+	ROM_LOAD( "gnome.002", 0x100000, 0x80000, CRC(f6e5e6f0) SHA1(9751e8df87f14a252595547d24b8dd865ee4f08d) )
+	ROM_LOAD( "gnome.003", 0x200000, 0x80000, CRC(f8beb972) SHA1(3afbca8ce7e69d2dadae05f69205a6fd9036cf6a) )
+	ROM_LOAD( "gnome.004", 0x300000, 0x80000, CRC(83357c38) SHA1(45cd31c4f02f9d7b1888701c2146d1e7229b6cb5) )
+	ROM_LOAD( "gnome.005", 0x080000, 0x80000, CRC(687ad3e3) SHA1(23941a4f40c45029b9a43451f78b04c03c3cd7da) )
+	ROM_LOAD( "gnome.006", 0x180000, 0x80000, CRC(7ef2b88a) SHA1(7e7de60fc6791731d7cfd6a50e2bc5af1bf5e4b2) )
+	ROM_LOAD( "gnome.007", 0x280000, 0x80000, CRC(71976bdf) SHA1(c44dbfa75a0f12893b3177907fc93b3d5e8ad390) )
+	ROM_LOAD( "gnome.008", 0x380000, 0x80000, CRC(c86a1586) SHA1(e622bca8dc618ca8edc1a7daa9c8286383caebef) )
+ROM_END
+
+ROM_START( gnome_3c ) // 080303 bank F9, payout percentage 60%
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "bootleg_gn_m_080303c.rom", 0x00000, 0x40000, CRC(a7479ddb) SHA1(d64be81ff20548373e08ccae58d00f5cb2a335da) ) /* Not officially listed on Igrosoft's web site hash page */
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "gnome.001", 0x000000, 0x80000, CRC(6ed866d7) SHA1(68d75d24d98e6d533cb26ceac0a680203cb26069) )
+	ROM_LOAD( "gnome.002", 0x100000, 0x80000, CRC(f6e5e6f0) SHA1(9751e8df87f14a252595547d24b8dd865ee4f08d) )
+	ROM_LOAD( "gnome.003", 0x200000, 0x80000, CRC(f8beb972) SHA1(3afbca8ce7e69d2dadae05f69205a6fd9036cf6a) )
+	ROM_LOAD( "gnome.004", 0x300000, 0x80000, CRC(83357c38) SHA1(45cd31c4f02f9d7b1888701c2146d1e7229b6cb5) )
+	ROM_LOAD( "gnome.005", 0x080000, 0x80000, CRC(687ad3e3) SHA1(23941a4f40c45029b9a43451f78b04c03c3cd7da) )
+	ROM_LOAD( "gnome.006", 0x180000, 0x80000, CRC(7ef2b88a) SHA1(7e7de60fc6791731d7cfd6a50e2bc5af1bf5e4b2) )
+	ROM_LOAD( "gnome.007", 0x280000, 0x80000, CRC(71976bdf) SHA1(c44dbfa75a0f12893b3177907fc93b3d5e8ad390) )
+	ROM_LOAD( "gnome.008", 0x380000, 0x80000, CRC(c86a1586) SHA1(e622bca8dc618ca8edc1a7daa9c8286383caebef) )
+ROM_END
+
+ROM_START( gnome_5a ) // 090406 bank F9, payout percentage 70%
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "bootleg_gn_m_090406a.rom", 0x00000, 0x40000, CRC(51558b99) SHA1(ec9788698f93b96ad26f2f4128733702ac6c2d2e) ) /* Not officially listed on Igrosoft's web site hash page */
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "gnome.001", 0x000000, 0x80000, CRC(6ed866d7) SHA1(68d75d24d98e6d533cb26ceac0a680203cb26069) )
+	ROM_LOAD( "gnome.002", 0x100000, 0x80000, CRC(f6e5e6f0) SHA1(9751e8df87f14a252595547d24b8dd865ee4f08d) )
+	ROM_LOAD( "gnome.003", 0x200000, 0x80000, CRC(f8beb972) SHA1(3afbca8ce7e69d2dadae05f69205a6fd9036cf6a) )
+	ROM_LOAD( "gnome.004", 0x300000, 0x80000, CRC(83357c38) SHA1(45cd31c4f02f9d7b1888701c2146d1e7229b6cb5) )
+	ROM_LOAD( "gnome.005", 0x080000, 0x80000, CRC(687ad3e3) SHA1(23941a4f40c45029b9a43451f78b04c03c3cd7da) )
+	ROM_LOAD( "gnome.006", 0x180000, 0x80000, CRC(7ef2b88a) SHA1(7e7de60fc6791731d7cfd6a50e2bc5af1bf5e4b2) )
+	ROM_LOAD( "gnome.007", 0x280000, 0x80000, CRC(71976bdf) SHA1(c44dbfa75a0f12893b3177907fc93b3d5e8ad390) )
+	ROM_LOAD( "gnome.008", 0x380000, 0x80000, CRC(c86a1586) SHA1(e622bca8dc618ca8edc1a7daa9c8286383caebef) )
+ROM_END
+
+ROM_START( gnome_5b ) // 090406 bank F9, modified graphics, changed version text to "MDS_is_the_best_ LOTTOGAME (I)"
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "bootleg_gn_m_090406b.rom", 0x00000, 0x40000, CRC(f7b55e2f) SHA1(e7043433acea5387bc9c67f94e09ab3dae0b8ccf) ) /* Not officially listed on Igrosoft's web site hash page */
+
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "bootleg_1c", 0x000000, 0x80000, CRC(a52efb59) SHA1(724094b057dbf0b29e98c2c6c1bde7fac5534969) )
+	ROM_LOAD( "bootleg_2c", 0x100000, 0x80000, CRC(ec259703) SHA1(2d9be4b9a2a9a6a34b2e61cd117940c4f2be849b) )
+	ROM_LOAD( "bootleg_3c", 0x200000, 0x80000, CRC(68e057fc) SHA1(35e93e404ce47faa384d0c1c8c4dce77cfa0a960) )
+	ROM_LOAD( "bootleg_4c", 0x300000, 0x80000, CRC(0dd2f6bf) SHA1(1976f8665353745ea0032c2cf0ce05a75acf030c) )
+	ROM_LOAD( "bootleg_5c", 0x080000, 0x80000, CRC(c1b142fb) SHA1(a24dbbe4ae056b682604f44ead6fd1633df33e87) )
+	ROM_LOAD( "bootleg_6c", 0x180000, 0x80000, CRC(0efe6ea1) SHA1(0bd96da3a2e7ed47f266c391835cbfb0fe5731e6) )
+	ROM_LOAD( "bootleg_7",  0x280000, 0x80000, CRC(71976bdf) SHA1(c44dbfa75a0f12893b3177907fc93b3d5e8ad390) )
+	ROM_LOAD( "gnome.008",  0x380000, 0x80000, CRC(c86a1586) SHA1(e622bca8dc618ca8edc1a7daa9c8286383caebef) )
+ROM_END
 
 
-GAME( 2002, mfish_3a,    mfish_parent,    multfish, multfish,  0,             ROT0,  "bootleg", "Multi Fish (bootleg, 021124, banking address hack)", GAME_SUPPORTS_SAVE ) // bank F9
-GAME( 2002, mfish_12a,   mfish_parent,    multfish, multfish,  0,             ROT0,  "bootleg", "Multi Fish (bootleg, 040308, banking address hack)", GAME_SUPPORTS_SAVE ) // bank F9
+ROM_START( fcockt2a ) // 080707 bank F9
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "bootleg_fc2_080707a.rom", 0x00000, 0x40000, CRC(c4840b3c) SHA1(518079207bb3d13e492003b382d28a8cf3647f63) ) /* Not officially listed on Igrosoft's web site hash page */
 
-GAME( 2003, crzmon_7a,   crzmon_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Crazy Monkey (bootleg, 031110, backdoor set 1)", GAME_SUPPORTS_SAVE ) // backdoor 1,1 1,3 1,5 1,7  3,3  3,4
-GAME( 2003, crzmon_7b,   crzmon_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Crazy Monkey (bootleg, 031110, backdoor set 2)", GAME_SUPPORTS_SAVE ) // backdoor 1,5 5,5 1,7 3,2  3,3  3,4
-GAME( 2003, crzmon_8a,   crzmon_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Crazy Monkey (bootleg, 050120, backdoor)", GAME_SUPPORTS_SAVE ) // backdoor 1,1 1,3 1,5 1,7  3,3  3,4
-GAME( 2003, crzmon_8b,   crzmon_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Crazy Monkey (bootleg, 050120, changed version text)", GAME_SUPPORTS_SAVE ) // changed version text to 070315
-GAME( 2003, crzmon_8c,   crzmon_parent,   multfish, multfish,  customl,       ROT0,  "bootleg", "Crazy Monkey (bootleg, 050120, VIDEO GAME-1 CM01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, changed version text to "VIDEO GAME-1 CM01"
-GAME( 2003, crzmon_8d,   crzmon_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Crazy Monkey (bootleg, 050120, LOTTOGAME (I))", GAME_SUPPORTS_SAVE ) // modified graphics, changed version text to "MDS_is_the_best_ LOTTOGAME (I)"
-GAME( 2003, crzmon_8e,   crzmon_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Crazy Monkey (bootleg, 050120, LOTO PROGRAM V-CM2)", GAME_SUPPORTS_SAVE ) // modified graphics, many texts changed, changed version text to "LOTO PROGRAM V-CM2"
-GAME( 2003, crzmon_8f,   crzmon_parent,   multfish, multfish,  customl,       ROT0,  "bootleg", "Crazy Monkey (bootleg, 050120, LOTOS CM01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, many texts changed, changed version text to "LOTOS CM01"
-GAME( 2003, crzmon_9a,   crzmon_parent,   multfish, multfish,  customl,       ROT0,  "bootleg", "Crazy Monkey (bootleg, 070315, VIDEO GAME-1 O01 set 1)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, changed version text to "VIDEO GAME-1 O01"
-GAME( 2003, crzmon_9b,   crzmon_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Crazy Monkey (bootleg, 070315, VIDEO GAME-1 O01 set 2)", GAME_SUPPORTS_SAVE ) // modified graphics, changed version text to "VIDEO GAME-1 O01" (crzmon_9a, decoded gfx)
-GAME( 2003, crzmon_9c,   crzmon_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Crazy Monkey (bootleg, 070315, payout percentage 70)", GAME_SUPPORTS_SAVE ) // payout percentage 70%
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "fruitcocktail2.001",  0x000000, 0x80000, CRC(d1b9416d) SHA1(4d3cb0a6dbcf02bbd20d5c43df358882b2ad794d) )
+	ROM_LOAD( "fruitcocktail2.002",  0x100000, 0x80000, CRC(69236be1) SHA1(9a2e6c8f279714f79a606c0b118b6bf1d8442cda) )
+	ROM_LOAD( "fruitcocktail2.003",  0x200000, 0x80000, CRC(29aade8c) SHA1(bef42f8a25c90e3a1cccd13872a10eb8b2b2e276) )
+	ROM_LOAD( "fruitcocktail2.004",  0x300000, 0x80000, CRC(4b9646e7) SHA1(26548a018401f4e07383eb145f8f0847677f3272) )
+	ROM_LOAD( "fruitcocktail2_old.005", 0x080000, 0x80000, CRC(6b9e6b43) SHA1(c7fb17e91ec62b22da42f110d68b4f37e39de3ce) )
+	ROM_LOAD( "fruitcocktail2_old.006", 0x180000, 0x80000, CRC(2c9f712e) SHA1(c3118154eafca74b66b3325a2e07c85f86f3544d) )
+	ROM_LOAD( "fruitcocktail2_old.007", 0x280000, 0x80000, CRC(85ba9a86) SHA1(aa9b6170135e9e420509e8f7c1702c9896bc5d8e) )
+	ROM_LOAD( "fruitcocktail2_old.008", 0x380000, 0x80000, CRC(a27c49a2) SHA1(7c9ee0e01f76ca3ab6716579f5dde7036050970b) )
+ROM_END
 
-GAME( 2003, fcockt_6a,   fcockt_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Fruit Cocktail (bootleg, 040216, banking address hack)", GAME_SUPPORTS_SAVE ) // bank F8
-GAME( 2003, fcockt_6b,   fcockt_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Fruit Cocktail (bootleg, 040216, backdoor)", GAME_SUPPORTS_SAVE ) // backdoor 1,1 1,3 1,5 1,7  3,3  3,4
-GAME( 2003, fcockt_6c,   fcockt_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Fruit Cocktail (bootleg, 040216, LotoRossy+)", GAME_SUPPORTS_SAVE ) // modified graphics, some code changes, description says "for Lat-02 terminals", older set
-GAME( 2003, fcockt_6d,   fcockt_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Fruit Cocktail (bootleg, 040216, VIDEO GAME-1 FR01)", GAME_SUPPORTS_SAVE ) // modified graphics, some code changes, changed version text to "VIDEO GAME-1 FR01", description says "for Lat-02 terminals", newer set
-GAME( 2003, fcockt_7a,   fcockt_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Fruit Cocktail (bootleg, 050118, backdoor)", GAME_SUPPORTS_SAVE ) // backdoor 1,1 1,3 1,5 1,7  3,3  3,4
-GAME( 2003, fcockt_7b,   fcockt_parent,   multfish, multfish,  customl,       ROT0,  "bootleg", "Fruit Cocktail (bootleg, 050118, VIDEO GAME-1 FR01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, many texts changed, changed version text to "VIDEO GAME-1 FR01"
-GAME( 2003, fcockt_7c,   fcockt_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Fruit Cocktail (bootleg, 050118, payout percentage 40)", GAME_SUPPORTS_SAVE ) // payout percentage 40%
-GAME( 2003, fcockt_7d,   fcockt_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Fruit Cocktail (bootleg, 050118, payout percentage 60)", GAME_SUPPORTS_SAVE ) // payout percentage 60%
-GAME( 2003, fcockt_7e,   fcockt_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Fruit Cocktail (bootleg, 050118, payout percentage 70)", GAME_SUPPORTS_SAVE ) // payout percentage 70%
-GAME( 2003, fcockt_7f,   fcockt_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Fruit Cocktail (bootleg, 050118, changed version text)", GAME_SUPPORTS_SAVE ) // changed version text to 070305
-GAME( 2003, fcockt_7g,   fcockt_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Fruit Cocktail (bootleg, 050118, LOTO PROGRAM V-FC2)", GAME_SUPPORTS_SAVE ) // modified graphics, many texts changed, changed version text to "LOTO PROGRAM V-FC2"
-GAME( 2003, fcockt_7h,   fcockt_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Fruit Cocktail (bootleg, 050118, LOTOS FR01)", GAME_SUPPORTS_SAVE ) // modified graphics, many texts changed, changed version text to "LOTOS FR01"
-GAME( 2003, fcockt_8a,   fcockt_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Fruit Cocktail (bootleg, 060111, LOTO COCKTAIL V01-0001)", GAME_SUPPORTS_SAVE ) // modified graphics, many texts changed, changed version text to "LOTO COCKTAIL V01-0001"
-GAME( 2003, fcockt_8b,   fcockt_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Fruit Cocktail (bootleg, 060111, LOTTOGAME (I))", GAME_SUPPORTS_SAVE ) // modified graphics, changed version text to "MDS_is_the_best_ LOTTOGAME (I)"
+ROM_START( fcockt2_4a ) // 081105 bank F9
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "bootleg_fc2_m_081105a.rom", 0x00000, 0x40000,  CRC(411ad706) SHA1(4d29a6b1927241efdcdb3224b9ebe0eb6af92533) ) /* Not officially listed on Igrosoft's web site hash page */
 
-GAME( 2003, lhaunt_4a,   lhaunt_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Lucky Haunter (bootleg, 031111, backdoor)", GAME_SUPPORTS_SAVE ) // backdoor 1,1 1,3 1,5 1,7  3,3  3,4
-GAME( 2003, lhaunt_5a,   lhaunt_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Lucky Haunter (bootleg, 040216, backdoor)", GAME_SUPPORTS_SAVE ) // backdoor 1,1 1,3 1,5 1,7  3,3  3,4
-GAME( 2003, lhaunt_6a,   lhaunt_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Lucky Haunter (bootleg, 040825, backdoor)", GAME_SUPPORTS_SAVE ) // backdoor 1,5 9,1 5,1 1,5  3,3  3,4
-GAME( 2003, lhaunt_6b,   lhaunt_parent,   multfish, multfish,  customl,       ROT0,  "bootleg", "Lucky Haunter (bootleg, 040825, VIDEO GAME-1 PB01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, many texts changed, changed version text to "VIDEO GAME-1 PB01"
-GAME( 2003, lhaunt_6c,   lhaunt_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Lucky Haunter (bootleg, 040825, changed version text)", GAME_SUPPORTS_SAVE ) // changed version text to 070604
-GAME( 2003, lhaunt_6d,   lhaunt_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Lucky Haunter (bootleg, 040825, LOTTOGAME (I))", GAME_SUPPORTS_SAVE ) // modified graphics, changed version text to "MDS_is_the_best_ LOTTOGAME (I)"
-GAME( 2003, lhaunt_6e,   lhaunt_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Lucky Haunter (bootleg, 040825, LOTO PROGRAM V-LH2)", GAME_SUPPORTS_SAVE ) // modified graphics, many texts changed, changed version text to "LOTO PROGRAM V-LH2"
-GAME( 2003, lhaunt_6f,   lhaunt_parent,   multfish, multfish,  customl,       ROT0,  "bootleg", "Lucky Haunter (bootleg, 040825, LOTOS PB01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, many texts changed, changed version text to "LOTOS PB01"
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "fruitcocktail2.001", 0x000000, 0x80000, CRC(d1b9416d) SHA1(4d3cb0a6dbcf02bbd20d5c43df358882b2ad794d) )
+	ROM_LOAD( "fruitcocktail2.002", 0x100000, 0x80000, CRC(69236be1) SHA1(9a2e6c8f279714f79a606c0b118b6bf1d8442cda) )
+	ROM_LOAD( "fruitcocktail2.003", 0x200000, 0x80000, CRC(29aade8c) SHA1(bef42f8a25c90e3a1cccd13872a10eb8b2b2e276) )
+	ROM_LOAD( "fruitcocktail2.004", 0x300000, 0x80000, CRC(4b9646e7) SHA1(26548a018401f4e07383eb145f8f0847677f3272) )
+	ROM_LOAD( "fruitcocktail2.005", 0x080000, 0x80000, CRC(3fc13d72) SHA1(ba0727138ef03d576d190cbce04b9eb0bba88a9a) )
+	ROM_LOAD( "fruitcocktail2.006", 0x180000, 0x80000, CRC(8fc75fd7) SHA1(3b7cd8a3e04ca9d4494b37c801e21d1293f094e8) )
+	ROM_LOAD( "fruitcocktail2.007", 0x280000, 0x80000, CRC(d37fcc0f) SHA1(57c2ea5dc747f16e2233305f2c73cb4b632aae2c) )
+	ROM_LOAD( "fruitcocktail2.008", 0x380000, 0x80000, CRC(e3a9442c) SHA1(cbaba182e858b0f158756118e5da873e3ddfc0b9) )
+ROM_END
 
-GAME( 2004, garage_4a,   garage_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Garage (bootleg, 040219, backdoor)", GAME_SUPPORTS_SAVE ) // backdoor 1,1 1,3 1,5 1,7  3,3  3,4
-GAME( 2004, garage_4b,   garage_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Garage (bootleg, 040219, changed version text)", GAME_SUPPORTS_SAVE ) // changed version text to 070329
-GAME( 2004, garage_4c,   garage_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Garage (bootleg, 040219, LOTO PROGRAM V-GG2)", GAME_SUPPORTS_SAVE ) // modified graphics, many texts changed, changed version text to "LOTO PROGRAM V-GG2"
-GAME( 2004, garage_5a,   garage_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Garage (bootleg, 050311, backdoor)", GAME_SUPPORTS_SAVE ) // backdoor 1,1 1,3 1,5 1,7  3,3  3,4
-GAME( 2004, garage_5b,   garage_parent,   multfish, multfish,  customl,       ROT0,  "bootleg", "Garage (bootleg, 050311, VIDEO GAME-1 GA01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, changed version text to "VIDEO GAME-1 GA01"
-GAME( 2004, garage_5c,   garage_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Garage (bootleg, 050311, payout percentage 70)", GAME_SUPPORTS_SAVE ) // payout percentage 70%
-GAME( 2004, garage_5d,   garage_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Garage (bootleg, 050311, LOTTOGAME (I))", GAME_SUPPORTS_SAVE ) // modified graphics, changed version text to "MDS_is_the_best_ LOTTOGAME (I)"
-GAME( 2004, garage_5e,   garage_parent,   multfish, multfish,  customl,       ROT0,  "bootleg", "Garage (bootleg, 050311, LOTOS GA01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, many texts changed, changed version text to "LOTOS GA01"
+ROM_START( fcockt2_4b ) // 081105 bank F9, no credit limit, "MaxVin" signature
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "bootleg_fc2_m_081105_cm.rom", 0x00000, 0x40000,  CRC(f0c702b9) SHA1(89121ddd325aac567ebd443eb443c4db0549236c) ) /* Not officially listed on Igrosoft's web site hash page */
 
-GAME( 2004, rclimb_3a,   rclimb_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Rock Climber (bootleg, 040827, backdoor)", GAME_SUPPORTS_SAVE ) // backdoor 1,5 9,1 5,1 1,5  3,3  3,4
-GAME( 2004, rclimb_3b,   rclimb_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Rock Climber (bootleg, 040827, new service menu)", GAME_SUPPORTS_SAVE ) // new service menu
-GAME( 2004, rclimb_3c,   rclimb_parent,   multfish, multfish,  customl,       ROT0,  "bootleg", "Rock Climber (bootleg, 040827, VIDEO GAME-1 SK01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, many texts changed, changed version text to "VIDEO GAME-1 SK01"
-GAME( 2004, rclimb_3d,   rclimb_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Rock Climber (bootleg, 040827, LOTTOGAME (I))", GAME_SUPPORTS_SAVE ) // modified graphics, changed version text to "MDS_is_the_best_ LOTTOGAME (I)"
-GAME( 2004, rclimb_3e,   rclimb_parent,   multfish, multfish,  customl,       ROT0,  "bootleg", "Rock Climber (bootleg, 040827, LOTOS SK01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, many texts changed, changed version text to "LOTOS SK01"
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "fruitcocktail2.001", 0x000000, 0x80000, CRC(d1b9416d) SHA1(4d3cb0a6dbcf02bbd20d5c43df358882b2ad794d) )
+	ROM_LOAD( "fruitcocktail2.002", 0x100000, 0x80000, CRC(69236be1) SHA1(9a2e6c8f279714f79a606c0b118b6bf1d8442cda) )
+	ROM_LOAD( "fruitcocktail2.003", 0x200000, 0x80000, CRC(29aade8c) SHA1(bef42f8a25c90e3a1cccd13872a10eb8b2b2e276) )
+	ROM_LOAD( "fruitcocktail2.004", 0x300000, 0x80000, CRC(4b9646e7) SHA1(26548a018401f4e07383eb145f8f0847677f3272) )
+	ROM_LOAD( "fruitcocktail2.005", 0x080000, 0x80000, CRC(3fc13d72) SHA1(ba0727138ef03d576d190cbce04b9eb0bba88a9a) )
+	ROM_LOAD( "fruitcocktail2.006", 0x180000, 0x80000, CRC(8fc75fd7) SHA1(3b7cd8a3e04ca9d4494b37c801e21d1293f094e8) )
+	ROM_LOAD( "fruitcocktail2.007", 0x280000, 0x80000, CRC(d37fcc0f) SHA1(57c2ea5dc747f16e2233305f2c73cb4b632aae2c) )
+	ROM_LOAD( "fruitcocktail2.008", 0x380000, 0x80000, CRC(e3a9442c) SHA1(cbaba182e858b0f158756118e5da873e3ddfc0b9) )
+ROM_END
 
-GAME( 2004, sweetla,     sweetl_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Sweet Life (bootleg, 041220, backdoor)", GAME_SUPPORTS_SAVE ) // backdoor 1,5 9,1 5,3 1,5  3,3  3,4
-GAME( 2004, sweetlb,     sweetl_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Sweet Life (bootleg, 041220, banking address hack, changed version text)", GAME_SUPPORTS_SAVE ) // bank F9, changed version text to 070412
+ROM_START( fcockt2_4c ) // 081105 custom alteras, modified graphics, bank F9, many texts changed, changed version text to "VIDEO GAME-1 FR02"
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "bootleg_fc2_m_081105b.rom", 0x00000, 0x40000,  CRC(b627f7d6) SHA1(0bcdb1cd808055d0a9e965f2c6ff522ac3fe6949) ) /* Not officially listed on Igrosoft's web site hash page */
 
-GAME( 2004, resdnt_2a,   resdnt_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Resident (bootleg, 040513, backdoor)", GAME_SUPPORTS_SAVE ) // backdoor 1,5 9,1 5,1 1,5  3,3  3,4
-GAME( 2004, resdnt_2b,   resdnt_parent,   multfish, multfish,  customl,       ROT0,  "bootleg", "Resident (bootleg, 040513, VIDEO GAME-1 SE01 set 1)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, changed version text to "VIDEO GAME-1 SE01"
-GAME( 2004, resdnt_2c,   resdnt_parent,   multfish, multfish,  customl,       ROT0,  "bootleg", "Resident (bootleg, 040513, VIDEO GAME-1 SE01 set 2)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, changed version text to "VIDEO GAME-1 SE01"
-GAME( 2004, resdnt_2d,   resdnt_parent,   multfish, multfish,  customl,       ROT0,  "bootleg", "Resident (bootleg, 040513, VIDEO GAME-1 SE01 set 3)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, many texts changed, changed version text to "VIDEO GAME-1 SE01"
-GAME( 2004, resdnt_2e,   resdnt_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Resident (bootleg, 040513, LOTTOGAME (I))", GAME_SUPPORTS_SAVE ) // modified graphics, changed version text to "MDS_is_the_best_ LOTTOGAME (I)"
-GAME( 2004, resdnt_2f,   resdnt_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Resident (bootleg, 040513, LOTO PROGRAM V-RS2)", GAME_SUPPORTS_SAVE ) // modified graphics, many texts changed, changed version text to "LOTO PROGRAM V-RS2"
-GAME( 2004, resdnt_2g,   resdnt_parent,   multfish, multfish,  customl,       ROT0,  "bootleg", "Resident (bootleg, 040513, LOTOS SE01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, many texts changed, changed version text to "LOTOS SE01"
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "bootleg_1b", 0x000000, 0x80000, CRC(68b62355) SHA1(387da330fddaa685cb7aca32bf861e44d5cdbe58) )
+	ROM_LOAD( "bootleg_2b", 0x100000, 0x80000, CRC(d36e8704) SHA1(80a84a24b3a43a0110a00ed3b01c7156218ccbf3) )
+	ROM_LOAD( "bootleg_3b", 0x200000, 0x80000, CRC(57d87c5b) SHA1(6bc28e5c34a7e76d0e601b970ab922e5ad28ae85) )
+	ROM_LOAD( "bootleg_4b", 0x300000, 0x80000, CRC(3de30bab) SHA1(c4c4c549ad980f562238054cd0e3ef6b0977f7b7) )
+	ROM_LOAD( "bootleg_5b", 0x080000, 0x80000, CRC(b47d65aa) SHA1(71c642ea7887ea35c6d7d985502082d2424c035a) )
+	ROM_LOAD( "bootleg_6b", 0x180000, 0x80000, CRC(aa982f4e) SHA1(edf75d4ddd60532ac0ca2e17e3fd9004aa768973) )
+	ROM_LOAD( "bootleg_7b", 0x280000, 0x80000, CRC(b9b1ead7) SHA1(111e505fce8fe75043ff7cc5dc68e81ce4f98d06) )
+	ROM_LOAD( "bootleg_8b", 0x380000, 0x80000, CRC(8e49d1c1) SHA1(4735503335cf499895d1b2d9a405be50f21a2d68) )
+ROM_END
 
-GAME( 2005, islanda,     island_parent,   multfish, multfish,  0,             ROT0,  "bootleg", "Island (bootleg, 050713, backdoor)", GAME_SUPPORTS_SAVE ) // backdoor 1,1 1,3 1,5 1,7  3,3  3,4
-GAME( 2005, islandb,     island_parent,   multfish, multfish,  customl,       ROT0,  "bootleg", "Island (bootleg, 050713, VIDEO GAME-1 OS01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, many texts changed, changed version text to "VIDEO GAME-1 OS01"
-GAME( 2005, islandc,     island_parent,   multfish, multfish,  customl,       ROT0,  "bootleg", "Island (bootleg, 050713, LOTOS OS01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, many texts changed, changed version text to "LOTOS OS01"
+ROM_START( fcockt2_4d ) // 081105 bank F9, no credit limit, "MaxVin" signature, payout percentage 70%
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "bootleg_fc2_m_081105c.rom", 0x00000, 0x40000,  CRC(b6d88fcc) SHA1(337a59accfbc229be05aff84ba70fc135fde09de) ) /* Not officially listed on Igrosoft's web site hash page */
 
-GAME( 2006, island2a,    island2_parent,  island2a, multfish,  0,             ROT0,  "bootleg", "Island 2 (bootleg, 060529, banking address hack)", GAME_SUPPORTS_SAVE ) // bank F9 (not standart, game not work)
-GAME( 2006, island2b,    island2_parent,  multfish, multfish,  0,             ROT0,  "bootleg", "Island 2 (bootleg, 060529, banking address hack, changed version text)", GAME_SUPPORTS_SAVE ) // bank F9, changed version text to 070205, skip some start tests
-GAME( 2006, island2c,    island2_parent,  multfish, multfish,  0,             ROT0,  "bootleg", "Island 2 (bootleg, 060529, LOTTOGAME (I))", GAME_SUPPORTS_SAVE ) // bank F9, modified graphics, changed version text to "MDS_is_the_best_ LOTTOGAME (I)"
-GAME( 2006, island2_3a,  island2_parent,  multfish, multfish,  0,             ROT0,  "bootleg", "Island 2 (bootleg, 061218, VIDEO GAME-1 OS2-01)", GAME_SUPPORTS_SAVE ) // bank F9, modified graphics, changed version text to "VIDEO GAME-1 OS2-01"
-GAME( 2006, island2_4a,  island2_parent,  multfish, multfish,  0,             ROT0,  "bootleg", "Island 2 (bootleg, 070205, banking address hack)", GAME_SUPPORTS_SAVE ) // bank F9
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "fruitcocktail2.001", 0x000000, 0x80000, CRC(d1b9416d) SHA1(4d3cb0a6dbcf02bbd20d5c43df358882b2ad794d) )
+	ROM_LOAD( "fruitcocktail2.002", 0x100000, 0x80000, CRC(69236be1) SHA1(9a2e6c8f279714f79a606c0b118b6bf1d8442cda) )
+	ROM_LOAD( "fruitcocktail2.003", 0x200000, 0x80000, CRC(29aade8c) SHA1(bef42f8a25c90e3a1cccd13872a10eb8b2b2e276) )
+	ROM_LOAD( "fruitcocktail2.004", 0x300000, 0x80000, CRC(4b9646e7) SHA1(26548a018401f4e07383eb145f8f0847677f3272) )
+	ROM_LOAD( "fruitcocktail2.005", 0x080000, 0x80000, CRC(3fc13d72) SHA1(ba0727138ef03d576d190cbce04b9eb0bba88a9a) )
+	ROM_LOAD( "fruitcocktail2.006", 0x180000, 0x80000, CRC(8fc75fd7) SHA1(3b7cd8a3e04ca9d4494b37c801e21d1293f094e8) )
+	ROM_LOAD( "fruitcocktail2.007", 0x280000, 0x80000, CRC(d37fcc0f) SHA1(57c2ea5dc747f16e2233305f2c73cb4b632aae2c) )
+	ROM_LOAD( "fruitcocktail2.008", 0x380000, 0x80000, CRC(e3a9442c) SHA1(cbaba182e858b0f158756118e5da873e3ddfc0b9) )
+ROM_END
 
-GAME( 2006, pirate2a,    pirate2_parent,  multfish, multfish,  0,             ROT0,  "bootleg", "Pirate 2 (bootleg, 061005, banking address hack set 1)", GAME_SUPPORTS_SAVE ) // bank F9
-GAME( 2006, pirate2b,    pirate2_parent,  multfish, multfish,  0,             ROT0,  "bootleg", "Pirate 2 (bootleg, 061005, banking address hack set 2)", GAME_SUPPORTS_SAVE ) // bank F9, skip raster beam position check
-GAME( 2006, pirate2c,    pirate2_parent,  multfish, multfish,  0,             ROT0,  "bootleg", "Pirate 2 (bootleg, 061005, banking address hack, changed version text set 1)", GAME_SUPPORTS_SAVE ) // bank F9, changed version text to 070126
-GAME( 2006, pirate2d,    pirate2_parent,  multfish, multfish,  0,             ROT0,  "bootleg", "Pirate 2 (bootleg, 061005, banking address hack, changed version text set 2)", GAME_SUPPORTS_SAVE ) // bank F9, changed version text to 070126
-GAME( 2006, pirate2e,    pirate2_parent,  multfish, multfish,  0,             ROT0,  "bootleg", "Pirate 2 (bootleg, 061005, banking address hack, changed version text set 3)", GAME_SUPPORTS_SAVE ) // bank F9, changed version text to 070126, skip some start tests
-GAME( 2006, pirate2f,    pirate2_parent,  multfish, multfish,  customl,       ROT0,  "bootleg", "Pirate 2 (bootleg, 061005, VIDEO GAME-1 PR01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, many texts changed, changed version text to "VIDEO GAME-1 PR01"
-GAME( 2006, pirate2g,    pirate2_parent,  multfish, multfish,  0,             ROT0,  "bootleg", "Pirate 2 (bootleg, 061005, LOTTOGAME (I))", GAME_SUPPORTS_SAVE ) // bank F9, modified graphics, changed version text to "MDS_is_the_best_ LOTTOGAME (I)"
-GAME( 2006, pirate2h,    pirate2_parent,  multfish, multfish,  customl,       ROT0,  "bootleg", "Pirate 2 (bootleg, 061005, LOTOS PR01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, many texts changed, changed version text to "LOTOS PR01"
-GAME( 2006, pirate2_2a,  pirate2_parent,  multfish, multfish,  0,             ROT0,  "bootleg", "Pirate 2 (bootleg, 070126, banking address hack)", GAME_SUPPORTS_SAVE ) // bank F9
+ROM_START( fcockt2_4e ) // 081105 bank F9, modified graphics, changed version text to "MDS_is_the_best_ LOTTOGAME (I)"
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "bootleg_fc2_m_081105d.rom", 0x00000, 0x40000,  CRC(37b1a159) SHA1(52c8e825ebb85a59803a6d14c766892e56a72c9e) ) /* Not officially listed on Igrosoft's web site hash page */
 
-GAME( 2006, keksa,       keks_parent,     multfish, multfish,  0,             ROT0,  "bootleg", "Keks (bootleg, 060328, banking address hack)", GAME_SUPPORTS_SAVE ) // bank F9
-GAME( 2006, keksb,       keks_parent,     multfish, multfish,  0,             ROT0,  "bootleg", "Keks (bootleg, 060328, backdoor)", GAME_SUPPORTS_SAVE ) // backdoor 1,1 1,3 1,5 1,7  3,3  3,4
-GAME( 2006, keksc,       keks_parent,     multfish, multfish,  0,             ROT0,  "bootleg", "Keks (bootleg, 060328, banking address hack, changed version text)", GAME_SUPPORTS_SAVE ) // bank F9, changed version text to 070119
-GAME( 2006, keks_2a,     keks_parent,     multfish, multfish,  0,             ROT0,  "bootleg", "Keks (bootleg, 060403, banking address hack)", GAME_SUPPORTS_SAVE ) // bank F9
-GAME( 2006, keks_2b,     keks_parent,     multfish, multfish,  0,             ROT0,  "bootleg", "Keks (bootleg, 060403, banking address hack, changed version text)", GAME_SUPPORTS_SAVE ) // bank F9, changed version text to 070119
-GAME( 2006, keks_2c,     keks_parent,     multfish, multfish,  customl,       ROT0,  "bootleg", "Keks (bootleg, 060403, VIDEO GAME-1 KS01 set 1)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, bank F9, changed version text to "VIDEO GAME-1 KS01"
-GAME( 2006, keks_2d,     keks_parent,     multfish, multfish,  0,             ROT0,  "bootleg", "Keks (bootleg, 060403, VIDEO GAME-1 KS01 set 2)", GAME_SUPPORTS_SAVE ) // modified graphics, bank F9, changed version text to "VIDEO GAME-1 KS01" (keks_2c, decoded gfx)
-GAME( 2006, keks_2e,     keks_parent,     multfish, multfish,  0,             ROT0,  "bootleg", "Keks (bootleg, 060403, banking address hack, payout percentage 60)", GAME_SUPPORTS_SAVE ) // bank F9, payout percentage 60%
-GAME( 2006, keks_2f,     keks_parent,     multfish, multfish,  0,             ROT0,  "bootleg", "Keks (bootleg, 060403, LOTTOGAME (I))", GAME_SUPPORTS_SAVE ) // bank F9, modified graphics, changed version text to "MDS_is_the_best_ LOTTOGAME (I)"
-GAME( 2006, keks_2g,     keks_parent,     multfish, multfish,  customl,       ROT0,  "bootleg", "Keks (bootleg, 060403, LOTOS KS01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, bank F9, many texts changed, changed version text to "LOTOS KS01"
-GAME( 2006, keks_3a,     keks_parent,     multfish, multfish,  0,             ROT0,  "bootleg", "Keks (bootleg, 070119, banking address hack set 1)", GAME_SUPPORTS_SAVE ) // bank F9
-GAME( 2006, keks_3b,     keks_parent,     multfish, multfish,  0,             ROT0,  "bootleg", "Keks (bootleg, 070119, banking address hack set 2)", GAME_SUPPORTS_SAVE ) // bank F9
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "bootleg_1c", 0x000000, 0x80000, CRC(9fe02e19) SHA1(dec48a0990d2341ae86a3a4acd5972844b93fccb) )
+	ROM_LOAD( "bootleg_2c", 0x100000, 0x80000, CRC(734bd656) SHA1(e44124fd60675cfc8319bca5bbd90f99d73f4896) )
+	ROM_LOAD( "bootleg_3c", 0x200000, 0x80000, CRC(36ff74dc) SHA1(7df93e4fa1c240adf33ef910efb8397abfa1a106) )
+	ROM_LOAD( "bootleg_4c", 0x300000, 0x80000, CRC(b88356c9) SHA1(fbdcfc0d30f2a9b1364863d7a06b32f94113e865) )
+	ROM_LOAD( "bootleg_5c", 0x080000, 0x80000, CRC(14053302) SHA1(adf0a1493074d16797e8d19dc98f2d5d2cb26e43) )
+	ROM_LOAD( "bootleg_6c", 0x180000, 0x80000, CRC(21a91970) SHA1(6f4832c743469171cd0efe4554f243c4bed21e88) )
+	ROM_LOAD( "bootleg_7c", 0x280000, 0x80000, CRC(3a8a7340) SHA1(9408791686926dd13216352ffcb04ad9f8954b3e) )
+	ROM_LOAD( "bootleg_8c", 0x380000, 0x80000, CRC(fbf48ebd) SHA1(04917e613d9a3f0caeab71c78b9f77c4b5b84988) )
+ROM_END
 
-GAME( 2007, gnomea,      gnome_parent,    multfish, multfish,  0,             ROT0, "bootleg",  "Gnome (bootleg, 070906, banking address hack set 1)", GAME_SUPPORTS_SAVE ) // bank F9
-GAME( 2007, gnomeb,      gnome_parent,    multfish, multfish,  0,             ROT0, "bootleg",  "Gnome (bootleg, 070906, banking address hack set 2)", GAME_SUPPORTS_SAVE ) // bank F9
-GAME( 2007, gnomec,      gnome_parent,    multfish, multfish,  0,             ROT0, "bootleg",  "Gnome (bootleg, 070906, banking address hack set 3)", GAME_SUPPORTS_SAVE ) // bank F9
-GAME( 2007, gnomed,      gnome_parent,    multfish, multfish,  customl,       ROT0, "bootleg",  "Gnome (bootleg, 070906, VIDEO GAME-1 GN01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, many texts changed, changed version text to "VIDEO GAME-1 GN01"
-GAME( 2007, gnomee,      gnome_parent,    multfish, multfish,  customl,       ROT0, "bootleg",  "Gnome (bootleg, 070906, LOTOS GN01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, bank F9, many texts changed, changed version text to "LOTOS GN01"
-GAME( 2007, gnome_2a,    gnome_parent,    multfish, multfish,  0,             ROT0, "bootleg",  "Gnome (bootleg, 071115, banking address hack)", GAME_SUPPORTS_SAVE ) // bank F9
+ROM_START( fcockt2_4f ) // 081105 custom alteras, modified graphics, bank F9, many texts changed, changed version text to "LOTOS FR02"
+	ROM_REGION( 0x40000, "maincpu", 0 ) // z80 code, banked
+	ROM_LOAD( "bootleg_fc2_m_081105f.rom", 0x00000, 0x40000,  CRC(b4fa0663) SHA1(aee3cb980fc7d9fbba1a4e9fe80e6be8df58bb3b) ) /* Not officially listed on Igrosoft's web site hash page */
 
+	ROM_REGION( 0x400000, "gfx", 0 )
+	ROM_LOAD( "bootleg_1e", 0x000000, 0x80000, CRC(3c72a5e2) SHA1(15e07d64a0d633ccdadea9eb55556e6aa239c0e5) )
+	ROM_LOAD( "bootleg_2e", 0x100000, 0x80000, CRC(017a61f7) SHA1(023cec2be1cfe885c562415d18fc32edf3c61346) )
+	ROM_LOAD( "bootleg_3e", 0x200000, 0x80000, CRC(8ea5532f) SHA1(498991cfb7a92c3a6342e824a310c7edc5577cff) )
+	ROM_LOAD( "bootleg_4e", 0x300000, 0x80000, CRC(c879025f) SHA1(93f77787ded2a4353320dcb9d4d1b1f5dd7a3b13) )
+	ROM_LOAD( "bootleg_5b", 0x080000, 0x80000, CRC(b47d65aa) SHA1(71c642ea7887ea35c6d7d985502082d2424c035a) )
+	ROM_LOAD( "bootleg_6b", 0x180000, 0x80000, CRC(aa982f4e) SHA1(edf75d4ddd60532ac0ca2e17e3fd9004aa768973) )
+	ROM_LOAD( "bootleg_7b", 0x280000, 0x80000, CRC(b9b1ead7) SHA1(111e505fce8fe75043ff7cc5dc68e81ce4f98d06) )
+	ROM_LOAD( "bootleg_8b", 0x380000, 0x80000, CRC(8e49d1c1) SHA1(4735503335cf499895d1b2d9a405be50f21a2d68) )
+ROM_END
+
+
+GAME( 2002, mfish_3a,    mfish_parent,    multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Multi Fish (bootleg, 021124, banking address hack)", GAME_SUPPORTS_SAVE ) // bank F9
+GAME( 2002, mfish_12a,   mfish_parent,    multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Multi Fish (bootleg, 040308, banking address hack)", GAME_SUPPORTS_SAVE ) // bank F9
+
+GAME( 2003, crzmon_7a,   crzmon_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Crazy Monkey (bootleg, 031110, backdoor set 1)", GAME_SUPPORTS_SAVE ) // backdoor 1,1 1,3 1,5 1,7  3,3  3,4
+GAME( 2003, crzmon_7b,   crzmon_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Crazy Monkey (bootleg, 031110, backdoor set 2)", GAME_SUPPORTS_SAVE ) // backdoor 1,5 5,5 1,7 3,2  3,3  3,4
+GAME( 2003, crzmon_8a,   crzmon_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Crazy Monkey (bootleg, 050120, backdoor)", GAME_SUPPORTS_SAVE ) // backdoor 1,1 1,3 1,5 1,7  3,3  3,4
+GAME( 2003, crzmon_8b,   crzmon_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Crazy Monkey (bootleg, 050120, changed version text)", GAME_SUPPORTS_SAVE ) // changed version text to 070315
+GAME( 2003, crzmon_8c,   crzmon_parent,   multfish, multfish, multfish_state,  customl,       ROT0,  "bootleg", "Crazy Monkey (bootleg, 050120, VIDEO GAME-1 CM01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, changed version text to "VIDEO GAME-1 CM01"
+GAME( 2003, crzmon_8d,   crzmon_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Crazy Monkey (bootleg, 050120, LOTTOGAME (I))", GAME_SUPPORTS_SAVE ) // modified graphics, changed version text to "MDS_is_the_best_ LOTTOGAME (I)"
+GAME( 2003, crzmon_8e,   crzmon_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Crazy Monkey (bootleg, 050120, LOTO PROGRAM V-CM2)", GAME_SUPPORTS_SAVE ) // modified graphics, many texts changed, changed version text to "LOTO PROGRAM V-CM2"
+GAME( 2003, crzmon_8f,   crzmon_parent,   multfish, multfish, multfish_state,  customl,       ROT0,  "bootleg", "Crazy Monkey (bootleg, 050120, LOTOS CM01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, many texts changed, changed version text to "LOTOS CM01"
+GAME( 2003, crzmon_9a,   crzmon_parent,   multfish, multfish, multfish_state,  customl,       ROT0,  "bootleg", "Crazy Monkey (bootleg, 070315, VIDEO GAME-1 O01 set 1)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, changed version text to "VIDEO GAME-1 O01"
+GAME( 2003, crzmon_9b,   crzmon_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Crazy Monkey (bootleg, 070315, VIDEO GAME-1 O01 set 2)", GAME_SUPPORTS_SAVE ) // modified graphics, changed version text to "VIDEO GAME-1 O01" (crzmon_9a, decoded gfx)
+GAME( 2003, crzmon_9c,   crzmon_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Crazy Monkey (bootleg, 070315, payout percentage 70)", GAME_SUPPORTS_SAVE ) // payout percentage 70%
+
+GAME( 2003, fcockt_6a,   fcockt_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Fruit Cocktail (bootleg, 040216, banking address hack)", GAME_SUPPORTS_SAVE ) // bank F8
+GAME( 2003, fcockt_6b,   fcockt_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Fruit Cocktail (bootleg, 040216, backdoor)", GAME_SUPPORTS_SAVE ) // backdoor 1,1 1,3 1,5 1,7  3,3  3,4
+GAME( 2003, fcockt_6c,   fcockt_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Fruit Cocktail (bootleg, 040216, LotoRossy+)", GAME_SUPPORTS_SAVE ) // modified graphics, some code changes, description says "for Lat-02 terminals", older set
+GAME( 2003, fcockt_6d,   fcockt_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Fruit Cocktail (bootleg, 040216, VIDEO GAME-1 FR01)", GAME_SUPPORTS_SAVE ) // modified graphics, some code changes, changed version text to "VIDEO GAME-1 FR01", description says "for Lat-02 terminals", newer set
+GAME( 2003, fcockt_7a,   fcockt_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Fruit Cocktail (bootleg, 050118, backdoor)", GAME_SUPPORTS_SAVE ) // backdoor 1,1 1,3 1,5 1,7  3,3  3,4
+GAME( 2003, fcockt_7b,   fcockt_parent,   multfish, multfish, multfish_state,  customl,       ROT0,  "bootleg", "Fruit Cocktail (bootleg, 050118, VIDEO GAME-1 FR01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, many texts changed, changed version text to "VIDEO GAME-1 FR01"
+GAME( 2003, fcockt_7c,   fcockt_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Fruit Cocktail (bootleg, 050118, payout percentage 40)", GAME_SUPPORTS_SAVE ) // payout percentage 40%
+GAME( 2003, fcockt_7d,   fcockt_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Fruit Cocktail (bootleg, 050118, payout percentage 60)", GAME_SUPPORTS_SAVE ) // payout percentage 60%
+GAME( 2003, fcockt_7e,   fcockt_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Fruit Cocktail (bootleg, 050118, payout percentage 70)", GAME_SUPPORTS_SAVE ) // payout percentage 70%
+GAME( 2003, fcockt_7f,   fcockt_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Fruit Cocktail (bootleg, 050118, changed version text)", GAME_SUPPORTS_SAVE ) // changed version text to 070305
+GAME( 2003, fcockt_7g,   fcockt_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Fruit Cocktail (bootleg, 050118, LOTO PROGRAM V-FC2)", GAME_SUPPORTS_SAVE ) // modified graphics, many texts changed, changed version text to "LOTO PROGRAM V-FC2"
+GAME( 2003, fcockt_7h,   fcockt_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Fruit Cocktail (bootleg, 050118, LOTOS FR01)", GAME_SUPPORTS_SAVE ) // modified graphics, many texts changed, changed version text to "LOTOS FR01"
+GAME( 2003, fcockt_8a,   fcockt_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Fruit Cocktail (bootleg, 060111, LOTO COCKTAIL V01-0001)", GAME_SUPPORTS_SAVE ) // modified graphics, many texts changed, changed version text to "LOTO COCKTAIL V01-0001"
+GAME( 2003, fcockt_8b,   fcockt_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Fruit Cocktail (bootleg, 060111, LOTTOGAME (I))", GAME_SUPPORTS_SAVE ) // modified graphics, changed version text to "MDS_is_the_best_ LOTTOGAME (I)"
+
+GAME( 2003, lhaunt_4a,   lhaunt_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Lucky Haunter (bootleg, 031111, backdoor)", GAME_SUPPORTS_SAVE ) // backdoor 1,1 1,3 1,5 1,7  3,3  3,4
+GAME( 2003, lhaunt_5a,   lhaunt_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Lucky Haunter (bootleg, 040216, backdoor)", GAME_SUPPORTS_SAVE ) // backdoor 1,1 1,3 1,5 1,7  3,3  3,4
+GAME( 2003, lhaunt_6a,   lhaunt_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Lucky Haunter (bootleg, 040825, backdoor)", GAME_SUPPORTS_SAVE ) // backdoor 1,5 9,1 5,1 1,5  3,3  3,4
+GAME( 2003, lhaunt_6b,   lhaunt_parent,   multfish, multfish, multfish_state,  customl,       ROT0,  "bootleg", "Lucky Haunter (bootleg, 040825, VIDEO GAME-1 PB01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, many texts changed, changed version text to "VIDEO GAME-1 PB01"
+GAME( 2003, lhaunt_6c,   lhaunt_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Lucky Haunter (bootleg, 040825, changed version text)", GAME_SUPPORTS_SAVE ) // changed version text to 070604
+GAME( 2003, lhaunt_6d,   lhaunt_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Lucky Haunter (bootleg, 040825, LOTTOGAME (I))", GAME_SUPPORTS_SAVE ) // modified graphics, changed version text to "MDS_is_the_best_ LOTTOGAME (I)"
+GAME( 2003, lhaunt_6e,   lhaunt_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Lucky Haunter (bootleg, 040825, LOTO PROGRAM V-LH2)", GAME_SUPPORTS_SAVE ) // modified graphics, many texts changed, changed version text to "LOTO PROGRAM V-LH2"
+GAME( 2003, lhaunt_6f,   lhaunt_parent,   multfish, multfish, multfish_state,  customl,       ROT0,  "bootleg", "Lucky Haunter (bootleg, 040825, LOTOS PB01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, many texts changed, changed version text to "LOTOS PB01"
+
+GAME( 2004, garage_4a,   garage_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Garage (bootleg, 040219, backdoor)", GAME_SUPPORTS_SAVE ) // backdoor 1,1 1,3 1,5 1,7  3,3  3,4
+GAME( 2004, garage_4b,   garage_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Garage (bootleg, 040219, changed version text)", GAME_SUPPORTS_SAVE ) // changed version text to 070329
+GAME( 2004, garage_4c,   garage_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Garage (bootleg, 040219, LOTO PROGRAM V-GG2)", GAME_SUPPORTS_SAVE ) // modified graphics, many texts changed, changed version text to "LOTO PROGRAM V-GG2"
+GAME( 2004, garage_5a,   garage_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Garage (bootleg, 050311, backdoor)", GAME_SUPPORTS_SAVE ) // backdoor 1,1 1,3 1,5 1,7  3,3  3,4
+GAME( 2004, garage_5b,   garage_parent,   multfish, multfish, multfish_state,  customl,       ROT0,  "bootleg", "Garage (bootleg, 050311, VIDEO GAME-1 GA01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, changed version text to "VIDEO GAME-1 GA01"
+GAME( 2004, garage_5c,   garage_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Garage (bootleg, 050311, payout percentage 70)", GAME_SUPPORTS_SAVE ) // payout percentage 70%
+GAME( 2004, garage_5d,   garage_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Garage (bootleg, 050311, LOTTOGAME (I))", GAME_SUPPORTS_SAVE ) // modified graphics, changed version text to "MDS_is_the_best_ LOTTOGAME (I)"
+GAME( 2004, garage_5e,   garage_parent,   multfish, multfish, multfish_state,  customl,       ROT0,  "bootleg", "Garage (bootleg, 050311, LOTOS GA01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, many texts changed, changed version text to "LOTOS GA01"
+
+GAME( 2004, rclimb_3a,   rclimb_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Rock Climber (bootleg, 040827, backdoor)", GAME_SUPPORTS_SAVE ) // backdoor 1,5 9,1 5,1 1,5  3,3  3,4
+GAME( 2004, rclimb_3b,   rclimb_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Rock Climber (bootleg, 040827, new service menu)", GAME_SUPPORTS_SAVE ) // new service menu
+GAME( 2004, rclimb_3c,   rclimb_parent,   multfish, multfish, multfish_state,  customl,       ROT0,  "bootleg", "Rock Climber (bootleg, 040827, VIDEO GAME-1 SK01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, many texts changed, changed version text to "VIDEO GAME-1 SK01"
+GAME( 2004, rclimb_3d,   rclimb_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Rock Climber (bootleg, 040827, LOTTOGAME (I))", GAME_SUPPORTS_SAVE ) // modified graphics, changed version text to "MDS_is_the_best_ LOTTOGAME (I)"
+GAME( 2004, rclimb_3e,   rclimb_parent,   multfish, multfish, multfish_state,  customl,       ROT0,  "bootleg", "Rock Climber (bootleg, 040827, LOTOS SK01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, many texts changed, changed version text to "LOTOS SK01"
+
+GAME( 2004, sweetla,     sweetl_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Sweet Life (bootleg, 041220, backdoor)", GAME_SUPPORTS_SAVE ) // backdoor 1,5 9,1 5,3 1,5  3,3  3,4
+GAME( 2004, sweetlb,     sweetl_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Sweet Life (bootleg, 041220, banking address hack, changed version text)", GAME_SUPPORTS_SAVE ) // bank F9, changed version text to 070412
+
+GAME( 2004, resdnt_2a,   resdnt_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Resident (bootleg, 040513, backdoor)", GAME_SUPPORTS_SAVE ) // backdoor 1,5 9,1 5,1 1,5  3,3  3,4
+GAME( 2004, resdnt_2b,   resdnt_parent,   multfish, multfish, multfish_state,  customl,       ROT0,  "bootleg", "Resident (bootleg, 040513, VIDEO GAME-1 SE01 set 1)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, changed version text to "VIDEO GAME-1 SE01"
+GAME( 2004, resdnt_2c,   resdnt_parent,   multfish, multfish, multfish_state,  customl,       ROT0,  "bootleg", "Resident (bootleg, 040513, VIDEO GAME-1 SE01 set 2)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, changed version text to "VIDEO GAME-1 SE01"
+GAME( 2004, resdnt_2d,   resdnt_parent,   multfish, multfish, multfish_state,  customl,       ROT0,  "bootleg", "Resident (bootleg, 040513, VIDEO GAME-1 SE01 set 3)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, many texts changed, changed version text to "VIDEO GAME-1 SE01"
+GAME( 2004, resdnt_2e,   resdnt_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Resident (bootleg, 040513, LOTTOGAME (I))", GAME_SUPPORTS_SAVE ) // modified graphics, changed version text to "MDS_is_the_best_ LOTTOGAME (I)"
+GAME( 2004, resdnt_2f,   resdnt_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Resident (bootleg, 040513, LOTO PROGRAM V-RS2)", GAME_SUPPORTS_SAVE ) // modified graphics, many texts changed, changed version text to "LOTO PROGRAM V-RS2"
+GAME( 2004, resdnt_2g,   resdnt_parent,   multfish, multfish, multfish_state,  customl,       ROT0,  "bootleg", "Resident (bootleg, 040513, LOTOS SE01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, many texts changed, changed version text to "LOTOS SE01"
+
+GAME( 2005, islanda,     island_parent,   multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Island (bootleg, 050713, backdoor)", GAME_SUPPORTS_SAVE ) // backdoor 1,1 1,3 1,5 1,7  3,3  3,4
+GAME( 2005, islandb,     island_parent,   multfish, multfish, multfish_state,  customl,       ROT0,  "bootleg", "Island (bootleg, 050713, VIDEO GAME-1 OS01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, many texts changed, changed version text to "VIDEO GAME-1 OS01"
+GAME( 2005, islandc,     island_parent,   multfish, multfish, multfish_state,  customl,       ROT0,  "bootleg", "Island (bootleg, 050713, LOTOS OS01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, many texts changed, changed version text to "LOTOS OS01"
+
+GAME( 2006, island2a,    island2_parent,  island2a, multfish, driver_device,  0,             ROT0,  "bootleg", "Island 2 (bootleg, 060529, banking address hack)", GAME_SUPPORTS_SAVE ) // bank F9 (not standart, game not work)
+GAME( 2006, island2b,    island2_parent,  multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Island 2 (bootleg, 060529, banking address hack, changed version text)", GAME_SUPPORTS_SAVE ) // bank F9, changed version text to 070205, skip some start tests
+GAME( 2006, island2c,    island2_parent,  multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Island 2 (bootleg, 060529, LOTTOGAME (I))", GAME_SUPPORTS_SAVE ) // bank F9, modified graphics, changed version text to "MDS_is_the_best_ LOTTOGAME (I)"
+GAME( 2006, island2_3a,  island2_parent,  multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Island 2 (bootleg, 061218, VIDEO GAME-1 OS2-01)", GAME_SUPPORTS_SAVE ) // bank F9, modified graphics, changed version text to "VIDEO GAME-1 OS2-01"
+GAME( 2006, island2_4a,  island2_parent,  multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Island 2 (bootleg, 070205, banking address hack)", GAME_SUPPORTS_SAVE ) // bank F9
+
+GAME( 2006, pirate2a,    pirate2_parent,  multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Pirate 2 (bootleg, 061005, banking address hack set 1)", GAME_SUPPORTS_SAVE ) // bank F9
+GAME( 2006, pirate2b,    pirate2_parent,  multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Pirate 2 (bootleg, 061005, banking address hack set 2)", GAME_SUPPORTS_SAVE ) // bank F9, skip raster beam position check
+GAME( 2006, pirate2c,    pirate2_parent,  multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Pirate 2 (bootleg, 061005, banking address hack, changed version text set 1)", GAME_SUPPORTS_SAVE ) // bank F9, changed version text to 070126
+GAME( 2006, pirate2d,    pirate2_parent,  multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Pirate 2 (bootleg, 061005, banking address hack, changed version text set 2)", GAME_SUPPORTS_SAVE ) // bank F9, changed version text to 070126
+GAME( 2006, pirate2e,    pirate2_parent,  multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Pirate 2 (bootleg, 061005, banking address hack, changed version text set 3)", GAME_SUPPORTS_SAVE ) // bank F9, changed version text to 070126, skip some start tests
+GAME( 2006, pirate2f,    pirate2_parent,  multfish, multfish, multfish_state,  customl,       ROT0,  "bootleg", "Pirate 2 (bootleg, 061005, VIDEO GAME-1 PR01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, many texts changed, changed version text to "VIDEO GAME-1 PR01"
+GAME( 2006, pirate2g,    pirate2_parent,  multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Pirate 2 (bootleg, 061005, LOTTOGAME (I))", GAME_SUPPORTS_SAVE ) // bank F9, modified graphics, changed version text to "MDS_is_the_best_ LOTTOGAME (I)"
+GAME( 2006, pirate2h,    pirate2_parent,  multfish, multfish, multfish_state,  customl,       ROT0,  "bootleg", "Pirate 2 (bootleg, 061005, LOTOS PR01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, many texts changed, changed version text to "LOTOS PR01"
+GAME( 2006, pirate2_2a,  pirate2_parent,  multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Pirate 2 (bootleg, 070126, banking address hack)", GAME_SUPPORTS_SAVE ) // bank F9
+
+GAME( 2006, keksa,       keks_parent,     multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Keks (bootleg, 060328, banking address hack)", GAME_SUPPORTS_SAVE ) // bank F9
+GAME( 2006, keksb,       keks_parent,     multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Keks (bootleg, 060328, backdoor)", GAME_SUPPORTS_SAVE ) // backdoor 1,1 1,3 1,5 1,7  3,3  3,4
+GAME( 2006, keksc,       keks_parent,     multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Keks (bootleg, 060328, banking address hack, changed version text)", GAME_SUPPORTS_SAVE ) // bank F9, changed version text to 070119
+GAME( 2006, keks_2a,     keks_parent,     multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Keks (bootleg, 060403, banking address hack)", GAME_SUPPORTS_SAVE ) // bank F9
+GAME( 2006, keks_2b,     keks_parent,     multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Keks (bootleg, 060403, banking address hack, changed version text)", GAME_SUPPORTS_SAVE ) // bank F9, changed version text to 070119
+GAME( 2006, keks_2c,     keks_parent,     multfish, multfish, multfish_state,  customl,       ROT0,  "bootleg", "Keks (bootleg, 060403, VIDEO GAME-1 KS01 set 1)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, bank F9, changed version text to "VIDEO GAME-1 KS01"
+GAME( 2006, keks_2d,     keks_parent,     multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Keks (bootleg, 060403, VIDEO GAME-1 KS01 set 2)", GAME_SUPPORTS_SAVE ) // modified graphics, bank F9, changed version text to "VIDEO GAME-1 KS01" (keks_2c, decoded gfx)
+GAME( 2006, keks_2e,     keks_parent,     multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Keks (bootleg, 060403, banking address hack, payout percentage 60)", GAME_SUPPORTS_SAVE ) // bank F9, payout percentage 60%
+GAME( 2006, keks_2f,     keks_parent,     multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Keks (bootleg, 060403, LOTTOGAME (I))", GAME_SUPPORTS_SAVE ) // bank F9, modified graphics, changed version text to "MDS_is_the_best_ LOTTOGAME (I)"
+GAME( 2006, keks_2g,     keks_parent,     multfish, multfish, multfish_state,  customl,       ROT0,  "bootleg", "Keks (bootleg, 060403, LOTOS KS01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, bank F9, many texts changed, changed version text to "LOTOS KS01"
+GAME( 2006, keks_3a,     keks_parent,     multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Keks (bootleg, 070119, banking address hack set 1)", GAME_SUPPORTS_SAVE ) // bank F9
+GAME( 2006, keks_3b,     keks_parent,     multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Keks (bootleg, 070119, banking address hack set 2)", GAME_SUPPORTS_SAVE ) // bank F9
+
+GAME( 2007, gnomea,      gnome_parent,    multfish, multfish, driver_device,  0,             ROT0, "bootleg",  "Gnome (bootleg, 070906, banking address hack set 1)", GAME_SUPPORTS_SAVE ) // bank F9
+GAME( 2007, gnomeb,      gnome_parent,    multfish, multfish, driver_device,  0,             ROT0, "bootleg",  "Gnome (bootleg, 070906, banking address hack set 2)", GAME_SUPPORTS_SAVE ) // bank F9
+GAME( 2007, gnomec,      gnome_parent,    multfish, multfish, driver_device,  0,             ROT0, "bootleg",  "Gnome (bootleg, 070906, banking address hack set 3)", GAME_SUPPORTS_SAVE ) // bank F9
+GAME( 2007, gnomed,      gnome_parent,    multfish, multfish, multfish_state,  customl,       ROT0, "bootleg",  "Gnome (bootleg, 070906, VIDEO GAME-1 GN01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, many texts changed, changed version text to "VIDEO GAME-1 GN01"
+GAME( 2007, gnomee,      gnome_parent,    multfish, multfish, multfish_state,  customl,       ROT0, "bootleg",  "Gnome (bootleg, 070906, LOTOS GN01)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, bank F9, many texts changed, changed version text to "LOTOS GN01"
+GAME( 2007, gnome_2a,    gnome_parent,    multfish, multfish, driver_device,  0,             ROT0, "bootleg",  "Gnome (bootleg, 071115, banking address hack)", GAME_SUPPORTS_SAVE ) // bank F9
+GAME( 2007, gnome_3a,    gnome_parent,    multfish, multfish, driver_device,  0,             ROT0, "bootleg",  "Gnome (bootleg, 080303, banking address hack)", GAME_SUPPORTS_SAVE ) // bank F9
+GAME( 2007, gnome_3b,    gnome_parent,    multfish, multfish, driver_device,  0,             ROT0, "bootleg",  "Gnome (bootleg, 080303, banking address hack, payout percentage 45)", GAME_SUPPORTS_SAVE ) // bank F9 payout percentage 45%
+GAME( 2007, gnome_3c,    gnome_parent,    multfish, multfish, driver_device,  0,             ROT0, "bootleg",  "Gnome (bootleg, 080303, banking address hack, payout percentage 60)", GAME_SUPPORTS_SAVE ) // bank F9 payout percentage 60%
+GAME( 2007, gnome_5a,    gnome_parent,    multfish, multfish, driver_device,  0,             ROT0, "bootleg",  "Gnome (bootleg, 090406, banking address hack, payout percentage 70)", GAME_SUPPORTS_SAVE ) // bank F9, payout percentage 70%
+GAME( 2007, gnome_5b,    gnome_parent,    multfish, multfish, driver_device,  0,             ROT0, "bootleg",  "Gnome (bootleg, 090406, LOTTOGAME (I))", GAME_SUPPORTS_SAVE ) // bank F9, modified graphics, changed version text to "MDS_is_the_best_ LOTTOGAME (I)"
+
+GAME( 2007, sweetl2_2a,  sweetl2_parent,  multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Sweet Life 2 (bootleg, 080320, banking address hack set 1)", GAME_SUPPORTS_SAVE ) // bank F9
+GAME( 2007, sweetl2_2b,  sweetl2_parent,  multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Sweet Life 2 (bootleg, 080320, banking address hack set 2)", GAME_SUPPORTS_SAVE ) // bank F9, some fixes
+GAME( 2007, sweetl2_2c,  sweetl2_parent,  multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Sweet Life 2 (bootleg, 080320, VIDEO GAME-1 MD01)", GAME_SUPPORTS_SAVE ) // modified graphics, bank F9, changed version text to "VIDEO GAME-1 MD01"
+GAME( 2007, sweetl2_2d,  sweetl2_parent,  multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Sweet Life 2 (bootleg, 080320, LOTTOGAME (I))", GAME_SUPPORTS_SAVE ) // bank F9, modified graphics, changed version text to "MDS_is_the_best_ LOTTOGAME (I)"
+
+GAME( 2008, fcockt2a,    fcockt2_parent,  multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Fruit Cocktail 2 (bootleg, 080707, banking address hack)", GAME_SUPPORTS_SAVE ) // bank F9
+GAME( 2008, fcockt2_4a,  fcockt2_parent,  multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Fruit Cocktail 2 (bootleg, 081105, banking address hack)", GAME_SUPPORTS_SAVE ) // bank F9
+GAME( 2008, fcockt2_4b,  fcockt2_parent,  multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Fruit Cocktail 2 (bootleg, 081105, banking address hack, no credit limit)", GAME_SUPPORTS_SAVE ) // bank F9, no credit limit, "MaxVin" signature
+GAME( 2008, fcockt2_4c,  fcockt2_parent,  multfish, multfish, multfish_state,  customl,       ROT0,  "bootleg", "Fruit Cocktail 2 (bootleg, 081105, VIDEO GAME-1 FR02)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, bank F9, many texts changed, changed version text to "VIDEO GAME-1 FR02"
+GAME( 2008, fcockt2_4d,  fcockt2_parent,  multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Fruit Cocktail 2 (bootleg, 081105, banking address hack, payout percentage 70)", GAME_SUPPORTS_SAVE ) // bank F9, no credit limit, "MaxVin" signature, payout percentage 70%
+GAME( 2008, fcockt2_4e,  fcockt2_parent,  multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Fruit Cocktail 2 (bootleg, 081105, LOTTOGAME (I))", GAME_SUPPORTS_SAVE ) // bank F9, modified graphics, changed version text to "MDS_is_the_best_ LOTTOGAME (I)"
+GAME( 2008, fcockt2_4f,  fcockt2_parent,  multfish, multfish, multfish_state,  customl,       ROT0,  "bootleg", "Fruit Cocktail 2 (bootleg, 081105, LOTOS FR02)", GAME_SUPPORTS_SAVE ) // custom alteras, modified graphics, bank F9, many texts changed, changed version text to "LOTOS FR02"
+
+
+/* 0x000000 - 0x03ffff Crazy Monkey V03-1110
+   0x040000 - 0x07ffff Garage V05-0311
+   0x080000 - 0x0bffff Lucky Haunter V04-0825
+   0x0c0000 - 0x0fffff Island 2  IS2-060529
+   0x100000 - 0x13ffff Fruit Cocktail V05-0118
+   0x140000 - 0x17ffff Resident  V04-0513
+   0x180000 - 0x1bffff Rock Climber RC040827
+   0x1c0000 - 0x1fffff xxxx MENU xxxx  ( Lucky Haunter V04-0825 service mode )
+   0x200000 - 0x23ffff Pirate PR060210
+   0x240000 - 0x27ffff Sweet Life SL041220
+   0x280000 - 0x2bffff Keks KS060403
+   0x2c0000 - 0x2fffff xxxx MENU xxxx  ( Lucky Haunter V04-0825 service mode )
+   0x300000 - 0x33ffff NOTHING
+   0x340000 - 0x37ffff NOTHING
+   0x380000 - 0x3bffff NOTHING
+   0x3c0000 - 0x3fffff NOTHING
+*/
+ROM_START( igromult )
+	ROM_REGION( 0x400000, "maincpu", 0 )
+	ROM_LOAD( "10games.320.bin", 0x0000, 0x400000, CRC(94e5b2e1) SHA1(62544a5b3de02b5f323478dbae19ef2409af2529) )
+
+	ROM_REGION( 0x4000000, "gfx", 0 ) /* There should be 64MB worth of FLASH ROM for the gfx, the menu GFX are unique at least (not in any Igrosoft set) */
+	ROM_LOAD( "10games.gfx", 0x000000, 0x4000000, NO_DUMP )
+ROM_END
+
+/* 0x000000 - 0x03ffff Crazy Monkey V03-1110
+   0x040000 - 0x07ffff Garage V05-0311
+   0x080000 - 0x0bffff Lucky Haunter V04-0825
+   0x0c0000 - 0x0fffff Island 2  IS2-060529
+   0x100000 - 0x13ffff Fruit Cocktail V05-0118
+   0x140000 - 0x17ffff Resident  V04-0513
+   0x180000 - 0x1bffff Rock Climber RC040827
+   0x1c0000 - 0x1fffff Pirate PR060210
+   0x200000 - 0x23ffff Sweet Life SL041220
+   0x240000 - 0x27ffff Keks KS060403
+   0x280000 - 0x2bffff Gnome M GNM-080303
+   0x2c0000 - 0x2fffff Multifish 4Game V04-0308
+   0x300000 - 0x33ffff Pirate 2 PR2-061005
+   0x340000 - 0x37ffff F Cocktail 2 FC2M-081105
+   0x380000 - 0x3bffff Sweet Life 2 - SL2M-080320
+   0x3c0000 - 0x3fffff  xxxx MENU xxxx  ( Lucky Haunter V04-0825 service mode )
+*/
+
+ROM_START( igromula )
+	ROM_REGION( 0x400000, "maincpu", 0 )
+	ROM_LOAD( "15games.320.bin", 0x0000, 0x400000, CRC(1cfd520d) SHA1(7316b883a13ff98fc7c3ff05aa085f1fb8e0bdcd) )
+
+	ROM_REGION( 0x4000000, "gfx", 0 ) /* There should be 64MB worth of FLASH ROM for the gfx, the menu GFX are unique at least (not in any Igrosoft set) */
+	ROM_LOAD( "15games.gfx", 0x000000, 0x4000000, NO_DUMP )
+ROM_END
+
+GAME( 2003, igromult,   0,        multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Igrosoft Multigame Bootleg (10 Games)", GAME_NOT_WORKING ) // no GFX roms
+GAME( 2003, igromula,   igromult, multfish, multfish, driver_device,  0,             ROT0,  "bootleg", "Igrosoft Multigame Bootleg (15 Games)", GAME_NOT_WORKING ) // no GFX roms

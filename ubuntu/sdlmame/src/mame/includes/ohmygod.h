@@ -7,14 +7,15 @@
 class ohmygod_state : public driver_device
 {
 public:
-	ohmygod_state(running_machine &machine, const driver_device_config_base &config)
-		: driver_device(machine, config) { }
+	ohmygod_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag) ,
+		m_videoram(*this, "videoram"),
+		m_spriteram(*this, "spriteram"){ }
 
 
 	/* memory pointers */
-	UINT16 *    m_videoram;
-	UINT16 *    m_spriteram;
-	size_t      m_spriteram_size;
+	required_shared_ptr<UINT16> m_videoram;
+	required_shared_ptr<UINT16> m_spriteram;
 
 	/* video-related */
 	tilemap_t    *m_bg_tilemap;
@@ -25,15 +26,16 @@ public:
 	/* misc */
 	int m_adpcm_bank_shift;
 	int m_sndbank;
+	DECLARE_WRITE16_MEMBER(ohmygod_ctrl_w);
+	DECLARE_WRITE16_MEMBER(ohmygod_videoram_w);
+	DECLARE_WRITE16_MEMBER(ohmygod_spritebank_w);
+	DECLARE_WRITE16_MEMBER(ohmygod_scrollx_w);
+	DECLARE_WRITE16_MEMBER(ohmygod_scrolly_w);
+	DECLARE_DRIVER_INIT(ohmygod);
+	DECLARE_DRIVER_INIT(naname);
+	TILE_GET_INFO_MEMBER(get_tile_info);
+	virtual void machine_start();
+	virtual void machine_reset();
+	virtual void video_start();
+	UINT32 screen_update_ohmygod(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect);
 };
-
-
-/*----------- defined in video/ohmygod.c -----------*/
-
-WRITE16_HANDLER( ohmygod_videoram_w );
-WRITE16_HANDLER( ohmygod_spritebank_w );
-WRITE16_HANDLER( ohmygod_scrollx_w );
-WRITE16_HANDLER( ohmygod_scrolly_w );
-
-VIDEO_START( ohmygod );
-SCREEN_UPDATE( ohmygod );

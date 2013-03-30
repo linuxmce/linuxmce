@@ -74,37 +74,37 @@ const debug_view_memory::memory_view_pos debug_view_memory::s_memory_pos_table[9
 
 debug_view_memory_source::debug_view_memory_source(const char *name, address_space &space)
 	: debug_view_source(name, &space.device()),
-	  m_space(&space),
-	  m_memintf(dynamic_cast<device_memory_interface *>(&space.device())),
-	  m_base(NULL),
-	  m_length(0),
-	  m_offsetxor(0),
-	  m_endianness(space.endianness()),
-	  m_prefsize(space.data_width() / 8)
+		m_space(&space),
+		m_memintf(dynamic_cast<device_memory_interface *>(&space.device())),
+		m_base(NULL),
+		m_length(0),
+		m_offsetxor(0),
+		m_endianness(space.endianness()),
+		m_prefsize(space.data_width() / 8)
 {
 }
 
-debug_view_memory_source::debug_view_memory_source(const char *name, const memory_region &region)
+debug_view_memory_source::debug_view_memory_source(const char *name, memory_region &region)
 	: debug_view_source(name),
-	  m_space(NULL),
-	  m_memintf(NULL),
-	  m_base(region),
-	  m_length(region.bytes()),
-	  m_offsetxor(NATIVE_ENDIAN_VALUE_LE_BE(region.width() - 1, 0)),
-	  m_endianness(region.endianness()),
-	  m_prefsize(MIN(region.width(), 8))
+		m_space(NULL),
+		m_memintf(NULL),
+		m_base(region),
+		m_length(region.bytes()),
+		m_offsetxor(NATIVE_ENDIAN_VALUE_LE_BE(region.width() - 1, 0)),
+		m_endianness(region.endianness()),
+		m_prefsize(MIN(region.width(), 8))
 {
 }
 
 debug_view_memory_source::debug_view_memory_source(const char *name, void *base, int element_size, int num_elements)
 	: debug_view_source(name),
-	  m_space(NULL),
-	  m_memintf(NULL),
-	  m_base(base),
-	  m_length(element_size * num_elements),
-	  m_offsetxor(0),
-	  m_endianness(ENDIANNESS_NATIVE),
-	  m_prefsize(MIN(element_size, 8))
+		m_space(NULL),
+		m_memintf(NULL),
+		m_base(base),
+		m_length(element_size * num_elements),
+		m_offsetxor(0),
+		m_endianness(ENDIANNESS_NATIVE),
+		m_prefsize(MIN(element_size, 8))
 {
 }
 
@@ -120,15 +120,15 @@ debug_view_memory_source::debug_view_memory_source(const char *name, void *base,
 
 debug_view_memory::debug_view_memory(running_machine &machine, debug_view_osd_update_func osdupdate, void *osdprivate)
 	: debug_view(machine, DVT_MEMORY, osdupdate, osdprivate),
-	  m_expression(machine),
-	  m_chunks_per_row(16),
-	  m_bytes_per_chunk(1),
-	  m_reverse_view(false),
-	  m_ascii_view(true),
-	  m_no_translation(false),
-	  m_maxaddr(0),
-	  m_bytes_per_row(16),
-	  m_byte_offset(0)
+		m_expression(machine),
+		m_chunks_per_row(16),
+		m_bytes_per_chunk(1),
+		m_reverse_view(false),
+		m_ascii_view(true),
+		m_no_translation(false),
+		m_maxaddr(0),
+		m_bytes_per_row(16),
+		m_byte_offset(0)
 {
 	// fail if no available sources
 	enumerate_sources();
@@ -152,23 +152,22 @@ void debug_view_memory::enumerate_sources()
 	astring name;
 
 	// first add all the devices' address spaces
-	device_memory_interface *memintf = NULL;
-	for (bool gotone = m_machine.m_devicelist.first(memintf); gotone; gotone = memintf->next(memintf))
-		for (address_spacenum spacenum = AS_0; spacenum < ADDRESS_SPACES; spacenum++)
-		{
-			address_space *space = memintf->space(spacenum);
-			if (space != NULL)
-			{
-				name.printf("%s '%s' %s space memory", memintf->device().name(), memintf->device().tag(), space->name());
-				m_source_list.append(*auto_alloc(m_machine, debug_view_memory_source(name, *space)));
-			}
-		}
+	memory_interface_iterator iter(machine().root_device());
+	for (device_memory_interface *memintf = iter.first(); memintf != NULL; memintf = iter.next())
+		if (&memintf->device() != &machine().root_device())
+			for (address_spacenum spacenum = AS_0; spacenum < ADDRESS_SPACES; spacenum++)
+				if (memintf->has_space(spacenum))
+				{
+					address_space &space = memintf->space(spacenum);
+					name.printf("%s '%s' %s space memory", memintf->device().name(), memintf->device().tag(), space.name());
+					m_source_list.append(*auto_alloc(machine(), debug_view_memory_source(name, space)));
+				}
 
 	// then add all the memory regions
-	for (const memory_region *region = m_machine.first_region(); region != NULL; region = region->next())
+	for (memory_region *region = machine().memory().first_region(); region != NULL; region = region->next())
 	{
 		name.printf("Region '%s'", region->name());
-		m_source_list.append(*auto_alloc(m_machine, debug_view_memory_source(name, *region)));
+		m_source_list.append(*auto_alloc(machine(), debug_view_memory_source(name, *region)));
 	}
 
 	// finally add all global array symbols
@@ -177,15 +176,16 @@ void debug_view_memory::enumerate_sources()
 		// stop when we run out of items
 		UINT32 valsize, valcount;
 		void *base;
-		const char *itemname = m_machine.state().indexed_item(itemnum, base, valsize, valcount);
+		const char *itemname = machine().save().indexed_item(itemnum, base, valsize, valcount);
 		if (itemname == NULL)
 			break;
 
-		// if this is a single-entry global, add it
-		if (valcount > 1 && strstr(itemname, "globals/"))
+		// add pretty much anything that's not a timer (we may wish to cull other items later)
+		// also, don't trim the front of the name, it's important to know which VIA6522 we're looking at, e.g.
+		if (strncmp(itemname, "timer/", 6))
 		{
-			name.cpy(strrchr(itemname, '/') + 1);
-			m_source_list.append(*auto_alloc(m_machine, debug_view_memory_source(name, base, valsize, valcount)));
+			name.cpy(itemname);
+			m_source_list.append(*auto_alloc(machine(), debug_view_memory_source(name, base, valsize, valcount)));
 		}
 	}
 
@@ -627,10 +627,10 @@ bool debug_view_memory::read(UINT8 size, offs_t offs, UINT64 &data)
 		{
 			switch (size)
 			{
-				case 1:	data = debug_read_byte(source.m_space, offs, !m_no_translation); break;
-				case 2:	data = debug_read_word(source.m_space, offs, !m_no_translation); break;
-				case 4:	data = debug_read_dword(source.m_space, offs, !m_no_translation); break;
-				case 8:	data = debug_read_qword(source.m_space, offs, !m_no_translation); break;
+				case 1: data = debug_read_byte(*source.m_space, offs, !m_no_translation); break;
+				case 2: data = debug_read_word(*source.m_space, offs, !m_no_translation); break;
+				case 4: data = debug_read_dword(*source.m_space, offs, !m_no_translation); break;
+				case 8: data = debug_read_qword(*source.m_space, offs, !m_no_translation); break;
 			}
 		}
 		return ismapped;
@@ -674,10 +674,10 @@ void debug_view_memory::write(UINT8 size, offs_t offs, UINT64 data)
 	{
 		switch (size)
 		{
-			case 1:	debug_write_byte(source.m_space, offs, data, !m_no_translation); break;
-			case 2:	debug_write_word(source.m_space, offs, data, !m_no_translation); break;
-			case 4:	debug_write_dword(source.m_space, offs, data, !m_no_translation); break;
-			case 8:	debug_write_qword(source.m_space, offs, data, !m_no_translation); break;
+			case 1: debug_write_byte(*source.m_space, offs, data, !m_no_translation); break;
+			case 2: debug_write_word(*source.m_space, offs, data, !m_no_translation); break;
+			case 4: debug_write_dword(*source.m_space, offs, data, !m_no_translation); break;
+			case 8: debug_write_qword(*source.m_space, offs, data, !m_no_translation); break;
 		}
 		return;
 	}
@@ -707,10 +707,10 @@ void debug_view_memory::write(UINT8 size, offs_t offs, UINT64 data)
 
 // hack for FD1094 editing
 #ifdef FD1094_HACK
-	if (source.m_base == m_machine.region("user2"))
+	if (source.m_base == machine().root_device().memregion("user2"))
 	{
 		extern void fd1094_regenerate_key(running_machine &machine);
-		fd1094_regenerate_key(m_machine);
+		fd1094_regenerate_key(machine());
 	}
 #endif
 }
@@ -750,7 +750,6 @@ void debug_view_memory::set_bytes_per_chunk(UINT8 chunkbytes)
 	pos.m_shift += 8 * ((pos.m_address % m_bytes_per_chunk) ^ ((source.m_endianness == ENDIANNESS_LITTLE) ? 0 : (m_bytes_per_chunk - 1)));
 	pos.m_address -= pos.m_address % m_bytes_per_chunk;
 
-	m_recompute = m_update_pending = true;
 	end_update_and_set_cursor_pos(pos);
 }
 

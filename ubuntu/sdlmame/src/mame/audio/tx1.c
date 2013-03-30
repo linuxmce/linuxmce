@@ -16,7 +16,7 @@
  *  8253 Programmable Interval Timer
  *
  *************************************/
-struct _pit8253_state
+struct pit8253_state
 {
 	union
 	{
@@ -31,8 +31,7 @@ struct _pit8253_state
 	int idx[3];
 };
 
-typedef struct _tx1_sound_state tx1_sound_state;
-struct _tx1_sound_state
+struct tx1_sound_state
 {
 	sound_stream *m_stream;
 	UINT32 m_freq_to_step;
@@ -40,7 +39,7 @@ struct _tx1_sound_state
 	UINT32 m_step1;
 	UINT32 m_step2;
 
-	struct _pit8253_state m_pit8253;
+	pit8253_state m_pit8253;
 
 	UINT8 m_ay_outputa;
 	UINT8 m_ay_outputb;
@@ -72,7 +71,7 @@ INLINE tx1_sound_state *get_safe_token(device_t *device)
 	assert(device != NULL);
 	assert(device->type() == TX1 || device->type() == BUGGYBOY);
 
-	return (tx1_sound_state *)downcast<legacy_device_base *>(device)->token();
+	return (tx1_sound_state *)downcast<tx1_sound_device *>(device)->token();
 }
 
 WRITE8_DEVICE_HANDLER( tx1_pit8253_w )
@@ -121,16 +120,16 @@ READ8_DEVICE_HANDLER( tx1_pit8253_r )
  *************************************/
 
 /* RC oscillator: 1785Hz */
-#define TX1_NOISE_CLOCK		(1/(1000.0e-12 * 560000.0))
-#define TX1_PIT_CLOCK		(TX1_PIXEL_CLOCK / 16)
-#define TX1_FRAC			30
+#define TX1_NOISE_CLOCK     (1/(1000.0e-12 * 560000.0))
+#define TX1_PIT_CLOCK       (TX1_PIXEL_CLOCK / 16)
+#define TX1_FRAC            30
 
-#define TX1_SHUNT			(250.0)
-#define TX1_R0				(180000.0 + TX1_SHUNT)
-#define TX1_R1				(56000.0  + TX1_SHUNT)
-#define TX1_R2				(22000.0  + TX1_SHUNT)
-#define TX1_R				(100000.0 + TX1_SHUNT)
-#define TX1_RI				(180000.0)
+#define TX1_SHUNT           (250.0)
+#define TX1_R0              (180000.0 + TX1_SHUNT)
+#define TX1_R1              (56000.0  + TX1_SHUNT)
+#define TX1_R2              (22000.0  + TX1_SHUNT)
+#define TX1_R               (100000.0 + TX1_SHUNT)
+#define TX1_RI              (180000.0)
 
 static const double tx1_engine_gains[16] =
 {
@@ -307,7 +306,7 @@ static DEVICE_START( tx1_sound )
 	state->m_freq_to_step = (double)(1 << TX1_FRAC) / (double)machine.sample_rate();
 
 	/* Compute the engine resistor weights */
-	compute_resistor_weights(0,	10000, -1.0,
+	compute_resistor_weights(0, 10000, -1.0,
 			4, &r0[0], state->m_weights0, 0, 0,
 			3, &r1[0], state->m_weights1, 0, 0,
 			3, &r2[0], state->m_weights2, 0, 0);
@@ -320,43 +319,25 @@ static DEVICE_RESET( tx1_sound )
 	state->m_step0 = state->m_step1 = state->m_step2 = 0;
 }
 
-DEVICE_GET_INFO( tx1_sound )
-{
-	switch (state)
-	{
-		/* --- the following bits of info are returned as 64-bit signed integers --- */
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(tx1_sound_state);			break;
-
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME(tx1_sound);		break;
-		case DEVINFO_FCT_RESET:							info->reset = DEVICE_RESET_NAME(tx1_sound);		break;
-
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "TX-1 Custom");					break;
-		case DEVINFO_STR_SOURCE_FILE:						strcpy(info->s, __FILE__);						break;
-	}
-}
-
-
 /*************************************
  *
  *  Buggy Boy
  *
  *************************************/
 
-#define BUGGYBOY_PIT_CLOCK		(BUGGYBOY_ZCLK / 8)
-#define BUGGYBOY_NOISE_CLOCK	(BUGGYBOY_PIT_CLOCK / 4)
+#define BUGGYBOY_PIT_CLOCK      (BUGGYBOY_ZCLK / 8)
+#define BUGGYBOY_NOISE_CLOCK    (BUGGYBOY_PIT_CLOCK / 4)
 
-#define BUGGYBOY_R1		47000.0
-#define BUGGYBOY_R2		22000.0
-#define BUGGYBOY_R3		10000.0
-#define BUGGYBOY_R4		5600.0
-#define BUGGYBOY_SHUNT	250.0
+#define BUGGYBOY_R1     47000.0
+#define BUGGYBOY_R2     22000.0
+#define BUGGYBOY_R3     10000.0
+#define BUGGYBOY_R4     5600.0
+#define BUGGYBOY_SHUNT  250.0
 
-#define BUGGYBOY_R1S	(1.0/(1.0/BUGGYBOY_R1 + 1.0/BUGGYBOY_SHUNT))
-#define BUGGYBOY_R2S	(1.0/(1.0/BUGGYBOY_R2 + 1.0/BUGGYBOY_SHUNT))
-#define BUGGYBOY_R3S	(1.0/(1.0/BUGGYBOY_R3 + 1.0/BUGGYBOY_SHUNT))
-#define BUGGYBOY_R4S	(1.0/(1.0/BUGGYBOY_R4 + 1.0/BUGGYBOY_SHUNT))
+#define BUGGYBOY_R1S    (1.0/(1.0/BUGGYBOY_R1 + 1.0/BUGGYBOY_SHUNT))
+#define BUGGYBOY_R2S    (1.0/(1.0/BUGGYBOY_R2 + 1.0/BUGGYBOY_SHUNT))
+#define BUGGYBOY_R3S    (1.0/(1.0/BUGGYBOY_R3 + 1.0/BUGGYBOY_SHUNT))
+#define BUGGYBOY_R4S    (1.0/(1.0/BUGGYBOY_R4 + 1.0/BUGGYBOY_SHUNT))
 
 static const double bb_engine_gains[16] =
 {
@@ -436,25 +417,25 @@ WRITE8_DEVICE_HANDLER( bb_ym2_a_w )
 WRITE8_DEVICE_HANDLER( bb_ym2_b_w )
 {
 	tx1_sound_state *state = get_safe_token(device);
-	device_t *ym1 = device->machine().device("ym1");
-	device_t *ym2 = device->machine().device("ym2");
+	device_t *ym1 = space.machine().device("ym1");
+	device_t *ym2 = space.machine().device("ym2");
 	double gain;
 
 	state->m_stream->update();
 
 	state->m_ym2_outputb = data ^ 0xff;
 
-	if (!strcmp(device->machine().system().name, "buggyboyjr"))
+	if (!strcmp(space.machine().system().name, "buggyboyjr"))
 	{
-		coin_counter_w(device->machine(), 0, data & 0x01);
-		coin_counter_w(device->machine(), 1, data & 0x02);
+		coin_counter_w(space.machine(), 0, data & 0x01);
+		coin_counter_w(space.machine(), 1, data & 0x02);
 	}
 
 	/*
-        Until we support > 2 speakers, double the gain of the front speakers
+	    Until we support > 2 speakers, double the gain of the front speakers
 
-        TODO: We do support more than 2 speakers but the output is downmixed to stereo.
-    */
+	    TODO: We do support more than 2 speakers but the output is downmixed to stereo.
+	*/
 
 	/* Rear left speaker */
 	device_sound_interface *sound;
@@ -565,8 +546,8 @@ static DEVICE_START( buggyboy_sound )
 		0x0, 0x1, 0xe, 0xf, 0x8, 0x9, 0x6, 0x7, 0xc, 0xd, 0xe, 0xf, 0x4, 0x5, 0x6, 0x7
 	};
 
-	compute_resistor_weights(0,	16384,	-1.0,
-							4,	&resistors[0], aweights, 0,	0,
+	compute_resistor_weights(0, 16384,  -1.0,
+							4,  &resistors[0], aweights, 0, 0,
 							0, 0, 0, 0, 0,
 							0, 0, 0, 0, 0 );
 
@@ -591,22 +572,101 @@ static DEVICE_RESET( buggyboy_sound )
 	state->m_noise_lfsrd = 0;
 }
 
-DEVICE_GET_INFO( buggyboy_sound )
+const device_type BUGGYBOY = &device_creator<buggyboy_sound_device>;
+
+buggyboy_sound_device::buggyboy_sound_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: tx1_sound_device(mconfig, BUGGYBOY, "Buggy Boy Custom", tag, owner, clock)
 {
-	switch (state)
-	{
-		case DEVINFO_INT_TOKEN_BYTES:					info->i = sizeof(tx1_sound_state);			break;
+}
 
-		/* --- the following bits of info are returned as pointers to data or functions --- */
-		case DEVINFO_FCT_START:							info->start = DEVICE_START_NAME(buggyboy_sound);	break;
-		case DEVINFO_FCT_RESET:							info->reset = DEVICE_RESET_NAME(buggyboy_sound);	break;
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
 
-		/* --- the following bits of info are returned as NULL-terminated strings --- */
-		case DEVINFO_STR_NAME:							strcpy(info->s, "Buggy Boy Custom");			break;
-		case DEVINFO_STR_SOURCE_FILE:						strcpy(info->s, __FILE__);						break;
-	}
+void buggyboy_sound_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void buggyboy_sound_device::device_start()
+{
+	DEVICE_START_NAME( buggyboy_sound )(this);
+}
+
+//-------------------------------------------------
+//  device_reset - device-specific reset
+//-------------------------------------------------
+
+void buggyboy_sound_device::device_reset()
+{
+	DEVICE_RESET_NAME( buggyboy_sound )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void buggyboy_sound_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
 }
 
 
-DEFINE_LEGACY_SOUND_DEVICE(BUGGYBOY, buggyboy_sound);
-DEFINE_LEGACY_SOUND_DEVICE(TX1, tx1_sound);
+const device_type TX1 = &device_creator<tx1_sound_device>;
+
+tx1_sound_device::tx1_sound_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, TX1, "TX-1 Custom", tag, owner, clock),
+		device_sound_interface(mconfig, *this)
+{
+	m_token = global_alloc_clear(tx1_sound_state);
+}
+
+tx1_sound_device::tx1_sound_device(const machine_config &mconfig, device_type type, const char *name, const char *tag, device_t *owner, UINT32 clock)
+	: device_t(mconfig, type, name, tag, owner, clock),
+		device_sound_interface(mconfig, *this)
+{
+	m_token = global_alloc_clear(tx1_sound_state);
+}
+//-------------------------------------------------
+//  device_config_complete - perform any
+//  operations now that the configuration is
+//  complete
+//-------------------------------------------------
+
+void tx1_sound_device::device_config_complete()
+{
+}
+
+//-------------------------------------------------
+//  device_start - device-specific startup
+//-------------------------------------------------
+
+void tx1_sound_device::device_start()
+{
+	DEVICE_START_NAME( tx1_sound )(this);
+}
+
+//-------------------------------------------------
+//  device_reset - device-specific reset
+//-------------------------------------------------
+
+void tx1_sound_device::device_reset()
+{
+	DEVICE_RESET_NAME( tx1_sound )(this);
+}
+
+//-------------------------------------------------
+//  sound_stream_update - handle a stream update
+//-------------------------------------------------
+
+void tx1_sound_device::sound_stream_update(sound_stream &stream, stream_sample_t **inputs, stream_sample_t **outputs, int samples)
+{
+	// should never get here
+	fatalerror("sound_stream_update called; not applicable to legacy sound devices\n");
+}

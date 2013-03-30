@@ -16,13 +16,31 @@
 ***************************************************************************/
 
 
-typedef struct _decocomn_interface decocomn_interface;
-struct _decocomn_interface
+struct decocomn_interface
 {
 	const char         *screen;
 };
 
-DECLARE_LEGACY_DEVICE(DECOCOMN, decocomn);
+class decocomn_device : public device_t
+{
+public:
+	decocomn_device(const machine_config &mconfig, const char *tag, device_t *owner, UINT32 clock);
+	~decocomn_device() { global_free(m_token); }
+
+	// access to legacy token
+	void *token() const { assert(m_token != NULL); return m_token; }
+protected:
+	// device-level overrides
+	virtual void device_config_complete();
+	virtual void device_start();
+	virtual void device_reset();
+private:
+	// internal state
+	void *m_token;
+};
+
+extern const device_type DECOCOMN;
+
 
 
 /***************************************************************************
@@ -37,21 +55,13 @@ DECLARE_LEGACY_DEVICE(DECOCOMN, decocomn);
     DEVICE I/O FUNCTIONS
 ***************************************************************************/
 
-WRITE16_DEVICE_HANDLER( decocomn_nonbuffered_palette_w );
-WRITE16_DEVICE_HANDLER( decocomn_buffered_palette_w );
-WRITE16_DEVICE_HANDLER( decocomn_palette_dma_w );
+DECLARE_WRITE16_DEVICE_HANDLER( decocomn_nonbuffered_palette_w );
+DECLARE_WRITE16_DEVICE_HANDLER( decocomn_buffered_palette_w );
+DECLARE_WRITE16_DEVICE_HANDLER( decocomn_palette_dma_w );
 
-WRITE16_DEVICE_HANDLER( decocomn_priority_w );
-READ16_DEVICE_HANDLER( decocomn_priority_r );
+DECLARE_WRITE16_DEVICE_HANDLER( decocomn_priority_w );
+DECLARE_READ16_DEVICE_HANDLER( decocomn_priority_r );
 
-READ16_DEVICE_HANDLER( decocomn_71_r );
-
-/* used by boogwing, dassault, nitrobal */
-void decocomn_clear_sprite_priority_bitmap(device_t *device);
-void decocomn_pdrawgfx(
-		device_t *device,
-		bitmap_t *dest,const rectangle *clip,const gfx_element *gfx,
-		UINT32 code,UINT32 color,int flipx,int flipy,int sx,int sy,
-		int transparent_color,UINT32 pri_mask,UINT32 sprite_mask,UINT8 write_pri,UINT8 alpha);
+DECLARE_READ16_DEVICE_HANDLER( decocomn_71_r );
 
 #endif

@@ -25,29 +25,29 @@ There's a chance that certain bootlegs might have the different 8/20 MHz XTALS.
 #include "includes/mrdo.h"
 
 
-#define MAIN_CLOCK		XTAL_8_2MHz
-#define VIDEO_CLOCK		XTAL_19_6MHz
+#define MAIN_CLOCK      XTAL_8_2MHz
+#define VIDEO_CLOCK     XTAL_19_6MHz
 
 
 
 /* this looks like some kind of protection. The game doesn't clear the screen */
 /* if a read from this address doesn't return the value it expects. */
-static READ8_HANDLER( mrdo_SECRE_r )
+READ8_MEMBER(mrdo_state::mrdo_SECRE_r)
 {
-	UINT8 *RAM = space->machine().region("maincpu")->base();
-	return RAM[cpu_get_reg(&space->device(), Z80_HL)];
+	UINT8 *RAM = memregion("maincpu")->base();
+	return RAM[space.device().state().state_int(Z80_HL)];
 }
 
 
 
-static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( main_map, AS_PROGRAM, 8, mrdo_state )
 	AM_RANGE(0x0000, 0x7fff) AM_ROM
-	AM_RANGE(0x8000, 0x87ff) AM_RAM_WRITE(mrdo_bgvideoram_w) AM_BASE_MEMBER(mrdo_state, m_bgvideoram)
-	AM_RANGE(0x8800, 0x8fff) AM_RAM_WRITE(mrdo_fgvideoram_w) AM_BASE_MEMBER(mrdo_state, m_fgvideoram)
-	AM_RANGE(0x9000, 0x90ff) AM_WRITEONLY AM_BASE_SIZE_MEMBER(mrdo_state, m_spriteram, m_spriteram_size)
-	AM_RANGE(0x9800, 0x9800) AM_WRITE(mrdo_flipscreen_w)	/* screen flip + playfield priority */
-	AM_RANGE(0x9801, 0x9801) AM_DEVWRITE("sn1", sn76496_w)
-	AM_RANGE(0x9802, 0x9802) AM_DEVWRITE("sn2", sn76496_w)
+	AM_RANGE(0x8000, 0x87ff) AM_RAM_WRITE(mrdo_bgvideoram_w) AM_SHARE("bgvideoram")
+	AM_RANGE(0x8800, 0x8fff) AM_RAM_WRITE(mrdo_fgvideoram_w) AM_SHARE("fgvideoram")
+	AM_RANGE(0x9000, 0x90ff) AM_WRITEONLY AM_SHARE("spriteram")
+	AM_RANGE(0x9800, 0x9800) AM_WRITE(mrdo_flipscreen_w)    /* screen flip + playfield priority */
+	AM_RANGE(0x9801, 0x9801) AM_DEVWRITE("u8106_1", u8106_device, write)
+	AM_RANGE(0x9802, 0x9802) AM_DEVWRITE("u8106_2", u8106_device, write)
 	AM_RANGE(0x9803, 0x9803) AM_READ(mrdo_SECRE_r)
 	AM_RANGE(0xa000, 0xa000) AM_READ_PORT("P1")
 	AM_RANGE(0xa001, 0xa001) AM_READ_PORT("P2")
@@ -117,7 +117,7 @@ static INPUT_PORTS_START( mrdo )
 	PORT_DIPSETTING(    0x0c, DEF_STR( 1C_4C ) )
 	PORT_DIPSETTING(    0x0b, DEF_STR( 1C_5C ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
-	/* settings 0x01 thru 0x05 all give 1 Coin/1 Credit */
+	/* settings 0x01 through 0x05 all give 1 Coin/1 Credit */
 	PORT_DIPNAME( 0xf0, 0xf0, DEF_STR( Coin_A ) ) PORT_DIPLOCATION("SW2:4,3,2,1")
 	PORT_DIPSETTING(    0x60, DEF_STR( 4C_1C ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( 3C_1C ) )
@@ -130,7 +130,7 @@ static INPUT_PORTS_START( mrdo )
 	PORT_DIPSETTING(    0xc0, DEF_STR( 1C_4C ) )
 	PORT_DIPSETTING(    0xb0, DEF_STR( 1C_5C ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
-	/* settings 0x10 thru 0x50 all give 1 Coin/1 Credit */
+	/* settings 0x10 through 0x50 all give 1 Coin/1 Credit */
 INPUT_PORTS_END
 
 
@@ -158,40 +158,55 @@ static const gfx_layout spritelayout =
 };
 
 static GFXDECODE_START( mrdo )
-	GFXDECODE_ENTRY( "gfx1", 0, charlayout,      0, 64 )	/* colors 0-255 directly mapped */
+	GFXDECODE_ENTRY( "gfx1", 0, charlayout,      0, 64 )    /* colors 0-255 directly mapped */
 	GFXDECODE_ENTRY( "gfx2", 0, charlayout,      0, 64 )
 	GFXDECODE_ENTRY( "gfx3", 0, spritelayout, 4*64, 16 )
 GFXDECODE_END
 
 
+/*************************************
+ *
+ *  Sound interface
+ *
+ *************************************/
+
+
+//-------------------------------------------------
+//  sn76496_config psg_intf
+//-------------------------------------------------
+
+static const sn76496_config psg_intf =
+{
+	DEVCB_NULL
+};
+
 
 static MACHINE_CONFIG_START( mrdo, mrdo_state )
 
 	/* basic machine hardware */
-	MCFG_CPU_ADD("maincpu", Z80, MAIN_CLOCK/2)	/* Verified */
+	MCFG_CPU_ADD("maincpu", Z80, MAIN_CLOCK/2)  /* Verified */
 	MCFG_CPU_PROGRAM_MAP(main_map)
-	MCFG_CPU_VBLANK_INT("screen", irq0_line_hold)
+	MCFG_CPU_VBLANK_INT_DRIVER("screen", mrdo_state,  irq0_line_hold)
 
 	/* video hardware */
 	MCFG_SCREEN_ADD("screen", RASTER)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_RAW_PARAMS(VIDEO_CLOCK/4, 312, 8, 248, 262, 32, 224)
-	MCFG_SCREEN_UPDATE(mrdo)
+	MCFG_SCREEN_UPDATE_DRIVER(mrdo_state, screen_update_mrdo)
 
 	MCFG_GFXDECODE(mrdo)
 	MCFG_PALETTE_LENGTH(64*4+16*4)
 
-	MCFG_PALETTE_INIT(mrdo)
-	MCFG_VIDEO_START(mrdo)
 
 	/* sound hardware */
 	MCFG_SPEAKER_STANDARD_MONO("mono")
 
-	MCFG_SOUND_ADD("sn1", SN76489, MAIN_CLOCK/2)	/* Verified */
+	MCFG_SOUND_ADD("u8106_1", U8106, MAIN_CLOCK/2)  /* sn76489-equivalent?, Verified */
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
+	MCFG_SOUND_CONFIG(psg_intf)
 
-	MCFG_SOUND_ADD("sn2", SN76489, MAIN_CLOCK/2)	/* Verified */
+	MCFG_SOUND_ADD("u8106_2", U8106, MAIN_CLOCK/2)  /* sn76489-equivalent?, Verified */
 	MCFG_SOUND_ROUTE(ALL_OUTPUTS, "mono", 0.50)
+	MCFG_SOUND_CONFIG(psg_intf)
 MACHINE_CONFIG_END
 
 
@@ -222,10 +237,10 @@ ROM_START( mrdo )
 	ROM_LOAD( "k5-06.bin",    0x1000, 0x1000, CRC(b1f68b04) SHA1(25709cd81c03df51f27cd730fecf86a1daa9e27e) )
 
 	ROM_REGION( 0x0080, "proms", 0 )
-	ROM_LOAD( "u02--2.bin",   0x0000, 0x0020, CRC(238a65d7) SHA1(a5b20184a1989db23544296331462ec4d7be7516) )	/* palette (high bits) */
-	ROM_LOAD( "t02--3.bin",   0x0020, 0x0020, CRC(ae263dc0) SHA1(7072c100b9d692f5bb12b0c9e304425f534481e2) )	/* palette (low bits) */
-	ROM_LOAD( "f10--1.bin",   0x0040, 0x0020, CRC(16ee4ca2) SHA1(fcba4d103708b9711452009cd29c4f88d2f64cd3) )	/* sprite color lookup table */
-	ROM_LOAD( "j10--4.bin",   0x0060, 0x0020, CRC(ff7fe284) SHA1(3ac8e30011c1fcba0ee8f4dc932f82296c3ba143) )	/* timing (not used) */
+	ROM_LOAD( "u02--2.bin",   0x0000, 0x0020, CRC(238a65d7) SHA1(a5b20184a1989db23544296331462ec4d7be7516) )    /* palette (high bits) */
+	ROM_LOAD( "t02--3.bin",   0x0020, 0x0020, CRC(ae263dc0) SHA1(7072c100b9d692f5bb12b0c9e304425f534481e2) )    /* palette (low bits) */
+	ROM_LOAD( "f10--1.bin",   0x0040, 0x0020, CRC(16ee4ca2) SHA1(fcba4d103708b9711452009cd29c4f88d2f64cd3) )    /* sprite color lookup table */
+	ROM_LOAD( "j10--4.bin",   0x0060, 0x0020, CRC(ff7fe284) SHA1(3ac8e30011c1fcba0ee8f4dc932f82296c3ba143) )    /* timing (not used) */
 ROM_END
 
 ROM_START( mrdot )
@@ -248,10 +263,10 @@ ROM_START( mrdot )
 	ROM_LOAD( "k5-06.bin",    0x1000, 0x1000, CRC(b1f68b04) SHA1(25709cd81c03df51f27cd730fecf86a1daa9e27e) )
 
 	ROM_REGION( 0x0080, "proms", 0 )
-	ROM_LOAD( "u02--2.bin",   0x0000, 0x0020, CRC(238a65d7) SHA1(a5b20184a1989db23544296331462ec4d7be7516) )	/* palette (high bits) */
-	ROM_LOAD( "t02--3.bin",   0x0020, 0x0020, CRC(ae263dc0) SHA1(7072c100b9d692f5bb12b0c9e304425f534481e2) )	/* palette (low bits) */
-	ROM_LOAD( "f10--1.bin",   0x0040, 0x0020, CRC(16ee4ca2) SHA1(fcba4d103708b9711452009cd29c4f88d2f64cd3) )	/* sprite color lookup table */
-	ROM_LOAD( "j10--4.bin",   0x0060, 0x0020, CRC(ff7fe284) SHA1(3ac8e30011c1fcba0ee8f4dc932f82296c3ba143) )	/* timing (not used) */
+	ROM_LOAD( "u02--2.bin",   0x0000, 0x0020, CRC(238a65d7) SHA1(a5b20184a1989db23544296331462ec4d7be7516) )    /* palette (high bits) */
+	ROM_LOAD( "t02--3.bin",   0x0020, 0x0020, CRC(ae263dc0) SHA1(7072c100b9d692f5bb12b0c9e304425f534481e2) )    /* palette (low bits) */
+	ROM_LOAD( "f10--1.bin",   0x0040, 0x0020, CRC(16ee4ca2) SHA1(fcba4d103708b9711452009cd29c4f88d2f64cd3) )    /* sprite color lookup table */
+	ROM_LOAD( "j10--4.bin",   0x0060, 0x0020, CRC(ff7fe284) SHA1(3ac8e30011c1fcba0ee8f4dc932f82296c3ba143) )    /* timing (not used) */
 ROM_END
 
 ROM_START( mrdofix )
@@ -274,10 +289,10 @@ ROM_START( mrdofix )
 	ROM_LOAD( "k5-06.bin",    0x1000, 0x1000, CRC(b1f68b04) SHA1(25709cd81c03df51f27cd730fecf86a1daa9e27e) )
 
 	ROM_REGION( 0x0080, "proms", 0 )
-	ROM_LOAD( "u02--2.bin",   0x0000, 0x0020, CRC(238a65d7) SHA1(a5b20184a1989db23544296331462ec4d7be7516) )	/* palette (high bits) */
-	ROM_LOAD( "t02--3.bin",   0x0020, 0x0020, CRC(ae263dc0) SHA1(7072c100b9d692f5bb12b0c9e304425f534481e2) )	/* palette (low bits) */
-	ROM_LOAD( "f10--1.bin",   0x0040, 0x0020, CRC(16ee4ca2) SHA1(fcba4d103708b9711452009cd29c4f88d2f64cd3) )	/* sprite color lookup table */
-	ROM_LOAD( "j10--4.bin",   0x0060, 0x0020, CRC(ff7fe284) SHA1(3ac8e30011c1fcba0ee8f4dc932f82296c3ba143) )	/* timing (not used) */
+	ROM_LOAD( "u02--2.bin",   0x0000, 0x0020, CRC(238a65d7) SHA1(a5b20184a1989db23544296331462ec4d7be7516) )    /* palette (high bits) */
+	ROM_LOAD( "t02--3.bin",   0x0020, 0x0020, CRC(ae263dc0) SHA1(7072c100b9d692f5bb12b0c9e304425f534481e2) )    /* palette (low bits) */
+	ROM_LOAD( "f10--1.bin",   0x0040, 0x0020, CRC(16ee4ca2) SHA1(fcba4d103708b9711452009cd29c4f88d2f64cd3) )    /* sprite color lookup table */
+	ROM_LOAD( "j10--4.bin",   0x0060, 0x0020, CRC(ff7fe284) SHA1(3ac8e30011c1fcba0ee8f4dc932f82296c3ba143) )    /* timing (not used) */
 ROM_END
 
 ROM_START( mrlo )
@@ -300,10 +315,10 @@ ROM_START( mrlo )
 	ROM_LOAD( "k5-06.bin",    0x1000, 0x1000, CRC(b1f68b04) SHA1(25709cd81c03df51f27cd730fecf86a1daa9e27e) )
 
 	ROM_REGION( 0x0080, "proms", 0 )
-	ROM_LOAD( "u02--2.bin",   0x0000, 0x0020, CRC(238a65d7) SHA1(a5b20184a1989db23544296331462ec4d7be7516) )	/* palette (high bits) */
-	ROM_LOAD( "t02--3.bin",   0x0020, 0x0020, CRC(ae263dc0) SHA1(7072c100b9d692f5bb12b0c9e304425f534481e2) )	/* palette (low bits) */
-	ROM_LOAD( "f10--1.bin",   0x0040, 0x0020, CRC(16ee4ca2) SHA1(fcba4d103708b9711452009cd29c4f88d2f64cd3) )	/* sprite color lookup table */
-	ROM_LOAD( "j10--4.bin",   0x0060, 0x0020, CRC(ff7fe284) SHA1(3ac8e30011c1fcba0ee8f4dc932f82296c3ba143) )	/* timing (not used) */
+	ROM_LOAD( "u02--2.bin",   0x0000, 0x0020, CRC(238a65d7) SHA1(a5b20184a1989db23544296331462ec4d7be7516) )    /* palette (high bits) */
+	ROM_LOAD( "t02--3.bin",   0x0020, 0x0020, CRC(ae263dc0) SHA1(7072c100b9d692f5bb12b0c9e304425f534481e2) )    /* palette (low bits) */
+	ROM_LOAD( "f10--1.bin",   0x0040, 0x0020, CRC(16ee4ca2) SHA1(fcba4d103708b9711452009cd29c4f88d2f64cd3) )    /* sprite color lookup table */
+	ROM_LOAD( "j10--4.bin",   0x0060, 0x0020, CRC(ff7fe284) SHA1(3ac8e30011c1fcba0ee8f4dc932f82296c3ba143) )    /* timing (not used) */
 ROM_END
 
 ROM_START( mrdu )
@@ -326,10 +341,10 @@ ROM_START( mrdu )
 	ROM_LOAD( "k5-06.bin",    0x1000, 0x1000, CRC(b1f68b04) SHA1(25709cd81c03df51f27cd730fecf86a1daa9e27e) )
 
 	ROM_REGION( 0x0080, "proms", 0 )
-	ROM_LOAD( "u02--2.bin",   0x0000, 0x0020, CRC(238a65d7) SHA1(a5b20184a1989db23544296331462ec4d7be7516) )	/* palette (high bits) */
-	ROM_LOAD( "t02--3.bin",   0x0020, 0x0020, CRC(ae263dc0) SHA1(7072c100b9d692f5bb12b0c9e304425f534481e2) )	/* palette (low bits) */
-	ROM_LOAD( "f10--1.bin",   0x0040, 0x0020, CRC(16ee4ca2) SHA1(fcba4d103708b9711452009cd29c4f88d2f64cd3) )	/* sprite color lookup table */
-	ROM_LOAD( "j10--4.bin",   0x0060, 0x0020, CRC(ff7fe284) SHA1(3ac8e30011c1fcba0ee8f4dc932f82296c3ba143) )	/* timing (not used) */
+	ROM_LOAD( "u02--2.bin",   0x0000, 0x0020, CRC(238a65d7) SHA1(a5b20184a1989db23544296331462ec4d7be7516) )    /* palette (high bits) */
+	ROM_LOAD( "t02--3.bin",   0x0020, 0x0020, CRC(ae263dc0) SHA1(7072c100b9d692f5bb12b0c9e304425f534481e2) )    /* palette (low bits) */
+	ROM_LOAD( "f10--1.bin",   0x0040, 0x0020, CRC(16ee4ca2) SHA1(fcba4d103708b9711452009cd29c4f88d2f64cd3) )    /* sprite color lookup table */
+	ROM_LOAD( "j10--4.bin",   0x0060, 0x0020, CRC(ff7fe284) SHA1(3ac8e30011c1fcba0ee8f4dc932f82296c3ba143) )    /* timing (not used) */
 ROM_END
 
 ROM_START( mrdoy )
@@ -352,10 +367,10 @@ ROM_START( mrdoy )
 	ROM_LOAD( "dosnow.6",     0x1000, 0x1000, CRC(413f88d1) SHA1(830df0def7289536e2d08e0517cdb6edbc947400) )
 
 	ROM_REGION( 0x0080, "proms", 0 )
-	ROM_LOAD( "u02--2.bin",   0x0000, 0x0020, CRC(238a65d7) SHA1(a5b20184a1989db23544296331462ec4d7be7516) )	/* palette (high bits) */
-	ROM_LOAD( "t02--3.bin",   0x0020, 0x0020, CRC(ae263dc0) SHA1(7072c100b9d692f5bb12b0c9e304425f534481e2) )	/* palette (low bits) */
-	ROM_LOAD( "f10--1.bin",   0x0040, 0x0020, CRC(16ee4ca2) SHA1(fcba4d103708b9711452009cd29c4f88d2f64cd3) )	/* sprite color lookup table */
-	ROM_LOAD( "j10--4.bin",   0x0060, 0x0020, CRC(ff7fe284) SHA1(3ac8e30011c1fcba0ee8f4dc932f82296c3ba143) )	/* timing (not used) */
+	ROM_LOAD( "u02--2.bin",   0x0000, 0x0020, CRC(238a65d7) SHA1(a5b20184a1989db23544296331462ec4d7be7516) )    /* palette (high bits) */
+	ROM_LOAD( "t02--3.bin",   0x0020, 0x0020, CRC(ae263dc0) SHA1(7072c100b9d692f5bb12b0c9e304425f534481e2) )    /* palette (low bits) */
+	ROM_LOAD( "f10--1.bin",   0x0040, 0x0020, CRC(16ee4ca2) SHA1(fcba4d103708b9711452009cd29c4f88d2f64cd3) )    /* sprite color lookup table */
+	ROM_LOAD( "j10--4.bin",   0x0060, 0x0020, CRC(ff7fe284) SHA1(3ac8e30011c1fcba0ee8f4dc932f82296c3ba143) )    /* timing (not used) */
 ROM_END
 
 ROM_START( yankeedo )
@@ -378,18 +393,18 @@ ROM_START( yankeedo )
 	ROM_LOAD( "yd_d6.k5",     0x1000, 0x1000, CRC(790579aa) SHA1(89d8a77d2046cf8cfc393e0f08d361d1886bfec1) )
 
 	ROM_REGION( 0x0080, "proms", 0 )
-	ROM_LOAD( "u02--2.bin",   0x0000, 0x0020, CRC(238a65d7) SHA1(a5b20184a1989db23544296331462ec4d7be7516) )	/* palette (high bits) */
-	ROM_LOAD( "t02--3.bin",   0x0020, 0x0020, CRC(ae263dc0) SHA1(7072c100b9d692f5bb12b0c9e304425f534481e2) )	/* palette (low bits) */
-	ROM_LOAD( "f10--1.bin",   0x0040, 0x0020, CRC(16ee4ca2) SHA1(fcba4d103708b9711452009cd29c4f88d2f64cd3) )	/* sprite color lookup table */
-	ROM_LOAD( "j10--4.bin",   0x0060, 0x0020, CRC(ff7fe284) SHA1(3ac8e30011c1fcba0ee8f4dc932f82296c3ba143) )	/* timing (not used) */
+	ROM_LOAD( "u02--2.bin",   0x0000, 0x0020, CRC(238a65d7) SHA1(a5b20184a1989db23544296331462ec4d7be7516) )    /* palette (high bits) */
+	ROM_LOAD( "t02--3.bin",   0x0020, 0x0020, CRC(ae263dc0) SHA1(7072c100b9d692f5bb12b0c9e304425f534481e2) )    /* palette (low bits) */
+	ROM_LOAD( "f10--1.bin",   0x0040, 0x0020, CRC(16ee4ca2) SHA1(fcba4d103708b9711452009cd29c4f88d2f64cd3) )    /* sprite color lookup table */
+	ROM_LOAD( "j10--4.bin",   0x0060, 0x0020, CRC(ff7fe284) SHA1(3ac8e30011c1fcba0ee8f4dc932f82296c3ba143) )    /* timing (not used) */
 ROM_END
 
 
 
-GAME( 1982, mrdo,     0,    mrdo, mrdo, 0, ROT270, "Universal", "Mr. Do!", GAME_SUPPORTS_SAVE )
-GAME( 1982, mrdoy,    mrdo, mrdo, mrdo, 0, ROT270, "Universal", "Mr. Do! (prototype)" , GAME_SUPPORTS_SAVE )	/* aka "Yukidaruma" */
-GAME( 1982, mrdot,    mrdo, mrdo, mrdo, 0, ROT270, "Universal (Taito license)", "Mr. Do! (Taito)", GAME_SUPPORTS_SAVE )
-GAME( 1982, mrdofix,  mrdo, mrdo, mrdo, 0, ROT270, "Universal (Taito license)", "Mr. Do! (bugfixed)", GAME_SUPPORTS_SAVE )
-GAME( 1982, mrlo,     mrdo, mrdo, mrdo, 0, ROT270, "bootleg", "Mr. Lo!", GAME_SUPPORTS_SAVE )
-GAME( 1982, mrdu,     mrdo, mrdo, mrdo, 0, ROT270, "bootleg", "Mr. Du!", GAME_SUPPORTS_SAVE )
-GAME( 1982, yankeedo, mrdo, mrdo, mrdo, 0, ROT270, "hack", "Yankee DO!", GAME_SUPPORTS_SAVE )
+GAME( 1982, mrdo,     0,    mrdo, mrdo, driver_device, 0, ROT270, "Universal", "Mr. Do!", GAME_SUPPORTS_SAVE )
+GAME( 1982, mrdoy,    mrdo, mrdo, mrdo, driver_device, 0, ROT270, "Universal", "Mr. Do! (prototype)" , GAME_SUPPORTS_SAVE ) /* aka "Yukidaruma" */
+GAME( 1982, mrdot,    mrdo, mrdo, mrdo, driver_device, 0, ROT270, "Universal (Taito license)", "Mr. Do! (Taito)", GAME_SUPPORTS_SAVE )
+GAME( 1982, mrdofix,  mrdo, mrdo, mrdo, driver_device, 0, ROT270, "Universal (Taito license)", "Mr. Do! (bugfixed)", GAME_SUPPORTS_SAVE )
+GAME( 1982, mrlo,     mrdo, mrdo, mrdo, driver_device, 0, ROT270, "bootleg", "Mr. Lo!", GAME_SUPPORTS_SAVE )
+GAME( 1982, mrdu,     mrdo, mrdo, mrdo, driver_device, 0, ROT270, "bootleg", "Mr. Du!", GAME_SUPPORTS_SAVE )
+GAME( 1982, yankeedo, mrdo, mrdo, mrdo, driver_device, 0, ROT270, "hack", "Yankee DO!", GAME_SUPPORTS_SAVE )

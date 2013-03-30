@@ -31,68 +31,68 @@ Sound: AY-3-8912
 #include "machine/nvram.h"
 
 
-static WRITE8_HANDLER( usgames_rombank_w )
+WRITE8_MEMBER(usgames_state::usgames_rombank_w)
 {
-	UINT8 *RAM = space->machine().region("maincpu")->base();
+	UINT8 *RAM = memregion("maincpu")->base();
 
 //  logerror ("BANK WRITE? -%02x-\n",data);
 //popmessage("%02x",data);
 
-	memory_set_bankptr(space->machine(),  "bank1",&RAM[ 0x10000 + 0x4000 * data] );
+	membank("bank1")->set_base(&RAM[ 0x10000 + 0x4000 * data] );
 }
 
-static WRITE8_HANDLER( lamps1_w )
+WRITE8_MEMBER(usgames_state::lamps1_w)
 {
 	/* button lamps */
-	set_led_status(space->machine(), 0,data & 0x01);
-	set_led_status(space->machine(), 1,data & 0x02);
-	set_led_status(space->machine(), 2,data & 0x04);
-	set_led_status(space->machine(), 3,data & 0x08);
-	set_led_status(space->machine(), 4,data & 0x10);
+	set_led_status(machine(), 0,data & 0x01);
+	set_led_status(machine(), 1,data & 0x02);
+	set_led_status(machine(), 2,data & 0x04);
+	set_led_status(machine(), 3,data & 0x08);
+	set_led_status(machine(), 4,data & 0x10);
 
 	/* bit 5 toggles all the time - extra lamp? */
 }
 
-static WRITE8_HANDLER( lamps2_w )
+WRITE8_MEMBER(usgames_state::lamps2_w)
 {
 	/* bit 5 toggles all the time - extra lamp? */
 }
 
 
 
-static ADDRESS_MAP_START( usgames_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( usgames_map, AS_PROGRAM, 8, usgames_state )
 	AM_RANGE(0x0000, 0x1fff) AM_RAM AM_SHARE("nvram")
 	AM_RANGE(0x2000, 0x2000) AM_READ_PORT("DSW")
 	AM_RANGE(0x2010, 0x2010) AM_READ_PORT("INPUTS")
 	AM_RANGE(0x2020, 0x2020) AM_WRITE(lamps1_w)
 	AM_RANGE(0x2030, 0x2030) AM_WRITE(lamps2_w)
-	AM_RANGE(0x2040, 0x2040) AM_DEVWRITE("crtc", mc6845_address_w)
+	AM_RANGE(0x2040, 0x2040) AM_DEVWRITE("crtc", mc6845_device, address_w)
 	AM_RANGE(0x2041, 0x2041) AM_READ_PORT("UNK1")
-	AM_RANGE(0x2041, 0x2041) AM_DEVWRITE("crtc", mc6845_register_w)
+	AM_RANGE(0x2041, 0x2041) AM_DEVWRITE("crtc", mc6845_device, register_w)
 	AM_RANGE(0x2060, 0x2060) AM_WRITE(usgames_rombank_w)
 	AM_RANGE(0x2070, 0x2070) AM_READ_PORT("UNK2")
-	AM_RANGE(0x2400, 0x2401) AM_DEVWRITE("aysnd", ay8910_address_data_w)
-	AM_RANGE(0x2800, 0x2fff) AM_RAM_WRITE(usgames_charram_w) AM_BASE_MEMBER(usgames_state, m_charram)
-	AM_RANGE(0x3000, 0x3fff) AM_RAM_WRITE(usgames_videoram_w) AM_BASE_MEMBER(usgames_state, m_videoram)
+	AM_RANGE(0x2400, 0x2401) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_data_w)
+	AM_RANGE(0x2800, 0x2fff) AM_RAM_WRITE(usgames_charram_w) AM_SHARE("charram")
+	AM_RANGE(0x3000, 0x3fff) AM_RAM_WRITE(usgames_videoram_w) AM_SHARE("videoram")
 	AM_RANGE(0x4000, 0x7fff) AM_ROMBANK("bank1")
 	AM_RANGE(0x8000, 0xffff) AM_ROM
 ADDRESS_MAP_END
 
 
-static ADDRESS_MAP_START( usg185_map, AS_PROGRAM, 8 )
+static ADDRESS_MAP_START( usg185_map, AS_PROGRAM, 8, usgames_state )
 	AM_RANGE(0x0000, 0x1fff) AM_RAM AM_SHARE("nvram")
-	AM_RANGE(0x2000, 0x2001) AM_DEVWRITE("aysnd", ay8910_address_data_w)
+	AM_RANGE(0x2000, 0x2001) AM_DEVWRITE_LEGACY("aysnd", ay8910_address_data_w)
 	AM_RANGE(0x2400, 0x2400) AM_READ_PORT("DSW")
 	AM_RANGE(0x2410, 0x2410) AM_READ_PORT("INPUTS")
 	AM_RANGE(0x2420, 0x2420) AM_WRITE(lamps1_w)
 	AM_RANGE(0x2430, 0x2430) AM_WRITE(lamps2_w)
-	AM_RANGE(0x2440, 0x2440) AM_DEVWRITE("crtc", mc6845_address_w)
+	AM_RANGE(0x2440, 0x2440) AM_DEVWRITE("crtc", mc6845_device, address_w)
 	AM_RANGE(0x2441, 0x2441) AM_READ_PORT("UNK1")
-	AM_RANGE(0x2441, 0x2441) AM_DEVWRITE("crtc", mc6845_register_w)
+	AM_RANGE(0x2441, 0x2441) AM_DEVWRITE("crtc", mc6845_device, register_w)
 	AM_RANGE(0x2460, 0x2460) AM_WRITE(usgames_rombank_w)
 	AM_RANGE(0x2470, 0x2470) AM_READ_PORT("UNK2")
-	AM_RANGE(0x2800, 0x2fff) AM_RAM_WRITE(usgames_charram_w) AM_BASE_MEMBER(usgames_state, m_charram)
-	AM_RANGE(0x3000, 0x3fff) AM_RAM_WRITE(usgames_videoram_w) AM_BASE_MEMBER(usgames_state, m_videoram)
+	AM_RANGE(0x2800, 0x2fff) AM_RAM_WRITE(usgames_charram_w) AM_SHARE("charram")
+	AM_RANGE(0x3000, 0x3fff) AM_RAM_WRITE(usgames_videoram_w) AM_SHARE("videoram")
 	AM_RANGE(0x4000, 0x7fff) AM_ROMBANK("bank1")
 	AM_RANGE(0x8000, 0xffff) AM_ROM
 ADDRESS_MAP_END
@@ -114,7 +114,7 @@ static INPUT_PORTS_START( usg32 )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START("DSW")
-	PORT_DIPNAME( 0x01, 0x01, "Service Keyboard Attached?" )	// Not actually a DIP, when keyboard is plugged in, this goes low
+	PORT_DIPNAME( 0x01, 0x01, "Service Keyboard Attached?" )    // Not actually a DIP, when keyboard is plugged in, this goes low
 	PORT_DIPSETTING(    0x01, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
 	PORT_SERVICE_NO_TOGGLE( 0x02, IP_ACTIVE_HIGH )
@@ -131,7 +131,7 @@ static INPUT_PORTS_START( usg32 )
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SPECIAL ) // +12 Volts?
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_VBLANK )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_CUSTOM ) PORT_VBLANK("screen")
 
 	PORT_START("UNK1")
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
@@ -216,16 +216,16 @@ GFXDECODE_END
 
 static const mc6845_interface mc6845_intf =
 {
-	"screen",	/* screen we are acting on */
-	8,			/* number of pixels per video memory address */
-	NULL,		/* before pixel update callback */
-	NULL,		/* row update callback */
-	NULL,		/* after pixel update callback */
-	DEVCB_NULL,	/* callback for display state changes */
-	DEVCB_NULL,	/* callback for cursor state changes */
-	DEVCB_NULL,	/* HSYNC callback */
-	DEVCB_NULL,	/* VSYNC callback */
-	NULL		/* update address callback */
+	"screen",   /* screen we are acting on */
+	8,          /* number of pixels per video memory address */
+	NULL,       /* before pixel update callback */
+	NULL,       /* row update callback */
+	NULL,       /* after pixel update callback */
+	DEVCB_NULL, /* callback for display state changes */
+	DEVCB_NULL, /* callback for cursor state changes */
+	DEVCB_NULL, /* HSYNC callback */
+	DEVCB_NULL, /* VSYNC callback */
+	NULL        /* update address callback */
 };
 
 
@@ -234,7 +234,7 @@ static MACHINE_CONFIG_START( usg32, usgames_state )
 	/* basic machine hardware */
 	MCFG_CPU_ADD("maincpu", M6809, 2000000) /* ?? */
 	MCFG_CPU_PROGRAM_MAP(usgames_map)
-	MCFG_CPU_PERIODIC_INT(irq0_line_hold,5*60) /* ?? */
+	MCFG_CPU_PERIODIC_INT_DRIVER(usgames_state, irq0_line_hold, 5*60) /* ?? */
 
 	MCFG_NVRAM_ADD_0FILL("nvram")
 
@@ -242,16 +242,13 @@ static MACHINE_CONFIG_START( usg32, usgames_state )
 	MCFG_SCREEN_ADD("screen", RASTER)
 	MCFG_SCREEN_REFRESH_RATE(60)
 	MCFG_SCREEN_VBLANK_TIME(ATTOSECONDS_IN_USEC(2500) /* not accurate */)
-	MCFG_SCREEN_FORMAT(BITMAP_FORMAT_INDEXED16)
 	MCFG_SCREEN_SIZE(64*8, 32*8)
 	MCFG_SCREEN_VISIBLE_AREA(7*8, 57*8-1, 0*8, 31*8-1)
-	MCFG_SCREEN_UPDATE(usgames)
+	MCFG_SCREEN_UPDATE_DRIVER(usgames_state, screen_update_usgames)
 
 	MCFG_GFXDECODE(usgames)
 	MCFG_PALETTE_LENGTH(2*256)
 
-	MCFG_PALETTE_INIT(usgames)
-	MCFG_VIDEO_START(usgames)
 
 	MCFG_MC6845_ADD("crtc", MC6845, XTAL_18MHz / 16, mc6845_intf)
 
@@ -367,29 +364,29 @@ ROM_START( usg252 )
 	ROM_REGION( 0x80000, "maincpu", 0 )
 	ROM_LOAD( "usg252.u12",   0x08000, 0x08000, CRC(766a855a) SHA1(e67ca9944d92192de423de6aa8a60f2e28b17db1) )
 	/* for the banked region */
-	ROM_LOAD( "usg252.u28",   0x1c000, 0x04000, CRC(d44d2ffa) SHA1(8bd756418b4f8ad11cb0f2044fb91c63d7771497) )	// ROM 2
+	ROM_LOAD( "usg252.u28",   0x1c000, 0x04000, CRC(d44d2ffa) SHA1(8bd756418b4f8ad11cb0f2044fb91c63d7771497) )  // ROM 2
 	ROM_CONTINUE(             0x18000, 0x04000 )
 	ROM_CONTINUE(             0x14000, 0x04000 )
 	ROM_CONTINUE(             0x10000, 0x04000 )
-	ROM_LOAD( "usg252.u18",   0x2c000, 0x04000, CRC(2fff1da2) SHA1(c44718f7aab82f45379f21b68e8ee2668fe3a378) )	// ROM 1
+	ROM_LOAD( "usg252.u18",   0x2c000, 0x04000, CRC(2fff1da2) SHA1(c44718f7aab82f45379f21b68e8ee2668fe3a378) )  // ROM 1
 	ROM_CONTINUE(             0x28000, 0x04000 )
 	ROM_CONTINUE(             0x24000, 0x04000 )
 	ROM_CONTINUE(             0x20000, 0x04000 )
-	ROM_LOAD( "usg252.u36",   0x3c000, 0x04000, CRC(b6d007be) SHA1(ec2afe983fd925d9f4602f47ddadd117bcc74972) )	// ROM 4
+	ROM_LOAD( "usg252.u36",   0x3c000, 0x04000, CRC(b6d007be) SHA1(ec2afe983fd925d9f4602f47ddadd117bcc74972) )  // ROM 4
 	ROM_CONTINUE(             0x38000, 0x04000 )
 	ROM_CONTINUE(             0x34000, 0x04000 )
 	ROM_CONTINUE(             0x30000, 0x04000 )
-	ROM_LOAD( "usg252.u35",   0x4c000, 0x04000, CRC(9542295b) SHA1(56dd7b8fd581779656cb71cc42dbb9f77fb303f4) )	// ROM 3
+	ROM_LOAD( "usg252.u35",   0x4c000, 0x04000, CRC(9542295b) SHA1(56dd7b8fd581779656cb71cc42dbb9f77fb303f4) )  // ROM 3
 	ROM_CONTINUE(             0x48000, 0x04000 )
 	ROM_CONTINUE(             0x44000, 0x04000 )
 	ROM_CONTINUE(             0x40000, 0x04000 )
 ROM_END
 
 
-GAME( 1987, usg32,  0,     usg32,  usg32, 0, ROT0, "U.S. Games", "Super Duper Casino (California V3.2)", 0 )
-GAME( 1988, usg83,  0,     usg32,  usg83, 0, ROT0, "U.S. Games", "Super Ten V8.3", 0 )
-GAME( 1988, usg83x, usg83, usg32,  usg83, 0, ROT0, "U.S. Games", "Super Ten V8.3X", 0 )
-GAME( 1988, usg82,  usg83, usg32,  usg83, 0, ROT0, "U.S. Games", "Super Ten V8.2" , 0)	// "Feb.08,1988"
-GAME( 1989, usg182, 0,     usg185, usg83, 0, ROT0, "U.S. Games", "Games V18.2", 0 )
-GAME( 1991, usg185, 0,     usg185, usg83, 0, ROT0, "U.S. Games", "Games V18.7C", 0 )
-GAME( 1992, usg252, 0,     usg185, usg83, 0, ROT0, "U.S. Games", "Games V25.4X", 0 )
+GAME( 1987, usg32,  0,     usg32,  usg32, driver_device, 0, ROT0, "U.S. Games", "Super Duper Casino (California V3.2)", 0 )
+GAME( 1988, usg83,  0,     usg32,  usg83, driver_device, 0, ROT0, "U.S. Games", "Super Ten V8.3", 0 )
+GAME( 1988, usg83x, usg83, usg32,  usg83, driver_device, 0, ROT0, "U.S. Games", "Super Ten V8.3X", 0 )
+GAME( 1988, usg82,  usg83, usg32,  usg83, driver_device, 0, ROT0, "U.S. Games", "Super Ten V8.2" , 0)   // "Feb.08,1988"
+GAME( 1989, usg182, 0,     usg185, usg83, driver_device, 0, ROT0, "U.S. Games", "Games V18.2", 0 )
+GAME( 1991, usg185, 0,     usg185, usg83, driver_device, 0, ROT0, "U.S. Games", "Games V18.7C", 0 )
+GAME( 1992, usg252, 0,     usg185, usg83, driver_device, 0, ROT0, "U.S. Games", "Games V25.4X", 0 )

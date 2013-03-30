@@ -75,7 +75,7 @@ else
 UNAME = $(shell uname -a)
 
 ifeq ($(firstword $(filter Linux,$(UNAME))),Linux)
-TARGETOS = unix
+TARGETOS = linux
 endif
 ifeq ($(firstword $(filter Solaris,$(UNAME))),Solaris)
 TARGETOS = solaris
@@ -94,6 +94,9 @@ TARGETOS = openbsd
 endif
 ifeq ($(firstword $(filter Darwin,$(UNAME))),Darwin)
 TARGETOS = macosx
+endif
+ifeq ($(firstword $(filter Haiku,$(UNAME))),Haiku)
+TARGETOS = haiku
 endif
 
 ifndef TARGETOS
@@ -143,7 +146,7 @@ endif
 
 endif
 
-PTR64=0
+
 
 #-------------------------------------------------
 # configure name of final executable
@@ -163,9 +166,10 @@ PTR64=0
 
 # uncomment and specify architecture-specific optimizations here
 # some examples:
-#   optimize for I686:   ARCHOPTS = -march=pentiumpro
-#   optimize for Core 2: ARCHOPTS = -march=core2
-#   optimize for G4:     ARCHOPTS = -mcpu=G4
+#   ARCHOPTS = -march=pentiumpro  # optimize for I686
+#   ARCHOPTS = -march=core2       # optimize for Core 2
+#   ARCHOPTS = -march=native      # optimize for local machine (auto detect)
+#   ARCHOPTS = -mcpu=G4           # optimize for G4
 # note that we leave this commented by default so that you can
 # configure this in your environment and never have to think about it
 # ARCHOPTS =
@@ -192,6 +196,10 @@ PTR64=0
 # (vs. the native framework port).  Normal users should not enable this.
 # MACOSX_USE_LIBSDL = 1
 
+# uncomment and specify path to cppcheck executable to perform
+# static code analysis during compilation
+# CPPCHECK =
+
 
 
 #-------------------------------------------------
@@ -210,6 +218,15 @@ BUILD_EXPAT = 1
 
 # uncomment next line to build zlib as part of MAME build
 BUILD_ZLIB = 1
+
+# uncomment next line to build libflac as part of MAME build
+BUILD_FLAC = 1
+
+# uncomment next line to build jpeglib as part of MAME build
+BUILD_JPEGLIB = 1
+
+# uncomment next line to build PortMidi as part of MAME/MESS build
+BUILD_MIDILIB = 1
 
 # uncomment next line to include the symbols
 # SYMBOLS = 1
@@ -303,7 +320,7 @@ LD = @g++
 MD = -mkdir$(EXE)
 RM = @rm -f
 OBJDUMP = @objdump
-
+PYTHON = @python
 
 
 #-------------------------------------------------
@@ -362,7 +379,7 @@ EMULATOR = $(FULLNAME)$(EXE)
 SRC = src
 
 # build the targets in different object dirs, so they can co-exist
-OBJ = obj/$(OSD)/$(FULLNAME)
+OBJ = obj/$(PREFIX)$(OSD)$(SUFFIX)$(SUFFIX64)$(SUFFIXDEBUG)$(SUFFIXPROFILE)
 
 
 
@@ -403,6 +420,21 @@ endif
 # define MAME_PROFILER if we are a profiling build
 ifdef PROFILER
 DEFS += -DMAME_PROFILER
+endif
+
+# define USE_NETWORK if we are a making network enabled build
+ifdef USE_NETWORK
+DEFS += -DUSE_NETWORK
+endif
+
+# need to ensure FLAC functions are statically linked
+ifeq ($(BUILD_FLAC),1)
+DEFS += -DFLAC__NO_DLL
+endif
+
+# define USE_SYSTEM_JPEGLIB if library shipped with MAME is not used
+ifneq ($(BUILD_JPEGLIB),1)
+DEFS += -DUSE_SYSTEM_JPEGLIB
 endif
 
 
@@ -452,18 +484,14 @@ endif
 # add the optimization flag
 CCOMFLAGS += -O$(OPTIMIZE)
 
-# if we are optimizing, include optimization options
-# and make all errors into warnings
-ifneq ($(OPTIMIZE),0)
-ifneq ($(TARGETOS),os2)
+# add the error warning flag
 ifndef NOWERROR
-CCOMFLAGS += -Werror -fno-strict-aliasing $(ARCHOPTS)
-else
-CCOMFLAGS += -fno-strict-aliasing $(ARCHOPTS)
+CCOMFLAGS += -Werror
 endif
-else
+
+# if we are optimizing, include optimization options
+ifneq ($(OPTIMIZE),0)
 CCOMFLAGS += -fno-strict-aliasing $(ARCHOPTS)
-endif
 endif
 
 # add a basic set of warnings
@@ -486,6 +514,9 @@ CONLYFLAGS += \
 COBJFLAGS += \
 	-Wpointer-arith 
 
+# warnings only applicable to C++ compiles
+CPPONLYFLAGS += \
+	-Woverloaded-virtual
 
 
 #-------------------------------------------------
@@ -500,6 +531,7 @@ INCPATH += \
 	-I$(OBJ)/emu \
 	-I$(OBJ)/emu/layout \
 	-I$(SRC)/lib/util \
+	-I$(SRC)/lib \
 	-I$(SRC)/osd \
 	-I$(SRC)/osd/$(OSD) \
 
@@ -560,8 +592,7 @@ endif
 # this variable
 #-------------------------------------------------
 
-OBJDIRS = $(OBJ)
-
+OBJDIRS = $(OBJ) $(OBJ)/$(TARGET)/$(SUBTARGET)
 
 
 #-------------------------------------------------
@@ -569,14 +600,17 @@ OBJDIRS = $(OBJ)
 #-------------------------------------------------
 
 LIBEMU = $(OBJ)/libemu.a
-LIBCPU = $(OBJ)/libcpu.a
-LIBDASM = $(OBJ)/libdasm.a
-LIBSOUND = $(OBJ)/libsound.a
+LIBCPU = $(OBJ)/$(TARGET)/$(SUBTARGET)/libcpu.a
+LIBDASM = $(OBJ)/$(TARGET)/$(SUBTARGET)/libdasm.a
+LIBSOUND = $(OBJ)/$(TARGET)/$(SUBTARGET)/libsound.a
 LIBUTIL = $(OBJ)/libutil.a
 LIBOCORE = $(OBJ)/libocore.a
 LIBOSD = $(OBJ)/libosd.a
 
 VERSIONOBJ = $(OBJ)/version.o
+EMUINFOOBJ = $(OBJ)/$(TARGET)/$(TARGET).o
+DRIVLISTSRC = $(OBJ)/$(TARGET)/$(SUBTARGET)/drivlist.c
+DRIVLISTOBJ = $(OBJ)/$(TARGET)/$(SUBTARGET)/drivlist.o
 
 
 
@@ -606,10 +640,39 @@ LIBS += -lz
 ZLIB =
 endif
 
+# add flac library
+ifeq ($(BUILD_FLAC),1)
+INCPATH += -I$(SRC)/lib/util
+FLAC_LIB = $(OBJ)/libflac.a
+# $(OBJ)/libflac++.a
+else
+LIBS += -lFLAC
+FLAC_LIB =
+endif
+
+# add jpeglib image library
+ifeq ($(BUILD_JPEGLIB),1)
+INCPATH += -I$(SRC)/lib/libjpeg
+JPEG_LIB = $(OBJ)/libjpeg.a
+else
+LIBS += -ljpeg
+JPEG_LIB =
+endif
+
 # add SoftFloat floating point emulation library
 SOFTFLOAT = $(OBJ)/libsoftfloat.a
 
+# add formats emulation library
+FORMATS_LIB = $(OBJ)/libformats.a
 
+# add PortMidi MIDI library
+ifeq ($(BUILD_MIDILIB),1)
+INCPATH += -I$(SRC)/lib/portmidi
+MIDI_LIB = $(OBJ)/libportmidi.a
+else
+LIBS += -lportmidi
+MIDI_LIB =
+endif
 
 #-------------------------------------------------
 # 'default' target needs to go here, before the 
@@ -620,7 +683,14 @@ default: maketree buildtools emulator
 
 all: default tools
 
+# TODO: move to a .mak file in the regtests folder?
+tests: maketree jedutil$(EXE) chdman$(EXE)
+	@echo Running jedutil unittest
+	$(PYTHON) src/regtests/jedutil/jedtest.py
+	@echo Running chdman unittest
+	$(PYTHON) src/regtests/chdman/chdtest.py
 
+7Z_LIB = $(OBJ)/lib7z.a 
 
 #-------------------------------------------------
 # defines needed by multiple make files 
@@ -640,10 +710,11 @@ BUILDOUT = $(BUILDOBJ)
 include $(SRC)/osd/$(OSD)/$(OSD).mak
 
 # then the various core pieces
+include $(SRC)/build/build.mak
 include $(SRC)/$(TARGET)/$(SUBTARGET).mak
+-include $(SRC)/$(TARGET)/osd/$(OSD)/$(OSD).mak
 include $(SRC)/emu/emu.mak
 include $(SRC)/lib/lib.mak
-include $(SRC)/build/build.mak
 -include $(SRC)/osd/$(CROSS_BUILD_OSD)/build.mak
 include $(SRC)/tools/tools.mak
 
@@ -651,6 +722,8 @@ include $(SRC)/tools/tools.mak
 CCOMFLAGS += $(INCPATH)
 CDEFS = $(DEFS)
 
+# TODO: -x c++ should not be hard-coded
+CPPCHECKFLAGS = $(CDEFS) $(INCPATH) -x c++ --enable=style
 
 
 #-------------------------------------------------
@@ -660,22 +733,6 @@ CDEFS = $(DEFS)
 emulator: maketree $(BUILD) $(EMULATOR)
 
 buildtools: maketree $(BUILD)
-
-# In order to keep dependencies reasonable, we exclude objects in the base of
-# $(SRC)/emu, as well as all the OSD objects and anything in the $(OBJ) tree
-depend: maketree $(MAKEDEP_TARGET)
-	@echo Rebuilding depend.mak...
-	$(MAKEDEP) -I. $(INCPATH) -X$(SRC)/emu -X$(SRC)/osd/... -X$(OBJ)/... src/$(TARGET) > depend.mak
-
-INCPATH += \
-	-I$(SRC)/$(TARGET) \
-	-I$(OBJ)/$(TARGET)/layout \
-	-I$(SRC)/emu \
-	-I$(OBJ)/emu \
-	-I$(OBJ)/emu/layout \
-	-I$(SRC)/lib/util \
-	-I$(SRC)/osd \
-	-I$(SRC)/osd/$(OSD) \
 
 tools: maketree $(TOOLS)
 
@@ -719,15 +776,15 @@ $(sort $(OBJDIRS)):
 
 ifndef EXECUTABLE_DEFINED
 
-# always recompile the version string
-$(VERSIONOBJ): $(DRVLIBS) $(LIBOSD) $(LIBCPU) $(LIBEMU) $(LIBSOUND) $(LIBUTIL) $(EXPAT) $(ZLIB) $(SOFTFLOAT) $(LIBOCORE) $(RESFILE)
-
-$(EMULATOR): $(VERSIONOBJ) $(DRVLIBS) $(LIBOSD) $(LIBCPU) $(LIBEMU) $(LIBDASM) $(LIBSOUND) $(LIBUTIL) $(EXPAT) $(SOFTFLOAT) $(ZLIB) $(LIBOCORE) $(RESFILE)
+$(EMULATOR): $(EMUINFOOBJ) $(DRIVLISTOBJ) $(DRVLIBS) $(LIBOSD) $(LIBCPU) $(LIBEMU) $(LIBDASM) $(LIBSOUND) $(LIBUTIL) $(EXPAT) $(SOFTFLOAT) $(JPEG_LIB) $(FLAC_LIB) $(7Z_LIB) $(FORMATS_LIB) $(ZLIB) $(LIBOCORE) $(MIDI_LIB) $(RESFILE)
+	$(CC) $(CDEFS) $(CFLAGS) -c $(SRC)/version.c -o $(VERSIONOBJ)
 	@echo Linking $@...
-	$(LD) $(LDFLAGS) $(LDFLAGSEMULATOR) $^ $(LIBS) -o $@
+	$(LD) $(LDFLAGS) $(LDFLAGSEMULATOR) $(VERSIONOBJ) $^ $(LIBS) -o $@
 ifeq ($(TARGETOS),win32)
 ifdef SYMBOLS
+ifndef MSVC_BUILD
 	$(OBJDUMP) --section=.text --line-numbers --syms --demangle $@ >$(FULLNAME).sym
+endif
 endif
 endif
 
@@ -742,14 +799,30 @@ endif
 $(OBJ)/%.o: $(SRC)/%.c | $(OSPREBUILD)
 	@echo Compiling $<...
 	$(CC) $(CDEFS) $(CFLAGS) -c $< -o $@
+ifdef CPPCHECK
+	@$(CPPCHECK) $(CPPCHECKFLAGS) $<
+endif
+
+$(OBJ)/%.o: $(OBJ)/%.c | $(OSPREBUILD)
+	@echo Compiling $<...
+	$(CC) $(CDEFS) $(CFLAGS) -c $< -o $@
+ifdef CPPCHECK
+	@$(CPPCHECK) $(CPPCHECKFLAGS) $<
+endif
 
 $(OBJ)/%.pp: $(SRC)/%.c | $(OSPREBUILD)
 	@echo Compiling $<...
 	$(CC) $(CDEFS) $(CFLAGS) -E $< -o $@
+ifdef CPPCHECK
+	@$(CPPCHECK) $(CPPCHECKFLAGS) $<
+endif
 
 $(OBJ)/%.s: $(SRC)/%.c | $(OSPREBUILD)
 	@echo Compiling $<...
 	$(CC) $(CDEFS) $(CFLAGS) -S $< -o $@
+ifdef CPPCHECK
+	@$(CPPCHECK) $(CPPCHECKFLAGS) $<
+endif
 
 $(OBJ)/%.lh: $(SRC)/%.lay $(FILE2STR_TARGET)
 	@echo Converting $<...
@@ -759,6 +832,17 @@ $(OBJ)/%.fh: $(SRC)/%.png $(PNG2BDC_TARGET) $(FILE2STR_TARGET)
 	@echo Converting $<...
 	@$(PNG2BDC) $< $(OBJ)/temp.bdc
 	@$(FILE2STR) $(OBJ)/temp.bdc $@ font_$(basename $(notdir $<)) UINT8
+
+$(DRIVLISTOBJ): $(DRIVLISTSRC)
+	@echo Compiling $<...
+	$(CC) $(CDEFS) $(CFLAGS) -c $< -o $@
+ifdef CPPCHECK
+	@$(CPPCHECK) $(CPPCHECKFLAGS) $<
+endif
+
+$(DRIVLISTSRC): $(SRC)/$(TARGET)/$(SUBTARGET).lst $(MAKELIST_TARGET)
+	@echo Building driver list $<...
+	@$(MAKELIST) $< >$@
 
 $(OBJ)/%.a:
 	@echo Archiving $@...
@@ -777,4 +861,4 @@ endif
 # optional dependencies file
 #-------------------------------------------------
 
--include depend.mak
+-include depend_$(TARGET).mak

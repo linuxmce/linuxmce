@@ -7,45 +7,42 @@
 
 ***************************************************************************/
 
-static TILE_GET_INFO( get_bg18_tile_info )
+TILE_GET_INFO_MEMBER(taitol_state::get_bg18_tile_info)
 {
-	taitol_state *state = machine.driver_data<taitol_state>();
-	int attr = state->m_rambanks[2 * tile_index + 0x8000 + 1];
-	int code = state->m_rambanks[2 * tile_index + 0x8000]
+	int attr = m_rambanks[2 * tile_index + 0x8000 + 1];
+	int code = m_rambanks[2 * tile_index + 0x8000]
 			| ((attr & 0x03) << 8)
-			| ((state->m_bankc[(attr & 0xc) >> 2]) << 10)
-			| (state->m_horshoes_gfxbank << 12);
+			| ((m_bankc[(attr & 0xc) >> 2]) << 10)
+			| (m_horshoes_gfxbank << 12);
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			0,
 			code,
 			(attr & 0xf0) >> 4,
 			0);
 }
 
-static TILE_GET_INFO( get_bg19_tile_info )
+TILE_GET_INFO_MEMBER(taitol_state::get_bg19_tile_info)
 {
-	taitol_state *state = machine.driver_data<taitol_state>();
-	int attr = state->m_rambanks[2 * tile_index + 0x9000 + 1];
-	int code = state->m_rambanks[2 * tile_index + 0x9000]
+	int attr = m_rambanks[2 * tile_index + 0x9000 + 1];
+	int code = m_rambanks[2 * tile_index + 0x9000]
 			| ((attr & 0x03) << 8)
-			| ((state->m_bankc[(attr & 0xc) >> 2]) << 10)
-			| (state->m_horshoes_gfxbank << 12);
+			| ((m_bankc[(attr & 0xc) >> 2]) << 10)
+			| (m_horshoes_gfxbank << 12);
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			0,
 			code,
 			(attr & 0xf0) >> 4,
 			0);
 }
 
-static TILE_GET_INFO( get_ch1a_tile_info )
+TILE_GET_INFO_MEMBER(taitol_state::get_ch1a_tile_info)
 {
-	taitol_state *state = machine.driver_data<taitol_state>();
-	int attr = state->m_rambanks[2 * tile_index + 0xa000 + 1];
-	int code = state->m_rambanks[2 * tile_index + 0xa000] | ((attr & 0x01) << 8) | ((attr & 0x04) << 7);
+	int attr = m_rambanks[2 * tile_index + 0xa000 + 1];
+	int code = m_rambanks[2 * tile_index + 0xa000] | ((attr & 0x01) << 8) | ((attr & 0x04) << 7);
 
-	SET_TILE_INFO(
+	SET_TILE_INFO_MEMBER(
 			2,
 			code,
 			(attr & 0xf0) >> 4,
@@ -60,24 +57,23 @@ static TILE_GET_INFO( get_ch1a_tile_info )
 
 ***************************************************************************/
 
-VIDEO_START( taitol )
+VIDEO_START_MEMBER(taitol_state,taitol)
 {
-	taitol_state *state = machine.driver_data<taitol_state>();
 	int i;
 
-	state->m_bg18_tilemap = tilemap_create(machine, get_bg18_tile_info, tilemap_scan_rows, 8, 8, 64, 32);
-	state->m_bg19_tilemap = tilemap_create(machine, get_bg19_tile_info, tilemap_scan_rows, 8, 8, 64, 32);
-	state->m_ch1a_tilemap = tilemap_create(machine, get_ch1a_tile_info, tilemap_scan_rows, 8, 8, 64, 32);
+	m_bg18_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(taitol_state::get_bg18_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 64, 32);
+	m_bg19_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(taitol_state::get_bg19_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 64, 32);
+	m_ch1a_tilemap = &machine().tilemap().create(tilemap_get_info_delegate(FUNC(taitol_state::get_ch1a_tile_info),this), TILEMAP_SCAN_ROWS, 8, 8, 64, 32);
 
-	tilemap_set_transparent_pen(state->m_bg18_tilemap, 0);
-	tilemap_set_transparent_pen(state->m_ch1a_tilemap, 0);
+	m_bg18_tilemap->set_transparent_pen(0);
+	m_ch1a_tilemap->set_transparent_pen(0);
 
 	for (i = 0; i < 256; i++)
-		palette_set_color(machine, i, MAKE_RGB(0, 0, 0));
+		palette_set_color(machine(), i, MAKE_RGB(0, 0, 0));
 
-	tilemap_set_scrolldx(state->m_ch1a_tilemap, -8, -8);
-	tilemap_set_scrolldx(state->m_bg18_tilemap, 28, -11);
-	tilemap_set_scrolldx(state->m_bg19_tilemap, 38, -21);
+	m_ch1a_tilemap->set_scrolldx(-8, -8);
+	m_bg18_tilemap->set_scrolldx(28, -11);
+	m_bg19_tilemap->set_scrolldx(38, -21);
 }
 
 
@@ -88,47 +84,43 @@ VIDEO_START( taitol )
 
 ***************************************************************************/
 
-WRITE8_HANDLER( horshoes_bankg_w )
+WRITE8_MEMBER(taitol_state::horshoes_bankg_w)
 {
-	taitol_state *state = space->machine().driver_data<taitol_state>();
 
-	if (state->m_horshoes_gfxbank != data)
+	if (m_horshoes_gfxbank != data)
 	{
-		state->m_horshoes_gfxbank = data;
+		m_horshoes_gfxbank = data;
 
-		tilemap_mark_all_tiles_dirty(state->m_bg18_tilemap);
-		tilemap_mark_all_tiles_dirty(state->m_bg19_tilemap);
+		m_bg18_tilemap->mark_all_dirty();
+		m_bg19_tilemap->mark_all_dirty();
 	}
 }
 
-WRITE8_HANDLER( taitol_bankc_w )
+WRITE8_MEMBER(taitol_state::taitol_bankc_w)
 {
-	taitol_state *state = space->machine().driver_data<taitol_state>();
 
-	if (state->m_bankc[offset] != data)
+	if (m_bankc[offset] != data)
 	{
-		state->m_bankc[offset] = data;
-//      logerror("Bankc %d, %02x (%04x)\n", offset, data, cpu_get_pc(&space->device()));
+		m_bankc[offset] = data;
+//      logerror("Bankc %d, %02x (%04x)\n", offset, data, space.device().safe_pc());
 
-		tilemap_mark_all_tiles_dirty(state->m_bg18_tilemap);
-		tilemap_mark_all_tiles_dirty(state->m_bg19_tilemap);
+		m_bg18_tilemap->mark_all_dirty();
+		m_bg19_tilemap->mark_all_dirty();
 	}
 }
 
-READ8_HANDLER( taitol_bankc_r )
+READ8_MEMBER(taitol_state::taitol_bankc_r)
 {
-	taitol_state *state = space->machine().driver_data<taitol_state>();
-	return state->m_bankc[offset];
+	return m_bankc[offset];
 }
 
 
-WRITE8_HANDLER( taitol_control_w )
+WRITE8_MEMBER(taitol_state::taitol_control_w)
 {
-	taitol_state *state = space->machine().driver_data<taitol_state>();
 
-//  logerror("Control Write %02x (%04x)\n", data, cpu_get_pc(&space->device()));
+//  logerror("Control Write %02x (%04x)\n", data, space.device().safe_pc());
 
-	state->m_cur_ctrl = data;
+	m_cur_ctrl = data;
 //popmessage("%02x",data);
 
 	/* bit 0 unknown */
@@ -138,76 +130,75 @@ WRITE8_HANDLER( taitol_control_w )
 	/* bit 3 controls sprite/tile priority - handled in vh_screenrefresh() */
 
 	/* bit 4 flip screen */
-	state->m_flipscreen = data & 0x10;
-	tilemap_set_flip_all(space->machine(), state->m_flipscreen ? (TILEMAP_FLIPY | TILEMAP_FLIPX) : 0);
+	m_flipscreen = data & 0x10;
+	machine().tilemap().set_flip_all(m_flipscreen ? (TILEMAP_FLIPY | TILEMAP_FLIPX) : 0);
 
 	/* bit 5 display enable - handled in vh_screenrefresh() */
 }
 
-READ8_HANDLER( taitol_control_r )
+READ8_MEMBER(taitol_state::taitol_control_r)
 {
-	taitol_state *state = space->machine().driver_data<taitol_state>();
 
-//  logerror("Control Read %02x (%04x)\n", cur_ctrl, cpu_get_pc(&space->device()));
-	return state->m_cur_ctrl;
+//  logerror("Control Read %02x (%04x)\n", cur_ctrl, space.device().safe_pc());
+	return m_cur_ctrl;
 }
 
 void taitol_chardef14_m( running_machine &machine, int offset )
 {
-	gfx_element_mark_dirty(machine.gfx[2], offset / 32 + 0);
+	machine.gfx[2]->mark_dirty(offset / 32 + 0);
 }
 
 void taitol_chardef15_m( running_machine &machine, int offset )
 {
-	gfx_element_mark_dirty(machine.gfx[2], offset / 32 + 128);
+	machine.gfx[2]->mark_dirty(offset / 32 + 128);
 }
 
 void taitol_chardef16_m( running_machine &machine, int offset )
 {
-	gfx_element_mark_dirty(machine.gfx[2], offset / 32 + 256);
+	machine.gfx[2]->mark_dirty(offset / 32 + 256);
 }
 
 void taitol_chardef17_m( running_machine &machine, int offset )
 {
-	gfx_element_mark_dirty(machine.gfx[2], offset / 32 + 384);
+	machine.gfx[2]->mark_dirty(offset / 32 + 384);
 }
 
 void taitol_chardef1c_m( running_machine &machine, int offset )
 {
-	gfx_element_mark_dirty(machine.gfx[2], offset / 32 + 512);
+	machine.gfx[2]->mark_dirty(offset / 32 + 512);
 }
 
 void taitol_chardef1d_m( running_machine &machine, int offset )
 {
-	gfx_element_mark_dirty(machine.gfx[2], offset / 32 + 640);
+	machine.gfx[2]->mark_dirty(offset / 32 + 640);
 }
 
 void taitol_chardef1e_m( running_machine &machine, int offset )
 {
-	gfx_element_mark_dirty(machine.gfx[2], offset / 32 + 768);
+	machine.gfx[2]->mark_dirty(offset / 32 + 768);
 }
 
 void taitol_chardef1f_m( running_machine &machine, int offset )
 {
-	gfx_element_mark_dirty(machine.gfx[2], offset / 32 + 896);
+	machine.gfx[2]->mark_dirty(offset / 32 + 896);
 }
 
 void taitol_bg18_m( running_machine &machine, int offset )
 {
 	taitol_state *state = machine.driver_data<taitol_state>();
-	tilemap_mark_tile_dirty(state->m_bg18_tilemap, offset / 2);
+	state->m_bg18_tilemap->mark_tile_dirty(offset / 2);
 }
 
 void taitol_bg19_m( running_machine &machine, int offset )
 {
 	taitol_state *state = machine.driver_data<taitol_state>();
-	tilemap_mark_tile_dirty(state->m_bg19_tilemap, offset / 2);
+	state->m_bg19_tilemap->mark_tile_dirty(offset / 2);
 }
 
 void taitol_char1a_m( running_machine &machine, int offset )
 {
 	taitol_state *state = machine.driver_data<taitol_state>();
-	tilemap_mark_tile_dirty(state->m_ch1a_tilemap, offset / 2);
+	state->m_ch1a_tilemap->mark_tile_dirty(offset / 2);
 }
 
 void taitol_obj1b_m( running_machine &machine, int offset )
@@ -243,7 +234,7 @@ void taitol_obj1b_m( running_machine &machine, int offset )
                  plgirs2 bullets and raimais big bosses.
 */
 
-static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rectangle *cliprect )
+static void draw_sprites( running_machine &machine, bitmap_ind16 &bitmap, const rectangle &cliprect )
 {
 	taitol_state *state = machine.driver_data<taitol_state>();
 	int offs;
@@ -284,53 +275,55 @@ static void draw_sprites( running_machine &machine, bitmap_t *bitmap, const rect
 }
 
 
-SCREEN_UPDATE( taitol )
+UINT32 taitol_state::screen_update_taitol(screen_device &screen, bitmap_ind16 &bitmap, const rectangle &cliprect)
 {
-	taitol_state *state = screen->machine().driver_data<taitol_state>();
 	int dx, dy;
 
-	dx = state->m_rambanks[0xb3f4] | (state->m_rambanks[0xb3f5] << 8);
-	if (state->m_flipscreen)
+	dx = m_rambanks[0xb3f4] | (m_rambanks[0xb3f5] << 8);
+	if (m_flipscreen)
 		dx = ((dx & 0xfffc) | ((dx - 3) & 0x0003)) ^ 0xf;
-	dy = state->m_rambanks[0xb3f6];
+	dy = m_rambanks[0xb3f6];
 
-	tilemap_set_scrollx(state->m_bg18_tilemap, 0, -dx);
-	tilemap_set_scrolly(state->m_bg18_tilemap, 0, -dy);
+	m_bg18_tilemap->set_scrollx(0, -dx);
+	m_bg18_tilemap->set_scrolly(0, -dy);
 
-	dx = state->m_rambanks[0xb3fc] | (state->m_rambanks[0xb3fd] << 8);
-	if (state->m_flipscreen)
+	dx = m_rambanks[0xb3fc] | (m_rambanks[0xb3fd] << 8);
+	if (m_flipscreen)
 		dx = ((dx & 0xfffc) | ((dx - 3) & 0x0003)) ^ 0xf;
-	dy = state->m_rambanks[0xb3fe];
+	dy = m_rambanks[0xb3fe];
 
-	tilemap_set_scrollx(state->m_bg19_tilemap, 0, -dx);
-	tilemap_set_scrolly(state->m_bg19_tilemap, 0, -dy);
+	m_bg19_tilemap->set_scrollx(0, -dx);
+	m_bg19_tilemap->set_scrolly(0, -dy);
 
-	if (state->m_cur_ctrl & 0x20)	/* display enable */
+	if (m_cur_ctrl & 0x20)  /* display enable */
 	{
-		bitmap_fill(screen->machine().priority_bitmap, cliprect, 0);
+		machine().priority_bitmap.fill(0, cliprect);
 
-		tilemap_draw(bitmap, cliprect, state->m_bg19_tilemap, 0, 0);
+		m_bg19_tilemap->draw(bitmap, cliprect, 0, 0);
 
-		if (state->m_cur_ctrl & 0x08)	/* sprites always over BG1 */
-			tilemap_draw(bitmap, cliprect, state->m_bg18_tilemap, 0, 0);
-		else					/* split priority */
-			tilemap_draw(bitmap, cliprect, state->m_bg18_tilemap,0,1);
+		if (m_cur_ctrl & 0x08)  /* sprites always over BG1 */
+			m_bg18_tilemap->draw(bitmap, cliprect, 0, 0);
+		else                    /* split priority */
+			m_bg18_tilemap->draw(bitmap, cliprect, 0,1);
 
-		draw_sprites(screen->machine(), bitmap, cliprect);
+		draw_sprites(machine(), bitmap, cliprect);
 
-		tilemap_draw(bitmap, cliprect, state->m_ch1a_tilemap, 0, 0);
+		m_ch1a_tilemap->draw(bitmap, cliprect, 0, 0);
 	}
 	else
-		bitmap_fill(bitmap, cliprect, screen->machine().pens[0]);
+		bitmap.fill(machine().pens[0], cliprect);
 	return 0;
 }
 
 
 
-SCREEN_EOF( taitol )
+void taitol_state::screen_eof_taitol(screen_device &screen, bool state)
 {
-	taitol_state *state = machine.driver_data<taitol_state>();
-	UINT8 *spriteram = state->m_rambanks + 0xb000;
+	// rising edge
+	if (state)
+	{
+		UINT8 *spriteram = m_rambanks + 0xb000;
 
-	memcpy(state->m_buff_spriteram, spriteram, TAITOL_SPRITERAM_SIZE);
+		memcpy(m_buff_spriteram, spriteram, TAITOL_SPRITERAM_SIZE);
+	}
 }
