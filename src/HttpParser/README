@@ -1,0 +1,13 @@
+This contains code for a streamable HTTP Parser. Borrowed from the XBMC Project.
+
+Copyright notice below:
+
+/*
+ * This code implements parsing of HTTP requests.
+ * This code was written by Steve Hanov in 2009, no copyright is claimed.
+ * This code is in the public domain.
+ * Code was taken from http://refactormycode.com/codes/778-an-efficient-http-parser
+ */
+
+Code put into src/ by tschak 2013-03-30
+
