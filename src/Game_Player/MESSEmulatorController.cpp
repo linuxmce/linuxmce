@@ -15,7 +15,7 @@ namespace DCE
   {
     m_pGame_Player = pGame_Player;
     m_pEmulatorModel = pEmulatorModel;
-    m_pEmulatorModel->m_sEmulatorBinary="/usr/local/bin/mess";
+    m_pEmulatorModel->m_sEmulatorBinary="/usr/bin/mess";
     m_pEmulatorModel->m_sProcessName="mess";
     m_pEmulatorModel->m_sConfigFileTemplate="/usr/pluto/templates/mess.ini.template";
     m_pEmulatorModel->m_sConfigFile="/root/.mess/mess.ini";
@@ -198,7 +198,7 @@ namespace DCE
       {
 	m_pEmulatorModel->m_sProcessName="csmess";
 	m_pEmulatorModel->m_sWindowName="csmess.csmess";
-	m_pEmulatorModel->m_sEmulatorBinary="/usr/local/bin/csmess";
+	m_pEmulatorModel->m_sEmulatorBinary="/usr/bin/csmess";
 	if (m_pEmulatorModel->m_bIsStreamingSource)
 	  {
 	    // This is the server, set args as needed
@@ -214,7 +214,7 @@ namespace DCE
 	// Regular non streaming instance.
 	m_pEmulatorModel->m_sProcessName="mess";
 	m_pEmulatorModel->m_sWindowName="mess.mess";
-	m_pEmulatorModel->m_sEmulatorBinary="/usr/local/bin/mess";
+	m_pEmulatorModel->m_sEmulatorBinary="/usr/bin/mess";
       }
 
     if (X11EmulatorController::run())

@@ -15,7 +15,7 @@ namespace DCE
   {
     m_pGame_Player = pGame_Player;
     m_pEmulatorModel = pEmulatorModel;
-    m_pEmulatorModel->m_sEmulatorBinary="/usr/local/bin/mame";
+    m_pEmulatorModel->m_sEmulatorBinary="/usr/bin/mame";
     m_pEmulatorModel->m_sProcessName="mame";
     m_pEmulatorModel->m_sConfigFileTemplate="/usr/pluto/templates/mame.ini.template";
     m_pEmulatorModel->m_sConfigFile="/root/.mame/mame.ini";
@@ -125,7 +125,7 @@ namespace DCE
       {
 	m_pEmulatorModel->m_sProcessName="csmame";
 	m_pEmulatorModel->m_sWindowName="csmame.csmame";
-	m_pEmulatorModel->m_sEmulatorBinary="/usr/local/bin/csmame";
+	m_pEmulatorModel->m_sEmulatorBinary="/usr/bin/csmame";
 	if (m_pEmulatorModel->m_bIsStreamingSource)
 	  {
 	    // This is the server, set args as needed
@@ -141,7 +141,7 @@ namespace DCE
 	// Regular non streaming instance.
 	m_pEmulatorModel->m_sProcessName="mame";
 	m_pEmulatorModel->m_sWindowName="mame.mame";
-	m_pEmulatorModel->m_sEmulatorBinary="/usr/local/bin/mame";
+	m_pEmulatorModel->m_sEmulatorBinary="/usr/bin/mame";
       }
 
     if (X11EmulatorController::run())
