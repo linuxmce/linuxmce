@@ -50,7 +50,7 @@
 #include "CommonFunctions.h"
 #include "DCE/Logger.h"
 
-#define  VERSION "2.0.0.45.12062726126"
+#define  VERSION "<=version=>"
 
 using namespace std;
 
