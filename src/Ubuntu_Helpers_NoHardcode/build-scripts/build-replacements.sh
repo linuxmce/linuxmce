@@ -37,8 +37,7 @@ function Update_Changed_Since_Last_Build
         local url_id=$(svn info "$fs_path" | grep '^URL: ' | cut -d' ' -f2 | md5sum | cut -d' ' -f1)
         local revision_new=$(svn info $fs_path | grep '^Revision: ' | cut -d' ' -f2)
 
-	[[ ! -e "$cache_file" ]] && touch "$cache_file"
-        grep -v "$url_id" "$cache_file" > "${cache_file}.tmp"
+        grep -v "$url_id" "$cache_file" > "${cache_file}.tmp" || :
         echo "$url_id|$revision_new" >> "${cache_file}.tmp"
         mv "${cache_file}.tmp" "$cache_file"
 }
