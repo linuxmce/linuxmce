@@ -34,5 +34,10 @@ cpath = $(1)
 	$(CC) -c $(CFLAGS) $< -o $(call cpath,$@)
 
 svn:            
-	@$(foreach file,$(sources), svn log $(file) 2> /dev/null | head -2 | tail -1 | cut -d"|" -f1;)
+	@echo "Deleting old temp file (if it exists)"
+	@rm -f t
+	@echo "Writing svn revision of each source file into a tempfile"
+	@$(foreach file,$(sources), svn log $(file) 2> /dev/null | head -2 | tail -1 | cut -d"|" -f1>>t;)
+	@echo "Sorting tempfile and returning highest number"
+	@sort t | tail -1|cut -dr -f2
 
