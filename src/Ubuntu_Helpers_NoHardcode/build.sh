@@ -45,4 +45,9 @@ pushd /usr/local/lmce-build/build-dvd
 popd
 
 fi
-wget http://vt100.at/announce.php?text=precise\ fluffy\ is\ done -O /dev/null
+# push stuff into deb
+pushd /var/lmce-build/out/tmp
+dupload --to linuxmce *.changes
+popd
+
+wget --no-check-certificate  https://vt100.at/announce.php?text=precise\ fluffy\ is\ done -O /dev/null
