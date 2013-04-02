@@ -249,6 +249,7 @@ WorkThePhones()
 				fi
 				;;
 			"SCCP")
+				RunConfigureScript
 				WriteSccpPhone
 				;;
 			"IAX"|"IAX2")

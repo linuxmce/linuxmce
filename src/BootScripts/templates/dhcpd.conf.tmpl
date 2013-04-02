@@ -6,6 +6,8 @@
 
 # option definitions common to all supported networks...
 option domain-name-servers %CORE_INTERNAL_ADDRESS%;
+option voip-tftp-server code 150 = ip-address;
+option voip-tftp-server %CORE_INTERNAL_ADDRESS%;
 authoritative;
 
 ddns-update-style interim;

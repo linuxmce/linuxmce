@@ -29,6 +29,7 @@ my $Device_ID;
 my $Device_IP;
 my $Device_MAC;
 my $Device_EXT;
+my $Device_FIRMWARE;
 my $IntIP;
 
 #check params
@@ -50,6 +51,8 @@ if ($IntIP eq "") {
 }
 
 $Device_EXT=$Device_EXT = get_device_devicedata($Device_ID,31);
+$Device_FIRMWARE = get_device_devicedata($Device_ID,313);
+$Device_FIRMWARE =~ s{.loads}{};
 
 chomp($Device_EXT);
 $Device_MAC =~ s/[^0-9A-Fa-f]//g;
@@ -140,7 +143,11 @@ $str_SEPDefault .= "<mlppIndicationStatus>Default</mlppIndicationStatus>\r\n";
 $str_SEPDefault .= "<preemption>Default</preemption>\r\n";
 $str_SEPDefault .= "<connectionMonitorDuration>120</connectionMonitorDuration>\r\n";
 $str_SEPDefault .= "</devicePool>\r\n";
-$str_SEPDefault .= "<loadInformation></loadInformation>\r\n";
+$str_SEPDefault .= "<loadInformation>";
+if ($Device_FIRMWARE ne "") {
+	$str_SEPDefault .= $Device_FIRMWARE;
+}
+$str_SEPDefault .= "</loadInformation>\r\n";
 $str_SEPDefault .= "<vendorConfig>\r\n";
 $str_SEPDefault .= " <disableSpeaker>false</disableSpeaker>\r\n";
 $str_SEPDefault .= " <disableSpeakerAndHeadset>false</disableSpeakerAndHeadset>\r\n";
@@ -199,9 +206,6 @@ close(FILE);
 
 `ln -sf /tftpboot/SEPDefault7970.cnf.xml /tftpboot/SEP$Device_MAC.cnf.xml`;
 
-# no longer needed
-#`/usr/pluto/bin/GenerateSCCP.sh`;
-
 ### Update Cisco 7970 Orbiter
 my $ORB_ID;
 my $ORB_CNT;
@@ -234,7 +238,4 @@ if($DB_ROW = $DB_STATEMENT->fetchrow_hashref())
     $DB_STATEMENT->finish();
 }
 $DB_PL_HANDLE->disconnect();
-
-#A HARD RELOAD FOR ASTERISK (no longer needed in realtime env.)
-#exec("service asterisk restart");
 
