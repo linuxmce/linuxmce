@@ -76,7 +76,7 @@ string g_sPackages, g_sPackages_Exclude, g_sManufacturer, g_sSourcecodePrefix, g
 string g_sPK_RepositorySource;
 int g_iPK_Distro=0,g_iSVNRevision=0;
 int g_iCoresToUse=1;
-bool g_bBuildSource = true, g_bCreatePackage = true, g_bInteractive = false, g_bSimulate = false, g_bSupressPrompts = false, g_bDontTouchDB = false, g_bSetVersion = true, g_bOnlyCompileIfNotFound = false;
+bool g_bBuildSource = true, g_bCreatePackage = true, g_bCreateSourcePackage = false, g_bInteractive = false, g_bSimulate = false, g_bSupressPrompts = false, g_bDontTouchDB = false, g_bSetVersion = true, g_bOnlyCompileIfNotFound = false;
 bool g_bStripAll = false;
 Database_pluto_main *g_pDatabase_pluto_main;
 Row_Version *g_pRow_Version;
@@ -230,6 +230,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'c':
 			g_bCreatePackage = false;
+			break;
+		case 'l':
+			g_bCreateSourcePackage = true;
 			break;
 		case 'i':
 			g_bInteractive = true;
@@ -509,6 +512,12 @@ int main(int argc, char *argv[])
 			if( !PackageIsCompatible(pRow_Package) )
 			{
 				cout << "Skipping: " << pRow_Package->Description_get() << " because it is not compatible" << endl;
+				continue;
+			}
+
+			if( pRow_Package->IsSource_get() && !g_bCreateSourcePackage )
+			{
+				cout << "Skipping: " << pRow_Package->Description_get() << " because source packaging is disabled" << endl;
 				continue;
 			}
 
@@ -1216,15 +1225,15 @@ AsksSourceQuests:
 		}
 
 		// Replace the <=version=> in all the files
-cout << "Deciding to do snr on: " << sSourceDirectory << endl;
+		cout << "Deciding to do snr on: " << sSourceDirectory << endl;
 		if( !g_bSimulate && pRow_Package->FK_Package_Sourcecode_get()!=446 ) // Don't do the snr on MakeRelease itself
 		{
 			list<string> listFiles;
 			FileUtils::FindFiles(listFiles,sSourceDirectory,"*.cpp\t*.c\t*.h\t*.cs\tlogin.php",true);
-cout << "Found " << (int) listFiles.size() << endl;
+			cout << "Found " << (int) listFiles.size() << endl;
 			for(list<string>::iterator it=listFiles.begin();it!=listFiles.end();++it)
 			{
-cout << "Doing snr on " << sSourceDirectory << "/" << *it << endl;
+				cout << "Doing snr on " << sSourceDirectory << "/" << *it << endl;
 				StringUtils::Replace(sSourceDirectory + "/" + *it,sSourceDirectory + "/" + *it,"<=version=>",g_pRow_Version->VersionName_get());
 				StringUtils::Replace(sSourceDirectory + "/" + *it,sSourceDirectory + "/" + *it, "<=compile_date=>", g_sCompile_Date );
 				StringUtils::Replace(sSourceDirectory + "/" + *it,sSourceDirectory + "/" + *it, "/*SVN_REVISION*/", "int g_SvnRevision=" + StringUtils::itos(g_iSVNRevision) + ";" );
