@@ -32,3 +32,7 @@ cpath = $(1)
 
 %.o: %.c
 	$(CC) -c $(CFLAGS) $< -o $(call cpath,$@)
+
+svn:            
+	@$(foreach file,$(sources), svn log $(file) 2> /dev/null | head -2 | tail -1 | cut -d"|" -f1;)
+
