@@ -5,7 +5,7 @@
  *\bug needs better description
  * Screen for video call in progress, needs more definition.
  */
-import QtQuick 1.0
+import QtQuick 1.1
 import "../components"
 Item{
     id:climate

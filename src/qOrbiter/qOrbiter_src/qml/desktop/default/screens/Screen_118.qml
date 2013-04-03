@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 1.1
 import "../components"
 /*!
  *\brief Remote for CD player of some type.

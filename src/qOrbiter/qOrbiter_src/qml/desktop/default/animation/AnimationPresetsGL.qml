@@ -1,4 +1,4 @@
-// import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
+// import QtQuick 1.1 // to target S60 5th Edition or Maemo 5
 /*
 this is the desktop version of the animation presets. It is an experimental file that will be used to contain the animations
 and in some cases integrated with opengl effects for various pages. The idea is that by making this common, we can expose the animations on

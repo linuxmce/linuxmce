@@ -5,7 +5,7 @@
  *\bug needs better description.
  *Save file screen, need more description
  */
-import QtQuick 1.0
+import QtQuick 1.1
 import "../components"
 Item{
     id:file_save

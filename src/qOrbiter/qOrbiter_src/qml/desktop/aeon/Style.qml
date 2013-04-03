@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 1.1
 /*!
  *\class Style
  *\brief This component defines the qml style

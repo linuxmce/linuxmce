@@ -4,7 +4,7 @@
 #include <QAbstractListModel>
 #include <QVariant>
 #include <QMap>
-
+#include <QDebug>
 //for use with the fileformat table.
 class AttributeSortItem: public QObject
 {
@@ -44,7 +44,7 @@ public slots:
     bool setStatus(bool b) { m_isSelected = b; emit dataChanged();}
     bool updateSelection (bool newBool) ;
     void destruct() {
-        //qDebug() << "calling destructor for item.";
+        qDebug() << "calling destructor for item.";
        this->deleteLater();
     }
 };

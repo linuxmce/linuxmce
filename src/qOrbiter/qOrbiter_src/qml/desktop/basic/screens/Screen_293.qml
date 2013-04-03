@@ -1,6 +1,6 @@
 // UI1 Screen Game Atari 2600 Monitor Mode (293)
 // Created using structure-qml.php from Peer Oliver Schmidt\m// based on the LinuxMCE database
-import QtQuick 1.0
+import QtQuick 1.1
 import "../components"
 Item {
 	Image {

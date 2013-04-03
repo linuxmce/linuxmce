@@ -42,6 +42,7 @@ void EPGChannelList::appendRows(const QList<EPGItemClass *> &items)
     foreach(EPGItemClass *item, items)
     {
         connect(item, SIGNAL(dataChanged()), this , SLOT(handleItemChange()));
+        //connect(item, SIGNAL(destroyed()), this, SLOT()
         m_list.append(item);
     }
     endInsertRows();
@@ -74,11 +75,16 @@ void EPGChannelList::handleItemChange()
 
 void EPGChannelList::resetInternalData()
 {
-    qDebug("Resetting Tv Program list data");
-    m_list.clear();
+    qDebug("Clearing Television Channel Listmodel data.");
+     int counter=0;
 
-    //qDeleteAll(m_list.begin(), m_list.end());
-    //m_list.clear();
+    QList<EPGItemClass*>::iterator i;
+    for( i = m_list.begin(); i !=m_list.end(); ++i){
+        EPGItemClass* pItem = m_list.takeFirst();
+        pItem->destruct();
+        counter++;
+    }
+    qDebug("Television Channel Listmodel data Cleared.");
 
 }
 

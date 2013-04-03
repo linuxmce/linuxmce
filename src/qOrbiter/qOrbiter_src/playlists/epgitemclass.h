@@ -25,7 +25,7 @@ public:
 
 public:
     EPGItemClass() {}
-    explicit EPGItemClass( QString chanName, int chanIndex,  QString channel, QString program, int dceIndex, QString chanImage, QString progImag);
+    explicit EPGItemClass( QString chanName, int chanIndex,  QString channel, QString program, int dceIndex, QString chanImage, QString progImag, QObject *parent = 0);
     QVariant data(int role) const;
     QHash<int, QByteArray> roleNames() const;
 
@@ -54,6 +54,11 @@ private:
 signals:
     void imageChanged();
     void dataChanged();
+
+public slots:
+    void destruct(){
+        this->deleteLater();
+    }
 
 };
 

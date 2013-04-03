@@ -5,7 +5,7 @@
  *\todo needs better description.
  *Manage playlist screen.
  */
-import QtQuick 1.0
+import QtQuick 1.1
 import "../components"
 Item{
     id:manage_playlist

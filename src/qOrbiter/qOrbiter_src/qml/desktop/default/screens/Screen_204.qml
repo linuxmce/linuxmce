@@ -5,7 +5,7 @@
  *
  This screen shows the reload router screen.
  */
-import QtQuick 1.0
+import QtQuick 1.1
 import "../components"
 Stage{
     id:reloadrouter

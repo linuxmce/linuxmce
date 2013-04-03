@@ -2,7 +2,7 @@
   Depreciated splash.qml, use the one in root
   */
 
-import QtQuick 1.0
+import QtQuick 1.1
 import "../components"
 
 Rectangle {

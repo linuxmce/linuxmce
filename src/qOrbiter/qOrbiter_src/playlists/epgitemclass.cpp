@@ -1,7 +1,7 @@
 #include "epgitemclass.h"
 
-EPGItemClass::EPGItemClass( QString chanName, int chanIndex,  QString channel, QString program, int dceIndex, QString chanImage, QString progImag ) :
-    m_channame(chanName), m_dceIndex(dceIndex), m_channel(channel), m_program(program), channel_image(chanImage), program_image(progImag), channel_number(chanIndex)
+EPGItemClass::EPGItemClass( QString chanName, int chanIndex,  QString channel, QString program, int dceIndex, QString chanImage, QString progImag, QObject *parent ) :
+     m_channame(chanName), m_dceIndex(dceIndex), m_channel(channel), m_program(program), channel_image(chanImage), program_image(progImag), channel_number(chanIndex)
 {
 
 }

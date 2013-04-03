@@ -1,7 +1,7 @@
 /*
   Splash.qml This is the general linuxmce splash screen and should be used for all devices on startup.
   */
-import QtQuick 1.0
+import QtQuick 1.1
 
 Item {
     id: splashLogic

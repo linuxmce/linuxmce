@@ -92,8 +92,9 @@ void ListModel::appendRows(const QList<gridItem *> &items)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
     foreach(gridItem *item, items) {
-        m_list.append(item);
+        QObject::connect(item, SIGNAL(destroyed()), this, SLOT(itemDeleted()),Qt::QueuedConnection);
         QObject::connect(item, SIGNAL(dataChanged()), this , SLOT(handleItemChange()));
+        m_list.append(item);       
     }
 
     endInsertRows();

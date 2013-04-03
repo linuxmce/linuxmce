@@ -5,7 +5,7 @@
  *
  *This is the screen displaying the lighting floorplan.
  */
-import QtQuick 1.0
+import QtQuick 1.1
 import "../components"
 Rectangle{
     id:lights

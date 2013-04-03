@@ -12,7 +12,7 @@ class ScreenSaverClass : public QObject
     Q_PROPERTY (QString currentImage READ getImage WRITE setImage NOTIFY imageChanged)
     Q_PROPERTY (bool isReady READ getStatus WRITE setStatus NOTIFY statusChanged)
     Q_PROPERTY (int transitionDuration READ getDuration WRITE setDuration NOTIFY durationChanged )
-   Q_PROPERTY (int timerInterval READ getInterval WRITE setInterval NOTIFY intervalChanged)
+    Q_PROPERTY (int timerInterval READ getInterval WRITE setInterval NOTIFY intervalChanged)
     Q_PROPERTY (bool active READ getActive WRITE setActive NOTIFY activatedChanged)
 
 public:
@@ -51,6 +51,7 @@ public slots:
 
     QImage getImageData() {return qi_currentImage;}
     QString getImage();
+    QImage qmlImage() { return qi_currentImage;}
 
     void setImage(QString imgUrl);
 

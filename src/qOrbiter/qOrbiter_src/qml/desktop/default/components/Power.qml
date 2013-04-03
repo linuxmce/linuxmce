@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 1.1
 import "../../lib/handlers"
 Rectangle{
     id:power_rect_container

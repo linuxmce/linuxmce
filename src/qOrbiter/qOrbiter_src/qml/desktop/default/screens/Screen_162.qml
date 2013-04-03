@@ -5,7 +5,7 @@
  *
  * Control Hulu with this screen
  */
-import QtQuick 1.0
+import QtQuick 1.1
 import "../components"
 
 Rectangle {

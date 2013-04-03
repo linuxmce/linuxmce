@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 1.1
 import "../js/ComponentLoader.js" as MyJs
 import "../../lib/handlers"
 

@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 1.1
 Item
 {
     property int listHeight:viewMode ? scaleX(3): appH

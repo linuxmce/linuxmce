@@ -2064,7 +2064,6 @@ void qOrbiter::requestMediaSubtypes(int type)
             if(subSplit.count()>1){
                 emit newMediaSubtype(new AttributeSortItem( subSplit.last(),subSplit.first(), "",false,  0));
             }
-
         }
     }
     else

@@ -1,6 +1,6 @@
 // UI1 Screen AnswertoLinPhones (59)
 // Created using structure-qml.php from Peer Oliver Schmidt\m// based on the LinuxMCE database
-import QtQuick 1.0
+import QtQuick 1.1
 import "../components"
 Item {
 	Image {
