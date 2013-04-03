@@ -6,7 +6,7 @@ then
 else
 	Moon_KernelVersion=$(uname -r)
 fi
-Moon_KernelArch=$(apt-config dump | grep 'APT::Architecture' | sed 's/APT::Architecture "\(.*\)".*/\1/g')
+Moon_KernelArch=$(apt-config dump | grep 'APT::Architecture ' | sed 's/APT::Architecture "\(.*\)".*/\1/g')
 Moon_RootLocation='package/'
 # Remove old kernel images from package dir
 rm -fr $Moon_RootLocation/{boot,lib/modules}
