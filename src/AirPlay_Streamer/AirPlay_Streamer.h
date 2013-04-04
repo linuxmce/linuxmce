@@ -33,7 +33,7 @@ namespace DCE
 //<-dceag-decl-e->
 	  friend class AirPlay_Service;
 		// Private member variables
-
+	  bool m_bIsPaused;
 		// Private methods
 public:
 		// Public member variables
@@ -41,6 +41,7 @@ public:
 	  DeviceData_Base *m_pDeviceMD; 
 	  DeviceData_Base *m_pDevice_Media_PlugIn;
 	  string m_sCurrentMacAddress;
+	  bool m_bIsPlaying;
 //<-dceag-const-b->
 public:
 		// Constructors/Destructor
@@ -56,7 +57,14 @@ public:
 		virtual void CreateChildren();
 		string DeviceNameFromMacAddress(string sMacAddress);
 		void StartAirTunesPlayback();
+		void StartAirPlayPlayback(string sLocation);
 		void StopAirTunesPlayback();
+		void StopAirPlayPlayback();
+		bool IsPaused();
+		void SetPause(bool bIsPaused);
+		bool IsPlaying();
+		void SetPlaying(bool bIsPlaying);
+
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
 		// You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file

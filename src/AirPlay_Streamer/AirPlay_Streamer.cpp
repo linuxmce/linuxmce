@@ -36,6 +36,7 @@ AirPlay_Streamer::AirPlay_Streamer(int DeviceID, string ServerAddress,bool bConn
 //<-dceag-const-e->
 {
   m_pAirPlay_Service = new AirPlay_Service(this);
+  m_bIsPaused=false;
 }
 
 //<-dceag-const2-b->
@@ -52,6 +53,7 @@ AirPlay_Streamer::~AirPlay_Streamer()
 {
   delete m_pAirPlay_Service;
   m_pAirPlay_Service = NULL;
+  m_bIsPaused=false;
 }
 
 //<-dceag-getconfig-b->
@@ -194,6 +196,49 @@ void AirPlay_Streamer::StopAirTunesPlayback()
 					       m_dwPK_Device, 0, 0, "",
 					       false);
   SendCommand(CMD_MH_Stop_Media_Cat);
+}
+
+void AirPlay_Streamer::StopAirPlayPlayback()
+{
+  CMD_MH_Stop_Media_Cat CMD_MH_Stop_Media_Cat (m_dwPK_Device,
+					       DEVICECATEGORY_Media_Plugins_CONST,
+					       false, BL_SameHouse,
+					       m_dwPK_Device, 0, 0, "",
+					       false);
+  SendCommand(CMD_MH_Stop_Media_Cat);
+}
+
+
+void AirPlay_Streamer::StartAirPlayPlayback(string sLocation)
+{
+  // TODO: Implement
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_Streamer::StartAirPlayPlayback - got a playback request for URL: %s",sLocation.c_str());
+}
+
+/**
+ * Accessor, is paused.
+ */
+bool AirPlay_Streamer::IsPaused()
+{
+  return m_bIsPaused;
+}
+
+void AirPlay_Streamer::SetPause(bool bIsPaused)
+{
+  m_bIsPaused=bIsPaused;
+}
+
+/**
+ * Accessor, is playing.
+ */
+bool AirPlay_Streamer::IsPlaying()
+{
+  return m_bIsPlaying;
+}
+
+void AirPlay_Streamer::SetPlaying(bool bIsPlaying)
+{
+  m_bIsPlaying=bIsPlaying;
 }
 
 /*

@@ -22,7 +22,7 @@ sources = Main.cpp AirPlay_Streamer.cpp $(Gen_Dev_Files)
 CXXFLAGS += `pkg-config --cflags avahi-client` 
 CPPFLAGS +=
 LDFLAGS += `pkg-config --libs avahi-client`
-XTRALDLIBS = -lmysqlclient_r -lshairport -lao
+XTRALDLIBS = -lmysqlclient_r -lshairport -lao -lplist
 
 Gen_Dev_Files +=
 sources += AirPlay_Protocol_Factory.cpp \
@@ -30,7 +30,7 @@ sources += AirPlay_Protocol_Factory.cpp \
 		AirPlay_Protocol.cpp \
 		AirPlay_Protocol_AirPlay.cpp \
 		AirPlay_Protocol_AirTunes.cpp \
-                AirPlay_Socket.cpp
+	        ../HttpParser/HttpParser.cpp
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
