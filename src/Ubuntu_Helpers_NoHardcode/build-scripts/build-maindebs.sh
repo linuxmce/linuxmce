@@ -110,7 +110,14 @@ function build_main_debs() {
 					RepositorySource=25
 					Main_Version='2.0.0.46.'
 					;;
-			esac
+					# mame - excluded due to long time for compilation.
+					exclude_list=$exclude_list,682,683
+                       			# videolan client
+#		                         exlucde_list=$exclude_list,431,432
+                       	                exclude_list=$exclude_list,$mkr_tira
+#                                        exclude_list=$exclude_list,$mkr_usb_uirt_0038_package
+                                        exclude_list=$exclude_list,$mkr_vloopback_driver_package
+#                                        exclude_list=$exclude_list,672,674 #
 			;;
 		"raspbian")
                         #FIXME Hackozaurus for ubuntu-diskless-tools
