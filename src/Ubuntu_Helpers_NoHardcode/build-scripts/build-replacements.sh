@@ -37,7 +37,8 @@ function Update_Changed_Since_Last_Build
         local url_id=$(svn info "$fs_path" | grep '^URL: ' | cut -d' ' -f2 | md5sum | cut -d' ' -f1)
         local revision_new=$(svn info $fs_path | grep '^Revision: ' | cut -d' ' -f2)
 
-        grep -v "$url_id" "$cache_file" > "${cache_file}.tmp" || :
+	[[ ! -e "$cache_file" ]] && touch "$cache_file"
+        grep -v "$url_id" "$cache_file" > "${cache_file}.tmp"
         echo "$url_id|$revision_new" >> "${cache_file}.tmp"
         mv "${cache_file}.tmp" "$cache_file"
 }
@@ -69,13 +70,13 @@ function Build_Replacements_Common_ubuntu
 	Build_Replacement_Package tee-pluto misc_utils/tee-pluto
 
 	#Package: pluto-mplayer
-	Build_Replacement_Package pluto-mplayer ubuntu/mplayer-svn26234
+#	Build_Replacement_Package pluto-mplayer ubuntu/mplayer-svn26234
 
 	#Package: pluto-ffmpeg
-	Build_Replacement_Package pluto-ffmpeg ubuntu/ffmpeg-svn12476
+#	Build_Replacement_Package pluto-ffmpeg ubuntu/ffmpeg-svn12476
 
 	#Package: freepbx
-	Build_Replacement_Package freepbx ubuntu/asterisk/freepbx
+#	Build_Replacement_Package freepbx ubuntu/asterisk/freepbx
 
         #Package: chan-sccp
 #	DisplayMessage "NOT building chan-sccp atm"
