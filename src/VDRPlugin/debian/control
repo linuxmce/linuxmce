@@ -4,7 +4,7 @@ Priority: extra
 Maintainer: root <root@fluffybitch.org>
 Build-Depends: debhelper (>= 7)
 Standards-Version: 3.8.3
-Homepage: <insert the upstream URL, if relevant>
+Homepage: http://www.linuxmce.org
 
 Package: pluto-vdr-plugin
 Architecture: any
