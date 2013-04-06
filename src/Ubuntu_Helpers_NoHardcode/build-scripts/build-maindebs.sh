@@ -9,6 +9,7 @@ set -e
 #set -x
 
 # set NUMCORES=X in /etc/lmce-build/builder.custom.conf to enable multi-job builds
+if [ ! "$NUM_CORES" ] ; then NUM_CORES=1 ; fi
 if [ "$NUM_CORES" -gt 1 ] ; then make_jobs="-j $NUM_CORES"; fi
 
 PLUTO_BUILD_CRED=""
@@ -109,7 +110,6 @@ function build_main_debs() {
 					Distro_ID="20"
 					RepositorySource=25
 					Main_Version='2.0.0.46.'
-					;;
 					# mame - excluded due to long time for compilation.
 					exclude_list=$exclude_list,682,683
                        			# videolan client
@@ -118,6 +118,8 @@ function build_main_debs() {
 #                                        exclude_list=$exclude_list,$mkr_usb_uirt_0038_package
                                         exclude_list=$exclude_list,$mkr_vloopback_driver_package
 #                                        exclude_list=$exclude_list,672,674 #
+					;;
+			esac
 			;;
 		"raspbian")
                         #FIXME Hackozaurus for ubuntu-diskless-tools
