@@ -1,6 +1,0 @@
-## Files, which only get installed on i386
-#
-debian/tmp/usr/lib/xine/plugins/*/xineplug_decode_vdpau_h264.so
-debian/tmp/usr/lib/xine/plugins/*/xineplug_decode_vdpau_mpeg12.so
-debian/tmp/usr/lib/xine/plugins/*/xineplug_decode_vdpau_vc1.so
-debian/tmp/usr/lib/xine/plugins/*/xineplug_vo_out_vdpau.so

@@ -1,6 +1,0 @@
-etc/alsa/modprobe-post-install.d
-etc/udev
-etc/udev/rules.d
-usr/bin
-usr/sbin
-var/lib/alsa

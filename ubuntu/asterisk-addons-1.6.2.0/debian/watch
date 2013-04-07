@@ -1,3 +1,0 @@
-version=3
-opts=dversionmangle=s/\~dfsg//,downloadurlmangle=s/.*ref=// \
-	http://downloads.asterisk.org/pub/telephony/asterisk/releases/asterisk-addons-([0-9.]*).tar.gz debian svn-upgrade

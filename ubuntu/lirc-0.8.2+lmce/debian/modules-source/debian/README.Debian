@@ -1,7 +1,0 @@
-LIRC binary kernel modules for Debian
--------------------------------------
-
- This package only contains binary kernel modules, documentation can be found
- on lirc main package.
-
- -- Manuel Estrada Sainz <ranty@debian.org>, Fri, 22 Jun 2001 14:53:23 +0200

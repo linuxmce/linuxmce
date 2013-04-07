@@ -1,5 +1,0 @@
-debian/tmp/opt/libxine/bin/xine-config
-debian/tmp/opt/libxine/include
-debian/tmp/opt/libxine/lib/libxine*.so
-debian/tmp/opt/libxine/lib/pkgconfig/libxine.pc
-debian/tmp/opt/libxine/share/aclocal/xine.m4

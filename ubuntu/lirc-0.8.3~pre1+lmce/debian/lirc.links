@@ -1,4 +1,0 @@
-etc/lirc/lircd.conf etc/lircd.conf
-usr/share/lirc/remotes  usr/share/doc/lirc/remotes
-usr/share/lirc/lirc.hwdb usr/share/doc/lirc/lirc.hwdb
-usr/share/lirc/transmitter.hwdb usr/share/doc/lirc/transmitter.hwdb

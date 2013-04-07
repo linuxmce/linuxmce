@@ -1,5 +1,0 @@
-v4l2-s2-modules (24c6f128d7bc-0ubuntu1~ppa1i) Intrepid; urgency=low
-
-  * DKMS package for V4L
-
- -- Mandingo <Mandingo@Mydingo.com>  Thu, 27 May 2010 12:57:19 -0500

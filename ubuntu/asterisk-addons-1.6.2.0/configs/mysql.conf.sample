@@ -1,8 +1,0 @@
-; Configuration file for app_addon_sql_mysql
-[general]
-; If set, autoclear will destroy allocated statement and connection resources
-; when the channel ends.  For most usage of the MYSQL app, this is what you
-; want, but it's conceivable that somebody is sharing MYSQL connections across
-; multiple channels, in which case, this should be set to 'no'.  Defaults to
-; 'no', as this was the original behavior.
-autoclear=yes

@@ -1,7 +1,0 @@
-#! /bin/sh
-DOCDIR=/opt/libxine/share/doc/libxine1-pluto
-if [ -d "$DOCDIR" -a ! -L "$DOCDIR" ]; then                  
-  rmdir "$DOCDIR" && ln -s libxine1-pluto-bin "$DOCDIR"
-fi
-
-##DEBHELPER##

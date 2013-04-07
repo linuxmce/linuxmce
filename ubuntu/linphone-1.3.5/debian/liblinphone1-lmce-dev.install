@@ -1,4 +1,0 @@
-opt/linphone-1.3.5/include/linphone/*.h
-opt/linphone-1.3.5/lib/liblinphone.la
-opt/linphone-1.3.5/lib/liblinphone.so
-opt/linphone-1.3.5/lib/pkgconfig/linphone.pc

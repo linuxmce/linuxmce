@@ -1,5 +1,0 @@
-#lirc pipes
-lircd           p       ""      ""      root    root    666
-lircm           p       ""      ""      root    root    666
-lirc		d	""	""	root	root	755
-lirc/0		c	61	0	root	root	660

@@ -1,7 +1,0 @@
-opt/libsdl1.2-1.2.7+1.2.8cvs20041007/include/SDL
-opt/libsdl1.2-1.2.7+1.2.8cvs20041007/lib/*.a
-opt/libsdl1.2-1.2.7+1.2.8cvs20041007/lib/*.so
-opt/libsdl1.2-1.2.7+1.2.8cvs20041007/lib/*.la
-opt/libsdl1.2-1.2.7+1.2.8cvs20041007/bin/sdl-config
-opt/libsdl1.2-1.2.7+1.2.8cvs20041007/share/aclocal/*
-opt/libsdl1.2-1.2.7+1.2.8cvs20041007/share/man/man1/sdl-config.1*

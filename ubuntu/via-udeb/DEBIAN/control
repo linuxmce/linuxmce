@@ -1,9 +1,0 @@
-Package: via-driver-installer
-Version: 0.1-20070509.1
-Section: debian-installer
-Priority: required
-Architecture: i386
-Depends: libc6 (>= 2.3.6-6), libdebconfclient0-udeb, libdebian-installer4-udeb (>= 0.50), mounted-partitions, debootstrap-udeb (>= 0.3.1), created-fstab, archdetect, di-utils-mapdevfs, di-utils (>= 1.16), rootskel (>= 1.19), gpgv-udeb
-Installed-Size: 632
-Maintainer: Debian Install System Team <debian-boot@lists.debian.org>
-Description: Install the base system

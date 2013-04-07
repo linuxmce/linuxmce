@@ -1,6 +1,0 @@
-# Compulsory line, this is a version 3 file
-version=3
-
-# Look for new releases on sourceforce
-opts=dversionmangle=s/0\+svn/SVN-/ \
-  http://sf.net/fuppes/fuppes-(.*)\.tar\.gz

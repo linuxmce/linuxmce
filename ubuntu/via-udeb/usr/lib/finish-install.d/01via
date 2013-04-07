@@ -1,6 +1,0 @@
-#!/bin/sh
-set -e
-
-cp -r /cdrom/VIA/files/* /target/
-/cdrom/Pluto-Install/post-debootstrap.sh
-/cdrom/Pluto-Install/post-grub-install.sh

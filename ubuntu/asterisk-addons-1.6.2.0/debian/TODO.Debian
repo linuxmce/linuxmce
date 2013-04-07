@@ -1,5 +1,0 @@
-* Handle documentation. They get installed to 
-  /usr/share/asterisk/docuemntation as a single file for all modules.
-  As of asterisk 1.6.2 all the on-line help will be taken from there.
-  Maybe switch to a single package?
-* Get DATADIR from asterisk?

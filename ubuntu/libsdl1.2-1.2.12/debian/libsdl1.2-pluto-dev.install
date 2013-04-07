@@ -1,8 +1,0 @@
-opt/libsdl/include/SDL
-opt/libsdl/lib/*.a
-opt/libsdl/lib/*.so
-opt/libsdl/lib/*.la
-opt/libsdl/lib/pkgconfig
-opt/libsdl/bin/sdl-config
-opt/libsdl/share/aclocal/*
-opt/libsdl/share/man/man1/sdl-config.1*
