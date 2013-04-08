@@ -1,3 +1,9 @@
+lmce-asterisk (0+0.3.3-3ubuntu2) precise; urgency=low
+
+  * Add possibility to change DTMF via webadmin
+
+ -- Serge Wagener <serge@linuxmce.org>  Mon, 08 Apr 2013 17:04:02 +0200
+
 lmce-asterisk (0+0.3.3-3ubuntu1) precise; urgency=low
 
   * remove asterisk-sounds-extra from depends

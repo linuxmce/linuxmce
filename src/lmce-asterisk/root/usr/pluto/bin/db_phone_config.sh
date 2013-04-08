@@ -249,7 +249,6 @@ WorkThePhones()
 				fi
 				;;
 			"SCCP")
-				RunConfigureScript
 				WriteSccpPhone
 				;;
 			"IAX"|"IAX2")
@@ -334,9 +333,8 @@ AddTrunk()
 				('$(( 100+$id ))', 'sip.conf', 'general', 'register', '$username:$password@$host/$phonenumber');"
 				type='peer'
 			fi
-			LINESSQL="$LINESSQL INSERT INTO $DB_SIP_Device_Table (name,defaultuser,secret,host,port,context,qualify,nat,type,fromuser,fromdomain,callerid,allow,insecure,directmedia,language) VALUES \
-			('$phonenumber','$username','$password','$host','5060','$context','yes','yes','$type','$username','$host','$phonenumber','alaw;ulaw','port,invite','no','$LANGUAGE');"
-        ;;
+			LINESSQL="$LINESSQL INSERT INTO $DB_SIP_Device_Table (name,defaultuser,secret,host,port,context,qualify,nat,type,fromuser,fromdomain,callerid,allow,insecure,directmedia,language,dtmfmode) VALUES \
+			('$phonenumber','$username','$password','$host','5060','$context','yes','yes','$type','$username','$host','$phonenumber','alaw;ulaw','port,invite','no','$LANGUAGE','$dtmfmode');"			        ;;
         "GTALK")
         	# provider registry
 			LINESSQL="$LINESSQL INSERT INTO $DB_astconfig_Table (cat_metric,var_metric,filename,category,var_name,var_val) VALUES
@@ -470,7 +468,7 @@ WorkTheLines()
 		echo "Routing emergency number: $number via $emergencyphonelineProtocol/$emergencyphonelineNumber"
 	done
 
-	SQL="SELECT id,protocol,name,host,username,password,prefix,enabled,phonenumber,isfax,faxmail FROM $DB_PhoneLines_Table"
+	SQL="SELECT id,protocol,name,host,username,password,prefix,enabled,phonenumber,isfax,faxmail,dtmfmode FROM $DB_PhoneLines_Table"
 	R=$(RunSQL "$SQL")
 	for Row in $R; do
 		id=$(Field 1 "$Row")
@@ -484,6 +482,7 @@ WorkTheLines()
 		phonenumber=$(Field 9 "$Row")
 		isfax=$(Field 10 "$Row")
 		faxmail=$(Field 11 "$Row")
+		dtmfmode=$(Field 12 "$Row")
 		if [[ $protocol == 'GTALK' ]]; then phonenumber=$username; fi
 		echo "Working phoneline $id-$name ($protocol/$phonenumber)"
 		if [[ $enabled == "yes" ]]; then AddTrunk; fi

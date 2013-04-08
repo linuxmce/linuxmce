@@ -345,6 +345,7 @@ CREATE TABLE IF NOT EXISTS `phonelines` (
   `isfax` enum('yes','no') NOT NULL DEFAULT 'no',
   `prefix` varchar(5) NOT NULL,
   `protocol` varchar(5) NOT NULL DEFAULT 'SIP',
+  `dtmfmode` VARCHAR(10) NOT NULL DEFAULT 'auto',
   `name` varchar(50) NOT NULL DEFAULT '',
   `host` varchar(50) NOT NULL DEFAULT 'default',
   `port` varchar(5) NOT NULL DEFAULT '5060',
