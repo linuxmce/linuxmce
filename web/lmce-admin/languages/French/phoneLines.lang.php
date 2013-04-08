@@ -6,6 +6,7 @@ $TEXT_FAX_HEADER_CONST='entête sur fax sortants';
 $TEXT_PREFIX_CONST='Prefixe';
 $TEXT_CHANNELS_CONST='Canal';
 $TEXT_PROTOCOL_CONST='Protocole';
+$TEXT_DTMFMODE_CONST='Mode DTMF';
 $TEXT_PHONE_NUMBER_CONST='Numéro tél.';
 $TEXT_USERNAME_REQUIRED_CONST='Veuillez entrer un nom d\'utilisateur';
 $TEXT_DIAL_EMERGENCY_NUMBERS_CONST='Numéroter des services de secours';

@@ -6,6 +6,7 @@ $TEXT_FAX_HEADER_CONST='header on outgoing faxes';
 $TEXT_PREFIX_CONST='Prefix';
 $TEXT_CHANNELS_CONST='Chan.';
 $TEXT_PROTOCOL_CONST='Protocol';
+$TEXT_DTMFMODE_CONST='DTMF mode';
 $TEXT_PHONE_NUMBER_CONST='Phone number';
 $TEXT_USERNAME_REQUIRED_CONST='Please provide an username';
 $TEXT_DIAL_EMERGENCY_NUMBERS_CONST='Dial emergency numbers';

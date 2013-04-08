@@ -22,7 +22,7 @@ function phoneLines($output,$astADO,$dbADO) {
 
 	if($action=='form'){
 		$ProtocolList=array('SIP','IAX','SPA','GTALK');
-		
+		$DTMFList=array('rfc2833','inband','info','auto');
 		$out.='
 		<script type="text/javascript">
 			function toggleFax() 	{
@@ -113,6 +113,12 @@ function phoneLines($output,$astADO,$dbADO) {
 					$out .='</select></td>
 				</tr>		
 				<tr>
+					<td><B>'.translate('TEXT_DTMFMODE_CONST').'</B></td>
+					<td><select name="dtmf">';
+					foreach ($DTMFList as $d) $out.='<option value="'.$d.'" '.(($editdata['dtmfmode'] == $d)?'selected="selected"':'').'>'.$d.'</option>';
+					$out .='</select></td>
+				</tr>		
+				<tr>
 					<td><em>* '.translate('TEXT_REQUIRED_FIELDS_CONST').'</em></td>
 					<td>&nbsp;</td>
 					<td><input type="submit" class="button" name="submit" value="'.translate('TEXT_SAVE_CONST').'"> <input type="reset" class="button" name="cancelBtn1" value="'.translate('TEXT_CANCEL_CONST').'"></td>
@@ -149,6 +155,7 @@ function phoneLines($output,$astADO,$dbADO) {
 					."',phonenumber='".$_POST['phone']
 					."',host='".$_POST['host']
 					."',protocol='".$_POST['proto']
+					."',dtmfmode='".$_POST['dtmf']
 					."' WHERE id=".$editedID;
 				$res=$astADO->Execute($SQL);
 				$cmd='sudo -u root /usr/pluto/bin/db_phone_config.sh lines';
