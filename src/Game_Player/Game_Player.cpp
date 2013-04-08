@@ -451,12 +451,12 @@ void Game_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sC
 	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::CMD_Stop_Media - Emulator has crashed. Reporting it to Orbiters.");
 	  string sText = "I am sorry, the Game you were playing has unexpectedly crashed. If this persists, please try a different game.";
 	  string sOptions = "Ok|";
-	  CMD_Display_Dialog_Box_On_Orbiter_Cat db(m_dwPK_Device,DEVICECATEGORY_Orbiter_Plugins_CONST,
-					       false, BL_SameHouse,
-					       sText,
-					       sOptions,
-					       ""); // FIXME: make proper list.
-	  SendCommandNoResponse(db);
+	  // CMD_Display_Dialog_Box_On_Orbiter_Cat db(m_dwPK_Device,DEVICECATEGORY_Orbiter_Plugins_CONST,
+	  //				       false, BL_SameHouse,
+	  //				       sText,
+	  // 				       sOptions,
+	  //				       ""); // FIXME: make proper list.
+	  // SendCommandNoResponse(db);
 	  if (m_bIsRecording)
 	    {
 	      m_bIsRecording = !m_bIsRecording;
