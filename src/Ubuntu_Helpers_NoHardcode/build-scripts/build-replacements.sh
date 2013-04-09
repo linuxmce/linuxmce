@@ -19,7 +19,7 @@ function Changed_Since_Last_Build
 	local url_id=$(svn info "$fs_path" | grep '^URL: ' | cut -d' ' -f2 | md5sum | cut -d' ' -f1)
 	local revision_new=$(svn info $fs_path | grep '^Revision: ' | cut -d' ' -f2)
 	local revision_old=$(cat "$cache_file" | grep "^${url_id}" | cut -d'|' -f2)
-	
+
 	if [ "$revision_new" = "$revision_old" ] ; then
 		return $(/bin/false)
 	fi
@@ -37,8 +37,7 @@ function Update_Changed_Since_Last_Build
         local url_id=$(svn info "$fs_path" | grep '^URL: ' | cut -d' ' -f2 | md5sum | cut -d' ' -f1)
         local revision_new=$(svn info $fs_path | grep '^Revision: ' | cut -d' ' -f2)
 
-	[[ ! -e "$cache_file" ]] && touch "$cache_file"
-        grep -v "$url_id" "$cache_file" > "${cache_file}.tmp"
+        [[ -f "$cache_file" ]] && grep -v "$url_id" "$cache_file" > "${cache_file}.tmp" || :
         echo "$url_id|$revision_new" >> "${cache_file}.tmp"
         mv "${cache_file}.tmp" "$cache_file"
 }
@@ -314,8 +313,8 @@ function Build_Replacements_Precise
 	Build_Replacement_Package lirc ubuntu/lirc-0.8.6+lmce1
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/lirc-x*.deb ${replacements_dir}
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/lirc-modules*.deb ${replacements_dir}
-	
-        apt-get install -y liblinphone-dev 
+
+        apt-get install -y liblinphone-dev
 
 	Build_Replacement_Package vdrnfofs ubuntu/vdrnfofs-0.5
 
@@ -329,10 +328,14 @@ function Build_Replacements_Precise
 	# lmce-asterisk
 	Build_Replacement_Package lmce-asterisk src/lmce-asterisk
         cp ${svn_dir}/${svn_branch_name}/src/lmce-asterisk*.deb ${replacements_dir}
-        Build_Replacement_Package chan-sccp-b ubuntu/asterisk/chan_sccp_v4                
+        Build_Replacement_Package chan-sccp-b ubuntu/asterisk/chan_sccp_v4
 	#Package: zaptel-modules
 
-	Build_Replacement_Package python-coherence ubuntu/Coherence-0.6.6.2	        
+	Build_Replacement_Package python-coherence ubuntu/Coherence-0.6.6.2
+
+	# Open ZWave library
+	Build_Replacement_Package libopenzwave1.0 external/open-zwave
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/libopenzwave1.0*.deb
 }
 
 function Build_Replacements_Intrepid
