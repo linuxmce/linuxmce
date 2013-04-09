@@ -319,7 +319,7 @@ function Build_Replacements_Precise
 	Build_Replacement_Package vdrnfofs ubuntu/vdrnfofs-0.5
 
 	# SqueezeSlave
-	Build_Replacement_Package squeezeslave ubuntu/squeezeslave
+	Build_Replacement_Package squeezeslave ubuntu/squeezeslave-1.3-393
 
 	# shairport (AirPlay Audio)
 # not building as libao2 is no longer with us. Maybe libao4 works?!
