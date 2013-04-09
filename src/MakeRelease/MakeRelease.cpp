@@ -1012,12 +1012,14 @@ bool CompileSource(Row_Package *pRow_Package)
 	cout << "====================================================" << endl;
 
 	vector<Row_Package_Source *> vectRow_Package_Source;
-	g_pDatabase_pluto_main->Package_Source_get()->GetRows( 
-		"FK_Package=" + StringUtils::itos(pRow_Package->FK_Package_Sourcecode_get()) + " AND FK_RepositorySource=" + StringUtils::itos(REPOSITORYSOURCE_Pluto_SVN_CONST),
+	g_pDatabase_pluto_main->Package_Source_get()->GetRows(
+		"JOIN Package_Source_Compat ON PK_Package_Source=FK_Package_Source WHERE FK_Package=" + StringUtils::itos(pRow_Package->FK_Package_Sourcecode_get()) +
+		" AND FK_RepositorySource=" + StringUtils::itos(REPOSITORYSOURCE_Pluto_SVN_CONST) +
+		" AND ((FK_Distro=" + StringUtils::itos(g_pRow_Distro->PK_Distro_get()) + " OR FK_Distro IS NULL) AND (FK_OperatingSystem IS NULL OR FK_OperatingSystem=" + StringUtils::itos(g_pRow_Distro->FK_OperatingSystem_get()) + "))",
 		&vectRow_Package_Source);
 	if( vectRow_Package_Source.size()>1 )
 	{
-		cout << "Package: " << pRow_Package->Description_get() << " is in SVN more than once!" << endl;
+		cout << "Package: " << pRow_Package->Description_get() << " has multiple SVN compatibilities for this distro!" << endl;
 		return false;
 	}
 
