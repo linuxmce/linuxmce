@@ -2267,31 +2267,22 @@ bool ZWApi::ZWApi::zwIsSleepingNode(int node_id) {
 }
 
 bool ZWApi::ZWApi::wakeupHandler(int node_id) {
+	pthread_mutex_lock (&mutexSendQueue);
+
 	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Running wakeupHandler for node %i",node_id);
-        std::deque < ZWJob * >::iterator sendQueueIt;
 
-        std::multimap < int, ZWJob * >::iterator wakeupQueueIt;
-        std::multimap < int, ZWJob * >::iterator wakeupQueueItLast;
-
-	wakeupQueueIt = ZWWakeupQueue.find(node_id);
-
-	if (wakeupQueueIt == ZWWakeupQueue.end()) {
-		// nothing in queue, good bye
-		return true;	
-	}
-
-	wakeupQueueItLast = ZWWakeupQueue.upper_bound(node_id);
-	for ( ; wakeupQueueIt != wakeupQueueItLast; ++wakeupQueueIt) {
+	std::multimap < int, ZWJob * >::iterator wakeupQueueIt;
+	for (wakeupQueueIt = ZWWakeupQueue.lower_bound(node_id) ; wakeupQueueIt != ZWWakeupQueue.upper_bound(node_id); ++wakeupQueueIt) {
 		
-		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Moving job %p from wakup to send queue",(*wakeupQueueIt).second);
-		pthread_mutex_lock (&mutexSendQueue);
+		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Moving job %p from wakeup to send queue (node %i)",(*wakeupQueueIt).second, (*wakeupQueueIt).first);
 		ZWSendQueue.push_back((*wakeupQueueIt).second);
-		ZWWakeupQueue.erase(wakeupQueueIt);
-		pthread_mutex_unlock (&mutexSendQueue);
-
 	}
+	ZWWakeupQueue.erase(node_id);
+
+	pthread_mutex_unlock (&mutexSendQueue);
+
 	return true;
-}	
+}
 
 string ZWApi::ZWApi::commandClassToString(char nodeinfo) {
 	switch((unsigned char)nodeinfo) {
