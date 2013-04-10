@@ -70,7 +70,7 @@ TranslateSerialPort()
 	if [[ "$SearchFor" == pci* || "$SearchFor" == platform* ]]; then
 		if [[ -d /sys/class/tty ]]; then
 			pushd /sys/class/tty &>/dev/null
-			for dev in ttyUSB*/device ttyACM*/device ttyAMA*/device; do
+			for dev in ttyUSB*/device ttyACM*/device; do
 				id=$(readlink -f "$dev" | sed -r 's,^.*(pci.*|platform.*)/usb[0-9]*/[0-9./-]*/[0-9]*-([0-9.]*):[0-9.]*(/ttyUSB[0-9]*)?$,\1+\2,g')
 				if [[ "$id" == "$SearchFor" ]]; then
 					SerialPort="/dev/$(dirname "$dev")"
