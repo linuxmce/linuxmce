@@ -33,7 +33,7 @@
 
 DCE::ZWave *DCEcallback;
 
-#include <math.h>	 
+#include <math.h>
 
 extern "C" void *start( void* );
 
@@ -82,23 +82,23 @@ void *ZWApi::ZWApi::init(const char *device) {
 
  	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Get version");
 	mybuf[0] = ZW_GET_VERSION;
-	sendFunction( mybuf , 1, REQUEST, 0); 
+	sendFunction( mybuf , 1, REQUEST, 0);
 
  	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Get home/node id");
 	mybuf[0] = ZW_MEMORY_GET_ID;
-	sendFunction( mybuf , 1, REQUEST, 0); 
+	sendFunction( mybuf , 1, REQUEST, 0);
 
  	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Get capabilities");
 	mybuf[0] = FUNC_ID_SERIAL_API_GET_CAPABILITIES;
-	sendFunction( mybuf , 1, REQUEST, 0); 
-	
+	sendFunction( mybuf , 1, REQUEST, 0);
+
  	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Get SUC node id");
 	mybuf[0] = FUNC_ID_ZW_GET_SUC_NODE_ID;
-	sendFunction( mybuf , 1, REQUEST, 0); 
-	
+	sendFunction( mybuf , 1, REQUEST, 0);
+
  	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Get init data");
 	mybuf[0] = FUNC_ID_SERIAL_API_GET_INIT_DATA;
-	sendFunction( mybuf , 1, REQUEST, 0); 
+	sendFunction( mybuf , 1, REQUEST, 0);
 
 	return NULL;
 }
@@ -158,7 +158,7 @@ void ZWApi::ZWApi::handleCommandSensorMultilevelReport(int nodeid, int instance_
 		        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"General purpose measurement value received: %d %",value);
 		} else {
 		        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"General purpose measurement value received: %d (dimensionless)",value);
-		} 
+		}
 		;;
 		break;
 	case SENSOR_MULTILEVEL_REPORT_LUMINANCE:
@@ -166,7 +166,7 @@ void ZWApi::ZWApi::handleCommandSensorMultilevelReport(int nodeid, int instance_
 		        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Luminance measurement received: %d %",value);
 		} else {
 		        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Luminance measurement received: %d Lux",value);
-		} 
+		}
 		DCEcallback->SendBrightnessChangedEvent ((unsigned char)nodeid, instance_id, value);
 		;;
 		break;
@@ -224,13 +224,13 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 					tempbuf[1]=1; // 0=SUC,1=SIS
 					// tempbuf[2]=ZW_SUC_FUNC_BASIC_SUC;
 					tempbuf[2]=ZW_SUC_FUNC_NODEID_SERVER;
-					sendFunction( tempbuf , 3, REQUEST, 0); 
+					sendFunction( tempbuf , 3, REQUEST, 0);
 					tempbuf[0]=FUNC_ID_ZW_SET_SUC_NODE_ID;
 					tempbuf[1]=ournodeid;
 					tempbuf[2]=1; // TRUE, we want to be SUC/SIS
 					tempbuf[3]=0; // no low power
 					tempbuf[4]=ZW_SUC_FUNC_NODEID_SERVER;
-					sendFunction( tempbuf , 5, REQUEST, 1); 
+					sendFunction( tempbuf , 5, REQUEST, 1);
 				} else if ((unsigned char)frame[2] != ournodeid) {
 					DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"requesting network update from SUC");
 					tempbuf[0]=FUNC_ID_ZW_REQUEST_NETWORK_UPDATE;
@@ -248,7 +248,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 				for (int i=1; i<=maxnodeid; i++) {
 					bool nodebit;
 					nodebit = (unsigned char)frame[2+i/8] & (1<<((i%8)-1));
-					// printf("%c", nodebit ? 'Y' : 'N'); 
+					// printf("%c", nodebit ? 'Y' : 'N');
 					if (nodebit) {
 						routingtable.append("Y");
 					} else {
@@ -308,16 +308,16 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 					memory_dump_offset+=60;
 					zwWriteMemory(memory_dump_offset, memory_dump_len, memory_dump+memory_dump_offset);
 				} else if (memory_dump_offset == 16380) {
-					memory_dump_len=4;	
+					memory_dump_len=4;
 					zwWriteMemory(memory_dump_offset, memory_dump_len, memory_dump+memory_dump_offset);
 					memory_dump_offset+=4;
 				} else {
 					DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"Memory restore complete %i",memory_dump_offset);
 					memory_dump_offset=65535;
-					
+
 				}
 
-				
+
 				break;
 			;;
 			case FUNC_ID_SERIAL_API_GET_INIT_DATA:
@@ -333,10 +333,10 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 								addIntent((i-5)*8+j+1,1);
 								tempbuf[0]=FUNC_ID_ZW_GET_NODE_PROTOCOL_INFO;
 								tempbuf[1]=(i-5)*8+j+1;
-								sendFunction( tempbuf , 2, REQUEST, 0); 
+								sendFunction( tempbuf , 2, REQUEST, 0);
 							} else {
 								sprintf(tempbuf,"%i",(i-5)*8+j+1);
-								// DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Node id %i not in node mask, deleting",(i-5)*8+j+1); 
+								// DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Node id %i not in node mask, deleting",(i-5)*8+j+1);
 								DCEcallback->DeleteDevicesForNode(tempbuf);
 							}
 						}
@@ -506,11 +506,11 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 						zwGetRoutingInfo((*ZWNodeMapIt).first);
 						addIntent((*ZWNodeMapIt).first,2);
 						ZWNodeMapIt++;
-		
+
 					}
-						
+
 					// DCEcallback->CMD_Report_Child_Devices();
-					
+
 				}
 				break;
 			;;
@@ -533,11 +533,11 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 				break;
 			case FUNC_ID_SERIAL_API_GET_CAPABILITIES:
 				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got reply to FUNC_ID_SERIAL_API_GET_CAPABILITIES:");
-				DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"SerAppV:%i,r%i,Manf %i,Typ %i,Prod %i",(unsigned char)frame[2],(unsigned char)frame[3], ((unsigned char)frame[4]<<8) + (unsigned char)frame[5],((unsigned char)frame[6]<<8) + (unsigned char)frame[7],((unsigned char)frame[8]<<8) + (unsigned char)frame[9]);	
+				DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"SerAppV:%i,r%i,Manf %i,Typ %i,Prod %i",(unsigned char)frame[2],(unsigned char)frame[3], ((unsigned char)frame[4]<<8) + (unsigned char)frame[5],((unsigned char)frame[6]<<8) + (unsigned char)frame[7],((unsigned char)frame[8]<<8) + (unsigned char)frame[9]);
 				break;
 			case ZW_GET_VERSION:
 				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got reply to ZW_VERSION:");
-				DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ZWave Version: %c.%c%c",(unsigned char)frame[9],(unsigned char)frame[11],(unsigned char)frame[12]);	
+				DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ZWave Version: %c.%c%c",(unsigned char)frame[9],(unsigned char)frame[11],(unsigned char)frame[12]);
 				break;
 			default:
 				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"TODO: handle response for 0x%x ",(unsigned char)frame[1]);
@@ -580,7 +580,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							pthread_mutex_unlock (&mutexSendQueue);
 							await_callback = 0;
 							dropped_jobs = 0;
-							
+
 							break;
 						default:
 							DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"ERROR: ZW_SEND Response is invalid!");
@@ -604,7 +604,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Setback schedule thermostat detected, triggering configuration");
 							zwWakeupSet((unsigned char)frame[4],15,true);
 						}
-						// finish adding node	
+						// finish adding node
 						zwAddNodeToNetwork(0,false);
 						break;
 					case ADD_NODE_STATUS_ADDING_CONTROLLER:
@@ -639,7 +639,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 					case REMOVE_NODE_STATUS_ADDING_SLAVE:
 						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"REMOVE_NODE_STATUS_ADDING_SLAVE");
 						// DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ing node id %i",(unsigned int)frame[4]);
-						// finish adding node	
+						// finish adding node
 						zwRemoveNodeFromNetwork(0);
 						break;
 					case REMOVE_NODE_STATUS_ADDING_CONTROLLER:
@@ -693,11 +693,11 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 						if (frame[6] == CTRL_REPLICATION_TRANSFER_GROUP) {
 							// we simply ack the group information for now
 							tempbuf[0]=FUNC_ID_ZW_REPLICATION_COMMAND_COMPLETE;
-							sendFunction( tempbuf , 1, REQUEST, 0); 
+							sendFunction( tempbuf , 1, REQUEST, 0);
 						} else {
 							// ack everything else, too
 							tempbuf[0]=FUNC_ID_ZW_REPLICATION_COMMAND_COMPLETE;
-							sendFunction( tempbuf , 1, REQUEST, 0); 
+							sendFunction( tempbuf , 1, REQUEST, 0);
 						}
 						break;
 					;;
@@ -720,7 +720,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 									DCEcallback->AddCapability(PKDevice, (unsigned char)frame[7]);
 									newNode->iPKDevice = PKDevice;
 								}
-							}					
+							}
 						} else if (frame[6] == MULTI_INSTANCE_CMD_ENCAP) {
 						        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got MULTI_INSTANCE_CMD_ENCAP from node %i: instance %i Command Class 0x%x type 0x%x",(unsigned char)frame[3],(unsigned char)frame[7],(unsigned char)frame[8],(unsigned char)frame[9]);
 						        if (frame[8] == COMMAND_CLASS_SENSOR_MULTILEVEL) {
@@ -747,7 +747,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							}
 						}
 						break;
-					;;	
+					;;
 					case COMMAND_CLASS_VERSION:
 						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_VERSION");
 						if (frame[6] == VERSION_REPORT) {
@@ -800,7 +800,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 										case 3:
 											DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Electric meter measurement received: %d pulses",value);
 											break;
-									} 
+									}
 									break;
 								case METER_REPORT_GAS_METER:
 									switch (scale) {
@@ -813,7 +813,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 										case 3:
 											DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Gas meter measurement received: %d pulses",value);
 											break;
-									} 
+									}
 									break;
 								case METER_REPORT_WATER_METER:
 									switch (scale) {
@@ -829,7 +829,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 										case 3:
 											DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Water meter measurement received: %d pulses",value);
 											break;
-									} 
+									}
 									break;
 								default:
 									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"unknown METER_REPORT received: %i",(unsigned char)frame[7]);
@@ -854,8 +854,8 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 								case 0x64: printf("Popp\n");
 								break;;
 								default: printf("none\n");
-							}	*/ 
-							
+							}	*/
+
 						}
 
 						break;
@@ -887,12 +887,12 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							zwGetBatteryLevel((unsigned char) frame[3]);
 
 							// inject commands from the sleeping queue for this nodeid
-							wakeupHandler((unsigned char) frame[3]);	
+							wakeupHandler((unsigned char) frame[3]);
 
 							// handle broadcasts from unconfigured devices
-							if (frame[2] & RECEIVE_STATUS_TYPE_BROAD ) { 
+							if (frame[2] & RECEIVE_STATUS_TYPE_BROAD ) {
 								DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got broadcast wakeup from node %i, doing WAKE_UP_INTERVAL_SET",frame[3]);
-								if (ournodeid != -1) { 
+								if (ournodeid != -1) {
 									zwWakeupSet((unsigned char)frame[3],60,false); // wakeup interval
 									wakeupHandler((unsigned char) frame[3]); // fire commands, device is awake
 								}
@@ -905,7 +905,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 								tempbuf[3]=COMMAND_CLASS_WAKE_UP;
 								tempbuf[4]=WAKE_UP_NO_MORE_INFORMATION;
 								tempbuf[5]=TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
-								sendFunction( tempbuf , 6, REQUEST, 1); 
+								sendFunction( tempbuf , 6, REQUEST, 1);
 								// ...
 							}//
 						}
@@ -966,7 +966,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 										break;
 								}
 							}
-							
+
 						}
 					case COMMAND_CLASS_SWITCH_MULTILEVEL:
 						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_SWITCH_MULTILEVEL - ");
@@ -1027,7 +1027,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							if (ZWNodeMapIt != ZWNodeMap.end()) {
 
 								// send OnOff event for remote switches and controllers to support scenarios
-								if  ( ( (*ZWNodeMapIt).second->typeGeneric == GENERIC_TYPE_SWITCH_REMOTE) || 
+								if  ( ( (*ZWNodeMapIt).second->typeGeneric == GENERIC_TYPE_SWITCH_REMOTE) ||
 									( (*ZWNodeMapIt).second->typeBasic == BASIC_TYPE_CONTROLLER) ) {
 									if ((unsigned char)frame[7] == 0xff) {
 									        DCEcallback->SendOnOffEvent ((unsigned char)frame[3],-1, 1);
@@ -1044,8 +1044,8 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 										zwRequestBasicReport(atoi(pch),0);
 										pch = strtok (NULL, ",");
 									}
-										
-									
+
+
 								} else if (((*ZWNodeMapIt).second->typeGeneric == GENERIC_TYPE_SENSOR_BINARY)||((*ZWNodeMapIt).second->typeGeneric == GENERIC_TYPE_SENSOR_MULTILEVEL)) {
 									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"This is a binary sensor, so we send sensor tripped events");
 									// if ((unsigned char)frame[7] == 0xff) {
@@ -1062,12 +1062,12 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 
 								}
 							}
-							
+
 						} else {
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got COMMAND_CLASS_BASIC: %i, ignoring",(unsigned char)frame[6]);
-									
+
 							// zwSendBasicReport((unsigned char)frame[3]);
-						}						
+						}
 						break;
 					case COMMAND_CLASS_CLIMATE_CONTROL_SCHEDULE:
 						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_CLIMATE_CONTROL_SCHEDULE: - ");
@@ -1089,7 +1089,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 								vector<string> vectSchedule;
 								vector<string>::const_iterator vectScheduleIt;
 								StringUtils::Tokenize(sSchedule, ";", vectSchedule);
-								for (vectScheduleIt = vectSchedule.begin() ; vectScheduleIt != vectSchedule.end() ; vectScheduleIt++ ) { 
+								for (vectScheduleIt = vectSchedule.begin() ; vectScheduleIt != vectSchedule.end() ; vectScheduleIt++ ) {
 									string sSchedElem = *vectScheduleIt;
 									if (sSchedElem.find(",") !=string::npos) {
 										vector<string> vectScheduleElem;
@@ -1112,7 +1112,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 												tempbuf[i++] = 0x7a;
 
 											}
-											
+
 										}
 									}
 								}
@@ -1121,7 +1121,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							tempbuf[i++]=0;
 							tempbuf[i++]=0x7f; // unused state, end setpoints
 							tempbuf[i++]=TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
-							sendFunction( tempbuf , i, REQUEST, 1); 
+							sendFunction( tempbuf , i, REQUEST, 1);
 
 						}
 						break;
@@ -1156,7 +1156,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 					case COMMAND_CLASS_BATTERY:
 						if ((unsigned char)frame[6] == BATTERY_REPORT) {
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_BATTERY:BATTERY_REPORT: Battery level: %d",(unsigned char)frame[7]);
-	
+
 							if ((unsigned char)frame[7] == 0xff) {
 								DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"Battery low warning from node %d",(unsigned char)frame[3]);
 							}
@@ -1177,7 +1177,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							int precision = ( (unsigned char)frame[8] & THERMOSTAT_SETPOINT_REPORT_PRECISION_MASK ) >> THERMOSTAT_SETPOINT_REPORT_PRECISION_SHIFT;
 							if ((((unsigned char)frame[8]) & THERMOSTAT_SETPOINT_REPORT_SIZE_MASK) == 2) {
 								temp = ((unsigned char)frame[9] << 8) + (unsigned char)frame[10];
-							} else {	
+							} else {
 								temp = (unsigned char)frame[9];
 							}
 							if (precision > 0) {
@@ -1203,7 +1203,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"auto changeover, %.1f%c",ftemp,scale.c_str());
 									break;
 							}
-							
+
 							// Send setpoint changed back to router.
 							if (scale == "F")
 							  {
@@ -1214,13 +1214,13 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							    DCEcallback->SendSetpointChangedEvent(frame[3], -1, ftemp);
 							  }
 
-							
+
 						}
 					case COMMAND_CLASS_SWITCH_BINARY:
 						if ((unsigned char)frame[6] == SWITCH_BINARY_SET) {
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_SWITCH_BINARY:SWITCH_BINARY_SET received from node %d value %d",(unsigned char)frame[3],(unsigned char)frame[7]);
 						}
-						
+
 					case COMMAND_CLASS_CLOCK:
 						if ((unsigned char)frame[6] == CLOCK_GET) {
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_CLOCK:CLOCK_GET received from node %d",(unsigned char)frame[3]);
@@ -1288,7 +1288,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							timestruct = localtime(&timestamp);
 							// printf("Time: %i %i %i\n",timestruct->tm_wday, timestruct->tm_hour, timestruct->tm_min);
 							// iterate over commands
-							offset = 8;	
+							offset = 8;
 							for (int i=0; i<frame[7]; i++) {
 								DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND LENGTH: %d, CLASS: %x",frame[offset],(unsigned char) frame[offset+1]);
 								switch ((unsigned char)frame[offset+1]) {
@@ -1306,7 +1306,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 										if (SCHEDULE_CHANGED_GET == (unsigned char) frame[offset+2]) {
 											DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_CLIMATE_CONTROL_SCHEDULE:SCHEDULE_CHANGED_GET");
 
-											
+
 										}
 										if (SCHEDULE_OVERRIDE_GET == (unsigned char) frame[offset+2]) {
 											DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_CLIMATE_CONTROL_SCHEDULE:SCHEDULE_OVERRIDE_GET");
@@ -1328,7 +1328,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 									case COMMAND_CLASS_WAKE_UP:
 										if (WAKE_UP_NOTIFICATION == (unsigned char) frame[offset+2]) {
                                                                                         DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_WAKE_UP:WAKE_UP_NOTIFICATION");
-										}	
+										}
 										break;
 									default:
 									;;
@@ -1340,7 +1340,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							tempbuf[2]=19; // cmd_length;
 							tempbuf[3]=COMMAND_CLASS_MULTI_CMD;
 							tempbuf[4]=MULTI_CMD_ENCAP;
-							tempbuf[5]=4; // cmd_count; 
+							tempbuf[5]=4; // cmd_count;
 							tempbuf[6]=4; //length of next command
 							tempbuf[7]=COMMAND_CLASS_CLOCK;
 							tempbuf[8]=CLOCK_REPORT;
@@ -1377,8 +1377,8 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							tempbuf[20]=COMMAND_CLASS_WAKE_UP;
 							tempbuf[21]=WAKE_UP_NO_MORE_INFORMATION;
 							tempbuf[22]=TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
-							sendFunction( tempbuf , 23, REQUEST, 1); 
- 
+							sendFunction( tempbuf , 23, REQUEST, 1);
+
 						}
 						break;
 					default:
@@ -1399,7 +1399,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 						if (ZWNodeMapIt != ZWNodeMap.end()) {
 							ZWNode *node = (*ZWNodeMapIt).second;
 							if (node->sleepingDevice) {
-								wakeupHandler((unsigned char) frame[3]);	
+								wakeupHandler((unsigned char) frame[3]);
 							}
 							parseNodeInfo((unsigned char)frame[3],&(frame[8]),(unsigned char)frame[4]-3);
 							updateNodeCapabilities(node, &(frame[8]), (unsigned char)frame[4]-3);
@@ -1448,8 +1448,8 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 													zwRequestBasicReport(atoi(pch),0);
 													pch = strtok (NULL, ",");
 												}
-													
-												
+
+
 											}
 										}
 										break;
@@ -1524,7 +1524,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 					default:
 						break;
 					;;
-				}	
+				}
 				break;
 			;;
 			default:
@@ -1652,8 +1652,8 @@ void *ZWApi::ZWApi::receiveFunction() {
 					if (timer > 30 && await_callback != 0) {
 						DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING, "No callback received: await_callback: %i timer: %i",await_callback,timer);
 						timer = 0;
-						// resend, we got no final callback 
-						await_ack = 0;	
+						// resend, we got no final callback
+						await_ack = 0;
 						await_callback = 0;
 						if (ZWSendQueue.front()->sendcount > 2) {
 							DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "ERROR: Dropping command, no callback received after three resends");
@@ -1664,7 +1664,7 @@ void *ZWApi::ZWApi::receiveFunction() {
 
 
 				}
-				
+
 			} else {
 				idletimer++;
 				//if ((idletimer % 100) == 0) {
@@ -1793,7 +1793,7 @@ int ZWApi::ZWApi::getIntent(int type) {
 size_t ZWApi::ZWApi::getIntentSize() {
 	size_t size;
 	pthread_mutex_lock (&mutexSendQueue);
-	size = ZWIntentQueue.size();	
+	size = ZWIntentQueue.size();
 	pthread_mutex_unlock (&mutexSendQueue);
 	return size;
 }
@@ -2011,23 +2011,23 @@ bool ZWApi::ZWApi::zwAssociationRemove(int node_id, int group, int target_node_i
 
 bool ZWApi::ZWApi::zwReplicateController(int mode) {
 	char mybuf[1024];
-	
+
 	if (mode) {
 		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Replicate controller start");
 		mybuf[0] = FUNC_ID_ZW_SET_LEARN_MODE;
 		mybuf[1] = 0x01;
-		sendFunction( mybuf , 2, REQUEST, 0); 
+		sendFunction( mybuf , 2, REQUEST, 0);
 
 	} else {
 		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Replicate controller end");
 		mybuf[0] = FUNC_ID_ZW_SET_LEARN_MODE;
 		mybuf[1] = 0x00;
-		sendFunction( mybuf , 2, REQUEST, 0); 
+		sendFunction( mybuf , 2, REQUEST, 0);
 
 		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Get new init data after replication");
 		deviceList = "";
 		mybuf[0] = FUNC_ID_SERIAL_API_GET_INIT_DATA;
-		sendFunction( mybuf , 1, REQUEST, 0); 
+		sendFunction( mybuf , 1, REQUEST, 0);
 	}
 
 	return true;
@@ -2035,10 +2035,10 @@ bool ZWApi::ZWApi::zwReplicateController(int mode) {
 
 bool ZWApi::ZWApi::zwSetDefault() {
 	char mybuf[1024];
-	
+
 	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Reset controller and erase all node information");
 	mybuf[0] = FUNC_ID_ZW_SET_DEFAULT;
-	sendFunction( mybuf , 1, REQUEST, 1); 
+	sendFunction( mybuf , 1, REQUEST, 1);
 	return true;
 }
 
@@ -2046,14 +2046,14 @@ bool ZWApi::ZWApi::zwAddNodeToNetwork(int startstop, bool highpower) {
 	char mybuf[1024];
 
 	mybuf[0] = FUNC_ID_ZW_ADD_NODE_TO_NETWORK;
-	if (startstop) {	
+	if (startstop) {
 		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Adding new node - start");
 		mybuf[1] = highpower ? ADD_NODE_ANY | ADD_NODE_OPTION_HIGH_POWER : ADD_NODE_ANY;
-		sendFunction( mybuf , 2, REQUEST, 1); 
+		sendFunction( mybuf , 2, REQUEST, 1);
 	} else {
 		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Adding new node - end");
 		mybuf[1] = ADD_NODE_STOP;
-		sendFunction( mybuf , 2, REQUEST, 0); 
+		sendFunction( mybuf , 2, REQUEST, 0);
 	}
 	return true;
 }
@@ -2062,14 +2062,14 @@ bool ZWApi::ZWApi::zwRemoveNodeFromNetwork(int startstop) {
 	char mybuf[1024];
 
 	mybuf[0] = FUNC_ID_ZW_REMOVE_NODE_FROM_NETWORK;
-	if (startstop) {	
+	if (startstop) {
 		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Removing node - start");
 		mybuf[1] = REMOVE_NODE_ANY;
-		sendFunction( mybuf , 2, REQUEST, 1); 
+		sendFunction( mybuf , 2, REQUEST, 1);
 	} else {
 		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Removing node - end");
 		mybuf[1] = REMOVE_NODE_STOP;
-		sendFunction( mybuf , 2, REQUEST, 0); 
+		sendFunction( mybuf , 2, REQUEST, 0);
 	}
 	return true;
 }
@@ -2079,7 +2079,7 @@ bool ZWApi::ZWApi::zwRemoveFailedNodeId(int nodeid) {
 	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Removing failed node %i",nodeid);
 	mybuf[0] = FUNC_ID_ZW_REMOVE_FAILED_NODE_ID;
 	mybuf[1] = (unsigned char)nodeid;
-	sendFunction( mybuf , 2, REQUEST, 1); 
+	sendFunction( mybuf , 2, REQUEST, 1);
 
 	return true;
 }
@@ -2127,7 +2127,7 @@ bool ZWApi::ZWApi::zwConfigurationSet(int node_id,int parameter,int value, int s
 			mybuf[2] = 5;
 			len = 9;
 			break;
-		case 2:	
+		case 2:
 			mybuf[6] = 2;
 			mybuf[7] = ( (value >> 8 ) & 0xff);
 			mybuf[8] = (value & 0xff);
@@ -2209,7 +2209,7 @@ bool ZWApi::ZWApi::zwWakeupSet(int node_id,int value, bool multi) {
 		// convert to seconds
 		value = value * 60;
 		mybuf[5] = (value >> 16) & 0xff; // seconds msb
-		mybuf[6] = (value >> 8) & 0xff; // 
+		mybuf[6] = (value >> 8) & 0xff; //
 		mybuf[7] = value & 0xff; // seconds lsb
 		mybuf[8] = ournodeid;
 		mybuf[9] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
@@ -2227,7 +2227,7 @@ bool ZWApi::ZWApi::zwWakeupSet(int node_id,int value, bool multi) {
 		mybuf[8]=WAKE_UP_INTERVAL_SET;
 		value = value * 60;
 		mybuf[9] = (value >> 16) & 0xff; // seconds msb
-		mybuf[10] = (value >> 8) & 0xff; // 
+		mybuf[10] = (value >> 8) & 0xff; //
 		mybuf[11] = value & 0xff; // seconds lsb
 		mybuf[12]=ournodeid;
 		//mybuf[13]=2;
@@ -2273,7 +2273,7 @@ bool ZWApi::ZWApi::wakeupHandler(int node_id) {
 
 	std::multimap < int, ZWJob * >::iterator wakeupQueueIt;
 	for (wakeupQueueIt = ZWWakeupQueue.lower_bound(node_id) ; wakeupQueueIt != ZWWakeupQueue.upper_bound(node_id); ++wakeupQueueIt) {
-		
+
 		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Moving job %p from wakeup to send queue (node %i)",(*wakeupQueueIt).second, (*wakeupQueueIt).first);
 		ZWSendQueue.push_back((*wakeupQueueIt).second);
 	}
@@ -2294,7 +2294,7 @@ string ZWApi::ZWApi::commandClassToString(char nodeinfo) {
 		return "COMMAND_CLASS_ASSOCIATION";
 	case COMMAND_CLASS_MULTI_CMD:
 		return "COMMAND_CLASS_MULTI_CMD";
-	case COMMAND_CLASS_MARK:	
+	case COMMAND_CLASS_MARK:
 		return "* COMMAND_CLASS_MARK *";
 	case COMMAND_CLASS_ALARM:
 		return "COMMAND_CLASS_ALARM";
@@ -2478,7 +2478,7 @@ void ZWApi::ZWApi::parseNodeInfo(int nodeid, char *nodeinfo, size_t length) {
 		case COMMAND_CLASS_SECURITY:
 			security = true;
 			break;
-		case COMMAND_CLASS_MARK:	
+		case COMMAND_CLASS_MARK:
 			DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Can control the following command classes:");
 			break;
 		default:
@@ -2525,7 +2525,7 @@ int ZWApi::ZWApi::getDeviceTemplate(int basic, int generic, int specific, char *
 					devicetemplate = DEVICETEMPLATE_Light_Switch_dimmable_CONST;
 					break;
 			}
-				
+
 			break;
 		case GENERIC_TYPE_SWITCH_REMOTE:
 #ifdef DEVICETEMPLATE_Remote_Switch_CONST
@@ -2619,7 +2619,7 @@ void ZWApi::ZWApi::zwWriteMemory(int offset, int len, unsigned char *data) {
 		for (int i=0;i<len;i++) {
 			mybuf[5+i]=data[i];
 		}
-	}	
+	}
 	sendFunction( mybuf , 5+len, REQUEST, 0);
 }
 
@@ -3211,10 +3211,10 @@ void ZWApi::ZWApi::parseManufacturerSpecific(int nodeid, int manuf, int type, in
 			switch (type) {
 				case 0x3: switch(prod) {
 						case 0x2: sProduct = "Multisensor";
-							zwAssociationSet(nodeid, 3, ournodeid); 
-							zwAssociationSet(nodeid, 6, ournodeid); 
-							zwAssociationSet(nodeid, 9, ournodeid); 
-							zwAssociationSet(nodeid, 14, ournodeid); 
+							zwAssociationSet(nodeid, 3, ournodeid);
+							zwAssociationSet(nodeid, 6, ournodeid);
+							zwAssociationSet(nodeid, 9, ournodeid);
+							zwAssociationSet(nodeid, 14, ournodeid);
 							break;
 					}
 					break;
@@ -3298,10 +3298,10 @@ void ZWApi::ZWApi::parseManufacturerSpecific(int nodeid, int manuf, int type, in
 				case 0x2: switch(prod) {
 						case 0x9: sProduct = "Home Energy Meter";
 							zwConfigurationSet(nodeid,101,2,4); // send multilevel sensor report for group 1
-							zwConfigurationSet(nodeid,111,120,4); // every 2 minutes 
+							zwConfigurationSet(nodeid,111,120,4); // every 2 minutes
 							zwConfigurationSet(nodeid,102,1,4); // send battery report for group 2
 							zwConfigurationSet(nodeid,112,86400,4); // every day
-							zwAssociationSet(nodeid, 2, ournodeid); 
+							zwAssociationSet(nodeid, 2, ournodeid);
 							break;
 					}
 					break;
@@ -3338,7 +3338,7 @@ void ZWApi::ZWApi::zwSecuritySchemeGet(int node_id) {
         mybuf[2] = 3; // length of command
 	mybuf[3] = COMMAND_CLASS_SECURITY;
 	mybuf[4] = SECURITY_SCHEME_GET;
-	mybuf[5]= 0; // security scheme 0 
+	mybuf[5]= 0; // security scheme 0
         mybuf[6] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
         sendFunction( mybuf , 7, REQUEST, 1);
 }
@@ -3403,7 +3403,7 @@ void ZWApi::ZWApi::zwIsFailedNode(int node_id) {
 	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Removing failed node %i",node_id);
 	mybuf[0] = FUNC_ID_ZW_IS_FAILED_NODE_ID;
 	mybuf[1] = (unsigned char)node_id;
-	sendFunction( mybuf , 2, REQUEST, 1); 
+	sendFunction( mybuf , 2, REQUEST, 1);
 
 }
 
