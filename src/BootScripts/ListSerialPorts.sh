@@ -9,6 +9,12 @@ if [[ -f /proc/tty/driver/serial ]]; then
 	done
 fi
 
+## Notes for future reference
+## ttyAMA is one of several things you can find on ARM
+## Link: http://yarchive.net/comp/linux/serial.html
+## if you're from the future and reading this, you probably encountered one of the others mentioned in that link:
+## "ttyAM, ttySA, ttyPXA, and so the list goes on" :)
+
 if [[ -f /proc/tty/driver/ttyAMA ]]; then
 	Ports=$(cat /proc/tty/driver/ttyAMA | grep -v unknown | grep ': ' | cut -d: -f1)
 	for i in $Ports; do
