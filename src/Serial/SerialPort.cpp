@@ -275,17 +275,9 @@ CSerialPort::CSerialPort(string Port, unsigned BPS, eParityBitStop ParityBitStop
 	
 	struct termios t;
 	
-	if( Port.size()<6 || Port.substr(0,5)!="/dev/" )
-		Port = "/dev/" + Port;
 	Port = TranslateSerialUSB(Port);
 	if ((m_fdSerial = open(string(Port).c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK)) < 0)
 	{
-	if (Port == "ttyS5")
-		system("mknod /dev/ttyS5 c 4 69");	    
-        if (Port == "ttyS4")
-		system("mknod /dev/ttyS4 c 4 68");
-	
-	if ((m_fdSerial = open(string("/dev/"+Port).c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK)) < 0)
 		throw string("Cannot open ")+Port+string("\r\n");
     }
     memset(&t, 0, sizeof(struct termios));
