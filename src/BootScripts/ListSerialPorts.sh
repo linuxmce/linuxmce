@@ -18,9 +18,9 @@ fi
 
 if [[ -d /sys/class/tty ]]; then
 	pushd /sys/class/tty &>/dev/null
-	for dev in ttyUSB*/device ttyACM*/device; do
+	for dev in ttyUSB*/device ttyACM*/device ttyAMA*/device; do
 		##id=$(readlink "$dev" | sed 's,^.*/\(usb.*\)/tty.*$,\1,g')
-		id=$(readlink -f "$dev" | sed -r 's,^.*(pci.*)/usb[0-9]*/[0-9./-]*/[0-9]*-([0-9.]*):[0-9.]*(/ttyUSB[0-9]*)?$,\1+\2,g')
+		id=$(readlink -f "$dev" | sed -r 's,^.*(pci.*|platform.*)/usb[0-9]*/[0-9./-]*/[0-9]*-([0-9.]*):[0-9.]*(/ttyUSB[0-9]*)?$,\1+\2,g')
 		echo "$id"
 	done
 	popd &>/dev/null
