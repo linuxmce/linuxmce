@@ -6,7 +6,7 @@ set -e
 . /usr/pluto/bin/Config_Ops.sh
 . /usr/pluto/bin/Network_Parameters.sh
 
-## fstab for diskless mds
+## timezone for diskless mds
 File="/etc/timezone"
 Content=""
 
