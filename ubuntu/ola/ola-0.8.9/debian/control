@@ -1,7 +1,7 @@
 Source: ola
 Priority: extra
 Maintainer: Simon Newton <nomis52@gmail.com>
-Build-Depends: debhelper (>= 7), autotools-dev
+Build-Depends: debhelper (>= 7), autotools-dev, libcppunit-dev
 Standards-Version: 3.8.0
 Section: libs
 Homepage: http://code.google.com/p/linux-lighting/
