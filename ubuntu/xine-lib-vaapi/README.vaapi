@@ -1,0 +1,97 @@
+Make sure you have the following in your ~/.xine/config.
+
+General ffmpeg settings :
+
+# Priorität für Dekoder ffmpeg-wmv8
+# numeric, default: 0
+engine.decoder_priorities.ffmpeg-wmv8:0
+
+# Priorität für Dekoder ffmpeg-wmv9
+# numeric, default: 0
+engine.decoder_priorities.ffmpeg-wmv9:0
+
+# Priorität für Dekoder ffmpegvideo
+# numeric, default: 0
+engine.decoder_priorities.ffmpegvideo:1
+
+# Priorität für Dekoder mpeg2
+# numeric, default: 0
+#engine.decoder_priorities.mpeg2:0
+
+Video out settings :
+
+#vaapi: set deinterlace to 0 ( none ), 1 ( top field ), 2 ( bob ).
+# numeric, default: 0
+#video.output.vaapi_deinterlace:0
+
+# vaapi: VDR osd height workaround.
+# numeric, default: 0
+#video.output.vaapi_vdr_osd_height:0
+
+# vaapi: VDR osd width workaround.
+# numeric, default: 0
+#video.output.vaapi_vdr_osd_width:0
+
+# VAAPI Mpeg2 softdecoding
+# bool, default: 0
+#video.processing.vaapi_mpeg_softdec:0
+
+# VAAPI Mpeg2 softdecoding deinterlace
+# bool, default: 0
+#video.processing.vaapi_mpeg_softdec_deinterlace:0
+
+# vaapi: opengl output rendering
+# bool, default: 0
+#video.output.vaapi_opengl_render:0
+
+# vaapi: opengl rendering tfp
+# bool, default: 0
+#video.output.vaapi_opengl_use_tfp:0
+
+# vaapi: set vaapi_guarded_render to 0 ( yes ) 1 ( no )
+# numeric, default: 0
+#video.output.vaapi_guarded_render:0
+
+If you see crashes set guarded render mode.
+
+# vaapi: swap UV planes.
+# bool, default: 0
+#video.output.vaapi_swap_uv_planes:0
+
+Swap UV is a workaround for IronLake chipsets where the driver is bugy.
+
+
+Notes on use with VDR. The OSD will have some delay. This is technical and can only be overcome
+writting a complete new decoder which use VAAPI direct and not ffmpeg.
+
+For using unsclaed OSD there you can overwrite the OSD size in the config file.
+
+For xineliboutput use the defaults.
+
+For vdr-xine set in VDR the OSD size to 1920x1080 and use the following in ~/.xine/config :
+
+video.output.vaapi_vdr_osd_height:0
+video.output.vaapi_vdr_osd_width:0
+
+The workaround is needed, because vdr-xine does not report the real unscaled OSD size.
+
+
+When you get GPU hangs on Mpeg2 material set :
+
+video.processing.vaapi_mpeg_softdec:1
+
+This disables VAAPI fpr Mpeg2.
+
+
+You can use example.config.vaapi as an example config for xine.
+
+Call xine like : xine -V vaapi video.mkv
+
+xvba-vaapi hints:
+
+export LIBVA_DRIVER_NAME=xvba
+export LIBVA_DRIVERS_PATH=/usr/lib/dri/
+video.output.vaapi_opengl_render:1
+
+
+Postprocessing does not work. Do not use "--post vdr_video --post vdr-audio --post vdr" in your xine call.
