@@ -79,7 +79,13 @@ VT=${XDisplay#:}
 VT=vt"$((7+VT))"
 
 # Start X11
-Xcmd=(/usr/pluto/bin/Start_X_Wrapper.sh --parms "$@" --client "$XClient" "${XClientParm[@]}" --server "$XDisplay" -ignoreABI -ac -allowMouseOpenFail "$VT" "${XServerParm[@]}" --flags "${WrapperFlags[@]}" -config "${XOrgConf}")
+ConfGet "PK_Distro"
+if [[ 19 -eq "$PK_Distro" ]] ;then
+	# Raspbian does not get an xorg.conf
+	Xcmd=(/usr/pluto/bin/Start_X_Wrapper.sh --parms "$@" --client "$XClient" "${XClientParm[@]}" --server "$XDisplay" -ignoreABI -ac -allowMouseOpenFail "$VT" "${XServerParm[@]}" --flags "${WrapperFlags[@]}")
+else
+	Xcmd=(/usr/pluto/bin/Start_X_Wrapper.sh --parms "$@" --client "$XClient" "${XClientParm[@]}" --server "$XDisplay" -ignoreABI -ac -allowMouseOpenFail "$VT" "${XServerParm[@]}" --flags "${WrapperFlags[@]}" -config "${XOrgConf}")
+fi
 if [[ "$Background" == y ]]; then
 	screen -d -m -S XWindowSystem "${Xcmd[@]}"
 	# Start everouter for gyration mouse

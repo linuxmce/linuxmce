@@ -4,6 +4,13 @@
 . /usr/pluto/bin/Utils.sh
 . /usr/pluto/bin/SQL_Ops.sh
 
+ConfGet "PK_Distro"
+if [[ 19 -eq "$PK_Distro" ]] ;then
+	# Raspbian does not currently use SetupAudioVideo
+	Logging "$TYPE" "$SEVERITY_NORMAL" "SetupAudioVideo" "Skipping (Raspbian)"
+	exit 0
+fi
+
 DEVICECATEGORY_Media_Director="8"
 DEVICECATEGORY_Video_Cards="125"
 DEVICECATEGORY_Sound_Cards="124"
@@ -399,7 +406,7 @@ AudioSettings_Check()
 		Reboot="Reboot"
 	fi
 }
-	
+
 Logging "$TYPE" "$SEVERITY_NORMAL" "SetupAudioVideo" "Starting"
 ReadConf
 VideoSettings_Check
