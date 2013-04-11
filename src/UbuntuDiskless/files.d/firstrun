@@ -6,7 +6,7 @@ set -e
 . /usr/pluto/bin/Config_Ops.sh
 . /usr/pluto/bin/Network_Parameters.sh
 
-## fstab for diskless mds
+## firstrun for diskless mds
 File="/etc/rcS.d/S99firstrun"
 Content="#!/bin/bash
 trap 'rm -f $File' EXIT
