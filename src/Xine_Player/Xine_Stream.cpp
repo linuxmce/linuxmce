@@ -1228,7 +1228,7 @@ int Xine_Stream::XServerEventProcessor(XEvent &event )
 
 		case ConfigureNotify:
 		{
-			XConfigureEvent *cev = ( XConfigureEvent * ) & event;
+/*			XConfigureEvent *cev = ( XConfigureEvent * ) & event;
 			Window tmp_win;
 
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "ConfigureNotify: %ix%i", cev->width, cev->height);
@@ -1246,6 +1246,7 @@ int Xine_Stream::XServerEventProcessor(XEvent &event )
 				m_pFactory->m_iImgXPos = cev->x;
 				m_pFactory->m_iImgYPos = cev->y;
 			}
+*/
 		}
 		break;
 	}
