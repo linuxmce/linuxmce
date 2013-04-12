@@ -804,7 +804,8 @@ function isMediaDirector($deviceID,$dbADO,$mdOnly=0)
 		$DeviceTemplate=$row['FK_DeviceTemplate'];
 	}else
 		return false;
-	if($DeviceTemplate==$GLOBALS['rootMediaDirectorsID']){
+//	if($DeviceTemplate==$GLOBALS['rootMediaDirectorsID']){
+	if($DeviceTemplate==$GLOBALS['rootMediaDirectorsID'] || $DeviceTemplate==$GLOBALS['rootRPIMediaDirectorsID']){
 		return true;
 	}
 	elseif($mdOnly==1){
@@ -2876,7 +2877,8 @@ function getTopLevelParentIP($deviceID,$dbADO)
 		if((int)$row['FK_Device_ControlledVia']!=0){
 			$topParent=getTopLevelParentIP($row['FK_Device_ControlledVia'],$dbADO);
 		}else{
-			if($row['FK_DeviceCategory']==$GLOBALS['CategoryCore'] || $row['FK_DeviceTemplate']==$GLOBALS['rootMediaDirectorsID']){
+//			if($row['FK_DeviceCategory']==$GLOBALS['CategoryCore'] || $row['FK_DeviceTemplate']==$GLOBALS['rootMediaDirectorsID']){
+			if($row['FK_DeviceCategory']==$GLOBALS['CategoryCore'] || $row['FK_DeviceTemplate']==$GLOBALS['rootMediaDirectorsID'] || $row['FK_DeviceTemplate']==$GLOBALS['rootRPIMediaDirectorsID']){
 				$topParent=($row['FK_DeviceCategory']==$GLOBALS['CategoryCore'] && $row['IPaddress']=='')?'127.0.0.1':$row['IPaddress'];
 			}else{
 				$topParent=0;
@@ -2900,7 +2902,8 @@ function getTopLevelParent($deviceID,$dbADO)
 		if((int)$row['FK_Device_ControlledVia']!=0){
 			$topParent=getTopLevelParent($row['FK_Device_ControlledVia'],$dbADO);
 		}else{
-			if($row['FK_DeviceCategory']==$GLOBALS['CategoryCore'] || $row['FK_DeviceTemplate']==$GLOBALS['rootMediaDirectorsID']){
+//			if($row['FK_DeviceCategory']==$GLOBALS['CategoryCore'] || $row['FK_DeviceTemplate']==$GLOBALS['rootMediaDirectorsID']){
+			if($row['FK_DeviceCategory']==$GLOBALS['CategoryCore'] || $row['FK_DeviceTemplate']==$GLOBALS['rootMediaDirectorsID'] || $row['FK_DeviceTemplate']==$GLOBALS['rootRPIMediaDirectorsID']){
 				$topParent=$deviceID;
 			}else{
 				$topParent=0;
