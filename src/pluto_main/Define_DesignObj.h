@@ -2824,6 +2824,8 @@
 #define DESIGNOBJ_popGameOptions_Arcade_CONST 6219
 #define DESIGNOBJ_butStart_UI2_CONST 6220
 #define DESIGNOBJ_butSelect_UI2_CONST 6221
+#define DESIGNOBJ_mnuAirPlayRemote_CONST 6222
+#define DESIGNOBJ_AirPlay_FS_CONST 6223
 
 #define DESIGNOBJ_TABLE "DesignObj"
 #define DESIGNOBJ_PK_DESIGNOBJ_FIELD "PK_DesignObj"

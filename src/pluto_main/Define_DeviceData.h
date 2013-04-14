@@ -263,6 +263,7 @@
 #define DEVICEDATA_Sampling_Rate_CONST 310
 #define DEVICEDATA_Channel_Left_CONST 311
 #define DEVICEDATA_Channel_Right_CONST 312
+#define DEVICEDATA_Firmware_CONST 313
 
 #define DEVICEDATA_TABLE "DeviceData"
 #define DEVICEDATA_PK_DEVICEDATA_FIELD "PK_DeviceData"
