@@ -208,7 +208,7 @@ class MediaStream *AirPlay_PlugIn::CreateMediaStream( class MediaHandlerInfo *pM
 					  iPK_Users, st_RemovableMedia, StreamID );
   
   m_mapDevicesToStreams[pMediaDevice->m_pDeviceData_Router->m_dwPK_Device] = StreamID;
-  
+
   return pAirPlayMediaStream;
   
 }
@@ -260,20 +260,37 @@ bool AirPlay_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 		return false;
  
 	MediaFile *pMediaFile = NULL;
- 
+	string sFileToPlay;
+	string sLocation, sPosition;
+
 	LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "AirPlay_PlugIn::StartMedia() Media type %d", pMediaStream->m_iPK_MediaType);
  
-	string Response;
-  
+	sFileToPlay = pAirPlayMediaStream->GetFilenameToPlay("empty file name");
+
+	// If there is a | at the end, then parse it as an explicit seek location. 
+	if (sFileToPlay.find("}") != string::npos)
+	  {
+	    string::size_type pos=0;
+	    sLocation = StringUtils::Tokenize(sFileToPlay, "}",pos);
+	    sPosition = StringUtils::Tokenize(sFileToPlay, "}",pos);
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"sLocation is %s",sLocation.c_str());
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"sPosition is %s",sPosition.c_str());
+	  }
+	else
+	  {
+	    sLocation = sFileToPlay;
+	    sPosition = "";
+	  }
+
 	// send the CMD straight through.
  
 	pAirPlayMediaStream->m_sMediaDescription = "AirPlay audio";
 
 	DCE::CMD_Play_Media CMD_Play_Media(m_dwPK_Device,
-						pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
-						pAirPlayMediaStream->m_iPK_MediaType,
-						pAirPlayMediaStream->m_iStreamID_get(),
-						"","");
+					   pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
+					   pAirPlayMediaStream->m_iPK_MediaType,
+					   pAirPlayMediaStream->m_iStreamID_get(),
+					   sPosition,sLocation);
 	SendCommand(CMD_Play_Media);
  
 	/* We're going to send a message to all the orbiters in this area so they know what the remote is,
@@ -298,4 +315,48 @@ bool AirPlay_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 
 	return MediaHandlerBase::StartMedia(pMediaStream,sError);
  
+}
+
+bool AirPlay_PlugIn::StopMedia( class MediaStream *pMediaStream )
+{
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"StopMedia Called");
+	PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
+ 
+	map<int, int>::iterator it = m_mapDevicesToStreams.find(pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device);
+    if( it!=m_mapDevicesToStreams.end() )
+        m_mapDevicesToStreams.erase(it);
+
+	LoggerWrapper::GetInstance()->Write( LV_STATUS, "AirPlay::PlugIn::StopMedia() Stopping Media Stream Playback... Pos: %d", pMediaStream->m_iDequeMediaFile_Pos );
+ 
+	AirPlayMediaStream *pAirPlayMediaStream = NULL;
+ 
+	if ((pAirPlayMediaStream = ConvertToAirPlayMediaStream(pMediaStream,"AirPlay::PlugIn::StopMedia():")) == NULL )
+		return false;
+ 
+	if (!pAirPlayMediaStream->m_pMediaDevice_Source)
+	  {
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Stopping media in AirPlay::PlugIn but MediaDevice_Source is NULL");
+	    return false;
+	  }
+
+	int PK_Device = pAirPlayMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device;
+	int iStreamID = pAirPlayMediaStream->m_iStreamID_get();
+	string savedPosition;
+ 
+	DCE::CMD_Stop_Media CMD_Stop_Media(m_dwPK_Device,
+						pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
+						pAirPlayMediaStream->m_iStreamID_get(),
+						&savedPosition);
+ 
+	if (!SendCommand(CMD_Stop_Media))
+	  {
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"The Target device %d didn't respond to stop media command!", PK_Device);
+	  }
+	else
+	  {
+	    // no need to handle bookmarks, I don't think!
+	  }
+ 
+	return MediaHandlerBase::StopMedia(pMediaStream);
+
 }

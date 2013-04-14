@@ -68,7 +68,7 @@ public:
 		/**
 		 * @brief Stop media playback
 		 */
-		//virtual bool StopMedia( class MediaStream *pMediaStream );
+		virtual bool StopMedia( class MediaStream *pMediaStream );
 		
 		//virtual MediaDevice *FindMediaDeviceForEntertainArea(EntertainArea *pEntertainArea);
 		/**
