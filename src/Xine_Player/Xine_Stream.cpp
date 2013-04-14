@@ -22,6 +22,9 @@
 
 #include "DCE/Logger.h"
 
+#include <X11/keysym.h>
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
 
 // watchdog
 namespace DCE
@@ -34,6 +37,12 @@ extern	bool g_bXINE_HAS_TRICKPLAY_SUPPORT;
 
 bool bStreamWatchDogFlag=false;
 int iStreamWatchDogCounter=0;
+
+int _defaultWindowHandler(Display *disp, XErrorEvent *err)
+{
+  DCE::LoggerWrapper::GetInstance()->Write(LV_STATUS,"_defaultWindowHandler - we got called.");
+  return 0;
+}
 
 void* StreamWatchDogRoutine(void* param)
 {
@@ -229,6 +238,9 @@ Xine_Stream::Xine_Stream(Xine_Stream_Factory* pFactory, xine_t *pXineLibrary, in
 	}
 	
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Xine_Stream::Xine_Stream m_iStreamID %d",m_iStreamID);
+
+	XSetErrorHandler(_defaultWindowHandler);
+
 }
 
 Xine_Stream::~Xine_Stream()
@@ -1228,7 +1240,7 @@ int Xine_Stream::XServerEventProcessor(XEvent &event )
 
 		case ConfigureNotify:
 		{
-/*			XConfigureEvent *cev = ( XConfigureEvent * ) & event;
+			XConfigureEvent *cev = ( XConfigureEvent * ) & event;
 			Window tmp_win;
 
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "ConfigureNotify: %ix%i", cev->width, cev->height);
@@ -1246,11 +1258,10 @@ int Xine_Stream::XServerEventProcessor(XEvent &event )
 				m_pFactory->m_iImgXPos = cev->x;
 				m_pFactory->m_iImgYPos = cev->y;
 			}
-*/
+
 		}
 		break;
 	}
-
 	return true;
 }
 
@@ -3539,7 +3550,7 @@ bool Xine_Stream::setAspectRatio(string sAR)
 
 bool Xine_Stream::setZoomLevel(string sZL)
 {
-	PLUTO_SAFETY_LOCK(streamLock, m_streamMutex);
+/*	PLUTO_SAFETY_LOCK(streamLock, m_streamMutex);
 	
 	int iNewLevel = m_iZoomLevel;
 	if ( sZL.length()>0 )
@@ -3575,6 +3586,7 @@ bool Xine_Stream::setZoomLevel(string sZL)
 			return true;
 		}
 	}
+*/
 }
 
 void Xine_Stream::SendMessageToOrbiter(string sMessage)
