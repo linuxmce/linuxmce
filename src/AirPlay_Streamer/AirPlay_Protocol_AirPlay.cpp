@@ -10,6 +10,7 @@
 /** inet includes */
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sstream>
 
 DCE::AirPlay_Streamer *gAirPlay_StreamerI;
 
@@ -24,7 +25,7 @@ int DCE::AirPlay_Protocol_AirPlay::m_iIsPlaying = 0;
 "<plist version=\"1.0\">\r\n"\
 "<dict>\r\n"\
 "<key>deviceid</key>\r\n"\
-"<string>%s</string>\r\n"\
+"<string>11:22:33:44:55:66</string>\r\n"\
 "<key>features</key>\r\n"\
 "<integer>119</integer>\r\n"\
 "<key>model</key>\r\n"\
@@ -73,7 +74,7 @@ namespace DCE
     TXTRecord_Add("features=0x77");
     TXTRecord_Add("model=LinuxMCE,1");
     TXTRecord_Add("srcvers=101.10");
-    
+    m_pAirPlay_Videolan=new AirPlay_Videolan();
   }
 
   AirPlay_Protocol_AirPlay::~AirPlay_Protocol_AirPlay()
@@ -84,6 +85,7 @@ namespace DCE
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_Protocol_AirPlay::~AirPlay_Protocol_AirPlay() - Waiting for Server Thread to go byebye...");
 	pthread_join(m_serverThread, NULL);
       }
+    
   }
 
   bool AirPlay_Protocol_AirPlay::ServerSocketSetup()
@@ -104,7 +106,11 @@ namespace DCE
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_Protocol_AirPlay::ServerSocketSetup() - Could not grab a server socket. errno # %d",errno);
 	return false;
       }
-    
+
+    // Set SO_REUSEADDR to get around binding problems
+    int optval = 1;
+    setsockopt(m_iServerSocket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof optval);
+
     if (bind(m_iServerSocket, (struct sockaddr *)&myaddr, sizeof myaddr) < 0)
       {
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_Protocol_AirPlay::ServerSocketSetup() - could not bind to server socket, errno # %d",errno);
@@ -139,6 +145,12 @@ namespace DCE
 
   bool AirPlay_Protocol_AirPlay::init()
   {
+
+    if (!m_pAirPlay_Videolan->init())
+      {
+	return false;
+      }
+
     if (!ServerSocketSetup())
       {
 	return false;
@@ -230,6 +242,7 @@ namespace DCE
 	  {
 	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_Protocol_AirPlay::AirPlayTCPClient::ProcessConnections(): New connection detected");
 	    AirPlayTCPClient newconnection;
+	    newconnection.m_pAirPlay_Protocol_AirPlay = this;
 	    newconnection.m_iSocket = accept(m_iServerSocket, &newconnection.m_ClientAddr, &newconnection.m_ClientAddrLen);
 	    
 	    if (newconnection.m_iSocket == INVALID_SOCKET)
@@ -254,8 +267,29 @@ namespace DCE
   {
     while (!m_pAirPlay_Streamer->m_bQuit_get())
       {
+
+	if (m_pAirPlay_Videolan->IsPlaying())
+	  {
+	    m_pAirPlay_Videolan->UpdateStatus();
+	  }
+
 	ProcessConnections();
       }
+  }
+
+  float AirPlay_Protocol_AirPlay::GetDuration()
+  {
+    return m_pAirPlay_Videolan->GetDuration();
+  }
+  
+  float AirPlay_Protocol_AirPlay::GetPosition()
+  {
+    return m_pAirPlay_Videolan->GetPosition();
+  }
+
+  void AirPlay_Protocol_AirPlay::SetTime(float fTime)
+  {
+    m_pAirPlay_Videolan->SetTime(fTime);
   }
 
   AirPlay_Protocol_AirPlay::AirPlayTCPClient::AirPlayTCPClient()
@@ -264,6 +298,7 @@ namespace DCE
     m_pHttpParser = new HttpParser();
     m_ClientAddrLen = sizeof(struct sockaddr);
     m_iLastEvent = EVENT_NONE;
+    m_pAirPlay_Protocol_AirPlay = NULL;
   }
 
   AirPlay_Protocol_AirPlay::AirPlayTCPClient::AirPlayTCPClient(const AirPlayTCPClient& client)
@@ -324,6 +359,7 @@ namespace DCE
 	
 	// Prepare the response
 	string response;
+	stringstream ssResponse;
 	char tmp[100];
 	const time_t ltime = time(NULL);
 	char *date = asctime(gmtime(&ltime)); //Fri, 17 Dec 2010 11:18:01 GMT;
@@ -338,8 +374,9 @@ namespace DCE
 	if (responseBody.size() > 0)
 	  {
 	    char tmp2[100];
+	    stringstream ssResponse2;
 	    sprintf(tmp2,"%sContent-Length: %d\r\n",response.c_str(), responseBody.size());
-	    response=tmp2;
+	    response = tmp2;
 	  }
 	response += "\r\n";
 	
@@ -361,8 +398,9 @@ namespace DCE
 	  {
 	    //search the reverse socket to this sessionid
 	    char tmp3[100];
+	    stringstream ssResponse3;
 	    sprintf(tmp3,"POST /event HTTP/1.1\r\n");
-	    response=tmp3;
+	    response = tmp3;
 	    reverseSocket = reverseSockets[sessionId]; //that is our reverse socket
 	    response += reverseHeader;
 	  }
@@ -378,6 +416,8 @@ namespace DCE
 	    send(reverseSocket, response.c_str(), response.size(), 0);//send the event status on the eventSocket
 	  }
 	
+	cout << endl << "Response is: " << endl << response << endl;
+
 	// We need a new parser...
 	delete m_pHttpParser;
 	m_pHttpParser = new HttpParser;
@@ -402,6 +442,7 @@ namespace DCE
     m_ClientAddr = client.m_ClientAddr;
     m_ClientAddrLen = client.m_ClientAddrLen;
     m_pHttpParser = client.m_pHttpParser;
+    m_pAirPlay_Protocol_AirPlay=client.m_pAirPlay_Protocol_AirPlay;
   }
   
   void AirPlay_Protocol_AirPlay::AirPlayTCPClient::ComposeReverseEvent(string& reverseHeader,
@@ -625,7 +666,7 @@ namespace DCE
 	    Encode(userAgent);
 	    location += "|User-Agent=" + userAgent;
 	    
-	    gAirPlay_StreamerI->StartAirPlayPlayback(location);
+	    gAirPlay_StreamerI->StartAirPlayPlayback(location, position);
 	    ComposeReverseEvent(reverseHeader, reverseBody, sessionId, EVENT_PLAYING);
 	  }
       }
@@ -638,6 +679,18 @@ namespace DCE
 	  {
 	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_Protocol_AirPlay::AirPlayTCPClient::ProcessRequest(): got GET request %s", uri.c_str());
 	    
+	    float fPosition = m_pAirPlay_Protocol_AirPlay->GetPosition();
+	    int fDuration = 3505;
+
+	    char cResponseBody[256];
+	    stringstream ssResponseBody;
+	    sprintf(cResponseBody,"duration: %d\r\nposition: %f",fDuration,fPosition);
+	    
+	    ssResponseBody << cResponseBody;
+	    responseBody = ssResponseBody.str();
+
+	    responseHeader = "Content-Type: text/parameters\r\n";
+
 	    /* if (g_application.m_pPlayer && g_application.m_pPlayer->GetTotalTime())
 	       {
 	       float position = ((float) g_application.m_pPlayer->GetTime()) / 1000;
@@ -651,7 +704,8 @@ namespace DCE
 	else
 	  {
 	    const char* found = strstr(queryString.c_str(), "position=");
-	    
+	    float fPosition = (atof(found + strlen("position=")));
+	    m_pAirPlay_Protocol_AirPlay->SetTime(fPosition);
 	    /*if (found && g_application.m_pPlayer)
 	      {
 	      int64_t position = (int64_t) (atof(found + strlen("position=")) * 1000.0);
@@ -723,6 +777,10 @@ namespace DCE
 
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_Protocol_AirPlay::AirPlayTCPClient::ProcessRequest: got request %s", uri.c_str());
       
+      //      fPosition = m_pAirPlay_Protocol_AirPlay->GetPosition();
+      //fDuration = 3505.00;
+      
+
       /* if (g_application.m_pPlayer)
 	{
 	  if (g_application.m_pPlayer->GetTotalTime())
@@ -760,9 +818,7 @@ namespace DCE
   else if (uri == "/server-info")
   {
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_Protocol_AirPlay::AirPlayTCPClient::Process_Request(): got request %s", uri.c_str());
-    char cResponseBody[8192];
-    sprintf(cResponseBody, SERVER_INFO, "11:22:33:44:55:66");
-    responseBody = cResponseBody;
+    responseBody = SERVER_INFO;
     responseHeader = "Content-Type: text/x-apple-plist+xml\r\n";
   }
 

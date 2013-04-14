@@ -8,6 +8,7 @@
 #define AIRPLAYPROTOCOLAIRPLAY_H
 
 #include "AirPlay_Protocol.h"
+#include "AirPlay_Videolan.h"
 #include "HttpParser/HttpParser.h"
 #include <plist/plist.h>
 
@@ -44,6 +45,7 @@ namespace DCE
     public:
       static int m_iIsPlaying;
       int m_iServerSocket;
+      AirPlay_Videolan *m_pAirPlay_Videolan;
       
       AirPlay_Protocol_AirPlay(AirPlay_Streamer *pAirPlay_Streamer);
       ~AirPlay_Protocol_AirPlay();
@@ -56,10 +58,14 @@ namespace DCE
       bool StartServerThread();
       void ServerThread();
       void ProcessConnections();
+      float GetPosition();
+      float GetDuration();
+      void SetTime(float fTime);
 
       class AirPlayTCPClient
       {
       public:
+        AirPlay_Protocol_AirPlay *m_pAirPlay_Protocol_AirPlay;
 	AirPlayTCPClient();
 	~AirPlayTCPClient();
 	AirPlayTCPClient(const AirPlayTCPClient& client);

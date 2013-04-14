@@ -36,12 +36,13 @@ namespace DCE
 	  bool m_bIsPaused;
 		// Private methods
 public:
-		// Public member variables
+	 	// Public member variables
 	  AirPlay_Service *m_pAirPlay_Service;
 	  DeviceData_Base *m_pDeviceMD; 
 	  DeviceData_Base *m_pDevice_Media_PlugIn;
 	  string m_sCurrentMacAddress;
 	  bool m_bIsPlaying;
+	  int m_iPK_MediaType;
 //<-dceag-const-b->
 public:
 		// Constructors/Destructor
@@ -57,7 +58,7 @@ public:
 		virtual void CreateChildren();
 		string DeviceNameFromMacAddress(string sMacAddress);
 		void StartAirTunesPlayback();
-		void StartAirPlayPlayback(string sLocation);
+		void StartAirPlayPlayback(string sLocation, float fPosition);
 		void StopAirTunesPlayback();
 		void StopAirPlayPlayback();
 		bool IsPaused();

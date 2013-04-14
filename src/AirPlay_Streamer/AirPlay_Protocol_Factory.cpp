@@ -53,8 +53,8 @@ namespace DCE
 
   bool AirPlay_Protocol_Factory::init()
   {
-    addProtocolForMediaType(5, new AirPlay_Protocol_AirPlay(m_pAirPlay_Streamer));
-    addProtocolForMediaType(4, new AirPlay_Protocol_AirTunes(m_pAirPlay_Streamer));
+    addProtocolForMediaType(61, new AirPlay_Protocol_AirPlay(m_pAirPlay_Streamer));
+    addProtocolForMediaType(60, new AirPlay_Protocol_AirTunes(m_pAirPlay_Streamer));
     // Come back in here and register the protocols.
     return true;
   }

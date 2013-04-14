@@ -28,6 +28,7 @@ using namespace DCE;
 //<-dceag-d-e->
 
 #include "pluto_main/Define_MediaType.h"
+#include "AirPlay_Protocol_AirPlay.h"
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -122,6 +123,7 @@ void AirPlay_Streamer::ReceivedUnknownCommand(string &sCMD_Result,Message *pMess
 void AirPlay_Streamer::PostConnect()
 {
   Command_Impl::PostConnect();
+  EVENT_Playback_Completed ("", 0, false); 
 }
 
 void AirPlay_Streamer::OnQuit()
@@ -209,10 +211,32 @@ void AirPlay_Streamer::StopAirPlayPlayback()
 }
 
 
-void AirPlay_Streamer::StartAirPlayPlayback(string sLocation)
+void AirPlay_Streamer::StartAirPlayPlayback(string sLocation, float fPosition)
 {
   // TODO: Implement
   LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_Streamer::StartAirPlayPlayback - got a playback request for URL: %s",sLocation.c_str());
+
+  char cPosition[32];
+  string sPosition;
+  sprintf(cPosition,"%f",fPosition);
+  sPosition=cPosition;
+
+  sLocation += "}" + sPosition;
+
+  CMD_MH_Play_Media CMD_MH_Play_Media(m_pData->m_dwPK_Device_ControlledVia,
+				      m_pDevice_Media_PlugIn->m_dwPK_Device,
+				      0,
+				      sLocation,
+				      MEDIATYPE_lmce_AirPlay_video_CONST,
+				      DEVICETEMPLATE_AirPlay_Streamer_CONST,
+				      "",
+				      false,
+				      0,
+				      0,
+				      0,
+				      0);
+  SendCommand(CMD_MH_Play_Media);
+  
 }
 
 /**
@@ -311,6 +335,25 @@ void AirPlay_Streamer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMe
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 	cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
+
+	m_iPK_MediaType = iPK_MediaType;
+
+	if (iPK_MediaType == 60)
+	  {
+	    // Ignore
+	    return;
+	  }
+
+	AirPlay_Protocol_AirPlay* pAirPlay_Protocol_AirPlay = (AirPlay_Protocol_AirPlay *)m_pAirPlay_Service->m_pAirPlay_Protocol_Factory->getAirPlayProtocolForMediaType(iPK_MediaType);
+
+	if (!pAirPlay_Protocol_AirPlay)
+	  {
+	    return;
+	  }
+
+	pAirPlay_Protocol_AirPlay->m_pAirPlay_Videolan->PlayURL(sMediaURL);
+	pAirPlay_Protocol_AirPlay->m_pAirPlay_Videolan->SetPosition(atof(sMediaPosition.c_str()));
+
 }
 
 //<-dceag-c38-b->
@@ -328,6 +371,22 @@ void AirPlay_Streamer::CMD_Stop_Media(int iStreamID,string *sMediaPosition,strin
 	cout << "Need to implement command #38 - Stop Media" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
+
+	if (m_iPK_MediaType == 60)
+	  {
+	    return; // ignore
+	  }
+
+	AirPlay_Protocol_AirPlay* pAirPlay_Protocol_AirPlay = (AirPlay_Protocol_AirPlay *)m_pAirPlay_Service->m_pAirPlay_Protocol_Factory->getAirPlayProtocolForMediaType(m_iPK_MediaType);
+
+	if (!pAirPlay_Protocol_AirPlay)
+	  {
+	    return;
+	  }
+	
+	pAirPlay_Protocol_AirPlay->m_pAirPlay_Videolan->Stop();
+
+	
 }
 
 //<-dceag-c39-b->
