@@ -472,6 +472,7 @@ namespace DCE
 	sprintf(tmp2,"%sx-apple-session-id: %s\r\n",reverseHeader.c_str(),sessionId.c_str());
 	reverseHeader = tmp2;
 	m_iLastEvent = state;
+	cout << endl << reverseHeader << reverseBody << endl;
       }
     
   }
