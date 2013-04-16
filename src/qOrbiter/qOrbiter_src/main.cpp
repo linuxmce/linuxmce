@@ -396,7 +396,12 @@ int main(int argc, char* argv[])
         // connnect local logger
         QObject::connect(&pqOrbiter, SIGNAL(commandResponseChanged(QString)), &localLogger, SLOT(logCommandMessage(QString)));
         QObject::connect(&pqOrbiter, SIGNAL(mediaMessage(QString)), &localLogger, SLOT(logGuiMessage(QString)));
+
+#ifdef Qt4
         QObject::connect(orbiterWin.mainView.engine(), SIGNAL(warnings(QList<QDeclarativeError>)), &localLogger, SLOT(logQmlErrors(QList<QDeclarativeError>)));
+     #elif QT5
+        QObject::connect(orbiterWin.mainView.engine(), SIGNAL(warnings(QList<QQmlError>)), &localLogger, SLOT(logQmlErrors(QList<QQmlError>)));
+#endif
         QObject::connect(&w, SIGNAL(skinMessage(QString)), &localLogger, SLOT(logSkinMessage(QString)));
         QObject::connect(&w, SIGNAL(qtMessage(QString)) , &localLogger, SLOT(logQtMessage(QString)));
 #ifdef ANDROID

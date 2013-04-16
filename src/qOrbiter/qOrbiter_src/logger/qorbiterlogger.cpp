@@ -99,6 +99,7 @@ void QOrbiterLogger::logMediaMessage(QString message)
         writeCommandMessage(skinMsg);
 }
 
+#ifdef QT5
 void QOrbiterLogger::logQmlErrors(QList<QQmlError> e)
 {
     if(loggingEnabled){
@@ -108,6 +109,7 @@ void QOrbiterLogger::logQmlErrors(QList<QQmlError> e)
         }
     }
 }
+#endif
 
 #ifndef QT5
 void QOrbiterLogger::logQmlErrors(QList<QDeclarativeError> e)

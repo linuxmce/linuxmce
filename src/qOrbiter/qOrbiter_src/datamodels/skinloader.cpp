@@ -33,10 +33,10 @@ void SkinLoader::loadSkin(QString name) {
 #if (QT5)
     current_component = new QQmlComponent(ui_reference->qorbiterUIwin->engine(), style);
 #else
-    current_component->loadUrl(style); //= new QDeclarativeComponent(ui_reference->qorbiterUIwin->engine(), style);
+     current_component = new QDeclarativeComponent(ui_reference->qorbiterUIwin->engine(), style);
 
 #endif
-
+ current_component->loadUrl(style); //= new QDeclarativeComponent(ui_reference->qorbiterUIwin->engine(), style);
     if (current_component->isLoading()) {
         //qDebug() << "Hooking up slot";
 

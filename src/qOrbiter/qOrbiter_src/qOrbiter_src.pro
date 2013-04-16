@@ -93,7 +93,7 @@ linux-g++{
                 folder_01.source = qml/desktop
                 folder_01.target = $$DESTDIR/qml
         }
-        else:contains(QT_VERSION,5.0.*){
+        else:contains(QT_VERSION,5.1.*){
                 folder_01.source = qml/rpi
                 folder_01.target = $$DESTDIR/qml
         }
