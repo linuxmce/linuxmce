@@ -1,6 +1,6 @@
 #include "skindatamodel.h"
 #include "qorbitermanager.h"
-#if (QT5)
+#ifdef QT5
 #include <QtQml/QQmlComponent>
 #include <QtQml/QQmlEngine>
 #include <QtQuick/QQuickView>
@@ -30,8 +30,11 @@ SkinDataModel::SkinDataModel(QUrl &baseUrl, SkinDataItem* prototype, qorbiterMan
     ui_reference = uiRef;
     SkinLoader* load = new SkinLoader(m_baseUrl, ui_reference, this);
     m_skin_loader = load;
+#ifndef QT5
     current_style = new QDeclarativeComponent(ui_reference->qorbiterUIwin->rootContext()->engine(), this);
-
+#else
+    current_style = new QQmlComponent(ui_reference->qorbiterUIwin->rootContext()->engine(), this);
+#endif
     QObject::connect(m_skin_loader, SIGNAL(finishedList()), this, SLOT(checkStatus()));
 }
 

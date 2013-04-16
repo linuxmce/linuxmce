@@ -16,7 +16,7 @@
 GenericFlatListModel::GenericFlatListModel(GenericModelItem *prototypeItem, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototypeItem)
 {
-#ifndef RPI
+#ifndef QT5
     setRoleNames(m_prototype->roleNames());
 #endif
     qRegisterMetaType<QModelIndex>("QModelIndex");

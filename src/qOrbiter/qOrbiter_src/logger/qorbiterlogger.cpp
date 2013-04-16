@@ -99,6 +99,17 @@ void QOrbiterLogger::logMediaMessage(QString message)
         writeCommandMessage(skinMsg);
 }
 
+void QOrbiterLogger::logQmlErrors(QList<QQmlError> e)
+{
+    if(loggingEnabled){
+        for(int i = 0; i < e.count(); i++){
+            QQmlError b = e.at(i);
+            writeGuiMessage(QTime::currentTime().toString()+" - QML Error - "+b.toString()+"\n");
+        }
+    }
+}
+
+#ifndef QT5
 void QOrbiterLogger::logQmlErrors(QList<QDeclarativeError> e)
 {
     if(loggingEnabled){
@@ -108,6 +119,7 @@ void QOrbiterLogger::logQmlErrors(QList<QDeclarativeError> e)
         }
     }
 }
+#endif
 
 void QOrbiterLogger::logUserMessage(QString message)
 {

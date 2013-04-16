@@ -62,6 +62,7 @@ Q_IMPORT_PLUGIN(UIKit)
 #include <QApplication>
 #include <QtDeclarative/QDeclarativeEngine>
 #endif
+
 #include <logger/qorbiterlogger.h>
 #include <datamodels/listModel.h>
 #include <datamodels/gridItem.h>

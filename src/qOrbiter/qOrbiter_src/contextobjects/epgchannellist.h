@@ -28,7 +28,9 @@
 #include <QVariant>
 #include <playlists/epgitemclass.h>
 #include <qorbitermanager.h>
-
+#ifdef QT5
+#include <QApplication>
+#endif
 
 class qorbiterManager;
 

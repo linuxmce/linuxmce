@@ -3,7 +3,11 @@
 
 #include <QObject>
 #include <QFile>
+#ifndef QT5
 #include <QDeclarativeError>
+#else
+#include <QQmlError>
+#endif
 /*!
  * \brief qorbiterLogger - C++ logging context object.
 
@@ -81,7 +85,13 @@ public slots:
     void logQtMessage(QString message);
     void logSkinMessage(QString message);
     void logMediaMessage(QString message);
+
+#ifndef QT5
     void logQmlErrors(QList<QDeclarativeError> e );
+#else
+    void logQmlErrors(QList<QQmlError> e);
+#endif
+
     void logUserMessage(QString message);
 
     void setLogLocation(QString l);

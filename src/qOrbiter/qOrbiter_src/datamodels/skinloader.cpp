@@ -1,12 +1,21 @@
 #include "skinloader.h"
 #include "qorbitermanager.h"
+#ifndef QT5
 #include <QDeclarativeEngine>
 #include  <QDeclarativeContext>
+#else
+#include <QQmlEngine>
+#include <QQmlContext>
+#endif
 SkinLoader::SkinLoader(QUrl baseUrl, qorbiterManager *uiRef, SkinDataModel *parent): ui_reference(uiRef), m_base_url(baseUrl), m_parent(parent)
 {
     totalSkinsToLoad = 0;
     loadercounter= 0;
+#ifdef QT4
     current_component = new QDeclarativeComponent(ui_reference->qorbiterUIwin->rootContext()->engine(),this);
+#elif QT5
+      current_component = new QQmlComponent(ui_reference->qorbiterUIwin->rootContext()->engine(),this);
+#endif
 
 }
 

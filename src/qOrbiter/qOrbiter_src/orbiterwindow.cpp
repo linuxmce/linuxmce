@@ -55,9 +55,13 @@
 orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen, bool frameless, QObject *parent) :
     QObject(parent), deviceno(deviceid)
 {
-#ifndef ANDROID
+#ifdef QT4
     if(frameless==true){
         mainView.window()->setWindowFlags(Qt::FramelessWindowHint);
+    }
+#elif QT5
+    if(frameless == true){
+        mainView.setFlags(Qt::FramelessWindowHint);
     }
 #endif
     router = QString::fromStdString(routerip);
@@ -101,7 +105,11 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);
 #endif
     mainView.rootContext()->setContextProperty("window", this);
+#ifndef QT5
     mainView.setWindowTitle("LinuxMCE Orbiter ");
+#else
+    mainView.setTitle("LinuxMCE Orbiter");
+#endif
     //  mainView.rootContext()->setContextProperty("orbiterList" , "");
 
 #ifdef GLENABLED

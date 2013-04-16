@@ -1640,10 +1640,12 @@ void qorbiterManager::startOrbiter()
         QApplication::processEvents(QEventLoop::AllEvents);
 
         m_bStartingUp = false;
-        qorbiterUIwin->setWindowTitle("LinuxMCE Orbiter " + QString::number(iPK_Device));
+
 #if (QT5)
+        qorbiterUIwin->setTitle("LinuxMCE Orbiter "+ QString::number(iPK_Device));
         qorbiterUIwin->setResizeMode(QQuickView::SizeRootObjectToView);
 #else
+        qorbiterUIwin->setWindowTitle("LinuxMCE Orbiter " + QString::number(iPK_Device));
         qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 #endif
         QApplication::processEvents(QEventLoop::AllEvents);

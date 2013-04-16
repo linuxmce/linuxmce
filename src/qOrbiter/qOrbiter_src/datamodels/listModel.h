@@ -6,8 +6,8 @@
 #include <QVariant>
 #include <datamodels/gridItem.h>
 #include <qorbitermanager.h>
-#include <QDeclarativeListProperty>
 #include <QKeyEvent>
+
 
 /*!
  * \brief The ListModel class is based on QAbstractListmodel for the purposes of provinding a flat list of data.
@@ -24,7 +24,7 @@ class ListModel : public QAbstractListModel
     Q_PROPERTY (int totalcells READ getTotalCells WRITE setTotalCells NOTIFY sizeChanged)
     Q_PROPERTY (int currentCells READ getCurrentCells WRITE setCurrentCells NOTIFY cellsChanged)
     Q_PROPERTY (int totalPages READ getTotalPages WRITE setTotalPages NOTIFY totalPagesChanged)
-    Q_PROPERTY(QDeclarativeListProperty<QString> alphabet READ getAlphabet  )
+
 
 
 public:
@@ -89,7 +89,7 @@ public slots:
         qDebug() << "Model Item Destroyed Signal emitted.";
     }
 
-    QDeclarativeListProperty<QString> getAlphabet() { return QDeclarativeListProperty<QString>(this,m_sortList); }
+
 
     int setSection(QString s){
 

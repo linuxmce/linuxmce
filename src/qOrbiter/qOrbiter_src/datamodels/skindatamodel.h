@@ -39,7 +39,11 @@ public:
     void addSkin(QString url);
     int *default_ea;
 
+#ifndef QT5
     QDeclarativeComponent *current_style;
+#else
+  QQmlComponent * current_style;
+#endif
     QObject *currentItem;
     QUrl m_baseUrl;
     QUrl m_entryUrl;
