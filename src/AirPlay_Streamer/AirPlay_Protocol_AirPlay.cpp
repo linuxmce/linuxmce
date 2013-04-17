@@ -681,11 +681,11 @@ namespace DCE
 	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_Protocol_AirPlay::AirPlayTCPClient::ProcessRequest(): got GET request %s", uri.c_str());
 	    
 	    float fPosition = m_pAirPlay_Protocol_AirPlay->GetPosition();
-	    int fDuration = 3505;
+	    int fDuration = 0;
 
 	    char cResponseBody[256];
 	    stringstream ssResponseBody;
-	    sprintf(cResponseBody,"duration: %d\r\nposition: %f",fDuration,fPosition);
+	    sprintf(cResponseBody,"duration: %d\r\nposition: %f\r\n",fDuration,fPosition);
 	    
 	    ssResponseBody << cResponseBody;
 	    responseBody = ssResponseBody.str();
