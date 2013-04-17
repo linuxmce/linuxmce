@@ -30,8 +30,7 @@ sources +=
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
 
-whattodo:
-	@echo "type 'make bin', 'make so' or 'make all'"
+whattodo: bin
 
 all: bin so
 

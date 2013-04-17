@@ -41,8 +41,7 @@ using namespace std;
 
 extern "C" void *start( void* );
 void *start( void *p ) {
-	agocontrol_Bridge::agocontrol_Bridge *base;
-	base = static_cast<agocontrol_Bridge::agocontrol_Bridge*>(p);
+	agocontrol_Bridge *base = static_cast<agocontrol_Bridge*>(p);
 	base->receiveFunction();
 	return NULL;
 }
