@@ -170,8 +170,6 @@ namespace DCE
     libvlc_media_player_set_xwindow (m_pMp, m_Window);
     SetDuration(libvlc_media_player_get_length(m_pMp));
     libvlc_media_player_play(m_pMp);
-    libvlc_video_set_marquee_int(m_pMp, 0, 0);
-    libvlc_video_set_marquee_string(m_pMp, 1, "Testaroo");
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"media player is seekable? %d",libvlc_media_player_is_seekable(m_pMp));
     SetPlaying(true);
   }
