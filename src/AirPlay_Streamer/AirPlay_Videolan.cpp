@@ -45,7 +45,9 @@ namespace DCE
 	return false;
       }
 
-    m_pInst = libvlc_new(0, NULL);
+    static const char* const args[] = {"--no-video-title-show"};
+
+    m_pInst = libvlc_new(sizeof args / sizeof *args, args);
 
     if (!m_pInst)
       {
@@ -162,13 +164,14 @@ namespace DCE
   {
     libvlc_time_t iLength=0;
     libvlc_media_player_stop(m_pMp);
-    libvlc_video_set_marquee_int(m_pMp, 0, 0);
     libvlc_media_t *m = libvlc_media_new_location (m_pInst, sMediaURL.c_str());
     libvlc_media_player_set_media(m_pMp, m);
     libvlc_media_release(m);
     libvlc_media_player_set_xwindow (m_pMp, m_Window);
     SetDuration(libvlc_media_player_get_length(m_pMp));
     libvlc_media_player_play(m_pMp);
+    libvlc_video_set_marquee_int(m_pMp, 0, 0);
+    libvlc_video_set_marquee_string(m_pMp, 1, "Testaroo");
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"media player is seekable? %d",libvlc_media_player_is_seekable(m_pMp));
     SetPlaying(true);
   }
