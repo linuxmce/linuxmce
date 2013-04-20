@@ -9,8 +9,8 @@ set -e
 #set -x
 
 # set NUMCORES=X in /etc/lmce-build/builder.custom.conf to enable multi-job builds
-if [ ! "$NUM_CORES" ] ; then NUM_CORES=1 ; fi
-if [ "$NUM_CORES" -gt 1 ] ; then make_jobs="-j $NUM_CORES"; fi
+make_jobs=""
+if [ 1 -lt "$NUM_CORES" ] ; then make_jobs="-j $NUM_CORES"; fi
 
 PLUTO_BUILD_CRED=""
 if [ "$sql_build_host" ] ; then PLUTO_BUILD_CRED="$PLUTO_BUILD_CRED -h $sql_build_host"; fi

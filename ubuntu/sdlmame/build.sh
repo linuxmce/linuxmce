@@ -4,6 +4,7 @@ ARCH=`uname -m`
 
 . /etc/lmce-build/builder.conf
 
+make_jobs=""
 [[ 1 -lt "$NUM_CORES" ]]  && make_jobs="-j $NUM_CORES"
 
 MKOPTS="PTR64=0"
