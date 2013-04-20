@@ -25,7 +25,7 @@ int DCE::AirPlay_Protocol_AirPlay::m_iIsPlaying = 0;
 "<plist version=\"1.0\">\r\n"\
 "<dict>\r\n"\
 "<key>deviceid</key>\r\n"\
-"<string>11:22:33:44:55:66</string>\r\n"\
+"<string>%s</string>\r\n"\
 "<key>features</key>\r\n"\
 "<integer>119</integer>\r\n"\
 "<key>model</key>\r\n"\
@@ -57,6 +57,28 @@ void * StartAirPlayThread(void * Arg)
   return NULL;
 }
 
+/* Format a string */
+string string_format(const std::string fmt, ...) {
+  int size = 100;
+  std::string str;
+  va_list ap;
+  while (1) {
+    str.resize(size);
+    va_start(ap, fmt);
+    int n = vsnprintf((char *)str.c_str(), size, fmt.c_str(), ap);
+    va_end(ap);
+    if (n > -1 && n < size) {
+      str.resize(n);
+      return str;
+    }
+    if (n > -1)
+      size = n + 1;
+    else
+      size *= 2;
+  }
+  return str;
+}
+
 namespace DCE
 {
 
@@ -66,9 +88,7 @@ namespace DCE
     gAirPlay_StreamerI = pAirPlay_Streamer;
     Port_set(7000);
     ServiceType_set("_airplay._tcp");
-    char tmp[100];
-    sprintf(tmp, "deviceid=%s",pAirPlay_Streamer->m_sCurrentMacAddress.c_str());
-    string tmpStr = tmp;
+    string tmpStr = string_format("deviceid=%s",pAirPlay_Streamer->m_sCurrentMacAddress.c_str()); 
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ADDR IS %s",tmpStr.c_str());
     TXTRecord_Add(tmpStr);
     TXTRecord_Add("features=0x77");
@@ -359,13 +379,10 @@ namespace DCE
 	
 	// Prepare the response
 	string response;
-	stringstream ssResponse;
-	char tmp[100];
 	const time_t ltime = time(NULL);
 	char *date = asctime(gmtime(&ltime)); //Fri, 17 Dec 2010 11:18:01 GMT;
 	date[strlen(date) - 1] = '\0'; // remove \n
-	sprintf(tmp,"HTTP/1.1 %d %s\nDate: %s\r\n", status, statusMsg.c_str(), date);
-	response = tmp;
+	response = string_format("HTTP/1.1 %d %s\nDate: %s\r\n", status, statusMsg.c_str(), date);
 	if (responseHeader.size() > 0)
 	  {
 	    response += responseHeader;
@@ -373,10 +390,7 @@ namespace DCE
 	
 	if (responseBody.size() > 0)
 	  {
-	    char tmp2[100];
-	    stringstream ssResponse2;
-	    sprintf(tmp2,"%sContent-Length: %d\r\n",response.c_str(), responseBody.size());
-	    response = tmp2;
+	    response = string_format("%sContent-Length: %d\r\n",response.c_str(), responseBody.size());
 	  }
 	response += "\r\n";
 	
@@ -397,10 +411,7 @@ namespace DCE
 	if (reverseHeader.size() > 0 && reverseSockets.find(sessionId) != reverseSockets.end())
 	  {
 	    //search the reverse socket to this sessionid
-	    char tmp3[100];
-	    stringstream ssResponse3;
-	    sprintf(tmp3,"POST /event HTTP/1.1\r\n");
-	    response = tmp3;
+	    response = string_format("POST /event HTTP/1.1\r\n");
 	    reverseSocket = reverseSockets[sessionId]; //that is our reverse socket
 	    response += reverseHeader;
 	  }
@@ -415,8 +426,6 @@ namespace DCE
 	  {
 	    send(reverseSocket, response.c_str(), response.size(), 0);//send the event status on the eventSocket
 	  }
-	
-	cout << endl << "Response is: " << endl << response << endl;
 
 	// We need a new parser...
 	delete m_pHttpParser;
@@ -740,32 +749,25 @@ namespace DCE
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_Protocol_AirPlay::AirPlayTCPClient::ProcessRequest(): got request %s", uri.c_str());
       if (m_pHttpParser->getContentLength() > 0)
 	{
-	  /* XFILE::CFile tmpFile;
-	  CStdString tmpFileName = "special://temp/airplay_photo.jpg";
-	  
+	  string sTmpFileName = "/tmp/airplay_photo.jpg";
 	  if( m_pHttpParser->getContentLength() > 3 &&
 	      m_pHttpParser->getBody()[1] == 'P' &&
 	      m_pHttpParser->getBody()[2] == 'N' &&
 	      m_pHttpParser->getBody()[3] == 'G')
 	    {
-	      tmpFileName = "special://temp/airplay_photo.png";
+	      sTmpFileName = "/tmp/airplay_photo.png";
 	    }
-	  
-	  if (tmpFile.OpenForWrite(tmpFileName, true))
+
+	  if (FileUtils::WriteBufferIntoFile(sTmpFileName, 
+					     m_pHttpParser->getBody(),
+					     m_pHttpParser->getContentLength()))
 	    {
-	      int writtenBytes=0;
-	      writtenBytes = tmpFile.Write(m_pHttpParser->getBody(), m_pHttpParser->getContentLength());
-	      tmpFile.Close();
-	      
-	      if (writtenBytes > 0 && (unsigned int)writtenBytes == m_pHttpParser->getContentLength())
-		{
-		  CApplicationMessenger::Get().PictureShow(tmpFileName);
-		}
-	      else
-		{
-		  CLog::Log(LOGERROR,"AirPlayServer: Error writing tmpFile.");
-		}
-	    } */
+	      // File written, send to be displayed
+	      gAirPlay_StreamerI->StartAirPlayPhotos(sTmpFileName);
+	    }
+	    
+	  
+	  
 	}
     }
     
@@ -819,7 +821,13 @@ namespace DCE
   else if (uri == "/server-info")
   {
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_Protocol_AirPlay::AirPlayTCPClient::Process_Request(): got request %s", uri.c_str());
-    responseBody = SERVER_INFO;
+    char *cResponseBody;
+    cResponseBody = (char *)malloc(1024);
+    sprintf(cResponseBody, SERVER_INFO, m_pAirPlay_Protocol_AirPlay->m_pAirPlay_Streamer->m_sCurrentMacAddress.c_str());
+    stringstream ssResponseBody;
+    ssResponseBody << cResponseBody;
+    responseBody = ssResponseBody.str();
+    free(cResponseBody);
     responseHeader = "Content-Type: text/x-apple-plist+xml\r\n";
   }
 

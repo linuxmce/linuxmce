@@ -164,6 +164,10 @@ namespace DCE
   {
     libvlc_time_t iLength=0;
     libvlc_media_player_stop(m_pMp);
+    if (sMediaURL.find("://") == string::npos)
+      {
+	sMediaURL = "file://" + sMediaURL;
+      }
     libvlc_media_t *m = libvlc_media_new_location (m_pInst, sMediaURL.c_str());
     libvlc_media_player_set_media(m_pMp, m);
     libvlc_media_release(m);

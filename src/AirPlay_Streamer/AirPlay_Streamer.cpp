@@ -190,6 +190,25 @@ void AirPlay_Streamer::StartAirTunesPlayback()
   
 }
 
+void AirPlay_Streamer::StartAirPlayPhotos(string sLocation)
+{
+  CMD_MH_Play_Media CMD_MH_Play_Media(m_pData->m_dwPK_Device_ControlledVia,
+				      m_pDevice_Media_PlugIn->m_dwPK_Device,
+				      0,
+				      sLocation,
+				      MEDIATYPE_lmce_AirPlay_video_CONST,
+				      DEVICETEMPLATE_AirPlay_Streamer_CONST,
+				      "",
+				      false,
+				      0,
+				      0,
+				      0,
+				      0);
+  SendCommand(CMD_MH_Play_Media);
+  
+}
+
+
 void AirPlay_Streamer::StopAirTunesPlayback()
 {
   CMD_MH_Stop_Media_Cat CMD_MH_Stop_Media_Cat (m_dwPK_Device,
@@ -209,6 +228,34 @@ void AirPlay_Streamer::StopAirPlayPlayback()
 					       false);
   SendCommand(CMD_MH_Stop_Media_Cat);
 }
+
+void AirPlay_Streamer::StopAirPlayPhotos()
+{
+  CMD_MH_Stop_Media_Cat CMD_MH_Stop_Media_Cat (m_dwPK_Device,
+					       DEVICECATEGORY_Media_Plugins_CONST,
+					       false, BL_SameHouse,
+					       m_dwPK_Device, 0, 0, "",
+					       false);
+  SendCommand(CMD_MH_Stop_Media_Cat);
+
+  if (FileUtils::FileExists("/tmp/airplay_photo.jpg"))
+    {
+      if (!FileUtils::DelFile("/tmp/airplay_photo.jpg"))
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not delete /tmp/airplay_photo.jpg");
+	}
+    }
+
+  if (FileUtils::FileExists("/tmp/airplay_photo.png"))
+    {
+      if (!FileUtils::DelFile("/tmp/airplay_photo.png"))
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not delete /tmp/airplay_photo.png");
+	}
+    }
+
+}
+
 
 
 void AirPlay_Streamer::StartAirPlayPlayback(string sLocation, float fPosition)

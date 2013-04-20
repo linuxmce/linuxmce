@@ -58,6 +58,8 @@ public:
 		virtual void CreateChildren();
 		string DeviceNameFromMacAddress(string sMacAddress);
 		void StartAirTunesPlayback();
+		void StartAirPlayPhotos(string sLocation);
+		void StopAirPlayPhotos();
 		void StartAirPlayPlayback(string sLocation, float fPosition);
 		void StopAirTunesPlayback();
 		void StopAirPlayPlayback();
