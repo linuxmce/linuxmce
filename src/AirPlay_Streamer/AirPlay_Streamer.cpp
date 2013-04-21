@@ -174,20 +174,24 @@ void AirPlay_Streamer::CreateChildren()
 
 void AirPlay_Streamer::StartAirTunesPlayback()
 {
-  CMD_MH_Play_Media CMD_MH_Play_Media(m_pData->m_dwPK_Device_ControlledVia,
-				      m_pDevice_Media_PlugIn->m_dwPK_Device,
-				      0,
-				      "",
-				      MEDIATYPE_lmce_Airplay_audio_CONST,
-				      DEVICETEMPLATE_AirPlay_Streamer_CONST,
-				      "",
-				      false,
-				      0,
-				      0,
-				      0,
-				      0);
-  SendCommand(CMD_MH_Play_Media);
-  
+  // This is to avoid the weird protocol inconistency on iOS devices where a dummy AirTunes
+  // stream is started, and ultimately not used, when AirPlay is requested. wtf?
+  if (!m_bIsPlaying) // seriously, wtf?
+    {
+      CMD_MH_Play_Media CMD_MH_Play_Media(m_pData->m_dwPK_Device_ControlledVia,
+					  m_pDevice_Media_PlugIn->m_dwPK_Device,
+					  0,
+					  "",
+					  MEDIATYPE_lmce_Airplay_audio_CONST,
+					  DEVICETEMPLATE_AirPlay_Streamer_CONST,
+					  "",
+					  false,
+					  0,
+					  0,
+					  0,
+					  0);
+      SendCommand(CMD_MH_Play_Media);
+    }
 }
 
 void AirPlay_Streamer::StartAirPlayPhotos(string sLocation)
@@ -211,12 +215,15 @@ void AirPlay_Streamer::StartAirPlayPhotos(string sLocation)
 
 void AirPlay_Streamer::StopAirTunesPlayback()
 {
-  CMD_MH_Stop_Media_Cat CMD_MH_Stop_Media_Cat (m_dwPK_Device,
-					       DEVICECATEGORY_Media_Plugins_CONST,
-					       false, BL_SameHouse,
-					       m_dwPK_Device, 0, 0, "",
-					       false);
-  SendCommand(CMD_MH_Stop_Media_Cat);
+  if (!m_bIsPlaying)
+    {
+      CMD_MH_Stop_Media_Cat CMD_MH_Stop_Media_Cat (m_dwPK_Device,
+						   DEVICECATEGORY_Media_Plugins_CONST,
+						   false, BL_SameHouse,
+						   m_dwPK_Device, 0, 0, "",
+						   false);
+      SendCommand(CMD_MH_Stop_Media_Cat);
+    }
 }
 
 void AirPlay_Streamer::StopAirPlayPlayback()
@@ -227,6 +234,7 @@ void AirPlay_Streamer::StopAirPlayPlayback()
 					       m_dwPK_Device, 0, 0, "",
 					       false);
   SendCommand(CMD_MH_Stop_Media_Cat);
+  m_bIsPlaying=false;
 }
 
 void AirPlay_Streamer::StopAirPlayPhotos()
@@ -283,7 +291,7 @@ void AirPlay_Streamer::StartAirPlayPlayback(string sLocation, float fPosition)
 				      0,
 				      0);
   SendCommand(CMD_MH_Play_Media);
-  
+  m_bIsPlaying=true;
 }
 
 /**

@@ -233,7 +233,8 @@ namespace DCE
     delete device_linuxmce->pipe;
     return 0;
 #else
-    gAirPlay_Streamer->StopAirTunesPlayback();
+    if (!gAirPlay_Streamer->m_bIsPlaying)
+      gAirPlay_Streamer->StopAirTunesPlayback();
     return ::ao_close(device);
 #endif
   }

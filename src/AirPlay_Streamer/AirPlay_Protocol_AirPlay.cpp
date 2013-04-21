@@ -48,6 +48,54 @@ int DCE::AirPlay_Protocol_AirPlay::m_iIsPlaying = 0;
 "</dict>\r\n"\
 "</plist>\r\n"\
 
+#define PLAYBACK_INFO  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"\
+"<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\r\n"\
+"<plist version=\"1.0\">\r\n"\
+"<dict>\r\n"\
+"<key>duration</key>\r\n"\
+"<real>%f</real>\r\n"\
+"<key>loadedTimeRanges</key>\r\n"\
+"<array>\r\n"\
+"\t\t<dict>\r\n"\
+"\t\t\t<key>duration</key>\r\n"\
+"\t\t\t<real>%f</real>\r\n"\
+"\t\t\t<key>start</key>\r\n"\
+"\t\t\t<real>0.0</real>\r\n"\
+"\t\t</dict>\r\n"\
+"</array>\r\n"\
+"<key>playbackBufferEmpty</key>\r\n"\
+"<true/>\r\n"\
+"<key>playbackBufferFull</key>\r\n"\
+"<false/>\r\n"\
+"<key>playbackLikelyToKeepUp</key>\r\n"\
+"<true/>\r\n"\
+"<key>position</key>\r\n"\
+"<real>%f</real>\r\n"\
+"<key>rate</key>\r\n"\
+"<real>%d</real>\r\n"\
+"<key>readyToPlay</key>\r\n"\
+"<true/>\r\n"\
+"<key>seekableTimeRanges</key>\r\n"\
+"<array>\r\n"\
+"\t\t<dict>\r\n"\
+"\t\t\t<key>duration</key>\r\n"\
+"\t\t\t<real>%f</real>\r\n"\
+"\t\t\t<key>start</key>\r\n"\
+"\t\t\t<real>0.0</real>\r\n"\
+"\t\t</dict>\r\n"\
+"</array>\r\n"\
+"</dict>\r\n"\
+"</plist>\r\n"
+
+#define PLAYBACK_INFO_NOT_READY  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"\
+"<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\r\n"\
+"<plist version=\"1.0\">\r\n"\
+"<dict>\r\n"\
+"<key>readyToPlay</key>\r\n"\
+"<false/>\r\n"\
+"</dict>\r\n"\
+"</plist>\r\n"
+
 /** Static method for pthread entry. */
 void * StartAirPlayThread(void * Arg)
 {
@@ -773,12 +821,24 @@ namespace DCE
     
   else if (uri == "/playback-info")
     {
-      float position = 0.0f;
-      float duration = 0.0f;
+      float position = m_pAirPlay_Protocol_AirPlay->GetPosition();
+      float duration = m_pAirPlay_Protocol_AirPlay->GetDuration();
       float cachePosition = 0.0f;
       bool playing = false;
 
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_Protocol_AirPlay::AirPlayTCPClient::ProcessRequest: got request %s", uri.c_str());
+      
+      responseBody = string_format(PLAYBACK_INFO, duration, cachePosition, position, (m_pAirPlay_Protocol_AirPlay->m_pAirPlay_Streamer->m_bIsPlaying ? 1 : 0), duration);
+      responseHeader = "Content-Type: text/x-apple-plist+xml\r\n";
+
+      if (m_pAirPlay_Protocol_AirPlay->m_pAirPlay_Streamer->m_bIsPlaying)
+	{
+	  ComposeReverseEvent(reverseHeader, reverseBody, sessionId, EVENT_PLAYING);
+	}
+      else
+	{
+	  ComposeReverseEvent(reverseHeader, reverseBody, sessionId, EVENT_PAUSED);
+	}
       
       //      fPosition = m_pAirPlay_Protocol_AirPlay->GetPosition();
       //fDuration = 3505.00;
