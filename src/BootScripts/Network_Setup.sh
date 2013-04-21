@@ -629,12 +629,12 @@ if [ -n "$IntIf" ] && [ -z "$( echo $IntIf | grep : )"  ] && [ -e /etc/default/l
 fi
 
 ## Bind afpd to local interface only
-if ! BlacklistConfFiles '/etc/netatalk/afpd.conf' ;then
-	if !(grep -q "^-ipaddr" "/etc/netatalk/afpd.conf") ;then
-		echo "-ipaddr $IntIP" >> /etc/netatalk/afpd.conf
-	fi
-	service netatalk restart
-fi
+#if ! BlacklistConfFiles '/etc/netatalk/afpd.conf' ;then
+#	if !(grep -q "^-ipaddr" "/etc/netatalk/afpd.conf") ;then
+#		echo "-ipaddr $IntIP" >> /etc/netatalk/afpd.conf
+#	fi
+#	service netatalk restart
+#fi
 
 ## Regenerate snakeoil certificates in case host or domain name was changed
 sudo make-ssl-cert generate-default-snakeoil --force-overwrite
