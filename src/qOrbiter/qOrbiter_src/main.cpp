@@ -385,7 +385,7 @@ int main(int argc, char* argv[])
 #endif
 
         TimeCodeManager *timecode = new TimeCodeManager();
-        orbiterWin.mainView.rootContext()->setContextProperty("logger", &localLogger);
+      //  orbiterWin.mainView.rootContext()->setContextProperty("logger", &localLogger);
         orbiterWin.mainView.rootContext()->setContextProperty("dceTimecode", timecode);
         orbiterWin.mainView.rootContext()->setContextProperty("dataModel", mediaModel);
         orbiterWin.mainView.rootContext()->setContextProperty("mediaplaylist", storedVideoPlaylist);

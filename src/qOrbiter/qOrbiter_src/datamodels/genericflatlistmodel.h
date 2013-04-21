@@ -4,7 +4,11 @@
 
 #include <QAbstractListModel>
 #include <datamodels/genericmodelitem.h>
+#ifdef QT5
+#include <QtWidgets/QApplication>
+#else
 #include <QApplication>
+#endif
 #include <QHash>
 #include <QList>
 #include <QVariant>

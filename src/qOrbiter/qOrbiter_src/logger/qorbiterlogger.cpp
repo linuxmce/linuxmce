@@ -2,7 +2,11 @@
 #include <QDebug>
 #include <QTime>
 #include <QDir>
+#ifdef QT5
+#include <QtWidgets/QApplication>
+#else
 #include <QApplication>
+#endif
 
 QOrbiterLogger::QOrbiterLogger(QObject *parent) :
     QObject(parent)

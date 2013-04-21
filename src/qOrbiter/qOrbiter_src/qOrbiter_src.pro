@@ -48,6 +48,7 @@ contains(QT_VERSION,5.*.*){
         message("$$QT_VERSION Core")
         DEFINES+=QT5
         DEFINES+=GLENABLED
+        QT+= opengl
 }
 
 
@@ -92,17 +93,19 @@ linux-g++{
         contains(QT_VERSION,4.*.*){
                 folder_01.source = qml/desktop
                 folder_01.target = $$DESTDIR/qml
+                 plugins_folder.source = imports/
+                 plugins_folder.target = $$DESTDIR
         }
         else:contains(QT_VERSION,5.1.*){
                 folder_01.source = qml/rpi
                 folder_01.target = $$DESTDIR/qml
+                 plugins_folder.source = imports/
         }
         folder_03.source = config.xml
         folder_03.target = $$DESTDIR
         DEFINES += for_desktop
 
-        plugins_folder.source = imports/
-        plugins_folder.target = $$DESTDIR
+
 
         DEPLOYMENTFOLDERS+= plugins_folder
         DEPLOYMENTFOLDERS += folder_01  folder_03
@@ -288,13 +291,24 @@ QT5{
 
 #turtlenecks and such
 macx{
+        contains(QT_VERSION,4.*.*){
         QT += xml
         QT += network
+        }
+
 }
 
+
 !macx{
+        contains(QT_VERSION,4.*.*){
         LIBS += -lQtXml
-	LIBS += -lQtNetwork
+        LIBS += -lQtNetwork
+        }
+        else:contains(QT_VERSION,5.*.*){
+        QT += xml
+        QT += network
+        }
+
 }
 
 #windows builds require a special pthreads.

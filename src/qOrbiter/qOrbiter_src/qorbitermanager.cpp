@@ -17,7 +17,7 @@
 
 #include <QtGlobal>
 #include <QtXml/QtXml>
-#if (QT5)
+#ifdef QT5
 #include <QtCore/QFile>
 #include <QtQml/QtQml>
 #include <QtCore/QTimer>
@@ -25,6 +25,7 @@
 #include <QtWidgets/QApplication>
 #include <QtQml/QQmlContext>
 #include <QtQuick/QQuickView>
+#include <QtXml/QDomDocument>
 #else
 #include <QtDeclarative/QDeclarativeProperty>
 #include <QFile>
@@ -859,10 +860,10 @@ void qorbiterManager::swapSkins(QString incSkin)
     {
 
         emit skinMessage("Setting Skin to:" +incSkin);
-        qDebug()<<"Break";
         emit skinMessage("Got it from the model : " + tskinModel->m_baseUrl.toString());
         setImagePath(tskinModel->m_baseUrl.toString()+"/"+incSkin+"/img/");
         //load the actual skin entry point
+        qDebug() << "skin break";;
         currentSkin = incSkin;
         qorbiterUIwin->engine()->rootContext()->setContextProperty("skinStyle", tskinModel->currentItem);
 #if (QT5)
@@ -1226,7 +1227,7 @@ void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
  */
 bool qorbiterManager::readLocalConfig()
 {
-
+    qDebug() << " config Break";
     QDomDocument localConfig;
 #ifdef Q_OS_MAC
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
@@ -1274,10 +1275,13 @@ bool qorbiterManager::readLocalConfig()
     else
     {
         setDceResponse("Reading Local Config");
-        QByteArray tDoc = localConfigFile.readAll();
-        localConfigFile.close();
-        if (!localConfig.setContent( tDoc))
+        QByteArray tDoc;
+        tDoc = localConfigFile.readAll();
+      //  localConfigFile.close();
+
+        if (!localConfig.setContent(tDoc))
         {
+
             setDceResponse("Could not parse config!");
             return false;
         }

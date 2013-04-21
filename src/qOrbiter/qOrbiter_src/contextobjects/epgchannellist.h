@@ -29,7 +29,7 @@
 #include <playlists/epgitemclass.h>
 #include <qorbitermanager.h>
 #ifdef QT5
-#include <QApplication>
+#include <QtWidgets/QApplication>
 #endif
 
 class qorbiterManager;
