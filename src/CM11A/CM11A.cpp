@@ -74,9 +74,6 @@ bool CM11A::Connect(int iPK_DeviceTemplate) {
 	}
 	
 	string sPort = TranslateSerialUSB(DATA_Get_COM_Port_on_PC());
-	if(sPort.find("/dev/") == 0) {
-		sPort.erase(0, strlen("/dev/"));
-	}
 	
 	if(sPort.length() > 0) {
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Using serial port: %s.", sPort.c_str());

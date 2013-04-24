@@ -41,7 +41,7 @@
 
 using namespace DCE;
 
-#define CM11A_PORT					"ttyS0"
+#define CM11A_PORT					"/dev/ttyS0"
 #define CM11A_BPS					4800
 
 #define CM11A_ERROR_SLEEP			5100
