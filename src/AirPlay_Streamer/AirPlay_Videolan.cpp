@@ -234,4 +234,42 @@ namespace DCE
     libvlc_media_player_set_time(m_pMp,iTime);
   }
 
+  void AirPlay_Videolan::Pause()
+  {
+    if (m_pMp)
+      libvlc_media_player_set_pause(m_pMp, 1);
+  }
+  
+  void AirPlay_Videolan::Restart()
+  {
+    if (m_pMp)
+      libvlc_media_player_set_pause(m_pMp, 0);
+  }
+
+  void AirPlay_Videolan::SetRate(float fMediaPlayBackSpeed)
+  {
+    if (m_pMp)
+      libvlc_media_player_set_rate(m_pMp, fMediaPlayBackSpeed);
+  }
+
+  void AirPlay_Videolan::JumpFwd(int iMult)
+  {
+    libvlc_time_t iTime;
+
+    if (!m_pMp)
+      return;
+
+    libvlc_media_player_set_time(m_pMp, (m_fPosition * 1000) + (iMult * 30 * 1000));    
+  }
+  
+  void AirPlay_Videolan::JumpBack(int iMult)
+  {
+    libvlc_time_t iTime;
+    
+    if (!m_pMp)
+      return;
+    
+    libvlc_media_player_set_time(m_pMp, (m_fPosition * 1000) - (iMult * 30 * 1000));
+  }
+
 }

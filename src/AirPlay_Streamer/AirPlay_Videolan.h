@@ -47,6 +47,11 @@ namespace DCE
     bool IsPlaying();
     void SetPlaying(bool bIsPlaying);
     void UpdateStatus();
+    void Pause();
+    void Restart();
+    void SetRate(float fMediaPlayBackSpeed);
+    void JumpFwd(int iMult);
+    void JumpBack(int iMult);
   };
 
 }

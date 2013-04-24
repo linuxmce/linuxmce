@@ -456,6 +456,20 @@ void AirPlay_Streamer::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message
 {
 	cout << "Need to implement command #39 - Pause Media" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+	
+	if (m_iPK_MediaType == 60)
+	  {
+	    return; // ignore
+	  }
+	
+	AirPlay_Protocol_AirPlay* pAirPlay_Protocol_AirPlay = (AirPlay_Protocol_AirPlay *)m_pAirPlay_Service->m_pAirPlay_Protocol_Factory->getAirPlayProtocolForMediaType(m_iPK_MediaType);
+	
+	if (!pAirPlay_Protocol_AirPlay)
+	  {
+	    return;
+	  }
+	SetPause(true);
+	pAirPlay_Protocol_AirPlay->m_pAirPlay_Videolan->Pause();
 }
 
 //<-dceag-c40-b->
@@ -470,6 +484,21 @@ void AirPlay_Streamer::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Messa
 {
 	cout << "Need to implement command #40 - Restart Media" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+	if (m_iPK_MediaType == 60)
+	  {
+	    return; // ignore
+	  }
+	
+	AirPlay_Protocol_AirPlay* pAirPlay_Protocol_AirPlay = (AirPlay_Protocol_AirPlay *)m_pAirPlay_Service->m_pAirPlay_Protocol_Factory->getAirPlayProtocolForMediaType(m_iPK_MediaType);
+	
+	if (!pAirPlay_Protocol_AirPlay)
+	  {
+	    return;
+	  }
+	SetPause(false);
+	pAirPlay_Protocol_AirPlay->m_pAirPlay_Videolan->Restart();
+
 }
 
 //<-dceag-c41-b->
@@ -490,6 +519,24 @@ void AirPlay_Streamer::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybac
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	cout << "Parm #43 - MediaPlaybackSpeed=" << iMediaPlaybackSpeed << endl;
 	cout << "Parm #220 - Report=" << bReport << endl;
+
+	float fMediaPlayBackSpeed = iMediaPlaybackSpeed / 1000;
+
+	if (m_iPK_MediaType == 60)
+	  {
+	    return; // ignore
+	  }
+	
+	AirPlay_Protocol_AirPlay* pAirPlay_Protocol_AirPlay = (AirPlay_Protocol_AirPlay *)m_pAirPlay_Service->m_pAirPlay_Protocol_Factory->getAirPlayProtocolForMediaType(m_iPK_MediaType);
+	
+	if (!pAirPlay_Protocol_AirPlay)
+	  {
+	    return;
+	  }
+	SetPause(false);
+	pAirPlay_Protocol_AirPlay->m_pAirPlay_Videolan->Restart();
+	pAirPlay_Protocol_AirPlay->m_pAirPlay_Videolan->SetRate(fMediaPlayBackSpeed);
+
 }
 
 //<-dceag-c42-b->
@@ -524,6 +571,39 @@ void AirPlay_Streamer::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int
 	cout << "Need to implement command #65 - Jump Position In Playlist" << endl;
 	cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+	
+	if (m_iPK_MediaType == 60)
+	  {
+	    return; // ignore
+	  }
+	
+	AirPlay_Protocol_AirPlay* pAirPlay_Protocol_AirPlay = (AirPlay_Protocol_AirPlay *)m_pAirPlay_Service->m_pAirPlay_Protocol_Factory->getAirPlayProtocolForMediaType(m_iPK_MediaType);
+	
+	if (!pAirPlay_Protocol_AirPlay)
+	  {
+	    return;
+	  }
+	SetPause(false);
+	pAirPlay_Protocol_AirPlay->m_pAirPlay_Videolan->Restart();
+	if (sValue_To_Assign[0] == '+')
+	  {
+	    string sMult = sValue_To_Assign.substr(1,string::npos);
+	    int iMult = atoi(sMult.c_str());
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Jumping Forward %d*30 secs.",iMult);
+	    pAirPlay_Protocol_AirPlay->m_pAirPlay_Videolan->JumpFwd(iMult);
+	  }
+	else if (sValue_To_Assign[0] == '-')
+	  {
+	    string sMult = sValue_To_Assign.substr(1,string::npos);
+	    int iMult = atoi(sMult.c_str());
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Jumping backward %d*30 secs.",iMult);
+	    pAirPlay_Protocol_AirPlay->m_pAirPlay_Videolan->JumpBack(iMult);
+	  }
+	else 
+	  {
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Absolute Jump to Position in Stream not supported for AirPlay Streams.");
+	  }
+
 }
 
 //<-dceag-c126-b->
