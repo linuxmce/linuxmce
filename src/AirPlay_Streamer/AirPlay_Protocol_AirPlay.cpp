@@ -523,7 +523,7 @@ namespace DCE
 	  }
 	reverseHeader = "Content-Type: text/x-apple-plist+xml\r\n";
 	char tmp1[1000];
-	sprintf(tmp1,"%sContent-Length: %d",reverseHeader.c_str(),reverseBody.size());
+	sprintf(tmp1,"%sContent-Length: %d\r\n",reverseHeader.c_str(),reverseBody.size());
 	reverseHeader = tmp1;
 	char tmp2[1000];
 	sprintf(tmp2,"%sx-apple-session-id: %s\r\n",reverseHeader.c_str(),sessionId.c_str());
