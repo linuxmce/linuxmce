@@ -25,7 +25,7 @@ SendToDCE()
 ReplyToDCE()
 {
 	local String0="$1" OutVars="$2"
-	builtin printf "%s\n%s\n" "$String0" "$OutVars"
+	builtin printf "%s\n%s\n" "$(ParmEncode "$String0")" "$OutVars"
 }
 
 ## Device communication functions
@@ -130,9 +130,10 @@ BuildCommand()
 ## Utility functions
 Log()
 {
-	builtin echo "$(date -R)" "$@" >&2
-	if [[ -n "$LogFile" ]]; then
-		builtin echo "$(date -R)" "$@" >>"$LogFile"
+	local LogMsg="$(date --rfc-3339=ns) $*"
+	builtin echo "$LogMsg" >&2
+	if [[ -n "$Framework_LogFile" ]]; then
+		builtin echo "$LogMsg" >&$Framework_LogFD
 	fi
 }
 
@@ -160,7 +161,7 @@ Framework_LoadParms()
 		case "${!i}" in
 			-d) ((i++)); DevNo="${!i}" ;;
 			-r) ((i++)); Router="${!i}" ;;
-			-l) ((i++)); LogFile="${!i}" ;;
+			-l) ((i++)); Framework_LogFile="${!i}"; exec {Framework_LogFD}>>"$Framework_LogFile" ;;
 		esac
 	done
 
@@ -189,7 +190,7 @@ Framework_MainLoop()
 			Command="${!Var}"
 			if [[ -n "$Command" ]]; then
 				Log "fd $FD: command: $Command"
-				eval "$Command"
+				$Command
 			else
 				Log "fd $FD: no command; doing nothing"
 			fi
@@ -293,7 +294,7 @@ Framework_ConnectDevice()
 		;;
 		custom)
 			Log "ConnectDevice: Parameters: Command=$DeviceConnection_Command"
-			socat PTY,link="$Framework_PipeDir/ttyDevice",echo=0,icanon=0,raw "EXEC: $DeviceConnection_Command" &
+			socat PTY,link="$Framework_PipeDir/ttyDevice",echo=0,icanon=0,raw "EXEC:\"$DeviceConnection_Command\"" &
 			Framework_PIDofDevConn=$!
 		;;
 		*)
@@ -324,8 +325,10 @@ Framework_ReadFromDCE()
 	local -a Parms
 	local i line
 	local ParmName ParmValue
-	local CmdReply CmdReplyFile ReplyString ReplyOutVars
+	local CmdReplyFile ReplyString ReplyOutVars
+	local -a CmdReply
 	local ExitCode
+	local Var
 
 	CmdReplyFile="$Framework_PipeDir/CmdReply"
 
@@ -343,10 +346,10 @@ Framework_ReadFromDCE()
 		exit "$ExitCode"
 	else
 		DCECmd=()
-		## This is done this was in order to prevent path expansion on parameters containing stars and other shell pattern characters
-		while read line; do
+		## This is done this way in order to prevent path expansion on parameters containing stars and other shell pattern characters
+		while read -d' ' line; do
 			DCECmd=("${DCECmd[@]}" "$line")
-		done < <(builtin echo "$DCEline" | tr ' ' '\n')
+		done <<<"$DCEline " # NOTE: space at the end required because we told 'read' that the line separator
 		Reply="${DCECmd[0]}"
 		From="${DCECmd[1]}"
 		To="${DCECmd[2]}"
@@ -356,8 +359,12 @@ Framework_ReadFromDCE()
 		for ((i = 5; i < ${#DCECmd[@]}; i++)); do
 			ParmName="${DCECmd[$i]}"
 			((i++))
-			ParmValue=$(ParmDecode "${DCECmd[$i]}")
-			Parms=("${Parms[@]}" "Parm_$ParmName='$ParmValue'")
+			
+			ParmValue="${DCECmd[$i]}"
+			if [[ "$ParmValue" == *%* ]]; then
+				ParmValue=$(ParmDecode "$ParmValue") # this takes almost 100ms
+			fi
+			export -n "Parm_$ParmName=$ParmValue"
 		done
 
 		if [[ "$Type" == 1 ]]; then # this branch is for commands (i.e. not events or other stuff)
@@ -366,19 +373,22 @@ Framework_ReadFromDCE()
 			Framework_DelayDCE=DelayDCE
 			if [[ "$DevNo" != "$To" ]]; then
 				Log "Received DCE command for child $To with parms ${Parms[*]}"
-				eval "${Parms[@]}" ReceivedCommandForChild "$From" "$To" "$Type" "$Cmd" >"$CmdReplyFile"
+				ReceivedCommandForChild "$From" "$To" "$Type" "$Cmd" >"$CmdReplyFile"
 			elif declare -F "Cmd_$Cmd" &>/dev/null; then
 				Log "Calling function for DCE command $Cmd with parms ${Parms[*]}"
-				eval "${Parms[@]}" "Cmd_$Cmd" "$From" "$To" >"$CmdReplyFile"
+				"Cmd_$Cmd" "$From" "$To" >"$CmdReplyFile"
 			else
 				Log "Received unknown DCE command $Cmd with parms ${Parms[*]}"
-				eval "${Parms[@]}" ReceivedUnknownCommand "$From" "$To" "$Type" "$Cmd" >"$CmdReplyFile"
+				ReceivedUnknownCommand "$From" "$To" "$Type" "$Cmd" >"$CmdReplyFile"
 			fi
-			CmdReply=$(<"$CmdReplyFile")
+			for i in 0 1; do
+				read line
+				CmdReply[$i]="$line"
+			done <"$CmdReplyFile"
 			Framework_DelayDCE=DontDelayDCE
 
-			ReplyString=$(builtin echo "$CmdReply" | awk 'NR == 1')
-			ReplyOutVars=$(builtin echo "$CmdReply" | awk 'NR == 2')
+			ReplyString="${CmdReply[0]}"
+			ReplyOutVars="${CmdReply[1]}"
 
 			if [[ -z "$ReplyString" ]]; then
 				ReplyString=OK
@@ -391,6 +401,10 @@ Framework_ReadFromDCE()
 
 		# TODO: events and interceptors
 		fi
+
+		for Var in ${!Parm_*}; do
+			unset $Var
+		done
 
 		Framework_SendDelayedDCE
 	fi
@@ -412,11 +426,15 @@ Framework_ReadFromDevice()
 			Framework_FD_Device=
 		fi
 
+		if declare -F "OnDeviceDisconnect" &>/dev/null; then
+			OnDeviceDisconnect
+		fi
+
 		if [[ "$DeviceConnection_OnDisconnect" == reconnect ]]; then
 			Framework_ConnectDevice
 		else
 			Framework_DisableDevice
-			exit 1
+			exit 0
 		fi
 	else
 		ProcessDeviceStream "$Data"
@@ -429,6 +447,7 @@ Framework_SendDelayedDCE()
 
 	if [[ "$Framework_DelayDCE" == DelayDCE ]]; then
 		Log "SendDelayedDCE: called while delay is still active"
+		return
 	fi
 	Log "Sending out delayed DCE messages"
 

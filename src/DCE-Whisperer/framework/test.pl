@@ -11,7 +11,7 @@ sub Configure()
 {
 	%Configuration = (
 		## Device connection generics
-		"DeviceConnection_Type" => "inet", # choices: none, serial, inet, custom
+		"DeviceConnection_Type" => "none", # choices: none, serial, inet, custom
 		## Connection parameters
 		# type=serial:
 		"DeviceConnection_BaudRate" => 9600,

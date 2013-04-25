@@ -35,8 +35,8 @@ static void *StartShellThread(void *Parm)
 
 /*private*/ bool ShellInterface::ReadRow(string &Row)
 {
-	char msg[1024];
-	if (fgets(msg, 1024, stdin) == NULL)
+	char msg[16384];
+	if (fgets(msg, 16384, stdin) == NULL)
 		return false;
 	msg[strlen(msg) - 1] = 0;
 	Row = msg;
@@ -78,8 +78,8 @@ void *ShellInterface::MainThread(void *Parm)
 				for (size_t i = idx_start; i < vect_sTokens_size; ++i)
 				{
 					string sDecodedToken = StringUtils::URLDecode(vect_sTokens[i]);
-					if (strchr(sDecodedToken.c_str(), ' ') != NULL)
-						sDecodedToken = "\"" + sDecodedToken + "\"";
+					//if (strchr(sDecodedToken.c_str(), ' ') != NULL)
+						sDecodedToken = "\"" + StringUtils::Replace(sDecodedToken, "\"", "\\\"") + "\"";
 					CommandForDCE += (i > idx_start ? " " : "") + sDecodedToken;
 				}
 
@@ -162,7 +162,7 @@ void ShellInterface::SendMessage(Message *pMessage, Message *&pMessage_Reply, st
 		else if (m_sWaitedReply != "")
 		{
 			fprintf(stderr, "Reply is a string\n");
-			sReply = m_sWaitedReply;
+			sReply = m_sWaitedReply.substr(1, m_sWaitedReply.size() - 2); // strip surrounding quotes
 		}
 		else
 		{
