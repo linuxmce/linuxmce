@@ -2,8 +2,8 @@
 Package = DCE_Destination_Package
 Dir = 
 desc = DCE Implemenation for #1928 YouTube Plug-in
-Maintainer = DCE_MaintainerName
-Email = DCE_MaintainerEmail
+Maintainer = ThomasName
+Email = 
 Depend = DCE_Dependencies
 <-dceag-p-e->
 

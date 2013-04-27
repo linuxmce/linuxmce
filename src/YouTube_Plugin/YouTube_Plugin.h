@@ -76,14 +76,12 @@ public:
 	/*
 			*****DATA***** accessors inherited from base class
 	int DATA_Get_Priority();
-	string DATA_Get_Media_Catalog();
 
 			*****EVENT***** accessors inherited from base class
 	void EVENT_Playback_Info_Changed(string sMediaDescription,string sSectionDescription,string sSynposisDescription);
 
 			*****COMMANDS***** we need to implement
 	*/
-
 
 //<-dceag-h-e->
 	};
