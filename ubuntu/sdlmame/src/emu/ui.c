@@ -317,6 +317,9 @@ int ui_display_startup_screens(running_machine &machine, int first_time, int sho
 	int show_warnings = TRUE;
 	int state;
 
+		// patch for LinuxMCE to make initial emulator state more predictable
+	        show_gameinfo=show_warnings=show_disclaimer=FALSE; 
+
 	/* disable everything if we are using -str for 300 or fewer seconds, or if we're the empty driver,
 	   or if we are debugging */
 	if (!first_time || (str > 0 && str < 60*5) || &machine.system() == &GAME_NAME(___empty) || (machine.debug_flags & DEBUG_FLAG_ENABLED) != 0)
@@ -1511,7 +1514,7 @@ static UINT32 handler_ingame(running_machine &machine, render_container *contain
 	{
 		if (!machine.video().is_recording())
 		{
-			machine.video().begin_recording(NULL, video_manager::MF_MNG);
+			machine.video().begin_recording(NULL, video_manager::MF_AVI);
 			popmessage("REC START");
 		}
 		else
