@@ -24,6 +24,7 @@ namespace DCE
     m_sConfigFileTemplate = MESS_CONFIG_FILE_TEMPLATE;
     m_sWindowName = "mess.mess";
     m_sSystemName = "";
+    m_bCanSaveState=true;
     initializeActionstoKeysyms();
   }
 
