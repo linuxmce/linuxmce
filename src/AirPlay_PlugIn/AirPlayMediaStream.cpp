@@ -58,7 +58,10 @@ namespace DCE {
 
 	bool AirPlayMediaStream::ContainsVideo()
 	{
-		return true;	// sound only, no need to stop Pluto_Screen_Saver!
+	  if (m_iPK_MediaType == 60)
+	    return false;
+	  else
+	    return true;	// sound only, no need to stop Pluto_Screen_Saver!
 	}
 
 };
