@@ -26,6 +26,8 @@
 #include "../Media_Plugin/MediaStream.h"
 #include "../Media_Plugin/MediaHandlerBase.h"
 
+#include "YouTubeMediaStream.h"
+
 //<-dceag-decl-b->! custom
 namespace DCE
 {
@@ -33,11 +35,13 @@ namespace DCE
 	{
 //<-dceag-decl-e->
 		// Private member variables
-
+	  pluto_pthread_mutex_t m_YouTubeMediaMutex;
+	  map<int, int> m_mapDevicesToStreams;
+	  class Orbiter_Plugin *m_pOrbiter_Plugin;
 		// Private methods
 public:
 		// Public member variables
-
+	  int m_iPriority;
 //<-dceag-const-b->
 public:
 		// Constructors/Destructor
@@ -64,8 +68,17 @@ public:
 		*/
 		virtual bool StopMedia( class MediaStream *pMediaStream );
 
-		virtual void PopulateDataGrid(string sToken,MediaListGrid *pMediaListGrid,int PK_MediaType, string sPK_Attribute, int PK_AttributeType_Sort, bool bShowFiles, string &sPK_MediaSubType, string &sPK_FileFormat, string &sPK_Attribute_Genres, string &sPK_Sources, string &sPK_Users_Private, int PK_Users, int iLastViewed, int *iPK_Variable, string *sValue_To_Assign );
-		virtual void GetExtendedAttributes(string sType, string sPK_MediaSource, string sURL, string *sValue_To_Assign);
+		virtual MediaDevice *FindMediaDeviceForEntertainArea(EntertainArea *pEntertainArea);
+		/**
+		 * @brief We need to see all media inserted events so we can start the appropriate media devices
+		 */
+		
+		YouTubeMediaStream *ConvertToYouTubeMediaStream(MediaStream *pMediaStream, string callerIdMessage = "");
+		
+		bool MenuOnScreen( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );
+		
+		virtual void PrepareToDelete();
+
 
 //<-dceag-h-b->
 	/*

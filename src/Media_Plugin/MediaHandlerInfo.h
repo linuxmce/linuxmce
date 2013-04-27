@@ -63,6 +63,7 @@ namespace DCE
 #define MEDIASTREAM_TYPE_SMARTQ			108
 #define MEDIASTREAM_TYPE_PANDORA		109
 #define MEDIASTREAM_TYPE_AIRPLAY_AUDIO  	110
+#define MEDIASTREAM_TYPE_YOUTUBE                111
 
 	/** @brief
 	*
