@@ -25,6 +25,8 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
+#include <QUrl>
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 YouTube_Player::YouTube_Player(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
@@ -278,6 +280,9 @@ void YouTube_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMedi
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 	cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
+
+	// this->qYouTubeWindow->gotoPage(QUrl("http://www.youtube.com/tv"));
+
 }
 
 //<-dceag-c38-b->
@@ -295,6 +300,7 @@ void YouTube_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string 
 	cout << "Need to implement command #38 - Stop Media" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
+	// this->qYouTubeWindow->gotoPage(QUrl("about:blank"));
 }
 
 //<-dceag-c39-b->

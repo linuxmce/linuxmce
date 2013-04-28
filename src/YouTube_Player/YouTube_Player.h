@@ -20,6 +20,8 @@
 #include "Gen_Devices/YouTube_PlayerBase.h"
 //<-dceag-d-e->
 
+class YouTubeWindow;
+
 //<-dceag-decl-b->
 namespace DCE
 {
@@ -31,6 +33,7 @@ namespace DCE
 		// Private methods
 public:
 		// Public member variables
+        YouTubeWindow *qYouTubeWindow;
 
 //<-dceag-const-b->
 public:
