@@ -47,7 +47,8 @@ namespace DCE
 
     static const char* const args[] = {"--no-video-title-show"};
 
-    m_pInst = libvlc_new(sizeof args / sizeof *args, args);
+    // m_pInst = libvlc_new(sizeof args / sizeof *args, args);
+    m_pInst = libvlc_new(NULL, NULL);
 
     if (!m_pInst)
       {
