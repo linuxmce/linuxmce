@@ -90,6 +90,7 @@ bool YouTube_Plugin::Register()
 	vector<int> vectPK_DeviceTemplate;
 	vectPK_DeviceTemplate.push_back(DEVICETEMPLATE_YouTube_Player_CONST);
 	m_pMedia_Plugin->RegisterMediaPlugin( this, this, vectPK_DeviceTemplate, true );
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXXXXX YOUTUBE PLAYER REGISTERED XXXXXXX");
 
 	return Connect(PK_DeviceTemplate_get()); 
 }
@@ -187,6 +188,8 @@ class MediaStream *YouTube_Plugin::CreateMediaStream( class MediaHandlerInfo *pM
   
   m_mapDevicesToStreams[pMediaDevice->m_pDeviceData_Router->m_dwPK_Device] = StreamID;
 
+  return pYouTubeMediaStream;
+
 }
 
 bool YouTube_Plugin::StartMedia( class MediaStream *pMediaStream,string &sError )
@@ -195,8 +198,6 @@ bool YouTube_Plugin::StartMedia( class MediaStream *pMediaStream,string &sError 
   LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"YouTube_Plugin::StartMedia Called");
   
   PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
-  
-  LoggerWrapper::GetInstance()->Write( LV_STATUS, "YouTube_Plugin::StartMedia() Starting media stream playback. pos: %d", pMediaStream->m_iDequeMediaFile_Pos );
   
   YouTubeMediaStream *pYouTubeMediaStream = NULL;
   if ( (pYouTubeMediaStream = ConvertToYouTubeMediaStream(pMediaStream, "YouTube_Plugin::StartMedia(): ")) == NULL )
@@ -270,7 +271,7 @@ bool YouTube_Plugin::StopMedia( class MediaStream *pMediaStream )
 				     &savedPosition);
   
   SendCommand(CMD_Stop_Media);
-  
+  return true;  
 }
 
 MediaDevice *YouTube_Plugin::FindMediaDeviceForEntertainArea(EntertainArea *pEntertainArea)

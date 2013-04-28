@@ -77,8 +77,6 @@ public:
 		
 		bool MenuOnScreen( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );
 		
-		virtual void PrepareToDelete();
-
 
 //<-dceag-h-b->
 	/*
