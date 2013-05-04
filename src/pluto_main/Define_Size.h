@@ -24,7 +24,7 @@
 #define SIZE_480x320_iPhone_CONST 22
 #define SIZE_960x640_iPhone_4_CONST 23
 #define SIZE_1024x600_CONST 24
-#define SIZE_1920x1200_CONST 25
+#define SIZE_1440x900_CONST 25
 
 #define SIZE_TABLE "Size"
 #define SIZE_PK_SIZE_FIELD "PK_Size"
