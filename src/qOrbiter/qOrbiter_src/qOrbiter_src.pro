@@ -204,7 +204,7 @@ macx{
         folder_05.target = $$DESTDIR/qml
         folder_03.source = config.xml
         folder_03.target = $$APP_RESOURCES_PATH
-        ICON = osxicons.icns
+        ICON = ../platforms/osx/osxicons.icns
         DEPLOYMENTFOLDERS += folder_01 folder_02 folder_03 folder_05
 }
 
