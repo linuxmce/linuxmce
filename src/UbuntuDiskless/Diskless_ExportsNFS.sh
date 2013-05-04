@@ -7,7 +7,7 @@
 
 DEVICEDATA_DisklessImages=258
 
-## We should not run un diskless mds
+## We should not run on diskless mds
 if [[ -f /etc/diskless.conf ]]; then
 	exit 0
 fi
@@ -111,8 +111,9 @@ for Client in $DisklessMDs; do
 					else
 						continue
 					fi
+				else
+					Exports_DisklessMDRoots="$Exports_DisklessMDRoots\n$DisklessMD_Root/$Name	$INTERNAL_SUBNET/$INTERNAL_SUBNET_MASK(rw,no_root_squash,no_all_squash,sync,no_subtree_check)"
 				fi
-				Exports_DisklessMDRoots="$Exports_DisklessMDRoots\n$DisklessMD_Root/$Name	$INTERNAL_SUBNET/$INTERNAL_SUBNET_MASK(rw,no_root_squash,no_all_squash,sync,no_subtree_check)"
 			done
 		fi
 	fi

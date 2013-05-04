@@ -23,7 +23,10 @@ function setup_tftp_boot
 	local Moon_BootConfFile="/tftpboot/pxelinux.cfg/01-$(echo ${Moon_MAC//:/-} | tr 'A-Z' 'a-z')"
 	local BootConf=""
 
-	local BootParams="quiet splash video=uvesafb:mode_option=1024x768-24,mtrr=3,scroll=ywrap vmalloc=256m"
+	# deprecated boot parameter "video=" and we don't want to force vesafb with modern accelerated framebuffers (ie intel)
+	# if extra parameters are necessary they should be added to the DT as DEVICEDATA_Extra_Parameters
+	#local BootParams="quiet splash video=uvesafb:mode_option=1024x768-24,mtrr=3,scroll=ywrap vmalloc=256m"
+	local BootParams="quiet splash"
 	local BootParams_Extra=$(RunSQL "SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device = $Moon_DeviceID AND FK_DeviceData = $DEVICEDATA_Extra_Parameters")
 	local BootParams_Override=$(RunSQL "SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device = $Moon_DeviceID AND FK_DeviceData = $DEVICEDATA_Extra_Parameters_Override")
 	if [[ "$BootParams_Override" == "1" ]] ;then
@@ -36,32 +39,51 @@ function setup_tftp_boot
 
 	mkdir -p /tftpboot/pxelinux.cfg
 
-	if [[ -z "$Moon_DisklessImages" ]]; then
-		BootConf="${BootConf}DEFAULT Pluto\n"
-		BootConf="${BootConf}LABEL Pluto\n"
-		BootConf="${BootConf}KERNEL ${Moon_DeviceID}/vmlinuz\n"
-		BootConf="${BootConf}APPEND initrd=${Moon_DeviceID}/initrd.img ramdisk=10240 rw root=/dev/nfs boot=nfs nfsroot=${IntIP}:/usr/pluto/diskless/${Moon_DeviceID},intr,nolock,udp,rsize=32768,wsize=32768,retrans=10,timeo=50 ${BootParams}\n"
+	# If a diskless image is specified it may have a specific required kernel,
+	# set the pxeconfig according to the specified diskless image name, if provided
+	if [[ -n "$Moon_DisklessImages" ]]; then
+		for line in "$Moon_DisklessImages"; do
+			NameKernel="${line%%=*}"
+			if [[ "$NameKernel" == *-* ]]; then
+				Name="${NameKernel%%-*}"
+				Kernel="${NameKernel#*-}"
+			else
+				Name="$NameKernel"
+				Kernel=
+			fi
+			[[ -z "$Kernel" ]] && continue || :
+			[[ -z "$DefaultBootName" ]] && DefaultBootName="$Name" || :
+			Value="${line#*=}"
 
-		echo -e "$BootConf" > "$Moon_BootConfFile"
+			# Only create symlinks if $Name is defined.
+			if [[ -n "$Name" ]]; then
+				mkdir -p "/tftpboot/${Moon_DeviceID}/$Name"
+				rm -f "/tftpboot/${Moon_DeviceID}/$Name/"{vmlinuz,initrd.img}
+				if [[ ! -f "${Moon_RootLocation}/boot/vmlinuz-${Kernel}" ]]; then
+					LC_ALL="C" chroot "${Moon_RootLocation}" apt-get install "linux-image-${Kernel}"
+				fi
 
+				# Changed to point to the always updated ubuntu softlink at device root. 
+				ln -s "${Moon_RootLocation}/vmlinuz" "/tftpboot/${Moon_DeviceID}/$Name/vmlinuz"
+				ln -s "${Moon_RootLocation}/initrd.img" "/tftpboot/${Moon_DeviceID}/$Name/initrd.img"
+			fi
+		done
+
+		# Only create the pxeconfig if $DefaultBootName is defined.
+		if [[ -n "$DefaultBootName" ]]; then
+			BootConf="${BootConf}DEFAULT Pluto\n"
+			BootConf="${BootConf}LABEL Pluto\n"
+			BootConf="${BootConf}KERNEL ${Moon_DeviceID}/$DefaultBootName/vmlinuz\n"
+			BootConf="${BootConf}APPEND initrd=${Moon_DeviceID}/$DefaultBootName/initrd.img ramdisk=10240 rw root=/dev/nfs boot=nfs nfsroot=${IntIP}:/usr/pluto/diskless/${Moon_DeviceID}/$DefaultBootName,intr,nolock,udp,rsize=32768,wsize=32768,retrans=10,timeo=50 ${BootParams}\n"
+			echo -e "$BootConf" > "$Moon_BootConfFile"
+		fi
+
+	fi
+
+	# If there are no specific diskless images defined or no DefaultBootName defined in 
+	# a referenced diskless image then define a normal MD pxeconfig
+	if [[ -n "$Moon_DisklessImages" ]] || [[ -z "$DefaultBootName" ]]; then
 		mkdir -p /tftpboot/${Moon_DeviceID}
-		#rm -f /tftpboot/${Moon_DeviceID}/vmlinuz
-		#ln -s ${Moon_RootLocation}/boot/vmlinuz /tftpboot/${Moon_DeviceID}/vmlinuz
-		#rm -f /tftpboot/${Moon_DeviceID}/initrd.img
-		#ln -s ${Moon_RootLocation}/boot/initrd.img /tftpboot/${Moon_DeviceID}/initrd.img
-
-		## Find kernel and initrd
-		#Kernel=
-		#Initrd=
-		#for File in /usr/pluto/diskless/"$Moon_DeviceID"/boot/vmlinuz-*; do
-		#	Kernel="$File"
-		#done
-		#if [[ -z "$Kernel" ]]; then
-		#	echo "WARNING: Missing kernel or initrd file. Cannot set for PXE boot."
-		#	continue
-		#fi
-		#Kver=$(basename "$Kernel")
-		#Kver="${Kver#vmlinuz-}"
 
 		## Find kernel and initrd
 		Kver=$(basename $(ls ${Moon_RootLocation}/boot/vmlinuz-* | head -1) | cut -d"-" -f2-99)
@@ -78,7 +100,6 @@ function setup_tftp_boot
 	       		ln -sf ${Moon_RootLocation}/vmlinuz /tftpboot/${Moon_DeviceID}/vmlinuz
 		else
 			# /vmlinuz was not found, setup the symlinks
-			#ln -s "${Moon_RootLocation}/boot/vmlinuz-${Kernel}" "/tftpboot/${Moon_DeviceID}/$Name/vmlinuz"
 			pushd ${Moon_RootLocation}
 			ln -sf boot/vmlinuz-${Kver} ${Moon_RootLocation}/vmlinuz
 			popd
@@ -89,7 +110,6 @@ function setup_tftp_boot
 			ln -sf ${Moon_RootLocation}/initrd.img /tftpboot/${Moon_DeviceID}/initrd.img
 		else
 			# /initrd.img was not found, setup the symlink
-			#ln -s "${Moon_RootLocation}/boot/initrd.img-${Kernel}" "/tftpboot/${Moon_DeviceID}/$Name/initrd.img" 
 			pushd ${Moon_RootLocation}
 			ln -sf boot/initrd.img-${Kver} ${Moon_RootLocation}/initrd.img
 			popd
@@ -102,39 +122,11 @@ function setup_tftp_boot
 		## which may be different from the one installed on the MD, thus not doing what we want by default
 		chroot /usr/pluto/diskless/"$Moon_DeviceID" depmod "$Kver"
 		chroot /usr/pluto/diskless/"$Moon_DeviceID" update-initramfs -k "$Kver" -u
-	else
-		# This is imperative for alternate Diskless Images
-		# Such as that used on the rpi diskless image and others.
-		for line in $Moon_DisklessImages; do
-			NameKernel="${line%%=*}"
-			if [[ "$NameKernel" == *-* ]]; then
-				Name="${NameKernel%%-*}"
-				Kernel="${NameKernel#*-}"
-			else
-				Name="$NameKernel"
-				Kernel=
-			fi
-			[[ -z "$Kernel" ]] && continue || :
-			[[ -z "$DefaultBootName" ]] && DefaultBootName="$Name" || :
-			Value="${line#*=}"
-			mkdir -p "/tftpboot/${Moon_DeviceID}/$Name"
-			rm -f "/tftpboot/${Moon_DeviceID}/$Name/"{vmlinuz,initrd.img}
-                        if [[ ! -f "${Moon_RootLocation}/boot/vmlinuz-${Kernel}" ]]; then
-                        	# If the moon's kernel image does not correspond to the core's image, we have a problem
-                                # and we try to install the correct version
-                                chroot "${Moon_RootLocation}" apt-get install "linux-image-${Kernel}"
-                        fi
-
-			# Changed to point to the always updated buntu softlink at device root. 
-                        ln -s ${Moon_RootLocation}/vmlinuz /tftpboot/${Moon_DeviceID}/$Name/vmlinuz
-			ln -s ${Moon_RootLocation}/initrd.img /tftpboot/${Moon_DeviceID}/$Name/initrd.img
-		done
 
 		BootConf="${BootConf}DEFAULT Pluto\n"
 		BootConf="${BootConf}LABEL Pluto\n"
-		BootConf="${BootConf}KERNEL ${Moon_DeviceID}/$DefaultBootName/vmlinuz\n"
-		BootConf="${BootConf}APPEND initrd=${Moon_DeviceID}/$DefaultBootName/initrd.img ramdisk=10240 rw root=/dev/nfs boot=nfs nfsroot=${IntIP}:/usr/pluto/diskless/${Moon_DeviceID}/$DefaultBootName,intr,nolock,udp,rsize=32768,wsize=32768,retrans=10,timeo=50 ${BootParams}\n"
-
+		BootConf="${BootConf}KERNEL ${Moon_DeviceID}/vmlinuz\n"
+		BootConf="${BootConf}APPEND initrd=${Moon_DeviceID}/initrd.img ramdisk=10240 rw root=/dev/nfs boot=nfs nfsroot=${IntIP}:/usr/pluto/diskless/${Moon_DeviceID},intr,nolock,udp,rsize=32768,wsize=32768,retrans=10,timeo=50 ${BootParams}\n"
 		echo -e "$BootConf" > "$Moon_BootConfFile"
 	fi
 }
@@ -240,7 +232,6 @@ function update_config_files
 			continue
 		fi
 
-		pushd $ScriptDir
 		if [[ "${#Names[@]}" -eq 0 ]]; then
 			$ScriptDir/$Script --root "$Moon_RootLocation" --device "$Moon_DeviceID" --template "$Moon_DeviceTemplate"
 		else
@@ -248,7 +239,6 @@ function update_config_files
 				$ScriptDir/$Script --root "$Moon_RootLocation/$Name" --device "$Moon_DeviceID" --subname "$Name" --template "$Moon_DeviceTemplate"
 			done
 		fi
-		popd
 	done
 }
 
@@ -340,13 +330,10 @@ for Row in $R; do
 	Moon_Model="${Moon_Model%_*}_${Moon_Architecture}"
 	RunSQL "UPDATE Device_DeviceData SET IK_DeviceData='$Moon_Model' WHERE FK_Device='$Moon_DeviceID' AND FK_DeviceData='$DEVICEDATA_Model'"
 
-
 	Moon_RootLocation="/usr/pluto/diskless/${Moon_DeviceID}"
 	Moon_BootConfFile="/tftpboot/pxelinux.cfg/01-$(echo ${Moon_MAC//:/-} | tr 'A-Z' 'a-z')"
 	Moon_DisklessImages=$(GetDeviceData "$Moon_DeviceID" "$DEVICEDATA_DisklessImages")
 
-
-	
 	## Adding moon to hosts (/etc/hosts)
 	hosts_DisklessMD="${hosts_DisklessMD}${Moon_IP}	moon${Moon_DeviceID}\n"
 
