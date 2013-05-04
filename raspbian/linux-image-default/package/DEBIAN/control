@@ -1,0 +1,12 @@
+Package: linux-image-default-raspbian-wheezy
+Version: 3.2.0-4-rpi-lmce1
+Section: unknown
+Priority: optional
+Architecture: all
+Installed-Size: 5796
+Provides: fuse-module, ivtv-modules, kvm-api-4, linux-image, linux-image-2.6, linux-image-3.2.0-4-rpi, rhcs-modules2-1
+Depends: 
+Suggests: linux-headers-3.2.0-4-rpi
+Maintainer: LinuxMCE Team <packaging@linuxmce.org>
+Description: Linux kernel image for version 3.2.0-4-rpi on all Diskless
+ Kernel image for LinuxMCE diskless Media Directors
