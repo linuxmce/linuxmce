@@ -15,12 +15,12 @@ Moon_RootLocation="package"
 initramfs_tools_dir="initramfs-tools-default-$flavor-$build_name"
 default_name="default-arm-bcm2835"
 kernel_dir="tftpboot/$default_name"
-pxe_config_dir="tftpboot/pxelinux.cfg"
+pxe_config_dir="$Moon_RootLocation/tftpboot/pxelinux.cfg"
 pxe_config_file="$pxe_config_dir/$default_name"
 
 # Remove old kernel images from package dir
-rm -fr $Moon_RootLocation/{$kernel_dir,lib/modules}
-mkdir -p $Moon_RootLocation/{$kernel_dir,lib/modules}
+rm -fr $Moon_RootLocation/$kernel_dir
+mkdir -p $Moon_RootLocation/$kernel_dir
 
 # Copy kernel image and sysmap
 if [ ! -f /boot/vmlinuz-${Moon_KernelVersion} ]; then
@@ -51,22 +51,11 @@ ln -fs vmlinuz-${Moon_KernelVersion} vmlinuz
 ln -fs initrd.img-${Moon_KernelVersion} initrd.img
 popd
 
-# Copy from /lib/modules only whare belongs to linux-image-`uname -r`
-dpkg -L linux-image-${Moon_KernelVersion}  | grep '^/lib/modules/'  | sed 's|^/lib/modules/||g' | while read line ;do
-	if [[ -f "/lib/modules/$line" ]] ;then
-		cp "/lib/modules/$line" "${Moon_RootLocation}/lib/modules/$line"
-	elif [[ -d "/lib/modules/$line" ]] ;then
-		mkdir -p "${Moon_RootLocation}/lib/modules/$line"
-	else
-		echo "Skiped $line"
-	fi
-done
-
 # Create PXE configuration for default boot
 mkdir -p "$pxe_config_dir"
 echo "DEFAULT Pluto
 LABEL Pluto
-KERNEL default-arm-bcm2835/vmlinuz
+KERNEL $default_name/vmlinuz
 APPEND root=/dev/nfs initrd=$default_name/initrd ramdisk_size=10240 rw
 " > ${pxe_config_file}
 
