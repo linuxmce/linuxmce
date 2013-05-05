@@ -25,30 +25,34 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 #include <QDebug>
+#include <qjson/parser.h>
+#include <qjson/serializer.h>
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 Hue_Controller::Hue_Controller(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
-	: Hue_Controller_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
+        : Hue_Controller_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 {
     qDebug() << "Created Controller.";
-    qDebug() << this->thread();
+    mb_isNew = true;
+
 }
 
 //<-dceag-const2-b->
 // The constructor when the class is created as an embedded instance within another stand-alone device
-Hue_Controller::Hue_Controller(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
-	: Hue_Controller_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
-//<-dceag-const2-e->
-{
-}
+//Hue_Controller::Hue_Controller(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
+//        : Hue_Controller_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter, 0)
+//////<-dceag-const2-e->
+//{
+//}
 
 //<-dceag-dest-b->
-Hue_Controller::~Hue_Controller()
-//<-dceag-dest-e->
-{
-	
-}
+//Hue_Controller::~Hue_Controller()
+////<-dceag-dest-e->
+//{
+//
+//}
+
 
 //<-dceag-getconfig-b->
 bool Hue_Controller::GetConfig()
@@ -57,9 +61,18 @@ bool Hue_Controller::GetConfig()
 		return false;
 //<-dceag-getconfig-e->
 
-	// Put your code here to initialize the data in this class
-	// The configuration parameters DATA_ are now populated
-	return true;
+    // Put your code here to initialize the data in this class
+    // The configuration parameters DATA_ are now populated
+    QString m_id= QString::fromStdString(this->DATA_Get_Device());
+    if(m_id.isEmpty()){
+        qDebug() << "Hue ID is not set, Adding 1st missing hue controller." << m_id;
+        findLocalControllers();
+
+  // DATA_Set_Device("derp", true);
+   //  DATA_Set_Server_IP("foodiddy", true);
+
+    }
+    return true;
 }
 
 //<-dceag-reg-b->
@@ -67,17 +80,17 @@ bool Hue_Controller::GetConfig()
 bool Hue_Controller::Register()
 //<-dceag-reg-e->
 {
-	return Connect(PK_DeviceTemplate_get()); 
+    return Connect(PK_DeviceTemplate_get());
 }
 
 /*  Since several parents can share the same child class, and each has it's own implementation, the base class in Gen_Devices
 	cannot include the actual implementation.  Instead there's an extern function declared, and the actual new exists here.  You 
 	can safely remove this block (put a ! after the dceag-createinst-b block) if this device is not embedded within other devices. */
 //<-dceag-createinst-b->
-Hue_Controller_Command *Create_Hue_Controller(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
-{
-	return new Hue_Controller(pPrimaryDeviceCommand, pData, pEvent, pRouter);
-}
+//Hue_Controller_Command *Create_Hue_Controller(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
+//{
+//        return new Hue_Controller(pPrimaryDeviceCommand, pData, pEvent, pRouter);
+//}
 //<-dceag-createinst-e->
 
 /*
@@ -92,7 +105,7 @@ Hue_Controller_Command *Create_Hue_Controller(Command_Impl *pPrimaryDeviceComman
 void Hue_Controller::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
 //<-dceag-cmdch-e->
 {
-	sCMD_Result = "UNHANDLED CHILD";
+    sCMD_Result = "UNHANDLED CHILD";
 }
 
 /*
@@ -104,7 +117,7 @@ void Hue_Controller::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,s
 void Hue_Controller::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 //<-dceag-cmduk-e->
 {
-	sCMD_Result = "UNKNOWN COMMAND";
+    sCMD_Result = "UNKNOWN COMMAND";
 }
 
 //<-dceag-sample-b->
@@ -206,8 +219,8 @@ void Hue_Controller::SomeFunction()
 void Hue_Controller::CMD_Set_Level(string sLevel,string &sCMD_Result,Message *pMessage)
 //<-dceag-c184-e->
 {
-	cout << "Need to implement command #184 - Set Level" << endl;
-	cout << "Parm #76 - Level=" << sLevel << endl;
+    cout << "Need to implement command #184 - Set Level" << endl;
+    cout << "Parm #76 - Level=" << sLevel << endl;
 }
 
 //<-dceag-c192-b->
@@ -222,9 +235,9 @@ void Hue_Controller::CMD_Set_Level(string sLevel,string &sCMD_Result,Message *pM
 void Hue_Controller::CMD_On(int iPK_Pipe,string sPK_Device_Pipes,string &sCMD_Result,Message *pMessage)
 //<-dceag-c192-e->
 {
-	cout << "Need to implement command #192 - On" << endl;
-	cout << "Parm #97 - PK_Pipe=" << iPK_Pipe << endl;
-	cout << "Parm #98 - PK_Device_Pipes=" << sPK_Device_Pipes << endl;
+    cout << "Need to implement command #192 - On" << endl;
+    cout << "Parm #97 - PK_Pipe=" << iPK_Pipe << endl;
+    cout << "Parm #98 - PK_Device_Pipes=" << sPK_Device_Pipes << endl;
 }
 
 //<-dceag-c193-b->
@@ -237,8 +250,8 @@ void Hue_Controller::CMD_On(int iPK_Pipe,string sPK_Device_Pipes,string &sCMD_Re
 void Hue_Controller::CMD_Off(int iPK_Pipe,string &sCMD_Result,Message *pMessage)
 //<-dceag-c193-e->
 {
-	cout << "Need to implement command #193 - Off" << endl;
-	cout << "Parm #97 - PK_Pipe=" << iPK_Pipe << endl;
+    cout << "Need to implement command #193 - Off" << endl;
+    cout << "Parm #97 - PK_Pipe=" << iPK_Pipe << endl;
 }
 
 //<-dceag-c756-b->
@@ -249,7 +262,7 @@ void Hue_Controller::CMD_Off(int iPK_Pipe,string &sCMD_Result,Message *pMessage)
 void Hue_Controller::CMD_Report_Child_Devices(string &sCMD_Result,Message *pMessage)
 //<-dceag-c756-e->
 {
-	cout << "Need to implement command #756 - Report Child Devices" << endl;
+    cout << "Need to implement command #756 - Report Child Devices" << endl;
 }
 
 //<-dceag-c757-b->
@@ -262,8 +275,8 @@ void Hue_Controller::CMD_Report_Child_Devices(string &sCMD_Result,Message *pMess
 void Hue_Controller::CMD_Download_Configuration(string sText,string &sCMD_Result,Message *pMessage)
 //<-dceag-c757-e->
 {
-	cout << "Need to implement command #757 - Download Configuration" << endl;
-	cout << "Parm #9 - Text=" << sText << endl;
+    cout << "Need to implement command #757 - Download Configuration" << endl;
+    cout << "Parm #9 - Text=" << sText << endl;
 }
 
 //<-dceag-c760-b->
@@ -281,10 +294,10 @@ PK_CommandParameter|Value|... */
 void Hue_Controller::CMD_Send_Command_To_Child(string sID,int iPK_Command,string sParameters,string &sCMD_Result,Message *pMessage)
 //<-dceag-c760-e->
 {
-	cout << "Need to implement command #760 - Send Command To Child" << endl;
-	cout << "Parm #10 - ID=" << sID << endl;
-	cout << "Parm #154 - PK_Command=" << iPK_Command << endl;
-	cout << "Parm #202 - Parameters=" << sParameters << endl;
+    cout << "Need to implement command #760 - Send Command To Child" << endl;
+    cout << "Parm #10 - ID=" << sID << endl;
+    cout << "Parm #154 - PK_Command=" << iPK_Command << endl;
+    cout << "Parm #202 - Parameters=" << sParameters << endl;
 }
 
 //<-dceag-c776-b->
@@ -298,8 +311,8 @@ NOEMON or CANBUS */
 void Hue_Controller::CMD_Reset(string sArguments,string &sCMD_Result,Message *pMessage)
 //<-dceag-c776-e->
 {
-	cout << "Need to implement command #776 - Reset" << endl;
-	cout << "Parm #51 - Arguments=" << sArguments << endl;
+    cout << "Need to implement command #776 - Reset" << endl;
+    cout << "Parm #51 - Arguments=" << sArguments << endl;
 }
 
 //<-dceag-c788-b->
@@ -312,8 +325,8 @@ void Hue_Controller::CMD_Reset(string sArguments,string &sCMD_Result,Message *pM
 void Hue_Controller::CMD_StatusReport(string sArguments,string &sCMD_Result,Message *pMessage)
 //<-dceag-c788-e->
 {
-	cout << "Need to implement command #788 - StatusReport" << endl;
-	cout << "Parm #51 - Arguments=" << sArguments << endl;
+    cout << "Need to implement command #788 - StatusReport" << endl;
+    cout << "Parm #51 - Arguments=" << sArguments << endl;
 }
 
 //<-dceag-c980-b->
@@ -330,10 +343,15 @@ void Hue_Controller::CMD_StatusReport(string sArguments,string &sCMD_Result,Mess
 void Hue_Controller::CMD_Set_Color_RGB(int iRed_Level,int iGreen_Level,int iBlue_Level,string &sCMD_Result,Message *pMessage)
 //<-dceag-c980-e->
 {
-	cout << "Need to implement command #980 - Set Color RGB" << endl;
-	cout << "Parm #279 - Red_Level=" << iRed_Level << endl;
-	cout << "Parm #280 - Green_Level=" << iGreen_Level << endl;
-	cout << "Parm #281 - Blue_Level=" << iBlue_Level << endl;
+
+    cout << "Need to implement command #980 - Set Color RGB" << endl;
+    cout << "Parm #279 - Red_Level=" << iRed_Level << endl;
+    cout << "Parm #280 - Green_Level=" << iGreen_Level << endl;
+    cout << "Parm #281 - Blue_Level=" << iBlue_Level << endl;
+}
+
+bool Hue_Controller::findLocalControllers(){
+
 }
 
 
