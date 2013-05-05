@@ -10,12 +10,12 @@ DEVICEDATA_Architecture=112
 #TARGET_TYPES="raspbian-armhf"
 TARGET_TYPES="ubuntu-i386"
 
-HOST_DISTRO=`lsb_release -i -s | tr '[:upper:]' '[:lower:]'`
-HOST_RELEASE=`lsb_release -c -s`
-HOST_ARCH=`apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g' | head -1`
+HOST_DISTRO=$(lsb_release -i -s | tr '[:upper:]' '[:lower:]')
+HOST_RELEASE=$(lsb_release -c -s)
+HOST_ARCH=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g' | head -1)
 
 #Assign latest installed kernel and not running kernel
-HOST_KVER=`ls /lib/modules/ --sort time|head -1`
+HOST_KVER=$(find /lib/modules/* -maxdepth 0 -type d |sort -r |head -1)
 
 #host file locations
 ARCHIVE_DIR='/usr/pluto/install'
@@ -45,7 +45,7 @@ mkdir -p /var/log/pluto
 if [ ! -f ${log_file} ]; then
 	touch ${log_file}
 	if [ "$?" = 1 ]; then
-		echo "`date` - Unable to write to ${log_file} - re-run script as root"
+		echo "$(date) - Unable to write to ${log_file} - re-run script as root"
 		exit 1
 	fi
 else
@@ -54,7 +54,7 @@ else
 fi
 TeeMyOutput --outfile ${log_file} --stdboth --append -- "$@"
 VerifyExitCode "Log Setup"
-echo "`date` - Logging initiatilized to ${log_file}"
+echo "$(date) - Logging initiatilized to ${log_file}"
 }
 
 VerifyExitCode () {
@@ -160,7 +160,7 @@ exit 1 # just in case
 ###########################################################
 
 StatsMessage () {
-	printf "`date` - $* \n"
+	printf "$(date) - $* \n"
 }
 
 RunSQL () {
@@ -198,8 +198,8 @@ function do_debootstrap {
 		;;
 	esac
 
-	[ `which "qemu-$qemu_arch-static"` ] && qemu_static_bin=`which "qemu-$qemu_arch-static"`
-	debootstrap --arch "$TARGET_ARCH" --foreign "$release_name" "$temp_dir" "$repository"
+	[[ -f $(which "qemu-$qemu_arch-static") ]] && qemu_static_bin=$(which "qemu-$qemu_arch-static")
+	debootstrap --arch "$TARGET_ARCH" --foreign --no-check-gpg "$release_name" "$temp_dir" "$repository"
 	mkdir -p "$temp_dir/usr/bin"
 	[[ -f "$qemu_static_bin" ]] && cp "$qemu_static_bin" "$temp_dir/usr/bin"
 	chroot "$temp_dir" /debootstrap/debootstrap --second-stage
@@ -285,9 +285,11 @@ deb http://packages.medibuntu.org/ $TARGET_RELEASE free non-free
 		;;
 	"raspbian")
 		StatsMessage "Setting up /etc/sources.list for raspbian"
-		echo "deb file:/usr/pluto/deb-cache ./
+		echo "#deb file:/usr/pluto/deb-cache ./
 deb $TARGET_REPO $TARGET_RELEASE main contrib non-free rpi
 deb-src $TARGET_REPO $TARGET_RELEASE main contrib non-free rpi
+deb http://deb.linuxmce.org/ precise main non-free contrib
+#deb http://dl.dropbox.com/u/118201886/raspbian $TARGET_RELEASE main
 #deb http://deb.linuxmce.org/raspbian/ $TARGET_RELEASE main
 " > ${TEMP_DIR}/etc/apt/sources.list
 if ! [[ -d ${TEMP_DIR}/etc/apt/sources.list.d ]]; then 
@@ -299,6 +301,7 @@ deb-src http://archive.raspberrypi.org/debian/ $TARGET_RELEASE main
 		;;
 esac
 
+[[ -f /etc/apt/apt.conf.d/02proxy ]] && cp {,"$TEMP_DIR"}/etc/apt/apt.conf.d/02proxy
 [[ -f /etc/apt/apt.conf.d/30pluto ]] && cp {,"$TEMP_DIR"}/etc/apt/apt.conf.d/30pluto
 [[ -f /etc/apt/preferences ]] && cp {,"$TEMP_DIR"}/etc/apt/preferences
 [[ -f /etc/apt/apt.conf ]] && cp {,"$TEMP_DIR"}/etc/apt/apt.conf
@@ -306,37 +309,56 @@ esac
 ## Setup initial ssh access    
 StatsMessage "Setting up SSH"
 [[ -f /usr/pluto/keys/id_dsa_pluto.pub ]] && mkdir -p "$TEMP_DIR"/root/.ssh && cat /usr/pluto/keys/id_dsa_pluto.pub >> "$TEMP_DIR"/root/.ssh/authorized_keys
+
+## Setup kernel postinst hook to fix kernel/initrd symlinks
+StatsMessage "Setting up Kernel postinst hooks"
+echo "#!/bin/bash
+# LinuxMCE post kernel image install.
+# 
+# We make sure we can read the image and the kernel, and the softlink is correct.
+
+chmod g+r /boot/* || :
+chmod o+r /boot/* || :
+
+pushd /
+ln -sf boot/initrd-$1 initrd.img || :
+ln -sf boot/vmlinuz-$1 vmlinuz || :
+popd
+
+exit 0
+" > $TEMP_DIR/etc/kernel/postinst.d/symlinks
+chmod +x $TEMP_DIR/etc/kernel/postinst.d/symlinks
 }
 
 MD_Seamless_Compatability () {
-if [[ "$TARGET_DISTRO" == "ubuntu" ]]; then
-######################
-#Foxconn NT330i
-######################
-StatsMessage "Setting up Foxconn NT330i compatability"
-if ! grep atl1c $TEMP_DIR/etc/modules >/dev/null; then
-	#White space should not be present in the modules files, you MUST remove for the MD to boot properly
-	sed -i '/^$/d' $TEMP_DIR/etc/modules
-	echo atl1c>>$TEMP_DIR/etc/modules
-fi
+if [[ "ubuntu" == "$TARGET_DISTRO" ]]; then
+	######################
+	#Foxconn NT330i
+	######################
+	StatsMessage "Setting up Foxconn NT330i compatability"
+	if ! grep atl1c $TEMP_DIR/etc/modules >/dev/null; then
+		#White space should not be present in the modules files, you MUST remove for the MD to boot properly
+		sed -i '/^$/d' $TEMP_DIR/etc/modules
+		echo atl1c>>$TEMP_DIR/etc/modules
+	fi
 
-if ! grep atl1c $TEMP_DIR/etc/initramfs-tools/modules >/dev/null; then
-	#White space should not be present in the modules files, you MUST remove for the MD to boot properly
-	sed -i '/^$/d' $TEMP_DIR/etc/initramfs-tools/modules
-	echo atl1c>>$TEMP_DIR/etc/initramfs-tools/modules
-fi
+	if ! grep atl1c $TEMP_DIR/etc/initramfs-tools/modules >/dev/null; then
+		#White space should not be present in the modules files, you MUST remove for the MD to boot properly
+		sed -i '/^$/d' $TEMP_DIR/etc/initramfs-tools/modules
+		echo atl1c>>$TEMP_DIR/etc/initramfs-tools/modules
+	fi
 
-if ! grep atl1c /etc/initramfs-tools-interactor/modules >/dev/null; then
-	echo atl1c>>/etc/initramfs-tools-interactor/modules
-	VerifyExitCode "insertion of atl1c to modules file failed"
-	#White space should not be present in the modules files, you MUST remove for the MD to boot properly
-	sed -i '/^$/d' /etc/initramfs-tools-interactor/modules
-	modprobe atl1c
-	VerifyExitCode "Modprobe for atl1c failed"
-fi
-######################
-#End Foxconn NT330i
-######################
+	if ! grep atl1c /etc/initramfs-tools-interactor/modules >/dev/null; then
+		echo atl1c>>/etc/initramfs-tools-interactor/modules
+		VerifyExitCode "insertion of atl1c to modules file failed"
+		#White space should not be present in the modules files, you MUST remove for the MD to boot properly
+		sed -i '/^$/d' /etc/initramfs-tools-interactor/modules
+		modprobe atl1c
+		VerifyExitCode "Modprobe for atl1c failed"
+	fi
+	######################
+	#End Foxconn NT330i
+	######################
 fi
 }
 
@@ -346,7 +368,7 @@ StatsMessage "PreSeeding package installation preferences"
 LC_ALL=C chroot $TEMP_DIR apt-get -y -qq update
 VerifyExitCode "apt update"
 
-if [[ "$TARGET_DISTRO" == "ubuntu" ]]; then
+if [[ "ubuntu" == "$TARGET_DISTRO" ]]; then
 	#Setup the medibuntu repo
 	LC_ALL=C chroot $TEMP_DIR apt-get -y --force-yes install medibuntu-keyring 
 	VerifyExitCode "medibuntu apt add keyring"
@@ -400,25 +422,38 @@ StatsMessage "Generating locales"
 echo "en_US.UTF-8 UTF-8" >"$TEMP_DIR"/etc/locale.gen
 LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y install locales
 
-# FIXME: need to add raspbian kernel headers
-if [[ "$TARGET_DISTRO" = "ubuntu" ]]; then
-	#Install headers and run depmod for the seamless integraiton function, ensure no errors exist
-	LC_ALL=C chroot "$TEMP_DIR" apt-get -y install linux-headers-generic
-	VerifyExitCode "Install linux headers package failed"
-	TARGET_KVER=$(ls -vd "$TEMP_DIR"/lib/modules/[0-9]* | sed 's/.*\///g' | tail -1) 
-	LC_ALL=C chroot "$TEMP_DIR" depmod -v "$TARGET_KVER" 
-	VerifyExitCode "depmod failed for $TARGET_KVER" 
+case "$TARGET_DISTRO" in
+	"ubuntu")
+		#Install headers and run depmod for the seamless integraiton function, ensure no errors exist
+		TARGET_KVER_LTS_HES=""
+		[[ "precise" = "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-ltsquantal"
+		LC_ALL=C chroot "$TEMP_DIR" apt-get -y install linux-headers-generic$TARGET_KVER_LTS_HES
+		VerifyExitCode "Install linux headers package failed"
 
-	StatsMessage "Installing kernel"
-	LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y --no-install-recommends install linux-image-generic
+		TARGET_KVER=$(ls -vd "$TEMP_DIR"/lib/modules/[0-9]* | sed 's/.*\///g' | tail -1) 
+		LC_ALL=C chroot "$TEMP_DIR" depmod -v "$TARGET_KVER" 
+		VerifyExitCode "depmod failed for $TARGET_KVER" 
 
-	## Prevent lpadmin from running as it blocks the system
-	LC_ALL=C chroot "$TEMP_DIR" apt-get -y install cupsys-client
-	cp "$TEMP_DIR"/usr/sbin/lpadmin{,.disabled}
-	echo > "$TEMP_DIR"/usr/sbin/lpadmin 
-	LC_ALL=C chroot "$TEMP_DIR" apt-get -y install cups-pdf
-	mv "$TEMP_DIR"/usr/sbin/lpadmin{.disabled,}
-fi
+		StatsMessage "Installing kernel"
+		LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y --no-install-recommends install linux-image-generic$TARGET_KVER_LTS_HES
+
+		## Prevent lpadmin from running as it blocks the system
+		LC_ALL=C chroot "$TEMP_DIR" apt-get -y install cupsys-client
+		cp "$TEMP_DIR"/usr/sbin/lpadmin{,.disabled}
+		echo > "$TEMP_DIR"/usr/sbin/lpadmin 
+		LC_ALL=C chroot "$TEMP_DIR" apt-get -y install cups-pdf
+		mv "$TEMP_DIR"/usr/sbin/lpadmin{.disabled,}
+		;;
+	"raspbian")
+		# FIXME: need to add raspbian kernel headers
+
+		# raspbian doesn't come with lsb-release by default???
+		LC_ALL=C chroot "$TEMP_DIR" apt-get -y install lsb-release
+
+		# FIXME: need a way to detect recent kernels
+		LC_ALL=C chroot "$TEMP_DIR" apt-get -y install linux-image-3.2.0-4-rpi
+		;;
+esac
 
 case "$TARGET_ARCH" in
 	i386|amd64)
@@ -441,15 +476,13 @@ case "$TARGET_DISTRO" in
 		DEVICE_LIST="28 62 1759 5 11 1825 26 1808 1901"
 		;;
 	"raspbian")
-		# more required device template required
-#		DEVICE_LIST="26 1808" 
-		DEVICE_LIST=""
+		DEVICE_LIST="2216 62 1759 11 1825 26 1808 1901"
 		;;
 esac
 
 # Determine if MythTV is installed by looking for MythTV_Plugin...
 # Don't install mythtv into raspbian
-if [[ "$TARGET_DISTRO" != "raspbian" ]]; then
+if [[ "raspbian" != "$TARGET_DISTRO" ]]; then
 	Q="SELECT PK_Device FROM Device WHERE FK_DeviceTemplate=36"
 	MythTV_Installed=$(RunSQL "$Q")
 	if [ $MythTV_Installed ];then
@@ -491,6 +524,7 @@ for device in $DEVICE_LIST; do
 		else
 			StatsMessage "#### Package $pkg_name failed ($TEMP_DIR) - We wait 10sec and try again - to stop retrying press Ctrl-C. "
 			sleep 10
+			LC_ALL=C chroot $TEMP_DIR apt-get -f -y --force-yes install
 		fi
 	done
 done
@@ -517,8 +551,9 @@ case "$TARGET_DISTRO" in
 			popd >/dev/null
 		fi
 
-		if [[ "$INSTALL_KUBUNTU_DESKTOP" != "no" ]]; then
-			LC_ALL=C chroot $TEMP_DIR apt-get -y install kubuntu-desktop
+		if [[ "no" != "$INSTALL_KUBUNTU_DESKTOP" ]]; then
+#			LC_ALL=C chroot $TEMP_DIR apt-get -y install kubuntu-desktop
+			LC_ALL=C chroot $TEMP_DIR apt-get -y install kde-minimal
 		fi
 		echo '/bin/false' >"$TEMP_DIR/etc/X11/default-display-manager"
 
@@ -527,7 +562,7 @@ case "$TARGET_DISTRO" in
 		LC_ALL=C chroot $TEMP_DIR update-rc.d -f NetworkManager remove
 
 		#Install ancillary programs
-		LC_ALL=C chroot $TEMP_DIR apt-get -y install xserver-xorg-video-all linux-firmware
+		LC_ALL=C chroot $TEMP_DIR apt-get -y install xserver-xorg-video-all$TARGET_KVER_LTS_HES linux-firmware
 		VerifyExitCode "Ancillary programs install failed"
 
 		;;
@@ -542,7 +577,7 @@ esac
 LC_ALL=C chroot $TEMP_DIR ln -s /usr/lib/libdvdread.so.4 /usr/lib/libdvdread.so.3
 
 # Install plymouth theme on MD in Lucid
-if [[ "$TARGET_RELEASE" = "lucid" ]] || [[ "$TARGET_RELEASE" = "precise" ]]; then
+if [[ "lucid" == "$TARGET_RELEASE" ]]; then
 	LC_ALL=C chroot $TEMP_DIR apt-get -y install lmce-plymouth-theme
 	VerifyExitCode "MCE plymouth theme install failed"
 fi
@@ -670,7 +705,7 @@ for TARGET in $TARGET_TYPES; do
 			TARGET_DISTRO="raspbian"
 			TARGET_RELEASE="wheezy" #TODO: get from ?
 			TARGET_ARCH="armhf"
-			TARGET_REPO="http://mirrordirector.raspbian.org/raspbian/"
+			TARGET_REPO="http://archive.raspbian.org/raspbian/"
 			DBST_ARCHIVE="LMCEMD_Debootstraped-raspbian-armhf.tar.bz2"
 			DisklessFS="LMCEMD-$TARGET_DISTRO-$TARGET_ARCH.tar.bz2"
 			TARGET_DISTRO_ID=19
@@ -680,18 +715,27 @@ for TARGET in $TARGET_TYPES; do
 	esac
 
 	# install cross arch utilities if target_arch is different from host_arch
-	if [ "$TARGET_ARCH" != "$HOST_ARCH" ]; then
+	if [ x"$TARGET_ARCH" != x"$HOST_ARCH" ]; then
 		StatsMessage "Installing cross-arch utilities for $TARGET_RELEASE"
 		apt-get -y install binfmt-support qemu debootstrap
 
 		case "$HOST_RELEASE" in 
 			"lucid")
+				apt-get -f -y install patch
 				# lucid's qemu-arm-static is buggy and missing wheezy definition, need version from precise
 				if [[ ! -d /usr/share/doc/qemu-user-static ]]; then 
 					wget http://archive.ubuntu.com/ubuntu/pool/universe/q/qemu-linaro/qemu-user-static_1.0.50-2012.03-0ubuntu2_i386.deb
 					dpkg -i qemu-user-static_1.0.50-2012.03-0ubuntu2_i386.deb
 					rm  -f qemu-user-static_1.0.50-2012.03-0ubuntu2_i386.deb
 				fi
+				# in order to handle data.tar.xz we must upgrade dpkg on lucid -- this is getting old!
+				wget http://archive.ubuntu.com/ubuntu/pool/main/d/debootstrap/debootstrap_1.0.46_all.deb
+				wget http://archive.ubuntu.com/ubuntu/pool/main/d/dpkg/dpkg_1.16.0.3ubuntu5_i386.deb
+				wget http://archive.ubuntu.com/ubuntu/pool/main/d/dpkg/dpkg-dev_1.16.0.3ubuntu5_all.deb
+				wget http://archive.ubuntu.com/ubuntu/pool/main/d/dpkg/libdpkg-perl_1.16.0.3ubuntu5_all.deb
+				dpkg -i debootstrap_1.0.46_all.deb dpkg_1.16.0.3ubuntu5_i386.deb dpkg-dev_1.16.0.3ubuntu5_all.deb libdpkg-perl_1.16.0.3ubuntu5_all.deb
+				apt-get -f -y --force-yes install
+				rm -f debootstrap_1.0.46_all.deb dpkg_1.16.0.3ubuntu5_i386.deb dpkg-dev_1.16.0.3ubuntu5_all.deb libdpkg-perl_1.16.0.3ubuntu5_all.deb
 				[[ ! -f /usr/share/debootstrap/scripts/wheezy ]] && cp /usr/share/debootstrap/scripts/squeeze /usr/share/debootstrap/scripts/wheezy
 				;;
 			"precise")
