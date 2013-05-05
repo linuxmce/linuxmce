@@ -1,0 +1,144 @@
+Source: linphone
+Section: sound
+Priority: optional
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: Debian VoIP Team <pkg-voip-maintainers@lists.alioth.debian.org>
+Uploaders: Samuel Mimram <smimram@debian.org>, Kilian Krause <kilian@debian.org>, Faidon Liambotis <paravoid@debian.org>, Mark Purcell <msp@debian.org>, Lionel Elie Mamane <lmamane@debian.org>
+Build-Depends: debhelper (>= 7), dpkg-dev (>= 1.13.19), cdbs, 
+ autoconf, automake1.9, autotools-dev, libtool, pkg-config, intltool,
+ libglib2.0-dev, libosip2-dev (>= 3.0.3-2), libexosip2-dev (>= 3.0.3-2),
+ libsrtp-dev [alpha amd64 armel armhf hppa i386 mips mipsel powerpc s390],
+ libasound2-dev [alpha amd64 arm armeb armel armhf avr32 hppa i386 ia64 lpia m32r m68k mips mipsel powerpc ppc64 s390 s390x sh3 sh3eb sh4 sh4eb sparc sparc64],
+ libv4l-dev [alpha amd64 arm armeb armel armhf avr32 hppa i386 ia64 lpia m32r m68k mips mipsel powerpc ppc64 s390 s390x sh3 sh3eb sh4 sh4eb sparc sparc64],
+ libspeex-dev (>= 1.1.12), libspeexdsp-dev, libsamplerate0-dev, libxml-parser-perl, libgsm1-dev,
+ libgtk2.0-dev, libglade2-dev, libtheora-dev,
+ libxv-dev,
+ libavcodec-dev, libreadline-dev, libsdl1.2-dev, libswscale-dev, doxygen
+Standards-Version: 3.9.1
+Homepage: http://www.linphone.org/
+Vcs-Svn: svn://svn.debian.org/pkg-voip/linphone/trunk/
+Vcs-Browser: http://svn.debian.org/wsvn/pkg-voip/linphone/?op=log
+
+Package: linphone
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, linphone-nox (=${binary:Version})
+Suggests: yelp
+Replaces: linphone-common (<< 3.1.2-2)
+Description: SIP softphone - graphical client
+ Linphone is an audio and video internet phone using the SIP protocol. It 
+ has a GTK+ and console interface, includes a large variety of audio and video 
+ codecs, and provides IM features.
+ .
+ The main features of linphone are:
+   - a nice graphical interface;
+   - it includes a large variety of codecs with different quality / bandwidths;
+   - it uses the well-known and standardised SIP protocol.
+
+Package: linphone-nox
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, linphone-common (=${source:Version}), host
+Description: SIP softphone - console-only client
+ Linphone is an audio and video internet phone using the SIP protocol. It 
+ has a GTK+ and console interface, includes a large variety of audio and video 
+ codecs, and provides IM features.
+ .
+ This package contains the console version of linphone.
+
+Package: linphone-common
+Architecture: all
+Depends: ${misc:Depends}
+Replaces: linphone-nox (<= 0.12.2-2)
+Description: Shared components of the linphone SIP softphone
+ Linphone is an audio and video internet phone using the SIP protocol. It 
+ has a GTK+ and console interface, includes a large variety of audio and video 
+ codecs, and provides IM features.
+ .
+ This package contains the resource files of linphone (the rings).
+
+Package: liblinphone3
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: linphone's shared library part (supporting the SIP protocol)
+ Linphone is an audio and video internet phone using the SIP protocol. It 
+ has a GTK+ and console interface, includes a large variety of audio and video 
+ codecs, and provides IM features.
+ .
+ This package contains only the shared runtime libraries.
+
+Package: liblinphone-dev
+Section: libdevel
+Architecture: any
+Provides: liblinphone2-dev
+Replaces: liblinphone2-dev
+Depends: ${misc:Depends}, liblinphone3 (= ${binary:Version}),
+ libmediastreamer-dev, libortp-dev, libosip2-dev (>= 2.2.0), libspeex-dev, libsamplerate0-dev, libasound2-dev [linux-any]
+Conflicts: liblinphone2-dev
+Description: linphone web phone's library (supporting the SIP protocol)
+ Linphone is an audio and video internet phone using the SIP protocol. It 
+ has a GTK+ and console interface, includes a large variety of audio and video 
+ codecs, and provides IM features.
+ .
+ This package contains the files needed to use the linphone's library in your
+ programs.
+
+Package: libmediastreamer0
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: linphone web phone's media library
+ Linphone is an audio and video internet phone using the SIP protocol. It 
+ has a GTK+ and console interface, includes a large variety of audio and video 
+ codecs, and provides IM features.
+ .
+ This package contains the shared runtime libraries for handling media
+ operations.
+
+Package: libmediastreamer-dev
+Section: libdevel
+Architecture: any
+Provides: libmediastreamer0-dev
+Replaces: libmediastreamer0-dev
+Depends: ${misc:Depends}, libmediastreamer0 (= ${binary:Version}), libasound2-dev [linux-any], libortp-dev, libspeex-dev
+Conflicts: libmediastreamer0-dev
+Description: linphone web phone's media library
+ Linphone is an audio and video internet phone using the SIP protocol. It 
+ has a GTK+ and console interface, includes a large variety of audio and video 
+ codecs, and provides IM features.
+ .
+ This package contains the shared runtime libraries for handling media
+ operations.
+
+Package: libortp8
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Real-time Transport Protocol stack
+ This library implements the RFC1889 (RTP) with a easy to use API with high
+ and low level access.
+ .
+ Its main features are:
+   - support for multiples profiles, AV profile (RFC1890) being the default one;
+   - an optional packet scheduler for synchronizing rtp recv and send;
+   - implements blocking and non blocking IO for RTP sessions;
+   - supports mutiplexing IO;
+   - supports part of RFC2833 for telephone events over RTP.
+
+Package: libortp-dev
+Section: libdevel
+Architecture: any
+Provides: libortp7-dev
+Replaces: libortp7-dev
+Depends: ${misc:Depends}, libortp8 (= ${binary:Version}),
+ libsrtp0-dev [alpha amd64 armel armhf hppa i386 mips mipsel powerpc s390]
+Conflicts: libortp7-dev
+Description: Real-time Transport Protocol stack
+ This library implements the RFC1889 (RTP) with a easy to use API with high
+ and low level access.
+ .
+ Its main features are:
+   - support for multiples profiles, AV profile (RFC1890) being the default one;
+   - an optional packet scheduler for synchronizing rtp recv and send;
+   - implements blocking and non blocking IO for RTP sessions;
+   - supports mutiplexing IO;
+   - supports part of RFC2833 for telephone events over RTP.

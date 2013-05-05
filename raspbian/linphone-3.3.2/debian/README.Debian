@@ -1,0 +1,41 @@
+Location of configuration file changed between 1.3.3-1 and 1.3.5-1 versions
+---------------------------------------------------------------------------
+If you want to keep your old settings, you should type the following command:
+mv ~/.gnome2/linphone ~/.gnome2_private/linphone
+
+
+Converting the address book entries between versions 0.12.2 and 1.0.0
+---------------------------------------------------------------------
+You seem to have lost your address book while updating linphone?
+
+Linphone has changed the format in which address book entries are stored between
+versions 0.12.2 and 1.0.0.
+
+To see your old entries back with a new version of linphone you can use the perl
+script cv_addr_book.pl provided in /usr/share/doc/linphone/. You only have to
+run it once under your current user (don't forget to chmod +x the script before
+running it).
+
+If you don't want to know the details, don't read the following paragraph. The
+address book is stored in the file ~/.gnome2/linphone. The old entries were in
+this format:
+
+[address_book]
+entry_count=4
+entry0=Name0 <sip:user0@host0>
+entry1=Name1 <sip:user1@host1>
+...
+
+whereas new entries are in this format:
+
+[friend_0]
+url=Name0 <sip:user0@host0>
+pol=wait
+subscribe=1
+proxy=-1
+
+etc.
+
+Sorry for the inconveniences caused by this change.
+
+ -- Samuel Mimram <smimram@debian.org>  Thu, 13 Apr 2006 13:49:36 +0200

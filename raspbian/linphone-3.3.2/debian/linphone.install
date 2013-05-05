@@ -1,0 +1,4 @@
+usr/bin/linphone-3
+usr/lib/linphone/mediastream	/usr/lib/gnome-applets
+usr/share/applications/linphone.desktop
+debian/linphone2.xpm            /usr/share/pixmaps/linphone

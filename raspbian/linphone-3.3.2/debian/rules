@@ -1,0 +1,34 @@
+#!/usr/bin/make -f
+
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/autotools.mk
+
+DEB_BUILD_PARALLEL := yes
+DEB_DH_MAKESHLIBS_ARGS_libmediastreamer0 := -V
+DEB_DH_MAKESHLIBS_ARGS_liblinphone3 := -V
+DEB_DH_MAKESHLIBS_ARGS_libortp8 := -V
+DEB_INSTALL_CHANGELOGS_ALL := NEWS
+DEB_CONFIGURE_EXTRA_FLAGS = --disable-strict
+
+DEBVERSION:=$(shell head -n 1 debian/changelog \
+		    | sed -e 's/^[^(]*(\([^)]*\)).*/\1/')
+UPVERSION:=$(shell echo $(DEBVERSION) | sed -e 's/^.*://' -e 's/-[0-9.]*$$//' -e 's/.dfsg$$//')
+
+FILENAME := linphone_$(UPVERSION).orig.tar.gz
+URL := http://mirrors.zerg.biz/nongnu/linphone/stable/sources/linphone-$(UPVERSION).tar.gz
+
+clean::
+	rm -fR oRTP/doc
+
+install/linphone-common::
+	rm debian/tmp/usr/share/linphone/COPYING
+
+print-version:
+	@@echo "Debian version:          $(DEBVERSION)"
+	@@echo "Upstream version:        $(UPVERSION)"
+
+get-orig-source:
+	@@dh_testdir
+	@@[ -d ../tarballs/. ]||mkdir -p ../tarballs
+	@@echo Downloading $(FILENAME) from $(URL) ...
+	@@wget -nv -T10 -t3 -O ../tarballs/$(FILENAME) $(URL)
