@@ -1,0 +1,30 @@
+#!/bin/sh
+
+PREREQ=""
+
+# Output pre-requisites
+prereqs()
+{
+	echo "$PREREQ"
+}
+
+case "$1" in
+    prereqs)
+	prereqs
+	exit 0
+	;;
+esac
+
+DT=2216
+#for d in /sys/bus/pci/devices/*; do
+#	if [[ ! -f "$d/vendor" ]]; then
+#		continue
+#	fi
+#	vendor=$(cat "$d/vendor")
+#	device=$(cat "$d/device")
+#	if [[ "$vendor:$device" == "0x1106:0x3157" ]]; then
+#		DT=1893 # Fiire Station 1
+#		break
+#	fi
+#done
+echo "$DT"

@@ -1,13 +1,6 @@
-# List of modules that you want to include in your initramfs.
-# They will be loaded at boot time in the order below.
-#
-# Syntax:  module_name [args ...]
-#
-# You must run update-initramfs(8) to effect this change.
-#
-# Examples:
-#
-# raid1
-# sd_mod
-#sky2
-#atl1
+# NOTE: when you add a module to this list,
+# NOTE: please be sure to update and rebuild linux-image-diskless too
+# NOTE: reference: ubuntu/linux-image-dummy/makepackage.sh
+sky2
+atl1
+atl1c

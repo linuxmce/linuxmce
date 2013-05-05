@@ -6,16 +6,17 @@ if [ "$KVER" ]
 then
 	Moon_KernelVersion=$KVER
 else
-	Moon_KernelVersion=$(uname -r)
+	Moon_KernelVersion=$(find /lib/modules/* -maxdepth 0 -type d |sort -r |head -1)
 fi
 
 #Moon_KernelArch=$(apt-config dump | grep 'APT::Architecture ' | sed 's/APT::Architecture "\(.*\)".*/\1/g')
 Moon_KernelArch="all"
-Moon_RootLocation='package/'
-initramfs_tools_dir="initramfs-tools-default-$flavor-$build_name/"
+Moon_RootLocation="package"
+initramfs_tools_dir="initramfs-tools-default-$flavor-$build_name"
 default_name="default-arm-bcm2835"
-kernel_dir="tftpboot/$default_name/"
-pxe_config_file="tftpboot/pxelinux.cfg/$default_name"
+kernel_dir="tftpboot/$default_name"
+pxe_config_dir="tftpboot/pxelinux.cfg"
+pxe_config_file="$pxe_config_dir/$default_name"
 
 # Remove old kernel images from package dir
 rm -fr $Moon_RootLocation/{$kernel_dir,lib/modules}
@@ -26,8 +27,8 @@ if [ ! -f /boot/vmlinuz-${Moon_KernelVersion} ]; then
 	echo Need to install linux-image-${Moon_KernelVersion}
 	apt-get install linux-image-${Moon_KernelVersion}
 fi
-cp /boot/vmlinuz-${Moon_KernelVersion} ${Moon_RootLocation}/${kernel_dir}
-cp /boot/System.map-${Moon_KernelVersion} ${Moon_RootLocation}/${kernel_dir}
+cp /boot/vmlinuz-${Moon_KernelVersion} ${Moon_RootLocation}/${kernel_dir}/
+cp /boot/System.map-${Moon_KernelVersion} ${Moon_RootLocation}/${kernel_dir}/
 
 # Generate NFS bootable initrd
 AddModules()
@@ -42,7 +43,7 @@ AddModules()
 
 sed -i 's/^.*BOOT=.*/BOOT=nfs/g' "$initramfs_tools_dir/initramfs.conf"
 
-mkinitramfs -d "$initramfs_tools_dir" -o ${Moon_RootLocation}/${kernel_dir}/initrd.img-${Moon_KernelVersion} ${Moon_KernelVersion}
+mkinitramfs -d "$initramfs_tools_dir/" -o ${Moon_RootLocation}/${kernel_dir}/initrd.img-${Moon_KernelVersion} ${Moon_KernelVersion}
 
 # Setup the symlinks
 pushd ${Moon_RootLocation}/${kernel_dir}
@@ -62,6 +63,7 @@ dpkg -L linux-image-${Moon_KernelVersion}  | grep '^/lib/modules/'  | sed 's|^/l
 done
 
 # Create PXE configuration for default boot
+mkdir -p 
 echo "DEFAULT Pluto
 LABEL Pluto
 KERNEL default-arm-bcm2835/vmlinuz
