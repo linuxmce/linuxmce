@@ -19,11 +19,14 @@
 
 #include "Gen_Devices/Hue_ControllerBase.h"
 //<-dceag-d-e->
-
+#include "QObject"
+#include  "qjson/parser.h"
+#include "qjson/qobjecthelper.h"
+#include "qjson/serializer.h"
 //<-dceag-decl-b->
 namespace DCE
 {
-	class Hue_Controller : public Hue_Controller_Command
+    class Hue_Controller : public Hue_Controller_Command , public QObject
 	{
 //<-dceag-decl-e->
 		// Private member variables

@@ -24,13 +24,15 @@ using namespace DCE;
 
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
-
+#include <QDebug>
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 Hue_Controller::Hue_Controller(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
 	: Hue_Controller_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 {
+    qDebug() << "Created Controller.";
+    qDebug() << this->thread();
 }
 
 //<-dceag-const2-b->
