@@ -226,6 +226,7 @@ function update_config_files
 			Names=("${Names[@]}" "$Name")
 		done
 	fi
+	pushd "$ScriptDir" >/dev/null
 	for Script in $ScriptsList ;do
 		if [[ ! -x $ScriptDir/$Script ]] ;then
 			echo "WARNING: Script $Script cannot be executed"
@@ -240,6 +241,7 @@ function update_config_files
 			done
 		fi
 	done
+	popd >/dev/null
 }
 
 
