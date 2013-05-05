@@ -30,7 +30,7 @@ using namespace DCE;
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 Hue_Controller::Hue_Controller(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
-        : Hue_Controller_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
+	: Hue_Controller_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 {
     qDebug() << "Created Controller.";
@@ -40,15 +40,15 @@ Hue_Controller::Hue_Controller(int DeviceID, string ServerAddress,bool bConnectE
 
 //<-dceag-const2-b->
 // The constructor when the class is created as an embedded instance within another stand-alone device
-//Hue_Controller::Hue_Controller(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
-//        : Hue_Controller_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter, 0)
-//////<-dceag-const2-e->
+Hue_Controller::Hue_Controller(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
+	: Hue_Controller_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
+//<-dceag-const2-e->
 //{
 //}
 
 //<-dceag-dest-b->
-//Hue_Controller::~Hue_Controller()
-////<-dceag-dest-e->
+Hue_Controller::~Hue_Controller()
+//<-dceag-dest-e->
 //{
 //
 //}
@@ -87,10 +87,10 @@ bool Hue_Controller::Register()
 	cannot include the actual implementation.  Instead there's an extern function declared, and the actual new exists here.  You 
 	can safely remove this block (put a ! after the dceag-createinst-b block) if this device is not embedded within other devices. */
 //<-dceag-createinst-b->
-//Hue_Controller_Command *Create_Hue_Controller(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
-//{
-//        return new Hue_Controller(pPrimaryDeviceCommand, pData, pEvent, pRouter);
-//}
+Hue_Controller_Command *Create_Hue_Controller(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
+{
+	return new Hue_Controller(pPrimaryDeviceCommand, pData, pEvent, pRouter);
+}
 //<-dceag-createinst-e->
 
 /*
