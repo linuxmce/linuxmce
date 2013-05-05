@@ -63,11 +63,11 @@ dpkg -L linux-image-${Moon_KernelVersion}  | grep '^/lib/modules/'  | sed 's|^/l
 done
 
 # Create PXE configuration for default boot
-mkdir -p 
+mkdir -p "$pxe_config_dir"
 echo "DEFAULT Pluto
 LABEL Pluto
 KERNEL default-arm-bcm2835/vmlinuz
-APPEND root=/dev/nfs initrd=default-arm-bcm2835/initrd ramdisk_size=10240 rw
+APPEND root=/dev/nfs initrd=$default_name/initrd ramdisk_size=10240 rw
 " > ${pxe_config_file}
 
 cp ${Moon_RootLocation}/DEBIAN/changelog{.in,}
