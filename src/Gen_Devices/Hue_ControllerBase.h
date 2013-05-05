@@ -96,16 +96,24 @@ public:
 			return m_mapParameters[DEVICEDATA_Device_CONST];
 	}
 
-	void Set_Device(string Value)
-	{
-		SetParm(DEVICEDATA_Device_CONST,Value.c_str());
-	}
 	string Get_Username()
 	{
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Username_CONST);
 		else
 			return m_mapParameters[DEVICEDATA_Username_CONST];
+	}
+
+	void Set_Username(string Value)
+	{
+		SetParm(DEVICEDATA_Username_CONST,Value.c_str());
+	}
+	string Get_Server_IP()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Server_IP_CONST);
+		else
+			return m_mapParameters[DEVICEDATA_Server_IP_CONST];
 	}
 
 };
@@ -213,8 +221,9 @@ public:
 	Command_Impl *CreateCommand(int PK_DeviceTemplate, Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent);
 	//Data accessors
 	string DATA_Get_Device() { return GetData()->Get_Device(); }
-	void DATA_Set_Device(string Value,bool bUpdateDatabase=false) { GetData()->Set_Device(Value); if( bUpdateDatabase ) SetDeviceDataInDB(m_dwPK_Device,1,Value); }
 	string DATA_Get_Username() { return GetData()->Get_Username(); }
+	void DATA_Set_Username(string Value,bool bUpdateDatabase=false) { GetData()->Set_Username(Value); if( bUpdateDatabase ) SetDeviceDataInDB(m_dwPK_Device,127,Value); }
+	string DATA_Get_Server_IP() { return GetData()->Get_Server_IP(); }
 	//Event accessors
 	void EVENT_State_Changed(int iValue) { GetEvents()->State_Changed(iValue); }
 	//Commands - Override these to handle commands from the server
