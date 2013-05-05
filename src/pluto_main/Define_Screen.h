@@ -167,9 +167,9 @@
 #define SCREEN_Apple_2_Remote_CONST 166
 #define SCREEN_Apple_2_FS_CONST 167
 #define SCREEN_Commodore_Remote_CONST 168
-#define SCREEN_AudiClimate_CONST 169
-#define SCREEN_AudiSecurity_CONST 170
-#define SCREEN_AudiTelecom_CONST 171
+#define SCREEN_AirTunes_CONST 169
+#define SCREEN_AirTunes_FS_CONST 170
+#define SCREEN_AirTunes_FS_Options_CONST 171
 #define SCREEN_AudiFullScreen_CONST 172
 #define SCREEN_AudiVideoRemote_CONST 173
 #define SCREEN_CleanScreen_CONST 174
