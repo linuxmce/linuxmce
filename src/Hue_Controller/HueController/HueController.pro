@@ -40,8 +40,8 @@ SOURCES += ../Main.cpp \
     ../../DCE/DeviceData_Impl.cpp \
     ../../PlutoUtils/getch.cpp \
     ../../Gen_Devices/Hue_ControllerBase.cpp \
-    ../Hue_Controller.cpp \
-    huebridge.cpp
+    ../Hue_Controller.cpp
+
 HEADERS += ../../PlutoUtils/ThreadedClass.h \
     ../../PlutoUtils/MultiThreadIncludes.h \
     ../../PlutoUtils/StringUtils.h \
@@ -63,5 +63,4 @@ HEADERS += ../../PlutoUtils/ThreadedClass.h \
     ../../pluto_main/Define_DeviceCategory.h \
     ../../pluto_main/Define_DeviceTemplate.h \
     ../../Gen_Devices/Hue_ControllerBase.h \
-    ../Hue_Controller.h \
-    huebridge.h
+    ../Hue_Controller.h

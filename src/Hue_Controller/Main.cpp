@@ -13,6 +13,7 @@
 */
 //<-dceag-incl-b->
 #include "Hue_Controller.h"
+
 #include "DCE/Logger.h"
 #include "ServerLogger.h"
 #include "PlutoUtils/FileUtils.h"
@@ -118,7 +119,7 @@ int main(int argc, char* argv[])
 		<< "Visit www.plutohome.com for source code and license information" << endl << endl;
 
 	string sRouter_IP="dcerouter";
-	int PK_Device=0;
+        int PK_Device=69;
 	string sLogger="stdout";
 
 	bool bLocalMode=false,bError=false; // An error parsing the command line
@@ -205,6 +206,7 @@ int main(int argc, char* argv[])
 			g_pSocketCrashHandler=SocketCrashHandler;
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
 			pHue_Controller->CreateChildren();
+
 			if( bLocalMode )
 				pHue_Controller->RunLocalMode();
 			else

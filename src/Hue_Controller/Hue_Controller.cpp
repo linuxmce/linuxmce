@@ -43,15 +43,15 @@ Hue_Controller::Hue_Controller(int DeviceID, string ServerAddress,bool bConnectE
 Hue_Controller::Hue_Controller(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
 	: Hue_Controller_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
 //<-dceag-const2-e->
-//{
-//}
+{
+}
 
 //<-dceag-dest-b->
 Hue_Controller::~Hue_Controller()
 //<-dceag-dest-e->
-//{
-//
-//}
+{
+
+}
 
 
 //<-dceag-getconfig-b->
@@ -66,7 +66,7 @@ bool Hue_Controller::GetConfig()
     QString m_id= QString::fromStdString(this->DATA_Get_Device());
     if(m_id.isEmpty()){
         qDebug() << "Hue ID is not set, Adding 1st missing hue controller." << m_id;
-        findLocalControllers();
+
 
   // DATA_Set_Device("derp", true);
    //  DATA_Set_Server_IP("foodiddy", true);
@@ -350,8 +350,6 @@ void Hue_Controller::CMD_Set_Color_RGB(int iRed_Level,int iGreen_Level,int iBlue
     cout << "Parm #281 - Blue_Level=" << iBlue_Level << endl;
 }
 
-bool Hue_Controller::findLocalControllers(){
 
-}
 
 

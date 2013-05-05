@@ -1,6 +1,6 @@
 #include "huebridge.h"
 
-HueBridge::HueBridge(QObject *parent) :
-    QObject(parent)
+HueBridge::HueBridge(Hue_Controller* dceObject, QObject *parent) :
+    QObject(parent), mp_dceController(dceObject)
 {
 }

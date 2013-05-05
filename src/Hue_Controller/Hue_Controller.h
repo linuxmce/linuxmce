@@ -19,11 +19,9 @@
 
 #include "Gen_Devices/Hue_ControllerBase.h"
 //<-dceag-d-e->
-#include "QObject"
-#include  "qjson/parser.h"
-#include "qjson/qobjecthelper.h"
-#include "qjson/serializer.h"
-#include "qnetworkaccessmanager.h"
+
+
+
 //<-dceag-decl-b->
 namespace DCE
 {
@@ -33,10 +31,7 @@ namespace DCE
         // Private member variables
         bool mb_isNew;
 
-
         // Private methods
-
-
     public:
         // Public member variables
 
@@ -169,8 +164,7 @@ NOEMON or CANBUS */
 
 //<-dceag-h-e->
 
-      public slots:
-            void replyFinished(QNetworkReply*);
+
     };
 
     //<-dceag-end-b->
