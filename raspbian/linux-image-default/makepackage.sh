@@ -53,10 +53,10 @@ popd
 
 # Create PXE configuration for default boot
 mkdir -p "$pxe_config_dir"
-echo "DEFAULT Pluto
-LABEL Pluto
+echo "DEFAULT LinuxMCE
+LABEL LinuxMCE
 KERNEL $default_name/vmlinuz
-APPEND root=/dev/nfs initrd=$default_name/initrd ramdisk_size=10240 rw
+APPEND root=/dev/nfs initrd=$default_name/initrd.img ramdisk_size=10240 rw
 " > ${pxe_config_file}
 
 cp ${Moon_RootLocation}/DEBIAN/changelog{.in,}
