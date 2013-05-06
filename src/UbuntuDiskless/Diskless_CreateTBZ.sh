@@ -306,12 +306,13 @@ esac
 [[ -f /etc/apt/preferences ]] && cp {,"$TEMP_DIR"}/etc/apt/preferences
 [[ -f /etc/apt/apt.conf ]] && cp {,"$TEMP_DIR"}/etc/apt/apt.conf
 
-## Setup initial ssh access    
+## Setup initial ssh access
 StatsMessage "Setting up SSH"
 [[ -f /usr/pluto/keys/id_dsa_pluto.pub ]] && mkdir -p "$TEMP_DIR"/root/.ssh && cat /usr/pluto/keys/id_dsa_pluto.pub >> "$TEMP_DIR"/root/.ssh/authorized_keys
 
-## Setup kernel postinst hook to fix kernel/initrd symlinks
-StatsMessage "Setting up Kernel postinst hooks"
+
+## Setup kernel postinst script to repair vmlinuz/initrd.img symlinks in /
+StatsMessage "Setting up kernel postinst.d/"
 echo "#!/bin/bash
 # LinuxMCE post kernel image install.
 # 
@@ -321,45 +322,59 @@ chmod g+r /boot/* || :
 chmod o+r /boot/* || :
 
 pushd /
-ln -sf boot/initrd-$1 initrd.img || :
-ln -sf boot/vmlinuz-$1 vmlinuz || :
+ln -sf boot/initrd.img-\$1 initrd.img || :
+ln -sf boot/vmlinuz-\$1 vmlinuz || :
 popd
 
 exit 0
-" > $TEMP_DIR/etc/kernel/postinst.d/symlinks
-chmod +x $TEMP_DIR/etc/kernel/postinst.d/symlinks
+">$TEMP_DIR/etc/kernel/postinst.d/update-symlinks
+chmod +x $TEMP_DIR/etc/kernel/postinst.d/update-symlinks
 }
 
 MD_Seamless_Compatability () {
-if [[ "ubuntu" == "$TARGET_DISTRO" ]]; then
-	######################
-	#Foxconn NT330i
-	######################
-	StatsMessage "Setting up Foxconn NT330i compatability"
-	if ! grep atl1c $TEMP_DIR/etc/modules >/dev/null; then
-		#White space should not be present in the modules files, you MUST remove for the MD to boot properly
-		sed -i '/^$/d' $TEMP_DIR/etc/modules
-		echo atl1c>>$TEMP_DIR/etc/modules
-	fi
+case "$TARGET_DISTRO" in
+	ubuntu)
+		######################
+		#Foxconn NT330i
+		######################
+		StatsMessage "Setting up Foxconn NT330i compatability"
+		if ! grep atl1c $TEMP_DIR/etc/modules >/dev/null; then
+			#White space should not be present in the modules files, you MUST remove for the MD to boot properly
+			sed -i '/^$/d' $TEMP_DIR/etc/modules
+			echo atl1c>>$TEMP_DIR/etc/modules
+		fi
 
-	if ! grep atl1c $TEMP_DIR/etc/initramfs-tools/modules >/dev/null; then
-		#White space should not be present in the modules files, you MUST remove for the MD to boot properly
-		sed -i '/^$/d' $TEMP_DIR/etc/initramfs-tools/modules
-		echo atl1c>>$TEMP_DIR/etc/initramfs-tools/modules
-	fi
+		if ! grep atl1c $TEMP_DIR/etc/initramfs-tools/modules >/dev/null; then
+			#White space should not be present in the modules files, you MUST remove for the MD to boot properly
+			sed -i '/^$/d' $TEMP_DIR/etc/initramfs-tools/modules
+			echo atl1c>>$TEMP_DIR/etc/initramfs-tools/modules
+		fi
 
-	if ! grep atl1c /etc/initramfs-tools-interactor/modules >/dev/null; then
-		echo atl1c>>/etc/initramfs-tools-interactor/modules
-		VerifyExitCode "insertion of atl1c to modules file failed"
-		#White space should not be present in the modules files, you MUST remove for the MD to boot properly
-		sed -i '/^$/d' /etc/initramfs-tools-interactor/modules
-		modprobe atl1c
-		VerifyExitCode "Modprobe for atl1c failed"
-	fi
-	######################
-	#End Foxconn NT330i
-	######################
-fi
+		if ! grep atl1c /etc/initramfs-tools-interactor/modules >/dev/null; then
+			echo atl1c>>/etc/initramfs-tools-interactor/modules
+			VerifyExitCode "insertion of atl1c to modules file failed"
+
+			#White space should not be present in the modules files, you MUST remove for the MD to boot properly
+			sed -i '/^$/d' /etc/initramfs-tools-interactor/modules
+			modprobe atl1c
+			VerifyExitCode "Modprobe for atl1c failed"
+		fi
+		######################
+		#End Foxconn NT330i
+		######################
+		;;
+	raspbian)
+		echo -e "BOOT=nfs\nMODULES=most\nCOMPRESS=\n" > "$TEMP_DIR/etc/initramfs-tools/conf.d/linuxmce.conf"
+		VerifyExitCode "Creation of etc/initramfs-tools/conf.d/linuxmce.conf file failed"
+
+                if ! grep smsc95xx $TEMP_DIR/etc/initramfs-tools/modules >/dev/null; then
+                        #White space should not be present in the modules files, you MUST remove for the MD to boot properly
+                        sed -i '/^$/d' "$TEMP_DIR/etc/initramfs-tools/modules"
+                        echo smsc95xx>>"$TEMP_DIR/etc/initramfs-tools/modules"
+			VerifyExitCode "Insertion of smsc95xx module in initramfs-tools/modules failed"
+                fi
+		;;
+esac
 }
 
 MD_Preseed () {
@@ -424,7 +439,8 @@ LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y install locales
 
 case "$TARGET_DISTRO" in
 	"ubuntu")
-		#Install headers and run depmod for the seamless integraiton function, ensure no errors exist
+		StatsMessage "Installing kernel headers"
+		#Install headers and run depmod for the seamless integraton function, ensure no errors exist
 		TARGET_KVER_LTS_HES=""
 		[[ "precise" = "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-ltsquantal"
 		LC_ALL=C chroot "$TEMP_DIR" apt-get -y install linux-headers-generic$TARGET_KVER_LTS_HES
@@ -436,6 +452,7 @@ case "$TARGET_DISTRO" in
 
 		StatsMessage "Installing kernel"
 		LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y --no-install-recommends install linux-image-generic$TARGET_KVER_LTS_HES
+		VerifyExitCode "Install linux kernel package failed"
 
 		## Prevent lpadmin from running as it blocks the system
 		LC_ALL=C chroot "$TEMP_DIR" apt-get -y install cupsys-client
@@ -445,13 +462,24 @@ case "$TARGET_DISTRO" in
 		mv "$TEMP_DIR"/usr/sbin/lpadmin{.disabled,}
 		;;
 	"raspbian")
-		# FIXME: need to add raspbian kernel headers
+		StatsMessage "Installing kernel headers"
+		# Get most recent rpi kernel header version
+		TARGET_HEADER_KVER=$(apt-cache search linux-headers- |grep rpi |sort -r |head -1 |cut -d ' ' -f 1| cut -d '-' -f 3-)
+
+		#Install headers and run depmod, ensure no errors exist
+		LC_ALL=C chroot "TEMP_DIR" apt-get -y install linux-headers-"$TARGET_HEADER_KVER"
+		VerifyExitCode "Install linux headers package failed"
+
+		TARGET_KVER=$(basename $(find "$TEMP_DIR"/lib/modules/* -maxdepth 0 -type d |sort -r |head -1))
+		LC_ALL=C chroot "$TEMP_DIR" depmod -v "$TARGET_KVER" 
+		VerifyExitCode "depmod failed for $TARGET_KVER" 
+
+		StatsMessage "Installing kernel"
+		LC_ALL=C chroot "$TEMP_DIR" apt-get -y install linux-image-"$TARGET_KVER"
+		VerifyExitCode "Install linux kernel package failed"
 
 		# raspbian doesn't come with lsb-release by default???
 		LC_ALL=C chroot "$TEMP_DIR" apt-get -y install lsb-release
-
-		# FIXME: need a way to detect recent kernels
-		LC_ALL=C chroot "$TEMP_DIR" apt-get -y install linux-image-3.2.0-4-rpi
 		;;
 esac
 
@@ -529,9 +557,9 @@ for device in $DEVICE_LIST; do
 	done
 done
 
+StatsMessage "Install other ancillary programs for MCE"
 case "$TARGET_ARCH" in
 	i386|amd64)
-		StatsMessage "Install other ancillary programs for MCE"
 		## Packages that are marked as dependencies only in the database
 		LC_ALL=C chroot $TEMP_DIR apt-get -y install id-my-disc
 		;;
@@ -551,7 +579,7 @@ case "$TARGET_DISTRO" in
 			popd >/dev/null
 		fi
 
-		if [[ "no" != "$INSTALL_KUBUNTU_DESKTOP" ]]; then
+		if [[ "$INSTALL_KUBUNTU_DESKTOP" != "no" ]]; then
 #			LC_ALL=C chroot $TEMP_DIR apt-get -y install kubuntu-desktop
 			LC_ALL=C chroot $TEMP_DIR apt-get -y install kde-minimal
 		fi
@@ -581,13 +609,6 @@ if [[ "lucid" == "$TARGET_RELEASE" ]]; then
 	LC_ALL=C chroot $TEMP_DIR apt-get -y install lmce-plymouth-theme
 	VerifyExitCode "MCE plymouth theme install failed"
 fi
-
-#Install backported alsa modules for HDMI audio for legacy hardware
-#tkmedia mentioned there are conflicts with this and capture cards using V4L, disabling for now
-#if [[ "$TARGET_RELEASE" = "lucid" ]] ; then
-	#LC_ALL=C chroot $TEMP_DIR apt-get -y install linux-backports-modules-alsa-lucid-generic
-	#VerifyExitCode "Alsa backport modules install failed for HDMI"
-#fi
 
 }
 
