@@ -20,13 +20,21 @@ function setup_tftp_boot
 {
 	echo "* Configuring TFTP Boot for MD #${Moon_DeviceID}"
 
+	Moon_DistroID=$(RunSQL "SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device='$Moon_DeviceID' AND FK_DeviceData='$DEVICEDATA_PK_Distro'")
 	local Moon_BootConfFile="/tftpboot/pxelinux.cfg/01-$(echo ${Moon_MAC//:/-} | tr 'A-Z' 'a-z')"
 	local BootConf=""
 
 	# deprecated boot parameter "video=" and we don't want to force vesafb with modern accelerated framebuffers (ie intel)
 	# if extra parameters are necessary they should be added to the DT as DEVICEDATA_Extra_Parameters
 	#local BootParams="quiet splash video=uvesafb:mode_option=1024x768-24,mtrr=3,scroll=ywrap vmalloc=256m"
-	local BootParams="quiet splash"
+	case $Moon_DistroID in
+		19)
+			local BootParams="splash"
+			;;
+		*)
+			local BootParams="quiet splash"
+			;;
+	esac
 	local BootParams_Extra=$(RunSQL "SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device = $Moon_DeviceID AND FK_DeviceData = $DEVICEDATA_Extra_Parameters")
 	local BootParams_Override=$(RunSQL "SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device = $Moon_DeviceID AND FK_DeviceData = $DEVICEDATA_Extra_Parameters_Override")
 	if [[ "$BootParams_Override" == "1" ]] ;then
@@ -123,10 +131,19 @@ function setup_tftp_boot
 		chroot /usr/pluto/diskless/"$Moon_DeviceID" depmod "$Kver"
 		chroot /usr/pluto/diskless/"$Moon_DeviceID" update-initramfs -k "$Kver" -u
 
+		case $Moon_DistroID in
+			19)
+			nfsroot="${IntIP}:/usr/pluto/diskless/${Moon_DeviceID}"
+			;;
+			*)
+			nfsroot="${IntIP}:/usr/pluto/diskless/${Moon_DeviceID},intr,nolock,udp,rsize=32768,wsize=32768,retrans=10,timeo=50"
+			;;
+		esac
+
 		BootConf="${BootConf}DEFAULT Pluto\n"
 		BootConf="${BootConf}LABEL Pluto\n"
 		BootConf="${BootConf}KERNEL ${Moon_DeviceID}/vmlinuz\n"
-		BootConf="${BootConf}APPEND initrd=${Moon_DeviceID}/initrd.img ramdisk=10240 rw root=/dev/nfs boot=nfs nfsroot=${IntIP}:/usr/pluto/diskless/${Moon_DeviceID},intr,nolock,udp,rsize=32768,wsize=32768,retrans=10,timeo=50 ${BootParams}\n"
+		BootConf="${BootConf}APPEND initrd=${Moon_DeviceID}/initrd.img ramdisk=10240 rw root=/dev/nfs boot=nfs nfsroot=${nfsroot} ${BootParams}\n"
 		echo -e "$BootConf" > "$Moon_BootConfFile"
 	fi
 }
