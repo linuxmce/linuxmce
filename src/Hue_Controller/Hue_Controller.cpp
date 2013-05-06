@@ -27,28 +27,36 @@ using namespace DCE;
 #include <QDebug>
 #include <qjson/parser.h>
 #include <qjson/serializer.h>
+#include <qnetworkreply.h>
+#include <qnetworkrequest.h>
+#include <qeventloop.h>
+#include <QVariantMap>
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
-Hue_Controller::Hue_Controller(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
-	: Hue_Controller_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
-//<-dceag-const-e->
+Hue_Controller::Hue_Controller(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter, QObject*parent)
+    : DCE::Hue_Controller_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
+    //<-dceag-const-e->
 {
+    
     qDebug() << "Created Controller.";
     mb_isNew = true;
-
+    communicator = new QNetworkAccessManager(this);
+    QObject::connect(this, SIGNAL(initiateConfigDownload()), this, SLOT(getHueDataStore()));
+    QObject::connect(this, SIGNAL(initiateConfigDownload()), this, SLOT(dummySlot()));
 }
 
 //<-dceag-const2-b->
 // The constructor when the class is created as an embedded instance within another stand-alone device
 Hue_Controller::Hue_Controller(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
-	: Hue_Controller_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
-//<-dceag-const2-e->
+    : DCE::Hue_Controller_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
+    //<-dceag-const2-e->
 {
 }
 
 //<-dceag-dest-b->
 Hue_Controller::~Hue_Controller()
-//<-dceag-dest-e->
+        //<-dceag-dest-e->
 {
 
 }
@@ -57,19 +65,21 @@ Hue_Controller::~Hue_Controller()
 //<-dceag-getconfig-b->
 bool Hue_Controller::GetConfig()
 {
-	if( !Hue_Controller_Command::GetConfig() )
-		return false;
-//<-dceag-getconfig-e->
+    if( !Hue_Controller_Command::GetConfig() )
+        return false;
+    //<-dceag-getconfig-e->
 
     // Put your code here to initialize the data in this class
     // The configuration parameters DATA_ are now populated
     QString m_id= QString::fromStdString(this->DATA_Get_Device());
+    targetIpAddress= QString::fromStdString(this->DATA_Get_Server_IP());
+    // authUser = QString::fromStdString(this->DATA_Get_Username());
+    authUser="newdeveloper";
     if(m_id.isEmpty()){
         qDebug() << "Hue ID is not set, Adding 1st missing hue controller." << m_id;
-
-
-  // DATA_Set_Device("derp", true);
-   //  DATA_Set_Server_IP("foodiddy", true);
+        qDebug() << "Looking up ::"<< targetIpAddress;
+        qDebug() << "Defult username"<<authUser;
+        initBridgeConnection();
 
     }
     return true;
@@ -78,7 +88,7 @@ bool Hue_Controller::GetConfig()
 //<-dceag-reg-b->
 // This function will only be used if this device is loaded into the DCE Router's memory space as a plug-in.  Otherwise Connect() will be called from the main()
 bool Hue_Controller::Register()
-//<-dceag-reg-e->
+        //<-dceag-reg-e->
 {
     return Connect(PK_DeviceTemplate_get());
 }
@@ -89,7 +99,7 @@ bool Hue_Controller::Register()
 //<-dceag-createinst-b->
 Hue_Controller_Command *Create_Hue_Controller(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
 {
-	return new Hue_Controller(pPrimaryDeviceCommand, pData, pEvent, pRouter);
+    return new Hue_Controller(pPrimaryDeviceCommand, pData, pEvent, pRouter);
 }
 //<-dceag-createinst-e->
 
@@ -103,7 +113,7 @@ Hue_Controller_Command *Create_Hue_Controller(Command_Impl *pPrimaryDeviceComman
 */
 //<-dceag-cmdch-b->
 void Hue_Controller::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
-//<-dceag-cmdch-e->
+        //<-dceag-cmdch-e->
 {
     sCMD_Result = "UNHANDLED CHILD";
 }
@@ -115,7 +125,7 @@ void Hue_Controller::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,s
 */
 //<-dceag-cmduk-b->
 void Hue_Controller::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
-//<-dceag-cmduk-e->
+        //<-dceag-cmduk-e->
 {
     sCMD_Result = "UNKNOWN COMMAND";
 }
@@ -138,7 +148,7 @@ void Hue_Controller::SomeFunction()
 	// commands and requests, including the parameters.  See "AllCommandsRequests.h"
 
 	// Examples:
-	
+
 	// Send a specific the "CMD_Simulate_Mouse_Click" command, which takes an X and Y parameter.  We'll use 55,77 for X and Y.
 	DCE::CMD_Simulate_Mouse_Click CMD_Simulate_Mouse_Click(m_dwPK_Device,OrbiterID,55,77);
 	SendCommand(CMD_Simulate_Mouse_Click);
@@ -211,13 +221,13 @@ void Hue_Controller::SomeFunction()
 
 //<-dceag-c184-b->
 
-	/** @brief COMMAND: #184 - Set Level */
-	/** Sets the brightness of the light.  The value is 0 for off, up to 100 for full brightness. Several devices such as Drapes Switch can accept relative levels (+1 to step forward/-1 to step backword). */
-		/** @param #76 Level */
-			/** The level to set, as a value between 0 (off) and 100 (full).  It can be preceeded with a - or + indicating a relative value.  +20 means up 20%. */
+/** @brief COMMAND: #184 - Set Level */
+/** Sets the brightness of the light.  The value is 0 for off, up to 100 for full brightness. Several devices such as Drapes Switch can accept relative levels (+1 to step forward/-1 to step backword). */
+/** @param #76 Level */
+/** The level to set, as a value between 0 (off) and 100 (full).  It can be preceeded with a - or + indicating a relative value.  +20 means up 20%. */
 
 void Hue_Controller::CMD_Set_Level(string sLevel,string &sCMD_Result,Message *pMessage)
-//<-dceag-c184-e->
+        //<-dceag-c184-e->
 {
     cout << "Need to implement command #184 - Set Level" << endl;
     cout << "Parm #76 - Level=" << sLevel << endl;
@@ -225,15 +235,15 @@ void Hue_Controller::CMD_Set_Level(string sLevel,string &sCMD_Result,Message *pM
 
 //<-dceag-c192-b->
 
-	/** @brief COMMAND: #192 - On */
-	/** Turn on the device */
-		/** @param #97 PK_Pipe */
-			/** Normally when a device is turned on all the inputs and outputs are selected automatically.  If this parameter is specified, only the settings along this pipe will be set. */
-		/** @param #98 PK_Device_Pipes */
-			/** Normally when a device is turned on the corresponding "pipes" are enabled by default. if this parameter is blank.  If this parameter is 0, no pipes will be enabled.  This can also be a comma seperated list of devices, meaning only the pipes to those devic */
+/** @brief COMMAND: #192 - On */
+/** Turn on the device */
+/** @param #97 PK_Pipe */
+/** Normally when a device is turned on all the inputs and outputs are selected automatically.  If this parameter is specified, only the settings along this pipe will be set. */
+/** @param #98 PK_Device_Pipes */
+/** Normally when a device is turned on the corresponding "pipes" are enabled by default. if this parameter is blank.  If this parameter is 0, no pipes will be enabled.  This can also be a comma seperated list of devices, meaning only the pipes to those devic */
 
 void Hue_Controller::CMD_On(int iPK_Pipe,string sPK_Device_Pipes,string &sCMD_Result,Message *pMessage)
-//<-dceag-c192-e->
+        //<-dceag-c192-e->
 {
     cout << "Need to implement command #192 - On" << endl;
     cout << "Parm #97 - PK_Pipe=" << iPK_Pipe << endl;
@@ -242,13 +252,13 @@ void Hue_Controller::CMD_On(int iPK_Pipe,string sPK_Device_Pipes,string &sCMD_Re
 
 //<-dceag-c193-b->
 
-	/** @brief COMMAND: #193 - Off */
-	/** Turn off the device */
-		/** @param #97 PK_Pipe */
-			/** Normally when a device is turned on all the inputs and outputs are selected automatically.  If this parameter is specified, only the settings along this pipe will be set. */
+/** @brief COMMAND: #193 - Off */
+/** Turn off the device */
+/** @param #97 PK_Pipe */
+/** Normally when a device is turned on all the inputs and outputs are selected automatically.  If this parameter is specified, only the settings along this pipe will be set. */
 
 void Hue_Controller::CMD_Off(int iPK_Pipe,string &sCMD_Result,Message *pMessage)
-//<-dceag-c193-e->
+        //<-dceag-c193-e->
 {
     cout << "Need to implement command #193 - Off" << endl;
     cout << "Parm #97 - PK_Pipe=" << iPK_Pipe << endl;
@@ -256,43 +266,72 @@ void Hue_Controller::CMD_Off(int iPK_Pipe,string &sCMD_Result,Message *pMessage)
 
 //<-dceag-c756-b->
 
-	/** @brief COMMAND: #756 - Report Child Devices */
-	/** Report all the child sensors this has by firing an event 'Reporting Child Devices' */
+/** @brief COMMAND: #756 - Report Child Devices */
+/** Report all the child sensors this has by firing an event 'Reporting Child Devices' */
 
 void Hue_Controller::CMD_Report_Child_Devices(string &sCMD_Result,Message *pMessage)
-//<-dceag-c756-e->
+        //<-dceag-c756-e->
 {
     cout << "Need to implement command #756 - Report Child Devices" << endl;
 }
 
 //<-dceag-c757-b->
 
-	/** @brief COMMAND: #757 - Download Configuration */
-	/** Download new configuration data for this device */
-		/** @param #9 Text */
-			/** Any information the device may want to do the download */
+/** @brief COMMAND: #757 - Download Configuration */
+/** Download new configuration data for this device */
+/** @param #9 Text */
+/** Any information the device may want to do the download */
 
 void Hue_Controller::CMD_Download_Configuration(string sText,string &sCMD_Result,Message *pMessage)
-//<-dceag-c757-e->
+        //<-dceag-c757-e->
 {
     cout << "Need to implement command #757 - Download Configuration" << endl;
     cout << "Parm #9 - Text=" << sText << endl;
+   emit initiateConfigDownload();
+
+}
+
+void Hue_Controller::getHueDataStore(){
+    QNetworkAccessManager* http = new QNetworkAccessManager(this);
+    QNetworkRequest tx;
+    tx.setUrl(QUrl("http://"+targetIpAddress+"/api/"+authUser));
+    QNetworkReply *tr = http->get(tx);
+    QObject::connect(tr,SIGNAL(finished()),this, SLOT(downloadConfigResponse()));
+
+    qDebug() << "Sent Data Store request";
+    QEventLoop respWait;
+    QObject::connect(http, SIGNAL(finished(QNetworkReply*)), &respWait, SLOT(quit()));
+    respWait.exec();
+}
+
+void Hue_Controller::downloadConfigResponse(){
+    qDebug() << " Got DataStore Response " ;
+    QNetworkReply* r = qobject_cast<QNetworkReply*>(sender());
+    QJson::Parser parser;
+    bool ok;
+    QVariant p = parser.parse(r->readAll(), &ok);
+    qDebug() << p;
+
+}
+
+void Hue_Controller::dummySlot(){
+    qDebug()<< "dummy executed";
 }
 
 //<-dceag-c760-b->
 
-	/** @brief COMMAND: #760 - Send Command To Child */
-	/** After reporting new child devices, there may be children we want to test, but we haven't done a quick reload router and can't send them messages directly.  This way we can send 'live' messages to children */
-		/** @param #10 ID */
-			/** The internal ID used for this device--not the Pluto device ID. */
-		/** @param #154 PK_Command */
-			/** The command to send */
-		/** @param #202 Parameters */
-			/** Parameters for the command in the format:
+/** @brief COMMAND: #760 - Send Command To Child */
+/** After reporting new child devices, there may be children we want to test, but we haven't done a quick reload router and can't send them messages directly.  This way we can send 'live' messages to children */
+/** @param #10 ID */
+/** The internal ID used for this device--not the Pluto device ID. */
+/** @param #154 PK_Command */
+/** The command to send */
+/** @param #202 Parameters */
+/** Parameters for the command in the format:
 PK_CommandParameter|Value|... */
 
 void Hue_Controller::CMD_Send_Command_To_Child(string sID,int iPK_Command,string sParameters,string &sCMD_Result,Message *pMessage)
-//<-dceag-c760-e->
+        //<-dceag-c760-e->
 {
     cout << "Need to implement command #760 - Send Command To Child" << endl;
     cout << "Parm #10 - ID=" << sID << endl;
@@ -302,14 +341,14 @@ void Hue_Controller::CMD_Send_Command_To_Child(string sID,int iPK_Command,string
 
 //<-dceag-c776-b->
 
-	/** @brief COMMAND: #776 - Reset */
-	/** Reset device. */
-		/** @param #51 Arguments */
-			/** Argument string
+/** @brief COMMAND: #776 - Reset */
+/** Reset device. */
+/** @param #51 Arguments */
+/** Argument string
 NOEMON or CANBUS */
 
 void Hue_Controller::CMD_Reset(string sArguments,string &sCMD_Result,Message *pMessage)
-//<-dceag-c776-e->
+        //<-dceag-c776-e->
 {
     cout << "Need to implement command #776 - Reset" << endl;
     cout << "Parm #51 - Arguments=" << sArguments << endl;
@@ -317,13 +356,13 @@ void Hue_Controller::CMD_Reset(string sArguments,string &sCMD_Result,Message *pM
 
 //<-dceag-c788-b->
 
-	/** @brief COMMAND: #788 - StatusReport */
-	/** Test comand. Asq a report */
-		/** @param #51 Arguments */
-			/** Argument string */
+/** @brief COMMAND: #788 - StatusReport */
+/** Test comand. Asq a report */
+/** @param #51 Arguments */
+/** Argument string */
 
 void Hue_Controller::CMD_StatusReport(string sArguments,string &sCMD_Result,Message *pMessage)
-//<-dceag-c788-e->
+        //<-dceag-c788-e->
 {
     cout << "Need to implement command #788 - StatusReport" << endl;
     cout << "Parm #51 - Arguments=" << sArguments << endl;
@@ -331,17 +370,17 @@ void Hue_Controller::CMD_StatusReport(string sArguments,string &sCMD_Result,Mess
 
 //<-dceag-c980-b->
 
-	/** @brief COMMAND: #980 - Set Color RGB */
-	/** set the rgb color of a device */
-		/** @param #279 Red Level */
-			/** The red level for the device */
-		/** @param #280 Green Level */
-			/** The green level for the device */
-		/** @param #281 Blue Level */
-			/** The blue level for the device */
+/** @brief COMMAND: #980 - Set Color RGB */
+/** set the rgb color of a device */
+/** @param #279 Red Level */
+/** The red level for the device */
+/** @param #280 Green Level */
+/** The green level for the device */
+/** @param #281 Blue Level */
+/** The blue level for the device */
 
 void Hue_Controller::CMD_Set_Color_RGB(int iRed_Level,int iGreen_Level,int iBlue_Level,string &sCMD_Result,Message *pMessage)
-//<-dceag-c980-e->
+        //<-dceag-c980-e->
 {
 
     cout << "Need to implement command #980 - Set Color RGB" << endl;
@@ -349,6 +388,57 @@ void Hue_Controller::CMD_Set_Color_RGB(int iRed_Level,int iGreen_Level,int iBlue
     cout << "Parm #280 - Green_Level=" << iGreen_Level << endl;
     cout << "Parm #281 - Blue_Level=" << iBlue_Level << endl;
 }
+
+bool Hue_Controller::findControllers(){
+
+}
+
+void Hue_Controller::initBridgeConnection(){
+    qDebug()<<"Init() Connection...";
+    QUrl initUrl = "http://"+targetIpAddress+"/api/"+authUser+"/"+"config";
+
+    QNetworkRequest init(initUrl);
+    QNetworkReply * rt = communicator->get(QNetworkRequest(init));
+    //this->connect(rt, SIGNAL(aboutToClose()), this, SLOT(processResponse()));
+    QObject::connect(rt, SIGNAL(finished()), this, SLOT(initResponse()));
+    qDebug() << init.url();
+    qDebug()<<"Request Sent.";
+
+    QEventLoop respWait;
+    QObject::connect(communicator, SIGNAL(finished(QNetworkReply*)), &respWait, SLOT(quit()));
+    cout << "Waiting for Response" << endl;
+    respWait.exec();
+    
+
+}
+
+void Hue_Controller::initResponse(){
+    qDebug() << " Got Reponse " ;
+    QNetworkReply* r = qobject_cast<QNetworkReply*>(sender());
+    QJson::Parser parser;
+    bool ok;
+
+    QVariant p = parser.parse(r->readAll(), &ok);
+
+   // qDebug() << p.typeName();
+    QString tipe = p.typeName();
+
+    if(tipe=="QVariantList"){
+        qDebug()<<"Error";
+
+    }else if(tipe=="QVariantMap"){
+       qDebug() << "Success";      \
+       QVariantMap successType= p.toMap();
+       if(successType.contains("config")){
+           qDebug() << "config call";
+       }
+       //qDebug() << configItems["lights"];
+    }
+    //qDebug() << p;
+r->deleteLater();
+
+}
+
 
 
 

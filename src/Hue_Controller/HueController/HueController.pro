@@ -1,16 +1,23 @@
 # -------------------------------------------------
 # Project created by QtCreator 2013-05-04T14:36:21
 # -------------------------------------------------
-QT += network \
-    script
-QT -= gui
+QT       += core
+QT       += network
+QT       += thread
+#QT       -= gui
+
+
 TARGET = HueController
+CONFIG   +=sharedlib
 CONFIG += console
 CONFIG -= app_bundle
 TEMPLATE = app
 INCLUDEPATH += /usr/include/qjson/ \
     ../../ \
     ../../DCE/
+
+LIBS += -lqjson
+
 SOURCES += ../Main.cpp \
     ../../PlutoUtils/uuencode.cpp \
     ../../PlutoUtils/ThreadedClass.cpp \

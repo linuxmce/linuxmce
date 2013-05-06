@@ -11,8 +11,10 @@
      See the GNU General Public License for more details.
 
 */
-//<-dceag-incl-b->
 #include "Hue_Controller.h"
+#include <QCoreApplication>
+//<-dceag-incl-b->
+
 
 #include "DCE/Logger.h"
 #include "ServerLogger.h"
@@ -112,6 +114,7 @@ extern "C" {
 //<-dceag-main-b->
 int main(int argc, char* argv[]) 
 {
+    QCoreApplication a(argc, argv);
 	g_sBinary = FileUtils::FilenameWithoutPath(argv[0]);
 	g_sBinaryPath = FileUtils::BasePath(argv[0]);
 
@@ -234,6 +237,8 @@ int main(int argc, char* argv[])
 			bReload=true;
 
 		delete pHue_Controller;
+
+                return a.exec();
 	}
 	catch(string s)
 	{
