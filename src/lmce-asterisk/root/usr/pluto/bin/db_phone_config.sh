@@ -470,7 +470,7 @@ WorkTheLines()
 
 	SQL="SELECT id,protocol,name,host,username,password,prefix,enabled,phonenumber,isfax,faxmail,dtmfmode FROM $DB_PhoneLines_Table"
 	R=$(RunSQL "$SQL")
-	for Row in $R; do
+	for Row in "$R"; do
 		id=$(Field 1 "$Row")
 		protocol=$(Field 2 "$Row")
 		name=$(Field 3 "$Row")
