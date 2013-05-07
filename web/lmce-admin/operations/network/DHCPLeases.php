@@ -21,7 +21,7 @@ function DHCPLeases($output,$dbADO) {
 	if(count($retArray)==0){
 		$_GET['error'].='Insuffient rights: pluto.conf file cannot be opened.';
 	}
-	$accessFile = "/var/lib/dhcp3/dhcpd.leases";
+	$accessFile = "/var/lib/dhcp/dhcpd.leases";
 	$test = new Leases;
 if (!isset($_GET['error']) && !$test->readLease($accessFile)) {
   header("Location: index.php?section=DHCPLeases&error=$TEXT_ERROR_CANNOT_OPEN_FILE_FOR_READING_CONST $accessFile");
