@@ -3,6 +3,7 @@ function eibDevices($output,$dbADO,$eibADO) {
 	// include language files
 	includeLangFile('common.lang.php');
 	includeLangFile('eibDevices.lang.php');
+	includeLangFile('rooms.lang.php');
 	
 	global $dbPlutoMainDatabase;
 	/* @var $dbADO ADOConnection */
@@ -20,6 +21,7 @@ function eibDevices($output,$dbADO,$eibADO) {
 	
 	switch ($type){
 		case 'lights':
+			$FPOTType = 2;
 			$allowedTemplates[$GLOBALS['LightSwitchOnOff']]['label']=translate('TEXT_KNX_SWITCHONOFF');
 			$allowedTemplates[$GLOBALS['LightSwitchOnOff']]['GA'][]=translate('TEXT_KNX_ONOFF');
 			$allowedTemplates[$GLOBALS['LightSwitchOnOff']]['GA'][]=translate('TEXT_KNX_STATUS');
@@ -44,6 +46,7 @@ function eibDevices($output,$dbADO,$eibADO) {
 			$allowedTemplates[$GLOBALS['BrightnessSensor']]['GA'][]=translate('TEXT_KNX_BRIGHTNESS');
 		break;
 		case 'security':
+			$FPOTType = 1;
 			$resDT=$dbADO->Execute('SELECT DT.PK_DeviceTemplate,DT.Description FROM DeviceTemplate AS DT,DeviceTemplate_DeviceCategory_ControlledVia as CV WHERE DT.PK_DeviceTemplate= CV.FK_DeviceTemplate AND CV.FK_DeviceCategory=? AND DT.FK_DeviceCategory=? ORDER BY DT.Description ASC',array($GLOBALS['specialized'],$GLOBALS['rootSecurity']));
 			while($rowDT=$resDT->FetchRow()){
 				$allowedTemplates[$rowDT['PK_DeviceTemplate']]['label']=$rowDT['Description'];
@@ -51,6 +54,7 @@ function eibDevices($output,$dbADO,$eibADO) {
 			}
 		break;
 		case 'climate':
+			$FPOTType = 3;
 			$allowedTemplates[$GLOBALS['StandardThermostat']]['label']=translate('TEXT_KNX_THERMOSTAT');
 			$allowedTemplates[$GLOBALS['StandardThermostat']]['GA'][]=translate('TEXT_KNX_SETPOINT_TEMP');
 			$allowedTemplates[$GLOBALS['StandardThermostat']]['GA'][]=translate('TEXT_KNX_SET_MODE');
@@ -62,6 +66,7 @@ function eibDevices($output,$dbADO,$eibADO) {
 			$allowedTemplates[$GLOBALS['StandardThermometer']]['GA'][]=translate('TEXT_KNX_ACTUAL_TEMP');
 		break;
 		case 'drapes':
+			$FPOTType = 2;
 			$allowedTemplates[$GLOBALS['DrapesSwitch']]['label']='Drapes switch';
 			$allowedTemplates[$GLOBALS['DrapesSwitch']]['GA'][]=translate('TEXT_KNX_LEVEL');
 			$allowedTemplates[$GLOBALS['DrapesSwitch']]['GA'][]=translate('TEXT_KNX_LEVEL_STATUS');
@@ -203,30 +208,75 @@ function eibDevices($output,$dbADO,$eibADO) {
 			<td colspan="3">&nbsp;</td>
 		</tr>';
 	
+	// get list of KNX devices
 	$resEIB=$dbADO->Execute('SELECT * FROM Device WHERE (FK_DeviceTemplate=? OR FK_DeviceTemplate=?) AND FK_Installation=? ORDER BY Description ASC',array($GLOBALS['EIB'],$GLOBALS['KNX'],$installationID));
 	$eibDevices=array();
 	while($row=$resEIB->FetchRow()){
 		$eibDevices[$row['PK_Device']]=$row['Description'];
 	}
+
+	// get room list
+	$resRooms=$dbADO->Execute('SELECT PK_Room,Description FROM Room ORDER BY Description ASC');
+	$Rooms=array();
+	$Rooms[0]='---';
+	while($row=$resRooms->FetchRow()){
+		$Rooms[$row['PK_Room']]=$row['Description'];
+	}
+
+	// get floorplan object type list
+	$resFPOT=$dbADO->Execute('SELECT PK_FloorplanObjectType,Description FROM FloorplanObjectType WHERE FK_FloorplanType=? ORDER BY Description ASC', $FPOTType);
+	$FPOTList=array();
+	$FPOTList[0]='---';
+	while($row=$resFPOT->FetchRow()){
+		$FPOTList[$row['PK_FloorplanObjectType']]=$row['Description'];
+	}
+	
 	
 	$queryDevices='
-		SELECT Device.*,Device_DeviceData.IK_DeviceData,DeviceTemplate.Description AS Template
-		FROM Device
-		INNER JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate
-		LEFT JOIN Device_DeviceData ON FK_Device=PK_Device
-		WHERE FK_DeviceTemplate IN ('.join(',',array_keys($allowedTemplates)).') AND FK_Device_ControlledVia IN ('.join(',',array_keys($eibDevices)).') AND FK_DeviceData=? AND Device.FK_Installation=?
+		SELECT Device.*,DeviceTemplate.Description AS Template,DD12.IK_DeviceData AS port,DD11.IK_DeviceData AS FPOT 
+		FROM Device 
+		  INNER JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate 
+		  LEFT JOIN Device_DeviceData AS DD12 ON DD12.FK_Device=PK_Device
+		  LEFT JOIN Device_DeviceData AS DD11 ON DD11.FK_Device=PK_Device
+		WHERE FK_DeviceTemplate IN ('.join(',',array_keys($allowedTemplates)).')
+		  AND FK_Device_ControlledVia IN ('.join(',',array_keys($eibDevices)).') 
+		  AND DD12.FK_DeviceData=? 
+		  AND DD11.FK_DeviceData=?
+		  AND Device.FK_Installation=? 
 		ORDER BY Description ASC
 	';
-	$resDevices=$dbADO->Execute($queryDevices,array($targetDeviceData,$installationID));
+	$resDevices=$dbADO->Execute($queryDevices,array($targetDeviceData,11,$installationID));
 	$devicesArray=array();
 	while($rowDevices=$resDevices->FetchRow()){
 		$devicesArray[$rowDevices['PK_Device']]=$rowDevices['FK_DeviceTemplate'];
-		$channelParts=explode('|',$rowDevices['IK_DeviceData']);
+		$channelParts=explode('|',$rowDevices['port']);
 		$out.='
-		<input type="hidden" name="oldDD_'.$rowDevices['PK_Device'].'" value="'.$rowDevices['IK_DeviceData'].'">
+		<input type="hidden" name="oldDD_'.$rowDevices['PK_Device'].'" value="'.$rowDevices['port'].'">
+		<input type="hidden" name="oldRoom_'.$rowDevices['PK_Device'].'" value="'.$rowDevices['FK_Room'].'">
+		<input type="hidden" name="oldFPOT_'.$rowDevices['PK_Device'].'" value="'.$rowDevices['FPOT'].'">
 		<tr>
-			<td align="center">'.translate('TEXT_DEVICE_CONST').': <B>'.$rowDevices['Description'].' # '.$rowDevices['PK_Device'].'</B><br> '.translate('TEXT_DEVICE_TEMPLATE_CONST').': <B>'.$rowDevices['Template'].' # '.$rowDevices['FK_DeviceTemplate'].'</B></td>
-			<td align="right">
+			<td style="border-bottom: 1px solid grey;">
+				<table>
+				<tr><td>'.translate('TEXT_DEVICE_CONST').'</td><td><B>'.$rowDevices['Description'].' # '.$rowDevices['PK_Device'].'</td></tr>
+				<tr><td>'.translate('TEXT_DEVICE_TEMPLATE_CONST').'</td><td><B>'.$rowDevices['Template'].' # '.$rowDevices['FK_DeviceTemplate'].'</td></tr>
+				<tr><td>'.translate('TEXT_ROOM_CONST').'</td><td><select name="Room_'.$rowDevices['PK_Device'].'">';
+					foreach($Rooms AS $RoomID=>$RoomName){
+						$selected = ($RoomID == $rowDevices['FK_Room'] ? 'selected' : '');
+						$out.='<option '.$selected.' value="'.$RoomID.'">'.$RoomName.'</option>';
+					}
+				$out.='
+				</select></td></tr>
+				<tr><td>'.translate('TEXT_FLOORPLAN_OBJECT_TYPE_CONST').'</td><td><select name="FPOT_'.$rowDevices['PK_Device'].'">';
+					foreach($FPOTList AS $FPOTID=>$FPOTName){
+						$selected = ($FPOTID == $rowDevices['FPOT'] ? 'selected' : '');
+						$out.='<option '.$selected.' value="'.$FPOTID.'">'.$FPOTName.'</option>';
+					}
+				$out.='
+				</select></td></tr>
+				<tr><td colspan="2"><input type="button" class="button" name="del" value="'.translate('TEXT_DELETE_CONST').'" onClick="if(confirm(\''.translate('TEXT_EIB_CONFIRM_DELETE_CONST').'\'))self.location=\'index.php?section=eibDevices&action=delDevice&type='.$type.'&delID='.$rowDevices['PK_Device'].'\';"></td></tr>
+				</table>
+			</td>
+			<td align="right" style="border-bottom: 1px solid grey;">
 				<fieldset><legend><B>'.translate('TEXT_GROUP_ADDRESSES_CONST').'</B></legend>
 				<table>';
 					$template=$allowedTemplates[$rowDevices['FK_DeviceTemplate']];
@@ -246,7 +296,6 @@ function eibDevices($output,$dbADO,$eibADO) {
 					}
 		$out.='</table>
 			</fieldset></td>
-			<td><input type="button" class="button" name="del" value="'.translate('TEXT_DELETE_CONST').'" onClick="if(confirm(\''.translate('TEXT_EIB_CONFIRM_DELETE_CONST').'\'))self.location=\'index.php?section=eibDevices&action=delDevice&type='.$type.'&delID='.$rowDevices['PK_Device'].'\';"></td>
 		</tr>';
 	}
 	$firstTemplate=array_shift(array_keys($allowedTemplates));
@@ -342,6 +391,7 @@ function eibDevices($output,$dbADO,$eibADO) {
 		if(isset($_POST['update'])){
 			$devicesArray=unserialize(urldecode($_POST['devicesArray']));
 			foreach ($devicesArray as $deviceID=>$templateID){
+				// update GA's if modified
 				$newDeviceData='';
 				$template=$allowedTemplates[$templateID];
 				$num_ga=count($template['GA']);
@@ -350,15 +400,33 @@ function eibDevices($output,$dbADO,$eibADO) {
 					$newDeviceData.=$_POST['GA_'.$deviceID.'_'.$i];
 				}
 				$oldDeviceData=$_POST['oldDD_'.$deviceID];
-				if($oldDeviceData!=$newDeviceData){
+				if($oldDeviceData != $newDeviceData){
 					if(is_null($oldDeviceData)){
 						$dbADO->Execute('INSERT INTO Device_DeviceData (FK_Device,FK_DeviceData, IK_DeviceData) VALUES (?,?,?)',array($deviceID,$targetDeviceData,$newDeviceData));
 					}else{
 						$dbADO->Execute('UPDATE Device_DeviceData SET IK_DeviceData=? WHERE FK_Device=? AND FK_DeviceData=?',array($newDeviceData,$deviceID,$targetDeviceData));
 					}
 				}
+
+				// update room if modified
+				$oldRoom=$_POST['oldRoom_'.$deviceID];
+				$newRoom=$_POST['Room_'.$deviceID];
+				if($oldRoom != $newRoom) {
+					$dbADO->Execute('UPDATE Device SET FK_Room=? WHERE PK_Device=?',array($newRoom,$deviceID));
+				}
+
+				// update FPOT if modified
+				$oldFPOT=$_POST['oldFPOT_'.$deviceID];
+				$newFPOT=$_POST['FPOT_'.$deviceID];
+				if($oldFPOT != $newFPOT) {
+					echo "Old: $oldFPOT New: $newFPOT";
+					if(is_null($oldFPOT)){
+						$dbADO->Execute('INSERT INTO Device_DeviceData (FK_Device,FK_DeviceData, IK_DeviceData) VALUES (?,?,?)',array($deviceID,11,$newFPOT));
+					}else{
+						$dbADO->Execute('UPDATE Device_DeviceData SET IK_DeviceData=? WHERE FK_Device=? AND FK_DeviceData=?',array($newFPOT,$deviceID,11));
+					}
+				}
 			}
-			
 			header("Location: index.php?section=eibDevices&type=$type&msg=".translate('TEXT_EIB_DEVICES_UPDATED_CONST'));
 			exit();
 		}
