@@ -1,3 +1,9 @@
+lmce-asterisk (0+0.3.3-3ubuntu3) precise; urgency=low
+
+  * Add Cisco 7941 template and configure script
+
+ -- Serge Wagener <serge@linuxmce.org>  Wed, 08 May 2013 17:48:03 +0200
+
 lmce-asterisk (0+0.3.3-3ubuntu2) precise; urgency=low
 
   * Add possibility to change DTMF via webadmin
