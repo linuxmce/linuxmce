@@ -26,7 +26,7 @@
 //<-dceag-decl-b->
 namespace DCE
 {
-    class Hue_Controller : public Hue_Controller_Command, public QObject
+    class Hue_Controller : public Hue_Controller_Command
     {
         Q_OBJECT
         //<-dceag-decl-e->
@@ -41,13 +41,11 @@ namespace DCE
     public:
         // Public member variables
 
-    signals:
-        void responseRecieved();
-        void initiateConfigDownload();
+
         //<-dceag-const-b->
     public:
         // Constructors/Destructor
-        Hue_Controller(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL, QObject *parent=0);
+        Hue_Controller(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL, QObject*parent=0);
         virtual ~Hue_Controller();
         virtual bool GetConfig();
         virtual bool Register();
@@ -61,7 +59,7 @@ namespace DCE
         //<-dceag-const2-b->
         // The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
         // You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file
-        Hue_Controller(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
+        //Hue_Controller(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
         //<-dceag-const2-e->
 
         //<-dceag-h-b->
@@ -175,7 +173,10 @@ NOEMON or CANBUS */
 	virtual void CMD_Set_Color_RGB(int iRed_Level,int iGreen_Level,int iBlue_Level,string &sCMD_Result,Message *pMessage);
 
         //<-dceag-h-e->
-
+    signals:
+        void responseRecieved();
+        void initiateConfigDownload();
+        void testSignal();
 
     public slots:
         void initResponse();
@@ -183,6 +184,10 @@ NOEMON or CANBUS */
         void getHueDataStore();
         void downloadConfigResponse();
         void dummySlot();
+
+        void GetStorage() {getHueDataStore(); }
+
+    protected:
 
     };
 
