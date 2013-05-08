@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QNetworkAccessManager>
 #include <QEventLoop>
+#include <QUrl>
 
 class HueInterface : public QObject
 {
@@ -16,7 +17,7 @@ signals:
     void downloadFinished(QString);
 
 public slots:
-    void getDeviceDatabase();
+    void getDeviceDatabase(QUrl target);
     void downloadResponse();
     
 };

@@ -201,30 +201,30 @@ int main(int argc, char* argv[])
 
     bool bAppError=false;
     bool bReload=false;
-QThread *hueThread = new QThread;
+    QThread *hueThread = new QThread;
     Hue_Controller *pHue_Controller = new Hue_Controller(PK_Device, sRouter_IP,true,bLocalMode);
-pHue_Controller->moveToThread(hueThread);
+    pHue_Controller->moveToThread(hueThread);
 
     HueInterface *interface = new HueInterface();
 
     //interface->moveToThread(hueThread);
-    QObject::connect(pHue_Controller, SIGNAL(initiateConfigDownload()), interface, SLOT(getDeviceDatabase()), Qt::AutoConnection);
-hueThread->start();
+    QObject::connect(pHue_Controller, SIGNAL(initiateConfigDownload(QUrl)), interface, SLOT(getDeviceDatabase(QUrl)), Qt::AutoConnection);
+    hueThread->start();
     if ( pHue_Controller->GetConfig() && pHue_Controller->Connect(pHue_Controller->PK_DeviceTemplate_get()) )
     {
 
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
         pHue_Controller->CreateChildren();
 
-//        if( bLocalMode )
-//            pHue_Controller->RunLocalMode();
-//        else
-//        {
-//            if(pHue_Controller->m_RequestHandlerThread)
-//                pthread_join(pHue_Controller->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
-//        }
+        //        if( bLocalMode )
+        //            pHue_Controller->RunLocalMode();
+        //        else
+        //        {
+        //            if(pHue_Controller->m_RequestHandlerThread)
+        //                pthread_join(pHue_Controller->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
+        //        }
 
-return a.exec();
+        return a.exec();
     }
     else
     {

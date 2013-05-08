@@ -23,6 +23,7 @@
 #include <qjson/serializer.h>
 #include <qjson/parser.h>
 #include <QNetworkAccessManager>
+#include <QUrl>
 //<-dceag-decl-b->
 namespace DCE
 {
@@ -175,17 +176,15 @@ NOEMON or CANBUS */
         //<-dceag-h-e->
     signals:
         void responseRecieved();
-        void initiateConfigDownload();
+        void initiateConfigDownload(QUrl target);
         void testSignal();
 
     public slots:
-        void initResponse();
-
-        void getHueDataStore();
-        void downloadConfigResponse();
+        void initResponse();      
+        void downloadConfigResponse(QNetworkReply*);
         void dummySlot();
 
-        void GetStorage() {getHueDataStore(); }
+
 
     protected:
 

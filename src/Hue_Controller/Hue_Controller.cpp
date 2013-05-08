@@ -294,24 +294,12 @@ void Hue_Controller::CMD_Download_Configuration(string sText,string &sCMD_Result
 
     cout << "Need to implement command #757 - Download Configuration" << endl;
     cout << "Parm #9 - Text=" << sText << endl;
- emit initiateConfigDownload();
+ emit initiateConfigDownload(QUrl("http://"+targetIpAddress+"/api/"+authUser));
 }
 
-void Hue_Controller::getHueDataStore(){
-    QNetworkAccessManager *temp;
-    QNetworkRequest tx;
-    tx.setUrl(QUrl("http://"+targetIpAddress+"/api/"+authUser));
-    QNetworkReply *tr = temp->get(tx);
-    connect(tr,SIGNAL(finished()),this, SLOT(downloadConfigResponse()));
 
-    qDebug() << "Sent Data Store request";
-    QEventLoop storeWait;
-    QObject::connect(temp, SIGNAL(finished(QNetworkReply*)), &storeWait, SLOT(quit()));
-    storeWait.exec();
 
-}
-
-void Hue_Controller::downloadConfigResponse(){
+void Hue_Controller::downloadConfigResponse(QNetworkReply*){
     qDebug() << " Got DataStore Response " ;
     QNetworkReply* r = qobject_cast<QNetworkReply*>(sender());
     qDebug() << r->size();
