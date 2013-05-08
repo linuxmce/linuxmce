@@ -4,13 +4,6 @@
 . /usr/pluto/bin/Utils.sh
 . /usr/pluto/bin/SQL_Ops.sh
 
-ConfGet "PK_Distro"
-if [[ 19 -eq "$PK_Distro" ]] ;then
-	# Raspbian does not currently use SetupAudioVideo
-	Logging "$TYPE" "$SEVERITY_NORMAL" "SetupAudioVideo" "Skipping (Raspbian)"
-	exit 0
-fi
-
 DEVICECATEGORY_Media_Director="8"
 DEVICECATEGORY_Video_Cards="125"
 DEVICECATEGORY_Sound_Cards="124"
@@ -41,6 +34,19 @@ OrbiterDev=$(FindDevice_Template "$ComputerDev" "$DEVICETEMPLATE_OnScreen_Orbite
 VideoCardDev=$(FindDevice_Category "$ComputerDev" "$DEVICECATEGORY_Video_Cards")
 AsoundConf="/usr/pluto/templates/asound.conf"
 ConfGet "AlternateSC"
+
+# FIXME: This needs to move to an rpi version of AVWizard, for now here is fine
+case "$PK_Distro" in
+	19)
+		# Detect and use the current boot resolution
+		FBWIDTH=$(for arg in $(cat /proc/cmdline); do echo $arg |grep "fbwidth" | cut -d '=' -f 2; done)
+		FBHEIGHT=$(for arg in $(cat /proc/cmdline); do echo $arg |grep "fbheight" | cut -d '=' -f 2; done)
+
+		SetDeviceData "$PK_Device" "$DEVICEDATA_Video_Settings" "$FBWIDTH $FBHEIGHT/60"
+		SetDeviceData "$PK_Device" "$DEVICEDATA_Connector" "HDMI-0"
+		SetDeviceData "$PK_Device" "$DEVICEDATA_TV_Standard" "1080P"
+		;;
+fi
 
 if [[ -z "$VideoCardDev" ]]; then
 	VideoCardDev=$(FindDevice_Category "$PK_Device" "$DEVICECATEGORY_Video_Cards")
@@ -350,7 +356,11 @@ VideoSettings_Check()
 	fi
 
 	if [[ "$Update_XorgConf" == "XorgConf" ]]; then
-		/usr/pluto/bin/Xconfigure.sh
+		# Raspbian does not use Xconfigure
+		if [[ "19" ! -eq "$PK_Distro" ]] ;then
+			/usr/pluto/bin/Xconfigure.sh
+		fi
+
 		if [[ "$DB_Reboot" == 1 ]]; then
 			Reboot="Reboot"
 		else
