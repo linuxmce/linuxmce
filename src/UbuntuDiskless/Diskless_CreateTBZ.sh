@@ -383,7 +383,7 @@ StatsMessage "PreSeeding package installation preferences"
 LC_ALL=C chroot $TEMP_DIR apt-get -y -qq update
 VerifyExitCode "apt update"
 
-if [[ "ubuntu" == "$TARGET_DISTRO" ]]; then
+if [[ "$TARGET_DISTRO" == "ubuntu" ]]; then
 	#Setup the medibuntu repo
 	LC_ALL=C chroot $TEMP_DIR apt-get -y --force-yes install medibuntu-keyring 
 	VerifyExitCode "medibuntu apt add keyring"
@@ -462,24 +462,13 @@ case "$TARGET_DISTRO" in
 		mv "$TEMP_DIR"/usr/sbin/lpadmin{.disabled,}
 		;;
 	"raspbian")
-		StatsMessage "Installing kernel headers"
-		# Get most recent rpi kernel header version
-		TARGET_HEADER_KVER=$(apt-cache search linux-headers- |grep rpi |sort -r |head -1 |cut -d ' ' -f 1| cut -d '-' -f 3-)
-
-		#Install headers and run depmod, ensure no errors exist
-		LC_ALL=C chroot "TEMP_DIR" apt-get -y install linux-headers-"$TARGET_HEADER_KVER"
-		VerifyExitCode "Install linux headers package failed"
-
-		TARGET_KVER=$(basename $(find "$TEMP_DIR"/lib/modules/* -maxdepth 0 -type d |sort -r |head -1))
-		LC_ALL=C chroot "$TEMP_DIR" depmod -v "$TARGET_KVER" 
-		VerifyExitCode "depmod failed for $TARGET_KVER" 
-
-		StatsMessage "Installing kernel"
-		LC_ALL=C chroot "$TEMP_DIR" apt-get -y install linux-image-"$TARGET_KVER"
-		VerifyExitCode "Install linux kernel package failed"
-
 		# raspbian doesn't come with lsb-release by default???
 		LC_ALL=C chroot "$TEMP_DIR" apt-get -y install lsb-release
+
+		# FIXME: need a way to detect recent kernels
+		LC_ALL=C chroot "$TEMP_DIR" apt-get -y install linux-image-3.2.0-4-rpi
+
+		LC_ALL=C chroot "$TEMP_DIR" apt-get -y install libraspberrypi0 raspberrypi-bootloader
 		;;
 esac
 
@@ -510,7 +499,7 @@ esac
 
 # Determine if MythTV is installed by looking for MythTV_Plugin...
 # Don't install mythtv into raspbian
-if [[ "raspbian" != "$TARGET_DISTRO" ]]; then
+if [[ "$TARGET_DISTRO" != "raspbian" ]]; then
 	Q="SELECT PK_Device FROM Device WHERE FK_DeviceTemplate=36"
 	MythTV_Installed=$(RunSQL "$Q")
 	if [ $MythTV_Installed ];then
@@ -605,7 +594,7 @@ esac
 LC_ALL=C chroot $TEMP_DIR ln -s /usr/lib/libdvdread.so.4 /usr/lib/libdvdread.so.3
 
 # Install plymouth theme on MD in Lucid
-if [[ "lucid" == "$TARGET_RELEASE" ]]; then
+if [[ "$TARGET_RELEASE" == "lucid" ]]; then
 	LC_ALL=C chroot $TEMP_DIR apt-get -y install lmce-plymouth-theme
 	VerifyExitCode "MCE plymouth theme install failed"
 fi
@@ -700,7 +689,7 @@ trap "Trap_Exit" EXIT
 Setup_Logfile
 
 #TODO get as much of this from database as possible
-for TARGET in $TARGET_TYPES; do
+for TARGET in "$TARGET_TYPES"; do
 	case "$TARGET" in
 		"ubuntu-i386")
 			TARGET_DISTRO="ubuntu"
