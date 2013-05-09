@@ -15,6 +15,7 @@ public:
     QEventLoop waiter;
 signals:
     void downloadFinished(QString);
+    void newDataStore(const QByteArray b);
 
 public slots:
     void getDeviceDatabase(QUrl target);

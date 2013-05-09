@@ -209,6 +209,7 @@ int main(int argc, char* argv[])
 
     //interface->moveToThread(hueThread);
     QObject::connect(pHue_Controller, SIGNAL(initiateConfigDownload(QUrl)), interface, SLOT(getDeviceDatabase(QUrl)), Qt::AutoConnection);
+    QObject::connect(interface, SIGNAL(newDataStore(QByteArray)), pHue_Controller, SLOT(processDataStore(QByteArray)), Qt::QueuedConnection);
     hueThread->start();
     if ( pHue_Controller->GetConfig() && pHue_Controller->Connect(pHue_Controller->PK_DeviceTemplate_get()) )
     {

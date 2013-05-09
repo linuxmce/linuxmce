@@ -9,8 +9,8 @@ HueInterface::HueInterface(QObject *parent) :
     QObject(parent)
 {
     comms = new QNetworkAccessManager(this);
-  //  QObject::connect(comms, SIGNAL(finished(QNetworkReply*)), this, SLOT(downloadResponse(QNetworkReply*)));
-   QObject::connect(comms, SIGNAL(finished(QNetworkReply*)), &waiter, SLOT(quit()));
+    //  QObject::connect(comms, SIGNAL(finished(QNetworkReply*)), this, SLOT(downloadResponse(QNetworkReply*)));
+    QObject::connect(comms, SIGNAL(finished(QNetworkReply*)), &waiter, SLOT(quit()));
 
 }
 
@@ -30,24 +30,7 @@ void HueInterface::downloadResponse()
 {
     qDebug() << " Got DataStore Response " ;
     QNetworkReply* r = qobject_cast<QNetworkReply*>(sender());
-   // qDebug() << r->readAll();
-    QJson::Parser parser;
-    bool ok;
-    QVariantMap p = parser.parse(r->readAll(), &ok).toMap();
-    QVariantMap lightNest = p["lights"].toMap();
-
-    qDebug() << "Light Count"<< lightNest.count();
-   // qDebug() << lightNest;
-    QMap<QString, QVariant>::const_iterator i;
-
-    for(i=lightNest.begin(); i!= lightNest.constEnd(); i++ )
-    {
-        qDebug() << i.key() ;// << " :: " << i.value();
-        QVariantMap light = i.value().toMap();
-
-        QVariantMap state = light["state"].toMap();
-        qDebug() << state["on"].toString();
-    }
-
-
+    QByteArray dataStore = r->readAll();
+    emit newDataStore(dataStore);
+    r->deleteLater();
 }

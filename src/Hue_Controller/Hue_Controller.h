@@ -23,7 +23,9 @@
 #include <qjson/serializer.h>
 #include <qjson/parser.h>
 #include <QNetworkAccessManager>
+#include <QVariant>
 #include <QUrl>
+#include <huecontrollerhardware.h>
 //<-dceag-decl-b->
 namespace DCE
 {
@@ -34,10 +36,16 @@ namespace DCE
         // Private member variables
         bool mb_isNew;
         bool validated;
+        bool linkButton;
+
 
         QString targetIpAddress;
         QString authUser;
         QNetworkAccessManager *communicator;
+
+        QList<HueControllerHardware*> hueControllers;
+        QVariantMap lights;
+
         // Private methods
     public:
         // Public member variables
@@ -179,11 +187,15 @@ NOEMON or CANBUS */
         void initiateConfigDownload(QUrl target);
         void testSignal();
 
+
     public slots:
         void initResponse();      
         void downloadConfigResponse(QNetworkReply*);
         void dummySlot();
 
+        void processDataStore(const QByteArray data);
+
+        HueControllerHardware* getController(int index) {return hueControllers.at(index); }
 
 
     protected:
