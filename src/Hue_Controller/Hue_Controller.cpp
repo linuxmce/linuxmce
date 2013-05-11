@@ -34,6 +34,8 @@ using namespace DCE;
 #include <QApplication>
 #include <QStringList>
 #include <huecontrollerhardware.h>
+#include <huebulb.h>
+#include <pthread.h>
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -43,11 +45,11 @@ Hue_Controller::Hue_Controller(int DeviceID, string ServerAddress, bool bConnect
 {
     
     qDebug() << "Created Controller.";
-
+    authUser ="newdeveloper";
 
     // QObject::connect(this, SIGNAL(initiateConfigDownload()), this, SLOT(getHueDataStore()), Qt::DirectConnection);
     // QObject::connect(this, SIGNAL(initiateConfigDownload()), this, SLOT(dummySlot()));
-    //QObject::connect(this,SIGNAL(testSignal()), this, SLOT(dummySlot()));
+    QObject::connect(this,SIGNAL(testSignal()), this, SLOT(dummySlot()));
 
 }
 
@@ -75,7 +77,7 @@ bool Hue_Controller::GetConfig()
     //<-dceag-getconfig-e->
 
     mb_isNew = true;
-    communicator = new QNetworkAccessManager();
+
     qDebug() << "Getting Config";
     // Put your code here to initialize the data in this class
     // The configuration parameters DATA_ are now populated
@@ -85,21 +87,13 @@ bool Hue_Controller::GetConfig()
 
     for (int i = 0; i < db_controllers.length(); i++){
         HueControllerHardware *controllerDevice = new HueControllerHardware();
+        targetIpAddress = db_controllers.at(i);
         controllerDevice->m_ipAddress = db_controllers.at(i);
         hueControllers.append(controllerDevice);
+        if(downloadControllerConfig(QUrl(controllerDevice->m_ipAddress), i)){
+            qDebug() << "Finished processing controller " << i;
+        }
     }
-
-    targetIpAddress = db_controllers.first();
-    // authUser = QString::fromStdString(this->DATA_Get_Username());
-
-    authUser="newdeveloper";
-    //    if(m_id.isEmpty()){
-    //        qDebug() << "Hue ID is not set, Adding 1st missing hue controller." << m_id;
-    //        qDebug() << "Looking up ::"<< targetIpAddress;
-    //        qDebug() << "Defult username"<<authUser;
-    //        initBridgeConnection();
-
-    //    }
     return true;
 }
 
@@ -133,7 +127,68 @@ bool Hue_Controller::Register()
 void Hue_Controller::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
 //<-dceag-cmdch-e->
 {
-    sCMD_Result = "UNHANDLED CHILD";
+    //    qDebug() << pMessage->m_dwMessage_Type;
+    //    qDebug() << pMessage->m_dwPK_Device_To;
+    //    qDebug() << pMessage->m_dwID;
+    //    qDebug() << pMessage->m_mapData_Parameters.size();
+    qDebug() << pMessage->ToString().c_str();
+    QStringList command = QString::fromStdString(pMessage->ToString(false)).remove("-o ").split(" ");
+    int cmd = command.at(3).toInt();
+    int device = pMessage->m_dwPK_Device_To;
+    QString controllerTarget;
+    int ID=0;
+
+    for (int f = 0; f < hueBulbs.size(); ++f){
+        if(hueBulbs.at(f)->getLinuxMceId() ==device){
+            controllerTarget = hueBulbs.at(f)->getController();
+                        ID = hueBulbs.at(f)->getInternalId()+1;
+        }
+    }
+
+    QVariantMap params;
+    QUrl target;
+
+    if(!controllerTarget.isEmpty() && ID != 0)
+    {
+
+    }
+    else
+        {
+           sCMD_Result = "Failed";
+            exit;
+        }
+
+    switch (cmd) {
+    case 193:
+        target.setUrl("http://"+controllerTarget+"/api/"+authUser+"/lights/"+QString::number(ID)+"/state");
+        sCMD_Result = "OFF - OK";
+        params.insert("on", false);
+        if(sendPowerMessage(target, params))
+        {  sCMD_Result = "OFF - OK";  break;
+        }
+        else
+        { sCMD_Result = "OFF - ERROR";
+            break;
+        }
+    case 192:
+        target.setUrl("http://"+controllerTarget+"/api/"+authUser+"/lights/"+QString::number(ID)+"/state");
+        params.insert("on", true);
+        if(sendPowerMessage(target, params))
+        sCMD_Result = "ON - OK";
+
+        break;
+    case 980:
+
+        sCMD_Result = "SET RBG - OK";
+        //  int redLevl = command.at(6).toInt();
+        //  int greenLevel = command.at(8).toInt();
+        //  int blueLevel = command.at(10).toInt();
+        break;
+    default:
+        sCMD_Result = "NOT IMPLEMENTED";
+        break;
+    }
+    qDebug() << "Command " << cmd;
 }
 
 /*
@@ -146,6 +201,68 @@ void Hue_Controller::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessag
 //<-dceag-cmduk-e->
 {
     sCMD_Result = "UNKNOWN COMMAND";
+}
+
+void Hue_Controller::CreateChildren()
+{
+    qDebug() << "creating children";
+    for( int i=0; i < (int)m_pData->m_vectDeviceData_Impl_Children.size(); i++ )
+    {
+        DeviceData_Impl *pDeviceData_Impl_Child = m_pData->m_vectDeviceData_Impl_Children[i];
+
+        // This device was marked as disabled
+        if (pDeviceData_Impl_Child->m_bDisabled)
+        {
+            LoggerWrapper::GetInstance()->Write(LV_WARNING, "Child device %d is disabled", pDeviceData_Impl_Child->m_dwPK_Device);
+            continue;
+        }
+        LoggerWrapper::GetInstance()->Write(LV_WARNING, "Creating child %d", pDeviceData_Impl_Child->m_dwPK_Device);
+
+        // This device has it's own executible. Try to spawn it. If that fails, we will try to create it ourselves
+        if( pDeviceData_Impl_Child->m_bImplementsDCE && !pDeviceData_Impl_Child->m_bIsEmbedded )
+        {
+            if( SpawnChildDevice(pDeviceData_Impl_Child->m_dwPK_Device,pDeviceData_Impl_Child->m_sCommandLine) )
+                continue;
+        }
+        Event_Impl *pEvent = m_pEvent->CreateEvent( pDeviceData_Impl_Child->m_dwPK_DeviceTemplate, m_pPrimaryDeviceCommand->m_pEvent->m_pClientSocket, pDeviceData_Impl_Child->m_dwPK_Device );
+        if ( !pEvent )
+        {
+            pEvent = new Event_Impl( m_pPrimaryDeviceCommand->m_pEvent->m_pClientSocket, pDeviceData_Impl_Child->m_dwPK_Device );
+            LoggerWrapper::GetInstance()->Write( LV_WARNING, "Note: Device manager has attached a device of type %d that this has no custom event handler for.  It will not fire events.",
+                                                 pDeviceData_Impl_Child->m_dwPK_DeviceTemplate);
+        }
+        Command_Impl *pCommand = m_pPrimaryDeviceCommand->CreateCommand( pDeviceData_Impl_Child->m_dwPK_DeviceTemplate, m_pPrimaryDeviceCommand, pDeviceData_Impl_Child, pEvent );
+        if ( !pCommand )
+        {
+            pCommand = new Command_Impl(m_pPrimaryDeviceCommand, pDeviceData_Impl_Child, pEvent, m_pRouter);
+            pCommand->m_bGeneric=true;
+            LoggerWrapper::GetInstance()->Write(LV_WARNING, "Note: Device manager has attached a device of type %d that this has no custom handler for.  This is normal for IR.", pDeviceData_Impl_Child->m_dwPK_DeviceTemplate);
+            int linuxmceID = pDeviceData_Impl_Child->m_dwPK_Device;
+            int lightID = QString::fromStdString(pDeviceData_Impl_Child->mapParameters_Find(DEVICEDATA_UnitNo_CONST)).toInt();
+            qDebug() << "Light ID " << lightID;
+            QListIterator<HueBulb*>bI(hueBulbs);
+            while(bI.hasNext()){
+                if(bI.next()->lightId==lightID){
+                    bI.next()->linuxmceId = linuxmceID;
+                    qDebug() << "Linked existing light with linuxmce db";
+                }
+
+            }
+
+            //            bulb->lightId =
+            //            CMD_Set_Device_Data setData(this->m_dwPK_Device, (long)9, pDeviceData_Impl_Child->m_dwPK_Device, "1", DEVICEDATA_UnitNo_CONST);
+
+
+        }
+
+        pCommand->m_pParent = this;
+        pCommand->CreateChildren();
+        m_mapCommandImpl_Children[pDeviceData_Impl_Child->m_dwPK_Device] = pCommand;
+    }
+    pthread_yield();
+    qDebug() << "Finished with Children Devices";
+    if(m_pData->m_vectDeviceData_Impl_Children.size()!=hueBulbs.size())
+        qDebug() << hueBulbs.count()- m_pData->m_vectDeviceData_Impl_Children.size() << " devices not added to linuxmce.";
 }
 
 //<-dceag-sample-b->
@@ -266,6 +383,7 @@ void Hue_Controller::CMD_On(int iPK_Pipe,string sPK_Device_Pipes,string &sCMD_Re
     cout << "Need to implement command #192 - On" << endl;
     cout << "Parm #97 - PK_Pipe=" << iPK_Pipe << endl;
     cout << "Parm #98 - PK_Device_Pipes=" << sPK_Device_Pipes << endl;
+    pthread_yield(); //this->m_pThread);
     emit testSignal();
 }
 
@@ -307,6 +425,7 @@ void Hue_Controller::CMD_Download_Configuration(string sText,string &sCMD_Result
 
     cout << "Need to implement command #757 - Download Configuration" << endl;
     cout << "Parm #9 - Text=" << sText << endl;
+    pthread_yield();
     emit initiateConfigDownload(QUrl("http://"+targetIpAddress+"/api/"+authUser));/*"+/config/"*/
 }
 
@@ -349,11 +468,12 @@ void Hue_Controller::processDataStore(const QByteArray data)
     }
 
     if(deviceIndex > -1){
-      hueControllers.at(deviceIndex)->m_ipAddress= configuration["mac"].toString();
+        hueControllers.at(deviceIndex)->m_ipAddress= configuration["mac"].toString();
     }
     else{
         qDebug() << "Fail Notify::" << configuration["ipaddress"].toString()+"::"+hueControllers.at(0)->m_ipAddress;
         qDebug() << deviceIndex;
+        return;
     }
 
 
@@ -373,10 +493,15 @@ void Hue_Controller::processDataStore(const QByteArray data)
     }
 
     qDebug() << "Controllers online::" << hueControllers.count();
-    qDebug() << "Lights online::" << lights.count();
+    qDebug() << "Lights online::" << hueBulbs.count();
+    qDebug() << "Lights in system::"<< m_pData->m_vectDeviceData_Impl_Children.size();
+    pthread_yield();
 
-    p.detach();
+    CreateChildren();
+
 }
+
+
 
 //<-dceag-c760-b->
 
@@ -453,14 +578,14 @@ bool Hue_Controller::findControllers(){
 
 }
 
-void Hue_Controller::initBridgeConnection(){
+bool Hue_Controller::downloadControllerConfig(QUrl deviceIp, int index)
+{
     qDebug()<<"Init() Connection...";
-    QUrl initUrl = "http://"+targetIpAddress+"/api/"+authUser;
+    QUrl initUrl = "http://"+deviceIp.toString()+"/api/"+authUser;
     QNetworkAccessManager *initManager = new QNetworkAccessManager;
     QNetworkRequest init(initUrl);
     QNetworkReply * rt = initManager->get(QNetworkRequest(init));
-    //this->connect(rt, SIGNAL(aboutToClose()), this, SLOT(processResponse()));
-    QObject::connect(rt, SIGNAL(finished()), this, SLOT(initResponse()));
+
     qDebug() << init.url();
     qDebug()<<"Request Sent.";
 
@@ -468,39 +593,106 @@ void Hue_Controller::initBridgeConnection(){
     QObject::connect(initManager, SIGNAL(finished(QNetworkReply*)), &respWait, SLOT(quit()));
     cout << "Waiting for Response" << endl;
     respWait.exec();
-    
 
+    qDebug()<< "Got Response";
+
+    int deviceIndex = index;
+    QByteArray rep = rt->readAll();
+
+    QJson::Parser parser;
+    bool ok;
+    QVariantMap p = parser.parse(rep, &ok).toMap();
+
+    if(p.size()==0)
+        return false;
+
+    if(!ok)
+        return false;
+
+    QVariantMap lightNest = p["lights"].toMap();
+    QVariantMap configuration=p["config"].toMap();
+    qDebug() << "Light Count"<< lightNest.count();
+
+    if(deviceIndex > -1){
+        hueControllers.at(deviceIndex)->m_macAddress= configuration["mac"].toString();
+         hueControllers.at(deviceIndex)->m_ipAddress= configuration["ipaddress"].toString();
+    }
+    else{
+        qDebug() << "Fail Notify::" << configuration["ipaddress"].toString()+"::"+hueControllers.at(index)->m_ipAddress;
+        qDebug() << deviceIndex;
+        return false;
+    }
+
+    QMap<QString, QVariant>::const_iterator i;
+    for(i=lightNest.begin(); i!= lightNest.constEnd(); i++ )
+    {
+        HueBulb *b = new HueBulb();
+        qDebug() << i.key() ;// << " :: " << i.value();
+        QVariantMap light = i.value().toMap();
+
+        QVariantMap state = light["state"].toMap();
+        qDebug() << state["on"].toString();
+        QString fd = state["on"].toString();
+        b->powerState = fd;
+        b->lightId = i.key().toInt();
+        b->controller=hueControllers.at(index)->m_ipAddress;
+        hueBulbs.append(b);
+    }
+
+    qDebug() << "Controllers online::" << hueControllers.count();
+    qDebug() << "Controller Lights::" << hueBulbs.count();
+    qDebug() << "Lights in system::"<< m_pData->m_vectDeviceData_Impl_Children.size();
+    return true;
+}
+
+void Hue_Controller::initBridgeConnection(){
+    qDebug()<<"Init() Connection...";
+    QUrl initUrl = "http://"+targetIpAddress+"/api/"+authUser;
+    QNetworkAccessManager *initManager = new QNetworkAccessManager;
+    QNetworkRequest init(initUrl);
+    QNetworkReply * rt = initManager->get(QNetworkRequest(init));
+    //this->connect(rt, SIGNAL(aboutToClose()), this, SLOT(processResponse()));
+    // QObject::connect(rt, SIGNAL(finished()), this, SLOT(initResponse()));
+    qDebug() << init.url();
+    qDebug()<<"Request Sent.";
+
+    QEventLoop respWait;
+    QObject::connect(initManager, SIGNAL(finished(QNetworkReply*)), &respWait, SLOT(quit()));
+    cout << "Waiting for Response" << endl;
+    respWait.exec();
+    qDebug()<< "Got Response";
+    qDebug() << rt->readAll();
 }
 
 void Hue_Controller::initResponse(){
     qDebug() << " Got Reponse " ;
     QNetworkReply* r = qobject_cast<QNetworkReply*>(sender());
     qDebug() << r->size();
-    QJson::Parser parser;
-    bool ok;
-
-    QVariant p = parser.parse(r->readAll(), &ok);
-
-    // qDebug() << p.typeName();
-    QString tipe = p.typeName();
-
-    if(tipe=="QVariantList"){
-        qDebug()<<"Error";
-
-    }else if(tipe=="QVariantMap"){
-        qDebug() << "Success";      \
-        QVariantMap successType= p.toMap();
-        if(successType.contains("config")){
-            qDebug() << "config call";
-        }
-        //qDebug() << configItems["lights"];
-    }
-    //qDebug() << p;
+    processDataStore(r->readAll());
     r->deleteLater();
-
-
+    pthread_yield();
+    return;
 }
 
+bool Hue_Controller::sendPowerMessage(QUrl message, QVariant params)
+{
+    qDebug() << "Power message::"<<message;
+    QNetworkAccessManager *p = new QNetworkAccessManager;
+    QNetworkRequest pr(message);
+    QJson::Serializer serializer;
+    QByteArray serialized = serializer.serialize(params);
+    qDebug()<< serialized;
+
+   QNetworkReply * ptx =  p->put(pr, serialized);
+   QEventLoop respWait;
+   QObject::connect(p, SIGNAL(finished(QNetworkReply*)), &respWait, SLOT(quit()));
+   cout << "Waiting for Response" << endl;
+   respWait.exec();
+   qDebug()<< "Got Response";
+   qDebug() << ptx->readAll();
+   pthread_yield();
+    return true;
+}
 
 
 

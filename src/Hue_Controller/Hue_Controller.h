@@ -26,6 +26,7 @@
 #include <QVariant>
 #include <QUrl>
 #include <huecontrollerhardware.h>
+#include <huebulb.h>
 //<-dceag-decl-b->
 namespace DCE
 {
@@ -41,10 +42,11 @@ namespace DCE
 
         QString targetIpAddress;
         QString authUser;
-        QNetworkAccessManager *communicator;
+
 
         QList<HueControllerHardware*> hueControllers;
-        QVariantMap lights;
+        QList<HueBulb*> hueBulbs;
+
 
         // Private methods
     public:
@@ -60,9 +62,11 @@ namespace DCE
         virtual bool Register();
         virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
         virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
+        virtual void CreateChildren();
         //<-dceag-const-e->
         void initBridgeConnection();
         bool findControllers();
+        bool downloadControllerConfig(QUrl deviceIp, int index);
 
 
         //<-dceag-const2-b->
@@ -199,6 +203,7 @@ NOEMON or CANBUS */
 
 
     protected:
+        bool sendPowerMessage(QUrl message, QVariant params);
 
     };
 

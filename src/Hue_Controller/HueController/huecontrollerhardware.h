@@ -20,6 +20,10 @@ signals:
     
 public slots:
 
+    QString getIpAddress() {return m_ipAddress;}
+    QString getMacAddress() {return m_macAddress;}
+    QString getInternalId() {return m_phillips_id;}
+
 
     
 };
