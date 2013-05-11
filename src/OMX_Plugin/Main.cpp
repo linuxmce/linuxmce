@@ -12,7 +12,7 @@
 
 */
 //<-dceag-incl-b->
-#include "omxplayer_Plugin.h"
+#include "OMX_Plugin.h"
 #include "DCE/Logger.h"
 #include "ServerLogger.h"
 #include "PlutoUtils/FileUtils.h"
@@ -22,9 +22,9 @@
 
 // In source files stored in archives and packages, these 2 lines will have the release version (build)
 // and the svn revision as a global variable that can be inspected within a core dump
-#define  VERSION "2.0.0.46.13051027515"
-const char *g_szCompile_Date="Sat May 11 00:55:42 2013";
-int g_SvnRevision=27515;
+#define  VERSION "<=version=>"
+const char *g_szCompile_Date="<=compile_date=>";
+/*SVN_REVISION*/
 
 
 using namespace DCE;
@@ -77,7 +77,7 @@ extern "C" {
 		// Then the Router will scan for all .so or .dll files, and if found they will be registered with a temporary device number
 		bool bIsRuntimePlugin=false;
 		if( bIsRuntimePlugin )
-			return omxplayer_Plugin::PK_DeviceTemplate_get_static();
+			return OMX_Plugin::PK_DeviceTemplate_get_static();
 		else
 			return 0;
 	}
@@ -91,19 +91,19 @@ extern "C" {
 		LoggerWrapper::SetInstance(pPlutoLogger);
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d loaded as plug-in",PK_Device);
 
-		omxplayer_Plugin *pomxplayer_Plugin = new omxplayer_Plugin(PK_Device, "localhost",true,false,pRouter);
-		if( pomxplayer_Plugin->m_bQuit_get()|| !pomxplayer_Plugin->GetConfig() )
+		OMX_Plugin *pOMX_Plugin = new OMX_Plugin(PK_Device, "localhost",true,false,pRouter);
+		if( pOMX_Plugin->m_bQuit_get()|| !pOMX_Plugin->GetConfig() )
 		{
-			delete pomxplayer_Plugin;
+			delete pOMX_Plugin;
 			return NULL;
 		}
 		else
 		{
-			g_pCommand_Impl=pomxplayer_Plugin;
+			g_pCommand_Impl=pOMX_Plugin;
 			g_pDeadlockHandler=Plugin_DeadlockHandler;
 			g_pSocketCrashHandler=Plugin_SocketCrashHandler;
 		}
-		return pomxplayer_Plugin;
+		return pOMX_Plugin;
 	}
 }
 //<-dceag-plug-e->
@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
 	g_sBinary = FileUtils::FilenameWithoutPath(argv[0]);
 	g_sBinaryPath = FileUtils::BasePath(argv[0]);
 
-	cout << "omxplayer_Plugin, v." << VERSION << endl
+	cout << "OMX_Plugin, v." << VERSION << endl
 		<< "Visit www.plutohome.com for source code and license information" << endl << endl;
 
 	string sRouter_IP="dcerouter";
@@ -155,7 +155,7 @@ int main(int argc, char* argv[])
 	if (bError)
 	{
 		cout << "A Pluto DCE Device.  See www.plutohome.com/dce for details." << endl
-			<< "Usage: omxplayer_Plugin [-r Router's IP] [-d My Device ID] [-l dcerouter|stdout|null|filename]" << endl
+			<< "Usage: OMX_Plugin [-r Router's IP] [-d My Device ID] [-l dcerouter|stdout|null|filename]" << endl
 			<< "-r -- the IP address of the DCE Router  Defaults to 'dcerouter'." << endl
 			<< "-d -- This device's ID number.  If not specified, it will be requested from the router based on our IP address." << endl
 			<< "-l -- Where to save the log files.  Specify 'dcerouter' to have the messages logged to the DCE Router.  Defaults to stdout." << endl;
@@ -179,7 +179,7 @@ int main(int argc, char* argv[])
 	try
 	{
 		if( sLogger=="dcerouter" )
-			LoggerWrapper::SetInstance(new ServerLogger(PK_Device, omxplayer_Plugin::PK_DeviceTemplate_get_static(), sRouter_IP));
+			LoggerWrapper::SetInstance(new ServerLogger(PK_Device, OMX_Plugin::PK_DeviceTemplate_get_static(), sRouter_IP));
 		else if( sLogger=="null" )
 			LoggerWrapper::SetType(LT_LOGGER_NULL);
 		else if( sLogger!="stdout" )
@@ -197,20 +197,20 @@ int main(int argc, char* argv[])
 	bool bReload=false;
 	try
 	{
-		omxplayer_Plugin *pomxplayer_Plugin = new omxplayer_Plugin(PK_Device, sRouter_IP,true,bLocalMode);
-		if ( pomxplayer_Plugin->GetConfig() && pomxplayer_Plugin->Connect(pomxplayer_Plugin->PK_DeviceTemplate_get()) ) 
+		OMX_Plugin *pOMX_Plugin = new OMX_Plugin(PK_Device, sRouter_IP,true,bLocalMode);
+		if ( pOMX_Plugin->GetConfig() && pOMX_Plugin->Connect(pOMX_Plugin->PK_DeviceTemplate_get()) ) 
 		{
-			g_pCommand_Impl=pomxplayer_Plugin;
+			g_pCommand_Impl=pOMX_Plugin;
 			g_pDeadlockHandler=DeadlockHandler;
 			g_pSocketCrashHandler=SocketCrashHandler;
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
-			pomxplayer_Plugin->CreateChildren();
+			pOMX_Plugin->CreateChildren();
 			if( bLocalMode )
-				pomxplayer_Plugin->RunLocalMode();
+				pOMX_Plugin->RunLocalMode();
 			else
 			{
-				if(pomxplayer_Plugin->m_RequestHandlerThread)
-					pthread_join(pomxplayer_Plugin->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
+				if(pOMX_Plugin->m_RequestHandlerThread)
+					pthread_join(pOMX_Plugin->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
 			}
 			g_pDeadlockHandler=NULL;
 			g_pSocketCrashHandler=NULL;
@@ -218,7 +218,7 @@ int main(int argc, char* argv[])
 		else 
 		{
 			bAppError = true;
-			if( pomxplayer_Plugin->m_pEvent && pomxplayer_Plugin->m_pEvent->m_pClientSocket && pomxplayer_Plugin->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
+			if( pOMX_Plugin->m_pEvent && pOMX_Plugin->m_pEvent->m_pClientSocket && pOMX_Plugin->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
 			{
 				bAppError = false;
 				bReload = false;
@@ -228,10 +228,10 @@ int main(int argc, char* argv[])
 				LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
 		}
 
-		if( pomxplayer_Plugin->m_bReload )
+		if( pOMX_Plugin->m_bReload )
 			bReload=true;
 
-		delete pomxplayer_Plugin;
+		delete pOMX_Plugin;
 	}
 	catch(string s)
 	{

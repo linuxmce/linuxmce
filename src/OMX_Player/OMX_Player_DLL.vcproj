@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="omxplayer_Player"
+	Name="OMX_Player"
 	ProjectGUID="{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}"
 	Keyword="Win32Proj">
 	<Platforms>
@@ -14,7 +14,7 @@
 			Name="Debug|Win32"
 			OutputDirectory="Debug"
 			IntermediateDirectory="Debug"
-			ConfigurationType="1"
+			ConfigurationType="2"
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
@@ -33,11 +33,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="pthreadVC.lib wsock32.lib DCE.lib"
-				OutputFile="../Debug/omxplayer_Player.exe"
+				OutputFile="../Debug/OMX_Player.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../libs/Libraries/pthreads-win32/lib;../lib"
+				ModuleDefinitionFile="OMX_Player.def"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/omxplayer_Player.pdb"
+				ProgramDatabaseFile="$(OutDir)/OMX_Player.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
@@ -70,9 +71,9 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				AdditionalIncludeDirectories="..;../DCE/;../../libs/Libraries/pthreads-win32/include;/mysql/include"
 				InlineFunctionExpansion="1"
 				OmitFramePointers="TRUE"
+				AdditionalIncludeDirectories="..;../DCE/;../../libs/Libraries/pthreads-win32/include;/mysql/include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
@@ -86,9 +87,10 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="pthreadVC.lib wsock32.lib DCE-r.lib"
-				OutputFile="../bin/omxplayer_Player.exe"
+				OutputFile="../bin/OMX_Player.dll"
 				AdditionalLibraryDirectories="../../libs/Libraries/pthreads-win32/lib;../lib"
 				LinkIncremental="1"
+				ModuleDefinitionFile="OMX_Player.def"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -126,10 +128,13 @@
 				RelativePath="Main.cpp">
 			</File>
 			<File
-				RelativePath="omxplayer_Player.cpp">
+				RelativePath="OMX_Player.cpp">
 			</File>
 			<File
-				RelativePath="..\Gen_Devices\omxplayer_PlayerBase.cpp">
+				RelativePath="OMX_Player.def">
+			</File>
+			<File
+				RelativePath="..\Gen_Devices\OMX_PlayerBase.cpp">
 			</File>
 		</Filter>
 		<Filter
@@ -139,7 +144,7 @@
 				RelativePath="..\DCE\DCEDeviceData_Impl.h">
 			</File>
 			<File
-				RelativePath="omxplayer_Player.h">
+				RelativePath="OMX_Player.h">
 			</File>
 		</Filter>
 		<Filter

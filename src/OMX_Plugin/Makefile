@@ -11,12 +11,12 @@ CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql $(SNR_CPPFLAGS)
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
 BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
-MYNAME = omxplayer_Player
+MYNAME = OMX_Plugin
 VERSION = 2.0.0
-MYDEVTEMPLATEID = 2259
+MYDEVTEMPLATEID = 2260
 
-Gen_Dev_Files = $(GENDEV)/omxplayer_PlayerBase.cpp
-sources = Main.cpp omxplayer_Player.cpp $(Gen_Dev_Files)
+Gen_Dev_Files = $(GENDEV)/OMX_PluginBase.cpp
+sources = Main.cpp OMX_Plugin.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
 CXXFLAGS +=
@@ -35,25 +35,25 @@ whattodo: all
 
 all: bin so
 
-bin: omxplayer_Player
+bin: OMX_Plugin
 
-so: omxplayer_Player.so
+so: OMX_Plugin.so
 
-omxplayer_Player.so: $(sources:.cpp=.o)
+OMX_Plugin.so: $(sources:.cpp=.o)
 	$(CXX) -shared -o $(MYNAME).so $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	mkdir -p ../bin
 	cp $@ ../bin
 #	chmod +x post_make.sh
 #	./post_make.sh $@
 		
-omxplayer_Player: $(sources:.cpp=.o)
+OMX_Plugin: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	mkdir -p ../bin
 	cp $@ ../bin
 #	./post_make.sh $@
 
 clean: clean-recursive
-	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) omxplayer_Player omxplayer_Player.so >/dev/null
+	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) OMX_Plugin OMX_Plugin.so >/dev/null
 
 package:
 	chmod +x make_package.sh
@@ -61,7 +61,7 @@ package:
 
 install:
 	mkdir -p $(DESTDIR)/usr/pluto/bin
-	cp omxplayer_Player $(DESTDIR)/usr/pluto/bin
+	cp OMX_Plugin $(DESTDIR)/usr/pluto/bin
 
 include $(ROOT)/PlutoUtils/make.rules
 ifeq (,$(findstring clean, $(MAKECMDGOALS)))

@@ -12,7 +12,7 @@
 
 */
 //<-dceag-d-b->
-#include "omxplayer_Plugin.h"
+#include "OMX_Plugin.h"
 #include "DCE/Logger.h"
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
@@ -27,31 +27,31 @@ using namespace DCE;
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
-omxplayer_Plugin::omxplayer_Plugin(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
-	: omxplayer_Plugin_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
+OMX_Plugin::OMX_Plugin(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
+	: OMX_Plugin_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 {
 }
 
 //<-dceag-const2-b->
 // The constructor when the class is created as an embedded instance within another stand-alone device
-omxplayer_Plugin::omxplayer_Plugin(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
-	: omxplayer_Plugin_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
+OMX_Plugin::OMX_Plugin(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
+	: OMX_Plugin_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
 //<-dceag-const2-e->
 {
 }
 
 //<-dceag-dest-b->
-omxplayer_Plugin::~omxplayer_Plugin()
+OMX_Plugin::~OMX_Plugin()
 //<-dceag-dest-e->
 {
 	
 }
 
 //<-dceag-getconfig-b->
-bool omxplayer_Plugin::GetConfig()
+bool OMX_Plugin::GetConfig()
 {
-	if( !omxplayer_Plugin_Command::GetConfig() )
+	if( !OMX_Plugin_Command::GetConfig() )
 		return false;
 //<-dceag-getconfig-e->
 
@@ -62,7 +62,7 @@ bool omxplayer_Plugin::GetConfig()
 
 //<-dceag-reg-b->
 // This function will only be used if this device is loaded into the DCE Router's memory space as a plug-in.  Otherwise Connect() will be called from the main()
-bool omxplayer_Plugin::Register()
+bool OMX_Plugin::Register()
 //<-dceag-reg-e->
 {
 	return Connect(PK_DeviceTemplate_get()); 
@@ -72,9 +72,9 @@ bool omxplayer_Plugin::Register()
 	cannot include the actual implementation.  Instead there's an extern function declared, and the actual new exists here.  You 
 	can safely remove this block (put a ! after the dceag-createinst-b block) if this device is not embedded within other devices. */
 //<-dceag-createinst-b->
-omxplayer_Plugin_Command *Create_omxplayer_Plugin(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
+OMX_Plugin_Command *Create_OMX_Plugin(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
 {
-	return new omxplayer_Plugin(pPrimaryDeviceCommand, pData, pEvent, pRouter);
+	return new OMX_Plugin(pPrimaryDeviceCommand, pData, pEvent, pRouter);
 }
 //<-dceag-createinst-e->
 
@@ -87,7 +87,7 @@ omxplayer_Plugin_Command *Create_omxplayer_Plugin(Command_Impl *pPrimaryDeviceCo
 	should change the sCMD_Result to OK
 */
 //<-dceag-cmdch-b->
-void omxplayer_Plugin::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
+void OMX_Plugin::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
 //<-dceag-cmdch-e->
 {
 	sCMD_Result = "UNHANDLED CHILD";
@@ -99,7 +99,7 @@ void omxplayer_Plugin::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl
 	should change the sCMD_Result to OK
 */
 //<-dceag-cmduk-b->
-void omxplayer_Plugin::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
+void OMX_Plugin::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 //<-dceag-cmduk-e->
 {
 	sCMD_Result = "UNKNOWN COMMAND";
@@ -114,7 +114,7 @@ Without the !, everything between <=dceag-sometag-b-> and <=dceag-sometag-e->
 will be replaced by DCEGenerator each time it is run with the normal merge selection.
 The above blocks are actually <- not <=.  We don't want a substitution here
 
-void omxplayer_Plugin::SomeFunction()
+void OMX_Plugin::SomeFunction()
 {
 	// If this is going to be loaded into the router as a plug-in, you can implement: 	virtual bool Register();
 	// to do all your registration, such as creating message interceptors

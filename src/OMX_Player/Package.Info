@@ -1,8 +1,8 @@
 <-dceag-p-b->
 Package = DCE_Destination_Package
 Dir = 
-desc = DCE Implemenation for #2259 omxplayer Player
-Maintainer = AdministratorName
+desc = DCE Implemenation for #2259 OMX Player
+Maintainer = JayName
 Email = 
 Depend = DCE_Dependencies
 <-dceag-p-e->

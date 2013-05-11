@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="omxplayer_Plugin"
+	Name="OMX_Plugin"
 	ProjectGUID="{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}"
 	Keyword="Win32Proj">
 	<Platforms>
@@ -33,12 +33,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="pthreadVC.lib wsock32.lib DCE.lib"
-				OutputFile="../Debug/omxplayer_Plugin.dll"
+				OutputFile="../Debug/OMX_Plugin.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../libs/Libraries/pthreads-win32/lib;../lib"
-				ModuleDefinitionFile="omxplayer_Plugin.def"
+				ModuleDefinitionFile="OMX_Plugin.def"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/omxplayer_Plugin.pdb"
+				ProgramDatabaseFile="$(OutDir)/OMX_Plugin.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
@@ -87,10 +87,10 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="pthreadVC.lib wsock32.lib DCE-r.lib"
-				OutputFile="../bin/omxplayer_Plugin.dll"
+				OutputFile="../bin/OMX_Plugin.dll"
 				AdditionalLibraryDirectories="../../libs/Libraries/pthreads-win32/lib;../lib"
 				LinkIncremental="1"
-				ModuleDefinitionFile="omxplayer_Plugin.def"
+				ModuleDefinitionFile="OMX_Plugin.def"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -128,13 +128,13 @@
 				RelativePath="Main.cpp">
 			</File>
 			<File
-				RelativePath="omxplayer_Plugin.cpp">
+				RelativePath="OMX_Plugin.cpp">
 			</File>
 			<File
-				RelativePath="omxplayer_Plugin.def">
+				RelativePath="OMX_Plugin.def">
 			</File>
 			<File
-				RelativePath="..\Gen_Devices\omxplayer_PluginBase.cpp">
+				RelativePath="..\Gen_Devices\OMX_PluginBase.cpp">
 			</File>
 		</Filter>
 		<Filter
@@ -144,7 +144,7 @@
 				RelativePath="..\DCE\DCEDeviceData_Impl.h">
 			</File>
 			<File
-				RelativePath="omxplayer_Plugin.h">
+				RelativePath="OMX_Plugin.h">
 			</File>
 		</Filter>
 		<Filter

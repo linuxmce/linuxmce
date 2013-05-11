@@ -12,18 +12,18 @@
 
 */
 //<-dceag-d-b->
-#ifndef omxplayer_Player_h
-#define omxplayer_Player_h
+#ifndef OMX_Player_h
+#define OMX_Player_h
 
-//	DCE Implemenation for #2259 omxplayer Player
+//	DCE Implemenation for #2259 OMX Player
 
-#include "Gen_Devices/omxplayer_PlayerBase.h"
+#include "Gen_Devices/OMX_PlayerBase.h"
 //<-dceag-d-e->
 
 //<-dceag-decl-b->
 namespace DCE
 {
-	class omxplayer_Player : public omxplayer_Player_Command
+	class OMX_Player : public OMX_Player_Command
 	{
 //<-dceag-decl-e->
 		// Private member variables
@@ -35,8 +35,8 @@ public:
 //<-dceag-const-b->
 public:
 		// Constructors/Destructor
-		omxplayer_Player(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL);
-		virtual ~omxplayer_Player();
+		OMX_Player(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL);
+		virtual ~OMX_Player();
 		virtual bool GetConfig();
 		virtual bool Register();
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
@@ -46,7 +46,7 @@ public:
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
 		// You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file
-		omxplayer_Player(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
+		OMX_Player(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
 //<-dceag-const2-e->
 
 //<-dceag-h-b->
