@@ -1,5 +1,5 @@
-#ifndef Generic_Serial_DeviceBase_h
-#define Generic_Serial_DeviceBase_h
+#ifndef Roku_LTHDXDXS_Streaming_PlaBase_h
+#define Roku_LTHDXDXS_Streaming_PlaBase_h
 #include "DeviceData_Impl.h"
 #include "Message.h"
 #include "Command_Impl.h"
@@ -24,16 +24,16 @@ namespace DCE
 * @brief OUR EVENT CLASS
 */
 
-class Generic_Serial_Device_Event : public Event_Impl
+class Roku_LTHDXDXS_Streaming_Pla_Event : public Event_Impl
 {
 public:
 
 	/**
 	* @brief Constructors
 	*/
-	Generic_Serial_Device_Event(int DeviceID, string ServerAddress, bool bConnectEventHandler=true) :
+	Roku_LTHDXDXS_Streaming_Pla_Event(int DeviceID, string ServerAddress, bool bConnectEventHandler=true) :
 		Event_Impl(DeviceID, DEVICETEMPLATE_Roku_LTHDXDXS_Streaming_Pla_CONST, ServerAddress, bConnectEventHandler, SOCKET_TIMEOUT) {};
-	Generic_Serial_Device_Event(class ClientSocket *pOCClientSocket, int DeviceID) : Event_Impl(pOCClientSocket, DeviceID) {};
+	Roku_LTHDXDXS_Streaming_Pla_Event(class ClientSocket *pOCClientSocket, int DeviceID) : Event_Impl(pOCClientSocket, DeviceID) {};
 
 	/**
 	* @brief Events builder method
@@ -51,14 +51,14 @@ public:
 * @brief OUR DATA CLASS
 */
 
-class Generic_Serial_Device_Data : public DeviceData_Impl
+class Roku_LTHDXDXS_Streaming_Pla_Data : public DeviceData_Impl
 {
 public:
 
 	/**
 	* @brief No-op destructor
 	*/
-	virtual ~Generic_Serial_Device_Data() {};
+	virtual ~Roku_LTHDXDXS_Streaming_Pla_Data() {};
 
 	/**
 	* @brief Builder data method
@@ -74,7 +74,7 @@ public:
 	/**
 	* @brief Returns the description of the device
 	*/
-	virtual const char *GetDeviceDescription() { return "Generic_Serial_Device"; } ;
+	virtual const char *GetDeviceDescription() { return "Roku_LTHDXDXS_Streaming_Pla"; } ;
 
 	/**
 	* @brief Device data access methods:
@@ -131,17 +131,17 @@ public:
 
 //   OUR COMMAND CLASS 
 
-class Generic_Serial_Device_Command : public Command_Impl
+class Roku_LTHDXDXS_Streaming_Pla_Command : public Command_Impl
 {
 public:
-	Generic_Serial_Device_Command(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL)
+	Roku_LTHDXDXS_Streaming_Pla_Command(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL)
 	: Command_Impl(DeviceID, ServerAddress, bLocalMode, pRouter)
 	{
 	}
 	virtual bool GetConfig()
 	{
 		m_pData=NULL;
-		m_pEvent = new Generic_Serial_Device_Event(m_dwPK_Device, m_sHostName, !m_bLocalMode);
+		m_pEvent = new Roku_LTHDXDXS_Streaming_Pla_Event(m_dwPK_Device, m_sHostName, !m_bLocalMode);
 		if( m_pEvent->m_dwPK_Device )
 			m_dwPK_Device = m_pEvent->m_dwPK_Device;
 		if( m_sIPAddress!=m_pEvent->m_pClientSocket->m_sIPAddress )	
@@ -154,7 +154,7 @@ public:
 				while( m_pEvent->m_pClientSocket->m_eLastError==cs_err_BadDevice && (m_dwPK_Device = DeviceIdInvalid())!=0 )
 				{
 					delete m_pEvent;
-					m_pEvent = new Generic_Serial_Device_Event(m_dwPK_Device, m_sHostName, !m_bLocalMode);
+					m_pEvent = new Roku_LTHDXDXS_Streaming_Pla_Event(m_dwPK_Device, m_sHostName, !m_bLocalMode);
 					if( m_pEvent->m_dwPK_Device )
 						m_dwPK_Device = m_pEvent->m_dwPK_Device;
 				}
@@ -178,7 +178,7 @@ public:
 		
 		if( m_bLocalMode )
 		{
-			m_pData = new Generic_Serial_Device_Data();
+			m_pData = new Roku_LTHDXDXS_Streaming_Pla_Data();
 			return true;
 		}
 		if( (m_pEvent->m_pClientSocket->m_eLastError!=cs_err_None && m_pEvent->m_pClientSocket->m_eLastError!=cs_err_NeedReload) || m_pEvent->m_pClientSocket->m_Socket==INVALID_SOCKET )
@@ -187,7 +187,7 @@ public:
 		int Size; char *pConfig = m_pEvent->GetConfig(Size);
 		if( !pConfig )
 			return false;
-		m_pData = new Generic_Serial_Device_Data();
+		m_pData = new Roku_LTHDXDXS_Streaming_Pla_Data();
 		if( Size )
 		{
 			if( m_pData->SerializeRead(Size,pConfig)==false )
@@ -218,11 +218,11 @@ public:
 		PostConfigCleanup();
 		return true;
 	};
-	Generic_Serial_Device_Command(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter) : Command_Impl(pPrimaryDeviceCommand, pData, pEvent, pRouter) {};
-	virtual ~Generic_Serial_Device_Command() {};
-	Generic_Serial_Device_Event *GetEvents() { return (Generic_Serial_Device_Event *) m_pEvent; };
-	Generic_Serial_Device_Data *GetData() { return (Generic_Serial_Device_Data *) m_pData; };
-	const char *GetClassName() { return "Generic_Serial_Device_Command"; };
+	Roku_LTHDXDXS_Streaming_Pla_Command(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter) : Command_Impl(pPrimaryDeviceCommand, pData, pEvent, pRouter) {};
+	virtual ~Roku_LTHDXDXS_Streaming_Pla_Command() {};
+	Roku_LTHDXDXS_Streaming_Pla_Event *GetEvents() { return (Roku_LTHDXDXS_Streaming_Pla_Event *) m_pEvent; };
+	Roku_LTHDXDXS_Streaming_Pla_Data *GetData() { return (Roku_LTHDXDXS_Streaming_Pla_Data *) m_pData; };
+	const char *GetClassName() { return "Roku_LTHDXDXS_Streaming_Pla_Command"; };
 	virtual int PK_DeviceTemplate_get() { return DEVICETEMPLATE_Roku_LTHDXDXS_Streaming_Pla_CONST; };
 	static int PK_DeviceTemplate_get_static() { return DEVICETEMPLATE_Roku_LTHDXDXS_Streaming_Pla_CONST; };
 	virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage) { };
