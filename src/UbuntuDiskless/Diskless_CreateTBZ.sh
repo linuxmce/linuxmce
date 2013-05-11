@@ -469,6 +469,12 @@ case "$TARGET_DISTRO" in
 		LC_ALL=C chroot "$TEMP_DIR" apt-get -y install linux-image-3.2.0-4-rpi
 
 		LC_ALL=C chroot "$TEMP_DIR" apt-get -y install libraspberrypi0 raspberrypi-bootloader
+
+                LC_ALL=C chroot $TEMP_DIR apt-get -y install alsa-base alsa-utils pulseaudio
+                VerifyExitCode "alsa-base, alsa-utils or pulseaudio packages install failed"
+
+                LC_ALL=C chroot $TEMP_DIR apt-get -y install xorg
+                VerifyExitCode "xorg package install failed"
 		;;
 esac
 
@@ -569,8 +575,8 @@ case "$TARGET_DISTRO" in
 		fi
 
 		if [[ "$INSTALL_KUBUNTU_DESKTOP" != "no" ]]; then
-#			LC_ALL=C chroot $TEMP_DIR apt-get -y install kubuntu-desktop
-			LC_ALL=C chroot $TEMP_DIR apt-get -y install kde-minimal
+			LC_ALL=C chroot $TEMP_DIR apt-get -y install kubuntu-desktop
+#			LC_ALL=C chroot $TEMP_DIR apt-get -y install kde-minimal
 		fi
 		echo '/bin/false' >"$TEMP_DIR/etc/X11/default-display-manager"
 
@@ -587,6 +593,10 @@ case "$TARGET_DISTRO" in
                 #Install nfs-common and openssh-server
                 LC_ALL=C chroot $TEMP_DIR apt-get -y install nfs-common openssh-server
                 VerifyExitCode "nfs-common or openssh-server programs install failed"
+
+		#FIXME: why is this required, something else is missing
+                LC_ALL=C chroot $TEMP_DIR groupadd Debian-Exim
+                VerifyExitCode "groupadd Debian-Exim failed"
 		;;
 esac
 
