@@ -25,27 +25,38 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
+#include "Orbiter_Plugin/Orbiter_Plugin.h"
+#include "pluto_main/Define_MediaType.h"
+#include "pluto_main/Define_DeviceCategory.h"
+#include "pluto_main/Define_Event.h"
+#include "pluto_main/Define_EventParameter.h"
+#include "pluto_main/Define_DesignObj.h"
+#include "pluto_main/Define_Variable.h"
+#include "../pluto_main/Define_DataGrid.h"
+#include "../pluto_main/Define_DeviceData.h"
+#include "../pluto_main/Define_Event.h"
+#include "../pluto_main/Define_DeviceData.h"
+#include "../pluto_main/Define_DeviceTemplate.h"
+#include "../pluto_main/Table_Users.h"
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 OMX_Plugin::OMX_Plugin(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
 	: OMX_Plugin_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
+	,m_OMXMediaMutex("omx media mutex")
 {
+  m_OMXMediaMutex.Init(NULL);
 }
 
-//<-dceag-const2-b->
-// The constructor when the class is created as an embedded instance within another stand-alone device
-OMX_Plugin::OMX_Plugin(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
-	: OMX_Plugin_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
-//<-dceag-const2-e->
-{
-}
+//<-dceag-const2-b->!
 
 //<-dceag-dest-b->
 OMX_Plugin::~OMX_Plugin()
 //<-dceag-dest-e->
 {
-	
+	PLUTO_SAFETY_LOCK(mm,m_OMXMediaMutex);
+	pthread_mutex_destroy(&m_OMXMediaMutex.mutex);
 }
 
 //<-dceag-getconfig-b->
@@ -65,6 +76,26 @@ bool OMX_Plugin::GetConfig()
 bool OMX_Plugin::Register()
 //<-dceag-reg-e->
 {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Starting OMX_Plugin::Register()");
+
+	m_iPriority=DATA_Get_Priority();
+
+	m_pMedia_Plugin=( Media_Plugin * ) m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
+	m_pOrbiter_Plugin=( Orbiter_Plugin * ) m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Orbiter_Plugin_CONST);
+	if( !m_pMedia_Plugin || !m_pOrbiter_Plugin )
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Cannot find sister plugins to OMX plugin");
+		return false;
+	}
+
+	vector<int> vectPK_DeviceTemplate;
+	vectPK_DeviceTemplate.push_back(DEVICETEMPLATE_OMX_Player_CONST);
+	m_pMedia_Plugin->RegisterMediaPlugin( this, this, vectPK_DeviceTemplate, true );
+
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Registered device %d",DEVICETEMPLATE_OMX_Player_CONST);
+
+	RegisterMsgInterceptor(( MessageInterceptorFn )( &OMX_Plugin::MenuOnScreen ), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Menu_Onscreen_CONST );
+
 	return Connect(PK_DeviceTemplate_get()); 
 }
 
@@ -105,7 +136,7 @@ void OMX_Plugin::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 	sCMD_Result = "UNKNOWN COMMAND";
 }
 
-//<-dceag-sample-b->
+//<-dceag-sample-b->!
 /*		**** SAMPLE ILLUSTRATING HOW TO USE THE BASE CLASSES ****
 
 **** IF YOU DON'T WANT DCEGENERATOR TO KEEP PUTTING THIS AUTO-GENERATED SECTION ****
@@ -194,4 +225,232 @@ void OMX_Plugin::SomeFunction()
 
 */
 
+class MediaStream *OMX_Plugin::CreateMediaStream( class MediaHandlerInfo *pMediaHandlerInfo, int iPK_MediaProvider, vector<class EntertainArea *> &vectEntertainArea, MediaDevice *pMediaDevice, int iPK_Users, deque<MediaFile *> *dequeFilenames, int StreamID )
+{
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"OMX Plugin CreateMediaStream Called");
+  
+  OMXMediaStream *pOMXMediaStream;
+  MediaDevice *pMediaDevice_PassedIn;
+  
+  PLUTO_SAFETY_LOCK( xm, m_OMXMediaMutex );
+  
+  if(m_bQuit_get())
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "OMX_Plugin::CreateMediaStream with m_bQuit");
+      return NULL;
+    }
+  
+  PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
+  
+  pMediaDevice_PassedIn = NULL;
+  if ( vectEntertainArea.size()==0 && pMediaDevice == NULL )
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "I can't create a media stream without an entertainment area or a media device");
+      return NULL;
+    }
+  
+  if ( pMediaDevice != NULL  && // test the media device only if it set
+       pMediaDevice->m_pDeviceData_Router->m_dwPK_DeviceTemplate != DEVICETEMPLATE_OMX_Player_CONST )
+    {
+      pMediaDevice_PassedIn = pMediaDevice;
+      pMediaDevice = m_pMedia_Plugin->m_mapMediaDevice_Find(m_pRouter->FindClosestRelative(DEVICETEMPLATE_OMX_Player_CONST, pMediaDevice->m_pDeviceData_Router->m_dwPK_Device));
+    }
+  
+  if ( !pMediaDevice )
+    {
+      for(size_t s=0;s<vectEntertainArea.size();++s)
+	{
+	  EntertainArea *pEntertainArea = vectEntertainArea[0];
+	  pMediaDevice = FindMediaDeviceForEntertainArea(pEntertainArea);
+	  if( pMediaDevice )
+	    break;
+	}
+      if( !pMediaDevice )
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "I didn't find a device in the target ent area.");
+	  return NULL;
+	}
+    }
+  
+  LoggerWrapper::GetInstance()->Write(LV_STATUS, "Selected device (%d: %s) as playback device!",
+				      pMediaDevice->m_pDeviceData_Router->m_dwPK_Device,
+				      pMediaDevice->m_pDeviceData_Router->m_sDescription.c_str());
+  
+  pOMXMediaStream = new OMXMediaStream( this, pMediaHandlerInfo,iPK_MediaProvider,
+					  pMediaDevice,
+					  iPK_Users, st_RemovableMedia, StreamID );
+  
+  m_mapDevicesToStreams[pMediaDevice->m_pDeviceData_Router->m_dwPK_Device] = StreamID;
+  
+  return pOMXMediaStream;
+  
+}
+
+bool OMX_Plugin::StartMedia( MediaStream *pMediaStream,string &sError )
+{
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"StartMedia Called");
+ 
+	PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
+ 
+	LoggerWrapper::GetInstance()->Write( LV_STATUS, "OMX_Plugin::StartMedia() Starting media stream playback. pos: %d", pMediaStream->m_iDequeMediaFile_Pos );
+ 
+	OMXMediaStream *pOMXMediaStream = NULL;
+	if ( (pOMXMediaStream = ConvertToOMXMediaStream(pMediaStream, "OMX_Plugin::StartMedia(): ")) == NULL )
+		return false;
+ 
+	string sFileToPlay;
+	MediaFile *pMediaFile = NULL;
+ 
+	sFileToPlay = pOMXMediaStream->GetFilenameToPlay("Empty file name");
+ 
+	LoggerWrapper::GetInstance()->Write( LV_STATUS, "OMX_Plugin::StartMedia() Media type %d %s", pMediaStream->m_iPK_MediaType, sFileToPlay.c_str());
+ 
+	string mediaURL;
+	string Response;
+ 
+	mediaURL = sFileToPlay;
+ 
+	// send the CMD straight through.
+ 
+	pOMXMediaStream->m_sMediaDescription = "OMX";
+
+	DCE::CMD_Play_Media CMD_Play_Media(m_dwPK_Device,
+						pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
+						pOMXMediaStream->m_iPK_MediaType,
+						pOMXMediaStream->m_iStreamID_get( ),
+						"00:00:00",
+						mediaURL);
+	
+	SendCommand(CMD_Play_Media);
+ 
+	/** We're going to send a message to all the orbiters in this area so they know what the remote is,
+	and we will send all bound remotes to the new screen */
+	for( MapEntertainArea::iterator itEA = pOMXMediaStream->m_mapEntertainArea.begin( );itEA != pOMXMediaStream->m_mapEntertainArea.end( );++itEA )
+	{
+		EntertainArea *pEntertainArea = ( *itEA ).second;
+		LoggerWrapper::GetInstance()->Write( LV_STATUS, "Looking into the ent area (%p) with id %d and %d remotes", pEntertainArea, pEntertainArea->m_iPK_EntertainArea, (int) pEntertainArea->m_mapBoundRemote.size() );
+        for(map<int,OH_Orbiter *>::iterator it=m_pOrbiter_Plugin->m_mapOH_Orbiter.begin();it!=m_pOrbiter_Plugin->m_mapOH_Orbiter.end();++it)
+        {
+            OH_Orbiter *pOH_Orbiter = (*it).second;
+			if( pOH_Orbiter->m_pEntertainArea!=pEntertainArea )
+				continue;
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Processing remote: for orbiter: %d", pOH_Orbiter->m_pDeviceData_Router->m_dwPK_Device);
+			bool bBound = pEntertainArea->m_mapBoundRemote.find(pOH_Orbiter->m_pDeviceData_Router->m_dwPK_Device)!=pEntertainArea->m_mapBoundRemote.end();
+			pOMXMediaStream->SetNowPlaying(pOH_Orbiter,false,bBound);
+		}
+	}
+
+	return MediaHandlerBase::StartMedia(pMediaStream,sError);
+ 
+}
+
+bool OMX_Plugin::StopMedia( class MediaStream *pMediaStream )
+{
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"StopMedia Called");
+	PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
+ 
+	map<int, int>::iterator it = m_mapDevicesToStreams.find(pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device);
+	if( it!=m_mapDevicesToStreams.end() )
+		m_mapDevicesToStreams.erase(it);
+
+	LoggerWrapper::GetInstance()->Write( LV_STATUS, "OMX_Plugin::StopMedia() Stopping Media Stream Playback... Pos: %d", pMediaStream->m_iDequeMediaFile_Pos );
+ 
+	OMXMediaStream *pOMXMediaStream = NULL;
+ 
+	if ((pOMXMediaStream = ConvertToOMXMediaStream(pMediaStream,"OMX_Plugin::StopMedia():")) == NULL )
+		return false;
+ 
+	string savedPosition;
+ 
+	DCE::CMD_Stop_Media CMD_Stop_Media(m_dwPK_Device,
+						pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
+						pOMXMediaStream->m_iStreamID_get(),
+						&savedPosition);
+ 
+	SendCommand(CMD_Stop_Media);
+ 
+	return MediaHandlerBase::StopMedia(pMediaStream);
+}
+
+MediaDevice *OMX_Plugin::FindMediaDeviceForEntertainArea(EntertainArea *pEntertainArea)
+{
+	PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
+ 
+	MediaDevice *pMediaDevice;
+	pMediaDevice = GetMediaDeviceForEntertainArea(pEntertainArea, DEVICETEMPLATE_OMX_Player_CONST);
+ 
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Looking for a proper device in the ent area %d (%s)", pEntertainArea->m_iPK_EntertainArea, pEntertainArea->m_sDescription.c_str());
+	if ( pMediaDevice == NULL )
+	{
+
+		return NULL;
+	}
+ 
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Returning this device %d (%s)", pMediaDevice->m_pDeviceData_Router->m_dwPK_Device, pMediaDevice->m_pDeviceData_Router->m_sDescription.c_str());
+ 
+	return pMediaDevice;
+}
+
+OMXMediaStream *OMX_Plugin::ConvertToOMXMediaStream(MediaStream *pMediaStream, string callerIdMessage)
+{
+	PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
+ 
+	if ( pMediaStream == NULL )
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, (callerIdMessage + "Stream is a NULL stream!").c_str());
+		return NULL;
+	}
+ 
+	if ( pMediaStream->GetType() != MEDIASTREAM_TYPE_OMX )
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, (callerIdMessage + "Stream is not a OMXMediaStream!").c_str());
+		return NULL;
+	}
+ 
+	return static_cast<OMXMediaStream*>(pMediaStream);
+}
+
+/* Grabbed almost verbatim from Xine Player */
+bool OMX_Plugin::MenuOnScreen( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo )
+{
+	PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
+
+	/** Confirm this is from one of ours */
+	if( !pDeviceFrom || pDeviceFrom->m_dwPK_DeviceTemplate != DEVICETEMPLATE_OMX_Player_CONST )
+		return false; 
+
+	int StreamID = atoi( pMessage->m_mapParameters[EVENTPARAMETER_Stream_ID_CONST].c_str( ) );
+	bool bOnOff = pMessage->m_mapParameters[EVENTPARAMETER_OnOff_CONST]=="1";
+
+	/** Find the stream */
+	OMXMediaStream *pOMXMediaStream = NULL;
+	MediaStream *pMediaStream = m_pMedia_Plugin->m_mapMediaStream_Find( StreamID,pMessage->m_dwPK_Device_From );
+	if( !pMediaStream || (pOMXMediaStream = ConvertToOMXMediaStream(pMediaStream, "OMX_Plugin::MenuOnScreen(): ")) == NULL )
+		return false;
+
+	pOMXMediaStream->m_bUseAltScreens=bOnOff;
+
+	LoggerWrapper::GetInstance()->Write( LV_STATUS, "MediaStream %p with id %d and type %d reached an OnScreen Menu.", pOMXMediaStream, pOMXMediaStream->m_iStreamID_get( ), pOMXMediaStream->m_iPK_MediaType );
+	LoggerWrapper::GetInstance()->Write( LV_STATUS, "MediaStream m_mapEntertainArea.size( ) %d", pOMXMediaStream->m_mapEntertainArea.size( ) );
+
+
+	/** We're going to send a message to all the orbiters in this area so they know what the remote is,
+	and we will send all bound remotes to the new screen */
+	for( MapEntertainArea::iterator itEA = pOMXMediaStream->m_mapEntertainArea.begin( );itEA != pOMXMediaStream->m_mapEntertainArea.end( );++itEA )
+	{
+		EntertainArea *pEntertainArea = ( *itEA ).second;
+		LoggerWrapper::GetInstance()->Write( LV_STATUS, "Looking into the ent area (%p) with id %d and %d remotes", pEntertainArea, pEntertainArea->m_iPK_EntertainArea, (int) pEntertainArea->m_mapBoundRemote.size() );
+        for(map<int,OH_Orbiter *>::iterator it=m_pOrbiter_Plugin->m_mapOH_Orbiter.begin();it!=m_pOrbiter_Plugin->m_mapOH_Orbiter.end();++it)
+        {
+            OH_Orbiter *pOH_Orbiter = (*it).second;
+			if( pOH_Orbiter->m_pEntertainArea!=pEntertainArea )
+				continue;
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Processing remote: for orbiter: %d", pOH_Orbiter->m_pDeviceData_Router->m_dwPK_Device);
+			bool bBound = pEntertainArea->m_mapBoundRemote.find(pOH_Orbiter->m_pDeviceData_Router->m_dwPK_Device)!=pEntertainArea->m_mapBoundRemote.end();
+			pOMXMediaStream->SetNowPlaying(pOH_Orbiter,false,bBound);
+		}
+	}
+
+	return false;
+}
 

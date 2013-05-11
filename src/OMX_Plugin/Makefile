@@ -25,12 +25,12 @@ LDFLAGS +=
 XTRALDLIBS = -lmysqlclient_r
 
 Gen_Dev_Files +=
-sources +=
+sources += OMXMediaStream.cpp
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
 
-whattodo: all
+whattodo: so
 	@echo "type 'make bin', 'make so' or 'make all'"
 
 all: bin so
