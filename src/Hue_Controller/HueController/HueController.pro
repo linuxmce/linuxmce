@@ -48,7 +48,6 @@ SOURCES += ../Main.cpp \
     ../../PlutoUtils/getch.cpp \
     ../../Gen_Devices/Hue_ControllerBase.cpp \
     ../Hue_Controller.cpp \
-    hueinterface.cpp \
     huecontrollerhardware.cpp \
     huebulb.cpp
 
@@ -74,6 +73,5 @@ HEADERS += ../../PlutoUtils/ThreadedClass.h \
     ../../pluto_main/Define_DeviceTemplate.h \
     ../../Gen_Devices/Hue_ControllerBase.h \
     ../Hue_Controller.h \
-    hueinterface.h \
     huecontrollerhardware.h \
     huebulb.h

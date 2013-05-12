@@ -12,7 +12,6 @@
 
 */
 #include "Hue_Controller.h"
-#include "hueinterface.h"
 #include <QCoreApplication>
 //<-dceag-incl-b->
 

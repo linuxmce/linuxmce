@@ -387,6 +387,8 @@ void Hue_Controller::CMD_On(int iPK_Pipe,string sPK_Device_Pipes,string &sCMD_Re
     cout << "Parm #98 - PK_Device_Pipes=" << sPK_Device_Pipes << endl;
     pthread_yield(); //this->m_pThread);
     emit testSignal();
+
+     pthread_yield();
 }
 
 //<-dceag-c193-b->
