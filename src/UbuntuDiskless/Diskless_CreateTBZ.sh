@@ -595,7 +595,7 @@ case "$TARGET_DISTRO" in
                 VerifyExitCode "nfs-common or openssh-server programs install failed"
 
 		#FIXME: why is this required, something else is missing
-                LC_ALL=C chroot $TEMP_DIR addgroup --force-badname Debian-Exim
+                LC_ALL=C chroot $TEMP_DIR addgroup --force-badname Debian-exim
                 VerifyExitCode "addgroup Debian-Exim failed"
 		;;
 esac
