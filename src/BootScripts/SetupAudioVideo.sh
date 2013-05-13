@@ -42,11 +42,13 @@ case "$PK_Distro" in
 		FBWIDTH=$(for arg in $(cat /proc/cmdline); do echo $arg |grep "fbwidth" | cut -d '=' -f 2; done)
 		FBHEIGHT=$(for arg in $(cat /proc/cmdline); do echo $arg |grep "fbheight" | cut -d '=' -f 2; done)
 
-		SetDeviceData "$PK_Device" "$DEVICEDATA_Video_Settings" "$FBWIDTH $FBHEIGHT/60"
+		SetDeviceData "$PK_Device" "$DEVICEDATA_Video_settings" "$FBWIDTH $FBHEIGHT/60"
+
+		# FIXME: Grab these values from environment
 		SetDeviceData "$PK_Device" "$DEVICEDATA_Connector" "HDMI-0"
 		SetDeviceData "$PK_Device" "$DEVICEDATA_TV_Standard" "1080P"
 		;;
-fi
+esac
 
 if [[ -z "$VideoCardDev" ]]; then
 	VideoCardDev=$(FindDevice_Category "$PK_Device" "$DEVICECATEGORY_Video_Cards")
@@ -250,7 +252,7 @@ Setup_AsoundConf()
 			SoundOut="plug:dmix:"
 			ConnectType="analog"
 			;;
-	esac	
+	esac
 
 	if [[ "$AlternateSC" -ne "2" ]]; then
 		SoundCard="${HWOnlyCard},${CardDevice}"
@@ -357,7 +359,7 @@ VideoSettings_Check()
 
 	if [[ "$Update_XorgConf" == "XorgConf" ]]; then
 		# Raspbian does not use Xconfigure
-		if [[ "19" ! -eq "$PK_Distro" ]] ;then
+		if [[ "$PK_Distro" != "19" ]]; then
 			/usr/pluto/bin/Xconfigure.sh
 		fi
 
