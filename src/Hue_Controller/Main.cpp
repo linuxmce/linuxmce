@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
          << "Visit www.plutohome.com for source code and license information" << endl << endl;
 
     string sRouter_IP="dcerouter";
-    int PK_Device=69;
+    int PK_Device=-1;
     string sLogger="stdout";
 
     bool bLocalMode=false,bError=false; // An error parsing the command line

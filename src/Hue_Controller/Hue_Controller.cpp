@@ -36,6 +36,8 @@ using namespace DCE;
 #include <huecontrollerhardware.h>
 #include <huebulb.h>
 #include <pthread.h>
+#include <QColor>
+#include <math.h>
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -83,6 +85,14 @@ bool Hue_Controller::GetConfig()
     // The configuration parameters DATA_ are now populated
 
     QStringList db_controllers= QString::fromStdString(this->DATA_Get_Server_IP()).split(",");
+    string foo="";
+    CMD_Get_Device_Data getData(this->m_dwPK_Device, 8, m_dwPK_Device, DEVICEDATA_Server_IP_CONST, false, &foo);
+    if(SendCommand(getData)){
+        qDebug() << foo.c_str();
+        if(db_controllers.isEmpty())
+            db_controllers=QString::fromStdString(foo).split(",");
+    }
+
     qDebug () << db_controllers;
 
     for (int i = 0; i < db_controllers.length(); i++){
@@ -132,7 +142,7 @@ void Hue_Controller::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,s
     //    qDebug() << pMessage->m_dwID;
     //    qDebug() << pMessage->m_mapData_Parameters.size();
     qDebug() << pMessage->ToString().c_str();
-    QStringList command = QString::fromStdString(pMessage->ToString(false)).remove("-o ").split(" ");
+    QStringList command = QString::fromStdString(pMessage->ToString(false)).remove("-o ").remove("\"").split(" ");
     int cmd = command.at(3).toInt();
     int device = pMessage->m_dwPK_Device_To;
     QString controllerTarget;
@@ -157,6 +167,27 @@ void Hue_Controller::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,s
         sCMD_Result = "Failed";
         exit;
     }
+    int conversion_var = ceil(65280 / 360);
+
+    QString setLevelVal;
+    if(command.length() > 5 && cmd ==184){
+        qDebug()<<"modifying set level param";
+        setLevelVal = command.at(5);
+           setLevelVal.remove("\"");
+    }
+
+ QColor q;
+    if(command.length() > 10){
+        int redLevel = command.at(5).toInt();
+        int greenLevel = command.at(7).toInt();
+        int blueLevel = command.at(9).toInt();
+        q.setRgb(redLevel,greenLevel,blueLevel);
+        qDebug() << redLevel<<"::" <<greenLevel << "::"<< blueLevel;
+
+       // q.setRgb();
+    }
+
+
 
     switch (cmd) {
     case 193:
@@ -177,12 +208,25 @@ void Hue_Controller::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,s
             sCMD_Result = "ON - OK";
 
         break;
-    case 980:
+    case 184:
+        qDebug() << command.at(5); //.replace("","\"");
 
+        target.setUrl("http://"+controllerTarget+"/api/"+authUser+"/lights/"+QString::number(ID)+"/state");
+        params.insert("on", true);
+        params.insert("bri",int(setLevelVal.toInt()*2.55));
+        if(sendPowerMessage(target, params))
+            sCMD_Result = "SET LEVEL - OK";
+
+        break;
+    case 980:
+        target.setUrl("http://"+controllerTarget+"/api/"+authUser+"/lights/"+QString::number(ID)+"/state");
+        params.insert("on", true);
+        params.insert("bri",q.lightness());
+        params.insert("hue",( q.hslHue()*conversion_var) );
+        params.insert("sat",q.hslSaturation());
+        if(sendPowerMessage(target, params));
         sCMD_Result = "SET RBG - OK";
-        //  int redLevl = command.at(6).toInt();
-        //  int greenLevel = command.at(8).toInt();
-        //  int blueLevel = command.at(10).toInt();
+
         break;
     default:
         sCMD_Result = "NOT IMPLEMENTED";
@@ -265,6 +309,18 @@ void Hue_Controller::CreateChildren()
     qDebug() << "Finished with Children Devices";
     if(m_pData->m_vectDeviceData_Impl_Children.size()!=hueBulbs.size())
         qDebug() << hueBulbs.count()- m_pData->m_vectDeviceData_Impl_Children.size() << " device(s) not added to linuxmce.";
+}
+
+void Hue_Controller::OnDisconnect()
+{
+    pthread_yield();
+    exit(1);
+}
+
+void Hue_Controller::OnReload()
+{
+    pthread_yield();
+    exit(1);
 }
 
 //<-dceag-sample-b->
@@ -675,6 +731,13 @@ bool Hue_Controller::downloadControllerConfig(QUrl deviceIp, int index)
     return true;
 }
 
+void Hue_Controller::getScreenSaverColor()
+{
+    char *pData="";
+    int pData_size;
+
+}
+
 void Hue_Controller::initBridgeConnection(){
     qDebug()<<"Init() Connection...";
     QUrl initUrl = "http://"+targetIpAddress+"/api/"+authUser;
@@ -706,7 +769,7 @@ void Hue_Controller::initResponse(){
 
 bool Hue_Controller::sendPowerMessage(QUrl message, QVariant params)
 {
-    qDebug() << "Power message::"<<message;
+    qDebug() << "state message::"<<message;
     QNetworkAccessManager *p = new QNetworkAccessManager;
     QNetworkRequest pr(message);
     QJson::Serializer serializer;
