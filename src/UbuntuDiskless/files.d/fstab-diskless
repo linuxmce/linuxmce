@@ -5,6 +5,9 @@ set -e
 . ./filesd-parms.sh $@
 . /usr/pluto/bin/Config_Ops.sh
 . /usr/pluto/bin/Network_Parameters.sh
+. /usr/pluto/bin/SQL_Ops.sh
+
+DEVICEDATA_DISTRO=7
 
 DisklessDir="$Parm_Device"
 if [[ -n "$Parm_Subname" ]]; then
@@ -20,10 +23,10 @@ cp "${TemplateFile}" "${Parm_RootLocation}${File}"
 sed --in-place -e "s,\(%CORE_INTERNAL_ADDRESS%\),${IntIP},g" ${Parm_RootLocation}/${File}
 sed --in-place -e "s,\(%MOON_ID%\),${DisklessDir},g" ${Parm_RootLocation}/${File}
 
-ConfGet "PK_Distro"
+PK_Distro=$(RunSQL "SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device='$Parm_Device' AND FK_DeviceData='$DEVICEDATA_DISTRO'")
 if [[ 19 -eq "$PK_Distro" ]] ;then
 	# Raspbian needs /boot mounted to /dev/mmcblk0p1
-	echo "/dev/mmcblk0p1  /boot           vfat    defaults                0       0" >>${Parm_RootLocation}/${File}
+	echo "/dev/mmcblk0p1  /sdcard           vfat    defaults                0       0" >>${Parm_RootLocation}/${File}
 fi
 
 ## Create some mountpoint so we know for sure that they exist
