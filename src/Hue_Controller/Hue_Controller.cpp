@@ -24,6 +24,7 @@ using namespace DCE;
 
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
+
 #include <QDebug>
 #include <qjson/parser.h>
 #include <qjson/serializer.h>
@@ -81,6 +82,7 @@ bool Hue_Controller::GetConfig()
     mb_isNew = true;
 
     qDebug() << "Getting Config";
+    LoggerWrapper::GetInstance()->Write(LV_STATUS, "Hue Controller Device getting configuration");
     // Put your code here to initialize the data in this class
     // The configuration parameters DATA_ are now populated
 
@@ -93,7 +95,7 @@ bool Hue_Controller::GetConfig()
             db_controllers=QString::fromStdString(foo).split(",");
     }
 
-    qDebug () << db_controllers;
+    LoggerWrapper::GetInstance()->Write(LV_STATUS, "Controllers found: %s", db_controllers.join("||").toStdString().c_str());
 
     for (int i = 0; i < db_controllers.length(); i++){
         HueControllerHardware *controllerDevice = new HueControllerHardware();
@@ -102,8 +104,11 @@ bool Hue_Controller::GetConfig()
         hueControllers.append(controllerDevice);
         if(downloadControllerConfig(QUrl(controllerDevice->m_ipAddress), i)){
             qDebug() << "Finished processing controller " << i;
+            LoggerWrapper::GetInstance()->Write(LV_STATUS, "Finished processing controller #%d", i);
         }
     }
+    LoggerWrapper::GetInstance()->Write(LV_STATUS, "Finished with all controllers. Total Count: %d", db_controllers.size());
+    qDebug() << "Finished all controllers. Total count" << db_controllers.size();
     return true;
 }
 
@@ -174,6 +179,7 @@ void Hue_Controller::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,s
         qDebug()<<"modifying set level param";
         setLevelVal = command.at(5);
            setLevelVal.remove("\"");
+
     }
 
  QColor q;
@@ -183,7 +189,6 @@ void Hue_Controller::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,s
         int blueLevel = command.at(9).toInt();
         q.setRgb(redLevel,greenLevel,blueLevel);
         qDebug() << redLevel<<"::" <<greenLevel << "::"<< blueLevel;
-
        // q.setRgb();
     }
 
@@ -222,11 +227,16 @@ void Hue_Controller::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,s
         target.setUrl("http://"+controllerTarget+"/api/"+authUser+"/lights/"+QString::number(ID)+"/state");
         params.insert("on", true);
         params.insert("bri",q.lightness());
-        params.insert("hue",( q.hslHue()*conversion_var) );
-        params.insert("sat",q.hslSaturation());
+        params.insert("hue",( q.hsvHue()*conversion_var) );
+        params.insert("sat",q.hsvSaturation());
         if(sendPowerMessage(target, params));
         sCMD_Result = "SET RBG - OK";
-
+    case 641:
+        target.setUrl("http://"+controllerTarget+"/api/"+authUser+"/lights/"+QString::number(ID)+"/state");
+        params.insert("on", true);
+        params.insert("alert","lselect");
+        if(sendPowerMessage(target, params));
+        sCMD_Result = "SET STROBE - OK";
         break;
     default:
         sCMD_Result = "NOT IMPLEMENTED";
@@ -314,13 +324,14 @@ void Hue_Controller::CreateChildren()
 void Hue_Controller::OnDisconnect()
 {
     pthread_yield();
-    exit(1);
+   DisconnectAndWait();
+
 }
 
 void Hue_Controller::OnReload()
 {
     pthread_yield();
-    exit(1);
+    DisconnectAndWait();
 }
 
 //<-dceag-sample-b->
@@ -477,7 +488,7 @@ void Hue_Controller::CMD_Report_Child_Devices(string &sCMD_Result,Message *pMess
 
         if(hueBulbs.at(n)->getLinuxMceId()==0){
             qDebug() <<  hueBulbs.at(n)->lightName << " has no linuxmce id. it should be added.";
-
+            LoggerWrapper::GetInstance()->Write(LV_STATUS, "%s has no LinuxMCE Device number, it should be added.", hueBulbs.at(n)->lightName.toStdString().c_str());
             for( int i=0; i < (int)m_pData->m_vectDeviceData_Impl_Children.size(); i++ )
             {
                 DeviceData_Impl *existingBulb = m_pData->m_vectDeviceData_Impl_Children.at(i);
@@ -501,6 +512,9 @@ void Hue_Controller::CMD_Report_Child_Devices(string &sCMD_Result,Message *pMess
                         qDebug()<<"Set Device Name";
                     }
                     added.append(existingBulb->m_dwPK_Device);
+                }
+                else{
+
                 }
                // qDebug() << "There are no more bulbs in the linuxmce system, but the controller has more." <<hueBulbs.at(n)->lightName << "is being added them now. ";
             }
@@ -535,7 +549,8 @@ void Hue_Controller::CMD_Report_Child_Devices(string &sCMD_Result,Message *pMess
                     added.append(newDevice);
                 }
             }
-
+        }
+        else{
 
         }
 
@@ -661,18 +676,18 @@ bool Hue_Controller::findControllers(){
 
 bool Hue_Controller::downloadControllerConfig(QUrl deviceIp, int index)
 {
-    qDebug()<<"Init() Connection...";
+    qDebug()<<"Connecting to "<< deviceIp;
+    qDebug() << "Controller #" << (index+1);
+
+    LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connecting to %s , controller # %d ",deviceIp.toString().toStdString().c_str(),index);
+
     QUrl initUrl = "http://"+deviceIp.toString()+"/api/"+authUser;
     QNetworkAccessManager *initManager = new QNetworkAccessManager;
     QNetworkRequest init(initUrl);
     QNetworkReply * rt = initManager->get(QNetworkRequest(init));
-
     qDebug() << init.url();
-    qDebug()<<"Request Sent.";
-
     QEventLoop respWait;
     QObject::connect(initManager, SIGNAL(finished(QNetworkReply*)), &respWait, SLOT(quit()));
-    cout << "Waiting for Response" << endl;
     respWait.exec();
 
     qDebug()<< "Got Response";
@@ -685,7 +700,10 @@ bool Hue_Controller::downloadControllerConfig(QUrl deviceIp, int index)
     QVariantMap p = parser.parse(rep, &ok).toMap();
 
     if(p.size()==0)
+    {
+        LoggerWrapper::GetInstance()->Write(LV_WARNING, "Could not connect to %s ! Response was invalid. Please check the device ip and that it is setup.", deviceIp.toString().toStdString().c_str());
         return false;
+    }
 
     if(!ok)
         return false;
