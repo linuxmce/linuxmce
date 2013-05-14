@@ -304,6 +304,7 @@ void Hue_Controller::CreateChildren()
             LoggerWrapper::GetInstance()->Write(LV_WARNING, "Note: Device manager has attached a device of type %d that this has no custom handler for.  This is normal for IR.", pDeviceData_Impl_Child->m_dwPK_DeviceTemplate);
             int linuxmceID = pDeviceData_Impl_Child->m_dwPK_Device;
             int lightID = QString::fromStdString(pDeviceData_Impl_Child->mapParameters_Find(DEVICEDATA_UnitNo_CONST)).toInt();
+              QStringList p = QString::fromStdString(pDeviceData_Impl_Child->mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST)).split(":");
 
             if(lightID < 1 || linuxmceID < 1){
                 qDebug() << "Child device "<< linuxmceID << " is misconfigured. please reload configuration.";
@@ -312,7 +313,7 @@ void Hue_Controller::CreateChildren()
                 qDebug() << "Light ID " << lightID;
 
                 for (int n = 0; n < hueBulbs.size(); n++){
-                    if(hueBulbs.at(n)->getInternalId()==lightID){
+                    if(hueBulbs.at(n)->controller==p.at(0)&& hueBulbs.at(n)->getInternalId()==lightID ){
                         hueBulbs.at(n)->linuxmceId = linuxmceID;
                         qDebug() << "Linked existing light with linuxmce db. " << hueBulbs.at(n)->lightName;
                     }
@@ -334,14 +335,14 @@ void Hue_Controller::CreateChildren()
 void Hue_Controller::OnDisconnect()
 {
     pthread_yield();
-   DisconnectAndWait();
+   exit(1);
 
 }
 
 void Hue_Controller::OnReload()
 {
     pthread_yield();
-    DisconnectAndWait();
+    exit(1);
 }
 
 //<-dceag-sample-b->
@@ -495,8 +496,9 @@ void Hue_Controller::CMD_Report_Child_Devices(string &sCMD_Result,Message *pMess
     QList<int>added;
 
     for(int n=0; n < hueBulbs.size(); n++ ){
-
-        if(hueBulbs.at(n)->getLinuxMceId()==0){
+	qDebug() << hueBulbs.at(n)->lightName;
+        qDebug() << hueBulbs.at(n)->getLinuxMceId();
+	if(hueBulbs.at(n)->getLinuxMceId()==0){
             qDebug() <<  hueBulbs.at(n)->lightName << " has no linuxmce id. it should be added.";
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "%s has no LinuxMCE Device number, it should be added.", hueBulbs.at(n)->lightName.toStdString().c_str());
             for( int i=0; i < (int)m_pData->m_vectDeviceData_Impl_Children.size(); i++ )
@@ -524,7 +526,7 @@ void Hue_Controller::CMD_Report_Child_Devices(string &sCMD_Result,Message *pMess
                     added.append(existingBulb->m_dwPK_Device);
                 }
                 else{
-
+		qDebug() << hueBulbs.at(n)->getLinuxMceId();
                 }
                // qDebug() << "There are no more bulbs in the linuxmce system, but the controller has more." <<hueBulbs.at(n)->lightName << "is being added them now. ";
             }
