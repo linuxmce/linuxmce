@@ -234,10 +234,20 @@ void Hue_Controller::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,s
     case 641:
         target.setUrl("http://"+controllerTarget+"/api/"+authUser+"/lights/"+QString::number(ID)+"/state");
         params.insert("on", true);
-        params.insert("alert","lselect");
+        params.insert("alert",command.at(5).toLower()=="on" ? "lselect":"none");
         if(sendPowerMessage(target, params));
         sCMD_Result = "SET STROBE - OK";
+
         break;
+    case 550:
+        target.setUrl("http://"+controllerTarget+"/api/"+authUser+"/lights/"+QString::number(ID)+"/state");
+        params.insert("on", true);
+        params.insert("effect",command.at(5).toLower());
+        if(sendPowerMessage(target, params));
+        sCMD_Result = "SET MODE OK";
+
+        break;
+
     default:
         sCMD_Result = "NOT IMPLEMENTED";
         break;
