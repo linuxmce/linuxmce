@@ -1,8 +1,9 @@
 <?
 function DHCPLeases($output,$dbADO) {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/dhcpleases.lang.php');
+ 	includeLangFile('common.lang.php');
+ 	includeLangFile('dhcpleases.lang.php');
+
 	include(APPROOT.'/include/dhcpd-tools/DHCPd-parse.php');
 	
 	/* @var $dbADO ADOConnection */
@@ -24,7 +25,7 @@ function DHCPLeases($output,$dbADO) {
 	$accessFile = "/var/lib/dhcp/dhcpd.leases";
 	$test = new Leases;
 if (!isset($_GET['error']) && !$test->readLease($accessFile)) {
-  header("Location: index.php?section=DHCPLeases&error=$TEXT_ERROR_CANNOT_OPEN_FILE_FOR_READING_CONST $accessFile");
+  header("Location: index.php?section=DHCPLeases&error=".translate('TEXT_ERROR_CANNOT_OPEN_FILE_FOR_READING_CONST')." $accessFile");
 	exit();
 }
 		$out.='
@@ -32,13 +33,13 @@ if (!isset($_GET['error']) && !$test->readLease($accessFile)) {
 	<table cellpadding="3" cellspacing="0">
 		<tr class="tablehead">
 		<TD>#</TD>
-			<td><B>'.$TEXT_IP_ADDRESS_CONST.'</B></td>
-			<td><B>'.$TEXT_MAC_ADDRESS_CONST.'</B></td>
-			<td><B>'.$TEXT_EXPIRES_CONST.'</B></td>
-			<td><B>'.$TEXT_STATUS_CONST.'</B></td>
-			<td><B>'.$TEXT_HOSTNAME_CONST.'</B></td>
-			<td><B>'.$TEXT_DESCRIPTION_CONST.'</B></td>
-			<td><B>'.$TEXT_DEVICE_CONST.'</B></td>
+			<td><B>'.translate('TEXT_IP_ADDRESS_CONST').'</B></td>
+			<td><B>'.translate('TEXT_MAC_ADDRESS_CONST').'</B></td>
+			<td><B>'.translate('TEXT_EXPIRES_CONST').'</B></td>
+			<td><B>'.translate('TEXT_STATUS_CONST').'</B></td>
+			<td><B>'.translate('TEXT_HOSTNAME_CONST').'</B></td>
+			<td><B>'.translate('TEXT_DESCRIPTION_CONST').'</B></td>
+			<td><B>'.translate('TEXT_DEVICE_CONST').'</B></td>
 		</tr>';
 		$pos=0;
 		while($lease = $test->nextLease()){
@@ -61,7 +62,7 @@ if (!isset($_GET['error']) && !$test->readLease($accessFile)) {
 				$out .= '</tr>';
 				$pos++;
 		}
-		$accessFile="/etc/dhcp3/dhcpd.conf";
+		$accessFile="/etc/dhcp/dhcpd.conf";
     $FileArray=@file($accessFile);	
     $File=implode('',$FileArray);
     preg_match_all('/host (\S+) { hardware ethernet (\S+); fixed-address (\S+);/',$File,$matches);
@@ -88,12 +89,12 @@ if (!isset($_GET['error']) && !$test->readLease($accessFile)) {
 	</table>	
 	';
 	
-	$output->setMenuTitle($TEXT_ADVANCED_CONST.' |');
-	$output->setPageTitle($TEXT_DHCP_LEASES_CONST);
+	$output->setMenuTitle(translate('TEXT_ADVANCED_CONST').' |');
+	$output->setPageTitle(translate('TEXT_DHCP_LEASES_CONST'));
 	$output->setScriptCalendar('null');
-	$output->setNavigationMenu(array($TEXT_DHCP_LEASES_CONST=>'index.php?section=DHCPLeases'));	
+	$output->setNavigationMenu(array(translate('TEXT_DHCP_LEASES_CONST')=>'index.php?section=DHCPLeases'));	
 	$output->setBody($out);
-	$output->setTitle(APPLICATION_NAME.' :: '.$TEXT_DHCP_LEASES_CONST);
+	$output->setTitle(APPLICATION_NAME.' :: '.translate('TEXT_DHCP_LEASES_CONST'));
 	$output->output();
 }
 
