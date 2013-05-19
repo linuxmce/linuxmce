@@ -8,6 +8,8 @@ QT       += network
 
 
 TARGET = HueController
+target.path = /tmp #development option with ssh.
+INSTALLS = target
 CONFIG   +=sharedlib
 CONFIG += console
 CONFIG -= app_bundle

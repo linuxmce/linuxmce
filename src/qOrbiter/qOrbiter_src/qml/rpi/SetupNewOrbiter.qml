@@ -2,19 +2,19 @@
 import QtQuick 2.0
 
 Rectangle {
-    width: manager.appWidth
-    height: manager.appHeight
-    color: "slategrey"
+    width: appW
+    height: appH
+    color: "transparent"
     //palette?
     property string orangeRed: "#993300"
     property string deYork: "#99CC99"
     property string midnightBlue: "#003366"
     //---------
     function scaleX(x){
-        return x/100*manager.appHeight
+        return x/100*appH
     }
     function scaleY(y){
-        return y/100*manager.appWidth
+        return y/100*appW
     }
     Component.onCompleted: window.showSetup()
 
@@ -73,24 +73,13 @@ Rectangle {
             }
         }
         Row{
-            StyledText {
+            Text {
                 id: welcome
                 text: qsTr("Setup A New Orbiter")
                 color:"white"
                 font.pointSize: 18
                 font.bold: true
-            }
-            Rectangle{
-                height: scaleX(14)
-                width: scaleX(14)
-                color: "blue"
-                StyledText{
-                    text:"Go!"
-                    anchors.centerIn: parent
-                    color:"white"
-
-                }
-
+                font.family: myFont.name
             }
         }
 
@@ -115,12 +104,13 @@ Rectangle {
                     radius:10
                     border.color:usersView.currentIndex === index ? midnightBlue : orangeRed
                     color: usersView.currentIndex === index ? deYork : "white"
-                    StyledText {
+                    Text {
                         text: dataTitle
                         font.pointSize: 12
-                        wrapMode: StyledText.WrapAtWordBoundaryOrAnywhere
+                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                         width: parent.width *.75
                         anchors.centerIn: parent
+                        font.family: myFont.name
                     }
                     MouseArea{
                         anchors.fill: parent
@@ -151,12 +141,13 @@ Rectangle {
                     radius:10
                     border.color:roomsView.currentIndex === index ? midnightBlue : orangeRed
                     color: roomsView.currentIndex === index ? deYork : "white"
-                    StyledText {
+                    Text {
                         text: dataTitle
                         font.pointSize: 12
-                        wrapMode: StyledText.WrapAtWordBoundaryOrAnywhere
+                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                         width: parent.width *.75
                         anchors.centerIn: parent
+                        font.family: myFont.name
                     }
                     MouseArea{
                         anchors.fill: parent
@@ -185,12 +176,13 @@ Rectangle {
                     border.color:langView.currentIndex === index ? midnightBlue : orangeRed
                     color: langView.currentIndex === index ? deYork : "white"
 
-                    StyledText {
+                    Text {
                         text: lang
                         font.pointSize: 12
-                        wrapMode: StyledText.WrapAtWordBoundaryOrAnywhere
+                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                         width: parent.width *.75
                         anchors.centerIn: parent
+                        font.family: myFont.name
                     }
                     MouseArea{
                         anchors.fill: parent
@@ -204,7 +196,7 @@ Rectangle {
             }
         }
 
-        StyledText {
+        Text {
             id: logo
             text: qsTr("LinuxMCE")
             anchors.bottom: parent.bottom
@@ -213,66 +205,115 @@ Rectangle {
             font.bold: true
             color:"white"
             font.pointSize: 12
+            font.family: myFont.name
         }
 
-        Column{
-            id:confirmCol
+        Rectangle{
+            id:setupButton
+            height: scaleY(8)
+            width: scaleX(14)
+            color: "blue"
+            radius: 8
             anchors.bottom: parent.bottom
-            anchors.left: parent.left
-            height: parent.height *.15
-            width: parent.width / 3
-            spacing:5
+            anchors.horizontalCenter: parent.horizontalCenter
 
-                StyledText {
-                    id: selectedUser
-                    text: qsTr("Please Select a Default User")
-                    font.bold: true
-                    color: deYork
-                    font.pointSize: 14
-                    x:0
-                    onStyledTextChanged: {
-                        x = -50
-                        userSelected.restart()
-                    }
-                }
-                ParallelAnimation{
-                    id:userSelected
+            Text{
+                text:"Go!"
+                anchors.centerIn: parent
+                color:"white"
+                font.family: myFont.name
+            }
+            MouseArea{
+                anchors.fill: parent
+                onClicked: window.setupNewOrbiter(selectedUser, selectedRoom, 1, 1, appH, appW)
+            }
 
-                    PropertyAnimation{
-                        target: selectedUser
-                        property:"x"
-                        to:confirmCol.width
-                        duration: 2500
-                    }
-
-                    PropertyAnimation{
-                        target:selectedUser
-                        property: "opacity"
-                        from:0
-                        to:1
-                        duration:1000
-                    }
-                }
-
-
-                StyledText {
-                    id: selectedRoom
-                    text: qsTr("Please Select A Default Room")
-                }
-
-
-
-                StyledText{
-                    id:selectedLang
-                    text:qsTr("Please Select a Default Language")
-                }
-
-
-                StyledText {
-                    id: selectedResolution
-                    text:"Size "+newOrbiterSetupContainer.height
-                }
         }
+        Rectangle{
+            id:exitButton
+            height: scaleY(8)
+            width: scaleX(14)
+            color: "blue"
+            radius: 8
+            anchors.bottom: parent.bottom
+            anchors.left: setupButton.right
+            anchors.leftMargin: scaleX(2)
+
+            Text{
+                text:"Exit!"
+                anchors.centerIn: parent
+                color:"white"
+                font.family: myFont.name
+            }
+            MouseArea{
+                anchors.fill: parent
+                onClicked: pageLoader.source ="SplashView.qml"       //screenChange("SplashView.qml")
+            }
+
+        }
+
+//        Column{
+//            id:confirmCol
+//            anchors.bottom: parent.bottom
+//            anchors.left: parent.left
+//            height: parent.height *.15
+//            width: parent.width / 3
+//            spacing:5
+
+//                Text {
+//                    id: selectedUser
+//                    text: qsTr("Please Select a Default User")
+//                    font.bold: true
+//                    color: deYork
+//                    font.pixelSize: 14
+//                    font.family: myFont.name
+//                    x:0
+//                    onTextChanged: {
+//                        x = -50
+//                        userSelected.restart()
+//                    }
+//                }
+//                ParallelAnimation{
+//                    id:userSelected
+
+//                    PropertyAnimation{
+//                        target: selectedUser
+//                        property:"x"
+//                        to:confirmCol.width
+//                        duration: 2500
+//                    }
+
+//                    PropertyAnimation{
+//                        target:selectedUser
+//                        property: "opacity"
+//                        from:0
+//                        to:1
+//                        duration:1000
+//                    }
+//                }
+
+
+//                Text {
+//                    id: selectedRoom
+//                    text: qsTr("Please Select A Default Room")
+//                    font.family: myFont.name
+//                }
+
+
+
+//                Text{
+//                    id:selectedLang
+//                    text:qsTr("Please Select a Default Language")
+//                    font.family: myFont.name
+//                }
+
+
+//                Text {
+//                    id: selectedResolution
+//                    text:"Size "+newOrbiterSetupContainer.height
+//                    font.family: myFont.name
+//                }
+//        }
 
     }
 }

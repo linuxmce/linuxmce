@@ -55,7 +55,7 @@
 orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen, bool frameless, QObject *parent) :
     QObject(parent), deviceno(deviceid)
 {
-#ifdef QT4
+#ifdef QT4_8
     if(frameless==true){
         mainView.window()->setWindowFlags(Qt::FramelessWindowHint);
     }

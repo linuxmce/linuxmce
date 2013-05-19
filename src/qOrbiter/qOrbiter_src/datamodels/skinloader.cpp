@@ -11,7 +11,7 @@ SkinLoader::SkinLoader(QUrl baseUrl, qorbiterManager *uiRef, SkinDataModel *pare
 {
     totalSkinsToLoad = 0;
     loadercounter= 0;
-#ifdef QT4
+#ifdef QT4_8
     current_component = new QDeclarativeComponent(ui_reference->qorbiterUIwin->rootContext()->engine(),this);
 #elif QT5
       current_component = new QQmlComponent(ui_reference->qorbiterUIwin->rootContext()->engine(),this);

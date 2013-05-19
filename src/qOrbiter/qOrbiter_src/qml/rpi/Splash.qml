@@ -8,24 +8,31 @@ Item {
     height:appH
     width:appW
     property bool orbiterSetup:false
+    property string router_ip: ""
 
     onOrbiterSetupChanged:{  console.log(orbiterSetup) ; existing_orbiters.visible = false; orbiter_options.visible = true; newOrbiterOptionContainer.visible=true; window.showSetup()}
     onWidthChanged: console.log("detected size change")
+    Image {
+        id: splash
+        anchors.centerIn: parent
+        fillMode: Image.PreserveAspectFit
+        source: "default/img/icons/backgrounds/bedroom.png"
+        anchors.fill: parent
+    }
+    FontLoader{
+        id:myFont
+        name:"Sawasdee"
+        source: "default/fonts/Sawasdee.ttf"
+    }
 
     function scaleX(x){
-        return x/100*appW
+        return x/100*appH
     }
     function scaleY(y){
-        return y/100*appH
+        return y/100*appW
     }
 
-    Connections{
-        target: window      
-        onShowExternal: {
-            console.log("showing external ip box")
-            ext_routerip.visible = true
-        }
-    }
+
 
     function screenchange(screenname )
     {

@@ -169,6 +169,7 @@ void SkinDataModel::setActiveSkin(QString name)
     delete current_style;
 
     ui_reference->setDceResponse("Loading Skin at " + m_baseUrl.toString() + "/" + name);
+    qDebug() << "This is the base url::"<< m_baseUrl.toString();
     QString skinURL = m_baseUrl.toString() + "/" + name+"/Style.qml";
     m_entryUrl = m_baseUrl.toString()+"/"+name+"/main.qml";
 
@@ -178,15 +179,17 @@ void SkinDataModel::setActiveSkin(QString name)
 
 #if (QT5)
     QQmlComponent skinData(ui_reference->qorbiterUIwin->engine(), skinURL);
-#else
 
+#elif __ANDROID__
+     current_style = new QDeclarativeComponent(ui_reference->qorbiterUIwin->engine(), QUrl(skinURL));
+#else
      current_style = new QDeclarativeComponent(ui_reference->qorbiterUIwin->engine(), skinURL);
 #endif
 
     if (current_style->isError()) {
+        qDebug() << current_style->errorString();
         // this dir does not contain a Style.qml; ignore it
         ui_reference->setDceResponse(current_style->errors().last().toString());
-
         return;
     }
     else

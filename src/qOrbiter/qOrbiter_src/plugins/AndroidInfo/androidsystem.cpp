@@ -67,29 +67,29 @@ bool AndroidSystem::findClassIdents()
             // qDebug() << env->get(buildVersionClass, env->GetStaticFieldID(buildVersionClass,"CODENAME", "()java/lang/String;"));
         }
 
-        jclass buildClass = env->FindClass("android/os/Build");
-        if(buildClass){
-            qDebug() << "getting model info";
-            jfieldID modelField =  env->GetStaticFieldID(buildClass, "MODEL","Ljava/lang/String;");
-            jfieldID brandField = env->GetStaticFieldID(buildClass, "BRAND","Ljava/lang/String;");
-            jfieldID manufacturerField = env->GetStaticFieldID(buildClass, "MANUFACTURER","Ljava/lang/String;");
+//        jclass buildClass = env->FindClass("android/os/Build");
+//        if(buildClass){
+//            qDebug() << "getting model info";
+//            jfieldID modelField =  env->GetStaticFieldID(buildClass, "MODEL","Ljava/lang/String;");
+//            jfieldID brandField = env->GetStaticFieldID(buildClass, "BRAND","Ljava/lang/String;");
+//            jfieldID manufacturerField = env->GetStaticFieldID(buildClass, "MANUFACTURER","Ljava/lang/String;");
 
-            jstring modelString =(jstring)env->GetStaticObjectField(buildClass, modelField);
-            jstring deviceString =(jstring)env->GetStaticObjectField(buildClass, brandField);
-            jstring manufacturerString = (jstring) env->GetStaticObjectField(buildClass, manufacturerField);
+//            jstring modelString =(jstring)env->GetStaticObjectField(buildClass, modelField);
+//            jstring deviceString =(jstring)env->GetStaticObjectField(buildClass, brandField);
+//            jstring manufacturerString = (jstring) env->GetStaticObjectField(buildClass, manufacturerField);
 
-            const char*  myConvertedModelString = env->GetStringUTFChars(modelString, 0);
-            const char*  myConvertedBrandString = env->GetStringUTFChars(deviceString, 0);
-            const char*  myConvertedManufacturerString = env->GetStringUTFChars(manufacturerString, 0);
+//            const char*  myConvertedModelString = env->GetStringUTFChars(modelString, 0);
+//            const char*  myConvertedBrandString = env->GetStringUTFChars(deviceString, 0);
+//            const char*  myConvertedManufacturerString = env->GetStringUTFChars(manufacturerString, 0);
 
-            setDeviceBrand(QString::fromAscii(myConvertedBrandString));
-            setDeviceManufacturer(QString::fromAscii(myConvertedManufacturerString));
-            setDeviceName(QString::fromAscii(myConvertedModelString));
-        }
+//            setDeviceBrand(QString::fromAscii(myConvertedBrandString));
+//            setDeviceManufacturer(QString::fromAscii(myConvertedManufacturerString));
+//            setDeviceName(QString::fromAscii(myConvertedModelString));
+//        }
 
         jclass externalStorageClass = env->FindClass("android.os.Environment");
         if(externalStorageClass){
-
+            qDebug() << "Found External Storage Class";
             jmethodID storageMethodID = env->GetStaticMethodID(externalStorageClass, "getExternalStorageState", "()Ljava/lang/String;");
             jstring jStorageState = (jstring)env->CallObjectMethod(externalStorageClass, storageMethodID);
             const char* myConvertedStorageState = env->GetStringUTFChars(jStorageState, 0);
@@ -150,13 +150,13 @@ bool AndroidSystem::getDisplayInfo()
 
 
 
-//             // jobject display = env->GetObjectArrayElement(displayArrayObj, 0);
-//             // jclass displayObjClass = env->FindClass("Landroid/view/Display;");
-//           //  jmethodID displayId = env->GetMethodID(displayObjClass, "getDisplay", "()I");
-//            //  qDebug() <<env->CallIntMethod(display, displayId);
+//              jobject display = env->GetObjectArrayElement(displayArrayObj, 0);
+//              jclass displayObjClass = env->FindClass("Landroid/view/Display;");
+//             jmethodID displayId = env->GetMethodID(displayObjClass, "getDisplay", "()I");
+//              qDebug() <<env->CallIntMethod(display, displayId);
 //        }
 
 //        return true;
 //    }
-    return true;
+   return true;
 }

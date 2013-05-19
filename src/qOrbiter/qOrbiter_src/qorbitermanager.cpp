@@ -865,7 +865,12 @@ void qorbiterManager::swapSkins(QString incSkin)
         //load the actual skin entry point
         qDebug() << "skin break";;
         currentSkin = incSkin;
-        qorbiterUIwin->engine()->rootContext()->setContextProperty("skinStyle", tskinModel->currentItem);
+#ifdef __ANDROID__
+        qorbiterUIwin->engine()->rootContext()->setContextProperty("style", tskinModel->currentItem);
+#else
+          qorbiterUIwin->engine()->rootContext()->setContextProperty("skinStyle", tskinModel->currentItem);
+#endif
+
 #if (QT5)
         QObject::connect(qorbiterUIwin, SIGNAL(statusChanged(QQuickView::Status)),
                          this, SLOT(skinLoaded(QQuickView::Status)));

@@ -353,9 +353,6 @@ int main(int argc, char* argv[])
 #endif
         AbstractImageProvider modelimageprovider(&w);
         orbiterWin.mainView.engine()->addImageProvider("listprovider", &modelimageprovider);
-
-
-
         pqOrbiter.moveToThread(&dceThread);
         QObject::connect(&dceThread, SIGNAL(started()), &pqOrbiter, SLOT(beginSetup()));
 #ifndef QT5
@@ -385,7 +382,7 @@ int main(int argc, char* argv[])
 #endif
 
         TimeCodeManager *timecode = new TimeCodeManager();
-      //  orbiterWin.mainView.rootContext()->setContextProperty("logger", &localLogger);
+        orbiterWin.mainView.rootContext()->setContextProperty("logger", &localLogger);
         orbiterWin.mainView.rootContext()->setContextProperty("dceTimecode", timecode);
         orbiterWin.mainView.rootContext()->setContextProperty("dataModel", mediaModel);
         orbiterWin.mainView.rootContext()->setContextProperty("mediaplaylist", storedVideoPlaylist);
@@ -397,7 +394,7 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(commandResponseChanged(QString)), &localLogger, SLOT(logCommandMessage(QString)));
         QObject::connect(&pqOrbiter, SIGNAL(mediaMessage(QString)), &localLogger, SLOT(logGuiMessage(QString)));
 
-#ifdef Qt4
+#ifdef QT4_8
         QObject::connect(orbiterWin.mainView.engine(), SIGNAL(warnings(QList<QDeclarativeError>)), &localLogger, SLOT(logQmlErrors(QList<QDeclarativeError>)));
      #elif QT5
         QObject::connect(orbiterWin.mainView.engine(), SIGNAL(warnings(QList<QQmlError>)), &localLogger, SLOT(logQmlErrors(QList<QQmlError>)));
