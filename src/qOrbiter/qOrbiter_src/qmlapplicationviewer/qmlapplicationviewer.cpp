@@ -158,7 +158,7 @@ void QmlApplicationViewer::setOrientation(ScreenOrientation orientation)
     }
 #endif // Q_OS_SYMBIAN
 
-#if !defined(Q_OS_LINUX)
+#if !defined(Q_OS_LINUX) && !defined (Q_OS_MACX)
     Qt::WidgetAttribute attribute;
     switch (orientation) {
 #if QT_VERSION < 0x040702
