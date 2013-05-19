@@ -502,7 +502,7 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 		|| StringUtils::ToLower(mediaURL).find(".a0") != string::npos
 		|| StringUtils::ToLower(mediaURL).find(".b0") != string::npos)
 	{
-		pGameMediaStream->m_sAppName = "mess.mess";
+		pGameMediaStream->m_sAppName = "xvic.xvic";
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_vic20_CONST;
 	}
 
@@ -514,7 +514,7 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 		|| StringUtils::ToLower(mediaURL).find(".d64") != string::npos
 		|| StringUtils::ToLower(mediaURL).find(".crt") != string::npos)
 	{
-		pGameMediaStream->m_sAppName = "mess.mess";
+		pGameMediaStream->m_sAppName = "x64.x64";
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_c64_CONST;
 	}
 
