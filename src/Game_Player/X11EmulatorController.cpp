@@ -276,6 +276,7 @@ namespace DCE
 	m_pEmulatorModel->m_iCurrentKeyModifier = XK_Shift_R;
 	break;
       default:
+        LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Mapped to %d",m_pEmulatorModel->m_mapButtonToKeysyms_Find(iPK_Button));
 	if (m_pEmulatorModel->m_mapButtonToKeysyms_Exists(iPK_Button) && m_pEmulatorModel->m_bRunning)
 	  {
 	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Sending key %d, modifier %d, to window %x",m_pEmulatorModel->m_mapButtonToKeysyms_Find(iPK_Button),

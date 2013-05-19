@@ -24,6 +24,7 @@ namespace DCE
     VICEEmulatorModel *m_pEmulatorModel;
     virtual bool init();
     virtual bool run();
+    virtual bool stop();
     virtual bool setSpeed(int iSpeed);
     virtual bool gotoMenu(int iMenu);
     virtual void setMediaPosition(string sMediaPosition);

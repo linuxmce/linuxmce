@@ -89,10 +89,24 @@ namespace DCE
       }
 
     if (X11EmulatorController::run())
-      return true;
+      {
+        usleep(2000);
+        m_pGame_Player->EVENT_Menu_Onscreen(m_pEmulatorModel->m_iStreamID,false);
+        usleep(2000);
+      	return true;
+      }
     
     return false;
 
+  }
+
+  bool VICEEmulatorController::stop()
+  {
+      X11EmulatorController::stop();
+
+      // TODO: remember why the hell I removed this from the base class!
+      m_pEmulatorModel->m_mapMedia.clear();
+      return true;
   }
 
   bool VICEEmulatorController::setSpeed(int iSpeed)
