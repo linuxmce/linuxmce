@@ -14,15 +14,15 @@ Rectangle {
     property alias buttonbordercolor: buttonBase.border
     property alias buttonopacity: buttonimage.opacity
 
-    height: style.stdbuttonh
-    width: style.stdbuttonw
+    height: skinStyle.stdbuttonh
+    width: skinStyle.stdbuttonw
     clip:true
     radius: 1
     Image {
         id: buttonimage
         source: ""
-        height: style.stdbuttonh
-        width: style.stdbuttonw
+        height: skinStyle.stdbuttonh
+        width: skinStyle.stdbuttonw
 
     }
     StyledText {

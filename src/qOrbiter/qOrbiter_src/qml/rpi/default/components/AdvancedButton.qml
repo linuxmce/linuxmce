@@ -3,8 +3,8 @@ import QtQuick 2.0
 Rectangle{
 
     color: "transparent"
-    height: style.stdbuttonw
-    width: style.stdbuttonw
+    height: skinStyle.stdbuttonw
+    width: skinStyle.stdbuttonw
     property alias buttontext: buttonLabel.text
     property alias buttontextcolor: buttonLabel.color
     property alias buttontextfontsize: buttonLabel.font.pointSize
@@ -52,7 +52,7 @@ Rectangle{
             hoverEnabled: true
             onEntered: {
                 buttonbg.opacity = 1
-                buttonLabel.color = style.lighttext
+                buttonLabel.color = skinStyle.lighttext
                 buttonLabel.font.capitalization = Font.AllUppercase
             }
 

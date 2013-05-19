@@ -354,7 +354,7 @@ public slots:
     QString getEpisode () {return episode;}
 
     //-----audio getters and setter--------//
-    void setAlbum (QString inc_album) {   qDebug()<<inc_album; album = inc_album;  emit albumChanged();}
+    void setAlbum (QString inc_album) {  album = inc_album;  emit albumChanged();}
     QString getAlbum () {return album;}
 
     void setTrack (QString inc_track) {track = inc_track;  emit trackChanged();}

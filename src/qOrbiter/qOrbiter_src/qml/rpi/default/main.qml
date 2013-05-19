@@ -17,7 +17,7 @@ Item {
         anchors.left:parent.left
 
         z:0
-        Component.onCompleted: setWindowSize(manager.appHeight, manager.appWidth)
+        //Component.onCompleted: setWindowSize(manager.appHeight, manager.appWidth)
         MouseArea{
             anchors.fill: dceplayer
             acceptedButtons: Qt.LeftButton | Qt.RightButton

@@ -34,8 +34,8 @@ Component{
             anchors.top: parent.top
             anchors.topMargin: scaleY(2)
             color:"transparent"
-            height: style.stdbuttonh
-            width: style.stdbuttonw
+            height: skinStyle.stdbuttonh
+            width: skinStyle.stdbuttonw
             buttontext: title
             buttontextbold: true
             buttontextitalic: true

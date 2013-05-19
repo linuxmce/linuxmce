@@ -40,7 +40,7 @@ Rectangle {
         anchors.top: fileviewscreen.top
         anchors.horizontalCenter: fileviewscreen.horizontalCenter
         radius:5
-        color:style.darkhighlight
+        color:skinStyle.darkhighlight
         width: grid_view1.width
         height: scaleY(5)
         Row{
@@ -135,7 +135,7 @@ Rectangle {
                     anchors.fill: mainItem
                     hoverEnabled: true
                     onEntered: {
-                        mainItem.color = style.darkhighlight
+                        mainItem.color = skinStyle.darkhighlight
                         mainItem.scale = 1.25
                         mainItem.z = 10
 
@@ -170,7 +170,7 @@ Rectangle {
                     Image
                     {
                         id: imagerect;
-                        source:"image://datagridimg/"+id ;
+                    source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/MediaImage.php?img="+path : ""
                         height: scaleY(18);
                         width: scaleX(18);
                         anchors.centerIn: parent;
@@ -350,8 +350,8 @@ Rectangle {
 
             ButtonSq
             {
-                height: scaleY(style.iconHeight)
-                width: scaleX(style.iconWidth)
+                height: scaleY(skinStyle.iconHeight)
+                width: scaleX(skinStyle.iconWidth)
                 buttontext: "Go Back"
                 buttontextbold: true
                 MouseArea

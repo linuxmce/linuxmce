@@ -96,7 +96,7 @@ linux-g++{
                  plugins_folder.source = imports/
                  plugins_folder.target = $$DESTDIR
         }
-        else:contains(QT_VERSION,5.1.*){
+        else:contains(QT_VERSION,5.0.*){
                 folder_01.source = qml/rpi
                 folder_01.target = $$DESTDIR/qml
                  plugins_folder.source = imports/

@@ -48,7 +48,7 @@ public:
 #ifdef QT5
     QHash <int, QByteArray> roleNames() const ;
 #endif
-    void clear();
+
     bool isActive;
  //nowPlayingButton->setProgram(simpleEPGmodel->data(simpleEPGmodel->getChannelIndex(chanid), 5).toString());
     bool checkDupe(QString name, QString position);
@@ -94,6 +94,8 @@ public slots:
     void itemDeleted(){
         qDebug() << "Model Item Destroyed Signal emitted.";
     }
+void clear();
+    //void clear() { m_list.clear(); }
 
 signals:
     void ItemAdded();

@@ -21,7 +21,7 @@ Rectangle{
             height: scaleY(13)
             width: scaleX(8)
             color: "transparent"
-            radius: style.but_smooth
+            radius: skinStyle.but_smooth
 
             Image {
                 id: mHeaderImg
@@ -48,7 +48,7 @@ Rectangle{
             width: scaleX(8)
             clip:true
 
-            radius: style.but_smooth
+            radius: skinStyle.but_smooth
             buttontext: dcenowplaying.qs_mainTitle +" \n " + dceTimecode.qsCurrentTime
 
             MouseArea{
@@ -60,15 +60,15 @@ Rectangle{
             id:mediaflick
             height: scaleY(16)
             width: scaleX(79)
-            contentHeight: style.buttonH
-            contentWidth: (style.buttonW + 5) * (mediaflick.children.width)
+            contentHeight: skinStyle.buttonH
+            contentWidth: (skinStyle.buttonW + 5) * (mediaflick.children.width)
             clip: true
             flickableDirection: "HorizontalFlick"
             anchors.verticalCenter: parent.verticalCenter
 
             ListView{
                 id: mediaScenarios
-                height: scaleY(style.buttonH)
+                height: scaleY(skinStyle.buttonH)
                 width: stage.width
 
                 model: currentRoomMedia

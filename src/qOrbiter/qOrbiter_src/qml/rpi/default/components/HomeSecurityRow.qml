@@ -23,7 +23,7 @@ Rectangle{
             anchors.top: parent.top
             anchors.topMargin: scaleY(2)
             color: "transparent"
-            radius: style.but_smooth
+            radius: skinStyle.but_smooth
 
             Image {
                 id: buttonbg
@@ -49,12 +49,12 @@ manager.showfloorplan(5)
             width: scaleX(95)
             flickableDirection: "HorizontalFlick"
             contentHeight: childrenRect.height
-            contentWidth: ((style.buttonW + 5) * (securityScenarios.count + 1)) - 5
+            contentWidth: ((skinStyle.buttonW + 5) * (securityScenarios.count + 1)) - 5
             clip: true
 
             ListView{
                 id: securityScenarios
-                height: scaleY(style.buttonH)
+                height: scaleY(skinStyle.buttonH)
                 width: stage.width
                 model: currentRoomSecurity
                 orientation:ListView.Horizontal

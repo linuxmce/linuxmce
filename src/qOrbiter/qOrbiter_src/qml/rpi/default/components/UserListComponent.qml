@@ -4,8 +4,8 @@ import QtQuick 2.0
 Rectangle {
 
     id: rectangle1
-    height: scaleY(style.buttonH)
-    width:  scaleX(style.buttonW)
+    height: scaleY(skinStyle.buttonH)
+    width:  scaleX(skinStyle.buttonW)
     clip: true
 
     transitions: Transition {
@@ -50,7 +50,7 @@ Rectangle {
         id: delrect
         height:scaleY(5)
         width: parent.width
-        color: style.not_color
+        color: skinStyle.not_color
         clip:true
 
         StyledText {
@@ -65,7 +65,7 @@ Rectangle {
             anchors.fill: parent
             hoverEnabled: true
             onEntered: delrect.color = "grey"
-            onExited: delrect.color = style.not_color
+            onExited: delrect.color = skinStyle.not_color
             onClicked:
             {
                 rectangle1.state = "Default"
