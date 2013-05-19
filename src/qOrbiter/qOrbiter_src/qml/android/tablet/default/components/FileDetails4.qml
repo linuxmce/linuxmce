@@ -22,7 +22,7 @@ Rectangle {
 
     Connections{
         target:filedetailsclass
-        onImageChanged:filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
+        onImageChanged:filedetailsimage.source = "http://"+m_ipAddress+"/lmce-admin/MediaImage.php?img="+filedetailsclass.screenshot
     }
 
     Rectangle{
@@ -64,7 +64,7 @@ Rectangle {
             id: filedetailsimage
             width: filedetailsclass.aspect=="wide"? scaleX(30) : scaleX(23)
             height:filedetailsclass.aspect=="wide"?scaleY(40) : scaleY(55)
-            source: ""
+            source: "http://"+m_ipAddress+"/lmce-admin/MediaImage.php?img="+filedetailsclass.screenshot
             smooth: true
         }
 

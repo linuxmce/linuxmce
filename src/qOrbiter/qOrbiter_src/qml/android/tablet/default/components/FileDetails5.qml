@@ -32,13 +32,13 @@ Rectangle {
     Image{
         id:imdb
         anchors.fill: parent
-        source:"http://"+srouterip+"/lmce-admin/imdbImage.php?file="+filedetailsclass.file+"&prop="+bgImageProp
+        source:"http://"+m_ipAddress+"/lmce-admin/imdbImage.php?file="+filedetailsclass.file+"&prop="+bgImageProp
         onStatusChanged: imdb.status == Image.Ready ? filedetailrect.height = scaleY(100) : ""
     }
 
     //    Connections{
     //        target:filedetailsclass
-    //        onImageChanged:filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
+    //        onImageChanged:filedetailsimage.source = "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?file="+filedetailsclass.file+"&prop="+bgImageProp
     //    }
 
     Rectangle{
@@ -88,7 +88,7 @@ Rectangle {
             property bool poster : sourceSize.height < sourceSize.width ? true : false
             width: poster ? scaleX(35) : scaleX(25)
             height:poster ? scaleY(40) : scaleY(65)
-            source:filedetailsclass.screenshot !=="" ? "http://"+srouterip+"/lmce-admin/MediaImage.php?img="+filedetailsclass.screenshot : ""
+            source:filedetailsclass.screenshot !=="" ? "http://"+m_ipAddress+"/lmce-admin/MediaImage.php?img="+filedetailsclass.screenshot : ""
             smooth: true
         }
 
