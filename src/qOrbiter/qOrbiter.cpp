@@ -24,9 +24,7 @@
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
-#include <QDebug>
-#include <iostream>
-#include <QtNetwork/QSslConfiguration>
+
 
 
 using namespace std;
@@ -34,6 +32,11 @@ using namespace DCE;
 
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
+#include <QDebug>
+#include <iostream>
+#include <QtNetwork/QSslConfiguration>
+#include <pthread.h>
+#include <QSharedPointer>
 #ifdef QT5
 #include <QtWidgets/QApplication>
 #endif
@@ -3545,6 +3548,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                  std::string pResponse ="";
                   if(SendCommand(req_data_grid_pics, &pResponse) && pResponse == "OK")
                   {
+
                       DataGridTable* pMediaGridTable = new DataGridTable(iData_Size,pData,false);
 
                       emit mediaResponseChanged("grid request ok");
@@ -3597,12 +3601,12 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                           gridItem * item = new gridItem(fk_file, cellTitle, filePath.remove("/home/mediapics/"), index, this);
                           if(!b_cancelRequest){
                               emit addItem(item);
+
                               QApplication::processEvents(QEventLoop::AllEvents);
 #ifdef rpi
                               Sleep(60);
 #elif ANDROID
-                              Sleep(30);
-
+                             Sleep(40);
 #else
                               // Sleep(10);
 #endif
@@ -4988,10 +4992,9 @@ void qOrbiter::getFloorPlanImage(QString fp_path)
 
 void qOrbiter::getScreenSaverImage(QString inc_requested_img_path)
 {
-    char *picData;
+    char *picData="";
     int picData_Size;
     picData_Size = 0;
-
     CMD_Request_File reqFile((long)m_dwPK_Device, (long)4 , inc_requested_img_path.toStdString(), &picData, &picData_Size);
     string p_sResponse="";
     if(SendCommand(reqFile, &p_sResponse) && p_sResponse=="OK")
@@ -4999,14 +5002,15 @@ void qOrbiter::getScreenSaverImage(QString inc_requested_img_path)
 #ifdef QT5
         //QApplication::processEvents(QEventLoop::AllEvents);
 #endif
+pthread_yield();
 
-        QByteArray t(picData, picData_Size);
         emit mediaResponseChanged("DCE::Recieved Screensaver image");
-        emit currentScreenSaverImage(t);
+        emit currentScreenSaverImage(QByteArray(picData, picData_Size));
 
        delete picData;
         picData=NULL;
         picData_Size = 0;
+
     }
 }
 

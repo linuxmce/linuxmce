@@ -36,8 +36,6 @@ Item {
 
     Component.onCompleted: {logger.userLogMsg = "Main.qml loaded in default skin"; manager.setBoundStatus(true)}
 
-
-
     FontLoader{
         id:myFont
         name:"Sawasdee"
@@ -169,18 +167,18 @@ Item {
         Keys.onTabPressed: hideUI()
 
 
-//        ScreenSaver
-//        {   id:ss
-//            height: manager.appHeight
-//            width: manager.appWidth
-//            anchors.centerIn: parent
-//            Component.onCompleted: screensaver.setActive(true)
-//            MouseArea{
-//                anchors.fill: ss
-//                acceptedButtons: Qt.LeftButton | Qt.RightButton
-//                onClicked:  Qt.RightButton ? pageLoader.visible = !pageLoader.visible: ""
-//            }
-//        }
+        ScreenSaver
+        {   id:ss
+            height: manager.appHeight
+            width: manager.appWidth
+            anchors.centerIn: parent
+            Component.onCompleted: screensaver.setActive(true)
+            MouseArea{
+                anchors.fill: ss
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                onClicked:  Qt.RightButton ? pageLoader.visible = !pageLoader.visible: ""
+            }
+        }
 
         Image {
             id: appbackground

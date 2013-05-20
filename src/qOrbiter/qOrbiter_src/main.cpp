@@ -695,6 +695,14 @@ int main(int argc, char* argv[])
         //epgThread->start();
 #endif
 
+//#ifdef Q_OS_LINUX
+//        QProcess p;
+//        p.start("awk", QStringList() << "/MemTotal/ { print $2 }" << "/proc/meminfo");
+//        p.waitForFinished();
+//        QString memory = p.readAllStandardOutput();
+//        system_info.append(QString("; RAM: %1 MB").arg(memory.toLong() / 1024));
+//        p.close();
+//#endif
         if(sRouter_IP!="")
         {
             qDebug()<< "Command Line override. Using command line settings";

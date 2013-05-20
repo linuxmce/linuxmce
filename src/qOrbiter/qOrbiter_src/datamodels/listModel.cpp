@@ -81,9 +81,10 @@ void ListModel::appendRow( gridItem *item)
     setLoadingStatus(true);
     // qDebug() << "adding" << m_list.count()+1;
 
-//    gridItem * copiedItem = new gridItem(item->id(),item->name(), item->path(),item->index());
+    gridItem * copiedItem = new gridItem();
+    copiedItem = item;
     //  QObject::connect(copiedItem, SIGNAL(destroyed(QObject*)), this, SLOT(objectDestroyed(QObject*)));
-    appendRows(QList<gridItem*>() << item);
+    appendRows(QList<gridItem*>() << copiedItem);
 
 
 }

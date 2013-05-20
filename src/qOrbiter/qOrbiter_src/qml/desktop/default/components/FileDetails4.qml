@@ -27,7 +27,7 @@ Rectangle {
 
     Connections{
         target:filedetailsclass
-        onImageChanged:filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
+        onImageChanged:filedetailsimage.source = "http://"+m_ipAddress+"/lmce-admin/MediaImage.php?img="+filedetailsclass.screenshot
     }
 
     Rectangle{
