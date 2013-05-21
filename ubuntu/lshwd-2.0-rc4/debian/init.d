@@ -1,4 +1,14 @@
 #! /bin/sh
+### BEGIN INIT INFO
+# Provides:          lshwd
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Should-Start:
+# Default-Start:     2
+# Default-Stop:      1
+# Short-Description: lshwd
+# Description:       lshwd
+### END INIT INFO #
 #
 # Coldplug hardware replacement for hotplug
 #
