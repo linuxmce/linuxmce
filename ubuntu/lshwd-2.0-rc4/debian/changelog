@@ -1,3 +1,9 @@
+lshwd (2.0-rc4-1pluto14-lmce1) unstable; urgency=low
+
+  * Add LSB tags to init script
+
+ -- phenigma <phenigma@hotmail.com>  Tue, 21 May 2013 17:09:13 -0500
+
 lshwd (2.0-rc4-1pluto14) unstable; urgency=low
 
   * Return driver "radeon" for all VGA class devices which report manufacturer
