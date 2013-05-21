@@ -1,4 +1,14 @@
 #!/bin/bash
+### BEGIN INIT INFO
+# Provides:          lmceupdate
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Should-Start:
+# Default-Start:     2
+# Default-Stop:      1
+# Short-Description: LMCEUpdate
+# Description:       This script updates the LMCE MD
+### END INIT INFO #
 
 case "$1" in
 	start)
